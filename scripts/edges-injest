@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+set -e
+
+# ===== 基础配置 =====
+EDGES_REPO="$HOME/edges"
+BASE_BRANCH="main"
+DATE=$(date +%Y-%m-%d)
+# ====================
+
+TITLE="$1"
+CONTENT_FILE="$2"
+CO_AUTHOR="$3"
+
+if [ -z "$TITLE" ] || [ -z "$CONTENT_FILE" ] || [ -z "$CO_AUTHOR" ]; then
+  echo 'usage: edges_ingest "title" content.md "AI Name <email>"'
+  exit 1
+fi
+
+if [ ! -f "$CONTENT_FILE" ]; then
+  echo "content file not found: $CONTENT_FILE"
+  exit 1
+fi
+
+cd "$EDGES_REPO"
+
+git checkout "$BASE_BRANCH"
+git pull
+
+SLUG=$(echo "$TITLE" \
+  | tr '[:upper:]' '[:lower:]' \
+  | tr ' ' '-' \
+  | tr -cd 'a-z0-9-')
+
+FILE="inbox/${DATE}--${SLUG}.md"
+BRANCH="ingest/${SLUG}"
+
+git checkout -b "$BRANCH"
+
+cat > "$FILE" <<EOF
+# $TITLE
+
+> Ingested on $DATE
+
+EOF
+
+cat "$CONTENT_FILE" >> "$FILE"
+
+git add "$FILE"
+
+git commit -m "ingest: $TITLE
+
+Co-authored-by: $CO_AUTHOR
+"
+
+git push -u origin "$BRANCH"
+
+if command -v gh >/dev/null 2>&1; then
+  gh pr create \
+    --title "$TITLE" \
+    --body "Auto-ingested with AI assistance.\n\nCo-authored-by: $CO_AUTHOR"
+else
+  echo "Branch pushed. Please open PR manually."
+fi
+
+echo "✅ Ingested: $FILE"
+
