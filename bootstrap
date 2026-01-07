@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-BIN_DIR="$(cd "$(dirname "$0")/bin" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BIN_DIR="$SCRIPT_DIR/bin"
+ENV_FILE="$SCRIPT_DIR/.env"
 RC_FILES=("$HOME/.zshrc" "$HOME/.bash_profile")
 MARKER="# edges bin"
 
@@ -41,8 +43,14 @@ else
   for rc_file in "${RC_FILES[@]}"; do
     [ -f "$rc_file" ] || touch "$rc_file"
     add_path "$rc_file"
+    # Add .env sourcing if not present
+    if [ -f "$ENV_FILE" ] && ! grep -qF "source \"$ENV_FILE\"" "$rc_file" 2>/dev/null; then
+      echo "source \"$ENV_FILE\"" >> "$rc_file"
+      echo "Added .env sourcing to: $rc_file"
+    fi
   done
   export PATH="$BIN_DIR:$PATH"
+  [ -f "$ENV_FILE" ] && source "$ENV_FILE"
   echo ""
   echo "PATH exported for current session."
   echo "New terminals will auto-load."
