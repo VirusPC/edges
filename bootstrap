@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+set -e
+
+BIN_DIR="$(cd "$(dirname "$0")/bin" && pwd)"
+SHELL_NAME="$(basename "$SHELL")"
+
+case "$SHELL_NAME" in
+  zsh)
+    RC_FILE="$HOME/.zshrc"
+    ;;
+  bash)
+    RC_FILE="$HOME/.bash_profile"
+    ;;
+  *)
+    echo "Unsupported shell: $SHELL_NAME"
+    exit 1
+    ;;
+esac
+
+EXPORT_LINE="export PATH=\"$BIN_DIR:\$PATH\""
+
+if grep -qF "$BIN_DIR" "$RC_FILE" 2>/dev/null; then
+  echo "PATH already configured in $RC_FILE"
+else
+  echo "" >> "$RC_FILE"
+  echo "# edges bin" >> "$RC_FILE"
+  echo "$EXPORT_LINE" >> "$RC_FILE"
+  echo "Added to $RC_FILE:"
+  echo "  $EXPORT_LINE"
+  echo ""
+  echo "Run 'source $RC_FILE' or restart terminal to apply."
+fi
