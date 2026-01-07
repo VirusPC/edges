@@ -42,9 +42,9 @@ edges-injest "如何评估技术债" "技术债的评估需要考虑..." "Claude
 ```
 
 脚本会：
-1. 在 `inbox/` 创建 `YYYY-MM-DD--slug.md` 文件
+1. 在 `inbox/` 创建 `YYYY-MM-DD--slug.md` 文件（中文标题会降级为 `untitled-时间戳`）
 2. 创建 `ingest/YYYY-MM-DD-slug` 分支并推送
-3. 自动创建 PR（需配置认证），或输出 PR 链接
+3. 自动创建 PR（需配置认证），未配置时输出带预填内容的 PR 链接
 
 #### 自动创建 PR
 
