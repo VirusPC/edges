@@ -8,16 +8,12 @@ DATE=$(date +%Y-%m-%d)
 # ====================
 
 TITLE="$1"
-CONTENT_FILE="$2"
+CONTENT="$2"
 CO_AUTHOR="$3"
 
-if [ -z "$TITLE" ] || [ -z "$CONTENT_FILE" ] || [ -z "$CO_AUTHOR" ]; then
-  echo 'usage: edges_ingest "title" content.md "AI Name <email>"'
+if [ -z "$TITLE" ] || [ -z "$CONTENT" ] || [ -z "$CO_AUTHOR" ]; then
+  echo 'usage: edges-injest "title" "content" "AI Name <email>"'
   exit 1
-fi
-
-if [ ! -f "$CONTENT_FILE" ]; then
-  touch "$CONTENT_FILE"
 fi
 
 cd "$EDGES_REPO"
@@ -30,19 +26,25 @@ SLUG=$(echo "$TITLE" \
   | tr ' ' '-' \
   | tr -cd 'a-z0-9-')
 
+# Fallback if slug is empty (e.g., non-ASCII title)
+if [ -z "$SLUG" ]; then
+  SLUG="untitled-$(date +%s)"
+fi
+
 FILE="inbox/${DATE}--${SLUG}.md"
-BRANCH="ingest/${SLUG}"
+BRANCH="ingest/${DATE}-${SLUG}"
 
 git checkout -b "$BRANCH"
+
+mkdir -p inbox
 
 cat > "$FILE" <<EOF
 # $TITLE
 
 > Ingested on $DATE
 
+$CONTENT
 EOF
-
-cat "$CONTENT_FILE" >> "$FILE"
 
 git add "$FILE"
 
@@ -53,12 +55,27 @@ Co-authored-by: $CO_AUTHOR
 
 git push -u origin "$BRANCH"
 
-if command -v gh >/dev/null 2>&1; then
+# Get remote URL and construct PR link
+REMOTE_URL=$(git remote get-url origin)
+# Convert SSH to HTTPS format for PR URL
+if [[ "$REMOTE_URL" == git@github.com:* ]]; then
+  REPO_PATH="${REMOTE_URL#git@github.com:}"
+  REPO_PATH="${REPO_PATH%.git}"
+  PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1"
+elif [[ "$REMOTE_URL" == https://github.com/* ]]; then
+  REPO_PATH="${REMOTE_URL#https://github.com/}"
+  REPO_PATH="${REPO_PATH%.git}"
+  PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1"
+fi
+
+if command -v gh >/dev/null 2>&1 && gh auth status &>/dev/null; then
   gh pr create \
     --title "$TITLE" \
-    --body "Auto-ingested with AI assistance.\n\nCo-authored-by: $CO_AUTHOR"
+    --body "Auto-ingested with AI assistance.
+
+Co-authored-by: $CO_AUTHOR"
 else
-  echo "Branch pushed. Please open PR manually."
+  echo "📎 Create PR: $PR_URL"
 fi
 
 echo "✅ Ingested: $FILE"
