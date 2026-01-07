@@ -30,8 +30,18 @@ source ~/.zshrc  # 或 source ~/.bash_profile
 
 ### edges-injest
 
-AI 辅助内容导入脚本。
+AI 辅助内容导入脚本，自动创建分支、提交并生成 PR 链接。
 
 ```bash
-edges-injest "标题" content.md "AI Name <email>"
+edges-injest "标题" "内容正文" "AI Name <email>"
 ```
+
+示例：
+```bash
+edges-injest "如何评估技术债" "技术债的评估需要考虑..." "Claude <claude@anthropic.com>"
+```
+
+脚本会：
+1. 在 `inbox/` 创建 `YYYY-MM-DD--slug.md` 文件
+2. 创建 `ingest/YYYY-MM-DD-slug` 分支并推送
+3. 输出带预填 title/body 的 PR 创建链接（若 `gh` 已登录则自动创建 PR）

@@ -57,15 +57,22 @@ git push -u origin "$BRANCH"
 
 # Get remote URL and construct PR link
 REMOTE_URL=$(git remote get-url origin)
+PR_BODY="Auto-ingested with AI assistance.
+
+Co-authored-by: $CO_AUTHOR"
+# URL encode the body and title (use safe='' to encode all special chars)
+PR_BODY_ENCODED=$(echo -n "$PR_BODY" | python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe=''))")
+PR_TITLE_ENCODED=$(echo -n "$TITLE" | python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe=''))")
+
 # Convert SSH to HTTPS format for PR URL
 if [[ "$REMOTE_URL" == git@github.com:* ]]; then
   REPO_PATH="${REMOTE_URL#git@github.com:}"
   REPO_PATH="${REPO_PATH%.git}"
-  PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1"
+  PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1&title=${PR_TITLE_ENCODED}&body=${PR_BODY_ENCODED}"
 elif [[ "$REMOTE_URL" == https://github.com/* ]]; then
   REPO_PATH="${REMOTE_URL#https://github.com/}"
   REPO_PATH="${REPO_PATH%.git}"
-  PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1"
+  PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1&title=${PR_TITLE_ENCODED}&body=${PR_BODY_ENCODED}"
 fi
 
 if command -v gh >/dev/null 2>&1 && gh auth status &>/dev/null; then
