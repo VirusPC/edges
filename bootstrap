@@ -2,31 +2,47 @@
 set -e
 
 BIN_DIR="$(cd "$(dirname "$0")/bin" && pwd)"
-SHELL_NAME="$(basename "$SHELL")"
+RC_FILES=("$HOME/.zshrc" "$HOME/.bash_profile")
+MARKER="# edges bin"
 
-case "$SHELL_NAME" in
-  zsh)
-    RC_FILE="$HOME/.zshrc"
-    ;;
-  bash)
-    RC_FILE="$HOME/.bash_profile"
-    ;;
-  *)
-    echo "Unsupported shell: $SHELL_NAME"
-    exit 1
-    ;;
-esac
+add_path() {
+  local rc_file="$1"
+  local export_line="export PATH=\"$BIN_DIR:\$PATH\""
+  
+  if grep -qF "$BIN_DIR" "$rc_file" 2>/dev/null; then
+    echo "Already configured: $rc_file"
+  else
+    echo "" >> "$rc_file"
+    echo "$MARKER" >> "$rc_file"
+    echo "$export_line" >> "$rc_file"
+    echo "Added to: $rc_file"
+  fi
+}
 
-EXPORT_LINE="export PATH=\"$BIN_DIR:\$PATH\""
+remove_path() {
+  local rc_file="$1"
+  if grep -qF "$BIN_DIR" "$rc_file" 2>/dev/null; then
+    # Remove the marker line and the export line
+    sed -i '' "/$MARKER/d" "$rc_file"
+    sed -i '' "\|$BIN_DIR|d" "$rc_file"
+    echo "Removed from: $rc_file"
+  else
+    echo "Not found in: $rc_file"
+  fi
+}
 
-if grep -qF "$BIN_DIR" "$RC_FILE" 2>/dev/null; then
-  echo "PATH already configured in $RC_FILE"
+if [ "$1" = "--uninstall" ] || [ "$1" = "-u" ]; then
+  for rc_file in "${RC_FILES[@]}"; do
+    [ -f "$rc_file" ] && remove_path "$rc_file"
+  done
+  echo "Done. Restart terminal to apply."
 else
-  echo "" >> "$RC_FILE"
-  echo "# edges bin" >> "$RC_FILE"
-  echo "$EXPORT_LINE" >> "$RC_FILE"
-  echo "Added to $RC_FILE:"
-  echo "  $EXPORT_LINE"
+  for rc_file in "${RC_FILES[@]}"; do
+    [ -f "$rc_file" ] || touch "$rc_file"
+    add_path "$rc_file"
+  done
+  export PATH="$BIN_DIR:$PATH"
   echo ""
-  echo "Run 'source $RC_FILE' or restart terminal to apply."
+  echo "PATH exported for current session."
+  echo "New terminals will auto-load."
 fi
