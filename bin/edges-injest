@@ -75,14 +75,43 @@ elif [[ "$REMOTE_URL" == https://github.com/* ]]; then
   PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1&title=${PR_TITLE_ENCODED}&body=${PR_BODY_ENCODED}"
 fi
 
+PR_CREATED=false
+
+# Try gh first
 if command -v gh >/dev/null 2>&1 && gh auth status &>/dev/null; then
   gh pr create \
     --title "$TITLE" \
-    --body "Auto-ingested with AI assistance.
+    --body "$PR_BODY" && PR_CREATED=true
+fi
 
-Co-authored-by: $CO_AUTHOR"
-else
+# Fallback to curl with GITHUB_TOKEN
+if [ "$PR_CREATED" = false ] && [ -n "$GITHUB_TOKEN" ]; then
+  PR_RESPONSE=$(curl -s -X POST \
+    -H "Authorization: token $GITHUB_TOKEN" \
+    -H "Accept: application/vnd.github.v3+json" \
+    "https://api.github.com/repos/${REPO_PATH}/pulls" \
+    -d "$(cat <<EOFPR
+{
+  "title": $(echo -n "$TITLE" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))"),
+  "body": $(echo -n "$PR_BODY" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))"),
+  "head": "$BRANCH",
+  "base": "$BASE_BRANCH"
+}
+EOFPR
+)")
+  PR_HTML_URL=$(echo "$PR_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('html_url',''))" 2>/dev/null)
+  if [ -n "$PR_HTML_URL" ]; then
+    echo "🔗 PR created: $PR_HTML_URL"
+    PR_CREATED=true
+  else
+    echo "⚠️  Failed to create PR via API"
+  fi
+fi
+
+# Final fallback: output URL
+if [ "$PR_CREATED" = false ]; then
   echo "📎 Create PR: $PR_URL"
+  echo "💡 Tip: Set GITHUB_TOKEN or run 'gh auth login' for auto PR creation"
 fi
 
 echo "✅ Ingested: $FILE"

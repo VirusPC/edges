@@ -44,4 +44,22 @@ edges-injest "如何评估技术债" "技术债的评估需要考虑..." "Claude
 脚本会：
 1. 在 `inbox/` 创建 `YYYY-MM-DD--slug.md` 文件
 2. 创建 `ingest/YYYY-MM-DD-slug` 分支并推送
-3. 输出带预填 title/body 的 PR 创建链接（若 `gh` 已登录则自动创建 PR）
+3. 自动创建 PR（需配置认证），或输出 PR 链接
+
+#### 自动创建 PR
+
+支持两种方式（任选其一）：
+
+**方式一：gh CLI（推荐）**
+```bash
+gh auth login
+```
+
+**方式二：GITHUB_TOKEN**
+
+1. 访问 https://github.com/settings/tokens 创建 token（需 `repo` 权限）
+2. 添加到 shell 配置：
+```bash
+echo 'export GITHUB_TOKEN="your_token"' >> ~/.zshrc
+source ~/.zshrc
+```
