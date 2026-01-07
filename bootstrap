@@ -37,6 +37,7 @@ if [ "$1" = "--uninstall" ] || [ "$1" = "-u" ]; then
   done
   echo "Done. Restart terminal to apply."
 else
+  chmod +x "$BIN_DIR"/*
   for rc_file in "${RC_FILES[@]}"; do
     [ -f "$rc_file" ] || touch "$rc_file"
     add_path "$rc_file"

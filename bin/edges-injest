@@ -2,7 +2,7 @@
 set -e
 
 # ===== 基础配置 =====
-EDGES_REPO="$HOME/edges"
+EDGES_REPO="$HOME/Documents/projects/agent/edges"
 BASE_BRANCH="main"
 DATE=$(date +%Y-%m-%d)
 # ====================
@@ -17,8 +17,7 @@ if [ -z "$TITLE" ] || [ -z "$CONTENT_FILE" ] || [ -z "$CO_AUTHOR" ]; then
 fi
 
 if [ ! -f "$CONTENT_FILE" ]; then
-  echo "content file not found: $CONTENT_FILE"
-  exit 1
+  touch "$CONTENT_FILE"
 fi
 
 cd "$EDGES_REPO"
