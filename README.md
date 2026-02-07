@@ -1,65 +1,61 @@
-# Edges
+# Edges - 认知系统
 
-以知识沉淀为手段、以长期认知复利为目标的个人系统。
+> 构建可复用的认知优势，提高未来判断效率
 
-## 核心理念
-
-知识的价值不取决于数量或完整性，而取决于它是否：
-- 反复影响判断
-- 提高成功概率
-- 降低同类问题的思考成本
+---
 
 ## 目录结构
 
-- `notes/` - 未收敛、未定价的认知材料
-- `edges/` - 已形成的判断优势
-- `archive/` - 已失效或被吸收的内容
-- `bin/` - 工具脚本
-
-## 快速开始
-
-```bash
-# 将 bin 目录添加到 PATH
-./bootstrap
-
-# 重新加载 shell 配置
-source ~/.zshrc  # 或 source ~/.bash_profile
+```
+edges/
+├── README.md           # 本文件 - 系统说明
+├── notes/              # 📝 原始想法、待处理内容
+│   ├── inbox.md        # 快速收集箱（定期清理）
+│   ├── to-learn.md     # 待学习内容
+│   ├── reading-list.md # 阅读清单
+│   └── fleeting/       # 临时笔记（可定期归档或删除）
+│
+├── edges/              # 🎯 已沉淀的认知优势
+│   ├── README.md       # edges 总览
+│   ├── tech/           # 技术领域
+│   ├── work/           # 工作方法
+│   ├── thinking/       # 思维模型
+│   └── index.md        # 按标签/领域的索引
+│
+└── archive/            # 📦 归档内容
+    ├── 2025/           # 按年份
+    └── retired/        # 过时/不再关注的内容
 ```
 
-## 工具
+---
 
-### edges-injest
+## 命名规范
 
-AI 辅助内容导入脚本，自动创建分支、提交并生成 PR 链接。
+| 规则 | 示例 |
+|------|------|
+| 文件用小写+连字符 | `golang-concurrency.md` |
+| 日期前缀用于时序内容 | `2025-01-15-meeting-notes.md` |
+| edges 用领域/主题前缀 | `tech-database-indexing.md` |
 
-```bash
-edges-injest "标题" "内容正文" "AI Name <email>"
+---
+
+## 内容流转
+
+```
+inbox/notes → 加工 → edges → 归档/删除
+   ↓              ↓
+  3天未处理    形成可复用判断
+  就删掉或归档   提高未来决策效率
 ```
 
-示例：
-```bash
-edges-injest "如何评估技术债" "技术债的评估需要考虑..." "Claude <claude@anthropic.com>"
-```
+---
 
-脚本会：
-1. 在 `inbox/` 创建 `YYYY-MM-DD--slug.md` 文件（中文标题会降级为 `untitled-时间戳`）
-2. 创建 `ingest/YYYY-MM-DD-slug` 分支并推送
-3. 自动创建 PR（需配置认证），未配置时输出带预填内容的 PR 链接
+## 核心原则
 
-#### 自动创建 PR
+1. **notes → edges** 不是搬运，是提炼
+2. 定期清理 inbox，不积累未处理内容
+3. edges 要能回答「下次遇到类似情况，我会怎么做」
 
-支持两种方式（任选其一）：
+---
 
-**方式一：gh CLI（推荐）**
-```bash
-gh auth login
-```
-
-**方式二：GITHUB_TOKEN**
-
-1. 访问 https://github.com/settings/tokens 创建 token（需 `repo` 权限）
-2. 添加到 shell 配置：
-```bash
-echo 'export GITHUB_TOKEN="your_token"' >> ~/.zshrc
-source ~/.zshrc
-```
+*最后更新: 2025-02-08*
