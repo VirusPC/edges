@@ -69,3 +69,18 @@
 ---
 
 *Created: 2025-02-09*
+
+---
+
+## 捕获记录
+
+### 2025-02-09
+- **[资源]** Karpathy: 2025 LLM Year in Review
+  - 模块: 大模型基础
+  - 类型: 文章
+  - 来源: https://karpathy.bearblog.dev/year-in-review-2025/
+  - 摘要: Karpathy回顾2025年LLM关键进展：RLVR成为新训练范式，通过可验证奖励让LLM自发发展推理策略。与SFT/RLHF短阶段不同，RLVR允许长时间优化，带来test-time compute新维度，DeepSeek R1和OpenAI o3为代表。
+  - 关键要点: RLVR替代传统训练栈、推理能力涌现、test-time scaling law
+  - 状态: 已读待整理
+  - 标签: #training #rlvr #reasoning #test-time-compute
+
