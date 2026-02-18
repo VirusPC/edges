@@ -110,3 +110,7 @@ Chronicle 是一个 **以知识沉淀为手段、以长期认知复利为目标�
 当内容无法在未来判断中提供优势，
 或边际认知收益明显为负时，停止。
 
+## Git 提交规则
+
+- 当 Agent 执行 `git commit` 时，提交信息必须包含以下 trailer：
+  `Co-authored-by: OpenAI Codex <codex@openai.com>`
