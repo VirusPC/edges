@@ -59,3 +59,13 @@ inbox/notes → 加工 → edges → 归档/删除
 ---
 
 *最后更新: 2025-02-08*
+
+---
+
+## Agent Extensions 初始化
+
+协作者在首次 clone 后，执行下面命令把 `extensions/skills/` 同步到各类 agent 的 skills 目录：
+
+```bash
+./bin/init-extensions
+```
