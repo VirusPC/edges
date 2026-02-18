@@ -6,11 +6,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 function resolveDefaultRepoPath(): string {
-  return path.resolve(__dirname, "../../../");
+  return path.resolve(__dirname, "../../../../");
 }
 
 function resolveDefaultScriptPath(): string {
-  return path.resolve(__dirname, "../../../bin/new-note");
+  return path.resolve(__dirname, "../../../../bin/new-note");
 }
 
 export function loadConfig(): RuntimeConfig {

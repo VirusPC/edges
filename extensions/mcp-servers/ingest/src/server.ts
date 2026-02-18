@@ -23,8 +23,8 @@ export async function startServer(): Promise<void> {
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
     tools: [
       {
-        name: "ingest_summary",
-        description: "Ingest a summary into the edges repository and perform commit/push",
+        name: "new_note",
+        description: "Create a new note in the edges repository and perform commit/push",
         inputSchema: {
           type: "object",
           properties: {
@@ -39,7 +39,7 @@ export async function startServer(): Promise<void> {
   }));
 
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    if (request.params.name !== "ingest_summary") {
+    if (request.params.name !== "new_note") {
       return {
         content: [{ type: "text", text: JSON.stringify({ status: "failed", errorCode: "UNKNOWN_ERROR", reason: "Unknown tool" }) }],
         isError: true,

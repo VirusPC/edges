@@ -1,6 +1,6 @@
 ## 1. TypeScript MCP 服务骨架与接口定义
 
-- [ ] 1.1 初始化 TypeScript + Node.js MCP server 工程结构与启动入口
+- [ ] 1.1 在 `extensions/mcp-servers/ingest` 初始化 TypeScript + Node.js MCP server 工程结构与启动入口
 - [ ] 1.2 定义 ingest 工具输入 schema（`title`、`content`、`coAuthor`）与必填校验
 - [ ] 1.3 定义 ingest 工具输出 schema（`status`、`filePath`、`branch`、`prUrl`、`errorCode`）
 - [ ] 1.4 实现统一错误模型与错误码映射（校验失败、git失败、push失败、凭据失败）
@@ -11,6 +11,7 @@
 - [ ] 2.2 实现 Node 层脚本调用适配（参数数组调用 `bin/new-note`，禁止 shell 字符串拼接）
 - [ ] 2.3 改造 `bin/new-note` 以支持仓库路径可配置（例如环境变量覆盖），去除固定本地路径假设
 - [ ] 2.4 实现脚本输出解析与结构化回传，确保成功/失败都返回机器可解析结果
+- [ ] 2.5 工具名统一为 `new_note` 并对外提供调用契约
 
 ## 3. Git 规则与安全约束落地
 

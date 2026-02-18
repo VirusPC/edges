@@ -4,7 +4,7 @@ TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 in
 
 ## What It Does
 
-- 暴露 MCP 工具 `ingest_summary`
+- 暴露 MCP 工具 `new_note`
 - 接收结构化输入：`title`、`content`、`coAuthor`
 - 调用 `bin/new-note` 执行：
   - 生成 `inbox/YYYY-MM-DD--slug.md`
@@ -23,7 +23,7 @@ TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 in
 ## Install
 
 ```bash
-cd mcp-server/ingest
+cd extensions/mcp-servers/ingest
 npm install
 npm run build
 ```
@@ -44,7 +44,7 @@ npm run dev
 
 - `EDGES_REPO_PATH`: 目标仓库路径，默认当前仓库根目录
 - `EDGES_BASE_BRANCH`: 基线分支，默认 `main`
-- `EDGES_NEW_NOTE_SCRIPT`: new-note 脚本路径，默认 `../../../bin/new-note`（由服务进程自动解析到仓库根 `bin/new-note`）
+- `EDGES_NEW_NOTE_SCRIPT`: new-note 脚本路径，默认 `../../../../bin/new-note`（由服务进程自动解析到仓库根 `bin/new-note`）
 - `EDGES_INGEST_SCRIPT`: 旧变量名，仍兼容（不建议继续使用）
 
 脚本侧兼容变量：
@@ -53,7 +53,7 @@ npm run dev
 
 ## MCP Tool
 
-MCP tool 名称：`ingest_summary`
+MCP tool 名称：`new_note`
 
 输入字段：
 - `title` (string)
@@ -99,7 +99,7 @@ MCP tool 名称：`ingest_summary`
 ```json
 {
   "command": "node",
-  "args": ["/absolute/path/to/edges/mcp-server/ingest/dist/index.js"],
+  "args": ["/absolute/path/to/edges/extensions/mcp-servers/ingest/dist/index.js"],
   "env": {
     "EDGES_REPO_PATH": "/absolute/path/to/edges",
     "EDGES_BASE_BRANCH": "main"
@@ -112,7 +112,7 @@ MCP tool 名称：`ingest_summary`
 ```json
 {
   "command": "npx",
-  "args": ["tsx", "/absolute/path/to/edges/mcp-server/ingest/src/index.ts"]
+  "args": ["tsx", "/absolute/path/to/edges/extensions/mcp-servers/ingest/src/index.ts"]
 }
 ```
 
@@ -131,4 +131,4 @@ npm test
 
 ## Rollback
 
-如果线上出现异常，可通过停止该 MCP server 或从客户端配置中移除 `ingest_summary` 工具，回退到手工执行 `bin/new-note`。
+如果线上出现异常，可通过停止该 MCP server 或从客户端配置中移除 `new_note` 工具，回退到手工执行 `bin/new-note`。
