@@ -4,7 +4,7 @@
 
 ## Servers
 
-- `ingest/`: 接收外部 AI 总结并写入仓库（commit/push）
+- `new-note/`: 接收外部 AI 总结并写入仓库（commit/push）
 
 ## Conventions
 

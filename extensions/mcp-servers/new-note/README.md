@@ -23,7 +23,7 @@ TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 in
 ## Install
 
 ```bash
-cd extensions/mcp-servers/ingest
+cd extensions/mcp-servers/new-note
 npm install
 npm run build
 ```
@@ -99,7 +99,7 @@ MCP tool 名称：`new_note`
 ```json
 {
   "command": "node",
-  "args": ["/absolute/path/to/edges/extensions/mcp-servers/ingest/dist/index.js"],
+  "args": ["/absolute/path/to/edges/extensions/mcp-servers/new-note/dist/index.js"],
   "env": {
     "EDGES_REPO_PATH": "/absolute/path/to/edges",
     "EDGES_BASE_BRANCH": "main"
@@ -112,7 +112,7 @@ MCP tool 名称：`new_note`
 ```json
 {
   "command": "npx",
-  "args": ["tsx", "/absolute/path/to/edges/extensions/mcp-servers/ingest/src/index.ts"]
+  "args": ["tsx", "/absolute/path/to/edges/extensions/mcp-servers/new-note/src/index.ts"]
 }
 ```
 

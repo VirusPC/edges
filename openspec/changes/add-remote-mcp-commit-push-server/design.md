@@ -1,6 +1,6 @@
 ## Context
 
-当前目标是在远程仓库环境提供一个可被外部 AI 调用的 MCP server（目录为 `extensions/mcp-servers/ingest`），使其把总结内容安全地写入仓库并执行 commit/push。现有仓库已存在 `bin/new-note` 脚本，具备从标题和内容生成文件、创建分支、commit、push、可选建 PR 的能力；但它是 CLI 入口，不是可编排的服务接口，且默认仓库路径为本地固定路径，无法直接作为远程服务契约。
+当前目标是在远程仓库环境提供一个可被外部 AI 调用的 MCP server（目录为 `extensions/mcp-servers/new-note`），使其把总结内容安全地写入仓库并执行 commit/push。现有仓库已存在 `bin/new-note` 脚本，具备从标题和内容生成文件、创建分支、commit、push、可选建 PR 的能力；但它是 CLI 入口，不是可编排的服务接口，且默认仓库路径为本地固定路径，无法直接作为远程服务契约。
 
 约束条件：
 - 服务端实现语言固定为 TypeScript + Node.js。
@@ -23,7 +23,7 @@
 ## Decisions
 
 1. **MCP server 采用 TypeScript + Node.js 单服务进程**
-- Rationale: 与 MCP 生态和工具链兼容性高，便于定义强类型请求/响应 schema，降低外部 AI 调用时的参数歧义；部署目录统一到 `extensions/mcp-servers/ingest`，便于后续多服务并存。
+- Rationale: 与 MCP 生态和工具链兼容性高，便于定义强类型请求/响应 schema，降低外部 AI 调用时的参数歧义；部署目录统一到 `extensions/mcp-servers/new-note`，便于后续多服务并存。
 - Alternative considered:
   - Python server：可行，但与已确定技术方向不一致，后续与 Node 生态组件整合成本更高。
 

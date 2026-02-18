@@ -74,12 +74,12 @@ inbox/notes → 加工 → edges → 归档/删除
 
 仓库支持多个 MCP server，统一放在 `extensions/mcp-servers/` 下。当前可用服务：
 
-- `extensions/mcp-servers/ingest`：接收外部 AI 总结并执行入库（落盘、commit、push）
+- `extensions/mcp-servers/new-note`：接收外部 AI 总结并执行入库（落盘、commit、push）
 
 常用命令：
 
 ```bash
-cd extensions/mcp-servers/ingest
+cd extensions/mcp-servers/new-note
 npm install
 npm run build
 npm test
