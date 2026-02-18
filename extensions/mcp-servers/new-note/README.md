@@ -1,4 +1,4 @@
-# edges-mcp-server
+# new-note
 
 TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 ingest（落盘、commit、push）。
 
@@ -30,6 +30,10 @@ npm run build
 
 ## Run
 
+### STDIO 模式（默认）
+
+适用于本地开发和与 IDE 集成：
+
 ```bash
 npm start
 ```
@@ -39,6 +43,24 @@ npm start
 ```bash
 npm run dev
 ```
+
+### HTTP 模式
+
+适用于远程访问和 Web 集成：
+
+```bash
+# 开发模式 (HTTP)
+npm run dev:http
+
+# 生产模式 (HTTP)
+npm run start:http
+
+# 自定义端口
+npm run dev:http -- --port 8080
+```
+
+HTTP 模式将在以下端点启动服务器：
+- Streamable HTTP 端点: `http://localhost:3000/new-note`
 
 ## Environment Variables
 
@@ -94,6 +116,8 @@ MCP tool 名称：`new_note`
 
 ## Client Integration
 
+### STDIO 模式配置
+
 以支持 stdio MCP 的客户端为例，可将命令配置为：
 
 ```json
@@ -113,6 +137,26 @@ MCP tool 名称：`new_note`
 {
   "command": "npx",
   "args": ["tsx", "/absolute/path/to/edges/extensions/mcp-servers/new-note/src/index.ts"]
+}
+```
+
+### HTTP 模式配置
+
+对于支持 Streamable HTTP 的客户端（推荐）：
+
+```json
+{
+  "type": "streamable-http",
+  "url": "http://localhost:3000/new-note"
+}
+```
+
+或者使用通用 HTTP 配置：
+
+```json
+{
+  "type": "http",
+  "url": "http://localhost:3000/new-note"
 }
 ```
 
