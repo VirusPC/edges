@@ -1,71 +1,54 @@
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
 import { loadConfig } from "./config.js";
 import { runIngest } from "./service.js";
-import { validateInput } from "./validation.js";
 
 export async function startServer(): Promise<void> {
   const config = loadConfig();
 
-  const server = new Server(
-    {
-      name: "edges-mcp-ingest",
-      version: "0.1.0",
-    },
-    {
-      capabilities: {
-        tools: {},
-      },
-    },
-  );
-
-  server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: [
-      {
-        name: "new_note",
-        description: "Create a new note in the edges repository and perform commit/push",
-        inputSchema: {
-          type: "object",
-          properties: {
-            title: { type: "string" },
-            content: { type: "string" },
-            coAuthor: { type: "string" },
-          },
-          required: ["title", "content", "coAuthor"],
-        },
-      },
-    ],
-  }));
-
-  server.setRequestHandler(CallToolRequestSchema, async (request) => {
-    if (request.params.name !== "new_note") {
-      return {
-        content: [{ type: "text", text: JSON.stringify({ status: "failed", errorCode: "UNKNOWN_ERROR", reason: "Unknown tool" }) }],
-        isError: true,
-      };
-    }
-
-    try {
-      const input = validateInput(request.params.arguments ?? {});
-      const result = await runIngest(input, config);
-      return {
-        content: [
-          {
-            type: "text",
-            text: JSON.stringify(result, null, 2),
-          },
-        ],
-        isError: result.status === "failed",
-      };
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "invalid request";
-      return {
-        content: [{ type: "text", text: JSON.stringify({ status: "failed", errorCode: "VALIDATION_ERROR", reason: message }) }],
-        isError: true,
-      };
-    }
+  const server = new McpServer({
+    name: "edges-mcp-ingest",
+    version: "0.1.0",
   });
+
+  server.registerTool("new_note", {
+    title: "New Note Tool",
+    description: "Create a new note in the edges repository and perform commit/push",
+    inputSchema: {
+      title: z.string().describe("Note title"),
+      content: z.string().describe("Note content"),
+      coAuthor: z.string().describe("Co-author for git commit"),
+    },
+  }, async ({ title, content, coAuthor }) => {
+      try {
+        const result = await runIngest({ title, content, coAuthor }, config);
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(result, null, 2),
+            },
+          ],
+        };
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "invalid request";
+        return {
+          content: [
+            {
+              type: "text" as const,
+              text: JSON.stringify(
+                { status: "failed", errorCode: "VALIDATION_ERROR", reason: message },
+                null,
+                2
+              ),
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+  );
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
