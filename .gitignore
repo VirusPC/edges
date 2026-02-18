@@ -18,3 +18,9 @@
 *.tmp
 *.temp
 .env
+
+# Node artifacts
+node_modules/
+dist/
+mcp-server/*/node_modules/
+mcp-server/*/dist/
