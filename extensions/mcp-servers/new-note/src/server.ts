@@ -10,6 +10,31 @@ import { createAuthMiddleware, validateAuthConfig, type AuthenticatedRequest } f
 export async function startServer(transportType: 'stdio' | 'http' = 'stdio', port?: number): Promise<void> {
   const config = loadConfig();
   
+  // Log server configuration
+  console.error(`[new-note] Starting server in ${transportType} mode`);
+  console.error(`[new-note] ------------------------------------------`);
+  console.error(`[new-note] Configuration:`);
+  console.error(`  - Repo path: ${config.repoPath}`);
+  console.error(`  - Base branch: ${config.baseBranch}`);
+  console.error(`  - Script path: ${config.scriptPath}`);
+  
+  // Log environment variables status
+  console.error(`[new-note] ------------------------------------------`);
+  console.error(`[new-note] Environment Variables:`);
+  console.error(`  • EDGES_REPO_PATH:`);
+  console.error(`    ${process.env.EDGES_REPO_PATH ? '✓ Set: ' + process.env.EDGES_REPO_PATH : '○ Default: ' + config.repoPath}`);
+  console.error(`  • EDGES_BASE_BRANCH:`);
+  console.error(`    ${process.env.EDGES_BASE_BRANCH ? '✓ Set: ' + process.env.EDGES_BASE_BRANCH : '○ Default: ' + config.baseBranch}`);
+  console.error(`  • EDGES_NEW_NOTE_SCRIPT:`);
+  console.error(`    ${process.env.EDGES_NEW_NOTE_SCRIPT ? '✓ Set: ' + process.env.EDGES_NEW_NOTE_SCRIPT : '○ Default: ' + config.scriptPath}`);
+  
+  if (transportType === 'http') {
+    console.error(`  • EDGES_AUTH_TOKEN:`);
+    console.error(`    ${process.env.EDGES_AUTH_TOKEN ? '✓ Set: ' + process.env.EDGES_AUTH_TOKEN.substring(0, 8) + '...' : '✗ Not set (recommended for HTTP)'}`);
+  }
+  console.error(`  • GITHUB_TOKEN:`);
+  console.error(`    ${process.env.GITHUB_TOKEN ? '✓ Set: ' + process.env.GITHUB_TOKEN.substring(0, 8) + '... (PR creation enabled)' : '○ Not set (PR creation unavailable)'}`);
+  
   // Validate auth configuration for HTTP mode
   if (transportType === 'http') {
     validateAuthConfig(config);
@@ -19,6 +44,10 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
     name: "new-note",
     version: "0.1.0",
   });
+
+  console.error(`[new-note] Registering MCP tool: new_note`);
+  console.error(`  - Title: New Note Tool`);
+  console.error(`  - Description: Create a new note in the edges repository and perform commit/push`);
 
   server.registerTool("new_note", {
     title: "New Note Tool",
@@ -59,6 +88,9 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
   );
 
   if (transportType === 'http') {
+    const httpPort = port || 3000;
+    const baseUrl = `http://localhost:${httpPort}`;
+    
     const app = express();
     app.use(express.json());
     
@@ -85,15 +117,29 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
       }
     });
     
-    const httpPort = port || 3000;
     app.listen(httpPort, () => {
-      console.log(`MCP server listening on http://localhost:${httpPort}`);
-      console.log(`Streamable HTTP endpoint: http://localhost:${httpPort}/new-note`);
+      console.error(`\n[new-note] ==========================================`);
+      console.error(`[new-note] 🚀 HTTP Server Started Successfully`);
+      console.error(`[new-note] ==========================================`);
+      console.error(`[new-note] Port: ${httpPort}`);
+      console.error(`[new-note] Base URL: ${baseUrl}`);
+      console.error(`[new-note] Authentication: ${config.authToken ? '✓ Enabled (Bearer token required)' : '✗ Disabled'}`);
+      console.error(`[new-note] ------------------------------------------`);
+      console.error(`[new-note] Available Endpoints:`);
+      console.error(`[new-note]   • Health Check:`);
+      console.error(`[new-note]     GET ${baseUrl}/health`);
+      console.error(`[new-note]   • MCP Endpoint (Streamable HTTP):`);
+      console.error(`[new-note]     POST ${baseUrl}/new-note`);
+      console.error(`[new-note] ------------------------------------------`);
+      console.error(`[new-note] Available Tools:`);
+      console.error(`[new-note]   • new_note: Create a new note and commit/push`);
+      console.error(`[new-note] ==========================================\n`);
     });
     
     await server.connect(transport);
   } else {
     const transport = new StdioServerTransport();
     await server.connect(transport);
+    console.error(`[new-note] Server started successfully in stdio mode`);
   }
 }

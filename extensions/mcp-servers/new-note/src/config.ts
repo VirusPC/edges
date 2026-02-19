@@ -18,5 +18,8 @@ export function loadConfig(): RuntimeConfig {
     repoPath: process.env.EDGES_REPO_PATH ?? resolveDefaultRepoPath(),
     baseBranch: process.env.EDGES_BASE_BRANCH ?? "main",
     scriptPath: process.env.EDGES_NEW_NOTE_SCRIPT ?? process.env.EDGES_INGEST_SCRIPT ?? resolveDefaultScriptPath(),
+    authToken: process.env.EDGES_AUTH_TOKEN,
+    gitUsername: process.env.GIT_USERNAME,
+    gitEmail: process.env.GIT_EMAIL,
   };
 }
