@@ -96,6 +96,17 @@ Chronicle 是一个 **以知识沉淀为手段、以长期认知复利为目标�
 
 ---
 
+## 你的工具箱 (extensions/)
+
+你可以通过 `extensions/` 目录下的内容扩展你的能力：
+
+- **MCP Servers**: 当你需要执行复杂的外部操作（如自动入库、搜索、文件系统交互）时，优先检查 `extensions/mcp-servers/`。
+- **Skills**: 当你需要参考特定的任务流程或 Prompt 模板时，查阅 `extensions/skills/`。
+
+在使用这些扩展之前，请务必阅读该目录下的 `README.md` 或源代码以了解调用协议。
+
+---
+
 ## 基本规则
 
 - 不确定性先保留在 notes

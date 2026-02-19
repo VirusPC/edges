@@ -58,26 +58,29 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 
 ---
 
-## Agent Extensions 初始化
+## Agent Extensions (extensions/)
 
-协作者在首次 clone 后，执行下面命令把 `extensions/skills/` 同步到各类 agent 的 skills 目录：
+`extensions/` 目录存放了增强 AI Agent 能力的各类插件、服务和工具：
+
+- **`mcp-servers/`**: [Model Context Protocol](https://modelcontextprotocol.io/) 服务器。允许 AI 直接通过标准化协议调用本地服务（如 `new-note` 服务用于自动化笔记入库）。
+- **`skills/`**: 存放 AI Agent 的具体技能定义（如特定任务的 Prompt 模板或操作流程）。
+- **`subagents/`**: 专门化的子代理配置，用于处理特定领域的复杂任务。
+- **`tools/`**: 供 Agent 调用的独立脚本或工具集。
+
+### 初始化
+
+协作者在首次 clone 后，执行下面命令把 `extensions/skills/` 同步到各类 agent 的配置目录：
 
 ```bash
 ./bin/init-extensions
 ```
 
-## MCP Servers
+### 可用 MCP Servers
 
-仓库支持多个 MCP server，统一放在 `extensions/mcp-servers/` 下。当前可用服务：
+当前已实现的 MCP 服务：
 
-- `extensions/mcp-servers/new-note`：接收外部 AI 总结并执行入库（落盘、commit、push）
+- **`new-note`**: 接收外部 AI 总结并执行入库（落盘、commit、push）。
+  - 路径: `extensions/mcp-servers/new-note`
+  - 功能: 自动在 `knowledge/notes/` 下创建新文件并推送到仓库。
 
-常用命令：
 
-```bash
-cd extensions/mcp-servers/new-note
-npm install
-npm run build
-npm test
-npm start
-```
