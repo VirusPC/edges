@@ -96,14 +96,14 @@ Chronicle 是一个 **以知识沉淀为手段、以长期认知复利为目标�
 
 ---
 
-## 你的工具箱 (extensions/)
+## 连接与通信 (extensions/)
 
-你可以通过 `extensions/` 目录下的内容扩展你的能力：
+`extensions/` 目录定义了外部世界与 Edges 系统通信的协议和接口。作为 Agent，你应当利用这些内容作为你与系统交互的桥梁：
 
-- **MCP Servers**: 当你需要执行复杂的外部操作（如自动入库、搜索、文件系统交互）时，优先检查 `extensions/mcp-servers/`。
-- **Skills**: 当你需要参考特定的任务流程或 Prompt 模板时，查阅 `extensions/skills/`。
+- **MCP Servers**: 当你需要跨越环境限制（如从 IDE 写入 Repo）时，通过 `extensions/mcp-servers/` 提供的工具进行操作。
+- **Skills**: 这些是你与系统协同工作的“标准手册”，查阅 `extensions/skills/` 以确保你的行为符合系统规范。
 
-在使用这些扩展之前，请务必阅读该目录下的 `README.md` 或源代码以了解调用协议。
+请记住：这些是**接口层**，用于实现“外部输入 -> 系统处理 -> 认知沉淀”的闭环。
 
 ---
 

@@ -58,29 +58,28 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 
 ---
 
-## Agent Extensions (extensions/)
+## 外部连接扩展 (extensions/)
 
-`extensions/` 目录存放了增强 AI Agent 能力的各类插件、服务和工具：
+`extensions/` 目录存放的是 **供外部系统或 AI Agent 连接并接入 Edges 系统** 的接口与插件。它们不是 Edges 系统本身的开发工具，而是对外的“连接器”：
 
-- **`mcp-servers/`**: [Model Context Protocol](https://modelcontextprotocol.io/) 服务器。允许 AI 直接通过标准化协议调用本地服务（如 `new-note` 服务用于自动化笔记入库）。
-- **`skills/`**: 存放 AI Agent 的具体技能定义（如特定任务的 Prompt 模板或操作流程）。
-- **`subagents/`**: 专门化的子代理配置，用于处理特定领域的复杂任务。
-- **`tools/`**: 供 Agent 调用的独立脚本或工具集。
+- **`mcp-servers/`**: 标准化的 [MCP](https://modelcontextprotocol.io/) 协议服务器。允许外部 AI 客户端（如 Claude Desktop, Cursor, IDE 插件）直接调用 Edges 的能力（如自动化笔记入库）。
+- **`skills/`**: 供外部 Agent 加载的技能定义，使其了解如何按 Edges 的规范进行思考和操作。
+- **`subagents/`**: 预配置的子代理，作为外部系统与 Edges 数据流之间的中转站。
+- **`tools/`**: 暴露给外部调用的独立工具。
 
-### 初始化
+### 接入初始化
 
-协作者在首次 clone 后，执行下面命令把 `extensions/skills/` 同步到各类 agent 的配置目录：
+外部 Agent 或协作者在首次接入时，可通过以下命令同步配置：
 
 ```bash
 ./bin/init-extensions
 ```
 
-### 可用 MCP Servers
+### 核心连接器: MCP Servers
 
 当前已实现的 MCP 服务：
 
-- **`new-note`**: 接收外部 AI 总结并执行入库（落盘、commit、push）。
-  - 路径: `extensions/mcp-servers/new-note`
-  - 功能: 自动在 `knowledge/notes/` 下创建新文件并推送到仓库。
+- **`new-note`**: 提供标准的 `new-note` tool。
+  - 功能: 接收外部总结信息，并按规范自动写入 `knowledge/notes/`。
 
 
