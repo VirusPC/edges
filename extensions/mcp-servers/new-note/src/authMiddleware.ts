@@ -14,6 +14,11 @@ export function createAuthMiddleware(config: RuntimeConfig) {
       return next();
     }
 
+    // If no token is configured, auth is effectively disabled.
+    if (!config.authToken) {
+      return next();
+    }
+
     // Check for Authorization header
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -55,8 +60,8 @@ export function createAuthMiddleware(config: RuntimeConfig) {
 }
 
 export function validateAuthConfig(config: RuntimeConfig): void {
-  // For HTTP mode, auth token is required
+  // For HTTP mode, auth token is optional.
   if (!config.authToken) {
-    console.warn('Warning: Authentication token not configured. HTTP endpoints will require valid tokens.');
+    console.warn('Warning: EDGES_AUTH_TOKEN is not set. HTTP auth is disabled for /new-note.');
   }
 }

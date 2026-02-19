@@ -63,7 +63,7 @@ HTTP 模式将在以下端点启动服务器：
 - Streamable HTTP 端点: `http://localhost:3000/new-note`
 - 健康检查端点: `http://localhost:3000/health`
 
-**注意**: HTTP 模式需要配置认证令牌，并在请求中包含 `Authorization: Bearer <token>` 头部。
+**注意**: HTTP 认证是可选的。仅当设置了 `EDGES_AUTH_TOKEN` 时，才需要在请求中包含 `Authorization: Bearer <token>` 头部。
 
 ## Environment Variables
 
@@ -76,7 +76,7 @@ HTTP 模式将在以下端点启动服务器：
 
 ### HTTP 认证 (可选)
 
-- `EDGES_AUTH_TOKEN`: HTTP API 认证令牌（仅用于 HTTP 模式）
+- `EDGES_AUTH_TOKEN`: HTTP API 认证令牌（可选，仅用于 HTTP 模式；未设置时跳过认证）
 
 ## MCP Tool
 
@@ -171,6 +171,8 @@ MCP tool 名称：`new_note`
   }
 }
 ```
+
+如果未设置 `EDGES_AUTH_TOKEN`，可省略 `headers.Authorization`。
 
 **HTTP 认证错误码：**
 - `AUTH_MISSING`: 缺少 Authorization 头部
