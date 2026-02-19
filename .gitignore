@@ -18,6 +18,7 @@
 *.tmp
 *.temp
 .env
+.env.current
 
 # Node artifacts
 node_modules/
