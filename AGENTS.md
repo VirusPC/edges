@@ -112,5 +112,4 @@ Chronicle 是一个 **以知识沉淀为手段、以长期认知复利为目标�
 
 ## Git 提交规则
 
-- 当 Agent 执行 `git commit` 时，提交信息必须包含以下 trailer：
-  `Co-authored-by: OpenAI Codex <codex@openai.com>`
+- 当 Agent 执行 `git commit` 时，提交信息必须包含 co-author trailer
