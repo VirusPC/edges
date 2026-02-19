@@ -84,6 +84,10 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 外部 Agent 或协作者在首次接入时，执行：
 
 ```bash
+# (推荐) 初始化本地开发环境并添加 bin/ 路径到系统 PATH
+pnpm setup
+
+# 或者仅执行扩展初始化
 ./bin/init-extensions
 ```
 
