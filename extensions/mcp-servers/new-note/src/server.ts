@@ -173,8 +173,10 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
         
         // Clean up on request close
         req.on("close", () => {
-          transport.close();
-          server.close();
+          // TODO: 看下什么导致的迅速 close
+          console.error("[new-note] Request closed");
+          // transport.close();
+          // server.close();
         });
         
         try {
