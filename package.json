@@ -5,8 +5,10 @@
   "description": "Edges - 认知系统服务工作区",
   "scripts": {
     "setup": "./bootstrap",
+    "build": "pnpm recursive build",
     "test": "pnpm recursive test",
     "lint": "pnpm recursive lint",
+    "format": "pnpm recursive exec -- prettier --write \"src/**/*.ts\"",
     "start:note-server": "pnpm --filter new-note start",
     "dev:note-server": "pnpm --filter new-note dev",
     "mcp:run": "pnpm --filter"

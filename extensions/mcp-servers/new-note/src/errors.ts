@@ -6,7 +6,7 @@ export function classifyError(output: { stdout?: string; stderr?: string; messag
   if (text.includes("usage: new-note") || text.includes("validation")) {
     return "VALIDATION_ERROR";
   }
-  if (text.includes("no such file") && (text.includes("new-note") || text.includes("edges-injest"))) {
+  if (text.includes("no such file") && text.includes("new-note")) {
     return "SCRIPT_NOT_FOUND";
   }
   if (text.includes("permission denied (publickey)") || text.includes("authentication failed")) {

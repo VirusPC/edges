@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-set -e
-
-# Backward-compat wrapper. Prefer using `bin/new-note`.
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-exec "$SCRIPT_DIR/new-note" "$@"

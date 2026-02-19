@@ -72,7 +72,7 @@ HTTP 模式将在以下端点启动服务器：
 - `EDGES_MODE`: (可选) 提交模式。
   - `direct` (默认): 直接在基线分支上提交并推送。
   - `pr`: 创建新分支并尝试建立 PR。
-- `GITHUB_TOKEN`: (可选) GitHub 个人访问令牌。仅用于自动创建 PR；如果使用 `bin/new-note-direct` 或已配置 `gh` CLI，则不需要。
+- `GITHUB_TOKEN`: (可选) GitHub 个人访问令牌。仅用于自动创建 PR；如果已配置 `gh` CLI，则不需要。
 
 ### HTTP 认证 (可选)
 
@@ -188,7 +188,7 @@ npm test
 - 报 `SCRIPT_NOT_FOUND`：检查脚本是否存在于 `bin/new-note` 并具有执行权限。
 - 报 `PUSH_AUTH_FAILED`：检查服务器上的 Git 凭据（SSH key / token）。
 - 报 `GIT_FAILURE`：检查远程仓库可达性、分支权限和本地工作区状态。
-- 无法自动建 PR：确认 `gh auth status` 或 `GITHUB_TOKEN` 可用。注意 `new-note-direct` 脚本不提供 PR 功能。
+- 无法自动建 PR：确认 `gh auth status` 或 `GITHUB_TOKEN` 可用。注意 `direct` 提交模式不提供 PR 功能。
 
 ## Rollback
 
