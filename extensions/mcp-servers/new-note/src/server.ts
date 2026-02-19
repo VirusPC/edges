@@ -146,6 +146,8 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
     // Mount the transport at /new-note endpoint
     app.use('/new-note', async (req, res, next) => {
       try {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.setHeader("Access-Control-Expose-Headers", "Mcp-Session-Id");
         await transport.handleRequest(req, res);
       } catch (error) {
         next(error);
