@@ -41,12 +41,12 @@ if [ -z "$SLUG" ]; then
   SLUG="untitled-$(date +%s)"
 fi
 
-FILE="inbox/${DATE}--${SLUG}.md"
+FILE="knowledge/notes/${DATE}--${SLUG}.md"
 BRANCH="ingest/${DATE}-${SLUG}"
 
 git checkout -b "$BRANCH"
 
-mkdir -p inbox
+mkdir -p knowledge/notes
 
 cat > "$FILE" <<EOF
 # $TITLE

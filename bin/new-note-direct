@@ -42,9 +42,9 @@ if [ -z "$SLUG" ]; then
   SLUG="untitled-$(date +%s)"
 fi
 
-FILE="inbox/${DATE}--${SLUG}.md"
+FILE="knowledge/notes/${DATE}--${SLUG}.md"
 
-mkdir -p inbox
+mkdir -p knowledge/notes
 
 cat > "$FILE" <<EOF
 # $TITLE

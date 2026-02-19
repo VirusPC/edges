@@ -9,22 +9,18 @@
 ```
 edges/
 ├── README.md           # 本文件 - 系统说明
-├── notes/              # 📝 原始想法、待处理内容
-│   ├── inbox.md        # 快速收集箱（定期清理）
-│   ├── to-learn.md     # 待学习内容
-│   ├── reading-list.md # 阅读清单
-│   └── fleeting/       # 临时笔记（可定期归档或删除）
-│
-├── edges/              # 🎯 已沉淀的认知优势
-│   ├── README.md       # edges 总览
-│   ├── tech/           # 技术领域
-│   ├── work/           # 工作方法
-│   ├── thinking/       # 思维模型
-│   └── index.md        # 按标签/领域的索引
-│
-└── archive/            # 📦 归档内容
-    ├── 2025/           # 按年份
-    └── retired/        # 过时/不再关注的内容
+├── knowledge/          # 🧠 知识库
+│   ├── notes/          # 📝 原始想法、待处理内容
+│   │   ├── inbox.md    # 快速收集箱（定期清理）
+│   │   ├── to-learn.md # 待学习内容
+│   │   └── ...
+│   ├── edges/          # 🎯 已沉淀的认知优势
+│   │   ├── README.md   # edges 总览
+│   │   └── ...
+│   └── archive/        # 📦 归档内容
+│       └── ...
+├── bin/                # 🛠️ 脚本工具
+└── extensions/         # 🧩 Agent 扩展与 MCP Servers
 ```
 
 ---
