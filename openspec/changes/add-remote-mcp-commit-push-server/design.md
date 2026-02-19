@@ -62,9 +62,14 @@
 4. 在测试环境验证成功路径与失败路径（git 失败、push 失败、参数缺失）。
 5. 渐进上线：先内部调用，再开放给外部 AI；保留回滚开关（禁用 MCP ingest tool，回退手工流程）。
 
-## Open Questions
+## Open Questions & Decisions
 
-- 是否要求 MCP server 直接创建 PR，还是只保证 commit/push，PR 作为可选后处理？
-- 目标写入目录是否固定为 `inbox/`，还是根据内容类型路由到 `notes/`/`edges/`？
-- `coAuthor` 字段是否强制，默认值策略是什么（例如 OpenAI Codex trailer）？
-- 是否需要为外部 AI 接入额外认证（token allowlist）以限制调用来源？
+- **是否要求 MCP server 直接创建 PR？**
+  - Decision: 是。`bin/new-note` 已实现优先尝试 `gh` CLI，其次回退到 `curl` 调用 GitHub API 创建 PR。
+- **目标写入目录是否固定？**
+  - Decision: 目前固定写入 `knowledge/notes/`。
+- **`coAuthor` 字段策略？**
+  - Decision: 强制必填，由 MCP server 在输入层进行校验。
+- **外部 AI 接入认证？**
+  - Decision: 已在 HTTP 模式下通过 `authMiddleware` 实现 Token 校验。
+
