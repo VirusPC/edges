@@ -1,0 +1,19 @@
+{
+  "name": "edges",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Edges - 认知系统服务工作区",
+  "scripts": {
+    "test": "pnpm recursive test",
+    "lint": "pnpm recursive lint",
+    "start:note-server": "pnpm --filter new-note start",
+    "dev:note-server": "pnpm --filter new-note dev",
+    "mcp:run": "pnpm --filter"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

@@ -89,4 +89,25 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 
 ---
 
+## 4. 工作区管理 (Workspace)
+
+本项目采用 **pnpm workspace** 进行“服务端服务工作区”管理，实现环境隔离与统一调度。
+
+### 核心操作
+
+- **安装依赖**: `pnpm install` (在根目录执行)
+- **启动 MCP Server**:
+  - 启动 New Note: `pnpm start:note-server`
+  - 开发模式: `pnpm dev:note-server`
+- **通用的启动器**: `pnpm mcp:run <server-name> <command>`
+  - 示例: `pnpm mcp:run new-note build`
+
+### 结构规范
+
+- `extensions/mcp-servers/*`: 独立的 MCP 服务单元，各自拥有 `package.json`。
+- `bin/`: 系统维护脚本，已整合进工作区路径。
+- `tsconfig.base.json`: 共享的全局编译器配置。
+
+---
+
 *最后更新: 2026-02-19*
