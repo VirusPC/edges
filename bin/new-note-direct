@@ -2,7 +2,8 @@
 set -e
 
 # ===== 基础配置 =====
-EDGES_REPO="${EDGES_REPO:-$HOME/Documents/projects/agent/edges}"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+EDGES_REPO="${EDGES_REPO:-$(dirname "$SCRIPT_DIR")}"
 BASE_BRANCH="${EDGES_BASE_BRANCH:-main}"
 DATE=$(date +%Y-%m-%d)
 # ====================

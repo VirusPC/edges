@@ -9,17 +9,16 @@ function resolveDefaultRepoPath(): string {
   return path.resolve(__dirname, "../../../../");
 }
 
-function resolveDefaultScriptPath(): string {
-  return path.resolve(__dirname, "../../../../bin/new-note");
-}
-
 export function loadConfig(): RuntimeConfig {
+  const repoPath = process.env.EDGES_REPO ?? resolveDefaultRepoPath();
+  const rawMode = process.env.EDGES_MODE?.toLowerCase();
+  const mode = rawMode === "direct" ? "direct" : "pr";
+  
   return {
-    repoPath: process.env.EDGES_REPO_PATH ?? resolveDefaultRepoPath(),
+    repoPath,
     baseBranch: process.env.EDGES_BASE_BRANCH ?? "main",
-    scriptPath: process.env.EDGES_NEW_NOTE_SCRIPT ?? process.env.EDGES_INGEST_SCRIPT ?? resolveDefaultScriptPath(),
+    scriptPath: path.join(repoPath, "bin/new-note"),
+    mode,
     authToken: process.env.EDGES_AUTH_TOKEN,
-    gitUsername: process.env.GIT_USERNAME,
-    gitEmail: process.env.GIT_EMAIL,
   };
 }

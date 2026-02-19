@@ -2,8 +2,11 @@
 set -e
 
 # ===== 基础配置 =====
-EDGES_REPO="${EDGES_REPO:-$HOME/Documents/projects/agent/edges}"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+EDGES_REPO="${EDGES_REPO:-$(dirname "$SCRIPT_DIR")}"
 BASE_BRANCH="${EDGES_BASE_BRANCH:-main}"
+# Mode: 'pr' (create new branch and PR) or 'direct' (commit to base branch)
+MODE="${EDGES_MODE:-pr}"
 DATE=$(date +%Y-%m-%d)
 # ====================
 
@@ -44,7 +47,13 @@ fi
 FILE="knowledge/notes/${DATE}--${SLUG}.md"
 BRANCH="ingest/${DATE}-${SLUG}"
 
-git checkout -b "$BRANCH"
+if [ "$MODE" = "direct" ]; then
+  BRANCH="$BASE_BRANCH"
+  echo "📝 Mode: Direct commit to $BASE_BRANCH"
+else
+  echo "🌿 Mode: Create branch and PR"
+  git checkout -b "$BRANCH"
+fi
 
 mkdir -p knowledge/notes
 
@@ -63,45 +72,54 @@ git commit -m "ingest: $TITLE
 Co-authored-by: $CO_AUTHOR
 "
 
-git push -u origin "$BRANCH"
+if [ "$MODE" = "direct" ]; then
+  git push
+else
+  git push -u origin "$BRANCH"
+fi
 
 # Get remote URL and construct PR link
-REMOTE_URL=$(git remote get-url origin)
-PR_BODY="Auto-ingested with AI assistance.
+if [ "$MODE" = "direct" ]; then
+  PR_CREATED=true
+  PR_HTML_URL=""
+  PR_URL=""
+else
+  REMOTE_URL=$(git remote get-url origin)
+  PR_BODY="Auto-ingested with AI assistance.
 
 Co-authored-by: $CO_AUTHOR"
-# URL encode the body and title (use safe='' to encode all special chars)
-PR_BODY_ENCODED=$(echo -n "$PR_BODY" | python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe=''))")
-PR_TITLE_ENCODED=$(echo -n "$TITLE" | python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe=''))")
+  # URL encode the body and title (use safe='' to encode all special chars)
+  PR_BODY_ENCODED=$(echo -n "$PR_BODY" | python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe=''))")
+  PR_TITLE_ENCODED=$(echo -n "$TITLE" | python3 -c "import sys, urllib.parse; print(urllib.parse.quote(sys.stdin.read(), safe=''))")
 
-# Convert SSH to HTTPS format for PR URL
-if [[ "$REMOTE_URL" == git@github.com:* ]]; then
-  REPO_PATH="${REMOTE_URL#git@github.com:}"
-  REPO_PATH="${REPO_PATH%.git}"
-  PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1&title=${PR_TITLE_ENCODED}&body=${PR_BODY_ENCODED}"
-elif [[ "$REMOTE_URL" == https://github.com/* ]]; then
-  REPO_PATH="${REMOTE_URL#https://github.com/}"
-  REPO_PATH="${REPO_PATH%.git}"
-  PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1&title=${PR_TITLE_ENCODED}&body=${PR_BODY_ENCODED}"
-fi
+  # Convert SSH to HTTPS format for PR URL
+  if [[ "$REMOTE_URL" == git@github.com:* ]]; then
+    REPO_PATH="${REMOTE_URL#git@github.com:}"
+    REPO_PATH="${REPO_PATH%.git}"
+    PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1&title=${PR_TITLE_ENCODED}&body=${PR_BODY_ENCODED}"
+  elif [[ "$REMOTE_URL" == https://github.com/* ]]; then
+    REPO_PATH="${REMOTE_URL#https://github.com/}"
+    REPO_PATH="${REPO_PATH%.git}"
+    PR_URL="https://github.com/${REPO_PATH}/compare/${BASE_BRANCH}...${BRANCH}?expand=1&title=${PR_TITLE_ENCODED}&body=${PR_BODY_ENCODED}"
+  fi
 
-PR_CREATED=false
-PR_HTML_URL=""
+  PR_CREATED=false
+  PR_HTML_URL=""
 
-# Try gh first
-if command -v gh >/dev/null 2>&1 && gh auth status &>/dev/null; then
-  gh pr create \
-    --title "$TITLE" \
-    --body "$PR_BODY" && PR_CREATED=true
-fi
+  # Try gh first
+  if command -v gh >/dev/null 2>&1 && gh auth status &>/dev/null; then
+    gh pr create \
+      --title "$TITLE" \
+      --body "$PR_BODY" && PR_CREATED=true
+  fi
 
-# Fallback to curl with GITHUB_TOKEN
-if [ "$PR_CREATED" = false ] && [ -n "$GITHUB_TOKEN" ]; then
-  PR_RESPONSE=$(curl -s -X POST \
-    -H "Authorization: token $GITHUB_TOKEN" \
-    -H "Accept: application/vnd.github.v3+json" \
-    "https://api.github.com/repos/${REPO_PATH}/pulls" \
-    -d "$(cat <<EOFPR
+  # Fallback to curl with GITHUB_TOKEN
+  if [ "$PR_CREATED" = false ] && [ -n "$GITHUB_TOKEN" ]; then
+    PR_RESPONSE=$(curl -s -X POST \
+      -H "Authorization: token $GITHUB_TOKEN" \
+      -H "Accept: application/vnd.github.v3+json" \
+      "https://api.github.com/repos/${REPO_PATH}/pulls" \
+      -d "$(cat <<EOFPR
 {
   "title": $(echo -n "$TITLE" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))"),
   "body": $(echo -n "$PR_BODY" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))"),
@@ -110,25 +128,29 @@ if [ "$PR_CREATED" = false ] && [ -n "$GITHUB_TOKEN" ]; then
 }
 EOFPR
 )")
-  PR_HTML_URL=$(echo "$PR_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('html_url',''))" 2>/dev/null)
-  if [ -n "$PR_HTML_URL" ]; then
-    echo "🔗 PR created: $PR_HTML_URL"
-    PR_CREATED=true
-  else
-    echo "⚠️  Failed to create PR via API"
+    PR_HTML_URL=$(echo "$PR_RESPONSE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('html_url',''))" 2>/dev/null)
+    if [ -n "$PR_HTML_URL" ]; then
+      echo "🔗 PR created: $PR_HTML_URL"
+      PR_CREATED=true
+    else
+      echo "⚠️  Failed to create PR via API"
+    fi
   fi
-fi
 
-# Final fallback: output URL
-if [ "$PR_CREATED" = false ]; then
-  echo "📎 Create PR: $PR_URL"
-  echo "💡 Tip: Set GITHUB_TOKEN or run 'gh auth login' for auto PR creation"
+  # Final fallback: output URL
+  if [ "$PR_CREATED" = false ]; then
+    echo "📎 Create PR: $PR_URL"
+    echo "💡 Tip: Set GITHUB_TOKEN or run 'gh auth login' for auto PR creation"
+  fi
 fi
 
 echo "✅ Ingested: $FILE"
 echo "__EDGES_FILE__=$FILE"
 echo "__EDGES_BRANCH__=$BRANCH"
-if [ -n "$PR_HTML_URL" ]; then
+if [ "$MODE" = "direct" ]; then
+  echo "__EDGES_PR_STATUS__=direct_commit"
+  echo "__EDGES_PR_URL__="
+elif [ -n "$PR_HTML_URL" ]; then
   echo "__EDGES_PR_STATUS__=created"
   echo "__EDGES_PR_URL__=$PR_HTML_URL"
 else

@@ -67,24 +67,16 @@ HTTP 模式将在以下端点启动服务器：
 
 ## Environment Variables
 
-- `EDGES_REPO_PATH`: 目标仓库路径，默认当前仓库根目录
+- `EDGES_REPO`: 目标仓库路径，默认当前仓库根目录（自动通过相对路径解析）
 - `EDGES_BASE_BRANCH`: 基线分支，默认 `main`
-- `EDGES_NEW_NOTE_SCRIPT`: new-note 脚本路径，默认 `../../../../bin/new-note`（由服务进程自动解析到仓库根 `bin/new-note`）
-- `EDGES_INGEST_SCRIPT`: 旧变量名，仍兼容（不建议继续使用）
+- `EDGES_MODE`: (可选) 提交模式。
+  - `pr` (默认): 创建新分支并尝试建立 PR。
+  - `direct`: 直接在基线分支上提交并推送。
+- `GITHUB_TOKEN`: (可选) GitHub 个人访问令牌。仅用于自动创建 PR；如果使用 `bin/new-note-direct` 或已配置 `gh` CLI，则不需要。
 
-### Authorization Variables (Optional)
+### HTTP 认证 (可选)
 
-- `GITHUB_TOKEN`: GitHub 个人访问令牌（用于自动创建 PR）
-- `EDGES_AUTH_TOKEN`: HTTP API 认证令牌（用于 HTTP 模式）
-
-**说明**：
-- `GITHUB_TOKEN`: 用于脚本自动创建 GitHub PR
-- `EDGES_AUTH_TOKEN`: 用于 HTTP API 认证（如果启用 HTTP 服务器）
-
-脚本侧兼容变量：
-- `EDGES_REPO`
-- `EDGES_BASE_BRANCH`
-- `GITHUB_TOKEN`
+- `EDGES_AUTH_TOKEN`: HTTP API 认证令牌（仅用于 HTTP 模式）
 
 ## MCP Tool
 
@@ -138,11 +130,12 @@ MCP tool 名称：`new_note`
   "command": "node",
   "args": ["/absolute/path/to/edges/extensions/mcp-servers/new-note/dist/index.js"],
   "env": {
-    "EDGES_REPO_PATH": "/absolute/path/to/edges",
-    "EDGES_BASE_BRANCH": "main"
+    "GITHUB_TOKEN": "your_token_here (optional)"
   }
 }
 ```
+
+**提示**：如果 MCP Server 位于仓库的标准 `extensions/mcp-servers/new-note` 路径下，通常不需要设置 `EDGES_REPO`，它会自动识别。
 
 如需源码直跑（开发环境）：
 
@@ -192,10 +185,10 @@ npm test
 
 ## Troubleshooting
 
-- 报 `SCRIPT_NOT_FOUND`：检查 `EDGES_NEW_NOTE_SCRIPT` 路径和执行权限。
+- 报 `SCRIPT_NOT_FOUND`：检查脚本是否存在于 `bin/new-note` 并具有执行权限。
 - 报 `PUSH_AUTH_FAILED`：检查服务器上的 Git 凭据（SSH key / token）。
 - 报 `GIT_FAILURE`：检查远程仓库可达性、分支权限和本地工作区状态。
-- 无法自动建 PR：确认 `gh auth status` 或 `GITHUB_TOKEN` 可用。
+- 无法自动建 PR：确认 `gh auth status` 或 `GITHUB_TOKEN` 可用。注意 `new-note-direct` 脚本不提供 PR 功能。
 
 ## Rollback
 

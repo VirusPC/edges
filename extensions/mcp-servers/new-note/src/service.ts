@@ -1,14 +1,8 @@
-import type { IngestRequest, IngestResult, RuntimeConfig } from "./types.js";
+import type { IngestRequest, IngestResult, RuntimeConfig, ScriptSuccess } from "./types.js";
 import { classifyError, summarize } from "./errors.js";
 import { runIngestScript } from "./scriptAdapter.js";
 
-type IngestRunner = (input: IngestRequest, config: RuntimeConfig) => Promise<{
-  filePath: string;
-  branch: string;
-  prUrl?: string;
-  prStatus: "created" | "unavailable";
-  stdout: string;
-}>;
+type IngestRunner = (input: IngestRequest, config: RuntimeConfig) => Promise<ScriptSuccess>;
 
 export async function runIngest(
   input: IngestRequest,

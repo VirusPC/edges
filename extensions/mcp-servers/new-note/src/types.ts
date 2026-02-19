@@ -17,7 +17,7 @@ export interface IngestSuccess {
   filePath: string;
   branch: string;
   prUrl?: string;
-  prStatus: "created" | "unavailable";
+  prStatus: "created" | "unavailable" | "direct_commit";
   stdoutSummary: string;
 }
 
@@ -35,15 +35,14 @@ export interface RuntimeConfig {
   repoPath: string;
   baseBranch: string;
   scriptPath: string;
+  mode: "pr" | "direct";
   authToken?: string;
-  gitUsername?: string;
-  gitEmail?: string;
 }
 
 export interface ScriptSuccess {
   filePath: string;
   branch: string;
   prUrl?: string;
-  prStatus: "created" | "unavailable";
+  prStatus: "created" | "unavailable" | "direct_commit";
   stdout: string;
 }

@@ -16,24 +16,17 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
   console.error(`[new-note] Configuration:`);
   console.error(`  - Repo path: ${config.repoPath}`);
   console.error(`  - Base branch: ${config.baseBranch}`);
+  console.error(`  - Mode: ${config.mode.toUpperCase()}${config.mode === 'pr' ? ' (Create branch + PR)' : ' (Direct commit to base)'}`);
   console.error(`  - Script path: ${config.scriptPath}`);
   
   // Log environment variables status
   console.error(`[new-note] ------------------------------------------`);
   console.error(`[new-note] Environment Variables:`);
-  console.error(`  • EDGES_REPO_PATH:`);
-  console.error(`    ${process.env.EDGES_REPO_PATH ? '✓ Set: ' + process.env.EDGES_REPO_PATH : '○ Default: ' + config.repoPath}`);
-  console.error(`  • EDGES_BASE_BRANCH:`);
-  console.error(`    ${process.env.EDGES_BASE_BRANCH ? '✓ Set: ' + process.env.EDGES_BASE_BRANCH : '○ Default: ' + config.baseBranch}`);
-  console.error(`  • EDGES_NEW_NOTE_SCRIPT:`);
-  console.error(`    ${process.env.EDGES_NEW_NOTE_SCRIPT ? '✓ Set: ' + process.env.EDGES_NEW_NOTE_SCRIPT : '○ Default: ' + config.scriptPath}`);
   
   if (transportType === 'http') {
-    console.error(`  • EDGES_AUTH_TOKEN:`);
-    console.error(`    ${process.env.EDGES_AUTH_TOKEN ? '✓ Set: ' + process.env.EDGES_AUTH_TOKEN.substring(0, 8) + '...' : '✗ Not set (recommended for HTTP)'}`);
+    console.error(`  • EDGES_AUTH_TOKEN: ${process.env.EDGES_AUTH_TOKEN ? '✓ Set' : '✗ Not set'}`);
   }
-  console.error(`  • GITHUB_TOKEN:`);
-  console.error(`    ${process.env.GITHUB_TOKEN ? '✓ Set: ' + process.env.GITHUB_TOKEN.substring(0, 8) + '... (PR creation enabled)' : '○ Not set (PR creation unavailable)'}`);
+  console.error(`  • GITHUB_TOKEN: ${process.env.GITHUB_TOKEN ? '✓ Set (PR enabled)' : '○ Not set (PR disabled)'}`);
   
   // Validate auth configuration for HTTP mode
   if (transportType === 'http') {

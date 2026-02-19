@@ -22,16 +22,8 @@ export async function runIngestScript(input: IngestRequest, config: RuntimeConfi
     ...process.env,
     EDGES_REPO: config.repoPath,
     EDGES_BASE_BRANCH: config.baseBranch,
+    EDGES_MODE: config.mode,
   };
-
-  // Add authorization environment variables if provided
-  if (config.authToken) {
-    envVars.EDGES_AUTH_TOKEN = config.authToken;
-  }
-  // Pass through GITHUB_TOKEN if available in environment
-  if (process.env.GITHUB_TOKEN) {
-    envVars.GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-  }
 
   const { stdout } = await execFileAsync(config.scriptPath, [input.title, input.content, input.coAuthor], {
     env: envVars,
@@ -47,11 +39,15 @@ export async function runIngestScript(input: IngestRequest, config: RuntimeConfi
     throw new Error("Missing marker output from ingest script");
   }
 
+  let prStatus: "created" | "unavailable" | "direct_commit" = "unavailable";
+  if (prStatusMarker === "created") prStatus = "created";
+  if (prStatusMarker === "direct_commit") prStatus = "direct_commit";
+
   return {
     filePath,
     branch,
     prUrl,
-    prStatus: prStatusMarker === "created" ? "created" : "unavailable",
+    prStatus,
     stdout,
   };
 }

@@ -4,8 +4,6 @@ import type { RuntimeConfig } from './types.js';
 export interface AuthenticatedRequest extends Request {
   auth?: {
     token?: string;
-    username?: string;
-    email?: string;
   };
 }
 
@@ -49,9 +47,7 @@ export function createAuthMiddleware(config: RuntimeConfig) {
 
     // Attach auth info to request
     req.auth = {
-      token,
-      username: config.gitUsername,
-      email: config.gitEmail
+      token
     };
 
     next();
