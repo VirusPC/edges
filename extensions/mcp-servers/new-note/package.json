@@ -11,7 +11,8 @@
     "start": "node --env-file=.env dist/index.js --http --port 3000",
     "dev:stdio": "tsx --env-file=.env src/index.ts",
     "start:stdio": "node --env-file=.env dist/index.js",
-    "test": "node --test --import tsx"
+    "test": "node --test --import tsx",
+    "test:integration": "./test/integration.sh"
   },
   "engines": {
     "node": ">=20"

@@ -31,8 +31,10 @@ fi
 
 cd "$EDGES_REPO"
 
-git checkout "$BASE_BRANCH"
-git pull
+if [ "$EDGES_DRY_RUN" != "true" ]; then
+  git checkout "$BASE_BRANCH"
+  git pull
+fi
 
 SLUG=$(echo "$TITLE" \
   | tr '[:upper:]' '[:lower:]' \
@@ -73,9 +75,9 @@ Co-authored-by: $CO_AUTHOR
 "
 
 if [ "$MODE" = "direct" ]; then
-  git push
+  [ "$EDGES_DRY_RUN" != "true" ] && git push
 else
-  git push -u origin "$BRANCH"
+  [ "$EDGES_DRY_RUN" != "true" ] && git push -u origin "$BRANCH"
 fi
 
 # Get remote URL and construct PR link
@@ -84,7 +86,7 @@ if [ "$MODE" = "direct" ]; then
   PR_HTML_URL=""
   PR_URL=""
 else
-  REMOTE_URL=$(git remote get-url origin)
+  REMOTE_URL=$( [ "$EDGES_DRY_RUN" = "true" ] && echo "https://github.com/example/repo" || git remote get-url origin )
   PR_BODY="Auto-ingested with AI assistance.
 
 Co-authored-by: $CO_AUTHOR"
