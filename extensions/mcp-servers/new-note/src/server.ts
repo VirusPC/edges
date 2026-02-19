@@ -131,6 +131,8 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
     // Set up Streamable HTTP transport with single endpoint
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: () => crypto.randomUUID(),
+      // sessionIdGenerator: undefined, // stateless mode
+      enableJsonResponse: true,
     });
     
     // Mount the transport at /new-note endpoint
