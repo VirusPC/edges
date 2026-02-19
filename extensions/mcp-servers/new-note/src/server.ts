@@ -10,32 +10,8 @@ import { loadConfig } from "./config.js";
 import { runIngest } from "./service.js";
 import { createAuthMiddleware, validateAuthConfig, type AuthenticatedRequest } from "./authMiddleware.js";
 
-export async function startServer(transportType: 'stdio' | 'http' = 'stdio', port?: number): Promise<void> {
-  const config = loadConfig();
-  
-  // Log server configuration
-  console.error(`[new-note] Starting server in ${transportType} mode`);
-  console.error(`[new-note] ------------------------------------------`);
-  console.error(`[new-note] Configuration:`);
-  console.error(`  - Repo path: ${config.repoPath}`);
-  console.error(`  - Base branch: ${config.baseBranch}`);
-  console.error(`  - Mode: ${config.mode.toUpperCase()}${config.mode === 'pr' ? ' (Create branch + PR)' : ' (Direct commit to base)'}`);
-  console.error(`  - Script path: ${config.scriptPath}`);
-  
-  // Log environment variables status
-  console.error(`[new-note] ------------------------------------------`);
-  console.error(`[new-note] Environment Variables:`);
-  
-  if (transportType === 'http') {
-    console.error(`  • EDGES_AUTH_TOKEN: ${process.env.EDGES_AUTH_TOKEN ? '✓ Set' : '✗ Not set'}`);
-  }
-  console.error(`  • GITHUB_TOKEN: ${process.env.GITHUB_TOKEN ? '✓ Set (PR enabled)' : '○ Not set (PR disabled)'}`);
-  
-  // Validate auth configuration for HTTP mode
-  if (transportType === 'http') {
-    validateAuthConfig(config);
-  }
-
+// Create MCP server instance with tools and prompts registered
+function createMcpServer(config: ReturnType<typeof loadConfig>) {
   const server = new McpServer({
     name: "new-note",
     version: "0.1.0",
@@ -113,18 +89,48 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
     }
   );
 
+  return server;
+}
+
+export async function startServer(transportType: 'stdio' | 'http' = 'stdio', port?: number): Promise<void> {
+  const config = loadConfig();
+  
+  // Log server configuration
+  console.error(`[new-note] Starting server in ${transportType} mode`);
+  console.error(`[new-note] ------------------------------------------`);
+  console.error(`[new-note] Configuration:`);
+  console.error(`  - Repo path: ${config.repoPath}`);
+  console.error(`  - Base branch: ${config.baseBranch}`);
+  console.error(`  - Mode: ${config.mode.toUpperCase()}${config.mode === 'pr' ? ' (Create branch + PR)' : ' (Direct commit to base)'}`);
+  console.error(`  - Script path: ${config.scriptPath}`);
+  
+  // Log environment variables status
+  console.error(`[new-note] ------------------------------------------`);
+  console.error(`[new-note] Environment Variables:`);
+  
+  if (transportType === 'http') {
+    console.error(`  • EDGES_AUTH_TOKEN: ${process.env.EDGES_AUTH_TOKEN ? '✓ Set' : '✗ Not set'}`);
+  }
+  console.error(`  • GITHUB_TOKEN: ${process.env.GITHUB_TOKEN ? '✓ Set (PR enabled)' : '○ Not set (PR disabled)'}`);
+  
+  // Validate auth configuration for HTTP mode
+  if (transportType === 'http') {
+    validateAuthConfig(config);
+  }
+
   if (transportType === 'http') {
     const httpPort = port || 3000;
     const baseUrl = `http://localhost:${httpPort}`;
+    const MCP_PATH = "/new-note";
     
     const app = express();
-    // app.use(express.json());
     
     // Configure CORS
     app.use(cors({ 
       origin: '*', 
-      exposedHeaders: ['mcp-session-id'], 
-      allowedHeaders: ['Content-Type', 'mcp-session-id'], 
+      exposedHeaders: ['mcp-session-id', 'Mcp-Session-Id'], 
+      allowedHeaders: ['Content-Type', 'mcp-session-id', 'Mcp-Session-Id', 'Authorization'], 
+      credentials: false,
     }));
     
     // Add authorization middleware
@@ -136,22 +142,51 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
       res.json({ status: 'ok', timestamp: new Date().toISOString() });
     });
     
-    // Set up Streamable HTTP transport with single endpoint
-    const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: () => crypto.randomUUID(),
-      // sessionIdGenerator: undefined, // stateless mode
-      enableJsonResponse: true,
+    // Root endpoint
+    app.get('/', (req, res) => {
+      res.type('text/plain').send('New Note MCP server');
     });
     
-    // Mount the transport at /new-note endpoint
-    app.use('/new-note', async (req, res, next) => {
-      try {
+    // Handle OPTIONS preflight requests for MCP endpoint
+    app.options(MCP_PATH, (req, res) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "content-type, mcp-session-id, Authorization");
+      res.setHeader("Access-Control-Expose-Headers", "Mcp-Session-Id");
+      res.status(204).end();
+    });
+    
+    // Handle MCP requests (POST, GET, DELETE)
+    const MCP_METHODS = ['POST', 'GET', 'DELETE'];
+    MCP_METHODS.forEach(method => {
+      app[method.toLowerCase() as 'post' | 'get' | 'delete'](MCP_PATH, async (req, res) => {
+        // Set CORS headers
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.setHeader("Access-Control-Expose-Headers", "Mcp-Session-Id");
-        await transport.handleRequest(req, res);
-      } catch (error) {
-        next(error);
-      }
+        
+        // Create new server and transport for each request (stateless mode)
+        const server = createMcpServer(config);
+        const transport = new StreamableHTTPServerTransport({
+          sessionIdGenerator: undefined, // stateless mode - no session ID required
+          enableJsonResponse: true,
+        });
+        
+        // Clean up on request close
+        req.on("close", () => {
+          transport.close();
+          server.close();
+        });
+        
+        try {
+          await server.connect(transport);
+          await transport.handleRequest(req, res);
+        } catch (error) {
+          console.error("[new-note] Error handling MCP request:", error);
+          if (!res.headersSent) {
+            res.status(500).type('text/plain').end("Internal server error");
+          }
+        }
+      });
     });
     
     app.listen(httpPort, () => {
@@ -165,16 +200,16 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
       console.error(`[new-note] Available Endpoints:`);
       console.error(`[new-note]   • Health Check:`);
       console.error(`[new-note]     GET ${baseUrl}/health`);
-      console.error(`[new-note]   • MCP Endpoint (Streamable HTTP):`);
-      console.error(`[new-note]     POST ${baseUrl}/new-note`);
+      console.error(`[new-note]   • MCP Endpoint (Streamable HTTP, stateless):`);
+      console.error(`[new-note]     POST/GET/DELETE ${baseUrl}${MCP_PATH}`);
       console.error(`[new-note] ------------------------------------------`);
       console.error(`[new-note] Available Tools:`);
       console.error(`[new-note]   • new_note: Create a new note and commit/push`);
       console.error(`[new-note] ==========================================\n`);
     });
-    
-    await server.connect(transport);
   } else {
+    // STDIO mode - reuse server instance
+    const server = createMcpServer(config);
     const transport = new StdioServerTransport();
     await server.connect(transport);
     console.error(`[new-note] Server started successfully in stdio mode`);
