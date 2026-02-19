@@ -92,7 +92,7 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
     }, 
     async ({ transcript }) => {
       try {
-        const skillFile = path.join(config.skillsPath, "conversation-to-notes/PROMPT.md");
+        const skillFile = path.join(config.skillsPath, "conversation-to-notes/SKILL.md");
         const skillContent = await fs.readFile(skillFile, "utf-8");
         
         return {

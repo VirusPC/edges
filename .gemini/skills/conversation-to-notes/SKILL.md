@@ -1,17 +1,21 @@
-Name: conversation_to_notes
+---
+name: conversation-to-notes
+description: 将原始对话记录整理为结构清晰的中文笔记摘要，生成符合 YYYY-MM-DD--主题简述.md 格式的标题。
+---
 
-Description:
+# conversation_to_notes
+
 将原始对话记录整理为结构清晰的中文笔记摘要。
 生成符合格式 YYYY-MM-DD--主题简述.md 的标题。
 仅进行总结与梳理，不进行战略判断或方法论抽象。
 
-When to Use:
+## When to Use:
 当需要将原始对话或聊天记录总结转化为可阅读笔记时使用。
 
-Inputs:
+## Inputs:
 - 原始对话全文
 
-Instructions:
+## Instructions:
 1. 识别对话的核心讨论主题。
 2. 生成标题，格式严格为：YYYY-MM-DD--主题简述.md
    - 若对话中包含日期信息，则使用该日期
@@ -22,7 +26,7 @@ Instructions:
 5. 删除重复、闲聊和无关内容。
 6. 所有输出必须为中文。
 
-Output Format:
+## Output Format:
 
 文件名：
 YYYY-MM-DD--主题简述.md
@@ -41,13 +45,13 @@ YYYY-MM-DD--主题简述.md
 【补充说明】
 ...
 
-Constraints:
+## Constraints:
 - 不添加原记录中不存在的新观点。
 - 不进行战略价值判断或方法论抽象。
 - 不输出与总结无关的说明性文字。
 - 标题必须严格符合 YYYY-MM-DD--主题简述.md 格式。
 - 输出必须为中文。
 
-Limitations:
+## Limitations:
 - 若原始记录高度碎片化，可能影响总结完整性。
 - 依赖输入文本提供足够语境。
