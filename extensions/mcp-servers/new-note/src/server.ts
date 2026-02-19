@@ -118,7 +118,7 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
     const baseUrl = `http://localhost:${httpPort}`;
     
     const app = express();
-    app.use(express.json());
+    // app.use(express.json());
     
     // Configure CORS
     app.use(cors({ 
