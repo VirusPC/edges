@@ -18,6 +18,7 @@ export function loadConfig(): RuntimeConfig {
     repoPath,
     baseBranch: process.env.EDGES_BASE_BRANCH ?? "main",
     scriptPath: path.join(repoPath, "bin/new-note"),
+    skillsPath: path.join(repoPath, "extensions/skills"),
     mode,
     authToken: process.env.EDGES_AUTH_TOKEN,
   };

@@ -3,6 +3,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
 import express from "express";
+import fs from "node:fs/promises";
+import path from "node:path";
 import { loadConfig } from "./config.js";
 import { runIngest } from "./service.js";
 import { createAuthMiddleware, validateAuthConfig, type AuthenticatedRequest } from "./authMiddleware.js";
@@ -76,6 +78,36 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
           ],
           isError: true,
         };
+      }
+    }
+  );
+
+  console.error(`[new-note] Registering MCP prompt: summarize_conversation`);
+  server.registerPrompt("summarize_conversation", 
+    {
+      description: "Summarize a conversation into a structured note for the Edges system",
+      argsSchema: {
+        transcript: z.string().optional().describe("The raw conversation transcript to summarize"),
+      }
+    }, 
+    async ({ transcript }) => {
+      try {
+        const skillFile = path.join(config.skillsPath, "conversation-to-notes.md");
+        const skillContent = await fs.readFile(skillFile, "utf-8");
+        
+        return {
+          messages: [
+            {
+              role: "user",
+              content: {
+                type: "text",
+                text: `${skillContent}\n\n${transcript ? `HERE IS THE TRANSCRIPT TO SUMMARIZE:\n\n${transcript}` : "Please summarize our current conversation following the instructions above."}`,
+              },
+            },
+          ],
+        };
+      } catch (error) {
+        throw new Error(`Failed to load skill template: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
   );

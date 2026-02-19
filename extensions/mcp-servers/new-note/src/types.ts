@@ -35,6 +35,7 @@ export interface RuntimeConfig {
   repoPath: string;
   baseBranch: string;
   scriptPath: string;
+  skillsPath: string;
   mode: "pr" | "direct";
   authToken?: string;
 }
