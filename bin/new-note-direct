@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -e
+
+# ===== 基础配置 =====
+EDGES_REPO="${EDGES_REPO:-$HOME/Documents/projects/agent/edges}"
+BASE_BRANCH="${EDGES_BASE_BRANCH:-main}"
+DATE=$(date +%Y-%m-%d)
+# ====================
+
+TITLE="$1"
+CONTENT="$2"
+CO_AUTHOR="$3"
+
+if [ -z "$TITLE" ] || [ -z "$CONTENT" ] || [ -z "$CO_AUTHOR" ]; then
+  echo 'usage: new-note-direct "title" "content" "AI Name <email>"'
+  exit 1
+fi
+
+if [ ! -d "$EDGES_REPO" ]; then
+  echo "error: repository path does not exist: $EDGES_REPO"
+  exit 1
+fi
+
+if ! command -v git >/dev/null 2>&1; then
+  echo "error: git is required"
+  exit 1
+fi
+
+cd "$EDGES_REPO"
+
+# 确保在基础分支上
+git checkout "$BASE_BRANCH"
+git pull
+
+SLUG=$(echo "$TITLE" \
+  | tr '[:upper:]' '[:lower:]' \
+  | tr ' ' '-' \
+  | tr -cd 'a-z0-9-')
+
+# Fallback if slug is empty (e.g., non-ASCII title)
+if [ -z "$SLUG" ]; then
+  SLUG="untitled-$(date +%s)"
+fi
+
+FILE="inbox/${DATE}--${SLUG}.md"
+
+mkdir -p inbox
+
+cat > "$FILE" <<EOF
+# $TITLE
+
+> Ingested on $DATE
+
+$CONTENT
+EOF
+
+git add "$FILE"
+
+git commit -m "ingest: $TITLE
+
+Co-authored-by: $CO_AUTHOR"
+
+git push
+
+echo "✅ Ingested: $FILE"
+echo "__EDGES_FILE__=$FILE"
+echo "__EDGES_BRANCH__=$BASE_BRANCH"
+echo "__EDGES_PR_STATUS__=direct_commit"
+echo "__EDGES_PR_URL__="
