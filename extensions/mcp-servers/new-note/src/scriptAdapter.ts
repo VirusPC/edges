@@ -18,12 +18,23 @@ function pickMarkerValue(stdout: string, marker: string): string | undefined {
 }
 
 export async function runIngestScript(input: IngestRequest, config: RuntimeConfig): Promise<ScriptSuccess> {
+  const envVars: Record<string, string | undefined> = {
+    ...process.env,
+    EDGES_REPO: config.repoPath,
+    EDGES_BASE_BRANCH: config.baseBranch,
+  };
+
+  // Add authorization environment variables if provided
+  if (config.authToken) {
+    envVars.EDGES_AUTH_TOKEN = config.authToken;
+  }
+  // Pass through GITHUB_TOKEN if available in environment
+  if (process.env.GITHUB_TOKEN) {
+    envVars.GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+  }
+
   const { stdout } = await execFileAsync(config.scriptPath, [input.title, input.content, input.coAuthor], {
-    env: {
-      ...process.env,
-      EDGES_REPO: config.repoPath,
-      EDGES_BASE_BRANCH: config.baseBranch,
-    },
+    env: envVars,
     maxBuffer: 1024 * 1024 * 10,
   });
 

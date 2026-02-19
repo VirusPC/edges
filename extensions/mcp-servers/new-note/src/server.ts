@@ -5,9 +5,15 @@ import { z } from "zod";
 import express from "express";
 import { loadConfig } from "./config.js";
 import { runIngest } from "./service.js";
+import { createAuthMiddleware, validateAuthConfig, type AuthenticatedRequest } from "./authMiddleware.js";
 
 export async function startServer(transportType: 'stdio' | 'http' = 'stdio', port?: number): Promise<void> {
   const config = loadConfig();
+  
+  // Validate auth configuration for HTTP mode
+  if (transportType === 'http') {
+    validateAuthConfig(config);
+  }
 
   const server = new McpServer({
     name: "new-note",
@@ -55,6 +61,15 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
   if (transportType === 'http') {
     const app = express();
     app.use(express.json());
+    
+    // Add authorization middleware
+    const authMiddleware = createAuthMiddleware(config);
+    app.use(authMiddleware);
+    
+    // Health check endpoint (no auth required)
+    app.get('/health', (req, res) => {
+      res.json({ status: 'ok', timestamp: new Date().toISOString() });
+    });
     
     // Set up Streamable HTTP transport with single endpoint
     const transport = new StreamableHTTPServerTransport({

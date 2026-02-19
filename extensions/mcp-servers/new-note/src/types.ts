@@ -35,6 +35,9 @@ export interface RuntimeConfig {
   repoPath: string;
   baseBranch: string;
   scriptPath: string;
+  authToken?: string;
+  gitUsername?: string;
+  gitEmail?: string;
 }
 
 export interface ScriptSuccess {
