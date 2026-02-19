@@ -3,6 +3,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { z } from "zod";
 import express from "express";
+import cors from "cors";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { loadConfig } from "./config.js";
@@ -118,6 +119,13 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
     
     const app = express();
     app.use(express.json());
+    
+    // Configure CORS
+    app.use(cors({ 
+      origin: '*', 
+      exposedHeaders: ['mcp-session-id'], 
+      allowedHeaders: ['Content-Type', 'mcp-session-id'], 
+    }));
     
     // Add authorization middleware
     const authMiddleware = createAuthMiddleware(config);
