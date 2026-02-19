@@ -70,8 +70,8 @@ HTTP 模式将在以下端点启动服务器：
 - `EDGES_REPO`: 目标仓库路径，默认当前仓库根目录（自动通过相对路径解析）
 - `EDGES_BASE_BRANCH`: 基线分支，默认 `main`
 - `EDGES_MODE`: (可选) 提交模式。
-  - `pr` (默认): 创建新分支并尝试建立 PR。
-  - `direct`: 直接在基线分支上提交并推送。
+  - `direct` (默认): 直接在基线分支上提交并推送。
+  - `pr`: 创建新分支并尝试建立 PR。
 - `GITHUB_TOKEN`: (可选) GitHub 个人访问令牌。仅用于自动创建 PR；如果使用 `bin/new-note-direct` 或已配置 `gh` CLI，则不需要。
 
 ### HTTP 认证 (可选)

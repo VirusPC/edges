@@ -6,7 +6,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 EDGES_REPO="${EDGES_REPO:-$(dirname "$SCRIPT_DIR")}"
 BASE_BRANCH="${EDGES_BASE_BRANCH:-main}"
 # Mode: 'pr' (create new branch and PR) or 'direct' (commit to base branch)
-MODE="${EDGES_MODE:-pr}"
+MODE="${EDGES_MODE:-direct}"
 DATE=$(date +%Y-%m-%d)
 # ====================
 

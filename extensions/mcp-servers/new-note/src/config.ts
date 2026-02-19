@@ -12,7 +12,7 @@ function resolveDefaultRepoPath(): string {
 export function loadConfig(): RuntimeConfig {
   const repoPath = process.env.EDGES_REPO ?? resolveDefaultRepoPath();
   const rawMode = process.env.EDGES_MODE?.toLowerCase();
-  const mode = rawMode === "direct" ? "direct" : "pr";
+  const mode = rawMode === "pr" ? "pr" : "direct";
   
   return {
     repoPath,
