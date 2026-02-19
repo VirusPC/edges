@@ -82,8 +82,8 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
     }
   );
 
-  console.error(`[new-note] Registering MCP prompt: summarize_conversation`);
-  server.registerPrompt("summarize_conversation", 
+  console.error(`[new-note] Registering MCP prompt: conversation-to-notes`);
+  server.registerPrompt("conversation-to-notes", 
     {
       description: "Summarize a conversation into a structured note for the Edges system",
       argsSchema: {

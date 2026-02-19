@@ -1,57 +1,50 @@
 ---
 name: conversation-to-notes
-description: 将原始对话记录整理为结构清晰的中文笔记摘要，生成符合 YYYY-MM-DD--主题简述.md 格式的标题。
+description: Use this skill when you need to summarize a raw conversation transcript into a structured Chinese note for the Edges system. It generates a standardized filename (YYYY-MM-DD--topic.md) and extracts key conclusions and logical processes.
 ---
 
-# conversation_to_notes
+# Conversation to Notes Skill
 
-将原始对话记录整理为结构清晰的中文笔记摘要。
-生成符合格式 YYYY-MM-DD--主题简述.md 的标题。
-仅进行总结与梳理，不进行战略判断或方法论抽象。
+This skill provides a procedural guide for transforming raw chat logs into high-quality, structured Chinese summaries following the Edges system standards.
 
-## When to Use:
-当需要将原始对话或聊天记录总结转化为可阅读笔记时使用。
+## When to Use
+- When the user provides a transcript of a discussion or brainstorm.
+- When a session ends and needs to be archived as a reusable knowledge asset.
 
-## Inputs:
-- 原始对话全文
+## Core Instructions
 
-## Instructions:
-1. 识别对话的核心讨论主题。
-2. 生成标题，格式严格为：YYYY-MM-DD--主题简述.md
-   - 若对话中包含日期信息，则使用该日期
-   - 否则使用当前日期
-   - 主题简述必须为简洁中文
-3. 提取主要结论与关键观点。
-4. 梳理重要推理过程或逻辑关系。
-5. 删除重复、闲聊和无关内容。
-6. 所有输出必须为中文。
+1. **Identify the Theme**: Determine the central topic of the discussion.
+2. **Standardized Filename**:
+   - Format: `YYYY-MM-DD--ShortDescription.md`
+   - Use the date mentioned in the chat, or today's date if none.
+   - Use concise Chinese for the description.
+3. **Extract Content**:
+   - **Discussion Theme**: What was this about?
+   - **Key Conclusions**: What are the final decisions or insights?
+   - **Logical Process**: How did the conversation get there?
+   - **Additional Notes**: Any caveats or future follow-ups.
+4. **Language**: All output must be in **Chinese**.
 
-## Output Format:
+## Output Structure
 
-文件名：
-YYYY-MM-DD--主题简述.md
+**Filename:** `YYYY-MM-DD--主题简述.md`
 
 ---
 
-【讨论主题】
+### 【讨论主题】
 ...
 
-【主要结论】
+### 【主要结论】
 ...
 
-【关键过程】
+### 【关键过程】
 ...
 
-【补充说明】
+### 【补充说明】
 ...
 
-## Constraints:
-- 不添加原记录中不存在的新观点。
-- 不进行战略价值判断或方法论抽象。
-- 不输出与总结无关的说明性文字。
-- 标题必须严格符合 YYYY-MM-DD--主题简述.md 格式。
-- 输出必须为中文。
-
-## Limitations:
-- 若原始记录高度碎片化，可能影响总结完整性。
-- 依赖输入文本提供足够语境。
+## Constraints
+- **Strictly Chinese**: Never output summary in other languages.
+- **No Hallucinations**: Do not add insights not present in the original text.
+- **No Metadata**: Do not output explanation text outside the specified structure.
+- **Standard Header**: The summary must start with the standardized sections.
