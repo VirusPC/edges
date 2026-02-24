@@ -1,0 +1,2 @@
+- What spec-driven development gets wrong https://x.com/augmentcode/status/2025993446633492725?s=46
+- 
