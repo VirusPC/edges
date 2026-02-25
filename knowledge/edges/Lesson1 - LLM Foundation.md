@@ -177,25 +177,8 @@ Attention 解决了"token 间如何交互"的问题，但它只是一个组件�
 
 一个 Transformer Block 的结构：
 ![[Pasted image 20260225204203.png]]
-```
+> **注**：上图展示的是经典 Transformer 的 **Encoder-Decoder 架构**（包含左侧encoder和右侧decoder），也是最初用于机器翻译设计的结构。但**现代大语言模型（LLM）几乎全部转向了纯解码器（ecoder-only）架构**，只有右侧。
 
-输入
-
-↓
-
-Multi-Head Attention ← token 间建立关联（"谁和谁有关"）
-
-↓ + 残差连接 + LayerNorm
-
-Feed-Forward Network ← 每个 token 独立做非线性变换（"加工理解"）
-
-↓ + 残差连接 + LayerNorm
-
-输出
-
-× N 层堆叠（GPT-3: 96层，LLaMA-70B: 80层）
-
-```
 
 几个要点：
 
@@ -213,7 +196,18 @@ Feed-Forward Network ← 每个 token 独立做非线性变换（"加工理解"�
 | Encoder-Decoder  | 先理解再生成     | T5、早期翻译模型                      |
 | **Decoder-Only** | 只看前文，自回归生成 | **GPT、Claude、Gemini、DeepSeek** |
 
-**现代 LLM 统一选择了 Decoder-Only**，通过因果掩码（causal mask）确保每个 token 只看前面的 token，从左到右逐步生成。原因是它在大规模预训练上最高效，且生成能力最强。
+在问答场景下，Encoder-Decoder 和 Decoder-Only 的区别在哪里？
+
+假设你问模型一个问题：`“帮我写一段冒泡排序的代码”`
+
+*   **Encoder-Decoder（像“闭卷考试”）**：
+    模型有两个大脑。**大脑 A (Encoder)** 负责审题，它会反复阅读你的问题，理解你要的是“冒泡排序”而不是“快速排序”，然后把这个理解封装成一个“意图包”传给 **大脑 B (Decoder)**。大脑 B 拿到意图包后，开始在另一张白纸上从头写代码。问题和答案在模型里是**物理隔绝**的。
+    
+*   **Decoder-Only（像“即兴接话”）**：
+    模型只有一个大脑。它不觉得你在考它，它觉得你只是说了一句话：`“帮我写一段冒泡排序的代码”`。它的本能是把这句话接下去。于是它顺着你的语气，自然而然地输出：`“好的，以下是 Python 实现的冒泡排序：...”`。在模型看来，**你的问题和它的答案其实是同一段长文本的前后半部分**。
+
+**为什么现代 LLM 统一选择了 Decoder-Only？**
+虽然 Encoder-Decoder 在翻译任务上很强，但 Decoder-Only 在处理问答时展现了更强的“联想”和“推理”能力。它把全世界的知识都看作是一个无止境的“续写任务”，这种**问答即续写**的统一范式，让它能更容易地通过海量互联网文本学会逻辑和常识。此外，Decoder-Only 在推理时可以极大利用 KV Cache 缓存（详见 3.2），在大规模并发场景下工程效率更高。
 
 **工程视角**：Decoder-Only 的自回归特性意味着——模型是**逐 token 生成**的，每个 token 都依赖前面所有 token。这直接导致了生成速度受限（无法跳过中间内容直接输出结论），也解释了为什么 output token 比 input token 贵（详见第三部分）。
 
