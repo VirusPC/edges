@@ -1,0 +1,217 @@
+{
+  "main": {
+    "id": "d37fb4e261b2befc",
+    "type": "split",
+    "children": [
+      {
+        "id": "48dfd4df66a6f353",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6bece72113910749",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "knowledge/edges/Lesson1 - LLM Foundation.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Lesson1 - LLM Foundation"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "34d0df3ae2f777e0",
+    "type": "split",
+    "children": [
+      {
+        "id": "75b2262c177becbf",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "636505b8300469c8",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "34af3e3d26787ab1",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "fefdca67f8d616cd",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "right": {
+    "id": "68fc1907ba6c8135",
+    "type": "split",
+    "children": [
+      {
+        "id": "9c7bb0d3f94f7c08",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "25302df07843b471",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "knowledge/edges/Lesson1 - LLM Foundation.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Lesson1 - LLM Foundation"
+            }
+          },
+          {
+            "id": "121370f698f67052",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "knowledge/edges/Lesson1 - LLM Foundation.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Lesson1 - LLM Foundation"
+            }
+          },
+          {
+            "id": "c9194af24e8f1ddc",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "892bdc1242085489",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "41b969f938a46b3d",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "knowledge/edges/Lesson1 - LLM Foundation.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Lesson1 - LLM Foundation"
+            }
+          },
+          {
+            "id": "33eecac44040d9a2",
+            "type": "leaf",
+            "state": {
+              "type": "git-view",
+              "state": {},
+              "icon": "git-pull-request",
+              "title": "Source Control"
+            }
+          }
+        ],
+        "currentTab": 5
+      }
+    ],
+    "direction": "horizontal",
+    "width": 389.5
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false,
+      "obsidian-git:Open Git source control": false
+    }
+  },
+  "active": "33eecac44040d9a2",
+  "lastOpenFiles": [
+    "knowledge/edges/Lesson1 - LLM Foundation.md",
+    "knowledge/resources/Pasted image 20260225204203.png",
+    "knowledge/resources/Pasted image 20260225163609.png",
+    "knowledge/resources/Pasted image 20260225163540.png",
+    "knowledge/resources/Pasted image 20260225163521.png",
+    "knowledge/resources/Pasted image 20260225163512.png",
+    "knowledge/resources/Pasted image 20260225163447.png",
+    "knowledge/resources",
+    "Pasted image 20260225163334.png",
+    "knowledge/edges/README.md",
+    "knowledge/notes/2026-02-21--2026-02-21--obsidiannas.md",
+    "knowledge/notes/2026-02-21--2026-02-21--aimd.md",
+    "knowledge/notes/2026-02-20--openspec--codex--codexprompts-.md",
+    "extensions/skills/conversation-to-notes/SKILL.md",
+    "knowledge/edges/bird-cli-config.md",
+    "AGENTS.md"
+  ]
+}
