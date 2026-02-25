@@ -13,12 +13,12 @@
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "extensions/mcp-servers/new-note/src/server.ts",
-                "bFile": "extensions/mcp-servers/new-note/src/server.ts",
+                "aFile": ".obsidian/workspace.json",
+                "bFile": ".obsidian/workspace.json",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: server.ts  (Working Tree)"
+              "title": "Diff: workspace.json  (Working Tree)"
             }
           }
         ]
@@ -191,13 +191,13 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "ef20bdaef9964cc7",
   "lastOpenFiles": [
+    "knowledge/edges/Lesson1 - LLM Foundation.md",
     "knowledge/notes/2026-02-21--2026-02-21--obsidiannas.md",
     "knowledge/notes/2026-02-21--2026-02-21--aimd.md",
     "knowledge/notes/2026-02-20--openspec--codex--codexprompts-.md",
     "extensions/skills/conversation-to-notes/SKILL.md",
-    "knowledge/edges/Lesson1 - LLM Foundation.md",
     "knowledge/edges/bird-cli-config.md",
     "AGENTS.md"
   ]
