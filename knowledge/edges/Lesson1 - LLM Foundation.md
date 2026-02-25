@@ -171,12 +171,12 @@ Multi-head attention 可以把它想成：同一段前文，模型不只用一�
 
 ---
 
-### 1.5 Transformer：把 Attention 组装成完整架构
+### 1.5 Transformer：把 Embedding、Attention 等模块组装成完整架构
 
-Attention 解决了"token 间如何交互"的问题，但它只是一个组件。**Transformer 是把 Attention 和其他模块组合成完整架构的方案。**
+Attention 解决了"token 间如何交互"的问题，但它只是一个组件。**Transformer 是把 Embedding、 Attention 和其他模块组合成完整架构的方案。**
 
 一个 Transformer Block 的结构：
-
+![[Pasted image 20260225204203.png]]
 ```
 
 输入
@@ -219,7 +219,7 @@ Feed-Forward Network ← 每个 token 独立做非线性变换（"加工理解"�
 
 ---
 
-### 1.6 训练三阶段：能力是怎么"长"出来的
+### 1.6 训练机制：能力是怎么"长"出来的
 
 ```
 
