@@ -11,14 +11,14 @@
             "id": "6bece72113910749",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "knowledge/edges/Lesson1 - LLM Foundation.md",
-                "mode": "source",
-                "source": false
+                "aFile": "knowledge/edges/Lesson1 - LLM Foundation.md",
+                "bFile": "knowledge/edges/Lesson1 - LLM Foundation.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "Lesson1 - LLM Foundation"
+              "icon": "diff",
+              "title": "Diff: Lesson1 - LLM Foundation  (Working Tree)"
             }
           }
         ]
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -95,7 +94,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "knowledge/edges/Lesson1 - LLM Foundation.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +103,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Lesson1 - LLM Foundation"
+              "title": "Backlinks"
             }
           },
           {
@@ -114,12 +112,11 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "knowledge/edges/Lesson1 - LLM Foundation.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Lesson1 - LLM Foundation"
+              "title": "Outgoing links"
             }
           },
           {
@@ -157,13 +154,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/edges/Lesson1 - LLM Foundation.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Lesson1 - LLM Foundation"
+              "title": "Outline"
             }
           },
           {
