@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "48dfd4df66a6f353",
+        "id": "b4de688c9cf7c990",
         "type": "tabs",
         "children": [
           {
-            "id": "6bece72113910749",
+            "id": "f7aee255fe4714e3",
             "type": "leaf",
             "state": {
               "type": "split-diff-view",
@@ -78,7 +78,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 546.5,
+    "collapsed": true
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -177,7 +178,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 389.5
+    "width": 430.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -191,15 +192,22 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "f7aee255fe4714e3",
   "lastOpenFiles": [
     "knowledge/edges/Lesson1 - LLM Foundation.md",
     "knowledge/resources/Pasted image 20260225204203.png",
     "knowledge/resources/Pasted image 20260225163609.png",
     "knowledge/resources/Pasted image 20260225163540.png",
-    "knowledge/resources/Pasted image 20260225163521.png",
     "knowledge/resources/Pasted image 20260225163512.png",
     "knowledge/resources/Pasted image 20260225163447.png",
+    "knowledge/notes/README.md",
+    "knowledge/notes/openclaw-tmux-permissions.md",
+    "knowledge/notes/ai-training-inbox.md",
+    "knowledge/notes/obsidian-daily-notes/2026-02-26--LLM推理KV缓存与微调硬件.md.md",
+    "knowledge/notes/obsidian-daily-notes/2026-02-24.md",
+    "knowledge/notes/obsidian-daily-notes",
+    "knowledge/notes/ai-training/SDD.md",
+    "knowledge/resources/Pasted image 20260225163521.png",
     "knowledge/resources",
     "Pasted image 20260225163334.png",
     "knowledge/edges/README.md",
