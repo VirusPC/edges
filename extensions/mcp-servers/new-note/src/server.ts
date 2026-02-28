@@ -26,7 +26,7 @@ function createMcpServer(config: ReturnType<typeof loadConfig>) {
     description: "Create a new note in the edges repository and perform commit/push",
     inputSchema: {
       title: z.string().describe("Note title"),
-      content: z.string().describe("笔记内容。应包含以下结构化内容：\n\n【讨论主题】\n简洁描述本次对话的背景和核心议题\n\n【主要结论】\n(事实与共识)\n提取对话中达成的共识、定论或发现的关键事实\n\n【认知更新】\n(洞察与 Edge 雏形)\n识别对话中产生的关键洞察、逻辑转变或可复用的 Edge（判断优势）\n\n【行动指南】\n(决策与后续动作)\n列出明确的具体决策、后续行动项或实验计划\n\n【补充说明】\n(其他重要细节或备注)\n记录不属于上述分类但重要的琐碎信息、背景补充或相关参考"),
+      content: z.string().describe("Note content"),
       coAuthor: z.string().describe("Co-author for git commit"),
     },
   }, async ({ title, content, coAuthor }) => {
@@ -173,8 +173,6 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
         
         // Clean up on request close
         req.on("close", () => {
-          // TODO: 看下什么导致的迅速 close
-          console.error("[new-note] Request closed");
           // transport.close();
           // server.close();
         });
