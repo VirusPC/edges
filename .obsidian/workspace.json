@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "b4de688c9cf7c990",
+        "id": "373232c563b89394",
         "type": "tabs",
         "children": [
           {
-            "id": "f7aee255fe4714e3",
+            "id": "d2a4f52f39e07809",
             "type": "leaf",
             "state": {
               "type": "split-diff-view",
               "state": {
-                "aFile": "knowledge/edges/Lesson1 - LLM Foundation.md",
-                "bFile": "knowledge/edges/Lesson1 - LLM Foundation.md",
+                "aFile": "Untitled.md",
+                "bFile": "Untitled.md",
                 "aRef": ""
               },
               "icon": "diff",
-              "title": "Diff: Lesson1 - LLM Foundation  (Working Tree)"
+              "title": "Diff: Untitled  (Working Tree)"
             }
           }
         ]
@@ -44,7 +44,7 @@
                 "autoReveal": false
               },
               "icon": "lucide-folder-closed",
-              "title": "Files"
+              "title": "文件列表"
             }
           },
           {
@@ -78,8 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 546.5,
-    "collapsed": true
+    "width": 200
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -178,22 +177,35 @@
       }
     ],
     "direction": "horizontal",
-    "width": 430.5
+    "width": 226.5
   },
   "left-ribbon": {
     "hiddenItems": {
-      "switcher:Open quick switcher": false,
-      "graph:Open graph view": false,
-      "canvas:Create new canvas": false,
-      "daily-notes:Open today's daily note": false,
-      "templates:Insert template": false,
-      "command-palette:Open command palette": false,
-      "bases:Create new base": false,
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false,
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "f7aee255fe4714e3",
+  "active": "33eecac44040d9a2",
   "lastOpenFiles": [
+    "Untitled.md",
+    "knowledge/edges/AI Blog List.md",
+    "knowledge/edges/2025-Performance.md",
+    "extensions/skills/conversation-to-notes/SKILL.md",
+    "extensions/skills/conversation-to-notes/README.md",
+    "extensions/skills/README.md",
+    "knowledge/notes/2026-03-01--2026-03-01--xsctaimd.md",
+    "knowledge/notes/2026-03-01--ai-tech-stack-convergence.md",
+    "knowledge/notes/2026-03-01--multi-agent-workflows-problems.md",
+    "knowledge/notes/2026-03-01--2026-03-01--aiopus-codexmd.md",
+    "knowledge/notes/2026-03-01--agents-md-effectiveness-study.md",
+    "knowledge/notes/2026-03-01--2026-03-01--llmevaluationmd.md",
+    "knowledge/edges/bird-cli-config.md",
     "knowledge/edges/Lesson1 - LLM Foundation.md",
     "knowledge/resources/Pasted image 20260225204203.png",
     "knowledge/resources/Pasted image 20260225163609.png",
@@ -214,8 +226,6 @@
     "knowledge/notes/2026-02-21--2026-02-21--obsidiannas.md",
     "knowledge/notes/2026-02-21--2026-02-21--aimd.md",
     "knowledge/notes/2026-02-20--openspec--codex--codexprompts-.md",
-    "extensions/skills/conversation-to-notes/SKILL.md",
-    "knowledge/edges/bird-cli-config.md",
     "AGENTS.md"
   ]
 }
