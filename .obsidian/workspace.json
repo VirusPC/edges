@@ -11,14 +11,14 @@
             "id": "d2a4f52f39e07809",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "Untitled.md",
-                "bFile": "Untitled.md",
-                "aRef": ""
+                "file": "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: Untitled  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "Lesson1 - LLM Foundation"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 320.5
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -191,41 +191,53 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "636505b8300469c8",
   "lastOpenFiles": [
-    "Untitled.md",
+    "knowledge/edges/ai-course",
+    "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
+    "未命名.md",
+    "knowledge/edges/Introduction to Agents.md",
     "knowledge/edges/AI Blog List.md",
-    "knowledge/edges/2025-Performance.md",
-    "extensions/skills/conversation-to-notes/SKILL.md",
-    "extensions/skills/conversation-to-notes/README.md",
-    "extensions/skills/README.md",
-    "knowledge/notes/2026-03-01--2026-03-01--xsctaimd.md",
-    "knowledge/notes/2026-03-01--ai-tech-stack-convergence.md",
-    "knowledge/notes/2026-03-01--multi-agent-workflows-problems.md",
-    "knowledge/notes/2026-03-01--2026-03-01--aiopus-codexmd.md",
-    "knowledge/notes/2026-03-01--agents-md-effectiveness-study.md",
-    "knowledge/notes/2026-03-01--2026-03-01--llmevaluationmd.md",
-    "knowledge/edges/bird-cli-config.md",
-    "knowledge/edges/Lesson1 - LLM Foundation.md",
-    "knowledge/resources/Pasted image 20260225204203.png",
-    "knowledge/resources/Pasted image 20260225163609.png",
-    "knowledge/resources/Pasted image 20260225163540.png",
-    "knowledge/resources/Pasted image 20260225163512.png",
-    "knowledge/resources/Pasted image 20260225163447.png",
-    "knowledge/notes/README.md",
-    "knowledge/notes/openclaw-tmux-permissions.md",
-    "knowledge/notes/ai-training-inbox.md",
-    "knowledge/notes/obsidian-daily-notes/2026-02-26--LLM推理KV缓存与微调硬件.md.md",
-    "knowledge/notes/obsidian-daily-notes/2026-02-24.md",
-    "knowledge/notes/obsidian-daily-notes",
-    "knowledge/notes/ai-training/SDD.md",
-    "knowledge/resources/Pasted image 20260225163521.png",
-    "knowledge/resources",
-    "Pasted image 20260225163334.png",
-    "knowledge/edges/README.md",
-    "knowledge/notes/2026-02-21--2026-02-21--obsidiannas.md",
-    "knowledge/notes/2026-02-21--2026-02-21--aimd.md",
-    "knowledge/notes/2026-02-20--openspec--codex--codexprompts-.md",
-    "AGENTS.md"
+    "node_modules/optimist/test/_/bin.js",
+    "node_modules/optimist/test/_/argv.js",
+    "node_modules/optimist/test/usage.js",
+    "node_modules/optimist/test/parse.js",
+    "node_modules/optimist/test/_.js",
+    "node_modules/optimist/test/_",
+    "node_modules/optimist/test",
+    "node_modules/optimist/readme.markdown",
+    "node_modules/optimist/example/xup.js",
+    "node_modules/optimist/example/short.js",
+    "node_modules/acorn-walk/node_modules/acorn/README.md",
+    "node_modules/acorn-walk/node_modules/acorn/CHANGELOG.md",
+    "node_modules/acorn-walk/README.md",
+    "node_modules/acorn-walk/CHANGELOG.md",
+    "node_modules/ws/node_modules/commander/Readme.md",
+    "node_modules/ws/README.md",
+    "node_modules/ws/History.md",
+    "node_modules/acorn-loose/node_modules/acorn/README.md",
+    "node_modules/acorn-loose/node_modules/acorn/CHANGELOG.md",
+    "node_modules/acorn-loose/README.md",
+    "node_modules/acorn-loose/CHANGELOG.md",
+    "node_modules/strip-ansi-cjs/node_modules/ansi-regex/readme.md",
+    "node_modules/strip-ansi-cjs/readme.md",
+    "node_modules/uri-js/node_modules/punycode/README.md",
+    "node_modules/uri-js/README.md",
+    "node_modules/eslint-scope/node_modules/estraverse/README.md",
+    "node_modules/eslint-scope/README.md",
+    "node_modules/cross-spawn/node_modules/which/CHANGELOG.md",
+    "node_modules/cross-spawn/node_modules/which/README.md",
+    "node_modules/cross-spawn/README.md",
+    "node_modules/esrecurse/node_modules/estraverse/README.md",
+    "node_modules/js-md4/doc/fonts/OpenSans-Regular-webfont.svg",
+    "node_modules/js-md4/doc/fonts/OpenSans-LightItalic-webfont.svg",
+    "node_modules/js-md4/doc/fonts/OpenSans-Light-webfont.svg",
+    "node_modules/js-md4/doc/fonts/OpenSans-Italic-webfont.svg",
+    "node_modules/js-md4/doc/fonts/OpenSans-BoldItalic-webfont.svg",
+    "node_modules/js-md4/doc/fonts/OpenSans-Bold-webfont.svg",
+    "node_modules/playwright-core/lib/vite/traceViewer/playwright-logo.svg",
+    "node_modules/playwright-core/lib/vite/recorder/playwright-logo.svg",
+    "node_modules/playwright-core/lib/server/chromium/appIcon.png",
+    "node_modules/github-flavored-markdown/images/gfm.png"
   ]
 }
