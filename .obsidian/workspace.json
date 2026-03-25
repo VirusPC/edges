@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/ai-course/Lesson2 - Prompt Engineering - 精简大纲.md",
+                "file": "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Lesson2 - Prompt Engineering - 精简大纲"
+              "title": "Lesson1 - LLM Foundation"
             }
           }
         ]
@@ -154,13 +154,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/edges/ai-course/Lesson2 - Prompt Engineering - 精简大纲.md",
+                "file": "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Lesson2 - Prompt Engineering - 精简大纲 的大纲"
+              "title": "Lesson1 - LLM Foundation 的大纲"
             }
           },
           {
@@ -174,11 +174,11 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 525.5
+    "width": 431.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -192,20 +192,23 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "3a8775d4bff4dec4",
   "lastOpenFiles": [
-    "knowledge/edges/ai-course/Lesson2 - Prompt Engineering - V1.md",
-    "knowledge/edges/ai-course/Lesson 2：提示词工程（Prompt Engineering）.md",
+    "knowledge/edges/backup/第一课：大模型基础.md",
+    "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
+    "knowledge/edges/backup",
     "knowledge/edges/ai-course/Lesson 2：提示词工程.md",
+    "knowledge/edges/ai-course/Lesson2 - Prompt Engineering - V1.md",
     "knowledge/edges/ai-course/Lesson2 - Prompt Engineering - 精简大纲.md",
     "knowledge/edges/ai-course/Lesson2 - Prompt Engineering - 大纲.md",
+    "knowledge/edges/google-kaggle-agent-course/Lesson 1.md",
+    "knowledge/edges/ai-vault/AI资产沉淀.md",
+    "knowledge/edges/ai-course/Lesson 2：提示词工程（Prompt Engineering）.md",
     "knowledge/edges/ai-course/Lesson2-大纲改进方向.md",
     "knowledge/edges/ai-course/Lesson4 - Agentic AI - 大纲.md",
     "knowledge/edges/ai-course/Lesson3 - Context Engineering - 大纲.md",
     "knowledge/edges/ai-course/课程写作风格与方法论.md",
-    "knowledge/edges/google-kaggle-agent-course/Lesson 1.md",
     "knowledge/edges/google-kaggle-agent-course",
-    "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
     "knowledge/edges/ai-course/outline.md",
     "knowledge/edges/ai-course",
     "knowledge/edges/Introduction to Agents.md",
@@ -217,7 +220,6 @@
     "node_modules/optimist/test/_.js",
     "node_modules/optimist/test/_",
     "node_modules/optimist/test",
-    "node_modules/optimist/readme.markdown",
     "node_modules/acorn-walk/node_modules/acorn/README.md",
     "node_modules/acorn-walk/node_modules/acorn/CHANGELOG.md",
     "node_modules/acorn-walk/README.md",
@@ -228,8 +230,6 @@
     "node_modules/acorn-loose/node_modules/acorn/README.md",
     "node_modules/acorn-loose/node_modules/acorn/CHANGELOG.md",
     "node_modules/acorn-loose/README.md",
-    "node_modules/acorn-loose/CHANGELOG.md",
-    "node_modules/strip-ansi-cjs/node_modules/ansi-regex/readme.md",
     "node_modules/js-md4/doc/fonts/OpenSans-Regular-webfont.svg",
     "node_modules/js-md4/doc/fonts/OpenSans-LightItalic-webfont.svg",
     "node_modules/js-md4/doc/fonts/OpenSans-Light-webfont.svg",
