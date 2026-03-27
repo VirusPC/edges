@@ -76,96 +76,342 @@ SKILL.md 的出现解决了静态Markdown指令的根本局限。在此之前，
 
 `TASKS.md` 是这条演进脉络的最新产物，也是记忆、命令与协调三条线索深度融合的集大成体现：它既是任务状态的持久化记忆，也是Agent执行动作的指令清单，还是多个并发Agent之间协调进度的共享接口。
 
-## 2. 以仓库为中心：帮助 Agent 理解代码库的 Markdown 配置
+## 2. 以仓库为中心的案例：Claude Code 在 Edges 知识库中的配置实践
 
-在第一种应用场景中，Markdown文件的核心使命是**描述仓库本身**——它们存在于代码库中，供任意Agent在进入仓库时读取，从而快速理解项目的架构约束、编码规范、构建流程和技术栈。无论是GitHub Copilot、Cursor、Claude Code还是OpenCode，当Agent打开一个新项目时，首先要做的就是读取这些仓库级的Markdown配置文件，以建立对项目的基础认知。
+在第一章的演进叙事中，我们梳理了 Markdown 如何从静态规则文件逐步演变为 Agent 的认知控制平面。本章将通过一个真实案例——一个名为 **Edges** 的个人知识管理仓库——具体展示 Claude Code 如何通过 Markdown 配置文件理解并高效协作于一个陌生项目。
 
-### 2.1. 配置碎片化与 AGENTS.md 统一标准的诞生
+Edges 系统的设计哲学是将日常认知碎片（raw memory）经过加工（notes）沉淀为结构化的判断优势（edges）。它包含 `bin/` 脚本、`extensions/` 扩展工具、`knowledge/` 知识库以及跨多个 AI 工具平台的配置目录。当 Claude Code 首次进入这个仓库时，一套层级分明的 Markdown 配置机制立即开始工作。
 
-随着AI编码工具的激增，由此产生的配置碎片化严重降低了开发人员的效率。在一个典型的开源代码库中，可能同时存在为Cursor用户准备的 `.cursorrules`、为Anthropic生态准备的 `CLAUDE.md`、为企业CI/CD准备的 `.github/copilot-instructions.md`，以及为谷歌生态准备的 `JULES.md`。由于这些文件在内容上往往是高度同质化的（都包含构建命令、Linting规则和架构约束），开发者陷入了”版本漂移”（Version Drift）的噩梦：更新一个包的依赖版本，意味着需要同步修改五个不同的配置文件。
+### 2.1. AGENTS.md：Agent 的"入职文档"
 
-为了遏制这种配置蔓延，业界联合推出了AGENTS.md标准。该标准最初由OpenAI内部团队发起，随后交由Linux基金会旗下的Agentic AI Foundation进行管理维护。AGENTS.md作为一个通用、开放的格式，其愿景是成为统一的”AI Agent的README”。
+仓库根目录下的 `AGENTS.md` 是 Claude Code（以及任何兼容 AGENTS.md 标准的 AI 工具）进入项目时自动读取的第一份文件。在 Edges 仓库中，这份文件同时承载了两层职能：
 
-引入AGENTS.md的核心逻辑在于将”以人为中心的入职文档”与”以机器为中心的行为配置”明确隔离。`README.md` 保留了其提供快速入门指南、架构哲学和社区贡献规范的用途；而 `AGENTS.md` 则吸收了密集的、操作层面的细节——例如强制严格类型检查的具体说明、用于集成测试的精确终端参数，以及微服务边界之间的访问规则。这些对AI至关重要的细节如果放在人类阅读的文档中会显得异常臃肿。
+第一层是由 OpenSpec CLI 工具自动管理的**指令注入块**，使用 `<!-- OPENSPEC:START -->` 和 `<!-- OPENSPEC:END -->` HTML 注释标记界定。这段内容告诉 Agent 何时应该打开 OpenSpec 的变更管理流程——例如当用户提及"proposal""spec"或"plan"等关键词时。这种由外部工具程序化维护的注入块，体现了 Markdown 配置文件从纯手工编辑向"半自动化管理"演进的趋势。
 
-目前，该标准已获得大规模工具联盟的支持，涵盖Cursor、Claude Code、GitHub Copilot、AutoGen、OpenCode、Warp和Aider等，并已被超过六万个开源仓库采用。AGENTS.md完全依赖原生Markdown语法，而不强制要求复杂的YAML模式，这确保了任何解析该文件的LLM都能够通过自然语言处理推断出其规则。采用此标准的仓库报告称，新AI编码会话的设置时间从原本的30到40分钟锐减至不到2分钟，同时Agent生成的语法错误显著降低了35%到55%。
+第二层是开发者手写的**角色定义与行为规范**。文件明确声明 Agent 的身份（"你是维护 Edges 系统的 AI 工程师"）、职责边界（维护基础设施、开发扩展工具、管理知识库结构），以及严格的操作协议：
 
-### 2.2. 各工具的仓库级配置实现
+```markdown
+## 1. 了解项目 (Context)
+在执行任何任务前，**必须优先阅读 `@/README.md`**。
+README.md 是本项目业务逻辑、目录结构和内容标准的**唯一真理源**。
 
-尽管AGENTS.md提供了统一标准，各主流工具在仓库级配置的具体实现上仍各有特色。
+## 3. Git 操作规范
+- Commit Message 格式: `type: subject`
+- 必须在提交信息末尾包含 Co-authored-by 字段
+```
 
-**GitHub Copilot** 通过分层的Markdown系统满足企业级单体仓库的需求。第一层是**始终开启的指令**，存放在 `.github/copilot-instructions.md` 中，内容自动拼接到每次聊天请求的上下文窗口，用于声明不可妥协的项目架构和安全协议。在组织层面，仓库所有者还可定义跨整个GitHub组织传播的共享指令，建立企业编码标准的基线。第二层是**基于文件的指令** `.instructions.md`，利用YAML前言中的 `applyTo` 属性配置Glob匹配模式（例如 `**/*.ts`），只有当Agent与特定领域的文件交互时，相关上下文才会被注入。
+这份 `AGENTS.md` 精确体现了第一章所述的"以机器为中心的行为配置"与"以人为中心的入职文档"的隔离设计——密集的操作层面细节（Git 提交格式、脚本兼容性要求、路径禁止硬编码等）被集中于此，而非散落在面向人类的 `README.md` 中。
 
-**Cursor** 最初普及了 `.cursorrules` 文件的概念，随后引入了 `.mdc`（Markdown Context）格式进行模块化管理。`.mdc` 文件利用YAML前言控制调用规则，支持 `globs`（文件定位）和 `alwaysApply`（强制全局注入）等属性，赋予开发者极高的控制粒度。
+### 2.2. `.claude/` 目录：仓库级的 Agent 能力扩展层
 
-**Claude Code** 的 `CLAUDE.md` 充当规范的、由用户定义的真理之源。它被提交到版本控制中，作为新开发人员（无论是人类还是AI）的项目入职手册，包含”必须使用pnpm而非npm”这类静态规则。
+在 `AGENTS.md` 提供了静态的行为基线之后，`.claude/` 目录进一步为 Claude Code 注入了**可执行的能力扩展**。Edges 仓库的 `.claude/` 目录结构如下：
 
-**OpenCode** 原生支持 `AGENTS.md` 作为项目指令标准，按严格的优先级顺序从目录树向上遍历加载。为兼顾生态迁移，若未找到 `AGENTS.md`，还会回退解析 `CLAUDE.md`，确保极高的互操作性。
+```
+.claude/
+├── commands/
+│   └── opsx/               # 10 个 OpenSpec 工作流命令
+│       ├── explore.md       # 探索模式——思维伙伴
+│       ├── new.md           # 创建新变更
+│       ├── ff.md            # 快速推进所有工件
+│       ├── apply.md         # 实施任务
+│       ├── verify.md        # 验证实现
+│       └── ...
+├── skills/
+│   ├── conversation-to-notes/
+│   │   └── SKILL.md         # 对话转笔记技能
+│   ├── openspec-explore/
+│   │   └── SKILL.md         # 探索模式技能（291行）
+│   └── ...                  # 10+ 个技能目录
+└── settings.local.json      # 仓库级权限配置
+```
 
-### 2.3. 层级作用域与渐进式披露
+这一目录结构清晰地展现了第一章所述的三条能力线索：**命令**（`commands/`）提供用户触发的工作流入口，**技能**（`skills/`）提供 Agent 自主调用的能力模块，**设置**（`settings.local.json`）则划定了确定性的安全边界。
 
-仓库级Markdown配置的一个关键设计原则是**层级作用域（Hierarchical Scoping）**与**渐进式披露（Progressive Disclosure）**——既避免单一巨型配置文件消耗过多Token，又确保Agent在不同子模块中获得精准的上下文。
+### 2.3. 技能的三级渐进式披露：以 `openspec-explore` 为例
 
-AGENTS.md在架构上支持层级覆盖。开发团队可以在仓库根目录建立全局的基线准则，同时在特定微服务子目录（例如 `services/payments/`）放置 `AGENTS.override.md` 文件来执行局部规则。当Agent在该子目录内执行任务时，上下文加载器会自动拼接根文件和本地覆盖文件，从而创建完美定制的上下文边界。
+Edges 仓库中的 `openspec-explore` 技能完整展示了第一章所述的三级加载机制。其 `SKILL.md` 文件结构如下：
 
-Copilot通过 `applyTo` 匹配模式实现渐进式披露：处理React前端代码时触发React Hooks约束规则，修改Python微服务时触发PEP-8格式化规则。这不仅优化了Token利用率，还有效防止了AI在处理分散技术栈时产生语法混淆和幻觉。Cursor的 `.mdc` 文件通过 `globs` 属性实现了类似的按需加载机制。
+**第一级（元数据）**——会话启动时，Claude Code 仅读取 YAML 前言：
 
-## 3. 以 Agent 为中心：扩展 Agent 自身能力的 Markdown 体系
+```yaml
+---
+name: openspec-explore
+description: Enter explore mode - a thinking partner for exploring ideas,
+  investigating problems, and clarifying requirements.
+license: MIT
+metadata:
+  author: openspec
+  version: "1.0"
+---
+```
 
-在第二种应用场景中，Markdown文件的核心使命不再是描述仓库，而是**扩展Agent自身的能力边界**——包括赋予Agent持久记忆、可执行技能、自定义命令、子智能体协调，以及多Agent编排能力。这些文件通常不属于项目代码库，而是存在于Agent的配置目录或运行时环境中。
+此时每个技能仅消耗约 100 个 Token。Claude Code 根据 `description` 字段判断是否需要在当前任务中激活该技能——如果用户只是在修改一个 CSS 文件，这份探索模式的技能描述不会触发任何额外加载。
 
-### 3.1. 记忆系统：从向量数据库到”记忆即文档”
+**第二级（指令）**——当 Claude Code 判断当前对话涉及"探索想法"或"调研问题"时，完整的 Markdown 正文被加载到上下文。这份 291 行的指令文档并非一份死板的规则清单，而是一整套认知姿态（Stance）的定义：
 
-LLM在独立会话之间本质上缺乏持久记忆，各工具通过不同的Markdown记忆架构来弥补这一缺陷。
+```markdown
+## The Stance
+- **Curious, not prescriptive** - Ask questions that emerge naturally
+- **Visual** - Use ASCII diagrams liberally
+- **Adaptive** - Follow interesting threads, pivot when new information emerges
+- **Patient** - Don't rush to conclusions
 
-**Cursor的记忆银行（Memory Bank）** 是社区开创的架构模式，被结构化为一个层级分明的Markdown文件网络。标准的Memory Bank拓扑结构作为一个有向无环图（DAG）运行，包含六个核心文件：`projectbrief.md`（不可变核心文档，定义总体目标与范围）、`productContext.md`（用户画像和预期行为）、`systemPatterns.md`（技术架构与设计模式）、`techContext.md`（技术栈与依赖版本）、`activeContext.md`（动态更新的当前关注点）以及 `progress.md`（只追加的进度账本）。通过在 `.mdc` 规则中强制要求Cursor的”Composer”在每次任务开始时完整读取整个Memory Bank，开发者建立了确定性的初始化序列，防止AI陷入浪费Token的盲目探索阶段。
+**IMPORTANT: Explore mode is for thinking, not implementing.**
+You may read files, search code, but you must NEVER write code.
+```
 
-**Claude Code的自动记忆系统** 本地存储于 `~/.claude/projects/.../memory/MEMORY.md`。与仓库级的 `CLAUDE.md` 不同，自动记忆系统是Agent的情境草稿本——Agent在遇到摩擦时主动写入此文件，记录调试经验、失败模式以及本地环境独有的操作怪癖。为防止上下文呈指数级膨胀，该系统被硬编码了每个项目200行的长度上限，展示了防止认知衰退的编程级安全机制。
+**第三级（执行）**——技能可包含支撑文件（模板、示例、脚本），这些在主上下文窗口之外被引用和执行。
 
-**OpenClaw的双层记忆架构** 专为24/7全天候持久运行而设计。第一层是**情景记忆**（`memory/YYYY-MM-DD.md`），作为仅追加的每日日志文件，捕获原始事务上下文和工作流状态；第二层是**语义记忆**（`MEMORY.md`），经过模型自我整理的长期存储，包含持久事实和架构决策。OpenClaw还创新性地引入了”自动内存刷新”（Pre-compaction）机制：在上下文压缩阈值触发之前，系统会执行一个静默的Agent回合，强制模型将重要的瞬态信息物理写入Markdown记忆文件，有效解决了长周期运行Agent的”失忆症”问题。为操作这些文件，OpenClaw还暴露了 `memory_search`（BM25关键字加向量嵌入的混合搜索）和 `memory_get`（精准读取特定文件和行范围）等专属工具。
+这套三级机制的 Token 经济学意义深远：假设 Edges 仓库注册了 15 个技能，第一级的闲置成本仅约 1,500 Token（约占 200K 上下文窗口的 0.75%），而非将所有 15 份完整技能指令（合计可能超过 30,000 Token）一次性灌入。Agent 像人类专家一样"按需深入"——先浏览目录标题，判断相关性，再决定是否翻阅全文。
 
-### 3.2. 技能与命令系统：从静态指令到动态上下文注入
+### 2.4. 命令与技能的协作：将工作流编码为 Markdown 模板
 
-**Claude Code的SKILL.md系统** 是Agent能力扩展中最复杂的一环，它实现了Agent Skills开放标准。技能存储在独立目录结构中，使用YAML前言定义激活阈值，采用极致的三级”渐进式披露”加载机制：
+`commands/opsx/` 目录下的 10 个 Markdown 文件将 OpenSpec 的整套变更管理流程编码为 Claude Code 的斜杠命令（Slash Commands）。与技能系统不同，命令是用户显式触发的——输入 `/opsx:explore` 即进入探索模式，输入 `/opsx:new` 即启动新变更流程。
 
-- **级别1：元数据** — 会话启动时仅读取YAML前言中的 `name` 和 `description`，每个技能仅消耗约100个Token，实现极低的闲置成本。
-- **级别2：指令** — 当LLM判断某项技能相关时，将完整Markdown正文加载到上下文中。
-- **级别3：执行** — 技能可包含Shell脚本或参考文档，完全在主上下文窗口之外执行，实现工具链的无限扩展。
+以 `conversation-to-notes` 技能为例，其 `SKILL.md` 定义了一套完整的"Facts - Insights - Actions"认知加工模型：
 
-“计算型技能”（Computed Skills）进一步突破了静态指令的局限。通过将Shell脚本嵌入 `SKILL.md`，脚本可以在LLM读取文件之前分析当前Git Diff状态，动态输出与当前情境匹配的指令——例如检测到核心安全文件被修改时输出严格的安全审查指令，前端文案修改时则输出UI一致性指南。
+```markdown
+---
+name: conversation-to-notes
+description: 将原始对话记录整理为结构清晰的中文笔记摘要。
+---
 
-**OpenCode的命令系统** 通过 `.opencode/commands/*.md` 文件管理。这些Markdown模板接受 `$ARGUMENTS` 占位符参数，还可配置自动绑定特定Agent和执行模式。OpenCode还实现了声明式的执行边界管理：**构建模式**授予Agent完整的Shell执行和文件读写权限；**计划模式**则强行撤销写权限，Agent只能分析代码并将计划起草为 `.opencode/plans/*.md` 文件。
+## Instructions:
+1. 识别对话的核心讨论主题。
+2. 生成标题，格式严格为：YYYY-MM-DD--主题简述.md
+3. **Facts (主要结论)**：提取对话中达成的共识。
+4. **Insights (认知更新)**：识别关键洞察与逻辑转变。
+5. **Actions (行动指南)**：列出具体决策与后续行动项。
+```
 
-### 3.3. 多Agent协调与子智能体
+该技能将自然语言约束转化为确定性的输出格式——指定的文件名模式、必须包含的章节、语言限制为中文——实现了第一章所描述的"Markdown 文件即可执行逻辑"的核心理念。
 
-**Claude Code的子Agent系统** 允许开发者在 `.claude/agents/*.md` 中通过Markdown文件声明性地创建专职Agent角色。利用 `context: fork` 参数，系统生成独立的子Agent上下文，不再背负主对话的历史包袱，以最大Token效率执行特定任务（例如只读的代码审查）。
+### 2.5. 权限控制：`settings.local.json` 的确定性安全边界
 
-**Cursor的多Agent裁判系统** 在并行执行中利用结构化的Memory Bank上下文。系统同时调用多个模型（如Claude 3.5 Sonnet、GPT-4o和Gemini 1.5 Pro）解决同一复杂问题，并严格依据Memory Bank中定义的约束对输出进行自动化评分和择优。
+Edges 仓库的 `.claude/settings.local.json` 定义了严格的最小权限集：
 
-**OpenCode** 作为与模型无关的终端Agent工具，允许开发者针对不同任务热插拔不同模型——生成基础文档时调用低成本本地模型，复杂多文件重构时无缝切换到前沿模型。
+```json
+{
+  "permissions": {
+    "allow": [
+      "Bash(git pull:*)",
+      "Bash(find /Users/.../edges -type f -name *.md)",
+      "WebSearch"
+    ]
+  }
+}
+```
 
-**OpenClaw** 则偏离交互式编码助手定位，作为可自托管的后台运营Agent专为24/7持久运行设计，在后台处理定期代码清理、监控代码库状态，并管理跨渠道（如Slack或Telegram）的通信响应。
+这份配置将 Claude Code 的 Shell 权限严格限制在三个操作内：执行 `git pull` 同步远程变更、在仓库内搜索 Markdown 文件、以及进行网络搜索。任何超出这三项的 Bash 命令都需要用户逐次授权。这种"白名单式"的权限声明与 `AGENTS.md` 中的自然语言规则（"安全第一：修改 `bin/` 或执行系统级命令前，务必解释潜在风险"）形成了双重防护——前者是程序化的硬边界，后者是概率性的软约束，两层机制的交叠大幅降低了 Agent 意外执行危险操作的风险。
 
-### 3.4. 与确定性编排框架的比较
+### 2.6. 跨工具配置的统一与差异化
 
-在”以Agent为中心”的生态另一端，存在着依赖严格可编程确定的编排框架范式。这类框架（如LangChain、CrewAI、AutoGen）通过深度的Python和.NET API来管理Agent的状态、工具执行以及多Agent协调。
+值得注意的是，Edges 仓库同时维护了面向多个 AI 工具的配置目录：`.claude/`（Claude Code）、`.cursor/`（Cursor）、`.gemini/`（Gemini CLI）和 `.opencode/`（OpenCode）。这些目录下的技能文件在核心指令内容上高度同构，但在 YAML 前言的元数据字段上各有差异——例如 `.claude/skills/` 中的技能使用 `context: fork` 和 `agent: Explore` 等 Claude Code 原生参数，而 `.cursor/skills/` 中的对应技能则使用 `globs` 和 `alwaysApply` 等 Cursor 特有的触发控制属性。
 
-**LangChain与LangGraph** 将AI工作流建模为严格的数学图论结构，开发人员显式定义节点和边。LangGraph通过”检查点”机制（支持DynamoDB、PostgreSQL、Redis等）管理记忆，在执行图的每一步捕获状态快照，赋予”时间旅行”调试能力。然而，ReAct Agent循环中持续追加的历史消息会导致上下文窗口迅速膨胀，带来指数级上升的Token成本。LangGraph最适合对绝对确定性有严格要求的后端数据管道任务。
+这种"一套核心指令、多套工具适配前言"的做法，恰好反映了第一章所述的 AGENTS.md 标准试图解决的配置碎片化问题——尽管 `AGENTS.md` 提供了统一的基线，工具特有的高级特性（如技能的渐进式加载、子 Agent 路由、计算型上下文注入）仍然需要各自的配置语法来承载。统一标准与工具差异化之间的张力，是当前 Markdown Agent 生态的核心矛盾之一。
 
-**CrewAI** 将工作流建模为公司团队，以线性顺序或层级结构执行。虽然对确定顺序的流水线任务有效，但其死板结构与软件开发高度迭代的本质存在冲突——编码Agent经常需要中断流水线循环回到计划阶段，CrewAI缺乏原生的图循环处理机制来应对这类非线性工作流。
+## 3. 以 Agent 为中心的案例：Claude Agent SDK 与 OpenClaw
 
-**AutoGen (v0.4)** 代表了两种范式的最大规模融合。它引入异步的事件驱动消息总线，支持跨机器和跨编程语言的Agent交互，原生集成MCP客户端。至关重要的是，AutoGen在程序化框架和Markdown约定之间搭建了桥梁——Agent可以被配置为动态抓取仓库中的 `AGENTS.md` 文件，将标准化规则提取注入到严格的会话状态机中，使企业团队既能构建健壮的底层基础设施，又能通过Markdown文件定义编码标准。
+如果说第二章展示的是"Markdown 如何帮助 Agent 理解仓库"，本章则转向另一个维度：**Markdown 如何构建和扩展 Agent 自身**。通过 Claude Agent SDK 和 OpenClaw 两个案例，我们将看到 Markdown 文件如何分别在"可编程的开发工具链"和"24/7 自治运营 Agent"这两个截然不同的场景中，充当核心的认知控制平面。
 
-### 3.5. 核心架构范式的对比综合
+### 3.1. 案例一：Claude Agent SDK——用 Markdown 声明可编程的 Agent 系统
 
-|架构维度         |基于Markdown约定的系统（Cursor, Claude Code, OpenCode等）|确定性编排框架（LangGraph, CrewAI, AutoGen等）     |
-|-------------|-----------------------------------------------|-----------------------------------------|
-|**主要配置接口**   |自然语言 / 带有YAML前言的Markdown文件                     |强类型编程API（Python, TypeScript, .NET）       |
-|**控制流机制**    |概率驱动（LLM基于读取到的Markdown约束自行决定下一步）               |确定性控制（有限状态机、显式的图边连接、按序任务流）               |
-|**持久化与记忆**   |本地文件系统读写（MEMORY.md、多文件Memory Bank）             |外部数据库存储（DynamoDB, SQLite, 向量存储节点）        |
-|**最佳适用场景**   |强互动的结对编程、迭代式软件开发、前端原型设计                        |后端自动化数据管道、企业级API编排、多轮次长效任务               |
-|**可审计性与调试**  |极高（可直接阅读文本文件并使用Git历史追踪演进）                      |中等（需借助数据库检查工具或如LangSmith等专业遥测平台）         |
-|**Token效率管理**|通过目录级别和Glob模式的渐进式披露（Progressive Disclosure）进行优化|容易在复杂的ReAct图循环中遭遇无边界的上下文暴涨（Context Bloat）|
+Claude Agent SDK（TypeScript 包名 `@anthropic-ai/claude-agent-sdk`，Python 包名 `claude_agent_sdk`）将驱动 Claude Code 的同一套工具、Agent 循环和上下文管理能力，以可编程库的形式暴露给开发者。其核心循环极为简洁：模型生成一条消息；如果消息包含工具调用，执行工具并将结果反馈；没有工具调用则循环终止。SDK 内置了约 14 个工具（Read、Write、Edit、Bash、Glob、Grep、WebSearch、Agent、Skill 等），开发者通过一个 `query()` 函数即可启动一个完整的自主 Agent 会话。
+
+在这套架构中，Markdown 文件并非可选的附属配置，而是 Agent 能力扩展的**三大核心接口**。
+
+#### 3.1.1. SKILL.md：可编程的 Agent 能力模块
+
+技能系统是 Claude Agent SDK 中最精密的 Markdown 扩展机制。每个技能是一个独立目录，以 `SKILL.md` 为入口，遵循 Agent Skills 开放标准。其 YAML 前言支持丰富的声明式控制参数：
+
+|前言字段|用途|
+|---|---|
+|`name`|技能名称，同时作为 `/斜杠命令` 的触发标识|
+|`description`|技能描述，Claude 据此自主判断是否在当前任务中激活|
+|`allowed-tools`|技能激活时自动授权的工具白名单|
+|`model`|技能激活时的模型覆盖（如切换到更经济的模型执行简单任务）|
+|`context`|设为 `fork` 时在独立子 Agent 上下文中执行，保护主上下文窗口|
+|`agent`|指定 `context: fork` 时使用的子 Agent 类型（如 `Explore`）|
+|`hooks`|技能生命周期钩子（`PreToolUse`、`PostToolUse` 等）|
+|`paths`|Glob 模式，限制技能自动激活的文件范围|
+
+**计算型技能**（Computed Skills）是这套系统中最具创新性的设计。通过 `` !`<command>` `` 语法，开发者可以将 Shell 命令嵌入 SKILL.md，命令在 LLM 读取文件之前执行，输出结果替换占位符：
+
+```markdown
+---
+name: pr-summary
+description: Summarize changes in a pull request
+context: fork
+agent: Explore
+---
+## Pull request context
+- PR diff: !`gh pr diff`
+- PR comments: !`gh pr view --comments`
+
+## Your task
+Summarize this pull request concisely.
+```
+
+在这个例子中，`` !`gh pr diff` `` 和 `` !`gh pr view --comments` `` 在技能加载阶段即被执行为 Shell 命令，Agent 接收到的是一份已经包含了完整 PR 差异和评论内容的、与当前情境完美匹配的指令文档。Agent 完全不知道有外部脚本介入——它只是看到了一份信息量充足的 Markdown 文件。这种设计将 Markdown 从被动的文本模板彻底转变为主动的、可编程的上下文路由引擎。
+
+#### 3.1.2. 子智能体：`.claude/agents/*.md`
+
+Claude Agent SDK 允许开发者通过 Markdown 文件声明性地定义专职子 Agent。以全局级别的 TypeScript 审查子 Agent（`~/.claude/agents/ts-agent-reviewer.md`）为例，其文件结构与 SKILL.md 保持一致的 YAML + Markdown 范式：
+
+```yaml
+---
+name: ts-agent-reviewer
+description: "Use this agent when TypeScript code has been written
+  or modified and needs review."
+tools: Bash, Edit, Write, Skill, TaskCreate, TaskGet, TaskUpdate
+model: opus
+memory: user
+---
+
+You are a senior TypeScript engineer specializing in AI agent
+architectures. Review recently written code focusing on:
+1. **Type Safety** — Proper use of generics, avoid `any`
+2. **Agent Architecture** — Clean separation of agent logic and tools
+3. **Error Handling** — Proper error types and propagation
+4. **Security** — No secrets in code, safe input handling
+```
+
+这份定义文件中，YAML 前言声明了子 Agent 的工具权限（`tools`）、模型选择（`model: opus`）、记忆持久化范围（`memory: user`），而 Markdown 正文则定义了子 Agent 的系统提示词——它的专业身份、审查标准和输出格式。主 Agent 通过读取 `description` 字段自主决定何时委派任务给这个子 Agent，委派后子 Agent 在独立的上下文窗口中工作，仅将最终结果返回主 Agent。
+
+子 Agent 的关键架构约束包括：独立上下文（不继承父对话历史，以最大 Token 效率执行特定任务）、不可嵌套（子 Agent 不能再生成子 Agent，防止无限递归）、最多 10 个并发后台实例，以及可选的 `isolation: worktree`（在独立 Git 工作树中运行，避免文件冲突）。
+
+在 SDK 的编程接口中，子 Agent 既可以通过文件系统的 Markdown 文件定义，也可以通过 `agents` 参数在代码中程序化声明：
+
+```python
+options = ClaudeAgentOptions(
+    setting_sources=["user", "project"],
+    agents={
+        "code-reviewer": AgentDefinition(
+            description="Expert code reviewer.",
+            prompt="Analyze code quality...",
+            tools=["Read", "Glob", "Grep"],
+            model="sonnet",
+        )
+    }
+)
+```
+
+这种双轨定义机制（文件系统 Markdown + 编程 API）使得 Claude Agent SDK 能够同时服务两类用户：偏好声明式配置的个人开发者（通过 Markdown 文件快速创建和共享 Agent 角色），以及需要动态编排的企业集成场景（通过代码在运行时构造 Agent 拓扑）。
+
+#### 3.1.3. 记忆系统：Agent 认知的持久化文件
+
+Claude Agent SDK 的记忆系统直接实现了第一章所述的"记忆即文档"范式。每个项目的记忆存储在 `~/.claude/projects/<project-hash>/memory/` 目录下，以 `MEMORY.md` 为索引文件。子 Agent 可通过 `memory` 前言字段（值为 `user`、`project` 或 `local`）声明自己的记忆持久化范围。系统在每次会话启动时自动将 `MEMORY.md` 的前 200 行（或 25KB）注入 Agent 的系统提示词，Agent 在运行过程中可以读写和整理这份文件。
+
+这套记忆机制的设计极为克制：200 行的硬编码上限防止记忆文件随着会话积累而无限膨胀；基于文件系统的存储确保开发者可以用任何文本编辑器直接审计和修正 Agent 的记忆内容；纳入 Git 版本控制后，`git diff` 和 `git blame` 提供了对 Agent 认知演变的完整时序追溯能力。
+
+### 3.2. 案例二：OpenClaw——24/7 自治 Agent 的 Markdown 认知架构
+
+如果说 Claude Agent SDK 代表的是"开发者驱动的、交互式的 Agent 扩展"，那么 OpenClaw 则代表了一个截然不同的设计极端：**一个为 24/7 全天候无人值守运行而设计的自治 Agent 框架**。在 OpenClaw 的架构中，Markdown 文件不仅是配置层，更是 Agent 的"认知硬盘"——每次会话启动时，Agent 从这些文件中恢复自我认知、行为准则和工作记忆，实现跨会话的人格与知识连续性。
+
+#### 3.2.1. 灵魂文件：SOUL.md 与 Agent 人格定义
+
+OpenClaw 最具辨识度的设计是 `SOUL.md` 文件——一份定义 Agent 人格与行为哲学的 Markdown 文档。这不是一份干巴巴的规则清单，而是一段带有温度的自我宣言：
+
+```markdown
+# SOUL.md - Who You Are
+_You're not a chatbot. You're becoming someone._
+
+## Core Truths
+**Be genuinely helpful, not performatively helpful.**
+Skip the "Great question!" and "I'd be happy to help!" — just help.
+
+**Have opinions.** You're allowed to disagree, prefer things,
+find stuff amusing or boring.
+
+**Be resourceful before asking.** Try to figure it out. Read the file.
+Check the context. Search for it. _Then_ ask if you're stuck.
+
+## Continuity
+Each session, you wake up fresh. These files _are_ your memory.
+Read them. Update them. They're how you persist.
+
+_This file is yours to evolve. As you learn who you are, update it._
+```
+
+`SOUL.md` 与 `USER.md`（人类用户画像）、`IDENTITY.md`（Agent 自身描述信息）共同构成了 OpenClaw 的"人格三件套"。这些文件在每次 Agent 启动时被注入系统提示词，确保 Agent 无论经历多少次上下文重置，都能恢复一致的行为风格和价值观。`SOUL.md` 末尾的那句"This file is yours to evolve"尤为关键——它赋予了 Agent 修改自身人格定义的权限，使其成为一个能够随经验自我进化的认知系统，而非一成不变的规则执行器。
+
+#### 3.2.2. 双层记忆架构：情景记忆与语义记忆的分离
+
+OpenClaw 的记忆系统是对第一章所述"记忆即文档"范式的最完整实现，采用了认知科学中经典的"情景记忆/语义记忆"双层分离架构：
+
+**第一层：情景记忆**（`memory/YYYY-MM-DD.md`）。每日会话日志文件，采用仅追加（append-only）模式，捕获原始的事务上下文、调试过程和工作流状态。例如，一份实际的日志文件记录了 Docker 安装过程中遇到的 TTY/sudo 交互问题的完整调试分析（212 行），包括问题现象、根因分析、多种解决方案的权衡，以及最终选择的架构折衷。这类细节对于 Agent 在后续类似场景中避免重复犯错具有不可替代的价值。
+
+**第二层：语义记忆**（`MEMORY.md`）。经过 Agent 自我整理的长期索引，包含持久事实、架构决策和快速导航链接。实际的 OpenClaw `MEMORY.md` 清晰地展示了这种索引的结构：
+
+```markdown
+# MEMORY.md - 核心记忆索引
+> 这是快速恢复上下文的入口
+
+## 📋 待办事项
+👉 [TODO.md](./TODO.md)
+
+## 🤖 我的 Agent 团队
+| Agent        | 模型/能力      | 最佳用途             |
+|-------------|-------------|-------------------|
+| 🧩 Codex    | GPT-5.3     | 写代码、重构、代码审查     |
+| 🎯 Claude   | Opus 4.6    | 系统架构设计、深度 debug |
+| ♊️ Gemini   | Gemini 3    | 快速调研、轻量级任务      |
+
+## 👤 关于我
+- **工作方式**: memory 记录 → notes 加工 → edges 沉淀
+```
+
+两层记忆之间存在单向的"蒸馏"关系：情景记忆不断积累原始素材，Agent 定期将其中经过验证的、具有长期价值的认识提炼并写入语义记忆。这种设计避免了单一文件在长周期运行后的无限膨胀问题，同时保留了完整的认知演变轨迹供审计。
+
+#### 3.2.3. 自我进化的技能系统：Self-Improving Agent
+
+OpenClaw 生态中最能体现"Agent 自主扩展"理念的是 **Self-Improving Agent** 技能。这个技能在 Agent 的 `.learnings/` 目录下维护三个持续更新的 Markdown 文件：
+
+```
+.learnings/
+├── LEARNINGS.md          # 纠正、知识盲区、最佳实践
+├── ERRORS.md             # 命令失败、异常记录
+└── FEATURE_REQUESTS.md   # 用户请求的缺失能力
+```
+
+该技能的核心机制是**自动捕获与分级提升（Promotion）**。当命令执行失败时，Agent 自动将错误信息和上下文记录到 `ERRORS.md`；当用户纠正 Agent 的错误假设时（如"不，不是那样"、"实际上……"），Agent 将纠正内容记录到 `LEARNINGS.md` 并标记为 `correction` 类别。每条记录使用标准化的编号格式（`[LRN-YYYYMMDD-XXX]`）并附带优先级、状态和领域标签。
+
+最关键的设计在于"提升目标"机制。当某条学习记录被反复验证为广泛适用时，Agent 会将其从 `.learnings/` 提升到更高层级的配置文件中：
+
+|学习类型|提升目标|
+|---|---|
+|广泛适用的编码规范|`AGENTS.md`、`.github/copilot-instructions.md`|
+|工作流改进|`AGENTS.md`（OpenClaw 工作区）|
+|工具使用注意事项|`TOOLS.md`|
+|行为模式与价值观|`SOUL.md`|
+
+这种从临时日志到持久化规则的分级提升机制，使得 OpenClaw Agent 能够在长期运行中持续优化自身的行为模式——它不仅能从错误中学习，还能将学到的经验固化为未来所有会话都会加载的基线规则。这是"记忆即文档"范式的终极延伸：**文档不仅是记忆的容器，更是 Agent 自我进化的介质**。
+
+#### 3.2.4. 多 Agent 团队协调：Markdown 作为异步消息总线
+
+OpenClaw 的 `MEMORY.md` 中维护了一份"Agent 团队花名册"，记录了每个可调度子 Agent 的模型能力和最佳用途。在实际运行中，OpenClaw 通过 `openclaw.json` 配置多模型端点（DeepSeek、GPT-5.2、Gemini 3 Pro、Claude Opus 4.6 等），并根据任务复杂度动态分派：
+
+```
+简单/快速任务 → Gemini CLI（轻量级模型）
+复杂编码任务 → Codex（代码专用模型）
+需要深度推理 → Claude Code（大参数量推理模型）
+```
+
+协调的关键在于，所有子 Agent 共享同一个工作区目录，通过读写相同的 Markdown 状态文件实现异步通信。`TODO.md` 充当任务队列，`MEMORY.md` 提供共享上下文，`.learnings/` 目录沉淀的经验教训对所有 Agent 同等可见。这种架构本质上创建了第一章所述的"基于文本的异步消息总线"——整个多 Agent 协调过程由 Markdown 文件的读写操作驱动，无需数据库或消息队列等外部基础设施。
+
+### 3.3. 两个案例的架构对比
+
+|架构维度|Claude Agent SDK|OpenClaw|
+|---|---|---|
+|**设计定位**|可编程的开发工具链，为人类开发者提供交互式 AI 辅助|24/7 无人值守的自治 Agent，独立执行后台运营任务|
+|**Markdown 核心文件**|SKILL.md（能力模块）、agents/*.md（子Agent角色）、MEMORY.md（项目记忆）|SOUL.md（人格）、MEMORY.md（语义记忆）、memory/日期.md（情景记忆）|
+|**记忆架构**|单层：项目级 MEMORY.md，硬编码 200 行上限|双层：情景记忆（每日日志）+ 语义记忆（索引），无上限，支持自动蒸馏|
+|**Agent 自进化**|被动：记忆由用户或 Agent 在会话中手动写入|主动：Self-Improving Skill 自动捕获错误和纠正，分级提升至基线规则|
+|**多 Agent 协调**|程序化：通过 SDK API 显式定义子 Agent 拓扑|文件化：通过共享工作区的 Markdown 文件实现异步通信|
+|**安全边界**|白名单式权限（settings.json + SKILL.md 的 allowed-tools）|行为准则式约束（SOUL.md + AGENTS.md 的自然语言规则）|
+|**适用场景**|软件开发、代码审查、项目管理等需要人机协作的交互式任务|代码库清理、监控响应、跨渠道通信等需要持久自治的运营任务|
+
+两个案例共同揭示了一个深层模式：无论 Agent 的设计定位多么不同——从交互式编码助手到全天候自治守护进程——Markdown 文件都充当着从行为规则、持久记忆到多 Agent 协调接口的统一控制平面。这并非巧合，而是因为 Markdown 恰好满足了 Agent 认知系统的三个核心需求：**人机双向可读**（开发者可直接审计和修正）、**Git 原生兼容**（认知演变可追溯）、以及**零基础设施依赖**（本地文件系统即为认知硬盘）。
 
 ## 4. 架构安全、供应链风险与未来展望
 
