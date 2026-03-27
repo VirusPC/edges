@@ -3,7 +3,8 @@ name: conversation-to-notes
 description: 将原始对话记录整理为结构清晰的中文笔记摘要。基于 Facts - Insights - Actions 模型，包含讨论主题、主要结论、认知更新、行动指南及补充说明。
 ---
 
-# conversation_to_notes
+
+
 
 将原始对话记录整理为结构清晰的中文笔记摘要。
 生成符合格式 YYYY-MM-DD--主题简述.md 的标题。
@@ -49,6 +50,10 @@ YYYY-MM-DD--主题简述.md
 
 【补充说明】
 (其他重要细节或备注)
+...
+
+【相关链接】
+(提到的一些重要的链接)
 ...
 
 ## Constraints:
