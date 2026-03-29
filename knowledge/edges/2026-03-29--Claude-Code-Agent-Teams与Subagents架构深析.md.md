@@ -37,7 +37,7 @@
 | `hooks:`      | ✅ 正常执行             | ❌ 静默忽略 bug         |
 | Markdown body | ✅ 作为 system prompt | ❌ 静默忽略 bug         |
 | `model:`      | ✅                  | ✅ 唯一生效的字段          |
-
+对于即兴创建的子 agent 并不会说加载项目里的 skills。
 
 【认知更新】
 “开关只是架构切换，不是功能切换”
