@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/ai-vault/AI资产沉淀.md",
+                "file": "knowledge/edges/ai-vault/hooks.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "AI资产沉淀"
+              "title": "hooks"
             }
           }
         ]
@@ -192,8 +192,11 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "3a8775d4bff4dec4",
   "lastOpenFiles": [
+    "knowledge/edges/ai-vault/AI资产沉淀.md",
+    "knowledge/edges/ai-vault/相关资料.md",
+    "knowledge/edges/ai-vault/从 AGENTS.md 到 SKILL.md：Markdown 驱动的 Agent 能力扩展.md",
     "knowledge/notes/浏览器检索benchmark.md",
     "knowledge/edges/claude/2026-11-10-prompts-提示词工程最佳实践.md.md",
     "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
@@ -208,11 +211,9 @@
     "knowledge/edges/claude/2025-11-25-Agentsmd-Using CLAUDE.md files, Customizing Claude Code for your codebase.md",
     "knowledge/edges/claude/2025-11-19-skills-How to create Skills for Claude, steps and examples.md",
     "knowledge/edges/claude",
-    "knowledge/edges/ai-vault/相关资料.md",
     "knowledge/edges/ai-vault/hooks.md",
     "knowledge/edges/ai-course/相关资料.md",
     "knowledge/edges/2026-03-29--Claude-Code-Agent-Teams与Subagents架构深析.md.md",
-    "knowledge/edges/ai-vault/从 AGENTS.md 到 SKILL.md：Markdown 驱动的 Agent 能力扩展.md",
     "knowledge/edges/check-lists/技术方案.md",
     "knowledge/edges/check-lists/发布页面.md",
     "knowledge/notes/markdown-and-agents/以 Markdown 为中心的 Agent 扩展体系。.md",
@@ -223,7 +224,6 @@
     "knowledge/notes/markdown-and-agents",
     "knowledge/notes/markdown  ext.md",
     "knowledge/notes/ai-training/模型参数设置-claude.md",
-    "knowledge/notes/Harness Engineering.md",
     "knowledge/resources/Pasted image 20260225204203.png",
     "openspec/changes/chatgpt-notes-mcp-app",
     "notes/ai-training",
