@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/notes/markdown-and-agents/以 Markdown 为中心的 Agent 扩展体系。.md",
+                "file": "knowledge/notes/markdown-and-agents/AGENTS.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "以 Markdown 为中心的 Agent 扩展体系。"
+              "title": "AGENTS"
             }
           }
         ]
@@ -154,13 +154,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/edges/check-lists/技术方案.md",
+                "file": "knowledge/notes/markdown-and-agents/AGENTS.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "技术方案 的大纲"
+              "title": "AGENTS 的大纲"
             }
           },
           {
@@ -174,11 +174,11 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
-    "width": 288.5
+    "width": 385.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -192,14 +192,17 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "636505b8300469c8",
+  "active": "3a8775d4bff4dec4",
   "lastOpenFiles": [
     "knowledge/notes/markdown-and-agents/以 Markdown 为中心的 Agent 扩展体系2.md",
+    "knowledge/notes/markdown-and-agents/AGENTS.md",
     "knowledge/notes/markdown-and-agents/以 Markdown 为中心的 Agent 扩展体系。.md",
-    "knowledge/edges/ai-vault/从 AGENTS.md 到 SKILL.md：Markdown 驱动的 Agent 能力扩展.md",
+    "AGENTS.md",
     "knowledge/edges/ai-vault/AI资产沉淀.md",
-    "knowledge/edges/ai-vault/hooks.md",
     "knowledge/edges/ai-vault/相关资料.md",
+    "knowledge/edges/CPC问题.md",
+    "knowledge/edges/ai-vault/从 AGENTS.md 到 SKILL.md：Markdown 驱动的 Agent 能力扩展.md",
+    "knowledge/edges/ai-vault/hooks.md",
     "knowledge/edges/ai-course/课程写作风格与方法论.md",
     "knowledge/edges/ai-course/相关资料.md",
     "knowledge/edges/ai-course/Lesson 2：提示词工程.md",
@@ -217,9 +220,6 @@
     "knowledge/edges/claude/2026-11-10-prompts-提示词工程最佳实践.md.md",
     "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
     "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
-    "knowledge/edges/claude/2026-01-29-skills-A complete guide to building skills for Claude.md",
-    "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
-    "knowledge/edges/claude/2026-01-22-skills-Building Agents with Skills, Equipping Agents for Specialized Work.md",
     "knowledge/edges/claude",
     "knowledge/edges/check-lists",
     "knowledge/未命名",
