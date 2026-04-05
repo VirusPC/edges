@@ -4,21 +4,21 @@
     "type": "split",
     "children": [
       {
-        "id": "bdc67f24eb24acb6",
+        "id": "744b21e1e70b48fc",
         "type": "tabs",
         "children": [
           {
-            "id": "3a8775d4bff4dec4",
+            "id": "52faad067a497db1",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/notes/markdown-and-agents/AGENTS.md",
+                "file": "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "AGENTS"
+              "title": "从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展"
             }
           }
         ]
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 294.5
+    "width": 586.5
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -154,13 +154,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/notes/markdown-and-agents/AGENTS.md",
+                "file": "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "AGENTS 的大纲"
+              "title": "从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展 的大纲"
             }
           },
           {
@@ -174,7 +174,7 @@
             }
           }
         ],
-        "currentTab": 4
+        "currentTab": 5
       }
     ],
     "direction": "horizontal",
@@ -192,10 +192,35 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "3a8775d4bff4dec4",
+  "active": "33eecac44040d9a2",
   "lastOpenFiles": [
-    "knowledge/notes/markdown-and-agents/以 Markdown 为中心的 Agent 扩展体系2.md",
+    "knowledge/edges/check-lists/项目流程.md",
+    "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
+    "knowledge/edges/claude/2026-01-29-skills-A complete guide to building skills for Claude.md",
+    "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
+    "knowledge/edges/claude/2026-01-22-skills-Building Agents with Skills, Equipping Agents for Specialized Work.md",
+    "knowledge/edges/claude/2026-01-21-2026 Agentic Coding 趋势报告.md",
+    "knowledge/edges/claude/2025-12-12-hooks-Claude Code power user customization, How to configure hooks.md",
+    "knowledge/edges/claude/2025-11-25-Agentsmd-Using CLAUDE.md files, Customizing Claude Code for your codebase.md",
+    "knowledge/edges/claude/2025-11-19-skills-How to create Skills for Claude, steps and examples.md",
+    "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
+    "knowledge/resources/Pasted image 20260403160808.png",
+    "knowledge/resources/Pasted image 20260403160717.png",
+    "knowledge/edges/2026-03-08--LLM幻觉成因与评估体系缺陷.md.md",
     "knowledge/notes/markdown-and-agents/AGENTS.md",
+    "knowledge/edges/2026-03-29--Claude-Code-Agent-Teams与Subagents架构深析.md.md",
+    "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
+    "knowledge/resources/Pasted image 20260403153818.png",
+    "knowledge/resources/Pasted image 20260403153648.png",
+    "knowledge/resources/Pasted image 20260403153618.png",
+    "knowledge/resources/Pasted image 20260403152452.png",
+    "knowledge/resources/Pasted image 20260403152413.png",
+    "knowledge/resources/Pasted image 20260403151952.png",
+    "knowledge/resources/Pasted image 20260403151948.png",
+    "knowledge/resources/Pasted image 20260403151132.png",
+    "knowledge/edges/langchain/2026-03-10-The Anatomy of an Agent Harness.md",
+    "knowledge/edges/langchain",
+    "knowledge/edges/claude/2025-11-10-prompts-提示词工程最佳实践.md.md",
     "knowledge/notes/markdown-and-agents/以 Markdown 为中心的 Agent 扩展体系。.md",
     "AGENTS.md",
     "knowledge/edges/ai-vault/AI资产沉淀.md",
@@ -206,39 +231,14 @@
     "knowledge/edges/ai-course/课程写作风格与方法论.md",
     "knowledge/edges/ai-course/相关资料.md",
     "knowledge/edges/ai-course/Lesson 2：提示词工程.md",
-    "knowledge/edges/ai-course/Lesson1 - 故事线大纲.md",
-    "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
-    "knowledge/edges/ai-course/Lesson2-大纲改进方向.md",
-    "knowledge/edges/ai-course/Lesson3 - Context Engineering - 大纲.md",
-    "knowledge/edges/ai-course/Lesson4 - Agentic AI - 大纲.md",
-    "knowledge/edges/ai-course/outline.md",
-    "knowledge/edges/check-lists/发布页面.md",
-    "knowledge/edges/check-lists/技术方案.md",
-    "knowledge/edges/check-lists/联调.md",
-    "knowledge/edges/check-lists/未命名.md",
-    "knowledge/notes/浏览器检索benchmark.md",
-    "knowledge/edges/claude/2026-11-10-prompts-提示词工程最佳实践.md.md",
-    "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
-    "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
     "knowledge/edges/claude",
     "knowledge/edges/check-lists",
     "knowledge/未命名",
     "knowledge/notes/markdown-and-agents",
-    "knowledge/resources/Pasted image 20260225204203.png",
     "openspec/changes/chatgpt-notes-mcp-app",
     "notes/ai-training",
     "notes",
     "knowledge/edges/backup",
-    "knowledge/edges/google-kaggle-agent-course",
-    "knowledge/edges/ai-course",
-    "node_modules/js-md4/doc/fonts/OpenSans-Regular-webfont.svg",
-    "node_modules/js-md4/doc/fonts/OpenSans-LightItalic-webfont.svg",
-    "node_modules/js-md4/doc/fonts/OpenSans-Light-webfont.svg",
-    "node_modules/js-md4/doc/fonts/OpenSans-Italic-webfont.svg",
-    "node_modules/js-md4/doc/fonts/OpenSans-BoldItalic-webfont.svg",
-    "node_modules/js-md4/doc/fonts/OpenSans-Bold-webfont.svg",
-    "node_modules/playwright-core/lib/vite/traceViewer/playwright-logo.svg",
-    "node_modules/playwright-core/lib/vite/recorder/playwright-logo.svg",
-    "node_modules/playwright-core/lib/server/chromium/appIcon.png"
+    "knowledge/edges/google-kaggle-agent-course"
   ]
 }
