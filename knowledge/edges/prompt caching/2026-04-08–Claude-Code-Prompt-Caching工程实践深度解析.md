@@ -13,7 +13,8 @@
 
 1. **`__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__` 的作用**：Claude Code 系统提示词中的缓存分割标记，告诉 harness 代码在此处插入 `cache_control` 显式断点，将 prompt 分为静态段（跨用户共享缓存）和动态段（per-session 缓存）。
 2. **Prompt Caching ≠ KV Cache**：KV Cache 解决单次请求内的计算复用；Prompt Caching 是 Anthropic API 层的跨请求服务端缓存，基于前缀逐字节匹配（密码学哈希），需要通过 `cache_control` 显式或自动标记断点。
-3. **Claude Code 的四层缓存结构**（来自 Thariq 一手文章）：
+3. Prompt Caching 缓存的是 prefill 阶段生成的 KV Cache（注意力层中间状态），而非模型输出——命中后跳过输入序列的前向传播计算，直接进入自回归 decode 阶段生成新的输出。​​​​​​​​​​​​​​​​
+4. **Claude Code 的四层缓存结构**（来自 Thariq 一手文章）：
 - 静态 system prompt + Tools → 全局缓存
 - CLAUDE.md → 项目级缓存
 - Session context → 会话级缓存
