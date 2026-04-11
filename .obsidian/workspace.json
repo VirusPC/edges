@@ -4,21 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "744b21e1e70b48fc",
+        "id": "12e472ec16e746ac",
         "type": "tabs",
         "children": [
           {
-            "id": "52faad067a497db1",
+            "id": "01b75e04da854e50",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
+                "file": "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展"
+              "title": "Lesson1 - LLM Foundation"
+            }
+          },
+          {
+            "id": "17364b0d6368fcdd",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "knowledge/edges/CLI Practice.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "CLI Practice"
             }
           }
         ]
@@ -78,7 +92,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 586.5
+    "width": 316.5,
+    "collapsed": true
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -154,13 +169,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
+                "file": "knowledge/edges/claude/claude-agent-sdk/Hosting the Agent SDK.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展 的大纲"
+              "title": "Hosting the Agent SDK 的大纲"
             }
           },
           {
@@ -178,7 +193,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 385.5
+    "width": 293.5
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -192,24 +207,38 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "01b75e04da854e50",
   "lastOpenFiles": [
+    "knowledge/edges/ai-course/Lesson1 - 章节问题总结.md",
+    "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
+    "knowledge/edges/CLI Practice.md",
+    "knowledge/edges/ai-course/AGENTS.md",
+    "knowledge/edges/ai-course/相关资料.md",
+    "knowledge/edges/ai-course/课程写作风格与方法论.md",
+    "knowledge/edges/ai-course/Lesson1 - 故事线大纲.md",
+    "knowledge/edges/ai-course/Lesson1 - 故事线大纲_simple.md",
+    "notes/ai-training/01-foundations.md",
+    "knowledge/edges/prompt caching/2026-04-08–Claude-Code-Prompt-Caching工程实践深度解析.md",
+    "knowledge/edges/从 SFT 到 RAG 到 上下文工程.md",
+    "knowledge/edges/2026-04-06–n8n与Skill驱动Agent编排的范式对比.md",
+    "knowledge/edges/2026-03-29--Claude-Code-Agent-Teams与Subagents架构深析.md.md",
+    "knowledge/edges/2026-03-08--LLM幻觉成因与评估体系缺陷.md.md",
+    "knowledge/edges/prompt caching/2022-3-30-Transformer inference arithmetic.md",
+    "knowledge/archive/报名展示状态机.md",
+    "knowledge/edges/prompt caching/2025-12-01-How prompt caching works.md",
+    "knowledge/edges/prompt caching/kv cache vs prompt  caching.md",
+    "knowledge/edges/claude/claude-agent-sdk/Hosting the Agent SDK.md",
+    "knowledge/edges/prompt caching/Lessons from Building Claude Code, Prompt Caching Is Everything.md",
+    "knowledge/edges/prompt caching",
+    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
+    "knowledge/edges/claude/claude-agent-sdk",
     "knowledge/edges/check-lists/项目流程.md",
+    "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
     "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
     "knowledge/edges/claude/2026-01-29-skills-A complete guide to building skills for Claude.md",
     "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
-    "knowledge/edges/claude/2026-01-22-skills-Building Agents with Skills, Equipping Agents for Specialized Work.md",
-    "knowledge/edges/claude/2026-01-21-2026 Agentic Coding 趋势报告.md",
-    "knowledge/edges/claude/2025-12-12-hooks-Claude Code power user customization, How to configure hooks.md",
-    "knowledge/edges/claude/2025-11-25-Agentsmd-Using CLAUDE.md files, Customizing Claude Code for your codebase.md",
-    "knowledge/edges/claude/2025-11-19-skills-How to create Skills for Claude, steps and examples.md",
-    "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
     "knowledge/resources/Pasted image 20260403160808.png",
     "knowledge/resources/Pasted image 20260403160717.png",
-    "knowledge/edges/2026-03-08--LLM幻觉成因与评估体系缺陷.md.md",
-    "knowledge/notes/markdown-and-agents/AGENTS.md",
-    "knowledge/edges/2026-03-29--Claude-Code-Agent-Teams与Subagents架构深析.md.md",
-    "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
     "knowledge/resources/Pasted image 20260403153818.png",
     "knowledge/resources/Pasted image 20260403153648.png",
     "knowledge/resources/Pasted image 20260403153618.png",
@@ -218,27 +247,13 @@
     "knowledge/resources/Pasted image 20260403151952.png",
     "knowledge/resources/Pasted image 20260403151948.png",
     "knowledge/resources/Pasted image 20260403151132.png",
-    "knowledge/edges/langchain/2026-03-10-The Anatomy of an Agent Harness.md",
     "knowledge/edges/langchain",
-    "knowledge/edges/claude/2025-11-10-prompts-提示词工程最佳实践.md.md",
-    "knowledge/notes/markdown-and-agents/以 Markdown 为中心的 Agent 扩展体系。.md",
-    "AGENTS.md",
-    "knowledge/edges/ai-vault/AI资产沉淀.md",
-    "knowledge/edges/ai-vault/相关资料.md",
-    "knowledge/edges/CPC问题.md",
-    "knowledge/edges/ai-vault/从 AGENTS.md 到 SKILL.md：Markdown 驱动的 Agent 能力扩展.md",
-    "knowledge/edges/ai-vault/hooks.md",
-    "knowledge/edges/ai-course/课程写作风格与方法论.md",
-    "knowledge/edges/ai-course/相关资料.md",
-    "knowledge/edges/ai-course/Lesson 2：提示词工程.md",
     "knowledge/edges/claude",
     "knowledge/edges/check-lists",
     "knowledge/未命名",
     "knowledge/notes/markdown-and-agents",
     "openspec/changes/chatgpt-notes-mcp-app",
     "notes/ai-training",
-    "notes",
-    "knowledge/edges/backup",
-    "knowledge/edges/google-kaggle-agent-course"
+    "notes"
   ]
 }
