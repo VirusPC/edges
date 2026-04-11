@@ -1,11 +1,4 @@
-# 第一课：大模型基础
-
-> **目标**：理解大模型"能力从何而来、成本因何而生"，为工程决策提供理性基线，明白"如何进行模型选型和参数配置"。
-
----
-
-## 核心主线
-
+# 
 ```mermaid
 graph LR
     subgraph theory["理论基础"]
@@ -449,9 +442,9 @@ Decode 阶段，每生成一个新 token 理论上要对所有前面的 token �
 
 ## 第四部分：模型选型
 
-前面三部分建立了理性基线——你知道了模型怎么处理代码、能力边界在哪、成本花在了哪里。现在进入工程决策：**为什么要选型 → 约束是什么 → 怎么选**。
+前面三部分建立了理性基线——你知道了模型怎么处理代码、能力边界在哪、成本花在了哪里。现在进入工程决策。第四个问题：为什么不直接用最强的模型？
 
-### 4.1 为什么要选型
+### 4.1 为什么不直接用最强模型
 
 旗舰模型（Opus 4.6、GPT-4.1 等）代表能力上限，但不是工程默认选项：
 
@@ -478,32 +471,22 @@ Decode 阶段，每生成一个新 token 理论上要对所有前面的 token �
 
 > 这些差异在 Benchmark 上体现有限，需要在你的真实任务上实测。OpenRouter 单模型详情页和 Chatbot Arena 的任务分类排名是比较好的参考起点。
 
-既然不能无脑选最强，第一步是明确你的约束。
-
 ---
 
-### 4.2 约束定义
+### 4.2 判断维度：选型看什么
 
-选型之前，先把约束写成可检查的问题（参考 Chip Huyen [AI Engineering](https://github.com/chiphuyen/aie-book/blob/main/chapter-summaries.md) Ch.2 的四类评估标准：领域能力、生成质量、指令跟随、成本与延迟）：
+把约束写成可检查的六个问题：
 
-| 维度          | 关键问题                          | 对选型的影响                                   | 对应 Step |
-| ----------- | ----------------------------- | ---------------------------------------- | ------- |
-| **任务类型**    | 问答 / 代码 / 视觉 / 多模态？           | 决定是否需要 Coder / Vision 变体                 | 1       |
-| **上下文长度**   | 单次输入有多长？需要处理整个代码库还是单个函数？      | 长文档/大仓库需要 128k+ 窗口的模型；"能塞下"≠"都能用好"       | 1       |
-| **成本上限**    | 每次调用的预算是多少？                   | 直接划掉高于预算的模型层级                            | 1       |
-| **延迟要求**    | 用户能等几秒？P95 延迟要求？              | 旗舰模型 TTFT 通常比小模型慢 2–5×                   | 1       |
-| **输出格式**    | 需要稳定 JSON / function calling？ | 必须选 Instruct/Chat 版本并实测                  | 1       |
-| **部署模式**    | API 调用还是本地？数据能出境吗？对幻觉的容忍度？    | 本地部署只能选开源可自托管模型；医疗/法律/金融等高风险场景仍可用 LLM，但必须叠加验证层（如规则校验、人工复核）来兜底 | 2       |
-| **显存 / 硬件** | 本地有多少显存（或统一内存）？               | 直接决定能跑的最大参数量和精度（本地部署专属，API 场景可跳过）        | 2       |
-| **质量要求**    | 任务有多难？简单分类还是复杂推理？             | 简单任务用 Haiku 级别即可；复杂推理、多步编码必须上旗舰          | 3       |
+| 维度          | 关键问题                          | 对选型的影响                   |
+| ----------- | ----------------------------- | ------------------------ |
+| **任务类型**    | 问答 / 代码 / 视觉 / 多模态？           | 决定是否需要 Coder / Vision 变体 |
+| **部署模式**    | API 调用还是本地？数据能出境吗？            | 本地部署只能选开源可自托管模型          |
+| **显存 / 硬件** | 本地有多少显存（或统一内存）？               | 直接决定能跑的最大参数量和精度（见下方粗估）   |
+| **成本上限**    | 每次调用的预算是多少？                   | 直接划掉高于预算的模型层级            |
+| **延迟要求**    | 用户能等几秒？P95 延迟要求？              | 旗舰模型 TTFT 通常比小模型慢 2–5×   |
+| **输出格式**    | 需要稳定 JSON / function calling？ | 必须选 Instruct/Chat 版本并实测  |
 
-**AI CR 场景**：如果仓库私有且不允许代码出境，直接排除所有纯 API 模型；如果 CR 触发频率很高（每天上百个 PR），旗舰模型的成本可能比招一个人还贵——这些约束比"哪个模型 review 质量最高"优先级更高。
-
----
-
-**配套决策**：约束确定后，还有两个策略会反过来影响选型范围。
-
-**知识策略**（影响选型：如果最终需要 SFT，则必须选开源模型）：先 Prompt，够用就不升级；Prompt 塞不下再试 Long Context 直接灌入（很多场景下比搭 RAG 管线更简单有效）；Long Context 仍不够或需要检索海量知识库时上 RAG；RAG 之后行为仍不稳定才考虑 SFT。
+**知识策略**（影响选型：如果最终需要 SFT，则必须选开源模型）：先 Prompt，够用就不升级；Prompt 拿不到新知识再加 RAG；RAG 之后行为仍不稳定才考虑 SFT。
 
 **路由策略**：同一系统不必所有调用用同一模型。工程中常见三种路由实现（[参考](https://portkey.ai/blog/task-based-llm-routing/)）：
 
@@ -513,56 +496,19 @@ Decode 阶段，每生成一个新 token 理论上要对所有前面的 token �
 | **分类器路由** | 训练一个小模型（如 BERT）判断请求难度，动态分流 | 请求量大、规则难穷举时 |
 | **级联路由** | 先用便宜模型跑，质量不达标再自动升级到强模型 | 对质量有硬指标时 |
 
-> 路由的收益已有实证：Anthropic 在其[多模型路由指南](https://docs.anthropic.com/en/docs/build-with-claude/prompt-routing)中建议按任务复杂度分流到不同层级模型；实际工程中，团队通过规则路由将月度 LLM 开销降低 50%+ 而不影响输出质量的案例并不少见。
+> 路由的收益已有实证：有团队通过规则路由将月度 LLM 开销从 $42k 降至 $18k，客户满意度不变（[案例来源](https://www.swfte.com/blog/intelligent-llm-routing-multi-model-ai)）。
 
 **AI CR 场景**：CR 是规则路由的典型应用——按文件变更复杂度分流，先用 Haiku 级别的快模型扫一遍明显的代码风格和格式问题（低成本高频），只对包含复杂逻辑变更的文件升级到 Sonnet/Opus 做深度 review（高成本低频），同样的 review 覆盖率，成本降 60%+。
 
-约束明确后，接下来用四步流程找到具体的模型。
-
 ---
 
-### 4.3 怎么选
+### 4.3 实践四步：初筛 → 比价 → Benchmark 排除 → 私有评测集定夺
 
-> **框架性参考**：本节的四步选型流程参考了 [OpenAI Cookbook: Practical Guide for Model Selection](https://cookbook.openai.com/examples/partners/model_selection_guide/model_selection_guide)（按用例分类 → 模型比较 → 原型到生产 checklist）和 Chip Huyen [AI Engineering](https://github.com/chiphuyen/aie-book/blob/main/chapter-summaries.md) Ch.2 Model Selection（评估标准 → 公开 Benchmark 导航 → 设计评测 Pipeline）。
+#### Step 1：从模型名字做粗略判断
 
-**快速选型 → 本地可行性 → Benchmark 排除 → 私有评测集定夺**
+**为什么要学会读模型名字？** 本地部署时，你面对的往往只有一个文件名——从 HuggingFace 下载的 `.gguf`、Ollama 拉取的镜像名、或者 llama.cpp 加载的模型路径。没有 OpenRouter 这样的平台帮你过滤、比价、查功能列表；能提取出哪些信息，完全取决于你能不能读懂这个字符串。
 
-#### Step 1：用聚合平台快速选型
-
-> **解决的约束**：任务类型、上下文长度、成本上限、延迟要求、输出格式——一次过滤完成初筛。
-
-带着 4.2 定义的约束，用**模型聚合平台**做初筛是最高效的起点——这类平台汇集了数百个模型的定价、能力、上下文窗口等元数据，用约束条件做过滤，几分钟锁定候选池。这里以 [OpenRouter](https://openrouter.ai/models) 为例演示（类似平台还有 [LiteLLM](https://docs.litellm.ai/)、[Portkey](https://portkey.ai/) 等，方法相通）。选型时有五个实用入口：
-
-- **发现候选**（[/models](https://openrouter.ai/models)）：按任务类型、上下文长度、是否支持工具调用过滤，几分钟看到满足约束的所有模型。
-- **实时比价**：每个模型都列出每百万 token 的 Input / Output 单价，同档位不同模型价格可差 5–10 倍，横向对比一目了然。
-- **全局排行**（[/rankings](https://openrouter.ai/rankings)）：按调用量、Token 消耗量排名，反映真实工程场景下哪些模型被大量使用——比单纯看 Benchmark 分数更贴近生产。
-- **单模型详情页**：每个模型有独立页面，列出该模型的 Benchmark 成绩、定价明细、上下文窗口、支持的功能（工具调用、JSON 模式、视觉等），以及 Playground 可直接测试——是做候选对比时的标准查阅入口。
-- **统一 API 测试**：切换模型只需改 `model` 字段，不用为每家申请单独 API key，快速用真实任务对比输出质量。
-
-看到定价页时，不要只”看贵不贵”，顺手做一遍经济性校验：
-
-```text
-总费用 = (Input tokens × Input 单价) + (Output tokens × Output 单价)
-端到端延迟 ≈ 排队时间 + TTFT + 输出 token 数 / TPS
-```
-
-| 定价要素           | 说明                      | 价格关系            |
-| -------------- | ----------------------- | --------------- |
-| Input Token    | 发给模型的全部内容               | 基准              |
-| Output Token   | 模型生成的回答                 | 通常比 Input 贵     |
-| Cached Input   | 命中 Prompt Cache 的 token | 通常远低于普通 Input   |
-| Thinking Token | Extended Thinking 推理过程  | 通常按 Output 口径计费 |
-
-降本优先顺序：**先选对模型层级** → **控制 output 长度** → **利用 Prompt Cache** → **合理设 `max_tokens`**。  
-也就是说，经济性校验最好就在 OpenRouter 比较阶段一起做，不要等 shortlist 定完才回头补算。
-
-#### Step 2：读模型名字，判断本地能不能跑（本地部署专属）
-
-> **解决的约束**：部署模式、显存/硬件——判断候选模型在你的硬件上是否可行。API 调用路线可跳过。
-
-本地部署时，你面对的往往只有一个文件名——从 HuggingFace 下载的 `.gguf`、Ollama 拉取的镜像名、或者 llama.cpp 加载的模型路径。Step 1 帮你锁定了候选模型，这一步要回答的问题是：**这个模型在我的硬件上跑不跑得动？**
-
-模型名字里藏着关键信息：
+模型名字里藏着关键信息，快速判断"值不值得进候选池"：
 
 | 名字线索 | 常见标记 | 代表什么 | 对选型的含义 |
 | --- | --- | --- | --- |
@@ -572,7 +518,7 @@ Decode 阶段，每生成一个新 token 理论上要对所有前面的 token �
 | **指令对齐** | `Instruct`、`Chat` | 经过指令微调 | 应用默认选 Instruct/Chat |
 | **任务域变体** | `Coder`、`Vision`、`Reasoning` | 领域强化版本 | 代码任务优先 Coder |
 | **量化/精度** | `Q4/Q8`、`INT4`、`GGUF` | 权重压缩精度 | 本地部署必看，省显存但有精度损失 |
-| **上下文长度** | `32k/128k/1M` | 最大窗口 | “能塞下”≠”都能用好” |
+| **上下文长度** | `32k/128k/1M` | 最大窗口 | "能塞下"≠"都能用好" |
 | **版本日期** | `-20250214`、`v1.1` | 具体快照 | 生产中固定版本，避免 `latest` 漂移 |
 
 例：`Qwen2.5-Coder-7B-Instruct-Q4_K_M.gguf` = Qwen2.5 家族 / 代码优化 / 7B / 指令对齐 / 4bit 量化 / 本地推理格式。
@@ -594,49 +540,64 @@ KV Cache 显存 ≈ 随上下文长度线性增长
   32 GB → Q4 量化的 32B，或 FP16 的 14B
 ```
 
-> **Apple Silicon 统一内存注意**：Mac 的统一内存（Unified Memory）可被 CPU 和 GPU 共享，因此理论上能加载比独显更大的模型——例如 32 GB M 系列芯片可以跑 Q4 量化的 32B 模型。但代价是当模型权重超出 GPU 可用份额时会走内存带宽而非显存带宽，推理速度会明显下降（token/s 可能降到独显的 1/3–1/2）。实际选型时建议留 30%+ 统一内存给系统和 KV Cache，不要按总容量满载。
-
 > 名字只是初筛，命名没有行业统一标准，最终靠实测。
 
-#### Step 3：用 Benchmark 剔除”虽然火但不适合你”的模型
+#### Step 2：用 OpenRouter 比较候选，并顺手做经济性校验
 
-> **解决的约束**：质量要求——用公开评测数据验证候选模型在你关心的能力维度上是否达标。
+[OpenRouter](https://openrouter.ai/models) 是一个聚合了 200+ 模型的统一 API 平台，选型时有五个实用入口：
 
-有些模型调用量大、社区讨论多，但不一定适合你的任务。Benchmark 的作用是做减法——排除明显不达标的选项，不是最终决策依据（[为什么公开 Benchmark 不够用](https://www.evidentlyai.com/llm-guide/llm-benchmarks)｜[LLM Benchmarks in 2026](https://www.lxt.ai/blog/llm-benchmarks/)｜[LLM Selection Guide 2026](https://iternal.ai/llm-selection-guide)）：
+- **发现候选**（[/models](https://openrouter.ai/models)）：按任务类型、上下文长度、是否支持工具调用过滤，几分钟看到满足约束的所有模型。
+- **实时比价**：每个模型都列出每百万 token 的 Input / Output 单价，同档位不同模型价格可差 5–10 倍，横向对比一目了然。
+- **全局排行**（[/rankings](https://openrouter.ai/rankings)）：按调用量、Token 消耗量排名，反映真实工程场景下哪些模型被大量使用——比单纯看 Benchmark 分数更贴近生产。
+- **单模型详情页**：每个模型有独立页面，列出该模型的 Benchmark 成绩、定价明细、上下文窗口、支持的功能（工具调用、JSON 模式、视觉等），以及 Playground 可直接测试——是做候选对比时的标准查阅入口。
+- **统一 API 测试**：切换模型只需改 `model` 字段，不用为每家申请单独 API key，快速用真实任务对比输出质量。
+
+看到定价页时，不要只“看贵不贵”，顺手做一遍经济性校验：
+
+```text
+总费用 = (Input tokens × Input 单价) + (Output tokens × Output 单价)
+端到端延迟 ≈ 排队时间 + TTFT + 输出 token 数 / TPS
+```
+
+| 定价要素           | 说明                      | 价格关系            |
+| -------------- | ----------------------- | --------------- |
+| Input Token    | 发给模型的全部内容               | 基准              |
+| Output Token   | 模型生成的回答                 | 通常比 Input 贵     |
+| Cached Input   | 命中 Prompt Cache 的 token | 通常远低于普通 Input   |
+| Thinking Token | Extended Thinking 推理过程  | 通常按 Output 口径计费 |
+
+降本优先顺序：**先选对模型层级** → **控制 output 长度** → **利用 Prompt Cache** → **合理设 `max_tokens`**。  
+也就是说，经济性校验最好就在 OpenRouter 比较阶段一起做，不要等 shortlist 定完才回头补算。
+
+#### Step 3：用 Benchmark 排除明显差的
+
+Benchmark 是"入围赛"，用来排除明显不达标的选项，不是最终决策依据（[为什么公开 Benchmark 不够用](https://www.evidentlyai.com/llm-guide/llm-benchmarks)）：
 
 | Benchmark                 | 测什么                | 工程参考价值        |
 | ------------------------- | ------------------ | ------------- |
 | **SWE-Bench Verified**    | 真实 GitHub Issue 修复 | 最接近真实工程的代码评测  |
 | **Aider Polyglot**        | 多语言代码编辑            | 贴近日常编码场景      |
-| **BigCodeBench**          | 复杂函数级代码生成（多库组合调用）  | HumanEval/MBPP 的升级替代，区分度更高 |
+| **HumanEval / MBPP**      | 函数级代码生成            | Python 为主，偏简单 |
 | **MMLU / MMLU-Pro**       | 多学科知识              | 综合能力广度        |
-| **LMArena (原 Chatbot Arena)** | 综合人类偏好         | 众包盲评，最难作弊     |
+| **Chatbot Arena (LMSYS)** | 综合人类偏好             | 众包盲评，最难作弊     |
 | **LiveBench**             | 动态更新评测             | 对抗数据污染        |
-
-**做 AI Coding 选型时，重点看前三个：**
-
-- **SWE-Bench Verified**：从真实开源项目（Django、Flask、scikit-learn 等）中抽取已关闭的 GitHub Issue，要求模型在完整仓库上下文中定位问题文件、理解跨文件依赖、生成补丁并通过原有测试。它测的不是"能不能写一个函数"，而是"能不能在一个真实项目里修 bug"——这正是 AI CR / AI Coding Agent 的核心能力。如果一个模型在 SWE-Bench 上表现差，基本不用考虑让它做复杂代码任务。
-- **Aider Polyglot**：用 [Aider](https://aider.chat/)（一个终端 AI 编程助手）驱动模型在 Python、JavaScript、TypeScript、Java、C# 等多种语言上做代码编辑任务，测的是模型能否按指令准确修改已有代码并保持上下文一致。和 SWE-Bench 的区别在于它更偏"日常编码助手"场景——不需要从 Issue 出发做完整诊断，而是直接给定编辑意图，看模型改得对不对。多语言覆盖也意味着你能看出模型是"只擅长 Python"还是"各语言都稳"。
-- **BigCodeBench**：要求模型在单个函数内组合调用多个第三方库（如同时用 pandas + matplotlib + numpy），测的是对真实 API 的掌握程度和复杂调用编排能力。它是 HumanEval/MBPP 的升级版——后者大多是自包含的算法题，主流模型已接近满分，区分度很低；BigCodeBench 的题目更贴近日常开发中"查文档、组合 API"的真实场景。
 
 **理性使用 Benchmark 的四条原则：**
 
-1. 静态 Benchmark 可能被训练数据覆盖，分数虚高；优先看 LMArena、LiveBench。
+1. 静态 Benchmark 可能被训练数据覆盖，分数虚高；优先看 Chatbot Arena、LiveBench。
 2. 榜单高分 ≠ 你的任务好用；公开 Benchmark 只做排除，真正定夺靠下一步的私有评测集。
 3. 只关心 pass@1（一次通过），pass@5 对工程无意义。
 4. 分数差 1–2% 不值得换模型；迁移成本远超你以为的。
 
 #### Step 4：构建私有评测集做最终决策
 
-> **解决的约束**：所有维度的最终验证——用你的真实业务数据，端到端检验质量、延迟、成本、输出格式是否同时达标。
-
-这是工程团队选型时**最被低估但最关键的一步**（[参考：如何构建 LLM 评测集](https://hamel.dev/blog/posts/evals/)｜[LLM Evals FAQ](https://hamel.dev/blog/posts/evals-faq/)）。公开 Benchmark 测的是通用能力，但你的任务有自己的分布——只有用真实数据评测才能做出靠谱决策。
+这是工程团队选型时**最被低估但最关键的一步**（[参考：如何构建 LLM 评测集](https://hamel.dev/blog/posts/evals/)）。公开 Benchmark 测的是通用能力，但你的任务有自己的分布——只有用真实数据评测才能做出靠谱决策。
 
 **做法：**
 
 1. **从生产数据中抽样 50–100 个典型 case**（AI CR 场景：选真实 PR diff + 期望的 review 意见）
 2. **定义评分维度**：准确性、格式合规、误报率等——和你的业务指标对齐
-3. **用 LLM-as-Judge 做自动评测**：让一个强模型对候选模型的输出打分，可以低成本地跑多轮对比（[LLM-as-Judge 指南](https://www.anthropic.com/research/evaluating-ai-systems)｜[Hamel: LLM-as-Judge 实践](https://hamel.dev/blog/posts/llm-judge/)）。注意：LLM-as-Judge 存在 **position bias**（倾向于给先出现的答案更高分），做 A/B 对比时务必随机化候选输出的呈现顺序，或跑两次交换顺序取平均
+3. **用 LLM-as-Judge 做自动评测**：让一个强模型对候选模型的输出打分，可以低成本地跑多轮对比（[LLM-as-Judge 指南](https://www.anthropic.com/research/evaluating-ai-systems)）
 4. **人工抽检 10–20%**：确认自动评分和人类判断一致
 
 > 构建评测集的门槛不高——50 条带标注的真实样本就能比任何公开 Benchmark 更准确地预测模型在你任务上的表现。投入一个下午，省下反复换模型的周级折腾。
@@ -647,7 +608,7 @@ KV Cache 显存 ≈ 随上下文长度线性增长
 
 1. **先排约束，再比能力**：成本、延迟、数据合规优先于模型能力排名
 2. **路由 + 知识策略联动**：路由决定"哪些调用用哪个模型"，知识策略决定"选定模型后怎么补知识"——两者共同影响最终选型
-3. **聚合平台选型，Benchmark 排除，私有评测集定夺**：先用平台快速锁定候选（本地部署再加一步硬件可行性判断），再用 Benchmark 剔除不适合的，最终由你自己的 50–100 条真实 case 说了算
+3. **Benchmark 排除，私有评测集定夺**：公开 Benchmark 用来去掉明显差的；最终选谁，由你自己的 50–100 条真实 case 说了算
 
 ---
 
