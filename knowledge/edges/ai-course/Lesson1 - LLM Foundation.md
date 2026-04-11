@@ -10,7 +10,6 @@ graph LR
     P3 -->|"建立理性基线"| P4
 ```
 
-
 你搭了一个 AI CR 工具，在 PR 合并前自动 review 代码。某天一个同事提交了这样一段 TypeScript：
 
 ```typescript
