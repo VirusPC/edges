@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
+                "file": "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Lesson1 - LLM Foundation"
+              "title": "Lesson1 - 演讲记忆地图 v2"
             }
           },
           {
@@ -92,8 +92,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 316.5,
-    "collapsed": true
+    "width": 316.5
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -169,13 +168,21 @@
             "state": {
               "type": "outline",
               "state": {
+<<<<<<< main
                 "file": "knowledge/edges/claude/claude-agent-sdk/Hosting the Agent SDK.md",
+=======
+                "file": "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
+>>>>>>> origin/main
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
+<<<<<<< main
               "title": "Hosting the Agent SDK 的大纲"
+=======
+              "title": "Lesson1 - 演讲记忆地图 v2 的大纲"
+>>>>>>> origin/main
             }
           },
           {
@@ -209,12 +216,19 @@
   },
   "active": "01b75e04da854e50",
   "lastOpenFiles": [
+<<<<<<< main
     "knowledge/edges/ai-course/Lesson1 - 章节问题总结.md",
+=======
+>>>>>>> origin/main
     "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
+    "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
+    "knowledge/edges/ai-course/Lesson1 - 章节问题总结.md",
+    "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图.md",
+    "knowledge/edges/ai-course/课程写作风格与方法论.md",
+    "knowledge/edges/python 服务.md",
     "knowledge/edges/CLI Practice.md",
     "knowledge/edges/ai-course/AGENTS.md",
     "knowledge/edges/ai-course/相关资料.md",
-    "knowledge/edges/ai-course/课程写作风格与方法论.md",
     "knowledge/edges/ai-course/Lesson1 - 故事线大纲.md",
     "knowledge/edges/ai-course/Lesson1 - 故事线大纲_simple.md",
     "notes/ai-training/01-foundations.md",
@@ -234,9 +248,12 @@
     "knowledge/edges/claude/claude-agent-sdk",
     "knowledge/edges/check-lists/项目流程.md",
     "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
+<<<<<<< main
     "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
     "knowledge/edges/claude/2026-01-29-skills-A complete guide to building skills for Claude.md",
     "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
+=======
+>>>>>>> origin/main
     "knowledge/resources/Pasted image 20260403160808.png",
     "knowledge/resources/Pasted image 20260403160717.png",
     "knowledge/resources/Pasted image 20260403153818.png",
