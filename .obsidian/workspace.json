@@ -11,14 +11,14 @@
             "id": "01b75e04da854e50",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "extensions/skills/deep-research/deep-research.md",
-                "bFile": "extensions/skills/deep-research/deep-research.md",
-                "aRef": ""
+                "file": "notes/OpenSpec & 串流程的思考.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: deep-research  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "OpenSpec & 串流程的思考"
             }
           },
           {
@@ -208,6 +208,7 @@
   },
   "active": "01b75e04da854e50",
   "lastOpenFiles": [
+    "notes/OpenSpec & 串流程的思考.md",
     "extensions/skills/deep-research/deep-research.md",
     "extensions/skills/paper/SKILL.md",
     "extensions/skills/deep-research",
@@ -238,7 +239,6 @@
     "knowledge/edges/claude/claude-agent-sdk/Hosting the Agent SDK.md",
     "knowledge/edges/prompt caching/Lessons from Building Claude Code, Prompt Caching Is Everything.md",
     "knowledge/edges/prompt caching",
-    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
     "knowledge/edges/claude/claude-agent-sdk",
     "knowledge/resources/Pasted image 20260403160808.png",
     "knowledge/resources/Pasted image 20260403160717.png",
