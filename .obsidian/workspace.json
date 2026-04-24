@@ -13,12 +13,20 @@
             "state": {
               "type": "markdown",
               "state": {
+<<<<<<< main
                 "file": "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
+=======
+                "file": "notes/OpenSpec & 串流程的思考.md",
+>>>>>>> origin/main
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
+<<<<<<< main
               "title": "Lesson1 - 演讲记忆地图 v2"
+=======
+              "title": "OpenSpec & 串流程的思考"
+>>>>>>> origin/main
             }
           },
           {
@@ -169,9 +177,13 @@
               "type": "outline",
               "state": {
 <<<<<<< main
+<<<<<<< main
                 "file": "knowledge/edges/claude/claude-agent-sdk/Hosting the Agent SDK.md",
 =======
                 "file": "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
+>>>>>>> origin/main
+=======
+                "file": "extensions/skills/deep-research/deep-research.md",
 >>>>>>> origin/main
                 "followCursor": false,
                 "showSearch": false,
@@ -179,9 +191,13 @@
               },
               "icon": "lucide-list",
 <<<<<<< main
+<<<<<<< main
               "title": "Hosting the Agent SDK 的大纲"
 =======
               "title": "Lesson1 - 演讲记忆地图 v2 的大纲"
+>>>>>>> origin/main
+=======
+              "title": "deep-research 的大纲"
 >>>>>>> origin/main
             }
           },
@@ -217,15 +233,33 @@
   "active": "01b75e04da854e50",
   "lastOpenFiles": [
 <<<<<<< main
+<<<<<<< main
     "knowledge/edges/ai-course/Lesson1 - 章节问题总结.md",
 =======
 >>>>>>> origin/main
+=======
+    "notes/OpenSpec & 串流程的思考.md",
+    "extensions/skills/deep-research/deep-research.md",
+    "extensions/skills/paper/SKILL.md",
+    "extensions/skills/deep-research",
+>>>>>>> origin/main
     "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
+<<<<<<< main
     "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
     "knowledge/edges/ai-course/Lesson1 - 章节问题总结.md",
     "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图.md",
     "knowledge/edges/ai-course/课程写作风格与方法论.md",
     "knowledge/edges/python 服务.md",
+=======
+    "extensions/skills/paper",
+    "未命名 1",
+    "未命名",
+    "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
+    "knowledge/edges/ai-course/Lesson1 - 章节问题总结.md",
+    "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图.md",
+    "knowledge/edges/ai-course/课程写作风格与方法论.md",
+    "knowledge/edges/python 服务.md",
+>>>>>>> origin/main
     "knowledge/edges/CLI Practice.md",
     "knowledge/edges/ai-course/AGENTS.md",
     "knowledge/edges/ai-course/相关资料.md",
@@ -244,14 +278,16 @@
     "knowledge/edges/claude/claude-agent-sdk/Hosting the Agent SDK.md",
     "knowledge/edges/prompt caching/Lessons from Building Claude Code, Prompt Caching Is Everything.md",
     "knowledge/edges/prompt caching",
-    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
     "knowledge/edges/claude/claude-agent-sdk",
+<<<<<<< main
     "knowledge/edges/check-lists/项目流程.md",
     "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
 <<<<<<< main
     "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
     "knowledge/edges/claude/2026-01-29-skills-A complete guide to building skills for Claude.md",
     "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
+=======
+>>>>>>> origin/main
 =======
 >>>>>>> origin/main
     "knowledge/resources/Pasted image 20260403160808.png",
@@ -267,10 +303,6 @@
     "knowledge/edges/langchain",
     "knowledge/edges/claude",
     "knowledge/edges/check-lists",
-    "knowledge/未命名",
-    "knowledge/notes/markdown-and-agents",
-    "openspec/changes/chatgpt-notes-mcp-app",
-    "notes/ai-training",
-    "notes"
+    "knowledge/未命名"
   ]
 }
