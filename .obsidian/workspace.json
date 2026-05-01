@@ -41,12 +41,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/archive/test.md",
+                "file": "knowledge/edges/claude/2026-03-19-Product management on the AI exponential.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "test"
+              "title": "2026-03-19-Product management on the AI exponential"
             }
           }
         ],
@@ -221,15 +221,18 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "636505b8300469c8",
+  "active": "17364b0d6368fcdd",
   "lastOpenFiles": [
+    "knowledge/edges/claude/2026-03-24-Auto mode for Claude Code.md",
+    "knowledge/edges/claude/2026-03-19-Product management on the AI exponential.md",
+    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
+    "knowledge/archive/test.md",
     "knowledge/notes/2026-03-01--multi-agent-workflows-problems.md",
     "knowledge/edges/CLI Practice.md",
     "knowledge/notes/2026-05-01-个人效率.md",
     "knowledge/resources/1040g3g831vkgcenb3m06htco0p9gu1p0pfdvcf8 1.jpg",
     "knowledge/resources/1040g3g831vkgcenb3m06htco0p9gu1p0pfdvcf8.jpg",
     "knowledge/edges/claude/2026-03-09-Bringing Code Review to Claude Code.md",
-    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
     "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models 1.md",
     "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
     "notes/OpenSpec & 串流程的思考.md",
@@ -252,9 +255,6 @@
     "knowledge/edges/ai-course/Lesson1 - 故事线大纲_simple.md",
     "notes/ai-training/01-foundations.md",
     "knowledge/edges/prompt caching/2026-04-08–Claude-Code-Prompt-Caching工程实践深度解析.md",
-    "knowledge/edges/从 SFT 到 RAG 到 上下文工程.md",
-    "knowledge/edges/2026-04-06–n8n与Skill驱动Agent编排的范式对比.md",
-    "knowledge/edges/2026-03-29--Claude-Code-Agent-Teams与Subagents架构深析.md.md",
     "knowledge/edges/prompt caching",
     "knowledge/edges/claude/claude-agent-sdk",
     "knowledge/resources/Pasted image 20260403160808.png",
