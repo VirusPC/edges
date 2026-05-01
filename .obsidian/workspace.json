@@ -237,8 +237,9 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
-    "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
+    "extensions/skills/conversation-to-notes/SKILL.md",
     "knowledge/edges/claude/2026-04-10-Seeing like an agent, how we design tools in Claude Code.md",
+    "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
     "knowledge/resources/Pasted image 20260501214623.png",
     "knowledge/resources/Pasted image 20260501214609.png",
     "knowledge/resources/Pasted image 20260501214603.png",
@@ -275,7 +276,6 @@
     "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
     "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图.md",
     "knowledge/edges/ai-course/课程写作风格与方法论.md",
-    "knowledge/edges/python 服务.md",
     "knowledge/edges/prompt caching",
     "knowledge/edges/claude/claude-agent-sdk",
     "knowledge/resources/Pasted image 20260403160808.png",
