@@ -13,20 +13,26 @@
             "state": {
               "type": "markdown",
               "state": {
-<<<<<<< main
-                "file": "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
-=======
-                "file": "notes/OpenSpec & 串流程的思考.md",
->>>>>>> origin/main
+                "file": "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-<<<<<<< main
-              "title": "Lesson1 - 演讲记忆地图 v2"
-=======
-              "title": "OpenSpec & 串流程的思考"
->>>>>>> origin/main
+              "title": "2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models"
+            }
+          },
+          {
+            "id": "21b0151f8ddf695d",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "knowledge/notes/2026-05-01-个人效率.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "2026-05-01-个人效率"
             }
           },
           {
@@ -35,15 +41,16 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/CLI Practice.md",
+                "file": "knowledge/archive/test.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "CLI Practice"
+              "title": "test"
             }
           }
-        ]
+        ],
+        "currentTab": 2
       }
     ],
     "direction": "vertical"
@@ -176,29 +183,13 @@
             "state": {
               "type": "outline",
               "state": {
-<<<<<<< main
-<<<<<<< main
-                "file": "knowledge/edges/claude/claude-agent-sdk/Hosting the Agent SDK.md",
-=======
-                "file": "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
->>>>>>> origin/main
-=======
                 "file": "extensions/skills/deep-research/deep-research.md",
->>>>>>> origin/main
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-<<<<<<< main
-<<<<<<< main
-              "title": "Hosting the Agent SDK 的大纲"
-=======
-              "title": "Lesson1 - 演讲记忆地图 v2 的大纲"
->>>>>>> origin/main
-=======
               "title": "deep-research 的大纲"
->>>>>>> origin/main
             }
           },
           {
@@ -230,37 +221,31 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "01b75e04da854e50",
+  "active": "636505b8300469c8",
   "lastOpenFiles": [
-<<<<<<< main
-<<<<<<< main
-    "knowledge/edges/ai-course/Lesson1 - 章节问题总结.md",
-=======
->>>>>>> origin/main
-=======
+    "knowledge/notes/2026-03-01--multi-agent-workflows-problems.md",
+    "knowledge/edges/CLI Practice.md",
+    "knowledge/notes/2026-05-01-个人效率.md",
+    "knowledge/resources/1040g3g831vkgcenb3m06htco0p9gu1p0pfdvcf8 1.jpg",
+    "knowledge/resources/1040g3g831vkgcenb3m06htco0p9gu1p0pfdvcf8.jpg",
+    "knowledge/edges/claude/2026-03-09-Bringing Code Review to Claude Code.md",
+    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
+    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models 1.md",
+    "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
     "notes/OpenSpec & 串流程的思考.md",
+    "knowledge/notes/职业规划.md",
+    "knowledge/edges/ai-course/Lesson1 - 章节问题总结.md",
     "extensions/skills/deep-research/deep-research.md",
     "extensions/skills/paper/SKILL.md",
     "extensions/skills/deep-research",
->>>>>>> origin/main
     "knowledge/edges/ai-course/Lesson1 - LLM Foundation.md",
-<<<<<<< main
-    "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
-    "knowledge/edges/ai-course/Lesson1 - 章节问题总结.md",
-    "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图.md",
-    "knowledge/edges/ai-course/课程写作风格与方法论.md",
-    "knowledge/edges/python 服务.md",
-=======
     "extensions/skills/paper",
     "未命名 1",
     "未命名",
     "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图 v2.md",
-    "knowledge/edges/ai-course/Lesson1 - 章节问题总结.md",
     "knowledge/edges/ai-course/Lesson1 - 演讲记忆地图.md",
     "knowledge/edges/ai-course/课程写作风格与方法论.md",
     "knowledge/edges/python 服务.md",
->>>>>>> origin/main
-    "knowledge/edges/CLI Practice.md",
     "knowledge/edges/ai-course/AGENTS.md",
     "knowledge/edges/ai-course/相关资料.md",
     "knowledge/edges/ai-course/Lesson1 - 故事线大纲.md",
@@ -270,26 +255,8 @@
     "knowledge/edges/从 SFT 到 RAG 到 上下文工程.md",
     "knowledge/edges/2026-04-06–n8n与Skill驱动Agent编排的范式对比.md",
     "knowledge/edges/2026-03-29--Claude-Code-Agent-Teams与Subagents架构深析.md.md",
-    "knowledge/edges/2026-03-08--LLM幻觉成因与评估体系缺陷.md.md",
-    "knowledge/edges/prompt caching/2022-3-30-Transformer inference arithmetic.md",
-    "knowledge/archive/报名展示状态机.md",
-    "knowledge/edges/prompt caching/2025-12-01-How prompt caching works.md",
-    "knowledge/edges/prompt caching/kv cache vs prompt  caching.md",
-    "knowledge/edges/claude/claude-agent-sdk/Hosting the Agent SDK.md",
-    "knowledge/edges/prompt caching/Lessons from Building Claude Code, Prompt Caching Is Everything.md",
     "knowledge/edges/prompt caching",
     "knowledge/edges/claude/claude-agent-sdk",
-<<<<<<< main
-    "knowledge/edges/check-lists/项目流程.md",
-    "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
-<<<<<<< main
-    "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
-    "knowledge/edges/claude/2026-01-29-skills-A complete guide to building skills for Claude.md",
-    "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
-=======
->>>>>>> origin/main
-=======
->>>>>>> origin/main
     "knowledge/resources/Pasted image 20260403160808.png",
     "knowledge/resources/Pasted image 20260403160717.png",
     "knowledge/resources/Pasted image 20260403153818.png",
@@ -298,8 +265,6 @@
     "knowledge/resources/Pasted image 20260403152452.png",
     "knowledge/resources/Pasted image 20260403152413.png",
     "knowledge/resources/Pasted image 20260403151952.png",
-    "knowledge/resources/Pasted image 20260403151948.png",
-    "knowledge/resources/Pasted image 20260403151132.png",
     "knowledge/edges/langchain",
     "knowledge/edges/claude",
     "knowledge/edges/check-lists",
