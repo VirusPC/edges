@@ -22,8 +22,9 @@
 - 让 Claude 自己持久化上下文：之前是人给它选择记忆和做记忆的持久化。。除了传统的外部检索系统，文中强调 compaction 和 memory folder 两种模式，让 Claude 自己决定“记什么”和“怎么记”。实验表明新一代模型在相同记忆预算下能显著提升长程任务表现，例如在 BrowseComp/BrowseComp-Plus 上随着版本迭代，利用 compaction/memory folder 的表现大幅提升。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
 
-## 模式三：谨慎设置边界
-主要是考虑成本、用户体验还有安全性。
+## 模式三：谨慎设置能力边界和操作边界。
+
+主要是考虑成本、用户体验还有安全性。在给 Claude 搭建 agent/harness 时，要通过「缓存策略 + 工具设计 + 安全/UX 约束」来给模型划定清晰的能力边界和操作边界，而不是把一切都“放飞”。
 
 - 成本侧，用缓存友好的上下文结构：Messages API 是无状态的，每次都要把系统提示、工具描述、历史等重新打包，所以需要通过 prompt caching 和 breakpoints 把稳定部分缓存起来；为此建议将“静态在前、动态在后”，用追加消息而不是编辑，避免频繁切换模型，并通过 tool search 等机制在不破坏缓存的前提下发现工具。[claude](https://claude.com/blog/harnessing-claudes-intelligence) 
 - 静态在前，动态在后。随着对话轮数的增加，不断将这个边界向后推移。推移的时候注意前面的 TOOLS 和 MESSAGES 保持不变。TOOLS 如果想变就改概率，MESSAGES 如果想变，那就在后面新加内容，比如说 System Reminder。除了提示词之外，还要注意模型不要随便切换，切换也会破坏提示词缓存。
