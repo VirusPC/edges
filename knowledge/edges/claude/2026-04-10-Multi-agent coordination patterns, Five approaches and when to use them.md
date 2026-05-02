@@ -2,13 +2,13 @@
 
 ## 五种模式一览
 
-|场景关键词|推荐模式|核心特征|
-|---|---|---|
-|质量极其重要、有明确评估标准|Generator‑Verifier|生成 + 审核循环，直到通过或到达上限。[claude](https://claude.com/blog/multi-agent-coordination-patterns)|
-|任务可清晰拆分、子任务边界清楚|Orchestrator‑Subagent|有「组长」负责任务规划与结果汇总。[claude](https://claude.com/blog/multi-agent-coordination-patterns)|
-|并行、大量、长期独立子任务|Agent Teams|多个长期存活的 worker 逐步积累上下文。[claude](https://claude.com/blog/multi-agent-coordination-patterns)|
-|事件驱动、Agent 生态持续扩展|Message Bus|发布/订阅消息总线，路由事件给合适 agent。[claude](https://claude.com/blog/multi-agent-coordination-patterns)|
-|多 Agent 需要实时共享发现、协同研究|Shared State|公共存储作为「共享工作台」，无中心协调器。[claude](https://claude.com/blog/multi-agent-coordination-patterns)|
+| 场景关键词                 | 推荐模式                  | 核心特征                                                                                        |
+| --------------------- | --------------------- | ------------------------------------------------------------------------------------------- |
+| 质量极其重要、有明确评估标准        | Generator‑Verifier    | 生成 + 审核循环，直到通过或到达上限。[claude](https://claude.com/blog/multi-agent-coordination-patterns)     |
+| 任务可清晰拆分、子任务边界清楚       | Orchestrator‑Subagent | 有「组长」负责任务规划与结果汇总。[claude](https://claude.com/blog/multi-agent-coordination-patterns)        |
+| 并行、大量、长期独立子任务         | Agent Teams           | 多个长期存活的 worker 逐步积累上下文。[claude](https://claude.com/blog/multi-agent-coordination-patterns)  |
+| 事件驱动、Agent 生态持续扩展     | Message Bus           | 发布/订阅消息总线，路由事件给合适 agent。[claude](https://claude.com/blog/multi-agent-coordination-patterns) |
+| 多 Agent 需要实时共享发现、协同研究 | Shared State          | 公共存储作为「共享工作台」，无中心协调器。[claude](https://claude.com/blog/multi-agent-coordination-patterns)    |
 
 ## 各模式要点
 
