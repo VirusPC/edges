@@ -17,9 +17,9 @@
 
 - 让 Claude 自己编排工具：之前是人精心设计工具编排。传统做法是每次工具结果都回流到上下文，让模型读完再决定下一步，这既贵又慢；如果给 Claude 一个代码执行环境（bash 或 REPL），它可以自己写代码来调用工具、过滤结果，只把必要的输出回写到上下文，从而减少 token 开销并加速推理。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
-- 让 Claude 自己管理上下文：之前是人给它构造上下文。不要在 system prompt 里堆积一堆 task-specific 规则，而是用 skills 的 YAML frontmatter 提供轻量描述，当需要时再让 Claude 通过读文件工具渐进式加载；同时用 context editing 移除过时内容，用 subagents 在需要时 fork 新上下文。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
+- 让 Claude 自己管理上下文：之前是人给它拼接上下文。不要在 system prompt 里堆积一堆 task-specific 规则，而是用 skills 的 YAML frontmatter 提供轻量描述，当需要时再让 Claude 通过读文件工具渐进式加载；同时用 context editing 移除过时内容，用 subagents 在需要时 fork 新上下文。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
-- 让 Claude 自己持久化上下文：之前是人给它做记忆的持久化。。除了传统的外部检索系统，文中强调 compaction 和 memory folder 两种模式，让 Claude 自己决定“记什么”和“怎么记”。实验表明新一代模型在相同记忆预算下能显著提升长程任务表现，例如在 BrowseComp/BrowseComp-Plus 上随着版本迭代，利用 compaction/memory folder 的表现大幅提升。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
+- 让 Claude 自己持久化上下文：之前是人给它选择记忆和做记忆的持久化。。除了传统的外部检索系统，文中强调 compaction 和 memory folder 两种模式，让 Claude 自己决定“记什么”和“怎么记”。实验表明新一代模型在相同记忆预算下能显著提升长程任务表现，例如在 BrowseComp/BrowseComp-Plus 上随着版本迭代，利用 compaction/memory folder 的表现大幅提升。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
 
 ## 模式三：谨慎设置边界而不是到处封死
