@@ -4,14 +4,14 @@
 
 核心观点是：不要把 Claude 当成固定能力的“黑盒 API”，而是当成会不断变强的通用智能，用通用工具（bash、文本编辑器、代码执行等）让它自己编排工具、管理上下文和记忆；与此同时，agent harness 需要持续“减法”，去掉已经变成负担的规则和结构，并在 UX、安全、观测性上设置少量关键边界。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
 
-## 模式一：用好 Claude 已经熟悉的工具
+## 模式一：用好 Claude 已经熟悉的工具。模型可以做更多什么？
 
 - 建议优先使用 Claude 已经非常熟练的通用工具（如 bash 工具和 text editor 工具），很多高级能力（Agent Skills、programmatic tool calling、memory tool）其实都是在这些基础上组合出来的。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
 - SWE-bench Verified 的表现演进说明：仅靠 bash + 文本编辑器这类通用工具，模型就能不断提高复杂任务上的表现，说明“用模型熟悉的通用工具+让模型自己组合”比为每个任务设计专用工具更可持续。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
 
-## 模式二：问“我可以停止做什么？”
+## 模式二：问“我可以停止做什么？”模型可以多做点什么？
 
 这一部分强调把过去写死在 harness 里的逻辑逐步交还给 Claude 自己决策。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
 
@@ -22,7 +22,7 @@
 - 让 Claude 自己持久化上下文：之前是人给它选择记忆和做记忆的持久化。。除了传统的外部检索系统，文中强调 compaction 和 memory folder 两种模式，让 Claude 自己决定“记什么”和“怎么记”。实验表明新一代模型在相同记忆预算下能显著提升长程任务表现，例如在 BrowseComp/BrowseComp-Plus 上随着版本迭代，利用 compaction/memory folder 的表现大幅提升。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
 
-## 模式三：谨慎设置能力边界和操作边界
+## 模式三：谨慎设置能力边界和操作边界模型。不应该做什么？
 
 主要是考虑成本、用户体验还有安全性。在给 Claude 搭建 agent/harness 时，要通过「缓存策略 + 工具设计 + 安全/UX 约束」来给模型划定清晰的能力边界和操作边界，而不是把一切都“放飞”。
 
