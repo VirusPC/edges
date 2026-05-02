@@ -22,15 +22,15 @@
 - 让 Claude 自己持久化上下文：之前是人给它选择记忆和做记忆的持久化。。除了传统的外部检索系统，文中强调 compaction 和 memory folder 两种模式，让 Claude 自己决定“记什么”和“怎么记”。实验表明新一代模型在相同记忆预算下能显著提升长程任务表现，例如在 BrowseComp/BrowseComp-Plus 上随着版本迭代，利用 compaction/memory folder 的表现大幅提升。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
 
-## 模式三：谨慎设置边界而不是到处封死
+## 模式三：谨慎设置边界
 主要是考虑成本、用户体验还有安全性。
 
-- 用缓存友好的上下文结构：Messages API 是无状态的，每次都要把系统提示、工具描述、历史等重新打包，所以需要通过 prompt caching 和 breakpoints 把稳定部分缓存起来；为此建议将“静态在前、动态在后”，用追加消息而不是编辑，避免频繁切换模型，并通过 tool search 等机制在不破坏缓存的前提下发现工具。[claude](https://claude.com/blog/harnessing-claudes-intelligence) 
+- 成本侧，用缓存友好的上下文结构：Messages API 是无状态的，每次都要把系统提示、工具描述、历史等重新打包，所以需要通过 prompt caching 和 breakpoints 把稳定部分缓存起来；为此建议将“静态在前、动态在后”，用追加消息而不是编辑，避免频繁切换模型，并通过 tool search 等机制在不破坏缓存的前提下发现工具。[claude](https://claude.com/blog/harnessing-claudes-intelligence) 
 - 静态在前，动态在后。随着对话轮数的增加，不断将这个边界向后推移。推移的时候注意前面的 TOOLS 和 MESSAGES 保持不变。TOOLS 如果想变就改概率，MESSAGES 如果想变，那就在后面新加内容，比如说 System Reminder。除了提示词之外，还要注意模型不要随便切换，切换也会破坏提示词缓存。
     
-- 用“声明式工具”表达关键动作：把安全敏感、难以回滚或需要向用户展示的动作从通用 bash 命令提升为 typed tools，这样 harness 可以按动作类型做权限控制、用户确认、审计和观测（日志、trace、replay），同时为用户交互提供更好的 UI（例如弹窗、多选）。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
+- 用户体验侧，用“声明式工具”表达关键动作：把安全敏感、难以回滚或需要向用户展示的动作从通用 bash 命令提升为 typed tools，这样 harness 可以按动作类型做权限控制、用户确认、审计和观测（日志、trace、replay），同时为用户交互提供更好的 UI（例如弹窗、多选）。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
-- 工具边界需要动态再评估：随着模型对命令的理解和安全性判断变强（比如 Claude Code auto-mode 中二次审查 bash 命令的模式），有些过去必须拆成专用工具的场景可以重新交还给通用工具；但对高风险动作，专用工具仍然有价值。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
+- 安全侧，工具边界需要动态再评估：随着模型对命令的理解和安全性判断变强（比如 Claude Code auto-mode 中二次审查 bash 命令的模式），有些过去必须拆成专用工具的场景可以重新交还给通用工具；但对高风险动作，专用工具仍然有价值。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
 
 ## 展望与整体思路
