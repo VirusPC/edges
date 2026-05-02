@@ -4,7 +4,7 @@
 
 核心观点是：不要把 Claude 当成固定能力的“黑盒 API”，而是当成会不断变强的通用智能，用通用工具（bash、文本编辑器、代码执行等）让它自己编排工具、管理上下文和记忆；与此同时，agent harness 需要持续“减法”，去掉已经变成负担的规则和结构，并在 UX、安全、观测性上设置少量关键边界。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
 
-## 模式一：用好 Claude 已经熟悉的工具。模型擅长做什么?
+## 模式一：用好 Claude 已经熟悉的工具。给模型用什么？
 
 - 建议优先使用 Claude 已经非常熟练的通用工具（如 bash 工具和 text editor 工具），很多高级能力（Agent Skills、programmatic tool calling、memory tool）其实都是在这些基础上组合出来的。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
