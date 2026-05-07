@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/notes/OpenSpec & 串流程的思考.md",
+                "file": "knowledge/notes/ai-training/01-foundations 1.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "OpenSpec & 串流程的思考"
+              "title": "01-foundations 1"
             }
           }
         ],
@@ -211,13 +211,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/notes/OpenSpec & 串流程的思考.md",
+                "file": "knowledge/notes/ai-training/01-foundations 1.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "OpenSpec & 串流程的思考 的大纲"
+              "title": "01-foundations 1 的大纲"
             }
           },
           {
@@ -249,10 +249,11 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "636505b8300469c8",
   "lastOpenFiles": [
+    "knowledge/notes/OpenSpec & 串流程的思考.md",
     "knowledge/notes/kimi agent swarm.md",
-    "knowledge/notes/ai-training 1/01-foundations.md",
+    "knowledge/notes/ai-training/01-foundations 1.md",
     "knowledge/edges/google-kaggle-agent-course/Context Engineering_Sessions, Memory.md",
     "knowledge/edges/google-kaggle-agent-course/Lesson 1.md",
     "knowledge/edges/claude/2026-04-02-Harnessing Claude’s intelligence.md",
@@ -286,7 +287,6 @@
     "knowledge/edges/claude/2026-03-19-Product management on the AI exponential.md",
     "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
     "knowledge/archive/test.md",
-    "knowledge/notes/2026-03-01--multi-agent-workflows-problems.md",
     "knowledge/resources/1040g3g831vkgcenb3m06htco0p9gu1p0pfdvcf8 1.jpg",
     "knowledge/resources/1040g3g831vkgcenb3m06htco0p9gu1p0pfdvcf8.jpg",
     "extensions/skills/deep-research",
