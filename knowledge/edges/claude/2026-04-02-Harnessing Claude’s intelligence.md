@@ -11,7 +11,7 @@
 - SWE-bench Verified 的表现演进说明：仅靠 bash + 文本编辑器这类通用工具，模型就能不断提高复杂任务上的表现，说明“用模型熟悉的通用工具+让模型自己组合”比为每个任务设计专用工具更可持续。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
 
-## 模式二：问“我可以停止做什么？”模型可以多做点什么？
+## 模式二：问“我可以停止做什么？更多的自由。
 
 这一部分强调把过去写死在 harness 里的逻辑逐步交还给 Claude 自己决策。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
 
@@ -22,7 +22,7 @@
 - 让 Claude 自己持久化上下文：之前是人给做记忆的选择和持久化。。除了传统的外部检索系统，文中强调 compaction 和 memory folder 两种模式，让 Claude 自己决定“记什么”和“怎么记”。实验表明新一代模型在相同记忆预算下能显著提升长程任务表现，例如在 BrowseComp/BrowseComp-Plus 上随着版本迭代，利用 compaction/memory folder 的表现大幅提升。[claude](https://claude.com/blog/harnessing-claudes-intelligence)
     
 
-## 模式三：谨慎设置能力边界和操作边界模型。不应该做什么？
+## 模式三：谨慎设置能力边界和操作边界模型。更多的约束。
 
 主要是考虑成本、用户体验还有安全性。在给 Claude 搭建 agent/harness 时，要通过「缓存策略 + 工具设计 + 安全/UX 约束」来给模型划定清晰的能力边界和操作边界，而不是把一切都“放飞”。
 
