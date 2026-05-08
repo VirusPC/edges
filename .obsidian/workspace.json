@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/google-kaggle-agent-course/Context Engineering_Sessions, Memory.md",
+                "file": "knowledge/edges/google-kaggle-agent-course/3. Context Engineering_Sessions, Memory.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Context Engineering_Sessions, Memory"
+              "title": "3. Context Engineering_Sessions, Memory"
             }
           }
         ],
@@ -211,13 +211,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/edges/google-kaggle-agent-course/Context Engineering_Sessions, Memory.md",
+                "file": "knowledge/edges/google-kaggle-agent-course/3. Context Engineering_Sessions, Memory.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Context Engineering_Sessions, Memory 的大纲"
+              "title": "3. Context Engineering_Sessions, Memory 的大纲"
             }
           },
           {
@@ -255,7 +255,7 @@
     "knowledge/notes/职业规划.md",
     "knowledge/notes/ai-training/01-foundations 1.md",
     "knowledge/notes/kimi agent swarm.md",
-    "knowledge/edges/google-kaggle-agent-course/Context Engineering_Sessions, Memory.md",
+    "knowledge/edges/google-kaggle-agent-course/3. Context Engineering_Sessions, Memory.md",
     "knowledge/edges/google-kaggle-agent-course/Lesson 1.md",
     "knowledge/edges/claude/2026-04-02-Harnessing Claude’s intelligence.md",
     "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
