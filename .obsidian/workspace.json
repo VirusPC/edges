@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/check-lists/新技术项目.md",
+                "file": "knowledge/edges/google-kaggle-agent-course/Context Engineering_Sessions, Memory.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "新技术项目"
+              "title": "Context Engineering_Sessions, Memory"
             }
           }
         ],
@@ -211,13 +211,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/edges/check-lists/新技术项目.md",
+                "file": "knowledge/edges/google-kaggle-agent-course/Context Engineering_Sessions, Memory.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "新技术项目 的大纲"
+              "title": "Context Engineering_Sessions, Memory 的大纲"
             }
           },
           {
@@ -249,14 +249,13 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "2601bbbb5a325331",
+  "active": "33eecac44040d9a2",
   "lastOpenFiles": [
-    "knowledge/edges/google-kaggle-agent-course/3. Context Engineering_Sessions, Memory.md",
-    "knowledge/edges/check-lists/新技术项目.md",
     "knowledge/notes/OpenSpec & 串流程的思考.md",
     "knowledge/notes/职业规划.md",
     "knowledge/notes/ai-training/01-foundations 1.md",
     "knowledge/notes/kimi agent swarm.md",
+    "knowledge/edges/google-kaggle-agent-course/Context Engineering_Sessions, Memory.md",
     "knowledge/edges/google-kaggle-agent-course/Lesson 1.md",
     "knowledge/edges/claude/2026-04-02-Harnessing Claude’s intelligence.md",
     "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
@@ -287,6 +286,7 @@
     "knowledge/notes/2. harness.md",
     "knowledge/edges/anthropic",
     "knowledge/edges/claude/2026-03-19-Product management on the AI exponential.md",
+    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
     "knowledge/resources/1040g3g831vkgcenb3m06htco0p9gu1p0pfdvcf8 1.jpg",
     "knowledge/resources/1040g3g831vkgcenb3m06htco0p9gu1p0pfdvcf8.jpg",
     "extensions/skills/deep-research",
