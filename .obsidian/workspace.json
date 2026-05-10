@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/check-lists/新技术项目.md",
+                "file": "knowledge/edges/check-lists/项目流程.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "新技术项目"
+              "title": "项目流程"
             }
           }
         ],
@@ -211,13 +211,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/edges/check-lists/新技术项目.md",
+                "file": "knowledge/edges/check-lists/项目流程.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "新技术项目 的大纲"
+              "title": "项目流程 的大纲"
             }
           },
           {
@@ -251,8 +251,8 @@
   },
   "active": "2601bbbb5a325331",
   "lastOpenFiles": [
-    "knowledge/edges/google-kaggle-agent-course/3. Context Engineering_Sessions, Memory.md",
     "knowledge/edges/check-lists/新技术项目.md",
+    "knowledge/edges/google-kaggle-agent-course/3. Context Engineering_Sessions, Memory.md",
     "knowledge/notes/OpenSpec & 串流程的思考.md",
     "knowledge/notes/职业规划.md",
     "knowledge/notes/ai-training/01-foundations 1.md",
