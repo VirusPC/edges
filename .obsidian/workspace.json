@@ -67,14 +67,14 @@
             "id": "2601bbbb5a325331",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "split-diff-view",
               "state": {
-                "file": "knowledge/edges/check-lists/项目流程.md",
-                "mode": "source",
-                "source": false
+                "aFile": "conflict-files-obsidian-git.md",
+                "bFile": "conflict-files-obsidian-git.md",
+                "aRef": ""
               },
-              "icon": "lucide-file",
-              "title": "项目流程"
+              "icon": "diff",
+              "title": "Diff: conflict-files-obsidian-git  (Working Tree)"
             }
           }
         ],
@@ -251,7 +251,12 @@
   },
   "active": "2601bbbb5a325331",
   "lastOpenFiles": [
+    "knowledge/edges/check-lists/项目流程.md",
     "knowledge/edges/check-lists/新技术项目.md",
+    "conflict-files-obsidian-git.md",
+    "knowledge/notes/jd/阶跃星辰.md",
+    "knowledge/notes/jd/腾讯元宝.md",
+    "knowledge/notes/jd",
     "knowledge/edges/google-kaggle-agent-course/3. Context Engineering_Sessions, Memory.md",
     "knowledge/notes/OpenSpec & 串流程的思考.md",
     "knowledge/notes/职业规划.md",
@@ -282,11 +287,7 @@
     "knowledge/resources/Pasted image 20260501214554.png",
     "knowledge/resources/Pasted image 20260501214549.png",
     "knowledge/resources/Pasted image 20260501214534.png",
-    "knowledge/edges/claude/2026-04-08-Claude Managed Agents, get to production 10x faster.md",
-    "knowledge/edges/claude/2026-04-07-How and when to use subagents in Claude Code.md",
-    "knowledge/notes/2. harness.md",
     "knowledge/edges/anthropic",
-    "knowledge/edges/claude/2026-03-19-Product management on the AI exponential.md",
     "knowledge/resources/1040g3g831vkgcenb3m06htco0p9gu1p0pfdvcf8 1.jpg",
     "knowledge/resources/1040g3g831vkgcenb3m06htco0p9gu1p0pfdvcf8.jpg",
     "extensions/skills/deep-research",
@@ -294,7 +295,6 @@
     "未命名 1",
     "未命名",
     "knowledge/edges/prompt caching",
-    "knowledge/edges/claude/claude-agent-sdk",
     "knowledge/resources/Pasted image 20260403160808.png",
     "knowledge/resources/Pasted image 20260403160717.png"
   ]
