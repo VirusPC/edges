@@ -67,14 +67,14 @@
             "id": "2601bbbb5a325331",
             "type": "leaf",
             "state": {
-              "type": "split-diff-view",
+              "type": "markdown",
               "state": {
-                "aFile": "conflict-files-obsidian-git.md",
-                "bFile": "conflict-files-obsidian-git.md",
-                "aRef": ""
+                "file": "knowledge/notes/Harness Engineering.md",
+                "mode": "source",
+                "source": false
               },
-              "icon": "diff",
-              "title": "Diff: conflict-files-obsidian-git  (Working Tree)"
+              "icon": "lucide-file",
+              "title": "Harness Engineering"
             }
           }
         ],
@@ -251,10 +251,13 @@
   },
   "active": "2601bbbb5a325331",
   "lastOpenFiles": [
+    "knowledge/notes/2. harness.md",
+    "knowledge/notes/jd/大模型算法-北京.md",
+    "knowledge/notes/jd/阶跃星辰.md",
+    "knowledge/notes/jd/xxx.md",
     "knowledge/edges/check-lists/项目流程.md",
     "knowledge/edges/check-lists/新技术项目.md",
     "conflict-files-obsidian-git.md",
-    "knowledge/notes/jd/阶跃星辰.md",
     "knowledge/notes/jd/腾讯元宝.md",
     "knowledge/notes/jd",
     "knowledge/edges/google-kaggle-agent-course/3. Context Engineering_Sessions, Memory.md",
@@ -277,10 +280,7 @@
     "knowledge/edges/claude/2026-03-09-Bringing Code Review to Claude Code.md",
     "knowledge/edges/claude/2025-11-25-Agentsmd-Using CLAUDE.md files, Customizing Claude Code for your codebase.md",
     "extensions/skills/summarize-ai-article/SKILL.md",
-    "knowledge/edges/claude/2026-04-15-Using Claude Code, session management and 1M context.md",
     "extensions/skills/summarize-ai-article",
-    "extensions/skills/deep-research/deep-research.md",
-    "extensions/skills/conversation-to-notes/SKILL.md",
     "knowledge/resources/Pasted image 20260501214623.png",
     "knowledge/resources/Pasted image 20260501214609.png",
     "knowledge/resources/Pasted image 20260501214603.png",
