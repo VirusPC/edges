@@ -1,5 +1,7 @@
 
 
+https://mp.weixin.qq.com/s/JV4-oPP0jjsBCZ4tW3Gy1g
+
 https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents
 
 https://mitchellh.com/writing/my-ai-adoption-journey#step-5-engineer-the-harness
