@@ -1,3 +1,6 @@
+传统 RAG 的核心假设是：**相似的片段更可能有答案**。  
+PageIndex 的核心假设是：**文档的结构路径本身就携带答案线索**，先找正确章节，再找正确页面，再找正确段落 。
+
 Vector-based RAG 面临的问题：
 1.  (Query - Knowledge) **Query and knowledge space mismatch**. Vector retrieval assumes that the _most semantically similar_ text to the query is also the _most relevant_. But this isn’t always true: queries often express _intent_, not _content_.
     
