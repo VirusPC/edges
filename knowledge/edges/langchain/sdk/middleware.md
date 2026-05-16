@@ -1,4 +1,4 @@
-middleware可以用来实现动态的 model & tools
+middleware可以用来实现动态的 model & tools。核心是`handler(request.override(xxx=yyy))`
 ## 动态model
 
 ```python
