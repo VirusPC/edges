@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/langchain/sdk/agent VS deepAgent.md",
+                "file": "knowledge/edges/langchain/sdk/LangSmith VS Langfuse.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "agent VS deepAgent"
+              "title": "LangSmith VS Langfuse"
             }
           }
         ],
@@ -251,8 +251,9 @@
   },
   "active": "2601bbbb5a325331",
   "lastOpenFiles": [
-    "knowledge/edges/langchain/sdk/杂记.md",
     "knowledge/edges/langchain/sdk/agent VS deepAgent.md",
+    "knowledge/edges/langchain/sdk/LangSmith VS Langfuse.md",
+    "knowledge/edges/langchain/sdk/杂记.md",
     "knowledge/edges/python/方括号和点.md",
     "knowledge/edges/python/urllib vs requests.md",
     "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
@@ -285,7 +286,6 @@
     "knowledge/notes/jd/腾讯元宝.md",
     "knowledge/notes/jd",
     "knowledge/notes/OpenSpec & 串流程的思考.md",
-    "knowledge/notes/职业规划.md",
     "knowledge/edges/papers",
     "extensions/skills/summarize-ai-article-ultra",
     "extensions/skills/summarize-ai-article",

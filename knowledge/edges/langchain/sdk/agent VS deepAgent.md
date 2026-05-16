@@ -2,13 +2,13 @@ Deep Agent 和 LangChain Agent 的核心区别是:**Deep Agent 内置了更多�
 
 ## 主要区别
 
-|特性|LangChain Agent|Deep Agent|
-|---|---|---|
-|**规划能力**|需要自己实现|内置 `write_todos` 工具进行任务规划 [langchain](https://docs.langchain.com/oss/python/langchain/quickstart#langchain-agents)|
-|**文件系统**|需要自己添加工具|内置 `grep`、`read_file` 等文件工具 [langchain](https://docs.langchain.com/oss/python/langchain/quickstart#langchain-agents)|
-|**上下文管理**|手动处理长文本|自动使用文件系统管理大量数据 [langchain](https://docs.langchain.com/oss/python/langchain/quickstart#langchain-agents)|
-|**子代理**|需要自己实现|可以自动生成专门的子代理处理复杂子任务 [langchain](https://docs.langchain.com/oss/python/langchain/quickstart#langchain-agents)|
-|**适用场景**|需要精细控制时|需要快速构建强大功能时 [langchain](https://docs.langchain.com/oss/python/langchain/quickstart#langchain-agents)|
+| 特性        | LangChain Agent | Deep Agent                                                                                                           |
+| --------- | --------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **规划能力**  | 需要自己实现          | 内置 `write_todos` 工具进行任务规划 [langchain](https://docs.langchain.com/oss/python/langchain/quickstart#langchain-agents)   |
+| **文件系统**  | 需要自己添加工具        | 内置 `grep`、`read_file` 等文件工具 [langchain](https://docs.langchain.com/oss/python/langchain/quickstart#langchain-agents) |
+| **上下文管理** | 手动处理长文本         | 自动使用文件系统管理大量数据 [langchain](https://docs.langchain.com/oss/python/langchain/quickstart#langchain-agents)              |
+| **子代理**   | 需要自己实现          | 可以自动生成专门的子代理处理复杂子任务 [langchain](https://docs.langchain.com/oss/python/langchain/quickstart#langchain-agents)         |
+| **适用场景**  | 需要精细控制时         | 需要快速构建强大功能时 [langchain](https://docs.langchain.com/oss/python/langchain/quickstart#langchain-agents)                 |
 
 ## 实际表现对比
 
