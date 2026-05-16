@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/python/方括号和点.md",
+                "file": "knowledge/edges/langchain/sdk/agent VS deepAgent.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "方括号和点"
+              "title": "agent VS deepAgent"
             }
           }
         ],
@@ -251,10 +251,11 @@
   },
   "active": "2601bbbb5a325331",
   "lastOpenFiles": [
-    "knowledge/edges/python/urllib vs requests.md",
+    "knowledge/edges/langchain/sdk/杂记.md",
+    "knowledge/edges/langchain/sdk/agent VS deepAgent.md",
     "knowledge/edges/python/方括号和点.md",
+    "knowledge/edges/python/urllib vs requests.md",
     "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
-    "knowledge/edges/langchain/sdk/未命名.md",
     "knowledge/edges/langchain/sdk",
     "knowledge/edges/claude/2026-04-10-Seeing like an agent, how we design tools in Claude Code.md",
     "knowledge/edges/claude/2026-04-15-Using Claude Code, session management and 1M context.md",
@@ -285,7 +286,6 @@
     "knowledge/notes/jd",
     "knowledge/notes/OpenSpec & 串流程的思考.md",
     "knowledge/notes/职业规划.md",
-    "knowledge/notes/ai-training/01-foundations 1.md",
     "knowledge/edges/papers",
     "extensions/skills/summarize-ai-article-ultra",
     "extensions/skills/summarize-ai-article",
