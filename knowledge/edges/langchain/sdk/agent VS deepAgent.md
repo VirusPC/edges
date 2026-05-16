@@ -42,6 +42,9 @@ Deep Agent 和 LangChain Agent 的核心区别是:**Deep Agent 内置了更多�
 
 ```python
 # LangChain Agent - 基础版本
+from langchain_openai import ChatOpenAI
+model = ChatOpenAI( model="gpt-5.4", temperature=0.1, max_tokens=1000, timeout=30 # ... (other params) )
+
 from langchain.agents import create_agent
 
 agent = create_agent(

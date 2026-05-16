@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/langchain/sdk/LangSmith VS Langfuse.md",
+                "file": "knowledge/edges/python/import.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "LangSmith VS Langfuse"
+              "title": "import"
             }
           }
         ],
@@ -251,10 +251,12 @@
   },
   "active": "2601bbbb5a325331",
   "lastOpenFiles": [
+    "knowledge/edges/python/with.md",
+    "knowledge/edges/python/import.md",
+    "knowledge/edges/python/方括号和点.md",
     "knowledge/edges/langchain/sdk/agent VS deepAgent.md",
     "knowledge/edges/langchain/sdk/LangSmith VS Langfuse.md",
     "knowledge/edges/langchain/sdk/杂记.md",
-    "knowledge/edges/python/方括号和点.md",
     "knowledge/edges/python/urllib vs requests.md",
     "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
     "knowledge/edges/langchain/sdk",
@@ -262,7 +264,6 @@
     "knowledge/edges/claude/2026-04-15-Using Claude Code, session management and 1M context.md",
     "knowledge/edges/memory/PageIndex.md",
     "knowledge/resources/Pasted image 20260513212240.png",
-    "knowledge/edges/python/with.md",
     "knowledge/edges/2026-03-13--大模型参数演进与个人专业硬件部署指南.md",
     "knowledge/edges/python/asyncio.md",
     "knowledge/edges/python/未命名",
@@ -285,7 +286,6 @@
     "conflict-files-obsidian-git.md",
     "knowledge/notes/jd/腾讯元宝.md",
     "knowledge/notes/jd",
-    "knowledge/notes/OpenSpec & 串流程的思考.md",
     "knowledge/edges/papers",
     "extensions/skills/summarize-ai-article-ultra",
     "extensions/skills/summarize-ai-article",
