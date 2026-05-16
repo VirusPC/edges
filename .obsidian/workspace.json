@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/langchain/sdk/dynamic tools.md",
+                "file": "knowledge/edges/langchain/优化/Prompt Caching.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "dynamic tools"
+              "title": "Prompt Caching"
             }
           }
         ],
@@ -251,8 +251,13 @@
   },
   "active": "2601bbbb5a325331",
   "lastOpenFiles": [
-    "knowledge/edges/langchain/sdk/middleware.md",
+    "knowledge/edges/langchain/sdk/tool.md",
+    "knowledge/edges/langchain/sdk/杂记.md",
+    "knowledge/edges/langchain/优化/Prompt Caching.md",
+    "knowledge/edges/langchain/sdk/优化 1.md",
+    "knowledge/edges/langchain/优化",
     "knowledge/edges/langchain/sdk/dynamic tools.md",
+    "knowledge/edges/langchain/sdk/middleware.md",
     "knowledge/edges/python/作用域.md",
     "knowledge/resources/Pasted image 20260517015052.png",
     "knowledge/edges/python/import.md",
@@ -260,7 +265,6 @@
     "knowledge/edges/python/方括号和点.md",
     "knowledge/edges/langchain/sdk/agent VS deepAgent.md",
     "knowledge/edges/langchain/sdk/LangSmith VS Langfuse.md",
-    "knowledge/edges/langchain/sdk/杂记.md",
     "knowledge/edges/python/urllib vs requests.md",
     "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
     "knowledge/edges/langchain/sdk",
@@ -283,9 +287,6 @@
     "knowledge/notes/Harness Engineering.md",
     "knowledge/notes/2. harness.md",
     "knowledge/notes/jd/大模型算法-北京.md",
-    "knowledge/notes/jd/阶跃星辰.md",
-    "knowledge/notes/jd/xxx.md",
-    "knowledge/edges/check-lists/项目流程.md",
     "knowledge/notes/jd",
     "knowledge/edges/papers",
     "extensions/skills/summarize-ai-article-ultra",
@@ -295,7 +296,6 @@
     "knowledge/resources/Pasted image 20260501214603.png",
     "knowledge/resources/Pasted image 20260501214554.png",
     "knowledge/resources/Pasted image 20260501214549.png",
-    "knowledge/resources/Pasted image 20260501214534.png",
-    "knowledge/edges/anthropic"
+    "knowledge/resources/Pasted image 20260501214534.png"
   ]
 }

@@ -8,21 +8,74 @@
 
 ## 基于 State 过滤
 
-python
+```python
+@wrap_model_call
+def state_based_tool_filter(request: ModelRequest, handler) -> ModelResponse:
+    """根据对话状态过滤工具"""
+    message_count = len(request.state["messages"])
+    
+    if message_count < 5:
+        # 新对话只提供基础工具
+        tools = [search_tool]
+    else:
+        # 深度对话提供全部工具
+        tools = [search_tool, analysis_tool, export_tool]
+    
+    return handler(request.override(tools=tools))
 
-`@wrap_model_call def state_based_tool_filter(request: ModelRequest, handler) -> ModelResponse:     """根据对话状态过滤工具"""    message_count = len(request.state["messages"])         if message_count < 5:        # 新对话只提供基础工具        tools = [search_tool]    else:        # 深度对话提供全部工具        tools = [search_tool, analysis_tool, export_tool]         return handler(request.override(tools=tools)) agent = create_agent(     model="gpt-5.4",    tools=[search_tool, analysis_tool, export_tool],  # 预注册所有工具    middleware=[state_based_tool_filter] )`
+agent = create_agent(
+    model="gpt-5.4",
+    tools=[search_tool, analysis_tool, export_tool],  # 预注册所有工具
+    middleware=[state_based_tool_filter]
+)
+```
 
 ## 基于 Store 过滤 (权限/特性标记)
 
-python
+```python
+@wrap_model_call
+def store_based_tools(request: ModelRequest, handler) -> ModelResponse:
+    """根据 Store 中的用户偏好/权限过滤工具"""
+    user_id = request.runtime.context.user_id
+    
+    # 从 Store 读取用户启用的功能
+    store = request.runtime.store
+    feature_flags = store.get(("features",), user_id)
+    
+    if feature_flags:
+        enabled_features = feature_flags.value.get("enabled_tools", [])
+        # 只包含用户启用的工具
+        tools = [t for t in request.tools if t.name in enabled_features]
+        request = request.override(tools=tools)
+    
+    return handler(request)
 
-`@wrap_model_call def store_based_tools(request: ModelRequest, handler) -> ModelResponse:     """根据 Store 中的用户偏好/权限过滤工具"""    user_id = request.runtime.context.user_id         # 从 Store 读取用户启用的功能    store = request.runtime.store    feature_flags = store.get(("features",), user_id)         if feature_flags:        enabled_features = feature_flags.value.get("enabled_tools", [])        # 只包含用户启用的工具        tools = [t for t in request.tools if t.name in enabled_features]        request = request.override(tools=tools)         return handler(request) agent = create_agent(     model="gpt-5.4",    tools=[search_tool, analysis_tool, export_tool],    middleware=[store_based_tools],    context_schema=Context,    store=InMemoryStore() )`
+agent = create_agent(
+    model="gpt-5.4",
+    tools=[search_tool, analysis_tool, export_tool],
+    middleware=[store_based_tools],
+    context_schema=Context,
+    store=InMemoryStore()
+)
+```
 
 ## 基于 Runtime Context 过滤
 
-python
-
-`@wrap_model_call def context_based_tools(request: ModelRequest, handler) -> ModelResponse:     """根据运行时上下文过滤工具"""    user_role = request.runtime.context.get("user_role", "user")         if user_role == "admin":        tools = request.tools  # 管理员获得所有工具    elif user_role == "analyst":        tools = [t for t in request.tools if t.name in ["search", "analysis"]]    else:        tools = [t for t in request.tools if t.name == "search"]         return handler(request.override(tools=tools))`
+```python
+@wrap_model_call
+def context_based_tools(request: ModelRequest, handler) -> ModelResponse:
+    """根据运行时上下文过滤工具"""
+    user_role = request.runtime.context.get("user_role", "user")
+    
+    if user_role == "admin":
+        tools = request.tools  # 管理员获得所有工具
+    elif user_role == "analyst":
+        tools = [t for t in request.tools if t.name in ["search", "analysis"]]
+    else:
+        tools = [t for t in request.tools if t.name == "search"]
+    
+    return handler(request.override(tools=tools))
+```
 
 **优势**:
 
@@ -37,9 +90,33 @@ python
 
 **适用场景**: 工具无法在 agent 创建时预先知道,需要根据运行时信息动态生成或注册工具 。[langchain](https://docs.langchain.com/oss/python/langchain/agents#dynamic-tools)
 
-python
+```python
+@wrap_model_call
+def runtime_tool_registration(request: ModelRequest, handler) -> ModelResponse:
+    """运行时动态生成工具"""
+    # 根据用户输入或状态动态创建工具
+    user_databases = request.runtime.context.get("available_dbs", [])
+    
+    # 动态生成数据库查询工具
+    dynamic_tools = []
+    for db in user_databases:
+        @tool
+        def query_db(query: str, db_name: str = db) -> str:
+            f"""Query the {db_name} database"""
+            return execute_query(db_name, query)
+        
+        dynamic_tools.append(query_db)
+    
+    # 合并静态工具和动态工具
+    all_tools = list(request.tools) + dynamic_tools
+    return handler(request.override(tools=all_tools))
 
-`@wrap_model_call def runtime_tool_registration(request: ModelRequest, handler) -> ModelResponse:     """运行时动态生成工具"""    # 根据用户输入或状态动态创建工具    user_databases = request.runtime.context.get("available_dbs", [])         # 动态生成数据库查询工具    dynamic_tools = []    for db in user_databases:        @tool        def query_db(query: str, db_name: str = db) -> str:            f"""Query the {db_name} database"""            return execute_query(db_name, query)                 dynamic_tools.append(query_db)         # 合并静态工具和动态工具    all_tools = list(request.tools) + dynamic_tools    return handler(request.override(tools=all_tools)) agent = create_agent(     model="gpt-5.4",    tools=[search_tool],  # 基础静态工具    middleware=[runtime_tool_registration] )`
+agent = create_agent(
+    model="gpt-5.4",
+    tools=[search_tool],  # 基础静态工具
+    middleware=[runtime_tool_registration]
+)
+```
 
 **优势**:
 
