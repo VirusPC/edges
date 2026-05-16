@@ -69,12 +69,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/edges/python/import.md",
+                "file": "knowledge/edges/python/作用域.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "import"
+              "title": "作用域"
             }
           }
         ],
@@ -251,8 +251,11 @@
   },
   "active": "2601bbbb5a325331",
   "lastOpenFiles": [
-    "knowledge/edges/python/with.md",
+    "knowledge/resources/Pasted image 20260517015052.png",
+    "knowledge/edges/langchain/sdk/middleware.md",
+    "knowledge/edges/python/作用域.md",
     "knowledge/edges/python/import.md",
+    "knowledge/edges/python/with.md",
     "knowledge/edges/python/方括号和点.md",
     "knowledge/edges/langchain/sdk/agent VS deepAgent.md",
     "knowledge/edges/langchain/sdk/LangSmith VS Langfuse.md",
@@ -282,9 +285,6 @@
     "knowledge/notes/jd/阶跃星辰.md",
     "knowledge/notes/jd/xxx.md",
     "knowledge/edges/check-lists/项目流程.md",
-    "knowledge/edges/check-lists/新技术项目.md",
-    "conflict-files-obsidian-git.md",
-    "knowledge/notes/jd/腾讯元宝.md",
     "knowledge/notes/jd",
     "knowledge/edges/papers",
     "extensions/skills/summarize-ai-article-ultra",
