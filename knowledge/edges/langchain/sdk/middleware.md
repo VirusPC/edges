@@ -1,5 +1,14 @@
+[Middleware](https://docs.langchain.com/oss/python/langchain/middleware) provides powerful extensibility for customizing agent behavior at different stages of execution. You can use middleware to:
+
+- Process state before the model is called (e.g., message trimming, context injection)
+- Modify or validate the model’s response (e.g., guardrails, content filtering)
+- Handle tool execution errors with custom logic
+- Implement dynamic model selection based on state or context
+- Add custom logging, monitoring, or analytics
+## **函数式 / 装饰器形式**
+
 middleware可以用来实现动态的 model & tools。核心是`handler(request.override(xxx=yyy))`
-## 动态model
+### 动态model
 
 ```python
 from langchain_openai import ChatOpenAI
@@ -30,7 +39,7 @@ agent = create_agent(
 )
 ```
 
-## 动态 Tools
+### 动态 Tools
 https://docs.langchain.com/oss/python/langchain/agents#dynamic-tools
 
 ```python
@@ -65,4 +74,37 @@ agent = create_agent(
     tools=[public_search, private_search, advanced_search],
     middleware=[state_based_tools]
 )
+```
+
+## **类继承形式**
+
+### 自定义State
+
+```python
+from langchain.agents import AgentState
+from langchain.agents.middleware import AgentMiddleware
+from typing import Any
+
+
+class CustomState(AgentState):
+    user_preferences: dict
+
+class CustomMiddleware(AgentMiddleware):
+    state_schema = CustomState
+    tools = [tool1, tool2]
+
+    def before_model(self, state: CustomState, runtime) -> dict[str, Any] | None:
+        ...
+
+agent = create_agent(
+    model,
+    tools=tools,
+    middleware=[CustomMiddleware()]
+)
+
+# The agent can now track additional state beyond messages
+result = agent.invoke({
+    "messages": [{"role": "user", "content": "I prefer technical explanations"}],
+    "user_preferences": {"style": "technical", "verbosity": "detailed"},
+})
 ```
