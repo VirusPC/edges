@@ -14,7 +14,7 @@ LangGraph 是 Pregel 思想在大模型 Agent 编排领域的精神续作：
  * **高级特征**：利用 Pregel 的停机与唤醒思想，LangGraph 实现了多 Agent 的 **Fan-out/Fan-in（扇出与扇入并行）**，以及人机交互中的 **Interrupt（人工审批中断挂起）**。
 ## 3. Channel（通道）的本质
  * **并发编程中（如 Go）**：Channel 是连接不同线程/协程的**安全传送带**，遵循“不要通过共享内存来通信，而要通过通信来共享内存”的原则。
- * **LangGraph / Pregel 中**：Channel 的本质**绝对不是信号量（Semaphore）**（信号量只是控制并发数的红绿灯计数器）。
+ * **LangGraph / Pregel 中**：Channel 的本质**绝对不是信号量（Semaphore）**（信号量只是控制并发数的红绿灯计数器）。是Value(共享内存) 
  * **本质定义**：Channel 的本质是一个**带有一套归纳规则（Reducer）的并发安全内存数据缓冲区**。
  * **核心价值**：它支持发布-订阅机制。当多个节点并行运行时，它们可以往同一个 Channel 盲写数据，Channel 内部的 Reducer 会根据预设逻辑（如 List 的 append 追加，或数字的 sum 相加）自动、安全地合并状态，避免了写冲突。
 ## 4. Python 结构化并发：Gather vs TaskGroup
