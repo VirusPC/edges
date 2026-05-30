@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 77.09049255441009,
+            "dimension": 73.42497136311569,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -88,12 +88,26 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/python/进程，线程和协程.md",
+                    "file": "knowledge/notes/Harness Engineering.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "进程，线程和协程"
+                  "title": "Harness Engineering"
+                }
+              },
+              {
+                "id": "80dcf286baf778ee",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "Agent Trace.md",
+                    "mode": "source",
+                    "source": false
+                  },
+                  "icon": "lucide-file",
+                  "title": "Agent Trace"
                 }
               },
               {
@@ -102,12 +116,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/langchain/sdk/未命名.md",
+                    "file": "knowledge/edges/memory/PageIndex.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "未命名"
+                  "title": "PageIndex"
                 }
               }
             ],
@@ -116,7 +130,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 22.90950744558992,
+            "dimension": 26.57502863688431,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -196,7 +210,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "grep",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -204,7 +218,7 @@
                 "sortOrder": "alphabetical"
               },
               "icon": "lucide-search",
-              "title": "Search"
+              "title": "搜索"
             }
           },
           {
@@ -221,7 +235,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 427.5
+    "width": 597.5
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -336,37 +350,41 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "087a72d36e6c660a",
+  "active": "80dcf286baf778ee",
   "lastOpenFiles": [
+    "knowledge/notes/Harness Engineering.md",
+    "Agent Trace.md",
+    "knowledge/edges/observibility",
+    "knowledge/edges/claude/2026-04-07-How and when to use subagents in Claude Code.md",
+    "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
+    "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
+    "knowledge/edges/claude/2026-04-15-Using Claude Code, session management and 1M context.md",
+    "knowledge/edges/claude/2026-04-22-Building agents that reach production systems with MCP.md",
+    "knowledge/edges/python/进程，线程和协程.md",
+    "knowledge/edges/memory/PageIndex.md",
+    "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
+    "knowledge/edges/claude/2026-04-10-Seeing like an agent, how we design tools in Claude Code.md",
+    "knowledge/edges/ai-engineering/Tool.md",
+    "knowledge/edges/agent-sdk/OpenAI Agents SDK.md",
+    "knowledge/edges/ai-engineering",
+    "knowledge/edges/backend",
+    "knowledge/edges/采访/提问.md",
+    "knowledge/edges/interview/Tool.md",
+    "knowledge/edges/interview",
+    "knowledge/edges/langchain/sdk/InMemorySaver 和 InMemoryStore.md",
     "knowledge/edges/langchain/未命名.md",
-    "knowledge/edges/langchain/sdk/未命名.md",
     "knowledge/edges/python/threading.local VS ContextVar.md",
     "knowledge/edges/python/并发原语.md",
-    "knowledge/edges/python/进程，线程和协程.md",
     "knowledge/edges/python/作用域.md",
     "knowledge/edges/python/方括号和点.md",
     "knowledge/edges/python/TypedDict、dataclass 和 Pydantic BaseModel 有什么区别.md",
     "knowledge/edges/python/with.md",
     "knowledge/notes/jd/快手.md",
-    "knowledge/edges/采访/提问.md",
     "knowledge/edges/采访",
     "knowledge/edges/python/IPC.md",
     "knowledge/edges/langchain/Pregel和channel.md",
-    "knowledge/edges/python/asyncio.md",
-    "knowledge/edges/python/import.md",
-    "knowledge/edges/python/urllib vs requests.md",
-    "extensions/skills/summarize-ai-article-ultra/SKILL.md",
-    "knowledge/edges/langchain/sdk/middleware.md",
-    "knowledge/edges/langchain/sdk/杂记.md",
-    "knowledge/edges/langchain/优化/Prompt Caching.md",
-    "knowledge/edges/langchain/sdk/tool.md",
-    "knowledge/edges/langchain/sdk/优化 1.md",
     "knowledge/edges/langchain/优化",
-    "knowledge/edges/langchain/sdk/dynamic tools.md",
     "knowledge/resources/Pasted image 20260517015052.png",
-    "knowledge/edges/langchain/sdk/agent VS deepAgent.md",
-    "knowledge/edges/langchain/sdk/LangSmith VS Langfuse.md",
-    "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
     "knowledge/edges/langchain/sdk",
     "knowledge/resources/Pasted image 20260513212240.png",
     "knowledge/edges/python/未命名",
@@ -374,10 +392,6 @@
     "knowledge/edges/agent-sdk",
     "knowledge/resources/Pasted image 20260512155448.png",
     "knowledge/resources/Pasted image 20260512155415.png",
-    "knowledge/edges/memory",
-    "knowledge/notes/jd",
-    "knowledge/edges/papers",
-    "extensions/skills/summarize-ai-article-ultra",
     "knowledge/resources/Pasted image 20260501214623.png",
     "knowledge/resources/Pasted image 20260501214609.png",
     "knowledge/resources/Pasted image 20260501214603.png",

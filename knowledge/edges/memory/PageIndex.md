@@ -25,6 +25,8 @@ Three properties fall out of this design, and each one is exactly what classic v
 - **Retrieval depends on context.** The decision at each node is conditioned on the query, the conversation history, the user's role, and the path the LLM has already walked. There's no fixed-length cap forcing context to be discarded. Context shapes every navigation step.
 - **Transparent retrieval process.** The search trace is a readable path through the tree: which sections were opened, which were skipped, which yielded the evidence. You can audit _why_ an answer came back, replay the same path for a different model, and surface the citation chain to the end user. Vector search returns a list of chunks with no story; PageIndex returns a route.
 
+https://x.com/akshay_pachaar/status/2058976178908885210
+
 ## References
 
 - https://pageindex.ai/blog/pageindex-intro
