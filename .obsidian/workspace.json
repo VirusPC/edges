@@ -235,7 +235,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 597.5
+    "width": 292.5
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -352,6 +352,7 @@
   },
   "active": "80dcf286baf778ee",
   "lastOpenFiles": [
+    "knowledge/edges/memory/Memory..md",
     "knowledge/notes/Harness Engineering.md",
     "Agent Trace.md",
     "knowledge/edges/observibility",
@@ -382,7 +383,6 @@
     "knowledge/notes/jd/快手.md",
     "knowledge/edges/采访",
     "knowledge/edges/python/IPC.md",
-    "knowledge/edges/langchain/Pregel和channel.md",
     "knowledge/edges/langchain/优化",
     "knowledge/resources/Pasted image 20260517015052.png",
     "knowledge/edges/langchain/sdk",
