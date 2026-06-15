@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 73.42497136311569,
+            "dimension": 79.8183652875883,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -102,12 +102,26 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/interview/未命名.md",
+                    "file": "knowledge/edges/interview/关键问题.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "未命名"
+                  "title": "关键问题"
+                }
+              },
+              {
+                "id": "61eec819e3742014",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "knowledge/edges/blogs/2026-06-09.md",
+                    "mode": "source",
+                    "source": false
+                  },
+                  "icon": "lucide-file",
+                  "title": "2026-06-09"
                 }
               },
               {
@@ -125,12 +139,12 @@
                 }
               }
             ],
-            "currentTab": 6
+            "currentTab": 7
           },
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 26.57502863688431,
+            "dimension": 20.181634712411707,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -350,12 +364,16 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "80dcf286baf778ee",
+  "active": "61eec819e3742014",
   "lastOpenFiles": [
-    "knowledge/edges/interview/提问.md",
+    "knowledge/edges/blogs/2026-06-09.md",
     "knowledge/edges/interview/未命名.md",
+    "xxx.md",
+    "knowledge/edges/interview/关键问题.md",
+    "knowledge/edges/interview/面试节奏.md",
+    "knowledge/edges/interview/提问.md",
     "knowledge/edges/_eval_cli/cli.md",
-    "knowledge/edges/未命名 1",
+    "knowledge/edges/blogs",
     "knowledge/edges/agent-sdk/Claude code 体验问题.md",
     "knowledge/edges/_eval_cli",
     "knowledge/resources/Pasted image 20260531115014.png",
@@ -382,10 +400,6 @@
     "knowledge/edges/langchain/sdk/InMemorySaver 和 InMemoryStore.md",
     "knowledge/edges/langchain/未命名.md",
     "knowledge/edges/python/threading.local VS ContextVar.md",
-    "knowledge/edges/python/并发原语.md",
-    "knowledge/edges/python/作用域.md",
-    "knowledge/edges/python/方括号和点.md",
-    "knowledge/edges/python/TypedDict、dataclass 和 Pydantic BaseModel 有什么区别.md",
     "knowledge/edges/interview",
     "knowledge/edges/langchain/优化",
     "knowledge/resources/Pasted image 20260517015052.png",
