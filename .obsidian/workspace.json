@@ -97,35 +97,21 @@
                 }
               },
               {
-                "id": "80dcf286baf778ee",
+                "id": "928c30413c030ef8",
                 "type": "leaf",
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/interview/关键问题.md",
+                    "file": "knowledge/edges/python/集合.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "关键问题"
-                }
-              },
-              {
-                "id": "61eec819e3742014",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "extensions/skills/weekly-ai-blogs-digest/SKILL.md.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "SKILL.md"
+                  "title": "集合"
                 }
               }
             ],
-            "currentTab": 7
+            "currentTab": 6
           },
           {
             "id": "61485840fab31675",
@@ -210,7 +196,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "grep",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -311,13 +297,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/edges/check-lists/项目流程.md",
+                "file": "knowledge/edges/python/集合.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "项目流程 的大纲"
+              "title": "集合 的大纲"
             }
           },
           {
@@ -350,10 +336,25 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "61eec819e3742014",
+  "active": "636505b8300469c8",
   "lastOpenFiles": [
-    "extensions/skills/summarize-ai-article/SKILL.md",
+    "knowledge/edges/python/TypedDict、dataclass 和 Pydantic BaseModel 有什么区别.md",
+    "knowledge/edges/_eval_agent_desktop/展示.md",
+    "knowledge/resources/Pasted image 20260621185031.png",
+    "knowledge/edges/python/集合.md",
+    "knowledge/edges/python/TypeScript ↔ Python 类型对照表.md",
+    "knowledge/edges/interview/关键问题.md",
+    "knowledge/edges/python/typings.md",
+    "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
+    "knowledge/notes/python",
+    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
+    "knowledge/resources/Pasted image 20260621155726.png",
+    "knowledge/resources/Pasted image 20260621155613.png",
+    "knowledge/resources/Pasted image 20260621155432.png",
+    "knowledge/edges/_eval_cli/cli.md",
+    "knowledge/edges/_eval_agent_desktop",
     "extensions/skills/weekly-ai-blogs-digest/SKILL.md.md",
+    "extensions/skills/summarize-ai-article/SKILL.md",
     "extensions/skills/weekly-ai-blogs-digest",
     "knowledge/notes/2026-06-16--正则解析Agent输出与现代结构化输出演进.md.md",
     "knowledge/edges/memory/PageIndex.md",
@@ -361,10 +362,8 @@
     "knowledge/edges/blogs/2026-06-09 Loop Engineering.md",
     "knowledge/edges/interview/未命名.md",
     "xxx.md",
-    "knowledge/edges/interview/关键问题.md",
     "knowledge/edges/interview/面试节奏.md",
     "knowledge/edges/interview/提问.md",
-    "knowledge/edges/_eval_cli/cli.md",
     "knowledge/edges/blogs",
     "knowledge/edges/agent-sdk/Claude code 体验问题.md",
     "knowledge/edges/_eval_cli",
@@ -376,27 +375,13 @@
     "knowledge/edges/observibility",
     "knowledge/edges/claude/2026-04-07-How and when to use subagents in Claude Code.md",
     "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
-    "knowledge/edges/claude/2026-04-10-Multi-agent coordination patterns, Five approaches and when to use them.md",
-    "knowledge/edges/claude/2026-04-15-Using Claude Code, session management and 1M context.md",
-    "knowledge/edges/claude/2026-04-22-Building agents that reach production systems with MCP.md",
-    "knowledge/edges/python/进程，线程和协程.md",
-    "knowledge/notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展.md",
-    "knowledge/edges/claude/2026-04-10-Seeing like an agent, how we design tools in Claude Code.md",
-    "knowledge/edges/ai-engineering/Tool.md",
-    "knowledge/edges/agent-sdk/OpenAI Agents SDK.md",
     "knowledge/edges/ai-engineering",
     "knowledge/edges/backend",
     "knowledge/edges/interview",
-    "knowledge/edges/interview",
-    "knowledge/edges/langchain/优化",
     "knowledge/resources/Pasted image 20260517015052.png",
     "knowledge/resources/Pasted image 20260513212240.png",
     "knowledge/resources/Pasted image 20260512155448.png",
     "knowledge/resources/Pasted image 20260512155415.png",
-    "knowledge/resources/Pasted image 20260501214623.png",
-    "knowledge/resources/Pasted image 20260501214609.png",
-    "knowledge/resources/Pasted image 20260501214603.png",
-    "knowledge/resources/Pasted image 20260501214554.png",
-    "knowledge/resources/Pasted image 20260501214549.png"
+    "knowledge/resources/Pasted image 20260501214623.png"
   ]
 }
