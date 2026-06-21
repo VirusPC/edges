@@ -317,7 +317,7 @@
             }
           }
         ],
-        "currentTab": 5
+        "currentTab": 4
       }
     ],
     "direction": "horizontal",
@@ -336,15 +336,16 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "636505b8300469c8",
+  "active": "928c30413c030ef8",
   "lastOpenFiles": [
+    "knowledge/edges/python/leetcode tips.md",
+    "knowledge/edges/python/集合.md",
+    "knowledge/edges/python/TypeScript ↔ Python 类型对照表.md",
+    "knowledge/edges/python/typing.md",
     "knowledge/edges/python/TypedDict、dataclass 和 Pydantic BaseModel 有什么区别.md",
     "knowledge/edges/_eval_agent_desktop/展示.md",
     "knowledge/resources/Pasted image 20260621185031.png",
-    "knowledge/edges/python/集合.md",
-    "knowledge/edges/python/TypeScript ↔ Python 类型对照表.md",
     "knowledge/edges/interview/关键问题.md",
-    "knowledge/edges/python/typings.md",
     "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
     "knowledge/notes/python",
     "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
