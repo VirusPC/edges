@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 79.8183652875883,
+            "dimension": 79.81836528758829,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -116,12 +116,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/notes/2026-06-16--正则解析Agent输出与现代结构化输出演进.md.md",
+                    "file": "extensions/skills/weekly-ai-blogs-digest/SKILL.md.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "2026-06-16--正则解析Agent输出与现代结构化输出演进.md"
+                  "title": "SKILL.md"
                 }
               }
             ],
@@ -130,7 +130,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 20.181634712411707,
+            "dimension": 20.181634712411704,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -352,8 +352,11 @@
   },
   "active": "61eec819e3742014",
   "lastOpenFiles": [
-    "knowledge/edges/memory/PageIndex.md",
+    "extensions/skills/summarize-ai-article/SKILL.md",
+    "extensions/skills/weekly-ai-blogs-digest/SKILL.md.md",
+    "extensions/skills/weekly-ai-blogs-digest",
     "knowledge/notes/2026-06-16--正则解析Agent输出与现代结构化输出演进.md.md",
+    "knowledge/edges/memory/PageIndex.md",
     "extensions/skills/conversation-to-notes/SKILL.md",
     "knowledge/edges/blogs/2026-06-09 Loop Engineering.md",
     "knowledge/edges/interview/未命名.md",
@@ -383,13 +386,10 @@
     "knowledge/edges/agent-sdk/OpenAI Agents SDK.md",
     "knowledge/edges/ai-engineering",
     "knowledge/edges/backend",
-    "knowledge/edges/interview/Tool.md",
     "knowledge/edges/interview",
-    "knowledge/edges/langchain/sdk/InMemorySaver 和 InMemoryStore.md",
     "knowledge/edges/interview",
     "knowledge/edges/langchain/优化",
     "knowledge/resources/Pasted image 20260517015052.png",
-    "knowledge/edges/langchain/sdk",
     "knowledge/resources/Pasted image 20260513212240.png",
     "knowledge/resources/Pasted image 20260512155448.png",
     "knowledge/resources/Pasted image 20260512155415.png",
