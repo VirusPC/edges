@@ -100,12 +100,14 @@
                 "id": "928c30413c030ef8",
                 "type": "leaf",
                 "state": {
-                  "type": "pdf",
+                  "type": "markdown",
                   "state": {
-                    "file": "knowledge/projects/memory/LoCoMo.pdf"
+                    "file": "knowledge/edges/claude/2026-04-02-Harnessing Claude’s intelligence.md",
+                    "mode": "source",
+                    "source": false
                   },
-                  "icon": "lucide-file-text",
-                  "title": "LoCoMo"
+                  "icon": "lucide-file",
+                  "title": "2026-04-02-Harnessing Claude’s intelligence"
                 }
               }
             ],
@@ -219,7 +221,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 292.5
+    "width": 734.5
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -334,12 +336,24 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "928c30413c030ef8",
+  "active": "636505b8300469c8",
   "lastOpenFiles": [
-    "knowledge/projects/memory/finance-bench.pdf",
-    "knowledge/projects/memory/LoCoMo.pdf",
-    "knowledge/projects/memory/LongMemEval.pdf",
+    "knowledge/edges/claude/2026-04-07-How and when to use subagents in Claude Code.md",
+    "knowledge/edges/claude/2026-04-02-Harnessing Claude’s intelligence.md",
+    "knowledge/edges/claude/2026-03-19-Product management on the AI exponential.md",
+    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
+    "knowledge/edges/claude/2026-03-09-Bringing Code Review to Claude Code.md",
+    "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
+    "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
+    "knowledge/edges/claude/2026-01-29-skills-A complete guide to building skills for Claude.md",
+    "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
+    "knowledge/edges/claude/2026-01-22-skills-Building Agents with Skills, Equipping Agents for Specialized Work.md",
+    "knowledge/edges/claude/2026-01-21-Eight trends defining how software gets built in 2026.md",
     "knowledge/projects/memory/CLAUDE.md",
+    "knowledge/projects/memory/记忆Benchmark笔记-LongMemEval与LoCoMo.md",
+    "knowledge/projects/memory/LongMemEval.pdf",
+    "knowledge/projects/memory/LoCoMo.pdf",
+    "knowledge/projects/memory/finance-bench.pdf",
     "extensions/skills/conversation-to-notes/SKILL.md",
     "knowledge/projects/memory",
     "knowledge/projects",
@@ -361,21 +375,10 @@
     "knowledge/resources/Pasted image 20260621155432.png",
     "knowledge/edges/_eval_cli/cli.md",
     "knowledge/edges/_eval_agent_desktop",
-    "extensions/skills/weekly-ai-blogs-digest/SKILL.md.md",
-    "extensions/skills/summarize-ai-article/SKILL.md",
     "extensions/skills/weekly-ai-blogs-digest",
-    "knowledge/notes/2026-06-16--正则解析Agent输出与现代结构化输出演进.md.md",
-    "knowledge/edges/memory/PageIndex.md",
-    "knowledge/edges/blogs/2026-06-09 Loop Engineering.md",
-    "knowledge/edges/interview/未命名.md",
-    "xxx.md",
-    "knowledge/edges/interview/面试节奏.md",
-    "knowledge/edges/interview/提问.md",
     "knowledge/edges/blogs",
-    "knowledge/edges/agent-sdk/Claude code 体验问题.md",
     "knowledge/edges/_eval_cli",
     "knowledge/resources/Pasted image 20260531115014.png",
-    "Agent Trace.md",
     "knowledge/resources/Pasted image 20260517015052.png",
     "knowledge/resources/Pasted image 20260513212240.png",
     "knowledge/resources/Pasted image 20260512155448.png",
