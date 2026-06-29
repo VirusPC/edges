@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 58.14814814814816,
+            "dimension": 62.381454162276086,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -102,12 +102,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
+                    "file": "extensions/others/twitter-query.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "自定义subagent、skill"
+                  "title": "twitter-query"
                 }
               }
             ],
@@ -116,7 +116,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 41.85185185185184,
+            "dimension": 37.61854583772392,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -158,7 +158,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "终端：pengcheng1@H52HH2C4KC:~/Documents/projects/agent/edges"
+                  "title": "终端：Kimi Code"
                 }
               }
             ]
@@ -221,7 +221,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 307.5
+    "width": 282.5
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -338,23 +338,30 @@
   },
   "active": "928c30413c030ef8",
   "lastOpenFiles": [
+    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
+    "extensions/others/twitter-query.md",
+    "extensions/others",
+    "knowledge/edges/python/集合.md",
+    "knowledge/edges/python/TypeScript ↔ Python 类型对照表.md",
+    "knowledge/edges/claude/2026-04-07-How and when to use subagents in Claude Code.md",
+    "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
+    "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
+    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
+    "knowledge/edges/_eval_cli/cli.md",
+    "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
     "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
     "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
-    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
     "knowledge/resources/Pasted image 20260625215636.png",
     "knowledge/edges/_eval_agent_desktop/展示.md",
     "knowledge/projects/benchmark/benchmark_report_zh.md",
     "knowledge/resources/Pasted image 20260625215617.png",
     "knowledge/edges/claude/2026-04-02-Harnessing Claude’s intelligence.md",
     "knowledge/projects/benchmark",
-    "knowledge/edges/claude/2026-04-07-How and when to use subagents in Claude Code.md",
     "knowledge/edges/claude/2026-03-19-Product management on the AI exponential.md",
     "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
     "knowledge/edges/claude/2026-03-09-Bringing Code Review to Claude Code.md",
-    "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
     "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
     "knowledge/edges/claude/2026-01-29-skills-A complete guide to building skills for Claude.md",
-    "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
     "knowledge/edges/claude/2026-01-22-skills-Building Agents with Skills, Equipping Agents for Specialized Work.md",
     "knowledge/edges/claude/2026-01-21-Eight trends defining how software gets built in 2026.md",
     "knowledge/projects/memory/CLAUDE.md",
@@ -366,12 +373,6 @@
     "knowledge/projects/memory",
     "knowledge/projects",
     "extensions/skills/conversation-to-notes/README.md",
-    "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
-    "knowledge/edges/python/集合.md",
-    "knowledge/edges/python/leetcode tips.md",
-    "knowledge/edges/python/TypeScript ↔ Python 类型对照表.md",
-    "knowledge/edges/python/typing.md",
-    "knowledge/edges/python/TypedDict、dataclass 和 Pydantic BaseModel 有什么区别.md",
     "knowledge/resources/Pasted image 20260621185031.png",
     "knowledge/notes/python",
     "knowledge/resources/Pasted image 20260621155726.png",
@@ -379,7 +380,6 @@
     "knowledge/resources/Pasted image 20260621155432.png",
     "knowledge/edges/_eval_agent_desktop",
     "extensions/skills/weekly-ai-blogs-digest",
-    "knowledge/edges/blogs",
     "knowledge/resources/Pasted image 20260531115014.png",
     "knowledge/resources/Pasted image 20260517015052.png",
     "knowledge/resources/Pasted image 20260513212240.png",
