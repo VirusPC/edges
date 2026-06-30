@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 64.17281348788198,
+            "dimension": 72.25,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -116,21 +116,35 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_agent_desktop/chat、匿名.md",
+                    "file": "knowledge/edges/system_prompt/repos.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "chat、匿名"
+                  "title": "repos"
+                }
+              },
+              {
+                "id": "1e73a7564b0b443e",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "knowledge/edges/_eval_agent_desktop/划词提问.md",
+                    "mode": "source",
+                    "source": false
+                  },
+                  "icon": "lucide-file",
+                  "title": "划词提问"
                 }
               }
             ],
-            "currentTab": 7
+            "currentTab": 8
           },
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 35.82718651211802,
+            "dimension": 27.750000000000004,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -254,7 +268,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "repos",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -394,10 +408,17 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "9c833cc94222879f",
+  "active": "1e73a7564b0b443e",
   "lastOpenFiles": [
-    "knowledge/edges/_eval_agent_desktop/匿名模式.md",
+    "knowledge/resources/Pasted image 20260630212333.png",
+    "knowledge/resources/Pasted image 20260630212248.png",
+    "extensions/new-server/bootstrap.md",
+    "knowledge/edges/_eval_agent_desktop/划词提问.md",
+    "knowledge/edges/system_prompt/repos.md",
+    "extensions/new-server",
     "knowledge/edges/_eval_agent_desktop/chat、匿名.md",
+    "knowledge/edges/system_prompt",
+    "knowledge/edges/_eval_agent_desktop/匿名模式.md",
     "knowledge/resources/Pasted image 20260630190931.png",
     "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
     "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
@@ -428,19 +449,12 @@
     "knowledge/resources/Pasted image 20260625215617.png",
     "knowledge/edges/claude/2026-04-02-Harnessing Claude’s intelligence.md",
     "knowledge/projects/benchmark",
-    "knowledge/edges/claude/2026-03-19-Product management on the AI exponential.md",
-    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
-    "knowledge/edges/claude/2026-03-09-Bringing Code Review to Claude Code.md",
-    "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
     "knowledge/projects/memory/LongMemEval.pdf",
     "knowledge/projects/memory/LoCoMo.pdf",
     "knowledge/projects/memory/finance-bench.pdf",
     "knowledge/projects/memory",
-    "knowledge/projects",
     "knowledge/resources/Pasted image 20260621185031.png",
-    "knowledge/notes/python",
     "knowledge/resources/Pasted image 20260621155726.png",
-    "knowledge/resources/Pasted image 20260621155613.png",
-    "knowledge/resources/Pasted image 20260621155432.png"
+    "knowledge/resources/Pasted image 20260621155613.png"
   ]
 }
