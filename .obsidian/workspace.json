@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 75.86933614330874,
+            "dimension": 76.29083245521602,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -102,12 +102,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_ai_tricks/tricks.md",
+                    "file": "knowledge/edges/_ai_findings/未命名.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "tricks"
+                  "title": "未命名"
                 }
               }
             ],
@@ -116,7 +116,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 24.130663856691253,
+            "dimension": 23.70916754478398,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -201,7 +201,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "终端：✳ Claude Code"
+                  "title": "终端：✳ Review AI tricks documentation"
                 }
               }
             ],
@@ -382,7 +382,8 @@
   },
   "active": "928c30413c030ef8",
   "lastOpenFiles": [
-    "knowledge/edges/_ai_tricks/tricks.md",
+    "knowledge/edges/_ai_findings/tricks.md",
+    "knowledge/edges/_ai_findings/未命名.md",
     "knowledge/resources/compatible_path-image-8f5608df231645e2a99b595bacbc1bf0.png",
     "knowledge/edges/_eval_cli/remote-control.md",
     "knowledge/edges/未命名",
