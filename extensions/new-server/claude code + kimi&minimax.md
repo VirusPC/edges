@@ -1,5 +1,8 @@
+## 获取api key
 kimi plan key 获取地址：https://www.kimi.com/code/console
 minimax plan key获取地址：https://platform.minimaxi.com/console/plan
+
+## 配置bash命令
 ```bash
 
 ~/.bashrc
@@ -34,4 +37,18 @@ use_official() {
   unset ANTHROPIC_DEFAULT_OPUS_MODEL ANTHROPIC_DEFAULT_SONNET_MODEL ANTHROPIC_DEFAULT_HAIKU_MODEL
   echo "已恢复官方 Claude"
 }
+```
+
+## 跳过引导登录
+
+```bash
+node --eval "
+const os=require('os'),fs=require('fs'),path=require('path');
+const fp=path.join(os.homedir(),'.claude.json');
+const c=fs.existsSync(fp)?JSON.parse(fs.readFileSync(fp,'utf-8')):{};
+c.hasCompletedOnboarding=true;
+fs.writeFileSync(fp,JSON.stringify(c,null,2));
+console.log('done');
+"
+
 ```
