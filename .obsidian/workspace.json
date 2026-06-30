@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 76.29083245521602,
+            "dimension": 64.17281348788198,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -102,12 +102,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_ai_findings/practice.md",
+                    "file": "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "practice"
+                  "title": "多信息源下的汇总资料能力"
                 }
               }
             ],
@@ -116,7 +116,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 23.70916754478398,
+            "dimension": 35.82718651211802,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -201,7 +201,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "终端：✳ Review AI tricks documentation"
+                  "title": "终端：pengcheng1@H52HH2C4KC:~/Documents/projects/agent/edges"
                 }
               }
             ],
@@ -382,28 +382,31 @@
   },
   "active": "928c30413c030ef8",
   "lastOpenFiles": [
+    "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
+    "knowledge/edges/_eval_agent_desktop/展示.md",
+    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
+    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
+    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
+    "image_001.jpg",
+    "image_001.jpg.tmp-83583-1782810499905-0-ddg41pgel7b",
+    "AGENTS.md",
+    "knowledge/edges/_ai_findings/practice.md",
     "knowledge/resources/Pasted image 20260630170144.png",
     "knowledge/edges/_ai_findings/感受.md",
-    "knowledge/edges/_ai_findings/practice.md",
     "knowledge/edges/_ai_findings/tricks.md",
     "knowledge/edges/_eval_cli/remote-control.md",
     "knowledge/resources/compatible_path-image-8f5608df231645e2a99b595bacbc1bf0.png",
     "knowledge/edges/未命名",
     "extensions/others/twitter-query.md",
-    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
     "extensions/others",
     "knowledge/edges/python/集合.md",
     "knowledge/edges/python/TypeScript ↔ Python 类型对照表.md",
     "knowledge/edges/claude/2026-04-07-How and when to use subagents in Claude Code.md",
     "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
     "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
-    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
     "knowledge/edges/_eval_cli/cli.md",
     "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
-    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
-    "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
     "knowledge/resources/Pasted image 20260625215636.png",
-    "knowledge/edges/_eval_agent_desktop/展示.md",
     "knowledge/projects/benchmark/benchmark_report_zh.md",
     "knowledge/resources/Pasted image 20260625215617.png",
     "knowledge/edges/claude/2026-04-02-Harnessing Claude’s intelligence.md",
@@ -413,7 +416,6 @@
     "knowledge/edges/claude/2026-03-09-Bringing Code Review to Claude Code.md",
     "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
     "knowledge/edges/claude/2026-01-29-skills-A complete guide to building skills for Claude.md",
-    "knowledge/edges/claude/2026-01-22-skills-Building Agents with Skills, Equipping Agents for Specialized Work.md",
     "knowledge/projects/memory/LongMemEval.pdf",
     "knowledge/projects/memory/LoCoMo.pdf",
     "knowledge/projects/memory/finance-bench.pdf",
@@ -424,9 +426,6 @@
     "knowledge/resources/Pasted image 20260621155726.png",
     "knowledge/resources/Pasted image 20260621155613.png",
     "knowledge/resources/Pasted image 20260621155432.png",
-    "knowledge/edges/_eval_agent_desktop",
-    "knowledge/resources/Pasted image 20260531115014.png",
-    "knowledge/resources/Pasted image 20260517015052.png",
-    "knowledge/resources/Pasted image 20260513212240.png"
+    "knowledge/resources/Pasted image 20260531115014.png"
   ]
 }
