@@ -130,12 +130,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_agent_desktop/划词提问.md",
+                    "file": "extensions/new-server/claude code + kimi&minimax.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "划词提问"
+                  "title": "claude code + kimi&minimax"
                 }
               }
             ],
@@ -410,10 +410,13 @@
   },
   "active": "1e73a7564b0b443e",
   "lastOpenFiles": [
+    "extensions/mcp-servers/README.md",
+    "extensions/new-server/claude code + kimi&minimax.md",
+    "extensions/new-server/bootstrap.md",
+    "knowledge/edges/_eval_agent_desktop/artifacts.md",
+    "knowledge/edges/_eval_agent_desktop/划词提问.md",
     "knowledge/resources/Pasted image 20260630212333.png",
     "knowledge/resources/Pasted image 20260630212248.png",
-    "extensions/new-server/bootstrap.md",
-    "knowledge/edges/_eval_agent_desktop/划词提问.md",
     "knowledge/edges/system_prompt/repos.md",
     "extensions/new-server",
     "knowledge/edges/_eval_agent_desktop/chat、匿名.md",
@@ -445,16 +448,13 @@
     "knowledge/edges/_eval_cli/cli.md",
     "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
     "knowledge/resources/Pasted image 20260625215636.png",
-    "knowledge/projects/benchmark/benchmark_report_zh.md",
     "knowledge/resources/Pasted image 20260625215617.png",
-    "knowledge/edges/claude/2026-04-02-Harnessing Claude’s intelligence.md",
     "knowledge/projects/benchmark",
     "knowledge/projects/memory/LongMemEval.pdf",
     "knowledge/projects/memory/LoCoMo.pdf",
     "knowledge/projects/memory/finance-bench.pdf",
     "knowledge/projects/memory",
     "knowledge/resources/Pasted image 20260621185031.png",
-    "knowledge/resources/Pasted image 20260621155726.png",
-    "knowledge/resources/Pasted image 20260621155613.png"
+    "knowledge/resources/Pasted image 20260621155726.png"
   ]
 }
