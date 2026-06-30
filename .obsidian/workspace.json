@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 62.381454162276086,
+            "dimension": 75.86933614330874,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -102,12 +102,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "extensions/others/twitter-query.md",
+                    "file": "knowledge/edges/_ai_tricks/未命名.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "twitter-query"
+                  "title": "未命名"
                 }
               }
             ],
@@ -116,7 +116,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 37.61854583772392,
+            "dimension": 24.130663856691253,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -160,8 +160,52 @@
                   "icon": "terminal",
                   "title": "终端：Kimi Code"
                 }
+              },
+              {
+                "id": "bf7363c8d081e7d8",
+                "type": "leaf",
+                "pinned": true,
+                "state": {
+                  "type": "terminal:terminal",
+                  "state": {
+                    "terminal:terminal": {
+                      "cwd": "/Users/pengcheng1/Documents/projects/agent/edges",
+                      "focus": false,
+                      "profile": {
+                        "args": [
+                          "--login"
+                        ],
+                        "executable": "/bin/zsh",
+                        "followTheme": true,
+                        "name": "",
+                        "platforms": {
+                          "darwin": true
+                        },
+                        "pythonExecutable": "python3",
+                        "restoreHistory": false,
+                        "rightClickAction": "copyPaste",
+                        "successExitCodes": [
+                          "0",
+                          "SIGINT",
+                          "SIGTERM"
+                        ],
+                        "terminalOptions": {
+                          "documentOverride": null
+                        },
+                        "type": "integrated",
+                        "useWin32Conhost": true
+                      },
+                      "profileSourceId": "darwinIntegratedDefault",
+                      "serial": null
+                    }
+                  },
+                  "pinned": true,
+                  "icon": "terminal",
+                  "title": "终端：✳ Claude Code"
+                }
               }
-            ]
+            ],
+            "currentTab": 1
           }
         ],
         "direction": "horizontal"
@@ -338,8 +382,11 @@
   },
   "active": "928c30413c030ef8",
   "lastOpenFiles": [
-    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
+    "knowledge/edges/_eval_cli/remote-control.md",
+    "knowledge/edges/_ai_tricks/未命名.md",
+    "knowledge/edges/未命名",
     "extensions/others/twitter-query.md",
+    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
     "extensions/others",
     "knowledge/edges/python/集合.md",
     "knowledge/edges/python/TypeScript ↔ Python 类型对照表.md",
@@ -369,17 +416,14 @@
     "knowledge/projects/memory/LongMemEval.pdf",
     "knowledge/projects/memory/LoCoMo.pdf",
     "knowledge/projects/memory/finance-bench.pdf",
-    "extensions/skills/conversation-to-notes/SKILL.md",
     "knowledge/projects/memory",
     "knowledge/projects",
-    "extensions/skills/conversation-to-notes/README.md",
     "knowledge/resources/Pasted image 20260621185031.png",
     "knowledge/notes/python",
     "knowledge/resources/Pasted image 20260621155726.png",
     "knowledge/resources/Pasted image 20260621155613.png",
     "knowledge/resources/Pasted image 20260621155432.png",
     "knowledge/edges/_eval_agent_desktop",
-    "extensions/skills/weekly-ai-blogs-digest",
     "knowledge/resources/Pasted image 20260531115014.png",
     "knowledge/resources/Pasted image 20260517015052.png",
     "knowledge/resources/Pasted image 20260513212240.png",
