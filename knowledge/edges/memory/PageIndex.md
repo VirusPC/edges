@@ -8,7 +8,10 @@ Claude Code Grep的问题：
 
 Vector-based RAG 面临的问题：
 1.   **Similarity is not the same as relevance.**
-	1. (Query&Knowledge, Relevant but not similar, **low recall**) **Query and knowledge space mismatch**. Vector retrieval assumes that the _most semantically similar_ text to the query is also the _most relevant_. But this isn’t always true: queries often express _intent_, not _content_.
+	1. (Query&Knowledge, Relevant but not similar, **low recall**) **Query and knowledge space mismatch**. Vector retrieval assumes that the _most semantically similar_ text to the query is also the _most relevant_. But this isn’t always true: queries often express _intent_, not _content_. 
+		1. **无法连点成线。** Microsoft GraphRAG 的研究明确指出 baseline RAG 的两个失败模式：
+			1. 一是"struggles to connect the dots"——当答案需要通过共享属性连接分散信息时，平坦的向量检索无能为力；
+			2. 二是"performs poorly when being asked to holistically understand summarized semantic concepts over large data collections"——无法对大规模语料做全局性的语义理解。
 	2. (Knowledge, Similar but not relevant, **low accuracy**) **Semantic similarity is not equivalent to relevance**. This is especially problematic in domain-specific documents (e.g., financial filings, legal documents, and technical manuals), where many passages share near-identical semantics but differ critically in relevance.
 
 ![[Pasted image 20260513212240.png]]

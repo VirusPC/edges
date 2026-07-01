@@ -130,12 +130,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "extensions/new-server/dns.md",
+                    "file": "knowledge/edges/memory/PageIndex.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "dns"
+                  "title": "PageIndex"
                 }
               }
             ],
@@ -268,7 +268,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "repos",
+                "query": "pageindex",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -289,7 +289,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -408,11 +409,14 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "1e73a7564b0b443e",
+  "active": "33eecac44040d9a2",
   "lastOpenFiles": [
+    "knowledge/edges/agent-sdk/OpenAI Agents SDK.md",
+    "knowledge/edges/ai-vault/AI资产沉淀.md",
+    "knowledge/notes/1. memory.md",
+    "extensions/new-server/dns.md",
     "knowledge/resources/Pasted image 20260701110803.png",
     "extensions/new-server/bootstrap.md",
-    "extensions/new-server/dns.md",
     "extensions/new-server/claude code + kimi&minimax.md",
     "extensions/mcp-servers/README.md",
     "knowledge/edges/_eval_agent_desktop/artifacts.md",
@@ -445,8 +449,6 @@
     "knowledge/edges/python/集合.md",
     "knowledge/edges/python/TypeScript ↔ Python 类型对照表.md",
     "knowledge/edges/claude/2026-04-07-How and when to use subagents in Claude Code.md",
-    "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
-    "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
     "knowledge/resources/Pasted image 20260625215636.png",
     "knowledge/resources/Pasted image 20260625215617.png",
     "knowledge/projects/benchmark",
@@ -454,7 +456,6 @@
     "knowledge/projects/memory/LoCoMo.pdf",
     "knowledge/projects/memory/finance-bench.pdf",
     "knowledge/projects/memory",
-    "knowledge/resources/Pasted image 20260621185031.png",
-    "knowledge/resources/Pasted image 20260621155726.png"
+    "knowledge/resources/Pasted image 20260621185031.png"
   ]
 }
