@@ -18,6 +18,7 @@ Vector-based RAG 面临的问题：
     
 2. **. Embeddings have limited representation power**
 	1. (Knowledge, embeding limitation) **Hard chunking breaks semantic and contextual integrity**. Documents are split into fixed-size chunks (e.g., 512 or 1000 tokens) for embedding. This “hard chunking” often cuts through sentences, paragraphs, or sections, fragmenting meaning and context.
+		1. 一个 chunk 可能是"系统设计原则"，也可能是"某个函数的第 42-143 行实现"。向量空间不区分抽象层次——"设计原则"和"代码实现"在语义上可能很近（都包含"单一职责"关键词），但它们服务于完全不同的认知需求。
 	2. (Query, embedding limitation) **Cannot integrate chat history**. Each query is treated independently. The retriever doesn’t know what’s been asked or answered before.
     
 3. (Knowledge Reference) **Hard to deal with in-document reference**. Documents often contain references such as “see Appendix G” or “refer to Table 5.3”. Since these references don’t share semantic similarity with the referenced content, traditional RAG misses them unless additional preprocessing (like a knowledge graph) is performed.
@@ -35,3 +36,4 @@ https://x.com/akshay_pachaar/status/2058976178908885210
 - https://pageindex.ai/blog/pageindex-intro
 - https://pageindex.ai/blog/pageindex-filesystem
 - https://pageindex.ai/blog/claude-code-agentic-rag
+- https://mp.weixin.qq.com/mp/wappoc_appmsgcaptcha?poc_token=HBu0RGqjJFfIS3ie4X0bv55tQ6SEUWvcwI0KXavt&target_url=https%3A%2F%2Fmp.weixin.qq.com%2Fs%3F__biz%3DMzIzOTU0NTQ0MA%3D%3D%26mid%3D2247560713%26idx%3D1%26sn%3Dfd6b0f4e8ce2b3bd20da9e0189170023
