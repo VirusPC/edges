@@ -130,12 +130,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/ai-engineering/mcp.md",
+                    "file": "knowledge/edges/python/@classmethod.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "mcp"
+                  "title": "@classmethod"
                 }
               }
             ],
@@ -369,13 +369,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/edges/ai-engineering/mcp.md",
+                "file": "knowledge/edges/python/@classmethod.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "mcp 的大纲"
+              "title": "@classmethod 的大纲"
             }
           },
           {
@@ -408,10 +408,11 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "1e73a7564b0b443e",
   "lastOpenFiles": [
-    "knowledge/edges/ai-engineering/Memory.md",
     "knowledge/edges/ai-engineering/mcp.md",
+    "knowledge/edges/python/@classmethod.md",
+    "knowledge/edges/ai-engineering/Memory.md",
     "knowledge/edges/ai-engineering/Context Compression.md",
     "knowledge/edges/ai-engineering/Tool.md",
     "knowledge/edges/memory/PageIndex.md",
@@ -444,7 +445,6 @@
     "knowledge/edges/_ai_findings/practice.md",
     "knowledge/resources/Pasted image 20260630170144.png",
     "knowledge/edges/_ai_findings/感受.md",
-    "knowledge/edges/_ai_findings/tricks.md",
     "knowledge/resources/compatible_path-image-8f5608df231645e2a99b595bacbc1bf0.png",
     "knowledge/edges/未命名",
     "extensions/others",
