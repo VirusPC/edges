@@ -130,12 +130,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/python/@classmethod.md",
+                    "file": "knowledge/edges/python/@dataclass.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "@classmethod"
+                  "title": "@dataclass"
                 }
               }
             ],
@@ -410,8 +410,11 @@
   },
   "active": "1e73a7564b0b443e",
   "lastOpenFiles": [
-    "knowledge/edges/ai-engineering/mcp.md",
+    "knowledge/edges/python/@dataclass.md",
+    "extensions/skills/paper/SKILL.md",
+    "extensions/skills/deep-research/deep-research.md",
     "knowledge/edges/python/@classmethod.md",
+    "knowledge/edges/ai-engineering/mcp.md",
     "knowledge/edges/ai-engineering/Memory.md",
     "knowledge/edges/ai-engineering/Context Compression.md",
     "knowledge/edges/ai-engineering/Tool.md",
@@ -441,10 +444,7 @@
     "knowledge/edges/_eval_agent_desktop/cloud能力.md",
     "image_001.jpg",
     "image_001.jpg.tmp-83583-1782810499905-0-ddg41pgel7b",
-    "AGENTS.md",
-    "knowledge/edges/_ai_findings/practice.md",
     "knowledge/resources/Pasted image 20260630170144.png",
-    "knowledge/edges/_ai_findings/感受.md",
     "knowledge/resources/compatible_path-image-8f5608df231645e2a99b595bacbc1bf0.png",
     "knowledge/edges/未命名",
     "extensions/others",
