@@ -130,12 +130,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/python/@dataclass.md",
+                    "file": "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "@dataclass"
+                  "title": "整体工作体验"
                 }
               }
             ],
@@ -411,6 +411,7 @@
   "active": "1e73a7564b0b443e",
   "lastOpenFiles": [
     "knowledge/edges/python/@dataclass.md",
+    "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
     "extensions/skills/paper/SKILL.md",
     "extensions/skills/deep-research/deep-research.md",
     "knowledge/edges/python/@classmethod.md",
@@ -441,7 +442,6 @@
     "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
     "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
     "knowledge/edges/_eval_agent_desktop/展示.md",
-    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
     "image_001.jpg",
     "image_001.jpg.tmp-83583-1782810499905-0-ddg41pgel7b",
     "knowledge/resources/Pasted image 20260630170144.png",
