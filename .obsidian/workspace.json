@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 40.58624577226607,
+            "dimension": 77.45208568207441,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -130,12 +130,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_cli/cli.md",
+                    "file": "knowledge/notes/1. memory.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "cli"
+                  "title": "1. memory"
                 }
               }
             ],
@@ -144,7 +144,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 59.41375422773394,
+            "dimension": 22.547914317925592,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -407,8 +407,9 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "1e73a7564b0b443e",
   "lastOpenFiles": [
+    "knowledge/edges/papers/2026-01-Memory in the Age of AI Agents, A Survey.md",
     "knowledge/edges/_eval_cli/cli.md",
     "knowledge/edges/memory/PageIndex.md",
     "knowledge/edges/agent-sdk/OpenAI Agents SDK.md",
@@ -439,7 +440,6 @@
     "knowledge/edges/system_prompt/repos.md",
     "extensions/new-server",
     "knowledge/edges/system_prompt",
-    "knowledge/edges/_eval_agent_desktop/匿名模式.md",
     "knowledge/resources/Pasted image 20260630190931.png",
     "image_001.jpg",
     "image_001.jpg.tmp-83583-1782810499905-0-ddg41pgel7b",
