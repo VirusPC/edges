@@ -86,3 +86,8 @@ class AgentState(BaseModel):
 
 LangGraph 三种都支持，但 TypedDict 是社区惯例——state 通常在受控流程里流转，校验开销没必要。Pydantic 一般留给”和外部世界打交道的边界”，比如工具入参/出参、API schema、LLM structured output。dataclass 在 LangGraph 里相对少见，除非你想给 state 挂方法。
 按你做 agent infra 的视角，可以把这三个理解成不同的信任边界层：外部输入用 Pydantic 兜住校验，内部流转用 TypedDict 走轻量通道，纯本地值对象用 dataclass。​​​​​​​​​​​​​​​​
+
+# 4. 直接用class
+在 LeetCode 的算法题中，系统后台传给你的树节点是**真实的实例对象**。这意味着你的算法代码里必定充满了类似 `if node.left:` 或者 `return node.val` 这样的写法。
+
+如果你用 `TypedDict` 来注解 `TreeNode`，这就相当于告诉你的代码编辑器：“嘿，传进来的这个变量是个字典。” 当你顺手敲下 `node.val` 的时候，你的 IDE（比如 VS Code）就会立刻给你划上红线报错：“字典没有 `val` 这个属性，你是不是想写 `node['val']`？”

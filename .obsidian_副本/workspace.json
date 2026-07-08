@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 77.45208568207441,
+            "dimension": 58.14814814814815,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -102,95 +102,24 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
+                    "file": "knowledge/projects/benchmark/benchmark_report_zh.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "多信息源下的汇总资料能力"
-                }
-              },
-              {
-                "id": "9c833cc94222879f",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "knowledge/edges/system_prompt/repos.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "repos"
-                }
-              },
-              {
-                "id": "1e73a7564b0b443e",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "knowledge/notes/1. memory.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "1. memory"
+                  "title": "benchmark_report_zh"
                 }
               }
             ],
-            "currentTab": 8
+            "currentTab": 6
           },
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 22.547914317925592,
+            "dimension": 41.85185185185185,
             "children": [
               {
                 "id": "d202c0e805c2078c",
-                "type": "leaf",
-                "pinned": true,
-                "state": {
-                  "type": "terminal:terminal",
-                  "state": {
-                    "terminal:terminal": {
-                      "cwd": "/Users/pengcheng1/Documents/projects/agent/edges",
-                      "focus": false,
-                      "profile": {
-                        "args": [
-                          "--login"
-                        ],
-                        "executable": "/bin/zsh",
-                        "followTheme": true,
-                        "name": "",
-                        "platforms": {
-                          "darwin": true
-                        },
-                        "pythonExecutable": "python3",
-                        "restoreHistory": false,
-                        "rightClickAction": "copyPaste",
-                        "successExitCodes": [
-                          "0",
-                          "SIGINT",
-                          "SIGTERM"
-                        ],
-                        "terminalOptions": {
-                          "documentOverride": null
-                        },
-                        "type": "integrated",
-                        "useWin32Conhost": true
-                      },
-                      "profileSourceId": "darwinIntegratedDefault",
-                      "serial": null
-                    }
-                  },
-                  "pinned": true,
-                  "icon": "terminal",
-                  "title": "终端：✳ Commit and push changes"
-                }
-              },
-              {
-                "id": "bf7363c8d081e7d8",
                 "type": "leaf",
                 "pinned": true,
                 "state": {
@@ -267,7 +196,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "pageindex",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -292,7 +221,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 282.5
+    "width": 307.5
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -368,13 +297,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/edges/python/@classmethod.md",
+                "file": "knowledge/edges/python/集合.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "@classmethod 的大纲"
+              "title": "集合 的大纲"
             }
           },
           {
@@ -407,53 +336,53 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "1e73a7564b0b443e",
+  "active": "d202c0e805c2078c",
   "lastOpenFiles": [
-    "knowledge/edges/papers/2026-01-Memory in the Age of AI Agents, A Survey.md",
-    "knowledge/edges/_eval_cli/cli.md",
-    "knowledge/edges/memory/PageIndex.md",
-    "knowledge/edges/agent-sdk/OpenAI Agents SDK.md",
-    "knowledge/edges/python/asyncio.md",
-    "knowledge/edges/ai-vault/AI资产沉淀.md",
-    "knowledge/notes/1. memory.md",
-    "knowledge/edges/_eval_agent_desktop/回滚.md",
-    "knowledge/edges/_eval_agent_desktop/chat、匿名.md",
-    "knowledge/edges/_eval_agent_desktop/划词提问.md",
-    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
-    "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
-    "knowledge/edges/python/@dataclass.md",
-    "extensions/skills/paper/SKILL.md",
-    "extensions/skills/deep-research/deep-research.md",
-    "knowledge/edges/python/@classmethod.md",
-    "knowledge/edges/ai-engineering/mcp.md",
-    "knowledge/edges/ai-engineering/Memory.md",
-    "knowledge/edges/ai-engineering/Context Compression.md",
-    "knowledge/edges/ai-engineering/Tool.md",
-    "extensions/new-server/dns.md",
-    "knowledge/resources/Pasted image 20260701110803.png",
-    "extensions/new-server/bootstrap.md",
-    "extensions/new-server/claude code + kimi&minimax.md",
-    "extensions/mcp-servers/README.md",
-    "knowledge/edges/_eval_agent_desktop/artifacts.md",
-    "knowledge/resources/Pasted image 20260630212333.png",
-    "knowledge/resources/Pasted image 20260630212248.png",
-    "knowledge/edges/system_prompt/repos.md",
-    "extensions/new-server",
-    "knowledge/edges/system_prompt",
-    "knowledge/resources/Pasted image 20260630190931.png",
-    "image_001.jpg",
-    "image_001.jpg.tmp-83583-1782810499905-0-ddg41pgel7b",
-    "knowledge/resources/Pasted image 20260630170144.png",
-    "knowledge/resources/compatible_path-image-8f5608df231645e2a99b595bacbc1bf0.png",
-    "knowledge/edges/未命名",
-    "extensions/others",
-    "knowledge/resources/Pasted image 20260625215636.png",
-    "knowledge/resources/Pasted image 20260625215617.png",
+    "knowledge/projects/benchmark/benchmark_report_zh.md",
+    "knowledge/edges/claude/2026-04-02-Harnessing Claude’s intelligence.md",
     "knowledge/projects/benchmark",
+    "knowledge/edges/claude/2026-04-07-How and when to use subagents in Claude Code.md",
+    "knowledge/edges/claude/2026-03-19-Product management on the AI exponential.md",
+    "knowledge/edges/claude/2026-03-13-A “diff” tool for AI, Finding behavioral differences in new models.md",
+    "knowledge/edges/claude/2026-03-09-Bringing Code Review to Claude Code.md",
+    "knowledge/edges/claude/2026-03-05-agents-Common workflow patterns for AI agents.md",
+    "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
+    "knowledge/edges/claude/2026-01-29-skills-A complete guide to building skills for Claude.md",
+    "knowledge/edges/claude/2026-01-23-agents-When to use multi-agent systems (and when not to).md",
+    "knowledge/edges/claude/2026-01-22-skills-Building Agents with Skills, Equipping Agents for Specialized Work.md",
+    "knowledge/edges/claude/2026-01-21-Eight trends defining how software gets built in 2026.md",
+    "knowledge/projects/memory/CLAUDE.md",
+    "knowledge/projects/memory/记忆Benchmark笔记-LongMemEval与LoCoMo.md",
     "knowledge/projects/memory/LongMemEval.pdf",
     "knowledge/projects/memory/LoCoMo.pdf",
     "knowledge/projects/memory/finance-bench.pdf",
+    "extensions/skills/conversation-to-notes/SKILL.md",
     "knowledge/projects/memory",
-    "knowledge/resources/Pasted image 20260621185031.png"
+    "knowledge/projects",
+    "extensions/skills/conversation-to-notes/README.md",
+    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
+    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
+    "knowledge/edges/_eval_agent_desktop/展示.md",
+    "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
+    "knowledge/edges/python/集合.md",
+    "knowledge/edges/python/leetcode tips.md",
+    "knowledge/edges/python/TypeScript ↔ Python 类型对照表.md",
+    "knowledge/edges/python/typing.md",
+    "knowledge/edges/python/TypedDict、dataclass 和 Pydantic BaseModel 有什么区别.md",
+    "knowledge/resources/Pasted image 20260621185031.png",
+    "knowledge/edges/interview/关键问题.md",
+    "knowledge/notes/python",
+    "knowledge/resources/Pasted image 20260621155726.png",
+    "knowledge/resources/Pasted image 20260621155613.png",
+    "knowledge/resources/Pasted image 20260621155432.png",
+    "knowledge/edges/_eval_agent_desktop",
+    "extensions/skills/weekly-ai-blogs-digest",
+    "knowledge/edges/blogs",
+    "knowledge/resources/Pasted image 20260531115014.png",
+    "knowledge/resources/Pasted image 20260517015052.png",
+    "knowledge/resources/Pasted image 20260513212240.png",
+    "knowledge/resources/Pasted image 20260512155448.png",
+    "knowledge/resources/Pasted image 20260512155415.png",
+    "knowledge/resources/Pasted image 20260501214623.png"
   ]
 }
