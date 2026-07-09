@@ -116,12 +116,26 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/system_prompt/repos.md",
+                    "file": "knowledge/edges/agent/Tool/Tool设计.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "repos"
+                  "title": "Tool设计"
+                }
+              },
+              {
+                "id": "1ab67634af022e9e",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "knowledge/edges/agent/Tool/mcp vs cli.md",
+                    "mode": "source",
+                    "source": false
+                  },
+                  "icon": "lucide-file",
+                  "title": "mcp vs cli"
                 }
               },
               {
@@ -186,7 +200,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "终端：✳ Commit and push changes"
+                  "title": "终端：pengcheng1@H52HH2C4KC:~/Documents/projects/agent/edges"
                 }
               },
               {
@@ -267,7 +281,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "pageindex",
+                "query": "面试",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -407,37 +421,42 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "1e73a7564b0b443e",
+  "active": "1ab67634af022e9e",
   "lastOpenFiles": [
+    "knowledge/edges/agent/lifecycle/Claude code 主循环.md",
+    "knowledge/edges/agent/Tool/mcp vs cli.md",
+    "未命名.md",
+    "knowledge/edges/agent/Tool/Tool设计.md",
+    "knowledge/edges/agent/lifecycle",
+    "knowledge/edges/agent/Memory&Context/上下文压缩.md",
+    "knowledge/edges/agent/Tool",
+    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
+    "knowledge/edges/agent/Memory&Context",
+    "未命名",
+    "knowledge/edges/agent",
+    "knowledge/edges/python/并发原语.md",
+    "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
+    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
+    "knowledge/edges/_eval_agent_desktop/匿名模式.md",
+    "knowledge/edges/_eval_agent_desktop/chat、匿名.md",
+    "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
+    "knowledge/edges/_eval_agent_desktop/划词提问.md",
+    "knowledge/archive/报名展示状态机.md",
+    "knowledge/archive/test.md",
+    "extensions/skills/paper/SKILL.md",
+    "knowledge/edges/system_prompt/repos.md",
+    "knowledge/notes/1. memory.md",
     "knowledge/edges/papers/2026-01-Memory in the Age of AI Agents, A Survey.md",
     "knowledge/edges/_eval_cli/cli.md",
     "knowledge/edges/memory/PageIndex.md",
     "knowledge/edges/agent-sdk/OpenAI Agents SDK.md",
     "knowledge/edges/python/asyncio.md",
     "knowledge/edges/ai-vault/AI资产沉淀.md",
-    "knowledge/notes/1. memory.md",
     "knowledge/edges/_eval_agent_desktop/回滚.md",
-    "knowledge/edges/_eval_agent_desktop/chat、匿名.md",
-    "knowledge/edges/_eval_agent_desktop/划词提问.md",
-    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
     "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
-    "knowledge/edges/python/@dataclass.md",
-    "extensions/skills/paper/SKILL.md",
-    "extensions/skills/deep-research/deep-research.md",
-    "knowledge/edges/python/@classmethod.md",
-    "knowledge/edges/ai-engineering/mcp.md",
-    "knowledge/edges/ai-engineering/Memory.md",
-    "knowledge/edges/ai-engineering/Context Compression.md",
-    "knowledge/edges/ai-engineering/Tool.md",
-    "extensions/new-server/dns.md",
     "knowledge/resources/Pasted image 20260701110803.png",
-    "extensions/new-server/bootstrap.md",
-    "extensions/new-server/claude code + kimi&minimax.md",
-    "extensions/mcp-servers/README.md",
-    "knowledge/edges/_eval_agent_desktop/artifacts.md",
     "knowledge/resources/Pasted image 20260630212333.png",
     "knowledge/resources/Pasted image 20260630212248.png",
-    "knowledge/edges/system_prompt/repos.md",
     "extensions/new-server",
     "knowledge/edges/system_prompt",
     "knowledge/resources/Pasted image 20260630190931.png",
@@ -449,11 +468,6 @@
     "extensions/others",
     "knowledge/resources/Pasted image 20260625215636.png",
     "knowledge/resources/Pasted image 20260625215617.png",
-    "knowledge/projects/benchmark",
-    "knowledge/projects/memory/LongMemEval.pdf",
-    "knowledge/projects/memory/LoCoMo.pdf",
-    "knowledge/projects/memory/finance-bench.pdf",
-    "knowledge/projects/memory",
     "knowledge/resources/Pasted image 20260621185031.png"
   ]
 }
