@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 77.45208568207441,
+            "dimension": 39.93677555321391,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -130,12 +130,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "extensions/skills/paper/SKILL.md",
+                    "file": "knowledge/edges/_eval_cli/cli.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "SKILL"
+                  "title": "cli"
                 }
               },
               {
@@ -158,7 +158,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 22.547914317925592,
+            "dimension": 60.06322444678609,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -200,7 +200,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "终端：pengcheng1@H52HH2C4KC:~/Documents/projects/agent/edges"
+                  "title": "终端：✳ Add CLAUDE.md referencing AGENTS.md"
                 }
               },
               {
@@ -421,9 +421,12 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "1ab67634af022e9e",
+  "active": "d202c0e805c2078c",
   "lastOpenFiles": [
+    "knowledge/edges/_eval_cli/cli.md",
+    "CLAUDE.md",
     "extensions/skills/conversation-to-notes/SKILL.md",
+    "extensions/skills/paper/SKILL.md",
     "knowledge/edges/agent/Tool/Tool设计.md",
     "knowledge/edges/agent/Tool/mcp vs cli.md",
     "knowledge/edges/agent/lifecycle/Claude code 主循环.md",
@@ -444,16 +447,13 @@
     "knowledge/edges/_eval_agent_desktop/划词提问.md",
     "knowledge/archive/报名展示状态机.md",
     "knowledge/archive/test.md",
-    "extensions/skills/paper/SKILL.md",
     "knowledge/edges/system_prompt/repos.md",
     "knowledge/notes/1. memory.md",
     "knowledge/edges/papers/2026-01-Memory in the Age of AI Agents, A Survey.md",
-    "knowledge/edges/_eval_cli/cli.md",
     "knowledge/edges/memory/PageIndex.md",
     "knowledge/edges/agent-sdk/OpenAI Agents SDK.md",
     "knowledge/edges/python/asyncio.md",
     "knowledge/edges/ai-vault/AI资产沉淀.md",
-    "knowledge/edges/_eval_agent_desktop/回滚.md",
     "knowledge/resources/Pasted image 20260701110803.png",
     "knowledge/resources/Pasted image 20260630212333.png",
     "knowledge/resources/Pasted image 20260630212248.png",
