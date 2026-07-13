@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 39.93677555321391,
+            "dimension": 74.60484720758693,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -130,12 +130,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_cli/cli.md",
+                    "file": "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "cli"
+                  "title": "5. Auto Compact"
                 }
               },
               {
@@ -158,7 +158,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 60.06322444678609,
+            "dimension": 25.395152792413068,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -306,7 +306,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 282.5
+    "width": 373.5
   },
   "right": {
     "id": "68fc1907ba6c8135",
@@ -421,8 +421,17 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "d202c0e805c2078c",
+  "active": "1ab67634af022e9e",
   "lastOpenFiles": [
+    "knowledge/edges/agent/Memory&Context/claude code/4.Context Collapse.md",
+    "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact.md",
+    "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact Threshold.md",
+    "knowledge/edges/agent/Memory&Context/claude code/3. MicroCompact.md",
+    "knowledge/edges/agent/Memory&Context/claude code/1. Tool 输出预算.md",
+    "knowledge/edges/agent/Memory&Context/claude code/2. Snip.md",
+    "knowledge/edges/agent/Memory&Context/claude code/0. Summary.md",
+    "knowledge/edges/agent/Tool/未命名.md",
+    "knowledge/edges/agent/Memory&Context/claude code",
     "knowledge/edges/_eval_cli/cli.md",
     "CLAUDE.md",
     "extensions/skills/conversation-to-notes/SKILL.md",
@@ -446,14 +455,6 @@
     "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
     "knowledge/edges/_eval_agent_desktop/划词提问.md",
     "knowledge/archive/报名展示状态机.md",
-    "knowledge/archive/test.md",
-    "knowledge/edges/system_prompt/repos.md",
-    "knowledge/notes/1. memory.md",
-    "knowledge/edges/papers/2026-01-Memory in the Age of AI Agents, A Survey.md",
-    "knowledge/edges/memory/PageIndex.md",
-    "knowledge/edges/agent-sdk/OpenAI Agents SDK.md",
-    "knowledge/edges/python/asyncio.md",
-    "knowledge/edges/ai-vault/AI资产沉淀.md",
     "knowledge/resources/Pasted image 20260701110803.png",
     "knowledge/resources/Pasted image 20260630212333.png",
     "knowledge/resources/Pasted image 20260630212248.png",
@@ -465,7 +466,6 @@
     "knowledge/resources/Pasted image 20260630170144.png",
     "knowledge/resources/compatible_path-image-8f5608df231645e2a99b595bacbc1bf0.png",
     "knowledge/edges/未命名",
-    "extensions/others",
     "knowledge/resources/Pasted image 20260625215636.png",
     "knowledge/resources/Pasted image 20260625215617.png",
     "knowledge/resources/Pasted image 20260621185031.png"
