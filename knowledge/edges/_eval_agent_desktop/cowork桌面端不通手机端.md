@@ -1,1 +1,0 @@
-claude kimi 都这样。但其实很不方便。claude code可以半途执行remote control，交控制权给手机，cowork为啥不行？
