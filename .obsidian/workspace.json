@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/world-model/2026-06-02-Li Feifei-世界模型功能分类.md",
+                    "file": "knowledge/edges/_eval_cli/cli.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "2026-06-02-Li Feifei-世界模型功能分类"
+                  "title": "cli"
                 }
               },
               {
@@ -409,6 +409,7 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
+    "knowledge/edges/_eval_cli/未命名.md",
     "extensions/skills/summarize-ai-article-ultra/SKILL.md",
     "knowledge/edges/world-model/2026-06-02-Li Feifei-世界模型功能分类.md",
     "extensions/skills/summarize-ai-article/SKILL.md",
@@ -436,7 +437,6 @@
     "knowledge/edges/_eval_agent_desktop/语音输入能力。.md",
     "knowledge/edges/agent/Memory&Context/claude code/4.Context Collapse.md",
     "knowledge/edges/agent/Memory&Context/claude code/3. MicroCompact.md",
-    "knowledge/edges/agent/Memory&Context/claude code/1. Tool 输出预算.md",
     "knowledge/edges/agent/Memory&Context/claude code",
     "knowledge/edges/agent/lifecycle",
     "knowledge/edges/agent/Tool",
