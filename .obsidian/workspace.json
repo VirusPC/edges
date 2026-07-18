@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "extensions/skills/summarize-ai-article-ultra/SKILL.md",
+                    "file": "knowledge/edges/world-model/2026-06-02-Li Feifei-世界模型功能分类.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "SKILL"
+                  "title": "2026-06-02-Li Feifei-世界模型功能分类"
                 }
               },
               {
@@ -409,9 +409,10 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
+    "extensions/skills/summarize-ai-article-ultra/SKILL.md",
+    "knowledge/edges/world-model/2026-06-02-Li Feifei-世界模型功能分类.md",
     "extensions/skills/summarize-ai-article/SKILL.md",
     "knowledge/edges/world-model/2025-11-10-Li Feifei-空间智能是AI的下一个前沿.md",
-    "extensions/skills/summarize-ai-article-ultra/SKILL.md",
     "knowledge/edges/world-model",
     "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact.md",
     "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact Threshold.md",
