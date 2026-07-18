@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 74.60484720758693,
+            "dimension": 76.55016910935738,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -130,12 +130,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_agent_desktop/remote control.md",
+                    "file": "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "remote control"
+                  "title": "5. Auto Compact"
                 }
               },
               {
@@ -158,7 +158,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 25.395152792413068,
+            "dimension": 23.449830890642616,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -200,7 +200,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "终端：✳ Add CLAUDE.md referencing AGENTS.md"
+                  "title": "终端：zsh"
                 }
               },
               {
@@ -423,38 +423,39 @@
   },
   "active": "1ab67634af022e9e",
   "lastOpenFiles": [
+    "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact Threshold.md",
+    "knowledge/edges/agent/Memory&Context/claude code/0. Summary.md",
+    "knowledge/edges/agent/lifecycle/Claude code 主循环.md",
     "knowledge/edges/_eval_agent_desktop/重编辑会话能力.md",
+    "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
+    "knowledge/edges/_eval_agent_desktop/展示.md",
+    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
+    "knowledge/edges/_eval_agent_desktop/回滚.md",
+    "knowledge/edges/_eval_agent_desktop/划词提问.md",
+    "knowledge/edges/_eval_agent_desktop/对话同步.md",
+    "knowledge/edges/_eval_cli/cli.md",
+    "knowledge/edges/_eval_agent_desktop/remote control & dispatch.md",
+    "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
+    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
+    "knowledge/edges/_eval_agent_desktop/chat、匿名.md",
+    "knowledge/edges/_eval_agent_desktop/artifacts.md",
+    "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
+    "extensions/skills/summarize-ai-article-ultra/SKILL.md",
+    "extensions/skills/summarize-ai-article/SKILL.md",
     "knowledge/resources/Pasted image 20260713153750.png",
     "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact.md",
     "knowledge/edges/_eval_agent_desktop/语音输入能力。.md",
-    "knowledge/edges/_eval_agent_desktop/对话同步.md",
-    "knowledge/edges/_eval_agent_desktop/remote control.md",
     "knowledge/edges/agent/Memory&Context/claude code/4.Context Collapse.md",
-    "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact Threshold.md",
     "knowledge/edges/agent/Memory&Context/claude code/3. MicroCompact.md",
     "knowledge/edges/agent/Memory&Context/claude code/1. Tool 输出预算.md",
     "knowledge/edges/agent/Memory&Context/claude code/2. Snip.md",
-    "knowledge/edges/agent/Memory&Context/claude code/0. Summary.md",
     "knowledge/edges/agent/Tool/未命名.md",
     "knowledge/edges/agent/Memory&Context/claude code",
-    "knowledge/edges/_eval_cli/cli.md",
-    "CLAUDE.md",
-    "extensions/skills/conversation-to-notes/SKILL.md",
-    "extensions/skills/paper/SKILL.md",
-    "knowledge/edges/agent/Tool/Tool设计.md",
-    "knowledge/edges/agent/Tool/mcp vs cli.md",
-    "knowledge/edges/agent/lifecycle/Claude code 主循环.md",
-    "未命名.md",
     "knowledge/edges/agent/lifecycle",
-    "knowledge/edges/agent/Memory&Context/上下文压缩.md",
     "knowledge/edges/agent/Tool",
-    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
     "knowledge/edges/agent/Memory&Context",
     "未命名",
     "knowledge/edges/agent",
-    "knowledge/edges/python/并发原语.md",
-    "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
-    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
     "knowledge/resources/Pasted image 20260701110803.png",
     "knowledge/resources/Pasted image 20260630212333.png",
     "knowledge/resources/Pasted image 20260630212248.png",
