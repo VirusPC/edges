@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/english/draws to a close.md",
+                    "file": "knowledge/edges/english/README.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "draws to a close"
+                  "title": "README"
                 }
               },
               {
@@ -410,6 +410,7 @@
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
     "knowledge/edges/english/draws to a close.md",
+    "knowledge/edges/english/README.md",
     "knowledge/edges/_eval_agent_desktop/形态.md",
     "knowledge/edges/english/eat the cost.md",
     "knowledge/edges/english/feels off.md",
@@ -436,7 +437,6 @@
     "knowledge/edges/_eval_agent_desktop/对话同步.md",
     "knowledge/edges/_eval_agent_desktop/remote control & dispatch.md",
     "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
-    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
     "knowledge/resources/Pasted image 20260713153750.png",
     "knowledge/edges/agent/Memory&Context/claude code",
     "knowledge/edges/agent/lifecycle",
