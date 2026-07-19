@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 76.55016910935738,
+            "dimension": 77.45208568207441,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/english/feels off.md",
+                    "file": "knowledge/edges/english/draws to a close.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "feels off"
+                  "title": "draws to a close"
                 }
               },
               {
@@ -144,7 +144,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 23.449830890642616,
+            "dimension": 22.547914317925592,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -409,6 +409,8 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
+    "knowledge/edges/english/draws to a close.md",
+    "knowledge/edges/_eval_agent_desktop/形态.md",
     "knowledge/edges/english/eat the cost.md",
     "knowledge/edges/english/feels off.md",
     "knowledge/edges/_eval_agent_desktop/steering.md",
@@ -435,8 +437,6 @@
     "knowledge/edges/_eval_agent_desktop/remote control & dispatch.md",
     "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
     "knowledge/edges/_eval_agent_desktop/cloud能力.md",
-    "knowledge/edges/_eval_agent_desktop/chat、匿名.md",
-    "knowledge/edges/_eval_agent_desktop/artifacts.md",
     "knowledge/resources/Pasted image 20260713153750.png",
     "knowledge/edges/agent/Memory&Context/claude code",
     "knowledge/edges/agent/lifecycle",

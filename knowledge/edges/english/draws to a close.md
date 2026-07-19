@@ -1,0 +1,4 @@
+- draws to a close
+- 即将结束
+- 2025 draws to a close and it’s been quite a year. Around this time last year, I wrote a post that reflected [on my life](https://lucumr.pocoo.org/2024/12/26/reflecting-on-life/)
+- https://lucumr.pocoo.org/2025/12/22/a-year-of-vibes/
