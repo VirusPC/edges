@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_cli/cli.md",
+                    "file": "knowledge/edges/_eval_agent_desktop/steering.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "cli"
+                  "title": "steering"
                 }
               },
               {
@@ -409,6 +409,12 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
+    "knowledge/edges/_eval_cli/cli.md",
+    "knowledge/edges/_eval_agent_desktop/steering.md",
+    "knowledge/edges/_eval_agent_desktop/语音输入能力。.md",
+    "knowledge/edges/_eval_agent_desktop/展示.md",
+    "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
+    "knowledge/edges/_eval_agent_desktop/重编辑会话能力.md",
     "knowledge/edges/_eval_cli/未命名.md",
     "extensions/skills/summarize-ai-article-ultra/SKILL.md",
     "knowledge/edges/world-model/2026-06-02-Li Feifei-世界模型功能分类.md",
@@ -419,14 +425,10 @@
     "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact Threshold.md",
     "knowledge/edges/agent/Memory&Context/claude code/0. Summary.md",
     "knowledge/edges/agent/lifecycle/Claude code 主循环.md",
-    "knowledge/edges/_eval_agent_desktop/重编辑会话能力.md",
-    "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
-    "knowledge/edges/_eval_agent_desktop/展示.md",
     "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
     "knowledge/edges/_eval_agent_desktop/回滚.md",
     "knowledge/edges/_eval_agent_desktop/划词提问.md",
     "knowledge/edges/_eval_agent_desktop/对话同步.md",
-    "knowledge/edges/_eval_cli/cli.md",
     "knowledge/edges/_eval_agent_desktop/remote control & dispatch.md",
     "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
     "knowledge/edges/_eval_agent_desktop/cloud能力.md",
@@ -434,9 +436,7 @@
     "knowledge/edges/_eval_agent_desktop/artifacts.md",
     "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
     "knowledge/resources/Pasted image 20260713153750.png",
-    "knowledge/edges/_eval_agent_desktop/语音输入能力。.md",
     "knowledge/edges/agent/Memory&Context/claude code/4.Context Collapse.md",
-    "knowledge/edges/agent/Memory&Context/claude code/3. MicroCompact.md",
     "knowledge/edges/agent/Memory&Context/claude code",
     "knowledge/edges/agent/lifecycle",
     "knowledge/edges/agent/Tool",
