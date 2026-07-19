@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/english/README.md",
+                    "file": "knowledge/edges/_eval_agent_desktop/artifacts.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "README"
+                  "title": "artifacts"
                 }
               },
               {
@@ -407,10 +407,12 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "930f5fa820b5d060",
+  "active": "636505b8300469c8",
   "lastOpenFiles": [
-    "knowledge/edges/english/draws to a close.md",
+    "knowledge/edges/_eval_agent_desktop/artifacts 编辑.md",
+    "knowledge/edges/_eval_agent_desktop/artifacts.md",
     "knowledge/edges/english/README.md",
+    "knowledge/edges/english/draws to a close.md",
     "knowledge/edges/_eval_agent_desktop/形态.md",
     "knowledge/edges/english/eat the cost.md",
     "knowledge/edges/english/feels off.md",
@@ -435,8 +437,6 @@
     "knowledge/edges/_eval_agent_desktop/回滚.md",
     "knowledge/edges/_eval_agent_desktop/划词提问.md",
     "knowledge/edges/_eval_agent_desktop/对话同步.md",
-    "knowledge/edges/_eval_agent_desktop/remote control & dispatch.md",
-    "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
     "knowledge/resources/Pasted image 20260713153750.png",
     "knowledge/edges/agent/Memory&Context/claude code",
     "knowledge/edges/agent/lifecycle",
