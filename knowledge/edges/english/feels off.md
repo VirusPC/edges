@@ -1,0 +1,4 @@
+- feels off
+- 感觉不对劲
+- our shipping step feels off. Research how the good checkouts handle it, then fix ours
+- https://x.com/search?q=claude%20desktop&src=typed_query
