@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 40.24802705749718,
+            "dimension": 71.92784667418263,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -144,7 +144,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 59.75197294250282,
+            "dimension": 28.07215332581736,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -409,6 +409,7 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
+    "knowledge/edges/_eval_agent_desktop/steering.md",
     "knowledge/edges/_eval_api/订阅制下的 api key.md",
     "knowledge/edges/_eval_api",
     "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
@@ -435,7 +436,6 @@
     "knowledge/edges/_eval_agent_desktop/artifacts 编辑.md",
     "knowledge/edges/english/README.md",
     "knowledge/edges/english/draws to a close.md",
-    "knowledge/edges/english/eat the cost.md",
     "knowledge/edges/english",
     "knowledge/edges/world-model",
     "knowledge/resources/Pasted image 20260713153750.png",
