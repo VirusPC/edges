@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 71.92784667418263,
+            "dimension": 77.45208568207441,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_agent_desktop/steering.md",
+                    "file": "knowledge/edges/_eval_cli/kimi code.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "steering"
+                  "title": "kimi code"
                 }
               },
               {
@@ -144,7 +144,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 28.07215332581736,
+            "dimension": 22.547914317925592,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -267,7 +267,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "minimax",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -409,35 +409,36 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
-    "knowledge/edges/_eval_web/raft.md",
-    "knowledge/resources/Pasted image 20260726002442.png",
+    "knowledge/edges/_eval_cli/cli.md",
+    "knowledge/edges/_eval_cli/kimi code.md",
+    "knowledge/projects/benchmark/benchmark_report_zh.md",
+    "knowledge/edges/2026-03-13--大模型参数演进与个人专业硬件部署指南.md",
+    "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact.md",
+    "knowledge/edges/agent/Memory&Context/claude code/4.Context Collapse.md",
+    "knowledge/edges/agent/Memory&Context/claude code/3. MicroCompact.md",
+    "knowledge/edges/agent/Memory&Context/claude code/2. Snip.md",
+    "knowledge/edges/agent/Memory&Context/claude code/1. Tool 输出预算.md",
+    "knowledge/edges/_eval_agent_desktop/形态.md",
+    "knowledge/edges/_eval_agent_desktop/回滚.md",
+    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
+    "knowledge/edges/_eval_agent_desktop/划词提问.md",
+    "knowledge/edges/_eval_agent_desktop/匿名模式.md",
+    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
+    "knowledge/edges/_eval_agent_desktop/对话同步.md",
+    "knowledge/edges/_eval_api/订阅制下的 api key.md",
+    "knowledge/edges/backup/第一课：大模型基础.md",
+    "knowledge/edges/backup/Lesson1 - LLM Foundation 1.md",
+    "knowledge/edges/Lesson1 - LLM Foundation.md",
+    "knowledge/edges/_eval_agent_desktop/artifacts.md",
     "knowledge/edges/_eval_agent_desktop/agent团队.md",
+    "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
+    "knowledge/edges/_eval_agent_desktop/重编辑会话能力.md",
+    "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
+    "knowledge/edges/_eval_agent_desktop/展示.md",
+    "knowledge/resources/Pasted image 20260726002442.png",
     "knowledge/edges/_eval_web",
     "knowledge/resources/Pasted image 20260725233123.png",
-    "knowledge/edges/_eval_api/订阅制下的 api key.md",
-    "knowledge/edges/_eval_agent_desktop/steering.md",
     "knowledge/edges/_eval_api",
-    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
-    "knowledge/projects/benchmark/benchmark_report_zh.md",
-    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
-    "extensions/new-server/claude code + kimi&minimax.md",
-    "knowledge/notes/职业规划.md",
-    "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact.md",
-    "knowledge/edges/agent/Memory&Context/claude code/3. MicroCompact.md",
-    "knowledge/edges/agent/Memory&Context/claude code/1. Tool 输出预算.md",
-    "knowledge/edges/agent/Memory&Context/claude code/0. Summary.md",
-    "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
-    "knowledge/edges/_eval_agent_desktop/语音输入能力。.md",
-    "knowledge/edges/_eval_agent_desktop/形态.md",
-    "knowledge/edges/_eval_agent_desktop/划词提问.md",
-    "knowledge/edges/_eval_agent_desktop/回滚.md",
-    "knowledge/edges/_eval_agent_desktop/remote control & dispatch.md",
-    "knowledge/edges/_eval_agent_desktop/mcp server (connector).md",
-    "knowledge/edges/_eval_agent_desktop/chat、匿名.md",
-    "knowledge/edges/_eval_agent_desktop/artifacts.md",
-    "knowledge/edges/_eval_agent_desktop/重编辑会话能力.md",
-    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
-    "knowledge/edges/_eval_cli/cli.md",
     "knowledge/edges/english",
     "knowledge/edges/world-model",
     "knowledge/resources/Pasted image 20260713153750.png",

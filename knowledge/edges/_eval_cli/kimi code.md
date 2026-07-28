@@ -1,0 +1,1 @@
+1. 缺少 auto approve
