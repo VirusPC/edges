@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_cli/kimi code.md",
+                    "file": "extensions/skills/weekly-ai-blogs-digest/SKILL.md.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "kimi code"
+                  "title": "SKILL.md"
                 }
               },
               {
@@ -409,8 +409,11 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
-    "knowledge/edges/_eval_cli/cli.md",
+    "extensions/skills/summarize-ai-article/SKILL.md",
+    "knowledge/edges/_eval_ai_product/multi-agent.md",
     "knowledge/edges/_eval_cli/kimi code.md",
+    "knowledge/edges/_eval_ai_product",
+    "knowledge/edges/_eval_cli/cli.md",
     "knowledge/projects/benchmark/benchmark_report_zh.md",
     "knowledge/edges/2026-03-13--大模型参数演进与个人专业硬件部署指南.md",
     "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact.md",
@@ -433,8 +436,6 @@
     "knowledge/edges/_eval_agent_desktop/agent团队.md",
     "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
     "knowledge/edges/_eval_agent_desktop/重编辑会话能力.md",
-    "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
-    "knowledge/edges/_eval_agent_desktop/展示.md",
     "knowledge/resources/Pasted image 20260726002442.png",
     "knowledge/edges/_eval_web",
     "knowledge/resources/Pasted image 20260725233123.png",
@@ -447,7 +448,6 @@
     "knowledge/edges/agent/Tool",
     "knowledge/edges/agent/Memory&Context",
     "未命名",
-    "knowledge/edges/agent",
     "knowledge/resources/Pasted image 20260701110803.png",
     "knowledge/resources/Pasted image 20260630212333.png",
     "knowledge/resources/Pasted image 20260630212248.png",

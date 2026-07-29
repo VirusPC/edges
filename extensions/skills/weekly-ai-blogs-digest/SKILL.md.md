@@ -67,12 +67,14 @@ https://block.github.io/goose/blog
 https://zed.dev/blog
 https://roocode.com/blog
 https://www.coderabbit.ai/blog
-https://docs.sit.xiaohongshu.com/doc/08e9a31350a1ee53d9d4a4664665086f?debug=true
 https://www.warp.dev/blog
 https://www.kimi.com/blog/
 https://blog.fsck.com/
 https://www.trychroma.com/research
 https://baoyu.io/translations/2026-05-10/akshay-pachaar-2041146899319971922
-https://cowork.xiaohongshu.com/s/qianfanlearn/index.html
 https://antigravity.google/blog
+https://jxnl.co/writing/#business-and-product
+https://baoyu.io/
+https://lucumr.pocoo.org/
+https://minimaxi.com/blog
 ```
