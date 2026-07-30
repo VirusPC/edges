@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "extensions/skills/weekly-ai-blogs-digest/SKILL.md.md",
+                    "file": "knowledge/edges/_eval_agent_desktop/回滚 & 重编辑会话能力.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "SKILL.md"
+                  "title": "回滚 & 重编辑会话能力"
                 }
               },
               {
@@ -409,33 +409,35 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
+    "knowledge/edges/_eval_agent_desktop/回滚.md",
+    "knowledge/edges/_eval_agent_desktop/回滚 & 重编辑会话能力.md",
+    "knowledge/resources/Pasted image 20260730111855.png",
+    "knowledge/resources/Pasted image 20260730111806.png",
+    "knowledge/resources/Pasted image 20260730111658.png",
+    "knowledge/edges/_eval_agent_desktop/agent团队.md",
+    "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
+    "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
+    "knowledge/edges/_eval_agent_desktop/语音输入能力。.md",
+    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
+    "knowledge/edges/_eval_agent_desktop/形态.md",
+    "knowledge/edges/_eval_agent_desktop/匿名模式.md",
+    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
+    "knowledge/edges/_eval_agent_desktop/对话同步.md",
+    "knowledge/edges/_eval_cli/cli.md",
+    "knowledge/edges/_eval_agent_desktop/划词提问.md",
+    "knowledge/edges/_eval_agent_desktop/steering.md",
+    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
+    "extensions/skills/weekly-ai-blogs-digest/SKILL.md.md",
     "extensions/skills/summarize-ai-article/SKILL.md",
     "knowledge/edges/_eval_ai_product/multi-agent.md",
     "knowledge/edges/_eval_cli/kimi code.md",
     "knowledge/edges/_eval_ai_product",
-    "knowledge/edges/_eval_cli/cli.md",
     "knowledge/projects/benchmark/benchmark_report_zh.md",
     "knowledge/edges/2026-03-13--大模型参数演进与个人专业硬件部署指南.md",
     "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact.md",
     "knowledge/edges/agent/Memory&Context/claude code/4.Context Collapse.md",
     "knowledge/edges/agent/Memory&Context/claude code/3. MicroCompact.md",
     "knowledge/edges/agent/Memory&Context/claude code/2. Snip.md",
-    "knowledge/edges/agent/Memory&Context/claude code/1. Tool 输出预算.md",
-    "knowledge/edges/_eval_agent_desktop/形态.md",
-    "knowledge/edges/_eval_agent_desktop/回滚.md",
-    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
-    "knowledge/edges/_eval_agent_desktop/划词提问.md",
-    "knowledge/edges/_eval_agent_desktop/匿名模式.md",
-    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
-    "knowledge/edges/_eval_agent_desktop/对话同步.md",
-    "knowledge/edges/_eval_api/订阅制下的 api key.md",
-    "knowledge/edges/backup/第一课：大模型基础.md",
-    "knowledge/edges/backup/Lesson1 - LLM Foundation 1.md",
-    "knowledge/edges/Lesson1 - LLM Foundation.md",
-    "knowledge/edges/_eval_agent_desktop/artifacts.md",
-    "knowledge/edges/_eval_agent_desktop/agent团队.md",
-    "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
-    "knowledge/edges/_eval_agent_desktop/重编辑会话能力.md",
     "knowledge/resources/Pasted image 20260726002442.png",
     "knowledge/edges/_eval_web",
     "knowledge/resources/Pasted image 20260725233123.png",
@@ -451,9 +453,6 @@
     "knowledge/resources/Pasted image 20260701110803.png",
     "knowledge/resources/Pasted image 20260630212333.png",
     "knowledge/resources/Pasted image 20260630212248.png",
-    "knowledge/resources/Pasted image 20260630190931.png",
-    "image_001.jpg",
-    "knowledge/resources/Pasted image 20260630170144.png",
-    "knowledge/resources/compatible_path-image-8f5608df231645e2a99b595bacbc1bf0.png"
+    "knowledge/resources/Pasted image 20260630190931.png"
   ]
 }
