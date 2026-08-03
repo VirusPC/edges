@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/agent-sdk/pi/typebox vs zod.md",
+                    "file": "knowledge/edges/agent-sdk/pi/pi vs other agents.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "typebox vs zod"
+                  "title": "pi vs other agents"
                 }
               },
               {
@@ -409,8 +409,9 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
-    "knowledge/edges/_eval_agent_desktop/回滚 & 重编辑会话能力.md",
     "knowledge/edges/agent-sdk/pi/typebox vs zod.md",
+    "knowledge/edges/agent-sdk/pi/pi vs other agents.md",
+    "knowledge/edges/_eval_agent_desktop/回滚 & 重编辑会话能力.md",
     "knowledge/edges/agent-sdk/pi",
     "knowledge/resources/Pasted image 20260730112146.png",
     "knowledge/edges/_eval_agent_desktop/回滚.md",
@@ -440,7 +441,6 @@
     "knowledge/edges/agent/Memory&Context/claude code/5. Auto Compact.md",
     "knowledge/edges/agent/Memory&Context/claude code/4.Context Collapse.md",
     "knowledge/edges/agent/Memory&Context/claude code/3. MicroCompact.md",
-    "knowledge/edges/agent/Memory&Context/claude code/2. Snip.md",
     "knowledge/resources/Pasted image 20260726002442.png",
     "knowledge/edges/_eval_web",
     "knowledge/resources/Pasted image 20260725233123.png",
