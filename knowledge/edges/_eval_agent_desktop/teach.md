@@ -1,0 +1,1 @@
+gemini 的 teach 功能对学习很有帮助。
