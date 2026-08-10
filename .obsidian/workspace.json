@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_agent_desktop/多模态.md",
+                    "file": "knowledge/edges/_eval_agent_desktop/deep research.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "多模态"
+                  "title": "deep research"
                 }
               },
               {
@@ -411,6 +411,8 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
+    "knowledge/edges/_eval_agent_desktop/多模态.md",
+    "knowledge/edges/_eval_agent_desktop/deep research.md",
     "knowledge/resources/Pasted image 20260808194831.png",
     "knowledge/resources/download.mp3",
     "knowledge/notes/职业规划.md",
@@ -422,7 +424,6 @@
     "knowledge/edges/_eval_agent_desktop/cloud能力.md",
     "knowledge/edges/_eval_agent_desktop/artifacts.md",
     "knowledge/edges/_eval_agent_desktop/对话同步.md",
-    "knowledge/edges/_eval_agent_desktop/多模态.md",
     "knowledge/edges/_eval_agent_desktop/语音输入能力。.md",
     "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
     "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
@@ -455,7 +456,6 @@
     "knowledge/resources/Pasted image 20260725233123.png",
     "knowledge/resources/Pasted image 20260713153750.png",
     "knowledge/resources/Pasted image 20260701110803.png",
-    "knowledge/resources/Pasted image 20260630212333.png",
-    "knowledge/resources/Pasted image 20260630212248.png"
+    "knowledge/resources/Pasted image 20260630212333.png"
   ]
 }
