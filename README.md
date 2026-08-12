@@ -1,3 +1,4 @@
+<<<<<<< ours
 # Edges - 认知系统
 
 > 构建可复用的认知优势，提高未来判断效率
@@ -115,3 +116,34 @@ pnpm setup
 ---
 
 *最后更新: 2026-02-19*
+=======
+# Claude Agent SDK Test
+
+This repository is initialized as a minimal Python project that uses Anthropic's Claude Agent SDK.
+
+## What's included
+
+- `claude-agent-sdk` as a project dependency.
+- A small CLI entrypoint that sends a prompt through the Claude Agent SDK.
+- A simple helper module and lightweight tests for local validation.
+
+## Quick start
+
+1. Create and activate a virtual environment.
+2. Install the project in editable mode:
+
+   ```bash
+   pip install -e .
+   ```
+
+3. Run the sample agent prompt:
+
+   ```bash
+   claude-agent-sdk-test "Summarize the repository setup"
+   ```
+
+## Notes
+
+- The project uses the bundled Claude Code CLI that ships with `claude-agent-sdk`.
+- You can customize runtime behavior in `src/claude_agent_sdk_test/agent.py`.
+>>>>>>> theirs

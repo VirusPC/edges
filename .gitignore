@@ -1,3 +1,4 @@
+<<<<<<< ours
 # macOS
 .DS_Store
 .AppleDouble
@@ -25,3 +26,14 @@ node_modules/
 dist/
 extensions/mcp-servers/*/node_modules/
 extensions/mcp-servers/*/dist/
+=======
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.pytest_cache/
+.mypy_cache/
+dist/
+build/
+*.egg-info/
+>>>>>>> theirs

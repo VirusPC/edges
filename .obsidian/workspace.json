@@ -60,12 +60,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_agent_desktop/codex cloud 能力.md",
+                    "file": "knowledge/edges/_eval_ai_product/multica.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "codex cloud 能力"
+                  "title": "multica"
                 }
               },
               {
@@ -411,11 +411,23 @@
   },
   "active": "930f5fa820b5d060",
   "lastOpenFiles": [
+    "knowledge/resources/Pasted image 20260812212243.png",
+    "knowledge/resources/Pasted image 20260812212240.png",
+    "knowledge/edges/_eval_ai_product/multi-agent.md",
+    "knowledge/edges/_eval_ai_product/multica.md",
+    "knowledge/edges/_eval_agent_desktop/codex cloud 能力.md",
+    "tests/test_agent.py",
+    "tests",
+    "src/claude_agent_sdk_test/agent.py",
+    "src/claude_agent_sdk_test/__main__.py",
+    "src/claude_agent_sdk_test/__init__.py",
+    "src/claude_agent_sdk_test",
+    "src",
+    "pyproject.toml",
     "knowledge/resources/Pasted image 20260812195506.png",
     "knowledge/resources/Pasted image 20260812170913.png",
     "knowledge/resources/Pasted image 20260812170846.png",
     "knowledge/edges/_eval_cli/codex.md",
-    "knowledge/edges/_eval_agent_desktop/codex cloud 能力.md",
     "knowledge/resources/Pasted image 20260812164414.png",
     "knowledge/edges/_eval_cli/未命名.md",
     "knowledge/edges/_eval_agent_desktop/teach.md",
@@ -437,25 +449,13 @@
     "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
     "knowledge/edges/_eval_agent_desktop/展示.md",
     "knowledge/resources/世界杯研发流程_配音_晓晓女声_2.mp3",
-    "knowledge/resources/full_voiceover 1.mp3",
-    "knowledge/resources/full_voiceover.mp3",
-    "knowledge/resources/tech_bgm_1min 2.mp3",
-    "knowledge/resources/tech_bgm_1min 1.mp3",
-    "knowledge/resources/tech_bgm_1min.mp3",
-    "knowledge/resources/tech-bgm.mp3",
     "knowledge/edges/agent-sdk/pi/typebox vs zod.md",
     "knowledge/edges/agent-sdk/pi/pi vs other agents.md",
     "knowledge/edges/agent/2026-08-03--Gondolin-agent-sandbox-笔记摘要.md",
-    "knowledge/edges/agent-sdk/pi",
     "knowledge/resources/Pasted image 20260730112146.png",
     "knowledge/edges/_eval_agent_desktop/回滚.md",
     "knowledge/resources/Pasted image 20260730111855.png",
     "knowledge/resources/Pasted image 20260730111806.png",
-    "knowledge/resources/Pasted image 20260730111658.png",
-    "knowledge/edges/_eval_agent_desktop/形态.md",
-    "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
-    "knowledge/edges/_eval_ai_product",
-    "knowledge/resources/Pasted image 20260726002442.png",
-    "knowledge/resources/Pasted image 20260725233123.png"
+    "knowledge/resources/Pasted image 20260730111658.png"
   ]
 }
