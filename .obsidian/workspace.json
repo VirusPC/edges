@@ -74,12 +74,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/langchain/sdk/middleware.md",
+                    "file": "knowledge/edges/_eval_ai_product/multica.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "middleware"
+                  "title": "multica"
                 }
               },
               {
@@ -139,7 +139,7 @@
                 }
               }
             ],
-            "currentTab": 3
+            "currentTab": 4
           },
           {
             "id": "61485840fab31675",
@@ -409,13 +409,14 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "930f5fa820b5d060",
+  "active": "2601bbbb5a325331",
   "lastOpenFiles": [
+    "knowledge/edges/langchain/sdk/middleware.md",
     "knowledge/resources/Pasted image 20260812212943.png",
+    "knowledge/edges/_eval_ai_product/multica.md",
     "knowledge/resources/Pasted image 20260812212243.png",
     "knowledge/resources/Pasted image 20260812212240.png",
     "knowledge/edges/_eval_ai_product/multi-agent.md",
-    "knowledge/edges/_eval_ai_product/multica.md",
     "knowledge/edges/_eval_agent_desktop/codex cloud 能力.md",
     "tests/test_agent.py",
     "tests",
@@ -455,7 +456,6 @@
     "knowledge/edges/agent/2026-08-03--Gondolin-agent-sandbox-笔记摘要.md",
     "knowledge/resources/Pasted image 20260730112146.png",
     "knowledge/edges/_eval_agent_desktop/回滚.md",
-    "knowledge/resources/Pasted image 20260730111855.png",
-    "knowledge/resources/Pasted image 20260730111806.png"
+    "knowledge/resources/Pasted image 20260730111855.png"
   ]
 }
