@@ -7,6 +7,7 @@
 - Claude 不支持先浏览文件系统
 - Minimax Code 不支持
 - ZCode 不支持
+- Kimi Code 不支持
 
 Codex：
 
@@ -21,3 +22,5 @@ Minimax Code:
 ![[Pasted image 20260813155433.png]]
 ZCode
 ![[Pasted image 20260813155826.png]]
+Kimi Code
+![[Pasted image 20260813155933.png]]
