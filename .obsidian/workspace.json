@@ -74,12 +74,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/_eval_agent_desktop/变量、函数跨文件跳转.md",
+                    "file": "knowledge/edges/_eval_agent_desktop/local + code.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "变量、函数跨文件跳转"
+                  "title": "local + code"
                 }
               },
               {
@@ -411,8 +411,9 @@
   },
   "active": "2601bbbb5a325331",
   "lastOpenFiles": [
-    "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
+    "knowledge/resources/Pasted image 20260813154434.png",
     "knowledge/edges/_eval_agent_desktop/变量、函数跨文件跳转.md",
+    "knowledge/edges/_eval_agent_desktop/整体工作体验.md",
     "knowledge/edges/_eval_agent_desktop/local + code.md",
     "knowledge/resources/Pasted image 20260813153810.png",
     "knowledge/edges/_eval_agent_desktop/codex：cloud + code.md",
@@ -455,7 +456,6 @@
     "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
     "knowledge/edges/_eval_agent_desktop/展示.md",
     "knowledge/resources/世界杯研发流程_配音_晓晓女声_2.mp3",
-    "knowledge/edges/agent-sdk/pi/typebox vs zod.md",
-    "knowledge/edges/agent-sdk/pi/pi vs other agents.md"
+    "knowledge/edges/agent-sdk/pi/typebox vs zod.md"
   ]
 }
