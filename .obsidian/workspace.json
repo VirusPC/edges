@@ -411,6 +411,7 @@
   },
   "active": "2601bbbb5a325331",
   "lastOpenFiles": [
+    "knowledge/resources/Pasted image 20260813160020.png",
     "knowledge/resources/Pasted image 20260813155933.png",
     "knowledge/resources/Pasted image 20260813155826.png",
     "knowledge/resources/Pasted image 20260813155433.png",
@@ -436,7 +437,6 @@
     "src/claude_agent_sdk_test",
     "src",
     "pyproject.toml",
-    "knowledge/resources/Pasted image 20260812195506.png",
     "knowledge/edges/_eval_cli/codex.md",
     "knowledge/edges/_eval_cli/未命名.md",
     "knowledge/edges/_eval_agent_desktop/teach.md",
