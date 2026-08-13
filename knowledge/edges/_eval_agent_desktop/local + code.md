@@ -5,6 +5,8 @@
 - Codex 允许先浏览文件系统，指定具体页面来进行修改
 - Cursor Agents Window 也允许
 - Claude 不支持先浏览文件系统
+- Minimax Code 不支持
+- ZCode 不支持
 
 Codex：
 
@@ -15,3 +17,7 @@ Cursor Agents Window：
 
 Claude
 ![[Pasted image 20260813153810.png]]
+Minimax Code:
+![[Pasted image 20260813155433.png]]
+ZCode
+![[Pasted image 20260813155826.png]]
