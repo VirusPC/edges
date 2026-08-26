@@ -102,12 +102,26 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "extensions/system-prompt/user-prompt-verification.md",
+                    "file": "knowledge/notes/Untitled.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "user-prompt-verification"
+                  "title": "Untitled"
+                }
+              },
+              {
+                "id": "d40be39f32feed36",
+                "type": "leaf",
+                "state": {
+                  "type": "markdown",
+                  "state": {
+                    "file": "auto memory 用于 project 的问题.md",
+                    "mode": "source",
+                    "source": false
+                  },
+                  "icon": "lucide-file",
+                  "title": "auto memory 用于 project 的问题"
                 }
               },
               {
@@ -153,7 +167,7 @@
                 }
               }
             ],
-            "currentTab": 6
+            "currentTab": 7
           },
           {
             "id": "61485840fab31675",
@@ -423,10 +437,17 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "c953dc8b198251dd",
+  "active": "33eecac44040d9a2",
   "lastOpenFiles": [
-    "extensions/system-prompt/template.md",
+    "knowledge/notes/Untitled.md",
+    "auto memory 用于 project 的问题.md",
+    "knowledge/notes/memory/project-memory",
+    "knowledge/notes/memory",
+    "knowledge/edges/papers/2026-01-Memory in the Age of AI Agents, A Survey.md",
+    "README.md",
+    "knowledge/posts",
     "extensions/system-prompt/user-prompt-verification.md",
+    "extensions/system-prompt/template.md",
     "english input.md",
     "Untitled.md",
     "extensions/system-prompt",
@@ -453,23 +474,16 @@
     "src/claude_agent_sdk_test/__main__.py",
     "src/claude_agent_sdk_test/__init__.py",
     "src/claude_agent_sdk_test",
-    "src",
-    "pyproject.toml",
     "knowledge/edges/_eval_cli/codex.md",
     "knowledge/edges/_eval_cli/未命名.md",
     "knowledge/edges/_eval_agent_desktop/teach.md",
     "knowledge/edges/_eval_agent_desktop/deep research.md",
     "knowledge/edges/_eval_agent_desktop/多模态.md",
-    "knowledge/resources/download.mp3",
     "knowledge/notes/职业规划.md",
     "knowledge/edges/_eval_agent_desktop/agent团队.md",
     "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
     "knowledge/edges/_eval_agent_desktop/匿名模式.md",
     "knowledge/edges/_eval_agent_desktop/回滚 & 重编辑会话能力.md",
-    "knowledge/edges/_eval_agent_desktop/steering.md",
-    "knowledge/edges/_eval_agent_desktop/cloud能力.md",
-    "knowledge/edges/_eval_agent_desktop/artifacts.md",
-    "knowledge/edges/_eval_agent_desktop/对话同步.md",
-    "knowledge/edges/_eval_agent_desktop/语音输入能力。.md"
+    "knowledge/edges/_eval_agent_desktop/steering.md"
   ]
 }
