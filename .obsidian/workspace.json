@@ -116,12 +116,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "auto memory 用于 project 的问题.md",
+                    "file": "knowledge/notes/memory/user-memory/需求.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "auto memory 用于 project 的问题"
+                  "title": "需求"
                 }
               },
               {
@@ -437,10 +437,12 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "d40be39f32feed36",
   "lastOpenFiles": [
+    "knowledge/notes/memory/project-memory/auto memory 的 project memory 为什么不行.md",
+    "knowledge/notes/memory/user-memory/需求.md",
+    "knowledge/notes/memory/user-memory",
     "knowledge/notes/Untitled.md",
-    "auto memory 用于 project 的问题.md",
     "knowledge/notes/memory/project-memory",
     "knowledge/notes/memory",
     "knowledge/edges/papers/2026-01-Memory in the Age of AI Agents, A Survey.md",
@@ -473,7 +475,6 @@
     "src/claude_agent_sdk_test/agent.py",
     "src/claude_agent_sdk_test/__main__.py",
     "src/claude_agent_sdk_test/__init__.py",
-    "src/claude_agent_sdk_test",
     "knowledge/edges/_eval_cli/codex.md",
     "knowledge/edges/_eval_cli/未命名.md",
     "knowledge/edges/_eval_agent_desktop/teach.md",
@@ -483,7 +484,6 @@
     "knowledge/edges/_eval_agent_desktop/agent团队.md",
     "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
     "knowledge/edges/_eval_agent_desktop/匿名模式.md",
-    "knowledge/edges/_eval_agent_desktop/回滚 & 重编辑会话能力.md",
-    "knowledge/edges/_eval_agent_desktop/steering.md"
+    "knowledge/edges/_eval_agent_desktop/回滚 & 重编辑会话能力.md"
   ]
 }
