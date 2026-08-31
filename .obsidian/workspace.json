@@ -116,12 +116,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/notes/memory/user-memory/需求.md",
+                    "file": "knowledge/projects/memory/Untitled.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "需求"
+                  "title": "Untitled"
                 }
               },
               {
@@ -297,7 +297,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "minimax",
+                "query": "benchmark",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -305,7 +305,7 @@
                 "sortOrder": "alphabetical"
               },
               "icon": "lucide-search",
-              "title": "搜索"
+              "title": "Search"
             }
           },
           {
@@ -439,8 +439,15 @@
   },
   "active": "d40be39f32feed36",
   "lastOpenFiles": [
-    "knowledge/notes/memory/project-memory/auto memory 的 project memory 为什么不行.md",
+    "knowledge/projects/memory/记忆Benchmark笔记-LongMemEval与LoCoMo.md",
+    "knowledge/projects/memory/Untitled.md",
+    "knowledge/projects/benchmark/benchmark_report_zh.md",
+    "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
+    "knowledge/edges/_eval_agent_desktop/多模态.md",
+    "knowledge/edges/_eval_agent_desktop/语音输入能力。.md",
+    "knowledge/edges/_eval_agent_desktop/自定义subagent、skill.md",
     "knowledge/notes/memory/user-memory/需求.md",
+    "knowledge/notes/memory/project-memory/auto memory 的 project memory 为什么不行.md",
     "knowledge/notes/memory/user-memory",
     "knowledge/notes/Untitled.md",
     "knowledge/notes/memory/project-memory",
@@ -477,13 +484,6 @@
     "src/claude_agent_sdk_test/__init__.py",
     "knowledge/edges/_eval_cli/codex.md",
     "knowledge/edges/_eval_cli/未命名.md",
-    "knowledge/edges/_eval_agent_desktop/teach.md",
-    "knowledge/edges/_eval_agent_desktop/deep research.md",
-    "knowledge/edges/_eval_agent_desktop/多模态.md",
-    "knowledge/notes/职业规划.md",
-    "knowledge/edges/_eval_agent_desktop/agent团队.md",
-    "knowledge/edges/_eval_agent_desktop/隐藏文件夹.md",
-    "knowledge/edges/_eval_agent_desktop/匿名模式.md",
-    "knowledge/edges/_eval_agent_desktop/回滚 & 重编辑会话能力.md"
+    "knowledge/edges/_eval_agent_desktop/teach.md"
   ]
 }
