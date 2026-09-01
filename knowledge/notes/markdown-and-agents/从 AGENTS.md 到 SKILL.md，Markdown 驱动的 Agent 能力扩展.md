@@ -38,7 +38,7 @@ graph LR A["单体规则<br/>AGENTS.md"] --> B["模块化规则&技能<br/>Rules
 
 碎片化的痛点最终催生了标准化运动。2025年5月，Sourcegraph 的 [AMP 团队](https://ampcode.com/manual)率先在其产品中使用 `AGENT.md`（单数形式）作为项目指导文件。随后，[OpenAI 正式宣布](https://developers.openai.com/codex/guides/agents-md) `AGENTS.md`（复数形式）为跨工具的供应商中立标准。作为"AI Agent的README"，它在2025年12月被交由 [Agentic AI Foundation](https://www.linuxfoundation.org/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation) 维护，并迅速被[超过六万个开源项目采用](https://openai.com/index/agentic-ai-foundation/)。`AGENTS.md` 的巧妙之处在于它的多重身份：同一个文件既是行为规则（定义编码标准和架构约束），也是项目记忆（承载构建命令和技术栈信息），还是多Agent协调接口（规范不同Agent在微服务边界之间的访问规则）。这种"一个文件，多重角色"的特性，使得跨工具配置第一次有了统一的事实来源。
 
-但是。虽然AGENTS.md已经被大部分Agent所接受，仍有小部分没有支持，例如Claude Code 和 RevanX。公司内大家常用工具的兼容情况可见：[https://docs.xiaohongshu.com/doc/cdd56844f1ef88fa1a1d41fef320d1d3](https://docs.xiaohongshu.com/doc/cdd56844f1ef88fa1a1d41fef320d1d3)
+但是。虽然AGENTS.md已经被大部分Agent所接受，仍有小部分没有支持，例如 Claude Code 和部分公司自研 Agent。落地前建议先拉一张团队常用工具的兼容性矩阵。
 ![[Pasted image 20260403153618.png]]
 ![[Pasted image 20260403153648.png]]
 ![[Pasted image 20260403153818.png]]
@@ -49,15 +49,15 @@ graph LR A["单体规则<br/>AGENTS.md"] --> B["模块化规则&技能<br/>Rules
 
 但无论是单体文件还是统一标准，单文件膨胀的问题始终存在。当项目的规则越写越多，全量加载的成本也越来越高。单体文件的膨胀问题催生了第一次架构升级。
 
-2025年1月，Cursor 在 [v0.45 版本](https://forum.cursor.com/t/using-the-project-rules-in-0-45-2/44447)中引入了 `.cursor/rules/*.mdc` 格式，将原本的巨型单文件拆分为多个独立的规则模块。这次升级的关键突破在于 YAML 前言（Frontmatter）机制：每个 `.mdc` 文件的头部可以声明触发条件和描述信息，Agent 通过读取这些元数据自主判断当前对话是否需要加载该规则（Apply Intelligently）。例如，一条关于数据库迁移的规则只在开发者操作数据库相关文件时才被注入，处理前端样式时则完全忽略。[https://docs.xiaohongshu.com/doc/1b3aebcc275c7839c76ebbcadf131483](https://docs.xiaohongshu.com/doc/1b3aebcc275c7839c76ebbcadf131483)
+2025年1月，Cursor 在 [v0.45 版本](https://forum.cursor.com/t/using-the-project-rules-in-0-45-2/44447)中引入了 `.cursor/rules/*.mdc` 格式，将原本的巨型单文件拆分为多个独立的规则模块。这次升级的关键突破在于 YAML 前言（Frontmatter）机制：每个 `.mdc` 文件的头部可以声明触发条件和描述信息，Agent 通过读取这些元数据自主判断当前对话是否需要加载该规则（Apply Intelligently）。例如，一条关于数据库迁移的规则只在开发者操作数据库相关文件时才被注入，处理前端样式时则完全忽略。
 
 这一设计将指令加载从”全量灌入”升级为”按需注入”，大幅降低了无关 Token 的消耗。同月，GitHub Copilot 也[宣布](https://github.blog/changelog/2025-01-21-custom-repository-instructions-are-now-available-for-copilot-on-github-com-public-preview/)了对 `.github/copilot-instructions.md` 的公开预览支持，模块化配置成为行业共识。
 
-在去年10月份，RevanX 和 CodeWiz 也陆续对Rules提供了支持 ，沉淀了40个日常的Rules，和多个CNY期间的Rules。https://docs.xiaohongshu.com/doc/7ae05128c9e4af9c997597a1c3473fd9
+在去年10月份，公司内几个自研 Agent 也陆续对 Rules 提供了支持，沉淀了一批日常 Rules 和大促活动期间的专项 Rules。
 
 TODO: 此处应有表格。
 
-在Cursor标准上，参考得物、淘天等公司的实践经验，我们通过设置 分层架构、规则模版、 软性的编写建议，并把经验沉淀到了Rules转化Commands（类似现在的skill-creator）来帮助大家理解和贡献Rules。 https://docs.xiaohongshu.com/doc/512997ecc276b601677d21c252e98aa3
+在Cursor标准上，参考业界同行的实践经验，我们通过设置 分层架构、规则模版、 软性的编写建议，并把经验沉淀到了Rules转化Commands（类似现在的skill-creator）来帮助大家理解和贡献Rules。
 
 
 
@@ -77,7 +77,7 @@ TODO: 此处应有表格。
 
 ### 自定义命令：把高频动作模板化
 
-以下是RN大仓初始化Rules的一个Command，支撑了日常和CNY期间大量 Redoc&代码 转 Rules规范的工作。
+以下是 RN 大仓初始化 Rules 的一个 Command，支撑了日常和大促活动期间大量「在线文档 & 代码 → Rules 规范」的转化工作。
 
 ```markdown
 
@@ -361,7 +361,7 @@ YAML 前言中的 `description` 字段告诉主Agent何时应该调用这个子A
 
 一个 `SKILL.md` 文件可以同时是一个斜杠命令（用户输入 `/pr-summary` 触发）和一个子Agent定义（`context: fork` 隔离运行）。在 [v2.1.3 版本](https://code.claude.com/docs/en/changelog)中，Claude Code 正式将 `.claude/commands/` 合并进技能系统——[官方文档](https://code.claude.com/docs/en/skills)明确说明：”`commands/deploy.md` 和 `skills/deploy/SKILL.md` 都会创建 `/deploy`，行为完全一致。”旧的 commands 目录仍然兼容，但不再是推荐写法。
 
-类似的合流也在 [Cursor](https://cursor.com/docs/skills) 上发生。Cursor提供了migrate-to-skills工具，来一键将rules迁移到SKills https://docs.xiaohongshu.com/doc/cdd56844f1ef88fa1a1d41fef320d1d3
+类似的合流也在 [Cursor](https://cursor.com/docs/skills) 上发生。Cursor提供了migrate-to-skills工具，来一键将rules迁移到SKills。
 
 这次合流的意义不只是减少了配置目录。更重要的是，开发者不用再思考”这个需求应该写成 command 还是 agent 还是 rule”——在 Claude Code 里答案统一是 `SKILL.md`，通过前言字段的组合来声明它的触发方式、运行环境和能力边界。
 
@@ -406,8 +406,8 @@ https://claude.com/blog/complete-guide-to-building-skills-for-claude
 展望未来，仍存在一些问题
 1. 从指令和记忆的角度
 	1. **已有知识消费分发困难**：团队在业务迭代中积累了大量组件、工具函数、最佳实践、Rules、Commands 等研发资产，但存在资产分散和Agent兼容困难问题。
-		1. **业务上下文资产分散**：这些资产散落在 Redoc、README等异构来源中，散落在不同的上下文市场和Skills市场中。**以业务为中心**的上下文资产没有得到聚合，Agent和开发者感知不到、消费困难。
-		2. **Agent资产需求存在差异**：不同Agent（Cursor、RevanX、Codewiz、Claude Code、OpenCode）需要的资产结构存在差异（如要求的存放目录不同、skills存在定制yaml头），且不断发展（如rules=>skills）。需要通过某种方式来抹平差异，简化分发和迭代过程。
+		1. **业务上下文资产分散**：这些资产散落在 在线文档平台、README等异构来源中，散落在不同的上下文市场和Skills市场中。**以业务为中心**的上下文资产没有得到聚合，Agent和开发者感知不到、消费困难。
+		2. **Agent资产需求存在差异**：不同Agent（Cursor、Claude Code、OpenCode 及各家自研 Agent）需要的资产结构存在差异（如要求的存放目录不同、skills存在定制yaml头），且不断发展（如rules=>skills）。需要通过某种方式来抹平差异，简化分发和迭代过程。
 	2. **个人经验未沉淀为组织经验**：个人经验 不等于 团队经验，个人提效 不等于 组织提效。大量有价值的经验存在于个人与Agent的对话历史和交互过程中，但尚未得到有效利用，尚未提升为整个组织级经验。
 		1. **沉淀**：用户对 Agent 建议的接受、拒绝与修正行为是判断资产是否有效的天然信号，对话中涌现的高价值技术决策也可沉淀为新资产——但这条回路目前完全缺失。（**沉淀比较麻烦，涉及记忆的总结、抽象层级设定、记忆合并、记忆淘汰等操作**）
 		2. **防腐**：RLHF 的核心洞察就是人类反馈是模型改进最直接的信号。在团队 AI 编码场景中，每一次开发者对 Agent 建议的 accept/reject/edit 都是一个隐式标注行为，其信噪比\高于事后收集的问卷或 review。

@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 66.94444444444444,
+            "dimension": 37.5,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -111,45 +111,17 @@
                 }
               },
               {
-                "id": "d40be39f32feed36",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "CLAUDE.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "CLAUDE"
-                }
-              },
-              {
-                "id": "928c30413c030ef8",
-                "type": "leaf",
-                "state": {
-                  "type": "markdown",
-                  "state": {
-                    "file": "knowledge/edges/_eval_agent_desktop/多信息源下的汇总资料能力.md",
-                    "mode": "source",
-                    "source": false
-                  },
-                  "icon": "lucide-file",
-                  "title": "多信息源下的汇总资料能力"
-                }
-              },
-              {
                 "id": "9c833cc94222879f",
                 "type": "leaf",
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/edges/agent/Tool/Tool设计.md",
+                    "file": "AGENTS.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "Tool设计"
+                  "title": "AGENTS"
                 }
               },
               {
@@ -172,7 +144,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 33.05555555555556,
+            "dimension": 62.5,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -214,7 +186,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "Terminal: pengcheng1@H52HH2C4KC:~/Documents/projects/agent/edges/src/claude_agent_sdk_test"
+                  "title": "Terminal: ⠐ 总结仓库作者的人物画像"
                 }
               },
               {
@@ -257,7 +229,17 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "终端：pengcheng1@H52HH2C4KC:~/Documents/projects/agent/edges"
+                  "title": "Terminal: pengcheng1@H52HH2C4KC:~/Documents/projects/agent/edges"
+                }
+              },
+              {
+                "id": "f47284ee64468523",
+                "type": "leaf",
+                "state": {
+                  "type": "empty",
+                  "state": {},
+                  "icon": "lucide-file",
+                  "title": "New tab"
                 }
               }
             ]
@@ -437,53 +419,53 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "d40be39f32feed36",
+  "active": "d202c0e805c2078c",
   "lastOpenFiles": [
-    "未命名.md",
-    "CLAUDE.md",
-    "Untitled.md",
-    "image_001.jpg",
-    "extensions/new-server/dns.md",
-    "extensions/new-server/claude code + kimi&minimax.md",
-    "extensions/new-server/bootstrap.md",
-    "README.md",
-    "knowledge/notes/Agent Trace.md",
-    "bin/install-skills",
-    "bin/README.md",
-    "extensions/skills/paper-10-questions/SKILL.md",
-    "extensions/skills/paper-10-questions",
-    "extensions/skills/weekly-ai-blogs-digest/SKILL.md",
-    "extensions/skills/horizontal-vertical-research/SKILL.md",
-    "extensions/skills/horizontal-vertical-research",
-    "knowledge/projects/memory/Untitled.md",
-    "extensions/skills/project-memory-remember/SKILL.md",
-    "extensions/skills/project-memory-remember",
-    "extensions/skills/project-memory-init/scripts/operations/remember.py",
-    "extensions/skills/project-memory-init/scripts/operations/init.py",
-    "extensions/skills/project-memory-init/scripts/operations/doctor.py",
-    "extensions/skills/project-memory-init/scripts/operations/__init__.py",
-    "extensions/skills/project-memory-init/scripts/operations",
-    "extensions/skills/project-memory-init/scripts/nodes/entries.py",
-    "extensions/skills/project-memory-init/scripts/README.md",
-    "extensions/skills/project-memory-init/references/templates/type_slug.tmpl.md",
-    "extensions/skills/project-memory-init/references/templates/_entry_line.tmpl.md",
-    "extensions/skills/project-memory-init/references/templates/REFERENCE.tmpl.md",
-    "extensions/skills/project-memory-init/references/templates/PROJECT.tmpl.md",
-    "extensions/skills/project-memory-init/references/templates/FEEDBACK.tmpl.md",
-    "extensions/skills/project-memory-init/references/templates/AGENTS.tmpl.md",
-    "extensions/skills/project-memory-init/references/prior-art/README.md",
-    "extensions/skills/project-memory-init/references/prior-art/04-index-granularity.md",
-    "extensions/skills/project-memory-init/references/prior-art/03-oss-frameworks.md",
-    "extensions/skills/project-memory-init/references/prior-art/02-coding-agents.md",
-    "extensions/skills/project-memory-init/references/prior-art/01-academic-papers.md",
-    "knowledge/resources/Pasted image 20260813160020.png",
-    "knowledge/resources/Pasted image 20260813155933.png",
-    "knowledge/resources/Pasted image 20260813155826.png",
-    "knowledge/resources/Pasted image 20260813155433.png",
-    "knowledge/resources/Pasted image 20260813154434.png",
-    "knowledge/resources/Pasted image 20260813153810.png",
-    "knowledge/resources/Pasted image 20260813153418.png",
-    "knowledge/resources/Pasted image 20260813153209.png",
-    "knowledge/resources/Pasted image 20260812212943.png"
+    "AGENTS.md",
+    "extensions/skills/README.md",
+    "knowledge/edges/2026-03-08--LLM幻觉成因与评估体系缺陷.md.md",
+    "knowledge/notes/2026-09-01--skill-分发改用-npx-skills.md",
+    "extensions/skills/project-memory-init/references/prior-art/OVERVIEW.md",
+    "extensions/skills/project-memory-init/scripts/OVERVIEW.md",
+    "extensions/skills/project-memory-init/references/templates/entry_line.tmpl.md",
+    "knowledge/edges/音视频/img/tiSsbDlaLQAWWFTk/1751625517038-3ab9ab30-5286-4e38-914c-eedff9d6259b-445618.png",
+    "knowledge/edges/音视频/img/tiSsbDlaLQAWWFTk",
+    "knowledge/edges/音视频/index.md",
+    "knowledge/edges/音视频/img",
+    "knowledge/edges/音视频/VAD_ASR_TTS.md",
+    "knowledge/edges/音视频/M3U8.md",
+    "knowledge/edges/音视频/HLS存储额外信息.md",
+    "knowledge/edges/音视频/HLS、M3U8、.TS.md",
+    "knowledge/edges/音视频/HLS.md",
+    "knowledge/edges/音视频/Canvas录制HLS.md",
+    "knowledge/edges/音视频",
+    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736598458038-0b2c544c-c0f2-48e6-bead-77958b62219f-234040.png",
+    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736598451387-3cbbd206-b310-4e79-b804-c66ed306e4af-495129.png",
+    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736598115005-aa3319cf-6261-4a19-9a82-ad702cfe5b25-141132.png",
+    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736597966402-1bb1ec76-3ace-4283-8822-a5bb8c72f8db-101285.png",
+    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736597816707-4dc00b1c-c3ba-4ae4-ac21-3a5fc6a62b66-846224.png",
+    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736597599791-991d370b-bb91-4b85-9ddf-ae17549d3e9c-226523.png",
+    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736597301872-73791888-e7d5-4e6c-a583-26b7520b02dc-749134.png",
+    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736596677770-4ae2702b-7ead-4d6f-8187-6e05e9bc5c3f-011829.png",
+    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736595882554-52a6bf44-0bd2-479b-b025-b758f6e48b05-617218.png",
+    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J",
+    "knowledge/edges/金融量化/技术面/趋势/img/BX6FRutyxK1Wgahe",
+    "knowledge/edges/金融量化/技术面/压力支撑/img/lpecbxKfdi9uVFJG",
+    "knowledge/edges/金融量化/技术面/信号/img/fD5YFHrUpg-_P849",
+    "knowledge/edges/金融量化/技术面/信号/img/BpWC2t8U164mRq-D",
+    "knowledge/edges/金融量化/技术面/信号/img/ATzQ9gXdmdPciS0a",
+    "knowledge/edges/金融量化/技术面/信号/KDJvsRSI/本质.md",
+    "knowledge/edges/金融量化/技术面/信号/KDJvsRSI/index.md",
+    "knowledge/edges/金融量化/技术面/趋势/均线.md",
+    "knowledge/edges/金融量化/技术面/趋势/index.md",
+    "knowledge/edges/金融量化/技术面/趋势/img",
+    "knowledge/edges/金融量化/技术面/趋势/MACD.md",
+    "knowledge/edges/金融量化/技术面/压力支撑/index.md",
+    "knowledge/edges/金融量化/技术面/压力支撑/BOLL（布林指标_布林带_布林支撑）.md",
+    "knowledge/edges/金融量化/技术面/信号/index.md",
+    "knowledge/edges/金融量化/技术面/信号/RSI-震荡市场出场信号.md",
+    "knowledge/edges/金融量化/技术面/信号/KD（J）-入场信号.md",
+    "knowledge/edges/金融量化/技术面/信号/ATR-仓位_止损.md",
+    "knowledge/edges/金融量化/FinancialEngineeringandRiskManagement/FinancialEngineeringandRiskManagementSpecialization/Introduction.md"
   ]
 }
