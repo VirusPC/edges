@@ -1,6 +1,7 @@
 ---
 name: project-memory-remember
 description: 把可复用结论写入本项目 .memory 并刷新索引。用户要求记住时必须用；任务产出可复用结论时也要主动用。
+version: 1.0.0
 ---
 
 # Project Memory Remember

@@ -1,6 +1,7 @@
 ---
 name: conversation-to-notes
 description: 将原始对话记录整理为结构清晰的中文笔记摘要。基于 Facts - Insights - Actions 模型，包含讨论主题、主要结论、认知更新、行动指南及补充说明。
+version: 1.0.0
 ---
 
 

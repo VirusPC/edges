@@ -1,6 +1,7 @@
 ---
 name: project-memory-doctor
 description: 体检整棵项目记忆树，修掉索引不一致（死条目、未登记的记忆目录、重复或错位的条目、别人的 AGENTS.md）。用户要求整理、检查或修复项目记忆时使用；init 返回 needs-doctor 时也用。默认只诊断，改文件要显式确认。
+version: 1.0.0
 ---
 
 # Project Memory Doctor

@@ -1,6 +1,7 @@
 ---
 name: project-memory-init
 description: 在指定目录创建或修复项目记忆（AGENTS.md + .memory）。用户要求初始化项目记忆时使用；不覆盖已有正文。
+version: 1.0.0
 ---
 
 # Project Memory Init

@@ -1,6 +1,7 @@
 ---
 name: project-memory-ask
 description: 用户提问时检索本项目 AGENTS.md 索引的项目记忆。不必等用户说搜索。
+version: 1.0.0
 ---
 
 # Project Memory Ask

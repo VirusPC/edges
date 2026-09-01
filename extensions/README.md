@@ -7,7 +7,7 @@
 ## 目录结构
 
 - **`mcp-servers/`**: [Model Context Protocol](https://modelcontextprotocol.io/) 服务器实现。提供标准化的 Tool 接口供 AI 客户端调用。
-- **`skills/`**: 供外部 Agent 加载的技能定义（Prompt 模板、思维链规范）。
+- **`skills/`**: 供外部 Agent 加载的技能定义（Prompt 模板、思维链规范）。执行 `./bin/install-skills` 分发到本机各 Agent 的全局配置目录。
 - **`subagents/`**: 针对特定复杂任务预配置的子代理。
 - **`tools/`**: 暴露给外部系统的独立工具或脚本适配器。
 - **`docs/`**: 关于接口协议和接入指南的详细文档。

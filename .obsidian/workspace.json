@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 77.45208568207441,
+            "dimension": 66.94444444444444,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -116,12 +116,12 @@
                 "state": {
                   "type": "markdown",
                   "state": {
-                    "file": "knowledge/projects/memory/Untitled.md",
+                    "file": "extensions/new-server/dns.md",
                     "mode": "source",
                     "source": false
                   },
                   "icon": "lucide-file",
-                  "title": "Untitled"
+                  "title": "dns"
                 }
               },
               {
@@ -172,7 +172,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 22.547914317925592,
+            "dimension": 33.05555555555556,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -214,7 +214,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "Terminal: pengcheng1@H52HH2C4KC:~/Documents/projects/agent/edges"
+                  "title": "Terminal: pengcheng1@H52HH2C4KC:~/Documents/projects/agent/edges/src/claude_agent_sdk_test"
                 }
               },
               {
@@ -439,6 +439,18 @@
   },
   "active": "636505b8300469c8",
   "lastOpenFiles": [
+    "extensions/new-server/claude code + kimi&minimax.md",
+    "extensions/new-server/bootstrap.md",
+    "README.md",
+    "knowledge/notes/Agent Trace.md",
+    "bin/install-skills",
+    "bin/README.md",
+    "extensions/skills/paper-10-questions/SKILL.md",
+    "extensions/skills/paper-10-questions",
+    "extensions/skills/weekly-ai-blogs-digest/SKILL.md",
+    "extensions/skills/horizontal-vertical-research/SKILL.md",
+    "extensions/skills/horizontal-vertical-research",
+    "knowledge/projects/memory/Untitled.md",
     "extensions/skills/project-memory-remember/SKILL.md",
     "extensions/skills/project-memory-remember",
     "extensions/skills/project-memory-init/scripts/operations/remember.py",
@@ -447,9 +459,6 @@
     "extensions/skills/project-memory-init/scripts/operations/__init__.py",
     "extensions/skills/project-memory-init/scripts/operations",
     "extensions/skills/project-memory-init/scripts/nodes/entries.py",
-    "extensions/skills/project-memory-init/scripts/nodes/agents.py",
-    "extensions/skills/project-memory-init/scripts/nodes/__init__.py",
-    "extensions/skills/project-memory-init/scripts/nodes",
     "extensions/skills/project-memory-init/scripts/README.md",
     "extensions/skills/project-memory-init/references/templates/type_slug.tmpl.md",
     "extensions/skills/project-memory-init/references/templates/_entry_line.tmpl.md",
@@ -466,15 +475,6 @@
     "extensions/skills/project-memory-init/references/design-decisions.md",
     "extensions/skills/project-memory-init/references/architecture.md",
     "extensions/skills/project-memory-init/references/PROTOCOL.md",
-    "extensions/skills/project-memory-init/references/LAYOUT.md",
-    "extensions/skills/project-memory-init/SKILL.md",
-    "extensions/skills/project-memory-doctor/SKILL.md",
-    "extensions/skills/project-memory-ask/SKILL.md",
-    "knowledge/projects/memory/记忆Benchmark笔记-LongMemEval与LoCoMo.md",
-    "knowledge/projects/memory/Untitled.md",
-    "knowledge/projects/benchmark/benchmark_report_zh.md",
-    "knowledge/edges/claude/2026-03-03-skills-Improving skill-creator.md",
-    "knowledge/edges/_eval_agent_desktop/多模态.md",
     "knowledge/resources/Pasted image 20260813160020.png",
     "knowledge/resources/Pasted image 20260813155933.png",
     "knowledge/resources/Pasted image 20260813155826.png",
