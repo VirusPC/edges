@@ -186,7 +186,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "Terminal: ⠐ 总结仓库作者的人物画像"
+                  "title": "Terminal: ⠂ 总结仓库作者的人物画像"
                 }
               },
               {
@@ -404,7 +404,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 293.5
+    "width": 409.484375
   },
   "left-ribbon": {
     "hiddenItems": {
