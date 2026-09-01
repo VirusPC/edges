@@ -25,3 +25,13 @@ node_modules/
 dist/
 extensions/mcp-servers/*/node_modules/
 extensions/mcp-servers/*/dist/
+
+# 公开仓库：不接收 Office 文档
+# 这类文件正文与元数据都不可 diff 审查，专利交底书/评审材料等极易夹带
+# 内部信息与个人信息。要归档就转成脱敏后的 markdown。
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.pptx
+*.ppt
