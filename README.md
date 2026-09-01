@@ -1,4 +1,3 @@
-<<<<<<< ours
 # Edges - 认知系统
 
 > 构建可复用的认知优势，提高未来判断效率
@@ -67,7 +66,7 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 存放维护本仓库的原生脚本工具。
 
 - **`new-note`**: 快速创建笔记的 CLI 工具。
-- **`init-extensions`**: 初始化/同步外部扩展配置。
+- **`install-skills`**: 把 `extensions/skills/` 分发到本机各 AI Agent 的全局配置目录（软链，改源即时生效）。
 
 ---
 
@@ -88,8 +87,8 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 # (推荐) 初始化本地开发环境并添加 bin/ 路径到系统 PATH
 pnpm setup
 
-# 或者仅执行扩展初始化
-./bin/init-extensions
+# 把 skills 分发到本机各 Agent 的全局配置目录（~/.claude、~/.codex、~/.cursor 等）
+./bin/install-skills
 ```
 
 ---
@@ -116,34 +115,3 @@ pnpm setup
 ---
 
 *最后更新: 2026-02-19*
-=======
-# Claude Agent SDK Test
-
-This repository is initialized as a minimal Python project that uses Anthropic's Claude Agent SDK.
-
-## What's included
-
-- `claude-agent-sdk` as a project dependency.
-- A small CLI entrypoint that sends a prompt through the Claude Agent SDK.
-- A simple helper module and lightweight tests for local validation.
-
-## Quick start
-
-1. Create and activate a virtual environment.
-2. Install the project in editable mode:
-
-   ```bash
-   pip install -e .
-   ```
-
-3. Run the sample agent prompt:
-
-   ```bash
-   claude-agent-sdk-test "Summarize the repository setup"
-   ```
-
-## Notes
-
-- The project uses the bundled Claude Code CLI that ships with `claude-agent-sdk`.
-- You can customize runtime behavior in `src/claude_agent_sdk_test/agent.py`.
->>>>>>> theirs
