@@ -41,7 +41,6 @@ graph LR A["单体规则<br/>AGENTS.md"] --> B["模块化规则&技能<br/>Rules
 但是。虽然AGENTS.md已经被大部分Agent所接受，仍有小部分没有支持，例如 Claude Code 和部分公司自研 Agent。落地前建议先拉一张团队常用工具的兼容性矩阵。
 ![[Pasted image 20260403153618.png]]
 ![[Pasted image 20260403153648.png]]
-![[Pasted image 20260403153818.png]]
 > **行动指南：** 在项目根目录创建 `AGENTS.md`（或对应工具的规则文件），写入技术栈、命名规范、目录结构和构建命令。先从一个文件开始，让AI了解你的项目基本情况。许多工具也提供了/init命令来直接根据项目内容和你的需求描述生成合适的AGENTS.md
 
 
