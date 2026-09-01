@@ -1,7 +1,7 @@
 
 注意cloudflare把 橙云关掉，开启 dns only。
 
-![[Pasted image 20260701110803.png]]
+![Cloudflare 关闭橙云、切换为 DNS only](./assets/cloudflare-dns-only.png)
 
 否则，端口会无人应答哦
 ```bash
