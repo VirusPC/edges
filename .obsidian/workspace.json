@@ -114,14 +114,14 @@
                 "id": "9c833cc94222879f",
                 "type": "leaf",
                 "state": {
-                  "type": "markdown",
+                  "type": "split-diff-view",
                   "state": {
-                    "file": "AGENTS.md",
-                    "mode": "source",
-                    "source": false
+                    "aFile": ".obsidian/workspace.json",
+                    "bFile": ".obsidian/workspace.json",
+                    "aRef": ""
                   },
-                  "icon": "lucide-file",
-                  "title": "AGENTS"
+                  "icon": "diff",
+                  "title": "Diff: workspace.json  (Working Tree)"
                 }
               },
               {
@@ -186,7 +186,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "Terminal: ⠂ 总结仓库作者的人物画像"
+                  "title": "Terminal: ✳ 总结仓库作者的人物画像"
                 }
               },
               {
@@ -419,7 +419,7 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "d202c0e805c2078c",
+  "active": "33eecac44040d9a2",
   "lastOpenFiles": [
     "AGENTS.md",
     "extensions/skills/README.md",
