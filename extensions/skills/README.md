@@ -17,16 +17,59 @@ description: <一句话，说明何时该触发、何时不该触发>
 
 `description` 是 agent 决定要不要加载这个 skill 的唯一依据，写清楚触发场景和边界（"如果 X 请改用 Y"），不要写成 `summarize ai article` 这种同义反复。
 
+`name` 与目录名一致这条**没有机器校验了**（旧的 `install-skills` 脚本会拦，已退役）。`npx skills` 按 frontmatter 里的 `name` 决定安装后的目录名，本地目录名只是兜底；两个 skill 的 `name` 撞车时，后一个会被静默丢弃。
+
+### 文件命名约束
+
+**skill 目录下不要出现这些文件，`npx skills` 分发时会静默丢弃它们**（每一层目录都生效）：
+
+| 丢弃 | 保留 |
+| --- | --- |
+| `README.md` | `OVERVIEW.md`、`CHANGELOG.md`、`LICENSE`、`notes.txt` |
+| 任何 `_` 开头的文件（`_frag.md`、`__init__.py`） | `type_slug.md`（下划线不在开头） |
+| `metadata.json` | `.gitignore` 等点文件 |
+
+踩过一次：`project-memory-init` 的 `references/templates/_entry_line.tmpl.md` 是脚本运行时要读的模板，被丢弃后 `remember` 直接报「模板不存在」；`scripts/README.md` 和 `references/prior-art/README.md` 被丢弃后，`SKILL.md` 和 `architecture.md` 里指向它们的链接全成死链。现已分别改名为 `entry_line.tmpl.md` 和 `OVERVIEW.md`。
+
+> 这条规则来自实测，不是文档——`vercel-labs/skills` 的 README 和 main 分支源码都只声明排除 `metadata.json` / `.git` / `__pycache__`。改完 skill 目录结构后，用 `diff <(cd <src> && find . -type f | sort) <(cd ~/.agents/skills/<name> && find . -type f | sort)` 复核一遍。
+
 ## 分发
 
+统一走 [`vercel-labs/skills`](https://github.com/vercel-labs/skills)。
+
+### 本机（作者）
+
 ```bash
-./bin/install-skills            # 装到本机所有 agent 的全局配置目录
-./bin/install-skills --list     # 看装到哪了
-./bin/install-skills --dry-run  # 预演
-./bin/install-skills --uninstall
+pnpm skills:install
 ```
 
-分发走软链，**改本目录下的文件即时生效**，无需重跑。只有新增或删除 skill 才需要重跑。详见 [`bin/README.md`](../../bin/README.md)。
+内容装到中枢 `~/.agents/skills/<name>/`（实体拷贝），再给六个 agent 目录各建一条软链。Codex、Cursor、Gemini CLI、opencode 其实原生就读中枢（Codex 源码里 `~/.codex/skills` 已标 deprecated），这几条软链是冗余的，但无害。
+
+> ⚠️ **改完必须重跑。** 中枢里是实体拷贝而非软链——`npx skills` 会把源目录里的软链一并 `dereference` 掉——所以改了本目录下的文件不会自动生效。`npx skills update` 对本地路径源直接跳过（跳过理由就是 `Local path`），只能重跑上面那条命令。
+
+### 外部用户
+
+```bash
+npx skills add VirusPC/edges/extensions/skills
+```
+
+**子路径不能省。** `npx skills add VirusPC/edges` 装不到本目录的 skill：CLI 的扫描根是一张写死的表，`extensions/` 不在表里，而本仓库的 `.claude/skills/`、`.agents/skills/`、`.codex/skills/` 等目录在表里、且 vendored 了 openspec 的产物——短命令会把那些当成本仓库的 skill 装走。子路径形式把扫描根整个换掉，正好只命中这 10 个。
+
+单装某一个：
+
+```bash
+npx skills add VirusPC/edges/extensions/skills --skill paper-10-questions
+```
+
+> `project-memory-ask` / `-doctor` / `-init` / `-remember` **必须四个一起装**。后三个靠同级目录定位 `project-memory-init`，单独装会找不到它的 `scripts/memory.py` 和 `references/`。
+
+### 卸载
+
+```bash
+npx skills remove <name> -g
+```
+
+它按名字删，会清掉所有 agent 目录下的同名条目，**不区分是谁装的**。
 
 ## 命名注意
 

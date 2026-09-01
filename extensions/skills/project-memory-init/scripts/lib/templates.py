@@ -17,7 +17,8 @@ TEMPLATE_DIR = SKILL_DIR / "references" / "templates"
 ENTRY_OUTPUT_PATTERN = "type_slug.md"
 
 # 下层索引与条目索引共用这一份行片段：都是「一个链接加一句说明」。
-ENTRY_LINE_TEMPLATE = "_entry_line.md"
+# 名字不能以下划线开头——`npx skills` 分发时会丢弃 `_` 开头的文件和 README.md。
+ENTRY_LINE_TEMPLATE = "entry_line.md"
 
 PLACEHOLDER_PATTERN = re.compile(r"\{(\w+)\}")
 

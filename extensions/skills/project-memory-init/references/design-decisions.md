@@ -166,13 +166,13 @@ N=8 时常驻成本已是官方同规模的约 6 倍，差距随条数线性拉�
 2. **容量阈值** —— 聚合文件超过 N 条或 M KB 时提示拆成 module 主题文件。改动小，缓解不治根，可作为 1 的补充。
 3. **彻底对齐官方** —— 一条记忆一个文件，`kind` 降为 frontmatter 字段。scaling 最好，但是重写，且丢掉 `rg` 与 review 优势。
 
-**外部调研（2026-08-25）**：四路独立调研均指向方案 1，见 [`prior-art/README.md`](prior-art/README.md)。三条改变结论的证据：
+**外部调研（2026-08-25）**：四路独立调研均指向方案 1，见 [`prior-art/OVERVIEW.md`](prior-art/OVERVIEW.md)。三条改变结论的证据：
 
 - **粒度不是越细越好**。LongMemEval 的消融是倒 U 形——中间粒度最优，再拆成原子事实反而丢信息。Callan 1994 则显示两级证据结合永远最好（+7%~23.5%）。所以方案 1 应是「文件级索引行**保留**、条目级索引**新增**」，不是替换。
 - **问题定性要升级：这是正确性问题，不是账单问题**。Lost in the Middle 实测到答案埋在中间时准确率低于闭卷基线；Chroma 实测到单个似是而非的段落就能把准确率压到 needle-only 基线以下。所以「取消无条件先读 `FEEDBACK.md`」的优先级高于省 token。
 - **别指望索引提升准确率**。arXiv 2607.26637 实测组织化只降低检索成本（4.0 分 → 1.4 分/查询）、不提高答对率。索引设计的目标函数应定为「最小化读进上下文的字节数」。
 
-阈值取值、以及 `upsert_h2` 标题匹配缺口（basic-memory 的 permalink 式稳定 id）和新鲜度缺口（Graphiti 的失效不删除、Copilot 的 citation + 28 天 TTL）的具体做法，同见 [`prior-art/README.md`](prior-art/README.md)。
+阈值取值、以及 `upsert_h2` 标题匹配缺口（basic-memory 的 permalink 式稳定 id）和新鲜度缺口（Graphiti 的失效不删除、Copilot 的 citation + 28 天 TTL）的具体做法，同见 [`prior-art/OVERVIEW.md`](prior-art/OVERVIEW.md)。
 
 ## 2026-08-26：改为 .memory + 索引/内容分离
 
@@ -192,7 +192,7 @@ N=8 时常驻成本已是官方同规模的约 6 倍，差距随条数线性拉�
 
 **为什么不退成官方的单一 `MEMORY.md`**：`kind` → 文件的路由关系保持显式，remember 只需重算一个入口；三个入口各自也更小。代价是多一跳（`AGENTS.md` → 入口 → 正文），但三个入口都很小，可以一次并读。
 
-**与调研的对账**（[`prior-art/README.md`](prior-art/README.md)）：兑现了「条目级索引」、「文件级索引行保留而非替换」（`AGENTS.md` 仍列三个入口）、「取消无条件全量加载」、以及 permalink 式稳定 id。仍未兑现：索引行数硬上限、失效不删除、citation 读时校验、单次加载 3~5 条的强制手段——全部转入待议。
+**与调研的对账**（[`prior-art/OVERVIEW.md`](prior-art/OVERVIEW.md)）：兑现了「条目级索引」、「文件级索引行保留而非替换」（`AGENTS.md` 仍列三个入口）、「取消无条件全量加载」、以及 permalink 式稳定 id。仍未兑现：索引行数硬上限、失效不删除、citation 读时校验、单次加载 3~5 条的强制手段——全部转入待议。
 
 ### 索引是派生产物，全量重算
 
@@ -849,7 +849,7 @@ diff <(rg -o '^## .*— (.*)' -r '$1' PROTOCOL.md) <(rg -o '^## .*— (.*)' -r '
 
 ### `AGENTS.md` 同时充当 `MEMORY.md`
 
-**事实**：本方案的 `AGENTS.md` **形式像 `CLAUDE.md`、功能像 `MEMORY.md`**（调研早有此判断，见 [`prior-art/README.md`](prior-art/README.md) 与 [`prior-art/04-index-granularity.md`](prior-art/04-index-granularity.md)，这里把它升成一条决策）。Claude Code 里这是**两个文件、两套机制**：`CLAUDE.md` 是人写的常驻指令，`/memories/MEMORY.md` 是记忆工具维护的索引。我们把两个角色合进了同一份文件。
+**事实**：本方案的 `AGENTS.md` **形式像 `CLAUDE.md`、功能像 `MEMORY.md`**（调研早有此判断，见 [`prior-art/OVERVIEW.md`](prior-art/OVERVIEW.md) 与 [`prior-art/04-index-granularity.md`](prior-art/04-index-granularity.md)，这里把它升成一条决策）。Claude Code 里这是**两个文件、两套机制**：`CLAUDE.md` 是人写的常驻指令，`/memories/MEMORY.md` 是记忆工具维护的索引。我们把两个角色合进了同一份文件。
 
 **合并换来的最大好处：加载机制白拿。** 记忆体系最难的一环从来不是「怎么存」，而是「agent 凭什么会去读」。官方的记忆工具为此专门规定了「每次会话开始只自动读 `MEMORY.md` 这一个文件」。而 `AGENTS.md` 的加载语义**已经被各家 harness 内建了**：根那份无条件常驻，子树那份在「读到该子树的文件」时才加载（[`prior-art/02-coding-agents.md`](prior-art/02-coding-agents.md) 记着官方原话 "not at launch, but when Claude reads files in those subtrees"，Amp 用 41 份 `AGENTS.md` 验证过这个规模）。把索引直接写进 `AGENTS.md`，于是**发现机制和渐进加载都不必自己造**——这正是整套方案能只用「文件 + `rg`」、不需要任何常驻进程或向量库的原因。
 

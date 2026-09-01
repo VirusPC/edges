@@ -72,7 +72,8 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 存放维护本仓库的原生脚本工具。
 
 - **`new-note`**: 快速创建笔记的 CLI 工具。
-- **`install-skills`**: 把 `extensions/skills/` 分发到本机各 AI Agent 的全局配置目录（软链，改源即时生效）。
+
+> skill 分发不在 `bin/`。见下方「接入初始化」。
 
 ---
 
@@ -100,8 +101,16 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 pnpm setup
 
 # 把 skills 分发到本机各 Agent 的全局配置目录（~/.claude、~/.codex、~/.cursor 等）
-./bin/install-skills
+pnpm skills:install
 ```
+
+只想用 skill、不接入整套系统的话，不必克隆本仓库：
+
+```bash
+npx skills add VirusPC/edges/extensions/skills
+```
+
+子路径不能省，原因见 [`extensions/skills/README.md`](extensions/skills/README.md)。
 
 ---
 

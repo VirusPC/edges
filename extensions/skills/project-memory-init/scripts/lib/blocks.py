@@ -37,7 +37,7 @@ ENTRIES_END = "<!-- project-memory-entries:end -->"
 # 外层是唯一的顶层区块，所以顶层不需要顺序表。
 INNER_BLOCK_ORDER = (LOCAL_START, CHILDREN_START, AUTO_START)
 
-# 下层索引里的一个条目，写入形态见 _entry_line.tmpl.md。路径从链接目标取而不是从
+# 下层索引里的一个条目，写入形态见 entry_line.tmpl.md。路径从链接目标取而不是从
 # 标签取：标签带不带反引号都能解析，旧文件和手写条目一样认。
 INDEX_ENTRY_PATTERN = re.compile(r"^- \[[^\]]*\]\(([^)]+)\)(?: — (.*))?$", re.MULTILINE)
 
