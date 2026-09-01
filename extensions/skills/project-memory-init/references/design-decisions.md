@@ -1025,6 +1025,20 @@ scripts/lib/               → blocks / templates / paths / provenance
 
 **模板路径**：`templates.py` 搬进 `lib/` 后不再用 `__file__` 往上两层猜 skill 根，改由 `lib/paths.py` 的 `SKILL_DIR` 提供（`parents[2]`：lib → scripts → skill 根）。
 
+## 2026-09-02：Init 只允许用户手动调用
+
+**背景**：Remember 会在有可复用结论时主动跑。旧写法是目标目录还没 Init 时，agent 先跑 `$project-memory-init` 再写。等于一次「这条值得记」的判断，顺手给仓库装上 `AGENTS.md` + `.memory/`（进 git）。
+
+**决策**：Init 只在用户明确要求时运行。Remember / Ask / Doctor 都不得代为调用。没 Init 时 Remember 拒写，告诉用户去跑 Init，不要自己建。
+
+**理由**：
+
+- Init 是「这个项目要不要用这套记忆系统」，Remember 是「这条结论要不要落盘」。两件事不能绑在一次 agent 判断里。
+- 自动 Init 还容易把写入目标选成刚改过的子目录，记忆随改动集裂开。协议说拿不准写记忆根、树要稀疏；自动建目录把闸门拆了。
+- 用户说「记住」也一样：先问要不要 Init，不要替他启用。
+
+这翻掉「remember 的主路径改回内联」里把「目标目录还没初始化、要先 init」列为 subagent 逃生舱那一条。现在没 Init 不是委派理由，是停下来问。
+
 ## 待议
 
 - 索引行数/字节硬上限（调研建议 200 行 / 25 KB，触及 75% 时告警）尚未实现。判据见「`AGENTS.md` 同时充当 `MEMORY.md`」：功能等同索引，就该用 `MEMORY.md` 的硬上限而不是 `CLAUDE.md` 的软建议。
