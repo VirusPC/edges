@@ -29,7 +29,7 @@ version: 1.0.0
 
 返回的 `path` 和 `action`（`created` / `updated`）就是写入凭据——索引是全量重算的，返回了路径就说明索引里有它，不必再查一遍。`agentsAction` 是 `needs-doctor` 时要一并说明：那表示该目录的 `AGENTS.md` 还没纳管，索引没能刷新。
 
-目标目录还没初始化（没有 `.memory/` 或本套 `AGENTS.md`）时，脚本会拒绝写入。告诉用户去跑 `$project-memory-init`，不要自己 Init。
+目标目录还没初始化（没有 `.memory/` 或本套 `AGENTS.md`）时，脚本会拒绝写入。问用户要不要 Init，得到明确同意后再跑 `$project-memory-init`；不要自己 Init。
 
 ## 什么时候改派 subagent
 

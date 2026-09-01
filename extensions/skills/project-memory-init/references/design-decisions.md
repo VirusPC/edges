@@ -1029,7 +1029,7 @@ scripts/lib/               → blocks / templates / paths / provenance
 
 **背景**：Remember 会在有可复用结论时主动跑。旧写法是目标目录还没 Init 时，agent 先跑 `$project-memory-init` 再写。等于一次「这条值得记」的判断，顺手给仓库装上 `AGENTS.md` + `.memory/`（进 git）。
 
-**决策**：Init 只在用户明确要求时运行。Remember / Ask / Doctor 都不得代为调用。没 Init 时 Remember 拒写，告诉用户去跑 Init，不要自己建。
+**决策**：Init 只在用户明确要求时运行。Remember / Ask / Doctor 都不得代为调用。没 Init 时 Remember 拒写，问用户要不要 Init，同意后再跑；不要自己建。
 
 **理由**：
 
@@ -1037,7 +1037,7 @@ scripts/lib/               → blocks / templates / paths / provenance
 - 自动 Init 还容易把写入目标选成刚改过的子目录，记忆随改动集裂开。协议说拿不准写记忆根、树要稀疏；自动建目录把闸门拆了。
 - 用户说「记住」也一样：先问要不要 Init，不要替他启用。
 
-这翻掉「remember 的主路径改回内联」里把「目标目录还没初始化、要先 init」列为 subagent 逃生舱那一条。现在没 Init 不是委派理由，是停下来问。
+这翻掉「remember 的主路径改回内联」里把「目标目录还没初始化、要先 init」列为 subagent 逃生舱那一条。现在没 Init 不是委派理由，是停下来问要不要启用。
 
 ## 待议
 
