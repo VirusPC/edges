@@ -107,7 +107,7 @@ pnpm skills:install
 只想用 skill、不接入整套系统的话，不必克隆本仓库：
 
 ```bash
-npx skills add VirusPC/edges/extensions/skills
+npx skills@latest add VirusPC/edges/extensions/skills
 ```
 
 子路径不能省，原因见 [`extensions/skills/README.md`](extensions/skills/README.md)。

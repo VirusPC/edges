@@ -33,21 +33,26 @@ Claude Code 是这里唯一的孤岛，值得留意——它的 `skills` 生态�
 
 **判断**：这类工具选型，先分清它是**分发器**还是**链接器**。分发器优化的是「让别人拿到」，链接器优化的是「我自己改得快」。两个目标在实现上是冲突的（拷贝 vs 软链），指望一个工具全占是不现实的。这次是主动用「即时生效」换「工具链统一」。
 
-## 三、实测出的文件丢弃规则（文档和源码都没写）
+## 三、`npx <cmd>` 可能根本没在跑你以为的那个包
 
-**每一层目录**都会静默丢弃这三类文件：
+这条是本次最贵的一课，而且它先把我骗过去了一轮。
 
-| 丢弃 | 保留 |
-| --- | --- |
-| `README.md` | `OVERVIEW.md`、`CHANGELOG.md`、`LICENSE`、`notes.txt` |
-| 任何 `_` 开头的文件 | `type_slug.md`（下划线不在开头） |
-| `metadata.json` | `.gitignore` 等点文件 |
+实测发现分发后少了 6 个文件——`README.md` 和所有 `_` 开头的（含 `__init__.py`、一个运行时模板）。每层目录都丢，稳定复现。我据此认定「发布版行为与公开源码不一致」，还改名绕开、写进了文档。
 
-而 `vercel-labs/skills` 的 README 和 main 分支源码**都只声明排除 `metadata.json` / `.git` / `__pycache__` / `__pypackages__`**，没有 `README.md`，也没有下划线规则。发布版行为与公开源码不一致。
+**归因是错的。** 真实原因：本机全局装了个 `skills@1.0.18`（`~/.nvm/.../lib/node_modules/skills`，2026-01 装的），`npx skills` 发现 PATH 上有同名 binary 就直接执行，**根本不去下载 registry 上的 1.5.23**。而且删掉全局包之后仍然不对——npm 又把 `skills` 这个命令名解析到了已废弃的 `add-skill@1.0.29`：
 
-代价是真金白银的：`project-memory-init` 的 `references/templates/_entry_line.tmpl.md` 是脚本运行时要读的模板，被丢弃后 `remember` 直接 `{"ok": false, "error": "模板不存在"}`；`scripts/README.md` 被丢弃后，`SKILL.md` 里指向它的链接成了死链。已分别改名为 `entry_line.tmpl.md` 和 `OVERVIEW.md`。
+```
+npx skills --version         # 0.1.0    ← 老包，丢文件
+npx skills@latest --version  # 1.5.23   ← 真包，一个不丢
+```
 
-**教训**：**「装完能跑」不等于「装完是全的」。** 当时如果只看安装器打印的 `✓ Installed 10 skills`，会以为完全成功——`SKILL.md` 在、目录在、`--help` 也能跑，只有走到 `remember` 这条具体路径才炸。验收得比对文件清单，不能只看退出码：
+那条丢弃规则确实存在过：`vercel-labs/skills` 的 PR #7（2026-01-15）明确写了 *"Skip README.md (developer documentation)"* 和 *"Skip files starting with `_` (templates, section definitions)"*，但分别在 **v1.4.1**（2026-02-20，随 PR #297 悄悄移除，release note 里没提）和 **v1.4.5**（PR #548）就修掉了。也就是说我实测到的是**五个月前的行为**。上游还有 issue #61、#292、#543 报过同一件事，全部已关闭。
+
+**教训一**：验证一个工具的行为，先验证**跑的是不是那个工具**。我比对了「装出来的文件 vs 源文件」，差异真实、复现稳定、结论错误——因为我从没确认过被执行的二进制是哪个版本。`--version` 应该是第一步，不是最后一步。
+
+**教训二**：`npx <cmd>` 的解析优先级是坑。PATH 上的同名 binary 优先于 registry，npx 自己还有一层命令名→包名的缓存映射。**凡是写进文档或脚本的 `npx` 命令，一律带 `@latest` 或固定版本**，成本为零。
+
+**教训三**：**「装完能跑」不等于「装完是全的」。** 安装器打印 `✓ Installed 10 skills`，`SKILL.md` 在、目录在、`--help` 也能跑，只有走到 `remember` 那条具体路径才炸。验收要比对文件清单，不能只看退出码：
 
 ```bash
 diff <(cd <src> && find . -type f | sort) \
@@ -70,6 +75,6 @@ diff <(cd <src> && find . -type f | sort) \
 
 ## 待议
 
-- `~/.agents/skills` 下同一个 skill 现在有两条可达路径（中枢 + 各 agent 冗余软链），Codex 的 `dedupe_skill_roots_by_path` 去重的是 root 不是目标，可能重复列出。暂未观察到实际影响。
-- 三个 `__init__.py`（只有 docstring）也被丢了。Python 3 命名空间包让它照常工作，init / remember / doctor 三个操作均已实测通过，暂不处理。
-- 上游那条未声明的丢弃规则值得提 issue。
+- `project-memory-init` 里被改名的三个文件（`entry_line.tmpl.md`、两个 `OVERVIEW.md`）现在已无必要——那是为绕开老包做的。留着当防御性兼容，代价是丢了 `_` 前缀「这是片段不是产物」的语义。哪天确定不会再碰到老版本，可以改回去。
+- 上游那条丢弃规则已在 v1.4.1 / v1.4.5 修掉，不必再提 issue。但**它从未出现在任何文档里**——连至今仍生效的 `metadata.json` 排除也没写——这个文档缺口值得提。
+- `npx` 把 `skills` 解析到 `add-skill@1.0.29` 的机制没查清（该包 bin 名其实是 `add-skill`）。带 `@latest` 就绕开了，没继续深挖。

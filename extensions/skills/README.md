@@ -19,19 +19,24 @@ description: <一句话，说明何时该触发、何时不该触发>
 
 `name` 与目录名一致这条**没有机器校验了**（旧的 `install-skills` 脚本会拦，已退役）。`npx skills` 按 frontmatter 里的 `name` 决定安装后的目录名，本地目录名只是兜底；两个 skill 的 `name` 撞车时，后一个会被静默丢弃。
 
-### 文件命名约束
+### 一定要带 `@latest`
 
-**skill 目录下不要出现这些文件，`npx skills` 分发时会静默丢弃它们**（每一层目录都生效）：
+**所有 `npx skills` 命令都写成 `npx skills@latest`。** 不带版本号时，npm 可能把 `skills` 这个命令名解析到已废弃的 `add-skill` 老包（本机上就是 `add-skill@1.0.29`，`--version` 报 `0.1.0`）：
 
-| 丢弃 | 保留 |
-| --- | --- |
-| `README.md` | `OVERVIEW.md`、`CHANGELOG.md`、`LICENSE`、`notes.txt` |
-| 任何 `_` 开头的文件（`_frag.md`、`__init__.py`） | `type_slug.md`（下划线不在开头） |
-| `metadata.json` | `.gitignore` 等点文件 |
+```bash
+npx skills --version         # 0.1.0   ← 老包，会静默丢文件
+npx skills@latest --version  # 1.5.23  ← 真包
+```
 
-踩过一次：`project-memory-init` 的 `references/templates/_entry_line.tmpl.md` 是脚本运行时要读的模板，被丢弃后 `remember` 直接报「模板不存在」；`scripts/README.md` 和 `references/prior-art/README.md` 被丢弃后，`SKILL.md` 和 `architecture.md` 里指向它们的链接全成死链。现已分别改名为 `entry_line.tmpl.md` 和 `OVERVIEW.md`。
+老包（对应 `skills` ≤ 1.4.0 那一代）分发时会**静默丢弃** `README.md` 和所有 `_` 开头的文件，每层目录都生效，装完不报任何错。踩过一次：`project-memory-init` 的 `_entry_line.tmpl.md` 是脚本运行时要读的模板，丢了之后 `remember` 直接报「模板不存在」，但安装器照样打印 `✓ Installed 10 skills`。
 
-> 这条规则来自实测，不是文档——`vercel-labs/skills` 的 README 和 main 分支源码都只声明排除 `metadata.json` / `.git` / `__pycache__`。改完 skill 目录结构后，用 `diff <(cd <src> && find . -type f | sort) <(cd ~/.agents/skills/<name> && find . -type f | sort)` 复核一遍。
+本目录的命名已经避开了这两类（用 `entry_line.tmpl.md` 和 `OVERVIEW.md`），所以旧版也能正常装。但**新版 1.4.1 / 1.4.5 起已分别修掉 README 和下划线的排除**，不必为此约束新 skill——只有 `metadata.json` 是至今仍会被丢的（这条有文档）。
+
+> 改完 skill 目录结构后，用这条复核，别只看退出码：
+> ```bash
+> diff <(cd <src> && find . -type f | sort) \
+>      <(cd ~/.agents/skills/<name> && find . -type f | sort)
+> ```
 
 ## 分发
 
@@ -43,22 +48,22 @@ description: <一句话，说明何时该触发、何时不该触发>
 pnpm skills:install
 ```
 
-内容装到中枢 `~/.agents/skills/<name>/`（实体拷贝），再给六个 agent 目录各建一条软链。Codex、Cursor、Gemini CLI、opencode 其实原生就读中枢（Codex 源码里 `~/.codex/skills` 已标 deprecated），这几条软链是冗余的，但无害。
+内容装到中枢 `~/.agents/skills/<name>/`（实体拷贝），再给 `~/.claude/skills/` 和 `~/.factory/skills/` 各建一条软链。Codex、Cursor、Gemini CLI、opencode **不会**拿到自己目录下的软链——它们原生就读中枢（Codex 源码里 `~/.codex/skills` 已标 deprecated），CLI 刻意跳过以免重复列出。只有 Claude Code 不读中枢，那条软链是它能看到 skill 的唯一原因。
 
-> ⚠️ **改完必须重跑。** 中枢里是实体拷贝而非软链——`npx skills` 会把源目录里的软链一并 `dereference` 掉——所以改了本目录下的文件不会自动生效。`npx skills update` 对本地路径源直接跳过（跳过理由就是 `Local path`），只能重跑上面那条命令。
+> ⚠️ **改完必须重跑。** 中枢里是实体拷贝而非软链——`npx skills` 会把源目录里的软链一并 `dereference` 掉——所以改了本目录下的文件不会自动生效。`npx skills@latest update` 对本地路径源直接跳过（跳过理由就是 `Local path`），只能重跑上面那条命令。
 
 ### 外部用户
 
 ```bash
-npx skills add VirusPC/edges/extensions/skills
+npx skills@latest add VirusPC/edges/extensions/skills
 ```
 
-**子路径不能省。** `npx skills add VirusPC/edges` 装不到本目录的 skill：CLI 的扫描根是一张写死的表，`extensions/` 不在表里，而本仓库的 `.claude/skills/`、`.agents/skills/`、`.codex/skills/` 等目录在表里、且 vendored 了 openspec 的产物——短命令会把那些当成本仓库的 skill 装走。子路径形式把扫描根整个换掉，正好只命中这 10 个。
+**子路径不能省。** `npx skills@latest add VirusPC/edges` 装不到本目录的 skill：CLI 的扫描根是一张写死的表，`extensions/` 不在表里，而本仓库的 `.claude/skills/`、`.agents/skills/`、`.codex/skills/` 等目录在表里、且 vendored 了 openspec 的产物——短命令会把那些当成本仓库的 skill 装走。子路径形式把扫描根整个换掉，正好只命中这 10 个。
 
 单装某一个：
 
 ```bash
-npx skills add VirusPC/edges/extensions/skills --skill paper-10-questions
+npx skills@latest add VirusPC/edges/extensions/skills --skill paper-10-questions
 ```
 
 > `project-memory-ask` / `-doctor` / `-init` / `-remember` **必须四个一起装**。后三个靠同级目录定位 `project-memory-init`，单独装会找不到它的 `scripts/memory.py` 和 `references/`。
@@ -66,7 +71,7 @@ npx skills add VirusPC/edges/extensions/skills --skill paper-10-questions
 ### 卸载
 
 ```bash
-npx skills remove <name> -g
+npx skills@latest remove <name> -g
 ```
 
 它按名字删，会清掉所有 agent 目录下的同名条目，**不区分是谁装的**。
