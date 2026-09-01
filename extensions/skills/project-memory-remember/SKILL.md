@@ -29,14 +29,11 @@ version: 1.0.0
 
 返回的 `path` 和 `action`（`created` / `updated`）就是写入凭据——索引是全量重算的，返回了路径就说明索引里有它，不必再查一遍。`agentsAction` 是 `needs-doctor` 时要一并说明：那表示该目录的 `AGENTS.md` 还没纳管，索引没能刷新。
 
-目标目录还没初始化（没有 `.memory/` 或 `AGENTS.md`）时，脚本会拒绝写入，先按 `project-memory-init` 跑一次 `init`。
+目标目录还没初始化（没有 `.memory/` 或本套 `AGENTS.md`）时，脚本会拒绝写入。告诉用户去跑 `$project-memory-init`，不要自己 Init。
 
 ## 什么时候改派 subagent
 
-默认自己内联写完，一次 CLI 调用几十毫秒，没必要委派。只有两种情况值得派一个后台 subagent（`run_in_background: true`）：
-
-- **一次要沉淀多条**，尤其是跨几个目录。
-- **目标目录还没初始化**，得先 init、甚至先 `doctor` 兜一遍。
+默认自己内联写完。只有一次要沉淀多条、尤其跨几个目录时，才派后台 subagent（`run_in_background: true`）。
 
 委派时提示词必须自带全部素材，因为 subagent 读不到本次对话——目标目录绝对路径、`type`、`slug`、结论、起因、怎么应用，缺一样它只能瞎编。派完立刻继续原来的活，它结束时的完成通知里带 `path` 和 `action`。
 
