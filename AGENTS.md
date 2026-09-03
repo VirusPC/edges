@@ -44,9 +44,16 @@ Keep this managed block so 'openspec update' can refresh the instructions.
 - **开发原则**: 确保接口简洁、标准，便于外部 Agent（如 Claude, Cursor）调用。
 - **文档**: 修改任何 extension 后，必须同步更新该目录下的 README 说明。
 
-### 脚本维护 (bin/)
+### 用户命令 (bin/)
+`bin/` 存放用户/Agent 装好后反复调用的命令（如 `new-note`）。它们会被 `pnpm setup` 加入 `$PATH`。
 - **兼容性**: 脚本应保持 POSIX 兼容或明确指定解释器。
 - **路径**: 脚本中严禁硬编码绝对路径，应相对于仓库根目录动态获取。
+
+### 项目维护脚本 (scripts/)
+`scripts/` 存放仓库自身使用的一次性或低频维护脚本（setup、release、migration、cleanup 等）。它们**不**进 `$PATH`，统一通过 `package.json` 的 `scripts` 字段以 `pnpm <name>` 方式对外暴露。
+- **新增脚本前先问**: 是不是会有第二个、第三个？如果是，建 `scripts/`；如果只是个例，先放根目录或 `bin/` 也行。
+- **每个新脚本都要同步更新**: `package.json` 的 `scripts` 字段 + 本 AGENTS.md 的目录约定 + `README.md` 的对应章节。
+- **路径规范**: 同 `bin/`，严禁硬编码绝对路径。
 
 ---
 

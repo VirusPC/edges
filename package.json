@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Edges - 认知系统服务工作区",
   "scripts": {
-    "setup": "./bootstrap",
+    "setup": "./scripts/setup",
     "skills:install": "npx -y skills@latest add ./extensions/skills -g -a claude-code -a codex -a cursor -a gemini-cli -a droid -a opencode -y",
     "build": "pnpm recursive build",
     "test": "pnpm recursive test",

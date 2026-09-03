@@ -67,17 +67,28 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 
 ---
 
-## 2. 基础设施 (bin/)
+## 2. 用户命令 (bin/)
 
-存放维护本仓库的原生脚本工具。
+存放面向用户/Agent 反复调用的可执行命令，由 `pnpm setup` 加入 `$PATH` 后可在任意目录直接调用。
 
 - **`new-note`**: 快速创建笔记的 CLI 工具。
 
-> skill 分发不在 `bin/`。见下方「接入初始化」。
+> 项目自身的维护脚本（setup、release、migration 等）不在 `bin/`，见下一节 `scripts/`。
+> skill 分发不在 `bin/`，见下方「接入初始化」。
 
 ---
 
-## 3. 外部连接 (extensions/)
+## 3. 项目维护脚本 (scripts/)
+
+存放本仓库开发者用于初始化、构建、清理、发布等**一次性或低频**操作的脚本。不会自动加入 `$PATH`，统一通过 `pnpm <script-name>` 入口调用。
+
+- **`setup`**: 首次接入时初始化本地环境（注册 `bin/` 到 PATH、加载 `.env`）。对应 `pnpm setup`。
+
+判据：换台机器克隆下来要重新跑一遍的 → `scripts/`；装好之后用户/Agent 天天用的 → `bin/`。
+
+---
+
+## 4. 外部连接 (extensions/)
 
 `extensions/` 目录是 Edges 系统对外的**接口层**，供外部 Agent 或系统接入。
 
@@ -114,7 +125,7 @@ npx skills@latest add VirusPC/edges/extensions/skills
 
 ---
 
-## 4. 工作区管理 (Workspace)
+## 5. 工作区管理 (Workspace)
 
 本项目采用 **pnpm workspace** 进行“服务端服务工作区”管理，实现环境隔离与统一调度。
 
@@ -130,9 +141,10 @@ npx skills@latest add VirusPC/edges/extensions/skills
 ### 结构规范
 
 - `extensions/mcp-servers/*`: 独立的 MCP 服务单元，各自拥有 `package.json`，是 workspace 的唯一成员。
-- `bin/`: 系统维护脚本（shell，非 node 包），由 `pnpm setup` 加入 `$PATH`。
+- `bin/`: 面向用户/Agent 反复调用的可执行命令（shell，非 node 包），由 `pnpm setup` 加入 `$PATH`。
+- `scripts/`: 项目自身的维护脚本（setup、release、migration 等），通过 `pnpm <name>` 调用，不入 PATH。
 - `tsconfig.base.json`: 共享的全局编译器配置。
 
 ---
 
-*最后更新: 2026-09-01*
+*最后更新: 2026-09-03*
