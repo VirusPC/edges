@@ -141,6 +141,17 @@ git ls-files | grep -iE '\.(docx?|xlsx?|pptx?)$'
       Co-authored-by: Assistant Name <assistant@example.com>
       ```
 
+3.  **Obsidian 工作区文件常驻 dirty**:
+    - `.obsidian/workspace.json` 是被 Obsidian 后台持续重写的运行时状态，会让 working tree 永远 "有未暂存改动"。
+    - 影响: `git pull --rebase`、`git rebase`、`git stash`（无 `--autostash`）会一直报 "cannot rebase: You have unstaged changes"。
+    - 解法: 涉及远端同步或 rebase 的命令，统一加 `--autostash`：
+      ```bash
+      git pull --rebase --autostash origin main
+      git rebase --autostash origin/main
+      ```
+    - 原理: `--autostash` 让 git 在操作前自动 stash、操作后自动 pop，能 cover Obsidian 的 race。
+    - 不要尝试用 `git checkout -- .obsidian/workspace.json` 硬清——Obsidian 几秒内会再写一次，且会污染后续 rebase 的工作树状态。
+
 ---
 
 ## 5. 交互准则
