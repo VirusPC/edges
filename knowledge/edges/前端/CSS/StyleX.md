@@ -29,7 +29,7 @@ CSS is a powerful and expressive language. However, it can sometimes feel fragil
 
 Most existing solutions to this problem rely on rules and conventions.
 
-![1702026697607-4447a3bb-e426-4e56-8ac4-55abdc17de99.png](./img/PHFSb4e2hadJlsPY/1702026697607-4447a3bb-e426-4e56-8ac4-55abdc17de99-299221.png)
+![1702026697607-4447a3bb-e426-4e56-8ac4-55abdc17de99.png](./img/PHFSb4e2hadJlsPY/1702026697607-4447a3bb-e426-4e56-8ac4-55abdc17de99-299221.jpg)
 
 **StyleX aims to improve on both the consistency and predictability of styles **_**and**_** the expressive power available. **We believe this is possible through build-tools.
 

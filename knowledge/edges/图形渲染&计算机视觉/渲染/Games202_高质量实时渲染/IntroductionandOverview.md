@@ -55,7 +55,7 @@ Highest Level: 4 different parts on real-time rendering
 ![1684560876715-6d57aa6d-5f50-42df-ba3e-44e5889ffdee.png](./img/sQPzuyq8OFzsc0Lb/1684560876715-6d57aa6d-5f50-42df-ba3e-44e5889ffdee-612194.png)
 
 ### Shadow and Environment Mapping
-![1684578184941-7325b9c4-c6b7-41dd-a79c-b6f980320bae.png](./img/sQPzuyq8OFzsc0Lb/1684578184941-7325b9c4-c6b7-41dd-a79c-b6f980320bae-260226.png)
+![1684578184941-7325b9c4-c6b7-41dd-a79c-b6f980320bae.png](./img/sQPzuyq8OFzsc0Lb/1684578184941-7325b9c4-c6b7-41dd-a79c-b6f980320bae-260226.jpg)
 
 ### Interactive Global Environment Techniques
 ![1684578220708-a2e90847-56ff-4370-9d9a-e30a85d3205b.png](./img/sQPzuyq8OFzsc0Lb/1684578220708-a2e90847-56ff-4370-9d9a-e30a85d3205b-694997.png)
@@ -67,12 +67,12 @@ Highest Level: 4 different parts on real-time rendering
 ![1684579305190-7b7497e8-022a-47c4-b3b9-6aa08c90eeb7.png](./img/sQPzuyq8OFzsc0Lb/1684579305190-7b7497e8-022a-47c4-b3b9-6aa08c90eeb7-072252.png)
 
 ### Participating Meida Rendering, Image Space Effects, etc.
-![1684579396079-5a827996-d095-4bc7-af63-14ae80610efc.png](./img/sQPzuyq8OFzsc0Lb/1684579396079-5a827996-d095-4bc7-af63-14ae80610efc-135423.png)
+![1684579396079-5a827996-d095-4bc7-af63-14ae80610efc.png](./img/sQPzuyq8OFzsc0Lb/1684579396079-5a827996-d095-4bc7-af63-14ae80610efc-135423.jpg)
 
-![1684579486533-34e18cb1-1e77-4102-9bc0-bb48854ced1f.png](./img/sQPzuyq8OFzsc0Lb/1684579486533-34e18cb1-1e77-4102-9bc0-bb48854ced1f-516654.png)
+![1684579486533-34e18cb1-1e77-4102-9bc0-bb48854ced1f.png](./img/sQPzuyq8OFzsc0Lb/1684579486533-34e18cb1-1e77-4102-9bc0-bb48854ced1f-516654.jpg)
 
 ### Antialiasing and Supersampling
-![1684579514620-a24c858c-b18f-4856-a921-ea35f4c2cdcf.png](./img/sQPzuyq8OFzsc0Lb/1684579514620-a24c858c-b18f-4856-a921-ea35f4c2cdcf-155463.png)
+![1684579514620-a24c858c-b18f-4856-a921-ea35f4c2cdcf.png](./img/sQPzuyq8OFzsc0Lb/1684579514620-a24c858c-b18f-4856-a921-ea35f4c2cdcf-155463.jpg)
 
 
 
@@ -142,13 +142,13 @@ Computer Graphics is AWSOME!
     - Extended to Virtual Reality (VR) and even movies
 + In the future
 
-![1684587382875-8266533b-2283-461d-bcda-e5ad1750f11b.png](./img/sQPzuyq8OFzsc0Lb/1684587382875-8266533b-2283-461d-bcda-e5ad1750f11b-526055.png)
+![1684587382875-8266533b-2283-461d-bcda-e5ad1750f11b.png](./img/sQPzuyq8OFzsc0Lb/1684587382875-8266533b-2283-461d-bcda-e5ad1750f11b-526055.jpg)
 
-![1684587341824-f975c094-8a1b-4b4c-ab10-b27ccf20236a.png](./img/sQPzuyq8OFzsc0Lb/1684587341824-f975c094-8a1b-4b4c-ab10-b27ccf20236a-991002.png)
+![1684587341824-f975c094-8a1b-4b4c-ab10-b27ccf20236a.png](./img/sQPzuyq8OFzsc0Lb/1684587341824-f975c094-8a1b-4b4c-ab10-b27ccf20236a-991002.jpg)
 
-![1684587352985-4300585d-95a6-41b2-a309-9d9db6851a04.png](./img/sQPzuyq8OFzsc0Lb/1684587352985-4300585d-95a6-41b2-a309-9d9db6851a04-531594.png)
+![1684587352985-4300585d-95a6-41b2-a309-9d9db6851a04.png](./img/sQPzuyq8OFzsc0Lb/1684587352985-4300585d-95a6-41b2-a309-9d9db6851a04-531594.jpg)
 
-![1684587482592-2461c34e-4859-4960-9de1-f05d25659cc5.png](./img/sQPzuyq8OFzsc0Lb/1684587482592-2461c34e-4859-4960-9de1-f05d25659cc5-877718.png)
+![1684587482592-2461c34e-4859-4960-9de1-f05d25659cc5.png](./img/sQPzuyq8OFzsc0Lb/1684587482592-2461c34e-4859-4960-9de1-f05d25659cc5-877718.jpg)
 
 ## Technological and algorithmic milestones
 + Programmable graphics hardware (20years ago: shaders)
@@ -165,11 +165,11 @@ Computer Graphics is AWSOME!
 
 ![1684587748487-34dd79f1-a870-41c3-884d-58882afcf5eb.png](./img/sQPzuyq8OFzsc0Lb/1684587748487-34dd79f1-a870-41c3-884d-58882afcf5eb-322037.png)
 
-![1684587888905-d838a77e-3f2b-415b-bc7b-612c1c760f7a.png](./img/sQPzuyq8OFzsc0Lb/1684587888905-d838a77e-3f2b-415b-bc7b-612c1c760f7a-685262.png)
+![1684587888905-d838a77e-3f2b-415b-bc7b-612c1c760f7a.png](./img/sQPzuyq8OFzsc0Lb/1684587888905-d838a77e-3f2b-415b-bc7b-612c1c760f7a-685262.jpg)
 
-![1684588015841-06370211-dfe9-4f9e-ac4f-4d2064c6bbdd.png](./img/sQPzuyq8OFzsc0Lb/1684588015841-06370211-dfe9-4f9e-ac4f-4d2064c6bbdd-749170.png)
+![1684588015841-06370211-dfe9-4f9e-ac4f-4d2064c6bbdd.png](./img/sQPzuyq8OFzsc0Lb/1684588015841-06370211-dfe9-4f9e-ac4f-4d2064c6bbdd-749170.jpg)
 
-![1684588133839-afb11009-3ed0-4df6-a38a-dd830d66516d.png](./img/sQPzuyq8OFzsc0Lb/1684588133839-afb11009-3ed0-4df6-a38a-dd830d66516d-361319.png)
+![1684588133839-afb11009-3ed0-4df6-a38a-dd830d66516d.png](./img/sQPzuyq8OFzsc0Lb/1684588133839-afb11009-3ed0-4df6-a38a-dd830d66516d-361319.jpg)
 
 
 

@@ -110,7 +110,7 @@ estimate the integral of a function by averaging random samples of the function'
 ### Example: Uniform Monte Carlo Estimator
 ![1683211297484-168e3365-2350-4b6b-b2e0-195707da714e.png](./img/LIMsXKLbYiBqyko7/1683211297484-168e3365-2350-4b6b-b2e0-195707da714e-216035.png)
 
-![1683211418408-df709810-dc1c-4add-bdcd-7d0db9bb957a.png](./img/LIMsXKLbYiBqyko7/1683211418408-df709810-dc1c-4add-bdcd-7d0db9bb957a-213788.png)
+![1683211418408-df709810-dc1c-4add-bdcd-7d0db9bb957a.png](./img/LIMsXKLbYiBqyko7/1683211418408-df709810-dc1c-4add-bdcd-7d0db9bb957a-213788.jpg)
 
 ### Equation
 ![1683211915718-6fa5547a-09bb-45b4-8cc9-4494044449e2.png](./img/LIMsXKLbYiBqyko7/1683211915718-6fa5547a-09bb-45b4-8cc9-4494044449e2-777837.png)
@@ -286,9 +286,9 @@ Russian Roulette is all about probability
 + With probability 0 < P < 1, you are fine
 + With probability 1 - P, otherwise
 
-![1683256245431-d095e9c7-8093-4b74-bbad-fb2b894d44b3.png](./img/LIMsXKLbYiBqyko7/1683256245431-d095e9c7-8093-4b74-bbad-fb2b894d44b3-909217.png)
+![1683256245431-d095e9c7-8093-4b74-bbad-fb2b894d44b3.png](./img/LIMsXKLbYiBqyko7/1683256245431-d095e9c7-8093-4b74-bbad-fb2b894d44b3-909217.jpg)
 
-![1683257513229-bb65e650-eb1c-4c6d-a037-c6d3784e8a7a.png](./img/LIMsXKLbYiBqyko7/1683257513229-bb65e650-eb1c-4c6d-a037-c6d3784e8a7a-015981.png) ![1683257565083-744d2553-4137-48fa-aa26-2b1b8aa3be2b.png](./img/LIMsXKLbYiBqyko7/1683257565083-744d2553-4137-48fa-aa26-2b1b8aa3be2b-948471.png)
+![1683257513229-bb65e650-eb1c-4c6d-a037-c6d3784e8a7a.png](./img/LIMsXKLbYiBqyko7/1683257513229-bb65e650-eb1c-4c6d-a037-c6d3784e8a7a-015981.png) ![1683257565083-744d2553-4137-48fa-aa26-2b1b8aa3be2b.png](./img/LIMsXKLbYiBqyko7/1683257565083-744d2553-4137-48fa-aa26-2b1b8aa3be2b-948471.jpg)
 
 ### Path Tracing
 正确的path tracing shader（同problem2里的shader）：
@@ -320,7 +320,7 @@ ray_generation (camPos, pixel)
 ### Make Path Tracing more  Efficient (Sampling the light)
 Now we already have a correct version of path tracing. But it's not really efficient. 牵扯到采样频率问题.
 
-![1683257877361-ad85c966-7ea3-40e8-bd75-efc49cb40200.png](./img/LIMsXKLbYiBqyko7/1683257877361-ad85c966-7ea3-40e8-bd75-efc49cb40200-790573.png)
+![1683257877361-ad85c966-7ea3-40e8-bd75-efc49cb40200.png](./img/LIMsXKLbYiBqyko7/1683257877361-ad85c966-7ea3-40e8-bd75-efc49cb40200-790573.jpg)
 
 Why inefficient?
 
@@ -345,7 +345,7 @@ How to make it efficient?
 # ![1683269749817-2b54fba5-93cb-44e0-bab5-141116373eed.png](./img/LIMsXKLbYiBqyko7/1683269749817-2b54fba5-93cb-44e0-bab5-141116373eed-782967.png)
  把光线传播分成两部分：1) 光源直接对这一点的贡献和 2)所有其他非光源对这一点的贡献。直接光照不需要俄罗斯轮盘赌（RR）。
 
-![1683270317656-8d512c11-79d1-4ffb-917d-dd04380aca40.png](./img/LIMsXKLbYiBqyko7/1683270317656-8d512c11-79d1-4ffb-917d-dd04380aca40-334134.png)
+![1683270317656-8d512c11-79d1-4ffb-917d-dd04380aca40.png](./img/LIMsXKLbYiBqyko7/1683270317656-8d512c11-79d1-4ffb-917d-dd04380aca40-334134.jpg)
 
 改写之后的渲染方程：
 
@@ -362,7 +362,7 @@ How do we know the sample on the light is not blocked or not?
 1. path tracing 不好处理点光源。如果真的需要点光源，建议改成 使用一个很小的面积光源。
 
 ## Is Path Tracing Correct?
-![1683271435728-abac7377-6954-4533-9540-f2c0e0c948e1.png](./img/LIMsXKLbYiBqyko7/1683271435728-abac7377-6954-4533-9540-f2c0e0c948e1-411956.png)
+![1683271435728-abac7377-6954-4533-9540-f2c0e0c948e1.png](./img/LIMsXKLbYiBqyko7/1683271435728-abac7377-6954-4533-9540-f2c0e0c948e1-411956.jpg)
 
 # Ray Tracing: Previous VS Modern Concepts
 + Previous

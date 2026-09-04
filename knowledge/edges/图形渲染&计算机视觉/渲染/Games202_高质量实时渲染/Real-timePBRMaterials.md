@@ -703,7 +703,7 @@ Non-Photo realistic rendering (NPR)
 + Focus: lighting, shadows, materials, etc.
 + Producing **artistic** appearances
 
- ![1704467816811-bae68061-7259-49bc-8ee6-9534fbb7c328.png](./img/sBlLSlltVvm57FF7/1704467816811-bae68061-7259-49bc-8ee6-9534fbb7c328-392884.png)
+ ![1704467816811-bae68061-7259-49bc-8ee6-9534fbb7c328.png](./img/sBlLSlltVvm57FF7/1704467816811-bae68061-7259-49bc-8ee6-9534fbb7c328-392884.jpg)
 
 ![1704468051568-4b2b47ec-8cea-4f3e-a5ed-7854c9ef4d7b.png](./img/sBlLSlltVvm57FF7/1704468051568-4b2b47ec-8cea-4f3e-a5ed-7854c9ef4d7b-734279.png)
 
@@ -749,9 +749,9 @@ Cars是第一步用光线追踪做的动画
     - Block of colors . 色块
     - Strokes on surfaces 人物的面上会打上很多线
 
-![1704468645053-6ba05f3f-1067-45b3-85be-bdc5748efb9c.png](./img/sBlLSlltVvm57FF7/1704468645053-6ba05f3f-1067-45b3-85be-bdc5748efb9c-744934.png)
+![1704468645053-6ba05f3f-1067-45b3-85be-bdc5748efb9c.png](./img/sBlLSlltVvm57FF7/1704468645053-6ba05f3f-1067-45b3-85be-bdc5748efb9c-744934.jpg)
 
-![1704468748575-d98c938b-469d-46b5-a35e-5a5c0a886355.png](./img/sBlLSlltVvm57FF7/1704468748575-d98c938b-469d-46b5-a35e-5a5c0a886355-026776.png)无主之地
+![1704468748575-d98c938b-469d-46b5-a35e-5a5c0a886355.png](./img/sBlLSlltVvm57FF7/1704468748575-d98c938b-469d-46b5-a35e-5a5c0a886355-026776.jpg)无主之地
 
 
 

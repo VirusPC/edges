@@ -154,7 +154,7 @@ RTR 中的 rendering equation 和 games101 里的略有不同。
 
 + incident lighting （光源）来自各个方向，**方便处理环境光照**。
 
-![1684726902362-65f308af-8aea-4600-a589-27bbd2953ceb.png](./img/N7UPOSFsMEiStSYb/1684726902362-65f308af-8aea-4600-a589-27bbd2953ceb-770925.png)
+![1684726902362-65f308af-8aea-4600-a589-27bbd2953ceb.png](./img/N7UPOSFsMEiStSYb/1684726902362-65f308af-8aea-4600-a589-27bbd2953ceb-770925.jpg)
 
 全局光照 = 直接光照 + 间接光照
 

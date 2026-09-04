@@ -10,7 +10,7 @@
           {
             "id": "12e472ec16e746ac",
             "type": "tabs",
-            "dimension": 37.5,
+            "dimension": 76.60695468914646,
             "children": [
               {
                 "id": "01b75e04da854e50",
@@ -114,14 +114,14 @@
                 "id": "9c833cc94222879f",
                 "type": "leaf",
                 "state": {
-                  "type": "split-diff-view",
+                  "type": "markdown",
                   "state": {
-                    "aFile": ".obsidian/workspace.json",
-                    "bFile": ".obsidian/workspace.json",
-                    "aRef": ""
+                    "file": "knowledge/edges/_eval_ai_product/grok-bot.md",
+                    "mode": "source",
+                    "source": false
                   },
-                  "icon": "diff",
-                  "title": "Diff: workspace.json  (Working Tree)"
+                  "icon": "lucide-file",
+                  "title": "grok-bot"
                 }
               },
               {
@@ -144,7 +144,7 @@
           {
             "id": "61485840fab31675",
             "type": "tabs",
-            "dimension": 62.5,
+            "dimension": 23.39304531085353,
             "children": [
               {
                 "id": "d202c0e805c2078c",
@@ -229,7 +229,7 @@
                   },
                   "pinned": true,
                   "icon": "terminal",
-                  "title": "Terminal: pengcheng1@H52HH2C4KC:~/Documents/projects/agent/edges"
+                  "title": "Terminal: 了解根目录 bootstrap 作用"
                 }
               },
               {
@@ -242,7 +242,8 @@
                   "title": "New tab"
                 }
               }
-            ]
+            ],
+            "currentTab": 1
           }
         ],
         "direction": "horizontal"
@@ -279,7 +280,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "benchmark",
+                "query": "pageIndex",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -404,7 +405,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 409.484375
+    "width": 335.8671875
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -419,16 +420,31 @@
       "terminal:Open terminal": false
     }
   },
-  "active": "33eecac44040d9a2",
+  "active": "9c833cc94222879f",
   "lastOpenFiles": [
+    "knowledge/edges/memory/PageIndex.md",
+    "knowledge/edges/_eval_ai_product/grok-bot.md",
+    "knowledge/edges/agent-sdk/OpenAI Agents SDK.md",
     "AGENTS.md",
+    "knowledge/resources/compatible_path-image-8f5608df231645e2a99b595bacbc1bf0.jpg",
+    "knowledge/edges/金融量化/技术面/趋势/img/BX6FRutyxK1Wgahe/1736524193468-fe2ffafd-30cd-4478-a698-6f8b7017dfb2-647721.jpg",
+    "knowledge/edges/数据可视化/可视化基础/img/f9Z5ditxu4PtdVvL/1690353372382-901eb57f-f7f7-4e78-bc7d-7af6b21742ce-395464.jpg",
+    "knowledge/edges/数据可视化/可视化基础/img/f9Z5ditxu4PtdVvL/1690351993591-23577db1-6afd-4338-bf69-59291c5c3684-600684.jpg",
+    "knowledge/edges/数据可视化/img/SjK2NbqGhbv0xWCm/1735059690959-94b71978-1a0e-441e-a194-c022355b9a42-601045.jpg",
+    "knowledge/edges/图形渲染&计算机视觉/视觉/Games203_三维重建和理解/img/yhtln2N_e0kDZdYr/1711294511840-12fbddad-3f2b-4e84-9355-3ddfae9b2dc4-152364.jpg",
+    "knowledge/edges/图形渲染&计算机视觉/视觉/Games203_三维重建和理解/img/VfS0LZzN0ZBTPthk/1718975407732-58a01cd5-9f8b-4feb-af54-7ffaa9710dc1-814734.jpg",
+    "knowledge/edges/图形渲染&计算机视觉/视觉/Games203_三维重建和理解/img/VfS0LZzN0ZBTPthk/1711271817835-8de8aa81-d4d5-4c45-9e84-8ade1edea8b4-585182.jpg",
+    "knowledge/edges/图形渲染&计算机视觉/视觉/Games203_三维重建和理解/img/VfS0LZzN0ZBTPthk/1711269681119-fc7607a4-570c-43c9-98a6-1f6234b76fbd-645618.jpg",
+    "knowledge/edges/图形渲染&计算机视觉/渲染/img/wqqkrQf7AbgoUfBn/1705732808004-f0c8c020-7d83-4286-88bb-49ddddfcf7ab-292227.jpg",
+    "scripts/README.md",
+    "scripts/setup",
+    "scripts",
     "extensions/skills/README.md",
     "knowledge/edges/2026-03-08--LLM幻觉成因与评估体系缺陷.md.md",
     "knowledge/notes/2026-09-01--skill-分发改用-npx-skills.md",
     "extensions/skills/project-memory-init/references/prior-art/OVERVIEW.md",
     "extensions/skills/project-memory-init/scripts/OVERVIEW.md",
     "extensions/skills/project-memory-init/references/templates/entry_line.tmpl.md",
-    "knowledge/edges/音视频/img/tiSsbDlaLQAWWFTk/1751625517038-3ab9ab30-5286-4e38-914c-eedff9d6259b-445618.png",
     "knowledge/edges/音视频/img/tiSsbDlaLQAWWFTk",
     "knowledge/edges/音视频/index.md",
     "knowledge/edges/音视频/img",
@@ -439,33 +455,18 @@
     "knowledge/edges/音视频/HLS.md",
     "knowledge/edges/音视频/Canvas录制HLS.md",
     "knowledge/edges/音视频",
-    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736598458038-0b2c544c-c0f2-48e6-bead-77958b62219f-234040.png",
-    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736598451387-3cbbd206-b310-4e79-b804-c66ed306e4af-495129.png",
-    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736598115005-aa3319cf-6261-4a19-9a82-ad702cfe5b25-141132.png",
-    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736597966402-1bb1ec76-3ace-4283-8822-a5bb8c72f8db-101285.png",
-    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736597816707-4dc00b1c-c3ba-4ae4-ac21-3a5fc6a62b66-846224.png",
-    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736597599791-991d370b-bb91-4b85-9ddf-ae17549d3e9c-226523.png",
-    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736597301872-73791888-e7d5-4e6c-a583-26b7520b02dc-749134.png",
-    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736596677770-4ae2702b-7ead-4d6f-8187-6e05e9bc5c3f-011829.png",
-    "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J/1736595882554-52a6bf44-0bd2-479b-b025-b758f6e48b05-617218.png",
     "knowledge/edges/金融量化/技术面/趋势/img/fy47CDEolWSuVr-J",
     "knowledge/edges/金融量化/技术面/趋势/img/BX6FRutyxK1Wgahe",
     "knowledge/edges/金融量化/技术面/压力支撑/img/lpecbxKfdi9uVFJG",
     "knowledge/edges/金融量化/技术面/信号/img/fD5YFHrUpg-_P849",
     "knowledge/edges/金融量化/技术面/信号/img/BpWC2t8U164mRq-D",
-    "knowledge/edges/金融量化/技术面/信号/img/ATzQ9gXdmdPciS0a",
     "knowledge/edges/金融量化/技术面/信号/KDJvsRSI/本质.md",
     "knowledge/edges/金融量化/技术面/信号/KDJvsRSI/index.md",
     "knowledge/edges/金融量化/技术面/趋势/均线.md",
     "knowledge/edges/金融量化/技术面/趋势/index.md",
-    "knowledge/edges/金融量化/技术面/趋势/img",
     "knowledge/edges/金融量化/技术面/趋势/MACD.md",
     "knowledge/edges/金融量化/技术面/压力支撑/index.md",
     "knowledge/edges/金融量化/技术面/压力支撑/BOLL（布林指标_布林带_布林支撑）.md",
-    "knowledge/edges/金融量化/技术面/信号/index.md",
-    "knowledge/edges/金融量化/技术面/信号/RSI-震荡市场出场信号.md",
-    "knowledge/edges/金融量化/技术面/信号/KD（J）-入场信号.md",
-    "knowledge/edges/金融量化/技术面/信号/ATR-仓位_止损.md",
-    "knowledge/edges/金融量化/FinancialEngineeringandRiskManagement/FinancialEngineeringandRiskManagementSpecialization/Introduction.md"
+    "knowledge/edges/金融量化/技术面/信号/index.md"
   ]
 }

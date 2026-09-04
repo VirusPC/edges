@@ -35,7 +35,7 @@ engine update 中刚开始的时候，利用存储的事件更新inputManager
 2. 更新各个manager
     1. ![1700657079496-4f4f49fe-b79d-4351-9b74-5dda58fdf885.png](./img/WKrxQ7EuKitm3qiP/1700657079496-4f4f49fe-b79d-4351-9b74-5dda58fdf885-414779.png)
 3. 生成高阶事件（nativeEvent转pointer）
-    1. ![1700658193671-4dd3409c-f717-4daf-b532-ea437d71dad9.png](./img/WKrxQ7EuKitm3qiP/1700658193671-4dd3409c-f717-4daf-b532-ea437d71dad9-165788.png)
+    1. ![1700658193671-4dd3409c-f717-4daf-b532-ea437d71dad9.png](./img/WKrxQ7EuKitm3qiP/1700658193671-4dd3409c-f717-4daf-b532-ea437d71dad9-165788.jpg)
 
 ### 触发脚本
 engine update 中的物理更新后，触发脚本
@@ -46,7 +46,7 @@ engine update 中的物理更新后，触发脚本
     1. ![1700656832588-1251403c-9d33-4d35-8558-b6f4069a1ffe.png](./img/WKrxQ7EuKitm3qiP/1700656832588-1251403c-9d33-4d35-8558-b6f4069a1ffe-488105.png)
 3. pointerManager.firePointerScript
     1. 包含拾取逻辑
-    2. ![1700656859926-b5fe2004-2cb3-4813-8d8f-861b8c8f4eb1.png](./img/WKrxQ7EuKitm3qiP/1700656859926-b5fe2004-2cb3-4813-8d8f-861b8c8f4eb1-185005.png)
+    2. ![1700656859926-b5fe2004-2cb3-4813-8d8f-861b8c8f4eb1.png](./img/WKrxQ7EuKitm3qiP/1700656859926-b5fe2004-2cb3-4813-8d8f-861b8c8f4eb1-185005.jpg)
 4. 
 
 

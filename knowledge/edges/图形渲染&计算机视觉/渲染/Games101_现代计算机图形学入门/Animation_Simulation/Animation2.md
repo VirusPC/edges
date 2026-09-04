@@ -59,7 +59,7 @@
 
 一阶：不存在对其他变量的微分（不存在偏微分）
 
-![1683991512465-16b7c508-24d7-4595-9d94-9c2c03c5af69.png](./img/dpQDh5v9f7HfJrpC/1683991512465-16b7c508-24d7-4595-9d94-9c2c03c5af69-424166.png)
+![1683991512465-16b7c508-24d7-4595-9d94-9c2c03c5af69.png](./img/dpQDh5v9f7HfJrpC/1683991512465-16b7c508-24d7-4595-9d94-9c2c03c5af69-424166.jpg)
 
 ### Solving for Particle Position
 解之前，先给定初始位置x0
@@ -231,7 +231,7 @@ Key idea：
 
 Remind: 模拟和渲染是两个不同的步骤
 
-![1684029536318-b9b0354b-c0a2-4e54-8736-0b27ca73a7b3.png](./img/dpQDh5v9f7HfJrpC/1684029536318-b9b0354b-c0a2-4e54-8736-0b27ca73a7b3-460636.png)
+![1684029536318-b9b0354b-c0a2-4e54-8736-0b27ca73a7b3.png](./img/dpQDh5v9f7HfJrpC/1684029536318-b9b0354b-c0a2-4e54-8736-0b27ca73a7b3-460636.jpg)
 
 ## Eulerian vs Larangian
 物理模拟中两种思路

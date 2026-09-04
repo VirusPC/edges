@@ -53,7 +53,7 @@ Extend Bezier curves to surfaces
 
 核心思想：贝塞尔曲线加双线性插值。
 
-![1682844061951-9774fe45-6a28-4b2e-9a2b-2174f4301ad9.png](./img/GsIlUxq1EUOhOjyf/1682844061951-9774fe45-6a28-4b2e-9a2b-2174f4301ad9-740986.png)
+![1682844061951-9774fe45-6a28-4b2e-9a2b-2174f4301ad9.png](./img/GsIlUxq1EUOhOjyf/1682844061951-9774fe45-6a28-4b2e-9a2b-2174f4301ad9-740986.jpg)
 
 ## Bicubic Bezier Surface Patch
 ![1682844121620-81b937fb-0734-45eb-8aa4-2010185c58a1.png](./img/GsIlUxq1EUOhOjyf/1682844121620-81b937fb-0734-45eb-8aa4-2010185c58a1-857706.png)
@@ -68,7 +68,7 @@ Extend Bezier curves to surfaces
 不同贝塞尔曲面如何拼在一起，使得它平滑？有方法。
 
 ## Evaluating Bezier Surfaces
-![1682912179302-226c908b-7d8c-4c98-981b-3e9dd4b585b6.png](./img/GsIlUxq1EUOhOjyf/1682912179302-226c908b-7d8c-4c98-981b-3e9dd4b585b6-451757.png)
+![1682912179302-226c908b-7d8c-4c98-981b-3e9dd4b585b6.png](./img/GsIlUxq1EUOhOjyf/1682912179302-226c908b-7d8c-4c98-981b-3e9dd4b585b6-451757.jpg)
 
 ![1682912197043-e0c230f4-5606-4d57-a442-0d0bda2a4553.png](./img/GsIlUxq1EUOhOjyf/1682912197043-e0c230f4-5606-4d57-a442-0d0bda2a4553-632154.png)
 
@@ -121,7 +121,7 @@ Second, tune their positions
 ![1682932982995-2dab635b-4409-4301-be46-c60a4d6d9755.png](./img/GsIlUxq1EUOhOjyf/1682932982995-2dab635b-4409-4301-be46-c60a4d6d9755-649787.png) 
 
 ### Results
-![1682933407554-5ba6a0cf-2dcc-496f-933f-6087dd4ae6ef.png](./img/GsIlUxq1EUOhOjyf/1682933407554-5ba6a0cf-2dcc-496f-933f-6087dd4ae6ef-250747.png)
+![1682933407554-5ba6a0cf-2dcc-496f-933f-6087dd4ae6ef.png](./img/GsIlUxq1EUOhOjyf/1682933407554-5ba6a0cf-2dcc-496f-933f-6087dd4ae6ef-250747.jpg)
 
 ## Catmull-Clark Subdivision (General Mesh)
 Loop Subdivision只支持三角形网格，Catmull-Clark Subdivision支持任意形状网格。

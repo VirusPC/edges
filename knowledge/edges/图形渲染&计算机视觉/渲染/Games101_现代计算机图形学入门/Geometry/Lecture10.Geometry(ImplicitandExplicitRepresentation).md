@@ -51,7 +51,7 @@
 
 # Various representation of geometry
 
-![1682696490337-c4d73d39-41ad-4eec-959a-4669f811c480.png](./img/bChpJqIahMrY5QJr/1682696490337-c4d73d39-41ad-4eec-959a-4669f811c480-336199.png)
+![1682696490337-c4d73d39-41ad-4eec-959a-4669f811c480.png](./img/bChpJqIahMrY5QJr/1682696490337-c4d73d39-41ad-4eec-959a-4669f811c480-336199.jpg)
 
 ## "Implicit" Representations of Geometry
 
@@ -70,7 +70,7 @@ Based on classifying points
 1. Sampling Can be hard。很难直接说出这个面由哪些点组成，长什么样。
 2. difficult to model complex shapes。
 
-![1682696789502-390f3fc1-c2b2-431c-952d-46bc888aae71.png](./img/bChpJqIahMrY5QJr/1682696789502-390f3fc1-c2b2-431c-952d-46bc888aae71-844359.png)
+![1682696789502-390f3fc1-c2b2-431c-952d-46bc888aae71.png](./img/bChpJqIahMrY5QJr/1682696789502-390f3fc1-c2b2-431c-952d-46bc888aae71-844359.jpg)
 
 ### 优点
 
@@ -82,7 +82,7 @@ Based on classifying points
 
 #### Algebraic surfaces （代数曲面）
 
-![1682735324266-266f9b63-fec6-4c7c-9fc4-e701430e325b.png](./img/bChpJqIahMrY5QJr/1682735324266-266f9b63-fec6-4c7c-9fc4-e701430e325b-454661.png)
+![1682735324266-266f9b63-fec6-4c7c-9fc4-e701430e325b.png](./img/bChpJqIahMrY5QJr/1682735324266-266f9b63-fec6-4c7c-9fc4-e701430e325b-454661.jpg)
 
 缺点： 代数方法难以描述复杂形状
 
@@ -152,7 +152,7 @@ Hard to control space!
 
 变化频率太高，会引起强烈的走样。
 
-![1682737495112-d0a35fd9-6fb0-480a-9ea7-e798d0d5d8d8.png](./img/bChpJqIahMrY5QJr/1682737495112-d0a35fd9-6fb0-480a-9ea7-e798d0d5d8d8-344294.png)
+![1682737495112-d0a35fd9-6fb0-480a-9ea7-e798d0d5d8d8.png](./img/bChpJqIahMrY5QJr/1682737495112-d0a35fd9-6fb0-480a-9ea7-e798d0d5d8d8-344294.jpg)
 
 ## "Explicit" Representations of Geometry
 

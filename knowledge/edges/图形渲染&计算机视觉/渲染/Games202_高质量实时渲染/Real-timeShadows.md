@@ -172,7 +172,7 @@ perspective projection 中将frustum变为长方体时，物体的深度（z）�
 
 
 
-![1685281521312-c6774650-09e0-46cc-bfb7-a1360a29207e.png](./img/hrf6neuQXTUoRE5i/1685281521312-c6774650-09e0-46cc-bfb7-a1360a29207e-801859.png)
+![1685281521312-c6774650-09e0-46cc-bfb7-a1360a29207e.png](./img/hrf6neuQXTUoRE5i/1685281521312-c6774650-09e0-46cc-bfb7-a1360a29207e-801859.jpg)
 
 
 
@@ -825,13 +825,13 @@ Mainly two usages:
 
 当圆的半径小于某个阈值时，认为相交
 
-![1697541782217-7c6c0ade-6612-415c-90a4-1ddf38693e5e.png](./img/hrf6neuQXTUoRE5i/1697541782217-7c6c0ade-6612-415c-90a4-1ddf38693e5e-476335.png)
+![1697541782217-7c6c0ade-6612-415c-90a4-1ddf38693e5e.png](./img/hrf6neuQXTUoRE5i/1697541782217-7c6c0ade-6612-415c-90a4-1ddf38693e5e-476335.jpg)
 
 不与物体相交：
 
 当半径一直不小于阈值，甚至不断扩大时，就认为光线不和任何物体相交
 
-![1697541828527-18a519e1-558a-42f8-9cce-9bb5f6fc853e.png](./img/hrf6neuQXTUoRE5i/1697541828527-18a519e1-558a-42f8-9cce-9bb5f6fc853e-057791.png)
+![1697541828527-18a519e1-558a-42f8-9cce-9bb5f6fc853e.png](./img/hrf6neuQXTUoRE5i/1697541828527-18a519e1-558a-42f8-9cce-9bb5f6fc853e-057791.jpg)
 
 ### 渲染
 用于做渲染的问题：只能判断相交，获取不到材质，无法进行光线反弹的计算。
@@ -841,7 +841,7 @@ Lumen创新性地引入了表面缓存的概念。
 #### 表面缓存
 计算机为了存储光照专门分配的一段空间。
 
-![1697542246958-17ec3967-3ab8-42bc-baca-9eec3d473351.png](./img/hrf6neuQXTUoRE5i/1697542246958-17ec3967-3ab8-42bc-baca-9eec3d473351-141718.png)
+![1697542246958-17ec3967-3ab8-42bc-baca-9eec3d473351.png](./img/hrf6neuQXTUoRE5i/1697542246958-17ec3967-3ab8-42bc-baca-9eec3d473351-141718.jpg)
 
 无限次光线反弹如何在一帧内实现？
 

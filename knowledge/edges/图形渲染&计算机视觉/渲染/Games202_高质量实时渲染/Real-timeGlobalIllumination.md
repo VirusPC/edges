@@ -269,7 +269,7 @@ p照亮 x_1, x_2, x_-1, x_-2 （不考虑遮挡）
  x_1, x_2, x_-1, x_-2 照亮 x
 
 ### Acceleartion  
-![1697899815543-39a2a079-e09a-4572-9d0f-e67311ecfcd5.png](./img/aBVvL0MKXR_cfwuO/1697899815543-39a2a079-e09a-4572-9d0f-e67311ecfcd5-291870.png)
+![1697899815543-39a2a079-e09a-4572-9d0f-e67311ecfcd5.png](./img/aBVvL0MKXR_cfwuO/1697899815543-39a2a079-e09a-4572-9d0f-e67311ecfcd5-291870.jpg)
 观察，光源越远贡献越低。对于一个shading point，只需看距离它比较近的次级光源就可以了。
 
 如何判断哪些次级光源近？paper里提出了一个巨大的假设：shadow map 上离得比较近，世界坐标内离得就比较近。基于这个假设可以做加速，类似PCSS的第一步和第二步。
@@ -286,7 +286,7 @@ p照亮 x_1, x_2, x_-1, x_-2 （不考虑遮挡）
     - normal：反射物（次级光源）的法线。用于计算$ cos\theta' $，可以用于加速求次级光源对shading point的贡献。（直接从光源采样）
     - flux：光源相关的属性，和发线等没关系。结果像是flux shading。
 
- ![1697899960360-287ef096-32b2-49a8-9091-37da0f82a774.png](./img/aBVvL0MKXR_cfwuO/1697899960360-287ef096-32b2-49a8-9091-37da0f82a774-655614.png)
+ ![1697899960360-287ef096-32b2-49a8-9091-37da0f82a774.png](./img/aBVvL0MKXR_cfwuO/1697899960360-287ef096-32b2-49a8-9091-37da0f82a774-655614.jpg)
 
 
 
@@ -311,7 +311,7 @@ p照亮 x_1, x_2, x_-1, x_-2 （不考虑遮挡）
 + 
 
 ### 效果
- ![1697900557247-1ae862c7-4eb1-4bad-ae11-a5ba9a45304a.png](./img/aBVvL0MKXR_cfwuO/1697900557247-1ae862c7-4eb1-4bad-ae11-a5ba9a45304a-267037.png)
+ ![1697900557247-1ae862c7-4eb1-4bad-ae11-a5ba9a45304a.png](./img/aBVvL0MKXR_cfwuO/1697900557247-1ae862c7-4eb1-4bad-ae11-a5ba9a45304a-267037.jpg)
 
 对于手电筒效果特别好。下面开启后，可以看到屋顶上反射出藤蔓。一点点变化会让效果看起来好很多。
 
@@ -348,7 +348,7 @@ RSM里用到一个概念，相当于把shadow map里的任何一个小的像素�
 
 # Real-Time Global Illumination (in 3D Space)
 ## LPV: Light Propogation Volumes
-![1697977009837-e928c4ea-467c-4ee2-876c-b91d408f8f56.png](./img/aBVvL0MKXR_cfwuO/1697977009837-e928c4ea-467c-4ee2-876c-b91d408f8f56-418119.png)
+![1697977009837-e928c4ea-467c-4ee2-876c-b91d408f8f56.png](./img/aBVvL0MKXR_cfwuO/1697977009837-e928c4ea-467c-4ee2-876c-b91d408f8f56-418119.jpg)
 
 高性能高质量。LPV一定程度上能解决RSM的问题
 
@@ -517,7 +517,7 @@ What is "screen space"?
 +  Using information only from "the screen"
 +  In other words, post processing on existing renderings
 
-![1698232121987-4eb87728-9567-422c-a041-cc103463166d.png](./img/aBVvL0MKXR_cfwuO/1698232121987-4eb87728-9567-422c-a041-cc103463166d-612795.png)
+![1698232121987-4eb87728-9567-422c-a041-cc103463166d.png](./img/aBVvL0MKXR_cfwuO/1698232121987-4eb87728-9567-422c-a041-cc103463166d-612795.jpg)
 
 
 
@@ -542,7 +542,7 @@ Why AO?
 + Cheap to implement
 + But enhances the sense of relative positions
 
-![1698232476365-9ed122da-2d29-40bb-8205-8dd6cf79b847.png](./img/aBVvL0MKXR_cfwuO/1698232476365-9ed122da-2d29-40bb-8205-8dd6cf79b847-021132.png)
+![1698232476365-9ed122da-2d29-40bb-8205-8dd6cf79b847.png](./img/aBVvL0MKXR_cfwuO/1698232476365-9ed122da-2d29-40bb-8205-8dd6cf79b847-021132.jpg)
 
 左：有AO；右：无AO
 
@@ -568,12 +568,12 @@ What is SSAO?
 
 离线渲染中也用。AO 在3D建模软件中被称为天光。
 
-![1698232896647-8ea67eab-2d01-468b-b849-c98cf20e553f.png](./img/aBVvL0MKXR_cfwuO/1698232896647-8ea67eab-2d01-468b-b849-c98cf20e553f-040926.png)
+![1698232896647-8ea67eab-2d01-468b-b849-c98cf20e553f.png](./img/aBVvL0MKXR_cfwuO/1698232896647-8ea67eab-2d01-468b-b849-c98cf20e553f-040926.jpg)
 
 #### Key idea3
 1. Also assuming **diffuse **materials. 都当作 diffuse 材质
 
-![1698233003939-db9790bc-8838-4613-b557-a8d835c3e838.png](./img/aBVvL0MKXR_cfwuO/1698233003939-db9790bc-8838-4613-b557-a8d835c3e838-912954.png)
+![1698233003939-db9790bc-8838-4613-b557-a8d835c3e838.png](./img/aBVvL0MKXR_cfwuO/1698233003939-db9790bc-8838-4613-b557-a8d835c3e838-912954.jpg)
 
 ### Theory
 #### Understanding
@@ -585,7 +585,7 @@ And again, from "the RTR approximation / equation"!
 
 
 
-![1698233482732-2e6de39b-3fc9-47de-b318-594650bf99b2.png](./img/aBVvL0MKXR_cfwuO/1698233482732-2e6de39b-3fc9-47de-b318-594650bf99b2-527046.png)
+![1698233482732-2e6de39b-3fc9-47de-b318-594650bf99b2.png](./img/aBVvL0MKXR_cfwuO/1698233482732-2e6de39b-3fc9-47de-b318-594650bf99b2-527046.jpg)
 
 蓝色：Visibility部分拆出来。加权平均的visibility 。
 
@@ -750,7 +750,7 @@ V=0时的间接光照
 
 
 
-![1699271204779-fa763950-45da-4f33-bf15-4db1b3b02ddd.png](./img/aBVvL0MKXR_cfwuO/1699271204779-fa763950-45da-4f33-bf15-4db1b3b02ddd-258651.png)
+![1699271204779-fa763950-45da-4f33-bf15-4db1b3b02ddd.png](./img/aBVvL0MKXR_cfwuO/1699271204779-fa763950-45da-4f33-bf15-4db1b3b02ddd-258651.jpg)
 
 核心是：怎样做SSDO，**哪些面会被挡住**，会对 shading point 产生贡献。
 
@@ -786,7 +786,7 @@ Issues?
 
 
 
-![1699272158121-a107a78a-2fff-49fc-8427-dac35abf8939.png](./img/aBVvL0MKXR_cfwuO/1699272158121-a107a78a-2fff-49fc-8427-dac35abf8939-404494.png)
+![1699272158121-a107a78a-2fff-49fc-8427-dac35abf8939.png](./img/aBVvL0MKXR_cfwuO/1699272158121-a107a78a-2fff-49fc-8427-dac35abf8939-404494.jpg)
 
 接收不到绿墙的光照
 
@@ -820,9 +820,9 @@ Two fundamental tasks of SSR
 
 
 
-![1699456207505-50ff1cc1-b70f-4241-b3a0-165068cb5d43.png](./img/aBVvL0MKXR_cfwuO/1699456207505-50ff1cc1-b70f-4241-b3a0-165068cb5d43-149188.png)
+![1699456207505-50ff1cc1-b70f-4241-b3a0-165068cb5d43.png](./img/aBVvL0MKXR_cfwuO/1699456207505-50ff1cc1-b70f-4241-b3a0-165068cb5d43-149188.jpg)
 
-![1699456256917-1b396923-e85a-4352-9a86-0e1a36768108.png](./img/aBVvL0MKXR_cfwuO/1699456256917-1b396923-e85a-4352-9a86-0e1a36768108-077995.png)
+![1699456256917-1b396923-e85a-4352-9a86-0e1a36768108.png](./img/aBVvL0MKXR_cfwuO/1699456256917-1b396923-e85a-4352-9a86-0e1a36768108-077995.jpg)
 
 
 
@@ -940,15 +940,15 @@ mipmap中每一层的每个纹素都是一个结点，上下层对应节点构�
 1. Hidden Geometry Problem 不知道壳背后的几何，只能反射屏幕中出现的这层壳
 2. Edge Cutoff 不知道屏幕外的几何
 
-![1699546332292-7ab6b21c-bf52-4390-bf80-eb72f8c57d5f.png](./img/aBVvL0MKXR_cfwuO/1699546332292-7ab6b21c-bf52-4390-bf80-eb72f8c57d5f-038932.png)
+![1699546332292-7ab6b21c-bf52-4390-bf80-eb72f8c57d5f.png](./img/aBVvL0MKXR_cfwuO/1699546332292-7ab6b21c-bf52-4390-bf80-eb72f8c57d5f-038932.jpg)
 
-![1699546408416-10f669c4-8d3b-4b7f-85e8-d8e0028d6586.png](./img/aBVvL0MKXR_cfwuO/1699546408416-10f669c4-8d3b-4b7f-85e8-d8e0028d6586-078821.png)
+![1699546408416-10f669c4-8d3b-4b7f-85e8-d8e0028d6586.png](./img/aBVvL0MKXR_cfwuO/1699546408416-10f669c4-8d3b-4b7f-85e8-d8e0028d6586-078821.jpg)
 
 
 
 Edge Cutoff 如何解决？根据反射光的距离，做衰减。反射光的距离长了，就认为反射不太到了
 
-![1699546504621-a986bf02-266e-4ffb-8bf2-ae9285eb0aef.png](./img/aBVvL0MKXR_cfwuO/1699546504621-a986bf02-266e-4ffb-8bf2-ae9285eb0aef-110179.png)
+![1699546504621-a986bf02-266e-4ffb-8bf2-ae9285eb0aef.png](./img/aBVvL0MKXR_cfwuO/1699546504621-a986bf02-266e-4ffb-8bf2-ae9285eb0aef-110179.jpg)
 
 #### Shading
 光线与场景求交，从传统的三维的与BVH求交，变成了与屏幕的壳求交。其他 path tracing 的任何方法都可以拿来用。

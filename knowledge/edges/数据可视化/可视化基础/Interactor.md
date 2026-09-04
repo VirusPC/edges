@@ -19,7 +19,7 @@
 2. **running **=mousemove=> **running**
 3. **running **=mouseup=> **start**
 
-![1690353372382-901eb57f-f7f7-4e78-bc7d-7af6b21742ce.png](./img/f9Z5ditxu4PtdVvL/1690353372382-901eb57f-f7f7-4e78-bc7d-7af6b21742ce-395464.png)
+![1690353372382-901eb57f-f7f7-4e78-bc7d-7af6b21742ce.png](./img/f9Z5ditxu4PtdVvL/1690353372382-901eb57f-f7f7-4e78-bc7d-7af6b21742ce-395464.jpg)
 
 garnet
 
@@ -60,7 +60,7 @@ Command
 + do
 + undo
 
-![1690351993591-23577db1-6afd-4338-bf69-59291c5c3684.png](./img/f9Z5ditxu4PtdVvL/1690351993591-23577db1-6afd-4338-bf69-59291c5c3684-600684.png)
+![1690351993591-23577db1-6afd-4338-bf69-59291c5c3684.png](./img/f9Z5ditxu4PtdVvL/1690351993591-23577db1-6afd-4338-bf69-59291c5c3684-600684.jpg)
 
 
 

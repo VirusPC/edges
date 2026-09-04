@@ -23,7 +23,7 @@
       - [How to perturb the normal (in flatland)](#how-to-perturb-the-normal-in-flatland)
       - [How to perturb the normal (in 3D)](#how-to-perturb-the-normal-in-3d)
     + [Displacement mapping](#displacement-mapping)
-    + [![1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6.png](./img/wUjE88pIvvLfspzr/1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6-794496.png)](#1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6pngimgwuje88pivvlfspzr1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6-794496png)
+    + [![1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6.png](./img/wUjE88pIvvLfspzr/1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6-794496.jpg)](#1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6pngimgwuje88pivvlfspzr1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6-794496png)
   * [3D Procedual Noise + Solid Modeling](#3d-procedual-noise--solid-modeling)
   * [Provide Precomputed Shading](#provide-precomputed-shading)
   * [3D Textures and Volume rendering](#3d-textures-and-volume-rendering)
@@ -255,7 +255,7 @@ Ripmaps and summed area tables
 
 仍然存在的问题：各项异性过滤，对于横着或竖着的长条形很有效，但对斜着的长条形效果仍然不好。
 
-![1674474512555-04fae1a8-c3e9-4ec8-98c3-c65f811aedfc.png](./img/wUjE88pIvvLfspzr/1674474512555-04fae1a8-c3e9-4ec8-98c3-c65f811aedfc-097670.png)
+![1674474512555-04fae1a8-c3e9-4ec8-98c3-c65f811aedfc.png](./img/wUjE88pIvvLfspzr/1674474512555-04fae1a8-c3e9-4ec8-98c3-c65f811aedfc-097670.jpg)
 
 ### EWA filtering
 各项异性过滤相对mipmap做了一些改进，但仍然存在问题：但对斜着的长条形效果仍然不好。
@@ -300,18 +300,18 @@ environment map怎么来的？在屋子里放上一个非常光滑的球，球�
 
 把环境光记录在球上，然后展开存储在texture里。这种被称为spherical environment map。
 
-![1682691897729-d33e1dfb-0838-4c2d-ae58-56a45b4f32bc.png](./img/wUjE88pIvvLfspzr/1682691897729-d33e1dfb-0838-4c2d-ae58-56a45b4f32bc-483401.png)
+![1682691897729-d33e1dfb-0838-4c2d-ae58-56a45b4f32bc.png](./img/wUjE88pIvvLfspzr/1682691897729-d33e1dfb-0838-4c2d-ae58-56a45b4f32bc-483401.jpg)
 
 Spherical map 展开时遇到的问题：distortion，扭曲，特别是上面和下面
 
-![1682691988156-1660f8b5-0956-4325-bf4a-641b881e9c30.png](./img/wUjE88pIvvLfspzr/1682691988156-1660f8b5-0956-4325-bf4a-641b881e9c30-398731.png)
+![1682691988156-1660f8b5-0956-4325-bf4a-641b881e9c30.png](./img/wUjE88pIvvLfspzr/1682691988156-1660f8b5-0956-4325-bf4a-641b881e9c30-398731.jpg)
 
 ### Cube map
 减少了spherical map的distortion问题
 
 ![1682692172763-ff23ae1b-002a-4ed6-8ff2-8b5b017287fe.png](./img/wUjE88pIvvLfspzr/1682692172763-ff23ae1b-002a-4ed6-8ff2-8b5b017287fe-534551.png)
 
-![1682692234735-a8faef65-7ce4-470b-bbdc-e2906084a6bf.png](./img/wUjE88pIvvLfspzr/1682692234735-a8faef65-7ce4-470b-bbdc-e2906084a6bf-276051.png)
+![1682692234735-a8faef65-7ce4-470b-bbdc-e2906084a6bf.png](./img/wUjE88pIvvLfspzr/1682692234735-a8faef65-7ce4-470b-bbdc-e2906084a6bf-276051.jpg)
 
 引入新的问题：想要某一个方向的光照时，球体可以很容易得到，而立方体需要先判断光线记录在哪一个面上。虽然多了额外的计算，但这计算过程非常快。
 
@@ -326,7 +326,7 @@ besides colors, textures can also represent
 
 **Add surface detail without adding more triangles**
 
-![1682692608709-e474505d-e5cd-4bcd-b807-e2bf3490dcbd.png](./img/wUjE88pIvvLfspzr/1682692608709-e474505d-e5cd-4bcd-b807-e2bf3490dcbd-643435.png)
+![1682692608709-e474505d-e5cd-4bcd-b807-e2bf3490dcbd.png](./img/wUjE88pIvvLfspzr/1682692608709-e474505d-e5cd-4bcd-b807-e2bf3490dcbd-643435.jpg)
 
 ### Bump Mapping
 **Add surface detail without adding more triangles**
@@ -356,7 +356,7 @@ besides colors, textures can also represent
 
 DirectX的做法：Dynamic  tessellation，动态曲面细分。开始先用粗糙的模型+凹凸贴图，然后在应用位移贴图的过程中检测是否需要把三角形变得更小更细。
 
-### ![1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6.png](./img/wUjE88pIvvLfspzr/1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6-794496.png)
+### ![1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6.png](./img/wUjE88pIvvLfspzr/1682694265518-981c4161-2dc0-48a8-a2ea-fced258535f6-794496.jpg)
 ## 3D Procedual Noise + Solid Modeling
 前面都假定纹理是二维的，然而，纹理也可以是三维的（定义了3维空间每一点的属性。例如，图中把球砍一半也可以看到颜色）。
 
@@ -364,17 +364,17 @@ DirectX的做法：Dynamic  tessellation，动态曲面细分。开始先用粗�
 
 图中两个例子采用了perlin noise，这一噪声函数也可用于山脉。
 
-![1682695005603-2353e566-5412-4db3-adc5-e8ba092df044.png](./img/wUjE88pIvvLfspzr/1682695005603-2353e566-5412-4db3-adc5-e8ba092df044-190453.png)
+![1682695005603-2353e566-5412-4db3-adc5-e8ba092df044.png](./img/wUjE88pIvvLfspzr/1682695005603-2353e566-5412-4db3-adc5-e8ba092df044-190453.jpg)
 
 ## Provide Precomputed Shading
 Simple shading 没考虑 Ambient occlusion（环境光遮蔽，比如眉骨会投影到眼睛上侧）
 
 提前计算好ambient occulsion， 然后与simple shading想加
 
-![1682695394734-5d1a0c77-59ed-40ec-b1bd-8a3c1415a4c3.png](./img/wUjE88pIvvLfspzr/1682695394734-5d1a0c77-59ed-40ec-b1bd-8a3c1415a4c3-898637.png)
+![1682695394734-5d1a0c77-59ed-40ec-b1bd-8a3c1415a4c3.png](./img/wUjE88pIvvLfspzr/1682695394734-5d1a0c77-59ed-40ec-b1bd-8a3c1415a4c3-898637.jpg)
 
 ## 3D Textures and Volume rendering
-![1682695918903-58385341-d8a2-41fc-aa40-dcff680d9b2a.png](./img/wUjE88pIvvLfspzr/1682695918903-58385341-d8a2-41fc-aa40-dcff680d9b2a-696880.png)
+![1682695918903-58385341-d8a2-41fc-aa40-dcff680d9b2a.png](./img/wUjE88pIvvLfspzr/1682695918903-58385341-d8a2-41fc-aa40-dcff680d9b2a-696880.jpg)
 
 # References
 + [How do mipmapping, anti-aliasing and anisotropic filtering contribute to rendering quality?](https://gamedev.stackexchange.com/questions/100985/how-do-mipmapping-anti-aliasing-and-anisotropic-filtering-contribute-to-renderi)

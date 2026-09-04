@@ -53,13 +53,13 @@
 
 * Material == BRDF
 
-![1683294661488-b130df3d-f2d8-4794-9793-719e3a7aebac.png](./img/BKU1UGeuTwkD4f-o/1683294661488-b130df3d-f2d8-4794-9793-719e3a7aebac-282857.png)
+![1683294661488-b130df3d-f2d8-4794-9793-719e3a7aebac.png](./img/BKU1UGeuTwkD4f-o/1683294661488-b130df3d-f2d8-4794-9793-719e3a7aebac-282857.jpg)
 
 ## Diffuse/Lambertian Material (BRDF)
 
 A Lambertian surface for reflection is a surface that appears\*\* uniformly bright\*\* from\*\* all directions \*\*of view and reflects the entire incident light. Lambertian reflectance is  the property exhibited by an ideal matte or diffusely reflecting surface
 
-![1683294958555-c7cbac48-2e58-4458-8120-0ddf9ae3cdbc.png](./img/BKU1UGeuTwkD4f-o/1683294958555-c7cbac48-2e58-4458-8120-0ddf9ae3cdbc-560872.png)
+![1683294958555-c7cbac48-2e58-4458-8120-0ddf9ae3cdbc.png](./img/BKU1UGeuTwkD4f-o/1683294958555-c7cbac48-2e58-4458-8120-0ddf9ae3cdbc-560872.jpg)
 
 * 不考虑自身发光项 => 渲染方程去掉发光项。
 * 假设入射光沿各个方向均匀分布=>$ L\_i(w\_i) $是常数；
@@ -80,7 +80,7 @@ A Lambertian surface for reflection is a surface that appears\*\* uniformly brig
 
 抛光的金属就是这种材质
 
-![1683297515387-905e8cdc-c9fb-4a8d-8066-74449fcccd07.png](./img/BKU1UGeuTwkD4f-o/1683297515387-905e8cdc-c9fb-4a8d-8066-74449fcccd07-697192.png)
+![1683297515387-905e8cdc-c9fb-4a8d-8066-74449fcccd07.png](./img/BKU1UGeuTwkD4f-o/1683297515387-905e8cdc-c9fb-4a8d-8066-74449fcccd07-697192.jpg)
 
 ## Ideal Reflective/Refractive Material (BRDF)
 
@@ -90,7 +90,7 @@ A Lambertian surface for reflection is a surface that appears\*\* uniformly brig
 
 原始的whitted style ray tracing 并没有考虑折射。
 
-![1683297612519-dd1e38e6-ca71-45dd-8c28-fc4625939af6.png](./img/BKU1UGeuTwkD4f-o/1683297612519-dd1e38e6-ca71-45dd-8c28-fc4625939af6-518519.png)
+![1683297612519-dd1e38e6-ca71-45dd-8c28-fc4625939af6.png](./img/BKU1UGeuTwkD4f-o/1683297612519-dd1e38e6-ca71-45dd-8c28-fc4625939af6-518519.jpg)
 
 ### Perfect Specular Reflection
 
@@ -108,7 +108,7 @@ A Lambertian surface for reflection is a surface that appears\*\* uniformly brig
 
 如何用BRDF表示 specular reflection？这里不细讲。放下效果图：
 
-![1683344936144-7c69ea96-d6ce-44c9-8a2d-6f427f9634b0.png](./img/BKU1UGeuTwkD4f-o/1683344936144-7c69ea96-d6ce-44c9-8a2d-6f427f9634b0-407936.png)
+![1683344936144-7c69ea96-d6ce-44c9-8a2d-6f427f9634b0.png](./img/BKU1UGeuTwkD4f-o/1683344936144-7c69ea96-d6ce-44c9-8a2d-6f427f9634b0-407936.jpg)
 
 ### Specular Refraction
 
@@ -120,7 +120,7 @@ Light refracts when it enters a new medium.
 
 光打到海水表面，海水表面是凹凸不平的，光线会往不同方向折射。对于海底的一点，会接收到来自不同方向的光。 某些地方收到的光比较多，比较亮，形成条状光带。
 
-![1683345161914-05869bd1-842c-4fdf-a7ec-89a09db20048.png](./img/BKU1UGeuTwkD4f-o/1683345161914-05869bd1-842c-4fdf-a7ec-89a09db20048-491953.png)
+![1683345161914-05869bd1-842c-4fdf-a7ec-89a09db20048.png](./img/BKU1UGeuTwkD4f-o/1683345161914-05869bd1-842c-4fdf-a7ec-89a09db20048-491953.jpg)
 
 给定入射方向，如何算折射方向？
 
@@ -157,7 +157,7 @@ Transmitted angle depends on
 
 斯涅耳窗口(也称为斯涅耳圆或optical man-hole)是一种现象，通过这种现象，水下观察者可以通过一个约96度的光锥看到水面以上的一切。这种现象是由光进入水中的折射引起的，受斯内尔定律支配。斯内尔窗户外面的区域要么是完全黑暗的，要么是水下物体的全内反射反射
 
-![1683363947966-50ff41e3-864b-4cae-9d8c-65a9dcc293a9.png](./img/BKU1UGeuTwkD4f-o/1683363947966-50ff41e3-864b-4cae-9d8c-65a9dcc293a9-667772.png)
+![1683363947966-50ff41e3-864b-4cae-9d8c-65a9dcc293a9.png](./img/BKU1UGeuTwkD4f-o/1683363947966-50ff41e3-864b-4cae-9d8c-65a9dcc293a9-667772.jpg)
 
 球体为什么不存在全反射现象？球非常对称，折射进来的光必定能折射出去。其他形状需要考虑全反射。
 
@@ -191,7 +191,7 @@ Transmitted angle depends on
 
 导体的菲涅耳项相差很多：
 
-![1683365322814-a3606374-1ffa-42b0-ae46-0be05e52f38e.png](./img/BKU1UGeuTwkD4f-o/1683365322814-a3606374-1ffa-42b0-ae46-0be05e52f38e-364321.png)
+![1683365322814-a3606374-1ffa-42b0-ae46-0be05e52f38e.png](./img/BKU1UGeuTwkD4f-o/1683365322814-a3606374-1ffa-42b0-ae46-0be05e52f38e-364321.jpg)
 
 #### Formulae
 
@@ -239,7 +239,7 @@ glossy材质的法向量在方向上比较集中
 
 diffuse材质的法向量在方向上比较分散
 
-![1683384838086-38d6bbc8-5593-4d13-b3dd-3a3b9fdc08b4.png](./img/BKU1UGeuTwkD4f-o/1683384838086-38d6bbc8-5593-4d13-b3dd-3a3b9fdc08b4-717396.png)
+![1683384838086-38d6bbc8-5593-4d13-b3dd-3a3b9fdc08b4.png](./img/BKU1UGeuTwkD4f-o/1683384838086-38d6bbc8-5593-4d13-b3dd-3a3b9fdc08b4-717396.jpg)
 
 基于上面的思想：
 
@@ -256,9 +256,9 @@ Micorfacet Model的BRDF如下：
 
 微表面模型可以描述的东西特别特别多，非常真实
 
-![1683385790786-99935e74-23d5-40f6-bb52-6e9726a8dea3.png](./img/BKU1UGeuTwkD4f-o/1683385790786-99935e74-23d5-40f6-bb52-6e9726a8dea3-430526.png)
+![1683385790786-99935e74-23d5-40f6-bb52-6e9726a8dea3.png](./img/BKU1UGeuTwkD4f-o/1683385790786-99935e74-23d5-40f6-bb52-6e9726a8dea3-430526.jpg)
 
-![1683385801655-a88cda7f-c362-44c0-bfde-4c54f22a6eab.png](./img/BKU1UGeuTwkD4f-o/1683385801655-a88cda7f-c362-44c0-bfde-4c54f22a6eab-404342.png)
+![1683385801655-a88cda7f-c362-44c0-bfde-4c54f22a6eab.png](./img/BKU1UGeuTwkD4f-o/1683385801655-a88cda7f-c362-44c0-bfde-4c54f22a6eab-404342.jpg)
 
 但描述木头时，还需要在微表面模型上添加更多的东西
 
@@ -276,7 +276,7 @@ Microfacet Model 是一个统称，有很多微表面模型，但都遵守微表
 
 原因：是磨过的金属。
 
-![1683386219995-9b999828-c7fc-4856-8f5d-dcb2822b5867.png](./img/BKU1UGeuTwkD4f-o/1683386219995-9b999828-c7fc-4856-8f5d-dcb2822b5867-624428.png)
+![1683386219995-9b999828-c7fc-4856-8f5d-dcb2822b5867.png](./img/BKU1UGeuTwkD4f-o/1683386219995-9b999828-c7fc-4856-8f5d-dcb2822b5867-624428.jpg)
 
 两种材质：
 
@@ -289,9 +289,9 @@ Microfacet Model 是一个统称，有很多微表面模型，但都遵守微表
 
 各向异性材质：theta不变，同时旋转入射角和出射角的方位角。若得到的BRDF的值不同，就为各项异性材质。
 
-![1683386499301-e2266f83-1911-4624-b3bc-1e8d6f261349.png](./img/BKU1UGeuTwkD4f-o/1683386499301-e2266f83-1911-4624-b3bc-1e8d6f261349-255420.png)
+![1683386499301-e2266f83-1911-4624-b3bc-1e8d6f261349.png](./img/BKU1UGeuTwkD4f-o/1683386499301-e2266f83-1911-4624-b3bc-1e8d6f261349-255420.jpg)
 
-![1683387117592-055c5460-92a0-464b-ade5-90305ebaca15.png](./img/BKU1UGeuTwkD4f-o/1683387117592-055c5460-92a0-464b-ade5-90305ebaca15-452891.png)
+![1683387117592-055c5460-92a0-464b-ade5-90305ebaca15.png](./img/BKU1UGeuTwkD4f-o/1683387117592-055c5460-92a0-464b-ade5-90305ebaca15-452891.jpg)
 
 尼龙这种针织物是各项异性，但很接近各项同性。
 
@@ -391,7 +391,7 @@ MERL BRDB Database
 
 基于实验测，经验统计或是套用真实存在的物理公式
 
-![1697476935799-bf82c82e-b865-45d5-a8bf-6c07010bdec1.png](./img/BKU1UGeuTwkD4f-o/1697476935799-bf82c82e-b865-45d5-a8bf-6c07010bdec1-470511.png)
+![1697476935799-bf82c82e-b865-45d5-a8bf-6c07010bdec1.png](./img/BKU1UGeuTwkD4f-o/1697476935799-bf82c82e-b865-45d5-a8bf-6c07010bdec1-470511.jpg)
 
 # References
 

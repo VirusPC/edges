@@ -26,7 +26,7 @@
 
 
 
-![1730629195239-6b785c0a-9abc-45f4-853a-5e92e49402e5.png](./img/s2vj0tWbdzqsEGvU/1730629195239-6b785c0a-9abc-45f4-853a-5e92e49402e5-774810.png)
+![1730629195239-6b785c0a-9abc-45f4-853a-5e92e49402e5.png](./img/s2vj0tWbdzqsEGvU/1730629195239-6b785c0a-9abc-45f4-853a-5e92e49402e5-774810.jpg)
 
 
 
@@ -153,7 +153,7 @@ ProlificDreamer：https://ml.cs.tsinghua.edu.cn/prolificdreamer/
     1. 数据上的提升，objaverse-XL(2023年，10M+ 3D模型)，渲染技巧得到单图
     2. 计算资源的平衡，模型设计中几个地方的分辨率问题，3平面nerf表征的优化，平面channel的数量。视角图片的分辨率（512 or 128）。
 
-![1730630574503-1cbded46-f3e8-4306-a004-fe1bedb2b532.png](./img/s2vj0tWbdzqsEGvU/1730630574503-1cbded46-f3e8-4306-a004-fe1bedb2b532-438037.png)
+![1730630574503-1cbded46-f3e8-4306-a004-fe1bedb2b532.png](./img/s2vj0tWbdzqsEGvU/1730630574503-1cbded46-f3e8-4306-a004-fe1bedb2b532-438037.jpg)
 
 
 

@@ -119,7 +119,7 @@ Split Sum 基于 microfacet BRDF
 + Spherical map vs. cube map
 + 隐含条件：光照来自无限远处
 
-![1688731829546-9526640e-d47e-4115-ab48-26c5c93cd127.png](./img/v0j3wh2ck-YyEO68/1688731829546-9526640e-d47e-4115-ab48-26c5c93cd127-371053.png)
+![1688731829546-9526640e-d47e-4115-ab48-26c5c93cd127.png](./img/v0j3wh2ck-YyEO68/1688731829546-9526640e-d47e-4115-ab48-26c5c93cd127-371053.jpg)
 
 
 
@@ -310,7 +310,7 @@ The Split Sum 是虚幻引擎 PBR 做的这么牛的基础
 ### Background knowledge
 #### Frequency and filtering
 ##### Fourier Transform，傅里叶级数展开
-![1697456077249-f9119adb-adf4-44e9-a1be-0560e2d543d8.png](./img/v0j3wh2ck-YyEO68/1697456077249-f9119adb-adf4-44e9-a1be-0560e2d543d8-729646.png)
+![1697456077249-f9119adb-adf4-44e9-a1be-0560e2d543d8.png](./img/v0j3wh2ck-YyEO68/1697456077249-f9119adb-adf4-44e9-a1be-0560e2d543d8-729646.jpg)
 
 任何函数都能写成sin和cos的组合。
 
@@ -319,20 +319,20 @@ PS：这个函数刚好是偶函数，只有cos没有sin
 
 
 ##### Visualizing Image Frequency Content
-![1697456220931-04d9c517-684a-4fa4-81e9-16ec076aa6aa.png](./img/v0j3wh2ck-YyEO68/1697456220931-04d9c517-684a-4fa4-81e9-16ec076aa6aa-126396.png)
+![1697456220931-04d9c517-684a-4fa4-81e9-16ec076aa6aa.png](./img/v0j3wh2ck-YyEO68/1697456220931-04d9c517-684a-4fa4-81e9-16ec076aa6aa-126396.jpg)
 
 变化非常剧烈还是平缓。
 
 频谱：中心低频，外面高频。自然图片大都是低频内容。
 
-![1697456334927-a94ff70e-0584-42da-b45f-b16db46f5ffe.png](./img/v0j3wh2ck-YyEO68/1697456334927-a94ff70e-0584-42da-b45f-b16db46f5ffe-562462.png)
+![1697456334927-a94ff70e-0584-42da-b45f-b16db46f5ffe.png](./img/v0j3wh2ck-YyEO68/1697456334927-a94ff70e-0584-42da-b45f-b16db46f5ffe-562462.jpg)
 
-![1697456349612-5c34a6df-8eaa-4c41-9694-9b9bebd5b3f4.png](./img/v0j3wh2ck-YyEO68/1697456349612-5c34a6df-8eaa-4c41-9694-9b9bebd5b3f4-341109.png)
+![1697456349612-5c34a6df-8eaa-4c41-9694-9b9bebd5b3f4.png](./img/v0j3wh2ck-YyEO68/1697456349612-5c34a6df-8eaa-4c41-9694-9b9bebd5b3f4-341109.jpg)
 
 时域卷积 = 频域乘积
 
 ##### A general understanding
-![1697456582849-588a5dd7-b596-48d9-9fc1-53a109721606.png](./img/v0j3wh2ck-YyEO68/1697456582849-588a5dd7-b596-48d9-9fc1-53a109721606-543094.png)
+![1697456582849-588a5dd7-b596-48d9-9fc1-53a109721606.png](./img/v0j3wh2ck-YyEO68/1697456582849-588a5dd7-b596-48d9-9fc1-53a109721606-543094.jpg)
 
 两个函数乘起来，再做积分，可以被认为是滤波操作。
 
@@ -349,7 +349,7 @@ PS：这个函数刚好是偶函数，只有cos没有sin
 
 多项式系列也可以是基函数（泰勒之外）。
 
-![1697456793117-0a95d19e-fc26-46e9-8a5e-90090c9388dc.png](./img/v0j3wh2ck-YyEO68/1697456793117-0a95d19e-fc26-46e9-8a5e-90090c9388dc-865270.png)
+![1697456793117-0a95d19e-fc26-46e9-8a5e-90090c9388dc.png](./img/v0j3wh2ck-YyEO68/1697456793117-0a95d19e-fc26-46e9-8a5e-90090c9388dc-865270.jpg)
 
 
 
@@ -357,7 +357,7 @@ PS：这个函数刚好是偶函数，只有cos没有sin
 先考虑，给你一个diffuse的材质，给你环境光，如何把shading算出来，先不考虑shadow。
 
 #### Spherical Harmonics (SH)
-![1697457101684-a9aa983b-aff1-4997-b4f4-df73700efa3d.png](./img/v0j3wh2ck-YyEO68/1697457101684-a9aa983b-aff1-4997-b4f4-df73700efa3d-550720.png)
+![1697457101684-a9aa983b-aff1-4997-b4f4-df73700efa3d.png](./img/v0j3wh2ck-YyEO68/1697457101684-a9aa983b-aff1-4997-b4f4-df73700efa3d-550720.jpg)
 
 SH是一系列的基函数，每一个基函数都是在球面上的对方向的一个二维函数。（三维空间，两个数可以表示一个反向）（蓝色代表正值，黄色代表正值）
 
@@ -420,7 +420,7 @@ f(w)最常见的应用：环境光照，环境光照就是一个二维函数。�
 
 diffuse物体的BRDF，可以用3阶球谐函数来表示（相当于低频滤波器，失去了高频信息） =》 环境光照也可以用3阶来表示
 
-![1697551539110-72264ac4-3ef3-4ea9-b062-2f4d77d8d5a0.png](./img/v0j3wh2ck-YyEO68/1697551539110-72264ac4-3ef3-4ea9-b062-2f4d77d8d5a0-975434.png)
+![1697551539110-72264ac4-3ef3-4ea9-b062-2f4d77d8d5a0.png](./img/v0j3wh2ck-YyEO68/1697551539110-72264ac4-3ef3-4ea9-b062-2f4d77d8d5a0-975434.jpg)
 
 ![1697551551824-6762cbbe-2889-49a3-aa99-6f4241053da8.png](./img/v0j3wh2ck-YyEO68/1697551551824-6762cbbe-2889-49a3-aa99-6f4241053da8-290711.png)
 
@@ -459,7 +459,7 @@ lighting,visibility,BRDF都可以描述成球谐函数
 
 挨个乘太慢。PRT会利用基函数的性质，预计算一些东西，来加速。
 
-![1697553810369-eedcc481-551b-4da6-b899-6960e0cd9df5.png](./img/v0j3wh2ck-YyEO68/1697553810369-eedcc481-551b-4da6-b899-6960e0cd9df5-212400.png)
+![1697553810369-eedcc481-551b-4da6-b899-6960e0cd9df5.png](./img/v0j3wh2ck-YyEO68/1697553810369-eedcc481-551b-4da6-b899-6960e0cd9df5-212400.jpg)
 
 ![1697553893528-b78257ce-1dc7-4e8f-b170-b2e297c9578d.png](./img/v0j3wh2ck-YyEO68/1697553893528-b78257ce-1dc7-4e8f-b170-b2e297c9578d-192258.png)
 
@@ -516,7 +516,7 @@ $ T_i $: light transport.
 
 ![1697555549445-17827d9d-e3b0-40a4-a464-0f9057de91f7.png](./img/v0j3wh2ck-YyEO68/1697555549445-17827d9d-e3b0-40a4-a464-0f9057de91f7-263350.png)
 
-![1697556311854-47ed8ebb-40ee-41e0-828e-fe05d22e2ffd.png](./img/v0j3wh2ck-YyEO68/1697556311854-47ed8ebb-40ee-41e0-828e-fe05d22e2ffd-233067.png)
+![1697556311854-47ed8ebb-40ee-41e0-828e-fe05d22e2ffd.png](./img/v0j3wh2ck-YyEO68/1697556311854-47ed8ebb-40ee-41e0-828e-fe05d22e2ffd-233067.jpg)
 
 Inter：考虑light的多次bounce
 
@@ -558,7 +558,7 @@ T(o)继续投影
 
 ![1697882935145-7327ea88-4360-458b-aad2-ea1c4a9f0581.png](./img/v0j3wh2ck-YyEO68/1697882935145-7327ea88-4360-458b-aad2-ea1c4a9f0581-158242.png)
 
-![1697883001608-1a03aad6-534f-4a7a-ad87-11af8692b5fa.png](./img/v0j3wh2ck-YyEO68/1697883001608-1a03aad6-534f-4a7a-ad87-11af8692b5fa-669193.png)
+![1697883001608-1a03aad6-534f-4a7a-ad87-11af8692b5fa.png](./img/v0j3wh2ck-YyEO68/1697883001608-1a03aad6-534f-4a7a-ad87-11af8692b5fa-669193.jpg)
 
 显然，glossy非常高频，接近镜面反射时，不能用PRT
 
@@ -567,7 +567,7 @@ T(o)继续投影
 
 
 
-![1697884357997-00d7626c-a6ed-44d6-8507-df13af652fef.png](./img/v0j3wh2ck-YyEO68/1697884357997-00d7626c-a6ed-44d6-8507-df13af652fef-852855.png)
+![1697884357997-00d7626c-a6ed-44d6-8507-df13af652fef.png](./img/v0j3wh2ck-YyEO68/1697884357997-00d7626c-a6ed-44d6-8507-df13af652fef-852855.jpg)
 
 
 
@@ -590,21 +590,21 @@ T(o)继续投影
 
 不管什么路径，L和E中间的所有东西都是light transport。可以把任意复杂的transport path通过任意方式任意时间去预计算
 
-![1697884448220-6e43e8d7-79db-4adc-b91e-91701613ce5b.png](./img/v0j3wh2ck-YyEO68/1697884448220-6e43e8d7-79db-4adc-b91e-91701613ce5b-535227.png)
+![1697884448220-6e43e8d7-79db-4adc-b91e-91701613ce5b.png](./img/v0j3wh2ck-YyEO68/1697884448220-6e43e8d7-79db-4adc-b91e-91701613ce5b-535227.jpg)
 
 light transport 本身也可以视作一个新的rendering equation。B_i 代替 L_i。Light transport的预计算就是一个渲染过程。
 
 
 
-![1697884740716-b04aab99-2e4e-4372-9181-fe879bc482a6.png](./img/v0j3wh2ck-YyEO68/1697884740716-b04aab99-2e4e-4372-9181-fe879bc482a6-896523.png)
+![1697884740716-b04aab99-2e4e-4372-9181-fe879bc482a6.png](./img/v0j3wh2ck-YyEO68/1697884740716-b04aab99-2e4e-4372-9181-fe879bc482a6-896523.jpg)
 
 Spatially Varing：相同材质在物体不同地方有着不同的BRDF（比如生锈的物体），BRDF从普通的4维变成了6维
 
 ####   Summary
-![1697884912001-6996c4fa-ba71-423b-9944-48793b358b89.png](./img/v0j3wh2ck-YyEO68/1697884912001-6996c4fa-ba71-423b-9944-48793b358b89-291487.png)
+![1697884912001-6996c4fa-ba71-423b-9944-48793b358b89.png](./img/v0j3wh2ck-YyEO68/1697884912001-6996c4fa-ba71-423b-9944-48793b358b89-291487.jpg)
 
 #### Limitations
-![1697884927924-d9916fc6-e5d5-4b92-8f48-980fb28747bb.png](./img/v0j3wh2ck-YyEO68/1697884927924-d9916fc6-e5d5-4b92-8f48-980fb28747bb-383207.png)
+![1697884927924-d9916fc6-e5d5-4b92-8f48-980fb28747bb.png](./img/v0j3wh2ck-YyEO68/1697884927924-d9916fc6-e5d5-4b92-8f48-980fb28747bb-383207.jpg)
 
 #### Follow up works
 ![1697885368213-889b7d2d-66df-4f05-89bd-9bf7390c73c6.png](./img/v0j3wh2ck-YyEO68/1697885368213-889b7d2d-66df-4f05-89bd-9bf7390c73c6-452442.png)

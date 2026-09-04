@@ -249,7 +249,7 @@ grid的方法：
 
 ![1711294492763-7762d91d-e775-4cf3-bfd9-06073fd99e30.png](./img/yhtln2N_e0kDZdYr/1711294492763-7762d91d-e775-4cf3-bfd9-06073fd99e30-254458.png)
 
-![1711294511840-12fbddad-3f2b-4e84-9355-3ddfae9b2dc4.png](./img/yhtln2N_e0kDZdYr/1711294511840-12fbddad-3f2b-4e84-9355-3ddfae9b2dc4-152364.png)
+![1711294511840-12fbddad-3f2b-4e84-9355-3ddfae9b2dc4.png](./img/yhtln2N_e0kDZdYr/1711294511840-12fbddad-3f2b-4e84-9355-3ddfae9b2dc4-152364.jpg)
 
 Kinect如何应用pattern原理：
 

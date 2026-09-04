@@ -115,7 +115,7 @@ Imaging = Synthesis + Capture
         * 问题：1）分辨率不足。对相片的分辨率要求高。2）制造成本高。
 
 # What's Happening Inside Camera?
-![1683464896889-f39bd4dd-f18e-4749-9574-ad064d55d36e.png](./img/a9tEKfXFO2k0Y0Od/1683464896889-f39bd4dd-f18e-4749-9574-ad064d55d36e-275064.png)
+![1683464896889-f39bd4dd-f18e-4749-9574-ad064d55d36e.png](./img/a9tEKfXFO2k0Y0Od/1683464896889-f39bd4dd-f18e-4749-9574-ad064d55d36e-275064.jpg)
 
 ## Pinholes & Lenses From Image on Sensor
 针孔相机和透镜相机都可以拍照。
@@ -124,11 +124,11 @@ Imaging = Synthesis + Capture
 
 
 
-![1683464941291-8ab0d43b-dfbf-4901-8b75-3cab9596949a.png](./img/a9tEKfXFO2k0Y0Od/1683464941291-8ab0d43b-dfbf-4901-8b75-3cab9596949a-006861.png)
+![1683464941291-8ab0d43b-dfbf-4901-8b75-3cab9596949a.png](./img/a9tEKfXFO2k0Y0Od/1683464941291-8ab0d43b-dfbf-4901-8b75-3cab9596949a-006861.jpg)
 
 
 
-![1683465111000-84bae38d-e6ed-42ce-b7cc-11443263e751.png](./img/a9tEKfXFO2k0Y0Od/1683465111000-84bae38d-e6ed-42ce-b7cc-11443263e751-180039.png)
+![1683465111000-84bae38d-e6ed-42ce-b7cc-11443263e751.png](./img/a9tEKfXFO2k0Y0Od/1683465111000-84bae38d-e6ed-42ce-b7cc-11443263e751-180039.jpg)
 
 ![1683465083774-7903273e-ec1d-41bc-8a83-f432d8acda54.png](./img/a9tEKfXFO2k0Y0Od/1683465083774-7903273e-ec1d-41bc-8a83-f432d8acda54-827809.png)
 
@@ -160,10 +160,10 @@ Imaging = Synthesis + Capture
 
 
 
-![1683466105852-7563635c-f0d9-4e04-aa85-491fcce9d6e4.png](./img/a9tEKfXFO2k0Y0Od/1683466105852-7563635c-f0d9-4e04-aa85-491fcce9d6e4-272758.png)
+![1683466105852-7563635c-f0d9-4e04-aa85-491fcce9d6e4.png](./img/a9tEKfXFO2k0Y0Od/1683466105852-7563635c-f0d9-4e04-aa85-491fcce9d6e4-272758.jpg)
 
 ## Effects of Sensor Size on FOV
-![1683466163957-a3f4b13f-aec1-428f-8225-398f23cc8f29.png](./img/a9tEKfXFO2k0Y0Od/1683466163957-a3f4b13f-aec1-428f-8225-398f23cc8f29-332905.png)
+![1683466163957-a3f4b13f-aec1-428f-8225-398f23cc8f29.png](./img/a9tEKfXFO2k0Y0Od/1683466163957-a3f4b13f-aec1-428f-8225-398f23cc8f29-332905.jpg)
 
 
 
@@ -175,7 +175,7 @@ Imaging = Synthesis + Capture
 ![1683466331882-58fa7088-faf7-4eac-b697-6076fbf9bfc2.png](./img/a9tEKfXFO2k0Y0Od/1683466331882-58fa7088-faf7-4eac-b697-6076fbf9bfc2-616474.png)
 
 ## Maintain FOV on Smaller Sensor?
-![1683466442671-ab15c59e-1e56-48db-a55f-92ba4ca9b23c.png](./img/a9tEKfXFO2k0Y0Od/1683466442671-ab15c59e-1e56-48db-a55f-92ba4ca9b23c-598055.png)
+![1683466442671-ab15c59e-1e56-48db-a55f-92ba4ca9b23c.png](./img/a9tEKfXFO2k0Y0Od/1683466442671-ab15c59e-1e56-48db-a55f-92ba4ca9b23c-598055.jpg)
 
 # Exposure
 ## Introduction
@@ -209,7 +209,7 @@ H= TxE  快门按的时间越长，结果越亮
 + 第二行，快门速度。用分数表示，开放多少时间，单位秒。
 + 第三行，ISO。乘以的数。增大ISO，也会放大噪声的程度。简单放大信号会同时放大噪声。
 
-![1683467148972-a47a8442-4b1b-4965-91fa-1cc43562829a.png](./img/a9tEKfXFO2k0Y0Od/1683467148972-a47a8442-4b1b-4965-91fa-1cc43562829a-251216.png)
+![1683467148972-a47a8442-4b1b-4965-91fa-1cc43562829a.png](./img/a9tEKfXFO2k0Y0Od/1683467148972-a47a8442-4b1b-4965-91fa-1cc43562829a-251216.jpg)
 
 ## ISO (Gain)
 Third variable for exposure
@@ -221,7 +221,7 @@ Digital: trade sensitivity for noise
 + Multiply signal before analog-to-digital conversion
 + Linear effect (ISO 200 needs half the light as ISO 100)
 
-![1683467646108-d1502bc1-48e6-43d6-97d6-c95131f3acae.png](./img/a9tEKfXFO2k0Y0Od/1683467646108-d1502bc1-48e6-43d6-97d6-c95131f3acae-476863.png)
+![1683467646108-d1502bc1-48e6-43d6-97d6-c95131f3acae.png](./img/a9tEKfXFO2k0Y0Od/1683467646108-d1502bc1-48e6-43d6-97d6-c95131f3acae-476863.jpg)
 
 ## F-Number (F-Stop): Exposure Levels
 更专业的摄像领域会区分F Number和F Stop.
@@ -234,7 +234,7 @@ Written as FN or F/N. N is the f-number.
 
 inform understanding: the inverse-diameter of a round aperture.
 
-![1683467801984-1efe8cc4-72bd-4cfb-810a-d005afc122eb.png](./img/a9tEKfXFO2k0Y0Od/1683467801984-1efe8cc4-72bd-4cfb-810a-d005afc122eb-270936.png)
+![1683467801984-1efe8cc4-72bd-4cfb-810a-d005afc122eb.png](./img/a9tEKfXFO2k0Y0Od/1683467801984-1efe8cc4-72bd-4cfb-810a-d005afc122eb-270936.jpg)
 
 ## Shutter
 ### Physical Shutter
@@ -250,7 +250,7 @@ inform understanding: the inverse-diameter of a round aperture.
 
 下图为快门落下过程。这个过程会造成一定影响
 
-![1683468056746-530e3ab6-327b-4e52-8c7d-fb02dfbecd31.png](./img/a9tEKfXFO2k0Y0Od/1683468056746-530e3ab6-327b-4e52-8c7d-fb02dfbecd31-926057.png)
+![1683468056746-530e3ab6-327b-4e52-8c7d-fb02dfbecd31.png](./img/a9tEKfXFO2k0Y0Od/1683468056746-530e3ab6-327b-4e52-8c7d-fb02dfbecd31-926057.jpg)
 
 ### Side Effect of Shutter Speed
 两个side effect：Motion blur 和 Rolling shutter
@@ -263,17 +263,17 @@ inform understanding: the inverse-diameter of a round aperture.
 
 更长的曝光时间会产生更严重的运动模糊。
 
-![1683468326901-e55650f9-fcfc-4fc9-8cf4-02b90ad58104.png](./img/a9tEKfXFO2k0Y0Od/1683468326901-e55650f9-fcfc-4fc9-8cf4-02b90ad58104-805572.png)
+![1683468326901-e55650f9-fcfc-4fc9-8cf4-02b90ad58104.png](./img/a9tEKfXFO2k0Y0Od/1683468326901-e55650f9-fcfc-4fc9-8cf4-02b90ad58104-805572.jpg)
 
 Note: motino blur is not always bad!
 
 比如，赛车游戏中，运动模糊会让人觉得快
 
-![1683468483041-2e63a1ff-d443-4441-933f-cf0f49afb1ec.png](./img/a9tEKfXFO2k0Y0Od/1683468483041-2e63a1ff-d443-4441-933f-cf0f49afb1ec-620733.png)
+![1683468483041-2e63a1ff-d443-4441-933f-cf0f49afb1ec.png](./img/a9tEKfXFO2k0Y0Od/1683468483041-2e63a1ff-d443-4441-933f-cf0f49afb1ec-620733.jpg)
 
 **Rolling shutter（果冻效应）**: different parts of photo taken at different times
 
-![1683468678342-aefd4556-3abd-473a-9314-3bfefccec1c2.png](./img/a9tEKfXFO2k0Y0Od/1683468678342-aefd4556-3abd-473a-9314-3bfefccec1c2-329344.png)
+![1683468678342-aefd4556-3abd-473a-9314-3bfefccec1c2.png](./img/a9tEKfXFO2k0Y0Od/1683468678342-aefd4556-3abd-473a-9314-3bfefccec1c2-329344.jpg)
 
 ## Constant Exposure
 两两组合可以达到相同的曝光度
@@ -287,11 +287,11 @@ Note: motino blur is not always bad!
 ## Fast and Slow Photography
 高速摄影
 
-![1683468963550-c9fa3b20-608d-4ae4-8df8-9f6090fa45d4.png](./img/a9tEKfXFO2k0Y0Od/1683468963550-c9fa3b20-608d-4ae4-8df8-9f6090fa45d4-912073.png)
+![1683468963550-c9fa3b20-608d-4ae4-8df8-9f6090fa45d4.png](./img/a9tEKfXFO2k0Y0Od/1683468963550-c9fa3b20-608d-4ae4-8df8-9f6090fa45d4-912073.jpg)
 
 延时摄影：
 
-![1683469045793-230ba778-6ddf-4f9b-8788-8a35bcac8b6a.png](./img/a9tEKfXFO2k0Y0Od/1683469045793-230ba778-6ddf-4f9b-8788-8a35bcac8b6a-436077.png)
+![1683469045793-230ba778-6ddf-4f9b-8788-8a35bcac8b6a.png](./img/a9tEKfXFO2k0Y0Od/1683469045793-230ba778-6ddf-4f9b-8788-8a35bcac8b6a-436077.jpg)
 
 
 
@@ -308,7 +308,7 @@ Note: motino blur is not always bad!
 
 透镜组共同表现为一个可以改变焦距的透镜。
 
-![1683469385543-bce3aa40-5a8a-4296-a6d7-418f850ab5c4.png](./img/a9tEKfXFO2k0Y0Od/1683469385543-bce3aa40-5a8a-4296-a6d7-418f850ab5c4-509706.png)
+![1683469385543-bce3aa40-5a8a-4296-a6d7-418f850ab5c4.png](./img/a9tEKfXFO2k0Y0Od/1683469385543-bce3aa40-5a8a-4296-a6d7-418f850ab5c4-509706.jpg)
 
 ## The Thin Lens Equation
 f: 焦距
@@ -489,30 +489,30 @@ uv + st
 
 整个世界还是在st右边
 
-![1683788600197-239715a5-f0d5-49a0-b545-0f10a7daed22.png](./img/a9tEKfXFO2k0Y0Od/1683788600197-239715a5-f0d5-49a0-b545-0f10a7daed22-800733.png)
+![1683788600197-239715a5-f0d5-49a0-b545-0f10a7daed22.png](./img/a9tEKfXFO2k0Y0Od/1683788600197-239715a5-f0d5-49a0-b545-0f10a7daed22-800733.jpg)
 
 ## Light Field Camera
 ### Stanford Camera Array
 每个位置是一个uv，通过摄像机组记录光场
 
-![1683788780757-b566effe-503f-4237-8ac8-c37432ea2f5b.png](./img/a9tEKfXFO2k0Y0Od/1683788780757-b566effe-503f-4237-8ac8-c37432ea2f5b-132534.png)
+![1683788780757-b566effe-503f-4237-8ac8-c37432ea2f5b.png](./img/a9tEKfXFO2k0Y0Od/1683788780757-b566effe-503f-4237-8ac8-c37432ea2f5b-132534.jpg)
 
 ### Itegral Images ("Fly's Eye" Lenslets)
-不同方向的光分开记录![1683788816797-1965eedf-fbf2-470c-9527-3604b05fa499.png](./img/a9tEKfXFO2k0Y0Od/1683788816797-1965eedf-fbf2-470c-9527-3604b05fa499-648696.png)
+不同方向的光分开记录![1683788816797-1965eedf-fbf2-470c-9527-3604b05fa499.png](./img/a9tEKfXFO2k0Y0Od/1683788816797-1965eedf-fbf2-470c-9527-3604b05fa499-648696.jpg)
 
 #### The Lytro Light Field Camera
 采用了前面的微透镜原理。把每个像素替换成一个透镜，把经过透镜的不同方向的光区分开再记录下来。
 
 光场照相机的作用：支持后期重新聚焦。（Computational Refocusing）
 
-![1683788995685-a0e62767-8561-4639-a46b-a8c15ce602d9.png](./img/a9tEKfXFO2k0Y0Od/1683788995685-a0e62767-8561-4639-a46b-a8c15ce602d9-291738.png)
+![1683788995685-a0e62767-8561-4639-a46b-a8c15ce602d9.png](./img/a9tEKfXFO2k0Y0Od/1683788995685-a0e62767-8561-4639-a46b-a8c15ce602d9-291738.jpg)
 
 ### Light Field Camera
-![1683789440933-cf8e42bc-6206-4abd-8843-0b286bb52521.png](./img/a9tEKfXFO2k0Y0Od/1683789440933-cf8e42bc-6206-4abd-8843-0b286bb52521-823878.png)
+![1683789440933-cf8e42bc-6206-4abd-8843-0b286bb52521.png](./img/a9tEKfXFO2k0Y0Od/1683789440933-cf8e42bc-6206-4abd-8843-0b286bb52521-823878.jpg)
 
 取不同方向的光线，就像是虚拟移动摄像机的位置。
 
-![1683789676152-a1fbd62e-14e6-49b6-a6b7-8bc4abc456d8.png](./img/a9tEKfXFO2k0Y0Od/1683789676152-a1fbd62e-14e6-49b6-a6b7-8bc4abc456d8-406861.png)
+![1683789676152-a1fbd62e-14e6-49b6-a6b7-8bc4abc456d8.png](./img/a9tEKfXFO2k0Y0Od/1683789676152-a1fbd62e-14e6-49b6-a6b7-8bc4abc456d8-406861.jpg)
 
 光场相机通常有以下问题
 
@@ -521,7 +521,7 @@ uv + st
 
 
 
-![1683789933354-d7c2b098-1d0f-4034-b7c0-33f214260587.png](./img/a9tEKfXFO2k0Y0Od/1683789933354-d7c2b098-1d0f-4034-b7c0-33f214260587-554788.png)
+![1683789933354-d7c2b098-1d0f-4034-b7c0-33f214260587.png](./img/a9tEKfXFO2k0Y0Od/1683789933354-d7c2b098-1d0f-4034-b7c0-33f214260587-554788.jpg)
 
 # References
 + [Lecture 19 Cameras, Lenses and Light Fields_哔哩哔哩_bilibili](https://www.bilibili.com/video/BV1X7411F744?p=19&vd_source=a637826c55b409b420b4b6584a6e8379)

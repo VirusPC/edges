@@ -56,7 +56,7 @@ hugging face 提供了类似 npm registry 的管理平台，用户可以将 onnx
 ### 使用模型
 简单三步
 
-![1701495094264-dc63fe1e-d329-4150-be71-16482f40e769.png](./img/V5kzn4knrNbJVqSW/1701495094264-dc63fe1e-d329-4150-be71-16482f40e769-885133.png)
+![1701495094264-dc63fe1e-d329-4150-be71-16482f40e769.png](./img/V5kzn4knrNbJVqSW/1701495094264-dc63fe1e-d329-4150-be71-16482f40e769-885133.jpg)
 
 
 
@@ -70,7 +70,7 @@ hugging face 提供了类似 npm registry 的管理平台，用户可以将 onnx
 
 2. 语义图像搜索（案例中用的模型50MB，图像2.5万张。忽略模型和数据库加载时间，计算时间只有50ms，还是在纯js的情况下）
 
-![1701495499047-8e4881ff-21e1-434e-b3e6-5fff9cbabfe3.png](./img/V5kzn4knrNbJVqSW/1701495499047-8e4881ff-21e1-434e-b3e6-5fff9cbabfe3-968698.png)
+![1701495499047-8e4881ff-21e1-434e-b3e6-5fff9cbabfe3.png](./img/V5kzn4knrNbJVqSW/1701495499047-8e4881ff-21e1-434e-b3e6-5fff9cbabfe3-968698.jpg)
 
 3. google 的 quick draw
 

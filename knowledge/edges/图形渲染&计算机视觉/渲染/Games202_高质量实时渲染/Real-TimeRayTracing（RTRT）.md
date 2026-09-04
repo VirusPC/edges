@@ -190,7 +190,7 @@ RTRT中最关键的技术其实是降噪
 
 
 # State of the Art* Denoising Solution
-![1704519813969-c04242f5-ef16-4108-bee3-3a965bb38782.png](./img/oZ9r44PReGgWJrcc/1704519813969-c04242f5-ef16-4108-bee3-3a965bb38782-534528.png)
+![1704519813969-c04242f5-ef16-4108-bee3-3a965bb38782.png](./img/oZ9r44PReGgWJrcc/1704519813969-c04242f5-ef16-4108-bee3-3a965bb38782-534528.jpg)
 
 RTRT 降噪技术，学术界18年-21年研究的比较少
 
@@ -240,7 +240,7 @@ Spatial？后面再说
     - Usually, per pixel depth normal, world coordinate, etc.
     - Therefore, only <font style="color:#DF2A3F;">screen space</font> info.
 
-![1704521933219-6a5242e7-899b-4a2a-857c-a4ac4a5c0049.png](./img/oZ9r44PReGgWJrcc/1704521933219-6a5242e7-899b-4a2a-857c-a4ac4a5c0049-617312.png)
+![1704521933219-6a5242e7-899b-4a2a-857c-a4ac4a5c0049.png](./img/oZ9r44PReGgWJrcc/1704521933219-6a5242e7-899b-4a2a-857c-a4ac4a5c0049-617312.jpg)
 
 ## Methods
 ### Back Projection
@@ -294,15 +294,15 @@ $ \alpha $一般取 0.1 - 0.2，其实80%-90%的贡献都来自上一帧。
 ## 效果
 降噪前：
 
-![1704549736260-bd2ad48d-a352-47db-8ee2-80a5d6d5c556.png](./img/oZ9r44PReGgWJrcc/1704549736260-bd2ad48d-a352-47db-8ee2-80a5d6d5c556-069449.png)
+![1704549736260-bd2ad48d-a352-47db-8ee2-80a5d6d5c556.png](./img/oZ9r44PReGgWJrcc/1704549736260-bd2ad48d-a352-47db-8ee2-80a5d6d5c556-069449.jpg)
 
 降噪后：
 
-![1704549764520-09d1a7a5-5b43-4edd-a18c-e8a3b8134fb7.png](./img/oZ9r44PReGgWJrcc/1704549764520-09d1a7a5-5b43-4edd-a18c-e8a3b8134fb7-170403.png)
+![1704549764520-09d1a7a5-5b43-4edd-a18c-e8a3b8134fb7.png](./img/oZ9r44PReGgWJrcc/1704549764520-09d1a7a5-5b43-4edd-a18c-e8a3b8134fb7-170403.jpg)
 
 光线追踪很长时间后的 ground truth：
 
-![1704550078839-f65f1450-4e36-4c10-8406-9b7c9e19c109.png](./img/oZ9r44PReGgWJrcc/1704550078839-f65f1450-4e36-4c10-8406-9b7c9e19c109-472614.png)
+![1704550078839-f65f1450-4e36-4c10-8406-9b7c9e19c109.png](./img/oZ9r44PReGgWJrcc/1704550078839-f65f1450-4e36-4c10-8406-9b7c9e19c109-472614.jpg)
 
 Q：滤波会让图片变得更亮或更暗？降噪之前明显更暗，降噪之后变亮了许多，是不是不遵循能量守恒？
 
@@ -324,11 +324,11 @@ We can still blindly use temporal information
 + Of course, this is incorrect 上一帧搬了百分之八九十，错太多
 + But what kind of artifact will it bring? Lagging（或ghosting）。 产生的artifact被称为残影（拖尾）
 
-![1704557577328-8fdbd101-df69-4870-bdf8-5f627b1bc829.png](./img/oZ9r44PReGgWJrcc/1704557577328-8fdbd101-df69-4870-bdf8-5f627b1bc829-493625.png)
+![1704557577328-8fdbd101-df69-4870-bdf8-5f627b1bc829.png](./img/oZ9r44PReGgWJrcc/1704557577328-8fdbd101-df69-4870-bdf8-5f627b1bc829-493625.jpg)
 
-![1704557603585-31f3aeb4-2c68-4ccf-afeb-eef3e30ba006.png](./img/oZ9r44PReGgWJrcc/1704557603585-31f3aeb4-2c68-4ccf-afeb-eef3e30ba006-742481.png)
+![1704557603585-31f3aeb4-2c68-4ccf-afeb-eef3e30ba006.png](./img/oZ9r44PReGgWJrcc/1704557603585-31f3aeb4-2c68-4ccf-afeb-eef3e30ba006-742481.jpg)
 
-![1704557650506-22379157-9a57-4a03-b5e9-08bdfefdcf78.png](./img/oZ9r44PReGgWJrcc/1704557650506-22379157-9a57-4a03-b5e9-08bdfefdcf78-715727.png)
+![1704557650506-22379157-9a57-4a03-b5e9-08bdfefdcf78.png](./img/oZ9r44PReGgWJrcc/1704557650506-22379157-9a57-4a03-b5e9-08bdfefdcf78-715727.jpg)
 
 
 
@@ -359,9 +359,9 @@ Problem: <font style="color:#DF2A3F;">re-introducing noise</font>!   重新引�
 
 看不到拖影了，但看到噪声了。两者类似但不是一个东西。
 
-![1704558344846-393e71f7-d4ea-44a9-931c-965729e67420.png](./img/oZ9r44PReGgWJrcc/1704558344846-393e71f7-d4ea-44a9-931c-965729e67420-635166.png)
+![1704558344846-393e71f7-d4ea-44a9-931c-965729e67420.png](./img/oZ9r44PReGgWJrcc/1704558344846-393e71f7-d4ea-44a9-931c-965729e67420-635166.jpg)
 
-![1704558324651-4cb2dc37-6ec9-410b-a467-d80044d2005b.png](./img/oZ9r44PReGgWJrcc/1704558324651-4cb2dc37-6ec9-410b-a467-d80044d2005b-982853.png)
+![1704558324651-4cb2dc37-6ec9-410b-a467-d80044d2005b.png](./img/oZ9r44PReGgWJrcc/1704558324651-4cb2dc37-6ec9-410b-a467-d80044d2005b-982853.jpg)
 
 
 

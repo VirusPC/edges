@@ -72,7 +72,7 @@ Definition: **Radiant flux** (power，有时称为能量，实际不是能量，
 
 从另一个角度讲，flux（通量）也是单位时间内通过一个平面的能量
 
-![1683109444731-51b6634b-8062-41a9-bc1e-3c4456b015dd.png](./img/B5TWuGymIOFW4Cdy/1683109444731-51b6634b-8062-41a9-bc1e-3c4456b015dd-851449.png)
+![1683109444731-51b6634b-8062-41a9-bc1e-3c4456b015dd.png](./img/B5TWuGymIOFW4Cdy/1683109444731-51b6634b-8062-41a9-bc1e-3c4456b015dd-851449.jpg)
 
 ## Important measures of interest
 ![1683109695254-45edb644-d7d0-4f57-923b-0410e73d6c22.png](./img/B5TWuGymIOFW4Cdy/1683109695254-45edb644-d7d0-4f57-923b-0410e73d6c22-835502.png)
@@ -114,7 +114,7 @@ Definition: The **irradiance** is the power per (**perpendicular**/projected) un
 
 衰减的是Irradiance
 
-![1683132315628-874a0e8d-adae-4a2d-9e52-dadf08f4a4ab.png](./img/B5TWuGymIOFW4Cdy/1683132315628-874a0e8d-adae-4a2d-9e52-dadf08f4a4ab-627432.png)
+![1683132315628-874a0e8d-adae-4a2d-9e52-dadf08f4a4ab.png](./img/B5TWuGymIOFW4Cdy/1683132315628-874a0e8d-adae-4a2d-9e52-dadf08f4a4ab-627432.jpg)
 
 ### Radiance
 光沿光线传播的能量

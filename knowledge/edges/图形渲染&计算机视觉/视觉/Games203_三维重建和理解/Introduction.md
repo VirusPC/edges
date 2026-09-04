@@ -60,7 +60,7 @@
 这门课会把2D VIsion 和 3D Vision 放到一起讲。
 
 ### Geometry Processing Pipeline
-![1711269681119-fc7607a4-570c-43c9-98a6-1f6234b76fbd.png](./img/VfS0LZzN0ZBTPthk/1711269681119-fc7607a4-570c-43c9-98a6-1f6234b76fbd-645618.png)
+![1711269681119-fc7607a4-570c-43c9-98a6-1f6234b76fbd.png](./img/VfS0LZzN0ZBTPthk/1711269681119-fc7607a4-570c-43c9-98a6-1f6234b76fbd-645618.jpg)
 
 几何处理（geometry processing）用一种计算的方法研究现实世界中的物理对象（physical object），通过硬件扫描生成物理对象的三维模型，然后做各种处理和分析。
 
@@ -103,7 +103,7 @@
 ### Application
 无人驾驶，AR，VR，需要对地球做精致的建模，这是一个重建问题。物体做大规模的重建
 
-![1711271817835-8de8aa81-d4d5-4c45-9e84-8ade1edea8b4.png](./img/VfS0LZzN0ZBTPthk/1711271817835-8de8aa81-d4d5-4c45-9e84-8ade1edea8b4-585182.png)
+![1711271817835-8de8aa81-d4d5-4c45-9e84-8ade1edea8b4.png](./img/VfS0LZzN0ZBTPthk/1711271817835-8de8aa81-d4d5-4c45-9e84-8ade1edea8b4-585182.jpg)
 
 Performance capture。采集人的performance。
 
@@ -239,7 +239,7 @@ Rototics。机器人与自然界做交互，牵扯到3维的建模和理解。
 
 representation：
 
-![1718975407732-58a01cd5-9f8b-4feb-af54-7ffaa9710dc1.png](./img/VfS0LZzN0ZBTPthk/1718975407732-58a01cd5-9f8b-4feb-af54-7ffaa9710dc1-814734.png)
+![1718975407732-58a01cd5-9f8b-4feb-af54-7ffaa9710dc1.png](./img/VfS0LZzN0ZBTPthk/1718975407732-58a01cd5-9f8b-4feb-af54-7ffaa9710dc1-814734.jpg)
 
 
 

@@ -81,7 +81,7 @@ A **rendering path** is a series of operations related to lighting and shading. 
    2. 什么时候用？
       1. 最低照明保真度，不支持实时阴影
 
-![1701866495881-e0535d68-ab78-4371-a012-b138b176c95e.png](./img/4Hb1Lh5T5BWQUx1J/1701866495881-e0535d68-ab78-4371-a012-b138b176c95e-913532.png)
+![1701866495881-e0535d68-ab78-4371-a012-b138b176c95e.png](./img/4Hb1Lh5T5BWQUx1J/1701866495881-e0535d68-ab78-4371-a012-b138b176c95e-913532.jpg)
 
 ### Forward rendering path
 

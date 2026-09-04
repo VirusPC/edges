@@ -85,7 +85,7 @@
 ![1673276117192-f8c962fa-321a-450a-a932-13ffdbef8fb0.png](./img/oPsKft0smpygBLT7/1673276117192-f8c962fa-321a-450a-a932-13ffdbef8fb0-918911.png)
 
 2. Molre Patterns in Imaging
-    1. ![1673276158174-43f226a3-fe23-43f3-8c9e-a986f6a9610b.png](./img/oPsKft0smpygBLT7/1673276158174-43f226a3-fe23-43f3-8c9e-a986f6a9610b-170423.png)
+    1. ![1673276158174-43f226a3-fe23-43f3-8c9e-a986f6a9610b.png](./img/oPsKft0smpygBLT7/1673276158174-43f226a3-fe23-43f3-8c9e-a986f6a9610b-170423.jpg)
 3. Wagon Wheel Illusion (False Motion)
     1. 轮子顺时针旋转，看到的却是逆时针旋转
     2. 人眼在时间上的采样跟不上旋转速度

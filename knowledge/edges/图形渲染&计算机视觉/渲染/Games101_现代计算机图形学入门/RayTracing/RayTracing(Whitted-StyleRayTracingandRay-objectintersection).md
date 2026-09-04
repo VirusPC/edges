@@ -56,7 +56,7 @@
 
 2. Rasterization is fast, but quality is relatively low. 光栅化本质是一种快速近似，质量相对较低。光栅化相当于只考虑直接光，不考虑间接光。
 
-![1674911775336-9057a9ff-fd3a-4db5-99c5-beef54d8b4ea.png](./img/Ex_WUpCqYxA7ubjg/1674911775336-9057a9ff-fd3a-4db5-99c5-beef54d8b4ea-370274.png)‘
+![1674911775336-9057a9ff-fd3a-4db5-99c5-beef54d8b4ea.png](./img/Ex_WUpCqYxA7ubjg/1674911775336-9057a9ff-fd3a-4db5-99c5-beef54d8b4ea-370274.jpg)‘
 
 也存在缺点：
 
@@ -147,7 +147,7 @@ Ray is defined by its origin and a direction vector
 ![1683097438538-14e6cd0f-b375-4ba6-a1ae-3e7cea064b98.png](./img/Ex_WUpCqYxA7ubjg/1683097438538-14e6cd0f-b375-4ba6-a1ae-3e7cea064b98-974675.png)
 
 ## Ray Intersection with Implicit Surface
-![1683097542530-ee6d73ed-7dc2-404b-ba18-137e5e9725ed.png](./img/Ex_WUpCqYxA7ubjg/1683097542530-ee6d73ed-7dc2-404b-ba18-137e5e9725ed-368447.png)
+![1683097542530-ee6d73ed-7dc2-404b-ba18-137e5e9725ed.png](./img/Ex_WUpCqYxA7ubjg/1683097542530-ee6d73ed-7dc2-404b-ba18-137e5e9725ed-368447.jpg)
 
 ## Ray Intersection with Triangle Mesh
 Why?

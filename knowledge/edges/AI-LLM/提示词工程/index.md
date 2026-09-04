@@ -197,7 +197,7 @@ ReAct框架（Reasoning + Acting）是一种结合 推理链（Chain-of-Thought,
 
 大模型为了完成一个大目标，需要不断地做一些任务。每个任务都会经历思考（Thought）、行动（Action）、观察（Observation）三个阶段。思考，决定了下一步的行动；行动是完成了一个具体的动作；而观察，则是对行动结果进行评估，决定是否要结束这个处理过程。
 
-![1753016303331-06764c38-3e3b-469f-aea5-2964602e2da0.png](./img/B_WmI9dkJ2qVc7rA/1753016303331-06764c38-3e3b-469f-aea5-2964602e2da0-534039.png)
+![1753016303331-06764c38-3e3b-469f-aea5-2964602e2da0.png](./img/B_WmI9dkJ2qVc7rA/1753016303331-06764c38-3e3b-469f-aea5-2964602e2da0-534039.jpg)
 
 提示词模版：<https://smith.langchain.com/hub/hwchase17/react>
 
