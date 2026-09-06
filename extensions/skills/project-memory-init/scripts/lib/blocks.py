@@ -29,7 +29,7 @@ LOCAL_END = "<!-- project-memory-local:end -->"
 CHILDREN_START = "<!-- project-memory-children:start -->"
 CHILDREN_END = "<!-- project-memory-children:end -->"
 
-# 仅记忆根：自动检索与沉淀策略。
+# 已废弃：旧版自动化策略区块。模板不再生成；classify 仍认，doctor 的 stale-auto 删除。
 AUTO_START = "<!-- project-memory-auto:start -->"
 AUTO_END = "<!-- project-memory-auto:end -->"
 
@@ -43,7 +43,6 @@ INNER_BLOCK_PAIRS = (
     (IMPORTANT_START, IMPORTANT_END),
     (LOCAL_START, LOCAL_END),
     (CHILDREN_START, CHILDREN_END),
-    (AUTO_START, AUTO_END),
 )
 INNER_BLOCK_ORDER = tuple(start for start, _end in INNER_BLOCK_PAIRS)
 
@@ -74,8 +73,6 @@ def load_agents_template() -> str:
         LOCAL_END,
         CHILDREN_START,
         CHILDREN_END,
-        AUTO_START,
-        AUTO_END,
         OUTER_END,
     ):
         found = template.find(marker)
@@ -181,18 +178,21 @@ def build_local_block() -> str:
     return extract_block(LOCAL_START, LOCAL_END)
 
 
-def build_auto_block() -> str:
-    """渲染项目记忆的自动检索与沉淀策略。"""
-    return extract_block(AUTO_START, AUTO_END)
-
-
 def build_children_block(entries: str) -> str:
     """渲染下层记忆索引区块。"""
     return extract_block(CHILDREN_START, CHILDREN_END).replace("{index_entries}", entries)
 
 
+def drop_auto_block(document: str) -> str:
+    """删掉已废弃的自动化策略区块，并收拢外层空白。"""
+    if AUTO_START not in document:
+        return document
+    updated = block_pattern(AUTO_START, AUTO_END).sub("", document, count=1)
+    return re.sub(r"\n{3,}", "\n\n", prune_outer_region(updated))
+
+
 def render_agents_document(
-    title: str, local_block: str, children_block: str, auto_block: str
+    title: str, local_block: str, children_block: str
 ) -> str:
     """整份渲染 AGENTS.md；仅用于文件尚不存在的干净场景。
 
@@ -203,7 +203,6 @@ def render_agents_document(
     for (start, end), block in (
         ((LOCAL_START, LOCAL_END), local_block),
         ((CHILDREN_START, CHILDREN_END), children_block),
-        ((AUTO_START, AUTO_END), auto_block),
     ):
         document = block_pattern(start, end).sub(lambda _match: block, document, count=1)
     return re.sub(r"\n{3,}", "\n\n", prune_outer_region(document)).rstrip() + "\n"

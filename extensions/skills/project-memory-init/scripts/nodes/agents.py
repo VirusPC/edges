@@ -7,7 +7,6 @@ import re
 from pathlib import Path
 
 from lib.blocks import (
-    AUTO_END,
     AUTO_START,
     CHILDREN_END,
     CHILDREN_START,
@@ -17,9 +16,9 @@ from lib.blocks import (
     LOCAL_START,
     OUTER_START,
     block_pattern,
-    build_auto_block,
     build_children_block,
     build_local_block,
+    drop_auto_block,
     ensure_important_block,
     insert_inner_block,
     prune_outer_region,
@@ -50,7 +49,7 @@ def classify_agents_file(path: Path) -> str:
 
 
 def sync_agents_blocks(
-    directory: Path, local: str = "", children: str = "", auto: str = ""
+    directory: Path, local: str = "", children: str = ""
 ) -> str:
     """维护一份 AGENTS.md 的受管区块，只写传进来的那几个。
 
@@ -61,18 +60,17 @@ def sync_agents_blocks(
     if state == "foreign":
         return "needs-doctor"
     if state == "missing":
-        write_atomic(path, render_agents_document(directory.name, local, children, auto))
+        write_atomic(path, render_agents_document(directory.name, local, children))
         return "created"
     existing = path.read_text(encoding="utf-8")
     updated = ensure_important_block(existing)
     for (start, end), block in (
         ((LOCAL_START, LOCAL_END), local),
         ((CHILDREN_START, CHILDREN_END), children),
-        ((AUTO_START, AUTO_END), auto),
     ):
         if block:
             updated = upsert_block(updated, start, end, block)
-    updated = prune_outer_region(updated)
+    updated = drop_auto_block(prune_outer_region(updated))
     if updated == existing:
         return "preserved"
     write_atomic(path, updated)
@@ -80,12 +78,8 @@ def sync_agents_blocks(
 
 
 def sync_target_agents(target: Path, root: Path) -> str:
-    """维护目标目录的 AGENTS.md：本层记忆区块，记忆根再加自动化策略。"""
-    return sync_agents_blocks(
-        target,
-        local=build_local_block(),
-        auto=build_auto_block() if target == root else "",
-    )
+    """维护目标目录的 AGENTS.md：本层硬约束与本层记忆区块。"""
+    return sync_agents_blocks(target, local=build_local_block())
 
 
 def normalize_index_description(target: Path, description: str | None) -> str:
@@ -202,7 +196,7 @@ def sync_index_entry(
         write_atomic(
             path,
             render_agents_document(
-                anchor.name, build_local_block(), build_children_block(entry), ""
+                anchor.name, build_local_block(), build_children_block(entry)
             ),
         )
         return "created", relative_agents, normalized_description

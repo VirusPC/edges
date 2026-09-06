@@ -1078,6 +1078,16 @@ scripts/lib/               → blocks / templates / paths / provenance
 
 **Hermes 对照**：它的整体是学习环（同一轮 review 可写 memory 和 skill），不是混桶。Memory 靠硬上限把流程挤去 skill；`USER.md` 在 agent 家目录。不抄 2200 字上限（那是个人助手常驻 prompt 的账）。
 
+## 2026-09-06：撤销独立 auto 区块，时机纪律并进硬约束
+
+**决策**：删掉 `project-memory-auto`。检索与沉淀的时机三条写进硬约束种子，每层新建入口都带。doctor 认旧标记为 `stale-auto` 并删除。PROTOCOL 的三类（硬约束、本层索引、下层索引）不变。
+
+**这翻掉「常驻策略区块的触发条件」和「翻案：auto 收回外层区域内部」。** 发现机制仍要常驻——根 `AGENTS.md` 无条件加载，没有时机句 agent 不会去读 skill。但独立成块是第四类内容，和协议「入口里有三类东西」打架，也把 skill 操作纪律又抄了一份。放进 important 种子：还是常驻、还带 `$project-memory-ask` / `$project-memory-remember` 触发名，不再多一个区块。外层靠 important + local 撑着，不靠 auto。
+
+**区块外正文不是第四类记忆。** reshape 收紧为标题、身份、指向真理源的指针；长规范进 important 或 README。本仓根 `AGENTS.md` 按这个收过，隐私表搬进 README。
+
+**JSON 去掉 `autoAction`。** 只给 agent 看，与 init 1.3.0 同发。
+
 ## 待议
 
 - 索引行数/字节硬上限（调研建议 200 行 / 25 KB，触及 75% 时告警）尚未实现。判据见「`AGENTS.md` 同时充当 `MEMORY.md`」：功能等同索引，就该用 `MEMORY.md` 的硬上限而不是 `CLAUDE.md` 的软建议。
@@ -1091,4 +1101,4 @@ scripts/lib/               → blocks / templates / paths / provenance
 - 下级目录的描述是否该有独立事实源，从而让下级索引也能全量重算（见「记忆层级会漂移」一节的候选表）。目前体检修 `unregistered` 时只能给兜底描述，原描述随目录一起丢了。**已有候选答案：给下级 `AGENTS.md` 加 `description` frontmatter**——它是开集成员，描述必须跟着自己走（判据见「收敛这两份文件时留下的顾虑与自查」一节）。这样下级索引可以从各下级的 `AGENTS.md` 全量重算，`init --description` 退化成首次写入的初值。未做，属行为变更。
 - **兜底的下级条目描述还硬编码在脚本里**（`agents.py` 的 `normalize_index_description()`）。要么给它一份模板，要么等上面那条「给下级 `AGENTS.md` 加 `description`」落地后它自然消失——后者更彻底，所以先不单独动。
 - **描述质量没有任何门槛**：`remember` 只强制 `description` 存在，`doctor` 不检查它写得怎么样。而自从 `ask` 改为依赖产物里的说明挑入口与条目（见「再翻案：`ask` 依赖产物」一节），**描述质量直接决定运行时要打开多少正文**——写成标题复述，agent 就只能挨个打开。候选检查项：过短、与 `title` 高度重复、通篇没有可判别的名词。这是把成本转移到写时之后必须补上的那一半。
-- **旧标记名的迁移识别未实现**：`doctor` 需要一条新 finding，认出旧版区块名并改写成当前名。义务已写进 `LAYOUT`（见「LAYOUT 不冻结任何东西」一节），实现留到改名真正发生时——那之前没有旧名可认。**同一条 finding 该顺带认「嵌套错位」**：区块名对但位置不对（比如 `auto` 待在外层之外，见「翻案：`auto` 收回外层区域内部」一节），现在既不报错也不修。
+- **旧标记名的迁移识别未实现**：`doctor` 需要一条新 finding，认出旧版区块名并改写成当前名。义务已写进 `LAYOUT`（见「LAYOUT 不冻结任何东西」一节）。`project-memory-auto` 已由 `stale-auto` 删除，其它旧名仍留到真正改名时再认。**同一条 finding 该顺带认「嵌套错位」**：区块名对但位置不对，现在既不报错也不修。

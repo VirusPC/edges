@@ -5,7 +5,9 @@
 <!-- project-memory-important:start -->
 ## 本层硬约束
 
-该目录下不检索就会做错事的规则，直接写在这里，不要链到 `.memory` 文件。没有就只留这句说明。
+- 回答问题或动手改代码之前先查项目记忆（`$project-memory-ask`），不用等用户说「搜索」；本轮查过就别重复查。
+- 用户纠正了你，或者任务产出了已验证、以后还用得上的结论，就沉淀（`$project-memory-remember`），动手前先读它的「什么时候写」。
+- 本层硬约束直接写在这个区块里，不要链到 `.memory` 文件。
 <!-- project-memory-important:end -->
 
 <!-- project-memory-local:start -->
@@ -26,14 +28,5 @@
 
 {index_entries}
 <!-- project-memory-children:end -->
-
-<!-- project-memory-auto:start -->
-## 记忆自动化
-
-- 回答问题或动手改代码之前先查项目记忆（`$project-memory-ask`），不用等用户说「搜索」；本轮查过就别重复查。
-- 用户纠正了你，或者任务产出了已验证、以后还用得上的结论，就沉淀（`$project-memory-remember`），动手前先读它的「什么时候写」。
-- 本层硬约束写在入口的对应区块里，加载这份 `AGENTS.md` 时直接遵守，不要再去 `.memory` 里找一份副本。
-- 索引是分层的：按当前任务涉及的目录，取从这里到那些目录之间的各层，不要一次加载全部。
-<!-- project-memory-auto:end -->
 
 <!-- project-memory:end -->

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lib.blocks import build_auto_block, index_files, load_agents_template
+from lib.blocks import index_files, load_agents_template
 from lib.paths import (
     AGENTS_FILE_NAME,
     list_memory_files,
@@ -18,7 +18,6 @@ from lib.templates import ENTRY_OUTPUT_PATTERN, read_template
 from nodes.agents import (
     find_index_anchor,
     rehome_index_entries,
-    sync_agents_blocks,
     sync_index_entry,
     sync_target_agents,
 )
@@ -76,7 +75,8 @@ def init_memory(target: Path, root: Path, description: str | None = None) -> dic
         refresh_index(target, entry_type)
     agents_action = sync_target_agents(target, root)
     # 先建记忆根的 AGENTS.md，anchor 可能就是它。
-    auto_action = sync_agents_blocks(root, auto=build_auto_block())
+    if target != root:
+        sync_target_agents(root, root)
     anchor = find_index_anchor(target, root)
     rehomed = rehome_index_entries(target, anchor, root)
     index_action, index_entry, index_description = sync_index_entry(
@@ -90,7 +90,6 @@ def init_memory(target: Path, root: Path, description: str | None = None) -> dic
         "agentsAction": agents_action,
         "rootDir": str(root),
         "rootAgentsMd": str(root / AGENTS_FILE_NAME),
-        "autoAction": auto_action,
         "indexAnchor": str(anchor),
         "indexAction": index_action,
         "indexEntry": index_entry,

@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-06
+
+### Added
+
+- 诊断并删除已废弃的自动化策略区块（`stale-auto`）。
+
+### Removed
+
+- `missing-auto`：不再要求记忆根有独立的自动化策略区块。
+
 ## [1.2.0] - 2026-09-06
 
 ### Added
@@ -25,7 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.2.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.3.0...HEAD
+[1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.2.0...skill/project-memory-doctor@1.3.0
 [1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.1.0...skill/project-memory-doctor@1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.0.0...skill/project-memory-doctor@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-memory-doctor@1.0.0

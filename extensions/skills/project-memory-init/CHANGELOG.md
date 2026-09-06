@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-06
+
+### Removed
+
+- `AGENTS.md` 不再生成独立的自动化策略区块；检索与沉淀时机写进硬约束种子。
+
+### Changed
+
+- init 的 JSON 不再返回 `autoAction`。
+
 ## [1.2.1] - 2026-09-06
 
 ### Changed
@@ -32,7 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.1...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.3.0...HEAD
+[1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.1...skill/project-memory-init@1.3.0
 [1.2.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.0...skill/project-memory-init@1.2.1
 [1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.1.0...skill/project-memory-init@1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.0.0...skill/project-memory-init@1.1.0

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-06
+
+### Changed
+
+- 区块外只留身份与指针；长规范写进硬约束或 README，不要堆在入口正文里。
+
 ## [1.1.0] - 2026-09-06
 
 ### Changed
@@ -19,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 把已有 `AGENTS.md` 拆成常驻指令和 `.memory` 条目；init / doctor 不改正文。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.1.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.2.0...HEAD
+[1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.1.0...skill/project-memory-reshape@1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.0.0...skill/project-memory-reshape@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-memory-reshape@1.0.0

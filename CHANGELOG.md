@@ -12,11 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - MIT 许可证。
+- README 增加「隐私与脱敏」节。
 
 ### Changed
 
 - project-memory 的 `AGENTS.md` 增加本层硬约束区块：最重要的规则直接写在入口里。
 - project-memory 的 `AGENTS.md` 受管区块之间空一行。
+- `AGENTS.md` 作为记忆入口只保留硬约束、本层索引、下层索引；检索与沉淀时机写进硬约束。根入口正文收到身份、指针和硬约束，目录细则仍看 README。
+
+### Removed
+
+- `AGENTS.md` 独立的自动化策略区块。
 
 ## [1.0.0] - 2026-09-06
 

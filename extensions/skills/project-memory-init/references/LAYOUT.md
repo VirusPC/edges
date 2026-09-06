@@ -6,7 +6,7 @@
 
 ```text
 <仓库根>/
-├── AGENTS.md                       # 本层记忆入口：硬约束 + 分类型入口清单 + 下层索引 + 自动化策略
+├── AGENTS.md                       # 本层记忆入口：硬约束 + 分类型入口清单 + 下层索引
 ├── .memory/
 │   ├── FEEDBACK.md                 # 分类型入口：只列 feedbacks/ 下的记忆
 │   ├── PROJECT.md                  # 分类型入口：只列 projects/ 下的记忆
@@ -32,19 +32,18 @@
 
 标记是 HTML 注释，成对出现：`<!-- <名字>:start -->` 与 `<!-- <名字>:end -->`，名字带工具前缀（本套是 `project-memory`）。
 
-区块分两层：外层 `project-memory` 是本套在这份共享文件里的属地，本套写的东西全在它里面，顺序恒为 important → local → children → auto。内层区块之间、以及内层与外层标记之间，各空一行（`prune_outer_region()` 每次写入都收成这样）。
+区块分两层：外层 `project-memory` 是本套在这份共享文件里的属地，本套写的东西全在它里面，顺序恒为 important → local → children。内层区块之间、以及内层与外层标记之间，各空一行（`prune_outer_region()` 每次写入都收成这样）。
 
 | 区块标记 | 出现在 | 内容 | 内容来源 |
 | --- | --- | --- | --- |
 | `<!-- project-memory:start -->` | 每个持有记忆或索引的目录 | 只是容器，本身不放内容 | 缺失时按需建壳 |
 | ├ `<!-- project-memory-important:start -->` | 每个记忆目录 | 本层硬约束，规则直接写在区块里 | 人/agent 手写；缺失时用模板种子，已有正文不覆盖 |
 | ├ `<!-- project-memory-local:start -->` | 每个记忆目录 | 本层四份分类型入口的清单 | 模板里的字面量 |
-| ├ `<!-- project-memory-children:start -->` | 有下层记忆目录时 | 直接下层记忆目录的 `AGENTS.md` | 增量维护，一次 init 一条 |
-| └ `<!-- project-memory-auto:start -->` | 仅记忆根 | 自动检索与沉淀策略 | 模板里的字面量 |
+| └ `<!-- project-memory-children:start -->` | 有下层记忆目录时 | 直接下层记忆目录的 `AGENTS.md` | 增量维护，一次 init 一条 |
 
-硬约束不进 `.memory/`、不做成索引行。旧文件没有这个区块时，`$project-memory-doctor` 认 `missing-important`，补上种子正文，不改区块外和其它内层。
+硬约束不进 `.memory/`、不做成索引行。检索与沉淀的时机纪律写在硬约束种子里，不再单独成块。旧文件没有这个区块时，`$project-memory-doctor` 认 `missing-important`，补上种子正文，不改区块外和其它内层。旧文件若还留着 `<!-- project-memory-auto:start -->`，`$project-memory-doctor` 认 `stale-auto`，删掉该区块。
 
-内层区块一个都不剩时外层不留空壳（`prune_outer_region()`）——只持有索引的目录条目清空后，整块区域一起消失。记忆根走不到这一步：`auto` 一直在，外层跟着一直在。
+内层区块一个都不剩时外层不留空壳（`prune_outer_region()`）——只持有索引的目录条目清空后，整块区域一起消失。记忆根至少有 important 和 local，外层跟着一直在。
 
 下层条目的路径相对本层。举例：`src/DC/deep` 有记忆而 `src`、`src/DC` 都没有时，它直接挂在记忆根下，条目写 `src/DC/deep/AGENTS.md`。层级随记忆增减变化时，init 会把错位条目归位（`rehome_index_entries()`）。
 
@@ -77,4 +76,4 @@
 
 **模板名 = 产物文件名去掉后缀 + `.tmpl.md`**。入口模板与普通记忆模板仍统一放在 `templates/`，不按产物目录分层。下划线开头的是行片段，不对应产物；`type_slug.tmpl.md` 是唯一例外，产物名带尖括号，文件名改用角色词。`skills/` 遵循外部标准，不由普通记忆模板定义。
 
-`AGENTS.tmpl.md` 把四对区块标记连嵌套关系一起写在里面。其中本层记忆区块的每一行就是一个类型声明，脚本从中推导 `type` 与索引文件名。索引文件名全大写；类型目录名取 type 的复数（`lib/paths.py` 的 `type_dir_name()`）；普通记忆的条目前缀仍取 `type` 原值，`skills` 的内部结构不在本实现中定义。
+`AGENTS.tmpl.md` 把三对内层区块标记连嵌套关系一起写在里面。其中本层记忆区块的每一行就是一个类型声明，脚本从中推导 `type` 与索引文件名。索引文件名全大写；类型目录名取 type 的复数（`lib/paths.py` 的 `type_dir_name()`）；普通记忆的条目前缀仍取 `type` 原值，`skills` 的内部结构不在本实现中定义。

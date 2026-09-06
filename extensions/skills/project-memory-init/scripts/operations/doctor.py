@@ -6,7 +6,6 @@ from __future__ import annotations
 from pathlib import Path
 
 from lib.blocks import (
-    AUTO_END,
     AUTO_START,
     IMPORTANT_END,
     IMPORTANT_START,
@@ -14,9 +13,9 @@ from lib.blocks import (
     LOCAL_START,
     MEMORY_INDEX_LINK_PATTERN,
     block_pattern,
-    build_auto_block,
     build_important_block,
     build_local_block,
+    drop_auto_block,
     index_files,
     prune_outer_region,
     upsert_block,
@@ -277,14 +276,16 @@ def collect_findings(root: Path) -> list[dict[str, str]]:
     findings, seen = scan_index_entries(root, holders, owned)
     findings.extend(scan_registrations(root, memory_dirs, seen))
     findings.extend(scan_memory_layout(root, memory_dirs))
-    root_agents = root / AGENTS_FILE_NAME
-    if classify_agents_file(root_agents) == "managed":
-        if AUTO_START not in root_agents.read_text(encoding="utf-8"):
+    for holder in holders:
+        agents_path = holder / AGENTS_FILE_NAME
+        if classify_agents_file(agents_path) != "managed":
+            continue
+        if AUTO_START in agents_path.read_text(encoding="utf-8"):
             findings.append(
                 {
-                    "issue": "missing-auto",
-                    "path": relative_or_name(root_agents, root),
-                    "detail": "记忆根缺少自动化策略区块",
+                    "issue": "stale-auto",
+                    "path": relative_or_name(agents_path, root),
+                    "detail": "已废弃的自动化策略区块，应删除",
                 }
             )
     return findings
@@ -364,9 +365,12 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
                 displaced.append((entry_dir, finding.get("description", "")))
             if drop_index_entries(agents_path, {finding["entry"]}):
                 repaired.append(f"{issue}: {finding['path']} 移除 {finding['entry']}")
-        elif issue == "missing-auto":
-            sync_agents_blocks(owner, auto=build_auto_block())
-            repaired.append(f"{issue}: {finding['path']} 补上策略区块")
+        elif issue == "stale-auto":
+            document = agents_path.read_text(encoding="utf-8")
+            updated = drop_auto_block(document).rstrip() + "\n"
+            if updated != document:
+                write_atomic(agents_path, updated)
+                repaired.append(f"{issue}: {finding['path']} 删除已废弃的自动化策略区块")
         elif issue == "missing-important":
             action = sync_agents_blocks(owner)
             if action in {"created", "updated"}:
@@ -380,8 +384,6 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
                     updated, IMPORTANT_START, IMPORTANT_END, build_important_block()
                 )
                 updated = upsert_block(updated, LOCAL_START, LOCAL_END, build_local_block())
-            if owner == root:
-                updated = upsert_block(updated, AUTO_START, AUTO_END, build_auto_block())
             if updated != document:
                 write_atomic(agents_path, prune_outer_region(updated).rstrip() + "\n")
                 repaired.append(f"{issue}: {finding['path']} 补挂受管区块，既有正文原样保留")
@@ -409,11 +411,7 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
         agents_path = owner / AGENTS_FILE_NAME
         relative_agents = relative_or_name(agents_path, root)
         if relative_agents in local_repairs:
-            local_action = sync_agents_blocks(
-                owner,
-                local=build_local_block(),
-                auto=build_auto_block() if owner == root else "",
-            )
+            local_action = sync_agents_blocks(owner, local=build_local_block())
             if local_action in {"created", "updated"}:
                 repaired.append(
                     f"{local_action}-agents: {relative_agents} 刷新入口清单"

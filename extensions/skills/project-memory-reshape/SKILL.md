@@ -1,12 +1,12 @@
 ---
 name: project-memory-reshape
-description: 把已有 AGENTS.md 按 project-memory-init 的形状重新组织：硬约束写进入口对应区块，身份与指针留在区块外，记忆内容抽到 .memory，其余受管区块只留索引。用户要求整理、改造、迁移、重组已有 AGENTS.md 时使用；init/doctor 不改正文，不要用它们代替本 skill。
-version: 1.1.0
+description: 把已有 AGENTS.md 按 project-memory-init 的形状重新组织：硬约束写进入口对应区块，区块外只留身份与指针，长规范进 important 或 README，记忆内容抽到 .memory，其余受管区块只留索引。用户要求整理、改造、迁移、重组已有 AGENTS.md 时使用；init/doctor 不改正文，不要用它们代替本 skill。
+version: 1.2.0
 ---
 
 # Project Memory Reshape
 
-把一份**已经存在**的 `AGENTS.md` 收成 init 要求的形状：硬约束写在入口的对应区块里，其它受管区块是索引，区块外是身份与指针，记忆正文在 `.memory/` 条目里。
+把一份**已经存在**的 `AGENTS.md` 收成 init 要求的形状：硬约束写在入口的对应区块里，其它受管区块是索引，区块外只留身份与指向真理源的指针，长规范进 important 或 README，记忆正文在 `.memory/` 条目里。
 
 只在用户明确要求重组这份文件时运行。形状见 [`PROTOCOL.md`](../project-memory-init/references/PROTOCOL.md)；落盘细节认 `$project-memory-init` 的 CLI 与产物，不要手写记忆文件、也不要手改受管区块。
 
@@ -31,7 +31,7 @@ version: 1.1.0
 | 去哪 | 收什么 |
 | --- | --- |
 | 写进本层硬约束区块 | 该目录下不检索就会做错事的规则，条目直接列在区块里 |
-| 留在 `AGENTS.md` 区块外 | 身份与职责、指向唯一真理源的指针（例如「目录约定看 README」） |
+| 留在 `AGENTS.md` 区块外 | 标题、一两句身份、指向唯一真理源的指针（例如「目录约定看 README」）。不要把长规范留在这里 |
 | 抽到 `.memory` | 按 `$project-memory-remember` 的闸门：纠正与禁止 → `feedback`；代码/git 推不出的决策 → `project`；外部资料去哪找 → `reference` |
 | 删掉 | 与 README 或其他真理源重复的结构说明、能从代码推出来的架构与路径、过期进度、一次性流程。可执行流程该是 skill，不要在这里新造一份 |
 

@@ -1,7 +1,7 @@
 ---
 name: project-memory-init
 description: 在指定目录创建或修复项目记忆（AGENTS.md + .memory）。仅当用户明确要求初始化时使用，禁止自动调用；不覆盖已有正文。
-version: 1.2.1
+version: 1.3.0
 ---
 
 # Project Memory Init
@@ -41,11 +41,11 @@ version: 1.2.1
      [--description <目录职责说明>]
    ```
 
-4. 按脚本返回的 JSON 汇报结果。`agentsAction` / `autoAction` / `indexAction` 里出现 `needs-doctor` 要单独点出来；`inheritedEntries` 或 `detachedEntries` 非空说明有下层条目被移动过，也要说明。
+4. 按脚本返回的 JSON 汇报结果。`agentsAction` / `indexAction` 里出现 `needs-doctor` 要单独点出来；`inheritedEntries` 或 `detachedEntries` 非空说明有下层条目被移动过，也要说明。
 
 ## 规则
 
-- 改动范围：目标目录的 `AGENTS.md` 与 `.memory/`、记忆根的 `AGENTS.md`（策略区块），以及登记本层时那一层祖先的 `AGENTS.md`。
+- 改动范围：目标目录的 `AGENTS.md` 与 `.memory/`、记忆根的 `AGENTS.md`，以及登记本层时那一层祖先的 `AGENTS.md`。
 - 已存在的索引文件一律不覆盖，受管区块之外的正文原样保留；重复执行只刷新模板拥有的受管区块。本层硬约束区块缺失时补上种子，**已有规则不覆盖**。
 - 本层硬约束直接写在 `AGENTS.md` 对应区块里，不要链到 `.memory` 文件；那是人/agent 维护的正文，不是 remember 的落点。
 - 所有生成的文案都来自 `references/templates/`，脚本运行时读取。模板名 = 产物名 + `.tmpl.md`，所以 `AGENTS.tmpl.md` 生成 `AGENTS.md`，`type_slug.tmpl.md` 生成普通记忆的 `<plural>/<type>_<slug>.md`。`skills/` 遵循外部 Agent Skills 协议，不由普通记忆模板生成。要改文案，改模板，别改脚本。
