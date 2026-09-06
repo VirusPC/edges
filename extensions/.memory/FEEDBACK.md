@@ -6,5 +6,5 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- [改 skill 后必须升级 version](feedbacks/feedback_skill_bump_version.md) — 更新 extensions/skills 下任何一个 skill 后，同步升 SKILL.md frontmatter 的 version。
+- [改 skill 后必须升级 version、写 changelog、打 tag](feedbacks/feedback_skill_bump_version.md) — 更新 extensions/skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/<name>@<version> tag。
 <!-- project-memory-entries:end -->

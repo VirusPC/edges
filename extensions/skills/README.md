@@ -10,12 +10,30 @@
 ---
 name: <目录名>
 description: <一句话，说明何时该触发、何时不该触发>
+version: <semver>
 ---
 
 <正文>
 ```
 
 `description` 是 agent 决定要不要加载这个 skill 的唯一依据，写清楚触发场景和边界（"如果 X 请改用 Y"），不要写成 `summarize ai article` 这种同义反复。
+
+每个 skill 各自独立 semver，和 `SKILL.md` 同目录放一份 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) 格式的 `CHANGELOG.md`。改了某个 skill 的 `SKILL.md`、scripts、references 或对外行为后：
+
+1. 按 semver 升它自己的 `version`（补丁 +0.0.1，行为/契约变 +0.1.0，不兼容 +1.0.0）
+2. 把 `[Unreleased]` 下的条目挪到 `## [x.y.z] - YYYY-MM-DD`
+3. 对**同一个 commit** 打 annotated tag：`skill/<name>@<version>`
+4. `git push origin main --follow-tags`
+
+没改到的 skill 不要动版本；目录级 README 不算单个 skill 的版本。一次 commit 改了多个 skill，每个改过的各写 changelog、各打一条 tag。
+
+查找某个版本对应的 commit：
+
+```bash
+git show skill/project-memory-init@1.1.0
+git log --oneline skill/project-memory-init@1.0.0..skill/project-memory-init@1.1.0 -- extensions/skills/project-memory-init
+git tag -l 'skill/project-memory-init@*'
+```
 
 `name` 与目录名一致这条**没有机器校验了**（旧的 `install-skills` 脚本会拦，已退役）。`npx skills` 按 frontmatter 里的 `name` 决定安装后的目录名，本地目录名只是兜底；两个 skill 的 `name` 撞车时，后一个会被静默丢弃。
 
