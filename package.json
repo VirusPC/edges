@@ -2,6 +2,7 @@
   "name": "edges",
   "private": true,
   "version": "1.0.0",
+  "license": "MIT",
   "description": "Edges - 认知系统服务工作区",
   "scripts": {
     "setup": "./scripts/setup",
