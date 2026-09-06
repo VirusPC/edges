@@ -1039,6 +1039,20 @@ scripts/lib/               → blocks / templates / paths / provenance
 
 这翻掉「remember 的主路径改回内联」里把「目标目录还没初始化、要先 init」列为 subagent 逃生舱那一条。现在没 Init 不是委派理由，是停下来问要不要启用。
 
+## 2026-09-06：类型正文分目录，`skills/` 只声明兼容边界
+
+**决策一：索引留在 `.memory/` 根部，正文按类型分目录。** `FEEDBACK.md`、`PROJECT.md`、`REFERENCE.md` 与新增的 `SKILLS.md` 仍是本层的四个类型入口；`feedback`、`project`、`reference` 的正文分别移入同名小写目录。也就是说，入口维持一层可见，类型内部不再全部平铺在 `.memory/` 根部。
+
+这保留了 `AGENTS.md → 类型入口 → 正文` 的固定两跳，同时让目录本身成为类型边界。入口如果跟着正文一起下沉，读方要先知道各类型目录的位置才能找到入口，等于在已有索引层前又加了一层没有检索价值的导航；所以「每类一个目录」只作用于内容，不作用于入口。
+
+**决策二：新增 `skills` 类型，但不由项目记忆定义技能内部格式。** `.memory/skills/` 作为常规 Agent Skills 根目录存在，`SKILLS.md` 只负责把它接入本层记忆入口。`LAYOUT.md` 只声明这条兼容边界，不展开技能目录内有哪些文件、frontmatter 有哪些字段，也不复制当前版本的 Agent Skills 结构。
+
+理由是**协议归属要单一**：这里拥有的是「项目记忆如何索引 skills」的决定，不拥有「一个标准 skill 长什么样」。复制外部协议会制造第二份事实源；一旦 Agent Skills 演化，本项目会在没有自身行为变化时被迫修改布局文档，还可能因更新不及时产生伪兼容。`skills/` 的内部结构因此始终以其自身协议为准，本实现只消费，不重新定义。
+
+**普通记忆与 skills 不强求同形。** `feedback`、`project`、`reference` 继续使用 `<type>/<type>_<slug>.md` 和本实现的条目模板；`skills` 只共享「有一个类型入口」这层抽象。为了表面统一而让 skills 套 `type_slug.tmpl.md`，会破坏它作为常规 skills 根目录直接复用、发现和分发的目标。
+
+**本轮只定布局，不代表实现已完成。** 模板、索引重算、remember/init/doctor 对新目录与 `skills` 类型的支持仍需另行设计和实现；在那之前，`LAYOUT.md` 描述的是目标结构，不是当前脚本已经具备的行为。
+
 ## 待议
 
 - 索引行数/字节硬上限（调研建议 200 行 / 25 KB，触及 75% 时告警）尚未实现。判据见「`AGENTS.md` 同时充当 `MEMORY.md`」：功能等同索引，就该用 `MEMORY.md` 的硬上限而不是 `CLAUDE.md` 的软建议。
@@ -1053,4 +1067,4 @@ scripts/lib/               → blocks / templates / paths / provenance
 - **兜底的下级条目描述还硬编码在脚本里**（`agents.py` 的 `normalize_index_description()`）。要么给它一份模板，要么等上面那条「给下级 `AGENTS.md` 加 `description`」落地后它自然消失——后者更彻底，所以先不单独动。
 - **描述质量没有任何门槛**：`remember` 只强制 `description` 存在，`doctor` 不检查它写得怎么样。而自从 `ask` 改为依赖产物里的说明挑入口与条目（见「再翻案：`ask` 依赖产物」一节），**描述质量直接决定运行时要打开多少正文**——写成标题复述，agent 就只能挨个打开。候选检查项：过短、与 `title` 高度重复、通篇没有可判别的名词。这是把成本转移到写时之后必须补上的那一半。
 - **旧标记名的迁移识别未实现**：`doctor` 需要一条新 finding，认出旧版区块名并改写成当前名。义务已写进 `LAYOUT`（见「LAYOUT 不冻结任何东西」一节），实现留到改名真正发生时——那之前没有旧名可认。**同一条 finding 该顺带认「嵌套错位」**：区块名对但位置不对（比如 `auto` 待在外层之外，见「翻案：`auto` 收回外层区域内部」一节），现在既不报错也不修。
-- **把 skill / rule 纳入记忆索引**尚未设计：它们的 frontmatter 已经协议合规（见「frontmatter 只必需 `description`」一节），但那些文件谁拥有、`doctor` 是否体检、与 harness 自身的加载机制如何不打架，都没答案。设计时必须兑现「同形不同权」——不能让一条记忆获得 skill 那样的执行权。
+- **`skills` 已纳入目标布局，但实现边界尚未补齐**：`.memory/skills/` 遵循外部 Agent Skills 协议，项目记忆只通过 `SKILLS.md` 索引它；索引如何生成、文件由谁拥有、`doctor` 检查到哪一层、与 harness 自身加载机制如何不打架仍待设计。实现时必须兑现「同形不同权」——普通记忆不能因此获得 skill 那样的执行权。
