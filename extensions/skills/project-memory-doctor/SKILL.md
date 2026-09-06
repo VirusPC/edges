@@ -1,7 +1,7 @@
 ---
 name: project-memory-doctor
 description: 体检整棵项目记忆树，修掉索引不一致（死条目、未登记的记忆目录、重复或错位的条目、别人的 AGENTS.md）。用户要求整理、检查或修复项目记忆时使用；init 返回 needs-doctor 时也用。默认只诊断，改文件要显式确认。
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Project Memory Doctor
@@ -20,7 +20,7 @@ version: 1.0.0
 
 **本 skill 不读取或改写任何条目正文。** 它会读取 frontmatter 来重算入口，并可把旧版平铺记忆文件移动到当前类型目录；文件内容原样保留。其余操作只涉及目录、类型入口、`AGENTS.md` 受管区块和下层索引，所以修复仍是机械的、确定性的、幂等的。
 
-记忆**内容**层面的合并、抽象、遗忘（文献里叫 consolidation 或 dreaming）不属于这里，也尚未实现。用户要求「精简记忆」「合并重复的记忆内容」时，明确说明本 skill 只能修索引结构，别顺手去改正文。
+记忆**内容**层面的合并、抽象、遗忘（文献里叫 consolidation 或 dreaming）不属于这里，也尚未实现。用户要求「精简记忆」「合并重复的记忆内容」时，明确说明本 skill 只能修索引结构，别顺手去改正文。要把已有 `AGENTS.md` 的区块外正文拆进 `.memory`，改走 `$project-memory-reshape`。
 
 ## 为什么这些问题归 doctor
 

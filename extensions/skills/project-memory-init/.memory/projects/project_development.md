@@ -10,7 +10,7 @@ updatedAt: "2026-09-06T13:38:38+08:00"
 
 # Project Memory 系列 Skill 开发流程
 
-本文件规定 `project-memory-init`、`project-memory-ask`、`project-memory-remember`、`project-memory-doctor` 及以后同系列 skill 的修改顺序。
+本文件规定 `project-memory-init`、`project-memory-ask`、`project-memory-remember`、`project-memory-reshape`、`project-memory-doctor` 及以后同系列 skill 的修改顺序。
 
 ```text
 PROTOCOL.md
@@ -46,7 +46,7 @@ project-memory-doctor
 
 ## 4. 修改其他受影响的非 doctor skill
 
-依次检查 `project-memory-ask`、`project-memory-remember` 及其他非 doctor 的同系列 skill。只修改实际受影响者；优先继续依赖 `PROTOCOL.md`、CLI `--help` 或落盘产物等自描述接口，不复制 `LAYOUT.md` 的实现细节。
+依次检查 `project-memory-ask`、`project-memory-remember`、`project-memory-reshape` 及其他非 doctor 的同系列 skill。只修改实际受影响者；优先继续依赖 `PROTOCOL.md`、CLI `--help` 或落盘产物等自描述接口，不复制 `LAYOUT.md` 的实现细节。
 
 完成判据：读、写及其他工作流能正确使用新实现，未受影响的 skill 没有为了表面同步而增加耦合。
 

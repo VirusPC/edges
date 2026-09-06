@@ -1,18 +1,20 @@
 ---
 name: project-memory-init
 description: 在指定目录创建或修复项目记忆（AGENTS.md + .memory）。仅当用户明确要求初始化时使用，禁止自动调用；不覆盖已有正文。
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Project Memory Init
 
 在一个已存在的目录里建好 `.memory/` 的四个类型入口及内容目录，并维护该目录的 `AGENTS.md` 索引。
 
-只在用户明确要求 Init 时运行。Remember、Ask、Doctor 都不得代为调用。
+只在用户明确要求 Init 时运行。Remember、Ask、Doctor 都不得代为调用。用户要求 `$project-memory-reshape` 某一份已有 `AGENTS.md` 时，视为同时同意对该目录 Init。
+
+要把已有 `AGENTS.md` 的区块外正文拆成常驻指令和记忆条目，用 `$project-memory-reshape`。本 skill 不覆盖已有正文。
 
 维护相关的文档，别混：
 
-- [`references/PROTOCOL.md`](references/PROTOCOL.md) 是**协议**，冻结的。四个 skill 共同遵守，两个消费方（`project-memory-ask` 检索、`project-memory-remember` 沉淀）只以它为准。
+- [`references/PROTOCOL.md`](references/PROTOCOL.md) 是**协议**，冻结的。本系列 skill 共同遵守，两个消费方（`project-memory-ask` 检索、`project-memory-remember` 沉淀）只以它为准。
 - [`references/LAYOUT.md`](references/LAYOUT.md) 是协议的**实现**，按协议三层描述具体产物。本 skill 和 `project-memory-doctor` 共同拥有它，可以自由升级，只要不破协议。改了 `scripts/lib/blocks.py` 的标记常量就同步改那份文档，体检拿它当目标态，漂移了就没有判据。
 - 开发流程、设计决策与调研史料在本层项目记忆里，从 [`AGENTS.md`](AGENTS.md) 进入。
 

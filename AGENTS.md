@@ -159,7 +159,7 @@ git ls-files | grep -iE '\.(docx?|xlsx?|pptx?)$'
 
 按任务目录加载对应 `AGENTS.md`。
 
-- [extensions/skills/project-memory-init/AGENTS.md](extensions/skills/project-memory-init/AGENTS.md) — project-memory-init 目录的项目记忆与规范入口。
+- [extensions/AGENTS.md](extensions/AGENTS.md) — 对外接口层：skills、MCP、tools 等供外部 Agent 接入的扩展。
 <!-- project-memory-children:end -->
 <!-- project-memory-auto:start -->
 ## 记忆自动化
