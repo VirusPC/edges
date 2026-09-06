@@ -17,6 +17,10 @@ from lib.templates import read_template, template_path
 OUTER_START = "<!-- project-memory:start -->"
 OUTER_END = "<!-- project-memory:end -->"
 
+# 本层硬约束：规则直接写在区块里，不进记忆文件。
+IMPORTANT_START = "<!-- project-memory-important:start -->"
+IMPORTANT_END = "<!-- project-memory-important:end -->"
+
 # 本层记忆：分类型入口的清单。
 LOCAL_START = "<!-- project-memory-local:start -->"
 LOCAL_END = "<!-- project-memory-local:end -->"
@@ -35,7 +39,7 @@ ENTRIES_END = "<!-- project-memory-entries:end -->"
 
 # 外层区域内部的规范顺序，与模板一致；补写缺失区块时按它定位。
 # 外层是唯一的顶层区块，所以顶层不需要顺序表。
-INNER_BLOCK_ORDER = (LOCAL_START, CHILDREN_START, AUTO_START)
+INNER_BLOCK_ORDER = (IMPORTANT_START, LOCAL_START, CHILDREN_START, AUTO_START)
 
 # 下层索引里的一个条目，写入形态见 entry_line.tmpl.md。路径从链接目标取而不是从
 # 标签取：标签带不带反引号都能解析，旧文件和手写条目一样认。
@@ -49,7 +53,7 @@ MEMORY_INDEX_LINK_PATTERN = re.compile(
 
 @lru_cache(maxsize=None)
 def load_agents_template() -> str:
-    """读 AGENTS.md 模板，并校验四对区块标记都在、不重复、且嵌套与顺序正确。
+    """读 AGENTS.md 模板，并校验各对区块标记都在、不重复、且嵌套与顺序正确。
 
     标记序列同时编码了嵌套，所以逐个标记比位置就能一次校验完。
     """
@@ -58,6 +62,8 @@ def load_agents_template() -> str:
     position = -1
     for marker in (
         OUTER_START,
+        IMPORTANT_START,
+        IMPORTANT_END,
         LOCAL_START,
         LOCAL_END,
         CHILDREN_START,
@@ -120,6 +126,13 @@ def prune_outer_region(document: str) -> str:
     return re.sub(r"\n{3,}", "\n\n", updated)
 
 
+def ensure_important_block(document: str) -> str:
+    """硬约束区块缺失时插入模板种子；已有正文原样保留。"""
+    if block_pattern(IMPORTANT_START, IMPORTANT_END).search(document):
+        return document
+    return insert_inner_block(document, IMPORTANT_START, build_important_block())
+
+
 def insert_inner_block(document: str, start: str, block: str) -> str:
     """把一个区块插进外层区域内部，缺外层时先补一个空壳。"""
     if OUTER_START not in document:
@@ -145,6 +158,11 @@ def upsert_block(document: str, start: str, end: str, block: str) -> str:
     return f"{append_block(document, block)}\n"
 
 
+def build_important_block() -> str:
+    """渲染本层硬约束区块的种子。已有正文由调用方保留，不拿这份覆盖。"""
+    return extract_block(IMPORTANT_START, IMPORTANT_END)
+
+
 def build_local_block() -> str:
     """渲染本层记忆区块。类型入口是闭集且恒存在，所以清单是模板字面量。"""
     return extract_block(LOCAL_START, LOCAL_END)
@@ -168,6 +186,7 @@ def render_agents_document(
     用不到的区块传空串，整段连标记一起消失；内层全空时外层也不留。
     """
     document = load_agents_template().replace("{title}", title)
+    # 硬约束区块不替换：新文件沿用模板种子，已有文件由 ensure 路径保留正文。
     for (start, end), block in (
         ((LOCAL_START, LOCAL_END), local_block),
         ((CHILDREN_START, CHILDREN_END), children_block),

@@ -3,6 +3,13 @@
 本目录是 project-memory 系列 skill 的共享家。协议与布局在 `references/`，开发流程、设计决策与调研史料在 `.memory/`。
 
 <!-- project-memory:start -->
+<!-- project-memory-important:start -->
+## 本层硬约束
+
+- 改这套 skill 的顺序：`PROTOCOL.md` → `LAYOUT.md` → `project-memory-init` → 其他非 doctor skill → `project-memory-doctor`。不能跳到下游再反过来定义上游。
+- Init 只在用户明确要求时运行；Remember / Ask / Doctor 不得代为 Init。
+- 本层硬约束直接写在这个区块里，不要链到 `.memory` 文件。
+<!-- project-memory-important:end -->
 <!-- project-memory-local:start -->
 ## 本层记忆
 

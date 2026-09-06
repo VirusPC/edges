@@ -8,11 +8,13 @@ from pathlib import Path
 from lib.blocks import (
     AUTO_END,
     AUTO_START,
+    IMPORTANT_START,
     LOCAL_END,
     LOCAL_START,
     MEMORY_INDEX_LINK_PATTERN,
     block_pattern,
     build_auto_block,
+    build_important_block,
     build_local_block,
     index_files,
     upsert_block,
@@ -250,6 +252,14 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
                         "detail": "本层记忆入口清单与当前布局不一致",
                     }
                 )
+            if IMPORTANT_START not in document:
+                findings.append(
+                    {
+                        "issue": "missing-important",
+                        "path": relative_or_name(agents_path, root),
+                        "detail": "记忆目录缺少本层硬约束区块",
+                    }
+                )
     return findings
 
 
@@ -355,11 +365,18 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
         elif issue == "missing-auto":
             sync_agents_blocks(owner, auto=build_auto_block())
             repaired.append(f"{issue}: {finding['path']} 补上策略区块")
+        elif issue == "missing-important":
+            action = sync_agents_blocks(owner)
+            if action in {"created", "updated"}:
+                repaired.append(f"{issue}: {finding['path']} 补上硬约束区块，已有规则原样保留")
         elif issue == "foreign-agents":
             # 唯一一处往他人文件里写的地方：只补挂受管区块，既有正文一字不动。
             document = agents_path.read_text(encoding="utf-8")
             updated = document
             if memory_dir(owner).is_dir():
+                updated = upsert_block(
+                    updated, IMPORTANT_START, IMPORTANT_END, build_important_block()
+                )
                 updated = upsert_block(updated, LOCAL_START, LOCAL_END, build_local_block())
             if owner == root:
                 updated = upsert_block(updated, AUTO_START, AUTO_END, build_auto_block())

@@ -10,6 +10,8 @@ updatedAt: "2026-09-06T13:38:38+08:00"
 
 # Project Memory 系列 Skill 开发流程
 
+修改顺序这条硬约束写在本目录 `AGENTS.md` 的本层硬约束区块里。本文件只展开每一步的完成判据。
+
 本文件规定 `project-memory-init`、`project-memory-ask`、`project-memory-remember`、`project-memory-reshape`、`project-memory-doctor` 及以后同系列 skill 的修改顺序。
 
 ```text

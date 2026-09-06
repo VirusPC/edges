@@ -6,7 +6,7 @@
 
 ```text
 <仓库根>/
-├── AGENTS.md                       # 本层记忆入口：分类型入口清单 + 下层索引 + 自动化策略
+├── AGENTS.md                       # 本层记忆入口：硬约束 + 分类型入口清单 + 下层索引 + 自动化策略
 ├── .memory/
 │   ├── FEEDBACK.md                 # 分类型入口：只列 feedbacks/ 下的记忆
 │   ├── PROJECT.md                  # 分类型入口：只列 projects/ 下的记忆
@@ -32,14 +32,17 @@
 
 标记是 HTML 注释，成对出现：`<!-- <名字>:start -->` 与 `<!-- <名字>:end -->`，名字带工具前缀（本套是 `project-memory`）。
 
-区块分两层：外层 `project-memory` 是本套在这份共享文件里的属地，本套写的东西全在它里面，顺序恒为 local → children → auto。
+区块分两层：外层 `project-memory` 是本套在这份共享文件里的属地，本套写的东西全在它里面，顺序恒为 important → local → children → auto。
 
 | 区块标记 | 出现在 | 内容 | 内容来源 |
 | --- | --- | --- | --- |
 | `<!-- project-memory:start -->` | 每个持有记忆或索引的目录 | 只是容器，本身不放内容 | 缺失时按需建壳 |
+| ├ `<!-- project-memory-important:start -->` | 每个记忆目录 | 本层硬约束，规则直接写在区块里 | 人/agent 手写；缺失时用模板种子，已有正文不覆盖 |
 | ├ `<!-- project-memory-local:start -->` | 每个记忆目录 | 本层四份分类型入口的清单 | 模板里的字面量 |
 | ├ `<!-- project-memory-children:start -->` | 有下层记忆目录时 | 直接下层记忆目录的 `AGENTS.md` | 增量维护，一次 init 一条 |
 | └ `<!-- project-memory-auto:start -->` | 仅记忆根 | 自动检索与沉淀策略 | 模板里的字面量 |
+
+硬约束不进 `.memory/`、不做成索引行。旧文件没有这个区块时，`$project-memory-doctor` 认 `missing-important`，补上种子正文，不改区块外和其它内层。
 
 内层区块一个都不剩时外层不留空壳（`prune_outer_region()`）——只持有索引的目录条目清空后，整块区域一起消失。记忆根走不到这一步：`auto` 一直在，外层跟着一直在。
 

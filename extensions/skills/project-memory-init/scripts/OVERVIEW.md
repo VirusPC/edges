@@ -33,7 +33,7 @@
 | 改 init / remember / doctor 的行为 | 对应的 `operations/*.py` |
 | 改 `AGENTS.md` 区块怎么维护、下层索引怎么登记 | `nodes/agents.py` |
 | 改类型目录、记忆文件读写、frontmatter、分类型入口怎么重算 | `nodes/entries.py` |
-| 改区块标记名或嵌套顺序 | `lib/blocks.py`，并同步 [`../references/LAYOUT.md`](../references/LAYOUT.md) |
+| 改区块标记名或嵌套顺序 | `lib/blocks.py`，并同步 [`../references/LAYOUT.md`](../references/LAYOUT.md)。硬约束区块只保证存在、不覆盖已有正文 |
 | 改产物文案、字段清单、行格式、类型清单 | [`../references/templates/`](../references/templates/)，不要改脚本 |
 | 改路径约定（`.memory`、类型目录名、`AGENTS.md`、skill 根） | `lib/paths.py` |
 | 改出处 / 审计字段从哪来 | `lib/provenance.py` + [`../references/frontmatter-fields.md`](../references/frontmatter-fields.md) |

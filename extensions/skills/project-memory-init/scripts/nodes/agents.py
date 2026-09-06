@@ -11,6 +11,7 @@ from lib.blocks import (
     AUTO_START,
     CHILDREN_END,
     CHILDREN_START,
+    IMPORTANT_START,
     INDEX_ENTRY_PATTERN,
     LOCAL_END,
     LOCAL_START,
@@ -19,6 +20,7 @@ from lib.blocks import (
     build_auto_block,
     build_children_block,
     build_local_block,
+    ensure_important_block,
     insert_inner_block,
     prune_outer_region,
     render_agents_document,
@@ -35,7 +37,13 @@ def classify_agents_file(path: Path) -> str:
     text = path.read_text(encoding="utf-8")
     if any(
         marker in text
-        for marker in (OUTER_START, LOCAL_START, CHILDREN_START, AUTO_START)
+        for marker in (
+            OUTER_START,
+            IMPORTANT_START,
+            LOCAL_START,
+            CHILDREN_START,
+            AUTO_START,
+        )
     ):
         return "managed"
     return "foreign"
@@ -56,7 +64,7 @@ def sync_agents_blocks(
         write_atomic(path, render_agents_document(directory.name, local, children, auto))
         return "created"
     existing = path.read_text(encoding="utf-8")
-    updated = existing
+    updated = ensure_important_block(existing)
     for (start, end), block in (
         ((LOCAL_START, LOCAL_END), local),
         ((CHILDREN_START, CHILDREN_END), children),

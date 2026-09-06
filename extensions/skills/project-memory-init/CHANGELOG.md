@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-06
+
+### Added
+
+- `AGENTS.md` 增加本层硬约束区块：规则直接写在入口里，init / doctor 只保证区块存在、不覆盖已有正文。
+
 ## [1.1.0] - 2026-09-06
 
 ### Changed
@@ -20,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.1.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.0...HEAD
+[1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.1.0...skill/project-memory-init@1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.0.0...skill/project-memory-init@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-memory-init@1.0.0

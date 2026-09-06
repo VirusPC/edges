@@ -1,7 +1,7 @@
 ---
 name: project-memory-doctor
 description: 体检整棵项目记忆树，修掉索引不一致（死条目、未登记的记忆目录、重复或错位的条目、别人的 AGENTS.md）。用户要求整理、检查或修复项目记忆时使用；init 返回 needs-doctor 时也用。默认只诊断，改文件要显式确认。
-version: 1.1.0
+version: 1.2.0
 ---
 
 # Project Memory Doctor
@@ -34,6 +34,7 @@ init 是单目标、只往前写的，只能处理自己这次动作引起的漂
 | `duplicate` | 同一个目录被多份索引登记 | 删掉错误层级那几条，保留正确的 |
 | `foreign-agents` | 有 `AGENTS.md` 但不含本套受管标记 | 追加受管区块，**既有正文一字不改** |
 | `missing-auto` | 记忆根缺少自动化策略区块 | 补上 |
+| `missing-important` | 记忆目录缺少本层硬约束区块 | 补上种子正文，**已有规则不覆盖** |
 | `legacy-flat-entry` | 旧版记忆文件仍平铺在 `.memory/` | 原样移入对应类型目录 |
 | `legacy-entry-conflict` | 新旧位置存在同名记忆文件 | 只报告，不覆盖任何一份 |
 | `legacy-singular-type-dir` | 旧版单数类型目录（`feedback/` 等） | 原样改名为复数（`feedbacks/` 等） |

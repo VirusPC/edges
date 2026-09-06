@@ -1,6 +1,11 @@
 # extensions
 
 <!-- project-memory:start -->
+<!-- project-memory-important:start -->
+## 本层硬约束
+
+该目录下不检索就会做错事的规则，直接写在这里，不要链到 `.memory` 文件。没有就只留这句说明。
+<!-- project-memory-important:end -->
 <!-- project-memory-local:start -->
 ## 本层记忆
 

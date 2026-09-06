@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-06
+
+### Changed
+
+- 不检索就会做错事的规则写进该层 `AGENTS.md` 的硬约束区块，不走 remember、不另建记忆文件。
+
 ## [1.1.0] - 2026-09-06
 
 ### Changed
@@ -19,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.1.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.2.0...HEAD
+[1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.1.0...skill/project-memory-remember@1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.0.0...skill/project-memory-remember@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-memory-remember@1.0.0

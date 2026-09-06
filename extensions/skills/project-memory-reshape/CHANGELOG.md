@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-06
+
+### Changed
+
+- 硬约束写进入口对应区块并直接列出；区块外只留身份与指针；不要把硬约束抽进 `.memory`。
+
 ## [1.0.0] - 2026-09-06
 
 ### Added
 
 - 把已有 `AGENTS.md` 拆成常驻指令和 `.memory` 条目；init / doctor 不改正文。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.0.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.1.0...HEAD
+[1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.0.0...skill/project-memory-reshape@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-memory-reshape@1.0.0
