@@ -39,7 +39,13 @@ ENTRIES_END = "<!-- project-memory-entries:end -->"
 
 # 外层区域内部的规范顺序，与模板一致；补写缺失区块时按它定位。
 # 外层是唯一的顶层区块，所以顶层不需要顺序表。
-INNER_BLOCK_ORDER = (IMPORTANT_START, LOCAL_START, CHILDREN_START, AUTO_START)
+INNER_BLOCK_PAIRS = (
+    (IMPORTANT_START, IMPORTANT_END),
+    (LOCAL_START, LOCAL_END),
+    (CHILDREN_START, CHILDREN_END),
+    (AUTO_START, AUTO_END),
+)
+INNER_BLOCK_ORDER = tuple(start for start, _end in INNER_BLOCK_PAIRS)
 
 # 下层索引里的一个条目，写入形态见 entry_line.tmpl.md。路径从链接目标取而不是从
 # 标签取：标签带不带反引号都能解析，旧文件和手写条目一样认。
@@ -116,12 +122,19 @@ def append_block(text: str, block: str) -> str:
 
 
 def prune_outer_region(document: str) -> str:
-    """规范化外层区域的内部留白；内层区块一个都不剩就连外层一起去掉。"""
+    """规范化外层区域：内层区块之间、以及与外层标记之间各空一行；内层全空则去掉外层。"""
     match = block_pattern(OUTER_START, OUTER_END).search(document)
     if match is None:
         return document
-    body = match.group(0)[len(OUTER_START) : -len(OUTER_END)].strip()
-    region = f"{OUTER_START}\n{body}\n{OUTER_END}" if body else ""
+    inner = match.group(0)[len(OUTER_START) : -len(OUTER_END)]
+    blocks = []
+    for start, end in INNER_BLOCK_PAIRS:
+        found = block_pattern(start, end).search(inner)
+        if found:
+            blocks.append(found.group(0).strip("\n"))
+    region = (
+        f"{OUTER_START}\n\n" + "\n\n".join(blocks) + f"\n\n{OUTER_END}" if blocks else ""
+    )
     updated = document[: match.start()] + region + document[match.end() :]
     return re.sub(r"\n{3,}", "\n\n", updated)
 

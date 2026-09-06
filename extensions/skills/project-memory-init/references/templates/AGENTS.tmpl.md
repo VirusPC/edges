@@ -1,6 +1,7 @@
 # {title}
 
 <!-- project-memory:start -->
+
 <!-- project-memory-important:start -->
 ## 本层硬约束
 
@@ -34,4 +35,5 @@
 - 本层硬约束写在入口的对应区块里，加载这份 `AGENTS.md` 时直接遵守，不要再去 `.memory` 里找一份副本。
 - 索引是分层的：按当前任务涉及的目录，取从这里到那些目录之间的各层，不要一次加载全部。
 <!-- project-memory-auto:end -->
+
 <!-- project-memory:end -->

@@ -143,11 +143,13 @@ git ls-files | grep -iE '\.(docx?|xlsx?|pptx?)$'
 - **配置优先**: 遇到路径、环境问题，优先检查 `.env` 或配置文件，而非硬编码。
 
 <!-- project-memory:start -->
+
 <!-- project-memory-important:start -->
 ## 本层硬约束
 
 该目录下不检索就会做错事的规则，直接写在这里，不要链到 `.memory` 文件。没有就只留这句说明。
 <!-- project-memory-important:end -->
+
 <!-- project-memory-local:start -->
 ## 本层记忆
 
@@ -166,6 +168,7 @@ git ls-files | grep -iE '\.(docx?|xlsx?|pptx?)$'
 
 - [extensions/AGENTS.md](extensions/AGENTS.md) — 对外接口层：skills、MCP、tools 等供外部 Agent 接入的扩展。
 <!-- project-memory-children:end -->
+
 <!-- project-memory-auto:start -->
 ## 记忆自动化
 
@@ -174,4 +177,5 @@ git ls-files | grep -iE '\.(docx?|xlsx?|pptx?)$'
 - 本层硬约束写在入口的对应区块里，加载这份 `AGENTS.md` 时直接遵守，不要再去 `.memory` 里找一份副本。
 - 索引是分层的：按当前任务涉及的目录，取从这里到那些目录之间的各层，不要一次加载全部。
 <!-- project-memory-auto:end -->
+
 <!-- project-memory:end -->

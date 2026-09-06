@@ -32,7 +32,7 @@
 
 标记是 HTML 注释，成对出现：`<!-- <名字>:start -->` 与 `<!-- <名字>:end -->`，名字带工具前缀（本套是 `project-memory`）。
 
-区块分两层：外层 `project-memory` 是本套在这份共享文件里的属地，本套写的东西全在它里面，顺序恒为 important → local → children → auto。
+区块分两层：外层 `project-memory` 是本套在这份共享文件里的属地，本套写的东西全在它里面，顺序恒为 important → local → children → auto。内层区块之间、以及内层与外层标记之间，各空一行（`prune_outer_region()` 每次写入都收成这样）。
 
 | 区块标记 | 出现在 | 内容 | 内容来源 |
 | --- | --- | --- | --- |

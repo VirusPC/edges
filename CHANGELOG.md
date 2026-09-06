@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - project-memory 的 `AGENTS.md` 增加本层硬约束区块：最重要的规则直接写在入口里。
+- project-memory 的 `AGENTS.md` 受管区块之间空一行。
 
 ## [1.0.0] - 2026-09-06
 

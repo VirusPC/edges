@@ -8,6 +8,7 @@ from pathlib import Path
 from lib.blocks import (
     AUTO_END,
     AUTO_START,
+    IMPORTANT_END,
     IMPORTANT_START,
     LOCAL_END,
     LOCAL_START,
@@ -17,6 +18,7 @@ from lib.blocks import (
     build_important_block,
     build_local_block,
     index_files,
+    prune_outer_region,
     upsert_block,
 )
 from lib.paths import (
@@ -381,7 +383,7 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
             if owner == root:
                 updated = upsert_block(updated, AUTO_START, AUTO_END, build_auto_block())
             if updated != document:
-                write_atomic(agents_path, updated.rstrip() + "\n")
+                write_atomic(agents_path, prune_outer_region(updated).rstrip() + "\n")
                 repaired.append(f"{issue}: {finding['path']} 补挂受管区块，既有正文原样保留")
 
     # 迁移完成后才重算入口；否则旧版平铺文件会在索引里暂时消失。

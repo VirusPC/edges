@@ -3,6 +3,7 @@
 本目录是 project-memory 系列 skill 的共享家。协议与布局在 `references/`，开发流程、设计决策与调研史料在 `.memory/`。
 
 <!-- project-memory:start -->
+
 <!-- project-memory-important:start -->
 ## 本层硬约束
 
@@ -10,6 +11,7 @@
 - Init 只在用户明确要求时运行；Remember / Ask / Doctor 不得代为 Init。
 - 本层硬约束直接写在这个区块里，不要链到 `.memory` 文件。
 <!-- project-memory-important:end -->
+
 <!-- project-memory-local:start -->
 ## 本层记忆
 
@@ -28,4 +30,5 @@
 - 用户纠正了你，或者任务产出了已验证、以后还用得上的结论，就沉淀（`$project-memory-remember`），动手前先读它的「什么时候写」。
 - 索引是分层的：按当前任务涉及的目录，取从这里到那些目录之间的各层，不要一次加载全部。
 <!-- project-memory-auto:end -->
+
 <!-- project-memory:end -->

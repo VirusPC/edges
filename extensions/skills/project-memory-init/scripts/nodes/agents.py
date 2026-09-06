@@ -72,6 +72,7 @@ def sync_agents_blocks(
     ):
         if block:
             updated = upsert_block(updated, start, end, block)
+    updated = prune_outer_region(updated)
     if updated == existing:
         return "preserved"
     write_atomic(path, updated)

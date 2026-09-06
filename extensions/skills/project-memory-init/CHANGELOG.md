@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-09-06
+
+### Changed
+
+- `AGENTS.md` 内层区块之间、以及与外层标记之间各空一行。
+
 ## [1.2.0] - 2026-09-06
 
 ### Added
@@ -26,7 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.1...HEAD
+[1.2.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.0...skill/project-memory-init@1.2.1
 [1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.1.0...skill/project-memory-init@1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.0.0...skill/project-memory-init@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-memory-init@1.0.0
