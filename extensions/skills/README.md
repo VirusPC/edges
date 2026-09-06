@@ -27,6 +27,8 @@ version: <semver>
 
 没改到的 skill 不要动版本；目录级 README 不算单个 skill 的版本。一次 commit 改了多个 skill，每个改过的各写 changelog、各打一条 tag。
 
+仓库级变更另记根目录 [`CHANGELOG.md`](../../../CHANGELOG.md)，用 `vX.Y.Z` tag，**不是** skill 总账。只改某个 skill 的补丁不必升仓库版本。
+
 查找某个版本对应的 commit：
 
 ```bash

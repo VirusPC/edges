@@ -147,4 +147,4 @@ npx skills@latest add VirusPC/edges/extensions/skills
 
 ---
 
-*最后更新: 2026-09-03*
+仓库级版本记录见 [CHANGELOG.md](CHANGELOG.md)。Skill 各自发版，见 `extensions/skills/<name>/CHANGELOG.md`。
