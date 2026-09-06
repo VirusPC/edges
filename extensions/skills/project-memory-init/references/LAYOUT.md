@@ -41,7 +41,7 @@
 | ├ `<!-- project-memory-local:start -->` | 每个记忆目录 | 本层四份分类型入口的清单 | 模板里的字面量 |
 | └ `<!-- project-memory-children:start -->` | 有下层记忆目录时 | 直接下层记忆目录的 `AGENTS.md` | 增量维护，一次 init 一条 |
 
-硬约束不进 `.memory/`、不做成索引行。检索与沉淀的时机纪律写在硬约束种子里，不再单独成块。旧文件没有这个区块时，`$project-memory-doctor` 认 `missing-important`，补上种子正文，不改区块外和其它内层。旧文件若还留着 `<!-- project-memory-auto:start -->`，`$project-memory-doctor` 认 `stale-auto`，删掉该区块。
+硬约束不进 `.memory/`、不做成索引行。种子只有两句：ask / remember 的聚光灯（点名这两个日常 skill，不写用法、不编排 init / doctor / reshape），以及「硬约束写在本区块、不要链到 `.memory`」。各层自己的仓规手写追加在后面。不再单独成块。旧文件没有这个区块时，`$project-memory-doctor` 认 `missing-important`，补上种子正文，**已有规则不覆盖**。旧文件若还留着 `<!-- project-memory-auto:start -->`，`$project-memory-doctor` 认 `stale-auto`，删掉该区块。
 
 内层区块一个都不剩时外层不留空壳（`prune_outer_region()`）——只持有索引的目录条目清空后，整块区域一起消失。记忆根至少有 important 和 local，外层跟着一直在。
 

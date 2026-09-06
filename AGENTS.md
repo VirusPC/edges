@@ -9,13 +9,10 @@
 <!-- project-memory-important:start -->
 ## 本层硬约束
 
-- 回答问题或动手改代码之前先查项目记忆（`$project-memory-ask`），不用等用户说「搜索」；本轮查过就别重复查。
-- 用户纠正了你，或者任务产出了已验证、以后还用得上的结论，就沉淀（`$project-memory-remember`），动手前先读它的「什么时候写」。
+- 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
 - 本层硬约束直接写在这个区块里，不要链到 `.memory` 文件。
 - 本仓公开（`github.com/VirusPC/edges`）。凭据、个人信息、未公开 IP、办公文档不入库；内部信息脱敏后再写；截图按「能不能上公开博客」判断。细则见 README 的「隐私与脱敏」。
-- 改 `bin/` / `scripts/`：不硬编码绝对路径；新维护脚本放 `scripts/`，并更新 `package.json` 与 README。
 - Git：`type: subject`；AI 参与加 `Co-authored-by`；不提交 `.obsidian/workspace.json`；`pull` / `rebase` 加 `--autostash`。
-- 少即是多；改系统级命令前说明风险；路径问题先查配置。
 <!-- project-memory-important:end -->
 
 <!-- project-memory-local:start -->

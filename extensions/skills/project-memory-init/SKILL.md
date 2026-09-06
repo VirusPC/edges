@@ -1,7 +1,7 @@
 ---
 name: project-memory-init
 description: 在指定目录创建或修复项目记忆（AGENTS.md + .memory）。仅当用户明确要求初始化时使用，禁止自动调用；不覆盖已有正文。
-version: 1.3.0
+version: 1.4.0
 ---
 
 # Project Memory Init
@@ -46,7 +46,7 @@ version: 1.3.0
 ## 规则
 
 - 改动范围：目标目录的 `AGENTS.md` 与 `.memory/`、记忆根的 `AGENTS.md`，以及登记本层时那一层祖先的 `AGENTS.md`。
-- 已存在的索引文件一律不覆盖，受管区块之外的正文原样保留；重复执行只刷新模板拥有的受管区块。本层硬约束区块缺失时补上种子，**已有规则不覆盖**。
+- 已存在的索引文件一律不覆盖，受管区块之外的正文原样保留；重复执行只刷新模板拥有的受管区块。本层硬约束区块缺失时补上种子，**已有规则不覆盖**。种子只有两句：ask / remember 的聚光灯，以及「硬约束写在本区块」。不要把 skill 用法抄进入口，也不要在种子里点名 init / doctor / reshape。各层仓规手写追加，再跑 init 也不会覆盖。
 - 本层硬约束直接写在 `AGENTS.md` 对应区块里，不要链到 `.memory` 文件；那是人/agent 维护的正文，不是 remember 的落点。
 - 所有生成的文案都来自 `references/templates/`，脚本运行时读取。模板名 = 产物名 + `.tmpl.md`，所以 `AGENTS.tmpl.md` 生成 `AGENTS.md`，`type_slug.tmpl.md` 生成普通记忆的 `<plural>/<type>_<slug>.md`。`skills/` 遵循外部 Agent Skills 协议，不由普通记忆模板生成。要改文案，改模板，别改脚本。
 - **扩展这套东西时守住一条：模板尽可能体现内容结构，脚本只做占位符替换。** 判据是「盯着模板能不能说出产物长什么样」。所以字段清单、行格式、类型清单都在模板里，不要为了省事挪回脚本。

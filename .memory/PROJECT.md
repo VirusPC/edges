@@ -11,4 +11,5 @@
 - [整仓 MIT，不拆 knowledge 许可证](projects/project_mit_license.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
 - [new-note MCP 的 ingest 约束](projects/project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时要遵守的编排、校验、git 失败处理和未完成项。
 - [仓库用根 CHANGELOG 和 v 标签发版](projects/project_repo_changelog.md) — 写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 vX.Y.Z tag；不要当成 skill 总账，也不要因 skill 补丁去升仓库版本。
+- [根硬约束只留聚光灯、脱敏与 git](projects/project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
 <!-- project-memory-entries:end -->

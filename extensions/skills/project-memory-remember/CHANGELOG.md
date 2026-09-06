@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-06
+
+### Changed
+
+- 封面补上「被纠正时也要主动用」，与硬约束聚光灯对齐。
+
 ## [1.2.1] - 2026-09-06
 
 ### Changed
@@ -31,7 +37,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.2.1...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.3.0...HEAD
+[1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.2.1...skill/project-memory-remember@1.3.0
 [1.2.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.2.0...skill/project-memory-remember@1.2.1
 [1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.1.0...skill/project-memory-remember@1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.0.0...skill/project-memory-remember@1.1.0

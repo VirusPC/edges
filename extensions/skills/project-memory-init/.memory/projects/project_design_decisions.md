@@ -1078,6 +1078,12 @@ scripts/lib/               → blocks / templates / paths / provenance
 
 **Hermes 对照**：它的整体是学习环（同一轮 review 可写 memory 和 skill），不是混桶。Memory 靠硬上限把流程挤去 skill；`USER.md` 在 agent 家目录。不抄 2200 字上限（那是个人助手常驻 prompt 的账）。
 
+## 2026-09-06：硬约束种子收成聚光灯，不是时机说明书
+
+**决策**：硬约束种子只留两句——ask / remember 聚光灯，以及「硬约束写在本区块」。各层仓规手写追加。不把查/记的做法抄进入口，不点名 init / doctor / reshape。ask / remember 的 description 补上「动手前也要查」「被纠正也要记」。
+
+**这收窄上一节「时机纪律并进硬约束」。** 发现机制仍要常驻，否则两个日常 skill 会淹在海量 skill 里。但常驻的是点名，不是把 auto 区块整段搬进 important。封面负责匹配时机，入口负责不被淹没。
+
 ## 2026-09-06：撤销独立 auto 区块，时机纪律并进硬约束
 
 **决策**：删掉 `project-memory-auto`。检索与沉淀的时机三条写进硬约束种子，每层新建入口都带。doctor 认旧标记为 `stale-auto` 并删除。PROTOCOL 的三类（硬约束、本层索引、下层索引）不变。

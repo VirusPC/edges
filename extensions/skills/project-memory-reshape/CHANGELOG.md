@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-06
+
+### Changed
+
+- 硬约束拆分：聚光灯点名 ask / remember，外加该目录仓规；不要写 init / doctor / reshape，也不要把 README 长规范搬进来。
+
 ## [1.2.0] - 2026-09-06
 
 ### Changed
@@ -25,7 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 把已有 `AGENTS.md` 拆成常驻指令和 `.memory` 条目；init / doctor 不改正文。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.2.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.3.0...HEAD
+[1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.2.0...skill/project-memory-reshape@1.3.0
 [1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.1.0...skill/project-memory-reshape@1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-reshape@1.0.0...skill/project-memory-reshape@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-memory-reshape@1.0.0

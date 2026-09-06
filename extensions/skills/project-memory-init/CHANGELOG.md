@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-09-06
+
+### Changed
+
+- 硬约束种子收成两句：ask / remember 聚光灯，以及「硬约束写在本区块」。不编排 init / doctor / reshape。
+
 ## [1.3.0] - 2026-09-06
 
 ### Removed
@@ -42,7 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.3.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.4.0...HEAD
+[1.4.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.3.0...skill/project-memory-init@1.4.0
 [1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.1...skill/project-memory-init@1.3.0
 [1.2.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.0...skill/project-memory-init@1.2.1
 [1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.1.0...skill/project-memory-init@1.2.0
