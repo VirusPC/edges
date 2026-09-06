@@ -8,7 +8,7 @@ version: 1.0.0
 
 把结论写进仓库内的项目记忆。写入落在 git 里是永久的，所以这个 skill 的正文基本都是那道闸门。
 
-下文的 `<init-dir>` 指同级的 `project-memory-init` skill 目录，通常在 `.claude/skills/` 或 `.agents/skills/` 下。
+下文的 `<init-dir>` 指同级的 `project-memory-init` skill 目录，通常在 `.agents/skills/` 下。
 
 ## 什么时候写
 

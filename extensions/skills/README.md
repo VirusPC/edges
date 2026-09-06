@@ -38,6 +38,16 @@ npx skills@latest --version  # 1.5.23  ← 真包
 >      <(cd ~/.agents/skills/<name> && find . -type f | sort)
 > ```
 
+## 项目级（本仓库工作区）
+
+约定：**能读 `.agents/skills` 的 Agent 不再占一份目录；读不到的，只留一条软链，不拷贝。**
+
+- 实体只在 `.agents/skills/`（目前是 OpenSpec 的产物）
+- Claude Code 不读 `.agents/skills`，所以 `.claude/skills` → `.agents/skills`
+- `.codex/skills`、`.cursor/skills`、`.factory/skills`、`.gemini/skills`、`.opencode/skills`、`.agent/skills` 都不留
+
+`openspec update` 可能把那些目录再拷回来，删掉即可，不要改回实体拷贝。
+
 ## 分发
 
 统一走 [`vercel-labs/skills`](https://github.com/vercel-labs/skills)。
@@ -48,7 +58,7 @@ npx skills@latest --version  # 1.5.23  ← 真包
 pnpm skills:install
 ```
 
-内容装到中枢 `~/.agents/skills/<name>/`（实体拷贝），再给 `~/.claude/skills/` 和 `~/.factory/skills/` 各建一条软链。Codex、Cursor、Gemini CLI、opencode **不会**拿到自己目录下的软链——它们原生就读中枢（Codex 源码里 `~/.codex/skills` 已标 deprecated），CLI 刻意跳过以免重复列出。只有 Claude Code 不读中枢，那条软链是它能看到 skill 的唯一原因。
+内容装到中枢 `~/.agents/skills/<name>/`（实体拷贝），再给 `~/.claude/skills/` 建一条软链。Codex、Cursor、Gemini CLI、Factory、opencode 原生读中枢（Codex 源码里 `~/.codex/skills` 已标 deprecated），不必再占一份目录。只有 Claude Code 不读中枢，那条软链是它能看到 skill 的唯一原因。
 
 > ⚠️ **改完必须重跑。** 中枢里是实体拷贝而非软链——`npx skills` 会把源目录里的软链一并 `dereference` 掉——所以改了本目录下的文件不会自动生效。`npx skills@latest update` 对本地路径源直接跳过（跳过理由就是 `Local path`），只能重跑上面那条命令。
 
@@ -58,7 +68,7 @@ pnpm skills:install
 npx skills@latest add VirusPC/edges/extensions/skills
 ```
 
-**子路径不能省。** `npx skills@latest add VirusPC/edges` 装不到本目录的 skill：CLI 的扫描根是一张写死的表，`extensions/` 不在表里，而本仓库的 `.claude/skills/`、`.agents/skills/`、`.codex/skills/` 等目录在表里、且 vendored 了 openspec 的产物——短命令会把那些当成本仓库的 skill 装走。子路径形式把扫描根整个换掉，正好只命中这 10 个。
+**子路径不能省。** `npx skills@latest add VirusPC/edges` 装不到本目录的 skill：CLI 的扫描根是一张写死的表，`extensions/` 不在表里，而仓库根下的 `.agents/skills/`（以及 Claude 那条软链）在表里、且 vendored 了 openspec 的产物——短命令会把那些当成本仓库的 skill 装走。子路径形式把扫描根整个换掉，正好只命中这 10 个。
 
 单装某一个：
 

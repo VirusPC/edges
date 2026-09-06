@@ -15,7 +15,7 @@
 **协议与能力**
 
 - **`mcp-servers/`**: [Model Context Protocol](https://modelcontextprotocol.io/) 服务器实现。提供标准化的 Tool 接口供 AI 客户端调用。
-- **`skills/`**: 供外部 Agent 加载的技能定义（Prompt 模板、思维链规范）。本机跑 `pnpm skills:install` 分发到各 Agent 的全局配置目录；外部用户用 `npx skills@latest add VirusPC/edges/extensions/skills`。
+- **`skills/`**: 供外部 Agent 加载的技能定义（Prompt 模板、思维链规范）。本机跑 `pnpm skills:install` 写入 `~/.agents/skills`（并为 Claude Code 建软链）；外部用户用 `npx skills@latest add VirusPC/edges/extensions/skills`。
 - **`subagents/`**: 针对特定复杂任务预配置的子代理。
 - **`tools/`**: 暴露给外部系统的独立工具或脚本适配器。
 

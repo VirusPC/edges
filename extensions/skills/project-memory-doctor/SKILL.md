@@ -6,7 +6,7 @@ version: 1.0.0
 
 # Project Memory Doctor
 
-体检整棵记忆树:先诊断，确认后再修。`<init-dir>` 为 sibling `project-memory-init`（`.claude/skills/` 或 `.agents/skills/`）。
+体检整棵记忆树:先诊断，确认后再修。`<init-dir>` 为 sibling `project-memory-init`（`.agents/skills/`）。
 
 ## 什么时候用
 

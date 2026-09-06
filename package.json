@@ -5,7 +5,7 @@
   "description": "Edges - 认知系统服务工作区",
   "scripts": {
     "setup": "./scripts/setup",
-    "skills:install": "npx -y skills@latest add ./extensions/skills -g -a claude-code -a codex -a cursor -a gemini-cli -a droid -a opencode -y",
+    "skills:install": "npx -y skills@latest add ./extensions/skills -g -a claude-code -y",
     "build": "pnpm recursive build",
     "test": "pnpm recursive test",
     "lint": "pnpm recursive lint",

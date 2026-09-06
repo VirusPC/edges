@@ -6,5 +6,5 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- 暂无条目。
+- [Skill 分发：能不要的不要，必须留的软链](feedbacks/feedback_agent_skills_hub_symlink.md) — 整理仓库或本机 .xxx/skills 时：能读 .agents/skills 的不占目录；Claude Code 只留软链，禁止实体拷贝。commands 目录不适用。
 <!-- project-memory-entries:end -->

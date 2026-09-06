@@ -111,7 +111,7 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 # (推荐) 初始化本地开发环境并添加 bin/ 路径到系统 PATH
 pnpm setup
 
-# 把 skills 分发到本机各 Agent 的全局配置目录（~/.claude、~/.codex、~/.cursor 等）
+# 把 skills 写入 ~/.agents/skills；Claude Code 不读中枢，另建软链
 pnpm skills:install
 ```
 
