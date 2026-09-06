@@ -45,7 +45,7 @@ version: 1.0.0
 
 - 改动范围：目标目录的 `AGENTS.md` 与 `.memory/`、记忆根的 `AGENTS.md`（策略区块），以及登记本层时那一层祖先的 `AGENTS.md`。
 - 已存在的索引文件一律不覆盖，受管区块之外的正文原样保留；重复执行只刷新受管区块。
-- 所有生成的文案都来自 `references/templates/`，脚本运行时读取。模板名 = 产物名 + `.tmpl.md`，所以 `AGENTS.tmpl.md` 生成 `AGENTS.md`，`type_slug.tmpl.md` 生成普通记忆的 `<type>/<type>_<slug>.md`。`skills/` 遵循外部 Agent Skills 协议，不由普通记忆模板生成。要改文案，改模板，别改脚本。
+- 所有生成的文案都来自 `references/templates/`，脚本运行时读取。模板名 = 产物名 + `.tmpl.md`，所以 `AGENTS.tmpl.md` 生成 `AGENTS.md`，`type_slug.tmpl.md` 生成普通记忆的 `<plural>/<type>_<slug>.md`。`skills/` 遵循外部 Agent Skills 协议，不由普通记忆模板生成。要改文案，改模板，别改脚本。
 - **扩展这套东西时守住一条：模板尽可能体现内容结构，脚本只做占位符替换。** 判据是「盯着模板能不能说出产物长什么样」。所以字段清单、行格式、类型清单都在模板里，不要为了省事挪回脚本。
 - `scripts/` 按层分目录，依赖只朝下。入口仍是 `scripts/memory.py`（已发布契约，路径不改）。目录地图、改哪里、怎么跑见 [`scripts/OVERVIEW.md`](scripts/OVERVIEW.md)。
 - 目标就是记忆根时，`indexAction` 返回 `not-applicable`。索引条目只在传了 `--description` 时才刷新已有描述，没刷新时 `indexDescription` 返回 `null`。

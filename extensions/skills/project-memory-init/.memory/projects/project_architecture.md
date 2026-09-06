@@ -10,13 +10,13 @@ updatedAt: "2026-09-06T13:38:38+08:00"
 
 # 项目记忆的技术关键点
 
-这套东西的**承重点**在哪、**最脆**的地方在哪。规范看 [`PROTOCOL.md`](../../references/PROTOCOL.md)，当前实现看 [`LAYOUT.md`](../../references/LAYOUT.md)，每个决定当时怎么权衡的看 [`design-decisions.md`](project_design_decisions.md)，外部证据看 [`prior-art/`](../reference/reference_prior_art.md)。
+这套东西的**承重点**在哪、**最脆**的地方在哪。规范看 [`PROTOCOL.md`](../../references/PROTOCOL.md)，当前实现看 [`LAYOUT.md`](../../references/LAYOUT.md)，每个决定当时怎么权衡的看 [`design-decisions.md`](project_design_decisions.md)，外部证据看 [`prior-art/`](../references/reference_prior_art.md)。
 
 先说判断：难点从来不是「怎么存」，是**凭什么 agent 会去读**，以及**怎么不让它膨胀**。所有技术选择都是在这两件事上做取舍。
 
 ## 一、把加载机制白拿过来
 
-整个方案的地基。记忆体系最难的一环是发现与按需加载，而 `AGENTS.md` 的加载语义**已经被各家 harness 内建了**：根那份无条件常驻，子树那份在 agent 读到该子树文件时才加载（官方原话与 Amp 用 41 份 `AGENTS.md` 的规模验证，见 [`prior-art/02-coding-agents.md`](../reference/reference_coding_agents.md)）。把索引直接写进 `AGENTS.md`，发现机制和渐进加载就都不用自己造——这才是整套东西能只靠「文件 + `rg`」、不需要常驻进程或向量库的原因。
+整个方案的地基。记忆体系最难的一环是发现与按需加载，而 `AGENTS.md` 的加载语义**已经被各家 harness 内建了**：根那份无条件常驻，子树那份在 agent 读到该子树文件时才加载（官方原话与 Amp 用 41 份 `AGENTS.md` 的规模验证，见 [`prior-art/02-coding-agents.md`](../references/reference_coding_agents.md)）。把索引直接写进 `AGENTS.md`，发现机制和渐进加载就都不用自己造——这才是整套东西能只靠「文件 + `rg`」、不需要常驻进程或向量库的原因。
 
 代价是这份文件同时装着人写的常驻正文和工具维护的索引，所以**受管区块不是便利，是这次合并的成立条件**：HTML 注释成对标记、名字带工具前缀，工具只拥有自己划出的那块，区块外一字不动。多工具共存于同一份 `AGENTS.md` 靠的就是这个。标记与嵌套顺序集中在 `scripts/lib/blocks.py`。
 
@@ -64,9 +64,9 @@ updatedAt: "2026-09-06T13:38:38+08:00"
 
 ## 十、不做的事也是技术点
 
-无向量、无常驻进程、无扁平大索引、无自动摘要。「凡是能从代码或 git 历史推导的都不记」这条闸门比任何检索优化都重要，因为规模化下的头号失败模式是记忆膨胀与 context collapse（[`prior-art/01-academic-papers.md`](../reference/reference_academic_papers.md)）。
+无向量、无常驻进程、无扁平大索引、无自动摘要。「凡是能从代码或 git 历史推导的都不记」这条闸门比任何检索优化都重要，因为规模化下的头号失败模式是记忆膨胀与 context collapse（[`prior-art/01-academic-papers.md`](../references/reference_academic_papers.md)）。
 
-内容层的整合与遗忘（`dream`）只占了个名字没做——业界唯一的产品级结论恰好是负面的：有团队明确放弃了离线去重整理服务，判定规模化下不值得，改为依赖读时相关性判断加时间淘汰（[`prior-art/02-coding-agents.md`](../reference/reference_coding_agents.md)）。
+内容层的整合与遗忘（`dream`）只占了个名字没做——业界唯一的产品级结论恰好是负面的：有团队明确放弃了离线去重整理服务，判定规模化下不值得，改为依赖读时相关性判断加时间淘汰（[`prior-art/02-coding-agents.md`](../references/reference_coding_agents.md)）。
 
 ## 最脆的三处
 

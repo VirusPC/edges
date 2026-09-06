@@ -60,9 +60,26 @@ def memory_dir(target: Path) -> Path:
     return target / MEMORY_DIR_NAME
 
 
+def type_dir_name(entry_type: str) -> str:
+    """类型内容目录名：复数，与 `skills/` 对齐。
+
+    `--type`、索引文件名、条目前缀仍用单数。已经以 s 结尾的类型名
+    （目前是 `skills`）不再追加。
+    """
+    return entry_type if entry_type.endswith("s") else f"{entry_type}s"
+
+
 def type_dir(target: Path, entry_type: str) -> Path:
     """目标目录里某一类型的内容目录。"""
-    return memory_dir(target) / entry_type
+    return memory_dir(target) / type_dir_name(entry_type)
+
+
+def legacy_type_dir(target: Path, entry_type: str) -> Path | None:
+    """旧版「目录名 = type 原值」的位置；与当前目录不同且存在时才返回。"""
+    if type_dir_name(entry_type) == entry_type:
+        return None
+    path = memory_dir(target) / entry_type
+    return path if path.exists() else None
 
 
 def relative_or_name(path: Path, root: Path) -> str:

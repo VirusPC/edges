@@ -11,6 +11,7 @@ from lib.paths import (
     list_memory_files,
     memory_dir,
     type_dir,
+    type_dir_name,
     write_atomic,
 )
 from lib.templates import ENTRY_OUTPUT_PATTERN, read_template
@@ -43,6 +44,21 @@ def init_memory(target: Path, root: Path, description: str | None = None) -> dic
         raise ValueError(
             "检测到旧版平铺记忆文件，请先运行 project-memory-doctor 迁移: "
             + ", ".join(legacy)
+        )
+    stale_dirs = (
+        sorted(
+            entry_type
+            for entry_type in index_files()
+            if type_dir_name(entry_type) != entry_type
+            and (directory / entry_type).exists()
+        )
+        if directory.is_dir()
+        else []
+    )
+    if stale_dirs:
+        raise ValueError(
+            "检测到旧版单数类型目录，请先运行 project-memory-doctor 迁移: "
+            + ", ".join(stale_dirs)
         )
     directory.mkdir(parents=True, exist_ok=True)
     for entry_type in index_files():

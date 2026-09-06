@@ -68,7 +68,7 @@ npx skills@latest add VirusPC/edges/extensions/skills --skill paper-10-questions
 
 > `project-memory-ask` / `-doctor` / `-init` / `-remember` **必须四个一起装**。后三个靠同级目录定位 `project-memory-init`，单独装会找不到它的 `scripts/memory.py` 和 `references/`。
 
-维护这组 skill 时，按 [`project-memory-init/.memory/project/project_development.md`](project-memory-init/.memory/project/project_development.md) 的顺序修改和验证。
+维护这组 skill 时，按 [`project-memory-init/.memory/projects/project_development.md`](project-memory-init/.memory/projects/project_development.md) 的顺序修改和验证。
 
 ### 卸载
 

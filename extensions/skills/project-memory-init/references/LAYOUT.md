@@ -2,21 +2,21 @@
 
 [`PROTOCOL.md`](PROTOCOL.md) 的实现。下面按产物层次说明具体布局，破折号后的解释语与协议一致。
 
-可以自由升级，不破协议就行。**但凡改动已发布产物的名字**（区块标记、索引文件名、条目前缀），**要同步给 `$project-memory-doctor` 加旧名识别与改写**；区块内的固定文案不参与解析，改了不必管存量（见 doctor 的「已知缺口」）。改名不涉及两个消费方——它们不认名字，只认产物里读到的链接与说明。改了 `../scripts/lib/blocks.py` 的标记常量或 `templates/` 的结构，同步改这里。
+可以自由升级，不破协议就行。**但凡改动已发布产物的名字**（区块标记、索引文件名、类型目录名、条目前缀），**要同步给 `$project-memory-doctor` 加旧名识别与改写**；区块内的固定文案不参与解析，改了不必管存量（见 doctor 的「已知缺口」）。改名不涉及两个消费方——它们不认名字，只认产物里读到的链接与说明。改了 `../scripts/lib/blocks.py` 的标记常量或 `templates/` 的结构，同步改这里。
 
 ```text
 <仓库根>/
 ├── AGENTS.md                       # 本层记忆入口：分类型入口清单 + 下层索引 + 自动化策略
 ├── .memory/
-│   ├── FEEDBACK.md                 # 分类型入口：只列 feedback/ 下的记忆
-│   ├── PROJECT.md                  # 分类型入口：只列 project/ 下的记忆
-│   ├── REFERENCE.md                # 分类型入口：只列 reference/ 下的记忆
+│   ├── FEEDBACK.md                 # 分类型入口：只列 feedbacks/ 下的记忆
+│   ├── PROJECT.md                  # 分类型入口：只列 projects/ 下的记忆
+│   ├── REFERENCE.md                # 分类型入口：只列 references/ 下的记忆
 │   ├── SKILLS.md                   # 分类型入口：只列 skills/ 下的技能
-│   ├── feedback/
+│   ├── feedbacks/
 │   │   └── feedback_<slug>.md      # 记忆文件：一条记忆一个文件，前缀即类型
-│   ├── project/
+│   ├── projects/
 │   │   └── project_<slug>.md
-│   ├── reference/
+│   ├── references/
 │   │   └── reference_<slug>.md
 │   └── skills/                      # 常规 Agent Skills 根目录，内部结构遵循其自身协议
 └── <下层记忆目录>/                 # 记忆层级上的直接下层，目录深度任意
@@ -47,7 +47,7 @@
 
 ## `FEEDBACK.md` / `PROJECT.md` / `REFERENCE.md` / `SKILLS.md` — 本层不同类型记忆入口
 
-协议要求按 `type` 分入口，本实现取四类。四份入口都放在本层 `.memory/` 根部，正文按类型放进同名小写目录。每个入口各有一个 `<!-- project-memory-entries:start -->` 区块，内容从对应类型目录全量重算。
+协议要求按 `type` 分入口，本实现取四类。四份入口都放在本层 `.memory/` 根部，正文按类型放进**复数**小写目录。每个入口各有一个 `<!-- project-memory-entries:start -->` 区块，内容从对应类型目录全量重算。
 
 **条目**指区块里的一行，与记忆文件一一对应。入口是派生产物、不手写；行格式只存在于 [`templates/entry_line.tmpl.md`](templates/entry_line.tmpl.md)，下层索引与条目索引共用。
 
@@ -55,14 +55,16 @@
 
 | type | 记忆入口 | 内容位置 | 收什么 |
 | --- | --- | --- | --- |
-| `feedback` | `FEEDBACK.md` | `feedback/feedback_<slug>.md` | 用户的纠正、确认过的做法、禁止模式 |
-| `project` | `PROJECT.md` | `project/project_<slug>.md` | 进行中的工作、时间点、代码里推不出的决策 |
-| `reference` | `REFERENCE.md` | `reference/reference_<slug>.md` | 项目外的信息去哪找 |
+| `feedback` | `FEEDBACK.md` | `feedbacks/feedback_<slug>.md` | 用户的纠正、确认过的做法、禁止模式 |
+| `project` | `PROJECT.md` | `projects/project_<slug>.md` | 进行中的工作、时间点、代码里推不出的决策 |
+| `reference` | `REFERENCE.md` | `references/reference_<slug>.md` | 项目外的信息去哪找 |
 | `skills` | `SKILLS.md` | `skills/` | 可复用的能力说明、操作流程与使用规范 |
 
-## `<type>/<type>_<slug>.md` — 详细记忆内容
+目录名是 type 的复数（已经以 `s` 结尾的不再追加），所以 `skills` 的目录名与类型名相同。`--type`、索引文件名、条目前缀仍用单数。`.memory/references/` 和 skill 根的 `references/`（PROTOCOL / LAYOUT / 模板）靠路径区分。旧版单数目录（`feedback/` / `project/` / `reference/`）由 `$project-memory-doctor` 原样改名为复数；新旧位置都在时只报告冲突。
 
-本节只适用于 `feedback`、`project`、`reference`。`slug` 是小写 snake_case 且不带类型前缀，前缀与父目录均由脚本按 `type` 加。
+## `<plural>/<type>_<slug>.md` — 详细记忆内容
+
+本节只适用于 `feedback`、`project`、`reference`。`slug` 是小写 snake_case 且不带类型前缀，前缀由脚本按 `type` 加，父目录是 type 的复数。
 
 结构是「扁平 YAML frontmatter + 正文」，字段清单与顺序看 [`templates/type_slug.tmpl.md`](templates/type_slug.tmpl.md)。落盘时**取不到的字段整行省略**。字段的值从哪来、更新时谁覆盖谁，见 [`frontmatter-fields.md`](frontmatter-fields.md)。
 
@@ -72,4 +74,4 @@
 
 **模板名 = 产物文件名去掉后缀 + `.tmpl.md`**。入口模板与普通记忆模板仍统一放在 `templates/`，不按产物目录分层。下划线开头的是行片段，不对应产物；`type_slug.tmpl.md` 是唯一例外，产物名带尖括号，文件名改用角色词。`skills/` 遵循外部标准，不由普通记忆模板定义。
 
-`AGENTS.tmpl.md` 把四对区块标记连嵌套关系一起写在里面。其中本层记忆区块的每一行就是一个类型声明，脚本从中推导 `type`、类型目录名与索引文件名。类型目录名取 `type` 原值，索引文件名全大写；普通记忆的条目前缀同样取 `type` 原值，`skills` 的内部结构不在本实现中定义。
+`AGENTS.tmpl.md` 把四对区块标记连嵌套关系一起写在里面。其中本层记忆区块的每一行就是一个类型声明，脚本从中推导 `type` 与索引文件名。索引文件名全大写；类型目录名取 type 的复数（`lib/paths.py` 的 `type_dir_name()`）；普通记忆的条目前缀仍取 `type` 原值，`skills` 的内部结构不在本实现中定义。

@@ -17,7 +17,7 @@ updatedAt: "2026-09-06T13:38:38+08:00"
 - [`03-oss-frameworks.md`](reference_oss_frameworks.md) — 开源记忆框架的机制细节（含源码取证）
 - [`04-index-granularity.md`](reference_index_granularity.md) — 索引粒度的先验与阈值
 
-四个方向独立收敛到同一结论：[`../design-decisions.md`](../project/project_design_decisions.md) 里「scaling 瓶颈」一节列的候选方案 1（索引下沉到条目级）是正确方向，且现在有量化依据。
+四个方向独立收敛到同一结论：[`../design-decisions.md`](../projects/project_design_decisions.md) 里「scaling 瓶颈」一节列的候选方案 1（索引下沉到条目级）是正确方向，且现在有量化依据。
 
 ## 一、索引下沉的依据
 

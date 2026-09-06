@@ -20,6 +20,7 @@ from lib.blocks import (
 from lib.paths import (
     AGENTS_FILE_NAME,
     MEMORY_DIR_NAME,
+    legacy_type_dir,
     memory_dir,
     relative_or_name,
     type_dir,
@@ -136,6 +137,26 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
         directory = memory_dir(owner)
         for entry_type, file_name in index_files().items():
             content_dir = type_dir(owner, entry_type)
+            stale = legacy_type_dir(owner, entry_type)
+            if stale is not None:
+                issue = (
+                    "legacy-type-dir-conflict"
+                    if content_dir.exists()
+                    else "legacy-singular-type-dir"
+                )
+                detail = (
+                    "新旧类型目录都在，无法自动决定保留哪份"
+                    if content_dir.exists()
+                    else "旧版单数类型目录需要改名为复数"
+                )
+                findings.append(
+                    {
+                        "issue": issue,
+                        "path": relative_or_name(stale, root),
+                        "destination": relative_or_name(content_dir, root),
+                        "detail": detail,
+                    }
+                )
             if content_dir.exists() and not content_dir.is_dir():
                 findings.append(
                     {
@@ -144,7 +165,7 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
                         "detail": "类型内容路径存在但不是目录，无法自动修复",
                     }
                 )
-            elif not content_dir.is_dir():
+            elif not content_dir.is_dir() and stale is None:
                 findings.append(
                     {
                         "issue": "missing-type-dir",
@@ -285,16 +306,21 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
         if finding["issue"] in {"missing-agents", "outdated-local"}
     }
     for finding in findings:
-        if finding["issue"] != "legacy-flat-entry":
+        if finding["issue"] not in {"legacy-flat-entry", "legacy-singular-type-dir"}:
             continue
         source = root / finding["path"]
         destination = root / finding["destination"]
-        if not source.is_file() or destination.exists():
+        if destination.exists():
             continue
-        destination.parent.mkdir(parents=True, exist_ok=True)
+        if finding["issue"] == "legacy-flat-entry":
+            if not source.is_file():
+                continue
+            destination.parent.mkdir(parents=True, exist_ok=True)
+        elif not source.is_dir():
+            continue
         source.rename(destination)
         repaired.append(
-            f"legacy-flat-entry: {finding['path']} 移到 {finding['destination']}"
+            f"{finding['issue']}: {finding['path']} 移到 {finding['destination']}"
         )
 
     for finding in findings:
@@ -308,6 +334,8 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
         if issue in {
             "legacy-flat-entry",
             "legacy-entry-conflict",
+            "legacy-singular-type-dir",
+            "legacy-type-dir-conflict",
             "invalid-type-dir",
             "missing-index",
             "invalid-index",
