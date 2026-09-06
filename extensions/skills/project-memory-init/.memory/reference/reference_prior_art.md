@@ -1,13 +1,23 @@
+---
+name: reference_prior_art
+title: 同类方案调研：文件系统式记忆
+description: 四路并行调研的综合结论，改变本方案决策的外部证据总入口。
+type: reference
+username: viruspc
+email: cheng.peng.helloworld@gmail.com
+updatedAt: "2026-09-06T13:38:38+08:00"
+---
+
 # 同类方案调研：文件系统式记忆
 
 2026-08-25，四路并行调研的综合结论。四份原始报告在同目录下，本文只保留能改变决策的部分。
 
-- [`01-academic-papers.md`](01-academic-papers.md) — 学术论文与 benchmark
-- [`02-coding-agents.md`](02-coding-agents.md) — 各家编码 agent / AI IDE 的工程实践
-- [`03-oss-frameworks.md`](03-oss-frameworks.md) — 开源记忆框架的机制细节（含源码取证）
-- [`04-index-granularity.md`](04-index-granularity.md) — 索引粒度的先验与阈值
+- [`01-academic-papers.md`](reference_academic_papers.md) — 学术论文与 benchmark
+- [`02-coding-agents.md`](reference_coding_agents.md) — 各家编码 agent / AI IDE 的工程实践
+- [`03-oss-frameworks.md`](reference_oss_frameworks.md) — 开源记忆框架的机制细节（含源码取证）
+- [`04-index-granularity.md`](reference_index_granularity.md) — 索引粒度的先验与阈值
 
-四个方向独立收敛到同一结论：[`../design-decisions.md`](../design-decisions.md) 里「scaling 瓶颈」一节列的候选方案 1（索引下沉到条目级）是正确方向，且现在有量化依据。
+四个方向独立收敛到同一结论：[`../design-decisions.md`](../project/project_design_decisions.md) 里「scaling 瓶颈」一节列的候选方案 1（索引下沉到条目级）是正确方向，且现在有量化依据。
 
 ## 一、索引下沉的依据
 
@@ -79,4 +89,4 @@
 
 ## 八、一处需要澄清的引用
 
-[`04-index-granularity.md`](04-index-granularity.md) 指出「文档里没有『最多加载 5 条』，是外推」。文档确实没写，但**源码里有**：`src/memdir/findRelevantMemories.ts` 的 `SELECT_MEMORIES_SYSTEM_PROMPT` 原文为 `Return a list of filenames for the memories that will clearly be useful ... (up to 5)`。该数字成立，出处是源码而非文档。
+[`04-index-granularity.md`](reference_index_granularity.md) 指出「文档里没有『最多加载 5 条』，是外推」。文档确实没写，但**源码里有**：`src/memdir/findRelevantMemories.ts` 的 `SELECT_MEMORIES_SYSTEM_PROMPT` 原文为 `Return a list of filenames for the memories that will clearly be useful ... (up to 5)`。该数字成立，出处是源码而非文档。

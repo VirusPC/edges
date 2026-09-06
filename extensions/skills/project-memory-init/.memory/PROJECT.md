@@ -6,5 +6,7 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `project/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- 暂无条目。
+- [项目记忆的技术关键点](project/project_architecture.md) — 这套记忆的承重点、最脆的地方，以及技术选择的判断。
+- [project-memory 设计决策记录](project/project_design_decisions.md) — 成型过程中的关键取舍、翻案与待议；论证不进 PROTOCOL/LAYOUT。
+- [Project Memory 系列 Skill 开发流程](project/project_development.md) — 修改顺序：协议 → 布局 → init → 其他非 doctor skill → doctor。
 <!-- project-memory-entries:end -->

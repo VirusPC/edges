@@ -6,5 +6,5 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `feedback/feedback_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- 暂无条目。
+- [--root-dir 封住记忆树，不把外面的 .memory 当祖先](feedback/feedback_isolated_root_dir.md) — 目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。
 <!-- project-memory-entries:end -->

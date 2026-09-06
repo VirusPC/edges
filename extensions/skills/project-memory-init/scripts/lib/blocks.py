@@ -81,7 +81,7 @@ def load_agents_template() -> str:
 def index_files() -> dict[str, str]:
     """type → 索引文件名，从本层记忆区块声明的那几行推导。
 
-    加一个类型 = 区块里加一行 + 放一份同名模板，脚本不用动。
+    普通记忆类型只需加一行与同名入口模板；外部格式类型还要提供薄适配。
     """
     names = MEMORY_INDEX_LINK_PATTERN.findall(extract_block(LOCAL_START, LOCAL_END))
     if not names:
@@ -146,7 +146,7 @@ def upsert_block(document: str, start: str, end: str, block: str) -> str:
 
 
 def build_local_block() -> str:
-    """渲染本层记忆区块。三份索引是闭集且恒存在，所以那三行是模板里的字面量。"""
+    """渲染本层记忆区块。类型入口是闭集且恒存在，所以清单是模板字面量。"""
     return extract_block(LOCAL_START, LOCAL_END)
 
 

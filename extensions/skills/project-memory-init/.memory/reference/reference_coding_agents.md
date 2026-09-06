@@ -1,8 +1,18 @@
+---
+name: reference_coding_agents
+title: 编码 agent 的工程实践
+description: 各家编码 agent / AI IDE 的记忆与 AGENTS.md 实践。
+type: reference
+username: viruspc
+email: cheng.peng.helloworld@gmail.com
+updatedAt: "2026-09-06T13:38:38+08:00"
+---
+
 # 原始报告 02 — 编码 agent / AI IDE 的工程实践
 
 - 调研日期：2026-08-25
 - 调研范围：Claude Code、Cursor、Windsurf、Cline、Aider、Continue、Zed、Copilot、Amp、OpenHands 等已发货产品的记忆机制
-- 综合结论见 [`README.md`](README.md)
+- 综合结论见 [`README.md`](reference_prior_art.md)
 - 以下为子 agent 原始产出，未做删改
 
 ---

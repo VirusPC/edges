@@ -6,16 +6,17 @@ version: 1.0.0
 
 # Project Memory Init
 
-在一个已存在的目录里建好 `.memory/` 的三个索引文件，并维护该目录的 `AGENTS.md` 索引。
+在一个已存在的目录里建好 `.memory/` 的四个类型入口及内容目录，并维护该目录的 `AGENTS.md` 索引。
 
 只在用户明确要求 Init 时运行。Remember、Ask、Doctor 都不得代为调用。
 
-两份文档，别混：
+维护相关的文档，别混：
 
 - [`references/PROTOCOL.md`](references/PROTOCOL.md) 是**协议**，冻结的。四个 skill 共同遵守，两个消费方（`project-memory-ask` 检索、`project-memory-remember` 沉淀）只以它为准。
-- [`references/LAYOUT.md`](references/LAYOUT.md) 是协议的**实现**，三节与协议三条一一对应。本 skill 和 `project-memory-doctor` 共同拥有它，可以自由升级，只要不破协议。改了 `scripts/lib/blocks.py` 的标记常量就同步改那份文档，体检拿它当目标态，漂移了就没有判据。
+- [`references/LAYOUT.md`](references/LAYOUT.md) 是协议的**实现**，按协议三层描述具体产物。本 skill 和 `project-memory-doctor` 共同拥有它，可以自由升级，只要不破协议。改了 `scripts/lib/blocks.py` 的标记常量就同步改那份文档，体检拿它当目标态，漂移了就没有判据。
+- 开发流程、设计决策与调研史料在本层项目记忆里，从 [`AGENTS.md`](AGENTS.md) 进入。
 
-所以升级实现时守住协议，两个消费方都不用跟着改，因为**它们各有一个自描述的东西可依赖**：`remember` 经 `scripts/memory.py` 落盘，`--help` 就是它看到的全部接口；`ask` 只认产物本身——每个链接后面那句说明就是挑选判据，而那些说明由脚本全量重算，永远和磁盘一致。所以别指望它们知道区块标记名、索引文件名或记忆目录名，也不必为改名去改它们。
+所以升级实现时守住协议；单纯修改名字或路径通常不用改两个消费方，因为**它们各有一个自描述的东西可依赖**：`remember` 经 `scripts/memory.py` 落盘，`--help` 就是它看到的全部接口；`ask` 只认产物本身——每个链接后面那句说明就是挑选判据，而那些说明由脚本全量重算，永远和磁盘一致。只有消费方自己的交互边界变化时才同步修改，不要让它们知道区块标记名、索引文件名或记忆目录名。
 
 ## init 与体检的分界
 
@@ -44,7 +45,7 @@ version: 1.0.0
 
 - 改动范围：目标目录的 `AGENTS.md` 与 `.memory/`、记忆根的 `AGENTS.md`（策略区块），以及登记本层时那一层祖先的 `AGENTS.md`。
 - 已存在的索引文件一律不覆盖，受管区块之外的正文原样保留；重复执行只刷新受管区块。
-- 所有生成的文案都来自 `references/templates/`，脚本运行时读取。模板名 = 产物名 + `.tmpl.md`，所以 `AGENTS.tmpl.md` 生成 `AGENTS.md`，`type_slug.tmpl.md` 生成 `<type>_<slug>.md`。要改文案，改模板，别改脚本。
+- 所有生成的文案都来自 `references/templates/`，脚本运行时读取。模板名 = 产物名 + `.tmpl.md`，所以 `AGENTS.tmpl.md` 生成 `AGENTS.md`，`type_slug.tmpl.md` 生成普通记忆的 `<type>/<type>_<slug>.md`。`skills/` 遵循外部 Agent Skills 协议，不由普通记忆模板生成。要改文案，改模板，别改脚本。
 - **扩展这套东西时守住一条：模板尽可能体现内容结构，脚本只做占位符替换。** 判据是「盯着模板能不能说出产物长什么样」。所以字段清单、行格式、类型清单都在模板里，不要为了省事挪回脚本。
 - `scripts/` 按层分目录，依赖只朝下。入口仍是 `scripts/memory.py`（已发布契约，路径不改）。目录地图、改哪里、怎么跑见 [`scripts/OVERVIEW.md`](scripts/OVERVIEW.md)。
 - 目标就是记忆根时，`indexAction` 返回 `not-applicable`。索引条目只在传了 `--description` 时才刷新已有描述，没刷新时 `indexDescription` 返回 `null`。

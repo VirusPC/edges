@@ -1,8 +1,18 @@
+---
+name: reference_academic_papers
+title: 学术论文与 benchmark
+description: 记忆索引粒度、膨胀与检索的论文证据。
+type: reference
+username: viruspc
+email: cheng.peng.helloworld@gmail.com
+updatedAt: "2026-09-06T13:38:38+08:00"
+---
+
 # 原始报告 01 — 学术论文与 benchmark
 
 - 调研日期：2026-08-25
 - 调研范围：LLM agent 长期记忆的学术工作，侧重「以文件/文档为存储载体」而非纯向量库
-- 综合结论见 [`README.md`](README.md)
+- 综合结论见 [`README.md`](reference_prior_art.md)
 - 以下为子 agent 原始产出，未做删改
 
 ---

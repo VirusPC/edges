@@ -10,8 +10,11 @@ from lib.blocks import (
     AUTO_START,
     LOCAL_END,
     LOCAL_START,
+    MEMORY_INDEX_LINK_PATTERN,
+    block_pattern,
     build_auto_block,
     build_local_block,
+    index_files,
     upsert_block,
 )
 from lib.paths import (
@@ -19,6 +22,7 @@ from lib.paths import (
     MEMORY_DIR_NAME,
     memory_dir,
     relative_or_name,
+    type_dir,
     write_atomic,
 )
 from nodes.agents import (
@@ -29,6 +33,7 @@ from nodes.agents import (
     sync_agents_blocks,
     sync_index_entry,
 )
+from nodes.entries import expected_index_document, memory_entry_types, refresh_index
 
 
 def is_noise_path(parts: tuple[str, ...]) -> bool:
@@ -123,6 +128,110 @@ def scan_registrations(
     return findings
 
 
+def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, str]]:
+    """检查每层 .memory/ 是否符合当前 LAYOUT；不读取条目正文。"""
+    findings: list[dict[str, str]] = []
+    expected_indexes = [Path(name).stem for name in index_files().values()]
+    for owner in memory_dirs:
+        directory = memory_dir(owner)
+        for entry_type, file_name in index_files().items():
+            content_dir = type_dir(owner, entry_type)
+            if content_dir.exists() and not content_dir.is_dir():
+                findings.append(
+                    {
+                        "issue": "invalid-type-dir",
+                        "path": relative_or_name(content_dir, root),
+                        "detail": "类型内容路径存在但不是目录，无法自动修复",
+                    }
+                )
+            elif not content_dir.is_dir():
+                findings.append(
+                    {
+                        "issue": "missing-type-dir",
+                        "path": relative_or_name(content_dir, root),
+                        "detail": "缺少类型内容目录",
+                    }
+                )
+
+            index_path = directory / file_name
+            if index_path.exists() and not index_path.is_file():
+                findings.append(
+                    {
+                        "issue": "invalid-index",
+                        "path": relative_or_name(index_path, root),
+                        "detail": "类型入口路径存在但不是文件，无法自动修复",
+                    }
+                )
+            elif not index_path.is_file():
+                findings.append(
+                    {
+                        "issue": "missing-index",
+                        "path": relative_or_name(index_path, root),
+                        "type": entry_type,
+                        "detail": "缺少类型入口文件",
+                    }
+                )
+            elif index_path.read_text(encoding="utf-8") != expected_index_document(
+                owner, entry_type
+            ):
+                findings.append(
+                    {
+                        "issue": "outdated-index",
+                        "path": relative_or_name(index_path, root),
+                        "type": entry_type,
+                        "detail": "类型入口与当前内容目录不一致，需要全量重算",
+                    }
+                )
+
+        for entry_type in memory_entry_types():
+            for source in sorted(directory.glob(f"{entry_type}_*.md")):
+                destination = type_dir(owner, entry_type) / source.name
+                issue = (
+                    "legacy-entry-conflict"
+                    if destination.exists()
+                    else "legacy-flat-entry"
+                )
+                detail = (
+                    "新旧位置都有同名文件，无法自动决定保留哪份"
+                    if destination.exists()
+                    else "旧版平铺记忆文件需要移入对应类型目录"
+                )
+                findings.append(
+                    {
+                        "issue": issue,
+                        "path": relative_or_name(source, root),
+                        "destination": relative_or_name(destination, root),
+                        "detail": detail,
+                    }
+                )
+
+        agents_path = owner / AGENTS_FILE_NAME
+        agents_state = classify_agents_file(agents_path)
+        if agents_state == "missing":
+            findings.append(
+                {
+                    "issue": "missing-agents",
+                    "path": relative_or_name(agents_path, root),
+                    "detail": "记忆目录缺少 AGENTS.md 入口",
+                }
+            )
+        elif agents_state == "managed":
+            document = agents_path.read_text(encoding="utf-8")
+            match = block_pattern(LOCAL_START, LOCAL_END).search(document)
+            actual_indexes = (
+                MEMORY_INDEX_LINK_PATTERN.findall(match.group(0)) if match else []
+            )
+            if actual_indexes != expected_indexes:
+                findings.append(
+                    {
+                        "issue": "outdated-local",
+                        "path": relative_or_name(agents_path, root),
+                        "detail": "本层记忆入口清单与当前布局不一致",
+                    }
+                )
+    return findings
+
+
 def collect_findings(root: Path) -> list[dict[str, str]]:
     """扫全树，找出单次 init 看不见的索引不一致。
 
@@ -134,6 +243,7 @@ def collect_findings(root: Path) -> list[dict[str, str]]:
     holders = memory_dirs if root in owned else [root, *memory_dirs]
     findings, seen = scan_index_entries(root, holders, owned)
     findings.extend(scan_registrations(root, memory_dirs, seen))
+    findings.extend(scan_memory_layout(root, memory_dirs))
     root_agents = root / AGENTS_FILE_NAME
     if classify_agents_file(root_agents) == "managed":
         if AUTO_START not in root_agents.read_text(encoding="utf-8"):
@@ -169,8 +279,43 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
     """
     repaired: list[str] = []
     displaced: list[tuple[Path, str]] = []
+    local_repairs = {
+        finding["path"]
+        for finding in findings
+        if finding["issue"] in {"missing-agents", "outdated-local"}
+    }
+    for finding in findings:
+        if finding["issue"] != "legacy-flat-entry":
+            continue
+        source = root / finding["path"]
+        destination = root / finding["destination"]
+        if not source.is_file() or destination.exists():
+            continue
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        source.rename(destination)
+        repaired.append(
+            f"legacy-flat-entry: {finding['path']} 移到 {finding['destination']}"
+        )
+
     for finding in findings:
         issue = finding["issue"]
+        if issue == "missing-type-dir":
+            path = root / finding["path"]
+            if not path.exists():
+                path.mkdir(parents=True, exist_ok=True)
+                repaired.append(f"missing-type-dir: {finding['path']} 补建目录")
+            continue
+        if issue in {
+            "legacy-flat-entry",
+            "legacy-entry-conflict",
+            "invalid-type-dir",
+            "missing-index",
+            "invalid-index",
+            "outdated-index",
+            "outdated-local",
+            "missing-agents",
+        }:
+            continue
         agents_path = root / finding["path"]
         owner = agents_path.parent
         if issue in {"dead-entry", "misplaced", "duplicate"}:
@@ -193,6 +338,40 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
             if updated != document:
                 write_atomic(agents_path, updated.rstrip() + "\n")
                 repaired.append(f"{issue}: {finding['path']} 补挂受管区块，既有正文原样保留")
+
+    # 迁移完成后才重算入口；否则旧版平铺文件会在索引里暂时消失。
+    for owner in discover_memory_dirs(root):
+        content_dirs_valid = True
+        for entry_type in index_files():
+            directory = type_dir(owner, entry_type)
+            if directory.exists() and not directory.is_dir():
+                content_dirs_valid = False
+                continue
+            directory.mkdir(parents=True, exist_ok=True)
+        if not content_dirs_valid:
+            continue
+        for entry_type, file_name in index_files().items():
+            index_path = memory_dir(owner) / file_name
+            if index_path.exists() and not index_path.is_file():
+                continue
+            action = refresh_index(owner, entry_type)
+            if action in {"created", "updated"}:
+                repaired.append(
+                    f"{action}-index: {relative_or_name(index_path, root)}"
+                )
+        agents_path = owner / AGENTS_FILE_NAME
+        relative_agents = relative_or_name(agents_path, root)
+        if relative_agents in local_repairs:
+            local_action = sync_agents_blocks(
+                owner,
+                local=build_local_block(),
+                auto=build_auto_block() if owner == root else "",
+            )
+            if local_action in {"created", "updated"}:
+                repaired.append(
+                    f"{local_action}-agents: {relative_agents} 刷新入口清单"
+                )
+
     for directory, description in displaced:
         repaired.extend(register(directory.resolve(), root, description or None, "misplaced"))
     # 重扫补登记：既覆盖原本就未登记的，也覆盖上一段删除后新暴露出来的。

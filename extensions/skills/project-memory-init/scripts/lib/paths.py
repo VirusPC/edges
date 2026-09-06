@@ -60,6 +60,11 @@ def memory_dir(target: Path) -> Path:
     return target / MEMORY_DIR_NAME
 
 
+def type_dir(target: Path, entry_type: str) -> Path:
+    """目标目录里某一类型的内容目录。"""
+    return memory_dir(target) / entry_type
+
+
 def relative_or_name(path: Path, root: Path) -> str:
     """尽量给出相对记忆根的路径，越界时退回文件名。"""
     try:
@@ -69,8 +74,22 @@ def relative_or_name(path: Path, root: Path) -> str:
 
 
 def list_memory_files(target: Path, pattern: str = "*.md") -> list[Path]:
-    """列出记忆目录下的 Markdown，按文件名升序以保证 diff 稳定。"""
+    """递归列出记忆目录下的 Markdown，按相对路径排序以保证 diff 稳定。"""
     directory = memory_dir(target)
     if not directory.is_dir():
         return []
-    return sorted(directory.glob(pattern), key=lambda path: path.name)
+    return sorted(
+        directory.rglob(pattern),
+        key=lambda path: path.relative_to(directory).as_posix(),
+    )
+
+
+def list_type_files(
+    target: Path, entry_type: str, pattern: str = "*.md", *, recursive: bool = False
+) -> list[Path]:
+    """列出某一类型目录里的文件；是否递归由该类型的适配器决定。"""
+    directory = type_dir(target, entry_type)
+    if not directory.is_dir():
+        return []
+    paths = directory.rglob(pattern) if recursive else directory.glob(pattern)
+    return sorted(paths, key=lambda path: path.relative_to(directory).as_posix())

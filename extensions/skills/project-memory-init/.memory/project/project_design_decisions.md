@@ -1,7 +1,17 @@
+---
+name: project_design_decisions
+title: project-memory 设计决策记录
+description: 成型过程中的关键取舍、翻案与待议；论证不进 PROTOCOL/LAYOUT。
+type: project
+username: viruspc
+email: cheng.peng.helloworld@gmail.com
+updatedAt: "2026-09-06T13:38:38+08:00"
+---
+
 # project-memory 设计决策记录
 
 记录 `project-memory-init` / `-ask` / `-remember` 三个 skill 成型过程中的关键取舍与依据。
-「形状是什么」看 [`PROTOCOL.md`](PROTOCOL.md)，「实现长什么样」看 [`LAYOUT.md`](LAYOUT.md)，本文只回答「为什么是这样」。**那两份文件只说重点，所有论证都在这里**——早期章节里出现的 `memory-layout.md` 是 `LAYOUT.md` 的旧名，叙述保留原样。
+「形状是什么」看 [`PROTOCOL.md`](../../references/PROTOCOL.md)，「实现长什么样」看 [`LAYOUT.md`](../../references/LAYOUT.md)，本文只回答「为什么是这样」。**那两份文件只说重点，所有论证都在这里**——早期章节里出现的 `memory-layout.md` 是 `LAYOUT.md` 的旧名，叙述保留原样。
 
 按时间追加，不改写历史。2026-08-25 之前的章节记录的是初版形态，其中被 [2026-08-26 的结构改造](#2026-08-26改为-memory--索引内容分离)取代的结论已在该节列出，读到旧结论时先对照那份清单。
 
@@ -166,13 +176,13 @@ N=8 时常驻成本已是官方同规模的约 6 倍，差距随条数线性拉�
 2. **容量阈值** —— 聚合文件超过 N 条或 M KB 时提示拆成 module 主题文件。改动小，缓解不治根，可作为 1 的补充。
 3. **彻底对齐官方** —— 一条记忆一个文件，`kind` 降为 frontmatter 字段。scaling 最好，但是重写，且丢掉 `rg` 与 review 优势。
 
-**外部调研（2026-08-25）**：四路独立调研均指向方案 1，见 [`prior-art/OVERVIEW.md`](prior-art/OVERVIEW.md)。三条改变结论的证据：
+**外部调研（2026-08-25）**：四路独立调研均指向方案 1，见 [`prior-art/OVERVIEW.md`](../reference/reference_prior_art.md)。三条改变结论的证据：
 
 - **粒度不是越细越好**。LongMemEval 的消融是倒 U 形——中间粒度最优，再拆成原子事实反而丢信息。Callan 1994 则显示两级证据结合永远最好（+7%~23.5%）。所以方案 1 应是「文件级索引行**保留**、条目级索引**新增**」，不是替换。
 - **问题定性要升级：这是正确性问题，不是账单问题**。Lost in the Middle 实测到答案埋在中间时准确率低于闭卷基线；Chroma 实测到单个似是而非的段落就能把准确率压到 needle-only 基线以下。所以「取消无条件先读 `FEEDBACK.md`」的优先级高于省 token。
 - **别指望索引提升准确率**。arXiv 2607.26637 实测组织化只降低检索成本（4.0 分 → 1.4 分/查询）、不提高答对率。索引设计的目标函数应定为「最小化读进上下文的字节数」。
 
-阈值取值、以及 `upsert_h2` 标题匹配缺口（basic-memory 的 permalink 式稳定 id）和新鲜度缺口（Graphiti 的失效不删除、Copilot 的 citation + 28 天 TTL）的具体做法，同见 [`prior-art/OVERVIEW.md`](prior-art/OVERVIEW.md)。
+阈值取值、以及 `upsert_h2` 标题匹配缺口（basic-memory 的 permalink 式稳定 id）和新鲜度缺口（Graphiti 的失效不删除、Copilot 的 citation + 28 天 TTL）的具体做法，同见 [`prior-art/OVERVIEW.md`](../reference/reference_prior_art.md)。
 
 ## 2026-08-26：改为 .memory + 索引/内容分离
 
@@ -192,7 +202,7 @@ N=8 时常驻成本已是官方同规模的约 6 倍，差距随条数线性拉�
 
 **为什么不退成官方的单一 `MEMORY.md`**：`kind` → 文件的路由关系保持显式，remember 只需重算一个入口；三个入口各自也更小。代价是多一跳（`AGENTS.md` → 入口 → 正文），但三个入口都很小，可以一次并读。
 
-**与调研的对账**（[`prior-art/OVERVIEW.md`](prior-art/OVERVIEW.md)）：兑现了「条目级索引」、「文件级索引行保留而非替换」（`AGENTS.md` 仍列三个入口）、「取消无条件全量加载」、以及 permalink 式稳定 id。仍未兑现：索引行数硬上限、失效不删除、citation 读时校验、单次加载 3~5 条的强制手段——全部转入待议。
+**与调研的对账**（[`prior-art/OVERVIEW.md`](../reference/reference_prior_art.md)）：兑现了「条目级索引」、「文件级索引行保留而非替换」（`AGENTS.md` 仍列三个入口）、「取消无条件全量加载」、以及 permalink 式稳定 id。仍未兑现：索引行数硬上限、失效不删除、citation 读时校验、单次加载 3~5 条的强制手段——全部转入待议。
 
 ### 索引是派生产物，全量重算
 
@@ -394,7 +404,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 
 命名先后走过 `refactor` → `tidy` → `doctor`。前两步的理由记在下面两节，这里记最后一步，以及为什么否掉了 `dream`。
 
-**否掉 `dream`：那是个已被占用的术语，指的是另一件事。** [`prior-art/03-oss-frameworks.md`](prior-art/03-oss-frameworks.md) 记着 Letta 的 "dreaming" 是后台 subagent 在独立 git worktree 里整理记忆再 merge 回主分支；[`prior-art/01-academic-papers.md`](prior-art/01-academic-papers.md) 记的那个「agent 记忆 = git 仓库」的系统更直接——它**同时**有 `/doctor`（审计放置错误、重复、token 占用）和 `dreaming`（后台并发整理），两者是分开的。本 skill 对应的是前者。
+**否掉 `dream`：那是个已被占用的术语，指的是另一件事。** [`prior-art/03-oss-frameworks.md`](../reference/reference_oss_frameworks.md) 记着 Letta 的 "dreaming" 是后台 subagent 在独立 git worktree 里整理记忆再 merge 回主分支；[`prior-art/01-academic-papers.md`](../reference/reference_academic_papers.md) 记的那个「agent 记忆 = git 仓库」的系统更直接——它**同时**有 `/doctor`（审计放置错误、重复、token 占用）和 `dreaming`（后台并发整理），两者是分开的。本 skill 对应的是前者。
 
 判据是**它从不打开任何条目文件的正文**：六类诊断全在 `AGENTS.md` 的受管区块和索引条目上，一个字的记忆内容都不读。而 `dream` 在文献里恰恰指内容层的合并、抽象、遗忘。叫 `dream` 会让 agent 和人都预期它去动正文，是过度承诺。
 
@@ -496,7 +506,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 
 **问题**：init 已经往 AGENTS.md 写了 policy 区块，那检索和沉淀的指令是不是也该一并写进去，省掉两个 skill。
 
-**判据**是两轴：常驻还是按需、不变还是项目特定。目标函数沿用 [`prior-art/01-academic-papers.md`](prior-art/01-academic-papers.md) 那条——**最小化读进上下文的字节数**。量出来的体积：policy 区块 8 行常驻，ask 35 行 / 2325 字节，remember 89 行 / 5709 字节；全内联就是约 124 行、8 KB 每轮常驻。
+**判据**是两轴：常驻还是按需、不变还是项目特定。目标函数沿用 [`prior-art/01-academic-papers.md`](../reference/reference_academic_papers.md) 那条——**最小化读进上下文的字节数**。量出来的体积：policy 区块 8 行常驻，ask 35 行 / 2325 字节，remember 89 行 / 5709 字节；全内联就是约 124 行、8 KB 每轮常驻。
 
 **结论是不对称的。**
 
@@ -544,7 +554,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 | 检索纪律 | 挑错文件白读一遍，这一轮结束就没了 | 常驻够用，纪律进 policy 区块 |
 | 沉淀纪律 | 写进 git 是永久的，而且**坏条目会自我强化**——它以后会被检索到并当成已确认的结论用，却没人回头审计它当初该不该写 | 值得那次刻意加载，留成 skill |
 
-举个具体的：任务中顺手记一条「正在改 WorkTabV2 的弹窗逻辑」，两周后这事早结束了，但它还在索引里，每次相关任务都被读出来误导判断。所以「不要写」那份清单（临时进度、猜测、能从代码或 git 推出的事实）是整个系统里价值最高的一段内容——[`prior-art/01-academic-papers.md`](prior-art/01-academic-papers.md) 记着规模化的头号失败模式就是记忆膨胀与 context collapse。
+举个具体的：任务中顺手记一条「正在改 WorkTabV2 的弹窗逻辑」，两周后这事早结束了，但它还在索引里，每次相关任务都被读出来误导判断。所以「不要写」那份清单（临时进度、猜测、能从代码或 git 推出的事实）是整个系统里价值最高的一段内容——[`prior-art/01-academic-papers.md`](../reference/reference_academic_papers.md) 记着规模化的头号失败模式就是记忆膨胀与 context collapse。
 
 关键问题于是变成 **agent 在真正动手写的那一刻有没有在读它**。放 AGENTS.md 里它常驻，但那是一份讲项目的长文档，清单是里面几条 bullet，和其他所有内容一起竞争注意力；放 skill 里，agent 是在决定要写之后、动手之前专门加载它，读到时它就是「我现在要做的这件事的说明书」。
 
@@ -560,7 +570,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 
 同时定住 policy 区块的预算：吸收 ask 的四条后从 8 行到 10 行左右，**到此为止**。允许 ask 折进来的前提正是「常驻字节数最小化」这条目标函数，如果折完 AGENTS.md 变胖了，这笔交换就白做了。
 
-**递归也不用文字讲。** 每份 `AGENTS.md` 的 `project-memory-index` 区块列出自己的直接下级，顺着跳就到底——递归是数据，不是指令。所以 policy 里只留一句「往深层顺着子目录索引一级级跳」，结构细节继续由 [`PROTOCOL.md`](PROTOCOL.md) 承担，agent 没把握时去读，不必常驻。
+**递归也不用文字讲。** 每份 `AGENTS.md` 的 `project-memory-index` 区块列出自己的直接下级，顺着跳就到底——递归是数据，不是指令。所以 policy 里只留一句「往深层顺着子目录索引一级级跳」，结构细节继续由 [`PROTOCOL.md`](../../references/PROTOCOL.md) 承担，agent 没把握时去读，不必常驻。
 
 ### 契约是产物格式，不是 skill 之间的文件引用
 
@@ -573,7 +583,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 
 **要买到的东西是版本偏斜容忍**：任一 skill 单独升级后其余仍能工作。即使 init 升级、现存 `AGENTS.md` 还是旧格式，ask 和 remember 也不受影响。
 
-**冻结的核心契约**现在单独成文，见 [`PROTOCOL.md`](PROTOCOL.md)（抽离过程见下面「协议单独成文」一节）。
+**冻结的核心契约**现在单独成文，见 [`PROTOCOL.md`](../../references/PROTOCOL.md)（抽离过程见下面「协议单独成文」一节）。
 
 **其中「按实际读到的内容走」那条是整套东西成立的关键**，而它成立是因为消费方是 LLM 而不是 parser：读 markdown 不需要知道标记名，看见链接就能跳。所以契约可以定得足够弱，弱到几乎不可能被格式升级破坏。
 
@@ -604,7 +614,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 
 ### 协议单独成文
 
-**决策**：抽出 [`PROTOCOL.md`](PROTOCOL.md)，只写冻结的抽象约定；`memory-layout.md` 降为「当前实现」。
+**决策**：抽出 [`PROTOCOL.md`](../../references/PROTOCOL.md)，只写冻结的抽象约定；`memory-layout.md` 降为「当前实现」。
 
 **动机是 `memory-layout.md` 混了两种变更频率的东西**：嵌套树、入口文件、两类索引这些几乎永不变；而具体索引文件名、四个区块标记、frontmatter 字段清单、模板命名会随实现升级。混在一份文件里，消费方就没法只依赖不变的那部分——上一轮我把「冻结契约」塞进它开头，是把协议写在了实现文档里，位置错了。
 
@@ -641,7 +651,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 
 **这不违反上一节的棘轮，但要分两档**：**必需键是硬棘轮**（所有实现都得产出它），**可选键是软棘轮**——只占用名字、不强制存在，`LAYOUT` 完全可以无视，代价仅是 `type` 这个名字被订走、不能挪作他用。而 `name` 从必需降为可选是**放松**，放松永远安全。
 
-**三处独立证据支持这几个键值得标准化**：调研里的参考实现是「frontmatter（`name` + `description`）+ markdown + grep」（[`prior-art/01-academic-papers.md`](prior-art/01-academic-papers.md)）；本仓 18 份 `SKILL.md` **全部**含 `name` 与 `description`，其中 8 份就只有这两个，另外 10 份分五种组合、都是在这两个之上加可选项（`argument-hint`、`user-invocable`、`model` 等），无一例外；Cursor rule 则只有 `description`（本仓无 `.cursor/rules/`，未就地取证）。**三方独立落到「一句描述 + 各自扩展」这同一形态**，说明它是「按描述挑选、按需加载」这类产物的自然最小集。协议因此顺带获得泛化能力——**skill、rule 这类东西本身就是协议合规的记忆条目**，将来纳入索引不必改协议。
+**三处独立证据支持这几个键值得标准化**：调研里的参考实现是「frontmatter（`name` + `description`）+ markdown + grep」（[`prior-art/01-academic-papers.md`](../reference/reference_academic_papers.md)）；本仓 18 份 `SKILL.md` **全部**含 `name` 与 `description`，其中 8 份就只有这两个，另外 10 份分五种组合、都是在这两个之上加可选项（`argument-hint`、`user-invocable`、`model` 等），无一例外；Cursor rule 则只有 `description`（本仓无 `.cursor/rules/`，未就地取证）。**三方独立落到「一句描述 + 各自扩展」这同一形态**，说明它是「按描述挑选、按需加载」这类产物的自然最小集。协议因此顺带获得泛化能力——**skill、rule 这类东西本身就是协议合规的记忆条目**，将来纳入索引不必改协议。
 
 **但要同时写下边界：同形不同权。** skill 是会被加载执行的**指令**，记忆条目是供判断的**证据**。形状可以统一，权限不能——否则 agent 会把一条记忆当命令照做，或者把一份 skill 当成可随意改写的数据。谁能改、谁被执行，仍按各自体系的规则走。
 
@@ -662,7 +672,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 
 **索引文件与 `AGENTS.md` 同属非叶子**，因为它们干的是同一件事。这给「索引为什么不单独占小节」换了个更硬的理由：不是它话少，而是**它不是独立的一类**。协议因此只说「`AGENTS.md` 与记忆文件之间还可以再夹一层索引，顺着链接走、别假设中间隔了几层」，几份索引、按什么分，全归 `LAYOUT`。
 
-**中途给这一类起过一个统称「路标」，后来废掉了。** 起它是因为「非叶子」这一类里既有 `AGENTS.md` 又有索引文件，需要一个词同时指两者。但它是自造词，读者在任何标准语汇里查不到，摆在冻结契约里成了理解门槛。废掉之后发现根本不需要造词：**类名用「非叶子节点」**（标准树术语，两个小节标题本来就这么写的），**中间那层用「索引」**（标准词，而且它就是索引）。两个小节标题因此改成 `## 非叶子节点：AGENTS.md` 与 `## 叶子节点：<memory>.md`——用文件名点题比用抽象类名更直给，读者不必先建立词汇表。**这个词的来路也值得记**：它是从调研笔记里漂进来的——[`prior-art/04-index-granularity.md`](prior-art/04-index-granularity.md) 转述 OpenAI 递归摘要研究时用了「索引不应是正文的摘要，而应是正文的路标」这个说法，[`prior-art/01-academic-papers.md`](prior-art/01-academic-papers.md) 记另一套系统时也用了它。在那两处是**转述别人的比喻**，没问题；被我顺手搬进契约当正式术语就不行了。**教训：给一类东西造统称之前，先确认标准词真的不够用；比喻留在调研笔记里，别升进契约。**
+**中途给这一类起过一个统称「路标」，后来废掉了。** 起它是因为「非叶子」这一类里既有 `AGENTS.md` 又有索引文件，需要一个词同时指两者。但它是自造词，读者在任何标准语汇里查不到，摆在冻结契约里成了理解门槛。废掉之后发现根本不需要造词：**类名用「非叶子节点」**（标准树术语，两个小节标题本来就这么写的），**中间那层用「索引」**（标准词，而且它就是索引）。两个小节标题因此改成 `## 非叶子节点：AGENTS.md` 与 `## 叶子节点：<memory>.md`——用文件名点题比用抽象类名更直给，读者不必先建立词汇表。**这个词的来路也值得记**：它是从调研笔记里漂进来的——[`prior-art/04-index-granularity.md`](../reference/reference_index_granularity.md) 转述 OpenAI 递归摘要研究时用了「索引不应是正文的摘要，而应是正文的路标」这个说法，[`prior-art/01-academic-papers.md`](../reference/reference_academic_papers.md) 记另一套系统时也用了它。在那两处是**转述别人的比喻**，没问题；被我顺手搬进契约当正式术语就不行了。**教训：给一类东西造统称之前，先确认标准词真的不够用；比喻留在调研笔记里，别升进契约。**
 
 **「非叶子不需要 frontmatter」这句现在可以正面写了。** 之前只能拐着弯说「主语限定在一条记忆一个文件上」，因为按当时的术语，「非叶子」指的是目录，而目录当然没有 frontmatter，这句话会变成废话。
 
@@ -841,7 +851,7 @@ diff <(rg -o '^## .*— (.*)' -r '$1' PROTOCOL.md) <(rg -o '^## .*— (.*)' -r '
 **为什么分类型（依据在「记忆分类与命名对齐」与「官方源码取证结论」两节，这里只说它换来什么）**：
 
 1. **三类的寿命和失效方式根本不同，所以维护策略也不同。** 源码里 `project` 要求把相对日期转成绝对日期（「周四」→「2026-03-05」），这条最能说明它是**带时间戳的观察**，会过期；`feedback` 是长期规则，正文结构固定为结论 + `**Why:**` + `**How to apply:**`；`reference` 是指针，它的失效方式是链接坏掉。**把它们混在一处，就没法给任何一类定淘汰规则**——这正是「待议」里 `dream`（整合与遗忘）能不能做的前提。
-2. **类型是挡记忆膨胀的闸门。** 官方的「不要记什么」清单是按类型给判据的，每类「收什么、不收什么」写在对应入口模板的引言里，写方才有得可依。反例是自家踩过的：原 `OVERVIEW.md` 模板写着「项目目标、架构、目录、数据流」，直接撞在「凡是能从代码推导的都不记」上——**一个分类错的容器会主动招来垃圾**。而 [`prior-art/01-academic-papers.md`](prior-art/01-academic-papers.md) 记着规模化的头号失败模式就是记忆膨胀与 context collapse。
+2. **类型是挡记忆膨胀的闸门。** 官方的「不要记什么」清单是按类型给判据的，每类「收什么、不收什么」写在对应入口模板的引言里，写方才有得可依。反例是自家踩过的：原 `OVERVIEW.md` 模板写着「项目目标、架构、目录、数据流」，直接撞在「凡是能从代码推导的都不记」上——**一个分类错的容器会主动招来垃圾**。而 [`prior-art/01-academic-papers.md`](../reference/reference_academic_papers.md) 记着规模化的头号失败模式就是记忆膨胀与 context collapse。
 3. **类型是检索的第一道过滤器。** 入口层进协议之后，读方可以在打开任何正文之前先按问题性质挑入口：问「这活儿该怎么干」走 feedback，问「现在在做什么」走 project，问「文档在哪」走 reference。分类型分片还让每份入口都小——`FEEDBACK.md` 这类是「先读」文件，什么都往里堆会让渐进式披露失效。
 4. **分界判据一句话**（源码取证）：`feedback` 管「活儿该怎么干」，`project` 管「在干什么、出了什么事」。官方第四类 `user`（角色、专长、个人偏好）是跨项目的个人信息，不落仓库。
 
@@ -849,9 +859,9 @@ diff <(rg -o '^## .*— (.*)' -r '$1' PROTOCOL.md) <(rg -o '^## .*— (.*)' -r '
 
 ### `AGENTS.md` 同时充当 `MEMORY.md`
 
-**事实**：本方案的 `AGENTS.md` **形式像 `CLAUDE.md`、功能像 `MEMORY.md`**（调研早有此判断，见 [`prior-art/OVERVIEW.md`](prior-art/OVERVIEW.md) 与 [`prior-art/04-index-granularity.md`](prior-art/04-index-granularity.md)，这里把它升成一条决策）。Claude Code 里这是**两个文件、两套机制**：`CLAUDE.md` 是人写的常驻指令，`/memories/MEMORY.md` 是记忆工具维护的索引。我们把两个角色合进了同一份文件。
+**事实**：本方案的 `AGENTS.md` **形式像 `CLAUDE.md`、功能像 `MEMORY.md`**（调研早有此判断，见 [`prior-art/OVERVIEW.md`](../reference/reference_prior_art.md) 与 [`prior-art/04-index-granularity.md`](../reference/reference_index_granularity.md)，这里把它升成一条决策）。Claude Code 里这是**两个文件、两套机制**：`CLAUDE.md` 是人写的常驻指令，`/memories/MEMORY.md` 是记忆工具维护的索引。我们把两个角色合进了同一份文件。
 
-**合并换来的最大好处：加载机制白拿。** 记忆体系最难的一环从来不是「怎么存」，而是「agent 凭什么会去读」。官方的记忆工具为此专门规定了「每次会话开始只自动读 `MEMORY.md` 这一个文件」。而 `AGENTS.md` 的加载语义**已经被各家 harness 内建了**：根那份无条件常驻，子树那份在「读到该子树的文件」时才加载（[`prior-art/02-coding-agents.md`](prior-art/02-coding-agents.md) 记着官方原话 "not at launch, but when Claude reads files in those subtrees"，Amp 用 41 份 `AGENTS.md` 验证过这个规模）。把索引直接写进 `AGENTS.md`，于是**发现机制和渐进加载都不必自己造**——这正是整套方案能只用「文件 + `rg`」、不需要任何常驻进程或向量库的原因。
+**合并换来的最大好处：加载机制白拿。** 记忆体系最难的一环从来不是「怎么存」，而是「agent 凭什么会去读」。官方的记忆工具为此专门规定了「每次会话开始只自动读 `MEMORY.md` 这一个文件」。而 `AGENTS.md` 的加载语义**已经被各家 harness 内建了**：根那份无条件常驻，子树那份在「读到该子树的文件」时才加载（[`prior-art/02-coding-agents.md`](../reference/reference_coding_agents.md) 记着官方原话 "not at launch, but when Claude reads files in those subtrees"，Amp 用 41 份 `AGENTS.md` 验证过这个规模）。把索引直接写进 `AGENTS.md`，于是**发现机制和渐进加载都不必自己造**——这正是整套方案能只用「文件 + `rg`」、不需要任何常驻进程或向量库的原因。
 
 **受管区块因此不是便利，而是这次合并的成立条件。** 一份文件同时装人写的常驻正文和工具维护的索引，只有在「工具只拥有自己划出的区域」这条约定下才不会互相破坏。这也是上一轮裁定 S11 必须留在协议里的根据：它不是实现细节，它是合并本身的前提。
 
@@ -1051,14 +1061,16 @@ scripts/lib/               → blocks / templates / paths / provenance
 
 **普通记忆与 skills 不强求同形。** `feedback`、`project`、`reference` 继续使用 `<type>/<type>_<slug>.md` 和本实现的条目模板；`skills` 只共享「有一个类型入口」这层抽象。为了表面统一而让 skills 套 `type_slug.tmpl.md`，会破坏它作为常规 skills 根目录直接复用、发现和分发的目标。
 
-**本轮只定布局，不代表实现已完成。** 模板、索引重算、remember/init/doctor 对新目录与 `skills` 类型的支持仍需另行设计和实现；在那之前，`LAYOUT.md` 描述的是目标结构，不是当前脚本已经具备的行为。
+**落地顺序按 [开发流程](project_development.md) 执行。** `PROTOCOL.md` 的三层形状没有变化，所以保持不动；init 负责创建四份入口与四个类型目录，普通记忆改写入对应子目录，`skills` 只通过薄适配重算索引。remember 的 `--type` 仍只开放三种普通记忆，不生成 skill；ask 继续按产物说明走，不需要知道这次布局变化。
+
+**存量迁移最后交给 doctor。** init 发现旧版平铺记忆时在写入前拒绝继续，避免先重算出一份漏条目的索引；doctor 把旧文件原样移入类型目录，再补目录、入口和本层清单，最后全量重算。新旧位置存在同名文件时只报告冲突、不覆盖，修复后再跑一次必须零 finding。这样迁移权仍集中在唯一拥有全树视野且要求显式 `--apply` 的地方。
 
 ## 待议
 
 - 索引行数/字节硬上限（调研建议 200 行 / 25 KB，触及 75% 时告警）尚未实现。判据见「`AGENTS.md` 同时充当 `MEMORY.md`」：功能等同索引，就该用 `MEMORY.md` 的硬上限而不是 `CLAUDE.md` 的软建议。
 - **「记忆不要重述 `AGENTS.md` 正文」这条纪律无处落地**：合并两个角色之后它才成立（同上节），但 `remember` 的「什么时候不写」里没有它，`doctor` 也没有对应检查项——正文与记忆重述彼此，靠字面比对大概查不出来。
 - 失效不删除（`invalid_at` 式的双时间记账）、citation + 读时校验、单次加载 3~5 条的强制手段，三条调研结论均未落地。
-- **内容层的整合与遗忘尚未实现，名字预留给 `dream`**（见「这个 skill 叫 `doctor`」一节）。它要做的是合并重复条目、抽象出更高层结论、标记失效，和 `doctor` 的结构修复分属两个 skill。已经攒下的判据：触发用**累计量而非定时**（Generative Agents 的 importance 累加越过阈值才跑，[`prior-art/01-academic-papers.md`](prior-art/01-academic-papers.md)，定时跑会在没变化时做无意义重写，而重写正是 context collapse 的来源）；遗忘用 recency + frequency + explicit signals 三因子，全部可从 git 和脚本计数拿到，不需要向量；失效**标记而不删除**（bi-temporal），`rg` 时过滤掉即可。**但要先掉一个警告**：[`prior-art/02-coding-agents.md`](prior-art/02-coding-agents.md) 记着有团队明确放弃了离线去重/整理服务，判定规模化下不值得，改为依赖读时相关性判断加时间淘汰——这是该领域唯一的产品级结论，而且是负面的。所以 `dream` 该不该建本身还没定，名字先占住，别让 `doctor` 顺手长成它。
+- **内容层的整合与遗忘尚未实现，名字预留给 `dream`**（见「这个 skill 叫 `doctor`」一节）。它要做的是合并重复条目、抽象出更高层结论、标记失效，和 `doctor` 的结构修复分属两个 skill。已经攒下的判据：触发用**累计量而非定时**（Generative Agents 的 importance 累加越过阈值才跑，[`prior-art/01-academic-papers.md`](../reference/reference_academic_papers.md)，定时跑会在没变化时做无意义重写，而重写正是 context collapse 的来源）；遗忘用 recency + frequency + explicit signals 三因子，全部可从 git 和脚本计数拿到，不需要向量；失效**标记而不删除**（bi-temporal），`rg` 时过滤掉即可。**但要先掉一个警告**：[`prior-art/02-coding-agents.md`](../reference/reference_coding_agents.md) 记着有团队明确放弃了离线去重/整理服务，判定规模化下不值得，改为依赖读时相关性判断加时间淘汰——这是该领域唯一的产品级结论，而且是负面的。所以 `dream` 该不该建本身还没定，名字先占住，别让 `doctor` 顺手长成它。
 - 体检只收敛 `AGENTS.md` 的受管区块与索引条目，不校验 `.memory/` 内部（比如条目文件存在但三个索引里没有它）。条目索引本来就全量重算，理论上不会漂，但没有兜底检查。
 - **失去 `.memory/` 却还持有索引的目录，对 `doctor` 完全不可见**（体检时实测确认）。`collect_findings()` 的 holders 只收当前带 `.memory/` 的目录加记忆根，所以这种目录的区块既不被扫也不被清：它下面原有的条目会在记忆根重复登记一份、旧的那份留在原处，而 `doctor` 报「无 findings」；它的本层记忆区块还继续挂着三条指向已不存在的 `.memory/*.md` 的死链。正常流程走不到这个形状（`find_index_anchor()` 只挑带记忆的祖先），事后手删 `.memory/` 就会。修法要先定边界：holders 改成「扫全树所有带受管标记的 `AGENTS.md`」是最直接的，代价是体检从「按记忆目录」变成「按文件」，得重新想清楚哪些目录本来就允许只持有索引。
 - Claude Code 下会话 id 的环境变量名未核实，`agentClient` 探到了但 `originSessionId` 可能为空。
@@ -1067,4 +1079,3 @@ scripts/lib/               → blocks / templates / paths / provenance
 - **兜底的下级条目描述还硬编码在脚本里**（`agents.py` 的 `normalize_index_description()`）。要么给它一份模板，要么等上面那条「给下级 `AGENTS.md` 加 `description`」落地后它自然消失——后者更彻底，所以先不单独动。
 - **描述质量没有任何门槛**：`remember` 只强制 `description` 存在，`doctor` 不检查它写得怎么样。而自从 `ask` 改为依赖产物里的说明挑入口与条目（见「再翻案：`ask` 依赖产物」一节），**描述质量直接决定运行时要打开多少正文**——写成标题复述，agent 就只能挨个打开。候选检查项：过短、与 `title` 高度重复、通篇没有可判别的名词。这是把成本转移到写时之后必须补上的那一半。
 - **旧标记名的迁移识别未实现**：`doctor` 需要一条新 finding，认出旧版区块名并改写成当前名。义务已写进 `LAYOUT`（见「LAYOUT 不冻结任何东西」一节），实现留到改名真正发生时——那之前没有旧名可认。**同一条 finding 该顺带认「嵌套错位」**：区块名对但位置不对（比如 `auto` 待在外层之外，见「翻案：`auto` 收回外层区域内部」一节），现在既不报错也不修。
-- **`skills` 已纳入目标布局，但实现边界尚未补齐**：`.memory/skills/` 遵循外部 Agent Skills 协议，项目记忆只通过 `SKILLS.md` 索引它；索引如何生成、文件由谁拥有、`doctor` 检查到哪一层、与 harness 自身加载机制如何不打架仍待设计。实现时必须兑现「同形不同权」——普通记忆不能因此获得 skill 那样的执行权。

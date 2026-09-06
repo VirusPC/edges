@@ -1,8 +1,18 @@
+---
+name: reference_index_granularity
+title: 索引粒度的先验与阈值
+description: 索引粒度、路标 vs 摘要，以及可落地的阈值。
+type: reference
+username: viruspc
+email: cheng.peng.helloworld@gmail.com
+updatedAt: "2026-09-06T13:38:39+08:00"
+---
+
 # 原始报告 04 — 索引粒度的先验与阈值
 
 - 调研日期：2026-08-25
 - 调研范围：面向 LLM 的索引/摘要设计的可量化先验，含 IR 经典文献、llms.txt、sitemap、API 文档索引、MOC 实践
-- 综合结论见 [`README.md`](README.md)
+- 综合结论见 [`README.md`](reference_prior_art.md)
 - 以下为子 agent 原始产出，未做删改
 - **一处编者注**：报告在「可信度校准」一节称 Claude Code 文档里没有「最多加载 5 条」。文档确实没写，但源码 `src/memdir/findRelevantMemories.ts` 的 `SELECT_MEMORIES_SYSTEM_PROMPT` 原文含 `(up to 5)`，该数字成立，出处是源码而非文档。
 

@@ -49,7 +49,7 @@
 
 协议要求按 `type` 分入口，本实现取四类。四份入口都放在本层 `.memory/` 根部，正文按类型放进同名小写目录。每个入口各有一个 `<!-- project-memory-entries:start -->` 区块，内容从对应类型目录全量重算。
 
-**条目**指区块里的一行，与记忆文件一一对应。入口是派生产物、不手写；行格式只存在于 [`templates/_entry_line.tmpl.md`](templates/_entry_line.tmpl.md)，下层索引与条目索引共用。
+**条目**指区块里的一行，与记忆文件一一对应。入口是派生产物、不手写；行格式只存在于 [`templates/entry_line.tmpl.md`](templates/entry_line.tmpl.md)，下层索引与条目索引共用。
 
 `feedback`、`project`、`reference` 沿用 [Claude Code auto memory](https://code.claude.com/docs/en/memory)；官方第四类 `user`（角色、专长、个人偏好）不落盘。本实现另加 `skills`，用于存放可被 Agent 直接发现和加载的标准技能。每类「记什么、不记什么」写在对应入口模板的引言里。
 

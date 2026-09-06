@@ -1,4 +1,6 @@
-# {title}
+# project-memory-init
+
+本目录是 project-memory 系列 skill 的共享家。协议与布局在 `references/`，开发流程、设计决策与调研史料在 `.memory/`。
 
 <!-- project-memory:start -->
 <!-- project-memory-local:start -->
@@ -11,14 +13,6 @@
 - [.memory/REFERENCE.md](.memory/REFERENCE.md) — 需求文档、设计稿、接口文档、监控面板等外部资料。
 - [.memory/SKILLS.md](.memory/SKILLS.md) — 可复用的能力说明、操作流程与使用规范。
 <!-- project-memory-local:end -->
-
-<!-- project-memory-children:start -->
-## 下层记忆索引
-
-按任务目录加载对应 `AGENTS.md`。
-
-{index_entries}
-<!-- project-memory-children:end -->
 
 <!-- project-memory-auto:start -->
 ## 记忆自动化

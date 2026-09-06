@@ -38,7 +38,7 @@ def remember(
         path.stem, entry_type, title, description, existing, detected, overrides
     )
     write_atomic(path, render_entry(fields, content))
-    # 三个索引一起重算：AGENTS.md 的记忆区块静态声明了它们都在，缺一个就是死链。
+    # 全部索引一起重算：AGENTS.md 的记忆区块静态声明了它们都在，缺一个就是死链。
     for declared_type in index_files():
         refresh_index(target, declared_type)
     agents_action = sync_target_agents(target, resolve_root(target, None))

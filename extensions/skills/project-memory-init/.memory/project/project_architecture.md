@@ -1,12 +1,22 @@
+---
+name: project_architecture
+title: 项目记忆的技术关键点
+description: 这套记忆的承重点、最脆的地方，以及技术选择的判断。
+type: project
+username: viruspc
+email: cheng.peng.helloworld@gmail.com
+updatedAt: "2026-09-06T13:38:38+08:00"
+---
+
 # 项目记忆的技术关键点
 
-这套东西的**承重点**在哪、**最脆**的地方在哪。规范看 [`PROTOCOL.md`](PROTOCOL.md)，当前实现看 [`LAYOUT.md`](LAYOUT.md)，每个决定当时怎么权衡的看 [`design-decisions.md`](design-decisions.md)，外部证据看 [`prior-art/`](prior-art/OVERVIEW.md)。
+这套东西的**承重点**在哪、**最脆**的地方在哪。规范看 [`PROTOCOL.md`](../../references/PROTOCOL.md)，当前实现看 [`LAYOUT.md`](../../references/LAYOUT.md)，每个决定当时怎么权衡的看 [`design-decisions.md`](project_design_decisions.md)，外部证据看 [`prior-art/`](../reference/reference_prior_art.md)。
 
 先说判断：难点从来不是「怎么存」，是**凭什么 agent 会去读**，以及**怎么不让它膨胀**。所有技术选择都是在这两件事上做取舍。
 
 ## 一、把加载机制白拿过来
 
-整个方案的地基。记忆体系最难的一环是发现与按需加载，而 `AGENTS.md` 的加载语义**已经被各家 harness 内建了**：根那份无条件常驻，子树那份在 agent 读到该子树文件时才加载（官方原话与 Amp 用 41 份 `AGENTS.md` 的规模验证，见 [`prior-art/02-coding-agents.md`](prior-art/02-coding-agents.md)）。把索引直接写进 `AGENTS.md`，发现机制和渐进加载就都不用自己造——这才是整套东西能只靠「文件 + `rg`」、不需要常驻进程或向量库的原因。
+整个方案的地基。记忆体系最难的一环是发现与按需加载，而 `AGENTS.md` 的加载语义**已经被各家 harness 内建了**：根那份无条件常驻，子树那份在 agent 读到该子树文件时才加载（官方原话与 Amp 用 41 份 `AGENTS.md` 的规模验证，见 [`prior-art/02-coding-agents.md`](../reference/reference_coding_agents.md)）。把索引直接写进 `AGENTS.md`，发现机制和渐进加载就都不用自己造——这才是整套东西能只靠「文件 + `rg`」、不需要常驻进程或向量库的原因。
 
 代价是这份文件同时装着人写的常驻正文和工具维护的索引，所以**受管区块不是便利，是这次合并的成立条件**：HTML 注释成对标记、名字带工具前缀，工具只拥有自己划出的那块，区块外一字不动。多工具共存于同一份 `AGENTS.md` 靠的就是这个。标记与嵌套顺序集中在 `scripts/lib/blocks.py`。
 
@@ -22,7 +32,7 @@
 
 ## 三、派生物全量重算，而不是增量维护
 
-条目索引从记忆文件的 frontmatter 全量重算（`nodes/entries.py`），所以幂等、不可能漂移，并发安全是顺带白拿的。而**下层索引是增量维护的**，因为下层目录的描述没有事实源——这一处不对称正是 `doctor` 存在的理由，也是「给下层 `AGENTS.md` 加 `description`」那条待议的动因。
+条目索引从各类型内容目录的 frontmatter 全量重算（`nodes/entries.py`），所以幂等，发生漂移也能机械恢复；`skills` 只在这里做一层外部格式适配，不把它的内部协议复制进布局文档。而**下层索引是增量维护的**，因为下层目录的描述没有事实源——这一处不对称正是 `doctor` 存在的理由，也是「给下层 `AGENTS.md` 加 `description`」那条待议的动因。
 
 抽出来的原则：**有事实源的地方能全量重算，能全量重算的地方就不需要体检。** 需要体检的都是缺事实源的地方。
 
@@ -40,7 +50,7 @@
 
 ## 七、模板是结构的事实源，脚本只做占位符替换
 
-类型清单是从 `AGENTS.tmpl.md` 里那几行链接反推出来的（`lib/blocks.py` 的 `index_files()`），所以**加一个类型只改模板、脚本一行不动**；所有文案零硬编码。判据是「盯着模板能不能说出产物长什么样」。
+类型清单是从 `AGENTS.tmpl.md` 里那几行链接反推出来的（`lib/blocks.py` 的 `index_files()`）。普通记忆类型的目录、入口与文件命名可以继续从模板推导；像 `skills` 这样由外部协议拥有内容形状的类型，只在 `nodes/entries.py` 留一层薄适配，不把外部协议抄进本地模板。判据仍是「盯着模板能不能说出本实现拥有的产物长什么样」。
 
 ## 八、把成本压到写时，只把与问题相关的判断留在运行时
 
@@ -48,15 +58,15 @@
 
 ## 九、`type` 是结构，不是标签
 
-三类的**寿命和失效方式根本不同**：`project` 是带时间戳的观察会过期，`feedback` 是长期规则，`reference` 的失效方式是链接坏掉。混在一处就没法给任何一类定淘汰规则。同时类型是检索的第一道过滤器，也是挡膨胀的闸门——「收什么、不收什么」写在各自入口模板的引言里。
+普通三类的**寿命和失效方式根本不同**：`project` 是带时间戳的观察会过期，`feedback` 是长期规则，`reference` 的失效方式是链接坏掉。新增的 `skills` 又有另一套外部生命周期，所以只接入索引、不强行同形。混在一处就没法给任何一类定淘汰规则。同时类型是检索的第一道过滤器，也是挡膨胀的闸门——「收什么、不收什么」写在各自入口模板的引言里。
 
 反例是自家踩过的：原 `OVERVIEW.md` 模板写着「项目目标、架构、目录、数据流」，直接撞在「凡是能从代码推导的都不记」上。**一个分类错的容器会主动招来垃圾。**
 
 ## 十、不做的事也是技术点
 
-无向量、无常驻进程、无扁平大索引、无自动摘要。「凡是能从代码或 git 历史推导的都不记」这条闸门比任何检索优化都重要，因为规模化下的头号失败模式是记忆膨胀与 context collapse（[`prior-art/01-academic-papers.md`](prior-art/01-academic-papers.md)）。
+无向量、无常驻进程、无扁平大索引、无自动摘要。「凡是能从代码或 git 历史推导的都不记」这条闸门比任何检索优化都重要，因为规模化下的头号失败模式是记忆膨胀与 context collapse（[`prior-art/01-academic-papers.md`](../reference/reference_academic_papers.md)）。
 
-内容层的整合与遗忘（`dream`）只占了个名字没做——业界唯一的产品级结论恰好是负面的：有团队明确放弃了离线去重整理服务，判定规模化下不值得，改为依赖读时相关性判断加时间淘汰（[`prior-art/02-coding-agents.md`](prior-art/02-coding-agents.md)）。
+内容层的整合与遗忘（`dream`）只占了个名字没做——业界唯一的产品级结论恰好是负面的：有团队明确放弃了离线去重整理服务，判定规模化下不值得，改为依赖读时相关性判断加时间淘汰（[`prior-art/02-coding-agents.md`](../reference/reference_coding_agents.md)）。
 
 ## 最脆的三处
 

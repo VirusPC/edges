@@ -155,8 +155,11 @@ def find_index_anchor(target: Path, root: Path) -> Path:
     """target 该登记到哪一层：最近的带记忆祖先，一个都没有才落到记忆根。
 
     索引因此跟随记忆层级而非目录层级——路径上不带记忆的中间目录被跳过，
-    不会凭空多出一层只为转发。
+    不会凭空多出一层只为转发。目标就是记忆根时不再往上找：`--root-dir`
+    把树封在这里，外面即使有 `.memory/` 也不算本棵树的祖先。
     """
+    if target == root:
+        return root
     for candidate in target.parents:
         if candidate == root:
             break

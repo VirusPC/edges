@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 
 from lib.blocks import ENTRIES_END, ENTRIES_START, index_files, upsert_block
-from lib.paths import list_memory_files, memory_dir, write_atomic
+from lib.paths import list_type_files, memory_dir, type_dir, write_atomic
 from lib.provenance import AUDIT_FIELDS, ORIGIN_FIELDS, now_timestamp
 from lib.templates import (
     ENTRY_LINE_TEMPLATE,
@@ -28,6 +28,15 @@ YAML_TYPED = re.compile(
     r"^(?:true|false|yes|no|on|off|null|~|[+-]?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|\d{4}-\d{2}-\d{2}.*)$",
     re.IGNORECASE,
 )
+
+# 这类入口由本套索引，但正文遵循外部协议，不能套普通记忆模板。
+SKILLS_TYPE = "skills"
+EXTERNAL_ENTRY_TYPES = frozenset({SKILLS_TYPE})
+
+
+def memory_entry_types() -> tuple[str, ...]:
+    """可由 remember 写入的普通记忆类型。"""
+    return tuple(name for name in index_files() if name not in EXTERNAL_ENTRY_TYPES)
 
 
 def yaml_scalar(value: str) -> str:
@@ -51,25 +60,34 @@ def yaml_scalar(value: str) -> str:
 def parse_frontmatter(path: Path) -> dict[str, str]:
     """读取扁平 YAML frontmatter；没有 frontmatter 或读不出来时返回空字典。"""
     try:
-        lines = path.read_text(encoding="utf-8").splitlines()
+        source = path.open(encoding="utf-8")
     except (OSError, UnicodeError):
         return {}
-    if not lines or lines[0].strip() != "---":
-        return {}
-    fields: dict[str, str] = {}
-    for line in lines[1:]:
-        if line.strip() == "---":
-            break
-        if not line.strip() or line.startswith((" ", "\t")):
-            continue
-        key, separator, raw_value = line.partition(":")
-        if not separator:
-            continue
-        value = raw_value.strip()
-        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
-            value = value[1:-1]
-        if value:
-            fields[key.strip()] = value
+    with source:
+        try:
+            first = next(source)
+        except (StopIteration, UnicodeError):
+            return {}
+        if first.strip() != "---":
+            return {}
+        fields: dict[str, str] = {}
+        try:
+            for raw_line in source:
+                line = raw_line.rstrip("\r\n")
+                if line.strip() == "---":
+                    break
+                if not line.strip() or line.startswith((" ", "\t")):
+                    continue
+                key, separator, raw_value = line.partition(":")
+                if not separator:
+                    continue
+                value = raw_value.strip()
+                if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+                    value = value[1:-1]
+                if value:
+                    fields[key.strip()] = value
+        except UnicodeError:
+            return {}
     return fields
 
 
@@ -92,12 +110,14 @@ def render_entry(fields: dict[str, str], content: str) -> str:
 
 def resolve_memory_path(target: Path, entry_type: str, slug: str | None) -> Path:
     """把类型与 slug 映射为唯一的条目文件路径。"""
+    if entry_type not in memory_entry_types():
+        raise ValueError(f"--type 不支持由 remember 写入: {entry_type}")
     normalized = (slug or "").strip().lower()
     if not re.fullmatch(r"[a-z0-9]+(?:_[a-z0-9]+)*", normalized):
         raise ValueError("--slug 必须是小写 snake_case，例如 reuse_existing_constants")
     if normalized.startswith(tuple(f"{name}_" for name in index_files())):
         raise ValueError("--slug 不要带类型前缀，脚本会按 --type 自动加上")
-    return memory_dir(target) / f"{entry_type}_{normalized}.md"
+    return type_dir(target, entry_type) / f"{entry_type}_{normalized}.md"
 
 
 def build_entry_fields(
@@ -139,14 +159,24 @@ def build_entry_fields(
 def build_entry_index(target: Path, entry_type: str) -> str:
     """从全部条目文件的 frontmatter 重算某个索引的条目清单。"""
     entries: list[str] = []
-    for path in list_memory_files(target, f"{entry_type}_*.md"):
+    directory = memory_dir(target)
+    if entry_type == SKILLS_TYPE:
+        # skills/ 的内部形状属于外部协议；这里只保留一个很薄的当前格式适配器。
+        paths = list_type_files(target, entry_type, "*/SKILL.md")
+    else:
+        paths = list_type_files(target, entry_type, f"{entry_type}_*.md")
+    for path in paths:
         fields = parse_frontmatter(path)
-        title = fields.get("title") or path.stem
+        title = fields.get("title") or fields.get("name") or path.stem
         description = fields.get("description") or "缺少 description，请补齐 frontmatter。"
         entries.append(
             render_line(
                 ENTRY_LINE_TEMPLATE,
-                {"title": title, "path": path.name, "description": description},
+                {
+                    "title": title,
+                    "path": path.relative_to(directory).as_posix(),
+                    "description": description,
+                },
             )
         )
     if not entries:
@@ -154,16 +184,28 @@ def build_entry_index(target: Path, entry_type: str) -> str:
     return "\n".join([ENTRIES_START, "\n".join(entries), ENTRIES_END])
 
 
+def expected_index_document(target: Path, entry_type: str) -> str:
+    """计算索引目标态但不落盘，供 refresh 与 doctor 共用。"""
+    file_name = index_files()[entry_type]
+    path = memory_dir(target) / file_name
+    existing = (
+        path.read_text(encoding="utf-8")
+        if path.is_file()
+        else read_template(file_name)
+    )
+    updated = upsert_block(
+        existing, ENTRIES_START, ENTRIES_END, build_entry_index(target, entry_type)
+    )
+    return updated.rstrip() + "\n"
+
+
 def refresh_index(target: Path, entry_type: str) -> str:
     """刷新索引文件里的条目清单；索引文件缺失时先按模板补建。"""
     file_name = index_files()[entry_type]
     path = memory_dir(target) / file_name
     existed = path.is_file()
-    existing = path.read_text(encoding="utf-8") if existed else read_template(file_name)
-    updated = upsert_block(
-        existing, ENTRIES_START, ENTRIES_END, build_entry_index(target, entry_type)
-    )
-    updated = updated.rstrip() + "\n"
+    existing = path.read_text(encoding="utf-8") if existed else ""
+    updated = expected_index_document(target, entry_type)
     if not existed:
         write_atomic(path, updated)
         return "created"

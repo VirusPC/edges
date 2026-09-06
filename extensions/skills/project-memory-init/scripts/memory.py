@@ -7,9 +7,9 @@ import argparse
 import json
 from pathlib import Path
 
-from lib.blocks import index_files
 from lib.paths import resolve_root, resolve_target
 from lib.provenance import compact_fields
+from nodes.entries import memory_entry_types
 from operations.doctor import doctor_memory
 from operations.init import init_memory
 from operations.remember import remember
@@ -38,7 +38,7 @@ def build_parser() -> argparse.ArgumentParser:
     remember_parser.add_argument(
         "--type",
         required=True,
-        choices=sorted(index_files()),
+        choices=sorted(memory_entry_types()),
         help="feedback=纠正与禁止模式，project=代码里推不出的决策，reference=外部资料去哪找",
     )
     remember_parser.add_argument("--slug", required=True, help="小写 snake_case，不带类型前缀")

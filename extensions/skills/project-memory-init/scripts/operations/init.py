@@ -6,7 +6,13 @@ from __future__ import annotations
 from pathlib import Path
 
 from lib.blocks import build_auto_block, index_files, load_agents_template
-from lib.paths import AGENTS_FILE_NAME, list_memory_files, memory_dir, write_atomic
+from lib.paths import (
+    AGENTS_FILE_NAME,
+    list_memory_files,
+    memory_dir,
+    type_dir,
+    write_atomic,
+)
 from lib.templates import ENTRY_OUTPUT_PATTERN, read_template
 from nodes.agents import (
     find_index_anchor,
@@ -15,7 +21,7 @@ from nodes.agents import (
     sync_index_entry,
     sync_target_agents,
 )
-from nodes.entries import refresh_index
+from nodes.entries import memory_entry_types, refresh_index
 
 
 def init_memory(target: Path, root: Path, description: str | None = None) -> dict[str, object]:
@@ -24,7 +30,23 @@ def init_memory(target: Path, root: Path, description: str | None = None) -> dic
     templates = {name: read_template(name) for name in index_files().values()}
     read_template(ENTRY_OUTPUT_PATTERN)
     directory = memory_dir(target)
+    legacy = (
+        sorted(
+            path.name
+            for entry_type in memory_entry_types()
+            for path in directory.glob(f"{entry_type}_*.md")
+        )
+        if directory.is_dir()
+        else []
+    )
+    if legacy:
+        raise ValueError(
+            "检测到旧版平铺记忆文件，请先运行 project-memory-doctor 迁移: "
+            + ", ".join(legacy)
+        )
     directory.mkdir(parents=True, exist_ok=True)
+    for entry_type in index_files():
+        type_dir(target, entry_type).mkdir(parents=True, exist_ok=True)
     created: list[str] = []
     preserved: list[str] = []
     for name, template in templates.items():

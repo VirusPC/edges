@@ -2,6 +2,8 @@
 
 字段清单与顺序看 [`templates/type_slug.tmpl.md`](templates/type_slug.tmpl.md)。这里只讲值从哪来，以及更新已有条目时谁覆盖谁。
 
+本文件只适用于 `feedback`、`project`、`reference` 三种普通记忆；`skills/` 的内容遵循其自身协议。
+
 **正常写入路径用不到这一份。** 除 `--title` / `--description` 外的字段都由脚本自动填，只有要修正已经写错的值时才需要查表。
 
 | 字段组 | 来源 | 更新时 |

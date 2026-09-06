@@ -15,7 +15,7 @@
 │   └── doctor.py   # 扫全树，修索引不一致
 ├── nodes/          # 协议里的两类节点
 │   ├── agents.py   # 入口文件 AGENTS.md
-│   └── entries.py  # 记忆文件与分类型入口
+│   └── entries.py  # 类型目录、普通记忆文件与分类型入口
 └── lib/            # 公共件；不知道操作的存在
     ├── blocks.py   # 标记与区块
     ├── templates.py
@@ -32,13 +32,13 @@
 | 加 CLI 参数或子命令 | `memory.py`，逻辑放到 `operations/` |
 | 改 init / remember / doctor 的行为 | 对应的 `operations/*.py` |
 | 改 `AGENTS.md` 区块怎么维护、下层索引怎么登记 | `nodes/agents.py` |
-| 改记忆文件读写、frontmatter、分类型入口怎么重算 | `nodes/entries.py` |
+| 改类型目录、记忆文件读写、frontmatter、分类型入口怎么重算 | `nodes/entries.py` |
 | 改区块标记名或嵌套顺序 | `lib/blocks.py`，并同步 [`../references/LAYOUT.md`](../references/LAYOUT.md) |
 | 改产物文案、字段清单、行格式、类型清单 | [`../references/templates/`](../references/templates/)，不要改脚本 |
 | 改路径约定（`.memory`、`AGENTS.md`、skill 根） | `lib/paths.py` |
 | 改出处 / 审计字段从哪来 | `lib/provenance.py` + [`../references/frontmatter-fields.md`](../references/frontmatter-fields.md) |
 
-加一个记忆类型：在 `AGENTS.tmpl.md` 的本层记忆区块加一行，再放一份同名模板。脚本从那几行推导，不用动。
+加一个普通记忆类型：在 `AGENTS.tmpl.md` 的本层记忆区块加一行，再放一份同名入口模板。脚本从那几行推导类型目录与索引名。像 `skills` 这样由外部协议定义内容的类型还要在 `nodes/entries.py` 增加薄适配，不能套普通记忆模板。
 
 ## 怎么跑
 
