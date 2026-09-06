@@ -42,11 +42,11 @@ npx skills@latest --version  # 1.5.23  ← 真包
 
 约定：**能读 `.agents/skills` 的 Agent 不再占一份目录；读不到的，只留一条软链，不拷贝。**
 
-- 实体只在 `.agents/skills/`（目前是 OpenSpec 的产物）
+- 实体只在 `.agents/skills/`
 - Claude Code 不读 `.agents/skills`，所以 `.claude/skills` → `.agents/skills`
 - `.codex/skills`、`.cursor/skills`、`.factory/skills`、`.gemini/skills`、`.opencode/skills`、`.agent/skills` 都不留
 
-`openspec update` 可能把那些目录再拷回来，删掉即可，不要改回实体拷贝。
+本仓库已卸载 OpenSpec。若有工具再把 skill 拷回那些目录，删掉即可，不要改回实体拷贝。
 
 ## 分发
 
@@ -68,7 +68,7 @@ pnpm skills:install
 npx skills@latest add VirusPC/edges/extensions/skills
 ```
 
-**子路径不能省。** `npx skills@latest add VirusPC/edges` 装不到本目录的 skill：CLI 的扫描根是一张写死的表，`extensions/` 不在表里，而仓库根下的 `.agents/skills/`（以及 Claude 那条软链）在表里、且 vendored 了 openspec 的产物——短命令会把那些当成本仓库的 skill 装走。子路径形式把扫描根整个换掉，正好只命中这 10 个。
+**子路径不能省。** `npx skills@latest add VirusPC/edges` 装不到本目录的 skill：CLI 的扫描根是一张写死的表（仓库根一层、根下 `skills/`、以及 `.claude/skills` / `.agents/skills` 等 agent 目录），`extensions/` 不在表里。子路径形式把扫描根整个换掉，正好只命中这 10 个。
 
 单装某一个：
 

@@ -6,5 +6,6 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- 暂无条目。
+- [放弃的 ChatGPT MCP 接入](projects/project_abandoned_chatgpt_mcp.md) — 2026-02-19 建过两条空的 ChatGPT MCP change，没有设计可恢复；若再做从当前 MCP 布局重开。
+- [new-note MCP 的 ingest 约束](projects/project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时要遵守的编排、校验、git 失败处理和未完成项。
 <!-- project-memory-entries:end -->
