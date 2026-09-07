@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-09-07
+
+### Changed
+
+- 触发条件扩到对话里用户给出的有用信息（想法、约定、约束），不限于纠正和已验证结论。
+
 ## [1.4.0] - 2026-09-07
 
 ### Added
@@ -48,7 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.4.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.5.0...HEAD
+[1.5.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.4.0...skill/project-memory-remember@1.5.0
 [1.4.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.3.0...skill/project-memory-remember@1.4.0
 [1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.2.1...skill/project-memory-remember@1.3.0
 [1.2.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.2.0...skill/project-memory-remember@1.2.1
