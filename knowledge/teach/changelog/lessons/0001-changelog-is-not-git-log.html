@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>0001 · Changelog 不是 git log</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="meta">
+      课次 0001 ·
+      <a href="../MISSION.md">Mission</a> ·
+      <a href="../reference/changelog-skeleton.html">骨架速查</a>
+    </header>
+
+    <h1>Changelog 不是 git log</h1>
+    <p class="lede">你要写的是给人看的「值得注意的变更清单」，不是把提交历史贴进仓库。</p>
+
+    <h2>这一课你能带走什么</h2>
+    <p>能判断一段文字该不该进 <code>CHANGELOG.md</code>，并亲手起一个符合约定的空文件骨架。</p>
+
+    <h2>不要把提交历史贴进去</h2>
+    <p>
+      <a href="https://keepachangelog.com/en/2.0.0/">Keep a Changelog 2.0.0</a>
+      把 changelog 定义成一份<strong>经过挑选</strong>的、对读者<strong>值得注意</strong>的变更记录，按版本倒序排列。
+      它明确反对把 <code>git log</code> 当 changelog。
+    </p>
+    <p>三个关键词先记住：</p>
+    <ul>
+      <li><strong>经过挑选</strong>：有取舍，不是仓库的全量过程记录。</li>
+      <li><strong>值得注意</strong>：对使用或依赖这个项目的人有意义，不是每一次内部改动。</li>
+      <li><strong>按版本倒序</strong>：最新的发布（以及尚未发布的 <code>Unreleased</code>）放在最上面。</li>
+    </ul>
+
+    <h2>两份给人看的来源，职责不同</h2>
+    <p>
+      <code>git log</code> 记录的是<strong>开发过程里发生了什么</strong>：常含 merge、措辞含糊的提交、内部改动。
+      Changelog 记录的是<strong>对读者可见的差异</strong>——往往跨过好几次提交，并用读者语言写出来。
+    </p>
+    <div class="note">
+      把提交历史贴进 <code>CHANGELOG.md</code>，文件会充满噪声，把真正值得注意的变更淹没掉。
+    </div>
+    <p>
+      机器（含 LLM、从提交生成的工具）可以<strong>起草</strong>，但必须<strong>筛选</strong>：能进 changelog 的，是用户侧或依赖方需要知道的变化，不是 merge / 重构 / 内部工具噪声。
+    </p>
+
+    <h2>和 commit、release notes 各管什么</h2>
+    <p>
+      一次提交是过程里的一个点记录；某条 changelog 条目常常从多条提交里抽出，再润色。
+      Release notes 可以在对外宣布时再加工语气，但仓库里的 <code>CHANGELOG.md</code> 应先成为权威源：先写清「改了什么、该不该升级」，再决定要不要另写营销向文案。
+    </p>
+
+    <h2>亲手起一个最小骨架</h2>
+    <p>在自己的项目根目录放一份 <code>CHANGELOG.md</code>，先只要约定声明和空的 <code>[Unreleased]</code>：</p>
+<pre><code># Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+</code></pre>
+    <p>
+      用来边开发边记下条目。没有真正发布前，不要虚构版本号和日期。完整六节标题见
+      <a href="../reference/changelog-skeleton.html">骨架速查</a>。
+    </p>
+
+    <h2>课后动作（约 2 分钟）</h2>
+    <ol>
+      <li>选一个自己的仓库，打开或新建 <code>CHANGELOG.md</code>。</li>
+      <li>把 <code>## [Unreleased]</code> 放在已发布版本的上面。</li>
+      <li>六个分类小题可以暂且只留空节；还没想好先记哪类，下节再分。</li>
+    </ol>
+    <p>做完把你选的仓库名和第一行标题告诉我即可。</p>
+
+    <h2>精读材料</h2>
+    <p>
+      精读 <a href="https://keepachangelog.com/en/2.0.0/">Keep a Changelog 2.0.0</a>（约 10–15 分钟）：
+      先读 What is a changelog、Guiding principles、Don’t dump git logs。
+    </p>
+    <p>
+      对照 <a href="https://keepachangelog.com/zh-CN/1.1.0/">中文版</a> 找表述；约定冲突时以 2.0.0 英文为准。
+    </p>
+
+    <div class="ask-teacher">
+      <strong>卡住了？问我。</strong>
+      把你现在的 <code>CHANGELOG.md</code> 草稿——哪怕只有骨架——丢过来就行。
+    </div>
+
+    <h2>自测</h2>
+    <div id="q1"></div>
+    <div id="q2"></div>
+
+    <footer class="nav">
+      下一课预告：六个变更类型（Added / Changed / Deprecated / Removed / Fixed / Security）怎么分。
+    </footer>
+  </div>
+  <script src="../assets/quiz.js"></script>
+  <script>
+    Quiz.mount(document.getElementById("q1"), {
+      question: "下面哪一条更适合放进 CHANGELOG.md？",
+      choices: [
+        { id: "a", label: "合并分支仅消除冲突，用户侧看不见变化" },
+        { id: "b", label: "导出报表新增按月份筛选，用户能直接用" },
+        { id: "c", label: "重构代码迁移工具函数，抽到共享包内部" },
+        { id: "d", label: "把仓库代码检查配置更新到当前最新版本" },
+      ],
+      answer: "b",
+      explainOk: "对。用户侧可见的能力变化才记。",
+      explainBad: "不对。changelog 记对读者值得注意的差异，不记 merge / 重构 / 内部工具噪声。「导出报表新增按月份筛选」才是。",
+    });
+    Quiz.mount(document.getElementById("q2"), {
+      question: "changelog 和 git log 最核心的区别是？",
+      choices: [
+        { id: "a", label: "一个必须用标记语言　一个只能自动生成" },
+        { id: "b", label: "一个精选值得注意的变更　一个记录每次提交" },
+        { id: "c", label: "一个强制每次都升版本　一个完全不许升版本" },
+        { id: "d", label: "一个只写给外部技术读者　一个只写给作者" },
+      ],
+      answer: "b",
+      explainOk: "对。精选（curated）值得注意的变更，对比全量过程记录。",
+      explainBad: "不对。核心不是标记语言、升版本或读者身份，而是「变更精选」对上「记录每次提交」。",
+    });
+  </script>
+</body>
+</html>

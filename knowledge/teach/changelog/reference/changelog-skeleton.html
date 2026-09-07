@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>骨架速查 · Changelog</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="meta">
+      参考 ·
+      <a href="../MISSION.md">Mission</a> ·
+      <a href="../lessons/0001-changelog-is-not-git-log.html">课次 0001</a>
+    </header>
+
+    <h1>CHANGELOG.md 骨架</h1>
+    <p class="lede">先落下这个空文件，再往 <code>## [Unreleased]</code> 里记值得注意的变更。日期和版本号等真正发布时再填。</p>
+
+    <pre><code># Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+</code></pre>
+
+    <div class="note">
+      六个标题不必每次都写满：没有该类变更就删掉空节。未发布的条目一律放在 <code>[Unreleased]</code>；切版本时再把它变成 <code>[X.Y.Z] - YYYY-MM-DD</code>。
+    </div>
+
+    <p class="cite">
+      约定来源：<a href="https://keepachangelog.com/en/2.0.0/">Keep a Changelog 2.0.0</a> ·
+      版本号含义：<a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning 2.0.0</a>
+    </p>
+
+    <footer class="nav">
+      <a href="../lessons/0001-changelog-is-not-git-log.html">← 回到课次 0001</a>
+    </footer>
+  </div>
+</body>
+</html>
