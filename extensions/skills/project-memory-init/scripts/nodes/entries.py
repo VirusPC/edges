@@ -7,7 +7,14 @@ import re
 from pathlib import Path
 
 from lib.blocks import ENTRIES_END, ENTRIES_START, index_files, upsert_block
-from lib.paths import list_type_files, memory_dir, type_dir, write_atomic
+from lib.paths import (
+    is_external_type,
+    list_type_files,
+    memory_dir,
+    relative_link,
+    type_content_dir,
+    write_atomic,
+)
 from lib.provenance import AUDIT_FIELDS, ORIGIN_FIELDS, now_timestamp
 from lib.templates import (
     ENTRY_LINE_TEMPLATE,
@@ -29,14 +36,36 @@ YAML_TYPED = re.compile(
     re.IGNORECASE,
 )
 
-# 这类入口由本套索引，但正文遵循外部协议，不能套普通记忆模板。
+# 正文遵循 Agent Skills 协议的类型：形态是 <name>/SKILL.md，不套普通记忆模板。
+# 「用什么格式」和「能不能写」是两回事——skills 两者都占，agent_skills 只占前者，
+# 后者由 lib.paths.is_external_type() 判定（内容根在 .memory/ 外的一律只读）。
 SKILLS_TYPE = "skills"
-EXTERNAL_ENTRY_TYPES = frozenset({SKILLS_TYPE})
+AGENT_SKILLS_TYPE = "agent_skills"
+AGENT_SKILL_FORMAT_TYPES = frozenset({SKILLS_TYPE, AGENT_SKILLS_TYPE})
+
+# Agent Skills 协议：产物名固定，目录名即 name，kebab-case 且不超过 64 字符。
+SKILL_OUTPUT_NAME = "SKILL.md"
+SKILL_NAME_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+SKILL_NAME_MAX = 64
 
 
 def memory_entry_types() -> tuple[str, ...]:
-    """可由 remember 写入的普通记忆类型。"""
-    return tuple(name for name in index_files() if name not in EXTERNAL_ENTRY_TYPES)
+    """可由 remember 写入的类型。内容根在 `.memory/` 之外的一律只读。"""
+    return tuple(name for name in index_files() if not is_external_type(name))
+
+
+def entry_output_name(entry_type: str) -> str:
+    """这一类的产物名，同时决定用哪份模板（模板名 = 产物名 + .tmpl.md）。"""
+    if entry_type in AGENT_SKILL_FORMAT_TYPES:
+        return SKILL_OUTPUT_NAME
+    return ENTRY_OUTPUT_PATTERN
+
+
+def entry_name(path: Path, entry_type: str) -> str:
+    """条目的 name。skill 的身份是目录名，不是文件名——文件名恒为 SKILL.md。"""
+    if entry_type in AGENT_SKILL_FORMAT_TYPES:
+        return path.parent.name
+    return path.stem
 
 
 def yaml_scalar(value: str) -> str:
@@ -91,17 +120,19 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
     return fields
 
 
-def render_entry(fields: dict[str, str], content: str) -> str:
+def render_entry(
+    fields: dict[str, str], content: str, output_name: str = ENTRY_OUTPUT_PATTERN
+) -> str:
     """渲染单条记忆。frontmatter 的字段清单、顺序与可选性全部由模板决定。"""
     normalized_content = content.strip()
     if not normalized_content:
         raise ValueError("content 不能为空")
-    template = read_template(ENTRY_OUTPUT_PATTERN)
+    template = read_template(output_name)
     declared = set(PLACEHOLDER_PATTERN.findall(template))
     # 脚本产出了模板没声明的字段时必须报错，否则那个字段会被静默丢掉。
     undeclared = sorted(key for key, value in fields.items() if value and key not in declared)
     if undeclared:
-        name = template_path(ENTRY_OUTPUT_PATTERN).name
+        name = template_path(output_name).name
         raise ValueError(f"{name} 缺少占位符，字段会丢失: {', '.join(undeclared)}")
     values = {key: yaml_scalar(value) for key, value in fields.items() if value}
     values["content"] = normalized_content
@@ -113,11 +144,20 @@ def resolve_memory_path(target: Path, entry_type: str, slug: str | None) -> Path
     if entry_type not in memory_entry_types():
         raise ValueError(f"--type 不支持由 remember 写入: {entry_type}")
     normalized = (slug or "").strip().lower()
+    directory = type_content_dir(target, entry_type)
+    if entry_type in AGENT_SKILL_FORMAT_TYPES:
+        # Agent Skills 协议要求 name 等于目录名，所以 slug 直接当目录名用。
+        if not SKILL_NAME_PATTERN.fullmatch(normalized) or len(normalized) > SKILL_NAME_MAX:
+            raise ValueError(
+                f"--slug 在 {entry_type} 里是技能目录名，必须是 kebab-case 且不超过 "
+                f"{SKILL_NAME_MAX} 字符，例如 rerun-failed-e2e"
+            )
+        return directory / normalized / SKILL_OUTPUT_NAME
     if not re.fullmatch(r"[a-z0-9]+(?:_[a-z0-9]+)*", normalized):
         raise ValueError("--slug 必须是小写 snake_case，例如 reuse_existing_constants")
     if normalized.startswith(tuple(f"{name}_" for name in index_files())):
         raise ValueError("--slug 不要带类型前缀，脚本会按 --type 自动加上")
-    return type_dir(target, entry_type) / f"{entry_type}_{normalized}.md"
+    return directory / f"{entry_type}_{normalized}.md"
 
 
 def build_entry_fields(
@@ -130,9 +170,12 @@ def build_entry_fields(
     overrides: dict[str, str],
 ) -> dict[str, str]:
     """组装 frontmatter。显式覆盖优先级最高，其余按字段语义决定谁胜出。"""
+    agent_skill = entry_type in AGENT_SKILL_FORMAT_TYPES
+    # skill 的既有 title 在 metadata: 里，parse_frontmatter 读不到缩进行，所以取不回来。
     resolved_title = (title or existing.get("title") or "").strip()
     resolved_description = (description or existing.get("description") or "").strip()
-    if not resolved_title:
+    # Agent Skills 没有 title 这个概念，给了就存进 metadata，不给也不拦。
+    if not resolved_title and not agent_skill:
         raise ValueError("新建记忆必须提供 --title")
     if not resolved_description:
         raise ValueError("新建记忆必须提供 --description")
@@ -140,8 +183,10 @@ def build_entry_fields(
         "name": name,
         "title": resolved_title,
         "description": resolved_description,
-        "type": entry_type,
     }
+    # skill 的类型由它所在的位置决定，写进 frontmatter 只会多一个 spec 不认的顶层键。
+    if not agent_skill:
+        fields["type"] = entry_type
     # 出处字段记的是「谁最先写的」，所以已有值胜过本次探测值。
     for key in ORIGIN_FIELDS:
         value = overrides.get(key) or existing.get(key) or detected.get(key)
@@ -160,21 +205,23 @@ def build_entry_index(target: Path, entry_type: str) -> str:
     """从全部条目文件的 frontmatter 重算某个索引的条目清单。"""
     entries: list[str] = []
     directory = memory_dir(target)
-    if entry_type == SKILLS_TYPE:
-        # skills/ 的内部形状属于外部协议；这里只保留一个很薄的当前格式适配器。
-        paths = list_type_files(target, entry_type, "*/SKILL.md")
+    if entry_type in AGENT_SKILL_FORMAT_TYPES:
+        # skill 目录的内部形状属于外部协议；这里只保留一个很薄的当前格式适配器。
+        paths = list_type_files(target, entry_type, f"*/{SKILL_OUTPUT_NAME}")
     else:
         paths = list_type_files(target, entry_type, f"{entry_type}_*.md")
     for path in paths:
         fields = parse_frontmatter(path)
-        title = fields.get("title") or fields.get("name") or path.stem
+        name = entry_name(path, entry_type)
+        title = fields.get("title") or fields.get("name") or name
         description = fields.get("description") or "缺少 description，请补齐 frontmatter。"
         entries.append(
             render_line(
                 ENTRY_LINE_TEMPLATE,
                 {
                     "title": title,
-                    "path": path.relative_to(directory).as_posix(),
+                    # 外部类型的内容根在 .memory/ 外，链接必须能带 `../` 越界。
+                    "path": relative_link(path, directory),
                     "description": description,
                 },
             )

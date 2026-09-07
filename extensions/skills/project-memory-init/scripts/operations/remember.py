@@ -11,6 +11,8 @@ from lib.provenance import AUDIT_FIELDS, ORIGIN_FIELDS, agent_context, git_ident
 from nodes.agents import sync_target_agents
 from nodes.entries import (
     build_entry_fields,
+    entry_name,
+    entry_output_name,
     parse_frontmatter,
     refresh_index,
     render_entry,
@@ -34,10 +36,11 @@ def remember(
     action = "updated" if path.exists() else "created"
     existing = parse_frontmatter(path) if path.exists() else {}
     detected = {**agent_context(), **git_identity(target)}
+    name = entry_name(path, entry_type)
     fields = build_entry_fields(
-        path.stem, entry_type, title, description, existing, detected, overrides
+        name, entry_type, title, description, existing, detected, overrides
     )
-    write_atomic(path, render_entry(fields, content))
+    write_atomic(path, render_entry(fields, content, entry_output_name(entry_type)))
     # 全部索引一起重算：AGENTS.md 的记忆区块静态声明了它们都在，缺一个就是死链。
     for declared_type in index_files():
         refresh_index(target, declared_type)
@@ -48,8 +51,9 @@ def remember(
         "operation": "remember",
         "targetDir": str(target),
         "type": entry_type,
-        "name": path.stem,
-        "title": fields["title"],
+        "name": name,
+        # skill 可以不给 title，回落到 name 免得这里报个空串。
+        "title": fields["title"] or name,
         "path": path.relative_to(target).as_posix(),
         "index": index_path.relative_to(target).as_posix(),
         "action": action,

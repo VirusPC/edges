@@ -11,6 +11,7 @@
 - [project-memory 设计决策记录](projects/project_design_decisions.md) — 成型过程中的关键取舍、翻案与待议；论证不进 PROTOCOL/LAYOUT。
 - [Project Memory 系列 Skill 开发流程](projects/project_development.md) — 修改顺序：协议 → 布局 → init → 其他非 doctor skill → doctor。
 - [本层硬约束写在 AGENTS.md 区块里](projects/project_important_block.md) — 改 AGENTS.md 记忆形状、或决定一条规则该常驻还是进 .memory 时：点名 ask/remember，加上不检索就会做错的仓规，直接写进 project-memory-important；目录细则不进这里也不进 .memory。
+- [skills 按「谁有权改写」分成两类](projects/project_skill_ownership_split.md) — 为什么否掉 .memory→.agents 改名，改成 skills（自动沉淀）与 agent_skills（只索引）两个类型；两份入口为什么都放 .memory/；为什么没平铺进 local 区块。
 - [AGENTS.md 要点名 ask 和 remember](projects/project_spotlight_ask_remember.md) — 决定 AGENTS.md 要不要点名 skill、或觉得 skill 自己的说明就够时：要点名 ask 和 remember，因为 skill 一多，模型不一定会自己加载它们；不要点名 init/doctor/reshape，也不要在入口里写整套工具怎么用。
-- [项目记忆的类型集合](projects/project_type_set.md) — 当前四类是否够用；否掉 docs 与仓库内 user；.memory 类型目录改复数与 skills 对齐。
+- [项目记忆的类型集合](projects/project_type_set.md) — 当前五类及各自的闸门；skills 从只索引改为可写、新增只读的 agent_skills；否掉 docs 与仓库内 user。
 <!-- project-memory-entries:end -->

@@ -8,9 +8,10 @@ from pathlib import Path
 from lib.blocks import index_files, load_agents_template
 from lib.paths import (
     AGENTS_FILE_NAME,
+    is_external_type,
     list_memory_files,
     memory_dir,
-    type_dir,
+    type_content_dir,
     type_dir_name,
     write_atomic,
 )
@@ -21,14 +22,16 @@ from nodes.agents import (
     sync_index_entry,
     sync_target_agents,
 )
-from nodes.entries import memory_entry_types, refresh_index
+from nodes.entries import SKILL_OUTPUT_NAME, memory_entry_types, refresh_index
 
 
 def init_memory(target: Path, root: Path, description: str | None = None) -> dict[str, object]:
     """幂等初始化索引文件与 AGENTS.md 区块。模板全部校验通过后才动文件。"""
     load_agents_template()
     templates = {name: read_template(name) for name in index_files().values()}
+    # 两份记忆模板都先读一遍：缺任何一份都该在动文件之前失败。
     read_template(ENTRY_OUTPUT_PATTERN)
+    read_template(SKILL_OUTPUT_NAME)
     directory = memory_dir(target)
     legacy = (
         sorted(
@@ -61,7 +64,10 @@ def init_memory(target: Path, root: Path, description: str | None = None) -> dic
         )
     directory.mkdir(parents=True, exist_ok=True)
     for entry_type in index_files():
-        type_dir(target, entry_type).mkdir(parents=True, exist_ok=True)
+        # 外部类型的内容根是人与生态的地盘，不存在就是正常状态，绝不代建。
+        if is_external_type(entry_type):
+            continue
+        type_content_dir(target, entry_type).mkdir(parents=True, exist_ok=True)
     created: list[str] = []
     preserved: list[str] = []
     for name, template in templates.items():

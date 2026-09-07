@@ -23,10 +23,11 @@ from lib.blocks import (
 from lib.paths import (
     AGENTS_FILE_NAME,
     MEMORY_DIR_NAME,
+    is_external_type,
     legacy_type_dir,
     memory_dir,
     relative_or_name,
-    type_dir,
+    type_content_dir,
     write_atomic,
 )
 from nodes.agents import (
@@ -139,8 +140,11 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
     for owner in memory_dirs:
         directory = memory_dir(owner)
         for entry_type, file_name in index_files().items():
-            content_dir = type_dir(owner, entry_type)
+            content_dir = type_content_dir(owner, entry_type)
             stale = legacy_type_dir(owner, entry_type)
+            # 外部类型的内容根归人与生态：缺了不是毛病，也轮不到我们改名或补建。
+            if is_external_type(entry_type):
+                stale = None
             if stale is not None:
                 issue = (
                     "legacy-type-dir-conflict"
@@ -168,7 +172,11 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
                         "detail": "类型内容路径存在但不是目录，无法自动修复",
                     }
                 )
-            elif not content_dir.is_dir() and stale is None:
+            elif (
+                not content_dir.is_dir()
+                and stale is None
+                and not is_external_type(entry_type)
+            ):
                 findings.append(
                     {
                         "issue": "missing-type-dir",
@@ -209,7 +217,7 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
 
         for entry_type in memory_entry_types():
             for source in sorted(directory.glob(f"{entry_type}_*.md")):
-                destination = type_dir(owner, entry_type) / source.name
+                destination = type_content_dir(owner, entry_type) / source.name
                 issue = (
                     "legacy-entry-conflict"
                     if destination.exists()
@@ -392,9 +400,12 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
     for owner in discover_memory_dirs(root):
         content_dirs_valid = True
         for entry_type in index_files():
-            directory = type_dir(owner, entry_type)
+            directory = type_content_dir(owner, entry_type)
             if directory.exists() and not directory.is_dir():
                 content_dirs_valid = False
+                continue
+            # 唯一一处会 mkdir 的地方，外部类型必须在这里被挡住。
+            if is_external_type(entry_type):
                 continue
             directory.mkdir(parents=True, exist_ok=True)
         if not content_dirs_valid:

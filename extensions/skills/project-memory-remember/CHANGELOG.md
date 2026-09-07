@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-09-07
+
+### Added
+
+- `--type skills`：把可复用流程自动沉淀成 `.memory/skills/<slug>/SKILL.md`。`--slug` 在这一类里是技能目录名，走 kebab-case；`--title` 可省；出处与审计写进 `metadata:`，键名前缀 `edges-`。
+- 「沉淀成 skill 还是 feedback」的判据：可执行的重复步骤 → `skills`，「以后别这么干」→ `feedback`，「当初为什么这么定」→ `project`。
+
+### Changed
+
+- `skills` 不再是「不由 remember 写入」的类型。只读的那一半改由新类型 `agent_skills` 承担，它不出现在 `--type` 里。
+
 ## [1.3.0] - 2026-09-06
 
 ### Changed
@@ -37,7 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.3.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.4.0...HEAD
+[1.4.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.3.0...skill/project-memory-remember@1.4.0
 [1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.2.1...skill/project-memory-remember@1.3.0
 [1.2.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.2.0...skill/project-memory-remember@1.2.1
 [1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.1.0...skill/project-memory-remember@1.2.0

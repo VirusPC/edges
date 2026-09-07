@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-09-07
+
+### Added
+
+- 第五个类型 `agent_skills`：索引本层 `.agents/skills/` 下人写或 `npx skills` 装入的技能，入口是 `.memory/AGENT_SKILLS.md`。它是唯一内容根在 `.memory/` 之外的类型，**本套工具绝不往那里写**——不建目录、不生成内容、不改写既有文件。
+- `SKILL.tmpl.md`：`skills` 的产物模板，生成合法的 Agent Skills 目录 `skills/<name>/SKILL.md`。
+
+### Changed
+
+- `SKILLS.md` 入口改为只收自动沉淀的流程，人写或装入的移到 `AGENT_SKILLS.md`。分界线是谁有权改写。
+- `lib/paths.py` 的 `type_dir()` 改名 `type_content_dir()`，内容根越出 `.memory/` 的类型集中在 `EXTERNAL_CONTENT_DIRS`；该表同时意味着只读。
+- 索引条目路径改用 `relative_link()` 渲染，允许 `../` 越界，所以外部类型渲染成 `../.agents/skills/<name>/SKILL.md`。
+
+### Migration
+
+- 存量 `AGENTS.md` 会被 `$project-memory-doctor` 判为 `outdated-local` 并自动补上第五行，同时补建缺失的 `AGENT_SKILLS.md`。不需要手工迁移。
+
 ## [1.4.0] - 2026-09-06
 
 ### Changed
@@ -48,7 +65,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.4.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.5.0...HEAD
+[1.5.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.4.0...skill/project-memory-init@1.5.0
 [1.4.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.3.0...skill/project-memory-init@1.4.0
 [1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.1...skill/project-memory-init@1.3.0
 [1.2.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.0...skill/project-memory-init@1.2.1

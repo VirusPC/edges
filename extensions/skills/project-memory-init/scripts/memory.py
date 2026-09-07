@@ -39,10 +39,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--type",
         required=True,
         choices=sorted(memory_entry_types()),
-        help="feedback=纠正与禁止模式，project=代码里推不出的决策，reference=外部资料去哪找",
+        help=(
+            "feedback=纠正与禁止模式，project=代码里推不出的决策，"
+            "reference=外部资料去哪找，skills=可复用的执行流程"
+        ),
     )
-    remember_parser.add_argument("--slug", required=True, help="小写 snake_case，不带类型前缀")
-    remember_parser.add_argument("--title", help="索引里显示的标题；更新时可省略")
+    remember_parser.add_argument(
+        "--slug",
+        required=True,
+        help="小写 snake_case，不带类型前缀；skills 例外，用 kebab-case，它就是技能目录名",
+    )
+    remember_parser.add_argument("--title", help="索引里显示的标题；skills 可省略")
     remember_parser.add_argument("--description", help="索引里的一句说明；更新时可省略")
     remember_parser.add_argument("--origin-session-id", help="默认从环境变量探测")
     remember_parser.add_argument("--agent-client", help="默认从环境变量探测")

@@ -11,6 +11,13 @@ from pathlib import Path
 MEMORY_DIR_NAME = ".memory"
 AGENTS_FILE_NAME = "AGENTS.md"
 
+# 生态标准的 skill 位置。本套工具只读它，绝不写。
+AGENTS_DIR_NAME = ".agents"
+
+# 内容根不在 .memory/ 下的类型：type → 相对目标目录的路径片段。
+# 只有这一张表能让内容根越出 .memory/，越界带来的读写差别由调用方各自处理。
+EXTERNAL_CONTENT_DIRS = {"agent_skills": (AGENTS_DIR_NAME, "skills")}
+
 # paths.py 在 lib/ 下：parents[0]=lib, [1]=scripts, [2]=skill 根。
 SKILL_DIR = Path(__file__).resolve().parents[2]
 
@@ -69,14 +76,27 @@ def type_dir_name(entry_type: str) -> str:
     return entry_type if entry_type.endswith("s") else f"{entry_type}s"
 
 
-def type_dir(target: Path, entry_type: str) -> Path:
-    """目标目录里某一类型的内容目录。"""
+def is_external_type(entry_type: str) -> bool:
+    """内容根是否在 `.memory/` 之外。外部类型一律只读，工具不往里写。"""
+    return entry_type in EXTERNAL_CONTENT_DIRS
+
+
+def type_content_dir(target: Path, entry_type: str) -> Path:
+    """目标目录里某一类型的内容根。
+
+    默认是 `.memory/<复数>`；`EXTERNAL_CONTENT_DIRS` 里的类型改挂到目标目录下别处。
+    映射必须优先于 `type_dir_name()`——`agent_skills` 结尾是 `s`，不加复数也会
+    落到 `.memory/agent_skills`，靠这张表才拨回 `.agents/skills`。
+    """
+    external = EXTERNAL_CONTENT_DIRS.get(entry_type)
+    if external is not None:
+        return target.joinpath(*external)
     return memory_dir(target) / type_dir_name(entry_type)
 
 
 def legacy_type_dir(target: Path, entry_type: str) -> Path | None:
     """旧版「目录名 = type 原值」的位置；与当前目录不同且存在时才返回。"""
-    if type_dir_name(entry_type) == entry_type:
+    if is_external_type(entry_type) or type_dir_name(entry_type) == entry_type:
         return None
     path = memory_dir(target) / entry_type
     return path if path.exists() else None
@@ -88,6 +108,15 @@ def relative_or_name(path: Path, root: Path) -> str:
         return path.relative_to(root).as_posix()
     except ValueError:
         return path.name
+
+
+def relative_link(path: Path, base: Path) -> str:
+    """索引条目里的链接路径：相对 base，允许 `../` 越界。
+
+    与 `relative_or_name()` 的区别是越界处理——那个退回文件名（够用于报告），
+    这个必须给出真能点开的路径，因为外部类型的内容根就在 `.memory/` 外面。
+    """
+    return Path(os.path.relpath(path, base)).as_posix()
 
 
 def list_memory_files(target: Path, pattern: str = "*.md") -> list[Path]:
@@ -104,8 +133,8 @@ def list_memory_files(target: Path, pattern: str = "*.md") -> list[Path]:
 def list_type_files(
     target: Path, entry_type: str, pattern: str = "*.md", *, recursive: bool = False
 ) -> list[Path]:
-    """列出某一类型目录里的文件；是否递归由该类型的适配器决定。"""
-    directory = type_dir(target, entry_type)
+    """列出某一类型内容根里的文件；是否递归由该类型的适配器决定。"""
+    directory = type_content_dir(target, entry_type)
     if not directory.is_dir():
         return []
     paths = directory.rglob(pattern) if recursive else directory.glob(pattern)

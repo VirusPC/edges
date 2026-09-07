@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-09-07
+
+### Changed
+
+- 认识第五个类型 `agent_skills`，并对它跳过全部写操作：不报 `missing-type-dir`、不报 `legacy-type-dir`、`--apply` 时也不补建目录。`.agents/` 归人与生态，一个字节都不碰；本层没有 `.agents/skills/` 时索引是空清单，属正常状态。
+- 存量 `AGENTS.md` 因为少一行入口会被判 `outdated-local`，`--apply` 自动刷新并补建 `AGENT_SKILLS.md`。
+
 ## [1.3.1] - 2026-09-06
 
 ### Changed
@@ -41,7 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.3.1...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.4.0...HEAD
+[1.4.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.3.1...skill/project-memory-doctor@1.4.0
 [1.3.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.3.0...skill/project-memory-doctor@1.3.1
 [1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.2.0...skill/project-memory-doctor@1.3.0
 [1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.1.0...skill/project-memory-doctor@1.2.0
