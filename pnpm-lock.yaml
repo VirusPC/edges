@@ -12,6 +12,22 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
+  extensions/clis:
+    dependencies:
+      zod:
+        specifier: ^3.24.2
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.19.11
+        version: 22.19.11
+      tsx:
+        specifier: ^4.19.3
+        version: 4.21.0
+      typescript:
+        specifier: ^5.8.2
+        version: 5.9.3
+
   extensions/mcp-servers/new-note:
     dependencies:
       '@modelcontextprotocol/sdk':
@@ -372,7 +388,7 @@ packages:
     engines: {node: '>= 0.4'}
 
   esbuild@0.27.3:
-    resolution: {integrity: sha512-8VwMnyGCONIs6cWue2IdpHxHnAjzxnw2Zr7MkVxB2vjmQ2ivqGFb4LEG3SMnv0Gb2F/G/2yA8zUaiL1gywDCCg==, tarball: https://registry.npmjs.org/esbuild/-/esbuild-0.27.3.tgz}
+    resolution: {integrity: sha1-WFnKjnCjr5VrJolc5JVNfnO9J6g=, tarball: https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/esbuild/download/esbuild-0.27.3.tgz}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -432,7 +448,7 @@ packages:
     engines: {node: '>= 0.8'}
 
   fsevents@2.3.3:
-    resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==, tarball: https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/fsevents/-/fsevents-2.3.3.tgz}
+    resolution: {integrity: sha1-ysZAd4XQNnWipeGlMFxpezR9kNY=, tarball: https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/fsevents/download/fsevents-2.3.3.tgz}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
@@ -448,7 +464,7 @@ packages:
     engines: {node: '>= 0.4'}
 
   get-tsconfig@4.13.6:
-    resolution: {integrity: sha512-shZT/QMiSHc/YBLxxOkMtgSid5HFoauqCE3/exfsEcwg1WkeqjG+V40yBbBrsD+jW2HDXcs28xOfcbm2jI8Ddw==, tarball: https://registry.npmjs.org/get-tsconfig/-/get-tsconfig-4.13.6.tgz}
+    resolution: {integrity: sha1-L7/aVYqYppGnmPEjr9lZFbrc6HY=, tarball: https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/get-tsconfig/download/get-tsconfig-4.13.6.tgz}
 
   gopd@1.2.0:
     resolution: {integrity: sha1-ifVrghe9vIgCvSmd9tfxCB1+UaE=, tarball: https://registry.npmjs.org/gopd/-/gopd-1.2.0.tgz}
@@ -624,7 +640,7 @@ packages:
     engines: {node: '>=0.10.0'}
 
   resolve-pkg-maps@1.0.0:
-    resolution: {integrity: sha1-YWs9wsVwVrVYjDHN9LPWTbEzcg8=, tarball: https://registry.npmjs.org/resolve-pkg-maps/-/resolve-pkg-maps-1.0.0.tgz}
+    resolution: {integrity: sha1-YWs9wsVwVrVYjDHN9LPWTbEzcg8=, tarball: https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/resolve-pkg-maps/download/resolve-pkg-maps-1.0.0.tgz}
 
   router@2.2.0:
     resolution: {integrity: sha512-nLTrUKm2UyiL7rlhapu/Zl45FwNgkZGaCpZbIHajDYgwlJCOzLSk+cIPAnsEqV955GjILJnKbdQC1nVPz+gAYQ==, tarball: https://registry.npmjs.org/router/-/router-2.2.0.tgz}
@@ -688,7 +704,7 @@ packages:
     engines: {node: '>=0.6'}
 
   tsx@4.21.0:
-    resolution: {integrity: sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw==, tarball: https://registry.npmjs.org/tsx/-/tsx-4.21.0.tgz}
+    resolution: {integrity: sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw==, tarball: https://artifactory.devops.xiaohongshu.com/artifactory/api/npm/npm-public/tsx/-/tsx-4.21.0.tgz}
     engines: {node: '>=18.0.0'}
     hasBin: true
 

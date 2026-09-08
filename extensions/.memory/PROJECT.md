@@ -6,5 +6,6 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
+- [new_note 收成 extensions/clis/edges-note，MCP 保留](projects/project_clis_from_mcp.md) — 改 ingest、new-note MCP 或 clis 时：本地 agent 走 extensions/clis/edges-note，git 仍在 bin/new-note，MCP 保留；鉴权用 --token-file，JSON stdout。不要把 CLI 放仓库根。
 - [Skill 独立发版，changelog 按 skill 分](projects/project_skill_independent_versioning.md) — 决定 changelog、tag、semver 粒度时：每个 skill 一份，不要 extensions/skills 总 changelog。
 <!-- project-memory-entries:end -->

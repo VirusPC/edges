@@ -11,7 +11,7 @@ Edges 是一个 **以知识沉淀为手段、以长期认知复利为目标的�
 
 ## 设计思想
 
-**终端捕获，核心沉淀**：各个终端（ChatGPT、Cursor、Claude Code、Gemini CLI 等）作为知识的感知端，负责总结对话中的核心逻辑与灵感。通过 **`new-note` MCP Server**，这些零散的思考被自动、标准地沉淀到 Edges 系统的 `knowledge/notes/` 中，实现“对话即笔记，思考即资产”的自动化闭环。
+**终端捕获，核心沉淀**：各个终端（ChatGPT、Cursor、Claude Code、Gemini CLI 等）作为知识的感知端，负责总结对话中的核心逻辑与灵感。通过 **`edges-note` CLI**（本地有 shell 的 agent）或 **`new-note` MCP Server**（没有 shell 的宿主），这些零散的思考被自动、标准地沉淀到 Edges 系统的 `knowledge/notes/` 中，实现“对话即笔记，思考即资产”的自动化闭环。
 
 ### 核心指标
 
@@ -71,9 +71,11 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 
 ## 2. 用户命令 (bin/)
 
-存放面向用户/Agent 反复调用的可执行命令，由 `pnpm setup` 加入 `$PATH` 后可在任意目录直接调用。
+**`bin/`** 存放面向人的可执行命令（shell），由 `pnpm setup` 加入 `$PATH` 后可在任意目录直接调用。
 
-- **`new-note`**: 快速创建笔记的 CLI 工具。
+- **`new-note`**: 笔记 ingest 的 git 实现（落盘、commit、push）。人可以直接调；agent 不要把它当机器契约。
+
+面向 agent 的 CLI 项目在 [`extensions/clis/`](extensions/clis/README.md)（`edges-note`），不在 `bin/`。
 
 > 项目自身的维护脚本（setup、release、migration 等）不在 `bin/`，见下一节 `scripts/`。
 > skill 分发不在 `bin/`，见下方「接入初始化」。
@@ -97,7 +99,8 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 
 **收录标准**: 判据是「换一个 Agent、换一台机器，这东西还带得走吗」，而不是「它是代码还是文档」。纯 markdown 同样属于 extensions。
 
-- **`mcp-servers/`**: 标准化接口服务 (如 `new-note` server)，让 AI 能够直接操作知识库。
+- **`clis/`**: 面向 agent 的 CLI 项目（`edges-note`）。本地有 shell 的 agent 优先走它。
+- **`mcp-servers/`**: 标准化接口服务 (如 `new-note` server)，给**没有 shell** 的 AI 宿主。
 - **`skills/`**: 导出给外部 Agent 的思维链与操作规范。
 - **`subagents/`**: 专用子代理配置。
 - **`tools/`**: 独立调用工具。
@@ -138,16 +141,18 @@ npx skills@latest add VirusPC/edges/extensions/skills
 ### 核心操作
 
 - **安装依赖**: `pnpm install` (在根目录执行)
-- **启动 MCP Server**:
+- **启动 MCP Server**（无 shell 的宿主）:
   - 启动 New Note: `pnpm start:note-server`
   - 开发模式: `pnpm dev:note-server`
+- **Agent CLI**: `pnpm cli:note -- --help`
 - **通用的启动器**: `pnpm mcp:run <server-name> <command>`
   - 示例: `pnpm mcp:run new-note build`
 
 ### 结构规范
 
-- `extensions/mcp-servers/*`: 独立的 MCP 服务单元，各自拥有 `package.json`，是 workspace 的唯一成员。
-- `bin/`: 面向用户/Agent 反复调用的可执行命令（shell，非 node 包），由 `pnpm setup` 加入 `$PATH`。
+- `extensions/mcp-servers/*`: 独立的 MCP 服务单元，各自拥有 `package.json`。
+- `extensions/clis`: 面向 agent 的 CLI 项目（workspace 成员 `edges-cli`，二进制 `edges-note`）。
+- `bin/`: 面向人的可执行命令（shell，非 node 包），由 `pnpm setup` 加入 `$PATH`。 ingest 的 git 实现在这里。
 - `scripts/`: 项目自身的维护脚本（setup、release、migration 等），通过 `pnpm <name>` 调用，不入 PATH。
 - `tsconfig.base.json`: 共享的全局编译器配置。
 
