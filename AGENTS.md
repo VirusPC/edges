@@ -1,6 +1,6 @@
 # Agent Developer Guide
 
-你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 extensions、辅助知识库结构。
+你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 extensions 与 shared-extensions、辅助知识库结构。
 
 目录约定、业务逻辑与内容标准看 [README.md](README.md)，那是唯一真理源。
 
@@ -34,6 +34,7 @@
 按任务目录加载对应 `AGENTS.md`。
 
 - [extensions/AGENTS.md](extensions/AGENTS.md) — 对外接口层：skills、MCP、tools 等供外部 Agent 接入的扩展。
+- [shared-extensions/AGENTS.md](shared-extensions/AGENTS.md) — 跨机器、跨 Agent 共享的个人 harness：skills、MCP 配置、plugins、hooks。
 <!-- project-memory-children:end -->
 
 <!-- project-memory:end -->

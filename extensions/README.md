@@ -6,9 +6,11 @@
 
 ## 收录标准
 
-判据是**「换一个 Agent、换一台机器，这东西还带得走吗」**，而不是「它是代码还是文档」。
+判据是**「这是为了让 Agent / 外部系统接入或操作 Edges」**，而不是「它是代码还是文档」。
 纯 markdown 一样是 extension——一段能复用的 system prompt、一份开荒新机器的操作手册，与一个 MCP server 在这里地位相同。
-反过来，只在当下有用、不可复用的总结属于 `knowledge/notes/`，不进这里。
+反过来：只在当下有用、不可复用的总结属于 `knowledge/notes/`；跨机器共用、却不绑定 Edges 的 harness（通用 skill、MCP 配置、plugins、hooks）属于 [`shared-extensions/`](../shared-extensions/README.md)。
+
+换 Agent、换机器带得走是进本目录的必要条件，不是充分条件。
 
 ## 目录结构
 

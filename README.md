@@ -97,7 +97,7 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 
 `extensions/` 目录是 Edges 系统对外的**接口层**，供外部 Agent 或系统接入。
 
-**收录标准**: 判据是「换一个 Agent、换一台机器，这东西还带得走吗」，而不是「它是代码还是文档」。纯 markdown 同样属于 extensions。
+**收录标准**: 判据是「这是为了让 Agent / 外部系统接入或操作 Edges」，而不是「它是代码还是文档」。纯 markdown 同样属于 extensions。换 Agent、换机器带得走是必要条件，但不是充分条件——跨机器共用、却不绑定 Edges 的 harness 走 [`shared-extensions/`](shared-extensions/README.md)。
 
 - **`clis/`**: 面向 agent 的 CLI 项目（`edges-note`）。本地有 shell 的 agent 优先走它。
 - **`mcp-servers/`**: 标准化接口服务 (如 `new-note` server)，给**没有 shell** 的 AI 宿主。
@@ -134,7 +134,24 @@ npx skills@latest add VirusPC/edges/extensions/skills
 
 ---
 
-## 5. 工作区管理 (Workspace)
+## 5. 跨机器共享扩展 (shared-extensions/)
+
+`shared-extensions/` 是个人 agent harness 的真源：同一套扩展装到所有本地和云端机器，被所有 Agent 共用。
+
+**收录标准**: 判据是「离开 Edges，换一台机器、换一个 Agent，我还要带着它干活吗」。和 `extensions/` 互斥。
+
+- **`skills/`**: 不绑定 Edges 的通用 skill（不走 `npx skills add VirusPC/edges/extensions/skills`）。
+- **`mcp/`**: MCP **配置**（连哪些 server）。Edges 自己的 MCP server 实现仍在 `extensions/mcp-servers/`。
+- **`plugins/`**: Agent 插件。
+- **`hooks/`**: Agent 生命周期钩子。
+
+凭据只用环境变量占位，禁止写入实际 token。发现位在各机器的全局 Agent 目录（`~/.agents/skills` 等），不是本仓库的 `.agents/skills`。安装脚本尚未落地，有第一份真实内容时再加。
+
+整层一份版本（[`VERSION`](shared-extensions/VERSION)、[`CHANGELOG.md`](shared-extensions/CHANGELOG.md)、tag `shared-extensions@`），不按单条扩展发版。记忆入口 [`shared-extensions/AGENTS.md`](shared-extensions/AGENTS.md)。细则见 [`shared-extensions/README.md`](shared-extensions/README.md)。
+
+---
+
+## 6. 工作区管理 (Workspace)
 
 本项目采用 **pnpm workspace** 进行“服务端服务工作区”管理，实现环境隔离与统一调度。
 
@@ -158,12 +175,12 @@ npx skills@latest add VirusPC/edges/extensions/skills
 
 ---
 
-## 6. 隐私与脱敏
+## 7. 隐私与脱敏
 
 > **前提：本仓库是公开仓库（`github.com/VirusPC/edges`）。** 任何写入的内容都等同于公开发表。
 > 写笔记时的默认心智是「我在发博客」，不是「我在记私人日记」。
 
-### 6.1 绝对不能进仓库 (Never)
+### 7.1 绝对不能进仓库 (Never)
 
 以下内容一旦写入即为事故，不存在「先提交再清理」这个选项——git 历史无法真正删除：
 
@@ -174,7 +191,7 @@ npx skills@latest add VirusPC/edges/extensions/skills
 | **未公开 IP** | 专利交底书、未发布的方案评审材料、内部立项文档 |
 | **二进制办公文档** | `.docx/.xlsx/.pptx` 等（正文与元数据都无法 diff 审查，已在 `.gitignore` 中拒收） |
 
-### 6.2 必须脱敏后才能进仓库 (Redact)
+### 7.2 必须脱敏后才能进仓库 (Redact)
 
 公司内部信息不必一概不写——**方法论可以留，标识符必须去**。脱敏映射：
 
@@ -193,7 +210,7 @@ npx skills@latest add VirusPC/edges/extensions/skills
 > 本文为通用方法论记录，已移除具体公司内部系统名称、内部文档链接与排期。
 ```
 
-### 6.3 截图是最容易漏掉的泄漏面
+### 7.3 截图是最容易漏掉的泄漏面
 
 **文字脱敏了不等于截图脱敏了。** 截图会带上编辑器标签页文件名、终端路径、浏览器地址栏、侧边栏目录树、IM 窗口。
 
@@ -201,14 +218,14 @@ npx skills@latest add VirusPC/edges/extensions/skills
 - 内部系统 UI 的截图一律不入库；需要示意就自己造一个 demo 再截
 - 判据：**这张图放到公开博客里，我会不会需要打码？** 会，就别放
 
-### 6.4 写入与发现泄漏
+### 7.4 写入与发现泄漏
 
-1. **写入前自查**：向 `knowledge/` 写入内容时，先按 6.1 / 6.2 过一遍；命中就地脱敏，并说明改了什么。
+1. **写入前自查**：向 `knowledge/` 或 `shared-extensions/` 写入内容时，先按 7.1 / 7.2 过一遍；命中就地脱敏，并说明改了什么。
 2. **发现即上报**：在仓库任意位置发现疑似泄漏，立即停下并告知，不要默默修掉——需要知道它曾经存在过多久。
 3. **历史重写必须仓库所有者确认**：`git filter-repo`、`git push --force` 属于不可逆操作。可以准备命令、做好备份（`git bundle create ... --all`），但执行必须由所有者本人完成。
 4. **删文件 ≠ 删历史**：报告清理结果时，必须明确区分「工作区已清理」和「历史已重写」。
 
-### 6.5 例行自查
+### 7.5 例行自查
 
 ```bash
 # 内部标识符扫描（按需扩充 pattern）

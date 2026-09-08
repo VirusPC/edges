@@ -1,6 +1,6 @@
 # Skills (extensions/skills/)
 
-本目录是 Edges 系统所有 skill 的**唯一真源**，供外部 AI Agent（Claude Code、Codex、Cursor、Gemini CLI、Factory、opencode）加载。
+本目录是 Edges **对外分发、接入本系统**的 skill 真源，供外部 AI Agent（Claude Code、Codex、Cursor、Gemini CLI、Factory、opencode）加载。不绑定 Edges 的通用 skill 在 [`shared-extensions/skills/`](../../shared-extensions/skills/README.md)，不要放进来。
 
 ## 目录规范
 

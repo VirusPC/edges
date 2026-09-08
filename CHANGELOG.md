@@ -5,12 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-本文件只记 **Edges 仓库级**变更。Skill 各自独立 semver，明细见 [`extensions/skills/<name>/CHANGELOG.md`](extensions/skills/)。
+本文件只记 **Edges 仓库级**变更。对外 skill 各自独立 semver，明细见 [`extensions/skills/<name>/CHANGELOG.md`](extensions/skills/)。跨机器 harness 整层一份版本，明细见 [`shared-extensions/CHANGELOG.md`](shared-extensions/CHANGELOG.md)。
 
 ## [Unreleased]
 
 ### Added
 
+- `shared-extensions/`：跨机器、跨 Agent 共享的个人 harness（skills、MCP 配置、plugins、hooks）。接入 Edges 的能力仍在 `extensions/`。整层发版：`VERSION` + `CHANGELOG.md` + tag `shared-extensions@`。
 - MIT 许可证。
 - README 增加「隐私与脱敏」节。
 - `extensions/clis/`：面向 agent 的 `edges-note` CLI（JSON stdout，复用 `bin/new-note`）。本地 agent 优先走它；MCP `new-note` 保留。
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `extensions/` 收录标准收窄为「接入或操作 Edges」；跨机器共用但不绑定 Edges 的扩展改走 `shared-extensions/`。
 - project-memory 的 `AGENTS.md` 增加本层硬约束区块：最重要的规则直接写在入口里。
 - project-memory 的 `AGENTS.md` 受管区块之间空一行。
 - `AGENTS.md` 作为记忆入口只保留硬约束、本层索引、下层索引；检索与沉淀时机写进硬约束。根入口正文收到身份、指针和硬约束，目录细则仍看 README。
