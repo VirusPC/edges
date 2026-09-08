@@ -1,11 +1,12 @@
 ---
 name: project_root_important_scope
-title: 根硬约束只留聚光灯、脱敏与 git
 description: 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T21:51:03+08:00"
+metadata:
+  edges-title: 根硬约束只留聚光灯、脱敏与 git
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T21:51:03+08:00"
 ---
 
 根 `AGENTS.md` 的本层硬约束只留四条：ask / remember 聚光灯、「硬约束写在本区块」、公开仓脱敏闸门、git 纪律。`bin/` / `scripts/` 路径约定和「少即是多」不进硬约束，也不进 `.memory`。

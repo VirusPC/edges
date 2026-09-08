@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-09-08
+
+### Changed
+
+- 说明普通记忆的实现字段也写进 `metadata.edges-*`，不要手写扁平顶层键。
+
 ## [1.5.0] - 2026-09-07
 
 ### Changed
@@ -54,7 +60,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.5.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.5.1...HEAD
+[1.5.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.5.0...skill/project-memory-remember@1.5.1
 [1.5.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.4.0...skill/project-memory-remember@1.5.0
 [1.4.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.3.0...skill/project-memory-remember@1.4.0
 [1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.2.1...skill/project-memory-remember@1.3.0

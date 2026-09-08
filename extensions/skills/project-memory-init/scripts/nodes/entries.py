@@ -48,6 +48,36 @@ SKILL_OUTPUT_NAME = "SKILL.md"
 SKILL_NAME_PATTERN = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 SKILL_NAME_MAX = 64
 
+# spec 顶层闭集。实现字段不出现在这里。
+SPEC_TOP_LEVEL_KEYS = frozenset(
+    {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
+)
+
+# 旧版普通记忆写在 YAML 顶层的实现字段；读仍认，写不再产出。
+FLAT_COMPAT_KEYS = frozenset(
+    {
+        "title",
+        "type",
+        "originSessionId",
+        "agentClient",
+        "username",
+        "email",
+        "updatedAt",
+    }
+)
+
+# metadata 子键 → 内部字段名。带 edges- 前缀的是当前写法；未加前缀的也能读。
+METADATA_KEY_MAP = {
+    "edges-title": "title",
+    "edges-type": "type",
+    "edges-origin-session-id": "originSessionId",
+    "edges-agent-client": "agentClient",
+    "edges-username": "username",
+    "edges-email": "email",
+    "edges-updated-at": "updatedAt",
+    **{key: key for key in FLAT_COMPAT_KEYS},
+}
+
 
 def memory_entry_types() -> tuple[str, ...]:
     """可由 remember 写入的类型。内容根在 `.memory/` 之外的一律只读。"""
@@ -86,8 +116,65 @@ def yaml_scalar(value: str) -> str:
     return f'"{escaped}"'
 
 
+def parse_yaml_scalar(raw: str) -> str:
+    """解开 yaml_scalar 加上的引号。"""
+    value = raw.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        inner = value[1:-1]
+        if value[0] == '"':
+            inner = inner.replace('\\"', '"').replace("\\\\", "\\")
+        return inner
+    return value
+
+
+def _parse_frontmatter_lines(lines: list[str]) -> dict[str, str]:
+    """从 frontmatter 行解析逻辑字段。顶层旧键先填，metadata 后盖，后者赢。"""
+    top_level: dict[str, str] = {}
+    metadata: dict[str, str] = {}
+    in_metadata = False
+    for raw_line in lines:
+        line = raw_line.rstrip("\r\n")
+        if not line.strip():
+            continue
+        indented = line.startswith((" ", "\t"))
+        if indented:
+            if not in_metadata:
+                continue
+            key, separator, raw_value = line.strip().partition(":")
+            if not separator:
+                continue
+            value = parse_yaml_scalar(raw_value)
+            if value:
+                metadata[key.strip()] = value
+            continue
+        in_metadata = False
+        key, separator, raw_value = line.partition(":")
+        if not separator:
+            continue
+        name = key.strip()
+        if name == "metadata":
+            in_metadata = True
+            continue
+        value = parse_yaml_scalar(raw_value)
+        if value:
+            top_level[name] = value
+    fields: dict[str, str] = {}
+    for key, value in top_level.items():
+        if key in SPEC_TOP_LEVEL_KEYS or key in FLAT_COMPAT_KEYS:
+            fields[key] = value
+    for key, value in metadata.items():
+        internal = METADATA_KEY_MAP.get(key)
+        if internal:
+            fields[internal] = value
+    return fields
+
+
 def parse_frontmatter(path: Path) -> dict[str, str]:
-    """读取扁平 YAML frontmatter；没有 frontmatter 或读不出来时返回空字典。"""
+    """读取 YAML frontmatter 为内部字段名。
+
+    新文件：实现字段在 `metadata.edges-*`。旧文件：同一批字段在顶层。
+    两边都有时 metadata 赢。读不出来时返回空字典。
+    """
     try:
         source = path.open(encoding="utf-8")
     except (OSError, UnicodeError):
@@ -99,7 +186,31 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
             return {}
         if first.strip() != "---":
             return {}
-        fields: dict[str, str] = {}
+        collected: list[str] = []
+        try:
+            for raw_line in source:
+                if raw_line.rstrip("\r\n").strip() == "---":
+                    break
+                collected.append(raw_line)
+        except UnicodeError:
+            return {}
+    return _parse_frontmatter_lines(collected)
+
+
+def top_level_frontmatter_keys(path: Path) -> set[str]:
+    """frontmatter 里未缩进的键名，用来发现旧版扁平实现字段。"""
+    keys: set[str] = set()
+    try:
+        source = path.open(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return keys
+    with source:
+        try:
+            first = next(source)
+        except (StopIteration, UnicodeError):
+            return keys
+        if first.strip() != "---":
+            return keys
         try:
             for raw_line in source:
                 line = raw_line.rstrip("\r\n")
@@ -107,17 +218,64 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
                     break
                 if not line.strip() or line.startswith((" ", "\t")):
                     continue
-                key, separator, raw_value = line.partition(":")
-                if not separator:
-                    continue
-                value = raw_value.strip()
-                if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
-                    value = value[1:-1]
-                if value:
-                    fields[key.strip()] = value
+                key, separator, _value = line.partition(":")
+                if separator:
+                    keys.add(key.strip())
         except UnicodeError:
-            return {}
-    return fields
+            return keys
+    return keys
+
+
+def has_legacy_flat_frontmatter(path: Path) -> bool:
+    """普通记忆是否还把实现字段写在 YAML 顶层。"""
+    return bool(top_level_frontmatter_keys(path) & FLAT_COMPAT_KEYS)
+
+
+def extract_entry_body(text: str) -> str:
+    """取关闭 `---` 之后的正文。"""
+    if not text.startswith("---"):
+        return text
+    rest = text[3:]
+    if rest.startswith("\n"):
+        rest = rest[1:]
+    marker = "\n---"
+    index = rest.find(marker)
+    if index < 0:
+        return text
+    body = rest[index + len(marker) :]
+    if body.startswith("\n"):
+        body = body[1:]
+    return body
+
+
+def ordinary_memory_types() -> tuple[str, ...]:
+    """走 type_slug 模板的可写类型，不含 skills。"""
+    return tuple(
+        name for name in memory_entry_types() if name not in AGENT_SKILL_FORMAT_TYPES
+    )
+
+
+def rewrite_ordinary_header(path: Path) -> bool:
+    """把旧扁平文件头收成当前模板，正文 strip 后写回。改了返回 True。"""
+    try:
+        original = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return False
+    fields = parse_frontmatter(path)
+    if "name" not in fields:
+        fields["name"] = path.stem
+    if "type" not in fields:
+        prefix = path.stem.split("_", 1)[0]
+        if prefix in ordinary_memory_types():
+            fields["type"] = prefix
+    body = extract_entry_body(original).strip()
+    if not body:
+        return False
+    updated = render_entry(fields, body, ENTRY_OUTPUT_PATTERN)
+    if updated == original:
+        return False
+    write_atomic(path, updated)
+    return True
 
 
 def render_entry(
@@ -171,7 +329,7 @@ def build_entry_fields(
 ) -> dict[str, str]:
     """组装 frontmatter。显式覆盖优先级最高，其余按字段语义决定谁胜出。"""
     agent_skill = entry_type in AGENT_SKILL_FORMAT_TYPES
-    # skill 的既有 title 在 metadata: 里，parse_frontmatter 读不到缩进行，所以取不回来。
+    # title 可能来自旧顶层键或 metadata.edges-title，parse_frontmatter 已经摊平。
     resolved_title = (title or existing.get("title") or "").strip()
     resolved_description = (description or existing.get("description") or "").strip()
     # Agent Skills 没有 title 这个概念，给了就存进 metadata，不给也不拦。

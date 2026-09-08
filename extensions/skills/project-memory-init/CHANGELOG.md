@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-09-08
+
+### Changed
+
+- 普通记忆（`feedback` / `project` / `reference`）写入改为 Agent Skills 闭集：顶层只留 `name` / `description` / `metadata`，实现字段进 `metadata.edges-*`。读取仍兼容旧的扁平顶层键，两边都有时 metadata 赢。
+
 ## [1.5.0] - 2026-09-07
 
 ### Added
@@ -65,7 +71,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.5.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.6.0...HEAD
+[1.6.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.5.0...skill/project-memory-init@1.6.0
 [1.5.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.4.0...skill/project-memory-init@1.5.0
 [1.4.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.3.0...skill/project-memory-init@1.4.0
 [1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.2.1...skill/project-memory-init@1.3.0

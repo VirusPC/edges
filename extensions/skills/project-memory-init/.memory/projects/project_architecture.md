@@ -1,11 +1,12 @@
 ---
 name: project_architecture
-title: 项目记忆的技术关键点
 description: 这套记忆的承重点、最脆的地方，以及技术选择的判断。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T13:38:38+08:00"
+metadata:
+  edges-title: 项目记忆的技术关键点
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T13:38:38+08:00"
 ---
 
 # 项目记忆的技术关键点

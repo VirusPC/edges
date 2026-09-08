@@ -1,11 +1,12 @@
 ---
 name: reference_agent_oriented_cli
-title: 面向 agent 的 CLI 怎么设计
 description: 设计或评审给 agent 用的 CLI 时查：AXI vs raw CLI vs MCP、--help、非交互、stdout/stderr、退出码、结构化错误码，及 AXI/Scalekit/clig.dev/gh --json/checklist 来源。
-type: reference
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-08T14:24:29+08:00"
+metadata:
+  edges-title: 面向 agent 的 CLI 怎么设计
+  edges-type: reference
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-08T14:24:29+08:00"
 ---
 
 面向 agent 的 CLI 不是「给人看的终端程序再加 `--json`」，也不是默认上 MCP。有效界面是 agent-optimized CLI：自描述 `--help`、全程非交互、stdout 只放可解析结果、stderr 放诊断、失败稳定非零退出、错误带可分支的结构化码。

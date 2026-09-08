@@ -1,12 +1,13 @@
 ---
 name: feedback_verify_before_asserting
-title: 断言仓库事实前先跑能证伪它的命令
 description: 汇报仓库、git 历史或工具行为的事实时：先跑验证命令，别把推断说成查过的。工具输出的显示形态不等于文件内容。
-type: feedback
-agentClient: claude-code
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-07T21:43:47+08:00"
+metadata:
+  edges-title: 断言仓库事实前先跑能证伪它的命令
+  edges-type: feedback
+  edges-agent-client: claude-code
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-07T21:43:47+08:00"
 ---
 
 说「仓库里有/没有 X」「工具会/不会做 Y」之前，先跑那条能证伪它的命令。推断没查证就标明是推断，别和查过的混在同一个语气里。

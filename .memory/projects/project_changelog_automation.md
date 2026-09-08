@@ -1,11 +1,12 @@
 ---
 name: project_changelog_automation
-title: Changelog 自动化：调研过，暂不生成正文
 description: 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T20:46:46+08:00"
+metadata:
+  edges-title: Changelog 自动化：调研过，暂不生成正文
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T20:46:46+08:00"
 ---
 
 调研过常见 changelog 自动生成方案，结论是 Edges 继续手写 Keep a Changelog 的 `[Unreleased]`；以后若加自动化，只做「把 Unreleased 切成版本段 + 打 tag + 校验忘写」，不要从 Conventional Commits 或 git log 生成正文。脚本尚未落地。

@@ -1,11 +1,12 @@
 ---
 name: feedback_clis_under_extensions
-title: CLI 项目放 extensions/clis，不放仓库根
 description: 新增或移动面向 agent 的 CLI 时：放 extensions/clis，禁止仓库根 clis/。
-type: feedback
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-08T15:28:25+08:00"
+metadata:
+  edges-title: CLI 项目放 extensions/clis，不放仓库根
+  edges-type: feedback
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-08T15:28:25+08:00"
 ---
 
 面向 agent 的 CLI 项目放 `extensions/clis/`，不要放仓库根目录 `clis/`。

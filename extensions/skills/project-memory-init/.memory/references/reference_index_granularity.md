@@ -1,11 +1,12 @@
 ---
 name: reference_index_granularity
-title: 索引粒度的先验与阈值
 description: 索引粒度、路标 vs 摘要，以及可落地的阈值。
-type: reference
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T13:38:39+08:00"
+metadata:
+  edges-title: 索引粒度的先验与阈值
+  edges-type: reference
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T13:38:39+08:00"
 ---
 
 # 原始报告 04 — 索引粒度的先验与阈值

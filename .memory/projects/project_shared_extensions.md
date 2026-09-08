@@ -1,11 +1,12 @@
 ---
 name: project_shared_extensions
-title: 跨机器跨 Agent 的 harness 放 shared-extensions
 description: 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-08T15:55:33+08:00"
+metadata:
+  edges-title: 跨机器跨 Agent 的 harness 放 shared-extensions
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-08T15:55:33+08:00"
 ---
 
 跨机器、跨 Agent 共用、且不绑定 Edges 产品的 harness 放 `shared-extensions/`；接入或操作 Edges 的能力继续放 `extensions/`。

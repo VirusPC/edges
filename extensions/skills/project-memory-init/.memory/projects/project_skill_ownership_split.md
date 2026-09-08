@@ -1,12 +1,13 @@
 ---
 name: project_skill_ownership_split
-title: skills 按「谁有权改写」分成两类
 description: 为什么否掉 .memory→.agents 改名，改成 skills（自动沉淀）与 agent_skills（只索引）两个类型；两份入口为什么都放 .memory/；为什么没平铺进 local 区块。
-type: project
-agentClient: claude-code
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-07T17:38:29+08:00"
+metadata:
+  edges-title: skills 按「谁有权改写」分成两类
+  edges-type: project
+  edges-agent-client: claude-code
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-07T17:38:29+08:00"
 ---
 
 `skills` 收 remember 自动沉淀的流程（`.memory/skills/`），`agent_skills` 只索引人写或 `npx skills` 装入的（`.agents/skills/`），工具对后者一个字节都不写。两份入口都放 `.memory/`。

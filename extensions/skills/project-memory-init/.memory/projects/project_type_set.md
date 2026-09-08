@@ -1,12 +1,13 @@
 ---
 name: project_type_set
-title: 项目记忆的类型集合
 description: 当前五类及各自的闸门；skills 从只索引改为可写、新增只读的 agent_skills；否掉 docs 与仓库内 user。
-type: project
-agentClient: claude-code
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-07T17:38:56+08:00"
+metadata:
+  edges-title: 项目记忆的类型集合
+  edges-type: project
+  edges-agent-client: claude-code
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-07T17:38:56+08:00"
 ---
 
 可写类型是 `feedback` / `project` / `reference` / `skills`；`agent_skills` 只索引不写。不要加 `docs`，也不要把 `user` 放进仓库树。`.memory/` 下类型目录用复数。

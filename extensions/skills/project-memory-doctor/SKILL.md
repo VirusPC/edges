@@ -1,7 +1,7 @@
 ---
 name: project-memory-doctor
 description: 体检整棵项目记忆树，修掉索引不一致（死条目、未登记的记忆目录、重复或错位的条目、别人的 AGENTS.md）。用户要求整理、检查或修复项目记忆时使用；init 返回 needs-doctor 时也用。默认只诊断，改文件要显式确认。
-version: 1.4.0
+version: 1.5.0
 ---
 
 # Project Memory Doctor
@@ -18,7 +18,7 @@ version: 1.4.0
 
 ## 边界：只管结构，不改正文
 
-**本 skill 不读取或改写任何条目正文。** 它会读取 frontmatter 来重算入口，并可把旧版平铺记忆文件移动到当前类型目录；文件内容原样保留。其余操作只涉及目录、类型入口、`AGENTS.md` 受管区块和下层索引，所以修复仍是机械的、确定性的、幂等的。
+**本 skill 不改写任何条目正文。** 它会读取 frontmatter 来重算入口，并可把旧版平铺记忆文件移动到当前类型目录。唯一改文件头的例外是 `legacy-flat-frontmatter`：把 YAML 顶层的实现字段收进 `metadata:`，关闭 `---` 之后的正文一字不动。其余操作只涉及目录、类型入口、`AGENTS.md` 受管区块和下层索引，所以修复仍是机械的、确定性的、幂等的。
 
 记忆**内容**层面的合并、抽象、遗忘（文献里叫 consolidation 或 dreaming）不属于这里，也尚未实现。用户要求「精简记忆」「合并重复的记忆内容」时，明确说明本 skill 只能修索引结构，别顺手去改正文。要把已有 `AGENTS.md` 的区块外正文拆进 `.memory`，改走 `$project-memory-reshape`。
 
@@ -36,6 +36,7 @@ init 是单目标、只往前写的，只能处理自己这次动作引起的漂
 | `stale-auto` | 仍留着已废弃的 `project-memory-auto` 区块 | 删掉该区块 |
 | `missing-important` | 记忆目录缺少本层硬约束区块 | 补上当前模板种子（ask / remember 聚光灯 +「硬约束写在本区块」），**已有规则不覆盖** |
 | `legacy-flat-entry` | 旧版记忆文件仍平铺在 `.memory/` | 原样移入对应类型目录 |
+| `legacy-flat-frontmatter` | 普通记忆把 `title` / `type` / 出处 / 审计写在 YAML 顶层 | 按当前模板重写文件头，正文不动 |
 | `legacy-entry-conflict` | 新旧位置存在同名记忆文件 | 只报告，不覆盖任何一份 |
 | `legacy-singular-type-dir` | 旧版单数类型目录（`feedback/` 等） | 原样改名为复数（`feedbacks/` 等） |
 | `legacy-type-dir-conflict` | 单数目录与复数目录同时存在 | 只报告，不覆盖任何一份 |
@@ -68,7 +69,7 @@ init 是单目标、只往前写的，只能处理自己这次动作引起的漂
 
 - **默认只诊断。** 这里的修复会移动旧版文件、删除索引条目、改写别人的 `AGENTS.md`，属于破坏性操作，所以先报告、经用户确认再 `--apply`。用户已经明确说了「检查并修掉」就可以直接带 `--apply`，但汇报里仍要列清改了什么。
 - **`foreign-agents` 只追加，不改写。** 手写正文和别的工具的受管块（如 `runa-memory:*`）都原样保留，只在文件里补挂本套的受管区块。不要自己动手编辑这类文件。
-- 只碰结构与派生索引。除把 `legacy-flat-entry` 原样移入类型目录、把 `legacy-singular-type-dir` 原样改名为复数外，**不新增、删除或改写记忆内容**——内容增删仍是 `$project-memory-remember` 的事。
+- 只碰结构与派生索引。除把 `legacy-flat-entry` 原样移入类型目录、把 `legacy-singular-type-dir` 原样改名为复数、把 `legacy-flat-frontmatter` 的文件头收进 `metadata:` 外，**不新增、删除或改写记忆正文**——内容增删仍是 `$project-memory-remember` 的事。
 - **`.agents/` 一个字节都不碰。** `agent_skills` 的内容根在那里，归人与生态所有：不报 `missing-type-dir`、不补建目录、不改写内容，只把它索引进 `.memory/AGENT_SKILLS.md`。本层没有 `.agents/skills/` 时那份索引是空清单，这是正常状态，不是待修的毛病。
 - 修复是幂等的：跑完再跑一次应该零 `findings`。不是的话说明有 bug，报给用户，别反复重试。
 - `--target-dir` 给记忆树里任意一个目录都行，脚本会自己回溯到记忆根。

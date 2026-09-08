@@ -1,11 +1,12 @@
 ---
 name: feedback_isolated_root_dir
-title: "--root-dir 封住记忆树，不把外面的 .memory 当祖先"
 description: 目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。
-type: feedback
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T13:41:45+08:00"
+metadata:
+  edges-title: "--root-dir 封住记忆树，不把外面的 .memory 当祖先"
+  edges-type: feedback
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T13:41:45+08:00"
 ---
 
 `--root-dir` 等于 `--target-dir` 时，这棵记忆树封在目标自己，外面即使有 `.memory/` 也不是祖先。

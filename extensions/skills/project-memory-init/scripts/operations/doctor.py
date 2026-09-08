@@ -25,6 +25,7 @@ from lib.paths import (
     MEMORY_DIR_NAME,
     is_external_type,
     legacy_type_dir,
+    list_type_files,
     memory_dir,
     relative_or_name,
     type_content_dir,
@@ -38,7 +39,14 @@ from nodes.agents import (
     sync_agents_blocks,
     sync_index_entry,
 )
-from nodes.entries import expected_index_document, memory_entry_types, refresh_index
+from nodes.entries import (
+    expected_index_document,
+    has_legacy_flat_frontmatter,
+    memory_entry_types,
+    ordinary_memory_types,
+    refresh_index,
+    rewrite_ordinary_header,
+)
 
 
 def is_noise_path(parts: tuple[str, ...]) -> bool:
@@ -237,6 +245,17 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
                     }
                 )
 
+        for entry_type in ordinary_memory_types():
+            for entry_path in list_type_files(owner, entry_type, f"{entry_type}_*.md"):
+                if has_legacy_flat_frontmatter(entry_path):
+                    findings.append(
+                        {
+                            "issue": "legacy-flat-frontmatter",
+                            "path": relative_or_name(entry_path, root),
+                            "detail": "普通记忆的实现字段还在 YAML 顶层，应收入 metadata",
+                        }
+                    )
+
         agents_path = owner / AGENTS_FILE_NAME
         agents_state = classify_agents_file(agents_path)
         if agents_state == "missing":
@@ -346,6 +365,13 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
 
     for finding in findings:
         issue = finding["issue"]
+        if issue == "legacy-flat-frontmatter":
+            path = root / finding["path"]
+            if path.is_file() and rewrite_ordinary_header(path):
+                repaired.append(
+                    f"legacy-flat-frontmatter: {finding['path']} 顶层实现字段收进 metadata"
+                )
+            continue
         if issue == "missing-type-dir":
             path = root / finding["path"]
             if not path.exists():

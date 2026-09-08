@@ -1,11 +1,12 @@
 ---
 name: feedback_no_openspec
-title: 不要再给本仓库装 OpenSpec
 description: 规划与决策写 .memory，禁止 openspec init 以及把 skill/command vendor 进仓库里的 agent 目录。
-type: feedback
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T16:53:25+08:00"
+metadata:
+  edges-title: 不要再给本仓库装 OpenSpec
+  edges-type: feedback
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T16:53:25+08:00"
 ---
 
 本仓库不再使用 OpenSpec。不要重新执行 `openspec init`，也不要把 OpenSpec 的 skill / slash command 再 vendor 进仓库里的 `.claude/`、`.agents/`、`.cursor/` 等目录。

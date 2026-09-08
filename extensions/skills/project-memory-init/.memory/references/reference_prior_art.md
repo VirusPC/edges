@@ -1,11 +1,12 @@
 ---
 name: reference_prior_art
-title: 同类方案调研：文件系统式记忆
 description: 四路并行调研的综合结论，改变本方案决策的外部证据总入口。
-type: reference
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T13:38:38+08:00"
+metadata:
+  edges-title: 同类方案调研：文件系统式记忆
+  edges-type: reference
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T13:38:38+08:00"
 ---
 
 # 同类方案调研：文件系统式记忆

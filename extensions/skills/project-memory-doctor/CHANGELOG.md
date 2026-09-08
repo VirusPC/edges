@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-09-08
+
+### Added
+
+- `legacy-flat-frontmatter`：普通记忆把实现字段写在 YAML 顶层时诊断并 `--apply` 把文件头收进 `metadata:`，正文不动。
+
 ## [1.4.0] - 2026-09-07
 
 ### Changed
@@ -48,7 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.4.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.5.0...HEAD
+[1.5.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.4.0...skill/project-memory-doctor@1.5.0
 [1.4.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.3.1...skill/project-memory-doctor@1.4.0
 [1.3.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.3.0...skill/project-memory-doctor@1.3.1
 [1.3.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-doctor@1.2.0...skill/project-memory-doctor@1.3.0

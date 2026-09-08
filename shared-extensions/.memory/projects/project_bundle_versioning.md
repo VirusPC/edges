@@ -1,11 +1,12 @@
 ---
 name: project_bundle_versioning
-title: shared-extensions 整层一份版本，不按条目发版
 description: 改本目录的 skill / mcp / plugin / hook 或发版约定时：升 VERSION、写本层 CHANGELOG、打 shared-extensions@x.y.z。不要给单条扩展独立 semver，也不要把明细抄进根 changelog。只改 .memory 不升版本。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-08T16:00:03+08:00"
+metadata:
+  edges-title: shared-extensions 整层一份版本，不按条目发版
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-08T16:00:03+08:00"
 ---
 
 `shared-extensions/` 整层一份 semver：`VERSION` + `CHANGELOG.md` + annotated tag `shared-extensions@<version>`。不要给单个 skill / mcp / plugin / hook 另开 version 或 changelog。

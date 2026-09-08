@@ -1,11 +1,12 @@
 ---
 name: project_skill_independent_versioning
-title: Skill 独立发版，changelog 按 skill 分
 description: 决定 changelog、tag、semver 粒度时：每个 skill 一份，不要 extensions/skills 总 changelog。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T20:02:49+08:00"
+metadata:
+  edges-title: Skill 独立发版，changelog 按 skill 分
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T20:02:49+08:00"
 ---
 
 `extensions/skills/` 里每个 skill 独立 semver，`CHANGELOG.md` 和 tag `skill/<name>@<version>` 都按单个 skill 计，不维护整目录一份总 changelog。仓库根 `CHANGELOG.md` 记的是 Edges 仓库本身，不是 skill 总账。

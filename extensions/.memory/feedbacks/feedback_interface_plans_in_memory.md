@@ -1,11 +1,12 @@
 ---
 name: feedback_interface_plans_in_memory
-title: 接口层方案进 .memory，不进 docs
 description: 写 extensions 层调研或技术方案时：进 .memory（reference/project），禁止放 extensions/docs 或 knowledge/projects，否则 ask 检索不到。
-type: feedback
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-08T14:24:29+08:00"
+metadata:
+  edges-title: 接口层方案进 .memory，不进 docs
+  edges-type: feedback
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-08T14:24:29+08:00"
 ---
 
 接口层的调研、技术方案、设计决策写入 `extensions/.memory`（reference / project），不要放 `extensions/docs` 或 `knowledge/projects`。

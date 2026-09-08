@@ -1,11 +1,12 @@
 ---
 name: project_repo_changelog
-title: 仓库用根 CHANGELOG 和 v 标签发版
 description: 写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 vX.Y.Z tag；不要当成 skill 或 shared-extensions 总账，也不要因它们的补丁去升仓库版本。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-08T16:00:03+08:00"
+metadata:
+  edges-title: 仓库用根 CHANGELOG 和 v 标签发版
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-08T16:00:03+08:00"
 ---
 
 Edges 仓库自己有一份根目录 `CHANGELOG.md`（Keep a Changelog）和 `vX.Y.Z` tag，版本号以 `package.json` 的 `version` 为准。这和对外 skill 的独立发版、`shared-extensions/` 的整层发版并行，不是把那些 changelog 抄到根上。

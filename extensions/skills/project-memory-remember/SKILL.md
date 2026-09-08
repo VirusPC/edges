@@ -1,7 +1,7 @@
 ---
 name: project-memory-remember
 description: 把可复用结论写入本项目 .memory 并刷新索引。用户要求记住时必须用；被纠正、用户给出可用想法/约定/约束、或任务产出已验证、以后还用得上的结论时也要主动用。
-version: 1.5.0
+version: 1.5.1
 ---
 
 # Project Memory Remember
@@ -37,7 +37,7 @@ version: 1.5.0
 写 `skills` 时三点不同：
 
 - `--slug` 是**技能目录名**，用 kebab-case（`rerun-failed-e2e`），不是 snake_case。产物是 `.memory/skills/<slug>/SKILL.md`。
-- `--title` 可省——Agent Skills 没有这个概念，给了会存进 `metadata`。
+- `--title` 可省——Agent Skills 没有这个概念，给了会存进 `metadata`。普通记忆的 `title` / `type` / 出处 / 审计同样写进 `metadata.edges-*`，不要手写扁平顶层键。
 - 正文写步骤、输入输出、边界情况，不套「结论 → Why → How to apply」那套；`description` 要同时说清**做什么**和**什么时候用**，因为它是各家 agent 启动时唯一加载的那一层。
 
 `agent_skills` 不由 remember 写入，`--type` 里也没有它。那份索引对着本层 `.agents/skills/`，内容是人写或 `npx skills` 装的，本套工具只索引不改写。要新增就手写或走 `npx skills`，然后用 init 刷新入口。

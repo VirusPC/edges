@@ -1,11 +1,12 @@
 ---
 name: project_mit_license
-title: 整仓 MIT，不拆 knowledge 许可证
 description: 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T20:06:34+08:00"
+metadata:
+  edges-title: 整仓 MIT，不拆 knowledge 许可证
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T20:06:34+08:00"
 ---
 
 Edges 整仓使用 MIT，版权人 `viruspc`。根目录 `LICENSE` 与 `package.json` 的 `license` 字段是权威声明；`knowledge/` 不另开 CC 或其他许可证。

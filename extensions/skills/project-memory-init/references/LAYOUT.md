@@ -2,7 +2,7 @@
 
 [`PROTOCOL.md`](PROTOCOL.md) 的实现。下面按产物层次说明具体布局，破折号后的解释语与协议一致。
 
-可以自由升级，不破协议就行。**但凡改动已发布产物的名字**（区块标记、索引文件名、类型目录名、条目前缀），**要同步给 `$project-memory-doctor` 加旧名识别与改写**；区块内的固定文案不参与解析，改了不必管存量（见 doctor 的「已知缺口」）。改名不涉及两个消费方——它们不认名字，只认产物里读到的链接与说明。改了 `../scripts/lib/blocks.py` 的标记常量或 `templates/` 的结构，同步改这里。
+可以自由升级，不破协议就行。**但凡改动已发布产物的名字**（区块标记、索引文件名、类型目录名、条目前缀），**要同步给 `$project-memory-doctor` 加旧名识别与改写**；区块内的固定文案不参与解析，改了不必管存量（见 doctor 的「已知缺口」）。普通记忆把实现字段从 YAML 顶层收进 `metadata:` 也算已发布线格式，由 `legacy-flat-frontmatter` 识别并改写文件头。改名不涉及两个消费方——它们不认名字，只认产物里读到的链接与说明。改了 `../scripts/lib/blocks.py` 的标记常量或 `templates/` 的结构，同步改这里。
 
 ```text
 <仓库根>/
@@ -86,9 +86,11 @@
 
 本节只适用于 `feedback`、`project`、`reference`。`slug` 是小写 snake_case 且不带类型前缀，前缀由脚本按 `type` 加，父目录是 type 的复数。
 
-结构是「扁平 YAML frontmatter + 正文」，字段清单与顺序看 [`templates/type_slug.tmpl.md`](templates/type_slug.tmpl.md)。落盘时**取不到的字段整行省略**。字段的值从哪来、更新时谁覆盖谁，见 [`frontmatter-fields.md`](frontmatter-fields.md)。
+落盘形态跟 [Agent Skills 规范](https://agentskills.io/specification) 同一套闭集：顶层只写 spec 认的键（本实现用 `name` / `description` / `metadata`），实现字段进 `metadata:`，键名前缀 `edges-`。字段清单与顺序看 [`templates/type_slug.tmpl.md`](templates/type_slug.tmpl.md)。落盘时**取不到的字段整行省略**。字段的值从哪来、更新时谁覆盖谁，见 [`frontmatter-fields.md`](frontmatter-fields.md)。
 
-九个字段按协议地位分三档：`description` 是协议必需的；`name` / `type` / `updatedAt` 是协议的可选保留键，本实现总是写；其余五个（`title`、`originSessionId`、`agentClient`、`username`、`email`）只属于本实现。
+九个逻辑字段按协议地位分三档：`description` 是协议必需的；`name` / `type` / `updatedAt` 是协议的可选保留键，本实现总是写（后两个在 `metadata:` 里，不出现在 YAML 顶层）；其余五个（`title`、`originSessionId`、`agentClient`、`username`、`email`）只属于本实现，同样进 `metadata:`。
+
+读兼容旧的扁平顶层键（`title` / `type` / `originSessionId` / `agentClient` / `username` / `email` / `updatedAt`）：解析时顶层与 `metadata:` 都收，两边都有则 `metadata:` 赢。doctor 的 `legacy-flat-frontmatter` 把旧文件头改写成当前模板，正文不动。
 
 ## `skills/<name>/SKILL.md` — 自动沉淀的流程
 
@@ -100,10 +102,10 @@
 
 `edges-updated-at` 恒有值，所以 `metadata:` 不会退化成没有子键的空映射（那会被 Claude Code 当成非 map 丢掉）。**别把这个字段改成可选。**
 
-索引侧不需要特判：`parse_frontmatter()` 跳过缩进行，所以 `metadata:` 的子键不会污染条目；`title` 缺失时条目自动回落到 `name`。
+`parse_frontmatter()` 会展开 `metadata:` 的 `edges-*` 子键（以及未加前缀的旧名）成内部字段名，供索引与更新使用；`title` 缺失时条目自动回落到 `name`。旧版把实现字段写在 YAML 顶层的文件仍然能读。
 
 ## 模板
 
-**模板名 = 产物文件名去掉后缀 + `.tmpl.md`**。入口模板与记忆模板仍统一放在 `templates/`，不按产物目录分层。下划线开头的是行片段，不对应产物；`type_slug.tmpl.md` 是唯一例外，产物名带尖括号，文件名改用角色词。两份记忆模板按格式归属分工：`type_slug.tmpl.md` 管本实现自定义的三类，`SKILL.tmpl.md` 管遵循 Agent Skills 协议的 `skills`。`agent_skills` 没有模板——工具不写它。
+**模板名 = 产物文件名去掉后缀 + `.tmpl.md`**。入口模板与记忆模板仍统一放在 `templates/`，不按产物目录分层。下划线开头的是行片段，不对应产物；`type_slug.tmpl.md` 是唯一例外，产物名带尖括号，文件名改用角色词。两份记忆模板都是 Agent Skills 闭集 + `metadata.edges-*`：`type_slug.tmpl.md` 多一个 `edges-type`（普通三类的 `type` 仍要落盘），`SKILL.tmpl.md` 不写 `type`（由目录位置编码）。`agent_skills` 没有模板——工具不写它。
 
 `AGENTS.tmpl.md` 把三对内层区块标记连嵌套关系一起写在里面。其中本层记忆区块的每一行就是一个类型声明，脚本从中推导 `type` 与索引文件名。索引文件名全大写、可含下划线（`AGENT_SKILLS.md` → `agent_skills`）；内容根取 `lib/paths.py` 的 `type_content_dir()`；普通记忆的条目前缀仍取 `type` 原值。

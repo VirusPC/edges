@@ -8,6 +8,7 @@
 - [学术论文与 benchmark](references/reference_academic_papers.md) — 记忆索引粒度、膨胀与检索的论文证据。
 - [编码 agent 的工程实践](references/reference_coding_agents.md) — 各家编码 agent / AI IDE 的记忆与 AGENTS.md 实践。
 - [索引粒度的先验与阈值](references/reference_index_granularity.md) — 索引粒度、路标 vs 摘要，以及可落地的阈值。
+- [Agent Skills 规范正文](references/reference_official_skills_spec.md) — 写或核对 SKILL.md / 普通记忆 YAML 头时查：顶层闭集、name 规则、metadata 用途。规范 https://agentskills.io/specification；本仓与生态落差见 extensions 的 reference_skill_format_spec。
 - [开源记忆框架](references/reference_oss_frameworks.md) — 开源记忆框架的机制细节与源码取证。
 - [同类方案调研：文件系统式记忆](references/reference_prior_art.md) — 四路并行调研的综合结论，改变本方案决策的外部证据总入口。
 <!-- project-memory-entries:end -->

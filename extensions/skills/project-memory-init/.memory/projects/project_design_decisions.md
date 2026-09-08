@@ -1,11 +1,12 @@
 ---
 name: project_design_decisions
-title: project-memory 设计决策记录
 description: 成型过程中的关键取舍、翻案与待议；论证不进 PROTOCOL/LAYOUT。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T14:08:14+08:00"
+metadata:
+  edges-title: project-memory 设计决策记录
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T14:08:14+08:00"
 ---
 
 # project-memory 设计决策记录

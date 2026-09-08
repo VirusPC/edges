@@ -1,11 +1,12 @@
 ---
 name: reference_coding_agents
-title: 编码 agent 的工程实践
 description: 各家编码 agent / AI IDE 的记忆与 AGENTS.md 实践。
-type: reference
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T13:38:38+08:00"
+metadata:
+  edges-title: 编码 agent 的工程实践
+  edges-type: reference
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T13:38:38+08:00"
 ---
 
 # 原始报告 02 — 编码 agent / AI IDE 的工程实践

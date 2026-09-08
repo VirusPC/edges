@@ -1,11 +1,12 @@
 ---
 name: project_development
-title: Project Memory 系列 Skill 开发流程
 description: 修改顺序：协议 → 布局 → init → 其他非 doctor skill → doctor。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T13:38:38+08:00"
+metadata:
+  edges-title: Project Memory 系列 Skill 开发流程
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T13:38:38+08:00"
 ---
 
 # Project Memory 系列 Skill 开发流程

@@ -1,12 +1,13 @@
 ---
 name: reference_skill_format_spec
-title: Agent Skills 规范与生态实践的落差
 description: SKILL.md 顶层字段是闭集（六个），但生态普遍不遵守；自定义数据该放 metadata 的真实理由是撞名而非被拒。写或改 skill 前查。
-type: reference
-agentClient: claude-code
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-07T17:39:46+08:00"
+metadata:
+  edges-title: Agent Skills 规范与生态实践的落差
+  edges-type: reference
+  edges-agent-client: claude-code
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-07T17:39:46+08:00"
 ---
 
 规范正文在 <https://agentskills.io/specification>，参考校验器是 [`skills-ref`](https://github.com/agentskills/agentskills/tree/main/skills-ref)（`skills-ref validate ./my-skill`）。客户端名录在 <https://agentskills.io/clients>。

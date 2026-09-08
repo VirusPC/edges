@@ -1,11 +1,12 @@
 ---
 name: project_spotlight_ask_remember
-title: AGENTS.md 要点名 ask 和 remember
 description: 决定 AGENTS.md 要不要点名 skill、或觉得 skill 自己的说明就够时：要点名 ask 和 remember，因为 skill 一多，模型不一定会自己加载它们；不要点名 init/doctor/reshape，也不要在入口里写整套工具怎么用。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T22:06:32+08:00"
+metadata:
+  edges-title: AGENTS.md 要点名 ask 和 remember
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T22:06:32+08:00"
 ---
 
 `AGENTS.md` 里必须点名 ask 和 remember。不要指望模型只靠 skill 列表里那句说明，自己把这两个找出来。不要点名 init / doctor / reshape，也不要在入口里写整套记忆工具怎么用。

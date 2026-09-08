@@ -1,11 +1,12 @@
 ---
 name: feedback_agent_skills_hub_symlink
-title: Skill 分发：能不要的不要，必须留的软链
 description: 整理仓库或本机 .xxx/skills 时：能读 .agents/skills 的不占目录；Claude Code 只留软链，禁止实体拷贝。commands 目录不适用。
-type: feedback
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T16:45:07+08:00"
+metadata:
+  edges-title: Skill 分发：能不要的不要，必须留的软链
+  edges-type: feedback
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T16:45:07+08:00"
 ---
 
 项目级和全局的 skill 分发同一条原则：能读 `.agents/skills` 的 Agent 不占目录；读不到的只留软链，禁止实体拷贝。

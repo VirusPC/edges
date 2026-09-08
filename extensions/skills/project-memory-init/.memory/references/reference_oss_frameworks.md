@@ -1,11 +1,12 @@
 ---
 name: reference_oss_frameworks
-title: 开源记忆框架
 description: 开源记忆框架的机制细节与源码取证。
-type: reference
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T13:38:39+08:00"
+metadata:
+  edges-title: 开源记忆框架
+  edges-type: reference
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T13:38:39+08:00"
 ---
 
 # 原始报告 03 — 开源记忆框架的机制细节

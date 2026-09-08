@@ -1,7 +1,7 @@
 ---
 name: project-memory-ask
 description: 用户提问或动手改代码前检索本项目 AGENTS.md 索引的项目记忆。不必等用户说搜索；本轮查过不重复。
-version: 1.2.0
+version: 1.2.1
 ---
 
 # Project Memory Ask
@@ -18,7 +18,7 @@ version: 1.2.0
 
 **按你实际读到的内容走。** 有几份入口、叫什么名字、记忆目录叫什么，都随实现版本变，产物里写的才是准的；冻结的只有「入口逐层套、到记忆文件固定两跳、每项都带一句说明」这个形状（[`PROTOCOL.md`](../project-memory-init/references/PROTOCOL.md)）。看不到本套结构就当这个项目没建记忆。
 
-记忆文件里 `description` 一定有，就是条目后面那句；`name` / `updatedAt` 有则可用，没有就退回文件名、别按时间筛。
+记忆文件里 `description` 一定有，就是条目后面那句；`name` / `updatedAt` 有则可用（`updatedAt` 可能在顶层，也可能在 `metadata:`），没有就退回文件名、别按时间筛。
 
 ## 怎么查
 

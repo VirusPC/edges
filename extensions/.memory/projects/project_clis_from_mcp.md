@@ -1,11 +1,12 @@
 ---
 name: project_clis_from_mcp
-title: new_note 收成 extensions/clis/edges-note，MCP 保留
 description: 改 ingest、new-note MCP 或 clis 时：本地 agent 走 extensions/clis/edges-note，git 仍在 bin/new-note，MCP 保留；鉴权用 --token-file，JSON stdout。不要把 CLI 放仓库根。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-08T15:28:25+08:00"
+metadata:
+  edges-title: new_note 收成 extensions/clis/edges-note，MCP 保留
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-08T15:28:25+08:00"
 ---
 
 本地、有 shell 的 agent 用 `extensions/clis/` 的 `edges-note` 做 ingest；git 仍只在 `bin/new-note`；`extensions/mcp-servers/new-note` 保留给没有 shell 的宿主。两边都 `execFile` 同一条脚本，MCP 不套 CLI。不要把 CLI 项目放在仓库根 `clis/`。

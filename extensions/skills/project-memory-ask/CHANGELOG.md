@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-09-08
+
+### Changed
+
+- `updatedAt` 可能在顶层，也可能在 `metadata:`；有则可用。
+
 ## [1.2.0] - 2026-09-06
 
 ### Changed
@@ -25,7 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-ask@1.2.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-ask@1.2.1...HEAD
+[1.2.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-ask@1.2.0...skill/project-memory-ask@1.2.1
 [1.2.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-ask@1.1.0...skill/project-memory-ask@1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-ask@1.0.0...skill/project-memory-ask@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-memory-ask@1.0.0

@@ -1,11 +1,12 @@
 ---
 name: feedback_skill_bump_version
-title: 改 skill 后必须升级 version、写 changelog、打 tag
 description: 更新 extensions/skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/<name>@<version> tag。
-type: feedback
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T17:52:01+08:00"
+metadata:
+  edges-title: 改 skill 后必须升级 version、写 changelog、打 tag
+  edges-type: feedback
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T17:52:01+08:00"
 ---
 
 更新 `extensions/skills/` 下任何一个 skill 后，必须同步：升该 skill `SKILL.md` 的 `version`、把变更写入同目录 `CHANGELOG.md`、对同一个 commit 打 annotated tag `skill/<name>@<version>`。

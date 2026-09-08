@@ -1,11 +1,12 @@
 ---
 name: project_important_block
-title: 本层硬约束写在 AGENTS.md 区块里
 description: 改 AGENTS.md 记忆形状、或决定一条规则该常驻还是进 .memory 时：点名 ask/remember，加上不检索就会做错的仓规，直接写进 project-memory-important；目录细则不进这里也不进 .memory。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T22:06:32+08:00"
+metadata:
+  edges-title: 本层硬约束写在 AGENTS.md 区块里
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T22:06:32+08:00"
 ---
 
 本层硬约束写在 `AGENTS.md` 的 `project-memory-important` 区块里，规则直接列出，不进 `.memory`、不做成索引行。区块装两样：点名 ask / remember，以及该目录不检索就会做错的仓规。init / doctor 只保证区块存在，缺失时补种子，不覆盖已有正文。

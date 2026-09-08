@@ -1,11 +1,12 @@
 ---
 name: project_new_note_ingest
-title: new-note MCP 的 ingest 约束
 description: 改 new-note 或新增 MCP ingest 时要遵守的编排、校验、git 失败处理和未完成项。
-type: project
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T16:53:25+08:00"
+metadata:
+  edges-title: new-note MCP 的 ingest 约束
+  edges-type: project
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T16:53:25+08:00"
 ---
 
 `new-note` MCP 的约束是：TypeScript + Node.js 编排，git 操作交给 `bin/new-note`，失败即停，返回机器可解析结果。不要改成 Python server，也不要在 TS 里直接拼 shell 跑 git。

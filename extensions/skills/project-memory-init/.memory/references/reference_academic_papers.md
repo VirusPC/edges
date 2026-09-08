@@ -1,11 +1,12 @@
 ---
 name: reference_academic_papers
-title: 学术论文与 benchmark
 description: 记忆索引粒度、膨胀与检索的论文证据。
-type: reference
-username: viruspc
-email: cheng.peng.helloworld@gmail.com
-updatedAt: "2026-09-06T13:38:38+08:00"
+metadata:
+  edges-title: 学术论文与 benchmark
+  edges-type: reference
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: "2026-09-06T13:38:38+08:00"
 ---
 
 # 原始报告 01 — 学术论文与 benchmark
