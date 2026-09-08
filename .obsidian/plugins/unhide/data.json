@@ -1,0 +1,11 @@
+{
+  "showHiddenFiles": true,
+  "showConfigurationFolder": false,
+  "protectSync": true,
+  "showingRules": [
+    "+/",
+    "-/\\.git(?:\\/|$)/u",
+    "-/\\.venv(?:\\/|$)/u",
+    "-/node_modules(?:\\/|$)/u"
+  ]
+}
