@@ -62,7 +62,8 @@ npx skills@latest --version  # 1.5.23  ← 真包
 
 约定：**能读 `.agents/skills` 的 Agent 不再占一份目录；读不到的，只留一条软链，不拷贝。**
 
-- 实体只在 `.agents/skills/`
+- 本目录是 Edges 自有 skill 的真源。每个 skill 在 `.agents/skills/<name>` 是一条指向这里的相对软链，由 `pnpm skills:link` 维护（新增或删除 skill 后重跑）。
+- `npx skills` 从别处装进来的 vendor skill 在 `.agents/skills/` 里是实体拷贝，脚本不碰。
 - Claude Code 不读 `.agents/skills`，所以 `.claude/skills` → `.agents/skills`
 - `.codex/skills`、`.cursor/skills`、`.factory/skills`、`.gemini/skills`、`.opencode/skills`、`.agent/skills` 都不留
 
@@ -75,10 +76,11 @@ npx skills@latest --version  # 1.5.23  ← 真包
 ### 本机（作者）
 
 ```bash
-pnpm skills:install
+pnpm skills:link      # 项目级：extensions/skills → .agents/skills 相对软链
+pnpm skills:install   # 全局：拷进 ~/.agents/skills，Claude Code 另建软链
 ```
 
-内容装到中枢 `~/.agents/skills/<name>/`（实体拷贝），再给 `~/.claude/skills/` 建一条软链。Codex、Cursor、Gemini CLI、Factory、opencode 原生读中枢（Codex 源码里 `~/.codex/skills` 已标 deprecated），不必再占一份目录。只有 Claude Code 不读中枢，那条软链是它能看到 skill 的唯一原因。
+`skills:link` 只写仓库内的发现位。`skills:install` 把内容装到中枢 `~/.agents/skills/<name>/`（实体拷贝），再给 `~/.claude/skills/` 建一条软链。Codex、Cursor、Gemini CLI、Factory、opencode 原生读中枢（Codex 源码里 `~/.codex/skills` 已标 deprecated），不必再占一份目录。只有 Claude Code 不读中枢，那条软链是它能看到全局 skill 的唯一原因。
 
 > ⚠️ **改完必须重跑。** 中枢里是实体拷贝而非软链——`npx skills` 会把源目录里的软链一并 `dereference` 掉——所以改了本目录下的文件不会自动生效。`npx skills@latest update` 对本地路径源直接跳过（跳过理由就是 `Local path`），只能重跑上面那条命令。
 
@@ -88,7 +90,7 @@ pnpm skills:install
 npx skills@latest add VirusPC/edges/extensions/skills
 ```
 
-**子路径不能省。** `npx skills@latest add VirusPC/edges` 装不到本目录的 skill：CLI 的扫描根是一张写死的表（仓库根一层、根下 `skills/`、以及 `.claude/skills` / `.agents/skills` 等 agent 目录），`extensions/` 不在表里。子路径形式把扫描根整个换掉，正好只命中这 11 个。
+**外部用户继续走子路径。** `npx skills@latest add VirusPC/edges` 会扫到 `.agents/skills`，里面除了本目录的软链（安装时会被 dereference 成实体）还有 grill-* 等 vendor 拷贝。只要 Edges 自有 skill，子路径把扫描根换到本目录，vendor 进不来。`extensions/` 本身不在 CLI 扫描根表里。
 
 单装某一个：
 

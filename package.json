@@ -6,6 +6,7 @@
   "description": "Edges - 认知系统服务工作区",
   "scripts": {
     "setup": "./scripts/setup",
+    "skills:link": "./scripts/link-agent-skills",
     "skills:install": "npx -y skills@latest add ./extensions/skills -g -a claude-code -y",
     "build": "pnpm recursive build",
     "test": "pnpm recursive test",

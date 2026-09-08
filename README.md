@@ -85,6 +85,7 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 存放本仓库开发者用于初始化、构建、清理、发布等**一次性或低频**操作的脚本。不会自动加入 `$PATH`，统一通过 `pnpm <script-name>` 入口调用。
 
 - **`setup`**: 首次接入时初始化本地环境（注册 `bin/` 到 PATH、加载 `.env`）。对应 `pnpm setup`。
+- **`link-agent-skills`**: 把 `extensions/skills` 里每个 skill 以相对软链挂到 `.agents/skills`（项目级发现位）。对应 `pnpm skills:link`。`npx skills` 装进来的 vendor 拷贝不动。
 
 判据：换台机器克隆下来要重新跑一遍的 → `scripts/`；装好之后用户/Agent 天天用的 → `bin/`。
 
@@ -113,7 +114,10 @@ knowledge/notes → 加工 → knowledge/edges → 归档/删除
 # (推荐) 初始化本地开发环境并添加 bin/ 路径到系统 PATH
 pnpm setup
 
-# 把 skills 写入 ~/.agents/skills；Claude Code 不读中枢，另建软链
+# 项目级：extensions/skills 软链到 .agents/skills（vendor 拷贝不动）
+pnpm skills:link
+
+# 本机全局：写入 ~/.agents/skills；Claude Code 不读中枢，另建软链
 pnpm skills:install
 ```
 
