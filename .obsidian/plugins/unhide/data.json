@@ -1,7 +1,11 @@
 {
-  "showHiddenFiles": true,
-  "showConfigurationFolder": false,
+  "errorNoticeTimeout": 0,
+  "language": "",
+  "noticeTimeout": 5,
+  "openChangelogOnUpdate": true,
   "protectSync": true,
+  "showConfigurationFolder": false,
+  "showHiddenFiles": true,
   "showingRules": [
     "+/",
     "-/\\.git(?:\\/|$)/u",
