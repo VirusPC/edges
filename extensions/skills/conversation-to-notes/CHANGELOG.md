@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-09
+
+### Changed
+
+- 中文 FIA 章节标题与 Facts / Insights / Actions 对齐：`主要结论` → `事实`，`认知更新` → `洞察`，`行动指南` → `行动`。
+
 ## [1.0.0] - 2026-09-01
 
 ### Added
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@1.0.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@1.1.0...HEAD
+[1.1.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@1.0.0...skill/conversation-to-notes@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/conversation-to-notes@1.0.0
