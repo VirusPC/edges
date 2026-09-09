@@ -4,7 +4,7 @@
 【主要结论】
 - project-memory 需要支持自由扩展 memory type。
 - 已有示例：`docs` type 放置文档；`progress` type 记录任务进展。
-- 可选扩展类型还包括：`tasks`、`docs`、`research`（与上述示例并存，不互相取代）。
+- 可选扩展类型还包括：`tasks`、`docs`、`research`、`progress`、`reminder`、`scheduler`（与上述示例并存，不互相取代）。
 - 每个扩展 type 都由用户定义自己的 name、description、metadata。
 
 【认知更新】
@@ -12,7 +12,7 @@
 
 【行动指南】
 - 设计扩展方案：每个自定义 type 均可声明 name、description、metadata。
-- 用 docs / progress，以及可选的 tasks / docs / research，作为示例类型验证方案。
+- 用可选类型 `tasks` / `docs` / `research` / `progress` / `reminder` / `scheduler` 作为示例类型验证方案。
 
 【补充说明】
 - 来源：记事本对话速记（2026-09-09）。
