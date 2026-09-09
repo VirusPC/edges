@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `evaluation/`：评测整套 Edges（用例、harness、报告）。系统元工作，不是知识生命周期阶段。
+- `observation/`：观测运行与使用（脱敏 run log、指标与仪表盘笔记）。不替代 `.memory` 决策。
+
 ### Changed
 
 ### Fixed
