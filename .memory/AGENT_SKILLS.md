@@ -21,5 +21,6 @@
 - [project-memory-reshape](../.agents/skills/project-memory-reshape/SKILL.md) — 把已有 AGENTS.md 按 project-memory-init 的形状重新组织：硬约束写进入口对应区块，区块外只留身份与指针，长规范进 important 或 README，记忆内容抽到 .memory，其余受管区块只留索引。用户要求整理、改造、迁移、重组已有 AGENTS.md 时使用；init/doctor 不改正文，不要用它们代替本 skill。
 - [summarize-ai-article-ultra](../.agents/skills/summarize-ai-article-ultra/SKILL.md) — 当用户想把一篇文章 / 页面内容整理成可归档的中文结构化笔记时使用此技能。按 Facts - Insights - Actions 组织，输出文件名为 YYYY-MM-DD--主题简述.md 的完整笔记，含讨论主题、主要内容、认知更新、行动指南、补充说明五段。适合要落盘进知识库的场景。如果只是想快速扫一眼要点、不落盘，改用 summarize-ai-article；如果整理的是对话记录而非文章，改用 conversation-to-notes。
 - [summarize-ai-article](../.agents/skills/summarize-ai-article/SKILL.md) — 当用户想要快速理解一篇 AI 技术文章的核心时使用此技能。输出一段简短的要点摘要——在解决什么问题、怎么解决、效果如何——并结合读者（agent infra 工程师 + 业务开发）给出后续行动建议和与最新 AI 进展的关联。适合边读边扫的场景。如果需要的是结构化、可归档、要落盘成 markdown 笔记的完整摘要，改用 summarize-ai-article-ultra。
+- [teach](../.agents/skills/teach/SKILL.md) — Teach the user a new skill or concept, within this workspace.
 - [weekly-ai-blogs-digest](../.agents/skills/weekly-ai-blogs-digest/SKILL.md) — 当用户想要汇总一段时间内（默认过去一周）AI / AI Coding 领域各大博客的新文章时使用此技能。会逐站收集新发布链接、逐篇做 200 字内摘要、总结整体技术风向，并按固定模版输出为 markdown 文件。在以下短语触发："本周 AI 资讯"、"汇总一下 AI 博客"、"weekly AI digest"、"看看这周 AI Coding 有什么新东西"。不要为单篇文章总结（用 summarize-ai-article）或非博客类信源触发。
 <!-- project-memory-entries:end -->
