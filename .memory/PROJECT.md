@@ -6,12 +6,5 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- [订阅管理盘点进展](projects/project_progress.md) — 订阅/用量盘点进展：双 Gmail + QQ IMAP、国内 Kimi 无邮箱、CodexBar Linux CLI 已装待鉴权；后续 Apple/微信侧核对。
-- [放弃的 ChatGPT MCP 接入](projects/project_abandoned_chatgpt_mcp.md) — 2026-02-19 建过两条空的 ChatGPT MCP change，没有设计可恢复；若再做从当前 MCP 布局重开。
-- [Changelog 自动化：调研过，暂不生成正文](projects/project_changelog_automation.md) — 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。
-- [整仓 MIT，不拆 knowledge 许可证](projects/project_mit_license.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
-- [new-note MCP 的 ingest 约束](projects/project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时要遵守的编排、校验、git 失败处理和未完成项。
-- [仓库用根 CHANGELOG 和 v 标签发版](projects/project_repo_changelog.md) — 写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 vX.Y.Z tag；不要当成 skill 或 shared-extensions 总账，也不要因它们的补丁去升仓库版本。
-- [根硬约束只留聚光灯、脱敏与 git](projects/project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
-- [跨机器跨 Agent 的 harness 放 shared-extensions](projects/project_shared_extensions.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。
+- [todos 只追加直接推 main](project_todos_direct_main.md) — 往 knowledge/todos/ 写只追加速记时，直接提交 main、不提 PR
 <!-- project-memory-entries:end -->
