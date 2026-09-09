@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- 根 `AGENTS.md` 硬约束增加：大的架构变化必须在同一变更集更新根 README。
+
 ### Fixed
 
 ### Removed
