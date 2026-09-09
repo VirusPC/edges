@@ -1,243 +1,160 @@
-# Edges - 认知系统
+# Edges — 个人认知系统
 
-> 构建可复用的认知优势，提高未来判断效率
+> 构建可复用的认知优势，提高未来判断效率。
 
-## 项目背景
+Edges 是一个以知识资产为核心、由 Agent 接口和可迁移 harness 支撑的个人认知系统。它让重要经验能够被重新找到和使用，在真实判断、行动与外部互动中接受反馈，并随时间持续演化。
 
-Edges 是一个 **以知识沉淀为手段、以长期认知复利为目标的个人系统**。
+这是一个公开的个人系统，不承诺整仓可以即插即用；其中的 skills、CLI、MCP 等组件可以独立复用。
 
-它关注的不是一次判断是否正确，
-而是：**是否在时间维度上，持续形成可复用的判断优势（edges）。**
+## 理念：知识必须进入闭环
 
-## 设计思想
+信息被记录下来，并不意味着它已经成为知识。缺少提炼、无法重新找到、不能影响行动的内容，只是在积累存储成本。Edges 关心的是让经验进入知识闭环（Knowledge Loop），在使用和反馈中逐渐形成可复用的判断优势。
 
-**终端捕获，核心沉淀**：各个终端（ChatGPT、Cursor、Claude Code、Gemini CLI 等）作为知识的感知端，负责总结对话中的核心逻辑与灵感。通过 **`edges-note` CLI**（本地有 shell 的 agent）或 **`new-note` MCP Server**（没有 shell 的宿主），这些零散的思考被自动、标准地沉淀到 Edges 系统的 `knowledge/notes/` 中，实现“对话即笔记，思考即资产”的自动化闭环。
+核心原则是：**多端捕获，统一沉淀；按需输出，反馈演化。**
 
-### 核心指标
-
-所有内容沉淀都应服务于以下指标，否则价值极低：
-
-- **效率**: 同类判断是否更快形成
-- **时间**: 相似问题是否更容易处理
-- **评估**: 判断是否可被复盘或证伪
-- **落地**: 是否真实影响行动与取舍
-- **复利**: 是否能在未来多次被调用并放大收益
-
----
-
-## 1. 核心资产 (knowledge/)
-
-这是系统的核心数据层，承载所有的认知材料。
-
-### 目录流转
-
-```
-knowledge/notes → 加工 → knowledge/edges → 归档/删除
-      ↓                        ↓
-   原材料暂存                形成可复用判断
-  允许不确定性               提高未来决策效率
+```text
+(1) 捕获：对话 / 文章 / 实践 / 学习
+        |
+        v
+(2) 生产：Notes / Projects / Teach
+        |
+        | 提炼
+        v
+(3) 沉淀：Edges
+        |
+        | 使用
+        +--> 内部调用 --> 判断与行动
+        |
+        +--> 外部扩环 --> Posts / 系统接口 --> 外部参与者
+        |
+        v
+(4) 反馈：行动结果 / 新经验 / 问题 / 反驳 / 新证据
+        |
+        | 重新进入系统，推动知识与系统演化
+        +------------------------------------------> 回到 (1)
 ```
 
-### 收录标准
+知识闭环可以向外扩张。Edge 被个人调用，形成“判断—行动—新经验”的内部循环；Post 和系统接口把知识带给更多人和系统，引入新的问题、反驳与证据。输出不是终点：只有这些反馈催生的新洞察重新进入知识生产入口，个人循环才扩展成连接真实世界的更大循环。
 
-| 目录             | 存什么 (Yes)     | 作用                            |
-| -------------- | ------------- | ----------------------------- |
-| **`notes/`**   | 新信息、想法、线索、疑问  | **输入**: 允许不确定性，作为未来 Edge 的原材料 |
-| **`edges/`**   | 稳定的、可复用的判断优势  | **资产**: 提高成功概率，减少错误成本         |
-| **`archive/`** | 已结算、失效或被替代的内容 | **历史**: 保留痕迹，不干扰当前决策          |
+反馈修正 Edge，推动知识演化；反馈进一步改变知识组织、检索、输出方式或工具能力，推动系统演化。Edges 当前追求 Human/Agent-in-the-loop 的受控自进化：Agent 协助发现问题、提出改进和执行验证，人判断并采纳重要变更。Recursive Self-Improvement（递归自我改进）是更长期的方向，不是当前能力。
 
-以下目录**不参与上述流转**，是支撑性存储：
+## 知识模型
 
-| 目录               | 存什么              | 作用                              |
-| ---------------- | ---------------- | ------------------------------- |
-| **`projects/`**  | 成体系的专题材料与产出 | **专题**: 围绕单一议题的长期材料 |
-| **`resources/`** | 图片、音频等附件         | **附件**: 被笔记引用的媒体文件，不独立阅读        |
-| **`posts/`**     | 对外博客（公开发表的成稿） | **对外**: 人仔细维护；AI 不得自动改写        |
+目录不是一条强制流水线，而是在知识闭环中承担不同角色：
 
-### ⛔️ 拒收原则 (Not)
+| 角色 | 目录或机制 | 作用 |
+| --- | --- | --- |
+| 知识生产 | [`notes/`](knowledge/notes/)、[`projects/`](knowledge/projects/)、[`teach/`](knowledge/teach/) | 捕获零散材料，或围绕明确目标保留专项上下文 |
+| 知识沉淀 | [`edges/`](knowledge/edges/) | 保存脱离原始场景仍可复用的判断 |
+| 知识使用 | 内部调用、[`posts/`](knowledge/posts/)、系统接口 | 影响行动，并把知识接入更多参与者和反馈来源 |
+| 支撑与退出 | [`resources/`](knowledge/resources/)、[`archive/`](knowledge/archive/) | 提供共享附件，或将内容移出活跃知识空间 |
 
-- 只在当下有用、不可复用的总结
-- 无法进入判断链条的“聪明观点”
-- 没有时间维度、无法被验证的结论
+Notes 是低成本、零散且尚未形成稳定结论的捕获。Projects 是以解决问题或交付产出为目标的专项工作区；Teach 是以学习进展和能力获得为目标的专项工作区。三者都是知识生产入口，不是依次晋级的成熟度阶段。专项中的原始上下文留在工作区，跨场景仍有价值的经验另行提炼为 Edge。
 
-### ⚠️ 维护规则
+### Edge 与演化
 
-1. **notes → edges** 不是搬运，是提炼。
-2. edge 一旦形成，不回写历史；演化通过新增或替代体现。
-3. 迁移到 archive 必须有明确原因。
-4. **`knowledge/posts/` 是对外博客，由人维护**：存放将公开发表的成稿，不是内部 notes。AI 不得自动创建、编辑、移动、删除、重构或重写该目录下的任何文件。人类可在别处让 AI 起草，再由人粘贴或提交进 posts。
+Edge 是已经提炼出理由与适用边界、能够影响未来判断或行动的可复用判断。它至少应说明结论、理由、适用边界和检验方式，并满足四项准入标准：未来可以复用，能够影响行动，允许复盘或证伪，并能随新经验继续演化。现实验证可以记录，但不是成为 Edge 的前提。
 
----
+从 Note 或专项形成 Edge 是提炼，不是移动原文或复制全文。外部反馈首先作为新材料回到 Note 或对应专项，经过判断后再用于演化 Edge：
 
-## 2. 用户命令 (bin/)
+- 不改变判断含义的勘误、证据和链接补充，可以原地修改。
+- 适用边界、因果解释或结论发生实质变化时，创建继任 Edge，并标明替代关系。
+- 被替代的旧 Edge 归档到对应的 `archive/edges/` 路径。
 
-**`bin/`** 存放面向人的可执行命令（shell），由 `pnpm setup` 加入 `$PATH` 后可在任意目录直接调用。
+### 知识如何发挥作用
 
-- **`new-note`**: 笔记 ingest 的 git 实现（落盘、commit、push）。人可以直接调；agent 不要把它当机器契约。
+- **内部调用**：在新问题中检索并使用 Edge，使其影响判断与行动；结果产生的新经验再回到知识生产入口。
+- **外部扩环**：Post 或系统接口把活跃知识交付给外部参与者；读者反馈、使用结果和新证据回流后，形成更大的知识闭环。
 
-面向 agent 的 CLI 项目在 [`extensions/clis/`](extensions/clis/README.md)（`edges-note`），不在 `bin/`。
+[`knowledge/posts/`](knowledge/posts/) 存放准备公开发表的成稿。Post 可以取材于 Note、Edge 或专项成果，但不会替代内部知识真源。该目录由人仔细维护；AI 不得自动创建、编辑、移动、删除、重构或重写其中的任何文件，可以在其他位置协助起草，再由人审阅后放入。
 
-> 项目自身的维护脚本（setup、release、migration 等）不在 `bin/`，见下一节 `scripts/`。
-> skill 分发不在 `bin/`，见下方「接入初始化」。
+当前主要通过文件、Obsidian 和人工检索调用知识。后续计划接入 RAG、PageIndex 等索引方式，并经 [`extensions/`](extensions/) 向外部系统提供机器可读的知识访问能力；这些属于规划方向，尚不是现有能力。
 
----
+### 支撑与退出
 
-## 3. 项目维护脚本 (scripts/)
+[`knowledge/resources/`](knowledge/resources/) 存放跨知识区域共享的图片、音频等附件，不作为独立知识阅读；只属于某个专项的附件与专项共置。
 
-存放本仓库开发者用于初始化、构建、清理、发布等**一次性或低频**操作的脚本。不会自动加入 `$PATH`，统一通过 `pnpm <script-name>` 入口调用。
+[`knowledge/archive/`](knowledge/archive/) 类似整个知识空间的回收站：内容退出活跃区域，但保留来源和恢复可能性。它不是知识出口，也不限于失效 Edge。归档必须保留内容在 `knowledge/` 下的原始相对路径：
 
-- **`setup`**: 首次接入时初始化本地环境（注册 `bin/` 到 PATH、加载 `.env`）。对应 `pnpm setup`。
-- **`link-agent-skills`**: 把 `extensions/skills` 里每个 skill 以相对软链挂到 `.agents/skills`（项目级发现位）。对应 `pnpm skills:link`。`npx skills` 装进来的 vendor 拷贝不动。
+```text
+knowledge/notes/a.md → knowledge/archive/notes/a.md
+knowledge/projects/foo/report.md → knowledge/archive/projects/foo/report.md
+```
 
-判据：换台机器克隆下来要重新跑一遍的 → `scripts/`；装好之后用户/Agent 天天用的 → `bin/`。
+曾经有意义或被引用过的内容应归档，并写明原因；误建、空白或纯临时文件可以直接删除。
 
----
+> 以上是新增内容和后续维护的目标约定。历史内容尚未全部按该模型整理，目录现状不代表已经完成迁移。
 
-## 4. 外部连接 (extensions/)
+## 系统实现
 
-`extensions/` 目录是 Edges 系统对外的**接口层**，供外部 Agent 或系统接入。
+| 目录 | 职责 | 边界 |
+| --- | --- | --- |
+| [`knowledge/`](knowledge/) | 知识生产、提炼、使用与退出 | Edges 的核心资产 |
+| [`extensions/`](extensions/README.md) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关 |
+| [`shared-extensions/`](shared-extensions/README.md) | 跨机器、跨 Agent 共用的个人 harness | 离开 Edges 仍然有价值 |
+| [`bin/`](bin/README.md) | 安装后由人反复调用的命令 | 加入 `$PATH` |
+| [`scripts/`](scripts/README.md) | 初始化、构建、迁移等维护脚本 | 通过 `pnpm` 调用，不加入 `$PATH` |
 
-**收录标准**: 判据是「这是为了让 Agent / 外部系统接入或操作 Edges」，而不是「它是代码还是文档」。纯 markdown 同样属于 extensions。换 Agent、换机器带得走是必要条件，但不是充分条件——跨机器共用、却不绑定 Edges 的 harness 走 [`shared-extensions/`](shared-extensions/README.md)。
+捕获入口最终回到同一套知识模型：人可以使用 `bin/new-note`；有 shell 的 Agent 使用 [`edges-note` CLI](extensions/clis/README.md)，获得稳定参数和 JSON 输出；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)。它们复用同一条 Note 入库链路。
 
-- **`clis/`**: 面向 agent 的 CLI 项目（`edges-note`）。本地有 shell 的 agent 优先走它。
-- **`mcp-servers/`**: 标准化接口服务 (如 `new-note` server)，给**没有 shell** 的 AI 宿主。
-- **`skills/`**: 导出给外部 Agent 的思维链与操作规范。
-- **`subagents/`**: 专用子代理配置。
-- **`tools/`**: 独立调用工具。
-- **`system-prompt/`**: 可复用的 system prompt 片段与模板，接新 Agent 时直接取用。
-- **`new-server/`**: 新机器/新服务的开荒操作手册（用户与权限、DNS、第三方模型 key 接入等）。
-- **`docs/`**: 接口协议与接入指南。
-- **`others/`**: 尚未归类的可复用片段（如存档的检索式）。
+`extensions/` 收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill 和其他接口。`shared-extensions/` 则保存不依赖 Edges、可跨机器和 Agent 客户端复用的个人 harness；两者互斥。
 
-### 接入初始化
+现有输出侧以文件、Obsidian 和人工检索为主。未来的索引、检索与机器接口仍放在 `extensions/`，让知识闭环可以连接外部系统，但必须在实现前明确标注为规划能力。
 
-外部 Agent 或协作者在首次接入时，执行：
+## 使用与维护
+
+### 维护完整的 Edges
 
 ```bash
-# (推荐) 初始化本地开发环境并添加 bin/ 路径到系统 PATH
+pnpm install
 pnpm setup
-
-# 项目级：extensions/skills 软链到 .agents/skills（vendor 拷贝不动）
 pnpm skills:link
-
-# 本机全局：写入 ~/.agents/skills；Claude Code 不读中枢，另建软链
-pnpm skills:install
 ```
 
-只想用 skill、不接入整套系统的话，不必克隆本仓库：
+- `pnpm install`：安装 workspace 依赖。
+- `pnpm setup`：初始化本地环境，并把 `bin/` 加入 `$PATH`。
+- `pnpm skills:link`：把 Edges 自有 skills 链到项目级 `.agents/skills/`。
+
+### 只使用可复用组件
+
+不克隆整套系统也可以安装公开 skills：
 
 ```bash
 npx skills@latest add VirusPC/edges/extensions/skills
 ```
 
-子路径不能省，原因见 [`extensions/skills/README.md`](extensions/skills/README.md)。
+子路径不能省。单独使用 Agent CLI、MCP server 或 skills 的方式分别见 [`extensions/clis/README.md`](extensions/clis/README.md)、[`extensions/mcp-servers/README.md`](extensions/mcp-servers/README.md) 和 [`extensions/skills/README.md`](extensions/skills/README.md)。
 
----
-
-## 5. 跨机器共享扩展 (shared-extensions/)
-
-`shared-extensions/` 是个人 agent harness 的真源：同一套扩展装到所有本地和云端机器，被所有 Agent 共用。
-
-**收录标准**: 判据是「离开 Edges，换一台机器、换一个 Agent，我还要带着它干活吗」。和 `extensions/` 互斥。
-
-- **`skills/`**: 不绑定 Edges 的通用 skill（不走 `npx skills add VirusPC/edges/extensions/skills`）。
-- **`mcp/`**: MCP **配置**（连哪些 server）。Edges 自己的 MCP server 实现仍在 `extensions/mcp-servers/`。
-- **`plugins/`**: Agent 插件。
-- **`hooks/`**: Agent 生命周期钩子。
-
-凭据只用环境变量占位，禁止写入实际 token。发现位在各机器的全局 Agent 目录（`~/.agents/skills` 等），不是本仓库的 `.agents/skills`。安装脚本尚未落地，有第一份真实内容时再加。
-
-整层一份版本（[`VERSION`](shared-extensions/VERSION)、[`CHANGELOG.md`](shared-extensions/CHANGELOG.md)、tag `shared-extensions@`），不按单条扩展发版。记忆入口 [`shared-extensions/AGENTS.md`](shared-extensions/AGENTS.md)。细则见 [`shared-extensions/README.md`](shared-extensions/README.md)。
-
----
-
-## 6. 工作区管理 (Workspace)
-
-本项目采用 **pnpm workspace** 进行“服务端服务工作区”管理，实现环境隔离与统一调度。
-
-### 核心操作
-
-- **安装依赖**: `pnpm install` (在根目录执行)
-- **启动 MCP Server**（无 shell 的宿主）:
-  - 启动 New Note: `pnpm start:note-server`
-  - 开发模式: `pnpm dev:note-server`
-- **Agent CLI**: `pnpm cli:note -- --help`
-- **通用的启动器**: `pnpm mcp:run <server-name> <command>`
-  - 示例: `pnpm mcp:run new-note build`
-
-### 结构规范
-
-- `extensions/mcp-servers/*`: 独立的 MCP 服务单元，各自拥有 `package.json`。
-- `extensions/clis`: 面向 agent 的 CLI 项目（workspace 成员 `edges-cli`，二进制 `edges-note`）。
-- `bin/`: 面向人的可执行命令（shell，非 node 包），由 `pnpm setup` 加入 `$PATH`。 ingest 的 git 实现在这里。
-- `scripts/`: 项目自身的维护脚本（setup、release、migration 等），通过 `pnpm <name>` 调用，不入 PATH。
-- `tsconfig.base.json`: 共享的全局编译器配置。
-
----
-
-## 7. 隐私与脱敏
-
-> **前提：本仓库是公开仓库（`github.com/VirusPC/edges`）。** 任何写入的内容都等同于公开发表。
-> 写笔记时的默认心智是「我在发博客」，不是「我在记私人日记」。
-
-### 7.1 绝对不能进仓库 (Never)
-
-以下内容一旦写入即为事故，不存在「先提交再清理」这个选项——git 历史无法真正删除：
-
-| 类别 | 具体形态 |
-|---|---|
-| **凭据** | token、API key、密码、私钥、cookie、`.env` 实际值 |
-| **个人信息** | 手机号、身份证、住址、非公开邮箱、他人真实姓名/花名 |
-| **未公开 IP** | 专利交底书、未发布的方案评审材料、内部立项文档 |
-| **二进制办公文档** | `.docx/.xlsx/.pptx` 等（正文与元数据都无法 diff 审查，已在 `.gitignore` 中拒收） |
-
-### 7.2 必须脱敏后才能进仓库 (Redact)
-
-公司内部信息不必一概不写——**方法论可以留，标识符必须去**。脱敏映射：
-
-| 原始 | 替换为 |
-|---|---|
-| 内部域名与文档链接（`docs.<公司>.com/...` 等） | 整条删除，或写成「（内部文档，略）」 |
-| 内部系统 / 自研 Agent 名 | `内部文档平台`、`内部 Agent A/B` 等占位代称 |
-| 内部服务名、仓库名、代码路径、类全名 | 删除该行，或改写为通用描述 |
-| 同事姓名与花名 | 改为角色（`POC`、`直属负责人`、`QA`） |
-| 内部排期日期、具体量化指标 | 改为相对周次 / 量级（`第 3 周`、`一批`） |
-| 内部通报、周报、评审记录的原文照搬 | 提炼为通用条目，不保留内部行文口吻 |
-
-脱敏后在文件头加一行说明，让未来的读者知道这不是原文：
-
-```markdown
-> 本文为通用方法论记录，已移除具体公司内部系统名称、内部文档链接与排期。
-```
-
-### 7.3 截图是最容易漏掉的泄漏面
-
-**文字脱敏了不等于截图脱敏了。** 截图会带上编辑器标签页文件名、终端路径、浏览器地址栏、侧边栏目录树、IM 窗口。
-
-- 引入任何截图前，先实际打开看一遍，而不是只看文件名
-- 内部系统 UI 的截图一律不入库；需要示意就自己造一个 demo 再截
-- 判据：**这张图放到公开博客里，我会不会需要打码？** 会，就别放
-
-### 7.4 写入与发现泄漏
-
-1. **写入前自查**：向 `knowledge/` 或 `shared-extensions/` 写入内容时，先按 7.1 / 7.2 过一遍；命中就地脱敏，并说明改了什么。
-2. **发现即上报**：在仓库任意位置发现疑似泄漏，立即停下并告知，不要默默修掉——需要知道它曾经存在过多久。
-3. **历史重写必须仓库所有者确认**：`git filter-repo`、`git push --force` 属于不可逆操作。可以准备命令、做好备份（`git bundle create ... --all`），但执行必须由所有者本人完成。
-4. **删文件 ≠ 删历史**：报告清理结果时，必须明确区分「工作区已清理」和「历史已重写」。
-
-### 7.5 例行自查
+### 开发与验证
 
 ```bash
-# 内部标识符扫描（按需扩充 pattern）
-grep -rIn -E '<内部域名>|<内部系统名>|<内部服务名前缀>' --include='*.md' . | grep -v node_modules
-
-# 凭据形态扫描
-grep -rIn -E '(api[_-]?key|token|secret|password)\s*[:=]\s*["\x27][^"\x27]{16,}' --include='*.md' --include='*.ts' . | grep -v node_modules
-
-# 确认没有办公文档混入
-git ls-files | grep -iE '\.(docx?|xlsx?|pptx?)$'
+pnpm build
+pnpm test
 ```
 
----
+根 [`package.json`](package.json) 是可用 workspace 命令的当前清单，专项命令见各子目录 README。
 
-许可证为 [MIT](LICENSE)。仓库级版本记录见 [CHANGELOG.md](CHANGELOG.md)。Skill 各自发版，见 `extensions/skills/<name>/CHANGELOG.md`。Agent 入口是 [`AGENTS.md`](AGENTS.md)，硬约束写在那份文件里，目录约定仍以本 README 为准。
+### 文档与版本
+
+- [`README.md`](README.md)：目录约定、业务逻辑和内容标准的唯一真理源。
+- [`AGENTS.md`](AGENTS.md)：Agent 必须优先看到的硬约束和分层项目记忆入口。
+- [`CONTEXT.md`](CONTEXT.md)：领域术语表，不存放实现细节。
+- [`.memory/`](.memory/)：保存无法从代码或 Git 历史直接推导的决策、反馈与参考资料。
+- 仓库级变更记录在 [`CHANGELOG.md`](CHANGELOG.md)，tag 使用 `vX.Y.Z`。
+- 对外 skill 各自独立 semver；`shared-extensions/` 整层使用自己的 [`VERSION`](shared-extensions/VERSION) 与 [`CHANGELOG.md`](shared-extensions/CHANGELOG.md)。
+
+进一步文档：[Edges 扩展](extensions/README.md) · [共享 Agent harness](shared-extensions/README.md) · [用户命令](bin/README.md) · [维护脚本](scripts/README.md)
+
+## 公开仓库边界
+
+本仓库公开在 `github.com/VirusPC/edges`，写入即等同公开发表：
+
+- token、API key、密码、私钥、cookie 等凭据，个人信息、未公开 IP，以及 `.docx`、`.xlsx`、`.pptx` 等办公二进制文件绝不入库。
+- 内部域名、系统名、服务名、代码路径、同事身份和排期等标识符必须删除或改写为通用表述后才能入库。
+- 截图按“能否直接放到公开博客”判断；需要打码、包含内部 UI 或可能泄漏上下文的截图不要入库。
+- 发现疑似泄漏时立即停止并告知仓库所有者；删除工作区文件不等于清除 Git 历史。
+- `git filter-repo`、force push 等历史重写必须由仓库所有者确认并执行。
+
+## License
+
+本仓库使用 [MIT License](LICENSE)。系统演进记录见 [`CHANGELOG.md`](CHANGELOG.md)。
