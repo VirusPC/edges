@@ -13,12 +13,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `docs/adr/`：记录领域决策；首条为对话整理采用复盘四栏。
 - CONTEXT 增加「复盘四栏」及四栏术语。
+- CONTEXT 增加 Task、`edges-tasks-status`、Task Run Log、backlog（Task）。
+- `docs/adr/0002-knowledge-tasks-status-folders.md`：`knowledge/todos` 迁为按状态分夹的 `knowledge/tasks`。
+- [`knowledge/tasks/`](knowledge/tasks/)：跨 Agent 接力的 Task 看板。
 
 ### Changed
+
+- 存量 `knowledge/todos/*.md` 改写为 project-memory 形态后迁入 `knowledge/tasks/backlog/`。
 
 ### Fixed
 
 ### Removed
+
+- `knowledge/todos/`（不留重定向 stub）。
 
 ## [1.1.0] - 2026-09-09
 

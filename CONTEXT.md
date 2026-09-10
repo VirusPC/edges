@@ -127,3 +127,19 @@ _避免使用_：普通反馈闭环、知识更新、未展开的 RSI
 **Archive**：
 暂存从活跃知识空间移除、但仍需保留来源和恢复可能性的材料；它是退出机制，不是知识出口。
 _避免使用_：知识出口、历史知识库、失效 Edge 专区
+
+**Task**：
+跨 Agent 接力的工作项（idea 捕获后经细聊与开发直至收口）；按 edges-tasks-status 分夹存放在 knowledge/tasks/ 下。
+_避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目
+
+**edges-tasks-status**：
+Task（Issue 层）的唯一状态字段，取值为 backlog | todo | in_progress | in_review | done | blocked | cancelled。
+_避免使用_：裸 status 字段名、Run 层状态、open/discussing/building 旧枚举
+
+**Task Run Log**：
+与某个 Task 同目录、同 stem 的点文件 sidecar（`.{stem}.log.md`），只追加执行记录（Run）；不写入 Task 正文。
+_避免使用_：正文内【执行记录】表、把 Run 嵌进 frontmatter
+
+**backlog（Task）**：
+tasks 层内「已进入任务系统但未排期」的筛选池；也是 agent 衍生提案的默认入口。人侧存量从旧 todos 迁入时默认落此态。
+_避免使用_：knowledge/todos 系统外池、Draft

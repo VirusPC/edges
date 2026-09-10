@@ -52,9 +52,12 @@ Edges 是一个以知识资产为核心、由 Agent 接口和可迁移 harness �
 | 知识生产 | [`notes/`](knowledge/notes/)、[`projects/`](knowledge/projects/)、[`teach/`](knowledge/teach/) | 承载研究线索与在研资产，选择性投入认知资本 |
 | 知识沉淀 | [`edges/`](knowledge/edges/) | 形成脱离原始场景仍可反复部署的核心资产 |
 | 知识使用 | 内部调用、[`posts/`](knowledge/posts/)、系统接口 | 部署资产，获得决策收益和外部反馈 |
+| 工作项 | [`tasks/`](knowledge/tasks/) | 跨 Agent 接力的 Task 看板，按 `edges-tasks-status` 分夹；不是知识原材料，也不是抢单队列 |
 | 支撑与退出 | [`resources/`](knowledge/resources/)、[`archive/`](knowledge/archive/) | 支撑资产使用、控制持有成本并保留恢复可能 |
 
 Notes 是低成本、零散且尚未形成稳定结论的捕获。Projects 是以解决问题或交付产出为目标的专项工作区；Teach 是以学习进展和能力获得为目标的专项工作区。三者都是知识生产入口，不是依次晋级的成熟度阶段，也不要求投入相同成本。专项中的原始上下文留在工作区，只有预期能够复用、影响决策或降低不确定性的经验，才值得进一步提炼为 Edge。
+
+[`knowledge/tasks/`](knowledge/tasks/) 存放跨 Agent 接力的工作项，按 `edges-tasks-status` 分夹。新人侧捕获默认落入 `backlog/`；执行记录写在同 stem 的 sidecar，不进入 Task 正文。它不是 Note，也不是 Multica 式可抢单队列。
 
 ### Edge 与演化
 
