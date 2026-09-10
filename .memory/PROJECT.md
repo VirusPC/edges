@@ -8,7 +8,7 @@
 <!-- project-memory-entries:start -->
 - [放弃的 ChatGPT MCP 接入](projects/project_abandoned_chatgpt_mcp.md) — 2026-02-19 建过两条空的 ChatGPT MCP change，没有设计可恢复；若再做从当前 MCP 布局重开。
 - [Changelog 自动化：调研过，暂不生成正文](projects/project_changelog_automation.md) — 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。
-- [对话整理采用复盘四栏](projects/project_conversation_notes_fupan_four_columns.md) — 改 conversation-to-notes 或对话 Note 结构时：用复盘四栏；不要复活已关闭的 FIA 中文换皮（事实/洞察/行动）；不要批量改写旧笔记；不要把升 Edge 写进该 skill。
+- [对话整理采用复盘四栏](projects/project_conversation_notes_fupan_four_columns.md) — 改 conversation-to-notes 或对话 Note 结构时：用复盘四栏；相关链接写入【补充说明】并附说明；不要复活已关闭的 FIA 中文换皮；不要批量改写旧笔记；不要把升 Edge 写进该 skill。
 - [整仓 MIT，不拆 knowledge 许可证](projects/project_mit_license.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
 - [new-note MCP 的 ingest 约束](projects/project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时要遵守的编排、校验、git 失败处理和未完成项。
 - [订阅管理盘点进展](projects/project_progress.md) — 订阅/用量盘点进展：双 Gmail + QQ IMAP、国内 Kimi 无邮箱、CodexBar Linux CLI 已装待鉴权；后续 Apple/微信侧核对。

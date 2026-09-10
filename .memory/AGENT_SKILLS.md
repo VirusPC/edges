@@ -7,7 +7,7 @@
 > 条目区块由脚本重算，路径相对 `.memory/`，所以形如 `../.agents/skills/<name>/SKILL.md`。
 
 <!-- project-memory-entries:start -->
-- [conversation-to-notes](../.agents/skills/conversation-to-notes/SKILL.md) — 将原始对话记录整理为结构清晰的中文笔记摘要。使用复盘四栏（背景→过程→所学→行动指南），灵感来自 After Action Review，但不是官方 AAR 模板。含补充说明与相关链接。
+- [conversation-to-notes](../.agents/skills/conversation-to-notes/SKILL.md) — 将原始对话记录整理为结构清晰的中文笔记摘要。使用复盘四栏（背景→过程→所学→行动指南），灵感来自 After Action Review，但不是官方 AAR 模板。含补充说明（相关链接写入该栏并附简短说明）。
 - [domain-modeling](../.agents/skills/domain-modeling/SKILL.md) — Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording or editing an ADR.
 - [grill-me](../.agents/skills/grill-me/SKILL.md) — A relentless interview to sharpen a plan or design.
 - [grill-with-docs](../.agents/skills/grill-with-docs/SKILL.md) — A relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go.
