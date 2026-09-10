@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONTEXT 增加 Task、`edges-tasks-status`、Task Run Log、backlog（Task）。
 - `docs/adr/0002-knowledge-tasks-status-folders.md`：`knowledge/todos` 迁为按状态分夹的 `knowledge/tasks`。
 - [`knowledge/tasks/`](knowledge/tasks/)：跨 Agent 接力的 Task 看板。
+- `extensions/skills/learn-repo`：把要学习的外部仓库以 git submodule 挂进 `knowledge/teach/<topic>/repos/`，主仓库只记指针不涨体积，并在主题 RESOURCES.md 登记来源与用途。
+- Obsidian `userIgnoreFilters` 排除 `knowledge/teach/*/repos/`，学习仓库的文件不进 vault 搜索与关系图谱。
 
 ### Changed
 

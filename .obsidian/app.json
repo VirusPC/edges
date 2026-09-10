@@ -1,5 +1,8 @@
 {
   "attachmentFolderPath": "knowledge/resources",
   "readableLineLength": false,
-  "showUnsupportedFiles": true
+  "showUnsupportedFiles": true,
+  "userIgnoreFilters": [
+    "knowledge/teach/*/repos/"
+  ]
 }
