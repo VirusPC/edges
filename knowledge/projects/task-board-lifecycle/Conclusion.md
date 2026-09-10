@@ -22,12 +22,12 @@
 
 `backlog / todo / in_progress / in_review / done / blocked / cancelled`
 
-- `todo`：转化落点，已指派或待指派。
+- `todo`：人转化的默认落点（commitment point，随时可开工），已指派或待指派。
 - `in_progress`：agent 开始执行。**没有独立 Claimed**——指派制下认领与开工是同一瞬间。
 - `in_review`：agent 交付、等人验收（对应 Azure Resolved / MTurk Reviewable）。
 - `done`：人工确认或 PR 合并，**唯一正向终态**。
 - `blocked` / `cancelled`：一等状态（跟 Multica 走；换来整个「无固定流转、任意可跳」的松散看板，个人系统不用维护 transition 权限）。
-- `backlog`：类别定义保留但**基本闲置**——todos 目录已是系统外池子，转化即落 `todo`，不要两层 backlog。
+- `backlog`：**转化了但未排期**的台阶，也是 **agent 衍生提案**的入口——agent 执行中发现的欠账（「这里还欠一个 X」）自主建 task 挂 `backlog` 等人筛：升 `todo` ＝ 接单，`cancelled` ＝ 不做。与 todos 目录不重复：todos 是**人**的捕获池（系统外），`backlog` 是任务层内部的筛选池（系统内）。
 
 ### 3. Run 层：5 态（砍掉 Multica 的 4 个调度态）
 
@@ -47,7 +47,7 @@
 
 | 砍掉的东西 | 原因 |
 |---|---|
-| `Draft` 草稿态 | 转化是显式动作，转化那一刻就是 commitment point；todos 目录已是草稿池，不要两层草稿 |
+| `Draft` 草稿态 | 转化前的想法归 todos 目录（人的捕获池），转化后的暂存归 `backlog`（系统内筛选池）；`Draft` 卡在两者中间，两头的活都已被占 |
 | `Expired` / 认领超时 / 验收超时 | 抢单平台（MTurk、猪八戒）防「挂很久没人接」的机制；指派制没有此问题，Multica 自己也没有。将来真忘记验收，再补 MTurk 式自动通过也不迟 |
 | 独立 `Claimed` 态 | 指派制下认领 = 开工，分开只对多人抢单有意义 |
 | Issue 层的 `failed` | failed 属于 Run 层；task 不停在 failed 上，重试历史天然保留在 Run 记录里 |
@@ -82,8 +82,8 @@ Run 不放 frontmatter 的理由：N 条 × 多字段在 YAML 里是嵌套列表
 
 ### 7. todo→task 转化语义
 
-- 转化 = 从「可能做」到「承诺做」的边界（commitment point），由人显式触发，不自动批量转。
-- 转化动作落库：`origin_todo` 引用 + `converted_at`；终点是 Issue 的 `todo` 态（或带指派直接 `in_progress`）。
+- 转化 = 从「系统外」进「系统内」，由人显式触发（单条、批量皆可）。承诺点细分：批量转化可先落 `backlog` 攒着（「值得做」），`backlog → todo` 才是 commitment point（「现在做」，lead time 起点）；单条即时转化直接落 `todo`，转化即承诺。
+- 落库：`origin_todo` 引用 + `converted_at`；人转化的终点是 `todo`（或带指派直接 `in_progress`），agent 自建提案的终点是 `backlog`。
 
 ## 方案演进记录（为什么是这个形状）
 

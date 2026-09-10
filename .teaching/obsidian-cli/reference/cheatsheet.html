@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>Obsidian CLI 命令速查表</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<p class="meta">参考文档 · 随课更新 · 来源：<a href="https://github.com/kepano/obsidian-skills/blob/main/skills/obsidian-cli/SKILL.md">kepano/obsidian-skills</a> / <a href="https://obsidian.md/help/cli">官方文档</a> / <code>obsidian help</code></p>
+
+<h1>Obsidian CLI 命令速查表</h1>
+
+<blockquote>前提：Obsidian 桌面应用正在运行。命令 <code>obsidian help</code> 永远是最新的权威列表。</blockquote>
+
+<h2>语法三规则</h2>
+<ul>
+  <li><strong>参数</strong>用 <code>=</code> 赋值，含空格要引号：<code>obsidian create name="My Note"</code></li>
+  <li><strong>标志</strong>是布尔开关，无值：<code>silent overwrite</code></li>
+  <li>多行内容用 <code>\n</code>（换行）和 <code>\t</code>（Tab）</li>
+</ul>
+
+<h2>定位</h2>
+<table>
+  <tr><th>写法</th><th>含义</th></tr>
+  <tr><td><code>file="名字"</code></td><td>像 wikilink 一样按名解析，无需路径/扩展名</td></tr>
+  <tr><td><code>path="folder/note.md"</code></td><td>vault 根起的精确路径</td></tr>
+  <tr><td><code>vault="名称"</code>（放最前）</td><td>多 vault 时指定目标；缺省用最近聚焦的 vault</td></tr>
+  <tr><td>都不给</td><td>作用于当前活动文件</td></tr>
+</table>
+
+<h2>常用命令</h2>
+<pre><code>obsidian read file="My Note"                 # 读笔记
+obsidian create name="New" content="# Hi" silent   # 建（可加 template=）
+obsidian append file="My Note" content="…"  # 追加
+obsidian search query="关键词" limit=10      # 搜索
+obsidian daily:read / daily:append content="- [ ] 任务"  # 每日笔记
+obsidian property:set name=status value=done file="My Note"  # 改属性
+obsidian tasks daily todo                   # 任务列表
+obsidian tags sort=count counts             # 标签统计
+obsidian backlinks file="My Note"           # 反向链接</code></pre>
+
+<h2>通用修饰</h2>
+<ul>
+  <li><code>--copy</code>：任何命令的输出复制到剪贴板</li>
+  <li><code>silent</code>：不打开/切换文件窗口（Agent 批量操作必备）</li>
+  <li><code>total</code>：列表命令返回计数</li>
+  <li>完整命令树：<code>obsidian help</code>（含 dev:* / plugin:* 开发者命令族，本 mission 暂不涉及）</li>
+</ul>
+
+<footer><p>课件：<a href="../lessons/0001-enable-cli-and-first-roundtrip.html">0001 启用与首次读写</a></p></footer>
+</body>
+</html>
