@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `docs/adr/`：记录领域决策；首条为对话整理采用复盘四栏。
+- CONTEXT 增加「复盘四栏」及四栏术语。
+
 ### Changed
 
 ### Fixed
