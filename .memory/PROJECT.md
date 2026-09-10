@@ -18,5 +18,6 @@
 - [根硬约束只留聚光灯、脱敏与 git](projects/project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
 - [根 README 以知识闭环为唯一主线](projects/project_root_readme_direction.md) — 设计或修改根 README 时：从投资视角解释知识管理、分层 Agent Memory 与知识闭环，用一张图串联认知资本、Edge、收益、风险、流动性和反馈再投资。
 - [跨机器跨 Agent 的 harness 放 shared-extensions](projects/project_shared_extensions.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。
+- [工作项叫 tasks，支持状态流转](projects/project_tasks_with_status_not_todos.md) — idea→专家→Cloud 工作流下，目录与概念用 knowledge/tasks/（非 todos），并支持状态流转
 - [todos 只追加直接推 main](projects/project_todos_direct_main.md) — 往 knowledge/todos/ 写只追加速记时，直接提交 main、不提 PR
 <!-- project-memory-entries:end -->
