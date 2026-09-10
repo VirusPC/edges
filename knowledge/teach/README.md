@@ -5,3 +5,4 @@ Stateful teaching workspaces (teach skill). One topic per subdirectory.
 ## Topics
 
 - [changelog](./changelog/) — write a usable `CHANGELOG.md` for your own projects
+- [link-external-repo](./link-external-repo/) — 关联外部仓库而不撑大主仓库：submodule / subtree / gitignore+clone / partial clone 选型与实操

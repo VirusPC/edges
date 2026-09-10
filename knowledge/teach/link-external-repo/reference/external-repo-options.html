@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>速查 · 外部仓库关联方式选型</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <style>
+    table.opt {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--sans);
+      font-size: 0.82rem;
+      margin: 1rem 0;
+    }
+    table.opt th, table.opt td {
+      border: 1px solid var(--line);
+      padding: 0.5rem 0.6rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    table.opt thead th {
+      background: var(--card);
+      font-weight: 600;
+    }
+    table.opt td.dim { color: var(--muted); white-space: nowrap; }
+    .good { color: var(--ok); }
+    .bad { color: var(--bad); }
+    @media print { body { background: white; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="meta">
+      速查 ·
+      <a href="../MISSION.md">Mission</a> ·
+      <a href="../lessons/0001-two-kinds-of-size.html">第一课</a>
+    </header>
+
+    <h1>外部仓库关联方式选型</h1>
+    <p class="lede">先问两个问题：体积指「主仓库 .git 历史」还是「本地磁盘」？关联需不需要被别人 clone 后看到？</p>
+
+    <table class="opt">
+      <thead>
+        <tr>
+          <th></th>
+          <th>git submodule</th>
+          <th>git subtree</th>
+          <th>gitignore + 本地 clone</th>
+          <th>partial clone / sparse-checkout</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="dim">主仓库 .git 体积</td>
+          <td><span class="good">≈0</span>：只存 gitlink（指向某次提交）+ <code>.gitmodules</code></td>
+          <td><span class="bad">增长</span>：内容合入历史；<code>--squash</code> 可免带全历史，但每次更新的快照仍进历史</td>
+          <td><span class="good">0</span>：主仓库对此一无所知</td>
+          <td>不适用：这是「使用方」克隆外部仓库的方式，不动主仓库</td>
+        </tr>
+        <tr>
+          <td class="dim">本地磁盘占用</td>
+          <td>init 后占工作区磁盘</td>
+          <td>占工作区磁盘</td>
+          <td>占（可放仓库外或 symlink）</td>
+          <td><span class="good">省</span>：<code>--filter=blob:none</code> 按需拉 blob；sparse-checkout 只检出部分路径</td>
+        </tr>
+        <tr>
+          <td class="dim">关联进版本库</td>
+          <td><span class="good">是</span>：URL + 提交号可追溯、可 review</td>
+          <td><span class="good">是</span>（内容本身进库）</td>
+          <td><span class="bad">否</span>：只存在你机器上，约定靠文档</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="dim">别人 clone 主仓库后</td>
+          <td>默认空目录；<code>--recurse-submodules</code> 或 <code>git submodule update --init</code> 才有内容</td>
+          <td>内容即得，无额外步骤</td>
+          <td>什么都没有</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="dim">更新外部版本</td>
+          <td>子目录内 checkout 新提交 → 主仓库提交「指针变更」diff 只有一行 SHA</td>
+          <td><code>subtree pull</code>，产生内容 diff</td>
+          <td>手动 <code>git pull</code></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="dim">适用场景</td>
+          <td>要记录关联、又不想撑大主仓库——本 mission 的默认答案</td>
+          <td>要内容随仓库走、clone 即用、使用者无感</td>
+          <td>纯个人本地参考，无需他人复现</td>
+          <td>外部仓库本身很大，只想省磁盘/带宽地「用」它</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>常用命令</h2>
+<pre><code># submodule：添加 / 初始化 / 更新指针 / 移除
+git submodule add https://example.com/ext-repo.git vendor/ext
+git submodule update --init --recursive
+# （子目录里 checkout 新提交后）
+git add vendor/ext &amp;&amp; git commit -m "chore: bump ext-repo"
+git submodule deinit -f vendor/ext &amp;&amp; git rm -f vendor/ext
+
+# 主仓库体积实测（前后对比）
+git count-objects -vH
+
+# partial clone + sparse-checkout：按需拉外部大仓库
+git clone --filter=blob:none --no-checkout https://example.com/big-repo.git
+cd big-repo
+git sparse-checkout init --cone
+git sparse-checkout set src/some-dir
+git checkout</code></pre>
+
+    <p class="cite">
+      依据：<a href="https://git-scm.com/docs/gitsubmodules">gitsubmodules(7)</a> ·
+      <a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">Pro Git: Submodules</a> ·
+      <a href="https://github.com/git/git/blob/master/contrib/subtree/git-subtree.adoc">git-subtree.adoc</a> ·
+      <a href="https://github.blog/open-source/git/get-up-to-speed-with-partial-clone-and-shallow-clone/">GitHub Blog: partial clone</a>
+    </p>
+  </div>
+</body>
+</html>
