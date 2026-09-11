@@ -6,7 +6,6 @@ import type { RuntimeConfig } from "../src/types.js";
 const config: RuntimeConfig = {
   repoPath: "/repo",
   baseBranch: "main",
-  scriptPath: "/repo/bin/new-note",
   mode: "direct",
   dryRun: true,
 };

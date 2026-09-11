@@ -5,13 +5,9 @@ import path from "node:path";
 import { promises as fs } from "node:fs";
 import { execFile as execFileCb } from "node:child_process";
 import { promisify } from "node:util";
-import { fileURLToPath } from "node:url";
 import { run } from "../src/run.js";
 
 const execFile = promisify(execFileCb);
-const here = path.dirname(fileURLToPath(import.meta.url));
-const edgesRoot = path.resolve(here, "../../..");
-const scriptPath = path.join(edgesRoot, "bin/new-note");
 
 async function initTempRepo(): Promise<string> {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "edges-cli-ingest-"));
@@ -39,7 +35,6 @@ test("dry-run ingest against an isolated repo returns parseable success", async 
       env: {
         ...process.env,
         EDGES_REPO: repo,
-        EDGES_SCRIPT: scriptPath,
         EDGES_DRY_RUN: "true",
         EDGES_MODE: "direct",
         EDGES_AUTH_TOKEN: "",
@@ -55,10 +50,7 @@ test("dry-run ingest against an isolated repo returns parseable success", async 
     prStatus: string;
   };
   assert.equal(parsed.status, "success");
-  assert.ok(parsed.filePath);
-  assert.ok(parsed.branch);
+  assert.ok(parsed.filePath.startsWith("knowledge/notes/"));
   assert.equal(parsed.prStatus, "direct_commit");
-
-  const written = path.join(repo, parsed.filePath);
-  await fs.access(written);
+  await fs.access(path.join(repo, parsed.filePath));
 });

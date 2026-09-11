@@ -1,6 +1,6 @@
 # edges-cli (`edges`)
 
-Multi-command Edges CLI. Local agents should call this instead of the MCP server. Git still lives in `bin/new-note`.
+Multi-command Edges CLI. Humans and local agents share `edges`. Note ingest git lives in this package (`src/git`). npm `package.json` `"bin"` is the install hook for the `edges` binary, not a separate layer.
 
 The command tree is built with [Commander.js](https://github.com/tj/commander.js):
 

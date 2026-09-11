@@ -141,6 +141,13 @@ test("note subcommand runs the ingest pipeline", async () => {
   assert.equal(parsed.filePath, "knowledge/notes/2026-09-07--title.md");
 });
 
+test("note --help no longer documents EDGES_SCRIPT", async () => {
+  const result = await run(["note", "--help"]);
+  assert.equal(result.exitCode, 0);
+  assert.doesNotMatch(result.stdout, /EDGES_SCRIPT/);
+  assert.doesNotMatch(result.stdout, /bin\/new-note/);
+});
+
 test("injected ingest success is formatted on stdout", async () => {
   const result = await run(["note", ...requiredNoteFlags], {
     env: { EDGES_AUTH_TOKEN: "" },

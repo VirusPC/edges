@@ -5,7 +5,7 @@ import { exitCodeFor, exitCodeForError } from "./exit.js";
 import { formatResult } from "./format.js";
 import { parseArgv } from "./parse.js";
 import { formatHelp } from "./program.js";
-import { runIngestScript } from "./scriptAdapter.js";
+import { runNoteIngest } from "./git/ingest.js";
 import { runIngest, type IngestRunner } from "./service.js";
 import type { IngestFailure } from "./types.js";
 import { formatZodReason, validateInput } from "./validation.js";
@@ -101,7 +101,7 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
     return fail({ status: "failed", errorCode: auth.failure.errorCode, reason: auth.failure.reason });
   }
 
-  const runner = io.ingest ?? runIngestScript;
+  const runner = io.ingest ?? runNoteIngest;
   const result = await runIngest(request, config, runner, env);
   const stderrLines = result.status === "success" ? result.diagnostics : result.stderrSummary;
   const stderr = stderrLines ? `${stderrLines.endsWith("\n") ? stderrLines : `${stderrLines}\n`}` : "";

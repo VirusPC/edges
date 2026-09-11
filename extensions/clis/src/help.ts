@@ -20,7 +20,7 @@ STRUCTURED OUTPUT
     {"status":"success","filePath":"...","branch":"...","prStatus":"created|unavailable|direct_commit"}
 
   Failure:
-    {"status":"failed","errorCode":"VALIDATION_ERROR|AUTH_MISSING|AUTH_INVALID_FORMAT|AUTH_INVALID_TOKEN|SCRIPT_NOT_FOUND|GIT_FAILURE|PUSH_AUTH_FAILED|UNKNOWN_ERROR","reason":"..."}
+    {"status":"failed","errorCode":"VALIDATION_ERROR|AUTH_MISSING|AUTH_INVALID_FORMAT|AUTH_INVALID_TOKEN|GIT_FAILURE|PUSH_AUTH_FAILED|UNKNOWN_ERROR","reason":"..."}
 
 AUTH
   Optional, same gate as the new-note MCP HTTP server.
@@ -41,12 +41,11 @@ EXIT CODES
 
 ENV
   EDGES_REPO          Target git repo (default: this Edges checkout)
-  EDGES_SCRIPT        Path to bin/new-note (default: <Edges>/bin/new-note)
   EDGES_BASE_BRANCH   Default main
   EDGES_MODE          direct | pr
   EDGES_DRY_RUN       true to skip checkout/pull/push
   EDGES_AUTH_TOKEN    Optional expected token
-  GITHUB_TOKEN        Passed through to bin/new-note for PR creation
+  GITHUB_TOKEN        Passed through to git ingest for PR creation
 
 EXAMPLES
   edges note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
