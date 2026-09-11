@@ -49,7 +49,7 @@ Edges 是一个以知识资产为核心、由 Agent 接口和可迁移 harness �
 
 | 角色 | 目录或机制 | 作用 |
 | --- | --- | --- |
-| 知识生产 | [`notes/`](knowledge/notes/)、[`projects/`](knowledge/projects/)、[`teach/`](knowledge/teach/) | 承载研究线索与在研资产，选择性投入认知资本 |
+| 知识生产 | [`notes/`](knowledge/notes/)、[`projects/`](knowledge/projects/)、[`teaching/`](knowledge/teaching/) | 承载研究线索与在研资产，选择性投入认知资本 |
 | 知识沉淀 | [`edges/`](knowledge/edges/) | 形成脱离原始场景仍可反复部署的核心资产 |
 | 知识使用 | 内部调用、[`posts/`](knowledge/posts/)、系统接口 | 部署资产，获得决策收益和外部反馈 |
 | 工作项 | [`tasks/`](knowledge/tasks/) | 跨 Agent 接力的 Task 看板，按 `edges-tasks-status` 分夹；不是知识原材料，也不是抢单队列 |

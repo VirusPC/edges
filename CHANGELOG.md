@@ -18,14 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONTEXT 增加 Task、`edges-tasks-status`、Task Run Log、backlog（Task）。
 - `docs/adr/0002-knowledge-tasks-status-folders.md`：`knowledge/todos` 迁为按状态分夹的 `knowledge/tasks`。
 - [`knowledge/tasks/`](knowledge/tasks/)：跨 Agent 接力的 Task 看板。
-- `extensions/skills/learn-repo`：把要学习的外部仓库以 git submodule 挂进 `knowledge/teach/<topic>/repos/`，主仓库只记指针不涨体积，并在主题 RESOURCES.md 登记来源与用途。
-- Obsidian `userIgnoreFilters` 排除 `knowledge/teach/*/repos/`，学习仓库的文件不进 vault 搜索与关系图谱。
+- `extensions/skills/learn-repo`：把要学习的外部仓库以 git submodule 挂进 `knowledge/teaching/<topic>/repos/`，主仓库只记指针不涨体积，并在主题 RESOURCES.md 登记来源与用途。
+- Obsidian `userIgnoreFilters` 排除 `knowledge/teaching/*/repos/`，学习仓库的文件不进 vault 搜索与关系图谱。
 
 ### Changed
 
 - 存量 `knowledge/todos/*.md` 改写为 project-memory 形态后迁入 `knowledge/tasks/backlog/`。
-- ECS 部署：`.github/workflows/deploy-teach.yml` 改为 SSH 触发整仓 `git fetch` / `reset --hard origin/main`，不再 rsync 推送 `knowledge/teach/`。
-- `obsidian-cli` 教学工作区从 `.teaching/obsidian-cli/` 迁到 `knowledge/teach/obsidian-cli/`。
+- ECS 部署：`.github/workflows/deploy-teach.yml` 改为 SSH 触发整仓 `git fetch` / `reset --hard origin/main`，不再 rsync 推送 `knowledge/teaching/`。
+- `obsidian-cli` 教学工作区从 `.teaching/obsidian-cli/` 迁到 `knowledge/teaching/obsidian-cli/`。
+- `knowledge/teach/` 重命名为 `knowledge/teaching/`；公网路径 `/teach/` 改为 `/teaching/`。
 
 ### Fixed
 
@@ -43,7 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README 增加「隐私与脱敏」节。
 - `extensions/clis/`：面向 agent 的 `edges-note` CLI（JSON stdout，复用 `bin/new-note`）。本地 agent 优先走它；MCP `new-note` 保留。
 - `pnpm skills:link`：把 `extensions/skills` 里每个 skill 以相对软链挂到 `.agents/skills`。
-- 项目级 `teach` skill / `knowledge/teach/` 教学工作区。
+- 项目级 `teach` skill / `knowledge/teaching/` 教学工作区。
 - 项目级 `.agents/skills` 增加 `grill-with-docs`：grilling 同时产出 ADR 与 glossary。
 
 ### Changed
