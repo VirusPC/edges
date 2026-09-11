@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-09-11
+
+### Added
+
+- `--type user`：本仓不宜公开的个人材料（个人偏好、凭据与密钥）写入 `.memory/users/user_<slug>.md`，索引 `.memory/USER.md`。两份都被 gitignore，不进 git。
+
+### Changed
+
+- 可提交类型仍然禁止密钥与非项目个人偏好；这两类只允许走 `user`。v1 不做脱敏晋升。
+
 ## [1.5.1] - 2026-09-08
 
 ### Changed
@@ -60,7 +70,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.5.1...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.6.0...HEAD
+[1.6.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.5.1...skill/project-memory-remember@1.6.0
 [1.5.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.5.0...skill/project-memory-remember@1.5.1
 [1.5.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.4.0...skill/project-memory-remember@1.5.0
 [1.4.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-remember@1.3.0...skill/project-memory-remember@1.4.0

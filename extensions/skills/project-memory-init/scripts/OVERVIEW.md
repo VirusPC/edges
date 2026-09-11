@@ -52,7 +52,7 @@
 ```bash
 python3 memory.py init --target-dir <目录> [--root-dir <工作区根>] [--description <说明>]
 python3 memory.py doctor --target-dir <记忆树里任一目录> [--apply]
-python3 memory.py remember --target-dir <目录> --type <feedback|project|reference> --slug <slug> ...
+python3 memory.py remember --target-dir <目录> --type <feedback|project|reference|skills|user> --slug <slug> ...
 ```
 
 `remember` 的完整参数以 `--help` 为准。

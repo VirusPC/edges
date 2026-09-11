@@ -10,6 +10,7 @@
 ├── .memory/                        # 工具的地盘：remember 落盘、索引全量重算、doctor 可改写
 │   ├── FEEDBACK.md                 # 分类型入口：只列 feedbacks/ 下的记忆
 │   ├── PROJECT.md                  # 分类型入口：只列 projects/ 下的记忆
+│   ├── USER.md                     # 分类型入口：只列 users/ 下的记忆（gitignore，不进 git）
 │   ├── REFERENCE.md                # 分类型入口：只列 references/ 下的记忆
 │   ├── SKILLS.md                   # 分类型入口：只列 skills/ 下自动沉淀的流程
 │   ├── AGENT_SKILLS.md             # 分类型入口：只列 ../.agents/skills/ 下人写或装入的技能
@@ -17,6 +18,8 @@
 │   │   └── feedback_<slug>.md      # 记忆文件：一条记忆一个文件，前缀即类型
 │   ├── projects/
 │   │   └── project_<slug>.md
+│   ├── users/                      # 用户记忆条目；与 USER.md 一并 gitignore
+│   │   └── user_<slug>.md
 │   ├── references/
 │   │   └── reference_<slug>.md
 │   └── skills/
@@ -42,7 +45,7 @@
 | --- | --- | --- | --- |
 | `<!-- project-memory:start -->` | 每个持有记忆或索引的目录 | 只是容器，本身不放内容 | 缺失时按需建壳 |
 | ├ `<!-- project-memory-important:start -->` | 每个记忆目录 | 本层硬约束，规则直接写在区块里 | 人/agent 手写；缺失时用模板种子，已有正文不覆盖 |
-| ├ `<!-- project-memory-local:start -->` | 每个记忆目录 | 本层四份分类型入口的清单 | 模板里的字面量 |
+| ├ `<!-- project-memory-local:start -->` | 每个记忆目录 | 本层分类型入口的清单 | 模板里的字面量 |
 | └ `<!-- project-memory-children:start -->` | 有下层记忆目录时 | 直接下层记忆目录的 `AGENTS.md` | 增量维护，一次 init 一条 |
 
 硬约束不进 `.memory/`、不做成索引行。种子只有两句：ask / remember 的聚光灯（点名这两个日常 skill，不写用法、不编排 init / doctor / reshape），以及「硬约束写在本区块、不要链到 `.memory`」。各层自己的仓规手写追加在后面。不再单独成块。旧文件没有这个区块时，`$project-memory-doctor` 认 `missing-important`，补上种子正文，**已有规则不覆盖**。旧文件若还留着 `<!-- project-memory-auto:start -->`，`$project-memory-doctor` 认 `stale-auto`，删掉该区块。
@@ -51,25 +54,26 @@
 
 下层条目的路径相对本层。举例：`src/DC/deep` 有记忆而 `src`、`src/DC` 都没有时，它直接挂在记忆根下，条目写 `src/DC/deep/AGENTS.md`。层级随记忆增减变化时，init 会把错位条目归位（`rehome_index_entries()`）。
 
-## `FEEDBACK.md` / `PROJECT.md` / `REFERENCE.md` / `SKILLS.md` / `AGENT_SKILLS.md` — 本层不同类型记忆入口
+## `FEEDBACK.md` / `PROJECT.md` / `USER.md` / `REFERENCE.md` / `SKILLS.md` / `AGENT_SKILLS.md` — 本层不同类型记忆入口
 
-协议要求按 `type` 分入口，本实现取五类。**五份入口都放在本层 `.memory/` 根部**，正文按类型放进**复数**小写目录——`agent_skills` 是唯一例外，它的内容根在 `.memory/` 之外。每个入口各有一个 `<!-- project-memory-entries:start -->` 区块，内容从对应内容根全量重算。
+协议要求按 `type` 分入口，本实现取六类。**六份入口都放在本层 `.memory/` 根部**，正文按类型放进**复数**小写目录——`agent_skills` 是唯一例外，它的内容根在 `.memory/` 之外。每个入口各有一个 `<!-- project-memory-entries:start -->` 区块，内容从对应内容根全量重算。`.memory/USER.md` 与 `.memory/users/` 被 gitignore，不进 git；Agent 读的是本机这份 `USER.md`。
 
 **条目**指区块里的一行，与记忆文件一一对应。入口是派生产物、不手写；行格式只存在于 [`templates/entry_line.tmpl.md`](templates/entry_line.tmpl.md)，下层索引与条目索引共用。
 
-`feedback`、`project`、`reference` 沿用 [Claude Code auto memory](https://code.claude.com/docs/en/memory)；官方第四类 `user`（角色、专长、个人偏好）不落盘。本实现另加两类可执行流程，按**谁有权改写**分开。
+`feedback`、`project`、`reference` 沿用 [Claude Code auto memory](https://code.claude.com/docs/en/memory)；官方第四类 `user` 按 ADR-0003 落在仓库工作树内且 gitignore，按仓绑定。本实现另加两类可执行流程，按**谁有权改写**分开。
 
 | type | 记忆入口 | 内容位置 | remember 可写 | 收什么 |
 | --- | --- | --- | --- | --- |
 | `feedback` | `FEEDBACK.md` | `feedbacks/feedback_<slug>.md` | 是 | 用户的纠正、确认过的做法、禁止模式 |
 | `project` | `PROJECT.md` | `projects/project_<slug>.md` | 是 | 进行中的工作、时间点、代码里推不出的决策，以及项目内的规范 |
+| `user` | `USER.md` | `users/user_<slug>.md` | 是 | 本仓个人偏好、凭据与不得公开材料；整类 gitignore |
 | `reference` | `REFERENCE.md` | `references/reference_<slug>.md` | 是 | 项目外的信息去哪找 |
 | `skills` | `SKILLS.md` | `skills/<name>/SKILL.md` | 是 | 从会话里沉淀出来的可复用流程 |
 | `agent_skills` | `AGENT_SKILLS.md` | `../.agents/skills/<name>/SKILL.md` | **否** | 人写或 `npx skills` 装入的标准技能 |
 
 每类「记什么、不记什么」写在对应入口模板的引言里。
 
-目录名是 type 的复数（已经以 `s` 结尾的不再追加），所以 `skills` 的目录名与类型名相同。`--type`、索引文件名、条目前缀仍用单数。`.memory/references/` 和 skill 根的 `references/`（PROTOCOL / LAYOUT / 模板）靠路径区分。旧版单数目录（`feedback/` / `project/` / `reference/`）由 `$project-memory-doctor` 原样改名为复数；新旧位置都在时只报告冲突。
+目录名是 type 的复数（已经以 `s` 结尾的不再追加），所以 `skills` 的目录名与类型名相同。`--type`、索引文件名、条目前缀仍用单数。用户记忆目录是 `users/`。`.memory/references/` 和 skill 根的 `references/`（PROTOCOL / LAYOUT / 模板）靠路径区分。旧版单数目录（`feedback/` / `project/` / `reference/`）由 `$project-memory-doctor` 原样改名为复数；新旧位置都在时只报告冲突。`user` 没有旧单数目录。
 
 ### `agent_skills`：唯一内容根在 `.memory/` 外的类型
 
@@ -84,7 +88,7 @@
 
 ## `<plural>/<type>_<slug>.md` — 详细记忆内容
 
-本节只适用于 `feedback`、`project`、`reference`。`slug` 是小写 snake_case 且不带类型前缀，前缀由脚本按 `type` 加，父目录是 type 的复数。
+本节只适用于 `feedback`、`project`、`reference`、`user`。`slug` 是小写 snake_case 且不带类型前缀，前缀由脚本按 `type` 加，父目录是 type 的复数。`user` 的入口与目录被 gitignore，落盘形态与其他普通记忆相同。
 
 落盘形态跟 [Agent Skills 规范](https://agentskills.io/specification) 同一套闭集：顶层只写 spec 认的键（本实现用 `name` / `description` / `metadata`），实现字段进 `metadata:`，键名前缀 `edges-`。字段清单与顺序看 [`templates/type_slug.tmpl.md`](templates/type_slug.tmpl.md)。落盘时**取不到的字段整行省略**。字段的值从哪来、更新时谁覆盖谁，见 [`frontmatter-fields.md`](frontmatter-fields.md)。
 

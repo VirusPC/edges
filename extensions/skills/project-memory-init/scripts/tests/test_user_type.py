@@ -39,5 +39,67 @@ class UserTypeRegistrationTests(unittest.TestCase):
             )
 
 
+class UserInitTests(unittest.TestCase):
+    def test_init_creates_user_index_and_dir(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            result = init_memory(target, target, "temp tree")
+            user_index = target / ".memory" / "USER.md"
+            users_dir = target / ".memory" / "users"
+            self.assertTrue(user_index.is_file(), result)
+            self.assertTrue(users_dir.is_dir(), result)
+            text = user_index.read_text(encoding="utf-8")
+            self.assertIn("project-memory-entries:start", text)
+            self.assertIn(
+                ".memory/USER.md",
+                (target / "AGENTS.md").read_text(encoding="utf-8"),
+            )
+
+
+class UserRememberTests(unittest.TestCase):
+    def test_remember_user_writes_entry_and_refreshes_index(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            result = remember(
+                target,
+                "user",
+                "local_editor",
+                "Prefer helix for git commits",
+                "personal editor preference for this repo, not a team convention",
+                "Use helix for interactive rebase in this clone.\n\n"
+                "**Why:** personal muscle memory.\n\n"
+                "**How to apply:** do not write this into project memory.",
+                {"username": "tester", "email": "t@example.com"},
+            )
+            path = target / ".memory" / "users" / "user_local_editor.md"
+            self.assertTrue(path.is_file(), result)
+            self.assertEqual(result["path"], ".memory/users/user_local_editor.md")
+            self.assertEqual(result["index"], ".memory/USER.md")
+            index = (target / ".memory" / "USER.md").read_text(encoding="utf-8")
+            self.assertIn("user_local_editor.md", index)
+            self.assertIn("personal editor preference", index)
+
+
+class UserGitignoreTests(unittest.TestCase):
+    def test_root_gitignore_covers_user_memory(self) -> None:
+        root = Path(__file__).resolve()
+        gitignore = None
+        for candidate in (root, *root.parents):
+            probe = candidate / ".gitignore"
+            if probe.is_file() and (candidate / "docs" / "adr").is_dir():
+                gitignore = probe
+                break
+        self.assertIsNotNone(gitignore)
+        text = gitignore.read_text(encoding="utf-8")
+        for pattern in (
+            ".memory/users/",
+            ".memory/USER.md",
+            "user-memory-backup-*.tar.gz",
+            "user-memory-backup-*.zip",
+        ):
+            self.assertIn(pattern, text, pattern)
+
+
 if __name__ == "__main__":
     unittest.main()
