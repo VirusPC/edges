@@ -4,15 +4,16 @@ description: 如何将 user memory 以安全方式引入体系（结合 .gitigno
 metadata:
   edges-type: task
   edges-title: 安全引入 user memory 与 gitignore
-  edges-tasks-status: in_progress
-  edges-task-pr: "https://github.com/VirusPC/edges/pull/38"
+  edges-tasks-status: in_review
+  edges-task-pr: "https://github.com/VirusPC/edges/pull/39"
+  edges-task-pr-docs: "https://github.com/VirusPC/edges/pull/38"
   edges-task-assignee: Coding 专家
   edges-task-assignee-id: 099e84df-06c3-4c5d-9e29-fc255dce3d56
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-11T19:43:00+08:00"
+  edges-updated-at: "2026-09-11T20:03:00+08:00"
 ---
 
 应考虑：如何将 user memory 以安全的方式引入本体系（tasks / project-memory），可结合 `.gitignore` 等手段；并需评估——仓库删除后，是否仍应保持在本地硬盘（例如用户目录下）。
