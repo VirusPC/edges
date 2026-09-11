@@ -40,7 +40,7 @@ def build_parser() -> argparse.ArgumentParser:
         required=True,
         choices=sorted(memory_entry_types()),
         help=(
-            "feedback=纠正与禁止模式，project=代码里推不出的决策，"
+            "feedback=纠正与禁止模式，project=代码里推不出的决策，以及项目内的规范，"
             "reference=外部资料去哪找，skills=可复用的执行流程"
         ),
     )

@@ -62,7 +62,7 @@
 | type | 记忆入口 | 内容位置 | remember 可写 | 收什么 |
 | --- | --- | --- | --- | --- |
 | `feedback` | `FEEDBACK.md` | `feedbacks/feedback_<slug>.md` | 是 | 用户的纠正、确认过的做法、禁止模式 |
-| `project` | `PROJECT.md` | `projects/project_<slug>.md` | 是 | 进行中的工作、时间点、代码里推不出的决策 |
+| `project` | `PROJECT.md` | `projects/project_<slug>.md` | 是 | 进行中的工作、时间点、代码里推不出的决策，以及项目内的规范 |
 | `reference` | `REFERENCE.md` | `references/reference_<slug>.md` | 是 | 项目外的信息去哪找 |
 | `skills` | `SKILLS.md` | `skills/<name>/SKILL.md` | 是 | 从会话里沉淀出来的可复用流程 |
 | `agent_skills` | `AGENT_SKILLS.md` | `../.agents/skills/<name>/SKILL.md` | **否** | 人写或 `npx skills` 装入的标准技能 |
