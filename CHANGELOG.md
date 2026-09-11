@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- 根目录 `inbox/` 旧 ingest 自动 PR 测试草稿。
 - `knowledge/todos/`（不留重定向 stub）。
 
 ## [1.1.0] - 2026-09-09
