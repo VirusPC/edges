@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 可写类型 `user`：入口 `.memory/USER.md`，内容目录 `.memory/users/`，条目 `user_<slug>.md`。权威副本在工作树内且 gitignore（ADR-0003）。存量 `AGENTS.md` 会被 `$project-memory-doctor` 判为 `outdated-local` 并补上 `USER.md` 那一行。
 
+### Changed
+
+- 本层入口清单顺序改为 `user` → `feedback` → `project` → `reference`（`project` 是兜底）；`skills` / `agent_skills` 仍靠后。
+
 ## [1.6.0] - 2026-09-08
 
 ### Changed

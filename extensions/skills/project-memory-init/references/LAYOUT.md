@@ -8,18 +8,18 @@
 <仓库根>/
 ├── AGENTS.md                       # 本层记忆入口：硬约束 + 分类型入口清单 + 下层索引
 ├── .memory/                        # 工具的地盘：remember 落盘、索引全量重算、doctor 可改写
-│   ├── FEEDBACK.md                 # 分类型入口：只列 feedbacks/ 下的记忆
-│   ├── PROJECT.md                  # 分类型入口：只列 projects/ 下的记忆
 │   ├── USER.md                     # 分类型入口：只列 users/ 下的记忆（gitignore，不进 git）
+│   ├── FEEDBACK.md                 # 分类型入口：只列 feedbacks/ 下的记忆
+│   ├── PROJECT.md                  # 分类型入口：只列 projects/ 下的记忆（兜底）
 │   ├── REFERENCE.md                # 分类型入口：只列 references/ 下的记忆
 │   ├── SKILLS.md                   # 分类型入口：只列 skills/ 下自动沉淀的流程
 │   ├── AGENT_SKILLS.md             # 分类型入口：只列 ../.agents/skills/ 下人写或装入的技能
+│   ├── users/                      # 用户记忆条目；与 USER.md 一并 gitignore
+│   │   └── user_<slug>.md
 │   ├── feedbacks/
 │   │   └── feedback_<slug>.md      # 记忆文件：一条记忆一个文件，前缀即类型
 │   ├── projects/
 │   │   └── project_<slug>.md
-│   ├── users/                      # 用户记忆条目；与 USER.md 一并 gitignore
-│   │   └── user_<slug>.md
 │   ├── references/
 │   │   └── reference_<slug>.md
 │   └── skills/
@@ -54,7 +54,7 @@
 
 下层条目的路径相对本层。举例：`src/DC/deep` 有记忆而 `src`、`src/DC` 都没有时，它直接挂在记忆根下，条目写 `src/DC/deep/AGENTS.md`。层级随记忆增减变化时，init 会把错位条目归位（`rehome_index_entries()`）。
 
-## `FEEDBACK.md` / `PROJECT.md` / `USER.md` / `REFERENCE.md` / `SKILLS.md` / `AGENT_SKILLS.md` — 本层不同类型记忆入口
+## `USER.md` / `FEEDBACK.md` / `PROJECT.md` / `REFERENCE.md` / `SKILLS.md` / `AGENT_SKILLS.md` — 本层不同类型记忆入口
 
 协议要求按 `type` 分入口，本实现取六类。**六份入口都放在本层 `.memory/` 根部**，正文按类型放进**复数**小写目录——`agent_skills` 是唯一例外，它的内容根在 `.memory/` 之外。每个入口各有一个 `<!-- project-memory-entries:start -->` 区块，内容从对应内容根全量重算。`.memory/USER.md` 与 `.memory/users/` 被 gitignore，不进 git；Agent 读的是本机这份 `USER.md`。
 
@@ -62,11 +62,13 @@
 
 `feedback`、`project`、`reference` 沿用 [Claude Code auto memory](https://code.claude.com/docs/en/memory)；官方第四类 `user` 按 ADR-0003 落在仓库工作树内且 gitignore，按仓绑定。本实现另加两类可执行流程，按**谁有权改写**分开。
 
+本层清单顺序是检索优先级：先更具体的 `user` / `feedback`，`project` 是兜底，然后 `reference`；`skills` / `agent_skills` 仍靠后。
+
 | type | 记忆入口 | 内容位置 | remember 可写 | 收什么 |
 | --- | --- | --- | --- | --- |
-| `feedback` | `FEEDBACK.md` | `feedbacks/feedback_<slug>.md` | 是 | 用户的纠正、确认过的做法、禁止模式 |
-| `project` | `PROJECT.md` | `projects/project_<slug>.md` | 是 | 进行中的工作、时间点、代码里推不出的决策，以及项目内的规范 |
 | `user` | `USER.md` | `users/user_<slug>.md` | 是 | 本仓个人偏好、凭据与不得公开材料；整类 gitignore |
+| `feedback` | `FEEDBACK.md` | `feedbacks/feedback_<slug>.md` | 是 | 用户的纠正、确认过的做法、禁止模式 |
+| `project` | `PROJECT.md` | `projects/project_<slug>.md` | 是 | 进行中的工作、时间点、代码里推不出的决策，以及项目内的规范；对不上更具体类型时的兜底 |
 | `reference` | `REFERENCE.md` | `references/reference_<slug>.md` | 是 | 项目外的信息去哪找 |
 | `skills` | `SKILLS.md` | `skills/<name>/SKILL.md` | 是 | 从会话里沉淀出来的可复用流程 |
 | `agent_skills` | `AGENT_SKILLS.md` | `../.agents/skills/<name>/SKILL.md` | **否** | 人写或 `npx skills` 装入的标准技能 |

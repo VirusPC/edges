@@ -6,5 +6,6 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
+- [AGENTS.md 本层入口顺序：user → feedback → project → reference](feedbacks/feedback_agents_local_type_order.md) — 改 AGENTS.md 本层记忆清单或挑类型时：先 user，再 feedback，再 project（兜底），再 reference；skills / agent_skills 仍靠后。
 - [--root-dir 封住记忆树，不把外面的 .memory 当祖先](feedbacks/feedback_isolated_root_dir.md) — 目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。
 <!-- project-memory-entries:end -->

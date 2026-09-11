@@ -25,6 +25,12 @@ class UserTypeRegistrationTests(unittest.TestCase):
         files = index_files()
         self.assertEqual(files["user"], "USER.md")
 
+    def test_index_files_order_user_then_feedback_project_reference(self) -> None:
+        self.assertEqual(
+            list(index_files()),
+            ["user", "feedback", "project", "reference", "skills", "agent_skills"],
+        )
+
     def test_memory_entry_types_includes_user(self) -> None:
         self.assertIn("user", memory_entry_types())
 
