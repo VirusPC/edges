@@ -1,22 +1,5 @@
-export const HELP_TEXT = `edges-note — ingest a note into the Edges knowledge repo (agent-oriented)
-
-USAGE
-  edges-note --title <title> --content <content> --co-author <name-email> [--json] [--dry-run] [--mode direct|pr] [--token-file <path>]
-
-REQUIRED
-  --title          Note title (1–120 chars)
-  --content        Note body (1–50,000 chars)
-  --co-author      Git co-author, e.g. "Name <email@domain>" (3–200 chars)
-
-OPTIONS
-  --json           Write a machine-parseable JSON result to stdout (always on; flag kept for agents)
-  --dry-run        Set EDGES_DRY_RUN=true: write and commit locally, do not push
-  --mode           direct | pr  (default: EDGES_MODE or direct)
-  --token-file     Present EDGES_AUTH_TOKEN from a file (never pass the token on argv)
-  --token-stdin    Present EDGES_AUTH_TOKEN from a non-TTY stdin
-  -h, --help       Show this help
-  -v, --version    Print version
-
+/** Extra `--help` sections. Option names and the command tree come from Commander. */
+export const AFTER_HELP = `
 STRUCTURED OUTPUT
   Success and failure are JSON objects on stdout. Progress and diagnostics go to stderr.
   Get structured output with --json (default). Pipe stdout to jq.
@@ -29,6 +12,7 @@ STRUCTURED OUTPUT
 
 AUTH
   Optional, same gate as the new-note MCP HTTP server.
+  Auth flags stay on the default / ingest command for now (no separate auth subcommand yet).
   If EDGES_AUTH_TOKEN is unset, auth is skipped.
   If it is set, present the same value via --token-file or --token-stdin before git starts.
   Do not use a --token flag (it would leak into ps and shell history).
@@ -54,6 +38,6 @@ ENV
 
 EXAMPLES
   edges-note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
-  edges-note --title "Daily" --content "..." --co-author "Codex <codex@openai.com>" --dry-run
+  edges-note ingest --title "Daily" --content "..." --co-author "Codex <codex@openai.com>" --dry-run
   edges-note --help
 `;

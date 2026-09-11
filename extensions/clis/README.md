@@ -2,6 +2,8 @@
 
 Agent-oriented CLI for ingesting a note into the Edges repo. Local agents should call this instead of the MCP server. Git still lives in `bin/new-note`.
 
+The command tree is built with [Commander.js](https://github.com/tj/commander.js). The default command is ingest: existing flat flags still work. `edges-note ingest ...` is an equivalent alias so later subcommands (for example `auth`) can be added without breaking callers.
+
 Design decision: [`.memory/projects/project_clis_from_mcp.md`](../.memory/projects/project_clis_from_mcp.md). Agent-CLI mechanics: [`.memory/references/reference_agent_oriented_cli.md`](../.memory/references/reference_agent_oriented_cli.md).
 
 ## Run
@@ -10,6 +12,16 @@ Design decision: [`.memory/projects/project_clis_from_mcp.md`](../.memory/projec
 pnpm --filter edges-cli exec tsx src/index.ts --help
 
 pnpm --filter edges-cli exec tsx src/index.ts \
+  --title "Daily" \
+  --content "Notes from the session." \
+  --co-author "Codex <codex@openai.com>" \
+  --json
+```
+
+`ingest` is optional and does the same thing:
+
+```bash
+pnpm --filter edges-cli exec tsx src/index.ts ingest \
   --title "Daily" \
   --content "Notes from the session." \
   --co-author "Codex <codex@openai.com>" \

@@ -3,8 +3,8 @@ import { checkAuth } from "./auth.js";
 import { loadConfig } from "./config.js";
 import { exitCodeFor, exitCodeForError } from "./exit.js";
 import { formatResult } from "./format.js";
-import { HELP_TEXT } from "./help.js";
 import { parseArgv } from "./parse.js";
+import { formatHelp } from "./program.js";
 import { runIngestScript } from "./scriptAdapter.js";
 import { runIngest, type IngestRunner } from "./service.js";
 import type { IngestFailure } from "./types.js";
@@ -37,7 +37,7 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
   const parsed = parseArgv(argv);
 
   if (parsed.kind === "help") {
-    return { exitCode: 0, stdout: HELP_TEXT.endsWith("\n") ? HELP_TEXT : `${HELP_TEXT}\n`, stderr: "" };
+    return { exitCode: 0, stdout: formatHelp(), stderr: "" };
   }
   if (parsed.kind === "version") {
     return { exitCode: 0, stdout: `${VERSION}\n`, stderr: "" };

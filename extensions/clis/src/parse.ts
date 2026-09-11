@@ -1,5 +1,13 @@
-import { parseArgs } from "node:util";
+import { Command, CommanderError } from "commander";
+import { createProgram, type IngestCliOptions } from "./program.js";
 import type { IngestErrorCode } from "./types.js";
+
+function applyExitOverride(cmd: Command): void {
+  cmd.exitOverride();
+  for (const child of cmd.commands) {
+    applyExitOverride(child);
+  }
+}
 
 export type ParseOk =
   | { kind: "help" }
@@ -23,72 +31,31 @@ export type ParseFail = {
 
 export type ParseResult = ParseOk | ParseFail;
 
-export function parseArgv(argv: string[]): ParseResult {
-  let parsed;
-  try {
-    parsed = parseArgs({
-      args: argv,
-      options: {
-        title: { type: "string" },
-        content: { type: "string" },
-        "co-author": { type: "string" },
-        json: { type: "boolean", default: false },
-        "dry-run": { type: "boolean", default: false },
-        mode: { type: "string" },
-        "token-file": { type: "string" },
-        "token-stdin": { type: "boolean", default: false },
-        help: { type: "boolean", short: "h", default: false },
-        version: { type: "boolean", short: "v", default: false },
-      },
-      strict: true,
-      allowPositionals: true,
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return { kind: "error", errorCode: "VALIDATION_ERROR", reason: message };
-  }
+function validationError(reason: string): ParseFail {
+  return { kind: "error", errorCode: "VALIDATION_ERROR", reason };
+}
 
-  if (parsed.values.help) {
-    return { kind: "help" };
-  }
-  if (parsed.values.version) {
-    return { kind: "version" };
-  }
-
-  if (parsed.positionals.length > 0) {
-    return {
-      kind: "error",
-      errorCode: "VALIDATION_ERROR",
-      reason: `unexpected positional arguments: ${parsed.positionals.join(" ")}. Use --title, --content, and --co-author.`,
-    };
-  }
-
-  const mode = parsed.values.mode;
+function fromIngestOptions(opts: IngestCliOptions): ParseResult {
+  const mode = opts.mode;
   if (mode !== undefined && mode !== "pr" && mode !== "direct") {
-    return { kind: "error", errorCode: "VALIDATION_ERROR", reason: '--mode must be "direct" or "pr"' };
+    return validationError('--mode must be "direct" or "pr"');
   }
 
-  if (parsed.values["token-file"] && parsed.values["token-stdin"]) {
-    return {
-      kind: "error",
-      errorCode: "VALIDATION_ERROR",
-      reason: "use only one of --token-file or --token-stdin",
-    };
+  if (opts.tokenFile && opts.tokenStdin) {
+    return validationError("use only one of --token-file or --token-stdin");
   }
 
-  const title = parsed.values.title;
-  const content = parsed.values.content;
-  const coAuthor = parsed.values["co-author"];
+  const title = opts.title;
+  const content = opts.content;
+  const coAuthor = opts.coAuthor;
   const missing: string[] = [];
   if (!title) missing.push("--title");
   if (!content) missing.push("--content");
   if (!coAuthor) missing.push("--co-author");
   if (missing.length > 0 || !title || !content || !coAuthor) {
-    return {
-      kind: "error",
-      errorCode: "VALIDATION_ERROR",
-      reason: `missing required flags: ${missing.join(", ") || "--title, --content, --co-author"}`,
-    };
+    return validationError(
+      `missing required flags: ${missing.join(", ") || "--title, --content, --co-author"}`,
+    );
   }
 
   return {
@@ -96,9 +63,48 @@ export function parseArgv(argv: string[]): ParseResult {
     title,
     content,
     coAuthor,
-    dryRun: parsed.values["dry-run"] === true,
-    mode: mode as "pr" | "direct" | undefined,
-    tokenFile: parsed.values["token-file"],
-    tokenStdin: parsed.values["token-stdin"] === true,
+    dryRun: opts.dryRun === true,
+    mode,
+    tokenFile: opts.tokenFile,
+    tokenStdin: opts.tokenStdin === true,
   };
+}
+
+export function parseArgv(argv: string[]): ParseResult {
+  let collected: IngestCliOptions | undefined;
+  const program = createProgram(
+    {
+      onIngest: (opts) => {
+        collected = opts;
+      },
+    },
+    {
+      writeOut: () => {},
+      writeErr: () => {},
+    },
+  );
+  applyExitOverride(program);
+
+  try {
+    program.parse(argv, { from: "user" });
+  } catch (err) {
+    if (err instanceof CommanderError) {
+      if (err.code === "commander.helpDisplayed" || err.code === "commander.help") {
+        return { kind: "help" };
+      }
+      if (err.code === "commander.version") {
+        return { kind: "version" };
+      }
+      const reason = err.message.replace(/^error:\s*/i, "");
+      return validationError(reason);
+    }
+    const message = err instanceof Error ? err.message : String(err);
+    return validationError(message);
+  }
+
+  if (!collected) {
+    return validationError("missing required flags: --title, --content, --co-author");
+  }
+
+  return fromIngestOptions(collected);
 }

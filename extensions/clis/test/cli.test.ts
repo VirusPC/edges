@@ -34,6 +34,7 @@ test("real entry --help documents ingest and structured output", async () => {
   assert.match(result.stdout, /--content/);
   assert.match(result.stdout, /--co-author/);
   assert.match(result.stdout, /--json/);
+  assert.match(result.stdout, /Commands:/);
 });
 
 test("real entry missing args exits non-zero with JSON error", async () => {
