@@ -4,9 +4,9 @@
   "license": "MIT",
   "private": true,
   "type": "module",
-  "description": "Agent-oriented CLI for ingesting notes into the Edges repository",
+  "description": "Multi-command Edges CLI (note ingest, tasks, and more)",
   "bin": {
-    "edges-note": "./dist/index.js"
+    "edges": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",

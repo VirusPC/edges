@@ -112,7 +112,7 @@ knowledge/projects/foo/report.md → knowledge/archive/projects/foo/report.md
 
 `evaluation/` 与 `observation/` 是系统实现旁的支撑目录：前者对照假设，后者记录野外现象。它们不进入 notes → edges → archive 主链；观测或评测若产生新洞察，仍须回到捕获入口。
 
-捕获入口最终回到同一套知识模型：人可以使用 `bin/new-note`；有 shell 的 Agent 使用 [`edges-note` CLI](extensions/clis/README.md)，获得稳定参数和 JSON 输出；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)。它们复用同一条 Note 入库链路。
+捕获入口最终回到同一套知识模型：人可以使用 `bin/new-note`；有 shell 的 Agent 使用 [`edges` CLI](extensions/clis/README.md) 的 `edges note …`，获得稳定参数和 JSON 输出；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)。它们复用同一条 Note 入库链路。
 
 Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；`AGENTS.md` 和 `.memory/` 保存维护系统所需的运营规则、决策与经验；`knowledge/` 保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
 

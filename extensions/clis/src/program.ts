@@ -1,5 +1,5 @@
 import { Command, Option } from "commander";
-import { AFTER_HELP } from "./help.js";
+import { NOTE_AFTER_HELP, ROOT_AFTER_HELP, TASKS_AFTER_HELP } from "./help.js";
 import { VERSION } from "./version.js";
 
 export type IngestCliOptions = {
@@ -14,13 +14,15 @@ export type IngestCliOptions = {
 };
 
 export type ProgramHandlers = {
-  onIngest?: (opts: IngestCliOptions) => void;
+  onNote?: (opts: IngestCliOptions) => void;
+  onTasks?: () => void;
+  onMissingCommand?: () => void;
 };
 
 /**
- * Auth flags (`--token-file`, `--token-stdin`) stay on ingest / the default
- * command — same optional gate as the new-note MCP HTTP server. Future
- * `auth` subcommands can sit beside `ingest` without moving these flags.
+ * Auth flags (`--token-file`, `--token-stdin`) stay on `note` — same optional
+ * gate as the new-note MCP HTTP server. Future `auth` subcommands can sit
+ * beside `note` without moving these flags.
  */
 export function addIngestOptions(cmd: Command): Command {
   return cmd
@@ -59,38 +61,47 @@ export function createProgram(
 ): Command {
   const program = new Command();
   program
-    .name("edges-note")
-    .description("ingest a note into the Edges knowledge repo (agent-oriented)")
-    .usage("--title <title> --content <content> --co-author <name-email> [options]")
+    .name("edges")
+    .description("Edges CLI: notes, tasks, and more")
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help")
-    .enablePositionalOptions()
     .allowExcessArguments(false)
     .showHelpAfterError(false)
     .showSuggestionAfterError(false)
     .helpCommand(false);
 
-  addIngestOptions(program);
-  program.action((opts: IngestCliOptions) => {
-    handlers.onIngest?.(opts);
+  program.action(() => {
+    handlers.onMissingCommand?.();
   });
 
-  const ingest = program
-    .command("ingest")
-    .description("Ingest a note (same flags as the default invocation)")
+  const note = program
+    .command("note")
+    .description("Ingest a note into the Edges knowledge repo")
     .usage("--title <title> --content <content> --co-author <name-email> [options]")
     .allowExcessArguments(false)
     .showHelpAfterError(false)
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help");
 
-  addIngestOptions(ingest);
-  // Merge root options so `edges-note --dry-run ingest --title ...` does not drop flags.
-  ingest.action((opts: IngestCliOptions, cmd: Command) => {
-    handlers.onIngest?.({ ...cmd.optsWithGlobals(), ...opts });
+  addIngestOptions(note);
+  note.action((opts: IngestCliOptions) => {
+    handlers.onNote?.(opts);
   });
+  note.addHelpText("after", NOTE_AFTER_HELP);
 
-  program.addHelpText("after", AFTER_HELP);
+  const tasks = program
+    .command("tasks")
+    .description("Task board commands (not implemented yet)")
+    .allowExcessArguments(false)
+    .showHelpAfterError(false)
+    .helpOption("-h, --help", "Show this help");
+
+  tasks.action(() => {
+    handlers.onTasks?.();
+  });
+  tasks.addHelpText("after", TASKS_AFTER_HELP);
+
+  program.addHelpText("after", ROOT_AFTER_HELP);
   applyOutput(program, output);
   return program;
 }

@@ -32,20 +32,33 @@ function fail(failure: IngestFailure, stderr = ""): RunResult {
   };
 }
 
+function helpText(text: string): string {
+  if (text.trim().length === 0) {
+    return formatHelp();
+  }
+  return text.endsWith("\n") ? text : `${text}\n`;
+}
+
 export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
   const env = io.env ?? process.env;
   const parsed = parseArgv(argv);
 
   if (parsed.kind === "help") {
-    return { exitCode: 0, stdout: formatHelp(), stderr: "" };
+    return { exitCode: 0, stdout: helpText(parsed.text), stderr: "" };
   }
   if (parsed.kind === "version") {
     return { exitCode: 0, stdout: `${VERSION}\n`, stderr: "" };
   }
+  if (parsed.kind === "tasks") {
+    return fail(
+      { status: "failed", errorCode: "VALIDATION_ERROR", reason: "tasks is not implemented yet" },
+      "See edges tasks --help for usage.\n",
+    );
+  }
   if (parsed.kind === "error") {
     return fail(
       { status: "failed", errorCode: parsed.errorCode, reason: parsed.reason },
-      "See edges-note --help for usage.\n",
+      "See edges --help for usage.\n",
     );
   }
 
@@ -60,7 +73,7 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
     if (error instanceof ZodError) {
       return fail(
         { status: "failed", errorCode: "VALIDATION_ERROR", reason: formatZodReason(error) },
-        "See edges-note --help for usage.\n",
+        "See edges note --help for usage.\n",
       );
     }
     throw error;
@@ -87,10 +100,7 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
 
   const runner = io.ingest ?? runIngestScript;
   const result = await runIngest(request, config, runner, env);
-  const stderrLines =
-    result.status === "success"
-      ? result.diagnostics
-      : result.stderrSummary;
+  const stderrLines = result.status === "success" ? result.diagnostics : result.stderrSummary;
   const stderr = stderrLines ? `${stderrLines.endsWith("\n") ? stderrLines : `${stderrLines}\n`}` : "";
 
   return {

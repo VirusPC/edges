@@ -2,7 +2,7 @@
 
 TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 ingest（落盘、commit、push）。
 
-本地有 shell 的 agent 请用 [`clis/edges-note`](../../clis/README.md)，不要默认走 MCP。本 server 留给没有 shell 的宿主。决策：[`.memory/projects/project_clis_from_mcp.md`](../../.memory/projects/project_clis_from_mcp.md)。
+本地有 shell 的 agent 请用 [`clis` 的 `edges note`](../../clis/README.md)，不要默认走 MCP。本 server 留给没有 shell 的宿主。决策：[`.memory/projects/project_clis_from_mcp.md`](../../.memory/projects/project_clis_from_mcp.md)。
 
 ## What It Does
 

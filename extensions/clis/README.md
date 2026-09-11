@@ -1,8 +1,16 @@
-# edges-cli (`edges-note`)
+# edges-cli (`edges`)
 
-Agent-oriented CLI for ingesting a note into the Edges repo. Local agents should call this instead of the MCP server. Git still lives in `bin/new-note`.
+Multi-command Edges CLI. Local agents should call this instead of the MCP server. Git still lives in `bin/new-note`.
 
-The command tree is built with [Commander.js](https://github.com/tj/commander.js). The default command is ingest: existing flat flags still work. `edges-note ingest ...` is an equivalent alias so later subcommands (for example `auth`) can be added without breaking callers.
+The command tree is built with [Commander.js](https://github.com/tj/commander.js):
+
+```
+edges note …          # ingest a note (required flags on this command)
+edges tasks …         # placeholder (not implemented yet)
+edges --help / -v
+```
+
+**Breaking rename:** the bin is `edges` only. There is no `edges-note` shim and no default ingest at the root. Callers must migrate to `edges note …`. Running `edges` without a subcommand is a usage error.
 
 Design decision: [`.memory/projects/project_clis_from_mcp.md`](../.memory/projects/project_clis_from_mcp.md). Agent-CLI mechanics: [`.memory/references/reference_agent_oriented_cli.md`](../.memory/references/reference_agent_oriented_cli.md).
 
@@ -11,30 +19,22 @@ Design decision: [`.memory/projects/project_clis_from_mcp.md`](../.memory/projec
 ```bash
 pnpm --filter edges-cli exec tsx src/index.ts --help
 
-pnpm --filter edges-cli exec tsx src/index.ts \
+pnpm --filter edges-cli exec tsx src/index.ts note \
   --title "Daily" \
   --content "Notes from the session." \
   --co-author "Codex <codex@openai.com>" \
   --json
 ```
 
-`ingest` is optional and does the same thing:
+After `pnpm --filter edges-cli build`, the bin is `edges` (`dist/index.js`).
 
-```bash
-pnpm --filter edges-cli exec tsx src/index.ts ingest \
-  --title "Daily" \
-  --content "Notes from the session." \
-  --co-author "Codex <codex@openai.com>" \
-  --json
-```
-
-After `pnpm --filter edges-cli build`, the bin is `edges-note` (`dist/index.js`).
-
-## Required flags
+## `note` required flags
 
 - `--title` (1–120)
 - `--content` (1–50,000)
 - `--co-author` (3–200), e.g. `Name <email@domain>`
+
+Optional: `--json`, `--dry-run`, `--mode`, `--token-file`, `--token-stdin`.
 
 ## Structured output
 
@@ -47,11 +47,15 @@ Exit codes: `0` success, `2` usage/validation, `4` auth, `1` runtime.
 
 ## Auth
 
-Same optional gate as MCP HTTP. If `EDGES_AUTH_TOKEN` is set, present it with `--token-file` or `--token-stdin` (non-TTY). Never pass the token on argv.
+Same optional gate as MCP HTTP. If `EDGES_AUTH_TOKEN` is set, present it with `--token-file` or `--token-stdin` (non-TTY) on `edges note`. Never pass the token on argv.
 
 ## Dry-run
 
 `--dry-run` or `EDGES_DRY_RUN=true` writes and commits locally and does **not** push.
+
+## `tasks`
+
+Placeholder only. `edges tasks --help` documents that it is not implemented yet. Invoking `edges tasks` exits with a usage error. No task-board logic yet.
 
 ## Tests
 

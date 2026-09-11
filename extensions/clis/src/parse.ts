@@ -10,10 +10,10 @@ function applyExitOverride(cmd: Command): void {
 }
 
 export type ParseOk =
-  | { kind: "help" }
+  | { kind: "help"; text: string }
   | { kind: "version" }
   | {
-      kind: "ingest";
+      kind: "note";
       title: string;
       content: string;
       coAuthor: string;
@@ -21,7 +21,8 @@ export type ParseOk =
       mode?: "pr" | "direct";
       tokenFile?: string;
       tokenStdin: boolean;
-    };
+    }
+  | { kind: "tasks" };
 
 export type ParseFail = {
   kind: "error";
@@ -35,7 +36,7 @@ function validationError(reason: string): ParseFail {
   return { kind: "error", errorCode: "VALIDATION_ERROR", reason };
 }
 
-function fromIngestOptions(opts: IngestCliOptions): ParseResult {
+function fromNoteOptions(opts: IngestCliOptions): ParseResult {
   const mode = opts.mode;
   if (mode !== undefined && mode !== "pr" && mode !== "direct") {
     return validationError('--mode must be "direct" or "pr"');
@@ -59,7 +60,7 @@ function fromIngestOptions(opts: IngestCliOptions): ParseResult {
   }
 
   return {
-    kind: "ingest",
+    kind: "note",
     title,
     content,
     coAuthor,
@@ -72,15 +73,28 @@ function fromIngestOptions(opts: IngestCliOptions): ParseResult {
 
 export function parseArgv(argv: string[]): ParseResult {
   let collected: IngestCliOptions | undefined;
+  let sawTasks = false;
+  let sawMissingCommand = false;
+  let output = "";
   const program = createProgram(
     {
-      onIngest: (opts) => {
+      onNote: (opts) => {
         collected = opts;
+      },
+      onTasks: () => {
+        sawTasks = true;
+      },
+      onMissingCommand: () => {
+        sawMissingCommand = true;
       },
     },
     {
-      writeOut: () => {},
-      writeErr: () => {},
+      writeOut: (str) => {
+        output += str;
+      },
+      writeErr: (str) => {
+        output += str;
+      },
     },
   );
   applyExitOverride(program);
@@ -90,7 +104,7 @@ export function parseArgv(argv: string[]): ParseResult {
   } catch (err) {
     if (err instanceof CommanderError) {
       if (err.code === "commander.helpDisplayed" || err.code === "commander.help") {
-        return { kind: "help" };
+        return { kind: "help", text: output };
       }
       if (err.code === "commander.version") {
         return { kind: "version" };
@@ -102,9 +116,15 @@ export function parseArgv(argv: string[]): ParseResult {
     return validationError(message);
   }
 
+  if (sawTasks) {
+    return { kind: "tasks" };
+  }
+  if (sawMissingCommand) {
+    return validationError("missing command. Use edges --help.");
+  }
   if (!collected) {
-    return validationError("missing required flags: --title, --content, --co-author");
+    return validationError("missing command. Use edges --help.");
   }
 
-  return fromIngestOptions(collected);
+  return fromNoteOptions(collected);
 }

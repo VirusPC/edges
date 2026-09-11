@@ -1,5 +1,17 @@
 /** Extra `--help` sections. Option names and the command tree come from Commander. */
-export const AFTER_HELP = `
+
+export const ROOT_AFTER_HELP = `
+EXAMPLES
+  edges note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
+  edges note --help
+  edges tasks --help
+
+BREAKING RENAME
+  The bin is edges only (not edges-note). There is no shim.
+  Callers must migrate to: edges note --title … --content … --co-author …
+`;
+
+export const NOTE_AFTER_HELP = `
 STRUCTURED OUTPUT
   Success and failure are JSON objects on stdout. Progress and diagnostics go to stderr.
   Get structured output with --json (default). Pipe stdout to jq.
@@ -12,7 +24,7 @@ STRUCTURED OUTPUT
 
 AUTH
   Optional, same gate as the new-note MCP HTTP server.
-  Auth flags stay on the default / ingest command for now (no separate auth subcommand yet).
+  Auth flags stay on the note command for now (no separate auth subcommand yet).
   If EDGES_AUTH_TOKEN is unset, auth is skipped.
   If it is set, present the same value via --token-file or --token-stdin before git starts.
   Do not use a --token flag (it would leak into ps and shell history).
@@ -37,7 +49,11 @@ ENV
   GITHUB_TOKEN        Passed through to bin/new-note for PR creation
 
 EXAMPLES
-  edges-note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
-  edges-note ingest --title "Daily" --content "..." --co-author "Codex <codex@openai.com>" --dry-run
-  edges-note --help
+  edges note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
+  edges note --dry-run --title "Daily" --content "..." --co-author "Codex <codex@openai.com>"
+  edges note --help
+`;
+
+export const TASKS_AFTER_HELP = `
+Not implemented yet. This command is a placeholder for future task-board work.
 `;
