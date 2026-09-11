@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>速查 · V1 一步循环（8 步）</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <style>
+    ol.steps {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0;
+      counter-reset: step;
+    }
+    ol.steps li {
+      position: relative;
+      padding: 0.7rem 0.85rem 0.7rem 3rem;
+      margin: 0.45rem 0;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    ol.steps li::before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      left: 0.7rem;
+      top: 0.7rem;
+      width: 1.55rem;
+      height: 1.55rem;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    ol.steps li strong {
+      font-family: var(--sans);
+      font-size: 0.92rem;
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+    ol.steps li .detail {
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+    @media print {
+      body { background: white; }
+      footer.nav { display: none; }
+      ol.steps li { break-inside: avoid; }
+      .wrap { max-width: none; padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="meta">
+      参考 ·
+      <a href="../MISSION.md">Mission</a> ·
+      <a href="../lessons/0001-one-request-through-agent-step.html">课次 0001</a> ·
+      <a href="./v1-glossary.html">术语表</a>
+    </header>
+
+    <h1>一次用户请求：V1 的 8 步</h1>
+    <p class="lede">从 Conversation 进门，穿过无状态的 <code>Agent.step</code>，到 Workspace 里跑工具——一页记牢。</p>
+
+    <ol class="steps">
+      <li>
+        <strong>User → Conversation</strong>
+        <span class="detail"><code>send_message(...)</code> 再 <code>run()</code>；Conversation 拥有生命周期与 <code>ConversationState</code>。</span>
+      </li>
+      <li>
+        <strong>Message → Event</strong>
+        <span class="detail">追加进只读向前的 <code>EventLog</code>（如用户 <code>MessageEvent</code>）；事件既是记忆也是集成总线。</span>
+      </li>
+      <li>
+        <strong>Conversation 编排 Agent.step()</strong>
+        <span class="detail">Agent <strong>无状态</strong>：从 state 读历史，往 EventLog 写新事件。</span>
+      </li>
+      <li>
+        <strong>可选 Condensation</strong>
+        <span class="detail">Condenser 可能压缩历史 / 发出 <code>Condensation</code>，再交给 LLM。</span>
+      </li>
+      <li>
+        <strong>LLM 查询</strong>
+        <span class="detail">可转换事件 → messages；模型返回 tool calls 或纯文本。</span>
+      </li>
+      <li>
+        <strong>解析 → ActionEvent(s) 或 MessageEvent</strong>
+        <span class="detail">工具调用变成类型化 <code>ActionEvent</code>；纯文本可能结束本步。</span>
+      </li>
+      <li>
+        <strong>安全 / 确认门</strong>
+        <span class="detail">分析器 + 策略可能设 <code>WAITING_FOR_CONFIRMATION</code> 并返回。</span>
+      </li>
+      <li>
+        <strong>在 Workspace 执行工具 → ObservationEvent(s)</strong>
+        <span class="detail">Action→Observation；本地进程或远程 Agent Server 取决于 workspace。循环直到完成 / 暂停 / 出错。</span>
+      </li>
+    </ol>
+
+    <div class="note">
+      V0 词汇桥（可选）：FE ↔ Backend ↔ <code>EventStream</code> ↔ <code>Runtime</code> ↔ <code>ActionExecutionServer</code>。
+      教 V1 时优先用 <strong>Conversation / EventLog / Agent / Workspace / Agent Server</strong>。
+    </div>
+
+    <p class="cite">
+      依据：
+      <a href="https://docs.openhands.dev/sdk/arch/overview">SDK overview（序列）</a> ·
+      <a href="https://docs.openhands.dev/sdk/arch/agent">Agent step flow</a> ·
+      亦见 <a href="https://docs.openhands.dev/sdk/arch/events">events</a> /
+      <a href="https://docs.openhands.dev/sdk/arch/conversation">conversation</a> /
+      <a href="https://docs.openhands.dev/sdk/arch/workspace">workspace</a>
+    </p>
+
+    <footer class="nav">
+      <a href="./v1-glossary.html">← 术语表</a> ·
+      <a href="../lessons/0001-one-request-through-agent-step.html">课次 0001 →</a>
+    </footer>
+  </div>
+</body>
+</html>

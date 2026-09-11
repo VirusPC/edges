@@ -1,22 +1,22 @@
 ---
 name: project_todos_direct_main
-description: 往 knowledge/todos/ 写只追加速记时，直接提交 main、不提 PR
+description: 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks_direct_main
 metadata:
-  edges-title: todos 只追加直接推 main
+  edges-title: todos 只追加直接推 main（已由 tasks 路径取代）
   edges-type: project
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
-  edges-username: 记事本
+  edges-username: Task 记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-09T04:31:57+00:00"
+  edges-updated-at: "2026-09-10T08:00:40+00:00"
 ---
 
-往 `knowledge/todos/` 写只追加的速记时，直接提交到 `main`，不提 PR；怎么快怎么来。
+往 `knowledge/todos/` 写只追加速记、直接推 main 的约定已被 `knowledge/tasks/` 取代；旧路径不再是活跃捕获入口。
 
 **Why:**
-这类内容是人记人看的待办清单，只追加、不改历史主干逻辑；走 PR 会拖慢记事节奏。用户已明确要求对 todos 速记跳过默认 PR 流程。
+grill-with-docs 已决定删除 `knowledge/todos/`（不留 stub），工作项按 `edges-tasks-status` 分夹落在 `knowledge/tasks/`。继续写 todos 会指向不存在的目录。
 
 **How to apply:**
-- 新增/补充 `knowledge/todos/*.md`：pull 最新 `main` → 只改 todos 相关文件 → commit（带 `Co-authored-by: 记事本 <grok-bot@users.noreply.github.com>`）→ push `main`
-- 不要为这类速记开 PR
-- `knowledge/notes/` 等知识归档仍可按原 edges-publish / 可 review 流程；本约定仅覆盖 `knowledge/todos/` 的只追加速记
+- 不要再往 `knowledge/todos/` 追加
+- 新人侧 / Task 记录员只追加速记：写 `knowledge/tasks/backlog/`，直接推 main（见 `project_tasks_direct_main`）
+- 本条只保留「曾经对 todos 跳过 PR」的历史，不再作为现行路径

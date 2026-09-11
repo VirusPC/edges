@@ -60,6 +60,26 @@ _避免使用_：任何不确定性、金融风险指标、单纯缺少资料
 不要求预先形成目标或结论的轻量知识捕获，可作为 Edge 的原材料。
 _避免使用_：专项、Edge、任意 Markdown 文件
 
+**复盘四栏**：
+整理对话 Note 时使用的四段结构（背景→过程→所学→行动指南），灵感来自 After Action Review，但不是官方 AAR 模板本身。
+_避免使用_：Facts–Insights–Actions、主要结论/认知更新旧三分法、官方 AAR 模板（若指本结构）
+
+**背景（对话整理）**：
+复盘四栏的第一栏：这次对话为何发生、意图与议题。
+_避免使用_：讨论主题（若指本栏）
+
+**过程（对话整理）**：
+复盘四栏的第二栏：对话中实际发生的事实，评价尽量少。
+_避免使用_：主要结论、Facts（若指本栏）、所学的同义改写
+
+**所学**：
+复盘四栏的第三栏：可带走再用的判断，不是过程的复述。
+_避免使用_：认知更新、Insights、过程栏的复述
+
+**行动指南（对话整理）**：
+复盘四栏的第四栏：带触发条件与具体做法的行动说明。
+_避免使用_：裸待办清单、Actions（若指本栏）
+
 **专项工作区（Initiative Workspace）**：
 围绕一个明确目标持续组织材料、状态和产出的有边界工作空间；可直接产生需要提炼为 Edge 的经验。
 _避免使用_：长笔记、主题分类、知识资产
@@ -107,3 +127,19 @@ _避免使用_：普通反馈闭环、知识更新、未展开的 RSI
 **Archive**：
 暂存从活跃知识空间移除、但仍需保留来源和恢复可能性的材料；它是退出机制，不是知识出口。
 _避免使用_：知识出口、历史知识库、失效 Edge 专区
+
+**Task**：
+跨 Agent 接力的工作项（idea 捕获后经细聊与开发直至收口）；按 edges-tasks-status 分夹存放在 knowledge/tasks/ 下。
+_避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目
+
+**edges-tasks-status**：
+Task（Issue 层）的唯一状态字段，取值为 backlog | todo | in_progress | in_review | done | blocked | cancelled。
+_避免使用_：裸 status 字段名、Run 层状态、open/discussing/building 旧枚举
+
+**Task Run Log**：
+与某个 Task 同目录、同 stem 的点文件 sidecar（`.{stem}.log.md`），只追加执行记录（Run）；不写入 Task 正文。
+_避免使用_：正文内【执行记录】表、把 Run 嵌进 frontmatter
+
+**backlog（Task）**：
+tasks 层内「已进入任务系统但未排期」的筛选池；也是 agent 衍生提案的默认入口。人侧存量从旧 todos 迁入时默认落此态。
+_避免使用_：knowledge/todos 系统外池、Draft

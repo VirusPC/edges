@@ -1,0 +1,50 @@
+# SSH into Aliyun ECS and reset the full-repo checkout to origin/main.
+# ECS can reach GitHub over HTTPS; do not rsync-push a path subset.
+name: Deploy teach site
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ecs-edges-pull
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull edges on ECS
+        env:
+          TEACH_DEPLOY_HOST: ${{ secrets.TEACH_DEPLOY_HOST }}
+          TEACH_DEPLOY_USER: ${{ secrets.TEACH_DEPLOY_USER }}
+          TEACH_DEPLOY_SSH_KEY: ${{ secrets.TEACH_DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          : "${TEACH_DEPLOY_HOST:?missing secret TEACH_DEPLOY_HOST}"
+          : "${TEACH_DEPLOY_USER:?missing secret TEACH_DEPLOY_USER}"
+          : "${TEACH_DEPLOY_SSH_KEY:?missing secret TEACH_DEPLOY_SSH_KEY}"
+          key="$(mktemp)"
+          trap 'rm -f "$key"' EXIT
+          printf '%s\n' "$TEACH_DEPLOY_SSH_KEY" > "$key"
+          chmod 600 "$key"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H -T 10 "$TEACH_DEPLOY_HOST" >> ~/.ssh/known_hosts
+          ssh -i "$key" \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            "${TEACH_DEPLOY_USER}@${TEACH_DEPLOY_HOST}" \
+            'set -euo pipefail
+             cd /home/cheng-dev/projects/edges
+             git fetch origin main
+             git checkout main
+             git reset --hard origin/main
+             git --no-pager status -sb
+             git rev-parse HEAD'

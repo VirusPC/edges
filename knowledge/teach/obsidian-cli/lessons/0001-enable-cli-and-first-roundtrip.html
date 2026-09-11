@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>0001 · 启用 Obsidian CLI 并跑通第一次读写</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<p class="meta">Obsidian CLI 课程 · 第 1 课 · 2026-09-09 ·
+<a href="../reference/cheatsheet.html">命令速查表</a></p>
+
+<h1>启用 Obsidian CLI，跑通第一次读写</h1>
+
+<p><strong>本课目标（一次小小的胜利）：</strong>升级 Obsidian → 启用 CLI → 在终端里读出并追加一条笔记。完成后，你的终端（也就是任何命令行 AI Agent）就拥有了你笔记库的入口。</p>
+
+<h2>为什么值得 5 分钟</h2>
+
+<p>你的 mission 是让 ZCode 这类 Agent 直接操作笔记库。在此之前，Agent 只能把 vault 当普通文件夹改 markdown 文件——可行，但绕过了 Obsidian：索引、插件、链接解析都不知情。CLI 是 Obsidian 官方给 Agent 留的正门：它向<em>正在运行的桌面应用</em>发指令，读、搜、写都经过 Obsidian 本身（<a href="https://obsidian.md/help/cli">官方文档</a>、<a href="https://obsidian.md/cli">产品页</a>）。</p>
+
+<blockquote>一个关键认知：CLI 不是独立程序，它是「遥控器」——Obsidian 桌面应用必须开着。（<a href="https://dev.to/shimo4228/obsidians-official-cli-is-here-no-more-hacking-your-vault-from-the-back-door-3123">dev.to 概览</a>）</blockquote>
+
+<h2>第 1 步：升级到 1.12.4 或更高</h2>
+
+<p>你现在是 <code>1.11.7</code>——那是 CLI 还需要 Catalyst 付费许可证的内测版。1.12.4 起 CLI 对所有用户（含免费）开放。</p>
+
+<pre><code>Obsidian.app → 菜单栏 → Check for updates（或设置 → 通用 → 检查更新）
+升级完成后确认：/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' /Applications/Obsidian.app/Contents/Info.plist
+应输出 ≥ 1.12.4</code></pre>
+
+<h2>第 2 步：启用 CLI</h2>
+
+<p>设置 → 通用（General）→ <strong>命令行界面 / Command line interface</strong> → 启用。Obsidian 会把 <code>obsidian</code> 命令装入你的 PATH。</p>
+
+<pre><code># 验证：新开一个终端窗口
+which obsidian     # 应输出路径
+obsidian help      # 列出全部命令，这份列表永远是最新文档</code></pre>
+
+<h2>第 3 步：第一次读写闭环</h2>
+
+<pre><code># 读：按名字定位，像 wikilink 一样，不需要路径和扩展名
+obsidian read file="某篇现有笔记"
+
+# 写：往每日笔记追加一条待办
+obsidian daily:append content="- [ ] 跑通 Obsidian CLI 第一课 ✅"
+
+# 验证：再读回来
+obsidian daily:read</code></pre>
+
+<p>如果 <code>daily:read</code> 能看到你刚追加的那行，闭环已通：终端 → Obsidian → 你的笔记。</p>
+
+<div class="win">
+<strong>恭喜。</strong>从这一刻起，任何能执行 shell 命令的 Agent（ZCode、Claude Code、n8n 脚本）都能用同一组命令操作你的知识库。第 2 课我们把这套命令交给 Agent 实战。
+</div>
+
+<h2>检验一下（先凭记忆答，再试命令）</h2>
+
+<div class="quiz" data-answer="C">
+<p>1. 你关掉了 Obsidian 桌面应用，只留终端。此时 <code>obsidian read</code> 会怎样？</p>
+<button>A. 正常工作，CLI 自己读文件</button>
+<button>B. 弹窗提示购买 Catalyst</button>
+<button>C. 失败，CLI 依赖运行中的应用</button>
+<p class="fb"></p>
+</div>
+
+<div class="quiz" data-answer="B">
+<p>2. 笔记在 <code>projects/ideas/next.md</code>，哪种定位方式<strong>最稳</strong>？</p>
+<button>A. file="next"</button>
+<button>B. path="projects/ideas/next.md"</button>
+<button>C. search="next"</button>
+<p class="fb"></p>
+</div>
+
+<div class="quiz" data-answer="A">
+<p>3. 想让创建的笔记不弹出窗口打扰你，加什么？</p>
+<button>A. silent</button>
+<button>B. quiet=true</button>
+<button>C. hidden</button>
+<p class="fb"></p>
+</div>
+
+<h2>延伸阅读（推荐主资源）</h2>
+
+<p>📍 首选：<a href="https://github.com/kepano/obsidian-skills/blob/main/skills/obsidian-cli/SKILL.md">kepano（Obsidian CEO）的 obsidian-cli SKILL.md</a>——就是写给 Agent 的用法说明，5 分钟读完，本课所有语法出自这里。</p>
+
+<footer>
+<p>有任何不清楚的地方，<strong>直接在 ZCode 里问你的老师（我）</strong>——比如「file= 和 path= 到底差在哪」「多 vault 怎么指定」。</p>
+<p><a href="../reference/cheatsheet.html">→ 命令速查表（打印友好）</a></p>
+</footer>
+
+<script>
+document.querySelectorAll('.quiz').forEach(q => {
+  const fb = q.querySelector('.fb');
+  q.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+    const ok = b.textContent[0] === q.dataset.answer;
+    fb.textContent = ok ? '✓ 正确。' : '✗ 不对，回看上文或运行 obsidian help 验证。';
+    fb.className = 'fb ' + (ok ? 'ok' : 'bad');
+  }));
+});
+</script>
+</body>
+</html>

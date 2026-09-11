@@ -13,12 +13,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `evaluation/`：评测整套 Edges（用例、harness、报告）。系统元工作，不是知识生命周期阶段。
 - `observation/`：观测运行与使用（脱敏 run log、指标与仪表盘笔记）。不替代 `.memory` 决策。
+- `docs/adr/`：记录领域决策；首条为对话整理采用复盘四栏。
+- CONTEXT 增加「复盘四栏」及四栏术语。
+- CONTEXT 增加 Task、`edges-tasks-status`、Task Run Log、backlog（Task）。
+- `docs/adr/0002-knowledge-tasks-status-folders.md`：`knowledge/todos` 迁为按状态分夹的 `knowledge/tasks`。
+- [`knowledge/tasks/`](knowledge/tasks/)：跨 Agent 接力的 Task 看板。
+- `extensions/skills/learn-repo`：把要学习的外部仓库以 git submodule 挂进 `knowledge/teach/<topic>/repos/`，主仓库只记指针不涨体积，并在主题 RESOURCES.md 登记来源与用途。
+- Obsidian `userIgnoreFilters` 排除 `knowledge/teach/*/repos/`，学习仓库的文件不进 vault 搜索与关系图谱。
 
 ### Changed
+
+- 存量 `knowledge/todos/*.md` 改写为 project-memory 形态后迁入 `knowledge/tasks/backlog/`。
+- ECS 部署：`.github/workflows/deploy-teach.yml` 改为 SSH 触发整仓 `git fetch` / `reset --hard origin/main`，不再 rsync 推送 `knowledge/teach/`。
+- `obsidian-cli` 教学工作区从 `.teaching/obsidian-cli/` 迁到 `knowledge/teach/obsidian-cli/`。
 
 ### Fixed
 
 ### Removed
+
+- 根目录 `inbox/` 旧 ingest 自动 PR 测试草稿。
+- `knowledge/todos/`（不留重定向 stub）。
 
 ## [1.1.0] - 2026-09-09
 

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>0001 · 关联外部仓库：先分清两种「体积」</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="meta">
+      课次 0001 ·
+      <a href="../MISSION.md">Mission</a> ·
+      <a href="../reference/external-repo-options.html">选型速查</a>
+    </header>
+
+    <h1>关联外部仓库：先分清两种「体积」</h1>
+    <p class="lede">「不想占体积」里藏着两个不同的体积——分清它们，四个方案的选择就变成查表。</p>
+
+    <h2>这一课你能带走什么</h2>
+    <p>能把「外部仓库关联进来但不占体积」翻译成明确需求，并选出对应方案（今天就能回答你自己的问题）。</p>
+
+    <h2>两种体积，别混在一起</h2>
+    <p>说「不希望它占用体积」时，先问自己担心的是哪一个：</p>
+    <ul>
+      <li><strong>主仓库 .git 历史</strong>：任何提交进主仓库的东西都永久留在历史里，删掉工作区文件也删不掉历史。edges 是公开仓库，克隆体积随历史单调增长。</li>
+      <li><strong>本地磁盘占用</strong>：工作区里实际检出的文件。它不进主仓库历史，只占你这块盘。</li>
+    </ul>
+    <p>「关联外部仓库」的四个方案，差别就在它们动的是哪个体积：</p>
+    <ul>
+      <li><strong>git submodule</strong>：主仓库只存一个 <strong>gitlink</strong>（mode 为 <code>160000</code> 的目录条目，指向外部仓库的某次提交）加一份 <code>.gitmodules</code> 配置。内容完全不在主仓库历史里——<a href="https://git-scm.com/docs/gitsubmodules">gitsubmodules(7)</a> 就是这么定义的。主仓库体积成本约等于零，同时关联（URL + 提交号）可追溯、可 review。</li>
+      <li><strong>git subtree</strong>：把外部仓库内容真正合进主仓库历史。克隆即得、协作者无感，但主仓库体积实打实增长——<code>--squash</code> 可以不带外部全历史，可每次更新的快照仍在主仓库里（<a href="https://github.com/git/git/blob/master/contrib/subtree/git-subtree.adoc">git-subtree.adoc</a>）。与「不占体积」相反。</li>
+      <li><strong>gitignore + 本地 clone</strong>：把外部仓库 clone 到固定位置（或 symlink 进来）并 gitignore。主仓库零成本，但关联只存在你机器上，别人 clone 后一无所知。</li>
+      <li><strong>partial clone / sparse-checkout</strong>：这是「使用方」克隆外部大仓库时省本地磁盘的手段（<a href="https://github.blog/open-source/git/get-up-to-speed-with-partial-clone-and-shallow-clone/">GitHub Blog</a>），跟往主仓库里关联是两个维度，可以叠加在前三者之外。</li>
+    </ul>
+
+    <div class="note">
+      回到你最初的问题：要「关联可追溯 + 主仓库不涨体积」，标准答案是 <strong>submodule</strong>；
+      如果只是你本地参考、不需要别人复现，<strong>gitignore + clone</strong> 更省事。四方案完整对比见
+      <a href="../reference/external-repo-options.html">选型速查</a>。
+    </div>
+
+    <h2>「不占体积」的另一面</h2>
+    <p>submodule 的省，正是靠「默认不给内容」换来的：别人 clone 主仓库后，子模块目录<strong>存在但为空</strong>，
+    要 <code>git submodule update --init</code>（或克隆时加 <code>--recurse-submodules</code>）才拉到内容。
+    <a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">Pro Git</a> 把这列为 submodule 最常见的协作坑：
+    忘了 init 就看到空目录，不是坏了，是设计如此。CI、Agent 会话同理，需要在流程里显式 init。</p>
+    <p>更新外部版本也不难：进子目录 checkout 新提交，回到主仓库提交——diff 只有一行 SHA 变更。</p>
+
+    <h2>亲手验证（约 3 分钟，用一次性仓库）</h2>
+    <p>别在 edges 上做实验。在 <code>/tmp</code> 建个 lab，眼见为实：</p>
+<pre><code>mkdir /tmp/submod-lab &amp;&amp; cd /tmp/submod-lab
+git init &amp;&amp; echo hi &gt; README.md &amp;&amp; git add . &amp;&amp; git commit -m init
+
+git count-objects -vH        # 记下 size-pack
+
+# 关联一个很小的公开仓库
+git submodule add https://github.com/octocat/Hello-World.git vendor/hello
+git commit -m "add submodule"
+
+git ls-files -s vendor/hello  # 第一个字段 160000：gitlink，指向提交而非 blob
+cat .gitmodules               # 主仓库里真正新增的东西：这个文件 + 一行 gitlink
+
+git count-objects -vH         # 对比：主仓库几乎没涨
+du -sh .git                   # 外部内容在 .git/modules 里，属于本地磁盘，不进主仓库对象库</code></pre>
+    <p>做完 <code>rm -rf /tmp/submod-lab</code> 即可。</p>
+
+    <h2>精读材料</h2>
+    <p>
+      精读 <a href="https://git-scm.com/book/en/v2/Git-Tools-Submodules">Pro Git — Git Tools: Submodules</a>（约 20 分钟）：
+      重点读「Cloning a Project with Submodules」与「Working on a Project with Submodules」两节。
+    </p>
+
+    <div class="ask-teacher">
+      <strong>卡住了？问我。</strong>
+      lab 跑不通、或你不确定手头那个仓库该选哪个方案——把仓库用途（参考阅读 / 依赖运行 / 归档）告诉我，我帮你判断。
+    </div>
+
+    <h2>自测</h2>
+    <div id="q1"></div>
+    <div id="q2"></div>
+
+    <footer class="nav">
+      下一课预告：submodule 完整生命周期——在真实仓库里 add、更新指针、deinit/remove，以及 CI / Agent 会话里的 init 约定。
+    </footer>
+  </div>
+  <script src="../assets/quiz.js"></script>
+  <script>
+    Quiz.mount(document.getElementById("q1"), {
+      question: "主仓库 .git 历史几乎不增长，同时关联可被版本库追溯，选哪种？",
+      choices: [
+        { id: "a", label: "submodule：仓库只记提交指针" },
+        { id: "b", label: "subtree：内容快照合入历史" },
+        { id: "c", label: "复制入库：文件整体进主仓库" },
+        { id: "d", label: "手动克隆：关联不留版本记录" },
+      ],
+      answer: "a",
+      explainOk: "对。gitlink + .gitmodules，内容不进主仓库历史，URL 和提交号都可追溯。",
+      explainBad: "不对。subtree 与复制会把内容写进主仓库历史；手动克隆则不构成可追溯关联。只记指针的是 submodule。",
+    });
+    Quiz.mount(document.getElementById("q2"), {
+      question: "同事 clone 了带 submodule 的主仓库（没加 --recurse-submodules），他会看到？",
+      choices: [
+        { id: "a", label: "目录存在但内容是空的" },
+        { id: "b", label: "目录连同文件全部就位" },
+        { id: "c", label: "克隆直接报错并中断" },
+        { id: "d", label: "文件就位但未被跟踪" },
+      ],
+      answer: "a",
+      explainOk: "对。默认不拉子模块内容，update --init 之后才有文件。",
+      explainBad: "不对。默认克隆不拉子模块内容也不报错——目录在但为空，init 后才有文件。",
+    });
+  </script>
+</body>
+</html>
