@@ -99,6 +99,10 @@ export function parseArgv(argv: string[]): ParseResult {
   );
   applyExitOverride(program);
 
+  if (argv[0] === "ingest") {
+    return validationError("ingest was renamed to note. Use: edges note …");
+  }
+
   try {
     program.parse(argv, { from: "user" });
   } catch (err) {

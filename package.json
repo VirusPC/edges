@@ -14,7 +14,7 @@
     "format": "pnpm recursive exec -- prettier --write \"src/**/*.ts\"",
     "start:note-server": "pnpm --filter new-note start",
     "dev:note-server": "pnpm --filter new-note dev",
-    "cli:note": "pnpm --filter edges-cli exec tsx src/index.ts",
+    "cli:note": "pnpm --filter edges-cli exec tsx src/index.ts note",
     "mcp:run": "pnpm --filter"
   },
   "engines": {

@@ -30,8 +30,8 @@ test("run --help lists note and tasks", async () => {
   const result = await run(["--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /Commands:/);
-  assert.match(result.stdout, /\bnote\b/);
-  assert.match(result.stdout, /\btasks\b/);
+  assert.match(result.stdout, /^\s+note\b/m);
+  assert.match(result.stdout, /^\s+tasks\b/m);
   assert.doesNotMatch(result.stdout, /^\s+ingest\b/m);
 });
 
@@ -82,6 +82,7 @@ test("missing note flags fail with JSON error and do not call ingest", async () 
   const parsed = JSON.parse(result.stdout) as { status: string; errorCode: string };
   assert.equal(parsed.status, "failed");
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
+  assert.match(result.stderr, /edges note --help/);
 });
 
 test("root without a subcommand does not run note ingest", async () => {

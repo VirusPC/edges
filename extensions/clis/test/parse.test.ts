@@ -108,6 +108,7 @@ test("parseArgv rejects the removed ingest subcommand name", () => {
   assert.equal(parsed.kind, "error");
   if (parsed.kind === "error") {
     assert.equal(parsed.errorCode, "VALIDATION_ERROR");
+    assert.match(parsed.reason, /edges note/);
   }
 });
 

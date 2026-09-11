@@ -56,10 +56,13 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
     );
   }
   if (parsed.kind === "error") {
-    return fail(
-      { status: "failed", errorCode: parsed.errorCode, reason: parsed.reason },
-      "See edges --help for usage.\n",
-    );
+    const usage =
+      argv[0] === "note"
+        ? "See edges note --help for usage.\n"
+        : argv[0] === "tasks"
+          ? "See edges tasks --help for usage.\n"
+          : "See edges --help for usage.\n";
+    return fail({ status: "failed", errorCode: parsed.errorCode, reason: parsed.reason }, usage);
   }
 
   let request;
