@@ -105,14 +105,13 @@ knowledge/projects/foo/report.md → knowledge/archive/projects/foo/report.md
 | [`AGENTS.md`](AGENTS.md) 与 [`.memory/`](.memory/) | 为 Agent 提供分层的规则、决策、纠错与流程记忆 | 服务项目维护，不替代长期知识库 |
 | [`extensions/`](extensions/README.md) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关 |
 | [`shared-extensions/`](shared-extensions/README.md) | 跨机器、跨 Agent 共用的个人 harness | 离开 Edges 仍然有价值 |
-| [`bin/`](bin/README.md) | 安装后由人反复调用的命令 | 加入 `$PATH` |
 | [`scripts/`](scripts/README.md) | 初始化、构建、迁移等维护脚本 | 通过 `pnpm` 调用，不加入 `$PATH` |
 | [`evaluation/`](evaluation/README.md) | 评测整套 Edges | 系统元工作，不是知识生命周期阶段 |
 | [`observation/`](observation/README.md) | 观测运行与使用 | 运营观测，不替代 `.memory` 决策 |
 
 `evaluation/` 与 `observation/` 是系统实现旁的支撑目录：前者对照假设，后者记录野外现象。它们不进入 notes → edges → archive 主链；观测或评测若产生新洞察，仍须回到捕获入口。
 
-捕获入口最终回到同一套知识模型：人可以使用 `bin/new-note`；有 shell 的 Agent 使用 [`edges` CLI](extensions/clis/README.md) 的 `edges note …`，获得稳定参数和 JSON 输出；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)。它们复用同一条 Note 入库链路。
+捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](extensions/clis/README.md) 的 `edges note …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](extensions/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
 
 Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；`AGENTS.md` 和 `.memory/` 保存维护系统所需的运营规则、决策与经验；`knowledge/` 保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
 
@@ -131,7 +130,7 @@ pnpm skills:link
 ```
 
 - `pnpm install`：安装 workspace 依赖。
-- `pnpm setup`：初始化本地环境，并把 `bin/` 加入 `$PATH`。
+- `pnpm setup`：初始化本地环境（加载 .env；不再把仓根 bin/ 写入 PATH）。
 - `pnpm skills:link`：把 Edges 自有 skills 链到项目级 `.agents/skills/`。
 
 ### 只使用可复用组件
@@ -162,7 +161,7 @@ pnpm test
 - 仓库级变更记录在 [`CHANGELOG.md`](CHANGELOG.md)，tag 使用 `vX.Y.Z`。
 - 对外 skill 各自独立 semver；`shared-extensions/` 整层使用自己的 [`VERSION`](shared-extensions/VERSION) 与 [`CHANGELOG.md`](shared-extensions/CHANGELOG.md)。
 
-进一步文档：[Edges 扩展](extensions/README.md) · [共享 Agent harness](shared-extensions/README.md) · [用户命令](bin/README.md) · [维护脚本](scripts/README.md) · [评测](evaluation/README.md) · [观测](observation/README.md)
+进一步文档：[Edges 扩展](extensions/README.md) · [共享 Agent harness](shared-extensions/README.md) · [维护脚本](scripts/README.md) · [评测](evaluation/README.md) · [观测](observation/README.md)
 
 ## 公开仓库边界
 

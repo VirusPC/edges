@@ -1,6 +1,6 @@
 # scripts/
 
-项目自身的**维护脚本**目录。区别于 `bin/`（用户/Agent 反复调用的命令）。
+项目自身的维护脚本目录。人和 Agent 天天用的入库命令是 `extensions/clis` 的 `edges`，不是仓根脚本。
 
 ## 何时放这里
 
@@ -12,13 +12,13 @@
 
 ## 何时**不**放这里
 
-- 用户/Agent 装好之后**天天会用**的命令 → `bin/`
+- 用户/Agent 装好之后**天天会用**的命令 → `extensions/clis` 的 `edges`（`package.json` `"bin"` 安装挂钩）
 - 跟外部系统/MCP 协议相关的代码 → `extensions/`；跨机器 harness 的安装脚本仍放本目录，源在 `shared-extensions/`
 - 纯 Node 包、可被 pnpm 链接的 → `extensions/mcp-servers/<name>/`
 
 ## 命名与权限
 
-- 文件无后缀（如 `setup`、`release`），与 `bin/new-note` 保持风格一致
+- 文件无后缀（如 `setup`、`release`）
 - 顶部必须有 shebang（`#!/usr/bin/env bash` / `node` / `python3` 等）
 - 必须 `chmod +x`
 
@@ -34,7 +34,7 @@
 
 | 脚本 | 入口 | 作用 |
 |---|---|---|
-| `setup` | `pnpm setup` | 首次接入初始化：把 `bin/` 加入 PATH、加载 `.env` |
+| `setup` | `pnpm setup` | 首次接入初始化：加载 .env；清掉旧的仓根 bin PATH |
 | `link-agent-skills` | `pnpm skills:link` | 把 `extensions/skills` 里每个 skill 软链到 `.agents/skills` |
 
 `pnpm skills:link -- --check` 只校验不写；`--dry-run` 打印动作；`--self-test` 在临时目录跑一遍。vendor 拷贝（`.agents/skills` 里的实体目录）不碰；source 里删掉的 skill，对应软链会清掉。

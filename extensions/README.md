@@ -36,5 +36,5 @@
 
 1. **标准化**: 本地 agent 优先 CLI（`extensions/clis/`）；没有 shell 的宿主再用 MCP。
 2. **文档化**: 每个子目录都应包含独立的 README，说明其调用协议和配置方法。
-3. **解耦**: Extension 应当只依赖 `bin/` 脚本或标准的 `knowledge/` 路径，避免复杂的内部依赖。
+3. **解耦**: Extension 应当只依赖 `edges` CLI 契约或标准的 `knowledge/` 路径，避免复杂的内部依赖。不要依赖仓根 `bin/`。
 4. **自包含**: 一个 extension 应当能被单独复制走。避免用 Obsidian wikilink 引用 `knowledge/resources/` 下的附件——链接在 vault 内能解析，但目录被带到别处时附件会丢失。
