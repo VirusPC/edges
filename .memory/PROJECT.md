@@ -20,5 +20,6 @@
 - [跨机器跨 Agent 的 harness 放 shared-extensions](projects/project_shared_extensions.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。
 - [tasks 只追加直接推 main](projects/project_tasks_direct_main.md) — 往 knowledge/tasks/ 写只追加速记时，直接提交 main、不提 PR
 - [工作项叫 tasks，支持状态流转](projects/project_tasks_with_status_not_todos.md) — idea→专家→Cloud 工作流下，目录与概念用 knowledge/tasks/（非 todos），并按 edges-tasks-status 分夹流转
+- [teach 站点用 Actions rsync 推送到 ECS](projects/project_teach_site_rsync_push.md) — 改 teach 站点部署或想在 ECS 上更新 knowledge/teach 时：用 GitHub Actions rsync 推送，不要 SSH 进机器 git pull。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](projects/project_todos_direct_main.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks_direct_main
 <!-- project-memory-entries:end -->

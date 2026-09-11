@@ -1,0 +1,47 @@
+# Push knowledge/teach to the Aliyun ECS nginx static root.
+# ECS cannot reach GitHub (HTTPS 443 timeouts), so this workflow
+# rsync-pushes content. Do not replace this with a remote `git pull`.
+name: Deploy teach site
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "knowledge/teach/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install OpenSSH and rsync
+        run: sudo apt-get update && sudo apt-get install -y openssh-client rsync
+
+      - name: Sync knowledge/teach to ECS
+        env:
+          TEACH_DEPLOY_HOST: ${{ secrets.TEACH_DEPLOY_HOST }}
+          TEACH_DEPLOY_USER: ${{ secrets.TEACH_DEPLOY_USER }}
+          TEACH_DEPLOY_SSH_KEY: ${{ secrets.TEACH_DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          : "${TEACH_DEPLOY_HOST:?missing secret TEACH_DEPLOY_HOST}"
+          : "${TEACH_DEPLOY_USER:?missing secret TEACH_DEPLOY_USER}"
+          : "${TEACH_DEPLOY_SSH_KEY:?missing secret TEACH_DEPLOY_SSH_KEY}"
+          key="$(mktemp)"
+          trap 'rm -f "$key"' EXIT
+          printf '%s\n' "$TEACH_DEPLOY_SSH_KEY" > "$key"
+          chmod 600 "$key"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H "$TEACH_DEPLOY_HOST" >> ~/.ssh/known_hosts
+          rsync -az --delete \
+            -e "ssh -i $key -o IdentitiesOnly=yes -o BatchMode=yes" \
+            knowledge/teach/ \
+            "${TEACH_DEPLOY_USER}@${TEACH_DEPLOY_HOST}:/home/cheng-dev/projects/edges/knowledge/teach/"
