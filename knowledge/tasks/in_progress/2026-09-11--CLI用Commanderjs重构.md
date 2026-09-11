@@ -4,12 +4,14 @@ description: CLI 用 Commander.js 重构
 metadata:
   edges-type: task
   edges-title: CLI 用 Commander.js 重构
-  edges-tasks-status: backlog
+  edges-tasks-status: in_progress
+  edges-task-assignee: Coding Agent 专家
+  edges-task-assignee-id: ac913463-5bf6-4c16-adc0-900c61a8692d
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-11T09:41:00+08:00"
+  edges-updated-at: "2026-09-11T19:15:00+08:00"
 ---
 
 CLI 用 Commander.js（commander）重构。
