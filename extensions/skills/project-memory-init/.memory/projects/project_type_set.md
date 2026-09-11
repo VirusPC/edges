@@ -1,6 +1,6 @@
 ---
 name: project_type_set
-description: 当前五类及各自的闸门；skills 可写、agent_skills 只索引；否掉 docs。仓库内 user 见 ADR-0003（已推翻不进树）。
+description: 当前类型及闸门；否掉 docs。user 进仓且 gitignore，布局同其他类型（users/ / USER.md / user_<slug>.md），见 ADR-0003；v1 不做晋升。
 metadata:
   edges-title: 项目记忆的类型集合
   edges-type: project
@@ -8,10 +8,10 @@ metadata:
   edges-agent-client: cursor
   edges-username: Coding 专家
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-11T11:41:39+00:00"
+  edges-updated-at: "2026-09-11T11:43:59+00:00"
 ---
 
-可写类型是 `feedback` / `project` / `reference` / `skills`；`agent_skills` 只索引不写。不要加 `docs`。把官方 `user` 放进仓库树这一条已被 ADR-0003 推翻：用户记忆是项目记忆类型，权威副本在仓库工作树内且 gitignore，按仓库路径绑定。`.memory/` 下类型目录用复数。
+可写类型是 `feedback` / `project` / `reference` / `skills`；`agent_skills` 只索引不写。不要加 `docs`。把官方 `user` 放进仓库树这一条已被 ADR-0003 推翻：用户记忆是项目记忆类型，权威副本在仓库工作树内且 gitignore，按仓库路径绑定，布局与其他类型相同（`.memory/users/`、`USER.md`、`user_<slug>.md`）。`.memory/` 下类型目录用复数。
 
 **Why:**
 
@@ -19,12 +19,12 @@ metadata:
 
 **这一条推翻了本条自己的旧结论「`skills` 只索引、remember 不写」。** 当时的理由是「`.memory/skills/` 空槽对不上 `extensions/skills/` 这个真源」——现在两个槽各有归属，理由不成立了：`skills` 收自动沉淀的流程，`agent_skills` 索引 `.agents/skills/` 里人写或装入的。分界是**谁有权改写**，不是「是不是可执行指令」。详见 [[project_skill_ownership_split]]。
 
-**「不要把 `user` 放进仓库树」已被仓库根 `docs/adr/0003-user-memory-in-repo-gitignored.md`（ADR-0003）推翻。** 现行结论是仓内权威副本 + gitignore + 按仓绑定；家目录当真源已被用户否决。目录名、入口形状、内容闸门、晋升路径和精确 ignore glob 仍未定，不要在本条里发明。其余（否掉 docs、五类闸门、复数目录、skills 可写 / agent_skills 只索引）仍成立。
+**「不要把 `user` 放进仓库树」已被仓库根 `docs/adr/0003-user-memory-in-repo-gitignored.md`（ADR-0003）推翻。** 现行结论是仓内权威副本 + gitignore + 按仓绑定 + 与其他类型相同的复数目录布局。内容闸门从简（个人偏好、凭据与不得公开的材料）；gitignore 是凭据可以放这里的前提。v1 不做脱敏晋升到可提交类型。家目录当真源已被用户否决。其余（否掉 docs、既有五类闸门、skills 可写 / agent_skills 只索引）仍成立。skill 接线未做，等 shared understanding 确认。
 
 **How to apply:**
 
-- 问「该不该加类型」时三件齐才加：**独立检索问题、与现有类不同的失效方式、有「不记什么」闸门**。五类各自的失效方式：feedback = 又踩同一个坑；project = 推翻已定决策；reference = 找不到源头；skills = 流程执行不出来；agent_skills = 装的东西发现不了。
+- 问「该不该加类型」时三件齐才加：**独立检索问题、与现有类不同的失效方式、有「不记什么」的闸门**。既有五类各自的失效方式：feedback = 又踩同一个坑；project = 推翻已定决策；reference = 找不到源头；skills = 流程执行不出来；agent_skills = 装的东西发现不了。
 - 文档按为什么再读它归类：决策 → `project`；指针（或无稳定出处时的蒸馏笔记）→ `reference`；**自动沉淀的可执行流程 → `skills`**；人写或装入的技能 → 放 `.agents/skills/`，由 `agent_skills` 索引；常驻指令 → `AGENTS.md` 正文。
 - 不要改 `project` / `reference` 引言去迁就已有文件。
-- 用户记忆进仓库树且 gitignore 的现行结论见 ADR-0003。目录名与闸门未定前，不要在本条或实现里发明路径；也不要把家目录或 edges-private 当成真源。
-- `.memory/` 类型目录用复数（`feedbacks/` `projects/` `references/` `skills/`）；`--type`、索引文件名、条目前缀保持单数。`agent_skills` 没有 `.memory/` 下的目录——它的内容根在 `.agents/skills/`。
+- 用户记忆的现行结论见 ADR-0003：仓内 `.memory/users/` + `USER.md` + `user_<slug>.md`，gitignore，不把家目录或 edges-private 当真源。不要在 v1 设计晋升到可提交类型。不要在确认 shared understanding 之前做 skill 接线。
+- `.memory/` 类型目录用复数（`feedbacks/` `projects/` `references/` `skills/`；用户记忆为 `users/`）；`--type`、索引文件名、条目前缀保持单数。`agent_skills` 没有 `.memory/` 下的目录——它的内容根在 `.agents/skills/`。
