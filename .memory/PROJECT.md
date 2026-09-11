@@ -7,7 +7,7 @@
 
 <!-- project-memory-entries:start -->
 - [放弃的 ChatGPT MCP 接入](projects/project_abandoned_chatgpt_mcp.md) — 2026-02-19 建过两条空的 ChatGPT MCP change，没有设计可恢复；若再做从当前 MCP 布局重开。
-- [bin / CLI / Skill 分层](projects/project_bin_cli_skill_layering.md) — 能力面是 CLI+Skill+MCP 三入口；删仓根 bin/；Note git 迁进 extensions/clis 的 TS 并保持对等；MCP 子进程调 edges note。新能力不要再加仓根脚本或把 npm bin 当一层。
+- [能力面：CLI / Skill / MCP](projects/project_capability_surface_cli_skill_mcp.md) — 能力面是 CLI、Skill、MCP 三者并列；删仓根 bin/；Note git 迁进 extensions/clis 的 TS 并保持对等；MCP 子进程调 edges note。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。
 - [Changelog 自动化：调研过，暂不生成正文](projects/project_changelog_automation.md) — 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。
 - [对话整理采用复盘四栏](projects/project_conversation_notes_fupan_four_columns.md) — 改 conversation-to-notes 或对话 Note 结构时：用复盘四栏；相关链接写入【补充说明】并附说明；不要复活已关闭的 FIA 中文换皮；不要批量改写旧笔记；不要把升 Edge 写进该 skill。
 - [idea→task→专家→Cloud Agent→改状态](projects/project_idea_todo_expert_cloud_loop.md) — 工作流：idea 记到 knowledge/tasks（Task 记录员）→ 有空时专家 Agent 细聊 → Cursor Cloud Agent 开发 → 开发完改 Task 状态

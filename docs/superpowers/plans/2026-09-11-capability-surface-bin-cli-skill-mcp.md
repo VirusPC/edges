@@ -4,11 +4,11 @@
 
 **Goal:** Delete repo-root `bin/`, move note-ingest git into `extensions/clis` TypeScript with full `bin/new-note` parity, make MCP spawn `edges note`, and add an `edges-note` Skill that only teaches when/how to call the CLI (or MCP when there is no shell).
 
-**Architecture:** Capability Surface is three entries — CLI, Skill, MCP — as defined in CONTEXT and accepted in ADR-0004. The `edges` CLI owns git via small `execFile('git', …)` wrappers (no `simple-git`, no leftover bash). MCP is a subprocess client of that CLI (`execFile` of the `edges-cli` entry + `note` flags), not an in-process import and not `execFile` of a repo-root script. Skill is a SKILL.md only: invoke recipes, JSON/exit codes, MCP fallback. npm `package.json` `"bin": { "edges": … }` stays an install hook, not a glossary layer.
+**Architecture:** Capability Surface is three entries — CLI, Skill, MCP — as defined in CONTEXT and accepted in ADR-0004. The `edges` CLI owns git via small `execFile('git', …)` wrappers (no `simple-git`, no leftover bash). MCP is a subprocess client of that CLI (`execFile` of the `edges-cli` entry + `note` flags), not an in-process import and not `execFile` of a repo-root script. Skill is a SKILL.md only: invoke recipes, JSON/exit codes, and the no-shell MCP peer. npm `package.json` `"bin": { "edges": … }` stays an install hook, not a glossary layer.
 
 **Tech Stack:** TypeScript, Node.js ≥20, `node:child_process.execFile` (git/gh from CLI; `edges note` from MCP), existing `commander` + `zod`, `node:test` + `tsx`, Node built-in `fetch` + `encodeURIComponent` (replace bash `curl`/`python3`).
 
-**Spec:** `docs/adr/0004-capability-surface-cli-skill-mcp.md` (accepted). Glossary: `CONTEXT.md` terms **能力面（Capability Surface）**, **CLI**, **Skill（调用说明）**, **MCP（Edges）**. Behavioral source until Task 4 deletes it: `bin/new-note`. Prior layering note (will be updated in Task 6): `.memory/projects/project_bin_cli_skill_layering.md`.
+**Spec:** `docs/adr/0004-capability-surface-cli-skill-mcp.md` (accepted). Glossary: `CONTEXT.md` terms **能力面（Capability Surface）**, **CLI**, **Skill（调用说明）**, **MCP（Edges）**. Behavioral source until Task 4 deletes it: `bin/new-note`. Prior layering note (will be updated in Task 6): `.memory/projects/project_capability_surface_cli_skill_mcp.md`.
 
 ## Global Constraints
 
@@ -68,7 +68,7 @@
 - `scripts/setup` — stop adding a `bin/` PATH; keep `.env` sourcing
 - `scripts/README.md`, root `README.md`, `extensions/README.md`, `extensions/tools/README.md`
 - `CHANGELOG.md` Unreleased — Removed `bin/`; Changed MCP spawn; Added `edges-note` skill
-- Memory via `memory.py remember` (not hand-edited indexes): `project_bin_cli_skill_layering`, `project_new_note_ingest`, `project_clis_from_mcp`, `reference_bin_cli_skill_classic_projects`
+- Memory via `memory.py remember` (not hand-edited indexes): `project_capability_surface_cli_skill_mcp`, `project_new_note_ingest`, `project_clis_from_mcp`, `reference_bin_cli_skill_classic_projects`. If `project_bin_cli_skill_layering` is still present, delete that file after remember so the two-layer slug leaves the index.
 
 **Delete**
 
@@ -1550,7 +1550,7 @@ Setup row: `首次接入初始化：加载 .env；清掉旧的仓根 bin PATH`.
 
 ```
 ### Added
-- `extensions/skills/edges-note`：教 Agent 何时如何调用 `edges note`（无 shell 则指向 MCP）。
+- `extensions/skills/edges-note`：教 Agent 何时如何调用 CLI 与 MCP（能力面三入口）。
 
 ### Changed
 - `new-note` MCP 改为子进程调用 `edges note`，不再 `execFile` 仓根脚本。
@@ -1614,7 +1614,7 @@ Expected: FAIL (`No such file`).
 ```markdown
 ---
 name: edges-note
-description: 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 `edges note`；没有 shell 的宿主改用 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
+description: 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 `edges note`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
 version: 1.0.0
 ---
 
@@ -1693,7 +1693,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- 教 Agent 用 `edges note` 入库；无 shell 则指向 new-note MCP。无 git 脚本。
+- 教 Agent 用 CLI 与 MCP 入库 Note（能力面三入口）。无 git 脚本。
 
 [Unreleased]: https://github.com/VirusPC/edges/compare/skill/edges-note@1.0.0...HEAD
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/edges-note@1.0.0
@@ -1744,7 +1744,7 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 
 **Files:**
 - Update via `memory.py remember` (do not hand-edit indexes):
-  - `.memory/projects/project_bin_cli_skill_layering.md`
+  - `.memory/projects/project_capability_surface_cli_skill_mcp.md`
   - `.memory/projects/project_new_note_ingest.md`
   - `.memory/references/reference_bin_cli_skill_classic_projects.md`
   - `extensions/.memory/projects/project_clis_from_mcp.md`
@@ -1753,24 +1753,25 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 
 **Interfaces:**
 - Consumes: remember CLI `python3 extensions/skills/project-memory-init/scripts/memory.py remember`
-- Produces: indexes refreshed by the script; `project_bin_cli_skill_layering` How-to no longer says 「实现后续 PR」 or 「`bin/new-note` 可当 git 残留」
+- Produces: indexes refreshed by the script; `project_capability_surface_cli_skill_mcp` How-to no longer says 「实现后续 PR」 or 「`bin/new-note` 可当 git 残留」；title/Why/How-to keep CLI + Skill + MCP as equal peers (no 「必要时 MCP」, no two-layer shorthand)
 
 - [ ] **Step 1: Write a failing consistency check**
 
 ```bash
-rg -n 'bin/new-note 可继续|git 仍只在 `bin/new-note`|两边都 `execFile` 同一条脚本|实现后续 PR：整目录删除' \
-  .memory/projects/project_bin_cli_skill_layering.md \
+rg -n 'bin/new-note 可继续|git 仍只在 `bin/new-note`|两边都 `execFile` 同一条脚本|实现后续 PR：整目录删除|必要时 MCP' \
+  .memory/projects/project_capability_surface_cli_skill_mcp.md \
   .memory/projects/project_new_note_ingest.md \
   .memory/references/reference_bin_cli_skill_classic_projects.md \
   extensions/.memory/projects/project_clis_from_mcp.md
 test -f docs/adr/0004-capability-surface-cli-skill-mcp.md
+test ! -f .memory/projects/project_bin_cli_skill_layering.md
 ```
 
 Expected: ADR file exists (already on this plan branch / PR #41). Memory files still contain the stale phrases until remember runs.
 
 - [ ] **Step 2: Run the check and keep the list of stale files**
 
-Run the `rg` above. Expected: matches in the four memory bodies (and/or their descriptions). `project_bin_cli_skill_layering` on a branch that only cherry-picked PR #41 still says 「实现后续 PR」.
+Run the `rg` above. Expected: matches in the four memory bodies (and/or their descriptions). `project_capability_surface_cli_skill_mcp` on a branch that only cherry-picked PR #41 still says 「实现后续 PR」.
 
 - [ ] **Step 3: remember the four entries**
 
@@ -1782,18 +1783,21 @@ INIT=extensions/skills/project-memory-init/scripts/memory.py
 python3 "$INIT" remember \
   --target-dir . \
   --type project \
-  --slug bin_cli_skill_layering \
-  --title "bin / CLI / Skill 分层" \
-  --description "能力面是 CLI+Skill+MCP 三入口；仓根 bin/ 已删除；Note git 在 extensions/clis 的 TS；MCP 子进程调 edges note。新能力不要再加仓根脚本或把 npm bin 当一层。" \
-  --content "能力面定为 CLI、Skill 与 MCP 三者。仓根 \`bin/\`（含 \`new-note\`）已删除；Note 入库的 git 在 \`extensions/clis\` 的 TypeScript，与旧脚本全量对等。MCP 用子进程调用 \`edges note\`，不直连仓根脚本、也不 in-process import。Skill 在 \`extensions/skills/edges-note/\`，只教何时如何调 CLI（无 shell 则指向 MCP）。npm \`package.json\` 的 \`bin\` 只是安装挂钩，不是一层。
+  --slug capability_surface_cli_skill_mcp \
+  --title "能力面：CLI / Skill / MCP" \
+  --description "能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 extensions/clis 的 TS；MCP 子进程调 edges note。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。" \
+  --content "能力面定为 CLI、Skill 与 MCP 三者并列。仓根 \`bin/\`（含 \`new-note\`）已删除；Note 入库的 git 在 \`extensions/clis\` 的 TypeScript，与旧脚本全量对等。MCP 用子进程调用 \`edges note\`，不直连仓根脚本、也不 in-process import。Skill 在 \`extensions/skills/edges-note/\`，说明何时如何调 CLI 或 MCP。npm \`package.json\` 的 \`bin\` 只是安装挂钩，不是一层。
 
 **Why:**
-对齐 gh / AXI / Agent Skills（一个 CLI + 一份 skill），去掉「给人的 PATH 脚本」这层假分层；无 shell 宿主仍需要 MCP。2026-09-11 grill 确认（ADR 0004）。实现已按 \`docs/superpowers/plans/2026-09-11-capability-surface-bin-cli-skill-mcp.md\` 落地。
+能力面始终是三条对等入口：CLI、Skill、MCP。经典项目（gh / AXI / Agent Skills）只示范 CLI 与 Skill 的形状，用来去掉「给人的 PATH 脚本」这层假分层；Edges 另外把 MCP 作为无 shell 宿主的一等入口，不是事后加装。删除仓根 \`bin/\` 后，MCP 仍通过子进程调用 CLI。2026-09-11 grill 确认（ADR 0004）。实现已按 \`docs/superpowers/plans/2026-09-11-capability-surface-bin-cli-skill-mcp.md\` 落地。
 
 **How to apply:**
-- 新能力只落 CLI 契约 + Skill 说明 + 必要时 MCP 暴露；禁止 Skill → 仓根 \`bin/\`，也禁止把 npm \`bin\` 定义成一层。
+- 新能力落 CLI 契约 + Skill 说明 + MCP 暴露（需要机器入口时一并提供；能力面定义里 MCP 不是可选项）。禁止 Skill → 仓根 \`bin/\`，也禁止把 npm \`bin\` 定义成一层。
 - 不要恢复仓根 \`bin/\`、只搬 bash、半迁移 git、或 MCP in-process import CLI。
 - 对照来源见 \`reference_bin_cli_skill_classic_projects\`。"
+
+# Drop the old two-layer slug so the index does not keep both:
+rm -f .memory/projects/project_bin_cli_skill_layering.md
 
 python3 "$INIT" remember \
   --target-dir . \
@@ -1818,11 +1822,11 @@ python3 "$INIT" remember \
   --type reference \
   --slug bin_cli_skill_classic_projects \
   --title "bin/CLI/Skill 经典项目对照" \
-  --description "对照 gh、AXI、Agent Skills 规范、superpowers：何时查「要不要仓根 bin/、Skill 调谁」。本仓现状是 CLI 内 TS git + Skill 说明 + MCP spawn edges note。" \
-  --content "设计 edges 的能力面时，对照这些一手来源：能力面是「一个 CLI + 一份 SKILL.md」外加无 shell 的 MCP；npm/AXI 的 bin 等于 CLI 安装入口，不是仓根再摆人用 shell。
+  --description "对照 gh、AXI、Agent Skills 规范、superpowers：何时查「要不要仓根 bin/、Skill 调谁」。经典项目示范 CLI+Skill 形状；Edges 能力面仍是 CLI+Skill+MCP 并列。本仓现状是 CLI 内 TS git + Skill 说明 + MCP spawn edges note。" \
+  --content "设计 edges 的能力面时，对照这些一手来源：经典项目是「一个 CLI + 一份 SKILL.md」；Edges 在此之上把 MCP 作为无 shell 宿主的一等入口，三者并列。npm/AXI 的 bin 等于 CLI 安装入口，不是仓根再摆人用 shell。
 
 **Why:**
-2026-09-11 为对齐「要不要单独养仓根 \`bin/\`」做的短调研。结论写入 \`project_bin_cli_skill_layering\` 与 ADR 0004。
+2026-09-11 为对齐「要不要单独养仓根 \`bin/\`」做的短调研。结论写入 \`project_capability_surface_cli_skill_mcp\` 与 ADR 0004。对照来源只用来定 CLI 与 Skill 的形状，不要据此把 MCP 写成可选项。
 
 **How to apply:**
 - \`gh\`（cli/cli）：人和 agent 共用一个 \`gh\`。Skill 只教 agent 痛点。https://github.com/cli/cli/blob/trunk/skills/gh/SKILL.md
@@ -1852,7 +1856,7 @@ python3 "$INIT" remember \
 \`\`\`
 agent / human
  ├─ extensions/clis  edges            多命令 CLI（note / tasks / …；Commander + JSON；git 在 src/git）
- ├─ extensions/skills/edges-note      何时如何调 CLI（无 shell 则指向 MCP）
+ ├─ extensions/skills/edges-note      何时如何调 CLI 或 MCP（对等能力面入口）
  └─ extensions/mcp-servers/new-note   无 shell 的 MCP 宿主（spawn edges note）
 \`\`\`
 
@@ -1893,7 +1897,7 @@ rg -n 'bin/new-note|仓根 `bin/`' \
   extensions/mcp-servers/README.md extensions/mcp-servers/new-note/src \
   extensions/mcp-servers/new-note/README.md \
   extensions/skills/edges-note \
-  .memory/projects/project_bin_cli_skill_layering.md \
+  .memory/projects/project_capability_surface_cli_skill_mcp.md \
   .memory/projects/project_new_note_ingest.md \
   .memory/references/reference_bin_cli_skill_classic_projects.md \
   extensions/.memory/projects/project_clis_from_mcp.md \
@@ -1913,13 +1917,14 @@ If doctor is clean and tests pass, do not `--apply` anything extra.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .memory/projects/project_bin_cli_skill_layering.md \
+git add .memory/projects/project_capability_surface_cli_skill_mcp.md \
   .memory/projects/project_new_note_ingest.md \
   .memory/references/reference_bin_cli_skill_classic_projects.md \
   .memory/PROJECT.md .memory/REFERENCE.md \
   extensions/.memory/projects/project_clis_from_mcp.md \
   extensions/.memory/PROJECT.md \
   CHANGELOG.md
+git add -u .memory/projects/project_bin_cli_skill_layering.md
 git commit -m "docs(memory): capability surface is CLI+Skill+MCP after bin/ removal
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1944,9 +1949,9 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 | CLI in-process TS; drop `scriptPath` / `EDGES_SCRIPT` | 2 |
 | MCP spawn/exec `edges note`, not bash, not in-process import | 3 |
 | Map MCP auth (strip `EDGES_AUTH_TOKEN` on child) | 3 |
-| Skill under `extensions/skills/edges-note/` teaching CLI + MCP fallback | 5 |
+| Skill under `extensions/skills/edges-note/` teaching CLI and MCP as equal peers | 5 |
 | Root README / docs no longer say human PATH via `bin/` | 4 |
-| Update `project_bin_cli_skill_layering` and related memory | 6 |
+| Update `project_capability_surface_cli_skill_mcp` and related memory | 6 |
 | npm `package.json` `bin` remains `edges` install hook only | 2 README, 5 SKILL, 6 memory |
 | `execFile('git')` wrappers, no simple-git | Locked design + Task 1 |
 | ADR-0004 + CONTEXT present or cherry-pick #41 | Global Constraints + Task 6 |
