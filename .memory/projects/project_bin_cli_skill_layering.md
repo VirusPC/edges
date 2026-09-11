@@ -1,6 +1,6 @@
 ---
 name: project_bin_cli_skill_layering
-description: 给人用的 bin/ PATH 入口与 agent 用的 extensions/clis 契约分层；Skill 只调 CLI 不调 bin
+description: 对齐经典项目：能力面是 CLI+Skill 两层；仓根 bin/ 不是给人的第三层；新能力只落 extensions/clis + Skill
 metadata:
   edges-title: bin / CLI / Skill 分层
   edges-type: project
@@ -8,16 +8,16 @@ metadata:
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-11T20:11:44+08:00"
+  edges-updated-at: "2026-09-11T20:28:20+08:00"
 ---
 
-`bin/` 留在仓库里，作给人用的薄 `$PATH` 入口；agent 侧稳定契约放 `extensions/clis`（稳定 flag / JSON / exit code）；Skill 只写何时、如何调用 CLI——Skill → CLI，不要 Skill → bin。实现可共底层，bin 可以是薄封装。
+给 agent 的能力面是 CLI + Skill 两层。Unix/npm/AXI 里的 bin 就是 CLI 入口（`package.json` `"bin"`），不是再给人单独做一层仓根 `bin/`。新能力只落 `extensions/clis` + Skill；不要再加「给人的薄 PATH 封装」。现有 `bin/new-note` 只当 git 实现残留，不当分层样板。
 
 **Why:**
-人和 agent 的调用面不同：人要短路径 shell 入口，agent / Skill 要可脚本化的稳定契约。Skill 若直接调 `bin/`，会把给人的薄封装冻成契约，或把 agent 契约绑死在 PATH 入口上。
+peng cheng 2026-09-11 要求按经典项目调研对齐。先前「仓根 `bin/` 给人、`extensions/clis` 给 agent」与 `gh` / AXI / Agent Skills 规范不一致，也和本仓「CLI 包着 `bin/new-note`」拧着。
 
 **How to apply:**
-- 给人：维护根目录 `bin/`（薄封装即可）。
-- agent / 自动化：只依赖 `extensions/clis` 的稳定 flag、JSON、exit code。
-- Skill：只描述何时、如何调用 CLI；禁止 Skill → `bin/`。
-- 新能力先落 CLI 契约，再按需加 `bin/` 薄包装。
+- 新能力：`extensions/clis` 契约 + Skill 只写何时如何调 CLI。禁止 Skill → 仓根 `bin/`。
+- 人要 PATH：用同一 CLI（npm `bin` 或 `npx -y`），不要再包 bash。
+- `bin/new-note` 可继续当唯一 git 实现，直到迁进 CLI；不要往 `bin/` 加新人用入口。
+- 对照来源见 `reference_bin_cli_skill_classic_projects`。
