@@ -1,6 +1,6 @@
 ---
 name: feedback_restore_force_replaces
-description: 改 user-memory-restore 时：--force 先清空 users/ 与 USER.md 再解压；成员过滤不依赖 filter=data，拒绝 symlink 等非普通文件。
+description: 改 user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。
 metadata:
   edges-title: Restore --force 整份替换，不合并
   edges-type: feedback
@@ -8,7 +8,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-11T12:11:10+00:00"
+  edges-updated-at: "2026-09-11T12:20:47+00:00"
 ---
 
 `$user-memory-restore` 的 `--force` 是整份替换，不是合并；解压前必须清空目标 `.memory/users/` 与已有 `.memory/USER.md`。解压只用全版本可用的普通文件过滤器，禁止只依赖 Python 3.12 的 `filter="data"`。

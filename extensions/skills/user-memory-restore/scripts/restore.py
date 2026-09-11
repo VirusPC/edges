@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
 import tarfile
 from pathlib import Path
@@ -57,20 +58,18 @@ def _safe_members(tar: tarfile.TarFile, repo_dir: Path) -> list[tarfile.TarInfo]
     return kept
 
 
+def _remove_path(path: Path) -> None:
+    """Unlink a file/symlink; rmtree a real directory. Do not walk a link."""
+    if path.is_symlink() or path.is_file():
+        path.unlink()
+    elif path.is_dir():
+        shutil.rmtree(path)
+
+
 def _clear_user_memory(repo_dir: Path) -> None:
     """Replace semantics: drop dest USER.md and everything under users/."""
-    users = repo_dir / ".memory" / "users"
-    if users.exists():
-        for path in sorted(users.rglob("*"), reverse=True):
-            if path.is_symlink() or path.is_file():
-                path.unlink()
-            elif path.is_dir():
-                path.rmdir()
-        if users.exists():
-            users.rmdir()
-    index = repo_dir / ".memory" / "USER.md"
-    if index.exists() or index.is_symlink():
-        index.unlink()
+    _remove_path(repo_dir / ".memory" / "users")
+    _remove_path(repo_dir / ".memory" / "USER.md")
 
 
 def _extract_regular_file(

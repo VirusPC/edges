@@ -147,7 +147,37 @@ class RestoreTests(unittest.TestCase):
             with self.assertRaises(ValueError) as raised:
                 restore_user_memory(archive, dest)
             self.assertIn("非普通文件", str(raised.exception))
-            self.assertFalse((dest / ".memory" / "users" / "user_evil.md").exists())
+            planted = dest / ".memory" / "users" / "user_evil.md"
+            self.assertFalse(planted.exists())
+            self.assertFalse(planted.is_symlink())
+            self.assertFalse((dest / "outside-secret").exists())
+
+    def test_force_does_not_follow_users_symlink(self) -> None:
+        from backup import backup_user_memory
+        from restore import restore_user_memory
+
+        with tempfile.TemporaryDirectory() as raw:
+            src = Path(raw) / "src"
+            dest = Path(raw) / "dest"
+            (src / ".memory" / "users").mkdir(parents=True)
+            (src / ".memory" / "users" / "user_new.md").write_text(
+                "from-archive\n", encoding="utf-8"
+            )
+            (src / ".memory" / "USER.md").write_text("# USER\n", encoding="utf-8")
+            sibling = dest / ".memory" / "feedbacks"
+            sibling.mkdir(parents=True)
+            keep = sibling / "keep.md"
+            keep.write_text("do-not-delete\n", encoding="utf-8")
+            (dest / ".memory" / "users").symlink_to(sibling)
+            archive = backup_user_memory(src, timestamp="20260911T160000Z")
+            restore_user_memory(archive, dest, force=True)
+            self.assertEqual(keep.read_text(encoding="utf-8"), "do-not-delete\n")
+            self.assertTrue(sibling.is_dir())
+            self.assertFalse((dest / ".memory" / "users").is_symlink())
+            self.assertEqual(
+                (dest / ".memory" / "users" / "user_new.md").read_text(encoding="utf-8"),
+                "from-archive\n",
+            )
 
 
 if __name__ == "__main__":
