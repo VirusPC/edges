@@ -6,10 +6,9 @@
 
 ## Servers
 
-- `new-note/`: 接收外部 AI 总结并写入仓库（commit/push）。与 `clis` 的 `edges note` 调用同一条 `bin/new-note`。
+- `new-note/`: 无 shell 宿主的入库入口。子进程调用 `edges note`，与 CLI 同一套契约。
 
 ## Conventions
 
 - 每个服务目录独立包含 `package.json`、`src/`、`test/`、`README.md`
 - 在具体服务目录内执行 `npm install`、`npm run build`、`npm test`
-- 公共脚本放在仓库根目录 `bin/`
