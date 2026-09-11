@@ -26,8 +26,9 @@ dist/
 extensions/mcp-servers/*/node_modules/
 extensions/mcp-servers/*/dist/
 
-# 用户记忆：仓内权威副本与仓库根默认备份，不进 git（ADR-0003）
+# 用户记忆：仓内权威副本、根索引与仓库根默认备份，不进 git（ADR-0003）
 .memory/users/
+.memory/USER.md
 user-memory-backup-*.tar.gz
 user-memory-backup-*.zip
 
