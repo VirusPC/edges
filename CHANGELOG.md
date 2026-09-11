@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 存量 `knowledge/todos/*.md` 改写为 project-memory 形态后迁入 `knowledge/tasks/backlog/`。
 - ECS 部署：`.github/workflows/deploy-teach.yml` 改为 SSH 触发整仓 `git fetch` / `reset --hard origin/main`，不再 rsync 推送 `knowledge/teach/`。
+- `obsidian-cli` 教学工作区从 `.teaching/obsidian-cli/` 迁到 `knowledge/teach/obsidian-cli/`。
 
 ### Fixed
 
