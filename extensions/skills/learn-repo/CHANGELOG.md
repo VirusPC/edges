@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- 按 semver 标记的首个版本：把要学习的外部仓库以 git submodule 挂进 `knowledge/teach/<topic>/repos/`，并在 RESOURCES.md 登记来源、commit 与用途。
+- 按 semver 标记的首个版本：把要学习的外部仓库以 git submodule 挂进 `knowledge/teaching/<topic>/repos/`，并在 RESOURCES.md 登记来源、commit 与用途。
 
 [Unreleased]: https://github.com/VirusPC/edges/compare/skill/learn-repo@1.0.0...HEAD
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/learn-repo@1.0.0

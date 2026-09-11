@@ -6,5 +6,5 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- [公网 /teach/ 用 HTML 主题首页](projects/project_teach_html_index_homepage.md) — 改 teach 站点首页或 Topics 时：公网 /teach/ 由 knowledge/teach/index.html 做主题索引，与 README Topics 同步重建
+- [公网 /teaching/ 用 HTML 主题首页](projects/project_teach_html_index_homepage.md) — 改 teach 站点首页或 Topics 时：公网 /teaching/ 由 knowledge/teaching/index.html 做主题索引，与 README Topics 同步重建
 <!-- project-memory-entries:end -->
