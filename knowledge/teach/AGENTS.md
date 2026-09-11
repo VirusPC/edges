@@ -7,6 +7,7 @@
 
 - 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
 - 本层硬约束直接写在这个区块里，不要链到 `.memory` 文件。
+- 每次跑完 teach skill，回复里必须给出课页的在线 URL（公网站点上可打开的 http(s) 链接），不要只给仓库相对路径、file:// 或内网/Mesh 主机名。
 <!-- project-memory-important:end -->
 
 <!-- project-memory-local:start -->

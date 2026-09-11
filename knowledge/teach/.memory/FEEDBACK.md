@@ -6,5 +6,5 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- 暂无条目。
+- [teach skill 跑完必须回在线 URL](feedbacks/feedback_teach_return_online_url.md) — 跑完 teach skill、产出或更新课页后：回复里必须给可在浏览器打开的在线 URL；不要只丢仓库路径、file:// 或 Mesh 主机名。
 <!-- project-memory-entries:end -->
