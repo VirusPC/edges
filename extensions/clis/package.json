@@ -4,20 +4,21 @@
   "license": "MIT",
   "private": true,
   "type": "module",
-  "description": "Agent-oriented CLI for ingesting notes into the Edges repository",
+  "description": "Multi-command Edges CLI (note ingest, tasks, and more)",
   "bin": {
-    "edges-note": "./dist/index.js"
+    "edges": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
-    "test": "node --test --import tsx"
+    "test": "node --test --import tsx test/*.test.ts"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
+    "commander": "^14.0.3",
     "zod": "^3.24.2"
   },
   "devDependencies": {

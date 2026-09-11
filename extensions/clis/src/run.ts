@@ -3,8 +3,8 @@ import { checkAuth } from "./auth.js";
 import { loadConfig } from "./config.js";
 import { exitCodeFor, exitCodeForError } from "./exit.js";
 import { formatResult } from "./format.js";
-import { HELP_TEXT } from "./help.js";
 import { parseArgv } from "./parse.js";
+import { formatHelp } from "./program.js";
 import { runIngestScript } from "./scriptAdapter.js";
 import { runIngest, type IngestRunner } from "./service.js";
 import type { IngestFailure } from "./types.js";
@@ -32,21 +32,37 @@ function fail(failure: IngestFailure, stderr = ""): RunResult {
   };
 }
 
+function helpText(text: string): string {
+  if (text.trim().length === 0) {
+    return formatHelp();
+  }
+  return text.endsWith("\n") ? text : `${text}\n`;
+}
+
 export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
   const env = io.env ?? process.env;
   const parsed = parseArgv(argv);
 
   if (parsed.kind === "help") {
-    return { exitCode: 0, stdout: HELP_TEXT.endsWith("\n") ? HELP_TEXT : `${HELP_TEXT}\n`, stderr: "" };
+    return { exitCode: 0, stdout: helpText(parsed.text), stderr: "" };
   }
   if (parsed.kind === "version") {
     return { exitCode: 0, stdout: `${VERSION}\n`, stderr: "" };
   }
-  if (parsed.kind === "error") {
+  if (parsed.kind === "tasks") {
     return fail(
-      { status: "failed", errorCode: parsed.errorCode, reason: parsed.reason },
-      "See edges-note --help for usage.\n",
+      { status: "failed", errorCode: "VALIDATION_ERROR", reason: "tasks is not implemented yet" },
+      "See edges tasks --help for usage.\n",
     );
+  }
+  if (parsed.kind === "error") {
+    const usage =
+      argv[0] === "note"
+        ? "See edges note --help for usage.\n"
+        : argv[0] === "tasks"
+          ? "See edges tasks --help for usage.\n"
+          : "See edges --help for usage.\n";
+    return fail({ status: "failed", errorCode: parsed.errorCode, reason: parsed.reason }, usage);
   }
 
   let request;
@@ -60,7 +76,7 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
     if (error instanceof ZodError) {
       return fail(
         { status: "failed", errorCode: "VALIDATION_ERROR", reason: formatZodReason(error) },
-        "See edges-note --help for usage.\n",
+        "See edges note --help for usage.\n",
       );
     }
     throw error;
@@ -87,10 +103,7 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
 
   const runner = io.ingest ?? runIngestScript;
   const result = await runIngest(request, config, runner, env);
-  const stderrLines =
-    result.status === "success"
-      ? result.diagnostics
-      : result.stderrSummary;
+  const stderrLines = result.status === "success" ? result.diagnostics : result.stderrSummary;
   const stderr = stderrLines ? `${stderrLines.endsWith("\n") ? stderrLines : `${stderrLines}\n`}` : "";
 
   return {

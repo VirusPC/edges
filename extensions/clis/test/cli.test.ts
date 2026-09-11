@@ -26,20 +26,33 @@ async function launch(args: string[], env: NodeJS.ProcessEnv = process.env) {
   }
 }
 
-test("real entry --help documents ingest and structured output", async () => {
+test("real entry --help lists note and tasks", async () => {
   const result = await launch(["--help"]);
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /ingest/i);
+  assert.match(result.stdout, /Commands:/);
+  assert.match(result.stdout, /\bnote\b/);
+  assert.match(result.stdout, /\btasks\b/);
+});
+
+test("real entry note --help documents ingest flags", async () => {
+  const result = await launch(["note", "--help"]);
+  assert.equal(result.status, 0);
   assert.match(result.stdout, /--title/);
   assert.match(result.stdout, /--content/);
   assert.match(result.stdout, /--co-author/);
   assert.match(result.stdout, /--json/);
 });
 
-test("real entry missing args exits non-zero with JSON error", async () => {
-  const result = await launch([]);
+test("real entry note missing flags exits non-zero with JSON error", async () => {
+  const result = await launch(["note"]);
   assert.notEqual(result.status, 0);
   const parsed = JSON.parse(result.stdout) as { status: string; errorCode: string };
   assert.equal(parsed.status, "failed");
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
+});
+
+test("real entry tasks --help documents the placeholder", async () => {
+  const result = await launch(["tasks", "--help"]);
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /not implemented/i);
 });
