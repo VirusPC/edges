@@ -6,7 +6,7 @@
 
 内容闸门从简：个人偏好（非项目共享）、凭据与密钥、以及其他不得公开的材料都可以进用户记忆。gitignore 是凭据可以放这里的前提。v1 不做脱敏后晋升到可提交类型，也不设计那条投影路径。
 
-生命周期跟随工作树（`rm -rf` 克隆可以删掉它）。逃生靠备份 skill 与恢复/回注 skill：备份目标目录由用户指定，默认归档落在仓库根。gitignore 覆盖 `.memory/users/`、`.memory/USER.md`（与其他类型索引同位置的根索引，一并挡住以免只 ignore 条目目录），以及仓库根默认备份名 `user-memory-backup-*.tar.gz` / `user-memory-backup-*.zip`。
+生命周期跟随工作树（`rm -rf` 克隆可以删掉它）。逃生靠备份 skill 与恢复/回注 skill：备份目标目录由用户指定，默认归档落在仓库根。gitignore 覆盖 `.memory/users/`、`.memory/USER.md`（与其他类型索引同位置的根索引，一并挡住以免只 ignore 条目目录），以及仓库根默认备份名 `user-memory-backup-*.tar.gz` / `user-memory-backup-*.zip`。含斜杠的 gitignore 模式只匹配仓库根，所以实现再加 `**/.memory/users/` 与 `**/.memory/USER.md`，挡住下层记忆目录。
 
 这推翻了 `project_type_set` 里「不要把 `user` 放进仓库树 / 跨项目偏好只放 agent 家目录」的旧结论。skill 接线（init / remember `--type user` 等）等用户确认 shared understanding 后再做，不在本决策里实现。
 

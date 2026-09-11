@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -99,6 +100,30 @@ class UserGitignoreTests(unittest.TestCase):
             "user-memory-backup-*.zip",
         ):
             self.assertIn(pattern, text, pattern)
+
+    def test_nested_user_memory_paths_are_ignored(self) -> None:
+        repo = Path(__file__).resolve()
+        root = None
+        for candidate in (repo, *repo.parents):
+            if (candidate / ".git").exists() and (candidate / ".gitignore").is_file():
+                root = candidate
+                break
+        self.assertIsNotNone(root)
+        nested = (
+            "extensions/.memory/USER.md",
+            "extensions/.memory/users/user_sample.md",
+            "knowledge/tasks/.memory/USER.md",
+        )
+        for relative in nested:
+            checked = subprocess.run(
+                ["git", "-C", str(root), "check-ignore", "-q", relative],
+                check=False,
+            )
+            self.assertEqual(
+                checked.returncode,
+                0,
+                f"{relative} must be gitignored (slash patterns in .gitignore are root-only unless **)",
+            )
 
 
 if __name__ == "__main__":

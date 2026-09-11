@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- 可写项目记忆类型 `user`（ADR-0003）：`.memory/users/` + `.memory/USER.md` 为仓内权威副本且 gitignore；`$user-memory-backup` / `$user-memory-restore` 做换机逃生。不做 `private` 条目元数据。
 - `evaluation/`：评测整套 Edges（用例、harness、报告）。系统元工作，不是知识生命周期阶段。
 - `observation/`：观测运行与使用（脱敏 run log、指标与仪表盘笔记）。不替代 `.memory` 决策。
 - `docs/adr/`：记录领域决策；首条为对话整理采用复盘四栏。
