@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONTEXT 增加能力面（Capability Surface）、CLI、Skill（调用说明）、MCP（Edges）。
 - `docs/adr/0002-knowledge-tasks-status-folders.md`：`knowledge/todos` 迁为按状态分夹的 `knowledge/tasks`。
 - `docs/adr/0004-capability-surface-cli-skill-mcp.md`：能力面定为 CLI + Skill + MCP，删除仓根 `bin/`（实现另 PR）。
+- `docs/superpowers/plans/2026-09-11-capability-surface-bin-cli-skill-mcp.md`：ADR-0004 的实现计划（CLI 内 TS git、Skill、MCP 子进程调 `edges note`）。
 - [`knowledge/tasks/`](knowledge/tasks/)：跨 Agent 接力的 Task 看板。
 - `extensions/skills/learn-repo`：把要学习的外部仓库以 git submodule 挂进 `knowledge/teaching/<topic>/repos/`，主仓库只记指针不涨体积，并在主题 RESOURCES.md 登记来源与用途。
 - Obsidian `userIgnoreFilters` 排除 `knowledge/teaching/*/repos/`，学习仓库的文件不进 vault 搜索与关系图谱。
