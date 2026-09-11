@@ -4,7 +4,7 @@ description: CLI 用 Commander.js 重构
 metadata:
   edges-type: task
   edges-title: CLI 用 Commander.js 重构
-  edges-tasks-status: in_review
+  edges-tasks-status: done
   edges-task-pr: "https://github.com/VirusPC/edges/pull/37"
   edges-task-assignee: Coding Agent 专家
   edges-task-assignee-id: ac913463-5bf6-4c16-adc0-900c61a8692d
@@ -12,7 +12,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-11T19:33:00+08:00"
+  edges-updated-at: "2026-09-11T20:08:00+08:00"
 ---
 
 CLI 用 Commander.js（commander）重构。
