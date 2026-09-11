@@ -1,8 +1,11 @@
 import { execFile } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import type { IngestRequest, RuntimeConfig, ScriptSuccess } from "./types.js";
 
 const execFileAsync = promisify(execFile);
+const MCP_PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 type CliPayload = {
   status: string;
@@ -75,6 +78,7 @@ export async function runEdgesNote(
   let stdout = "";
   try {
     const result = await execFileAsync(file, args, {
+      cwd: MCP_PACKAGE_ROOT,
       env: childEnv,
       maxBuffer: 1024 * 1024 * 10,
     });

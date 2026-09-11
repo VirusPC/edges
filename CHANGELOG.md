@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 - 仓根 `bin/`（含 `new-note`）。Note 入库 git 在 `extensions/clis` TypeScript。
+- `EDGES_SCRIPT`（MCP / CLI 不再用该环境变量指向仓根脚本）。
 - 根目录 `inbox/` 旧 ingest 自动 PR 测试草稿。
 - `knowledge/todos/`（不留重定向 stub）。
 

@@ -2,7 +2,7 @@
 
 `extensions/` 是 Edges 系统与外部世界（AI Agent、IDE 客户端、第三方系统）通信的**接口层**。
 
-这里的代码不是用来开发 Edges 系统本身的，而是作为“连接器”，实现 **“终端捕获，核心沉淀”** 的设计思想：让 ChatGPT、Cursor、Claude Code 等终端生成的思考，能够通过 agent CLI 或 MCP 流入核心资产库。本地有 shell 的 agent 优先 [`clis/`](clis/)（`edges note …`）；MCP 留给没有 shell 的宿主。决策见 [`.memory/projects/project_clis_from_mcp.md`](.memory/projects/project_clis_from_mcp.md)。
+这里的代码不是用来开发 Edges 系统本身的，而是作为“连接器”，实现 **“终端捕获，核心沉淀”** 的设计思想：让 ChatGPT、Cursor、Claude Code 等终端生成的思考，能够通过 CLI、Skill 或 MCP 流入核心资产库。三条入口并列：[`clis/`](clis/)（`edges note …`）、[`skills/`](skills/)（何时如何调用）、[`mcp-servers/`](mcp-servers/)（没有 shell 的宿主）。决策见 [`.memory/projects/project_capability_surface_cli_skill_mcp.md`](.memory/projects/project_capability_surface_cli_skill_mcp.md)。
 
 ## 收录标准
 
@@ -34,7 +34,7 @@
 
 ## 接入准则
 
-1. **标准化**: 本地 agent 优先 CLI（`extensions/clis/`）；没有 shell 的宿主再用 MCP。
+1. **标准化**: 能力面是 CLI、Skill、MCP 三者并列（[`clis/`](clis/)、[`skills/`](skills/)、[`mcp-servers/`](mcp-servers/)），不是「有 shell 就只用 CLI、没有再补 MCP」。
 2. **文档化**: 每个子目录都应包含独立的 README，说明其调用协议和配置方法。
 3. **解耦**: Extension 应当只依赖 `edges` CLI 契约或标准的 `knowledge/` 路径，避免复杂的内部依赖。不要依赖仓根 `bin/`。
 4. **自包含**: 一个 extension 应当能被单独复制走。避免用 Obsidian wikilink 引用 `knowledge/resources/` 下的附件——链接在 vault 内能解析，但目录被带到别处时附件会丢失。

@@ -2,18 +2,24 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { promises as fs } from "node:fs";
 import { runEdgesNote } from "../src/cliAdapter.js";
 import { classifyError } from "../src/errors.js";
 import type { RuntimeConfig } from "../src/types.js";
 
+const mcpPackageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
 test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "edges-mcp-cli-"));
   const mockCli = path.join(tmp, "mock-edges.mjs");
+  const capturePath = path.join(tmp, "capture.json");
   await fs.writeFile(
     mockCli,
     [
+      "import { writeFileSync } from 'node:fs';",
       "const args = process.argv.slice(2);",
+      "writeFileSync(process.env.EDGES_CAPTURE_PATH, JSON.stringify({ args, cwd: process.cwd() }));",
       "if (args[0] !== 'note') { console.error('missing note'); process.exit(1); }",
       "if (process.env.EDGES_AUTH_TOKEN) { console.error('auth leaked'); process.exit(1); }",
       "if (process.env.EDGES_REPO !== '/repo') { console.error('repo'); process.exit(1); }",
@@ -38,16 +44,46 @@ test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () =>
     authToken: "secret-should-not-leak",
   };
 
-  const result = await runEdgesNote(
-    { title: "Demo", content: "Body", coAuthor: "OpenAI Codex <codex@openai.com>" },
-    config,
-    { ...process.env, EDGES_AUTH_TOKEN: "secret-should-not-leak", GITHUB_TOKEN: "ghs_x" },
-  );
+  const previousCwd = process.cwd();
+  process.chdir(tmp);
+  try {
+    const result = await runEdgesNote(
+      { title: "Demo", content: "Body", coAuthor: "OpenAI Codex <codex@openai.com>" },
+      config,
+      {
+        ...process.env,
+        EDGES_AUTH_TOKEN: "secret-should-not-leak",
+        GITHUB_TOKEN: "ghs_x",
+        EDGES_CAPTURE_PATH: capturePath,
+      },
+    );
 
-  assert.equal(result.filePath, "knowledge/notes/2026-09-11--demo.md");
-  assert.equal(result.branch, "ingest/2026-09-11-demo");
-  assert.equal(result.prStatus, "created");
-  assert.equal(result.prUrl, "https://github.com/org/repo/pull/9");
+    assert.equal(result.filePath, "knowledge/notes/2026-09-11--demo.md");
+    assert.equal(result.branch, "ingest/2026-09-11-demo");
+    assert.equal(result.prStatus, "created");
+    assert.equal(result.prUrl, "https://github.com/org/repo/pull/9");
+
+    const capture = JSON.parse(await fs.readFile(capturePath, "utf8")) as {
+      args: string[];
+      cwd: string;
+    };
+    assert.deepEqual(capture.args, [
+      "note",
+      "--title",
+      "Demo",
+      "--content",
+      "Body",
+      "--co-author",
+      "OpenAI Codex <codex@openai.com>",
+      "--json",
+      "--mode",
+      "pr",
+      "--dry-run",
+    ]);
+    assert.equal(capture.cwd, mcpPackageRoot);
+  } finally {
+    process.chdir(previousCwd);
+  }
 });
 
 test("runEdgesNote maps CLI failure JSON to a thrown error with errorCode", async () => {
@@ -74,8 +110,13 @@ test("runEdgesNote maps CLI failure JSON to a thrown error with errorCode", asyn
         config,
         { ...process.env },
       ),
-    (err: Error & { errorCode?: string }) => {
+    (err: Error & { errorCode?: string; stdout?: string }) => {
       assert.match(err.message, /boom/);
+      assert.equal(err.errorCode, "GIT_FAILURE");
+      assert.equal(
+        classifyError({ stdout: err.stdout, message: err.message }),
+        "GIT_FAILURE",
+      );
       return true;
     },
   );

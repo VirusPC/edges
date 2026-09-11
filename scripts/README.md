@@ -34,7 +34,7 @@
 
 | 脚本 | 入口 | 作用 |
 |---|---|---|
-| `setup` | `pnpm setup` | 首次接入初始化：加载 .env；清掉旧的仓根 bin PATH |
+| `setup` | `pnpm setup` | 首次接入初始化：加载 .env；只清带 `# edges bin` 或 `$REPO/bin` 的 PATH。`pnpm setup --uninstall` 再去掉 `source "<repo>/.env"` |
 | `link-agent-skills` | `pnpm skills:link` | 把 `extensions/skills` 里每个 skill 软链到 `.agents/skills` |
 
 `pnpm skills:link -- --check` 只校验不写；`--dry-run` 打印动作；`--self-test` 在临时目录跑一遍。vendor 拷贝（`.agents/skills` 里的实体目录）不碰；source 里删掉的 skill，对应软链会清掉。
