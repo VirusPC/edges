@@ -1,12 +1,12 @@
 ---
 name: project-memory-remember
 description: 把可复用结论写入本项目 .memory 并刷新索引。用户要求记住时必须用；被纠正、用户给出可用想法/约定/约束、或任务产出已验证、以后还用得上的结论时也要主动用。
-version: 1.5.1
+version: 1.6.0
 ---
 
 # Project Memory Remember
 
-把结论写进仓库内的项目记忆。写入落在 git 里是永久的，所以这个 skill 的正文基本都是那道闸门。
+把结论写进仓库内的项目记忆。可提交类型（`feedback` / `project` / `reference` / `skills`）写入会进 git，是永久的；`--type user` 落在 gitignore 的 `.memory/users/` 与 `.memory/USER.md`，不进版本历史。闸门按类型分开。
 
 下文的 `<init-dir>` 指同级的 `project-memory-init` skill 目录，通常在 `.agents/skills/` 下。
 
@@ -16,7 +16,8 @@ version: 1.5.1
 - 用户纠正了你，必须写。
 - 结论已经验证过，而且以后再做这个项目还用得上，主动写。
 - 对话里用户给出的有用信息也要主动写，不限于纠正。包括可用的想法、产品或技术取舍、命名或目录约定、约束与禁区、对既有做法的澄清，以及以后接手的人仍该知道的背景。即使还没被代码验证，只要用户把它说成项目事实或意图，就写；条目正文里简短标明是用户所述还是已验证。
-- 以下内容不要写：临时进度、纯会话流水账、与项目无关的个人偏好、通用常识、一次性输出、既未经用户确认也未经任务验证的猜测、密钥。
+- 以下内容不要写进可提交类型（`feedback` / `project` / `reference` / `skills`）：临时进度、纯会话流水账、与项目无关的个人偏好、通用常识、一次性输出、既未经用户确认也未经任务验证的猜测、密钥。
+- **个人偏好与密钥只写 `--type user`。** 绑定本仓库、不宜公开的个人材料（个人偏好而非项目共享约定、凭据与密钥、以及其他不得公开的上下文）走 `user`。gitignore 挡住 `.memory/users/` 与 `.memory/USER.md`，所以它们不进 git。其他类型仍然禁止密钥。v1 不把 user 条目脱敏晋升到可提交类型。
 - 读代码或 git 历史就能得到的事实也不写——架构、目录结构、文件路径、某次调试的修法，写进来只会过期。`AGENTS.md` 已经写过的同样不重复。
 - **不检索就会做错事的规则不要走 remember。** 写进该层 `AGENTS.md` 的本层硬约束区块，直接列在区块里，不要另建记忆文件。那一块允许手改正文；其它受管区块（本层索引、下层索引）仍不要手改。
 
@@ -39,6 +40,16 @@ version: 1.5.1
 - `--slug` 是**技能目录名**，用 kebab-case（`rerun-failed-e2e`），不是 snake_case。产物是 `.memory/skills/<slug>/SKILL.md`。
 - `--title` 可省——Agent Skills 没有这个概念，给了会存进 `metadata`。普通记忆的 `title` / `type` / 出处 / 审计同样写进 `metadata.edges-*`，不要手写扁平顶层键。
 - 正文写步骤、输入输出、边界情况，不套「结论 → Why → How to apply」那套；`description` 要同时说清**做什么**和**什么时候用**，因为它是各家 agent 启动时唯一加载的那一层。
+
+### `user`：本仓不宜公开的个人材料
+
+判据是**作用域加能否公开**，不是「像不像偏好」。项目共享约定仍走 `project` / `feedback`；只有「只对这个人、这个克隆成立，且不宜进公开仓」的才进 `user`。
+
+- 产物是 `.memory/users/user_<slug>.md`，索引是 `.memory/USER.md`。两份都被 gitignore，**不要 `git add`**。
+- `--slug` 与其他普通记忆一样，小写 snake_case，不带 `user_` 前缀。
+- 正文仍按「一句结论 → `**Why:**` → `**How to apply:**`」。
+- Agent 读的是本机这份 `USER.md`。换机或删仓前用 `$user-memory-backup`；回注用 `$user-memory-restore`。
+- v1 不做脱敏晋升：不要把 user 条目改写进 `project` / `feedback` 来「变成可提交」。
 
 `agent_skills` 不由 remember 写入，`--type` 里也没有它。那份索引对着本层 `.agents/skills/`，内容是人写或 `npx skills` 装的，本套工具只索引不改写。要新增就手写或走 `npx skills`，然后用 init 刷新入口。
 

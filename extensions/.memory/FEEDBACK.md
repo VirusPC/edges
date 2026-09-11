@@ -10,5 +10,6 @@
 - [Codex 唤起 skill 用 $ 不是 /](feedbacks/feedback_codex_invoke_skill_with_dollar.md) — 在 Codex 里触发某个 skill 时用 $skill-name；/ 是斜杠命令。/skills 只列清单。不要把认不到 skill 当成没装上。
 - [接口层方案进 .memory，不进 docs](feedbacks/feedback_interface_plans_in_memory.md) — 写 extensions 层调研或技术方案时：进 .memory（reference/project），禁止放 extensions/docs 或 knowledge/projects，否则 ask 检索不到。
 - [不要加 edges-note shim 或根目录默认 ingest](feedbacks/feedback_no_edges_note_shim.md) — 改 edges-cli 的 bin、默认命令或兼容入口时：只保留 edges；禁止 edges-note 第二 bin / shim；根目录无子命令不得跑 note ingest。
+- [Restore --force 整份替换，不合并](feedbacks/feedback_restore_force_replaces.md) — 改 user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。
 - [改 skill 后必须升级 version、写 changelog、打 tag](feedbacks/feedback_skill_bump_version.md) — 更新 extensions/skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/<name>@<version> tag。
 <!-- project-memory-entries:end -->
