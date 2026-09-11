@@ -96,6 +96,22 @@ _避免使用_：教学工作区、专题笔记
 因 Agent 或外部系统需要接入、操作 Edges 而存在的可复用能力。
 _避免使用_：共享扩展、通用 Agent 工具
 
+**能力面（Capability Surface）**：
+Agent 与人发现并调用 Edges 扩展能力的入口集合；本仓定为 CLI、Skill 与 MCP 三者。
+_避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成单独一层、仅 CLI+Skill（漏掉 MCP）
+
+**CLI**：
+以 `edges` 为名的命令行界面（含 `note`、`tasks` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
+_避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
+
+**Skill（调用说明）**：
+教 Agent 何时、如何调用能力面的说明性能力包：有 shell 则调 CLI，无 shell 则调作为对等能力面入口的 MCP；不承载 git 或入库实现。
+_避免使用_：实现脚本目录、仓根 `bin/` 封装、业务逻辑真源
+
+**MCP（Edges）**：
+在无 shell 宿主上暴露 Edges 扩展能力的机器入口；与 CLI、Skill 同属能力面，调用同一套领域契约而非另一套产品。
+_避免使用_：唯一入口、替代 CLI、直连仓根脚本（已否决）
+
 **共享 Agent Harness（Shared Agent Harness）**：
 不依赖 Edges 仍有价值，并可跨机器、跨 Agent 客户端使用的个人 Agent 能力。
 _避免使用_：Edges 扩展、连接器
