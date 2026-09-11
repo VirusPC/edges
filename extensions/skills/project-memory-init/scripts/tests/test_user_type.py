@@ -102,6 +102,8 @@ class UserGitignoreTests(unittest.TestCase):
         for pattern in (
             ".memory/users/",
             ".memory/USER.md",
+            "**/.memory/users/",
+            "**/.memory/USER.md",
             "user-memory-backup-*.tar.gz",
             "user-memory-backup-*.zip",
         ):

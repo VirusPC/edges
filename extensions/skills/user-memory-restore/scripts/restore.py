@@ -19,21 +19,70 @@ INIT_SCRIPTS = (
 )
 
 
-def _safe_members(tar: tarfile.TarFile) -> list[tarfile.TarInfo]:
+def _normalize_member_name(name: str) -> str:
+    normalized = name.replace("\\", "/")
+    if normalized.startswith("./"):
+        normalized = normalized[2:]
+    return normalized
+
+
+def _destination_for_member(repo_dir: Path, name: str) -> Path:
+    """Resolve dest path and require it stay under repo .memory/."""
+    memory_root = (repo_dir / ".memory").resolve()
+    destination = (repo_dir / name).resolve()
+    try:
+        destination.relative_to(memory_root)
+    except ValueError as error:
+        raise ValueError(f"归档成员会写到 .memory/ 之外: {name}") from error
+    return destination
+
+
+def _safe_members(tar: tarfile.TarFile, repo_dir: Path) -> list[tarfile.TarInfo]:
+    """Keep only regular files under USER.md / users/. Fail closed on specials."""
     kept: list[tarfile.TarInfo] = []
     for info in tar.getmembers():
-        name = info.name.replace("\\", "/")
-        if name.startswith("./"):
-            name = name[2:]
-        if name != info.name:
-            info.name = name
+        name = _normalize_member_name(info.name)
+        info.name = name
         if ".." in Path(name).parts or Path(name).is_absolute():
             raise ValueError(f"归档含非法路径: {info.name}")
-        if name == ALLOWED_INDEX or name.startswith(ALLOWED_USERS_PREFIX):
-            kept.append(info)
+        allowed = name == ALLOWED_INDEX or name.startswith(ALLOWED_USERS_PREFIX)
+        if not allowed:
+            continue
+        if not info.isfile():
+            raise ValueError(f"归档含非普通文件成员: {info.name}")
+        _destination_for_member(repo_dir, name)
+        kept.append(info)
     if not kept:
         raise ValueError("归档里没有 .memory/USER.md 或 .memory/users/ 成员")
     return kept
+
+
+def _clear_user_memory(repo_dir: Path) -> None:
+    """Replace semantics: drop dest USER.md and everything under users/."""
+    users = repo_dir / ".memory" / "users"
+    if users.exists():
+        for path in sorted(users.rglob("*"), reverse=True):
+            if path.is_symlink() or path.is_file():
+                path.unlink()
+            elif path.is_dir():
+                path.rmdir()
+        if users.exists():
+            users.rmdir()
+    index = repo_dir / ".memory" / "USER.md"
+    if index.exists() or index.is_symlink():
+        index.unlink()
+
+
+def _extract_regular_file(
+    tar: tarfile.TarFile, info: tarfile.TarInfo, repo_dir: Path
+) -> None:
+    destination = _destination_for_member(repo_dir, info.name)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    source = tar.extractfile(info)
+    if source is None:
+        raise ValueError(f"无法读取归档成员: {info.name}")
+    with source, destination.open("wb") as handle:
+        handle.write(source.read())
 
 
 def user_memory_occupied(repo_dir: Path) -> bool:
@@ -72,7 +121,7 @@ def _refresh_user_index(repo_dir: Path) -> str:
 def restore_user_memory(
     archive: Path, repo_dir: Path, force: bool = False
 ) -> dict[str, object]:
-    """Reinject USER.md and users/. Refuse overwrite unless force=True."""
+    """Reinject USER.md and users/. --force replaces dest user memory, it does not merge."""
     archive = archive.expanduser().resolve()
     repo_dir = repo_dir.expanduser().resolve()
     if not archive.is_file():
@@ -80,15 +129,14 @@ def restore_user_memory(
     if not repo_dir.is_dir():
         raise ValueError(f"目标仓库不存在或不是目录: {repo_dir}")
     if user_memory_occupied(repo_dir) and not force:
-        raise ValueError("目标已有用户记忆条目，拒绝覆盖；确认后加 --force")
+        raise ValueError("目标已有用户记忆条目，拒绝覆盖；确认后加 --force（替换，不合并）")
     extracted: list[str] = []
     with tarfile.open(archive, "r:*") as tar:
-        members = _safe_members(tar)
-        extract_kwargs: dict[str, object] = {"path": repo_dir}
-        if "filter" in tar.extract.__code__.co_varnames:
-            extract_kwargs["filter"] = "data"
+        members = _safe_members(tar, repo_dir)
+        if force:
+            _clear_user_memory(repo_dir)
         for info in members:
-            tar.extract(info, **extract_kwargs)
+            _extract_regular_file(tar, info, repo_dir)
             extracted.append(info.name)
     refresh = _refresh_user_index(repo_dir)
     return {
@@ -106,7 +154,7 @@ def main() -> int:
     parser.add_argument(
         "--force",
         action="store_true",
-        help="目标已有用户记忆条目时覆盖",
+        help="目标已有用户记忆时整份替换（清空 users/ 与 USER.md 再解压），不合并",
     )
     arguments = parser.parse_args()
     try:

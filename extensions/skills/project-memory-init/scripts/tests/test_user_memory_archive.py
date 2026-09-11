@@ -94,6 +94,61 @@ class RestoreTests(unittest.TestCase):
             restore_user_memory(archive, dest, force=True)
             self.assertTrue((dest / ".memory" / "users" / "user_keep.md").is_file())
 
+    def test_force_replace_drops_orphan_user_entries(self) -> None:
+        from backup import backup_user_memory
+        from restore import restore_user_memory
+
+        with tempfile.TemporaryDirectory() as raw:
+            src = Path(raw) / "src"
+            dest = Path(raw) / "dest"
+            (src / ".memory" / "users").mkdir(parents=True)
+            (src / ".memory" / "users" / "user_new.md").write_text(
+                "rotated-secret\n", encoding="utf-8"
+            )
+            (src / ".memory" / "USER.md").write_text(
+                "<!-- project-memory-entries:start -->\n"
+                "- [new](users/user_new.md) — current\n"
+                "<!-- project-memory-entries:end -->\n",
+                encoding="utf-8",
+            )
+            (dest / ".memory" / "users").mkdir(parents=True)
+            (dest / ".memory" / "users" / "user_old.md").write_text(
+                "stale-secret\n", encoding="utf-8"
+            )
+            (dest / ".memory" / "USER.md").write_text(
+                "<!-- project-memory-entries:start -->\n"
+                "- [old](users/user_old.md) — leftover\n"
+                "<!-- project-memory-entries:end -->\n",
+                encoding="utf-8",
+            )
+            archive = backup_user_memory(src, timestamp="20260911T150000Z")
+            restore_user_memory(archive, dest, force=True)
+            self.assertFalse((dest / ".memory" / "users" / "user_old.md").exists())
+            self.assertEqual(
+                (dest / ".memory" / "users" / "user_new.md").read_text(encoding="utf-8"),
+                "rotated-secret\n",
+            )
+            index = (dest / ".memory" / "USER.md").read_text(encoding="utf-8")
+            self.assertNotIn("user_old.md", index)
+            self.assertIn("user_new.md", index)
+
+    def test_restore_rejects_symlink_escape(self) -> None:
+        from restore import restore_user_memory
+
+        with tempfile.TemporaryDirectory() as raw:
+            dest = Path(raw) / "dest"
+            dest.mkdir()
+            archive = Path(raw) / "evil.tar.gz"
+            with tarfile.open(archive, "w:gz") as tar:
+                info = tarfile.TarInfo(name=".memory/users/user_evil.md")
+                info.type = tarfile.SYMTYPE
+                info.linkname = "../../outside-secret"
+                tar.addfile(info)
+            with self.assertRaises(ValueError) as raised:
+                restore_user_memory(archive, dest)
+            self.assertIn("非普通文件", str(raised.exception))
+            self.assertFalse((dest / ".memory" / "users" / "user_evil.md").exists())
+
 
 if __name__ == "__main__":
     unittest.main()

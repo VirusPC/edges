@@ -6,9 +6,9 @@ metadata:
   edges-type: project
   edges-origin-session-id: bc-76b9e05c-a544-4dad-adb8-bcc3ea821615
   edges-agent-client: cursor
-  edges-username: Coding 专家
-  edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-11T12:07:27+00:00"
+  edges-username: Cursor Agent
+  edges-email: cursoragent@cursor.com
+  edges-updated-at: "2026-09-11T12:11:31+00:00"
 ---
 
 可写类型是 `user` / `feedback` / `project` / `reference` / `skills`；`agent_skills` 只索引不写。不要加 `docs`。用户记忆是项目记忆类型，权威副本在仓库工作树内且 gitignore，按仓库路径绑定，布局与其他类型相同（`.memory/users/`、`USER.md`、`user_<slug>.md`）。本层入口清单顺序是 `user` → `feedback` → `project` → `reference`（`project` 兜底），然后才是 `skills` / `agent_skills`。skill 接线（init / remember `--type user`、备份/恢复）已做。`.memory/` 下类型目录用复数。
@@ -19,7 +19,7 @@ metadata:
 
 **这一条推翻了本条自己的旧结论「`skills` 只索引、remember 不写」。** 当时的理由是「`.memory/skills/` 空槽对不上 `extensions/skills/` 这个真源」——现在两个槽各有归属，理由不成立了：`skills` 收自动沉淀的流程，`agent_skills` 索引 `.agents/skills/` 里人写或装入的。分界是**谁有权改写**，不是「是不是可执行指令」。详见 [[project_skill_ownership_split]]。
 
-**「不要把 `user` 放进仓库树」已被仓库根 `docs/adr/0003-user-memory-in-repo-gitignored.md`（ADR-0003）推翻。** 现行结论是仓内权威副本 + gitignore + 按仓绑定 + 与其他类型相同的复数目录布局。内容闸门从简（个人偏好、凭据与不得公开的材料）；gitignore 是凭据可以放这里的前提。v1 不做脱敏晋升到可提交类型。家目录当真源已被用户否决。其余（否掉 docs、既有闸门、skills 可写 / agent_skills 只索引）仍成立。`private` 条目元数据是另案，不在这次接线里做。
+**「不要把 `user` 放进仓库树」已被仓库根 `docs/adr/0003-user-memory-in-repo-gitignored.md`（ADR-0003）推翻。** 现行结论是仓内权威副本 + gitignore + 按仓绑定 + 与其他类型相同的复数目录布局。内容闸门从简（个人偏好、凭据与不得公开的材料）；gitignore 是凭据可以放这里的前提。v1 不做脱敏晋升到可提交类型。家目录当真源已被用户否决。其余（否掉 docs、现有各类型闸门含 `user`、skills 可写 / agent_skills 只索引）仍成立。`private` 条目元数据是另案，不在这次接线里做。
 
 本层清单顺序是用户纠正：先更具体的 `user` / `feedback`，`project` 当兜底，再 `reference`。详见 [[feedback_agents_local_type_order]]。
 
