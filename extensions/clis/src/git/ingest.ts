@@ -62,8 +62,10 @@ export async function runNoteIngest(
 
   try {
     await exec("git", ["--version"]);
-  } catch {
-    throw new Error("error: git is required");
+  } catch (error) {
+    throw Object.assign(new Error("error: git is required"), {
+      code: (error as NodeJS.ErrnoException).code,
+    });
   }
 
   const lines: string[] = [];
@@ -120,6 +122,8 @@ export async function runNoteIngest(
       baseBranch: config.baseBranch,
       remoteUrl,
       githubToken: env.GITHUB_TOKEN,
+      cwd: config.repoPath,
+      env,
       exec,
       fetchJson: deps.fetchJson,
     });

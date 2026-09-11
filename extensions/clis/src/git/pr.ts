@@ -31,6 +31,8 @@ export type CreatePrInput = {
   baseBranch: string;
   remoteUrl: string;
   githubToken?: string;
+  cwd?: string;
+  env?: NodeJS.ProcessEnv;
   exec: ExecFn;
   fetchJson?: (
     url: string,
@@ -56,9 +58,10 @@ export async function createPullRequest(input: CreatePrInput): Promise<{
   compareUrl?: string;
 }> {
   const compareUrl = buildCompareUrl(input);
+  const execOpts = { cwd: input.cwd, env: input.env };
   try {
-    await input.exec("gh", ["auth", "status"]);
-    const created = await input.exec("gh", ["pr", "create", "--title", input.title, "--body", input.body]);
+    await input.exec("gh", ["auth", "status"], execOpts);
+    const created = await input.exec("gh", ["pr", "create", "--title", input.title, "--body", input.body], execOpts);
     const htmlUrl = created.stdout
       .split("\n")
       .map((s) => s.trim())
@@ -72,23 +75,27 @@ export async function createPullRequest(input: CreatePrInput): Promise<{
 
   const repo = repoPathFromRemote(input.remoteUrl);
   if (input.githubToken && repo) {
-    const fetchJson = input.fetchJson ?? defaultFetchJson;
-    const payload = await fetchJson(`https://api.github.com/repos/${repo}/pulls`, {
-      method: "POST",
-      headers: {
-        Authorization: `token ${input.githubToken}`,
-        Accept: "application/vnd.github.v3+json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        title: input.title,
-        body: input.body,
-        head: input.branch,
-        base: input.baseBranch,
-      }),
-    });
-    if (payload.html_url) {
-      return { created: true, htmlUrl: payload.html_url, compareUrl };
+    try {
+      const fetchJson = input.fetchJson ?? defaultFetchJson;
+      const payload = await fetchJson(`https://api.github.com/repos/${repo}/pulls`, {
+        method: "POST",
+        headers: {
+          Authorization: `token ${input.githubToken}`,
+          Accept: "application/vnd.github.v3+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: input.title,
+          body: input.body,
+          head: input.branch,
+          base: input.baseBranch,
+        }),
+      });
+      if (payload.html_url) {
+        return { created: true, htmlUrl: payload.html_url, compareUrl };
+      }
+    } catch {
+      // fall through to compare URL — push already succeeded
     }
   }
 

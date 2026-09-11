@@ -82,6 +82,43 @@ test("dry-run pr creates local branch and does not push", async () => {
   assert.ok(!gitCommands.some((a) => a[0] === "push"));
 });
 
+test("pr mode runs gh in the target repo cwd after checkout pull and push", async () => {
+  const calls: Array<{ file: string; args: string[]; cwd?: string }> = [];
+  const result = await runNoteIngest(
+    input,
+    { repoPath: "/repo", baseBranch: "main", mode: "pr", dryRun: false },
+    {},
+    {
+      exec: async (file, args, options) => {
+        calls.push({ file, args, cwd: options?.cwd });
+        if (file === "git" && args[0] === "--version") return { stdout: "git version 2.0", stderr: "" };
+        if (file === "git" && args[0] === "remote") {
+          return { stdout: "https://github.com/VirusPC/edges.git\n", stderr: "" };
+        }
+        if (file === "gh" && args[0] === "auth") return { stdout: "ok", stderr: "" };
+        if (file === "gh" && args[0] === "pr") {
+          return { stdout: "https://github.com/VirusPC/edges/pull/9\n", stderr: "" };
+        }
+        return { stdout: "", stderr: "" };
+      },
+      now,
+      directoryExists: async () => true,
+      mkdirp: async () => undefined,
+      writeFile: async () => undefined,
+    },
+  );
+
+  assert.equal(result.prStatus, "created");
+  assert.equal(result.prUrl, "https://github.com/VirusPC/edges/pull/9");
+  const git = calls.filter((c) => c.file === "git");
+  assert.ok(git.some((c) => c.args[0] === "checkout" && c.args[1] === "main" && c.cwd === "/repo"));
+  assert.ok(git.some((c) => c.args[0] === "pull" && c.cwd === "/repo"));
+  assert.ok(git.some((c) => c.args[0] === "push" && c.args.includes("-u") && c.cwd === "/repo"));
+  const ghPr = calls.find((c) => c.file === "gh" && c.args[0] === "pr");
+  assert.ok(ghPr);
+  assert.equal(ghPr.cwd, "/repo");
+});
+
 test("commit message includes Co-authored-by trailer", async () => {
   const calls: string[][] = [];
   await runNoteIngest(
