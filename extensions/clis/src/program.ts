@@ -67,6 +67,7 @@ export function createProgram(
     .enablePositionalOptions()
     .allowExcessArguments(false)
     .showHelpAfterError(false)
+    .showSuggestionAfterError(false)
     .helpCommand(false);
 
   addIngestOptions(program);
@@ -84,8 +85,9 @@ export function createProgram(
     .helpOption("-h, --help", "Show this help");
 
   addIngestOptions(ingest);
-  ingest.action((opts: IngestCliOptions) => {
-    handlers.onIngest?.(opts);
+  // Merge root options so `edges-note --dry-run ingest --title ...` does not drop flags.
+  ingest.action((opts: IngestCliOptions, cmd: Command) => {
+    handlers.onIngest?.({ ...cmd.optsWithGlobals(), ...opts });
   });
 
   program.addHelpText("after", AFTER_HELP);

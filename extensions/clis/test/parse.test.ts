@@ -66,6 +66,29 @@ test("parseArgv accepts the ingest subcommand with the same flags", () => {
   }
 });
 
+test("parseArgv keeps flags that appear before the ingest subcommand", () => {
+  const parsed = parseArgv([
+    "--dry-run",
+    "--json",
+    "ingest",
+    "--title",
+    "Daily summary",
+    "--content",
+    "Some useful content",
+    "--co-author",
+    "OpenAI Codex <codex@openai.com>",
+    "--mode",
+    "pr",
+  ]);
+
+  assert.equal(parsed.kind, "ingest");
+  if (parsed.kind === "ingest") {
+    assert.equal(parsed.dryRun, true);
+    assert.equal(parsed.mode, "pr");
+    assert.equal(parsed.title, "Daily summary");
+  }
+});
+
 test("parseArgv ingest --help is help, not a positional error", () => {
   const parsed = parseArgv(["ingest", "--help"]);
   assert.equal(parsed.kind, "help");
