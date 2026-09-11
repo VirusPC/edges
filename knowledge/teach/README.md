@@ -2,6 +2,8 @@
 
 Stateful teaching workspaces (teach skill). One topic per subdirectory.
 
+Public homepage: [`index.html`](./index.html)（公网 `/teach/`）。每次交付后与下面 Topics 同步重建。
+
 ## Topics
 
 - [changelog](./changelog/) — write a usable `CHANGELOG.md` for your own projects
