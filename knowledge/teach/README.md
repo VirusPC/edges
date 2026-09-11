@@ -6,3 +6,4 @@ Stateful teaching workspaces (teach skill). One topic per subdirectory.
 
 - [changelog](./changelog/) — write a usable `CHANGELOG.md` for your own projects
 - [link-external-repo](./link-external-repo/) — 关联外部仓库而不撑大主仓库：submodule / subtree / gitignore+clone / partial clone 选型与实操
+- [openhands](./openhands/) — 搞懂 OpenHands V1 架构与核心实现（Conversation / Agent.step / Workspace），能对照改/扩展

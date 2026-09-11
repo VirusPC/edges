@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>速查 · V1 术语表（≤10）</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+  <style>
+    table.gloss {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      margin: 1rem 0 1.5rem;
+    }
+    table.gloss th, table.gloss td {
+      border: 1px solid var(--line);
+      padding: 0.55rem 0.65rem;
+      text-align: left;
+      vertical-align: top;
+    }
+    table.gloss thead th {
+      background: var(--card);
+      font-weight: 600;
+    }
+    table.gloss td.term {
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      white-space: nowrap;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    table.gloss td.cite a { font-size: 0.78rem; }
+    .print-hint {
+      font-family: var(--sans);
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.5rem;
+    }
+    @media print {
+      body { background: white; }
+      header.meta a[href]::after { content: ""; }
+      .ask-teacher, footer.nav { display: none; }
+      table.gloss { font-size: 0.78rem; }
+      .wrap { max-width: none; padding: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="meta">
+      参考 ·
+      <a href="../MISSION.md">Mission</a> ·
+      <a href="../lessons/0001-one-request-through-agent-step.html">课次 0001</a> ·
+      <a href="./one-step-loop.html">一步循环</a>
+    </header>
+
+    <h1>V1 术语表（≤10）</h1>
+    <p class="lede">先把这十个词钉牢：后面读 <code>Agent.step</code>、Conversation、Workspace 时就不会把 Canvas / 旧 V0 词汇搅进来。</p>
+    <p class="print-hint">打印友好：浏览器 → 打印 / 另存 PDF。</p>
+
+    <table class="gloss">
+      <thead>
+        <tr>
+          <th>术语</th>
+          <th>一句话</th>
+          <th>文档</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="term">Agent</td>
+          <td>无状态的 reasoning-action 执行器；一次 <code>step()</code> = 一轮循环</td>
+          <td class="cite"><a href="https://docs.openhands.dev/sdk/arch/agent">agent</a></td>
+        </tr>
+        <tr>
+          <td class="term">Conversation</td>
+          <td>生命周期 + 状态管理者；按 workspace 分成 Local / Remote</td>
+          <td class="cite"><a href="https://docs.openhands.dev/sdk/arch/conversation">conversation</a></td>
+        </tr>
+        <tr>
+          <td class="term">ConversationState</td>
+          <td>单一可变真相源（元数据 + EventLog）</td>
+          <td class="cite"><a href="https://docs.openhands.dev/sdk/arch/conversation">conversation</a> · <a href="https://arxiv.org/html/2511.03690v1">paper §4.2</a></td>
+        </tr>
+        <tr>
+          <td class="term">Event / EventLog</td>
+          <td>不可变、只追加的历史；既是记忆，也是观察者总线</td>
+          <td class="cite"><a href="https://docs.openhands.dev/sdk/arch/events">events</a></td>
+        </tr>
+        <tr>
+          <td class="term">ActionEvent / ObservationEvent</td>
+          <td>工具调用 vs 工具结果（可转成 LLM 消息）</td>
+          <td class="cite"><a href="https://docs.openhands.dev/sdk/arch/events">events</a></td>
+        </tr>
+        <tr>
+          <td class="term">LLM</td>
+          <td>与提供商无关的模型接口（LiteLLM）</td>
+          <td class="cite"><a href="https://docs.openhands.dev/sdk/arch/llm">llm</a></td>
+        </tr>
+        <tr>
+          <td class="term">Tool (Action→Observation)</td>
+          <td>带类型的能力，在 workspace 环境里执行</td>
+          <td class="cite"><a href="https://docs.openhands.dev/sdk/arch/tool-system">tool-system</a></td>
+        </tr>
+        <tr>
+          <td class="term">Workspace</td>
+          <td>命令与文件实际跑的地方（Local / Remote / Docker…）</td>
+          <td class="cite"><a href="https://docs.openhands.dev/sdk/arch/workspace">workspace</a></td>
+        </tr>
+        <tr>
+          <td class="term">Agent Server</td>
+          <td>托管远程 Conversation 的 REST/WebSocket 宿主</td>
+          <td class="cite"><a href="https://docs.openhands.dev/sdk/arch/agent-server">agent-server</a></td>
+        </tr>
+        <tr>
+          <td class="term">Condenser</td>
+          <td>压缩历史，给上下文窗口腾地方</td>
+          <td class="cite"><a href="https://docs.openhands.dev/sdk/arch/agent">agent</a> · <a href="https://docs.openhands.dev/sdk/arch/condenser">condenser</a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="note">
+      后续课再展开：Agent Canvas、ACP、SecurityAnalyzer、MCP、Skills、Secret Registry、Stuck Detection。
+      V0 旧词（<code>EventStream</code> / <code>Runtime</code> / <code>CodeActAgent</code>）见
+      <a href="https://docs.openhands.dev/openhands/usage/architecture/backend">legacy backend</a>，勿当现行默认。
+    </div>
+
+    <p class="cite">
+      依据研究简报 §5 · 官方文档
+      <a href="https://docs.openhands.dev/sdk/arch/overview">overview</a>
+    </p>
+
+    <footer class="nav">
+      <a href="../lessons/0001-one-request-through-agent-step.html">← 回到课次 0001</a> ·
+      <a href="./one-step-loop.html">一步循环速查 →</a>
+    </footer>
+  </div>
+</body>
+</html>

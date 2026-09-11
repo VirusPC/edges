@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>0001 · 一次请求如何穿过 Agent.step</title>
+  <link rel="stylesheet" href="../assets/lesson.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="meta">
+      课次 0001 ·
+      <a href="../MISSION.md">Mission</a> ·
+      <a href="../reference/v1-glossary.html">术语表</a> ·
+      <a href="../reference/one-step-loop.html">一步循环</a>
+    </header>
+
+    <h1>一次请求如何穿过 Agent.step</h1>
+    <p class="lede">范围收紧：Conversation / EventLog → Agent.step → LLM → Tools / Workspace。不讲 Canvas 全产品、Cloud、Automations。</p>
+
+    <h2>这一课你能带走什么</h2>
+    <p>能用自己的话指着 V1 的八步，说出一次用户消息如何变成事件、如何进无状态的 <code>Agent.step</code>、如何经 LLM 变成工具调用、又如何在 Workspace 里变成 Observation。</p>
+
+    <h2>先避开仓库边界陷阱</h2>
+    <p>
+      <a href="https://github.com/OpenHands/OpenHands">github.com/OpenHands/OpenHands</a>
+      在 <code>main</code> 上是 <strong>Agent Canvas</strong>（前端 / 控制台 / 本地栈编排），
+      <strong>不是</strong>代理循环本体。
+    </p>
+    <p>
+      真正的 agent loop、events、LLM、workspace、Agent Server 在
+      <a href="https://github.com/OpenHands/software-agent-sdk">OpenHands/software-agent-sdk</a>。
+      官方文档总览：
+      <a href="https://docs.openhands.dev/sdk/arch/overview">SDK Architecture Overview</a>。
+    </p>
+    <div class="note">
+      打开错仓库会在 Canvas 的 UI / 编排文档里空转。Lesson 1 的代码与概念主线一律指向
+      <strong>software-agent-sdk</strong> + docs 的 <code>sdk/arch/*</code>。
+    </div>
+
+    <h2>一句话骨架</h2>
+    <p>
+      用户消息进入 <strong>Conversation</strong>，落成 <strong>EventLog</strong> 里的事件；
+      Conversation 调用无状态的 <strong>Agent.step()</strong>；
+      可选 Condenser 之后问 <strong>LLM</strong>；
+      解析出 Action 或 Message；过确认门后，在 <strong>Workspace</strong> 环境执行 <strong>Tool</strong>，
+      写回 <code>ObservationEvent</code>，再决定是否继续 step。
+    </p>
+    <p>
+      八步展开见
+      <a href="../reference/one-step-loop.html">一步循环速查</a>；
+      十个词见
+      <a href="../reference/v1-glossary.html">V1 术语表</a>。
+    </p>
+
+    <h2>三个容易混的点</h2>
+    <ul>
+      <li><strong>Agent 无状态</strong>：会话真相在 <code>ConversationState</code> / EventLog，不在 Agent 成员变量里。</li>
+      <li><strong>记忆 ≈ 事件日志（+ Condenser）</strong>：不是另起一套隐式 chat buffer；长期跨会话 memory 是后话。</li>
+      <li><strong>隔离可选</strong>：V1 不默认「必须 Docker」；Local vs Remote 由 Workspace 类型决定。</li>
+    </ul>
+
+    <h2>精读材料</h2>
+    <p>
+      <strong>主文：</strong>
+      <a href="https://docs.openhands.dev/sdk/arch/agent">Agent — reasoning-action loop</a>
+      （约 15–20 分钟）。对着 mermaid 把 condense → LLM → actions → confirm → execute → observations 走一遍。
+    </p>
+    <p>
+      <strong>伴读（先 5 分钟）：</strong>
+      <a href="https://docs.openhands.dev/sdk/arch/overview">SDK Architecture Overview</a>
+      ——四个包 + 基本序列图，再进 Agent 页不迷路。
+    </p>
+
+    <h2>课后作业（约 15 分钟）</h2>
+    <ol>
+      <li>打开精读主文 <a href="https://docs.openhands.dev/sdk/arch/agent">docs.openhands.dev/sdk/arch/agent</a>。</li>
+      <li>扫一眼 <a href="https://github.com/OpenHands/software-agent-sdk/blob/main/README.md">software-agent-sdk README</a>（最小 <code>LLM</code> / <code>Agent</code> / <code>Conversation</code> / <code>run()</code>）。</li>
+      <li>告诉老师：八步里哪一步目前最糊——用你自己的话点名即可。</li>
+    </ol>
+
+    <div class="ask-teacher">
+      <strong>卡住了？问我。</strong>
+      仓库找错、术语对不上旧博客、或某一步的文档句子读不通——把链接 + 你卡住的原话丢过来。
+    </div>
+
+    <h2>自测</h2>
+    <div id="q1"></div>
+    <div id="q2"></div>
+    <div id="q3"></div>
+
+    <footer class="nav">
+      下一课预告：LocalConversation vs RemoteConversation / Agent Server 边界，以及何时不该把 SDK 嵌进进程。
+    </footer>
+  </div>
+  <script src="../assets/quiz.js"></script>
+  <script>
+    Quiz.mount(document.getElementById("q1"), {
+      question: "要读 V1 的 Agent.step / Conversation / EventLog，应打开哪类仓库？",
+      choices: [
+        { id: "a", label: "前端画布仓：此处无代理循环源码" },
+        { id: "b", label: "软件代理仓：此处有代理循环源码" },
+        { id: "c", label: "浏览器客户：此处无代理循环源码" },
+        { id: "d", label: "自动化调度：此处无代理循环源码" },
+      ],
+      answer: "b",
+      explainOk: "对。循环在 OpenHands/software-agent-sdk；OpenHands/OpenHands 是 Agent Canvas。",
+      explainBad: "不对。代理循环在 software-agent-sdk。OpenHands/OpenHands 是 Agent Canvas 前端仓。",
+    });
+    Quiz.mount(document.getElementById("q2"), {
+      question: "关于 Agent 与状态，哪一句符合 V1 SDK？",
+      choices: [
+        { id: "a", label: "Agent 在进程内保存全部会话状态" },
+        { id: "b", label: "Agent 无状态，逐步读写会话状态" },
+        { id: "c", label: "Agent 只负责渲染界面上的控件层" },
+        { id: "d", label: "Agent 必须先启动沙箱再执行步进" },
+      ],
+      answer: "b",
+      explainOk: "对。Agent 无状态；ConversationState / EventLog 才是真相源。",
+      explainBad: "不对。Agent 无状态，逐步读写 ConversationState；也不默认必须 Docker。",
+    });
+    Quiz.mount(document.getElementById("q3"), {
+      question: "工具调用成功后，结果通常如何回到循环？",
+      choices: [
+        { id: "a", label: "在工作区环境执行并写观察事件" },
+        { id: "b", label: "经旧版运行时客户端再转发沙箱" },
+        { id: "c", label: "写入模型权重而不进入事件日志" },
+        { id: "d", label: "只在画布浏览器标签页里去运行" },
+      ],
+      answer: "a",
+      explainOk: "对。在 Workspace 执行 Action，追加 ObservationEvent 进 EventLog。",
+      explainBad: "不对。V1 在 Workspace 执行并写 ObservationEvent；不是 V0 Runtime 必经、也不是改权重。",
+    });
+  </script>
+</body>
+</html>
