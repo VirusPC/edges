@@ -6,7 +6,10 @@ import type { RuntimeConfig } from "../src/types.js";
 const config: RuntimeConfig = {
   repoPath: "/repo",
   baseBranch: "main",
-  scriptPath: "/repo/bin/new-note",
+  cliEntry: "/repo/extensions/clis/dist/index.js",
+  skillsPath: "/repo/extensions/skills",
+  mode: "direct",
+  dryRun: false,
 };
 
 test("runIngest returns success payload", async () => {

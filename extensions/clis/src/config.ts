@@ -19,7 +19,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig 
   return {
     repoPath,
     baseBranch: env.EDGES_BASE_BRANCH ?? "main",
-    scriptPath: env.EDGES_SCRIPT ?? path.join(edgesRoot, "bin/new-note"),
     mode,
     dryRun: env.EDGES_DRY_RUN === "true",
     authToken,

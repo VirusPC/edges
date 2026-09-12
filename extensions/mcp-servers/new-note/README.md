@@ -8,8 +8,8 @@ TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 in
 
 - 暴露 MCP 工具 `new_note`
 - 接收结构化输入：`title`、`content`、`coAuthor`
-- 调用 `bin/new-note` 执行：
-  - 生成 `inbox/YYYY-MM-DD--slug.md`
+- 子进程调用 `edges note`（与 CLI 同一套 flags / JSON 契约）：
+  - 生成 `knowledge/notes/YYYY-MM-DD--slug.md`
   - `git checkout -b ingest/...`
   - `git commit` + `git push`
   - 可选创建 PR
@@ -75,6 +75,8 @@ HTTP 模式将在以下端点启动服务器：
   - `direct` (默认): 直接在基线分支上提交并推送。
   - `pr`: 创建新分支并尝试建立 PR。
 - `GITHUB_TOKEN`: (可选) GitHub 个人访问令牌。仅用于自动创建 PR；如果已配置 `gh` CLI，则不需要。
+- `EDGES_CLI`: (可选) `edges-cli` 入口绝对路径（`dist/index.js` 或 `src/index.ts`）。未设置时优先 `extensions/clis/dist/index.js`，否则回退 `extensions/clis/src/index.ts`。
+- `EDGES_DRY_RUN`: `true` 时给 `edges note` 加上 `--dry-run`。
 
 ### HTTP 认证 (可选)
 
@@ -94,7 +96,7 @@ MCP tool 名称：`new_note`
 ```json
 {
   "status": "success",
-  "filePath": "inbox/2026-02-18--daily-summary.md",
+  "filePath": "knowledge/notes/2026-02-18--daily-summary.md",
   "branch": "ingest/2026-02-18-daily-summary",
   "prUrl": "https://github.com/org/repo/compare/main...ingest/2026-02-18-daily-summary?expand=1",
   "prStatus": "unavailable",
@@ -189,11 +191,15 @@ npm test
 
 ## Troubleshooting
 
-- 报 `SCRIPT_NOT_FOUND`：检查脚本是否存在于 `bin/new-note` 并具有执行权限。
+- 报 `SCRIPT_NOT_FOUND`：`edges-cli` 入口缺失。执行 `pnpm --filter edges-cli build`，或设置 `EDGES_CLI` 指向 `dist/index.js` / `src/index.ts`。
 - 报 `PUSH_AUTH_FAILED`：检查服务器上的 Git 凭据（SSH key / token）。
 - 报 `GIT_FAILURE`：检查远程仓库可达性、分支权限和本地工作区状态。
 - 无法自动建 PR：确认 `gh auth status` 或 `GITHUB_TOKEN` 可用。注意 `direct` 提交模式不提供 PR 功能。
 
 ## Rollback
 
-如果线上出现异常，可通过停止该 MCP server 或从客户端配置中移除 `new_note` 工具，回退到手工执行 `bin/new-note`。
+如果线上出现异常，可通过停止该 MCP server 或从客户端配置中移除 `new_note` 工具，回退到手工执行：
+
+```bash
+pnpm --filter edges-cli exec tsx src/index.ts note --title "…" --content "…" --co-author "…" --json
+```

@@ -34,9 +34,10 @@ export type IngestResult = IngestSuccess | IngestFailure;
 export interface RuntimeConfig {
   repoPath: string;
   baseBranch: string;
-  scriptPath: string;
+  cliEntry: string;
   skillsPath: string;
   mode: "pr" | "direct";
+  dryRun: boolean;
   authToken?: string;
 }
 

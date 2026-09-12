@@ -19,7 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CONTEXT 增加 Task、`edges-tasks-status`、Task Run Log、backlog（Task）。
 - CONTEXT 增加能力面（Capability Surface）、CLI、Skill（调用说明）、MCP（Edges）。
 - `docs/adr/0002-knowledge-tasks-status-folders.md`：`knowledge/todos` 迁为按状态分夹的 `knowledge/tasks`。
-- `docs/adr/0004-capability-surface-cli-skill-mcp.md`：能力面定为 CLI + Skill + MCP，删除仓根 `bin/`（实现另 PR）。
+- `docs/adr/0004-capability-surface-cli-skill-mcp.md`：能力面定为 CLI + Skill + MCP，删除仓根 `bin/`（实现见本 Unreleased 的 Removed/Changed）。
+- `extensions/skills/edges-note`：教 Agent 何时如何调用 CLI 与 MCP（能力面三入口）。
 - `docs/superpowers/plans/2026-09-11-capability-surface-bin-cli-skill-mcp.md`：ADR-0004 的实现计划（CLI 内 TS git、Skill、MCP 子进程调 `edges note`）。
 - [`knowledge/tasks/`](knowledge/tasks/)：跨 Agent 接力的 Task 看板。
 - `extensions/skills/learn-repo`：把要学习的外部仓库以 git submodule 挂进 `knowledge/teaching/<topic>/repos/`，主仓库只记指针不涨体积，并在主题 RESOURCES.md 登记来源与用途。
@@ -27,6 +28,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `new-note` MCP 改为子进程调用 `edges note`，不再 `execFile` 仓根脚本。
+- `pnpm setup` 不再把仓根 `bin/` 写入 PATH。
+- 根 README 捕获入口改为 CLI + Skill + MCP（ADR-0004）。
 - `edges-cli` 二进制改为 `edges`；入库走 `edges note …`。旧的 `edges-note`、根目录默认 ingest、`ingest` 子命令已移除，无 shim。
 - 存量 `knowledge/todos/*.md` 改写为 project-memory 形态后迁入 `knowledge/tasks/backlog/`。
 - ECS 部署：`.github/workflows/deploy-teach.yml` 改为 SSH 触发整仓 `git fetch` / `reset --hard origin/main`，不再 rsync 推送 `knowledge/teaching/`。
@@ -37,6 +41,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
+- 仓根 `bin/`（含 `new-note`）。Note 入库 git 在 `extensions/clis` TypeScript。
+- `EDGES_SCRIPT`（MCP / CLI 不再用该环境变量指向仓根脚本）。
 - 根目录 `inbox/` 旧 ingest 自动 PR 测试草稿。
 - `knowledge/todos/`（不留重定向 stub）。
 

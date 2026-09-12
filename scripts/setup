@@ -2,56 +2,65 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-BIN_DIR="$SCRIPT_DIR/bin"
-ENV_FILE="$SCRIPT_DIR/.env"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+ENV_FILE="$REPO_ROOT/.env"
 RC_FILES=("$HOME/.zshrc" "$HOME/.bash_profile")
 MARKER="# edges bin"
+ENV_SOURCE="source \"$ENV_FILE\""
+LEGACY_BIN_DIR="$REPO_ROOT/bin"
 
-add_path() {
+# Drop only Edges marker lines and PATH entries that mention this repo's bin/.
+# Never match a generic `/bin:$PATH`. Keep a recoverable $rc_file.edges.bak.
+strip_rc_needles() {
   local rc_file="$1"
-  local export_line="export PATH=\"$BIN_DIR:\$PATH\""
-  
-  if grep -qF "$BIN_DIR" "$rc_file" 2>/dev/null; then
-    echo "Already configured: $rc_file"
+  shift
+  [ -f "$rc_file" ] || return 0
+
+  local tmp changed=0 line needle drop
+  tmp="$(mktemp)"
+  while IFS= read -r line || [ -n "$line" ]; do
+    drop=0
+    for needle in "$@"; do
+      case "$line" in
+        *"$needle"*) drop=1; break ;;
+      esac
+    done
+    if [ "$drop" -eq 1 ]; then
+      changed=1
+      continue
+    fi
+    printf '%s\n' "$line"
+  done < "$rc_file" > "$tmp"
+
+  if [ "$changed" -eq 1 ]; then
+    cp "$rc_file" "${rc_file}.edges.bak"
+    mv "$tmp" "$rc_file"
+    echo "Removed Edges rc lines from: $rc_file (backup: ${rc_file}.edges.bak)"
   else
-    echo "" >> "$rc_file"
-    echo "$MARKER" >> "$rc_file"
-    echo "$export_line" >> "$rc_file"
-    echo "Added to: $rc_file"
+    rm -f "$tmp"
   fi
 }
 
-remove_path() {
-  local rc_file="$1"
-  if grep -qF "$BIN_DIR" "$rc_file" 2>/dev/null; then
-    # Remove the marker line and the export line
-    sed -i '' "/$MARKER/d" "$rc_file"
-    sed -i '' "\|$BIN_DIR|d" "$rc_file"
-    echo "Removed from: $rc_file"
-  else
-    echo "Not found in: $rc_file"
-  fi
+strip_legacy_bin_path() {
+  strip_rc_needles "$1" "$MARKER" "$LEGACY_BIN_DIR"
 }
 
 if [ "$1" = "--uninstall" ] || [ "$1" = "-u" ]; then
   for rc_file in "${RC_FILES[@]}"; do
-    [ -f "$rc_file" ] && remove_path "$rc_file"
+    strip_rc_needles "$rc_file" "$MARKER" "$LEGACY_BIN_DIR" "$ENV_SOURCE"
   done
   echo "Done. Restart terminal to apply."
-else
-  chmod +x "$BIN_DIR"/*
-  for rc_file in "${RC_FILES[@]}"; do
-    [ -f "$rc_file" ] || touch "$rc_file"
-    add_path "$rc_file"
-    # Add .env sourcing if not present
-    if [ -f "$ENV_FILE" ] && ! grep -qF "source \"$ENV_FILE\"" "$rc_file" 2>/dev/null; then
-      echo "source \"$ENV_FILE\"" >> "$rc_file"
-      echo "Added .env sourcing to: $rc_file"
-    fi
-  done
-  export PATH="$BIN_DIR:$PATH"
-  [ -f "$ENV_FILE" ] && source "$ENV_FILE"
-  echo ""
-  echo "PATH exported for current session."
-  echo "New terminals will auto-load."
+  exit 0
 fi
+
+for rc_file in "${RC_FILES[@]}"; do
+  [ -f "$rc_file" ] || touch "$rc_file"
+  strip_legacy_bin_path "$rc_file"
+  if [ -f "$ENV_FILE" ] && ! grep -qF "$ENV_SOURCE" "$rc_file" 2>/dev/null; then
+    echo "$ENV_SOURCE" >> "$rc_file"
+    echo "Added .env sourcing to: $rc_file"
+  fi
+done
+
+[ -f "$ENV_FILE" ] && source "$ENV_FILE"
+echo "Setup complete. Use: pnpm --filter edges-cli exec tsx src/index.ts note --help"

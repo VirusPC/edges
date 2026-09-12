@@ -1,12 +1,45 @@
 import type { IngestErrorCode } from "./types.js";
 
-export function classifyError(output: { stdout?: string; stderr?: string; message?: string }): IngestErrorCode {
+const KNOWN_CODES: ReadonlySet<string> = new Set([
+  "VALIDATION_ERROR",
+  "SCRIPT_NOT_FOUND",
+  "GIT_FAILURE",
+  "PUSH_AUTH_FAILED",
+  "PR_CREATION_UNAVAILABLE",
+  "UNKNOWN_ERROR",
+]);
+
+export function classifyError(output: {
+  stdout?: string;
+  stderr?: string;
+  message?: string;
+  code?: string | number;
+}): IngestErrorCode {
+  if (output.code === "ENOENT" || output.code === "ERR_MODULE_NOT_FOUND") {
+    return "SCRIPT_NOT_FOUND";
+  }
+
+  if (output.stdout) {
+    try {
+      const parsed = JSON.parse(output.stdout) as { errorCode?: string };
+      if (parsed.errorCode && KNOWN_CODES.has(parsed.errorCode)) {
+        return parsed.errorCode as IngestErrorCode;
+      }
+    } catch {
+      // stdout is not CLI JSON
+    }
+  }
+
   const text = [output.stdout, output.stderr, output.message].filter(Boolean).join("\n").toLowerCase();
 
   if (text.includes("usage: new-note") || text.includes("validation")) {
     return "VALIDATION_ERROR";
   }
-  if (text.includes("no such file") && text.includes("new-note")) {
+  if (
+    (text.includes("enoent") && (text.includes("edges") || text.includes("cli"))) ||
+    text.includes("cannot find module") ||
+    text.includes("err_module_not_found")
+  ) {
     return "SCRIPT_NOT_FOUND";
   }
   if (text.includes("permission denied (publickey)") || text.includes("authentication failed")) {

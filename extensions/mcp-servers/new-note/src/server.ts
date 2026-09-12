@@ -102,7 +102,7 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
   console.error(`  - Repo path: ${config.repoPath}`);
   console.error(`  - Base branch: ${config.baseBranch}`);
   console.error(`  - Mode: ${config.mode.toUpperCase()}${config.mode === 'pr' ? ' (Create branch + PR)' : ' (Direct commit to base)'}`);
-  console.error(`  - Script path: ${config.scriptPath}`);
+  console.error(`  - CLI entry: ${config.cliEntry}`);
   
   // Log environment variables status
   console.error(`[new-note] ------------------------------------------`);

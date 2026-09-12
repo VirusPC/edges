@@ -7,9 +7,9 @@ test("classifyError detects auth failures", () => {
   assert.equal(code, "PUSH_AUTH_FAILED");
 });
 
-test("classifyError detects missing script via ENOENT", () => {
-  const code = classifyError({ code: "ENOENT", message: "spawn bin/new-note ENOENT" });
-  assert.equal(code, "SCRIPT_NOT_FOUND");
+test("classifyError maps git ENOENT to GIT_FAILURE", () => {
+  const code = classifyError({ code: "ENOENT", message: "spawn git ENOENT" });
+  assert.equal(code, "GIT_FAILURE");
 });
 
 test("summarize returns shortened text", () => {
