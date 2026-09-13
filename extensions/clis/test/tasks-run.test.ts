@@ -193,3 +193,99 @@ test("run tasks runs missing task is TASK_NOT_FOUND", async () => {
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+test("run tasks run-messages returns notes for a stable run-id", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const stem = "2026-09-13--msg";
+  try {
+    const dir = path.join(repo, "knowledge/tasks/in_progress");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, `${stem}.md`),
+      `---
+name: msg
+description: msg
+metadata:
+  edges-type: task
+  edges-title: msg
+  edges-tasks-status: in_progress
+---
+
+body
+`,
+      "utf8",
+    );
+    await writeFile(
+      path.join(dir, `.${stem}.log.md`),
+      `# Run log: ${stem}
+
+| # | agent | started_at | ended_at | status | error_code |
+|---|---|---|---|---|---|
+| 1 | Agent | 2026-09-13T01:00:00Z |  | running |  |
+
+## Notes
+
+- 2026-09-13T01:05:00Z hello from the run
+`,
+      "utf8",
+    );
+    const full = await run(["tasks", "run-messages", `${stem}--1`, "--output", "json"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(full.exitCode, 0);
+    const body = JSON.parse(full.stdout) as {
+      command: string;
+      run: { runId: string };
+      messages: { text: string }[];
+    };
+    assert.equal(body.command, "run-messages");
+    assert.equal(body.run.runId, `${stem}--1`);
+    assert.match(body.messages[0]?.text ?? "", /hello from the run/);
+
+    const short = await run(["tasks", "run-messages", "1", "--task", stem, "--output", "json"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(short.exitCode, 0);
+    assert.equal(JSON.parse(short.stdout).run.runId, `${stem}--1`);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks run-messages 1 without --task is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "run-messages", "1"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
+test("run tasks run-messages unknown id is RUN_NOT_FOUND", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const stem = "2026-09-13--msg";
+  try {
+    const dir = path.join(repo, "knowledge/tasks/todo");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, `${stem}.md`),
+      `---
+name: msg
+description: msg
+metadata:
+  edges-type: task
+  edges-title: msg
+  edges-tasks-status: todo
+---
+
+body
+`,
+      "utf8",
+    );
+    await writeFile(path.join(dir, `.${stem}.log.md`), `# Run log: ${stem}\n\n## Notes\n`, "utf8");
+    const result = await run(["tasks", "run-messages", `${stem}--9`, "--output", "json"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(result.exitCode, 1);
+    assert.equal(JSON.parse(result.stdout).errorCode, "RUN_NOT_FOUND");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});

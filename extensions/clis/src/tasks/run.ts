@@ -7,9 +7,9 @@ type RunResult = {
   stderr: string;
 };
 import { createNodeBoardFs, createNodeBoardWriter, type BoardFs, type BoardWriter } from "./board.js";
-import { formatRunsTable, formatTasksResult, type TasksFailure } from "./format.js";
+import { formatRunMessagesTable, formatRunsTable, formatTasksResult, type TasksFailure } from "./format.js";
 import { parseRunLog } from "./runlog.js";
-import { getTaskService, listTasksService } from "./service.js";
+import { findRun, getTaskService, listTasksService } from "./service.js";
 import { moveTaskStatus } from "./move.js";
 import { createTask, updateTask } from "./write.js";
 import type { TasksErrorCode, TasksParseOk } from "./types.js";
@@ -124,8 +124,21 @@ export async function runTasks(parsed: TasksParseOk, io: TasksRunIo = {}): Promi
           formatRunsTable(parsedLog.runs),
         );
       }
-      case "tasks-run-messages":
-        return fail("VALIDATION_ERROR", `${parsed.kind} not wired`);
+      case "tasks-run-messages": {
+        const found = await findRun(repoPath, parsed.runId, parsed.task, fs);
+        if (parsed.output === "json") {
+          return succeed({
+            status: "success",
+            command: "run-messages",
+            run: found.run,
+            messages: found.messages,
+          });
+        }
+        return succeed(
+          { status: "success", command: "run-messages", run: found.run, messages: found.messages },
+          formatRunMessagesTable(found.run, found.messages),
+        );
+      }
       default:
         return fail("VALIDATION_ERROR", "unknown tasks command");
     }
