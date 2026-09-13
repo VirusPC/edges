@@ -39,6 +39,24 @@ export type TaskListItem = {
   runCount: number;
 };
 
+export type TaskRecord = TaskListItem & {
+  name: string;
+  metadata: Record<string, string>;
+  body: string;
+  sidecarExists: boolean;
+  sidecarMarkdown?: string;
+};
+
+export class TasksError extends Error {
+  readonly errorCode: TasksErrorCode;
+
+  constructor(errorCode: TasksErrorCode, message: string) {
+    super(message);
+    this.name = "TasksError";
+    this.errorCode = errorCode;
+  }
+}
+
 export type TasksOutput = "table" | "json";
 
 export type TasksParseOk =
