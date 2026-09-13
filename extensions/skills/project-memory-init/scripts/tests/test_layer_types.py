@@ -21,6 +21,7 @@ from lib.types import (  # noqa: E402
     validate_type_name,
 )
 from operations.init import init_memory  # noqa: E402
+from operations.remember import remember  # noqa: E402
 
 
 class SeedIsolationTests(unittest.TestCase):
@@ -103,6 +104,56 @@ class DiscoverLayerTypesTests(unittest.TestCase):
             )
             discovered = discover_layer_types(target)
             self.assertEqual(discovered["research"], "RESEARCH.md")
+
+
+class PreserveExtraTypesTests(unittest.TestCase):
+    def _add_docs_line(self, target: Path) -> None:
+        agents = target / "AGENTS.md"
+        text = agents.read_text(encoding="utf-8")
+        agents.write_text(
+            text.replace(
+                "<!-- project-memory-local:end -->",
+                "- [.memory/DOCS.md](.memory/DOCS.md) — 文档指针\n"
+                "<!-- project-memory-local:end -->",
+            ),
+            encoding="utf-8",
+        )
+        (target / ".memory" / "DOCS.md").write_text(
+            "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+            "<!-- project-memory-entries:end -->\n",
+            encoding="utf-8",
+        )
+        (target / ".memory" / "docs").mkdir(exist_ok=True)
+
+    def test_init_on_existing_layer_keeps_extra_local_line(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            self._add_docs_line(target)
+            init_memory(target, target, "temp tree")
+            local = (target / "AGENTS.md").read_text(encoding="utf-8")
+            self.assertIn(".memory/DOCS.md", local)
+            self.assertIn(".memory/USER.md", local)
+
+    def test_remember_does_not_drop_extra_local_line(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            self._add_docs_line(target)
+            remember(
+                target,
+                "project",
+                "keep_docs_line",
+                "Keep extra type line",
+                "remember must not rewrite local block back to seeds only",
+                "Extra types stay.\n\n**Why:** ADR 0006 discovery.\n\n"
+                "**How to apply:** merge, do not replace.",
+                {"username": "tester", "email": "t@example.com"},
+            )
+            self.assertIn(
+                ".memory/DOCS.md",
+                (target / "AGENTS.md").read_text(encoding="utf-8"),
+            )
 
 
 if __name__ == "__main__":

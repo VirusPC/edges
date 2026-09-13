@@ -13,9 +13,11 @@ from lib.blocks import (
     LOCAL_START,
     MEMORY_INDEX_LINK_PATTERN,
     block_pattern,
+    build_local_block,
     index_files,
 )
 from lib.paths import AGENTS_FILE_NAME, is_external_type, memory_dir
+from lib.templates import ENTRY_LINE_TEMPLATE, render_line
 
 SEED_TYPE_NAMES: tuple[str, ...] = (
     "user",
@@ -89,3 +91,40 @@ def layer_writable_types(target: Path) -> tuple[str, ...]:
     return tuple(
         name for name in discover_layer_types(target) if not is_external_type(name)
     )
+
+
+def upsert_local_type_line(document: str, index_file: str, description: str) -> str:
+    """插入或保留 `.memory/FOO.md` 行，从不删除其它 type 行。"""
+    relative = f".memory/{index_file}"
+    line = render_line(
+        ENTRY_LINE_TEMPLATE,
+        {"title": relative, "path": relative, "description": description},
+    )
+    match = block_pattern(LOCAL_START, LOCAL_END).search(document)
+    if match is None:
+        raise ValueError("AGENTS.md 缺少本层记忆区块，请先 init")
+    block = match.group(0)
+    entry_pattern = re.compile(
+        rf"^- \[[^\]]*\]\({re.escape(relative)}\)(?: — .*)?$",
+        re.MULTILINE,
+    )
+    if entry_pattern.search(block):
+        return document
+    updated_block = block.replace(LOCAL_END, f"{line}\n{LOCAL_END}", 1)
+    return document[: match.start()] + updated_block + document[match.end() :]
+
+
+def ensure_seed_local_lines(document: str) -> str:
+    """补上缺失的种子行，不删除额外 type 行。"""
+    if block_pattern(LOCAL_START, LOCAL_END).search(document) is None:
+        return document
+    seed_block = build_local_block()
+    for raw in MEMORY_INDEX_LINK_PATTERN.findall(seed_block):
+        desc_match = re.search(
+            rf"\]\(\.memory/{re.escape(raw)}\.md\)(?: — (.*))?$",
+            seed_block,
+            re.MULTILINE,
+        )
+        description = (desc_match.group(1) if desc_match else "").strip()
+        document = upsert_local_type_line(document, f"{raw}.md", description)
+    return document

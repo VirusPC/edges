@@ -174,7 +174,7 @@ def build_important_block() -> str:
 
 
 def build_local_block() -> str:
-    """渲染本层记忆区块。类型入口是闭集且恒存在，所以清单是模板字面量。"""
+    """渲染本层记忆区块的官方种子清单。已有文件合并额外 type 行，不拿这份覆盖。"""
     return extract_block(LOCAL_START, LOCAL_END)
 
 
