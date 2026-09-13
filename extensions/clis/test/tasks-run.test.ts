@@ -101,3 +101,34 @@ test("run tasks update without flags is VALIDATION_ERROR", async () => {
   assert.equal(result.exitCode, 2);
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
+
+test("run tasks status returns command status", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const dir = path.join(repo, "knowledge/tasks/todo");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, "2026-09-13--mv.md"),
+      `---
+name: mv
+description: mv
+metadata:
+  edges-type: task
+  edges-title: mv
+  edges-tasks-status: todo
+---
+
+body
+`,
+      "utf8",
+    );
+    const result = await run(["tasks", "status", "2026-09-13--mv", "done"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(result.exitCode, 0);
+    const body = JSON.parse(result.stdout) as { command: string };
+    assert.equal(body.command, "status");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});

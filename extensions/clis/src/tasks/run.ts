@@ -9,6 +9,7 @@ type RunResult = {
 import { createNodeBoardFs, createNodeBoardWriter, type BoardFs, type BoardWriter } from "./board.js";
 import { formatTasksResult, type TasksFailure } from "./format.js";
 import { getTaskService, listTasksService } from "./service.js";
+import { moveTaskStatus } from "./move.js";
 import { createTask, updateTask } from "./write.js";
 import type { TasksErrorCode, TasksParseOk } from "./types.js";
 import { TasksError } from "./types.js";
@@ -98,7 +99,14 @@ export async function runTasks(parsed: TasksParseOk, io: TasksRunIo = {}): Promi
         );
         return succeed({ status: "success", command: "update", ...updated });
       }
-      case "tasks-status":
+      case "tasks-status": {
+        const writer = io.writer ?? createNodeBoardWriter();
+        const moved = await moveTaskStatus(repoPath, parsed.target, parsed.next, {
+          fs: writer,
+          now: io.now ?? new Date(),
+        });
+        return succeed({ status: "success", command: "status", ...moved });
+      }
       case "tasks-runs":
       case "tasks-run-messages":
         return fail("VALIDATION_ERROR", `${parsed.kind} not wired`);

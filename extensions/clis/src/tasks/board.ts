@@ -1,4 +1,4 @@
-import { access, mkdir, readdir, readFile, rename, writeFile } from "node:fs/promises";
+import { access, mkdir, readdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { parseTaskDoc } from "./frontmatter.js";
 import {
@@ -28,6 +28,7 @@ export type BoardWriter = BoardFs & {
   writeFile(abs: string, contents: string): Promise<void>;
   mkdirp(abs: string): Promise<void>;
   rename(from: string, to: string): Promise<void>;
+  unlink(abs: string): Promise<void>;
 };
 
 export function createNodeBoardFs(): BoardFs {
@@ -60,6 +61,9 @@ export function createNodeBoardWriter(): BoardWriter {
     },
     async rename(from: string, to: string): Promise<void> {
       await rename(from, to);
+    },
+    async unlink(abs: string): Promise<void> {
+      await unlink(abs);
     },
   };
 }
