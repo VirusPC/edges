@@ -1,5 +1,6 @@
 import { Command, CommanderError } from "commander";
 import { createProgram, type IngestCliOptions } from "./program.js";
+import type { TasksParseOk } from "./tasks/types.js";
 import type { IngestErrorCode } from "./types.js";
 
 function applyExitOverride(cmd: Command): void {
@@ -9,20 +10,22 @@ function applyExitOverride(cmd: Command): void {
   }
 }
 
+export type NoteParseOk = {
+  kind: "note";
+  title: string;
+  content: string;
+  coAuthor: string;
+  dryRun: boolean;
+  mode?: "pr" | "direct";
+  tokenFile?: string;
+  tokenStdin: boolean;
+};
+
 export type ParseOk =
   | { kind: "help"; text: string }
   | { kind: "version" }
-  | {
-      kind: "note";
-      title: string;
-      content: string;
-      coAuthor: string;
-      dryRun: boolean;
-      mode?: "pr" | "direct";
-      tokenFile?: string;
-      tokenStdin: boolean;
-    }
-  | { kind: "tasks" };
+  | NoteParseOk
+  | TasksParseOk;
 
 export type ParseFail = {
   kind: "error";
@@ -73,7 +76,8 @@ function fromNoteOptions(opts: IngestCliOptions): ParseResult {
 
 export function parseArgv(argv: string[]): ParseResult {
   let collected: IngestCliOptions | undefined;
-  let sawTasks = false;
+  let collectedTasks: TasksParseOk | undefined;
+  let sawMissingTasksCommand = false;
   let sawMissingCommand = false;
   let output = "";
   const program = createProgram(
@@ -81,8 +85,11 @@ export function parseArgv(argv: string[]): ParseResult {
       onNote: (opts) => {
         collected = opts;
       },
-      onTasks: () => {
-        sawTasks = true;
+      onTasksCommand: (parsed) => {
+        collectedTasks = parsed;
+      },
+      onMissingTasksCommand: () => {
+        sawMissingTasksCommand = true;
       },
       onMissingCommand: () => {
         sawMissingCommand = true;
@@ -120,8 +127,11 @@ export function parseArgv(argv: string[]): ParseResult {
     return validationError(message);
   }
 
-  if (sawTasks) {
-    return { kind: "tasks" };
+  if (sawMissingTasksCommand) {
+    return validationError("missing tasks subcommand. Use edges tasks --help.");
+  }
+  if (collectedTasks) {
+    return collectedTasks;
   }
   if (sawMissingCommand) {
     return validationError("missing command. Use edges --help.");

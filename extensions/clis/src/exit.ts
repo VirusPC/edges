@@ -1,3 +1,4 @@
+import type { TasksErrorCode } from "./tasks/types.js";
 import type { IngestErrorCode, IngestResult } from "./types.js";
 
 export function exitCodeFor(result: IngestResult): number {
@@ -18,4 +19,8 @@ export function exitCodeForError(errorCode: IngestErrorCode): number {
     default:
       return 1;
   }
+}
+
+export function exitCodeForTasksError(code: TasksErrorCode): number {
+  return code === "VALIDATION_ERROR" ? 2 : 1;
 }
