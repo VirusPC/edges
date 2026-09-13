@@ -34,6 +34,11 @@ test("parseArgv tasks get/create/update/status/runs/run-messages", () => {
   assert.equal(msgs.kind, "tasks-run-messages");
 });
 
+test("parseArgv has no delete command", () => {
+  const parsed = parseArgv(["tasks", "delete", "stem"]);
+  assert.equal(parsed.kind, "error");
+});
+
 test("parseArgv rejects tasks delete, log, and missing subcommand", () => {
   for (const argv of [["tasks"], ["tasks", "delete", "x"], ["tasks", "log", "x"]] as string[][]) {
     const parsed = parseArgv(argv);

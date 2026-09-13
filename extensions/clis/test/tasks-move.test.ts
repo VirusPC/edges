@@ -43,3 +43,36 @@ body
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+test("status cancelled keeps both files under cancelled/", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const fromDir = path.join(repo, "knowledge/tasks/backlog");
+    await mkdir(fromDir, { recursive: true });
+    await mkdir(path.join(repo, "knowledge/tasks/cancelled"), { recursive: true });
+    await writeFile(
+      path.join(fromDir, "2026-09-13--stop.md"),
+      `---
+name: stop
+description: stop
+metadata:
+  edges-type: task
+  edges-title: stop
+  edges-tasks-status: backlog
+---
+
+body
+`,
+      "utf8",
+    );
+    await writeFile(path.join(fromDir, ".2026-09-13--stop.log.md"), "# Run log: 2026-09-13--stop\n", "utf8");
+    await moveTaskStatus(repo, "2026-09-13--stop", "cancelled", {
+      fs: nodeBoardWriter(),
+      now: new Date("2026-09-13T12:00:00Z"),
+    });
+    await access(path.join(repo, "knowledge/tasks/cancelled/2026-09-13--stop.md"));
+    await access(path.join(repo, "knowledge/tasks/cancelled/.2026-09-13--stop.log.md"));
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
