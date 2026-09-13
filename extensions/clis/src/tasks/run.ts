@@ -8,7 +8,7 @@ type RunResult = {
 };
 import { createNodeBoardFs, type BoardFs, type BoardWriter } from "./board.js";
 import { formatTasksResult, type TasksFailure } from "./format.js";
-import { listTasksService } from "./service.js";
+import { getTaskService, listTasksService } from "./service.js";
 import type { TasksErrorCode, TasksParseOk } from "./types.js";
 import { TasksError } from "./types.js";
 
@@ -61,7 +61,11 @@ export async function runTasks(parsed: TasksParseOk, io: TasksRunIo = {}): Promi
         const tasks = await listTasksService(repoPath, { status: parsed.status }, fs);
         return succeed({ status: "success", command: "list", tasks });
       }
-      case "tasks-get":
+      case "tasks-get": {
+        const record = await getTaskService(repoPath, parsed.target, fs);
+        const { sidecarMarkdown: _sidecarMarkdown, ...task } = record;
+        return succeed({ status: "success", command: "get", task });
+      }
       case "tasks-create":
       case "tasks-update":
       case "tasks-status":

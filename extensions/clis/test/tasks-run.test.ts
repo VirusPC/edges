@@ -35,3 +35,47 @@ x
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+test("run tasks get returns the task body", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const dir = path.join(repo, "knowledge/tasks/todo");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, "2026-09-13--got.md"),
+      `---
+name: got
+description: got
+metadata:
+  edges-type: task
+  edges-title: got
+  edges-tasks-status: todo
+---
+
+hello body
+`,
+      "utf8",
+    );
+    const result = await run(["tasks", "get", "2026-09-13--got"], { env: { ...process.env, EDGES_REPO: repo } });
+    assert.equal(result.exitCode, 0);
+    const body = JSON.parse(result.stdout) as { command: string; task: { body: string; stem: string } };
+    assert.equal(body.command, "get");
+    assert.equal(body.task.stem, "2026-09-13--got");
+    assert.match(body.task.body, /hello body/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks get missing exits 1 with TASK_NOT_FOUND", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    await mkdir(path.join(repo, "knowledge/tasks/backlog"), { recursive: true });
+    const result = await run(["tasks", "get", "missing"], { env: { ...process.env, EDGES_REPO: repo } });
+    assert.equal(result.exitCode, 1);
+    const body = JSON.parse(result.stdout) as { errorCode: string };
+    assert.equal(body.errorCode, "TASK_NOT_FOUND");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
