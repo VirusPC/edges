@@ -7,13 +7,14 @@ metadata:
   edges-tasks-status: in_progress
   edges-task-pr: "https://github.com/VirusPC/edges/pull/49"
   edges-task-pr-plan: "https://github.com/VirusPC/edges/pull/52"
+  edges-task-pr-impl: "https://github.com/VirusPC/edges/pull/53"
   edges-task-assignee: Coding Agent 专家
   edges-task-assignee-id: ac913463-5bf6-4c16-adc0-900c61a8692d
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-14T01:21:00+08:00"
+  edges-updated-at: "2026-09-14T01:39:00+08:00"
 ---
 
 project-memory 需要支持自由扩展 memory type；示例可含 `docs`、`progress`、`tasks`、`research`、`reminder`、`scheduler` 等，由用户定义 name、description、metadata。约束：**如无必要，勿增实体**——可能不需要单独的 JSON 配置文件；提供某种在指定目录下新增 type 的 skill 即可。
