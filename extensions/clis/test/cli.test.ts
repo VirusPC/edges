@@ -58,3 +58,14 @@ test("real entry tasks --help lists subcommands and not the placeholder", async 
   assert.match(result.stdout, /\blist\b/);
   assert.doesNotMatch(result.stdout, /not implemented/i);
 });
+
+test("real entry tasks --help names all seven verbs and forbids delete/log", async () => {
+  const result = await launch(["tasks", "--help"]);
+  assert.equal(result.status, 0);
+  for (const verb of ["list", "get", "create", "update", "status", "runs", "run-messages"]) {
+    assert.match(result.stdout, new RegExp(`\\b${verb}\\b`));
+  }
+  assert.doesNotMatch(result.stdout, /^\s+delete\b/m);
+  assert.doesNotMatch(result.stdout, /^\s+log\b/m);
+  assert.match(result.stdout, /CLI \+ Skill \+ MCP/);
+});

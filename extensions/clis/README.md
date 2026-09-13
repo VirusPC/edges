@@ -6,7 +6,7 @@ The command tree is built with [Commander.js](https://github.com/tj/commander.js
 
 ```
 edges note …          # ingest a note (required flags on this command)
-edges tasks …         # placeholder (not implemented yet)
+edges tasks …         # Task board (list/get/create/update/status + read-only runs)
 edges --help / -v
 ```
 
@@ -55,7 +55,21 @@ Same optional gate as MCP HTTP. If `EDGES_AUTH_TOKEN` is set, present it with `-
 
 ## `tasks`
 
-Placeholder only. `edges tasks --help` documents that it is not implemented yet. Invoking `edges tasks` exits with a usage error. No task-board logic yet.
+Board root is `<EDGES_REPO>/knowledge/tasks/`. Writes are filesystem-only (no git). Cancel with `status cancelled`. There is no `delete` command and no top-level `log` verb.
+
+```
+edges tasks list [--status <edges-tasks-status>]
+edges tasks get <stem|path>
+edges tasks create --title <title> [--description] [--body] [--status] [--name] [--assignee]
+edges tasks update <stem|path> [--title] [--description] [--body] [--assignee]
+edges tasks status <stem|path> <edges-tasks-status>
+edges tasks runs <stem|path> [--output table|json]
+edges tasks run-messages <run-id> [--task <stem>] [--output table|json]
+```
+
+Issue-layer stdout is always JSON (`--json` is accepted and ignored). `runs` / `run-messages` default to a table; pass `--output json` for JSON. Run layer is read-only (no append). `create` writes the Task file plus an empty sidecar `.{stem}.log.md`.
+
+Skill and MCP come later on this same contract. Capability Surface is CLI + Skill + MCP.
 
 ## Tests
 
