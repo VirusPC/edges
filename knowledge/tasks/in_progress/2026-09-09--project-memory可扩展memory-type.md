@@ -11,7 +11,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-13T12:32:00+08:00"
+  edges-updated-at: "2026-09-13T14:31:00+08:00"
 ---
 
 project-memory 需要支持自由扩展 memory type；示例可含 `docs`、`progress`、`tasks`、`research`、`reminder`、`scheduler` 等，由用户定义 name、description、metadata。约束：**如无必要，勿增实体**——可能不需要单独的 JSON 配置文件；提供某种在指定目录下新增 type 的 skill 即可。
