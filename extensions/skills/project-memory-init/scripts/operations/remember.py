@@ -36,11 +36,11 @@ def remember(
     action = "updated" if path.exists() else "created"
     existing = parse_frontmatter(path) if path.exists() else {}
     detected = {**agent_context(), **git_identity(target)}
-    name = entry_name(path, entry_type)
+    name = entry_name(path, entry_type, target)
     fields = build_entry_fields(
-        name, entry_type, title, description, existing, detected, overrides
+        name, entry_type, title, description, existing, detected, overrides, target
     )
-    write_atomic(path, render_entry(fields, content, entry_output_name(entry_type)))
+    write_atomic(path, render_entry(fields, content, entry_output_name(entry_type, target)))
     # 全部已发现类型一起重算：种子加本层额外 type，缺一个就是死链。
     for declared_type in discover_layer_types(target):
         refresh_index(target, declared_type)

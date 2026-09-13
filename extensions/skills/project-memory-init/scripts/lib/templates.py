@@ -73,15 +73,23 @@ def read_index_template(
     from lib.paths import type_dir_name
 
     flags = flags or {}
+    plural = type_dir_name(entry_type)
+    fmt = flags.get("format", "ordinary")
+    body_hint = (
+        f"`{plural}/<name>/SKILL.md`"
+        if fmt == "skills"
+        else f"`{plural}/{entry_type}_<slug>.md`"
+    )
     return fill_placeholders(
         read_template("TYPE.md"),
         {
             "NAME": entry_type.upper(),
             "type": entry_type,
             "description": description or entry_type,
-            "plural": type_dir_name(entry_type),
+            "plural": plural,
+            "body_hint": body_hint,
             "gitignore": flags.get("gitignore", "false"),
             "writable": flags.get("writable", "true"),
-            "format": flags.get("format", "ordinary"),
+            "format": fmt,
         },
     )

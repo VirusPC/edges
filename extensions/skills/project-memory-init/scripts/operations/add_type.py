@@ -31,7 +31,13 @@ def add_type(
     gitignore: bool = False,
     writable: bool = True,
     format: str = "ordinary",
+    external_content_dir: tuple[str, ...] | None = None,
 ) -> dict[str, object]:
+    if external_content_dir is not None:
+        raise ValueError(
+            "external content root is stubbed this round; "
+            "only official agent_skills may live outside .memory/"
+        )
     name = validate_type_name(entry_type)
     normalized = " ".join((description or "").split())
     if not normalized:

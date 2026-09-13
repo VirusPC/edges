@@ -10,6 +10,7 @@ from lib.blocks import ENTRIES_END, ENTRIES_START, index_files, upsert_block
 from lib.types import (
     discover_layer_types,
     index_file_name,
+    layer_type_specs,
     layer_writable_types,
     reject_unwritable_type,
 )
@@ -93,15 +94,28 @@ def memory_entry_types(target: Path | None = None) -> tuple[str, ...]:
     return layer_writable_types(target)
 
 
-def entry_output_name(entry_type: str) -> str:
+def is_skill_format(target: Path, entry_type: str) -> bool:
+    if entry_type in AGENT_SKILL_FORMAT_TYPES:
+        return True
+    for spec in layer_type_specs(target):
+        if spec.name == entry_type:
+            return spec.format == "skills"
+    return False
+
+
+def entry_output_name(entry_type: str, target: Path | None = None) -> str:
     """这一类的产物名，同时决定用哪份模板（模板名 = 产物名 + .tmpl.md）。"""
+    if target is not None and is_skill_format(target, entry_type):
+        return SKILL_OUTPUT_NAME
     if entry_type in AGENT_SKILL_FORMAT_TYPES:
         return SKILL_OUTPUT_NAME
     return ENTRY_OUTPUT_PATTERN
 
 
-def entry_name(path: Path, entry_type: str) -> str:
+def entry_name(path: Path, entry_type: str, target: Path | None = None) -> str:
     """条目的 name。skill 的身份是目录名，不是文件名——文件名恒为 SKILL.md。"""
+    if target is not None and is_skill_format(target, entry_type):
+        return path.parent.name
     if entry_type in AGENT_SKILL_FORMAT_TYPES:
         return path.parent.name
     return path.stem
@@ -262,7 +276,11 @@ def ordinary_memory_types(target: Path | None = None) -> tuple[str, ...]:
     return tuple(
         name
         for name in memory_entry_types(target)
-        if name not in AGENT_SKILL_FORMAT_TYPES
+        if not (
+            is_skill_format(target, name)
+            if target is not None
+            else name in AGENT_SKILL_FORMAT_TYPES
+        )
     )
 
 
@@ -314,7 +332,7 @@ def resolve_memory_path(target: Path, entry_type: str, slug: str | None) -> Path
         raise ValueError(reject_unwritable_type(target, entry_type))
     normalized = (slug or "").strip().lower()
     directory = type_content_dir(target, entry_type)
-    if entry_type in AGENT_SKILL_FORMAT_TYPES:
+    if is_skill_format(target, entry_type):
         # Agent Skills 协议要求 name 等于目录名，所以 slug 直接当目录名用。
         if not SKILL_NAME_PATTERN.fullmatch(normalized) or len(normalized) > SKILL_NAME_MAX:
             raise ValueError(
@@ -338,9 +356,14 @@ def build_entry_fields(
     existing: dict[str, str],
     detected: dict[str, str],
     overrides: dict[str, str],
+    target: Path | None = None,
 ) -> dict[str, str]:
     """组装 frontmatter。显式覆盖优先级最高，其余按字段语义决定谁胜出。"""
-    agent_skill = entry_type in AGENT_SKILL_FORMAT_TYPES
+    agent_skill = (
+        is_skill_format(target, entry_type)
+        if target is not None
+        else entry_type in AGENT_SKILL_FORMAT_TYPES
+    )
     # title 可能来自旧顶层键或 metadata.edges-title，parse_frontmatter 已经摊平。
     resolved_title = (title or existing.get("title") or "").strip()
     resolved_description = (description or existing.get("description") or "").strip()
@@ -375,14 +398,14 @@ def build_entry_index(target: Path, entry_type: str) -> str:
     """从全部条目文件的 frontmatter 重算某个索引的条目清单。"""
     entries: list[str] = []
     directory = memory_dir(target)
-    if entry_type in AGENT_SKILL_FORMAT_TYPES:
+    if is_skill_format(target, entry_type):
         # skill 目录的内部形状属于外部协议；这里只保留一个很薄的当前格式适配器。
         paths = list_type_files(target, entry_type, f"*/{SKILL_OUTPUT_NAME}")
     else:
         paths = list_type_files(target, entry_type, f"{entry_type}_*.md")
     for path in paths:
         fields = parse_frontmatter(path)
-        name = entry_name(path, entry_type)
+        name = entry_name(path, entry_type, target)
         title = fields.get("title") or fields.get("name") or name
         description = fields.get("description") or "缺少 description，请补齐 frontmatter。"
         entries.append(

@@ -143,5 +143,51 @@ class AddTypeIndexOnlyTests(unittest.TestCase):
             self.assertNotIn("outdated-local", issues)
 
 
+class AddTypeSkillsFormatTests(unittest.TestCase):
+    def test_skills_format_remember_writes_skill_md(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            add_type(
+                target,
+                "playbook",
+                "可执行手册，形态与 skills 相同",
+                format="skills",
+            )
+            result = remember(
+                target,
+                "playbook",
+                "rerun-failed-e2e",
+                None,
+                "rerun failed e2e once",
+                "1. Collect failed tests.\n2. Rerun them.",
+                {"username": "tester", "email": "t@example.com"},
+            )
+            path = target / ".memory" / "playbooks" / "rerun-failed-e2e" / "SKILL.md"
+            self.assertTrue(path.is_file(), result)
+            self.assertEqual(
+                result["path"],
+                ".memory/playbooks/rerun-failed-e2e/SKILL.md",
+            )
+
+
+class AddTypeExternalStubTests(unittest.TestCase):
+    def test_external_content_dir_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            with self.assertRaises(ValueError) as ctx:
+                add_type(
+                    target,
+                    "plugins",
+                    "want external root",
+                    external_content_dir=(".agents", "plugins"),
+                )
+            message = str(ctx.exception)
+            self.assertIn("stub", message.lower())
+            self.assertIn("agent_skills", message)
+            self.assertNotIn("plugins", discover_layer_types(target))
+
+
 if __name__ == "__main__":
     unittest.main()
