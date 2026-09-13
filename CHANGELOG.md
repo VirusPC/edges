@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/adr/0002-knowledge-tasks-status-folders.md`：`knowledge/todos` 迁为按状态分夹的 `knowledge/tasks`。
 - `docs/adr/0004-capability-surface-cli-skill-mcp.md`：能力面定为 CLI + Skill + MCP，删除仓根 `bin/`（实现见本 Unreleased 的 Removed/Changed）。
 - `extensions/skills/edges-note`：教 Agent 何时如何调用 CLI 与 MCP（能力面三入口）。
+- `docs/superpowers/plans/2026-09-13-extensible-project-memory-types.md`：ADR-0006 的实现计划（LAYOUT 登记用户 Memory Type；`$project-memory-add-type`；官方种子仍是六类；本计划 PR 不实现 skill）。
 - `docs/superpowers/plans/2026-09-13-edges-tasks-cli.md`：ADR-0005 的实现计划（本轮只做 `edges tasks` CLI；Run 层只读 `runs` / `run-messages`）。
 - `docs/superpowers/plans/2026-09-11-capability-surface-bin-cli-skill-mcp.md`：ADR-0004 的实现计划（CLI 内 TS git、Skill、MCP 子进程调 `edges note`）。
 - [`knowledge/tasks/`](knowledge/tasks/)：跨 Agent 接力的 Task 看板。
