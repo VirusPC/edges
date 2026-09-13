@@ -24,6 +24,7 @@ from lib.types import (  # noqa: E402
     seed_index_files,
     validate_type_name,
 )
+from nodes.entries import expected_index_document  # noqa: E402
 from operations.init import init_memory  # noqa: E402
 from operations.remember import remember  # noqa: E402
 
@@ -263,6 +264,16 @@ class RememberDiscoveredTypeTests(unittest.TestCase):
             self.assertTrue(
                 (target / ".memory" / "docs" / "docs_cli_layout.md").is_file()
             )
+
+
+class TypeTemplateTests(unittest.TestCase):
+    def test_expected_index_uses_generic_template_for_unknown_type(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            document = expected_index_document(target, "docs")
+            self.assertIn("project-memory-entries:start", document)
+            self.assertIn("docs", document.lower())
 
 
 if __name__ == "__main__":

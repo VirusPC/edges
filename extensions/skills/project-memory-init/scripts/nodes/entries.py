@@ -22,6 +22,7 @@ from lib.templates import (
     ENTRY_OUTPUT_PATTERN,
     PLACEHOLDER_PATTERN,
     fill_placeholders,
+    read_index_template,
     read_template,
     render_line,
     template_path,
@@ -402,7 +403,7 @@ def expected_index_document(target: Path, entry_type: str) -> str:
     existing = (
         path.read_text(encoding="utf-8")
         if path.is_file()
-        else read_template(file_name)
+        else read_index_template(file_name, entry_type, entry_type)
     )
     updated = upsert_block(
         existing, ENTRIES_START, ENTRIES_END, build_entry_index(target, entry_type)
