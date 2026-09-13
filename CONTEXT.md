@@ -42,7 +42,7 @@ _避免使用_：独立全局 vault、edges-private 当真源、机器级单一�
 
 **可扩展 Memory Type**：
 在指定记忆目录通过 skill（如 `$project-memory-add-type`）登记新的 Memory Type（name / description / 可选特权 metadata），与内置种子类型同构、可被 remember / ask / doctor 发现；官方 init 种子不因示例类型膨胀。
-_避免使用_：单独 JSON/YAML 总配置平面、本轮把示例 type 写进默认种子
+_避免使用_：单独 JSON/YAML 总配置平面、把示例 type 写进默认种子
 
 **知识管理 Agent（Knowledge Management Agent）**：
 在人设定的目标、授权与风险边界内，承担研究、提炼、检索、部署和反馈处理的主动知识资产管理者。
