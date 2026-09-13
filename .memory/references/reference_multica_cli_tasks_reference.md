@@ -1,6 +1,6 @@
 ---
 name: reference_multica_cli_tasks_reference
-description: 设计 edges tasks CLI 时对照 Multica 官方 CLI：issue CRUD/status、runs、run-messages；无顶层 log 命令。
+description: 设计 edges tasks CLI 时对照 Multica：https://multica.ai/docs/cli ；指南 https://github.com/multica-ai/multica/blob/main/CLI_AND_DAEMON.md ；skill https://github.com/multica-ai/multica-cli ；runs PR https://github.com/multica-ai/multica/pull/314
 metadata:
   edges-title: Multica CLI（Issue/Run）对照链接
   edges-type: reference
@@ -8,7 +8,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-13T02:48:57+00:00"
+  edges-updated-at: "2026-09-13T02:51:33+00:00"
 ---
 
 设计 `edges tasks` 时对照 Multica 官方 CLI（Issue / Run 双层）。
