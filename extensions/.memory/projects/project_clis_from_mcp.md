@@ -8,12 +8,12 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-11T18:02:16+00:00"
+  edges-updated-at: "2026-09-13T04:08:49+00:00"
 ---
 
-本地、有 shell 的 agent 用 `extensions/clis/` 的 `edges` CLI；入库子命令是 `edges note …`。鉴权 flag（`--token-file` / `--token-stdin`）挂在 `note` 上，和 new-note MCP HTTP 同一道可选门闩。`edges tasks` 仍是占位。二进制只有 `edges`。git 在 `extensions/clis/src/git`；`extensions/mcp-servers/new-note` 留给没有 shell 的宿主，子进程调用 `edges note`。不要把 CLI 项目放在仓库根 `clis/`。
+本地、有 shell 的 agent 用 `extensions/clis/` 的 `edges` CLI；入库子命令是 `edges note …`。鉴权 flag（`--token-file` / `--token-stdin`）挂在 `note` 上，和 new-note MCP HTTP 同一道可选门闩。`edges tasks` 已落地 Issue 层 list/get/create/update/status 与只读 `runs` / `run-messages`（ADR 0005）。二进制只有 `edges`。git 在 `extensions/clis/src/git`（仅 `note` ingest）；tasks 写盘不调 git。`extensions/mcp-servers/new-note` 留给没有 shell 的宿主，子进程调用 `edges note`。不要把 CLI 项目放在仓库根 `clis/`。
 
-**Why:** ADR-0004 把能力面定为 CLI + Skill + MCP，并删除仓根 `bin/`。先前「两边都 execFile bin/new-note、MCP 不套 CLI」已被取代。
+**Why:** ADR-0004 把能力面定为 CLI + Skill + MCP，并删除仓根 `bin/`。ADR-0005 把本轮 tasks 钉在 CLI 契约。先前「两边都 execFile bin/new-note、MCP 不套 CLI」已被取代。
 
 **How to apply:**
 
@@ -38,12 +38,12 @@ agent / human
 
 ```
 edges note --title T --content C --co-author "Name <email>" [--json] [--dry-run] [--mode direct|pr] [--token-file PATH]
-edges tasks [--help]
+edges tasks list|get|create|update|status|runs|run-messages
 edges --help / -v
 ```
 
 - 根目录不带入子命令：help 或 usage error，不跑 note ingest。
-- 输出始终 JSON；进度在 stderr。
+- 输出始终 JSON（tasks 的 runs/run-messages 默认 table，可 `--output json`）；进度在 stderr。
 - 成功 exit 0；运行时失败 exit 1；缺字段 exit 2；鉴权失败 exit 4。
 - 环境：`EDGES_REPO`、`EDGES_BASE_BRANCH`、`EDGES_MODE`、`EDGES_DRY_RUN`、`EDGES_AUTH_TOKEN`、`GITHUB_TOKEN`。没有 `EDGES_SCRIPT`。
 
