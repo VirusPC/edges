@@ -79,3 +79,19 @@ test("run tasks get missing exits 1 with TASK_NOT_FOUND", async () => {
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+test("run tasks create is JSON and skips git", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    await mkdir(path.join(repo, "knowledge/tasks/backlog"), { recursive: true });
+    const result = await run(["tasks", "create", "--title", "From CLI"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(result.exitCode, 0);
+    const body = JSON.parse(result.stdout) as { command: string; path: string; stem: string };
+    assert.equal(body.command, "create");
+    assert.match(body.path, /knowledge\/tasks\/backlog\//);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
