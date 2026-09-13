@@ -1,5 +1,7 @@
 import { Command, Option } from "commander";
 import { NOTE_AFTER_HELP, ROOT_AFTER_HELP, TASKS_AFTER_HELP } from "./help.js";
+import { addTasksCommands } from "./tasks/program.js";
+import type { TasksParseOk } from "./tasks/types.js";
 import { VERSION } from "./version.js";
 
 export type IngestCliOptions = {
@@ -15,7 +17,8 @@ export type IngestCliOptions = {
 
 export type ProgramHandlers = {
   onNote?: (opts: IngestCliOptions) => void;
-  onTasks?: () => void;
+  onTasksCommand?: (parsed: TasksParseOk) => void;
+  onMissingTasksCommand?: () => void;
   onMissingCommand?: () => void;
 };
 
@@ -91,13 +94,16 @@ export function createProgram(
 
   const tasks = program
     .command("tasks")
-    .description("Task board commands (not implemented yet)")
+    .description("Task board commands")
     .allowExcessArguments(false)
     .showHelpAfterError(false)
     .helpOption("-h, --help", "Show this help");
 
+  addTasksCommands(tasks, (parsed) => {
+    handlers.onTasksCommand?.(parsed);
+  });
   tasks.action(() => {
-    handlers.onTasks?.();
+    handlers.onMissingTasksCommand?.();
   });
   tasks.addHelpText("after", TASKS_AFTER_HELP);
 

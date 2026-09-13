@@ -55,9 +55,12 @@ test("parseArgv tasks --help is help", () => {
   assert.equal(parsed.kind, "help");
 });
 
-test("parseArgv tasks without flags is the placeholder command", () => {
+test("parseArgv tasks without a subcommand is a validation error", () => {
   const parsed = parseArgv(["tasks"]);
-  assert.equal(parsed.kind, "tasks");
+  assert.equal(parsed.kind, "error");
+  if (parsed.kind === "error") {
+    assert.equal(parsed.errorCode, "VALIDATION_ERROR");
+  }
 });
 
 test("parseArgv rejects unexpected positionals on note", () => {
