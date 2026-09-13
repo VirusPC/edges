@@ -1,1 +1,1 @@
-"""三个操作：init / remember / doctor。只被 memory.py 调用。"""
+"""四个操作：init / remember / doctor / add-type。只被 memory.py 调用。"""
