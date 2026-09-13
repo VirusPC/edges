@@ -215,6 +215,59 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
             remaining = doctor_memory(target, apply=False)
             self.assertEqual(remaining["findings"], [], remaining)
 
+    def test_doctor_apply_restores_missing_seed_without_dropping_docs(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            add_type(target, "docs", "项目内文档指针，不是知识库正文")
+            agents = target / "AGENTS.md"
+            text = agents.read_text(encoding="utf-8")
+            agents.write_text(
+                "\n".join(
+                    line
+                    for line in text.splitlines()
+                    if ".memory/USER.md" not in line
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            diagnosed = doctor_memory(target, apply=False)
+            issues = {item["issue"] for item in diagnosed["findings"]}
+            self.assertIn("outdated-local", issues)
+            doctor_memory(target, apply=True)
+            local = agents.read_text(encoding="utf-8")
+            self.assertIn(".memory/USER.md", local)
+            self.assertIn(".memory/DOCS.md", local)
+            remaining = doctor_memory(target, apply=False)
+            self.assertEqual(remaining["findings"], [], remaining)
+
+    def test_init_refreshes_extra_type_index(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            add_type(target, "docs", "项目内文档指针，不是知识库正文")
+            remember(
+                target,
+                "docs",
+                "layout_pointer",
+                "LAYOUT is the extension surface",
+                "extra indexes must refresh on init too",
+                "Isomorphic to seeds.\n\n**Why:** plan file map.\n\n"
+                "**How to apply:** refresh discovered types.",
+                {"username": "tester", "email": "t@example.com"},
+            )
+            docs_index = target / ".memory" / "DOCS.md"
+            docs_index.write_text(
+                "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                "<!-- project-memory-entries:end -->\n",
+                encoding="utf-8",
+            )
+            init_memory(target, target, "temp tree")
+            self.assertIn(
+                "docs_layout_pointer.md",
+                docs_index.read_text(encoding="utf-8"),
+            )
+
     def test_unregistered_type_entry_is_linked_on_apply(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
             target = Path(raw)

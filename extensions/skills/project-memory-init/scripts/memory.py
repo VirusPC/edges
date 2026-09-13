@@ -101,8 +101,9 @@ def read_content(arguments: argparse.Namespace) -> str:
 def main() -> int:
     """执行原子操作并输出机器可读 JSON。"""
     try:
-        # 建 parser 就要读模板（`--type` 的取值来自模板），所以它也得在 try 里，
+        # 建 parser 仍会读模板（种子类型清单），所以它也得在 try 里，
         # 否则模板坏掉时抛的是 traceback 而不是约定的 JSON 错误。
+        # remember --type 的合法值在 parse 之后按该层发现结果校验。
         arguments = build_parser().parse_args()
         target = resolve_target(arguments.target_dir)
         if arguments.operation == "remember":

@@ -44,7 +44,7 @@
 
 两处会岔开的地方，加类型前先想清楚落在哪一边：
 
-- **内容格式**由外部协议定义（如 `skills` 走 Agent Skills 的 `<name>/SKILL.md`）→ 在 `nodes/entries.py` 的 `AGENT_SKILL_FORMAT_TYPES` 里登记，并给一份对应产物名的模板，不能套 `type_slug.tmpl.md`。
+- **内容格式**由外部协议定义（如 `skills` 走 Agent Skills 的 `<name>/SKILL.md`）→ 官方种子仍在 `nodes/entries.py` 的 `AGENT_SKILL_FORMAT_TYPES`；用户 type 用 `add-type --skills-format` 写进 privilege 注释。两种都走 `SKILL.md` 模板，不能套 `type_slug.tmpl.md`。
 - **内容根在 `.memory/` 之外**（如 `agent_skills` 挂在 `.agents/skills/`）→ 在 `lib/paths.py` 的 `EXTERNAL_CONTENT_DIRS` 里登记。这张表同时意味着**只读**：`memory_entry_types()` 会排掉它，init 与 doctor 都不建目录、不写内容。
 
 ## 怎么跑
