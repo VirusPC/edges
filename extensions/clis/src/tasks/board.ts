@@ -1,3 +1,4 @@
+import { access, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { parseTaskDoc } from "./frontmatter.js";
 import {
@@ -22,6 +23,31 @@ export type BoardFs = {
   readdir(abs: string): Promise<string[]>;
   exists(abs: string): Promise<boolean>;
 };
+
+export type BoardWriter = BoardFs & {
+  writeFile(abs: string, contents: string): Promise<void>;
+  mkdirp(abs: string): Promise<void>;
+  rename(from: string, to: string): Promise<void>;
+};
+
+export function createNodeBoardFs(): BoardFs {
+  return {
+    async readFile(abs: string): Promise<string> {
+      return readFile(abs, "utf8");
+    },
+    async readdir(abs: string): Promise<string[]> {
+      return readdir(abs);
+    },
+    async exists(abs: string): Promise<boolean> {
+      try {
+        await access(abs);
+        return true;
+      } catch {
+        return false;
+      }
+    },
+  };
+}
 
 function countSidecarRuns(markdown: string): number {
   const rows = markdown.split(/\r?\n/).filter((line) => line.trim().startsWith("|"));

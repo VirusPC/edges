@@ -45,27 +45,20 @@ test("run note --help documents ingest flags and structured output", async () =>
   assert.match(result.stdout, /STRUCTURED OUTPUT/);
 });
 
-test("run tasks --help documents the placeholder", async () => {
+test("run tasks --help lists subcommands and not the placeholder", async () => {
   const result = await run(["tasks", "--help"]);
   assert.equal(result.exitCode, 0);
-  assert.match(result.stdout, /not implemented/i);
+  assert.match(result.stdout, /\blist\b/);
+  assert.match(result.stdout, /\brun-messages\b/);
+  assert.doesNotMatch(result.stdout, /not implemented/i);
 });
 
-test("run tasks without flags exits usage and does not ingest", async () => {
-  let called = false;
-  const result = await run(["tasks"], {
-    ingest: async () => {
-      called = true;
-      throw new Error("ingest should not run");
-    },
-  });
-
-  assert.equal(called, false);
+test("run tasks without subcommand is usage JSON", async () => {
+  const result = await run(["tasks"]);
   assert.equal(result.exitCode, 2);
-  const parsed = JSON.parse(result.stdout) as { status: string; errorCode: string; reason: string };
+  const parsed = JSON.parse(result.stdout) as { status: string; errorCode: string };
   assert.equal(parsed.status, "failed");
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
-  assert.match(parsed.reason, /not implemented/i);
 });
 
 test("missing note flags fail with JSON error and do not call ingest", async () => {

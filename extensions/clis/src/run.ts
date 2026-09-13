@@ -7,6 +7,8 @@ import { parseArgv } from "./parse.js";
 import { formatHelp } from "./program.js";
 import { runNoteIngest } from "./git/ingest.js";
 import { runIngest, type IngestRunner } from "./service.js";
+import type { BoardFs, BoardWriter } from "./tasks/board.js";
+import { runTasks } from "./tasks/run.js";
 import type { IngestFailure } from "./types.js";
 import { formatZodReason, validateInput } from "./validation.js";
 import { VERSION } from "./version.js";
@@ -16,6 +18,10 @@ export type RunIo = {
   stdinText?: string;
   stdinIsTTY?: boolean;
   ingest?: IngestRunner;
+  repoPath?: string;
+  fs?: BoardFs;
+  now?: Date;
+  writer?: BoardWriter;
 };
 
 export type RunResult = {
@@ -49,11 +55,14 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
   if (parsed.kind === "version") {
     return { exitCode: 0, stdout: `${VERSION}\n`, stderr: "" };
   }
-  if (parsed.kind === "tasks") {
-    return fail(
-      { status: "failed", errorCode: "VALIDATION_ERROR", reason: "tasks is not implemented yet" },
-      "See edges tasks --help for usage.\n",
-    );
+  if (parsed.kind.startsWith("tasks-")) {
+    return runTasks(parsed, {
+      env,
+      repoPath: io.repoPath ?? loadConfig(env).repoPath,
+      fs: io.fs,
+      now: io.now,
+      writer: io.writer,
+    });
   }
   if (parsed.kind === "error") {
     const usage =
