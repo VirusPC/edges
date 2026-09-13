@@ -9,7 +9,7 @@ type RunResult = {
 import { createNodeBoardFs, createNodeBoardWriter, type BoardFs, type BoardWriter } from "./board.js";
 import { formatTasksResult, type TasksFailure } from "./format.js";
 import { getTaskService, listTasksService } from "./service.js";
-import { createTask } from "./write.js";
+import { createTask, updateTask } from "./write.js";
 import type { TasksErrorCode, TasksParseOk } from "./types.js";
 import { TasksError } from "./types.js";
 
@@ -83,7 +83,21 @@ export async function runTasks(parsed: TasksParseOk, io: TasksRunIo = {}): Promi
         );
         return succeed({ status: "success", command: "create", ...created });
       }
-      case "tasks-update":
+      case "tasks-update": {
+        const writer = io.writer ?? createNodeBoardWriter();
+        const updated = await updateTask(
+          repoPath,
+          parsed.target,
+          {
+            title: parsed.title,
+            description: parsed.description,
+            body: parsed.body,
+            assignee: parsed.assignee,
+          },
+          { fs: writer, now: io.now ?? new Date() },
+        );
+        return succeed({ status: "success", command: "update", ...updated });
+      }
       case "tasks-status":
       case "tasks-runs":
       case "tasks-run-messages":

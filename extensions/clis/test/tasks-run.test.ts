@@ -95,3 +95,9 @@ test("run tasks create is JSON and skips git", async () => {
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+test("run tasks update without flags is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "update", "stem"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+});

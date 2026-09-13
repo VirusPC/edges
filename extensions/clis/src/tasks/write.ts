@@ -1,9 +1,9 @@
 import path from "node:path";
-import type { BoardWriter } from "./board.js";
-import { renderNewTaskDoc } from "./frontmatter.js";
+import { getTask, type BoardWriter } from "./board.js";
+import { renderNewTaskDoc, replaceBody, setMetadataField, setTopLevelField } from "./frontmatter.js";
 import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
 import { newTaskStem, taskNameSlug } from "./slug.js";
-import type { TaskStatus } from "./types.js";
+import { TasksError, type TaskStatus } from "./types.js";
 
 export type { BoardWriter };
 
@@ -61,4 +61,35 @@ export async function createTask(
   await io.fs.writeFile(path.join(repoPath, rel), markdown);
   await io.fs.writeFile(path.join(repoPath, sidecarRel), emptyRunLog(stem));
   return { stem, path: rel, sidecarPath: sidecarRel };
+}
+
+export async function updateTask(
+  repoPath: string,
+  target: string,
+  patch: { title?: string; description?: string; body?: string; assignee?: string },
+  io: { fs: BoardWriter; now: Date },
+): Promise<{ stem: string; path: string }> {
+  if (!patch.title && !patch.description && !patch.body && !patch.assignee) {
+    throw new TasksError(
+      "VALIDATION_ERROR",
+      "update requires at least one of --title, --description, --body, --assignee",
+    );
+  }
+  const record = await getTask(repoPath, target, io.fs);
+  let markdown = await io.fs.readFile(path.join(repoPath, record.path));
+  if (patch.title !== undefined) {
+    markdown = setMetadataField(markdown, "edges-title", patch.title);
+  }
+  if (patch.description !== undefined) {
+    markdown = setTopLevelField(markdown, "description", patch.description);
+  }
+  if (patch.body !== undefined) {
+    markdown = replaceBody(markdown, patch.body);
+  }
+  if (patch.assignee !== undefined) {
+    markdown = setMetadataField(markdown, "edges-task-assignee", patch.assignee);
+  }
+  markdown = setMetadataField(markdown, "edges-updated-at", io.now.toISOString());
+  await io.fs.writeFile(path.join(repoPath, record.path), markdown);
+  return { stem: record.stem, path: record.path };
 }
