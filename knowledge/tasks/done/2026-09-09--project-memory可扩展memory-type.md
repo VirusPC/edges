@@ -4,7 +4,7 @@ description: project-memory 可扩展 memory type；如无必要勿增实体，�
 metadata:
   edges-type: task
   edges-title: project-memory 可扩展 memory type
-  edges-tasks-status: in_progress
+  edges-tasks-status: done
   edges-task-pr: "https://github.com/VirusPC/edges/pull/49"
   edges-task-pr-plan: "https://github.com/VirusPC/edges/pull/52"
   edges-task-pr-impl: "https://github.com/VirusPC/edges/pull/53"
@@ -14,7 +14,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-14T01:39:00+08:00"
+  edges-updated-at: "2026-09-14T02:06:00+08:00"
 ---
 
 project-memory 需要支持自由扩展 memory type；示例可含 `docs`、`progress`、`tasks`、`research`、`reminder`、`scheduler` 等，由用户定义 name、description、metadata。约束：**如无必要，勿增实体**——可能不需要单独的 JSON 配置文件；提供某种在指定目录下新增 type 的 skill 即可。
