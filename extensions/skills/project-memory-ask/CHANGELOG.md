@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- 本层清单里多出来的入口就是用户登记的 Memory Type，与种子同一跳规则；不要假定只有六份。
+
 ## [1.2.1] - 2026-09-08
 
 ### Changed

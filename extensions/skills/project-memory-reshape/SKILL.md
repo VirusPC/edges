@@ -32,7 +32,7 @@ version: 1.3.1
 | --- | --- |
 | 写进本层硬约束区块 | ask / remember 聚光灯（点名即可，不写用法）+ 该目录不检索就会做错的仓规。不要写 init / doctor / reshape，不要把 README 长规范搬进来 |
 | 留在 `AGENTS.md` 区块外 | 标题、一两句身份、指向唯一真理源的指针（例如「目录约定看 README」）。不要把长规范留在这里 |
-| 抽到 `.memory` | 按 `$project-memory-remember` 的闸门：纠正与禁止 → `feedback`；代码/git 推不出的决策 → `project`；外部资料去哪找 → `reference`；个人偏好 / 凭据 / 不得公开 → `user`（gitignore，不进 git） |
+| 抽到 `.memory` | 按 `$project-memory-remember` 的闸门：纠正与禁止 → `feedback`；代码/git 推不出的决策 → `project`；外部资料去哪找 → `reference`；个人偏好 / 凭据 / 不得公开 → `user`（gitignore，不进 git）。该层 `AGENTS.md` 已列出的额外 type 也可以作为 remember `--type` |
 | 删掉 | 与 README 或其他真理源重复的结构说明、能从代码推出来的架构与路径、过期进度、一次性流程。可执行流程该是 skill，不要在这里新造一份 |
 
 同一条事实不要既留在正文又写成记忆。常驻需要的留正文、不 remember；按需才看的抽走、从正文删掉。拿不准就留正文、不抽——错误的记忆条目以后会被检索出来当真。

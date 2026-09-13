@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `unregistered-type`：入口文件在、本层清单没有这一行时补上链接。
+
+### Changed
+
+- `outdated-local` 对照该层已发现的 type（种子 ∪ 用户登记）；`--apply` 不得删掉额外行。`.agents/` 仍一个字节都不碰。
+
 ## [1.5.0] - 2026-09-08
 
 ### Added

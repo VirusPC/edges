@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Init 仍只建官方六类种子。用户 Memory Type 由 `$project-memory-add-type` 按 LAYOUT 登记，不写进 `AGENTS.tmpl.md`（ADR-0006）。
+
 ## [1.7.0] - 2026-09-11
 
 ### Added
