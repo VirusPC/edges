@@ -6,13 +6,14 @@ metadata:
   edges-title: tasks 配套 skill：CRUD 与状态流转
   edges-tasks-status: in_progress
   edges-task-pr: "https://github.com/VirusPC/edges/pull/46"
+  edges-task-pr-plan: "https://github.com/VirusPC/edges/pull/47"
   edges-task-assignee: Coding Agent 专家
   edges-task-assignee-id: ac913463-5bf6-4c16-adc0-900c61a8692d
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-13T11:20:00+08:00"
+  edges-updated-at: "2026-09-13T11:30:00+08:00"
 ---
 
 tasks 应提供配套 skill：做增删改查与状态流转管理，并对外提供统一操作接口。
