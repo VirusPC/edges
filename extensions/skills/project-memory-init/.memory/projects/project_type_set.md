@@ -8,10 +8,10 @@ metadata:
   edges-agent-client: cursor
   edges-username: Coding Agent 专家
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-13T06:34:01+00:00"
+  edges-updated-at: "2026-09-13T17:32:01+00:00"
 ---
 
-可写类型是 `user` / `feedback` / `project` / `reference` / `skills`；`agent_skills` 只索引不写。这六类是官方 init 种子，不是 PROTOCOL 闭集：类型集合由 LAYOUT 实现与本层登记决定。不要把 `docs` 等示例写进默认种子。用户记忆是项目记忆的一种 Memory Type，权威副本在仓库工作树内且 gitignore，按仓库路径绑定，布局与其他类型相同（`.memory/users/`、`USER.md`、`user_<slug>.md`）。本层入口清单顺序是 `user` → `feedback` → `project` → `reference`（`project` 兜底），然后才是 `skills` / `agent_skills`。skill 接线（init / remember `--type user`、备份/恢复）已做。`.memory/` 下类型目录用复数。可扩展登记见仓库根 ADR 0006。
+可写类型是 `user` / `feedback` / `project` / `reference` / `skills`；`agent_skills` 只索引不写。这六类是官方 init 种子，不是 PROTOCOL 闭集：类型集合由 LAYOUT 实现与本层登记决定。不要把 `docs` 等示例写进默认种子。用户记忆是项目记忆的一种 Memory Type，权威副本在仓库工作树内且 gitignore，按仓库路径绑定，布局与其他类型相同（`.memory/users/`、`USER.md`、`user_<slug>.md`）。本层入口清单顺序是 `user` → `feedback` → `project` → `reference`（`project` 兜底），然后才是 `skills` / `agent_skills`。skill 接线（init / remember `--type user`、备份/恢复）已做。`.memory/` 下类型目录用复数。可扩展登记见仓库根 ADR 0006；`$project-memory-add-type` 已落地。
 
 **Why:**
 
@@ -21,14 +21,14 @@ metadata:
 
 **「不要把 `user` 放进仓库树」已被仓库根 `docs/adr/0003-user-memory-in-repo-gitignored.md`（ADR-0003）推翻。** 现行结论是仓内权威副本 + gitignore + 按仓绑定 + 与其他类型相同的复数目录布局。内容闸门从简（个人偏好、凭据与不得公开的材料）；gitignore 是凭据可以放这里的前提。v1 不做脱敏晋升到可提交类型。家目录当真源已被用户否决。其余（官方种子不含 docs、现有各类型闸门含 `user`、skills 可写 / agent_skills 只索引）仍成立。`private` 条目元数据是另案，不在这次接线里做。
 
-**「类型集合等于这六类、不能再加」已被仓库根 `docs/adr/0006-extensible-project-memory-types.md`（ADR-0006）收窄。** 六类仍是官方 init 种子与既有特例的家；用户后加的 type 与种子同构，由 LAYOUT + 本层登记发现，不另开 JSON/YAML 注册表。用户所述（grill 2026-09-13）。
+**「类型集合等于这六类、不能再加」已被仓库根 `docs/adr/0006-extensible-project-memory-types.md`（ADR-0006）收窄。** 六类仍是官方 init 种子与既有特例的家；用户后加的 type 与种子同构，由 LAYOUT + 本层登记发现，不另开 JSON/YAML 注册表。用户所述（grill 2026-09-13）。`$project-memory-add-type` 已实现，不再是待办。
 
 本层清单顺序是用户纠正：先更具体的 `user` / `feedback`，`project` 当兜底，再 `reference`。详见 [[feedback_agents_local_type_order]]。
 
 **How to apply:**
 
 - 问「该不该加官方种子」时三件齐才加：**独立检索问题、与现有类不同的失效方式、有「不记什么」的闸门**。既有类型的失效方式：user = 换机或删仓后本机个人材料丢了、或误把密钥写进可提交类型；feedback = 又踩同一个坑；project = 推翻已定决策；reference = 找不到源头；skills = 流程执行不出来；agent_skills = 装的东西发现不了。
-- 用户要在某一层自建 type：走 `$project-memory-add-type`（待实现），按 LAYOUT 落入口与目录；不要先做 JSON/YAML 总配置，也不要把示例写进 init 种子。
+- 用户要在某一层自建 type：走 `$project-memory-add-type`，按 LAYOUT 落入口与目录；不要先做 JSON/YAML 总配置，也不要把示例写进 init 种子。
 - 文档按为什么再读它归类，并按清单顺序先排除更具体的：本仓不宜公开 → `user`；纠正与禁区 → `feedback`；外部指针 → `reference`；对不上再 → `project`（兜底）；**自动沉淀的可执行流程 → `skills`**；人写或装入的技能 → 放 `.agents/skills/`，由 `agent_skills` 索引；常驻指令 → `AGENTS.md` 正文。
 - 不要改 `project` / `reference` 引言去迁就已有文件。
 - 用户记忆的现行结论见 ADR-0003：仓内 `.memory/users/` + `USER.md` + `user_<slug>.md`，gitignore，不把家目录或 edges-private 当真源。Agent 读本机 `USER.md`。换机用 `$user-memory-backup` / `$user-memory-restore`。不要在 v1 设计晋升到可提交类型，也不要加 `private` 字段。
