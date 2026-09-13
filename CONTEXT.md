@@ -162,10 +162,10 @@ _避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 r
 
 **Task Run（edges）**：
 对应 Multica Run 的一次执行尝试；仓内落在 Task 同目录 sidecar `.{stem}.log.md` 中带稳定 `run-id` 的记录，由 `edges tasks runs` / `run-messages` 只读查看。
-_避免使用_：把 Run 状态写成 Issue 的 edges-tasks-status、用行号当长期主键、本轮 CLI append（未定写路径）
+_避免使用_：把 Run 状态写成 Issue 的 edges-tasks-status、用行号当长期主键
 
 **Task Run Log**：
-某个 Task 的 Run 落盘载体：同目录、同 stem 的点文件 sidecar（`.{stem}.log.md`），只追加带稳定 `run-id` 的执行记录，不写入 Task 正文。本轮经 `edges tasks runs` / `run-messages` 只读查看。
+某个 Task 的 Run 落盘载体：同目录、同 stem 的点文件 sidecar（`.{stem}.log.md`），由记录方只追加带稳定 `run-id` 的执行记录，不写入 Task 正文。本轮 `edges tasks` CLI 只经 `runs` / `run-messages` 读取。
 _避免使用_：正文内【执行记录】表、把 Run 嵌进 frontmatter、自造 `log` 动词顶替 runs/run-messages
 
 **backlog（Task）**：

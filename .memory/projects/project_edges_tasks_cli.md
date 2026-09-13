@@ -8,7 +8,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-13T03:17:12+00:00"
+  edges-updated-at: "2026-09-13T03:19:32+00:00"
 ---
 
 本轮 `edges tasks` 只做看板 CLI，不实现 Skill / MCP，也不抄 Multica daemon。命令为 `list|get|create|update|status|runs|run-messages`；取消走 `status cancelled`；GitHub 关联本轮不做；Run 层只读 sidecar，稳定 `run-id`，动词用 `runs` / `run-messages`。决策见 ADR 0005。
