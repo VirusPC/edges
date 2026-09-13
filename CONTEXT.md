@@ -156,9 +156,17 @@ _避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 
 Task（Issue 层）的唯一状态字段，取值为 backlog | todo | in_progress | in_review | done | blocked | cancelled。
 _避免使用_：裸 status 字段名、Run 层状态、open/discussing/building 旧枚举
 
+**edges tasks（CLI）**：
+以 `edges tasks` 为入口的 Task 看板命令面，覆盖 Issue 层 list/get/create/update/status，以及 Run 层只读的 runs / run-messages。
+_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages
+
+**Task Run（edges）**：
+对应 Multica Run 的一次执行尝试；仓内落在 Task 同目录 sidecar `.{stem}.log.md` 中带稳定 `run-id` 的记录，由 `edges tasks runs` / `run-messages` 只读查看。
+_避免使用_：把 Run 状态写成 Issue 的 edges-tasks-status、用行号当长期主键
+
 **Task Run Log**：
-与某个 Task 同目录、同 stem 的点文件 sidecar（`.{stem}.log.md`），只追加执行记录（Run）；不写入 Task 正文。
-_避免使用_：正文内【执行记录】表、把 Run 嵌进 frontmatter
+某个 Task 的 Run 落盘载体：同目录、同 stem 的点文件 sidecar（`.{stem}.log.md`），由记录方只追加带稳定 `run-id` 的执行记录，不写入 Task 正文。本轮 `edges tasks` CLI 只经 `runs` / `run-messages` 读取。
+_避免使用_：正文内【执行记录】表、把 Run 嵌进 frontmatter、自造 `log` 动词顶替 runs/run-messages
 
 **backlog（Task）**：
 tasks 层内「已进入任务系统但未排期」的筛选池；也是 agent 衍生提案的默认入口。人侧存量从旧 todos 迁入时默认落此态。

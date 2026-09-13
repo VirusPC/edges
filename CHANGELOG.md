@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `docs/adr/`：记录领域决策；首条为对话整理采用复盘四栏。
 - CONTEXT 增加「复盘四栏」及四栏术语。
 - CONTEXT 增加 Task、`edges-tasks-status`、Task Run Log、backlog（Task）。
+- CONTEXT 增加 edges tasks（CLI）、Task Run（edges）；收紧 Task Run Log：本轮 CLI 动词为 `runs` / `run-messages` 且只读。
+- `docs/adr/0005-edges-tasks-cli.md`：本轮 tasks 看板只做 CLI；Run 层只读；不硬删、不接 GitHub、不抄 Multica daemon。
 - CONTEXT 增加能力面（Capability Surface）、CLI、Skill（调用说明）、MCP（Edges）。
 - `docs/adr/0002-knowledge-tasks-status-folders.md`：`knowledge/todos` 迁为按状态分夹的 `knowledge/tasks`。
 - `docs/adr/0004-capability-surface-cli-skill-mcp.md`：能力面定为 CLI + Skill + MCP，删除仓根 `bin/`（实现见本 Unreleased 的 Removed/Changed）。
