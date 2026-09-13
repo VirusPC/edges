@@ -32,9 +32,17 @@ _避免使用_：单一目录、全部上下文、知识资产
 服务于项目维护的有作用域运营记忆，保存无法从项目当前状态直接推导的约束、纠正、决策、资料指针和可复用流程。
 _避免使用_：长期知识库、会话流水账、代码事实副本
 
+**Memory Type（项目记忆）**：
+项目记忆中一条记忆归入哪份入口的分类；对应一层入口文件 + 内容目录（及条目前缀约定）。类型集合由 LAYOUT 实现与本层登记决定，不是 PROTOCOL 闭集枚举。
+_避免使用_：把 type 写成全局 JSON 注册表键、把看板 `knowledge/tasks` 状态夹直接叫 Memory Type
+
 **用户记忆（User Memory）**：
-项目记忆的一种类型，保存绑定到某一仓库路径、且不宜公开的个人材料（个人偏好而非项目共享约定、凭据与密钥，以及其他不得公开的上下文）；权威副本在该仓库工作树内，但不进入版本历史。它不是独立于项目记忆的全局层，也不把私有仓当作真源。
+项目记忆的一种 Memory Type，保存绑定到某一仓库路径、且不宜公开的个人材料（个人偏好而非项目共享约定、凭据与密钥，以及其他不得公开的上下文）；权威副本在该仓库工作树内，但不进入版本历史。它不是独立于项目记忆的全局层，也不把私有仓当作真源。
 _避免使用_：独立全局 vault、edges-private 当真源、机器级单一记忆库、项目共享约定
+
+**可扩展 Memory Type**：
+在指定记忆目录通过 skill（如 `$project-memory-add-type`）登记新的 Memory Type（name / description / 可选特权 metadata），与内置种子类型同构、可被 remember / ask / doctor 发现；官方 init 种子不因示例类型膨胀。
+_避免使用_：单独 JSON/YAML 总配置平面、本轮把示例 type 写进默认种子
 
 **知识管理 Agent（Knowledge Management Agent）**：
 在人设定的目标、授权与风险边界内，承担研究、提炼、检索、部署和反馈处理的主动知识资产管理者。
@@ -150,7 +158,7 @@ _避免使用_：知识出口、历史知识库、失效 Edge 专区
 
 **Task**：
 跨 Agent 接力的工作项（idea 捕获后经细聊与开发直至收口）；按 edges-tasks-status 分夹存放在 knowledge/tasks/ 下。
-_避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目
+_避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目、`tasks` Memory Type（若指看板工作项）
 
 **edges-tasks-status**：
 Task（Issue 层）的唯一状态字段，取值为 backlog | todo | in_progress | in_review | done | blocked | cancelled。
