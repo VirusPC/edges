@@ -3,6 +3,8 @@
 
 from __future__ import annotations
 
+import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -11,6 +13,8 @@ from pathlib import Path
 SCRIPTS = Path(__file__).resolve().parents[1]
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
+
+MEMORY_PY = SCRIPTS / "memory.py"
 
 from lib.blocks import index_files
 from lib.types import (  # noqa: E402
@@ -153,6 +157,111 @@ class PreserveExtraTypesTests(unittest.TestCase):
             self.assertIn(
                 ".memory/DOCS.md",
                 (target / "AGENTS.md").read_text(encoding="utf-8"),
+            )
+
+
+class RememberDiscoveredTypeTests(unittest.TestCase):
+    def test_remember_docs_writes_entry_and_index(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            agents = target / "AGENTS.md"
+            agents.write_text(
+                agents.read_text(encoding="utf-8").replace(
+                    "<!-- project-memory-local:end -->",
+                    "- [.memory/DOCS.md](.memory/DOCS.md) — 文档指针\n"
+                    "<!-- project-memory-local:end -->",
+                ),
+                encoding="utf-8",
+            )
+            (target / ".memory" / "docs").mkdir()
+            (target / ".memory" / "DOCS.md").write_text(
+                "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                "<!-- project-memory-entries:end -->\n",
+                encoding="utf-8",
+            )
+            result = remember(
+                target,
+                "docs",
+                "layout_only",
+                "LAYOUT-only extra type",
+                "user-added docs type must be writable like seeds",
+                "Treat extra types as ordinary memory.\n\n"
+                "**Why:** ADR 0006 isomorphic types.\n\n"
+                "**How to apply:** discover then remember.",
+                {"username": "tester", "email": "t@example.com"},
+            )
+            path = target / ".memory" / "docs" / "docs_layout_only.md"
+            self.assertTrue(path.is_file(), result)
+            self.assertEqual(result["path"], ".memory/docs/docs_layout_only.md")
+            self.assertEqual(result["index"], ".memory/DOCS.md")
+            self.assertIn("docs_layout_only.md", (target / ".memory" / "DOCS.md").read_text())
+
+    def test_cli_remember_type_docs(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init = subprocess.run(
+                [
+                    sys.executable,
+                    str(MEMORY_PY),
+                    "init",
+                    "--target-dir",
+                    str(target),
+                    "--root-dir",
+                    str(target),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(init.returncode, 0, init.stderr)
+            agents = target / "AGENTS.md"
+            agents.write_text(
+                agents.read_text(encoding="utf-8").replace(
+                    "<!-- project-memory-local:end -->",
+                    "- [.memory/DOCS.md](.memory/DOCS.md) — 文档指针\n"
+                    "<!-- project-memory-local:end -->",
+                ),
+                encoding="utf-8",
+            )
+            (target / ".memory" / "docs").mkdir()
+            (target / ".memory" / "DOCS.md").write_text(
+                "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                "<!-- project-memory-entries:end -->\n",
+                encoding="utf-8",
+            )
+            remember_cli = subprocess.run(
+                [
+                    sys.executable,
+                    str(MEMORY_PY),
+                    "remember",
+                    "--target-dir",
+                    str(target),
+                    "--type",
+                    "docs",
+                    "--slug",
+                    "cli_layout",
+                    "--title",
+                    "CLI extra type",
+                    "--description",
+                    "argparse must accept a discovered type",
+                    "--username",
+                    "tester",
+                    "--email",
+                    "t@example.com",
+                    "--content",
+                    "CLI remembers extras.\n\n**Why:** drop static choices.\n\n"
+                    "**How to apply:** resolve_target then validate.",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(remember_cli.returncode, 0, remember_cli.stderr)
+            payload = json.loads(remember_cli.stdout)
+            self.assertTrue(payload["ok"])
+            self.assertTrue(
+                (target / ".memory" / "docs" / "docs_cli_layout.md").is_file()
             )
 
 

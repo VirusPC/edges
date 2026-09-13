@@ -9,7 +9,7 @@ from pathlib import Path
 
 from lib.paths import resolve_root, resolve_target
 from lib.provenance import compact_fields
-from nodes.entries import memory_entry_types
+from lib.types import layer_writable_types
 from operations.doctor import doctor_memory
 from operations.init import init_memory
 from operations.remember import remember
@@ -38,11 +38,11 @@ def build_parser() -> argparse.ArgumentParser:
     remember_parser.add_argument(
         "--type",
         required=True,
-        choices=sorted(memory_entry_types()),
         help=(
-            "feedback=纠正与禁止模式，project=代码里推不出的决策，以及项目内的规范，"
-            "reference=外部资料去哪找，skills=可复用的执行流程，"
-            "user=本仓不宜公开的个人材料（gitignore，不进 git）"
+            "该层已登记的可写类型。官方种子: "
+            "feedback / project / reference / skills / user；"
+            "另加该层 AGENTS.md 本层清单里的用户类型。"
+            "agent_skills 只索引，不能 remember"
         ),
     )
     remember_parser.add_argument(
@@ -81,6 +81,13 @@ def main() -> int:
         # 否则模板坏掉时抛的是 traceback 而不是约定的 JSON 错误。
         arguments = build_parser().parse_args()
         target = resolve_target(arguments.target_dir)
+        if arguments.operation == "remember":
+            writable = layer_writable_types(target)
+            if arguments.type not in writable:
+                raise ValueError(
+                    f"--type 未在该层登记为可写类型: {arguments.type}。"
+                    f"已登记可写类型: {', '.join(writable) or '(none)'}"
+                )
         if arguments.operation == "init":
             root = resolve_root(target, arguments.root_dir)
             result = init_memory(target, root, arguments.description)

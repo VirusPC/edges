@@ -7,6 +7,7 @@ import re
 from pathlib import Path
 
 from lib.blocks import ENTRIES_END, ENTRIES_START, index_files, upsert_block
+from lib.types import discover_layer_types, index_file_name, layer_writable_types
 from lib.paths import (
     is_external_type,
     list_type_files,
@@ -79,9 +80,11 @@ METADATA_KEY_MAP = {
 }
 
 
-def memory_entry_types() -> tuple[str, ...]:
-    """可由 remember 写入的类型。内容根在 `.memory/` 之外的一律只读。"""
-    return tuple(name for name in index_files() if not is_external_type(name))
+def memory_entry_types(target: Path | None = None) -> tuple[str, ...]:
+    """可写类型。无 target 时仍是官方种子（init / 帮助文案）。"""
+    if target is None:
+        return tuple(name for name in index_files() if not is_external_type(name))
+    return layer_writable_types(target)
 
 
 def entry_output_name(entry_type: str) -> str:
@@ -248,10 +251,12 @@ def extract_entry_body(text: str) -> str:
     return body
 
 
-def ordinary_memory_types() -> tuple[str, ...]:
+def ordinary_memory_types(target: Path | None = None) -> tuple[str, ...]:
     """走 type_slug 模板的可写类型，不含 skills。"""
     return tuple(
-        name for name in memory_entry_types() if name not in AGENT_SKILL_FORMAT_TYPES
+        name
+        for name in memory_entry_types(target)
+        if name not in AGENT_SKILL_FORMAT_TYPES
     )
 
 
@@ -299,8 +304,8 @@ def render_entry(
 
 def resolve_memory_path(target: Path, entry_type: str, slug: str | None) -> Path:
     """把类型与 slug 映射为唯一的条目文件路径。"""
-    if entry_type not in memory_entry_types():
-        raise ValueError(f"--type 不支持由 remember 写入: {entry_type}")
+    if entry_type not in memory_entry_types(target):
+        raise ValueError(f"--type 未在该层登记为可写类型: {entry_type}")
     normalized = (slug or "").strip().lower()
     directory = type_content_dir(target, entry_type)
     if entry_type in AGENT_SKILL_FORMAT_TYPES:
@@ -313,7 +318,8 @@ def resolve_memory_path(target: Path, entry_type: str, slug: str | None) -> Path
         return directory / normalized / SKILL_OUTPUT_NAME
     if not re.fullmatch(r"[a-z0-9]+(?:_[a-z0-9]+)*", normalized):
         raise ValueError("--slug 必须是小写 snake_case，例如 reuse_existing_constants")
-    if normalized.startswith(tuple(f"{name}_" for name in index_files())):
+    prefixes = discover_layer_types(target) or index_files()
+    if normalized.startswith(tuple(f"{name}_" for name in prefixes)):
         raise ValueError("--slug 不要带类型前缀，脚本会按 --type 自动加上")
     return directory / f"{entry_type}_{normalized}.md"
 
@@ -391,7 +397,7 @@ def build_entry_index(target: Path, entry_type: str) -> str:
 
 def expected_index_document(target: Path, entry_type: str) -> str:
     """计算索引目标态但不落盘，供 refresh 与 doctor 共用。"""
-    file_name = index_files()[entry_type]
+    file_name = discover_layer_types(target).get(entry_type) or index_file_name(entry_type)
     path = memory_dir(target) / file_name
     existing = (
         path.read_text(encoding="utf-8")
@@ -406,7 +412,7 @@ def expected_index_document(target: Path, entry_type: str) -> str:
 
 def refresh_index(target: Path, entry_type: str) -> str:
     """刷新索引文件里的条目清单；索引文件缺失时先按模板补建。"""
-    file_name = index_files()[entry_type]
+    file_name = discover_layer_types(target).get(entry_type) or index_file_name(entry_type)
     path = memory_dir(target) / file_name
     existed = path.is_file()
     existing = path.read_text(encoding="utf-8") if existed else ""
