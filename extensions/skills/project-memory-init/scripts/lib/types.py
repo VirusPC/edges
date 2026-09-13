@@ -12,11 +12,13 @@ from lib.blocks import (
     LOCAL_END,
     LOCAL_START,
     MEMORY_INDEX_LINK_PATTERN,
+    TYPE_META_END,
+    TYPE_META_START,
     block_pattern,
     build_local_block,
     index_files,
 )
-from lib.paths import AGENTS_FILE_NAME, is_external_type, memory_dir
+from lib.paths import AGENTS_FILE_NAME, is_external_type, memory_dir, type_dir_name
 from lib.templates import ENTRY_LINE_TEMPLATE, render_line
 
 SEED_TYPE_NAMES: tuple[str, ...] = (
@@ -87,10 +89,93 @@ def discover_layer_types(target: Path) -> dict[str, str]:
     return types
 
 
-def layer_writable_types(target: Path) -> tuple[str, ...]:
-    return tuple(
-        name for name in discover_layer_types(target) if not is_external_type(name)
+def parse_type_meta(text: str) -> TypeSpec | None:
+    match = block_pattern(TYPE_META_START, TYPE_META_END).search(text)
+    if match is None:
+        return None
+    fields: dict[str, str] = {}
+    for raw in match.group(0).splitlines():
+        key, sep, value = raw.partition(":")
+        if sep:
+            fields[key.strip()] = value.strip()
+    name = fields.get("name", "")
+    if not name:
+        return None
+    return TypeSpec(
+        name=name,
+        index_file=index_file_name(name),
+        description=fields.get("description", ""),
+        writable=fields.get("writable", "true") != "false",
+        gitignore=fields.get("gitignore", "false") == "true",
+        format=fields.get("format", "ordinary"),
     )
+
+
+def layer_type_specs(target: Path) -> list[TypeSpec]:
+    specs: list[TypeSpec] = []
+    for name, file_name in discover_layer_types(target).items():
+        path = memory_dir(target) / file_name
+        parsed = None
+        if path.is_file():
+            try:
+                parsed = parse_type_meta(path.read_text(encoding="utf-8"))
+            except (OSError, UnicodeError):
+                parsed = None
+        if parsed is not None:
+            specs.append(parsed)
+            continue
+        specs.append(
+            TypeSpec(
+                name=name,
+                index_file=file_name,
+                description="",
+                writable=not is_external_type(name),
+                gitignore=name == "user",
+                format="skills" if name in {"skills", "agent_skills"} else "ordinary",
+            )
+        )
+    return specs
+
+
+def layer_writable_types(target: Path) -> tuple[str, ...]:
+    return tuple(spec.name for spec in layer_type_specs(target) if spec.writable)
+
+
+def gitignore_patterns(entry_type: str) -> tuple[str, ...]:
+    index_name = index_file_name(entry_type)
+    plural = type_dir_name(entry_type)
+    return (
+        f".memory/{index_name}",
+        f".memory/{plural}/",
+        f"**/.memory/{index_name}",
+        f"**/.memory/{plural}/",
+    )
+
+
+def find_git_root(start: Path) -> Path | None:
+    for candidate in (start, *start.parents):
+        if (candidate / ".git").exists():
+            return candidate
+    return None
+
+
+def ensure_type_gitignore(repo_root: Path, entry_type: str) -> str:
+    gitignore = repo_root / ".gitignore"
+    if not (repo_root / ".git").exists():
+        return "skipped-no-git"
+    existing = gitignore.read_text(encoding="utf-8") if gitignore.is_file() else ""
+    missing = [pattern for pattern in gitignore_patterns(entry_type) if pattern not in existing]
+    if not missing:
+        return "preserved"
+    block = "\n".join(
+        [
+            f"# Memory type {entry_type} (project-memory-add-type)",
+            *missing,
+        ]
+    )
+    updated = existing.rstrip() + "\n\n" + block + "\n"
+    gitignore.write_text(updated, encoding="utf-8")
+    return "updated"
 
 
 def upsert_local_type_line(document: str, index_file: str, description: str) -> str:

@@ -12,7 +12,7 @@ SCRIPTS = Path(__file__).resolve().parents[1]
 if str(SCRIPTS) not in sys.path:
     sys.path.insert(0, str(SCRIPTS))
 
-from lib.types import discover_layer_types  # noqa: E402
+from lib.types import discover_layer_types, parse_type_meta  # noqa: E402
 from operations.add_type import add_type  # noqa: E402
 from operations.init import init_memory  # noqa: E402
 from operations.remember import remember  # noqa: E402
@@ -77,6 +77,38 @@ class AddTypeLayoutTests(unittest.TestCase):
             self.assertTrue(
                 (target / ".memory" / "docs" / "docs_readme_pointer.md").is_file()
             )
+
+
+class AddTypeGitignoreTests(unittest.TestCase):
+    def test_gitignore_flag_appends_repo_patterns(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            (target / ".git").mkdir()
+            (target / ".gitignore").write_text("# keep\n", encoding="utf-8")
+            init_memory(target, target, "temp tree")
+            add_type(target, "secret", "本层不宜提交的摘录", gitignore=True)
+            text = (target / ".gitignore").read_text(encoding="utf-8")
+            for pattern in (
+                ".memory/SECRET.md",
+                ".memory/secrets/",
+                "**/.memory/SECRET.md",
+                "**/.memory/secrets/",
+            ):
+                self.assertIn(pattern, text, pattern)
+            meta = (target / ".memory" / "SECRET.md").read_text(encoding="utf-8")
+            self.assertIn("gitignore: true", meta)
+            spec = parse_type_meta(meta)
+            self.assertIsNotNone(spec)
+            self.assertEqual(spec.name, "secret")
+            self.assertTrue(spec.gitignore)
+
+    def test_gitignore_without_git_does_not_fail(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            result = add_type(target, "secret", "no git root", gitignore=True)
+            self.assertEqual(result["flags"]["gitignore"], True)
+            self.assertIn(result.get("gitignoreAction"), (None, "skipped-no-git"))
 
 
 if __name__ == "__main__":

@@ -13,6 +13,8 @@ from lib.paths import (
 )
 from lib.templates import read_index_template
 from lib.types import (
+    ensure_type_gitignore,
+    find_git_root,
     index_file_name,
     upsert_local_type_line,
     validate_type_name,
@@ -72,6 +74,14 @@ def add_type(
     else:
         agents_action = "preserved"
 
+    gitignore_action = None
+    if gitignore:
+        repo_root = find_git_root(target)
+        if repo_root is None:
+            gitignore_action = "skipped-no-git"
+        else:
+            gitignore_action = ensure_type_gitignore(repo_root, name)
+
     rel_index = index_path.relative_to(target).as_posix()
     rel_dir = content_dir.relative_to(target).as_posix()
     return {
@@ -82,9 +92,11 @@ def add_type(
         "contentDir": rel_dir,
         "agentsAction": agents_action,
         "action": "preserved" if existed else "created",
+        "gitignoreAction": gitignore_action,
         "flags": {
             "gitignore": gitignore,
             "writable": writable,
             "format": format,
+            "gitignoreAction": gitignore_action,
         },
     }

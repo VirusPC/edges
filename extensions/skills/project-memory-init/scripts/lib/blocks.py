@@ -37,6 +37,10 @@ AUTO_END = "<!-- project-memory-auto:end -->"
 ENTRIES_START = "<!-- project-memory-entries:start -->"
 ENTRIES_END = "<!-- project-memory-entries:end -->"
 
+# 用户登记 type 的特权 metadata，写在入口文件上，不是 JSON 注册表。
+TYPE_META_START = "<!-- project-memory-type:start -->"
+TYPE_META_END = "<!-- project-memory-type:end -->"
+
 # 外层区域内部的规范顺序，与模板一致；补写缺失区块时按它定位。
 # 外层是唯一的顶层区块，所以顶层不需要顺序表。
 INNER_BLOCK_PAIRS = (
