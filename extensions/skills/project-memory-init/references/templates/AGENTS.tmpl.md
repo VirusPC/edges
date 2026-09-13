@@ -12,7 +12,7 @@
 <!-- project-memory-local:start -->
 ## 本层记忆
 
-下面六个是索引，不是正文。按条目说明挑要读的，再打开对应内容。
+下面这些是索引，不是正文。按条目说明挑要读的，再打开对应内容。
 
 - [.memory/USER.md](.memory/USER.md) — 绑定本仓库、不宜公开的个人材料（个人偏好、凭据与密钥）。本机文件，不进 git。
 - [.memory/FEEDBACK.md](.memory/FEEDBACK.md) — 用户的纠正、确认过的做法与必须遵守的禁止模式。

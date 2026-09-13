@@ -17,6 +17,7 @@ if str(SCRIPTS) not in sys.path:
 MEMORY_PY = SCRIPTS / "memory.py"
 
 from lib.blocks import index_files
+from lib.templates import template_path  # noqa: E402
 from lib.types import (  # noqa: E402
     SEED_TYPE_NAMES,
     discover_layer_types,
@@ -274,6 +275,15 @@ class TypeTemplateTests(unittest.TestCase):
             document = expected_index_document(target, "docs")
             self.assertIn("project-memory-entries:start", document)
             self.assertIn("docs", document.lower())
+
+
+class LayoutHeadingTests(unittest.TestCase):
+    def test_agents_template_heading_has_no_count(self) -> None:
+        text = template_path("AGENTS.md").read_text(encoding="utf-8")
+        self.assertIn("下面这些是索引，不是正文", text)
+        self.assertNotIn("下面六个", text)
+        self.assertNotIn(".memory/DOCS.md", text)
+        self.assertNotIn(".memory/TASKS.md", text)
 
 
 if __name__ == "__main__":
