@@ -31,6 +31,7 @@ from lib.paths import (
     type_content_dir,
     write_atomic,
 )
+from lib.types import discover_layer_types, layer_type_specs
 from nodes.agents import (
     classify_agents_file,
     drop_index_entries,
@@ -144,14 +145,20 @@ def scan_registrations(
 def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, str]]:
     """检查每层 .memory/ 是否符合当前 LAYOUT；不读取条目正文。"""
     findings: list[dict[str, str]] = []
-    expected_indexes = [Path(name).stem for name in index_files().values()]
     for owner in memory_dirs:
+        discovered = discover_layer_types(owner)
+        expected_indexes = [Path(name).stem for name in discovered.values()]
+        specs = {spec.name: spec for spec in layer_type_specs(owner)}
         directory = memory_dir(owner)
-        for entry_type, file_name in index_files().items():
+        for entry_type, file_name in discovered.items():
+            spec = specs.get(entry_type)
+            skip_dir = is_external_type(entry_type) or (
+                spec is not None and not spec.writable
+            )
             content_dir = type_content_dir(owner, entry_type)
             stale = legacy_type_dir(owner, entry_type)
             # 外部类型的内容根归人与生态：缺了不是毛病，也轮不到我们改名或补建。
-            if is_external_type(entry_type):
+            if skip_dir:
                 stale = None
             if stale is not None:
                 issue = (
@@ -183,7 +190,7 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
             elif (
                 not content_dir.is_dir()
                 and stale is None
-                and not is_external_type(entry_type)
+                and not skip_dir
             ):
                 findings.append(
                     {

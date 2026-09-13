@@ -141,6 +141,19 @@ def layer_writable_types(target: Path) -> tuple[str, ...]:
     return tuple(spec.name for spec in layer_type_specs(target) if spec.writable)
 
 
+def reject_unwritable_type(target: Path, entry_type: str) -> str:
+    """remember / CLI 拒绝写入时的错误文案。"""
+    specs = {spec.name: spec for spec in layer_type_specs(target)}
+    spec = specs.get(entry_type)
+    if spec is not None and not spec.writable:
+        return f"--type {entry_type} 只索引，不能 remember"
+    writable = layer_writable_types(target)
+    return (
+        f"--type 未在该层登记为可写类型: {entry_type}。"
+        f"已登记可写类型: {', '.join(writable) or '(none)'}"
+    )
+
+
 def gitignore_patterns(entry_type: str) -> tuple[str, ...]:
     index_name = index_file_name(entry_type)
     plural = type_dir_name(entry_type)

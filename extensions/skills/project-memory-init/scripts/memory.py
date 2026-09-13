@@ -9,7 +9,7 @@ from pathlib import Path
 
 from lib.paths import resolve_root, resolve_target
 from lib.provenance import compact_fields
-from lib.types import layer_writable_types
+from lib.types import layer_writable_types, reject_unwritable_type
 from operations.doctor import doctor_memory
 from operations.init import init_memory
 from operations.remember import remember
@@ -84,10 +84,7 @@ def main() -> int:
         if arguments.operation == "remember":
             writable = layer_writable_types(target)
             if arguments.type not in writable:
-                raise ValueError(
-                    f"--type 未在该层登记为可写类型: {arguments.type}。"
-                    f"已登记可写类型: {', '.join(writable) or '(none)'}"
-                )
+                raise ValueError(reject_unwritable_type(target, arguments.type))
         if arguments.operation == "init":
             root = resolve_root(target, arguments.root_dir)
             result = init_memory(target, root, arguments.description)

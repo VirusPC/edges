@@ -7,7 +7,12 @@ import re
 from pathlib import Path
 
 from lib.blocks import ENTRIES_END, ENTRIES_START, index_files, upsert_block
-from lib.types import discover_layer_types, index_file_name, layer_writable_types
+from lib.types import (
+    discover_layer_types,
+    index_file_name,
+    layer_writable_types,
+    reject_unwritable_type,
+)
 from lib.paths import (
     is_external_type,
     list_type_files,
@@ -306,7 +311,7 @@ def render_entry(
 def resolve_memory_path(target: Path, entry_type: str, slug: str | None) -> Path:
     """把类型与 slug 映射为唯一的条目文件路径。"""
     if entry_type not in memory_entry_types(target):
-        raise ValueError(f"--type 未在该层登记为可写类型: {entry_type}")
+        raise ValueError(reject_unwritable_type(target, entry_type))
     normalized = (slug or "").strip().lower()
     directory = type_content_dir(target, entry_type)
     if entry_type in AGENT_SKILL_FORMAT_TYPES:

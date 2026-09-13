@@ -14,6 +14,7 @@ if str(SCRIPTS) not in sys.path:
 
 from lib.types import discover_layer_types, parse_type_meta  # noqa: E402
 from operations.add_type import add_type  # noqa: E402
+from operations.doctor import doctor_memory  # noqa: E402
 from operations.init import init_memory  # noqa: E402
 from operations.remember import remember  # noqa: E402
 
@@ -109,6 +110,37 @@ class AddTypeGitignoreTests(unittest.TestCase):
             result = add_type(target, "secret", "no git root", gitignore=True)
             self.assertEqual(result["flags"]["gitignore"], True)
             self.assertIn(result.get("gitignoreAction"), (None, "skipped-no-git"))
+
+
+class AddTypeIndexOnlyTests(unittest.TestCase):
+    def test_index_only_has_no_content_dir_and_rejects_remember(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp tree")
+            result = add_type(
+                target,
+                "catalog",
+                "只索引外部清单，不在这里写条目",
+                writable=False,
+            )
+            self.assertFalse(result["flags"]["writable"])
+            self.assertFalse((target / ".memory" / "catalogs").exists())
+            self.assertTrue((target / ".memory" / "CATALOG.md").is_file())
+            with self.assertRaises(ValueError) as ctx:
+                remember(
+                    target,
+                    "catalog",
+                    "nope",
+                    "title",
+                    "should fail",
+                    "body",
+                    {},
+                )
+            self.assertIn("只索引", str(ctx.exception))
+            report = doctor_memory(target, apply=False)
+            issues = {item["issue"] for item in report["findings"]}
+            self.assertNotIn("missing-type-dir", issues)
+            self.assertNotIn("outdated-local", issues)
 
 
 if __name__ == "__main__":
