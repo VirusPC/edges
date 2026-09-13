@@ -3,10 +3,14 @@
 
 from __future__ import annotations
 
+import json
+import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+MEMORY_PY = Path(__file__).resolve().parents[1] / "memory.py"
 
 SCRIPTS = Path(__file__).resolve().parents[1]
 if str(SCRIPTS) not in sys.path:
@@ -228,6 +232,115 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
                 ".memory/RESEARCH.md",
                 (target / "AGENTS.md").read_text(encoding="utf-8"),
             )
+
+
+class AddTypeCliTests(unittest.TestCase):
+    def test_cli_add_type_then_remember(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init = subprocess.run(
+                [
+                    sys.executable,
+                    str(MEMORY_PY),
+                    "init",
+                    "--target-dir",
+                    str(target),
+                    "--root-dir",
+                    str(target),
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(init.returncode, 0, init.stderr)
+            added = subprocess.run(
+                [
+                    sys.executable,
+                    str(MEMORY_PY),
+                    "add-type",
+                    "--target-dir",
+                    str(target),
+                    "--name",
+                    "docs",
+                    "--description",
+                    "项目内文档指针，不是知识库正文",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(added.returncode, 0, added.stderr)
+            payload = json.loads(added.stdout)
+            self.assertTrue(payload["ok"])
+            self.assertEqual(payload["type"], "docs")
+            remember_cli = subprocess.run(
+                [
+                    sys.executable,
+                    str(MEMORY_PY),
+                    "remember",
+                    "--target-dir",
+                    str(target),
+                    "--type",
+                    "docs",
+                    "--slug",
+                    "cli_docs",
+                    "--title",
+                    "CLI docs",
+                    "--description",
+                    "created from add-type CLI",
+                    "--username",
+                    "tester",
+                    "--email",
+                    "t@example.com",
+                    "--content",
+                    "CLI body.\n\n**Why:** wire the subcommand.\n\n"
+                    "**How to apply:** skill calls this.",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(remember_cli.returncode, 0, remember_cli.stderr)
+
+    def test_cli_external_content_dir_returns_json_error(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            subprocess.run(
+                [
+                    sys.executable,
+                    str(MEMORY_PY),
+                    "init",
+                    "--target-dir",
+                    str(target),
+                    "--root-dir",
+                    str(target),
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            stubbed = subprocess.run(
+                [
+                    sys.executable,
+                    str(MEMORY_PY),
+                    "add-type",
+                    "--target-dir",
+                    str(target),
+                    "--name",
+                    "plugins",
+                    "--description",
+                    "external stub",
+                    "--external-content-dir",
+                    ".agents/plugins",
+                ],
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            self.assertEqual(stubbed.returncode, 1)
+            payload = json.loads(stubbed.stdout)
+            self.assertFalse(payload["ok"])
+            self.assertIn("stub", payload["error"].lower())
 
 
 if __name__ == "__main__":
