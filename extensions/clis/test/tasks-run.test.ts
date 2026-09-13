@@ -132,3 +132,64 @@ body
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+test("run tasks runs --output json lists derived run-id", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const stem = "2026-09-13--with-run";
+  try {
+    const dir = path.join(repo, "knowledge/tasks/done");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, `${stem}.md`),
+      `---
+name: with_run
+description: with run
+metadata:
+  edges-type: task
+  edges-title: with run
+  edges-tasks-status: done
+---
+
+body
+`,
+      "utf8",
+    );
+    await writeFile(
+      path.join(dir, `.${stem}.log.md`),
+      `# Run log: ${stem}
+
+| # | agent | started_at | ended_at | status | error_code |
+|---|---|---|---|---|---|
+| 1 | Agent | 2026-09-13T01:00:00Z | 2026-09-13T02:00:00Z | completed |  |
+`,
+      "utf8",
+    );
+    const json = await run(["tasks", "runs", stem, "--output", "json"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(json.exitCode, 0);
+    const body = JSON.parse(json.stdout) as { command: string; runs: { runId: string }[] };
+    assert.equal(body.command, "runs");
+    assert.equal(body.runs[0]?.runId, `${stem}--1`);
+
+    const table = await run(["tasks", "runs", stem], { env: { ...process.env, EDGES_REPO: repo } });
+    assert.equal(table.exitCode, 0);
+    assert.match(table.stdout, /run-id/);
+    assert.match(table.stdout, new RegExp(`${stem}--1`));
+    assert.doesNotMatch(table.stdout, /"command":"runs"/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks runs missing task is TASK_NOT_FOUND", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    await mkdir(path.join(repo, "knowledge/tasks/backlog"), { recursive: true });
+    const result = await run(["tasks", "runs", "nope"], { env: { ...process.env, EDGES_REPO: repo } });
+    assert.equal(result.exitCode, 1);
+    assert.equal(JSON.parse(result.stdout).errorCode, "TASK_NOT_FOUND");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});

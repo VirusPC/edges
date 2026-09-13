@@ -7,7 +7,8 @@ type RunResult = {
   stderr: string;
 };
 import { createNodeBoardFs, createNodeBoardWriter, type BoardFs, type BoardWriter } from "./board.js";
-import { formatTasksResult, type TasksFailure } from "./format.js";
+import { formatRunsTable, formatTasksResult, type TasksFailure } from "./format.js";
+import { parseRunLog } from "./runlog.js";
 import { getTaskService, listTasksService } from "./service.js";
 import { moveTaskStatus } from "./move.js";
 import { createTask, updateTask } from "./write.js";
@@ -107,7 +108,22 @@ export async function runTasks(parsed: TasksParseOk, io: TasksRunIo = {}): Promi
         });
         return succeed({ status: "success", command: "status", ...moved });
       }
-      case "tasks-runs":
+      case "tasks-runs": {
+        const record = await getTaskService(repoPath, parsed.target, fs);
+        const parsedLog = parseRunLog(record.sidecarMarkdown ?? "", record.stem);
+        if (parsed.output === "json") {
+          return succeed({
+            status: "success",
+            command: "runs",
+            stem: record.stem,
+            runs: parsedLog.runs,
+          });
+        }
+        return succeed(
+          { status: "success", command: "runs", stem: record.stem, runs: parsedLog.runs },
+          formatRunsTable(parsedLog.runs),
+        );
+      }
       case "tasks-run-messages":
         return fail("VALIDATION_ERROR", `${parsed.kind} not wired`);
       default:
