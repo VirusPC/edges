@@ -27,6 +27,7 @@ from lib.blocks import (
 )
 from lib.paths import AGENTS_FILE_NAME, memory_dir, write_atomic
 from lib.templates import ENTRY_LINE_TEMPLATE, render_line
+from lib.types import ensure_seed_local_lines
 
 
 def classify_agents_file(path: Path) -> str:
@@ -78,8 +79,20 @@ def sync_agents_blocks(
 
 
 def sync_target_agents(target: Path, root: Path) -> str:
-    """维护目标目录的 AGENTS.md：本层硬约束与本层记忆区块。"""
-    return sync_agents_blocks(target, local=build_local_block())
+    """维护目标目录的 AGENTS.md：本层硬约束与本层记忆区块。
+
+    新文件用种子清单。已有文件只保证种子行在，额外 type 行原样保留。
+    """
+    path = target / AGENTS_FILE_NAME
+    if classify_agents_file(path) == "missing":
+        return sync_agents_blocks(target, local=build_local_block())
+    existing = path.read_text(encoding="utf-8")
+    updated = ensure_seed_local_lines(existing)
+    if updated != existing:
+        match = block_pattern(LOCAL_START, LOCAL_END).search(updated)
+        local = match.group(0) if match else build_local_block()
+        return sync_agents_blocks(target, local=local)
+    return sync_agents_blocks(target, local="")
 
 
 def normalize_index_description(target: Path, description: str | None) -> str:

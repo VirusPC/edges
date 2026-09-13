@@ -16,7 +16,6 @@ from lib.blocks import (
     build_important_block,
     build_local_block,
     drop_auto_block,
-    index_files,
     prune_outer_region,
     upsert_block,
 )
@@ -30,6 +29,14 @@ from lib.paths import (
     relative_or_name,
     type_content_dir,
     write_atomic,
+)
+from lib.types import (
+    discover_layer_types,
+    ensure_seed_local_lines,
+    layer_type_specs,
+    parse_type_meta,
+    seed_index_files,
+    upsert_local_type_line,
 )
 from nodes.agents import (
     classify_agents_file,
@@ -144,14 +151,20 @@ def scan_registrations(
 def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, str]]:
     """检查每层 .memory/ 是否符合当前 LAYOUT；不读取条目正文。"""
     findings: list[dict[str, str]] = []
-    expected_indexes = [Path(name).stem for name in index_files().values()]
     for owner in memory_dirs:
+        discovered = discover_layer_types(owner)
+        expected_indexes = [Path(name).stem for name in discovered.values()]
+        specs = {spec.name: spec for spec in layer_type_specs(owner)}
         directory = memory_dir(owner)
-        for entry_type, file_name in index_files().items():
+        for entry_type, file_name in discovered.items():
+            spec = specs.get(entry_type)
+            skip_dir = is_external_type(entry_type) or (
+                spec is not None and not spec.writable
+            )
             content_dir = type_content_dir(owner, entry_type)
             stale = legacy_type_dir(owner, entry_type)
             # 外部类型的内容根归人与生态：缺了不是毛病，也轮不到我们改名或补建。
-            if is_external_type(entry_type):
+            if skip_dir:
                 stale = None
             if stale is not None:
                 issue = (
@@ -183,7 +196,7 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
             elif (
                 not content_dir.is_dir()
                 and stale is None
-                and not is_external_type(entry_type)
+                and not skip_dir
             ):
                 findings.append(
                     {
@@ -223,7 +236,7 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
                     }
                 )
 
-        for entry_type in memory_entry_types():
+        for entry_type in memory_entry_types(owner):
             for source in sorted(directory.glob(f"{entry_type}_*.md")):
                 destination = type_content_dir(owner, entry_type) / source.name
                 issue = (
@@ -245,7 +258,7 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
                     }
                 )
 
-        for entry_type in ordinary_memory_types():
+        for entry_type in ordinary_memory_types(owner):
             for entry_path in list_type_files(owner, entry_type, f"{entry_type}_*.md"):
                 if has_legacy_flat_frontmatter(entry_path):
                     findings.append(
@@ -272,7 +285,23 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
             actual_indexes = (
                 MEMORY_INDEX_LINK_PATTERN.findall(match.group(0)) if match else []
             )
-            if actual_indexes != expected_indexes:
+            actual_set = {name.lower() for name in actual_indexes}
+            for entry_type, file_name in discovered.items():
+                if entry_type not in actual_set:
+                    findings.append(
+                        {
+                            "issue": "unregistered-type",
+                            "path": relative_or_name(agents_path, root),
+                            "type": entry_type,
+                            "entry": f".memory/{file_name}",
+                            "detail": "入口文件在，但本层清单没有这一行",
+                        }
+                    )
+            seed_missing = any(
+                name not in discovered or name not in actual_set
+                for name in seed_index_files()
+            )
+            if actual_indexes != expected_indexes and seed_missing:
                 findings.append(
                     {
                         "issue": "outdated-local",
@@ -409,6 +438,25 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
             action = sync_agents_blocks(owner)
             if action in {"created", "updated"}:
                 repaired.append(f"{issue}: {finding['path']} 补上硬约束区块，已有规则原样保留")
+        elif issue == "unregistered-type":
+            if classify_agents_file(agents_path) != "managed":
+                continue
+            document = agents_path.read_text(encoding="utf-8")
+            entry_type = finding.get("type", "")
+            entry = finding.get("entry", "")
+            file_name = Path(entry).name if entry else f"{entry_type.upper()}.md"
+            index_path = memory_dir(owner) / file_name
+            description = f"{entry_type} 类型的记忆入口。"
+            if index_path.is_file():
+                parsed = parse_type_meta(index_path.read_text(encoding="utf-8"))
+                if parsed is not None and parsed.description:
+                    description = parsed.description
+            updated = upsert_local_type_line(document, file_name, description)
+            if updated != document:
+                write_atomic(agents_path, updated)
+                repaired.append(
+                    f"{issue}: {finding['path']} 补上 {entry or file_name}"
+                )
         elif issue == "foreign-agents":
             # 唯一一处往他人文件里写的地方：只补挂受管区块，既有正文一字不动。
             document = agents_path.read_text(encoding="utf-8")
@@ -424,19 +472,24 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
 
     # 迁移完成后才重算入口；否则旧版平铺文件会在索引里暂时消失。
     for owner in discover_memory_dirs(root):
+        discovered = discover_layer_types(owner)
+        specs = {spec.name: spec for spec in layer_type_specs(owner)}
         content_dirs_valid = True
-        for entry_type in index_files():
+        for entry_type in discovered:
             directory = type_content_dir(owner, entry_type)
             if directory.exists() and not directory.is_dir():
                 content_dirs_valid = False
                 continue
-            # 唯一一处会 mkdir 的地方，外部类型必须在这里被挡住。
-            if is_external_type(entry_type):
+            spec = specs.get(entry_type)
+            skip_dir = is_external_type(entry_type) or (
+                spec is not None and not spec.writable
+            )
+            if skip_dir:
                 continue
             directory.mkdir(parents=True, exist_ok=True)
         if not content_dirs_valid:
             continue
-        for entry_type, file_name in index_files().items():
+        for entry_type, file_name in discovered.items():
             index_path = memory_dir(owner) / file_name
             if index_path.exists() and not index_path.is_file():
                 continue
@@ -448,7 +501,16 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
         agents_path = owner / AGENTS_FILE_NAME
         relative_agents = relative_or_name(agents_path, root)
         if relative_agents in local_repairs:
-            local_action = sync_agents_blocks(owner, local=build_local_block())
+            if classify_agents_file(agents_path) == "missing":
+                local_action = sync_agents_blocks(owner, local=build_local_block())
+            else:
+                existing = agents_path.read_text(encoding="utf-8")
+                merged = ensure_seed_local_lines(existing)
+                match = block_pattern(LOCAL_START, LOCAL_END).search(merged)
+                local = match.group(0) if match else build_local_block()
+                if merged != existing:
+                    write_atomic(agents_path, merged)
+                local_action = sync_agents_blocks(owner, local=local)
             if local_action in {"created", "updated"}:
                 repaired.append(
                     f"{local_action}-agents: {relative_agents} 刷新入口清单"

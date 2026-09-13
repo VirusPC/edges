@@ -9,7 +9,8 @@ from pathlib import Path
 
 from lib.paths import resolve_root, resolve_target
 from lib.provenance import compact_fields
-from nodes.entries import memory_entry_types
+from lib.types import layer_writable_types, reject_unwritable_type
+from operations.add_type import add_type
 from operations.doctor import doctor_memory
 from operations.init import init_memory
 from operations.remember import remember
@@ -38,11 +39,11 @@ def build_parser() -> argparse.ArgumentParser:
     remember_parser.add_argument(
         "--type",
         required=True,
-        choices=sorted(memory_entry_types()),
         help=(
-            "feedback=纠正与禁止模式，project=代码里推不出的决策，以及项目内的规范，"
-            "reference=外部资料去哪找，skills=可复用的执行流程，"
-            "user=本仓不宜公开的个人材料（gitignore，不进 git）"
+            "该层已登记的可写类型。官方种子: "
+            "feedback / project / reference / skills / user；"
+            "另加该层 AGENTS.md 本层清单里的用户类型。"
+            "agent_skills 只索引，不能 remember"
         ),
     )
     remember_parser.add_argument(
@@ -61,6 +62,29 @@ def build_parser() -> argparse.ArgumentParser:
         "--content", help="正文，按「一句结论 → **Why:** → **How to apply:**」组织"
     )
     content_group.add_argument("--content-file", help="从文件读正文；正文较长时用它")
+    add_parser = subparsers.add_parser("add-type")
+    add_parser.add_argument("--target-dir", required=True, help="已 init 的记忆目录")
+    add_parser.add_argument("--name", required=True, help="小写 snake_case 类型名，不能是官方种子")
+    add_parser.add_argument("--description", required=True, help="写进 AGENTS 本层清单的那句说明")
+    add_parser.add_argument(
+        "--gitignore",
+        action="store_true",
+        help="按 ADR-0003 风格把入口与复数目录写入仓库根 .gitignore",
+    )
+    add_parser.add_argument(
+        "--index-only",
+        action="store_true",
+        help="只索引不写（remember 拒绝；doctor 不报 missing-type-dir）",
+    )
+    add_parser.add_argument(
+        "--skills-format",
+        action="store_true",
+        help="条目形态与 skills 相同：<name>/SKILL.md，slug 用 kebab-case",
+    )
+    add_parser.add_argument(
+        "--external-content-dir",
+        help="本轮 stub：传入即 JSON 错误。只有官方 agent_skills 能把内容根放在 .memory/ 外",
+    )
     return parser
 
 
@@ -77,15 +101,34 @@ def read_content(arguments: argparse.Namespace) -> str:
 def main() -> int:
     """执行原子操作并输出机器可读 JSON。"""
     try:
-        # 建 parser 就要读模板（`--type` 的取值来自模板），所以它也得在 try 里，
+        # 建 parser 仍会读模板（种子类型清单），所以它也得在 try 里，
         # 否则模板坏掉时抛的是 traceback 而不是约定的 JSON 错误。
+        # remember --type 的合法值在 parse 之后按该层发现结果校验。
         arguments = build_parser().parse_args()
         target = resolve_target(arguments.target_dir)
+        if arguments.operation == "remember":
+            writable = layer_writable_types(target)
+            if arguments.type not in writable:
+                raise ValueError(reject_unwritable_type(target, arguments.type))
         if arguments.operation == "init":
             root = resolve_root(target, arguments.root_dir)
             result = init_memory(target, root, arguments.description)
         elif arguments.operation == "doctor":
             result = doctor_memory(resolve_root(target, arguments.root_dir), arguments.apply)
+        elif arguments.operation == "add-type":
+            result = add_type(
+                target,
+                arguments.name,
+                arguments.description,
+                gitignore=arguments.gitignore,
+                writable=not arguments.index_only,
+                format="skills" if arguments.skills_format else "ordinary",
+                external_content_dir=(
+                    tuple(Path(arguments.external_content_dir).parts)
+                    if arguments.external_content_dir
+                    else None
+                ),
+            )
         else:
             overrides = compact_fields(
                 {

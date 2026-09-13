@@ -4,6 +4,8 @@
 
 可以自由升级，不破协议就行。**但凡改动已发布产物的名字**（区块标记、索引文件名、类型目录名、条目前缀），**要同步给 `$project-memory-doctor` 加旧名识别与改写**；区块内的固定文案不参与解析，改了不必管存量（见 doctor 的「已知缺口」）。普通记忆把实现字段从 YAML 顶层收进 `metadata:` 也算已发布线格式，由 `legacy-flat-frontmatter` 识别并改写文件头。改名不涉及两个消费方——它们不认名字，只认产物里读到的链接与说明。改了 `../scripts/lib/blocks.py` 的标记常量或 `templates/` 的结构，同步改这里。
 
+**扩展一个 Memory Type（ADR 0006）：** 只改本文件描述的产物——该层 `.memory/<TYPE>.md` 入口、`.memory/<plural>/` 内容目录、以及 `AGENTS.md` 本层清单一行。用 `$project-memory-add-type`（`memory.py add-type`）登记。**不要**另写 JSON/YAML 类型注册表。PROTOCOL 不枚举类型。官方 init 种子仍是下表六类；`docs` / `progress` / `tasks` / `research` / `reminder` / `scheduler` 只作文档与测试冒烟，不进种子。
+
 ```text
 <仓库根>/
 ├── AGENTS.md                       # 本层记忆入口：硬约束 + 分类型入口清单 + 下层索引
@@ -45,7 +47,7 @@
 | --- | --- | --- | --- |
 | `<!-- project-memory:start -->` | 每个持有记忆或索引的目录 | 只是容器，本身不放内容 | 缺失时按需建壳 |
 | ├ `<!-- project-memory-important:start -->` | 每个记忆目录 | 本层硬约束，规则直接写在区块里 | 人/agent 手写；缺失时用模板种子，已有正文不覆盖 |
-| ├ `<!-- project-memory-local:start -->` | 每个记忆目录 | 本层分类型入口的清单 | 模板里的字面量 |
+| ├ `<!-- project-memory-local:start -->` | 每个记忆目录 | 本层分类型入口的清单 | 种子来自模板；用户 type 由 add-type 追加一行 |
 | └ `<!-- project-memory-children:start -->` | 有下层记忆目录时 | 直接下层记忆目录的 `AGENTS.md` | 增量维护，一次 init 一条 |
 
 硬约束不进 `.memory/`、不做成索引行。种子只有两句：ask / remember 的聚光灯（点名这两个日常 skill，不写用法、不编排 init / doctor / reshape），以及「硬约束写在本区块、不要链到 `.memory`」。各层自己的仓规手写追加在后面。不再单独成块。旧文件没有这个区块时，`$project-memory-doctor` 认 `missing-important`，补上种子正文，**已有规则不覆盖**。旧文件若还留着 `<!-- project-memory-auto:start -->`，`$project-memory-doctor` 认 `stale-auto`，删掉该区块。
@@ -56,7 +58,9 @@
 
 ## `USER.md` / `FEEDBACK.md` / `PROJECT.md` / `REFERENCE.md` / `SKILLS.md` / `AGENT_SKILLS.md` — 本层不同类型记忆入口
 
-协议要求按 `type` 分入口，本实现取六类。**六份入口都放在本层 `.memory/` 根部**，正文按类型放进**复数**小写目录——`agent_skills` 是唯一例外，它的内容根在 `.memory/` 之外。每个入口各有一个 `<!-- project-memory-entries:start -->` 区块，内容从对应内容根全量重算。`.memory/USER.md` 与 `.memory/users/` 被 gitignore，不进 git；Agent 读的是本机这份 `USER.md`。
+协议要求按 `type` 分入口。官方 init 种子是六类；本层还可以有用户登记的 type，发现顺序以本层 `AGENTS.md` 清单为准，并并上已有的 `.memory/<TYPE>.md` 入口产物。**种子入口都放在本层 `.memory/` 根部**，正文按类型放进**复数**小写目录——`agent_skills` 是唯一例外，它的内容根在 `.memory/` 之外。每个入口各有一个 `<!-- project-memory-entries:start -->` 区块，内容从对应内容根全量重算。`.memory/USER.md` 与 `.memory/users/` 被 gitignore，不进 git；Agent 读的是本机这份 `USER.md`。
+
+用户登记的 type 可在入口文件里写特权注释 `<!-- project-memory-type:start -->` … `<!-- project-memory-type:end -->`，字段是 `name` / `description` / `gitignore` / `writable` / `format`（`ordinary` 或 `skills`）。已实现的 flag：`gitignore`（按 ADR-0003 四条 pattern 追加仓库根 `.gitignore`）、`writable: false`（`--index-only`，remember 拒绝、doctor 不报 `missing-type-dir`）、`format: skills`（条目形态与 `skills` 相同）。内容根放在 `.memory/` 外仍只有官方 `agent_skills`；`--external-content-dir` 本轮是 stub。
 
 **条目**指区块里的一行，与记忆文件一一对应。入口是派生产物、不手写；行格式只存在于 [`templates/entry_line.tmpl.md`](templates/entry_line.tmpl.md)，下层索引与条目索引共用。
 
@@ -72,6 +76,8 @@
 | `reference` | `REFERENCE.md` | `references/reference_<slug>.md` | 是 | 项目外的信息去哪找 |
 | `skills` | `SKILLS.md` | `skills/<name>/SKILL.md` | 是 | 从会话里沉淀出来的可复用流程 |
 | `agent_skills` | `AGENT_SKILLS.md` | `../.agents/skills/<name>/SKILL.md` | **否** | 人写或 `npx skills` 装入的标准技能 |
+
+用户后加的 type 与普通种子同构：`--name docs` → 入口 `DOCS.md`、目录 `docs/`、条目前缀 `docs_`。`tasks` Memory Type 的目录是 `.memory/tasks/`，与 `knowledge/tasks/` 看板不是同一套文件。
 
 每类「记什么、不记什么」写在对应入口模板的引言里。
 
@@ -114,4 +120,4 @@
 
 **模板名 = 产物文件名去掉后缀 + `.tmpl.md`**。入口模板与记忆模板仍统一放在 `templates/`，不按产物目录分层。下划线开头的是行片段，不对应产物；`type_slug.tmpl.md` 是唯一例外，产物名带尖括号，文件名改用角色词。两份记忆模板都是 Agent Skills 闭集 + `metadata.edges-*`：`type_slug.tmpl.md` 多一个 `edges-type`（普通三类的 `type` 仍要落盘），`SKILL.tmpl.md` 不写 `type`（由目录位置编码）。`agent_skills` 没有模板——工具不写它。
 
-`AGENTS.tmpl.md` 把三对内层区块标记连嵌套关系一起写在里面。其中本层记忆区块的每一行就是一个类型声明，脚本从中推导 `type` 与索引文件名。索引文件名全大写、可含下划线（`AGENT_SKILLS.md` → `agent_skills`）；内容根取 `lib/paths.py` 的 `type_content_dir()`；普通记忆的条目前缀仍取 `type` 原值。
+`AGENTS.tmpl.md` 把三对内层区块标记连嵌套关系一起写在里面。种子仍从 `AGENTS.tmpl.md` 推导；**运行时** remember / doctor / ask 从该层 AGENTS / 入口产物发现。索引文件名全大写、可含下划线（`AGENT_SKILLS.md` → `agent_skills`）；内容根取 `lib/paths.py` 的 `type_content_dir()`；普通记忆的条目前缀仍取 `type` 原值。

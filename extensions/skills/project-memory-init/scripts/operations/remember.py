@@ -5,8 +5,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lib.blocks import index_files
 from lib.paths import AGENTS_FILE_NAME, memory_dir, resolve_root, write_atomic
+from lib.types import discover_layer_types, index_file_name
 from lib.provenance import AUDIT_FIELDS, ORIGIN_FIELDS, agent_context, git_identity
 from nodes.agents import sync_target_agents
 from nodes.entries import (
@@ -36,16 +36,18 @@ def remember(
     action = "updated" if path.exists() else "created"
     existing = parse_frontmatter(path) if path.exists() else {}
     detected = {**agent_context(), **git_identity(target)}
-    name = entry_name(path, entry_type)
+    name = entry_name(path, entry_type, target)
     fields = build_entry_fields(
-        name, entry_type, title, description, existing, detected, overrides
+        name, entry_type, title, description, existing, detected, overrides, target
     )
-    write_atomic(path, render_entry(fields, content, entry_output_name(entry_type)))
-    # 全部索引一起重算：AGENTS.md 的记忆区块静态声明了它们都在，缺一个就是死链。
-    for declared_type in index_files():
+    write_atomic(path, render_entry(fields, content, entry_output_name(entry_type, target)))
+    # 全部已发现类型一起重算：种子加本层额外 type，缺一个就是死链。
+    for declared_type in discover_layer_types(target):
         refresh_index(target, declared_type)
     agents_action = sync_target_agents(target, resolve_root(target, None))
-    index_path = memory_dir(target) / index_files()[entry_type]
+    index_path = memory_dir(target) / (
+        discover_layer_types(target).get(entry_type) or index_file_name(entry_type)
+    )
     provenance_keys = (*ORIGIN_FIELDS, *AUDIT_FIELDS)
     return {
         "operation": "remember",

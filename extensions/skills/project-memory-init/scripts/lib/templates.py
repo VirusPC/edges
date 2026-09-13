@@ -57,3 +57,39 @@ def fill_placeholders(text: str, values: dict[str, str]) -> str:
 def render_line(template_name: str, values: dict[str, str]) -> str:
     """按行片段模板渲染一个列表项，行格式只存在于模板里。"""
     return fill_placeholders(read_template(template_name).strip(), values)
+
+
+def read_index_template(
+    file_name: str,
+    entry_type: str,
+    description: str,
+    *,
+    flags: dict[str, str] | None = None,
+) -> str:
+    """种子入口用同名模板；用户 type 回落到 TYPE.tmpl.md。"""
+    path = template_path(file_name)
+    if path.is_file():
+        return read_template(file_name)
+    from lib.paths import type_dir_name
+
+    flags = flags or {}
+    plural = type_dir_name(entry_type)
+    fmt = flags.get("format", "ordinary")
+    body_hint = (
+        f"`{plural}/<name>/SKILL.md`"
+        if fmt == "skills"
+        else f"`{plural}/{entry_type}_<slug>.md`"
+    )
+    return fill_placeholders(
+        read_template("TYPE.md"),
+        {
+            "NAME": entry_type.upper(),
+            "type": entry_type,
+            "description": description or entry_type,
+            "plural": plural,
+            "body_hint": body_hint,
+            "gitignore": flags.get("gitignore", "false"),
+            "writable": flags.get("writable", "true"),
+            "format": fmt,
+        },
+    )

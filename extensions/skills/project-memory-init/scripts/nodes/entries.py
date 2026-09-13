@@ -7,6 +7,13 @@ import re
 from pathlib import Path
 
 from lib.blocks import ENTRIES_END, ENTRIES_START, index_files, upsert_block
+from lib.types import (
+    discover_layer_types,
+    index_file_name,
+    layer_type_specs,
+    layer_writable_types,
+    reject_unwritable_type,
+)
 from lib.paths import (
     is_external_type,
     list_type_files,
@@ -21,6 +28,7 @@ from lib.templates import (
     ENTRY_OUTPUT_PATTERN,
     PLACEHOLDER_PATTERN,
     fill_placeholders,
+    read_index_template,
     read_template,
     render_line,
     template_path,
@@ -79,20 +87,35 @@ METADATA_KEY_MAP = {
 }
 
 
-def memory_entry_types() -> tuple[str, ...]:
-    """可由 remember 写入的类型。内容根在 `.memory/` 之外的一律只读。"""
-    return tuple(name for name in index_files() if not is_external_type(name))
+def memory_entry_types(target: Path | None = None) -> tuple[str, ...]:
+    """可写类型。无 target 时仍是官方种子（init / 帮助文案）。"""
+    if target is None:
+        return tuple(name for name in index_files() if not is_external_type(name))
+    return layer_writable_types(target)
 
 
-def entry_output_name(entry_type: str) -> str:
+def is_skill_format(target: Path, entry_type: str) -> bool:
+    if entry_type in AGENT_SKILL_FORMAT_TYPES:
+        return True
+    for spec in layer_type_specs(target):
+        if spec.name == entry_type:
+            return spec.format == "skills"
+    return False
+
+
+def entry_output_name(entry_type: str, target: Path | None = None) -> str:
     """这一类的产物名，同时决定用哪份模板（模板名 = 产物名 + .tmpl.md）。"""
+    if target is not None and is_skill_format(target, entry_type):
+        return SKILL_OUTPUT_NAME
     if entry_type in AGENT_SKILL_FORMAT_TYPES:
         return SKILL_OUTPUT_NAME
     return ENTRY_OUTPUT_PATTERN
 
 
-def entry_name(path: Path, entry_type: str) -> str:
+def entry_name(path: Path, entry_type: str, target: Path | None = None) -> str:
     """条目的 name。skill 的身份是目录名，不是文件名——文件名恒为 SKILL.md。"""
+    if target is not None and is_skill_format(target, entry_type):
+        return path.parent.name
     if entry_type in AGENT_SKILL_FORMAT_TYPES:
         return path.parent.name
     return path.stem
@@ -248,10 +271,16 @@ def extract_entry_body(text: str) -> str:
     return body
 
 
-def ordinary_memory_types() -> tuple[str, ...]:
+def ordinary_memory_types(target: Path | None = None) -> tuple[str, ...]:
     """走 type_slug 模板的可写类型，不含 skills。"""
     return tuple(
-        name for name in memory_entry_types() if name not in AGENT_SKILL_FORMAT_TYPES
+        name
+        for name in memory_entry_types(target)
+        if not (
+            is_skill_format(target, name)
+            if target is not None
+            else name in AGENT_SKILL_FORMAT_TYPES
+        )
     )
 
 
@@ -299,11 +328,11 @@ def render_entry(
 
 def resolve_memory_path(target: Path, entry_type: str, slug: str | None) -> Path:
     """把类型与 slug 映射为唯一的条目文件路径。"""
-    if entry_type not in memory_entry_types():
-        raise ValueError(f"--type 不支持由 remember 写入: {entry_type}")
+    if entry_type not in memory_entry_types(target):
+        raise ValueError(reject_unwritable_type(target, entry_type))
     normalized = (slug or "").strip().lower()
     directory = type_content_dir(target, entry_type)
-    if entry_type in AGENT_SKILL_FORMAT_TYPES:
+    if is_skill_format(target, entry_type):
         # Agent Skills 协议要求 name 等于目录名，所以 slug 直接当目录名用。
         if not SKILL_NAME_PATTERN.fullmatch(normalized) or len(normalized) > SKILL_NAME_MAX:
             raise ValueError(
@@ -313,7 +342,8 @@ def resolve_memory_path(target: Path, entry_type: str, slug: str | None) -> Path
         return directory / normalized / SKILL_OUTPUT_NAME
     if not re.fullmatch(r"[a-z0-9]+(?:_[a-z0-9]+)*", normalized):
         raise ValueError("--slug 必须是小写 snake_case，例如 reuse_existing_constants")
-    if normalized.startswith(tuple(f"{name}_" for name in index_files())):
+    prefixes = discover_layer_types(target) or index_files()
+    if normalized.startswith(tuple(f"{name}_" for name in prefixes)):
         raise ValueError("--slug 不要带类型前缀，脚本会按 --type 自动加上")
     return directory / f"{entry_type}_{normalized}.md"
 
@@ -326,9 +356,14 @@ def build_entry_fields(
     existing: dict[str, str],
     detected: dict[str, str],
     overrides: dict[str, str],
+    target: Path | None = None,
 ) -> dict[str, str]:
     """组装 frontmatter。显式覆盖优先级最高，其余按字段语义决定谁胜出。"""
-    agent_skill = entry_type in AGENT_SKILL_FORMAT_TYPES
+    agent_skill = (
+        is_skill_format(target, entry_type)
+        if target is not None
+        else entry_type in AGENT_SKILL_FORMAT_TYPES
+    )
     # title 可能来自旧顶层键或 metadata.edges-title，parse_frontmatter 已经摊平。
     resolved_title = (title or existing.get("title") or "").strip()
     resolved_description = (description or existing.get("description") or "").strip()
@@ -363,14 +398,14 @@ def build_entry_index(target: Path, entry_type: str) -> str:
     """从全部条目文件的 frontmatter 重算某个索引的条目清单。"""
     entries: list[str] = []
     directory = memory_dir(target)
-    if entry_type in AGENT_SKILL_FORMAT_TYPES:
+    if is_skill_format(target, entry_type):
         # skill 目录的内部形状属于外部协议；这里只保留一个很薄的当前格式适配器。
         paths = list_type_files(target, entry_type, f"*/{SKILL_OUTPUT_NAME}")
     else:
         paths = list_type_files(target, entry_type, f"{entry_type}_*.md")
     for path in paths:
         fields = parse_frontmatter(path)
-        name = entry_name(path, entry_type)
+        name = entry_name(path, entry_type, target)
         title = fields.get("title") or fields.get("name") or name
         description = fields.get("description") or "缺少 description，请补齐 frontmatter。"
         entries.append(
@@ -391,12 +426,12 @@ def build_entry_index(target: Path, entry_type: str) -> str:
 
 def expected_index_document(target: Path, entry_type: str) -> str:
     """计算索引目标态但不落盘，供 refresh 与 doctor 共用。"""
-    file_name = index_files()[entry_type]
+    file_name = discover_layer_types(target).get(entry_type) or index_file_name(entry_type)
     path = memory_dir(target) / file_name
     existing = (
         path.read_text(encoding="utf-8")
         if path.is_file()
-        else read_template(file_name)
+        else read_index_template(file_name, entry_type, entry_type)
     )
     updated = upsert_block(
         existing, ENTRIES_START, ENTRIES_END, build_entry_index(target, entry_type)
@@ -406,7 +441,7 @@ def expected_index_document(target: Path, entry_type: str) -> str:
 
 def refresh_index(target: Path, entry_type: str) -> str:
     """刷新索引文件里的条目清单；索引文件缺失时先按模板补建。"""
-    file_name = index_files()[entry_type]
+    file_name = discover_layer_types(target).get(entry_type) or index_file_name(entry_type)
     path = memory_dir(target) / file_name
     existed = path.is_file()
     existing = path.read_text(encoding="utf-8") if existed else ""

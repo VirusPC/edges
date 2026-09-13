@@ -6,7 +6,7 @@ version: 1.7.0
 
 # Project Memory Init
 
-在一个已存在的目录里建好 `.memory/` 里模板声明的各类型入口及内容目录，并维护该目录的 `AGENTS.md` 索引。`user` 的入口 `USER.md` 与目录 `users/` 会被 gitignore，只留在本机。
+在一个已存在的目录里建好 `.memory/` 里模板声明的各类型入口及内容目录，并维护该目录的 `AGENTS.md` 索引。`user` 的入口 `USER.md` 与目录 `users/` 会被 gitignore，只留在本机。Init **只建官方六类种子**；用户后加的 Memory Type 不要写进模板，走 `$project-memory-add-type`。
 
 只在用户明确要求 Init 时运行。Remember、Ask、Doctor 都不得代为调用。用户要求 `$project-memory-reshape` 某一份已有 `AGENTS.md` 时，视为同时同意对该目录 Init。
 

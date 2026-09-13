@@ -16,6 +16,7 @@ from lib.paths import (
     write_atomic,
 )
 from lib.templates import ENTRY_OUTPUT_PATTERN, read_template
+from lib.types import discover_layer_types
 from nodes.agents import (
     find_index_anchor,
     rehome_index_entries,
@@ -77,7 +78,7 @@ def init_memory(target: Path, root: Path, description: str | None = None) -> dic
             continue
         write_atomic(path, template)
         created.append(path.relative_to(target).as_posix())
-    for entry_type in index_files():
+    for entry_type in discover_layer_types(target):
         refresh_index(target, entry_type)
     agents_action = sync_target_agents(target, root)
     # 先建记忆根的 AGENTS.md，anchor 可能就是它。
