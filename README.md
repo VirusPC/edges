@@ -1,5 +1,7 @@
 # Edges — 个人认知系统
 
+[![教学站点部署](https://github.com/VirusPC/edges/actions/workflows/deploy-teach.yml/badge.svg)](https://github.com/VirusPC/edges/actions/workflows/deploy-teach.yml)
+
 > 把认知资本转化为可复利的判断优势。
 
 Edges 是一个以知识资产为核心、由 Agent 接口和可迁移 harness 支撑的个人认知系统。它把有限的时间、注意力和推理能力投入知识的研究、提炼与使用，让重要经验形成可复用的 Edge，并在真实判断、行动和外部互动中持续获得反馈。
