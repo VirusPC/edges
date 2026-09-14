@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- 根 README 增加 `deploy-teach.yml` 工作流状态徽章，链到 Actions 工作流页。
 - `$project-memory-add-type`：按 LAYOUT 在指定记忆目录登记用户 Memory Type；remember / ask / doctor 从该层产物发现。官方种子仍是六类（ADR-0006）。
 - `edges tasks` CLI：Issue 层 list/get/create/update/status；Run 层只读 `runs` / `run-messages`（ADR-0005）。无硬删除、无 GitHub 同步、无 Skill/MCP 封装。
 - 可写项目记忆类型 `user`（ADR-0003）：`.memory/users/` + `.memory/USER.md` 为仓内权威副本且 gitignore；`$user-memory-backup` / `$user-memory-restore` 做换机逃生。不做 `private` 条目元数据。
@@ -36,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `deploy-teach.yml` 的 `deploy` job 设置 `environment: ecs`，让 GitHub 记录 Deployments。
 - `new-note` MCP 改为子进程调用 `edges note`，不再 `execFile` 仓根脚本。
 - `pnpm setup` 不再把仓根 `bin/` 写入 PATH。
 - 根 README 捕获入口改为 CLI + Skill + MCP（ADR-0004）。

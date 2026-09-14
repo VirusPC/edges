@@ -18,6 +18,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: ecs
     steps:
       - name: Pull edges on ECS
         env:
