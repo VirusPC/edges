@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- `deploy-teach.yml` 的 `deploy` job 设置 `environment: ecs`，让 GitHub 记录 Deployments。
+- `deploy-teach.yml` 的 `deploy` job 使用 `environment: production`（由 `ecs` 改名），让 GitHub 记录 Deployments。
 - `new-note` MCP 改为子进程调用 `edges note`，不再 `execFile` 仓根脚本。
 - `pnpm setup` 不再把仓根 `bin/` 写入 PATH。
 - 根 README 捕获入口改为 CLI + Skill + MCP（ADR-0004）。
