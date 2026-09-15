@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- CONTEXT 增加评测冒烟（Evaluation Smoke）、公开基准证明（Benchmark Proof）、评测报告（Evaluation Report）：冒烟只证明链路可跑，不是项目记忆或 Agent Memory 有效性证据。
+- `docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`：本轮 LoCoMo 只做评测冒烟；SUT 为上游 harness；分数不得引用为对项目记忆的公开基准证明。本轮只定文档，不实现 runner。
 - `edges tasks` Issue 层 `--priority` / `list --sort priority`（ADR-0007）。枚举 `urgent|high|medium|low|none`，写在 `metadata.edges-task-priority`；缺省为 `none`。`status` 不改 priority；改 priority 不搬状态夹。无 Skill/MCP 封装。
 - `docs/superpowers/plans/2026-09-16-edges-task-priority.md`：ADR-0007 的实现计划（本轮只做 `edges tasks` CLI `--priority` / `--sort priority`；不实现 Skill/MCP）。
 - CONTEXT 增加 `edges-task-priority`；收紧 Task / `edges-tasks-status` / edges tasks（CLI）的文档约定：优先级与状态正交；后续 create/update 用 `--priority`，list 可用 `--sort priority`。

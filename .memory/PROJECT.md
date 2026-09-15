@@ -13,6 +13,7 @@
 - [对话整理采用复盘四栏](projects/project_conversation_notes_fupan_four_columns.md) — 改 conversation-to-notes 或对话 Note 结构时：用复盘四栏；相关链接写入【补充说明】并附说明；不要复活已关闭的 FIA 中文换皮；不要批量改写旧笔记；不要把升 Edge 写进该 skill。
 - [Task Issue 优先级用词档位，与 status 正交](projects/project_edges_task_priority.md) — Task Issue 优先级为 urgent|high|medium|low|none，写在 metadata.edges-task-priority，与 status 正交、不搬状态夹。CLI 已落地 create/update --priority 与 list --sort priority；Skill/MCP 后做。决策见 docs/adr/0007-edges-task-priority.md；词 vs P0 调研见 knowledge/projects/tasks/2026-09-15--issue-priority-words-vs-p0.md
 - [edges tasks 本轮只做 CLI](projects/project_edges_tasks_cli.md) — 本轮 edges tasks 看板操作只做 CLI（list/get/create/update/status + 只读 runs/run-messages）；Skill 与 MCP 后做同一契约。决策见 ADR 0005。
+- [评测冒烟不是公开基准证明](projects/project_evaluation_smoke_is_not_benchmark_proof.md) — 写评测或引用 LoCoMo 等公开基准分数时：冒烟只证明链路可跑，不得当成项目记忆 / Agent Memory 的公开基准证明。决策见 docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md。
 - [可扩展 Memory Type：LAYOUT 登记，不另开注册表](projects/project_extensible_memory_types.md) — 可扩展 Memory Type：扩展面只在 LAYOUT，用 project-memory-add-type 登记；官方种子仍是六类。决策见 docs/adr/0006-extensible-project-memory-types.md。
 - [idea→task→专家→Cloud Agent→改状态](projects/project_idea_todo_expert_cloud_loop.md) — 工作流：idea 记到 knowledge/tasks（Task 记录员）→ 有空时专家 Agent 细聊 → Cursor Cloud Agent 开发 → 开发完改 Task 状态
 - [记忆研究笔记落 knowledge/projects/memory](projects/project_memory_research_notes_in_knowledge_projects.md) — 写 project-memory 的调研、优点、related work 等研究笔记时：落到 knowledge/projects/memory/；skill 层 .memory 只记协议与设计决策，不当成对外研究笔记落点。
