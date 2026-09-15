@@ -169,7 +169,7 @@ Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`�
 _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
 
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面，覆盖 Issue 层 list/get/create/update/status，以及 Run 层只读的 runs / run-messages。Issue 层 create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级。
+以 `edges tasks` 为入口的 Task 看板命令面，覆盖 Issue 层 list/get/create/update/status，以及 Run 层只读的 runs / run-messages。后续 Issue 层 create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级。
 _避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages
 
 **Task Run（edges）**：
