@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `docs/superpowers/plans/2026-09-16-edges-task-priority.md`：ADR-0007 的实现计划（本轮只做 `edges tasks` CLI `--priority` / `--sort priority`；不实现 Skill/MCP）。
 - CONTEXT 增加 `edges-task-priority`；收紧 Task / `edges-tasks-status` / edges tasks（CLI）的文档约定：优先级与状态正交；后续 create/update 用 `--priority`，list 可用 `--sort priority`。
 - `docs/adr/0007-edges-task-priority.md`：Issue 层优先级用 `urgent|high|medium|low|none`（非 P0–P3），写在 `metadata.edges-task-priority`；缺省为 `none`；改 priority 不搬状态夹。本轮只定文档，CLI 后做。
 - 根 README 增加 `deploy-teach.yml` 工作流状态徽章，链到 Actions 工作流页。
