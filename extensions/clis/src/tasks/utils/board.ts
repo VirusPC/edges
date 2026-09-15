@@ -1,6 +1,7 @@
 import { access, mkdir, readdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { parseTaskDoc } from "./frontmatter.js";
+import { priorityFromMetadata } from "./priority.js";
 import {
   boardRoot,
   isTaskMarkdownName,
@@ -134,6 +135,7 @@ async function readListItem(
     path: rel,
     sidecarPath: sidecarRel,
     runCount,
+    priority: priorityFromMetadata(doc.metadata),
   };
 }
 
