@@ -1,0 +1,19 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { classifyError, summarize } from "../../../src/note/utils/errors.js";
+
+test("classifyError detects auth failures", () => {
+  const code = classifyError({ stderr: "Permission denied (publickey)." });
+  assert.equal(code, "PUSH_AUTH_FAILED");
+});
+
+test("classifyError maps git ENOENT to GIT_FAILURE", () => {
+  const code = classifyError({ code: "ENOENT", message: "spawn git ENOENT" });
+  assert.equal(code, "GIT_FAILURE");
+});
+
+test("summarize returns shortened text", () => {
+  const text = "a".repeat(600);
+  const summary = summarize(text, 20);
+  assert.equal(summary, "aaaaaaaaaaaaaaaaaaaa...");
+});

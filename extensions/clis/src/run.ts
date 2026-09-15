@@ -1,17 +1,13 @@
-import { ZodError } from "zod";
-import { checkAuth } from "./auth.js";
-import { loadConfig } from "./config.js";
-import { exitCodeFor, exitCodeForError } from "./exit.js";
-import { formatResult } from "./format.js";
-import { parseArgv } from "./parse.js";
-import { formatHelp } from "./program.js";
-import { runNoteIngest } from "./git/ingest.js";
-import { runIngest, type IngestRunner } from "./service.js";
-import type { BoardFs, BoardWriter } from "./tasks/board.js";
-import { runTasks } from "./tasks/run.js";
-import type { IngestFailure } from "./types.js";
-import { formatZodReason, validateInput } from "./validation.js";
-import { VERSION } from "./version.js";
+import { loadConfig } from "./utils/config.js";
+import { exitCodeForError } from "./utils/exit.js";
+import { formatResult } from "./note/utils/format.js";
+import { runNote } from "./note/index.js";
+import type { IngestRunner } from "./note/utils/service.js";
+import type { IngestFailure } from "./note/utils/types.js";
+import { formatHelp, parseArgv } from "./program.js";
+import type { BoardFs, BoardWriter } from "./tasks/utils/board.js";
+import { runTasks } from "./tasks/index.js";
+import { VERSION } from "./utils/version.js";
 
 export type RunIo = {
   env?: NodeJS.ProcessEnv;
@@ -55,15 +51,6 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
   if (parsed.kind === "version") {
     return { exitCode: 0, stdout: `${VERSION}\n`, stderr: "" };
   }
-  if (parsed.kind.startsWith("tasks-")) {
-    return runTasks(parsed, {
-      env,
-      repoPath: io.repoPath ?? loadConfig(env).repoPath,
-      fs: io.fs,
-      now: io.now,
-      writer: io.writer,
-    });
-  }
   if (parsed.kind === "error") {
     const usage =
       argv[0] === "note"
@@ -73,51 +60,19 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
           : "See edges --help for usage.\n";
     return fail({ status: "failed", errorCode: parsed.errorCode, reason: parsed.reason }, usage);
   }
-
-  let request;
-  try {
-    request = validateInput({
-      title: parsed.title,
-      content: parsed.content,
-      coAuthor: parsed.coAuthor,
+  if (parsed.kind === "note") {
+    return runNote(parsed, {
+      env,
+      stdinText: io.stdinText,
+      stdinIsTTY: io.stdinIsTTY,
+      ingest: io.ingest,
     });
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return fail(
-        { status: "failed", errorCode: "VALIDATION_ERROR", reason: formatZodReason(error) },
-        "See edges note --help for usage.\n",
-      );
-    }
-    throw error;
   }
-
-  const config = loadConfig(env);
-  if (parsed.dryRun) {
-    config.dryRun = true;
-  }
-  if (parsed.mode) {
-    config.mode = parsed.mode;
-  }
-
-  const auth = await checkAuth({
-    expectedToken: config.authToken,
-    tokenFile: parsed.tokenFile,
-    tokenStdin: parsed.tokenStdin,
-    stdinText: io.stdinText,
-    stdinIsTTY: io.stdinIsTTY,
+  return runTasks(parsed, {
+    env,
+    repoPath: io.repoPath ?? loadConfig(env).repoPath,
+    fs: io.fs,
+    now: io.now,
+    writer: io.writer,
   });
-  if (!auth.ok) {
-    return fail({ status: "failed", errorCode: auth.failure.errorCode, reason: auth.failure.reason });
-  }
-
-  const runner = io.ingest ?? runNoteIngest;
-  const result = await runIngest(request, config, runner, env);
-  const stderrLines = result.status === "success" ? result.diagnostics : result.stderrSummary;
-  const stderr = stderrLines ? `${stderrLines.endsWith("\n") ? stderrLines : `${stderrLines}\n`}` : "";
-
-  return {
-    exitCode: exitCodeFor(result),
-    stdout: formatResult(result),
-    stderr,
-  };
 }

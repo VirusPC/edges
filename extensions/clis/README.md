@@ -1,6 +1,17 @@
 # edges-cli (`edges`)
 
-Multi-command Edges CLI. Humans and local agents share `edges`. Note ingest git lives in this package (`src/git`). npm `package.json` `"bin"` is the install hook for the `edges` binary, not a separate layer.
+Multi-command Edges CLI. Humans and local agents share `edges`. Note ingest git lives in `src/note/utils/git`. npm `package.json` `"bin"` is the install hook for the `edges` binary, not a separate layer.
+
+## Directory is the command tree
+
+Each command directory holds the same four files:
+
+- `index.ts` — public surface (re-exports this level’s `program` + `run`)
+- `program.ts` — Commander registration (flags and arguments)
+- `run.ts` — execute or dispatch. A **file** named `run.ts` is a dispatcher, not a command, so `tasks/run.ts` can sit next to `tasks/runs/` (`edges tasks runs`)
+- `help.ts` — human-readable usage (after-help)
+
+Plus subcommand folders and `utils/`. Argv parsing is `parseArgv` in `src/program.ts` (not a fifth root file). Root `src/index.ts` is the **bin** (`#!/usr/bin/env node`); nested `index.ts` files are barrels.
 
 The command tree is built with [Commander.js](https://github.com/tj/commander.js):
 

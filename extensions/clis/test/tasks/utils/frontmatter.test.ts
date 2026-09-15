@@ -1,0 +1,54 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { parseTaskDoc, setMetadataField, renderNewTaskDoc } from "../../../src/tasks/utils/frontmatter.js";
+
+const SAMPLE = `---
+name: cli_refactor_commanderjs
+description: CLI 用 Commander.js 重构
+metadata:
+  edges-type: task
+  edges-title: CLI 用 Commander.js 重构
+  edges-tasks-status: done
+  edges-task-pr: "https://github.com/VirusPC/edges/pull/37"
+  edges-updated-at: "2026-09-11T20:08:00+08:00"
+---
+
+CLI 用 Commander.js（commander）重构。
+
+**Why:**
+reason
+
+**How to apply:**
+- do the thing
+`;
+
+test("parseTaskDoc reads name, description, nested edges-* metadata, body", () => {
+  const doc = parseTaskDoc(SAMPLE);
+  assert.equal(doc.name, "cli_refactor_commanderjs");
+  assert.equal(doc.metadata["edges-tasks-status"], "done");
+  assert.equal(doc.metadata["edges-title"], "CLI 用 Commander.js 重构");
+  assert.match(doc.body, /Commander\.js/);
+});
+
+test("setMetadataField changes only that key and keeps neighbor order", () => {
+  const next = setMetadataField(SAMPLE, "edges-tasks-status", "cancelled");
+  assert.match(next, /edges-type: task\n  edges-title:/);
+  assert.match(next, /edges-tasks-status: cancelled/);
+  assert.match(next, /edges-task-pr:/);
+  assert.equal(parseTaskDoc(next).metadata["edges-tasks-status"], "cancelled");
+});
+
+test("renderNewTaskDoc writes ADR 0002 shape and omits empty assignee", () => {
+  const md = renderNewTaskDoc({
+    name: "edges_tasks_cli",
+    description: "edges tasks CLI",
+    title: "edges tasks CLI",
+    status: "backlog",
+    updatedAt: "2026-09-13T03:00:00+00:00",
+    body: "edges tasks CLI\n\n**Why:**\n\n\n**How to apply:**\n",
+  });
+  assert.match(md, /^---\nname: edges_tasks_cli\n/);
+  assert.match(md, /edges-type: task/);
+  assert.match(md, /edges-tasks-status: backlog/);
+  assert.doesNotMatch(md, /edges-task-assignee/);
+});
