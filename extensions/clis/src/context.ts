@@ -1,29 +1,34 @@
-import type { IngestRunner } from "./note/utils/service.js";
-import type { BoardFs, BoardWriter } from "./tasks/utils/board.js";
+/**
+ * One `edges` process invocation.
+ *
+ * `CliContext` is the production snapshot plus Commander's out-slot. It is not
+ * a Task Run (`edges tasks runs`), and it does not carry test doubles
+ * (`ingest`, `fs`, `writer`, `now`). Tests override production env vars
+ * (e.g. `EDGES_REPO`) or call domain functions directly.
+ */
 
-export type RunIo = {
-  env?: NodeJS.ProcessEnv;
-  stdinText?: string;
-  stdinIsTTY?: boolean;
-  ingest?: IngestRunner;
-  repoPath?: string;
-  fs?: BoardFs;
-  now?: Date;
-  writer?: BoardWriter;
-};
-
-export type RunResult = {
+/** Process output: JSON/table on stdout, diagnostics on stderr. */
+export type CliResult = {
   exitCode: number;
   stdout: string;
   stderr: string;
 };
 
-export type CliContext = {
-  io: RunIo;
-  result: RunResult | undefined;
+/** Production input to `run()`. Omit to default `env` to `process.env`. */
+export type CliInput = {
+  env?: NodeJS.ProcessEnv;
+  stdinText?: string;
+  stdinIsTTY?: boolean;
 };
 
-export function usageError(reason: string, scope: "root" | "note" | "tasks"): RunResult {
+export type CliContext = {
+  env: NodeJS.ProcessEnv;
+  stdinText?: string;
+  stdinIsTTY?: boolean;
+  result: CliResult | undefined;
+};
+
+export function usageError(reason: string, scope: "root" | "note" | "tasks"): CliResult {
   const usage =
     scope === "note"
       ? "See edges note --help for usage.\n"

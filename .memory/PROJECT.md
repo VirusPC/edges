@@ -9,6 +9,7 @@
 - [放弃的 ChatGPT MCP 接入](projects/project_abandoned_chatgpt_mcp.md) — 2026-02-19 建过两条空的 ChatGPT MCP change，没有设计可恢复；若再做从当前 MCP 布局重开。
 - [能力面：CLI / Skill / MCP](projects/project_capability_surface_cli_skill_mcp.md) — 能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 extensions/clis 的 TS；MCP 子进程调 edges note。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。
 - [Changelog 自动化：调研过，暂不生成正文](projects/project_changelog_automation.md) — 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。
+- [CliContext 只装生产快照](projects/project_cli_context_production_snapshot.md) — 改 edges CLI 的 CliContext / run() 入参时：只放 env 与 stdin 快照加 Commander 的 result；不要把 ingest、fs、writer、now 等测试替身塞进 Context。输出类型叫 CliResult，不要叫 RunResult。
 - [对话整理采用复盘四栏](projects/project_conversation_notes_fupan_four_columns.md) — 改 conversation-to-notes 或对话 Note 结构时：用复盘四栏；相关链接写入【补充说明】并附说明；不要复活已关闭的 FIA 中文换皮；不要批量改写旧笔记；不要把升 Edge 写进该 skill。
 - [edges tasks 本轮只做 CLI](projects/project_edges_tasks_cli.md) — 本轮 edges tasks 看板操作只做 CLI（list/get/create/update/status + 只读 runs/run-messages）；Skill 与 MCP 后做同一契约。决策见 ADR 0005。
 - [可扩展 Memory Type：LAYOUT 登记，不另开注册表](projects/project_extensible_memory_types.md) — 可扩展 Memory Type：扩展面只在 LAYOUT，用 project-memory-add-type 登记；官方种子仍是六类。决策见 docs/adr/0006-extensible-project-memory-types.md。

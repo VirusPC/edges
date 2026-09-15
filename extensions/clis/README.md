@@ -6,7 +6,7 @@ Multi-command Edges CLI. Humans and local agents share `edges`. Note ingest git 
 
 - **File** = one command node: flags, after-help, `.action` (leaf) or register children (group)
 - **Folder** = children of that command, plus `utils/`
-- Root extras: `index.ts` is the bin; `program.ts` is the `edges` node and also exports `run()` (only the root is invoked as a process); `context.ts` is the shared `CliContext` passed down the tree
+- Root extras: `index.ts` is the bin; `program.ts` is the `edges` node and also exports `run()` (only the root is invoked as a process); `context.ts` is the per-process `CliContext` (env / stdin snapshot + command result) passed down the tree
 
 The command tree is built with [Commander.js](https://github.com/tj/commander.js):
 

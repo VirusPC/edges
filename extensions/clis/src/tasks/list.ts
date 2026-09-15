@@ -22,8 +22,8 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", LIST_AFTER_HELP)
     .action(async (opts: { status?: TaskStatus }) => {
-      await runTasksCommand(ctx, async (io) => {
-        const listed = await listTasksService(io.repoPath, { status: opts.status }, io.fs);
+      await runTasksCommand(ctx, async (runtime) => {
+        const listed = await listTasksService(runtime.repoPath, { status: opts.status }, runtime.fs);
         return succeed({ status: "success", command: "list", tasks: listed });
       });
     });

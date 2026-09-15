@@ -40,9 +40,9 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
       name?: string;
       assignee?: string;
     }) => {
-      await runTasksCommand(ctx, async (io) => {
+      await runTasksCommand(ctx, async (runtime) => {
         const created = await createTask(
-          io.repoPath,
+          runtime.repoPath,
           {
             title: opts.title,
             description: opts.description,
@@ -51,7 +51,7 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
             name: opts.name,
             assignee: opts.assignee,
           },
-          { fs: io.writer, now: io.now },
+          { fs: runtime.writer, now: runtime.now },
         );
         return succeed({ status: "success", command: "create", ...created });
       });

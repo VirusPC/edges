@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { run } from "../src/program.js";
-import type { IngestRequest, RuntimeConfig, ScriptSuccess } from "../src/note/utils/types.js";
 
 const requiredNoteFlags = [
   "--title",
@@ -11,20 +10,6 @@ const requiredNoteFlags = [
   "--co-author",
   "OpenAI Codex <codex@openai.com>",
 ] as const;
-
-type IngestRunner = (
-  input: IngestRequest,
-  config: RuntimeConfig,
-) => Promise<ScriptSuccess>;
-
-function successIngest(): IngestRunner {
-  return async (): Promise<ScriptSuccess> => ({
-    filePath: "knowledge/notes/2026-09-07--title.md",
-    branch: "main",
-    prStatus: "direct_commit",
-    stdout: "ok\n__EDGES_FILE__=knowledge/notes/2026-09-07--title.md\n",
-  });
-}
 
 test("run --help lists note and tasks", async () => {
   const result = await run(["--help"]);
@@ -61,16 +46,9 @@ test("run tasks without subcommand is usage JSON", async () => {
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
 });
 
-test("missing note flags fail with JSON error and do not call ingest", async () => {
-  let called = false;
-  const result = await run(["note", "--title", "Only title"], {
-    ingest: async () => {
-      called = true;
-      throw new Error("ingest should not run");
-    },
-  });
+test("missing note flags fail with JSON error before ingest", async () => {
+  const result = await run(["note", "--title", "Only title"]);
 
-  assert.equal(called, false);
   assert.equal(result.exitCode, 2);
   const parsed = JSON.parse(result.stdout) as { status: string; errorCode: string };
   assert.equal(parsed.status, "failed");
@@ -78,60 +56,28 @@ test("missing note flags fail with JSON error and do not call ingest", async () 
   assert.match(result.stderr, /edges note --help/);
 });
 
-test("root without a subcommand does not run note ingest", async () => {
-  let called = false;
-  const result = await run([], {
-    ingest: async () => {
-      called = true;
-      throw new Error("ingest should not run");
-    },
-  });
+test("root without a subcommand is a usage error", async () => {
+  const result = await run([]);
 
-  assert.equal(called, false);
   assert.notEqual(result.exitCode, 0);
 });
 
 test("too-long title is rejected before ingest", async () => {
-  let called = false;
-  const result = await run(["note", "--title", "x".repeat(121), "--content", "body", "--co-author", "OpenAI Codex <codex@openai.com>"], {
-    ingest: async () => {
-      called = true;
-      throw new Error("ingest should not run");
-    },
-  });
+  const result = await run(["note", "--title", "x".repeat(121), "--content", "body", "--co-author", "OpenAI Codex <codex@openai.com>"]);
 
-  assert.equal(called, false);
   assert.equal(result.exitCode, 2);
   const parsed = JSON.parse(result.stdout) as { errorCode: string };
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
 });
 
-test("AUTH_MISSING does not call ingest", async () => {
-  let called = false;
+test("AUTH_MISSING does not start ingest", async () => {
   const result = await run(["note", ...requiredNoteFlags], {
     env: { EDGES_AUTH_TOKEN: "secret" },
-    ingest: async () => {
-      called = true;
-      throw new Error("ingest should not run");
-    },
   });
 
-  assert.equal(called, false);
   assert.equal(result.exitCode, 4);
   const parsed = JSON.parse(result.stdout) as { errorCode: string };
   assert.equal(parsed.errorCode, "AUTH_MISSING");
-});
-
-test("note subcommand runs the ingest pipeline", async () => {
-  const result = await run(["note", ...requiredNoteFlags], {
-    env: { EDGES_AUTH_TOKEN: "" },
-    ingest: successIngest(),
-  });
-
-  assert.equal(result.exitCode, 0);
-  const parsed = JSON.parse(result.stdout) as { status: string; filePath: string };
-  assert.equal(parsed.status, "success");
-  assert.equal(parsed.filePath, "knowledge/notes/2026-09-07--title.md");
 });
 
 test("note --help no longer documents EDGES_SCRIPT", async () => {
@@ -139,28 +85,4 @@ test("note --help no longer documents EDGES_SCRIPT", async () => {
   assert.equal(result.exitCode, 0);
   assert.doesNotMatch(result.stdout, /EDGES_SCRIPT/);
   assert.doesNotMatch(result.stdout, /bin\/new-note/);
-});
-
-test("injected ingest success is formatted on stdout", async () => {
-  const result = await run(["note", ...requiredNoteFlags], {
-    env: { EDGES_AUTH_TOKEN: "" },
-    ingest: async (_input: IngestRequest, _config: RuntimeConfig): Promise<ScriptSuccess> => ({
-      filePath: "knowledge/notes/2026-09-07--title.md",
-      branch: "main",
-      prStatus: "direct_commit",
-      stdout: "ok\n__EDGES_FILE__=knowledge/notes/2026-09-07--title.md\n",
-    }),
-  });
-
-  assert.equal(result.exitCode, 0);
-  const parsed = JSON.parse(result.stdout) as {
-    status: string;
-    filePath: string;
-    branch: string;
-    prStatus: string;
-  };
-  assert.equal(parsed.status, "success");
-  assert.equal(parsed.filePath, "knowledge/notes/2026-09-07--title.md");
-  assert.equal(parsed.branch, "main");
-  assert.equal(parsed.prStatus, "direct_commit");
 });

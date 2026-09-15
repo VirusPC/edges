@@ -1,6 +1,6 @@
 import { Command, Option } from "commander";
 import { ZodError } from "zod";
-import { type CliContext, type RunResult, usageError } from "./context.js";
+import { type CliContext, type CliResult, usageError } from "./context.js";
 import { loadConfig } from "./utils/config.js";
 import { exitCodeFor, exitCodeForError } from "./utils/exit.js";
 import { VERSION } from "./utils/version.js";
@@ -64,7 +64,7 @@ type IngestCliOptions = {
   tokenStdin?: boolean;
 };
 
-function fail(failure: IngestFailure): RunResult {
+function fail(failure: IngestFailure): CliResult {
   return {
     exitCode: exitCodeForError(failure.errorCode),
     stdout: formatResult(failure),
@@ -72,7 +72,7 @@ function fail(failure: IngestFailure): RunResult {
   };
 }
 
-function validateNoteOptions(opts: IngestCliOptions): RunResult | {
+function validateNoteOptions(opts: IngestCliOptions): CliResult | {
   title: string;
   content: string;
   coAuthor: string;
@@ -160,7 +160,7 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
       throw error;
     }
 
-    const env = ctx.io.env ?? process.env;
+    const env = ctx.env;
     const config = loadConfig(env);
     if (parsed.dryRun) {
       config.dryRun = true;
@@ -173,8 +173,8 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
       expectedToken: config.authToken,
       tokenFile: parsed.tokenFile,
       tokenStdin: parsed.tokenStdin,
-      stdinText: ctx.io.stdinText,
-      stdinIsTTY: ctx.io.stdinIsTTY,
+      stdinText: ctx.stdinText,
+      stdinIsTTY: ctx.stdinIsTTY,
     });
     if (!auth.ok) {
       ctx.result = fail({
@@ -185,8 +185,7 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
       return;
     }
 
-    const runner = ctx.io.ingest ?? runNoteIngest;
-    const result = await runIngest(request, config, runner, env);
+    const result = await runIngest(request, config, runNoteIngest, env);
     const stderrLines = result.status === "success" ? result.diagnostics : result.stderrSummary;
     const stderr = stderrLines ? (stderrLines.endsWith("\n") ? stderrLines : `${stderrLines}\n`) : "";
     ctx.result = {

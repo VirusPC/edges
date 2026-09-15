@@ -28,13 +28,13 @@ export function addStatusCommand(tasks: Command, ctx: CliContext): void {
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", STATUS_AFTER_HELP)
     .action(async (target: string, status: string) => {
-      await runTasksCommand(ctx, async (io) => {
+      await runTasksCommand(ctx, async (runtime) => {
         if (!isTaskStatus(status)) {
           return fail("VALIDATION_ERROR", `invalid edges-tasks-status: ${status}`);
         }
-        const moved = await moveTaskStatus(io.repoPath, target, status, {
-          fs: io.writer,
-          now: io.now,
+        const moved = await moveTaskStatus(runtime.repoPath, target, status, {
+          fs: runtime.writer,
+          now: runtime.now,
         });
         return succeed({ status: "success", command: "status", ...moved });
       });

@@ -1,8 +1,8 @@
 import { Command, CommanderError } from "commander";
 import {
   type CliContext,
-  type RunIo,
-  type RunResult,
+  type CliInput,
+  type CliResult,
   usageError,
   usageScope,
 } from "./context.js";
@@ -10,7 +10,7 @@ import { addNoteCommand } from "./note.js";
 import { addTasksCommand } from "./tasks.js";
 import { VERSION } from "./utils/version.js";
 
-export type { CliContext, RunIo, RunResult };
+export type { CliContext, CliInput, CliResult };
 
 const ROOT_AFTER_HELP = `
 EXAMPLES
@@ -23,13 +23,24 @@ BREAKING RENAME
   Callers must migrate to: edges note --title … --content … --co-author …
 `;
 
-function applyOutput(
-  cmd: Command,
-  output?: { writeOut: (str: string) => void; writeErr: (str: string) => void },
-): void {
-  if (!output) {
-    return;
-  }
+/**
+ * Capture Commander `--help` text. This is not process IO and not CliContext;
+ * leaves never call it.
+ */
+function captureCommanderText() {
+  let text = "";
+  const write = (str: string) => {
+    text += str;
+  };
+  return {
+    configure: { writeOut: write, writeErr: write },
+    text: () => text,
+  };
+}
+
+type CommanderTextConfigure = ReturnType<typeof captureCommanderText>["configure"];
+
+function applyOutput(cmd: Command, output: CommanderTextConfigure): void {
   cmd.configureOutput(output);
   for (const child of cmd.commands) {
     applyOutput(child, output);
@@ -43,10 +54,7 @@ function applyExitOverride(cmd: Command): void {
   }
 }
 
-function addRootCommand(ctx: CliContext, output?: {
-  writeOut: (str: string) => void;
-  writeErr: (str: string) => void;
-}): Command {
+function addRootCommand(ctx: CliContext, output: CommanderTextConfigure): Command {
   const program = new Command();
   program
     .name("edges")
@@ -77,41 +85,30 @@ function helpText(text: string): string {
 }
 
 export function formatHelp(): string {
-  let out = "";
-  const program = addRootCommand(
-    { io: {}, result: undefined },
-    {
-      writeOut: (str) => {
-        out += str;
-      },
-      writeErr: (str) => {
-        out += str;
-      },
-    },
-  );
+  const capture = captureCommanderText();
+  const program = addRootCommand({ env: process.env, result: undefined }, capture.configure);
   program.outputHelp();
-  return out.endsWith("\n") ? out : `${out}\n`;
+  const text = capture.text();
+  return text.endsWith("\n") ? text : `${text}\n`;
 }
 
 /**
  * Root-only: invoke the command tree as a process. Leaves and groups do not
  * have a sibling `run.ts`; they register on a parent and execute in `.action`.
  */
-export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
+export async function run(argv: string[], input: CliInput = {}): Promise<CliResult> {
   if (argv[0] === "ingest") {
     return usageError("ingest was renamed to note. Use: edges note …", "root");
   }
 
-  const ctx: CliContext = { io: { ...io, env: io.env ?? process.env }, result: undefined };
-  let output = "";
-  const program = addRootCommand(ctx, {
-    writeOut: (str) => {
-      output += str;
-    },
-    writeErr: (str) => {
-      output += str;
-    },
-  });
+  const ctx: CliContext = {
+    env: input.env ?? process.env,
+    stdinText: input.stdinText,
+    stdinIsTTY: input.stdinIsTTY,
+    result: undefined,
+  };
+  const capture = captureCommanderText();
+  const program = addRootCommand(ctx, capture.configure);
   applyExitOverride(program);
 
   try {
@@ -119,7 +116,7 @@ export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
   } catch (err) {
     if (err instanceof CommanderError) {
       if (err.code === "commander.helpDisplayed" || err.code === "commander.help") {
-        return { exitCode: 0, stdout: helpText(output), stderr: "" };
+        return { exitCode: 0, stdout: helpText(capture.text()), stderr: "" };
       }
       if (err.code === "commander.version") {
         return { exitCode: 0, stdout: `${VERSION}\n`, stderr: "" };

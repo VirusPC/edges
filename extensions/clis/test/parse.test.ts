@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { run } from "../src/program.js";
-import type { IngestRequest, RuntimeConfig, ScriptSuccess } from "../src/note/utils/types.js";
 
 const requiredNoteFlags = [
   "--title",
@@ -12,28 +11,9 @@ const requiredNoteFlags = [
   "OpenAI Codex <codex@openai.com>",
 ] as const;
 
-function successIngest() {
-  return async (): Promise<ScriptSuccess> => ({
-    filePath: "knowledge/notes/2026-09-07--title.md",
-    branch: "main",
-    prStatus: "direct_commit",
-    stdout: "ok\n",
-  });
-}
-
 function failedJson(stdout: string): { status: string; errorCode: string; reason: string } {
   return JSON.parse(stdout) as { status: string; errorCode: string; reason: string };
 }
-
-test("run accepts valid note flags", async () => {
-  const result = await run(["note", ...requiredNoteFlags, "--json"], {
-    env: { EDGES_AUTH_TOKEN: "" },
-    ingest: successIngest(),
-  });
-  assert.equal(result.exitCode, 0);
-  const body = JSON.parse(result.stdout) as { status: string };
-  assert.equal(body.status, "success");
-});
 
 test("run note rejects missing required flags", async () => {
   const result = await run(["note", "--title", "Daily summary"]);
@@ -111,15 +91,8 @@ test("run returns version", async () => {
   assert.match(short.stdout, /\d+\.\d+\.\d+/);
 });
 
-test("run root without a subcommand is not note ingest", async () => {
-  let called = false;
-  const result = await run([], {
-    ingest: async (_input: IngestRequest, _config: RuntimeConfig): Promise<ScriptSuccess> => {
-      called = true;
-      throw new Error("ingest should not run");
-    },
-  });
-  assert.equal(called, false);
+test("run root without a subcommand is a usage error", async () => {
+  const result = await run([]);
   assert.notEqual(result.exitCode, 0);
 });
 

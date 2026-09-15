@@ -1,39 +1,38 @@
-import type { CliContext, RunIo, RunResult } from "../../context.js";
+import type { CliContext, CliResult } from "../../context.js";
 import { loadConfig } from "../../utils/config.js";
 import { exitCodeForTasksError } from "../../utils/exit.js";
 import { createNodeBoardFs, createNodeBoardWriter } from "./board.js";
 import { formatTasksResult, type TasksFailure } from "./format.js";
 import { TasksError, type TasksErrorCode } from "./types.js";
 
-export type { RunResult };
+export type { CliResult };
 
-export function tasksRuntime(io: RunIo) {
-  const env = io.env ?? process.env;
+export function tasksRuntime(ctx: CliContext) {
   return {
-    repoPath: io.repoPath ?? loadConfig(env).repoPath,
-    fs: io.fs ?? createNodeBoardFs(),
-    now: io.now ?? new Date(),
-    writer: io.writer ?? createNodeBoardWriter(),
+    repoPath: loadConfig(ctx.env).repoPath,
+    fs: createNodeBoardFs(),
+    now: new Date(),
+    writer: createNodeBoardWriter(),
   };
 }
 
 /**
- * Run a tasks subcommand: resolve the runtime from `ctx.io`, run the body, and
- * store the result on `ctx` — mapping any thrown error to a `RunResult`.
+ * Run a tasks subcommand: resolve the production board runtime, run the body,
+ * and store the result on `ctx` — mapping any thrown error to a `CliResult`.
  */
 export async function runTasksCommand(
   ctx: CliContext,
-  fn: (io: ReturnType<typeof tasksRuntime>) => Promise<RunResult>,
+  fn: (runtime: ReturnType<typeof tasksRuntime>) => Promise<CliResult>,
 ): Promise<void> {
   try {
-    ctx.result = await fn(tasksRuntime(ctx.io));
+    ctx.result = await fn(tasksRuntime(ctx));
   } catch (error) {
     const mapped = asTasksError(error);
     ctx.result = fail(mapped.errorCode, mapped.message);
   }
 }
 
-export function fail(errorCode: TasksErrorCode, reason: string): RunResult {
+export function fail(errorCode: TasksErrorCode, reason: string): CliResult {
   const payload: TasksFailure = { status: "failed", errorCode, reason };
   return {
     exitCode: exitCodeForTasksError(errorCode),
@@ -42,7 +41,7 @@ export function fail(errorCode: TasksErrorCode, reason: string): RunResult {
   };
 }
 
-export function succeed(payload: Parameters<typeof formatTasksResult>[0], stdout?: string): RunResult {
+export function succeed(payload: Parameters<typeof formatTasksResult>[0], stdout?: string): CliResult {
   return {
     exitCode: 0,
     stdout: stdout ?? formatTasksResult(payload),

@@ -35,9 +35,9 @@ export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
       target: string,
       opts: { title?: string; description?: string; body?: string; assignee?: string },
     ) => {
-      await runTasksCommand(ctx, async (io) => {
+      await runTasksCommand(ctx, async (runtime) => {
         const updated = await updateTask(
-          io.repoPath,
+          runtime.repoPath,
           target,
           {
             title: opts.title,
@@ -45,7 +45,7 @@ export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
             body: opts.body,
             assignee: opts.assignee,
           },
-          { fs: io.writer, now: io.now },
+          { fs: runtime.writer, now: runtime.now },
         );
         return succeed({ status: "success", command: "update", ...updated });
       });

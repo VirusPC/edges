@@ -22,8 +22,8 @@ export function addGetCommand(tasks: Command, ctx: CliContext): void {
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", GET_AFTER_HELP)
     .action(async (target: string) => {
-      await runTasksCommand(ctx, async (io) => {
-        const record = await getTaskService(io.repoPath, target, io.fs);
+      await runTasksCommand(ctx, async (runtime) => {
+        const record = await getTaskService(runtime.repoPath, target, runtime.fs);
         const { sidecarMarkdown: _sidecarMarkdown, ...task } = record;
         return succeed({ status: "success", command: "get", task });
       });

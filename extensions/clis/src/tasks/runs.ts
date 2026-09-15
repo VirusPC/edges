@@ -27,8 +27,8 @@ export function addRunsCommand(tasks: Command, ctx: CliContext): void {
     .addOption(new Option("--output <format>", "table or json").choices(["table", "json"]).default("table"))
     .addHelpText("after", RUNS_AFTER_HELP)
     .action(async (target: string, opts: { output: "table" | "json" }) => {
-      await runTasksCommand(ctx, async (io) => {
-        const record = await getTaskService(io.repoPath, target, io.fs);
+      await runTasksCommand(ctx, async (runtime) => {
+        const record = await getTaskService(runtime.repoPath, target, runtime.fs);
         const parsedLog = parseRunLog(record.sidecarMarkdown ?? "", record.stem);
         const payload = {
           status: "success" as const,
