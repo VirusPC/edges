@@ -4,12 +4,12 @@ description: 工作项从 todos 更名为 tasks，并支持状态流转
 metadata:
   edges-type: task
   edges-title: todos 更名为 tasks 并支持状态流转
-  edges-tasks-status: backlog
+  edges-tasks-status: done
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: Task 记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-10T08:00:00+08:00"
+  edges-updated-at: "2026-09-16T01:55:00+08:00"
 ---
 
 在 idea → 专家细聊 → Cloud Agent 开发 → 改状态 模式下，叫 todo 不合适；应叫 `tasks`，同时支持设置状态流转。
