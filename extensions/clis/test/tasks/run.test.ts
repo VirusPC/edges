@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, readdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
@@ -100,6 +100,53 @@ test("run tasks create is JSON and skips git", async () => {
     const body = JSON.parse(result.stdout) as { command: string; path: string; stem: string };
     assert.equal(body.command, "create");
     assert.match(body.path, /knowledge\/tasks\/backlog\//);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks create --priority high returns JSON priority and writes the field", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    await mkdir(path.join(repo, "knowledge/tasks/backlog"), { recursive: true });
+    const env = { ...process.env, EDGES_REPO: repo };
+    const created = await run(["tasks", "create", "--title", "Pri", "--priority", "high"], { env });
+    assert.equal(created.exitCode, 0);
+    const body = JSON.parse(created.stdout) as { command: string; priority: string; path: string };
+    assert.equal(body.command, "create");
+    assert.equal(body.priority, "high");
+    const md = await readFile(path.join(repo, body.path), "utf8");
+    assert.match(md, /edges-task-priority: high/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks create --priority P0 is VALIDATION_ERROR and writes nothing", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    await mkdir(path.join(repo, "knowledge/tasks/backlog"), { recursive: true });
+    const result = await run(["tasks", "create", "--title", "Pri", "--priority", "P0"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(result.exitCode, 2);
+    assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+    const names = await readdir(path.join(repo, "knowledge/tasks/backlog"));
+    assert.deepEqual(names, []);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks create without --priority JSON priority is none", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    await mkdir(path.join(repo, "knowledge/tasks/backlog"), { recursive: true });
+    const result = await run(["tasks", "create", "--title", "From CLI"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(result.exitCode, 0);
+    assert.equal(JSON.parse(result.stdout).priority, "none");
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
