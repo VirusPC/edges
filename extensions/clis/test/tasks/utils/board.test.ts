@@ -86,3 +86,76 @@ test("getTask missing stem is TASK_NOT_FOUND", async () => {
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+test("listTasks and getTask expose priority none when the field is missing", async () => {
+  const repo = await seed();
+  try {
+    const items = await listTasks(repo, {}, nodeBoardFs());
+    assert.equal(items[0]?.priority, "none");
+    const got = await getTask(repo, "2026-09-13--demo", nodeBoardFs());
+    assert.equal(got.priority, "none");
+    assert.equal(got.metadata["edges-task-priority"], undefined);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("listTasks and getTask expose written edges-task-priority", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const dir = path.join(repo, "knowledge/tasks/backlog");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, "2026-09-16--hot.md"),
+      `---
+name: hot
+description: hot
+metadata:
+  edges-type: task
+  edges-title: hot
+  edges-tasks-status: backlog
+  edges-task-priority: urgent
+---
+
+body
+`,
+      "utf8",
+    );
+    const items = await listTasks(repo, {}, nodeBoardFs());
+    assert.equal(items[0]?.priority, "urgent");
+    const got = await getTask(repo, "2026-09-16--hot", nodeBoardFs());
+    assert.equal(got.priority, "urgent");
+    assert.equal(got.metadata["edges-task-priority"], "urgent");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("listTasks treats on-disk P0 as none so the board still lists", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const dir = path.join(repo, "knowledge/tasks/todo");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, "2026-09-16--legacy.md"),
+      `---
+name: legacy
+description: legacy
+metadata:
+  edges-type: task
+  edges-title: legacy
+  edges-tasks-status: todo
+  edges-task-priority: P0
+---
+
+body
+`,
+      "utf8",
+    );
+    const items = await listTasks(repo, {}, nodeBoardFs());
+    assert.equal(items.length, 1);
+    assert.equal(items[0]?.priority, "none");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});

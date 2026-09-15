@@ -27,10 +27,15 @@ x
     );
     const result = await run(["tasks", "list"], { env: { ...process.env, EDGES_REPO: repo } });
     assert.equal(result.exitCode, 0);
-    const body = JSON.parse(result.stdout) as { status: string; command: string; tasks: { stem: string }[] };
+    const body = JSON.parse(result.stdout) as {
+      status: string;
+      command: string;
+      tasks: { stem: string; priority?: string }[];
+    };
     assert.equal(body.status, "success");
     assert.equal(body.command, "list");
     assert.equal(body.tasks[0]?.stem, "2026-09-13--listed");
+    assert.equal(body.tasks[0]?.priority, "none");
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -58,10 +63,14 @@ hello body
     );
     const result = await run(["tasks", "get", "2026-09-13--got"], { env: { ...process.env, EDGES_REPO: repo } });
     assert.equal(result.exitCode, 0);
-    const body = JSON.parse(result.stdout) as { command: string; task: { body: string; stem: string } };
+    const body = JSON.parse(result.stdout) as {
+      command: string;
+      task: { body: string; stem: string; priority?: string };
+    };
     assert.equal(body.command, "get");
     assert.equal(body.task.stem, "2026-09-13--got");
     assert.match(body.task.body, /hello body/);
+    assert.equal(body.task.priority, "none");
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
