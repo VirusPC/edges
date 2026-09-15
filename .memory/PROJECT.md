@@ -14,6 +14,7 @@
 - [edges tasks 本轮只做 CLI](projects/project_edges_tasks_cli.md) — 本轮 edges tasks 看板操作只做 CLI（list/get/create/update/status + 只读 runs/run-messages）；Skill 与 MCP 后做同一契约。决策见 ADR 0005。
 - [可扩展 Memory Type：LAYOUT 登记，不另开注册表](projects/project_extensible_memory_types.md) — 可扩展 Memory Type：扩展面只在 LAYOUT，用 project-memory-add-type 登记；官方种子仍是六类。决策见 docs/adr/0006-extensible-project-memory-types.md。
 - [idea→task→专家→Cloud Agent→改状态](projects/project_idea_todo_expert_cloud_loop.md) — 工作流：idea 记到 knowledge/tasks（Task 记录员）→ 有空时专家 Agent 细聊 → Cursor Cloud Agent 开发 → 开发完改 Task 状态
+- [记忆研究笔记落 knowledge/projects/memory](projects/project_memory_research_notes_in_knowledge_projects.md) — 写 project-memory 的调研、优点、related work 等研究笔记时：落到 knowledge/projects/memory/；skill 层 .memory 只记协议与设计决策，不当成对外研究笔记落点。
 - [整仓 MIT，不拆 knowledge 许可证](projects/project_mit_license.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
 - [new-note MCP 的 ingest 约束](projects/project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges note，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
 - [posts 对外展示，Astro 博客 + Actions CI](projects/project_posts_public_astro_blog.md) — posts 面向对外展示；后续以 posts 为数据用 Astro 搭博客，并用 GitHub Actions 在服务器做 CI
