@@ -3,7 +3,8 @@ import { getTask, type BoardWriter } from "./board.js";
 import { renderNewTaskDoc, replaceBody, setMetadataField, setTopLevelField } from "./frontmatter.js";
 import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
 import { newTaskStem, taskNameSlug } from "./slug.js";
-import { TasksError, type TaskStatus } from "./types.js";
+import { parseTaskPriority } from "./priority.js";
+import { TasksError, type TaskPriority, type TaskStatus } from "./types.js";
 
 export type { BoardWriter };
 
@@ -14,6 +15,7 @@ export type TasksCreateInput = {
   status: TaskStatus;
   name?: string;
   assignee?: string;
+  priority?: string;
 };
 
 export function emptyRunLog(stem: string): string {
@@ -44,7 +46,8 @@ export async function createTask(
   repoPath: string,
   input: TasksCreateInput,
   io: { fs: BoardWriter; now: Date },
-): Promise<{ stem: string; path: string; sidecarPath: string }> {
+): Promise<{ stem: string; path: string; sidecarPath: string; priority: TaskPriority }> {
+  const priority = input.priority === undefined ? "none" : parseTaskPriority(input.priority);
   await io.fs.mkdirp(statusDir(repoPath, input.status));
   const stem = await uniqueStem(repoPath, input.status, newTaskStem(input.title, io.now), io.fs);
   const rel = taskRelPath(input.status, stem);
@@ -54,27 +57,29 @@ export async function createTask(
     description: input.description ?? input.title,
     title: input.title,
     status: input.status,
+    priority,
     assignee: input.assignee,
     updatedAt: io.now.toISOString(),
     body: input.body ?? defaultBody(input.title),
   });
   await io.fs.writeFile(path.join(repoPath, rel), markdown);
   await io.fs.writeFile(path.join(repoPath, sidecarRel), emptyRunLog(stem));
-  return { stem, path: rel, sidecarPath: sidecarRel };
+  return { stem, path: rel, sidecarPath: sidecarRel, priority };
 }
 
 export async function updateTask(
   repoPath: string,
   target: string,
-  patch: { title?: string; description?: string; body?: string; assignee?: string },
+  patch: { title?: string; description?: string; body?: string; assignee?: string; priority?: string },
   io: { fs: BoardWriter; now: Date },
-): Promise<{ stem: string; path: string }> {
-  if (!patch.title && !patch.description && !patch.body && !patch.assignee) {
+): Promise<{ stem: string; path: string; priority: TaskPriority }> {
+  if (!patch.title && !patch.description && !patch.body && !patch.assignee && patch.priority === undefined) {
     throw new TasksError(
       "VALIDATION_ERROR",
-      "update requires at least one of --title, --description, --body, --assignee",
+      "update requires at least one of --title, --description, --body, --assignee, --priority",
     );
   }
+  const parsedPriority = patch.priority === undefined ? undefined : parseTaskPriority(patch.priority);
   const record = await getTask(repoPath, target, io.fs);
   let markdown = await io.fs.readFile(path.join(repoPath, record.path));
   if (patch.title !== undefined) {
@@ -89,7 +94,14 @@ export async function updateTask(
   if (patch.assignee !== undefined) {
     markdown = setMetadataField(markdown, "edges-task-assignee", patch.assignee);
   }
+  if (parsedPriority !== undefined) {
+    markdown = setMetadataField(markdown, "edges-task-priority", parsedPriority);
+  }
   markdown = setMetadataField(markdown, "edges-updated-at", io.now.toISOString());
   await io.fs.writeFile(path.join(repoPath, record.path), markdown);
-  return { stem: record.stem, path: record.path };
+  return {
+    stem: record.stem,
+    path: record.path,
+    priority: parsedPriority ?? record.priority,
+  };
 }

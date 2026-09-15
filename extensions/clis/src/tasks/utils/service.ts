@@ -1,10 +1,10 @@
-import { getTask, listTasks, type BoardFs } from "./board.js";
+import { getTask, listTasks, type BoardFs, type TaskListOpts } from "./board.js";
 import { messagesForRun, parseRunLog, resolveRunId, type TaskRun } from "./runlog.js";
-import { TasksError, type TaskListItem, type TaskRecord, type TaskStatus } from "./types.js";
+import { TasksError, type TaskListItem, type TaskRecord } from "./types.js";
 
 export async function listTasksService(
   repoPath: string,
-  opts: { status?: TaskStatus },
+  opts: TaskListOpts,
   fs: BoardFs,
 ): Promise<TaskListItem[]> {
   return listTasks(repoPath, opts, fs);

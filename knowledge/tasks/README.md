@@ -31,6 +31,10 @@
 - **派发默认**：执行方先 `grill-with-docs`（CONTEXT / ADR），过关后再实现；用户当次明确跳过除外。
 - 改状态时：更新 frontmatter 的 `edges-tasks-status`，并把文件（及同 stem 的 `.*.log.md`）移到对应子目录。
 
+## Issue 层优先级
+
+需求先后用 frontmatter `metadata.edges-task-priority`：`urgent` | `high` | `medium` | `low` | `none`。与 `edges-tasks-status` 正交：改 priority 不搬状态夹，也不用文件夹或文件名编码优先级。缺省或旧文件无字段视为 `none`。CLI：`create` / `update --priority`，`list --priority`（可重复 OR）与 `list --sort priority`。详见 `docs/adr/0007-edges-task-priority.md`。
+
 ## 文件约定
 
 - Task 正文：结论 → **Why:** → **How to apply:**（对齐 project-memory-init）；**不写**执行流水。

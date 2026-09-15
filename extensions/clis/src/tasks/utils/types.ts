@@ -10,6 +10,9 @@ export const TASK_STATUSES = [
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
+export const TASK_PRIORITIES = ["urgent", "high", "medium", "low", "none"] as const;
+export type TaskPriority = (typeof TASK_PRIORITIES)[number];
+
 export const RUN_STATUSES = ["pending", "running", "completed", "failed", "cancelled"] as const;
 
 export type RunStatus = (typeof RUN_STATUSES)[number];
@@ -37,6 +40,7 @@ export type TaskListItem = {
   path: string;
   sidecarPath: string;
   runCount: number;
+  priority: TaskPriority;
 };
 
 export type TaskRecord = TaskListItem & {
