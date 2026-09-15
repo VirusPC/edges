@@ -1,5 +1,6 @@
-import { Command } from "commander";
+import { Command, Option } from "commander";
 import type { CliContext } from "../context.js";
+import { TASK_PRIORITIES, type TaskPriority } from "./utils/types.js";
 import { runTasksCommand, succeed } from "./utils/result.js";
 import { updateTask } from "./utils/write.js";
 
@@ -12,6 +13,7 @@ FLAGS
   --description <text>
   --body <markdown>
   --assignee <text>
+  --priority <priority>    edges-task-priority: urgent | high | medium | low | none
   --json  Write JSON to stdout (always on)
 
 Patches fields in place. Does not move the file; use status to change edges-tasks-status.
@@ -29,11 +31,12 @@ export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
     .option("--description <text>")
     .option("--body <markdown>")
     .option("--assignee <text>")
+    .addOption(new Option("--priority <priority>", "edges-task-priority").choices([...TASK_PRIORITIES]))
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", UPDATE_AFTER_HELP)
     .action(async (
       target: string,
-      opts: { title?: string; description?: string; body?: string; assignee?: string },
+      opts: { title?: string; description?: string; body?: string; assignee?: string; priority?: TaskPriority },
     ) => {
       await runTasksCommand(ctx, async (runtime) => {
         const updated = await updateTask(
@@ -44,6 +47,7 @@ export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
             description: opts.description,
             body: opts.body,
             assignee: opts.assignee,
+            priority: opts.priority,
           },
           { fs: runtime.writer, now: runtime.now },
         );

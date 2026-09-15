@@ -158,6 +158,30 @@ test("run tasks update without flags is VALIDATION_ERROR", async () => {
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
+test("run tasks update --priority high JSON and in-place path", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const env = { ...process.env, EDGES_REPO: repo };
+    await mkdir(path.join(repo, "knowledge/tasks/backlog"), { recursive: true });
+    const created = await run(["tasks", "create", "--title", "PatchPri"], { env });
+    const stem = JSON.parse(created.stdout).stem as string;
+    const updated = await run(["tasks", "update", stem, "--priority", "high"], { env });
+    assert.equal(updated.exitCode, 0);
+    const body = JSON.parse(updated.stdout) as { command: string; priority: string; path: string };
+    assert.equal(body.command, "update");
+    assert.equal(body.priority, "high");
+    assert.match(body.path, /knowledge\/tasks\/backlog\//);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks update --priority Urgent is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "update", "stem", "--priority", "Urgent"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
 test("run tasks status returns command status", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {

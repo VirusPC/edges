@@ -70,15 +70,16 @@ export async function createTask(
 export async function updateTask(
   repoPath: string,
   target: string,
-  patch: { title?: string; description?: string; body?: string; assignee?: string },
+  patch: { title?: string; description?: string; body?: string; assignee?: string; priority?: string },
   io: { fs: BoardWriter; now: Date },
-): Promise<{ stem: string; path: string }> {
-  if (!patch.title && !patch.description && !patch.body && !patch.assignee) {
+): Promise<{ stem: string; path: string; priority: TaskPriority }> {
+  if (!patch.title && !patch.description && !patch.body && !patch.assignee && patch.priority === undefined) {
     throw new TasksError(
       "VALIDATION_ERROR",
-      "update requires at least one of --title, --description, --body, --assignee",
+      "update requires at least one of --title, --description, --body, --assignee, --priority",
     );
   }
+  const parsedPriority = patch.priority === undefined ? undefined : parseTaskPriority(patch.priority);
   const record = await getTask(repoPath, target, io.fs);
   let markdown = await io.fs.readFile(path.join(repoPath, record.path));
   if (patch.title !== undefined) {
@@ -93,7 +94,14 @@ export async function updateTask(
   if (patch.assignee !== undefined) {
     markdown = setMetadataField(markdown, "edges-task-assignee", patch.assignee);
   }
+  if (parsedPriority !== undefined) {
+    markdown = setMetadataField(markdown, "edges-task-priority", parsedPriority);
+  }
   markdown = setMetadataField(markdown, "edges-updated-at", io.now.toISOString());
   await io.fs.writeFile(path.join(repoPath, record.path), markdown);
-  return { stem: record.stem, path: record.path };
+  return {
+    stem: record.stem,
+    path: record.path,
+    priority: parsedPriority ?? record.priority,
+  };
 }
