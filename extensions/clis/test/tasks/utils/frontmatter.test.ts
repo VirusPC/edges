@@ -52,3 +52,55 @@ test("renderNewTaskDoc writes ADR 0002 shape and omits empty assignee", () => {
   assert.match(md, /edges-tasks-status: backlog/);
   assert.doesNotMatch(md, /edges-task-assignee/);
 });
+
+test("renderNewTaskDoc omits edges-task-priority when none or omitted", () => {
+  const omitted = renderNewTaskDoc({
+    name: "edges_tasks_cli",
+    description: "edges tasks CLI",
+    title: "edges tasks CLI",
+    status: "backlog",
+    updatedAt: "2026-09-13T03:00:00+00:00",
+    body: "body\n",
+  });
+  assert.doesNotMatch(omitted, /edges-task-priority/);
+
+  const explicitNone = renderNewTaskDoc({
+    name: "edges_tasks_cli",
+    description: "edges tasks CLI",
+    title: "edges tasks CLI",
+    status: "backlog",
+    priority: "none",
+    updatedAt: "2026-09-13T03:00:00+00:00",
+    body: "body\n",
+  });
+  assert.doesNotMatch(explicitNone, /edges-task-priority/);
+});
+
+test("renderNewTaskDoc writes edges-task-priority after status when high", () => {
+  const md = renderNewTaskDoc({
+    name: "edges_tasks_cli",
+    description: "edges tasks CLI",
+    title: "edges tasks CLI",
+    status: "todo",
+    priority: "high",
+    updatedAt: "2026-09-13T03:00:00+00:00",
+    body: "body\n",
+  });
+  assert.match(md, /edges-tasks-status: todo\n  edges-task-priority: high\n/);
+  assert.equal(parseTaskDoc(md).metadata["edges-task-priority"], "high");
+});
+
+test("setMetadataField can set edges-task-priority to none", () => {
+  const withHigh = renderNewTaskDoc({
+    name: "n",
+    description: "d",
+    title: "t",
+    status: "todo",
+    priority: "high",
+    updatedAt: "2026-09-13T03:00:00+00:00",
+    body: "body\n",
+  });
+  const next = setMetadataField(withHigh, "edges-task-priority", "none");
+  assert.equal(parseTaskDoc(next).metadata["edges-task-priority"], "none");
+  assert.match(next, /edges-tasks-status: todo/);
+});
