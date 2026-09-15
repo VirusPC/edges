@@ -13,8 +13,10 @@
 ## 文档
 
 - [2026-09-14--nl-task-dependency-extraction-deep-report.md](./2026-09-14--nl-task-dependency-extraction-deep-report.md) — NL task 依赖抽取深化报告（论文十问 + 项目卡 + 关键点对比）
+- [2026-09-15--issue-priority-words-vs-p0.md](./2026-09-15--issue-priority-words-vs-p0.md) — Issue 优先级用词档 vs P0–P3 一手对照；Multica 无书面 why
 
 ## 相关看板 backlog（指针）
 
 - `knowledge/tasks/backlog/2026-09-14--落盘时推荐相关task并问依赖.md`
 - `knowledge/tasks/backlog/2026-09-15--按消息队列自动推送就绪task.md`
+- `knowledge/tasks/in_progress/2026-09-13--tasks补充需求优先级.md`
