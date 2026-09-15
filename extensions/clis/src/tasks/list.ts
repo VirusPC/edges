@@ -1,7 +1,7 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../context.js";
 import { TASK_STATUSES, type TaskStatus } from "./utils/types.js";
-import { succeed, tasksRuntime, withTasksResult } from "./utils/result.js";
+import { runTasksCommand, succeed } from "./utils/result.js";
 import { listTasksService } from "./utils/service.js";
 
 const LIST_AFTER_HELP = `
@@ -22,8 +22,7 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", LIST_AFTER_HELP)
     .action(async (opts: { status?: TaskStatus }) => {
-      ctx.result = await withTasksResult(async () => {
-        const io = tasksRuntime(ctx.io);
+      await runTasksCommand(ctx, async (io) => {
         const listed = await listTasksService(io.repoPath, { status: opts.status }, io.fs);
         return succeed({ status: "success", command: "list", tasks: listed });
       });

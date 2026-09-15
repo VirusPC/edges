@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../context.js";
-import { succeed, tasksRuntime, withTasksResult } from "./utils/result.js";
+import { runTasksCommand, succeed } from "./utils/result.js";
 import { updateTask } from "./utils/write.js";
 
 const UPDATE_AFTER_HELP = `
@@ -35,8 +35,7 @@ export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
       target: string,
       opts: { title?: string; description?: string; body?: string; assignee?: string },
     ) => {
-      ctx.result = await withTasksResult(async () => {
-        const io = tasksRuntime(ctx.io);
+      await runTasksCommand(ctx, async (io) => {
         const updated = await updateTask(
           io.repoPath,
           target,

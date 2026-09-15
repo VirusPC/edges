@@ -1,7 +1,7 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../context.js";
 import { formatRunsTable } from "./utils/format.js";
-import { succeed, tasksRuntime, withTasksResult } from "./utils/result.js";
+import { runTasksCommand, succeed } from "./utils/result.js";
 import { parseRunLog } from "./utils/runlog.js";
 import { getTaskService } from "./utils/service.js";
 
@@ -27,8 +27,7 @@ export function addRunsCommand(tasks: Command, ctx: CliContext): void {
     .addOption(new Option("--output <format>", "table or json").choices(["table", "json"]).default("table"))
     .addHelpText("after", RUNS_AFTER_HELP)
     .action(async (target: string, opts: { output: "table" | "json" }) => {
-      ctx.result = await withTasksResult(async () => {
-        const io = tasksRuntime(ctx.io);
+      await runTasksCommand(ctx, async (io) => {
         const record = await getTaskService(io.repoPath, target, io.fs);
         const parsedLog = parseRunLog(record.sidecarMarkdown ?? "", record.stem);
         const payload = {

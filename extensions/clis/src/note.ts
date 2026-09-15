@@ -64,11 +64,11 @@ type IngestCliOptions = {
   tokenStdin?: boolean;
 };
 
-function fail(failure: IngestFailure, stderr = ""): RunResult {
+function fail(failure: IngestFailure): RunResult {
   return {
     exitCode: exitCodeForError(failure.errorCode),
     stdout: formatResult(failure),
-    stderr: stderr ? (stderr.endsWith("\n") ? stderr : `${stderr}\n`) : "",
+    stderr: "",
   };
 }
 
@@ -95,11 +95,8 @@ function validateNoteOptions(opts: IngestCliOptions): RunResult | {
   if (!title) missing.push("--title");
   if (!content) missing.push("--content");
   if (!coAuthor) missing.push("--co-author");
-  if (missing.length > 0 || !title || !content || !coAuthor) {
-    return usageError(
-      `missing required flags: ${missing.join(", ") || "--title, --content, --co-author"}`,
-      "note",
-    );
+  if (!title || !content || !coAuthor) {
+    return usageError(`missing required flags: ${missing.join(", ")}`, "note");
   }
   return {
     title,
@@ -157,10 +154,7 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
       });
     } catch (error) {
       if (error instanceof ZodError) {
-        ctx.result = fail(
-          { status: "failed", errorCode: "VALIDATION_ERROR", reason: formatZodReason(error) },
-          "See edges note --help for usage.\n",
-        );
+        ctx.result = usageError(formatZodReason(error), "note");
         return;
       }
       throw error;
@@ -194,7 +188,7 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
     const runner = ctx.io.ingest ?? runNoteIngest;
     const result = await runIngest(request, config, runner, env);
     const stderrLines = result.status === "success" ? result.diagnostics : result.stderrSummary;
-    const stderr = stderrLines ? `${stderrLines.endsWith("\n") ? stderrLines : `${stderrLines}\n`}` : "";
+    const stderr = stderrLines ? (stderrLines.endsWith("\n") ? stderrLines : `${stderrLines}\n`) : "";
     ctx.result = {
       exitCode: exitCodeFor(result),
       stdout: formatResult(result),

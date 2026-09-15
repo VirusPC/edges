@@ -1,7 +1,7 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../context.js";
 import { formatRunMessagesTable } from "./utils/format.js";
-import { succeed, tasksRuntime, withTasksResult } from "./utils/result.js";
+import { runTasksCommand, succeed } from "./utils/result.js";
 import { findRun } from "./utils/service.js";
 
 const RUN_MESSAGES_AFTER_HELP = `
@@ -28,8 +28,7 @@ export function addRunMessagesCommand(tasks: Command, ctx: CliContext): void {
     .addOption(new Option("--output <format>", "table or json").choices(["table", "json"]).default("table"))
     .addHelpText("after", RUN_MESSAGES_AFTER_HELP)
     .action(async (runId: string, opts: { task?: string; output: "table" | "json" }) => {
-      ctx.result = await withTasksResult(async () => {
-        const io = tasksRuntime(ctx.io);
+      await runTasksCommand(ctx, async (io) => {
         const found = await findRun(io.repoPath, runId, opts.task, io.fs);
         const payload = {
           status: "success" as const,

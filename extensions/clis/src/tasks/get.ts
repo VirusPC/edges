@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../context.js";
-import { succeed, tasksRuntime, withTasksResult } from "./utils/result.js";
+import { runTasksCommand, succeed } from "./utils/result.js";
 import { getTaskService } from "./utils/service.js";
 
 const GET_AFTER_HELP = `
@@ -22,8 +22,7 @@ export function addGetCommand(tasks: Command, ctx: CliContext): void {
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", GET_AFTER_HELP)
     .action(async (target: string) => {
-      ctx.result = await withTasksResult(async () => {
-        const io = tasksRuntime(ctx.io);
+      await runTasksCommand(ctx, async (io) => {
         const record = await getTaskService(io.repoPath, target, io.fs);
         const { sidecarMarkdown: _sidecarMarkdown, ...task } = record;
         return succeed({ status: "success", command: "get", task });

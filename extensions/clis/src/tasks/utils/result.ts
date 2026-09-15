@@ -1,4 +1,4 @@
-import type { RunIo, RunResult } from "../../context.js";
+import type { CliContext, RunIo, RunResult } from "../../context.js";
 import { loadConfig } from "../../utils/config.js";
 import { exitCodeForTasksError } from "../../utils/exit.js";
 import { createNodeBoardFs, createNodeBoardWriter } from "./board.js";
@@ -17,12 +17,19 @@ export function tasksRuntime(io: RunIo) {
   };
 }
 
-export async function withTasksResult(fn: () => Promise<RunResult>): Promise<RunResult> {
+/**
+ * Run a tasks subcommand: resolve the runtime from `ctx.io`, run the body, and
+ * store the result on `ctx` — mapping any thrown error to a `RunResult`.
+ */
+export async function runTasksCommand(
+  ctx: CliContext,
+  fn: (io: ReturnType<typeof tasksRuntime>) => Promise<RunResult>,
+): Promise<void> {
   try {
-    return await fn();
+    ctx.result = await fn(tasksRuntime(ctx.io));
   } catch (error) {
     const mapped = asTasksError(error);
-    return fail(mapped.errorCode, mapped.message);
+    ctx.result = fail(mapped.errorCode, mapped.message);
   }
 }
 

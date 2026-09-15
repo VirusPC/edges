@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import type { CliContext } from "../context.js";
 import { isTaskStatus } from "./utils/paths.js";
-import { fail, succeed, tasksRuntime, withTasksResult } from "./utils/result.js";
+import { fail, runTasksCommand, succeed } from "./utils/result.js";
 import { moveTaskStatus } from "./utils/move.js";
 
 const STATUS_AFTER_HELP = `
@@ -28,11 +28,10 @@ export function addStatusCommand(tasks: Command, ctx: CliContext): void {
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", STATUS_AFTER_HELP)
     .action(async (target: string, status: string) => {
-      ctx.result = await withTasksResult(async () => {
+      await runTasksCommand(ctx, async (io) => {
         if (!isTaskStatus(status)) {
           return fail("VALIDATION_ERROR", `invalid edges-tasks-status: ${status}`);
         }
-        const io = tasksRuntime(ctx.io);
         const moved = await moveTaskStatus(io.repoPath, target, status, {
           fs: io.writer,
           now: io.now,

@@ -1,7 +1,7 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../context.js";
 import { TASK_STATUSES, type TaskStatus } from "./utils/types.js";
-import { succeed, tasksRuntime, withTasksResult } from "./utils/result.js";
+import { runTasksCommand, succeed } from "./utils/result.js";
 import { createTask } from "./utils/write.js";
 
 const CREATE_AFTER_HELP = `
@@ -40,8 +40,7 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
       name?: string;
       assignee?: string;
     }) => {
-      ctx.result = await withTasksResult(async () => {
-        const io = tasksRuntime(ctx.io);
+      await runTasksCommand(ctx, async (io) => {
         const created = await createTask(
           io.repoPath,
           {
