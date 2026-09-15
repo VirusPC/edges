@@ -8,7 +8,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-15T18:46:26+00:00"
+  edges-updated-at: "2026-09-15T18:49:16+00:00"
 ---
 
 本轮 LoCoMo 及同类便宜公开基准试跑只算评测冒烟，不得引用为对项目记忆或 Agent Memory 的公开基准证明。术语见 CONTEXT；决策见 docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md。用户所述、grill-with-docs 确认于 2026-09-15/16。
@@ -18,6 +18,6 @@ LoCoMo 测长程对话事实召回，项目记忆是文件系统作用域的运�
 
 **How to apply:**
 - 写评测、任务、笔记或 PR 时：LoCoMo 分数只能写成评测冒烟 / 评测报告，不能写成记忆评测通过、benchmark 证明有效、或项目记忆增益。
-- 公开基准证明仍走独立 Task（找公开 benchmark 证明 memory 有效性）；不要用本轮冒烟分数交差。
-- 本轮不要实现 LoCoMo runner，也不要把项目记忆接到 LoCoMo 当后端。
+- 公开基准证明仍走独立 Task（找公开 benchmark 证明 memory 有效性）；不要用冒烟分数交差。
+- 复用上游 LoCoMo harness，不要自研评测 runner，也不要把项目记忆接到 LoCoMo 当后端。
 - 对照 CONTEXT 术语与 ADR `docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`。
