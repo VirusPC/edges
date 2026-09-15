@@ -1,5 +1,7 @@
 # 代码仓库中的 Agent Memory Benchmark 与 Memory 设计研究
 
+> 续篇：[2026-09-15 第二轮调研](2026-09-15-agent-memory-benchmarks-round-2.md)。本文 §2.2、§5.3、§5.5、§6 的若干判断在那里被修订——现成的时间序仓库环境、SWE-bench 系列的污染边界、以及更细的 Memory 隔离对照组。
+
 ## 摘要
 
 截至 2026 年 9 月，**真正把“代码仓库环境中的 Memory 能力”作为独立变量进行评估的公开 benchmark 仍然很少**。最直接的两个是：
