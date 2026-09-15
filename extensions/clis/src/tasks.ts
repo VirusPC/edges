@@ -10,10 +10,10 @@ import { addUpdateCommand } from "./tasks/update.js";
 
 const TASKS_AFTER_HELP = `
 COMMANDS
-  list [--status <edges-tasks-status>]
+  list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--sort priority]
   get <stem|path>
-  create --title <title> [--description] [--body] [--status] [--name] [--assignee]
-  update <stem|path> [--title] [--description] [--body] [--assignee]
+  create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority]
+  update <stem|path> [--title] [--description] [--body] [--assignee] [--priority]
   status <stem|path> <edges-tasks-status>
   runs <stem|path> [--output table|json]
   run-messages <run-id> [--task <stem>] [--output table|json]

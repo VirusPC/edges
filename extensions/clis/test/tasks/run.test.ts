@@ -431,3 +431,37 @@ test("run tasks list --priority P0 is VALIDATION_ERROR", async () => {
   assert.equal(result.exitCode, 2);
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
+
+test("run tasks status rejects --priority and does not move", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const dir = path.join(repo, "knowledge/tasks/todo");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, "2026-09-16--stay.md"),
+      `---
+name: stay
+description: stay
+metadata:
+  edges-type: task
+  edges-title: stay
+  edges-tasks-status: todo
+  edges-task-priority: high
+---
+
+body
+`,
+      "utf8",
+    );
+    const result = await run(["tasks", "status", "2026-09-16--stay", "--priority", "low"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(result.exitCode, 2);
+    assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+    const md = await readFile(path.join(dir, "2026-09-16--stay.md"), "utf8");
+    assert.match(md, /edges-tasks-status: todo/);
+    assert.match(md, /edges-task-priority: high/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
