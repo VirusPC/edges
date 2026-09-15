@@ -1,7 +1,7 @@
 import { access, mkdir, readdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { parseTaskDoc } from "./frontmatter.js";
-import { priorityFromMetadata } from "./priority.js";
+import { filterTasksByPriority, priorityFromMetadata, sortTasksByPriority } from "./priority.js";
 import {
   boardRoot,
   isTaskMarkdownName,
@@ -15,6 +15,7 @@ import {
   TASK_STATUSES,
   TasksError,
   type TaskListItem,
+  type TaskPriority,
   type TaskRecord,
   type TaskStatus,
 } from "./types.js";
@@ -139,9 +140,15 @@ async function readListItem(
   };
 }
 
+export type TaskListOpts = {
+  status?: TaskStatus;
+  priorities?: TaskPriority[];
+  sort?: "priority";
+};
+
 export async function listTasks(
   repoPath: string,
-  opts: { status?: TaskStatus },
+  opts: TaskListOpts,
   fs: BoardFs,
 ): Promise<TaskListItem[]> {
   const statuses = opts.status ? [opts.status] : [...TASK_STATUSES];
@@ -149,7 +156,14 @@ export async function listTasks(
   for (const status of statuses) {
     items.push(...(await listStatusDir(repoPath, status, fs)));
   }
-  return items;
+  const filtered = filterTasksByPriority(items, opts.priorities ?? []);
+  if (opts.sort === "priority") {
+    return sortTasksByPriority(filtered);
+  }
+  if (opts.sort !== undefined) {
+    throw new TasksError("VALIDATION_ERROR", `invalid --sort: ${String(opts.sort)} (expected priority)`);
+  }
+  return filtered;
 }
 
 async function findByStem(repoPath: string, stem: string, fs: BoardFs): Promise<Array<{ status: TaskStatus }>> {

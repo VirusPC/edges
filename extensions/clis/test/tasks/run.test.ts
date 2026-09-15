@@ -369,3 +369,65 @@ body
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+async function seedPriorities() {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const docs: Array<{ status: "backlog" | "todo"; stem: string; priorityLine: string }> = [
+    { status: "backlog", stem: "2026-09-16--none-one", priorityLine: "" },
+    { status: "backlog", stem: "2026-09-16--high-one", priorityLine: "  edges-task-priority: high\n" },
+    { status: "todo", stem: "2026-09-16--urgent-one", priorityLine: "  edges-task-priority: urgent\n" },
+    { status: "todo", stem: "2026-09-16--high-two", priorityLine: "  edges-task-priority: high\n" },
+    { status: "todo", stem: "2026-09-16--low-one", priorityLine: "  edges-task-priority: low\n" },
+  ];
+  for (const doc of docs) {
+    const dir = path.join(repo, "knowledge/tasks", doc.status);
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, `${doc.stem}.md`),
+      `---
+name: ${doc.stem}
+description: ${doc.stem}
+metadata:
+  edges-type: task
+  edges-title: ${doc.stem}
+  edges-tasks-status: ${doc.status}
+${doc.priorityLine}---
+
+body
+`,
+      "utf8",
+    );
+  }
+  return repo;
+}
+
+test("run tasks list --priority urgent --priority high --sort priority", async () => {
+  const repo = await seedPriorities();
+  try {
+    const result = await run(
+      ["tasks", "list", "--priority", "urgent", "--priority", "high", "--sort", "priority"],
+      { env: { ...process.env, EDGES_REPO: repo } },
+    );
+    assert.equal(result.exitCode, 0);
+    const body = JSON.parse(result.stdout) as { tasks: Array<{ stem: string; priority: string }> };
+    assert.deepEqual(
+      body.tasks.map((task) => task.priority),
+      ["urgent", "high", "high"],
+    );
+    assert.equal(body.tasks[0]?.stem, "2026-09-16--urgent-one");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks list --sort status is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "list", "--sort", "status"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
+test("run tasks list --priority P0 is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "list", "--priority", "P0"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+});

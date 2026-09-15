@@ -83,6 +83,18 @@ test("run rejects tasks delete, log, and missing subcommand", async () => {
   }
 });
 
+test("run tasks list --sort status is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "list", "--sort", "status"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
+test("run tasks list --priority P0 is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "list", "--priority", "P0"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
 test("run tasks update --priority Urgent is VALIDATION_ERROR", async () => {
   const result = await run(["tasks", "update", "stem", "--priority", "Urgent"]);
   assert.equal(result.exitCode, 2);
