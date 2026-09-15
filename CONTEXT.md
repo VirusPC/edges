@@ -157,15 +157,19 @@ _避免使用_：普通反馈闭环、知识更新、未展开的 RSI
 _避免使用_：知识出口、历史知识库、失效 Edge 专区
 
 **Task**：
-跨 Agent 接力的工作项（idea 捕获后经细聊与开发直至收口）；按 edges-tasks-status 分夹存放在 knowledge/tasks/ 下。
+跨 Agent 接力的工作项（idea 捕获后经细聊与开发直至收口）；按 edges-tasks-status 分夹存放在 knowledge/tasks/ 下，需求先后用 edges-task-priority，不改状态夹。
 _避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目、`tasks` Memory Type（若指看板工作项）
 
 **edges-tasks-status**：
-Task（Issue 层）的唯一状态字段，取值为 backlog | todo | in_progress | in_review | done | blocked | cancelled。
+Task（Issue 层）的唯一状态字段，取值为 backlog | todo | in_progress | in_review | done | blocked | cancelled；与 edges-task-priority 正交，不表达谁先做。
 _避免使用_：裸 status 字段名、Run 层状态、open/discussing/building 旧枚举
 
+**edges-task-priority**：
+Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`，写在 frontmatter `metadata.edges-task-priority`；与 edges-tasks-status 正交，不决定状态夹位置。缺省或旧文件无字段时视为 `none`。
+_避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
+
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面，覆盖 Issue 层 list/get/create/update/status，以及 Run 层只读的 runs / run-messages。
+以 `edges tasks` 为入口的 Task 看板命令面，覆盖 Issue 层 list/get/create/update/status，以及 Run 层只读的 runs / run-messages。Issue 层 create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级。
 _避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages
 
 **Task Run（edges）**：

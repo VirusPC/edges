@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- CONTEXT 增加 `edges-task-priority`；收紧 Task / `edges-tasks-status` / edges tasks（CLI）：优先级与状态正交；create/update 用 `--priority`，list 可用 `--sort priority`。
+- `docs/adr/0007-edges-task-priority.md`：Issue 层优先级用 `urgent|high|medium|low|none`（非 P0–P3），写在 `metadata.edges-task-priority`；缺省为 `none`；改 priority 不搬状态夹。本轮只定文档，CLI 后做。
 - 根 README 增加 `deploy-teach.yml` 工作流状态徽章，链到 Actions 工作流页。
 - `$project-memory-add-type`：按 LAYOUT 在指定记忆目录登记用户 Memory Type；remember / ask / doctor 从该层产物发现。官方种子仍是六类（ADR-0006）。
 - `edges tasks` CLI：Issue 层 list/get/create/update/status；Run 层只读 `runs` / `run-messages`（ADR-0005）。无硬删除、无 GitHub 同步、无 Skill/MCP 封装。
