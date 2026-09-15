@@ -38,6 +38,7 @@
 - [shared-extensions/AGENTS.md](shared-extensions/AGENTS.md) — 跨机器、跨 Agent 共享的个人 harness：skills、MCP 配置、plugins、hooks。
 - [knowledge/tasks/AGENTS.md](knowledge/tasks/AGENTS.md) — 跨 Agent 接力的工作项看板（Issue 状态夹 + Run log）
 - [knowledge/teaching/AGENTS.md](knowledge/teaching/AGENTS.md) — teach skill 有状态教学工作区；每主题一子目录（changelog、link-external-repo 等）
+- [evaluation/AGENTS.md](evaluation/AGENTS.md) — 评测整套 Edges：用例、harness、scorecard 与报告；系统元工作，不进 notes→edges 主链
 <!-- project-memory-children:end -->
 
 <!-- project-memory:end -->
