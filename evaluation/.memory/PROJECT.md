@@ -6,5 +6,5 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- 暂无条目。
+- [本轮 LoCoMo 只做评测冒烟](projects/project_locomo_smoke_not_project_memory_proof.md) — 做 LoCoMo 或改 evaluation/ 冒烟用例时：SUT 是上游 LoCoMo harness，产物是评测报告；不要把分数当项目记忆证明，也不要把项目记忆接到 LoCoMo 当后端。决策见 docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md。
 <!-- project-memory-entries:end -->
