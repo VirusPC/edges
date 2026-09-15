@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 /**
- * Bin for `edges` (`#!/usr/bin/env node` + stdin/stdout). This is not a barrel.
- * Nested `index.ts` files re-export that directory's program + run.
- * Argv parsing lives in `program.ts`. `run.ts` (a file, not a folder) dispatches.
+ * Bin for `edges`. Root-only process I/O. Command nodes are `program.ts`
+ * (root), `note.ts` / `tasks.ts` (children), and `tasks/get.ts` (leaves).
  */
 import { readProcessInput } from "./utils/process-input.js";
-import { run } from "./run.js";
+import { run } from "./program.js";
 
 const input = await readProcessInput(process.argv, {
   stdin: process.stdin,

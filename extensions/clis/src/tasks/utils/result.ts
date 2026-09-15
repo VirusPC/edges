@@ -1,12 +1,30 @@
+import type { RunIo, RunResult } from "../../context.js";
+import { loadConfig } from "../../utils/config.js";
 import { exitCodeForTasksError } from "../../utils/exit.js";
+import { createNodeBoardFs, createNodeBoardWriter } from "./board.js";
 import { formatTasksResult, type TasksFailure } from "./format.js";
 import { TasksError, type TasksErrorCode } from "./types.js";
 
-export type RunResult = {
-  exitCode: number;
-  stdout: string;
-  stderr: string;
-};
+export type { RunResult };
+
+export function tasksRuntime(io: RunIo) {
+  const env = io.env ?? process.env;
+  return {
+    repoPath: io.repoPath ?? loadConfig(env).repoPath,
+    fs: io.fs ?? createNodeBoardFs(),
+    now: io.now ?? new Date(),
+    writer: io.writer ?? createNodeBoardWriter(),
+  };
+}
+
+export async function withTasksResult(fn: () => Promise<RunResult>): Promise<RunResult> {
+  try {
+    return await fn();
+  } catch (error) {
+    const mapped = asTasksError(error);
+    return fail(mapped.errorCode, mapped.message);
+  }
+}
 
 export function fail(errorCode: TasksErrorCode, reason: string): RunResult {
   const payload: TasksFailure = { status: "failed", errorCode, reason };

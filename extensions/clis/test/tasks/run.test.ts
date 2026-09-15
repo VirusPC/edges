@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { run } from "../../src/run.js";
+import { run } from "../../src/program.js";
 
 test("run tasks list returns JSON tasks from EDGES_REPO", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));

@@ -1,38 +1,27 @@
 import { Command, CommanderError } from "commander";
-import { ROOT_AFTER_HELP } from "./help.js";
 import {
-  addNoteCommand,
-  type IngestCliOptions,
-  type NoteParseOk,
-} from "./note/index.js";
-import { TASKS_AFTER_HELP } from "./tasks/help.js";
-import { addTasksCommands } from "./tasks/index.js";
-import type { TasksParseOk } from "./tasks/utils/types.js";
-import type { IngestErrorCode } from "./note/utils/types.js";
+  type CliContext,
+  type RunIo,
+  type RunResult,
+  usageError,
+  usageScope,
+} from "./context.js";
+import { addNoteCommand } from "./note.js";
+import { addTasksCommand } from "./tasks.js";
 import { VERSION } from "./utils/version.js";
 
-export type { IngestCliOptions, NoteParseOk };
+export type { CliContext, RunIo, RunResult };
 
-export type ProgramHandlers = {
-  onNote?: (opts: IngestCliOptions) => void;
-  onTasksCommand?: (parsed: TasksParseOk) => void;
-  onMissingTasksCommand?: () => void;
-  onMissingCommand?: () => void;
-};
+const ROOT_AFTER_HELP = `
+EXAMPLES
+  edges note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
+  edges note --help
+  edges tasks --help
 
-export type ParseOk =
-  | { kind: "help"; text: string }
-  | { kind: "version" }
-  | NoteParseOk
-  | TasksParseOk;
-
-export type ParseFail = {
-  kind: "error";
-  errorCode: IngestErrorCode;
-  reason: string;
-};
-
-export type ParseResult = ParseOk | ParseFail;
+BREAKING RENAME
+  The bin is edges only (not edges-note). There is no shim.
+  Callers must migrate to: edges note --title … --content … --co-author …
+`;
 
 function applyOutput(
   cmd: Command,
@@ -54,10 +43,10 @@ function applyExitOverride(cmd: Command): void {
   }
 }
 
-export function createProgram(
-  handlers: ProgramHandlers = {},
-  output?: { writeOut: (str: string) => void; writeErr: (str: string) => void },
-): Command {
+function addRootCommand(ctx: CliContext, output?: {
+  writeOut: (str: string) => void;
+  writeErr: (str: string) => void;
+}): Command {
   const program = new Command();
   program
     .name("edges")
@@ -70,149 +59,77 @@ export function createProgram(
     .helpCommand(false);
 
   program.action(() => {
-    handlers.onMissingCommand?.();
+    ctx.result = usageError("missing command. Use edges --help.", "root");
   });
 
-  addNoteCommand(program, handlers.onNote);
-
-  const tasks = program
-    .command("tasks")
-    .description("Task board commands")
-    .allowExcessArguments(false)
-    .showHelpAfterError(false)
-    .helpOption("-h, --help", "Show this help");
-
-  addTasksCommands(tasks, (parsed) => {
-    handlers.onTasksCommand?.(parsed);
-  });
-  tasks.action(() => {
-    handlers.onMissingTasksCommand?.();
-  });
-  tasks.addHelpText("after", TASKS_AFTER_HELP);
-
+  addNoteCommand(program, ctx);
+  addTasksCommand(program, ctx);
   program.addHelpText("after", ROOT_AFTER_HELP);
   applyOutput(program, output);
   return program;
 }
 
+function helpText(text: string): string {
+  if (text.trim().length === 0) {
+    return formatHelp();
+  }
+  return text.endsWith("\n") ? text : `${text}\n`;
+}
+
 export function formatHelp(): string {
   let out = "";
-  const program = createProgram(undefined, {
-    writeOut: (str) => {
-      out += str;
+  const program = addRootCommand(
+    { io: {}, result: undefined },
+    {
+      writeOut: (str) => {
+        out += str;
+      },
+      writeErr: (str) => {
+        out += str;
+      },
     },
-    writeErr: (str) => {
-      out += str;
-    },
-  });
+  );
   program.outputHelp();
   return out.endsWith("\n") ? out : `${out}\n`;
 }
 
-function validationError(reason: string): ParseFail {
-  return { kind: "error", errorCode: "VALIDATION_ERROR", reason };
-}
-
-function fromNoteOptions(opts: IngestCliOptions): ParseResult {
-  const mode = opts.mode;
-  if (mode !== undefined && mode !== "pr" && mode !== "direct") {
-    return validationError('--mode must be "direct" or "pr"');
+/**
+ * Root-only: invoke the command tree as a process. Leaves and groups do not
+ * have a sibling `run.ts`; they register on a parent and execute in `.action`.
+ */
+export async function run(argv: string[], io: RunIo = {}): Promise<RunResult> {
+  if (argv[0] === "ingest") {
+    return usageError("ingest was renamed to note. Use: edges note …", "root");
   }
 
-  if (opts.tokenFile && opts.tokenStdin) {
-    return validationError("use only one of --token-file or --token-stdin");
-  }
-
-  const title = opts.title;
-  const content = opts.content;
-  const coAuthor = opts.coAuthor;
-  const missing: string[] = [];
-  if (!title) missing.push("--title");
-  if (!content) missing.push("--content");
-  if (!coAuthor) missing.push("--co-author");
-  if (missing.length > 0 || !title || !content || !coAuthor) {
-    return validationError(
-      `missing required flags: ${missing.join(", ") || "--title, --content, --co-author"}`,
-    );
-  }
-
-  return {
-    kind: "note",
-    title,
-    content,
-    coAuthor,
-    dryRun: opts.dryRun === true,
-    mode,
-    tokenFile: opts.tokenFile,
-    tokenStdin: opts.tokenStdin === true,
-  };
-}
-
-export function parseArgv(argv: string[]): ParseResult {
-  let collected: IngestCliOptions | undefined;
-  let collectedTasks: TasksParseOk | undefined;
-  let sawMissingTasksCommand = false;
-  let sawMissingCommand = false;
+  const ctx: CliContext = { io: { ...io, env: io.env ?? process.env }, result: undefined };
   let output = "";
-  const program = createProgram(
-    {
-      onNote: (opts) => {
-        collected = opts;
-      },
-      onTasksCommand: (parsed) => {
-        collectedTasks = parsed;
-      },
-      onMissingTasksCommand: () => {
-        sawMissingTasksCommand = true;
-      },
-      onMissingCommand: () => {
-        sawMissingCommand = true;
-      },
+  const program = addRootCommand(ctx, {
+    writeOut: (str) => {
+      output += str;
     },
-    {
-      writeOut: (str) => {
-        output += str;
-      },
-      writeErr: (str) => {
-        output += str;
-      },
+    writeErr: (str) => {
+      output += str;
     },
-  );
+  });
   applyExitOverride(program);
 
-  if (argv[0] === "ingest") {
-    return validationError("ingest was renamed to note. Use: edges note …");
-  }
-
   try {
-    program.parse(argv, { from: "user" });
+    await program.parseAsync(argv, { from: "user" });
   } catch (err) {
     if (err instanceof CommanderError) {
       if (err.code === "commander.helpDisplayed" || err.code === "commander.help") {
-        return { kind: "help", text: output };
+        return { exitCode: 0, stdout: helpText(output), stderr: "" };
       }
       if (err.code === "commander.version") {
-        return { kind: "version" };
+        return { exitCode: 0, stdout: `${VERSION}\n`, stderr: "" };
       }
       const reason = err.message.replace(/^error:\s*/i, "");
-      return validationError(reason);
+      return usageError(reason, usageScope(argv));
     }
     const message = err instanceof Error ? err.message : String(err);
-    return validationError(message);
+    return usageError(message, usageScope(argv));
   }
 
-  if (sawMissingTasksCommand) {
-    return validationError("missing tasks subcommand. Use edges tasks --help.");
-  }
-  if (collectedTasks) {
-    return collectedTasks;
-  }
-  if (sawMissingCommand) {
-    return validationError("missing command. Use edges --help.");
-  }
-  if (!collected) {
-    return validationError("missing command. Use edges --help.");
-  }
-
-  return fromNoteOptions(collected);
+  return ctx.result ?? usageError("missing command. Use edges --help.", usageScope(argv));
 }

@@ -4,14 +4,9 @@ Multi-command Edges CLI. Humans and local agents share `edges`. Note ingest git 
 
 ## Directory is the command tree
 
-Each command directory holds the same four files:
-
-- `index.ts` — public surface (re-exports this level’s `program` + `run`)
-- `program.ts` — Commander registration (flags and arguments)
-- `run.ts` — execute or dispatch. A **file** named `run.ts` is a dispatcher, not a command, so `tasks/run.ts` can sit next to `tasks/runs/` (`edges tasks runs`)
-- `help.ts` — human-readable usage (after-help)
-
-Plus subcommand folders and `utils/`. Argv parsing is `parseArgv` in `src/program.ts` (not a fifth root file). Root `src/index.ts` is the **bin** (`#!/usr/bin/env node`); nested `index.ts` files are barrels.
+- **File** = one command node: flags, after-help, `.action` (leaf) or register children (group)
+- **Folder** = children of that command, plus `utils/`
+- Root extras: `index.ts` is the bin; `program.ts` is the `edges` node and also exports `run()` (only the root is invoked as a process); `context.ts` is the shared `CliContext` passed down the tree
 
 The command tree is built with [Commander.js](https://github.com/tj/commander.js):
 

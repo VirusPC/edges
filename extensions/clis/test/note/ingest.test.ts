@@ -5,7 +5,7 @@ import path from "node:path";
 import { promises as fs } from "node:fs";
 import { execFile as execFileCb } from "node:child_process";
 import { promisify } from "node:util";
-import { run } from "../../src/run.js";
+import { run } from "../../src/program.js";
 
 const execFile = promisify(execFileCb);
 

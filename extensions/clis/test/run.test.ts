@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { run } from "../src/run.js";
+import { run } from "../src/program.js";
 import type { IngestRequest, RuntimeConfig, ScriptSuccess } from "../src/note/utils/types.js";
 
 const requiredNoteFlags = [

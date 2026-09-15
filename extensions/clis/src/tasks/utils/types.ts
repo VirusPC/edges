@@ -58,27 +58,3 @@ export class TasksError extends Error {
 }
 
 export type TasksOutput = "table" | "json";
-
-export type TasksParseOk =
-  | { kind: "tasks-list"; status?: TaskStatus }
-  | { kind: "tasks-get"; target: string }
-  | {
-      kind: "tasks-create";
-      title: string;
-      description?: string;
-      body?: string;
-      status: TaskStatus;
-      name?: string;
-      assignee?: string;
-    }
-  | {
-      kind: "tasks-update";
-      target: string;
-      title?: string;
-      description?: string;
-      body?: string;
-      assignee?: string;
-    }
-  | { kind: "tasks-status"; target: string; next: TaskStatus }
-  | { kind: "tasks-runs"; target: string; output: TasksOutput }
-  | { kind: "tasks-run-messages"; runId: string; task?: string; output: TasksOutput };
