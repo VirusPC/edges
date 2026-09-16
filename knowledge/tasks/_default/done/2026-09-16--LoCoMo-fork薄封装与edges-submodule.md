@@ -13,7 +13,7 @@ metadata:
   edges-email: grok-bot@users.noreply.github.com
   edges-task-pr: "https://github.com/VirusPC/edges/pull/72"
   edges-task-pr-impl: "https://github.com/VirusPC/edges/pull/72"
-  edges-updated-at: "2026-09-16T17:45:00+08:00"
+  edges-updated-at: "2026-09-16T17:50:00+08:00"
 ---
 
 评测改走官方入口：在 fork 的 LoCoMo 上做薄封装，edges 用 submodule 钉住该 fork；逐步替换 edges 里自己移植的 scoring/context port。F1 走官方 `evaluation.py`。
