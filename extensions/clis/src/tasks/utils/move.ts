@@ -11,8 +11,8 @@ export async function moveTaskStatus(
   io: { fs: BoardWriter; now: Date },
 ): Promise<{ stem: string; from: TaskStatus; to: TaskStatus; path: string; sidecarPath: string }> {
   const record = await getTask(repoPath, target, io.fs);
-  const destRel = taskRelPath(next, record.stem);
-  const destSidecarRel = sidecarRelPath(next, record.stem);
+  const destRel = taskRelPath(record.project, next, record.stem);
+  const destSidecarRel = sidecarRelPath(record.project, next, record.stem);
   if (record.status === next) {
     return {
       stem: record.stem,
@@ -28,7 +28,7 @@ export async function moveTaskStatus(
     throw new TasksError("BOARD_IO_ERROR", `destination already exists: ${destRel}`);
   }
 
-  await io.fs.mkdirp(statusDir(repoPath, next));
+  await io.fs.mkdirp(statusDir(repoPath, record.project, next));
   const sourceAbs = path.join(repoPath, record.path);
   let markdown = await io.fs.readFile(sourceAbs);
   markdown = setMetadataField(markdown, "edges-tasks-status", next);

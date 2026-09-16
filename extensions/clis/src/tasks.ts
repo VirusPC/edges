@@ -10,10 +10,10 @@ import { addUpdateCommand } from "./tasks/update.js";
 
 const TASKS_AFTER_HELP = `
 COMMANDS
-  list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--sort priority]
+  list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority]
   get <stem|path>
-  create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority]
-  update <stem|path> [--title] [--description] [--body] [--assignee] [--priority]
+  create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project]
+  update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project]
   status <stem|path> <edges-tasks-status>
   runs <stem|path> [--output table|json]
   run-messages <run-id> [--task <stem>] [--output table|json]
@@ -23,7 +23,7 @@ Issue layer stdout is JSON. runs / run-messages default to a table; pass --outpu
 Cancel a Task with: edges tasks status <stem> cancelled
 There is no delete command.
 
-Run layer is read-only (no append). Skill and MCP will use this same contract later.
+Run layer is read-only (no append). Skill and MCP come later on this same contract.
 Capability Surface is CLI + Skill + MCP.
 
 EXAMPLES

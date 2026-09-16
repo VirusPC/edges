@@ -12,7 +12,7 @@
 - [CliContext 只装生产快照](projects/project_cli_context_production_snapshot.md) — 改 edges CLI 的 CliContext / run() 入参时：只放 env 与 stdin 快照加 Commander 的 result；不要把 ingest、fs、writer、now 等测试替身塞进 Context。输出类型叫 CliResult，不要叫 RunResult。
 - [对话整理采用复盘四栏](projects/project_conversation_notes_fupan_four_columns.md) — 改 conversation-to-notes 或对话 Note 结构时：用复盘四栏；相关链接写入【补充说明】并附说明；不要复活已关闭的 FIA 中文换皮；不要批量改写旧笔记；不要把升 Edge 写进该 skill。
 - [Task Issue 优先级用词档位，与 status 正交](projects/project_edges_task_priority.md) — Task Issue 优先级为 urgent|high|medium|low|none，写在 metadata.edges-task-priority，与 status 正交、不搬状态夹。CLI 已落地 create/update --priority 与 list --sort priority；Skill/MCP 后做。决策见 docs/adr/0007-edges-task-priority.md；词 vs P0 调研见 knowledge/projects/tasks/2026-09-15--issue-priority-words-vs-p0.md
-- [Task 看板按 Task Project 目录优先分组](projects/project_edges_task_project.md) — 看板 Task Project 为 directory-first + frontmatter 双写；未分组用 _default。决策见 docs/adr/0009-edges-task-project-grouping.md。实现计划 docs/superpowers/plans/2026-09-16-edges-task-project.md；本轮只落计划，不迁看板、不改 CLI。
+- [Task 看板按 Task Project 目录优先分组](projects/project_edges_task_project.md) — 看板 Task Project 为 directory-first + frontmatter 双写；未分组用 _default。决策见 docs/adr/0009-edges-task-project-grouping.md。CLI 已按 docs/superpowers/plans/2026-09-16-edges-task-project.md 落地；status 只在同 project 内移动。
 - [edges tasks 本轮只做 CLI](projects/project_edges_tasks_cli.md) — 本轮 edges tasks 看板操作只做 CLI（list/get/create/update/status + 只读 runs/run-messages）；Skill 与 MCP 后做同一契约。决策见 ADR 0005。
 - [可扩展 Memory Type：LAYOUT 登记，不另开注册表](projects/project_extensible_memory_types.md) — 可扩展 Memory Type：扩展面只在 LAYOUT，用 project-memory-add-type 登记；官方种子仍是六类。决策见 docs/adr/0006-extensible-project-memory-types.md。
 - [idea→task→专家→Cloud Agent→改状态](projects/project_idea_todo_expert_cloud_loop.md) — 工作流：idea 记到 knowledge/tasks（Task 记录员）→ 有空时专家 Agent 细聊 → Cursor Cloud Agent 开发 → 开发完改 Task 状态
@@ -26,7 +26,7 @@
 - [根 README 以知识闭环为唯一主线](projects/project_root_readme_direction.md) — 设计或修改根 README 时：从投资视角解释知识管理、分层 Agent Memory 与知识闭环，用一张图串联认知资本、Edge、收益、风险、流动性和反馈再投资。
 - [跨机器跨 Agent 的 harness 放 shared-extensions](projects/project_shared_extensions.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。
 - [tasks 只追加直接推 main](projects/project_tasks_direct_main.md) — 往 knowledge/tasks/ 写只追加速记时，直接提交 main、不提 PR
-- [工作项叫 tasks，支持状态流转](projects/project_tasks_with_status_not_todos.md) — idea→专家→Cloud 工作流下，目录与概念用 knowledge/tasks/（非 todos），并按 edges-tasks-status 分夹流转
+- [工作项叫 tasks，支持状态流转](projects/project_tasks_with_status_not_todos.md) — idea→专家→Cloud 工作流下，目录与概念用 knowledge/tasks/（非 todos），按 Task Project 再按 edges-tasks-status 分夹流转
 - [ECS 上 edges 用 Actions SSH 整仓 pull](projects/project_teach_site_rsync_push.md) — 改 teach 站点或 ECS 上的 edges 部署时：用 GitHub Actions SSH 触发整仓 git fetch/reset，不要再 rsync 推送；deploy job 保持 environment: production，根 README 保留工作流徽章。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](projects/project_todos_direct_main.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks_direct_main
 <!-- project-memory-entries:end -->

@@ -12,7 +12,7 @@ function failedJson(stdout: string): { status: string; errorCode: string } {
 test("run tasks list [--status]", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
     const listed = await run(["tasks", "list"], { env: { ...process.env, EDGES_REPO: repo } });
     assert.equal(listed.exitCode, 0);
     assert.equal(JSON.parse(listed.stdout).command, "list");
@@ -35,7 +35,7 @@ test("run tasks list rejects Run status values", async () => {
 test("run tasks get/create/update/status/runs/run-messages", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(["tasks", "create", "--title", "Hello"], { env });
     assert.equal(created.exitCode, 0);
@@ -105,6 +105,30 @@ test("run tasks create --priority P0 is VALIDATION_ERROR", async () => {
   const result = await run(["tasks", "create", "--title", "Pri", "--priority", "P0"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
+test("run tasks create --project Default is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "create", "--title", "Pri", "--project", "Default"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
+test("run tasks create --project in_progress is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "create", "--title", "Pri", "--project", "in_progress"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
+test("run tasks update --project Default is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "update", "stem", "--project", "Default"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
+test("run tasks list --project in_progress is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "list", "--project", "in_progress"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("run tasks --help is help and lists subcommands", async () => {

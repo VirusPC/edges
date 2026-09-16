@@ -1,4 +1,6 @@
 import { getTask, listTasks, type BoardFs, type TaskListOpts } from "./board.js";
+
+export type { TaskListOpts };
 import { messagesForRun, parseRunLog, resolveRunId, type TaskRun } from "./runlog.js";
 import { TasksError, type TaskListItem, type TaskRecord } from "./types.js";
 

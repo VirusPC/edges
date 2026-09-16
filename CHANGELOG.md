@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `edges tasks` Issue 层 `--project` 与看板路径 `knowledge/tasks/<project-slug>/<status>/`（ADR-0009）。未分组 `_default` ↔ 字段 `default`/省略；目录与 `metadata.edges-task-project` 双写。`status` 只在同一 project 内移动；跨 project 用 `update --project`。一次性把根下 status 夹迁入 `_default/`。无 Skill/MCP 封装。
 - `docs/superpowers/plans/2026-09-16-edges-task-project.md`：ADR-0009 的实现计划（本轮只做计划；`edges tasks` CLI `--project`、路径 `tasks/<project-slug>/<status>/`、一次性迁到 `_default`；不实现 Skill/MCP，本计划 PR 不改 CLI、不迁看板）。
 - CONTEXT 增加 Task Project（edges）、`edges-task-project`；收紧 Task / `edges-tasks-status` / `edges-task-priority` / edges tasks（CLI）：约定分组在 `knowledge/tasks/<project-slug>/`，未分组 `_default`；目录与 frontmatter 双写。后续实现：`status` 只在同一 project 内移动；跨 project 用 `update --project`（或等价入口）。
 - `docs/adr/0009-edges-task-project-grouping.md`：directory-first 的 Multica-like Project + frontmatter 双写；修订 ADR 0002 的路径（嵌在 project-slug 下）。本轮只定文档，不迁看板、不改 CLI；实现轮必须先让 CLI 跟上。
