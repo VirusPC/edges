@@ -6,6 +6,7 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
+- [Benchmark 审稿先看构念、数据、区分度与公平协议](projects/project_benchmark_review_checklist.md) — 设计或审阅 agent-memory / long-context 类 benchmark、或判断仓内冒烟分数能不能当证明时：先看构念效度 → 数据可信 → 区分度 → 可复现公平协议；分数表是证据不是贡献。全文见 knowledge/projects/memory/2026-09-16-benchmark-review-checklist.md。LoCoMo 个案仍看十问笔记；ADR 0008：Evaluation Smoke ≠ Benchmark Proof。
 - [LoCoMo 可借的是造数哲学（结构先于互动），不是 QA 分](projects/project_locomo_generator_structure_before_interaction.md) — 决定从 LoCoMo 借什么、或评 PM / 事件图世界模型时：可借的是 persona→G→按日切 session→接地对话，不是官方 QA 分。只跑 QA 测不到 online write→use 或事件图世界模型。全文见 knowledge/projects/memory/2026-09-16-LoCoMo-paper-10-questions.md「补充：合成造数逻辑、宣传落差与审稿站台」。四臂仍 paused；分数按 ADR 0008 不是 PM proof。
 - [LoCoMo 官方冒烟走 VirusPC/locomo submodule](projects/project_locomo_official_submodule_path.md) — 跑或改 LoCoMo Evaluation Smoke 时：首选 evaluation/run_locomo_official.py（submodule 官方 evaluate_qa.py / evaluation.py F1）。print-command 无 key；真实 smoke 用 KIMI_API_KEY + kimi-for-coding。evaluation/cases/locomo-smoke 是 legacy hand-port。不是 Benchmark Proof / Project Memory proof。
 - [LoCoMo 官方 QA 是事后静态库，不等于 PM-online](projects/project_locomo_online_produce_consume_vs_posthoc_qa.md) — 评 Project Memory / PM-online 或对照官方 RAG/截断基线时：官方 QA 是事后静态库，不等于对话中 write→use。全文见 knowledge/projects/memory/2026-09-16-LoCoMo-paper-10-questions.md「补充：过程中产生/消费 vs 事后静态库」。四臂仍 paused；分数按 ADR 0008 不是 PM proof。
