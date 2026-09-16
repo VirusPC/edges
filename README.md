@@ -126,10 +126,13 @@ Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的
 ### 维护完整的 Edges
 
 ```bash
+git clone --recurse-submodules https://github.com/VirusPC/edges.git
 pnpm install
 pnpm setup
 pnpm skills:link
 ```
+
+已有克隆若没有评测 submodule：`git submodule update --init evaluation/third_party/locomo`。LoCoMo 官方冒烟入口见 [`evaluation/README.md`](evaluation/README.md)。
 
 - `pnpm install`：安装 workspace 依赖。
 - `pnpm setup`：初始化本地环境（加载 .env；不再把仓根 bin/ 写入 PATH）。

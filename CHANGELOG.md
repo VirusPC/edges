@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `evaluation/third_party/locomo`：以 git submodule 钉住 [VirusPC/locomo](https://github.com/VirusPC/locomo) `cb5151e`（fork `main` 上 PR #1 merge）。薄封装 [`evaluation/run_locomo_official.py`](evaluation/run_locomo_official.py) 调用官方 `task_eval/evaluate_qa.py` → `evaluation.py` F1。首选官方评测冒烟路径；`evaluation/cases/locomo-smoke/` 标为 legacy hand-port，历史报告保留。不是 Benchmark Proof / Project Memory proof。clone 用 `--recurse-submodules`。
 - `evaluation/cases/locomo-smoke/`：LoCoMo 评测冒烟（截断上下文基线）。dummy dry-run 无 API；真实 run 走 OpenAI-compatible `kimi-for-coding`。SUT 为上游 locomo 打分/out-file schema。不是 Benchmark Proof，不接 Project Memory。
 - CONTEXT 增加评测冒烟（Evaluation Smoke）、公开基准证明（Benchmark Proof）、评测报告（Evaluation Report）：冒烟只证明链路可跑，不是项目记忆或 Agent Memory 有效性证据。
 - `docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`：本轮 LoCoMo 只做评测冒烟；SUT 为上游 harness；分数不得引用为对项目记忆的公开基准证明。

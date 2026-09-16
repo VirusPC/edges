@@ -4,14 +4,14 @@ description: LoCoMo fork 薄封装 + edges submodule，替换仓内 port harness
 metadata:
   edges-type: task
   edges-title: LoCoMo fork 薄封装 + edges submodule（替换 port harness）
-  edges-tasks-status: backlog
+  edges-tasks-status: in_progress
   edges-task-assignee: Agent Memory 专家
   edges-task-assignee-id: ae52bd9d-c3d6-414d-977d-f07b6d20d1a3
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-16T17:20:00+08:00"
+  edges-updated-at: "2026-09-16T17:35:00+08:00"
 ---
 
 评测改走官方入口：在 fork 的 LoCoMo 上做薄封装，edges 用 submodule 钉住该 fork；逐步替换 edges 里自己移植的 scoring/context port。F1 走官方 `evaluation.py`。

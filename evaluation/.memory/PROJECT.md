@@ -6,5 +6,6 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- [LoCoMo 冒烟是截断上下文基线，dummy dry-run 无 API](projects/project_locomo_smoke_truncated_baseline.md) — 跑或改 evaluation/cases/locomo-smoke 时：dummy 用 python3 run.py dry-run（不要 key）。真实 run 用 Kimi Code Console 的 KIMI_API_KEY + OPENAI_BASE_URL=https://api.kimi.com/coding/v1，模型 kimi-for-coding；不要用 Moonshot pay-as-you-go api.moonshot.ai。SUT 是上游 locomo 打分；不要接 Project Memory。
+- [LoCoMo 官方冒烟走 VirusPC/locomo submodule](projects/project_locomo_official_submodule_path.md) — 跑或改 LoCoMo Evaluation Smoke 时：首选 evaluation/run_locomo_official.py（submodule 官方 evaluate_qa.py / evaluation.py F1）。print-command 无 key；真实 smoke 用 KIMI_API_KEY + kimi-for-coding。evaluation/cases/locomo-smoke 是 legacy hand-port。不是 Benchmark Proof / Project Memory proof。
+- [LoCoMo 冒烟是截断上下文基线，dummy dry-run 无 API](projects/project_locomo_smoke_truncated_baseline.md) — 改 evaluation/cases/locomo-smoke 时：这是 legacy hand-port。新跑用 evaluation/run_locomo_official.py。dummy 仍可用 python3 run.py dry-run（不要 key）。真实 run 若走旧入口：KIMI_API_KEY + OPENAI_BASE_URL=https://api.kimi.com/coding/v1，模型 kimi-for-coding。SUT 是上游 locomo 打分；不要接 Project Memory。
 <!-- project-memory-entries:end -->

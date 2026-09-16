@@ -3,6 +3,7 @@
   "readableLineLength": false,
   "showUnsupportedFiles": true,
   "userIgnoreFilters": [
-    "knowledge/teaching/*/repos/"
+    "knowledge/teaching/*/repos/",
+    "evaluation/third_party/"
   ]
 }
