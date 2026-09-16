@@ -36,6 +36,7 @@ class OfficialCommandTests(unittest.TestCase):
         self.assertIn("--qa-per-category", command)
         self.assertIn("2", command)
         self.assertIn("kimi-for-coding", command)
+        self.assertIn("--overwrite", command)
         self.assertNotIn("evaluation/cases/locomo-smoke", joined)
 
 

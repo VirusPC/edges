@@ -79,6 +79,7 @@ def build_evaluate_command(
         str(qa_per_category),
         "--batch-size",
         "1",
+        "--overwrite",
     ]
 
 
@@ -146,7 +147,7 @@ See [{adr_path}](../../{adr_path}).
 | SUT | {sut} |
 | Fork | [VirusPC/locomo](https://github.com/VirusPC/locomo) @ `{PINNED_COMMIT}` |
 | Upstream base | {UPSTREAM_BASE} |
-| Intentional delta | OpenAI-compatible model backend only (official prompts + F1 unchanged) |
+| Intentional delta | OpenAI-compatible model backend + smoke subset flags (official prompts + F1 unchanged) |
 | Backend | truncated-context baseline (no RAG; Project Memory is **not** wired) |
 | Subset | {subset} |
 | Model | `{model}` |
@@ -257,13 +258,15 @@ def _format_print_command(args: argparse.Namespace) -> str:
     evaluate_line = " \\\n  ".join(_pretty_pairs(_pretty_argv(evaluate)))
     return f"""# Evaluation Smoke, not Benchmark Proof / not Project Memory proof.
 # Official F1: VirusPC/locomo task_eval/evaluation.py (pinned {PINNED_COMMIT}).
-# Upstream base: {UPSTREAM_BASE}. Only intentional delta: OpenAI-compatible model backend.
+# Upstream base: {UPSTREAM_BASE}. Intentional delta: OpenAI-compatible model backend + smoke subset flags; official F1/prompts unchanged.
 # Subset: {args.sample_id}; first {args.qa_per_category} QA per category in file order.
 
 # One-time submodule init
 {CLONE_COMMAND}
 # or, in an existing clone:
 {INIT_COMMAND}
+# optional live-run deps (not needed for print-command / unit tests):
+# pip install -r evaluation/third_party/locomo/requirements-openai-compat.txt
 
 # Official evaluate_qa.py (requires KIMI_API_KEY or OPENAI_API_KEY)
 KIMI_API_KEY=... OPENAI_BASE_URL={DEFAULT_BASE_URL} \\
@@ -315,7 +318,10 @@ def _run_smoke(args: argparse.Namespace) -> int:
         render_official_report(
             out_samples=out_samples,
             model=args.model,
-            subset=SUBSET,
+            subset=(
+                f"{args.sample_id}; first {args.qa_per_category} QA per category "
+                "1-5 in file order (take all if a category has <2)"
+            ),
             command=PRINT_COMMAND,
             real_command=SMOKE_COMMAND,
         ),

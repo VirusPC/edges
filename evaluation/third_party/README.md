@@ -9,7 +9,7 @@ Pinned third-party harnesses used by Edges evaluation. These are git submodules,
 - Path: [`locomo/`](locomo/)
 - Pinned commit: `cb5151e32c82c3b6fc6ffdc18e72572691b9d8ea` (PR #1 merge on fork `main`)
 - Upstream base: `snap-research/locomo@3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376`
-- Intentional delta: OpenAI-compatible / `kimi-for-coding` routing. Official `task_eval/evaluation.py` F1 is unchanged.
+- Intentional delta: OpenAI-compatible / `kimi-for-coding` routing plus smoke subset flags. Official `task_eval/evaluation.py` F1 and truncated-context prompts are unchanged.
 - Edges entry: [`../run_locomo_official.py`](../run_locomo_official.py)
 - Fork notes: [`locomo/docs/EDGES_EVAL.md`](locomo/docs/EDGES_EVAL.md)
 

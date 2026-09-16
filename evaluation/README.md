@@ -62,6 +62,7 @@ python3 evaluation/run_locomo_official.py print-command
 Live conv-44 / 2 QA per category / `kimi-for-coding` run (key via env, never commit the key):
 
 ```bash
+pip install -r evaluation/third_party/locomo/requirements-openai-compat.txt
 KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 \
   python3 evaluation/run_locomo_official.py smoke
 ```
