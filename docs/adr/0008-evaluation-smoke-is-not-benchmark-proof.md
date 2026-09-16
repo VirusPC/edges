@@ -14,8 +14,8 @@ LoCoMo 便宜、官方链路现成，容易被拿来当作「记忆有效」的�
 ## Consequences
 
 - 冒烟产物是评测报告，落在 Edges 评测工作区中的报告落点；不是 Edge，也不是知识资产。
-- [`knowledge/tasks/backlog/2026-09-11--找公开benchmark证明memory有效性.md`](../../knowledge/tasks/backlog/2026-09-11--找公开benchmark证明memory有效性.md) 继续拥有公开基准证明；本轮不提前用 LoCoMo 分数交差。
-- [`knowledge/tasks/backlog/2026-09-16--LoCoMo评测流水线冒烟.md`](../../knowledge/tasks/backlog/2026-09-16--LoCoMo评测流水线冒烟.md) 只负责把上游链路跑通并留下评测报告。
+- [`knowledge/tasks/_default/backlog/2026-09-11--找公开benchmark证明memory有效性.md`](../../knowledge/tasks/_default/backlog/2026-09-11--找公开benchmark证明memory有效性.md) 继续拥有公开基准证明；本轮不提前用 LoCoMo 分数交差。
+- [`knowledge/tasks/_default/backlog/2026-09-16--LoCoMo评测流水线冒烟.md`](../../knowledge/tasks/_default/backlog/2026-09-16--LoCoMo评测流水线冒烟.md) 只负责把上游链路跑通并留下评测报告。
 - 把项目记忆接入 LoCoMo 当记忆后端，不在本轮冒烟范围内。
 
 ## Considered Options
