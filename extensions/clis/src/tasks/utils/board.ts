@@ -3,6 +3,15 @@ import path from "node:path";
 import { parseTaskDoc } from "./frontmatter.js";
 import { filterTasksByPriority, priorityFromMetadata, sortTasksByPriority } from "./priority.js";
 import {
+  assertProjectDualWrite,
+  DEFAULT_TASK_PROJECT,
+  DEFAULT_TASK_PROJECT_DIR,
+  filterTasksByProject,
+  isUserProjectSlug,
+  projectDirName,
+  type TaskProjectId,
+} from "./project.js";
+import {
   boardRoot,
   isTaskMarkdownName,
   parseTarget,
@@ -88,12 +97,49 @@ function countSidecarRuns(markdown: string): number {
   return count;
 }
 
+export async function listProjectIds(repoPath: string, fs: BoardFs): Promise<TaskProjectId[]> {
+  const root = boardRoot(repoPath);
+  if (!(await fs.exists(root))) {
+    return [];
+  }
+  const names = await fs.readdir(root);
+  const ids: TaskProjectId[] = [];
+  for (const name of names) {
+    if (name.startsWith(".") || name === "AGENTS.md" || name === "README.md") {
+      continue;
+    }
+    if ((TASK_STATUSES as readonly string[]).includes(name)) {
+      continue;
+    }
+    try {
+      await fs.readdir(path.join(root, name));
+    } catch {
+      continue;
+    }
+    if (name === DEFAULT_TASK_PROJECT_DIR) {
+      ids.push(DEFAULT_TASK_PROJECT);
+    } else if (isUserProjectSlug(name)) {
+      ids.push(name);
+    }
+  }
+  return ids.sort((a, b) => {
+    if (a === DEFAULT_TASK_PROJECT) {
+      return -1;
+    }
+    if (b === DEFAULT_TASK_PROJECT) {
+      return 1;
+    }
+    return a.localeCompare(b);
+  });
+}
+
 async function listStatusDir(
   repoPath: string,
+  project: TaskProjectId,
   status: TaskStatus,
   fs: BoardFs,
 ): Promise<TaskListItem[]> {
-  const dir = statusDir(repoPath, status);
+  const dir = statusDir(repoPath, project, status);
   if (!(await fs.exists(dir))) {
     return [];
   }
@@ -107,23 +153,25 @@ async function listStatusDir(
     if (!stem) {
       continue;
     }
-    items.push(await readListItem(repoPath, status, stem, fs));
+    items.push(await readListItem(repoPath, project, status, stem, fs));
   }
   return items;
 }
 
 async function readListItem(
   repoPath: string,
+  project: TaskProjectId,
   status: TaskStatus,
   stem: string,
   fs: BoardFs,
 ): Promise<TaskListItem> {
-  const rel = taskRelPath(status, stem);
-  const sidecarRel = sidecarRelPath(status, stem);
+  const rel = taskRelPath(project, status, stem);
+  const sidecarRel = sidecarRelPath(project, status, stem);
   const abs = path.join(repoPath, rel);
   const sidecarAbs = path.join(repoPath, sidecarRel);
   const markdown = await fs.readFile(abs);
   const doc = parseTaskDoc(markdown);
+  const resolvedProject = assertProjectDualWrite(projectDirName(project), doc.metadata);
   let runCount = 0;
   if (await fs.exists(sidecarAbs)) {
     runCount = countSidecarRuns(await fs.readFile(sidecarAbs));
@@ -137,12 +185,14 @@ async function readListItem(
     sidecarPath: sidecarRel,
     runCount,
     priority: priorityFromMetadata(doc.metadata),
+    project: resolvedProject,
   };
 }
 
 export type TaskListOpts = {
   status?: TaskStatus;
   priorities?: TaskPriority[];
+  projects?: TaskProjectId[];
   sort?: "priority";
 };
 
@@ -151,12 +201,16 @@ export async function listTasks(
   opts: TaskListOpts,
   fs: BoardFs,
 ): Promise<TaskListItem[]> {
+  const projects = await listProjectIds(repoPath, fs);
   const statuses = opts.status ? [opts.status] : [...TASK_STATUSES];
   const items: TaskListItem[] = [];
-  for (const status of statuses) {
-    items.push(...(await listStatusDir(repoPath, status, fs)));
+  for (const project of projects) {
+    for (const status of statuses) {
+      items.push(...(await listStatusDir(repoPath, project, status, fs)));
+    }
   }
-  const filtered = filterTasksByPriority(items, opts.priorities ?? []);
+  const priorityFiltered = filterTasksByPriority(items, opts.priorities ?? []);
+  const filtered = filterTasksByProject(priorityFiltered, opts.projects ?? []);
   if (opts.sort === "priority") {
     return sortTasksByPriority(filtered);
   }
@@ -166,12 +220,19 @@ export async function listTasks(
   return filtered;
 }
 
-async function findByStem(repoPath: string, stem: string, fs: BoardFs): Promise<Array<{ status: TaskStatus }>> {
-  const hits: Array<{ status: TaskStatus }> = [];
-  for (const status of TASK_STATUSES) {
-    const abs = path.join(repoPath, taskRelPath(status, stem));
-    if (await fs.exists(abs)) {
-      hits.push({ status });
+async function findByStem(
+  repoPath: string,
+  stem: string,
+  fs: BoardFs,
+): Promise<Array<{ project: TaskProjectId; status: TaskStatus }>> {
+  const hits: Array<{ project: TaskProjectId; status: TaskStatus }> = [];
+  const projects = await listProjectIds(repoPath, fs);
+  for (const project of projects) {
+    for (const status of TASK_STATUSES) {
+      const abs = path.join(repoPath, taskRelPath(project, status, stem));
+      if (await fs.exists(abs)) {
+        hits.push({ project, status });
+      }
     }
   }
   return hits;
@@ -179,11 +240,12 @@ async function findByStem(repoPath: string, stem: string, fs: BoardFs): Promise<
 
 async function loadRecord(
   repoPath: string,
+  project: TaskProjectId,
   status: TaskStatus,
   stem: string,
   fs: BoardFs,
 ): Promise<TaskRecord> {
-  const item = await readListItem(repoPath, status, stem, fs);
+  const item = await readListItem(repoPath, project, status, stem, fs);
   const abs = path.join(repoPath, item.path);
   const sidecarAbs = path.join(repoPath, item.sidecarPath);
   const markdown = await fs.readFile(abs);
@@ -208,11 +270,15 @@ export async function getTask(repoPath: string, target: string, fs: BoardFs): Pr
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
     }
     const rel = path.relative(boardRoot(repoPath), path.dirname(abs));
-    const status = rel.split(path.sep)[0];
-    if (!status || !TASK_STATUSES.includes(status as TaskStatus)) {
+    const parts = rel.split(path.sep).filter(Boolean);
+    if (parts.length !== 2 || !TASK_STATUSES.includes(parts[1] as TaskStatus)) {
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
     }
-    return loadRecord(repoPath, status as TaskStatus, parsed.stem, fs);
+    const project = parts[0] === DEFAULT_TASK_PROJECT_DIR ? DEFAULT_TASK_PROJECT : parts[0];
+    if (project !== DEFAULT_TASK_PROJECT && !isUserProjectSlug(project)) {
+      throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
+    }
+    return loadRecord(repoPath, project, parts[1] as TaskStatus, parsed.stem, fs);
   }
 
   const hits = await findByStem(repoPath, parsed.stem, fs);
@@ -222,8 +288,8 @@ export async function getTask(repoPath: string, target: string, fs: BoardFs): Pr
   if (hits.length > 1) {
     throw new TasksError(
       "AMBIGUOUS_TASK",
-      `stem ${parsed.stem} exists in multiple status folders`,
+      `stem ${parsed.stem} exists in multiple project/status folders`,
     );
   }
-  return loadRecord(repoPath, hits[0]!.status, parsed.stem, fs);
+  return loadRecord(repoPath, hits[0]!.project, hits[0]!.status, parsed.stem, fs);
 }

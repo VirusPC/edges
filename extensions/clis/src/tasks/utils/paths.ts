@@ -1,5 +1,6 @@
 import path from "node:path";
-import { TASK_STATUSES, type TaskStatus } from "./types.js";
+import { projectDirName } from "./project.js";
+import { TASK_STATUSES, type TaskProjectId, type TaskStatus } from "./types.js";
 
 export function isTaskStatus(value: string): value is TaskStatus {
   return TASK_STATUSES.includes(value as TaskStatus);
@@ -9,16 +10,16 @@ export function boardRoot(repoPath: string): string {
   return path.join(repoPath, "knowledge/tasks");
 }
 
-export function statusDir(repoPath: string, status: TaskStatus): string {
-  return path.join(boardRoot(repoPath), status);
+export function statusDir(repoPath: string, project: TaskProjectId, status: TaskStatus): string {
+  return path.join(boardRoot(repoPath), projectDirName(project), status);
 }
 
-export function taskRelPath(status: TaskStatus, stem: string): string {
-  return path.join("knowledge/tasks", status, `${stem}.md`);
+export function taskRelPath(project: TaskProjectId, status: TaskStatus, stem: string): string {
+  return path.join("knowledge/tasks", projectDirName(project), status, `${stem}.md`);
 }
 
-export function sidecarRelPath(status: TaskStatus, stem: string): string {
-  return path.join("knowledge/tasks", status, `.${stem}.log.md`);
+export function sidecarRelPath(project: TaskProjectId, status: TaskStatus, stem: string): string {
+  return path.join("knowledge/tasks", projectDirName(project), status, `.${stem}.log.md`);
 }
 
 export function stemFromFilename(name: string): string | undefined {
