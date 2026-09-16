@@ -44,6 +44,18 @@ _避免使用_：独立全局 vault、edges-private 当真源、机器级单一�
 在指定记忆目录通过 skill（如 `$project-memory-add-type`）登记新的 Memory Type（name / description / 可选特权 metadata），与内置种子类型同构、可被 remember / ask / doctor 发现；官方 init 种子不因示例类型膨胀。
 _避免使用_：单独 JSON/YAML 总配置平面、把示例 type 写进默认种子
 
+**评测冒烟（Evaluation Smoke）**：
+以复现公开基准上「写入→检索→作答→打分」链路并产出可复查记录为目的的试跑；不构成项目记忆或 Agent Memory 有效性证据。
+_避免使用_：记忆评测通过、benchmark 证明有效、把冒烟分数当成项目记忆增益
+
+**公开基准证明（Benchmark Proof）**：
+在构念匹配的公开基准上，用同底座、同 harness，以及空记忆/安慰剂/随机等对照，论证记忆机制带来可归因增益的评测。
+_避免使用_：评测冒烟跑通、单次无对照的榜分数
+
+**评测报告（Evaluation Report）**：
+一次评测运行的可复现记录（含命令、底座、子集、分数与时间），落在 Edges 评测工作区中的报告落点，用于日后对照，不是知识资产本身。
+_避免使用_：Edge、研究笔记里的口头分数、任务描述里的声称结果
+
 **知识管理 Agent（Knowledge Management Agent）**：
 在人设定的目标、授权与风险边界内，承担研究、提炼、检索、部署和反馈处理的主动知识资产管理者。
 _避免使用_：被动文件工具、自主决策者、无人监督的基金经理
