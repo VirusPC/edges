@@ -31,6 +31,8 @@
 
 先有真实用例再往下加目录，不要预埋空数据文件。
 
-- [`cases/`](cases/README.md)：用例与 benchmark 定义
+- [`cases/`](cases/README.md)：用例与 benchmark 定义（现有 [`cases/locomo-smoke/`](cases/locomo-smoke/README.md)）
 - [`reports/`](reports/README.md)：某次运行的报告
 - 本 README
+
+LoCoMo 冒烟是 Evaluation Smoke，不是 Benchmark Proof。见 [`docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`](../docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md)。

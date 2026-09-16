@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `evaluation/cases/locomo-smoke/`：LoCoMo 评测冒烟（截断上下文基线）。dummy dry-run 无 API；真实 run 走 OpenAI-compatible `kimi-for-coding`。SUT 为上游 locomo 打分/out-file schema。不是 Benchmark Proof，不接 Project Memory。
+- CONTEXT 增加评测冒烟（Evaluation Smoke）、公开基准证明（Benchmark Proof）、评测报告（Evaluation Report）：冒烟只证明链路可跑，不是项目记忆或 Agent Memory 有效性证据。
+- `docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`：本轮 LoCoMo 只做评测冒烟；SUT 为上游 harness；分数不得引用为对项目记忆的公开基准证明。
 - `edges tasks` Issue 层 `--project` 与看板路径 `knowledge/tasks/<project-slug>/<status>/`（ADR-0009）。未分组 `_default` ↔ 字段 `default`/省略；目录与 `metadata.edges-task-project` 双写。`status` 只在同一 project 内移动；跨 project 用 `update --project`。一次性把根下 status 夹迁入 `_default/`。无 Skill/MCP 封装。
 - `docs/superpowers/plans/2026-09-16-edges-task-project.md`：ADR-0009 的实现计划（本轮只做计划；`edges tasks` CLI `--project`、路径 `tasks/<project-slug>/<status>/`、一次性迁到 `_default`；不实现 Skill/MCP，本计划 PR 不改 CLI、不迁看板）。
 - CONTEXT 增加 Task Project（edges）、`edges-task-project`；收紧 Task / `edges-tasks-status` / `edges-task-priority` / edges tasks（CLI）：约定分组在 `knowledge/tasks/<project-slug>/`，未分组 `_default`；目录与 frontmatter 双写。后续实现：`status` 只在同一 project 内移动；跨 project 用 `update --project`（或等价入口）。

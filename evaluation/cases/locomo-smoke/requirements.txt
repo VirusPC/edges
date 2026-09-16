@@ -1,0 +1,2 @@
+# Smoke harness is stdlib-only. nltk is optional and matches upstream
+# Porter stemming when present (`pip install nltk==3.8.1`).
