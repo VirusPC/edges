@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- CONTEXT 增加 Task Project（edges）、`edges-task-project`；收紧 Task / `edges-tasks-status` / `edges-task-priority` / edges tasks（CLI）：约定分组在 `knowledge/tasks/<project-slug>/`，未分组 `_default`；目录与 frontmatter 双写。后续实现：`status` 只在同一 project 内移动；跨 project 用 `update --project`（或等价入口）。
+- `docs/adr/0009-edges-task-project-grouping.md`：directory-first 的 Multica-like Project + frontmatter 双写；修订 ADR 0002 的路径（嵌在 project-slug 下）。本轮只定文档，不迁看板、不改 CLI；实现轮必须先让 CLI 跟上。
 - `edges tasks` Issue 层 `--priority` / `list --sort priority`（ADR-0007）。枚举 `urgent|high|medium|low|none`，写在 `metadata.edges-task-priority`；缺省为 `none`。`status` 不改 priority；改 priority 不搬状态夹。无 Skill/MCP 封装。
 - `docs/superpowers/plans/2026-09-16-edges-task-priority.md`：ADR-0007 的实现计划（本轮只做 `edges tasks` CLI `--priority` / `--sort priority`；不实现 Skill/MCP）。
 - CONTEXT 增加 `edges-task-priority`；收紧 Task / `edges-tasks-status` / edges tasks（CLI）的文档约定：优先级与状态正交；后续 create/update 用 `--priority`，list 可用 `--sort priority`。
