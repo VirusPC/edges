@@ -4,12 +4,12 @@ description: LoCoMo 官方 RAG 单档（rag-mode dialog、单一 top-k）——�
 metadata:
   edges-type: task
   edges-title: LoCoMo 官方 RAG 单档跟进（非冒烟范围）
-  edges-tasks-status: backlog
+  edges-tasks-status: cancelled
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-16T15:58:00+08:00"
+  edges-updated-at: "2026-09-16T16:05:00+08:00"
 ---
 
 LoCoMo 官方 RAG 单档对照（如 `rag-mode` dialog、单一 top-k）：在「截断上下文基线」冒烟过关后的**可选**跟进。
@@ -23,3 +23,5 @@ Agent Memory 专家 grill-with-docs 已定当前冒烟只做截断上下文基�
 - 范围：官方 RAG 单档配置（rag-mode dialog、单一 top-k 等）；与冒烟同一评测管道可复用则复用。
 - **非目标：** 不进当前冒烟；不把 LoCoMo（含 RAG 分）当 filesystem project-memory 证明；不替代 SWE-ContextBench 主证据。
 - 派发时默认先 grill-with-docs。
+
+**合并取消（2026-09-16）：** 内容并入 `2026-09-16--LoCoMo四臂探索对照` 的臂 1；本条 cancelled，不再单独跟踪。
