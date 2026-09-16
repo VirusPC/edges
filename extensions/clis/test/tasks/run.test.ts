@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, readdir, writeFile, rm } from "node:fs/promises";
+import { access, mkdtemp, mkdir, readFile, readdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
@@ -498,6 +498,55 @@ test("run tasks list --priority P0 is VALIDATION_ERROR", async () => {
   const result = await run(["tasks", "list", "--priority", "P0"]);
   assert.equal(result.exitCode, 2);
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
+test("run tasks status rejects --project and does not move", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const dir = path.join(repo, "knowledge/tasks/_default/todo");
+    await mkdir(dir, { recursive: true });
+    await writeFile(
+      path.join(dir, "2026-09-16--stay.md"),
+      `---
+name: stay
+description: stay
+metadata:
+  edges-type: task
+  edges-title: stay
+  edges-tasks-status: todo
+---
+
+body
+`,
+      "utf8",
+    );
+    const result = await run(["tasks", "status", "2026-09-16--stay", "--project", "cli"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(result.exitCode, 2);
+    assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+    const md = await readFile(path.join(dir, "2026-09-16--stay.md"), "utf8");
+    assert.match(md, /edges-tasks-status: todo/);
+    await assert.rejects(access(path.join(repo, "knowledge/tasks/cli/todo/2026-09-16--stay.md")));
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks status JSON has no project key and stays under _default", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const env = { ...process.env, EDGES_REPO: repo };
+    const created = await run(["tasks", "create", "--title", "Stat", "--status", "todo"], { env });
+    const stem = JSON.parse(created.stdout).stem as string;
+    const moved = await run(["tasks", "status", stem, "in_progress"], { env });
+    assert.equal(moved.exitCode, 0);
+    const body = JSON.parse(moved.stdout) as { path: string; project?: string };
+    assert.equal(body.path, `knowledge/tasks/_default/in_progress/${stem}.md`);
+    assert.equal(body.project, undefined);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
 });
 
 test("run tasks status rejects --priority and does not move", async () => {
