@@ -140,7 +140,7 @@ AGENTS.md 是共享文件，可以同时包含人写正文、其他工具区块�
 
 ### 8. Markdown 是事实源，索引是派生产物
 
-具体 Memory 文件是 canonical source。类型入口和索引可以根据目录及 frontmatter 全量重算。
+具体 Memory 文件是 canonical source。类型入口和索引可以根据目录及 frontmatter 全量重算。条目用 slug 文件名（不是 `0001-...`），索引用无序子弹列表重算，并发插入不必为序号打架——见 [memory-system-strengths.md](memory-system-strengths.md) 第 9 条。
 
 由此获得：
 
