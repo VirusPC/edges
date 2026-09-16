@@ -52,6 +52,14 @@
 
 配套的写入闸门比换更强 embedding 更重要：能从代码或 git 推出的不记，临时进度不记，未验证猜测不记。规模化下的头号失败是膨胀和 context collapse；这套系统把「不记什么」写成闸门，而不是指望离线整理服务事后收拾。
 
+## 9. 条目与清单用 slug / 无序列表，不用序号
+
+协作写入时，身份靠 slug，清单靠无序子弹，不靠 `0001`、`0002` 或正文有序列表的插入点。文件名是 `project_<slug>.md` 这类 snake_case，不是 `0001-...`。类型入口是脚本从 frontmatter 重算出来的子弹列表，不是人手维护的编号序列。
+
+多个 agent、多个 PR 同时往编号清单末尾加一项，就会抢下一个序号、互相改编号，diff 看起来像整表重排。无序子弹各插各的一行；独立 slug 文件各写各的路径。索引全量重算，入口文件里的顺序本来就不是协作身份。机制见 [memory-filesystem-tree.md](memory-filesystem-tree.md) 的「Markdown 是事实源」。
+
+这和 ADR 的 `docs/adr/0001-...` 不是一回事。ADR 是给人读的决策日志，序号是人类时间线；记忆条目是多 agent 并发插入的工作文件。不要把这边的无序号纪律套到 ADR 上，也不要反过来用 ADR 编号当记忆身份。
+
 ## 这些优点对应的代价
 
 便宜来自「白拿 harness、白拿目录、白拿 Git」，脆点也在同一批假设上：子树 `AGENTS.md` 的加载是 harness 行为，不是本仓库能保证的；下层索引缺独立事实源，所以要 doctor；常驻入口没有硬上限；结构正确不等于 description 能选路、内容仍然对。这些不是附录里的免责声明，是这套优点的另一面——展开见 [memory-filesystem-tree.md](memory-filesystem-tree.md) 的「当前边界」，以及 skill 层 [承重点与最脆三处](../../../extensions/skills/project-memory-init/.memory/projects/project_architecture.md)。
