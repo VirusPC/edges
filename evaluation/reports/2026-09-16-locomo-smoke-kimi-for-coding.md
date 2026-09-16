@@ -16,7 +16,7 @@ See [docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md](../../docs/adr/00
 | Mode | real (OpenAI-compatible API) |
 | Samples | 1 |
 | QA items | 10 |
-| Mean `kimi-for-coding_f1` | 0.000 |
+| Mean `kimi-for-coding_f1` | 0.625 |
 
 ## Reproduce
 
@@ -38,16 +38,16 @@ KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 python3 evaluati
 
 | sample_id | category | question | gold | prediction | F1 |
 | --- | --- | --- | --- | --- | --- |
-| conv-44 | 2 | Which year did Audrey adopt the first three of her dogs? | 2020 |  | 0.000 |
-| conv-44 | 2 | When did Andrew start his new job as a financial analyst? | The week before March 27, 2023 |  | 0.000 |
-| conv-44 | 1 | What kind of indoor activities has Andrew pursued with his girlfriend? | boardgames, volunteering at pet shelter, wine tasting, growing flowers |  | 0.000 |
-| conv-44 | 1 | What kind of places have Andrew and his girlfriend checked out around the city? | cafes, new places to eat, open space for hikes, pet shelter, wine tasting eve... |  | 0.000 |
-| conv-44 | 3 | What is an indoor activity that Andrew would enjoy doing while make his dog h... | cook dog treats |  | 0.000 |
-| conv-44 | 3 | Which meat does Audrey prefer eating more than others? | chicken |  | 0.000 |
-| conv-44 | 4 | Which specific type of bird mesmerizes Andrew? | Eagles |  | 0.000 |
-| conv-44 | 4 | What did Andrew express missing about exploring nature trails with his family... | The peaceful moments |  | 0.000 |
-| conv-44 | 5 | Which specific type of bird mesmerizes Audrey? | Eagles |  | 0.000 |
-| conv-44 | 5 | What kind of flowers does Andrew have a tattoo of? | sunflowers |  | 0.000 |
+| conv-44 | 2 | Which year did Audrey adopt the first three of her dogs? | 2020 | 2020 | 1.000 |
+| conv-44 | 2 | When did Andrew start his new job as a financial analyst? | The week before March 27, 2023 | last week (around March 20, 2023) | 0.545 |
+| conv-44 | 1 | What kind of indoor activities has Andrew pursued with his girlfriend? | boardgames, volunteering at pet shelter, wine tasting, growing flowers | playing board games | 0.000 |
+| conv-44 | 1 | What kind of places have Andrew and his girlfriend checked out around the city? | cafes, new places to eat, open space for hikes, pet shelter, wine tasting eve... | New places to eat around town. | 0.133 |
+| conv-44 | 3 | What is an indoor activity that Andrew would enjoy doing while make his dog h... | cook dog treats | playing board games | 0.000 |
+| conv-44 | 3 | Which meat does Audrey prefer eating more than others? | chicken | Chicken | 1.000 |
+| conv-44 | 4 | Which specific type of bird mesmerizes Andrew? | Eagles | Eagles | 1.000 |
+| conv-44 | 4 | What did Andrew express missing about exploring nature trails with his family... | The peaceful moments | the peaceful moments out in nature | 0.571 |
+| conv-44 | 5 | Which specific type of bird mesmerizes Audrey? | Eagles | Not mentioned in the conversation | 1.000 |
+| conv-44 | 5 | What kind of flowers does Andrew have a tattoo of? | sunflowers | Not mentioned in the conversation | 1.000 |
 
 ## What this is not
 

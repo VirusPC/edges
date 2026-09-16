@@ -36,6 +36,8 @@ python3 -m unittest discover -s evaluation/cases/locomo-smoke/tests -v
 
 ## Real kimi-for-coding baseline
 
+`kimi-for-coding` spends completion budget on `reasoning_content` first; keep `max_tokens` high enough (default 1024) or `message.content` can be empty.
+
 Upstream `evaluate_qa.py` only routes model names containing `gpt` / `claude` / `gemini` / selected HF ids. This wrapper feeds the cropped data-file, builds the official truncated-context prompt, calls an OpenAI-compatible Chat Completions endpoint, then scores with the upstream `eval_question_answering` rules.
 
 ```bash

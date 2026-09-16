@@ -9,8 +9,8 @@
           "D1:7"
         ],
         "category": 2,
-        "kimi-for-coding_prediction": "",
-        "kimi-for-coding_f1": 0.0
+        "kimi-for-coding_prediction": "2020",
+        "kimi-for-coding_f1": 1.0
       },
       {
         "question": "When did Andrew start his new job as a financial analyst?",
@@ -19,8 +19,8 @@
           "D1:2"
         ],
         "category": 2,
-        "kimi-for-coding_prediction": "",
-        "kimi-for-coding_f1": 0.0
+        "kimi-for-coding_prediction": "last week (around March 20, 2023)",
+        "kimi-for-coding_f1": 0.545
       },
       {
         "question": "What kind of indoor activities has Andrew pursued with his girlfriend?",
@@ -32,7 +32,7 @@
           "D19:15"
         ],
         "category": 1,
-        "kimi-for-coding_prediction": "",
+        "kimi-for-coding_prediction": "playing board games",
         "kimi-for-coding_f1": 0.0
       },
       {
@@ -49,8 +49,8 @@
           "D27:1"
         ],
         "category": 1,
-        "kimi-for-coding_prediction": "",
-        "kimi-for-coding_f1": 0.0
+        "kimi-for-coding_prediction": "New places to eat around town.",
+        "kimi-for-coding_f1": 0.133
       },
       {
         "question": "What is an indoor activity that Andrew would enjoy doing while make his dog happy?",
@@ -60,7 +60,7 @@
           "D12:1"
         ],
         "category": 3,
-        "kimi-for-coding_prediction": "",
+        "kimi-for-coding_prediction": "playing board games",
         "kimi-for-coding_f1": 0.0
       },
       {
@@ -71,8 +71,8 @@
           "D10:23"
         ],
         "category": 3,
-        "kimi-for-coding_prediction": "",
-        "kimi-for-coding_f1": 0.0
+        "kimi-for-coding_prediction": "Chicken",
+        "kimi-for-coding_f1": 1.0
       },
       {
         "question": "Which specific type of bird mesmerizes Andrew?",
@@ -81,8 +81,8 @@
           "D1:16"
         ],
         "category": 4,
-        "kimi-for-coding_prediction": "",
-        "kimi-for-coding_f1": 0.0
+        "kimi-for-coding_prediction": "Eagles",
+        "kimi-for-coding_f1": 1.0
       },
       {
         "question": "What did Andrew express missing about exploring nature trails with his family's dog?",
@@ -91,8 +91,8 @@
           "D2:18"
         ],
         "category": 4,
-        "kimi-for-coding_prediction": "",
-        "kimi-for-coding_f1": 0.0
+        "kimi-for-coding_prediction": "the peaceful moments out in nature",
+        "kimi-for-coding_f1": 0.571
       },
       {
         "question": "Which specific type of bird mesmerizes Audrey?",
@@ -101,8 +101,8 @@
         ],
         "category": 5,
         "adversarial_answer": "Eagles",
-        "kimi-for-coding_prediction": "",
-        "kimi-for-coding_f1": 0.0
+        "kimi-for-coding_prediction": "Not mentioned in the conversation",
+        "kimi-for-coding_f1": 1.0
       },
       {
         "question": "What kind of flowers does Andrew have a tattoo of?",
@@ -111,8 +111,8 @@
         ],
         "category": 5,
         "adversarial_answer": "sunflowers",
-        "kimi-for-coding_prediction": "",
-        "kimi-for-coding_f1": 0.0
+        "kimi-for-coding_prediction": "Not mentioned in the conversation",
+        "kimi-for-coding_f1": 1.0
       }
     ]
   }

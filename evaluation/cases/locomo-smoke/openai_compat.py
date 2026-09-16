@@ -33,7 +33,7 @@ def chat_complete(
     api_key: str,
     base_url: str,
     timeout: float = 120,
-    max_tokens: int = 64,
+    max_tokens: int = 1024,
 ) -> str:
     if not api_key:
         raise ValueError("missing API key: set KIMI_API_KEY or OPENAI_API_KEY")
