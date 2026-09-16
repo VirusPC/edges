@@ -9,7 +9,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-12T10:38:00+08:00"
+  edges-updated-at: "2026-09-16T15:15:00+08:00"
 ---
 
 edges 的 `knowledge/tasks` 机制能否、以及应如何与 GitHub 的机制（Issues / PRs / Projects）关联起来。
@@ -18,6 +18,9 @@ edges 的 `knowledge/tasks` 机制能否、以及应如何与 GitHub 的机制�
 看板已经是 Multica 式双层（Task 文件 = Issue，sidecar log = Run），实现侧又经常开 GitHub PR。两边若只靠聊天和手写 `edges-task-pr`，状态、指派、review 容易各走各的。关联不是为了再做一个同步器，而是让「仓内真源」和「GitHub 协作面」能对上号。
 
 GitHub Issue 相当于仓级「根目录」：一张平铺名单（label / milestone / 新的 parent-issue 只是软层级），对嵌套目录和 monorepo 不友好。仓内 Task 可以按状态夹、需求夹、包路径长在树上；Issue 做不到同构，所以不宜把 Issue 当成 Issue 层真源。
+
+**结论（2026-09-16）：**
+Project 分组（ADR 0009 / PR #69）已落地，**本条仍未做**，继续作为独立 backlog。分组解决的是仓内 `tasks/<project>/…` 组织；与 GitHub Issues/PR/Projects 的关联仍是另一维，不因 0009 自动完成。
 
 **How to apply:**
 - 先画对照，不要默认双向同步。候选：Task 文件 ↔ GitHub Issue；一次 Run / 实现 ↔ PR；`edges-tasks-status` ↔ Projects 列（或只单向投影）。
