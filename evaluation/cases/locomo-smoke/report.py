@@ -6,6 +6,7 @@ from statistics import mean
 from typing import Any
 
 from evaluate import f1_key
+from scoring import gold_answer
 
 
 def render_report(
@@ -29,7 +30,7 @@ def render_report(
             pred = qa.get(f"{model}_prediction", "")
             rows.append(
                 f"| {sample.get('sample_id')} | {qa.get('category')} | "
-                f"{_cell(qa.get('question'))} | {_cell(qa.get('answer'))} | "
+                f"{_cell(qa.get('question'))} | {_cell(gold_answer(qa))} | "
                 f"{_cell(pred)} | {score:.3f} |"
             )
 

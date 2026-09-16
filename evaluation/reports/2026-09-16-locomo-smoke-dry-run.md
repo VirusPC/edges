@@ -46,8 +46,8 @@ KIMI_API_KEY=... python3 evaluation/cases/locomo-smoke/run.py baseline
 | conv-44 | 3 | Which meat does Audrey prefer eating more than others? | chicken | DRY_RUN_PLACEHOLDER | 0.000 |
 | conv-44 | 4 | Which specific type of bird mesmerizes Andrew? | Eagles | DRY_RUN_PLACEHOLDER | 0.000 |
 | conv-44 | 4 | What did Andrew express missing about exploring nature trails with his family... | The peaceful moments | DRY_RUN_PLACEHOLDER | 0.000 |
-| conv-44 | 5 | Which specific type of bird mesmerizes Audrey? |  | DRY_RUN_PLACEHOLDER | 0.000 |
-| conv-44 | 5 | What kind of flowers does Andrew have a tattoo of? |  | DRY_RUN_PLACEHOLDER | 0.000 |
+| conv-44 | 5 | Which specific type of bird mesmerizes Audrey? | Eagles | DRY_RUN_PLACEHOLDER | 0.000 |
+| conv-44 | 5 | What kind of flowers does Andrew have a tattoo of? | sunflowers | DRY_RUN_PLACEHOLDER | 0.000 |
 
 ## What this is not
 

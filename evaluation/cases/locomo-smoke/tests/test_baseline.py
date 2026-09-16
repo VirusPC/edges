@@ -20,6 +20,8 @@ class BaselineTests(unittest.TestCase):
             self.assertEqual(api_key, "test-key")
             self.assertEqual(base_url, "https://api.kimi.com/coding/v1")
             self.assertIn("Andrew said", prompt)
+            if "Select the correct answer" in prompt:
+                return "(a)"
             return "No information available"
 
         out = live_evaluate(
@@ -35,8 +37,11 @@ class BaselineTests(unittest.TestCase):
         pred = prediction_key("kimi-for-coding")
         score = f1_key("kimi-for-coding")
         for qa in out[0]["qa"]:
-            self.assertEqual(qa[pred], "No information available")
             self.assertIn(score, qa)
+            if qa["category"] == 5:
+                self.assertEqual(qa[pred], "Not mentioned in the conversation")
+            else:
+                self.assertEqual(qa[pred], "No information available")
         cat5 = [qa[score] for qa in out[0]["qa"] if qa["category"] == 5]
         self.assertEqual(cat5, [1.0, 1.0])
 

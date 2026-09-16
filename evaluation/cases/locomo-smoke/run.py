@@ -112,7 +112,10 @@ def _add_io_flags(parser: argparse.ArgumentParser) -> None:
 
 
 def _load_or_crop(args: argparse.Namespace) -> list[dict]:
-    source = load_locomo(args.data_file, cache_path=args.cache_file)
+    data_file = args.data_file
+    if data_file is None and Path(args.cropped_file).is_file():
+        data_file = args.cropped_file
+    source = load_locomo(data_file, cache_path=args.cache_file)
     if (
         len(source) == 1
         and source[0].get("sample_id") == SAMPLE_ID

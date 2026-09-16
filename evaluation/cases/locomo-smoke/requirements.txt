@@ -1,2 +1,4 @@
-# Smoke harness is stdlib-only. nltk is optional and matches upstream
-# Porter stemming when present (`pip install nltk==3.8.1`).
+# Dummy dry-run is stdlib-only.
+# Optional, only if you want real-run F1 to use the same Porter stemmer
+# as snap-research/locomo task_eval/evaluation.py:
+# nltk==3.8.1

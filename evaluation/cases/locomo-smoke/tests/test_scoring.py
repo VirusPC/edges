@@ -4,7 +4,7 @@ import unittest
 
 from support import CASE_DIR  # noqa: F401  # puts case dir on sys.path
 
-from scoring import eval_question_answering, f1_score
+from scoring import eval_question_answering, f1_score, gold_answer
 
 
 class ScoringTests(unittest.TestCase):
@@ -31,6 +31,12 @@ class ScoringTests(unittest.TestCase):
         scores, _lens, recall = eval_question_answering(qas, "dummy_prediction")
         self.assertEqual(scores, [1, 0])
         self.assertEqual(recall, [1, 1])
+
+    def test_gold_answer_falls_back_to_adversarial_answer(self) -> None:
+        self.assertEqual(
+            gold_answer({"category": 5, "adversarial_answer": "Eagles"}),
+            "Eagles",
+        )
 
     def test_category_2_uses_single_span_f1(self) -> None:
         qas = [

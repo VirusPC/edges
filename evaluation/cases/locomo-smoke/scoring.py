@@ -11,7 +11,17 @@ import re
 import string
 from collections import Counter
 
-__all__ = ["eval_question_answering", "f1", "f1_score", "normalize_answer"]
+__all__ = ["eval_question_answering", "f1", "f1_score", "gold_answer", "normalize_answer"]
+
+
+def gold_answer(qa: dict) -> str:
+    """locomo10 cat-5 items store the foil in `adversarial_answer`, not `answer`."""
+
+    if "answer" in qa and qa["answer"] not in (None, ""):
+        return str(qa["answer"])
+    if qa.get("adversarial_answer") not in (None, ""):
+        return str(qa["adversarial_answer"])
+    return ""
 
 
 def normalize_answer(text: str) -> str:
@@ -59,7 +69,7 @@ def eval_question_answering(
     all_ems: list[float] = []
     all_recall: list[float] = []
     for index, line in enumerate(qas):
-        raw_answer = line["answer"] if "answer" in line else line.get("adversarial_answer", "")
+        raw_answer = gold_answer(line)
         answer = raw_answer if isinstance(line[eval_key], list) else str(raw_answer)
         if line["category"] == 3:
             answer = answer.split(";")[0].strip()

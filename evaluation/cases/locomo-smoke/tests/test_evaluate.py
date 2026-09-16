@@ -27,7 +27,7 @@ class DryRunEvaluateTests(unittest.TestCase):
             self.assertIn(score, qa)
             self.assertIsInstance(qa[score], float)
             self.assertIn("question", qa)
-            self.assertIn("answer", qa)
+            self.assertTrue("answer" in qa or "adversarial_answer" in qa)
             self.assertIn("category", qa)
 
     def test_does_not_call_network(self) -> None:

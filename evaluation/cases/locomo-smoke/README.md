@@ -12,7 +12,9 @@ Decision: [`docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`](../../../
 - QA: categories `1..5`; for each category take the **first 2 QA items in file order**. If a category has fewer than 2, take all of them.
 - This run: **truncated-context baseline only** (no RAG).
 
-`locomo10.json` is fetched from the pinned upstream commit `3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376` (or pass `--data-file` to a local copy). Full source is cached under `evaluation/.cache/` (gitignored). The crop keeps `sample_id` + `conversation` + selected `qa` and drops observation / summaries.
+Default `dry-run` / `baseline` reuse the committed crop at `data/locomo10-conv44-smoke.json` (offline). To rebuild it, pass `--data-file` to a local `locomo10.json` or delete the crop so the runner fetches the pinned upstream commit `3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376`. Full source is cached under `evaluation/.cache/` (gitignored). The crop keeps `sample_id` + `conversation` + selected `qa` and drops observation / summaries. Category 5 gold in locomo10 is `adversarial_answer`.
+
+Scoring is a stdlib port of upstream `eval_question_answering`. If `nltk` is installed it uses the same `PorterStemmer` as official locomo; otherwise an in-tree stemmer is used. Dummy dry-run F1 is 0 regardless. For a real run whose F1 you want to compare to `evaluate_qa.py`, `pip install nltk==3.8.1`.
 
 ## Dummy dry-run (no API)
 

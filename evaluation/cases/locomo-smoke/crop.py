@@ -78,5 +78,5 @@ def write_json(path: str | Path, payload: Any) -> Path:
 
 def _download(url: str, dest: Path) -> None:
     request = urllib.request.Request(url, headers={"User-Agent": "edges-locomo-smoke"})
-    with urllib.request.urlopen(request) as response:
+    with urllib.request.urlopen(request, timeout=60) as response:
         dest.write_bytes(response.read())

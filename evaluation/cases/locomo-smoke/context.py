@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from scoring import gold_answer
+
 CONV_START_PROMPT = (
     "Below is a conversation between two people: {} and {}. The conversation "
     "takes place over multiple days and the date of each conversation is "
@@ -90,11 +92,21 @@ def build_question_prompt(qa: dict[str, Any]) -> str:
     if qa.get("category") == 2:
         question = question + " Use DATE of CONVERSATION to answer with an approximate date."
     elif qa.get("category") == 5:
+        foil = gold_answer(qa) or "the stated option"
         question = (
             question
             + " Select the correct answer: (a) Not mentioned in the conversation (b) "
-            + str(qa.get("answer") or "the stated option")
+            + foil
             + "."
         )
         return QA_PROMPT_CAT_5.format(question)
     return QA_PROMPT.format(question)
+
+
+def map_cat5_prediction(prediction: str) -> str:
+    """Map (a)/(b) letters to official unanswerable phrasing. (a) is always the foil-reject option."""
+
+    text = prediction.strip().lower()
+    if text in {"a", "(a)", "a.", "(a)."} or text.startswith("(a)"):
+        return "Not mentioned in the conversation"
+    return prediction.strip()
