@@ -46,10 +46,10 @@ Optional env / flags:
 
 | Name | Default |
 | --- | --- |
-| `KIMI_API_KEY` or `OPENAI_API_KEY` | required for real run |
+| `KIMI_API_KEY` or `OPENAI_API_KEY` | required for real run (Bearer from **Kimi Code Console** membership, not Moonshot pay-as-you-go) |
 | `OPENAI_BASE_URL` | `https://api.kimi.com/coding/v1` |
 | `LOCOMO_MODEL` / `--model` | `kimi-for-coding` |
-| `--data-file` | fetch pinned `locomo10.json` into `evaluation/.cache/` |
+| `--data-file` | committed crop; omit to stay offline |
 | `--date` | `2026-09-16` |
 
-Do not put the API key in the repo.
+This is the Kimi Code (token plan) OpenAI-compatible endpoint. It is **not** Moonshot pay-as-you-go `https://api.moonshot.ai/v1` / `https://api.moonshot.cn/v1` (different product, different key). Do not put the API key in the repo.

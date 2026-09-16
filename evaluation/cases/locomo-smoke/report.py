@@ -70,7 +70,7 @@ Real kimi-for-coding run (key via env, never commit the key):
 {real_command}
 ```
 
-`KIMI_API_KEY` or `OPENAI_API_KEY` is required for the real run. `OPENAI_BASE_URL` defaults to `https://api.kimi.com/coding/v1` (Kimi Code OpenAI-compatible Chat Completions). Override the model with `--model` / `LOCOMO_MODEL`.
+`KIMI_API_KEY` or `OPENAI_API_KEY` is required for the real run (Kimi Code Console Bearer key, not a Moonshot pay-as-you-go key). `OPENAI_BASE_URL` defaults to `https://api.kimi.com/coding/v1`. Do not use `api.moonshot.ai` / `api.moonshot.cn` for `kimi-for-coding`. Override the model with `--model` / `LOCOMO_MODEL`.
 
 ## Per-question scores
 

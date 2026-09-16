@@ -17,6 +17,7 @@ DRY_RUN_MODEL = "dummy"
 DRY_RUN_ANSWER = "DRY_RUN_PLACEHOLDER"
 
 DEFAULT_MODEL = "kimi-for-coding"
+# Kimi Code Console (token plan), not Moonshot pay-as-you-go api.moonshot.ai.
 DEFAULT_BASE_URL = "https://api.kimi.com/coding/v1"
 
 # Official evaluate_qa.py only routes names containing gpt/claude/gemini/hf.
