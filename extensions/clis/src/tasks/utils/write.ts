@@ -105,16 +105,31 @@ export async function createTask(
 export async function updateTask(
   repoPath: string,
   target: string,
-  patch: { title?: string; description?: string; body?: string; assignee?: string; priority?: string },
+  patch: {
+    title?: string;
+    description?: string;
+    body?: string;
+    assignee?: string;
+    priority?: string;
+    project?: string;
+  },
   io: { fs: BoardWriter; now: Date },
-): Promise<{ stem: string; path: string; priority: TaskPriority }> {
-  if (!patch.title && !patch.description && !patch.body && !patch.assignee && patch.priority === undefined) {
+): Promise<{ stem: string; path: string; priority: TaskPriority; project: TaskProjectId }> {
+  if (
+    !patch.title &&
+    !patch.description &&
+    !patch.body &&
+    !patch.assignee &&
+    patch.priority === undefined &&
+    patch.project === undefined
+  ) {
     throw new TasksError(
       "VALIDATION_ERROR",
-      "update requires at least one of --title, --description, --body, --assignee, --priority",
+      "update requires at least one of --title, --description, --body, --assignee, --priority, --project",
     );
   }
   const parsedPriority = patch.priority === undefined ? undefined : parseTaskPriority(patch.priority);
+  const parsedProject = patch.project === undefined ? undefined : parseTaskProject(patch.project);
   const record = await getTask(repoPath, target, io.fs);
   let markdown = await io.fs.readFile(path.join(repoPath, record.path));
   if (patch.title !== undefined) {
@@ -132,11 +147,37 @@ export async function updateTask(
   if (parsedPriority !== undefined) {
     markdown = setMetadataField(markdown, "edges-task-priority", parsedPriority);
   }
+  if (parsedProject !== undefined) {
+    markdown = setMetadataField(markdown, "edges-task-project", parsedProject);
+  }
   markdown = setMetadataField(markdown, "edges-updated-at", io.now.toISOString());
-  await io.fs.writeFile(path.join(repoPath, record.path), markdown);
+
+  let destRel = record.path;
+  if (parsedProject !== undefined) {
+    destRel = taskRelPath(parsedProject, record.status, record.stem);
+    const destSidecarRel = sidecarRelPath(parsedProject, record.status, record.stem);
+    if (destRel !== record.path) {
+      if (await io.fs.exists(path.join(repoPath, destRel))) {
+        throw new TasksError("BOARD_IO_ERROR", `destination already exists: ${destRel}`);
+      }
+      await io.fs.mkdirp(statusDir(repoPath, parsedProject, record.status));
+      await io.fs.writeFile(path.join(repoPath, destRel), markdown);
+      const sourceSidecarAbs = path.join(repoPath, record.sidecarPath);
+      if (await io.fs.exists(sourceSidecarAbs)) {
+        await io.fs.rename(sourceSidecarAbs, path.join(repoPath, destSidecarRel));
+      }
+      await io.fs.unlink(path.join(repoPath, record.path));
+    } else {
+      await io.fs.writeFile(path.join(repoPath, record.path), markdown);
+    }
+  } else {
+    await io.fs.writeFile(path.join(repoPath, record.path), markdown);
+  }
+
   return {
     stem: record.stem,
-    path: record.path,
+    path: destRel,
     priority: parsedPriority ?? record.priority,
+    project: parsedProject ?? record.project,
   };
 }

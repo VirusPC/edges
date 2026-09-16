@@ -119,6 +119,12 @@ test("run tasks create --project in_progress is VALIDATION_ERROR", async () => {
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
+test("run tasks update --project Default is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "update", "stem", "--project", "Default"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
 test("run tasks --help is help and lists subcommands", async () => {
   const result = await run(["tasks", "--help"]);
   assert.equal(result.exitCode, 0);

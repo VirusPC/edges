@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { access, mkdtemp, mkdir, readFile, readdir, rm } from "node:fs/promises";
+import { access, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createTask, updateTask } from "../../../src/tasks/utils/write.js";
@@ -232,6 +232,110 @@ test("createTask --project in_progress is VALIDATION_ERROR and writes nothing", 
     const names = await readdir(root).catch(() => []);
     assert.equal(names.filter((name) => name !== "_default").length, names.includes("_default") ? names.length - 1 : names.length);
     assert.equal(names.includes("in_progress"), false);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("updateTask --project cli moves Task + sidecar and dual-writes", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const created = await createTask(
+      repo,
+      { title: "Move me", status: "todo", priority: "high" },
+      { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) },
+    );
+    const updated = await updateTask(
+      repo,
+      created.stem,
+      { project: "cli" },
+      { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 13, 0, 0) },
+    );
+    assert.equal(updated.project, "cli");
+    assert.equal(updated.path, "knowledge/tasks/cli/todo/2026-09-16--Move-me.md");
+    const md = await readFile(path.join(repo, updated.path), "utf8");
+    assert.match(md, /edges-task-project: cli/);
+    assert.match(md, /edges-tasks-status: todo/);
+    assert.match(md, /edges-task-priority: high/);
+    await access(path.join(repo, "knowledge/tasks/cli/todo/.2026-09-16--Move-me.log.md"));
+    await assert.rejects(access(path.join(repo, created.path)));
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("updateTask --project default writes the field and does not require other flags", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const created = await createTask(
+      repo,
+      { title: "Home", status: "in_progress", project: "cli" },
+      { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) },
+    );
+    const updated = await updateTask(
+      repo,
+      created.stem,
+      { project: "default" },
+      { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 13, 0, 0) },
+    );
+    assert.equal(updated.project, "default");
+    assert.equal(updated.path, "knowledge/tasks/_default/in_progress/2026-09-16--Home.md");
+    const md = await readFile(path.join(repo, updated.path), "utf8");
+    assert.match(md, /edges-task-project: default/);
+    assert.match(md, /edges-tasks-status: in_progress/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("updateTask --project in_progress is VALIDATION_ERROR and does not move", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const created = await createTask(
+      repo,
+      { title: "Stay", status: "todo" },
+      { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) },
+    );
+    await assert.rejects(
+      () =>
+        updateTask(
+          repo,
+          created.stem,
+          { project: "in_progress" },
+          { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 13, 0, 0) },
+        ),
+      (error: unknown) => (error as { errorCode: string }).errorCode === "VALIDATION_ERROR",
+    );
+    await access(path.join(repo, created.path));
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("updateTask --project dest-exists is BOARD_IO_ERROR and does not move", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const io = { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) };
+    const mover = await createTask(
+      repo,
+      { title: "Mover", status: "todo" },
+      io,
+    );
+    const destRel = `knowledge/tasks/cli/todo/${mover.stem}.md`;
+    await mkdir(path.dirname(path.join(repo, destRel)), { recursive: true });
+    await writeFile(path.join(repo, destRel), "blocker\n", "utf8");
+    await assert.rejects(
+      () =>
+        updateTask(
+          repo,
+          mover.path,
+          { project: "cli" },
+          { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 13, 0, 0) },
+        ),
+      (error: unknown) => (error as { errorCode: string }).errorCode === "BOARD_IO_ERROR",
+    );
+    await access(path.join(repo, mover.path));
+    await access(path.join(repo, destRel));
   } finally {
     await rm(repo, { recursive: true, force: true });
   }

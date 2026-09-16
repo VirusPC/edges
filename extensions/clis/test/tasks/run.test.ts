@@ -227,6 +227,29 @@ test("run tasks update --priority Urgent is VALIDATION_ERROR", async () => {
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
+test("run tasks update --project cli JSON and new path", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const env = { ...process.env, EDGES_REPO: repo };
+    const created = await run(["tasks", "create", "--title", "Go", "--status", "todo"], { env });
+    const stem = JSON.parse(created.stdout).stem as string;
+    const updated = await run(["tasks", "update", stem, "--project", "cli"], { env });
+    assert.equal(updated.exitCode, 0);
+    const body = JSON.parse(updated.stdout) as { command: string; project: string; path: string };
+    assert.equal(body.command, "update");
+    assert.equal(body.project, "cli");
+    assert.equal(body.path, `knowledge/tasks/cli/todo/${stem}.md`);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks update --project Default is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "update", "stem", "--project", "Default"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
 test("run tasks status returns command status", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
