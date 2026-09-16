@@ -4,6 +4,7 @@ import { renderNewTaskDoc, replaceBody, setMetadataField, setTopLevelField } fro
 import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
 import { newTaskStem, taskNameSlug } from "./slug.js";
 import { parseTaskPriority } from "./priority.js";
+import { parseTaskProject } from "./project.js";
 import { DEFAULT_TASK_PROJECT, TASK_STATUSES, TasksError, type TaskPriority, type TaskProjectId, type TaskStatus } from "./types.js";
 
 export type { BoardWriter };
@@ -16,7 +17,7 @@ export type TasksCreateInput = {
   name?: string;
   assignee?: string;
   priority?: string;
-  project?: TaskProjectId;
+  project?: string;
 };
 
 export function emptyRunLog(stem: string): string {
@@ -78,8 +79,8 @@ export async function createTask(
   repoPath: string,
   input: TasksCreateInput,
   io: { fs: BoardWriter; now: Date },
-): Promise<{ stem: string; path: string; sidecarPath: string; priority: TaskPriority }> {
-  const project = input.project ?? DEFAULT_TASK_PROJECT;
+): Promise<{ stem: string; path: string; sidecarPath: string; priority: TaskPriority; project: TaskProjectId }> {
+  const project = input.project === undefined ? DEFAULT_TASK_PROJECT : parseTaskProject(input.project);
   const priority = input.priority === undefined ? "none" : parseTaskPriority(input.priority);
   await io.fs.mkdirp(statusDir(repoPath, project, input.status));
   const stem = await uniqueStem(repoPath, project, input.status, newTaskStem(input.title, io.now), io.fs);
@@ -90,6 +91,7 @@ export async function createTask(
     description: input.description ?? input.title,
     title: input.title,
     status: input.status,
+    project,
     priority,
     assignee: input.assignee,
     updatedAt: io.now.toISOString(),
@@ -97,7 +99,7 @@ export async function createTask(
   });
   await io.fs.writeFile(path.join(repoPath, rel), markdown);
   await io.fs.writeFile(path.join(repoPath, sidecarRel), emptyRunLog(stem));
-  return { stem, path: rel, sidecarPath: sidecarRel, priority };
+  return { stem, path: rel, sidecarPath: sidecarRel, priority, project };
 }
 
 export async function updateTask(

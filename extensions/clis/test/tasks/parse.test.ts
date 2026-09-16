@@ -107,6 +107,18 @@ test("run tasks create --priority P0 is VALIDATION_ERROR", async () => {
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
+test("run tasks create --project Default is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "create", "--title", "Pri", "--project", "Default"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
+test("run tasks create --project in_progress is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "create", "--title", "Pri", "--project", "in_progress"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
 test("run tasks --help is help and lists subcommands", async () => {
   const result = await run(["tasks", "--help"]);
   assert.equal(result.exitCode, 0);

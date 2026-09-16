@@ -112,11 +112,56 @@ test("run tasks create --priority high returns JSON priority and writes the fiel
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(["tasks", "create", "--title", "Pri", "--priority", "high"], { env });
     assert.equal(created.exitCode, 0);
-    const body = JSON.parse(created.stdout) as { command: string; priority: string; path: string };
+    const body = JSON.parse(created.stdout) as { command: string; priority: string; project: string; path: string };
     assert.equal(body.command, "create");
     assert.equal(body.priority, "high");
+    assert.equal(body.project, "default");
+    assert.match(body.path, /knowledge\/tasks\/_default\/backlog\//);
     const md = await readFile(path.join(repo, body.path), "utf8");
     assert.match(md, /edges-task-priority: high/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks create --project cli returns JSON project and writes the field", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const env = { ...process.env, EDGES_REPO: repo };
+    const created = await run(["tasks", "create", "--title", "Pri", "--project", "cli"], { env });
+    assert.equal(created.exitCode, 0);
+    const body = JSON.parse(created.stdout) as { command: string; project: string; path: string };
+    assert.equal(body.command, "create");
+    assert.equal(body.project, "cli");
+    const md = await readFile(path.join(repo, body.path), "utf8");
+    assert.match(md, /edges-task-project: cli/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks create --project _default is VALIDATION_ERROR and writes nothing", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const result = await run(["tasks", "create", "--title", "Pri", "--project", "_default"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(result.exitCode, 2);
+    assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks create without --project JSON project is default", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const result = await run(["tasks", "create", "--title", "None"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(result.exitCode, 0);
+    assert.equal(JSON.parse(result.stdout).project, "default");
+    assert.match(JSON.parse(result.stdout).path, /knowledge\/tasks\/_default\/backlog\//);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }

@@ -180,6 +180,63 @@ test("updateTask --priority none writes the field and does not require other fla
   }
 });
 
+test("createTask omits edges-task-project on disk and returns project default", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const created = await createTask(
+      repo,
+      { title: "No Proj", status: "backlog" },
+      { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) },
+    );
+    assert.equal(created.project, "default");
+    assert.equal(created.path, "knowledge/tasks/_default/backlog/2026-09-16--No-Proj.md");
+    const md = await readFile(path.join(repo, created.path), "utf8");
+    assert.doesNotMatch(md, /edges-task-project/);
+    assert.match(md, /edges-tasks-status: backlog/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("createTask --project cli writes field and named directory", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const created = await createTask(
+      repo,
+      { title: "Named", status: "todo", project: "cli" },
+      { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) },
+    );
+    assert.equal(created.project, "cli");
+    assert.equal(created.path, "knowledge/tasks/cli/todo/2026-09-16--Named.md");
+    const md = await readFile(path.join(repo, created.path), "utf8");
+    assert.match(md, /edges-task-project: cli/);
+    await access(path.join(repo, created.sidecarPath));
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("createTask --project in_progress is VALIDATION_ERROR and writes nothing", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    await assert.rejects(
+      () =>
+        createTask(
+          repo,
+          { title: "Bad", status: "backlog", project: "in_progress" },
+          { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) },
+        ),
+      (error: unknown) => (error as { errorCode: string }).errorCode === "VALIDATION_ERROR",
+    );
+    const root = path.join(repo, "knowledge/tasks");
+    const names = await readdir(root).catch(() => []);
+    assert.equal(names.filter((name) => name !== "_default").length, names.includes("_default") ? names.length - 1 : names.length);
+    assert.equal(names.includes("in_progress"), false);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
 test("updateTask rejects P0 and leaves the file unchanged", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
