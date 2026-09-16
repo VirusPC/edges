@@ -10,7 +10,7 @@
 
 | Multica | 本仓库 | 落点 |
 | --- | --- | --- |
-| **Issue**（工作项本身，一个状态） | **Task 文件**（`*.md`） | `knowledge/tasks/<edges-tasks-status>/` |
+| **Issue**（工作项本身，一个状态） | **Task 文件**（`*.md`） | `knowledge/tasks/<project-slug>/<edges-tasks-status>/` |
 | Issue 状态 | `metadata.edges-tasks-status` | 与所在子目录名一致 |
 | **Run / 执行任务**（一次执行尝试，可 1:N） | **Task Run Log** | 同目录 sidecar `.{stem}.log.md` |
 | Run 状态 | log 表里的 `status` 列 | `pending` \| `running` \| `completed` \| `failed` \| `cancelled` |
@@ -30,6 +30,10 @@
 - 新人侧捕获默认落入 `backlog/`。
 - **派发默认**：执行方先 `grill-with-docs`（CONTEXT / ADR），过关后再实现；用户当次明确跳过除外。
 - 改状态时：更新 frontmatter 的 `edges-tasks-status`，并把文件（及同 stem 的 `.*.log.md`）移到对应子目录。
+
+## Issue 层 Task Project
+
+看板分组单位是 Task Project：directory-first，路径 `knowledge/tasks/<project-slug>/<edges-tasks-status>/`，并与 frontmatter `metadata.edges-task-project` 双写。未分组用保留目录 `_default`（字段为 `default` 或不写）。与 `edges-tasks-status`、`edges-task-priority` 正交。`status` 只在同一 project 内搬家；跨 project 用 `update --project`。详见 `docs/adr/0009-edges-task-project-grouping.md`。
 
 ## Issue 层优先级
 

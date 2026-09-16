@@ -64,10 +64,10 @@ Same optional gate as MCP HTTP. If `EDGES_AUTH_TOKEN` is set, present it with `-
 Board root is `<EDGES_REPO>/knowledge/tasks/`. Writes are filesystem-only (no git). Cancel with `status cancelled`. There is no `delete` command and no top-level `log` verb.
 
 ```
-edges tasks list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--sort priority]
+edges tasks list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority]
 edges tasks get <stem|path>
-edges tasks create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority]
-edges tasks update <stem|path> [--title] [--description] [--body] [--assignee] [--priority]
+edges tasks create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project]
+edges tasks update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project]
 edges tasks status <stem|path> <edges-tasks-status>
 edges tasks runs <stem|path> [--output table|json]
 edges tasks run-messages <run-id> [--task <stem>] [--output table|json]

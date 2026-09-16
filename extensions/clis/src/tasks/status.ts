@@ -12,7 +12,7 @@ ARGUMENTS
 FLAGS
   --json  Write JSON to stdout (always on)
 
-Moves the Task file and its sidecar. Moves inside the same Task Project. Reassign with: edges tasks update <stem> --project <slug>. Cancel with: cancelled. There is no delete command.
+Moves the Task file and its sidecar. Moves inside the same Task Project. Reassign across projects with edges tasks update (not status). Cancel with: cancelled. There is no delete command.
 
 EXAMPLES
   edges tasks status 2026-09-11--cli in_progress

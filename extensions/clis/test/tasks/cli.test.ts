@@ -12,6 +12,23 @@ test("tasks help lists seven verbs and omits delete/log", async () => {
   assert.doesNotMatch(result.stdout, /^\s+log\b/m);
 });
 
+test("tasks help documents project on list create update and not on status", async () => {
+  const root = await run(["tasks", "--help"]);
+  assert.match(root.stdout, /--project/);
+
+  const list = await run(["tasks", "list", "--help"]);
+  assert.match(list.stdout, /--project/);
+
+  const create = await run(["tasks", "create", "--help"]);
+  assert.match(create.stdout, /--project/);
+
+  const update = await run(["tasks", "update", "--help"]);
+  assert.match(update.stdout, /--project/);
+
+  const status = await run(["tasks", "status", "--help"]);
+  assert.doesNotMatch(status.stdout, /--project/);
+});
+
 test("tasks help documents priority on list create update and not on status", async () => {
   const root = await run(["tasks", "--help"]);
   assert.match(root.stdout, /--priority/);

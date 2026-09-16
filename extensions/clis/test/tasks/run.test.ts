@@ -36,6 +36,30 @@ x
     assert.equal(body.command, "list");
     assert.equal(body.tasks[0]?.stem, "2026-09-13--listed");
     assert.equal(body.tasks[0]?.priority, "none");
+    assert.equal(body.tasks[0]?.project, "default");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("run tasks list --project default --project cli ANDs with --status", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const env = { ...process.env, EDGES_REPO: repo };
+    await run(["tasks", "create", "--title", "A", "--status", "backlog"], { env });
+    await run(["tasks", "create", "--title", "B", "--status", "todo", "--project", "cli"], { env });
+    await run(["tasks", "create", "--title", "C", "--status", "todo", "--project", "docs"], { env });
+    const result = await run(
+      ["tasks", "list", "--status", "todo", "--project", "default", "--project", "cli"],
+      { env },
+    );
+    assert.equal(result.exitCode, 0);
+    const body = JSON.parse(result.stdout) as { tasks: Array<{ project: string; stem: string }> };
+    assert.deepEqual(
+      body.tasks.map((task) => task.project),
+      ["cli"],
+    );
+    assert.ok(body.tasks.every((task) => task.project !== undefined));
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
