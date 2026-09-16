@@ -206,6 +206,25 @@ multi-hop 是**唯一小 k 检索反而帮倒忙、且随 k 单调变好**的题
 
 **一句话**：LoCoMo 的**诊断性结论**（时间推理难、存储粒度重要、信噪比重要）全部活下来成为行业共识；**量化结论**（人机差距、长上下文无用、F1 分数）几乎全部过期——不是论文做错了，而是它测的是 2024 年的模型，"9K token 算长"这个前提本身易腐。
 
+## 补充：过程中产生/消费 vs 事后静态库（2026-09-16）
+
+> 来源：peng cheng 在 grill / 论文深读讨论中的构念澄清。本条是设计与读论文笔记，**不是**实现 PR；四臂 exploratory 仍暂停。
+
+真实 agent 记忆是在对话**过程中**交替产生与消费的：一边写（observation / session 摘要 / 项目记忆），一边立刻用（下一轮、下一问）。写入与使用交织，而不是先把整段历史封存、对话结束后再翻库。
+
+LoCoMo **只部分碰到**这条回路，不宜读成「做错了」，而是对**在线记忆系统**的构念错位：
+
+- **数据生成（在线产生）**：Park 式生成式智能体按 session 抽 observation、滚摘要，对话一边发生一边往长期记忆写——这是 online produce。
+- **QA 评测（事后消费）**：官方设定通常把**已经结束的整段对话**（或整份 observation 语料）当成静态库，再做截断上下文或 RAG。消费发生在对话结束之后。测的是长历史事实检索，不是「写完立刻用」的在线记忆环。
+
+上一条附录已写过：写入策略被冻结，单一 F1 把写入质量、检索、阅读裹在一起。本条补的是**时间轴**：产生是在线的，官方消费却是事后的。因此官方 RAG / 截断基线回答的是「给定已建好的库，事后能不能取回」，**不等于** Project Memory / PM-online 的 write→use 交织。
+
+对 Edges 的含义：
+
+- 官方冒烟的 RAG / 截断分数仍按 ADR 0008：Evaluation Smoke ≠ Benchmark Proof，更不是 PM proof。
+- 若以后评 Project Memory 或 online write→recall，必须加**因果 / session 顺序约束**。例如：用 session ≤k 的证据答题时，只允许读到写到 session k 为止的记忆；或沿时间线真正交错 write/answer——禁止偷看未来 session。
+- 四臂 exploratory（baseline｜官方 RAG｜PM-online｜empty）仍 paused；本条不恢复实现。
+
 ---
 
 参考笔记：同目录《记忆Benchmark笔记-LongMemEval与LoCoMo.md》（构念效度对照视角）；全部事实性数字以论文原文 §1–§8 及附录 Table 5 核对。
