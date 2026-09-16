@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""LoCoMo Evaluation Smoke runner (truncated-context baseline)."""
+"""Legacy LoCoMo Evaluation Smoke runner (hand-port, truncated-context baseline).
+
+Preferred official path: ``evaluation/run_locomo_official.py`` (VirusPC/locomo
+submodule → ``task_eval/evaluate_qa.py`` → official ``evaluation.py`` F1).
+"""
 
 from __future__ import annotations
 

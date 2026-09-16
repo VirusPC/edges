@@ -31,8 +31,52 @@
 
 先有真实用例再往下加目录，不要预埋空数据文件。
 
-- [`cases/`](cases/README.md)：用例与 benchmark 定义（现有 [`cases/locomo-smoke/`](cases/locomo-smoke/README.md)）
+- [`run_locomo_official.py`](run_locomo_official.py)：首选官方路径（VirusPC/locomo submodule → `task_eval/evaluate_qa.py` → official `evaluation.py` F1）
+- [`third_party/`](third_party/README.md)：评测用 git submodule（现有 [`third_party/locomo/`](third_party/locomo/)）
+- [`cases/`](cases/README.md)：用例与 benchmark 定义（[`cases/locomo-smoke/`](cases/locomo-smoke/README.md) 是历史 hand-port，legacy）
 - [`reports/`](reports/README.md)：某次运行的报告
 - 本 README
 
-LoCoMo 冒烟是 Evaluation Smoke，不是 Benchmark Proof。见 [`docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`](../docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md)。
+LoCoMo 冒烟是 Evaluation Smoke，不是 Benchmark Proof，也不是 Project Memory proof。见 [`docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`](../docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md)。
+
+## Clone with the LoCoMo submodule
+
+```bash
+git clone --recurse-submodules https://github.com/VirusPC/edges.git
+```
+
+Already cloned without the submodule:
+
+```bash
+git submodule update --init evaluation/third_party/locomo
+```
+
+## Preferred official-path smoke
+
+Print the official `evaluate_qa.py` command (no API key; safe in CI):
+
+```bash
+python3 evaluation/run_locomo_official.py print-command
+```
+
+Live conv-44 / 2 QA per category / `kimi-for-coding` run (key via env, never commit the key):
+
+```bash
+pip install -r evaluation/third_party/locomo/requirements-openai-compat.txt
+KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 \
+  python3 evaluation/run_locomo_official.py smoke
+```
+
+Optional official crop (keeps `observation` / `session_summary` / `event_summary` for later RAG; default out-file is gitignored under `evaluation/.cache/`):
+
+```bash
+python3 evaluation/run_locomo_official.py crop
+```
+
+Reports go to [`reports/`](reports/README.md) with titles that say **Evaluation Smoke / not Project Memory proof**. F1 is official `task_eval/evaluation.py`, not the hand-port in `cases/locomo-smoke/scoring.py`.
+
+Official-path tests (no API key):
+
+```bash
+python3 -m unittest discover -s evaluation/tests -v
+```

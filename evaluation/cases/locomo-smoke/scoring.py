@@ -1,4 +1,9 @@
-"""Upstream-compatible LoCoMo QA scoring.
+"""Legacy hand-port of LoCoMo QA scoring.
+
+**Legacy / port.** New Evaluation Smoke runs should score via the VirusPC/locomo
+submodule: `evaluation/run_locomo_official.py` → `task_eval/evaluate_qa.py` →
+official `task_eval/evaluation.py`. This module stays so PR #70 reports and
+`cases/locomo-smoke` tests remain reproducible.
 
 Faithful port of snap-research/locomo `task_eval/evaluation.py` helpers used by
 `eval_question_answering` (F1 / category-5 unanswerable check). Unused imports
