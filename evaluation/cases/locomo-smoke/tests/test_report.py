@@ -18,7 +18,10 @@ class ReportTests(unittest.TestCase):
             model=DRY_RUN_MODEL,
             subset="conv-44; first 2 QA per category 1-5 in file order",
             command="python3 evaluation/cases/locomo-smoke/run.py dry-run",
-            real_command="KIMI_API_KEY=... python3 evaluation/cases/locomo-smoke/run.py baseline",
+            real_command=(
+                "KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 "
+                "python3 evaluation/cases/locomo-smoke/run.py baseline"
+            ),
         )
         self.assertIn("Evaluation Smoke", text)
         self.assertIn("not Benchmark Proof", text)

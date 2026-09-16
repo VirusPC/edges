@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -16,6 +17,11 @@ class RunCliTests(unittest.TestCase):
             tmp_path = Path(tmp)
             reports = tmp_path / "reports"
             data_out = tmp_path / "cropped.json"
+            env = {
+                key: value
+                for key, value in os.environ.items()
+                if key not in {"KIMI_API_KEY", "OPENAI_API_KEY", "OPENAI_BASE_URL"}
+            }
             completed = subprocess.run(
                 [
                     sys.executable,
@@ -33,6 +39,7 @@ class RunCliTests(unittest.TestCase):
                 check=False,
                 capture_output=True,
                 text=True,
+                env=env,
             )
             self.assertEqual(
                 completed.returncode,

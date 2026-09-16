@@ -39,7 +39,8 @@ python3 -m unittest discover -s evaluation/cases/locomo-smoke/tests -v
 Upstream `evaluate_qa.py` only routes model names containing `gpt` / `claude` / `gemini` / selected HF ids. This wrapper feeds the cropped data-file, builds the official truncated-context prompt, calls an OpenAI-compatible Chat Completions endpoint, then scores with the upstream `eval_question_answering` rules.
 
 ```bash
-KIMI_API_KEY=... python3 evaluation/cases/locomo-smoke/run.py baseline
+KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 \
+  python3 evaluation/cases/locomo-smoke/run.py baseline
 ```
 
 Optional env / flags:

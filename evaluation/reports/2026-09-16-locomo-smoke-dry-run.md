@@ -29,7 +29,7 @@ python3 evaluation/cases/locomo-smoke/run.py dry-run
 Real kimi-for-coding run (key via env, never commit the key):
 
 ```bash
-KIMI_API_KEY=... python3 evaluation/cases/locomo-smoke/run.py baseline
+KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 python3 evaluation/cases/locomo-smoke/run.py baseline
 ```
 
 `KIMI_API_KEY` or `OPENAI_API_KEY` is required for the real run (Kimi Code Console Bearer key, not a Moonshot pay-as-you-go key). `OPENAI_BASE_URL` defaults to `https://api.kimi.com/coding/v1`. Do not use `api.moonshot.ai` / `api.moonshot.cn` for `kimi-for-coding`. Override the model with `--model` / `LOCOMO_MODEL`.
