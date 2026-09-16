@@ -157,20 +157,28 @@ _避免使用_：普通反馈闭环、知识更新、未展开的 RSI
 _避免使用_：知识出口、历史知识库、失效 Edge 专区
 
 **Task**：
-跨 Agent 接力的工作项（idea 捕获后经细聊与开发直至收口）；按 edges-tasks-status 分夹存放在 knowledge/tasks/ 下，需求先后用 edges-task-priority，不改状态夹。
+跨 Agent 接力的工作项（idea 捕获后经细聊与开发直至收口）；先按 Task Project 分到 knowledge/tasks/<project-slug>/，再按 edges-tasks-status 分夹；需求先后用 edges-task-priority，不改状态夹。
 _避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目、`tasks` Memory Type（若指看板工作项）
 
+**Task Project（edges）**：
+看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。
+_避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）
+
+**edges-task-project**：
+frontmatter `metadata.edges-task-project`，与目录 project-slug 双写；`_default` 对应 `default` 或不写字段。
+_避免使用_：只改 frontmatter 不改路径、或只改路径不同步 frontmatter
+
 **edges-tasks-status**：
-Task（Issue 层）的唯一状态字段，取值为 backlog | todo | in_progress | in_review | done | blocked | cancelled；与 edges-task-priority 正交，不表达谁先做。
-_避免使用_：裸 status 字段名、Run 层状态、open/discussing/building 旧枚举
+Task（Issue 层）的唯一状态字段，取值为 backlog | todo | in_progress | in_review | done | blocked | cancelled；状态夹位于所属 Task Project 目录内，与 Task Project、edges-task-priority 正交，不表达谁先做或属于哪个分组。
+_避免使用_：裸 status 字段名、Run 层状态、open/discussing/building 旧枚举、把状态夹当成 Task Project
 
 **edges-task-priority**：
-Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`，写在 frontmatter `metadata.edges-task-priority`；与 edges-tasks-status 正交，不决定状态夹位置。缺省或旧文件无字段时视为 `none`。
+Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`，写在 frontmatter `metadata.edges-task-priority`；与 edges-tasks-status、Task Project 正交，不决定状态夹或 project 目录。缺省或旧文件无字段时视为 `none`。
 _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
 
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面，覆盖 Issue 层 list/get/create/update/status，以及 Run 层只读的 runs / run-messages。后续 Issue 层 create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级。
-_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages
+以 `edges tasks` 为入口的 Task 看板命令面，覆盖 Issue 层 list/get/create/update/status，以及 Run 层只读的 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级，且只在同一 Task Project 内改状态。后续跨 project 用 `update --project`（或等价入口），不靠 status。
+_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家
 
 **Task Run（edges）**：
 对应 Multica Run 的一次执行尝试；仓内落在 Task 同目录 sidecar `.{stem}.log.md` 中带稳定 `run-id` 的记录，由 `edges tasks runs` / `run-messages` 只读查看。
