@@ -1,4 +1,4 @@
-import type { TaskPriority, TaskStatus } from "./types.js";
+import type { TaskPriority, TaskProjectId, TaskStatus } from "./types.js";
 
 export type ParsedTaskDoc = {
   name: string;
@@ -145,6 +145,7 @@ export function renderNewTaskDoc(input: {
   description: string;
   title: string;
   status: TaskStatus;
+  project?: TaskProjectId;
   priority?: TaskPriority;
   assignee?: string;
   updatedAt: string;
@@ -158,6 +159,9 @@ export function renderNewTaskDoc(input: {
     `  edges-title: ${quoteYamlValue(input.title)}`,
     `  edges-tasks-status: ${input.status}`,
   ];
+  if (input.project && input.project !== "default") {
+    lines.push(`  edges-task-project: ${input.project}`);
+  }
   if (input.priority && input.priority !== "none") {
     lines.push(`  edges-task-priority: ${input.priority}`);
   }
