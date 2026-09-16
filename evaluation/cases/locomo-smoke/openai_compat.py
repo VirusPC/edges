@@ -42,7 +42,7 @@ def chat_complete(
         {
             "model": model,
             "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0,
+            "temperature": 1,  # kimi-for-coding rejects other temperatures
             "max_tokens": max_tokens,
         }
     ).encode("utf-8")
