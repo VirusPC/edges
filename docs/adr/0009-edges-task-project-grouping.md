@@ -2,7 +2,7 @@
 
 看板需要在状态之外再切一组（对齐 Multica Project），但不能把状态夹当成 project，也不能只改标签不改路径。2026-09-16 grill 确认：directory-first，路径为 `knowledge/tasks/<project-slug>/<edges-tasks-status>/`，frontmatter `metadata.edges-task-project` 与目录 slug 双写。未分组用保留目录 `_default`（字段为 `default` 或不写）。本轮只定 CONTEXT / ADR（及记忆指针），不迁看板、不改 CLI；后续实现必须改 `edges tasks` 路径约定。**Amends ADR 0002**（状态夹仍按 `edges-tasks-status`，但嵌在 project-slug 下）；叠 ADR 0005 / 0007 的命令面。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
 
-**Status:** accepted（grill 确认于 2026-09-16）
+**Status:** accepted（ADR 0009；grill 确认于 2026-09-16）
 
 ## Decision
 

@@ -6,4 +6,4 @@ idea 经记录员落盘，再经 grill-with-docs 与 deep-research 细聊，交�
 
 **Why:** 命名与生命周期对齐；状态分夹让看板可浏览；project-memory frontmatter 保住可查询标量；sidecar 让 YAML 稳定。这同时修正 Conclusion 里「todos 当系统外池、backlog 基本闲置、Run 写进正文表」的过渡假设。
 
-**Amended by:** ADR 0008 — 状态枚举与 sidecar 不变；路径改为 `knowledge/tasks/<project-slug>/<status>/`（未分组 `_default`）。
+**Amended by:** ADR 0009 — 状态枚举与 sidecar 不变；路径改为 `knowledge/tasks/<project-slug>/<status>/`（未分组 `_default`）。
