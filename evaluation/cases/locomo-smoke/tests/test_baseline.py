@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import unittest
 
+from support import load_tiny_locomo
+
 from baseline import live_evaluate
 from crop import crop_samples
 from evaluate import f1_key, prediction_key
-from tests.support import load_tiny_locomo
 
 
 class BaselineTests(unittest.TestCase):

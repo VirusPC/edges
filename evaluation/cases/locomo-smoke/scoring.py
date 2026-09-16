@@ -59,7 +59,8 @@ def eval_question_answering(
     all_ems: list[float] = []
     all_recall: list[float] = []
     for index, line in enumerate(qas):
-        answer = line["answer"] if isinstance(line[eval_key], list) else str(line["answer"])
+        raw_answer = line["answer"] if "answer" in line else line.get("adversarial_answer", "")
+        answer = raw_answer if isinstance(line[eval_key], list) else str(raw_answer)
         if line["category"] == 3:
             answer = answer.split(";")[0].strip()
         output = line[eval_key]

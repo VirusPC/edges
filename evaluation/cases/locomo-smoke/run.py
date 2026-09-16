@@ -22,9 +22,9 @@ DEFAULT_CACHE = EVAL_DIR / ".cache" / "locomo" / "locomo10.json"
 DEFAULT_CROPPED = CASE_DIR / "data" / "locomo10-conv44-smoke.json"
 
 SUBSET = f"{SAMPLE_ID}; first 2 QA per category 1-5 in file order (take all if a category has <2)"
-DRY_RUN_COMMAND = "python evaluation/cases/locomo-smoke/run.py dry-run"
+DRY_RUN_COMMAND = "python3 evaluation/cases/locomo-smoke/run.py dry-run"
 REAL_COMMAND = (
-    "KIMI_API_KEY=... python evaluation/cases/locomo-smoke/run.py baseline"
+    "KIMI_API_KEY=... python3 evaluation/cases/locomo-smoke/run.py baseline"
 )
 
 

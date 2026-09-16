@@ -3,7 +3,7 @@ from __future__ import annotations
 import unittest
 from collections import Counter
 
-from tests.support import load_tiny_locomo
+from support import load_tiny_locomo
 
 from crop import SAMPLE_ID, crop_samples
 

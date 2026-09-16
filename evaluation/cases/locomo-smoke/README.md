@@ -17,7 +17,7 @@ Decision: [`docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`](../../../
 ## Dummy dry-run (no API)
 
 ```bash
-python evaluation/cases/locomo-smoke/run.py dry-run
+python3 evaluation/cases/locomo-smoke/run.py dry-run
 ```
 
 Writes:
@@ -29,7 +29,7 @@ Writes:
 Tests (stdlib `unittest`, no extra deps):
 
 ```bash
-python -m unittest discover -s evaluation/cases/locomo-smoke/tests -v
+python3 -m unittest discover -s evaluation/cases/locomo-smoke/tests -v
 ```
 
 ## Real kimi-for-coding baseline
@@ -37,7 +37,7 @@ python -m unittest discover -s evaluation/cases/locomo-smoke/tests -v
 Upstream `evaluate_qa.py` only routes model names containing `gpt` / `claude` / `gemini` / selected HF ids. This wrapper feeds the cropped data-file, builds the official truncated-context prompt, calls an OpenAI-compatible Chat Completions endpoint, then scores with the upstream `eval_question_answering` rules.
 
 ```bash
-KIMI_API_KEY=... python evaluation/cases/locomo-smoke/run.py baseline
+KIMI_API_KEY=... python3 evaluation/cases/locomo-smoke/run.py baseline
 ```
 
 Optional env / flags:

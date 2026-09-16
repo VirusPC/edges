@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests.support import CASE_DIR, FIXTURE_PATH
+from support import CASE_DIR, FIXTURE_PATH
 
 
 class RunCliTests(unittest.TestCase):

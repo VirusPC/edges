@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import unittest
 
+from support import CASE_DIR  # noqa: F401  # puts case dir on sys.path
+
 from scoring import eval_question_answering, f1_score
 
 
@@ -13,7 +15,7 @@ class ScoringTests(unittest.TestCase):
         qas = [
             {
                 "question": "adversarial",
-                "answer": "",
+                "adversarial_answer": "Eagles",
                 "category": 5,
                 "evidence": [],
                 "dummy_prediction": "No information available",

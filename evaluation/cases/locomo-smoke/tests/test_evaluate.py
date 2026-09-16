@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import unittest
 
+from support import load_tiny_locomo
+
 from crop import crop_samples
 from evaluate import DRY_RUN_ANSWER, DRY_RUN_MODEL, dry_run_evaluate, f1_key, prediction_key
-from tests.support import load_tiny_locomo
 
 
 class DryRunEvaluateTests(unittest.TestCase):

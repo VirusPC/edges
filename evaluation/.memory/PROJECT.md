@@ -6,5 +6,5 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- 暂无条目。
+- [LoCoMo 冒烟是截断上下文基线，dummy dry-run 无 API](projects/project_locomo_smoke_truncated_baseline.md) — 跑或改 evaluation/cases/locomo-smoke 时：dummy 用 python3 run.py dry-run；真实用 KIMI_API_KEY + run.py baseline。SUT 是上游 locomo 打分/out-file；cat-5 金标字段是 adversarial_answer；不要接 Project Memory。
 <!-- project-memory-entries:end -->
