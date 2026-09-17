@@ -16,7 +16,7 @@ metadata:
 
 ## 要做什么
 
- 里的类型索引（如平铺的 `FEEDBACK.md` / `PROJECT.md` / `REFERENCE.md`）改为：
+`.memory` 里的类型索引（如平铺的 `FEEDBACK.md` / `PROJECT.md` / `REFERENCE.md`）改为：
 
 1. 索引形态统一为 `AGENTS.md`
 2. **直接放在对应类型文件夹下**，例如 `feedbacks/AGENTS.md`
