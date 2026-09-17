@@ -1,6 +1,6 @@
 # 从 `_default` 提议新 Task Project 类型；人确认后再 create + classify
 
-classifyTasks（ADR 0010）按用户已设的 Task Project 质心做归属建议，但不会从堆积的 `_default` 里发现该建哪些新类型。2026-09-17 grill 确认：另开独立 Skill `proposeTypes`（`extensions/skills/project-tasks-propose-types/`），只读 `_default` tasks 与已有质心、输出候选表，不自动 `project create`。人确认类型后，再在后续步骤用 `project create` + `project-tasks-classify`。真 embedding 就绪前用 LLM / agent 判断；不称 Embedding NCC，也不用 K-means 命名。本轮只定 CONTEXT / ADR（及记忆指针），不写 skill 正文、不迁看板。**Pairs with ADR 0010**（分类工作流与元数据形状不变）；叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
+classifyTasks（ADR 0010）按用户已设的 Task Project 质心做归属建议，但不会从堆积的 `_default` 里发现该建哪些新类型。2026-09-17 grill 确认：另开独立 Skill `proposeTypes`（`extensions/skills/project-tasks-propose-types/`），只读 `_default` tasks 与已有质心、输出候选表，不自动 `project create`。人确认类型后，再在后续步骤用 `project create` + `project-tasks-classify`。真 embedding 就绪前用 LLM / agent 判断；不称 Embedding NCC，也不用 K-means 命名。本轮只定 CONTEXT / ADR（及记忆指针），不写 skill 正文、不迁看板。**Amends ADR 0010**（路径与类型发现边界；整板归属 + Q18=A 不变）；叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
 
 **Status:** accepted（ADR 0011；grill 确认于 2026-09-17）
 

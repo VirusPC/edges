@@ -173,7 +173,7 @@ _避免使用_：知识出口、历史知识库、失效 Edge 专区
 _避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目、`tasks` Memory Type（若指看板工作项）
 
 **Task Project（edges）**：
-看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；新类型由 proposeTypes 从 `_default` 提议、人确认后再 `project create`。索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
+看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
 _避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type、把未确认的候选当成已有 project
 
 **Task Project 索引**：
@@ -193,7 +193,7 @@ _避免使用_：已落盘的 Task Project、自动当成质心、Memory Type
 _避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、只整理 `_default`、公开 `edges tasks classify`
 
 **proposeTypes（edges）**：
-独立工作流 Skill（约定路径 `extensions/skills/project-tasks-propose-types/`，展示名 proposeTypes）：读 `_default` Task 与已有 Task Project 质心，输出新类型候选表（slug、description、supporting stems）。不自动 `project create`；人确认后另步 `project create` + classifyTasks。真 embedding 前用 LLM / agent 判断。默认一批 3–7 个候选。
+独立工作流 Skill（约定路径 `extensions/skills/project-tasks-propose-types/`，展示名 proposeTypes）：从 `_default` Task 与已有 Task Project 质心提议新的 Task Project 候选，本身不落地为 Task Project。
 _避免使用_：并进 classifyTasks、自动建 project、Embedding NCC、K-means 命名、公开 `edges tasks propose`
 
 **edges-task-project**：
@@ -210,7 +210,7 @@ _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等�
 
 **edges tasks（CLI）**：
 以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。后续实现：`project list|get|create|update` 读写 Task Project 元数据。
-_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` 动词（本轮）
+_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` 动词（本轮）
 
 **Task Run（edges）**：
 对应 Multica Run 的一次执行尝试；仓内落在 Task 同目录 sidecar `.{stem}.log.md` 中带稳定 `run-id` 的记录，由 `edges tasks runs` / `run-messages` 只读查看。
