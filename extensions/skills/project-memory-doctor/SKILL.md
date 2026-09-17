@@ -72,7 +72,7 @@ init 是单目标、只往前写的，只能处理自己这次动作引起的漂
 
 - **默认只诊断。** 这里的修复会移动旧版文件、删除索引条目、改写别人的 `AGENTS.md`，属于破坏性操作，所以先报告、经用户确认再 `--apply`。用户已经明确说了「检查并修掉」就可以直接带 `--apply`，但汇报里仍要列清改了什么。
 - **`foreign-agents` 只追加，不改写。** 手写正文和别的工具的受管块（如 `runa-memory:*`）都原样保留，只在文件里补挂本套的受管区块。不要自己动手编辑这类文件。
-- 只碰结构与派生索引。除把 `legacy-flat-entry` 原样移入类型目录、把 `legacy-singular-type-dir` 原样改名为复数、把 `legacy-flat-frontmatter` 的文件头收进 `metadata:` 外，**不新增、删除或改写记忆正文**——内容增删仍是 `$project-memory-remember` 的事。
+- 只碰结构与派生索引。除把 `legacy-flat-entry` 原样移入类型目录、把 `legacy-flat-index` 搬到 `<plural>/AGENTS.md` 后删除旧文件、把 `legacy-singular-type-dir` 原样改名为复数、把 `legacy-flat-frontmatter` 的文件头收进 `metadata:` 外，**不新增、删除或改写记忆正文**——内容增删仍是 `$project-memory-remember` 的事。
 - **`.agents/` 一个字节都不碰。** `agent_skills` 的内容根在那里，归人与生态所有：不报 `missing-type-dir`、不补建目录、不改写内容，只把它索引进 `.memory/agent_skills/AGENTS.md`。本层没有 `.agents/skills/` 时那份索引是空清单，这是正常状态，不是待修的毛病。
 - 修复是幂等的：跑完再跑一次应该零 `findings`。不是的话说明有 bug，报给用户，别反复重试。
 - `--target-dir` 给记忆树里任意一个目录都行，脚本会自己回溯到记忆根。

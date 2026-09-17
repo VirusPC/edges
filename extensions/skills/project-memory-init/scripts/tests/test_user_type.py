@@ -122,6 +122,7 @@ class UserGitignoreTests(unittest.TestCase):
         nested = (
             "extensions/.memory/USER.md",
             "extensions/.memory/users/user_sample.md",
+            "extensions/.memory/users/AGENTS.md",
             "knowledge/tasks/.memory/USER.md",
         )
         for relative in nested:

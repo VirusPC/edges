@@ -16,7 +16,11 @@ from lib.paths import (
     write_atomic,
 )
 from lib.templates import ENTRY_OUTPUT_PATTERN, read_template
-from lib.types import discover_layer_types, type_index_template_name
+from lib.types import (
+    discover_layer_types,
+    leftover_flat_index_names,
+    type_index_template_name,
+)
 from nodes.agents import (
     find_index_anchor,
     rehome_index_entries,
@@ -65,6 +69,12 @@ def init_memory(target: Path, root: Path, description: str | None = None) -> dic
         raise ValueError(
             "检测到旧版单数类型目录，请先运行 project-memory-doctor 迁移: "
             + ", ".join(stale_dirs)
+        )
+    leftover_indexes = leftover_flat_index_names(directory) if directory.is_dir() else []
+    if leftover_indexes:
+        raise ValueError(
+            "检测到旧版平铺类型入口，请先运行 project-memory-doctor 迁移: "
+            + ", ".join(leftover_indexes)
         )
     directory.mkdir(parents=True, exist_ok=True)
     for entry_type in index_files():

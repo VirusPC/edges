@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- 类型入口改为 `.memory/<plural>/AGENTS.md`，与条目同处（ADR-0012）。仍用 `FEEDBACK.tmpl.md` 等类型模板渲染，不用层入口 `AGENTS.tmpl.md`。`user` → `users/AGENTS.md`；`agent_skills` → `agent_skills/AGENTS.md`，绝不写入 `.agents/`。
+- 类型入口改为 `.memory/<plural>/AGENTS.md`，与条目同处（ADR-0012）。仍用 `FEEDBACK.tmpl.md` 等类型模板渲染，不用层入口 `AGENTS.tmpl.md`。`user` → `users/AGENTS.md`；`agent_skills` → `agent_skills/AGENTS.md`，绝不写入 `.agents/`。存量平铺 `TYPE.md` 入口拒绝 init，交给 `$project-memory-doctor`。
 - Init 仍只建官方六类种子。用户 Memory Type 由 `$project-memory-add-type` 按 LAYOUT 登记，不写进 `AGENTS.tmpl.md`（ADR-0006）。
 
 ## [1.7.0] - 2026-09-11

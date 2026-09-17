@@ -151,7 +151,15 @@ def restore_user_memory(
         for info in members:
             _extract_regular_file(tar, info, repo_dir)
             extracted.append(info.name)
+    leftover = repo_dir / ".memory" / "USER.md"
+    new_index = repo_dir / ".memory" / "users" / "AGENTS.md"
+    initialized = (repo_dir / "AGENTS.md").is_file()
+    if initialized and leftover.is_file() and not new_index.is_file():
+        new_index.parent.mkdir(parents=True, exist_ok=True)
+        leftover.rename(new_index)
     refresh = _refresh_user_index(repo_dir)
+    if initialized and leftover.is_file() and new_index.is_file():
+        leftover.unlink()
     return {
         "archive": str(archive),
         "repoDir": str(repo_dir),

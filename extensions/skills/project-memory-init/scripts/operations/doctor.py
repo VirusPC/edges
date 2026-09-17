@@ -171,9 +171,18 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
                 continue
             entry_type = path.stem.lower()
             dest = type_index_path(owner, entry_type)
-            if dest.exists() and dest.resolve() != path.resolve():
-                issue = "legacy-flat-index-conflict"
-                detail = "新旧类型入口都在，无法自动决定保留哪份"
+            dest_other = dest.exists() and dest.resolve() != path.resolve()
+            if dest_other:
+                try:
+                    identical = dest.is_file() and dest.read_bytes() == path.read_bytes()
+                except OSError:
+                    identical = False
+                if identical:
+                    issue = "legacy-flat-index"
+                    detail = "旧版平铺类型入口与新入口内容相同，删除旧文件"
+                else:
+                    issue = "legacy-flat-index-conflict"
+                    detail = "新旧类型入口都在，无法自动决定保留哪份"
             else:
                 issue = "legacy-flat-index"
                 detail = "旧版平铺类型入口需要搬到对应复数目录下的 AGENTS.md"
@@ -318,6 +327,8 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
             actual_rels = {f"{dir_name}/{AGENTS_FILE_NAME}" for dir_name in actual_new}
             actual_legacy_types = {name.lower() for name in actual_legacy}
             for entry_type, file_name in discovered.items():
+                if "/" not in file_name:
+                    continue
                 if (
                     file_name not in actual_rels
                     and entry_type not in actual_legacy_types
@@ -381,6 +392,35 @@ def collect_findings(root: Path) -> list[dict[str, str]]:
     return findings
 
 
+def apply_unregistered_type(root: Path, finding: dict[str, str]) -> list[str]:
+    """把已在磁盘上的类型入口补进本层清单。"""
+    agents_path = root / finding["path"]
+    if classify_agents_file(agents_path) != "managed":
+        return []
+    owner = agents_path.parent
+    document = agents_path.read_text(encoding="utf-8")
+    entry_type = finding.get("type", "")
+    entry = finding.get("entry", "")
+    rel = (
+        entry[len(".memory/") :]
+        if entry.startswith(".memory/")
+        else (index_file_name(entry_type) if entry_type else "")
+    )
+    if not rel or "/" not in rel:
+        return []
+    index_path = memory_dir(owner) / rel
+    description = f"{entry_type} 类型的记忆入口。"
+    if index_path.is_file():
+        parsed = parse_type_meta(index_path.read_text(encoding="utf-8"))
+        if parsed is not None and parsed.description:
+            description = parsed.description
+    updated = upsert_local_type_line(document, rel, description)
+    if updated == document:
+        return []
+    write_atomic(agents_path, updated)
+    return [f"unregistered-type: {finding['path']} 补上 {entry or rel}"]
+
+
 def register(directory: Path, root: Path, description: str | None, issue: str) -> list[str]:
     """把一个目录登记回该去的那一层；没实际改动就不进修复清单。"""
     anchor = find_index_anchor(directory, root)
@@ -417,12 +457,25 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
             continue
         source = root / finding["path"]
         destination = root / finding["destination"]
-        if destination.exists():
-            continue
         if finding["issue"] in {"legacy-flat-entry", "legacy-flat-index"}:
             if not source.is_file():
                 continue
+            if destination.exists():
+                if finding["issue"] == "legacy-flat-index" and destination.is_file():
+                    try:
+                        same = destination.read_bytes() == source.read_bytes()
+                    except OSError:
+                        same = False
+                    if same:
+                        source.unlink()
+                        repaired.append(
+                            f"{finding['issue']}: {finding['path']} 与 "
+                            f"{finding['destination']} 相同，删除旧文件"
+                        )
+                continue
             destination.parent.mkdir(parents=True, exist_ok=True)
+        elif destination.exists():
+            continue
         elif not source.is_dir():
             continue
         source.rename(destination)
@@ -479,28 +532,7 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
             if action in {"created", "updated"}:
                 repaired.append(f"{issue}: {finding['path']} 补上硬约束区块，已有规则原样保留")
         elif issue == "unregistered-type":
-            if classify_agents_file(agents_path) != "managed":
-                continue
-            document = agents_path.read_text(encoding="utf-8")
-            entry_type = finding.get("type", "")
-            entry = finding.get("entry", "")
-            rel = (
-                entry[len(".memory/") :]
-                if entry.startswith(".memory/")
-                else (index_file_name(entry_type) if entry_type else "")
-            )
-            index_path = memory_dir(owner) / rel
-            description = f"{entry_type} 类型的记忆入口。"
-            if index_path.is_file():
-                parsed = parse_type_meta(index_path.read_text(encoding="utf-8"))
-                if parsed is not None and parsed.description:
-                    description = parsed.description
-            updated = upsert_local_type_line(document, rel, description)
-            if updated != document:
-                write_atomic(agents_path, updated)
-                repaired.append(
-                    f"{issue}: {finding['path']} 补上 {entry or file_name}"
-                )
+            repaired.extend(apply_unregistered_type(root, finding))
         elif issue == "foreign-agents":
             # 唯一一处往他人文件里写的地方：只补挂受管区块，既有正文一字不动。
             document = agents_path.read_text(encoding="utf-8")
@@ -567,6 +599,8 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
         if finding["issue"] == "unregistered":
             directory = (root / finding["path"]).resolve()
             repaired.extend(register(directory, root, None, "unregistered"))
+        elif finding["issue"] == "unregistered-type":
+            repaired.extend(apply_unregistered_type(root, finding))
     return repaired
 
 

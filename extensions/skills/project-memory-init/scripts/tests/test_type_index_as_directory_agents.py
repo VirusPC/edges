@@ -212,6 +212,115 @@ class DoctorLegacyFlatIndexTests(unittest.TestCase):
                 (target / "AGENTS.md").read_text(encoding="utf-8"),
             )
 
+    def test_identical_leftover_is_migrated_not_conflict(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp")
+            old = target / ".memory" / "FEEDBACK.md"
+            new = target / ".memory" / "feedbacks" / "AGENTS.md"
+            old.write_text(new.read_text(encoding="utf-8"), encoding="utf-8")
+            diagnosed = doctor_memory(target, apply=False)
+            issues = {item["issue"] for item in diagnosed["findings"]}
+            self.assertIn("legacy-flat-index", issues)
+            self.assertNotIn("legacy-flat-index-conflict", issues)
+            doctor_memory(target, apply=True)
+            self.assertTrue(new.is_file())
+            self.assertFalse(old.exists())
+            self.assertEqual(doctor_memory(target, apply=False)["findings"], [])
+
+    def test_differing_leftover_is_conflict_and_keeps_both(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp")
+            old = target / ".memory" / "FEEDBACK.md"
+            new = target / ".memory" / "feedbacks" / "AGENTS.md"
+            kept = new.read_text(encoding="utf-8")
+            old.write_text(
+                kept.replace("暂无条目。", "- leftover kept"),
+                encoding="utf-8",
+            )
+            diagnosed = doctor_memory(target, apply=False)
+            issues = {item["issue"] for item in diagnosed["findings"]}
+            self.assertIn("legacy-flat-index-conflict", issues)
+            doctor_memory(target, apply=True)
+            self.assertTrue(old.is_file())
+            self.assertEqual(new.read_text(encoding="utf-8"), kept)
+            remaining = {item["issue"] for item in doctor_memory(target, apply=False)["findings"]}
+            self.assertIn("legacy-flat-index-conflict", remaining)
+
+    def test_custom_type_flat_index_registers_in_one_apply(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp")
+            add_type(target, "docs", "项目内文档指针，不是知识库正文")
+            old = target / ".memory" / "DOCS.md"
+            new = target / ".memory" / "docs" / "AGENTS.md"
+            old.write_text(new.read_text(encoding="utf-8"), encoding="utf-8")
+            new.unlink()
+            agents = target / "AGENTS.md"
+            agents.write_text(
+                agents.read_text(encoding="utf-8").replace(
+                    ".memory/docs/AGENTS.md", ".memory/DOCS.md"
+                ),
+                encoding="utf-8",
+            )
+            doctor_memory(target, apply=True)
+            self.assertTrue(new.is_file())
+            self.assertFalse(old.exists())
+            self.assertIn(
+                ".memory/docs/AGENTS.md",
+                agents.read_text(encoding="utf-8"),
+            )
+            self.assertEqual(doctor_memory(target, apply=False)["findings"], [])
+
+
+class InitAndDiscoverLegacyFlatTests(unittest.TestCase):
+    def test_init_refuses_leftover_flat_index(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp")
+            old = target / ".memory" / "FEEDBACK.md"
+            new = target / ".memory" / "feedbacks" / "AGENTS.md"
+            old.write_text(new.read_text(encoding="utf-8"), encoding="utf-8")
+            new.unlink()
+            with self.assertRaises(ValueError) as raised:
+                init_memory(target, target, "temp")
+            self.assertIn("project-memory-doctor", str(raised.exception))
+            self.assertIn("FEEDBACK.md", str(raised.exception))
+            self.assertFalse(new.exists())
+
+    def test_discover_and_remember_use_leftover_flat_index(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            target = Path(raw)
+            init_memory(target, target, "temp")
+            old = target / ".memory" / "FEEDBACK.md"
+            new = target / ".memory" / "feedbacks" / "AGENTS.md"
+            old.write_text(new.read_text(encoding="utf-8"), encoding="utf-8")
+            new.unlink()
+            agents = target / "AGENTS.md"
+            agents.write_text(
+                agents.read_text(encoding="utf-8").replace(
+                    ".memory/feedbacks/AGENTS.md", ".memory/FEEDBACK.md"
+                ),
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                discover_layer_types(target)["feedback"], "FEEDBACK.md"
+            )
+            result = remember(
+                target,
+                "feedback",
+                "before_doctor",
+                "Remember before doctor",
+                "leftover flat index still receives the entry",
+                "Keep the old index live.\n\n**Why:** upgrade path.\n\n"
+                "**How to apply:** run doctor after.",
+                {"username": "tester", "email": "t@example.com"},
+            )
+            self.assertEqual(result["index"], ".memory/FEEDBACK.md")
+            self.assertIn("](feedback_before_doctor.md)", old.read_text(encoding="utf-8"))
+            self.assertFalse(new.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

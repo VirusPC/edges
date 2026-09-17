@@ -9,6 +9,7 @@ from pathlib import Path
 
 from lib.blocks import (
     ENTRIES_START,
+    LEGACY_FLAT_INDEX_LINK_PATTERN,
     LOCAL_END,
     LOCAL_START,
     MEMORY_INDEX_LINK_PATTERN,
@@ -83,20 +84,48 @@ def _type_name_from_index_text(text: str, dir_name: str) -> str:
     return type_from_dir_name(dir_name)
 
 
+def leftover_flat_index_names(directory: Path) -> list[str]:
+    """`.memory/` 根部仍平铺的 `TYPE.md` 入口名（含条目区块）。"""
+    if not directory.is_dir():
+        return []
+    names: list[str] = []
+    for path in sorted(directory.glob("*.md")):
+        if not TYPE_INDEX_NAME_PATTERN.fullmatch(path.name):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            continue
+        if ENTRIES_START in text:
+            names.append(path.name)
+    return names
+
+
 def discover_layer_types(target: Path) -> dict[str, str]:
-    """从该层 AGENTS.md 本层清单 + `.memory/<plural>/AGENTS.md` 发现 type → 入口路径。"""
+    """从该层 AGENTS.md 本层清单 + `.memory/<plural>/AGENTS.md` 发现 type → 入口路径。
+
+    尚未 doctor 的平铺 `.memory/TYPE.md` 也认，入口路径仍指向旧文件，
+    直到 doctor 搬到 `<plural>/AGENTS.md`。新入口一旦在磁盘上就覆盖旧路径。
+    """
     types: dict[str, str] = {}
     agents = target / AGENTS_FILE_NAME
     directory = memory_dir(target)
+
+    def add(name: str, rel: str, *, overwrite: bool = False) -> None:
+        if overwrite or name not in types:
+            types[name] = rel
+
     if agents.is_file():
         match = block_pattern(LOCAL_START, LOCAL_END).search(
             agents.read_text(encoding="utf-8")
         )
         if match:
-            for dir_name in MEMORY_INDEX_LINK_PATTERN.findall(match.group(0)):
+            block = match.group(0)
+            for dir_name in MEMORY_INDEX_LINK_PATTERN.findall(block):
                 rel = f"{dir_name}/{AGENTS_FILE_NAME}"
                 path = directory / rel
                 name = type_from_dir_name(dir_name)
+                leftover = directory / f"{name.upper()}.md"
                 if path.is_file():
                     try:
                         name = _type_name_from_index_text(
@@ -104,8 +133,24 @@ def discover_layer_types(target: Path) -> dict[str, str]:
                         )
                     except (OSError, UnicodeError):
                         name = type_from_dir_name(dir_name)
-                types[name] = rel
+                    add(name, rel)
+                elif leftover.is_file() and leftover.name in leftover_flat_index_names(
+                    directory
+                ):
+                    add(name, leftover.name)
+                else:
+                    add(name, rel)
+            for stem in LEGACY_FLAT_INDEX_LINK_PATTERN.findall(block):
+                name = stem.lower()
+                leftover = f"{stem}.md"
+                dest_rel = type_index_relpath(name)
+                if (directory / dest_rel).is_file():
+                    add(name, dest_rel, overwrite=True)
+                elif (directory / leftover).is_file():
+                    add(name, leftover)
     if directory.is_dir():
+        for name in leftover_flat_index_names(directory):
+            add(Path(name).stem.lower(), name)
         for path in sorted(directory.glob(f"*/{AGENTS_FILE_NAME}")):
             try:
                 text = path.read_text(encoding="utf-8")
@@ -115,7 +160,7 @@ def discover_layer_types(target: Path) -> dict[str, str]:
                 continue
             dir_name = path.parent.name
             rel = f"{dir_name}/{AGENTS_FILE_NAME}"
-            types.setdefault(_type_name_from_index_text(text, dir_name), rel)
+            add(_type_name_from_index_text(text, dir_name), rel, overwrite=True)
     return types
 
 

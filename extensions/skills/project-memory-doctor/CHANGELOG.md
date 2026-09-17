@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `legacy-flat-index`：把 `.memory/FEEDBACK.md` 一类旧平铺入口搬到 `<plural>/AGENTS.md` 后删除旧文件。新旧都在且不同则 `legacy-flat-index-conflict`。
+- `legacy-flat-index`：把 `.memory/FEEDBACK.md` 一类旧平铺入口搬到 `<plural>/AGENTS.md` 后删除旧文件。新旧都在且内容相同则删旧文件；内容不同才是 `legacy-flat-index-conflict`。
 - `unregistered-type`：入口文件在、本层清单没有这一行时补上链接。
 
 ### Changed
