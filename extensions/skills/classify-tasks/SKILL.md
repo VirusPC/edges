@@ -69,7 +69,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks update <stem> --project <sug
 
 ## 能力面
 
-- **CLI：** `edges tasks project list|get|create|update` 与 `edges tasks list` / `update --project`
+- **CLI：** `edges tasks project list|get|create|update` 与 `edges tasks list` / `edges tasks update --project`
 - **Skill：** 本文件（classifyTasks）
 - **MCP：** 对等入口；本轮没有 classify MCP，也没有 generic tasks MCP。缺 shell 时说明 generic tasks Skill/MCP CRUD 仍在 backlog，不要假装 MCP 已能搬 Task
 
