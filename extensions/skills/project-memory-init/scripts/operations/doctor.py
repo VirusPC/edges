@@ -7,8 +7,10 @@ from pathlib import Path
 
 from lib.blocks import (
     AUTO_START,
+    ENTRIES_START,
     IMPORTANT_END,
     IMPORTANT_START,
+    LEGACY_FLAT_INDEX_LINK_PATTERN,
     LOCAL_END,
     LOCAL_START,
     MEMORY_INDEX_LINK_PATTERN,
@@ -28,11 +30,14 @@ from lib.paths import (
     memory_dir,
     relative_or_name,
     type_content_dir,
+    type_index_path,
     write_atomic,
 )
 from lib.types import (
+    TYPE_INDEX_NAME_PATTERN,
     discover_layer_types,
     ensure_seed_local_lines,
+    index_file_name,
     layer_type_specs,
     parse_type_meta,
     seed_index_files,
@@ -153,9 +158,34 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
     findings: list[dict[str, str]] = []
     for owner in memory_dirs:
         discovered = discover_layer_types(owner)
-        expected_indexes = [Path(name).stem for name in discovered.values()]
         specs = {spec.name: spec for spec in layer_type_specs(owner)}
         directory = memory_dir(owner)
+        for path in sorted(directory.glob("*.md")):
+            if not TYPE_INDEX_NAME_PATTERN.fullmatch(path.name):
+                continue
+            try:
+                text = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeError):
+                continue
+            if ENTRIES_START not in text:
+                continue
+            entry_type = path.stem.lower()
+            dest = type_index_path(owner, entry_type)
+            if dest.exists() and dest.resolve() != path.resolve():
+                issue = "legacy-flat-index-conflict"
+                detail = "新旧类型入口都在，无法自动决定保留哪份"
+            else:
+                issue = "legacy-flat-index"
+                detail = "旧版平铺类型入口需要搬到对应复数目录下的 AGENTS.md"
+            findings.append(
+                {
+                    "issue": issue,
+                    "path": relative_or_name(path, root),
+                    "destination": relative_or_name(dest, root),
+                    "type": entry_type,
+                    "detail": detail,
+                }
+            )
         for entry_type, file_name in discovered.items():
             spec = specs.get(entry_type)
             skip_dir = is_external_type(entry_type) or (
@@ -282,12 +312,16 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
         elif agents_state == "managed":
             document = agents_path.read_text(encoding="utf-8")
             match = block_pattern(LOCAL_START, LOCAL_END).search(document)
-            actual_indexes = (
-                MEMORY_INDEX_LINK_PATTERN.findall(match.group(0)) if match else []
-            )
-            actual_set = {name.lower() for name in actual_indexes}
+            block = match.group(0) if match else ""
+            actual_new = MEMORY_INDEX_LINK_PATTERN.findall(block)
+            actual_legacy = LEGACY_FLAT_INDEX_LINK_PATTERN.findall(block)
+            actual_rels = {f"{dir_name}/{AGENTS_FILE_NAME}" for dir_name in actual_new}
+            actual_legacy_types = {name.lower() for name in actual_legacy}
             for entry_type, file_name in discovered.items():
-                if entry_type not in actual_set:
+                if (
+                    file_name not in actual_rels
+                    and entry_type not in actual_legacy_types
+                ):
                     findings.append(
                         {
                             "issue": "unregistered-type",
@@ -298,10 +332,10 @@ def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, st
                         }
                     )
             seed_missing = any(
-                name not in discovered or name not in actual_set
+                name not in discovered or index_file_name(name) not in actual_rels
                 for name in seed_index_files()
             )
-            if actual_indexes != expected_indexes and seed_missing:
+            if actual_legacy or seed_missing:
                 findings.append(
                     {
                         "issue": "outdated-local",
@@ -375,13 +409,17 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
         if finding["issue"] in {"missing-agents", "outdated-local"}
     }
     for finding in findings:
-        if finding["issue"] not in {"legacy-flat-entry", "legacy-singular-type-dir"}:
+        if finding["issue"] not in {
+            "legacy-flat-entry",
+            "legacy-singular-type-dir",
+            "legacy-flat-index",
+        }:
             continue
         source = root / finding["path"]
         destination = root / finding["destination"]
         if destination.exists():
             continue
-        if finding["issue"] == "legacy-flat-entry":
+        if finding["issue"] in {"legacy-flat-entry", "legacy-flat-index"}:
             if not source.is_file():
                 continue
             destination.parent.mkdir(parents=True, exist_ok=True)
@@ -412,6 +450,8 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
             "legacy-entry-conflict",
             "legacy-singular-type-dir",
             "legacy-type-dir-conflict",
+            "legacy-flat-index",
+            "legacy-flat-index-conflict",
             "invalid-type-dir",
             "missing-index",
             "invalid-index",
@@ -444,14 +484,18 @@ def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
             document = agents_path.read_text(encoding="utf-8")
             entry_type = finding.get("type", "")
             entry = finding.get("entry", "")
-            file_name = Path(entry).name if entry else f"{entry_type.upper()}.md"
-            index_path = memory_dir(owner) / file_name
+            rel = (
+                entry[len(".memory/") :]
+                if entry.startswith(".memory/")
+                else (index_file_name(entry_type) if entry_type else "")
+            )
+            index_path = memory_dir(owner) / rel
             description = f"{entry_type} 类型的记忆入口。"
             if index_path.is_file():
                 parsed = parse_type_meta(index_path.read_text(encoding="utf-8"))
                 if parsed is not None and parsed.description:
                     description = parsed.description
-            updated = upsert_local_type_line(document, file_name, description)
+            updated = upsert_local_type_line(document, rel, description)
             if updated != document:
                 write_atomic(agents_path, updated)
                 repaired.append(

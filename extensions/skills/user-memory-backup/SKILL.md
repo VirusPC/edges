@@ -1,6 +1,6 @@
 ---
 name: user-memory-backup
-description: 把本仓库 gitignore 的用户记忆（.memory/users/ 与 .memory/USER.md）打成归档。换机、删仓或想留一份逃生副本时用。默认写到仓库根 user-memory-backup-<时间戳>.tar.gz，不要 git add。恢复用 user-memory-restore。
+description: 把本仓库 gitignore 的用户记忆（.memory/users/，含 users/AGENTS.md；以及尚未迁走的 .memory/USER.md）打成归档。换机、删仓或想留一份逃生副本时用。默认写到仓库根 user-memory-backup-<时间戳>.tar.gz，不要 git add。恢复用 user-memory-restore。
 version: 1.0.0
 ---
 
@@ -27,7 +27,7 @@ version: 1.0.0
      [--output-dir <归档目录>]
    ```
 
-4. 脚本只打包已存在的 `.memory/USER.md` 和 `.memory/users/` 下的文件。两份都没有就失败。
-5. 把返回 JSON 里的 `archive` 路径告诉用户。**不要 `git add` 归档，也不要 `git add` `.memory/USER.md` / `.memory/users/`。**
+4. 脚本打包已存在的 `.memory/users/`（含 `users/AGENTS.md`）以及尚未迁走的 `.memory/USER.md`。两处都没有就失败。
+5. 把返回 JSON 里的 `archive` 路径告诉用户。**不要 `git add` 归档，也不要 `git add` `.memory/users/` / `.memory/USER.md`。**
 
 恢复用 `$user-memory-restore`。

@@ -16,6 +16,7 @@ from lib.types import (
     ensure_type_gitignore,
     find_git_root,
     index_file_name,
+    type_index_template_name,
     upsert_local_type_line,
     validate_type_name,
 )
@@ -57,7 +58,7 @@ def add_type(
         write_atomic(
             index_path,
             read_index_template(
-                index_name,
+                type_index_template_name(name),
                 name,
                 normalized,
                 flags={

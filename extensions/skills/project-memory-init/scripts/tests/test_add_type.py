@@ -31,16 +31,17 @@ class AddTypeLayoutTests(unittest.TestCase):
             result = add_type(target, "docs", "项目内文档指针，不是知识库正文")
             self.assertEqual(result["operation"], "add-type")
             self.assertEqual(result["type"], "docs")
-            self.assertEqual(result["index"], ".memory/DOCS.md")
+            self.assertEqual(result["index"], ".memory/docs/AGENTS.md")
             self.assertEqual(result["contentDir"], ".memory/docs")
             self.assertEqual(result["action"], "created")
-            self.assertTrue((target / ".memory" / "DOCS.md").is_file())
+            self.assertTrue((target / ".memory" / "docs" / "AGENTS.md").is_file())
             self.assertTrue((target / ".memory" / "docs").is_dir())
+            self.assertFalse((target / ".memory" / "DOCS.md").exists())
             self.assertIn(
-                ".memory/DOCS.md",
+                ".memory/docs/AGENTS.md",
                 (target / "AGENTS.md").read_text(encoding="utf-8"),
             )
-            self.assertEqual(discover_layer_types(target)["docs"], "DOCS.md")
+            self.assertEqual(discover_layer_types(target)["docs"], "docs/AGENTS.md")
             self.assertFalse((target / "knowledge" / "tasks").exists())
 
     def test_add_type_rejects_uninitialized_target(self) -> None:
@@ -100,7 +101,9 @@ class AddTypeGitignoreTests(unittest.TestCase):
                 "**/.memory/secrets/",
             ):
                 self.assertIn(pattern, text, pattern)
-            meta = (target / ".memory" / "SECRET.md").read_text(encoding="utf-8")
+            meta = (target / ".memory" / "secrets" / "AGENTS.md").read_text(
+                encoding="utf-8"
+            )
             self.assertIn("gitignore: true", meta)
             spec = parse_type_meta(meta)
             self.assertIsNotNone(spec)
@@ -128,8 +131,9 @@ class AddTypeIndexOnlyTests(unittest.TestCase):
                 writable=False,
             )
             self.assertFalse(result["flags"]["writable"])
-            self.assertFalse((target / ".memory" / "catalogs").exists())
-            self.assertTrue((target / ".memory" / "CATALOG.md").is_file())
+            self.assertTrue((target / ".memory" / "catalogs" / "AGENTS.md").is_file())
+            self.assertFalse((target / ".memory" / "CATALOG.md").exists())
+            self.assertEqual(list((target / ".memory" / "catalogs").glob("catalog_*.md")), [])
             with self.assertRaises(ValueError) as ctx:
                 remember(
                     target,
@@ -209,7 +213,7 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
             add_type(target, "docs", "项目内文档指针，不是知识库正文")
             doctor_memory(target, apply=True)
             self.assertIn(
-                ".memory/DOCS.md",
+                ".memory/docs/AGENTS.md",
                 (target / "AGENTS.md").read_text(encoding="utf-8"),
             )
             remaining = doctor_memory(target, apply=False)
@@ -226,7 +230,7 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
                 "\n".join(
                     line
                     for line in text.splitlines()
-                    if ".memory/USER.md" not in line
+                    if ".memory/users/AGENTS.md" not in line
                 )
                 + "\n",
                 encoding="utf-8",
@@ -236,8 +240,8 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
             self.assertIn("outdated-local", issues)
             doctor_memory(target, apply=True)
             local = agents.read_text(encoding="utf-8")
-            self.assertIn(".memory/USER.md", local)
-            self.assertIn(".memory/DOCS.md", local)
+            self.assertIn(".memory/users/AGENTS.md", local)
+            self.assertIn(".memory/docs/AGENTS.md", local)
             remaining = doctor_memory(target, apply=False)
             self.assertEqual(remaining["findings"], [], remaining)
 
@@ -256,7 +260,7 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
                 "**How to apply:** refresh discovered types.",
                 {"username": "tester", "email": "t@example.com"},
             )
-            docs_index = target / ".memory" / "DOCS.md"
+            docs_index = target / ".memory" / "docs" / "AGENTS.md"
             docs_index.write_text(
                 "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
@@ -272,7 +276,9 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             target = Path(raw)
             init_memory(target, target, "temp tree")
-            (target / ".memory" / "RESEARCH.md").write_text(
+            research = target / ".memory" / "research"
+            research.mkdir()
+            (research / "AGENTS.md").write_text(
                 "# RESEARCH\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
@@ -282,7 +288,7 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
             self.assertIn("unregistered-type", issues)
             doctor_memory(target, apply=True)
             self.assertIn(
-                ".memory/RESEARCH.md",
+                ".memory/research/AGENTS.md",
                 (target / "AGENTS.md").read_text(encoding="utf-8"),
             )
 

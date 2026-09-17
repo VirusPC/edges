@@ -12,6 +12,7 @@ from pathlib import Path
 
 
 ALLOWED_INDEX = ".memory/USER.md"
+ALLOWED_USERS_INDEX = ".memory/users/AGENTS.md"
 ALLOWED_USERS_PREFIX = ".memory/users/"
 EMPTY_ENTRY = "- 暂无条目。"
 
@@ -46,7 +47,11 @@ def _safe_members(tar: tarfile.TarFile, repo_dir: Path) -> list[tarfile.TarInfo]
         info.name = name
         if ".." in Path(name).parts or Path(name).is_absolute():
             raise ValueError(f"归档含非法路径: {info.name}")
-        allowed = name == ALLOWED_INDEX or name.startswith(ALLOWED_USERS_PREFIX)
+        allowed = (
+            name == ALLOWED_INDEX
+            or name == ALLOWED_USERS_INDEX
+            or name.startswith(ALLOWED_USERS_PREFIX)
+        )
         if not allowed:
             continue
         if not info.isfile():
@@ -54,7 +59,9 @@ def _safe_members(tar: tarfile.TarFile, repo_dir: Path) -> list[tarfile.TarInfo]
         _destination_for_member(repo_dir, name)
         kept.append(info)
     if not kept:
-        raise ValueError("归档里没有 .memory/USER.md 或 .memory/users/ 成员")
+        raise ValueError(
+            "归档里没有 .memory/users/ 或尚未迁走的 .memory/USER.md 成员"
+        )
     return kept
 
 
@@ -89,21 +96,28 @@ def user_memory_occupied(repo_dir: Path) -> bool:
     users = repo_dir / ".memory" / "users"
     if users.is_dir() and any(path.is_file() for path in users.glob("user_*.md")):
         return True
-    index = repo_dir / ".memory" / "USER.md"
-    if not index.is_file():
-        return False
-    text = index.read_text(encoding="utf-8")
-    start = "<!-- project-memory-entries:start -->"
-    end = "<!-- project-memory-entries:end -->"
-    if start not in text or end not in text:
-        return bool(text.strip())
-    body = text[text.index(start) + len(start) : text.index(end)]
-    lines = [
-        line.strip()
-        for line in body.splitlines()
-        if line.strip() and not line.strip().startswith("<!--")
-    ]
-    return any(line != EMPTY_ENTRY for line in lines)
+    for index in (
+        repo_dir / ".memory" / "USER.md",
+        repo_dir / ".memory" / "users" / "AGENTS.md",
+    ):
+        if not index.is_file():
+            continue
+        text = index.read_text(encoding="utf-8")
+        start = "<!-- project-memory-entries:start -->"
+        end = "<!-- project-memory-entries:end -->"
+        if start not in text or end not in text:
+            if text.strip():
+                return True
+            continue
+        body = text[text.index(start) + len(start) : text.index(end)]
+        lines = [
+            line.strip()
+            for line in body.splitlines()
+            if line.strip() and not line.strip().startswith("<!--")
+        ]
+        if any(line != EMPTY_ENTRY for line in lines):
+            return True
+    return False
 
 
 def _refresh_user_index(repo_dir: Path) -> str:

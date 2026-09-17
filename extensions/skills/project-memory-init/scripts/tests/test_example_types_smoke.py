@@ -37,6 +37,9 @@ class ExampleTypesAreNotSeedsTests(unittest.TestCase):
         for name, _description in EXAMPLE_TYPES:
             self.assertNotIn(name, seeds)
             self.assertNotIn(f".memory/{name.upper()}.md", template)
+            self.assertNotIn(
+                f".memory/{type_dir_name(name)}/AGENTS.md", template
+            )
 
 
 class ExampleTypesSmokeTests(unittest.TestCase):
@@ -46,7 +49,12 @@ class ExampleTypesSmokeTests(unittest.TestCase):
             init_memory(target, target, "example smoke")
             for name, description in EXAMPLE_TYPES:
                 add_type(target, name, description)
-                self.assertTrue((target / ".memory" / f"{name.upper()}.md").is_file())
+                self.assertTrue(
+                    (
+                        target / ".memory" / type_dir_name(name) / "AGENTS.md"
+                    ).is_file()
+                )
+                self.assertFalse((target / ".memory" / f"{name.upper()}.md").exists())
                 self.assertEqual(
                     type_content_dir(target, name),
                     target / ".memory" / type_dir_name(name),
@@ -87,7 +95,7 @@ class ExampleTypesSmokeTests(unittest.TestCase):
             init_memory(target, target, "example smoke")
             agents = (target / "AGENTS.md").read_text(encoding="utf-8")
             for name, _description in EXAMPLE_TYPES:
-                self.assertIn(f".memory/{name.upper()}.md", agents)
+                self.assertIn(f".memory/{type_dir_name(name)}/AGENTS.md", agents)
                 self.assertIn(name, discover_layer_types(target))
             self.assertEqual(doctor_memory(target, apply=True)["remaining"], [])
 

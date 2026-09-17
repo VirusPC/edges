@@ -35,6 +35,22 @@ class BackupTests(unittest.TestCase):
             self.assertIn(".memory/USER.md", names)
             self.assertIn(".memory/users/user_pref.md", names)
 
+    def test_backup_packs_users_agents_without_legacy_user_md(self) -> None:
+        from backup import backup_user_memory
+
+        with tempfile.TemporaryDirectory() as raw:
+            repo = Path(raw) / "repo"
+            users = repo / ".memory" / "users"
+            users.mkdir(parents=True)
+            (users / "AGENTS.md").write_text("# USER\n", encoding="utf-8")
+            (users / "user_pref.md").write_text("secret token xyz\n", encoding="utf-8")
+            archive = backup_user_memory(repo, timestamp="20260917T120000Z")
+            with tarfile.open(archive, "r:gz") as tar:
+                names = set(tar.getnames())
+            self.assertIn(".memory/users/AGENTS.md", names)
+            self.assertIn(".memory/users/user_pref.md", names)
+            self.assertNotIn(".memory/USER.md", names)
+
     def test_backup_errors_when_nothing_to_pack(self) -> None:
         from backup import backup_user_memory
 

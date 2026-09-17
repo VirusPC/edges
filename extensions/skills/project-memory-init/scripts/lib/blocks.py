@@ -9,7 +9,7 @@ from __future__ import annotations
 import re
 from functools import lru_cache
 
-from lib.paths import AGENTS_FILE_NAME, MEMORY_DIR_NAME
+from lib.paths import AGENTS_FILE_NAME, MEMORY_DIR_NAME, type_from_dir_name
 from lib.templates import read_template, template_path
 
 
@@ -54,8 +54,13 @@ INNER_BLOCK_ORDER = tuple(start for start, _end in INNER_BLOCK_PAIRS)
 # 标签取：标签带不带反引号都能解析，旧文件和手写条目一样认。
 INDEX_ENTRY_PATTERN = re.compile(r"^- \[[^\]]*\]\(([^)]+)\)(?: — (.*))?$", re.MULTILINE)
 
-# 记忆区块里声明索引文件的那几行，形如 ](.memory/FEEDBACK.md)；索引文件名全大写。
+# 本层清单一行：](.memory/<plural>/AGENTS.md)
 MEMORY_INDEX_LINK_PATTERN = re.compile(
+    rf"\]\({re.escape(MEMORY_DIR_NAME)}/([^/\s)]+)/{re.escape(AGENTS_FILE_NAME)}\)"
+)
+
+# 旧平铺入口：](.memory/FEEDBACK.md)
+LEGACY_FLAT_INDEX_LINK_PATTERN = re.compile(
     rf"\]\({re.escape(MEMORY_DIR_NAME)}/([A-Z][A-Z0-9_]*)\.md\)"
 )
 
@@ -92,16 +97,19 @@ def load_agents_template() -> str:
 
 @lru_cache(maxsize=None)
 def index_files() -> dict[str, str]:
-    """type → 索引文件名，从本层记忆区块声明的那几行推导。
+    """type → 相对 `.memory/` 的类型入口路径，从本层记忆区块那几行推导。
 
-    普通记忆类型只需加一行与同名入口模板；外部格式类型还要提供薄适配。
+    链接是 `.memory/<plural>/AGENTS.md`；type 名由复数目录反推。
     """
-    names = MEMORY_INDEX_LINK_PATTERN.findall(extract_block(LOCAL_START, LOCAL_END))
-    if not names:
+    dirs = MEMORY_INDEX_LINK_PATTERN.findall(extract_block(LOCAL_START, LOCAL_END))
+    if not dirs:
         raise ValueError(
             f"{template_path(AGENTS_FILE_NAME).name} 的本层记忆区块里没有声明任何索引文件"
         )
-    return {name.lower(): f"{name}.md" for name in dict.fromkeys(names)}
+    return {
+        type_from_dir_name(dir_name): f"{dir_name}/{AGENTS_FILE_NAME}"
+        for dir_name in dict.fromkeys(dirs)
+    }
 
 
 def block_pattern(start: str, end: str) -> re.Pattern[str]:

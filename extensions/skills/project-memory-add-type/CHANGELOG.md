@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- 登记产物改为 `.memory/<plural>/AGENTS.md`（与条目同处），不再写根部 `.memory/<TYPE>.md`（ADR-0012）。
+
 ## [1.0.0] - 2026-09-13
 
 ### Added

@@ -40,7 +40,7 @@
 | 改路径约定（`.memory`、类型内容根、`AGENTS.md`、skill 根） | `lib/paths.py`。内容根越出 `.memory/` 的类型集中在 `EXTERNAL_CONTENT_DIRS`，那张表同时意味着「只读」 |
 | 改出处 / 审计字段从哪来 | `lib/provenance.py` + [`../references/frontmatter-fields.md`](../references/frontmatter-fields.md) |
 
-官方种子仍改 `AGENTS.tmpl.md` 模板；用户 type 走 `add-type`，由本层 AGENTS / 入口产物发现。
+官方种子仍改 `AGENTS.tmpl.md` 模板（本层清单链到 `.memory/<plural>/AGENTS.md`）；类型入口正文仍由 `FEEDBACK.tmpl.md` 等渲染。用户 type 走 `add-type`，由本层 AGENTS / 类型入口产物发现。
 
 两处会岔开的地方，加类型前先想清楚落在哪一边：
 

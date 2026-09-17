@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- 回注接受 `.memory/users/AGENTS.md`（ADR-0012）以及尚未迁走的 `.memory/USER.md`。
+
 ## [1.0.0] - 2026-09-11
 
 ### Added
