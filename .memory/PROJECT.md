@@ -10,7 +10,7 @@
 - [能力面：CLI / Skill / MCP](projects/project_capability_surface_cli_skill_mcp.md) — 能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 extensions/clis 的 TS；MCP 子进程调 edges note。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。
 - [Changelog 自动化：调研过，暂不生成正文](projects/project_changelog_automation.md) — 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。
 - [classifyTasks 与 Task Project 元数据实现计划](projects/project_classify_tasks_and_project_metadata.md) — 实现或改 edges tasks project / classify-tasks Skill 时打开：计划在 docs/superpowers/plans/2026-09-17-classify-tasks.md；本轮只做计划；能力面 CLI + Skill + MCP；无 embedding、无 classify 动词。
-- [classifyTasks 软聚类；Task Project 元数据只做索引层](projects/project_classify_tasks_and_task_project_metadata.md) — 改 Task Project 元数据、classifyTasks 工作流或看板 AGENTS.md 时：只做索引/描述层（Q18=A），不把 Task 升成 Memory Type。决策见 docs/adr/0010-classify-tasks-and-task-project-metadata.md。本轮只定文档。
+- [classifyTasks 按已有质心整板分类；元数据只做索引层](projects/project_classify_tasks_and_task_project_metadata.md) — 改 Task Project 元数据、classifyTasks 工作流或看板 AGENTS.md 时：只做索引/描述层（Q18=A），路径 extensions/skills/project-tasks-classify/；新类型走 proposeTypes（ADR 0011）。决策见 docs/adr/0010-classify-tasks-and-task-project-metadata.md。
 - [CliContext 只装生产快照](projects/project_cli_context_production_snapshot.md) — 改 edges CLI 的 CliContext / run() 入参时：只放 env 与 stdin 快照加 Commander 的 result；不要把 ingest、fs、writer、now 等测试替身塞进 Context。输出类型叫 CliResult，不要叫 RunResult。
 - [对话整理采用复盘四栏](projects/project_conversation_notes_fupan_four_columns.md) — 改 conversation-to-notes 或对话 Note 结构时：用复盘四栏；相关链接写入【补充说明】并附说明；不要复活已关闭的 FIA 中文换皮；不要批量改写旧笔记；不要把升 Edge 写进该 skill。
 - [Task Issue 优先级用词档位，与 status 正交](projects/project_edges_task_priority.md) — Task Issue 优先级为 urgent|high|medium|low|none，写在 metadata.edges-task-priority，与 status 正交、不搬状态夹。CLI 已落地 create/update --priority 与 list --sort priority；Skill/MCP 后做。决策见 docs/adr/0007-edges-task-priority.md；词 vs P0 调研见 knowledge/projects/tasks/2026-09-15--issue-priority-words-vs-p0.md
@@ -23,6 +23,7 @@
 - [new-note MCP 的 ingest 约束](projects/project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges note，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
 - [posts 对外展示，Astro 博客 + Actions CI](projects/project_posts_public_astro_blog.md) — posts 面向对外展示；后续以 posts 为数据用 Astro 搭博客，并用 GitHub Actions 在服务器做 CI
 - [订阅管理盘点进展](projects/project_progress.md) — 订阅/用量盘点进展：双 Gmail + QQ IMAP、国内 Kimi 无邮箱、CodexBar Linux CLI 已装待鉴权；后续 Apple/微信侧核对。
+- [proposeTypes 从 _default 提议新 Task Project 类型](projects/project_propose_types_from_default.md) — 改 propose-types 工作流或从 _default 发明新 Task Project 时打开：独立 Skill extensions/skills/project-tasks-propose-types/；输出候选表，不自动 project create；方法是 LLM/agent 判断；配对 project-tasks-classify 与 ADR 0011。本轮只定文档。
 - [仓库用根 CHANGELOG 和 v 标签发版](projects/project_repo_changelog.md) — 写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 vX.Y.Z tag；不要当成 skill 或 shared-extensions 总账，也不要因它们的补丁去升仓库版本。
 - [根硬约束只留聚光灯、脱敏与 git](projects/project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
 - [根 README 以知识闭环为唯一主线](projects/project_root_readme_direction.md) — 设计或修改根 README 时：从投资视角解释知识管理、分层 Agent Memory 与知识闭环，用一张图串联认知资本、Edge、收益、风险、流动性和反馈再投资。

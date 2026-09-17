@@ -4,7 +4,7 @@
 
 **Status:** accepted（ADR 0009；grill 确认于 2026-09-16）
 
-**See also:** ADR 0010（Task Project 元数据 + classifyTasks；扩展本条，不改分组形状）
+**See also:** ADR 0010（Task Project 元数据 + classifyTasks；扩展本条，不改分组形状）；ADR 0011（从 `_default` 提议新类型；不改分组形状）
 
 ## Decision
 
