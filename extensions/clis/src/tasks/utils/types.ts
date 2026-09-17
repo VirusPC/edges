@@ -17,6 +17,14 @@ export const DEFAULT_TASK_PROJECT = "default";
 export const DEFAULT_TASK_PROJECT_DIR = "_default";
 export type TaskProjectId = typeof DEFAULT_TASK_PROJECT | string;
 
+export type TaskProjectRecord = {
+  project: TaskProjectId;
+  dir: string;
+  title: string;
+  description: string;
+  path: string;
+};
+
 export const RUN_STATUSES = ["pending", "running", "completed", "failed", "cancelled"] as const;
 
 export type RunStatus = (typeof RUN_STATUSES)[number];
@@ -25,6 +33,7 @@ export type TasksErrorCode =
   | "VALIDATION_ERROR"
   | "TASK_NOT_FOUND"
   | "RUN_NOT_FOUND"
+  | "PROJECT_NOT_FOUND"
   | "AMBIGUOUS_TASK"
   | "BOARD_IO_ERROR"
   | "UNKNOWN_ERROR";
