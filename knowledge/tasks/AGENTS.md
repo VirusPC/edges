@@ -23,3 +23,11 @@
 <!-- project-memory-local:end -->
 
 <!-- project-memory:end -->
+
+<!-- task-projects:start -->
+## Task Projects
+
+CLI-maintained index of Task Project titles and descriptions. Do not hand-edit this section.
+
+- [`_default`](_default/AGENTS.md) — Ungrouped tasks that have not been assigned a named Task Project.
+<!-- task-projects:end -->
