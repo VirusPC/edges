@@ -8,6 +8,7 @@
 
 <!-- project-memory-entries:start -->
 - [brainstorming](../.agents/skills/brainstorming/SKILL.md) — You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
+- [classify-tasks](../.agents/skills/classify-tasks/SKILL.md) — 对整板 Task 做软聚类归属建议（以带描述的 Task Project 为质心），等人改建议表后再用 edges tasks CLI 落地。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
 - [conversation-to-notes](../.agents/skills/conversation-to-notes/SKILL.md) — 将原始对话记录整理为结构清晰的中文笔记摘要。使用复盘四栏（背景→过程→所学→行动指南），灵感来自 After Action Review，但不是官方 AAR 模板。含补充说明（相关链接写入该栏并附简短说明）。
 - [domain-modeling](../.agents/skills/domain-modeling/SKILL.md) — Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording or editing an ADR.
 - [edges-note](../.agents/skills/edges-note/SKILL.md) — 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 `edges note`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
