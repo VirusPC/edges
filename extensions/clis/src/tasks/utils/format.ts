@@ -1,5 +1,11 @@
 import type { TaskRun } from "./runlog.js";
-import type { TaskListItem, TaskRecord, TasksErrorCode } from "./types.js";
+import type {
+  TaskListItem,
+  TaskProjectId,
+  TaskProjectRecord,
+  TaskRecord,
+  TasksErrorCode,
+} from "./types.js";
 
 export type TasksFailure = {
   status: "failed";
@@ -20,6 +26,11 @@ export type TasksSuccess = {
   runs?: unknown[];
   run?: unknown;
   messages?: unknown[];
+  projects?: TaskProjectRecord[];
+  project?: TaskProjectId;
+  dir?: string;
+  title?: string;
+  description?: string;
 };
 
 export function formatTasksResult(payload: TasksSuccess | TasksFailure): string {
