@@ -19,6 +19,10 @@ references/AGENTS.md
 
 即：按类型（或作用域）建目录，索引就是该目录下的 `AGENTS.md`，而不是 hidden `.memory/` 里的另一套入口文件。
 
+## Why
+
+比 `.memory/` 内平铺类型索引**更加具备一致性和可扩展性**：索引形态统一为各处都认识的 `AGENTS.md`；新类型只需加目录 + 一份 `AGENTS.md`，不必再发明/维护另一套索引文件名约定。
+
 ## 对照现状（待推翻或收缩）
 
 当前常见：目录根有一份 `AGENTS.md`，另在 `.memory/` 内维护类型索引文件。本 idea 指向索引出口下沉到**类型目录下的 `AGENTS.md`**（如 `feedbacks/AGENTS.md`），降低双索引漂移。
