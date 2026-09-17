@@ -1,6 +1,6 @@
 ---
 name: project-tasks-classify
-description: 对整板 Task 做软聚类归属建议（以带描述的 Task Project 为质心），等人改建议表后再用 edges tasks CLI 落地。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
+description: 对整板 Task 按用户已设的 Task Project（标题 + 描述）做归属建议（LLM / agent 判断，不要求 embedding），等人改建议表后再用 edges tasks CLI 落地。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
 version: 1.0.0
 ---
 
@@ -10,19 +10,19 @@ version: 1.0.0
 
 ## 什么时候用
 
-- 用户要按主题整理 Task 看板：整板重聚（含已有 named project，不只 `_default`）。
-- 已有 Task Project 带标题与描述，要把它们当软聚类质心。
-- 不要用它做单条 CRUD（那是后续 generic tasks Skill/MCP）；不要用它跑 embedding K-means；不要调用不存在的 `edges tasks classify`。
+- 用户要按主题整理 Task 看板：整板分类（含已有 named project，不只 `_default`）。
+- 已有 Task Project 带标题与描述，要把它们当用户已设的分类质心。
+- 不要用它做单条 CRUD（那是后续 generic tasks Skill/MCP）；不要要求 embedding；不要调用不存在的 `edges tasks classify`。
 
 ## 步骤（必须按序，第 4 步要停）
 
-1. **读质心。** 在仓库根：
+1. **读已有质心。** 在仓库根：
 
 ```bash
 pnpm --filter edges-cli exec tsx src/index.ts tasks project list
 ```
 
-已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。解析 stdout JSON：`command` 为 `project.list`，`projects[].project|title|description` 是质心。若 `_default` 还没有 AGENTS.md，这条命令会 bootstrap 元数据，**不会**搬 Task 文件。
+已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。解析 stdout JSON：`command` 为 `project.list`，`projects[].project|title|description` 是用户已设的质心（slug + 标题 + 描述）。若 `_default` 还没有 AGENTS.md，这条命令会 bootstrap 元数据，**不会**搬 Task 文件。
 
 2. **读整板 Task。**
 
@@ -32,7 +32,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks list
 
 对需要正文的行再 `tasks get <stem>`。必须包含所有 project，禁止 `list --project default` 当作唯一输入。
 
-3. **软聚类建议。** 用每个 Task 的 title/description 对照每个 project 的 title/description，判断归入已有质心、留 `default`、或建议新 slug。不要 embedding，不要向量距离，不要在本目录写 `scripts/`。
+3. **按已有质心做归属建议。** 用每个 Task 的 title/description 对照每个 project 的 title/description，由 LLM / agent 判断归入已有质心、留 `default`、或建议新 slug。不要 embedding，不要向量距离，不要在本目录写 `scripts/`。
 
 4. **出表并等待人类修改。** 只输出这一张表，然后 **停止**，等人改 `suggested` / `action` / `note` 后再继续：
 
@@ -63,7 +63,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks update <stem> --project <sug
 - 不要 `edges tasks classify`（没有这个动词）。
 - 不要改 `edges-tasks-status` 或 `edges-task-priority`（不要 `status`，不要 `update --priority`）。
 - 不要 `mkdir` / `mv` / 手改 Task 文件 / 手改 `AGENTS.md` / 手改根 Task Projects 节。
-- 不要只用 `_default` 重聚；不要 embedding；不要把 Task 升成 Memory Type。
+- 不要只用 `_default` 分类；不要 embedding；不要把 Task 升成 Memory Type。
 - 不要在本 skill 下写 `scripts/`。
 - 不要把 npm `bin` 说成能力面的一层。能力面是 CLI + Skill + MCP。
 
@@ -73,4 +73,4 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks update <stem> --project <sug
 - **Skill：** 本文件（classifyTasks）
 - **MCP：** 对等入口；本轮没有 classify MCP，也没有 generic tasks MCP。缺 shell 时说明 generic tasks Skill/MCP CRUD 仍在 backlog，不要假装 MCP 已能搬 Task
 
-Whole-board recluster; wait for the human-edited table before apply.
+Whole-board classification onto user-set centroids; wait for the human-edited table before apply.

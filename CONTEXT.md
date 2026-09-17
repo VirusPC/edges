@@ -190,7 +190,7 @@ _避免使用_：已落盘的 Task Project、自动当成质心、Memory Type
 
 **classifyTasks（edges）**：
 独立工作流 Skill（约定路径 `extensions/skills/project-tasks-classify/`，展示名 classifyTasks）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），人改建议表后再经 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
-_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、只整理 `_default`、公开 `edges tasks classify`
+_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、要求 embedding / 向量分类、只整理 `_default`、公开 `edges tasks classify`
 
 **proposeTypes（edges）**：
 独立工作流 Skill（约定路径 `extensions/skills/project-tasks-propose-types/`，展示名 proposeTypes）：从 `_default` Task 与已有 Task Project 质心提议新的 Task Project 候选，本身不落地为 Task Project。

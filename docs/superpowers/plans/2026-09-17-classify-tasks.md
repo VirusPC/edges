@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add Task Project index/description metadata (`edges tasks project list|get|create|update`) and the independent classifyTasks Skill so an agent can soft-cluster the whole board against project descriptions, wait for a human-edited suggestion table, and apply moves only through existing `update --project` — without embeddings, without an `edges tasks classify` verb, and without relocating the live board again.
+**Goal:** Add Task Project index/description metadata (`edges tasks project list|get|create|update`) and the independent classifyTasks Skill so an agent can classify the whole board onto **user-set** Task Project centroids (title + description) by LLM / agent judgment, wait for a human-edited suggestion table, and apply moves only through existing `update --project` — without embeddings, without an `edges tasks classify` verb, and without relocating the live board again.
 
-**Architecture:** Keep the current Commander → `run()` → `src/tasks/*.ts` + `src/tasks/utils/` layout. Reuse `parseTaskProject` / `listProjectIds` / `updateTask(..., { project })` from ADR 0009. Add a focused `project-meta.ts` helper that owns lightweight per-project `AGENTS.md` and the root Task Projects index section **outside** project-memory managed markers. Register a nested `project` command group under `edges tasks` (one file per command node). classifyTasks is a SKILL.md-only workflow (no `scripts/`, no clustering library): it calls the CLI, proposes a table, waits, then applies via CLI. Capability Surface remains CLI + Skill + MCP as three peers (ADR 0004); this round implements the project CLI contract plus the project-tasks-classify Skill. Generic tasks Skill/MCP CRUD stays the separate backlog.
+**Architecture:** Keep the current Commander → `run()` → `src/tasks/*.ts` + `src/tasks/utils/` layout. Reuse `parseTaskProject` / `listProjectIds` / `updateTask(..., { project })` from ADR 0009. Add a focused `project-meta.ts` helper that owns lightweight per-project `AGENTS.md` and the root Task Projects index section **outside** project-memory managed markers. Register a nested `project` command group under `edges tasks` (one file per command node). classifyTasks is a SKILL.md-only workflow (no `scripts/`, no classification library): it calls the CLI, proposes a table, waits, then applies via CLI. Capability Surface remains CLI + Skill + MCP as three peers (ADR 0004); this round implements the project CLI contract plus the project-tasks-classify Skill. Generic tasks Skill/MCP CRUD stays the separate backlog.
 
 **Tech Stack:** TypeScript, Node.js ≥20, existing `commander` + `zod`, `node:test` + `tsx` (not vitest), `node:fs/promises`. No embeddings library. No new YAML library. No `simple-git`. No Multica daemon. No parent / sub-issue / stage.
 
@@ -17,13 +17,13 @@
 - Capability Surface wording, if mentioned: always **CLI + Skill + MCP** (three peers). Never “必要时 MCP”, never “CLI + Skill” as the Edges shorthand, never npm `package.json` `"bin"` as a layer
 - This round implements **CLI project subcommands + project-tasks-classify Skill**. Do not implement generic edges-tasks Skill/MCP CRUD (that backlog stays separate). Do not add a classify MCP
 - Skill path is exactly `extensions/skills/project-tasks-classify/` (frontmatter `name: project-tasks-classify`). Display name in headings is classifyTasks
-- Clustering is **soft** (agent judges against project title+description centroids). Whole-board recluster, not only `_default`. Batch human-editable suggestion table, then CLI apply
+- Classification is **LLM / agent judgment** onto **already-set** Task Project centroids (title + description). Whole-board classify, not only `_default`. Batch human-editable suggestion table, then CLI apply. Do not require embeddings
 - No embeddings. No vector store. No `scripts/` under project-tasks-classify. No public `edges tasks classify` (or `classify-tasks`) verb
 - CLI: `edges tasks project list|get|create|update`. `create` writes the project directory + lightweight `AGENTS.md` + refreshes the root `knowledge/tasks/AGENTS.md` Task Projects section **outside** `<!-- project-memory:start -->` … `<!-- project-memory:end -->`
 - Every Task Project including `_default` has a lightweight `AGENTS.md` (title + description, optional `## Pointers`). Do **not** run `project-memory-init` on each project
 - Task moves stay on existing `edges tasks update --project`. That path must **not** change `edges-tasks-status` or `edges-task-priority`
 - Q18=A: index/description is like Project Memory; board markdown remains SoT. Do not treat Task as a Memory Type (Q18=B / `tasks-memory与看板语义合并`)
-- Absorbs the first knife of `交互式主题聚类（参考 K-means）` and the in-progress `整理 _default project tasks 的 skill` (whole board, not `_default`-only). Embedding K-means and “classify sunk into CLI” remain exploration cards — do not implement them
+- Absorbs the first knife of `交互式主题聚类（参考 K-means）` and the in-progress `整理 _default project tasks 的 skill` (whole board, not `_default`-only). Embedding / real vector classification and “classify sunk into CLI” remain exploration cards — do not implement them
 - Bootstrap metadata only. Do **not** relocate Task files or sidecars (ADR 0009 already moved the live board into `_default/<status>/`)
 - Do not put `ingest` / `fs` / `writer` / `now` / `repoPath` on `CliContext` or `run()`’s second argument
 - Do not add `js-yaml` / `gray-matter` / `simple-git` / vitest. Stay on `commander` + `zod` + `node:test` + `tsx`
@@ -75,7 +75,7 @@ Verified on `origin/main` after ADR 0010 (`1a5875a`). Command tree is `extension
 - `extensions/skills/edges-tasks/**` or any generic tasks Skill/MCP CRUD wrapper
 - MCP server / tool for classify or for `tasks project`
 - `edges tasks classify` / `edges tasks project classify`
-- Embeddings, K-means code, or project-tasks-classify `scripts/`
+- Embeddings, vector-classification code, or project-tasks-classify `scripts/`
 - Full `project-memory-init` trees under `knowledge/tasks/<project>/`
 - Task-as-Memory-Type / Q18=B
 - Parent / sub-issue / stage
@@ -325,7 +325,7 @@ No code algorithm. The agent:
 
 1. `edges tasks project list` — centroids
 2. `edges tasks list` — whole board (every project × status)
-3. Soft-assign each Task to an existing centroid, `default`, or a **new slug the human must confirm**
+3. Assign each Task (LLM / agent judgment) to an existing centroid, `default`, or a **new slug the human must confirm**
 4. Print the suggestion table
 5. **Stop and wait** for the human to edit the table
 6. Apply with CLI only
@@ -354,7 +354,7 @@ Capability Surface paragraph in the Skill (required wording): hosts with a shell
 
 ### Absorbed backlogs (do not implement the leftover cards)
 
-- First knife of `knowledge/tasks/_default/backlog/2026-09-15--交互式主题聚类参考K-means.md` (soft cluster + human confirm). Embedding K-means stays on that card
+- First knife of `knowledge/tasks/_default/backlog/2026-09-15--交互式主题聚类参考K-means.md` (user-set themes + human confirm). Embedding / real vector classification stays on that card
 - In-progress `knowledge/tasks/_default/in_progress/2026-09-16--整理default-project的tasks-skill.md` is the same knife, widened to the whole board
 - Leave `knowledge/tasks/_default/backlog/2026-09-17--classify沉到edges-tasks-CLI.md` and `knowledge/tasks/_default/backlog/2026-09-16--edges-tasks的Skill与MCP封装.md` untouched as exploration / later CRUD
 
@@ -1303,14 +1303,14 @@ git commit -m "feat(tasks): add edges tasks project list|get|create|update" \
 
 **Interfaces:**
 - Consumes: CLI from Task 5 (`project list|get|create|update`, `tasks list`, `tasks update --project`)
-- Produces: a loadable Agent Skill whose `name` equals the directory name `project-tasks-classify`; display heading classifyTasks; no clustering code
+- Produces: a loadable Agent Skill whose `name` equals the directory name `project-tasks-classify`; display heading classifyTasks; no classification library
 
 Frontmatter (required):
 
 ```markdown
 ---
 name: project-tasks-classify
-description: 对整板 Task 做软聚类归属建议（以带描述的 Task Project 为质心），等人改建议表后再用 edges tasks CLI 落地。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
+description: 对整板 Task 按用户已设的 Task Project（标题 + 描述）做归属建议（LLM / agent 判断，不要求 embedding），等人改建议表后再用 edges tasks CLI 落地。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
 version: 1.0.0
 ---
 ```
@@ -1346,7 +1346,7 @@ for needle in [
     "wait",
 ]:
     assert needle in text, needle
-for banned in ["edges tasks classify", "openai.embeddings", "kmeans", "KMeans"]:
+for banned in ["openai.embeddings", "kmeans", "KMeans", "NCC", "Nearest Centroid", "Embedding-based"]:
     assert banned not in text, banned
 assert "手改" in text or "hand-edit" in text or "不要手" in text
 PY
@@ -1369,19 +1369,19 @@ Write `extensions/skills/project-tasks-classify/SKILL.md` with **exactly** this 
 
 ## 什么时候用
 
-- 用户要按主题整理 Task 看板：整板重聚（含已有 named project，不只 `_default`）。
-- 已有 Task Project 带标题与描述，要把它们当软聚类质心。
-- 不要用它做单条 CRUD（那是后续 generic tasks Skill/MCP）；不要用它跑 embedding K-means；不要调用不存在的 `edges tasks classify`。
+- 用户要按主题整理 Task 看板：整板分类（含已有 named project，不只 `_default`）。
+- 已有 Task Project 带标题与描述，要把它们当用户已设的分类质心。
+- 不要用它做单条 CRUD（那是后续 generic tasks Skill/MCP）；不要要求 embedding；不要调用不存在的 `edges tasks classify`。
 
 ## 步骤（必须按序，第 4 步要停）
 
-1. **读质心。** 在仓库根：
+1. **读已有质心。** 在仓库根：
 
 ```bash
 pnpm --filter edges-cli exec tsx src/index.ts tasks project list
 ```
 
-已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。解析 stdout JSON：`command` 为 `project.list`，`projects[].project|title|description` 是质心。若 `_default` 还没有 AGENTS.md，这条命令会 bootstrap 元数据，**不会**搬 Task 文件。
+已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。解析 stdout JSON：`command` 为 `project.list`，`projects[].project|title|description` 是用户已设的质心（slug + 标题 + 描述）。若 `_default` 还没有 AGENTS.md，这条命令会 bootstrap 元数据，**不会**搬 Task 文件。
 
 2. **读整板 Task。**
 
@@ -1391,7 +1391,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks list
 
 对需要正文的行再 `tasks get <stem>`。必须包含所有 project，禁止 `list --project default` 当作唯一输入。
 
-3. **软聚类建议。** 用每个 Task 的 title/description 对照每个 project 的 title/description，判断归入已有质心、留 `default`、或建议新 slug。不要 embedding，不要向量距离，不要在本目录写 `scripts/`。
+3. **按已有质心做归属建议。** 用每个 Task 的 title/description 对照每个 project 的 title/description，由 LLM / agent 判断归入已有质心、留 `default`、或建议新 slug。不要 embedding，不要向量距离，不要在本目录写 `scripts/`。
 
 4. **出表并等待人类修改。** 只输出这一张表，然后 **停止**，等人改 `suggested` / `action` / `note` 后再继续：
 
@@ -1422,7 +1422,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks update <stem> --project <sug
 - 不要 `edges tasks classify`（没有这个动词）。
 - 不要改 `edges-tasks-status` 或 `edges-task-priority`（不要 `status`，不要 `update --priority`）。
 - 不要 `mkdir` / `mv` / 手改 Task 文件 / 手改 `AGENTS.md` / 手改根 Task Projects 节。
-- 不要只用 `_default` 重聚；不要 embedding；不要把 Task 升成 Memory Type。
+- 不要只用 `_default` 分类；不要 embedding；不要把 Task 升成 Memory Type。
 - 不要在本 skill 下写 `scripts/`。
 - 不要把 npm `bin` 说成能力面的一层。能力面是 CLI + Skill + MCP。
 
@@ -1449,7 +1449,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- classifyTasks：整板软聚类建议表，人改后再用 `edges tasks project` 与 `update --project` 落地。无 embedding，无 `classify` 动词。能力面 CLI + Skill + MCP。
+- classifyTasks：整板按已有 Task Project 质心做归属建议表，人改后再用 `edges tasks project` 与 `update --project` 落地。无 embedding，无 `classify` 动词。能力面 CLI + Skill + MCP。
 
 [Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-tasks-classify@1.0.0...HEAD
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-tasks-classify@1.0.0
@@ -1551,7 +1551,7 @@ If any Task `*.md` or `.{stem}.log.md` appears, **stop and revert those files**.
 
 ```
 - `edges tasks project list|get|create|update`：Task Project 元数据（每 project 含 `_default` 的轻量 AGENTS.md + 根 `knowledge/tasks/AGENTS.md` Task Projects 节，写在 project-memory 受管标记外）。Q18=A；看板 markdown 仍是 Task 真源。无 embedding，无 `edges tasks classify`。
-- `extensions/skills/project-tasks-classify`：classifyTasks 整板软聚类工作流 Skill；人改建议表后经 CLI 落地。能力面 CLI + Skill + MCP。Generic tasks Skill/MCP CRUD 仍是另卡 backlog。
+- `extensions/skills/project-tasks-classify`：classifyTasks 整板按已有 Task Project 质心做归属建议（LLM / agent 判断）；人改建议表后经 CLI 落地。能力面 CLI + Skill + MCP。Generic tasks Skill/MCP CRUD 仍是另卡 backlog。
 ```
 
 Update the existing project memory via `$project-memory-remember` (do not hand-edit `.memory/PROJECT.md`). Reuse slug `classify_tasks_and_project_metadata` if the plan-only PR already created it; otherwise create it. Body shape:
@@ -1560,7 +1560,7 @@ Update the existing project memory via `$project-memory-remember` (do not hand-e
 ADR 0010 的 CLI project 子命令与 classifyTasks Skill 已按 docs/superpowers/plans/2026-09-17-classify-tasks.md 落地。元数据只在索引/描述层；apply 走 update --project，不改 status / priority。
 
 **Why:**
-grill 锁定 Q18=A、软聚类、无 embedding、无 classify 动词。能力面始终是 CLI + Skill + MCP。
+grill 锁定 Q18=A、按已有质心做 LLM / agent 判断、无 embedding、无 classify 动词。能力面始终是 CLI + Skill + MCP。
 
 **How to apply:**
 - 改 project 标题/描述用 `edges tasks project update`；新建用 `project create`。
@@ -1626,14 +1626,14 @@ Only stage `.memory/PROJECT.md` if the remember script refreshed the index. Do n
 | Decision | Task |
 | --- | --- |
 | Skill `extensions/skills/project-tasks-classify/`, display classifyTasks | Task 6 |
-| Soft clustering; project descriptions as centroids; whole-board recluster; batch editable table; CLI apply | Task 6 Locked design |
+| Classify onto user-set project centroids (LLM / agent judgment); whole-board classify; batch editable table; CLI apply | Task 6 Locked design |
 | No embeddings; no `edges tasks classify` | Global Constraints; Tasks 5–6 tests |
 | `edges tasks project list\|get\|create\|update`; create writes dir + AGENTS.md + root index outside project-memory markers | Tasks 2–5 |
 | Every project including `_default` has lightweight AGENTS.md | Tasks 1, 3, 7 |
 | Task moves via existing `update --project`; must not change status or priority | Task 5 CLI test; existing `write.test.ts` |
 | Q18=A index/description; board files remain SoT; not Task-as-Memory-Type | Locked design; Skill 禁止 |
 | Capability Surface CLI + Skill + MCP; this plan = project CLI + project-tasks-classify Skill; generic CRUD backlog separate | Header, Global Constraints, Task 5/6 copy |
-| Absorbs interactive theme-clustering first knife; embedding K-means / classify-in-CLI out of scope | Locked design “Absorbed backlogs” |
+| Absorbs interactive theme-clustering first knife; embedding / vector classification / classify-in-CLI out of scope | Locked design “Absorbed backlogs” |
 | Bootstrap metadata without relocating Tasks | Tasks 3, 7 |
 
 **Placeholder scan:** no TBD / TODO / “implement later” / “similar to Task N” left in steps.
