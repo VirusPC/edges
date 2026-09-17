@@ -8,6 +8,7 @@
 <!-- project-memory-entries:start -->
 - [CLI 项目放 extensions/clis，不放仓库根](feedbacks/feedback_clis_under_extensions.md) — 新增或移动面向 agent 的 CLI 时：放 extensions/clis，禁止仓库根 clis/。
 - [Codex 唤起 skill 用 $ 不是 /](feedbacks/feedback_codex_invoke_skill_with_dollar.md) — 在 Codex 里触发某个 skill 时用 $skill-name；/ 是斜杠命令。/skills 只列清单。不要把认不到 skill 当成没装上。
+- [禁止动词的 help 测例锚定命令行](feedbacks/feedback_help_forbid_verb_line_anchor.md) — 写 edges tasks --help 测例、禁止某个动词出现时：用 ^\s+verb\b 锚定命令列表行，不要用 /\bverb\b/，以免 after-help 的 “There is no X command” 被当成命令。
 - [接口层方案进 .memory，不进 docs](feedbacks/feedback_interface_plans_in_memory.md) — 写 extensions 层调研或技术方案时：进 .memory（reference/project），禁止放 extensions/docs 或 knowledge/projects，否则 ask 检索不到。
 - [不要加 edges-note shim 或根目录默认 ingest](feedbacks/feedback_no_edges_note_shim.md) — 改 edges-cli 的 bin、默认命令或兼容入口时：只保留 edges；禁止 edges-note 第二 bin / shim；根目录无子命令不得跑 note ingest。
 - [Restore --force 整份替换，不合并](feedbacks/feedback_restore_force_replaces.md) — 改 user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。
