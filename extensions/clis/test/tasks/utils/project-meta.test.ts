@@ -3,13 +3,34 @@ import assert from "node:assert/strict";
 import {
   DEFAULT_PROJECT_DESCRIPTION,
   DEFAULT_PROJECT_TITLE,
+  PROJECT_MEMORY_END,
+  PROJECT_MEMORY_START,
+  TASK_PROJECTS_END,
+  TASK_PROJECTS_START,
+  oneLineDescription,
   parseProjectAgents,
   parseProjectDescription,
   parseProjectTitle,
   renderProjectAgents,
+  rewriteRootAgents,
   seedDescriptionFor,
   seedTitleFor,
 } from "../../../src/tasks/utils/project-meta.js";
+
+const defaultRecord = {
+  project: "default" as const,
+  dir: "_default",
+  title: "Default",
+  description: "Ungrouped tasks that have not been assigned a named Task Project.",
+  path: "knowledge/tasks/_default/AGENTS.md",
+};
+const cliRecord = {
+  project: "cli",
+  dir: "cli",
+  title: "CLI",
+  description: "edges CLI\nwork",
+  path: "knowledge/tasks/cli/AGENTS.md",
+};
 
 test("seed copy for default and user slugs", () => {
   assert.equal(DEFAULT_PROJECT_TITLE, "Default");
@@ -85,5 +106,57 @@ test("parseProjectAgents rejects frontmatter and project-memory markers", () => 
   } catch (error) {
     assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
     assert.match((error as Error).message, /must not contain project-memory markers/);
+  }
+});
+
+test("oneLineDescription collapses newlines", () => {
+  assert.equal(oneLineDescription("edges CLI\nwork"), "edges CLI work");
+});
+
+test("rewriteRootAgents inserts after project-memory end and does not touch the managed block", () => {
+  const existing = `# tasks\n\n${PROJECT_MEMORY_START}\n\n## 本层硬约束\n\n- keep me\n${PROJECT_MEMORY_END}\n`;
+  const next = rewriteRootAgents(existing, [cliRecord, defaultRecord]);
+  const managed = existing.slice(
+    existing.indexOf(PROJECT_MEMORY_START),
+    existing.indexOf(PROJECT_MEMORY_END) + PROJECT_MEMORY_END.length,
+  );
+  const nextManaged = next.slice(
+    next.indexOf(PROJECT_MEMORY_START),
+    next.indexOf(PROJECT_MEMORY_END) + PROJECT_MEMORY_END.length,
+  );
+  assert.equal(nextManaged, managed);
+  assert.match(next, /<!-- task-projects:start -->/);
+  assert.ok(next.indexOf(PROJECT_MEMORY_END) < next.indexOf(TASK_PROJECTS_START));
+  assert.match(next, /- \[`_default`\]\(_default\/AGENTS.md\) — Ungrouped tasks that have not been assigned a named Task Project\./);
+  assert.match(next, /- \[`cli`\]\(cli\/AGENTS.md\) — edges CLI work/);
+  const defaultLine = next.indexOf("[`_default`]");
+  const cliLine = next.indexOf("[`cli`]");
+  assert.ok(defaultLine < cliLine);
+});
+
+test("rewriteRootAgents replaces an existing Task Projects span only", () => {
+  const existing = `${PROJECT_MEMORY_START}\nkeep\n${PROJECT_MEMORY_END}\n\n${TASK_PROJECTS_START}\n## Task Projects\n\nold\n${TASK_PROJECTS_END}\n\n# trailing\n`;
+  const next = rewriteRootAgents(existing, [defaultRecord]);
+  assert.match(next, /# trailing/);
+  assert.doesNotMatch(next, /^old$/m);
+  assert.equal(
+    next.slice(next.indexOf(PROJECT_MEMORY_START), next.indexOf(PROJECT_MEMORY_END) + PROJECT_MEMORY_END.length),
+    `${PROJECT_MEMORY_START}\nkeep\n${PROJECT_MEMORY_END}`,
+  );
+});
+
+test("rewriteRootAgents on empty file writes only the Task Projects block", () => {
+  const next = rewriteRootAgents("", [defaultRecord]);
+  assert.ok(next.startsWith(TASK_PROJECTS_START));
+  assert.doesNotMatch(next, /project-memory/);
+});
+
+test("rewriteRootAgents rejects a start marker without an end marker", () => {
+  try {
+    rewriteRootAgents(`${TASK_PROJECTS_START}\n## Task Projects\n`, [defaultRecord]);
+    assert.fail("expected throw");
+  } catch (error) {
+    assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
+    assert.match((error as Error).message, /malformed Task Projects markers/);
   }
 });
