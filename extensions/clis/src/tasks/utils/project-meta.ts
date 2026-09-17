@@ -1,7 +1,7 @@
 import path from "node:path";
 import { listProjectIds, type BoardFs, type BoardWriter } from "./board.js";
 import { boardRoot } from "./paths.js";
-import { projectDirName } from "./project.js";
+import { parseTaskProject, projectDirName } from "./project.js";
 import {
   DEFAULT_TASK_PROJECT,
   TasksError,
@@ -276,4 +276,84 @@ export async function ensureProjectMetadata(
   }
 
   return refreshProjectIndex(repoPath, writer);
+}
+
+export async function listProjects(
+  repoPath: string,
+  writer: BoardWriter,
+): Promise<TaskProjectRecord[]> {
+  return ensureProjectMetadata(repoPath, writer);
+}
+
+export async function getProject(
+  repoPath: string,
+  raw: string,
+  writer: BoardWriter,
+): Promise<TaskProjectRecord> {
+  const id = parseTaskProject(raw);
+  await ensureProjectMetadata(repoPath, writer);
+  return readProjectRecord(repoPath, id, writer);
+}
+
+export async function createProject(
+  repoPath: string,
+  input: { project: string; title: string; description: string },
+  writer: BoardWriter,
+): Promise<TaskProjectRecord> {
+  const id = parseTaskProject(input.project);
+  const title = parseProjectTitle(input.title);
+  const description = parseProjectDescription(input.description);
+  await ensureProjectMetadata(repoPath, writer, id);
+  const rel = projectAgentsRelPath(id);
+  if (await writer.exists(path.join(repoPath, rel))) {
+    throw new TasksError("VALIDATION_ERROR", `project already exists: ${id}`);
+  }
+  await writer.mkdirp(path.join(repoPath, "knowledge/tasks", projectDirName(id)));
+  await writer.writeFile(path.join(repoPath, rel), renderProjectAgents({ title, description }));
+  await refreshProjectIndex(repoPath, writer);
+  return {
+    project: id,
+    dir: projectDirName(id),
+    title,
+    description,
+    path: rel,
+  };
+}
+
+export async function updateProject(
+  repoPath: string,
+  raw: string,
+  patch: { title?: string; description?: string },
+  writer: BoardWriter,
+): Promise<TaskProjectRecord> {
+  if (patch.title === undefined && patch.description === undefined) {
+    throw new TasksError(
+      "VALIDATION_ERROR",
+      "project update requires at least one of --title, --description",
+    );
+  }
+  const id = parseTaskProject(raw);
+  const rel = projectAgentsRelPath(id);
+  const abs = path.join(repoPath, rel);
+  if (!(await writer.exists(abs))) {
+    throw new TasksError("PROJECT_NOT_FOUND", `project not found: ${id}`);
+  }
+  const parsed = parseProjectAgents(await writer.readFile(abs));
+  const title = patch.title === undefined ? parsed.title : parseProjectTitle(patch.title);
+  const description =
+    patch.description === undefined
+      ? parsed.description
+      : parseProjectDescription(patch.description);
+  await writer.writeFile(
+    abs,
+    renderProjectAgents({ title, description, pointers: parsed.pointers }),
+  );
+  await refreshProjectIndex(repoPath, writer);
+  return {
+    project: id,
+    dir: projectDirName(id),
+    title,
+    description,
+    path: rel,
+  };
 }
