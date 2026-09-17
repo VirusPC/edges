@@ -7,6 +7,11 @@ import {
 
 export type { TaskProjectRecord };
 
+export const TASK_PROJECTS_START = "<!-- task-projects:start -->";
+export const TASK_PROJECTS_END = "<!-- task-projects:end -->";
+export const PROJECT_MEMORY_START = "<!-- project-memory:start -->";
+export const PROJECT_MEMORY_END = "<!-- project-memory:end -->";
+
 export const DEFAULT_PROJECT_TITLE = "Default";
 export const DEFAULT_PROJECT_DESCRIPTION =
   "Ungrouped tasks that have not been assigned a named Task Project.";
@@ -91,4 +96,89 @@ export function renderProjectAgents(input: {
     out += `\n${block}\n`;
   }
   return out;
+}
+
+export function oneLineDescription(description: string): string {
+  return description.replace(/\r?\n/g, " ").replace(/[ \t]+/g, " ").trim();
+}
+
+function isDefaultProject(record: TaskProjectRecord): boolean {
+  return record.dir === "_default" || record.dir === "default" || record.project === "default";
+}
+
+function sortProjectRecords(projects: TaskProjectRecord[]): TaskProjectRecord[] {
+  return [...projects].sort((a, b) => {
+    const aDefault = isDefaultProject(a);
+    const bDefault = isDefaultProject(b);
+    if (aDefault !== bDefault) {
+      return aDefault ? -1 : 1;
+    }
+    return a.dir.localeCompare(b.dir);
+  });
+}
+
+function managedMemorySpan(markdown: string): string | null {
+  const start = markdown.indexOf(PROJECT_MEMORY_START);
+  if (start === -1) {
+    return null;
+  }
+  const end = markdown.indexOf(PROJECT_MEMORY_END, start);
+  if (end === -1) {
+    return null;
+  }
+  return markdown.slice(start, end + PROJECT_MEMORY_END.length);
+}
+
+export function renderTaskProjectsSection(projects: TaskProjectRecord[]): string {
+  const bullets = sortProjectRecords(projects).map(
+    (record) =>
+      `- [\`${record.dir}\`](${record.dir}/AGENTS.md) — ${oneLineDescription(record.description)}`,
+  );
+  return [
+    TASK_PROJECTS_START,
+    "## Task Projects",
+    "",
+    "CLI-maintained index of Task Project titles and descriptions. Do not hand-edit this section.",
+    "",
+    ...bullets,
+    TASK_PROJECTS_END,
+  ].join("\n");
+}
+
+export function rewriteRootAgents(existing: string, projects: TaskProjectRecord[]): string {
+  const block = renderTaskProjectsSection(projects);
+  const start = existing.indexOf(TASK_PROJECTS_START);
+  const end = existing.indexOf(TASK_PROJECTS_END);
+
+  if (start !== -1 && (end === -1 || end < start)) {
+    throw new TasksError(
+      "VALIDATION_ERROR",
+      "malformed Task Projects markers in knowledge/tasks/AGENTS.md",
+    );
+  }
+
+  let next: string;
+  if (start !== -1) {
+    next = existing.slice(0, start) + block + existing.slice(end + TASK_PROJECTS_END.length);
+  } else {
+    const memoryEnd = existing.indexOf(PROJECT_MEMORY_END);
+    if (memoryEnd !== -1) {
+      const lineEnd = existing.indexOf("\n", memoryEnd);
+      const insertAt = lineEnd === -1 ? existing.length : lineEnd + 1;
+      next = `${existing.slice(0, insertAt)}\n${block}\n${existing.slice(insertAt)}`;
+    } else {
+      next = `${block}\n`;
+    }
+  }
+
+  const managedBefore = managedMemorySpan(existing);
+  const managedAfter = managedMemorySpan(next);
+  if (managedBefore !== null && managedAfter !== null && managedBefore !== managedAfter) {
+    throw new TasksError(
+      "VALIDATION_ERROR",
+      "refusing to write Task Projects section inside project-memory markers",
+    );
+  }
+
+  return next;
 }
