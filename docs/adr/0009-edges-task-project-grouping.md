@@ -4,6 +4,8 @@
 
 **Status:** accepted（ADR 0009；grill 确认于 2026-09-16）
 
+**See also:** ADR 0010（Task Project 元数据 + classifyTasks；扩展本条，不改分组形状）
+
 ## Decision
 
 - **形状：** directory-first 的 Multica-like Project；目录与 frontmatter 双写。本轮不做完整 parent / sub-issue / stage。
