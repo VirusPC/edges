@@ -31,6 +31,8 @@ export type TasksSuccess = {
   dir?: string;
   title?: string;
   description?: string;
+  groupCount?: number;
+  itemCount?: number;
 };
 
 export function formatTasksResult(payload: TasksSuccess | TasksFailure): string {

@@ -22,6 +22,7 @@ COMMANDS
   project get <project>
   project create <project> --title <title> --description <text>
   project update <project> [--title] [--description]
+  project review-page --from <path|-> [--out <path>]
 
 There is no classify command. Task moves stay on update --project (same status and priority).
 
