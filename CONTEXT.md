@@ -193,11 +193,11 @@ proposeTypes 输出的一行：建议 slug、描述，以及支撑该类型的 `
 _避免使用_：已落盘的 Task Project、自动当成质心、Memory Type
 
 **Task Project 审阅页（edges）**：
-`edges tasks project review-page` 产出的 HTML 产物：人把 items 在通用 groups 之间拖拽改组后导出 JSON。页与 CLI 只渲染 groups+items，组是已有 Task Project 还是 proposeTypes 候选由调用方 Skill 解释；审阅页本身不是 Task Project，也不是分类算法。
-_避免使用_：把它当 Task Project、当分类算法、`--mode`、审阅页 MCP、自动打开浏览器、靠 Grok Bot HTML 预览当闸门、长期依赖 `tools/` 原型
+classifyTasks 与 proposeTypes 共用的人确认闸门：一份由 `edges tasks project review-page` 渲出的 HTML，只含通用 groups+items。组是已有 Task Project 还是 proposeTypes 候选由调用方 Skill 解释；审阅页本身不是 Task Project，也不是分类算法。
+_避免使用_：把它当 Task Project、当分类算法、`--mode`
 
 **审阅导出行（edges）**：
-Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`、`action`，可选 `note`。`stem` 是 CLI 查找键，不是 title，也不等于 frontmatter / 文档 `name`。
+Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`、`action`，可选 `note`。查找键是 Task stem，不是 title 或 `name`。
 _避免使用_：用 title 或 name 当查找键、把展示字段当 apply 键
 
 **classifyTasks（edges）**：
