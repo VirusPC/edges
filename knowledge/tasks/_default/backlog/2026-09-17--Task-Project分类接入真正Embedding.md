@@ -44,3 +44,5 @@ metadata:
   - backlog：`classify 沉到 edges tasks CLI`（有 embedding 后 CLI 才好沉）
   - backlog：`tasks-memory与看板语义合并`（Q18=B）— 勿与本卡并
 - 未指派。有 embedding 方案后再 grill-with-docs。
+
+**交叉笔记：** `knowledge/projects/tasks/2026-09-17--task-project-classify-no-fake-embedding.md`
