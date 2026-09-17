@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Task Project classify — 拖拽</title>
+<style>
+  :root {
+    --bg: #0f1419; --panel: #1a2332; --panel2: #243044; --text: #e7ecf3;
+    --muted: #9aa8bc; --border: #334155; --accent: #5b9fd4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 14px/1.45 system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); height: 100vh;
+    display: flex; flex-direction: column;
+    user-select: none;
+  }
+  header { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  h1 { margin: 0 0 4px; font-size: 17px; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+  input[type="search"], input[type="text"], select, textarea {
+    background: var(--panel); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; user-select: text;
+  }
+  input[type="search"] { flex: 1; min-width: 160px; }
+  button {
+    background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 12px; cursor: pointer; font: inherit;
+  }
+  button.primary { background: #1e4d73; border-color: var(--accent); }
+  #toast {
+    position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
+    background: #12324d; border: 1px solid var(--accent); color: var(--text);
+    padding: 10px 14px; border-radius: 10px; z-index: 100;
+    display: none; max-width: 90vw;
+  }
+  #toast.show { display: block; }
+  .layout { flex: 1; min-height: 0; display: grid; grid-template-columns: 280px 1fr; }
+  .sidebar {
+    border-right: 1px solid var(--border); overflow: auto; padding: 12px;
+    background: #121820; display: flex; flex-direction: column; gap: 8px;
+  }
+  .side-label { color: var(--muted); font-size: 11px; }
+  .group {
+    border: 1px dashed var(--border); border-radius: 12px; padding: 12px;
+    background: var(--panel); cursor: pointer; touch-action: none;
+  }
+  .group.is-filter { border-style: solid; border-color: var(--accent); }
+  .group.is-over {
+    border-style: solid; border-color: var(--accent);
+    background: #1c3350; outline: 2px solid var(--accent);
+  }
+  .group .name { font-weight: 650; font-size: 13px; word-break: break-all; }
+  .group .desc { color: var(--muted); font-size: 11px; margin-top: 4px; }
+  .group .meta { display: flex; justify-content: space-between; margin-top: 8px; }
+  .badge {
+    background: #0f1419; border: 1px solid var(--border); border-radius: 999px;
+    padding: 2px 8px; font-size: 12px; color: var(--accent);
+  }
+  .main { overflow: auto; padding: 12px 16px 80px; }
+  .main-head { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .list { display: grid; gap: 8px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; cursor: grab; touch-action: none;
+    display: grid; gap: 6px;
+  }
+  .card.dragging-source { opacity: .35; }
+  .stem { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .pill {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid var(--accent); color: var(--accent); font-size: 12px;
+  }
+  .muted { color: var(--muted); font-size: 12px; }
+  .card input[type="text"] { flex: 1; min-width: 140px; font-size: 12px; padding: 5px 8px; cursor: text; }
+  #ghost {
+    position: fixed; z-index: 90; pointer-events: none;
+    background: var(--panel2); border: 1px solid var(--accent); border-radius: 10px;
+    padding: 8px 10px; max-width: 360px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    display: none;
+    font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+  }
+  dialog {
+    border: 1px solid var(--border); border-radius: 12px; background: var(--panel);
+    color: var(--text); width: min(720px, 92vw); padding: 0;
+  }
+  dialog::backdrop { background: rgba(0,0,0,.55); }
+  .dlg-h { padding: 12px 14px; border-bottom: 1px solid var(--border); font-weight: 650; }
+  .dlg-b { padding: 12px 14px; }
+  .dlg-f { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
+  .export-box { width: 100%; min-height: 140px; font-family: ui-monospace, Menlo, monospace; font-size: 11px; margin-top: 8px; user-select: text; }
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { max-height: 34vh; border-right: 0; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Task Project classify — 拖拽分组</h1>
+  <div class="sub">按住右侧任务拖到左侧分组松手。点左侧（不拖）只做筛选。调完复制结果贴回聊天。</div>
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="搜索 stem / note…" />
+    <button type="button" class="primary" id="btnCopyJson">复制 JSON</button>
+    <button type="button" id="btnCopyMd">复制 Markdown 表</button>
+    <button type="button" id="btnShowExport">预览导出</button>
+    <button type="button" id="btnReset">恢复初始建议</button>
+  </div>
+</header>
+<div class="layout">
+  <aside class="sidebar" id="sidebar"></aside>
+  <section class="main">
+    <div class="main-head">
+      <h2 id="mainTitle" style="margin:0;font-size:15px">全部任务</h2>
+      <span class="muted" id="mainCount"></span>
+    </div>
+    <div class="list" id="list"></div>
+  </section>
+</div>
+<div id="ghost"></div>
+<div id="toast"></div>
+<dialog id="exportDlg">
+  <div class="dlg-h">导出预览</div>
+  <div class="dlg-b">
+    <select id="exportFmt"><option value="json">JSON</option><option value="md">Markdown</option></select>
+    <textarea id="exportText" class="export-box" readonly></textarea>
+  </div>
+  <div class="dlg-f">
+    <button type="button" class="primary" id="btnDlgCopy">复制</button>
+    <button type="button" id="btnDlgClose">关闭</button>
+  </div>
+</dialog>
+<script>
+const PROJECTS = {
+  "project-memory": { title: "Project Memory", desc: "类型/索引/reshape/与 docs 边界" },
+  "edges-tasks": { title: "Edges Tasks", desc: "看板与 Task 工作流" },
+  "edges-cli-platform": { title: "Edges CLI Platform", desc: "CLI/脚手架/发布/鉴权" },
+  "evaluation": { title: "Evaluation", desc: "评测与可重复 cases" },
+  "observation": { title: "Observation", desc: "观测（与 evaluation 分开）" },
+  "site-and-content": { title: "Site and Content", desc: "站点/posts/badge/内容" },
+  "agent-clients-ux": { title: "Agent Clients UX", desc: "客户端/插件/外设 UX" },
+  "default": { title: "Default", desc: "暂不归入 named project" }
+};
+const INITIAL = [
+  ["2026-09-08--runa-memory-ask调用结果统计","default","project-memory","move","memory ask 统计"],
+  ["2026-09-09--CLI与MCP需加鉴权","default","edges-cli-platform","move","CLI/MCP 鉴权"],
+  ["2026-09-09--memory需要assets资源目录","default","project-memory","move","memory assets"],
+  ["2026-09-09--project-memory跨agent继承经验","default","project-memory","move",""],
+  ["2026-09-09--待读-harness-playbook","default","agent-clients-ux","move","harness 阅读/代理侧"],
+  ["2026-09-09--笔记洗成project-memory格式","default","project-memory","move",""],
+  ["2026-09-09--评估Agent-Plugins客户端支持","default","agent-clients-ux","move",""],
+  ["2026-09-09--需要普通记笔记skill","default","agent-clients-ux","move","记笔记 skill/UX"],
+  ["2026-09-10--posts用Astro搭博客与CI","default","site-and-content","move",""],
+  ["2026-09-10--project-memory是树结构算法","default","project-memory","move",""],
+  ["2026-09-10--reshape底层拆树原子操作","default","project-memory","move",""],
+  ["2026-09-11--tasks随仓多人协作与作者区分","default","edges-tasks","move",""],
+  ["2026-09-11--task记录仓与执行仓分离","default","edges-tasks","move",""],
+  ["2026-09-11--找公开benchmark证明memory有效性","default","evaluation","move","memory 有效性评测"],
+  ["2026-09-11--数据与视图分离本地HTML","default","agent-clients-ux","move","本地可视化/视图"],
+  ["2026-09-11--本地memory可视化界面","default","agent-clients-ux","move","偏 UI；可改 project-memory"],
+  ["2026-09-11--记忆条目加private元数据","default","project-memory","move",""],
+  ["2026-09-11--跨设备同步桌面宠物与留言板","default","agent-clients-ux","move",""],
+  ["2026-09-11--输入系统接入Rokid眼镜","default","agent-clients-ux","move",""],
+  ["2026-09-12--tasks机制与GitHub关联","default","edges-tasks","move",""],
+  ["2026-09-12--整仓与memory同构递归融合","default","project-memory","move","大叙事；可 keep default"],
+  ["2026-09-12--系统可跟项目或挂用户目录","default","edges-cli-platform","move","安装/布局平台"],
+  ["2026-09-13--conversation-to-task-skill调用CLI","default","edges-tasks","move",""],
+  ["2026-09-13--edges内容分类整理便于检索","default","site-and-content","move","内容整理检索"],
+  ["2026-09-13--project-memory脚本迁到edges-CLI","default","edges-cli-platform","move","脚本→CLI"],
+  ["2026-09-13--reference的description应带关键链接","default","project-memory","move","reference type"],
+  ["2026-09-13--tasks-memory与看板语义合并","default","edges-tasks","move","主线看板"],
+  ["2026-09-13--知识库Evaluation系统","default","evaluation","move",""],
+  ["2026-09-13--知识库Observation系统","default","observation","move",""],
+  ["2026-09-13--统计个人skill使用频率","default","agent-clients-ux","move","skill 用量 UX"],
+  ["2026-09-14--edges-CLI发布成package","default","edges-cli-platform","move",""],
+  ["2026-09-14--仓库主页增加更多badge","default","site-and-content","move",""],
+  ["2026-09-14--整理posts文件夹并建站","default","site-and-content","move",""],
+  ["2026-09-14--落盘时推荐相关task并问依赖","default","edges-tasks","move",""],
+  ["2026-09-15--Task复杂可视化状态主题与调度","default","edges-tasks","move",""],
+  ["2026-09-15--交互式主题聚类参考K-means","default","edges-tasks","move","主题/分类工作流"],
+  ["2026-09-15--分主题后每task一文件夹","default","edges-tasks","move",""],
+  ["2026-09-15--按消息队列自动推送就绪task","default","edges-tasks","move",""],
+  ["2026-09-15--明确memory与docs边界","default","project-memory","move",""],
+  ["2026-09-16--LoCoMo四臂探索对照","default","evaluation","move",""],
+  ["2026-09-16--Memory模块解耦与可插拔接口","default","project-memory","move",""],
+  ["2026-09-16--SWE-ContextBench主评测","default","evaluation","move",""],
+  ["2026-09-16--Task与外部系统绑定","default","edges-tasks","move",""],
+  ["2026-09-16--edges-tasks的Skill与MCP封装","default","edges-tasks","move",""],
+  ["2026-09-16--edges-封装为脚手架框架并定义升级路径","default","edges-cli-platform","move",""],
+  ["2026-09-16--evaluation-cases登记可重复用例","default","evaluation","move",""],
+  ["2026-09-16--记忆查询Dropout随机屏蔽","default","project-memory","move","偏 memory 机制"],
+  ["2026-09-17--Task-Project分类接入真正Embedding","default","edges-tasks","move","Embedding backlog"],
+  ["2026-09-17--classify沉到edges-tasks-CLI","default","edges-tasks","move",""],
+  ["2026-09-17--memory类型索引改为目录下AGENTS","default","project-memory","move",""],
+  ["2026-09-17--重新评估Reference-memory-type","default","project-memory","move",""],
+  ["2026-09-16--整理default-project的tasks-skill","default","edges-tasks","move","当前 in_progress"]
+].map(([stem, current, suggested, action, note]) => ({stem, current, suggested, action, note}));
+
+const STORAGE_KEY = "edges-classify-v6-pointer-drag";
+let rows = loadRows();
+let filterProject = "all";
+
+// Custom pointer drag (NOT HTML5 DnD — drop events often never fire in embedded browsers).
+let drag = null; // { stem, startX, startY, lastX, lastY, active, sourceEl, pointerId }
+let ignoreFilterClicksUntil = 0;
+
+function loadRows() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length) return parsed;
+    }
+  } catch (_) {}
+  return structuredClone(INITIAL);
+}
+function persist() { localStorage.setItem(STORAGE_KEY, JSON.stringify(rows)); }
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove("show"), 2200);
+}
+function counts() {
+  const c = Object.fromEntries(Object.keys(PROJECTS).map(k => [k, 0]));
+  c.all = rows.length;
+  for (const r of rows) c[r.suggested] = (c[r.suggested] || 0) + 1;
+  return c;
+}
+function visibleRows() {
+  const q = document.getElementById("q").value.trim().toLowerCase();
+  return rows.filter(r => {
+    if (filterProject !== "all" && r.suggested !== filterProject) return false;
+    if (!q) return true;
+    return (r.stem + " " + (r.note || "") + " " + r.suggested).toLowerCase().includes(q);
+  });
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[ch]));
+}
+
+function moveTo(stem, suggested) {
+  const row = rows.find(r => r.stem === stem);
+  if (!row) { toast("找不到 " + stem); return false; }
+  const from = row.suggested;
+  if (from === suggested) { toast("已在 " + suggested); return false; }
+  row.suggested = suggested;
+  row.action = row.suggested === row.current ? "keep" : "move";
+  persist();
+  toast(`${stem}　${from} → ${suggested}`);
+  // In-place first so the pill/badge change is visible even before paint rebuilds.
+  const card = document.querySelector(`.card[data-stem="${stem}"]`);
+  const pill = card && card.querySelector(".pill");
+  if (pill) pill.textContent = suggested;
+  const fromBadge = document.querySelector(`.group[data-id="${from}"] .badge`);
+  const toBadge = document.querySelector(`.group[data-id="${suggested}"] .badge`);
+  if (fromBadge) fromBadge.textContent = String(Math.max(0, Number(fromBadge.textContent) - 1));
+  if (toBadge) toBadge.textContent = String(Number(toBadge.textContent) + 1);
+  // Stay on the current filter (usually 全部). Do not require a filter click.
+  paint();
+  return true;
+}
+
+function paint() {
+  const c = counts();
+  const sidebar = document.getElementById("sidebar");
+  const blocks = [
+    { id: "all", title: "全部", desc: "点击筛选；不能投放", n: c.all, droppable: false },
+    ...Object.keys(PROJECTS).map(id => ({
+      id, title: PROJECTS[id].title, desc: PROJECTS[id].desc, n: c[id] || 0, droppable: true
+    }))
+  ];
+  sidebar.innerHTML = `<div class="side-label">拖到分组上松手</div>` + blocks.map(b => `
+    <div class="group ${filterProject===b.id?"is-filter":""}"
+         data-id="${b.id}" data-droppable="${b.droppable?1:0}">
+      <div class="name">${esc(b.title)}</div>
+      <div class="desc">${esc(b.desc)}</div>
+      <div class="meta"><span class="badge">${b.n}</span><span class="muted">${b.droppable?b.id:"filter"}</span></div>
+    </div>`).join("");
+
+  const list = visibleRows();
+  document.getElementById("mainTitle").textContent =
+    filterProject === "all" ? "全部任务" : (PROJECTS[filterProject]?.title || filterProject);
+  document.getElementById("mainCount").textContent = list.length + " 条";
+  document.getElementById("list").innerHTML = list.map(r => `
+    <article class="card" data-stem="${esc(r.stem)}">
+      <div class="stem">${esc(r.stem)}</div>
+      <div class="row">
+        <span class="muted">归属</span>
+        <span class="pill">${esc(r.suggested)}</span>
+        <span class="muted">current ${esc(r.current)}</span>
+      </div>
+      <div class="row">
+        <input type="text" data-note-for="${esc(r.stem)}" placeholder="可选备注" value="${esc(r.note||"")}" />
+      </div>
+    </article>`).join("") || `<p class="muted">没有匹配任务</p>`;
+}
+
+function dropPoint(e, state) {
+  const x = e.clientX;
+  const y = e.clientY;
+  if (state && state.lastX != null && x === 0 && y === 0) {
+    return { x: state.lastX, y: state.lastY };
+  }
+  return { x, y };
+}
+
+function groupUnderPoint(x, y) {
+  const source = drag && drag.sourceEl;
+  const ghost = document.getElementById("ghost");
+  const parked = [];
+  const park = (el) => {
+    if (!el) return;
+    parked.push([el, el.style.pointerEvents]);
+    el.style.pointerEvents = "none";
+  };
+  park(ghost);
+  park(source);
+
+  let hit = null;
+  try {
+    // Primary: elementFromPoint after parking the drag chrome.
+    // Never rebuild the sidebar/list before this read.
+    const top = document.elementFromPoint(x, y);
+    if (top && !(source && (top === source || source.contains(top)))) {
+      hit = top.closest('.group[data-droppable="1"]');
+    }
+    if (!hit && typeof document.elementsFromPoint === "function") {
+      for (const node of document.elementsFromPoint(x, y)) {
+        if (source && (node === source || source.contains(node))) continue;
+        if (ghost && (node === ghost || ghost.contains(node))) continue;
+        const g = node.closest && node.closest('.group[data-droppable="1"]');
+        if (g) { hit = g; break; }
+      }
+    }
+  } finally {
+    for (const [el, pe] of parked) el.style.pointerEvents = pe;
+  }
+  if (hit) return hit;
+  // Geometry fallback: some webviews keep returning the captured card from hit-testing.
+  for (const g of document.querySelectorAll('.group[data-droppable="1"]')) {
+    const r = g.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return g;
+  }
+  return null;
+}
+
+function clearOver() {
+  document.querySelectorAll(".group.is-over").forEach(g => g.classList.remove("is-over"));
+}
+
+function onPointerDown(e) {
+  if (e.button != null && e.button !== 0) return;
+  if (e.target.closest("input,button,textarea,select,a")) return;
+  const card = e.target.closest(".card");
+  if (!card) return;
+  const stem = card.dataset.stem;
+  drag = {
+    stem,
+    startX: e.clientX,
+    startY: e.clientY,
+    lastX: e.clientX,
+    lastY: e.clientY,
+    active: false,
+    sourceEl: card,
+    pointerId: e.pointerId
+  };
+  try { card.setPointerCapture(e.pointerId); } catch (_) {}
+}
+
+function onPointerMove(e) {
+  if (!drag || drag.pointerId !== e.pointerId) return;
+  drag.lastX = e.clientX;
+  drag.lastY = e.clientY;
+  const dx = e.clientX - drag.startX;
+  const dy = e.clientY - drag.startY;
+  if (!drag.active) {
+    if (Math.hypot(dx, dy) < 6) return;
+    drag.active = true;
+    drag.sourceEl.classList.add("dragging-source");
+    const ghost = document.getElementById("ghost");
+    ghost.textContent = drag.stem;
+    ghost.style.display = "block";
+  }
+  const ghost = document.getElementById("ghost");
+  ghost.style.left = (e.clientX + 12) + "px";
+  ghost.style.top = (e.clientY + 12) + "px";
+
+  clearOver();
+  const g = groupUnderPoint(e.clientX, e.clientY);
+  if (g) g.classList.add("is-over");
+}
+
+function onPointerUp(e) {
+  if (!drag || drag.pointerId !== e.pointerId) return;
+  const wasActive = drag.active;
+  const stem = drag.stem;
+  const sourceEl = drag.sourceEl;
+  const { x, y } = dropPoint(e, drag);
+  // Release capture + hide ghost BEFORE hit-testing so elementFromPoint
+  // sees the group, not the captured card. Do not paint() before this read.
+  try { sourceEl.releasePointerCapture(e.pointerId); } catch (_) {}
+  document.getElementById("ghost").style.display = "none";
+  const g = wasActive ? groupUnderPoint(x, y) : null;
+  sourceEl.classList.remove("dragging-source");
+  sourceEl.style.pointerEvents = "";
+  clearOver();
+  drag = null;
+
+  if (!wasActive) return;
+  ignoreFilterClicksUntil = Date.now() + 800;
+  if (g) {
+    moveTo(stem, g.dataset.id);
+  } else {
+    toast("未放到分组上");
+  }
+}
+
+document.getElementById("list").addEventListener("pointerdown", onPointerDown);
+window.addEventListener("pointermove", onPointerMove);
+window.addEventListener("pointerup", onPointerUp);
+window.addEventListener("pointercancel", onPointerUp);
+
+// Sidebar click = filter only (no assign-by-click). Ignore the leftover
+// click some webviews fire on the drop target after pointerup.
+document.getElementById("sidebar").addEventListener("click", (e) => {
+  if (drag && drag.active) return;
+  if (Date.now() < ignoreFilterClicksUntil) {
+    e.preventDefault();
+    e.stopPropagation();
+    return;
+  }
+  const g = e.target.closest(".group");
+  if (!g) return;
+  filterProject = g.dataset.id;
+  paint();
+});
+
+document.getElementById("list").addEventListener("input", (e) => {
+  const input = e.target.closest("[data-note-for]");
+  if (!input) return;
+  const row = rows.find(r => r.stem === input.dataset.noteFor);
+  if (!row) return;
+  row.note = input.value;
+  persist();
+});
+
+function toExportJson() {
+  const out = rows.map(r => ({
+    stem: r.stem, current: r.current, suggested: r.suggested,
+    action: r.suggested === r.current ? "keep" : "move", note: r.note || ""
+  }));
+  return JSON.stringify({ version: 1, generated_for: "project-tasks-classify apply", rows: out }, null, 2);
+}
+function toExportMd() {
+  const lines = ["| stem | current | suggested | action | note |", "| --- | --- | --- | --- | --- |"];
+  for (const r of rows) {
+    const action = r.suggested === r.current ? "keep" : "move";
+    lines.push(`| ${r.stem} | ${r.current} | ${r.suggested} | ${action} | ${(r.note||"").replace(/\|/g,"\\|")} |`);
+  }
+  return lines.join("\n");
+}
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); toast("已复制"); }
+  catch (_) { toast("复制失败，请用预览手动选"); }
+}
+
+document.getElementById("q").addEventListener("input", paint);
+document.getElementById("btnCopyJson").onclick = () => copyText(toExportJson());
+document.getElementById("btnCopyMd").onclick = () => copyText(toExportMd());
+document.getElementById("btnShowExport").onclick = () => {
+  document.getElementById("exportText").value = toExportJson();
+  document.getElementById("exportDlg").showModal();
+};
+document.getElementById("exportFmt").onchange = (e) => {
+  document.getElementById("exportText").value = e.target.value === "md" ? toExportMd() : toExportJson();
+};
+document.getElementById("btnDlgCopy").onclick = () => copyText(document.getElementById("exportText").value);
+document.getElementById("btnDlgClose").onclick = () => document.getElementById("exportDlg").close();
+document.getElementById("btnReset").onclick = () => {
+  if (!confirm("恢复初始建议？")) return;
+  rows = structuredClone(INITIAL);
+  localStorage.removeItem(STORAGE_KEY);
+  persist();
+  paint();
+  toast("已恢复初始建议");
+};
+
+paint();
+toast("按住任务拖到左侧分组松手");
+</script>
+</body>
+</html>
