@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- CONTEXT 增加 Task stem（edges）、Task Project 审阅页（edges）、审阅导出行（edges）；收紧 classifyTasks / proposeTypes / edges tasks（CLI）：人闸主路径是 `project review-page`（通用 groups+items），Markdown 表作无 GUI 回退；无 `--mode`，无公开 `classify` / `apply-review`。
+- `docs/adr/0012-task-project-review-page-is-render-only-cli.md`：Task Project 审阅页是只渲染的 CLI。扩展 ADR 0010 / 0011 的人闸，不重开 embedding / CLI classify。本轮只定文档，不实现命令、不改写 skill。
 - CONTEXT 增加 proposeTypes（edges）、Task Project 候选（edges）；收紧 Task Project / classifyTasks：已有 project 是用户已设质心；新类型由 proposeTypes 提议，不把未确认候选当成 project。
 - `docs/adr/0011-propose-task-project-types-from-default.md`：独立 Skill `extensions/skills/project-tasks-propose-types/` 从 `_default` 提议新 Task Project 类型；输出候选表，不自动 `project create`。修订 ADR 0010 的路径与类型发现边界。本轮只定文档，不写 skill 正文，不迁看板。
 - `edges tasks project list|get|create|update`：Task Project 元数据（每 project 含 `_default` 的轻量 AGENTS.md + 根 `knowledge/tasks/AGENTS.md` Task Projects 节，写在 project-memory 受管标记外）。Q18=A；看板 markdown 仍是 Task 真源。无 embedding，无 `edges tasks classify`。
@@ -56,6 +58,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：Amended by ADR 0012（人闸主路径改为 render-only 审阅页；Markdown 建议表作无 GUI 回退）。
+- `docs/adr/0011-propose-task-project-types-from-default.md`：Amended by ADR 0012（proposeTypes 复用同一审阅页，不改类型发现边界）。
 - `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：Skill 路径改为 `extensions/skills/project-tasks-classify/`；类型发现拆到 ADR 0011；方法改为 LLM / agent 判断，不再写软 K-means 或 Embedding NCC。整板归属与 Q18=A 不变。
 - `deploy-teach.yml` 的 `deploy` job 使用 `environment: production`（由 `ecs` 改名），让 GitHub 记录 Deployments。
 - `new-note` MCP 改为子进程调用 `edges note`，不再 `execFile` 仓根脚本。
