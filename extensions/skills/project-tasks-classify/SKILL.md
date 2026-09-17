@@ -1,7 +1,7 @@
 ---
 name: project-tasks-classify
 description: 对整板 Task 做基于 Embedding 的最近质心分类（NCC）：以用户已设的 Task Project（slug + 描述）为质心，把每条 Task 分到最近质心，等人改建议表后再用 edges tasks CLI 落地。不要发现新簇、不要迭代质心、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
-version: 1.0.0
+version: 1.1.0
 ---
 
 # classifyTasks

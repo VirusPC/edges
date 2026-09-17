@@ -19,7 +19,7 @@
 ## Considered Options
 
 - 做成通用 edges-tasks Skill+MCP CRUD：否决；classifyTasks 是独立工作流。
-- 只用 `_default` 重聚：否决；整板分类。
+- 只用 `_default` 分类：否决；整板分类。
 - 自动批量建 project：否决；人改表后再 apply；新质心必须人先显式补上。
 - 仓内 embedding 库 / 迭代更新质心 / 自动发现簇：否决；NCC 用宿主 embedding + 已设质心。
 - 公开 `edges tasks classify`：否决；embedding 未沉到 CLI 前公开该动词只会空壳或再调 LLM。

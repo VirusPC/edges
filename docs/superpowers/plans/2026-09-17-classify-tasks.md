@@ -1311,7 +1311,7 @@ Frontmatter (required):
 ---
 name: project-tasks-classify
 description: 对整板 Task 做基于 Embedding 的最近质心分类（NCC）：以用户已设的 Task Project（slug + 描述）为质心，把每条 Task 分到最近质心，等人改建议表后再用 edges tasks CLI 落地。不要发现新簇、不要迭代质心、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
-version: 1.0.0
+version: 1.1.0
 ---
 ```
 
@@ -1333,7 +1333,7 @@ python3 - <<'PY'
 from pathlib import Path
 text = Path("extensions/skills/project-tasks-classify/SKILL.md").read_text()
 assert text.startswith("---\nname: project-tasks-classify\n")
-assert "version: 1.0.0" in text.split("---", 2)[1]
+assert "version: 1.1.0" in text.split("---", 2)[1]
 for needle in [
     "classifyTasks",
     "edges tasks project list",
@@ -1459,13 +1459,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-17
+
+### Changed
+
+- 概念模型改为 Embedding-based Nearest Centroid Classification（NCC）：质心由用户预先设定，Skill 只做最近质心归类；embedding 走宿主 / runtime 能力，不加仓内库。不再把工作流写成软聚类。
+- Skill id 与目录从 `classify-tasks` 改为 `project-tasks-classify`（展示名仍是 classifyTasks）。
+
 ## [1.0.0] - 2026-09-17
 
 ### Added
 
-- classifyTasks：整板 Embedding-based NCC 建议表，人改后再用 `edges tasks project` 与 `update --project` 落地。质心由用户预先设定；embedding 走宿主 / runtime。无 `classify` 动词。能力面 CLI + Skill + MCP。
+- classifyTasks：整板建议表，人改后再用 `edges tasks project` 与 `update --project` 落地。无 `classify` 动词。能力面 CLI + Skill + MCP。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-tasks-classify@1.0.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-tasks-classify@1.1.0...HEAD
+[1.1.0]: https://github.com/VirusPC/edges/compare/skill/project-tasks-classify@1.0.0...skill/project-tasks-classify@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-tasks-classify@1.0.0
 ```
 
@@ -1475,7 +1483,7 @@ Then:
 pnpm skills:link
 ```
 
-Do **not** `git tag skill/project-tasks-classify@1.0.0` in the implementation PR unless the human asks to release the skill. The changelog still records 1.0.0 as the first version.
+NCC rewrite is skill `1.1.0`. After the Skill files land, tag `skill/project-tasks-classify@1.1.0` on that commit (do not merge to main in this PR).
 
 - [ ] **Step 4: Run probe to verify it passes**
 
