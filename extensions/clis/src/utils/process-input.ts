@@ -4,6 +4,22 @@ export type ProcessInput = {
   stdinIsTTY: boolean;
 };
 
+function wantsStdin(argv: readonly string[]): boolean {
+  if (argv.includes("--token-stdin")) {
+    return true;
+  }
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    if (arg === "--from=-") {
+      return true;
+    }
+    if (arg === "--from" && argv[i + 1] === "-") {
+      return true;
+    }
+  }
+  return false;
+}
+
 async function readStdin(stdin: NodeJS.ReadableStream): Promise<string> {
   const chunks: Buffer[] = [];
   for await (const chunk of stdin) {
@@ -15,9 +31,9 @@ async function readStdin(stdin: NodeJS.ReadableStream): Promise<string> {
 /**
  * Turn `process.argv` + stdin into what `run()` needs.
  *
- * Stdin can be consumed once. `--token-stdin` is scanned on raw argv so we
- * drain it here (before Commander) and never put the token on argv. Skip TTY
- * so an interactive terminal does not hang waiting for a token.
+ * Stdin can be consumed once. `--token-stdin` and `--from -` are scanned on
+ * raw argv so we drain here (before Commander) and never put secrets on argv.
+ * Skip TTY so an interactive terminal does not hang waiting for a pipe.
  */
 export async function readProcessInput(
   argv: readonly string[],
@@ -25,7 +41,6 @@ export async function readProcessInput(
 ): Promise<ProcessInput> {
   const commandArgv = argv.slice(2);
   const stdinIsTTY = io.isTTY;
-  const stdinText =
-    commandArgv.includes("--token-stdin") && !stdinIsTTY ? await readStdin(io.stdin) : undefined;
+  const stdinText = wantsStdin(commandArgv) && !stdinIsTTY ? await readStdin(io.stdin) : undefined;
   return { argv: commandArgv, stdinText, stdinIsTTY };
 }

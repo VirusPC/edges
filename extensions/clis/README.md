@@ -12,7 +12,7 @@ The command tree is built with [Commander.js](https://github.com/tj/commander.js
 
 ```
 edges note …          # ingest a note (required flags on this command)
-edges tasks …         # Task board (list/get/create/update/status + read-only runs)
+edges tasks …         # Task board (list/get/create/update/status + project + read-only runs)
 edges --help / -v
 ```
 
@@ -75,9 +75,12 @@ edges tasks project list
 edges tasks project get <project>
 edges tasks project create <project> --title <title> --description <text>
 edges tasks project update <project> [--title] [--description]
+edges tasks project review-page --from <path|-> [--out <path>]
 ```
 
 Issue-layer stdout is always JSON (`--json` is accepted and ignored). `runs` / `run-messages` default to a table; pass `--output json` for JSON. Run layer is read-only (no append). `create` writes the Task file plus an empty sidecar `.{stem}.log.md`.
+
+`project review-page` is render-only: it reads generic `groups` + `items` JSON (`--from` file or `-` for stdin), writes a single-file HTML page (default: OS temp; `--out` overrides), and prints `{status, command: "project.review-page", path, groupCount, itemCount}`. It does not call `updateTask`, `createProject`, or any board mutator, and it does not open a browser. Open the printed `path` in a system browser. There is no `edges tasks classify` / `--mode` / `--open`.
 
 classifyTasks Skill (`extensions/skills/project-tasks-classify`) uses these project verbs plus `update --project`. Generic tasks Skill/MCP CRUD is a later backlog on this same contract. Capability Surface is CLI + Skill + MCP.
 
