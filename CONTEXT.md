@@ -33,16 +33,24 @@ _避免使用_：单一目录、全部上下文、知识资产
 _避免使用_：长期知识库、会话流水账、代码事实副本
 
 **Memory Type（项目记忆）**：
-项目记忆中一条记忆归入哪份入口的分类；对应一层入口文件 + 内容目录（及条目前缀约定）。类型集合由 LAYOUT 实现与本层登记决定，不是 PROTOCOL 闭集枚举。
-_避免使用_：把 type 写成全局 JSON 注册表键、把看板 `knowledge/tasks` 状态夹直接叫 Memory Type、把每条 Task 升成 Memory Type（Q18=B，另卡）
+项目记忆中一条记忆归入哪份类型入口的分类；每一类型在该层有一份类型入口，与该类型的条目同处。类型集合由 LAYOUT 实现与本层登记决定，不是 PROTOCOL 闭集枚举。
+_避免使用_：把 type 写成全局 JSON 注册表键、把看板 `knowledge/tasks` 状态夹直接叫 Memory Type、把每条 Task 升成 Memory Type（Q18=B，另卡）、把类型入口与层入口当成同一种 AGENTS.md
+
+**层入口 AGENTS.md**：
+某一记忆层目录上的项目记忆入口，承载本层硬约束、本层类型入口清单与下层记忆索引。
+_避免使用_：类型入口 AGENTS.md、把类型目录里的 AGENTS.md 当成层入口、Task Project AGENTS.md（若指项目记忆层入口）
+
+**类型入口 AGENTS.md**：
+某一 Memory Type 在该层的记忆入口，只含该类型引言与条目清单，与该类型条目同处；契约不同于层入口。
+_避免使用_：层入口 AGENTS.md、记忆层根上另立一套入口文件名、把类型入口写成全局注册表、Task Project AGENTS.md
 
 **用户记忆（User Memory）**：
 项目记忆的一种 Memory Type，保存绑定到某一仓库路径、且不宜公开的个人材料（个人偏好而非项目共享约定、凭据与密钥，以及其他不得公开的上下文）；权威副本在该仓库工作树内，但不进入版本历史。它不是独立于项目记忆的全局层，也不把私有仓当作真源。
 _避免使用_：独立全局 vault、edges-private 当真源、机器级单一记忆库、项目共享约定
 
 **可扩展 Memory Type**：
-在指定记忆目录通过 skill（如 `$project-memory-add-type`）登记新的 Memory Type（name / description / 可选特权 metadata），与内置种子类型同构、可被 remember / ask / doctor 发现；官方 init 种子不因示例类型膨胀。
-_避免使用_：单独 JSON/YAML 总配置平面、把示例 type 写进默认种子
+在指定记忆目录通过 skill（如 `$project-memory-add-type`）登记新的 Memory Type（name / description / 可选特权 metadata），与内置种子类型同构（类型入口 + 同处条目 + 层入口一行）、可被 remember / ask / doctor 发现；官方 init 种子不因示例类型膨胀。扩展面仍只在 LAYOUT，不另开类型注册表。
+_避免使用_：单独 JSON/YAML 总配置平面、把示例 type 写进默认种子、把加 type 写成改 PROTOCOL
 
 **评测冒烟（Evaluation Smoke）**：
 以复现公开基准上「写入→检索→作答→打分」链路并产出可复查记录为目的的试跑；不构成项目记忆或 Agent Memory 有效性证据。
