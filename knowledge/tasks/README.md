@@ -35,6 +35,8 @@
 
 看板分组单位是 Task Project：directory-first，路径 `knowledge/tasks/<project-slug>/<edges-tasks-status>/`，并与 frontmatter `metadata.edges-task-project` 双写。未分组用保留目录 `_default`（字段为 `default` 或不写）。与 `edges-tasks-status`、`edges-task-priority` 正交。`status` 只在同一 project 内搬家；跨 project 用 `update --project`。详见 `docs/adr/0009-edges-task-project-grouping.md`。
 
+每个 Task Project（含 `_default`）有一份轻量 `AGENTS.md`（标题 + 描述，可选 Pointers），不是对该目录做完整 project-memory-init。根 `knowledge/tasks/AGENTS.md` 在 project-memory 受管标记之外有 CLI 维护的 Task Projects 节。读写走 `edges tasks project list|get|create|update`。跨 project 搬家仍用 `update --project`，不得改 status 或 priority。能力面是 CLI + Skill + MCP。
+
 ## Issue 层优先级
 
 需求先后用 frontmatter `metadata.edges-task-priority`：`urgent` | `high` | `medium` | `low` | `none`。与 `edges-tasks-status` 正交：改 priority 不搬状态夹，也不用文件夹或文件名编码优先级。缺省或旧文件无字段视为 `none`。CLI：`create` / `update --priority`，`list --priority`（可重复 OR）与 `list --sort priority`。详见 `docs/adr/0007-edges-task-priority.md`。

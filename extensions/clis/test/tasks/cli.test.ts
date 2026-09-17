@@ -2,14 +2,24 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { run } from "../../src/program.js";
 
-test("tasks help lists seven verbs and omits delete/log", async () => {
+test("tasks help lists project group and omits delete/log/classify", async () => {
   const result = await run(["tasks", "--help"]);
   assert.equal(result.exitCode, 0);
-  for (const verb of ["list", "get", "create", "update", "status", "runs", "run-messages"]) {
+  for (const verb of ["list", "get", "create", "update", "status", "runs", "run-messages", "project"]) {
     assert.match(result.stdout, new RegExp(`\\b${verb}\\b`));
   }
   assert.doesNotMatch(result.stdout, /^\s+delete\b/m);
   assert.doesNotMatch(result.stdout, /^\s+log\b/m);
+  assert.doesNotMatch(result.stdout, /^\s+classify\b/m);
+});
+
+test("tasks project help lists list get create update", async () => {
+  const result = await run(["tasks", "project", "--help"]);
+  assert.equal(result.exitCode, 0);
+  for (const verb of ["list", "get", "create", "update"]) {
+    assert.match(result.stdout, new RegExp(`\\b${verb}\\b`));
+  }
+  assert.doesNotMatch(result.stdout, /^\s+classify\b/m);
 });
 
 test("tasks help documents project on list create update and not on status", async () => {
