@@ -76,7 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Task Project 审阅页：点击左侧分组按 `suggested` 筛选右侧列表（「全部」清空筛选）；投放仍用指针拖拽赋值，点击分组不再赋值。
+- Task Project 审阅页：点击左侧分组按 `suggested` 筛选右侧列表（「全部」清空筛选且不可投放）；投放仍用指针拖拽赋值。
 
 ### Removed
 

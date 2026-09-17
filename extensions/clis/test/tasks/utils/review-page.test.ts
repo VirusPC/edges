@@ -110,9 +110,11 @@ test("shipped review-page template filters by left-group click and keeps drag-as
   const template = await loadReviewPageTemplate((abs) => readFile(abs, "utf8"));
   assert.match(template, /filterId/);
   assert.match(template, /全部/);
-  assert.match(template, /data-droppable/);
+  assert.match(template, /data-droppable="0"/);
+  assert.match(template, /data-droppable="1"/);
   assert.match(template, /is-filter/);
   assert.match(template, /点左侧分组筛选/);
+  assert.match(template, /it\.suggested === filterId/);
   assert.match(template, /pointerdown/);
   assert.match(template, /stem: it\.stem/);
   assert.match(template, /action: it\.suggested === it\.current \? "keep" : "move"/);

@@ -1,6 +1,6 @@
 ---
 name: project_task_project_review_page_render_only_cli
-description: 改 classifyTasks / proposeTypes 人闸或 edges tasks project review-page 时打开：CLI 只渲通用 groups+items HTML（已落地）；Skill 出建议、现有 create/update 落地；无 --mode、无 classify/apply-review 动词、无审阅页 MCP。决策见 docs/adr/0012-task-project-review-page-is-render-only-cli.md。
+description: 改 classifyTasks / proposeTypes 人闸或 edges tasks project review-page 时打开：CLI 只渲通用 groups+items HTML（已落地）；左侧点击筛选、拖拽赋值；Skill 出建议、现有 create/update 落地；无 --mode、无 classify/apply-review 动词、无审阅页 MCP。决策见 docs/adr/0012-task-project-review-page-is-render-only-cli.md。
 metadata:
   edges-title: Task Project 审阅页是 render-only CLI
   edges-type: project
@@ -8,13 +8,15 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-17T08:51:45+00:00"
+  edges-updated-at: "2026-09-17T14:10:12+00:00"
 ---
 
-Task Project 人确认闸门是 render-only CLI `edges tasks project review-page`：Skill 产出建议 JSON，CLI 只渲通用 groups+items 审阅页，人拖拽后 Copy JSON 贴回，Skill 用现有 `project create` / `update --project` 落地。无 `--mode`，无公开 `classify` / `apply-review`，不自动打开浏览器，不为审阅页新开 MCP。命令与 classifyTasks 第 4 步主路径已落地（PR #85）；proposeTypes Skill 正文仍未入库，应复用同一命令。
+Task Project 人确认闸门是 render-only CLI `edges tasks project review-page`：Skill 产出建议 JSON，CLI 只渲通用 groups+items 审阅页，人确认后 Copy JSON 贴回，Skill 用现有 `project create` / `update --project` 落地。无 `--mode`，无公开 `classify` / `apply-review`，不自动打开浏览器，不为审阅页新开 MCP。命令与 classifyTasks 第 4 步主路径已落地（PR #85）；proposeTypes Skill 正文仍未入库，应复用同一命令。
+
+审阅页交互（PR #86 已验证）：左侧分组点击只筛选右侧列表（`suggested === group id`）；「全部」清空筛选且不可投放；投放仍用 pointer-drag 赋值，点击分组不得赋值。导出 JSON 形状仍是 `{stem,current,suggested,action,note}`。
 
 **Why:**
-2026-09-17 grill 确认：ad-hoc HTML 与聊天 Markdown 表不够当交互闸门；Grok Bot HTML 预览里拖拽不可靠。CLI 若计算归属会重开 ADR 0010 已否决的 `classify` 动词。`--mode` 会把页绑死在 classify vs propose，而两组工作流只要同一壳。能力面仍是 CLI + Skill + MCP。
+2026-09-17 grill 确认：ad-hoc HTML 与聊天 Markdown 表不够当交互闸门；Grok Bot HTML 预览里拖拽不可靠。CLI 若计算归属会重开 ADR 0010 已否决的 `classify` 动词。`--mode` 会把页绑死在 classify vs propose，而两组工作流只要同一壳。能力面仍是 CLI + Skill + MCP。左侧点击若直接赋值，人无法先按建议分组扫一眼再拖；所以 click=filter、drag=assign。
 
 **How to apply:**
 - How-to: plan at docs/superpowers/plans/2026-09-17-task-project-review-page.md
@@ -22,6 +24,7 @@ Task Project 人确认闸门是 render-only CLI `edges tasks project review-page
 - 命令是 `edges tasks project review-page --from <path|-> [--out <path>]`；成功 JSON 的 `command` 为 `project.review-page`，含绝对 `path`。默认写 OS 临时目录，不打开浏览器。
 - 导出行用 `stem`（文件名去 `.md`），不是 title，也不等于 frontmatter / 文档 `name`。页上 `action` 只有 `keep` | `move`。
 - classifyTasks 第 4 步主路径（已写进 `extensions/skills/project-tasks-classify/SKILL.md`）：写 JSON → review-page → 给人 HTML 路径 → 停止 → 等贴回 JSON → 现有 CLI apply。Markdown 表只作无 GUI 回退。
+- 改 `review-page.html` 时保持：`#edges-review-payload`、pointer drag（不要 HTML5 DnD）、点击左侧分组只改 `filterId`、`data-droppable="0"` 的「全部」不能接投放、`is-filter` 标当前筛选。
 - 不要公开 `edges tasks classify`；不要新开 `apply-review`；不要 `--mode`；不要审阅页 MCP；不要自动打开浏览器或靠 Grok Bot 预览当闸门。
 - 不要发明 proposeTypes Skill 正文；它将来复用同一 `project review-page`。不要在 `tools/` 下新放 HTML。
 - 对照 ADR `docs/adr/0012-task-project-review-page-is-render-only-cli.md`；叠 ADR 0010 / 0011 / 0004 / 0005 / 0009。
