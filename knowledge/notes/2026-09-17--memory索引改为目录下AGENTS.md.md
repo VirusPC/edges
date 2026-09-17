@@ -38,3 +38,7 @@ references/AGENTS.md
 
 - 布局 / 协议改造 idea，不是某次手工搬家任务。
 - 交叉：`knowledge/notes/2026-09-11--项目memory可见性思考.md`；project-memory-init 的 PROTOCOL / LAYOUT / design-decisions。
+
+## 看板
+
+已升格：`knowledge/tasks/_default/backlog/2026-09-17--memory类型索引改为目录下AGENTS.md.md`（协议级特殊 task）。
