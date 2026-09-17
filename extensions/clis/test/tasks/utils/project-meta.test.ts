@@ -1,5 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { nodeBoardWriter } from "./helpers.js";
 import {
   DEFAULT_PROJECT_DESCRIPTION,
   DEFAULT_PROJECT_TITLE,
@@ -7,10 +11,12 @@ import {
   PROJECT_MEMORY_START,
   TASK_PROJECTS_END,
   TASK_PROJECTS_START,
+  ensureProjectMetadata,
   oneLineDescription,
   parseProjectAgents,
   parseProjectDescription,
   parseProjectTitle,
+  projectAgentsRelPath,
   renderProjectAgents,
   rewriteRootAgents,
   seedDescriptionFor,
@@ -158,5 +164,62 @@ test("rewriteRootAgents rejects a start marker without an end marker", () => {
   } catch (error) {
     assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
     assert.match((error as Error).message, /malformed Task Projects markers/);
+  }
+});
+
+test("projectAgentsRelPath uses _default for default", () => {
+  assert.equal(projectAgentsRelPath("default"), "knowledge/tasks/_default/AGENTS.md");
+  assert.equal(projectAgentsRelPath("cli"), "knowledge/tasks/cli/AGENTS.md");
+});
+
+test("ensureProjectMetadata seeds _default and root index without moving Task files", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-proj-"));
+  try {
+    const taskRel = "knowledge/tasks/_default/backlog/2026-09-13--keep.md";
+    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await writeFile(path.join(repo, taskRel), "# keep\n", "utf8");
+    await mkdir(path.join(repo, "knowledge/tasks/cli/todo"), { recursive: true });
+    await writeFile(
+      path.join(repo, "knowledge/tasks/cli/todo/2026-09-13--other.md"),
+      "---\nmetadata:\n  edges-task-project: cli\n  edges-tasks-status: todo\n---\n\nx\n",
+      "utf8",
+    );
+    const rootAgents = path.join(repo, "knowledge/tasks/AGENTS.md");
+    await writeFile(
+      rootAgents,
+      `# tasks\n\n<!-- project-memory:start -->\n\n- keep-index\n<!-- project-memory:end -->\n`,
+      "utf8",
+    );
+
+    const records = await ensureProjectMetadata(repo, nodeBoardWriter());
+    assert.equal(records[0]?.project, "default");
+    assert.equal(records.some((item) => item.project === "cli"), true);
+
+    const seeded = await readFile(path.join(repo, "knowledge/tasks/_default/AGENTS.md"), "utf8");
+    assert.match(seeded, /^# Default\n/);
+    const cliAgents = await readFile(path.join(repo, "knowledge/tasks/cli/AGENTS.md"), "utf8");
+    assert.match(cliAgents, /^# cli\n/);
+    assert.match(cliAgents, /Task Project cli\./);
+
+    const root = await readFile(rootAgents, "utf8");
+    assert.match(root, /- keep-index/);
+    assert.match(root, /<!-- task-projects:start -->/);
+    assert.ok(root.indexOf("<!-- project-memory:end -->") < root.indexOf("<!-- task-projects:start -->"));
+
+    const task = await readFile(path.join(repo, taskRel), "utf8");
+    assert.equal(task, "# keep\n");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
+test("ensureProjectMetadata skipId leaves that AGENTS.md missing", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-proj-"));
+  try {
+    await mkdir(path.join(repo, "knowledge/tasks"), { recursive: true });
+    await ensureProjectMetadata(repo, nodeBoardWriter(), "default");
+    await assert.rejects(readFile(path.join(repo, "knowledge/tasks/_default/AGENTS.md"), "utf8"));
+  } finally {
+    await rm(repo, { recursive: true, force: true });
   }
 });

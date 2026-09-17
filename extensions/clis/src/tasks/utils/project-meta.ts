@@ -1,3 +1,7 @@
+import path from "node:path";
+import { listProjectIds, type BoardFs, type BoardWriter } from "./board.js";
+import { boardRoot } from "./paths.js";
+import { projectDirName } from "./project.js";
 import {
   DEFAULT_TASK_PROJECT,
   TasksError,
@@ -181,4 +185,95 @@ export function rewriteRootAgents(existing: string, projects: TaskProjectRecord[
   }
 
   return next;
+}
+
+export function projectAgentsRelPath(id: TaskProjectId): string {
+  return `knowledge/tasks/${projectDirName(id)}/AGENTS.md`;
+}
+
+function projectAgentsAbsPath(repoPath: string, id: TaskProjectId): string {
+  return path.join(repoPath, projectAgentsRelPath(id));
+}
+
+function rootAgentsAbsPath(repoPath: string): string {
+  return path.join(boardRoot(repoPath), "AGENTS.md");
+}
+
+async function collectProjectIds(repoPath: string, fs: BoardFs): Promise<TaskProjectId[]> {
+  const listed = await listProjectIds(repoPath, fs);
+  const ids: TaskProjectId[] = [DEFAULT_TASK_PROJECT];
+  for (const id of listed) {
+    if (id !== DEFAULT_TASK_PROJECT) {
+      ids.push(id);
+    }
+  }
+  return ids;
+}
+
+export async function readProjectRecord(
+  repoPath: string,
+  id: TaskProjectId,
+  fs: BoardFs,
+): Promise<TaskProjectRecord> {
+  const rel = projectAgentsRelPath(id);
+  const abs = projectAgentsAbsPath(repoPath, id);
+  if (!(await fs.exists(abs))) {
+    throw new TasksError("PROJECT_NOT_FOUND", `project not found: ${id}`);
+  }
+  const parsed = parseProjectAgents(await fs.readFile(abs));
+  return {
+    project: id,
+    dir: projectDirName(id),
+    title: parsed.title,
+    description: parsed.description,
+    path: rel,
+  };
+}
+
+export async function refreshProjectIndex(
+  repoPath: string,
+  writer: BoardWriter,
+): Promise<TaskProjectRecord[]> {
+  const records: TaskProjectRecord[] = [];
+  for (const id of await collectProjectIds(repoPath, writer)) {
+    const abs = projectAgentsAbsPath(repoPath, id);
+    if (!(await writer.exists(abs))) {
+      continue;
+    }
+    records.push(await readProjectRecord(repoPath, id, writer));
+  }
+
+  const rootAbs = rootAgentsAbsPath(repoPath);
+  const existing = (await writer.exists(rootAbs)) ? await writer.readFile(rootAbs) : "";
+  await writer.writeFile(rootAbs, rewriteRootAgents(existing, records));
+  return records;
+}
+
+export async function ensureProjectMetadata(
+  repoPath: string,
+  writer: BoardWriter,
+  skipId?: TaskProjectId,
+): Promise<TaskProjectRecord[]> {
+  await writer.mkdirp(path.join(boardRoot(repoPath), projectDirName(DEFAULT_TASK_PROJECT)));
+
+  for (const id of await collectProjectIds(repoPath, writer)) {
+    await writer.mkdirp(path.join(boardRoot(repoPath), projectDirName(id)));
+    if (skipId === id) {
+      continue;
+    }
+    const abs = projectAgentsAbsPath(repoPath, id);
+    if (!(await writer.exists(abs))) {
+      await writer.writeFile(
+        abs,
+        renderProjectAgents({
+          title: seedTitleFor(id),
+          description: seedDescriptionFor(id),
+        }),
+      );
+    } else {
+      await readProjectRecord(repoPath, id, writer);
+    }
+  }
+
+  return refreshProjectIndex(repoPath, writer);
 }
