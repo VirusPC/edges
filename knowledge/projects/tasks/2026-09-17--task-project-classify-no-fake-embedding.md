@@ -30,7 +30,7 @@
 - backlog（需 embedding 前置）：`knowledge/tasks/_default/backlog/2026-09-17--classify沉到edges-tasks-CLI.md`
 - backlog（真 embedding + K-means 探讨补记）：`knowledge/tasks/_default/backlog/2026-09-15--交互式主题聚类参考K-means.md`
 - ADR：`docs/adr/0010-classify-tasks-and-task-project-metadata.md`；分组形状见 ADR 0009
-- 任务记录员「Embedding 接入」backlog：讨论要求交叉；若卡已落盘请在此补绝对路径（本笔记落档时 main 上尚未检索到同名文件）
+- backlog（Embedding 接入）：`knowledge/tasks/_default/backlog/2026-09-17--Task-Project分类接入真正Embedding.md`
 
 ## 非目标
 
