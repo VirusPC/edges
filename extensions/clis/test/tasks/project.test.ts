@@ -134,6 +134,37 @@ test("updateProject preserves pointers and does not rewrite a Task file", async 
   }
 });
 
+test("updateProject seeds AGENTS.md when the project dir exists without metadata", async () => {
+  const repo = await virginRepo();
+  try {
+    await mkdir(path.join(repo, "knowledge/tasks/docs/backlog"), { recursive: true });
+    await writeFile(
+      path.join(repo, "knowledge/tasks/docs/backlog/2026-09-17--orphan.md"),
+      "---\nmetadata:\n  edges-tasks-status: backlog\n  edges-task-project: docs\n---\n\nbody\n",
+      "utf8",
+    );
+    await assert.rejects(() => readFile(path.join(repo, "knowledge/tasks/docs/AGENTS.md"), "utf8"));
+
+    const updated = await updateProject(
+      repo,
+      "docs",
+      { title: "Docs", description: "documentation work" },
+      nodeBoardWriter(),
+    );
+    assert.equal(updated.project, "docs");
+    assert.equal(updated.dir, "docs");
+    assert.equal(updated.title, "Docs");
+    assert.equal(updated.description, "documentation work");
+    assert.equal(updated.path, "knowledge/tasks/docs/AGENTS.md");
+
+    const agents = await readFile(path.join(repo, "knowledge/tasks/docs/AGENTS.md"), "utf8");
+    assert.match(agents, /^# Docs\n/);
+    assert.match(agents, /documentation work/);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
 test("createProject rejects _default as the CLI id", async () => {
   const repo = await virginRepo();
   try {
