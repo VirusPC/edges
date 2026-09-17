@@ -21,5 +21,5 @@
 
 ## Follow-up
 
-原 Open（`USER.md` 是否一并 ignore）已关：与 `.memory/users/` 一起挡住。不按条目加 `private` 元数据；那是另案，不在本决策范围。skill 接线（init / remember `--type user`、备份/恢复）是本决策之后的实现，不改上述布局与闸门。
+原 Open（`USER.md` 是否一并 ignore）已关：与 `.memory/users/` 一起挡住。不按条目加 `private` 元数据；那是另案，不在本决策范围。skill 接线（init / remember `--type user`、备份/恢复）是本决策之后的实现，不改上述布局与闸门。类型入口文件名由 ADR 0012 改为 `users/AGENTS.md`（仍随 `users/` gitignore）；仓内权威副本与闸门不变。
 
