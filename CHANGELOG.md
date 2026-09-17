@@ -11,11 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `edges tasks project list|get|create|update`：Task Project 元数据（每 project 含 `_default` 的轻量 AGENTS.md + 根 `knowledge/tasks/AGENTS.md` Task Projects 节，写在 project-memory 受管标记外）。Q18=A；看板 markdown 仍是 Task 真源。无 embedding，无 `edges tasks classify`。
-- `extensions/skills/project-tasks-classify`：classifyTasks 整板软聚类工作流 Skill；人改建议表后经 CLI 落地。能力面 CLI + Skill + MCP。Generic tasks Skill/MCP CRUD 仍是另卡 backlog。
-- `docs/superpowers/plans/2026-09-17-classify-tasks.md`：ADR-0010 的实现计划（本轮只做计划；`edges tasks project list|get|create|update` + project-tasks-classify Skill；软聚类整板、人改建议表后再 CLI 落地；无 embedding、无 `classify` 动词；能力面 CLI + Skill + MCP；本计划 PR 不实现 CLI/Skill、不迁看板）。
+- `edges tasks project list|get|create|update`：Task Project 元数据（每 project 含 `_default` 的轻量 AGENTS.md + 根 `knowledge/tasks/AGENTS.md` Task Projects 节，写在 project-memory 受管标记外）。Q18=A；看板 markdown 仍是 Task 真源。无仓内 embedding 库，无 `edges tasks classify`。
+- `extensions/skills/project-tasks-classify`：classifyTasks 整板 Embedding-based NCC 工作流 Skill；质心由用户预先设定，人改建议表后经 CLI 落地。能力面 CLI + Skill + MCP。Generic tasks Skill/MCP CRUD 仍是另卡 backlog。
+- `docs/superpowers/plans/2026-09-17-classify-tasks.md`：ADR-0010 的实现计划（本轮只做计划；`edges tasks project list|get|create|update` + project-tasks-classify Skill；Embedding-based NCC 整板、人改建议表后再 CLI 落地；无仓内 embedding 库、无 `classify` 动词；能力面 CLI + Skill + MCP；本计划 PR 不实现 CLI/Skill、不迁看板）。
 - CONTEXT 增加 classifyTasks（edges）、Task Project 索引、Task Project AGENTS.md；收紧 Task Project / `edges tasks`（CLI）/ Memory Type：project 元数据只在索引/描述层（Q18=A）；约定 `project list|get|create|update`；本轮无公开 `classify` 动词。
-- `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：classifyTasks 软聚类整板；Task Project 元数据对齐 Project Memory 的索引层。扩展 ADR 0009。本轮只定文档，不实现 CLI/Skill，不迁看板。
+- `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：classifyTasks 用 Embedding-based NCC 整板分类；Task Project 元数据对齐 Project Memory 的索引层。扩展 ADR 0009。本轮只定文档，不实现 CLI/Skill，不迁看板。
 - `evaluation/third_party/locomo`：以 git submodule 钉住 [VirusPC/locomo](https://github.com/VirusPC/locomo) `cb5151e`（fork `main` 上 PR #1 merge）。薄封装 [`evaluation/run_locomo_official.py`](evaluation/run_locomo_official.py) 调用官方 `task_eval/evaluate_qa.py` → `evaluation.py` F1。首选官方评测冒烟路径；`evaluation/cases/locomo-smoke/` 标为 legacy hand-port，历史报告保留。不是 Benchmark Proof / Project Memory proof。clone 用 `--recurse-submodules`。
 - `evaluation/cases/locomo-smoke/`：LoCoMo 评测冒烟（截断上下文基线）。dummy dry-run 无 API；真实 run 走 OpenAI-compatible `kimi-for-coding`。SUT 为上游 locomo 打分/out-file schema。不是 Benchmark Proof，不接 Project Memory。
 - CONTEXT 增加评测冒烟（Evaluation Smoke）、公开基准证明（Benchmark Proof）、评测报告（Evaluation Report）：冒烟只证明链路可跑，不是项目记忆或 Agent Memory 有效性证据。

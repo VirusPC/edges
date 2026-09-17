@@ -173,7 +173,7 @@ _避免使用_：知识出口、历史知识库、失效 Edge 专区
 _避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目、`tasks` Memory Type（若指看板工作项）
 
 **Task Project（edges）**：
-看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。每个 project 带标题与描述（软聚类质心）；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
+看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。每个 project 带标题与描述（用户预先设定的 NCC 质心）；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
 _避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type
 
 **Task Project 索引**：
@@ -185,8 +185,8 @@ _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件�
 _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
 
 **classifyTasks（edges）**：
-独立工作流 Skill（约定路径 `extensions/skills/project-tasks-classify/`，展示名 classifyTasks）：以带描述的 Task Project 为质心，对整板做软 K-means 式归属建议，人改建议表后再经 CLI 落地。
-_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、embedding K-means、只整理 `_default`、公开 `edges tasks classify`
+独立工作流 Skill（约定路径 `extensions/skills/project-tasks-classify/`，展示名 classifyTasks）：用 Embedding-based Nearest Centroid Classification（基于 Embedding 的最近质心分类，NCC）把整板 Task 分到用户已设的 Task Project 质心，人改建议表后再经 CLI 落地。
+_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动发现或迭代质心、只整理 `_default`、公开 `edges tasks classify`
 
 **edges-task-project**：
 frontmatter `metadata.edges-task-project`，与目录 project-slug 双写；`_default` 对应 `default` 或不写字段。

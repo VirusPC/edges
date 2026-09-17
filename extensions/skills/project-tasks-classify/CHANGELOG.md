@@ -9,7 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Skill id 与目录从 `classify-tasks` 改为 `project-tasks-classify`（展示名仍是 classifyTasks）。工作流不变。
+- 概念模型改为 Embedding-based Nearest Centroid Classification（NCC）：质心由用户预先设定，Skill 只做最近质心归类；embedding 走宿主 / runtime 能力，不加仓内库。不再把工作流写成软聚类。
+- Skill id 与目录从 `classify-tasks` 改为 `project-tasks-classify`（展示名仍是 classifyTasks）。
 
 ## [1.0.0] - 2026-09-17
 
