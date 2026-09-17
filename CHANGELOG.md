@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `edges tasks project review-page`：只渲染通用 `groups` + `items` JSON 为单文件 HTML（`--from` 文件或 `-`；默认 OS 临时路径，`--out` 覆盖）。成功 JSON 的 `command` 为 `project.review-page`，含 `path` / `groupCount` / `itemCount`。不打开浏览器，无 `--mode` / `--open`，无公开 `classify` / `apply-review`。
 - `docs/superpowers/plans/2026-09-17-task-project-review-page.md`：ADR-0012 的实现计划（本轮只做计划；`edges tasks project review-page` 只渲染 groups+items HTML；classifyTasks 第 4 步主路径改为审阅页，Markdown 表作无 GUI 回退；无 `--mode`、无公开 `classify` / `apply-review`；能力面 CLI + Skill + MCP；本计划 PR 不实现 CLI、不改写 Skill、不迁看板）。
 - CONTEXT 增加 Task stem（edges）、Task Project 审阅页（edges）、审阅导出行（edges）；收紧 classifyTasks / proposeTypes / edges tasks（CLI）：人闸主路径是 `project review-page`（通用 groups+items），Markdown 表作无 GUI 回退；无 `--mode`，无公开 `classify` / `apply-review`。
 - `docs/adr/0012-task-project-review-page-is-render-only-cli.md`：Task Project 审阅页是只渲染的 CLI。扩展 ADR 0010 / 0011 的人闸，不重开 embedding / CLI classify。本轮只定文档，不实现命令、不改写 skill。
@@ -59,6 +60,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- classifyTasks（`extensions/skills/project-tasks-classify`）第 4 步人闸主路径改为 `edges tasks project review-page`；Markdown 建议表仅作无 GUI 回退。能力面仍是 CLI + Skill + MCP。
 - `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：Amended by ADR 0012（人闸主路径改为 render-only 审阅页；Markdown 建议表作无 GUI 回退）。
 - `docs/adr/0011-propose-task-project-types-from-default.md`：Amended by ADR 0012（proposeTypes 复用同一审阅页，不改类型发现边界）。
 - `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：Skill 路径改为 `extensions/skills/project-tasks-classify/`；类型发现拆到 ADR 0011；方法改为 LLM / agent 判断，不再写软 K-means 或 Embedding NCC。整板归属与 Q18=A 不变。
