@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `docs/superpowers/plans/2026-09-17-classify-tasks.md`：ADR-0010 的实现计划（本轮只做计划；`edges tasks project list|get|create|update` + classify-tasks Skill；软聚类整板、人改建议表后再 CLI 落地；无 embedding、无 `classify` 动词；能力面 CLI + Skill + MCP；本计划 PR 不实现 CLI/Skill、不迁看板）。
 - CONTEXT 增加 classifyTasks（edges）、Task Project 索引、Task Project AGENTS.md；收紧 Task Project / `edges tasks`（CLI）/ Memory Type：project 元数据只在索引/描述层（Q18=A）；约定 `project list|get|create|update`；本轮无公开 `classify` 动词。
 - `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：classifyTasks 软聚类整板；Task Project 元数据对齐 Project Memory 的索引层。扩展 ADR 0009。本轮只定文档，不实现 CLI/Skill，不迁看板。
 - `evaluation/third_party/locomo`：以 git submodule 钉住 [VirusPC/locomo](https://github.com/VirusPC/locomo) `cb5151e`（fork `main` 上 PR #1 merge）。薄封装 [`evaluation/run_locomo_official.py`](evaluation/run_locomo_official.py) 调用官方 `task_eval/evaluate_qa.py` → `evaluation.py` F1。首选官方评测冒烟路径；`evaluation/cases/locomo-smoke/` 标为 legacy hand-port，历史报告保留。不是 Benchmark Proof / Project Memory proof。clone 用 `--recurse-submodules`。
