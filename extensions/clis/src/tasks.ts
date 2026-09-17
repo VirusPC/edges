@@ -31,7 +31,7 @@ Cancel a Task with: edges tasks status <stem> cancelled
 There is no delete command.
 
 Run layer is read-only (no append).
-classifyTasks Skill (extensions/skills/classify-tasks) uses these project verbs plus update --project.
+classifyTasks Skill (extensions/skills/project-tasks-classify) uses these project verbs plus update --project.
 Generic tasks Skill/MCP CRUD is a later backlog on this same contract.
 Capability Surface is CLI + Skill + MCP.
 

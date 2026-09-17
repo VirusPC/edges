@@ -1,12 +1,12 @@
 # classifyTasks 软聚类整板；Task Project 元数据只做索引/描述层
 
-看板已有 directory-first 的 Task Project（ADR 0009），但缺少「按主题整理」工作流，也缺少 project 级标题与描述。2026-09-17 grill 确认：独立 Skill `classifyTasks`（`extensions/skills/classify-tasks/`）对整板做软 K-means 式建议（带描述的 Task Project 为质心），人改建议表后再用 CLI 落地；Task Project 管理只在索引/描述层对齐 Project Memory（Q18=A），看板 markdown 仍是 Task 真源。本轮只定 CONTEXT / ADR（及记忆指针），不实现 CLI / Skill，不迁看板。**Extends ADR 0009**（分组形状不变，补元数据与 classify 工作流）；叠 ADR 0004 / 0005。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
+看板已有 directory-first 的 Task Project（ADR 0009），但缺少「按主题整理」工作流，也缺少 project 级标题与描述。2026-09-17 grill 确认：独立 Skill `classifyTasks`（`extensions/skills/project-tasks-classify/`）对整板做软 K-means 式建议（带描述的 Task Project 为质心），人改建议表后再用 CLI 落地；Task Project 管理只在索引/描述层对齐 Project Memory（Q18=A），看板 markdown 仍是 Task 真源。本轮只定 CONTEXT / ADR（及记忆指针），不实现 CLI / Skill，不迁看板。**Extends ADR 0009**（分组形状不变，补元数据与 classify 工作流）；叠 ADR 0004 / 0005。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
 
 **Status:** accepted（ADR 0010；grill 确认于 2026-09-17）
 
 ## Decision
 
-- **Skill：** `extensions/skills/classify-tasks/`，展示名 classifyTasks。独立工作流 Skill，不是通用 edges-tasks Skill+MCP CRUD。
+- **Skill：** `extensions/skills/project-tasks-classify/`，展示名 classifyTasks。独立工作流 Skill，不是通用 edges-tasks Skill+MCP CRUD。
 - **聚类：** 软 K-means 式。带描述的 Task Project 是质心；agent 建议改归属或新质心；人可加质心；对整板重聚（不只 `_default`）。先出建议表，人可改目标、留 `_default`、丢掉或补新 project，再经 CLI 应用。不自动批量建 project。本轮不用 embedding。
 - **正交：** classify 与 `update --project` 不得改 `edges-tasks-status` 或 `edges-task-priority`。
 - **元数据（Q18=A）：** Task Project 管理只在索引/描述层像 Project Memory。看板 markdown 仍是真源。不把每条 Task 升成 Memory Type（那是 Q18=B，与 [`tasks-memory与看板语义合并`](../../knowledge/tasks/_default/backlog/2026-09-13--tasks-memory与看板语义合并.md) 重叠，以后再谈）。

@@ -185,7 +185,7 @@ _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件�
 _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
 
 **classifyTasks（edges）**：
-独立工作流 Skill（约定路径 `extensions/skills/classify-tasks/`，展示名 classifyTasks）：以带描述的 Task Project 为质心，对整板做软 K-means 式归属建议，人改建议表后再经 CLI 落地。
+独立工作流 Skill（约定路径 `extensions/skills/project-tasks-classify/`，展示名 classifyTasks）：以带描述的 Task Project 为质心，对整板做软 K-means 式归属建议，人改建议表后再经 CLI 落地。
 _避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、embedding K-means、只整理 `_default`、公开 `edges tasks classify`
 
 **edges-task-project**：

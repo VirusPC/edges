@@ -1,5 +1,5 @@
 ---
-name: classify-tasks
+name: project-tasks-classify
 description: 对整板 Task 做软聚类归属建议（以带描述的 Task Project 为质心），等人改建议表后再用 edges tasks CLI 落地。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
 version: 1.0.0
 ---
