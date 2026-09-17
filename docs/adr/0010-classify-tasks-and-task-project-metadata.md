@@ -1,8 +1,8 @@
 # classifyTasks 按已有 Task Project 质心整板分类；Task Project 元数据只做索引/描述层
 
-看板已有 directory-first 的 Task Project（ADR 0009），但缺少「按主题整理」工作流，也缺少 project 级标题与描述。2026-09-17 grill 确认：独立 Skill `classifyTasks` 对整板做归属建议（带描述的 Task Project 为用户已设质心），人改建议表后再用 CLI 落地；Task Project 管理只在索引/描述层对齐 Project Memory（Q18=A），看板 markdown 仍是 Task 真源。同日撤回把方法写成 Embedding NCC / 软 K-means：本轮不要求 embedding，也不把向量分类或无标签聚类写成合同。Skill 路径定为 `extensions/skills/project-tasks-classify/`（初稿曾写 `classify-tasks/`）。**Extends ADR 0009**（分组形状不变，补元数据与 classify 工作流）；**Amended by ADR 0011**（类型发现从本 skill 拆出；整板归属 + Q18=A 不变）。叠 ADR 0004 / 0005。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
+看板已有 directory-first 的 Task Project（ADR 0009），但缺少「按主题整理」工作流，也缺少 project 级标题与描述。2026-09-17 grill 确认：独立 Skill `classifyTasks`（`extensions/skills/project-tasks-classify/`）对整板做归属建议（带描述的 Task Project 为用户已设质心），人改建议表后再用 CLI 落地；Task Project 管理只在索引/描述层对齐 Project Memory（Q18=A），看板 markdown 仍是 Task 真源。同日曾把方法名写成 Embedding-based 最近质心分类，随即撤回：本轮不要求 embedding，也不把向量分类或无标签聚类写成合同。Skill 路径定为 `extensions/skills/project-tasks-classify/`（初稿曾写 `classify-tasks/`）。**Extends ADR 0009**（分组形状不变，补元数据与 classify 工作流）；**Amended by ADR 0011**（类型发现从本 skill 拆出；整板归属 + Q18=A 不变）。叠 ADR 0004 / 0005。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
 
-**Status:** accepted（ADR 0010；grill 确认于 2026-09-17；同日由 ADR 0011 修订路径与类型发现边界）
+**Status:** accepted（ADR 0010；grill 确认于 2026-09-17；同日由 ADR 0011 修订路径与类型发现边界；同日撤回 embedding 作为本轮方法）
 
 **See also:** ADR 0011（从 `_default` 提议新 Task Project 类型；与本条配对）
 

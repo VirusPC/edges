@@ -26,6 +26,7 @@
 - [project-memory-init](../.agents/skills/project-memory-init/SKILL.md) — 在指定目录创建或修复项目记忆（AGENTS.md + .memory）。仅当用户明确要求初始化时使用，禁止自动调用；不覆盖已有正文。
 - [project-memory-remember](../.agents/skills/project-memory-remember/SKILL.md) — 把可复用结论写入本项目 .memory 并刷新索引。用户要求记住时必须用；被纠正、用户给出可用想法/约定/约束、或任务产出已验证、以后还用得上的结论时也要主动用。
 - [project-memory-reshape](../.agents/skills/project-memory-reshape/SKILL.md) — 把已有 AGENTS.md 按 project-memory-init 的形状重新组织：硬约束写进入口对应区块，区块外只留身份与指针，长规范进 important 或 README，记忆内容抽到 .memory，其余受管区块只留索引。用户要求整理、改造、迁移、重组已有 AGENTS.md 时使用；init/doctor 不改正文，不要用它们代替本 skill。
+- [project-tasks-classify](../.agents/skills/project-tasks-classify/SKILL.md) — 对整板 Task 按用户已设的 Task Project（标题 + 描述）做归属建议（LLM / agent 判断，不要求 embedding），等人改建议表后再用 edges tasks CLI 落地。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
 - [prototype](../.agents/skills/prototype/SKILL.md) — Build a throwaway prototype to answer a design question. Use when the user wants to sanity-check whether a state model or logic feels right, or explore what a UI should look like.
 - [requesting-code-review](../.agents/skills/requesting-code-review/SKILL.md) — Use when completing tasks, implementing major features, or before merging to verify work meets requirements
 - [subagent-driven-development](../.agents/skills/subagent-driven-development/SKILL.md) — Use when executing implementation plans with independent tasks in the current session

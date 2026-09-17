@@ -573,6 +573,80 @@ test("run tasks status JSON has no project key and stays under _default", async 
   }
 });
 
+test("run tasks project create/list/get/update and update --project keeps status and priority", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  try {
+    const env = { ...process.env, EDGES_REPO: repo };
+    const createdProj = await run(
+      ["tasks", "project", "create", "cli", "--title", "CLI", "--description", "edges CLI work"],
+      { env },
+    );
+    assert.equal(createdProj.exitCode, 0);
+    const createdBody = JSON.parse(createdProj.stdout);
+    assert.equal(createdBody.command, "project.create");
+    assert.equal(createdBody.project, "cli");
+    assert.equal(createdBody.dir, "cli");
+
+    const listed = await run(["tasks", "project", "list"], { env });
+    assert.equal(listed.exitCode, 0);
+    const listedBody = JSON.parse(listed.stdout) as {
+      command: string;
+      projects: Array<{ project: string }>;
+    };
+    assert.equal(listedBody.command, "project.list");
+    assert.deepEqual(
+      listedBody.projects.map((item) => item.project),
+      ["default", "cli"],
+    );
+
+    const got = await run(["tasks", "project", "get", "default"], { env });
+    assert.equal(got.exitCode, 0);
+    assert.equal(JSON.parse(got.stdout).command, "project.get");
+    assert.equal(JSON.parse(got.stdout).dir, "_default");
+
+    const updatedMeta = await run(
+      ["tasks", "project", "update", "cli", "--description", "updated"],
+      { env },
+    );
+    assert.equal(updatedMeta.exitCode, 0);
+    assert.equal(JSON.parse(updatedMeta.stdout).description, "updated");
+
+    const createdTask = await run(
+      ["tasks", "create", "--title", "Keep fields", "--status", "todo", "--priority", "high"],
+      { env },
+    );
+    assert.equal(createdTask.exitCode, 0);
+    const stem = JSON.parse(createdTask.stdout).stem as string;
+    const moved = await run(["tasks", "update", stem, "--project", "cli"], { env });
+    assert.equal(moved.exitCode, 0);
+    const movedBody = JSON.parse(moved.stdout);
+    assert.equal(movedBody.project, "cli");
+    assert.equal(movedBody.priority, "high");
+    const gotTask = await run(["tasks", "get", stem], { env });
+    const task = JSON.parse(gotTask.stdout).task as {
+      status: string;
+      priority: string;
+      project: string;
+    };
+    assert.equal(task.status, "todo");
+    assert.equal(task.priority, "high");
+    assert.equal(task.project, "cli");
+
+    const missing = await run(["tasks", "project", "get", "docs"], { env });
+    assert.equal(missing.exitCode, 1);
+    assert.equal(JSON.parse(missing.stdout).errorCode, "PROJECT_NOT_FOUND");
+
+    const badSlug = await run(
+      ["tasks", "project", "create", "_default", "--title", "Default", "--description", "nope"],
+      { env },
+    );
+    assert.equal(badSlug.exitCode, 2);
+    assert.equal(JSON.parse(badSlug.stdout).errorCode, "VALIDATION_ERROR");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
 test("run tasks status rejects --priority and does not move", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
