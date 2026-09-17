@@ -13,11 +13,11 @@ test("tasks help lists project group and omits delete/log/classify", async () =>
   assert.doesNotMatch(result.stdout, /^\s+classify\b/m);
 });
 
-test("tasks project help lists list get create update", async () => {
+test("tasks project help lists list get create update review-page", async () => {
   const result = await run(["tasks", "project", "--help"]);
   assert.equal(result.exitCode, 0);
-  for (const verb of ["list", "get", "create", "update"]) {
-    assert.match(result.stdout, new RegExp(`\\b${verb}\\b`));
+  for (const verb of ["list", "get", "create", "update", "review-page"]) {
+    assert.match(result.stdout, new RegExp(`^\\s+${verb}\\b`, "m"));
   }
   assert.doesNotMatch(result.stdout, /^\s+classify\b/m);
 });

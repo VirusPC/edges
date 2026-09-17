@@ -35,6 +35,14 @@ test("readProcessInput drains stdin when --token-stdin and not a TTY", async () 
   assert.equal(input.stdinIsTTY, false);
 });
 
+test("readProcessInput drains stdin when --from - and not a TTY", async () => {
+  const input = await readProcessInput(
+    ["node", "edges", "tasks", "project", "review-page", "--from", "-"],
+    { stdin: stdinFrom('{"groups":[],"items":[]}'), isTTY: false },
+  );
+  assert.equal(input.stdinText, '{"groups":[],"items":[]}');
+});
+
 test("readProcessInput skips stdin on a TTY even with --token-stdin", async () => {
   const input = await readProcessInput(["node", "edges", "note", "--token-stdin"], {
     stdin: stdinFrom("secret\n"),
