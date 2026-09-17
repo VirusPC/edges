@@ -7,11 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Skill id 与目录从 `classify-tasks` 改为 `project-tasks-classify`（展示名仍是 classifyTasks）。工作流不变。
+
 ## [1.0.0] - 2026-09-17
 
 ### Added
 
 - classifyTasks：整板软聚类建议表，人改后再用 `edges tasks project` 与 `update --project` 落地。无 embedding，无 `classify` 动词。能力面 CLI + Skill + MCP。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/classify-tasks@1.0.0...HEAD
-[1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/classify-tasks@1.0.0
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-tasks-classify@1.0.0...HEAD
+[1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-tasks-classify@1.0.0

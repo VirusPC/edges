@@ -8,7 +8,6 @@
 
 <!-- project-memory-entries:start -->
 - [brainstorming](../.agents/skills/brainstorming/SKILL.md) — You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
-- [classify-tasks](../.agents/skills/classify-tasks/SKILL.md) — 对整板 Task 做软聚类归属建议（以带描述的 Task Project 为质心），等人改建议表后再用 edges tasks CLI 落地。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
 - [conversation-to-notes](../.agents/skills/conversation-to-notes/SKILL.md) — 将原始对话记录整理为结构清晰的中文笔记摘要。使用复盘四栏（背景→过程→所学→行动指南），灵感来自 After Action Review，但不是官方 AAR 模板。含补充说明（相关链接写入该栏并附简短说明）。
 - [domain-modeling](../.agents/skills/domain-modeling/SKILL.md) — Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording or editing an ADR.
 - [edges-note](../.agents/skills/edges-note/SKILL.md) — 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 `edges note`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
@@ -27,6 +26,7 @@
 - [project-memory-init](../.agents/skills/project-memory-init/SKILL.md) — 在指定目录创建或修复项目记忆（AGENTS.md + .memory）。仅当用户明确要求初始化时使用，禁止自动调用；不覆盖已有正文。
 - [project-memory-remember](../.agents/skills/project-memory-remember/SKILL.md) — 把可复用结论写入本项目 .memory 并刷新索引。用户要求记住时必须用；被纠正、用户给出可用想法/约定/约束、或任务产出已验证、以后还用得上的结论时也要主动用。
 - [project-memory-reshape](../.agents/skills/project-memory-reshape/SKILL.md) — 把已有 AGENTS.md 按 project-memory-init 的形状重新组织：硬约束写进入口对应区块，区块外只留身份与指针，长规范进 important 或 README，记忆内容抽到 .memory，其余受管区块只留索引。用户要求整理、改造、迁移、重组已有 AGENTS.md 时使用；init/doctor 不改正文，不要用它们代替本 skill。
+- [project-tasks-classify](../.agents/skills/project-tasks-classify/SKILL.md) — 对整板 Task 做软聚类归属建议（以带描述的 Task Project 为质心），等人改建议表后再用 edges tasks CLI 落地。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
 - [prototype](../.agents/skills/prototype/SKILL.md) — Build a throwaway prototype to answer a design question. Use when the user wants to sanity-check whether a state model or logic feels right, or explore what a UI should look like.
 - [requesting-code-review](../.agents/skills/requesting-code-review/SKILL.md) — Use when completing tasks, implementing major features, or before merging to verify work meets requirements
 - [subagent-driven-development](../.agents/skills/subagent-driven-development/SKILL.md) — Use when executing implementation plans with independent tasks in the current session
