@@ -1,6 +1,6 @@
 ---
 name: project_type_set
-description: 官方 init 种子仍是六类；类型集合由 LAYOUT+本层登记决定，不是 PROTOCOL 闭集。可扩展见仓库根 docs/adr/0006-extensible-project-memory-types.md。否掉把 docs 等示例写进默认种子。user 进仓且 gitignore；v1 不做晋升。
+description: 官方 init 种子仍是六类；类型集合由 LAYOUT+本层登记决定，不是 PROTOCOL 闭集。可扩展见仓库根 ADR 0006。类型入口现为复数目录下 AGENTS.md（ADR 0012）。否掉把 docs 等示例写进默认种子。user 进仓且 gitignore；v1 不做晋升。
 metadata:
   edges-title: 项目记忆的类型集合
   edges-type: project
@@ -8,10 +8,10 @@ metadata:
   edges-agent-client: cursor
   edges-username: Coding Agent 专家
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-13T17:32:01+00:00"
+  edges-updated-at: "2026-09-17T07:56:00+00:00"
 ---
 
-可写类型是 `user` / `feedback` / `project` / `reference` / `skills`；`agent_skills` 只索引不写。这六类是官方 init 种子，不是 PROTOCOL 闭集：类型集合由 LAYOUT 实现与本层登记决定。不要把 `docs` 等示例写进默认种子。用户记忆是项目记忆的一种 Memory Type，权威副本在仓库工作树内且 gitignore，按仓库路径绑定，布局与其他类型相同（`.memory/users/`、`USER.md`、`user_<slug>.md`）。本层入口清单顺序是 `user` → `feedback` → `project` → `reference`（`project` 兜底），然后才是 `skills` / `agent_skills`。skill 接线（init / remember `--type user`、备份/恢复）已做。`.memory/` 下类型目录用复数。可扩展登记见仓库根 ADR 0006；`$project-memory-add-type` 已落地。
+可写类型是 `user` / `feedback` / `project` / `reference` / `skills`；`agent_skills` 只索引不写。这六类是官方 init 种子，不是 PROTOCOL 闭集：类型集合由 LAYOUT 实现与本层登记决定。不要把 `docs` 等示例写进默认种子。用户记忆是项目记忆的一种 Memory Type，权威副本在仓库工作树内且 gitignore，按仓库路径绑定，布局与其他类型相同（`.memory/users/`、`users/AGENTS.md`、`user_<slug>.md`）。类型入口路径见仓库根 ADR 0012。本层入口清单顺序是 `user` → `feedback` → `project` → `reference`（`project` 兜底），然后才是 `skills` / `agent_skills`。skill 接线（init / remember `--type user`、备份/恢复）已做。`.memory/` 下类型目录用复数。可扩展登记见仓库根 ADR 0006；`$project-memory-add-type` 已落地。
 
 **Why:**
 
@@ -31,6 +31,6 @@ metadata:
 - 用户要在某一层自建 type：走 `$project-memory-add-type`，按 LAYOUT 落入口与目录；不要先做 JSON/YAML 总配置，也不要把示例写进 init 种子。
 - 文档按为什么再读它归类，并按清单顺序先排除更具体的：本仓不宜公开 → `user`；纠正与禁区 → `feedback`；外部指针 → `reference`；对不上再 → `project`（兜底）；**自动沉淀的可执行流程 → `skills`**；人写或装入的技能 → 放 `.agents/skills/`，由 `agent_skills` 索引；常驻指令 → `AGENTS.md` 正文。
 - 不要改 `project` / `reference` 引言去迁就已有文件。
-- 用户记忆的现行结论见 ADR-0003：仓内 `.memory/users/` + `USER.md` + `user_<slug>.md`，gitignore，不把家目录或 edges-private 当真源。Agent 读本机 `USER.md`。换机用 `$user-memory-backup` / `$user-memory-restore`。不要在 v1 设计晋升到可提交类型，也不要加 `private` 字段。
-- `.memory/` 类型目录用复数（`users/` `feedbacks/` `projects/` `references/` `skills/`）；`--type`、索引文件名、条目前缀保持单数。`agent_skills` 没有 `.memory/` 下的目录——它的内容根在 `.agents/skills/`。
+- 用户记忆的现行结论见 ADR-0003：仓内 `.memory/users/` + `user_<slug>.md`，gitignore，不把家目录或 edges-private 当真源。类型入口现为 `users/AGENTS.md`（ADR 0012）；Agent 读本机这份入口。换机用 `$user-memory-backup` / `$user-memory-restore`。不要在 v1 设计晋升到可提交类型，也不要加 `private` 字段。
+- `.memory/` 类型目录用复数（`users/` `feedbacks/` `projects/` `references/` `skills/`）；`--type`、条目前缀保持单数。类型入口一律是该复数目录下的 `AGENTS.md`（ADR 0012）。`agent_skills` 的索引在 `.memory/agent_skills/AGENTS.md`，内容根仍在 `.agents/skills/`，永不写入 `.agents/`。
 - 可扩展决策与本轮不做的事见 ADR 0006；`tasks` Memory Type 若出现在示例里，不要和 `knowledge/tasks` 看板合并。

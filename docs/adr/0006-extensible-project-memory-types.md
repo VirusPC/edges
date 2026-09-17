@@ -2,11 +2,11 @@
 
 项目记忆需要支持在指定目录新增 Memory Type，但 PROTOCOL 只冻结「按 type 分入口、两跳到正文」的形状，不枚举具体类型。2026-09-13 grill 确认：扩展面只落在 LAYOUT（入口文件 + `<plural>/` + AGENTS 本层索引行），用 skill 在指定记忆目录登记；不另做 JSON/YAML 类型注册表。
 
-**Status:** accepted（grill 确认于 2026-09-13）
+**Status:** accepted（grill 确认于 2026-09-13；入口文件形态由 ADR 0012 改为 `<plural>/AGENTS.md`，扩展面仍只在 LAYOUT）
 
 ## Decision
 
-- **扩展面 = 只改 LAYOUT。** 一个 Memory Type 就是一层入口文件 + 内容目录（及条目前缀约定），并在该层 `AGENTS.md` 本层索引挂一行。PROTOCOL 不出现具体类型闭集；**不做**单独的 JSON/YAML 类型注册表（YAGNI）。
+- **扩展面 = 只改 LAYOUT。** 一个 Memory Type 就是一份类型入口 + 内容目录（及条目前缀约定），并在该层层入口 `AGENTS.md` 本层索引挂一行。类型入口现为 `<plural>/AGENTS.md`（ADR 0012），不是 `.memory/` 根部另立一套文件名。PROTOCOL 不出现具体类型闭集；**不做**单独的 JSON/YAML 类型注册表（YAGNI）。
 - **动作：** 新增 skill `$project-memory-add-type`（名称可按本仓 `project-memory-*` 系列微调），在指定记忆目录登记一个 type（name / description / 可选特权 metadata）。本轮只定文档，不实现该 skill。
 - **官方 init 种子仍是内置六类：** `user` / `feedback` / `project` / `reference` / `skills` / `agent_skills`。用户后加的 type 与种子同构，remember / ask / doctor 必须能从该层 AGENTS / 入口产物发现它们；既有特例仍只跟内置走（`user` 的 gitignore 见 ADR 0003；`agent_skills` 只索引不写；`skills` 为 Agent Skills 目录形态）。
 - **允许特权 metadata**（例如 gitignore 如用户记忆、只索引如 `agent_skills`、skills 形态）。实现 add-type 时落在**当前 Python skills / scripts**，精神与用户记忆 / ADR 0003 相同，**不要卡在 edges CLI**。某一 flag 的脚本改动过重时可 stub / 空实现并注明，完整补齐可后做。
