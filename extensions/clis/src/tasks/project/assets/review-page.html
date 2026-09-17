@@ -11,9 +11,10 @@
     header { padding:12px 16px; border-bottom:1px solid var(--border); }
     .layout { flex:1; min-height:0; display:grid; grid-template-columns:280px 1fr; }
     .sidebar { overflow:auto; padding:12px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
-    .group { border:1px dashed var(--border); border-radius:12px; padding:12px; background:var(--panel); cursor:pointer; }
-    .group.is-filter { border-style:solid; border-color:var(--accent); }
-    .group.is-over { outline:2px solid var(--accent); }
+    .group { border:1px dashed var(--border); border-radius:12px; padding:12px; background:var(--panel); cursor:pointer; opacity:0.62; transition:opacity .15s ease, background .15s ease, border-color .15s ease; }
+    .group:hover { opacity:1; }
+    .group.is-filter { border-style:solid; border-color:var(--accent); background:color-mix(in srgb, var(--accent) 24%, var(--panel)); opacity:1; }
+    .group.is-over { outline:2px solid var(--accent); outline-offset:3px; opacity:1; }
     .group .title { font-weight:650; }
     .group .desc { color:var(--muted); font-size:12px; margin-top:4px; }
     .main { overflow:auto; padding:12px 16px; }
