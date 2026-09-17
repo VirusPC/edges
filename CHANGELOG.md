@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `edges tasks project list|get|create|update`：Task Project 元数据（每 project 含 `_default` 的轻量 AGENTS.md + 根 `knowledge/tasks/AGENTS.md` Task Projects 节，写在 project-memory 受管标记外）。Q18=A；看板 markdown 仍是 Task 真源。无 embedding，无 `edges tasks classify`。
+- `extensions/skills/classify-tasks`：classifyTasks 整板软聚类工作流 Skill；人改建议表后经 CLI 落地。能力面 CLI + Skill + MCP。Generic tasks Skill/MCP CRUD 仍是另卡 backlog。
 - `docs/superpowers/plans/2026-09-17-classify-tasks.md`：ADR-0010 的实现计划（本轮只做计划；`edges tasks project list|get|create|update` + classify-tasks Skill；软聚类整板、人改建议表后再 CLI 落地；无 embedding、无 `classify` 动词；能力面 CLI + Skill + MCP；本计划 PR 不实现 CLI/Skill、不迁看板）。
 - CONTEXT 增加 classifyTasks（edges）、Task Project 索引、Task Project AGENTS.md；收紧 Task Project / `edges tasks`（CLI）/ Memory Type：project 元数据只在索引/描述层（Q18=A）；约定 `project list|get|create|update`；本轮无公开 `classify` 动词。
 - `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：classifyTasks 软聚类整板；Task Project 元数据对齐 Project Memory 的索引层。扩展 ADR 0009。本轮只定文档，不实现 CLI/Skill，不迁看板。
