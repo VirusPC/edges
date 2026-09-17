@@ -34,7 +34,7 @@ _避免使用_：长期知识库、会话流水账、代码事实副本
 
 **Memory Type（项目记忆）**：
 项目记忆中一条记忆归入哪份入口的分类；对应一层入口文件 + 内容目录（及条目前缀约定）。类型集合由 LAYOUT 实现与本层登记决定，不是 PROTOCOL 闭集枚举。
-_避免使用_：把 type 写成全局 JSON 注册表键、把看板 `knowledge/tasks` 状态夹直接叫 Memory Type
+_避免使用_：把 type 写成全局 JSON 注册表键、把看板 `knowledge/tasks` 状态夹直接叫 Memory Type、把每条 Task 升成 Memory Type（Q18=B，另卡）
 
 **用户记忆（User Memory）**：
 项目记忆的一种 Memory Type，保存绑定到某一仓库路径、且不宜公开的个人材料（个人偏好而非项目共享约定、凭据与密钥，以及其他不得公开的上下文）；权威副本在该仓库工作树内，但不进入版本历史。它不是独立于项目记忆的全局层，也不把私有仓当作真源。
@@ -173,8 +173,20 @@ _避免使用_：知识出口、历史知识库、失效 Edge 专区
 _避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目、`tasks` Memory Type（若指看板工作项）
 
 **Task Project（edges）**：
-看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。
-_避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）
+看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。每个 project 带标题与描述（软聚类质心）；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
+_避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type
+
+**Task Project 索引**：
+`knowledge/tasks/AGENTS.md` 里、project-memory 受管标记之外的 Task Projects 节；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。
+_避免使用_：手改该节、把它当 Memory Type 入口、把看板文件当记忆条目
+
+**Task Project AGENTS.md**：
+每个 Task Project 目录（含 `_default`）内的轻量 `AGENTS.md`，写标题与描述（可选指针）；不是对该目录做完整 `project-memory-init`。
+_避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
+
+**classifyTasks（edges）**：
+独立工作流 Skill（路径 `extensions/skills/classify-tasks/`，展示名 classifyTasks）：以带描述的 Task Project 为质心，对整板做软 K-means 式归属建议，人改建议表后再经 CLI 落地。
+_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、embedding K-means、只整理 `_default`、公开 `edges tasks classify`
 
 **edges-task-project**：
 frontmatter `metadata.edges-task-project`，与目录 project-slug 双写；`_default` 对应 `default` 或不写字段。
@@ -189,8 +201,8 @@ Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`�
 _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
 
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面，覆盖 Issue 层 list/get/create/update/status，以及 Run 层只读的 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级。后续实现：`status` 只在同一 Task Project 内搬家；跨 project 用 `update --project`（或等价入口）。
-_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家
+以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Task Project 元数据 `project list|get|create|update`（建目录与 project AGENTS.md、刷新根索引、改描述、读元数据）；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。
+_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` 动词（本轮）
 
 **Task Run（edges）**：
 对应 Multica Run 的一次执行尝试；仓内落在 Task 同目录 sidecar `.{stem}.log.md` 中带稳定 `run-id` 的记录，由 `edges tasks runs` / `run-messages` 只读查看。
