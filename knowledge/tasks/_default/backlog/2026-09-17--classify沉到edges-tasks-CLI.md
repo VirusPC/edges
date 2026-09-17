@@ -25,4 +25,5 @@ metadata:
   - in_progress：`整理 _default project tasks 的 skill`（当前 skill 编排路径）
   - backlog：`交互式主题聚类`（含真 embedding+K-means 补记）
   - backlog：`edges tasks 的 Skill + MCP 封装`（通用薄封装，不是 classify 算法）
+  - note：`knowledge/projects/tasks/2026-09-17--task-project-classify-no-fake-embedding.md`（不做假 embedding；真 Embedding 调研）
 - 未指派。有 embedding 方案后再 grill-with-docs。
