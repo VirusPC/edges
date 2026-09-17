@@ -9,7 +9,7 @@ metadata:
   edges-agent-client: grok-bot
   edges-username: Idea 记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-17T02:32:15+00:00"
+  edges-updated-at: "2026-09-17T10:35:00+08:00"
 ---
 
 **特殊：协议 / 布局级改造**，不是普通功能加料。动的是 project-memory 的索引合同（init / remember / doctor / PROTOCOL / LAYOUT），迁移面大，派发前必须 grill，不能和「多加一个 type」混成一条。
