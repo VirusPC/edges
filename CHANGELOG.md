@@ -5,85 +5,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-本文件只记 **Edges 仓库级**变更。对外 skill 各自独立 semver，明细见 [`extensions/skills/<name>/CHANGELOG.md`](extensions/skills/)。跨机器 harness 整层一份版本，明细见 [`shared-extensions/CHANGELOG.md`](shared-extensions/CHANGELOG.md)。
+本文件只记 Edges 这个仓库本身的重要变化，方便扫一眼「系统最近能做什么」。某个对外技能自己的版本记录，看 [`extensions/skills/`](extensions/skills/) 下面各自的 changelog；跨机器共用、但不绑定 Edges 的扩展，看 [`shared-extensions/CHANGELOG.md`](shared-extensions/CHANGELOG.md)。尚未发版的变化按功能模块分组。
+
+领域决策、术语表和实现计划不写进这份根 changelog，分别看 [`docs/adr/`](docs/adr/)、[`CONTEXT.md`](CONTEXT.md) 和 [`docs/superpowers/plans/`](docs/superpowers/plans/)。
 
 ## [Unreleased]
 
-### Added
+### 任务看板（edges tasks）
 
-- `edges tasks project review-page`：只渲染通用 `groups` + `items` JSON 为单文件 HTML（`--from` 文件或 `-`；默认 OS 临时路径，`--out` 覆盖）。成功 JSON 的 `command` 为 `project.review-page`，含 `path` / `groupCount` / `itemCount`。不打开浏览器，无 `--mode` / `--open`，无公开 `classify` / `apply-review`。
-- `docs/superpowers/plans/2026-09-17-task-project-review-page.md`：ADR-0012 的实现计划（本轮只做计划；`edges tasks project review-page` 只渲染 groups+items HTML；classifyTasks 第 4 步主路径改为审阅页，Markdown 表作无 GUI 回退；无 `--mode`、无公开 `classify` / `apply-review`；能力面 CLI + Skill + MCP；本计划 PR 不实现 CLI、不改写 Skill、不迁看板）。
-- CONTEXT 增加 Task stem（edges）、Task Project 审阅页（edges）、审阅导出行（edges）；收紧 classifyTasks / proposeTypes / edges tasks（CLI）：人闸主路径是 `project review-page`（通用 groups+items），Markdown 表作无 GUI 回退；无 `--mode`，无公开 `classify` / `apply-review`。
-- `docs/adr/0012-task-project-review-page-is-render-only-cli.md`：Task Project 审阅页是只渲染的 CLI。扩展 ADR 0010 / 0011 的人闸，不重开 embedding / CLI classify。本轮只定文档，不实现命令、不改写 skill。
-- CONTEXT 增加 proposeTypes（edges）、Task Project 候选（edges）；收紧 Task Project / classifyTasks：已有 project 是用户已设质心；新类型由 proposeTypes 提议，不把未确认候选当成 project。
-- `docs/adr/0011-propose-task-project-types-from-default.md`：独立 Skill `extensions/skills/project-tasks-propose-types/` 从 `_default` 提议新 Task Project 类型；输出候选表，不自动 `project create`。修订 ADR 0010 的路径与类型发现边界。本轮只定文档，不写 skill 正文，不迁看板。
-- `edges tasks project list|get|create|update`：Task Project 元数据（每 project 含 `_default` 的轻量 AGENTS.md + 根 `knowledge/tasks/AGENTS.md` Task Projects 节，写在 project-memory 受管标记外）。Q18=A；看板 markdown 仍是 Task 真源。无 embedding，无 `edges tasks classify`。
-- `extensions/skills/project-tasks-classify`：classifyTasks 整板按已有 Task Project 质心做归属建议（LLM / agent 判断）；人改建议表后经 CLI 落地。能力面 CLI + Skill + MCP。Generic tasks Skill/MCP CRUD 仍是另卡 backlog。
-- `docs/superpowers/plans/2026-09-17-classify-tasks.md`：ADR-0010 的实现计划（本轮只做计划；`edges tasks project list|get|create|update` + project-tasks-classify Skill；按已有质心整板分类、人改建议表后再 CLI 落地；无 embedding、无 `classify` 动词；能力面 CLI + Skill + MCP；本计划 PR 不实现 CLI/Skill、不迁看板）。
-- CONTEXT 增加 classifyTasks（edges）、Task Project 索引、Task Project AGENTS.md；收紧 Task Project / `edges tasks`（CLI）/ Memory Type：project 元数据只在索引/描述层（Q18=A）；约定 `project list|get|create|update`；本轮无公开 `classify` 动词。
-- `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：classifyTasks 按已有 Task Project 质心整板分类；Task Project 元数据对齐 Project Memory 的索引层。扩展 ADR 0009。本轮只定文档，不实现 CLI/Skill，不迁看板。
-- `evaluation/third_party/locomo`：以 git submodule 钉住 [VirusPC/locomo](https://github.com/VirusPC/locomo) `cb5151e`（fork `main` 上 PR #1 merge）。薄封装 [`evaluation/run_locomo_official.py`](evaluation/run_locomo_official.py) 调用官方 `task_eval/evaluate_qa.py` → `evaluation.py` F1。首选官方评测冒烟路径；`evaluation/cases/locomo-smoke/` 标为 legacy hand-port，历史报告保留。不是 Benchmark Proof / Project Memory proof。clone 用 `--recurse-submodules`。
-- `evaluation/cases/locomo-smoke/`：LoCoMo 评测冒烟（截断上下文基线）。dummy dry-run 无 API；真实 run 走 OpenAI-compatible `kimi-for-coding`。SUT 为上游 locomo 打分/out-file schema。不是 Benchmark Proof，不接 Project Memory。
-- CONTEXT 增加评测冒烟（Evaluation Smoke）、公开基准证明（Benchmark Proof）、评测报告（Evaluation Report）：冒烟只证明链路可跑，不是项目记忆或 Agent Memory 有效性证据。
-- `docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`：本轮 LoCoMo 只做评测冒烟；SUT 为上游 harness；分数不得引用为对项目记忆的公开基准证明。
-- `edges tasks` Issue 层 `--project` 与看板路径 `knowledge/tasks/<project-slug>/<status>/`（ADR-0009）。未分组 `_default` ↔ 字段 `default`/省略；目录与 `metadata.edges-task-project` 双写。`status` 只在同一 project 内移动；跨 project 用 `update --project`。一次性把根下 status 夹迁入 `_default/`。无 Skill/MCP 封装。
-- `docs/superpowers/plans/2026-09-16-edges-task-project.md`：ADR-0009 的实现计划（本轮只做计划；`edges tasks` CLI `--project`、路径 `tasks/<project-slug>/<status>/`、一次性迁到 `_default`；不实现 Skill/MCP，本计划 PR 不改 CLI、不迁看板）。
-- CONTEXT 增加 Task Project（edges）、`edges-task-project`；收紧 Task / `edges-tasks-status` / `edges-task-priority` / edges tasks（CLI）：约定分组在 `knowledge/tasks/<project-slug>/`，未分组 `_default`；目录与 frontmatter 双写。后续实现：`status` 只在同一 project 内移动；跨 project 用 `update --project`（或等价入口）。
-- `docs/adr/0009-edges-task-project-grouping.md`：directory-first 的 Multica-like Project + frontmatter 双写；修订 ADR 0002 的路径（嵌在 project-slug 下）。本轮只定文档，不迁看板、不改 CLI；实现轮必须先让 CLI 跟上。
-- `edges tasks` Issue 层 `--priority` / `list --sort priority`（ADR-0007）。枚举 `urgent|high|medium|low|none`，写在 `metadata.edges-task-priority`；缺省为 `none`。`status` 不改 priority；改 priority 不搬状态夹。无 Skill/MCP 封装。
-- `docs/superpowers/plans/2026-09-16-edges-task-priority.md`：ADR-0007 的实现计划（本轮只做 `edges tasks` CLI `--priority` / `--sort priority`；不实现 Skill/MCP）。
-- CONTEXT 增加 `edges-task-priority`；收紧 Task / `edges-tasks-status` / edges tasks（CLI）的文档约定：优先级与状态正交；后续 create/update 用 `--priority`，list 可用 `--sort priority`。
-- `docs/adr/0007-edges-task-priority.md`：Issue 层优先级用 `urgent|high|medium|low|none`（非 P0–P3），写在 `metadata.edges-task-priority`；缺省为 `none`；改 priority 不搬状态夹。本轮只定文档，CLI 后做。
-- 根 README 增加 `deploy-teach.yml` 工作流状态徽章，链到 Actions 工作流页。
-- `$project-memory-add-type`：按 LAYOUT 在指定记忆目录登记用户 Memory Type；remember / ask / doctor 从该层产物发现。官方种子仍是六类（ADR-0006）。
-- `edges tasks` CLI：Issue 层 list/get/create/update/status；Run 层只读 `runs` / `run-messages`（ADR-0005）。无硬删除、无 GitHub 同步、无 Skill/MCP 封装。
-- 可写项目记忆类型 `user`（ADR-0003）：`.memory/users/` + `.memory/USER.md` 为仓内权威副本且 gitignore；`$user-memory-backup` / `$user-memory-restore` 做换机逃生。不做 `private` 条目元数据。
-- `evaluation/`：评测整套 Edges（用例、harness、报告）。系统元工作，不是知识生命周期阶段。
-- `observation/`：观测运行与使用（脱敏 run log、指标与仪表盘笔记）。不替代 `.memory` 决策。
-- `docs/adr/`：记录领域决策；首条为对话整理采用复盘四栏。
-- CONTEXT 增加「复盘四栏」及四栏术语。
-- CONTEXT 增加 Task、`edges-tasks-status`、Task Run Log、backlog（Task）。
-- CONTEXT 增加 edges tasks（CLI）、Task Run（edges）；收紧 Task Run Log：本轮 CLI 动词为 `runs` / `run-messages` 且只读。
-- `docs/adr/0005-edges-tasks-cli.md`：本轮 tasks 看板只做 CLI；Run 层只读；不硬删、不接 GitHub、不抄 Multica daemon。
-- CONTEXT 增加 Memory Type（项目记忆）、可扩展 Memory Type；用户记忆改称一种 Memory Type；Task 避免与 `tasks` Memory Type 混称。
-- `docs/adr/0006-extensible-project-memory-types.md`：Memory Type 扩展面只在 LAYOUT；用 `$project-memory-add-type` 登记；官方 init 种子仍是六类；示例 type 不进种子；`tasks` Memory Type 本轮不与看板合并。
-- CONTEXT 增加能力面（Capability Surface）、CLI、Skill（调用说明）、MCP（Edges）。
-- `docs/adr/0002-knowledge-tasks-status-folders.md`：`knowledge/todos` 迁为按状态分夹的 `knowledge/tasks`。
-- `docs/adr/0004-capability-surface-cli-skill-mcp.md`：能力面定为 CLI + Skill + MCP，删除仓根 `bin/`（实现见本 Unreleased 的 Removed/Changed）。
-- `extensions/skills/edges-note`：教 Agent 何时如何调用 CLI 与 MCP（能力面三入口）。
-- `docs/superpowers/plans/2026-09-13-extensible-project-memory-types.md`：ADR-0006 的实现计划（LAYOUT 登记用户 Memory Type；`$project-memory-add-type`；官方种子仍是六类；本计划 PR 不实现 skill）。
-- `docs/superpowers/plans/2026-09-13-edges-tasks-cli.md`：ADR-0005 的实现计划（本轮只做 `edges tasks` CLI；Run 层只读 `runs` / `run-messages`）。
-- `docs/superpowers/plans/2026-09-11-capability-surface-bin-cli-skill-mcp.md`：ADR-0004 的实现计划（CLI 内 TS git、Skill、MCP 子进程调 `edges note`）。
-- [`knowledge/tasks/`](knowledge/tasks/)：跨 Agent 接力的 Task 看板。
-- `extensions/skills/learn-repo`：把要学习的外部仓库以 git submodule 挂进 `knowledge/teaching/<topic>/repos/`，主仓库只记指针不涨体积，并在主题 RESOURCES.md 登记来源与用途。
-- Obsidian `userIgnoreFilters` 排除 `knowledge/teaching/*/repos/`，学习仓库的文件不进 vault 搜索与关系图谱。
+- 跨 Agent 接力的工作项看板改到 [`knowledge/tasks/`](knowledge/tasks/)。原来 `knowledge/todos/` 里的条目已经改成现在的任务记录格式并迁了过来；旧目录已删除，没有再留跳转说明。
+- 可以用 `edges tasks` 管理这块看板：`edges tasks list`（列出）、`edges tasks get`（查看）、`edges tasks create`（创建）、`edges tasks update`（更新）、`edges tasks status`（改状态）。运行记录可以只读查看：`edges tasks runs`、`edges tasks run-messages`。目前还不能从命令行删除任务，也还没有和 GitHub 同步。创建或更新时可以用 `--priority` 标优先级，取值为 `urgent` / `high` / `medium` / `low` / `none`（写在 `metadata.edges-task-priority`，缺省为 `none`）；列出时可以用 `edges tasks list --sort priority` 按优先级排序。改优先级不会把任务挪到别的状态文件夹。
 
-### Changed
+### 任务项目与审阅
 
-- classifyTasks（`extensions/skills/project-tasks-classify`）第 4 步人闸主路径改为 `edges tasks project review-page`；Markdown 建议表仅作无 GUI 回退。能力面仍是 CLI + Skill + MCP。
-- `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：Amended by ADR 0012（人闸主路径改为 render-only 审阅页；Markdown 建议表作无 GUI 回退）。
-- `docs/adr/0011-propose-task-project-types-from-default.md`：Amended by ADR 0012（proposeTypes 复用同一审阅页，不改类型发现边界）。
-- `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：Skill 路径改为 `extensions/skills/project-tasks-classify/`；类型发现拆到 ADR 0011；方法改为 LLM / agent 判断，不再写软 K-means 或 Embedding NCC。整板归属与 Q18=A 不变。
-- `deploy-teach.yml` 的 `deploy` job 使用 `environment: production`（由 `ecs` 改名），让 GitHub 记录 Deployments。
-- `new-note` MCP 改为子进程调用 `edges note`，不再 `execFile` 仓根脚本。
-- `pnpm setup` 不再把仓根 `bin/` 写入 PATH。
-- 根 README 捕获入口改为 CLI + Skill + MCP（ADR-0004）。
-- `edges-cli` 二进制改为 `edges`；入库走 `edges note …`。旧的 `edges-note`、根目录默认 ingest、`ingest` 子命令已移除，无 shim。
-- 存量 `knowledge/todos/*.md` 改写为 project-memory 形态后迁入 `knowledge/tasks/backlog/`。
-- ECS 部署：`.github/workflows/deploy-teach.yml` 改为 SSH 触发整仓 `git fetch` / `reset --hard origin/main`，不再 rsync 推送 `knowledge/teaching/`。
-- `obsidian-cli` 教学工作区从 `.teaching/obsidian-cli/` 迁到 `knowledge/teaching/obsidian-cli/`。
-- `knowledge/teach/` 重命名为 `knowledge/teaching/`；公网路径 `/teach/` 改为 `/teaching/`。
+- 任务可以归到一个任务项目里，文件放在 `knowledge/tasks/<项目>/` 下；还没分组的放在 `_default`。创建或筛选时用 `--project`，换项目用 `edges tasks update --project`；`edges tasks status` 只在同一个项目内移动。项目的标题和说明用 `edges tasks project list`、`edges tasks project get`、`edges tasks project create`、`edges tasks project update` 管理；任务正文仍以看板上的 markdown 为准。
+- 新增命令 `edges tasks project review-page`：根据分组建议生成一个本地网页，方便用浏览器拖拽调整任务归属。点左侧分组可以筛选列表，拖到分组上可以改归属。新增 classifyTasks 技能（`extensions/skills/project-tasks-classify`）按你已经建好的任务项目给整板提出归属建议；确认时默认打开上面的审阅页，再用 `edges tasks update --project` 落地。没有图形界面时可以退回用表格。
 
-### Fixed
+### 项目记忆（project-memory）
 
-- Task Project 审阅页：点击左侧分组按 `suggested` 筛选右侧列表（「全部」清空筛选）；投放仍用指针拖拽赋值，点击分组不再赋值。
+- 可以用 `$project-memory-add-type` 给某个项目的记忆目录登记一种新的记忆类型；之后查询和写入都会认到它。官方自带的六类不变。用户个人记忆可以写在本机的 `.memory/users/`，这份副本不进 git；换机器时用 `$user-memory-backup` 打包，用 `$user-memory-restore` 恢复。
 
-### Removed
+### 评测与观测
 
-- 仓根 `bin/`（含 `new-note`）。Note 入库 git 在 `extensions/clis` TypeScript。
-- `EDGES_SCRIPT`（MCP / CLI 不再用该环境变量指向仓根脚本）。
-- 根目录 `inbox/` 旧 ingest 自动 PR 测试草稿。
-- `knowledge/todos/`（不留重定向 stub）。
+- 仓库里新增 `evaluation/`，用来检查整套 Edges 能不能跑通。目前有一条 LoCoMo 冒烟评测：只能说明评测链路能跑，不能当成「项目记忆有效」的公开证明。同时新增 `observation/`，用来放脱敏后的运行记录和指标笔记，不替代记忆里的决策。
+
+### 笔记入库与能力面
+
+- 把笔记写入仓库的入口现在是命令 `edges note`、对应的 `edges-note` 技能（`extensions/skills/edges-note`），以及 MCP。旧命令名 `edges-note` 和仓库根目录脚本已经去掉，没有留下兼容别名。仓库根目录不再提供 `bin/` 脚本，也不再用 `EDGES_SCRIPT` 环境变量去找这些脚本；安装时也不会再把仓库根的 `bin/` 加进 PATH。笔记入库时的 git 操作改在命令 `edges note` 里完成。根目录 `inbox/` 里旧的自动入库测试草稿已删除。
+
+### 教学站点
+
+- 教学工作区从 `knowledge/teach/` 改名为 `knowledge/teaching/`，网站上的路径也一起改了。部署改成：GitHub Actions 登录服务器后，在仓库里直接拉取最新的 main，不再单独推送教学目录。README 上加了部署状态徽章。新增 `learn-repo` 技能（`extensions/skills/learn-repo`）：把要长期学习的外部仓库挂到对应教学主题下，主仓库只记一个提交指针。Obsidian 会忽略这些学习仓库，避免搜索和图谱被外部文件占满。
 
 ## [1.1.0] - 2026-09-09
 
