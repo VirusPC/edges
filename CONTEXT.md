@@ -185,7 +185,7 @@ _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件�
 _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
 
 **classifyTasks（edges）**：
-独立工作流 Skill（路径 `extensions/skills/classify-tasks/`，展示名 classifyTasks）：以带描述的 Task Project 为质心，对整板做软 K-means 式归属建议，人改建议表后再经 CLI 落地。
+独立工作流 Skill（约定路径 `extensions/skills/classify-tasks/`，展示名 classifyTasks）：以带描述的 Task Project 为质心，对整板做软 K-means 式归属建议，人改建议表后再经 CLI 落地。
 _避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、embedding K-means、只整理 `_default`、公开 `edges tasks classify`
 
 **edges-task-project**：
@@ -201,7 +201,7 @@ Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`�
 _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
 
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Task Project 元数据 `project list|get|create|update`（建目录与 project AGENTS.md、刷新根索引、改描述、读元数据）；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。
+以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。后续实现：`project list|get|create|update` 读写 Task Project 元数据。
 _避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` 动词（本轮）
 
 **Task Run（edges）**：
