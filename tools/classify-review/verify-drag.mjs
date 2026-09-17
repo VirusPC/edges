@@ -17,6 +17,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
+import { existsSync } from "node:fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const HTML_PATH = path.join(__dirname, "classify-suggestions.html");
@@ -47,11 +48,18 @@ function requirePuppeteer() {
 }
 
 function chromePath() {
-  return (
-    process.env.CHROME_PATH ||
-    "/usr/bin/google-chrome-stable" ||
-    "/usr/bin/google-chrome"
-  );
+  const candidates = [
+    process.env.CHROME_PATH,
+    "/usr/bin/google-chrome-stable",
+    "/usr/bin/google-chrome",
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  ].filter(Boolean);
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) return candidate;
+  }
+  throw new Error("Chrome not found. Set CHROME_PATH to a browser binary.");
 }
 
 function serveHtml() {
@@ -300,6 +308,41 @@ async function main() {
     assert(
       titleAfterSynthClick === "全部任务",
       `post-drop click on the group must not steal filter, got ${titleAfterSynthClick}`
+    );
+
+    // 8) pointercancel must abort, not assign (last move may be over a group).
+    const stem5 = "2026-09-09--memory需要assets资源目录";
+    const pillBeforeCancel = await pillFor(page, stem5);
+    await page.evaluate((stem) => {
+      const card = document.querySelector(`.card[data-stem="${stem}"]`);
+      const group = document.querySelector('.group[data-id="evaluation"]');
+      const cr = card.getBoundingClientRect();
+      const gr = group.getBoundingClientRect();
+      const base = { bubbles: true, pointerId: 9, pointerType: "mouse", button: 0, buttons: 1 };
+      card.dispatchEvent(
+        new PointerEvent("pointerdown", { ...base, clientX: cr.x + 12, clientY: cr.y + 6 })
+      );
+      window.dispatchEvent(
+        new PointerEvent("pointermove", {
+          ...base,
+          clientX: gr.x + gr.width / 2,
+          clientY: gr.y + gr.height / 2,
+        })
+      );
+      window.dispatchEvent(
+        new PointerEvent("pointercancel", {
+          bubbles: true,
+          pointerId: 9,
+          pointerType: "mouse",
+          button: 0,
+          buttons: 0,
+        })
+      );
+    }, stem5);
+    const pillAfterCancel = await pillFor(page, stem5);
+    assert(
+      pillAfterCancel === pillBeforeCancel,
+      `pointercancel must not assign; pill ${pillAfterCancel} (was ${pillBeforeCancel})`
     );
 
     console.log("OK: drag-assign, filter-only click, input-ignore, toast, export, webview hit-test");

@@ -7,15 +7,18 @@
 任意静态方式即可，无需构建：
 
 ```bash
-# 本机直接打开
+# macOS
 open tools/classify-review/classify-suggestions.html
+
+# Linux
+xdg-open tools/classify-review/classify-suggestions.html
 
 # 或起一个本地静态服务（嵌入式预览 / 自动化更稳）
 python3 -m http.server 8765 --directory tools/classify-review
 # 然后访问 http://127.0.0.1:8765/classify-suggestions.html
 ```
 
-用浏览器打开后即可拖拽。改动写在 `localStorage`（键 `edges-classify-v6-pointer-drag`）。调完用「复制 JSON」或「复制 Markdown 表」贴回 Agent，再走 `edges tasks update --project`。
+用浏览器打开后即可拖拽。表是当时的 open-board 快照，不是 live `tasks list`。改动写在 `localStorage`（键 `edges-classify-v7-pointer-drag`，带 `snapshotId`；表换一批时改 `SNAPSHOT_ID` 才会丢掉旧编辑）。调完用「复制 JSON」或「复制 Markdown 表」贴回 Agent，再走 `edges tasks update --project`。
 
 ## 验证拖拽
 

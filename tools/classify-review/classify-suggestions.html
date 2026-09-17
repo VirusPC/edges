@@ -200,7 +200,8 @@ const INITIAL = [
   ["2026-09-16--整理default-project的tasks-skill","default","edges-tasks","move","当前 in_progress"]
 ].map(([stem, current, suggested, action, note]) => ({stem, current, suggested, action, note}));
 
-const STORAGE_KEY = "edges-classify-v6-pointer-drag";
+const STORAGE_KEY = "edges-classify-v7-pointer-drag";
+const SNAPSHOT_ID = "2026-09-17-open-board";
 let rows = loadRows();
 let filterProject = "all";
 
@@ -213,12 +214,18 @@ function loadRows() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length) return parsed;
+      if (parsed && parsed.snapshotId === SNAPSHOT_ID && Array.isArray(parsed.rows) && parsed.rows.length) {
+        return parsed.rows;
+      }
     }
   } catch (_) {}
   return structuredClone(INITIAL);
 }
-function persist() { localStorage.setItem(STORAGE_KEY, JSON.stringify(rows)); }
+function persist() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ snapshotId: SNAPSHOT_ID, rows }));
+  } catch (_) {}
+}
 function toast(msg) {
   const el = document.getElementById("toast");
   el.textContent = msg;
@@ -396,20 +403,26 @@ function onPointerMove(e) {
   if (g) g.classList.add("is-over");
 }
 
+function clearDragChrome(state) {
+  if (!state) return;
+  try { state.sourceEl.releasePointerCapture(state.pointerId); } catch (_) {}
+  state.sourceEl.classList.remove("dragging-source");
+  state.sourceEl.style.pointerEvents = "";
+  document.getElementById("ghost").style.display = "none";
+  clearOver();
+}
+
 function onPointerUp(e) {
   if (!drag || drag.pointerId !== e.pointerId) return;
   const wasActive = drag.active;
   const stem = drag.stem;
-  const sourceEl = drag.sourceEl;
   const { x, y } = dropPoint(e, drag);
   // Release capture + hide ghost BEFORE hit-testing so elementFromPoint
   // sees the group, not the captured card. Do not paint() before this read.
-  try { sourceEl.releasePointerCapture(e.pointerId); } catch (_) {}
+  try { drag.sourceEl.releasePointerCapture(drag.pointerId); } catch (_) {}
   document.getElementById("ghost").style.display = "none";
   const g = wasActive ? groupUnderPoint(x, y) : null;
-  sourceEl.classList.remove("dragging-source");
-  sourceEl.style.pointerEvents = "";
-  clearOver();
+  clearDragChrome(drag);
   drag = null;
 
   if (!wasActive) return;
@@ -421,10 +434,16 @@ function onPointerUp(e) {
   }
 }
 
+function onPointerCancel(e) {
+  if (!drag || drag.pointerId !== e.pointerId) return;
+  clearDragChrome(drag);
+  drag = null;
+}
+
 document.getElementById("list").addEventListener("pointerdown", onPointerDown);
 window.addEventListener("pointermove", onPointerMove);
 window.addEventListener("pointerup", onPointerUp);
-window.addEventListener("pointercancel", onPointerUp);
+window.addEventListener("pointercancel", onPointerCancel);
 
 // Sidebar click = filter only (no assign-by-click). Ignore the leftover
 // click some webviews fire on the drop target after pointerup.
