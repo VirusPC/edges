@@ -333,6 +333,7 @@ export async function updateProject(
     );
   }
   const id = parseTaskProject(raw);
+  await ensureProjectMetadata(repoPath, writer);
   const rel = projectAgentsRelPath(id);
   const abs = path.join(repoPath, rel);
   if (!(await writer.exists(abs))) {
