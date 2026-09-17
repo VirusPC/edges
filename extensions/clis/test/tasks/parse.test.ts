@@ -138,3 +138,16 @@ test("run tasks --help is help and lists subcommands", async () => {
   assert.match(result.stdout, /\brun-messages\b/);
   assert.doesNotMatch(result.stdout, /not implemented/i);
 });
+
+test("run tasks classify is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "classify"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+});
+
+test("run tasks project without subcommand is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "project"]);
+  assert.equal(result.exitCode, 2);
+  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+  assert.match(JSON.parse(result.stdout).reason, /missing project subcommand/);
+});
