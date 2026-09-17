@@ -172,6 +172,10 @@ _避免使用_：知识出口、历史知识库、失效 Edge 专区
 跨 Agent 接力的工作项（idea 捕获后经细聊与开发直至收口）；分组属 Task Project，再按 edges-tasks-status 分夹；需求先后用 edges-task-priority，不改状态夹。
 _避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目、`tasks` Memory Type（若指看板工作项）
 
+**Task stem（edges）**：
+Task 文件去掉 `.md` 的文件名，是 `edges tasks` 的查找键；不是展示标题，也不等于 frontmatter / 文档 `name`（三者常碰巧相同）。
+_避免使用_：title、name、把展示名当 CLI 查找键
+
 **Task Project（edges）**：
 看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
 _避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type、把未确认的候选当成已有 project
@@ -185,16 +189,24 @@ _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件�
 _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
 
 **Task Project 候选（edges）**：
-proposeTypes 输出表的一行：建议 slug、描述，以及支撑该类型的 `_default` Task stem 列表。人确认并 `project create` 之前还不是 Task Project。
+proposeTypes 输出的一行：建议 slug、描述，以及支撑该类型的 `_default` Task stem 列表（文件名去 `.md`，不是 title）。人确认并 `project create` 之前还不是 Task Project。
 _避免使用_：已落盘的 Task Project、自动当成质心、Memory Type
 
+**Task Project 审阅页（edges）**：
+`edges tasks project review-page` 产出的 HTML 产物：人把 items 在通用 groups 之间拖拽改组后导出 JSON。页与 CLI 只渲染 groups+items，组是已有 Task Project 还是 proposeTypes 候选由调用方 Skill 解释；审阅页本身不是 Task Project，也不是分类算法。
+_避免使用_：把它当 Task Project、当分类算法、`--mode`、审阅页 MCP、自动打开浏览器、靠 Grok Bot HTML 预览当闸门、长期依赖 `tools/` 原型
+
+**审阅导出行（edges）**：
+Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`、`action`，可选 `note`。`stem` 是 CLI 查找键，不是 title，也不等于 frontmatter / 文档 `name`。
+_避免使用_：用 title 或 name 当查找键、把展示字段当 apply 键
+
 **classifyTasks（edges）**：
-独立工作流 Skill（约定路径 `extensions/skills/project-tasks-classify/`，展示名 classifyTasks）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），人改建议表后再经 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
-_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、要求 embedding / 向量分类、只整理 `_default`、公开 `edges tasks classify`
+独立工作流 Skill（约定路径 `extensions/skills/project-tasks-classify/`，展示名 classifyTasks）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task Project 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
+_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、要求 embedding / 向量分类、只整理 `_default`、公开 `edges tasks classify`、把审阅页当成分类器
 
 **proposeTypes（edges）**：
-独立工作流 Skill（约定路径 `extensions/skills/project-tasks-propose-types/`，展示名 proposeTypes）：从 `_default` Task 与已有 Task Project 质心提议新的 Task Project 候选，本身不落地为 Task Project。
-_避免使用_：并进 classifyTasks、自动建 project、Embedding NCC、K-means 命名、公开 `edges tasks propose`
+独立工作流 Skill（约定路径 `extensions/skills/project-tasks-propose-types/`，展示名 proposeTypes）：从 `_default` Task 与已有 Task Project 质心提议新的 Task Project 候选，复用同一 Task Project 审阅页给人确认（无 GUI 时候选表回退），本身不落地为 Task Project。
+_避免使用_：并进 classifyTasks、自动建 project、Embedding NCC、K-means 命名、公开 `edges tasks propose`、为 proposeTypes 另开 `--mode`
 
 **edges-task-project**：
 frontmatter `metadata.edges-task-project`，与目录 project-slug 双写；`_default` 对应 `default` 或不写字段。
@@ -209,8 +221,8 @@ Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`�
 _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
 
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。后续实现：`project list|get|create|update` 读写 Task Project 元数据。
-_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` 动词（本轮）
+以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；约定中的 `project review-page` 只把建议 JSON 渲成 Task Project 审阅页，不算分类、不落地。
+_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）
 
 **Task Run（edges）**：
 对应 Multica Run 的一次执行尝试；仓内落在 Task 同目录 sidecar `.{stem}.log.md` 中带稳定 `run-id` 的记录，由 `edges tasks runs` / `run-messages` 只读查看。
