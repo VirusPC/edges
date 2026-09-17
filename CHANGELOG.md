@@ -54,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：Skill 路径改为 `extensions/skills/project-tasks-classify/`；类型发现拆到 ADR 0011；方法改为 LLM / agent 判断，不再写软 K-means 或 Embedding NCC。整板归属与 Q18=A 不变。
 - `deploy-teach.yml` 的 `deploy` job 使用 `environment: production`（由 `ecs` 改名），让 GitHub 记录 Deployments。
 - `new-note` MCP 改为子进程调用 `edges note`，不再 `execFile` 仓根脚本。
 - `pnpm setup` 不再把仓根 `bin/` 写入 PATH。
