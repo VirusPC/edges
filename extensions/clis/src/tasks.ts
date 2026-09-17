@@ -6,6 +6,7 @@ import { addListCommand } from "./tasks/list.js";
 import { addRunMessagesCommand } from "./tasks/run-messages.js";
 import { addRunsCommand } from "./tasks/runs.js";
 import { addStatusCommand } from "./tasks/status.js";
+import { addProjectCommand } from "./tasks/project.js";
 import { addUpdateCommand } from "./tasks/update.js";
 
 const TASKS_AFTER_HELP = `
@@ -17,13 +18,21 @@ COMMANDS
   status <stem|path> <edges-tasks-status>
   runs <stem|path> [--output table|json]
   run-messages <run-id> [--task <stem>] [--output table|json]
+  project list
+  project get <project>
+  project create <project> --title <title> --description <text>
+  project update <project> [--title] [--description]
+
+There is no classify command. Task moves stay on update --project (same status and priority).
 
 Issue layer stdout is JSON. runs / run-messages default to a table; pass --output json.
 
 Cancel a Task with: edges tasks status <stem> cancelled
 There is no delete command.
 
-Run layer is read-only (no append). Skill and MCP come later on this same contract.
+Run layer is read-only (no append).
+classifyTasks Skill (extensions/skills/project-tasks-classify) uses these project verbs plus update --project.
+Generic tasks Skill/MCP CRUD is a later backlog on this same contract.
 Capability Surface is CLI + Skill + MCP.
 
 EXAMPLES
@@ -45,6 +54,7 @@ export function addTasksCommand(program: Command, ctx: CliContext): void {
   addGetCommand(tasks, ctx);
   addCreateCommand(tasks, ctx);
   addUpdateCommand(tasks, ctx);
+  addProjectCommand(tasks, ctx);
   addStatusCommand(tasks, ctx);
   addRunsCommand(tasks, ctx);
   addRunMessagesCommand(tasks, ctx);

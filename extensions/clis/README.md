@@ -71,11 +71,15 @@ edges tasks update <stem|path> [--title] [--description] [--body] [--assignee] [
 edges tasks status <stem|path> <edges-tasks-status>
 edges tasks runs <stem|path> [--output table|json]
 edges tasks run-messages <run-id> [--task <stem>] [--output table|json]
+edges tasks project list
+edges tasks project get <project>
+edges tasks project create <project> --title <title> --description <text>
+edges tasks project update <project> [--title] [--description]
 ```
 
 Issue-layer stdout is always JSON (`--json` is accepted and ignored). `runs` / `run-messages` default to a table; pass `--output json` for JSON. Run layer is read-only (no append). `create` writes the Task file plus an empty sidecar `.{stem}.log.md`.
 
-Skill and MCP come later on this same contract. Capability Surface is CLI + Skill + MCP.
+classifyTasks Skill (`extensions/skills/project-tasks-classify`) uses these project verbs plus `update --project`. Generic tasks Skill/MCP CRUD is a later backlog on this same contract. Capability Surface is CLI + Skill + MCP.
 
 ## Tests
 
