@@ -9,9 +9,10 @@ metadata:
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
+  edges-task-pr: "https://github.com/VirusPC/edges/pull/76"
   edges-task-assignee: Coding Agent 专家
   edges-task-assignee-id: ac913463-5bf6-4c16-adc0-900c61a8692d
-  edges-updated-at: "2026-09-16T22:30:00+08:00"
+  edges-updated-at: "2026-09-17T10:35:00+08:00"
 ---
 
 做一条 skill：专门整理 **`_default` project** 下的 tasks。对每条（或一批）判断三选一：
