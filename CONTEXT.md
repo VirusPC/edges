@@ -173,8 +173,8 @@ _避免使用_：知识出口、历史知识库、失效 Edge 专区
 _避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目、`tasks` Memory Type（若指看板工作项）
 
 **Task Project（edges）**：
-看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。每个 project 带标题与描述（软聚类质心）；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
-_避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type
+看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；新类型由 proposeTypes 从 `_default` 提议、人确认后再 `project create`。索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
+_避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type、把未确认的候选当成已有 project
 
 **Task Project 索引**：
 `knowledge/tasks/AGENTS.md` 里、project-memory 受管标记之外的 Task Projects 节；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。
@@ -184,9 +184,17 @@ _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件�
 每个 Task Project 目录（含 `_default`）内的轻量 `AGENTS.md`，写标题与描述（可选指针）；不是对该目录做完整 `project-memory-init`。
 _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
 
+**Task Project 候选（edges）**：
+proposeTypes 输出表的一行：建议 slug、描述，以及支撑该类型的 `_default` Task stem 列表。人确认并 `project create` 之前还不是 Task Project。
+_避免使用_：已落盘的 Task Project、自动当成质心、Memory Type
+
 **classifyTasks（edges）**：
-独立工作流 Skill（约定路径 `extensions/skills/classify-tasks/`，展示名 classifyTasks）：以带描述的 Task Project 为质心，对整板做软 K-means 式归属建议，人改建议表后再经 CLI 落地。
-_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、embedding K-means、只整理 `_default`、公开 `edges tasks classify`
+独立工作流 Skill（约定路径 `extensions/skills/project-tasks-classify/`，展示名 classifyTasks）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），人改建议表后再经 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
+_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、只整理 `_default`、公开 `edges tasks classify`
+
+**proposeTypes（edges）**：
+独立工作流 Skill（约定路径 `extensions/skills/project-tasks-propose-types/`，展示名 proposeTypes）：读 `_default` Task 与已有 Task Project 质心，输出新类型候选表（slug、description、supporting stems）。不自动 `project create`；人确认后另步 `project create` + classifyTasks。真 embedding 前用 LLM / agent 判断。默认一批 3–7 个候选。
+_避免使用_：并进 classifyTasks、自动建 project、Embedding NCC、K-means 命名、公开 `edges tasks propose`
 
 **edges-task-project**：
 frontmatter `metadata.edges-task-project`，与目录 project-slug 双写；`_default` 对应 `default` 或不写字段。

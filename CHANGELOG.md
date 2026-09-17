@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- CONTEXT 增加 proposeTypes（edges）、Task Project 候选（edges）；收紧 Task Project / classifyTasks：已有 project 是用户已设质心；新类型由 proposeTypes 从 `_default` 提议，人确认后再 `project create` + classifyTasks；真 embedding 前用 LLM / agent 判断，不称 Embedding NCC、不用 K-means 命名。
+- `docs/adr/0011-propose-task-project-types-from-default.md`：独立 Skill `extensions/skills/project-tasks-propose-types/` 从 `_default` 提议新 Task Project 类型；输出候选表，不自动 `project create`。配对 ADR 0010。本轮只定文档，不写 skill 正文，不迁看板。
 - `docs/superpowers/plans/2026-09-17-classify-tasks.md`：ADR-0010 的实现计划（本轮只做计划；`edges tasks project list|get|create|update` + classify-tasks Skill；软聚类整板、人改建议表后再 CLI 落地；无 embedding、无 `classify` 动词；能力面 CLI + Skill + MCP；本计划 PR 不实现 CLI/Skill、不迁看板）。
 - CONTEXT 增加 classifyTasks（edges）、Task Project 索引、Task Project AGENTS.md；收紧 Task Project / `edges tasks`（CLI）/ Memory Type：project 元数据只在索引/描述层（Q18=A）；约定 `project list|get|create|update`；本轮无公开 `classify` 动词。
 - `docs/adr/0010-classify-tasks-and-task-project-metadata.md`：classifyTasks 软聚类整板；Task Project 元数据对齐 Project Memory 的索引层。扩展 ADR 0009。本轮只定文档，不实现 CLI/Skill，不迁看板。

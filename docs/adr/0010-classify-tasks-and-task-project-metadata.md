@@ -4,6 +4,8 @@
 
 **Status:** accepted（ADR 0010；grill 确认于 2026-09-17）
 
+**See also:** ADR 0011（从 `_default` 提议新 Task Project 类型；与本条配对，不改分类工作流形状）
+
 ## Decision
 
 - **Skill：** `extensions/skills/classify-tasks/`，展示名 classifyTasks。独立工作流 Skill，不是通用 edges-tasks Skill+MCP CRUD。

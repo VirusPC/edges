@@ -23,6 +23,7 @@
 - [new-note MCP 的 ingest 约束](projects/project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges note，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
 - [posts 对外展示，Astro 博客 + Actions CI](projects/project_posts_public_astro_blog.md) — posts 面向对外展示；后续以 posts 为数据用 Astro 搭博客，并用 GitHub Actions 在服务器做 CI
 - [订阅管理盘点进展](projects/project_progress.md) — 订阅/用量盘点进展：双 Gmail + QQ IMAP、国内 Kimi 无邮箱、CodexBar Linux CLI 已装待鉴权；后续 Apple/微信侧核对。
+- [proposeTypes 从 _default 提议新 Task Project 类型](projects/project_propose_types_from_default.md) — 改 propose-types 工作流或从 _default 发明新 Task Project 时打开：独立 Skill extensions/skills/project-tasks-propose-types/；输出候选表，不自动 project create；方法是 LLM/agent 判断；配对 project-tasks-classify 与 ADR 0011。本轮只定文档。
 - [仓库用根 CHANGELOG 和 v 标签发版](projects/project_repo_changelog.md) — 写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 vX.Y.Z tag；不要当成 skill 或 shared-extensions 总账，也不要因它们的补丁去升仓库版本。
 - [根硬约束只留聚光灯、脱敏与 git](projects/project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
 - [根 README 以知识闭环为唯一主线](projects/project_root_readme_direction.md) — 设计或修改根 README 时：从投资视角解释知识管理、分层 Agent Memory 与知识闭环，用一张图串联认知资本、Edge、收益、风险、流动性和反馈再投资。
