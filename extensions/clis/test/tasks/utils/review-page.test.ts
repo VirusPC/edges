@@ -106,6 +106,18 @@ test("defaultReviewPageTemplatePath and loadReviewPageTemplate read the shipped 
   assert.doesNotMatch(html, /id="edges-review-payload">\{\}<\/script>/);
 });
 
+test("shipped review-page template filters by left-group click and keeps drag-assign", async () => {
+  const template = await loadReviewPageTemplate((abs) => readFile(abs, "utf8"));
+  assert.match(template, /filterId/);
+  assert.match(template, /全部/);
+  assert.match(template, /data-droppable/);
+  assert.match(template, /is-filter/);
+  assert.match(template, /点左侧分组筛选/);
+  assert.match(template, /pointerdown/);
+  assert.match(template, /stem: it\.stem/);
+  assert.match(template, /action: it\.suggested === it\.current \? "keep" : "move"/);
+});
+
 test("writeReviewPage writes utf8 html", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-rp-"));
   try {

@@ -11,7 +11,8 @@
     header { padding:12px 16px; border-bottom:1px solid var(--border); }
     .layout { flex:1; min-height:0; display:grid; grid-template-columns:280px 1fr; }
     .sidebar { overflow:auto; padding:12px; border-right:1px solid var(--border); display:flex; flex-direction:column; gap:8px; }
-    .group { border:1px dashed var(--border); border-radius:12px; padding:12px; background:var(--panel); }
+    .group { border:1px dashed var(--border); border-radius:12px; padding:12px; background:var(--panel); cursor:pointer; }
+    .group.is-filter { border-style:solid; border-color:var(--accent); }
     .group.is-over { outline:2px solid var(--accent); }
     .group .title { font-weight:650; }
     .group .desc { color:var(--muted); font-size:12px; margin-top:4px; }
@@ -27,7 +28,7 @@
 <body>
   <header>
     <strong>Task Project 审阅页</strong>
-    <div style="color:var(--muted);font-size:13px;margin:4px 0 8px">按住右侧任务拖到左侧分组。系统浏览器打开；不要用聊天 HTML 预览当闸门。</div>
+    <div style="color:var(--muted);font-size:13px;margin:4px 0 8px">点左侧分组筛选；按住右侧任务拖到左侧分组松手赋值。系统浏览器打开；不要用聊天 HTML 预览当闸门。</div>
     <button type="button" id="btnCopy">复制导出 JSON</button>
   </header>
   <div class="layout">
@@ -42,7 +43,14 @@
     const payload = JSON.parse(document.getElementById("edges-review-payload").textContent || "{}");
     const groups = payload.groups || [];
     const items = payload.items || [];
-    const toast = (msg) => { const el = document.getElementById("toast"); el.textContent = msg; el.style.display = "block"; clearTimeout(toast._t); toast._t = setTimeout(() => el.style.display = "none", 2000); };
+    let filterId = "all";
+    const toast = (msg) => {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.style.display = "block";
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => { el.style.display = "none"; }, 2000);
+    };
     function exportRows() {
       return items.map(it => ({
         stem: it.stem,
@@ -52,22 +60,42 @@
         note: it.note || ""
       }));
     }
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c]));
+    }
+    function visibleItems() {
+      if (filterId === "all") return items;
+      return items.filter(it => it.suggested === filterId);
+    }
     function paint() {
       const counts = Object.fromEntries(groups.map(g => [g.id, 0]));
+      counts.all = items.length;
       for (const it of items) counts[it.suggested] = (counts[it.suggested] || 0) + 1;
-      document.getElementById("sidebar").innerHTML = groups.map(g =>
-        `<div class="group" data-group-id="${g.id}"><div class="title">${esc(g.title)}</div><div class="desc">${esc(g.description || "")}</div><div class="desc">${counts[g.id] || 0} 条 · ${esc(g.id)}</div></div>`
-      ).join("");
-      document.getElementById("list").innerHTML = items.map(it =>
+      const side = [
+        `<div class="group ${filterId==="all"?"is-filter":""}" data-group-id="all" data-droppable="0"><div class="title">全部</div><div class="desc">点击筛选；不能投放</div><div class="desc">${counts.all} 条</div></div>`
+      ].concat(groups.map(g =>
+        `<div class="group ${filterId===g.id?"is-filter":""}" data-group-id="${esc(g.id)}" data-droppable="1"><div class="title">${esc(g.title)}</div><div class="desc">${esc(g.description || "")}</div><div class="desc">${counts[g.id] || 0} 条 · ${esc(g.id)}</div></div>`
+      )).join("");
+      document.getElementById("sidebar").innerHTML = side;
+      const list = visibleItems();
+      document.getElementById("list").innerHTML = list.map(it =>
         `<article class="card" data-stem="${esc(it.stem)}"><div>${esc(it.title || it.stem)}</div><div class="stem">${esc(it.stem)}</div>${it.description ? `<div class="tdesc">${esc(it.description)}</div>` : ""}<div class="tdesc">${esc(it.current)} → ${esc(it.suggested)}</div></article>`
-      ).join("") || `<p class="tdesc">没有任务</p>`;
+      ).join("") || `<p class="tdesc">没有匹配任务</p>`;
     }
-    function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;" }[c])); }
     document.getElementById("btnCopy").onclick = async () => {
       const text = JSON.stringify(exportRows(), null, 2);
       try { await navigator.clipboard.writeText(text); toast("已复制导出 JSON"); }
       catch { toast("复制失败，请手动全选控制台输出"); console.log(text); }
     };
+    // Click left group = filter only (not assign)
+    document.getElementById("sidebar").addEventListener("click", (e) => {
+      const g = e.target.closest(".group");
+      if (!g) return;
+      const id = g.getAttribute("data-group-id");
+      if (!id) return;
+      filterId = id;
+      paint();
+    });
     let drag = null;
     document.getElementById("list").addEventListener("pointerdown", (e) => {
       const card = e.target.closest(".card");
@@ -86,9 +114,9 @@
       ghost.style.left = (e.clientX + 8) + "px";
       ghost.style.top = (e.clientY + 8) + "px";
       ghost.textContent = drag.stem;
-      document.querySelectorAll(".group").forEach(g => g.classList.remove("is-over"));
+      document.querySelectorAll('.group[data-droppable="1"]').forEach(g => g.classList.remove("is-over"));
       const el = document.elementFromPoint(e.clientX, e.clientY);
-      const group = el && el.closest(".group");
+      const group = el && el.closest('.group[data-droppable="1"]');
       if (group) group.classList.add("is-over");
     });
     function endDrag(e) {
@@ -99,7 +127,7 @@
       document.querySelectorAll(".group").forEach(g => g.classList.remove("is-over"));
       if (wasActive) {
         const el = document.elementFromPoint(e.clientX, e.clientY);
-        const group = el && el.closest(".group");
+        const group = el && el.closest('.group[data-droppable="1"]');
         if (group) {
           const id = group.getAttribute("data-group-id");
           const item = items.find(it => it.stem === stem);
@@ -113,7 +141,10 @@
       drag = null;
     }
     document.getElementById("list").addEventListener("pointerup", endDrag);
-    document.getElementById("list").addEventListener("pointercancel", () => { drag = null; document.getElementById("ghost").style.display = "none"; });
+    document.getElementById("list").addEventListener("pointercancel", () => {
+      drag = null;
+      document.getElementById("ghost").style.display = "none";
+    });
     paint();
   })();
   </script>
