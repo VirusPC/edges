@@ -4,14 +4,14 @@ description: 协议级改造：.memory 内类型索引改为类型目录下的 A
 metadata:
   edges-type: task
   edges-title: .memory 类型索引改为目录下 AGENTS.md
-  edges-tasks-status: in_progress
+  edges-tasks-status: done
   edges-origin-session-id: idea-recorder-2026-09-17
   edges-agent-client: grok-bot
   edges-username: Idea 记录员
   edges-email: grok-bot@users.noreply.github.com
   edges-task-assignee: Coding 专家
   edges-task-assignee-id: 099e84df-06c3-4c5d-9e29-fc255dce3d56
-  edges-updated-at: "2026-09-17T14:09:13.501Z"
+  edges-updated-at: "2026-09-18T09:10:00+08:00"
   edges-task-project: project-memory
 ---
 
@@ -37,4 +37,4 @@ metadata:
   - backlog：`Memory 模块解耦与可插拔接口`（后端可插拔 ≠ 本条索引布局）
   - backlog：`明确 memory 与 docs 边界`、`project-memory 可扩展 memory type`（若仍在）
   - note：`2026-09-11--项目memory可见性思考.md`
-- 已指派 Coding 专家（peng cheng：不派给正在忙的 Coding Agent 专家）。**必须先 grill-with-docs**（PROTOCOL/LAYOUT/CONTEXT/ADR），过关再改 init/remember/doctor 与迁移。
+- 已指派 Coding 专家；grill-with-docs 后实现。**2026-09-18 已合 main：** PR #91（merge `60d0675`，ADR-0012）。看板 → done。
