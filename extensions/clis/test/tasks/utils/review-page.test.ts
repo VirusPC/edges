@@ -118,6 +118,38 @@ test("shipped review-page template filters by left-group click and keeps drag-as
   assert.match(template, /action: it\.suggested === it\.current \? "keep" : "move"/);
 });
 
+test("shipped review-page template uses design A selected/unselected/drag-over styles", async () => {
+  const template = await loadReviewPageTemplate((abs) => readFile(abs, "utf8"));
+  const css = template.match(/<style>([\s\S]*?)<\/style>/)?.[1] ?? "";
+  assert.ok(css, "review-page template missing style block");
+
+  const rule = (selector: string) => {
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return css.match(new RegExp(`${escaped}\\s*\\{([^}]+)\\}`))?.[1] ?? "";
+  };
+
+  const group = rule(".group");
+  const selected = rule(".group.is-filter");
+  const over = rule(".group.is-over");
+  const hover = rule(".group:hover");
+
+  const opacity = Number(group.match(/opacity:\s*([0-9.]+)/)?.[1]);
+  assert.ok(
+    opacity >= 0.55 && opacity <= 0.7,
+    `unselected .group opacity ${opacity} should be ~0.55–0.7`,
+  );
+  assert.match(hover, /opacity:\s*1/);
+
+  assert.match(selected, /border-style:\s*solid/);
+  assert.match(selected, /border-color:\s*var\(--accent\)/);
+  assert.match(selected, /background:[^;]*(?:--accent|#5b9fd4)/);
+  assert.match(selected, /opacity:\s*1/);
+
+  assert.match(over, /outline:/);
+  assert.match(over, /outline-offset:/);
+  assert.match(over, /opacity:\s*1/);
+});
+
 test("writeReviewPage writes utf8 html", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-rp-"));
   try {
