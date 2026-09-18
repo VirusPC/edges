@@ -13,6 +13,7 @@ from lib.types import (
     layer_type_specs,
     layer_writable_types,
     reject_unwritable_type,
+    type_index_template_name,
 )
 from lib.paths import (
     is_external_type,
@@ -20,6 +21,7 @@ from lib.paths import (
     memory_dir,
     relative_link,
     type_content_dir,
+    type_index_path,
     write_atomic,
 )
 from lib.provenance import AUDIT_FIELDS, ORIGIN_FIELDS, now_timestamp
@@ -397,7 +399,7 @@ def build_entry_fields(
 def build_entry_index(target: Path, entry_type: str) -> str:
     """从全部条目文件的 frontmatter 重算某个索引的条目清单。"""
     entries: list[str] = []
-    directory = memory_dir(target)
+    index_base = type_index_path(target, entry_type).parent
     if is_skill_format(target, entry_type):
         # skill 目录的内部形状属于外部协议；这里只保留一个很薄的当前格式适配器。
         paths = list_type_files(target, entry_type, f"*/{SKILL_OUTPUT_NAME}")
@@ -413,8 +415,8 @@ def build_entry_index(target: Path, entry_type: str) -> str:
                 ENTRY_LINE_TEMPLATE,
                 {
                     "title": title,
-                    # 外部类型的内容根在 .memory/ 外，链接必须能带 `../` 越界。
-                    "path": relative_link(path, directory),
+                    # 入口与条目同目录；agent_skills 的内容根在 .memory/ 外，链接带 `../`。
+                    "path": relative_link(path, index_base),
                     "description": description,
                 },
             )
@@ -431,7 +433,9 @@ def expected_index_document(target: Path, entry_type: str) -> str:
     existing = (
         path.read_text(encoding="utf-8")
         if path.is_file()
-        else read_index_template(file_name, entry_type, entry_type)
+        else read_index_template(
+            type_index_template_name(entry_type), entry_type, entry_type
+        )
     )
     updated = upsert_block(
         existing, ENTRIES_START, ENTRIES_END, build_entry_index(target, entry_type)

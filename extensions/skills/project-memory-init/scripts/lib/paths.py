@@ -70,10 +70,39 @@ def memory_dir(target: Path) -> Path:
 def type_dir_name(entry_type: str) -> str:
     """类型内容目录名：复数，与 `skills/` 对齐。
 
-    `--type`、索引文件名、条目前缀仍用单数。已经以 s 结尾的类型名
+    `--type`、条目前缀仍用单数。已经以 s 结尾的类型名
     （目前是 `skills`）不再追加。
     """
     return entry_type if entry_type.endswith("s") else f"{entry_type}s"
+
+
+# 官方种子里「单数 type + s」的复数目录。其余目录名即 type（skills、docs）。
+SEED_DIR_TO_TYPE = {
+    "users": "user",
+    "feedbacks": "feedback",
+    "projects": "project",
+    "references": "reference",
+}
+
+
+def type_from_dir_name(dir_name: str) -> str:
+    """`type_dir_name()` 的种子逆映射；用户 type 默认目录名即 type。"""
+    return SEED_DIR_TO_TYPE.get(dir_name, dir_name)
+
+
+def type_index_relpath(entry_type: str) -> str:
+    """类型入口相对 `.memory/`：`<plural>/AGENTS.md`。"""
+    return f"{type_dir_name(entry_type)}/{AGENTS_FILE_NAME}"
+
+
+def type_index_path(target: Path, entry_type: str) -> Path:
+    """目标目录里某一类型的入口文件。"""
+    return memory_dir(target) / type_dir_name(entry_type) / AGENTS_FILE_NAME
+
+
+def legacy_flat_index_path(target: Path, entry_type: str) -> Path:
+    """旧版平铺入口 `.memory/TYPE.md`。"""
+    return memory_dir(target) / f"{entry_type.upper()}.md"
 
 
 def is_external_type(entry_type: str) -> bool:

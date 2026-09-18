@@ -1,12 +1,12 @@
 ---
 name: project-memory-add-type
-description: 在指定记忆目录按 LAYOUT 登记一个 Memory Type（入口文件 + 复数目录 + AGENTS 本层一行）。仅当用户明确要求新增 type 时使用。官方种子仍是六类；不要把示例 type 写进 init 模板。
+description: 在指定记忆目录按 LAYOUT 登记一个 Memory Type（<plural>/AGENTS.md + 同目录条目 + 层入口一行）。仅当用户明确要求新增 type 时使用。官方种子仍是六类；不要把示例 type 写进 init 模板。
 version: 1.0.0
 ---
 
 # Project Memory Add Type
 
-在**已经 init** 的记忆目录登记一个用户 Memory Type。扩展面只在 LAYOUT：`.memory/<TYPE>.md` + `.memory/<plural>/` + 该层 `AGENTS.md` 本层清单一行。不写 JSON/YAML 注册表。PROTOCOL 不枚举类型。
+在**已经 init** 的记忆目录登记一个用户 Memory Type。扩展面只在 LAYOUT：`.memory/<plural>/AGENTS.md` + 同目录条目 + 该层 `AGENTS.md` 本层清单一行。不写 JSON/YAML 注册表。PROTOCOL 不枚举类型。
 
 下文的 `<init-dir>` 指同级的 `project-memory-init` skill 目录。
 

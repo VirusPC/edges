@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `--type user` 的索引改为 `.memory/users/AGENTS.md`（ADR-0012）。`.memory/users/` 整类仍 gitignore。
 - `--type` 是该层已登记的可写类型（官方种子 + AGENTS 本层额外行），不再当成五/六个名字的闭集。`agent_skills` 仍不可写。
 
 ## [1.6.0] - 2026-09-11

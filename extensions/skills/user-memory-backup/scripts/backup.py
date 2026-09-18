@@ -40,7 +40,9 @@ def backup_user_memory(
         raise ValueError(f"仓库目录不存在或不是目录: {repo_dir}")
     members = _collect_members(repo_dir)
     if not members:
-        raise ValueError("没有可备份的用户记忆：缺少 .memory/USER.md 与 .memory/users/ 下的文件")
+        raise ValueError(
+            "没有可备份的用户记忆：缺少 .memory/users/ 与尚未迁走的 .memory/USER.md"
+        )
     destination = (output_dir or repo_dir).expanduser().resolve()
     destination.mkdir(parents=True, exist_ok=True)
     stamp = timestamp or _utc_stamp()

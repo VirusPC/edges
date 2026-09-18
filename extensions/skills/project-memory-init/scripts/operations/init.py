@@ -16,7 +16,11 @@ from lib.paths import (
     write_atomic,
 )
 from lib.templates import ENTRY_OUTPUT_PATTERN, read_template
-from lib.types import discover_layer_types
+from lib.types import (
+    discover_layer_types,
+    leftover_flat_index_names,
+    type_index_template_name,
+)
 from nodes.agents import (
     find_index_anchor,
     rehome_index_entries,
@@ -29,7 +33,10 @@ from nodes.entries import SKILL_OUTPUT_NAME, memory_entry_types, refresh_index
 def init_memory(target: Path, root: Path, description: str | None = None) -> dict[str, object]:
     """幂等初始化索引文件与 AGENTS.md 区块。模板全部校验通过后才动文件。"""
     load_agents_template()
-    templates = {name: read_template(name) for name in index_files().values()}
+    templates = {
+        rel: read_template(type_index_template_name(entry_type))
+        for entry_type, rel in index_files().items()
+    }
     # 两份记忆模板都先读一遍：缺任何一份都该在动文件之前失败。
     read_template(ENTRY_OUTPUT_PATTERN)
     read_template(SKILL_OUTPUT_NAME)
@@ -62,6 +69,12 @@ def init_memory(target: Path, root: Path, description: str | None = None) -> dic
         raise ValueError(
             "检测到旧版单数类型目录，请先运行 project-memory-doctor 迁移: "
             + ", ".join(stale_dirs)
+        )
+    leftover_indexes = leftover_flat_index_names(directory) if directory.is_dir() else []
+    if leftover_indexes:
+        raise ValueError(
+            "检测到旧版平铺类型入口，请先运行 project-memory-doctor 迁移: "
+            + ", ".join(leftover_indexes)
         )
     directory.mkdir(parents=True, exist_ok=True)
     for entry_type in index_files():

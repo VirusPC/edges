@@ -36,7 +36,7 @@
         └── ...
 ```
 
-存量平铺索引（`.memory/USER.md` / `FEEDBACK.md` / `PROJECT.md` / `REFERENCE.md` / `SKILLS.md` / `AGENT_SKILLS.md`）是 `$project-memory-doctor` 后续迁移对象：认出旧根部入口 → 搬到对应 `<plural>/AGENTS.md` → 删除旧文件。`user` 迁到 `users/AGENTS.md`（仍 gitignore）；`agent_skills` 迁到 `.memory/agent_skills/AGENTS.md`，永不写入 `.agents/`。本轮只定意图，不实现。
+存量平铺索引（`.memory/USER.md` / `FEEDBACK.md` / `PROJECT.md` / `REFERENCE.md` / `SKILLS.md` / `AGENT_SKILLS.md`）由 `$project-memory-doctor` 认 `legacy-flat-index`：搬到对应 `<plural>/AGENTS.md` 后删除旧文件。新旧入口都在且内容不同时认 `legacy-flat-index-conflict`，不覆盖。`user` 迁到 `users/AGENTS.md`（仍 gitignore）；`agent_skills` 迁到 `.memory/agent_skills/AGENTS.md`，永不写入 `.agents/`。
 
 ## `AGENTS.md` — 本层记忆入口
 

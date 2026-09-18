@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 项目记忆（project-memory）
 
 - 可以用 `$project-memory-add-type` 给某个项目的记忆目录登记一种新的记忆类型；之后查询和写入都会认到它。官方自带的六类不变。用户个人记忆可以写在本机的 `.memory/users/`，这份副本不进 git；换机器时用 `$user-memory-backup` 打包，用 `$user-memory-restore` 恢复。
+- 类型记忆入口从 `.memory/FEEDBACK.md` 一类平铺文件改到对应复数目录下的 `AGENTS.md`（例如 `.memory/feedbacks/AGENTS.md`），与该类型条目同处。层入口 `AGENTS.md` 的本层清单改链到这些类型入口。旧平铺文件由 `$project-memory-doctor` 迁走后删除。
 
 ### 评测与观测
 

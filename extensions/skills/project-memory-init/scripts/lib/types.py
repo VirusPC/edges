@@ -9,6 +9,7 @@ from pathlib import Path
 
 from lib.blocks import (
     ENTRIES_START,
+    LEGACY_FLAT_INDEX_LINK_PATTERN,
     LOCAL_END,
     LOCAL_START,
     MEMORY_INDEX_LINK_PATTERN,
@@ -18,7 +19,15 @@ from lib.blocks import (
     build_local_block,
     index_files,
 )
-from lib.paths import AGENTS_FILE_NAME, is_external_type, memory_dir, type_dir_name
+from lib.paths import (
+    AGENTS_FILE_NAME,
+    MEMORY_DIR_NAME,
+    is_external_type,
+    memory_dir,
+    type_dir_name,
+    type_from_dir_name,
+    type_index_relpath,
+)
 from lib.templates import ENTRY_LINE_TEMPLATE, render_line
 
 SEED_TYPE_NAMES: tuple[str, ...] = (
@@ -48,8 +57,13 @@ def seed_index_files() -> dict[str, str]:
     return index_files()
 
 
-def index_file_name(entry_type: str) -> str:
+def type_index_template_name(entry_type: str) -> str:
+    """Type-entry template stem (FEEDBACK.tmpl.md). Not the layer AGENTS.tmpl.md."""
     return f"{entry_type.upper()}.md"
+
+
+def index_file_name(entry_type: str) -> str:
+    return type_index_relpath(entry_type)
 
 
 def validate_type_name(entry_type: str) -> str:
@@ -63,29 +77,90 @@ def validate_type_name(entry_type: str) -> str:
     return name
 
 
+def _type_name_from_index_text(text: str, dir_name: str) -> str:
+    parsed = parse_type_meta(text)
+    if parsed is not None and parsed.name:
+        return parsed.name
+    return type_from_dir_name(dir_name)
+
+
+def leftover_flat_index_names(directory: Path) -> list[str]:
+    """`.memory/` 根部仍平铺的 `TYPE.md` 入口名（含条目区块）。"""
+    if not directory.is_dir():
+        return []
+    names: list[str] = []
+    for path in sorted(directory.glob("*.md")):
+        if not TYPE_INDEX_NAME_PATTERN.fullmatch(path.name):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            continue
+        if ENTRIES_START in text:
+            names.append(path.name)
+    return names
+
+
 def discover_layer_types(target: Path) -> dict[str, str]:
-    """从该层 AGENTS.md 本层清单 + `.memory/*.md` 入口产物发现 type → 入口文件名。"""
+    """从该层 AGENTS.md 本层清单 + `.memory/<plural>/AGENTS.md` 发现 type → 入口路径。
+
+    尚未 doctor 的平铺 `.memory/TYPE.md` 也认，入口路径仍指向旧文件，
+    直到 doctor 搬到 `<plural>/AGENTS.md`。新入口一旦在磁盘上就覆盖旧路径。
+    """
     types: dict[str, str] = {}
     agents = target / AGENTS_FILE_NAME
+    directory = memory_dir(target)
+
+    def add(name: str, rel: str, *, overwrite: bool = False) -> None:
+        if overwrite or name not in types:
+            types[name] = rel
+
     if agents.is_file():
         match = block_pattern(LOCAL_START, LOCAL_END).search(
             agents.read_text(encoding="utf-8")
         )
         if match:
-            for raw in MEMORY_INDEX_LINK_PATTERN.findall(match.group(0)):
-                types[raw.lower()] = f"{raw}.md"
-    directory = memory_dir(target)
+            block = match.group(0)
+            for dir_name in MEMORY_INDEX_LINK_PATTERN.findall(block):
+                rel = f"{dir_name}/{AGENTS_FILE_NAME}"
+                path = directory / rel
+                name = type_from_dir_name(dir_name)
+                leftover = directory / f"{name.upper()}.md"
+                if path.is_file():
+                    try:
+                        name = _type_name_from_index_text(
+                            path.read_text(encoding="utf-8"), dir_name
+                        )
+                    except (OSError, UnicodeError):
+                        name = type_from_dir_name(dir_name)
+                    add(name, rel)
+                elif leftover.is_file() and leftover.name in leftover_flat_index_names(
+                    directory
+                ):
+                    add(name, leftover.name)
+                else:
+                    add(name, rel)
+            for stem in LEGACY_FLAT_INDEX_LINK_PATTERN.findall(block):
+                name = stem.lower()
+                leftover = f"{stem}.md"
+                dest_rel = type_index_relpath(name)
+                if (directory / dest_rel).is_file():
+                    add(name, dest_rel, overwrite=True)
+                elif (directory / leftover).is_file():
+                    add(name, leftover)
     if directory.is_dir():
-        for path in sorted(directory.glob("*.md")):
-            if not TYPE_INDEX_NAME_PATTERN.fullmatch(path.name):
-                continue
+        for name in leftover_flat_index_names(directory):
+            add(Path(name).stem.lower(), name)
+        for path in sorted(directory.glob(f"*/{AGENTS_FILE_NAME}")):
             try:
                 text = path.read_text(encoding="utf-8")
             except (OSError, UnicodeError):
                 continue
             if ENTRIES_START not in text:
                 continue
-            types.setdefault(path.stem.lower(), path.name)
+            dir_name = path.parent.name
+            rel = f"{dir_name}/{AGENTS_FILE_NAME}"
+            add(_type_name_from_index_text(text, dir_name), rel, overwrite=True)
     return types
 
 
@@ -155,12 +230,12 @@ def reject_unwritable_type(target: Path, entry_type: str) -> str:
 
 
 def gitignore_patterns(entry_type: str) -> tuple[str, ...]:
-    index_name = index_file_name(entry_type)
+    legacy_flat = f"{entry_type.upper()}.md"
     plural = type_dir_name(entry_type)
     return (
-        f".memory/{index_name}",
+        f".memory/{legacy_flat}",
         f".memory/{plural}/",
-        f"**/.memory/{index_name}",
+        f"**/.memory/{legacy_flat}",
         f"**/.memory/{plural}/",
     )
 
@@ -191,8 +266,22 @@ def ensure_type_gitignore(repo_root: Path, entry_type: str) -> str:
     return "updated"
 
 
+def drop_legacy_flat_index_lines(document: str) -> str:
+    """删掉本层清单里旧的 `.memory/TYPE.md` 行。"""
+    match = block_pattern(LOCAL_START, LOCAL_END).search(document)
+    if match is None:
+        return document
+    updated_block = re.sub(
+        rf"^- \[[^\]]*\]\({re.escape(MEMORY_DIR_NAME)}/[A-Z][A-Z0-9_]*\.md\)(?: — .*)?\n?",
+        "",
+        match.group(0),
+        flags=re.MULTILINE,
+    )
+    return document[: match.start()] + updated_block + document[match.end() :]
+
+
 def upsert_local_type_line(document: str, index_file: str, description: str) -> str:
-    """插入或保留 `.memory/FOO.md` 行，从不删除其它 type 行。"""
+    """插入或保留 `.memory/<plural>/AGENTS.md` 行，从不删除其它 type 行。"""
     relative = f".memory/{index_file}"
     line = render_line(
         ENTRY_LINE_TEMPLATE,
@@ -213,16 +302,19 @@ def upsert_local_type_line(document: str, index_file: str, description: str) -> 
 
 
 def ensure_seed_local_lines(document: str) -> str:
-    """补上缺失的种子行，不删除额外 type 行。"""
+    """补上缺失的种子行，不删除额外 type 行；顺手收掉旧平铺链接。"""
     if block_pattern(LOCAL_START, LOCAL_END).search(document) is None:
         return document
+    document = drop_legacy_flat_index_lines(document)
     seed_block = build_local_block()
-    for raw in MEMORY_INDEX_LINK_PATTERN.findall(seed_block):
+    for dir_name in MEMORY_INDEX_LINK_PATTERN.findall(seed_block):
         desc_match = re.search(
-            rf"\]\(\.memory/{re.escape(raw)}\.md\)(?: — (.*))?$",
+            rf"\]\(\.memory/{re.escape(dir_name)}/{re.escape(AGENTS_FILE_NAME)}\)(?: — (.*))?$",
             seed_block,
             re.MULTILINE,
         )
         description = (desc_match.group(1) if desc_match else "").strip()
-        document = upsert_local_type_line(document, f"{raw}.md", description)
+        document = upsert_local_type_line(
+            document, f"{dir_name}/{AGENTS_FILE_NAME}", description
+        )
     return document

@@ -35,6 +35,22 @@ class BackupTests(unittest.TestCase):
             self.assertIn(".memory/USER.md", names)
             self.assertIn(".memory/users/user_pref.md", names)
 
+    def test_backup_packs_users_agents_without_legacy_user_md(self) -> None:
+        from backup import backup_user_memory
+
+        with tempfile.TemporaryDirectory() as raw:
+            repo = Path(raw) / "repo"
+            users = repo / ".memory" / "users"
+            users.mkdir(parents=True)
+            (users / "AGENTS.md").write_text("# USER\n", encoding="utf-8")
+            (users / "user_pref.md").write_text("secret token xyz\n", encoding="utf-8")
+            archive = backup_user_memory(repo, timestamp="20260917T120000Z")
+            with tarfile.open(archive, "r:gz") as tar:
+                names = set(tar.getnames())
+            self.assertIn(".memory/users/AGENTS.md", names)
+            self.assertIn(".memory/users/user_pref.md", names)
+            self.assertNotIn(".memory/USER.md", names)
+
     def test_backup_errors_when_nothing_to_pack(self) -> None:
         from backup import backup_user_memory
 
@@ -178,6 +194,35 @@ class RestoreTests(unittest.TestCase):
                 (dest / ".memory" / "users" / "user_new.md").read_text(encoding="utf-8"),
                 "from-archive\n",
             )
+
+    def test_restore_into_initialized_repo_drops_leftover_user_md(self) -> None:
+        from backup import backup_user_memory
+        from restore import restore_user_memory
+        from operations.init import init_memory
+
+        with tempfile.TemporaryDirectory() as raw:
+            src = Path(raw) / "src"
+            dest = Path(raw) / "dest"
+            dest.mkdir()
+            init_memory(dest, dest, "temp")
+            users = src / ".memory" / "users"
+            users.mkdir(parents=True)
+            (src / ".memory" / "USER.md").write_text(
+                "<!-- project-memory-entries:start -->\n"
+                "- [pref](users/user_pref.md) — personal\n"
+                "<!-- project-memory-entries:end -->\n",
+                encoding="utf-8",
+            )
+            (users / "user_pref.md").write_text("token=abc\n", encoding="utf-8")
+            archive = backup_user_memory(src, timestamp="20260917T180000Z")
+            restore_user_memory(archive, dest)
+            self.assertTrue((dest / ".memory" / "users" / "AGENTS.md").is_file())
+            self.assertTrue((dest / ".memory" / "users" / "user_pref.md").is_file())
+            self.assertFalse((dest / ".memory" / "USER.md").exists())
+            index = (dest / ".memory" / "users" / "AGENTS.md").read_text(
+                encoding="utf-8"
+            )
+            self.assertIn("user_pref.md", index)
 
 
 if __name__ == "__main__":

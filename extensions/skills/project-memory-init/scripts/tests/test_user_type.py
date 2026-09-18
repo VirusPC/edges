@@ -23,7 +23,7 @@ from operations.remember import remember  # noqa: E402
 class UserTypeRegistrationTests(unittest.TestCase):
     def test_index_files_includes_user(self) -> None:
         files = index_files()
-        self.assertEqual(files["user"], "USER.md")
+        self.assertEqual(files["user"], "users/AGENTS.md")
 
     def test_index_files_order_user_then_feedback_project_reference(self) -> None:
         self.assertEqual(
@@ -51,14 +51,14 @@ class UserInitTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             target = Path(raw)
             result = init_memory(target, target, "temp tree")
-            user_index = target / ".memory" / "USER.md"
+            user_index = target / ".memory" / "users" / "AGENTS.md"
             users_dir = target / ".memory" / "users"
             self.assertTrue(user_index.is_file(), result)
             self.assertTrue(users_dir.is_dir(), result)
             text = user_index.read_text(encoding="utf-8")
             self.assertIn("project-memory-entries:start", text)
             self.assertIn(
-                ".memory/USER.md",
+                ".memory/users/AGENTS.md",
                 (target / "AGENTS.md").read_text(encoding="utf-8"),
             )
 
@@ -82,8 +82,10 @@ class UserRememberTests(unittest.TestCase):
             path = target / ".memory" / "users" / "user_local_editor.md"
             self.assertTrue(path.is_file(), result)
             self.assertEqual(result["path"], ".memory/users/user_local_editor.md")
-            self.assertEqual(result["index"], ".memory/USER.md")
-            index = (target / ".memory" / "USER.md").read_text(encoding="utf-8")
+            self.assertEqual(result["index"], ".memory/users/AGENTS.md")
+            index = (target / ".memory" / "users" / "AGENTS.md").read_text(
+                encoding="utf-8"
+            )
             self.assertIn("user_local_editor.md", index)
             self.assertIn("personal editor preference", index)
 
@@ -120,6 +122,7 @@ class UserGitignoreTests(unittest.TestCase):
         nested = (
             "extensions/.memory/USER.md",
             "extensions/.memory/users/user_sample.md",
+            "extensions/.memory/users/AGENTS.md",
             "knowledge/tasks/.memory/USER.md",
         )
         for relative in nested:
