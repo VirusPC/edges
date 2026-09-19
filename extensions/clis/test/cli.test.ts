@@ -32,6 +32,7 @@ test("real entry --help lists note and tasks", async () => {
   assert.match(result.stdout, /Commands:/);
   assert.match(result.stdout, /\bnote\b/);
   assert.match(result.stdout, /\btasks\b/);
+  assert.match(result.stdout, /\bartifacts\b/);
 });
 
 test("real entry note --help documents ingest flags", async () => {
