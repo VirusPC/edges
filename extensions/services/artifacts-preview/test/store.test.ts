@@ -1,0 +1,94 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { mkdtemp, symlink, unlink } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { createArtifactStore } from "../src/store.js";
+
+const FIXED_ID = "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab";
+
+async function tempStore(nowMs: { current: number }) {
+  const dataDir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-"));
+  const store = createArtifactStore({
+    dataDir,
+    now: () => new Date(nowMs.current),
+    idFactory: () => FIXED_ID,
+  });
+  return { store, dataDir };
+}
+
+test("put then getFile returns bytes before expiry", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store } = await tempStore(nowMs);
+  const put = await store.put({
+    ttlSeconds: 60,
+    files: [{ path: "index.html", content: "<html>ok</html>" }],
+  });
+  assert.equal(put.id, FIXED_ID);
+  assert.equal(put.expiresAt, "2026-09-19T12:01:00.000Z");
+  const file = await store.getFile(FIXED_ID, "index.html");
+  assert.ok(file);
+  assert.equal(file.bytes.toString("utf8"), "<html>ok</html>");
+  assert.match(file.contentType, /text\/html/);
+});
+
+test("getFile returns null and deletes after expiry", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store } = await tempStore(nowMs);
+  await store.put({
+    ttlSeconds: 1,
+    files: [{ path: "index.html", content: "soon gone" }],
+  });
+  nowMs.current = Date.parse("2026-09-19T12:00:02.000Z");
+  const file = await store.getFile(FIXED_ID, "index.html");
+  assert.equal(file, null);
+  const meta = await store.getMeta(FIXED_ID);
+  assert.equal(meta, null);
+});
+
+test("sweepExpired removes only expired artifacts", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const dataDir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-"));
+  let n = 0;
+  const ids = [
+    "11111111-1111-4111-8111-111111111111",
+    "22222222-2222-4222-8222-222222222222",
+  ];
+  const store = createArtifactStore({
+    dataDir,
+    now: () => new Date(nowMs.current),
+    idFactory: () => ids[n++] ?? ids[1],
+  });
+  await store.put({ ttlSeconds: 1, files: [{ path: "a.html", content: "a" }] });
+  await store.put({ ttlSeconds: 3600, files: [{ path: "b.html", content: "b" }] });
+  nowMs.current = Date.parse("2026-09-19T12:00:02.000Z");
+  const removed = await store.sweepExpired();
+  assert.equal(removed, 1);
+  assert.equal(await store.getFile(ids[0], "a.html"), null);
+  const kept = await store.getFile(ids[1], "b.html");
+  assert.ok(kept);
+  assert.equal(kept.bytes.toString("utf8"), "b");
+});
+
+test("getFile refuses a symlink inside the artifact dir", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store, dataDir } = await tempStore(nowMs);
+  await store.put({
+    ttlSeconds: 60,
+    files: [{ path: "index.html", content: "real" }],
+  });
+  const target = path.join(dataDir, FIXED_ID, "files", "index.html");
+  await unlink(target);
+  await symlink("/etc/passwd", target);
+  const file = await store.getFile(FIXED_ID, "index.html");
+  assert.equal(file, null);
+});
+
+test("put rejects traversal file paths", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store } = await tempStore(nowMs);
+  await assert.rejects(
+    () => store.put({ ttlSeconds: 60, files: [{ path: "../secret", content: "no" }] }),
+    /relative POSIX|\.\.|empty segments|escapes/,
+  );
+});
