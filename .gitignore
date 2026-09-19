@@ -25,6 +25,8 @@ node_modules/
 dist/
 extensions/mcp-servers/*/node_modules/
 extensions/mcp-servers/*/dist/
+extensions/services/*/node_modules/
+extensions/services/*/dist/
 
 # Python
 __pycache__/
