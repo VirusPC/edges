@@ -241,7 +241,7 @@ _避免使用_：长期站点/博客、Astro、site-and-content、本地 HTML �
 _避免使用_：Post、知识资产、长期站点页面、聊天附件预览
 
 **edges artifacts（CLI）**：
-约定中的 `edges artifacts` 命令面：薄 `init`/token 与 `publish`/`rm`。`edges tasks project review-page` 仍只渲染，不发布。
+`edges artifacts` 命令面：薄 `init`/token 与 `publish`/`rm`。`edges tasks project review-page` 仍只渲染，不发布。
 _避免使用_：把 review-page 扩成托管、手搓上传绕过 CLI
 
 **聊天 HTML 预览**：
