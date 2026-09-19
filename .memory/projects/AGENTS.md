@@ -22,6 +22,7 @@
 - [整仓 MIT，不拆 knowledge 许可证](project_mit_license.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
 - [new-note MCP 的 ingest 约束](project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges note，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
 - [posts 对外展示，Astro 博客 + Actions CI](project_posts_public_astro_blog.md) — posts 面向对外展示；后续以 posts 为数据用 Astro 搭博客，并用 GitHub Actions 在服务器做 CI
+- [仓内任务优先用仓库 Skill 与 CLI](project_prefer_repo_skills_and_cli.md) — 执行 VirusPC/edges 仓内工作时，优先调用本仓 Skill 与 edges CLI；不可用须向用户说明缺口，勿默认手搓绕过。
 - [订阅管理盘点进展](project_progress.md) — 订阅/用量盘点进展：双 Gmail + QQ IMAP、国内 Kimi 无邮箱、CodexBar Linux CLI 已装待鉴权；后续 Apple/微信侧核对。
 - [proposeTypes 从 _default 提议新 Task Project 类型](project_propose_types_from_default.md) — 改 propose-types 工作流或从 _default 发明新 Task Project 时打开：独立 Skill extensions/skills/project-tasks-propose-types/；经同一 review-page 确认，不自动 project create；方法是 LLM/agent 判断；配对 project-tasks-classify、ADR 0011 与 ADR 0012。本轮不写 skill 正文。
 - [仓库用根 CHANGELOG 和 v 标签发版](project_repo_changelog.md) — 写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 v 标签。Unreleased 按功能模块分组；用人话写清「现在能做什么」，同一条里立刻给出真实命令名；枚举写仓库英文原值（优先级是 urgent/high/medium/low/none）。不要摊成扁平长列表，也不要把决策/术语/计划逐条写进去。
