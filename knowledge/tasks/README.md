@@ -43,6 +43,9 @@
 
 ## 文件约定
 
-- Task 正文：结论 → **Why:** → **How to apply:**（对齐 project-memory-init）；**不写**执行流水。
+- Task 正文：
+  - 开头结论 / `description` 须一句话讲清：解决什么问题 + 预期达成什么结果
+  - 正文区分事实背景 vs idea（见 `knowledge/tasks/.memory/projects/project_task_separate_facts_from_idea.md`）
+  - 结构：结论 → 事实背景 → Why → How；**不写**执行流水
 - Run 只追加到 `.{stem}.log.md`（点文件 sidecar），不改历史行、不塞进 frontmatter。
 - Task 记录员只追加 / 改状态时直接推 `main`，不提 PR。
