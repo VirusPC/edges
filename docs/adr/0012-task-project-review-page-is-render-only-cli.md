@@ -1,6 +1,6 @@
 # Task Project 审阅页是只渲染的 CLI（通用 groups+items）
 
-ADR 0010 / 0011 的人确认闸门原先靠聊天里的 Markdown 建议表，以及临时 ad-hoc HTML。2026-09-17 grill 确认：交互审阅改成 **render-only** CLI `edges tasks project review-page`——Skill 仍产出建议（LLM / agent）；CLI 只把 JSON 渲成 Task Project 审阅页；人拖拽改组后 Copy JSON 贴回聊天，Skill 用现有 `project create` / `update --project` 落地。页是通用 groups+items，无 `--mode`。**Extends ADR 0010 / 0011**（人闸形态；不重开 embedding / CLI classify）；**Amended by ADR 0013**（人如何打开页：Skill 可经 Artifacts 预览服务发布后给可达 URL；`review-page` 仍只渲染、仍打印本地路径）。叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。本轮只定 CONTEXT / 本 ADR，不实现命令、不改写 skill 正文。
+ADR 0010 / 0011 的人确认闸门原先靠聊天里的 Markdown 建议表，以及临时 ad-hoc HTML。2026-09-17 grill 确认：交互审阅改成 **render-only** CLI `edges tasks project review-page`——Skill 仍产出建议（LLM / agent）；CLI 只把 JSON 渲成 Task Project 审阅页；人拖拽改组后 Copy JSON 贴回聊天，Skill 用现有 `project create` / `update --project` 落地。页是通用 groups+items，无 `--mode`。**Extends ADR 0010 / 0011**（人闸形态；不重开 embedding / CLI classify）；**Amended by ADR 0013**（人如何打开页：Skill 可经 Artifacts 预览服务发布后给可达 URL；`review-page` 仍只渲染、仍打印本地路径）。叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。命令已落地（PR #85）；本 ADR 原轮只定 CONTEXT / 决策，不改写 skill 正文。
 
 **Status:** accepted（ADR 0012；grill 确认于 2026-09-17；2026-09-19 由 ADR 0013 修订打开方式）
 
@@ -25,7 +25,7 @@ ADR 0010 / 0011 的人确认闸门原先靠聊天里的 Markdown 建议表，以
 - CLI 计算归属或直接落地：否决；命令只渲染。
 - 新开 `apply-review` 动词：否决本轮；落地走现有 `project create` / `update --project`。
 - 为 review-page 新开 MCP：否决本轮。
-- 自动打开浏览器，或靠 Grok Bot HTML 预览当闸门：否决；预览里拖拽不可靠，人用系统浏览器打开打印出的路径。
+- 自动打开浏览器，或靠 Grok Bot HTML 预览当闸门：否决；预览里拖拽不可靠。桌面可用系统浏览器打开打印出的本地路径；手机必须用 ADR 0013 的可达 URL。
 - `--mode` 区分 classify / propose：否决；通用 groups+items，语义由 Skill 解释。
 - 长期依赖 `tools/` HTML 原型：否决；壳进 CLI 包。
 - Markdown 建议表当唯一人闸：否决；审阅页是主路径，表只作无 GUI 回退。

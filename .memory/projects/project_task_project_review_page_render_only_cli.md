@@ -1,6 +1,6 @@
 ---
 name: project_task_project_review_page_render_only_cli
-description: 改 classifyTasks / proposeTypes 人闸或 edges tasks project review-page 时打开：CLI 只渲通用 groups+items HTML（已落地）；托管/发布见 ADR 0013，不要把 publish 并进 review-page。决策见 docs/adr/0012-task-project-review-page-is-render-only-cli.md。
+description: 改 classifyTasks / proposeTypes 人闸或 edges tasks project review-page 时打开：CLI 只渲通用 groups+items HTML（已落地）；Skill 出建议、现有 create/update 落地；无 --mode、无 classify/apply-review 动词、无审阅页 MCP。托管/发布见 ADR 0013，不要把 publish 并进 review-page。决策见 docs/adr/0012-task-project-review-page-is-render-only-cli.md。
 metadata:
   edges-title: Task Project 审阅页是 render-only CLI
   edges-type: project
@@ -8,7 +8,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-19T14:10:27+00:00"
+  edges-updated-at: "2026-09-19T14:13:46+00:00"
 ---
 
 Task Project 人确认闸门是 render-only CLI `edges tasks project review-page`：Skill 产出建议 JSON，CLI 只渲通用 groups+items 审阅页，人拖拽后 Copy JSON 贴回，Skill 用现有 `project create` / `update --project` 落地。无 `--mode`，无公开 `classify` / `apply-review`，不自动打开浏览器，不为审阅页新开 MCP。命令与 classifyTasks 第 4 步主路径已落地（PR #85）；proposeTypes Skill 正文仍未入库，应复用同一命令。托管 / 发布是另一件事（ADR 0013）：Skill 可在渲染后 publish 再给人可达 URL；不要把 publish 并进 review-page。

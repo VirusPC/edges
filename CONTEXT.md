@@ -241,16 +241,16 @@ _避免使用_：长期站点/博客、Astro、site-and-content、本地 HTML �
 _避免使用_：Post、知识资产、长期站点页面、聊天附件预览
 
 **edges artifacts（CLI）**：
-约定中的 `edges artifacts` 命令面：薄 `init`/token 与本地配置（如 `~/.config/edges/artifacts.env`），`publish`/`rm` 读配置完成上传与删除。`edges tasks project review-page` 仍只渲染，不发布。
+约定中的 `edges artifacts` 命令面：薄 `init`/token 与 `publish`/`rm`。`edges tasks project review-page` 仍只渲染，不发布。
 _避免使用_：把 review-page 扩成托管、手搓上传绕过 CLI
 
 **聊天 HTML 预览**：
-Agent 客户端把 HTML 嵌进聊天窗口的预览（如 Grok Bot HTML preview）；手机常无法预览，桌面交互常坏，不能当交互闸门。
-_避免使用_：Artifacts 预览服务、系统浏览器打开的托管 URL
+Agent 客户端把 HTML 嵌进聊天窗口的预览（如 Grok Bot HTML preview）。
+_避免使用_：Artifacts 预览服务、系统浏览器打开的托管 URL、把它当交互闸门
 
 **本地 HTML 视图**：
-在本机或仓内打开的视图层（数据与视图分离），不是对外可达的短生命周期托管。
-_避免使用_：Artifacts 预览服务、云临时托管
+对着仓内数据文件的持久本机/仓内查看层（数据与视图分离），不是一次性渲出的人闸，也不是对外可达的短生命周期托管。
+_避免使用_：Artifacts 预览服务、云临时托管、Task Project 审阅页的临时 HTML
 
 **Task Run（edges）**：
 对应 Multica Run 的一次执行尝试；仓内落在 Task 同目录 sidecar `.{stem}.log.md` 中带稳定 `run-id` 的记录，由 `edges tasks runs` / `run-messages` 只读查看。
