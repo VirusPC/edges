@@ -6,6 +6,7 @@ import {
   usageError,
   usageScope,
 } from "./context.js";
+import { addArtifactsCommand } from "./artifacts.js";
 import { addNoteCommand } from "./note.js";
 import { addTasksCommand } from "./tasks.js";
 import { VERSION } from "./utils/version.js";
@@ -17,6 +18,7 @@ EXAMPLES
   edges note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
   edges note --help
   edges tasks --help
+  edges artifacts --help
 
 BREAKING RENAME
   The bin is edges only (not edges-note). There is no shim.
@@ -58,7 +60,7 @@ function addRootCommand(ctx: CliContext, output: CommanderTextConfigure): Comman
   const program = new Command();
   program
     .name("edges")
-    .description("Edges CLI: notes, tasks, and more")
+    .description("Edges CLI: notes, tasks, artifacts, and more")
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help")
     .allowExcessArguments(false)
@@ -72,6 +74,7 @@ function addRootCommand(ctx: CliContext, output: CommanderTextConfigure): Comman
 
   addNoteCommand(program, ctx);
   addTasksCommand(program, ctx);
+  addArtifactsCommand(program, ctx);
   program.addHelpText("after", ROOT_AFTER_HELP);
   applyOutput(program, output);
   return program;

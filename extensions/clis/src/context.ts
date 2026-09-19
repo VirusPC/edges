@@ -28,12 +28,14 @@ export type CliContext = {
   result: CliResult | undefined;
 };
 
-export function usageError(reason: string, scope: "root" | "note" | "tasks"): CliResult {
+export function usageError(reason: string, scope: "root" | "note" | "tasks" | "artifacts"): CliResult {
   const usage =
     scope === "note"
       ? "See edges note --help for usage.\n"
       : scope === "tasks"
         ? "See edges tasks --help for usage.\n"
+        : scope === "artifacts"
+          ? "See edges artifacts --help for usage.\n"
         : "See edges --help for usage.\n";
   return {
     exitCode: 2,
@@ -42,8 +44,9 @@ export function usageError(reason: string, scope: "root" | "note" | "tasks"): Cl
   };
 }
 
-export function usageScope(argv: string[]): "root" | "note" | "tasks" {
+export function usageScope(argv: string[]): "root" | "note" | "tasks" | "artifacts" {
   if (argv[0] === "note") return "note";
   if (argv[0] === "tasks") return "tasks";
+  if (argv[0] === "artifacts") return "artifacts";
   return "root";
 }

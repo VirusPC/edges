@@ -17,6 +17,7 @@ test("run --help lists note and tasks", async () => {
   assert.match(result.stdout, /Commands:/);
   assert.match(result.stdout, /^\s+note\b/m);
   assert.match(result.stdout, /^\s+tasks\b/m);
+  assert.match(result.stdout, /^\s+artifacts\b/m);
   assert.doesNotMatch(result.stdout, /^\s+ingest\b/m);
 });
 
