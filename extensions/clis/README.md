@@ -91,11 +91,11 @@ Thin client for the Artifacts 预览服务 (`extensions/services/artifacts-previ
 
 ```
 edges artifacts init [--base-url <url>] [--config <path>] [--force]
-edges artifacts publish <path> [--ttl <duration>] [--entry <relpath>] [--config <path>]
+edges artifacts publish <path> [--ttl <duration>] [--entry <relpath>] [--from-kind <kind>] [--from-name <name>] [--config <path>]
 edges artifacts rm <id|url> [--config <path>]
 ```
 
-`init` writes `~/.config/edges/artifacts.env` (`EDGES_ARTIFACTS_TOKEN`, `EDGES_ARTIFACTS_BASE_URL`) and prints the env the **server** process needs. `publish` / `rm` read that file (env overrides). Success stdout is JSON (`command`: `artifacts.init` | `artifacts.publish` | `artifacts.rm`). `publish` prints the public `url`.
+`init` writes `~/.config/edges/artifacts.env` (`EDGES_ARTIFACTS_TOKEN`, `EDGES_ARTIFACTS_BASE_URL`) and prints the env the **server** process needs. `publish` / `rm` read that file (env overrides). Success stdout is JSON (`command`: `artifacts.init` | `artifacts.publish` | `artifacts.rm`). `publish` prints the public `url` and records `from` (defaults `--from-kind cli --from-name edges-cli`).
 
 Phone review needs a reachable `EDGES_ARTIFACTS_BASE_URL` (ECS / public host). Localhost is only for the same machine. This round has no artifacts MCP.
 

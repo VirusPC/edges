@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { access, mkdir, mkdtemp, rm, stat, symlink, unlink, writeFile } from "node:fs/promises";
+import { access, mkdir, mkdtemp, readFile, rm, stat, symlink, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createArtifactStore } from "../src/store.js";
@@ -22,6 +22,7 @@ test("put then getFile returns bytes before expiry", async () => {
   const { store } = await tempStore(nowMs);
   const put = await store.put({
     ttlSeconds: 60,
+    from: { kind: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "<html>ok</html>" }],
   });
   assert.equal(put.id, FIXED_ID);
@@ -37,6 +38,7 @@ test("getFile returns null and deletes after expiry", async () => {
   const { store } = await tempStore(nowMs);
   await store.put({
     ttlSeconds: 1,
+    from: { kind: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "soon gone" }],
   });
   nowMs.current = Date.parse("2026-09-19T12:00:02.000Z");
@@ -59,8 +61,16 @@ test("sweepExpired removes only expired artifacts", async () => {
     now: () => new Date(nowMs.current),
     idFactory: () => ids[n++] ?? ids[1],
   });
-  await store.put({ ttlSeconds: 1, files: [{ path: "a.html", content: "a" }] });
-  await store.put({ ttlSeconds: 3600, files: [{ path: "b.html", content: "b" }] });
+  await store.put({
+    ttlSeconds: 1,
+    from: { kind: "cli", name: "edges-cli" },
+    files: [{ path: "a.html", content: "a" }],
+  });
+  await store.put({
+    ttlSeconds: 3600,
+    from: { kind: "cli", name: "edges-cli" },
+    files: [{ path: "b.html", content: "b" }],
+  });
   nowMs.current = Date.parse("2026-09-19T12:00:02.000Z");
   const removed = await store.sweepExpired();
   assert.equal(removed, 1);
@@ -75,6 +85,7 @@ test("getFile refuses an intermediate directory symlink", async () => {
   const { store, dataDir } = await tempStore(nowMs);
   await store.put({
     ttlSeconds: 60,
+    from: { kind: "cli", name: "edges-cli" },
     files: [
       { path: "css/app.css", content: "body{}" },
       { path: "index.html", content: "ok" },
@@ -93,6 +104,7 @@ test("created artifact dirs are 0700 and files are 0600", async () => {
   const { store, dataDir } = await tempStore(nowMs);
   await store.put({
     ttlSeconds: 60,
+    from: { kind: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "ok" }],
   });
   const dirMode = (await stat(path.join(dataDir, FIXED_ID))).mode & 0o777;
@@ -113,6 +125,7 @@ test("sweepExpired deletes orphan UUID dirs and invalid expiresAt", async () => 
 
   await store.put({
     ttlSeconds: 60,
+    from: { kind: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "immortal" }],
   });
   await writeFile(
@@ -128,6 +141,7 @@ test("getFile refuses a symlink inside the artifact dir", async () => {
   const { store, dataDir } = await tempStore(nowMs);
   await store.put({
     ttlSeconds: 60,
+    from: { kind: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "real" }],
   });
   const target = path.join(dataDir, FIXED_ID, "files", "index.html");
@@ -141,7 +155,43 @@ test("put rejects traversal file paths", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { store } = await tempStore(nowMs);
   await assert.rejects(
-    () => store.put({ ttlSeconds: 60, files: [{ path: "../secret", content: "no" }] }),
+    () =>
+      store.put({
+        ttlSeconds: 60,
+        from: { kind: "cli", name: "edges-cli" },
+        files: [{ path: "../secret", content: "no" }],
+      }),
     /relative POSIX|\.\.|empty segments|escapes/,
+  );
+});
+
+test("put writes from into meta.json", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store, dataDir } = await tempStore(nowMs);
+  await store.put({
+    ttlSeconds: 60,
+    from: { kind: "skill", name: "project-tasks-classify" },
+    files: [{ path: "index.html", content: "ok" }],
+  });
+  const meta = await store.getMeta(FIXED_ID);
+  assert.deepEqual(meta?.from, { kind: "skill", name: "project-tasks-classify" });
+  const raw = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
+    from: { kind: string; name: string };
+  };
+  assert.deepEqual(raw.from, { kind: "skill", name: "project-tasks-classify" });
+});
+
+test("put rejects missing or empty from", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store } = await tempStore(nowMs);
+  const files = [{ path: "index.html", content: "ok" }];
+  await assert.rejects(() => store.put({ ttlSeconds: 60, files }), /from/);
+  await assert.rejects(
+    () => store.put({ ttlSeconds: 60, from: { kind: "", name: "edges-cli" }, files }),
+    /from\.kind/,
+  );
+  await assert.rejects(
+    () => store.put({ ttlSeconds: 60, from: { kind: "cli", name: "   " }, files }),
+    /from\.name/,
   );
 });

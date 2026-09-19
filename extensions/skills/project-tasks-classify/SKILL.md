@@ -49,7 +49,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks project review-page --from /
    4. 若人需要可达 URL（手机 / 另一台机器），再发布，不要假定 localhost：
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts artifacts publish <绝对 HTML 路径>
+pnpm --filter edges-cli exec tsx src/index.ts artifacts publish <绝对 HTML 路径> --from-kind skill --from-name project-tasks-classify
 ```
 
       解析 stdout：`command` 为 `artifacts.publish`，把 `url` 给人。告诉人用 **系统浏览器**（Chrome / Safari / Firefox）打开该 URL。手机必须用 ECS / 公开的 `EDGES_ARTIFACTS_BASE_URL`，不能给 `localhost`。未 `edges artifacts init`、或服务没起来时，说明缺口，不要手搓上传。不要用聊天 HTML 预览当闸门——Grok Bot 预览里拖拽不可靠，见 `knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`。本步不实现审阅结果回传 Agent 客户端。

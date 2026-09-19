@@ -58,6 +58,7 @@ test("artifacts publish happy path posts JSON and prints the public URL", async 
     token: "shared-token",
     files: [{ path: "page.html", content: "<html>pub</html>" }],
     ttlSeconds: 86_400,
+    from: { kind: "cli", name: "edges-cli" },
     fetch: async (input, init) => {
       posted.url = String(input);
       posted.auth = (init?.headers as Record<string, string> | undefined)?.authorization;
@@ -67,6 +68,7 @@ test("artifacts publish happy path posts JSON and prints the public URL", async 
           id: "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab",
           url: "http://artifacts.test/artifacts/2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab/",
           expiresAt: "2026-09-20T12:00:00.000Z",
+          from: { kind: "cli", name: "edges-cli" },
         }),
         { status: 201, headers: { "content-type": "application/json" } },
       );
@@ -77,9 +79,102 @@ test("artifacts publish happy path posts JSON and prints the public URL", async 
   assert.deepEqual(posted.body, {
     ttlSeconds: 86_400,
     files: [{ path: "page.html", content: "<html>pub</html>" }],
+    from: { kind: "cli", name: "edges-cli" },
   });
   assert.equal(published.url, "http://artifacts.test/artifacts/2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab/");
   assert.equal(published.id, "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab");
+});
+
+test("artifacts publish help lists --from-kind and --from-name", async () => {
+  const result = await run(["artifacts", "publish", "--help"]);
+  assert.equal(result.exitCode, 0);
+  assert.match(result.stdout, /--from-kind/);
+  assert.match(result.stdout, /--from-name/);
+});
+
+test("artifacts publish defaults from to cli/edges-cli", async () => {
+  const posted: { body?: unknown } = {};
+  await publishArtifact({
+    baseUrl: "http://artifacts.test",
+    token: "shared-token",
+    files: [{ path: "page.html", content: "<html>pub</html>" }],
+    ttlSeconds: 86_400,
+    from: { kind: "cli", name: "edges-cli" },
+    fetch: async (_input, init) => {
+      posted.body = JSON.parse(String(init?.body));
+      return new Response(
+        JSON.stringify({
+          id: "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab",
+          url: "http://artifacts.test/artifacts/2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab/",
+          expiresAt: "2026-09-20T12:00:00.000Z",
+          from: { kind: "cli", name: "edges-cli" },
+        }),
+        { status: 201, headers: { "content-type": "application/json" } },
+      );
+    },
+  });
+  assert.deepEqual((posted.body as { from: unknown }).from, { kind: "cli", name: "edges-cli" });
+});
+
+test("artifacts publish via run defaults from and forwards custom flags", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-cli-"));
+  const configPath = path.join(dir, "artifacts.env");
+  const html = path.join(dir, "page.html");
+  await writeFile(html, "<html>from</html>");
+  await writeFile(
+    configPath,
+    "EDGES_ARTIFACTS_TOKEN=cli-token\nEDGES_ARTIFACTS_BASE_URL=http://will-be-overridden\n",
+  );
+
+  const seen: Array<{ kind?: string; name?: string }> = [];
+  const stub = http.createServer((req, res) => {
+    const chunks: Buffer[] = [];
+    req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
+    req.on("end", () => {
+      const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as {
+        from?: { kind: string; name: string };
+      };
+      seen.push(body.from ?? {});
+      res.writeHead(201, { "content-type": "application/json" });
+      res.end(
+        JSON.stringify({
+          id: "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab",
+          url: "http://127.0.0.1/artifacts/2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab/",
+          expiresAt: "2026-09-20T12:00:00.000Z",
+          from: body.from,
+        }),
+      );
+    });
+  });
+  await new Promise<void>((resolve) => stub.listen(0, "127.0.0.1", resolve));
+  const address = stub.address();
+  const port = typeof address === "object" && address ? address.port : 0;
+  const baseEnv = { HOME: dir, EDGES_ARTIFACTS_BASE_URL: `http://127.0.0.1:${port}` };
+  try {
+    const def = await run(["artifacts", "publish", html, "--config", configPath], { env: baseEnv });
+    assert.equal(def.exitCode, 0, def.stderr + def.stdout);
+    const custom = await run(
+      [
+        "artifacts",
+        "publish",
+        html,
+        "--config",
+        configPath,
+        "--from-kind",
+        "skill",
+        "--from-name",
+        "project-tasks-classify",
+      ],
+      { env: baseEnv },
+    );
+    assert.equal(custom.exitCode, 0, custom.stderr + custom.stdout);
+    assert.deepEqual(seen, [
+      { kind: "cli", name: "edges-cli" },
+      { kind: "skill", name: "project-tasks-classify" },
+    ]);
+  } finally {
+    await new Promise<void>((resolve, reject) => stub.close((err) => (err ? reject(err) : resolve())));
+  }
 });
 
 test("artifacts publish missing path is VALIDATION_ERROR", async () => {
