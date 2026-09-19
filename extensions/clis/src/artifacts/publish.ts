@@ -53,7 +53,15 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
             error instanceof Error ? error.message : String(error),
           );
         }
-        const files = await collectPublishFiles(inputPath);
+        let files;
+        try {
+          files = await collectPublishFiles(inputPath);
+        } catch (error) {
+          throw new ArtifactsError(
+            "VALIDATION_ERROR",
+            error instanceof Error ? error.message : String(error),
+          );
+        }
         const published = await publishArtifact({
           baseUrl: config.baseUrl,
           token: config.token,

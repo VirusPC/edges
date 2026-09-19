@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, symlink, unlink } from "node:fs/promises";
+import { access, mkdir, mkdtemp, rm, stat, symlink, unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { createArtifactStore } from "../src/store.js";
@@ -68,6 +68,59 @@ test("sweepExpired removes only expired artifacts", async () => {
   const kept = await store.getFile(ids[1], "b.html");
   assert.ok(kept);
   assert.equal(kept.bytes.toString("utf8"), "b");
+});
+
+test("getFile refuses an intermediate directory symlink", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store, dataDir } = await tempStore(nowMs);
+  await store.put({
+    ttlSeconds: 60,
+    files: [
+      { path: "css/app.css", content: "body{}" },
+      { path: "index.html", content: "ok" },
+    ],
+    entry: "index.html",
+  });
+  const cssDir = path.join(dataDir, FIXED_ID, "files", "css");
+  await rm(cssDir, { recursive: true, force: true });
+  await symlink("/etc", cssDir);
+  const file = await store.getFile(FIXED_ID, "css/passwd");
+  assert.equal(file, null);
+});
+
+test("created artifact dirs are 0700 and files are 0600", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store, dataDir } = await tempStore(nowMs);
+  await store.put({
+    ttlSeconds: 60,
+    files: [{ path: "index.html", content: "ok" }],
+  });
+  const dirMode = (await stat(path.join(dataDir, FIXED_ID))).mode & 0o777;
+  const fileMode = (await stat(path.join(dataDir, FIXED_ID, "files", "index.html"))).mode & 0o777;
+  assert.equal(dirMode, 0o700);
+  assert.equal(fileMode, 0o600);
+});
+
+test("sweepExpired deletes orphan UUID dirs and invalid expiresAt", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store, dataDir } = await tempStore(nowMs);
+  const orphan = "33333333-3333-4333-8333-333333333333";
+  await mkdir(path.join(dataDir, orphan, "files"), { recursive: true });
+  await writeFile(path.join(dataDir, orphan, "files", "stuck.txt"), "left behind");
+  const removedOrphan = await store.sweepExpired();
+  assert.equal(removedOrphan, 1);
+  await assert.rejects(() => access(path.join(dataDir, orphan)));
+
+  await store.put({
+    ttlSeconds: 60,
+    files: [{ path: "index.html", content: "immortal" }],
+  });
+  await writeFile(
+    path.join(dataDir, FIXED_ID, "meta.json"),
+    `${JSON.stringify({ id: FIXED_ID, entry: "index.html", expiresAt: "not-a-date" })}\n`,
+  );
+  const file = await store.getFile(FIXED_ID, "index.html");
+  assert.equal(file, null);
 });
 
 test("getFile refuses a symlink inside the artifact dir", async () => {

@@ -97,6 +97,6 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks update <stem> --project <sug
 
 - **CLI：** `edges tasks project list|get|create|update|review-page` 与 `edges tasks list` / `edges tasks update --project`；可达 URL 用 `edges artifacts publish`（`review-page` 不发布）
 - **Skill：** 本文件（classifyTasks）
-- **MCP：** 对等入口；本轮没有 classify MCP，也没有 generic tasks MCP，也没有 review-page MCP。缺 shell 时说明 generic tasks Skill/MCP CRUD 仍在 backlog，不要假装 MCP 已能搬 Task
+- **MCP：** 对等入口；本轮没有 classify MCP，也没有 generic tasks MCP，也没有 review-page MCP，也没有 artifacts MCP。缺 shell 时说明 generic tasks Skill/MCP CRUD 仍在 backlog，不要假装 MCP 已能搬 Task
 
 Whole-board classification onto user-set centroids; wait for the human-pasted review-page export (Markdown table only if HTML cannot be opened) before apply.
