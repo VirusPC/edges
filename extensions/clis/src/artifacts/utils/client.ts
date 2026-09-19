@@ -1,3 +1,7 @@
+import type { ArtifactFrom } from "./from.js";
+
+export type { ArtifactFrom };
+
 export type PublishFile = {
   path: string;
   content: string;
@@ -8,6 +12,7 @@ export type PublishResult = {
   id: string;
   url: string;
   expiresAt: string;
+  from?: ArtifactFrom;
 };
 
 const ARTIFACT_ID =
@@ -33,11 +38,13 @@ export async function publishArtifact(options: {
   files: PublishFile[];
   ttlSeconds: number;
   entry?: string;
+  from: ArtifactFrom;
   fetch: typeof fetch;
 }): Promise<PublishResult> {
   const body: Record<string, unknown> = {
     ttlSeconds: options.ttlSeconds,
     files: options.files,
+    from: options.from,
   };
   if (options.entry) {
     body.entry = options.entry;

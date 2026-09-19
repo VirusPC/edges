@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { constants } from "node:fs";
 import { chmod, lstat, mkdir, open, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { parseArtifactFrom } from "./from.js";
 import { assertSafeRelPath, isArtifactId, safeResolve } from "./paths.js";
 import type { ArtifactFileInput, ArtifactMeta, ArtifactStore } from "./types.js";
 
@@ -151,6 +152,11 @@ export function createArtifactStore(options: {
       if (!parsed || parsed.id !== id || typeof parsed.entry !== "string" || typeof parsed.expiresAt !== "string") {
         return null;
       }
+      try {
+        parsed.from = parseArtifactFrom(parsed.from);
+      } catch {
+        return null;
+      }
       return parsed;
     } catch {
       return null;
@@ -188,6 +194,7 @@ export function createArtifactStore(options: {
       if (!Array.isArray(input.files) || input.files.length === 0) {
         throw new Error("files must be a non-empty array");
       }
+      const from = parseArtifactFrom(input.from);
 
       const safeFiles = input.files.map((file) => {
         const rel = assertSafeRelPath(file.path);
@@ -214,9 +221,9 @@ export function createArtifactStore(options: {
         await writePrivateFile(dest, bytes);
       }
 
-      const meta: ArtifactMeta = { id, entry, expiresAt };
+      const meta: ArtifactMeta = { id, entry, expiresAt, from };
       await writePrivateFile(metaPath(id), `${JSON.stringify(meta)}\n`);
-      return { id, expiresAt, entry };
+      return { id, expiresAt, entry, from };
     },
 
     async getMeta(id) {

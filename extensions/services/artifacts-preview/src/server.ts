@@ -3,6 +3,7 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { authorizeWrite } from "./auth.js";
 import { headerValue, readJsonBody, sendError, sendJson } from "./http.js";
 import { isArtifactId } from "./paths.js";
+import { parseArtifactFrom } from "./from.js";
 import { createArtifactStore } from "./store.js";
 import type { ArtifactFileInput, PublishBody, ServerOptions } from "./types.js";
 
@@ -132,15 +133,18 @@ export function createArtifactsServer(options: ServerOptions): http.Server {
       const publish = body as PublishBody;
       try {
         const files = parseFiles(publish.files);
+        const from = parseArtifactFrom(publish.from);
         const created = await store.put({
           ttlSeconds: defaultTtl(publish.ttlSeconds),
           entry: publish.entry,
+          from,
           files,
         });
         sendJson(res, 201, {
           id: created.id,
           url: `${baseUrl}/artifacts/${created.id}/`,
           expiresAt: created.expiresAt,
+          from: created.from,
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);

@@ -34,6 +34,7 @@ test("POST upload then unauthenticated GET returns the file", async () => {
       },
       body: JSON.stringify({
         ttlSeconds: 60,
+        from: { kind: "cli", name: "edges-cli" },
         files: [{ path: "index.html", content: "<html>hello</html>" }],
       }),
     });
@@ -101,6 +102,7 @@ test("expired artifact GET is 404", async () => {
       },
       body: JSON.stringify({
         ttlSeconds: 1,
+        from: { kind: "cli", name: "edges-cli" },
         files: [{ path: "index.html", content: "bye" }],
       }),
     });
@@ -123,7 +125,10 @@ test("GET traversal path does not escape the artifact root", async () => {
         authorization: `Bearer ${TOKEN}`,
         "content-type": "application/json",
       },
-      body: JSON.stringify({ files: [{ path: "index.html", content: "ok" }] }),
+      body: JSON.stringify({
+        files: [{ path: "index.html", content: "ok" }],
+        from: { kind: "cli", name: "edges-cli" },
+      }),
     });
     assert.equal(created.status, 201);
     const escaped = await fetch(`${url}/artifacts/${FIXED_ID}/../../../../etc/passwd`);
@@ -151,6 +156,7 @@ test("GET refuses an intermediate directory symlink", async () => {
           { path: "index.html", content: "ok" },
         ],
         entry: "index.html",
+        from: { kind: "cli", name: "edges-cli" },
       }),
     });
     assert.equal(created.status, 201);
@@ -175,7 +181,10 @@ test("GET refuses a symlink inside the artifact dir", async () => {
         authorization: `Bearer ${TOKEN}`,
         "content-type": "application/json",
       },
-      body: JSON.stringify({ files: [{ path: "index.html", content: "ok" }] }),
+      body: JSON.stringify({
+        files: [{ path: "index.html", content: "ok" }],
+        from: { kind: "cli", name: "edges-cli" },
+      }),
     });
     assert.equal(created.status, 201);
     const target = path.join(dataDir, FIXED_ID, "files", "index.html");
@@ -198,7 +207,10 @@ test("DELETE requires auth and removes the artifact", async () => {
         authorization: `Bearer ${TOKEN}`,
         "content-type": "application/json",
       },
-      body: JSON.stringify({ files: [{ path: "index.html", content: "ok" }] }),
+      body: JSON.stringify({
+        files: [{ path: "index.html", content: "ok" }],
+        from: { kind: "cli", name: "edges-cli" },
+      }),
     });
     assert.equal(created.status, 201);
 
@@ -212,6 +224,79 @@ test("DELETE requires auth and removes the artifact", async () => {
     assert.equal(removed.status, 204);
     const page = await fetch(`${url}/artifacts/${FIXED_ID}/`);
     assert.equal(page.status, 404);
+  } finally {
+    await close();
+  }
+});
+
+test("POST persists from and echoes it on 201", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { url, close, dataDir } = await startServer(nowMs);
+  try {
+    const created = await fetch(`${url}/artifacts`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${TOKEN}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        files: [{ path: "index.html", content: "ok" }],
+        from: { kind: "agent", name: "cursor" },
+      }),
+    });
+    assert.equal(created.status, 201);
+    const body = (await created.json()) as { from: { kind: string; name: string } };
+    assert.deepEqual(body.from, { kind: "agent", name: "cursor" });
+    const { readFile } = await import("node:fs/promises");
+    const meta = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
+      from: { kind: string; name: string };
+    };
+    assert.deepEqual(meta.from, { kind: "agent", name: "cursor" });
+  } finally {
+    await close();
+  }
+});
+
+test("POST without from is 400", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { url, close } = await startServer(nowMs);
+  try {
+    const created = await fetch(`${url}/artifacts`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${TOKEN}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ files: [{ path: "index.html", content: "ok" }] }),
+    });
+    assert.equal(created.status, 400);
+    const body = (await created.json()) as { errorCode: string; reason: string };
+    assert.equal(body.errorCode, "VALIDATION_ERROR");
+    assert.match(body.reason, /from/);
+  } finally {
+    await close();
+  }
+});
+
+test("POST with empty from.name is 400", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { url, close } = await startServer(nowMs);
+  try {
+    const created = await fetch(`${url}/artifacts`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${TOKEN}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        files: [{ path: "index.html", content: "ok" }],
+        from: { kind: "cli", name: "" },
+      }),
+    });
+    assert.equal(created.status, 400);
+    const body = (await created.json()) as { errorCode: string; reason: string };
+    assert.equal(body.errorCode, "VALIDATION_ERROR");
+    assert.match(body.reason, /from\.name/);
   } finally {
     await close();
   }
