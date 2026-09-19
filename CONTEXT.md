@@ -233,7 +233,7 @@ _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等�
 _避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）、把 review-page 扩成 Artifacts 预览服务
 
 **Artifacts 预览服务**：
-个人短生命周期的静态托管：把 Agent 产出的交互 HTML 变成可在系统浏览器打开的 URL，到期删除。不是长期站点，也不是聊天里的 HTML 预览。
+稳定的短生命周期托管 + 真浏览器可开 URL，用来打开需要人交互的 Agent HTML；聊天内嵌预览是绕开的不可靠路径。
 _避免使用_：长期站点/博客、Astro、site-and-content、本地 HTML 视图、聊天 HTML 预览、审阅结果回传 Agent 客户端（若指同一件事）
 
 **Artifact（edges）**：
