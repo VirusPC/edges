@@ -1,3 +1,4 @@
 packages:
   - 'extensions/mcp-servers/*'
   - 'extensions/clis'
+  - 'extensions/services/*'
