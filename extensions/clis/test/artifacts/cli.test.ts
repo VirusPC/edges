@@ -82,6 +82,21 @@ test("artifacts publish happy path posts JSON and prints the public URL", async 
   assert.equal(published.id, "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab");
 });
 
+test("artifacts publish missing path is VALIDATION_ERROR", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-cli-"));
+  const configPath = path.join(dir, "artifacts.env");
+  await writeFile(
+    configPath,
+    "EDGES_ARTIFACTS_TOKEN=cli-token\nEDGES_ARTIFACTS_BASE_URL=http://127.0.0.1:1\n",
+  );
+  const result = await run(["artifacts", "publish", path.join(dir, "missing.html"), "--config", configPath], {
+    env: { HOME: dir },
+  });
+  assert.equal(result.exitCode, 2);
+  const payload = JSON.parse(result.stdout) as { errorCode: string };
+  assert.equal(payload.errorCode, "VALIDATION_ERROR");
+});
+
 test("artifacts publish via run uses a local HTTP stub", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-cli-"));
   const configPath = path.join(dir, "artifacts.env");

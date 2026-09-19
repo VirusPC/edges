@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { lstat, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { constants } from "node:fs";
+import { chmod, lstat, mkdir, open, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { assertSafeRelPath, isArtifactId, safeResolve } from "./paths.js";
 import type { ArtifactFileInput, ArtifactMeta, ArtifactStore } from "./types.js";
@@ -26,6 +27,80 @@ const CONTENT_TYPES: Record<string, string> = {
 
 export function contentTypeFor(rel: string): string {
   return CONTENT_TYPES[path.extname(rel).toLowerCase()] ?? "application/octet-stream";
+}
+
+async function chmodPrivateDir(dir: string): Promise<void> {
+  await chmod(dir, 0o700);
+}
+
+async function ensurePrivateDir(dir: string): Promise<void> {
+  await mkdir(dir, { recursive: true, mode: 0o700 });
+  await chmodPrivateDir(dir);
+}
+
+async function writePrivateFile(dest: string, bytes: Buffer | string): Promise<void> {
+  await writeFile(dest, bytes, { mode: 0o600 });
+  await chmod(dest, 0o600);
+}
+
+async function assertUnlinkedAncestors(root: string, rel: string): Promise<void> {
+  const parentRel = rel.includes("/") ? rel.slice(0, rel.lastIndexOf("/")) : "";
+  let cursor = path.resolve(root);
+  const rootInfo = await lstat(cursor);
+  if (rootInfo.isSymbolicLink()) {
+    throw new Error("artifact path must not be a symlink");
+  }
+  if (!parentRel) {
+    return;
+  }
+  for (const segment of parentRel.split("/")) {
+    cursor = path.join(cursor, segment);
+    const info = await lstat(cursor);
+    if (info.isSymbolicLink()) {
+      throw new Error("artifact path must not be a symlink");
+    }
+  }
+}
+
+/** Walk root + each relative segment with lstat; refuse any symlink. */
+export async function resolveUnlinkedFile(root: string, rel: string): Promise<string | null> {
+  let current: string;
+  try {
+    current = safeResolve(root, rel);
+    assertSafeRelPath(rel);
+  } catch {
+    return null;
+  }
+  const rootResolved = path.resolve(root);
+  const chain = [rootResolved];
+  const segments = assertSafeRelPath(rel).split("/");
+  let cursor = rootResolved;
+  for (const segment of segments) {
+    cursor = path.join(cursor, segment);
+    chain.push(cursor);
+  }
+  if (chain[chain.length - 1] !== current) {
+    return null;
+  }
+  for (const step of chain) {
+    try {
+      const info = await lstat(step);
+      if (info.isSymbolicLink()) {
+        return null;
+      }
+    } catch {
+      return null;
+    }
+  }
+  try {
+    const leaf = await lstat(current);
+    if (!leaf.isFile() || leaf.isSymbolicLink()) {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+  return current;
 }
 
 export function resolveEntry(files: ArtifactFileInput[], entry?: string): string {
@@ -97,10 +172,8 @@ export function createArtifactStore(options: {
 
   async function expireIfNeeded(id: string, now: Date): Promise<boolean> {
     const meta = await readMeta(id);
-    if (!meta) {
-      return true;
-    }
-    if (new Date(meta.expiresAt).getTime() <= now.getTime()) {
+    const expiresAt = meta ? Date.parse(meta.expiresAt) : Number.NaN;
+    if (!meta || Number.isNaN(expiresAt) || expiresAt <= now.getTime()) {
       await remove(id);
       return true;
     }
@@ -127,19 +200,22 @@ export function createArtifactStore(options: {
       }
 
       const expiresAt = new Date(nowFn().getTime() + input.ttlSeconds * 1000).toISOString();
+      await ensurePrivateDir(dataDir);
+      await ensurePrivateDir(artifactDir(id));
       const root = filesRoot(id);
-      await mkdir(root, { recursive: true });
+      await ensurePrivateDir(root);
 
       for (const file of safeFiles) {
         const dest = safeResolve(root, file.path);
-        await mkdir(path.dirname(dest), { recursive: true });
+        await ensurePrivateDir(path.dirname(dest));
+        await assertUnlinkedAncestors(root, file.path);
         const bytes =
           file.encoding === "base64" ? Buffer.from(file.content, "base64") : Buffer.from(file.content, "utf8");
-        await writeFile(dest, bytes);
+        await writePrivateFile(dest, bytes);
       }
 
       const meta: ArtifactMeta = { id, entry, expiresAt };
-      await writeFile(metaPath(id), `${JSON.stringify(meta)}\n`, "utf8");
+      await writePrivateFile(metaPath(id), `${JSON.stringify(meta)}\n`);
       return { id, expiresAt, entry };
     },
 
@@ -161,23 +237,18 @@ export function createArtifactStore(options: {
         return null;
       }
 
-      let dest: string;
-      try {
-        dest = safeResolve(filesRoot(id), rel);
-      } catch {
+      const dest = await resolveUnlinkedFile(filesRoot(id), rel);
+      if (!dest) {
         return null;
       }
-
       try {
-        const info = await lstat(dest);
-        if (info.isSymbolicLink()) {
-          return null;
+        const handle = await open(dest, constants.O_RDONLY | constants.O_NOFOLLOW);
+        try {
+          const bytes = await handle.readFile();
+          return { bytes, contentType: contentTypeFor(rel) };
+        } finally {
+          await handle.close();
         }
-        if (!info.isFile()) {
-          return null;
-        }
-        const bytes = await readFile(dest);
-        return { bytes, contentType: contentTypeFor(rel) };
       } catch {
         return null;
       }

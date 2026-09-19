@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, symlink, unlink } from "node:fs/promises";
+import { mkdtemp, rm, symlink, unlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { listenArtifactsServer } from "../src/server.js";
@@ -130,6 +130,36 @@ test("GET traversal path does not escape the artifact root", async () => {
     assert.ok(escaped.status === 404 || escaped.status === 400);
     const text = await escaped.text();
     assert.doesNotMatch(text, /root:/);
+  } finally {
+    await close();
+  }
+});
+
+test("GET refuses an intermediate directory symlink", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { url, close, dataDir } = await startServer(nowMs);
+  try {
+    const created = await fetch(`${url}/artifacts`, {
+      method: "POST",
+      headers: {
+        authorization: `Bearer ${TOKEN}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        files: [
+          { path: "css/app.css", content: "body{}" },
+          { path: "index.html", content: "ok" },
+        ],
+        entry: "index.html",
+      }),
+    });
+    assert.equal(created.status, 201);
+    const cssDir = path.join(dataDir, FIXED_ID, "files", "css");
+    await rm(cssDir, { recursive: true, force: true });
+    await symlink("/etc", cssDir);
+    const page = await fetch(`${url}/artifacts/${FIXED_ID}/css/passwd`);
+    assert.equal(page.status, 404);
+    assert.doesNotMatch(await page.text(), /root:/);
   } finally {
     await close();
   }
