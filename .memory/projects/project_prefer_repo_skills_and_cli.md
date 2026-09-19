@@ -8,7 +8,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-19T06:00:50+00:00"
+  edges-updated-at: "2026-09-19T06:18:49+00:00"
 ---
 
 做 edges 仓内任务时，优先使用本仓库已有的 Skill（如 `.agents/skills` / `extensions/skills`）与 CLI（`edges` / `extensions/clis`），而不是手写等价流程或绕过能力面。
@@ -17,4 +17,4 @@ metadata:
 与 ADR 0004（CLI+Skill+MCP）一致；保证契约单一、缺口可见、可补齐。
 
 **How to apply:**
-先查/加载相关 Skill 与 CLI 帮助；能走通就走通。若缺 Skill、CLI 动词、依赖装不上、或 CLI 只改盘不推远程导致流程断掉，向用户说清具体缺口，请用户决定补充还是临时改流程。禁止静默长期绕过。
+按 `agents_md_to_skill_to_cli` 的理想链路：读目录 `AGENTS.md` → 加载其指向的 Skill → 由 Skill 调 `edges` CLI；缺口向用户报，勿手搓绕过。
