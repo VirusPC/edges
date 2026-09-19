@@ -12,7 +12,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-19T13:31:00+08:00"
+  edges-updated-at: "2026-09-19T14:01:36.370Z"
 ---
 
 用网页 artifacts（例如 Tasks Classify 那种）做 review / 选择判断时，预览是否正常高度依赖客户端：Grok Bot 手机端往往不能预览；桌面端能开 HTML，但交互常有兼容问题（目测不是完整 Chrome 内核）。在此基础上补充假设——用户有一台自部署云服务器——并考虑在服务器上开临时目录，专门托管各类 artifacts，用真实浏览器打开链接完成 review。
@@ -25,3 +25,4 @@ metadata:
 - 对照勿并卡：`agent-clients-ux`「数据与视图分离 + 本地 HTML」（本地/仓内视图，不是云临时托管）；`edges-tasks`「Task 复杂可视化」「交互式主题聚类」「classify」等（业务能力可产出 artifacts，托管是基础设施）。
 - 与 `site-and-content` 建站/Astro 区分：那是长期内容站；本卡是短生命周期 review 托管。
 - 已指派 Coding 专家（2026-09-19 peng cheng 出栈）。**必须先 grill-with-docs**（CONTEXT/ADR），过关再实现上传/托管/链接回传；看板由任务记录员维护。
+- 「审阅结果回传 Agent 客户端」已拆独立 backlog，本卡本轮只做静态托管（上传→URL→TTL），不做回传。
