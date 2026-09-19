@@ -21,3 +21,5 @@ Grok Bot **聊天里的 HTML 附件/预览**环境下，页面拖拽异常：HTM
 
 - classify 审阅 HTML（`tools/classify-review` 或 `/workspace/classify-review`）
 - `project-tasks-classify` 流程
+- ADR 0012：Task Project 审阅页仍只渲染，不依赖本预览当闸门
+- ADR 0013：Artifacts 预览服务（聊天预览不可靠时的短生命周期托管出口）

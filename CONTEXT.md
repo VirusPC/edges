@@ -129,7 +129,7 @@ Agent 与人发现并调用 Edges 扩展能力的入口集合；本仓定为 CLI
 _避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成单独一层、仅 CLI+Skill（漏掉 MCP）
 
 **CLI**：
-以 `edges` 为名的命令行界面（含 `note`、`tasks` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
+以 `edges` 为名的命令行界面（含 `note`、`tasks`、约定中的 `artifacts` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
 _避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
 
 **Skill（调用说明）**：
@@ -201,8 +201,8 @@ proposeTypes 输出的一行：建议 slug、描述，以及支撑该类型的 `
 _避免使用_：已落盘的 Task Project、自动当成质心、Memory Type
 
 **Task Project 审阅页（edges）**：
-classifyTasks 与 proposeTypes 共用的人确认闸门：一份由 `edges tasks project review-page` 渲出的 HTML，只含通用 groups+items。组是已有 Task Project 还是 proposeTypes 候选由调用方 Skill 解释；审阅页本身不是 Task Project，也不是分类算法。
-_避免使用_：把它当 Task Project、当分类算法、`--mode`
+classifyTasks 与 proposeTypes 共用的人确认闸门：一份由 `edges tasks project review-page` 渲出的 HTML，只含通用 groups+items。组是已有 Task Project 还是 proposeTypes 候选由调用方 Skill 解释；审阅页本身不是 Task Project，也不是分类算法，也不负责托管。
+_避免使用_：把它当 Task Project、当分类算法、`--mode`、把它当 Artifacts 预览服务、让 review-page 负责发布
 
 **审阅导出行（edges）**：
 Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`、`action`，可选 `note`。查找键是 Task stem，不是 title 或 `name`。
@@ -229,8 +229,28 @@ Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`�
 _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
 
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；约定中的 `project review-page` 只把建议 JSON 渲成 Task Project 审阅页，不算分类、不落地。
-_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）
+以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；约定中的 `project review-page` 只把建议 JSON 渲成 Task Project 审阅页，不算分类、不落地、不托管。
+_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）、把 review-page 扩成 Artifacts 预览服务
+
+**Artifacts 预览服务**：
+个人短生命周期的静态托管：把 Agent 产出的交互 HTML 变成可在系统浏览器打开的 URL，到期删除。不是长期站点，也不是聊天里的 HTML 预览。
+_避免使用_：长期站点/博客、Astro、site-and-content、本地 HTML 视图、聊天 HTML 预览、审阅结果回传 Agent 客户端（若指同一件事）
+
+**Artifact（edges）**：
+一次短生命周期托管的静态包（通常是交互 HTML）；不是知识资产，也不是对外 Post。
+_避免使用_：Post、知识资产、长期站点页面、聊天附件预览
+
+**edges artifacts（CLI）**：
+约定中的 `edges artifacts` 命令面：薄 `init`/token 与本地配置（如 `~/.config/edges/artifacts.env`），`publish`/`rm` 读配置完成上传与删除。`edges tasks project review-page` 仍只渲染，不发布。
+_避免使用_：把 review-page 扩成托管、手搓上传绕过 CLI
+
+**聊天 HTML 预览**：
+Agent 客户端把 HTML 嵌进聊天窗口的预览（如 Grok Bot HTML preview）；手机常无法预览，桌面交互常坏，不能当交互闸门。
+_避免使用_：Artifacts 预览服务、系统浏览器打开的托管 URL
+
+**本地 HTML 视图**：
+在本机或仓内打开的视图层（数据与视图分离），不是对外可达的短生命周期托管。
+_避免使用_：Artifacts 预览服务、云临时托管
 
 **Task Run（edges）**：
 对应 Multica Run 的一次执行尝试；仓内落在 Task 同目录 sidecar `.{stem}.log.md` 中带稳定 `run-id` 的记录，由 `edges tasks runs` / `run-messages` 只读查看。

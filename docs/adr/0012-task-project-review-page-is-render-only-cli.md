@@ -1,10 +1,10 @@
 # Task Project 审阅页是只渲染的 CLI（通用 groups+items）
 
-ADR 0010 / 0011 的人确认闸门原先靠聊天里的 Markdown 建议表，以及临时 ad-hoc HTML。2026-09-17 grill 确认：交互审阅改成 **render-only** CLI `edges tasks project review-page`——Skill 仍产出建议（LLM / agent）；CLI 只把 JSON 渲成 Task Project 审阅页；人拖拽改组后 Copy JSON 贴回聊天，Skill 用现有 `project create` / `update --project` 落地。页是通用 groups+items，无 `--mode`。**Extends ADR 0010 / 0011**（人闸形态；不重开 embedding / CLI classify）；叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。本轮只定 CONTEXT / 本 ADR，不实现命令、不改写 skill 正文。
+ADR 0010 / 0011 的人确认闸门原先靠聊天里的 Markdown 建议表，以及临时 ad-hoc HTML。2026-09-17 grill 确认：交互审阅改成 **render-only** CLI `edges tasks project review-page`——Skill 仍产出建议（LLM / agent）；CLI 只把 JSON 渲成 Task Project 审阅页；人拖拽改组后 Copy JSON 贴回聊天，Skill 用现有 `project create` / `update --project` 落地。页是通用 groups+items，无 `--mode`。**Extends ADR 0010 / 0011**（人闸形态；不重开 embedding / CLI classify）；**Amended by ADR 0013**（人如何打开页：Skill 可经 Artifacts 预览服务发布后给可达 URL；`review-page` 仍只渲染、仍打印本地路径）。叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。本轮只定 CONTEXT / 本 ADR，不实现命令、不改写 skill 正文。
 
-**Status:** accepted（ADR 0012；grill 确认于 2026-09-17）
+**Status:** accepted（ADR 0012；grill 确认于 2026-09-17；2026-09-19 由 ADR 0013 修订打开方式）
 
-**See also:** ADR 0010（classifyTasks 整板归属 + 人确认闸门）；ADR 0011（proposeTypes 类型发现 + 人确认闸门）；[`knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`](../../knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md)（聊天 HTML 预览不能当拖拽闸门）
+**See also:** ADR 0010（classifyTasks 整板归属 + 人确认闸门）；ADR 0011（proposeTypes 类型发现 + 人确认闸门）；ADR 0013（[Artifacts 预览服务](0013-artifacts-preview-service.md)）；[`knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`](../../knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md)（聊天 HTML 预览不能当拖拽闸门）
 
 ## Decision
 
@@ -13,7 +13,7 @@ ADR 0010 / 0011 的人确认闸门原先靠聊天里的 Markdown 建议表，以
 - **输出：** 默认写到操作系统临时目录；可选 `--out <path>`；打印绝对路径。不自动打开浏览器。
 - **往返：** 页上 Copy JSON → 人贴回聊天 → Skill 用现有 `edges tasks project create` / `edges tasks update --project` 落地。本轮不新开 `apply-review` 动词。
 - **资源：** HTML/JS 壳作为 CLI 包内静态资源，不长期依赖 `tools/` 原型。
-- **Skill 编排（classifyTasks 第 4 步主路径）：** 写建议 JSON → 跑 `review-page` → 把 HTML 路径交给人 → **停止** → 等贴回的导出 JSON → apply。无 GUI 时 Markdown 建议表可作回退。proposeTypes 复用同一命令与同一 UI 壳。
+- **Skill 编排（classifyTasks 第 4 步主路径）：** 写建议 JSON → 跑 `review-page` → 把 HTML 路径交给人 → **停止** → 等贴回的导出 JSON → apply。无 GUI 时 Markdown 建议表可作回退。proposeTypes 复用同一命令与同一 UI 壳。打开方式见 ADR 0013：有可达托管时 Skill 在渲染后 `publish`，给人 URL；CLI 本身仍只写本地文件、不打开浏览器。
 - **审阅导出行：** `stem`、`current`、`suggested`、`action`，可选 `note`。`stem` 是文件名去 `.md` 的 CLI 查找键，不是 title，也不等于 frontmatter / 文档 `name`。
 - **无 `--mode`：** 不做 classify / propose 两种模式页。
 - **能力面：** 始终 CLI + Skill + MCP。本轮不为 review-page 新开 MCP 入口。
@@ -37,5 +37,6 @@ ADR 0010 / 0011 的人确认闸门原先靠聊天里的 Markdown 建议表，以
 - 新开 `apply-review` 动词
 - review-page MCP 入口
 - 自动打开浏览器 / 依赖 Grok Bot HTML 预览
+- 托管 / 发布（ADR 0013）
 - 本轮实现 `project review-page` 或改写 classifyTasks / proposeTypes 正文
 - 在 `tools/` 下新放 HTML
