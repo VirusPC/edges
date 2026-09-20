@@ -45,8 +45,15 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks list
 pnpm --filter edges-cli exec tsx src/index.ts tasks project review-page --from /tmp/suggestions.json
 ```
 
-   3. 解析 stdout JSON：`status` 为 `success`，`command` 为 `project.review-page`，读出绝对路径 `path`（另有 `groupCount` / `itemCount`）。告诉人用 **系统浏览器**（Chrome / Safari / Firefox）打开该文件。不要用聊天 HTML 预览当闸门——Grok Bot 预览里拖拽不可靠，见 `knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`。
-   4. **停止。** 等人在页上拖拽改组、点「复制导出 JSON」，把导出数组贴回聊天。在此之前不要 `project create` / `update --project`。
+   3. 解析 stdout JSON：`status` 为 `success`，`command` 为 `project.review-page`，读出绝对路径 `path`（另有 `groupCount` / `itemCount`）。`review-page` 仍只渲染，不要把 publish 并进这条命令。
+   4. 若人需要可达 URL（手机 / 另一台机器），再发布，不要假定 localhost：
+
+```bash
+pnpm --filter edges-cli exec tsx src/index.ts artifacts publish <绝对 HTML 路径>
+```
+
+      若这条预览的来源是看板 Task，再加上 `--from-type task --from-id <stem> --task-project <slug>`（`from.id` 是 task stem）。没有 Task 关联就不要带 `from` 相关 flag。不要用 `--from-name` / `--task-stem`，也不要写 `--from-type skill`。解析 stdout：`command` 为 `artifacts.publish`，把 `url` 给人。告诉人用 **系统浏览器**（Chrome / Safari / Firefox）打开该 URL。手机必须用 ECS / 公开的 `EDGES_ARTIFACTS_BASE_URL`，不能给 `localhost`。未 `edges artifacts init`、或服务没起来时，说明缺口，不要手搓上传。不要用聊天 HTML 预览当闸门——Grok Bot 预览里拖拽不可靠，见 `knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`。本步不实现审阅结果回传 Agent 客户端。
+   5. **停止。** 等人在页上拖拽改组、点「复制导出 JSON」，把导出数组贴回聊天。在此之前不要 `project create` / `update --project`。
 
    恢复后校验贴回的审阅导出行：每行含 `stem`、`current`、`suggested`、`action`，`note` 可缺省或为空串。`action` 为 `keep`（`suggested === current`）或 `move`。页上**没有** `create-then-move`；若 `suggested` 还不在 `project list` 里，第 5 步仍可先 `project create` 再 `update --project`。校验失败就停，不要猜。
 
@@ -88,8 +95,8 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks update <stem> --project <sug
 
 ## 能力面
 
-- **CLI：** `edges tasks project list|get|create|update|review-page` 与 `edges tasks list` / `edges tasks update --project`
+- **CLI：** `edges tasks project list|get|create|update|review-page` 与 `edges tasks list` / `edges tasks update --project`；可达 URL 用 `edges artifacts publish`（`review-page` 不发布）
 - **Skill：** 本文件（classifyTasks）
-- **MCP：** 对等入口；本轮没有 classify MCP，也没有 generic tasks MCP，也没有 review-page MCP。缺 shell 时说明 generic tasks Skill/MCP CRUD 仍在 backlog，不要假装 MCP 已能搬 Task
+- **MCP：** 对等入口；本轮没有 classify MCP，也没有 generic tasks MCP，也没有 review-page MCP，也没有 artifacts MCP。缺 shell 时说明 generic tasks Skill/MCP CRUD 仍在 backlog，不要假装 MCP 已能搬 Task
 
 Whole-board classification onto user-set centroids; wait for the human-pasted review-page export (Markdown table only if HTML cannot be opened) before apply.

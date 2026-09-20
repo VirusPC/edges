@@ -16,7 +16,8 @@
 
 **协议与能力**
 
-- **`clis/`**: 面向 agent 的 CLI 项目（`edges`：`note`、`tasks`、…）。有 shell 的本地 agent 优先走这里。
+- **`clis/`**: 面向 agent 的 CLI 项目（`edges`：`note`、`tasks`、`artifacts`、…）。有 shell 的本地 agent 优先走这里。
+- **`services/`**: 接入 Edges 的常驻 HTTP 进程（不是 MCP，也不是 Commander 命令节点）。目前是 Artifacts 预览服务 [`services/artifacts-preview/`](services/artifacts-preview/)；命令面仍是 `edges artifacts`。
 - **`mcp-servers/`**: [Model Context Protocol](https://modelcontextprotocol.io/) 服务器实现。给没有 shell 的 AI 客户端。
 - **`skills/`**: 供外部 Agent 加载的技能定义（Prompt 模板、思维链规范）。项目级用 `pnpm skills:link` 把每个 skill 软链到 `.agents/skills`；本机全局跑 `pnpm skills:install` 写入 `~/.agents/skills`（并为 Claude Code 建软链）；外部用户用 `npx skills@latest add VirusPC/edges/extensions/skills`。
 - **`subagents/`**: 针对特定复杂任务预配置的子代理。

@@ -137,7 +137,7 @@ Agent 与人发现并调用 Edges 扩展能力的入口集合；本仓定为 CLI
 _避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成单独一层、仅 CLI+Skill（漏掉 MCP）
 
 **CLI**：
-以 `edges` 为名的命令行界面（含 `note`、`tasks`、约定中的 `artifacts` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
+以 `edges` 为名的命令行界面（含 `note`、`tasks`、`artifacts` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
 _避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
 
 **Skill（调用说明）**：
@@ -249,7 +249,7 @@ _避免使用_：长期站点/博客、Astro、site-and-content、本地 HTML �
 _避免使用_：Post、知识资产、长期站点页面、聊天附件预览
 
 **edges artifacts（CLI）**：
-约定中的 `edges artifacts` 命令面：薄 `init`/token 与 `publish`/`rm`。`edges tasks project review-page` 仍只渲染，不发布。
+`edges artifacts` 命令面：薄 `init`/token 与 `publish`/`rm`。`edges tasks project review-page` 仍只渲染，不发布。
 _避免使用_：把 review-page 扩成托管、手搓上传绕过 CLI
 
 **聊天 HTML 预览**：
