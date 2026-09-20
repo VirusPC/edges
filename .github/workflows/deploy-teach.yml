@@ -1,5 +1,9 @@
 # SSH into Aliyun ECS and reset the full-repo checkout to origin/main.
 # ECS can reach GitHub over HTTPS; do not rsync-push a path subset.
+# After pull: rebuild/restart artifacts preview if the server env file exists.
+# Fallback if git fetch from ECS is flaky: from a machine that can reach both
+# GitHub and the box, tar the full repo over SSH, then run
+# extensions/services/artifacts-preview/deploy/bootstrap.sh on the box.
 name: Deploy teach site
 
 on:
@@ -51,4 +55,11 @@ jobs:
              git checkout main
              git reset --hard origin/main
              git --no-pager status -sb
-             git rev-parse HEAD'
+             git rev-parse HEAD
+             env_file="$HOME/.config/edges/artifacts-preview.env"
+             if [ -f "$env_file" ]; then
+               export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+               bash extensions/services/artifacts-preview/deploy/bootstrap.sh
+             else
+               echo "skip artifacts bootstrap: $env_file not found (one-time: artifacts-preview README)"
+             fi'
