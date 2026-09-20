@@ -69,6 +69,9 @@
 - **若**主机对话名与远程组网节点名不一致：  
   **则**统一成同一短名（本次为 minigtr），避免多套旧名并存难检索。
 
+- **若**在 Ubuntu 应用菜单找不到 Tailscale：  
+  **则**先用终端 `tailscale status` 确认是否已在线；Linux 侧通常无桌面图标，属正常。
+
 【补充说明】
 
 **硬件与分区结果（脱敏摘要）**
@@ -102,6 +105,12 @@
 - 把固件默认启动改为 ubuntu/GRUB，减少每次 F11。  
 - 在 Linux 侧重装或登录远程组网客户端，主机名保持 minigtr。  
 - 服务器向的 ssh、防火墙、自动更新等加固（本次未展开）。
+
+**Tailscale 在 Linux 上的形态**
+
+- Ubuntu / 一般 Linux：官方主要是 `tailscaled` 后台服务 + `tailscale` 命令行（如 `tailscale status`），**应用菜单里通常没有** Windows/macOS 那种可点的 Tailscale 客户端图标。
+- 装好并 `tailscale up` 后，即使「看不到应用」，节点也可以已在线；管理机器列表用浏览器打开 Tailscale Admin。
+- 同一台机器从 Windows 换成 Ubuntu 双系统里的 Linux 侧时，往往会变成**两条节点**（例如 Linux 叫 `minigtr`，旧 Windows 叫 `minigtr-win` 且离线），属正常，可在管理台关掉或重命名旧节点。
 
 **参考链接**
 
