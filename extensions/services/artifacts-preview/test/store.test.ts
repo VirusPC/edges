@@ -195,3 +195,67 @@ test("put rejects missing or empty from", async () => {
     /from\.name/,
   );
 });
+
+test("put writes optional task into meta.json", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store, dataDir } = await tempStore(nowMs);
+  const task = {
+    project: "agent-clients-ux",
+    stem: "2026-09-18--自建云服务器临时托管artifacts",
+  };
+  const put = await store.put({
+    ttlSeconds: 60,
+    from: { kind: "cli", name: "edges-cli" },
+    task,
+    files: [{ path: "index.html", content: "ok" }],
+  });
+  assert.deepEqual(put.task, task);
+  const meta = await store.getMeta(FIXED_ID);
+  assert.deepEqual(meta?.task, task);
+  const raw = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
+    task?: { project: string; stem: string };
+  };
+  assert.deepEqual(raw.task, task);
+});
+
+test("put omits task from meta.json when not provided", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store, dataDir } = await tempStore(nowMs);
+  const put = await store.put({
+    ttlSeconds: 60,
+    from: { kind: "cli", name: "edges-cli" },
+    files: [{ path: "index.html", content: "ok" }],
+  });
+  assert.equal(put.task, undefined);
+  const raw = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
+    task?: unknown;
+  };
+  assert.equal("task" in raw, false);
+});
+
+test("put rejects partial or invalid task", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { store } = await tempStore(nowMs);
+  const files = [{ path: "index.html", content: "ok" }];
+  const from = { kind: "cli", name: "edges-cli" };
+  await assert.rejects(
+    () => store.put({ ttlSeconds: 60, from, files, task: { project: "agent-clients-ux" } as never }),
+    /task\.stem/,
+  );
+  await assert.rejects(
+    () => store.put({ ttlSeconds: 60, from, files, task: { stem: "2026-09-18--x" } as never }),
+    /task\.project/,
+  );
+  await assert.rejects(
+    () => store.put({ ttlSeconds: 60, from, files, task: { project: "../etc", stem: "ok" } }),
+    /task\.project/,
+  );
+  await assert.rejects(
+    () => store.put({ ttlSeconds: 60, from, files, task: { project: "_default", stem: "a/b" } }),
+    /task\.stem/,
+  );
+  await assert.rejects(
+    () => store.put({ ttlSeconds: 60, from, files, task: { project: "_default", stem: ".." } }),
+    /task\.stem/,
+  );
+});

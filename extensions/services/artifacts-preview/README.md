@@ -48,7 +48,7 @@ EDGES_ARTIFACTS_DATA_DIR=/var/tmp/edges-artifacts
 | `GET` | `/artifacts/:id/` and `/artifacts/:id/:relpath` | no (UUID path + TTL) |
 | `DELETE` | `/artifacts/:id` | Bearer token |
 
-Default TTL is 24h (`ttlSeconds` on POST, or `edges artifacts publish --ttl 2h`). New publishes require `from: { kind, name }` (non-empty strings; suggested kinds `skill` | `cli` | `agent`); the server persists it in `meta.json` and echoes it on 201. CLI defaults `--from-kind cli --from-name edges-cli`. Server sweeps expired artifacts about every 60s and also on GET. Writes stay under a disk temp dir (`0700` / files `0600`); relative paths cannot traverse or follow symlinks out (every path component is `lstat`’d). On ECS set `EDGES_ARTIFACTS_DATA_DIR` off a shared `/tmp`.
+Default TTL is 24h (`ttlSeconds` on POST, or `edges artifacts publish --ttl 2h`). New publishes require `from: { kind, name }` (non-empty strings; suggested kinds `skill` | `cli` | `agent`); optional `task: { project, stem }` points at a Task when known. Both are persisted in `meta.json` (`task` omitted when absent) and echoed on 201. CLI defaults `--from-kind cli --from-name edges-cli`; pass `--task-project` / `--task-stem` together. Server sweeps expired artifacts about every 60s and also on GET. Writes stay under a disk temp dir (`0700` / files `0600`); relative paths cannot traverse or follow symlinks out (every path component is `lstat`’d). On ECS set `EDGES_ARTIFACTS_DATA_DIR` off a shared `/tmp`.
 
 ## Tests
 

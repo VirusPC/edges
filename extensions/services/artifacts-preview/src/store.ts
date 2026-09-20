@@ -3,6 +3,7 @@ import { constants } from "node:fs";
 import { chmod, lstat, mkdir, open, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { parseArtifactFrom } from "./from.js";
+import { parseArtifactTask } from "./task.js";
 import { assertSafeRelPath, isArtifactId, safeResolve } from "./paths.js";
 import type { ArtifactFileInput, ArtifactMeta, ArtifactStore } from "./types.js";
 
@@ -154,6 +155,12 @@ export function createArtifactStore(options: {
       }
       try {
         parsed.from = parseArtifactFrom(parsed.from);
+        const task = parseArtifactTask(parsed.task);
+        if (task) {
+          parsed.task = task;
+        } else {
+          delete parsed.task;
+        }
       } catch {
         return null;
       }
@@ -195,6 +202,7 @@ export function createArtifactStore(options: {
         throw new Error("files must be a non-empty array");
       }
       const from = parseArtifactFrom(input.from);
+      const task = parseArtifactTask(input.task);
 
       const safeFiles = input.files.map((file) => {
         const rel = assertSafeRelPath(file.path);
@@ -222,8 +230,11 @@ export function createArtifactStore(options: {
       }
 
       const meta: ArtifactMeta = { id, entry, expiresAt, from };
+      if (task) {
+        meta.task = task;
+      }
       await writePrivateFile(metaPath(id), `${JSON.stringify(meta)}\n`);
-      return { id, expiresAt, entry, from };
+      return task ? { id, expiresAt, entry, from, task } : { id, expiresAt, entry, from };
     },
 
     async getMeta(id) {

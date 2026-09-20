@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Artifacts 预览
 
-- 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。起服务用 `pnpm --filter edges-artifacts-preview start`（开发用 `pnpm --filter edges-artifacts-preview dev` 或根上的 `pnpm start:artifacts` / `pnpm dev:artifacts`）；本机先 `edges artifacts init` 写下 token 和 `EDGES_ARTIFACTS_BASE_URL`，再 `edges artifacts publish <path>` 打印公开 URL（默认记下 `from` 为 `cli`/`edges-cli`，也可用 `--from-kind` / `--from-name`），`edges artifacts rm <id|url>` 提前删。写接口要共享 token；浏览器打开 URL 不登录。手机审阅必须用 ECS / 可达地址，不能假定 localhost。`edges tasks project review-page` 仍只渲染，不发布。本轮没有 artifacts MCP。
+- 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。起服务用 `pnpm --filter edges-artifacts-preview start`（开发用 `pnpm --filter edges-artifacts-preview dev` 或根上的 `pnpm start:artifacts` / `pnpm dev:artifacts`）；本机先 `edges artifacts init` 写下 token 和 `EDGES_ARTIFACTS_BASE_URL`，再 `edges artifacts publish <path>` 打印公开 URL（默认记下 `from` 为 `cli`/`edges-cli`，也可用 `--from-kind` / `--from-name`；可选 `--task-project` / `--task-stem` 指向看板 Task），`edges artifacts rm <id|url>` 提前删。写接口要共享 token；浏览器打开 URL 不登录。手机审阅必须用 ECS / 可达地址，不能假定 localhost。`edges tasks project review-page` 仍只渲染，不发布。本轮没有 artifacts MCP。
 
 ### 笔记入库与能力面
 

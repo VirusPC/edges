@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import type { CliContext } from "../context.js";
 import { parseArtifactFrom } from "./utils/from.js";
+import { parseArtifactTaskFlags } from "./utils/task.js";
 import { publishArtifact } from "./utils/client.js";
 import { collectPublishFiles } from "./utils/collect.js";
 import { loadArtifactsConfig } from "./utils/config.js";
@@ -13,6 +14,8 @@ FLAGS
   --entry <relpath>   Entry file inside a directory publish
   --from-kind <kind>  Who published (skill | cli | agent | other). Default cli
   --from-name <name>  Publisher name (skill id, cli package, agent). Default edges-cli
+  --task-project <slug>  Optional Task Project slug (requires --task-stem)
+  --task-stem <stem>     Optional Task stem (requires --task-project)
   --config <path>     Config file (default: ~/.config/edges/artifacts.env)
 
 Reads EDGES_ARTIFACTS_TOKEN and EDGES_ARTIFACTS_BASE_URL from config or env.
@@ -22,6 +25,7 @@ EXAMPLES
   edges artifacts publish /tmp/review.html
   edges artifacts publish ./site --ttl 2h --entry index.html
   edges artifacts publish /tmp/review.html --from-kind skill --from-name project-tasks-classify
+  edges artifacts publish /tmp/review.html --task-project _default --task-stem 2026-09-18--example
 `;
 
 export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext): void {
@@ -33,9 +37,19 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
     .option("--entry <relpath>", "Entry file for directory publishes")
     .option("--from-kind <kind>", "Publisher kind (skill | cli | agent | other)", "cli")
     .option("--from-name <name>", "Publisher name", "edges-cli")
+    .option("--task-project <slug>", "Optional Task Project slug")
+    .option("--task-stem <stem>", "Optional Task stem")
     .option("--config <path>", "Config file path")
     .addHelpText("after", PUBLISH_AFTER_HELP)
-    .action(async (inputPath: string, opts: { ttl: string; entry?: string; fromKind: string; fromName: string; config?: string }) => {
+    .action(async (inputPath: string, opts: {
+      ttl: string;
+      entry?: string;
+      fromKind: string;
+      fromName: string;
+      taskProject?: string;
+      taskStem?: string;
+      config?: string;
+    }) => {
       await runArtifactsCommand(ctx, async () => {
         const config = await loadArtifactsConfig(ctx.env, opts.config);
         if (!config.token) {
@@ -69,8 +83,10 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
           );
         }
         let from;
+        let task;
         try {
           from = parseArtifactFrom({ kind: opts.fromKind, name: opts.fromName });
+          task = parseArtifactTaskFlags(opts.taskProject, opts.taskStem);
         } catch (error) {
           throw new ArtifactsError(
             "VALIDATION_ERROR",
@@ -84,6 +100,7 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
           ttlSeconds,
           entry: opts.entry,
           from,
+          task,
           fetch: globalThis.fetch,
         });
         return succeed({
@@ -92,6 +109,7 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
           url: published.url,
           expiresAt: published.expiresAt,
           from: published.from ?? from,
+          ...(published.task ?? task ? { task: published.task ?? task } : {}),
         });
       });
     });
