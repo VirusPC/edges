@@ -4,7 +4,7 @@
 
 **Status:** accepted（ADR 0015；grill 确认于 2026-09-20）
 
-**See also:** ADR 0014（[v1 宿主 minigtr](0014-self-hosted-langfuse-on-minigtr.md)）；ADR 0016（[官方 docker compose](0016-langfuse-docker-compose.md)）；[`knowledge/tasks/observation/in_progress/2026-09-20--自部署-Langfuse.md`](../../knowledge/tasks/observation/in_progress/2026-09-20--自部署-Langfuse.md)（基础设施卡；正文仍可能写「自有云」，v1 宿主以 ADR 0014 为准，勿在本轮改卡）；[`knowledge/tasks/observation/backlog/2026-09-13--知识库Observation系统.md`](../../knowledge/tasks/observation/backlog/2026-09-13--知识库Observation系统.md)（产品卡，勿改其正文来写部署）
+**See also:** ADR 0014（[v1 宿主 minigtr](0014-self-hosted-langfuse-on-minigtr.md)）；ADR 0016（[官方 docker compose](0016-langfuse-docker-compose.md)）；ADR 0017（[v1 仅 Tailscale](0017-langfuse-tailscale-only-access.md)）；ADR 0018（[密钥留 minigtr](0018-langfuse-secrets-stay-on-minigtr.md)）；ADR 0019（[备份](0019-langfuse-named-volumes-manual-backup.md)）；[`knowledge/tasks/observation/in_progress/2026-09-20--自部署-Langfuse.md`](../../knowledge/tasks/observation/in_progress/2026-09-20--自部署-Langfuse.md)（基础设施卡；正文仍可能写「自有云」，v1 宿主以 ADR 0014 为准，勿在本轮改卡）；[`knowledge/tasks/observation/backlog/2026-09-13--知识库Observation系统.md`](../../knowledge/tasks/observation/backlog/2026-09-13--知识库Observation系统.md)（产品卡，勿改其正文来写部署）
 
 ## Decision
 

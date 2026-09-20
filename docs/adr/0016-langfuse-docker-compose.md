@@ -4,7 +4,7 @@
 
 **Status:** accepted（ADR 0016；grill 确认于 2026-09-20）
 
-**See also:** ADR 0014（[v1 宿主 minigtr](0014-self-hosted-langfuse-on-minigtr.md)）；ADR 0015（[与 Observation 产品卡的边界](0015-langfuse-infra-vs-observation-product.md)）
+**See also:** ADR 0014（[v1 宿主 minigtr](0014-self-hosted-langfuse-on-minigtr.md)）；ADR 0015（[与 Observation 产品卡的边界](0015-langfuse-infra-vs-observation-product.md)）；ADR 0018（[密钥不进仓](0018-langfuse-secrets-stay-on-minigtr.md)）；ADR 0019（[named volume + 偶发 tar，无 HA](0019-langfuse-named-volumes-manual-backup.md)）
 
 ## Decision
 
