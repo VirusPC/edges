@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Artifacts 预览
 
 - 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。起服务用 `pnpm --filter edges-artifacts-preview start`（开发用 `pnpm --filter edges-artifacts-preview dev` 或根上的 `pnpm start:artifacts` / `pnpm dev:artifacts`）；本机先 `edges artifacts init` 写下 token 和 `EDGES_ARTIFACTS_BASE_URL`，再 `edges artifacts publish <path>` 打印公开 URL。有看板 Task 关联时再加 `--from-type task --from-id <stem> --task-project <slug>`（`from.id` 是 task stem）；没有关联就整段省略 `from`。`edges artifacts rm <id|url>` 提前删。写接口要共享 token；浏览器打开 URL 不登录。手机审阅必须用 ECS / 可达地址，不能假定 localhost。`edges tasks project review-page` 仍只渲染，不发布。本轮没有 artifacts MCP。
-- 现有阿里云 ECS（与 teach 同机）可以用 nginx 把 `/health`、`POST /artifacts` 和 `/artifacts/…` 反代到本机 8787，对外 BASE_URL 是 `http://182.92.131.89`（不另开公网端口，也不动 `/teaching/`）。一次性：人跑 `setup-nginx-artifacts.sh`、把 token 放进盒上 `artifacts-preview.env`；之后本机 `edges artifacts init --base-url http://182.92.131.89` 再 `edges artifacts publish`。合并到 main 后，若盒上已有这份 env，`deploy-teach.yml` 会在整仓 pull 之后跑 `deploy/bootstrap.sh` 重启该服务。
+- 现有阿里云 ECS（与 teach 同机）上，用 `edges artifacts server init` 只写盒上 env，`edges artifacts server install` 装依赖和 user unit（不启动），再用 `start` / `stop` / `restart` / `status` 管进程。对外 BASE_URL 是 `http://182.92.131.89`：nginx 把 `/health`、`POST /artifacts` 和 `/artifacts/…` 反代到本机 8787（不另开公网端口，也不动 `/teaching/`）。nginx 不是 CLI 动词——要暴露在 :80 时，人另跑一次 `deploy/setup-nginx-artifacts.sh`。之后本机 `edges artifacts init --base-url http://182.92.131.89` 再 `edges artifacts publish`。合并到 main 后，若盒上已有这份 env，`deploy-teach.yml` 会在整仓 pull 之后先 `install` 再 `restart`。
 
 ### 笔记入库与能力面
 

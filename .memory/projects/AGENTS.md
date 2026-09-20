@@ -8,7 +8,7 @@
 <!-- project-memory-entries:start -->
 - [放弃的 ChatGPT MCP 接入](project_abandoned_chatgpt_mcp.md) — 2026-02-19 建过两条空的 ChatGPT MCP change，没有设计可恢复；若再做从当前 MCP 布局重开。
 - [理想链路：AGENTS.md → Skill → CLI](project_agents_md_to_skill_to_cli.md) — peng cheng 理想发现链路——读目录 AGENTS.md，被指引到可加载 Skill，再由统一 Skill 调用 edges CLI；记忆 skills 类型不是自动加载层。
-- [Artifacts 预览 ECS：user unit + nginx :80](project_artifacts_preview_ecs_ops.md) — 改 artifacts 在阿里云 ECS 上怎么跑、或要不要给 8787 开安全组时打开：和 teach 同机；user systemd + linger；nginx 反代 /health 与 /artifacts/；不要公网 8787。人 sudo 一次装 nginx，token 只放盒上。
+- [Artifacts 预览 ECS：user unit + nginx :80](project_artifacts_preview_ecs_ops.md) — 改 artifacts 在阿里云 ECS 上怎么跑、或要不要给 8787 开安全组时打开：和 teach 同机；人机接口是 edges artifacts server（init / install 不启动 / start|stop|restart / status）；user systemd + linger；nginx 反代是一次性 sudo 脚本不是 CLI 动词；不要公网 8787。token 只放盒上。
 - [个人 Artifacts 预览服务：上传→URL→TTL](project_artifacts_preview_service.md) — 改 Artifacts 预览服务、edges artifacts、或审阅页如何给人打开时打开：稳定短生命周期托管 + 真浏览器可开 URL；聊天内嵌预览是绕开的不可靠路径；review-page 仍只渲染；结果回传另卡。ECS 手机 URL 走与 teach 同机的 :80 反代，不要假定 localhost。决策见 docs/adr/0013-artifacts-preview-service.md。
 - [能力面：CLI / Skill / MCP](project_capability_surface_cli_skill_mcp.md) — 能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 extensions/clis 的 TS；MCP 子进程调 edges note。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。
 - [Changelog 自动化：调研过，暂不生成正文](project_changelog_automation.md) — 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。

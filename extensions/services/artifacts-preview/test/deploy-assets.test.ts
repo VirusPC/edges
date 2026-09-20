@@ -15,8 +15,8 @@ async function readDeploy(name: string): Promise<string> {
   return readFile(path.join(deployDir, name), "utf8");
 }
 
-test("deploy nginx snippet proxies /health, POST /artifacts, and /artifacts/ without stealing /teaching/", async () => {
-  const conf = await readDeploy("nginx-artifacts-proxy.conf");
+test("deploy nginx include proxies /health, POST /artifacts, and /artifacts/ without stealing /teaching/", async () => {
+  const conf = await readDeploy("nginx-artifacts.conf");
   assert.match(conf, /location\s+=\s+\/health\s*\{/);
   assert.match(conf, /location\s+=\s+\/artifacts\s*\{/);
   assert.match(conf, /location\s+\/artifacts\/\s*\{/);
@@ -53,18 +53,19 @@ test("bootstrap and nginx setup scripts are executable and restart without inven
 
   const boot = await readFile(bootstrap, "utf8");
   assert.match(boot, /set -euo pipefail/);
-  assert.match(boot, /pnpm/);
-  assert.match(boot, /edges-artifacts-preview/);
-  assert.match(boot, /systemctl --user/);
+  assert.match(boot, /artifacts server install/);
+  assert.match(boot, /artifacts server restart/);
+  assert.doesNotMatch(boot, /systemctl --user restart/);
+  assert.doesNotMatch(boot, /nginx-snippet|nginx-setup|configure-proxy/);
   assert.match(boot, /XDG_RUNTIME_DIR/);
-  assert.match(boot, /127\.0\.0\.1:8787\/health/);
 
   const nginxSetup = await readFile(setup, "utf8");
   assert.match(nginxSetup, /\/etc\/nginx\/conf\.d\/teach\.conf/);
   assert.match(nginxSetup, /enable-linger/);
   assert.match(nginxSetup, /\/teaching\//);
-  assert.match(nginxSetup, /edges-artifacts-proxy\.conf/);
+  assert.match(nginxSetup, /nginx-artifacts\.conf/);
   assert.match(nginxSetup, /inject_nginx_include\.py/);
+  assert.doesNotMatch(nginxSetup, /nginx-snippet|configure-proxy/);
 });
 
 test("nginx include injector only patches server blocks that already serve /teaching/", async () => {
@@ -85,14 +86,14 @@ test("nginx include injector only patches server blocks that already serve /teac
     ].join("\n"),
   );
   const script = path.join(deployDir, "inject_nginx_include.py");
-  const includeLine = "include /etc/nginx/snippets/edges-artifacts-proxy.conf;";
+  const includeLine = "include /etc/nginx/snippets/edges-artifacts.conf;";
   const first = spawnSync("python3", [script, confPath, includeLine], { encoding: "utf8" });
   assert.equal(first.status, 0, first.stderr);
   const once = await readFile(confPath, "utf8");
   assert.equal(once.split(includeLine).length - 1, 1);
   assert.match(once, /location \/teaching\//);
   assert.match(once, /listen 8080;/);
-  assert.doesNotMatch(once, /listen 8080;[\s\S]*edges-artifacts-proxy/);
+  assert.doesNotMatch(once, /listen 8080;[\s\S]*edges-artifacts\.conf/);
 
   const second = spawnSync("python3", [script, confPath, includeLine], { encoding: "utf8" });
   assert.equal(second.status, 0, second.stderr);
@@ -101,11 +102,13 @@ test("nginx include injector only patches server blocks that already serve /teac
   await rm(dir, { recursive: true, force: true });
 });
 
-test("deploy-teach.yml still full-repo pulls then bootstraps artifacts when env exists", async () => {
+test("deploy-teach.yml still full-repo pulls then CLI-installs and restarts artifacts when env exists", async () => {
   const workflow = await readFile(path.join(repoRoot, ".github/workflows/deploy-teach.yml"), "utf8");
   assert.match(workflow, /git reset --hard origin\/main/);
   assert.match(workflow, /artifacts-preview\.env/);
-  assert.match(workflow, /deploy\/bootstrap\.sh/);
+  assert.match(workflow, /artifacts server install/);
+  assert.match(workflow, /artifacts server restart/);
+  assert.doesNotMatch(workflow, /nginx-snippet|nginx-setup|configure-proxy/);
   assert.match(workflow, /environment:\s*\n\s*name:\s*production/s);
   assert.match(workflow, /url:\s*http:\/\/182\.92\.131\.89\/teaching\//);
   assert.match(workflow, /concurrency:\s*\n\s*group:\s*ecs-edges-pull/s);

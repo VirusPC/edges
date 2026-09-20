@@ -11,8 +11,12 @@ import re
 import sys
 
 
+def already_included(text):
+    return "edges-artifacts.conf" in text or "edges-artifacts-proxy.conf" in text
+
+
 def inject_into_teaching_servers(text, include_line):
-    if "edges-artifacts-proxy.conf" in text:
+    if already_included(text):
         return text, False
 
     pattern = re.compile(r"^([ \t]*)server[ \t]*\{", re.M)
@@ -60,8 +64,8 @@ def main(argv):
     path = pathlib.Path(argv[1])
     include_line = argv[2]
     text = path.read_text()
-    if "edges-artifacts-proxy.conf" in text:
-        print("%s already includes edges-artifacts-proxy.conf" % path)
+    if already_included(text):
+        print("%s already includes edges-artifacts.conf" % path)
         return 0
     updated, changed = inject_into_teaching_servers(text, include_line)
     if not changed:

@@ -3,12 +3,16 @@ import { type CliContext, usageError } from "./context.js";
 import { addArtifactsInitCommand } from "./artifacts/init.js";
 import { addArtifactsPublishCommand } from "./artifacts/publish.js";
 import { addArtifactsRmCommand } from "./artifacts/rm.js";
+import { addArtifactsServerCommand } from "./artifacts/server.js";
 
 const ARTIFACTS_AFTER_HELP = `
 COMMANDS
   init [--base-url <url>] [--config <path>] [--force]
   publish <path> [--ttl <duration>] [--entry <relpath>] [--config <path>]
   rm <id|url> [--config <path>]
+  server init | install | start | stop | restart | status
+    Host process on this machine. install does not start.
+    nginx :80 is a one-time sudo script in deploy/, not a CLI verb.
 
 Local config default: ~/.config/edges/artifacts.env
 Write (publish / rm) needs the shared token. Browser GET of artifact URLs does not.
@@ -21,6 +25,9 @@ EXAMPLES
   edges artifacts init
   edges artifacts publish /tmp/review.html
   edges artifacts rm <id-or-url>
+  edges artifacts server init --base-url http://182.92.131.89
+  edges artifacts server install
+  edges artifacts server start
 `;
 
 export function addArtifactsCommand(program: Command, ctx: CliContext): void {
@@ -34,6 +41,7 @@ export function addArtifactsCommand(program: Command, ctx: CliContext): void {
   addArtifactsInitCommand(artifacts, ctx);
   addArtifactsPublishCommand(artifacts, ctx);
   addArtifactsRmCommand(artifacts, ctx);
+  addArtifactsServerCommand(artifacts, ctx);
   artifacts.action(() => {
     ctx.result = usageError("missing artifacts subcommand. Use edges artifacts --help.", "artifacts");
   });

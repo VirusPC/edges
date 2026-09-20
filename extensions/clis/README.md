@@ -93,9 +93,12 @@ Thin client for the Artifacts 预览服务 (`extensions/services/artifacts-previ
 edges artifacts init [--base-url <url>] [--config <path>] [--force]
 edges artifacts publish <path> [--ttl <duration>] [--entry <relpath>] [--from-type <type>] [--from-id <id>] [--task-project <slug>] [--config <path>]
 edges artifacts rm <id|url> [--config <path>]
+edges artifacts server init | install | start | stop | restart | status
 ```
 
 `init` writes `~/.config/edges/artifacts.env` (`EDGES_ARTIFACTS_TOKEN`, `EDGES_ARTIFACTS_BASE_URL`) and prints the env the **server** process needs. `publish` / `rm` read that file (env overrides). Success stdout is JSON (`command`: `artifacts.init` | `artifacts.publish` | `artifacts.rm`). `publish` prints the public `url`. Optional `from` is only written when `--from-type task --from-id <stem> --task-project <slug>` are all set (`id` is the task stem). Omit those flags when there is no task linkage. Do not use `--from-name` or `--task-stem`.
+
+On the host, `edges artifacts server init` writes `~/.config/edges/artifacts-preview.env` only. `install` builds the service and enables the user unit but does **not** start it. `start` / `stop` / `restart` are process lifecycle only; `status` is `/health` plus the unit. After a repo pull: `install` then `restart`. nginx on :80 is a one-time sudo script in `extensions/services/artifacts-preview/deploy/setup-nginx-artifacts.sh`, not a CLI verb.
 
 Phone review needs a reachable `EDGES_ARTIFACTS_BASE_URL` (ECS / public host). Localhost is only for the same machine. This round has no artifacts MCP.
 

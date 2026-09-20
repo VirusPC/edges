@@ -30,35 +30,36 @@ Same Node process as local. Phone review uses the **public IP http** origin (the
 
 `edges artifacts publish` only uploads to whatever `EDGES_ARTIFACTS_BASE_URL` points at. It does not deploy the service.
 
-One-time assets live in [`deploy/`](deploy/). Token stays on the server (and in your local CLI config). Never commit `EDGES_ARTIFACTS_TOKEN`.
+The host process CLI is `edges artifacts server` (`init`, `install`, `start` / `stop` / `restart`, `status`). `install` does not start. nginx reverse-proxy is host ops, not a CLI verb — static files live in [`deploy/`](deploy/) (`nginx-artifacts.conf` plus the one-shot sudo script). Token stays on the server (and in your local CLI config). Never commit `EDGES_ARTIFACTS_TOKEN`.
 
-### One-time on the ECS (human, sudo once)
+### One-time on the ECS
 
 1. **Node ≥ 20 + pnpm** on `cheng-dev` PATH (user systemd cannot sudo-install them). `corepack enable` then `corepack prepare pnpm@latest --activate` is enough if Node is already there.
-2. **Token env** (no sudo):
+2. **Server env** (no sudo; writes token + listen/public URL only):
 
    ```bash
-   mkdir -p ~/.config/edges ~/.local/share/edges-artifacts
-   chmod 700 ~/.local/share/edges-artifacts
-   cp ~/projects/edges/extensions/services/artifacts-preview/deploy/artifacts.env.example \
-     ~/.config/edges/artifacts-preview.env
-   chmod 0600 ~/.config/edges/artifacts-preview.env
-   # paste the shared token (see laptop init below) — do not leave replace-with-shared-token
+   edges artifacts server init --base-url http://182.92.131.89
+   # or copy deploy/artifacts.env.example → ~/.config/edges/artifacts-preview.env
+   # and paste the shared token — do not leave replace-with-shared-token
    ```
 
-3. **nginx proxy + linger** (sudo; assistants cannot inject the password — same as `~/setup-teach-nginx80.sh`):
+3. **Install then start the user unit** (no sudo; two commands, never combined):
+
+   ```bash
+   edges artifacts server install
+   edges artifacts server start
+   edges artifacts server status
+   ```
+
+   `deploy/bootstrap.sh` is a thin wrapper of `install` then `restart` (used by humans after a manual pull). Do not open a public 8787 security-group port.
+
+4. **Expose on :80** (sudo once, separately; assistants cannot inject the password — same as `~/setup-teach-nginx80.sh`):
 
    ```bash
    sudo bash ~/projects/edges/extensions/services/artifacts-preview/deploy/setup-nginx-artifacts.sh
    ```
 
-   That installs `deploy/nginx-artifacts-proxy.conf` into `/etc/nginx/snippets/` and `include`s it inside `/etc/nginx/conf.d/teach.conf` (the server that already serves `/teaching/`). It also `loginctl enable-linger` so the user unit survives deploy SSH logout. Do not open a public 8787 security-group port.
-
-4. **First start** (no sudo):
-
-   ```bash
-   bash ~/projects/edges/extensions/services/artifacts-preview/deploy/bootstrap.sh
-   ```
+   That installs `deploy/nginx-artifacts.conf` into `/etc/nginx/snippets/` and `include`s it inside `/etc/nginx/conf.d/teach.conf` (the server that already serves `/teaching/`). It also `loginctl enable-linger` so the user unit survives deploy SSH logout.
 
 ### Confirm
 
@@ -87,7 +88,7 @@ curl -fsS -X POST http://182.92.131.89/artifacts \
   -d '{"files":[{"path":"index.html","content":"<html>ok</html>"}]}'
 ```
 
-`edges artifacts publish` is the same `POST /artifacts` (no trailing slash). If that 301s to `/artifacts/`, the nginx snippet is wrong.
+`edges artifacts publish` is the same `POST /artifacts` (no trailing slash). If that 301s to `/artifacts/`, `deploy/nginx-artifacts.conf` is wrong.
 
 ### Laptop / local CLI (publish client)
 
@@ -106,9 +107,9 @@ edges artifacts publish /tmp/review.html
 
 ### After each main pull
 
-GitHub Actions [`.github/workflows/deploy-teach.yml`](../../../.github/workflows/deploy-teach.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). It runs `deploy/bootstrap.sh` **only when** `~/.config/edges/artifacts-preview.env` exists (skipped until the one-time token file is in place, so teach deploys stay green). After the env exists, a bootstrap failure fails the job so the restart is visible; the tree is already at `origin/main`.
+GitHub Actions [`.github/workflows/deploy-teach.yml`](../../../.github/workflows/deploy-teach.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). **Only when** `~/.config/edges/artifacts-preview.env` exists, it runs `edges artifacts server install` then `edges artifacts server restart` (skipped until the one-time token file is in place, so teach deploys stay green). After the env exists, a failure fails the job so the restart is visible; the tree is already at `origin/main`.
 
-If `git fetch` from the ECS is flaky: keep the Action as primary (it already works for teach). Fallback is a full-repo tar over SSH from a machine that can reach both GitHub and the box, then `bootstrap.sh` on the box — do not rsync a path subset.
+If `git fetch` from the ECS is flaky: keep the Action as primary (it already works for teach). Fallback is a full-repo tar over SSH from a machine that can reach both GitHub and the box, then the same two CLI commands (or `deploy/bootstrap.sh`) — do not rsync a path subset.
 
 Server env (see [`deploy/artifacts.env.example`](deploy/artifacts.env.example)):
 
