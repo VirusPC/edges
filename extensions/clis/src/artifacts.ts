@@ -10,9 +10,9 @@ COMMANDS
   init [--base-url <url>] [--config <path>] [--force]
   publish <path> [--ttl <duration>] [--entry <relpath>] [--config <path>]
   rm <id|url> [--config <path>]
-  server init | install | start | stop | restart | status
+  server install | start | stop | restart | status | setup-nginx
     Host process on this machine. install does not start.
-    nginx :80 is a one-time sudo script in deploy/, not a CLI verb.
+    setup-nginx is the one-shot :80 reverse proxy.
 
 Local config default: ~/.config/edges/artifacts.env
 Write (publish / rm) needs the shared token. Browser GET of artifact URLs does not.
@@ -22,12 +22,13 @@ edges tasks project review-page still only renders; publish separately.
 Capability Surface is CLI + Skill + MCP. This round has no artifacts MCP.
 
 EXAMPLES
-  edges artifacts init
+  edges artifacts init --base-url http://182.92.131.89
   edges artifacts publish /tmp/review.html
   edges artifacts rm <id-or-url>
-  edges artifacts server init --base-url http://182.92.131.89
   edges artifacts server install
   edges artifacts server start
+  edges artifacts server setup-nginx
+  edges artifacts server status
 `;
 
 export function addArtifactsCommand(program: Command, ctx: CliContext): void {

@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -90,10 +91,58 @@ export async function writeServerEnv(values: ServerEnv): Promise<void> {
   await chmod(values.configPath, 0o600);
 }
 
+export type EnsureServerEnvOptions = {
+  env: NodeJS.ProcessEnv;
+  configPath?: string;
+  force?: boolean;
+  baseUrl?: string;
+  host?: string;
+  port?: number;
+  dataDir?: string;
+  token?: string;
+};
+
+export type EnsuredServerEnv = ServerEnv & {
+  tokenCreated: boolean;
+  tokenRotated: boolean;
+};
+
+export async function ensureServerEnv(options: EnsureServerEnvOptions): Promise<EnsuredServerEnv> {
+  const configPath = options.configPath?.trim() || defaultServerConfigPath(options.env);
+  const existing = await loadServerEnv(options.env, configPath);
+  const hasToken = Boolean(existing.token && existing.token !== PLACEHOLDER_TOKEN);
+  if (hasToken && !options.force) {
+    return {
+      configPath,
+      token: existing.token as string,
+      baseUrl: existing.baseUrl || DEFAULT_PUBLIC_BASE_URL,
+      host: existing.host || DEFAULT_HOST,
+      port: existing.port ?? DEFAULT_PORT,
+      dataDir: existing.dataDir || defaultDataDir(options.env),
+      tokenCreated: false,
+      tokenRotated: false,
+    };
+  }
+  const values: ServerEnv = {
+    token: options.token?.trim() || randomBytes(32).toString("hex"),
+    baseUrl: existing.baseUrl || stripSlash(options.baseUrl) || DEFAULT_PUBLIC_BASE_URL,
+    host: existing.host || options.host?.trim() || DEFAULT_HOST,
+    port: existing.port ?? options.port ?? DEFAULT_PORT,
+    dataDir: existing.dataDir || options.dataDir?.trim() || defaultDataDir(options.env),
+    configPath,
+  };
+  await writeServerEnv(values);
+  return {
+    ...values,
+    tokenCreated: !hasToken,
+    tokenRotated: hasToken && Boolean(options.force),
+  };
+}
+
 export function assertUsableToken(token: string | undefined, configPath: string): string {
   if (!token || token === PLACEHOLDER_TOKEN) {
     throw new Error(
-      `missing ${configPath} — run edges artifacts server init (do not leave ${PLACEHOLDER_TOKEN})`,
+      `missing ${configPath} — run edges artifacts server install (do not leave ${PLACEHOLDER_TOKEN})`,
     );
   }
   return token;

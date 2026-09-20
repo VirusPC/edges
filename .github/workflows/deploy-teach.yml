@@ -1,8 +1,8 @@
 # SSH into Aliyun ECS and reset the full-repo checkout to origin/main.
 # ECS can reach GitHub over HTTPS; do not rsync-push a path subset.
 # After pull: edges artifacts server install, then restart, if the server env
-# file exists. Never a combined install-and-start. nginx :80 is a one-time
-# sudo script (deploy/setup-nginx-artifacts.sh), not a CLI verb.
+# file exists. Never a combined install-and-start. nginx is usually unchanged
+# (do not call setup-nginx from this Action).
 # Fallback if git fetch from ECS is flaky: from a machine that can reach both
 # GitHub and the box, tar the full repo over SSH, then the same two CLI
 # commands (or deploy/bootstrap.sh, which is that wrapper).

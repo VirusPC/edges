@@ -45,6 +45,18 @@ test("deploy unit is a systemd user unit that loads the server env file", async 
   assert.match(unit, /artifacts-preview\/dist\/index\.js/);
 });
 
+test("README is CLI-first and documents the locked server surface", async () => {
+  const readme = await readFile(path.join(pkgRoot, "README.md"), "utf8");
+  assert.match(readme, /edges artifacts server install/);
+  assert.match(readme, /edges artifacts server start/);
+  assert.match(readme, /edges artifacts server setup-nginx/);
+  assert.match(readme, /edges artifacts server status/);
+  assert.match(readme, /edges artifacts init --base-url http:\/\/182\.92\.131\.89/);
+  assert.match(readme, /install --force/);
+  assert.doesNotMatch(readme, /edges artifacts server init/);
+  assert.doesNotMatch(readme, /nginx-snippet|nginx-setup|configure-proxy/);
+});
+
 test("bootstrap and nginx setup scripts are executable and restart without inventing a public 8787", async () => {
   const bootstrap = path.join(deployDir, "bootstrap.sh");
   const setup = path.join(deployDir, "setup-nginx-artifacts.sh");
@@ -109,6 +121,7 @@ test("deploy-teach.yml still full-repo pulls then CLI-installs and restarts arti
   assert.match(workflow, /artifacts server install/);
   assert.match(workflow, /artifacts server restart/);
   assert.doesNotMatch(workflow, /nginx-snippet|nginx-setup|configure-proxy/);
+  assert.doesNotMatch(workflow, /artifacts server setup-nginx/);
   assert.match(workflow, /environment:\s*\n\s*name:\s*production/s);
   assert.match(workflow, /url:\s*http:\/\/182\.92\.131\.89\/teaching\//);
   assert.match(workflow, /concurrency:\s*\n\s*group:\s*ecs-edges-pull/s);

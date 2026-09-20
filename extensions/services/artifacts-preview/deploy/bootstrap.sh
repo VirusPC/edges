@@ -26,7 +26,7 @@ if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
   . "$NVM_DIR/nvm.sh"
 fi
 
-[ -f "$ENV_FILE" ] || die "missing $ENV_FILE — run: edges artifacts server init"
+[ -f "$ENV_FILE" ] || die "missing $ENV_FILE — run: edges artifacts server install"
 command -v node >/dev/null 2>&1 || die "node not on PATH (need Node >= 20 on this box)"
 command -v pnpm >/dev/null 2>&1 || die "pnpm not on PATH (corepack enable && corepack prepare pnpm@latest --activate)"
 

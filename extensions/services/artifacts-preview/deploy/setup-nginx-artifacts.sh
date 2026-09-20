@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-# One-time, human-run with sudo: install the /health + /artifacts/ proxy
-# into the existing teach :80 server. Does not replace /teaching/.
+# Thin script called by: edges artifacts server setup-nginx
+# Install the /health + /artifacts/ proxy into the existing teach :80
+# server. Does not replace /teaching/. Idempotent.
 #
-# Same pattern as ~/setup-teach-nginx80.sh — assistants historically cannot
-# inject a sudo password, so a person runs this once on the box.
+# If this is run without root, the CLI prints:
+#   sudo bash …/deploy/setup-nginx-artifacts.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"

@@ -8,7 +8,7 @@ import {
   configHome,
   defaultDataDir,
   defaultServerConfigPath,
-  loadServerEnv,
+  ensureServerEnv,
 } from "./env.js";
 import { type RunCommand, runCommand as defaultRunCommand } from "./run-command.js";
 
@@ -18,6 +18,7 @@ export type ServerOpsDeps = {
   env: NodeJS.ProcessEnv;
   runCommand?: RunCommand;
   fetchHealth?: HealthFetch;
+  getUid?: () => number;
 };
 
 function systemdEnv(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
@@ -67,18 +68,45 @@ export function resolveRepoRoot(env: NodeJS.ProcessEnv): string {
 export async function installArtifactsServer(options: ServerOpsDeps & {
   envFile?: string;
   repoRoot?: string;
-}): Promise<{ started: false; dataDir: string; repoRoot: string; unit: string }> {
+  force?: boolean;
+  baseUrl?: string;
+  host?: string;
+  port?: number;
+  dataDir?: string;
+  token?: string;
+}): Promise<{
+  started: false;
+  dataDir: string;
+  repoRoot: string;
+  unit: string;
+  configPath: string;
+  baseUrl: string;
+  host: string;
+  port: number;
+  token: string;
+  tokenCreated: boolean;
+  tokenRotated: boolean;
+}> {
   const env = options.env;
   const run = options.runCommand ?? defaultRunCommand;
   const envFile = options.envFile?.trim() || defaultServerConfigPath(env);
-  const loaded = await loadServerEnv(env, envFile);
+  const ensured = await ensureServerEnv({
+    env,
+    configPath: envFile,
+    force: options.force,
+    baseUrl: options.baseUrl,
+    host: options.host,
+    port: options.port,
+    dataDir: options.dataDir,
+    token: options.token,
+  });
   try {
-    assertUsableToken(loaded.token, envFile);
+    assertUsableToken(ensured.token, ensured.configPath);
   } catch (error) {
     throw new ArtifactsError("VALIDATION_ERROR", error instanceof Error ? error.message : String(error));
   }
   const repoRoot = options.repoRoot?.trim() || resolveRepoRoot(env);
-  const dataDir = loaded.dataDir || defaultDataDir(env);
+  const dataDir = ensured.dataDir || defaultDataDir(env);
   await mkdir(dataDir, { recursive: true, mode: 0o700 });
 
   const install = await run(
@@ -127,7 +155,58 @@ export async function installArtifactsServer(options: ServerOpsDeps & {
   if (enabled.exitCode !== 0) {
     throw new ArtifactsError("UNKNOWN_ERROR", `systemctl --user enable failed: ${enabled.stderr.trim()}`);
   }
-  return { started: false, dataDir, repoRoot, unit: UNIT_NAME };
+  return {
+    started: false,
+    dataDir,
+    repoRoot,
+    unit: UNIT_NAME,
+    configPath: ensured.configPath,
+    baseUrl: ensured.baseUrl,
+    host: ensured.host,
+    port: ensured.port,
+    token: ensured.token,
+    tokenCreated: ensured.tokenCreated,
+    tokenRotated: ensured.tokenRotated,
+  };
+}
+
+export async function setupNginxArtifacts(options: ServerOpsDeps & {
+  repoRoot?: string;
+}): Promise<{ applied: boolean; sudo: boolean; command: string }> {
+  const env = options.env;
+  const run = options.runCommand ?? defaultRunCommand;
+  const repoRoot = options.repoRoot?.trim() || resolveRepoRoot(env);
+  const script = path.join(artifactsDeployDir(repoRoot), "setup-nginx-artifacts.sh");
+  const command = `sudo bash ${script}`;
+  const uid = (options.getUid ?? (() => process.getuid?.() ?? 1000))();
+
+  if (uid === 0) {
+    const result = await run("bash", [script], { env });
+    if (result.exitCode !== 0) {
+      throw new ArtifactsError(
+        "UNKNOWN_ERROR",
+        result.stderr.trim() || result.stdout.trim() || "setup-nginx-artifacts.sh failed",
+      );
+    }
+    return { applied: true, sudo: false, command };
+  }
+
+  try {
+    const escalated = await run("sudo", ["-n", "bash", script], { env });
+    if (escalated.exitCode === 0) {
+      return { applied: true, sudo: true, command };
+    }
+  } catch {
+    // sudo missing or cannot run non-interactively
+  }
+
+  throw new ArtifactsError(
+    "UNKNOWN_ERROR",
+    [
+      "setup-nginx needs root to write nginx config (does not change /teaching/).",
+      `Run: ${command}`,
+    ].join(" "),
+  );
 }
 
 async function unitStatus(run: RunCommand, env: NodeJS.ProcessEnv): Promise<string> {

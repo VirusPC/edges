@@ -1,4 +1,3 @@
-import { randomBytes } from "node:crypto";
 import { Command } from "commander";
 import type { CliContext } from "../context.js";
 import { ArtifactsError, runArtifactsCommand, succeed } from "./utils/result.js";
@@ -6,14 +5,12 @@ import {
   DEFAULT_HOST,
   DEFAULT_PORT,
   DEFAULT_PUBLIC_BASE_URL,
-  defaultDataDir,
-  defaultServerConfigPath,
   loadServerEnv,
-  writeServerEnv,
 } from "./server/env.js";
 import {
   installArtifactsServer,
   restartArtifactsServer,
+  setupNginxArtifacts,
   startArtifactsServer,
   statusArtifactsServer,
   stopArtifactsServer,
@@ -21,27 +18,37 @@ import {
 
 const SERVER_AFTER_HELP = `
 COMMANDS
-  init [--base-url <url>] [--host <host>] [--port <n>] [--data-dir <path>] [--token <hex>] [--config <path>] [--force]
-    Write ~/.config/edges/artifacts-preview.env only. Does not start a process.
-  install
-    pnpm install/build + install/enable the user systemd unit. Does not start.
+  install [--force] [--base-url <url>] [--config <path>]
+    Ensure ~/.config/edges/artifacts-preview.env (create token if missing;
+    --force may rotate), pnpm install/build, install and enable the user unit.
+    Does not start.
   start | stop | restart
     Process lifecycle only (systemctl --user).
   status
-    curl 127.0.0.1/health + systemctl --user status
+    User unit + curl 127.0.0.1/health
+  setup-nginx
+    One-shot / idempotent reverse proxy: /health, POST /artifacts, /artifacts/…
+    → 127.0.0.1:8787. Does not change /teaching/. If sudo is needed, prints the
+    exact sudo command.
 
-Never combine install and start. After a repo pull: install (if build/unit changed) then restart.
+Never combine install and start.
 
-nginx reverse-proxy is host ops, not a CLI verb. Static files live in
-extensions/services/artifacts-preview/deploy/ (nginx-artifacts.conf plus
-setup-nginx-artifacts.sh). Run that sudo script once when exposing on :80.
-
-EXAMPLES
-  edges artifacts server init --base-url http://182.92.131.89
+First time on ECS:
   edges artifacts server install
   edges artifacts server start
+  edges artifacts server setup-nginx
   edges artifacts server status
-  sudo bash extensions/services/artifacts-preview/deploy/setup-nginx-artifacts.sh
+
+After a deploy-teach pull (env already on the box):
+  edges artifacts server install   # if build/unit changed
+  edges artifacts server restart   # or restart only
+
+Laptop client (same token as the server env):
+  edges artifacts init --base-url http://182.92.131.89
+  edges artifacts publish <path>
+  edges artifacts rm <id|url>
+
+Rotate token: edges artifacts server install --force, then client re-init.
 `;
 
 async function listenTarget(env: NodeJS.ProcessEnv, configPath?: string): Promise<{ host: string; port: number }> {
@@ -50,6 +57,36 @@ async function listenTarget(env: NodeJS.ProcessEnv, configPath?: string): Promis
     host: loaded.host || DEFAULT_HOST,
     port: loaded.port ?? DEFAULT_PORT,
   };
+}
+
+function installStderr(installed: {
+  token: string;
+  baseUrl: string;
+  tokenCreated: boolean;
+  tokenRotated: boolean;
+}): string {
+  const lines = [
+    installed.tokenCreated
+      ? "Created server env. Share this token with the laptop client:"
+      : installed.tokenRotated
+        ? "Rotated server token. Re-init the laptop client with this token:"
+        : "Server env exists (token unchanged). Unit installed and enabled. Not started.",
+  ];
+  if (installed.tokenCreated || installed.tokenRotated) {
+    lines.push(`  EDGES_ARTIFACTS_TOKEN=${installed.token}`);
+    lines.push(`  EDGES_ARTIFACTS_BASE_URL=${installed.baseUrl}`);
+    lines.push("");
+    lines.push("Laptop client (same token):");
+    lines.push(`  edges artifacts init --base-url ${installed.baseUrl}`);
+    lines.push("  then paste the token into ~/.config/edges/artifacts.env");
+  }
+  lines.push("");
+  lines.push("Unit installed and enabled. Not started.");
+  lines.push("Next: edges artifacts server start");
+  lines.push("Then: edges artifacts server setup-nginx");
+  lines.push("Then: edges artifacts server status");
+  lines.push("");
+  return lines.join("\n");
 }
 
 export function addArtifactsServerCommand(artifacts: Command, ctx: CliContext): void {
@@ -74,15 +111,15 @@ export function addArtifactsServerCommand(artifacts: Command, ctx: CliContext): 
   });
 
   server
-    .command("init")
-    .description("Write the server env file (token + listen/public URL). Does not start.")
-    .option("--base-url <url>", "Public URL prefix printed by publish", DEFAULT_PUBLIC_BASE_URL)
-    .option("--host <host>", "Listen host (loopback behind nginx)", DEFAULT_HOST)
-    .option("--port <n>", "Listen port", String(DEFAULT_PORT))
-    .option("--data-dir <path>", "Artifact data directory")
-    .option("--token <hex>", "Reuse an existing shared token")
+    .command("install")
+    .description("Ensure server env, build, and enable the user unit. Does not start.")
+    .option("--base-url <url>", "Public URL prefix when creating env", DEFAULT_PUBLIC_BASE_URL)
+    .option("--host <host>", "Listen host when creating env", DEFAULT_HOST)
+    .option("--port <n>", "Listen port when creating env", String(DEFAULT_PORT))
+    .option("--data-dir <path>", "Artifact data directory when creating env")
+    .option("--token <hex>", "Reuse an existing shared token when creating env")
     .option("--config <path>", "Server env path (default: ~/.config/edges/artifacts-preview.env)")
-    .option("--force", "Overwrite an existing token")
+    .option("--force", "Rotate an existing token")
     .action(async (opts: {
       baseUrl: string;
       host: string;
@@ -93,80 +130,35 @@ export function addArtifactsServerCommand(artifacts: Command, ctx: CliContext): 
       force?: boolean;
     }) => {
       await runArtifactsCommand(ctx, async () => {
-        const configPath = opts.config?.trim() || defaultServerConfigPath(ctx.env);
-        const existing = await loadServerEnv(ctx.env, configPath);
-        if (existing.token && !opts.force) {
-          throw new ArtifactsError(
-            "VALIDATION_ERROR",
-            `server env already has a token: ${configPath} (pass --force to overwrite)`,
-          );
-        }
         const port = Number(opts.port);
         if (!Number.isInteger(port) || port < 1 || port > 65535) {
           throw new ArtifactsError("VALIDATION_ERROR", "port must be an integer 1–65535");
         }
-        const token = opts.token?.trim() || randomBytes(32).toString("hex");
-        const values = {
-          token,
-          baseUrl: opts.baseUrl.replace(/\/$/, ""),
-          host: opts.host.trim() || DEFAULT_HOST,
-          port,
-          dataDir: opts.dataDir?.trim() || defaultDataDir(ctx.env),
-          configPath,
-        };
-        await writeServerEnv(values);
-        const stderr = [
-          "Wrote server env (config only; no process started):",
-          `  ${configPath}`,
-          `  EDGES_ARTIFACTS_TOKEN=${token}`,
-          `  EDGES_ARTIFACTS_BASE_URL=${values.baseUrl}`,
-          `  EDGES_ARTIFACTS_HOST=${values.host}`,
-          `  EDGES_ARTIFACTS_PORT=${values.port}`,
-          `  EDGES_ARTIFACTS_DATA_DIR=${values.dataDir}`,
-          "",
-          "Laptop client (same token):",
-          `  edges artifacts init --base-url ${values.baseUrl}`,
-          "",
-          "Then on this machine:",
-          "  edges artifacts server install        # deps + unit; does not start",
-          "  edges artifacts server start",
-          "  edges artifacts server status",
-          "",
-          "To expose on :80, separately run the one-time sudo script:",
-          "  sudo bash extensions/services/artifacts-preview/deploy/setup-nginx-artifacts.sh",
-          "",
-        ].join("\n");
-        return succeed(
-          {
-            command: "artifacts.server.init",
-            configPath,
-            baseUrl: values.baseUrl,
-            host: values.host,
-            port: values.port,
-            dataDir: values.dataDir,
-            tokenCreated: !opts.token,
-          },
-          stderr,
-        );
-      });
-    });
-
-  server
-    .command("install")
-    .description("Install deps, build, and enable the user unit. Does not start.")
-    .option("--config <path>", "Server env path")
-    .action(async (opts: { config?: string }) => {
-      await runArtifactsCommand(ctx, async () => {
         const installed = await installArtifactsServer({
           env: ctx.env,
           envFile: opts.config,
+          force: opts.force,
+          baseUrl: opts.baseUrl,
+          host: opts.host,
+          port,
+          dataDir: opts.dataDir,
+          token: opts.token,
         });
         return succeed(
           {
             command: "artifacts.server.install",
-            ...installed,
+            configPath: installed.configPath,
+            baseUrl: installed.baseUrl,
+            host: installed.host,
+            port: installed.port,
+            dataDir: installed.dataDir,
+            repoRoot: installed.repoRoot,
+            unit: installed.unit,
+            started: false,
+            tokenCreated: installed.tokenCreated,
+            tokenRotated: installed.tokenRotated,
           },
-          "Unit installed and enabled. Not started. Run: edges artifacts server start\n",
+          installStderr(installed),
         );
       });
     });
@@ -218,6 +210,27 @@ export function addArtifactsServerCommand(artifacts: Command, ctx: CliContext): 
           return { ...result, exitCode: 1 };
         }
         return result;
+      });
+    });
+
+  server
+    .command("setup-nginx")
+    .description("Install the :80 reverse proxy without changing /teaching/")
+    .action(async () => {
+      await runArtifactsCommand(ctx, async () => {
+        const applied = await setupNginxArtifacts({ env: ctx.env });
+        return succeed(
+          {
+            command: "artifacts.server.setup-nginx",
+            ...applied,
+          },
+          [
+            "nginx reverse-proxy installed (idempotent).",
+            "/health, POST /artifacts, /artifacts/… → 127.0.0.1:8787.",
+            "/teaching/ is unchanged.",
+            "",
+          ].join("\n"),
+        );
       });
     });
 }

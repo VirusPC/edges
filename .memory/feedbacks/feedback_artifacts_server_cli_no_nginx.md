@@ -1,16 +1,16 @@
 ---
 name: feedback_artifacts_server_cli_no_nginx
-description: 改 edges artifacts server 命令面、或想把 nginx 反代收进 CLI 时打开：只留 init / install / start|stop|restart / status。不要 nginx-snippet、nginx-setup、configure-proxy。nginx 是宿主机一次性 sudo 脚本。
+description: 改 edges artifacts server 命令面时打开：公开面是 install（保证 env、不 start）/ start|stop|restart / status / setup-nginx。没有 server init。不要 nginx-snippet、nginx-setup、configure-proxy。
 metadata:
-  edges-title: artifacts server CLI 不含 nginx 动词
+  edges-title: artifacts server CLI 用 setup-nginx，不要 snippet / server init
   edges-type: feedback
-  edges-origin-session-id: bc-03eab9e8-f0e7-5b5c-93d1-5b97661749f2
+  edges-origin-session-id: bc-64f20364-5e66-5924-903e-9e45abedf3ff
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-20T17:28:04+00:00"
+  edges-updated-at: "2026-09-20T17:36:18+00:00"
 ---
 
-`edges artifacts server` 只服务进程生命周期：`init`、`install`、`start`/`stop`/`restart`、`status`。nginx 反代不进 CLI（不要 `nginx-snippet`、`nginx-setup`、`configure-proxy`）；材料留在 `deploy/nginx-artifacts.conf` 和一次性 `setup-nginx-artifacts.sh`。
-**Why:** 2026-09-20 用户纠正：snippet 是实现物名字，不是用户意图；nginx reverse-proxy 是 host ops，和 init/install/start/stop/restart/status 不是同一条生命周期。用户明确不要发明 `configure-proxy`。
-**How to apply:** 帮助文本、包装脚本和工作流只写那六个动词。要暴露 :80 时，文档指向人跑 `sudo bash …/deploy/setup-nginx-artifacts.sh`。`deploy/bootstrap.sh` 只包装 `install` 然后 `restart`。不要把 nginx include 内容打印成 CLI 子命令。
+`edges artifacts server` 的公开面是 `install`（确保 env：缺 token 就建，`--force` 可轮换；装依赖/unit/enable，不 start）、`start`/`stop`/`restart`、`status`、`setup-nginx`。没有 `server init`（客户端才是顶层 `edges artifacts init`）。不要 `nginx-snippet` / `nginx-setup` / `configure-proxy`，也不要把打印 snippet 当主路径。
+**Why:** 2026-09-20 用户把此前「nginx 不是 CLI 动词 + 保留 server init」的纠正作废，指定本提示为唯一规格。`setup-nginx` 是一次性/可重入反代（`/health`、`POST /artifacts`、`/artifacts/…` → `127.0.0.1:8787`，不动 `/teaching/`）；需要 sudo 时升级或打印确切 `sudo bash …/setup-nginx-artifacts.sh`。
+**How to apply:** 帮助、README、ops 笔记和工作流只写这五个动词。第一次：`install` → `start` → `setup-nginx` → `status`。pull 之后：env 在才 `install` 再 `restart`（或只 `restart`）；不要从 Action 调 `setup-nginx`。永远不要把 install 和 start 合成一步。
