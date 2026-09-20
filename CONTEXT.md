@@ -64,6 +64,14 @@ _避免使用_：评测冒烟跑通、单次无对照的榜分数
 一次评测运行的可复现记录（含命令、底座、子集、分数与时间），落在 Edges 评测工作区中的报告落点，用于日后对照，不是知识资产本身。
 _避免使用_：Edge、研究笔记里的口头分数、任务描述里的声称结果
 
+**知识库 Observation 系统**：
+面向知识库运行时的 traces / logs / dashboard 产品语义：看到检索、读写、代理使用过程与异常；可以日后消费自托管 Langfuse，但不是该实例的部署运维。
+_避免使用_：自托管 Langfuse、自部署 Langfuse、Evaluation（打分裁判）、仓内 `observation/` 运营笔记目录（若指同一产品）
+
+**自托管 Langfuse**：
+自运维的 Langfuse 实例（看板卡「自部署 Langfuse」），用作 LLM/Agent 可观测后端候选；只覆盖该实例的部署、运维、鉴权与备份。
+_避免使用_：知识库 Observation 系统、Observation 产品、Langfuse Cloud（若指 v1 部署目标）、云 VPS（若指 v1 宿主）
+
 **知识管理 Agent（Knowledge Management Agent）**：
 在人设定的目标、授权与风险边界内，承担研究、提炼、检索、部署和反馈处理的主动知识资产管理者。
 _避免使用_：被动文件工具、自主决策者、无人监督的基金经理
