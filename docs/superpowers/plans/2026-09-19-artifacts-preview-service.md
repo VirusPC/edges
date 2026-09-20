@@ -125,7 +125,6 @@ POST /artifacts
     "ttlSeconds": 86400,
     "entry": "index.html",
     "from": { "kind": "cli", "name": "edges-cli" },
-    "task": { "project": "_default", "stem": "2026-09-18--example" },
     "files": [
       { "path": "index.html", "content": "<html>…</html>" },
       { "path": "icon.png", "encoding": "base64", "content": "…" }
@@ -135,8 +134,7 @@ POST /artifacts
     "id": "<uuid>",
     "url": "http://127.0.0.1:8787/artifacts/<uuid>/",
     "expiresAt": "2026-09-20T14:00:00.000Z",
-    "from": { "kind": "cli", "name": "edges-cli" },
-    "task": { "project": "_default", "stem": "2026-09-18--example" }
+    "from": { "kind": "cli", "name": "edges-cli" }
   }
 
 GET /artifacts/:id/
@@ -154,8 +152,7 @@ DELETE /artifacts/:id
 `files[].path` is a relative POSIX path. `encoding` omitted or `"utf8"` means `content` is UTF-8 text; `"base64"` means binary.
 
 `entry` optional: default `index.html` if present, else the sole file if `files.length === 1`, else reject.
-`from` required: `{ kind, name }` non-empty strings (kind ≤64, name ≤120). Suggested kinds: `skill` | `cli` | `agent`.
-`task` optional: `{ project, stem }` both required when present (no path separators / `..`). Omit for a pure manual preview.
+`from` required, discriminated by `kind`: `task` needs `project` + `stem` (no `name`); other kinds need `name` (no project/stem). Suggested kinds: `skill` | `cli` | `agent` | `task`.
 
 ### Path safety
 
@@ -194,7 +191,7 @@ $dataDir/<uuid>/files/<safe-relpath>
 `meta.json`:
 
 ```json
-{ "id": "<uuid>", "entry": "index.html", "expiresAt": "2026-09-20T14:00:00.000Z", "from": { "kind": "cli", "name": "edges-cli" }, "task": { "project": "_default", "stem": "2026-09-18--example" } }
+{ "id": "<uuid>", "entry": "index.html", "expiresAt": "2026-09-20T14:00:00.000Z", "from": { "kind": "cli", "name": "edges-cli" } }
 ```
 
 Expiry cleanup:
@@ -252,8 +249,8 @@ Phone review needs a reachable URL (not localhost).
 - `<path>` is a file or directory
 - Directory: walk regular files only; skip hidden names starting with `.`; skip symlinks; reject unsafe relative paths
 - `--ttl` accepts `24h` / `90m` / `3600` / `1d` (integer seconds if bare number). Default 24h
-- `--from-kind` / `--from-name` required on the HTTP body; defaults `cli` / `edges-cli`
-- `--task-project` / `--task-stem` optional together; omit both for no `task` pointer
+- `--from-kind` / `--from-name` on the HTTP `from` object; defaults `cli` / `edges-cli`
+- `--from-kind task` requires `--task-project` / `--task-stem` and omits `name`
 - Calls `POST /artifacts` with Bearer token
 - stdout JSON:
 
@@ -278,7 +275,7 @@ In `extensions/skills/project-tasks-classify/SKILL.md` step 4, after `review-pag
 1. If the human needs a reachable URL (phone / other machine):
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts artifacts publish <absolute-html-path> --from-kind skill --from-name project-tasks-classify --task-project <slug> --task-stem <stem>
+pnpm --filter edges-cli exec tsx src/index.ts artifacts publish <absolute-html-path> --from-kind skill --from-name project-tasks-classify
 ```
 
 2. Give the human `url` from stdout. Say: open in a **system browser**; phone needs the ECS / public `EDGES_ARTIFACTS_BASE_URL`, not `localhost`.

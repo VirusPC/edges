@@ -1,7 +1,6 @@
 import type { ArtifactFrom } from "./from.js";
-import type { ArtifactTask } from "./task.js";
 
-export type { ArtifactFrom, ArtifactTask };
+export type { ArtifactFrom };
 
 export type PublishFile = {
   path: string;
@@ -14,7 +13,6 @@ export type PublishResult = {
   url: string;
   expiresAt: string;
   from?: ArtifactFrom;
-  task?: ArtifactTask;
 };
 
 const ARTIFACT_ID =
@@ -41,7 +39,6 @@ export async function publishArtifact(options: {
   ttlSeconds: number;
   entry?: string;
   from: ArtifactFrom;
-  task?: ArtifactTask;
   fetch: typeof fetch;
 }): Promise<PublishResult> {
   const body: Record<string, unknown> = {
@@ -51,9 +48,6 @@ export async function publishArtifact(options: {
   };
   if (options.entry) {
     body.entry = options.entry;
-  }
-  if (options.task) {
-    body.task = options.task;
   }
   const response = await options.fetch(`${options.baseUrl.replace(/\/$/, "")}/artifacts`, {
     method: "POST",

@@ -278,10 +278,11 @@ test("POST without from is 400", async () => {
   }
 });
 
-test("POST persists task and echoes it on 201", async () => {
+test("POST persists from.kind task and echoes it on 201", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close, dataDir } = await startServer(nowMs);
-  const task = {
+  const from = {
+    kind: "task",
     project: "_default",
     stem: "2026-09-18--自建云服务器临时托管artifacts",
   };
@@ -294,52 +295,27 @@ test("POST persists task and echoes it on 201", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "cli", name: "edges-cli" },
-        task,
+        from,
       }),
     });
     assert.equal(created.status, 201);
-    const body = (await created.json()) as { task?: { project: string; stem: string } };
-    assert.deepEqual(body.task, task);
-    const { readFile } = await import("node:fs/promises");
-    const meta = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
-      task?: { project: string; stem: string };
-    };
-    assert.deepEqual(meta.task, task);
-  } finally {
-    await close();
-  }
-});
-
-test("POST without task omits task on 201", async () => {
-  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
-  const { url, close, dataDir } = await startServer(nowMs);
-  try {
-    const created = await fetch(`${url}/artifacts`, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${TOKEN}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "cli", name: "edges-cli" },
-      }),
-    });
-    assert.equal(created.status, 201);
-    const body = (await created.json()) as { task?: unknown };
+    const body = (await created.json()) as { from: Record<string, unknown>; task?: unknown };
+    assert.deepEqual(body.from, from);
+    assert.equal("name" in body.from, false);
     assert.equal("task" in body, false);
     const { readFile } = await import("node:fs/promises");
     const meta = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
+      from: Record<string, unknown>;
       task?: unknown;
     };
+    assert.deepEqual(meta.from, from);
     assert.equal("task" in meta, false);
   } finally {
     await close();
   }
 });
 
-test("POST with only task.project is 400", async () => {
+test("POST from.kind task without stem is 400", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close } = await startServer(nowMs);
   try {
@@ -351,20 +327,19 @@ test("POST with only task.project is 400", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "cli", name: "edges-cli" },
-        task: { project: "agent-clients-ux" },
+        from: { kind: "task", project: "agent-clients-ux" },
       }),
     });
     assert.equal(created.status, 400);
     const body = (await created.json()) as { errorCode: string; reason: string };
     assert.equal(body.errorCode, "VALIDATION_ERROR");
-    assert.match(body.reason, /task\.stem/);
+    assert.match(body.reason, /from\.stem/);
   } finally {
     await close();
   }
 });
 
-test("POST with path separators in task.stem is 400", async () => {
+test("POST with path separators in from.stem is 400", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close } = await startServer(nowMs);
   try {
@@ -376,14 +351,13 @@ test("POST with path separators in task.stem is 400", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "cli", name: "edges-cli" },
-        task: { project: "_default", stem: "foo/bar" },
+        from: { kind: "task", project: "_default", stem: "foo/bar" },
       }),
     });
     assert.equal(created.status, 400);
     const body = (await created.json()) as { errorCode: string; reason: string };
     assert.equal(body.errorCode, "VALIDATION_ERROR");
-    assert.match(body.reason, /task\.stem/);
+    assert.match(body.reason, /from\.stem/);
   } finally {
     await close();
   }

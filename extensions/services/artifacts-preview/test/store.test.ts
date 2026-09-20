@@ -196,66 +196,80 @@ test("put rejects missing or empty from", async () => {
   );
 });
 
-test("put writes optional task into meta.json", async () => {
+test("put writes from.kind task with project and stem", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { store, dataDir } = await tempStore(nowMs);
-  const task = {
+  const from = {
+    kind: "task" as const,
     project: "agent-clients-ux",
     stem: "2026-09-18--自建云服务器临时托管artifacts",
   };
   const put = await store.put({
     ttlSeconds: 60,
-    from: { kind: "cli", name: "edges-cli" },
-    task,
+    from,
     files: [{ path: "index.html", content: "ok" }],
   });
-  assert.deepEqual(put.task, task);
+  assert.deepEqual(put.from, from);
   const meta = await store.getMeta(FIXED_ID);
-  assert.deepEqual(meta?.task, task);
+  assert.deepEqual(meta?.from, from);
   const raw = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
-    task?: { project: string; stem: string };
+    from: Record<string, unknown>;
+    task?: unknown;
   };
-  assert.deepEqual(raw.task, task);
+  assert.deepEqual(raw.from, from);
+  assert.equal("name" in raw.from, false);
+  assert.equal("task" in raw, false);
 });
 
-test("put omits task from meta.json when not provided", async () => {
+test("put named from has no top-level task", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { store, dataDir } = await tempStore(nowMs);
-  const put = await store.put({
+  await store.put({
     ttlSeconds: 60,
     from: { kind: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "ok" }],
   });
-  assert.equal(put.task, undefined);
   const raw = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
+    from: Record<string, unknown>;
     task?: unknown;
   };
+  assert.deepEqual(raw.from, { kind: "cli", name: "edges-cli" });
   assert.equal("task" in raw, false);
+  assert.equal("project" in raw.from, false);
 });
 
-test("put rejects partial or invalid task", async () => {
+test("put rejects invalid from.kind task", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { store } = await tempStore(nowMs);
   const files = [{ path: "index.html", content: "ok" }];
-  const from = { kind: "cli", name: "edges-cli" };
   await assert.rejects(
-    () => store.put({ ttlSeconds: 60, from, files, task: { project: "agent-clients-ux" } as never }),
-    /task\.stem/,
+    () => store.put({ ttlSeconds: 60, from: { kind: "task", project: "agent-clients-ux" } as never, files }),
+    /from\.stem/,
   );
   await assert.rejects(
-    () => store.put({ ttlSeconds: 60, from, files, task: { stem: "2026-09-18--x" } as never }),
-    /task\.project/,
+    () => store.put({ ttlSeconds: 60, from: { kind: "task", stem: "2026-09-18--x" } as never, files }),
+    /from\.project/,
   );
   await assert.rejects(
-    () => store.put({ ttlSeconds: 60, from, files, task: { project: "../etc", stem: "ok" } }),
-    /task\.project/,
+    () => store.put({ ttlSeconds: 60, from: { kind: "task", name: "edges-cli" } as never, files }),
+    /from\.(project|stem)/,
   );
   await assert.rejects(
-    () => store.put({ ttlSeconds: 60, from, files, task: { project: "_default", stem: "a/b" } }),
-    /task\.stem/,
+    () =>
+      store.put({
+        ttlSeconds: 60,
+        from: { kind: "task", project: "../etc", stem: "ok" },
+        files,
+      }),
+    /from\.project/,
   );
   await assert.rejects(
-    () => store.put({ ttlSeconds: 60, from, files, task: { project: "_default", stem: ".." } }),
-    /task\.stem/,
+    () =>
+      store.put({
+        ttlSeconds: 60,
+        from: { kind: "task", project: "_default", stem: "a/b" },
+        files,
+      }),
+    /from\.stem/,
   );
 });

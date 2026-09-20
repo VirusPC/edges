@@ -1,7 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../context.js";
-import { parseArtifactFrom } from "./utils/from.js";
-import { parseArtifactTaskFlags } from "./utils/task.js";
+import { parseArtifactFromFlags } from "./utils/from.js";
 import { publishArtifact } from "./utils/client.js";
 import { collectPublishFiles } from "./utils/collect.js";
 import { loadArtifactsConfig } from "./utils/config.js";
@@ -12,10 +11,10 @@ const PUBLISH_AFTER_HELP = `
 FLAGS
   --ttl <duration>    Override TTL (24h, 90m, 3600). Default 24h
   --entry <relpath>   Entry file inside a directory publish
-  --from-kind <kind>  Who published (skill | cli | agent | other). Default cli
-  --from-name <name>  Publisher name (skill id, cli package, agent). Default edges-cli
-  --task-project <slug>  Optional Task Project slug (requires --task-stem)
-  --task-stem <stem>     Optional Task stem (requires --task-project)
+  --from-kind <kind>  Who published (skill | cli | agent | task | other). Default cli
+  --from-name <name>  Publisher name when kind is not task. Default edges-cli
+  --task-project <slug>  Task Project slug when --from-kind task
+  --task-stem <stem>     Task stem when --from-kind task
   --config <path>     Config file (default: ~/.config/edges/artifacts.env)
 
 Reads EDGES_ARTIFACTS_TOKEN and EDGES_ARTIFACTS_BASE_URL from config or env.
@@ -25,7 +24,7 @@ EXAMPLES
   edges artifacts publish /tmp/review.html
   edges artifacts publish ./site --ttl 2h --entry index.html
   edges artifacts publish /tmp/review.html --from-kind skill --from-name project-tasks-classify
-  edges artifacts publish /tmp/review.html --task-project _default --task-stem 2026-09-18--example
+  edges artifacts publish /tmp/review.html --from-kind task --task-project _default --task-stem 2026-09-18--example
 `;
 
 export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext): void {
@@ -35,10 +34,10 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
     .argument("<path>", "File or directory to publish")
     .option("--ttl <duration>", "TTL duration (default 24h)", "24h")
     .option("--entry <relpath>", "Entry file for directory publishes")
-    .option("--from-kind <kind>", "Publisher kind (skill | cli | agent | other)", "cli")
-    .option("--from-name <name>", "Publisher name", "edges-cli")
-    .option("--task-project <slug>", "Optional Task Project slug")
-    .option("--task-stem <stem>", "Optional Task stem")
+    .option("--from-kind <kind>", "Publisher kind (skill | cli | agent | task | other)", "cli")
+    .option("--from-name <name>", "Publisher name when kind is not task", "edges-cli")
+    .option("--task-project <slug>", "Task Project slug when --from-kind task")
+    .option("--task-stem <stem>", "Task stem when --from-kind task")
     .option("--config <path>", "Config file path")
     .addHelpText("after", PUBLISH_AFTER_HELP)
     .action(async (inputPath: string, opts: {
@@ -83,10 +82,13 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
           );
         }
         let from;
-        let task;
         try {
-          from = parseArtifactFrom({ kind: opts.fromKind, name: opts.fromName });
-          task = parseArtifactTaskFlags(opts.taskProject, opts.taskStem);
+          from = parseArtifactFromFlags({
+            kind: opts.fromKind,
+            name: opts.fromName,
+            taskProject: opts.taskProject,
+            taskStem: opts.taskStem,
+          });
         } catch (error) {
           throw new ArtifactsError(
             "VALIDATION_ERROR",
@@ -100,7 +102,6 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
           ttlSeconds,
           entry: opts.entry,
           from,
-          task,
           fetch: globalThis.fetch,
         });
         return succeed({
@@ -109,7 +110,6 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
           url: published.url,
           expiresAt: published.expiresAt,
           from: published.from ?? from,
-          ...(published.task ?? task ? { task: published.task ?? task } : {}),
         });
       });
     });

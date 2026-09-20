@@ -1,7 +1,6 @@
 import type { ArtifactFrom } from "./from.js";
-import type { ArtifactTask } from "./task.js";
 
-export type { ArtifactFrom, ArtifactTask };
+export type { ArtifactFrom };
 
 export type ArtifactEncoding = "utf8" | "base64";
 
@@ -16,14 +15,12 @@ export type ArtifactMeta = {
   entry: string;
   expiresAt: string;
   from: ArtifactFrom;
-  task?: ArtifactTask;
 };
 
 export type PublishBody = {
   ttlSeconds?: number;
   entry?: string;
   from: ArtifactFrom;
-  task?: ArtifactTask;
   files: ArtifactFileInput[];
 };
 
@@ -32,9 +29,8 @@ export type ArtifactStore = {
     ttlSeconds: number;
     entry?: string;
     from: ArtifactFrom;
-    task?: ArtifactTask;
     files: ArtifactFileInput[];
-  }): Promise<{ id: string; expiresAt: string; entry: string; from: ArtifactFrom; task?: ArtifactTask }>;
+  }): Promise<{ id: string; expiresAt: string; entry: string; from: ArtifactFrom }>;
   getMeta(id: string): Promise<ArtifactMeta | null>;
   getFile(id: string, rel: string): Promise<{ bytes: Buffer; contentType: string } | null>;
   remove(id: string): Promise<boolean>;

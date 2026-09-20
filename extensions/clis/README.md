@@ -95,7 +95,7 @@ edges artifacts publish <path> [--ttl <duration>] [--entry <relpath>] [--from-ki
 edges artifacts rm <id|url> [--config <path>]
 ```
 
-`init` writes `~/.config/edges/artifacts.env` (`EDGES_ARTIFACTS_TOKEN`, `EDGES_ARTIFACTS_BASE_URL`) and prints the env the **server** process needs. `publish` / `rm` read that file (env overrides). Success stdout is JSON (`command`: `artifacts.init` | `artifacts.publish` | `artifacts.rm`). `publish` prints the public `url` and records `from` (defaults `--from-kind cli --from-name edges-cli`). Optional `--task-project` / `--task-stem` must be set together; omit both for a manual preview with no Task pointer.
+`init` writes `~/.config/edges/artifacts.env` (`EDGES_ARTIFACTS_TOKEN`, `EDGES_ARTIFACTS_BASE_URL`) and prints the env the **server** process needs. `publish` / `rm` read that file (env overrides). Success stdout is JSON (`command`: `artifacts.init` | `artifacts.publish` | `artifacts.rm`). `publish` prints the public `url` and records `from` (defaults `--from-kind cli --from-name edges-cli`). `--from-kind task` requires `--task-project` / `--task-stem` and does not send `name`.
 
 Phone review needs a reachable `EDGES_ARTIFACTS_BASE_URL` (ECS / public host). Localhost is only for the same machine. This round has no artifacts MCP.
 

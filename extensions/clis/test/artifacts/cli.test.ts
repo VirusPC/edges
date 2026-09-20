@@ -177,14 +177,7 @@ test("artifacts publish via run defaults from and forwards custom flags", async 
   }
 });
 
-test("artifacts publish help lists --task-project and --task-stem", async () => {
-  const result = await run(["artifacts", "publish", "--help"]);
-  assert.equal(result.exitCode, 0);
-  assert.match(result.stdout, /--task-project/);
-  assert.match(result.stdout, /--task-stem/);
-});
-
-test("artifacts publish omits task unless both flags are set", async () => {
+test("artifacts publish --from-kind task forwards project and stem", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-cli-"));
   const configPath = path.join(dir, "artifacts.env");
   const html = path.join(dir, "page.html");
@@ -194,21 +187,23 @@ test("artifacts publish omits task unless both flags are set", async () => {
     "EDGES_ARTIFACTS_TOKEN=cli-token\nEDGES_ARTIFACTS_BASE_URL=http://will-be-overridden\n",
   );
 
-  const seen: Array<{ task?: unknown }> = [];
+  const seen: Array<Record<string, unknown>> = [];
   const stub = http.createServer((req, res) => {
     const chunks: Buffer[] = [];
     req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
     req.on("end", () => {
-      const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as { task?: unknown };
-      seen.push({ task: body.task });
+      const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as {
+        from?: Record<string, unknown>;
+        task?: unknown;
+      };
+      seen.push({ from: body.from, hasTask: "task" in body });
       res.writeHead(201, { "content-type": "application/json" });
       res.end(
         JSON.stringify({
           id: "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab",
           url: "http://127.0.0.1/artifacts/2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab/",
           expiresAt: "2026-09-20T12:00:00.000Z",
-          from: { kind: "cli", name: "edges-cli" },
-          ...(body.task ? { task: body.task } : {}),
+          from: body.from,
         }),
       );
     });
@@ -218,15 +213,15 @@ test("artifacts publish omits task unless both flags are set", async () => {
   const port = typeof address === "object" && address ? address.port : 0;
   const baseEnv = { HOME: dir, EDGES_ARTIFACTS_BASE_URL: `http://127.0.0.1:${port}` };
   try {
-    const omitted = await run(["artifacts", "publish", html, "--config", configPath], { env: baseEnv });
-    assert.equal(omitted.exitCode, 0, omitted.stderr + omitted.stdout);
-    const withTask = await run(
+    const result = await run(
       [
         "artifacts",
         "publish",
         html,
         "--config",
         configPath,
+        "--from-kind",
+        "task",
         "--task-project",
         "agent-clients-ux",
         "--task-stem",
@@ -234,27 +229,49 @@ test("artifacts publish omits task unless both flags are set", async () => {
       ],
       { env: baseEnv },
     );
-    assert.equal(withTask.exitCode, 0, withTask.stderr + withTask.stdout);
+    assert.equal(result.exitCode, 0, result.stderr + result.stdout);
     assert.deepEqual(seen, [
-      { task: undefined },
       {
-        task: {
+        from: {
+          kind: "task",
           project: "agent-clients-ux",
           stem: "2026-09-18--自建云服务器临时托管artifacts",
         },
+        hasTask: false,
       },
     ]);
-    const payload = JSON.parse(withTask.stdout) as { task?: { project: string; stem: string } };
-    assert.deepEqual(payload.task, {
+    const payload = JSON.parse(result.stdout) as { from: Record<string, unknown>; task?: unknown };
+    assert.deepEqual(payload.from, {
+      kind: "task",
       project: "agent-clients-ux",
       stem: "2026-09-18--自建云服务器临时托管artifacts",
     });
+    assert.equal("name" in payload.from, false);
+    assert.equal("task" in payload, false);
   } finally {
     await new Promise<void>((resolve, reject) => stub.close((err) => (err ? reject(err) : resolve())));
   }
 });
 
-test("artifacts publish only --task-project is VALIDATION_ERROR", async () => {
+test("artifacts publish --from-kind task without task flags is VALIDATION_ERROR", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-cli-"));
+  const configPath = path.join(dir, "artifacts.env");
+  const html = path.join(dir, "page.html");
+  await writeFile(html, "<html>partial</html>");
+  await writeFile(
+    configPath,
+    "EDGES_ARTIFACTS_TOKEN=cli-token\nEDGES_ARTIFACTS_BASE_URL=http://127.0.0.1:1\n",
+  );
+  const result = await run(["artifacts", "publish", html, "--config", configPath, "--from-kind", "task"], {
+    env: { HOME: dir },
+  });
+  assert.equal(result.exitCode, 2);
+  const payload = JSON.parse(result.stdout) as { errorCode: string; reason: string };
+  assert.equal(payload.errorCode, "VALIDATION_ERROR");
+  assert.match(payload.reason, /task-project|task-stem|from-kind task/i);
+});
+
+test("artifacts publish task flags without --from-kind task is VALIDATION_ERROR", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-cli-"));
   const configPath = path.join(dir, "artifacts.env");
   const html = path.join(dir, "page.html");
@@ -264,35 +281,26 @@ test("artifacts publish only --task-project is VALIDATION_ERROR", async () => {
     "EDGES_ARTIFACTS_TOKEN=cli-token\nEDGES_ARTIFACTS_BASE_URL=http://127.0.0.1:1\n",
   );
   const result = await run(
-    ["artifacts", "publish", html, "--config", configPath, "--task-project", "agent-clients-ux"],
+    [
+      "artifacts",
+      "publish",
+      html,
+      "--config",
+      configPath,
+      "--task-project",
+      "agent-clients-ux",
+      "--task-stem",
+      "2026-09-18--x",
+    ],
     { env: { HOME: dir } },
   );
   assert.equal(result.exitCode, 2);
   const payload = JSON.parse(result.stdout) as { errorCode: string; reason: string };
   assert.equal(payload.errorCode, "VALIDATION_ERROR");
-  assert.match(payload.reason, /task-stem|task\.stem|together/i);
+  assert.match(payload.reason, /from-kind task/i);
 });
 
-test("artifacts publish only --task-stem is VALIDATION_ERROR", async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-cli-"));
-  const configPath = path.join(dir, "artifacts.env");
-  const html = path.join(dir, "page.html");
-  await writeFile(html, "<html>partial</html>");
-  await writeFile(
-    configPath,
-    "EDGES_ARTIFACTS_TOKEN=cli-token\nEDGES_ARTIFACTS_BASE_URL=http://127.0.0.1:1\n",
-  );
-  const result = await run(
-    ["artifacts", "publish", html, "--config", configPath, "--task-stem", "2026-09-18--x"],
-    { env: { HOME: dir } },
-  );
-  assert.equal(result.exitCode, 2);
-  const payload = JSON.parse(result.stdout) as { errorCode: string; reason: string };
-  assert.equal(payload.errorCode, "VALIDATION_ERROR");
-  assert.match(payload.reason, /task-project|task\.project|together/i);
-});
-
-test("artifacts publish rejects task stem with path separators", async () => {
+test("artifacts publish --from-kind task rejects path separators", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-cli-"));
   const configPath = path.join(dir, "artifacts.env");
   const html = path.join(dir, "page.html");
@@ -308,6 +316,8 @@ test("artifacts publish rejects task stem with path separators", async () => {
       html,
       "--config",
       configPath,
+      "--from-kind",
+      "task",
       "--task-project",
       "_default",
       "--task-stem",
