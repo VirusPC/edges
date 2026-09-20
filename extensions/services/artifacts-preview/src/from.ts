@@ -1,36 +1,36 @@
 export type ArtifactFromNamed = {
-  kind: string;
+  type: string;
   name: string;
 };
 
 export type ArtifactFromTask = {
-  kind: "task";
+  type: "task";
   project: string;
   stem: string;
 };
 
 export type ArtifactFrom = ArtifactFromNamed | ArtifactFromTask;
 
-const KIND_MAX = 64;
+const TYPE_MAX = 64;
 const NAME_MAX = 120;
 const PROJECT_MAX = 64;
 const STEM_MAX = 200;
 
 export function parseArtifactFrom(raw: unknown): ArtifactFrom {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-    throw new Error("from must be an object with kind");
+    throw new Error("from must be an object with type");
   }
-  const rec = raw as { kind?: unknown; name?: unknown; project?: unknown; stem?: unknown };
-  const kind = parseToken(rec.kind, "from.kind", KIND_MAX);
-  if (kind === "task") {
+  const rec = raw as { type?: unknown; name?: unknown; project?: unknown; stem?: unknown };
+  const type = parseToken(rec.type, "from.type", TYPE_MAX);
+  if (type === "task") {
     return {
-      kind: "task",
+      type: "task",
       project: parseTaskPointer(rec.project, "from.project", PROJECT_MAX),
       stem: parseTaskPointer(rec.stem, "from.stem", STEM_MAX),
     };
   }
   return {
-    kind,
+    type,
     name: parseToken(rec.name, "from.name", NAME_MAX),
   };
 }

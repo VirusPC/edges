@@ -18,7 +18,7 @@ Agent 产出的交互 HTML 需要人操作。例如 classifyTasks 的 Task Proje
 - **语言：** TypeScript，与 `extensions/clis` 同栈。
 - **v1 能力：** 上传 → URL → TTL 删除；只做静态托管。本轮不做服务端表单结果存储。
 - **部署：** 同一套服务跑在本机与已有 ECS。手机审阅必须用 ECS / 可达 URL，不得假定 localhost。
-- **Edges 接线：** `edges artifacts` 薄命令面——`init`/token 与本地配置（如 `~/.config/edges/artifacts.env`）；`publish`/`rm` 读配置。新 publish 必带 `from`（`kind: task` 用 project+stem；其他 kind 用 name），写入 `meta.json`。`edges tasks project review-page` 仍只渲染（ADR 0012）。Skill 编排：渲染 → 发布 → 给人可达 URL。
+- **Edges 接线：** `edges artifacts` 薄命令面——`init`/token 与本地配置（如 `~/.config/edges/artifacts.env`）；`publish`/`rm` 读配置。新 publish 必带 `from`（`type: task` 用 project+stem；其他 type 用 name），写入 `meta.json`。`edges tasks project review-page` 仍只渲染（ADR 0012）。Skill 编排：渲染 → 发布 → 给人可达 URL。
 - **鉴权：** 写（publish / rm）要共享 token；读（浏览器打开 URL）不鉴权，靠难猜 UUID 路径 + TTL。
 - **TTL：** 默认 24h，publish 时可覆盖；服务端到期清理。
 - **能力面：** 仍是 ADR 0004 的 CLI + Skill + MCP。本轮不为 artifacts 新开 MCP。

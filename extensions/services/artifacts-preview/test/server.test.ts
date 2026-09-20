@@ -34,7 +34,7 @@ test("POST upload then unauthenticated GET returns the file", async () => {
       },
       body: JSON.stringify({
         ttlSeconds: 60,
-        from: { kind: "cli", name: "edges-cli" },
+        from: { type: "cli", name: "edges-cli" },
         files: [{ path: "index.html", content: "<html>hello</html>" }],
       }),
     });
@@ -102,7 +102,7 @@ test("expired artifact GET is 404", async () => {
       },
       body: JSON.stringify({
         ttlSeconds: 1,
-        from: { kind: "cli", name: "edges-cli" },
+        from: { type: "cli", name: "edges-cli" },
         files: [{ path: "index.html", content: "bye" }],
       }),
     });
@@ -127,7 +127,7 @@ test("GET traversal path does not escape the artifact root", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "cli", name: "edges-cli" },
+        from: { type: "cli", name: "edges-cli" },
       }),
     });
     assert.equal(created.status, 201);
@@ -156,7 +156,7 @@ test("GET refuses an intermediate directory symlink", async () => {
           { path: "index.html", content: "ok" },
         ],
         entry: "index.html",
-        from: { kind: "cli", name: "edges-cli" },
+        from: { type: "cli", name: "edges-cli" },
       }),
     });
     assert.equal(created.status, 201);
@@ -183,7 +183,7 @@ test("GET refuses a symlink inside the artifact dir", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "cli", name: "edges-cli" },
+        from: { type: "cli", name: "edges-cli" },
       }),
     });
     assert.equal(created.status, 201);
@@ -209,7 +209,7 @@ test("DELETE requires auth and removes the artifact", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "cli", name: "edges-cli" },
+        from: { type: "cli", name: "edges-cli" },
       }),
     });
     assert.equal(created.status, 201);
@@ -241,17 +241,17 @@ test("POST persists from and echoes it on 201", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "agent", name: "cursor" },
+        from: { type: "agent", name: "cursor" },
       }),
     });
     assert.equal(created.status, 201);
-    const body = (await created.json()) as { from: { kind: string; name: string } };
-    assert.deepEqual(body.from, { kind: "agent", name: "cursor" });
+    const body = (await created.json()) as { from: { type: string; name: string } };
+    assert.deepEqual(body.from, { type: "agent", name: "cursor" });
     const { readFile } = await import("node:fs/promises");
     const meta = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
-      from: { kind: string; name: string };
+      from: { type: string; name: string };
     };
-    assert.deepEqual(meta.from, { kind: "agent", name: "cursor" });
+    assert.deepEqual(meta.from, { type: "agent", name: "cursor" });
   } finally {
     await close();
   }
@@ -278,11 +278,11 @@ test("POST without from is 400", async () => {
   }
 });
 
-test("POST persists from.kind task and echoes it on 201", async () => {
+test("POST persists from.type task and echoes it on 201", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close, dataDir } = await startServer(nowMs);
   const from = {
-    kind: "task",
+    type: "task",
     project: "_default",
     stem: "2026-09-18--自建云服务器临时托管artifacts",
   };
@@ -315,7 +315,7 @@ test("POST persists from.kind task and echoes it on 201", async () => {
   }
 });
 
-test("POST from.kind task without stem is 400", async () => {
+test("POST from.type task without stem is 400", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close } = await startServer(nowMs);
   try {
@@ -327,7 +327,7 @@ test("POST from.kind task without stem is 400", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "task", project: "agent-clients-ux" },
+        from: { type: "task", project: "agent-clients-ux" },
       }),
     });
     assert.equal(created.status, 400);
@@ -351,7 +351,7 @@ test("POST with path separators in from.stem is 400", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "task", project: "_default", stem: "foo/bar" },
+        from: { type: "task", project: "_default", stem: "foo/bar" },
       }),
     });
     assert.equal(created.status, 400);
@@ -375,7 +375,7 @@ test("POST with empty from.name is 400", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { kind: "cli", name: "" },
+        from: { type: "cli", name: "" },
       }),
     });
     assert.equal(created.status, 400);

@@ -1,57 +1,57 @@
 export type ArtifactFromNamed = {
-  kind: string;
+  type: string;
   name: string;
 };
 
 export type ArtifactFromTask = {
-  kind: "task";
+  type: "task";
   project: string;
   stem: string;
 };
 
 export type ArtifactFrom = ArtifactFromNamed | ArtifactFromTask;
 
-const KIND_MAX = 64;
+const TYPE_MAX = 64;
 const NAME_MAX = 120;
 const PROJECT_MAX = 64;
 const STEM_MAX = 200;
 
 export function parseArtifactFrom(raw: unknown): ArtifactFrom {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
-    throw new Error("from must be an object with kind");
+    throw new Error("from must be an object with type");
   }
-  const rec = raw as { kind?: unknown; name?: unknown; project?: unknown; stem?: unknown };
-  const kind = parseToken(rec.kind, "from.kind", KIND_MAX);
-  if (kind === "task") {
+  const rec = raw as { type?: unknown; name?: unknown; project?: unknown; stem?: unknown };
+  const type = parseToken(rec.type, "from.type", TYPE_MAX);
+  if (type === "task") {
     return {
-      kind: "task",
+      type: "task",
       project: parseTaskPointer(rec.project, "from.project", PROJECT_MAX),
       stem: parseTaskPointer(rec.stem, "from.stem", STEM_MAX),
     };
   }
   return {
-    kind,
+    type,
     name: parseToken(rec.name, "from.name", NAME_MAX),
   };
 }
 
 export function parseArtifactFromFlags(opts: {
-  kind: string;
+  type: string;
   name: string;
   taskProject?: string;
   taskStem?: string;
 }): ArtifactFrom {
-  const kind = parseToken(opts.kind, "from.kind", KIND_MAX);
-  if (kind === "task") {
+  const type = parseToken(opts.type, "from.type", TYPE_MAX);
+  if (type === "task") {
     if (opts.taskProject === undefined || opts.taskStem === undefined) {
-      throw new Error("--from-kind task requires --task-project and --task-stem");
+      throw new Error("--from-type task requires --task-project and --task-stem");
     }
-    return parseArtifactFrom({ kind: "task", project: opts.taskProject, stem: opts.taskStem });
+    return parseArtifactFrom({ type: "task", project: opts.taskProject, stem: opts.taskStem });
   }
   if (opts.taskProject !== undefined || opts.taskStem !== undefined) {
-    throw new Error("--task-project and --task-stem are only valid with --from-kind task");
+    throw new Error("--task-project and --task-stem are only valid with --from-type task");
   }
-  return parseArtifactFrom({ kind, name: opts.name });
+  return parseArtifactFrom({ type, name: opts.name });
 }
 
 function parseToken(value: unknown, field: string, max: number): string {
