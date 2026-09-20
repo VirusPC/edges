@@ -34,7 +34,6 @@ test("POST upload then unauthenticated GET returns the file", async () => {
       },
       body: JSON.stringify({
         ttlSeconds: 60,
-        from: { type: "cli", name: "edges-cli" },
         files: [{ path: "index.html", content: "<html>hello</html>" }],
       }),
     });
@@ -102,7 +101,6 @@ test("expired artifact GET is 404", async () => {
       },
       body: JSON.stringify({
         ttlSeconds: 1,
-        from: { type: "cli", name: "edges-cli" },
         files: [{ path: "index.html", content: "bye" }],
       }),
     });
@@ -127,7 +125,6 @@ test("GET traversal path does not escape the artifact root", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { type: "cli", name: "edges-cli" },
       }),
     });
     assert.equal(created.status, 201);
@@ -156,7 +153,6 @@ test("GET refuses an intermediate directory symlink", async () => {
           { path: "index.html", content: "ok" },
         ],
         entry: "index.html",
-        from: { type: "cli", name: "edges-cli" },
       }),
     });
     assert.equal(created.status, 201);
@@ -183,7 +179,6 @@ test("GET refuses a symlink inside the artifact dir", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { type: "cli", name: "edges-cli" },
       }),
     });
     assert.equal(created.status, 201);
@@ -209,7 +204,6 @@ test("DELETE requires auth and removes the artifact", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { type: "cli", name: "edges-cli" },
       }),
     });
     assert.equal(created.status, 201);
@@ -229,37 +223,9 @@ test("DELETE requires auth and removes the artifact", async () => {
   }
 });
 
-test("POST persists from and echoes it on 201", async () => {
+test("POST without from is 201 and omits from", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close, dataDir } = await startServer(nowMs);
-  try {
-    const created = await fetch(`${url}/artifacts`, {
-      method: "POST",
-      headers: {
-        authorization: `Bearer ${TOKEN}`,
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        files: [{ path: "index.html", content: "ok" }],
-        from: { type: "agent", name: "cursor" },
-      }),
-    });
-    assert.equal(created.status, 201);
-    const body = (await created.json()) as { from: { type: string; name: string } };
-    assert.deepEqual(body.from, { type: "agent", name: "cursor" });
-    const { readFile } = await import("node:fs/promises");
-    const meta = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
-      from: { type: string; name: string };
-    };
-    assert.deepEqual(meta.from, { type: "agent", name: "cursor" });
-  } finally {
-    await close();
-  }
-});
-
-test("POST without from is 400", async () => {
-  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
-  const { url, close } = await startServer(nowMs);
   try {
     const created = await fetch(`${url}/artifacts`, {
       method: "POST",
@@ -269,22 +235,29 @@ test("POST without from is 400", async () => {
       },
       body: JSON.stringify({ files: [{ path: "index.html", content: "ok" }] }),
     });
-    assert.equal(created.status, 400);
-    const body = (await created.json()) as { errorCode: string; reason: string };
-    assert.equal(body.errorCode, "VALIDATION_ERROR");
-    assert.match(body.reason, /from/);
+    assert.equal(created.status, 201);
+    const body = (await created.json()) as { from?: unknown; task?: unknown };
+    assert.equal("from" in body, false);
+    assert.equal("task" in body, false);
+    const { readFile } = await import("node:fs/promises");
+    const meta = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
+      from?: unknown;
+      task?: unknown;
+    };
+    assert.equal("from" in meta, false);
+    assert.equal("task" in meta, false);
   } finally {
     await close();
   }
 });
 
-test("POST persists from.type task and echoes it on 201", async () => {
+test("POST persists from.type task with id then project and echoes it on 201", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close, dataDir } = await startServer(nowMs);
   const from = {
     type: "task",
+    id: "2026-09-18--自建云服务器临时托管artifacts",
     project: "_default",
-    stem: "2026-09-18--自建云服务器临时托管artifacts",
   };
   try {
     const created = await fetch(`${url}/artifacts`, {
@@ -301,7 +274,9 @@ test("POST persists from.type task and echoes it on 201", async () => {
     assert.equal(created.status, 201);
     const body = (await created.json()) as { from: Record<string, unknown>; task?: unknown };
     assert.deepEqual(body.from, from);
+    assert.deepEqual(Object.keys(body.from), ["type", "id", "project"]);
     assert.equal("name" in body.from, false);
+    assert.equal("stem" in body.from, false);
     assert.equal("task" in body, false);
     const { readFile } = await import("node:fs/promises");
     const meta = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
@@ -309,13 +284,14 @@ test("POST persists from.type task and echoes it on 201", async () => {
       task?: unknown;
     };
     assert.deepEqual(meta.from, from);
+    assert.deepEqual(Object.keys(meta.from), ["type", "id", "project"]);
     assert.equal("task" in meta, false);
   } finally {
     await close();
   }
 });
 
-test("POST from.type task without stem is 400", async () => {
+test("POST from.type task without id is 400", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close } = await startServer(nowMs);
   try {
@@ -333,13 +309,13 @@ test("POST from.type task without stem is 400", async () => {
     assert.equal(created.status, 400);
     const body = (await created.json()) as { errorCode: string; reason: string };
     assert.equal(body.errorCode, "VALIDATION_ERROR");
-    assert.match(body.reason, /from\.stem/);
+    assert.match(body.reason, /from\.id/);
   } finally {
     await close();
   }
 });
 
-test("POST with path separators in from.stem is 400", async () => {
+test("POST with path separators in from.id is 400", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close } = await startServer(nowMs);
   try {
@@ -351,19 +327,19 @@ test("POST with path separators in from.stem is 400", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { type: "task", project: "_default", stem: "foo/bar" },
+        from: { type: "task", id: "foo/bar", project: "_default" },
       }),
     });
     assert.equal(created.status, 400);
     const body = (await created.json()) as { errorCode: string; reason: string };
     assert.equal(body.errorCode, "VALIDATION_ERROR");
-    assert.match(body.reason, /from\.stem/);
+    assert.match(body.reason, /from\.id/);
   } finally {
     await close();
   }
 });
 
-test("POST with empty from.name is 400", async () => {
+test("POST with other from.type is 400", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close } = await startServer(nowMs);
   try {
@@ -375,13 +351,13 @@ test("POST with empty from.name is 400", async () => {
       },
       body: JSON.stringify({
         files: [{ path: "index.html", content: "ok" }],
-        from: { type: "cli", name: "" },
+        from: { type: "cli", name: "edges-cli" },
       }),
     });
     assert.equal(created.status, 400);
     const body = (await created.json()) as { errorCode: string; reason: string };
     assert.equal(body.errorCode, "VALIDATION_ERROR");
-    assert.match(body.reason, /from\.name/);
+    assert.match(body.reason, /from\.type must be task/);
   } finally {
     await close();
   }

@@ -48,7 +48,7 @@ EDGES_ARTIFACTS_DATA_DIR=/var/tmp/edges-artifacts
 | `GET` | `/artifacts/:id/` and `/artifacts/:id/:relpath` | no (UUID path + TTL) |
 | `DELETE` | `/artifacts/:id` | Bearer token |
 
-Default TTL is 24h (`ttlSeconds` on POST, or `edges artifacts publish --ttl 2h`). New publishes require `from`, discriminated by `type`: `task` uses `{ type, project, stem }`; other types use `{ type, name }` (suggested `skill` | `cli` | `agent`). Persist only `id`, `entry`, `expiresAt`, `from` in `meta.json` and echo `from` on 201. CLI defaults `--from-type cli --from-name edges-cli`; `--from-type task` requires `--task-project` / `--task-stem`. Server sweeps expired artifacts about every 60s and also on GET. Writes stay under a disk temp dir (`0700` / files `0600`); relative paths cannot traverse or follow symlinks out (every path component is `lstat`’d). On ECS set `EDGES_ARTIFACTS_DATA_DIR` off a shared `/tmp`.
+Default TTL is 24h (`ttlSeconds` on POST, or `edges artifacts publish --ttl 2h`). `from` is optional. When present, v1 only allows `{ type: "task", id, project }` (`id` is the edges task stem; both required). Persist only `id`, `entry`, `expiresAt`, and optional `from` in `meta.json`; echo `from` on 201 only when set. CLI: `--from-type task --from-id <stem> --task-project <slug>` (all three together, or omit `from`). No `--from-name`, `--task-stem`, or default `cli`/`edges-cli`. Server sweeps expired artifacts about every 60s and also on GET. Writes stay under a disk temp dir (`0700` / files `0600`); relative paths cannot traverse or follow symlinks out (every path component is `lstat`’d). On ECS set `EDGES_ARTIFACTS_DATA_DIR` off a shared `/tmp`.
 
 ## Tests
 

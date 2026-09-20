@@ -11,20 +11,19 @@ const PUBLISH_AFTER_HELP = `
 FLAGS
   --ttl <duration>    Override TTL (24h, 90m, 3600). Default 24h
   --entry <relpath>   Entry file inside a directory publish
-  --from-type <type>  Who published (skill | cli | agent | task | other). Default cli
-  --from-name <name>  Publisher name when type is not task. Default edges-cli
-  --task-project <slug>  Task Project slug when --from-type task
-  --task-stem <stem>     Task stem when --from-type task
+  --from-type <type>  Source type. v1 only allows task
+  --from-id <id>      Task stem (filename without .md) when --from-type task
+  --task-project <slug>  Task Project slug when publishing from a Task
   --config <path>     Config file (default: ~/.config/edges/artifacts.env)
 
+--from-type, --from-id, and --task-project must be set together, or omit all three.
 Reads EDGES_ARTIFACTS_TOKEN and EDGES_ARTIFACTS_BASE_URL from config or env.
 Prints the public URL. Phone review needs a reachable base URL, not localhost.
 
 EXAMPLES
   edges artifacts publish /tmp/review.html
   edges artifacts publish ./site --ttl 2h --entry index.html
-  edges artifacts publish /tmp/review.html --from-type skill --from-name project-tasks-classify
-  edges artifacts publish /tmp/review.html --from-type task --task-project _default --task-stem 2026-09-18--example
+  edges artifacts publish /tmp/review.html --from-type task --from-id 2026-09-18--example --task-project _default
 `;
 
 export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext): void {
@@ -34,19 +33,17 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
     .argument("<path>", "File or directory to publish")
     .option("--ttl <duration>", "TTL duration (default 24h)", "24h")
     .option("--entry <relpath>", "Entry file for directory publishes")
-    .option("--from-type <type>", "Publisher type (skill | cli | agent | task | other)", "cli")
-    .option("--from-name <name>", "Publisher name when type is not task", "edges-cli")
+    .option("--from-type <type>", "Source type (v1: task)")
+    .option("--from-id <id>", "Task stem when --from-type task")
     .option("--task-project <slug>", "Task Project slug when --from-type task")
-    .option("--task-stem <stem>", "Task stem when --from-type task")
     .option("--config <path>", "Config file path")
     .addHelpText("after", PUBLISH_AFTER_HELP)
     .action(async (inputPath: string, opts: {
       ttl: string;
       entry?: string;
-      fromType: string;
-      fromName: string;
+      fromType?: string;
       taskProject?: string;
-      taskStem?: string;
+      fromId?: string;
       config?: string;
     }) => {
       await runArtifactsCommand(ctx, async () => {
@@ -85,9 +82,8 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
         try {
           from = parseArtifactFromFlags({
             type: opts.fromType,
-            name: opts.fromName,
+            fromId: opts.fromId,
             taskProject: opts.taskProject,
-            taskStem: opts.taskStem,
           });
         } catch (error) {
           throw new ArtifactsError(
@@ -109,7 +105,7 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
           id: published.id,
           url: published.url,
           expiresAt: published.expiresAt,
-          from: published.from ?? from,
+          ...(published.from ?? from ? { from: published.from ?? from } : {}),
         });
       });
     });

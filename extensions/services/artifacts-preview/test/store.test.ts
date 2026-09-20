@@ -22,7 +22,6 @@ test("put then getFile returns bytes before expiry", async () => {
   const { store } = await tempStore(nowMs);
   const put = await store.put({
     ttlSeconds: 60,
-    from: { type: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "<html>ok</html>" }],
   });
   assert.equal(put.id, FIXED_ID);
@@ -38,7 +37,6 @@ test("getFile returns null and deletes after expiry", async () => {
   const { store } = await tempStore(nowMs);
   await store.put({
     ttlSeconds: 1,
-    from: { type: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "soon gone" }],
   });
   nowMs.current = Date.parse("2026-09-19T12:00:02.000Z");
@@ -63,12 +61,10 @@ test("sweepExpired removes only expired artifacts", async () => {
   });
   await store.put({
     ttlSeconds: 1,
-    from: { type: "cli", name: "edges-cli" },
     files: [{ path: "a.html", content: "a" }],
   });
   await store.put({
     ttlSeconds: 3600,
-    from: { type: "cli", name: "edges-cli" },
     files: [{ path: "b.html", content: "b" }],
   });
   nowMs.current = Date.parse("2026-09-19T12:00:02.000Z");
@@ -85,7 +81,6 @@ test("getFile refuses an intermediate directory symlink", async () => {
   const { store, dataDir } = await tempStore(nowMs);
   await store.put({
     ttlSeconds: 60,
-    from: { type: "cli", name: "edges-cli" },
     files: [
       { path: "css/app.css", content: "body{}" },
       { path: "index.html", content: "ok" },
@@ -104,7 +99,6 @@ test("created artifact dirs are 0700 and files are 0600", async () => {
   const { store, dataDir } = await tempStore(nowMs);
   await store.put({
     ttlSeconds: 60,
-    from: { type: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "ok" }],
   });
   const dirMode = (await stat(path.join(dataDir, FIXED_ID))).mode & 0o777;
@@ -125,7 +119,6 @@ test("sweepExpired deletes orphan UUID dirs and invalid expiresAt", async () => 
 
   await store.put({
     ttlSeconds: 60,
-    from: { type: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "immortal" }],
   });
   await writeFile(
@@ -141,7 +134,6 @@ test("getFile refuses a symlink inside the artifact dir", async () => {
   const { store, dataDir } = await tempStore(nowMs);
   await store.put({
     ttlSeconds: 60,
-    from: { type: "cli", name: "edges-cli" },
     files: [{ path: "index.html", content: "real" }],
   });
   const target = path.join(dataDir, FIXED_ID, "files", "index.html");
@@ -158,51 +150,37 @@ test("put rejects traversal file paths", async () => {
     () =>
       store.put({
         ttlSeconds: 60,
-        from: { type: "cli", name: "edges-cli" },
         files: [{ path: "../secret", content: "no" }],
       }),
     /relative POSIX|\.\.|empty segments|escapes/,
   );
 });
 
-test("put writes from into meta.json", async () => {
+test("put omits from when absent", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { store, dataDir } = await tempStore(nowMs);
-  await store.put({
+  const put = await store.put({
     ttlSeconds: 60,
-    from: { type: "skill", name: "project-tasks-classify" },
     files: [{ path: "index.html", content: "ok" }],
   });
+  assert.equal("from" in put, false);
   const meta = await store.getMeta(FIXED_ID);
-  assert.deepEqual(meta?.from, { type: "skill", name: "project-tasks-classify" });
+  assert.equal("from" in (meta ?? {}), false);
   const raw = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
-    from: { type: string; name: string };
+    from?: unknown;
+    task?: unknown;
   };
-  assert.deepEqual(raw.from, { type: "skill", name: "project-tasks-classify" });
+  assert.equal("from" in raw, false);
+  assert.equal("task" in raw, false);
 });
 
-test("put rejects missing or empty from", async () => {
-  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
-  const { store } = await tempStore(nowMs);
-  const files = [{ path: "index.html", content: "ok" }];
-  await assert.rejects(() => store.put({ ttlSeconds: 60, files }), /from/);
-  await assert.rejects(
-    () => store.put({ ttlSeconds: 60, from: { type: "", name: "edges-cli" }, files }),
-    /from\.type/,
-  );
-  await assert.rejects(
-    () => store.put({ ttlSeconds: 60, from: { type: "cli", name: "   " }, files }),
-    /from\.name/,
-  );
-});
-
-test("put writes from.type task with project and stem", async () => {
+test("put writes from.type task with id then project", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { store, dataDir } = await tempStore(nowMs);
   const from = {
     type: "task" as const,
+    id: "2026-09-18--自建云服务器临时托管artifacts",
     project: "agent-clients-ux",
-    stem: "2026-09-18--自建云服务器临时托管artifacts",
   };
   const put = await store.put({
     ttlSeconds: 60,
@@ -217,48 +195,41 @@ test("put writes from.type task with project and stem", async () => {
     task?: unknown;
   };
   assert.deepEqual(raw.from, from);
+  assert.deepEqual(Object.keys(raw.from), ["type", "id", "project"]);
   assert.equal("name" in raw.from, false);
+  assert.equal("stem" in raw.from, false);
   assert.equal("task" in raw, false);
 });
 
-test("put named from has no top-level task", async () => {
-  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
-  const { store, dataDir } = await tempStore(nowMs);
-  await store.put({
-    ttlSeconds: 60,
-    from: { type: "cli", name: "edges-cli" },
-    files: [{ path: "index.html", content: "ok" }],
-  });
-  const raw = JSON.parse(await readFile(path.join(dataDir, FIXED_ID, "meta.json"), "utf8")) as {
-    from: Record<string, unknown>;
-    task?: unknown;
-  };
-  assert.deepEqual(raw.from, { type: "cli", name: "edges-cli" });
-  assert.equal("task" in raw, false);
-  assert.equal("project" in raw.from, false);
-});
-
-test("put rejects invalid from.type task", async () => {
+test("put rejects other from.type and invalid task pointers", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { store } = await tempStore(nowMs);
   const files = [{ path: "index.html", content: "ok" }];
   await assert.rejects(
+    () => store.put({ ttlSeconds: 60, from: { type: "cli", name: "edges-cli" } as never, files }),
+    /from\.type must be task/,
+  );
+  await assert.rejects(
+    () => store.put({ ttlSeconds: 60, from: { type: "skill", name: "project-tasks-classify" } as never, files }),
+    /from\.type must be task/,
+  );
+  await assert.rejects(
     () => store.put({ ttlSeconds: 60, from: { type: "task", project: "agent-clients-ux" } as never, files }),
-    /from\.stem/,
+    /from\.id/,
   );
   await assert.rejects(
-    () => store.put({ ttlSeconds: 60, from: { type: "task", stem: "2026-09-18--x" } as never, files }),
+    () => store.put({ ttlSeconds: 60, from: { type: "task", id: "2026-09-18--x" } as never, files }),
     /from\.project/,
   );
   await assert.rejects(
-    () => store.put({ ttlSeconds: 60, from: { type: "task", name: "edges-cli" } as never, files }),
-    /from\.(project|stem)/,
+    () => store.put({ ttlSeconds: 60, from: { type: "task", stem: "2026-09-18--x", project: "_default" } as never, files }),
+    /from\.id/,
   );
   await assert.rejects(
     () =>
       store.put({
         ttlSeconds: 60,
-        from: { type: "task", project: "../etc", stem: "ok" },
+        from: { type: "task", id: "ok", project: "../etc" },
         files,
       }),
     /from\.project/,
@@ -267,9 +238,9 @@ test("put rejects invalid from.type task", async () => {
     () =>
       store.put({
         ttlSeconds: 60,
-        from: { type: "task", project: "_default", stem: "a/b" },
+        from: { type: "task", id: "a/b", project: "_default" },
         files,
       }),
-    /from\.stem/,
+    /from\.id/,
   );
 });

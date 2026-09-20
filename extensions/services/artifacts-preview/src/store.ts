@@ -153,7 +153,12 @@ export function createArtifactStore(options: {
         return null;
       }
       try {
-        parsed.from = parseArtifactFrom(parsed.from);
+        const from = parseArtifactFrom(parsed.from);
+        if (from) {
+          parsed.from = from;
+        } else {
+          delete parsed.from;
+        }
       } catch {
         return null;
       }
@@ -221,9 +226,12 @@ export function createArtifactStore(options: {
         await writePrivateFile(dest, bytes);
       }
 
-      const meta: ArtifactMeta = { id, entry, expiresAt, from };
+      const meta: ArtifactMeta = { id, entry, expiresAt };
+      if (from) {
+        meta.from = from;
+      }
       await writePrivateFile(metaPath(id), `${JSON.stringify(meta)}\n`);
-      return { id, expiresAt, entry, from };
+      return from ? { id, expiresAt, entry, from } : { id, expiresAt, entry };
     },
 
     async getMeta(id) {

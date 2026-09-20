@@ -38,16 +38,18 @@ export async function publishArtifact(options: {
   files: PublishFile[];
   ttlSeconds: number;
   entry?: string;
-  from: ArtifactFrom;
+  from?: ArtifactFrom;
   fetch: typeof fetch;
 }): Promise<PublishResult> {
   const body: Record<string, unknown> = {
     ttlSeconds: options.ttlSeconds,
     files: options.files,
-    from: options.from,
   };
   if (options.entry) {
     body.entry = options.entry;
+  }
+  if (options.from) {
+    body.from = options.from;
   }
   const response = await options.fetch(`${options.baseUrl.replace(/\/$/, "")}/artifacts`, {
     method: "POST",

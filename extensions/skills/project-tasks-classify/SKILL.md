@@ -49,10 +49,10 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks project review-page --from /
    4. 若人需要可达 URL（手机 / 另一台机器），再发布，不要假定 localhost：
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts artifacts publish <绝对 HTML 路径> --from-type skill --from-name project-tasks-classify
+pnpm --filter edges-cli exec tsx src/index.ts artifacts publish <绝对 HTML 路径>
 ```
 
-      来源是本 Skill 就用上面的 `--from-type skill --from-name project-tasks-classify`。若这条预览的来源是看板 Task，改用 `--from-type task --task-project <slug> --task-stem <stem>`（不要同时带 `--from-name`）。解析 stdout：`command` 为 `artifacts.publish`，把 `url` 给人。告诉人用 **系统浏览器**（Chrome / Safari / Firefox）打开该 URL。手机必须用 ECS / 公开的 `EDGES_ARTIFACTS_BASE_URL`，不能给 `localhost`。未 `edges artifacts init`、或服务没起来时，说明缺口，不要手搓上传。不要用聊天 HTML 预览当闸门——Grok Bot 预览里拖拽不可靠，见 `knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`。本步不实现审阅结果回传 Agent 客户端。
+      若这条预览的来源是看板 Task，再加上 `--from-type task --from-id <stem> --task-project <slug>`（`from.id` 是 task stem）。没有 Task 关联就不要带 `from` 相关 flag。不要用 `--from-name` / `--task-stem`，也不要写 `--from-type skill`。解析 stdout：`command` 为 `artifacts.publish`，把 `url` 给人。告诉人用 **系统浏览器**（Chrome / Safari / Firefox）打开该 URL。手机必须用 ECS / 公开的 `EDGES_ARTIFACTS_BASE_URL`，不能给 `localhost`。未 `edges artifacts init`、或服务没起来时，说明缺口，不要手搓上传。不要用聊天 HTML 预览当闸门——Grok Bot 预览里拖拽不可靠，见 `knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`。本步不实现审阅结果回传 Agent 客户端。
    5. **停止。** 等人在页上拖拽改组、点「复制导出 JSON」，把导出数组贴回聊天。在此之前不要 `project create` / `update --project`。
 
    恢复后校验贴回的审阅导出行：每行含 `stem`、`current`、`suggested`、`action`，`note` 可缺省或为空串。`action` 为 `keep`（`suggested === current`）或 `move`。页上**没有** `create-then-move`；若 `suggested` 还不在 `project list` 里，第 5 步仍可先 `project create` 再 `update --project`。校验失败就停，不要猜。

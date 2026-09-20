@@ -144,7 +144,7 @@ export function createArtifactsServer(options: ServerOptions): http.Server {
           id: created.id,
           url: `${baseUrl}/artifacts/${created.id}/`,
           expiresAt: created.expiresAt,
-          from: created.from,
+          ...(created.from ? { from: created.from } : {}),
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
