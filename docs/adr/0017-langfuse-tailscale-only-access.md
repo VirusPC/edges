@@ -9,7 +9,7 @@ ADR 0014 把 v1 宿主定在 minigtr，并写过「访问走已有 Tailscale」�
 ## Decision
 
 - **v1 访问面：仅 Tailscale。** 不在本轮做公网入口、Funnel、或反代证书。
-- **没有 Tailscale 时的后果：** 在公网 HTTPS 后续落地之前，访问实际上只剩 minigtr 本机 localhost / 所在局域网。不要把「没开 Tailscale 也能从外面打开」当成 v1 能力。
+- **接受无 Tailscale 时的缺口。** 2026-09-20 第三轮确认：公网 HTTPS 落地之前，没有 Tailscale 就只剩 minigtr 本机 localhost / 所在局域网。这是接受的可达性，不是缺陷清单上的「必须立刻补」。不要把「没开 Tailscale 也能从外面打开」当成 v1 能力。
 - **本轮范围：** 只记决策。不部署、不写 Tailscale 地址或 MagicDNS 当给人用的公网网址。
 
 ## Considered Options
@@ -17,6 +17,11 @@ ADR 0014 把 v1 宿主定在 minigtr，并写过「访问走已有 Tailscale」�
 - v1 就上公网 HTTPS（反代 + 证书）：否决本轮；需要，但设备不总开 Tailscale 是后续动机，不是现在做。
 - 把 Tailscale Funnel / 其他公网隧道当 v1：否决；与「仅 Tailscale」同轮冲突。
 - 假定人人随时在 tailnet 上：否决；这正是后续 HTTPS 的理由，不能拿来假装 v1 已覆盖。
+
+## Consequences
+
+- 直到公网 HTTPS 后续落地：场外设备要么在 tailnet 上，要么打不开。localhost / 局域网只覆盖人在 minigtr 旁边或同一 LAN 的情况。
+- 不为此提前做 Funnel 或反代；后续仍是 ADR 0017 的 Follow-up，不是本轮实现。
 
 ## Follow-up（未做）
 
