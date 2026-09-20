@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-18
+
 ### 任务看板与项目
 
 - 跨 Agent 接力的工作项看板改到 [`knowledge/tasks/`](knowledge/tasks/)。原来 `knowledge/todos/` 里的条目已经改成现在的任务记录格式并迁了过来；旧目录已删除，没有再留跳转说明。
@@ -88,6 +90,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 办公文档（`.docx` / `.xlsx` / `.pptx`）入库。
 - 未公开的专利交底材料。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/VirusPC/edges/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/releases/tag/v1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/v1.0.0
