@@ -1,5 +1,11 @@
 # SSH into Aliyun ECS and reset the full-repo checkout to origin/main.
 # ECS can reach GitHub over HTTPS; do not rsync-push a path subset.
+# After pull: edges artifacts server install, then restart, if the server env
+# file exists. Never a combined install-and-start. nginx is usually unchanged
+# (do not call setup-nginx from this Action).
+# Fallback if git fetch from ECS is flaky: from a machine that can reach both
+# GitHub and the box, tar the full repo over SSH, then the same two CLI
+# commands (or deploy/bootstrap.sh, which is that wrapper).
 name: Deploy teach site
 
 on:
@@ -51,4 +57,34 @@ jobs:
              git checkout main
              git reset --hard origin/main
              git --no-pager status -sb
-             git rev-parse HEAD'
+             git rev-parse HEAD
+             env_file="$HOME/.config/edges/artifacts-preview.env"
+             token=""
+             if [ -f "$env_file" ]; then
+               token="$(awk -F= '/^EDGES_ARTIFACTS_TOKEN=/{print substr($0, index($0,"=")+1); exit}' "$env_file")"
+             fi
+             if [ -n "$token" ] && [ "$token" != "replace-with-shared-token" ]; then
+               export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+               export PATH="${HOME}/.local/share/pnpm:${HOME}/.local/bin:/usr/local/bin:${PATH}"
+               if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
+                 export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+                 . "$NVM_DIR/nvm.sh"
+               fi
+               if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -S "${XDG_RUNTIME_DIR}/bus" ]; then
+                 export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+               fi
+               # Pull already succeeded. Failure here fails the job so a
+               # dead artifacts unit is visible; teach files are already new.
+               if ! command -v edges >/dev/null 2>&1; then
+                 pnpm install --frozen-lockfile --filter edges-cli...
+               fi
+               if command -v edges >/dev/null 2>&1; then
+                 edges artifacts server install
+                 edges artifacts server restart
+               else
+                 pnpm --filter edges-cli exec -- tsx src/index.ts artifacts server install
+                 pnpm --filter edges-cli exec -- tsx src/index.ts artifacts server restart
+               fi
+             else
+               echo "skip artifacts server: $env_file missing or token unused (one-time: artifacts-preview README)"
+             fi'

@@ -8,7 +8,8 @@
 <!-- project-memory-entries:start -->
 - [放弃的 ChatGPT MCP 接入](project_abandoned_chatgpt_mcp.md) — 2026-02-19 建过两条空的 ChatGPT MCP change，没有设计可恢复；若再做从当前 MCP 布局重开。
 - [理想链路：AGENTS.md → Skill → CLI](project_agents_md_to_skill_to_cli.md) — peng cheng 理想发现链路——读目录 AGENTS.md，被指引到可加载 Skill，再由统一 Skill 调用 edges CLI；记忆 skills 类型不是自动加载层。
-- [个人 Artifacts 预览服务：上传→URL→TTL](project_artifacts_preview_service.md) — 改 Artifacts 预览服务、edges artifacts、或审阅页如何给人打开时打开：稳定短生命周期托管 + 真浏览器可开 URL；服务在 extensions/services/artifacts-preview；CLI 是 edges artifacts init|publish|rm；from 可选且 v1 只允许 type=task 的 id+project；review-page 仍只渲染；结果回传另卡。决策见 docs/adr/0013-artifacts-preview-service.md。
+- [Artifacts 预览 ECS：user unit + nginx :80](project_artifacts_preview_ecs_ops.md) — 改 artifacts 在阿里云 ECS 上怎么跑、或要不要给 8787 开安全组时打开：和 teach 同机；人机接口是 edges artifacts server（install 不启动 / start|stop|restart / status / setup-nginx）；轮换 token 必须再 restart；客户端 init --token；不要公网 8787。
+- [个人 Artifacts 预览服务：上传→URL→TTL](project_artifacts_preview_service.md) — 改 Artifacts 预览服务、edges artifacts、或审阅页如何给人打开时打开：稳定短生命周期托管 + 真浏览器可开 URL；聊天内嵌预览是绕开的不可靠路径；review-page 仍只渲染；结果回传另卡。ECS 手机 URL 走与 teach 同机的 :80 反代，不要假定 localhost。决策见 docs/adr/0013-artifacts-preview-service.md。
 - [能力面：CLI / Skill / MCP](project_capability_surface_cli_skill_mcp.md) — 能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 extensions/clis 的 TS；MCP 子进程调 edges note。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。
 - [Changelog 自动化：调研过，暂不生成正文](project_changelog_automation.md) — 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。
 - [classifyTasks 与 Task Project 元数据](project_classify_tasks_and_project_metadata.md) — 实现或改 edges tasks project / project-tasks-classify Skill 时打开：能力面 CLI + Skill + MCP；按用户已设质心做 LLM / agent 判断；无 embedding、无 classify 动词。第 4 步人闸是 project review-page（Markdown 表仅无 GUI 回退）。四个 project 动词都会 ensure。Skill 目录/id 是 project-tasks-classify（展示名 classifyTasks）。
@@ -42,6 +43,6 @@
 - [Task Project 审阅页是 render-only CLI](project_task_project_review_page_render_only_cli.md) — 改 classifyTasks / proposeTypes 人闸或 edges tasks project review-page 时打开：CLI 只渲通用 groups+items HTML（已落地）；Skill 出建议、现有 create/update 落地；无 --mode、无 classify/apply-review 动词、无审阅页 MCP。托管/发布见 ADR 0013，不要把 publish 并进 review-page。决策见 docs/adr/0012-task-project-review-page-is-render-only-cli.md。
 - [tasks 只追加直接推 main](project_tasks_direct_main.md) — 往 knowledge/tasks/ 写只追加速记时，直接提交 main、不提 PR
 - [工作项叫 tasks，支持状态流转](project_tasks_with_status_not_todos.md) — idea→专家→Cloud 工作流下，目录与概念用 knowledge/tasks/（非 todos），按 Task Project 再按 edges-tasks-status 分夹流转
-- [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push.md) — 改 teach 站点或 ECS 上的 edges 部署时：用 GitHub Actions SSH 触发整仓 git fetch/reset，不要再 rsync 推送；deploy job 保持 environment: production，根 README 保留工作流徽章。
+- [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push.md) — 改 teach 站点或 ECS 上的 edges 部署时：用 GitHub Actions SSH 触发整仓 git fetch/reset，不要再 rsync 推送；deploy job 保持 environment: production，根 README 保留工作流徽章。artifacts 仅在盒上已有 server env 时于 pull 后 bootstrap。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks_direct_main
 <!-- project-memory-entries:end -->

@@ -46,6 +46,33 @@ test("artifacts init writes config and prints what the server needs", async () =
   assert.ok(token && token.length === 64);
   assert.match(result.stderr, /EDGES_ARTIFACTS_TOKEN=/);
   assert.match(result.stderr, /Phone review needs a reachable URL/);
+  assert.doesNotMatch(result.stderr, /EDGES_ARTIFACTS_HOST=0\.0\.0\.0/);
+});
+
+test("artifacts init --token writes the shared server token", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-cli-"));
+  const configPath = path.join(dir, "artifacts.env");
+  const token = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+  const result = await run(
+    [
+      "artifacts",
+      "init",
+      "--config",
+      configPath,
+      "--base-url",
+      "http://182.92.131.89",
+      "--token",
+      token,
+    ],
+    { env: { HOME: dir } },
+  );
+  assert.equal(result.exitCode, 0, result.stderr);
+  const payload = JSON.parse(result.stdout) as { tokenCreated: boolean; baseUrl: string };
+  assert.equal(payload.tokenCreated, false);
+  assert.equal(payload.baseUrl, "http://182.92.131.89");
+  const raw = await readFile(configPath, "utf8");
+  assert.match(raw, new RegExp(`EDGES_ARTIFACTS_TOKEN=${token}`));
+  assert.match(raw, /EDGES_ARTIFACTS_BASE_URL=http:\/\/182\.92\.131\.89/);
 });
 
 test("artifacts publish happy path posts JSON and prints the public URL", async () => {
