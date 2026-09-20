@@ -17,12 +17,12 @@ Artifacts 预览和 teach **同机、同一次整仓 pull**。Node 进程走 `ch
 ## 人要做的一次性动作
 
 1. 盒上装好 Node ≥ 20 与 pnpm（user PATH）。
-2. `edges artifacts server install`（写 env、装 unit，不启动）。本机用同一 token：`edges artifacts init --base-url http://182.92.131.89`。
+2. `edges artifacts server install`（写 env、装 unit，不启动）。本机用同一 token：`edges artifacts init --base-url http://182.92.131.89 --token <printed token>`。
 3. `edges artifacts server start`（不要和 install 合成一步）。
 4. `edges artifacts server setup-nginx`。
 5. `edges artifacts server status`；盒上 `curl http://127.0.0.1:8787/health`；外网 `curl http://182.92.131.89/health`；再确认 `/teaching/` 仍在。
 
-之后每次 main 部署：现有 `deploy-teach.yml` 在 pull 之后，若 env 文件在就 `install` 再 `restart`（构建/unit 没变也可以只 `restart`）；nginx 通常不用再跑。轮换 token：`edges artifacts server install --force`，然后本机重新 init。
+之后每次 main 部署：现有 `deploy-teach.yml` 在 pull 之后，若 env 文件在且 token 不是占位符，就 `install` 再 `restart`（构建/unit 没变也可以只 `restart`）；nginx 通常不用再跑。轮换 token：`install --force` → `restart` → 本机 `edges artifacts init --base-url http://182.92.131.89 --token <printed token> --force`。
 
 ## 交叉
 

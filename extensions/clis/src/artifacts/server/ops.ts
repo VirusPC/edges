@@ -170,6 +170,16 @@ export async function installArtifactsServer(options: ServerOpsDeps & {
   };
 }
 
+function shellSingleQuote(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+function isSudoAuthFailure(text: string): boolean {
+  return /password is required|a terminal is required|no tty|not in the sudoers|may not run sudo|command not found|ENOENT/i.test(
+    text,
+  );
+}
+
 export async function setupNginxArtifacts(options: ServerOpsDeps & {
   repoRoot?: string;
 }): Promise<{ applied: boolean; sudo: boolean; command: string }> {
@@ -177,8 +187,16 @@ export async function setupNginxArtifacts(options: ServerOpsDeps & {
   const run = options.runCommand ?? defaultRunCommand;
   const repoRoot = options.repoRoot?.trim() || resolveRepoRoot(env);
   const script = path.join(artifactsDeployDir(repoRoot), "setup-nginx-artifacts.sh");
-  const command = `sudo bash ${script}`;
+  const command = `sudo bash ${shellSingleQuote(script)}`;
   const uid = (options.getUid ?? (() => process.getuid?.() ?? 1000))();
+  const needsRoot = () =>
+    new ArtifactsError(
+      "UNKNOWN_ERROR",
+      [
+        "setup-nginx needs root to write nginx config (does not change /teaching/).",
+        `Run: ${command}`,
+      ].join(" "),
+    );
 
   if (uid === 0) {
     const result = await run("bash", [script], { env });
@@ -196,17 +214,21 @@ export async function setupNginxArtifacts(options: ServerOpsDeps & {
     if (escalated.exitCode === 0) {
       return { applied: true, sudo: true, command };
     }
-  } catch {
-    // sudo missing or cannot run non-interactively
+    const detail = escalated.stderr.trim() || escalated.stdout.trim();
+    if (!detail || isSudoAuthFailure(detail)) {
+      throw needsRoot();
+    }
+    throw new ArtifactsError("UNKNOWN_ERROR", detail);
+  } catch (error) {
+    if (error instanceof ArtifactsError) {
+      throw error;
+    }
+    const detail = error instanceof Error ? error.message : String(error);
+    if (isSudoAuthFailure(detail)) {
+      throw needsRoot();
+    }
+    throw new ArtifactsError("UNKNOWN_ERROR", detail);
   }
-
-  throw new ArtifactsError(
-    "UNKNOWN_ERROR",
-    [
-      "setup-nginx needs root to write nginx config (does not change /teaching/).",
-      `Run: ${command}`,
-    ].join(" "),
-  );
 }
 
 async function unitStatus(run: RunCommand, env: NodeJS.ProcessEnv): Promise<string> {

@@ -51,8 +51,9 @@ test("README is CLI-first and documents the locked server surface", async () => 
   assert.match(readme, /edges artifacts server start/);
   assert.match(readme, /edges artifacts server setup-nginx/);
   assert.match(readme, /edges artifacts server status/);
-  assert.match(readme, /edges artifacts init --base-url http:\/\/182\.92\.131\.89/);
+  assert.match(readme, /edges artifacts init --base-url http:\/\/182\.92\.131\.89 --token/);
   assert.match(readme, /install --force/);
+  assert.match(readme, /server restart/);
   assert.doesNotMatch(readme, /edges artifacts server init/);
   assert.doesNotMatch(readme, /nginx-snippet|nginx-setup|configure-proxy/);
 });
@@ -118,6 +119,7 @@ test("deploy-teach.yml still full-repo pulls then CLI-installs and restarts arti
   const workflow = await readFile(path.join(repoRoot, ".github/workflows/deploy-teach.yml"), "utf8");
   assert.match(workflow, /git reset --hard origin\/main/);
   assert.match(workflow, /artifacts-preview\.env/);
+  assert.match(workflow, /replace-with-shared-token/);
   assert.match(workflow, /artifacts server install/);
   assert.match(workflow, /artifacts server restart/);
   assert.doesNotMatch(workflow, /nginx-snippet|nginx-setup|configure-proxy/);

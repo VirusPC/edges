@@ -9,7 +9,7 @@ Phone review needs a **reachable** `EDGES_ARTIFACTS_BASE_URL` (ECS / public host
 ## Run locally
 
 ```bash
-# 1. Create ~/.config/edges/artifacts.env and print the server env
+# 1. Create ~/.config/edges/artifacts.env (local token + base URL)
 pnpm --filter edges-cli exec tsx src/index.ts artifacts init
 
 # 2. Start this service with the printed token
@@ -96,8 +96,7 @@ curl -fsS -X POST http://182.92.131.89/artifacts \
 Use the **same token** as the server env file:
 
 ```bash
-edges artifacts init --base-url http://182.92.131.89
-# then paste the server token into ~/.config/edges/artifacts.env
+edges artifacts init --base-url http://182.92.131.89 --token <token from server install>
 
 edges artifacts publish /tmp/review.html
 ```
@@ -112,7 +111,7 @@ If the unit files did not change, `restart` alone is enough; `install` then `res
 
 If `git fetch` from the ECS is flaky: keep the Action as primary (it already works for teach). Fallback is a full-repo tar over SSH from a machine that can reach both GitHub and the box, then the same CLI verbs (or `deploy/bootstrap.sh`, a thin wrapper of `install` then `restart`) — do not rsync a path subset.
 
-Rotate the token: `edges artifacts server install --force`, then client re-init with the printed token.
+Rotate the token: `edges artifacts server install --force`, then `edges artifacts server restart`, then client `edges artifacts init --base-url http://182.92.131.89 --token <printed token> --force`.
 
 Server env (see [`deploy/artifacts.env.example`](deploy/artifacts.env.example)):
 

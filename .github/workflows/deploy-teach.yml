@@ -59,7 +59,11 @@ jobs:
              git --no-pager status -sb
              git rev-parse HEAD
              env_file="$HOME/.config/edges/artifacts-preview.env"
+             token=""
              if [ -f "$env_file" ]; then
+               token="$(awk -F= '/^EDGES_ARTIFACTS_TOKEN=/{print substr($0, index($0,"=")+1); exit}' "$env_file")"
+             fi
+             if [ -n "$token" ] && [ "$token" != "replace-with-shared-token" ]; then
                export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
                export PATH="${HOME}/.local/share/pnpm:${HOME}/.local/bin:/usr/local/bin:${PATH}"
                if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
@@ -82,5 +86,5 @@ jobs:
                  pnpm --filter edges-cli exec -- tsx src/index.ts artifacts server restart
                fi
              else
-               echo "skip artifacts server: $env_file not found (one-time: artifacts-preview README)"
+               echo "skip artifacts server: $env_file missing or token unused (one-time: artifacts-preview README)"
              fi'

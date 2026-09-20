@@ -48,7 +48,10 @@ Laptop client (same token as the server env):
   edges artifacts publish <path>
   edges artifacts rm <id|url>
 
-Rotate token: edges artifacts server install --force, then client re-init.
+Rotate token:
+  edges artifacts server install --force
+  edges artifacts server restart
+  edges artifacts init --base-url http://182.92.131.89 --token <printed token> --force
 `;
 
 async function listenTarget(env: NodeJS.ProcessEnv, configPath?: string): Promise<{ host: string; port: number }> {
@@ -65,28 +68,35 @@ function installStderr(installed: {
   tokenCreated: boolean;
   tokenRotated: boolean;
 }): string {
-  const lines = [
-    installed.tokenCreated
-      ? "Created server env. Share this token with the laptop client:"
-      : installed.tokenRotated
-        ? "Rotated server token. Re-init the laptop client with this token:"
-        : "Server env exists (token unchanged). Unit installed and enabled. Not started.",
-  ];
-  if (installed.tokenCreated || installed.tokenRotated) {
-    lines.push(`  EDGES_ARTIFACTS_TOKEN=${installed.token}`);
-    lines.push(`  EDGES_ARTIFACTS_BASE_URL=${installed.baseUrl}`);
-    lines.push("");
-    lines.push("Laptop client (same token):");
-    lines.push(`  edges artifacts init --base-url ${installed.baseUrl}`);
-    lines.push("  then paste the token into ~/.config/edges/artifacts.env");
+  if (installed.tokenCreated) {
+    return [
+      "Created server env. Share this token with the laptop client:",
+      `  EDGES_ARTIFACTS_TOKEN=${installed.token}`,
+      `  EDGES_ARTIFACTS_BASE_URL=${installed.baseUrl}`,
+      "",
+      "Laptop client (same token):",
+      `  edges artifacts init --base-url ${installed.baseUrl} --token ${installed.token}`,
+      "",
+      "Unit installed and enabled. Not started.",
+      "Next: edges artifacts server start",
+      "Then: edges artifacts server setup-nginx",
+      "Then: edges artifacts server status",
+      "",
+    ].join("\n");
   }
-  lines.push("");
-  lines.push("Unit installed and enabled. Not started.");
-  lines.push("Next: edges artifacts server start");
-  lines.push("Then: edges artifacts server setup-nginx");
-  lines.push("Then: edges artifacts server status");
-  lines.push("");
-  return lines.join("\n");
+  if (installed.tokenRotated) {
+    return [
+      "Rotated server token. Reload the unit, then re-init the laptop client:",
+      `  EDGES_ARTIFACTS_TOKEN=${installed.token}`,
+      `  EDGES_ARTIFACTS_BASE_URL=${installed.baseUrl}`,
+      "",
+      "Unit installed and enabled. Not started.",
+      "Next: edges artifacts server restart",
+      `Then: edges artifacts init --base-url ${installed.baseUrl} --token ${installed.token} --force`,
+      "",
+    ].join("\n");
+  }
+  return "Server env exists (token unchanged). Unit installed and enabled. Not started.\n";
 }
 
 export function addArtifactsServerCommand(artifacts: Command, ctx: CliContext): void {

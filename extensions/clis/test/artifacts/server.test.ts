@@ -108,6 +108,46 @@ test("installArtifactsServer creates env when missing and does not start", async
   assert.ok(!calls.some((line) => /\b(start|restart|stop)\b/.test(line)));
 });
 
+test("installArtifactsServer --force rotates the token without starting", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-ops-"));
+  const repo = path.join(dir, "repo");
+  const deploy = path.join(repo, "extensions/services/artifacts-preview/deploy");
+  await mkdir(deploy, { recursive: true });
+  await writeFile(
+    path.join(deploy, "edges-artifacts-preview.service"),
+    "[Unit]\nDescription=test\n[Service]\nExecStart=/bin/true\n[Install]\nWantedBy=default.target\n",
+  );
+  const envFile = path.join(dir, "artifacts-preview.env");
+  const original = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+  await writeFile(
+    envFile,
+    [
+      `EDGES_ARTIFACTS_TOKEN=${original}`,
+      "EDGES_ARTIFACTS_BASE_URL=http://182.92.131.89",
+      "EDGES_ARTIFACTS_HOST=127.0.0.1",
+      "EDGES_ARTIFACTS_PORT=8787",
+      `EDGES_ARTIFACTS_DATA_DIR=${path.join(dir, "data")}`,
+      "",
+    ].join("\n"),
+    { mode: 0o600 },
+  );
+  const calls: string[] = [];
+  const result = await installArtifactsServer({
+    env: { HOME: dir },
+    envFile,
+    repoRoot: repo,
+    force: true,
+    runCommand: async (command, args) => {
+      calls.push([command, ...args].join(" "));
+      return { exitCode: 0, stdout: "ok\n", stderr: "" };
+    },
+  });
+  assert.equal(result.started, false);
+  assert.equal(result.tokenRotated, true);
+  assert.notEqual(result.token, original);
+  assert.ok(!calls.some((line) => /\b(start|restart|stop)\b/.test(line)));
+});
+
 test("installArtifactsServer builds and enables the unit without starting it", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-ops-"));
   const repo = path.join(dir, "repo");
@@ -233,8 +273,36 @@ test("setupNginxArtifacts prints exact sudo command when not root", async () => 
       }),
     (error: unknown) => {
       assert.ok(error instanceof Error);
-      assert.match(error.message, new RegExp(`sudo bash ${script.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
+      assert.match(error.message, /sudo bash '/);
+      assert.match(error.message, /setup-nginx-artifacts\.sh/);
       assert.doesNotMatch(error.message, /location = \/health|nginx-snippet/);
+      return true;
+    },
+  );
+});
+
+test("setupNginxArtifacts surfaces script failure when passwordless sudo ran", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-nginx-"));
+  const repo = path.join(dir, "repo");
+  const deploy = path.join(repo, "extensions/services/artifacts-preview/deploy");
+  await mkdir(deploy, { recursive: true });
+  await writeFile(path.join(deploy, "setup-nginx-artifacts.sh"), "#!/bin/bash\n");
+  await assert.rejects(
+    () =>
+      setupNginxArtifacts({
+        env: { HOME: dir },
+        repoRoot: repo,
+        getUid: () => 1000,
+        runCommand: async () => ({
+          exitCode: 1,
+          stdout: "",
+          stderr: "nginx: [emerg] unexpected end of file",
+        }),
+      }),
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.match(error.message, /nginx: \[emerg\] unexpected end of file/);
+      assert.doesNotMatch(error.message, /setup-nginx needs root/);
       return true;
     },
   );

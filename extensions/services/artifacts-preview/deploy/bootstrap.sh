@@ -27,6 +27,8 @@ if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
 fi
 
 [ -f "$ENV_FILE" ] || die "missing $ENV_FILE — run: edges artifacts server install"
+token="$(awk -F= '/^EDGES_ARTIFACTS_TOKEN=/{print substr($0, index($0,"=")+1); exit}' "$ENV_FILE")"
+[ -n "$token" ] && [ "$token" != "replace-with-shared-token" ] || die "unusable token in $ENV_FILE — run: edges artifacts server install"
 command -v node >/dev/null 2>&1 || die "node not on PATH (need Node >= 20 on this box)"
 command -v pnpm >/dev/null 2>&1 || die "pnpm not on PATH (corepack enable && corepack prepare pnpm@latest --activate)"
 
