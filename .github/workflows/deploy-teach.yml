@@ -59,6 +59,8 @@ jobs:
              env_file="$HOME/.config/edges/artifacts-preview.env"
              if [ -f "$env_file" ]; then
                export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+               # Pull already succeeded. Failure here fails the job so a
+               # dead artifacts unit is visible; teach files are already new.
                bash extensions/services/artifacts-preview/deploy/bootstrap.sh
              else
                echo "skip artifacts bootstrap: $env_file not found (one-time: artifacts-preview README)"

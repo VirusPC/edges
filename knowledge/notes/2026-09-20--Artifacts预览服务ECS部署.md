@@ -4,7 +4,7 @@ Teach 站点部署经验的 sibling（对照 [`2026-09-08--Teach站点部署与�
 
 ## 结论
 
-Artifacts 预览和 teach **同机、同一次整仓 pull**。Node 进程走 `cheng-dev` 的 systemd **user** unit（8787 只绑 127.0.0.1）；公网仍走已有 :80。人跑一次带 sudo 的 `setup-nginx-artifacts.sh`（和当年 `~/setup-teach-nginx80.sh` 同一限制：助手注不进 sudo 密码）。`/teaching/` 不动。给手机的 BASE_URL 写公网 IP 的 http，不写 Mesh 主机名，也不在备案完成前把域名当可用入口。
+Artifacts 预览和 teach **同机、同一次整仓 pull**。Node 进程走 `cheng-dev` 的 systemd **user** unit（8787 只绑 127.0.0.1）；公网仍走已有 :80。nginx 必须同时接住 `POST /artifacts`（无尾斜杠，CLI publish）和 `GET /artifacts/<uuid>/`。人跑一次带 sudo 的 `setup-nginx-artifacts.sh`（和当年 `~/setup-teach-nginx80.sh` 同一限制：助手注不进 sudo 密码）。`/teaching/` 不动。给手机的 BASE_URL 写公网 IP 的 http，不写 Mesh 主机名，也不在备案完成前把域名当可用入口。
 
 ## 已核实的约束（不要再发明）
 

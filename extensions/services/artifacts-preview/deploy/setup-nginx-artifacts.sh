@@ -29,34 +29,7 @@ install -m 644 "$SNIPPET_SRC" "$SNIPPET_DST"
 stamp="$(date +%Y%m%d%H%M%S)"
 cp -a "$TEACH_CONF" "${TEACH_CONF}.bak.artifacts.${stamp}"
 
-python3 - "$TEACH_CONF" "$INCLUDE_LINE" <<'PY'
-import pathlib
-import re
-import sys
-
-path = pathlib.Path(sys.argv[1])
-include_line = sys.argv[2]
-text = path.read_text()
-if "edges-artifacts-proxy.conf" in text:
-    print(f"{path} already includes edges-artifacts-proxy.conf")
-    raise SystemExit(0)
-
-pattern = re.compile(r"^([ \t]*)server[ \t]*\{", re.M)
-if not pattern.search(text):
-    raise SystemExit(f"no server {{ block in {path}")
-
-def inject(match: re.Match[str]) -> str:
-    indent = match.group(1) + "    "
-    return (
-        f"{match.group(0)}\n"
-        f"{indent}# edges artifacts preview: /health and /artifacts/ only; keep /teaching/\n"
-        f"{indent}{include_line}"
-    )
-
-updated = pattern.sub(inject, text, count=0)
-path.write_text(updated)
-print(f"inserted include into every server {{ in {path}")
-PY
+python3 "$SCRIPT_DIR/inject_nginx_include.py" "$TEACH_CONF" "$INCLUDE_LINE"
 
 if ! nginx -t; then
   mv "${TEACH_CONF}.bak.artifacts.${stamp}" "$TEACH_CONF"

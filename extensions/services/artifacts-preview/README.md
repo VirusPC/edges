@@ -77,6 +77,18 @@ curl -fsS -o /dev/null -w '%{http_code}\n' http://182.92.131.89/teaching/
 
 `/health` must be JSON `{"ok":true}`. `/teaching/` must still be the teach site.
 
+Write-path smoke (uses the shared token; do not paste the token into the repo):
+
+```bash
+# on a machine that has the token; expect 201 then a GET 200
+curl -fsS -X POST http://182.92.131.89/artifacts \
+  -H "authorization: Bearer $EDGES_ARTIFACTS_TOKEN" \
+  -H "content-type: application/json" \
+  -d '{"files":[{"path":"index.html","content":"<html>ok</html>"}]}'
+```
+
+`edges artifacts publish` is the same `POST /artifacts` (no trailing slash). If that 301s to `/artifacts/`, the nginx snippet is wrong.
+
 ### Laptop / local CLI (publish client)
 
 Use the **same token** as the server env file:
@@ -94,7 +106,7 @@ edges artifacts publish /tmp/review.html
 
 ### After each main pull
 
-GitHub Actions [`.github/workflows/deploy-teach.yml`](../../../.github/workflows/deploy-teach.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). After this change it also runs `deploy/bootstrap.sh` when `~/.config/edges/artifacts-preview.env` exists (skipped until the one-time token file is in place, so teach deploys stay green).
+GitHub Actions [`.github/workflows/deploy-teach.yml`](../../../.github/workflows/deploy-teach.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). It runs `deploy/bootstrap.sh` **only when** `~/.config/edges/artifacts-preview.env` exists (skipped until the one-time token file is in place, so teach deploys stay green). After the env exists, a bootstrap failure fails the job so the restart is visible; the tree is already at `origin/main`.
 
 If `git fetch` from the ECS is flaky: keep the Action as primary (it already works for teach). Fallback is a full-repo tar over SSH from a machine that can reach both GitHub and the box, then `bootstrap.sh` on the box — do not rsync a path subset.
 

@@ -21,6 +21,14 @@ die() {
   exit 1
 }
 
+# Non-interactive SSH often has no nvm/corepack on PATH.
+export PATH="${HOME}/.local/share/pnpm:${HOME}/.local/bin:/usr/local/bin:${PATH}"
+if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
+  export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+  # shellcheck disable=SC1091
+  . "$NVM_DIR/nvm.sh"
+fi
+
 [ -f "$ENV_FILE" ] || die "missing $ENV_FILE — copy deploy/artifacts.env.example, set EDGES_ARTIFACTS_TOKEN, chmod 0600"
 if grep -Eq '^[[:space:]]*EDGES_ARTIFACTS_TOKEN=replace-with-shared-token[[:space:]]*$' "$ENV_FILE"; then
   die "$ENV_FILE still has the placeholder token"

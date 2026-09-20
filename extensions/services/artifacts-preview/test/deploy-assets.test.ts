@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { access, constants, readFile } from "node:fs/promises";
+import { spawnSync } from "node:child_process";
+import { mkdtemp, readFile, rm, writeFile, access, constants } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,11 +15,14 @@ async function readDeploy(name: string): Promise<string> {
   return readFile(path.join(deployDir, name), "utf8");
 }
 
-test("deploy nginx snippet proxies /health and /artifacts/ without stealing /teaching/", async () => {
+test("deploy nginx snippet proxies /health, POST /artifacts, and /artifacts/ without stealing /teaching/", async () => {
   const conf = await readDeploy("nginx-artifacts-proxy.conf");
   assert.match(conf, /location\s+=\s+\/health\s*\{/);
+  assert.match(conf, /location\s+=\s+\/artifacts\s*\{/);
   assert.match(conf, /location\s+\/artifacts\/\s*\{/);
-  assert.match(conf, /proxy_pass\s+http:\/\/127\.0\.0\.1:8787/);
+  assert.match(conf, /POST \/artifacts/);
+  assert.match(conf, /proxy_pass\s+http:\/\/127\.0\.0\.1:8787;/);
+  assert.doesNotMatch(conf, /proxy_pass\s+http:\/\/127\.0\.0\.1:8787\//);
   assert.match(conf, /\/teaching\//);
   assert.doesNotMatch(conf, /^\s*listen\s+/m);
   assert.doesNotMatch(conf, /^\s*default_server/m);
@@ -59,6 +64,41 @@ test("bootstrap and nginx setup scripts are executable and restart without inven
   assert.match(nginxSetup, /enable-linger/);
   assert.match(nginxSetup, /\/teaching\//);
   assert.match(nginxSetup, /edges-artifacts-proxy\.conf/);
+  assert.match(nginxSetup, /inject_nginx_include\.py/);
+});
+
+test("nginx include injector only patches server blocks that already serve /teaching/", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-nginx-"));
+  const confPath = path.join(dir, "teach.conf");
+  await writeFile(
+    confPath,
+    [
+      "server {",
+      "    listen 80 default_server;",
+      "    location /teaching/ { alias /var/www/teaching/; }",
+      "}",
+      "server {",
+      "    listen 8080;",
+      "    location /other/ { }",
+      "}",
+      "",
+    ].join("\n"),
+  );
+  const script = path.join(deployDir, "inject_nginx_include.py");
+  const includeLine = "include /etc/nginx/snippets/edges-artifacts-proxy.conf;";
+  const first = spawnSync("python3", [script, confPath, includeLine], { encoding: "utf8" });
+  assert.equal(first.status, 0, first.stderr);
+  const once = await readFile(confPath, "utf8");
+  assert.equal(once.split(includeLine).length - 1, 1);
+  assert.match(once, /location \/teaching\//);
+  assert.match(once, /listen 8080;/);
+  assert.doesNotMatch(once, /listen 8080;[\s\S]*edges-artifacts-proxy/);
+
+  const second = spawnSync("python3", [script, confPath, includeLine], { encoding: "utf8" });
+  assert.equal(second.status, 0, second.stderr);
+  assert.match(second.stdout, /already includes/);
+  assert.equal((await readFile(confPath, "utf8")).split(includeLine).length - 1, 1);
+  await rm(dir, { recursive: true, force: true });
 });
 
 test("deploy-teach.yml still full-repo pulls then bootstraps artifacts when env exists", async () => {

@@ -1,8 +1,7 @@
 [Unit]
 Description=Edges artifacts preview (ADR 0013)
 Documentation=https://github.com/VirusPC/edges/blob/main/extensions/services/artifacts-preview/README.md
-After=network-online.target
-Wants=network-online.target
+After=network.target
 ConditionPathExists=%h/.config/edges/artifacts-preview.env
 
 [Service]
