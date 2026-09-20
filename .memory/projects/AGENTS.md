@@ -20,7 +20,7 @@
 - [edges tasks 本轮只做 CLI](project_edges_tasks_cli.md) — 本轮 edges tasks 看板操作只做 CLI（list/get/create/update/status + 只读 runs/run-messages）；Skill 与 MCP 后做同一契约。决策见 ADR 0005。
 - [可扩展 Memory Type：LAYOUT 登记，不另开注册表](project_extensible_memory_types.md) — 可扩展 Memory Type：扩展面只在 LAYOUT，用 project-memory-add-type 登记；官方种子仍是六类。决策见 docs/adr/0006-extensible-project-memory-types.md。
 - [idea→task→专家→Cloud Agent→改状态](project_idea_todo_expert_cloud_loop.md) — 工作流：idea 记到 knowledge/tasks（Task 记录员）→ 有空时专家 Agent 细聊 → Cursor Cloud Agent 开发 → 开发完改 Task 状态
-- [v1 Langfuse 用官方 docker compose](project_langfuse_docker_compose.md) — 选自托管 Langfuse 的 v1 编排、或有人提出上 Kubernetes 时打开：用官方 docker compose（Postgres + Langfuse 栈），不用 k8s；本仓不提交带密钥的 compose。决策见 docs/adr/0016-langfuse-docker-compose.md。
+- [v1 Langfuse 用官方 docker compose](project_langfuse_docker_compose.md) — 选自托管 Langfuse 的 v1 编排、或有人提出上 Kubernetes 时打开：用官方 docker compose（文档里的 Postgres + Langfuse 栈及其官方依赖），不用 k8s；本仓不提交带密钥的 compose。决策见 docs/adr/0016-langfuse-docker-compose.md。
 - [自部署 Langfuse 与 Observation 产品卡分开](project_langfuse_infra_vs_observation_product.md) — 改自部署 Langfuse 卡、知识库 Observation 系统、或想把两者并成一条时打开：前者只做实例部署/运维/鉴权/备份；后者是 traces/logs/dashboard 产品语义。Observation 可日后消费该后端，不要合并。决策见 docs/adr/0015-langfuse-infra-vs-observation-product.md。
 - [记忆研究笔记落 knowledge/projects/memory](project_memory_research_notes_in_knowledge_projects.md) — 写 project-memory 的调研、优点、related work 等研究笔记时：落到 knowledge/projects/memory/；skill 层 .memory 只记协议与设计决策，不当成对外研究笔记落点。
 - [整仓 MIT，不拆 knowledge 许可证](project_mit_license.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。

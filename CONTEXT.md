@@ -65,11 +65,11 @@ _避免使用_：评测冒烟跑通、单次无对照的榜分数
 _避免使用_：Edge、研究笔记里的口头分数、任务描述里的声称结果
 
 **知识库 Observation 系统**：
-面向知识库运行时的 traces / logs / dashboard 产品语义：看到检索、读写、代理使用过程与异常；可以日后消费自托管 Langfuse，但不是该实例的部署运维。
-_避免使用_：自托管 Langfuse、自部署 Langfuse、Evaluation（打分裁判）、仓内 `observation/` 运营笔记目录（若指同一产品）
+面向知识库运行时的 traces / logs / dashboard 产品语义：看到检索、读写、代理使用过程与异常。
+_避免使用_：自托管 Langfuse、自部署 Langfuse（若指 Observation 产品）、Evaluation（打分裁判）、仓内 `observation/` 运营笔记目录（若指同一产品）
 
 **自托管 Langfuse**：
-自运维的 Langfuse 实例（看板卡「自部署 Langfuse」），用作 LLM/Agent 可观测后端候选；只覆盖该实例的部署、运维、鉴权与备份。
+自运维的 Langfuse 实例，用作 LLM/Agent 可观测后端候选。看板卡名是「自部署 Langfuse」。
 _避免使用_：知识库 Observation 系统、Observation 产品、Langfuse Cloud（若指 v1 部署目标）、云 VPS（若指 v1 宿主）
 
 **知识管理 Agent（Knowledge Management Agent）**：

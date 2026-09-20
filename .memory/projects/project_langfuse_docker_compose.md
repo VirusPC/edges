@@ -1,6 +1,6 @@
 ---
 name: project_langfuse_docker_compose
-description: 选自托管 Langfuse 的 v1 编排、或有人提出上 Kubernetes 时打开：用官方 docker compose（Postgres + Langfuse 栈），不用 k8s；本仓不提交带密钥的 compose。决策见 docs/adr/0016-langfuse-docker-compose.md。
+description: 选自托管 Langfuse 的 v1 编排、或有人提出上 Kubernetes 时打开：用官方 docker compose（文档里的 Postgres + Langfuse 栈及其官方依赖），不用 k8s；本仓不提交带密钥的 compose。决策见 docs/adr/0016-langfuse-docker-compose.md。
 metadata:
   edges-title: v1 Langfuse 用官方 docker compose
   edges-type: project
@@ -8,13 +8,13 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-20T11:18:29+00:00"
+  edges-updated-at: "2026-09-20T11:21:00+00:00"
 ---
 
-v1 自托管 Langfuse 用官方 docker compose（Postgres + Langfuse 栈），不用 Kubernetes。本轮不把 compose 路径、端口或密钥写入 CONTEXT 或本仓。
+v1 自托管 Langfuse 用官方 docker compose（文档里的 Postgres + Langfuse 栈及其官方依赖），不用 Kubernetes。本轮不把 compose 路径、端口或密钥写入 CONTEXT 或本仓。
 
 **Why:**
-2026-09-20 grill 确认（peng cheng）：v1 落在单台物理机 minigtr，K8s 引入集群运维却不带来 v1 需要的能力。跟官方栈，少一份私有编排清单。
+2026-09-20 grill 确认（peng cheng）：v1 落在单台物理机 minigtr，K8s 引入集群运维却不带来 v1 需要的能力。跟官方栈，少一份私有编排清单；组件清单以官方文档为准，不在 ADR 里 pin。
 
 **How to apply:**
 - 拉起实例跟官方 Langfuse compose 文档，不要先上 k8s / k3s。

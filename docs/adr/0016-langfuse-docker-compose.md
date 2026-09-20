@@ -1,6 +1,6 @@
 # v1 用官方 Langfuse docker compose，不用 Kubernetes
 
-自托管 Langfuse 的官方编排主要是 docker compose（Postgres + Langfuse 栈）与 Kubernetes。v1 落在单台物理机 minigtr（ADR 0014），K8s 会引入集群运维，却不带来 v1 需要的能力。2026-09-20 grill 确认（peng cheng）：v1 用官方 Langfuse docker compose，不用 Kubernetes。
+自托管 Langfuse 的官方编排主要是 docker compose 与 Kubernetes。v1 落在单台物理机 minigtr（ADR 0014），K8s 会引入集群运维，却不带来 v1 需要的能力。2026-09-20 grill 确认（peng cheng）：v1 用官方 Langfuse docker compose（文档里的 Postgres + Langfuse 栈及其官方依赖），不用 Kubernetes。
 
 **Status:** accepted（ADR 0016；grill 确认于 2026-09-20）
 
@@ -8,7 +8,7 @@
 
 ## Decision
 
-- **v1 编排：** 官方 Langfuse docker compose，栈内含 Postgres 与 Langfuse 服务。跟官方文档走，不自研编排。
+- **v1 编排：** 官方 Langfuse docker compose（文档里的 Postgres + Langfuse 栈及其官方依赖）。跟官方文档走，不自研编排、不在本 ADR 里 pin 组件清单。
 - **不用 Kubernetes。** 单机 v1 不值得开集群控制面；以后若要多机/高可用再另开决策。
 - **本仓不落 compose 真源。** 路径、端口、密钥不写进 `CONTEXT.md`，也不在本轮向仓库提交带密钥的 compose。本轮只记决策。
 

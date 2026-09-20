@@ -27,7 +27,8 @@
 | [`.memory/`](../.memory/) | 运营账本。观测提供证据；被采纳的决策、纠错与约束写进 `.memory`，不把本目录当成第二份决策库。 |
 | [`extensions/`](../extensions/README.md) | 接口层。观测可以记录某个 extension 在野外的表现；实现仍在 extensions。 |
 | [`evaluation/`](../evaluation/README.md) | 评测把假设做成可复现对照；本目录只记看到了什么。观测不是评测。 |
-| 自托管 Langfuse | 独立的观测后端候选（部署 / 运维 / 鉴权 / 备份），不是本目录，也不是看板「知识库 Observation 系统」。v1 决策见 [ADR 0014](../docs/adr/0014-self-hosted-langfuse-on-minigtr.md)、[ADR 0015](../docs/adr/0015-langfuse-infra-vs-observation-product.md)、[ADR 0016](../docs/adr/0016-langfuse-docker-compose.md)。产品卡可以日后消费该后端。 |
+
+自托管 Langfuse 是独立的观测后端候选，不是本目录，也不是看板「知识库 Observation 系统」。v1 决策见 [ADR 0014](../docs/adr/0014-self-hosted-langfuse-on-minigtr.md)、[ADR 0015](../docs/adr/0015-langfuse-infra-vs-observation-product.md)、[ADR 0016](../docs/adr/0016-langfuse-docker-compose.md)。产品卡可以日后消费该后端。
 
 ## 起步布局
 
