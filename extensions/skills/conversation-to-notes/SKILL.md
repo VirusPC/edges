@@ -1,7 +1,7 @@
 ---
 name: conversation-to-notes
 description: 将原始对话记录整理为结构清晰的中文笔记摘要。使用复盘四栏（背景→过程→所学→行动指南），灵感来自 After Action Review，但不是官方 AAR 模板。含补充说明（相关链接写入该栏并附简短说明）。
-version: 2.1.0
+version: 2.1.1
 ---
 
 将原始对话记录整理为结构清晰的中文笔记摘要。
@@ -24,7 +24,6 @@ version: 2.1.0
 7. **【补充说明】**：记录不属于上述四栏但重要的琐碎信息、背景补充。对话里出现的相关参考链接也写在本栏，每条附一句它是什么、为何与本笔记相关。不要另开【相关链接】。
 8. 所有输出必须为中文。
 9. 本 skill 只整理对话为 Note，不要在这里「升 Edge」；Notes → Edges 是另一步。
-10. 可对照 `knowledge/notes` 层项目记忆核对文风；冲突时以该记忆与本 Constraints 为准。
 
 ## Output Format:
 

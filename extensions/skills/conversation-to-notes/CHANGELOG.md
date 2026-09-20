@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-09-20
+
+### Changed
+
+- 「写给人审阅」文风规则只写在本 skill 的 Constraints 里，自洽生效，不再另设外部核对指针。
+
 ## [2.1.0] - 2026-09-20
 
 ### Added
 
 - Constraints 补上「写给人审阅」：白话完整句、例子与上下文够独立读懂；密表进【补充说明】；【所学】只写对错理解与边界；【行动指南】须带触发与步骤；忌「记完四栏」式短稿。
-- Instructions 增加指针：可对照 `knowledge/notes` 层项目记忆核对文风，冲突时以该记忆与本 Constraints 为准。
 
 ## [2.0.0] - 2026-09-10
 
@@ -35,7 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.1...HEAD
+[2.1.1]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.0...skill/conversation-to-notes@2.1.1
 [2.1.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.0.0...skill/conversation-to-notes@2.1.0
 [2.0.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@1.0.0...skill/conversation-to-notes@2.0.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/conversation-to-notes@1.0.0
