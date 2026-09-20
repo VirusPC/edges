@@ -4,7 +4,7 @@ description: 提供稳定的 artifacts 预览服务（短生命周期托管 + �
 metadata:
   edges-type: task
   edges-title: 自建云服务器临时托管 artifacts
-  edges-tasks-status: in_progress
+  edges-tasks-status: done
   edges-task-project: agent-clients-ux
   edges-task-assignee: Coding 专家
   edges-task-assignee-id: 099e84df-06c3-4c5d-9e29-fc255dce3d56
@@ -12,7 +12,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-19T14:11:11.496Z"
+  edges-updated-at: "2026-09-20T16:51:57.226Z"
 ---
 
 提供一个稳定的 artifacts 预览服务：短生命周期托管，给出真浏览器可开的 URL。聊天内嵌 HTML 预览是要绕开的不可靠路径。
