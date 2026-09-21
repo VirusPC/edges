@@ -4,9 +4,9 @@ description: 临时 artifacts URL 会过期且每次 publish 新 UUID；需要�
 metadata:
   edges-type: task
   edges-title: Tasks review 持久站点（始终反映 main）
-  edges-tasks-status: in_progress
+  edges-tasks-status: done
   edges-task-project: agent-clients-ux
-  edges-updated-at: "2026-09-21T03:51:26.867Z"
+  edges-updated-at: "2026-09-21T08:55:48.671Z"
   edges-task-assignee: Coding 专家
   edges-task-assignee-id: 099e84df-06c3-4c5d-9e29-fc255dce3d56
 ---
