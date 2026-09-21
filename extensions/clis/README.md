@@ -87,7 +87,15 @@ classifyTasks Skill (`extensions/skills/project-tasks-classify`) uses these proj
 
 ## `artifacts`
 
-Thin client for the Artifacts 预览服务 (`extensions/services/artifacts-preview`). `review-page` still only renders; publish is a separate step.
+Thin client for the Artifacts 预览服务 ([`extensions/services/artifacts-preview`](../services/artifacts-preview/)). `review-page` still only renders; publish is a separate step. Full **use case × capability** matrix (what you can do, and which CLI / server / Action / HTTP pieces each thing uses): [artifacts-preview README](../services/artifacts-preview/README.md#use-cases--capabilities). Compact:
+
+| Want | Calls |
+| --- | --- |
+| Phone / browser open Agent review HTML | `edges tasks project review-page` (render only) → `edges artifacts publish` → public UUID URL; server already running (`edges artifacts server` + nginx on ECS) |
+| First-time ECS mount (same box as teaching) | `server install` → `start` → `setup-nginx` (`teaching.conf` must have `/teaching/`) → `status`; laptop `artifacts init --base-url http://182.92.131.89 --token …` |
+| Day-to-day short-lived page | laptop `artifacts init` (once) → `publish` / `rm`; HTTP POST / GET / DELETE |
+| After main deploy, keep service current | GitHub Action `deploy-teach.yml` pull → if env exists: `server install` then `restart` (or `restart` only) |
+| Rotate shared token | `server install --force` → `restart` → client `init --token … --force` |
 
 ```
 edges artifacts init [--base-url <url>] [--config <path>] [--force]
@@ -98,7 +106,7 @@ edges artifacts server install | start | stop | restart | status | setup-nginx
 
 `init` writes the **client** config `~/.config/edges/artifacts.env` (`EDGES_ARTIFACTS_TOKEN`, `EDGES_ARTIFACTS_BASE_URL`). Pass `--token` to reuse the value printed by `edges artifacts server install`. `publish` / `rm` read that file (env overrides). Success stdout is JSON (`command`: `artifacts.init` | `artifacts.publish` | `artifacts.rm`). `publish` prints the public `url`. Optional `from` is only written when `--from-type task --from-id <stem> --task-project <slug>` are all set (`id` is the task stem). Omit those flags when there is no task linkage. Do not use `--from-name` or `--task-stem`.
 
-On the host, `edges artifacts server install` ensures `~/.config/edges/artifacts-preview.env` (creates a token if missing; `--force` may rotate), builds the service, and enables the user unit but does **not** start it. There is no `server init`. `start` / `stop` / `restart` are process lifecycle only; `status` is the unit plus `/health`. `setup-nginx` is the one-shot / idempotent :80 reverse proxy into `/etc/nginx/conf.d/teaching.conf` (`/health`, `POST /artifacts`, `/artifacts/…` → `127.0.0.1:8787`, leave `/teaching/` alone). **teaching.conf must contain `/teaching/`**. If the live box still has leftover `teach.conf` with `/teach/`, rename/replace to `teaching.conf` and run `deploy/migrate-teaching-nginx-prefix.py` first — do not dual-support the old names. If sudo is needed it prints the exact `sudo bash …/setup-nginx-artifacts.sh` command. After a repo pull: `install` if the build or unit changed, then `restart` (or `restart` only). Never combine install and start.
+On the host, `edges artifacts server install` ensures `~/.config/edges/artifacts-preview.env` (creates a token if missing; `--force` may rotate), builds the service, and enables the user unit but does **not** start it. There is no `server init`. `start` / `stop` / `restart` are process lifecycle only; `status` is the unit plus `/health`. `setup-nginx` is the one-shot / idempotent :80 reverse proxy into `/etc/nginx/conf.d/teaching.conf` (`/health`, `POST /artifacts`, `/artifacts/…` → `127.0.0.1:8787`, leave `/teaching/` alone). **teaching.conf must contain `/teaching/`**. Live Aliyun ECS already uses that file + prefix (verified 2026-09-21). Leftover `teach.conf` / `/teach/` names were migrated away; `deploy/migrate-teaching-nginx-prefix.py` is one-shot leftover cleanup, and the injector still matches `/teaching/` only. After migrate, keep a **single** `location = /` → `/teaching/`. If sudo is needed it prints the exact `sudo bash …/setup-nginx-artifacts.sh` command. After a repo pull: `install` if the build or unit changed, then `restart` (or `restart` only). Never combine install and start.
 
 Phone review needs a reachable `EDGES_ARTIFACTS_BASE_URL` (ECS / public host). Localhost is only for the same machine. This round has no artifacts MCP.
 

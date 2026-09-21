@@ -119,6 +119,8 @@ Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的
 
 `extensions/` 收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill 和其他接口。`shared-extensions/` 则保存不依赖 Edges、可跨机器和 Agent 客户端复用的个人 harness；两者互斥。
 
+Agent 生成的审阅页或交互 HTML，可以经 Artifacts 预览服务变成真浏览器（含手机）能打开的短生命周期 URL：`edges tasks project review-page` 仍只渲染，再 `edges artifacts publish` 上传到与 teaching 同机的 ECS。本轮没有 artifacts MCP。用例与每条 CLI / 服务 / Action / HTTP 的对应见 [`extensions/services/artifacts-preview/README.md`](extensions/services/artifacts-preview/README.md#use-cases--capabilities)。
+
 现有调用侧以文件、Obsidian 和人工检索为主。未来的索引、检索与机器接口仍放在 `extensions/`，提高知识流动性并让闭环连接外部系统，但必须在实现前明确标注为规划能力。
 
 ## 使用与维护
