@@ -4,11 +4,11 @@ description: ADR-0013 服务+CLI 已合但 publish 只上传不部署；要把�
 metadata:
   edges-type: task
   edges-title: Artifacts预览服务部署到ECS
-  edges-tasks-status: in_progress
+  edges-tasks-status: done
   edges-task-project: agent-clients-ux
   edges-task-assignee: Coding 专家
   edges-task-assignee-id: 099e84df-06c3-4c5d-9e29-fc255dce3d56
-  edges-updated-at: "2026-09-20T17:03:06.379Z"
+  edges-updated-at: "2026-09-21T02:32:08.402Z"
 ---
 
 结论（idea）：完成 Artifacts 预览服务在 teach 同机 ECS 上的部署与对外入口，使客户端可用稳定公网 URL 打开 artifacts。
