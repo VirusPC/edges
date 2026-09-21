@@ -3,11 +3,12 @@
 # Install the /health + /artifacts/ proxy into the existing teaching :80
 # server. Does not replace /teaching/. Idempotent.
 #
-# teaching.conf must contain /teaching/. If the live box still has a leftover
-# site file under the old name, rename/replace it to teaching.conf first, then:
-#   sudo python3 …/deploy/migrate-teaching-nginx-prefix.py /etc/nginx/conf.d/teaching.conf
-#   nginx -t && systemctl reload nginx
-# then re-run this script / edges artifacts server setup-nginx.
+# teaching.conf must contain /teaching/. Live Aliyun ECS already uses
+# /etc/nginx/conf.d/teaching.conf + /teaching/ (verified 2026-09-21).
+# Leftover site-file / prefix names were migrated away. The injector
+# still matches /teaching/ only. migrate-teaching-nginx-prefix.py is
+# one-shot leftover cleanup; after it keep a single `location = /`
+# that 301s to /teaching/.
 #
 # If this is run without root, the CLI prints:
 #   sudo bash …/deploy/setup-nginx-artifacts.sh

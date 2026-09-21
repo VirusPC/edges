@@ -2,9 +2,19 @@
 
 Short-lived static **Artifacts 预览服务** (ADR 0013): upload → public URL → TTL delete.
 
-This package is the HTTP process. The thin command surface is `edges artifacts` in [`../../clis`](../../clis/). `edges tasks project review-page` stays render-only; Skill orchestration is render → `edges artifacts publish` → give the human the URL. Capability Surface is CLI + Skill + MCP; this round has no artifacts MCP.
+## Use cases × capabilities
 
-Phone review needs a **reachable** `EDGES_ARTIFACTS_BASE_URL` (ECS / public host). Localhost only works on the same machine.
+What you can accomplish, and which CLI / server / Action / HTTP pieces each thing uses. Decisions stay in ADR 0013; this README is how-to. Capability Surface is CLI + Skill + MCP; **this round has no artifacts MCP**. Skill orchestration is render → `edges artifacts publish` → give the human the URL.
+
+| Want | Capabilities / calls |
+| --- | --- |
+| Phone / browser open an Agent-generated review or interactive HTML | `edges tasks project review-page` (render only) → `edges artifacts publish` → public UUID URL. Server already running: `edges artifacts server` + nginx on ECS |
+| First-time mount preview on ECS (same box as teaching) | `edges artifacts server install` → `server start` → `server setup-nginx` (`teaching.conf` must have `/teaching/`) → `server status`; laptop `edges artifacts init --base-url http://182.92.131.89 --token …` |
+| Day-to-day publish a short-lived page | laptop `edges artifacts init` (once) → `publish` / `rm`; HTTP `POST /artifacts`, `GET /artifacts/:id/…`, `DELETE /artifacts/:id` as documented below |
+| After main deploy, keep the service current | GitHub Action `deploy-teach.yml` pull → if server env exists: `edges artifacts server install` then `restart` (or `restart` only) |
+| Rotate the shared token | `edges artifacts server install --force` → `restart` → client `edges artifacts init --token … --force` |
+
+This package is the HTTP process. The thin command surface is `edges artifacts` in [`../../clis`](../../clis/). `edges tasks project review-page` stays render-only. Phone review needs a **reachable** `EDGES_ARTIFACTS_BASE_URL` (ECS / public host). Localhost only works on the same machine.
 
 ## Run locally
 
@@ -62,17 +72,7 @@ There is no `server init` (client `edges artifacts init` is the laptop command).
 
    `setup-nginx` installs `deploy/nginx-artifacts.conf` into `/etc/nginx/snippets/` and `include`s it inside `/etc/nginx/conf.d/teaching.conf`. **teaching.conf must contain `/teaching/`** — the injector matches that prefix only. `TEACHING_CONF` defaults to that path. Do not dual-support leftover filenames or prefixes.
 
-   On the live ECS today the site file is still leftover `teach.conf` with `/teach/`. Fix path (one time, not a second current name):
-
-   1. Rename/replace to `teaching.conf` with `/teaching/` locations and redirects:
-
-      ```bash
-      sudo mv /etc/nginx/conf.d/teach.conf /etc/nginx/conf.d/teaching.conf
-      sudo python3 /home/cheng-dev/projects/edges/extensions/services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py /etc/nginx/conf.d/teaching.conf
-      sudo nginx -t && sudo systemctl reload nginx
-      ```
-
-   2. Then `edges artifacts server setup-nginx` injects `include /etc/nginx/snippets/edges-artifacts.conf;` into those `/teaching/` server blocks.
+   Live Aliyun ECS already uses `/etc/nginx/conf.d/teaching.conf` + `/teaching/` (verified 2026-09-21). Leftover names (`teach.conf`, `/teach/`) were migrated away; that is history, not the current box. The injector still matches `/teaching/` only. `deploy/migrate-teaching-nginx-prefix.py` is one-shot leftover cleanup: after it, each teaching `server {}` should have a **single** `location = /` that 301s to `/teaching/` — do not stack a second one. Then `edges artifacts server setup-nginx` injects `include /etc/nginx/snippets/edges-artifacts.conf;` into those `/teaching/` server blocks.
 
    Location reference: [`deploy/teaching-locations.conf`](deploy/teaching-locations.conf). `setup-nginx` also `loginctl enable-linger` so the user unit survives deploy SSH logout. If sudo is needed, the CLI prints the exact `sudo bash …/setup-nginx-artifacts.sh` command. There is no user-facing `apply.sh`.
 

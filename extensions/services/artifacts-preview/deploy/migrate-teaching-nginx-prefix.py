@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Migrate teaching.conf leftover prefixes to canonical /teaching/.
+"""Migrate leftover teaching.conf prefixes to canonical /teaching/.
+
+One-shot leftover cleanup (old teach.conf / /teach/ names). Not current-state
+ops: live Aliyun ECS already uses teaching.conf + /teaching/ (verified
+2026-09-21). After migrate, each teaching server {} should have a single
+`location = /` that 301s to `/teaching/` — do not stack a second one.
 
 Python 3.6 compatible (Alibaba Linux). No type annotations.
 Usage: migrate-teaching-nginx-prefix.py <teaching.conf>

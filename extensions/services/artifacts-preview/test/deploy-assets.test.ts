@@ -59,6 +59,11 @@ test("README is CLI-first and documents the locked server surface", async () => 
   assert.match(readme, /migrate-teaching-nginx-prefix\.py/);
   assert.match(readme, /teaching\.conf must contain `?\/teaching\/`?/);
   assert.match(readme, /\/etc\/nginx\/conf\.d\/teaching\.conf/);
+  assert.match(readme, /Use cases × capabilities/);
+  assert.match(readme, /edges tasks project review-page/);
+  assert.match(readme, /deploy-teach\.yml/);
+  assert.match(readme, /already uses/);
+  assert.doesNotMatch(readme, /On the live ECS today the site file is still leftover/);
 });
 
 test("bootstrap and nginx setup scripts are executable and restart without inventing a public 8787", async () => {
