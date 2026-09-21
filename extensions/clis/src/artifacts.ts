@@ -12,7 +12,7 @@ COMMANDS
   rm <id|url> [--config <path>]
   server install | start | stop | restart | status | setup-nginx
     Host process on this machine. install does not start.
-    setup-nginx is the one-shot :80 reverse proxy.
+    setup-nginx is the one-shot :80 reverse proxy into teaching.conf.
 
 Local config default: ~/.config/edges/artifacts.env
 Write (publish / rm) needs the shared token. Browser GET of artifact URLs does not.

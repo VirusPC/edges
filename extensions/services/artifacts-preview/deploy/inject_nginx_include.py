@@ -2,7 +2,7 @@
 """Insert an include line into nginx server blocks that already serve /teaching/.
 
 Python 3.6 compatible (Alibaba Linux). No type annotations.
-Usage: inject_nginx_include.py <teach.conf> <include-line>
+Usage: inject_nginx_include.py <teaching.conf> <include-line>
 """
 from __future__ import print_function
 
@@ -59,7 +59,7 @@ def inject_into_teaching_servers(text, include_line):
 
 def main(argv):
     if len(argv) != 3:
-        print("usage: inject_nginx_include.py <teach.conf> <include-line>", file=sys.stderr)
+        print("usage: inject_nginx_include.py <teaching.conf> <include-line>", file=sys.stderr)
         return 2
     path = pathlib.Path(argv[1])
     include_line = argv[2]
@@ -69,9 +69,16 @@ def main(argv):
         return 0
     updated, changed = inject_into_teaching_servers(text, include_line)
     if not changed:
+        migrator = (
+            pathlib.Path(__file__).resolve().parent / "migrate-teaching-nginx-prefix.py"
+        )
         print(
-            "no server { block containing /teaching/ in %s — add %s yourself"
-            % (path, include_line),
+            "no server { block containing /teaching/ in %s — add %s yourself\n"
+            "If this file is not yet on the /teaching/ prefix, run:\n"
+            "  python3 %s %s\n"
+            "then re-run edges artifacts server setup-nginx.\n"
+            "This injector matches /teaching/ only."
+            % (path, include_line, migrator, path),
             file=sys.stderr,
         )
         return 1

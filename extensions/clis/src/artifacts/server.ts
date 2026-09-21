@@ -27,9 +27,9 @@ COMMANDS
   status
     User unit + curl 127.0.0.1/health
   setup-nginx
-    One-shot / idempotent reverse proxy: /health, POST /artifacts, /artifacts/…
-    → 127.0.0.1:8787. Does not change /teaching/. If sudo is needed, prints the
-    exact sudo command.
+    One-shot / idempotent reverse proxy into /etc/nginx/conf.d/teaching.conf:
+    /health, POST /artifacts, /artifacts/… → 127.0.0.1:8787. Does not change
+    /teaching/. If sudo is needed, prints the exact sudo command.
 
 Never combine install and start.
 
@@ -225,7 +225,7 @@ export function addArtifactsServerCommand(artifacts: Command, ctx: CliContext): 
 
   server
     .command("setup-nginx")
-    .description("Install the :80 reverse proxy without changing /teaching/")
+    .description("Install the :80 reverse proxy into teaching.conf without changing /teaching/")
     .action(async () => {
       await runArtifactsCommand(ctx, async () => {
         const applied = await setupNginxArtifacts({ env: ctx.env });
@@ -237,7 +237,7 @@ export function addArtifactsServerCommand(artifacts: Command, ctx: CliContext): 
           [
             "nginx reverse-proxy installed (idempotent).",
             "/health, POST /artifacts, /artifacts/… → 127.0.0.1:8787.",
-            "/teaching/ is unchanged.",
+            "Injected into /etc/nginx/conf.d/teaching.conf. /teaching/ is unchanged.",
             "",
           ].join("\n"),
         );

@@ -26,7 +26,7 @@ After `pnpm --filter edges-artifacts-preview build`, `start` runs `node dist/ind
 
 ## ECS / reachable URL (Aliyun, same box as teach)
 
-Same Node process as local. Phone review uses the **public IP http** origin (the same pattern teach used before 备案). Do not put `:8787` in printed URLs; nginx on :80 reverse-proxies `/health` and `/artifacts/` to loopback. Leave `/teaching/` as it is. `teach.viruspc.tech` exists but 备案 is a separate concern — do not invent Cloudflare or 备案 steps here.
+Same Node process as local. Phone review uses the **public IP http** origin (the same pattern teaching used before 备案). Do not put `:8787` in printed URLs; nginx on :80 reverse-proxies `/health` and `/artifacts/` to loopback. Leave `/teaching/` as it is. This ECS must serve the site at **`/teaching/`** from **`/etc/nginx/conf.d/teaching.conf`**. `teach.viruspc.tech` exists but 备案 is a separate concern — do not invent Cloudflare or 备案 steps here.
 
 `edges artifacts publish` only uploads to whatever `EDGES_ARTIFACTS_BASE_URL` points at. It does not deploy the service.
 
@@ -60,7 +60,21 @@ There is no `server init` (client `edges artifacts init` is the laptop command).
    edges artifacts server status
    ```
 
-   `setup-nginx` installs `deploy/nginx-artifacts.conf` into `/etc/nginx/snippets/` and `include`s it inside `/etc/nginx/conf.d/teach.conf` (the server that already serves `/teaching/`). It also `loginctl enable-linger` so the user unit survives deploy SSH logout. If sudo is needed, the CLI prints the exact `sudo bash …/setup-nginx-artifacts.sh` command.
+   `setup-nginx` installs `deploy/nginx-artifacts.conf` into `/etc/nginx/snippets/` and `include`s it inside `/etc/nginx/conf.d/teaching.conf`. **teaching.conf must contain `/teaching/`** — the injector matches that prefix only. `TEACHING_CONF` defaults to that path. Do not dual-support leftover filenames or prefixes.
+
+   On the live ECS today the site file is still leftover `teach.conf` with `/teach/`. Fix path (one time, not a second current name):
+
+   1. Rename/replace to `teaching.conf` with `/teaching/` locations and redirects:
+
+      ```bash
+      sudo mv /etc/nginx/conf.d/teach.conf /etc/nginx/conf.d/teaching.conf
+      sudo python3 /home/cheng-dev/projects/edges/extensions/services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py /etc/nginx/conf.d/teaching.conf
+      sudo nginx -t && sudo systemctl reload nginx
+      ```
+
+   2. Then `edges artifacts server setup-nginx` injects `include /etc/nginx/snippets/edges-artifacts.conf;` into those `/teaching/` server blocks.
+
+   Location reference: [`deploy/teaching-locations.conf`](deploy/teaching-locations.conf). `setup-nginx` also `loginctl enable-linger` so the user unit survives deploy SSH logout. If sudo is needed, the CLI prints the exact `sudo bash …/setup-nginx-artifacts.sh` command. There is no user-facing `apply.sh`.
 
 ### Confirm
 
