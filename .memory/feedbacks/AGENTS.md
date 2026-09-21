@@ -13,6 +13,7 @@
 - [artifacts server CLI 用 setup-nginx，不要 snippet / server init](feedback_artifacts_server_cli_no_nginx.md) — 改 edges artifacts server 命令面时打开：公开面是 install（保证 env、不 start）/ start|stop|restart / status / setup-nginx。没有 server init。不要 nginx-snippet、nginx-setup、configure-proxy。
 - [artifacts server install 不启动进程](feedback_artifacts_server_install_not_start.md) — 改 edges artifacts server 的 install/start、或想把装 unit 和拉起进程合成一步时打开：install 保证 env、装依赖/unit/enable，不 start；start/stop/restart 只做进程生命周期。
 - [能力面必须 CLI / Skill / MCP 并列](feedback_capability_surface_three_peers.md) — 写能力面标题、Why、How-to 时：三者并列；禁止「必要时 MCP」、禁止用「一个 CLI + 一份 skill」当本仓简称。
+- [根 changelog 不要堆 schema 字段表](feedback_changelog_no_schema_dump.md) — 写根 CHANGELOG Unreleased 时打开：用人话完整句写能做什么，对照 [1.2.0]；不要把 schema 字段表、flag 汤或运维细节塞进一段。缘起 https://github.com/VirusPC/edges/pull/110。
 - [classifyTasks 按已有质心归类，不要求 embedding](feedback_classify_tasks_centroids_not_embeddings.md) — 写或改 project-tasks-classify / classifyTasks 时：按用户已设 Task Project（标题+描述）做归属建议，用 LLM / agent 判断；不要写成 Embedding-based 最近质心分类，不要要求 embedding，也不要把方法名写成 K-means。Embedding / 真向量分类另卡。缘起 https://github.com/VirusPC/edges/pull/78。
 - [reference 的 description 必须带关键链接](feedback_description_must_include_urls.md) — 写或更新 .memory/references/* 时：description 与 REFERENCE.md 索引行必须带关键 URL，不能只写在正文 Links。缘起 https://github.com/VirusPC/edges/pull/45。
 - [知识闭环的反馈回到捕获](feedback_knowledge_loop_returns_to_capture.md) — 绘制或描述知识闭环时：反馈必须重新成为输入并回到捕获，不能绕过捕获直接进入生产或沉淀。

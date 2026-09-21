@@ -34,7 +34,7 @@
 - [仓内任务优先用仓库 Skill 与 CLI](project_prefer_repo_skills_and_cli.md) — 执行 VirusPC/edges 仓内工作时，优先调用本仓 Skill 与 edges CLI；不可用须向用户说明缺口，勿默认手搓绕过。
 - [订阅管理盘点进展](project_progress.md) — 订阅/用量盘点进展：双 Gmail + QQ IMAP、国内 Kimi 无邮箱、CodexBar Linux CLI 已装待鉴权；后续 Apple/微信侧核对。
 - [proposeTypes 从 _default 提议新 Task Project 类型](project_propose_types_from_default.md) — 改 propose-types 工作流或从 _default 发明新 Task Project 时打开：独立 Skill extensions/skills/project-tasks-propose-types/；经同一 review-page 确认，不自动 project create；方法是 LLM/agent 判断；配对 project-tasks-classify、ADR 0011 与 ADR 0012。本轮不写 skill 正文。
-- [仓库用根 CHANGELOG 和 v 标签发版](project_repo_changelog.md) — 写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 v 标签。Unreleased 按功能模块分组；用人话写清「现在能做什么」，同一条里立刻给出真实命令名；枚举写仓库英文原值（优先级是 urgent/high/medium/low/none）。不要摊成扁平长列表，也不要把决策/术语/计划逐条写进去。
+- [仓库用根 CHANGELOG 和 v 标签发版](project_repo_changelog.md) — 写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 v 标签。Unreleased 按功能模块分组；用人话写清「现在能做什么」，同一条里立刻给出真实命令名；对照 [1.2.0] 的完整句，不要堆 schema 字段表。枚举写仓库英文原值（优先级是 urgent/high/medium/low/none）。不要摊成扁平长列表，也不要把决策/术语/计划逐条写进去。
 - [审阅页侧栏筛选用 design A（选中染色 + 未选变淡）](project_review_page_sidebar_filter_design_a.md) — 改 edges tasks project review-page 侧栏筛选外观时打开：选中 is-filter 用 accent 染色底+实线边；未选中 group 降 opacity 0.55–0.7（hover 可拉回）；is-over 外扩 outline，须和 is-filter 叠得开。只改 CSS，不改点击/拖放。用户 2026-09-17 选定 design A。
 - [根硬约束只留聚光灯、脱敏与 git](project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
 - [根 README 以知识闭环为唯一主线](project_root_readme_direction.md) — 设计或修改根 README 时：从投资视角解释知识管理、分层 Agent Memory 与知识闭环，用一张图串联认知资本、Edge、收益、风险、流动性和反馈再投资。
@@ -42,8 +42,8 @@
 - [跨机器跨 Agent 的 harness 放 shared-extensions](project_shared_extensions.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。
 - [Task Project 审阅页是 render-only CLI](project_task_project_review_page_render_only_cli.md) — 改 classifyTasks / proposeTypes 人闸或 edges tasks project review-page 时打开：CLI 只渲通用 groups+items HTML（已落地）；Skill 出建议、现有 create/update 落地；无 --mode、无 classify/apply-review 动词、无审阅页 MCP。一次性人闸见 ADR 0013；固定 /tasks/ 入口见 ADR 0021，不要把托管并进 review-page。决策见 docs/adr/0012-task-project-review-page-is-render-only-cli.md。
 - [tasks 只追加直接推 main](project_tasks_direct_main.md) — 往 knowledge/tasks/ 写只追加速记时，直接提交 main、不提 PR
-- [持久 /tasks/ 看板站：复用 review-page，扩展 deploy-teach](project_tasks_persistent_board_site.md) — 改 /tasks/ 持久入口、list --group-by、或看板站 vs Artifacts 时打开：不新开 status station；CI 扩展 deploy-teach.yml；分组 schema 松耦合（edges.tasks.grouped/v1）；review-page 仍只渲染；鉴权/写回另卡。决策见 docs/adr/0021-persistent-tasks-board-site.md。
+- [持久 /tasks/ 看板站：复用 review-page，扩展 deploy-teach](project_tasks_persistent_board_site.md) — 改 /tasks/ 持久入口、list --group-by、或看板站 vs Artifacts 时打开：不新开 status station；CI 扩展 deploy-teach.yml 并在 pull 后生成 _site；分组 schema 松耦合（edges.tasks.grouped/v1）；review-page 仍只渲染；nginx 一次性 setup-nginx-tasks.sh。决策见 docs/adr/0021-persistent-tasks-board-site.md。
 - [工作项叫 tasks，支持状态流转](project_tasks_with_status_not_todos.md) — idea→专家→Cloud 工作流下，目录与概念用 knowledge/tasks/（非 todos），按 Task Project 再按 edges-tasks-status 分夹流转
-- [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push.md) — 改 teach 站点、/tasks/ 持久站或 ECS 上的 edges 部署时：用 GitHub Actions SSH 触发整仓 git fetch/reset，不要再 rsync 推送；deploy job 保持 environment: production，根 README 保留工作流徽章。artifacts 仅在盒上已有 server env 时于 pull 后 bootstrap。/tasks/ 扩展同一 deploy-teach.yml，不要新开 workflow（ADR 0021）。
+- [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push.md) — 改 teach 站点、/tasks/ 持久站或 ECS 上的 edges 部署时：用 GitHub Actions SSH 触发整仓 git fetch/reset，不要再 rsync 推送；deploy job 保持 environment: production；reset 后始终生成 /tasks/；artifacts 仅在盒上已有 server env 时 bootstrap。不要新开 workflow（ADR 0021）。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks_direct_main
 <!-- project-memory-entries:end -->

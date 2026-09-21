@@ -65,7 +65,7 @@ Same optional gate as MCP HTTP. If `EDGES_AUTH_TOKEN` is set, present it with `-
 Board root is `<EDGES_REPO>/knowledge/tasks/`. Writes are filesystem-only (no git). Cancel with `status cancelled`. There is no `delete` command and no top-level `log` verb.
 
 ```
-edges tasks list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority]
+edges tasks list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
 edges tasks get <stem|path>
 edges tasks create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project]
 edges tasks update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project]
@@ -81,7 +81,18 @@ edges tasks project review-page --from <path|-> [--out <path>]
 
 Issue-layer stdout is always JSON (`--json` is accepted and ignored). `runs` / `run-messages` default to a table; pass `--output json` for JSON. Run layer is read-only (no append). `create` writes the Task file plus an empty sidecar `.{stem}.log.md`.
 
+Default `list` stays `{ status, command: "list", tasks: [...] }`. `list --group-by project` (optional `--format json`) emits loose-coupled `edges.tasks.grouped/v1`: `{ schema, groups[{id,title,description?}], items[{id|stem, group, title?, status?, …}] }`. Existing `--status` / `--priority` / `--project` / `--sort` still apply **before** grouping. That schema is not named for review-page.
+
 `project review-page` is render-only: it reads generic `groups` + `items` JSON (`--from` file or `-` for stdin), writes a single-file HTML page (default: OS temp; `--out` overrides), and prints `{status, command: "project.review-page", path, groupCount, itemCount}`. It does not call `updateTask`, `createProject`, or any board mutator, and it does not open a browser. Open the printed `path` in a system browser. There is no `edges tasks classify` / `--mode` / `--open`.
+
+Persistent public board (`http(s)://<host>/tasks/`, ADR 0021): generate maps the grouped list into review-page input and writes `knowledge/tasks/_site/index.html`. Box/CI entry:
+
+```bash
+pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
+  --out "$PWD/knowledge/tasks/_site/index.html"
+```
+
+Ops (one-time nginx, curl checks, PATH): [deploy/README.md](deploy/README.md). `deploy-teach.yml` generates after pull; it does not run setup-nginx.
 
 classifyTasks Skill (`extensions/skills/project-tasks-classify`) uses these project verbs plus `update --project`. Generic tasks Skill/MCP CRUD is a later backlog on this same contract. Capability Surface is CLI + Skill + MCP.
 

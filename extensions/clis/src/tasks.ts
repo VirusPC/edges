@@ -11,7 +11,7 @@ import { addUpdateCommand } from "./tasks/update.js";
 
 const TASKS_AFTER_HELP = `
 COMMANDS
-  list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority]
+  list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
   get <stem|path>
   create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project]
   update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project]
@@ -27,6 +27,7 @@ COMMANDS
 There is no classify command. Task moves stay on update --project (same status and priority).
 
 Issue layer stdout is JSON. runs / run-messages default to a table; pass --output json.
+list --group-by project emits edges.tasks.grouped/v1 ({ schema, groups[], items[] }).
 
 Cancel a Task with: edges tasks status <stem> cancelled
 There is no delete command.

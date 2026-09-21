@@ -249,7 +249,7 @@ Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`�
 _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
 
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；约定中的 `list --group-by project` 产出分组列表 schema（如 `edges.tasks.grouped/v1`，不绑 review-page）；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；`project review-page` 只把 groups+items JSON 渲成 Task Project 审阅页，不算分类、不落地、不托管。`/tasks/` 持久看板站是部署链消费者，不新开看板动词。
+以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`list --group-by project` 产出分组列表 schema（如 `edges.tasks.grouped/v1`，不绑 review-page）；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；`project review-page` 只把 groups+items JSON 渲成 Task Project 审阅页，不算分类、不落地、不托管。`/tasks/` 持久看板站是部署链消费者，不新开看板动词。
 _避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）、把 review-page 扩成 Artifacts 预览服务或 `/tasks/` 托管、把分组 schema 命名成 review-page 专属
 
 **Artifacts 预览服务**：
