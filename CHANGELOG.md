@@ -20,8 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Artifacts 预览
 
-- 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。起服务用 `pnpm --filter edges-artifacts-preview start`（开发用 `pnpm --filter edges-artifacts-preview dev` 或根上的 `pnpm start:artifacts` / `pnpm dev:artifacts`）；本机先 `edges artifacts init` 写下 token 和 `EDGES_ARTIFACTS_BASE_URL`，再 `edges artifacts publish <path>` 打印公开 URL。有看板 Task 关联时再加 `--from-type task --from-id <stem> --task-project <slug>`（`from.id` 是 task stem）；没有关联就整段省略 `from`。`edges artifacts rm <id|url>` 提前删。写接口要共享 token；浏览器打开 URL 不登录。手机审阅必须用 ECS / 可达地址，不能假定 localhost。`edges tasks project review-page` 仍只渲染，不发布。本轮没有 artifacts MCP。
-- 现有阿里云 ECS（与 teach 同机）上，用 `edges artifacts server install` 写盒上 env（缺 token 就建，`--force` 可轮换）、装依赖和 user unit（不启动），再用 `start` / `stop` / `restart` 管进程，`status` 看 unit 和 health，`setup-nginx` 做一次性 :80 反代。没有 `server init`。对外 BASE_URL 是 `http://182.92.131.89`：nginx 把 `/health`、`POST /artifacts` 和 `/artifacts/…` 反代到本机 8787（不另开公网端口，也不动 `/teaching/`）。站点文件是 `/etc/nginx/conf.d/teaching.conf`，必须带 `/teaching/`（`TEACHING_CONF`）。盒上若还是遗留的 `teach.conf` + `/teach/`，先改名为 `teaching.conf` 再跑 `deploy/migrate-teaching-nginx-prefix.py`（改 location，并给 `/` 做跳转），然后 `edges artifacts server setup-nginx`。不要双认旧文件名或旧前缀。第一次：`install` → `start` → `setup-nginx` → `status`。之后本机用同一 token 跑 `edges artifacts init --base-url http://182.92.131.89 --token <printed token>`，再 `publish` / `rm`。轮换 token 要再跑 `restart`，否则 unit 仍用旧 env。合并到 main 后，若盒上已有这份 env，`deploy-teach.yml` 会在整仓 pull 之后先 `install` 再 `restart`（nginx 通常不用再跑）。
+- 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。本机先用 `edges artifacts init` 记下服务地址和共享 token，再用 `edges artifacts publish` 拿到公开链接；提前删用 `edges artifacts rm`。
+- 写接口要带这份共享 token；浏览器打开链接不用登录。手机审阅必须用能到达的 `BASE_URL`，不能假定 localhost。
+- `edges tasks project review-page` 仍然只负责渲染，不发布。要给人打开时，先渲染再 `publish`。
+- 在和 teaching 同一台机器上，用 `edges artifacts server install` 装好环境（不启动进程），再用 `start` 拉起服务。日常用 `stop` / `restart` 管进程，用 `status` 查看。一次性对外跑 `setup-nginx`。没有 `server init`。
+- 反代写进已有的 `teaching.conf`，必须带 `/teaching/`，不要另开公网端口。
+- 合并到 main 后，如果盒上已经有这份服务配置，`deploy-teach.yml` 会在整仓 pull 之后重启服务。nginx 通常不用再跑。
 
 ### 笔记入库与能力面
 
