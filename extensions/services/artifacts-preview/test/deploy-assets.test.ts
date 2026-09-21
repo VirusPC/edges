@@ -56,8 +56,9 @@ test("README is CLI-first and documents the locked server surface", async () => 
   assert.match(readme, /server restart/);
   assert.doesNotMatch(readme, /edges artifacts server init/);
   assert.doesNotMatch(readme, /nginx-snippet|nginx-setup|configure-proxy/);
-  assert.match(readme, /migrate-teach-nginx-prefix\.py/);
-  assert.match(readme, /teach\.conf must contain `?\/teaching\/`?/);
+  assert.match(readme, /migrate-teaching-nginx-prefix\.py/);
+  assert.match(readme, /teaching\.conf must contain `?\/teaching\/`?/);
+  assert.match(readme, /\/etc\/nginx\/conf\.d\/teaching\.conf/);
 });
 
 test("bootstrap and nginx setup scripts are executable and restart without inventing a public 8787", async () => {
@@ -75,23 +76,29 @@ test("bootstrap and nginx setup scripts are executable and restart without inven
   assert.match(boot, /XDG_RUNTIME_DIR/);
 
   const nginxSetup = await readFile(setup, "utf8");
-  assert.match(nginxSetup, /\/etc\/nginx\/conf\.d\/teach\.conf/);
+  assert.match(nginxSetup, /TEACHING_CONF=/);
+  assert.match(nginxSetup, /\/etc\/nginx\/conf\.d\/teaching\.conf/);
   assert.match(nginxSetup, /enable-linger/);
   assert.match(nginxSetup, /\/teaching\//);
   assert.match(nginxSetup, /nginx-artifacts\.conf/);
   assert.match(nginxSetup, /inject_nginx_include\.py/);
-  assert.match(nginxSetup, /migrate-teach-nginx-prefix\.py/);
+  assert.match(nginxSetup, /migrate-teaching-nginx-prefix\.py/);
+  assert.doesNotMatch(nginxSetup, /TEACH_CONF|teach\.conf|\/teach\//);
   assert.doesNotMatch(nginxSetup, /nginx-snippet|configure-proxy/);
+
+  const injectSrc = await readDeploy("inject_nginx_include.py");
+  assert.match(injectSrc, /<teaching\.conf>/);
+  assert.doesNotMatch(injectSrc, /teach\.conf|migrate-teach-nginx-prefix|TEACH_CONF/);
 });
 
 const INCLUDE_LINE = "include /etc/nginx/snippets/edges-artifacts.conf;";
 const injectScript = path.join(deployDir, "inject_nginx_include.py");
-const migrateScript = path.join(deployDir, "migrate-teach-nginx-prefix.py");
-const legacyTeachFixture = path.join(here, "fixtures", "teach.conf.legacy-prefix");
+const migrateScript = path.join(deployDir, "migrate-teaching-nginx-prefix.py");
+const legacyTeachingFixture = path.join(here, "fixtures", "teaching.conf.legacy-prefix");
 
 test("nginx include injector only patches server blocks that already serve /teaching/", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-nginx-"));
-  const confPath = path.join(dir, "teach.conf");
+  const confPath = path.join(dir, "teaching.conf");
   await writeFile(
     confPath,
     [
@@ -121,27 +128,25 @@ test("nginx include injector only patches server blocks that already serve /teac
   await rm(dir, { recursive: true, force: true });
 });
 
-test("nginx include injector refuses legacy /teach/ and tells the operator to migrate", async () => {
+test("nginx include injector refuses a file without /teaching/ and points at the teaching migrator", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-nginx-legacy-"));
-  const confPath = path.join(dir, "teach.conf");
-  await writeFile(confPath, await readFile(legacyTeachFixture, "utf8"));
+  const confPath = path.join(dir, "teaching.conf");
+  await writeFile(confPath, await readFile(legacyTeachingFixture, "utf8"));
   const result = spawnSync("python3", [injectScript, confPath, INCLUDE_LINE], { encoding: "utf8" });
   assert.equal(result.status, 1, result.stdout);
   assert.match(result.stderr, /\/teaching\//);
-  assert.match(result.stderr, /migrate-teach-nginx-prefix\.py/);
-  assert.match(result.stderr, /\/teach\//);
-  assert.doesNotMatch(result.stderr, /dual-match|or \/teach\//);
+  assert.match(result.stderr, /migrate-teaching-nginx-prefix\.py/);
+  assert.doesNotMatch(result.stderr, /teach\.conf|dual-match|or \/teach\//);
   const unchanged = await readFile(confPath, "utf8");
   assert.equal(unchanged.split(INCLUDE_LINE).length - 1, 0);
-  assert.match(unchanged, /location \/teach\//);
   assert.doesNotMatch(unchanged, /location \/teaching\//);
   await rm(dir, { recursive: true, force: true });
 });
 
-test("teach nginx prefix migrator rewrites both 80 and 443 /teach/ servers toward /teaching/", async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), "edges-teach-prefix-"));
-  const confPath = path.join(dir, "teach.conf");
-  await writeFile(confPath, await readFile(legacyTeachFixture, "utf8"));
+test("teaching nginx prefix migrator rewrites both 80 and 443 servers toward /teaching/", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-teaching-prefix-"));
+  const confPath = path.join(dir, "teaching.conf");
+  await writeFile(confPath, await readFile(legacyTeachingFixture, "utf8"));
 
   const first = spawnSync("python3", [migrateScript, confPath], { encoding: "utf8" });
   assert.equal(first.status, 0, first.stderr);

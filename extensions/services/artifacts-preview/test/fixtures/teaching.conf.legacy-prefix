@@ -1,5 +1,6 @@
-# Shape of Aliyun ECS /etc/nginx/conf.d/teach.conf before the /teaching/ migration.
-# Two server blocks (80 + 443 ssl), location /teach/, root .../knowledge.
+# Snapshot of leftover Aliyun ECS site config before rename/replace
+# to /etc/nginx/conf.d/teaching.conf. Input only for the migrator.
+# Two server blocks (80 + 443 ssl), leftover prefix, root .../knowledge.
 # SSL paths are placeholders; do not commit real certs.
 
 server {

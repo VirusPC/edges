@@ -1,6 +1,6 @@
 ---
 name: project_artifacts_preview_ecs_ops
-description: 改 artifacts 在阿里云 ECS 上怎么跑、或要不要给 8787 开安全组时打开：和 teach 同机；人机接口是 edges artifacts server（install 不启动 / start|stop|restart / status / setup-nginx）；teach.conf 必须带 /teaching/，遗留 /teach/ 先 migrate；轮换 token 必须再 restart；客户端 init --token；不要公网 8787。
+description: 改 artifacts 在阿里云 ECS 上怎么跑、或要不要给 8787 开安全组时打开：和 teaching 同机；人机接口是 edges artifacts server（install 不启动 / start|stop|restart / status / setup-nginx）；站点文件 teaching.conf（TEACHING_CONF）必须带 /teaching/；遗留 teach.conf 先改名再 migrate；轮换 token 必须再 restart；客户端 init --token；不要公网 8787。
 metadata:
   edges-title: Artifacts 预览 ECS：user unit + nginx :80
   edges-type: project
@@ -8,9 +8,9 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-21T01:54:29+00:00"
+  edges-updated-at: "2026-09-21T01:58:08+00:00"
 ---
 
-Artifacts 预览在已有 teach ECS 上跑：人机接口是 `edges artifacts server`（`install` 写盒上 env 并装 unit 但不启动，`start`/`stop`/`restart` 管进程，`status` 看 health+unit，`setup-nginx` 做 :80 反代）。没有 `server init`。`teach.conf` 必须带 `/teaching/`；2026-09-21 核实生产一度仍是 `/teach/`，先跑 `migrate-teach-nginx-prefix.py` 再 `setup-nginx`，不要让 inject 双认 `/teach/`。轮换 token 必须再 `restart` 才能让 unit 读到新 `EnvironmentFile`。客户端用 `edges artifacts init --base-url http://182.92.131.89 --token <server-token>`。不要公网 8787。token 只活在盒上 env 与本机 CLI 配置。
-**Why:** ADR 0013 只要同一套进程本机+ECS、手机必须可达 URL。teach 已经占用 :80。2026-09-20 用户锁定公开面。2026-09-21 用户纠正：本机公网前缀只能是 `/teaching/`，遗留 `/teach/` 是要迁的配置。`EnvironmentFile` 只在进程启动时读取，所以 `install --force` 单独不够。
-**How to apply:** 不要为 artifacts 新开公网端口或另写一套 GitHub rsync。一次性：`server install` → `server start` →（若 teach.conf 仍是 `/teach/` 则先 migrate）→ `server setup-nginx` → `server status`。日常：`deploy-teach.yml` 整仓 pull 后，env 在且 token 不是占位符才 `install` 再 `restart`。轮换：`install --force` → `restart` → 客户端 `init --token … --force`。给手机的 BASE_URL 用 `http://182.92.131.89`。不要把真实 token 提交进仓。
+Artifacts 预览在已有 teaching ECS 上跑：人机接口是 `edges artifacts server`（`install` 写盒上 env 并装 unit 但不启动，`start`/`stop`/`restart` 管进程，`status` 看 health+unit，`setup-nginx` 把反代写进 `/etc/nginx/conf.d/teaching.conf`）。没有 `server init`。`TEACHING_CONF` 默认 `/etc/nginx/conf.d/teaching.conf`，必须带 `/teaching/`。2026-09-21 核实生产一度仍是 `teach.conf` + `/teach/`：先改名再跑 `migrate-teaching-nginx-prefix.py`，不要双认旧名。轮换 token 必须再 `restart` 才能让 unit 读到新 `EnvironmentFile`。客户端用 `edges artifacts init --base-url http://182.92.131.89 --token <server-token>`。不要公网 8787。token 只活在盒上 env 与本机 CLI 配置。
+**Why:** ADR 0013 只要同一套进程本机+ECS、手机必须可达 URL。teaching 站点已经占用 :80。2026-09-20 用户锁定公开面。2026-09-21 用户最终命名：`teaching.conf` + `/teaching/`。`EnvironmentFile` 只在进程启动时读取，所以 `install --force` 单独不够。
+**How to apply:** 不要为 artifacts 新开公网端口或另写一套 GitHub rsync。一次性：`server install` → `server start` →（若盒上还是旧站点文件则先改名为 `teaching.conf` 并 migrate）→ `server setup-nginx` → `server status`。日常：`deploy-teach.yml` 整仓 pull 后，env 在且 token 不是占位符才 `install` 再 `restart`。轮换：`install --force` → `restart` → 客户端 `init --token … --force`。给手机的 BASE_URL 用 `http://182.92.131.89`。不要把真实 token 提交进仓。

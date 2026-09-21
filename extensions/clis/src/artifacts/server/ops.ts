@@ -193,7 +193,7 @@ export async function setupNginxArtifacts(options: ServerOpsDeps & {
     new ArtifactsError(
       "UNKNOWN_ERROR",
       [
-        "setup-nginx needs root to write nginx config (does not change /teaching/).",
+        "setup-nginx needs root to write /etc/nginx/conf.d/teaching.conf (does not change /teaching/).",
         `Run: ${command}`,
       ].join(" "),
     );

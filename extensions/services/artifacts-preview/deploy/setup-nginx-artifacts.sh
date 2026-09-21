@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # Thin script called by: edges artifacts server setup-nginx
-# Install the /health + /artifacts/ proxy into the existing teach :80
+# Install the /health + /artifacts/ proxy into the existing teaching :80
 # server. Does not replace /teaching/. Idempotent.
 #
-# teach.conf must contain /teaching/. If it still has location /teach/,
-# migrate first (do not dual-match in inject_nginx_include.py):
-#   sudo python3 …/deploy/migrate-teach-nginx-prefix.py /etc/nginx/conf.d/teach.conf
+# teaching.conf must contain /teaching/. If the live box still has a leftover
+# site file under the old name, rename/replace it to teaching.conf first, then:
+#   sudo python3 …/deploy/migrate-teaching-nginx-prefix.py /etc/nginx/conf.d/teaching.conf
 #   nginx -t && systemctl reload nginx
 # then re-run this script / edges artifacts server setup-nginx.
 #
@@ -16,7 +16,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 CONF_SRC="$SCRIPT_DIR/nginx-artifacts.conf"
 CONF_DST="/etc/nginx/snippets/edges-artifacts.conf"
-TEACH_CONF="${TEACH_CONF:-/etc/nginx/conf.d/teach.conf}"
+TEACHING_CONF="${TEACHING_CONF:-/etc/nginx/conf.d/teaching.conf}"
 INCLUDE_LINE="include /etc/nginx/snippets/edges-artifacts.conf;"
 TARGET_USER="${SUDO_USER:-cheng-dev}"
 
@@ -28,19 +28,19 @@ die() {
 [ "$(id -u)" -eq 0 ] || die "run with sudo: sudo bash $SCRIPT_DIR/setup-nginx-artifacts.sh"
 [ -f "$CONF_SRC" ] || die "missing $CONF_SRC"
 command -v nginx >/dev/null 2>&1 || die "nginx not found"
-[ -f "$TEACH_CONF" ] || die "missing $TEACH_CONF — teach.conf must contain /teaching/; add $INCLUDE_LINE inside that server {}, then nginx -t && systemctl reload nginx. Legacy /teach/ → $SCRIPT_DIR/migrate-teach-nginx-prefix.py"
+[ -f "$TEACHING_CONF" ] || die "missing $TEACHING_CONF — teaching.conf must contain /teaching/; add $INCLUDE_LINE inside that server {}, then nginx -t && systemctl reload nginx. See $SCRIPT_DIR/migrate-teaching-nginx-prefix.py"
 
 install -d -m 755 /etc/nginx/snippets
 install -m 644 "$CONF_SRC" "$CONF_DST"
 
 stamp="$(date +%Y%m%d%H%M%S)"
-cp -a "$TEACH_CONF" "${TEACH_CONF}.bak.artifacts.${stamp}"
+cp -a "$TEACHING_CONF" "${TEACHING_CONF}.bak.artifacts.${stamp}"
 
-python3 "$SCRIPT_DIR/inject_nginx_include.py" "$TEACH_CONF" "$INCLUDE_LINE"
+python3 "$SCRIPT_DIR/inject_nginx_include.py" "$TEACHING_CONF" "$INCLUDE_LINE"
 
 if ! nginx -t; then
-  mv "${TEACH_CONF}.bak.artifacts.${stamp}" "$TEACH_CONF"
-  die "nginx -t failed; restored $TEACH_CONF from backup"
+  mv "${TEACHING_CONF}.bak.artifacts.${stamp}" "$TEACHING_CONF"
+  die "nginx -t failed; restored $TEACHING_CONF from backup"
 fi
 
 if command -v systemctl >/dev/null 2>&1; then

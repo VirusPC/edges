@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Migrate teach.conf from legacy /teach/ to canonical /teaching/.
+"""Migrate teaching.conf leftover prefixes to canonical /teaching/.
 
 Python 3.6 compatible (Alibaba Linux). No type annotations.
-Usage: migrate-teach-nginx-prefix.py <teach.conf>
+Usage: migrate-teaching-nginx-prefix.py <teaching.conf>
 
 Does not inject artifacts. After this, run:
   edges artifacts server setup-nginx
@@ -141,11 +141,10 @@ def insert_redirects(block, server_indent):
     return prefix + insert + block[close:], True
 
 
-def is_teach_server(block):
+def is_teaching_server(block):
     return bool(
         HAS_TEACHING_LOCATION.search(block)
         or re.search(r"location[ \t]+(?:\^[~*=][ \t]+)?/teach(?:/|\s)", block)
-        or "/teach/" in block
         or "/teaching/" in block
     )
 
@@ -157,7 +156,7 @@ def migrate_text(text):
     found = False
     for match, block in iter_blocks(text, SERVER_HEADER):
         pieces.append(text[last : match.start()])
-        if not is_teach_server(block):
+        if not is_teaching_server(block):
             pieces.append(block)
         else:
             found = True
@@ -173,14 +172,14 @@ def migrate_text(text):
 
 def main(argv):
     if len(argv) != 2:
-        print("usage: migrate-teach-nginx-prefix.py <teach.conf>", file=sys.stderr)
+        print("usage: migrate-teaching-nginx-prefix.py <teaching.conf>", file=sys.stderr)
         return 2
     path = pathlib.Path(argv[1])
     text = path.read_text()
     updated, changed, found = migrate_text(text)
     if not found:
         print(
-            "no teach server { block in %s — expected /teaching/ or legacy /teach/"
+            "no teaching server { block in %s — expected /teaching/"
             % path,
             file=sys.stderr,
         )
@@ -189,7 +188,7 @@ def main(argv):
         print("already uses /teaching/ (idempotent) in %s" % path)
         return 0
     path.write_text(updated)
-    print("migrated teach prefix to /teaching/ in %s" % path)
+    print("migrated leftover prefix to /teaching/ in %s" % path)
     return 0
 
 
