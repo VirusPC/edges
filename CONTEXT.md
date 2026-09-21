@@ -154,7 +154,11 @@ _避免使用_：Edges 扩展、连接器
 
 **教学工作区（Teaching Workspace）**：
 以学习进展和能力获得为目标的专项工作区。
-_避免使用_：笔记、Edge、项目工作区
+_避免使用_：笔记、Edge、项目工作区、教学站点（若指公网入口）
+
+**教学站点（/teaching/）**：
+与教学工作区对应的公网持久入口，固定路径 `/teaching/`，与其它 edges 衍生站同一阿里云 ECS 路径心智。
+_避免使用_：教学工作区（若指公网入口）、Artifacts 预览服务、`/tasks/` 持久看板站
 
 **Post**：
 从知识资产或专项成果编辑而来的对外发布物；它是知识资产部署后的输出，把知识闭环接入读者与公共讨论，但不替代其来源知识。
@@ -209,8 +213,16 @@ proposeTypes 输出的一行：建议 slug、描述，以及支撑该类型的 `
 _避免使用_：已落盘的 Task Project、自动当成质心、Memory Type
 
 **Task Project 审阅页（edges）**：
-classifyTasks 与 proposeTypes 共用的人确认闸门：一份由 `edges tasks project review-page` 渲出的 HTML，只含通用 groups+items。组是已有 Task Project 还是 proposeTypes 候选由调用方 Skill 解释；审阅页本身不是 Task Project，也不是分类算法，也不负责托管。
-_避免使用_：把它当 Task Project、当分类算法、`--mode`、把它当 Artifacts 预览服务、让 review-page 负责发布
+classifyTasks 与 proposeTypes 共用的人确认闸门：一份由 `edges tasks project review-page` 渲出的 HTML，只含通用 groups+items。组是已有 Task Project 还是 proposeTypes 候选由调用方 Skill 解释；审阅页本身不是 Task Project，也不是分类算法，也不负责托管。`/tasks/` 持久看板站复用这份 HTML 当固定入口，并不另开 status station；页仍只渲染。
+_避免使用_：把它当 Task Project、当分类算法、`--mode`、把它当 Artifacts 预览服务、让 review-page 负责发布、把它当成 `/tasks/` 站点本身、status station
+
+**`/tasks/` 持久看板站**：
+固定公网路径 `/tasks/` 上的持久入口，始终反映 main 看板；部署链从看板生成分组列表，经薄映射喂给现有 review-page 渲出同一份 HTML。不是新的 status station 产品，也不是 Artifacts 短 TTL 预览。
+_避免使用_：status station、Artifacts 预览服务、把它当 Task Project 审阅页命令本身、本轮按 project 拆 URL 树、本地 HTML 视图、教学站点
+
+**分组列表 schema（edges.tasks.grouped）**：
+`edges tasks list --group-by project` 产出的松耦合分组契约（如 `edges.tasks.grouped/v1`）：按 Task Project 编组的看板快照，不按审阅页命名、也不专属于 review-page；审阅页若要用，经薄映射即可。
+_避免使用_：review-page 输入 schema、把它叫 review-page JSON、把扁平 list 当成分组契约
 
 **审阅导出行（edges）**：
 Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`、`action`，可选 `note`。查找键是 Task stem，不是 title 或 `name`。
@@ -237,16 +249,16 @@ Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`�
 _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
 
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；约定中的 `project review-page` 只把建议 JSON 渲成 Task Project 审阅页，不算分类、不落地、不托管。
-_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）、把 review-page 扩成 Artifacts 预览服务
+以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；约定中的 `list --group-by project` 产出分组列表 schema（如 `edges.tasks.grouped/v1`，不绑 review-page）；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；`project review-page` 只把 groups+items JSON 渲成 Task Project 审阅页，不算分类、不落地、不托管。`/tasks/` 持久看板站是部署链消费者，不新开看板动词。
+_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）、把 review-page 扩成 Artifacts 预览服务或 `/tasks/` 托管、把分组 schema 命名成 review-page 专属
 
 **Artifacts 预览服务**：
-稳定的短生命周期托管 + 真浏览器可开 URL，用来打开需要人交互的 Agent HTML；聊天内嵌预览是绕开的不可靠路径。
-_避免使用_：长期站点/博客、Astro、site-and-content、本地 HTML 视图、聊天 HTML 预览、审阅结果回传 Agent 客户端（若指同一件事）
+稳定的短生命周期托管 + 真浏览器可开 URL，用来打开需要人交互的 Agent HTML；聊天内嵌预览是绕开的不可靠路径。与 `/tasks/` 持久看板站硬边界：后者是固定路径、无 TTL、始终反映 main。
+_避免使用_：长期站点/博客、Astro、site-and-content、本地 HTML 视图、聊天 HTML 预览、审阅结果回传 Agent 客户端（若指同一件事）、`/tasks/` 持久看板站、教学站点
 
 **Artifact（edges）**：
 一次短生命周期托管的静态包（通常是交互 HTML）；不是知识资产，也不是对外 Post。
-_避免使用_：Post、知识资产、长期站点页面、聊天附件预览
+_避免使用_：Post、知识资产、长期站点页面、聊天附件预览、`/tasks/` 持久看板站
 
 **edges artifacts（CLI）**：
 `edges artifacts` 命令面：薄 `init`/token 与 `publish`/`rm`。`edges tasks project review-page` 仍只渲染，不发布。
@@ -257,8 +269,8 @@ Agent 客户端把 HTML 嵌进聊天窗口的预览（如 Grok Bot HTML preview�
 _避免使用_：Artifacts 预览服务、系统浏览器打开的托管 URL、把它当交互闸门
 
 **本地 HTML 视图**：
-对着仓内数据文件的持久本机/仓内查看层（数据与视图分离），不是一次性渲出的人闸，也不是对外可达的短生命周期托管。
-_避免使用_：Artifacts 预览服务、云临时托管、Task Project 审阅页的临时 HTML
+对着仓内数据文件的持久本机/仓内查看层（数据与视图分离），不是一次性渲出的人闸，也不是对外可达的短生命周期托管，也不是公网 `/tasks/` 持久看板站。
+_避免使用_：Artifacts 预览服务、云临时托管、Task Project 审阅页的临时 HTML、`/tasks/` 持久看板站
 
 **Task Run（edges）**：
 对应 Multica Run 的一次执行尝试；仓内落在 Task 同目录 sidecar `.{stem}.log.md` 中带稳定 `run-id` 的记录，由 `edges tasks runs` / `run-messages` 只读查看。

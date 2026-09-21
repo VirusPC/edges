@@ -6,11 +6,12 @@ Short-lived static **Artifacts 预览服务** (ADR 0013): upload → public URL 
 
 ## 用例 × 能力
 
-这个包是 HTTP 进程；日常操作走 [`edges artifacts`](../../clis/README.md#artifacts)。能做的事：把短生命周期静态页变成真浏览器（含手机）可开的 URL，到期删；以及在本机或 ECS 式宿主上把服务装起来、重启、轮换 token。能力面仍是 CLI + Skill + MCP；本轮没有 artifacts MCP。Skill 路径：渲染 → `publish` → 给人 URL。`review-page` 仍只渲染，不 publish。
+这个包是 HTTP 进程；日常操作走 [`edges artifacts`](../../clis/README.md#artifacts)。能做的事：把短生命周期静态页变成真浏览器（含手机）可开的 URL，到期删；以及在本机或 ECS 式宿主上把服务装起来、重启、轮换 token。能力面仍是 CLI + Skill + MCP；本轮没有 artifacts MCP。Skill 路径：渲染 → `publish` → 给人 URL。`review-page` 仍只渲染，不 publish。固定入口看 main 整板**不是**本服务：那是无 TTL 的 `/tasks/` 持久看板站（[ADR 0021](../../../docs/adr/0021-persistent-tasks-board-site.md)），不要用 UUID `publish` 当长期入口。
 
 | 用例 | 达成什么 | CLI | HTTP | review-page / Skill / Action |
 | --- | --- | --- | --- | --- |
 | 手机 / 浏览器打开 Agent 审阅 HTML | 本地渲染页变成可达 UUID URL | `edges artifacts publish`（客户端已 `init`；配置的 `EDGES_ARTIFACTS_BASE_URL` 须能打到预览服务） | `POST /artifacts`；人打开 `GET /artifacts/:id/` | `edges tasks project review-page` **只渲染**；Skill：render → publish → 给 URL |
+| 固定入口看 main 整板 | 不是本服务（无 TTL 的 `/tasks/` 持久看板站） | — | — | 见 [ADR 0021](../../../docs/adr/0021-persistent-tasks-board-site.md)；不要 `publish` UUID 当长期入口 |
 | 首次托管服务（本机或 ECS 式） | 写出 env / unit，拉起进程，必要时对外反代 | `server install` → `start` →（经 nginx 对外时）`setup-nginx` → `status`；客户端 `artifacts init` | `GET /health` | 无 Action |
 | 日常发布 / 删除短生命周期页 | 上传一页或提前删掉 | 一次 `init` → `publish` / `rm` | `POST /artifacts` / `DELETE /artifacts/:id` | 无 |
 | 仓库部署 pull 之后 | 盒上已有 server env 时跟上新代码并重启 | `server install` 再 `restart`（env 不存在则跳过） | 重启后 `GET /health` | Action：[`.github/workflows/deploy-teach.yml`](../../../.github/workflows/deploy-teach.yml)；不要从 Action 再跑 `setup-nginx` |
