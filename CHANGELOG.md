@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 文档与系统
+
+- 根 README 写明了系统设计目标：一键部署 Edges、一键接入 Agent 客户端、一键产出对外资产。仓库按这个方向收敛。
+
 ### 任务看板与项目
 
 - 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
