@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 任务看板与项目
+
+- 可以用 `edges tasks list --group-by project`（可选 `--format json`）按任务项目分组列出看板，stdout 是松耦合的 `edges.tasks.grouped/v1`（`{ schema, groups[{id,title,description?}], items[{id|stem, group, title?, status?, …}] }`），不是审阅页格式。现有 `--status` / `--priority` / `--project` / `--sort` 仍先过滤再分组。部署链把这份 JSON 薄映射后交给 `edges tasks project review-page`，在盒上写成 `knowledge/tasks/_site/index.html`，公网固定入口是 `http(s)://<host>/tasks/`（与 `/teaching/` 同机，见 ADR 0021）。`review-page` 仍只渲染。
+
 ### Artifacts 预览
 
 - 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。起服务用 `pnpm --filter edges-artifacts-preview start`（开发用 `pnpm --filter edges-artifacts-preview dev` 或根上的 `pnpm start:artifacts` / `pnpm dev:artifacts`）；本机先 `edges artifacts init` 写下 token 和 `EDGES_ARTIFACTS_BASE_URL`，再 `edges artifacts publish <path>` 打印公开 URL。有看板 Task 关联时再加 `--from-type task --from-id <stem> --task-project <slug>`（`from.id` 是 task stem）；没有关联就整段省略 `from`。`edges artifacts rm <id|url>` 提前删。写接口要共享 token；浏览器打开 URL 不登录。手机审阅必须用 ECS / 可达地址，不能假定 localhost。`edges tasks project review-page` 仍只渲染，不发布。本轮没有 artifacts MCP。
