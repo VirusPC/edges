@@ -189,10 +189,19 @@ test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts 
   assert.match(workflow, /artifacts server restart/);
   assert.doesNotMatch(workflow, /nginx-snippet|nginx-setup|configure-proxy/);
   assert.doesNotMatch(workflow, /artifacts server setup-nginx/);
-  assert.match(workflow, /environment:\s*\n\s*name:\s*production/s);
   assert.match(workflow, /^name:\s*Deploy\s*$/m);
-  assert.match(workflow, /url:\s*https:\/\/edges\.viruspc\.tech\/teaching\//);
-  assert.match(workflow, /https:\/\/edges\.viruspc\.tech\/tasks\//);
+  const deployJob = workflow.split(/\n {2}site-teaching:/)[0];
+  assert.match(deployJob, /\n {2}deploy:[\s\S]*\n {4}environment:\s*production\s*\n/);
+  assert.doesNotMatch(deployJob, /\n\s*url:/);
+  assert.equal(workflow.match(/git reset --hard origin\/main/g)?.length, 1);
+  assert.match(
+    workflow,
+    /site-teaching:\s*\n {4}needs:\s*\[deploy\][\s\S]*?\n {6}name:\s*teaching\s*\n {6}url:\s*https:\/\/edges\.viruspc\.tech\/teaching\//,
+  );
+  assert.match(
+    workflow,
+    /site-tasks:\s*\n {4}needs:\s*\[deploy\][\s\S]*?\n {6}name:\s*tasks\s*\n {6}url:\s*https:\/\/edges\.viruspc\.tech\/tasks\//,
+  );
   assert.doesNotMatch(workflow, /teach\.viruspc\.tech/);
   assert.doesNotMatch(workflow, /182\.92\.131\.89/);
   assert.match(workflow, /concurrency:\s*\n\s*group:\s*ecs-edges-pull/s);

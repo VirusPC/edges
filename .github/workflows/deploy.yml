@@ -1,8 +1,8 @@
 # SSH into Aliyun ECS and reset the full-repo checkout to origin/main.
-# Public entry is the Cloudflare Tunnel HTTPS host (not the bare IP):
-#   https://edges.viruspc.tech/teaching/
-#   https://edges.viruspc.tech/tasks/
-# GitHub allows one environment URL; that primary is /teaching/.
+# Public entries are two GitHub environments, each with one URL:
+#   teaching → https://edges.viruspc.tech/teaching/
+#   tasks    → https://edges.viruspc.tech/tasks/
+# deploy does the only SSH pull and does not claim both URLs.
 # The job summary lists both paths. Do not use a teach.* hostname.
 # ECS can reach GitHub over HTTPS; do not rsync-push a path subset.
 # After pull: generate knowledge/tasks/_site for /tasks/ (always; failure
@@ -31,9 +31,9 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://edges.viruspc.tech/teaching/
+    # No site URL here. production stays so existing environment secrets
+    # and protection rules still apply to the SSH deploy.
+    environment: production
     steps:
       - name: Public site URLs
         run: |
@@ -108,3 +108,23 @@ jobs:
              else
                echo "skip artifacts server: $env_file missing or token unused (one-time: artifacts-preview README)"
              fi'
+
+  site-teaching:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    environment:
+      name: teaching
+      url: https://edges.viruspc.tech/teaching/
+    steps:
+      - name: Record teaching URL
+        run: echo "teaching"
+
+  site-tasks:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    environment:
+      name: tasks
+      url: https://edges.viruspc.tech/tasks/
+    steps:
+      - name: Record tasks URL
+        run: echo "tasks"
