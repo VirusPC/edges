@@ -1,3 +1,4 @@
+import type { GroupedListGroup, GroupedListItem } from "./grouped.js";
 import type { TaskRun } from "./runlog.js";
 import type {
   TaskListItem,
@@ -33,6 +34,9 @@ export type TasksSuccess = {
   description?: string;
   groupCount?: number;
   itemCount?: number;
+  schema?: string;
+  groups?: GroupedListGroup[];
+  items?: GroupedListItem[];
 };
 
 export function formatTasksResult(payload: TasksSuccess | TasksFailure): string {
