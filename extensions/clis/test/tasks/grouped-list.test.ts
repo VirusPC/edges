@@ -69,7 +69,11 @@ test("list filters apply before grouping", async () => {
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     await run(
-      ["tasks", "create", "--title", "Keep", "--status", "todo", "--project", "cli", "--priority", "high"],
+      ["tasks", "create", "--title", "KeepHigh", "--status", "todo", "--project", "cli", "--priority", "high"],
+      { env },
+    );
+    await run(
+      ["tasks", "create", "--title", "KeepUrgent", "--status", "todo", "--project", "docs", "--priority", "urgent"],
       { env },
     );
     await run(
@@ -100,6 +104,8 @@ test("list filters apply before grouping", async () => {
         "docs",
         "--priority",
         "high",
+        "--priority",
+        "urgent",
         "--sort",
         "priority",
       ],
@@ -116,10 +122,12 @@ test("list filters apply before grouping", async () => {
     );
     assert.deepEqual(
       body.items.map((item) => item.title),
-      ["Keep"],
+      ["KeepUrgent", "KeepHigh"],
     );
-    assert.equal(body.items[0]?.group, "cli");
-    assert.equal(body.items[0]?.priority, "high");
+    assert.deepEqual(
+      body.items.map((item) => item.priority),
+      ["urgent", "high"],
+    );
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
