@@ -1,4 +1,9 @@
 # SSH into Aliyun ECS and reset the full-repo checkout to origin/main.
+# Public entry is the Cloudflare Tunnel HTTPS host (not the bare IP):
+#   https://edges.viruspc.tech/teaching/
+#   https://edges.viruspc.tech/tasks/
+# GitHub allows one environment URL; that primary is /teaching/.
+# The job summary lists both paths. Do not use a teach.* hostname.
 # ECS can reach GitHub over HTTPS; do not rsync-push a path subset.
 # After pull: generate knowledge/tasks/_site for /tasks/ (always; failure
 # fails the job). Then edges artifacts server install, then restart, if the
@@ -7,7 +12,7 @@
 # Fallback if git fetch from ECS is flaky: from a machine that can reach both
 # GitHub and the box, tar the full repo over SSH, then the same two CLI
 # commands (or deploy/bootstrap.sh, which is that wrapper).
-name: Deploy teach site
+name: Deploy teaching and tasks sites
 
 on:
   push:
@@ -28,8 +33,16 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: http://182.92.131.89/teaching/
+      url: https://edges.viruspc.tech/teaching/
     steps:
+      - name: Public site URLs
+        run: |
+          {
+            echo '## Public site URLs'
+            echo
+            echo '- [Teaching](https://edges.viruspc.tech/teaching/)'
+            echo '- [Tasks](https://edges.viruspc.tech/tasks/)'
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Pull edges on ECS
         env:
           TEACH_DEPLOY_HOST: ${{ secrets.TEACH_DEPLOY_HOST }}

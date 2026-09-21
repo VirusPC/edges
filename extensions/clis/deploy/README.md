@@ -1,6 +1,6 @@
 # Persistent `/tasks/` board (ops)
 
-Public URL: `http(s)://<host>/tasks/` on the same Aliyun ECS origin as `/teaching/` (current public IP http is `http://182.92.131.89`). Decision: [ADR 0021](../../../docs/adr/0021-persistent-tasks-board-site.md).
+Public URL: [https://edges.viruspc.tech/tasks/](https://edges.viruspc.tech/tasks/) and [https://edges.viruspc.tech/teaching/](https://edges.viruspc.tech/teaching/) (Cloudflare Tunnel to the same Aliyun ECS nginx). Decision: [ADR 0021](../../../docs/adr/0021-persistent-tasks-board-site.md).
 
 This is generated HTML only. It is not Artifacts (`publish` / UUID / TTL) and not a new status-station product. `edges tasks project review-page` still only renders.
 
@@ -35,6 +35,8 @@ sudo bash /home/cheng-dev/projects/edges/extensions/clis/deploy/setup-nginx-task
 That installs `/etc/nginx/snippets/edges-tasks.conf` (`/tasks/` → `<repo>/knowledge/tasks/_site/`) and includes it only in `teaching.conf` servers that contain `/teaching/`. Do not add `/tasks/` to the artifacts snippet. Do not dual-recognize `/teach/`.
 
 ## Checks
+
+These curls hit the ECS origin over HTTP. The public entry is the HTTPS URLs above.
 
 ```bash
 curl -fsS -o /dev/null -w '%{http_code}\n' http://182.92.131.89/teaching/

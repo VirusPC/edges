@@ -45,6 +45,6 @@
 - [tasks 只追加直接推 main](project_tasks_direct_main.md) — 往 knowledge/tasks/ 写只追加速记时，直接提交 main、不提 PR
 - [持久 /tasks/ 看板站：复用 review-page，扩展 deploy-teach](project_tasks_persistent_board_site.md) — 改 /tasks/ 持久入口、list --group-by、或看板站 vs Artifacts 时打开：不新开 status station；CI 扩展 deploy-teach.yml 并在 pull 后生成 _site；分组 schema 松耦合（edges.tasks.grouped/v1）；review-page 仍只渲染；nginx 一次性 setup-nginx-tasks.sh。决策见 docs/adr/0021-persistent-tasks-board-site.md。
 - [工作项叫 tasks，支持状态流转](project_tasks_with_status_not_todos.md) — idea→专家→Cloud 工作流下，目录与概念用 knowledge/tasks/（非 todos），按 Task Project 再按 edges-tasks-status 分夹流转
-- [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push.md) — 改 teach 站点、/tasks/ 持久站或 ECS 上的 edges 部署时：用 GitHub Actions SSH 触发整仓 git fetch/reset，不要再 rsync 推送；deploy job 保持 environment: production；reset 后始终生成 /tasks/；artifacts 仅在盒上已有 server env 时 bootstrap。不要新开 workflow（ADR 0021）。
+- [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push.md) — 改 teaching、/tasks/ 或 ECS 部署时：Actions SSH 整仓 pull，不要 rsync；environment 保持 production，url 为 https://edges.viruspc.tech/teaching/，summary 同时列 /tasks/；不要用 teach.* 或裸 IP 当对外入口。不要新开 workflow（ADR 0021）。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks_direct_main
 <!-- project-memory-entries:end -->
