@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
 - 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy-teach.yml` 会在整仓 pull 之后自动生成。
+- 修复教学站部署流水线里读 token 时的引号错误，避免 Action 一启动就语法失败.
 - nginx 一次性配好后，打开 `http(s)://<host>/tasks/` 就是固定入口，始终反映 main 上的看板，和 `/teaching/` 在同一台机器上（见 ADR 0021）。第一次对外跑 `extensions/clis/deploy/setup-nginx-tasks.sh`。
 - `edges tasks project review-page` 仍然只负责渲染，本轮拖拽不会写回仓库。
 

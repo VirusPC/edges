@@ -73,7 +73,7 @@ jobs:
              env_file="$HOME/.config/edges/artifacts-preview.env"
              token=""
              if [ -f "$env_file" ]; then
-               token="$(awk -F= '/^EDGES_ARTIFACTS_TOKEN=/{print substr($0, index($0,"=")+1); exit}' "$env_file")"
+               token="$(grep -m1 "^EDGES_ARTIFACTS_TOKEN=" "$env_file" | cut -d= -f2- || true)"
              fi
              if [ -n "$token" ] && [ "$token" != "replace-with-shared-token" ]; then
                export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
