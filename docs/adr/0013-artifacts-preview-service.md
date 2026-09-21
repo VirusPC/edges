@@ -4,13 +4,13 @@
 
 ## Context
 
-Agent 产出的交互 HTML 需要人操作。例如 classifyTasks 的 Task Project 审阅页：render-only `edges tasks project review-page` 只写到本地临时路径（ADR 0012）。手机往往没有 localhost / 开发环境。Grok Bot 聊天内嵌 HTML 预览不可靠——手机常无法预览，桌面交互 / 拖拽会坏（见 [`knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`](../../knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md)）。因此自建短生命周期预览托管；与长期站点、以及 backlog「review页结果回传Agent客户端」分开。
+Agent 产出的交互 HTML 需要人操作。例如 classifyTasks 的 Task Project 审阅页：render-only `edges tasks project review-page` 只写到本地临时路径（ADR 0012）。手机往往没有 localhost / 开发环境。Grok Bot 聊天内嵌 HTML 预览不可靠——手机常无法预览，桌面交互 / 拖拽会坏（见 [`knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`](../../knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md)）。因此自建短生命周期预览托管；与长期站点、持久 `/tasks/` 看板站（ADR 0021）、以及 backlog「review页结果回传Agent客户端」分开。
 
 2026-09-19 grill 确认（peng cheng）：做个人 **Artifacts 预览服务**——上传 → URL → TTL 删除。本轮只定 CONTEXT / 本 ADR，不实现服务或 CLI。**Extends ADR 0012**（人如何打开审阅页；`review-page` 仍只渲染）。叠 ADR 0004。
 
 **Status:** accepted（ADR 0013；grill 确认于 2026-09-19）
 
-**See also:** ADR 0012（[Task Project 审阅页仍是 render-only CLI](0012-task-project-review-page-is-render-only-cli.md)）；[`knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`](../../knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md)（聊天 HTML 预览不能当交互闸门）
+**See also:** ADR 0012（[Task Project 审阅页仍是 render-only CLI](0012-task-project-review-page-is-render-only-cli.md)）；ADR 0021（[持久 `/tasks/` 看板站：固定路径，不是本 TTL 服务](0021-persistent-tasks-board-site.md)）；[`knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`](../../knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md)（聊天 HTML 预览不能当交互闸门）
 
 ## Decision
 
@@ -26,7 +26,7 @@ Agent 产出的交互 HTML 需要人操作。例如 classifyTasks 的 Task Proje
 
 ## Considered Options
 
-- 做成长期站点 / 博客（Astro / site-and-content）：否决；那是对外长期内容，生命周期与审阅页不同。
+- 做成长期站点 / 博客（Astro / site-and-content）或固定 `/tasks/` 看板入口：否决；长期固定路径是 ADR 0021，不是本 TTL 服务。
 - 做成本地 HTML 视图卡：否决；那是仓内 / 本机视图，手机打不开 localhost。
 - 本轮做审阅结果回传 Agent 客户端：否决；已拆独立 backlog。
 - 靠聊天 HTML 预览当闸门：否决；见 Grok Bot 预览笔记。

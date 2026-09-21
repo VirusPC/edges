@@ -1,10 +1,10 @@
 # Task Project 审阅页是只渲染的 CLI（通用 groups+items）
 
-ADR 0010 / 0011 的人确认闸门原先靠聊天里的 Markdown 建议表，以及临时 ad-hoc HTML。2026-09-17 grill 确认：交互审阅改成 **render-only** CLI `edges tasks project review-page`——Skill 仍产出建议（LLM / agent）；CLI 只把 JSON 渲成 Task Project 审阅页；人拖拽改组后 Copy JSON 贴回聊天，Skill 用现有 `project create` / `update --project` 落地。页是通用 groups+items，无 `--mode`。**Extends ADR 0010 / 0011**（人闸形态；不重开 embedding / CLI classify）；**Amended by ADR 0013**（人如何打开页：Skill 可经 Artifacts 预览服务发布后给可达 URL；`review-page` 仍只渲染、仍打印本地路径）。叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。命令已落地（PR #85）；本 ADR 原轮只定 CONTEXT / 决策，不改写 skill 正文。
+ADR 0010 / 0011 的人确认闸门原先靠聊天里的 Markdown 建议表，以及临时 ad-hoc HTML。2026-09-17 grill 确认：交互审阅改成 **render-only** CLI `edges tasks project review-page`——Skill 仍产出建议（LLM / agent）；CLI 只把 JSON 渲成 Task Project 审阅页；人拖拽改组后 Copy JSON 贴回聊天，Skill 用现有 `project create` / `update --project` 落地。页是通用 groups+items，无 `--mode`。**Extends ADR 0010 / 0011**（人闸形态；不重开 embedding / CLI classify）；**Amended by ADR 0013**（人如何打开页：Skill 可经 Artifacts 预览服务发布后给可达 URL；`review-page` 仍只渲染、仍打印本地路径）；**Amended by ADR 0021**（持久 `/tasks/` 端出同一份 HTML 当固定看板入口；页仍只渲染；本轮不写回、不加 `--mode`）。叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。命令已落地（PR #85）；本 ADR 原轮只定 CONTEXT / 决策，不改写 skill 正文。
 
-**Status:** accepted（ADR 0012；grill 确认于 2026-09-17；2026-09-19 由 ADR 0013 修订打开方式）
+**Status:** accepted（ADR 0012；grill 确认于 2026-09-17；2026-09-19 由 ADR 0013 修订打开方式；2026-09-21 由 ADR 0021 修订持久入口）
 
-**See also:** ADR 0010（classifyTasks 整板归属 + 人确认闸门）；ADR 0011（proposeTypes 类型发现 + 人确认闸门）；ADR 0013（[Artifacts 预览服务](0013-artifacts-preview-service.md)）；[`knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`](../../knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md)（聊天 HTML 预览不能当拖拽闸门）
+**See also:** ADR 0010（classifyTasks 整板归属 + 人确认闸门）；ADR 0011（proposeTypes 类型发现 + 人确认闸门）；ADR 0013（[Artifacts 预览服务](0013-artifacts-preview-service.md)）；ADR 0021（[持久 `/tasks/` 看板站](0021-persistent-tasks-board-site.md)）；[`knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`](../../knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md)（聊天 HTML 预览不能当拖拽闸门）
 
 ## Decision
 
