@@ -13,7 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 任务看板与项目
 
-- 可以用 `edges tasks list --group-by project`（可选 `--format json`）按任务项目分组列出看板，stdout 是松耦合的 `edges.tasks.grouped/v1`（`{ schema, groups[{id,title,description?}], items[{id|stem, group, title?, status?, …}] }`），不是审阅页格式。现有 `--status` / `--priority` / `--project` / `--sort` 仍先过滤再分组。部署链把这份 JSON 薄映射后交给 `edges tasks project review-page`，在盒上写成 `knowledge/tasks/_site/index.html`，公网固定入口是 `http(s)://<host>/tasks/`（与 `/teaching/` 同机，见 ADR 0021）。`review-page` 仍只渲染。
+- 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
+- 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy-teach.yml` 会在整仓 pull 之后自动生成。
+- nginx 一次性配好后，打开 `http(s)://<host>/tasks/` 就是固定入口，始终反映 main 上的看板，和 `/teaching/` 在同一台机器上（见 ADR 0021）。第一次对外跑 `extensions/clis/deploy/setup-nginx-tasks.sh`。
+- `edges tasks project review-page` 仍然只负责渲染，本轮拖拽不会写回仓库。
 
 ### Artifacts 预览
 
