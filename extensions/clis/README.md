@@ -87,7 +87,15 @@ classifyTasks Skill (`extensions/skills/project-tasks-classify`) uses these proj
 
 ## `artifacts`
 
-Thin client for the Artifacts 预览服务 (`extensions/services/artifacts-preview`). `review-page` still only renders; publish is a separate step.
+Thin client for the Artifacts 预览服务 (`extensions/services/artifacts-preview`). `review-page` still only renders; publish is a separate step. 用例 × 能力（审阅页打开、首次托管、日常 publish/rm、部署后重启、轮换 token）见 [artifacts-preview README](../services/artifacts-preview/README.md#use-case-matrix)。
+
+| 用例 | 主要调用 |
+| --- | --- |
+| 打开审阅页 | `tasks project review-page`（只渲染）→ `artifacts publish` |
+| 首次托管 | `server install` → `start` →（nginx 对外时）`setup-nginx` → `status`；客户端 `init` |
+| 日常 | `init`（一次）→ `publish` / `rm` |
+| pull 后 | Action `deploy-teach.yml`：`install` → `restart`（env 在才跑） |
+| 轮换 token | `install --force` → `restart` → `init --force` |
 
 ```
 edges artifacts init [--base-url <url>] [--config <path>] [--force]

@@ -117,7 +117,7 @@ knowledge/projects/foo/report.md → knowledge/archive/projects/foo/report.md
 
 Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；`AGENTS.md` 和 `.memory/` 保存维护系统所需的运营规则、决策与经验；`knowledge/` 保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
 
-`extensions/` 收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill 和其他接口。`shared-extensions/` 则保存不依赖 Edges、可跨机器和 Agent 客户端复用的个人 harness；两者互斥。
+`extensions/` 收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill 和其他接口。`shared-extensions/` 则保存不依赖 Edges、可跨机器和 Agent 客户端复用的个人 harness；两者互斥。短生命周期预览页（上传 → 可达 URL → TTL）的用例 × 能力见 [`extensions/services/artifacts-preview`](extensions/services/artifacts-preview/README.md#use-case-matrix)；命令面是 `edges artifacts`。
 
 现有调用侧以文件、Obsidian 和人工检索为主。未来的索引、检索与机器接口仍放在 `extensions/`，提高知识流动性并让闭环连接外部系统，但必须在实现前明确标注为规划能力。
 
