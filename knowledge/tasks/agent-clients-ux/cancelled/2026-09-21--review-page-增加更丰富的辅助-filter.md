@@ -4,9 +4,9 @@ description: review-page 现有筛选偏基础，复杂看板不好收窄；需�
 metadata:
   edges-type: task
   edges-title: review-page 增加更丰富的辅助 filter
-  edges-tasks-status: backlog
+  edges-tasks-status: cancelled
   edges-task-project: agent-clients-ux
-  edges-updated-at: "2026-09-21T08:59:34.285Z"
+  edges-updated-at: "2026-09-21T09:06:12.380Z"
 ---
 
 结论（idea）：为 review-page（含持久 /tasks/）增加更丰富的辅助 filter 能力。
@@ -24,3 +24,5 @@ review-page 现有筛选偏基础，复杂看板不好收窄；需要更丰富�
 - grill 过滤维度与组合、与左侧分组筛选关系。
 - 派发默认先 grill-with-docs，过关再实现。
 - 未指派。
+
+**合并取消（2026-09-21）：** 合并进「review-page 改造（三列布局 + 顶栏 filter）」统一卡，本卡 cancelled。

@@ -4,9 +4,9 @@ description: review-page 现在主要靠拖拽分组，缺右侧 markdown 预览
 metadata:
   edges-type: task
   edges-title: review-page 右侧增加 markdown 预览 panel
-  edges-tasks-status: backlog
+  edges-tasks-status: cancelled
   edges-task-project: agent-clients-ux
-  edges-updated-at: "2026-09-21T08:58:22.661Z"
+  edges-updated-at: "2026-09-21T09:06:11.960Z"
 ---
 
 结论（idea）：在 review-page（含持久 /tasks/ 与本地渲页）右侧增加 markdown 预览 panel。
@@ -23,3 +23,5 @@ review-page 现在主要靠拖拽分组，缺右侧 markdown 预览；需要在�
 - grill 选中态、是否只读、与 classify 模式关系。
 - 派发默认先 grill-with-docs，过关再实现。
 - 未指派。
+
+**合并取消（2026-09-21）：** 合并进「review-page 改造（三列布局 + 顶栏 filter）」统一卡，本卡 cancelled。
