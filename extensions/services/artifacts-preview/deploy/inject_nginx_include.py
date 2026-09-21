@@ -69,9 +69,22 @@ def main(argv):
         return 0
     updated, changed = inject_into_teaching_servers(text, include_line)
     if not changed:
+        hint = ""
+        if "/teach/" in text:
+            hint = (
+                "\nlegacy /teach/ found — migrate that prefix to /teaching/ first:\n"
+                "  python3 %s %s\n"
+                "then re-run edges artifacts server setup-nginx.\n"
+                "This injector matches /teaching/ only."
+                % (
+                    pathlib.Path(__file__).resolve().parent
+                    / "migrate-teach-nginx-prefix.py",
+                    path,
+                )
+            )
         print(
-            "no server { block containing /teaching/ in %s — add %s yourself"
-            % (path, include_line),
+            "no server { block containing /teaching/ in %s — add %s yourself%s"
+            % (path, include_line, hint),
             file=sys.stderr,
         )
         return 1

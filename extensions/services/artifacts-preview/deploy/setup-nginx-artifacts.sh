@@ -3,6 +3,12 @@
 # Install the /health + /artifacts/ proxy into the existing teach :80
 # server. Does not replace /teaching/. Idempotent.
 #
+# teach.conf must contain /teaching/. If it still has location /teach/,
+# migrate first (do not dual-match in inject_nginx_include.py):
+#   sudo python3 …/deploy/migrate-teach-nginx-prefix.py /etc/nginx/conf.d/teach.conf
+#   nginx -t && systemctl reload nginx
+# then re-run this script / edges artifacts server setup-nginx.
+#
 # If this is run without root, the CLI prints:
 #   sudo bash …/deploy/setup-nginx-artifacts.sh
 set -euo pipefail
@@ -22,7 +28,7 @@ die() {
 [ "$(id -u)" -eq 0 ] || die "run with sudo: sudo bash $SCRIPT_DIR/setup-nginx-artifacts.sh"
 [ -f "$CONF_SRC" ] || die "missing $CONF_SRC"
 command -v nginx >/dev/null 2>&1 || die "nginx not found"
-[ -f "$TEACH_CONF" ] || die "missing $TEACH_CONF — add $INCLUDE_LINE inside the server {} that already serves /teaching/, then nginx -t && systemctl reload nginx"
+[ -f "$TEACH_CONF" ] || die "missing $TEACH_CONF — teach.conf must contain /teaching/; add $INCLUDE_LINE inside that server {}, then nginx -t && systemctl reload nginx. Legacy /teach/ → $SCRIPT_DIR/migrate-teach-nginx-prefix.py"
 
 install -d -m 755 /etc/nginx/snippets
 install -m 644 "$CONF_SRC" "$CONF_DST"

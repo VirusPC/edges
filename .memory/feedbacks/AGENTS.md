@@ -8,6 +8,7 @@
 <!-- project-memory-entries:start -->
 - [Skill 分发：能不要的不要，必须留的软链](feedback_agent_skills_hub_symlink.md) — 整理仓库或本机 .xxx/skills 时：能读 .agents/skills 的不占目录；Claude Code 只留软链，禁止实体拷贝。commands 目录不适用。
 - [task 是 from.type，不是顶层字段](feedback_artifact_from_task_is_kind.md) — 改 artifact meta / edges artifacts publish 的 from 时打开：task 是 from.type 的一种来源，不要再写顶层 task 或 from.kind；v1 可选 from 只允许 {type:task,id,project}；CLI 是 --from-type / --from-id / --task-project。
+- [artifacts inject 只认 /teaching/，遗留 /teach/ 先迁 teach.conf](feedback_artifacts_inject_teaching_only.md) — 改 setup-nginx / inject_nginx_include.py 或盒上 teach.conf 仍是 /teach/ 时打开：注入脚本只匹配 /teaching/；不要双认 /teach/；先跑 migrate-teach-nginx-prefix.py 再 edges artifacts server setup-nginx。
 - [artifacts server CLI 用 setup-nginx，不要 snippet / server init](feedback_artifacts_server_cli_no_nginx.md) — 改 edges artifacts server 命令面时打开：公开面是 install（保证 env、不 start）/ start|stop|restart / status / setup-nginx。没有 server init。不要 nginx-snippet、nginx-setup、configure-proxy。
 - [artifacts server install 不启动进程](feedback_artifacts_server_install_not_start.md) — 改 edges artifacts server 的 install/start、或想把装 unit 和拉起进程合成一步时打开：install 保证 env、装依赖/unit/enable，不 start；start/stop/restart 只做进程生命周期。
 - [能力面必须 CLI / Skill / MCP 并列](feedback_capability_surface_three_peers.md) — 写能力面标题、Why、How-to 时：三者并列；禁止「必要时 MCP」、禁止用「一个 CLI + 一份 skill」当本仓简称。
