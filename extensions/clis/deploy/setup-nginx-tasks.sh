@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One-time sudo: serve generated knowledge/tasks/_site at /tasks/ on the
 # existing teaching.conf :80 server. Does not replace /teaching/.
-# Does not call this from deploy-teach.yml — Action only generates HTML.
+# Does not call this from deploy.yml — Action only generates HTML.
 #
 # teaching.conf must contain /teaching/. If the live box still has leftover
 # teach.conf / /teach/, rename to teaching.conf and run

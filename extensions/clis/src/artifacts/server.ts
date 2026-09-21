@@ -39,7 +39,7 @@ First time on ECS:
   edges artifacts server setup-nginx
   edges artifacts server status
 
-After a deploy-teach pull (env already on the box):
+After a deploy.yml pull (env already on the box):
   edges artifacts server install   # if build/unit changed
   edges artifacts server restart   # or restart only
 

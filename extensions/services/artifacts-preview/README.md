@@ -14,7 +14,7 @@ Short-lived static **Artifacts 预览服务** (ADR 0013): upload → public URL 
 | 固定入口看 main 整板 | 不是本服务（无 TTL 的 `/tasks/` 持久看板站） | — | — | 见 [ADR 0021](../../../docs/adr/0021-persistent-tasks-board-site.md)；不要 `publish` UUID 当长期入口 |
 | 首次托管服务（本机或 ECS 式） | 写出 env / unit，拉起进程，必要时对外反代 | `server install` → `start` →（经 nginx 对外时）`setup-nginx` → `status`；客户端 `artifacts init` | `GET /health` | 无 Action |
 | 日常发布 / 删除短生命周期页 | 上传一页或提前删掉 | 一次 `init` → `publish` / `rm` | `POST /artifacts` / `DELETE /artifacts/:id` | 无 |
-| 仓库部署 pull 之后 | 盒上已有 server env 时跟上新代码并重启 | `server install` 再 `restart`（env 不存在则跳过） | 重启后 `GET /health` | Action：[`.github/workflows/deploy-teach.yml`](../../../.github/workflows/deploy-teach.yml)；不要从 Action 再跑 `setup-nginx` |
+| 仓库部署 pull 之后 | 盒上已有 server env 时跟上新代码并重启 | `server install` 再 `restart`（env 不存在则跳过） | 重启后 `GET /health` | Action：[`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml)；不要从 Action 再跑 `setup-nginx` |
 | 轮换 token | 换共享 token，服务与客户端都跟上 | `server install --force` → `restart` → 客户端 `init --force` | 写接口换新 Bearer | 无 |
 
 This package is the HTTP process. The thin command surface is `edges artifacts` in [`../../clis`](../../clis/). `edges tasks project review-page` stays render-only; Skill orchestration is render → `edges artifacts publish` → give the human the URL. Capability Surface is CLI + Skill + MCP; this round has no artifacts MCP.
@@ -134,7 +134,7 @@ Phone opens the printed `http://182.92.131.89/artifacts/<uuid>/` in a system bro
 
 ### After each main pull
 
-GitHub Actions [`.github/workflows/deploy-teach.yml`](../../../.github/workflows/deploy-teach.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). **Only when** `~/.config/edges/artifacts-preview.env` exists, it runs `edges artifacts server install` then `edges artifacts server restart` (skipped until the one-time token file is in place, so teach deploys stay green). After the env exists, a failure fails the job so the restart is visible; the tree is already at `origin/main`. nginx is usually unchanged — do not re-run `setup-nginx` from the Action.
+GitHub Actions [`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). **Only when** `~/.config/edges/artifacts-preview.env` exists, it runs `edges artifacts server install` then `edges artifacts server restart` (skipped until the one-time token file is in place, so teach deploys stay green). After the env exists, a failure fails the job so the restart is visible; the tree is already at `origin/main`. nginx is usually unchanged — do not re-run `setup-nginx` from the Action.
 
 If the unit files did not change, `restart` alone is enough; `install` then `restart` is the conservative path the Action uses.
 

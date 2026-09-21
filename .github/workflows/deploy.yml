@@ -1,4 +1,9 @@
 # SSH into Aliyun ECS and reset the full-repo checkout to origin/main.
+# Public entries are two GitHub environments, each with one URL:
+#   teaching → https://edges.viruspc.tech/teaching/
+#   tasks    → https://edges.viruspc.tech/tasks/
+# deploy does the only SSH pull and does not claim both URLs.
+# The job summary lists both paths. Do not use a teach.* hostname.
 # ECS can reach GitHub over HTTPS; do not rsync-push a path subset.
 # After pull: generate knowledge/tasks/_site for /tasks/ (always; failure
 # fails the job). Then edges artifacts server install, then restart, if the
@@ -7,7 +12,7 @@
 # Fallback if git fetch from ECS is flaky: from a machine that can reach both
 # GitHub and the box, tar the full repo over SSH, then the same two CLI
 # commands (or deploy/bootstrap.sh, which is that wrapper).
-name: Deploy teach site
+name: Deploy
 
 on:
   push:
@@ -26,10 +31,18 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: http://182.92.131.89/teaching/
+    # No site URL here. production stays so existing environment secrets
+    # and protection rules still apply to the SSH deploy.
+    environment: production
     steps:
+      - name: Public site URLs
+        run: |
+          {
+            echo '## Public site URLs'
+            echo
+            echo '- [Teaching](https://edges.viruspc.tech/teaching/)'
+            echo '- [Tasks](https://edges.viruspc.tech/tasks/)'
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Pull edges on ECS
         env:
           TEACH_DEPLOY_HOST: ${{ secrets.TEACH_DEPLOY_HOST }}
@@ -95,3 +108,23 @@ jobs:
              else
                echo "skip artifacts server: $env_file missing or token unused (one-time: artifacts-preview README)"
              fi'
+
+  site-teaching:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    environment:
+      name: teaching
+      url: https://edges.viruspc.tech/teaching/
+    steps:
+      - name: Record teaching URL
+        run: echo "teaching"
+
+  site-tasks:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    environment:
+      name: tasks
+      url: https://edges.viruspc.tech/tasks/
+    steps:
+      - name: Record tasks URL
+        run: echo "tasks"

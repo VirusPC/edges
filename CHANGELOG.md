@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 任务看板与项目
 
 - 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
-- 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy-teach.yml` 会在整仓 pull 之后自动生成。
+- 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy.yml` 会在整仓 pull 之后自动生成。
 - 修复教学站部署流水线里读 token 时的引号错误，避免 Action 一启动就语法失败.
 - nginx 一次性配好后，打开 `http(s)://<host>/tasks/` 就是固定入口，始终反映 main 上的看板，和 `/teaching/` 在同一台机器上（见 ADR 0021）。第一次对外跑 `extensions/clis/deploy/setup-nginx-tasks.sh`。
 - `edges tasks project review-page` 仍然只负责渲染，本轮拖拽不会写回仓库。
@@ -30,7 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `edges tasks project review-page` 仍然只负责渲染，不发布。要给人打开时，先渲染再 `publish`。
 - 在和 teaching 同一台机器上，用 `edges artifacts server install` 装好环境（不启动进程），再用 `start` 拉起服务。日常用 `stop` / `restart` 管进程，用 `status` 查看。一次性对外跑 `setup-nginx`。没有 `server init`。
 - 反代写进已有的 `teaching.conf`，必须带 `/teaching/`，不要另开公网端口。
-- 合并到 main 后，如果盒上已经有这份服务配置，`deploy-teach.yml` 会在整仓 pull 之后重启服务。nginx 通常不用再跑。
+- 合并到 main 后，如果盒上已经有这份服务配置，`deploy.yml` 会在整仓 pull 之后重启服务。nginx 通常不用再跑。
 
 ### 笔记入库与能力面
 

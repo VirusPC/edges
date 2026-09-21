@@ -14,7 +14,7 @@ metadata:
 结论（idea）：建持久 Tasks review（或状态总览）站点：固定公网路径（如 `/tasks/` 或子域），CI 在 main 更新时重建并部署到 teach 同机 ECS（或同类），内容始终来自 main 看板。
 
 **事实背景:**
-- teaching 已有同机 ECS 持久站 + GitHub Action 拉 main 部署先例（`deploy-teach.yml`：SSH 整仓 `git fetch` + `reset --hard origin/main`）。
+- teaching 已有同机 ECS 持久站 + GitHub Action 拉 main 部署先例（`deploy.yml`：SSH 整仓 `git fetch` + `reset --hard origin/main`）。
 - Artifacts 预览是短 TTL UUID 路径（ADR-0013），适合一次性审阅页；每次 `publish` 新 UUID 且会过期，不适合当固定入口「永远打开同一 URL 看主分支看板」。
 - `edges tasks project review-page` 只渲本地/临时 HTML（ADR-0012 render-only）；`edges artifacts publish` 产出临时公网 URL。
 - 已有相关但不同的卡，勿并：`agent-clients-ux` done「自建云服务器临时托管 artifacts」与「Artifacts预览服务部署到ECS」（临时托管 / ECS）；`edges-tasks` backlog「看板状态可视化 Skill（review-page/HTML + artifacts publish）」偏 Skill 封装临时 publish。另勿并 changelog CLI、大一统 CRUD Skill/MCP。

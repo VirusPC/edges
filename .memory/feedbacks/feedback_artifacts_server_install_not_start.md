@@ -13,4 +13,4 @@ metadata:
 
 `edges artifacts server install` 确保 `~/.config/edges/artifacts-preview.env`（缺 token 就建，`--force` 可轮换），再装依赖、构建、安装并 enable user unit，返回 `started: false`，绝不 start/restart。拉起或重启进程用单独的 `start` / `restart`。
 **Why:** 2026-09-20 用户纠正：不要把 install 和 start 合成一个 API。随后锁定：没有 `server init`，env 由 `install` 自己保证。pull 之后的工作流是先 install 再 restart，不是一条 install-and-start。
-**How to apply:** 实现、测试、帮助和工作流都保持两条命令。断言 install 的 systemctl 调用里不能出现 start/restart/stop。包装脚本（`deploy/bootstrap.sh`、`deploy-teach.yml`）必须先后调用 `install` 和 `restart`，且仅当盒上已有 server env 时才跑，避免挡住 teach。
+**How to apply:** 实现、测试、帮助和工作流都保持两条命令。断言 install 的 systemctl 调用里不能出现 start/restart/stop。包装脚本（`deploy/bootstrap.sh`、`deploy.yml`）必须先后调用 `install` 和 `restart`，且仅当盒上已有 server env 时才跑，避免挡住 teach。
