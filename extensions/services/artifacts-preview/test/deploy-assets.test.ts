@@ -180,8 +180,8 @@ test("teaching nginx prefix migrator rewrites both 80 and 443 servers toward /te
   await rm(dir, { recursive: true, force: true });
 });
 
-test("deploy-teach.yml still full-repo pulls then CLI-installs and restarts artifacts when env exists", async () => {
-  const workflow = await readFile(path.join(repoRoot, ".github/workflows/deploy-teach.yml"), "utf8");
+test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts when env exists", async () => {
+  const workflow = await readFile(path.join(repoRoot, ".github/workflows/deploy.yml"), "utf8");
   assert.match(workflow, /git reset --hard origin\/main/);
   assert.match(workflow, /artifacts-preview\.env/);
   assert.match(workflow, /replace-with-shared-token/);
@@ -190,7 +190,11 @@ test("deploy-teach.yml still full-repo pulls then CLI-installs and restarts arti
   assert.doesNotMatch(workflow, /nginx-snippet|nginx-setup|configure-proxy/);
   assert.doesNotMatch(workflow, /artifacts server setup-nginx/);
   assert.match(workflow, /environment:\s*\n\s*name:\s*production/s);
-  assert.match(workflow, /url:\s*http:\/\/182\.92\.131\.89\/teaching\//);
+  assert.match(workflow, /^name:\s*Deploy\s*$/m);
+  assert.match(workflow, /url:\s*https:\/\/edges\.viruspc\.tech\/teaching\//);
+  assert.match(workflow, /https:\/\/edges\.viruspc\.tech\/tasks\//);
+  assert.doesNotMatch(workflow, /teach\.viruspc\.tech/);
+  assert.doesNotMatch(workflow, /182\.92\.131\.89/);
   assert.match(workflow, /concurrency:\s*\n\s*group:\s*ecs-edges-pull/s);
   assert.doesNotMatch(workflow, /^\s*rsync\b/m);
   assert.match(workflow, /do not rsync-push a path subset/);

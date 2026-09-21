@@ -92,7 +92,7 @@ pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
   --out "$PWD/knowledge/tasks/_site/index.html"
 ```
 
-Ops (one-time nginx, curl checks, PATH): [deploy/README.md](deploy/README.md). `deploy-teach.yml` generates after pull; it does not run setup-nginx.
+Ops (one-time nginx, curl checks, PATH): [deploy/README.md](deploy/README.md). `deploy.yml` generates after pull; it does not run setup-nginx.
 
 classifyTasks Skill (`extensions/skills/project-tasks-classify`) uses these project verbs plus `update --project`. Generic tasks Skill/MCP CRUD is a later backlog on this same contract. Capability Surface is CLI + Skill + MCP.
 
@@ -105,7 +105,7 @@ Thin client for the Artifacts 预览服务 (`extensions/services/artifacts-previ
 | 打开审阅页 | `tasks project review-page`（只渲染）→ `artifacts publish` |
 | 首次托管 | `server install` → `start` →（nginx 对外时）`setup-nginx` → `status`；客户端 `init` |
 | 日常 | `init`（一次）→ `publish` / `rm` |
-| pull 后 | Action `deploy-teach.yml`：`install` → `restart`（env 在才跑） |
+| pull 后 | Action `deploy.yml`：`install` → `restart`（env 在才跑） |
 | 轮换 token | `install --force` → `restart` → `init --force` |
 
 ```

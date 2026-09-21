@@ -6,7 +6,7 @@ This is generated HTML only. It is not Artifacts (`publish` / UUID / TTL) and no
 
 ## Generate (every deploy)
 
-After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy-teach.yml` job always runs:
+After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs:
 
 ```bash
 pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \

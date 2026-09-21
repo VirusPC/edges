@@ -6,7 +6,7 @@
 
 **Goal:** After each `main` pull on the existing Aliyun ECS teach box, generate a static HTML board at a fixed public path `/tasks/` that always reflects the main-branch Task board, by reading `edges tasks list --group-by project`, thin-mapping into existing review-page `{groups,items}`, and rendering with `edges tasks project review-page`.
 
-**Architecture:** No new product and no new workflow. `list --group-by project` emits a loose-coupled `edges.tasks.grouped/v1` snapshot. A small map in CLI utils (not inside review-page) turns that into generic groups+items. A generate helper runs that pipeline and writes `knowledge/tasks/_site/index.html`. `.github/workflows/deploy-teach.yml` runs the helper on the box after `git fetch` / `reset --hard origin/main`. nginx adds `location /tasks/` → that directory via a separate snippet included in the existing `teaching.conf` server that already serves `/teaching/` and artifacts `/health`+`/artifacts`.
+**Architecture:** No new product and no new workflow. `list --group-by project` emits a loose-coupled `edges.tasks.grouped/v1` snapshot. A small map in CLI utils (not inside review-page) turns that into generic groups+items. A generate helper runs that pipeline and writes `knowledge/tasks/_site/index.html`. `.github/workflows/deploy.yml` runs the helper on the box after `git fetch` / `reset --hard origin/main`. nginx adds `location /tasks/` → that directory via a separate snippet included in the existing `teaching.conf` server that already serves `/teaching/` and artifacts `/health`+`/artifacts`.
 
 **Tech Stack:** TypeScript, Node.js ≥20, existing `commander` + `runTasksCommand`, `node:test` + `tsx`, NodeNext ESM (relative imports end in `.js`). nginx snippet + bash setup (same one-time sudo pattern as artifacts `setup-nginx`). No Express. No new HTTP process. No embeddings. No browser automation in CI.
 
@@ -38,7 +38,7 @@ These are already decided in ADR 0021 / CONTEXT. This plan does not re-grill the
 - Default `edges tasks list` (no `--group-by`) stays a flat `{ status, command: "list", tasks: [...] }`
 - Existing `--project` / `--status` / `--priority` / `--sort` still apply **before** grouping
 - Generate path is read-only on the board: do **not** call `listProjects` / `ensureProjectMetadata` / `refreshProjectIndex` (those write `AGENTS.md` and would dirty the ECS checkout after `reset --hard`)
-- Extend `.github/workflows/deploy-teach.yml` only; do not add a second workflow
+- Extend `.github/workflows/deploy.yml` only; do not add a second workflow
 - nginx: `teaching.conf` + `/teaching/` only; do not dual-recognize `teach.conf` or `/teach/`
 - Do not break `/teaching/` or artifacts `/health` + `/artifacts`
 - Public URL shape: `http(s)://<host>/tasks/` (same ECS origin as teaching; current public IP http is `http://182.92.131.89`)
@@ -54,7 +54,7 @@ These are already decided in ADR 0021 / CONTEXT. This plan does not re-grill the
 
 ## File map
 
-Verified against `origin/main` after ADR 0021 (`af7986c`). Command tree: `extensions/clis/src/tasks.ts` + `extensions/clis/src/tasks/list.ts` + `extensions/clis/src/tasks/utils/`. README rule: **file = one command node**. review-page already exists (`src/tasks/project/review-page.ts` + `src/tasks/utils/review-page.ts`). Deploy file: `.github/workflows/deploy-teach.yml`. Artifacts nginx lives under `extensions/services/artifacts-preview/deploy/` and must stay `/teaching/`-only.
+Verified against `origin/main` after ADR 0021 (`af7986c`). Command tree: `extensions/clis/src/tasks.ts` + `extensions/clis/src/tasks/list.ts` + `extensions/clis/src/tasks/utils/`. README rule: **file = one command node**. review-page already exists (`src/tasks/project/review-page.ts` + `src/tasks/utils/review-page.ts`). Deploy file: `.github/workflows/deploy.yml`. Artifacts nginx lives under `extensions/services/artifacts-preview/deploy/` and must stay `/teaching/`-only.
 
 **Create — CLI grouped schema + map + generate**
 
@@ -78,7 +78,7 @@ Verified against `origin/main` after ADR 0021 (`af7986c`). Command tree: `extens
 - `extensions/clis/src/tasks.ts` — `TASKS_AFTER_HELP` lists the new flags
 - `extensions/clis/src/tasks/utils/format.ts` — `TasksSuccess` gains optional `schema?`, `groups?`, `items?`
 - `extensions/clis/README.md` — list flags + generate pipeline + `/tasks/` pointer
-- `.github/workflows/deploy-teach.yml` — after `reset --hard origin/main`, generate the site (always; fail the SSH script if generate fails); hoist PATH/`nvm` so generate does not depend on the artifacts-env branch
+- `.github/workflows/deploy.yml` — after `reset --hard origin/main`, generate the site (always; fail the SSH script if generate fails); hoist PATH/`nvm` so generate does not depend on the artifacts-env branch
 - `.gitignore` — `knowledge/tasks/_site/`
 - `CHANGELOG.md` `[Unreleased]` — module **任务看板与项目** (human Chinese + real command names; link ADR 0021 only as a reader pointer if needed — do not dump the ADR)
 - `CONTEXT.md` — `edges tasks（CLI）` drop “约定中的” from `list --group-by project` once the flag exists
@@ -284,7 +284,7 @@ knowledge/tasks/_site/
 
 Do not commit generated HTML.
 
-### `deploy-teach.yml`
+### `deploy.yml`
 
 Keep: `environment: production`, concurrency `ecs-edges-pull`, same SSH secrets, same checkout `/home/cheng-dev/projects/edges`, same `git fetch` / `checkout main` / `reset --hard origin/main`. Do **not** `git clean -fd`. Do **not** call `setup-nginx` from the Action (nginx is one-time on the box).
 
@@ -384,7 +384,7 @@ No live ECS / nginx test in CI. nginx is reviewed as committed snippet + setup s
 sudo bash /home/cheng-dev/projects/edges/extensions/clis/deploy/setup-nginx-tasks.sh
 ```
 
-3. Merge implementation to `main` → existing `deploy-teach.yml` pull + generate.
+3. Merge implementation to `main` → existing `deploy.yml` pull + generate.
 4. Checks (do not put tokens in the repo):
 
 ```bash
@@ -533,10 +533,10 @@ Generate test: `edges tasks create` a card, call `generateTasksSite`, assert the
 
 ---
 
-### Task 3: deploy-teach.yml generate step + gitignore
+### Task 3: deploy.yml generate step + gitignore
 
 **Files:**
-- Modify: `.github/workflows/deploy-teach.yml`
+- Modify: `.github/workflows/deploy.yml`
 - Modify: `.gitignore`
 
 **Interfaces:**
@@ -603,7 +603,7 @@ Root changelog (human Chinese + real command names; module **任务看板与项�
 
 ## Self-review
 
-1. **Spec coverage (ADR 0021):** not a new status station — Task 2 feeds existing review-page. Hard boundary vs Artifacts — generate + `/tasks/` alias, no `publish`. Same ECS path prefix — Task 4. Content from deploy-teach after pull — Task 3. Option B list → grouped schema → thin map → review-page — Tasks 1–2. No auth / writeback / `--mode` / new workflow / URL tree / board status — Non-goals + Global Constraints.
+1. **Spec coverage (ADR 0021):** not a new status station — Task 2 feeds existing review-page. Hard boundary vs Artifacts — generate + `/tasks/` alias, no `publish`. Same ECS path prefix — Task 4. Content from deploy.yml after pull — Task 3. Option B list → grouped schema → thin map → review-page — Tasks 1–2. No auth / writeback / `--mode` / new workflow / URL tree / board status — Non-goals + Global Constraints.
 2. **Placeholders:** none; schema, flags, paths, nginx snippet, SSH generate block, curl checks, and changelog sentence are spelled out.
 3. **Types:** `GROUPED_LIST_SCHEMA`, `GroupedList`, `groupedListToReviewPageInput`, `generateTasksSite`, `DEFAULT_TASKS_SITE_REL` are consistent across tasks. review-page still uses `stem` / `current` / `suggested` only after the map.
 4. **Grill fidelity:** no dual `/teach/`, no new workflow, no review-page hosting, no Artifacts-as-permanent-board.

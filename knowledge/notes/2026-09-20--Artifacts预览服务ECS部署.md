@@ -23,10 +23,10 @@ Artifacts 预览和 teaching **同机、同一次整仓 pull**。Node 进程走 
 5. `edges artifacts server setup-nginx`（只写 `teaching.conf` 里含 `/teaching/` 的 server）。
 6. `edges artifacts server status`；盒上 `curl http://127.0.0.1:8787/health`；外网 `curl http://182.92.131.89/health`；再确认 `/teaching/` 仍在。
 
-之后每次 main 部署：现有 `deploy-teach.yml` 在 pull 之后，若 env 文件在且 token 不是占位符，就 `install` 再 `restart`（构建/unit 没变也可以只 `restart`）；nginx 通常不用再跑。轮换 token：`install --force` → `restart` → 本机 `edges artifacts init --base-url http://182.92.131.89 --token <printed token> --force`。
+之后每次 main 部署：现有 `deploy.yml` 在 pull 之后，若 env 文件在且 token 不是占位符，就 `install` 再 `restart`（构建/unit 没变也可以只 `restart`）；nginx 通常不用再跑。轮换 token：`install --force` → `restart` → 本机 `edges artifacts init --base-url http://182.92.131.89 --token <printed token> --force`。
 
 ## 交叉
 
 - 服务与 CLI：`extensions/services/artifacts-preview/`、`edges artifacts`
-- 工作流：`.github/workflows/deploy-teach.yml`（concurrency `ecs-edges-pull`，environment `production`）
+- 工作流：`.github/workflows/deploy.yml`（concurrency `ecs-edges-pull`，environment `production`）
 - Teaching 站点文件 `/etc/nginx/conf.d/teaching.conf`，公网前缀 `/teaching/`（本层不改教学内容）。盒上若仍是旧名旧前缀，先改名再 migrate，不要双认。

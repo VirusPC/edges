@@ -1,6 +1,6 @@
 # Edges — 个人认知系统
 
-[![教学站点部署](https://github.com/VirusPC/edges/actions/workflows/deploy-teach.yml/badge.svg)](https://github.com/VirusPC/edges/actions/workflows/deploy-teach.yml)
+[![教学站点部署](https://github.com/VirusPC/edges/actions/workflows/deploy.yml/badge.svg)](https://github.com/VirusPC/edges/actions/workflows/deploy.yml)
 
 > 把认知资本转化为可复利的判断优势。
 

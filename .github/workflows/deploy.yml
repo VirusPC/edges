@@ -12,7 +12,7 @@
 # Fallback if git fetch from ECS is flaky: from a machine that can reach both
 # GitHub and the box, tar the full repo over SSH, then the same two CLI
 # commands (or deploy/bootstrap.sh, which is that wrapper).
-name: Deploy teaching and tasks sites
+name: Deploy
 
 on:
   push:
