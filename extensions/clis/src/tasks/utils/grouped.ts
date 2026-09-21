@@ -6,6 +6,7 @@ import {
   seedDescriptionFor,
   seedTitleFor,
 } from "./project-meta.js";
+import type { ReviewPageInput, ReviewPageItem } from "./review-page.js";
 import { DEFAULT_TASK_PROJECT, TasksError, type TaskListItem, type TaskProjectId } from "./types.js";
 
 export const GROUPED_LIST_SCHEMA = "edges.tasks.grouped/v1";
@@ -109,6 +110,34 @@ function parseItem(raw: unknown): GroupedListItem {
     item.priority = raw.priority;
   }
   return item;
+}
+
+export function groupedListToReviewPageInput(grouped: GroupedList): ReviewPageInput {
+  const groups = (grouped.groups.length > 0 ? grouped.groups : fallbackGroups()).map((group) => ({
+    id: group.id,
+    title: group.title,
+    description: group.description ?? "",
+  }));
+  const groupIds = new Set(groups.map((group) => group.id));
+  const items: ReviewPageItem[] = grouped.items.map((item) => {
+    const stem = (item.stem ?? item.id).trim();
+    if (!groupIds.has(item.group)) {
+      throw new TasksError("VALIDATION_ERROR", `grouped item ${stem} group not found: ${item.group}`);
+    }
+    const mapped: ReviewPageItem = {
+      stem,
+      current: item.group,
+      suggested: item.group,
+    };
+    if (item.title !== undefined) {
+      mapped.title = item.title;
+    }
+    if (item.description !== undefined) {
+      mapped.description = item.description;
+    }
+    return mapped;
+  });
+  return { groups, items };
 }
 
 export function parseGroupedList(raw: unknown): GroupedList {

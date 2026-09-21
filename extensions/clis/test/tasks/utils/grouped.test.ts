@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   GROUPED_LIST_SCHEMA,
   buildGroupedList,
+  groupedListToReviewPageInput,
   parseGroupedList,
 } from "../../../src/tasks/utils/grouped.js";
 import { TasksError } from "../../../src/tasks/utils/types.js";
@@ -97,4 +98,16 @@ test("parseGroupedList rejects missing schema, arrays, or identity", () => {
       return true;
     },
   );
+});
+
+test("groupedListToReviewPageInput maps group → current/suggested without renaming schema", () => {
+  const page = groupedListToReviewPageInput({
+    schema: "edges.tasks.grouped/v1",
+    groups: [{ id: "cli", title: "CLI" }],
+    items: [{ id: "2026-09-21--beta", group: "cli", title: "Beta" }],
+  });
+  assert.equal(page.items[0]?.stem, "2026-09-21--beta");
+  assert.equal(page.items[0]?.current, "cli");
+  assert.equal(page.items[0]?.suggested, "cli");
+  assert.equal("schema" in page, false);
 });
