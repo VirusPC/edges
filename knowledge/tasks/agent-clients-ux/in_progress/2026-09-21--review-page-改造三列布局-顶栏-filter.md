@@ -4,9 +4,11 @@ description: 现有 review-page 不够用；改造成顶栏 filter + 左 project
 metadata:
   edges-type: task
   edges-title: review-page 改造（三列布局 + 顶栏 filter）
-  edges-tasks-status: backlog
+  edges-tasks-status: in_progress
   edges-task-project: agent-clients-ux
-  edges-updated-at: "2026-09-21T09:06:08.202Z"
+  edges-updated-at: "2026-09-22T04:27:15.025Z"
+  edges-task-assignee: Coding 专家
+  edges-task-assignee-id: 099e84df-06c3-4c5d-9e29-fc255dce3d56
 ---
 
 结论（idea）：改造 review-page 为顶栏 filter + 左 project / 中看板 / 右 markdown 预览三列；中间看板参考 Linear 风格状态列，可复用开源看板组件。
@@ -24,4 +26,4 @@ metadata:
 **How to apply:**
 - grill 组件选型与 classify 模式。
 - 派发默认先 grill-with-docs，过关再实现。
-- 未指派。
+- 已出栈指派 Coding 专家。
