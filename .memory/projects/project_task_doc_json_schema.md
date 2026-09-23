@@ -8,10 +8,10 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-23T15:57:45+00:00"
+  edges-updated-at: "2026-09-23T17:18:56+00:00"
 ---
 
-Task 文档的字段约定是独立可复用的 JSON Schema `extensions/clis/schemas/task-doc.v1.json`（`$id` 为 `edges.task-doc/v1`）：`name`、`description`、`metadata`、`body`。CLI frontmatter 与看板条目的 `doc` 都对齐它。`metadata` 允许未知键；`edges-tasks-status` 与 `edges-task-priority` 用既有枚举。`body` 是 Markdown。本轮只放契约文件，CLI 尚未消费它。用户所述，grill 确认于 2026-09-23。
+Task 文档的字段约定是独立可复用的 JSON Schema `extensions/clis/schemas/task-doc.v1.json`（`$id` 为 `edges.task-doc/v1`）：`name`、`description`、`metadata`、`body`。CLI frontmatter 与看板条目的 `doc` 都对齐它。`metadata` 允许未知键；`edges-tasks-status` 与 `edges-task-priority` 用既有枚举。`body` 是 Markdown。分组列表的可选 `items[].doc` 与审阅页载荷已按该 schema 接线。用户所述，grill 确认于 2026-09-23；接线于 2026-09-23 实现轮验证。
 
 **Why:**
 自造轻量配置会和 frontmatter、看板 `doc`、以后的 LLM 结构化输出各维护一份。另开看板顶层 schema 会把 `edges.tasks.grouped/v1` 拆成两套对象。生成器若预编译 HTML，右栏就不再读 Markdown 正文。
@@ -21,4 +21,4 @@ Task 文档的字段约定是独立可复用的 JSON Schema `extensions/clis/sch
 - 不要把 `rawFrontmatter` 或 `bodyHtml` 写进契约。浏览器不读仓内 `.md`。
 - 状态枚举是 backlog、todo、in_progress、in_review、done、blocked、cancelled。优先级是 urgent、high、medium、low、none。`edges-task-project` 省略表示 default；不要把目录名 `_default` 或状态夹名写进该字段。
 - 看板载荷仍是 `edges.tasks.grouped/v1` 的可选 `items[].doc`。指派在 `metadata.edges-task-assignee`，不要在条目上再造一条与 `doc` 平行的必填字段。
-- 实现轮再让 CLI 校验这份 schema。本轮不要为了接线去改 review-page 或搭 React。
+- 继续让 grouped item 与 review-page 携带这份可选 `doc`。不要另开看板顶层 schema，也不要预编译 `bodyHtml`。
