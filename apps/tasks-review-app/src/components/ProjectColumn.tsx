@@ -1,3 +1,4 @@
+import { useDroppable } from "@dnd-kit/core";
 import { matchesReviewFilter, type ReviewFilter, type ReviewItem } from "../filter.ts";
 import type { ReviewGroup } from "../types.ts";
 
@@ -24,17 +25,51 @@ export function ProjectColumn({
         onSelect={onSelect}
       />
       {groups.map((group) => (
-        <ProjectRow
+        <ProjectDropRow
           key={group.id}
           id={group.id}
           title={group.title}
-          droppable="1"
           selected={filter.projectId === group.id}
           count={items.filter((item) => matchesReviewFilter(item, { ...filter, projectId: group.id })).length}
           onSelect={onSelect}
         />
       ))}
     </nav>
+  );
+}
+
+function ProjectDropRow({
+  id,
+  title,
+  selected,
+  count,
+  onSelect,
+}: {
+  id: string;
+  title: string;
+  selected: boolean;
+  count: number;
+  onSelect: (projectId: string) => void;
+}) {
+  const { setNodeRef, isOver } = useDroppable({ id: `project:${id}` });
+  const selectedClass = selected
+    ? "border-solid border-[#5b9fd4] bg-[#1a2332] opacity-100"
+    : "opacity-60 hover:opacity-100";
+  const overClass = isOver ? " outline outline-2 outline-offset-[3px] outline-[#5b9fd4]" : "";
+  return (
+    <button
+      type="button"
+      ref={setNodeRef}
+      data-project-id={id}
+      data-droppable="1"
+      data-droppable-id={`project:${id}`}
+      data-filter={selected ? "on" : undefined}
+      className={selectedClass + overClass}
+      onClick={() => onSelect(id)}
+    >
+      <span>{title}</span>
+      <span>{count}</span>
+    </button>
   );
 }
 

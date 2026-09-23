@@ -1,4 +1,5 @@
 import { itemAssignee, type ReviewFilter, type ReviewItem } from "../filter.ts";
+import { exportReviewRows } from "../export.ts";
 import { REVIEW_PRIORITIES, REVIEW_STATUS_COLUMNS } from "../statuses.ts";
 import { Input } from "@/components/ui/input";
 import {
@@ -81,7 +82,21 @@ export function TopBar({
           ))}
         </SelectContent>
       </Select>
-      <button type="button" data-action="copy-json" disabled>
+      <button
+        type="button"
+        data-action="copy-json"
+        onClick={() => {
+          const text = JSON.stringify(exportReviewRows(items), null, 2);
+          const write = navigator.clipboard?.writeText(text);
+          if (write === undefined) {
+            console.log(text);
+            return;
+          }
+          void write.catch(() => {
+            console.log(text);
+          });
+        }}
+      >
         复制导出 JSON
       </button>
     </header>

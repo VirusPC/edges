@@ -1,11 +1,13 @@
+import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { useEffect, useState } from "react";
 import { MarkdownPane } from "./components/MarkdownPane.tsx";
 import { ProjectColumn } from "./components/ProjectColumn.tsx";
 import { StatusBoard } from "./components/StatusBoard.tsx";
 import { TopBar } from "./components/TopBar.tsx";
+import { applyProjectDrop, projectIdFromDrop } from "./export.ts";
 import { matchesReviewFilter, type ReviewFilter } from "./filter.ts";
 import { buildReviewHash, navigateReviewHash, parseReviewHash } from "./hash.ts";
-import type { ReviewHashState, ReviewPayload } from "./types.ts";
+import type { ReviewGroup, ReviewHashState, ReviewItem, ReviewPayload } from "./types.ts";
 
 function readPayloadScript(): ReviewPayload {
   const text = document.getElementById("edges-review-payload")?.textContent?.trim() || "{}";
@@ -27,8 +29,10 @@ function filterFromHash(state: ReviewHashState): ReviewFilter {
 }
 
 export default function App({ initialPayload }: { initialPayload?: ReviewPayload }) {
-  const [payload] = useState<ReviewPayload>(() => initialPayload ?? readPayloadScript());
+  const [groups] = useState<ReviewGroup[]>(() => (initialPayload ?? readPayloadScript()).groups);
+  const [items, setItems] = useState<ReviewItem[]>(() => (initialPayload ?? readPayloadScript()).items);
   const [hashState, setHashState] = useState<ReviewHashState>(() => parseReviewHash(window.location.hash));
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
 
   useEffect(() => {
     const onPop = () => setHashState(parseReviewHash(window.location.hash));
@@ -44,30 +48,39 @@ export default function App({ initialPayload }: { initialPayload?: ReviewPayload
   }, [hashState]);
 
   const filter = filterFromHash(hashState);
-  const selected = payload.items.find((item) => item.stem === hashState.stem && matchesReviewFilter(item, filter));
+  const selected = items.find((item) => item.stem === hashState.stem && matchesReviewFilter(item, filter));
 
   return (
     <div data-review-shell="edges" className="flex h-screen flex-col">
       <TopBar
-        items={payload.items}
+        items={items}
         filter={filter}
         onChange={(next) => setHashState((prev) => ({ ...prev, ...next }))}
       />
-      <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(0,1fr)_320px]">
-        <ProjectColumn
-          groups={payload.groups}
-          items={payload.items}
-          filter={filter}
-          onSelect={(projectId) => setHashState((prev) => ({ ...prev, projectId }))}
-        />
-        <StatusBoard
-          items={payload.items}
-          groups={payload.groups}
-          filter={filter}
-          onSelect={(stem) => setHashState((prev) => ({ ...prev, stem }))}
-        />
-        <MarkdownPane body={selected?.doc?.body ?? ""} />
-      </div>
+      <DndContext
+        sensors={sensors}
+        onDragEnd={(event) => {
+          const projectId = projectIdFromDrop(event.over ? String(event.over.id) : undefined);
+          if (!projectId) return;
+          setItems((prev) => applyProjectDrop(prev, String(event.active.id), projectId));
+        }}
+      >
+        <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(0,1fr)_320px]">
+          <ProjectColumn
+            groups={groups}
+            items={items}
+            filter={filter}
+            onSelect={(projectId) => setHashState((prev) => ({ ...prev, projectId }))}
+          />
+          <StatusBoard
+            items={items}
+            groups={groups}
+            filter={filter}
+            onSelect={(stem) => setHashState((prev) => ({ ...prev, stem }))}
+          />
+          <MarkdownPane body={selected?.doc?.body ?? ""} />
+        </div>
+      </DndContext>
     </div>
   );
 }
