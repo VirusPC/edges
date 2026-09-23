@@ -160,3 +160,45 @@ test("writeReviewPage writes utf8 html", async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test("parseReviewPageInput keeps a thin doc and allows a missing doc", () => {
+  const withDoc = parseReviewPageInput({
+    groups: sample.groups,
+    items: [{
+      ...sample.items[0],
+      status: "todo",
+      priority: "low",
+      doc: {
+        name: "demo",
+        description: "demo task",
+        metadata: { "edges-task-assignee": "Ada", "extra-key": "kept" },
+        body: "",
+      },
+    }],
+  });
+  assert.equal(withDoc.items[0]?.doc?.body, "");
+  assert.equal(withDoc.items[0]?.doc?.metadata["extra-key"], "kept");
+  assert.equal(withDoc.items[0]?.status, "todo");
+  assert.equal(withDoc.items[0]?.priority, "low");
+
+  const withoutDoc = parseReviewPageInput(sample);
+  assert.equal(withoutDoc.items[0]?.doc, undefined);
+});
+
+test("parseReviewPageInput rejects a doc that is missing body", () => {
+  assert.throws(
+    () =>
+      parseReviewPageInput({
+        groups: sample.groups,
+        items: [{
+          ...sample.items[0],
+          doc: { name: "demo", description: "d", metadata: {} },
+        }],
+      }),
+    (error: unknown) => {
+      assert.equal((error as TasksError).errorCode, "VALIDATION_ERROR");
+      assert.match((error as Error).message, /review-page doc requires name, description, and body strings/);
+      return true;
+    },
+  );
+});

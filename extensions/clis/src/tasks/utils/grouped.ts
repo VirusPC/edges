@@ -168,6 +168,15 @@ export function groupedListToReviewPageInput(grouped: GroupedList): ReviewPageIn
     if (item.description !== undefined) {
       mapped.description = item.description;
     }
+    if (item.status !== undefined) {
+      mapped.status = item.status;
+    }
+    if (item.priority !== undefined) {
+      mapped.priority = item.priority;
+    }
+    if (item.doc !== undefined) {
+      mapped.doc = item.doc;
+    }
     return mapped;
   });
   return { groups, items };

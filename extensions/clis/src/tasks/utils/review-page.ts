@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { TasksError } from "./types.js";
+import type { TaskDoc } from "./task-doc.js";
 
 export type ReviewPageGroup = {
   id: string;
@@ -15,6 +16,9 @@ export type ReviewPageItem = {
   title?: string;
   description?: string;
   note?: string;
+  status?: string;
+  priority?: string;
+  doc?: TaskDoc;
 };
 
 export type ReviewPageInput = {
@@ -105,7 +109,38 @@ function parseItem(raw: unknown, groupIds: Set<string>, seenStems: Set<string>):
   if (note !== undefined) {
     item.note = note;
   }
+  const status = optionalString(raw.status);
+  const priority = optionalString(raw.priority);
+  if (status !== undefined) {
+    item.status = status;
+  }
+  if (priority !== undefined) {
+    item.priority = priority;
+  }
+  if ("doc" in raw && raw.doc !== undefined) {
+    item.doc = parseReviewDoc(raw.doc);
+  }
   return item;
+}
+
+function parseReviewDoc(raw: unknown): TaskDoc {
+  if (!isPlainObject(raw)) {
+    fail("review-page doc must be an object");
+  }
+  if (typeof raw.name !== "string" || typeof raw.description !== "string" || typeof raw.body !== "string") {
+    fail("review-page doc requires name, description, and body strings");
+  }
+  if (!isPlainObject(raw.metadata)) {
+    fail("review-page doc.metadata must be an object");
+  }
+  const metadata: Record<string, string> = {};
+  for (const [key, value] of Object.entries(raw.metadata)) {
+    if (typeof value !== "string") {
+      fail(`review-page doc.metadata.${key} must be a string`);
+    }
+    metadata[key] = value;
+  }
+  return { name: raw.name, description: raw.description, metadata, body: raw.body };
 }
 
 export function parseReviewPageInput(raw: unknown): ReviewPageInput {

@@ -145,6 +145,32 @@ test("buildGroupedList copies doc and omits rawFrontmatter", () => {
   assert.equal("rawFrontmatter" in (grouped.items[0]?.doc ?? {}), false);
 });
 
+test("groupedListToReviewPageInput copies status, priority, and doc", () => {
+  const page = groupedListToReviewPageInput({
+    schema: "edges.tasks.grouped/v1",
+    groups: [{ id: "cli", title: "CLI" }],
+    items: [{
+      id: "2026-09-21--beta",
+      group: "cli",
+      title: "Beta",
+      status: "todo",
+      priority: "high",
+      doc: {
+        name: "beta",
+        description: "d",
+        metadata: { "edges-task-assignee": "Ada" },
+        body: "body",
+      },
+    }],
+  });
+  assert.equal(page.items[0]?.status, "todo");
+  assert.equal(page.items[0]?.priority, "high");
+  assert.equal(page.items[0]?.doc?.body, "body");
+  assert.equal(page.items[0]?.current, "cli");
+  assert.equal(page.items[0]?.suggested, "cli");
+  assert.equal("assignee" in page.items[0]!, false);
+});
+
 test("buildGroupedList omits doc when the caller has none", () => {
   const grouped = buildGroupedList(
     [{
