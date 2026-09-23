@@ -28,6 +28,7 @@
 - [v1 自托管 Langfuse 只走 Tailscale](project_langfuse_tailscale_only_access.md) — 改自托管 Langfuse 的 v1 访问面、或有人要立刻做公网 HTTPS/反代时打开：v1 仅 Tailscale；没有 Tailscale 就接受只剩 minigtr localhost/LAN。公网 HTTPS（反代+证书）是后续未做。决策见 docs/adr/0017-langfuse-tailscale-only-access.md。
 - [v1 Langfuse 先证明 UI 再试 1–2 个客户端](project_langfuse_ui_then_few_clients.md) — 写自部署 Langfuse 的 v1 验收、或想一次接上 Grok/edges Agent 时打开：先证明 UI 健康，再试 1–2 个客户端；更广接线留在 Observation 产品卡。决策见 docs/adr/0020-langfuse-ui-then-few-clients.md。
 - [记忆研究笔记落 knowledge/projects/memory](project_memory_research_notes_in_knowledge_projects.md) — 写 project-memory 的调研、优点、related work 等研究笔记时：落到 knowledge/projects/memory/；skill 层 .memory 只记协议与设计决策，不当成对外研究笔记落点。
+- [minigtr 整机配置分层沉淀，不做大一统 skill](project_minigtr_host_bootstrap_layered.md) — 改 minigtr 初始化、想封整机 skill、或分不清 notes/ADR/NAS skill 边界时打开：装机留 notes，底座约定进本条，Langfuse 走 ADR 0014–0020，绿联 NAS 走 linux-nas-direct-link；不要做整机大包 skill。
 - [整仓 MIT，不拆 knowledge 许可证](project_mit_license.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
 - [new-note MCP 的 ingest 约束](project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges note，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
 - [posts 对外展示，Astro 博客 + Actions CI](project_posts_public_astro_blog.md) — posts 面向对外展示；后续以 posts 为数据用 Astro 搭博客，并用 GitHub Actions 在服务器做 CI
