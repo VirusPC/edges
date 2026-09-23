@@ -161,15 +161,44 @@ export function parseReviewPageInput(raw: unknown): ReviewPageInput {
   return { groups, items };
 }
 
-export function defaultReviewPageTemplatePath(): string {
-  return fileURLToPath(new URL("../project/assets/review-page.html", import.meta.url));
+export function defaultReviewPageAssetDir(): string {
+  return fileURLToPath(new URL("../project/assets/review-page/", import.meta.url));
 }
 
-export async function loadReviewPageTemplate(
+function missingAsset(abs: string): never {
+  fail(`review-page asset missing: ${abs} (run pnpm --filter edges-cli run build:tasks-review-app)`);
+}
+
+async function readAsset(
   readFile: (abs: string) => Promise<string>,
-  templatePath?: string,
+  abs: string,
 ): Promise<string> {
-  return readFile(templatePath ?? defaultReviewPageTemplatePath());
+  try {
+    return await readFile(abs);
+  } catch {
+    missingAsset(abs);
+  }
+}
+
+export async function loadBuiltReviewShell(
+  readFile: (abs: string) => Promise<string>,
+  assetDir?: string,
+): Promise<string> {
+  const dir = assetDir ?? defaultReviewPageAssetDir();
+  const html = await readAsset(readFile, path.join(dir, "index.html"));
+  const js = await readAsset(readFile, path.join(dir, "review.js"));
+  const css = await readAsset(readFile, path.join(dir, "review.css"));
+  const safeJs = js.replaceAll("</script", "<\\/script");
+  const safeCss = css.replaceAll("</style", "<\\/style");
+  return html
+    .replace(
+      /<script type="module"[^>]*><\/script>/,
+      () => `<script type="module">${safeJs}</script>`,
+    )
+    .replace(
+      /<link rel="stylesheet"[^>]*>/,
+      () => `<style type='text/css'>${safeCss}</style>`,
+    );
 }
 
 export function renderReviewPageHtml(input: ReviewPageInput, templateHtml: string): string {

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
 import {
-  loadReviewPageTemplate,
+  loadBuiltReviewShell,
   parseReviewPageInput,
   renderReviewPageHtml,
   resolveReviewPageOutPath,
@@ -31,8 +31,8 @@ export function addProjectReviewPageCommand(project: Command, ctx: CliContext): 
           );
         }
         const input = parseReviewPageInput(raw);
-        const template = await loadReviewPageTemplate((abs) => readFile(abs, "utf8"));
-        const html = renderReviewPageHtml(input, template);
+        const shell = await loadBuiltReviewShell((abs) => readFile(abs, "utf8"));
+        const html = renderReviewPageHtml(input, shell);
         const outPath = resolveReviewPageOutPath(opts.out, Date.now(), tmpdir());
         await writeReviewPage(outPath, html, writeFile);
         return succeed({

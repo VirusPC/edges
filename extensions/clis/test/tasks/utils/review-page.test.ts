@@ -4,8 +4,8 @@ import { mkdtemp, readFile, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
-  defaultReviewPageTemplatePath,
-  loadReviewPageTemplate,
+  defaultReviewPageAssetDir,
+  loadBuiltReviewShell,
   parseReviewPageInput,
   renderReviewPageHtml,
   resolveReviewPageOutPath,
@@ -95,59 +95,47 @@ test("renderReviewPageHtml rejects a template without the payload script", () =>
   );
 });
 
-test("defaultReviewPageTemplatePath and loadReviewPageTemplate read the shipped shell", async () => {
-  const templatePath = defaultReviewPageTemplatePath();
-  assert.match(templatePath, /project[/\\]assets[/\\]review-page\.html$/);
-  const template = await loadReviewPageTemplate((abs) => readFile(abs, "utf8"));
-  const html = renderReviewPageHtml(sample as never, template);
-  assert.match(html, /id="edges-review-payload"/);
-  assert.match(html, /2026-09-13--demo/);
-  assert.match(html, /复制导出 JSON/);
-  assert.doesNotMatch(html, /id="edges-review-payload">\{\}<\/script>/);
+test("loadBuiltReviewShell inlines js and css and keeps the payload slot", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-shell-"));
+  try {
+    await writeFile(
+      path.join(dir, "index.html"),
+      `<!doctype html><html><head><link rel="stylesheet" crossorigin href="./review.css"></head><body><script type="application/json" id="edges-review-payload">{}</script><script type="module" crossorigin src="./review.js"></script></body></html>`,
+    );
+    await writeFile(path.join(dir, "review.js"), "window.__review = true;</script>");
+    await writeFile(path.join(dir, "review.css"), "body{color:red}</style>");
+    const shell = await loadBuiltReviewShell((abs) => readFile(abs, "utf8"), dir);
+    assert.match(shell, /<script type="module">window\.__review = true;<\\\/script>/);
+    assert.match(shell, /<style type='text\/css'>body\{color:red\}<\\\/style>/);
+    assert.doesNotMatch(shell, /src="\.\/review\.js"/);
+    assert.doesNotMatch(shell, /href="\.\/review\.css"/);
+    const html = renderReviewPageHtml(sample as never, shell);
+    assert.match(html, /2026-09-13--demo/);
+    assert.doesNotMatch(html, /id="edges-review-payload">\{\}<\/script>/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
-test("shipped review-page template filters by left-group click and keeps drag-assign", async () => {
-  const template = await loadReviewPageTemplate((abs) => readFile(abs, "utf8"));
-  assert.match(template, /filterId/);
-  assert.match(template, /全部/);
-  assert.match(template, /data-droppable/);
-  assert.match(template, /is-filter/);
-  assert.match(template, /点左侧分组筛选/);
-  assert.match(template, /pointerdown/);
-  assert.match(template, /stem: it\.stem/);
-  assert.match(template, /action: it\.suggested === it\.current \? "keep" : "move"/);
+test("loadBuiltReviewShell names the build command when an asset is missing", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-shell-"));
+  try {
+    await assert.rejects(
+      () => loadBuiltReviewShell((abs) => readFile(abs, "utf8"), dir),
+      (error: unknown) => {
+        assert.equal((error as TasksError).errorCode, "VALIDATION_ERROR");
+        assert.match((error as Error).message, /review-page asset missing:/);
+        assert.match((error as Error).message, /pnpm --filter edges-cli run build:tasks-review-app/);
+        return true;
+      },
+    );
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });
 
-test("shipped review-page template uses design A selected/unselected/drag-over styles", async () => {
-  const template = await loadReviewPageTemplate((abs) => readFile(abs, "utf8"));
-  const css = template.match(/<style>([\s\S]*?)<\/style>/)?.[1] ?? "";
-  assert.ok(css, "review-page template missing style block");
-
-  const rule = (selector: string) => {
-    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return css.match(new RegExp(`${escaped}\\s*\\{([^}]+)\\}`))?.[1] ?? "";
-  };
-
-  const group = rule(".group");
-  const selected = rule(".group.is-filter");
-  const over = rule(".group.is-over");
-  const hover = rule(".group:hover");
-
-  const opacity = Number(group.match(/opacity:\s*([0-9.]+)/)?.[1]);
-  assert.ok(
-    opacity >= 0.55 && opacity <= 0.7,
-    `unselected .group opacity ${opacity} should be ~0.55–0.7`,
-  );
-  assert.match(hover, /opacity:\s*1/);
-
-  assert.match(selected, /border-style:\s*solid/);
-  assert.match(selected, /border-color:\s*var\(--accent\)/);
-  assert.match(selected, /background:[^;]*(?:--accent|#5b9fd4)/);
-  assert.match(selected, /opacity:\s*1/);
-
-  assert.match(over, /outline:/);
-  assert.match(over, /outline-offset:/);
-  assert.match(over, /opacity:\s*1/);
+test("default asset dir is the gitignored review-page build", () => {
+  assert.match(defaultReviewPageAssetDir(), /project[/\\]assets[/\\]review-page[/\\]?$/);
 });
 
 test("writeReviewPage writes utf8 html", async () => {
