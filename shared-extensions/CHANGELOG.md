@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-23
+
+### Added
+
+- `skills/linux-nas-direct-link`：Linux 主机用网线直连消费级 NAS（尤其绿联 UGOS）时的流程，含共享上网/NAT、专用用户 SMB 挂载、Tailscale（含 `tailscale0` 缺 IPv4）与 SSH 防锁。
+
 ## [1.0.0] - 2026-09-08
 
 ### Added
@@ -20,5 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 整层一份 `VERSION`、本 changelog、tag `shared-extensions@<version>`。
 - 本层项目记忆（`AGENTS.md` + `.memory/`）。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/shared-extensions@1.0.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/shared-extensions@1.1.0...HEAD
+[1.1.0]: https://github.com/VirusPC/edges/compare/shared-extensions@1.0.0...shared-extensions@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/shared-extensions@1.0.0
