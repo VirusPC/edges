@@ -1,10 +1,10 @@
 # 持久 `/tasks/` 看板站：始终反映 main，复用 review-page 输出
 
-临时 Artifacts URL 会过期且每次 `publish` 换 UUID，不能当「永远打开同一地址看主分支看板」的入口。2026-09-21 grill 确认（peng cheng）：不新开 status station 产品，只做一条与 teaching 同机的**持久**公网路径 `/tasks/`，内容始终来自 main 看板；GitHub Actions 在现有 `deploy.yml` 部署链上从看板生成数据，再喂给现有 `edges tasks project review-page` 渲 HTML。本轮只定 CONTEXT / 本 ADR，不实现 CLI、nginx 或 CI。**Extends ADR 0012**（页仍只渲染；本站是其 HTML 的持久入口）；**Hard boundary vs ADR 0013**（短 TTL UUID ≠ 固定路径）。叠 ADR 0004 / 0005 / 0009。
+临时 Artifacts URL 会过期且每次 `publish` 换 UUID，不能当「永远打开同一地址看主分支看板」的入口。2026-09-21 grill 确认（peng cheng）：不新开 status station 产品，只做一条与 teaching 同机的**持久**公网路径 `/tasks/`，内容始终来自 main 看板；GitHub Actions 在现有 `deploy.yml` 部署链上从看板生成数据，再喂给现有 `edges tasks project review-page` 渲 HTML。本轮只定 CONTEXT / 本 ADR，不实现 CLI、nginx 或 CI。**Extends ADR 0012**（页仍只渲染；本站是其 HTML 的持久入口）；**Hard boundary vs ADR 0013**（短 TTL UUID ≠ 固定路径）；**Amended by ADR 0022**（同一壳改为三栏，grouped item 可带可选 Task Doc；仍不写回 git、不加 `--mode`、鉴权仍后做）。叠 ADR 0004 / 0005 / 0009。
 
-**Status:** accepted（ADR 0021；grill 确认于 2026-09-21）
+**Status:** accepted（ADR 0021；grill 确认于 2026-09-21；2026-09-23 由 ADR 0022 修订壳与文档载荷）
 
-**See also:** ADR 0012（[Task Project 审阅页仍是 render-only CLI](0012-task-project-review-page-is-render-only-cli.md)）；ADR 0013（[Artifacts 预览服务：短 TTL](0013-artifacts-preview-service.md)）；看板 [`knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--Tasks-review-持久站点始终反映-main.md`](../../knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--Tasks-review-持久站点始终反映-main.md)
+**See also:** ADR 0012（[Task Project 审阅页仍是 render-only CLI](0012-task-project-review-page-is-render-only-cli.md)）；ADR 0022（[审阅壳三栏与 Task Doc](0022-review-shell-three-column-task-doc.md)）；ADR 0013（[Artifacts 预览服务：短 TTL](0013-artifacts-preview-service.md)）；看板 [`knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--Tasks-review-持久站点始终反映-main.md`](../../knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--Tasks-review-持久站点始终反映-main.md)
 
 ## Decision
 

@@ -212,17 +212,29 @@ _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为
 proposeTypes 输出的一行：建议 slug、描述，以及支撑该类型的 `_default` Task stem 列表（文件名去 `.md`，不是 title）。人确认并 `project create` 之前还不是 Task Project。
 _避免使用_：已落盘的 Task Project、自动当成质心、Memory Type
 
+**Task Doc（edges）**：
+一份 Task 的文档：`name`、`description`、`metadata`，以及 Markdown 正文 `body`。字段约定独立于某一页；CLI 的 frontmatter 与看板条目嵌入的文档对齐同一形状。
+_避免使用_：自造轻量配置、看板专用的另一套文档、预编译 HTML 正文、Task stem、edges-title（若指 `name`）
+
 **Task Project 审阅页（edges）**：
-classifyTasks 与 proposeTypes 共用的人确认闸门：一份由 `edges tasks project review-page` 渲出的 HTML，只含通用 groups+items。组是已有 Task Project 还是 proposeTypes 候选由调用方 Skill 解释；审阅页本身不是 Task Project，也不是分类算法，也不负责托管。`/tasks/` 持久看板站复用这份 HTML 当固定入口，并不另开 status station；页仍只渲染。
-_避免使用_：把它当 Task Project、当分类算法、`--mode`、把它当 Artifacts 预览服务、让 review-page 负责发布、把它当成 `/tasks/` 站点本身、status station
+classifyTasks、proposeTypes、本地 `edges tasks project review-page` 与 `/tasks/` 共用的那一份审阅壳：由 CLI 渲出的 HTML，载荷仍是通用 groups+items。组是已有 Task Project 还是 proposeTypes 候选由调用方 Skill 解释；审阅页本身不是 Task Project，也不是分类算法，也不负责托管。页仍只渲染。
+_避免使用_：把它当 Task Project、当分类算法、`--mode`、把它当 Artifacts 预览服务、让 review-page 负责发布、把它当成 `/tasks/` 站点本身、status station、按用途再拆一壳
+
+**审阅壳（Review Shell）**：
+Task Project 审阅页这一份交互界面。左栏是 Task Project：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。
+_避免使用_：三套页面、status station、本轮在中栏改状态、把语义检索算进这份壳、用另一套看板产品充当 Task 的领域模型
 
 **`/tasks/` 持久看板站**：
-固定公网路径 `/tasks/` 上的持久入口，始终反映 main 看板；部署链从看板生成分组列表，经薄映射喂给现有 review-page 渲出同一份 HTML。不是新的 status station 产品，也不是 Artifacts 短 TTL 预览。
-_避免使用_：status station、Artifacts 预览服务、把它当 Task Project 审阅页命令本身、本轮按 project 拆 URL 树、本地 HTML 视图、教学站点
+固定公网路径 `/tasks/` 上的持久入口，始终反映 main 看板；部署链从看板生成分组列表，经薄映射喂给同一审阅壳。页内文档来自分组条目嵌入的 Task Doc。不是新的 status station 产品，也不是 Artifacts 短 TTL 预览。
+_避免使用_：status station、Artifacts 预览服务、把它当 Task Project 审阅页命令本身、本轮按 project 拆 URL 树、本地 HTML 视图、教学站点、浏览器去读仓内 `.md`、本轮把页上拖拽写回 git
 
 **分组列表 schema（edges.tasks.grouped）**：
-`edges tasks list --group-by project` 产出的松耦合分组契约（如 `edges.tasks.grouped/v1`）：按 Task Project 编组的看板快照，不按审阅页命名、也不专属于 review-page；审阅页若要用，经薄映射即可。
-_避免使用_：review-page 输入 schema、把它叫 review-page JSON、把扁平 list 当成分组契约
+`edges tasks list --group-by project` 产出的松耦合分组契约（`edges.tasks.grouped/v1`）：`groups[]` 与 `items[]` 组成的看板快照，不按审阅页命名、也不专属于 review-page。条目可带可选字段，尤其是对齐 Task Doc 的 `doc`；审阅页经薄映射使用同一对象。
+_避免使用_：review-page 输入 schema、把它叫 review-page JSON、把扁平 list 当成分组契约、平行的看板顶层 schema
+
+**doc（看板条目）**：
+分组列表 `items[]` 上可选嵌入的 Task Doc（`name`、`description`、`metadata`、`body`）。审阅页只读页内 JSON 里的这份文档。
+_避免使用_：另开看板顶层 schema、浏览器读取磁盘 `.md`、生成器里的预编译 HTML 正文
 
 **审阅导出行（edges）**：
 Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`、`action`，可选 `note`。查找键是 Task stem，不是 title 或 `name`。
@@ -248,9 +260,13 @@ _避免使用_：裸 status 字段名、Run 层状态、open/discussing/building
 Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`，写在 frontmatter `metadata.edges-task-priority`；与 edges-tasks-status、Task Project 正交，不决定状态夹或 project 目录。缺省或旧文件无字段时视为 `none`。
 _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
 
+**edges-task-assignee**：
+Task 的指派，写在 frontmatter `metadata.edges-task-assignee`；与 edges-tasks-status、edges-task-priority、Task Project 正交。
+_避免使用_：用状态夹或 Task Project 表达谁负责、在看板条目上再造一份与 Task Doc 平行的必填指派字段
+
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`list --group-by project` 产出分组列表 schema（如 `edges.tasks.grouped/v1`，不绑 review-page）；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；`project review-page` 只把 groups+items JSON 渲成 Task Project 审阅页，不算分类、不落地、不托管。`/tasks/` 持久看板站是部署链消费者，不新开看板动词。
-_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）、把 review-page 扩成 Artifacts 预览服务或 `/tasks/` 托管、把分组 schema 命名成 review-page 专属
+以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`list --group-by project` 产出分组列表 schema（`edges.tasks.grouped/v1`，不绑 review-page），条目可嵌入可选的 Task Doc（`doc`）；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；`project review-page` 只把 groups+items JSON 渲成审阅壳，不算分类、不落地、不托管，页只读载荷里的 `doc`。`/tasks/` 持久看板站是部署链消费者，不新开看板动词。
+_避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）、把 review-page 扩成 Artifacts 预览服务或 `/tasks/` 托管、把分组 schema 命名成 review-page 专属、为看板另开顶层 schema、让浏览器读仓内 `.md`
 
 **Artifacts 预览服务**：
 稳定的短生命周期托管 + 真浏览器可开 URL，用来打开需要人交互的 Agent HTML；聊天内嵌预览是绕开的不可靠路径。与 `/tasks/` 持久看板站硬边界：后者是固定路径、无 TTL、始终反映 main。
