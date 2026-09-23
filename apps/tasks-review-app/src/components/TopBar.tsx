@@ -1,6 +1,7 @@
 import { itemAssignee, type ReviewFilter, type ReviewItem } from "../filter.ts";
 import { exportReviewRows } from "../export.ts";
 import { REVIEW_PRIORITIES, REVIEW_STATUS_COLUMNS } from "../statuses.ts";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -25,18 +26,19 @@ export function TopBar({
     a.localeCompare(b),
   );
   return (
-    <header className="flex flex-wrap items-center gap-2 border-b border-[#334155] p-2">
+    <header className="flex flex-wrap items-center gap-2 border-b border-[#334155] bg-[#0f1419] px-3 py-2.5">
       <Input
         data-filter="q"
         value={filter.q}
         placeholder="全文"
+        className="h-8 w-64 max-w-full shrink-0 bg-[#1a2332]"
         onChange={(event) => onChange({ ...filter, q: event.target.value })}
       />
       <Select
         value={filter.priority}
         onValueChange={(priority) => onChange({ ...filter, priority: priority as ReviewFilter["priority"] })}
       >
-        <SelectTrigger data-filter="priority">
+        <SelectTrigger data-filter="priority" size="sm" className="bg-[#1a2332]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -54,11 +56,11 @@ export function TopBar({
           onChange({ ...filter, assignee: assignee === ALL_ASSIGNEE ? "" : assignee })
         }
       >
-        <SelectTrigger data-filter="assignee">
+        <SelectTrigger data-filter="assignee" size="sm" className="bg-[#1a2332]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value={ALL_ASSIGNEE}>全部</SelectItem>
+          <SelectItem value={ALL_ASSIGNEE}>全部负责人</SelectItem>
           {assignees.map((assignee) => (
             <SelectItem key={assignee} value={assignee}>
               {assignee}
@@ -70,7 +72,7 @@ export function TopBar({
         value={filter.status}
         onValueChange={(status) => onChange({ ...filter, status: status as ReviewFilter["status"] })}
       >
-        <SelectTrigger data-filter="status">
+        <SelectTrigger data-filter="status" size="sm" className="bg-[#1a2332]">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -82,9 +84,12 @@ export function TopBar({
           ))}
         </SelectContent>
       </Select>
-      <button
+      <Button
         type="button"
+        variant="outline"
+        size="sm"
         data-action="copy-json"
+        className="ml-auto border-[#334155] bg-[#1a2332] text-[#e7ecf3] hover:bg-[#243044]"
         onClick={() => {
           const text = JSON.stringify(exportReviewRows(items), null, 2);
           const write = navigator.clipboard?.writeText(text);
@@ -98,7 +103,7 @@ export function TopBar({
         }}
       >
         复制导出 JSON
-      </button>
+      </Button>
     </header>
   );
 }

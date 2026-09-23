@@ -65,7 +65,7 @@ export default function App({ initialPayload }: { initialPayload?: ReviewPayload
           setItems((prev) => applyProjectDrop(prev, String(event.active.id), projectId));
         }}
       >
-        <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(0,1fr)_320px]">
+        <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(0,1fr)_380px]">
           <ProjectColumn
             groups={groups}
             items={items}
@@ -76,9 +76,10 @@ export default function App({ initialPayload }: { initialPayload?: ReviewPayload
             items={items}
             groups={groups}
             filter={filter}
+            selectedStem={hashState.stem}
             onSelect={(stem) => setHashState((prev) => ({ ...prev, stem }))}
           />
-          <MarkdownPane body={selected?.doc?.body ?? ""} />
+          <MarkdownPane item={selected} />
         </div>
       </DndContext>
     </div>

@@ -15,7 +15,8 @@ export function ProjectColumn({
 }) {
   const topBar = { ...filter, projectId: "all" };
   return (
-    <nav className="min-h-0 overflow-auto border-r border-[#334155] p-2">
+    <nav className="min-h-0 overflow-auto border-r border-[#334155] bg-[#0f1419] p-2">
+      <p className="px-2.5 pb-1 pt-1 text-[11px] font-medium tracking-wide text-[#9aa8bc]">项目</p>
       <ProjectRow
         id="all"
         title="全部"
@@ -38,6 +39,24 @@ export function ProjectColumn({
   );
 }
 
+function projectRowClass(selected: boolean, over = false): string {
+  const layout =
+    "mb-1 flex w-full items-center justify-between gap-3 rounded-lg border px-2.5 py-2 text-left text-sm text-[#e7ecf3]";
+  const state = selected
+    ? "border-solid border-[#5b9fd4] bg-[#1a2332] opacity-100"
+    : "border-transparent opacity-60 hover:opacity-100";
+  const overClass = over ? " outline outline-2 outline-offset-[3px] outline-[#5b9fd4]" : "";
+  return `${layout} ${state}${overClass}`;
+}
+
+function CountBadge({ count }: { count: number }) {
+  return (
+    <span className="shrink-0 rounded-full bg-[#0f1419] px-2 py-0.5 text-xs tabular-nums text-[#9aa8bc]">
+      {count}
+    </span>
+  );
+}
+
 function ProjectDropRow({
   id,
   title,
@@ -52,10 +71,6 @@ function ProjectDropRow({
   onSelect: (projectId: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `project:${id}` });
-  const selectedClass = selected
-    ? "border-solid border-[#5b9fd4] bg-[#1a2332] opacity-100"
-    : "opacity-60 hover:opacity-100";
-  const overClass = isOver ? " outline outline-2 outline-offset-[3px] outline-[#5b9fd4]" : "";
   return (
     <button
       type="button"
@@ -64,11 +79,11 @@ function ProjectDropRow({
       data-droppable="1"
       data-droppable-id={`project:${id}`}
       data-filter={selected ? "on" : undefined}
-      className={selectedClass + overClass}
+      className={projectRowClass(selected, isOver)}
       onClick={() => onSelect(id)}
     >
-      <span>{title}</span>
-      <span>{count}</span>
+      <span className="min-w-0 truncate">{title}</span>
+      <CountBadge count={count} />
     </button>
   );
 }
@@ -94,15 +109,11 @@ function ProjectRow({
       data-project-id={id}
       data-droppable={droppable}
       data-filter={selected ? "on" : undefined}
-      className={
-        selected
-          ? "border-solid border-[#5b9fd4] bg-[#1a2332] opacity-100"
-          : "opacity-60 hover:opacity-100"
-      }
+      className={projectRowClass(selected)}
       onClick={() => onSelect(id)}
     >
-      <span>{title}</span>
-      <span>{count}</span>
+      <span className="min-w-0 truncate">{title}</span>
+      <CountBadge count={count} />
     </button>
   );
 }

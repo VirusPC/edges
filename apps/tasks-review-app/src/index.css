@@ -133,8 +133,55 @@
   --background: #0f1419;
   --foreground: #e7ecf3;
   --card: #1a2332;
+  --card-foreground: #e7ecf3;
+  --popover: #1a2332;
+  --popover-foreground: #e7ecf3;
+  --primary: #5b9fd4;
+  --primary-foreground: #0f1419;
+  --secondary: #243044;
+  --secondary-foreground: #e7ecf3;
+  --muted: #243044;
   --muted-foreground: #9aa8bc;
+  --accent: #243044;
+  --accent-foreground: #e7ecf3;
   --border: #334155;
-  --accent: #5b9fd4;
+  --input: #334155;
+  --ring: #5b9fd4;
 }
 html, body, #root { height: 100%; background: #0f1419; color: #e7ecf3; }
+
+.markdown-body :is(h1, h2, h3) {
+  margin: 1rem 0 0.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #e7ecf3;
+}
+.markdown-body h1 { font-size: 1.25rem; }
+.markdown-body h2 { font-size: 1.05rem; }
+.markdown-body p { margin: 0.55rem 0; line-height: 1.65; }
+.markdown-body ul, .markdown-body ol { margin: 0.4rem 0 0.7rem; padding-left: 1.2rem; }
+.markdown-body ul { list-style: disc; }
+.markdown-body ol { list-style: decimal; }
+.markdown-body li { margin: 0.2rem 0; }
+.markdown-body a { color: #5b9fd4; text-decoration: underline; text-underline-offset: 2px; }
+.markdown-body code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  background: #1a2332;
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.markdown-body pre {
+  overflow: auto;
+  margin: 0.7rem 0;
+  background: #1a2332;
+  padding: 0.75rem;
+  border-radius: 8px;
+}
+.markdown-body pre code { background: transparent; padding: 0; }
+.markdown-body blockquote {
+  margin: 0.7rem 0;
+  border-left: 2px solid #5b9fd4;
+  padding-left: 0.75rem;
+  color: #9aa8bc;
+}
