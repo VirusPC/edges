@@ -6,7 +6,7 @@
 
 **Goal:** Ship one Vite + React review shell for classifyTasks, proposeTypes, `edges tasks project review-page`, and `/tasks/`, with a project column, read-only status columns, a Markdown pane, and a grouped item `doc` that the page reads only from injected JSON.
 
-**Architecture:** Source lives in `extensions/clis/review-app/`. Vite writes gitignored `index.html`, `review.js`, and `review.css` under `extensions/clis/src/tasks/project/assets/review-page/`. `review-page.ts` reads those three files, inlines the JS and CSS into one HTML file, and injects `#edges-review-payload`. Generators attach a Schema-aligned `doc` from `parseTaskDoc`. The browser never reads a Task markdown file. Navigation is hash or hash+query.
+**Architecture:** The monorepo keeps the UI source and the CLI apart. The Vite app is the workspace package `tasks-review-app` at `apps/tasks-review-app/` (room under `apps/` for later prebuilt shells). Its `outDir` writes gitignored `index.html`, `review.js`, and `review.css` into the CLI tree at `extensions/clis/src/tasks/project/assets/review-page/`. `extensions/clis/src/tasks/utils/review-page.ts` only reads those three files, inlines the JS and CSS into one HTML file, and injects `#edges-review-payload`. It does not import the Vite source. Generators attach a Schema-aligned `doc` from `parseTaskDoc`. The browser never reads a Task markdown file. Navigation is hash or hash+query.
 
 **Tech Stack:** Vite 8 + React 19 + Tailwind 4 + shadcn/ui (radix-nova, as scaffolded by `shadcn@4`), `@dnd-kit/core`, `react-markdown` + `remark-gfm`, Vitest 5 + Testing Library. CLI stays Node ≥20, TypeScript nodenext, `node:test` + `tsx`. Relative CLI imports end in `.js`.
 
@@ -40,7 +40,8 @@ The in-progress card still says the center board may reuse an open-source kanban
 - Schema `$id` is `edges.task-doc/v1`. Required doc fields: `name`, `description`, `metadata`, `body`. `metadata` may contain unknown keys. `edges-tasks-status` is `backlog | todo | in_progress | in_review | done | blocked | cancelled`. `edges-task-priority` is `urgent | high | medium | low | none`. Absent priority reads as `none`.
 - Grouped list stays `edges.tasks.grouped/v1` (`groups[]` + `items[]`). `doc` is optional on items. Do not add a second board schema. Flat `edges tasks list` (no `--group-by`) stays `{ status, command: "list", tasks: [...] }` and must not grow a `doc` field.
 - Existing `--status` / `--priority` / `--project` / `--sort` still apply before grouping.
-- Build output directory is gitignored. Generate it with `build:review-app`, `prepack`, CI, or the ECS deploy chain before writing `/tasks/`. Do not commit the built files.
+- Build output directory is gitignored. Generate it with `build:tasks-review-app`, `prepack`, CI, or the ECS deploy chain before writing `/tasks/`. Do not commit the built files.
+- Monorepo: UI source is `apps/tasks-review-app/` (package name `tasks-review-app`). CLI stays `extensions/clis/`. Vite `outDir` is `extensions/clis/src/tasks/project/assets/review-page/`. Do not put this app under `extensions/clis/`. Root `pnpm-workspace.yaml` lists `apps/*` so another shell can sit beside this one.
 - Runtime inlines `review.js` and `review.css`. Payload is `<script type="application/json" id="edges-review-payload">`. Not a zip. Not Playwright's `<template id="playwrightReportBase64">`.
 - Navigation is hash or hash+query (`#?q=&priority=&assignee=&status=&project=&stem=`). No path history. No server rewrite.
 - `edges tasks project review-page` stays render-only: no board writes, no browser open, no publish.
@@ -58,26 +59,26 @@ The in-progress card still says the center board may reuse an open-source kanban
 
 **Create — review app**
 
-- `extensions/clis/review-app/` — Vite app scaffolded by `shadcn init -t vite`, then edited. Package name `edges-review-app`. Not a nested pnpm workspace.
-- `extensions/clis/review-app/vite.config.ts` — Playwright-aligned `build` (`outDir`, `inlineDynamicImports`, fixed `review.js` / `review.css`).
-- `extensions/clis/review-app/src/statuses.ts` — status and priority enums read from `task-doc.v1.json`.
-- `extensions/clis/review-app/src/types.ts` — `TaskDoc`, `ReviewGroup`, `ReviewItem`, `ReviewPayload`.
-- `extensions/clis/review-app/src/filter.ts` — `matchesReviewFilter`, `itemStatus`, `itemPriority`, `itemAssignee`, `itemSearchText`.
-- `extensions/clis/review-app/src/hash.ts` — `parseReviewHash`, `buildReviewHash`, `navigateReviewHash`.
-- `extensions/clis/review-app/src/export.ts` — `exportReviewRows`, `applyProjectDrop`.
-- `extensions/clis/review-app/src/dev-mock.ts` — dev-only payload. Production bundle must not contain its marker stem.
-- `extensions/clis/review-app/src/components/TopBar.tsx` — search, priority, assignee, status, Copy JSON.
-- `extensions/clis/review-app/src/components/ProjectColumn.tsx` — filter + drop targets.
-- `extensions/clis/review-app/src/components/StatusBoard.tsx` — seven read-only columns plus an optional `未标注` column.
-- `extensions/clis/review-app/src/components/TaskCard.tsx` — stem, title, project tag, updated time; draggable.
-- `extensions/clis/review-app/src/components/MarkdownPane.tsx` — `doc.body` preview.
-- `extensions/clis/review-app/src/App.tsx` — wires the four regions, hash, and dnd-kit.
-- `extensions/clis/review-app/test/*.test.ts(x)` — Vitest.
+- `apps/tasks-review-app/` — Vite app scaffolded by `shadcn init -t vite`, then edited. Package name `tasks-review-app`. Not a nested pnpm workspace.
+- `apps/tasks-review-app/vite.config.ts` — Playwright-aligned `build` (`outDir`, `inlineDynamicImports`, fixed `review.js` / `review.css`).
+- `apps/tasks-review-app/src/statuses.ts` — status and priority enums read from `task-doc.v1.json`.
+- `apps/tasks-review-app/src/types.ts` — `TaskDoc`, `ReviewGroup`, `ReviewItem`, `ReviewPayload`.
+- `apps/tasks-review-app/src/filter.ts` — `matchesReviewFilter`, `itemStatus`, `itemPriority`, `itemAssignee`, `itemSearchText`.
+- `apps/tasks-review-app/src/hash.ts` — `parseReviewHash`, `buildReviewHash`, `navigateReviewHash`.
+- `apps/tasks-review-app/src/export.ts` — `exportReviewRows`, `applyProjectDrop`.
+- `apps/tasks-review-app/src/dev-mock.ts` — dev-only payload. Production bundle must not contain its marker stem.
+- `apps/tasks-review-app/src/components/TopBar.tsx` — search, priority, assignee, status, Copy JSON.
+- `apps/tasks-review-app/src/components/ProjectColumn.tsx` — filter + drop targets.
+- `apps/tasks-review-app/src/components/StatusBoard.tsx` — seven read-only columns plus an optional `未标注` column.
+- `apps/tasks-review-app/src/components/TaskCard.tsx` — stem, title, project tag, updated time; draggable.
+- `apps/tasks-review-app/src/components/MarkdownPane.tsx` — `doc.body` preview.
+- `apps/tasks-review-app/src/App.tsx` — wires the four regions, hash, and dnd-kit.
+- `apps/tasks-review-app/test/*.test.ts(x)` — Vitest.
 
 **Create — CLI doc mapping**
 
 - `extensions/clis/src/tasks/utils/task-doc.ts` — `TaskDoc`, `taskDocFromParsed`, `taskDocFromMarkdown`.
-- `extensions/clis/test/tasks/review-app-build.test.ts` — fixed filenames, gitignore, dev-mock excluded from `review.js`.
+- `extensions/clis/test/tasks/tasks-review-app-build.test.ts` — fixed filenames, gitignore, dev-mock excluded from `review.js`.
 
 **Modify — CLI**
 
@@ -86,41 +87,41 @@ The in-progress card still says the center board may reuse an open-source kanban
 - `extensions/clis/src/tasks/utils/review-page.ts` — optional `doc` / `status` / `priority`; load three assets; inline JS/CSS; inject payload.
 - `extensions/clis/src/tasks/project/review-page.ts` — call the asset loader instead of the handwritten HTML file.
 - `extensions/clis/src/tasks/list.ts` — one help sentence: grouped items may include optional `doc`.
-- `extensions/clis/package.json` — `build:review-app`, `prepack`, test depends on the app build, `edges-review-app` workspace devDependency.
+- `extensions/clis/package.json` — `build:tasks-review-app`, `prepack`, test depends on the app build, `tasks-review-app` workspace devDependency.
 - `extensions/clis/scripts/copy-review-page-asset.mjs` — still copies `src/tasks/project/assets` onto `dist` (the built directory is inside that tree).
 - `extensions/clis/test/tasks/utils/grouped.test.ts`, `review-page.test.ts`, `grouped-list.test.ts` — `doc` present on grouped list, absent on flat list, optional on review-page input.
 - Delete `extensions/clis/src/tasks/project/assets/review-page.html` once the inlined shell replaces it.
 
 **Modify — repo wiring**
 
-- `pnpm-workspace.yaml` — add `extensions/clis/review-app`.
+- `pnpm-workspace.yaml` — add `apps/*` so `tasks-review-app` and later shells are workspace packages.
 - `.gitignore` — `extensions/clis/src/tasks/project/assets/review-page/`.
-- `.github/workflows/deploy.yml` — install the new package and `pnpm --filter edges-review-app run build` before `generate-tasks-site.ts`.
+- `.github/workflows/deploy.yml` — install the new package and `pnpm --filter tasks-review-app run build` before `generate-tasks-site.ts`.
 - `extensions/clis/README.md`, `extensions/clis/deploy/README.md` — build-before-generate.
 - `extensions/skills/project-tasks-classify/SKILL.md` + `CHANGELOG.md` — optional thin `doc`; export row unchanged. Version `1.2.0` (tag `1.1.0` already exists; `SKILL.md` on this branch is still `1.0.0`).
 - `CHANGELOG.md` — one Chinese Unreleased bullet under `### 任务看板与项目` when the feature lands.
-- Root `pnpm-lock.yaml` — the only lockfile to update. Delete any `pnpm-lock.yaml` or `pnpm-workspace.yaml` the shadcn scaffold writes inside `review-app/`.
+- Root `pnpm-lock.yaml` — the only lockfile to update. Delete any `pnpm-lock.yaml` or `pnpm-workspace.yaml` the shadcn scaffold writes inside `apps/tasks-review-app/`.
 
 ---
 
 ### Task 1: Scaffold the review app and lock the Playwright build
 
 **Files:**
-- Create: `extensions/clis/review-app/**` (shadcn Vite scaffold, then the edits in this task)
-- Create: `extensions/clis/test/tasks/review-app-build.test.ts`
+- Create: `apps/tasks-review-app/**` (shadcn Vite scaffold, then the edits in this task)
+- Create: `extensions/clis/test/tasks/tasks-review-app-build.test.ts`
 - Modify: `pnpm-workspace.yaml`
 - Modify: `.gitignore`
 - Modify: `extensions/clis/package.json`
 - Modify: `pnpm-lock.yaml`
-- Test: `extensions/clis/test/tasks/review-app-build.test.ts`
+- Test: `extensions/clis/test/tasks/tasks-review-app-build.test.ts`
 
 **Interfaces:**
 - Consumes: none
-- Produces: `pnpm --filter edges-review-app run build` writes exactly these three files into `extensions/clis/src/tasks/project/assets/review-page/`: `index.html`, `review.js`, `review.css`. `index.html` references `review.js` and `review.css` (the CLI inlines them in Task 4). `review.js` does not contain the string `DEV-MOCK-STEM-NOT-IN-PROD`. Package script `build:review-app` on `edges-cli` runs that build. `prepack` runs `pnpm run build`.
+- Produces: `pnpm --filter tasks-review-app run build` writes exactly these three files into `extensions/clis/src/tasks/project/assets/review-page/`: `index.html`, `review.js`, `review.css`. `index.html` references `review.js` and `review.css` (the CLI inlines them in Task 4). `review.js` does not contain the string `DEV-MOCK-STEM-NOT-IN-PROD`. Package script `build:tasks-review-app` on `edges-cli` runs that build. `prepack` runs `pnpm run build`.
 
 - [ ] **Step 1: Write the failing test**
 
-Create `extensions/clis/test/tasks/review-app-build.test.ts`:
+Create `extensions/clis/test/tasks/tasks-review-app-build.test.ts`:
 
 ```ts
 import test from "node:test";
@@ -136,8 +137,8 @@ const assetDir = path.join(
   "extensions/clis/src/tasks/project/assets/review-page",
 );
 
-test("build:review-app emits index.html, review.js, and review.css only", () => {
-  const built = spawnSync("pnpm", ["--filter", "edges-review-app", "run", "build"], {
+test("build:tasks-review-app emits index.html, review.js, and review.css only", () => {
+  const built = spawnSync("pnpm", ["--filter", "tasks-review-app", "run", "build"], {
     cwd: repoRoot,
     encoding: "utf8",
   });
@@ -161,23 +162,23 @@ test("build:review-app emits index.html, review.js, and review.css only", () => 
 Run from the repo root:
 
 ```bash
-pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/review-app-build.test.ts
+pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/tasks-review-app-build.test.ts
 ```
 
-Expected: FAIL because `edges-review-app` is not a workspace package yet.
+Expected: FAIL because `tasks-review-app` is not a workspace package yet.
 
 - [ ] **Step 3: Scaffold, then replace the Vite build**
 
 From the repo root:
 
 ```bash
-mkdir -p extensions/clis/review-app
-pnpm dlx shadcn@latest init -t vite -y --no-monorepo -b radix -p nova -c extensions/clis/review-app
-rm -f extensions/clis/review-app/pnpm-workspace.yaml extensions/clis/review-app/pnpm-lock.yaml extensions/clis/review-app/README.md
-rm -rf extensions/clis/review-app/public
+mkdir -p apps/tasks-review-app
+pnpm dlx shadcn@latest init -t vite -y --no-monorepo -b radix -p nova -c apps/tasks-review-app
+rm -f apps/tasks-review-app/pnpm-workspace.yaml apps/tasks-review-app/pnpm-lock.yaml apps/tasks-review-app/README.md
+rm -rf apps/tasks-review-app/public
 ```
 
-Do not pass `-n`. That flag nests a second directory. If a nested `edges-review-app/` appears, move its files up into `extensions/clis/review-app/` and delete the extra directory.
+Do not pass `-n`. That flag nests a second directory. If a nested `tasks-review-app/` appears, move its files up into `apps/tasks-review-app/` and delete the extra directory. Set `apps/tasks-review-app/package.json` `"name"` to `tasks-review-app` when the scaffold wrote another name.
 
 Add the package to the root workspace. In `pnpm-workspace.yaml`:
 
@@ -185,18 +186,18 @@ Add the package to the root workspace. In `pnpm-workspace.yaml`:
 packages:
   - 'extensions/mcp-servers/*'
   - 'extensions/clis'
-  - 'extensions/clis/review-app'
+  - 'apps/*'
   - 'extensions/services/*'
 ```
 
 Append to the root `.gitignore`:
 
 ```
-# Review shell Vite outDir (ADR 0022). Source is extensions/clis/review-app/.
+# Review shell Vite outDir (ADR 0022). Source is apps/tasks-review-app/.
 extensions/clis/src/tasks/project/assets/review-page/
 ```
 
-Replace `extensions/clis/review-app/vite.config.ts` with:
+Replace `apps/tasks-review-app/vite.config.ts` with:
 
 ```ts
 import path from "node:path";
@@ -206,7 +207,7 @@ import { defineConfig } from "vitest/config";
 
 const outDir = path.resolve(
   __dirname,
-  "../src/tasks/project/assets/review-page",
+  "../../extensions/clis/src/tasks/project/assets/review-page",
 );
 
 export default defineConfig({
@@ -242,7 +243,7 @@ export default defineConfig({
 });
 ```
 
-Replace `extensions/clis/review-app/index.html` with:
+Replace `apps/tasks-review-app/index.html` with:
 
 ```html
 <!doctype html>
@@ -260,15 +261,15 @@ Replace `extensions/clis/review-app/index.html` with:
 </html>
 ```
 
-Replace `extensions/clis/review-app/src/App.tsx` with a placeholder the later tasks replace. Keep `data-review-shell="edges"`:
+Replace `apps/tasks-review-app/src/App.tsx` with a placeholder the later tasks replace. Keep `data-review-shell="edges"`:
 
 ```tsx
 export default function App() {
-  return <div data-review-shell="edges">edges-review-app</div>;
+  return <div data-review-shell="edges">tasks-review-app</div>;
 }
 ```
 
-Create `extensions/clis/review-app/src/dev-mock.ts`:
+Create `apps/tasks-review-app/src/dev-mock.ts`:
 
 ```ts
 export const mockPayload = {
@@ -284,7 +285,7 @@ export const mockPayload = {
 };
 ```
 
-In `extensions/clis/review-app/src/main.tsx`, load the dev mock only when `import.meta.env.DEV` is true, and pass nothing else into the production graph:
+In `apps/tasks-review-app/src/main.tsx`, load the dev mock only when `import.meta.env.DEV` is true, and pass nothing else into the production graph:
 
 ```tsx
 import { StrictMode } from "react";
@@ -315,7 +316,7 @@ if (import.meta.env.DEV) {
 
 `ThemeProvider` from the scaffold may stay or go. The placeholder does not need it. Delete the favicon link if the scaffold's `index.html` replacement above is what you saved.
 
-Add scripts on `edges-review-app` (keep the scaffold's `tsc -b && vite build` as `build`). Add a test script:
+Add scripts on `tasks-review-app` (keep the scaffold's `tsc -b && vite build` as `build`). Add a test script:
 
 ```json
 "test": "vitest run"
@@ -324,23 +325,23 @@ Add scripts on `edges-review-app` (keep the scaffold's `tsc -b && vite build` as
 Install Vitest 5 (peers with Vite 8) from the repo root:
 
 ```bash
-pnpm --filter edges-review-app add -D vitest@^5.0.1 jsdom @testing-library/react @testing-library/user-event
+pnpm --filter tasks-review-app add -D vitest@^5.0.1 jsdom @testing-library/react @testing-library/user-event
 ```
 
 Point `edges-cli` at the app. In `extensions/clis/package.json`:
 
 ```json
 "scripts": {
-  "build:review-app": "pnpm --filter edges-review-app run build",
-  "build": "pnpm run build:review-app && tsc -p tsconfig.json && node ./scripts/copy-review-page-asset.mjs",
+  "build:tasks-review-app": "pnpm --filter tasks-review-app run build",
+  "build": "pnpm run build:tasks-review-app && tsc -p tsconfig.json && node ./scripts/copy-review-page-asset.mjs",
   "prepack": "pnpm run build",
   "start": "node dist/index.js",
   "dev": "tsx src/index.ts",
-  "dev:review-app": "pnpm --filter edges-review-app run dev",
-  "test": "pnpm run build:review-app && node --test --import tsx './test/**/*.test.ts'"
+  "dev:tasks-review-app": "pnpm --filter tasks-review-app run dev",
+  "test": "pnpm run build:tasks-review-app && node --test --import tsx './test/**/*.test.ts'"
 },
 "devDependencies": {
-  "edges-review-app": "workspace:*",
+  "tasks-review-app": "workspace:*",
   "@types/node": "^22.19.11",
   "tsx": "^4.19.3",
   "typescript": "^5.8.2"
@@ -350,7 +351,7 @@ Point `edges-cli` at the app. In `extensions/clis/package.json`:
 Keep the existing `dependencies` block. Then:
 
 ```bash
-pnpm install --filter edges-cli... --filter edges-review-app...
+pnpm install --filter edges-cli... --filter tasks-review-app...
 ```
 
 Commit the root `pnpm-lock.yaml` only.
@@ -360,7 +361,7 @@ Commit the root `pnpm-lock.yaml` only.
 - [ ] **Step 4: Run the test to verify it passes**
 
 ```bash
-pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/review-app-build.test.ts
+pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/tasks-review-app-build.test.ts
 ```
 
 Expected: PASS. `git status --short` does not list `extensions/clis/src/tasks/project/assets/review-page/` as a file to add.
@@ -368,7 +369,7 @@ Expected: PASS. `git status --short` does not list `extensions/clis/src/tasks/pr
 - [ ] **Step 5: Commit**
 
 ```bash
-git add pnpm-workspace.yaml pnpm-lock.yaml .gitignore extensions/clis/package.json extensions/clis/review-app extensions/clis/test/tasks/review-app-build.test.ts
+git add pnpm-workspace.yaml pnpm-lock.yaml .gitignore extensions/clis/package.json apps/tasks-review-app extensions/clis/test/tasks/tasks-review-app-build.test.ts
 git commit -m "$(cat <<'EOF'
 build: scaffold review shell with fixed Vite filenames
 
@@ -890,7 +891,7 @@ EOF
 - Produces:
   - `export function defaultReviewPageAssetDir(): string` — directory URL `../project/assets/review-page/` next to the compiled or `tsx` module.
   - `export async function loadBuiltReviewShell(readFile: (abs: string) => Promise<string>, assetDir?: string): Promise<string>` — reads `index.html`, `review.js`, `review.css`, inlines them, returns one HTML string that still contains an empty payload script.
-  - Missing asset throws `TasksError` `VALIDATION_ERROR` with message `review-page asset missing: <absolute path> (run pnpm --filter edges-cli run build:review-app)`.
+  - Missing asset throws `TasksError` `VALIDATION_ERROR` with message `review-page asset missing: <absolute path> (run pnpm --filter edges-cli run build:tasks-review-app)`.
   - `project/review-page.ts` calls `loadBuiltReviewShell` then `renderReviewPageHtml`. Stdout stays `{ status, command: "project.review-page", path, groupCount, itemCount }`.
 
 - [ ] **Step 1: Write the failing test**
@@ -930,7 +931,7 @@ test("loadBuiltReviewShell names the build command when an asset is missing", as
       (error: unknown) => {
         assert.equal((error as TasksError).errorCode, "VALIDATION_ERROR");
         assert.match((error as Error).message, /review-page asset missing:/);
-        assert.match((error as Error).message, /pnpm --filter edges-cli run build:review-app/);
+        assert.match((error as Error).message, /pnpm --filter edges-cli run build:tasks-review-app/);
         return true;
       },
     );
@@ -964,7 +965,7 @@ export function defaultReviewPageAssetDir(): string {
 }
 
 function missingAsset(abs: string): never {
-  fail(`review-page asset missing: ${abs} (run pnpm --filter edges-cli run build:review-app)`);
+  fail(`review-page asset missing: ${abs} (run pnpm --filter edges-cli run build:tasks-review-app)`);
 }
 
 async function readAsset(
@@ -1014,7 +1015,7 @@ Delete `extensions/clis/src/tasks/project/assets/review-page.html`.
 - [ ] **Step 4: Run the tests to verify they pass**
 
 ```bash
-pnpm --filter edges-cli run build:review-app
+pnpm --filter edges-cli run build:tasks-review-app
 pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/utils/review-page.test.ts
 ```
 
@@ -1037,20 +1038,20 @@ EOF
 ### Task 5: Draw the three columns, filters, hash, and Markdown pane
 
 **Files:**
-- Create: `extensions/clis/review-app/src/types.ts`
-- Create: `extensions/clis/review-app/src/statuses.ts`
-- Create: `extensions/clis/review-app/src/filter.ts`
-- Create: `extensions/clis/review-app/src/hash.ts`
-- Create: `extensions/clis/review-app/src/components/TopBar.tsx`
-- Create: `extensions/clis/review-app/src/components/ProjectColumn.tsx`
-- Create: `extensions/clis/review-app/src/components/StatusBoard.tsx`
-- Create: `extensions/clis/review-app/src/components/TaskCard.tsx`
-- Create: `extensions/clis/review-app/src/components/MarkdownPane.tsx`
-- Modify: `extensions/clis/review-app/src/App.tsx`
-- Modify: `extensions/clis/review-app/src/index.css` (append the dark tokens; do not delete the scaffold's Tailwind import)
-- Test: `extensions/clis/review-app/test/filter.test.ts`
-- Test: `extensions/clis/review-app/test/hash.test.ts`
-- Test: `extensions/clis/review-app/test/shell.test.tsx`
+- Create: `apps/tasks-review-app/src/types.ts`
+- Create: `apps/tasks-review-app/src/statuses.ts`
+- Create: `apps/tasks-review-app/src/filter.ts`
+- Create: `apps/tasks-review-app/src/hash.ts`
+- Create: `apps/tasks-review-app/src/components/TopBar.tsx`
+- Create: `apps/tasks-review-app/src/components/ProjectColumn.tsx`
+- Create: `apps/tasks-review-app/src/components/StatusBoard.tsx`
+- Create: `apps/tasks-review-app/src/components/TaskCard.tsx`
+- Create: `apps/tasks-review-app/src/components/MarkdownPane.tsx`
+- Modify: `apps/tasks-review-app/src/App.tsx`
+- Modify: `apps/tasks-review-app/src/index.css` (append the dark tokens; do not delete the scaffold's Tailwind import)
+- Test: `apps/tasks-review-app/test/filter.test.ts`
+- Test: `apps/tasks-review-app/test/hash.test.ts`
+- Test: `apps/tasks-review-app/test/shell.test.tsx`
 
 **Interfaces:**
 - Consumes: payload shape from Task 3. Schema enums from `extensions/clis/schemas/task-doc.v1.json`.
@@ -1075,7 +1076,7 @@ Hash keys, omitted when they are the default: `q`, `priority`, `assignee`, `stat
 
 - [ ] **Step 1: Write the failing tests**
 
-`extensions/clis/review-app/test/filter.test.ts`:
+`apps/tasks-review-app/test/filter.test.ts`:
 
 ```ts
 import { describe, expect, it } from "vitest";
@@ -1135,7 +1136,7 @@ describe("matchesReviewFilter", () => {
 });
 ```
 
-`extensions/clis/review-app/test/hash.test.ts`:
+`apps/tasks-review-app/test/hash.test.ts`:
 
 ```ts
 import { expect, it } from "vitest";
@@ -1176,7 +1177,7 @@ it("treats an unknown status as all", () => {
 });
 ```
 
-`extensions/clis/review-app/test/shell.test.tsx`:
+`apps/tasks-review-app/test/shell.test.tsx`:
 
 ```tsx
 import { render, screen } from "@testing-library/react";
@@ -1249,7 +1250,7 @@ it("lays out filters, columns, design A, and the markdown pane", async () => {
 - [ ] **Step 2: Run the tests to verify they fail**
 
 ```bash
-pnpm --filter edges-review-app test
+pnpm --filter tasks-review-app test
 ```
 
 Expected: FAIL importing `../src/filter.ts` (module not found).
@@ -1259,7 +1260,7 @@ Expected: FAIL importing `../src/filter.ts` (module not found).
 `src/statuses.ts`:
 
 ```ts
-import taskDocSchema from "../../schemas/task-doc.v1.json" with { type: "json" };
+import taskDocSchema from "../../../extensions/clis/schemas/task-doc.v1.json" with { type: "json" };
 
 const metadata = taskDocSchema.properties.metadata.properties;
 
@@ -1351,8 +1352,8 @@ export function MarkdownPane({ body }: { body: string }) {
 Install the renderer:
 
 ```bash
-pnpm --filter edges-review-app add react-markdown remark-gfm
-pnpm --filter edges-review-app exec shadcn add input select -y
+pnpm --filter tasks-review-app add react-markdown remark-gfm
+pnpm --filter tasks-review-app exec shadcn add input select -y
 ```
 
 `TopBar.tsx` uses shadcn `Input` (`data-filter="q"`) and `Select` (`data-filter="priority" | "assignee" | "status"`). Priority options: `all` plus `REVIEW_PRIORITIES`. Status options: `all` plus `REVIEW_STATUS_COLUMNS`. Assignee options: `""` labeled `全部`, plus sorted unique non-empty assignees from the items. The Copy JSON button is a placeholder `disabled` in this task; Task 6 wires it.
@@ -1375,8 +1376,8 @@ On filter or stem change, call `navigateReviewHash(buildReviewHash(state))` only
 - [ ] **Step 4: Run the tests to verify they pass**
 
 ```bash
-pnpm --filter edges-review-app test
-pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/review-app-build.test.ts
+pnpm --filter tasks-review-app test
+pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/tasks-review-app-build.test.ts
 ```
 
 Expected: PASS. The build test still sees exactly three files, and `review.js` still lacks `DEV-MOCK-STEM-NOT-IN-PROD`.
@@ -1384,7 +1385,7 @@ Expected: PASS. The build test still sees exactly three files, and `review.js` s
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/review-app pnpm-lock.yaml
+git add apps/tasks-review-app pnpm-lock.yaml
 git commit -m "$(cat <<'EOF'
 feat: add review shell columns, filters, and hash navigation
 
@@ -1398,13 +1399,13 @@ EOF
 ### Task 6: Drag a card onto a project and copy the same JSON
 
 **Files:**
-- Create: `extensions/clis/review-app/src/export.ts`
-- Modify: `extensions/clis/review-app/src/App.tsx`
-- Modify: `extensions/clis/review-app/src/components/TaskCard.tsx`
-- Modify: `extensions/clis/review-app/src/components/ProjectColumn.tsx`
-- Modify: `extensions/clis/review-app/src/components/TopBar.tsx`
-- Test: `extensions/clis/review-app/test/export.test.ts`
-- Test: `extensions/clis/review-app/test/drag.test.tsx`
+- Create: `apps/tasks-review-app/src/export.ts`
+- Modify: `apps/tasks-review-app/src/App.tsx`
+- Modify: `apps/tasks-review-app/src/components/TaskCard.tsx`
+- Modify: `apps/tasks-review-app/src/components/ProjectColumn.tsx`
+- Modify: `apps/tasks-review-app/src/components/TopBar.tsx`
+- Test: `apps/tasks-review-app/test/export.test.ts`
+- Test: `apps/tasks-review-app/test/drag.test.tsx`
 
 **Interfaces:**
 - Consumes: `ReviewItem` from `types.ts`.
@@ -1509,7 +1510,7 @@ export function projectIdFromDrop(overId: string | undefined): string | undefine
 - [ ] **Step 2: Run the tests to verify they fail**
 
 ```bash
-pnpm --filter edges-review-app test
+pnpm --filter tasks-review-app test
 ```
 
 Expected: FAIL importing `../src/export.ts`.
@@ -1517,7 +1518,7 @@ Expected: FAIL importing `../src/export.ts`.
 - [ ] **Step 3: Write the minimal implementation**
 
 ```bash
-pnpm --filter edges-review-app add @dnd-kit/core
+pnpm --filter tasks-review-app add @dnd-kit/core
 ```
 
 `src/export.ts` as specified. `note` is `item.note ?? ""`. `action` is `keep` when `suggested === current`, else `move`.
@@ -1542,9 +1543,9 @@ pnpm --filter edges-review-app add @dnd-kit/core
 - [ ] **Step 4: Run the tests to verify they pass**
 
 ```bash
-pnpm --filter edges-review-app test
-pnpm --filter edges-cli run build:review-app
-pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/utils/review-page.test.ts ./test/tasks/review-app-build.test.ts
+pnpm --filter tasks-review-app test
+pnpm --filter edges-cli run build:tasks-review-app
+pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/utils/review-page.test.ts ./test/tasks/tasks-review-app-build.test.ts
 ```
 
 Expected: PASS.
@@ -1552,7 +1553,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/review-app pnpm-lock.yaml
+git add apps/tasks-review-app pnpm-lock.yaml
 git commit -m "$(cat <<'EOF'
 feat: drag review cards between projects and copy export JSON
 
@@ -1578,7 +1579,7 @@ EOF
 
 **Interfaces:**
 - Consumes: `loadBuiltReviewShell`, `parseReviewPageInput`, `renderReviewPageHtml`, `exportReviewRows`.
-- Produces: deploy always runs `pnpm --filter edges-review-app run build` after a frozen install that includes `edges-review-app`, then `generate-tasks-site.ts`. A classify payload with no `doc` still renders. A payload with a thin `doc` (`body: ""`) embeds that doc and does not add `assignee` beside it. Skill version becomes `1.2.0`.
+- Produces: deploy always runs `pnpm --filter tasks-review-app run build` after a frozen install that includes `tasks-review-app`, then `generate-tasks-site.ts`. A classify payload with no `doc` still renders. A payload with a thin `doc` (`body: ""`) embeds that doc and does not add `assignee` beside it. Skill version becomes `1.2.0`.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -1634,7 +1635,7 @@ test("review-page renders classify JSON with a missing doc and a thin doc", asyn
 });
 ```
 
-`extensions/clis/test/tasks/deploy-review-build.test.ts` reads `.github/workflows/deploy.yml` as text and asserts it contains `pnpm --filter edges-review-app run build` before `scripts/generate-tasks-site.ts`, and that this build is not inside `if [ ! -d node_modules ]`.
+`extensions/clis/test/tasks/deploy-review-build.test.ts` reads `.github/workflows/deploy.yml` as text and asserts it contains `pnpm --filter tasks-review-app run build` before `scripts/generate-tasks-site.ts`, and that this build is not inside `if [ ! -d node_modules ]`.
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
@@ -1642,15 +1643,15 @@ test("review-page renders classify JSON with a missing doc and a thin doc", asyn
 pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/review-page-classify.test.ts ./test/tasks/deploy-review-build.test.ts
 ```
 
-Expected: the deploy test FAIL because `deploy.yml` does not build `edges-review-app`. The classify test PASS only after Task 4; if it fails on a missing asset, run `pnpm --filter edges-cli run build:review-app` first. The deploy assertion is the failure this task must turn green.
+Expected: the deploy test FAIL because `deploy.yml` does not build `tasks-review-app`. The classify test PASS only after Task 4; if it fails on a missing asset, run `pnpm --filter edges-cli run build:tasks-review-app` first. The deploy assertion is the failure this task must turn green.
 
 - [ ] **Step 3: Write the minimal implementation**
 
 In `.github/workflows/deploy.yml`, replace the block that conditionally installs and then generates the site with:
 
 ```bash
-pnpm install --frozen-lockfile --filter edges-cli... --filter edges-review-app...
-pnpm --filter edges-review-app run build
+pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...
+pnpm --filter tasks-review-app run build
 test -s extensions/clis/src/tasks/project/assets/review-page/index.html
 test -s extensions/clis/src/tasks/project/assets/review-page/review.js
 test -s extensions/clis/src/tasks/project/assets/review-page/review.css
@@ -1670,15 +1671,15 @@ Leave the later artifacts `if [ ! -d` install alone. Do not add a second workflo
 In `extensions/clis/deploy/README.md`, put the build command in front of the generate command in the "Generate (every deploy)" section:
 
 ```bash
-pnpm install --frozen-lockfile --filter edges-cli... --filter edges-review-app...
-pnpm --filter edges-review-app run build
+pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...
+pnpm --filter tasks-review-app run build
 pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
   --out "$PWD/knowledge/tasks/_site/index.html"
 ```
 
 State that the Vite output is gitignored and must be built on the box. Do not write whether a machine has already been migrated.
 
-In `extensions/clis/README.md`, replace the `project review-page` paragraph with: the command still only renders; it reads groups+items JSON; it inlines the prebuilt shell (`pnpm --filter edges-cli run build:review-app` or `prepack`) into one HTML file; data is `#edges-review-payload`; items may omit `doc`. Mention `dev:review-app` for local UI work. Keep the Artifacts sentence: render, then `publish` separately.
+In `extensions/clis/README.md`, replace the `project review-page` paragraph with: the command still only renders; it reads groups+items JSON; it inlines the prebuilt shell (`pnpm --filter edges-cli run build:tasks-review-app` or `prepack`) into one HTML file; data is `#edges-review-payload`; items may omit `doc`. Mention `dev:tasks-review-app` for local UI work. Keep the Artifacts sentence: render, then `publish` separately.
 
 In `extensions/skills/project-tasks-classify/SKILL.md`, set `version: 1.2.0`. Under step 4's `items` bullet, add: `doc` is optional. When present it is `name`, `description`, `metadata`, and `body` (Markdown, `body` may be `""`). Omitting `doc` is valid. The pasted export is still `stem`, `current`, `suggested`, `action`, `note`. Do not require the skill to read Task files into `doc` in this round; the board generator does that for `/tasks/`.
 
@@ -1703,20 +1704,20 @@ git push origin skill/project-tasks-classify@1.2.0
 In the root `CHANGELOG.md` under `## [Unreleased]` / `### 任务看板与项目`, add this bullet and no field table:
 
 ```markdown
-- `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个三栏审阅页：顶栏可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选；左侧点项目筛选，拖到项目上只改 project，再用「复制导出 JSON」贴回。中间的状态列只展示，右侧渲染当前条目的 Markdown 正文。页上的脚本在生成前由 `pnpm --filter edges-review-app run build` 打好并内联进单份 HTML，构建产物不进 git。
+- `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个三栏审阅页：顶栏可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选；左侧点项目筛选，拖到项目上只改 project，再用「复制导出 JSON」贴回。中间的状态列只展示，右侧渲染当前条目的 Markdown 正文。页上的脚本在生成前由 `pnpm --filter tasks-review-app run build` 打好并内联进单份 HTML，构建产物不进 git。
 ```
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
 ```bash
-pnpm --filter edges-cli run build:review-app
+pnpm --filter edges-cli run build:tasks-review-app
 pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/review-page-classify.test.ts ./test/tasks/deploy-review-build.test.ts ./test/tasks/utils/review-page.test.ts ./test/tasks/grouped-list.test.ts
-pnpm --filter edges-review-app test
+pnpm --filter tasks-review-app test
 ```
 
 Expected: PASS.
 
-Open `dev:review-app` only if a browser is available. Otherwise the Vitest shell test is the UI check. Confirm a drag from a status column does not change `item.status` (Task 6) and that `/tasks/` generation is still `generate-tasks-site.ts` writing `knowledge/tasks/_site/index.html`.
+Open `dev:tasks-review-app` only if a browser is available. Otherwise the Vitest shell test is the UI check. Confirm a drag from a status column does not change `item.status` (Task 6) and that `/tasks/` generation is still `generate-tasks-site.ts` writing `knowledge/tasks/_site/index.html`.
 
 - [ ] **Step 5: Commit**
 
@@ -1739,9 +1740,9 @@ Push the tag with the branch. Do not move the in-progress task card.
 
 | Requirement | Task |
 | --- | --- |
-| Vite source `extensions/clis/review-app/`, fixed `index.html` / `review.js` / `review.css`, `inlineDynamicImports` | 1 |
+| Vite source `apps/tasks-review-app/`, fixed `index.html` / `review.js` / `review.css`, `inlineDynamicImports` | 1 |
 | Gitignore the outDir; do not commit artifacts | 1 |
-| `build:review-app` / `prepack` / `dev:review-app` | 1 |
+| `build:tasks-review-app` / `prepack` / `dev:tasks-review-app` | 1 |
 | Grouped items optional Schema-aligned `doc` from `parseTaskDoc`; flat list unchanged | 2 |
 | Page payload carries `doc`, `status`, `priority`; classify may omit `doc` | 3, 7 |
 | Runtime reads assets, inlines JS/CSS, injects `#edges-review-payload` | 4 |
