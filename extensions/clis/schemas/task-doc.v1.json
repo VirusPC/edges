@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "edges.task-doc/v1",
+  "title": "Task Doc",
+  "description": "Edges Task document contract. CLI frontmatter and a board item's optional doc align to this shape. Metadata keys mirror extensions/clis task frontmatter. Unknown metadata keys are allowed. body is Markdown, not precompiled HTML.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "description", "metadata", "body"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Frontmatter name. Not the Task stem and not metadata.edges-title."
+    },
+    "description": {
+      "type": "string"
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "edges-type": {
+          "const": "task"
+        },
+        "edges-title": {
+          "type": "string",
+          "description": "Display title. Board title falls back to name, then the Task stem."
+        },
+        "edges-tasks-status": {
+          "enum": [
+            "backlog",
+            "todo",
+            "in_progress",
+            "in_review",
+            "done",
+            "blocked",
+            "cancelled"
+          ]
+        },
+        "edges-task-project": {
+          "type": "string",
+          "maxLength": 64,
+          "pattern": "^[a-z][a-z0-9]*(-[a-z0-9]+)*$",
+          "not": {
+            "enum": [
+              "backlog",
+              "todo",
+              "in_progress",
+              "in_review",
+              "done",
+              "blocked",
+              "cancelled"
+            ]
+          },
+          "description": "Task Project id. Omit when default (directory _default). Value default is allowed. Not a status folder and not the directory name _default."
+        },
+        "edges-task-priority": {
+          "enum": ["urgent", "high", "medium", "low", "none"],
+          "description": "Orthogonal to edges-tasks-status. Omitted on new files when none; absent reads as none."
+        },
+        "edges-task-assignee": {
+          "type": "string"
+        },
+        "edges-updated-at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "body": {
+      "type": "string",
+      "description": "Markdown after frontmatter."
+    }
+  }
+}
