@@ -128,3 +128,13 @@
     @apply font-sans;
     }
 }
+
+:root {
+  --background: #0f1419;
+  --foreground: #e7ecf3;
+  --card: #1a2332;
+  --muted-foreground: #9aa8bc;
+  --border: #334155;
+  --accent: #5b9fd4;
+}
+html, body, #root { height: 100%; background: #0f1419; color: #e7ecf3; }
