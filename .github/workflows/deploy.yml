@@ -77,12 +77,20 @@ jobs:
                export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
                . "$NVM_DIR/nvm.sh"
              fi
-             if [ ! -d node_modules ]; then
-               pnpm install --frozen-lockfile --filter edges-cli...
-             fi
+             pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...
+             pnpm --filter tasks-review-app run build
+             test -s extensions/clis/src/tasks/project/assets/review-page/index.html
+             test -s extensions/clis/src/tasks/project/assets/review-page/review.js
+             test -s extensions/clis/src/tasks/project/assets/review-page/review.css
              pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
                --out "$PWD/knowledge/tasks/_site/index.html"
              test -s knowledge/tasks/_site/index.html
+             grep -q "id=\"edges-review-payload\"" knowledge/tasks/_site/index.html
+             grep -q "<script type=\"module\">" knowledge/tasks/_site/index.html
+             if grep -q "src=\"./review.js\"" knowledge/tasks/_site/index.html; then
+               echo "review.js must be inlined, not linked"
+               exit 1
+             fi
              env_file="$HOME/.config/edges/artifacts-preview.env"
              token=""
              if [ -f "$env_file" ]; then

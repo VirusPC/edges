@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 任务看板与项目
 
+- `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个三栏审阅页：顶栏可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选；左侧点项目筛选，拖到项目上只改 project，再用「复制导出 JSON」贴回。中间的状态列只展示，右侧渲染当前条目的 Markdown 正文。页上的脚本在生成前由 `pnpm --filter tasks-review-app run build` 打好并内联进单份 HTML，构建产物不进 git。
 - 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
 - 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy.yml` 会在整仓 pull 之后自动生成。
 - 修复教学站部署流水线里读 token 时的引号错误，避免 Action 一启动就语法失败.
