@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 笔记入库与能力面
 
-- 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理 Task 草稿（【背景/场景】、交付标准、非目标、关联）。与 notes / remember 分工；只成文，不落库。
+- 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理 Task 草稿，正文为结论 → 事实背景 → Why → How。与 notes / remember 分工；只成文，不落库。
 
 ### 文档与系统
 
