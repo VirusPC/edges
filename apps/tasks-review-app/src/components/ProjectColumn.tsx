@@ -1,4 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
+import { useState } from "react";
 import { matchesReviewFilter, type ReviewFilter, type ReviewItem } from "../filter.ts";
 import type { ReviewGroup } from "../types.ts";
 
@@ -75,6 +76,7 @@ function ProjectDropRow({
   onSelect: (projectId: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: `project:${id}` });
+  const [open, setOpen] = useState(false);
   return (
     <button
       type="button"
@@ -85,20 +87,22 @@ function ProjectDropRow({
       data-filter={selected ? "on" : undefined}
       className={projectRowClass(selected, isOver)}
       onClick={() => onSelect(id)}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
     >
-      <ProjectLabel title={title} description={description} />
+      <ProjectLabel title={title} description={description} open={open} />
       <CountBadge count={count} />
     </button>
   );
 }
 
-function ProjectLabel({ title, description }: { title: string; description: string }) {
+function ProjectLabel({ title, description, open }: { title: string; description: string; open: boolean }) {
   const text = description.trim();
   return (
     <span className="min-w-0 flex-1">
       <span className="block truncate">{title}</span>
       {text !== "" ? (
-        <span className="mt-1 hidden text-xs leading-snug font-normal whitespace-normal text-[#9aa8bc] group-hover:block">
+        <span className={`${open ? "mt-1 block" : "hidden"} text-xs leading-snug font-normal whitespace-normal text-[#9aa8bc]`}>
           {text}
         </span>
       ) : null}
@@ -123,6 +127,7 @@ function ProjectRow({
   count: number;
   onSelect: (projectId: string) => void;
 }) {
+  const [open, setOpen] = useState(false);
   return (
     <button
       type="button"
@@ -131,8 +136,10 @@ function ProjectRow({
       data-filter={selected ? "on" : undefined}
       className={projectRowClass(selected)}
       onClick={() => onSelect(id)}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
     >
-      <ProjectLabel title={title} description={description} />
+      <ProjectLabel title={title} description={description} open={open} />
       <CountBadge count={count} />
     </button>
   );
