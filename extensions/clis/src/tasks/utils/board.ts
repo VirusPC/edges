@@ -10,6 +10,7 @@ import {
 } from "node:fs/promises";
 import path from "node:path";
 import { parseTaskDoc } from "./frontmatter.js";
+import { taskDocFromParsed, type TaskDoc } from "./task-doc.js";
 import { filterTasksByPriority, priorityFromMetadata, sortTasksByPriority } from "./priority.js";
 import {
   assertProjectDualWrite,
@@ -146,30 +147,10 @@ export async function listProjectIds(repoPath: string, fs: BoardFs): Promise<Tas
   });
 }
 
-async function listStatusDir(
-  repoPath: string,
-  project: TaskProjectId,
-  status: TaskStatus,
-  fs: BoardFs,
-): Promise<TaskListItem[]> {
-  const dir = statusDir(repoPath, project, status);
-  if (!(await fs.exists(dir))) {
-    return [];
-  }
-  const names = await fs.readdir(dir);
-  const items: TaskListItem[] = [];
-  for (const name of names) {
-    if (!isTaskMarkdownName(name)) {
-      continue;
-    }
-    const stem = stemFromFilename(name);
-    if (!stem) {
-      continue;
-    }
-    items.push(await readListItem(repoPath, project, status, stem, fs));
-  }
-  return items;
-}
+export type ListedTask = {
+  item: TaskListItem;
+  doc: TaskDoc;
+};
 
 async function readListItem(
   repoPath: string,
@@ -177,28 +158,32 @@ async function readListItem(
   status: TaskStatus,
   stem: string,
   fs: BoardFs,
-): Promise<TaskListItem> {
+): Promise<ListedTask> {
   const rel = taskRelPath(project, status, stem);
   const sidecarRel = sidecarRelPath(project, status, stem);
   const abs = path.join(repoPath, rel);
   const sidecarAbs = path.join(repoPath, sidecarRel);
   const markdown = await fs.readFile(abs);
-  const doc = parseTaskDoc(markdown);
+  const parsed = parseTaskDoc(markdown);
+  const doc = taskDocFromParsed(parsed);
   const resolvedProject = assertProjectDualWrite(projectDirName(project), doc.metadata);
   let runCount = 0;
   if (await fs.exists(sidecarAbs)) {
     runCount = countSidecarRuns(await fs.readFile(sidecarAbs));
   }
   return {
-    stem,
-    title: doc.metadata["edges-title"] || doc.name || stem,
-    status,
-    description: doc.description,
-    path: rel,
-    sidecarPath: sidecarRel,
-    runCount,
-    priority: priorityFromMetadata(doc.metadata),
-    project: resolvedProject,
+    doc,
+    item: {
+      stem,
+      title: doc.metadata["edges-title"] || doc.name || stem,
+      status,
+      description: doc.description,
+      path: rel,
+      sidecarPath: sidecarRel,
+      runCount,
+      priority: priorityFromMetadata(doc.metadata),
+      project: resolvedProject,
+    },
   };
 }
 
@@ -209,20 +194,35 @@ export type TaskListOpts = {
   sort?: "priority";
 };
 
-export async function listTasks(
+export async function listTasksWithDocs(
   repoPath: string,
   opts: TaskListOpts,
   fs: BoardFs,
-): Promise<TaskListItem[]> {
+): Promise<Array<TaskListItem & { doc: TaskDoc }>> {
   const projects = await listProjectIds(repoPath, fs);
   const statuses = opts.status ? [opts.status] : [...TASK_STATUSES];
-  const items: TaskListItem[] = [];
+  const rows: Array<TaskListItem & { doc: TaskDoc }> = [];
   for (const project of projects) {
     for (const status of statuses) {
-      items.push(...(await listStatusDir(repoPath, project, status, fs)));
+      const dir = statusDir(repoPath, project, status);
+      if (!(await fs.exists(dir))) {
+        continue;
+      }
+      const names = await fs.readdir(dir);
+      for (const name of names) {
+        if (!isTaskMarkdownName(name)) {
+          continue;
+        }
+        const stem = stemFromFilename(name);
+        if (!stem) {
+          continue;
+        }
+        const listed = await readListItem(repoPath, project, status, stem, fs);
+        rows.push({ ...listed.item, doc: listed.doc });
+      }
     }
   }
-  const priorityFiltered = filterTasksByPriority(items, opts.priorities ?? []);
+  const priorityFiltered = filterTasksByPriority(rows, opts.priorities ?? []);
   const filtered = filterTasksByProject(priorityFiltered, opts.projects ?? []);
   if (opts.sort === "priority") {
     return sortTasksByPriority(filtered);
@@ -231,6 +231,15 @@ export async function listTasks(
     throw new TasksError("VALIDATION_ERROR", `invalid --sort: ${String(opts.sort)} (expected priority)`);
   }
   return filtered;
+}
+
+export async function listTasks(
+  repoPath: string,
+  opts: TaskListOpts,
+  fs: BoardFs,
+): Promise<TaskListItem[]> {
+  const rows = await listTasksWithDocs(repoPath, opts, fs);
+  return rows.map(({ doc: _doc, ...item }) => item);
 }
 
 async function findByStem(
@@ -258,7 +267,7 @@ async function loadRecord(
   stem: string,
   fs: BoardFs,
 ): Promise<TaskRecord> {
-  const item = await readListItem(repoPath, project, status, stem, fs);
+  const item = (await readListItem(repoPath, project, status, stem, fs)).item;
   const abs = path.join(repoPath, item.path);
   const sidecarAbs = path.join(repoPath, item.sidecarPath);
   const markdown = await fs.readFile(abs);

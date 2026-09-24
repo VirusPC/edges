@@ -1,4 +1,4 @@
-import { listProjectIds, listTasks, type BoardFs, type TaskListOpts } from "./board.js";
+import { listProjectIds, listTasksWithDocs, type BoardFs, type TaskListOpts } from "./board.js";
 import {
   DEFAULT_PROJECT_DESCRIPTION,
   DEFAULT_PROJECT_TITLE,
@@ -8,6 +8,7 @@ import {
 } from "./project-meta.js";
 import type { ReviewPageInput, ReviewPageItem } from "./review-page.js";
 import { DEFAULT_TASK_PROJECT, TasksError, type TaskListItem, type TaskProjectId } from "./types.js";
+import type { TaskDoc } from "./task-doc.js";
 
 export const GROUPED_LIST_SCHEMA = "edges.tasks.grouped/v1";
 
@@ -17,6 +18,8 @@ export type GroupedListGroup = {
   description?: string;
 };
 
+export type GroupedTaskInput = TaskListItem & { doc?: TaskDoc };
+
 export type GroupedListItem = {
   id: string;
   stem?: string;
@@ -25,6 +28,7 @@ export type GroupedListItem = {
   status?: string;
   description?: string;
   priority?: string;
+  doc?: TaskDoc;
 };
 
 export type GroupedList = {
@@ -53,19 +57,25 @@ function sortGroupIds(ids: Iterable<string>): string[] {
   });
 }
 
-export function buildGroupedList(tasks: TaskListItem[], groups: GroupedListGroup[]): GroupedList {
+export function buildGroupedList(tasks: GroupedTaskInput[], groups: GroupedListGroup[]): GroupedList {
   return {
     schema: GROUPED_LIST_SCHEMA,
     groups: groups.length > 0 ? groups : fallbackGroups(),
-    items: tasks.map((task) => ({
-      id: task.stem,
-      stem: task.stem,
-      group: task.project,
-      title: task.title,
-      status: task.status,
-      description: task.description,
-      priority: task.priority,
-    })),
+    items: tasks.map((task) => {
+      const item: GroupedListItem = {
+        id: task.stem,
+        stem: task.stem,
+        group: task.project,
+        title: task.title,
+        status: task.status,
+        description: task.description,
+        priority: task.priority,
+      };
+      if (task.doc) {
+        item.doc = task.doc;
+      }
+      return item;
+    }),
   };
 }
 
@@ -109,7 +119,30 @@ function parseItem(raw: unknown): GroupedListItem {
   if (typeof raw.priority === "string") {
     item.priority = raw.priority;
   }
+  if ("doc" in raw && raw.doc !== undefined) {
+    item.doc = parseTaskDocField(raw.doc);
+  }
   return item;
+}
+
+function parseTaskDocField(raw: unknown): TaskDoc {
+  if (!isPlainObject(raw)) {
+    throw new TasksError("VALIDATION_ERROR", "grouped list doc must be an object");
+  }
+  if (typeof raw.name !== "string" || typeof raw.description !== "string" || typeof raw.body !== "string") {
+    throw new TasksError("VALIDATION_ERROR", "grouped list doc requires name, description, and body strings");
+  }
+  if (!isPlainObject(raw.metadata)) {
+    throw new TasksError("VALIDATION_ERROR", "grouped list doc.metadata must be an object");
+  }
+  const metadata: Record<string, string> = {};
+  for (const [key, value] of Object.entries(raw.metadata)) {
+    if (typeof value !== "string") {
+      throw new TasksError("VALIDATION_ERROR", `grouped list doc.metadata.${key} must be a string`);
+    }
+    metadata[key] = value;
+  }
+  return { name: raw.name, description: raw.description, metadata, body: raw.body };
 }
 
 export function groupedListToReviewPageInput(grouped: GroupedList): ReviewPageInput {
@@ -134,6 +167,15 @@ export function groupedListToReviewPageInput(grouped: GroupedList): ReviewPageIn
     }
     if (item.description !== undefined) {
       mapped.description = item.description;
+    }
+    if (item.status !== undefined) {
+      mapped.status = item.status;
+    }
+    if (item.priority !== undefined) {
+      mapped.priority = item.priority;
+    }
+    if (item.doc !== undefined) {
+      mapped.doc = item.doc;
     }
     return mapped;
   });
@@ -178,7 +220,7 @@ export async function listGroupedByProject(
   opts: TaskListOpts,
   fs: BoardFs,
 ): Promise<GroupedList> {
-  const tasks = await listTasks(repoPath, opts, fs);
+  const tasks = await listTasksWithDocs(repoPath, opts, fs);
   const requested = opts.projects ?? [];
   const ids =
     requested.length > 0

@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { TasksError } from "./types.js";
+import type { TaskDoc } from "./task-doc.js";
 
 export type ReviewPageGroup = {
   id: string;
@@ -15,6 +16,9 @@ export type ReviewPageItem = {
   title?: string;
   description?: string;
   note?: string;
+  status?: string;
+  priority?: string;
+  doc?: TaskDoc;
 };
 
 export type ReviewPageInput = {
@@ -105,7 +109,38 @@ function parseItem(raw: unknown, groupIds: Set<string>, seenStems: Set<string>):
   if (note !== undefined) {
     item.note = note;
   }
+  const status = optionalString(raw.status);
+  const priority = optionalString(raw.priority);
+  if (status !== undefined) {
+    item.status = status;
+  }
+  if (priority !== undefined) {
+    item.priority = priority;
+  }
+  if ("doc" in raw && raw.doc !== undefined) {
+    item.doc = parseReviewDoc(raw.doc);
+  }
   return item;
+}
+
+function parseReviewDoc(raw: unknown): TaskDoc {
+  if (!isPlainObject(raw)) {
+    fail("review-page doc must be an object");
+  }
+  if (typeof raw.name !== "string" || typeof raw.description !== "string" || typeof raw.body !== "string") {
+    fail("review-page doc requires name, description, and body strings");
+  }
+  if (!isPlainObject(raw.metadata)) {
+    fail("review-page doc.metadata must be an object");
+  }
+  const metadata: Record<string, string> = {};
+  for (const [key, value] of Object.entries(raw.metadata)) {
+    if (typeof value !== "string") {
+      fail(`review-page doc.metadata.${key} must be a string`);
+    }
+    metadata[key] = value;
+  }
+  return { name: raw.name, description: raw.description, metadata, body: raw.body };
 }
 
 export function parseReviewPageInput(raw: unknown): ReviewPageInput {
@@ -126,15 +161,44 @@ export function parseReviewPageInput(raw: unknown): ReviewPageInput {
   return { groups, items };
 }
 
-export function defaultReviewPageTemplatePath(): string {
-  return fileURLToPath(new URL("../project/assets/review-page.html", import.meta.url));
+export function defaultReviewPageAssetDir(): string {
+  return fileURLToPath(new URL("../project/assets/review-page/", import.meta.url));
 }
 
-export async function loadReviewPageTemplate(
+function missingAsset(abs: string): never {
+  fail(`review-page asset missing: ${abs} (run pnpm --filter edges-cli run build:tasks-review-app)`);
+}
+
+async function readAsset(
   readFile: (abs: string) => Promise<string>,
-  templatePath?: string,
+  abs: string,
 ): Promise<string> {
-  return readFile(templatePath ?? defaultReviewPageTemplatePath());
+  try {
+    return await readFile(abs);
+  } catch {
+    missingAsset(abs);
+  }
+}
+
+export async function loadBuiltReviewShell(
+  readFile: (abs: string) => Promise<string>,
+  assetDir?: string,
+): Promise<string> {
+  const dir = assetDir ?? defaultReviewPageAssetDir();
+  const html = await readAsset(readFile, path.join(dir, "index.html"));
+  const js = await readAsset(readFile, path.join(dir, "review.js"));
+  const css = await readAsset(readFile, path.join(dir, "review.css"));
+  const safeJs = js.replaceAll("</script", "<\\/script");
+  const safeCss = css.replaceAll("</style", "<\\/style");
+  return html
+    .replace(
+      /<script type="module"[^>]*><\/script>/,
+      () => `<script type="module">${safeJs}</script>`,
+    )
+    .replace(
+      /<link rel="stylesheet"[^>]*>/,
+      () => `<style type='text/css'>${safeCss}</style>`,
+    );
 }
 
 export function renderReviewPageHtml(input: ReviewPageInput, templateHtml: string): string {

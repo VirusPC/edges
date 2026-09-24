@@ -21,7 +21,7 @@ test("flat list is unchanged without --group-by", async () => {
       command: string;
       schema?: string;
       groups?: unknown;
-      tasks: Array<{ stem: string }>;
+      tasks: Array<{ stem: string; doc?: unknown }>;
     };
     assert.equal(body.status, "success");
     assert.equal(body.command, "list");
@@ -29,6 +29,7 @@ test("flat list is unchanged without --group-by", async () => {
     assert.equal(body.groups, undefined);
     assert.ok(Array.isArray(body.tasks));
     assert.equal(body.tasks.length, 1);
+    assert.equal("doc" in body.tasks[0]!, false);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -46,7 +47,14 @@ test("list --group-by project --format json emits edges.tasks.grouped/v1", async
       command: string;
       schema: string;
       groups: Array<{ id: string; title: string; description?: string }>;
-      items: Array<{ id?: string; stem?: string; group: string; title?: string; status?: string }>;
+      items: Array<{
+        id?: string;
+        stem?: string;
+        group: string;
+        title?: string;
+        status?: string;
+        doc?: { name?: string; body?: unknown; metadata: Record<string, string> };
+      }>;
       tasks?: unknown;
     };
     assert.equal(body.status, "success");
@@ -59,6 +67,10 @@ test("list --group-by project --format json emits edges.tasks.grouped/v1", async
     assert.equal(item?.group, "default");
     assert.equal(item?.title, "Alpha");
     assert.equal(item?.status, "todo");
+    assert.equal(item?.doc?.name !== undefined, true);
+    assert.equal(typeof item?.doc?.body, "string");
+    assert.equal(item?.doc?.metadata["edges-tasks-status"], "todo");
+    assert.equal("rawFrontmatter" in (item?.doc ?? {}), false);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }

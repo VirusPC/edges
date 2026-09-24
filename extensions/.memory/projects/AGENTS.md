@@ -9,5 +9,6 @@
 - [new_note 收成 extensions/clis/edges，MCP 保留](project_clis_from_mcp.md) — 改 note ingest、new-note MCP 或 clis 时：本地 agent 走 extensions/clis 的 edges note；git 在 CLI 的 TS 模块；MCP 子进程调 edges note；鉴权 flag 留在 note 上；JSON stdout。不要把 CLI 放仓库根。
 - [edges-cli 测试用 glob 而不是目录 test](project_clis_node_test_glob.md) — 跑 extensions/clis 测试时：Node 22 + tsx 下 `node --test --import tsx test` 会把 test/ 当成模块并找 test/index.json；用 './test/**/*.test.ts'。
 - [Node ESM + TS 相对导入写 .js](project_node_esm_ts_import_js.md) — 写 Node ESM TypeScript（nodenext、tsc 出 JS）时：相对 import 用 .js，不要写 .ts，也不要省略扩展名。
+- [审阅壳外观 2026-09-24 收口](project_review_shell_chrome_2026_09_24.md) — 改审阅壳外观或信息密度时打开：顶栏左侧是 Edges；项目悬停出 description；卡片以标题为主；空状态列不占宽；右栏是 Markdown 抽屉。不改 ADR 0022 交互。
 - [Skill 独立发版，changelog 按 skill 分](project_skill_independent_versioning.md) — 决定 changelog、tag、semver 粒度时：每个 skill 一份，不要 extensions/skills 总 changelog。
 <!-- project-memory-entries:end -->

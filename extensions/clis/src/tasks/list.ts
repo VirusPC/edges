@@ -17,8 +17,7 @@ FLAGS
   --format json          stdout format (always json)
   --json                          Write JSON to stdout (always on)
 
-Grouped stdout (${GROUPED_LIST_SCHEMA}) is { schema, groups[{id,title,description?}], items[{id|stem, group, title?, status?, …}] }.
-Without --group-by the envelope stays { status, command: "list", tasks: [...] }.
+Grouped stdout (edges.tasks.grouped/v1) is { schema, groups, items }. Items may include optional doc (name, description, metadata, body). Without --group-by the envelope stays { status, command: "list", tasks: [...] } and tasks do not include doc.
 
 EXAMPLES
   edges tasks list

@@ -111,3 +111,80 @@ test("groupedListToReviewPageInput maps group → current/suggested without rena
   assert.equal(page.items[0]?.suggested, "cli");
   assert.equal("schema" in page, false);
 });
+
+test("buildGroupedList copies doc and omits rawFrontmatter", () => {
+  const grouped = buildGroupedList(
+    [{
+      stem: "2026-09-21--alpha",
+      title: "Alpha",
+      status: "todo",
+      description: "first",
+      path: "knowledge/tasks/_default/todo/2026-09-21--alpha.md",
+      sidecarPath: "knowledge/tasks/_default/todo/.2026-09-21--alpha.log.md",
+      runCount: 0,
+      priority: "high",
+      project: "default",
+      doc: {
+        name: "alpha",
+        description: "first",
+        metadata: {
+          "edges-type": "task",
+          "edges-title": "Alpha",
+          "edges-tasks-status": "todo",
+          "edges-task-priority": "high",
+          "edges-task-assignee": "Ada",
+          "edges-updated-at": "2026-09-21T00:00:00.000Z",
+        },
+        body: "hello body",
+      },
+    }],
+    [{ id: "default", title: "Default", description: "ungrouped" }],
+  );
+  assert.equal(grouped.items[0]?.doc?.body, "hello body");
+  assert.equal(grouped.items[0]?.doc?.metadata["edges-task-assignee"], "Ada");
+  assert.equal("rawFrontmatter" in (grouped.items[0]?.doc ?? {}), false);
+});
+
+test("groupedListToReviewPageInput copies status, priority, and doc", () => {
+  const page = groupedListToReviewPageInput({
+    schema: "edges.tasks.grouped/v1",
+    groups: [{ id: "cli", title: "CLI" }],
+    items: [{
+      id: "2026-09-21--beta",
+      group: "cli",
+      title: "Beta",
+      status: "todo",
+      priority: "high",
+      doc: {
+        name: "beta",
+        description: "d",
+        metadata: { "edges-task-assignee": "Ada" },
+        body: "body",
+      },
+    }],
+  });
+  assert.equal(page.items[0]?.status, "todo");
+  assert.equal(page.items[0]?.priority, "high");
+  assert.equal(page.items[0]?.doc?.body, "body");
+  assert.equal(page.items[0]?.current, "cli");
+  assert.equal(page.items[0]?.suggested, "cli");
+  assert.equal("assignee" in page.items[0]!, false);
+});
+
+test("buildGroupedList omits doc when the caller has none", () => {
+  const grouped = buildGroupedList(
+    [{
+      stem: "2026-09-21--alpha",
+      title: "Alpha",
+      status: "todo",
+      description: "first",
+      path: "p",
+      sidecarPath: "s",
+      runCount: 0,
+      priority: "none",
+      project: "default",
+    }],
+    [{ id: "default", title: "Default" }],
+  );
+  assert.equal("doc" in grouped.items[0]!, false);
+});

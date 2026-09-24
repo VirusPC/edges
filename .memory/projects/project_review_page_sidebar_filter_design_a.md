@@ -1,6 +1,6 @@
 ---
 name: project_review_page_sidebar_filter_design_a
-description: 改 edges tasks project review-page 侧栏筛选外观时打开：选中 is-filter 用 accent 染色底+实线边；未选中 group 降 opacity 0.55–0.7（hover 可拉回）；is-over 外扩 outline，须和 is-filter 叠得开。只改 CSS，不改点击/拖放。用户 2026-09-17 选定 design A。
+description: 改审阅页左栏项目筛选外观时打开：选中用 accent 实线边加面板底；未选中 opacity 0.6（hover 拉回）；拖过时外扩 outline，须和选中边叠得开。类写在 ProjectColumn，不改点击或拖放。用户 2026-09-17 选定 design A。
 metadata:
   edges-title: 审阅页侧栏筛选用 design A（选中染色 + 未选变淡）
   edges-type: project
@@ -8,13 +8,13 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-18T03:57:57+00:00"
+  edges-updated-at: "2026-09-23T17:47:00+00:00"
 ---
 
-审阅页侧栏当前筛选用 design A：选中 `.group.is-filter` 用 accent 染色底 + 实线 accent 边；未选中 `.group` 降到 opacity 0.55–0.7（hover 可拉回 1）；拖放目标 `.group.is-over` 用外扩 outline，和 is-filter 叠在一起仍要分得清。
+审阅页左栏项目筛选用 design A：选中是 accent 实线边加面板底；未选中 opacity 0.6，hover 拉回 1；拖放悬停用外扩 outline，和选中边叠在一起仍要分得清。
 
 **Why:**
-2026-09-17 用户在 Cloud 任务里选定 design A（相对只改边框或不降未选项）。JS 已给活动筛选（含「全部」）切 `is-filter`，缺的是暗色主题下可读的选中态。后续改审阅页外观时不要重开 A/B。
+2026-09-17 用户选定 design A。2026-09-23 壳改成 React 后外观仍是这套，不要重开 A/B，也不要再改已删除的 `review-page.html`。
 
 **How to apply:**
-只改 `extensions/clis/src/tasks/project/assets/review-page.html` 的 CSS，不要改点击筛选或 pointer 拖放。暗色 token 是 `--accent #5b9fd4`、`--panel #1a2332`。`is-over` 用 `outline` + `outline-offset`，不要和选中实线边糊成一条。构建脚本 `copy-review-page-asset.mjs` 会把同一文件拷到 dist。
+改 `apps/tasks-review-app/src/components/ProjectColumn.tsx` 的 class。选中含 `border-solid border-[#5b9fd4] bg-[#1a2332] opacity-100`；未选中含 `opacity-60 hover:opacity-100`。悬停拖放目标加 `outline outline-2 outline-offset-[3px] outline-[#5b9fd4]`。不要改点击筛选或只改 project 的拖放。空状态列可以不渲染，那不是侧栏筛选。

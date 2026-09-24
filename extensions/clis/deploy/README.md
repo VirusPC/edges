@@ -6,9 +6,11 @@ This is generated HTML only. It is not Artifacts (`publish` / UUID / TTL) and no
 
 ## Generate (every deploy)
 
-After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs:
+After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs. The Vite output under `extensions/clis/src/tasks/project/assets/review-page/` is gitignored and must be built on the box before generate:
 
 ```bash
+pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...
+pnpm --filter tasks-review-app run build
 pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
   --out "$PWD/knowledge/tasks/_site/index.html"
 ```
@@ -20,7 +22,7 @@ pnpm --filter edges-cli exec -- tsx extensions/clis/scripts/generate-tasks-site.
   --out "$PWD/knowledge/tasks/_site/index.html"
 ```
 
-If `node_modules` is missing, `pnpm install --frozen-lockfile --filter edges-cli...` first. Output is gitignored (`knowledge/tasks/_site/`). A failed generate fails the Action; nginx keeps serving the last good `index.html` until the next success.
+If dependencies are missing, `pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...` then `pnpm --filter tasks-review-app run build`. The Vite files are gitignored and are not in the git checkout. Output HTML is gitignored (`knowledge/tasks/_site/`). A failed generate fails the Action; nginx keeps serving the last good `index.html` until the next success.
 
 The Action does **not** re-run nginx setup.
 

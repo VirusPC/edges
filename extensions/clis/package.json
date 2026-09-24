@@ -9,10 +9,13 @@
     "edges": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json && node ./scripts/copy-review-page-asset.mjs",
+    "build:tasks-review-app": "pnpm --filter tasks-review-app run build",
+    "build": "pnpm run build:tasks-review-app && tsc -p tsconfig.json && node ./scripts/copy-review-page-asset.mjs",
+    "prepack": "pnpm run build",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
-    "test": "node --test --import tsx './test/**/*.test.ts'"
+    "dev:tasks-review-app": "pnpm --filter tasks-review-app run dev",
+    "test": "pnpm run build:tasks-review-app && node --test --import tsx './test/**/*.test.ts'"
   },
   "engines": {
     "node": ">=20"
@@ -22,6 +25,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "tasks-review-app": "workspace:*",
     "@types/node": "^22.19.11",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
