@@ -8,7 +8,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-24T01:39:39+00:00"
+  edges-updated-at: "2026-09-24T01:42:08+00:00"
 ---
 
 2026-09-24 peng cheng 收口的审阅壳外观：最上面一条 navbar，左端是系统名 Edges；左栏项目悬停才展示该项目的 description；卡片以人读标题为主，文件名和时间降级；空状态列不占宽度；右栏是分开的 Markdown 抽屉。

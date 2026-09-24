@@ -8,7 +8,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-24T01:39:39+00:00"
+  edges-updated-at: "2026-09-24T01:42:07+00:00"
 ---
 
 审阅壳的全文搜索和优先级、负责人、状态筛选整组靠右，紧挨在「复制导出 JSON」前面。

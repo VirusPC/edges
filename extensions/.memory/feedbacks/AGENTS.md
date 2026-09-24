@@ -12,5 +12,7 @@
 - [接口层方案进 .memory，不进 docs](feedback_interface_plans_in_memory.md) — 写 extensions 层调研或技术方案时：进 .memory（reference/project），禁止放 extensions/docs 或 knowledge/projects，否则 ask 检索不到。
 - [不要加 edges-note shim 或根目录默认 ingest](feedback_no_edges_note_shim.md) — 改 edges-cli 的 bin、默认命令或兼容入口时：只保留 edges；禁止 edges-note 第二 bin / shim；根目录无子命令不得跑 note ingest。
 - [Restore --force 整份替换，不合并](feedback_restore_force_replaces.md) — 改 user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。
+- [审阅壳竖线只拖宽度](feedback_review_shell_dividers_resize_width.md) — 改审阅壳三栏分隔线或拖放时打开：两条竖线只调整左右栏宽度，不搬任务、不改状态。项目拖放仍只在左栏。2026-09-24 peng cheng 澄清。
+- [审阅壳筛选靠右、紧挨导出](feedback_review_shell_filters_before_export.md) — 改审阅壳顶栏筛选或复制导出 JSON 的位置时打开：全文和优先级、负责人、状态整组靠右，紧挨在导出按钮前面。系统名不在这一栏。
 - [改 skill 后必须升级 version、写 changelog、打 tag](feedback_skill_bump_version.md) — 更新 extensions/skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/<name>@<version> tag。
 <!-- project-memory-entries:end -->
