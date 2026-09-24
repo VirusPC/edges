@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- 完成标准改为开卡时可选：对话里定不清可整栏省略，注明待 `grill-with-docs` 再补；必填门闩只卡背景与目标（v1.1.0）。
 - 人审可为对话确认或 PR；落库所在分支是否新建不限。
 - 落库写入本技能步骤 6：交人审阅后，用户确认再用 `create` / `update`（及必要时 `status`）写盘。
 - 步骤 5 为交人审阅关卡；确认前不写盘。

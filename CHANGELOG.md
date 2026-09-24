@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- `conversation-to-tasks`：完成标准开卡时可选，可留到 `grill-with-docs` 再补；必填仅背景与目标。
+
+
 ### 笔记入库与能力面
 
 - 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 完成标准（动作可选）；栏名用中文。与笔记 / 记忆技能分工；只成文，不落库。
