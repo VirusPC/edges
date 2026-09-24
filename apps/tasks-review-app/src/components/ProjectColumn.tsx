@@ -16,7 +16,7 @@ export function ProjectColumn({
 }) {
   const topBar = { ...filter, projectId: "all" };
   return (
-    <nav className="min-h-0 overflow-auto bg-[#0f1419] p-2">
+    <nav data-review-projects="edges" className="w-full min-w-0 shrink-0 overflow-auto bg-[#0f1419] p-2 md:min-h-0">
       <p className="px-2.5 pb-1 pt-1 text-[11px] font-medium tracking-wide text-[#9aa8bc]">项目</p>
       <ProjectRow
         id="all"
