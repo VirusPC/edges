@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- 约束不再重复禁止写盘命令（开场「只成文不落库」与步骤 5 已覆盖）。
 - 压缩步骤前导言；正文不再写三角分工（分工留给 CONTEXT，本技能靠步骤 1 判项）。
 - 步骤收成五步：判是否任务 → 只读去重 → 必填门闩（不足先问）→ 按模板成文并建议归属 → 只交草稿。各栏写法从步骤里抽出，避免与模板、约束重复。
 
