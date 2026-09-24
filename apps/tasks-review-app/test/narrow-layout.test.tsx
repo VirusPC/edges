@@ -116,8 +116,10 @@ it("stacks the filter, board, and detail on a narrow viewport and scrolls betwee
   expect(document.querySelector("[data-review-shell]")?.className).toContain(
     "overflow-x-hidden"
   )
-  expect(board?.className).toContain("overflow-x-auto")
   expect(board?.className).toContain("max-w-full")
+  expect(document.querySelector("[data-status-columns]")?.className).toContain(
+    "overflow-x-auto"
+  )
 
   await user.click(screen.getByText("Alpha title"))
   expect(detail).toHaveProperty("hidden", false)

@@ -54,13 +54,15 @@ function prominence(className: string): { px: number; weight: number } {
   const fixed = className.match(/text-\[(\d+)px\]/)
   const px = fixed
     ? Number(fixed[1])
-    : className.includes("text-base")
-      ? 16
-      : className.includes("text-sm")
-        ? 14
-        : className.includes("text-xs")
-          ? 12
-          : 0
+    : className.includes("text-lg")
+      ? 18
+      : className.includes("text-base")
+        ? 16
+        : className.includes("text-sm")
+          ? 14
+          : className.includes("text-xs")
+            ? 12
+            : 0
   const weight = className.includes("font-semibold")
     ? 600
     : className.includes("font-medium")
@@ -81,34 +83,41 @@ async function titleClasses() {
   HTMLElement.prototype.scrollIntoView = () => {}
   const user = userEvent.setup()
   render(<App initialPayload={payload} />)
-  const projectTitle = screen.getByText("项目").className
+  const projectTitle =
+    document.querySelector("[data-section-title=projects]")?.className ?? ""
   const projectRow =
     document.querySelector("[data-project-id=cli]")?.className ?? ""
+  const tasksTitle =
+    document.querySelector("[data-section-title=tasks]")?.className ?? ""
   const columnTitle =
     document.querySelector("[data-status-column=todo] h2")?.className ?? ""
   const cardTitle =
     document.querySelector("[data-stem='2026-09-21--alpha'] span")?.className ??
     ""
   await user.click(screen.getByText("Alpha title"))
+  const detailsTitle =
+    document.querySelector("[data-section-title=details]")?.className ?? ""
   const detailTitle =
     document.querySelector("[data-markdown-pane] header p")?.className ?? ""
-  const detailHeader =
-    document.querySelector("[data-markdown-pane] header")?.className ?? ""
   const detailBody =
     document.querySelector("[data-markdown-pane] .markdown-body")?.className ??
     ""
   return {
     projectTitle,
     projectRow,
+    tasksTitle,
     columnTitle,
     cardTitle,
+    detailsTitle,
     detailTitle,
-    detailHeader,
     detailBody,
   }
 }
 
-function expectSectionDivider(className: string) {
+function expectChapterStrip(className: string) {
+  expect(className).toContain("text-lg")
+  expect(className).toContain("font-semibold")
+  expect(className).toContain("bg-[#1a2332]")
   expect(className).toContain("border-b")
   expect(className).toContain("border-[#334155]")
 }
@@ -120,15 +129,19 @@ it("keeps section titles larger and heavier than list and body text on both widt
   useViewport(390)
   const narrow = await titleClasses()
 
+  expect(screen.getAllByText("Projects").length).toBeGreaterThan(0)
+  expect(screen.getAllByText("Tasks").length).toBeGreaterThan(0)
+  expect(screen.getAllByText("Details").length).toBeGreaterThan(0)
   expect(narrow.projectTitle).toBe(desktop.projectTitle)
-  expect(narrow.columnTitle).toBe(desktop.columnTitle)
-  expect(narrow.detailTitle).toBe(desktop.detailTitle)
-  expect(narrow.detailHeader).toBe(desktop.detailHeader)
+  expect(narrow.tasksTitle).toBe(desktop.tasksTitle)
+  expect(narrow.detailsTitle).toBe(desktop.detailsTitle)
 
   expectTitleBeatsBody(desktop.projectTitle, desktop.projectRow)
+  expectTitleBeatsBody(desktop.tasksTitle, desktop.cardTitle)
+  expectTitleBeatsBody(desktop.detailsTitle, desktop.detailBody)
   expectTitleBeatsBody(desktop.columnTitle, desktop.cardTitle)
   expectTitleBeatsBody(desktop.detailTitle, desktop.detailBody)
-  expectSectionDivider(desktop.projectTitle)
-  expectSectionDivider(desktop.columnTitle)
-  expectSectionDivider(desktop.detailHeader)
+  expectChapterStrip(desktop.projectTitle)
+  expectChapterStrip(desktop.tasksTitle)
+  expectChapterStrip(desktop.detailsTitle)
 })

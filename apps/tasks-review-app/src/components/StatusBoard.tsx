@@ -31,8 +31,15 @@ export function StatusBoard({
     <div
       id="review-board"
       data-status-board="edges"
-      className="flex w-full min-w-0 max-w-full shrink-0 gap-3 overflow-x-auto bg-[#0f1419] p-3 md:min-h-0 md:overflow-auto"
+      className="flex w-full min-w-0 max-w-full shrink-0 flex-col bg-[#0f1419] md:h-full md:min-h-0 md:overflow-hidden"
     >
+      <h2
+        data-section-title="tasks"
+        className="shrink-0 border-b border-[#334155] bg-[#1a2332] px-3 py-2 text-lg font-semibold tracking-wide text-[#e7ecf3]"
+      >
+        Tasks
+      </h2>
+      <div data-status-columns="edges" className="flex min-h-0 w-full min-w-0 gap-3 overflow-x-auto p-3 md:flex-1 md:overflow-auto">
       {columns.map((column) => (
         <section key={column.status} data-status-column={column.status} className="flex w-72 shrink-0 flex-col gap-2">
           <ColumnHeader title={column.title} count={column.items.length} dot={statusDotClass(column.status)} />
@@ -66,6 +73,7 @@ export function StatusBoard({
       {visible.length === 0 ? (
         <p className="px-2 py-6 text-sm text-[#9aa8bc]">没有匹配的卡片</p>
       ) : null}
+      </div>
     </div>
   );
 }

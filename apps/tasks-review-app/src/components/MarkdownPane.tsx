@@ -12,17 +12,23 @@ export function MarkdownPane({ item, narrow }: { item?: ReviewItem; narrow: bool
       hidden={narrow && !item}
       className="flex w-full min-w-0 shrink-0 flex-col bg-[#121820] md:min-h-0"
     >
+      {narrow && item ? (
+        <button
+          type="button"
+          className="px-4 pt-3 text-left text-sm text-[#5b9fd4]"
+          onClick={() => document.getElementById("review-board")?.scrollIntoView({ block: "start" })}
+        >
+          回到看板
+        </button>
+      ) : null}
+      <h2
+        data-section-title="details"
+        className="border-b border-[#334155] bg-[#1a2332] px-3 py-2 text-lg font-semibold tracking-wide text-[#e7ecf3]"
+      >
+        Details
+      </h2>
       {item ? (
         <header className="border-b border-[#334155] px-4 py-3">
-          {narrow ? (
-            <button
-              type="button"
-              className="mb-2 text-sm text-[#5b9fd4]"
-              onClick={() => document.getElementById("review-board")?.scrollIntoView({ block: "start" })}
-            >
-              回到看板
-            </button>
-          ) : null}
           <p className="text-base font-semibold leading-snug text-[#e7ecf3]">{reviewItemTitle(item)}</p>
           <p className="mt-1 truncate font-mono text-[11px] text-[#9aa8bc]">{item.stem}</p>
         </header>
