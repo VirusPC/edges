@@ -18,6 +18,8 @@
 - [reference 的 description 必须带关键链接](feedback_description_must_include_urls.md) — 写或更新 .memory/references/* 时：description 与 REFERENCE.md 索引行必须带关键 URL，不能只写在正文 Links。缘起 https://github.com/VirusPC/edges/pull/45。
 - [知识闭环的反馈回到捕获](feedback_knowledge_loop_returns_to_capture.md) — 绘制或描述知识闭环时：反馈必须重新成为输入并回到捕获，不能绕过捕获直接进入生产或沉淀。
 - [不要再给本仓库装 OpenSpec](feedback_no_openspec.md) — 规划与决策写 .memory，禁止 openspec init 以及把 skill/command vendor 进仓库里的 agent 目录。
+- [审阅壳竖线只拖宽度](feedback_review_shell_dividers_resize_width.md) — 改审阅壳三栏分隔线或拖放时打开：两条竖线只调整左右栏宽度，不搬任务、不改状态。项目拖放仍只在左栏。2026-09-24 peng cheng 澄清。
+- [审阅壳筛选靠右、紧挨导出](feedback_review_shell_filters_before_export.md) — 改审阅壳顶栏筛选或复制导出 JSON 的位置时打开：全文和优先级、负责人、状态整组靠右，紧挨在导出按钮前面。系统名不在这一栏。
 - [teach 工作区放 knowledge/teaching，不放 .teaching](feedback_teach_workspace_location.md) — 为 teach 技能新建教学工作区时：一律放 knowledge/teaching/<topic>/ 并在 knowledge/teaching/README.md 登记；不要写到 .teaching/。
 - [断言仓库事实前先跑能证伪它的命令](feedback_verify_before_asserting.md) — 汇报仓库、git 历史或工具行为的事实时：先跑验证命令，别把推断说成查过的。工具输出的显示形态不等于文件内容。
 <!-- project-memory-entries:end -->
