@@ -1,35 +1,118 @@
-import { useDroppable } from "@dnd-kit/core";
-import { useState } from "react";
-import { matchesReviewFilter, type ReviewFilter, type ReviewItem } from "../filter.ts";
-import type { ReviewGroup } from "../types.ts";
+import { useDroppable } from "@dnd-kit/core"
+import { useState } from "react"
+import {
+  matchesReviewFilter,
+  type ReviewFilter,
+  type ReviewItem,
+} from "../filter.ts"
+import type { ReviewGroup } from "../types.ts"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "./ui/select.tsx"
+
+function projectChoiceLabel(title: string, count: number): string {
+  return `${title} · ${count}`
+}
 
 export function ProjectColumn({
   groups,
   items,
   filter,
+  narrow,
   onSelect,
 }: {
-  groups: ReviewGroup[];
-  items: ReviewItem[];
-  filter: ReviewFilter;
-  onSelect: (projectId: string) => void;
+  groups: ReviewGroup[]
+  items: ReviewItem[]
+  filter: ReviewFilter
+  narrow: boolean
+  onSelect: (projectId: string) => void
 }) {
-  const topBar = { ...filter, projectId: "all" };
+  const topBar = { ...filter, projectId: "all" }
+  const allCount = items.filter((item) =>
+    matchesReviewFilter(item, topBar)
+  ).length
+  const choices = [
+    { id: "all", title: "全部", count: allCount },
+    ...groups.map((group) => ({
+      id: group.id,
+      title: group.title,
+      count: items.filter((item) =>
+        matchesReviewFilter(item, { ...filter, projectId: group.id })
+      ).length,
+    })),
+  ]
+  const selected =
+    choices.find((choice) => choice.id === filter.projectId) ?? choices[0]
   return (
-    <nav data-review-projects="edges" className="w-full min-w-0 shrink-0 overflow-auto bg-[#0f1419] p-2 md:min-h-0">
+    <nav
+      data-review-projects="edges"
+      className="w-full min-w-0 shrink-0 overflow-auto bg-[#0f1419] p-2 md:min-h-0"
+    >
       <h2
         data-section-title="projects"
         className="-mx-2 -mt-2 mb-2 border-b border-[#334155] bg-[#1a2332] px-3 py-2 text-lg font-semibold tracking-wide text-[#e7ecf3]"
       >
         Projects
       </h2>
+      {narrow ? (
+        <Select value={filter.projectId} onValueChange={onSelect}>
+          <SelectTrigger
+            data-project-select="edges"
+            aria-label="项目"
+            className="mb-1 h-9 w-full bg-[#1a2332]"
+          >
+            <span className="truncate">
+              {selected
+                ? projectChoiceLabel(selected.title, selected.count)
+                : "全部 · 0"}
+            </span>
+          </SelectTrigger>
+          <SelectContent>
+            {choices.map((choice) => (
+              <SelectItem key={choice.id} value={choice.id}>
+                {projectChoiceLabel(choice.title, choice.count)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      ) : (
+        <ProjectList
+          groups={groups}
+          items={items}
+          filter={filter}
+          allCount={allCount}
+          onSelect={onSelect}
+        />
+      )}
+    </nav>
+  )
+}
+
+function ProjectList({
+  groups,
+  items,
+  filter,
+  allCount,
+  onSelect,
+}: {
+  groups: ReviewGroup[]
+  items: ReviewItem[]
+  filter: ReviewFilter
+  allCount: number
+  onSelect: (projectId: string) => void
+}) {
+  return (
+    <div data-project-list="edges">
       <ProjectRow
         id="all"
         title="全部"
         description=""
         droppable="0"
         selected={filter.projectId === "all"}
-        count={items.filter((item) => matchesReviewFilter(item, topBar)).length}
+        count={allCount}
         onSelect={onSelect}
       />
       {groups.map((group) => (
@@ -39,30 +122,36 @@ export function ProjectColumn({
           title={group.title}
           description={group.description ?? ""}
           selected={filter.projectId === group.id}
-          count={items.filter((item) => matchesReviewFilter(item, { ...filter, projectId: group.id })).length}
+          count={
+            items.filter((item) =>
+              matchesReviewFilter(item, { ...filter, projectId: group.id })
+            ).length
+          }
           onSelect={onSelect}
         />
       ))}
-    </nav>
-  );
+    </div>
+  )
 }
 
 function projectRowClass(selected: boolean, over = false): string {
   const layout =
-    "group mb-1 flex w-full items-start justify-between gap-3 rounded-lg border px-2.5 py-2 text-left text-sm text-[#e7ecf3]";
+    "group mb-1 flex w-full items-start justify-between gap-3 rounded-lg border px-2.5 py-2 text-left text-sm text-[#e7ecf3]"
   const state = selected
     ? "border-solid border-[#5b9fd4] bg-[#1a2332] opacity-100"
-    : "border-transparent opacity-60 hover:opacity-100";
-  const overClass = over ? " outline outline-2 outline-offset-[3px] outline-[#5b9fd4]" : "";
-  return `${layout} ${state}${overClass}`;
+    : "border-transparent opacity-60 hover:opacity-100"
+  const overClass = over
+    ? " outline outline-2 outline-offset-[3px] outline-[#5b9fd4]"
+    : ""
+  return `${layout} ${state}${overClass}`
 }
 
 function CountBadge({ count }: { count: number }) {
   return (
-    <span className="shrink-0 rounded-full bg-[#0f1419] px-2 py-0.5 text-xs tabular-nums text-[#9aa8bc]">
+    <span className="shrink-0 rounded-full bg-[#0f1419] px-2 py-0.5 text-xs text-[#9aa8bc] tabular-nums">
       {count}
     </span>
-  );
+  )
 }
 
 function ProjectDropRow({
@@ -73,15 +162,15 @@ function ProjectDropRow({
   count,
   onSelect,
 }: {
-  id: string;
-  title: string;
-  description: string;
-  selected: boolean;
-  count: number;
-  onSelect: (projectId: string) => void;
+  id: string
+  title: string
+  description: string
+  selected: boolean
+  count: number
+  onSelect: (projectId: string) => void
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `project:${id}` });
-  const [open, setOpen] = useState(false);
+  const { setNodeRef, isOver } = useDroppable({ id: `project:${id}` })
+  const [open, setOpen] = useState(false)
   return (
     <button
       type="button"
@@ -98,21 +187,31 @@ function ProjectDropRow({
       <ProjectLabel title={title} description={description} open={open} />
       <CountBadge count={count} />
     </button>
-  );
+  )
 }
 
-function ProjectLabel({ title, description, open }: { title: string; description: string; open: boolean }) {
-  const text = description.trim();
+function ProjectLabel({
+  title,
+  description,
+  open,
+}: {
+  title: string
+  description: string
+  open: boolean
+}) {
+  const text = description.trim()
   return (
     <span className="min-w-0 flex-1">
       <span className="block truncate">{title}</span>
       {text !== "" ? (
-        <span className={`${open ? "mt-1 block" : "hidden"} text-xs leading-snug font-normal whitespace-normal text-[#9aa8bc]`}>
+        <span
+          className={`${open ? "mt-1 block" : "hidden"} text-xs leading-snug font-normal whitespace-normal text-[#9aa8bc]`}
+        >
           {text}
         </span>
       ) : null}
     </span>
-  );
+  )
 }
 
 function ProjectRow({
@@ -124,15 +223,15 @@ function ProjectRow({
   count,
   onSelect,
 }: {
-  id: string;
-  title: string;
-  description: string;
-  droppable: "0" | "1";
-  selected: boolean;
-  count: number;
-  onSelect: (projectId: string) => void;
+  id: string
+  title: string
+  description: string
+  droppable: "0" | "1"
+  selected: boolean
+  count: number
+  onSelect: (projectId: string) => void
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false)
   return (
     <button
       type="button"
@@ -147,5 +246,5 @@ function ProjectRow({
       <ProjectLabel title={title} description={description} open={open} />
       <CountBadge count={count} />
     </button>
-  );
+  )
 }

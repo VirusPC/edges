@@ -118,6 +118,9 @@ it("stacks the filter, board, and detail on a narrow viewport and scrolls betwee
   )
   expect(board?.className).toContain("max-w-full")
   expect(document.querySelector("[data-status-columns]")?.className).toContain(
+    "flex-col"
+  )
+  expect(document.querySelector("[data-status-columns]")?.className).not.toContain(
     "overflow-x-auto"
   )
 
@@ -145,7 +148,7 @@ it("keeps the desktop three-column shell and hides the narrow back control", () 
     "[data-review-columns=edges]"
   ) as HTMLElement
   expect(columns.style.gridTemplateColumns.startsWith("240px")).toBe(true)
-  expect(columns.style.gridTemplateColumns.endsWith("380px")).toBe(true)
+  expect(columns.style.gridTemplateColumns.endsWith("220px")).toBe(true)
   expect(document.querySelector("[data-panel-resize=left]")).not.toBeNull()
   expect(document.querySelector("[data-panel-resize=right]")).not.toBeNull()
   expect(document.querySelector("[data-markdown-pane]")).toHaveProperty(

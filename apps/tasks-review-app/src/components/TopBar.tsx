@@ -1,48 +1,88 @@
-import { itemAssignee, type ReviewFilter, type ReviewItem } from "../filter.ts";
-import { exportReviewRows } from "../export.ts";
-import { REVIEW_PRIORITIES, REVIEW_STATUS_COLUMNS } from "../statuses.ts";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState } from "react"
+import { itemAssignee, type ReviewFilter, type ReviewItem } from "../filter.ts"
+import { statusLabel } from "../display.ts"
+import { exportReviewRows } from "../export.ts"
+import { REVIEW_PRIORITIES, REVIEW_STATUS_COLUMNS } from "../statuses.ts"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 
-const ALL_ASSIGNEE = "__all__";
+const ALL_ASSIGNEE = "__all__"
 
-export function TopBar({
+function copyExport(items: ReviewItem[]) {
+  const text = JSON.stringify(exportReviewRows(items), null, 2)
+  const write = navigator.clipboard?.writeText(text)
+  if (write === undefined) {
+    console.log(text)
+    return
+  }
+  void write.catch(() => {
+    console.log(text)
+  })
+}
+
+function FilterFields({
   items,
   filter,
   onChange,
+  stacked = false,
+  portalContainer = null,
 }: {
-  items: ReviewItem[];
-  filter: ReviewFilter;
-  onChange: (next: ReviewFilter) => void;
+  items: ReviewItem[]
+  filter: ReviewFilter
+  onChange: (next: ReviewFilter) => void
+  stacked?: boolean
+  portalContainer?: HTMLElement | null
 }) {
-  const assignees = [...new Set(items.map(itemAssignee).filter((name) => name !== ""))].sort((a, b) =>
-    a.localeCompare(b),
-  );
+  const assignees = [
+    ...new Set(items.map(itemAssignee).filter((name) => name !== "")),
+  ].sort((a, b) => a.localeCompare(b))
+  const triggerClass = stacked ? "w-full bg-[#1a2332]" : "bg-[#1a2332]"
   return (
-    <header className="flex min-w-0 items-center overflow-x-hidden border-b border-[#334155] bg-[#0f1419] px-3 py-2.5">
-      <div className="ml-auto flex min-w-0 max-w-full flex-wrap items-center justify-end gap-2">
+    <>
       <Input
         data-filter="q"
         value={filter.q}
         placeholder="全文"
-        className="h-8 w-64 max-w-full shrink-0 bg-[#1a2332]"
+        className={
+          stacked
+            ? "h-8 w-full bg-[#1a2332]"
+            : "h-8 w-64 max-w-full shrink-0 bg-[#1a2332]"
+        }
         onChange={(event) => onChange({ ...filter, q: event.target.value })}
       />
       <Select
         value={filter.priority}
-        onValueChange={(priority) => onChange({ ...filter, priority: priority as ReviewFilter["priority"] })}
+        onValueChange={(priority) =>
+          onChange({
+            ...filter,
+            priority: priority as ReviewFilter["priority"],
+          })
+        }
       >
-        <SelectTrigger data-filter="priority" size="sm" className="bg-[#1a2332]">
+        <SelectTrigger
+          data-filter="priority"
+          size="sm"
+          className={triggerClass}
+        >
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent container={portalContainer}>
           <SelectItem value="all">全部优先级</SelectItem>
           {REVIEW_PRIORITIES.map((priority) => (
             <SelectItem key={priority} value={priority}>
@@ -54,13 +94,20 @@ export function TopBar({
       <Select
         value={filter.assignee === "" ? ALL_ASSIGNEE : filter.assignee}
         onValueChange={(assignee) =>
-          onChange({ ...filter, assignee: assignee === ALL_ASSIGNEE ? "" : assignee })
+          onChange({
+            ...filter,
+            assignee: assignee === ALL_ASSIGNEE ? "" : assignee,
+          })
         }
       >
-        <SelectTrigger data-filter="assignee" size="sm" className="bg-[#1a2332]">
+        <SelectTrigger
+          data-filter="assignee"
+          size="sm"
+          className={triggerClass}
+        >
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent container={portalContainer}>
           <SelectItem value={ALL_ASSIGNEE}>全部负责人</SelectItem>
           {assignees.map((assignee) => (
             <SelectItem key={assignee} value={assignee}>
@@ -71,16 +118,18 @@ export function TopBar({
       </Select>
       <Select
         value={filter.status}
-        onValueChange={(status) => onChange({ ...filter, status: status as ReviewFilter["status"] })}
+        onValueChange={(status) =>
+          onChange({ ...filter, status: status as ReviewFilter["status"] })
+        }
       >
-        <SelectTrigger data-filter="status" size="sm" className="bg-[#1a2332]">
+        <SelectTrigger data-filter="status" size="sm" className={triggerClass}>
           <SelectValue />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent container={portalContainer}>
           <SelectItem value="all">全部状态</SelectItem>
           {REVIEW_STATUS_COLUMNS.map((status) => (
             <SelectItem key={status} value={status}>
-              {status}
+              {statusLabel(status)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -91,21 +140,83 @@ export function TopBar({
         size="sm"
         data-action="copy-json"
         className="border-[#334155] bg-[#1a2332] text-[#e7ecf3] hover:bg-[#243044]"
-        onClick={() => {
-          const text = JSON.stringify(exportReviewRows(items), null, 2);
-          const write = navigator.clipboard?.writeText(text);
-          if (write === undefined) {
-            console.log(text);
-            return;
-          }
-          void write.catch(() => {
-            console.log(text);
-          });
-        }}
+        onClick={() => copyExport(items)}
       >
         复制导出 JSON
       </Button>
+    </>
+  )
+}
+
+export function TopBar({
+  items,
+  filter,
+  onChange,
+  narrow,
+}: {
+  items: ReviewItem[]
+  filter: ReviewFilter
+  onChange: (next: ReviewFilter) => void
+  narrow: boolean
+}) {
+  const [sheetEl, setSheetEl] = useState<HTMLDivElement | null>(null)
+  if (narrow) {
+    return (
+      <div className="ml-auto flex items-center">
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              data-action="open-filters"
+              className="border-[#334155] bg-[#1a2332] text-[#e7ecf3] hover:bg-[#243044]"
+            >
+              筛选
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            ref={setSheetEl}
+            data-filter-sheet=""
+            onInteractOutside={(event) => {
+              const target = event.target
+              if (
+                target instanceof Element &&
+                target.closest("[data-slot=select-content]")
+              ) {
+                event.preventDefault()
+              }
+            }}
+          >
+            <SheetHeader>
+              <SheetTitle>筛选</SheetTitle>
+              <SheetClose
+                aria-label="关闭筛选"
+                className="rounded-md px-2 py-1 text-sm text-[#9aa8bc] hover:bg-[#243044] hover:text-[#e7ecf3]"
+              >
+                关闭
+              </SheetClose>
+            </SheetHeader>
+            <SheetDescription>
+              全文、优先级、负责人和状态。导出 JSON 也在这里。
+            </SheetDescription>
+            <div className="flex flex-col gap-2">
+              <FilterFields
+                items={items}
+                filter={filter}
+                onChange={onChange}
+                stacked
+                portalContainer={sheetEl}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
-    </header>
-  );
+    )
+  }
+  return (
+    <div className="ml-auto flex max-w-full min-w-0 flex-wrap items-center justify-end gap-2">
+      <FilterFields items={items} filter={filter} onChange={onChange} />
+    </div>
+  )
 }
