@@ -4,9 +4,9 @@ description: 现有 review-page 不够用；改造成顶栏 filter + 左 project
 metadata:
   edges-type: task
   edges-title: review-page 改造（三列布局 + 顶栏 filter）
-  edges-tasks-status: in_review
+  edges-tasks-status: done
   edges-task-project: agent-clients-ux
-  edges-updated-at: "2026-09-23T17:21:42.254Z"
+  edges-updated-at: "2026-09-24T02:02:02.053Z"
   edges-task-assignee: Coding 专家
   edges-task-assignee-id: 099e84df-06c3-4c5d-9e29-fc255dce3d56
 ---
