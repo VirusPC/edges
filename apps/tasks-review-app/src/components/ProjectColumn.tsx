@@ -17,7 +17,12 @@ export function ProjectColumn({
   const topBar = { ...filter, projectId: "all" };
   return (
     <nav data-review-projects="edges" className="w-full min-w-0 shrink-0 overflow-auto bg-[#0f1419] p-2 md:min-h-0">
-      <p className="px-2.5 pb-1 pt-1 text-[11px] font-medium tracking-wide text-[#9aa8bc]">项目</p>
+      <h2
+        data-section-title="projects"
+        className="-mx-2 -mt-2 mb-2 border-b border-[#334155] bg-[#1a2332] px-3 py-2 text-lg font-semibold tracking-wide text-[#e7ecf3]"
+      >
+        Projects
+      </h2>
       <ProjectRow
         id="all"
         title="全部"
