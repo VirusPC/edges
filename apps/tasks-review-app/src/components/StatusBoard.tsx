@@ -72,12 +72,12 @@ export function StatusBoard({
 
 function ColumnHeader({ title, count, dot }: { title: string; count: number; dot: string }) {
   return (
-    <h2 className="sticky top-0 flex items-center justify-between gap-2 bg-[#0f1419] px-1 py-1 text-xs font-medium text-[#9aa8bc]">
+    <h2 className="sticky top-0 flex items-center justify-between gap-2 bg-[#0f1419] px-1 py-1 text-base font-semibold tracking-wide text-[#9aa8bc]">
       <span className="flex items-center gap-2">
         <span className={`size-1.5 rounded-full ${dot}`} />
         {title}
       </span>
-      <span className="rounded-full bg-[#1a2332] px-2 py-0.5 tabular-nums text-[#e7ecf3]">{count}</span>
+      <span className="rounded-full bg-[#1a2332] px-2 py-0.5 text-xs font-medium tabular-nums text-[#e7ecf3]">{count}</span>
     </h2>
   );
 }

@@ -23,7 +23,7 @@ export function MarkdownPane({ item, narrow }: { item?: ReviewItem; narrow: bool
               回到看板
             </button>
           ) : null}
-          <p className="text-sm font-medium leading-snug text-[#e7ecf3]">{reviewItemTitle(item)}</p>
+          <p className="text-base font-semibold leading-snug text-[#e7ecf3]">{reviewItemTitle(item)}</p>
           <p className="mt-1 truncate font-mono text-[11px] text-[#9aa8bc]">{item.stem}</p>
         </header>
       ) : (
