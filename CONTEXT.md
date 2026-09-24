@@ -225,8 +225,8 @@ classifyTasks、proposeTypes、本地 `edges tasks project review-page` 与 `/ta
 _避免使用_：把它当 Task Project、当分类算法、`--mode`、把它当 Artifacts 预览服务、让 review-page 负责发布、把它当成 `/tasks/` 站点本身、status station、按用途再拆一壳
 
 **审阅壳（Review Shell）**：
-Task Project 审阅页这一份交互界面。仓库只留下源码和构建管线：源码在仓根 `apps/tasks-review-app/`（包名 `tasks-review-app`，与 CLI 分开，`apps/` 可再放别的预构建壳），产物在 `extensions/clis/src/tasks/project/assets/review-page/`（`index.html`、`review.js`、`review.css`）且不入库，由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成。Vite 把产物写进 CLI 那份目录；`review-page.ts` 只读产物，不读 `apps/` 源码。写出的页把预构建 JS/CSS 内联成一份 HTML，数据是页内 JSON script `#edges-review-payload`。导航是 hash 或 hash 上的 query，同一份产物用于 `file://`、Artifacts 与 `/tasks/`。左栏是 Task Project：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。
-_避免使用_：三套页面、status station、本轮在中栏改状态、把语义检索算进这份壳、用另一套看板产品充当 Task 的领域模型、在用户机器上现编这份壳、把预构建产物提交进 git、默认用 zip+base64 装载荷、path history、靠服务器 rewrite 的 react-router
+Task Project 审阅页这一份交互界面。仓库只留下源码和构建管线：源码在仓根 `apps/tasks-review-app/`（包名 `tasks-review-app`，与 CLI 分开，`apps/` 可再放别的预构建壳），产物在 `extensions/clis/src/tasks/project/assets/review-page/`（`index.html`、`review.js`、`review.css`）且不入库，由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成。Vite 把产物写进 CLI 那份目录；`review-page.ts` 只读产物，不读 `apps/` 源码。写出的页把预构建 JS/CSS 内联成一份 HTML，数据是页内 JSON script `#edges-review-payload`。导航是 hash 或 hash 上的 query，同一份产物用于 `file://`、Artifacts 与 `/tasks/`。左栏是 Task Project：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。视口不窄于 Tailwind `md`（`≥768px`）时仍是这一套三栏。窄于 `md` 时同一壳改成纵向长滚动：项目筛选区、状态板，点卡片后详情接在状态板下方，仍在同一页里滚动。每张任务卡都有「移到项目…」，桌面与窄屏都能把卡片改到另一个 Task Project；这只改页内 JSON，写回仍是 Copy JSON。桌面左栏拖放还在。
+_避免使用_：三套页面、status station、本轮在中栏改状态、把语义检索算进这份壳、用另一套看板产品充当 Task 的领域模型、在用户机器上现编这份壳、把预构建产物提交进 git、默认用 zip+base64 装载荷、path history、靠服务器 rewrite 的 react-router、窄屏只做抽屉、底栏分页、左右滑页、窄屏另做一壳、窄屏在状态列上改状态
 
 **`/tasks/` 持久看板站**：
 固定公网路径 `/tasks/` 上的持久入口，始终反映 main 看板；部署链从看板生成分组列表，经薄映射喂给同一审阅壳。页内文档来自分组条目嵌入的 Task Doc。不是新的 status station 产品，也不是 Artifacts 短 TTL 预览。
