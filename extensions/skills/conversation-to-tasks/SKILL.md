@@ -1,36 +1,53 @@
 ---
 name: conversation-to-tasks
-description: 从对话抽出「谁下一步做什么、怎样算做完」的 Task 草稿（含【背景/场景】、交付物/完成标准、非目标、链接）。只整理成文，不落库。需要复盘四栏笔记时改用 conversation-to-notes；需要耐久结论（一句结论→Why→How）时改用 project-memory-remember。
+description: 把对话整理成 Task 草稿（背景、交付标准、非目标、关联）。只成文，不落库。复盘笔记用 conversation-to-notes；耐久结论用 project-memory-remember。
 version: 1.0.0
 ---
 
-# conversation-to-tasks
+把对话里「谁下一步做什么、怎样算做完」整理成可贴进看板的 Task 草稿。
 
-从对话抽出可执行工作项：谁下一步做什么、怎样算做完。本 skill **只整理成文，不在这里落库**；落库是另一步。
+本 skill **只整理成文，不落库**。写入看板是另一步（例如之后调用 `edges tasks create` / `update`）。这与 `conversation-to-notes` 对称：笔记 skill 也不负责把笔记写进仓库。
 
-与另两角分工（勿合并）：
+## 和另外两角怎么分
 
-| Skill | 产出 |
-| --- | --- |
-| `conversation-to-notes` | 复盘四栏笔记（【背景】【过程】【所学】【行动指南】） |
-| `project-memory-remember` | 耐久结论（一句结论 → **Why:** → **How to apply:**） |
-| `conversation-to-tasks`（本 skill） | Task 草稿：场景 + 交付/完成标准 + 非目标 |
+同一段对话可能拆出三类产物，不要揉成一张：
+
+| Skill | 回答的问题 | 产物 |
+| --- | --- | --- |
+| `conversation-to-notes` | 这次对话澄清了什么？ | 复盘四栏笔记 |
+| `project-memory-remember` | 以后还该记住什么？ | 耐久结论（结论 → Why → How） |
+| `conversation-to-tasks`（本 skill） | 谁接下来做什么、怎样算完？ | Task 草稿 |
+
+拿不准时：没有可指派的下一步、也没有完成标准 → 不要硬开 Task，改走 notes 或 remember。
 
 ## 什么时候用
 
-- 对话里出现了要跟人/Agent 接力的下一步，需要写成看板 Task 形状。
-- 不要用它写复盘笔记或沉淀记忆；那些走上面两角。
-- 不要手写 `knowledge/tasks/`，也不要在本 skill 里调 `edges tasks create`。
+- 对话里已经出现可接力的下一步，需要写成看板 Task 的形状。
+- 需要把「为何此刻出现」写清楚，避免读者只看到边界与做法、猜不出场景。
+
+## 什么时候不用
+
+- 只要复盘或沉淀记忆 → 用 `conversation-to-notes` / `project-memory-remember`。
+- 要把草稿写入 `knowledge/tasks/` → 不在本 skill 里做，交给落库步骤。
+
+## 输入
+
+- 原始对话（或足够完整的摘要）
+- 可选：已知相关 PR、笔记路径、已有 Task stem
 
 ## 步骤
 
-1. **抽取。** 从对话抽出可行动项；一条对话可产生多条或零条。若实质是笔记或耐久结论，改派 `conversation-to-notes` / `project-memory-remember`，不要硬开 Task。
-2. **去重（只读）。** 可选：用 `edges tasks list`（或 `get <stem>`）扫已有看板；若已有开放 Task 覆盖同一意图，在输出里建议 `update` 该 stem，不要再造近义新建。
-3. **正文形状。** 每条必须有：【背景/场景】（为何此刻出现、出自哪次对话/PR/笔记）、交付物 / 完成标准、非目标、链接（PR、笔记、兄弟 backlog）。`**Why:**` / `**How to apply:**` 可保留，只作边界与做法，**不能代替场景**。
-4. **归属建议。** 用 `edges tasks project list` 选已有 Task Project（不要自造 slug，除非先问人）；默认 `backlog`；未点名负责人则不写 assignee。
-5. **只输出草稿。** 交 title、description、建议的 project/status、以及正文；等人或后续落库步骤入库。报告建议路径即可，不写盘。
+1. **抽取工作项。** 从对话里列出可行动项；一条对话可以整理出多条、一条，或零条。若实质是笔记或耐久结论，改派对应 skill，不要硬开 Task。
+2. **只读去重（可选）。** 用 `edges tasks list` / `edges tasks get <stem>` 查看开放任务。若已有 Task 覆盖同一意图，在输出里建议更新该 stem，不要近义新建。
+3. **写正文。** 每条必须包含下面四块；缺一块就补全，或明确写「无」。
+   - **【背景/场景】**：为何此刻出现，出自哪次对话、PR 或笔记。后面的 Why / How 不能代替这一块。
+   - **交付物 / 完成标准**：交什么，怎样算做完。
+   - **非目标**：明确不做的事。
+   - **关联**：相关 PR、笔记、兄弟 backlog。
+4. **建议归属。** 用 `edges tasks project list` 选已有项目，不要自造 slug（除非先问人）。默认状态 `backlog`。对话未点名负责人则不写 assignee。
+5. **只交草稿。** 输出标题、正文、建议的 project / status；可以说明「若落库大致会是哪条路径」，但 **不要写盘**，也不要调用 `create` / `update` / `status`。
 
-## 正文模板（短）
+## 正文模板
 
 ```markdown
 <一句话：解决什么 + 怎样算完>
@@ -44,18 +61,16 @@ version: 1.0.0
 非目标
 - …
 
-链接
+关联
 - …
-
-**Why:**（可选，边界）
-…
-
-**How to apply:**（可选，做法）
-…
 ```
 
-## 禁止
+需要时可以在文末加简短的 **Why**（边界）和 **How to apply**（做法）。它们是补充，不能替换【背景/场景】。
 
-- 不要 `mkdir` / 手改 `knowledge/tasks/`。
-- 不要在本 skill 流程里调用 `edges tasks create|update|status` 写盘（list/get/project list 只读去重与选 project 可以）。
-- 不要把复盘四栏或记忆结论塞进 Task 顶替【背景/场景】。
+## 约束
+
+- 输出使用中文；写给人审阅，用白话完整句。
+- 不添加对话里没有的新需求。
+- 禁止手改 `knowledge/tasks/`；禁止在本 skill 流程里调用写盘命令（`create` / `update` / `status`）。
+- `list` / `get` / `project list` 仅用于去重与选项目。
+- 不要把复盘四栏或记忆结论塞进 Task，顶替【背景/场景】。
