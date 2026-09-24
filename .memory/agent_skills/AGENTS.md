@@ -9,6 +9,7 @@
 <!-- project-memory-entries:start -->
 - [brainstorming](../../.agents/skills/brainstorming/SKILL.md) — You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation.
 - [conversation-to-notes](../../.agents/skills/conversation-to-notes/SKILL.md) — 将原始对话记录整理为结构清晰的中文笔记摘要。使用复盘四栏（背景→过程→所学→行动指南），灵感来自 After Action Review，但不是官方 AAR 模板。含补充说明（相关链接写入该栏并附简短说明）。
+- [conversation-to-tasks](../../.agents/skills/conversation-to-tasks/SKILL.md) — 把对话整理成任务（背景 → 目标 → 完成标准；动作可选）。必填不足先提问；成文后交人审（对话确认或 PR），再用 CLI 落库。分支是否新建不限。
 - [domain-modeling](../../.agents/skills/domain-modeling/SKILL.md) — Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording or editing an ADR.
 - [edges-note](../../.agents/skills/edges-note/SKILL.md) — 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 `edges note`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
 - [executing-plans](../../.agents/skills/executing-plans/SKILL.md) — Use when you have a written implementation plan to execute in a separate session with review checkpoints
