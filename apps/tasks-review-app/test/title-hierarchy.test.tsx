@@ -92,6 +92,8 @@ async function titleClasses() {
   await user.click(screen.getByText("Alpha title"))
   const detailTitle =
     document.querySelector("[data-markdown-pane] header p")?.className ?? ""
+  const detailHeader =
+    document.querySelector("[data-markdown-pane] header")?.className ?? ""
   const detailBody =
     document.querySelector("[data-markdown-pane] .markdown-body")?.className ??
     ""
@@ -101,8 +103,14 @@ async function titleClasses() {
     columnTitle,
     cardTitle,
     detailTitle,
+    detailHeader,
     detailBody,
   }
+}
+
+function expectSectionDivider(className: string) {
+  expect(className).toContain("border-b")
+  expect(className).toContain("border-[#334155]")
 }
 
 it("keeps section titles larger and heavier than list and body text on both widths", async () => {
@@ -115,8 +123,12 @@ it("keeps section titles larger and heavier than list and body text on both widt
   expect(narrow.projectTitle).toBe(desktop.projectTitle)
   expect(narrow.columnTitle).toBe(desktop.columnTitle)
   expect(narrow.detailTitle).toBe(desktop.detailTitle)
+  expect(narrow.detailHeader).toBe(desktop.detailHeader)
 
   expectTitleBeatsBody(desktop.projectTitle, desktop.projectRow)
   expectTitleBeatsBody(desktop.columnTitle, desktop.cardTitle)
   expectTitleBeatsBody(desktop.detailTitle, desktop.detailBody)
+  expectSectionDivider(desktop.projectTitle)
+  expectSectionDivider(desktop.columnTitle)
+  expectSectionDivider(desktop.detailHeader)
 })
