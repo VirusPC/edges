@@ -4,12 +4,12 @@ description: conversation-to-task skill：按模板从对话总结 Task，并调
 metadata:
   edges-type: task
   edges-title: conversation-to-task skill：按模板总结 Task 并调用 CLI
-  edges-tasks-status: backlog
+  edges-tasks-status: cancelled
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-17T14:09:11.750Z"
+  edges-updated-at: "2026-09-24T10:41:28+08:00"
   edges-task-project: edges-tasks
 ---
 
@@ -23,3 +23,8 @@ metadata:
 - 落盘路径：调用 `edges tasks create`（及必要的 update/status）；禁止 Skill → 仓根 `bin/`，禁止只靠手写文件当主路径。
 - 模板/字段与任务记录员现有落盘习惯对齐。
 - 依赖：`edges tasks` CLI 过关后再派（可派 Coding Agent 专家）；#15 可并行细聊，实现上本 skill 应调同一套 CLI。
+
+
+---
+
+**2026-09-24 收口：** 本卡把「总结 skill」与「CLI 落盘」捆在一起，已过时。薄 skill 只整理（PR https://github.com/VirusPC/edges/pull/127）；CLI 落库见后继 `2026-09-24--conversation-to-tasks整理后调CLI落库`。本卡 → cancelled。
