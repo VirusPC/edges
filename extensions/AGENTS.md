@@ -29,7 +29,6 @@
 按任务目录加载对应 `AGENTS.md`。
 
 - [skills/project-memory-init/AGENTS.md](skills/project-memory-init/AGENTS.md) — project-memory-init 目录的项目记忆与规范入口。
-- [clis/AGENTS.md](clis/AGENTS.md) — edges CLI（edges-cli）：note、tasks、artifacts 命令面；review-page 只渲染并内联审阅壳。
 <!-- project-memory-children:end -->
 
 <!-- project-memory:end -->
