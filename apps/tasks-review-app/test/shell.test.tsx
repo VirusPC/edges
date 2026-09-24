@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it } from "vitest";
 import App from "../src/App.tsx";
@@ -62,4 +62,25 @@ it("lays out filters, columns, design A, and the markdown pane", async () => {
   expect(window.location.hash.startsWith("#?")).toBe(true);
   expect(window.location.hash).toContain("stem=");
   expect(document.querySelector("[data-status-column] [data-droppable]")).toBeNull();
+});
+
+it("keeps filters on the right, shows a project description, and drags column widths", () => {
+  render(<App initialPayload={payload} />);
+  const filters = document.querySelector("[data-filter=q]")?.parentElement;
+  expect(filters?.className).toContain("ml-auto");
+  expect(filters?.className).toContain("justify-end");
+  expect(filters?.lastElementChild).toBe(document.querySelector("[data-action=copy-json]"));
+  expect(document.querySelector("[data-project-id=cli]")?.textContent).toContain("edges CLI");
+
+  const columns = document.querySelector("[data-review-columns=edges]") as HTMLElement;
+  expect(columns.style.gridTemplateColumns.startsWith("240px")).toBe(true);
+  fireEvent.pointerDown(document.querySelector("[data-panel-resize=left]") as Element, { clientX: 240, pointerId: 1 });
+  fireEvent.pointerMove(window, { clientX: 300, pointerId: 1 });
+  fireEvent.pointerUp(window, { clientX: 300, pointerId: 1 });
+  expect(columns.style.gridTemplateColumns.startsWith("300px")).toBe(true);
+
+  fireEvent.pointerDown(document.querySelector("[data-panel-resize=right]") as Element, { clientX: 1000, pointerId: 2 });
+  fireEvent.pointerMove(window, { clientX: 940, pointerId: 2 });
+  fireEvent.pointerUp(window, { clientX: 940, pointerId: 2 });
+  expect(columns.style.gridTemplateColumns.endsWith("440px")).toBe(true);
 });

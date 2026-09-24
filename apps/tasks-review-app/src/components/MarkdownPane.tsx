@@ -6,7 +6,7 @@ import type { ReviewItem } from "../types.ts";
 export function MarkdownPane({ item }: { item?: ReviewItem }) {
   const body = item?.doc?.body ?? "";
   return (
-    <aside data-markdown-pane="true" className="flex min-h-0 flex-col border-l border-[#334155] bg-[#121820]">
+    <aside data-markdown-pane="true" className="flex min-h-0 flex-col bg-[#121820]">
       {item ? (
         <header className="border-b border-[#334155] px-4 py-3">
           <p className="text-sm font-medium leading-snug text-[#e7ecf3]">{reviewItemTitle(item)}</p>

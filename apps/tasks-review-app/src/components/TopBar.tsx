@@ -26,7 +26,8 @@ export function TopBar({
     a.localeCompare(b),
   );
   return (
-    <header className="flex flex-wrap items-center gap-2 border-b border-[#334155] bg-[#0f1419] px-3 py-2.5">
+    <header className="flex items-center border-b border-[#334155] bg-[#0f1419] px-3 py-2.5">
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
       <Input
         data-filter="q"
         value={filter.q}
@@ -89,7 +90,7 @@ export function TopBar({
         variant="outline"
         size="sm"
         data-action="copy-json"
-        className="ml-auto border-[#334155] bg-[#1a2332] text-[#e7ecf3] hover:bg-[#243044]"
+        className="border-[#334155] bg-[#1a2332] text-[#e7ecf3] hover:bg-[#243044]"
         onClick={() => {
           const text = JSON.stringify(exportReviewRows(items), null, 2);
           const write = navigator.clipboard?.writeText(text);
@@ -104,6 +105,7 @@ export function TopBar({
       >
         复制导出 JSON
       </Button>
+      </div>
     </header>
   );
 }
