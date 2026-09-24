@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- 人审可为对话确认或 PR；落库所在分支是否新建不限。
 - 落库写入本技能步骤 6：交人审阅后，用户确认再用 `create` / `update`（及必要时 `status`）写盘。
 - 步骤 5 为交人审阅关卡；确认前不写盘。
 - 约束不再重复禁止写盘命令（开场与步骤 5 已覆盖）。
