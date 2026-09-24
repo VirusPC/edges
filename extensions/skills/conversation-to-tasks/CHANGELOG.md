@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- 压缩步骤前导言：去掉重复开场与分工表，改为一句职责 + 一句三角分工。
 - 步骤收成五步：判是否任务 → 只读去重 → 必填门闩（不足先问）→ 按模板成文并建议归属 → 只交草稿。各栏写法从步骤里抽出，避免与模板、约束重复。
 
 ## [1.0.0] - 2026-09-24
