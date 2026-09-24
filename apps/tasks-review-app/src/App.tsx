@@ -51,13 +51,11 @@ function sideBounds(
 
 function ReviewToolbar({
   narrow,
-  sticky,
   items,
   filter,
   onChange,
 }: {
   narrow: boolean
-  sticky: boolean
   items: ReviewItem[]
   filter: ReviewFilter
   onChange: (next: ReviewFilter) => void
@@ -65,10 +63,7 @@ function ReviewToolbar({
   return (
     <header
       data-review-toolbar="edges"
-      className={
-        "flex h-12 shrink-0 items-center gap-3 border-b border-[#334155] bg-[#1a2332] px-3 " +
-        (sticky ? "sticky top-0 z-20" : "")
-      }
+      className="z-30 flex h-12 shrink-0 items-center gap-3 border-b border-[#334155] bg-[#1a2332] px-3"
     >
       <NavBar />
       <TopBar
@@ -160,12 +155,12 @@ export default function App({
   const narrow = useNarrowLayout()
   const [leftWidth, setLeftWidth] = useState(LEFT_DEFAULT)
   const [rightWidth, setRightWidth] = useState(RIGHT_DEFAULT)
+  const [detailOpen, setDetailOpen] = useState(() => hashState.stem !== "")
   const columnsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!narrow || hashState.stem === "") return
-    document.getElementById("review-detail")?.scrollIntoView({ block: "start" })
-  }, [narrow, hashState.stem])
+    if (hashState.stem !== "") setDetailOpen(true)
+  }, [hashState.stem])
 
   function onResizePointerDown(
     side: "left" | "right",
@@ -197,7 +192,6 @@ export default function App({
   const toolbar = (
     <ReviewToolbar
       narrow={narrow}
-      sticky={narrow}
       items={items}
       filter={filter}
       onChange={(next) => setHashState((prev) => ({ ...prev, ...next }))}
@@ -207,9 +201,9 @@ export default function App({
   return (
     <div
       data-review-shell="edges"
-      className="flex h-screen max-w-full flex-col overflow-x-hidden"
+      className="relative flex h-screen max-w-full flex-col overflow-x-hidden"
     >
-      {narrow ? null : toolbar}
+      {toolbar}
       <DndContext
         sensors={sensors}
         onDragEnd={(event) => {
@@ -230,7 +224,6 @@ export default function App({
             gridTemplateColumns: `${leftWidth}px 8px minmax(${CENTER_MIN}px,1fr) 8px ${rightWidth}px`,
           }}
         >
-          {narrow ? toolbar : null}
           <ProjectColumn
             groups={groups}
             items={items}
@@ -250,7 +243,10 @@ export default function App({
             filter={filter}
             narrow={narrow}
             selectedStem={hashState.stem}
-            onSelect={(stem) => setHashState((prev) => ({ ...prev, stem }))}
+            onSelect={(stem) => {
+              setDetailOpen(true)
+              setHashState((prev) => ({ ...prev, stem }))
+            }}
             onMove={(stem, projectId) =>
               setItems((prev) => applyProjectDrop(prev, stem, projectId))
             }
@@ -259,8 +255,18 @@ export default function App({
             side="right"
             onPointerDown={(event) => onResizePointerDown("right", event)}
           />
-          <MarkdownPane item={selected} narrow={narrow} />
+          {narrow ? null : (
+            <MarkdownPane item={selected} narrow={false} />
+          )}
         </div>
+        {narrow ? (
+          <MarkdownPane
+            item={selected}
+            narrow
+            open={detailOpen}
+            onBack={() => setDetailOpen(false)}
+          />
+        ) : null}
       </DndContext>
     </div>
   )

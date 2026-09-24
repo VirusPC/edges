@@ -126,19 +126,22 @@ it("stacks the filter, board, and detail on a narrow viewport and scrolls betwee
 
   await user.click(screen.getByText("Alpha title"))
   expect(detail).toHaveProperty("hidden", false)
+  expect(detail?.className).toContain("fixed")
+  expect(detail?.className).toContain("top-12")
+  expect(detail?.className).not.toContain("sticky")
   expect(document.querySelector("[data-markdown-pane] h1")?.textContent).toBe(
     "Heading"
   )
-  expect(scrollIntoView).toHaveBeenCalled()
+  expect(scrollIntoView).not.toHaveBeenCalled()
   expect(window.location.hash).toContain("stem=")
 
-  scrollIntoView.mockClear()
+  const stem = window.location.hash
   await user.click(screen.getByRole("button", { name: "回到看板" }))
-  expect(document.getElementById("review-board")?.scrollIntoView).toBe(
-    scrollIntoView
+  expect(window.location.hash).toBe(stem)
+  expect(detail).toHaveProperty("hidden", true)
+  expect(document.querySelector("[data-stem='2026-09-21--alpha']")?.getAttribute("data-selected")).toBe(
+    "on"
   )
-  expect(scrollIntoView).toHaveBeenCalled()
-  expect(detail).toHaveProperty("hidden", false)
 })
 
 it("keeps the desktop three-column shell and hides the narrow back control", () => {

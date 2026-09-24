@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { reviewItemTitle } from "../display.ts"
@@ -6,39 +7,18 @@ import type { ReviewItem } from "../types.ts"
 export function MarkdownPane({
   item,
   narrow,
+  open = false,
+  onBack,
 }: {
   item?: ReviewItem
   narrow: boolean
+  open?: boolean
+  onBack?: () => void
 }) {
   const body = item?.doc?.body ?? ""
-  return (
-    <aside
-      id="review-detail"
-      data-markdown-pane="true"
-      hidden={narrow && !item}
-      className="flex w-full min-w-0 shrink-0 flex-col bg-[#121820] md:min-h-0"
-    >
-      {narrow && item ? (
-        <div
-          data-detail-sticky="edges"
-          className="sticky top-0 z-30 flex min-h-12 items-center gap-2 border-b border-[#334155] bg-[#0f1419] px-3"
-        >
-          <button
-            type="button"
-            className="shrink-0 text-sm text-[#5b9fd4]"
-            onClick={() =>
-              document
-                .getElementById("review-board")
-                ?.scrollIntoView({ block: "start" })
-            }
-          >
-            回到看板
-          </button>
-          <p className="min-w-0 flex-1 truncate text-sm font-medium text-[#e7ecf3]">
-            {reviewItemTitle(item)}
-          </p>
-        </div>
-      ) : null}
+  const showPanel = narrow && open && item != null
+  const article: ReactNode = (
+    <>
       <h2
         data-section-title="details"
         className="border-b border-[#334155] bg-[#1a2332] px-3 py-2 text-lg font-semibold tracking-wide text-[#e7ecf3]"
@@ -62,6 +42,46 @@ export function MarkdownPane({
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{body}</ReactMarkdown>
         )}
       </div>
+    </>
+  )
+  return (
+    <aside
+      id="review-detail"
+      data-markdown-pane="true"
+      data-detail-panel={showPanel ? "viewport" : undefined}
+      hidden={narrow && !showPanel}
+      className={
+        "flex w-full min-w-0 shrink-0 flex-col bg-[#121820] md:min-h-0" +
+        (showPanel ? " fixed inset-x-0 top-12 bottom-0 z-40" : "")
+      }
+    >
+      {showPanel ? (
+        <div
+          data-detail-sticky="edges"
+          className="flex h-12 shrink-0 items-center gap-2 border-b border-[#334155] bg-[#0f1419] px-3"
+        >
+          <button
+            type="button"
+            className="shrink-0 text-sm text-[#5b9fd4]"
+            onClick={onBack}
+          >
+            回到看板
+          </button>
+          <p className="min-w-0 flex-1 truncate text-sm font-medium text-[#e7ecf3]">
+            {reviewItemTitle(item)}
+          </p>
+        </div>
+      ) : null}
+      {showPanel ? (
+        <div
+          data-detail-body="edges"
+          className="min-h-0 flex-1 overflow-y-auto"
+        >
+          {article}
+        </div>
+      ) : (
+        article
+      )}
     </aside>
   )
 }

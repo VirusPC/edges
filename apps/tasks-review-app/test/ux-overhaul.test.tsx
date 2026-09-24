@@ -154,29 +154,38 @@ it("opens narrow filters in a sheet and restores the board when the sheet closes
   expect(document.querySelector("[data-section-title=tasks]")).not.toBeNull()
 })
 
-it("keeps a sticky back-and-title bar on narrow detail without clearing the selection", async () => {
+it("covers the narrow board with a viewport detail panel and keeps the selection on back", async () => {
   useViewport(390)
   const user = userEvent.setup()
-  HTMLElement.prototype.scrollIntoView = vi.fn()
   render(<App initialPayload={payload} />)
   expect(screen.queryByRole("button", { name: "回到看板" })).toBeNull()
   await user.click(screen.getByText("待读 Harness Playbook"))
-  const sticky = document.querySelector("[data-detail-sticky]")
-  expect(sticky?.className).toContain("sticky")
-  expect(sticky?.className).toContain("top-0")
-  expect(sticky?.textContent).toContain("回到看板")
-  expect(sticky?.textContent).toContain("待读 Harness Playbook")
-  expect(sticky?.querySelector("p")?.className).toContain("truncate")
-  expect(sticky?.querySelector("[data-filter=q]")).toBeNull()
-  expect(sticky?.textContent).not.toContain("筛选")
+  const panel = document.querySelector("[data-markdown-pane]")
+  expect(panel?.getAttribute("data-detail-panel")).toBe("viewport")
+  expect(panel?.className).toContain("fixed")
+  expect(panel?.className).toContain("top-12")
+  expect(panel?.className).toContain("bottom-0")
+  expect(panel?.className).not.toContain("sticky")
+  const bar = document.querySelector("[data-detail-sticky]")
+  expect(bar?.className).not.toContain("sticky")
+  expect(bar?.className).toContain("shrink-0")
+  expect(bar?.textContent).toContain("回到看板")
+  expect(bar?.textContent).toContain("待读 Harness Playbook")
+  expect(bar?.querySelector("p")?.className).toContain("truncate")
+  expect(bar?.querySelector("[data-filter=q]")).toBeNull()
+  expect(document.querySelector("[data-detail-body]")?.className).toContain(
+    "overflow-y-auto"
+  )
   const stem = window.location.hash
   await user.click(screen.getByRole("button", { name: "回到看板" }))
   expect(window.location.hash).toBe(stem)
   expect(window.location.hash).toContain("stem=")
-  expect(document.querySelector("[data-markdown-pane]")).toHaveProperty(
-    "hidden",
-    false
-  )
+  expect(panel).toHaveProperty("hidden", true)
+  expect(
+    document
+      .querySelector("[data-stem='2026-09-09--harness-playbook']")
+      ?.getAttribute("data-selected")
+  ).toBe("on")
 })
 
 it("de-emphasizes the card stem until hover on desktop and expand on narrow", async () => {
