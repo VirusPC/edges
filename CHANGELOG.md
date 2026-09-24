@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 笔记入库与能力面
+
+- 新增 `conversation-to-tasks` 技能（`extensions/skills/conversation-to-tasks`）：从对话整理 Task 草稿（含【背景/场景】、交付/完成标准、非目标）；与 `conversation-to-notes`、`project-memory-remember` 三角色分立。只整理成文，不落库。
+
 ### 文档与系统
 
 - 根 README 写明了系统设计目标：一键部署 Edges、一键接入 Agent 客户端、一键产出对外资产。仓库按这个方向收敛。

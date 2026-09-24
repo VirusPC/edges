@@ -120,6 +120,10 @@ _避免使用_：认知更新、Insights、过程栏的复述
 复盘四栏的第四栏：带触发条件与具体做法的行动说明。
 _避免使用_：裸待办清单、Actions（若指本栏）
 
+**对话三角色（notes / remember / tasks）**：
+从同一段对话分出三类产物、勿合并：`conversation-to-notes`（复盘四栏笔记）、`project-memory-remember`（耐久结论：一句结论→Why→How）、`conversation-to-tasks`（谁下一步做什么与完成标准；须含【背景/场景】）。整理 skill 只成文，落库另步。
+_避免使用_：把 Task 写成记忆结论、把复盘笔记写成看板待办、在整理 skill 里直接调 CLI 写盘
+
 **专项工作区（Initiative Workspace）**：
 围绕一个明确目标持续组织材料、状态和产出的有边界工作空间；可直接产生需要提炼为 Edge 的经验。
 _避免使用_：长笔记、主题分类、知识资产
