@@ -1,12 +1,11 @@
 ---
 name: conversation-to-tasks
-description: 把对话整理成任务草稿（背景 → 目标 → 完成标准；动作可选）。必填项不足则先提问补齐。只成文，不落库。复盘笔记用 conversation-to-notes；耐久结论用 project-memory-remember。
+description: 把对话整理成任务草稿（背景 → 目标 → 完成标准；动作可选）。必填项不足则先提问补齐。只成文，不落库。
 version: 1.0.0
 ---
 
 从对话整理任务草稿。**只成文，不落库**（写入看板是另一步）。正文：**背景 → 目标 → 完成标准**（必填）；**动作**可选。
 
-与另外两角分工：`conversation-to-notes` 记这次澄清了什么；`project-memory-remember` 记以后还该记住什么；本技能记谁下一步做什么、怎样算完。无可接力下一步、也推不出完成标准 → 改走笔记或记忆，不要硬开任务。
 
 ## 步骤
 
