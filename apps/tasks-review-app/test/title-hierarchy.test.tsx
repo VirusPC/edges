@@ -54,8 +54,10 @@ function prominence(className: string): { px: number; weight: number } {
   const fixed = className.match(/text-\[(\d+)px\]/)
   const px = fixed
     ? Number(fixed[1])
-    : className.includes("text-lg")
-      ? 18
+    : className.includes("text-xl")
+      ? 20
+      : className.includes("text-lg")
+        ? 18
       : className.includes("text-base")
         ? 16
         : className.includes("text-sm")
@@ -83,6 +85,8 @@ async function titleClasses() {
   HTMLElement.prototype.scrollIntoView = () => {}
   const user = userEvent.setup()
   render(<App initialPayload={payload} />)
+  const edgesTitle =
+    document.querySelector("[data-review-nav] span")?.className ?? ""
   const projectTitle =
     document.querySelector("[data-section-title=projects]")?.className ?? ""
   const projectRow =
@@ -103,6 +107,7 @@ async function titleClasses() {
     document.querySelector("[data-markdown-pane] .markdown-body")?.className ??
     ""
   return {
+    edgesTitle,
     projectTitle,
     projectRow,
     tasksTitle,
@@ -132,10 +137,15 @@ it("keeps section titles larger and heavier than list and body text on both widt
   expect(screen.getAllByText("Projects").length).toBeGreaterThan(0)
   expect(screen.getAllByText("Tasks").length).toBeGreaterThan(0)
   expect(screen.getAllByText("Details").length).toBeGreaterThan(0)
+  expect(narrow.edgesTitle).toBe(desktop.edgesTitle)
   expect(narrow.projectTitle).toBe(desktop.projectTitle)
   expect(narrow.tasksTitle).toBe(desktop.tasksTitle)
   expect(narrow.detailsTitle).toBe(desktop.detailsTitle)
 
+  const edges = prominence(desktop.edgesTitle)
+  const chapter = prominence(desktop.projectTitle)
+  expect(edges.px).toBeGreaterThan(chapter.px)
+  expect(edges.weight).toBeGreaterThanOrEqual(chapter.weight)
   expectTitleBeatsBody(desktop.projectTitle, desktop.projectRow)
   expectTitleBeatsBody(desktop.tasksTitle, desktop.cardTitle)
   expectTitleBeatsBody(desktop.detailsTitle, desktop.detailBody)
