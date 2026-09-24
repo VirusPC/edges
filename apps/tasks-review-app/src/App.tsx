@@ -1,6 +1,7 @@
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { MarkdownPane } from "./components/MarkdownPane.tsx";
+import { NavBar } from "./components/NavBar.tsx";
 import { ProjectColumn } from "./components/ProjectColumn.tsx";
 import { StatusBoard } from "./components/StatusBoard.tsx";
 import { TopBar } from "./components/TopBar.tsx";
@@ -106,6 +107,7 @@ export default function App({ initialPayload }: { initialPayload?: ReviewPayload
 
   return (
     <div data-review-shell="edges" className="flex h-screen flex-col">
+      <NavBar />
       <TopBar
         items={items}
         filter={filter}

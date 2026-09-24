@@ -43,7 +43,10 @@ const payload: ReviewPayload = {
 it("lays out filters, columns, design A, and the markdown pane", async () => {
   const user = userEvent.setup();
   render(<App initialPayload={payload} />);
-  expect(document.querySelector("[data-review-shell=edges]")).not.toBeNull();
+  const shell = document.querySelector("[data-review-shell=edges]");
+  expect(shell).not.toBeNull();
+  expect(shell?.firstElementChild?.getAttribute("data-review-nav")).toBe("edges");
+  expect(shell?.firstElementChild?.textContent).toBe("Edges");
   expect(document.querySelector("[data-status-column=in_progress]")?.textContent).toContain("2026-09-21--alpha");
   expect(document.querySelector("[data-status-column=__unspecified]")?.textContent).toContain("2026-09-13--demo");
   expect(document.querySelector("[data-project-id=all]")?.getAttribute("data-droppable")).toBe("0");
