@@ -9,6 +9,7 @@ import { applyProjectDrop, projectIdFromDrop } from "./export.ts";
 import { matchesReviewFilter, type ReviewFilter } from "./filter.ts";
 import { buildReviewHash, navigateReviewHash, parseReviewHash } from "./hash.ts";
 import type { ReviewGroup, ReviewHashState, ReviewItem, ReviewPayload } from "./types.ts";
+import { useNarrowLayout } from "./use-narrow-layout.ts";
 
 function clampWidth(value: number, min: number, max: number): number {
   return Math.round(Math.min(max, Math.max(min, value)));
@@ -27,7 +28,7 @@ function PanelResizeHandle({
       aria-orientation="vertical"
       aria-label={side === "left" ? "调整项目栏宽度" : "调整正文栏宽度"}
       data-panel-resize={side}
-      className="group relative z-10 cursor-col-resize touch-none"
+      className="group relative z-10 hidden cursor-col-resize touch-none md:block"
       onPointerDown={onPointerDown}
     >
       <div className="absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[#334155] group-hover:bg-[#5b9fd4]" />
@@ -75,9 +76,15 @@ export default function App({ initialPayload }: { initialPayload?: ReviewPayload
 
   const filter = filterFromHash(hashState);
   const selected = items.find((item) => item.stem === hashState.stem && matchesReviewFilter(item, filter));
+  const narrow = useNarrowLayout();
   const [leftWidth, setLeftWidth] = useState(240);
   const [rightWidth, setRightWidth] = useState(380);
   const columnsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!narrow || hashState.stem === "") return;
+    document.getElementById("review-detail")?.scrollIntoView({ block: "start" });
+  }, [narrow, hashState.stem]);
 
   function onResizePointerDown(side: "left" | "right", event: ReactPointerEvent<HTMLDivElement>) {
     event.preventDefault();
@@ -106,7 +113,7 @@ export default function App({ initialPayload }: { initialPayload?: ReviewPayload
   }
 
   return (
-    <div data-review-shell="edges" className="flex h-screen flex-col">
+    <div data-review-shell="edges" className="flex h-screen max-w-full flex-col overflow-x-hidden">
       <NavBar />
       <TopBar
         items={items}
@@ -124,7 +131,7 @@ export default function App({ initialPayload }: { initialPayload?: ReviewPayload
         <div
           ref={columnsRef}
           data-review-columns="edges"
-          className="grid min-h-0 flex-1"
+          className="flex min-h-0 w-full min-w-0 max-w-full flex-1 flex-col overflow-x-hidden overflow-y-auto md:grid md:overflow-hidden"
           style={{ gridTemplateColumns: `${leftWidth}px 8px minmax(0,1fr) 8px ${rightWidth}px` }}
         >
           <ProjectColumn
@@ -140,9 +147,10 @@ export default function App({ initialPayload }: { initialPayload?: ReviewPayload
             filter={filter}
             selectedStem={hashState.stem}
             onSelect={(stem) => setHashState((prev) => ({ ...prev, stem }))}
+            onMove={(stem, projectId) => setItems((prev) => applyProjectDrop(prev, stem, projectId))}
           />
           <PanelResizeHandle side="right" onPointerDown={(event) => onResizePointerDown("right", event)} />
-          <MarkdownPane item={selected} />
+          <MarkdownPane item={selected} narrow={narrow} />
         </div>
       </DndContext>
     </div>

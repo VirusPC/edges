@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 任务看板与项目
 
+- 审阅页在窄于 768px 时改成纵向滚动：上面筛项目，中间是状态板（状态列在板内横向滚动），点开卡片后正文接在下面，可以用「回到看板」回到状态板。宽屏仍是三栏，拖到左栏改 project 不变；每张卡片的「移到项目…」只改页内归属，复制导出 JSON 会带上这次改动。
 - `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个三栏审阅页：顶栏可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选；左侧点项目筛选，拖到项目上只改 project，再用「复制导出 JSON」贴回。中间的状态列只展示，右侧渲染当前条目的 Markdown 正文。页上的脚本在生成前由 `pnpm --filter tasks-review-app run build` 打好并内联进单份 HTML，构建产物不进 git。
 - 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
 - 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy.yml` 会在整仓 pull 之后自动生成。

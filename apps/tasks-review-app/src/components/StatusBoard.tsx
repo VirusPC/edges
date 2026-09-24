@@ -10,12 +10,14 @@ export function StatusBoard({
   filter,
   selectedStem,
   onSelect,
+  onMove,
 }: {
   items: ReviewItem[];
   groups: ReviewGroup[];
   filter: ReviewFilter;
   selectedStem: string;
   onSelect: (stem: string) => void;
+  onMove: (stem: string, projectId: string) => void;
 }) {
   const visible = items.filter((item) => matchesReviewFilter(item, filter));
   const known = new Set<string>(REVIEW_STATUS_COLUMNS);
@@ -26,7 +28,11 @@ export function StatusBoard({
     items: visible.filter((item) => itemStatus(item) === status),
   })).filter((column) => column.items.length > 0);
   return (
-    <div className="flex min-h-0 gap-3 overflow-auto bg-[#0f1419] p-3">
+    <div
+      id="review-board"
+      data-status-board="edges"
+      className="flex w-full min-w-0 max-w-full shrink-0 gap-3 overflow-x-auto bg-[#0f1419] p-3 md:min-h-0 md:overflow-auto"
+    >
       {columns.map((column) => (
         <section key={column.status} data-status-column={column.status} className="flex w-72 shrink-0 flex-col gap-2">
           <ColumnHeader title={column.title} count={column.items.length} dot={statusDotClass(column.status)} />
@@ -37,6 +43,7 @@ export function StatusBoard({
               groups={groups}
               selected={item.stem === selectedStem}
               onSelect={onSelect}
+              onMove={onMove}
             />
           ))}
         </section>
@@ -51,6 +58,7 @@ export function StatusBoard({
               groups={groups}
               selected={item.stem === selectedStem}
               onSelect={onSelect}
+              onMove={onMove}
             />
           ))}
         </section>

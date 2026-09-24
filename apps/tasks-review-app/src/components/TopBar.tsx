@@ -26,8 +26,8 @@ export function TopBar({
     a.localeCompare(b),
   );
   return (
-    <header className="flex items-center border-b border-[#334155] bg-[#0f1419] px-3 py-2.5">
-      <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+    <header className="flex min-w-0 items-center overflow-x-hidden border-b border-[#334155] bg-[#0f1419] px-3 py-2.5">
+      <div className="ml-auto flex min-w-0 max-w-full flex-wrap items-center justify-end gap-2">
       <Input
         data-filter="q"
         value={filter.q}

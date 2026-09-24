@@ -148,7 +148,7 @@
   --input: #334155;
   --ring: #5b9fd4;
 }
-html, body, #root { height: 100%; background: #0f1419; color: #e7ecf3; }
+html, body, #root { height: 100%; max-width: 100%; background: #0f1419; color: #e7ecf3; overflow-x: hidden; }
 
 .markdown-body :is(h1, h2, h3) {
   margin: 1rem 0 0.4rem;
