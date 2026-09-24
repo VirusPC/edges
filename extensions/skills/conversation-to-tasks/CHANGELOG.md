@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- 从对话整理任务草稿；正文跟看板约定：结论 → 事实背景 → 为何 → 做法（事实背景须含「为何此刻出现」）。
+- 从对话整理任务草稿；正文三栏：背景 → 目标 → 完成标准（背景给人读；完成标准给循环验收）。
 - 与 `conversation-to-notes`、`project-memory-remember` 分工：本技能只回答「谁下一步做什么、怎样算完」。
 - 只成文，不落库；写入看板是另一步。
 - 栏名与说明用中文，避免中英混写。
