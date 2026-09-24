@@ -1,4 +1,4 @@
-# extensions
+# clis
 
 <!-- project-memory:start -->
 
@@ -7,7 +7,6 @@
 
 - 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
 - 本层硬约束直接写在这个区块里，不要链到 `.memory` 文件。
-- 不绑定 Edges 的通用 skill / MCP 配置 / plugin / hook 不放本目录，去 `shared-extensions/`。
 <!-- project-memory-important:end -->
 
 <!-- project-memory-local:start -->
@@ -22,14 +21,5 @@
 - [.memory/skills/AGENTS.md](.memory/skills/AGENTS.md) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
 - [.memory/agent_skills/AGENTS.md](.memory/agent_skills/AGENTS.md) — 本层 `.agents/skills/` 下人写或装入的标准技能，工具只索引不改写。
 <!-- project-memory-local:end -->
-
-<!-- project-memory-children:start -->
-## 下层记忆索引
-
-按任务目录加载对应 `AGENTS.md`。
-
-- [skills/project-memory-init/AGENTS.md](skills/project-memory-init/AGENTS.md) — project-memory-init 目录的项目记忆与规范入口。
-- [clis/AGENTS.md](clis/AGENTS.md) — edges CLI（edges-cli）：note、tasks、artifacts 命令面；review-page 只渲染并内联审阅壳。
-<!-- project-memory-children:end -->
 
 <!-- project-memory:end -->
