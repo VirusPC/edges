@@ -2,6 +2,9 @@
 
 ## Knowledge
 
+- [British Council: Checking understanding](https://learnenglish.britishcouncil.org/free-resources/speaking/a1/checking-understanding)
+  请求重复与核对含义的权威语言示例；第 3 课借用会话功能，练习请向导示范和确认理解。
+
 - [BSAC: Snorkel Diver Student Guide](https://www.bsac.com/document/snorkel-diver-student-guide/snorkel-diver-student-guide-v3.1-sept-2025.pdf)
   浮潜学员指南，Signals 与 Surface cover 支持下水前确认信号和照看安排的场景。
 - [BSAC: Snorkelling Tips](https://www.bsac.com/advice-and-support/club-support/snorkelling-support/snorkelling-tips/)
