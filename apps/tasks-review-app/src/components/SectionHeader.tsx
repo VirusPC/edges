@@ -15,6 +15,7 @@ export function SectionHeader({
   stickyClassName = "sticky top-0 z-20",
   section,
   variant,
+  onTitleDoubleClick,
 }: {
   title: ReactNode
   collapsed: boolean
@@ -24,6 +25,7 @@ export function SectionHeader({
   stickyClassName?: string
   section?: "projects" | "tasks" | "details"
   variant: "chapter" | "status"
+  onTitleDoubleClick?: () => void
 }) {
   const ToggleIcon = collapsed ? ChevronRight : ChevronDown
   const surface = variant === "chapter" ? CHAPTER : STATUS
@@ -39,7 +41,13 @@ export function SectionHeader({
         stickyClassName
       }
     >
-      <span className="flex min-w-0 flex-1 items-center gap-2 truncate">{title}</span>
+      <span
+        data-section-jump={onTitleDoubleClick ? section : undefined}
+        className="flex min-w-0 flex-1 items-center gap-2 truncate"
+        onDoubleClick={onTitleDoubleClick}
+      >
+        {title}
+      </span>
       {actions}
       <button
         type="button"

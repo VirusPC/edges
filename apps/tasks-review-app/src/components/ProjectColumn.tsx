@@ -6,6 +6,7 @@ import {
   type ReviewItem,
 } from "../filter.ts"
 import type { ReviewGroup } from "../types.ts"
+import { scrollReviewToSection } from "../scroll-review.ts"
 import { SectionHeader } from "./SectionHeader.tsx"
 import {
   Select,
@@ -60,6 +61,7 @@ export function ProjectColumn({
         title="Projects"
         collapsed={collapsed}
         onToggle={() => setCollapsed((value) => !value)}
+        onTitleDoubleClick={() => scrollReviewToSection("projects")}
       />
       {collapsed ? null : (
         <div className="p-2">

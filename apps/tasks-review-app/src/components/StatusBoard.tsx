@@ -8,6 +8,7 @@ import { statusDotClass, statusLabel } from "../display.ts"
 import { REVIEW_STATUS_COLUMNS } from "../statuses.ts"
 import type { ReviewGroup } from "../types.ts"
 import { useState } from "react"
+import { scrollReviewToSection } from "../scroll-review.ts"
 import { SectionHeader } from "./SectionHeader.tsx"
 import { TaskCard } from "./TaskCard.tsx"
 
@@ -73,6 +74,7 @@ export function StatusBoard({
         title="Tasks"
         collapsed={collapsed}
         onToggle={() => setCollapsed((value) => !value)}
+        onTitleDoubleClick={() => scrollReviewToSection("tasks")}
       />
       {collapsed ? null : (
       <div

@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { X } from "lucide-react"
+import { ListFilter, X } from "lucide-react"
 import { itemAssignee, type ReviewFilter, type ReviewItem } from "../filter.ts"
 import { statusLabel } from "../display.ts"
 import { exportReviewRows } from "../export.ts"
@@ -169,11 +169,13 @@ export function TopBar({
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="icon"
+              aria-label="筛选"
               data-action="open-filters"
-              className="border-[#334155] bg-transparent text-[#9aa8bc] hover:bg-[#243044] hover:text-[#e7ecf3]"
+              data-filter-icon="ListFilter"
+              className="size-8 border-[#334155] bg-transparent text-[#9aa8bc] hover:bg-[#243044] hover:text-[#e7ecf3]"
             >
-              筛选
+              <ListFilter className="size-4" aria-hidden="true" />
             </Button>
           </SheetTrigger>
           <SheetContent

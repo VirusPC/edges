@@ -162,6 +162,55 @@ it("opens the narrow project select and switches the board", async () => {
   expect(document.querySelector("[data-stem='2026-09-09--harness-playbook']")).toBeNull()
 })
 
+it("double-clicks a chapter title to that section and returns to the open card", async () => {
+  useViewport(390)
+  const user = userEvent.setup()
+  render(<App initialPayload={payload} />)
+  const scroller = document.querySelector("[data-review-columns]") as HTMLElement
+  const jumps: number[] = []
+  scroller.scrollTo = ((options?: ScrollToOptions) => {
+    jumps.push(options?.top ?? 0)
+  }) as HTMLElement["scrollTo"]
+  scroller.scrollTop = 500
+  const box = (top: number, height: number) =>
+    ({
+      top,
+      left: 0,
+      right: 0,
+      bottom: top + height,
+      width: 0,
+      height,
+      x: 0,
+      y: top,
+      toJSON() {},
+    }) as DOMRect
+  scroller.getBoundingClientRect = () => box(48, 800)
+  const tasks = document.querySelector("[data-section-title=tasks]") as HTMLElement
+  tasks.getBoundingClientRect = () => box(320, 48)
+  await user.dblClick(tasks.querySelector("[data-section-jump]") as Element)
+  expect(jumps.at(-1)).toBe(500 + 320 - 48)
+
+  const toggle = tasks.querySelector("[data-section-toggle]") as Element
+  const before = jumps.length
+  await user.dblClick(toggle)
+  expect(jumps.length).toBe(before)
+  expect(tasks.getAttribute("data-section-collapsed")).toBe("off")
+
+  await user.dblClick(document.querySelector("[data-review-nav=edges]") as Element)
+  expect(jumps.at(-1)).toBe(0)
+
+  await user.click(screen.getByText("待读 Harness Playbook"))
+  const card = document.querySelector(
+    "[data-stem='2026-09-09--harness-playbook']"
+  ) as HTMLElement
+  card.getBoundingClientRect = () => box(900, 80)
+  scroller.scrollTop = 2000
+  await user.click(screen.getByRole("button", { name: "回到看板" }))
+  expect(jumps.at(-1)).toBe(2000 + 900 - 48 - 96)
+  expect(window.location.hash).toContain("stem=")
+  expect(card.getAttribute("data-selected")).toBe("on")
+})
+
 it("opens narrow filters in a sheet and restores the board when the sheet closes", async () => {
   useViewport(390)
   const user = userEvent.setup()
@@ -181,9 +230,11 @@ it("opens narrow filters in a sheet and restores the board when the sheet closes
   expect(close?.textContent).not.toContain("关闭")
   expect(close?.querySelector("svg")).not.toBeNull()
   expect(screen.queryByRole("button", { name: "关闭" })).toBeNull()
-  expect(document.querySelector("[data-action=open-filters]")?.textContent).toContain(
-    "筛选"
-  )
+  const openFilters = document.querySelector("[data-action=open-filters]")
+  expect(openFilters?.textContent?.trim()).toBe("")
+  expect(openFilters?.querySelector("svg")).not.toBeNull()
+  expect(openFilters?.getAttribute("aria-label")).toBe("筛选")
+  expect(openFilters?.getAttribute("data-filter-icon")).toBe("ListFilter")
   await user.click(screen.getByRole("button", { name: "关闭筛选" }))
   expect(document.querySelector("[data-filter-sheet]")).toBeNull()
   expect(

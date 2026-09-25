@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { reviewItemTitle } from "../display.ts"
 import type { ReviewItem } from "../types.ts"
+import { scrollReviewToCard, scrollReviewToSection } from "../scroll-review.ts"
 import { SectionHeader } from "./SectionHeader.tsx"
 
 export function MarkdownPane({
@@ -30,17 +31,16 @@ export function MarkdownPane({
         title="Details"
         collapsed={collapsed}
         onToggle={() => setCollapsed((value) => !value)}
+        onTitleDoubleClick={() => scrollReviewToSection("details")}
         actions={
           narrow ? (
             <button
               type="button"
               data-section-back="edges"
               className="shrink-0 text-sm font-medium text-[#5b9fd4]"
-              onClick={() =>
-                document
-                  .getElementById("review-board")
-                  ?.scrollIntoView?.({ block: "start" })
-              }
+              onClick={() => {
+                if (item?.stem) scrollReviewToCard(item.stem)
+              }}
             >
               回到看板
             </button>

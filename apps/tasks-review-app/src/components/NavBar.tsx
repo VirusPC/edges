@@ -1,11 +1,14 @@
 import { Layers2 } from "lucide-react"
+import { scrollReviewToTop } from "../scroll-review.ts"
 
 export function NavBar() {
   return (
     <nav
       data-review-nav="edges"
+      data-section-jump="edges"
       aria-label="Edges"
       className="flex shrink-0 items-center gap-2"
+      onDoubleClick={scrollReviewToTop}
     >
       <span
         data-edges-mark="Layers2"
