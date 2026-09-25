@@ -142,6 +142,26 @@ it("uses one project select on a narrow viewport and stacks only non-empty statu
   expect(document.querySelector("[data-status-column=todo]")).toBeNull()
 })
 
+it("opens the narrow project select and switches the board", async () => {
+  useViewport(390)
+  Element.prototype.hasPointerCapture ??= () => false
+  Element.prototype.releasePointerCapture ??= () => {}
+  Element.prototype.setPointerCapture ??= () => {}
+  Element.prototype.scrollIntoView ??= () => {}
+  const user = userEvent.setup()
+  render(<App initialPayload={payload} />)
+  const select = document.querySelector("[data-project-select]")
+  await user.click(select as Element)
+  const content = await screen.findByRole("listbox")
+  expect(content.className).toContain("translate-y-1")
+  await user.click(screen.getByRole("option", { name: "Edges Tasks · 1" }))
+  expect(document.querySelector("[data-project-select]")?.textContent).toContain(
+    "Edges Tasks · 1"
+  )
+  expect(document.querySelector("[data-stem='2026-09-16--default-tasks']")).not.toBeNull()
+  expect(document.querySelector("[data-stem='2026-09-09--harness-playbook']")).toBeNull()
+})
+
 it("opens narrow filters in a sheet and restores the board when the sheet closes", async () => {
   useViewport(390)
   const user = userEvent.setup()

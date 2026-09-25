@@ -76,7 +76,11 @@ export function ProjectColumn({
                 : "全部 · 0"}
             </span>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent
+            position="popper"
+            align="start"
+            className="w-(--radix-select-trigger-width)"
+          >
             {choices.map((choice) => (
               <SelectItem key={choice.id} value={choice.id}>
                 {projectChoiceLabel(choice.title, choice.count)}
