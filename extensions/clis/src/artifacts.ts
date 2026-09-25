@@ -18,11 +18,13 @@ Local config default: ~/.config/edges/artifacts.env
 Write (publish / rm) needs the shared token. Browser GET of artifact URLs does not.
 
 Phone review needs a reachable EDGES_ARTIFACTS_BASE_URL (not localhost).
+Public example: https://edges.viruspc.tech
+POST /artifacts there returns Cloudflare 1010 without a browser User-Agent, and 201 with one. GET usually works either way. publish / rm always send a stable browser User-Agent.
 edges tasks project review-page still only renders; publish separately.
 Capability Surface is CLI + Skill + MCP. This round has no artifacts MCP.
 
 EXAMPLES
-  edges artifacts init --base-url http://182.92.131.89 --token <server-token>
+  edges artifacts init --base-url https://edges.viruspc.tech --token <server-token>
   edges artifacts publish /tmp/review.html
   edges artifacts rm <id-or-url>
   edges artifacts server install

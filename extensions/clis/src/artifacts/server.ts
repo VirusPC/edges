@@ -44,14 +44,14 @@ After a deploy.yml pull (env already on the box):
   edges artifacts server restart   # or restart only
 
 Laptop client (same token as the server env):
-  edges artifacts init --base-url http://182.92.131.89
+  edges artifacts init --base-url https://edges.viruspc.tech
   edges artifacts publish <path>
   edges artifacts rm <id|url>
 
 Rotate token:
   edges artifacts server install --force
   edges artifacts server restart
-  edges artifacts init --base-url http://182.92.131.89 --token <printed token> --force
+  edges artifacts init --base-url https://edges.viruspc.tech --token <printed token> --force
 `;
 
 async function listenTarget(env: NodeJS.ProcessEnv, configPath?: string): Promise<{ host: string; port: number }> {

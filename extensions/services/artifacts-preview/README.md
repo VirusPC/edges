@@ -10,7 +10,7 @@ Short-lived static **Artifacts 预览服务** (ADR 0013): upload → public URL 
 
 | 用例 | 达成什么 | CLI | HTTP | review-page / Skill / Action |
 | --- | --- | --- | --- | --- |
-| 手机 / 浏览器打开 Agent 审阅 HTML | 本地渲染页变成可达 UUID URL | `edges artifacts publish`（客户端已 `init`；配置的 `EDGES_ARTIFACTS_BASE_URL` 须能打到预览服务） | `POST /artifacts`；人打开 `GET /artifacts/:id/` | `edges tasks project review-page` **只渲染**；Skill：render → publish → 给 URL |
+| 手机 / 浏览器打开 Agent 审阅 HTML | 本地渲染页变成可达 UUID URL | `edges artifacts publish`（客户端已 `init`；`EDGES_ARTIFACTS_BASE_URL` 示例 `https://edges.viruspc.tech`） | `POST /artifacts`；人打开 `GET /artifacts/:id/`。对该主机的 POST，缺浏览器式 User-Agent 时 Cloudflare 回 1010，带上则为 201；GET 通常正常 | `edges tasks project review-page` **只渲染**；Skill：render → publish → 给 URL |
 | 固定入口看 main 整板 | 不是本服务（无 TTL 的 `/tasks/` 持久看板站） | — | — | 见 [ADR 0021](../../../docs/adr/0021-persistent-tasks-board-site.md)；不要 `publish` UUID 当长期入口 |
 | 首次托管服务（本机或 ECS 式） | 写出 env / unit，拉起进程，必要时对外反代 | `server install` → `start` →（经 nginx 对外时）`setup-nginx` → `status`；客户端 `artifacts init` | `GET /health` | 无 Action |
 | 日常发布 / 删除短生命周期页 | 上传一页或提前删掉 | 一次 `init` → `publish` / `rm` | `POST /artifacts` / `DELETE /artifacts/:id` | 无 |
@@ -41,7 +41,7 @@ After `pnpm --filter edges-artifacts-preview build`, `start` runs `node dist/ind
 
 ## ECS / reachable URL (Aliyun, same box as teach)
 
-Same Node process as local. Phone review uses the **public IP http** origin (the same pattern teaching used before 备案). Do not put `:8787` in printed URLs; nginx on :80 reverse-proxies `/health` and `/artifacts/` to loopback. Leave `/teaching/` as it is. This ECS must serve the site at **`/teaching/`** from **`/etc/nginx/conf.d/teaching.conf`**. `teach.viruspc.tech` exists but 备案 is a separate concern — do not invent Cloudflare or 备案 steps here.
+Same Node process as local. Phone review uses `https://edges.viruspc.tech`. Do not put `:8787` or a bare IP in printed URLs; nginx on :80 reverse-proxies `/health` and `/artifacts/` to loopback, and Cloudflare fronts that origin. Leave `/teaching/` as it is. This ECS must serve the site at **`/teaching/`** from **`/etc/nginx/conf.d/teaching.conf`**.
 
 `edges artifacts publish` only uploads to whatever `EDGES_ARTIFACTS_BASE_URL` points at. It does not deploy the service.
 
@@ -102,35 +102,48 @@ curl -fsS http://127.0.0.1:8787/health
 From a phone or any outside machine (no extra port):
 
 ```bash
-curl -fsS http://182.92.131.89/health
-curl -fsS -o /dev/null -w '%{http_code}\n' http://182.92.131.89/teaching/
+curl -fsS https://edges.viruspc.tech/health
+curl -fsS -o /dev/null -w '%{http_code}\n' https://edges.viruspc.tech/teaching/
 ```
 
 `/health` must be JSON `{"ok":true}`. `/teaching/` must still be the teach site.
 
-Write-path smoke (uses the shared token; do not paste the token into the repo):
+### Cloudflare 1010 on `POST /artifacts`
+
+Public base URL: `https://edges.viruspc.tech`.
+
+`POST /artifacts` (what `edges artifacts publish` does) returns **1010** when the request has no browser-like `User-Agent`. Node/undici’s default is `node`; a bare `curl` identifier is the same class of miss. The same POST with a normal browser User-Agent returns **201**. `GET /health` and `GET /artifacts/:id/` usually succeed without that header.
+
+`publish` and `rm` always send this stable User-Agent. They do not use the runtime default:
+
+```
+Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36
+```
+
+Write-path smoke (uses the shared token; do not paste the token into the repo). The `User-Agent` below is required; without it this curl is a 1010, not a 201:
 
 ```bash
 # on a machine that has the token; expect 201 then a GET 200
-curl -fsS -X POST http://182.92.131.89/artifacts \
+curl -fsS -X POST https://edges.viruspc.tech/artifacts \
   -H "authorization: Bearer $EDGES_ARTIFACTS_TOKEN" \
   -H "content-type: application/json" \
+  -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" \
   -d '{"files":[{"path":"index.html","content":"<html>ok</html>"}]}'
 ```
 
-`edges artifacts publish` is the same `POST /artifacts` (no trailing slash). If that 301s to `/artifacts/`, `deploy/nginx-artifacts.conf` is wrong.
+`edges artifacts publish` is the same `POST /artifacts` (no trailing slash) and already sets that User-Agent. If the POST 301s to `/artifacts/`, `deploy/nginx-artifacts.conf` is wrong.
 
 ### Laptop / local CLI (publish client)
 
 Use the **same token** as the server env file:
 
 ```bash
-edges artifacts init --base-url http://182.92.131.89 --token <token from server install>
+edges artifacts init --base-url https://edges.viruspc.tech --token <token from server install>
 
 edges artifacts publish /tmp/review.html
 ```
 
-Phone opens the printed `http://182.92.131.89/artifacts/<uuid>/` in a system browser, not localhost.
+Phone opens the printed `https://edges.viruspc.tech/artifacts/<uuid>/` in a system browser, not localhost.
 
 ### After each main pull
 
@@ -140,19 +153,19 @@ If the unit files did not change, `restart` alone is enough; `install` then `res
 
 If `git fetch` from the ECS is flaky: keep the Action as primary (it already works for teach). Fallback is a full-repo tar over SSH from a machine that can reach both GitHub and the box, then the same CLI verbs (or `deploy/bootstrap.sh`, a thin wrapper of `install` then `restart`) — do not rsync a path subset.
 
-Rotate the token: `edges artifacts server install --force`, then `edges artifacts server restart`, then client `edges artifacts init --base-url http://182.92.131.89 --token <printed token> --force`.
+Rotate the token: `edges artifacts server install --force`, then `edges artifacts server restart`, then client `edges artifacts init --base-url https://edges.viruspc.tech --token <printed token> --force`.
 
 Server env (see [`deploy/artifacts.env.example`](deploy/artifacts.env.example)):
 
 ```
 EDGES_ARTIFACTS_TOKEN=<shared token from install>
-EDGES_ARTIFACTS_BASE_URL=http://182.92.131.89
+EDGES_ARTIFACTS_BASE_URL=https://edges.viruspc.tech
 EDGES_ARTIFACTS_HOST=127.0.0.1
 EDGES_ARTIFACTS_PORT=8787
 EDGES_ARTIFACTS_DATA_DIR=/home/cheng-dev/.local/share/edges-artifacts
 ```
 
-`EDGES_ARTIFACTS_BASE_URL` is what `publish` prints (no trailing slash). If a phone must open the page, this cannot be `http://127.0.0.1` or `localhost`.
+`EDGES_ARTIFACTS_BASE_URL` is what `publish` prints (no trailing slash). If a phone must open the page, this cannot be `http://127.0.0.1` or `localhost`. `install` keeps an existing value; change the file on the box by hand. This repo does not rewrite the running env.
 
 ## HTTP
 

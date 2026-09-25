@@ -119,7 +119,9 @@ edges artifacts server install | start | stop | restart | status | setup-nginx
 
 On the host, `edges artifacts server install` ensures `~/.config/edges/artifacts-preview.env` (creates a token if missing; `--force` may rotate), builds the service, and enables the user unit but does **not** start it. There is no `server init`. `start` / `stop` / `restart` are process lifecycle only; `status` is the unit plus `/health`. `setup-nginx` is the one-shot / idempotent :80 reverse proxy into `/etc/nginx/conf.d/teaching.conf` (`/health`, `POST /artifacts`, `/artifacts/…` → `127.0.0.1:8787`, leave `/teaching/` alone). **teaching.conf must contain `/teaching/`**. If the live box still has leftover `teach.conf` with `/teach/`, rename/replace to `teaching.conf` and run `deploy/migrate-teaching-nginx-prefix.py` first — do not dual-support the old names. If sudo is needed it prints the exact `sudo bash …/setup-nginx-artifacts.sh` command. After a repo pull: `install` if the build or unit changed, then `restart` (or `restart` only). Never combine install and start.
 
-Phone review needs a reachable `EDGES_ARTIFACTS_BASE_URL` (ECS / public host). Localhost is only for the same machine. This round has no artifacts MCP.
+Phone review needs a reachable `EDGES_ARTIFACTS_BASE_URL`. The public example is `https://edges.viruspc.tech`, not a bare IP. Localhost is only for the same machine.
+
+`POST /artifacts` to that host returns Cloudflare **1010** when the request has no browser-like `User-Agent`, and **201** when it does. `GET` of the printed URL usually works either way. `publish` and `rm` always send a stable browser User-Agent (`Chrome/131` in the client); they do not use Node/undici’s default `node`. This round has no artifacts MCP.
 
 ## Tests
 

@@ -55,12 +55,12 @@ test("ensureServerEnv creates a token when the file is missing", async () => {
   });
   assert.equal(ensured.tokenCreated, true);
   assert.equal(ensured.tokenRotated, false);
-  assert.equal(ensured.baseUrl, "http://182.92.131.89");
+  assert.equal(ensured.baseUrl, "https://edges.viruspc.tech");
   assert.equal(ensured.host, "127.0.0.1");
   assert.equal(ensured.port, 8787);
   const raw = await readFile(configPath, "utf8");
   assert.match(raw, /EDGES_ARTIFACTS_TOKEN=[0-9a-f]{64}/);
-  assert.match(raw, /EDGES_ARTIFACTS_BASE_URL=http:\/\/182\.92\.131\.89/);
+  assert.match(raw, /EDGES_ARTIFACTS_BASE_URL=https:\/\/edges\.viruspc\.tech/);
   assert.equal((await stat(configPath)).mode & 0o777, 0o600);
 });
 
@@ -123,7 +123,7 @@ test("installArtifactsServer --force rotates the token without starting", async 
     envFile,
     [
       `EDGES_ARTIFACTS_TOKEN=${original}`,
-      "EDGES_ARTIFACTS_BASE_URL=http://182.92.131.89",
+      "EDGES_ARTIFACTS_BASE_URL=https://edges.viruspc.tech",
       "EDGES_ARTIFACTS_HOST=127.0.0.1",
       "EDGES_ARTIFACTS_PORT=8787",
       `EDGES_ARTIFACTS_DATA_DIR=${path.join(dir, "data")}`,
@@ -162,7 +162,7 @@ test("installArtifactsServer builds and enables the unit without starting it", a
     envFile,
     [
       "EDGES_ARTIFACTS_TOKEN=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      "EDGES_ARTIFACTS_BASE_URL=http://182.92.131.89",
+      "EDGES_ARTIFACTS_BASE_URL=https://edges.viruspc.tech",
       "EDGES_ARTIFACTS_HOST=127.0.0.1",
       "EDGES_ARTIFACTS_PORT=8787",
       `EDGES_ARTIFACTS_DATA_DIR=${path.join(dir, "data")}`,

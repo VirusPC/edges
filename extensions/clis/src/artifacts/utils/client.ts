@@ -18,6 +18,18 @@ export type PublishResult = {
 const ARTIFACT_ID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+/** Stable browser UA. Cloudflare 1010 blocks Node's default `node` identifier. */
+export const ARTIFACTS_CLIENT_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+
+function clientHeaders(token: string, extra?: Record<string, string>): Record<string, string> {
+  return {
+    ...extra,
+    authorization: `Bearer ${token}`,
+    "user-agent": ARTIFACTS_CLIENT_USER_AGENT,
+  };
+}
+
 export function extractArtifactId(idOrUrl: string): string {
   const trimmed = idOrUrl.trim();
   if (ARTIFACT_ID.test(trimmed)) {
@@ -53,10 +65,7 @@ export async function publishArtifact(options: {
   }
   const response = await options.fetch(`${options.baseUrl.replace(/\/$/, "")}/artifacts`, {
     method: "POST",
-    headers: {
-      authorization: `Bearer ${options.token}`,
-      "content-type": "application/json",
-    },
+    headers: clientHeaders(options.token, { "content-type": "application/json" }),
     body: JSON.stringify(body),
   });
   return parseWriteResponse(response, 201) as Promise<PublishResult>;
@@ -70,9 +79,7 @@ export async function deleteArtifact(options: {
 }): Promise<void> {
   const response = await options.fetch(`${options.baseUrl.replace(/\/$/, "")}/artifacts/${options.id}`, {
     method: "DELETE",
-    headers: {
-      authorization: `Bearer ${options.token}`,
-    },
+    headers: clientHeaders(options.token),
   });
   if (response.status === 204) {
     return;

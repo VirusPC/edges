@@ -16,7 +16,7 @@ IT资产管理 / 用户确认收尾。PR #113 squash 合入 main（`94bad88`）�
 
 **事实背景:**
 - 用户 peng cheng 2026-09-22：GitHub production 界面只显示 teaching，不显示 tasks；确认后要求记待办。
-- 合入前 `.github/workflows/deploy.yml`（原 `deploy-teach.yml`）曾设 `environment.name: production` 且 `url: http://182.92.131.89/teaching/`；同 job 已生成 tasks `_site`，但 GitHub 每个 environment 只展示一个 url。
+- 已改域名。合入前 `.github/workflows/deploy.yml`（原 `deploy-teach.yml`）曾设 `environment.name: production` 且 `url: http://182.92.131.89/teaching/`；同 job 已生成 tasks `_site`，但 GitHub 每个 environment 只展示一个 url。
 - /tasks/ 公网已可用；问题是 Deployments UI 登记入口，不是站点没部署。
 - 相关勿并：`agent-clients-ux` done「Tasks review 持久站点（始终反映 main）」；`agent-clients-ux` backlog「Artifacts 预览改走专用仓 + GitHub Pages」；`agent-clients-ux` backlog「edges 衍生站点统一鉴权」。另勿并 `_default` done「仓库主页展示teach站点部署状态」（当时只挂了 teaching 入口）与 `site-and-content` backlog「仓库主页增加更多 badge」。
 - IT资产管理 / 用户 2026-09-22 确认收尾。

@@ -3,7 +3,7 @@ import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 export const PLACEHOLDER_TOKEN = "replace-with-shared-token";
-export const DEFAULT_PUBLIC_BASE_URL = "http://182.92.131.89";
+export const DEFAULT_PUBLIC_BASE_URL = "https://edges.viruspc.tech";
 export const DEFAULT_HOST = "127.0.0.1";
 export const DEFAULT_PORT = 8787;
 export const UNIT_NAME = "edges-artifacts-preview.service";

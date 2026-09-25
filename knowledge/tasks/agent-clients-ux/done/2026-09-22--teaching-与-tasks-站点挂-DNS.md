@@ -20,6 +20,7 @@ DNS 已挂 edges.viruspc.tech，但域名 HTTPS/Flexible 因未备案 Beaver+TLS
 2026-09-22 稍后用户改口采用 ECS+Tunnel（见新卡 `knowledge/tasks/agent-clients-ux/done/2026-09-22--ECS-上-Cloudflare-Tunnel-对外teachingtasksartifacts.md`）；此前「放弃隧道」作废为对外策略。本卡仍 done：上面的 DNS 已挂与 Beaver/TLS 事实保留不删；Tunnel 落地不在本卡。
 
 **事实背景:**
+- 已改域名：现行入口是 https://edges.viruspc.tech/teaching/ 与 https://edges.viruspc.tech/tasks/。下面的裸 IP 是当时记录，不是当前 BASE_URL。
 - 公网原入口：http://182.92.131.89/teaching/ 、http://182.92.131.89/tasks/（同机 ECS）。
 - 用户 peng cheng 2026-09-22：要不先让 IT资产管理 给这两个页面挂 DNS。
 - 相关：GitHub Deployments 只显示 teaching url 的 backlog 另卡；本卡只做 DNS。
@@ -37,6 +38,6 @@ DNS 已挂 edges.viruspc.tech，但域名 HTTPS/Flexible 因未备案 Beaver+TLS
 
 **How to apply:**
 - **已取代：** 2026-09-22 稍后「放弃隧道、入口维持裸 IP」不再是对外策略。现行方向是 ECS + Cloudflare Tunnel（见上面新卡）。下面三条是被取代前的当轮结论，留作历史。
-- 对外入口维持裸 IP：http://182.92.131.89/teaching/ 与 http://182.92.131.89/tasks/。
+- 对外入口维持裸 IP：http://182.92.131.89/teaching/ 与 http://182.92.131.89/tasks/。已改域名：现行入口是 https://edges.viruspc.tech/teaching/ 与 https://edges.viruspc.tech/tasks/。
 - DNS 记录保留，但域名 HTTPS / Flexible 不可用，不作为对外入口。
 - 备案或以后 Tunnel 再议。已出栈指派 IT资产管理；用户口头放弃域名 HTTPS/Flexible/隧道等绕过。

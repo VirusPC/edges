@@ -4,6 +4,7 @@
 
 ### 事实（Facts）
 
+- 已改域名：Artifacts 的 `BASE_URL` 改为 `https://edges.viruspc.tech`。下面的裸 IP 是当时现象记录，不是当前入口。
 - 现象：`http://182.92.131.89/artifacts/<id>/` 直连 `curl` 返回 200；但 box Chromium，或经 `127.0.0.1:8791` 出口代理访问时，返回 HTTP 400、空 body，Chrome 显示「HTTP ERROR 400」。
 - 证据场景：Tasks 审阅壳 #133 验收；视觉同学在本机 `127.0.0.1:8766` 真滚页面。
 
@@ -11,7 +12,7 @@
 
 - 原因是 Grok Bot box 的 Cloudflare privacy egress 会拦截裸 IP 的 HTTP 请求，并非 artifacts / nginx 针对 UA 或 cookie 的策略。
 - Workaround：用 `curl` 下载同一份 HTML，再在本机 `127.0.0.1` 起服务；或者直接使用各 agent 共享的 `/workspace/cloud-agent-artifacts/...html`。
-- 中期方案：把 Artifacts 的 `BASE_URL` 换成可被代理放行的域名。
+- 已改域名：Artifacts 的 `BASE_URL` 改为 `https://edges.viruspc.tech`。
 
 ## 2. 中途步骤被打断 + 用户不回复：整条 loop 中断
 

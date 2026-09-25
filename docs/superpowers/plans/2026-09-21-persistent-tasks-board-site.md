@@ -41,7 +41,7 @@ These are already decided in ADR 0021 / CONTEXT. This plan does not re-grill the
 - Extend `.github/workflows/deploy.yml` only; do not add a second workflow
 - nginx: `teaching.conf` + `/teaching/` only; do not dual-recognize `teach.conf` or `/teach/`
 - Do not break `/teaching/` or artifacts `/health` + `/artifacts`
-- Public URL shape: `http(s)://<host>/tasks/` (same ECS origin as teaching; current public IP http is `http://182.92.131.89`)
+- Public URL shape: `https://edges.viruspc.tech/tasks/` (same ECS origin as teaching; 已改域名)
 - Output path: `knowledge/tasks/_site/index.html` (generated on the box; gitignored)
 - Do not change Task board status
 - Do not edit `knowledge/posts/`
@@ -388,9 +388,9 @@ sudo bash /home/cheng-dev/projects/edges/extensions/clis/deploy/setup-nginx-task
 4. Checks (do not put tokens in the repo):
 
 ```bash
-curl -fsS -o /dev/null -w '%{http_code}\n' http://182.92.131.89/teaching/
-curl -fsS -o /dev/null -w '%{http_code}\n' http://182.92.131.89/tasks/
-curl -fsS http://182.92.131.89/health
+curl -fsS -o /dev/null -w '%{http_code}\n' https://edges.viruspc.tech/teaching/
+curl -fsS -o /dev/null -w '%{http_code}\n' https://edges.viruspc.tech/tasks/
+curl -fsS https://edges.viruspc.tech/health
 ```
 
 `/teaching/` still the teach site. `/tasks/` is the generated board. `/health` still artifacts JSON `{"ok":true}`.
