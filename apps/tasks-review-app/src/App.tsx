@@ -155,12 +155,12 @@ export default function App({
   const narrow = useNarrowLayout()
   const [leftWidth, setLeftWidth] = useState(LEFT_DEFAULT)
   const [rightWidth, setRightWidth] = useState(RIGHT_DEFAULT)
-  const [detailOpen, setDetailOpen] = useState(() => hashState.stem !== "")
   const columnsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (hashState.stem !== "") setDetailOpen(true)
-  }, [hashState.stem])
+    if (!narrow || hashState.stem === "") return
+    document.getElementById("review-detail")?.scrollIntoView?.({ block: "start" })
+  }, [narrow, hashState.stem])
 
   function onResizePointerDown(
     side: "left" | "right",
@@ -243,10 +243,7 @@ export default function App({
             filter={filter}
             narrow={narrow}
             selectedStem={hashState.stem}
-            onSelect={(stem) => {
-              setDetailOpen(true)
-              setHashState((prev) => ({ ...prev, stem }))
-            }}
+            onSelect={(stem) => setHashState((prev) => ({ ...prev, stem }))}
             onMove={(stem, projectId) =>
               setItems((prev) => applyProjectDrop(prev, stem, projectId))
             }
@@ -255,18 +252,8 @@ export default function App({
             side="right"
             onPointerDown={(event) => onResizePointerDown("right", event)}
           />
-          {narrow ? null : (
-            <MarkdownPane item={selected} narrow={false} />
-          )}
+          <MarkdownPane item={selected} narrow={narrow} />
         </div>
-        {narrow ? (
-          <MarkdownPane
-            item={selected}
-            narrow
-            open={detailOpen}
-            onBack={() => setDetailOpen(false)}
-          />
-        ) : null}
       </DndContext>
     </div>
   )

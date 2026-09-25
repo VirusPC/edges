@@ -120,7 +120,7 @@ it("uses one project select on a narrow viewport and stacks only non-empty statu
   expect(select?.textContent).toContain("全部 · 4")
   expect(document.querySelector("[data-project-id=edges-tasks]")).toBeNull()
   expect(
-    document.querySelector("[data-section-title=tasks]")?.textContent
+    document.querySelector("[data-section-title=tasks] span")?.textContent
   ).toBe("Tasks")
   const columns = document.querySelector("[data-status-columns]")
   expect(columns?.className).toContain("flex-col")
@@ -154,37 +154,52 @@ it("opens narrow filters in a sheet and restores the board when the sheet closes
   expect(document.querySelector("[data-section-title=tasks]")).not.toBeNull()
 })
 
-it("covers the narrow board with a viewport detail panel and keeps the selection on back", async () => {
+it("sticks one section header at a time and keeps the selection on back", async () => {
   useViewport(390)
   const user = userEvent.setup()
   render(<App initialPayload={payload} />)
-  expect(screen.queryByRole("button", { name: "回到看板" })).toBeNull()
+  const pane = document.querySelector("[data-markdown-pane]")
+  expect(pane?.getAttribute("data-detail-panel")).toBeNull()
+  expect(pane?.className).not.toContain("fixed")
+  expect(pane?.parentElement).not.toBe(document.body)
+  for (const section of ["projects", "tasks", "details"]) {
+    const header = document.querySelector(`[data-section-title=${section}]`)
+    expect(header?.className).toContain("sticky")
+    expect(header?.className).toContain("top-0")
+    expect(header?.querySelector("[data-section-toggle]")?.textContent).toBe("收起")
+  }
+  const details = document.querySelector("[data-section-title=details]")
+  const back = details?.querySelector("[data-section-back]")
+  const toggle = details?.querySelector("[data-section-toggle]")
+  expect(back?.textContent).toBe("回到看板")
+  expect(
+    back &&
+      toggle &&
+      back.compareDocumentPosition(toggle) & Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy()
+  expect(
+    document.querySelector("[data-section-title=projects] [data-section-back]")
+  ).toBeNull()
+  expect(
+    document.querySelector("[data-section-title=tasks] [data-section-back]")
+  ).toBeNull()
+
+  await user.click(document.querySelector("[data-section-toggle=projects]") as Element)
+  expect(
+    document.querySelector("[data-section-title=projects]")?.getAttribute(
+      "data-section-collapsed"
+    )
+  ).toBe("on")
+  expect(document.querySelector("[data-project-select]")).toBeNull()
+  await user.click(document.querySelector("[data-section-toggle=projects]") as Element)
+  expect(document.querySelector("[data-project-select]")).not.toBeNull()
+
   await user.click(screen.getByText("待读 Harness Playbook"))
-  const panel = document.querySelector("[data-markdown-pane]")
-  expect(panel?.getAttribute("data-detail-panel")).toBe("viewport")
-  expect(panel?.className).toContain("fixed")
-  expect(panel?.className).toContain("top-12")
-  expect(panel?.className).toContain("bottom-0")
-  expect(panel?.className).toContain("overflow-hidden")
-  expect(panel?.className).not.toContain("sticky")
-  expect(panel?.parentElement).toBe(document.body)
-  const bar = document.querySelector("[data-detail-sticky]")
-  expect(bar?.closest("[data-detail-body]")).toBeNull()
-  expect(bar?.parentElement).toBe(panel)
-  expect(bar?.className).not.toContain("sticky")
-  expect(bar?.className).toContain("shrink-0")
-  expect(bar?.textContent).toContain("回到看板")
-  expect(bar?.textContent).toContain("待读 Harness Playbook")
-  expect(bar?.querySelector("p")?.className).toContain("truncate")
-  expect(bar?.querySelector("[data-filter=q]")).toBeNull()
-  expect(document.querySelector("[data-detail-body]")?.className).toContain(
-    "overflow-y-auto"
-  )
   const stem = window.location.hash
   await user.click(screen.getByRole("button", { name: "回到看板" }))
   expect(window.location.hash).toBe(stem)
   expect(window.location.hash).toContain("stem=")
-  expect(panel).toHaveProperty("hidden", true)
+  expect(pane).toHaveProperty("hidden", false)
   expect(
     document
       .querySelector("[data-stem='2026-09-09--harness-playbook']")

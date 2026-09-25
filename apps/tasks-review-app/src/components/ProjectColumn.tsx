@@ -6,6 +6,7 @@ import {
   type ReviewItem,
 } from "../filter.ts"
 import type { ReviewGroup } from "../types.ts"
+import { SectionHeader } from "./SectionHeader.tsx"
 import {
   Select,
   SelectContent,
@@ -46,18 +47,20 @@ export function ProjectColumn({
   ]
   const selected =
     choices.find((choice) => choice.id === filter.projectId) ?? choices[0]
+  const [collapsed, setCollapsed] = useState(false)
   return (
     <nav
       data-review-projects="edges"
-      className="w-full min-w-0 shrink-0 overflow-auto bg-[#0f1419] p-2 md:min-h-0"
+      className="w-full min-w-0 shrink-0 bg-[#0f1419] md:min-h-0 md:overflow-auto"
     >
-      <h2
-        data-section-title="projects"
-        className="-mx-2 -mt-2 mb-2 border-b border-[#334155] bg-[#1a2332] px-3 py-2 text-lg font-semibold tracking-wide text-[#e7ecf3]"
-      >
-        Projects
-      </h2>
-      {narrow ? (
+      <SectionHeader
+        section="projects"
+        collapsed={collapsed}
+        onToggle={() => setCollapsed((value) => !value)}
+      />
+      {collapsed ? null : (
+        <div className="p-2">
+          {narrow ? (
         <Select value={filter.projectId} onValueChange={onSelect}>
           <SelectTrigger
             data-project-select="edges"
@@ -86,6 +89,8 @@ export function ProjectColumn({
           allCount={allCount}
           onSelect={onSelect}
         />
+          )}
+        </div>
       )}
     </nav>
   )

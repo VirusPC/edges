@@ -7,6 +7,8 @@ import {
 import { statusDotClass, statusLabel } from "../display.ts"
 import { REVIEW_STATUS_COLUMNS } from "../statuses.ts"
 import type { ReviewGroup } from "../types.ts"
+import { useState } from "react"
+import { SectionHeader } from "./SectionHeader.tsx"
 import { TaskCard } from "./TaskCard.tsx"
 
 export function StatusBoard({
@@ -38,18 +40,19 @@ export function StatusBoard({
   const sectionClass = narrow
     ? "flex w-full min-w-0 flex-col gap-2"
     : "flex w-72 shrink-0 flex-col gap-2"
+  const [collapsed, setCollapsed] = useState(false)
   return (
     <div
       id="review-board"
       data-status-board="edges"
       className="flex w-full max-w-full min-w-0 shrink-0 flex-col bg-[#0f1419] md:h-full md:min-h-0 md:overflow-hidden"
     >
-      <h2
-        data-section-title="tasks"
-        className="shrink-0 border-b border-[#334155] bg-[#1a2332] px-3 py-2 text-lg font-semibold tracking-wide text-[#e7ecf3]"
-      >
-        Tasks
-      </h2>
+      <SectionHeader
+        section="tasks"
+        collapsed={collapsed}
+        onToggle={() => setCollapsed((value) => !value)}
+      />
+      {collapsed ? null : (
       <div
         data-status-columns="edges"
         className={
@@ -68,6 +71,7 @@ export function StatusBoard({
               title={column.title}
               count={column.items.length}
               dot={statusDotClass(column.status)}
+              narrow={narrow}
             />
             {column.items.map((item) => (
               <TaskCard
@@ -88,6 +92,7 @@ export function StatusBoard({
               title="未标注"
               count={unspecified.length}
               dot={statusDotClass("__unspecified")}
+              narrow={narrow}
             />
             {unspecified.map((item) => (
               <TaskCard
@@ -106,6 +111,7 @@ export function StatusBoard({
           <p className="px-2 py-6 text-sm text-[#9aa8bc]">没有匹配的卡片</p>
         ) : null}
       </div>
+      )}
     </div>
   )
 }
@@ -114,13 +120,20 @@ function ColumnHeader({
   title,
   count,
   dot,
+  narrow,
 }: {
   title: string
   count: number
   dot: string
+  narrow: boolean
 }) {
   return (
-    <h2 className="sticky top-0 flex items-center justify-between gap-2 border-b border-[#334155] bg-[#0f1419] px-1 py-1 text-base font-semibold tracking-wide text-[#9aa8bc]">
+    <h2
+      className={
+        (narrow ? "" : "sticky top-0 ") +
+        "flex items-center justify-between gap-2 border-b border-[#334155] bg-[#0f1419] px-1 py-1 text-base font-semibold tracking-wide text-[#9aa8bc]"
+      }
+    >
       <span className="flex items-center gap-2">
         <span className={`size-1.5 rounded-full ${dot}`} />
         {title}

@@ -111,8 +111,15 @@ it("stacks the filter, board, and detail on a narrow viewport and scrolls betwee
   expect(
     board!.compareDocumentPosition(detail!) & Node.DOCUMENT_POSITION_FOLLOWING
   ).toBeTruthy()
-  expect(detail).toHaveProperty("hidden", true)
-  expect(screen.queryByRole("button", { name: "回到看板" })).toBeNull()
+  expect(detail).toHaveProperty("hidden", false)
+  expect(detail?.className).not.toContain("fixed")
+  expect(detail?.getAttribute("data-detail-panel")).toBeNull()
+  expect(
+    document.querySelector("[data-section-title=details] [data-section-back]")
+  ).not.toBeNull()
+  expect(
+    document.querySelector("[data-section-title=tasks] [data-section-back]")
+  ).toBeNull()
   expect(document.querySelector("[data-review-shell]")?.className).toContain(
     "overflow-x-hidden"
   )
@@ -126,19 +133,21 @@ it("stacks the filter, board, and detail on a narrow viewport and scrolls betwee
 
   await user.click(screen.getByText("Alpha title"))
   expect(detail).toHaveProperty("hidden", false)
-  expect(detail?.className).toContain("fixed")
-  expect(detail?.className).toContain("top-12")
-  expect(detail?.className).not.toContain("sticky")
+  expect(detail?.className).not.toContain("fixed")
+  expect(detail?.getAttribute("data-detail-panel")).toBeNull()
+  expect(document.querySelector("[data-section-title=details]")?.className).toContain(
+    "sticky"
+  )
   expect(document.querySelector("[data-markdown-pane] h1")?.textContent).toBe(
     "Heading"
   )
-  expect(scrollIntoView).not.toHaveBeenCalled()
+  expect(scrollIntoView).toHaveBeenCalled()
   expect(window.location.hash).toContain("stem=")
 
   const stem = window.location.hash
   await user.click(screen.getByRole("button", { name: "回到看板" }))
   expect(window.location.hash).toBe(stem)
-  expect(detail).toHaveProperty("hidden", true)
+  expect(detail).toHaveProperty("hidden", false)
   expect(document.querySelector("[data-stem='2026-09-21--alpha']")?.getAttribute("data-selected")).toBe(
     "on"
   )
