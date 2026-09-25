@@ -2,9 +2,9 @@ import type { ReactNode } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react"
 
 const CHAPTER =
-  "border-b border-[#5b9fd4]/25 bg-[#0f1419] text-[#d7dee8] shadow-none"
+  "border-b border-[#2c4a63] bg-[#163044] text-[#e7ecf3] shadow-none"
 const STATUS =
-  "border-b border-[#2a3544] bg-[#121820] text-[#c5d0de] shadow-none"
+  "border-b border-[#1c2633] bg-[#0f1419] text-[#9aa8bc] shadow-none"
 
 export function SectionHeader({
   title,
