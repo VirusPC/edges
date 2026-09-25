@@ -41,6 +41,25 @@ export function StatusBoard({
     ? "flex w-full min-w-0 flex-col gap-2"
     : "flex w-72 shrink-0 flex-col gap-2"
   const [collapsed, setCollapsed] = useState(false)
+  const [collapsedStatuses, setCollapsedStatuses] = useState<ReadonlySet<string>>(
+    () => new Set()
+  )
+  const statusIds = [
+    ...columns.map((column) => column.status),
+    ...(unspecified.length > 0 ? ["__unspecified"] : []),
+  ]
+  const allStatusCollapsed =
+    narrow &&
+    statusIds.length > 0 &&
+    statusIds.every((status) => collapsedStatuses.has(status))
+  function toggleStatus(status: string) {
+    setCollapsedStatuses((current) => {
+      const next = new Set(current)
+      if (next.has(status)) next.delete(status)
+      else next.add(status)
+      return next
+    })
+  }
   return (
     <div
       id="review-board"
@@ -57,9 +76,11 @@ export function StatusBoard({
       {collapsed ? null : (
       <div
         data-status-columns="edges"
+        data-status-stack={allStatusCollapsed ? "tight" : "spaced"}
         className={
           narrow
-            ? "flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-x-clip"
+            ? "flex min-h-0 w-full min-w-0 flex-col overflow-x-clip " +
+              (allStatusCollapsed ? "gap-0" : "gap-4")
             : "flex min-h-0 w-full min-w-0 flex-1 gap-3 overflow-x-auto p-3"
         }
       >
@@ -73,6 +94,8 @@ export function StatusBoard({
             groups={groups}
             narrow={narrow}
             sectionClass={sectionClass}
+            collapsed={collapsedStatuses.has(column.status)}
+            onToggle={() => toggleStatus(column.status)}
             selectedStem={selectedStem}
             onSelect={onSelect}
             onMove={onMove}
@@ -81,12 +104,14 @@ export function StatusBoard({
         {unspecified.length > 0 ? (
           <StatusSection
             status="__unspecified"
-            title="未标注"
+            title={statusLabel("__unspecified")}
             dot={statusDotClass("__unspecified")}
             items={unspecified}
             groups={groups}
             narrow={narrow}
             sectionClass={sectionClass}
+            collapsed={collapsedStatuses.has("__unspecified")}
+            onToggle={() => toggleStatus("__unspecified")}
             selectedStem={selectedStem}
             onSelect={onSelect}
             onMove={onMove}
@@ -109,6 +134,8 @@ function StatusSection({
   groups,
   narrow,
   sectionClass,
+  collapsed,
+  onToggle,
   selectedStem,
   onSelect,
   onMove,
@@ -120,11 +147,12 @@ function StatusSection({
   groups: ReviewGroup[]
   narrow: boolean
   sectionClass: string
+  collapsed: boolean
+  onToggle: () => void
   selectedStem: string
   onSelect: (stem: string) => void
   onMove: (stem: string, projectId: string) => void
 }) {
-  const [collapsed, setCollapsed] = useState(false)
   return (
     <section data-status-column={status} className={sectionClass}>
       <SectionHeader
@@ -141,7 +169,7 @@ function StatusSection({
           </span>
         }
         collapsed={collapsed}
-        onToggle={() => setCollapsed((value) => !value)}
+        onToggle={onToggle}
         stickyClassName={narrow ? "sticky top-12 z-10" : "sticky top-0 z-10"}
       />
       {collapsed ? null : (

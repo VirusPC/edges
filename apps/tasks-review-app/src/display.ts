@@ -53,13 +53,13 @@ export function priorityBadgeClass(priority: string): string {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  backlog: "待办",
-  todo: "待处理",
-  in_progress: "进行中",
-  in_review: "评审中",
-  done: "已完成",
-  blocked: "已阻塞",
-  cancelled: "已取消",
+  backlog: "Backlog",
+  todo: "Todo",
+  in_progress: "In Progress",
+  in_review: "In Review",
+  done: "Done",
+  blocked: "Blocked",
+  cancelled: "Cancelled",
 }
 
 export function statusLabel(status: string): string {
@@ -68,9 +68,9 @@ export function statusLabel(status: string): string {
     return known
   }
   if (status === "" || status === "__unspecified") {
-    return "未标注"
+    return "Unspecified"
   }
-  return "其他状态"
+  return "Other"
 }
 
 export function statusDotClass(status: string): string {

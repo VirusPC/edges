@@ -101,16 +101,27 @@ function boardText(): string {
   return document.querySelector("[data-status-board]")?.textContent ?? ""
 }
 
-it("shows Chinese status names and hides raw snake_case on the board", () => {
+it("shows English status names and hides raw snake_case on the board", () => {
   useViewport(1024)
   render(<App initialPayload={payload} />)
-  expect(screen.getByRole("heading", { name: /待办/ })).toBeTruthy()
-  expect(screen.getByRole("heading", { name: /进行中/ })).toBeTruthy()
-  expect(screen.getByRole("heading", { name: /已完成/ })).toBeTruthy()
-  expect(screen.getByRole("heading", { name: /已取消/ })).toBeTruthy()
+  expect(screen.getByRole("heading", { name: /Backlog/ })).toBeTruthy()
+  expect(screen.getByRole("heading", { name: /In Progress/ })).toBeTruthy()
+  expect(screen.getByRole("heading", { name: /Done/ })).toBeTruthy()
+  expect(screen.getByRole("heading", { name: /Cancelled/ })).toBeTruthy()
   expect(boardText()).not.toMatch(/in_progress|backlog|cancelled/)
   expect(document.querySelector("[data-status-column=done]")).not.toBeNull()
   expect(document.querySelector("[data-status-column=todo]")).toBeNull()
+  const columns = document.querySelector("[data-status-columns]")
+  expect(columns?.getAttribute("data-status-stack")).toBe("spaced")
+  expect(columns?.className).toContain("gap-3")
+  for (const toggle of document.querySelectorAll(
+    "[data-status-column] [data-section-toggle]"
+  )) {
+    fireEvent.click(toggle)
+  }
+  expect(columns?.getAttribute("data-status-stack")).toBe("spaced")
+  expect(columns?.className).toContain("gap-3")
+  expect(columns?.className).not.toContain("gap-0")
 })
 
 it("uses one project select on a narrow viewport and stacks only non-empty statuses", () => {
@@ -218,6 +229,30 @@ it("sticks one section header at a time and keeps the selection on back", async 
   expect(statusHeader?.getAttribute("data-section-collapsed")).toBe("on")
   await user.click(statusToggle as Element)
   expect(backlog?.querySelector("[data-stem]")).not.toBeNull()
+
+  const columns = document.querySelector("[data-status-columns]")
+  expect(columns?.getAttribute("data-status-stack")).toBe("spaced")
+  expect(columns?.className).toContain("gap-4")
+  const statusToggles = [
+    ...document.querySelectorAll("[data-status-column] [data-section-toggle]"),
+  ]
+  expect(statusToggles.length).toBeGreaterThan(1)
+  for (const toggle of statusToggles) {
+    await user.click(toggle)
+  }
+  expect(columns?.getAttribute("data-status-stack")).toBe("tight")
+  expect(columns?.className).toContain("gap-0")
+  expect(columns?.className).not.toContain("gap-4")
+  expect(document.querySelector("[data-project-select]")).not.toBeNull()
+  expect(
+    document.querySelector("[data-section-title=projects] span")?.textContent
+  ).toBe("Projects")
+  await user.click(statusToggles[0]!)
+  expect(columns?.getAttribute("data-status-stack")).toBe("spaced")
+  expect(columns?.className).toContain("gap-4")
+  for (const toggle of statusToggles.slice(1)) {
+    await user.click(toggle)
+  }
 
   await user.click(screen.getByText("待读 Harness Playbook"))
   const stem = window.location.hash
