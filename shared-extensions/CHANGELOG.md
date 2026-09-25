@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-09-23
+
+### Added
+
+- `skills/looki-memory`：读取 Looki L1 的 moments、journals、lifelog 与 For You（含某天发生了什么）。不用于 Edges notes，也不用于 Looki SEA 购物 MCP。
+
 ## [1.0.0] - 2026-09-08
 
 ### Added
@@ -20,5 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 整层一份 `VERSION`、本 changelog、tag `shared-extensions@<version>`。
 - 本层项目记忆（`AGENTS.md` + `.memory/`）。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/shared-extensions@1.0.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/shared-extensions@1.1.0...HEAD
+[1.1.0]: https://github.com/VirusPC/edges/compare/shared-extensions@1.0.0...shared-extensions@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/shared-extensions@1.0.0
