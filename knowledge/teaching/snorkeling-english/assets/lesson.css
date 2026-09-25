@@ -9,3 +9,5 @@ summary { cursor:pointer; color:var(--accent); padding:.4rem 0; }
 details { border-top:1px solid var(--line); padding:.5rem 0; }
 blockquote { border-left:3px solid var(--accent); margin:1rem 0; padding:.4rem 1rem; }
 @media print { .wrap { max-width:none; padding:0; } a { color:inherit; } details { break-inside:avoid; } }
+
+.ipa { font-family: "Charis SIL", "Doulos SIL", "DejaVu Sans", sans-serif; font-weight:400; }

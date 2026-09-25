@@ -2,6 +2,9 @@
 
 ## Knowledge
 
+- [Cambridge Dictionary: Pronunciation](https://dictionary.cambridge.org/us/pronunciation/)
+  美式 IPA 与真人发音；本课程选用 US。逐词来源链接见 [术语发音表](reference/pronunciation.html)，采用对应词条 US 标注。
+
 - [British Council: Checking understanding](https://learnenglish.britishcouncil.org/free-resources/speaking/a1/checking-understanding)
   请求重复与核对含义的权威语言示例；第 3 课借用会话功能，练习请向导示范和确认理解。
 
