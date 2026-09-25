@@ -201,7 +201,7 @@ export default function App({
   return (
     <div
       data-review-shell="edges"
-      className="relative flex h-screen max-w-full flex-col overflow-x-hidden"
+      className="relative flex h-screen max-w-full flex-col overflow-x-hidden overflow-y-hidden"
     >
       {toolbar}
       <DndContext

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { createPortal } from "react-dom"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { reviewItemTitle } from "../display.ts"
@@ -44,7 +45,7 @@ export function MarkdownPane({
       </div>
     </>
   )
-  return (
+  const pane = (
     <aside
       id="review-detail"
       data-markdown-pane="true"
@@ -52,13 +53,33 @@ export function MarkdownPane({
       hidden={narrow && !showPanel}
       className={
         "flex w-full min-w-0 shrink-0 flex-col bg-[#121820] md:min-h-0" +
-        (showPanel ? " fixed inset-x-0 top-12 bottom-0 z-40" : "")
+        (showPanel
+          ? " fixed inset-x-0 top-12 bottom-0 z-40 h-[calc(100dvh-3rem)] overflow-hidden"
+          : "")
+      }
+      style={
+        showPanel
+          ? {
+              position: "fixed",
+              top: "3rem",
+              right: 0,
+              bottom: 0,
+              left: 0,
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+              height: "calc(100dvh - 3rem)",
+              maxHeight: "calc(100dvh - 3rem)",
+              zIndex: 40,
+            }
+          : undefined
       }
     >
       {showPanel ? (
         <div
           data-detail-sticky="edges"
           className="flex h-12 shrink-0 items-center gap-2 border-b border-[#334155] bg-[#0f1419] px-3"
+          style={{ flex: "0 0 auto" }}
         >
           <button
             type="button"
@@ -75,7 +96,13 @@ export function MarkdownPane({
       {showPanel ? (
         <div
           data-detail-body="edges"
-          className="min-h-0 flex-1 overflow-y-auto"
+          className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain"
+          style={{
+            flex: "1 1 0%",
+            minHeight: 0,
+            overflowY: "auto",
+            overscrollBehaviorY: "contain",
+          }}
         >
           {article}
         </div>
@@ -84,4 +111,8 @@ export function MarkdownPane({
       )}
     </aside>
   )
+  if (narrow && typeof document !== "undefined") {
+    return createPortal(pane, document.body)
+  }
+  return pane
 }

@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 任务看板与项目
 
 - `edges tasks project review-page` 和 `/tasks/` 上，三栏章节标题是 Projects、Tasks、Details。状态列名仍是 backlog 一类原值，点开的任务名留在 Details 下面。章节标题比列表和卡片更大、更粗，放在浅底色条上，下面有一条分区线；顶栏 Edges 比这三处章节标题更大。窄屏和宽屏同一套。
-- 审阅页窄于 768px 时，项目收成一个下拉（例如「全部 · 95」），状态按待办、进行中、已完成等中文分段纵向排开，只显示有卡片的状态且全部展开。筛选收进「筛选」；点开卡片后，详情用盖住看板的视口面板，顶栏固定「回到看板」和标题，只有正文滚动，回到看板关掉面板、不取消选中。宽屏把 Edges 和筛选合成一行，详情栏默认 220px，中栏更宽，分隔线仍可拖且中栏不会被拖没。卡片上的日期文件名默认收起。拖到左栏或「移到项目…」仍只改页内归属，复制导出 JSON 会带上这次改动。
+- 审阅页窄于 768px 时，项目收成一个下拉（例如「全部 · 95」），状态按待办、进行中、已完成等中文分段纵向排开，只显示有卡片的状态且全部展开。筛选收进「筛选」；点开卡片后，详情用盖住看板的视口面板；「回到看板」和标题在面板头上，不进正文的滚动层，只有正文滚动。回到看板关掉面板、不取消选中。宽屏把 Edges 和筛选合成一行，详情栏默认 220px，中栏更宽，分隔线仍可拖且中栏不会被拖没。卡片上的日期文件名默认收起。拖到左栏或「移到项目…」仍只改页内归属，复制导出 JSON 会带上这次改动。
 - `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个三栏审阅页：顶栏可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选；左侧点项目筛选，拖到项目上只改 project，再用「复制导出 JSON」贴回。中间的状态列只展示，右侧渲染当前条目的 Markdown 正文。页上的脚本在生成前由 `pnpm --filter tasks-review-app run build` 打好并内联进单份 HTML，构建产物不进 git。
 - 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
 - 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy.yml` 会在整仓 pull 之后自动生成。
