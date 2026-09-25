@@ -111,31 +111,77 @@ it("stacks the filter, board, and detail on a narrow viewport and scrolls betwee
   expect(
     board!.compareDocumentPosition(detail!) & Node.DOCUMENT_POSITION_FOLLOWING
   ).toBeTruthy()
-  expect(detail).toHaveProperty("hidden", true)
-  expect(screen.queryByRole("button", { name: "回到看板" })).toBeNull()
-  expect(document.querySelector("[data-review-shell]")?.className).toContain(
-    "overflow-x-hidden"
-  )
+  expect(detail).toHaveProperty("hidden", false)
+  expect(detail?.className).not.toContain("fixed")
+  expect(detail?.getAttribute("data-detail-panel")).toBeNull()
+  expect(
+    document.querySelector("[data-section-title=details] [data-section-back]")
+  ).not.toBeNull()
+  expect(
+    document.querySelector("[data-section-title=tasks] [data-section-back]")
+  ).toBeNull()
+  const shell = document.querySelector("[data-review-shell]")
+  expect(shell?.className).toContain("h-dvh")
+  expect(shell?.className).toContain("overflow-x-clip")
+  expect(shell?.className).not.toContain("h-screen")
+  expect(shell?.className).not.toContain("overflow-x-hidden")
+  expect(shell?.className).not.toContain("overflow-y-hidden")
+  const columns = document.querySelector("[data-review-columns]")
+  expect(columns?.className).toContain("overflow-y-auto")
+  expect(columns?.className).toContain("overflow-anchor:none")
+  expect(columns?.className).not.toContain("overflow-x-hidden")
+  expect(columns?.className).not.toContain("overflow-x-clip")
+  const flow = document.querySelector("[data-review-flow]")
+  expect(flow?.className).toContain("shrink-0")
+  expect(flow?.className).toContain("min-h-min")
+  expect(flow?.className).toContain("md:contents")
+  expect(columns?.children).toHaveLength(1)
+  expect(columns?.firstElementChild).toBe(flow)
+  expect(
+    flow
+      ?.querySelector("[data-review-projects]")
+      ?.compareDocumentPosition(flow.querySelector("[data-status-board]")!) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy()
+  expect(
+    flow
+      ?.querySelector("[data-status-board]")
+      ?.compareDocumentPosition(flow.querySelector("[data-markdown-pane]")!) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy()
+  const statusColumns = document.querySelector("[data-status-columns]")
+  expect(statusColumns?.className).toContain("shrink-0")
+  expect(statusColumns?.className).not.toContain("min-h-0")
   expect(board?.className).toContain("max-w-full")
   expect(document.querySelector("[data-status-columns]")?.className).toContain(
-    "overflow-x-auto"
+    "flex-col"
   )
+  expect(
+    document.querySelector("[data-status-columns]")?.className
+  ).not.toContain("overflow-x-auto")
 
   await user.click(screen.getByText("Alpha title"))
   expect(detail).toHaveProperty("hidden", false)
+  expect(detail?.className).not.toContain("fixed")
+  expect(detail?.getAttribute("data-detail-panel")).toBeNull()
+  expect(
+    document.querySelector("[data-section-title=details]")?.className
+  ).toContain("sticky")
   expect(document.querySelector("[data-markdown-pane] h1")?.textContent).toBe(
     "Heading"
   )
   expect(scrollIntoView).toHaveBeenCalled()
   expect(window.location.hash).toContain("stem=")
 
-  scrollIntoView.mockClear()
+  const stem = window.location.hash
   await user.click(screen.getByRole("button", { name: "回到看板" }))
-  expect(document.getElementById("review-board")?.scrollIntoView).toBe(
-    scrollIntoView
-  )
-  expect(scrollIntoView).toHaveBeenCalled()
+  expect(window.location.hash).toBe(stem)
   expect(detail).toHaveProperty("hidden", false)
+  expect(
+    document
+      .querySelector("[data-stem='2026-09-21--alpha']")
+      ?.getAttribute("data-selected")
+  ).toBe("on")
 })
 
 it("keeps the desktop three-column shell and hides the narrow back control", () => {
@@ -145,7 +191,7 @@ it("keeps the desktop three-column shell and hides the narrow back control", () 
     "[data-review-columns=edges]"
   ) as HTMLElement
   expect(columns.style.gridTemplateColumns.startsWith("240px")).toBe(true)
-  expect(columns.style.gridTemplateColumns.endsWith("380px")).toBe(true)
+  expect(columns.style.gridTemplateColumns.endsWith("220px")).toBe(true)
   expect(document.querySelector("[data-panel-resize=left]")).not.toBeNull()
   expect(document.querySelector("[data-panel-resize=right]")).not.toBeNull()
   expect(document.querySelector("[data-markdown-pane]")).toHaveProperty(

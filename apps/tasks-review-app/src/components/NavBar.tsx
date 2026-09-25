@@ -1,11 +1,27 @@
+import { Layers2 } from "lucide-react"
+import { scrollReviewToTop } from "../scroll-review.ts"
+
 export function NavBar() {
   return (
     <nav
       data-review-nav="edges"
+      data-section-jump="edges"
       aria-label="Edges"
-      className="flex h-11 shrink-0 items-center border-b border-[#334155] bg-[#1a2332] px-4"
+      className="flex shrink-0 items-center gap-2"
+      onDoubleClick={scrollReviewToTop}
     >
-      <span className="text-xl font-semibold tracking-wide text-[#e7ecf3]">Edges</span>
+      <span
+        data-edges-mark="Layers2"
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-[#d7ebf8] text-[#0b1218]"
+      >
+        <Layers2 className="size-5" aria-hidden="true" />
+      </span>
+      <span
+        data-edges-word="edges"
+        className="text-xl font-semibold tracking-wide text-[#f4f7fb]"
+      >
+        Edges
+      </span>
     </nav>
-  );
+  )
 }

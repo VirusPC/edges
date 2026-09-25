@@ -45,8 +45,8 @@ it("lays out filters, columns, design A, and the markdown pane", async () => {
   render(<App initialPayload={payload} />);
   const shell = document.querySelector("[data-review-shell=edges]");
   expect(shell).not.toBeNull();
-  expect(shell?.firstElementChild?.getAttribute("data-review-nav")).toBe("edges");
-  expect(shell?.firstElementChild?.textContent).toBe("Edges");
+  expect(shell?.firstElementChild?.getAttribute("data-review-toolbar")).toBe("edges");
+  expect(shell?.querySelector("[data-review-nav=edges]")?.textContent).toBe("Edges");
   expect(document.querySelector("[data-status-column=in_progress]")?.textContent).toContain("2026-09-21--alpha");
   expect(document.querySelector("[data-status-column=__unspecified]")?.textContent).toContain("2026-09-13--demo");
   expect(document.querySelector("[data-project-id=all]")?.getAttribute("data-droppable")).toBe("0");
@@ -85,5 +85,5 @@ it("keeps filters on the right, shows a project description, and drags column wi
   fireEvent.pointerDown(document.querySelector("[data-panel-resize=right]") as Element, { clientX: 1000, pointerId: 2 });
   fireEvent.pointerMove(window, { clientX: 940, pointerId: 2 });
   fireEvent.pointerUp(window, { clientX: 940, pointerId: 2 });
-  expect(columns.style.gridTemplateColumns.endsWith("440px")).toBe(true);
+  expect(columns.style.gridTemplateColumns.endsWith("280px")).toBe(true);
 });
