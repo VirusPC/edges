@@ -19,6 +19,8 @@ FLAGS
 --from-type, --from-id, and --task-project must be set together, or omit all three.
 Reads EDGES_ARTIFACTS_TOKEN and EDGES_ARTIFACTS_BASE_URL from config or env.
 Prints the public URL. Phone review needs a reachable base URL, not localhost.
+Public base URL example: https://edges.viruspc.tech
+POST /artifacts to that host returns Cloudflare 1010 without a browser User-Agent, and 201 with one. GET usually works either way. This command always sends a stable browser User-Agent; it does not use the Node/undici default.
 
 EXAMPLES
   edges artifacts publish /tmp/review.html

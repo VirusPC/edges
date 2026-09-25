@@ -24,9 +24,9 @@ export const ARTIFACTS_CLIENT_USER_AGENT =
 
 function clientHeaders(token: string, extra?: Record<string, string>): Record<string, string> {
   return {
+    ...extra,
     authorization: `Bearer ${token}`,
     "user-agent": ARTIFACTS_CLIENT_USER_AGENT,
-    ...extra,
   };
 }
 

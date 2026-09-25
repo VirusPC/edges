@@ -20,6 +20,7 @@ Agent 产出的交互 HTML 需要人操作。例如 classifyTasks 的 Task Proje
 - **部署：** 同一套服务跑在本机与已有 ECS。手机审阅必须用 ECS / 可达 URL，不得假定 localhost。
 - **Edges 接线：** `edges artifacts` 薄命令面——`init`/token 与本地配置（如 `~/.config/edges/artifacts.env`）；`publish`/`rm` 读配置。`from` 可选；有任务关联时只写 `{ type: "task", id, project }`（`id` 是 task stem），否则整段省略。`edges tasks project review-page` 仍只渲染（ADR 0012）。Skill 编排：渲染 → 发布 → 给人可达 URL。
 - **鉴权：** 写（publish / rm）要共享 token；读（浏览器打开 URL）不鉴权，靠难猜 UUID 路径 + TTL。
+- **公网写路径（2026-09-25）：** 客户端 `BASE_URL` 示例是 `https://edges.viruspc.tech`，不用裸 IP。对该主机的 `POST /artifacts`（`publish`），请求若没有浏览器式 `User-Agent`，Cloudflare 返回 1010；带正常 UA 则为 201。`GET /health` 与 `GET /artifacts/:id/` 通常不受这道检查影响。`edges artifacts publish` / `rm` 固定发送稳定浏览器式 User-Agent，不使用 Node/undici 默认标识。
 - **TTL：** 默认 24h，publish 时可覆盖；服务端到期清理。
 - **能力面：** 仍是 ADR 0004 的 CLI + Skill + MCP。本轮不为 artifacts 新开 MCP。
 - **本轮范围：** 只落地 glossary + 本 ADR。不实现服务、CLI、Skill 正文，不改看板状态。

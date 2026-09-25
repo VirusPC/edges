@@ -161,6 +161,9 @@ test("artifacts publish help lists --from-type --from-id --task-project", async 
   assert.match(result.stdout, /--task-project/);
   assert.doesNotMatch(result.stdout, /--from-name/);
   assert.doesNotMatch(result.stdout, /--task-stem/);
+  assert.match(result.stdout, /1010/);
+  assert.match(result.stdout, /User-Agent/);
+  assert.match(result.stdout, /https:\/\/edges\.viruspc\.tech/);
 });
 
 test("artifacts publish via run omits from when flags are absent", async () => {

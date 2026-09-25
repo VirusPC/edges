@@ -13,6 +13,7 @@ Artifacts 预览和 teaching **同机、同一次整仓 pull**。Node 进程走 
 - 进程：user unit + `loginctl enable-linger`（`setup-nginx` 会 enable linger），否则 Actions SSH 断开后服务会随会话死掉。
 - 密钥：`EDGES_ARTIFACTS_TOKEN` 只活在盒上 `~/.config/edges/artifacts-preview.env` 和本机 `~/.config/edges/artifacts.env`。仓里只有 `artifacts.env.example`。
 - URL 纪律：对外用 `https://edges.viruspc.tech/...`（已改域名）；禁止再把内部 Mesh 名或裸 IP 当成公网网址（teach 笔记里已被当面纠正过）。
+- Cloudflare 1010：对 `https://edges.viruspc.tech` 的 `POST /artifacts`（`edges artifacts publish`），请求缺浏览器式 `User-Agent` 时 Cloudflare 回 1010；带正常 UA 则 201。`GET` 读路径通常正常。CLI 的 `publish` / `rm` 固定发送 `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36`，不要依赖 Node/undici 默认 UA。手写 `curl` POST 必须带同样的 `-A`。
 
 ## 人要做的一次性动作
 

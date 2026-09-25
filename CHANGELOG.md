@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Artifacts 预览
 
-- 公网示例和 `edges artifacts init --base-url` 用 `https://edges.viruspc.tech`（`/health`、`/artifacts` 路径不变）。`publish` 和 `rm` 的请求带固定的浏览器式 User-Agent，避免 Cloudflare 拦下 Node 默认标识。
+- 公网示例和 `edges artifacts init --base-url` 用 `https://edges.viruspc.tech`（`/health`、`/artifacts` 路径不变）。对这个地址做 `publish`（`POST /artifacts`）时，请求带固定的浏览器式 User-Agent：缺了它 Cloudflare 回 1010，带上则是 201。打开链接的 GET 通常不受影响。
 - 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。本机先用 `edges artifacts init` 记下服务地址和共享 token，再用 `edges artifacts publish` 拿到公开链接；提前删用 `edges artifacts rm`。
 - 写接口要带这份共享 token；浏览器打开链接不用登录。手机审阅必须用能到达的 `BASE_URL`，不能假定 localhost。
 - `edges tasks project review-page` 仍然只负责渲染，不发布。要给人打开时，先渲染再 `publish`。
