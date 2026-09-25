@@ -1,6 +1,6 @@
 ---
 name: project_task_project_review_page_render_only_cli
-description: 改审阅壳或 edges tasks project review-page 时打开：仍只渲染、无 --mode。桌面三栏见 ADR 0022。窄屏同一页纵向分段；章节头是过渡色面，状态行贴背景且比章节小一档。筛选入口是 ListFilter 图标。双击章节标题滚到该节，回到看板滚到当前卡片。不要视口面板。源码在 apps/tasks-review-app/。
+description: 改审阅壳或 edges tasks project review-page 时打开：仍只渲染、无 --mode。桌面三栏见 ADR 0022。窄屏同一页纵向分段，滚动必须能到顶也能到 Details。章节头是过渡色面，状态行贴背景且比章节小一档。筛选入口是 ListFilter 图标。双击章节标题滚到该节，回到看板滚到当前卡片。不要视口面板。源码在 apps/tasks-review-app/。
 metadata:
   edges-title: Task Project 审阅页是 render-only CLI
   edges-type: project
@@ -8,7 +8,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-25T04:14:30+00:00"
+  edges-updated-at: "2026-09-25T04:33:52+00:00"
 ---
 
 Task Project 人确认闸门是 render-only CLI `edges tasks project review-page`：Skill 产出建议 JSON，CLI 只渲通用 groups+items 审阅页，人拖拽后 Copy JSON 贴回，Skill 用现有 `project create` / `update --project` 落地。无 `--mode`，无公开 `classify` / `apply-review`，不自动打开浏览器，不为审阅页新开 MCP。命令与 classifyTasks 第 4 步主路径已落地（PR #85）；proposeTypes Skill 正文仍未入库，应复用同一命令。托管分两条：一次性人闸走 Artifacts 预览（ADR 0013）；固定看板入口走 `/tasks/` 持久站（ADR 0021），都不要把托管并进 review-page。
@@ -24,6 +24,7 @@ Task Project 人确认闸门是 render-only CLI `edges tasks project review-page
 - How-to: plan at docs/superpowers/plans/2026-09-17-task-project-review-page.md；壳的三栏与 `doc` 以 ADR 0022 为准。窄屏看板的纵向分段与「移到项目…」以 ADR 0023 为准。2026-09-25 起窄屏详情也在这一页里：不要盖住看板的视口面板。
 - 改 glossary、审阅交互或 classifyTasks / proposeTypes 人闸时按 ADR 0012 / 0022 / 0023 与 CONTEXT 术语审阅壳 / Task Doc / doc（看板条目）/ Task stem。
 - 窄于 `md`：项目筛选是一个下拉；状态板按英文 Title Case 纵向分段，只显示有卡片的状态且默认全部展开，整页不横向溢出。窄屏上每一个状态段都收起时，标题紧挨成一列，不要段间深色空隙；还有一段展开，或是桌面，间距保持原样。Projects 的下拉和列表不要为这件事改间距。Projects → Tasks → Details 在同一滚动里。三个分区标题 `sticky` 在 Edges 下面，靠各自 section 的边界换班，不要三节同时钉住。每节最右侧是 Chevron 图标，收起后只留标题，不要用「收起」「展开」文字按钮。只有 Details 有「回到看板」，滚到当前卡片 `[data-stem]`，让开 96px（Tasks 标题加状态标题），不改 hash。点卡片 `scrollIntoView` 到 Details。双击章节标题（`[data-section-jump]`）滚到该节容器：Projects 是 `[data-review-projects]`，Tasks 是 `[data-status-board]`，Details 是 `[data-markdown-pane]`。双击 Edges（`[data-review-nav=edges]`）把 `[data-review-columns]` 滚到顶。箭头仍是单击折叠，不要和双击跳转绑在一起。大章节用 SectionHeader variant=chapter（顶栏色和页面背景之间的过渡色面，不要左侧色条，也不要回到抢眼大色块），状态行用 variant=status（底与页面同色，融进背景，扁列表，全部收起时仍紧挨）。强色在顶栏：顶栏是色带，Edges 用 Lucide Layers2 浅色图标块当最强识别。权重是顶栏最强、章节过渡、状态融进背景。状态标题比章节小一档（text-base，章节仍是 text-lg，顶栏仍是 text-xl），不要再拉大字号阶梯。窄屏项目 Select 的菜单用 position=popper 锚在触发器上；缺 SelectValue 的 item-aligned 不会定位，弹出层会停在 overflow:hidden 的视口外面。状态小节窄屏仍是 `sticky top-12`，贴在 Tasks 标题下，箭头可收起。不要视口面板，不要「回到看板 + 卡片标题」那条独立顶栏。每张卡的「移到项目…」是必须的；触摸拖放可以跳过。筛选抽屉的关闭是图标（Lucide X），可见文字里不要出现「关闭」；无障碍名「关闭筛选」可以留。
+- 窄屏滚动范围必须同时盖住页顶和 Details。壳高用 `100dvh`（前面先写 `100vh` 作回退），不要只留 `100vh`，否则浏览器底栏会把末尾那一截挡在可见区域外。纵向滚动只发生在 `[data-review-columns]`。不要给这个滚动容器写 `overflow-x: hidden`：`clip` 和 `auto`/`scroll`/`hidden` 放在同一元素上时，`clip` 会被算成 `hidden`，吸顶标题下容易滚不到最后一节。横向裁切放在外壳上，`overflow-x: clip` 且另一轴保持 `visible`。Projects、Tasks、Details 收进 `[data-review-flow]`（`shrink-0`、`min-h-min`；桌面用 `md:contents`，三栏网格的子项仍是原来那五格）。窄屏状态列不要 `min-h-0`。滚动容器设 `overflow-anchor: none`。双击跳转和「回到看板」只改 `scrollTop`，不要改 overflow、max-height 或 transform。回到看板仍锚 `[data-stem]`，让开 96px。
 - `≥768px`：保持 #126 的三栏、可拖分隔线、左栏拖放。观感只允许多出卡片菜单和分区标题上的收起。桌面不要「回到看板」，也不要窄屏那种盖住看板的面板。
 - 命令是 `edges tasks project review-page --from <path|-> [--out <path>]`；成功 JSON 的 `command` 为 `project.review-page`，含绝对 `path`。默认写 OS 临时目录，不打开浏览器。
 - 导出行用 `stem`（文件名去 `.md`），不是 title，也不等于 frontmatter / 文档 `name`。页上 `action` 只有 `keep` | `move`。拖到左栏或「移到项目…」只改 project；中栏不产生状态变更。

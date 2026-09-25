@@ -159,7 +159,9 @@ export default function App({
 
   useEffect(() => {
     if (!narrow || hashState.stem === "") return
-    document.getElementById("review-detail")?.scrollIntoView?.({ block: "start" })
+    document
+      .getElementById("review-detail")
+      ?.scrollIntoView?.({ block: "start" })
   }, [narrow, hashState.stem])
 
   function onResizePointerDown(
@@ -201,7 +203,7 @@ export default function App({
   return (
     <div
       data-review-shell="edges"
-      className="relative flex h-screen max-w-full flex-col overflow-x-hidden overflow-y-hidden"
+      className="relative flex h-dvh max-w-full flex-col overflow-x-clip"
     >
       {toolbar}
       <DndContext
@@ -219,40 +221,45 @@ export default function App({
         <div
           ref={columnsRef}
           data-review-columns="edges"
-          className="flex min-h-0 w-full max-w-full min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto md:grid md:overflow-hidden"
+          className="flex min-h-0 w-full max-w-full min-w-0 flex-1 flex-col overflow-y-auto [overflow-anchor:none] md:grid md:overflow-hidden"
           style={{
             gridTemplateColumns: `${leftWidth}px 8px minmax(${CENTER_MIN}px,1fr) 8px ${rightWidth}px`,
           }}
         >
-          <ProjectColumn
-            groups={groups}
-            items={items}
-            filter={filter}
-            narrow={narrow}
-            onSelect={(projectId) =>
-              setHashState((prev) => ({ ...prev, projectId }))
-            }
-          />
-          <PanelResizeHandle
-            side="left"
-            onPointerDown={(event) => onResizePointerDown("left", event)}
-          />
-          <StatusBoard
-            items={items}
-            groups={groups}
-            filter={filter}
-            narrow={narrow}
-            selectedStem={hashState.stem}
-            onSelect={(stem) => setHashState((prev) => ({ ...prev, stem }))}
-            onMove={(stem, projectId) =>
-              setItems((prev) => applyProjectDrop(prev, stem, projectId))
-            }
-          />
-          <PanelResizeHandle
-            side="right"
-            onPointerDown={(event) => onResizePointerDown("right", event)}
-          />
-          <MarkdownPane item={selected} narrow={narrow} />
+          <div
+            data-review-flow="edges"
+            className="min-h-min w-full min-w-0 shrink-0 md:contents"
+          >
+            <ProjectColumn
+              groups={groups}
+              items={items}
+              filter={filter}
+              narrow={narrow}
+              onSelect={(projectId) =>
+                setHashState((prev) => ({ ...prev, projectId }))
+              }
+            />
+            <PanelResizeHandle
+              side="left"
+              onPointerDown={(event) => onResizePointerDown("left", event)}
+            />
+            <StatusBoard
+              items={items}
+              groups={groups}
+              filter={filter}
+              narrow={narrow}
+              selectedStem={hashState.stem}
+              onSelect={(stem) => setHashState((prev) => ({ ...prev, stem }))}
+              onMove={(stem, projectId) =>
+                setItems((prev) => applyProjectDrop(prev, stem, projectId))
+              }
+            />
+            <PanelResizeHandle
+              side="right"
+              onPointerDown={(event) => onResizePointerDown("right", event)}
+            />
+            <MarkdownPane item={selected} narrow={narrow} />
+          </div>
         </div>
       </DndContext>
     </div>
