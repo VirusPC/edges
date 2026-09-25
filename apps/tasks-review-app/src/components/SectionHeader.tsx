@@ -2,9 +2,9 @@ import type { ReactNode } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react"
 
 const CHAPTER =
-  "border-b border-[#2c4a63] bg-[#163044] text-[#e7ecf3] shadow-none"
+  "border-b border-[#2c4a63] bg-[#163044] text-lg text-[#e7ecf3] shadow-none"
 const STATUS =
-  "border-b border-[#1c2633] bg-[#0f1419] text-[#9aa8bc] shadow-none"
+  "border-b border-[#1c2633] bg-[#0f1419] text-base text-[#9aa8bc] shadow-none"
 
 export function SectionHeader({
   title,
@@ -33,7 +33,7 @@ export function SectionHeader({
       data-section-variant={variant}
       data-section-collapsed={collapsed ? "on" : "off"}
       className={
-        "flex h-12 shrink-0 items-center gap-2 px-3 text-lg font-semibold tracking-wide " +
+        "flex h-12 shrink-0 items-center gap-2 px-3 font-semibold tracking-wide " +
         surface +
         " " +
         stickyClassName

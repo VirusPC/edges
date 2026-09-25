@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 任务看板与项目
 
-- `edges tasks project review-page` 和 `/tasks/` 上，三栏章节标题是 Projects、Tasks、Details。状态段标题是英文 Title Case，例如 Backlog、In Progress，点开的任务名留在 Details 下面。强色在顶栏：Edges 旁边是 Lucide `Layers2` 浅色图标块，顶栏本身是一条色带。章节标题是顶栏和页面背景之间的过渡色面，没有左侧色条。状态行贴着页面背景，仍是扁列表。窄屏项目下拉用弹出层锚在触发器上，打开后能切换项目。
+- `edges tasks project review-page` 和 `/tasks/` 上，三栏章节标题是 Projects、Tasks、Details。状态段标题是英文 Title Case，例如 Backlog、In Progress，点开的任务名留在 Details 下面。强色在顶栏：Edges 旁边是 Lucide `Layers2` 浅色图标块，顶栏本身是一条色带。章节标题是顶栏和页面背景之间的过渡色面，没有左侧色条。状态行贴着页面背景，仍是扁列表。窄屏项目下拉用弹出层锚在触发器上，打开后能切换项目。状态段标题比章节标题小一档。
 - 审阅页窄于 768px 时，项目收成一个下拉（例如「全部 · 95」），状态按 Backlog、In Progress、Done 这类英文标题分段纵向排开，只显示有卡片的状态且全部展开。筛选收进文字「筛选」，抽屉右上角用 × 关掉。窄屏仍是项目、任务、详情接在同一页里往下滚；Projects、Tasks、Details 的标题吸在 Edges 下面，同一时间只钉住当前这一节，右侧用箭头图标收起，不是文字按钮。Backlog、In Progress 这些状态标题也用同一套标题：吸在 Tasks 下面，并且可以用箭头收起。窄屏把每一个状态段都收起时，这些标题紧挨成一列，中间不留深色空隙；还有一段展开时，卡片仍跟在自己的标题下面，段与段的间距保持原样。桌面状态列间距不变，Projects 的下拉和列表也不为这件事改间距。只有 Details 有「回到看板」，点了滚回任务区，不取消选中。宽屏把 Edges 和筛选合成一行，详情栏默认 220px，中栏更宽，分隔线仍可拖且中栏不会被拖没。卡片上的日期文件名默认收起。拖到左栏或「移到项目…」仍只改页内归属，复制导出 JSON 会带上这次改动。
 - `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个三栏审阅页：顶栏可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选；左侧点项目筛选，拖到项目上只改 project，再用「复制导出 JSON」贴回。中间的状态列只展示，右侧渲染当前条目的 Markdown 正文。页上的脚本在生成前由 `pnpm --filter tasks-review-app run build` 打好并内联进单份 HTML，构建产物不进 git。
 - 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。

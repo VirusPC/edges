@@ -155,6 +155,11 @@ it("keeps section titles larger and heavier than list and body text on both widt
   expectChapterStrip(desktop.projectTitle)
   expectChapterStrip(desktop.tasksTitle)
   expectChapterStrip(desktop.detailsTitle)
+  expect(desktop.columnTitle).toContain("text-base")
+  expect(desktop.columnTitle).not.toContain("text-lg")
+  expect(prominence(desktop.projectTitle).px).toBeGreaterThan(
+    prominence(desktop.columnTitle).px
+  )
   expect(desktop.columnTitle).toContain("bg-[#0f1419]")
   expect(desktop.columnTitle).not.toContain("bg-[#163044]")
   expect(desktop.columnTitle).not.toContain("bg-[#121820]")
