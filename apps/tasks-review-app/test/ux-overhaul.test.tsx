@@ -186,7 +186,8 @@ it("double-clicks a chapter title to that section and returns to the open card",
     }) as DOMRect
   scroller.getBoundingClientRect = () => box(48, 800)
   const tasks = document.querySelector("[data-section-title=tasks]") as HTMLElement
-  tasks.getBoundingClientRect = () => box(320, 48)
+  const board = document.querySelector("[data-status-board]") as HTMLElement
+  board.getBoundingClientRect = () => box(320, 48)
   await user.dblClick(tasks.querySelector("[data-section-jump]") as Element)
   expect(jumps.at(-1)).toBe(500 + 320 - 48)
 

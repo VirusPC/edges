@@ -26,8 +26,14 @@ export function scrollReviewToTop() {
   else scroller.scrollTop = 0
 }
 
-export function scrollReviewToSection(section: "projects" | "tasks" | "details") {
-  scrollReviewTo(document.querySelector(`[data-section-title=${section}]`))
+const SECTION_ANCHOR = {
+  projects: "[data-review-projects]",
+  tasks: "[data-status-board]",
+  details: "[data-markdown-pane]",
+} as const
+
+export function scrollReviewToSection(section: keyof typeof SECTION_ANCHOR) {
+  scrollReviewTo(document.querySelector(SECTION_ANCHOR[section]))
 }
 
 export function scrollReviewToCard(stem: string) {
