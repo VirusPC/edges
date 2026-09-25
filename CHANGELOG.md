@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 笔记入库与能力面
 
+- `conversation-to-notes` 技能（`extensions/skills/conversation-to-notes`）现在要求整理出来的笔记写给人审阅：白话完整句，例子与上下文要够独立读懂；密表放进补充说明；所学只写判断与边界；行动指南须带触发与步骤。该技能的 2.1.0 / 2.1.1 已写在技能 changelog 里，这里不再复述明细。
 - 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 完成标准（动作可选）；栏名用中文。与笔记 / 记忆技能分工；只成文，不落库。
 
 ### 文档与系统
@@ -44,10 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 在和 teaching 同一台机器上，用 `edges artifacts server install` 装好环境（不启动进程），再用 `start` 拉起服务。日常用 `stop` / `restart` 管进程，用 `status` 查看。一次性对外跑 `setup-nginx`。没有 `server init`。
 - 反代写进已有的 `teaching.conf`，必须带 `/teaching/`，不要另开公网端口。
 - 合并到 main 后，如果盒上已经有这份服务配置，`deploy.yml` 会在整仓 pull 之后重启服务。nginx 通常不用再跑。
-
-### 笔记入库与能力面
-
-- `conversation-to-notes` 技能（`extensions/skills/conversation-to-notes`）现在要求整理出来的笔记写给人审阅：白话完整句，例子与上下文要够独立读懂；密表放进补充说明；所学只写判断与边界；行动指南须带触发与步骤。该技能的 2.1.0 / 2.1.1 已写在技能 changelog 里，这里不再复述明细。
 
 ## [1.2.0] - 2026-09-18
 
