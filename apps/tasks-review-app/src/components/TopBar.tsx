@@ -171,7 +171,7 @@ export function TopBar({
               variant="outline"
               size="sm"
               data-action="open-filters"
-              className="border-[#334155] bg-[#1a2332] text-[#e7ecf3] hover:bg-[#243044]"
+              className="border-[#334155] bg-transparent text-[#9aa8bc] hover:bg-[#243044] hover:text-[#e7ecf3]"
             >
               筛选
             </Button>

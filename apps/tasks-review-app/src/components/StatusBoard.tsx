@@ -67,6 +67,7 @@ export function StatusBoard({
       className="flex w-full max-w-full min-w-0 shrink-0 flex-col bg-[#0f1419] md:h-full md:min-h-0 md:overflow-hidden"
     >
       <SectionHeader
+        variant="chapter"
         section="tasks"
         toggleId="tasks"
         title="Tasks"
@@ -156,6 +157,7 @@ function StatusSection({
   return (
     <section data-status-column={status} className={sectionClass}>
       <SectionHeader
+        variant="status"
         toggleId={status}
         title={
           <>

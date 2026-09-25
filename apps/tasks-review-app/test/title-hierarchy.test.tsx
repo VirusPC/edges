@@ -86,7 +86,7 @@ async function titleClasses() {
   const user = userEvent.setup()
   render(<App initialPayload={payload} />)
   const edgesTitle =
-    document.querySelector("[data-review-nav] span")?.className ?? ""
+    document.querySelector("[data-edges-word]")?.className ?? ""
   const projectTitle =
     document.querySelector("[data-section-title=projects]")?.className ?? ""
   const projectRow =
@@ -122,9 +122,9 @@ async function titleClasses() {
 function expectChapterStrip(className: string) {
   expect(className).toContain("text-lg")
   expect(className).toContain("font-semibold")
-  expect(className).toContain("bg-[#1a2332]")
-  expect(className).toContain("border-b")
-  expect(className).toContain("border-[#334155]")
+  expect(className).toContain("bg-[#1e3348]")
+  expect(className).toContain("border-[#5b9fd4]/50")
+  expect(className).toContain("shadow-[inset_3px_0_0_0_#5b9fd4]")
 }
 
 it("keeps section titles larger and heavier than list and body text on both widths", async () => {
@@ -154,4 +154,11 @@ it("keeps section titles larger and heavier than list and body text on both widt
   expectChapterStrip(desktop.projectTitle)
   expectChapterStrip(desktop.tasksTitle)
   expectChapterStrip(desktop.detailsTitle)
+  expect(desktop.columnTitle).toContain("bg-[#121820]")
+  expect(desktop.columnTitle).not.toContain("bg-[#1e3348]")
+  expect(desktop.columnTitle).not.toContain("shadow-[inset_3px_0_0_0_#5b9fd4]")
+  expect(document.querySelector("[data-edges-mark] svg")).not.toBeNull()
+  expect(document.querySelector("[data-edges-mark]")?.getAttribute("data-edges-mark")).toBe(
+    "Layers2"
+  )
 })

@@ -24,6 +24,7 @@ export function MarkdownPane({
       className="flex w-full min-w-0 shrink-0 flex-col bg-[#121820] md:min-h-0"
     >
       <SectionHeader
+        variant="chapter"
         section="details"
         toggleId="details"
         title="Details"

@@ -54,6 +54,7 @@ export function ProjectColumn({
       className="w-full min-w-0 shrink-0 bg-[#0f1419] md:min-h-0 md:overflow-auto"
     >
       <SectionHeader
+        variant="chapter"
         section="projects"
         toggleId="projects"
         title="Projects"

@@ -1,7 +1,22 @@
+import { Layers2 } from "lucide-react"
+
 export function NavBar() {
   return (
-    <nav data-review-nav="edges" aria-label="Edges" className="shrink-0">
-      <span className="text-xl font-semibold tracking-wide text-[#e7ecf3]">
+    <nav
+      data-review-nav="edges"
+      aria-label="Edges"
+      className="flex shrink-0 items-center gap-2"
+    >
+      <span
+        data-edges-mark="Layers2"
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-[#5b9fd4] text-[#0b1218]"
+      >
+        <Layers2 className="size-5" aria-hidden="true" />
+      </span>
+      <span
+        data-edges-word="edges"
+        className="text-xl font-semibold tracking-wide text-[#f4f7fb]"
+      >
         Edges
       </span>
     </nav>
