@@ -11,21 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
+### conversation-to-tasks：完成标准可以后补
 
 - `conversation-to-tasks`：完成标准开卡时可选，可留到 `grill-with-docs` 再补；必填仅背景与目标。
 
 
-### 笔记入库与能力面
+### conversation-to-notes 给人审，conversation-to-tasks 只成草稿
 
 - `conversation-to-notes` 技能（`extensions/skills/conversation-to-notes`）现在要求整理出来的笔记写给人审阅：白话完整句，例子与上下文要够独立读懂；密表放进补充说明；所学只写判断与边界；行动指南须带触发与步骤。该技能的 2.1.0 / 2.1.1 已写在技能 changelog 里，这里不再复述明细。
 - 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 完成标准（动作可选）；栏名用中文。与笔记 / 记忆技能分工；只成文，不落库。
 
-### 文档与系统
+### README：一键部署、接入与产出
 
 - 根 README 写明了系统设计目标：一键部署 Edges、一键接入 Agent 客户端、一键产出对外资产。仓库按这个方向收敛。
 
-### 任务看板与项目
+### 审阅页窄屏与三栏、按项目分组、/tasks/ 部署
 
 - 窄屏审阅页从页顶可以一直滚到 Details，点「回到看板」之后也能再滚回 Projects。任务锚定仍停在当前卡片上，并让开吸顶标题。
 - `edges tasks project review-page` 和 `/tasks/` 上，三栏章节标题是 Projects、Tasks、Details。状态段标题是英文 Title Case，例如 Backlog、In Progress，点开的任务名留在 Details 下面。强色在顶栏：Edges 旁边是 Lucide `Layers2` 浅色图标块，顶栏本身是一条色带。章节标题是顶栏和页面背景之间的过渡色面，没有左侧色条。状态行贴着页面背景，仍是扁列表。窄屏项目下拉用弹出层锚在触发器上，打开后能切换项目。状态段标题比章节标题小一档。窄屏筛选入口是 Lucide `ListFilter` 图标。双击 Projects、Tasks、Details 或 Edges 会滚到那一节；「回到看板」滚到当前卡片，并让开吸顶的 Tasks 和状态标题。
@@ -37,7 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - nginx 一次性配好后，打开 `http(s)://<host>/tasks/` 就是固定入口，始终反映 main 上的看板，和 `/teaching/` 在同一台机器上（见 ADR 0021）。第一次对外跑 `extensions/clis/deploy/setup-nginx-tasks.sh`。
 - `edges tasks project review-page` 仍然只负责渲染，本轮拖拽不会写回仓库。
 
-### Artifacts 预览
+### Artifacts：临时预览页的发布与同机托管
 
 - 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。本机先用 `edges artifacts init` 记下服务地址和共享 token，再用 `edges artifacts publish` 拿到公开链接；提前删用 `edges artifacts rm`。
 - 写接口要带这份共享 token；浏览器打开链接不用登录。手机审阅必须用能到达的 `BASE_URL`，不能假定 localhost。
