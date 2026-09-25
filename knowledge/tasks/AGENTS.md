@@ -37,4 +37,5 @@ CLI-maintained index of Task Project titles and descriptions. Do not hand-edit t
 - [`observation`](observation/AGENTS.md) — 知识库/Agent Observation 观测/观察系统（与 Evaluation 分开）。
 - [`project-memory`](project-memory/AGENTS.md) — Project Memory 类型/索引/reshape/与 docs 边界等。
 - [`site-and-content`](site-and-content/AGENTS.md) — 站点/posts/badge/内容整理检索。
+- [`tech-reading`](tech-reading/AGENTS.md) — 记录所有技术阅读相关进展（论文、长文、官方文档、源码精读等）。看板管阅读工作项与进度；可读笔记仍可落 knowledge/notes。
 <!-- task-projects:end -->
