@@ -5,7 +5,7 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
-import { publishArtifact } from "../../src/artifacts/utils/client.js";
+import { deleteArtifact, publishArtifact } from "../../src/artifacts/utils/client.js";
 
 test("root help lists artifacts", async () => {
   const result = await run(["--help"]);
@@ -60,7 +60,7 @@ test("artifacts init --token writes the shared server token", async () => {
       "--config",
       configPath,
       "--base-url",
-      "http://182.92.131.89",
+      "https://edges.viruspc.tech",
       "--token",
       token,
     ],
@@ -69,10 +69,10 @@ test("artifacts init --token writes the shared server token", async () => {
   assert.equal(result.exitCode, 0, result.stderr);
   const payload = JSON.parse(result.stdout) as { tokenCreated: boolean; baseUrl: string };
   assert.equal(payload.tokenCreated, false);
-  assert.equal(payload.baseUrl, "http://182.92.131.89");
+  assert.equal(payload.baseUrl, "https://edges.viruspc.tech");
   const raw = await readFile(configPath, "utf8");
   assert.match(raw, new RegExp(`EDGES_ARTIFACTS_TOKEN=${token}`));
-  assert.match(raw, /EDGES_ARTIFACTS_BASE_URL=http:\/\/182\.92\.131\.89/);
+  assert.match(raw, /EDGES_ARTIFACTS_BASE_URL=https:\/\/edges\.viruspc\.tech/);
 });
 
 test("artifacts publish happy path posts JSON and prints the public URL", async () => {
@@ -108,6 +108,49 @@ test("artifacts publish happy path posts JSON and prints the public URL", async 
   assert.equal("from" in (posted.body as object), false);
   assert.equal(published.url, "http://artifacts.test/artifacts/2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab/");
   assert.equal(published.id, "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab");
+});
+
+const BROWSER_USER_AGENT =
+  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+
+test("artifacts publish and rm send a stable browser User-Agent and keep the bearer token", async () => {
+  const seen: Array<{ method?: string; authorization?: string; userAgent?: string }> = [];
+  const fetchImpl: typeof fetch = async (_input, init) => {
+    const headers = init?.headers as Record<string, string> | undefined;
+    seen.push({
+      method: init?.method,
+      authorization: headers?.authorization,
+      userAgent: headers?.["user-agent"],
+    });
+    if (init?.method === "DELETE") {
+      return new Response(null, { status: 204 });
+    }
+    return new Response(
+      JSON.stringify({
+        id: "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab",
+        url: "https://edges.viruspc.tech/artifacts/2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab/",
+        expiresAt: "2026-09-20T12:00:00.000Z",
+      }),
+      { status: 201, headers: { "content-type": "application/json" } },
+    );
+  };
+  await publishArtifact({
+    baseUrl: "https://edges.viruspc.tech",
+    token: "shared-token",
+    files: [{ path: "page.html", content: "<html>pub</html>" }],
+    ttlSeconds: 86_400,
+    fetch: fetchImpl,
+  });
+  await deleteArtifact({
+    baseUrl: "https://edges.viruspc.tech",
+    token: "shared-token",
+    id: "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab",
+    fetch: fetchImpl,
+  });
+  assert.deepEqual(seen, [
+    { method: "POST", authorization: "Bearer shared-token", userAgent: BROWSER_USER_AGENT },
+    { method: "DELETE", authorization: "Bearer shared-token", userAgent: BROWSER_USER_AGENT },
+  ]);
 });
 
 test("artifacts publish help lists --from-type --from-id --task-project", async () => {
@@ -347,6 +390,7 @@ test("artifacts publish via run uses a local HTTP stub", async () => {
 
   const stub = http.createServer((req, res) => {
     assert.equal(req.headers.authorization, "Bearer cli-token");
+    assert.equal(req.headers["user-agent"], BROWSER_USER_AGENT);
     const chunks: Buffer[] = [];
     req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
     req.on("end", () => {

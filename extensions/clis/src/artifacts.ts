@@ -22,7 +22,7 @@ edges tasks project review-page still only renders; publish separately.
 Capability Surface is CLI + Skill + MCP. This round has no artifacts MCP.
 
 EXAMPLES
-  edges artifacts init --base-url http://182.92.131.89 --token <server-token>
+  edges artifacts init --base-url https://edges.viruspc.tech --token <server-token>
   edges artifacts publish /tmp/review.html
   edges artifacts rm <id-or-url>
   edges artifacts server install

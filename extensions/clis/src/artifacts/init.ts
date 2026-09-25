@@ -21,7 +21,7 @@ On ECS, copy the token printed by edges artifacts server install.
 
 EXAMPLES
   edges artifacts init
-  edges artifacts init --base-url http://182.92.131.89 --token <server-token>
+  edges artifacts init --base-url https://edges.viruspc.tech --token <server-token>
 `;
 
 export function addArtifactsInitCommand(artifacts: Command, ctx: CliContext): void {

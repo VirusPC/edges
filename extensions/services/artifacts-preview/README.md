@@ -102,8 +102,8 @@ curl -fsS http://127.0.0.1:8787/health
 From a phone or any outside machine (no extra port):
 
 ```bash
-curl -fsS http://182.92.131.89/health
-curl -fsS -o /dev/null -w '%{http_code}\n' http://182.92.131.89/teaching/
+curl -fsS https://edges.viruspc.tech/health
+curl -fsS -o /dev/null -w '%{http_code}\n' https://edges.viruspc.tech/teaching/
 ```
 
 `/health` must be JSON `{"ok":true}`. `/teaching/` must still be the teach site.
@@ -112,7 +112,7 @@ Write-path smoke (uses the shared token; do not paste the token into the repo):
 
 ```bash
 # on a machine that has the token; expect 201 then a GET 200
-curl -fsS -X POST http://182.92.131.89/artifacts \
+curl -fsS -X POST https://edges.viruspc.tech/artifacts \
   -H "authorization: Bearer $EDGES_ARTIFACTS_TOKEN" \
   -H "content-type: application/json" \
   -d '{"files":[{"path":"index.html","content":"<html>ok</html>"}]}'
@@ -125,12 +125,12 @@ curl -fsS -X POST http://182.92.131.89/artifacts \
 Use the **same token** as the server env file:
 
 ```bash
-edges artifacts init --base-url http://182.92.131.89 --token <token from server install>
+edges artifacts init --base-url https://edges.viruspc.tech --token <token from server install>
 
 edges artifacts publish /tmp/review.html
 ```
 
-Phone opens the printed `http://182.92.131.89/artifacts/<uuid>/` in a system browser, not localhost.
+Phone opens the printed `https://edges.viruspc.tech/artifacts/<uuid>/` in a system browser, not localhost.
 
 ### After each main pull
 
@@ -140,19 +140,19 @@ If the unit files did not change, `restart` alone is enough; `install` then `res
 
 If `git fetch` from the ECS is flaky: keep the Action as primary (it already works for teach). Fallback is a full-repo tar over SSH from a machine that can reach both GitHub and the box, then the same CLI verbs (or `deploy/bootstrap.sh`, a thin wrapper of `install` then `restart`) — do not rsync a path subset.
 
-Rotate the token: `edges artifacts server install --force`, then `edges artifacts server restart`, then client `edges artifacts init --base-url http://182.92.131.89 --token <printed token> --force`.
+Rotate the token: `edges artifacts server install --force`, then `edges artifacts server restart`, then client `edges artifacts init --base-url https://edges.viruspc.tech --token <printed token> --force`.
 
 Server env (see [`deploy/artifacts.env.example`](deploy/artifacts.env.example)):
 
 ```
 EDGES_ARTIFACTS_TOKEN=<shared token from install>
-EDGES_ARTIFACTS_BASE_URL=http://182.92.131.89
+EDGES_ARTIFACTS_BASE_URL=https://edges.viruspc.tech
 EDGES_ARTIFACTS_HOST=127.0.0.1
 EDGES_ARTIFACTS_PORT=8787
 EDGES_ARTIFACTS_DATA_DIR=/home/cheng-dev/.local/share/edges-artifacts
 ```
 
-`EDGES_ARTIFACTS_BASE_URL` is what `publish` prints (no trailing slash). If a phone must open the page, this cannot be `http://127.0.0.1` or `localhost`.
+`EDGES_ARTIFACTS_BASE_URL` is what `publish` prints (no trailing slash). If a phone must open the page, this cannot be `http://127.0.0.1` or `localhost`. `install` keeps an existing value; change the file on the box by hand. This repo does not rewrite the running env.
 
 ## HTTP
 

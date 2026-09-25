@@ -38,12 +38,12 @@ That installs `/etc/nginx/snippets/edges-tasks.conf` (`/tasks/` → `<repo>/know
 
 ## Checks
 
-These curls hit the ECS origin over HTTP. The public entry is the HTTPS URLs above.
+These curls hit the public Cloudflare entry.
 
 ```bash
-curl -fsS -o /dev/null -w '%{http_code}\n' http://182.92.131.89/teaching/
-curl -fsS -o /dev/null -w '%{http_code}\n' http://182.92.131.89/tasks/
-curl -fsS http://182.92.131.89/health
+curl -fsS -o /dev/null -w '%{http_code}\n' https://edges.viruspc.tech/teaching/
+curl -fsS -o /dev/null -w '%{http_code}\n' https://edges.viruspc.tech/tasks/
+curl -fsS https://edges.viruspc.tech/health
 ```
 
 `/teaching/` is still the teach site. `/tasks/` is the generated board. `/health` is still artifacts JSON `{"ok":true}`.

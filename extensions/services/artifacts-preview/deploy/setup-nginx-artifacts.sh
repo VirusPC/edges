@@ -58,4 +58,4 @@ fi
 
 printf 'nginx proxy installed. /teaching/ is unchanged. Public checks:\n'
 printf '  curl -fsS http://127.0.0.1:8787/health   # after: edges artifacts server start\n'
-printf '  curl -fsS http://182.92.131.89/health    # via :80, no extra port\n'
+printf '  curl -fsS https://edges.viruspc.tech/health    # public entry, no extra port\n'
