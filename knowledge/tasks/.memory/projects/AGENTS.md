@@ -6,7 +6,7 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- [tasks 工作流阶段：grill → plan → implement → validate → close](project_assign_grill_with_docs_first.md) — 写或派发 tasks 时：阶段为 grill→plan→implement→validate→close；validate 是质量/设计/行为门禁（英文阶段名，不用「验收」），可派给非实现者，看板 in_review 大致对应；未 validate 不标 done，用户当次跳过除外。
+- [tasks 工作流阶段：grill → research → plan → implement → validate → close](project_assign_grill_with_docs_first.md) — 写或派发 tasks 时打开：默认链为 grill→research→plan→implement→validate→close；research 是 deep-research（竞品/开源/现成方案），独立于 grill 与 plan；validate 是质量/设计/行为门禁（英文阶段名，不用「验收」），可派给非实现者，看板 in_review 大致对应；未 validate 不标 done，用户当次跳过除外。
 - [云端 Obsidian vault 选用 edges clone](project_box_obsidian_vault_for_preview.md) — 预览 tasks/artifacts 时用 /workspace/edges 作 vault、AppImage+--no-sandbox、禁用 Sync；2026-09-11 已验证。
 - [七个 Task Project 占位已确认](project_evaluation_observation_placeholder_projects.md) — 改看板 Task Project 分组或往 knowledge/tasks/<slug> 落卡时打开：用户已确认七个空壳质心（project-memory、edges-tasks、edges-cli-platform、evaluation、observation、site-and-content、agent-clients-ux）；现有卡仍留 _default，等 classify/#78 再迁。仓根 evaluation/ 不是看板 project。
 - [Task 正文分节事实/idea，并一句话讲清问题与结果](project_task_separate_facts_from_idea.md) — 写/改 Task 时：分节事实/idea + 一句话讲清问题与预期结果；从对话经 conversation-to-tasks 开的新卡改走背景→目标→完成标准。

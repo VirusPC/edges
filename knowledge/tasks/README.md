@@ -28,7 +28,7 @@
 `backlog` | `todo` | `in_progress` | `in_review` | `done` | `blocked` | `cancelled`
 
 - 新人侧捕获默认落入 `backlog/`。
-- **派发默认**：grill → plan → implement → validate → close。执行方先 grill（grill-with-docs：CONTEXT / ADR），过关后再 plan（writing-plans），再 implement，再 validate（质量/设计/行为门禁；看板 `in_review` 大致对应），通过后再 close。未过 validate 不标 done。用户当次明确跳过除外。
+- **派发默认**：grill → research → plan → implement → validate → close。执行方先 grill（grill-with-docs：CONTEXT / ADR，定做什么/不做什么），过关后再 research（deep-research：竞品分析、开源项目调研、现成方案扫描），再 plan（writing-plans，用调研结果选路径），再 implement，再 validate（质量/设计/行为门禁；可派给非实现者；看板 `in_review` 大致对应），通过后再 close。research 不并进 grill 或 plan。未过 validate 不标 done。用户当次明确跳过除外。
 - 改状态时：更新 frontmatter 的 `edges-tasks-status`，并把文件（及同 stem 的 `.*.log.md`）移到对应子目录。
 
 ## Issue 层 Task Project
