@@ -2,7 +2,7 @@ import type { ReactNode } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react"
 
 const CHAPTER =
-  "border-y border-[#5b9fd4]/50 bg-[#1e3348] text-[#f4f7fb] shadow-[inset_3px_0_0_0_#5b9fd4]"
+  "border-b border-[#5b9fd4]/25 bg-[#0f1419] text-[#d7dee8] shadow-none"
 const STATUS =
   "border-b border-[#2a3544] bg-[#121820] text-[#c5d0de] shadow-none"
 

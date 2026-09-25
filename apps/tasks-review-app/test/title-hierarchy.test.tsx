@@ -122,9 +122,10 @@ async function titleClasses() {
 function expectChapterStrip(className: string) {
   expect(className).toContain("text-lg")
   expect(className).toContain("font-semibold")
-  expect(className).toContain("bg-[#1e3348]")
-  expect(className).toContain("border-[#5b9fd4]/50")
-  expect(className).toContain("shadow-[inset_3px_0_0_0_#5b9fd4]")
+  expect(className).toContain("bg-[#0f1419]")
+  expect(className).toContain("border-[#5b9fd4]/25")
+  expect(className).not.toContain("bg-[#1e3348]")
+  expect(className).not.toContain("shadow-[inset_")
 }
 
 it("keeps section titles larger and heavier than list and body text on both widths", async () => {
@@ -155,8 +156,12 @@ it("keeps section titles larger and heavier than list and body text on both widt
   expectChapterStrip(desktop.tasksTitle)
   expectChapterStrip(desktop.detailsTitle)
   expect(desktop.columnTitle).toContain("bg-[#121820]")
-  expect(desktop.columnTitle).not.toContain("bg-[#1e3348]")
+  expect(desktop.columnTitle).not.toContain("bg-[#0f1419]")
+  expect(desktop.columnTitle).not.toContain("border-[#5b9fd4]/25")
   expect(desktop.columnTitle).not.toContain("shadow-[inset_3px_0_0_0_#5b9fd4]")
+  const toolbar = document.querySelector("[data-review-toolbar]")?.className ?? ""
+  expect(toolbar).toContain("bg-[#15486c]")
+  expect(document.querySelector("[data-edges-mark]")?.className).toContain("bg-[#d7ebf8]")
   expect(document.querySelector("[data-edges-mark] svg")).not.toBeNull()
   expect(document.querySelector("[data-edges-mark]")?.getAttribute("data-edges-mark")).toBe(
     "Layers2"

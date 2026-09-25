@@ -63,7 +63,7 @@ function ReviewToolbar({
   return (
     <header
       data-review-toolbar="edges"
-      className="z-30 flex h-12 shrink-0 items-center gap-3 border-b-2 border-[#5b9fd4] bg-[#1a2332] px-3"
+      className="z-30 flex h-12 shrink-0 items-center gap-3 border-b-2 border-[#8ec4ef] bg-[#15486c] px-3"
     >
       <NavBar />
       <TopBar

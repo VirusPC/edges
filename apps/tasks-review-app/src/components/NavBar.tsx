@@ -9,7 +9,7 @@ export function NavBar() {
     >
       <span
         data-edges-mark="Layers2"
-        className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-[#5b9fd4] text-[#0b1218]"
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-md bg-[#d7ebf8] text-[#0b1218]"
       >
         <Layers2 className="size-5" aria-hidden="true" />
       </span>
