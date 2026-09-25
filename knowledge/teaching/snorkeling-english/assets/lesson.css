@@ -1,0 +1,11 @@
+@import url("../../assets/lesson.css");
+:root { --accent:#087e8b; --bg:#fafbf8; }
+body { font-family:var(--sans); }
+h1 { font-family:var(--serif); }
+.phrase { font-size:1.16rem; color:var(--ink); }
+dt { margin-top:1rem; font-weight:650; }
+dd { margin:.2rem 0 .8rem; color:var(--muted); }
+summary { cursor:pointer; color:var(--accent); padding:.4rem 0; }
+details { border-top:1px solid var(--line); padding:.5rem 0; }
+blockquote { border-left:3px solid var(--accent); margin:1rem 0; padding:.4rem 1rem; }
+@media print { .wrap { max-width:none; padding:0; } a { color:inherit; } details { break-inside:avoid; } }

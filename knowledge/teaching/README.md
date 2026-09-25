@@ -10,3 +10,4 @@ Public homepage: [`index.html`](./index.html)（公网 `/teaching/`）。每次�
 - [link-external-repo](./link-external-repo/) — 关联外部仓库而不撑大主仓库：submodule / subtree / gitignore+clone / partial clone 选型与实操
 - [obsidian-cli](./obsidian-cli/) — Obsidian CLI：让 AI Agent 接入笔记库
 - [openhands](./openhands/) — 搞懂 OpenHands V1 架构与核心实现（Conversation / Agent.step / Workspace），能对照改/扩展
+- [snorkeling-english](./snorkeling-english/) — 浮潜英语：优先练安全说明、求助与停止，再练装备沟通
