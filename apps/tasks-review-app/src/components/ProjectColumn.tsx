@@ -55,6 +55,8 @@ export function ProjectColumn({
     >
       <SectionHeader
         section="projects"
+        toggleId="projects"
+        title="Projects"
         collapsed={collapsed}
         onToggle={() => setCollapsed((value) => !value)}
       />

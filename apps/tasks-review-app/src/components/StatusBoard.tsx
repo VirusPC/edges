@@ -31,7 +31,7 @@ export function StatusBoard({
   const visible = items.filter((item) => matchesReviewFilter(item, filter))
   const known = new Set<string>(REVIEW_STATUS_COLUMNS)
   const unspecified = visible.filter((item) => !known.has(itemStatus(item)))
-  // Narrow sections: only non-empty statuses, all expanded. No collapse.
+  // Narrow sections: only non-empty statuses. Default expanded; each header can collapse.
   const columns = REVIEW_STATUS_COLUMNS.map((status) => ({
     status,
     title: statusLabel(status),
@@ -49,6 +49,8 @@ export function StatusBoard({
     >
       <SectionHeader
         section="tasks"
+        toggleId="tasks"
+        title="Tasks"
         collapsed={collapsed}
         onToggle={() => setCollapsed((value) => !value)}
       />
@@ -57,55 +59,38 @@ export function StatusBoard({
         data-status-columns="edges"
         className={
           narrow
-            ? "flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-x-hidden p-3"
+            ? "flex min-h-0 w-full min-w-0 flex-col gap-4 overflow-x-clip"
             : "flex min-h-0 w-full min-w-0 flex-1 gap-3 overflow-x-auto p-3"
         }
       >
         {columns.map((column) => (
-          <section
+          <StatusSection
             key={column.status}
-            data-status-column={column.status}
-            className={sectionClass}
-          >
-            <ColumnHeader
-              title={column.title}
-              count={column.items.length}
-              dot={statusDotClass(column.status)}
-              narrow={narrow}
-            />
-            {column.items.map((item) => (
-              <TaskCard
-                key={item.stem}
-                item={item}
-                groups={groups}
-                narrow={narrow}
-                selected={item.stem === selectedStem}
-                onSelect={onSelect}
-                onMove={onMove}
-              />
-            ))}
-          </section>
+            status={column.status}
+            title={column.title}
+            dot={statusDotClass(column.status)}
+            items={column.items}
+            groups={groups}
+            narrow={narrow}
+            sectionClass={sectionClass}
+            selectedStem={selectedStem}
+            onSelect={onSelect}
+            onMove={onMove}
+          />
         ))}
         {unspecified.length > 0 ? (
-          <section data-status-column="__unspecified" className={sectionClass}>
-            <ColumnHeader
-              title="未标注"
-              count={unspecified.length}
-              dot={statusDotClass("__unspecified")}
-              narrow={narrow}
-            />
-            {unspecified.map((item) => (
-              <TaskCard
-                key={item.stem}
-                item={item}
-                groups={groups}
-                narrow={narrow}
-                selected={item.stem === selectedStem}
-                onSelect={onSelect}
-                onMove={onMove}
-              />
-            ))}
-          </section>
+          <StatusSection
+            status="__unspecified"
+            title="未标注"
+            dot={statusDotClass("__unspecified")}
+            items={unspecified}
+            groups={groups}
+            narrow={narrow}
+            sectionClass={sectionClass}
+            selectedStem={selectedStem}
+            onSelect={onSelect}
+            onMove={onMove}
+          />
         ) : null}
         {visible.length === 0 ? (
           <p className="px-2 py-6 text-sm text-[#9aa8bc]">没有匹配的卡片</p>
@@ -116,31 +101,64 @@ export function StatusBoard({
   )
 }
 
-function ColumnHeader({
+function StatusSection({
+  status,
   title,
-  count,
   dot,
+  items,
+  groups,
   narrow,
+  sectionClass,
+  selectedStem,
+  onSelect,
+  onMove,
 }: {
+  status: string
   title: string
-  count: number
   dot: string
+  items: ReviewItem[]
+  groups: ReviewGroup[]
   narrow: boolean
+  sectionClass: string
+  selectedStem: string
+  onSelect: (stem: string) => void
+  onMove: (stem: string, projectId: string) => void
 }) {
+  const [collapsed, setCollapsed] = useState(false)
   return (
-    <h2
-      className={
-        (narrow ? "" : "sticky top-0 ") +
-        "flex items-center justify-between gap-2 border-b border-[#334155] bg-[#0f1419] px-1 py-1 text-base font-semibold tracking-wide text-[#9aa8bc]"
-      }
-    >
-      <span className="flex items-center gap-2">
-        <span className={`size-1.5 rounded-full ${dot}`} />
-        {title}
-      </span>
-      <span className="rounded-full bg-[#1a2332] px-2 py-0.5 text-xs font-medium text-[#e7ecf3] tabular-nums">
-        {count}
-      </span>
-    </h2>
+    <section data-status-column={status} className={sectionClass}>
+      <SectionHeader
+        toggleId={status}
+        title={
+          <>
+            <span className={`size-1.5 shrink-0 rounded-full ${dot}`} />
+            {title}
+          </>
+        }
+        actions={
+          <span className="shrink-0 rounded-full bg-[#0f1419] px-2 py-0.5 text-xs font-medium text-[#e7ecf3] tabular-nums">
+            {items.length}
+          </span>
+        }
+        collapsed={collapsed}
+        onToggle={() => setCollapsed((value) => !value)}
+        stickyClassName={narrow ? "sticky top-12 z-10" : "sticky top-0 z-10"}
+      />
+      {collapsed ? null : (
+        <div className={narrow ? "flex flex-col gap-2 px-3 py-3" : "contents"}>
+          {items.map((item) => (
+            <TaskCard
+              key={item.stem}
+              item={item}
+              groups={groups}
+              narrow={narrow}
+              selected={item.stem === selectedStem}
+              onSelect={onSelect}
+              onMove={onMove}
+            />
+          ))}
+        </div>
+      )}
+    </section>
   )
 }

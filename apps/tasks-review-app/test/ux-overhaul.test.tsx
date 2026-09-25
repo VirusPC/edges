@@ -197,6 +197,20 @@ it("sticks one section header at a time and keeps the selection on back", async 
   await user.click(document.querySelector("[data-section-toggle=projects]") as Element)
   expect(document.querySelector("[data-project-select]")).not.toBeNull()
 
+  const backlog = document.querySelector("[data-status-column=backlog]")
+  const statusHeader = backlog?.querySelector("h2")
+  expect(statusHeader?.className).toContain("sticky")
+  expect(statusHeader?.className).toContain("top-12")
+  const statusToggle = statusHeader?.querySelector("[data-section-toggle]")
+  expect(statusToggle?.textContent).toBe("")
+  expect(statusToggle?.querySelector("svg")).not.toBeNull()
+  expect(backlog?.querySelector("[data-stem]")).not.toBeNull()
+  await user.click(statusToggle as Element)
+  expect(backlog?.querySelector("[data-stem]")).toBeNull()
+  expect(statusHeader?.getAttribute("data-section-collapsed")).toBe("on")
+  await user.click(statusToggle as Element)
+  expect(backlog?.querySelector("[data-stem]")).not.toBeNull()
+
   await user.click(screen.getByText("待读 Harness Playbook"))
   const stem = window.location.hash
   await user.click(screen.getByRole("button", { name: "回到看板" }))

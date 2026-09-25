@@ -25,15 +25,25 @@ export function MarkdownPane({
     >
       <SectionHeader
         section="details"
+        toggleId="details"
+        title="Details"
         collapsed={collapsed}
         onToggle={() => setCollapsed((value) => !value)}
-        onBack={
-          narrow
-            ? () =>
+        actions={
+          narrow ? (
+            <button
+              type="button"
+              data-section-back="edges"
+              className="shrink-0 text-sm font-medium text-[#5b9fd4]"
+              onClick={() =>
                 document
                   .getElementById("review-board")
                   ?.scrollIntoView?.({ block: "start" })
-            : undefined
+              }
+            >
+              回到看板
+            </button>
+          ) : null
         }
       />
       {collapsed ? null : (

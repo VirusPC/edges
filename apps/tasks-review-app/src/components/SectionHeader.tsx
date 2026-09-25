@@ -1,39 +1,38 @@
+import type { ReactNode } from "react"
 import { ChevronDown, ChevronRight } from "lucide-react"
 
 export function SectionHeader({
-  section,
+  title,
   collapsed,
   onToggle,
-  onBack,
+  toggleId,
+  actions,
+  stickyClassName = "sticky top-0 z-20",
+  section,
 }: {
-  section: "projects" | "tasks" | "details"
+  title: ReactNode
   collapsed: boolean
   onToggle: () => void
-  onBack?: () => void
+  toggleId: string
+  actions?: ReactNode
+  stickyClassName?: string
+  section?: "projects" | "tasks" | "details"
 }) {
-  const title =
-    section === "projects" ? "Projects" : section === "tasks" ? "Tasks" : "Details"
   const ToggleIcon = collapsed ? ChevronRight : ChevronDown
   return (
     <h2
       data-section-title={section}
       data-section-collapsed={collapsed ? "on" : "off"}
-      className="sticky top-0 z-20 flex items-center gap-2 border-b border-[#334155] bg-[#1a2332] px-3 py-2 text-lg font-semibold tracking-wide text-[#e7ecf3]"
+      className={
+        "flex h-12 shrink-0 items-center gap-2 border-b border-[#334155] bg-[#1a2332] px-3 text-lg font-semibold tracking-wide text-[#e7ecf3] " +
+        stickyClassName
+      }
     >
-      <span className="min-w-0 flex-1">{title}</span>
-      {onBack ? (
-        <button
-          type="button"
-          data-section-back="edges"
-          className="shrink-0 text-sm font-medium text-[#5b9fd4]"
-          onClick={onBack}
-        >
-          回到看板
-        </button>
-      ) : null}
+      <span className="flex min-w-0 flex-1 items-center gap-2 truncate">{title}</span>
+      {actions}
       <button
         type="button"
-        data-section-toggle={section}
+        data-section-toggle={toggleId}
         aria-expanded={!collapsed}
         aria-label={collapsed ? "展开" : "收起"}
         className="inline-flex size-7 shrink-0 items-center justify-center text-[#9aa8bc]"
