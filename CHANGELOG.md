@@ -11,41 +11,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### conversation-to-tasks：完成标准可以后补
+### Changed
 
-- `conversation-to-tasks`：完成标准开卡时可选，可留到 `grill-with-docs` 再补；必填仅背景与目标。
+- **完成标准可后补：** `conversation-to-tasks`：完成标准开卡时可选，可留到 `grill-with-docs` 再补；必填仅背景与目标。
 
 
-### conversation-to-notes 给人审，conversation-to-tasks 只成草稿
+### 笔记入库与能力面
 
-- `conversation-to-notes` 技能（`extensions/skills/conversation-to-notes`）现在要求整理出来的笔记写给人审阅：白话完整句，例子与上下文要够独立读懂；密表放进补充说明；所学只写判断与边界；行动指南须带触发与步骤。该技能的 2.1.0 / 2.1.1 已写在技能 changelog 里，这里不再复述明细。
-- 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 完成标准（动作可选）；栏名用中文。与笔记 / 记忆技能分工；只成文，不落库。
+- **笔记写给人审：** `conversation-to-notes` 技能（`extensions/skills/conversation-to-notes`）现在要求整理出来的笔记写给人审阅：白话完整句，例子与上下文要够独立读懂；密表放进补充说明；所学只写判断与边界；行动指南须带触发与步骤。该技能的 2.1.0 / 2.1.1 已写在技能 changelog 里，这里不再复述明细。
+- **任务只成草稿：** 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 完成标准（动作可选）；栏名用中文。与笔记 / 记忆技能分工；只成文，不落库。
 
-### README：一键部署、接入与产出
+### 文档与系统
 
-- 根 README 写明了系统设计目标：一键部署 Edges、一键接入 Agent 客户端、一键产出对外资产。仓库按这个方向收敛。
+- **写明一键三件事：** 根 README 写明了系统设计目标：一键部署 Edges、一键接入 Agent 客户端、一键产出对外资产。仓库按这个方向收敛。
 
-### 审阅页窄屏与三栏、按项目分组、/tasks/ 部署
+### 任务看板与项目
 
-- 窄屏审阅页从页顶可以一直滚到 Details，点「回到看板」之后也能再滚回 Projects。任务锚定仍停在当前卡片上，并让开吸顶标题。
-- `edges tasks project review-page` 和 `/tasks/` 上，三栏章节标题是 Projects、Tasks、Details。状态段标题是英文 Title Case，例如 Backlog、In Progress，点开的任务名留在 Details 下面。强色在顶栏：Edges 旁边是 Lucide `Layers2` 浅色图标块，顶栏本身是一条色带。章节标题是顶栏和页面背景之间的过渡色面，没有左侧色条。状态行贴着页面背景，仍是扁列表。窄屏项目下拉用弹出层锚在触发器上，打开后能切换项目。状态段标题比章节标题小一档。窄屏筛选入口是 Lucide `ListFilter` 图标。双击 Projects、Tasks、Details 或 Edges 会滚到那一节；「回到看板」滚到当前卡片，并让开吸顶的 Tasks 和状态标题。
-- 审阅页窄于 768px 时，项目收成一个下拉（例如「全部 · 95」），状态按 Backlog、In Progress、Done 这类英文标题分段纵向排开，只显示有卡片的状态且全部展开。筛选收进图标按钮，抽屉标题仍是「筛选」，右上角用 × 关掉。窄屏仍是项目、任务、详情接在同一页里往下滚；Projects、Tasks、Details 的标题吸在 Edges 下面，同一时间只钉住当前这一节，右侧用箭头图标收起，不是文字按钮。Backlog、In Progress 这些状态标题也用同一套标题：吸在 Tasks 下面，并且可以用箭头收起。窄屏把每一个状态段都收起时，这些标题紧挨成一列，中间不留深色空隙；还有一段展开时，卡片仍跟在自己的标题下面，段与段的间距保持原样。桌面状态列间距不变，Projects 的下拉和列表也不为这件事改间距。只有 Details 有「回到看板」，点了滚回任务区，不取消选中。宽屏把 Edges 和筛选合成一行，详情栏默认 220px，中栏更宽，分隔线仍可拖且中栏不会被拖没。卡片上的日期文件名默认收起。拖到左栏或「移到项目…」仍只改页内归属，复制导出 JSON 会带上这次改动。
-- `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个三栏审阅页：顶栏可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选；左侧点项目筛选，拖到项目上只改 project，再用「复制导出 JSON」贴回。中间的状态列只展示，右侧渲染当前条目的 Markdown 正文。页上的脚本在生成前由 `pnpm --filter tasks-review-app run build` 打好并内联进单份 HTML，构建产物不进 git。
-- 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
-- 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy.yml` 会在整仓 pull 之后自动生成。
-- 修复教学站部署流水线里读 token 时的引号错误，避免 Action 一启动就语法失败.
-- nginx 一次性配好后，打开 `http(s)://<host>/tasks/` 就是固定入口，始终反映 main 上的看板，和 `/teaching/` 在同一台机器上（见 ADR 0021）。第一次对外跑 `extensions/clis/deploy/setup-nginx-tasks.sh`。
-- `edges tasks project review-page` 仍然只负责渲染，本轮拖拽不会写回仓库。
+- **窄屏能滚到详情：** 窄屏审阅页从页顶可以一直滚到 Details，点「回到看板」之后也能再滚回 Projects。任务锚定仍停在当前卡片上，并让开吸顶标题。
+- **标题配色与锚定：** `edges tasks project review-page` 和 `/tasks/` 上，三栏章节标题是 Projects、Tasks、Details。状态段标题是英文 Title Case，例如 Backlog、In Progress，点开的任务名留在 Details 下面。强色在顶栏：Edges 旁边是 Lucide `Layers2` 浅色图标块，顶栏本身是一条色带。章节标题是顶栏和页面背景之间的过渡色面，没有左侧色条。状态行贴着页面背景，仍是扁列表。窄屏项目下拉用弹出层锚在触发器上，打开后能切换项目。状态段标题比章节标题小一档。窄屏筛选入口是 Lucide `ListFilter` 图标。双击 Projects、Tasks、Details 或 Edges 会滚到那一节；「回到看板」滚到当前卡片，并让开吸顶的 Tasks 和状态标题。
+- **窄屏分段桌面一行：** 审阅页窄于 768px 时，项目收成一个下拉（例如「全部 · 95」），状态按 Backlog、In Progress、Done 这类英文标题分段纵向排开，只显示有卡片的状态且全部展开。筛选收进图标按钮，抽屉标题仍是「筛选」，右上角用 × 关掉。窄屏仍是项目、任务、详情接在同一页里往下滚；Projects、Tasks、Details 的标题吸在 Edges 下面，同一时间只钉住当前这一节，右侧用箭头图标收起，不是文字按钮。Backlog、In Progress 这些状态标题也用同一套标题：吸在 Tasks 下面，并且可以用箭头收起。窄屏把每一个状态段都收起时，这些标题紧挨成一列，中间不留深色空隙；还有一段展开时，卡片仍跟在自己的标题下面，段与段的间距保持原样。桌面状态列间距不变，Projects 的下拉和列表也不为这件事改间距。只有 Details 有「回到看板」，点了滚回任务区，不取消选中。宽屏把 Edges 和筛选合成一行，详情栏默认 220px，中栏更宽，分隔线仍可拖且中栏不会被拖没。卡片上的日期文件名默认收起。拖到左栏或「移到项目…」仍只改页内归属，复制导出 JSON 会带上这次改动。
+- **共用三栏审阅页：** `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个三栏审阅页：顶栏可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选；左侧点项目筛选，拖到项目上只改 project，再用「复制导出 JSON」贴回。中间的状态列只展示，右侧渲染当前条目的 Markdown 正文。页上的脚本在生成前由 `pnpm --filter tasks-review-app run build` 打好并内联进单份 HTML，构建产物不进 git。
+- **按项目分组列出：** 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
+- **部署生成静态页：** 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy.yml` 会在整仓 pull 之后自动生成。
+- **修复部署引号：** 修复教学站部署流水线里读 token 时的引号错误，避免 Action 一启动就语法失败.
+- **/tasks/ 固定入口：** nginx 一次性配好后，打开 `http(s)://<host>/tasks/` 就是固定入口，始终反映 main 上的看板，和 `/teaching/` 在同一台机器上（见 ADR 0021）。第一次对外跑 `extensions/clis/deploy/setup-nginx-tasks.sh`。
+- **拖拽不写回仓库：** `edges tasks project review-page` 仍然只负责渲染，本轮拖拽不会写回仓库。
 
-### Artifacts：临时预览页的发布与同机托管
+### Artifacts 预览
 
-- 公网示例和 `edges artifacts init --base-url` 用 `https://edges.viruspc.tech`（`/health`、`/artifacts` 路径不变）。对这个地址做 `publish`（`POST /artifacts`）时，请求带固定的浏览器式 User-Agent：缺了它 Cloudflare 回 1010，带上则是 201。打开链接的 GET 通常不受影响。
-- 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。本机先用 `edges artifacts init` 记下服务地址和共享 token，再用 `edges artifacts publish` 拿到公开链接；提前删用 `edges artifacts rm`。
-- 写接口要带这份共享 token；浏览器打开链接不用登录。手机审阅必须用能到达的 `BASE_URL`，不能假定 localhost。
-- `edges tasks project review-page` 仍然只负责渲染，不发布。要给人打开时，先渲染再 `publish`。
-- 在和 teaching 同一台机器上，用 `edges artifacts server install` 装好环境（不启动进程），再用 `start` 拉起服务。日常用 `stop` / `restart` 管进程，用 `status` 查看。一次性对外跑 `setup-nginx`。没有 `server init`。
-- 反代写进已有的 `teaching.conf`，必须带 `/teaching/`，不要另开公网端口。
-- 合并到 main 后，如果盒上已经有这份服务配置，`deploy.yml` 会在整仓 pull 之后重启服务。nginx 通常不用再跑。
+- **公网域名与标识：** 公网示例和 `edges artifacts init --base-url` 用 `https://edges.viruspc.tech`（`/health`、`/artifacts` 路径不变）。对这个地址做 `publish`（`POST /artifacts`）时，请求带固定的浏览器式 User-Agent：缺了它 Cloudflare 回 1010，带上则是 201。打开链接的 GET 通常不受影响。
+- **发布临时预览链接：** 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。本机先用 `edges artifacts init` 记下服务地址和共享 token，再用 `edges artifacts publish` 拿到公开链接；提前删用 `edges artifacts rm`。
+- **鉴权与可达地址：** 写接口要带这份共享 token；浏览器打开链接不用登录。手机审阅必须用能到达的 `BASE_URL`，不能假定 localhost。
+- **审阅页不负责发布：** `edges tasks project review-page` 仍然只负责渲染，不发布。要给人打开时，先渲染再 `publish`。
+- **同机安装与启停：** 在和 teaching 同一台机器上，用 `edges artifacts server install` 装好环境（不启动进程），再用 `start` 拉起服务。日常用 `stop` / `restart` 管进程，用 `status` 查看。一次性对外跑 `setup-nginx`。没有 `server init`。
+- **反代不另开端口：** 反代写进已有的 `teaching.conf`，必须带 `/teaching/`，不要另开公网端口。
+- **合并后重启服务：** 合并到 main 后，如果盒上已经有这份服务配置，`deploy.yml` 会在整仓 pull 之后重启服务。nginx 通常不用再跑。
 
 ## [1.2.0] - 2026-09-18
 
