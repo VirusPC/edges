@@ -166,7 +166,10 @@ it("sticks one section header at a time and keeps the selection on back", async 
     const header = document.querySelector(`[data-section-title=${section}]`)
     expect(header?.className).toContain("sticky")
     expect(header?.className).toContain("top-0")
-    expect(header?.querySelector("[data-section-toggle]")?.textContent).toBe("收起")
+    const toggle = header?.querySelector("[data-section-toggle]")
+    expect(toggle?.textContent).toBe("")
+    expect(toggle?.querySelector("svg")).not.toBeNull()
+    expect(toggle?.getAttribute("aria-expanded")).toBe("true")
   }
   const details = document.querySelector("[data-section-title=details]")
   const back = details?.querySelector("[data-section-back]")

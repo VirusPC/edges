@@ -1,3 +1,5 @@
+import { ChevronDown, ChevronRight } from "lucide-react"
+
 export function SectionHeader({
   section,
   collapsed,
@@ -11,6 +13,7 @@ export function SectionHeader({
 }) {
   const title =
     section === "projects" ? "Projects" : section === "tasks" ? "Tasks" : "Details"
+  const ToggleIcon = collapsed ? ChevronRight : ChevronDown
   return (
     <h2
       data-section-title={section}
@@ -32,10 +35,11 @@ export function SectionHeader({
         type="button"
         data-section-toggle={section}
         aria-expanded={!collapsed}
-        className="shrink-0 text-sm font-medium text-[#9aa8bc]"
+        aria-label={collapsed ? "展开" : "收起"}
+        className="inline-flex size-7 shrink-0 items-center justify-center text-[#9aa8bc]"
         onClick={onToggle}
       >
-        {collapsed ? "展开" : "收起"}
+        <ToggleIcon className="size-4" aria-hidden="true" />
       </button>
     </h2>
   )
