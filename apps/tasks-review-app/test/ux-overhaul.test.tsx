@@ -145,6 +145,14 @@ it("opens narrow filters in a sheet and restores the board when the sheet closes
   expect(sheet?.querySelector("[data-filter=assignee]")).not.toBeNull()
   expect(sheet?.querySelector("[data-filter=status]")).not.toBeNull()
   expect(sheet?.querySelector("[data-action=copy-json]")).not.toBeNull()
+  const close = sheet?.querySelector("[data-slot=sheet-close]")
+  expect(close?.textContent?.trim()).toBe("")
+  expect(close?.textContent).not.toContain("关闭")
+  expect(close?.querySelector("svg")).not.toBeNull()
+  expect(screen.queryByRole("button", { name: "关闭" })).toBeNull()
+  expect(document.querySelector("[data-action=open-filters]")?.textContent).toContain(
+    "筛选"
+  )
   await user.click(screen.getByRole("button", { name: "关闭筛选" }))
   expect(document.querySelector("[data-filter-sheet]")).toBeNull()
   expect(

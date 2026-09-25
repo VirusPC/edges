@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { X } from "lucide-react"
 import { itemAssignee, type ReviewFilter, type ReviewItem } from "../filter.ts"
 import { statusLabel } from "../display.ts"
 import { exportReviewRows } from "../export.ts"
@@ -192,9 +193,9 @@ export function TopBar({
               <SheetTitle>筛选</SheetTitle>
               <SheetClose
                 aria-label="关闭筛选"
-                className="rounded-md px-2 py-1 text-sm text-[#9aa8bc] hover:bg-[#243044] hover:text-[#e7ecf3]"
+                className="inline-flex size-7 shrink-0 items-center justify-center rounded-md text-[#9aa8bc] hover:bg-[#243044] hover:text-[#e7ecf3]"
               >
-                关闭
+                <X className="size-4" aria-hidden />
               </SheetClose>
             </SheetHeader>
             <SheetDescription>
