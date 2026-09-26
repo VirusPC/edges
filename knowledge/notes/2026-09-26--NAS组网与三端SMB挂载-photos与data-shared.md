@@ -36,15 +36,17 @@
    - 入口：Win `N:\shared`；Mac `~/NAS/data/shared`；GTR `/mnt/nas/data/shared`
 
 【所学】
-- 「NAS 上新建共享」≠「客户端自动多盘符」。  
-- Mac 有线未通时用 Mesh 挂载是技术债：能用，但重启后可能要再挂；应迁回家庭 LAN。  
+- **问题**：拓扑通了但三端还不能把 NAS 当磁盘；新建 UGOS 共享不会自动出现盘符；Mac 有线 SMB 当时不通。
+- **定稿方案**：Windows 持久映射 `N:` data、`P:` projects、`O:` docker、`Q:` personal_folder、`R:` photos；Mac `~/NAS/*`（当时经 Mesh，因有线未通）；GTR `/mnt/nas/*` + fstab + `/etc/nas-smb.cred`（只记路径）；通用入口 **`data/shared/{docs,downloads,tmp,media}`**；原则是少建独立共享、多用已有 data 下的英文子目录。
+- 「NAS 上新建共享」≠「客户端自动多盘符」。
+- Mac 有线未通时用 Mesh 挂载是技术债：能用，但重启后可能要再挂；应迁回家庭 LAN。
 - 独立共享只在需要隔离权限/备份策略时再开。
 
 【行动指南】
-- 新材料优先丢进 `data/shared/...`。  
-- 必须新独立共享：同时改 Win 映射 + Mac `~/NAS` + GTR fstab。  
-- Mac 有线恢复：SMB 从 Mesh 上的 nas 迁到家庭 LAN 上的 NAS。  
-- GTR 复电后盘没有：查 `/etc/nas-smb.cred`（只记路径）与 `~/bin/minigtr-recover.sh`。
+- 若有新材料要全家共用：优先放进 `data/shared/...`。
+- 若必须新开独立共享：同时改 Win 映射、Mac `~/NAS` 与 GTR fstab。
+- 若 Mac 有线恢复：把 SMB 从 Mesh 上的 nas 迁到家庭 LAN 上的 NAS。
+- 若 GTR 复电后盘没有：查 `/etc/nas-smb.cred`（只记路径）与 `~/bin/minigtr-recover.sh`。
 
 【补充说明】
 ### 挂载速查（脱敏）

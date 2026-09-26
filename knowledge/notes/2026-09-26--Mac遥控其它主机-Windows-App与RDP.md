@@ -33,14 +33,16 @@
    - 目的：远控/本机执行时少被锁屏打断。
 
 【所学】
-- 「能 SSH」≠「能看屏幕」。  
-- Windows App 连的是 RDP，依赖专业版 + 防火墙 + 账户密码。  
+- **问题**：包能到不等于能看屏幕；Mac 对 Windows 用哪套协议不清楚；账号容易填成 PIN；主机名过长难收藏。
+- **定稿方案**：Mac↔Mac 继续屏幕共享；Mac 或手机对 Windows 用 **Windows App + 本机远程桌面**（Win11 Pro for Workstations 已启用）；连接目标用短名 **`4070ts-win11`**，不写 Mesh 数字地址；用户写 `Cheng Peng` 或 `DESKTOP-K3G8QJ2\Cheng Peng`，密码用**本机账户密码**（笔记不记口令）；关掉自动锁屏以免远控被打断。Ubuntu 桌面远控当晚未强制落地。
+- 「能 SSH」≠「能看屏幕」。
+- Windows App 连的是 RDP，依赖专业版、防火墙放行和本机账户密码。
 - 短 MagicDNS 名对远控收藏极其重要；公开收藏夹不要塞 Mesh 私网数字地址。
 
 【行动指南】
-- 连不上：查 RDP 是否启用、Tailscale 是否在线、用户名是否带电脑名前缀、是否用账户密码而非 PIN。  
-- 只要命令行：OpenSSH 或 Grok Bot 本机执行。  
-- 控 Ubuntu 桌面：另开专题，仍走 Tailscale。
+- 若连不上：查远程桌面是否启用、Tailscale 是否在线、用户名是否带电脑名前缀、是否用本机账户密码而不是 PIN。
+- 若只要命令行：用 OpenSSH 或 Grok Bot 本机执行，不必开屏幕。
+- 若要控 Ubuntu 桌面：另开专题，仍走 Tailscale，不要公网裸奔。
 
 【补充说明】
 - 精确 Mesh 地址 → 本地 by-agent。交叉：改名 → SSH 篇；关锁屏 / Wi‑Fi → 支线篇。

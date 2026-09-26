@@ -33,15 +33,17 @@
    - 验收应含终端 `tailscale status`，不仅控制台绿点。
 
 【所学】
-- 用双列矩阵按主机逐行审计。  
-- 卸 GUI 后 PATH stub 是高概率坑。  
-- `cloudflared` 在 PATH ≠ 隧道已认证。  
+- **问题**：不知道每台是否装了 Tailscale / cloudflared，以及命令行是否真能敲；Windows 缺 cloudflared；Mac 卸 GUI 后 CLI stub 断裂。
+- **定稿方案**：用「主机 × Tailscale × cloudflared」双列矩阵做当晚验收；四机 Tailscale 均在线；GTR / NAS / Mac 隧道已有；Windows 新装 cloudflared **2026.9.3**（**未 login、未开隧道**）；Mac CLI 修好，残留坏 stub `/usr/local/bin/tailscale` 待管理员删除。
+- 用双列矩阵按主机逐行审计。
+- 卸 GUI 后 PATH stub 是高概率坑。
+- `cloudflared` 在 PATH ≠ 隧道已认证。
 - 「节点在线」与「本机 CLI 可用」是两件事，审计表要分列。
 
 【行动指南】
-- Win 要用 CF 隧道：在已装版本上补官方 login，密钥走安全卡片。  
-- Mac stub：管理员删除后 `hash -r`。  
-- 新主机入网：复制本审计表做 DoD。
+- 若 Windows 要用 Cloudflare 隧道：在已装版本上补官方 login，密钥走安全卡片，不写进笔记。
+- 若 Mac 仍命中坏 stub：管理员删除 `/usr/local/bin/tailscale` 后执行 `hash -r`。
+- 若新主机入网：复制本审计表做验收清单。
 
 【补充说明】
 - 敏感：账号 / tunnel token / Tailscale key **只记状态，不写值**。  

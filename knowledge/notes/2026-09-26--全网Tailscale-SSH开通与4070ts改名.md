@@ -45,17 +45,19 @@
 - 00:25–00:28 Tailscale 名：长名 → 试 `4070ts-win` → 定 **`4070ts-win11`**。本机名改需重启，当晚未改。
 
 【所学】
-- 服务器口径要含「常开的 Mac」。  
-- Docker 与系统包可能并存于磁盘；以**谁在跑**为准。  
-- 删 Tailscale 节点要 Access token，不是 Auth key。  
-- 短主机名要一次定稿，远控收藏夹才不会反复改。  
+- **问题**：服务器不能统一用 Tailscale 身份免密进壳；Mac 沙盒 GUI 当不了被连端；NAS 曾被误判在 Docker；Windows 没有 Tailscale SSH 服务端；新机 MagicDNS 名过长。
+- **定稿方案**：minigtr / nas / aliyun-ecs / macmini 四台开 `tailscale set --ssh` 并用邻机实测；Mac 卸 GUI 改 brew / `tailscaled`；NAS 以系统包为准经有线打开；Windows 不走 Tailscale SSH，改 OpenSSH / RDP；MagicDNS 定名 **`4070ts-win11`**（本机名 `DESKTOP-K3G8QJ2` 当晚未改），设备助手同步改名。
+- 服务器口径要含「常开的 Mac」。
+- Docker 与系统包可能并存于磁盘；以**谁在跑**为准。
+- 删 Tailscale 节点要 Access token，不是 Auth key；两种凭据都不入库。
+- 短主机名要一次定稿，远控收藏夹才不会反复改。
 - 「网通 / ping 通」≠「身份免密壳」；Permission denied 时先查 sshHostKeys，勿盲重试（尤其 NAS/UGOS）。
 
 【行动指南】
-- 新 Linux/NAS：`sudo tailscale set --ssh`，再实测 `ssh user@短名`。  
-- Mac 当 SSH 被连端：非 App Store 沙盒 GUI，用 brew / `tailscaled`。  
-- Windows 要远程壳：OpenSSH Server，不要指望 `tailscale set --ssh`。  
-- 改名：先 MagicDNS，再同步设备助手显示名；本机名另排重启。
+- 若新 Linux/NAS 入网：执行 `sudo tailscale set --ssh`，再用另一台已通节点实测 `ssh user@短名`。
+- 若 Mac 要当 SSH 被连端：确认不是 App Store 沙盒 GUI，改用 brew / `tailscaled`。
+- 若 Windows 要远程壳：装/开 OpenSSH Server，不要指望 `tailscale set --ssh`。
+- 若改短名：先改 MagicDNS，再同步设备助手显示名；本机名另排重启。
 
 【补充说明】
 - 凭证只记「已用安全卡片 / 已清临时文件」，不写值。  

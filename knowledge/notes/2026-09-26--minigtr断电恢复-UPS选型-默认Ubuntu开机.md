@@ -45,11 +45,13 @@
    - **失败链（可公开）**：首次代跑前 Mac→minigtr 普通 SSH 报 Permission denied；开 Tailscale SSH 后才通。脚本首跑出现「Tailscale 未入网」**假警报**（节点实际已在网且正用 Tailscale SSH 连着）→ 当晚修好误判逻辑，并保证 `~/.local/bin` 进 PATH。再跑结果：外网、eno1、sshd、Docker、四个 NAS 挂载均 OK；Codex remote-control 显示 connected；「完成：无失败（警告 0）」。
 
 【所学】
-- 「掉线」要先分：助手灰 ≠ 整机死；当晚是整机断电级。  
-- Tailscale 在线 ≠ Tailscale SSH；免密是单独开关 + ACL。  
-- 双系统恢复脚本必须写死「只服务哪一侧」，否则 Win/Ubuntu 混写必翻车。  
-- 默认系统改的是 EFI/BBS，不是「多装一个启动项」。  
-- UPS 买半小时续航要看 Wh/半载曲线，VA 数字会骗人。  
+- **问题**：常开枢纽失联时，先分不清是助手灰还是整机断电；复电后可能误进 Win11；服务与挂载要人盯；有 Tailscale 却误以为已经有免密壳。
+- **定稿方案**：默认进 Ubuntu（EFI BootOrder / BBS，Ubuntu 优先于 Windows）；Ubuntu 侧固定脚本 `~/bin/minigtr-recover.sh`（只服务 Ubuntu）；复电后经 Tailscale SSH 代跑；UPS 选型原则已定（半小时看电池能量，带 USB，用 NUT 低电量关机），**尚未下单**。
+- 「掉线」要先分：助手灰 ≠ 整机死；当晚是整机断电级。
+- Tailscale 在线 ≠ Tailscale SSH；免密是单独开关 + ACL。
+- 双系统恢复脚本必须写死「只服务哪一侧」，否则 Win/Ubuntu 混写必翻车。
+- 默认系统改的是 EFI/BBS，不是「多装一个启动项」。
+- UPS 买半小时续航要看 Wh/半载曲线，VA 数字会骗人。
 - 恢复脚本要容错「已在网却被状态解析误判」这类假警报。
 
 【行动指南】

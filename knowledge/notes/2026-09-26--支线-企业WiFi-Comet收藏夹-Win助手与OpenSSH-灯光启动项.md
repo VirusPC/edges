@@ -40,11 +40,13 @@
 - 测试同学：窗口内仅少量助手消息、无用户设备正文，与主线无关。
 
 【所学】
-- 企业 Wi‑Fi 与家里有线局域网必须分层；NAS 永不绑 802.1X。  
-- 「共享密码库」有物理边界：填得进哪台浏览器要事先说清。  
-- 人不在机前 ≠ 不能运维，但**第一次**提权/装 sshd 必须当面；之后用计划任务/SSH 管理员会话。  
-- 设备助手按机器拆分，避免 minigtr Ubuntu 助手兼管 Win 更新。  
-- OpenSSH 包名要精确（Preview ≠ Beta）；Capability 卡住应换通道或先修 WU。
+- **问题**：企业 Wi‑Fi 在列表里点一下往往不弹账密就失败；助手读不到用户本机密码和二次验证；人不在机前无法点 UAC；Windows 更新、Wi‑Fi、灯光、启动项和 Ubuntu 助手的边界混在一起。
+- **定稿方案**：`RED-ENGINEER` 用 PEAP+MSCHAPv2 手动配置；**NAS 禁止上企业网**；要给助手用的条目放进「Shared with Grok Bot」，并说清只能填助手自己那台浏览器；新建 **4070ts-win11设备助手** 专管这台 Windows；设计回机前的管理员通道（OpenSSH + `GrokBot-Admin` 任务，聊天确认后再触发）——**脚本未全部落地，sshd 当晚仍未出现**；Windows 更新错误已清缓存，待重启再看；Wi‑Fi 驱动已换较新正式包；机箱灯走 Mystic Light 调亮度（是否已灭未确认）；ChatGPT 与 Grok Bot 已加入开机启动。
+- 企业 Wi‑Fi 与家里有线局域网必须分层；NAS 永不绑 802.1X。
+- 「共享密码库」有物理边界：填得进哪台浏览器要事先说清。
+- 人不在机前 ≠ 不能运维，但**第一次**提权或装 sshd 必须当面；之后用计划任务或 SSH 管理员会话。
+- 设备助手按机器拆分，避免 minigtr Ubuntu 助手兼管 Win 更新。
+- OpenSSH 包名要精确（Preview ≠ Beta）；Capability 卡住应换通道或先修 Windows 更新。
 
 【行动指南】
 - 若再连 `RED-ENGINEER`：PEAP+MSCHAPv2，手动配置文件，勿列表盲点。  
