@@ -9,6 +9,15 @@
 - 用户原文：「**所有服务器一块给我开了吧。让 @IT资产管理 去做下**」「**不要用往 authorized_keys 塞 Mac 公钥替代；要用 Tailscale SSH。**」（交办口径）「**改名4070ts-win11吧，之前的名字太长了**」→ 又改「**改名4070ts-win**」→ 最终「**4070ts-win11**」「**@gtx4070ts-win11设备助手 也改名**」。
 - **公开库脱敏**：具体 Tailscale 私网地址 / 完整 MagicDNS 后缀见 by-agent；下文用短名与角色占位。
 
+## 主题
+
+这场在办全网「可重复的远程代跑通道」：把要当被连端的服务器（含常开 Mac）统一打开基于身份的远程登录并用邻机实测；Mac 必须换非沙盒安装通道；Windows 官方无该服务端则改走 OpenSSH / 远程桌面；节点短名一次定稿。
+
+- 难点：Mac 沙盒图形客户端报错、当不了被连端，必须卸 GUI 改 brew 守护进程。
+- 难点：NAS 磁盘上 Docker compose 与系统包可能并存；凭 compose 文件会误判「在容器里跑」，要以谁在跑为准。
+- 难点：Permission denied 时盲重试可能锁 IP；删除旧节点要用 Access token，不是入网 Auth key。
+- 难点：Windows 官方不提供 Tailscale SSH 服务端；短主机名反复改会拖累远控收藏与助手显示名。
+
 ## 过程
 
 ### 台账对齐（约 20:07 起）
@@ -26,6 +35,7 @@
 - 用户本机 `sudo tailscale set --ssh`；首次代跑需浏览器点授权。
 - 实测：`ssh viruspc@minigtr` 通 → 代跑恢复脚本。
 - 历史结论：此前有普通 Tailscale + sshd，**没有**开过 Tailscale SSH。
+- 交办口径明确：不要用往 authorized_keys 塞 Mac 公钥替代。
 
 ### nas：失败到纠正（约 20:18–20:21）
 
@@ -33,6 +43,7 @@
 - BatchMode Permission denied——**不盲重试防 UGOS 锁 IP**。
 - 用户：「**NAS是不是不应该在Docker里跑？**」「**minigtr和nas通过网线连着呢**」
 - **实情**：UGOS 本机已有 **tailscale + tailscaled**；Docker compose 遗留且容器未跑。经网线以 `cheng` 执行 `sudo tailscale set --ssh`；`ssh cheng@nas.…` 通。临时密码文件已清。
+- 取舍：以「谁在跑」为准，不凭磁盘上的 compose 下结论；不盲重试。
 
 ### Mac mini：必须换安装通道（20:47–21:05）
 
@@ -41,11 +52,26 @@
 - `brew install tailscale` → services start → `up` → `set --ssh`。新节点暂 `macmini-1`。
 - 删旧节点：Auth key 不可用；改为 Access token（**不入库**）后删旧并改回 `macmini`。
 - 验收：`ssh chengpeng@macmini` 自 minigtr 成功。
+- 取舍：沙盒 GUI 留着凑合 vs 卸 GUI 换 brew——必须换；删节点用 Access token，不用 Auth key。
 
 ### Windows 与改名（21:14+；00:25–00:28）
 
 - 官方：Tailscale SSH 服务端不支持 Windows；改走 OpenSSH / RDP。
 - Tailscale 名：长名 → 试 `4070ts-win` → 定 **`4070ts-win11`**。本机名改需重启，未改。
+- 取舍：不硬套 Linux 的 `set --ssh`；短名一次定稿，避免远控收藏漂移。
+
+## 结果
+
+做成了：
+
+- minigtr、nas、aliyun-ecs、macmini 四台服务器侧 Tailscale SSH 齐套，并经邻机实测。
+- Mac mini 卸沙盒 GUI，改 brew 守护进程；旧节点删掉，短名恢复为 `macmini`。
+- Windows 明确「无 Tailscale SSH 服务端」，改走 OpenSSH / RDP 路径；MagicDNS 短名定稿为 `4070ts-win11`，助手显示名同步。
+
+还剩：
+
+- Windows 本机名仍为 `DESKTOP-K3G8QJ2`（改本机名需重启，当晚未改）。
+- Windows 侧 OpenSSH / 管理员通道的落地细节见支线笔记，**未在本主题全部闭环**。
 
 ## 所学
 
@@ -54,6 +80,14 @@
 - 删除 Tailscale 节点要用 Access token，不是 Auth key。
 - 短主机名要一次定稿，反复改名会拖累远控收藏与助手显示名。
 - Windows 官方不提供 Tailscale SSH 服务端，不能拿 Linux 的开通步骤硬套。
+
+取舍补充：
+
+- 远程登录方式：往 authorized_keys 塞公钥 vs Tailscale SSH——按交办口径认后者为长期通道。
+- Mac 安装通道：留沙盒 GUI vs 卸 GUI 换 brew daemon——必须换，否则当不了被连端。
+- 删旧节点：Auth key vs Access token——认 Access token；Auth key 不可用。
+- Windows：硬套 `tailscale set --ssh` vs OpenSSH / RDP——认后者。
+- 短名：长名 / `4070ts-win` / `4070ts-win11`——最终定 `4070ts-win11`。
 
 ## 行动指南
 
@@ -72,11 +106,11 @@
 按顺序做：
 
 1. 确认各机已入组网且节点可见；把「要当被连端」的机器列成清单（含常开 Mac）。
-2. 在支持的服务器侧打开基于身份的远程登录开关，再用另一台已通节点实测登录。
-3. 若图形客户端报沙盒、当不了被连端：卸掉沙盒版，改用系统级守护进程后再开远程登录。
+2. 在支持的服务器侧打开基于身份的远程登录开关，再用另一台已通节点实测登录。不做：用往 authorized_keys 塞公钥当作长期替代。
+3. 若图形客户端报沙盒、当不了被连端：卸掉沙盒版，改用系统级守护进程后再开远程登录。不做：留着 GUI 凑合。
 4. 若系统官方不提供该远程登录服务端：改走本机命令行服务或屏幕远控，不要硬套同一开关。
 5. 清理重复或暂名节点时，用管理端 Access token，不用入网 Auth key。
-6. 节点显示名与助手名一次定稿为短名，避免远控收藏与对话 @ 漂移。
+6. 节点显示名与助手名一次定稿为短名，避免远控收藏与对话 @ 漂移。不做：反复试短名却不同步助手显示名。
 
 #### 验收标准
 
@@ -97,6 +131,8 @@
 2. 执行 `sudo tailscale set --ssh`。
 3. 用另一台已通节点实测（minigtr=`viruspc`，nas=`cheng`，aliyun-ecs=`cheng-dev`，macmini=`chengpeng`）。
 
+不做：往 authorized_keys 塞公钥替代。
+
 #### 若 Mac 要当 SSH 被连端
 
 则：
@@ -106,6 +142,8 @@
 - 若出现暂名 `macmini-1`：用 Access token（不是 Auth key）删旧节点并改回 `macmini`。
 - 验收：自 minigtr `ssh chengpeng@macmini` 成功。
 
+不做：留 GUI 指望它能当被连端。
+
 #### 若 NAS 开 SSH 遭 Permission denied
 
 则：
@@ -114,17 +152,19 @@
 - 先辨「谁在跑」：UGOS 系统包 tailscale/tailscaled 优先于磁盘上遗留的 Docker compose。
 - 经网线用用户 `cheng` 执行 `set --ssh`，再测 `ssh cheng@nas…`。
 
+不做：凭 compose 文件断定「在 Docker 里」就 docker exec。
+
 #### 若 Windows 要远程命令行
 
-则：不要指望 `tailscale set --ssh`；改装/开 OpenSSH Server，或走屏幕远控（见主题 06）。
+则：不要指望 `tailscale set --ssh`；改装/开 OpenSSH Server，或走屏幕远控（见主题 06）。当时未比较其它第三方远程命令行方案。
 
 #### 若改短名
 
-则：先改 MagicDNS，定稿 **`4070ts-win11`**（曾试 `4070ts-win`），再同步设备助手显示名；本机名 `DESKTOP-K3G8QJ2` 另排重启。
+则：先改 MagicDNS，定稿 **`4070ts-win11`**（曾试 `4070ts-win`），再同步设备助手显示名；本机名 `DESKTOP-K3G8QJ2` 另排重启。不做：只改助手名不改 MagicDNS，或反复改却不同步远控收藏。
 
 ## 补充说明
 
 - 凭证只记「已用安全卡片 / 已清临时文件」，不写值。
-- 精确地址 / machineId → `by-agent/IT资产管理.md`。
-- 交叉：复电与代跑入口 → 主题 01；有线局域网 → 主题 03；cloudflared / CLI 审计 → 主题 05；RDP → 主题 06。
+- 精确地址 / machineId → 本地协作目录 by-agent。
+- 交叉：复电与代跑入口 → [主题 01](./2026-09-26--minigtr断电恢复-UPS选型-默认Ubuntu开机.md)；有线局域网 → [主题 03](./2026-09-26--交换机重建局域网-无路由器-GTR网关.md)；cloudflared / CLI 审计 → [主题 05](./2026-09-26--Tailscale与Cloudflare安装审计-Win装cloudflared-Mac修CLI.md)；RDP → [主题 06](./2026-09-26--Mac遥控其它主机-Windows-App与RDP.md)。
 - 来源对话：IT资产管理为主，minigtr设备助手交办，约 20:07–21:05 与 00:25–00:28 段。
