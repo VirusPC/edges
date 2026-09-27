@@ -7,9 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-27
+
 ### Changed
 
-- 完成标准改为开卡时可选：对话里定不清可整栏省略，注明待 `grill-with-docs` 再补；必填门闩只卡背景与目标（v1.1.0）。
+- 正文顺序改为 **背景 → 目标 → 动作 → 完成标准**（后两栏仍可选）。与 `conversation-to-notes` 主题行动指南同序，便于笔记开卡平移；完成标准收在最后，对应「做完怎样算完」。
+- 明确 STAR 同构用途：制定任务（尤其 for agent），不是写复盘。
+
+## [1.1.0] - 2026-09-26
+
+### Changed
+
+- 完成标准改为开卡时可选：对话里定不清可整栏省略，注明待 `grill-with-docs` 再补；必填门闩只卡背景与目标。
 - 人审可为对话确认或 PR；落库所在分支是否新建不限。
 - 落库写入本技能步骤 6：交人审阅后，用户确认再用 `create` / `update`（及必要时 `status`）写盘。
 - 步骤 5 为交人审阅关卡；确认前不写盘。
@@ -26,5 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 只成文，不落库；写入看板是另一步。
 - 栏名与说明用中文，避免中英混写。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-tasks@1.0.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-tasks@1.2.0...HEAD
+[1.2.0]: https://github.com/VirusPC/edges/releases/tag/skill/conversation-to-tasks@1.2.0
+[1.1.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-tasks@1.0.0...skill/conversation-to-tasks@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/conversation-to-tasks@1.0.0
