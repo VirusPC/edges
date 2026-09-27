@@ -8,25 +8,25 @@
 
 ## 过程
 
-### 日间 克隆与首次 serve（CPU）
+### 14:57 克隆与首次 serve（CPU）
 
-用 `uv` 克隆仓库并 `uv sync --extra serve`，依赖解析成功。首次启动会拉取 Hugging Face 权重（Qwen3.5-4B-Base 与 kev-4b adapter）。API 可用，样本请求能返回；`GET /v1/models` 显示 `"device":"cpu"`，单次延迟大约两秒量级。当时误以为「能通就算装好了」。
+用户提出要跑 Kev-4B。按官方路径用 `uv` 克隆仓库并 `uv sync --extra serve`（约 14:58 起 sync，15:03 报 SETUP_OK）。随即在 8009 起服务并拉取 Hugging Face 权重（Qwen3.5-4B-Base 与 kev-4b adapter）。服务后来能通，但当时还没核对 device。
 
-### 日间 对照官方文档与平台差异
+### 15:45 冒烟通过，确认落在 CPU；对照官方文档
 
-核对官方路径后发现：文档并未给出 Windows 上如何安装 CUDA 版 torch；公开材料更贴近 Mac（MLX）与云端 Linux GPU（例如 Modal）。同时确认本机驱动与显卡正常，问题不在硬件识别，而在 Python 环境里的 torch 构建变体。
+用正确的 System One 请求冒烟成功（约 2.4s）；`GET /v1/models` 为 `"device":"cpu"`，环境里是 `torch 2.8.0+cpu`。核对官方 README：没有 Windows CUDA 安装说明，叙事更贴近 Mac（MLX）与云端 Linux GPU。本机驱动与 4070 Ti SUPER 正常，问题在 torch 构建变体，不在硬件。
 
-### 日间 第一次强行换 CUDA 源（版本越界）
+### 15:46 第一次强行换 CUDA 源（版本越界）
 
-从 `https://download.pytorch.org/whl/cu128` 强制装 CUDA torch，结果装到了 `2.11.0+cu128`。项目约束是 `torch>=2.6,<2.9`，随后再跑带 `--extra serve` 的 `uv` 命令时，解析器又回到 PyPI 的 `2.8.0+cpu`，白白下载了数 GB。
+停掉 8009 后，从 `https://download.pytorch.org/whl/cu128` 强制重装 torch。第一次脚本很快失败；随即改强制重装。下载过程中（约 15:52）用户追问为何一开始不直接装 CUDA。后来装到了 `2.11.0+cu128`，超出项目 `torch>=2.6,<2.9`；再跑带 `--extra serve` 的 `uv` 时又解析回 PyPI 的 `2.8.0+cpu`，白下了数 GB。
 
-### 日间 用 uv index/sources 钉到 2.8.0+cu128
+### 16:08 用 uv index/sources 钉到 2.8.0+cu128
 
-在本地 `pyproject.toml` 增加 pytorch cu128 索引，并用 `[tool.uv.sources]` 把 `torch` 指到该索引。`uv lock` 正确解析为 `2.8.0+cu128`（约 3GB 级下载）。下载进行中用户要求先停装、先复盘，进程被停掉；Hugging Face 模型缓存保留，半成品 venv / 本地 pyproject 补丁可能仍在。
+在本地 `pyproject.toml` 加 pytorch cu128 索引，并用 `[tool.uv.sources]` 把 `torch` 指过去。`uv lock` 正确落到 `2.8.0+cu128`（约 3GB 级下载），开始 sync。
 
-### 日间 复盘与对外检索
+### 16:12–16:15 停装、复盘与对外检索
 
-确认不必重装整套环境：权重缓存可复用，只需把 torch 来源与版本范围对齐。网上几乎没有「Kev 专用 Windows CUDA」issue，但 `uv` 官方 PyTorch 集成文档写明：PyPI 在 Windows/macOS 默认提供 CPU-only torch；同族问题在 Stack Overflow 等处很常见。Kev 仓库另有 Windows 换行/编码类 issue，说明有人在 Win 上跑，但 CUDA torch 这条尚未写进 README。
+约 16:12 按用户要求停装并复盘：不必整库重装，HF 权重缓存可留，只要把 torch 来源与版本区间对齐。约 16:15 查网上同类坑：Kev 仓库几乎没有「Windows 装成 CPU」专项 issue，但 `uv` 官方 PyTorch 文档写明 Windows/macOS 默认 CPU-only；Stack Overflow 等同族反馈很多。随后决定继续钉装，并同步写这篇笔记。
 
 ## 所学
 
