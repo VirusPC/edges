@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- CONTEXT 注明与 `conversation-to-tasks` 1.2.0 章节同序（验收/完成标准放最后）。
+
 ## [2.2.0] - 2026-09-27
 
 ### Changed
