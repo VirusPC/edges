@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.1] - 2026-09-27
+
+### Changed
+
+- 「做什么须带可选项」改为默认要求：无比较空间时可省略或写「当时未比较其它方案」，不硬编。
+
 ## [2.3.0] - 2026-09-27
 
 ### Changed
