@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.2] - 2026-09-27
+
+### Changed
+
+- 结果有未闭环项时：默认逐点问清后交 `conversation-to-tasks`（一次 1～2 条）；新增 ADR 0009。
+
 ## [2.3.1] - 2026-09-27
 
 ### Changed

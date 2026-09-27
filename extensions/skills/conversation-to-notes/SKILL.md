@@ -3,8 +3,8 @@ name: conversation-to-notes
 description: >-
   将原始对话整理为可独立阅读的中文笔记（记录 + 复盘）：背景/主题/过程/结果/所学/行动指南/补充说明。
   主题=一段主题+难点列表；凡写做什么须带可选项与不做原因；取舍在过程保留并在所学与行动指南补充。
-  行动指南分主题层与细节若则。用户说整理/总结对话时使用；入库 VirusPC/edges knowledge/notes/。
-version: 2.3.1
+  行动指南分主题层与细节若则。结果有未闭环项时逐点问清再交 conversation-to-tasks。用户说整理/总结对话时使用；入库 VirusPC/edges knowledge/notes/。
+version: 2.3.2
 ---
 
 将原始对话整理为结构清晰的中文笔记（**同时包含记录与复盘总结**）。
@@ -55,8 +55,9 @@ version: 2.3.1
     - 文档类笔记：已授权助手可直接 commit/push（含 PR 分支），commit 带 `Co-authored-by: <本助手名> <grok-bot@users.noreply.github.com>`
     - 大范围代码改动仍走 Cursor cloud agent
     - 公开库先脱敏（无 Tailscale `100.x`、凭证、授权链接等）
-16. 旧笔记不强制回写。
-17. 落盘前可对照 edges 项目记忆（如 `project_conversation_notes_plain_rich_human_review`）；冲突以本 skill + CONTEXT/ADR 为准。
+16. **遗留项 → 任务**：若「结果」中仍有未闭环事项，整理入库后不要默默结束。默认按优先级一次挑 1～2 条，向用户逐点问清（至少能写清背景与目标），再调用 `conversation-to-tasks` 成文开卡；问完落库后再问下一批，避免一次烤光。用户明确说「先不转任务」则可跳过。
+17. 旧笔记不强制回写。
+18. 落盘前可对照 edges 项目记忆（如 `project_conversation_notes_plain_rich_human_review`）；冲突以本 skill + CONTEXT/ADR 为准。
 
 ## Output Format（压缩范例）
 
@@ -122,6 +123,7 @@ version: 2.3.1
 - 不得用「收成/压缩」把过程里的取舍删掉；所学与行动指南只做取舍补充。
 - 写做什么时默认带相关可选项与不做原因；无比较空间时可省略或写「当时未比较其它方案」，不硬编。
 - 主题须有一段话；难点列表按实填写。
+- 结果有未闭环项时，默认逐点问清后交 `conversation-to-tasks`（一次 1～2 条）；用户说先不转任务可跳过。
 - 忌「记完结构」交差；人看不懂就加长改写后再入库。
 
 ## Limitations
