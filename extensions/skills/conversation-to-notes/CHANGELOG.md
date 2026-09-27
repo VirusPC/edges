@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.3] - 2026-09-27
+
+### Changed
+
+- 笔记必须保留原始材料引用（补充说明或背景末）；新增 ADR 0010。
+
 ## [2.3.2] - 2026-09-27
 
 ### Changed
