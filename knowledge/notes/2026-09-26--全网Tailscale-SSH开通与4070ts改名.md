@@ -52,14 +52,14 @@
 - 「网通 / ping 通」≠「身份免密壳」；Permission denied 时先查 sshHostKeys，勿盲重试（尤其 NAS/UGOS）。
 
 【行动指南】
-- **主题行动指南**：要把「远程代跑」从偶然变成可重复通道，就在 minigtr / nas / aliyun-ecs / macmini 四台服务器侧统一打开 Tailscale SSH，并用邻机实测 `ssh user@短名`；Mac 必须先卸 App Store 沙盒 GUI、改用 Homebrew 的 `tailscaled`。Windows 官方无 Tailscale SSH 服务端，改走 OpenSSH / RDP，MagicDNS 短名一次定稿为 `4070ts-win11`。
-- **前置条件**（没有就先做）：
+- **这一题怎么打**：要把「远程代跑」从偶然变成可重复通道，就在各服务器侧统一打开身份远程壳，并用邻机实测登录；图形客户端须卸沙盒版、改用系统级守护进程。Windows 官方无该远程壳服务端，改走本机 OpenSSH / 屏幕远控，节点短名一次定稿。
+- **动手前先确认这些**（没有下面这些，先别动手）：
   - 各机已装 Tailscale 且已入网（`tailscale status` 可见节点）。
   - 本机执行 `sudo tailscale set --ssh` 需要 sudo；Mac 侧须**已不是** App Store 沙盒 GUI（否则会报 sandboxed、当不了被连端）。
   - NAS：先确认是 UGOS **系统包** tailscale/tailscaled 在跑（Docker compose 可能只是磁盘遗留）；有线可达时用用户 `cheng`；BatchMode 遭 Permission denied 时**不要盲重试**（防 UGOS 锁 IP）。
   - 删除旧 Tailscale 节点：手边是 Access token（`tskey-api-…`），**不是** Auth key（`tskey-auth-…`）；token 不入库、不进聊天。
   - Windows 要远程壳：先接受「无 Tailscale SSH 服务端」这一官方限制。
-- **触发与做法**：
+- **什么时候怎么做**：
   - 若新 Linux/NAS 入网：前置——已 `tailscale up`。则执行 `sudo tailscale set --ssh`，再用另一台已通节点实测登录（minigtr=`viruspc`，nas=`cheng`，aliyun-ecs=`cheng-dev`，macmini=`chengpeng`）。
   - 若 Mac 要当 SSH 被连端：前置——若仍是沙盒 GUI 会失败。则卸 GUI → `brew install tailscale` → services start → `up` → `set --ssh`；若出现暂名 `macmini-1`，用 Access token 删旧节点并改回 `macmini`。
   - 若 Windows 要远程壳：前置——见上「无 TS-SSH 服务端」。则装/开 OpenSSH Server 或走 RDP（见主题 06），不要指望 `tailscale set --ssh`。

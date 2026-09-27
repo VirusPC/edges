@@ -47,14 +47,14 @@
 - OpenSSH 包名要精确（Preview ≠ Beta）；Capability 卡住应换通道或先修 WU。
 
 【行动指南】
-- **主题行动指南**：主线之外的旁支按「规则沉淀」处理：企业 Wi‑Fi 固定 **PEAP + MSCHAPv2** 且 **NAS 永不绑企业网**；Windows 事由交给专用 **4070ts-win11设备助手**；人不在机前时，第一次提权/装 sshd 仍须当面，之后才用管理员任务通道。密码只走 1Password「Shared with Grok Bot」，并事先说清自动填的物理边界。
-- **前置条件**（没有就先做）：
+- **这一题怎么打**：主线之外的旁支按「规则沉淀」处理：企业 Wi‑Fi 固定 **PEAP** 策略且共享存储节点永不绑企业网；Windows 事由交给专用设备助手；人不在机前时，第一次提权/装远程壳仍须当面，之后才用管理员任务通道。密码只走约定保险库共享通道，并事先说清自动填的物理边界（运维边界）。
+- **动手前先确认这些**（没有下面这些，先别动手）：
   - 连 `RED-ENGINEER`：已知是企业认证（不是家里 PSK）；手边有公司邮箱用户名；Win11 能进「手动添加网络」/ 改 EAP 属性；旧失败配置可先 `netsh wlan delete profile`。
   - 助手代用密码：条目已放入「Shared with Grok Bot」库；接受自动填只能填**助手自己电脑**的浏览器，填不进用户 Mac 上的 Comet；2FA 仍可能要人点。
   - 回机前管理员通道（OpenSSH + `C:\ProgramData\GrokBot` 任务运行器 `GrokBot-Admin`）：**人在 Win 键盘前**能点一次 UAC；且知悉当晚脚本**未全部落地**，不能假定已可远程提权。
   - 灭机箱灯：MSI Center / Mystic Light 可用（不单靠停服务）。
   - 续查 Windows 更新：已跑过清 SoftwareDistribution 的修复，并按提示**重启**后再看 `wu-fix-result.txt` / 新错误码。
-- **触发与做法**：
+- **什么时候怎么做**：
   - 若再连 `RED-ENGINEER`：前置——已删失败旧配置并准备手动添加。则 EAP 选 PEAP + MSCHAPv2（必要时不校验 CA；**不要用默认 TTLS**），用户名=公司邮箱；**禁止绿联 NAS 连企业网**。
   - 若要助手用密码：前置——条目在共享库。则让助手在自己电脑的浏览器里自动填；不要指望填进你 Mac 上的 Comet；2FA 仍可能要你点。
   - 若回 Win 机前一次：前置——人在机前可点 UAC。则按设计跑管理员通道（关 Wake on Magic Packet、OpenSSH、`GrokBot-Admin` 任务）；未跑完前不要假设「聊天确认即可远程最高权限」。
