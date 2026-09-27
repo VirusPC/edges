@@ -26,7 +26,7 @@
 3. **Mac mini CLI 修复**  
    - **失败链**：为开 Tailscale SSH 必须卸沙盒 GUI 后，系统里残留坏 stub（如 `/usr/local/bin/tailscale` 仍指向已卸 App）；日常 shell 曾优先踩到坏路径 → 表现为「控制台绿点 / 节点在线，但终端敲 tailscale 失败或指错」。  
    - 修复后命令行可用（节点短名 `macmini` 在线）；**未乱动**正在跑的 `tailscaled`。  
-   - 残留坏 stub 需管理员删除；删后 `hash -r`。验收 DoD：终端 `tailscale status` + 审计表双列勾选。
+   - 残留坏 stub 需管理员删除；删后 `hash -r`。验收标准：终端 `tailscale status` + 审计表双列勾选。
 
 4. **与 SSH 篇衔接**  
    - CLI 断裂根因是为开 Tailscale SSH **必须卸沙盒 GUI**。  
@@ -39,17 +39,17 @@
 - 「节点在线」与「本机 CLI 可用」是两件事，审计表要分列。
 
 【行动指南】
-- **这一题怎么打**：组网与身份远程壳通了之后，用「主机 × Mesh 客户端 × 隧道客户端」客户端审计矩阵按机验收——命令行真能敲、服务真在跑，而不是只看控制台绿点。缺项补齐、错路径修好；新主机入网时复制同一张表做验收标准。
-- **动手前先确认这些**（没有下面这些，先别动手）：
+- **这一主题怎么做**：组网与基于身份的远程登录通了之后，用「主机 × Tailscale 客户端 × 隧道客户端」客户端审计矩阵按机验收——命令行真能敲、服务真在跑，而不是只看控制台绿点。缺项补齐、错路径修好；新主机入网时复制同一张表做验收标准。
+- **前置条件**：
   - 能登录各机终端，或经已通的 Tailscale SSH / 本机执行跑命令。
   - Mac：已完成 GUI→Homebrew（主题 02）；修 CLI 时**不要乱动**正在跑的 `tailscaled`。
   - Windows 装 cloudflared：本机有 winget；**login / 开隧道另议**（凭证与 tunnel token 不进聊天）。
   - 清理 Mac 坏 stub：需要该机管理员权限（残留路径曾见 `/usr/local/bin/tailscale`）。
-- **什么时候怎么做**：
-  - 若 Win 要用 Cloudflare 隧道：前置——cloudflared 已在 PATH（当晚 winget 装上 **2026.9.3**，且明确未做 login）。则在本机补官方 login，密钥走安全卡片。
-  - 若 Mac 仍命中坏 stub：前置——有管理员权限。则删除 `/usr/local/bin/tailscale` 后执行 `hash -r`，再确认 brew 版 `tailscale status` 可用。
-  - 若新主机入网：前置——已明确要装 Mesh / 隧道客户端。则复制本审计表逐行勾选；验收必须含终端 `tailscale status`，不仅控制台绿点。
+- **具体做法**：
+  - 如果 Win 要用 Cloudflare 隧道：先确认：cloudflared 已在 PATH（当晚 winget 装上 **2026.9.3**，且明确未做 login）。就在本机补官方 login，密钥走安全卡片。
+  - 如果 Mac 仍命中坏 stub：先确认：有管理员权限。就删除 `/usr/local/bin/tailscale` 后执行 `hash -r`，再确认 brew 版 `tailscale status` 可用。
+  - 如果新主机入网：先确认：已明确要装 Tailscale / 隧道客户端。就复制本审计表逐行勾选；验收必须含终端 `tailscale status`，不仅控制台绿点。
 
 【补充说明】
 - 敏感：账号 / tunnel token / Tailscale key **只记状态，不写值**。  
-- 交叉：SSH →「全网 Tailscale SSH」篇；RDP →「Mac 遥控 Windows」篇；精确 Mesh 地址 → 本地 by-agent。
+- 交叉：SSH →「全网 Tailscale SSH」篇；RDP →「Mac 遥控 Windows」篇；精确 Tailscale 地址 → 本地 by-agent。

@@ -10,7 +10,7 @@
 
 【过程】
 1. **掉线确认（19:43）**  
-   助手结论要点：Grok Bot 本地执行未连接；从 Mac mini ping Mesh 上的 minigtr 全丢包，SSH 超时；「不像是只挂了助手，更像整机不在网」。Mac mini 当时在线。
+   助手结论要点：Grok Bot 本地执行未连接；从 Mac mini ping Tailscale 上的 minigtr 全丢包，SSH 超时；「不像是只挂了助手，更像整机不在网」。Mac mini 当时在线。
 
 2. **人工开机后的恢复口径（19:44）**  
    - 进 Ubuntu：若直接进 Win11，重启按 **F11** 选 `ubuntu`（固件常优先 Windows）；**Del** 进 Setup。  
@@ -53,18 +53,18 @@
 - 恢复脚本要容错「已在网却被状态解析误判」这类假警报。
 
 【行动指南】
-- **这一题怎么打**：常开枢纽失联或刚复电时，先确认是整机级问题并进入默认系统，再跑固定恢复流程把网络、身份 Mesh、共享挂载与关键服务拉回已知好状态；需要远程代跑时，依赖事先开通的身份远程壳。目标状态是「默认系统可进 + 一键验收 + 可从邻机代跑」。
-- **动手前先确认这些**（没有下面这些，先别动手）：
+- **这一主题怎么做**：常开枢纽失联或刚复电时，先确认是整机级问题并进入默认系统，再跑固定恢复流程把网络、Tailscale（身份组网）、共享挂载与关键服务拉回已知好状态；需要远程代跑时，依赖事先开通的基于身份的远程登录（Tailscale SSH）。目标状态是「默认系统可进 + 一键验收 + 可从邻机代跑」。
+- **前置条件**：
   - 人能碰到电源/键盘完成开机与选系统；或邻机已能经 Tailscale SSH 登入 minigtr（须先执行过 `tailscale set --ssh`，仅 Tailscale 在线不够）。
   - 确认已进 **Ubuntu**（用户 `viruspc`），不是误进 Win11；双系统脚本只服务 Ubuntu。
   - 恢复脚本路径已存在：`~/bin/minigtr-recover.sh`。
   - 改默认启动 / 进固件：人在机前，能按 **Del**（Setup）或 **F11**（临时选盘）。
   - 上 UPS：需求已定为「约半小时续航」，且接受当晚**尚未下单**、此处只按选型原则采购。
-- **什么时候怎么做**：
-  - 若 minigtr 再断电：前置——物理已通电，且确认进了 Ubuntu（误进 Win11 则先按下一则）。则跑 `~/bin/minigtr-recover.sh`，或让助手经 Tailscale SSH 从邻机代跑；脚本通过后再查 NAS 挂载与 Docker 等服务。
-  - 若又误进 Win11：前置——人在机前看得到开机画面。则临时 **F11** 选 ubuntu；长期在 Del → Boot → **UEFI NVME Drive BBS Priorities** 把 ubuntu 调到该 NVMe 盘内第一（外层 Boot Option #1 仍指向该盘），勿依赖每次手选。
-  - 若要上 UPS：前置——见上「半小时续航 / 未下单」。则选带 USB 的线交互式（约 600–1000VA、有效功率约 300–500W 档），半小时看电池能量而非只看 VA；Ubuntu 用 **NUT** 做低电量自动关机；NAS 尽量同保或另配小 UPS。
-  - 若以为「有 Tailscale 就能免密」：前置——节点已 `tailscale up` 在线。则先查是否有 sshHostKeys、是否执行过 `tailscale set --ssh`；未开则先开再谈代跑恢复脚本。
+- **具体做法**：
+  - 如果 minigtr 再断电：先确认：物理已通电，且确认进了 Ubuntu（误进 Win11 就先按下一则）。就跑 `~/bin/minigtr-recover.sh`，或让助手经 Tailscale SSH 从邻机代跑；脚本通过后再查 NAS 挂载与 Docker 等服务。
+  - 如果又误进 Win11：先确认：人在机前看得到开机画面。就临时 **F11** 选 ubuntu；长期在 Del → Boot → **UEFI NVME Drive BBS Priorities** 把 ubuntu 调到该 NVMe 盘内第一（外层 Boot Option #1 仍指向该盘），勿依赖每次手选。
+  - 如果要上 UPS：先确认：见上「半小时续航 / 未下单」。就选带 USB 的线交互式（约 600–1000VA、有效功率约 300–500W 档），半小时看电池能量而非只看 VA；Ubuntu 用 **NUT** 做低电量自动关机；NAS 尽量同保或另配小 UPS。
+  - 如果以为「有 Tailscale 就能免密」：先确认：节点已 `tailscale up` 在线。就先查是否有 sshHostKeys、是否执行过 `tailscale set --ssh`；未开就先开再谈代跑恢复脚本。
 
 【补充说明】
 - 凭证路径（不写秘密）：`/etc/nas-smb.cred`；Tailscale 本机状态由 `tailscaled` 管。  

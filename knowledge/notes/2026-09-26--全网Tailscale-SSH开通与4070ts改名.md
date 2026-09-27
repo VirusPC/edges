@@ -6,17 +6,17 @@
 - 时间：约 **20:07–21:05**（SSH 齐套）；**21:14+** 新 Windows 入网；**00:25–00:28** 改名定稿。  
 - 助手：IT资产管理为主；minigtr设备助手交办；4070ts-win11设备助手承接 Windows。  
 - 用户原文：「**所有服务器一块给我开了吧。让 @IT资产管理 去做下**」「**不要用往 authorized_keys 塞 Mac 公钥替代；要用 Tailscale SSH。**」「**改名4070ts-win11吧，之前的名字太长了**」→ 又改「**改名4070ts-win**」→ 最终「**4070ts-win11**」「**@gtx4070ts-win11设备助手 也改名**」。  
-- **公开库脱敏**：具体 Mesh 私网地址 / 完整 MagicDNS 后缀 / 密钥字面量见本地 by-agent；下文只用短名与角色描述。
+- **公开库脱敏**：具体 Tailscale 私网地址 / 完整 MagicDNS 后缀 / 密钥字面量见本地 by-agent；下文只用短名与角色描述。
 
 【过程】
 ### 台账（当晚，脱敏）
 | 节点 | MagicDNS 短名 | 地址写法 | SSH 用户 | Tailscale SSH |
 |---|---|---|---|---|
-| mini GTR | `minigtr` | Mesh 上的 minigtr | `viruspc` | ✅ 新开 |
-| NAS | `nas` | Mesh 上的 nas；家庭 LAN 上的 NAS | `cheng` | ✅ |
-| 阿里云 | `aliyun-ecs` | Mesh 上的 aliyun-ecs | `cheng-dev` | ✅ 已有 |
-| Mac mini | `macmini`（经短暂 `macmini-1`） | Mesh 上的 macmini | `chengpeng` | ✅ brew 后 |
-| Windows | 长名→`4070ts-win`→**`4070ts-win11`** | Mesh 上的 4070ts；本机名仍 `DESKTOP-K3G8QJ2` | `Cheng Peng` | ❌ Win 无服务端 |
+| mini GTR | `minigtr` | Tailscale 上的 minigtr | `viruspc` | ✅ 新开 |
+| NAS | `nas` | Tailscale 上的 nas；家庭 LAN 上的 NAS | `cheng` | ✅ |
+| 阿里云 | `aliyun-ecs` | Tailscale 上的 aliyun-ecs | `cheng-dev` | ✅ 已有 |
+| Mac mini | `macmini`（经短暂 `macmini-1`） | Tailscale 上的 macmini | `chengpeng` | ✅ brew 后 |
+| Windows | 长名→`4070ts-win`→**`4070ts-win11`** | Tailscale 上的 4070ts；本机名仍 `DESKTOP-K3G8QJ2` | `Cheng Peng` | ❌ Win 无服务端 |
 
 ### minigtr
 - 用户本机 `sudo tailscale set --ssh`；首次代跑需浏览器点授权。  
@@ -49,24 +49,24 @@
 - Docker 与系统包可能并存于磁盘；以**谁在跑**为准。  
 - 删 Tailscale 节点要 Access token，不是 Auth key。  
 - 短主机名要一次定稿，远控收藏夹才不会反复改。  
-- 「网通 / ping 通」≠「身份免密壳」；Permission denied 时先查 sshHostKeys，勿盲重试（尤其 NAS/UGOS）。
+- 「网通 / ping 通」≠「基于身份的免密远程登录」；Permission denied 时先查 sshHostKeys，勿盲重试（尤其 NAS/UGOS）。
 
 【行动指南】
-- **这一题怎么打**：要把「远程代跑」从偶然变成可重复通道，就在各服务器侧统一打开身份远程壳，并用邻机实测登录；图形客户端须卸沙盒版、改用系统级守护进程。Windows 官方无该远程壳服务端，改走本机 OpenSSH / 屏幕远控，节点短名一次定稿。
-- **动手前先确认这些**（没有下面这些，先别动手）：
+- **这一主题怎么做**：要把「远程代跑」从偶然变成可重复通道，就在各服务器侧统一打开基于身份的远程登录（Tailscale SSH），并用邻机实测登录；图形客户端须卸沙盒版、改用系统级守护进程。Windows 官方无 Tailscale SSH 服务端，改走本机 OpenSSH / 屏幕远控，节点短名一次定稿。
+- **前置条件**：
   - 各机已装 Tailscale 且已入网（`tailscale status` 可见节点）。
   - 本机执行 `sudo tailscale set --ssh` 需要 sudo；Mac 侧须**已不是** App Store 沙盒 GUI（否则会报 sandboxed、当不了被连端）。
   - NAS：先确认是 UGOS **系统包** tailscale/tailscaled 在跑（Docker compose 可能只是磁盘遗留）；有线可达时用用户 `cheng`；BatchMode 遭 Permission denied 时**不要盲重试**（防 UGOS 锁 IP）。
   - 删除旧 Tailscale 节点：手边是 Access token（`tskey-api-…`），**不是** Auth key（`tskey-auth-…`）；token 不入库、不进聊天。
-  - Windows 要远程壳：先接受「无 Tailscale SSH 服务端」这一官方限制。
-- **什么时候怎么做**：
-  - 若新 Linux/NAS 入网：前置——已 `tailscale up`。则执行 `sudo tailscale set --ssh`，再用另一台已通节点实测登录（minigtr=`viruspc`，nas=`cheng`，aliyun-ecs=`cheng-dev`，macmini=`chengpeng`）。
-  - 若 Mac 要当 SSH 被连端：前置——若仍是沙盒 GUI 会失败。则卸 GUI → `brew install tailscale` → services start → `up` → `set --ssh`；若出现暂名 `macmini-1`，用 Access token 删旧节点并改回 `macmini`。
-  - 若 Windows 要远程壳：前置——见上「无 TS-SSH 服务端」。则装/开 OpenSSH Server 或走 RDP（见主题 06），不要指望 `tailscale set --ssh`。
-  - 若改短名：前置——能进 Tailscale 管理端。则先改 MagicDNS，定稿 **`4070ts-win11`**（曾试 `4070ts-win`），再同步设备助手显示名；本机名 `DESKTOP-K3G8QJ2` 另排重启。
-  - 若 NAS 开 SSH 遭 Permission denied：前置——勿在 BatchMode 下连环重试。则先辨「谁在跑」，经网线用 `cheng` 执行 `set --ssh` 后再测 `ssh cheng@nas…`。
+  - Windows 要远程命令行：先接受「无 Tailscale SSH 服务端」这一官方限制。
+- **具体做法**：
+  - 如果新 Linux/NAS 入网：先确认：已 `tailscale up`。就执行 `sudo tailscale set --ssh`，再用另一台已通节点实测登录（minigtr=`viruspc`，nas=`cheng`，aliyun-ecs=`cheng-dev`，macmini=`chengpeng`）。
+  - 如果 Mac 要当 SSH 被连端：先确认：如果仍是沙盒 GUI 会失败。就卸 GUI → `brew install tailscale` → services start → `up` → `set --ssh`；如果出现暂名 `macmini-1`，用 Access token 删旧节点并改回 `macmini`。
+  - 如果 Windows 要远程命令行：先确认：见上「无 Tailscale SSH 服务端」。就装/开 OpenSSH Server 或走 RDP（见主题 06），不要指望 `tailscale set --ssh`。
+  - 如果改短名：先确认：能进 Tailscale 管理端。就先改 MagicDNS，定稿 **`4070ts-win11`**（曾试 `4070ts-win`），再同步设备助手显示名；本机名 `DESKTOP-K3G8QJ2` 另排重启。
+  - 如果 NAS 开 SSH 遭 Permission denied：先确认：勿在 BatchMode 下连环重试。就先辨「谁在跑」，经网线用 `cheng` 执行 `set --ssh` 后再测 `ssh cheng@nas…`。
 
 【补充说明】
 - 凭证只记「已用安全卡片 / 已清临时文件」，不写值。  
-- 精确 Mesh 地址 / machineId → 本地 `by-agent/IT资产管理.md`（不进公开库）。  
+- 精确 Tailscale 地址 / machineId → 本地 `by-agent/IT资产管理.md`（不进公开库）。  
 - 交叉：LAN →「交换机重建局域网」篇；cloudflared/CLI →「安装审计」篇；RDP →「Mac 遥控 Windows」篇。
