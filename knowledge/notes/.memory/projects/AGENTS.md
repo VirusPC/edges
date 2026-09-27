@@ -6,5 +6,5 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- [对话笔记：主题难点、过程结果、取舍补充、行动指南](project_conversation_notes_plain_rich_human_review.md) — 写 knowledge/notes：背景→主题→过程→结果→所学→行动指南；主题=一段+难点列表；取舍补充不压缩；做法默认带可选项，无比较可不硬编。
+- [对话笔记：主题难点、过程结果、取舍补充、遗留转任务](project_conversation_notes_plain_rich_human_review.md) — 写 knowledge/notes：2.3.2 结构；结果遗留逐点问清后交 conversation-to-tasks（一次1～2条）。
 <!-- project-memory-entries:end -->
