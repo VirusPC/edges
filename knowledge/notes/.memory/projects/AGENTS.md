@@ -6,5 +6,5 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- [对话复盘笔记：Markdown分层、主题/细节行动指南、验收标准、过程时间线](project_conversation_notes_plain_rich_human_review.md) — 写或改写 knowledge/notes：Markdown分层；主题行动指南；技术类必讲清技术难点；细节若则；过程时间线；白话。
+- [对话笔记：主题难点、过程结果、取舍补充、行动指南](project_conversation_notes_plain_rich_human_review.md) — 写 knowledge/notes：背景→主题→过程→结果→所学→行动指南；主题=一段+难点列表；取舍补充不压缩；做法带可选项与弃因。
 <!-- project-memory-entries:end -->
