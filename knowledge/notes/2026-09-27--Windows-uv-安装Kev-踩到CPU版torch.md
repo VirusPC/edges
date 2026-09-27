@@ -1,6 +1,6 @@
 # 2026-09-27--Windows-uv-安装Kev-踩到CPU版torch
 
-> 在 Windows 上按 Kev 官方 `uv sync --extra serve` 装完后，服务能跑但一直在 CPU；根因是 PyPI 的 Windows torch 默认只有 CPU wheel，而文档假设环境里已经有 CUDA 版 torch。
+> 在 Windows 上按 Kev 官方 `uv sync --extra serve` 装完后，服务能跑但一直在 CPU；根因是 PyPI 的 Windows torch 默认只有 CPU wheel，而文档假设环境里已经有 CUDA 版 torch。后来用 uv 把 torch 钉到区间内的 `2.8.0+cu128`，本机验收通过（`device:cuda`）。
 
 ## 背景
 
@@ -27,6 +27,11 @@
 ### 16:12–16:15 停装、复盘与对外检索
 
 约 16:12 按用户要求停装并复盘：不必整库重装，HF 权重缓存可留，只要把 torch 来源与版本区间对齐。约 16:15 查网上同类坑：Kev 仓库几乎没有「Windows 装成 CPU」专项 issue，但 `uv` 官方 PyTorch 文档写明 Windows/macOS 默认 CPU-only；Stack Overflow 等同族反馈很多。随后决定继续钉装，并同步写这篇笔记。
+
+
+### 16:22–16:44 续装 CUDA 并验收通过
+
+用户要求继续安装并同步写笔记。按已写好的 `pytorch-cu128` 索引与 sources 补丁重新 `uv sync --extra serve`，约十几分钟装完 `torch==2.8.0+cu128`。用 `uv run --no-sync --extra serve` 在 8009 拉起服务后：`torch.cuda.is_available()` 为 True；`GET /v1/models` 报告 `"device":"cuda"`、`bfloat16`；`POST /v1/systemone` 冒烟成功，模型侧延迟约 0.5 秒（此前 CPU 冒烟约 2.4 秒）。Hugging Face 权重缓存全程未重下。本地 `pyproject.toml` 补丁留在本机，未提交上游。用户随后按 models + systemone 两步亲手验证，确认可用。
 
 ## 所学
 
@@ -66,8 +71,9 @@ PyPI 上的 torch 在 Windows（以及 macOS）默认是 CPU-only wheel；项目
 
 1. 克隆后按官方做 `uv sync --extra serve`，但把「device=cpu」当成失败信号，而不是成功。
 2. 在本地 `pyproject.toml`（或不污染上游的等价 uv 配置）把 torch 指到 pytorch.org 的 cu128（或与驱动匹配的 cu 系列）索引，并保证解析到 `2.8.0+cu128` 这类满足 `>=2.6,<2.9` 的构建。
-3. 同步完成后再启动官方 serve；用 `GET /v1/models` 确认 `"device":"cuda"`。
-4. 本地改过的 `pyproject.toml` / lock 视为本机补丁，不要默认推回上游，除非单独提 PR 改善 Windows 文档。
+3. 同步完成后用 `uv run --no-sync --extra serve python -u -m kev.serve --run jaredpalmer/kev-4b --port 8009` 启动（`--no-sync` 避免启动时再解析回 CPU 包）。
+4. 验收：`GET http://127.0.0.1:8009/v1/models` 应为 `"device":"cuda"`；再 `POST /v1/systemone`（`state` + `questions`，题型为 `choice` / `noul` / `score`）做一次冒烟。本次实测 GPU 冒烟约 0.5 秒量级，CPU 时约 2.4 秒。
+5. 本地改过的 `pyproject.toml` / lock 视为本机补丁，不要默认推回上游，除非单独提 PR 改善 Windows 文档。
 
 #### 若已经误装成 2.11.0+cu128 或又被 sync 回 2.8.0+cpu
 
@@ -81,10 +87,16 @@ PyPI 上的 torch 在 Windows（以及 macOS）默认是 CPU-only wheel；项目
 
 则：优先查 Astral `uv` 的 PyTorch 集成文档与「Windows uv 仍装到 CPU torch」类问答；Kev 自己的 issue 里未必有同名工单，但 Windows 相关反馈（如换行/编码）说明平台有人在用。
 
+
+#### 若中途停装后又继续
+
+则：保留 HF 缓存与已写好的 uv index/sources 补丁，直接再跑一次落在区间内的 `uv sync`；启动时优先 `--no-sync`，装完立刻查 `device`，不要只看端口通不通。
+
 ## 补充说明
 
 - 参考：[uv — Using uv with PyTorch](https://docs.astral.sh/uv/guides/integration/pytorch/) — 明确平台默认 CPU / 需自配 GPU 索引
 - 参考：[Stack Overflow：uv 在 Windows 上仍装到 CPU torch](https://stackoverflow.com/questions/79829472/pytorch-installed-via-uv-project-shows-cpu-only-version-on-windows-with-cuda-spe) — 与本次症状同族
 - 参考：[jaredpalmer/kev](https://github.com/jaredpalmer/kev) — 官方安装路径短；Windows CUDA 未单独说明
 - 参考：Kev [#12](https://github.com/jaredpalmer/kev/issues/12)（Windows 换行/编码）、[#34](https://github.com/jaredpalmer/kev/issues/34)（torch 钉死与 wheel）— 侧面说明依赖与 Win 环境都脆
+- 本次最终验收：`torch 2.8.0+cu128`，服务 `device:cuda` / `bfloat16`，System One 冒烟通过
 - 本次未把机器名、内网地址、账号写进可复用步骤；具体本机路径只留在操作现场，不进主题行动指南
