@@ -38,9 +38,16 @@
 - 短 MagicDNS 名对远控收藏极其重要；公开收藏夹不要塞 Mesh 私网数字地址。
 
 【行动指南】
-- 连不上：查 RDP 是否启用、Tailscale 是否在线、用户名是否带电脑名前缀、是否用账户密码而非 PIN。  
-- 只要命令行：OpenSSH 或 Grok Bot 本机执行。  
-- 控 Ubuntu 桌面：另开专题，仍走 Tailscale。
+- **主题行动指南**：包能到不等于能看屏幕。要从 Mac（或手机）看到 Windows 桌面时，走 **Windows App（原 Microsoft Remote Desktop）+ 本机已启用的 RDP**，连接短名 `4070ts-win11`，用系统账户密码而非 PIN；Mac↔Mac 继续屏幕共享。目标是收藏一条短名就能稳定进桌面。
+- **前置条件**（没有就先做）：
+  - Windows 为专业版（当晚 **Pro for Workstations** 23H2）且已启用远程桌面（`fDenyTSConnections=0`，相关服务在跑）。
+  - 双方 Tailscale 在线；已知连接目标短名 **`4070ts-win11`**（或 Mesh 短名/触点）；统一走 Tailscale，不公网裸奔。
+  - 手边是本机账户密码（用户 `Cheng Peng`，备选 `DESKTOP-K3G8QJ2\Cheng Peng` / `.\Cheng Peng`）；**PIN 通常不能直接当 RDP 密码**；助手未存解锁密码。
+  - 若只要命令行：OpenSSH 或 Grok Bot 本机执行可用即可，不必开屏幕。
+- **触发与做法**：
+  - 若连不上：前置——先确认 RDP 已启用、Tailscale 在线。则查用户名是否需带电脑名前缀、是否误用 PIN 而非账户密码；必要时核对短名是否已改成 `4070ts-win11`。
+  - 若只要命令行：前置——见上「壳已可用」。则用 OpenSSH 或 Grok Bot 本机执行，不必开 Windows App。
+  - 若要控 Ubuntu 桌面：前置——接受当晚未强制落地（GNOME Remote Desktop / xrdp / VNC 仅讨论）。则另开专题，仍走 Tailscale，勿公网裸奔。
 
 【补充说明】
 - 精确 Mesh 地址 → 本地 by-agent。交叉：改名 → SSH 篇；关锁屏 / Wi‑Fi → 支线篇。

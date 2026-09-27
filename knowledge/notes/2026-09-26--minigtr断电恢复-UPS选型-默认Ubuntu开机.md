@@ -53,10 +53,18 @@
 - 恢复脚本要容错「已在网却被状态解析误判」这类假警报。
 
 【行动指南】
-- 若 minigtr 再断电：先确认物理开机进 Ubuntu → 跑 `~/bin/minigtr-recover.sh` 或让助手经 Tailscale SSH 代跑 → 再查 NAS/服务。  
-- 若又误进 Win11：F11 选 ubuntu；长期靠 BootOrder/BBS，勿依赖每次手选。  
-- 若要上 UPS：选带 USB 的线交互式，装 NUT；NAS 尽量同保或另配小 UPS。  
-- 若以为「有 Tailscale 就能免密」：先查节点是否有 sshHostKeys / 是否执行过 `tailscale set --ssh`。
+- **主题行动指南**：常开枢纽 minigtr 失联或刚复电时，先确认是整机级问题并进入 Ubuntu，再跑固定恢复脚本把网络、Tailscale、NAS 挂载与关键服务拉回已知好状态；需要远程代跑时，依赖事先开通的 Tailscale SSH。目标状态是「默认进 Ubuntu + 一键验收 + 可从邻机代跑」。
+- **前置条件**（执行下列动作前必须先具备；没有就先做）：
+  - 人能碰到电源/键盘完成开机与选系统；或邻机已能经 Tailscale SSH 登入 minigtr（须先执行过 `tailscale set --ssh`，仅 Tailscale 在线不够）。
+  - 确认已进 **Ubuntu**（用户 `viruspc`），不是误进 Win11；双系统脚本只服务 Ubuntu。
+  - 恢复脚本路径已存在：`~/bin/minigtr-recover.sh`。
+  - 改默认启动 / 进固件：人在机前，能按 **Del**（Setup）或 **F11**（临时选盘）。
+  - 上 UPS：需求已定为「约半小时续航」，且接受当晚**尚未下单**、此处只按选型原则采购。
+- **触发与做法**：
+  - 若 minigtr 再断电：前置——物理已通电，且确认进了 Ubuntu（误进 Win11 则先按下一则）。则跑 `~/bin/minigtr-recover.sh`，或让助手经 Tailscale SSH 从邻机代跑；脚本通过后再查 NAS 挂载与 Docker 等服务。
+  - 若又误进 Win11：前置——人在机前看得到开机画面。则临时 **F11** 选 ubuntu；长期在 Del → Boot → **UEFI NVME Drive BBS Priorities** 把 ubuntu 调到该 NVMe 盘内第一（外层 Boot Option #1 仍指向该盘），勿依赖每次手选。
+  - 若要上 UPS：前置——见上「半小时续航 / 未下单」。则选带 USB 的线交互式（约 600–1000VA、有效功率约 300–500W 档），半小时看电池能量而非只看 VA；Ubuntu 用 **NUT** 做低电量自动关机；NAS 尽量同保或另配小 UPS。
+  - 若以为「有 Tailscale 就能免密」：前置——节点已 `tailscale up` 在线。则先查是否有 sshHostKeys、是否执行过 `tailscale set --ssh`；未开则先开再谈代跑恢复脚本。
 
 【补充说明】
 - 凭证路径（不写秘密）：`/etc/nas-smb.cred`；Tailscale 本机状态由 `tailscaled` 管。  

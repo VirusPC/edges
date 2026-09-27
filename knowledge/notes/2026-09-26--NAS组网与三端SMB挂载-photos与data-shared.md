@@ -41,10 +41,18 @@
 - 独立共享只在需要隔离权限/备份策略时再开。
 
 【行动指南】
-- 新材料优先丢进 `data/shared/...`。  
-- 必须新独立共享：同时改 Win 映射 + Mac `~/NAS` + GTR fstab。  
-- Mac 有线恢复：SMB 从 Mesh 上的 nas 迁到家庭 LAN 上的 NAS。  
-- GTR 复电后盘没有：查 `/etc/nas-smb.cred`（只记路径）与 `~/bin/minigtr-recover.sh`。
+- **主题行动指南**：有线拓扑通了之后，要把 NAS 真正当磁盘用：在 Windows / Mac mini / mini GTR 三端对齐绿联 SMB 映射，并坚持「少建独立共享、多用 `data/shared` 英文子目录」。目标状态是全家有统一入口，新材料默认进 shared，不必每开一个 UGOS 共享就三台机器再补挂。
+- **前置条件**（没有就先做）：
+  - 有线局域网已定稿（主题 03）：能通到 NAS 的 LAN 触点 `〈LAN:nas〉`；Mac 若有线 ping/445 仍失败，可临时经 Tailscale 触点挂载（属技术债，通线后应迁回 LAN）。
+  - Windows：端口 445 已通，且准备做**持久**盘符映射（当晚：`N:` data、`P:` projects、`O:` docker、`Q:` personal_folder、`R:` photos）。
+  - Mac：能写 `~/NAS/...`；凭证用临时文件配置后清空，不进聊天。
+  - GTR：`/etc/nas-smb.cred` 已存在、可写 fstab；挂载点在 `/mnt/nas/*`；复电验收可配合 `minigtr-recover.sh`。
+  - 新建**独立**共享前：先确认真需要隔离权限/备份策略，并接受「须三端同时补挂」。
+- **触发与做法**：
+  - 若有新材料要全家共用：前置——三端已挂好 `data`。则优先丢进 `data/shared/{docs,downloads,tmp,media}/...`（Win `N:\shared`；Mac `~/NAS/data/shared`；GTR `/mnt/nas/data/shared`）。
+  - 若必须新开独立共享：前置——见上「隔离策略 + 三端补挂」。则同时改 Win 映射、Mac `~/NAS`、GTR fstab（当晚 `photos` 曾补 `R:` / `~/NAS/photos` / `/mnt/nas/photos`）；不要指望 UGOS 新建后客户端自动出盘符。
+  - 若 Mac 有线恢复：前置——Mac 有线 ping 与 445 已通。则把 SMB 从 `〈TS:nas〉` 迁到 `〈LAN:nas〉`。
+  - 若 GTR 复电后盘没有：前置——已进 Ubuntu。则查 `/etc/nas-smb.cred`（只记路径）与 recover 脚本；「445 通」不等于「已挂载」。
 
 【补充说明】
 ### 挂载速查（脱敏）

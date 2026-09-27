@@ -39,9 +39,16 @@
 - 「节点在线」与「本机 CLI 可用」是两件事，审计表要分列。
 
 【行动指南】
-- Win 要用 CF 隧道：在已装版本上补官方 login，密钥走安全卡片。  
-- Mac stub：管理员删除后 `hash -r`。  
-- 新主机入网：复制本审计表做 DoD。
+- **主题行动指南**：组网与 SSH 通了之后，用「主机 × Tailscale × cloudflared」双列矩阵按机验收——命令行真能敲、服务真在跑，而不是只看控制台绿点。当晚补齐 Windows 的 cloudflared、修好 Mac 卸沙盒 GUI 后 CLI 指错路径；新主机入网时复制同一张表做 DoD。
+- **前置条件**（没有就先做）：
+  - 能登录各机终端，或经已通的 Tailscale SSH / 本机执行跑命令。
+  - Mac：已完成 GUI→Homebrew（主题 02）；修 CLI 时**不要乱动**正在跑的 `tailscaled`。
+  - Windows 装 cloudflared：本机有 winget；**login / 开隧道另议**（凭证与 tunnel token 不进聊天）。
+  - 清理 Mac 坏 stub：需要该机管理员权限（残留路径曾见 `/usr/local/bin/tailscale`）。
+- **触发与做法**：
+  - 若 Win 要用 Cloudflare 隧道：前置——cloudflared 已在 PATH（当晚 winget 装上 **2026.9.3**，且明确未做 login）。则在本机补官方 login，密钥走安全卡片。
+  - 若 Mac 仍命中坏 stub：前置——有管理员权限。则删除 `/usr/local/bin/tailscale` 后执行 `hash -r`，再确认 brew 版 `tailscale status` 可用。
+  - 若新主机入网：前置——已明确要装 Mesh / 隧道客户端。则复制本审计表逐行勾选；验收必须含终端 `tailscale status`，不仅控制台绿点。
 
 【补充说明】
 - 敏感：账号 / tunnel token / Tailscale key **只记状态，不写值**。  
