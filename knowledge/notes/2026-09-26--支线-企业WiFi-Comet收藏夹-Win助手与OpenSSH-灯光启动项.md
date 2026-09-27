@@ -2,65 +2,125 @@
 
 > **今晚为何重要**：主线是断电恢复与组网，但支线同样定规则：企业 Wi‑Fi **PEAP+MSCHAPv2** 写法、NAS 禁止上企业网、Windows 设备助手的诞生、「人不在机前如何提权」的管理员通道设计、以及 Comet/1Password 共享库边界。这些决定了以后换公司网、加助手、要密码时不会重踩坑。
 
-【背景】
-- 多助手并行：通用-辅助-2（企业 Wi‑Fi / 远控概论）、minigtr设备助手（档案与交接）、4070ts-win11设备助手（Wi‑Fi 驱动、WU、启动项、锁屏）、IT资产管理（Comet、静电、主机清单）。  
-- 用户原文选录：「**我有一个Win 11系统，为什么连接有密码的公司WiFi，连接的时候没让我输密码，并且提示无法连接到这个网络？**」「**是企业认证，没有连过这个WiFi。**」「**我之前mini GTR怎么配的来着？**」「**在想我能否用屋里的网线将这些服务器连接成一个局域网？**」（引出交换机篇）「**新建一个 gtx4070ts-win11设备助手吧**」「**我不在电脑前怎么办？**」「**我希望你找我确认下就好了，我确认后你自动以管理员身份处理事情**」「**你看我Chrome浏览器的收藏夹里面有一个VPN相关的网站，是什么？**」「**comet浏览器也行**」「**临时帮我把win11这个主机的风扇灯光关掉**」「**把chatgpt和grok bot都设置为开机启动项**」。
+## 背景
 
-【过程】
-### A. 企业 Wi‑Fi（约 20:26–20:34，通用-辅助-2 + minigtr 档案）
-- 现象：没弹密码就「无法连接」——企业网不是共享 PSK；直接点 SSID 常立刻失败。  
-- minigtr 档案硬规则：WPA2 Enterprise → **PEAP + MSCHAPv2**；必要时不校验 CA；**不要用默认 TTLS**；SSID **`RED-ENGINEER`**；用户名=公司邮箱。  
-- **禁止绿联 NAS 连企业网**（802.1X 弱支持 + 合规）。  
-- Win11 UI 坑：必须走「手动添加网络 / 高级 Wi‑Fi 网络属性」填 EAP；列表里盲点 SSID 往往不弹账密。可用 `netsh wlan delete profile` 后重加。  
-- 用户链路：「其他都配了，但是没让我输入账号密码呀。」→「OK，后面让我输账号密码了，已连接安全，但实际上没有网。」→「哦，可以了，只是网比较慢而已。」
+- 多助手并行：通用-辅助-2（企业 Wi‑Fi / 远控概论）、minigtr设备助手（档案与交接）、4070ts-win11设备助手（Wi‑Fi 驱动、WU、启动项、锁屏）、IT资产管理（Comet、静电、主机清单）。
+- 用户原文选录：「**我有一个Win 11系统，为什么连接有密码的公司WiFi，连接的时候没让我输密码，并且提示无法连接到这个网络？**」「**是企业认证，没有连过这个WiFi。**」「**我之前mini GTR怎么配的来着？**」「**在想我能否用屋里的网线将这些服务器连接成一个局域网？**」（引出主题 03）「**新建一个 gtx4070ts-win11设备助手吧**」「**我不在电脑前怎么办？**」「**我希望你找我确认下就好了，我确认后你自动以管理员身份处理事情**」「**你看我Chrome浏览器的收藏夹里面有一个VPN相关的网站，是什么？**」「**comet浏览器也行**」「**临时帮我把win11这个主机的风扇灯光关掉**」「**把chatgpt和grok bot都设置为开机启动项**」。
 
-### B. Comet / 收藏夹 / 1Password（约 21:05–21:36，IT资产管理）
-- Mac mini Chrome 收藏夹空；Comet 仅见 Moonshot；无机场类书签。  
-- Comet **bookmarks 同步关着**，未挂 Google/Perplexity 账号。  
-- 助手只能读 1Password **「Shared with Grok Bot」** 库。用户放入 Google 后：自动填只能填「助手自己电脑」的浏览器，**填不进用户 Mac 上的 Comet**；人不在旁无法代过 2FA。  
-- 助手侧浏览器曾用共享 Google 登进 Perplexity（完整邮箱不入库）——**不同步到 Mac Comet**。VPN 收藏未找到。用户改去看新 Windows 设备。
+## 过程
 
-### C. Windows 设备助手 + OpenSSH / WU（22:07–23:25）
-- 新机入网；用户要装 OpenSSH；`Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0` 极慢。  
-- winget **失败链**：用户曾试错误包名 `Microsoft.OpenSSH.Beta` →「找不到与输入条件匹配的程序包」；正确 id 为 **`Microsoft.OpenSSH.Preview`**。  
-- 22:44：「新建一个 gtx4070ts-win11设备助手吧」→ 专管该 Win，与 minigtr Ubuntu 分开。  
-- 23:08+ 用户：「你自己跑不行吗」「我不在电脑前怎么办？」→ 方案：回机前一次性管理员脚本（OpenSSH + `C:\ProgramData\GrokBot` 任务运行器 `GrokBot-Admin`）；聊天确认后触发最高权限任务。  
-- 23:14 WU：**Windows 11 25H2 下载错误 0x80248007**；桌面 `fix-wu-0x80248007.ps1`；UAC 后清 SoftwareDistribution / catroot2；写 `wu-fix-result.txt`；需重启再试。大包曾卡 0%，Delivery Optimization 限速。  
-- 23:16 正式交接给 Windows 助手，勿再绕回 minigtr。会话末 OpenSSH **仍未出现 sshd**（待 WU/机前管理员通道收尾）。
+### 企业 Wi‑Fi（约 20:26–20:34，通用-辅助-2 + minigtr 档案）
 
-### D. Wi‑Fi 断连与驱动（22:52–23:59，4070 助手）
-- 「RED-ENGINEER 和 RED-GUEST 老是突然断联并招不到」；个人热点正常。  
-- 网卡：Qualcomm FastConnect 7800，驱动曾偏旧（2023-12）；信号弱；一周断线与重连失败偏多，原因常记「无可见接入点」。  
-- 已做：个人热点配置改手动，免与办公网抢连。Wake on Magic Packet 需管理员，人未在机前未改完。  
-- 主板一键更新**未**带上 WLAN 驱动。改用微软更新目录 WHQL：升到较新正式驱动（包在 `Downloads\WiFiDriverUpdate\`）。之后改走**家庭有线同网段**（见交换机篇），少依赖办公 Wi‑Fi。
+- 现象：没弹密码就「无法连接」——企业网不是共享 PSK；直接点 SSID 常立刻失败。
+- minigtr 档案硬规则：WPA2 Enterprise → **PEAP + MSCHAPv2**；必要时不校验 CA；**不要用默认 TTLS**；SSID **`RED-ENGINEER`**；用户名=公司邮箱。
+- **禁止绿联 NAS 连企业网**（802.1X 弱支持 + 合规）。
+- Win11：手动添加网络；属性里填 EAP；`netsh wlan delete profile` 后重加。
+- 用户：「其他都配了，但是没让我输入账号密码呀。」→「OK，后面让我输账号密码了，已连接安全，但实际上没有网。」→「哦，可以了，只是网比较慢而已。」
 
-### E. 灯光 / 启动项 / 其它
-- 风扇灯：MSI Center → **Mystic Light**；服务 `Mystic_Light_Service` / `MSI_Case_Service`。停服务不一定灭灯；应用内亮度 0/Off。Grok 掉线时改口头指导。用户：「MSI center 看起来更新失败」「看错了」。**会话末是否已关灭未确认。**  
-- 开机启动（23:45）：`Grok Bot` → `C:\Program Files\Grok Bot\Grok Bot.exe`；`ChatGPT` → 商店 `OpenAI.Codex`（shell:AppsFolder）。  
-- 测试同学：窗口内仅少量助手消息、无用户设备正文，与主线无关。
+### Comet / 收藏夹 / 1Password（约 21:05–21:36，IT资产管理）
 
-【所学】
-- 企业 Wi‑Fi 与家里有线局域网必须分层；NAS 永不绑 802.1X。  
-- 「共享密码库」有物理边界：填得进哪台浏览器要事先说清。  
-- 人不在机前 ≠ 不能运维，但**第一次**提权/装 sshd 必须当面；之后用计划任务/SSH 管理员会话。  
-- 设备助手按机器拆分，避免 minigtr Ubuntu 助手兼管 Win 更新。  
-- OpenSSH 包名要精确（Preview ≠ Beta）；Capability 卡住应换通道或先修 WU。
+- Mac mini Chrome 收藏夹空；Comet 仅见 Moonshot；无机场类书签。
+- Comet **bookmarks 同步关着**，未挂 Google / Perplexity 账号。
+- 助手只能读 1Password **「Shared with Grok Bot」** 库。用户放入 Google 后：自动填只能填「助手自己电脑」的浏览器，**填不进用户 Mac 上的 Comet**；人不在旁无法代过 2FA。
+- 助手侧浏览器曾用共享 Google 登进 Perplexity——**不同步到 Mac Comet**。VPN 收藏未找到。用户改去看新 Windows 设备。
 
-【行动指南】
-- **这一主题怎么做**：主线之外的旁支按「规则沉淀」处理：企业 Wi‑Fi 固定 **PEAP** 策略且共享存储节点永不绑企业网；Windows 事由交给专用设备助手；人不在机前时，第一次提权/开通远程登录仍须当面，之后才用管理员任务通道。密码只走约定保险库共享通道，并事先说清自动填的物理边界（运维边界）。
-- **前置条件**：
-  - 连 `RED-ENGINEER`：已知是企业认证（不是家里 PSK）；手边有公司邮箱用户名；Win11 能进「手动添加网络」/ 改 EAP 属性；旧失败配置可先 `netsh wlan delete profile`。
-  - 助手代用密码：条目已放入「Shared with Grok Bot」库；接受自动填只能填**助手自己电脑**的浏览器，填不进用户 Mac 上的 Comet；2FA 仍可能要人点。
-  - 回机前管理员通道（OpenSSH + `C:\ProgramData\GrokBot` 任务运行器 `GrokBot-Admin`）：**人在 Win 键盘前**能点一次 UAC；且知悉当晚脚本**未全部落地**，不能假定已可远程提权。
-  - 灭机箱灯：MSI Center / Mystic Light 可用（不单靠停服务）。
-  - 续查 Windows 更新：已跑过清 SoftwareDistribution 的修复，并按提示**重启**后再看 `wu-fix-result.txt` / 新错误码。
-- **具体做法**：
-  - 如果再连 `RED-ENGINEER`：先确认：已删失败旧配置并准备手动添加。就 EAP 选 PEAP + MSCHAPv2（必要时不校验 CA；**不要用默认 TTLS**），用户名=公司邮箱；**禁止绿联 NAS 连企业网**。
-  - 如果要助手用密码：先确认：条目在共享库。就让助手在自己电脑的浏览器里自动填；不要指望填进你 Mac 上的 Comet；2FA 仍可能要你点。
-  - 如果回 Win 机前一次：先确认：人在机前可点 UAC。就按设计跑管理员通道（关 Wake on Magic Packet、OpenSSH、`GrokBot-Admin` 任务）；未跑完前不要假设「聊天确认即可远程最高权限」。
-  - 如果灭机箱灯：先确认：MSI Center 可用。就走 Mystic Light 把亮度拉到 0/Off，不单靠停 `Mystic_Light_Service` / `MSI_Case_Service`。
-  - 如果 25H2 仍失败（曾见 `0x80248007`）：先确认：已重启并读过 `wu-fix-result.txt`。就按**新**错误码继续，勿对同一缓存清理空转。
+### Windows 设备助手 + OpenSSH / 更新（22:07–23:25）
 
-【补充说明】
-- 硬件快照（约 22:45）：Win11 10.0.22631；i7-14700KF；约 64GB RAM；RTX 4070 Ti SUPER；大容量 C:；当日傍晚开机。主板 MPG Z790 CARBON WIFI II。  
-- 交叉：局域网出口 → 交换机篇；改名与助手名 → SSH 篇；RDP/锁屏 → RDP 篇。
+- 新机入网；用户要装 OpenSSH；`Add-WindowsCapability` 极慢；winget 包名澄清（Preview 而非 Beta）。
+- 22:44：「新建一个 gtx4070ts-win11设备助手吧」→ agent `5411a2d9-…`。
+- 23:08+ 用户：「你自己跑不行吗」「我不在电脑前怎么办？」→ 方案：回机前一次性管理员脚本（OpenSSH + `C:\ProgramData\GrokBot` 任务运行器 `GrokBot-Admin`）；聊天确认后触发最高权限任务。
+- 23:14 WU：**Windows 11 25H2 下载错误 0x80248007**；桌面 `fix-wu-0x80248007.ps1`；UAC 后清 SoftwareDistribution；写 `wu-fix-result.txt`；需重启再试。大包曾卡 0%，Delivery Optimization 限速。
+- 23:16 正式交接给 Windows 助手，勿再绕回 minigtr。
+
+### Wi‑Fi 断连与驱动（22:52–23:59，4070 助手）
+
+- 「RED-ENGINEER 和 RED-GUEST 老是突然断联并招不到」；个人热点正常。
+- 网卡：Qualcomm FastConnect 7800，驱动曾 `3.0.0.1078`（2023-12-01）偏旧；信号 36–40%；一周断线~30、重连失败~34，原因「无可见接入点」。
+- 已做：`Cheng's iPhone` 改手动，免与办公网抢连。Wake on Magic Packet 需管理员，人未在机前未改完。
+- 主板一键更新**未**带上 WLAN 驱动。改用微软更新目录 WHQL：升到 **`3.1.0.1647`（2026-01-21）**；包在 `Downloads\WiFiDriverUpdate\`。之后改走有线（主题 03）。
+
+### 灯光 / 启动项 / 其它
+
+- 风扇灯：MSI Center → **Mystic Light**；服务 `Mystic_Light_Service` / `MSI_Case_Service`。停服务不一定灭灯；应用内亮度 0/Off。Grok 掉线时改口头指导。用户：「MSI center 看起来更新失败」「看错了」。
+- 开机启动（23:45）：`Grok Bot` → `C:\Program Files\Grok Bot\Grok Bot.exe`；`ChatGPT` → 商店 `OpenAI.Codex`（shell:AppsFolder）。
+- 测试同学：窗口内仅 2 条助手消息、无用户设备正文，与主线无关。
+
+## 所学
+
+- 企业 Wi‑Fi 与家里有线局域网必须分层；共享存储节点永不绑 802.1X 企业无线。
+- 「共享密码库」有物理边界：自动填得进哪台浏览器要事先说清。
+- 人不在机前不等于不能运维，但**第一次**提权 / 装远程命令行服务必须当面；之后才用计划任务或管理员会话。
+- 设备助手按机器拆分，避免 Linux 枢纽助手兼管 Windows 更新与本机杂项。
+
+## 行动指南
+
+### 主题行动指南
+
+#### 背景
+
+主线之外常并行出现：公司无线认证、浏览器与密码库边界、新 Windows 机的专用助手与提权方式、以及机箱灯 / 开机启动项等本机杂项。这些旁支若不沉淀成规则，下次换网或换助手仍会重踩坑。
+
+#### 核心问题
+
+如何把旁支收成可重复规则：企业无线固定认证写法且存储节点不上企业网；Windows 事由交给专用设备助手；人不在机前时第一次提权仍须当面；密码只走约定共享库并说清自动填的物理边界。
+
+#### 核心解决方案
+
+按顺序（按需启用各条）做：
+
+1. 企业无线：按档案固定 EAP 写法手动添加；删失败旧配置后再加；共享存储节点禁止绑企业无线。
+2. 密码与浏览器：只使用约定保险库共享库；事先说明自动填只能作用在助手自己电脑的浏览器，填不进用户本机其它浏览器；2FA 仍可能要人点。
+3. 新 Windows 机：新建专用设备助手，Linux 枢纽助手不再兼管该机更新与本机杂项。
+4. 提权：人在键盘前完成第一次管理员通道（远程命令行服务、约定任务运行器）；未跑完前不假设「聊天确认即可远程最高权限」。
+5. 本机杂项（灯、启动项、无线驱动、系统更新）：交给该机专用助手，按厂商界面或修复脚本处理，并留下可复查的结果文件。
+6. 无线不稳且已有有线拓扑时，优先改走有线，再并行治理驱动与配置。
+
+#### 验收标准
+
+以后按本主题相关旁支执行时，对应项成立才算完成：
+
+- 企业无线能按固定 EAP 写法连上，且 NAS 未加入企业无线。
+- 助手用密边界已知：共享库条目可用，且自动填物理边界已说明。
+- Windows 专机有专用助手；第一次提权通道的状态明确（已落地 / 未全部落地）。
+- 本机杂项有可复查结果（例如更新修复结果文件、驱动版本、启动项路径）。
+
+### 细节与其他
+
+#### 若再连 `RED-ENGINEER`
+
+则：
+
+1. 先删失败旧配置（`netsh wlan delete profile`），再手动添加网络。
+2. EAP 选 PEAP + MSCHAPv2（必要时不校验 CA；**不要用默认 TTLS**）。
+3. 用户名=公司邮箱。
+4. **禁止绿联 NAS 连企业网**。
+
+#### 若要助手用密码
+
+则：条目须在「Shared with Grok Bot」库；让助手在自己电脑的浏览器里自动填；不要指望填进你 Mac 上的 Comet；2FA 仍可能要你点。
+
+#### 若回 Windows 机前一次
+
+则：人在机前可点 UAC 时，按设计跑管理员通道（关 Wake on Magic Packet、OpenSSH、`GrokBot-Admin` 任务，路径含 `C:\ProgramData\GrokBot`）。当晚脚本**未全部落地**——未跑完前不要假设「聊天确认即可远程最高权限」。
+
+#### 若灭机箱灯
+
+则：走 MSI Center → Mystic Light，把亮度拉到 0/Off；不单靠停 `Mystic_Light_Service` / `MSI_Case_Service`。
+
+#### 若 25H2 仍失败（曾见 `0x80248007`）
+
+则：确认已重启并读过桌面 `wu-fix-result.txt`；按**新**错误码继续，勿对同一 SoftwareDistribution 清理空转。
+
+#### 若办公 Wi‑Fi 仍频繁断连
+
+则：核对 Qualcomm FastConnect 7800 驱动是否已到 WHQL **`3.1.0.1647`**（包曾在 `Downloads\WiFiDriverUpdate\`）；个人热点改手动以免抢连；有线可用时优先走交换机（主题 03）。
+
+#### 若要开机自启 ChatGPT / Grok Bot
+
+则：`Grok Bot` → `C:\Program Files\Grok Bot\Grok Bot.exe`；`ChatGPT` → 商店 `OpenAI.Codex`（shell:AppsFolder）。
+
+## 补充说明
+
+- 硬件快照（22:45）：Win11 10.0.22631；i7-14700KF；~64GB RAM；RTX 4070 Ti SUPER 驱动 560.94；C: ~1.86TB 剩 ~1.05TB；当日约 20:49 开机。主板 MPG Z790 CARBON WIFI II。
+- 交叉：局域网出口 → 主题 03；改名与助手名 → 主题 02；RDP / 锁屏 → 主题 06。
+- 来源对话：通用-辅助-2、minigtr设备助手、IT资产管理、4070ts-win11设备助手，约 20:26–23:59 散点。
