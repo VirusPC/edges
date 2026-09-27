@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.1] - 2026-09-27
+
 ### Changed
 
+- 技术类笔记必须讲清**技术难点**（难在哪、为何难、如何处理或未解）；写入所学与 Constraints，CONTEXT 补术语。
 - CONTEXT 注明与 `conversation-to-tasks` 1.2.0 章节同序（验收/完成标准放最后）。
 
 ## [2.2.0] - 2026-09-27
@@ -60,7 +63,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.2.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.2.1...HEAD
+[2.2.1]: https://github.com/VirusPC/edges/releases/tag/skill/conversation-to-notes@2.2.1
 [2.2.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.1...skill/conversation-to-notes@2.2.0
 [2.1.1]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.0...skill/conversation-to-notes@2.1.1
 [2.1.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.0.0...skill/conversation-to-notes@2.1.0
