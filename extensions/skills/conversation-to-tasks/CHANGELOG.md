@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - 正文顺序改为 **背景 → 目标 → 动作 → 完成标准**（后两栏仍可选）。与 `conversation-to-notes` 主题行动指南同序，便于笔记开卡平移；完成标准收在最后，对应「做完怎样算完」。
+- 明确 STAR 同构用途：制定任务（尤其 for agent），不是写复盘。
 
 ## [1.1.0] - 2026-09-26
 
