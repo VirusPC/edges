@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-09-27
+
+### Changed
+
+- 正文章节改为：`背景 → 主题 → 过程 → 结果 → 所学 → 行动指南 → 补充说明`（标题不加括号）。
+- `主题` = 一段主题 + 难点列表；本 skill 同时做记录与复盘总结。
+- 过程中的真实取舍原样保留；所学与行动指南**补充**取舍，不压缩过程。
+- 凡写「做什么」须带相关可选项与不做原因。
+- 新增 ADR 0007、0008；更新 CONTEXT。
+
 ## [2.2.1] - 2026-09-27
 
 ### Changed
@@ -63,7 +73,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.2.1...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.3.0...HEAD
+[2.3.0]: https://github.com/VirusPC/edges/releases/tag/skill/conversation-to-notes@2.3.0
 [2.2.1]: https://github.com/VirusPC/edges/releases/tag/skill/conversation-to-notes@2.2.1
 [2.2.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.1...skill/conversation-to-notes@2.2.0
 [2.1.1]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.0...skill/conversation-to-notes@2.1.1
