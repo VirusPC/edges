@@ -39,10 +39,16 @@ Zero Trust 里 Applications 为空（首次用 Access）。新建自托管应用
 
 为 curl 创建 Service Token。起初把「邮箱 Allow」与「Service Token」写进**同一条 Action = Allow** 的策略。结果：浏览器可登录，curl 带 `CF-Access-Client-Id` / `CF-Access-Client-Secret` 仍 **302**，侧写可见 `service_token_status:false` 一类表现。
 
-根因与修正：Service Token 必须挂在 **Action = Service Auth** 的独立策略上，不能塞进普通 Allow。修正后为两条：
+根因与修正：Service Token 必须挂在 **Action = Service Auth** 的独立策略上，不能塞进普通 Allow。修正后为两条（同一应用上满足任一即可进，不是叠加强度）：
 
-- `allow-kev` — Allow — 邮箱
-- `service-auth-kev` — Service Auth — Service Token
+| | `allow-kev`（Allow） | `service-auth-kev`（Service Auth） |
+| --- | --- | --- |
+| 给谁用 | 人（浏览器） | 机器（curl / 脚本） |
+| 凭什么 | 登录后证明身份（如邮箱） | 请求头 Service Token（`CF-Access-Client-Id` / `Secret`） |
+| 交互 | 跳登录页、有会话 Cookie | 无登录页；带头即过，不带则 302 |
+| 为何单独一条 | Allow 只认「人已登录」类身份规则 | Token 必须挂在 Service Auth 上才会按机器凭证验 |
+
+把 Token 勾进同一条 Allow 时，Access 仍按「人」的路径判；curl 没有浏览器会话，就会一直 302，看起来像 Token 坏了。
 
 凭证只落本地 env 文件（权限收紧），不进 git、不贴聊天。Mac 侧 `source` 后带头请求：无凭证 302，有凭证 200 且仍为 `device:cuda`。
 
@@ -64,7 +70,7 @@ Zero Trust 里 Applications 为空（首次用 Access）。新建自托管应用
 
 - Tunnel 与 Access 解耦：连通层和门禁层分开改、分开验。
 - 可选项上：相对 DIY 反代，选 Cloudflare 是因为域名/Zero Trust 已在体系内，少维护自建网关；不是「Cloudflare 永远更好」。
-- Service Token 必须走 **Service Auth** 策略；写进 Allow 时常见「浏览器正常、脚本永远 302」。
+- 两个策略是两种进门通道，不是两道更严的门：Allow 给人（邮箱登录），Service Auth 给机器（Token 头）；同一应用上满足任一即可。Token 写进 Allow 时常见「浏览器正常、脚本永远 302」。
 - Access 放行后的业务 404 来自源站（如 FastAPI 无 `/`），不要先怀疑门禁坏了。
 - bot 本地 skill 可能落后于 edges 权威版本；整理前应以 `extensions/skills/conversation-to-notes` 为准。
 
@@ -86,8 +92,8 @@ Zero Trust 里 Applications 为空（首次用 Access）。新建自托管应用
    （相关可选项：DIY 反代 / 自建网关。本次不做：要多维护一层，且域名与 Zero Trust 已在 Cloudflare 体系。）
 2. 在 Zero Trust 为该主机名建自托管 Access 应用（通常覆盖 `/*`）。
 3. 建一条 **Allow** 策略：仅允许约定身份（邮箱 / IdP 组）。
-4. 另建一条 **Service Auth** 策略：只挂 Service Token（不要和 Allow 写在同一条）。  
-   （相关可选项：把 Token 塞进 Allow。不做：机器凭证不会按 Service Token 路径生效，curl 易一直 302。）
+4. 另建一条 **Service Auth** 策略：只挂 Service Token（不要和 Allow 写在同一条）。两条同时挂在同一应用上，浏览器走 Allow、脚本走 Service Auth，满足任一即可进。  
+   （相关可选项：把 Token 塞进 Allow。不做：Access 仍按「人」路径判，curl 无会话会一直 302，像 Token 坏了。）
 5. 浏览器：打开 HTTPS 主机名，完成 Access 登录后再访问上游真实路径。
 6. 脚本：请求带 `CF-Access-Client-Id` 与 `CF-Access-Client-Secret`（本机 env 注入，勿提交仓库）。
 7. 分别验收：无凭证应被拦；浏览器登录后可访问真实上游路由；带 Token 的 curl 返回业务 JSON。
