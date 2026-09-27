@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0] - 2026-09-27
+
+### Changed
+
+- 正文强制 Markdown `##` / `###` / `####` 分层；不再用【背景】等方括号栏名作为正式结构。
+- **行动指南**拆成主题行动指南（背景 → 核心问题 → 可执行步骤 → 验收标准）与细节与其他（`#### 若…` / 则… 小章节）。
+- **过程**强制时间线（小节带时刻）；**验收标准**当作以后任务执行的完成判定清单。
+- 主题行动指南须可泛化（不绑主机名/网段/路径）；操作细节只进细节层。
+- 行动类对话内容优先进行动指南；学习类对话所学写知识点总结。
+- 入库提交通道改为灵活（文档可直接 commit；大代码改动仍走云 agent）。
+- 新增同目录 `CONTEXT.md` 与 `docs/adr/`（0001–0006）。
+
+### Removed
+
+- 以方括号四栏名为唯一正式结构的写法。
+
 ## [2.1.1] - 2026-09-20
 
 ### Changed
@@ -40,7 +56,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.1...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.2.0...HEAD
+[2.2.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.1...skill/conversation-to-notes@2.2.0
 [2.1.1]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.0...skill/conversation-to-notes@2.1.1
 [2.1.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.0.0...skill/conversation-to-notes@2.1.0
 [2.0.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@1.0.0...skill/conversation-to-notes@2.0.0
