@@ -4,15 +4,13 @@ description: 写/改 .memory/references 时，description 与 INDEX 摘要必须
 metadata:
   edges-type: task
   edges-title: reference memory 的 description 应带关键链接
-  edges-tasks-status: todo
+  edges-tasks-status: backlog
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-28T09:29:50.254Z"
+  edges-updated-at: "2026-09-28T09:35:50.906Z"
   edges-task-project: project-memory
-  edges-task-assignee: Coding Agent 专家
-  edges-task-assignee-id: ac913463-5bf6-4c16-adc0-900c61a8692d
 ---
 
 写或改 `.memory/references/*` 时，`description`（以及 INDEX 摘要行）必须包含可点击的关键 URL，不能只有「对照某某」而无链接。
