@@ -253,7 +253,8 @@ test("setupNginxArtifacts runs the deploy script when root", async () => {
   assert.equal(result.applied, true);
   assert.equal(result.sudo, false);
   assert.ok(calls.some((line) => line === `bash ${script}`));
-  assert.match(result.command, /sudo bash .*setup-nginx-artifacts\.sh/);
+  assert.match(result.sudoCommand, /sudo bash .*setup-nginx-artifacts\.sh/);
+  assert.equal("command" in result, false);
 });
 
 test("setupNginxArtifacts prints exact sudo command when not root", async () => {
