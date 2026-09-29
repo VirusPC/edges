@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 笔记入库与能力面
 
+- **CLI 不发到 npm：** `edges-cli` 不发布到 npm registry。`package.json` 的 `"private": true` 用来挡住发布。日常仍用 `pnpm --filter edges-cli exec tsx src/index.ts`；本地 `edges` 二进制来自 `dist/index.js`，要先让 `pnpm --filter edges-cli build` 成功（`prepack` 会跑同一套 build）。
 - **CLI 目录改名：** 多命令 CLI 的代码目录改为单数 `extensions/cli`。npm 包名仍是 `edges-cli`，二进制仍是 `edges`，`pnpm --filter edges-cli` 和命令行为不变。
 - **笔记写给人审：** `conversation-to-notes` 技能（`extensions/skills/conversation-to-notes`）现在要求整理出来的笔记写给人审阅：白话完整句，例子与上下文要够独立读懂；密表放进补充说明；所学只写判断与边界；行动指南须带触发与步骤。该技能的 2.1.0 / 2.1.1 已写在技能 changelog 里，这里不再复述明细。
 - **任务只成草稿：** 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 完成标准（动作可选）；栏名用中文。与笔记 / 记忆技能分工；只成文，不落库。
