@@ -11,8 +11,8 @@ function resolveDefaultRepoPath(): string {
 
 function resolveCliEntry(env: NodeJS.ProcessEnv): string {
   if (env.EDGES_CLI) return env.EDGES_CLI;
-  const dist = path.resolve(__dirname, "../../../clis/dist/index.js");
-  const src = path.resolve(__dirname, "../../../clis/src/index.ts");
+  const dist = path.resolve(__dirname, "../../../cli/dist/index.js");
+  const src = path.resolve(__dirname, "../../../cli/src/index.ts");
   return fs.existsSync(dist) ? dist : src;
 }
 

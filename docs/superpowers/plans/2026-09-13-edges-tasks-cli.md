@@ -23,7 +23,7 @@
 - Do not change `knowledge/tasks/` board status or task bodies as part of implementing this CLI (tests use a temp board)
 - Do not auto-create/edit/move/delete `knowledge/posts/`
 - Do not add `js-yaml` / `gray-matter` / `simple-git` / vitest. Stay on `commander` + `zod` + `node:test` + `tsx`
-- Test glob is `extensions/clis/test/*.test.ts` (`package.json` `"test": "node --test --import tsx test/*.test.ts"`). New tests must match that glob (`test/tasks-*.test.ts`). Helpers may live at `test/tasks-helpers.ts` (not a `*.test.ts`)
+- Test glob is `extensions/cli/test/*.test.ts` (`package.json` `"test": "node --test --import tsx test/*.test.ts"`). New tests must match that glob (`test/tasks-*.test.ts`). Helpers may live at `test/tasks-helpers.ts` (not a `*.test.ts`)
 - Reuse `EDGES_REPO` from `loadConfig()` as the repo root. Board lives at `<repoPath>/knowledge/tasks/`
 - `edges note` auth flags stay on `note` only. Tasks commands do not read `--token-file` / `--token-stdin`
 - Public repo: no credentials, tokens, or personal data in commits
@@ -35,41 +35,41 @@
 
 **Create**
 
-- `extensions/clis/src/tasks/types.ts` — `TaskStatus`, `RunStatus`, `TasksErrorCode`, records, parsed-command types
-- `extensions/clis/src/tasks/paths.ts` — status dirs, stem/path resolve, sidecar path, skip `AGENTS.md` / `README.md` / `.memory/`
-- `extensions/clis/src/tasks/slug.ts` — CJK-preserving file slug + ASCII `name` slug (do **not** reuse `git/slug.ts` `titleToSlug`, which strips CJK)
-- `extensions/clis/src/tasks/frontmatter.ts` — parse/serialize project-memory shape; surgical metadata patch
-- `extensions/clis/src/tasks/board.ts` — list/get over a temp or real board root
-- `extensions/clis/src/tasks/write.ts` — create + update (files only)
-- `extensions/clis/src/tasks/move.ts` — status move of Task + sidecar
-- `extensions/clis/src/tasks/runlog.ts` — parse sidecar table, stable `run-id`, note→run attribution
-- `extensions/clis/src/tasks/format.ts` — JSON envelope + `runs`/`run-messages` table
-- `extensions/clis/src/tasks/service.ts` — command handlers (`listTasks`, `getTask`, …)
-- `extensions/clis/src/tasks/program.ts` — attach Commander subtree to the `tasks` command
-- `extensions/clis/src/tasks/run.ts` — `runTasks(parsed, io)` used by root `run()`
-- `extensions/clis/test/tasks-helpers.ts` — temp board factory (not executed by the test glob)
-- `extensions/clis/test/tasks-paths.test.ts`
-- `extensions/clis/test/tasks-slug.test.ts`
-- `extensions/clis/test/tasks-frontmatter.test.ts`
-- `extensions/clis/test/tasks-board.test.ts`
-- `extensions/clis/test/tasks-write.test.ts`
-- `extensions/clis/test/tasks-move.test.ts`
-- `extensions/clis/test/tasks-runlog.test.ts`
-- `extensions/clis/test/tasks-parse.test.ts`
-- `extensions/clis/test/tasks-run.test.ts`
-- `extensions/clis/test/tasks-cli.test.ts`
+- `extensions/cli/src/tasks/types.ts` — `TaskStatus`, `RunStatus`, `TasksErrorCode`, records, parsed-command types
+- `extensions/cli/src/tasks/paths.ts` — status dirs, stem/path resolve, sidecar path, skip `AGENTS.md` / `README.md` / `.memory/`
+- `extensions/cli/src/tasks/slug.ts` — CJK-preserving file slug + ASCII `name` slug (do **not** reuse `git/slug.ts` `titleToSlug`, which strips CJK)
+- `extensions/cli/src/tasks/frontmatter.ts` — parse/serialize project-memory shape; surgical metadata patch
+- `extensions/cli/src/tasks/board.ts` — list/get over a temp or real board root
+- `extensions/cli/src/tasks/write.ts` — create + update (files only)
+- `extensions/cli/src/tasks/move.ts` — status move of Task + sidecar
+- `extensions/cli/src/tasks/runlog.ts` — parse sidecar table, stable `run-id`, note→run attribution
+- `extensions/cli/src/tasks/format.ts` — JSON envelope + `runs`/`run-messages` table
+- `extensions/cli/src/tasks/service.ts` — command handlers (`listTasks`, `getTask`, …)
+- `extensions/cli/src/tasks/program.ts` — attach Commander subtree to the `tasks` command
+- `extensions/cli/src/tasks/run.ts` — `runTasks(parsed, io)` used by root `run()`
+- `extensions/cli/test/tasks-helpers.ts` — temp board factory (not executed by the test glob)
+- `extensions/cli/test/tasks-paths.test.ts`
+- `extensions/cli/test/tasks-slug.test.ts`
+- `extensions/cli/test/tasks-frontmatter.test.ts`
+- `extensions/cli/test/tasks-board.test.ts`
+- `extensions/cli/test/tasks-write.test.ts`
+- `extensions/cli/test/tasks-move.test.ts`
+- `extensions/cli/test/tasks-runlog.test.ts`
+- `extensions/cli/test/tasks-parse.test.ts`
+- `extensions/cli/test/tasks-run.test.ts`
+- `extensions/cli/test/tasks-cli.test.ts`
 
 **Modify**
 
-- `extensions/clis/src/program.ts` — drop placeholder `onTasks`; call `addTasksCommands`; keep `note` unchanged
-- `extensions/clis/src/parse.ts` — `ParseOk` grows seven `tasks-*` kinds; unknown `tasks` verb / missing subcommand = `VALIDATION_ERROR`
-- `extensions/clis/src/run.ts` — dispatch `tasks-*` to `runTasks`; remove “not implemented yet”
-- `extensions/clis/src/help.ts` — replace `TASKS_AFTER_HELP` placeholder with the contract below
-- `extensions/clis/src/exit.ts` — `exitCodeForTasksError(code)` (2 = validation, 1 = not found / IO)
-- `extensions/clis/README.md` — document the seven commands; say Skill/MCP follow later on this contract
-- `extensions/clis/test/parse.test.ts` — rewrite placeholder assertions
-- `extensions/clis/test/run.test.ts` — rewrite placeholder assertions
-- `extensions/clis/test/cli.test.ts` — rewrite placeholder `--help` assertion
+- `extensions/cli/src/program.ts` — drop placeholder `onTasks`; call `addTasksCommands`; keep `note` unchanged
+- `extensions/cli/src/parse.ts` — `ParseOk` grows seven `tasks-*` kinds; unknown `tasks` verb / missing subcommand = `VALIDATION_ERROR`
+- `extensions/cli/src/run.ts` — dispatch `tasks-*` to `runTasks`; remove “not implemented yet”
+- `extensions/cli/src/help.ts` — replace `TASKS_AFTER_HELP` placeholder with the contract below
+- `extensions/cli/src/exit.ts` — `exitCodeForTasksError(code)` (2 = validation, 1 = not found / IO)
+- `extensions/cli/README.md` — document the seven commands; say Skill/MCP follow later on this contract
+- `extensions/cli/test/parse.test.ts` — rewrite placeholder assertions
+- `extensions/cli/test/run.test.ts` — rewrite placeholder assertions
+- `extensions/cli/test/cli.test.ts` — rewrite placeholder `--help` assertion
 - `CHANGELOG.md` `[Unreleased]` — Added `edges tasks` CLI (when the implementation lands)
 
 **Do not create/commit**
@@ -249,9 +249,9 @@ Run statuses on disk (ADR 0002 / README): `pending` | `running` | `completed` | 
 ### Task 1: Status enum, paths, identity resolve
 
 **Files:**
-- Create: `extensions/clis/src/tasks/types.ts`
-- Create: `extensions/clis/src/tasks/paths.ts`
-- Create: `extensions/clis/test/tasks-paths.test.ts`
+- Create: `extensions/cli/src/tasks/types.ts`
+- Create: `extensions/cli/src/tasks/paths.ts`
+- Create: `extensions/cli/test/tasks-paths.test.ts`
 
 **Interfaces:**
 - Consumes: `RuntimeConfig.repoPath` (later tasks pass it in)
@@ -349,8 +349,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/types.ts extensions/clis/src/tasks/paths.ts \
-  extensions/clis/test/tasks-paths.test.ts
+git add extensions/cli/src/tasks/types.ts extensions/cli/src/tasks/paths.ts \
+  extensions/cli/test/tasks-paths.test.ts
 git commit -m "feat(tasks): add status enum and board paths" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -360,8 +360,8 @@ git commit -m "feat(tasks): add status enum and board paths" \
 ### Task 2: CJK-preserving task slugs
 
 **Files:**
-- Create: `extensions/clis/src/tasks/slug.ts`
-- Create: `extensions/clis/test/tasks-slug.test.ts`
+- Create: `extensions/cli/src/tasks/slug.ts`
+- Create: `extensions/cli/test/tasks-slug.test.ts`
 - Modify: none of `src/git/slug.ts` (reuse `localDateYmd` only)
 
 **Interfaces:**
@@ -443,7 +443,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/slug.ts extensions/clis/test/tasks-slug.test.ts
+git add extensions/cli/src/tasks/slug.ts extensions/cli/test/tasks-slug.test.ts
 git commit -m "feat(tasks): add CJK-preserving task slugs" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -453,8 +453,8 @@ git commit -m "feat(tasks): add CJK-preserving task slugs" \
 ### Task 3: Project-memory frontmatter parse and surgical patch
 
 **Files:**
-- Create: `extensions/clis/src/tasks/frontmatter.ts`
-- Create: `extensions/clis/test/tasks-frontmatter.test.ts`
+- Create: `extensions/cli/src/tasks/frontmatter.ts`
+- Create: `extensions/cli/test/tasks-frontmatter.test.ts`
 
 **Interfaces:**
 - Consumes: `TaskStatus` from `./types.js`
@@ -554,7 +554,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/frontmatter.ts extensions/clis/test/tasks-frontmatter.test.ts
+git add extensions/cli/src/tasks/frontmatter.ts extensions/cli/test/tasks-frontmatter.test.ts
 git commit -m "feat(tasks): parse and patch task frontmatter" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -564,9 +564,9 @@ git commit -m "feat(tasks): parse and patch task frontmatter" \
 ### Task 4: Board read — list and get (no Commander yet)
 
 **Files:**
-- Create: `extensions/clis/src/tasks/board.ts`
-- Create: `extensions/clis/test/tasks-board.test.ts`
-- Modify: `extensions/clis/test/tasks-helpers.ts`
+- Create: `extensions/cli/src/tasks/board.ts`
+- Create: `extensions/cli/test/tasks-board.test.ts`
+- Modify: `extensions/cli/test/tasks-helpers.ts`
 
 **Interfaces:**
 - Consumes: `boardRoot`, `TASK_STATUSES`, `isTaskMarkdownName`, `parseTaskDoc`, `sidecarRelPath`
@@ -692,8 +692,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/board.ts extensions/clis/test/tasks-board.test.ts \
-  extensions/clis/test/tasks-helpers.ts
+git add extensions/cli/src/tasks/board.ts extensions/cli/test/tasks-board.test.ts \
+  extensions/cli/test/tasks-helpers.ts
 git commit -m "feat(tasks): list and get task board files" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -703,11 +703,11 @@ git commit -m "feat(tasks): list and get task board files" \
 ### Task 5: Commander subtree + parseArgv kinds
 
 **Files:**
-- Create: `extensions/clis/src/tasks/program.ts`
-- Create: `extensions/clis/test/tasks-parse.test.ts`
-- Modify: `extensions/clis/src/program.ts` (replace placeholder `tasks.action`)
-- Modify: `extensions/clis/src/parse.ts` (`ParseOk` union)
-- Modify: `extensions/clis/test/parse.test.ts` (placeholder tests)
+- Create: `extensions/cli/src/tasks/program.ts`
+- Create: `extensions/cli/test/tasks-parse.test.ts`
+- Modify: `extensions/cli/src/program.ts` (replace placeholder `tasks.action`)
+- Modify: `extensions/cli/src/parse.ts` (`ParseOk` union)
+- Modify: `extensions/cli/test/parse.test.ts` (placeholder tests)
 
 **Interfaces:**
 - Consumes: `TASK_STATUSES`, Commander `Command`
@@ -910,9 +910,9 @@ Expected: PASS. Then `pnpm --filter edges-cli test` — `run.test.ts` / `cli.tes
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/program.ts extensions/clis/src/program.ts \
-  extensions/clis/src/parse.ts extensions/clis/test/tasks-parse.test.ts \
-  extensions/clis/test/parse.test.ts
+git add extensions/cli/src/tasks/program.ts extensions/cli/src/program.ts \
+  extensions/cli/src/parse.ts extensions/cli/test/tasks-parse.test.ts \
+  extensions/cli/test/parse.test.ts
 git commit -m "feat(tasks): parse list get create update status runs" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -922,15 +922,15 @@ git commit -m "feat(tasks): parse list get create update status runs" \
 ### Task 6: `run()` dispatch + `edges tasks list`
 
 **Files:**
-- Create: `extensions/clis/src/tasks/format.ts`
-- Create: `extensions/clis/src/tasks/service.ts`
-- Create: `extensions/clis/src/tasks/run.ts`
-- Create: `extensions/clis/test/tasks-run.test.ts`
-- Modify: `extensions/clis/src/run.ts`
-- Modify: `extensions/clis/src/exit.ts`
-- Modify: `extensions/clis/src/help.ts`
-- Modify: `extensions/clis/test/run.test.ts`
-- Modify: `extensions/clis/test/cli.test.ts`
+- Create: `extensions/cli/src/tasks/format.ts`
+- Create: `extensions/cli/src/tasks/service.ts`
+- Create: `extensions/cli/src/tasks/run.ts`
+- Create: `extensions/cli/test/tasks-run.test.ts`
+- Modify: `extensions/cli/src/run.ts`
+- Modify: `extensions/cli/src/exit.ts`
+- Modify: `extensions/cli/src/help.ts`
+- Modify: `extensions/cli/test/run.test.ts`
+- Modify: `extensions/cli/test/cli.test.ts`
 
 **Interfaces:**
 - Consumes: `listTasks`, `ParseOk` `tasks-list`, `loadConfig(env).repoPath`
@@ -1056,10 +1056,10 @@ Expected: PASS for list/help/parse. `tasks get` without wiring still exits 2 unt
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/format.ts extensions/clis/src/tasks/service.ts \
-  extensions/clis/src/tasks/run.ts extensions/clis/src/run.ts extensions/clis/src/exit.ts \
-  extensions/clis/src/help.ts extensions/clis/test/tasks-run.test.ts \
-  extensions/clis/test/run.test.ts extensions/clis/test/cli.test.ts
+git add extensions/cli/src/tasks/format.ts extensions/cli/src/tasks/service.ts \
+  extensions/cli/src/tasks/run.ts extensions/cli/src/run.ts extensions/cli/src/exit.ts \
+  extensions/cli/src/help.ts extensions/cli/test/tasks-run.test.ts \
+  extensions/cli/test/run.test.ts extensions/cli/test/cli.test.ts
 git commit -m "feat(tasks): wire run() to tasks list" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1069,9 +1069,9 @@ git commit -m "feat(tasks): wire run() to tasks list" \
 ### Task 7: `edges tasks get`
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/run.ts`
-- Modify: `extensions/clis/src/tasks/service.ts`
-- Modify: `extensions/clis/test/tasks-run.test.ts`
+- Modify: `extensions/cli/src/tasks/run.ts`
+- Modify: `extensions/cli/src/tasks/service.ts`
+- Modify: `extensions/cli/test/tasks-run.test.ts`
 
 **Interfaces:**
 - Consumes: `getTask(repoPath, target, fs)`
@@ -1144,8 +1144,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/run.ts extensions/clis/src/tasks/service.ts \
-  extensions/clis/test/tasks-run.test.ts
+git add extensions/cli/src/tasks/run.ts extensions/cli/src/tasks/service.ts \
+  extensions/cli/test/tasks-run.test.ts
 git commit -m "feat(tasks): add edges tasks get" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1155,11 +1155,11 @@ git commit -m "feat(tasks): add edges tasks get" \
 ### Task 8: `edges tasks create` (file + empty sidecar, no git)
 
 **Files:**
-- Create: `extensions/clis/src/tasks/write.ts`
-- Create: `extensions/clis/test/tasks-write.test.ts`
-- Modify: `extensions/clis/src/tasks/service.ts`
-- Modify: `extensions/clis/src/tasks/run.ts`
-- Modify: `extensions/clis/test/tasks-run.test.ts`
+- Create: `extensions/cli/src/tasks/write.ts`
+- Create: `extensions/cli/test/tasks-write.test.ts`
+- Modify: `extensions/cli/src/tasks/service.ts`
+- Modify: `extensions/cli/src/tasks/run.ts`
+- Modify: `extensions/cli/test/tasks-run.test.ts`
 
 **Interfaces:**
 - Consumes: `newTaskStem`, `taskNameSlug`, `renderNewTaskDoc`, `taskRelPath`, `sidecarRelPath`
@@ -1262,9 +1262,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/write.ts extensions/clis/src/tasks/service.ts \
-  extensions/clis/src/tasks/run.ts extensions/clis/test/tasks-write.test.ts \
-  extensions/clis/test/tasks-run.test.ts extensions/clis/test/tasks-helpers.ts
+git add extensions/cli/src/tasks/write.ts extensions/cli/src/tasks/service.ts \
+  extensions/cli/src/tasks/run.ts extensions/cli/test/tasks-write.test.ts \
+  extensions/cli/test/tasks-run.test.ts extensions/cli/test/tasks-helpers.ts
 git commit -m "feat(tasks): create task file and empty sidecar" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1274,11 +1274,11 @@ git commit -m "feat(tasks): create task file and empty sidecar" \
 ### Task 9: `edges tasks update` (no move, no stem rename)
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/write.ts`
-- Modify: `extensions/clis/src/tasks/service.ts`
-- Modify: `extensions/clis/src/tasks/run.ts`
-- Modify: `extensions/clis/test/tasks-write.test.ts`
-- Modify: `extensions/clis/test/tasks-run.test.ts`
+- Modify: `extensions/cli/src/tasks/write.ts`
+- Modify: `extensions/cli/src/tasks/service.ts`
+- Modify: `extensions/cli/src/tasks/run.ts`
+- Modify: `extensions/cli/test/tasks-write.test.ts`
+- Modify: `extensions/cli/test/tasks-run.test.ts`
 
 **Interfaces:**
 - Consumes: `getTask`, `setMetadataField`, `setTopLevelField`, `replaceBody`
@@ -1341,9 +1341,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/write.ts extensions/clis/src/tasks/service.ts \
-  extensions/clis/src/tasks/run.ts extensions/clis/test/tasks-write.test.ts \
-  extensions/clis/test/tasks-run.test.ts
+git add extensions/cli/src/tasks/write.ts extensions/cli/src/tasks/service.ts \
+  extensions/cli/src/tasks/run.ts extensions/cli/test/tasks-write.test.ts \
+  extensions/cli/test/tasks-run.test.ts
 git commit -m "feat(tasks): update task fields without moving" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1353,11 +1353,11 @@ git commit -m "feat(tasks): update task fields without moving" \
 ### Task 10: `edges tasks status` moves Task + sidecar
 
 **Files:**
-- Create: `extensions/clis/src/tasks/move.ts`
-- Create: `extensions/clis/test/tasks-move.test.ts`
-- Modify: `extensions/clis/src/tasks/service.ts`
-- Modify: `extensions/clis/src/tasks/run.ts`
-- Modify: `extensions/clis/test/tasks-run.test.ts`
+- Create: `extensions/cli/src/tasks/move.ts`
+- Create: `extensions/cli/test/tasks-move.test.ts`
+- Modify: `extensions/cli/src/tasks/service.ts`
+- Modify: `extensions/cli/src/tasks/run.ts`
+- Modify: `extensions/cli/test/tasks-run.test.ts`
 
 **Interfaces:**
 - Consumes: `getTask`, `setMetadataField`, `taskRelPath`, `sidecarRelPath`
@@ -1438,9 +1438,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/move.ts extensions/clis/src/tasks/service.ts \
-  extensions/clis/src/tasks/run.ts extensions/clis/test/tasks-move.test.ts \
-  extensions/clis/test/tasks-run.test.ts extensions/clis/test/tasks-helpers.ts
+git add extensions/cli/src/tasks/move.ts extensions/cli/src/tasks/service.ts \
+  extensions/cli/src/tasks/run.ts extensions/cli/test/tasks-move.test.ts \
+  extensions/cli/test/tasks-run.test.ts extensions/cli/test/tasks-helpers.ts
 git commit -m "feat(tasks): status moves task and sidecar" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1450,10 +1450,10 @@ git commit -m "feat(tasks): status moves task and sidecar" \
 ### Task 11: No hard delete — `status cancelled` only
 
 **Files:**
-- Modify: `extensions/clis/test/tasks-move.test.ts`
-- Modify: `extensions/clis/test/tasks-parse.test.ts`
-- Modify: `extensions/clis/test/tasks-cli.test.ts` (create this file if Task 6 did not)
-- Modify: `extensions/clis/src/tasks/move.ts` only if unlink-of-task exists (it must not)
+- Modify: `extensions/cli/test/tasks-move.test.ts`
+- Modify: `extensions/cli/test/tasks-parse.test.ts`
+- Modify: `extensions/cli/test/tasks-cli.test.ts` (create this file if Task 6 did not)
+- Modify: `extensions/cli/src/tasks/move.ts` only if unlink-of-task exists (it must not)
 
 **Interfaces:**
 - Consumes: `moveTaskStatus(..., "cancelled")`, `parseArgv`
@@ -1520,8 +1520,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/test/tasks-move.test.ts extensions/clis/test/tasks-parse.test.ts \
-  extensions/clis/src/tasks/move.ts
+git add extensions/cli/test/tasks-move.test.ts extensions/cli/test/tasks-parse.test.ts \
+  extensions/cli/src/tasks/move.ts
 git commit -m "test(tasks): cancel via status, never delete" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1531,8 +1531,8 @@ git commit -m "test(tasks): cancel via status, never delete" \
 ### Task 12: Run-log parser and stable `run-id`
 
 **Files:**
-- Create: `extensions/clis/src/tasks/runlog.ts`
-- Create: `extensions/clis/test/tasks-runlog.test.ts`
+- Create: `extensions/cli/src/tasks/runlog.ts`
+- Create: `extensions/cli/test/tasks-runlog.test.ts`
 
 **Interfaces:**
 - Consumes: sidecar markdown + `stem`
@@ -1639,7 +1639,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/runlog.ts extensions/clis/test/tasks-runlog.test.ts
+git add extensions/cli/src/tasks/runlog.ts extensions/cli/test/tasks-runlog.test.ts
 git commit -m "feat(tasks): parse run log with stable run-id" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1649,10 +1649,10 @@ git commit -m "feat(tasks): parse run log with stable run-id" \
 ### Task 13: `edges tasks runs` summary + `--output json`
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/format.ts`
-- Modify: `extensions/clis/src/tasks/service.ts`
-- Modify: `extensions/clis/src/tasks/run.ts`
-- Modify: `extensions/clis/test/tasks-run.test.ts`
+- Modify: `extensions/cli/src/tasks/format.ts`
+- Modify: `extensions/cli/src/tasks/service.ts`
+- Modify: `extensions/cli/src/tasks/run.ts`
+- Modify: `extensions/cli/test/tasks-run.test.ts`
 
 **Interfaces:**
 - Consumes: `getTask`, `parseRunLog`
@@ -1746,8 +1746,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/format.ts extensions/clis/src/tasks/service.ts \
-  extensions/clis/src/tasks/run.ts extensions/clis/test/tasks-run.test.ts
+git add extensions/cli/src/tasks/format.ts extensions/cli/src/tasks/service.ts \
+  extensions/cli/src/tasks/run.ts extensions/cli/test/tasks-run.test.ts
 git commit -m "feat(tasks): add read-only tasks runs" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1757,12 +1757,12 @@ git commit -m "feat(tasks): add read-only tasks runs" \
 ### Task 14: `edges tasks run-messages`
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/format.ts`
-- Modify: `extensions/clis/src/tasks/service.ts`
-- Modify: `extensions/clis/src/tasks/run.ts`
-- Modify: `extensions/clis/src/tasks/runlog.ts` (lookup helper if needed)
-- Modify: `extensions/clis/test/tasks-run.test.ts`
-- Create: `extensions/clis/test/tasks-cli.test.ts` if not already created
+- Modify: `extensions/cli/src/tasks/format.ts`
+- Modify: `extensions/cli/src/tasks/service.ts`
+- Modify: `extensions/cli/src/tasks/run.ts`
+- Modify: `extensions/cli/src/tasks/runlog.ts` (lookup helper if needed)
+- Modify: `extensions/cli/test/tasks-run.test.ts`
+- Create: `extensions/cli/test/tasks-cli.test.ts` if not already created
 
 **Interfaces:**
 - Consumes: `resolveRunId`, `parseRunLog`, `messagesForRun`, `listTasks` (to find the stem's sidecar when a full `run-id` is given)
@@ -1894,9 +1894,9 @@ Expected: PASS (all prior tasks + this one)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/format.ts extensions/clis/src/tasks/service.ts \
-  extensions/clis/src/tasks/run.ts extensions/clis/src/tasks/runlog.ts \
-  extensions/clis/test/tasks-run.test.ts extensions/clis/test/tasks-cli.test.ts
+git add extensions/cli/src/tasks/format.ts extensions/cli/src/tasks/service.ts \
+  extensions/cli/src/tasks/run.ts extensions/cli/src/tasks/runlog.ts \
+  extensions/cli/test/tasks-run.test.ts extensions/cli/test/tasks-cli.test.ts
 git commit -m "feat(tasks): add read-only run-messages" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1906,8 +1906,8 @@ git commit -m "feat(tasks): add read-only run-messages" \
 ### Task 15: CLI docs + implementation CHANGELOG
 
 **Files:**
-- Modify: `extensions/clis/README.md`
-- Modify: `extensions/clis/src/help.ts` (only if examples drifted)
+- Modify: `extensions/cli/README.md`
+- Modify: `extensions/cli/src/help.ts` (only if examples drifted)
 - Modify: `CHANGELOG.md` `[Unreleased]` Added
 
 **Interfaces:**
@@ -1939,7 +1939,7 @@ Expected: FAIL if help/README still omit the Capability Surface sentence.
 
 - [ ] **Step 3: Write minimal implementation**
 
-Replace the `tasks` section in `extensions/clis/README.md` (currently “Placeholder only”) with the seven commands, JSON/table rules, cancel-via-status, read-only Run layer, filesystem-only writes, and: Skill and MCP come later on this contract; Capability Surface is CLI + Skill + MCP.
+Replace the `tasks` section in `extensions/cli/README.md` (currently “Placeholder only”) with the seven commands, JSON/table rules, cancel-via-status, read-only Run layer, filesystem-only writes, and: Skill and MCP come later on this contract; Capability Surface is CLI + Skill + MCP.
 
 `CHANGELOG.md` under `[Unreleased]` → `### Added`:
 
@@ -1958,7 +1958,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/README.md extensions/clis/src/help.ts extensions/clis/test/cli.test.ts \
+git add extensions/cli/README.md extensions/cli/src/help.ts extensions/cli/test/cli.test.ts \
   CHANGELOG.md
 git commit -m "docs(tasks): document edges tasks CLI contract" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -2025,4 +2025,4 @@ No `TBD`, `TODO`, “implement later”, “add validation”, or “similar to 
 
 ### 4. Test runner check
 
-`edges-cli` uses `node --test --import tsx test/*.test.ts`, not vitest. All new tests are `extensions/clis/test/tasks-*.test.ts`. Helpers stay in `test/tasks-helpers.ts`.
+`edges-cli` uses `node --test --import tsx test/*.test.ts`, not vitest. All new tests are `extensions/cli/test/tasks-*.test.ts`. Helpers stay in `test/tasks-helpers.ts`.

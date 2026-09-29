@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "edges.task-doc/v1",
   "title": "Task Doc",
-  "description": "Edges Task document contract. CLI frontmatter and a board item's optional doc align to this shape. Metadata keys mirror extensions/clis task frontmatter. Unknown metadata keys are allowed. body is Markdown, not precompiled HTML.",
+  "description": "Edges Task document contract. CLI frontmatter and a board item's optional doc align to this shape. Metadata keys mirror extensions/cli task frontmatter. Unknown metadata keys are allowed. body is Markdown, not precompiled HTML.",
   "type": "object",
   "additionalProperties": false,
   "required": ["name", "description", "metadata", "body"],

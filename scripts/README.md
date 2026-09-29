@@ -1,6 +1,6 @@
 # scripts/
 
-项目自身的维护脚本目录。人和 Agent 天天用的入库命令是 `extensions/clis` 的 `edges`，不是仓根脚本。
+项目自身的维护脚本目录。人和 Agent 天天用的入库命令是 `extensions/cli` 的 `edges`，不是仓根脚本。
 
 ## 何时放这里
 
@@ -12,7 +12,7 @@
 
 ## 何时**不**放这里
 
-- 用户/Agent 装好之后**天天会用**的命令 → `extensions/clis` 的 `edges`（`package.json` `"bin"` 安装挂钩）
+- 用户/Agent 装好之后**天天会用**的命令 → `extensions/cli` 的 `edges`（`package.json` `"bin"` 安装挂钩）
 - 跟外部系统/MCP 协议相关的代码 → `extensions/`；跨机器 harness 的安装脚本仍放本目录，源在 `shared-extensions/`
 - 纯 Node 包、可被 pnpm 链接的 → `extensions/mcp-servers/<name>/`
 

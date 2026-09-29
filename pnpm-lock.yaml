@@ -115,7 +115,7 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(@types/node@20.19.43)(jsdom@30.1.1)(vite@8.3.0(@types/node@20.19.43)(esbuild@0.27.3)(jiti@2.7.0)(tsx@4.21.0))
 
-  extensions/clis:
+  extensions/cli:
     dependencies:
       commander:
         specifier: ^14.0.3

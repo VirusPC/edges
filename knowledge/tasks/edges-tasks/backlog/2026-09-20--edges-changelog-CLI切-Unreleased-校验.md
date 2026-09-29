@@ -23,5 +23,5 @@ metadata:
 
 **How to apply:**
 - grill 动词面（release/cut/check）、与 package.json version / GitHub Release 边界、是否只根 CHANGELOG 还是含 skill changelog。
-- 实现落 extensions/clis。
+- 实现落 extensions/cli。
 - 未指派；派发默认 grill-with-docs。

@@ -11,10 +11,10 @@ metadata:
   edges-updated-at: "2026-09-13T04:08:49+00:00"
 ---
 
-本轮 `edges tasks` 只做看板 CLI，不实现 Skill / MCP，也不抄 Multica daemon。命令为 `list|get|create|update|status|runs|run-messages`；取消走 `status cancelled`；GitHub 关联本轮不做；Run 层只读 sidecar，稳定 `run-id`，动词用 `runs` / `run-messages`。CLI 已按 ADR 0005 与 `docs/superpowers/plans/2026-09-13-edges-tasks-cli.md` 落地在 `extensions/clis`（PR 实现）。决策见 ADR 0005。
+本轮 `edges tasks` 只做看板 CLI，不实现 Skill / MCP，也不抄 Multica daemon。命令为 `list|get|create|update|status|runs|run-messages`；取消走 `status cancelled`；GitHub 关联本轮不做；Run 层只读 sidecar，稳定 `run-id`，动词用 `runs` / `run-messages`。CLI 已按 ADR 0005 与 `docs/superpowers/plans/2026-09-13-edges-tasks-cli.md` 落地在 `extensions/cli`（PR 实现）。决策见 ADR 0005。
 
 **Why:**
-2026-09-13 grill 确认：先把 CLI 契约钉死，Skill 与 MCP 后做同一契约；能力面仍是 CLI + Skill + MCP 三者并列。2026-09-13 实现已按计划 Tasks 1–15 写入 `extensions/clis/src/tasks/`。
+2026-09-13 grill 确认：先把 CLI 契约钉死，Skill 与 MCP 后做同一契约；能力面仍是 CLI + Skill + MCP 三者并列。2026-09-13 实现已按计划 Tasks 1–15 写入 `extensions/cli/src/tasks/`。
 
 **How to apply:**
 - 实现或改 CLI 时按 ADR 0005 与 CONTEXT 术语；不要先写 Skill/MCP，不要硬删，不要本轮 append。

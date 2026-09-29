@@ -15,7 +15,7 @@ test("classifyError maps missing CLI entry to SCRIPT_NOT_FOUND", () => {
     "SCRIPT_NOT_FOUND",
   );
   assert.equal(
-    classifyError({ stderr: "Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/repo/extensions/clis/dist/index.js'" }),
+    classifyError({ stderr: "Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/repo/extensions/cli/dist/index.js'" }),
     "SCRIPT_NOT_FOUND",
   );
 });

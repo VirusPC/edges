@@ -6,7 +6,7 @@ This is generated HTML only. It is not Artifacts (`publish` / UUID / TTL) and no
 
 ## Generate (every deploy)
 
-After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs. The Vite output under `extensions/clis/src/tasks/project/assets/review-page/` is gitignored and must be built on the box before generate:
+After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs. The Vite output under `extensions/cli/src/tasks/project/assets/review-page/` is gitignored and must be built on the box before generate:
 
 ```bash
 pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...
@@ -18,7 +18,7 @@ pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
 From a checkout with PATH already set (same as the Action):
 
 ```bash
-pnpm --filter edges-cli exec -- tsx extensions/clis/scripts/generate-tasks-site.ts \
+pnpm --filter edges-cli exec -- tsx extensions/cli/scripts/generate-tasks-site.ts \
   --out "$PWD/knowledge/tasks/_site/index.html"
 ```
 
@@ -31,7 +31,7 @@ The Action does **not** re-run nginx setup.
 Requires `/etc/nginx/conf.d/teaching.conf` with `/teaching/` already in a `server { }` block. Leftover `teach.conf` / `/teach/` must be migrated first (`extensions/services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py`), then:
 
 ```bash
-sudo bash /home/cheng-dev/projects/edges/extensions/clis/deploy/setup-nginx-tasks.sh
+sudo bash /home/cheng-dev/projects/edges/extensions/cli/deploy/setup-nginx-tasks.sh
 ```
 
 That installs `/etc/nginx/snippets/edges-tasks.conf` (`/tasks/` → `<repo>/knowledge/tasks/_site/`) and includes it only in `teaching.conf` servers that contain `/teaching/`. Do not add `/tasks/` to the artifacts snippet. Do not dual-recognize `/teach/`.

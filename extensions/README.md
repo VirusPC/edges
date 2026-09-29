@@ -2,7 +2,7 @@
 
 `extensions/` 是 Edges 系统与外部世界（AI Agent、IDE 客户端、第三方系统）通信的**接口层**。
 
-这里的代码不是用来开发 Edges 系统本身的，而是作为“连接器”，实现 **“终端捕获，核心沉淀”** 的设计思想：让 ChatGPT、Cursor、Claude Code 等终端生成的思考，能够通过 CLI、Skill 或 MCP 流入核心资产库。三条入口并列：[`clis/`](clis/)（`edges note …`）、[`skills/`](skills/)（何时如何调用）、[`mcp-servers/`](mcp-servers/)（没有 shell 的宿主）。决策见 [`.memory/projects/project_capability_surface_cli_skill_mcp.md`](.memory/projects/project_capability_surface_cli_skill_mcp.md)。
+这里的代码不是用来开发 Edges 系统本身的，而是作为“连接器”，实现 **“终端捕获，核心沉淀”** 的设计思想：让 ChatGPT、Cursor、Claude Code 等终端生成的思考，能够通过 CLI、Skill 或 MCP 流入核心资产库。三条入口并列：[`cli/`](cli/)（`edges note …`）、[`skills/`](skills/)（何时如何调用）、[`mcp-servers/`](mcp-servers/)（没有 shell 的宿主）。决策见 [`.memory/projects/project_capability_surface_cli_skill_mcp.md`](.memory/projects/project_capability_surface_cli_skill_mcp.md)。
 
 ## 收录标准
 
@@ -16,7 +16,7 @@
 
 **协议与能力**
 
-- **`clis/`**: 面向 agent 的 CLI 项目（`edges`：`note`、`tasks`、`artifacts`、…）。有 shell 的本地 agent 优先走这里。
+- **`cli/`**: 面向 agent 的 CLI 项目（`edges`：`note`、`tasks`、`artifacts`、…）。有 shell 的本地 agent 优先走这里。
 - **`services/`**: 接入 Edges 的常驻 HTTP 进程（不是 MCP，也不是 Commander 命令节点）。目前是 Artifacts 预览服务 [`services/artifacts-preview/`](services/artifacts-preview/)；命令面仍是 `edges artifacts`。
 - **`mcp-servers/`**: [Model Context Protocol](https://modelcontextprotocol.io/) 服务器实现。给没有 shell 的 AI 客户端。
 - **`skills/`**: 供外部 Agent 加载的技能定义（Prompt 模板、思维链规范）。项目级用 `pnpm skills:link` 把每个 skill 软链到 `.agents/skills`；本机全局跑 `pnpm skills:install` 写入 `~/.agents/skills`（并为 Claude Code 建软链）；外部用户用 `npx skills@latest add VirusPC/edges/extensions/skills`。
@@ -35,7 +35,7 @@
 
 ## 接入准则
 
-1. **标准化**: 能力面是 CLI、Skill、MCP 三者并列（[`clis/`](clis/)、[`skills/`](skills/)、[`mcp-servers/`](mcp-servers/)），不是「有 shell 就只用 CLI、没有再补 MCP」。
+1. **标准化**: 能力面是 CLI、Skill、MCP 三者并列（[`cli/`](cli/)、[`skills/`](skills/)、[`mcp-servers/`](mcp-servers/)），不是「有 shell 就只用 CLI、没有再补 MCP」。
 2. **文档化**: 每个子目录都应包含独立的 README，说明其调用协议和配置方法。
 3. **解耦**: Extension 应当只依赖 `edges` CLI 契约或标准的 `knowledge/` 路径，避免复杂的内部依赖。不要依赖仓根 `bin/`。
 4. **自包含**: 一个 extension 应当能被单独复制走。避免用 Obsidian wikilink 引用 `knowledge/resources/` 下的附件——链接在 vault 内能解析，但目录被带到别处时附件会丢失。

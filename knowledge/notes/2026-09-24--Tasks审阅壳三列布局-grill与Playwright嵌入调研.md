@@ -38,7 +38,7 @@
 
 - CLI + 预构建前端 + 运行时注入；目录学 Playwright
 - 产物不入库；内联单 HTML + `#edges-review-payload`；hash（或 hash+query）
-- 树：`extensions/clis/review-app/` → gitignore `…/assets/review-page/` → `review-page.ts`
+- 树：`extensions/cli/review-app/` → gitignore `…/assets/review-page/` → `review-page.ts`
 - 不抄：第二 core 包、默认 zip+base64、CLI 内嵌 HMR
 
 ### 硬边界（未重开）
@@ -58,7 +58,7 @@
 
 1. grill 定 UI/领域：同一壳、左栏拖 project、中栏 status 只读、Task Doc JSON Schema、`doc` 嵌入 groups+items、顶栏四类 filter、Vite/React/shadcn、dnd-kit、react-markdown+remark-gfm。
 2. 提出 CLI 嵌 React → 对齐 Playwright HTML reporter（prebuild assets）。
-3. 子代理调研目录与运行时模型，提出 edges 镜像树：`extensions/clis/review-app/` → `assets/review-page/{index.html,review.js,review.css}` → `review-page.ts` 注入。
+3. 子代理调研目录与运行时模型，提出 edges 镜像树：`extensions/cli/review-app/` → `assets/review-page/{index.html,review.js,review.css}` → `review-page.ts` 注入。
 4. 开放三问：是否 commit 产物 / 单 HTML vs 三文件 / hash vs path。助手先给偏好推荐，后在「参考行业最佳范式」下又推一版——被纠正为瞎推理。
 5. 取证回合（executor，只引主源）：Playwright / Vitest UI / webpack-bundle-analyzer。
 
@@ -89,8 +89,8 @@
 - 推荐目录：
 
 ```
-extensions/clis/review-app/          # source
-extensions/clis/src/tasks/project/
+extensions/cli/review-app/          # source
+extensions/cli/src/tasks/project/
   assets/review-page/                # artifacts (gitignore)
   review-page.ts                     # inject
 ```
@@ -108,7 +108,7 @@ extensions/clis/src/tasks/project/
 【行动指南】
 
 - **若**实现 review-page / `/tasks/` 壳升级：  
-  **则**按 Q1–Q9 与取证后三项交付执行；源码放 `extensions/clis/review-app/`，产物进 gitignore 的 `assets/review-page/`，由 `review-page.ts` 注入 `#edges-review-payload`；导航用 hash（或 hash+query）。
+  **则**按 Q1–Q9 与取证后三项交付执行；源码放 `extensions/cli/review-app/`，产物进 gitignore 的 `assets/review-page/`，由 `review-page.ts` 注入 `#edges-review-payload`；导航用 hash（或 hash+query）。
 
 - **若**要扩 JSON 契约：  
   **则**扩展 `edges.tasks.grouped/v1`（items 可选 `doc`），勿新增平行 board schema；Schema 独立可复用，对齐 PR #124 / ADR 0022。

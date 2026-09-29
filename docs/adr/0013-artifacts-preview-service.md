@@ -15,7 +15,7 @@ Agent 产出的交互 HTML 需要人操作。例如 classifyTasks 的 Task Proje
 ## Decision
 
 - **目的：** 稳定的 artifacts 预览服务（短生命周期托管 + 真浏览器可开 URL）。聊天内嵌预览是绕开的不可靠路径，不是产品本身。
-- **语言：** TypeScript，与 `extensions/clis` 同栈。
+- **语言：** TypeScript，与 `extensions/cli` 同栈。
 - **v1 能力：** 上传 → URL → TTL 删除；只做静态托管。本轮不做服务端表单结果存储。
 - **部署：** 同一套服务跑在本机与已有 ECS。手机审阅必须用 ECS / 可达 URL，不得假定 localhost。
 - **Edges 接线：** `edges artifacts` 薄命令面——`init`/token 与本地配置（如 `~/.config/edges/artifacts.env`）；`publish`/`rm` 读配置。`from` 可选；有任务关联时只写 `{ type: "task", id, project }`（`id` 是 task stem），否则整段省略。`edges tasks project review-page` 仍只渲染（ADR 0012）。Skill 编排：渲染 → 发布 → 给人可达 URL。

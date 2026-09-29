@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 笔记入库与能力面
 
+- **CLI 目录改名：** 多命令 CLI 的代码目录改为单数 `extensions/cli`。npm 包名仍是 `edges-cli`，二进制仍是 `edges`，`pnpm --filter edges-cli` 和命令行为不变。
 - **笔记写给人审：** `conversation-to-notes` 技能（`extensions/skills/conversation-to-notes`）现在要求整理出来的笔记写给人审阅：白话完整句，例子与上下文要够独立读懂；密表放进补充说明；所学只写判断与边界；行动指南须带触发与步骤。该技能的 2.1.0 / 2.1.1 已写在技能 changelog 里，这里不再复述明细。
 - **任务只成草稿：** 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 完成标准（动作可选）；栏名用中文。与笔记 / 记忆技能分工；只成文，不落库。
 
@@ -34,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **按项目分组列出：** 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
 - **部署生成静态页：** 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy.yml` 会在整仓 pull 之后自动生成。
 - **修复部署引号：** 修复教学站部署流水线里读 token 时的引号错误，避免 Action 一启动就语法失败.
-- **/tasks/ 固定入口：** nginx 一次性配好后，打开 `http(s)://<host>/tasks/` 就是固定入口，始终反映 main 上的看板，和 `/teaching/` 在同一台机器上（见 ADR 0021）。第一次对外跑 `extensions/clis/deploy/setup-nginx-tasks.sh`。
+- **/tasks/ 固定入口：** nginx 一次性配好后，打开 `http(s)://<host>/tasks/` 就是固定入口，始终反映 main 上的看板，和 `/teaching/` 在同一台机器上（见 ADR 0021）。第一次对外跑 `extensions/cli/deploy/setup-nginx-tasks.sh`。
 - **拖拽不写回仓库：** `edges tasks project review-page` 仍然只负责渲染，本轮拖拽不会写回仓库。
 
 ### Artifacts 预览
@@ -80,7 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `shared-extensions/`：跨机器、跨 Agent 共享的个人 harness（skills、MCP 配置、plugins、hooks）。接入 Edges 的能力仍在 `extensions/`。整层发版：`VERSION` + `CHANGELOG.md` + tag `shared-extensions@`。
 - MIT 许可证。
 - README 增加「隐私与脱敏」节。
-- `extensions/clis/`：面向 agent 的 `edges-note` CLI（JSON stdout，复用 `bin/new-note`）。本地 agent 优先走它；MCP `new-note` 保留。
+- `extensions/cli/`：面向 agent 的 `edges-note` CLI（JSON stdout，复用 `bin/new-note`）。本地 agent 优先走它；MCP `new-note` 保留。
 - `pnpm skills:link`：把 `extensions/skills` 里每个 skill 以相对软链挂到 `.agents/skills`。
 - 项目级 `teach` skill / `knowledge/teaching/` 教学工作区。
 - 项目级 `.agents/skills` 增加 `grill-with-docs`：grilling 同时产出 ADR 与 glossary。

@@ -6,7 +6,7 @@ version: 1.0.0
 
 # edges note
 
-人和有 shell 的 Agent 共用 [`extensions/clis`](../../clis/README.md) 的 `edges note`。本 skill 只说明何时调用、怎么写对命令。Git / 落盘 / PR 在 CLI 里，不在本目录。
+人和有 shell 的 Agent 共用 [`extensions/cli`](../../cli/README.md) 的 `edges note`。本 skill 只说明何时调用、怎么写对命令。Git / 落盘 / PR 在 CLI 里，不在本目录。
 
 ## 什么时候用
 
