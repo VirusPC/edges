@@ -4,9 +4,11 @@ description: 目录实际是一套统一 edges 命令，复数名容易让人以
 metadata:
   edges-type: task
   edges-title: 把 extensions/clis 改名为 extensions/cli
-  edges-tasks-status: backlog
+  edges-tasks-status: todo
   edges-task-project: edges-cli-platform
-  edges-updated-at: "2026-09-29T14:59:14.465Z"
+  edges-updated-at: "2026-09-29T15:03:31.761Z"
+  edges-task-assignee: Coding Agent 专家
+  edges-task-assignee-id: ac913463-5bf6-4c16-adc0-900c61a8692d
 ---
 
 **背景：**
