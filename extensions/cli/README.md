@@ -2,6 +2,20 @@
 
 Multi-command Edges CLI. Humans and local agents share `edges`. Note ingest git lives in `src/note/utils/git`. npm `package.json` `"bin"` is the install hook for the `edges` binary, not a separate layer.
 
+## Consumption
+
+`edges-cli` is **not** published to the npm registry. `package.json` sets `"private": true` for that reason: this package stays in the repo and is not an install target on npm.
+
+The installable `edges` binary is the **local** `dist/` build. `"bin"` points at `./dist/index.js`. Produce that file with:
+
+```bash
+pnpm --filter edges-cli build
+```
+
+`prepack` runs the same `build`. A local `dist` binary exists only after `build` or `prepack` succeeds.
+
+Day-to-day use can stay on `tsx`, as in [Run](#run). After a successful local build, the `edges` binary comes from `dist/index.js`.
+
 ## Directory is the command tree
 
 - **File** = one command node: flags, after-help, `.action` (leaf) or register children (group)
@@ -33,7 +47,7 @@ pnpm --filter edges-cli exec tsx src/index.ts note \
   --json
 ```
 
-After `pnpm --filter edges-cli build`, the bin is `edges` (`dist/index.js`).
+Those examples use `tsx` and do not need a `dist/` build. The installed `edges` binary is the local `dist/` build in [Consumption](#consumption).
 
 ## `note` required flags
 
