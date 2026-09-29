@@ -79,9 +79,9 @@ jobs:
              fi
              pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...
              pnpm --filter tasks-review-app run build
-             test -s extensions/clis/src/tasks/project/assets/review-page/index.html
-             test -s extensions/clis/src/tasks/project/assets/review-page/review.js
-             test -s extensions/clis/src/tasks/project/assets/review-page/review.css
+             test -s extensions/cli/src/tasks/project/assets/review-page/index.html
+             test -s extensions/cli/src/tasks/project/assets/review-page/review.js
+             test -s extensions/cli/src/tasks/project/assets/review-page/review.css
              pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
                --out "$PWD/knowledge/tasks/_site/index.html"
              test -s knowledge/tasks/_site/index.html

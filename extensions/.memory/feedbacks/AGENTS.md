@@ -6,7 +6,7 @@
 > 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- [CLI 项目放 extensions/clis，不放仓库根](feedback_clis_under_extensions.md) — 新增或移动面向 agent 的 CLI 时：放 extensions/clis，禁止仓库根 clis/。
+- [CLI 项目放 extensions/cli，不放仓库根](feedback_cli_under_extensions.md) — 新增或移动面向 agent 的 CLI 时：放 extensions/cli，禁止仓库根 clis/。
 - [Codex 唤起 skill 用 $ 不是 /](feedback_codex_invoke_skill_with_dollar.md) — 在 Codex 里触发某个 skill 时用 $skill-name；/ 是斜杠命令。/skills 只列清单。不要把认不到 skill 当成没装上。
 - [禁止动词的 help 测例锚定命令行](feedback_help_forbid_verb_line_anchor.md) — 写 edges tasks --help 测例、禁止某个动词出现时：用 ^\s+verb\b 锚定命令列表行，不要用 /\bverb\b/，以免 after-help 的 “There is no X command” 被当成命令。
 - [接口层方案进 .memory，不进 docs](feedback_interface_plans_in_memory.md) — 写 extensions 层调研或技术方案时：进 .memory（reference/project），禁止放 extensions/docs 或 knowledge/projects，否则 ask 检索不到。

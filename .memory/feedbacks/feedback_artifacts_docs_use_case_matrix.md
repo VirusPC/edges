@@ -12,5 +12,5 @@ metadata:
 ---
 
 仓库里的 Artifacts 预览说明只写「能做什么 × 调用哪些能力」，不写某台机器当天的运行状态。
-**Why:** 2026-09-21 用户要求根 README、`extensions/clis/README.md` 与 `extensions/services/artifacts-preview/README.md` 补用例 × 能力矩阵，并禁止「ECS already migrated」「today the box is …」「verified-YYYY-MM-DD ops state」这类叙事。机器状态会过期，能力表不会。用户所述。
+**Why:** 2026-09-21 用户要求根 README、`extensions/cli/README.md` 与 `extensions/services/artifacts-preview/README.md` 补用例 × 能力矩阵，并禁止「ECS already migrated」「today the box is …」「verified-YYYY-MM-DD ops state」这类叙事。机器状态会过期，能力表不会。用户所述。
 **How to apply:** 改 artifacts 文档时用用例 × 能力表（CLI 动词、HTTP、review-page、Action / Skill）。可以写条件（例如 env 存在才 `install` 再 `restart`），不要写核实日期、当前盒上是否已迁、或公网入口当天是否可达。本轮没有 artifacts MCP；Skill 路径仍是 render → `publish` → 给 URL。

@@ -5,7 +5,7 @@ import { defineConfig } from "vitest/config";
 
 const outDir = path.resolve(
   __dirname,
-  "../../extensions/clis/src/tasks/project/assets/review-page",
+  "../../extensions/cli/src/tasks/project/assets/review-page",
 );
 
 export default defineConfig({

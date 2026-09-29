@@ -1,6 +1,6 @@
 ---
 name: project_task_doc_json_schema
-description: 改 Task frontmatter、CLI 的 Task 文档类型，或看板条目的 doc 时打开：字段真源是 extensions/clis/schemas/task-doc.v1.json（name、description、metadata、body）；不要自造轻量配置，也不要另开看板顶层 schema。决策见 docs/adr/0022。
+description: 改 Task frontmatter、CLI 的 Task 文档类型，或看板条目的 doc 时打开：字段真源是 extensions/cli/schemas/task-doc.v1.json（name、description、metadata、body）；不要自造轻量配置，也不要另开看板顶层 schema。决策见 docs/adr/0022。
 metadata:
   edges-title: Task Doc 字段真源是 JSON Schema
   edges-type: project
@@ -11,7 +11,7 @@ metadata:
   edges-updated-at: "2026-09-23T17:18:56+00:00"
 ---
 
-Task 文档的字段约定是独立可复用的 JSON Schema `extensions/clis/schemas/task-doc.v1.json`（`$id` 为 `edges.task-doc/v1`）：`name`、`description`、`metadata`、`body`。CLI frontmatter 与看板条目的 `doc` 都对齐它。`metadata` 允许未知键；`edges-tasks-status` 与 `edges-task-priority` 用既有枚举。`body` 是 Markdown。分组列表的可选 `items[].doc` 与审阅页载荷已按该 schema 接线。用户所述，grill 确认于 2026-09-23；接线于 2026-09-23 实现轮验证。
+Task 文档的字段约定是独立可复用的 JSON Schema `extensions/cli/schemas/task-doc.v1.json`（`$id` 为 `edges.task-doc/v1`）：`name`、`description`、`metadata`、`body`。CLI frontmatter 与看板条目的 `doc` 都对齐它。`metadata` 允许未知键；`edges-tasks-status` 与 `edges-task-priority` 用既有枚举。`body` 是 Markdown。分组列表的可选 `items[].doc` 与审阅页载荷已按该 schema 接线。用户所述，grill 确认于 2026-09-23；接线于 2026-09-23 实现轮验证。
 
 **Why:**
 自造轻量配置会和 frontmatter、看板 `doc`、以后的 LLM 结构化输出各维护一份。另开看板顶层 schema 会把 `edges.tasks.grouped/v1` 拆成两套对象。生成器若预编译 HTML，右栏就不再读 Markdown 正文。

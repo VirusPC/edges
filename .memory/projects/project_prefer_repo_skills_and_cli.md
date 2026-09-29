@@ -11,7 +11,7 @@ metadata:
   edges-updated-at: "2026-09-19T06:18:49+00:00"
 ---
 
-做 edges 仓内任务时，优先使用本仓库已有的 Skill（如 `.agents/skills` / `extensions/skills`）与 CLI（`edges` / `extensions/clis`），而不是手写等价流程或绕过能力面。
+做 edges 仓内任务时，优先使用本仓库已有的 Skill（如 `.agents/skills` / `extensions/skills`）与 CLI（`edges` / `extensions/cli`），而不是手写等价流程或绕过能力面。
 
 **Why:**
 与 ADR 0004（CLI+Skill+MCP）一致；保证契约单一、缺口可见、可补齐。

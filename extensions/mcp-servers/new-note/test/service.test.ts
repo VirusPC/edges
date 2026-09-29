@@ -6,7 +6,7 @@ import type { RuntimeConfig } from "../src/types.js";
 const config: RuntimeConfig = {
   repoPath: "/repo",
   baseBranch: "main",
-  cliEntry: "/repo/extensions/clis/dist/index.js",
+  cliEntry: "/repo/extensions/cli/dist/index.js",
   skillsPath: "/repo/extensions/skills",
   mode: "direct",
   dryRun: false,

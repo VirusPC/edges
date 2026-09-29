@@ -1,4 +1,4 @@
-import taskDocSchema from "../../../extensions/clis/schemas/task-doc.v1.json" with { type: "json" };
+import taskDocSchema from "../../../extensions/cli/schemas/task-doc.v1.json" with { type: "json" };
 
 const metadata = taskDocSchema.properties.metadata.properties;
 

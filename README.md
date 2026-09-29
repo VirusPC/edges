@@ -119,7 +119,7 @@ knowledge/projects/foo/report.md → knowledge/archive/projects/foo/report.md
 
 `evaluation/` 与 `observation/` 是系统实现旁的支撑目录：前者对照假设，后者记录野外现象。它们不进入 notes → edges → archive 主链；观测或评测若产生新洞察，仍须回到捕获入口。
 
-捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](extensions/clis/README.md) 的 `edges note …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](extensions/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
+捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](extensions/cli/README.md) 的 `edges note …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](extensions/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
 
 Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；`AGENTS.md` 和 `.memory/` 保存维护系统所需的运营规则、决策与经验；`knowledge/` 保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
 
@@ -152,7 +152,7 @@ pnpm skills:link
 npx skills@latest add VirusPC/edges/extensions/skills
 ```
 
-子路径不能省。单独使用 Agent CLI、MCP server 或 skills 的方式分别见 [`extensions/clis/README.md`](extensions/clis/README.md)、[`extensions/mcp-servers/README.md`](extensions/mcp-servers/README.md) 和 [`extensions/skills/README.md`](extensions/skills/README.md)。
+子路径不能省。单独使用 Agent CLI、MCP server 或 skills 的方式分别见 [`extensions/cli/README.md`](extensions/cli/README.md)、[`extensions/mcp-servers/README.md`](extensions/mcp-servers/README.md) 和 [`extensions/skills/README.md`](extensions/skills/README.md)。
 
 ### 开发与验证
 

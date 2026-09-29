@@ -19,7 +19,7 @@ metadata:
 **How to apply:**
 
 - **Scope TBD：** 先盘点并确定子命令集合，至少覆盖「找最近父节点」，再决定是否纳入遍历、挂载、剪枝、搬迁及节点增删改查等树操作。
-- **实现位置倾向：** 放进现有 `edges` CLI（likely `extensions/clis` / 对应 edges CLI package），不要新增并列入口或继续堆仓根脚本。
+- **实现位置倾向：** 放进现有 `edges` CLI（likely `extensions/cli` / 对应 edges CLI package），不要新增并列入口或继续堆仓根脚本。
 - 对照已有 project-memory skills/tools 与 `project-memory-init / remember / ask / doctor` 等入口，明确哪些只是调用层、哪些下沉为 CLI 的稳定契约；避免重复造树操作。
 - 与 backlog「reshape 底层拆树原子操作」对齐：底层原子能力与 CLI 命令边界分别定义，reshape 可组合 CLI 之下的实现，而不是把实现散落到 Skill。
 - **状态：** backlog；未指派。

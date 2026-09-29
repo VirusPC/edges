@@ -11,7 +11,7 @@ metadata:
   edges-updated-at: "2026-09-11T18:02:16+00:00"
 ---
 
-`new-note` MCP 的约束是：TypeScript + Node.js 编排，git 由 `edges note` 在 CLI 进程里跑，MCP 只 `execFile` 该 CLI。失败即停，返回机器可解析结果。不要改成 Python server，不要 in-process import `extensions/clis`，不要再 `execFile` 仓根脚本。
+`new-note` MCP 的约束是：TypeScript + Node.js 编排，git 由 `edges note` 在 CLI 进程里跑，MCP 只 `execFile` 该 CLI。失败即停，返回机器可解析结果。不要改成 Python server，不要 in-process import `extensions/cli`，不要再 `execFile` 仓根脚本。
 
 **Why:** 2026-02-19 的 ingest 把外部写入做成 MCP 工具 `new_note`。ADR-0004 把 git 收进 CLI，并规定 MCP 子进程调 CLI。参数数组调用避免注入。
 

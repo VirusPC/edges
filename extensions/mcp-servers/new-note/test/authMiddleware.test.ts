@@ -7,7 +7,7 @@ function makeConfig(authToken?: string): RuntimeConfig {
   return {
     repoPath: "/repo",
     baseBranch: "main",
-    cliEntry: "/repo/extensions/clis/dist/index.js",
+    cliEntry: "/repo/extensions/cli/dist/index.js",
     skillsPath: "/repo/extensions/skills",
     mode: "direct",
     dryRun: false,

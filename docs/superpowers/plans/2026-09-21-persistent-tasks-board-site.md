@@ -10,7 +10,7 @@
 
 **Tech Stack:** TypeScript, Node.js ≥20, existing `commander` + `runTasksCommand`, `node:test` + `tsx`, NodeNext ESM (relative imports end in `.js`). nginx snippet + bash setup (same one-time sudo pattern as artifacts `setup-nginx`). No Express. No new HTTP process. No embeddings. No browser automation in CI.
 
-**Spec:** `docs/adr/0021-persistent-tasks-board-site.md` (accepted 2026-09-21; extends ADR 0012; hard boundary vs ADR 0013). Glossary: `CONTEXT.md` terms **`/tasks/` 持久看板站**, **分组列表 schema（edges.tasks.grouped）**, **Task Project 审阅页（edges）**, **教学站点（/teaching/）**, **Artifacts 预览服务**, **edges tasks（CLI）**. Prior plans to mirror: `docs/superpowers/plans/2026-09-19-artifacts-preview-service.md`, `docs/superpowers/plans/2026-09-17-task-project-review-page.md`. Test runner: `.memory/projects` under extensions — `project_clis_node_test_glob.md`, `project_node_esm_ts_import_js.md`. Deploy memory: `.memory/projects/project_teach_site_rsync_push.md`. nginx naming: `.memory/feedbacks/feedback_artifacts_inject_teaching_only.md`. Changelog shape: `.memory/projects/project_repo_changelog.md`.
+**Spec:** `docs/adr/0021-persistent-tasks-board-site.md` (accepted 2026-09-21; extends ADR 0012; hard boundary vs ADR 0013). Glossary: `CONTEXT.md` terms **`/tasks/` 持久看板站**, **分组列表 schema（edges.tasks.grouped）**, **Task Project 审阅页（edges）**, **教学站点（/teaching/）**, **Artifacts 预览服务**, **edges tasks（CLI）**. Prior plans to mirror: `docs/superpowers/plans/2026-09-19-artifacts-preview-service.md`, `docs/superpowers/plans/2026-09-17-task-project-review-page.md`. Test runner: `.memory/projects` under extensions — `project_cli_node_test_glob.md`, `project_node_esm_ts_import_js.md`. Deploy memory: `.memory/projects/project_teach_site_rsync_push.md`. nginx naming: `.memory/feedbacks/feedback_artifacts_inject_teaching_only.md`. Changelog shape: `.memory/projects/project_repo_changelog.md`.
 
 ## Non-goals (do not implement; do not reopen)
 
@@ -54,30 +54,30 @@ These are already decided in ADR 0021 / CONTEXT. This plan does not re-grill the
 
 ## File map
 
-Verified against `origin/main` after ADR 0021 (`af7986c`). Command tree: `extensions/clis/src/tasks.ts` + `extensions/clis/src/tasks/list.ts` + `extensions/clis/src/tasks/utils/`. README rule: **file = one command node**. review-page already exists (`src/tasks/project/review-page.ts` + `src/tasks/utils/review-page.ts`). Deploy file: `.github/workflows/deploy.yml`. Artifacts nginx lives under `extensions/services/artifacts-preview/deploy/` and must stay `/teaching/`-only.
+Verified against `origin/main` after ADR 0021 (`af7986c`). Command tree: `extensions/cli/src/tasks.ts` + `extensions/cli/src/tasks/list.ts` + `extensions/cli/src/tasks/utils/`. README rule: **file = one command node**. review-page already exists (`src/tasks/project/review-page.ts` + `src/tasks/utils/review-page.ts`). Deploy file: `.github/workflows/deploy.yml`. Artifacts nginx lives under `extensions/services/artifacts-preview/deploy/` and must stay `/teaching/`-only.
 
 **Create — CLI grouped schema + map + generate**
 
-- `extensions/clis/src/tasks/utils/grouped.ts` — `GROUPED_LIST_SCHEMA`, types, `buildGroupedList`, `parseGroupedList`, `groupedListToReviewPageInput`, `listGroupedByProject` (read-only)
-- `extensions/clis/src/tasks/utils/generate-site.ts` — `generateTasksSite({ repoPath, outPath, env })` orchestrates list → map → `review-page --from -`
-- `extensions/clis/scripts/generate-tasks-site.ts` — box/CI entry: `--out` (default `knowledge/tasks/_site/index.html`), `EDGES_REPO` or walk up to a dir that contains `knowledge/tasks`
-- `extensions/clis/test/tasks/utils/grouped.test.ts` — schema shape + map
-- `extensions/clis/test/tasks/grouped-list.test.ts` — CLI `--group-by project` / filters / help
-- `extensions/clis/test/tasks/utils/generate-site.test.ts` — writes HTML that embeds review-page payload
+- `extensions/cli/src/tasks/utils/grouped.ts` — `GROUPED_LIST_SCHEMA`, types, `buildGroupedList`, `parseGroupedList`, `groupedListToReviewPageInput`, `listGroupedByProject` (read-only)
+- `extensions/cli/src/tasks/utils/generate-site.ts` — `generateTasksSite({ repoPath, outPath, env })` orchestrates list → map → `review-page --from -`
+- `extensions/cli/scripts/generate-tasks-site.ts` — box/CI entry: `--out` (default `knowledge/tasks/_site/index.html`), `EDGES_REPO` or walk up to a dir that contains `knowledge/tasks`
+- `extensions/cli/test/tasks/utils/grouped.test.ts` — schema shape + map
+- `extensions/cli/test/tasks/grouped-list.test.ts` — CLI `--group-by project` / filters / help
+- `extensions/cli/test/tasks/utils/generate-site.test.ts` — writes HTML that embeds review-page payload
 
 **Create — nginx / ops (separate from artifacts injector)**
 
-- `extensions/clis/deploy/nginx-tasks.conf` — `location = /tasks` 301 → `/tasks/`; `location /tasks/` alias to the generated `_site/`
-- `extensions/clis/deploy/setup-nginx-tasks.sh` — one-time sudo: install snippet, include into `teaching.conf` server blocks that already contain `/teaching/`, `nginx -t`, reload
-- `extensions/clis/deploy/inject_nginx_tasks_include.py` — sibling of artifacts injector; matches `/teaching/` only; looks for `edges-tasks.conf` (do **not** edit `inject_nginx_include.py` to dual-purpose or to recognize `/teach/`)
-- `extensions/clis/deploy/README.md` — short ops note: public URL, generate command, one-time nginx, PATH on ECS
+- `extensions/cli/deploy/nginx-tasks.conf` — `location = /tasks` 301 → `/tasks/`; `location /tasks/` alias to the generated `_site/`
+- `extensions/cli/deploy/setup-nginx-tasks.sh` — one-time sudo: install snippet, include into `teaching.conf` server blocks that already contain `/teaching/`, `nginx -t`, reload
+- `extensions/cli/deploy/inject_nginx_tasks_include.py` — sibling of artifacts injector; matches `/teaching/` only; looks for `edges-tasks.conf` (do **not** edit `inject_nginx_include.py` to dual-purpose or to recognize `/teach/`)
+- `extensions/cli/deploy/README.md` — short ops note: public URL, generate command, one-time nginx, PATH on ECS
 
 **Modify**
 
-- `extensions/clis/src/tasks/list.ts` — add `--group-by project` and `--format json`; help documents `edges.tasks.grouped/v1` and must **not** say `review-page`
-- `extensions/clis/src/tasks.ts` — `TASKS_AFTER_HELP` lists the new flags
-- `extensions/clis/src/tasks/utils/format.ts` — `TasksSuccess` gains optional `schema?`, `groups?`, `items?`
-- `extensions/clis/README.md` — list flags + generate pipeline + `/tasks/` pointer
+- `extensions/cli/src/tasks/list.ts` — add `--group-by project` and `--format json`; help documents `edges.tasks.grouped/v1` and must **not** say `review-page`
+- `extensions/cli/src/tasks.ts` — `TASKS_AFTER_HELP` lists the new flags
+- `extensions/cli/src/tasks/utils/format.ts` — `TasksSuccess` gains optional `schema?`, `groups?`, `items?`
+- `extensions/cli/README.md` — list flags + generate pipeline + `/tasks/` pointer
 - `.github/workflows/deploy.yml` — after `reset --hard origin/main`, generate the site (always; fail the SSH script if generate fails); hoist PATH/`nvm` so generate does not depend on the artifacts-env branch
 - `.gitignore` — `knowledge/tasks/_site/`
 - `CHANGELOG.md` `[Unreleased]` — module **任务看板与项目** (human Chinese + real command names; link ADR 0021 only as a reader pointer if needed — do not dump the ADR)
@@ -261,7 +261,7 @@ export async function generateTasksSite(input: {
 
 - `mkdir` the out parent (`knowledge/tasks/_site/`).
 - On list or review-page non-zero exit: throw `TasksError("BOARD_IO_ERROR", …)` so the box script fails visibly.
-- Script `extensions/clis/scripts/generate-tasks-site.ts`:
+- Script `extensions/cli/scripts/generate-tasks-site.ts`:
   - `--out <path>` optional; default `defaultTasksSiteOutPath(repoPath)`
   - `EDGES_REPO` or walk upward until `knowledge/tasks` exists
   - stdout JSON: `{ status, command: "generate-tasks-site", path, groupCount, itemCount }`
@@ -344,7 +344,7 @@ location /tasks/ {
 
 `setup-nginx-tasks.sh` (run with sudo, once):
 
-1. Resolve `SITE_DIR` from script location (`…/extensions/clis/deploy` → repo root → `knowledge/tasks/_site`) or `EDGES_REPO`.
+1. Resolve `SITE_DIR` from script location (`…/extensions/cli/deploy` → repo root → `knowledge/tasks/_site`) or `EDGES_REPO`.
 2. `install` the rendered snippet to `/etc/nginx/snippets/edges-tasks.conf`.
 3. Backup `TEACHING_CONF` (default `/etc/nginx/conf.d/teaching.conf`).
 4. Run `inject_nginx_tasks_include.py` to insert `include /etc/nginx/snippets/edges-tasks.conf;` into every `server {` that already contains `/teaching/`.
@@ -381,7 +381,7 @@ No live ECS / nginx test in CI. nginx is reviewed as committed snippet + setup s
 2. One-time on ECS (sudo), **after** leftover teach→teaching migration if still needed:
 
 ```bash
-sudo bash /home/cheng-dev/projects/edges/extensions/clis/deploy/setup-nginx-tasks.sh
+sudo bash /home/cheng-dev/projects/edges/extensions/cli/deploy/setup-nginx-tasks.sh
 ```
 
 3. Merge implementation to `main` → existing `deploy.yml` pull + generate.
@@ -402,12 +402,12 @@ If generate fails after merge, the Action fails; the previous `_site/index.html`
 ### Task 1: Grouped list schema + `list --group-by project`
 
 **Files:**
-- Create: `extensions/clis/src/tasks/utils/grouped.ts`
-- Create: `extensions/clis/test/tasks/utils/grouped.test.ts`
-- Create: `extensions/clis/test/tasks/grouped-list.test.ts`
-- Modify: `extensions/clis/src/tasks/list.ts`
-- Modify: `extensions/clis/src/tasks.ts`
-- Modify: `extensions/clis/src/tasks/utils/format.ts`
+- Create: `extensions/cli/src/tasks/utils/grouped.ts`
+- Create: `extensions/cli/test/tasks/utils/grouped.test.ts`
+- Create: `extensions/cli/test/tasks/grouped-list.test.ts`
+- Modify: `extensions/cli/src/tasks/list.ts`
+- Modify: `extensions/cli/src/tasks.ts`
+- Modify: `extensions/cli/src/tasks/utils/format.ts`
 
 **Interfaces:**
 - Consumes: `listTasks`, `listProjectIds`, `readProjectRecord`, `seedTitleFor`, `seedDescriptionFor`, existing `TaskListOpts`
@@ -465,7 +465,7 @@ test("parseGroupedList accepts envelope or raw schema and id or stem", () => {
 
 - [ ] **Step 3: Run tests to verify they fail**
 
-Run: `cd extensions/clis && node --test --import tsx './test/tasks/utils/grouped.test.ts' './test/tasks/grouped-list.test.ts'`
+Run: `cd extensions/cli && node --test --import tsx './test/tasks/utils/grouped.test.ts' './test/tasks/grouped-list.test.ts'`
 
 Expected: FAIL module not found / unknown option / help missing `--group-by`.
 
@@ -480,12 +480,12 @@ Run: same command as Step 3. Expected: PASS.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/grouped.ts \
-  extensions/clis/src/tasks/list.ts \
-  extensions/clis/src/tasks.ts \
-  extensions/clis/src/tasks/utils/format.ts \
-  extensions/clis/test/tasks/utils/grouped.test.ts \
-  extensions/clis/test/tasks/grouped-list.test.ts
+git add extensions/cli/src/tasks/utils/grouped.ts \
+  extensions/cli/src/tasks/list.ts \
+  extensions/cli/src/tasks.ts \
+  extensions/cli/src/tasks/utils/format.ts \
+  extensions/cli/test/tasks/utils/grouped.test.ts \
+  extensions/cli/test/tasks/grouped-list.test.ts
 git commit -m "feat(tasks): list --group-by project emits edges.tasks.grouped/v1"
 ```
 
@@ -496,11 +496,11 @@ Trailer: `Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>`
 ### Task 2: Thin map + generate helper
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/grouped.ts` (`groupedListToReviewPageInput`)
-- Create: `extensions/clis/src/tasks/utils/generate-site.ts`
-- Create: `extensions/clis/scripts/generate-tasks-site.ts`
-- Modify: `extensions/clis/test/tasks/utils/grouped.test.ts`
-- Create: `extensions/clis/test/tasks/utils/generate-site.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/grouped.ts` (`groupedListToReviewPageInput`)
+- Create: `extensions/cli/src/tasks/utils/generate-site.ts`
+- Create: `extensions/cli/scripts/generate-tasks-site.ts`
+- Modify: `extensions/cli/test/tasks/utils/grouped.test.ts`
+- Create: `extensions/cli/test/tasks/utils/generate-site.test.ts`
 
 **Interfaces:**
 - Consumes: `GroupedList`, `parseGroupedList`, existing `run()`, `parseReviewPageInput` contract (`groups` + `items` with `stem` / `current` / `suggested`)
@@ -540,7 +540,7 @@ Generate test: `edges tasks create` a card, call `generateTasksSite`, assert the
 - Modify: `.gitignore`
 
 **Interfaces:**
-- Consumes: `extensions/clis/scripts/generate-tasks-site.ts` from Task 2
+- Consumes: `extensions/cli/scripts/generate-tasks-site.ts` from Task 2
 - Produces: after `reset --hard origin/main`, a failed generate fails the job; PATH is set even when artifacts env is missing
 
 - [ ] **Step 1: Hoist PATH/nvm** out of the artifacts `if` in the remote SSH script (copy the existing exports verbatim).
@@ -555,10 +555,10 @@ No live SSH in CI for this task. Review the workflow diff against the locked scr
 ### Task 4: nginx snippet + one-time setup
 
 **Files:**
-- Create: `extensions/clis/deploy/nginx-tasks.conf`
-- Create: `extensions/clis/deploy/setup-nginx-tasks.sh`
-- Create: `extensions/clis/deploy/inject_nginx_tasks_include.py`
-- Create: `extensions/clis/deploy/README.md`
+- Create: `extensions/cli/deploy/nginx-tasks.conf`
+- Create: `extensions/cli/deploy/setup-nginx-tasks.sh`
+- Create: `extensions/cli/deploy/inject_nginx_tasks_include.py`
+- Create: `extensions/cli/deploy/README.md`
 
 **Interfaces:**
 - Produces: `/etc/nginx/snippets/edges-tasks.conf` with `/tasks/` → `__SITE_DIR__/`
@@ -574,10 +574,10 @@ No live SSH in CI for this task. Review the workflow diff against the locked scr
 ### Task 5: Docs + changelog
 
 **Files:**
-- Modify: `extensions/clis/README.md`
+- Modify: `extensions/cli/README.md`
 - Modify: `CHANGELOG.md` `[Unreleased]`
 - Modify: `CONTEXT.md` (`edges tasks（CLI）` — drop “约定中的” on `list --group-by project`)
-- Point ops note from clis README to `extensions/clis/deploy/README.md` and ADR 0021
+- Point ops note from cli README to `extensions/cli/deploy/README.md` and ADR 0021
 
 Root changelog (human Chinese + real command names; module **任务看板与项目**; do not dump ADR text):
 

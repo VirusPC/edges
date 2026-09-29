@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")")"
-CLI=(node --import tsx "$REPO_ROOT/extensions/clis/src/index.ts")
+CLI=(node --import tsx "$REPO_ROOT/extensions/cli/src/index.ts")
 
 ISOLATED="$(mktemp -d "${TMPDIR:-/tmp}/edges-mcp-note-XXXXXX")"
 cleanup() { rm -rf "$ISOLATED"; }

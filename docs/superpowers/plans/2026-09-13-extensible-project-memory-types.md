@@ -73,7 +73,7 @@
 - Any `types.json` / `types.yaml` / `.memory/registry*`
 - PROTOCOL type enumeration or a PROTOCOL closed set
 - Official seed rows for `docs` / `progress` / `tasks` / `research` / `reminder` / `scheduler`
-- `extensions/clis` / `edges` CLI verbs for add-type
+- `extensions/cli` / `edges` CLI verbs for add-type
 - MCP tool for add-type (same backlog as other project-memory scripts)
 - Edits under `knowledge/posts/`
 - `knowledge/tasks/` status moves or a merge of `tasks` Memory Type into the board

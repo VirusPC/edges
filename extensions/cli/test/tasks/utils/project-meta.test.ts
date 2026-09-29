@@ -90,7 +90,7 @@ test("render and parse round-trip title, description, and optional pointers", ()
   const withPointers = renderProjectAgents({
     title: "CLI",
     description: "edges CLI work",
-    pointers: "## Pointers\n\n- [readme](../../../extensions/clis/README.md)",
+    pointers: "## Pointers\n\n- [readme](../../../extensions/cli/README.md)",
   });
   const parsed = parseProjectAgents(withPointers);
   assert.equal(parsed.title, "CLI");

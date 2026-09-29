@@ -21,4 +21,4 @@ metadata:
 - AXI / `gh-axi`：CLI 是主界面；Skill 例子写成 `npx -y gh-axi …`。他们的 `bin/*.ts` 是 npm 入口，不是第三层。
 - Agent Skills 规范：已有包就 `npx`/`uvx`；命令难一次写对才把脚本放进 **skill 自己的 `scripts/`**，不是仓根 `bin/`。https://agentskills.io/skill-creation/using-scripts
 - obra/superpowers：Skill 是流程，落地调已有命令。
-- 本仓现状：`extensions/clis` 的 `edges note` 在进程内跑 git（`src/git`，`execFile('git', …)`）；MCP `new-note` 子进程调用该 CLI；`extensions/skills/edges-note` 只教何时如何调用。仓根 `bin/` 已删除。
+- 本仓现状：`extensions/cli` 的 `edges note` 在进程内跑 git（`src/git`，`execFile('git', …)`）；MCP `new-note` 子进程调用该 CLI；`extensions/skills/edges-note` 只教何时如何调用。仓根 `bin/` 已删除。
