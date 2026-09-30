@@ -5,10 +5,10 @@ metadata:
   edges-title: 仓库用根 CHANGELOG 和 v 标签发版
   edges-type: project
   edges-origin-session-id: bc-fac597fd-2b64-5779-8f6d-c1d20b4284d2
-  edges-agent-client: cursor
-  edges-username: cheng
-  edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: "2026-09-30T19:34:25+08:00"
+  edges-agent-client: codex
+  edges-username: Codex
+  edges-email: noreply@openai.com
+  edges-updated-at: "2026-09-30T19:36:20+08:00"
 ---
 
 Edges 仓库自己有一份根目录 `CHANGELOG.md`（Keep a Changelog）和 `vX.Y.Z` tag，版本号以 `package.json` 的 `version` 为准。这和对外技能的独立发版、`shared-extensions/` 的整层发版并行，不是把那些 changelog 抄到根上。根 `[Unreleased]` 只记读者扫「这个系统最近能做什么」时需要看到的仓库级能力，按功能模块分组，用好懂的完整中文来写；能力如果是命令，同一条里必须写出真实命令名。枚举和 flag 取值写仓库里的英文原值，不要改成中文意译。语气对齐 `[1.2.0]`：完整句子，不要把 schema 字段表或 flag 汤堆进一段。
