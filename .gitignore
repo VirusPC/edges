@@ -4,6 +4,9 @@
 .LSOverride
 ._*
 
+# Obsidian local workspace state
+.obsidian/workspace.json
+
 # Editor
 .idea/
 .vscode/
