@@ -11,44 +11,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- **完成标准可后补：** `conversation-to-tasks`：完成标准开卡时可选，可留到 `grill-with-docs` 再补；必填仅背景与目标。
-
-
-### 笔记入库与能力面
-
-- **CLI 不发到 npm：** `edges-cli` 不发布到 npm registry。`package.json` 的 `"private": true` 用来挡住发布。日常仍用 `pnpm --filter edges-cli exec tsx src/index.ts`；本地 `edges` 二进制来自 `dist/index.js`，要先让 `pnpm --filter edges-cli build` 成功（`prepack` 会跑同一套 build）。
-- **CLI 目录改名：** 多命令 CLI 的代码目录改为单数 `extensions/cli`。npm 包名仍是 `edges-cli`，二进制仍是 `edges`，`pnpm --filter edges-cli` 和命令行为不变。
-- **笔记写给人审：** `conversation-to-notes` 技能（`extensions/skills/conversation-to-notes`）现在要求整理出来的笔记写给人审阅：白话完整句，例子与上下文要够独立读懂；密表放进补充说明；所学只写判断与边界；行动指南须带触发与步骤。该技能的 2.1.0 / 2.1.1 已写在技能 changelog 里，这里不再复述明细。
-- **任务只成草稿：** 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 完成标准（动作可选）；栏名用中文。与笔记 / 记忆技能分工；只成文，不落库。
-
-### 文档与系统
-
-- **写明一键三件事：** 根 README 写明了系统设计目标：一键部署 Edges、一键接入 Agent 客户端、一键产出对外资产。仓库按这个方向收敛。
+## [1.3.0] - 2026-09-30
 
 ### 任务看板与项目
 
-- **窄屏能滚到详情：** 窄屏审阅页从页顶可以一直滚到 Details，点「回到看板」之后也能再滚回 Projects。任务锚定仍停在当前卡片上，并让开吸顶标题。
-- **标题配色与锚定：** `edges tasks project review-page` 和 `/tasks/` 上，三栏章节标题是 Projects、Tasks、Details。状态段标题是英文 Title Case，例如 Backlog、In Progress，点开的任务名留在 Details 下面。强色在顶栏：Edges 旁边是 Lucide `Layers2` 浅色图标块，顶栏本身是一条色带。章节标题是顶栏和页面背景之间的过渡色面，没有左侧色条。状态行贴着页面背景，仍是扁列表。窄屏项目下拉用弹出层锚在触发器上，打开后能切换项目。状态段标题比章节标题小一档。窄屏筛选入口是 Lucide `ListFilter` 图标。双击 Projects、Tasks、Details 或 Edges 会滚到那一节；「回到看板」滚到当前卡片，并让开吸顶的 Tasks 和状态标题。
-- **窄屏分段桌面一行：** 审阅页窄于 768px 时，项目收成一个下拉（例如「全部 · 95」），状态按 Backlog、In Progress、Done 这类英文标题分段纵向排开，只显示有卡片的状态且全部展开。筛选收进图标按钮，抽屉标题仍是「筛选」，右上角用 × 关掉。窄屏仍是项目、任务、详情接在同一页里往下滚；Projects、Tasks、Details 的标题吸在 Edges 下面，同一时间只钉住当前这一节，右侧用箭头图标收起，不是文字按钮。Backlog、In Progress 这些状态标题也用同一套标题：吸在 Tasks 下面，并且可以用箭头收起。窄屏把每一个状态段都收起时，这些标题紧挨成一列，中间不留深色空隙；还有一段展开时，卡片仍跟在自己的标题下面，段与段的间距保持原样。桌面状态列间距不变，Projects 的下拉和列表也不为这件事改间距。只有 Details 有「回到看板」，点了滚回任务区，不取消选中。宽屏把 Edges 和筛选合成一行，详情栏默认 220px，中栏更宽，分隔线仍可拖且中栏不会被拖没。卡片上的日期文件名默认收起。拖到左栏或「移到项目…」仍只改页内归属，复制导出 JSON 会带上这次改动。
-- **共用三栏审阅页：** `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个三栏审阅页：顶栏可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选；左侧点项目筛选，拖到项目上只改 project，再用「复制导出 JSON」贴回。中间的状态列只展示，右侧渲染当前条目的 Markdown 正文。页上的脚本在生成前由 `pnpm --filter tasks-review-app run build` 打好并内联进单份 HTML，构建产物不进 git。
-- **按项目分组列出：** 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
-- **部署生成静态页：** 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy.yml` 会在整仓 pull 之后自动生成。
-- **修复部署引号：** 修复教学站部署流水线里读 token 时的引号错误，避免 Action 一启动就语法失败.
-- **/tasks/ 固定入口：** nginx 一次性配好后，打开 `http(s)://<host>/tasks/` 就是固定入口，始终反映 main 上的看板，和 `/teaching/` 在同一台机器上（见 ADR 0021）。第一次对外跑 `extensions/cli/deploy/setup-nginx-tasks.sh`。
-- **拖拽不写回仓库：** `edges tasks project review-page` 仍然只负责渲染，本轮拖拽不会写回仓库。
+- **共用三栏审阅页：** `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个审阅页，按 Projects、Tasks、Details 展示项目、任务和正文。左侧点项目筛选，中间按状态展示任务，右侧渲染所选任务的 Markdown 正文；任务名显示在 Details 标题下面。卡片突出任务标题，带日期的文件标识默认收起。
+- **筛选与归属调整：** 可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选任务。把卡片拖到左侧项目，或使用「移到项目…」，只调整页内的项目归属；「复制导出 JSON」会带上调整结果，供审阅后回传。状态列只负责展示，页面操作不会直接写回仓库。
+- **桌面布局可调：** 宽屏把 Edges 顶栏和筛选控件放在同一行，详情栏默认宽 220px，为中间看板留出更多空间。两条分隔线可以拖动调整栏宽，中栏不会被拖没；桌面状态列间距保持不变。
+- **窄屏纵向浏览：** 页面窄于 768px 时，Projects、Tasks、Details 接在同一页中纵向滚动。项目列表收成显示数量的下拉框，弹出层锚在触发器上；筛选收进 Lucide `ListFilter` 图标按钮，抽屉标题为「筛选」，右上角用 × 关闭。任务按 Backlog、In Progress、Done 等英文状态标题分段，空状态不显示，有卡片的状态默认展开。
+- **分段吸顶与折叠：** 窄屏当前章节标题吸在 Edges 下方，状态标题吸在 Tasks 下方，两者均可通过箭头图标折叠。同一时间只吸顶当前章节；所有状态段收起时，标题紧挨成一列，不留深色空隙；仍有状态段展开时，保留卡片与段间距。项目下拉和项目列表的间距不受这次状态折叠调整影响。
+- **标题层级更清楚：** 顶栏使用色带，Edges 旁是 Lucide `Layers2` 浅色图标块。章节标题使用介于顶栏与页面背景之间的过渡色面，不加左侧色条；状态标题贴近页面背景，字号比章节标题小一档，保持扁平列表的层级。
+- **跳转与返回定位：** 双击 Projects、Tasks、Details 标题可滚到对应章节，双击 Edges 回到页顶。窄屏 Details 中的「回到看板」会滚到当前卡片、保留选中状态，并让开吸顶的 Tasks 和状态标题。修复窄屏滚动范围问题后，从页顶可以滚到详情，返回看板后也能再滚回 Projects。
+- **按项目分组列出：** 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板，需要时加 `--format json`。输出为稳定的 `edges.tasks.grouped/v1` 分组 JSON；原有筛选和排序先执行，再分组。这个输出与审阅页输入格式不同，部署生成器会完成转换。
+- **构建为单份页面：** 生成审阅页前，先用 `pnpm --filter tasks-review-app run build` 构建前端资源，随后由 `edges tasks project review-page` 将脚本和样式内联到一份 HTML 中；构建产物不进 git。`deploy.yml` 会在同步 main 后完成构建、格式转换和静态页生成，并修复了读取 Artifacts token 的引号错误，避免部署因语法错误中断。
+- **固定看板随部署更新：** nginx 首次配置完成后，`/tasks/` 与 `/teaching/` 在同一台机器上提供固定入口；看板随 main 的成功部署更新。首次配置使用 `extensions/cli/deploy/setup-nginx-tasks.sh`，后续部署自动生成页面。它是长期入口，不使用 Artifacts 临时链接的到期机制。
 
 ### Artifacts 预览
 
-- **setup-nginx 成功结果字段分开：** `edges artifacts server setup-nginx` 成功时，JSON 里的 `command` 仍是子命令名 `artifacts.server.setup-nginx`；要执行的 shell 字符串改到 `sudoCommand`。两个含义不再挤在同一个 `command` 上，`pnpm --filter edges-cli build` 可以完整通过。
-- **公网域名与标识：** 公网示例和 `edges artifacts init --base-url` 用 `https://edges.viruspc.tech`（`/health`、`/artifacts` 路径不变）。对这个地址做 `publish`（`POST /artifacts`）时，请求带固定的浏览器式 User-Agent：缺了它 Cloudflare 回 1010，带上则是 201。打开链接的 GET 通常不受影响。
-- **发布临时预览链接：** 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。本机先用 `edges artifacts init` 记下服务地址和共享 token，再用 `edges artifacts publish` 拿到公开链接；提前删用 `edges artifacts rm`。
-- **鉴权与可达地址：** 写接口要带这份共享 token；浏览器打开链接不用登录。手机审阅必须用能到达的 `BASE_URL`，不能假定 localhost。
-- **审阅页不负责发布：** `edges tasks project review-page` 仍然只负责渲染，不发布。要给人打开时，先渲染再 `publish`。
-- **同机安装与启停：** 在和 teaching 同一台机器上，用 `edges artifacts server install` 装好环境（不启动进程），再用 `start` 拉起服务。日常用 `stop` / `restart` 管进程，用 `status` 查看。一次性对外跑 `setup-nginx`。没有 `server init`。
-- **反代不另开端口：** 反代写进已有的 `teaching.conf`，必须带 `/teaching/`，不要另开公网端口。
-- **合并后重启服务：** 合并到 main 后，如果盒上已经有这份服务配置，`deploy.yml` 会在整仓 pull 之后重启服务。nginx 通常不用再跑。
+- **发布临时预览链接：** 可以把静态文件或目录上传成浏览器和手机可打开的 URL，到期自动删除。本机先用 `edges artifacts init --base-url <url> --token <server-token>` 保存服务地址并复用服务器的 token，再用 `edges artifacts publish` 发布，提前删除用 `edges artifacts rm`。审阅页先由 `edges tasks project review-page` 渲染，再单独发布。
+- **公网地址与鉴权：** 公网示例和 `edges artifacts init --base-url` 使用 `https://edges.viruspc.tech`，`/health`、`/artifacts` 路径不变。上传和删除需要共享 token，浏览器打开预览链接无需登录；给手机的地址必须从手机可达。客户端写请求带固定的浏览器式 User-Agent，以处理该公网入口对缺少此标识的 `POST /artifacts` 返回 Cloudflare 1010 的问题。
+- **安装与启停分开：** 在与教学站点相同的宿主上，用 `edges artifacts server install` 准备环境和服务，再用 `edges artifacts server start` 启动。日常通过 `stop` / `restart` 管进程、`status` 查看状态；`install` 不启动进程，也没有 `server init` 命令。
+- **复用现有反代：** 一次性运行 `edges artifacts server setup-nginx`，把反代写入已有的 `teaching.conf`；配置必须包含 `/teaching/`，不另开公网端口。后续常规部署不需要重复配置 nginx。
+- **部署后更新服务：** 合并到 main 后，若服务器已有 Artifacts 服务配置且 token 已设置，`deploy.yml` 会在同步 main 后执行 `edges artifacts server install` 和 `edges artifacts server restart`；缺少配置或仍使用占位 token 时跳过。
+- **修复 CLI 完整编译：** `edges artifacts server setup-nginx` 成功结果中的 `command` 保留子命令名 `artifacts.server.setup-nginx`，sudo shell 命令字符串放到 `sudoCommand`。修复两个含义共用字段的问题后，`pnpm --filter edges-cli build` 可以完整通过。
+
+### 笔记入库与能力面
+
+- **任务人审后落库：** 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`），从对话整理任务草稿，正文按背景 → 目标 → 动作 → 完成标准组织，使用中文栏名。背景和目标必填，动作和完成标准可选；完成标准可在 `grill-with-docs` 后补齐。通过 `edges tasks create` 或 `edges tasks update` 落库，可以在对话确认后写入，也可以写在独立分支上提 PR 审阅。
+- **CLI 目录改名：** 多命令 CLI 的代码目录从 `extensions/clis` 改为 `extensions/cli`，引用旧路径的本地脚本需要同步调整。npm 包名仍为 `edges-cli`，二进制仍为 `edges`，`pnpm --filter edges-cli` 和命令行为不变。
+- **明确本地 CLI 使用方式：** 文档明确 `edges-cli` 保持 `private`，不发布到 npm registry。日常可用 `pnpm --filter edges-cli exec tsx src/index.ts` 运行；本地 `edges` 二进制来自 `dist/index.js`，需先让 `pnpm --filter edges-cli build` 成功，`prepack` 会运行同一构建流程。
+
+### 文档与系统
+
+- **本地窗口状态不再入库：** `.obsidian/workspace.json` 已移出版本管理并加入忽略规则，Obsidian 的本地窗口布局不再随仓库提交共享。
 
 ## [1.2.0] - 2026-09-18
 
@@ -129,7 +124,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 办公文档（`.docx` / `.xlsx` / `.pptx`）入库。
 - 未公开的专利交底材料。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/VirusPC/edges/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/VirusPC/edges/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/releases/tag/v1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/v1.0.0
