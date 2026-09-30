@@ -182,19 +182,19 @@ function isSudoAuthFailure(text: string): boolean {
 
 export async function setupNginxArtifacts(options: ServerOpsDeps & {
   repoRoot?: string;
-}): Promise<{ applied: boolean; sudo: boolean; command: string }> {
+}): Promise<{ applied: boolean; sudo: boolean; sudoCommand: string }> {
   const env = options.env;
   const run = options.runCommand ?? defaultRunCommand;
   const repoRoot = options.repoRoot?.trim() || resolveRepoRoot(env);
   const script = path.join(artifactsDeployDir(repoRoot), "setup-nginx-artifacts.sh");
-  const command = `sudo bash ${shellSingleQuote(script)}`;
+  const sudoCommand = `sudo bash ${shellSingleQuote(script)}`;
   const uid = (options.getUid ?? (() => process.getuid?.() ?? 1000))();
   const needsRoot = () =>
     new ArtifactsError(
       "UNKNOWN_ERROR",
       [
         "setup-nginx needs root to write /etc/nginx/conf.d/teaching.conf (does not change /teaching/).",
-        `Run: ${command}`,
+        `Run: ${sudoCommand}`,
       ].join(" "),
     );
 
@@ -206,13 +206,13 @@ export async function setupNginxArtifacts(options: ServerOpsDeps & {
         result.stderr.trim() || result.stdout.trim() || "setup-nginx-artifacts.sh failed",
       );
     }
-    return { applied: true, sudo: false, command };
+    return { applied: true, sudo: false, sudoCommand };
   }
 
   try {
     const escalated = await run("sudo", ["-n", "bash", script], { env });
     if (escalated.exitCode === 0) {
-      return { applied: true, sudo: true, command };
+      return { applied: true, sudo: true, sudoCommand };
     }
     const detail = escalated.stderr.trim() || escalated.stdout.trim();
     if (!detail || isSudoAuthFailure(detail)) {
