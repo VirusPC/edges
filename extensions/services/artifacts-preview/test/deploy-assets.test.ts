@@ -31,7 +31,7 @@ test("deploy nginx include proxies /health, POST /artifacts, and /artifacts/ wit
 test("deploy env example has placeholders only and binds loopback", async () => {
   const env = await readDeploy("artifacts.env.example");
   assert.match(env, /^EDGES_ARTIFACTS_TOKEN=replace-with-shared-token$/m);
-  assert.match(env, /^EDGES_ARTIFACTS_BASE_URL=http:\/\/182\.92\.131\.89$/m);
+  assert.match(env, /^EDGES_ARTIFACTS_BASE_URL=https:\/\/edges\.viruspc\.tech$/m);
   assert.match(env, /^EDGES_ARTIFACTS_HOST=127\.0\.0\.1$/m);
   assert.match(env, /^EDGES_ARTIFACTS_PORT=8787$/m);
   assert.doesNotMatch(env, /EDGES_ARTIFACTS_TOKEN=[0-9a-f]{32,}/i);
@@ -51,7 +51,7 @@ test("README is CLI-first and documents the locked server surface", async () => 
   assert.match(readme, /edges artifacts server start/);
   assert.match(readme, /edges artifacts server setup-nginx/);
   assert.match(readme, /edges artifacts server status/);
-  assert.match(readme, /edges artifacts init --base-url http:\/\/182\.92\.131\.89 --token/);
+  assert.match(readme, /edges artifacts init --base-url https:\/\/edges\.viruspc\.tech --token/);
   assert.match(readme, /install --force/);
   assert.match(readme, /server restart/);
   assert.doesNotMatch(readme, /edges artifacts server init/);

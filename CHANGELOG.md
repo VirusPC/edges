@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-09-30
+
 ### Changed
 
 - **完成标准可后补：** `conversation-to-tasks`：完成标准开卡时可选，可留到 `grill-with-docs` 再补；必填仅背景与目标。
@@ -21,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CLI 不发到 npm：** `edges-cli` 不发布到 npm registry。`package.json` 的 `"private": true` 用来挡住发布。日常仍用 `pnpm --filter edges-cli exec tsx src/index.ts`；本地 `edges` 二进制来自 `dist/index.js`，要先让 `pnpm --filter edges-cli build` 成功（`prepack` 会跑同一套 build）。
 - **CLI 目录改名：** 多命令 CLI 的代码目录改为单数 `extensions/cli`。npm 包名仍是 `edges-cli`，二进制仍是 `edges`，`pnpm --filter edges-cli` 和命令行为不变。
 - **笔记写给人审：** `conversation-to-notes` 技能（`extensions/skills/conversation-to-notes`）现在要求整理出来的笔记写给人审阅：白话完整句，例子与上下文要够独立读懂；密表放进补充说明；所学只写判断与边界；行动指南须带触发与步骤。该技能的 2.1.0 / 2.1.1 已写在技能 changelog 里，这里不再复述明细。
-- **任务只成草稿：** 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 完成标准（动作可选）；栏名用中文。与笔记 / 记忆技能分工；只成文，不落库。
+- **任务人审后落库：** 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 动作 → 完成标准（后两栏可选）；栏名用中文。与笔记 / 记忆技能分工，通过 `edges tasks create` 或 `edges tasks update` 落库；可以在对话确认后写入，也可以写在独立分支上提 PR 审阅。
 
 ### 文档与系统
 
@@ -129,7 +131,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 办公文档（`.docx` / `.xlsx` / `.pptx`）入库。
 - 未公开的专利交底材料。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/VirusPC/edges/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/VirusPC/edges/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/releases/tag/v1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/v1.0.0
