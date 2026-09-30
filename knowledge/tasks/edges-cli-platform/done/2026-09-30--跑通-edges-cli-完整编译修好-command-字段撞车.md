@@ -4,9 +4,9 @@ description: 拆开装 nginx 结果里两个都叫 command 的字段，让 pnpm 
 metadata:
   edges-type: task
   edges-title: 跑通 edges-cli 完整编译（修好 command 字段撞车）
-  edges-tasks-status: todo
+  edges-tasks-status: done
   edges-task-project: edges-cli-platform
-  edges-updated-at: "2026-09-29T17:50:40.644Z"
+  edges-updated-at: "2026-09-30T09:32:38.023Z"
   edges-task-assignee: Coding Agent 专家
   edges-task-assignee-id: ac913463-5bf6-4c16-adc0-900c61a8692d
 ---
@@ -21,5 +21,5 @@ metadata:
 把两个 command 改成不同名字，相关测试跟着改。
 
 **完成标准：**
-- [ ] pnpm --filter edges-cli build 通过
-- [ ] 装 nginx 成功结果里两种含义不再共用同一个字段名
+- [x] pnpm --filter edges-cli build 通过
+- [x] 装 nginx 成功结果里两种含义不再共用同一个字段名
