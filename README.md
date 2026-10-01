@@ -101,7 +101,7 @@ knowledge/projects/foo/report.md → knowledge/archive/projects/foo/report.md
 
 ## 系统实现
 
-支撑知识闭环的六个核心思想：
+支撑知识闭环的七个核心思想：
 
 - **闭环复利**：知识指导行动，反馈回到捕获入口，持续改善知识与系统。
 - **递归维护**：系统一解决领域问题，系统二支撑、维护和改进它；维护系统自身也可成为维护对象。
@@ -109,6 +109,7 @@ knowledge/projects/foo/report.md → knowledge/archive/projects/foo/report.md
 - **树图结合**：树组织作用域与归属，交叉引用形成图，公共能力跨层复用。
 - **文件为本**：以文件系统承载记忆，保持可读、可编辑、可迁移。
 - **Git 原生管理**：用 Git 的跟踪、忽略与版本机制管理记忆；例如 user memory 通过 `.gitignore` 不随 Git 提交与共享，同时仍属于本层记忆。
+- **任意输入、统一转化、多种输出**：以统一的知识模型承接不同来源与形态的输入，按消费场景转化为多种输出，贯通沉淀、转化与消费的全流程。
 
 这些原则指导系统演进；Project Memory 已支持分层递归，整仓目录重构仍待落地。术语定义见 [CONTEXT.md](CONTEXT.md)。
 
