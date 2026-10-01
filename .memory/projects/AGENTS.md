@@ -22,6 +22,7 @@
 - [edges tasks 本轮只做 CLI](project_edges_tasks_cli.md) — 本轮 edges tasks 看板操作只做 CLI（list/get/create/update/status + 只读 runs/run-messages）；Skill 与 MCP 后做同一契约。决策见 ADR 0005。
 - [可扩展 Memory Type：LAYOUT 登记，不另开注册表](project_extensible_memory_types.md) — 可扩展 Memory Type：扩展面只在 LAYOUT，用 project-memory-add-type 登记；官方种子仍是六类。决策见 docs/adr/0006-extensible-project-memory-types.md。
 - [前端图标默认 Lucide](project_frontend_icon_set.md) — 改审阅壳或后续前端图标时打开：默认 Lucide（按需、可调 size/color/stroke）。同一产品不混搭。tasks-review 折叠用 ChevronDown/ChevronRight，筛选关闭用 X，不要可见文字收起/展开/关闭。正文在 knowledge/notes/2026-09-25--前端图标选型.md。
+- [Git 管理记忆的版本与共享范围](project_git_memory_management.md) — 概括 Edges 核心思想时：Git 管理还包括跟踪与忽略规则，例如 user memory 通过 gitignore 不随 Git 提交与共享；不能只解释成版本历史、分支和回滚。
 - [idea→task→专家→Cloud Agent→改状态](project_idea_todo_expert_cloud_loop.md) — 工作流：idea 记到 knowledge/tasks（Task 记录员）→ 有空时专家 Agent 细聊 → Cursor Cloud Agent 开发 → 开发完改 Task 状态
 - [v1 Langfuse 用官方 docker compose](project_langfuse_docker_compose.md) — 选自托管 Langfuse 的 v1 编排、或有人提出上 Kubernetes 时打开：用官方 docker compose（文档里的 Postgres + Langfuse 栈及其官方依赖），不用 k8s；本仓不提交带密钥的 compose。决策见 docs/adr/0016-langfuse-docker-compose.md。
 - [自部署 Langfuse 与 Observation 产品卡分开](project_langfuse_infra_vs_observation_product.md) — 改自部署 Langfuse 卡、知识库 Observation 系统、或想把两者并成一条时打开：前者只做实例部署/运维/鉴权/备份；后者是 traces/logs/dashboard 产品语义。v1 验收先 UI 再 1–2 个客户端（ADR 0020）；更广接线留产品卡。决策见 docs/adr/0015-langfuse-infra-vs-observation-product.md。
@@ -39,7 +40,8 @@
 - [仓库用根 CHANGELOG 和 v 标签发版](project_repo_changelog.md) — 仓库发版先提 PR，合并后给 main 的合并提交打 tag 并发布。写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 v 标签。Unreleased 的 ### 用功能模块原名（如笔记入库与能力面、文档与系统、任务看板与项目、Artifacts 预览），不要改成「模块：摘要」或只留摘要；每条前面写成 `- **小标题：** 正文`，小标题白话摘要，正文不因精简文风大段删实现说明（示例 commit a80d1b0）。用人话写清「现在能做什么」，同一条里立刻给出真实命令名；对照 [1.2.0] 的完整句，不要堆 schema 字段表。枚举写仓库英文原值（优先级是 urgent/high/medium/low/none）。不要摊成扁平长列表，也不要把决策/术语/计划逐条写进去。 新版本不留 Changed 等未按模块归类的兜底小节；切版时检查重复、条目顺序与已落地范围。
 - [审阅页侧栏筛选用 design A（选中染色 + 未选变淡）](project_review_page_sidebar_filter_design_a.md) — 改审阅页左栏项目筛选外观时打开：选中用 accent 实线边加面板底；未选中 opacity 0.6（hover 拉回）；拖过时外扩 outline，须和选中边叠得开。类写在 ProjectColumn，不改点击或拖放。用户 2026-09-17 选定 design A。
 - [根硬约束只留聚光灯、脱敏与 git](project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
-- [根 README 以知识闭环为唯一主线](project_root_readme_direction.md) — 设计或修改根 README 时：从投资视角解释知识管理、分层 Agent Memory 与知识闭环，用一张图串联认知资本、Edge、收益、风险、流动性和反馈再投资。
+- [根 README 以知识闭环为唯一主线](project_root_readme_direction.md) — 设计或修改根 README 时：个人 RSI 是当前实践，知识闭环是主线，四视角七思想保持；通用模型的根可面向个人、团队、公司等主体，其维护空间承载系统二。
+- [系统一／系统二按作用域建模，区分 harness 层级与自进化](project_scoped_systems_and_harness.md) — 讨论根、作用域或 RSI 时：根可面向任意选定主体或系统，维护空间承载系统二；个人 RSI 是当前实践，角色随作用域变化，不预设唯一绝对根或固定组织层级。
 - [v1 自托管 Langfuse 落在物理机 minigtr](project_self_hosted_langfuse_on_minigtr.md) — 改自托管 Langfuse 的 v1 宿主、或默认往阿里云/云 VPS 上放时打开：宿主是物理机 minigtr，按多数时候在线的小型服务器运维；双系统仍在但 Windows 不是日常路径。不是阿里云或其它云 VPS。访问面见 ADR 0017。决策见 docs/adr/0014-self-hosted-langfuse-on-minigtr.md。
 - [跨机器跨 Agent 的 harness 放 shared-extensions](project_shared_extensions.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。
 - [系统设计目标：三件事尽量一键](project_system_one_click_deploy_ingest_output.md) — 改根 README 的系统实现、或讨论 Edges 产品方向时打开：设计目标是一键部署底座、一键接入 Agent 客户端、一键产出对外资产；这是方向，仓库按这个方向收敛。不要另开顶级章节，也不要用它取代知识闭环主线。
