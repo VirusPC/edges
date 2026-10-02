@@ -4,12 +4,12 @@ description: 待读文章：Harness Playbook（Stencil）
 metadata:
   edges-type: task
   edges-title: 待读 Harness Playbook
-  edges-tasks-status: todo
+  edges-tasks-status: done
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: Task 记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-28T09:29:50.254Z"
+  edges-updated-at: "2026-09-28T09:33:32.258Z"
   edges-task-project: agent-clients-ux
   edges-task-assignee: Notes记录员
   edges-task-assignee-id: 8a5a84ab-e6ef-420c-81c5-979186cc9630
