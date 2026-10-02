@@ -137,7 +137,16 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 
 用户明确了结构：当前先保留原 `skills` 与 `agent_skills` 两种 type，归入统一的 `skills/` 容器；每个 type 保留自己的 `AGENTS.md`，最外层作用域入口直接引用这两份类型入口，与 Memory 一样组织。类型集合仍可扩展，不合并成单一 type，也不另建 `skills/AGENTS.md` 总入口。
 
-以下下层目录暂沿用原类型名表达迁移映射；外层 `skills` 是容器，内层 `skills` 是原本地方法类型：
+用户指出旧 `skills` / `agent_skills` 命名不能表达两类的本质区别，类型命名重新讨论；两类的组织与维护契约不变。当前命名候选如下，尚未确认或实施：
+
+| 旧类型标识 | 推荐新名 | 区别 |
+|---|---|---|
+| `skills` | `managed`（受管技能） | Project Memory 沉淀与维护正文及索引 |
+| `agent_skills` | `referenced`（引用技能） | Project Memory 仅维护索引，原位正文由原有机制维护 |
+
+对应候选入口为 `.edges/skills/managed/AGENTS.md` 与 `.edges/skills/referenced/AGENTS.md`，仍由最外层直接引用。名称表达正文维护关系，不按作者、格式、物理位置或安装状态分类：原位技能也可能是本仓自行编写，受管方法也可以被安装。
+
+以下暂以旧类型标识展示既有两类及迁移关系，不代表旧名称已被接受为目标命名；新名称确认后统一更新目录、类型标识、参数与迁移映射：
 
 ```text
 <scope>/
