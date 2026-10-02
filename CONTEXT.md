@@ -168,8 +168,8 @@ _避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成�
 以 `edges` 为名的命令行界面（含 `note`、`tasks`、`artifacts` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
 _避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
 
-**Skill（调用说明）**：
-教 Agent 何时、如何调用能力面的说明性能力包：有 shell 则调 CLI，无 shell 则调作为对等能力面入口的 MCP；不承载 git 或入库实现。
+**Skill（Edges 接入语境）**：
+用于接入 Edges、教 Agent 何时及如何调用能力面的说明性能力包：有 shell 则调 CLI，无 shell 则调作为对等能力面入口的 MCP；不承载 git 或入库实现。
 _避免使用_：实现脚本目录、仓根 `bin/` 封装、业务逻辑真源
 
 **MCP（Edges）**：
