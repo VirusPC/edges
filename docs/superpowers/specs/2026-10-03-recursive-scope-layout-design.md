@@ -1,6 +1,6 @@
 # 递归作用域目录与迁移设计
 
-日期：2026-10-03。状态：供整体审阅；尚未执行目录迁移或修改运行时。
+日期：2026-10-03。状态：用户已整体确认目标目录；尚未执行目录迁移或修改运行时。
 
 ## 目标与设计边界
 
@@ -8,7 +8,7 @@
 
 本设计区分三件事：目录由谁拥有、在该作用域承担什么职责、其组织约定能否复用。一个可复用模块不因此成为每层必建目录，一个源码目录也不因此成为独立责任作用域。
 
-已确认的取舍见 [ADR 0024](../../adr/0024-scope-first-content-ownership.md)。本方案对剩余布局细节采用以下具体落点供整体审阅：维护知识使用 `memory/`，技能使用 `skills/<type>/` 继续分类，不另建容器总入口，由作用域入口跨目录层级直接引用各 type；迁移 Skill 命名为 `project-memory-migrate`。
+已确认的取舍见 [ADR 0024](../../adr/0024-scope-first-content-ownership.md)。已确认的目标布局采用以下具体落点：维护知识使用 `memory/`，技能使用 `skills/<type>/` 继续分类，不另建容器总入口，由作用域入口跨目录层级直接引用各 type；迁移 Skill 暂名为 `project-memory-migrate`。
 
 本次不拆 Git 仓库，不部署观测后端，不将所有模块改造成 Memory Type，不建立全局 JSON/YAML 类型注册表，也不启用定期目录 review 自动任务。
 
@@ -55,11 +55,21 @@
 edges/
 ├── AGENTS.md
 ├── .edges/
-│   ├── memory/
-│   ├── skills/
-│   ├── tasks/
-│   ├── evaluation/
-│   └── observation/
+│   ├── memory/                         # 维护知识；各 type 按需建立
+│   │   ├── projects/AGENTS.md          # 背景、决策与约定
+│   │   ├── feedbacks/AGENTS.md         # 纠正与反馈
+│   │   ├── references/AGENTS.md        # 资料指针
+│   │   ├── users/AGENTS.md             # 索引与正文均 gitignore
+│   │   └── <其他 type>/AGENTS.md
+│   ├── skills/                         # 技能容器，无必经总入口
+│   │   ├── managed/
+│   │   │   ├── AGENTS.md
+│   │   │   └── <name>/SKILL.md
+│   │   ├── referenced/AGENTS.md        # 指向原位技能正文
+│   │   └── <其他 type>/AGENTS.md
+│   ├── tasks/AGENTS.md                 # 根作用域维护任务
+│   ├── evaluation/AGENTS.md            # 保留评测模块内容契约
+│   └── observation/README.md           # 当前观测模块说明
 ├── knowledge/
 │   ├── notes/
 │   ├── edges/
@@ -244,4 +254,4 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 - 新工具仅支持新布局，旧路径不会被常规写入重新创建。
 - 教学与任务发布链、相关构建和评测路径通过针对性验证；`knowledge/posts/` 无变更。
 
-整体审阅确认后编写分步实施计划。当前文档记录设计与交付要求，不表示迁移 Skill 或新目录运行时已经实现。
+用户已整体确认上述目标目录。后续编写分步实施计划，核对逐项任务与局部记忆的归属映射，再实施工具升级和迁移；目录确认不表示这些工作已经完成。当前文档记录设计与交付要求，迁移 Skill 和新目录运行时均尚未实现。
