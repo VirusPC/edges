@@ -10,6 +10,8 @@
 
 已确认的取舍见 [ADR 0024](../../adr/0024-scope-first-content-ownership.md)。已确认的目标布局采用以下具体落点：维护知识使用 `memory/`，技能使用 `skills/<type>/` 继续分类，不另建容器总入口，由作用域入口跨目录层级直接引用各 type；迁移 Skill 暂名为 `project-memory-migrate`。
 
+自身维护空间的默认目录采用 `.harness/`，以支撑、维护和改进的职责命名，适用于个人、Agent、团队等主体。Edges 保留为系统与工具名称；系统二表示相对职责，Agent Harness 表示 Agent 的支撑机制，目录名称不将两者等同。共享实现和工具约定文档按原有边界接入。
+
 本次不拆 Git 仓库，不部署观测后端，不将所有模块改造成 Memory Type，不建立全局 JSON/YAML 类型注册表，也不启用定期目录 review 自动任务。
 
 ## 通用规则与按需扩展
@@ -30,12 +32,12 @@
 
 推荐集合保持开放，其他作用域也可按需接入评测、观测或自己的扩展模块。模块采用与模块内部的 type 选择分开：选用模块后，按该模块自己的契约组织内容与入口；只有采用 `memory`、`skills` 后，才涉及下文的类型选择。模块推荐不把任务看板或评测工程的初始化交给 Project Memory，也不新增统一模块安装机制。
 
-以下是通用形状示意，未采用的模块不创建空目录；`.edges/` 的“默认”指维护材料的默认落点：
+以下是通用形状示意，未采用的模块不创建空目录；`.harness/` 的“默认”指维护材料的默认落点：
 
 ```text
 <scope>/
 ├── AGENTS.md
-├── .edges/                     # 本作用域默认维护目录，按需要建立
+├── .harness/                   # 本作用域默认维护目录，按需要建立
 │   ├── memory/<type>/          # 维护知识；类型开放
 │   ├── skills/<type>/          # 技能容器下按类型组织，按需扩展
 │   ├── tasks/                  # 可选的维护任务，保留 Task/Run 契约
@@ -44,10 +46,10 @@
 ```
 
 - `AGENTS.md` 是人和 Agent 的入口，硬约束仍写在所属层入口的硬约束区块。
-- `.edges/` 与其中的 `memory/` 是物理分组，不自动形成新的作用域，也不建立必经的中转入口。
+- `.harness/` 与其中的 `memory/` 是物理分组，不自动形成新的作用域，也不建立必经的中转入口。
 - 仅在确有独立目标、决策和验证责任时再划分子作用域。记忆层保持稀疏，可以跨过普通目录。
 - `AGENTS.md` 可跨文件系统层级直接引用目标入口；目录树组织存放与归属，入口引用图组织发现路径，两者不要求逐层对应。增加物理分类或总览文件，不自动增加必经检索跳数。
-- 领域任务位于所属作用域的 `tasks/`；维护该作用域的任务位于其 `.edges/tasks/`。Task Project 是看板分组，不自动成为项目作用域。
+- 领域任务位于所属作用域的 `tasks/`；维护该作用域的任务位于其 `.harness/tasks/`。Task Project 是看板分组，不自动成为项目作用域。
 - 模块可以具有作用域特有的职责，也可以在实践中提炼成可复用规范。定期目录 review 负责识别这种共性，当前只执行规范，不自动运行。
 - `CONTEXT.md`、`docs/adr/`、`docs/superpowers/` 和宿主固定入口保留约定位置，按所属职责引用接入。目录名本身不固定系统一或系统二角色。
 
@@ -68,12 +70,12 @@
 
 ## Edges 当前实例的目标目录
 
-以下 `.edges/` 中的五个模块是 Edges 根实例承接现有内容的目标布局，不是所有作用域初始化时自动生成的模板。
+以下 `.harness/` 中的五个模块是 Edges 根实例承接现有内容的目标布局，不是所有作用域初始化时自动生成的模板。
 
 ```text
 edges/
 ├── AGENTS.md
-├── .edges/
+├── .harness/
 │   ├── memory/                         # 维护知识；各 type 按需建立
 │   │   ├── projects/AGENTS.md          # 背景、决策与约定
 │   │   ├── feedbacks/AGENTS.md         # 纠正与反馈
@@ -116,8 +118,8 @@ edges/
 
 | 当前目录 | 目标及迁移规则 |
 |---|---|
-| `.memory/` | 按类型映射到 `.edges/memory/` 与 `.edges/skills/`；旧 skills/agent_skills 分别映射为 managed/referenced，各有类型入口，统一放入技能容器；保留自定义类型和来源权限语义 |
-| `knowledge/tasks/` | 按目标与实际归属分流到根 `tasks/`、根 `.edges/tasks/` 或已确认子作用域；保留 Task/Run 关联，不按 Task Project 名称机械建作用域 |
+| `.memory/` | 按类型映射到 `.harness/memory/` 与 `.harness/skills/`；旧 skills/agent_skills 分别映射为 managed/referenced，各有类型入口，统一放入技能容器；保留自定义类型和来源权限语义 |
+| `knowledge/tasks/` | 按目标与实际归属分流到根 `tasks/`、根 `.harness/tasks/` 或已确认子作用域；保留 Task/Run 关联，不按 Task Project 名称机械建作用域 |
 | `knowledge/projects/` | 上移为 `projects/`；内部仅按实际需要建立独立作用域 |
 | `knowledge/teaching/` | 上移为 `teaching/`，保留主题内容、学习状态、附件与课页；同步更新首页、Topics、构建和发布路径 |
 | `knowledge/notes/` | 根知识位置保留；有明确子作用域归属的内容逐项映射 |
@@ -125,8 +127,8 @@ edges/
 | `knowledge/posts/` | 原路径保留；AI 不创建、修改、移动或删除其中任何文件 |
 | `knowledge/resources/` | 根共享附件位置保留；专属附件随明确的所属工作区组织 |
 | `knowledge/archive/` | 根知识归档位置保留；迁移记录保留旧路径与所属作用域，不能按新路径重写历史含义 |
-| `evaluation/` | 整模块迁至 `.edges/evaluation/`，覆盖执行器、用例、测试、报告、submodule 和局部维护材料；逐项更新相关路径 |
-| `observation/` | 迁至 `.edges/observation/`；当前仅有说明和占位，不包含后端部署 |
+| `evaluation/` | 整模块迁至 `.harness/evaluation/`，覆盖执行器、用例、测试、报告、submodule 和局部维护材料；逐项更新相关路径 |
+| `observation/` | 迁至 `.harness/observation/`；当前仅有说明和占位，不包含后端部署 |
 | `extensions/` | 保留实现位置；维护归根，原有局部记忆逐项处理 |
 | `shared-extensions/` | 保留实现位置与发版边界；维护归根，原有局部记忆逐项处理 |
 | `apps/` | 保留应用源码和构建关系；目录或包不自动成为独立作用域 |
@@ -148,13 +150,13 @@ edges/
 
 ```text
 作用域 AGENTS.md
-  → .edges/memory/<type>/AGENTS.md
+  → .harness/memory/<type>/AGENTS.md
     → 该类条目
 ```
 
-维护知识仍是两跳到正文。`memory/` 不另建必经索引，类型入口不承担独立作用域硬约束。技能同样在容器下继续分 type；作用域入口可跨过物理容器直接链接 `.edges/skills/<type>/AGENTS.md`，保留通向正文的两跳路径。本方案不另建 `.edges/skills/AGENTS.md` 总入口。类型划分不改变不同来源的维护边界，具体规则见下节。
+维护知识仍是两跳到正文。`memory/` 不另建必经索引，类型入口不承担独立作用域硬约束。技能同样在容器下继续分 type；作用域入口可跨过物理容器直接链接 `.harness/skills/<type>/AGENTS.md`，保留通向正文的两跳路径。本方案不另建 `.harness/skills/AGENTS.md` 总入口。类型划分不改变不同来源的维护边界，具体规则见下节。
 
-物理分组调整不要求废掉现有 Skills 类型适配。自定义普通类型或 Skill 格式类型保持类型身份及独立命名空间，默认在 `.edges/memory/<原复数目录>/` 保留；不能仅因格式相同就自动归入技能容器。
+物理分组调整不要求废掉现有 Skills 类型适配。自定义普通类型或 Skill 格式类型保持类型身份及独立命名空间，默认在 `.harness/memory/<原复数目录>/` 保留；不能仅因格式相同就自动归入技能容器。
 
 在 Project Memory 受管区块外使用 `AGENTS.md` 的共享文件扩展点，列出本层工作与模块入口：领域任务、维护任务、评测、观测及原位文档。各模块继续维护自己的业务索引；模块入口不自动登记为记忆子层。Task 可以沿自己的 Task Project 索引继续查找，不受普通记忆两跳规则约束。
 
@@ -173,14 +175,14 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 | `skills` | `managed`（受管技能） | Project Memory 沉淀与维护正文及索引 |
 | `agent_skills` | `referenced`（引用技能） | Project Memory 仅维护索引，原位正文由原有机制维护 |
 
-对应入口为 `.edges/skills/managed/AGENTS.md` 与 `.edges/skills/referenced/AGENTS.md`，仍由最外层直接引用。名称表达正文维护关系，不按作者、格式、物理位置或安装状态分类：原位技能也可能是本仓自行编写，受管方法也可以被安装。
+对应入口为 `.harness/skills/managed/AGENTS.md` 与 `.harness/skills/referenced/AGENTS.md`，仍由最外层直接引用。名称表达正文维护关系，不按作者、格式、物理位置或安装状态分类：原位技能也可能是本仓自行编写，受管方法也可以被安装。
 
 目标目录如下；两类内置类型的目录名固定为 `managed` 与 `referenced`，不额外追加复数后缀：
 
 ```text
 <scope>/
 ├── AGENTS.md
-├── .edges/
+├── .harness/
 │   ├── memory/<type>/AGENTS.md
 │   └── skills/
 │       ├── managed/
@@ -195,9 +197,9 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 
 ```text
 作用域 AGENTS.md
-  ├─→ .edges/memory/<type>/AGENTS.md ─→ 记忆正文
-  ├─→ .edges/skills/managed/AGENTS.md ─→ 本地技能正文
-  └─→ .edges/skills/referenced/AGENTS.md ─→ .agents/skills/ 原位正文
+  ├─→ .harness/memory/<type>/AGENTS.md ─→ 记忆正文
+  ├─→ .harness/skills/managed/AGENTS.md ─→ 本地技能正文
+  └─→ .harness/skills/referenced/AGENTS.md ─→ .agents/skills/ 原位正文
 ```
 
 `AGENTS.md` 的引用可以跨越物理目录层级，容器不需要逐层中转。两跳描述“作用域入口 → 类型入口 → 正文”的标准发现路径，不要求将所有后代平铺在根入口。真正的子作用域仍按稀疏层级登记；跨目录引用不改写归属、写权限或适用的祖先硬约束，也不把资料提供方的全部规则扩散到调用方。
@@ -217,8 +219,8 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 
 #### 迁移与实现边界
 
-- `.memory/skills/` 整体映射到 `.edges/skills/managed/`，类型标识由 `skills` 改为 `managed`，保留 Skill 正文及 scripts、references、assets 等附属文件。
-- `.memory/agent_skills/AGENTS.md` 映射到 `.edges/skills/referenced/AGENTS.md`，类型标识由 `agent_skills` 改为 `referenced`，保留只索引语义；原位安装正文不搬入容器。
+- `.memory/skills/` 整体映射到 `.harness/skills/managed/`，类型标识由 `skills` 改为 `managed`，保留 Skill 正文及 scripts、references、assets 等附属文件。
+- `.memory/agent_skills/AGENTS.md` 映射到 `.harness/skills/referenced/AGENTS.md`，类型标识由 `agent_skills` 改为 `referenced`，保留只索引语义；原位安装正文不搬入容器。
 - 最外层入口直接引用两份新类型入口；保留旧索引中的人工说明、非受管内容和已有自定义类型，按映射更新引用，不保留旧布局运行时回退。 受管记录中已有的类型标识元数据随映射更新，不要求给原本未记录类型的 Skill 补字段；原位引用正文及其元数据不改写。
 - 安装入口位置与外部真源保持。只有指向本次已迁本地正文的安装链接，可由迁移器按明确映射更新目标；不能沿范围外的安装目录链接扩大写入。日常 init、remember、doctor 不获得修改安装链接的权限。
 - 冲突按实际目标路径判断，同名但不同源不自动合并；重复迁移不覆盖新增内容。私有类型及索引保持忽略规则，不能仅从已跟踪文件枚举迁移对象。
@@ -240,7 +242,7 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 对用户明确指定范围内的实际记忆层操作，保留原作用域关系；不因文件夹层数创建新层，不沿跨作用域引用扩大写入范围，不进入另外的 Git 仓库或 submodule。
 
 1. 扫描文件系统中的实际记忆层、登记类型、内容、附属文件和索引，包括 ignored/untracked 的用户材料。仅使用 `git ls-files` 不足以完成迁移。
-2. 在写入前生成源到目标的完整映射，检查目标冲突、类型格式、链接和权限标志。确定性项目不逐项询问；无法可靠判断或存在不同内容冲突时，汇总问题后再执行，不能静默覆盖。
+2. 在写入前生成源到目标的完整映射，检查目标冲突、类型格式、链接和权限标志。已有 `.harness/` 须按实际结构与入口契约识别，不能仅凭目录同名就认定已迁移；历史 runa 记忆布局或其他用途的同名目录按目标冲突报告，不自动接管、合并或覆盖。确定性项目不逐项询问；无法可靠判断或存在不同内容冲突时，汇总问题后再执行，不能静默覆盖。
 3. 先适配私有类型的忽略规则，再迁移内容与元数据。用户记忆的正文、类型索引和迁移中产生的私有副本均不进入公共版本历史或公开报告。
 4. 本地技能按确认的 type 映射整目录迁移，包含 scripts、references、assets 等附属文件；旧技能索引按确定的入口结构重建，安装正文不改写。仅按明确映射修复指向本次已迁本地真源的安装链接，其余安装入口与外部真源保持。保留自定义类型的标识、格式、`index-only`、`gitignore` 等语义，不按推荐种子重新分类。
 5. 按新路径重建受管索引和可确定的引用，保留硬约束、区块外正文及业务索引。自然语言中的历史示例、外部路径和职责归属不能通过盲目替换修改。
