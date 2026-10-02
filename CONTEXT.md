@@ -172,6 +172,14 @@ _避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
 用于接入 Edges、教 Agent 何时及如何调用能力面的说明性能力包：有 shell 则调 CLI，无 shell 则调作为对等能力面入口的 MCP；不承载 git 或入库实现。
 _避免使用_：实现脚本目录、仓根 `bin/` 封装、业务逻辑真源
 
+**受管技能（Managed Skill）**：
+由 Project Memory 沉淀并维护正文与索引的可复用方法；受管关系描述正文维护职责，与作者身份、来源和是否安装无关。
+_避免使用_：仅指 Agent 生成的技能、未安装技能、全部本地技能
+
+**引用技能（Referenced Skill）**：
+由 Project Memory 维护发现索引、正文及安装关系由原有机制维护的技能；可以是本仓自写或接入的技能。
+_避免使用_：仅指第三方技能、全部 Agent 技能、Project Memory 可直接改写的正文
+
 **MCP（Edges）**：
 在无 shell 宿主上暴露 Edges 扩展能力的机器入口；与 CLI、Skill 同属能力面，调用同一套领域契约而非另一套产品。
 _避免使用_：唯一入口、替代 CLI、直连仓根脚本（已否决）

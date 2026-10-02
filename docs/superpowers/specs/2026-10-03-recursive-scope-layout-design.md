@@ -47,7 +47,7 @@
 | 参考资料 | `reference` | 外部资料及已有文档的指针 |
 | 本地私有记忆 | `user` | 私有材料；正文和类型索引一并忽略提交 |
 
-展示名不要求改变现有类型标识与条目前缀。Skills 作为可选容器独立于维护知识选项，先保留原 skills 与 agent_skills 两种 type，并继续允许扩展。迁移已有项目时不用新建推荐清单重置旧项目；按明确的容器/type 映射迁移，自定义类型身份保持。
+展示名不要求改变现有类型标识与条目前缀。Skills 作为可选容器独立于维护知识选项，提供 managed（受管技能）与 referenced（引用技能）两种 type，并继续允许扩展。迁移已有项目时不用新建推荐清单重置旧项目；按明确的容器/type 映射迁移，自定义类型身份保持。
 
 ## Edges 当前实例的目标目录
 
@@ -87,7 +87,7 @@ edges/
 
 | 当前目录 | 目标及迁移规则 |
 |---|---|
-| `.memory/` | 按类型映射到 `.edges/memory/` 与 `.edges/skills/`；原 skills/agent_skills 各自保留 type 及入口，统一放入技能容器；保留自定义类型和来源权限语义 |
+| `.memory/` | 按类型映射到 `.edges/memory/` 与 `.edges/skills/`；旧 skills/agent_skills 分别映射为 managed/referenced，各有类型入口，统一放入技能容器；保留自定义类型和来源权限语义 |
 | `knowledge/tasks/` | 按目标与实际归属分流到根 `tasks/`、根 `.edges/tasks/` 或已确认子作用域；保留 Task/Run 关联，不按 Task Project 名称机械建作用域 |
 | `knowledge/projects/` | 上移为 `projects/`；内部仅按实际需要建立独立作用域 |
 | `knowledge/teaching/` | 上移为 `teaching/`，保留主题内容、学习状态、附件与课页；同步更新首页、Topics、构建和发布路径 |
@@ -135,18 +135,18 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 
 ### Skills：一个容器，保留两种 type
 
-用户明确了结构：当前先保留原 `skills` 与 `agent_skills` 两种 type，归入统一的 `skills/` 容器；每个 type 保留自己的 `AGENTS.md`，最外层作用域入口直接引用这两份类型入口，与 Memory 一样组织。类型集合仍可扩展，不合并成单一 type，也不另建 `skills/AGENTS.md` 总入口。
+用户明确了结构：当前以 `managed` 与 `referenced` 两种 type 承接原 skills 与 agent_skills 的职责，归入统一的 `skills/` 容器；每个 type 保留自己的 `AGENTS.md`，最外层作用域入口直接引用这两份类型入口，与 Memory 一样组织。类型集合仍可扩展，不合并成单一 type，也不另建 `skills/AGENTS.md` 总入口。
 
-用户指出旧 `skills` / `agent_skills` 命名不能表达两类的本质区别，类型命名重新讨论；两类的组织与维护契约不变。当前命名候选如下，尚未确认或实施：
+用户已确认按正文维护关系命名为 `managed` / `referenced`，两类的内容与维护契约保留。以下是目标命名与迁移映射，尚未实施：
 
-| 旧类型标识 | 推荐新名 | 区别 |
+| 旧类型标识 | 已确认新名 | 区别 |
 |---|---|---|
 | `skills` | `managed`（受管技能） | Project Memory 沉淀与维护正文及索引 |
 | `agent_skills` | `referenced`（引用技能） | Project Memory 仅维护索引，原位正文由原有机制维护 |
 
-对应候选入口为 `.edges/skills/managed/AGENTS.md` 与 `.edges/skills/referenced/AGENTS.md`，仍由最外层直接引用。名称表达正文维护关系，不按作者、格式、物理位置或安装状态分类：原位技能也可能是本仓自行编写，受管方法也可以被安装。
+对应入口为 `.edges/skills/managed/AGENTS.md` 与 `.edges/skills/referenced/AGENTS.md`，仍由最外层直接引用。名称表达正文维护关系，不按作者、格式、物理位置或安装状态分类：原位技能也可能是本仓自行编写，受管方法也可以被安装。
 
-以下暂以旧类型标识展示既有两类及迁移关系，不代表旧名称已被接受为目标命名；新名称确认后统一更新目录、类型标识、参数与迁移映射：
+目标目录如下；两类内置类型的目录名固定为 `managed` 与 `referenced`，不额外追加复数后缀：
 
 ```text
 <scope>/
@@ -154,10 +154,10 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 ├── .edges/
 │   ├── memory/<type>/AGENTS.md
 │   └── skills/
-│       ├── skills/
+│       ├── managed/
 │       │   ├── AGENTS.md
 │       │   └── <name>/SKILL.md
-│       └── agent_skills/
+│       └── referenced/
 │           └── AGENTS.md
 └── .agents/skills/<name>/SKILL.md   # 原位正文或安装链接
 ```
@@ -167,18 +167,18 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 ```text
 作用域 AGENTS.md
   ├─→ .edges/memory/<type>/AGENTS.md ─→ 记忆正文
-  ├─→ .edges/skills/skills/AGENTS.md ─→ 本地技能正文
-  └─→ .edges/skills/agent_skills/AGENTS.md ─→ .agents/skills/ 原位正文
+  ├─→ .edges/skills/managed/AGENTS.md ─→ 本地技能正文
+  └─→ .edges/skills/referenced/AGENTS.md ─→ .agents/skills/ 原位正文
 ```
 
 `AGENTS.md` 的引用可以跨越物理目录层级，容器不需要逐层中转。两跳描述“作用域入口 → 类型入口 → 正文”的标准发现路径，不要求将所有后代平铺在根入口。真正的子作用域仍按稀疏层级登记；跨目录引用不改写归属、写权限或适用的祖先硬约束，也不把资料提供方的全部规则扩散到调用方。
 
-#### 两类原有契约
+#### 两类维护契约
 
 | type | 内容来源 | Project Memory 维护范围 |
 |---|---|---|
-| `skills` | 本作用域沉淀的可复用方法，正文与附属文件放在该 type 目录 | `remember` 写正文、刷新索引；doctor 按已有授权修复 |
-| `agent_skills` | 原位 `.agents/skills/` 的实体或链接 | 只索引；正文和安装关系仍由原有机制维护 |
+| `managed` | 本作用域沉淀的可复用方法，正文与附属文件放在该 type 目录 | `remember` 写正文、刷新索引；doctor 按已有授权修复 |
+| `referenced` | 原位 `.agents/skills/` 的实体或链接 | 只索引；正文和安装关系仍由原有机制维护 |
 
 本次保留的是两类既有内容及维护契约，不按人写、Agent 写或第三方重新划分。无需为它们合成一个多来源、混合写权限的官方类型。自定义类型继续开放，初始化按选择建立入口；未采用的 type 不预建空目录，原位安装目录缺失时不代建正文。
 
@@ -188,13 +188,13 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 
 #### 迁移与实现边界
 
-- `.memory/skills/` 整体映射到 `.edges/skills/skills/`，保留 `skills` 类型身份、Skill 正文及 scripts、references、assets 等附属文件。
-- `.memory/agent_skills/AGENTS.md` 映射到 `.edges/skills/agent_skills/AGENTS.md`，保留 `agent_skills` 类型身份和只索引语义；原位安装正文不搬入容器。
-- 最外层入口直接引用两份新类型入口；保留旧索引中的人工说明、非受管内容和已有自定义类型，按映射更新引用，不保留旧布局运行时回退。
+- `.memory/skills/` 整体映射到 `.edges/skills/managed/`，类型标识由 `skills` 改为 `managed`，保留 Skill 正文及 scripts、references、assets 等附属文件。
+- `.memory/agent_skills/AGENTS.md` 映射到 `.edges/skills/referenced/AGENTS.md`，类型标识由 `agent_skills` 改为 `referenced`，保留只索引语义；原位安装正文不搬入容器。
+- 最外层入口直接引用两份新类型入口；保留旧索引中的人工说明、非受管内容和已有自定义类型，按映射更新引用，不保留旧布局运行时回退。 受管记录中已有的类型标识元数据随映射更新，不要求给原本未记录类型的 Skill 补字段；原位引用正文及其元数据不改写。
 - 安装入口位置与外部真源保持。只有指向本次已迁本地正文的安装链接，可由迁移器按明确映射更新目标；不能沿范围外的安装目录链接扩大写入。日常 init、remember、doctor 不获得修改安装链接的权限。
 - 冲突按实际目标路径判断，同名但不同源不自动合并；重复迁移不覆盖新增内容。私有类型及索引保持忽略规则，不能仅从已跟踪文件枚举迁移对象。
 
-沿用 PROTOCOL 的层入口、类型入口和正文分工。LAYOUT、类型路径解析、索引生成、doctor 与迁移器需适配多一层物理容器，但类型数量和维护权限不因搬入容器而改变；常规 `remember --type skills` 仍指本地方法类型，`agent_skills` 仍只索引。
+沿用 PROTOCOL 的层入口、类型入口和正文分工。LAYOUT、类型路径解析、索引生成、doctor 与迁移器需适配多一层物理容器，但类型数量和维护权限不因搬入容器而改变；新布局的正文写入使用 `remember --type managed`，`referenced` 不接受正文写入。`format: skills` 与 Agent Skills 的 SKILL.md 格式保持不变，不能把格式标识当成旧类型名一并替换。已有自定义类型若与新内置标识或目标路径冲突，须在迁移预检中报告，不自动覆盖或归并。
 
 验收覆盖最外层跨目录直达两类入口、本地写入与原位只索引、自定义类型保留、安装别名指向本地正文、子作用域隔离、符号链接边界和迁移链接修复。当前仅更新设计，尚未修改运行时或搬迁目录。
 
