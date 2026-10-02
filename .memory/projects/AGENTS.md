@@ -33,6 +33,7 @@
 - [记忆研究笔记落 knowledge/projects/memory](project_memory_research_notes_in_knowledge_projects.md) — 写 project-memory 的调研、优点、related work 等研究笔记时：落到 knowledge/projects/memory/；skill 层 .memory 只记协议与设计决策，不当成对外研究笔记落点。
 - [整仓 MIT，不拆 knowledge 许可证](project_mit_license.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
 - [new-note MCP 的 ingest 约束](project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges note，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
+- [定期从目录职责提炼通用维护规范](project_periodic_architecture_review.md) — 复盘 Edges 目录架构时：按实际职责与维护对象识别可跨作用域复用的系统二模块，输出规范候选；维护任务管理是例子，当前仅记规范、不启用自动运行。
 - [posts 对外展示，Astro 博客 + Actions CI](project_posts_public_astro_blog.md) — posts 面向对外展示；后续以 posts 为数据用 Astro 搭博客，并用 GitHub Actions 在服务器做 CI
 - [仓内任务优先用仓库 Skill 与 CLI](project_prefer_repo_skills_and_cli.md) — 执行 VirusPC/edges 仓内工作时，优先调用本仓 Skill 与 edges CLI；不可用须向用户说明缺口，勿默认手搓绕过。
 - [订阅管理盘点进展](project_progress.md) — 订阅/用量盘点进展：双 Gmail + QQ IMAP、国内 Kimi 无邮箱、CodexBar Linux CLI 已装待鉴权；后续 Apple/微信侧核对。
@@ -41,6 +42,7 @@
 - [审阅页侧栏筛选用 design A（选中染色 + 未选变淡）](project_review_page_sidebar_filter_design_a.md) — 改审阅页左栏项目筛选外观时打开：选中用 accent 实线边加面板底；未选中 opacity 0.6（hover 拉回）；拖过时外扩 outline，须和选中边叠得开。类写在 ProjectColumn，不改点击或拖放。用户 2026-09-17 选定 design A。
 - [根硬约束只留聚光灯、脱敏与 git](project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
 - [根 README 以知识闭环为唯一主线](project_root_readme_direction.md) — 设计或修改根 README 时：个人 RSI 是当前实践，知识闭环是主线，四视角七思想保持；通用模型的根可面向个人、团队、公司等主体，其维护空间承载系统二。
+- [递归目录按作用域归属并区分自身维护空间](project_scope_first_content_ownership.md) — 递归目录设计：Project Memory 按需扩展，.edges 归自身维护，公共实现先根负责；新建类型由用户选，新版仅新布局，旧项目提供一键迁移 Skill。
 - [系统一／系统二按作用域建模，区分 harness 层级与自进化](project_scoped_systems_and_harness.md) — 讨论根、作用域或 RSI 时：根可面向任意选定主体或系统，维护空间承载系统二；个人 RSI 是当前实践，角色随作用域变化，不预设唯一绝对根或固定组织层级。
 - [v1 自托管 Langfuse 落在物理机 minigtr](project_self_hosted_langfuse_on_minigtr.md) — 改自托管 Langfuse 的 v1 宿主、或默认往阿里云/云 VPS 上放时打开：宿主是物理机 minigtr，按多数时候在线的小型服务器运维；双系统仍在但 Windows 不是日常路径。不是阿里云或其它云 VPS。访问面见 ADR 0017。决策见 docs/adr/0014-self-hosted-langfuse-on-minigtr.md。
 - [跨机器跨 Agent 的 harness 放 shared-extensions](project_shared_extensions.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。
