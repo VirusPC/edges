@@ -90,7 +90,7 @@ edges/
 │   │   └── <其他 type>/AGENTS.md
 │   ├── tasks/AGENTS.md                 # 根作用域维护任务
 │   ├── evaluation/AGENTS.md            # 保留评测模块内容契约
-│   └── observation/README.md           # 当前观测模块说明
+│   └── observation/AGENTS.md           # 观测模块入口与内容索引
 ├── knowledge/
 │   ├── notes/
 │   ├── edges/
@@ -128,7 +128,7 @@ edges/
 | `knowledge/resources/` | 根共享附件位置保留；专属附件随明确的所属工作区组织 |
 | `knowledge/archive/` | 根知识归档位置保留；迁移记录保留旧路径与所属作用域，不能按新路径重写历史含义 |
 | `evaluation/` | 整模块迁至 `.harness/evaluation/`，覆盖执行器、用例、测试、报告、submodule 和局部维护材料；逐项更新相关路径 |
-| `observation/` | 迁至 `.harness/observation/`；当前仅有说明和占位，不包含后端部署 |
+| `observation/` | 迁至 `.harness/observation/`，以 `AGENTS.md` 为模块入口，将现有说明中的职责与导航纳入入口并更新上层引用；当前仅有说明和占位，不包含后端部署 |
 | `extensions/` | 保留实现位置；维护归根，原有局部记忆逐项处理 |
 | `shared-extensions/` | 保留实现位置与发版边界；维护归根，原有局部记忆逐项处理 |
 | `apps/` | 保留应用源码和构建关系；目录或包不自动成为独立作用域 |
@@ -140,11 +140,13 @@ edges/
 | `.github/` | 保留工作流位置，更新受影响的构建与发布源路径 |
 | `.obsidian/` | 保留 Vault 配置；不提交 `workspace.json` |
 
-根文件 `AGENTS.md`、`CLAUDE.md`、`README.md`、`CONTEXT.md`、`CHANGELOG.md`、`LICENSE` 保留。`.env.example`、`.gitattributes`、`.gitignore`、`.gitmodules`、`package.json`、`pnpm-lock.yaml`、`pnpm-workspace.yaml`、`skills-lock.json`、`tsconfig.base.json`、`tsconfig.json` 保留原位，按真实依赖更新内容。
+根文件 `AGENTS.md`、`CLAUDE.md`、`README.md`、`CONTEXT.md`、`CHANGELOG.md`、`LICENSE` 保留。现有 README 作为说明保留，不意味着新作用域必须创建 README。`.env.example`、`.gitattributes`、`.gitignore`、`.gitmodules`、`package.json`、`pnpm-lock.yaml`、`pnpm-workspace.yaml`、`skills-lock.json`、`tsconfig.base.json`、`tsconfig.json` 保留原位，按真实依赖更新内容。
 
 构建输出、缓存和依赖目录继续作为产物管理。移动源目录时同步适配忽略规则，不将原来被忽略的缓存或用户材料纳入版本管理。
 
 ## 入口、类型索引与模块发现
+
+`AGENTS.md` 是人和 Agent 共同使用的组织与发现入口。README 是可选说明，不承担核心发现链的必经转接，也不是全仓规范的唯一真理源；规范正文按职责保留单一真源，由入口引用。
 
 沿用 Project Memory 的硬约束、本层索引和下层索引区块，不因为物理目录变深而增加检索层级：
 
@@ -158,7 +160,7 @@ edges/
 
 物理分组调整不要求废掉现有 Skills 类型适配。自定义普通类型或 Skill 格式类型保持类型身份及独立命名空间，默认在 `.harness/memory/<原复数目录>/` 保留；不能仅因格式相同就自动归入技能容器。
 
-在 Project Memory 受管区块外使用 `AGENTS.md` 的共享文件扩展点，列出本层工作与模块入口：领域任务、维护任务、评测、观测及原位文档。各模块继续维护自己的业务索引；模块入口不自动登记为记忆子层。Task 可以沿自己的 Task Project 索引继续查找，不受普通记忆两跳规则约束。
+在 Project Memory 受管区块外使用 `AGENTS.md` 的共享文件扩展点，列出本层工作与模块入口：领域任务、维护任务、评测、观测及原位文档。Tasks、Evaluation、Observation 的业务模块入口统一使用各自的 `AGENTS.md`；作用域入口直接引用 `.harness/observation/AGENTS.md`，不经 README 中转。模块入口不自动成为独立作用域，也不自动登记为记忆子层。Memory、Skills 仍直接引用各 type 的 `AGENTS.md`，不因此补建容器总入口。Task 可以沿自己的 Task Project 索引继续查找，不受普通记忆两跳规则约束。
 
 这批变更应主要落在 LAYOUT、路径解析、索引生成和模块接入中。不得用全局替换 `.memory` 的方式改造解析器：作用域定位、children 索引、外部技能真源、doctor 扫描和 Git ignore 都需按新布局适配。
 
@@ -257,6 +259,7 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 - 审阅任务与局部维护记录的归属映射，按已确认职责分流；相同正文不复制成多份任务，聚合视图引用真源。
 - 搬迁项目与教学工作区，适配课页、Topics、附件以及部署源路径；公开 `/teaching/` 与 `/tasks/` 入口继续由发布层提供。
 - 迁移根评测与观测，适配 `.gitmodules`、评测仓根定位、忽略规则及报告引用。现有 LoCoMo 结果仍只是对应评测链路的证据，不因目录调整提高其结论强度。
+- 同步调整根入口中“README 是唯一真理源”的旧约定，以 AGENTS 入口图组织发现。原有有效规范按职责保留单一真源；适用硬约束直接位于所属层 AGENTS，其他正文由入口引用，不要求全部正文搬进入口。观测模块在迁移时建立 AGENTS 入口并更新引用。
 - 检查所有可修改文档和代码的路径依赖。受保护的 `knowledge/posts/` 仅读取以发现链接影响；如无法在其外部解决引用问题，列为待人工处理的阻断，不自动修改文章。
 - 校验实际目标工作树中的私有材料。共享 Git 提交不代表每个工作树的 ignored 用户记忆已迁移；各本地实例仍需运行对应迁移。
 
@@ -271,6 +274,7 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 - 通用推荐模块与根实例采用的模块明确区分；未采用的模块不预建目录。新建 Memory/Skills 仅创建所选类型，其他模块保留自身契约；迁移不按推荐清单补齐或重置已有结构。
 - 普通类型、自定义普通/Skill 格式类型、只读类型及递归用户记忆的转换不丢失内容或属性。
 - 层入口硬约束、类型入口、业务索引和真正的子层关系保留；维护知识仍保持两跳。
+- 从所属作用域 AGENTS 能直接发现 observation 的 AGENTS 入口；核心组织与约束发现不依赖先读 README。原有有效规范仍可达，根入口不再声明 README 为唯一真理源；未新增 Memory/Skills 容器总入口。
 - 原位接入技能正文零改写；指向已迁本地真源的安装链接保持可用。技能类型索引正确处理分类、别名、同名不同源和写入边界。用户记忆及索引始终被忽略；再次迁移无重复变更，冲突不覆盖，失败可恢复。
 - 根领域任务、根维护任务和子作用域任务写入各自真源；Task 与 Run 的关联保持。
 - 新工具仅支持新布局，旧路径不会被常规写入重新创建。

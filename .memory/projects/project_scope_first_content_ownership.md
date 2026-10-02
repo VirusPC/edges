@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 递归目录设计：Project Memory 按需扩展，.harness 归自身维护，公共实现先根负责；新建类型由用户选，新版仅新布局，旧项目提供一键迁移 Skill。
+description: 递归目录设计：AGENTS.md 统一发现，README 可选，.harness 归自身维护；模块与类型按需选择，新版仅新布局，旧项目一键迁移。
 metadata:
   edges-title: 递归目录按作用域归属并区分自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-03T03:37:33+08:00"
+  edges-updated-at: "2026-10-03T03:43:21+08:00"
 ---
 
 递归目录按作用域归属内容，并为有独立维护需求的作用域建立自身维护空间；本地维护材料默认集中存放，固定入口、遵循工具路径约定的材料与共享能力实现可位于该目录之外，通过入口与索引接入。
@@ -23,6 +23,7 @@ metadata:
 - 用户澄清即使采用各作用域就近维护、上层协调的方案，现有整套 edges CLI 仍归根作用域拥有和维护，其维护任务与知识归根维护空间；各子作用域使用它产生的领域内容仍就近归属。extensions/cli 是源码位置，不自动成为独立责任作用域；不能仅按源码目录为 extensions 建立独立维护空间。用户确认 Q10：extensions、shared-extensions、apps、scripts 保留源码真源位置，维护任务和知识先按实际职责归根维护空间；已有局部记忆逐项判断，不机械整包合并。确有独立管理目标、决策和验证需求时才细分责任作用域，不自动把整仓改成纯实现仓或迁出个人内容，也不把目标归属写成当前已实现任意子作用域操作。目录框架、维护空间分组与类型入口已确认；旧内容逐项归属、实际子作用域边界、工具引用适配及迁移清单在实施阶段细化；兼容边界按 Q12/Q13 已确定为新版仅支持新布局、旧项目一次性迁移。以已确认的整体设计为目录依据，不从局部示意推导额外规范。
 - 展示本次目录重构的整体方案时，须覆盖现有业务目录与支撑目录，并给出旧新归属对应；用户指出仅列 tasks、notes、projects、extensions 的示意遗漏了 teaching、evaluation 等，无法用于审查整仓结构。局部示意须明确标注，完整候选应同时交代 observation、apps、docs、scripts、内容支撑目录及固定宿主入口的去向；候选落点不能写成已确认迁移。
 - 用户纠正候选结构继续把 Tasks 放在 knowledge 下的问题：根作用域的领域工作项应直接归顶层 tasks，维护任务归对应维护空间的 tasks，子作用域任务仍就近归属。知识容器不能继续充当所有业务对象的兜底；根看板聚合不意味着把全部任务真源集中到根。用户随后确认 Q4：projects、teaching 也提升为顶层工作区集合，与 tasks、knowledge 并列；项目工作区与教学工作区继续保留不同目标和业务语义，内部按需组织知识、任务和自身维护。当前确认的是目标布局，具体迁移及发布、调用适配尚未实施。
+- 用户于 2026-10-03 纠正 observation 使用 README 作为目标入口的设计：目标入口应为 .harness/observation/AGENTS.md，由所属作用域 AGENTS 直接引用。AGENTS 是人和 Agent 的统一组织与发现入口；README 为可选说明，不是核心发现链必经节点或全仓唯一真理源。Tasks/Evaluation/Observation 用各自模块 AGENTS，Memory/Skills 仍直达 type，不补容器总入口；同名入口不自动形成独立作用域。实施时同步撤换根入口的 README 唯一真理源旧约定，保留并接入原有有效规范，硬约束直接写所属层 AGENTS；不因入口统一就把全部正文集中到入口。当前仅修订目标设计。
 - 用户确认 Q6：统一各模块的入口、归属与发现方式，保留各模块自己的内容契约；Task 保留任务状态与 Run 记录，Evaluation 保留用例与报告，不将全部内容强制改造成统一 Memory 条目。用户随后确认 Q5.1：自身维护空间保留独立的维护知识分组，承载供接手、判断和改进使用的上下文、决策、纠正和资料指针；原始任务状态、观测和评测证据留在各自模块，可复用结论引用其来源。整体目录方案已确认以 memory 为分组名，内部类型按需选择；技能发现入口按后续合并方案处理，不据此整包照搬旧 .memory。目录深度不直接决定作用域或检索跳数，实际适配另行设计。
 - 用户确认 Q7：现有 .memory/skills 的可执行方法正文从维护知识分组独立，作为能力模块组织。可执行方法是人或 Agent 能照着做的步骤与流程，不要求代码；维护知识保留采用方法的理由、背景和边界，并引用技能正文。共享技能保留共享真源，本作用域方法可本地维护，不复制共享正文，也不把所有 Skill 类型固定为系统二。用户随后提出 skills 与 agent_skills 共用 AGENTS.md，并进一步纠正：像 memory 一样继续往下分 type。skills 是容器，下层类型继续开放；撤回“统一成一个官方 skills 类型”的解释。用户进一步明确当前可保留对应原 skills、agent_skills 的两种 type，每类各有 AGENTS.md，最外层作用域入口直接引用两份类型入口；本方案按此保留两类职责及正文维护边界，类型标识后续已确认改名为 managed/referenced，不另设技能总入口，类型仍可扩展。入口合并不扩大 Project Memory 的正文写入权限，也不等于自动安装；尚未实现。
 - 用户指出 ADR、CONTEXT.md 与部分 docs 文档由其他 Skill 生成，其路径受那些 Skill 的约定约束。已核对 domain-modeling 的 CONTEXT.md/docs/adr 约定，以及 brainstorming/writing-plans 的 docs/superpowers/specs、plans 默认值（后两者允许用户覆盖）。设计时同时核对生成、读取、发现与引用，不因内容承担维护职责就直接搬入 .harness，也不把整个 docs 一概视为同一种职责。用户已确认 Q8：保留约定真源，通过所属作用域的层入口与类型入口等索引接入，正文只存一份，不另造同内容摘要。.harness 是默认维护目录，系统二职责可跨出该目录；当前保留 CONTEXT.md、docs/adr、docs/superpowers 的位置。路径约定可以演进，确需迁移时同时适配生成、读取、发现和引用，具体索引实现仍待设计。
