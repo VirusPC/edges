@@ -62,6 +62,7 @@ def merge_index_metadata(left, right):
 
     Values (including indented YAML structures) remain raw text. Different values
     for the same key require review instead of silently choosing an owner.
+    Only bare ASCII top-level keys are merged; other shapes require review.
     """
     type_pattern = re.compile(r'<!-- project-memory-type:start -->\n(.*?)<!-- project-memory-type:end -->', re.S)
     front_pattern = re.compile(r'\A\s*---\r?\n(.*?)\r?\n---(?:\r?\n|$)', re.S)
@@ -79,8 +80,16 @@ def merge_index_metadata(left, right):
     def union_fields(first, second):
         fields = {}
         comments = []
+        field_pattern = re.compile(r'^([A-Za-z_][A-Za-z0-9_.-]*):', re.M)
         for document in (first, second):
-            matches = list(re.finditer(r'(?m)^([A-Za-z_][A-Za-z0-9_.-]*):', document))
+            # Unsupported top-level keys must not be swallowed as continuation
+            # text of the previous field. Indented values stay byte-preserved.
+            for line in document.splitlines():
+                if not line.strip() or line.lstrip().startswith('#') or line[0].isspace():
+                    continue
+                if not field_pattern.match(line):
+                    raise ValueError('index-metadata-structure-needs-review')
+            matches = list(field_pattern.finditer(document))
             preamble = document[:matches[0].start()] if matches else document
             if any(line.strip() and not line.lstrip().startswith('#') for line in preamble.splitlines()):
                 raise ValueError('index-metadata-structure-needs-review')

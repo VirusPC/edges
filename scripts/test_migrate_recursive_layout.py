@@ -140,6 +140,34 @@ class InstanceMigrationTest(unittest.TestCase):
         self.assertNotEqual(result.returncode,0); self.assertIn('metadata-conflict',result.stderr)
         self.assertEqual(before,self.snapshot()); self.assertFalse((self.root/'.recursive-layout-migration').exists())
 
+    def test_quoted_frontmatter_conflict_rejects_before_any_write(self):
+        self.legacy_indexes('', '',
+                            '---\nroot-note: root\n"custom-field": root-value\n---\n',
+                            '---\nmodule-note: module\n"custom-field": module-value\n---\n')
+        before=self.snapshot(); result=self.run_script('--apply')
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('index-metadata-structure-needs-review',result.stderr)
+        self.assertEqual(before,self.snapshot())
+        self.assertFalse((self.root/'.recursive-layout-migration').exists())
+        self.assertFalse((self.root/'.harness').exists())
+
+    def assert_unsupported_metadata_key_rejected(self, key):
+        self.legacy_indexes('', '',
+                            '---\nroot-note: root\n'+key+': root-value\n---\n',
+                            '---\nmodule-note: module\n'+key+': module-value\n---\n')
+        before=self.snapshot(); result=self.run_script('--apply')
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('index-metadata-structure-needs-review',result.stderr)
+        self.assertEqual(before,self.snapshot())
+        self.assertFalse((self.root/'.recursive-layout-migration').exists())
+        self.assertFalse((self.root/'.harness').exists())
+
+    def test_single_quoted_key_cannot_hide_as_continuation(self):
+        self.assert_unsupported_metadata_key_rejected("'custom-field'")
+
+    def test_non_ascii_key_cannot_hide_as_continuation(self):
+        self.assert_unsupported_metadata_key_rejected('自定义字段')
+
     def test_private_directory_modes_exist_before_any_private_copy(self):
         from unittest.mock import patch
         result=self.run_script('--apply'); self.assertEqual(result.returncode,0,result.stderr)
