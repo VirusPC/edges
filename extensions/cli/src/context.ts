@@ -25,6 +25,7 @@ export type CliContext = {
   env: NodeJS.ProcessEnv;
   stdinText?: string;
   stdinIsTTY?: boolean;
+  purpose?: "domain" | "maintenance";
   result: CliResult | undefined;
 };
 
@@ -45,8 +46,9 @@ export function usageError(reason: string, scope: "root" | "note" | "tasks" | "a
 }
 
 export function usageScope(argv: string[]): "root" | "note" | "tasks" | "artifacts" {
-  if (argv[0] === "note") return "note";
-  if (argv[0] === "tasks") return "tasks";
-  if (argv[0] === "artifacts") return "artifacts";
+  const command = argv.filter((arg, i) => arg !== "--scope" && argv[i - 1] !== "--scope" && !arg.startsWith("--scope="))[0];
+  if (command === "note") return "note";
+  if (command === "tasks") return "tasks";
+  if (command === "artifacts") return "artifacts";
   return "root";
 }

@@ -1,74 +1,37 @@
-import { mkdir } from "node:fs/promises";
-import { existsSync } from "node:fs";
+import { mkdir, writeFile, readFile } from "node:fs/promises";
 import path from "node:path";
-import { run } from "../../program.js";
-import { groupedListToReviewPageInput, parseGroupedList } from "./grouped.js";
+import { discoverScopes, portableScope, resolveScope } from "../../utils/scope.js";
+import { createNodeBoardFs } from "./board.js";
+import { groupedListToReviewPageInput, listGroupedByProject, GROUPED_LIST_SCHEMA, type GroupedList } from "./grouped.js";
+import { taskBoardLocation, type TaskPurpose } from "./paths.js";
+import { loadBuiltReviewShell, parseReviewPageInput, renderReviewPageHtml } from "./review-page.js";
 import { TasksError } from "./types.js";
 
-export const DEFAULT_TASKS_SITE_REL = "knowledge/tasks/_site/index.html";
-
-export function defaultTasksSiteOutPath(repoPath: string): string {
-  return path.join(repoPath, DEFAULT_TASKS_SITE_REL);
-}
-
-export function findEdgesRepo(startDir: string, env: NodeJS.ProcessEnv = process.env): string {
-  const fromEnv = env.EDGES_REPO?.trim();
-  if (fromEnv) {
-    return path.resolve(fromEnv);
-  }
-  let dir = path.resolve(startDir);
-  while (true) {
-    if (existsSync(path.join(dir, "knowledge/tasks"))) {
-      return dir;
-    }
-    const parent = path.dirname(dir);
-    if (parent === dir) {
-      throw new TasksError("BOARD_IO_ERROR", "could not find a directory containing knowledge/tasks");
-    }
-    dir = parent;
-  }
-}
-
-function boardIoFailure(step: string, result: { stdout: string; stderr: string }): never {
-  const detail = result.stderr.trim() || result.stdout.trim() || `${step} failed`;
-  throw new TasksError("BOARD_IO_ERROR", detail);
-}
+export const DEFAULT_TASKS_SITE_REL = "tasks/_site/index.html";
+export function defaultTasksSiteOutPath(scopeDir: string): string { return path.join(scopeDir, DEFAULT_TASKS_SITE_REL); }
+export function findEdgesRepo(startDir: string, env: NodeJS.ProcessEnv = process.env): string { return resolveScope(env, startDir); }
 
 export async function generateTasksSite(input: {
   repoPath: string;
   outPath: string;
+  purpose?: TaskPurpose | "all";
   env?: NodeJS.ProcessEnv;
 }): Promise<{ path: string; groupCount: number; itemCount: number }> {
-  const env = { ...process.env, ...input.env, EDGES_REPO: input.repoPath };
-  const listed = await run(["tasks", "list", "--group-by", "project", "--format", "json"], { env });
-  if (listed.exitCode !== 0) {
-    boardIoFailure("list --group-by project", listed);
+  const purpose = input.purpose ?? "domain";
+  if (!["domain", "maintenance", "all"].includes(purpose)) throw new TasksError("VALIDATION_ERROR", "purpose must be domain, maintenance, or all");
+  const grouped: GroupedList = { schema: GROUPED_LIST_SCHEMA, groups: [], items: [] };
+  for (const scope of purpose === "all" ? discoverScopes(input.repoPath) : [input.repoPath]) {
+    for (const selected of purpose === "all" ? ["domain", "maintenance"] as const : [purpose]) {
+      const location = taskBoardLocation(scope, selected);
+      const board = await listGroupedByProject(location, {}, createNodeBoardFs(location), portableScope(scope, input.repoPath));
+      grouped.groups.push(...board.groups);
+      grouped.items.push(...board.items);
+    }
   }
-  let raw: unknown;
-  try {
-    raw = JSON.parse(listed.stdout);
-  } catch {
-    throw new TasksError("BOARD_IO_ERROR", "list --group-by project did not emit JSON");
-  }
-  const page = groupedListToReviewPageInput(parseGroupedList(raw));
+  const page = parseReviewPageInput(groupedListToReviewPageInput(grouped));
+  const shell = await loadBuiltReviewShell(abs => readFile(abs, "utf8"));
   const outPath = path.resolve(input.outPath);
   await mkdir(path.dirname(outPath), { recursive: true });
-  const rendered = await run(["tasks", "project", "review-page", "--from", "-", "--out", outPath], {
-    env,
-    stdinText: JSON.stringify(page),
-  });
-  if (rendered.exitCode !== 0) {
-    boardIoFailure("project review-page", rendered);
-  }
-  let body: { path?: string; groupCount?: number; itemCount?: number };
-  try {
-    body = JSON.parse(rendered.stdout) as { path?: string; groupCount?: number; itemCount?: number };
-  } catch {
-    throw new TasksError("BOARD_IO_ERROR", "project review-page did not emit JSON");
-  }
-  return {
-    path: body.path ?? outPath,
-    groupCount: body.groupCount ?? page.groups.length,
-    itemCount: body.itemCount ?? page.items.length,
-  };
+  await writeFile(outPath, renderReviewPageHtml(page, shell), "utf8");
+  return { path: outPath, groupCount: page.groups.length, itemCount: page.items.length };
 }

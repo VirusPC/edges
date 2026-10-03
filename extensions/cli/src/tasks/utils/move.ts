@@ -1,3 +1,4 @@
+import { scopeDir, type BoardTarget } from "./paths.js";
 import path from "node:path";
 import { getTask, type BoardWriter } from "./board.js";
 import { setMetadataField } from "./frontmatter.js";
@@ -5,14 +6,14 @@ import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
 import { TasksError, type TaskStatus } from "./types.js";
 
 export async function moveTaskStatus(
-  repoPath: string,
+  repoPath: BoardTarget,
   target: string,
   next: TaskStatus,
   io: { fs: BoardWriter; now: Date },
 ): Promise<{ stem: string; from: TaskStatus; to: TaskStatus; path: string; sidecarPath: string }> {
   const record = await getTask(repoPath, target, io.fs);
-  const destRel = taskRelPath(record.project, next, record.stem);
-  const destSidecarRel = sidecarRelPath(record.project, next, record.stem);
+  const destRel = taskRelPath(record.project, next, record.stem, repoPath);
+  const destSidecarRel = sidecarRelPath(record.project, next, record.stem, repoPath);
   if (record.status === next) {
     return {
       stem: record.stem,
@@ -23,21 +24,21 @@ export async function moveTaskStatus(
     };
   }
 
-  const destAbs = path.join(repoPath, destRel);
+  const destAbs = path.join(scopeDir(repoPath), destRel);
   if (await io.fs.exists(destAbs)) {
     throw new TasksError("BOARD_IO_ERROR", `destination already exists: ${destRel}`);
   }
 
   await io.fs.mkdirp(statusDir(repoPath, record.project, next));
-  const sourceAbs = path.join(repoPath, record.path);
+  const sourceAbs = path.join(scopeDir(repoPath), record.path);
   let markdown = await io.fs.readFile(sourceAbs);
   markdown = setMetadataField(markdown, "edges-tasks-status", next);
   markdown = setMetadataField(markdown, "edges-updated-at", io.now.toISOString());
   await io.fs.writeFile(destAbs, markdown);
 
-  const sourceSidecarAbs = path.join(repoPath, record.sidecarPath);
+  const sourceSidecarAbs = path.join(scopeDir(repoPath), record.sidecarPath);
   if (await io.fs.exists(sourceSidecarAbs)) {
-    await io.fs.rename(sourceSidecarAbs, path.join(repoPath, destSidecarRel));
+    await io.fs.rename(sourceSidecarAbs, path.join(scopeDir(repoPath), destSidecarRel));
   }
   await io.fs.unlink(sourceAbs);
 

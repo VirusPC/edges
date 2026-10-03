@@ -14,7 +14,7 @@ export function addProjectCreateCommand(project: Command, ctx: CliContext): void
     .action(async (projectId: string, opts: { title: string; description: string }) => {
       await runTasksCommand(ctx, async (runtime) => {
         const created = await createProject(
-          runtime.repoPath,
+          runtime.location,
           { project: projectId, title: opts.title, description: opts.description },
           runtime.writer,
         );

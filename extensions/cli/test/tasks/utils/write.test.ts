@@ -9,7 +9,7 @@ import { nodeBoardWriter } from "./helpers.js";
 test("createTask writes Task + empty sidecar under backlog and does not need git", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const now = new Date(2026, 8, 13, 12, 0, 0);
     const created = await createTask(
       repo,
@@ -32,7 +32,7 @@ test("createTask writes Task + empty sidecar under backlog and does not need git
 test("createTask suffixes -2 when stem exists", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const now = new Date(2026, 8, 13, 12, 0, 0);
     const io = { fs: nodeBoardWriter(), now };
     const first = await createTask(repo, { title: "Dup", status: "backlog" }, io);
@@ -48,7 +48,7 @@ test("updateTask changes title and body and keeps path", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const now = new Date(2026, 8, 13, 12, 0, 0);
-    await mkdir(path.join(repo, "knowledge/tasks/_default/todo"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/todo"), { recursive: true });
     const created = await createTask(
       repo,
       { title: "Stay", status: "todo" },
@@ -73,7 +73,7 @@ test("updateTask changes title and body and keeps path", async () => {
 test("createTask omits edges-task-priority on disk and returns priority none", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const created = await createTask(
       repo,
       { title: "No Pri", status: "backlog" },
@@ -91,14 +91,14 @@ test("createTask omits edges-task-priority on disk and returns priority none", a
 test("createTask writes high and does not move status", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/todo"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/todo"), { recursive: true });
     const created = await createTask(
       repo,
       { title: "Hot", status: "todo", priority: "high" },
       { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) },
     );
     assert.equal(created.priority, "high");
-    assert.match(created.path, /knowledge\/tasks\/_default\/todo\//);
+    assert.match(created.path, /tasks\/_default\/todo\//);
     const md = await readFile(path.join(repo, created.path), "utf8");
     assert.match(md, /edges-task-priority: high/);
     assert.match(md, /edges-tasks-status: todo/);
@@ -110,7 +110,7 @@ test("createTask writes high and does not move status", async () => {
 test("createTask rejects P0 before writing Task or sidecar", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     await assert.rejects(
       () =>
         createTask(
@@ -120,7 +120,7 @@ test("createTask rejects P0 before writing Task or sidecar", async () => {
         ),
       (error: { errorCode?: string }) => error.errorCode === "VALIDATION_ERROR",
     );
-    const names = await readdir(path.join(repo, "knowledge/tasks/_default/backlog"));
+    const names = await readdir(path.join(repo, "tasks/_default/backlog"));
     assert.deepEqual(names, []);
   } finally {
     await rm(repo, { recursive: true, force: true });
@@ -131,7 +131,7 @@ test("updateTask --priority high keeps path and edges-tasks-status", async () =>
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const now = new Date(2026, 8, 16, 12, 0, 0);
-    await mkdir(path.join(repo, "knowledge/tasks/_default/todo"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/todo"), { recursive: true });
     const created = await createTask(
       repo,
       { title: "Stay", status: "todo" },
@@ -145,11 +145,11 @@ test("updateTask --priority high keeps path and edges-tasks-status", async () =>
     );
     assert.equal(updated.path, created.path);
     assert.equal(updated.priority, "high");
-    assert.match(updated.path, /knowledge\/tasks\/_default\/todo\//);
+    assert.match(updated.path, /tasks\/_default\/todo\//);
     const md = await readFile(path.join(repo, updated.path), "utf8");
     assert.match(md, /edges-task-priority: high/);
     assert.match(md, /edges-tasks-status: todo/);
-    await assert.rejects(access(path.join(repo, "knowledge/tasks/_default/backlog", path.basename(created.path))));
+    await assert.rejects(access(path.join(repo, "tasks/_default/backlog", path.basename(created.path))));
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -159,7 +159,7 @@ test("updateTask --priority none writes the field and does not require other fla
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const now = new Date(2026, 8, 16, 12, 0, 0);
-    await mkdir(path.join(repo, "knowledge/tasks/_default/in_progress"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/in_progress"), { recursive: true });
     const created = await createTask(
       repo,
       { title: "Cool", status: "in_progress", priority: "urgent" },
@@ -189,7 +189,7 @@ test("createTask omits edges-task-project on disk and returns project default", 
       { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) },
     );
     assert.equal(created.project, "default");
-    assert.equal(created.path, "knowledge/tasks/_default/backlog/2026-09-16--No-Proj.md");
+    assert.equal(created.path, "tasks/_default/backlog/2026-09-16--No-Proj.md");
     const md = await readFile(path.join(repo, created.path), "utf8");
     assert.doesNotMatch(md, /edges-task-project/);
     assert.match(md, /edges-tasks-status: backlog/);
@@ -207,7 +207,7 @@ test("createTask --project cli writes field and named directory", async () => {
       { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) },
     );
     assert.equal(created.project, "cli");
-    assert.equal(created.path, "knowledge/tasks/cli/todo/2026-09-16--Named.md");
+    assert.equal(created.path, "tasks/cli/todo/2026-09-16--Named.md");
     const md = await readFile(path.join(repo, created.path), "utf8");
     assert.match(md, /edges-task-project: cli/);
     await access(path.join(repo, created.sidecarPath));
@@ -228,7 +228,7 @@ test("createTask --project in_progress is VALIDATION_ERROR and writes nothing", 
         ),
       (error: unknown) => (error as { errorCode: string }).errorCode === "VALIDATION_ERROR",
     );
-    const root = path.join(repo, "knowledge/tasks");
+    const root = path.join(repo, "tasks");
     const names = await readdir(root).catch(() => []);
     assert.equal(names.filter((name) => name !== "_default").length, names.includes("_default") ? names.length - 1 : names.length);
     assert.equal(names.includes("in_progress"), false);
@@ -252,12 +252,12 @@ test("updateTask --project cli moves Task + sidecar and dual-writes", async () =
       { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 13, 0, 0) },
     );
     assert.equal(updated.project, "cli");
-    assert.equal(updated.path, "knowledge/tasks/cli/todo/2026-09-16--Move-me.md");
+    assert.equal(updated.path, "tasks/cli/todo/2026-09-16--Move-me.md");
     const md = await readFile(path.join(repo, updated.path), "utf8");
     assert.match(md, /edges-task-project: cli/);
     assert.match(md, /edges-tasks-status: todo/);
     assert.match(md, /edges-task-priority: high/);
-    await access(path.join(repo, "knowledge/tasks/cli/todo/.2026-09-16--Move-me.log.md"));
+    await access(path.join(repo, "tasks/cli/todo/.2026-09-16--Move-me.log.md"));
     await assert.rejects(access(path.join(repo, created.path)));
   } finally {
     await rm(repo, { recursive: true, force: true });
@@ -279,7 +279,7 @@ test("updateTask --project default writes the field and does not require other f
       { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 13, 0, 0) },
     );
     assert.equal(updated.project, "default");
-    assert.equal(updated.path, "knowledge/tasks/_default/in_progress/2026-09-16--Home.md");
+    assert.equal(updated.path, "tasks/_default/in_progress/2026-09-16--Home.md");
     const md = await readFile(path.join(repo, updated.path), "utf8");
     assert.match(md, /edges-task-project: default/);
     assert.match(md, /edges-tasks-status: in_progress/);
@@ -321,7 +321,7 @@ test("updateTask --project dest-exists is BOARD_IO_ERROR and does not move", asy
       { title: "Mover", status: "todo" },
       io,
     );
-    const destRel = `knowledge/tasks/cli/todo/${mover.stem}.md`;
+    const destRel = `tasks/cli/todo/${mover.stem}.md`;
     await mkdir(path.dirname(path.join(repo, destRel)), { recursive: true });
     await writeFile(path.join(repo, destRel), "blocker\n", "utf8");
     await assert.rejects(
@@ -345,7 +345,7 @@ test("updateTask rejects P0 and leaves the file unchanged", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const now = new Date(2026, 8, 16, 12, 0, 0);
-    await mkdir(path.join(repo, "knowledge/tasks/_default/todo"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/todo"), { recursive: true });
     const created = await createTask(
       repo,
       { title: "Stay", status: "todo", priority: "low" },

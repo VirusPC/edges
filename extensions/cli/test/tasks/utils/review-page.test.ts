@@ -190,3 +190,13 @@ test("parseReviewPageInput rejects a doc that is missing body", () => {
     },
   );
 });
+
+test('legacy review items cannot bypass duplicate stem validation with ignored transport IDs', () => {
+  assert.throws(() => parseReviewPageInput({
+    groups: [{ id: 'default', title: 'Default' }],
+    items: [
+      { id: 'one', stem: 'same', current: 'default', suggested: 'default' },
+      { id: 'two', stem: 'same', current: 'default', suggested: 'default' },
+    ],
+  }), /duplicate/);
+});

@@ -15,6 +15,7 @@ export type { CliContext, CliInput, CliResult };
 
 const ROOT_AFTER_HELP = `
 EXAMPLES
+  edges --scope ./projects/demo tasks --purpose maintenance list
   edges note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
   edges note --help
   edges tasks --help
@@ -60,6 +61,7 @@ function addRootCommand(ctx: CliContext, output: CommanderTextConfigure): Comman
   const program = new Command();
   program
     .name("edges")
+    .option("--scope <directory>", "Target content scope (default: EDGES_SCOPE, EDGES_REPO, or cwd owner)")
     .description("Edges CLI: notes, tasks, artifacts, and more")
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help")
@@ -67,6 +69,11 @@ function addRootCommand(ctx: CliContext, output: CommanderTextConfigure): Comman
     .showHelpAfterError(false)
     .showSuggestionAfterError(false)
     .helpCommand(false);
+
+  program.hook("preAction", () => {
+    const scope = program.opts<{ scope?: string }>().scope;
+    if (scope !== undefined) ctx.env = { ...ctx.env, EDGES_SCOPE: scope };
+  });
 
   program.action(() => {
     ctx.result = usageError("missing command. Use edges --help.", "root");

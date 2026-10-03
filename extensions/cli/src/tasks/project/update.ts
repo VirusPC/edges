@@ -14,7 +14,7 @@ export function addProjectUpdateCommand(project: Command, ctx: CliContext): void
     .action(async (projectId: string, opts: { title?: string; description?: string }) => {
       await runTasksCommand(ctx, async (runtime) => {
         const updated = await updateProject(
-          runtime.repoPath,
+          runtime.location,
           projectId,
           { title: opts.title, description: opts.description },
           runtime.writer,

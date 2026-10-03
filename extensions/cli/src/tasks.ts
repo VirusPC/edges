@@ -1,4 +1,4 @@
-import { Command } from "commander";
+import { Command, Option } from "commander";
 import { type CliContext, usageError } from "./context.js";
 import { addCreateCommand } from "./tasks/create.js";
 import { addGetCommand } from "./tasks/get.js";
@@ -10,6 +10,9 @@ import { addProjectCommand } from "./tasks/project.js";
 import { addUpdateCommand } from "./tasks/update.js";
 
 const TASKS_AFTER_HELP = `
+TARGET
+  edges --scope <directory> tasks --purpose domain|maintenance ...
+  domain (default): <scope>/tasks; maintenance: <scope>/.harness/tasks
 COMMANDS
   list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
   get <stem|path>
@@ -48,10 +51,12 @@ export function addTasksCommand(program: Command, ctx: CliContext): void {
   const tasks = program
     .command("tasks")
     .description("Task board commands")
+    .addOption(new Option("--purpose <purpose>", "domain tasks or scope maintenance tasks").choices(["domain", "maintenance"]).default("domain"))
     .allowExcessArguments(false)
     .showHelpAfterError(false)
     .helpOption("-h, --help", "Show this help");
 
+  tasks.hook("preAction", () => { ctx.purpose = tasks.opts().purpose; });
   addListCommand(tasks, ctx);
   addGetCommand(tasks, ctx);
   addCreateCommand(tasks, ctx);

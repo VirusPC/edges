@@ -8,6 +8,7 @@ import { localDateYmd, titleToSlug } from "./slug.js";
 
 export type IngestGitConfig = {
   repoPath: string;
+  scopeDir?: string;
   baseBranch: string;
   mode: "pr" | "direct";
   dryRun: boolean;
@@ -71,13 +72,14 @@ export async function runNoteIngest(
   const lines: string[] = [];
   const date = localDateYmd(now);
   const slug = titleToSlug(input.title, now);
-  const filePath = `knowledge/notes/${date}--${slug}.md`;
-  const absFile = path.join(config.repoPath, filePath);
+  const absFile = path.join(config.scopeDir ?? config.repoPath, `knowledge/notes/${date}--${slug}.md`);
+  const filePath = path.relative(config.repoPath, absFile);
+  if (filePath.startsWith("..") || path.isAbsolute(filePath)) throw new Error("Note scope must be inside its Git repository");
   let branch = `ingest/${date}-${slug}`;
 
   if (!config.dryRun) {
     await exec("git", ["checkout", config.baseBranch], { cwd: config.repoPath, env });
-    await exec("git", ["pull"], { cwd: config.repoPath, env });
+    await exec("git", ["pull", "--autostash"], { cwd: config.repoPath, env });
   }
 
   if (config.mode === "direct") {
@@ -88,7 +90,7 @@ export async function runNoteIngest(
     await exec("git", ["checkout", "-b", branch], { cwd: config.repoPath, env });
   }
 
-  await mkdirp(path.join(config.repoPath, "knowledge/notes"));
+  await mkdirp(path.dirname(absFile));
   await writeFile(absFile, renderNoteMarkdown(input.title, input.content, date));
   await exec("git", ["add", filePath], { cwd: config.repoPath, env });
   await exec(

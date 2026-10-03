@@ -11,13 +11,13 @@ import { nodeBoardFs, nodeBoardWriter } from "./helpers.js";
 test("migrateLegacyBoard moves Task + hidden sidecar and removes root status dirs", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const backlog = path.join(repo, "knowledge/tasks/backlog");
-    const done = path.join(repo, "knowledge/tasks/done");
+    const backlog = path.join(repo, "tasks/backlog");
+    const done = path.join(repo, "tasks/done");
     await mkdir(backlog, { recursive: true });
     await mkdir(done, { recursive: true });
-    await mkdir(path.join(repo, "knowledge/tasks/.memory"), { recursive: true });
-    await writeFile(path.join(repo, "knowledge/tasks/AGENTS.md"), "# tasks\n", "utf8");
-    await writeFile(path.join(repo, "knowledge/tasks/README.md"), "# board\n", "utf8");
+    await mkdir(path.join(repo, "tasks/.memory"), { recursive: true });
+    await writeFile(path.join(repo, "tasks/AGENTS.md"), "# tasks\n", "utf8");
+    await writeFile(path.join(repo, "tasks/README.md"), "# board\n", "utf8");
     await writeFile(
       path.join(backlog, "2026-09-16--open.md"),
       `---
@@ -52,21 +52,21 @@ body
     const result = await migrateLegacyBoard(repo, nodeBoardWriter());
     assert.equal(result.moved, 3);
     assert.deepEqual(new Set(result.removedStatusDirs), new Set(["backlog", "done"]));
-    await access(path.join(repo, "knowledge/tasks/_default/backlog/2026-09-16--open.md"));
-    await access(path.join(repo, "knowledge/tasks/_default/backlog/.2026-09-16--open.log.md"));
-    await access(path.join(repo, "knowledge/tasks/_default/done/2026-09-16--closed.md"));
+    await access(path.join(repo, "tasks/_default/backlog/2026-09-16--open.md"));
+    await access(path.join(repo, "tasks/_default/backlog/.2026-09-16--open.log.md"));
+    await access(path.join(repo, "tasks/_default/done/2026-09-16--closed.md"));
     await assert.rejects(access(backlog));
     await assert.rejects(access(done));
-    const agents = await readFile(path.join(repo, "knowledge/tasks/AGENTS.md"), "utf8");
+    const agents = await readFile(path.join(repo, "tasks/AGENTS.md"), "utf8");
     assert.equal(agents, "# tasks\n");
-    await access(path.join(repo, "knowledge/tasks/.memory"));
+    await access(path.join(repo, "tasks/.memory"));
     const items = await listTasks(repo, {}, nodeBoardFs());
     assert.deepEqual(
       items.map((item) => `${item.project}:${item.status}:${item.stem}`).sort(),
       ["default:backlog:2026-09-16--open", "default:done:2026-09-16--closed"],
     );
     const open = await readFile(
-      path.join(repo, "knowledge/tasks/_default/backlog/2026-09-16--open.md"),
+      path.join(repo, "tasks/_default/backlog/2026-09-16--open.md"),
       "utf8",
     );
     assert.doesNotMatch(open, /edges-task-project/);
@@ -81,8 +81,8 @@ body
 test("migrateLegacyBoard refuses dest collision and unexpected subdirectory", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const legacy = path.join(repo, "knowledge/tasks/todo");
-    const dest = path.join(repo, "knowledge/tasks/_default/todo");
+    const legacy = path.join(repo, "tasks/todo");
+    const dest = path.join(repo, "tasks/_default/todo");
     await mkdir(legacy, { recursive: true });
     await mkdir(dest, { recursive: true });
     await writeFile(path.join(legacy, "2026-09-16--dup.md"), "legacy\n", "utf8");
@@ -109,11 +109,11 @@ test("migrateLegacyBoard refuses dest collision and unexpected subdirectory", as
 test("migrateLegacyBoard rmdirs empty root status folders", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/blocked"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/blocked"), { recursive: true });
     const result = await migrateLegacyBoard(repo, nodeBoardWriter());
     assert.equal(result.moved, 0);
     assert.deepEqual(result.removedStatusDirs, ["blocked"]);
-    const names = await readdir(path.join(repo, "knowledge/tasks"));
+    const names = await readdir(path.join(repo, "tasks"));
     assert.equal(names.includes("blocked"), false);
   } finally {
     await rm(repo, { recursive: true, force: true });

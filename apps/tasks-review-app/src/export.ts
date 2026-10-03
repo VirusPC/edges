@@ -1,23 +1,29 @@
-import type { ReviewItem } from "./types.ts";
+import { itemIdentity, type ReviewItem, type ReviewGroup } from "./types.ts";
 
-export function exportReviewRows(items: ReviewItem[]): Array<{
-  stem: string;
-  current: string;
-  suggested: string;
-  action: "keep" | "move";
-  note: string;
-}> {
-  return items.map((item) => ({
+export function sameSource(item: ReviewItem, group: ReviewGroup): boolean {
+  return item.source?.scope === group.source?.scope && item.source?.purpose === group.source?.purpose;
+}
+
+export function exportReviewRows(items: ReviewItem[], groups: ReviewGroup[] = []) {
+  return items.map(item => ({
     stem: item.stem,
-    current: item.current,
-    suggested: item.suggested,
-    action: item.suggested === item.current ? "keep" : "move",
+    current: item.source ? (groups.find(group => group.id === item.current)?.project ?? item.project!) : item.current,
+    suggested: item.source ? (groups.find(group => group.id === item.suggested)?.project ?? item.project!) : item.suggested,
+    ...(item.source ? { source: item.source } : {}),
+    action: item.suggested === item.current ? "keep" as const : "move" as const,
     note: item.note ?? "",
   }));
 }
 
-export function applyProjectDrop(items: ReviewItem[], stem: string, projectId: string): ReviewItem[] {
-  return items.map((item) => (item.stem === stem ? { ...item, suggested: projectId } : item));
+export function applyProjectDrop(items: ReviewItem[], identity: string, projectId: string, groups: ReviewGroup[] = []): ReviewItem[] {
+  return items.map(item => {
+    if (itemIdentity(item) !== identity) return item;
+    if (item.source) {
+      const group = groups.find(group => group.id === projectId);
+      if (!group || !sameSource(item, group)) return item;
+    }
+    return { ...item, suggested: projectId };
+  });
 }
 
 export function projectIdFromDrop(overId: string | undefined): string | undefined {

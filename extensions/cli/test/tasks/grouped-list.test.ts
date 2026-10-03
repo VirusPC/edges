@@ -60,11 +60,11 @@ test("list --group-by project --format json emits edges.tasks.grouped/v1", async
     assert.equal(body.status, "success");
     assert.equal(body.command, "list");
     assert.equal(body.schema, "edges.tasks.grouped/v1");
-    assert.ok(body.groups.some((group) => group.id === "default" && group.title));
+    assert.ok(body.groups.some((group) => group.id === '[".","domain","default"]' && group.title));
     assert.equal(body.tasks, undefined);
     const item = body.items[0];
     assert.ok(item?.id || item?.stem);
-    assert.equal(item?.group, "default");
+    assert.equal(item?.group, '[".","domain","default"]');
     assert.equal(item?.title, "Alpha");
     assert.equal(item?.status, "todo");
     assert.equal(item?.doc?.name !== undefined, true);
@@ -130,7 +130,7 @@ test("list filters apply before grouping", async () => {
     };
     assert.deepEqual(
       body.groups.map((group) => group.id),
-      ["cli", "docs"],
+      ['[".","domain","cli"]', '[".","domain","docs"]'],
     );
     assert.deepEqual(
       body.items.map((item) => item.title),

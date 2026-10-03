@@ -70,7 +70,7 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
           sort: opts.sort,
         };
         if (opts.groupBy === "project") {
-          const grouped = await listGroupedByProject(runtime.repoPath, listOpts, runtime.fs);
+          const grouped = await listGroupedByProject(runtime.location, listOpts, runtime.fs);
           return succeed({
             status: "success",
             command: "list",
@@ -79,7 +79,7 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
             items: grouped.items,
           });
         }
-        const listed = await listTasksService(runtime.repoPath, listOpts, runtime.fs);
+        const listed = await listTasksService(runtime.location, listOpts, runtime.fs);
         return succeed({ status: "success", command: "list", tasks: listed });
       });
     });

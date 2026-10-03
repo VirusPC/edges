@@ -28,7 +28,7 @@ export function addRunsCommand(tasks: Command, ctx: CliContext): void {
     .addHelpText("after", RUNS_AFTER_HELP)
     .action(async (target: string, opts: { output: "table" | "json" }) => {
       await runTasksCommand(ctx, async (runtime) => {
-        const record = await getTaskService(runtime.repoPath, target, runtime.fs);
+        const record = await getTaskService(runtime.location, target, runtime.fs);
         const parsedLog = parseRunLog(record.sidecarMarkdown ?? "", record.stem);
         const payload = {
           status: "success" as const,

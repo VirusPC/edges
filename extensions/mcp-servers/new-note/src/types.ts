@@ -32,7 +32,9 @@ export interface IngestFailure {
 export type IngestResult = IngestSuccess | IngestFailure;
 
 export interface RuntimeConfig {
-  repoPath: string;
+  repoPath?: string;
+  cwd?: string;
+  scopeDir?: string;
   baseBranch: string;
   cliEntry: string;
   skillsPath: string;

@@ -10,7 +10,7 @@ export function addProjectListCommand(project: Command, ctx: CliContext): void {
     .option("--json", "Write JSON to stdout (always on)")
     .action(async () => {
       await runTasksCommand(ctx, async (runtime) => {
-        const projects = await listProjects(runtime.repoPath, runtime.writer);
+        const projects = await listProjects(runtime.location, runtime.writer);
         return succeed({ status: "success", command: "project.list", projects });
       });
     });

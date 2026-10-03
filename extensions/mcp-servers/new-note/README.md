@@ -69,7 +69,8 @@ HTTP 模式将在以下端点启动服务器：
 
 ## Environment Variables
 
-- `EDGES_REPO`: 目标仓库路径，默认当前仓库根目录（自动通过相对路径解析）
+- `EDGES_SCOPE`: 显式目标作用域；优先于 `EDGES_REPO`。相对路径按 MCP 启动 cwd 解析。
+- `EDGES_REPO`: 未设置 `EDGES_SCOPE` 时的显式目标。两者均未设置时捕获 MCP 启动 cwd，由 CLI 找最近所属作用域或 Git 根；找不到则返回可操作的校验错误。CLI 和 Skill 资源独立从实现仓库读取。
 - `EDGES_BASE_BRANCH`: 基线分支，默认 `main`
 - `EDGES_MODE`: (可选) 提交模式。
   - `direct` (默认): 直接在基线分支上提交并推送。
@@ -139,7 +140,7 @@ MCP tool 名称：`new_note`
 }
 ```
 
-**提示**：如果 MCP Server 位于仓库的标准 `extensions/mcp-servers/new-note` 路径下，通常不需要设置 `EDGES_REPO`，它会自动识别。
+**提示**：配置 `EDGES_SCOPE` 可固定笔记归属；否则从启动 cwd 查找所属作用域。Server 安装位置不决定写入目标。笔记写入作用域的 `knowledge/notes/`，Git 操作使用实际仓库根。
 
 如需源码直跑（开发环境）：
 

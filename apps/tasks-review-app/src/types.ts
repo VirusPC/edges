@@ -7,7 +7,13 @@ export type TaskDoc = {
   body: string;
 };
 
+export type TaskSource = { scope: string; purpose: "domain" | "maintenance" };
+export const itemIdentity = (item: ReviewItem): string => item.id ?? item.stem;
+
 export type ReviewItem = {
+  id?: string;
+  source?: TaskSource;
+  project?: string;
   stem: string;
   current: string;
   suggested: string;
@@ -20,6 +26,8 @@ export type ReviewItem = {
 };
 
 export type ReviewGroup = {
+  source?: TaskSource;
+  project?: string;
   id: string;
   title: string;
   description?: string;

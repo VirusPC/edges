@@ -1,3 +1,4 @@
+import type { ReviewGroup } from "../types.ts"
 import { useState } from "react"
 import { ListFilter, X } from "lucide-react"
 import { itemAssignee, type ReviewFilter, type ReviewItem } from "../filter.ts"
@@ -25,8 +26,8 @@ import {
 
 const ALL_ASSIGNEE = "__all__"
 
-function copyExport(items: ReviewItem[]) {
-  const text = JSON.stringify(exportReviewRows(items), null, 2)
+function copyExport(items: ReviewItem[], groups: ReviewGroup[]) {
+  const text = JSON.stringify(exportReviewRows(items, groups), null, 2)
   const write = navigator.clipboard?.writeText(text)
   if (write === undefined) {
     console.log(text)
@@ -39,11 +40,13 @@ function copyExport(items: ReviewItem[]) {
 
 function FilterFields({
   items,
+  groups,
   filter,
   onChange,
   stacked = false,
   portalContainer = null,
 }: {
+  groups: ReviewGroup[]
   items: ReviewItem[]
   filter: ReviewFilter
   onChange: (next: ReviewFilter) => void
@@ -141,7 +144,7 @@ function FilterFields({
         size="sm"
         data-action="copy-json"
         className="border-[#334155] bg-[#1a2332] text-[#e7ecf3] hover:bg-[#243044]"
-        onClick={() => copyExport(items)}
+        onClick={() => copyExport(items, groups)}
       >
         复制导出 JSON
       </Button>
@@ -151,10 +154,12 @@ function FilterFields({
 
 export function TopBar({
   items,
+  groups,
   filter,
   onChange,
   narrow,
 }: {
+  groups: ReviewGroup[]
   items: ReviewItem[]
   filter: ReviewFilter
   onChange: (next: ReviewFilter) => void
@@ -205,6 +210,7 @@ export function TopBar({
             </SheetDescription>
             <div className="flex flex-col gap-2">
               <FilterFields
+                groups={groups}
                 items={items}
                 filter={filter}
                 onChange={onChange}
@@ -219,7 +225,7 @@ export function TopBar({
   }
   return (
     <div className="ml-auto flex max-w-full min-w-0 flex-wrap items-center justify-end gap-2">
-      <FilterFields items={items} filter={filter} onChange={onChange} />
+      <FilterFields groups={groups} items={items} filter={filter} onChange={onChange} />
     </div>
   )
 }

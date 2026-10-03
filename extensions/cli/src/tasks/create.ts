@@ -48,7 +48,7 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
     }) => {
       await runTasksCommand(ctx, async (runtime) => {
         const created = await createTask(
-          runtime.repoPath,
+          runtime.location,
           {
             title: opts.title,
             description: opts.description,

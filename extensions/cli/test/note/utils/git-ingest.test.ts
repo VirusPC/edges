@@ -138,3 +138,22 @@ test("commit message includes Co-authored-by trailer", async () => {
   const message = commit[commit.indexOf("-m") + 1];
   assert.equal(message, "ingest: Hello World\n\nCo-authored-by: Tester <tester@example.com>\n");
 });
+
+test('nested Note targets content scope while committing relative to actual Git root', async () => {
+  const { mkdtemp, mkdir, readFile, rm } = await import('node:fs/promises');
+  const { execFileSync } = await import('node:child_process');
+  const { tmpdir } = await import('node:os');
+  const path = await import('node:path');
+  const root = await mkdtemp(path.join(tmpdir(), 'edges-note-scope-'));
+  try {
+    execFileSync('git', ['init', '-q', root]);
+    execFileSync('git', ['config', 'user.email', 'test@example.com'], { cwd: root });
+    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: root });
+    const child = path.join(root, 'projects/child');
+    await mkdir(child, { recursive: true });
+    const result = await runNoteIngest(input, { repoPath: root, scopeDir: child, baseBranch: 'main', mode: 'direct', dryRun: true }, process.env, { now });
+    assert.equal(result.filePath, 'projects/child/knowledge/notes/2026-09-11--hello-world.md');
+    assert.match(await readFile(path.join(root, result.filePath), 'utf8'), /Body text/);
+    assert.equal(execFileSync('git', ['show', '--format=', '--name-only', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), result.filePath);
+  } finally { await rm(root, { recursive: true, force: true }); }
+});

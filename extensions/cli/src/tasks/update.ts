@@ -50,7 +50,7 @@ export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
     ) => {
       await runTasksCommand(ctx, async (runtime) => {
         const updated = await updateTask(
-          runtime.repoPath,
+          runtime.location,
           target,
           {
             title: opts.title,

@@ -1,3 +1,4 @@
+import { taskBoardLocation } from "./paths.js";
 import type { CliContext, CliResult } from "../../context.js";
 import { loadConfig } from "../../utils/config.js";
 import { exitCodeForTasksError } from "../../utils/exit.js";
@@ -8,11 +9,12 @@ import { TasksError, type TasksErrorCode } from "./types.js";
 export type { CliResult };
 
 export function tasksRuntime(ctx: CliContext) {
+  const location = taskBoardLocation(loadConfig(ctx.env).scopeDir, ctx.purpose);
   return {
-    repoPath: loadConfig(ctx.env).repoPath,
-    fs: createNodeBoardFs(),
+    location,
+    fs: createNodeBoardFs(location),
     now: new Date(),
-    writer: createNodeBoardWriter(),
+    writer: createNodeBoardWriter(location),
   };
 }
 
