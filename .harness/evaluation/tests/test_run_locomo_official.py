@@ -198,7 +198,7 @@ class RelocatedEvaluationTests(unittest.TestCase):
                         self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
                         body = (reports / name).read_text()
                         link = re.search(r"See \[.*?\]\((.*?)\)", body).group(1)
-                        self.assertEqual((reports / link).resolve(), adr)
+                        self.assertEqual((reports / link).resolve(), adr.resolve())
                         self.assertIn("python3 .harness/evaluation/", body)
 
 

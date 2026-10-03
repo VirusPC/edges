@@ -6,7 +6,13 @@ status: accepted
 
 Edges 的递归目录以作用域作为内容归属的主轴：项目专属的笔记、任务和可复用判断归该项目工作区，根级内容归根作用域；跨作用域检索与看板负责汇总，复用关系通过引用连接。用户于 2026-10-02 确认这一取舍，目的是让人和 Agent 进入一个作用域后能够接手完整的工作上下文，避免仅因内容类型不同而将同一项目的内容分散在全局目录。
 
-完整目录、索引与迁移交付要求见[整体设计](../superpowers/specs/2026-10-03-recursive-scope-layout-design.md)，用户于 2026-10-03 整体确认目标目录，尚未实施。
+完整目录、索引与迁移交付要求见[整体设计](../superpowers/specs/2026-10-03-recursive-scope-layout-design.md)，用户于 2026-10-03 整体确认目标目录。
+
+## 实施状态与历史语境（2026-10-03）
+
+当前隔离工作树已实现新布局运行时、选择式初始化、managed/referenced 类型、通用一次性迁移和 Edges 实例迁移；显式作用域及 domain/maintenance Task 路径、聚合看板和评测路径适配已通过集成验证。具体范围、命令与限制见[实施计划的 Task 6 证据](../superpowers/plans/2026-10-03-recursive-scope-layout.md#task-6-end-to-end-verification-and-pr-delivery)。整体评审、Task 完成状态和 PR 交付仍由该计划记录，不能从本 ADR 的 accepted 状态推断已交付。
+
+以下各节保留 **2026-10-02 至 2026-10-03 实施前的设计讨论与取舍**，并保留末尾明确标注日期的实现补记。历史段落中的“当前”“尚未实施”“仍待设计”等描述当时状态；已实现范围以上述证据为准，不能继续据此断言新布局、迁移器或选择式初始化未实现。任意外部内容目录接入、通用 Task Skill/MCP CRUD 与 Python 运行时迁入 CLI 等未完成能力不因本次迁移而完成。其他克隆的 ignored 私有材料仍须逐实例迁移；evaluation/teaching 两处原有 referenced 来源缺失诊断仍保留。
 
 ## 任务与知识容器
 

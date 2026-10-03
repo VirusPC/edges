@@ -13,7 +13,7 @@ This directory is the PR #70 hand-port of F1 + truncated context. It is kept so 
 
 Official-style **write → retrieve → answer → score** path for a tiny LoCoMo subset.
 
-This is **Evaluation Smoke, not Benchmark Proof**. The SUT is upstream [snap-research/locomo](https://github.com/snap-research/locomo) scoring / out-file schema (now preferred via [VirusPC/locomo](https://github.com/VirusPC/locomo)). Do **not** wire Project Memory / `.memory` as a LoCoMo backend, and do **not** cite scores as evidence that filesystem project-memory works.
+This is **Evaluation Smoke, not Benchmark Proof**. The SUT is upstream [snap-research/locomo](https://github.com/snap-research/locomo) scoring / out-file schema (now preferred via [VirusPC/locomo](https://github.com/VirusPC/locomo)). Do **not** wire Project Memory / `.harness/memory` as a LoCoMo backend, and do **not** cite scores as evidence that filesystem project-memory works.
 
 Decision: [`docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`](../../../../docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md).
 
