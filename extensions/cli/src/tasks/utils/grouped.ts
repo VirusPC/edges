@@ -1,3 +1,6 @@
+import { scopeDir, type BoardTarget } from "./paths.js";
+import { isTaskProjectId } from "./project.js";
+import { portableScope } from "../../utils/scope.js";
 import { listProjectIds, listTasksWithDocs, type BoardFs, type TaskListOpts } from "./board.js";
 import {
   DEFAULT_PROJECT_DESCRIPTION,
@@ -12,7 +15,14 @@ import type { TaskDoc } from "./task-doc.js";
 
 export const GROUPED_LIST_SCHEMA = "edges.tasks.grouped/v1";
 
+export type TaskSource = { scope: string; purpose: "domain" | "maintenance" };
+export function sourceIdentity(source: TaskSource, project: string, stem?: string): string {
+  return JSON.stringify(stem === undefined ? [source.scope, source.purpose, project] : [source.scope, source.purpose, project, stem]);
+}
+
 export type GroupedListGroup = {
+  source?: TaskSource;
+  project?: string;
   id: string;
   title: string;
   description?: string;
@@ -21,6 +31,8 @@ export type GroupedListGroup = {
 export type GroupedTaskInput = TaskListItem & { doc?: TaskDoc };
 
 export type GroupedListItem = {
+  source?: TaskSource;
+  project?: string;
   id: string;
   stem?: string;
   group: string;
@@ -79,6 +91,20 @@ export function buildGroupedList(tasks: GroupedTaskInput[], groups: GroupedListG
   };
 }
 
+export function parseSource(raw: unknown): TaskSource | undefined {
+  if (raw === undefined) return undefined;
+  if (!isPlainObject(raw) || typeof raw.scope !== "string" || !raw.scope || raw.scope.startsWith("/") || raw.scope.includes("\\") || raw.scope.split("/").includes("..") || /^[a-z]:/i.test(raw.scope) || !["domain", "maintenance"].includes(String(raw.purpose))) {
+    throw new TasksError("VALIDATION_ERROR", "source requires a portable scope and domain|maintenance purpose");
+  }
+  return { scope: raw.scope, purpose: raw.purpose as TaskSource["purpose"] };
+}
+export function parseSourceProject(raw: unknown): string {
+  if (typeof raw !== "string" || !isTaskProjectId(raw)) {
+    throw new TasksError("VALIDATION_ERROR", "source-aware project must be a real Task Project id (default or lowercase ASCII kebab-case slug)");
+  }
+  return raw;
+}
+
 function parseGroup(raw: unknown): GroupedListGroup {
   if (!isPlainObject(raw) || typeof raw.id !== "string" || raw.id.trim() === "") {
     throw new TasksError("VALIDATION_ERROR", "grouped list group id must be a non-empty string");
@@ -90,6 +116,8 @@ function parseGroup(raw: unknown): GroupedListGroup {
   if (typeof raw.description === "string") {
     group.description = raw.description;
   }
+  const source = parseSource(raw.source);
+  if (source) { group.source = source; group.project = parseSourceProject(raw.project); }
   return group;
 }
 
@@ -122,6 +150,12 @@ function parseItem(raw: unknown): GroupedListItem {
   if ("doc" in raw && raw.doc !== undefined) {
     item.doc = parseTaskDocField(raw.doc);
   }
+  const source = parseSource(raw.source);
+  if (source) {
+    if (!stemRaw) throw new TasksError("VALIDATION_ERROR", "source-aware item requires its stored stem");
+    item.source = source;
+    item.project = parseSourceProject(raw.project);
+  }
   return item;
 }
 
@@ -150,6 +184,7 @@ export function groupedListToReviewPageInput(grouped: GroupedList): ReviewPageIn
     id: group.id,
     title: group.title,
     description: group.description ?? "",
+    ...(group.source ? { source: group.source, project: group.project } : {}),
   }));
   const groupIds = new Set(groups.map((group) => group.id));
   const items: ReviewPageItem[] = grouped.items.map((item) => {
@@ -159,6 +194,7 @@ export function groupedListToReviewPageInput(grouped: GroupedList): ReviewPageIn
     }
     const mapped: ReviewPageItem = {
       stem,
+      ...(item.source ? { id: item.id, source: item.source, project: item.project } : {}),
       current: item.group,
       suggested: item.group,
     };
@@ -200,7 +236,7 @@ export function parseGroupedList(raw: unknown): GroupedList {
 }
 
 async function resolveGroup(
-  repoPath: string,
+  repoPath: BoardTarget,
   id: TaskProjectId,
   fs: BoardFs,
 ): Promise<GroupedListGroup> {
@@ -216,9 +252,10 @@ async function resolveGroup(
 }
 
 export async function listGroupedByProject(
-  repoPath: string,
+  repoPath: BoardTarget,
   opts: TaskListOpts,
   fs: BoardFs,
+  sourceScope = portableScope(scopeDir(repoPath)),
 ): Promise<GroupedList> {
   const tasks = await listTasksWithDocs(repoPath, opts, fs);
   const requested = opts.projects ?? [];
@@ -230,5 +267,11 @@ export async function listGroupedByProject(
   for (const id of sortGroupIds(ids)) {
     groups.push(await resolveGroup(repoPath, id, fs));
   }
-  return buildGroupedList(tasks, groups);
+  const grouped = buildGroupedList(tasks, groups);
+  const source: TaskSource = { scope: sourceScope, purpose: typeof repoPath === "string" ? "domain" : repoPath.purpose };
+  return {
+    ...grouped,
+    groups: grouped.groups.map(group => ({ ...group, source, project: group.id, id: sourceIdentity(source, group.id) })),
+    items: grouped.items.map(item => ({ ...item, source, project: item.group, id: sourceIdentity(source, item.group, item.stem), group: sourceIdentity(source, item.group) })),
+  };
 }

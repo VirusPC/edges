@@ -11,7 +11,7 @@ export function addProjectGetCommand(project: Command, ctx: CliContext): void {
     .option("--json", "Write JSON to stdout (always on)")
     .action(async (projectId: string) => {
       await runTasksCommand(ctx, async (runtime) => {
-        const record = await getProject(runtime.repoPath, projectId, runtime.writer);
+        const record = await getProject(runtime.location, projectId, runtime.writer);
         return succeed({ status: "success", command: "project.get", ...record });
       });
     });

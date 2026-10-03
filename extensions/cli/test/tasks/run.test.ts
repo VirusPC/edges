@@ -8,7 +8,7 @@ import { run } from "../../src/program.js";
 test("run tasks list returns JSON tasks from EDGES_REPO", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const dir = path.join(repo, "knowledge/tasks/_default/backlog");
+    const dir = path.join(repo, "tasks/_default/backlog");
     await mkdir(dir, { recursive: true });
     await writeFile(
       path.join(dir, "2026-09-13--listed.md"),
@@ -68,7 +68,7 @@ test("run tasks list --project default --project cli ANDs with --status", async 
 test("run tasks get returns the task body", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const dir = path.join(repo, "knowledge/tasks/_default/todo");
+    const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
       path.join(dir, "2026-09-13--got.md"),
@@ -103,7 +103,7 @@ hello body
 test("run tasks get missing exits 1 with TASK_NOT_FOUND", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const result = await run(["tasks", "get", "missing"], { env: { ...process.env, EDGES_REPO: repo } });
     assert.equal(result.exitCode, 1);
     const body = JSON.parse(result.stdout) as { errorCode: string };
@@ -116,14 +116,14 @@ test("run tasks get missing exits 1 with TASK_NOT_FOUND", async () => {
 test("run tasks create is JSON and skips git", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const result = await run(["tasks", "create", "--title", "From CLI"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(result.exitCode, 0);
     const body = JSON.parse(result.stdout) as { command: string; path: string; stem: string };
     assert.equal(body.command, "create");
-    assert.match(body.path, /knowledge\/tasks\/_default\/backlog\//);
+    assert.match(body.path, /tasks\/_default\/backlog\//);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -132,7 +132,7 @@ test("run tasks create is JSON and skips git", async () => {
 test("run tasks create --priority high returns JSON priority and writes the field", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(["tasks", "create", "--title", "Pri", "--priority", "high"], { env });
     assert.equal(created.exitCode, 0);
@@ -140,7 +140,7 @@ test("run tasks create --priority high returns JSON priority and writes the fiel
     assert.equal(body.command, "create");
     assert.equal(body.priority, "high");
     assert.equal(body.project, "default");
-    assert.match(body.path, /knowledge\/tasks\/_default\/backlog\//);
+    assert.match(body.path, /tasks\/_default\/backlog\//);
     const md = await readFile(path.join(repo, body.path), "utf8");
     assert.match(md, /edges-task-priority: high/);
   } finally {
@@ -185,7 +185,7 @@ test("run tasks create without --project JSON project is default", async () => {
     });
     assert.equal(result.exitCode, 0);
     assert.equal(JSON.parse(result.stdout).project, "default");
-    assert.match(JSON.parse(result.stdout).path, /knowledge\/tasks\/_default\/backlog\//);
+    assert.match(JSON.parse(result.stdout).path, /tasks\/_default\/backlog\//);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -194,13 +194,13 @@ test("run tasks create without --project JSON project is default", async () => {
 test("run tasks create --priority P0 is VALIDATION_ERROR and writes nothing", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const result = await run(["tasks", "create", "--title", "Pri", "--priority", "P0"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(result.exitCode, 2);
     assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
-    const names = await readdir(path.join(repo, "knowledge/tasks/_default/backlog"));
+    const names = await readdir(path.join(repo, "tasks/_default/backlog"));
     assert.deepEqual(names, []);
   } finally {
     await rm(repo, { recursive: true, force: true });
@@ -210,7 +210,7 @@ test("run tasks create --priority P0 is VALIDATION_ERROR and writes nothing", as
 test("run tasks create without --priority JSON priority is none", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const result = await run(["tasks", "create", "--title", "From CLI"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
@@ -231,7 +231,7 @@ test("run tasks update --priority high JSON and in-place path", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const created = await run(["tasks", "create", "--title", "PatchPri"], { env });
     const stem = JSON.parse(created.stdout).stem as string;
     const updated = await run(["tasks", "update", stem, "--priority", "high"], { env });
@@ -239,7 +239,7 @@ test("run tasks update --priority high JSON and in-place path", async () => {
     const body = JSON.parse(updated.stdout) as { command: string; priority: string; path: string };
     assert.equal(body.command, "update");
     assert.equal(body.priority, "high");
-    assert.match(body.path, /knowledge\/tasks\/_default\/backlog\//);
+    assert.match(body.path, /tasks\/_default\/backlog\//);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -262,7 +262,7 @@ test("run tasks update --project cli JSON and new path", async () => {
     const body = JSON.parse(updated.stdout) as { command: string; project: string; path: string };
     assert.equal(body.command, "update");
     assert.equal(body.project, "cli");
-    assert.equal(body.path, `knowledge/tasks/cli/todo/${stem}.md`);
+    assert.equal(body.path, `tasks/cli/todo/${stem}.md`);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -277,7 +277,7 @@ test("run tasks update --project Default is VALIDATION_ERROR", async () => {
 test("run tasks status returns command status", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const dir = path.join(repo, "knowledge/tasks/_default/todo");
+    const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
       path.join(dir, "2026-09-13--mv.md"),
@@ -309,7 +309,7 @@ test("run tasks runs --output json lists derived run-id", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   const stem = "2026-09-13--with-run";
   try {
-    const dir = path.join(repo, "knowledge/tasks/_default/done");
+    const dir = path.join(repo, "tasks/_default/done");
     await mkdir(dir, { recursive: true });
     await writeFile(
       path.join(dir, `${stem}.md`),
@@ -357,7 +357,7 @@ body
 test("run tasks runs missing task is TASK_NOT_FOUND", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const result = await run(["tasks", "runs", "nope"], { env: { ...process.env, EDGES_REPO: repo } });
     assert.equal(result.exitCode, 1);
     assert.equal(JSON.parse(result.stdout).errorCode, "TASK_NOT_FOUND");
@@ -370,7 +370,7 @@ test("run tasks run-messages returns notes for a stable run-id", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   const stem = "2026-09-13--msg";
   try {
-    const dir = path.join(repo, "knowledge/tasks/_default/in_progress");
+    const dir = path.join(repo, "tasks/_default/in_progress");
     await mkdir(dir, { recursive: true });
     await writeFile(
       path.join(dir, `${stem}.md`),
@@ -434,7 +434,7 @@ test("run tasks run-messages unknown id is RUN_NOT_FOUND", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   const stem = "2026-09-13--msg";
   try {
-    const dir = path.join(repo, "knowledge/tasks/_default/todo");
+    const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
       path.join(dir, `${stem}.md`),
@@ -472,7 +472,7 @@ async function seedPriorities() {
     { status: "todo", stem: "2026-09-16--low-one", priorityLine: "  edges-task-priority: low\n" },
   ];
   for (const doc of docs) {
-    const dir = path.join(repo, "knowledge/tasks/_default", doc.status);
+    const dir = path.join(repo, "tasks/_default", doc.status);
     await mkdir(dir, { recursive: true });
     await writeFile(
       path.join(dir, `${doc.stem}.md`),
@@ -527,7 +527,7 @@ test("run tasks list --priority P0 is VALIDATION_ERROR", async () => {
 test("run tasks status rejects --project and does not move", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const dir = path.join(repo, "knowledge/tasks/_default/todo");
+    const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
       path.join(dir, "2026-09-16--stay.md"),
@@ -551,7 +551,7 @@ body
     assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
     const md = await readFile(path.join(dir, "2026-09-16--stay.md"), "utf8");
     assert.match(md, /edges-tasks-status: todo/);
-    await assert.rejects(access(path.join(repo, "knowledge/tasks/cli/todo/2026-09-16--stay.md")));
+    await assert.rejects(access(path.join(repo, "tasks/cli/todo/2026-09-16--stay.md")));
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -566,7 +566,7 @@ test("run tasks status JSON has no project key and stays under _default", async 
     const moved = await run(["tasks", "status", stem, "in_progress"], { env });
     assert.equal(moved.exitCode, 0);
     const body = JSON.parse(moved.stdout) as { path: string; project?: string };
-    assert.equal(body.path, `knowledge/tasks/_default/in_progress/${stem}.md`);
+    assert.equal(body.path, `tasks/_default/in_progress/${stem}.md`);
     assert.equal(body.project, undefined);
   } finally {
     await rm(repo, { recursive: true, force: true });
@@ -650,7 +650,7 @@ test("run tasks project create/list/get/update and update --project keeps status
 test("run tasks status rejects --priority and does not move", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const dir = path.join(repo, "knowledge/tasks/_default/todo");
+    const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
       path.join(dir, "2026-09-16--stay.md"),

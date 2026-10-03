@@ -6,20 +6,27 @@ export function isTaskStatus(value: string): value is TaskStatus {
   return TASK_STATUSES.includes(value as TaskStatus);
 }
 
-export function boardRoot(repoPath: string): string {
-  return path.join(repoPath, "knowledge/tasks");
+export type TaskPurpose = "domain" | "maintenance";
+export type TaskBoardLocation = { scopeDir: string; purpose: TaskPurpose; boardDir: string };
+export type BoardTarget = string | TaskBoardLocation;
+export function taskBoardLocation(scopeDir: string, purpose: TaskPurpose = "domain"): TaskBoardLocation {
+  return { scopeDir, purpose, boardDir: path.join(scopeDir, purpose === "maintenance" ? ".harness/tasks" : "tasks") };
 }
+export function scopeDir(target: BoardTarget): string { return typeof target === "string" ? target : target.scopeDir; }
+export function boardRoot(target: BoardTarget): string { return typeof target === "string" ? path.join(target, "tasks") : target.boardDir; }
+export function boardRel(target: BoardTarget = ""): string { return path.relative(scopeDir(target), boardRoot(target)); }
 
-export function statusDir(repoPath: string, project: TaskProjectId, status: TaskStatus): string {
+
+export function statusDir(repoPath: BoardTarget, project: TaskProjectId, status: TaskStatus): string {
   return path.join(boardRoot(repoPath), projectDirName(project), status);
 }
 
-export function taskRelPath(project: TaskProjectId, status: TaskStatus, stem: string): string {
-  return path.join("knowledge/tasks", projectDirName(project), status, `${stem}.md`);
+export function taskRelPath(project: TaskProjectId, status: TaskStatus, stem: string, target: BoardTarget = ""): string {
+  return path.join(boardRel(target), projectDirName(project), status, `${stem}.md`);
 }
 
-export function sidecarRelPath(project: TaskProjectId, status: TaskStatus, stem: string): string {
-  return path.join("knowledge/tasks", projectDirName(project), status, `.${stem}.log.md`);
+export function sidecarRelPath(project: TaskProjectId, status: TaskStatus, stem: string, target: BoardTarget = ""): string {
+  return path.join(boardRel(target), projectDirName(project), status, `.${stem}.log.md`);
 }
 
 export function stemFromFilename(name: string): string | undefined {

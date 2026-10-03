@@ -7,20 +7,21 @@ from pathlib import Path
 
 from lib.paths import (
     AGENTS_FILE_NAME,
-    memory_dir,
-    type_content_dir,
+    assert_scope_path,
+    is_scope,
+    reject_legacy,
     write_atomic,
 )
 from lib.templates import read_index_template
 from lib.types import (
     ensure_type_gitignore,
+    layer_type_specs,
     find_git_root,
     index_file_name,
     type_index_template_name,
     upsert_local_type_line,
     validate_type_name,
 )
-from nodes.agents import classify_agents_file
 from nodes.entries import refresh_index
 
 
@@ -29,6 +30,7 @@ def add_type(
     entry_type: str,
     description: str,
     *,
+    module: str = "memory",
     gitignore: bool = False,
     writable: bool = True,
     format: str = "ordinary",
@@ -37,22 +39,36 @@ def add_type(
     if external_content_dir is not None:
         raise ValueError(
             "external content root is stubbed this round; "
-            "only official agent_skills may live outside .memory/"
+            "only official referenced may use an external content source"
         )
+    reject_legacy(target)
+    if module not in {"memory", "skills"}:
+        raise ValueError("module must be memory or skills")
     name = validate_type_name(entry_type)
     normalized = " ".join((description or "").split())
     if not normalized:
         raise ValueError("add-type 必须提供 --description")
     if format not in {"ordinary", "skills"}:
         raise ValueError("format 只能是 ordinary 或 skills")
-    if not memory_dir(target).is_dir() or classify_agents_file(
-        target / AGENTS_FILE_NAME
-    ) != "managed":
+    if not is_scope(target):
         raise ValueError("目标目录尚未初始化，请先执行 init")
 
-    index_name = index_file_name(name)
-    index_path = memory_dir(target) / index_name
-    content_dir = type_content_dir(target, name)
+    index_name = index_file_name(name, module)
+    index_path = assert_scope_path(target / index_name, target)
+    content_dir = index_path.parent
+    existing_specs = {spec.name: spec for spec in layer_type_specs(target)}
+    if name in existing_specs and existing_specs[name].index_file != index_name:
+        raise ValueError("Type already belongs to another module")
+    for spec in existing_specs.values():
+        if spec.index_file == index_name and spec.name != name:
+            raise ValueError(f"Type path already belongs to {spec.name}: {index_name}")
+    if name in existing_specs:
+        adopted = existing_specs[name]
+        gitignore, writable, format = adopted.gitignore, adopted.writable, adopted.format
+    if gitignore:
+        repo_root = find_git_root(target)
+        if repo_root:
+            ensure_type_gitignore(repo_root, name, module, index_name)
     existed = index_path.is_file()
     if not existed:
         write_atomic(
@@ -62,6 +78,7 @@ def add_type(
                 name,
                 normalized,
                 flags={
+                    "module": module,
                     "gitignore": "true" if gitignore else "false",
                     "writable": "true" if writable else "false",
                     "format": format,
@@ -87,7 +104,7 @@ def add_type(
         if repo_root is None:
             gitignore_action = "skipped-no-git"
         else:
-            gitignore_action = ensure_type_gitignore(repo_root, name)
+            gitignore_action = ensure_type_gitignore(repo_root, name, module, index_name)
 
     rel_index = index_path.relative_to(target).as_posix()
     rel_dir = content_dir.relative_to(target).as_posix()
@@ -95,6 +112,7 @@ def add_type(
         "operation": "add-type",
         "targetDir": str(target),
         "type": name,
+        "module": module,
         "index": rel_index,
         "contentDir": rel_dir,
         "agentsAction": agents_action,

@@ -33,7 +33,7 @@ edges --help / -v
 
 **Breaking rename:** the bin is `edges` only. There is no `edges-note` shim and no default ingest at the root. Callers must migrate to `edges note …`. Running `edges` without a subcommand is a usage error.
 
-Design decision: [`.memory/projects/project_cli_from_mcp.md`](../.memory/projects/project_cli_from_mcp.md). Agent-CLI mechanics: [`.memory/references/reference_agent_oriented_cli.md`](../.memory/references/reference_agent_oriented_cli.md).
+Design decision: [`.memory/projects/project_cli_from_mcp.md`](../../.harness/memory/projects/project_cli_from_mcp.md). Agent-CLI mechanics: [`.memory/references/reference_agent_oriented_cli.md`](../../.harness/memory/references/reference_agent_oriented_cli.md).
 
 ## Run
 
@@ -48,6 +48,20 @@ pnpm --filter edges-cli exec tsx src/index.ts note \
 ```
 
 Those examples use `tsx` and do not need a `dist/` build. The installed `edges` binary is the local `dist/` build in [Consumption](#consumption).
+
+## Target scope
+
+`edges --scope <directory> <command>` selects the content owner. Resolution order is `--scope`, `EDGES_SCOPE`, `EDGES_REPO`, then the nearest owning AGENTS scope or Git root above the process cwd. Relative paths resolve against cwd. The CLI install directory is never the default content target. An explicit directory does not initialize Project Memory.
+
+```bash
+edges --scope ./projects/demo tasks list
+edges --scope ./projects/demo tasks --purpose maintenance create --title "Repair build"
+edges --scope ./projects/demo note --title "Decision" --content "..." --co-author "Codex <codex@openai.com>"
+```
+
+The new-note MCP snapshots its caller cwd when no target is configured; an explicit configured scope/repo wins over ambient child-process environment. Its CLI and Skill resources remain tied to the implementation checkout.
+
+Notes go to the selected scope's `knowledge/notes/`; Git operations run at its actual repository root. Artifacts server installation uses the CLI implementation checkout, independently of content scope; the existing server operations `repoRoot` source override remains available.
 
 ## `note` required flags
 
@@ -76,7 +90,7 @@ Same optional gate as MCP HTTP. If `EDGES_AUTH_TOKEN` is set, present it with `-
 
 ## `tasks`
 
-Board root is `<EDGES_REPO>/knowledge/tasks/`. Writes are filesystem-only (no git). Cancel with `status cancelled`. There is no `delete` command and no top-level `log` verb.
+Board root is `<scope>/tasks/` by default (`--purpose domain`); `tasks --purpose maintenance` selects `<scope>/.harness/tasks/`. Paths cannot escape the selected board. Writes are filesystem-only (no git). Cancel with `status cancelled`. There is no `delete` command and no top-level `log` verb.
 
 ```
 edges tasks list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
@@ -99,12 +113,14 @@ Default `list` stays `{ status, command: "list", tasks: [...] }`. `list --group-
 
 `project review-page` still only renders. It reads `groups` + `items` JSON (`--from` file or `-` for stdin). It inlines the prebuilt shell (`pnpm --filter edges-cli run build:tasks-review-app` or `prepack`) into one HTML file. Data is `#edges-review-payload`. Items may omit `doc`. It writes that HTML (default: OS temp; `--out` overrides) and prints `{status, command: "project.review-page", path, groupCount, itemCount}`. It does not call `updateTask`, `createProject`, or any board mutator, and it does not open a browser. Open the printed `path` in a system browser. Local UI work uses `pnpm --filter edges-cli run dev:tasks-review-app`. There is no `edges tasks classify` / `--mode` / `--open`. `review-page` still only renders; publish is a separate step (`edges artifacts publish`).
 
-Persistent public board (`http(s)://<host>/tasks/`, ADR 0021): generate maps the grouped list into review-page input and writes `knowledge/tasks/_site/index.html`. Box/CI entry:
+Persistent public board (`http(s)://<host>/tasks/`, ADR 0021): generate maps the grouped list into review-page input and writes `tasks/_site/index.html` by default. Box/CI entry:
 
 ```bash
 pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
-  --out "$PWD/knowledge/tasks/_site/index.html"
+  --scope "$PWD" --purpose all --out "$PWD/tasks/_site/index.html"
 ```
+
+The generator accepts `--purpose domain|maintenance|all`. `all` walks real descendant scopes and both purposes, stopping at nested repositories and symlinks. Grouped items and HTML use stable IDs containing scope, purpose, project and stem. `source.scope` is repository-relative (`.` for root), and `source.purpose` is explicit; stored stems, project slugs, Task schema and Run IDs stay unchanged. Source-aware groups and items must provide a valid real `project`; source-aware grouped items must also provide their stored `stem`. Transport IDs are never fallback project or stem values. Exports retain the real stem/project and source. The page permits classification only within one source board.
 
 Ops (one-time nginx, curl checks, PATH): [deploy/README.md](deploy/README.md). `deploy.yml` generates after pull; it does not run setup-nginx.
 

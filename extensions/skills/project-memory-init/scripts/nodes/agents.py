@@ -18,16 +18,14 @@ from lib.blocks import (
     block_pattern,
     build_children_block,
     build_local_block,
-    drop_auto_block,
     ensure_important_block,
     insert_inner_block,
-    prune_outer_region,
     render_agents_document,
     upsert_block,
 )
-from lib.paths import AGENTS_FILE_NAME, memory_dir, write_atomic
+from lib.paths import AGENTS_FILE_NAME, assert_scope_path, is_scope, write_atomic
 from lib.templates import ENTRY_LINE_TEMPLATE, render_line
-from lib.types import ensure_seed_local_lines
+from lib.types import layer_type_specs, selected_local_block, upsert_local_type_line
 
 
 def classify_agents_file(path: Path) -> str:
@@ -57,6 +55,7 @@ def sync_agents_blocks(
     含他人内容时不动文件，交给 `$project-memory-doctor`。
     """
     path = directory / AGENTS_FILE_NAME
+    assert_scope_path(path, directory)
     state = classify_agents_file(path)
     if state == "foreign":
         return "needs-doctor"
@@ -71,7 +70,7 @@ def sync_agents_blocks(
     ):
         if block:
             updated = upsert_block(updated, start, end, block)
-    updated = drop_auto_block(prune_outer_region(updated))
+    # Preserve existing manual text and obsolete blocks; migration handles old formats.
     if updated == existing:
         return "preserved"
     write_atomic(path, updated)
@@ -83,16 +82,17 @@ def sync_target_agents(target: Path, root: Path) -> str:
 
     新文件用种子清单。已有文件只保证种子行在，额外 type 行原样保留。
     """
+    assert_scope_path(target / AGENTS_FILE_NAME, target)
     path = target / AGENTS_FILE_NAME
+    specs = layer_type_specs(target)
     if classify_agents_file(path) == "missing":
-        return sync_agents_blocks(target, local=build_local_block())
+        return sync_agents_blocks(target, local=selected_local_block(specs))
     existing = path.read_text(encoding="utf-8")
-    updated = ensure_seed_local_lines(existing)
-    if updated != existing:
-        match = block_pattern(LOCAL_START, LOCAL_END).search(updated)
-        local = match.group(0) if match else build_local_block()
-        return sync_agents_blocks(target, local=local)
-    return sync_agents_blocks(target, local="")
+    match = block_pattern(LOCAL_START, LOCAL_END).search(existing)
+    local = match.group(0) if match else selected_local_block([])
+    for spec in specs:
+        local = upsert_local_type_line(local, spec.index_file, spec.description or spec.name)
+    return sync_agents_blocks(target, local=local)
 
 
 def normalize_index_description(target: Path, description: str | None) -> str:
@@ -153,14 +153,11 @@ def drop_index_entries(path: Path, relative_paths: set[str]) -> bool:
     match = block_pattern(CHILDREN_START, CHILDREN_END).search(document)
     if match is None:
         return False
-    kept = [
-        found.group(0)
-        for found in INDEX_ENTRY_PATTERN.finditer(match.group(0))
-        if found.group(1) not in relative_paths
-    ]
-    replacement = build_children_block("\n".join(kept)) if kept else ""
-    updated = document[: match.start()] + replacement + document[match.end() :]
-    updated = re.sub(r"\n{3,}", "\n\n", prune_outer_region(updated)).rstrip() + "\n"
+    block = match.group(0)
+    updated_block = INDEX_ENTRY_PATTERN.sub(
+        lambda found: "" if found.group(1) in relative_paths else found.group(0), block
+    )
+    updated = document[:match.start()] + updated_block + document[match.end():]
     if updated == document:
         return False
     write_atomic(path, updated)
@@ -172,14 +169,14 @@ def find_index_anchor(target: Path, root: Path) -> Path:
 
     索引因此跟随记忆层级而非目录层级——路径上不带记忆的中间目录被跳过，
     不会凭空多出一层只为转发。目标就是记忆根时不再往上找：`--root-dir`
-    把树封在这里，外面即使有 `.memory/` 也不算本棵树的祖先。
+    把树封在这里，外面即使有其他作用域 也不算本棵树的祖先。
     """
     if target == root:
         return root
     for candidate in target.parents:
         if candidate == root:
             break
-        if memory_dir(candidate).is_dir():
+        if is_scope(candidate):
             return candidate
     return root
 
@@ -209,7 +206,7 @@ def sync_index_entry(
         write_atomic(
             path,
             render_agents_document(
-                anchor.name, build_local_block(), build_children_block(entry)
+                anchor.name, selected_local_block(layer_type_specs(anchor)), build_children_block(entry)
             ),
         )
         return "created", relative_agents, normalized_description

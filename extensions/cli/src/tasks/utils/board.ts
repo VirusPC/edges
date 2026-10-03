@@ -1,5 +1,7 @@
+import { scopeDir, type BoardTarget } from "./paths.js";
 import {
   access,
+  lstat,
   mkdir,
   readdir,
   readFile,
@@ -53,15 +55,38 @@ export type BoardWriter = BoardFs & {
   rmdir(abs: string): Promise<void>;
 };
 
-export function createNodeBoardFs(): BoardFs {
+async function assertBoardPath(target: BoardTarget | undefined, abs: string): Promise<void> {
+  if (target === undefined) return;
+  const scope = path.resolve(scopeDir(target));
+  const board = path.resolve(boardRoot(target));
+  const rel = path.relative(board, path.resolve(abs));
+  if (rel === ".." || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel)) {
+    throw new TasksError("VALIDATION_ERROR", "path is outside selected task board");
+  }
+  let cursor = scope;
+  for (const part of path.relative(scope, path.resolve(abs)).split(path.sep).filter(Boolean)) {
+    cursor = path.join(cursor, part);
+    try {
+      if ((await lstat(cursor)).isSymbolicLink()) throw new TasksError("VALIDATION_ERROR", "task board paths must not cross symlinks");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") break;
+      throw error;
+    }
+  }
+}
+
+export function createNodeBoardFs(target?: BoardTarget): BoardFs {
   return {
     async readFile(abs: string): Promise<string> {
+      await assertBoardPath(target, abs);
       return readFile(abs, "utf8");
     },
     async readdir(abs: string): Promise<string[]> {
+      await assertBoardPath(target, abs);
       return readdir(abs);
     },
     async exists(abs: string): Promise<boolean> {
+      await assertBoardPath(target, abs);
       try {
         await access(abs);
         return true;
@@ -72,22 +97,28 @@ export function createNodeBoardFs(): BoardFs {
   };
 }
 
-export function createNodeBoardWriter(): BoardWriter {
+export function createNodeBoardWriter(target?: BoardTarget): BoardWriter {
   return {
-    ...createNodeBoardFs(),
+    ...createNodeBoardFs(target),
     async writeFile(abs: string, contents: string): Promise<void> {
+      await assertBoardPath(target, abs);
       await writeFile(abs, contents, "utf8");
     },
     async mkdirp(abs: string): Promise<void> {
+      await assertBoardPath(target, abs);
       await mkdir(abs, { recursive: true });
     },
     async rename(from: string, to: string): Promise<void> {
+      await assertBoardPath(target, from);
+      await assertBoardPath(target, to);
       await rename(from, to);
     },
     async unlink(abs: string): Promise<void> {
+      await assertBoardPath(target, abs);
       await unlink(abs);
     },
     async rmdir(abs: string): Promise<void> {
+      await assertBoardPath(target, abs);
       await fsRmdir(abs);
     },
   };
@@ -111,7 +142,7 @@ function countSidecarRuns(markdown: string): number {
   return count;
 }
 
-export async function listProjectIds(repoPath: string, fs: BoardFs): Promise<TaskProjectId[]> {
+export async function listProjectIds(repoPath: BoardTarget, fs: BoardFs): Promise<TaskProjectId[]> {
   const root = boardRoot(repoPath);
   if (!(await fs.exists(root))) {
     return [];
@@ -153,16 +184,16 @@ export type ListedTask = {
 };
 
 async function readListItem(
-  repoPath: string,
+  repoPath: BoardTarget,
   project: TaskProjectId,
   status: TaskStatus,
   stem: string,
   fs: BoardFs,
 ): Promise<ListedTask> {
-  const rel = taskRelPath(project, status, stem);
-  const sidecarRel = sidecarRelPath(project, status, stem);
-  const abs = path.join(repoPath, rel);
-  const sidecarAbs = path.join(repoPath, sidecarRel);
+  const rel = taskRelPath(project, status, stem, repoPath);
+  const sidecarRel = sidecarRelPath(project, status, stem, repoPath);
+  const abs = path.join(scopeDir(repoPath), rel);
+  const sidecarAbs = path.join(scopeDir(repoPath), sidecarRel);
   const markdown = await fs.readFile(abs);
   const parsed = parseTaskDoc(markdown);
   const doc = taskDocFromParsed(parsed);
@@ -195,7 +226,7 @@ export type TaskListOpts = {
 };
 
 export async function listTasksWithDocs(
-  repoPath: string,
+  repoPath: BoardTarget,
   opts: TaskListOpts,
   fs: BoardFs,
 ): Promise<Array<TaskListItem & { doc: TaskDoc }>> {
@@ -234,7 +265,7 @@ export async function listTasksWithDocs(
 }
 
 export async function listTasks(
-  repoPath: string,
+  repoPath: BoardTarget,
   opts: TaskListOpts,
   fs: BoardFs,
 ): Promise<TaskListItem[]> {
@@ -243,7 +274,7 @@ export async function listTasks(
 }
 
 async function findByStem(
-  repoPath: string,
+  repoPath: BoardTarget,
   stem: string,
   fs: BoardFs,
 ): Promise<Array<{ project: TaskProjectId; status: TaskStatus }>> {
@@ -251,7 +282,7 @@ async function findByStem(
   const projects = await listProjectIds(repoPath, fs);
   for (const project of projects) {
     for (const status of TASK_STATUSES) {
-      const abs = path.join(repoPath, taskRelPath(project, status, stem));
+      const abs = path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath));
       if (await fs.exists(abs)) {
         hits.push({ project, status });
       }
@@ -261,15 +292,15 @@ async function findByStem(
 }
 
 async function loadRecord(
-  repoPath: string,
+  repoPath: BoardTarget,
   project: TaskProjectId,
   status: TaskStatus,
   stem: string,
   fs: BoardFs,
 ): Promise<TaskRecord> {
   const item = (await readListItem(repoPath, project, status, stem, fs)).item;
-  const abs = path.join(repoPath, item.path);
-  const sidecarAbs = path.join(repoPath, item.sidecarPath);
+  const abs = path.join(scopeDir(repoPath), item.path);
+  const sidecarAbs = path.join(scopeDir(repoPath), item.sidecarPath);
   const markdown = await fs.readFile(abs);
   const doc = parseTaskDoc(markdown);
   const sidecarExists = await fs.exists(sidecarAbs);
@@ -284,10 +315,10 @@ async function loadRecord(
   };
 }
 
-export async function getTask(repoPath: string, target: string, fs: BoardFs): Promise<TaskRecord> {
+export async function getTask(repoPath: BoardTarget, target: string, fs: BoardFs): Promise<TaskRecord> {
   const parsed = parseTarget(target);
   if (parsed.kind === "path") {
-    const abs = path.isAbsolute(target) ? target : path.join(repoPath, target);
+    const abs = path.isAbsolute(target) ? target : path.join(scopeDir(repoPath), target);
     if (!(await fs.exists(abs))) {
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
     }

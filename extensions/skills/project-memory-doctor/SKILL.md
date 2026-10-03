@@ -1,78 +1,34 @@
 ---
 name: project-memory-doctor
-description: 体检整棵项目记忆树，修掉索引不一致（死条目、未登记的记忆目录、重复或错位的条目、别人的 AGENTS.md）。用户要求整理、检查或修复项目记忆时使用；init 返回 needs-doctor 时也用。默认只诊断，改文件要显式确认。
-version: 1.5.0
+description: 诊断并修复已采用的 .harness 项目记忆索引与作用域登记。默认只诊断；明确授权修复时 apply。旧布局只报告迁移需求。
+version: 2.0.0
 ---
 
 # Project Memory Doctor
 
-体检整棵记忆树:先诊断，确认后再修。`<init-dir>` 为 sibling `project-memory-init`（`.agents/skills/`）。
+用户要求检查、修复项目记忆，或 init 返回 needs-doctor 时使用。目标态见 [LAYOUT](../project-memory-init/references/LAYOUT.md)。默认只诊断；用户已明确要求修复可直接 apply，否则先说明具体 findings 再获得授权。
 
-## 什么时候用
+```bash
+python3 <init-dir>/scripts/memory.py doctor \
+  --target-dir <scope> [--root-dir <boundary>] [--apply]
+```
 
-- 用户要求整理、检查或修复项目记忆。
-- `$project-memory-init` 返回了 `needs-doctor`。
-- 手工删过或搬过记忆目录之后。
+只修已采用类型的派生索引、层入口和下层登记，不代为 Init 未采用模块或类型，不改正文、文件头或安装链接。旧 `.memory` 返回 `migration-required`，由独立 `$project-memory-migrate` 转换。
 
-结构的目标态见 [`<init-dir>/references/LAYOUT.md`](../project-memory-init/references/LAYOUT.md)。本 skill 只把现状收敛到那份文档，不自行发明结构。
+| code / issue | 处理 |
+| --- | --- |
+| missing-index / stale-index | 补已采用类型入口，或重算 entries 区块 |
+| unregistered-type / outdated-local | 补本层类型链接，保留其他类型和人工说明 |
+| missing-agents / foreign-agents | 建层入口或追加受管区块，人工正文保留 |
+| missing-important | 补硬约束种子，已有规则不覆盖 |
+| dead-entry / misplaced / unregistered | 修最近真正子层登记，保留已有描述 |
+| migration-required | 只报告，转独立迁移器 |
+| unsafe-layout | 只报告路径越界、类型冲突或非法元数据，不扩大写权限 |
+| source-scan-error | 来源缺失、断链、不可读时保留已有索引，不当空来源 |
+| invalid-entry | 只诊断正文格式，不改写原位文件 |
 
-## 边界：只管结构，不改正文
+只扫描实际作用域；类型入口和业务模块 AGENTS 不自动成为子作用域。可穿过 `.harness/evaluation` 等容器发现真实子层；跳过安装链接、依赖目录与其他 Git 根/submodule。`referenced` 仅索引本层 `.agents/skills`，不扫描子层或全机技能。
 
-**本 skill 不改写任何条目正文。** 它会读取 frontmatter 来重算入口，并可把旧版平铺记忆文件移动到当前类型目录。唯一改文件头的例外是 `legacy-flat-frontmatter`：把 YAML 顶层的实现字段收进 `metadata:`，关闭 `---` 之后的正文一字不动。其余操作只涉及目录、类型入口、`AGENTS.md` 受管区块和下层索引，所以修复仍是机械的、确定性的、幂等的。
+`.agents` 一个字节都不写；缺失来源不代建。修复 `user` 或自定义私有类型前保证索引和正文忽略规则。索引来源无法完整读取时不写空索引；即使 `--apply` 后仍会有 remaining，应说明原因，不能宣称已修复干净或反复重试。
 
-记忆**内容**层面的合并、抽象、遗忘（文献里叫 consolidation 或 dreaming）不属于这里，也尚未实现。用户要求「精简记忆」「合并重复的记忆内容」时，明确说明本 skill 只能修索引结构，别顺手去改正文。要把已有 `AGENTS.md` 的区块外正文拆进 `.memory`，改走 `$project-memory-reshape`。
-
-## 为什么这些问题归 doctor
-
-init 是单目标、只往前写的，只能处理自己这次动作引起的漂移。跨层索引问题要扫全树才能发现；旧布局迁移会移动文件并处理冲突，需要走 doctor 的显式确认与幂等修复流程。因此都归本 skill：
-
-| `issue` | 含义 | 修复动作 |
-| --- | --- | --- |
-| `dead-entry` | 索引条目指向的目录已经没有记忆了 | 删掉该条目 |
-| `unregistered` | 有 `.memory/` 但没有任何索引登记它 | 登记到正确层级 |
-| `unregistered-type` | 入口文件在，但本层清单没有这一行 | 补上 AGENTS 本层链接，不删其它行 |
-| `misplaced` | 唯一的登记在错误层级 | 删掉旧条目，按原描述改登记到正确层级 |
-| `duplicate` | 同一个目录被多份索引登记 | 删掉错误层级那几条，保留正确的 |
-| `foreign-agents` | 有 `AGENTS.md` 但不含本套受管标记 | 追加受管区块，**既有正文一字不改** |
-| `stale-auto` | 仍留着已废弃的 `project-memory-auto` 区块 | 删掉该区块 |
-| `missing-important` | 记忆目录缺少本层硬约束区块 | 补上当前模板种子（ask / remember 聚光灯 +「硬约束写在本区块」），**已有规则不覆盖** |
-| `legacy-flat-index` | 旧版类型入口仍平铺在 `.memory/TYPE.md` | 搬到 `<plural>/AGENTS.md` 后删除旧文件 |
-| `legacy-flat-index-conflict` | 新旧类型入口都在且无法自动合并 | 只报告，不覆盖任何一份 |
-| `legacy-flat-entry` | 旧版记忆文件仍平铺在 `.memory/` | 原样移入对应类型目录 |
-| `legacy-flat-frontmatter` | 普通记忆把 `title` / `type` / 出处 / 审计写在 YAML 顶层 | 按当前模板重写文件头，正文不动 |
-| `legacy-entry-conflict` | 新旧位置存在同名记忆文件 | 只报告，不覆盖任何一份 |
-| `legacy-singular-type-dir` | 旧版单数类型目录（`feedback/` 等） | 原样改名为复数（`feedbacks/` 等） |
-| `legacy-type-dir-conflict` | 单数目录与复数目录同时存在 | 只报告，不覆盖任何一份 |
-| `missing-type-dir` / `missing-index` | 缺少当前布局要求的类型目录或入口 | 补建并全量重算入口 |
-| `invalid-type-dir` / `invalid-index` | 目标路径被错误的文件或目录占用 | 只报告，等待人工处理 |
-| `outdated-index` / `outdated-local` | 类型入口或本层入口清单与**该层已发现**的 type 清单不一致（种子 ∪ 用户登记） | 按现有产物重算；apply 不得删掉额外行 |
-| `missing-agents` | 记忆目录缺少 `AGENTS.md` 入口 | 按当前模板补建 |
-
-**已知缺口：区块内的固定文案不会自动更新。** init 对已存在的受管区块只追加或改写条目行，从不按模板重渲染区块正文，所以模板里的标题、引言改了名，存量 `AGENTS.md` 里的旧文案会一直留着。**这纯属文案**：脚本靠区块标记和条目行定位，标题写什么都不影响解析，所以不算 `finding`。用户问起或明确要求时才顺手改，改的是本套自己的受管区块，安全。
-
-## 步骤
-
-1. 先诊断。不带 `--apply`，只读不写：
-
-   ```bash
-   python3 <init-dir>/scripts/memory.py doctor --target-dir <记忆树里任一目录>
-   ```
-
-2. 把 `findings` 逐条讲给用户听：哪个文件、哪一条、为什么算问题、准备怎么改。`findings` 为空就直说记忆树是干净的，到此为止。
-
-3. 得到用户同意后再改：
-
-   ```bash
-   python3 <init-dir>/scripts/memory.py doctor --target-dir <同上> --apply
-   ```
-
-4. 汇报 `repaired`。`remaining` 非空说明还有修不掉的，如实说出来，不要假装干净。
-
-## 规则
-
-- **默认只诊断。** 这里的修复会移动旧版文件、删除索引条目、改写别人的 `AGENTS.md`，属于破坏性操作，所以先报告、经用户确认再 `--apply`。用户已经明确说了「检查并修掉」就可以直接带 `--apply`，但汇报里仍要列清改了什么。
-- **`foreign-agents` 只追加，不改写。** 手写正文和别的工具的受管块（如 `runa-memory:*`）都原样保留，只在文件里补挂本套的受管区块。不要自己动手编辑这类文件。
-- 只碰结构与派生索引。除把 `legacy-flat-entry` 原样移入类型目录、把 `legacy-flat-index` 搬到 `<plural>/AGENTS.md` 后删除旧文件、把 `legacy-singular-type-dir` 原样改名为复数、把 `legacy-flat-frontmatter` 的文件头收进 `metadata:` 外，**不新增、删除或改写记忆正文**——内容增删仍是 `$project-memory-remember` 的事。
-- **`.agents/` 一个字节都不碰。** `agent_skills` 的内容根在那里，归人与生态所有：不报 `missing-type-dir`、不补建目录、不改写内容，只把它索引进 `.memory/agent_skills/AGENTS.md`。本层没有 `.agents/skills/` 时那份索引是空清单，这是正常状态，不是待修的毛病。
-- 修复是幂等的：跑完再跑一次应该零 `findings`。不是的话说明有 bug，报给用户，别反复重试。
-- `--target-dir` 给记忆树里任意一个目录都行，脚本会自己回溯到记忆根。
+按返回 JSON 汇报 findings / repaired / remaining。内容合并、抽象、遗忘不属于 doctor；对已有 AGENTS 人工正文的重组使用 `$project-memory-reshape`。

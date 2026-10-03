@@ -7,14 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added
-
-- `legacy-flat-index`：把 `.memory/FEEDBACK.md` 一类旧平铺入口搬到 `<plural>/AGENTS.md` 后删除旧文件。新旧都在且内容相同则删旧文件；内容不同才是 `legacy-flat-index-conflict`。
-- `unregistered-type`：入口文件在、本层清单没有这一行时补上链接。
+## [2.0.0] - 2026-10-03
 
 ### Changed
 
-- 类型入口目标态改为 `.memory/<plural>/AGENTS.md`（ADR-0012）。`outdated-local` 对照该层已发现的 type（种子 ∪ 用户登记）；`--apply` 不得删掉额外行。`.agents/` 仍一个字节都不碰。
+- 只修新布局索引与作用域登记，保留人工正文；来源缺失/不可读保持旧索引并留诊断，旧布局只报告迁移需求。
 
 ## [1.5.0] - 2026-09-08
 

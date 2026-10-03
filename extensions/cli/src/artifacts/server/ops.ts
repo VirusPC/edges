@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { loadConfig } from "../../utils/config.js";
+import { resolveEdgesRoot } from "../../utils/config.js";
 import { ArtifactsError } from "../utils/result.js";
 import {
   UNIT_NAME,
@@ -61,8 +61,8 @@ export function artifactsDeployDir(repoRoot: string): string {
   return path.join(repoRoot, "extensions/services/artifacts-preview/deploy");
 }
 
-export function resolveRepoRoot(env: NodeJS.ProcessEnv): string {
-  return loadConfig(env).repoPath;
+export function resolveRepoRoot(_env: NodeJS.ProcessEnv): string {
+  return resolveEdgesRoot();
 }
 
 export async function installArtifactsServer(options: ServerOpsDeps & {

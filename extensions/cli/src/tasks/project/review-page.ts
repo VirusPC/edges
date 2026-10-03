@@ -9,7 +9,7 @@ import {
   resolveReviewPageOutPath,
   writeReviewPage,
 } from "../utils/review-page.js";
-import { runTasksCommand, succeed } from "../utils/result.js";
+import { asTasksError, fail, succeed } from "../utils/result.js";
 import { TasksError } from "../utils/types.js";
 
 export function addProjectReviewPageCommand(project: Command, ctx: CliContext): void {
@@ -19,7 +19,7 @@ export function addProjectReviewPageCommand(project: Command, ctx: CliContext): 
     .requiredOption("--from <path>", "JSON file path, or - for stdin")
     .option("--out <path>", "HTML output path (default: OS temp file)")
     .action(async (opts: { from: string; out?: string }) => {
-      await runTasksCommand(ctx, async () => {
+      try {
         const rawText = await readReviewPageSource(opts.from, ctx);
         let raw: unknown;
         try {
@@ -35,14 +35,17 @@ export function addProjectReviewPageCommand(project: Command, ctx: CliContext): 
         const html = renderReviewPageHtml(input, shell);
         const outPath = resolveReviewPageOutPath(opts.out, Date.now(), tmpdir());
         await writeReviewPage(outPath, html, writeFile);
-        return succeed({
+        ctx.result = succeed({
           status: "success",
           command: "project.review-page",
           path: outPath,
           groupCount: input.groups.length,
           itemCount: input.items.length,
         });
-      });
+      } catch (error) {
+        const mapped = asTasksError(error);
+        ctx.result = fail(mapped.errorCode, mapped.message);
+      }
     });
 }
 

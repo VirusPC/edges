@@ -32,7 +32,7 @@ export function addStatusCommand(tasks: Command, ctx: CliContext): void {
         if (!isTaskStatus(status)) {
           return fail("VALIDATION_ERROR", `invalid edges-tasks-status: ${status}`);
         }
-        const moved = await moveTaskStatus(runtime.repoPath, target, status, {
+        const moved = await moveTaskStatus(runtime.location, target, status, {
           fs: runtime.writer,
           now: runtime.now,
         });

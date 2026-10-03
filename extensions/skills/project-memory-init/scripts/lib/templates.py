@@ -85,6 +85,7 @@ def read_index_template(
         {
             "NAME": entry_type.upper(),
             "type": entry_type,
+            "module": flags.get("module", "memory"),
             "description": description or entry_type,
             "plural": plural,
             "body_hint": body_hint,

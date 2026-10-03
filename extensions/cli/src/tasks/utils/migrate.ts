@@ -1,3 +1,4 @@
+import { type BoardTarget } from "./paths.js";
 import path from "node:path";
 import type { BoardWriter } from "./board.js";
 import { boardRoot } from "./paths.js";
@@ -5,7 +6,7 @@ import { DEFAULT_TASK_PROJECT, TASK_STATUSES, TasksError } from "./types.js";
 import { projectDirName } from "./project.js";
 
 export async function migrateLegacyBoard(
-  repoPath: string,
+  repoPath: BoardTarget,
   fs: BoardWriter,
 ): Promise<{ moved: number; removedStatusDirs: string[] }> {
   let moved = 0;
@@ -32,13 +33,13 @@ export async function migrateLegacyBoard(
         isDirectory = false;
       }
       if (isDirectory) {
-        throw new TasksError("BOARD_IO_ERROR", `unexpected subdirectory: knowledge/tasks/${status}/${name}`);
+        throw new TasksError("BOARD_IO_ERROR", `unexpected subdirectory: tasks/${status}/${name}`);
       }
       const destAbs = path.join(destDir, name);
       if (await fs.exists(destAbs)) {
         throw new TasksError(
           "BOARD_IO_ERROR",
-          `destination already exists: knowledge/tasks/_default/${status}/${name}`,
+          `destination already exists: tasks/_default/${status}/${name}`,
         );
       }
       await fs.mkdirp(destDir);

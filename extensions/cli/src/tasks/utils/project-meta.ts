@@ -1,3 +1,4 @@
+import { scopeDir, boardRel, type BoardTarget } from "./paths.js";
 import path from "node:path";
 import { listProjectIds, type BoardFs, type BoardWriter } from "./board.js";
 import { boardRoot } from "./paths.js";
@@ -157,7 +158,7 @@ export function rewriteRootAgents(existing: string, projects: TaskProjectRecord[
   if (start !== -1 && (end === -1 || end < start)) {
     throw new TasksError(
       "VALIDATION_ERROR",
-      "malformed Task Projects markers in knowledge/tasks/AGENTS.md",
+      "malformed Task Projects markers in tasks/AGENTS.md",
     );
   }
 
@@ -171,7 +172,7 @@ export function rewriteRootAgents(existing: string, projects: TaskProjectRecord[
       const insertAt = lineEnd === -1 ? existing.length : lineEnd + 1;
       next = `${existing.slice(0, insertAt)}\n${block}\n${existing.slice(insertAt)}`;
     } else {
-      next = `${block}\n`;
+      next = `${existing.trimEnd()}${existing.trim() ? "\n\n" : ""}${block}\n`;
     }
   }
 
@@ -187,19 +188,19 @@ export function rewriteRootAgents(existing: string, projects: TaskProjectRecord[
   return next;
 }
 
-export function projectAgentsRelPath(id: TaskProjectId): string {
-  return `knowledge/tasks/${projectDirName(id)}/AGENTS.md`;
+export function projectAgentsRelPath(id: TaskProjectId, target: BoardTarget = ""): string {
+  return `${boardRel(target)}/${projectDirName(id)}/AGENTS.md`;
 }
 
-function projectAgentsAbsPath(repoPath: string, id: TaskProjectId): string {
-  return path.join(repoPath, projectAgentsRelPath(id));
+function projectAgentsAbsPath(repoPath: BoardTarget, id: TaskProjectId): string {
+  return path.join(scopeDir(repoPath), projectAgentsRelPath(id, repoPath));
 }
 
-function rootAgentsAbsPath(repoPath: string): string {
+function rootAgentsAbsPath(repoPath: BoardTarget): string {
   return path.join(boardRoot(repoPath), "AGENTS.md");
 }
 
-async function collectProjectIds(repoPath: string, fs: BoardFs): Promise<TaskProjectId[]> {
+async function collectProjectIds(repoPath: BoardTarget, fs: BoardFs): Promise<TaskProjectId[]> {
   const listed = await listProjectIds(repoPath, fs);
   const ids: TaskProjectId[] = [DEFAULT_TASK_PROJECT];
   for (const id of listed) {
@@ -211,14 +212,23 @@ async function collectProjectIds(repoPath: string, fs: BoardFs): Promise<TaskPro
 }
 
 export async function readProjectRecord(
-  repoPath: string,
+  repoPath: BoardTarget,
   id: TaskProjectId,
   fs: BoardFs,
 ): Promise<TaskProjectRecord> {
-  const rel = projectAgentsRelPath(id);
+  const rel = projectAgentsRelPath(id, repoPath);
   const abs = projectAgentsAbsPath(repoPath, id);
   if (!(await fs.exists(abs))) {
-    throw new TasksError("PROJECT_NOT_FOUND", `project not found: ${id}`);
+    if (!(await listProjectIds(repoPath, fs)).includes(id)) {
+      throw new TasksError("PROJECT_NOT_FOUND", `project not found: ${id}`);
+    }
+    return {
+      project: id,
+      dir: projectDirName(id),
+      title: seedTitleFor(id),
+      description: seedDescriptionFor(id),
+      path: rel,
+    };
   }
   const parsed = parseProjectAgents(await fs.readFile(abs));
   return {
@@ -231,7 +241,7 @@ export async function readProjectRecord(
 }
 
 export async function refreshProjectIndex(
-  repoPath: string,
+  repoPath: BoardTarget,
   writer: BoardWriter,
 ): Promise<TaskProjectRecord[]> {
   const records: TaskProjectRecord[] = [];
@@ -250,7 +260,7 @@ export async function refreshProjectIndex(
 }
 
 export async function ensureProjectMetadata(
-  repoPath: string,
+  repoPath: BoardTarget,
   writer: BoardWriter,
   skipId?: TaskProjectId,
 ): Promise<TaskProjectRecord[]> {
@@ -279,24 +289,27 @@ export async function ensureProjectMetadata(
 }
 
 export async function listProjects(
-  repoPath: string,
+  repoPath: BoardTarget,
   writer: BoardWriter,
 ): Promise<TaskProjectRecord[]> {
-  return ensureProjectMetadata(repoPath, writer);
+  const records: TaskProjectRecord[] = [];
+  for (const id of await listProjectIds(repoPath, writer)) {
+    records.push(await readProjectRecord(repoPath, id, writer));
+  }
+  return records;
 }
 
 export async function getProject(
-  repoPath: string,
+  repoPath: BoardTarget,
   raw: string,
   writer: BoardWriter,
 ): Promise<TaskProjectRecord> {
   const id = parseTaskProject(raw);
-  await ensureProjectMetadata(repoPath, writer);
   return readProjectRecord(repoPath, id, writer);
 }
 
 export async function createProject(
-  repoPath: string,
+  repoPath: BoardTarget,
   input: { project: string; title: string; description: string },
   writer: BoardWriter,
 ): Promise<TaskProjectRecord> {
@@ -304,12 +317,12 @@ export async function createProject(
   const title = parseProjectTitle(input.title);
   const description = parseProjectDescription(input.description);
   await ensureProjectMetadata(repoPath, writer, id);
-  const rel = projectAgentsRelPath(id);
-  if (await writer.exists(path.join(repoPath, rel))) {
+  const rel = projectAgentsRelPath(id, repoPath);
+  if (await writer.exists(path.join(scopeDir(repoPath), rel))) {
     throw new TasksError("VALIDATION_ERROR", `project already exists: ${id}`);
   }
-  await writer.mkdirp(path.join(repoPath, "knowledge/tasks", projectDirName(id)));
-  await writer.writeFile(path.join(repoPath, rel), renderProjectAgents({ title, description }));
+  await writer.mkdirp(path.join(boardRoot(repoPath), projectDirName(id)));
+  await writer.writeFile(path.join(scopeDir(repoPath), rel), renderProjectAgents({ title, description }));
   await refreshProjectIndex(repoPath, writer);
   return {
     project: id,
@@ -321,7 +334,7 @@ export async function createProject(
 }
 
 export async function updateProject(
-  repoPath: string,
+  repoPath: BoardTarget,
   raw: string,
   patch: { title?: string; description?: string },
   writer: BoardWriter,
@@ -334,8 +347,8 @@ export async function updateProject(
   }
   const id = parseTaskProject(raw);
   await ensureProjectMetadata(repoPath, writer);
-  const rel = projectAgentsRelPath(id);
-  const abs = path.join(repoPath, rel);
+  const rel = projectAgentsRelPath(id, repoPath);
+  const abs = path.join(scopeDir(repoPath), rel);
   if (!(await writer.exists(abs))) {
     throw new TasksError("PROJECT_NOT_FOUND", `project not found: ${id}`);
   }

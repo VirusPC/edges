@@ -1,3 +1,4 @@
+import { itemIdentity } from "./types.ts"
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import {
   useEffect,
@@ -50,12 +51,14 @@ function sideBounds(
 }
 
 function ReviewToolbar({
+  groups,
   narrow,
   items,
   filter,
   onChange,
 }: {
   narrow: boolean
+  groups: ReviewGroup[]
   items: ReviewItem[]
   filter: ReviewFilter
   onChange: (next: ReviewFilter) => void
@@ -66,7 +69,7 @@ function ReviewToolbar({
       className="z-30 flex h-12 shrink-0 items-center gap-3 border-b-2 border-[#8ec4ef] bg-[#15486c] px-3"
     >
       <NavBar />
-      <TopBar
+      <TopBar groups={groups}
         items={items}
         filter={filter}
         onChange={onChange}
@@ -150,7 +153,7 @@ export default function App({
 
   const filter = filterFromHash(hashState)
   const selected = items.find(
-    (item) => item.stem === hashState.stem && matchesReviewFilter(item, filter)
+    (item) => itemIdentity(item) === hashState.stem && matchesReviewFilter(item, filter)
   )
   const narrow = useNarrowLayout()
   const [leftWidth, setLeftWidth] = useState(LEFT_DEFAULT)
@@ -193,6 +196,7 @@ export default function App({
 
   const toolbar = (
     <ReviewToolbar
+      groups={groups}
       narrow={narrow}
       items={items}
       filter={filter}
@@ -214,7 +218,7 @@ export default function App({
           )
           if (!projectId) return
           setItems((prev) =>
-            applyProjectDrop(prev, String(event.active.id), projectId)
+            applyProjectDrop(prev, String(event.active.id), projectId, groups)
           )
         }}
       >
@@ -251,7 +255,7 @@ export default function App({
               selectedStem={hashState.stem}
               onSelect={(stem) => setHashState((prev) => ({ ...prev, stem }))}
               onMove={(stem, projectId) =>
-                setItems((prev) => applyProjectDrop(prev, stem, projectId))
+                setItems((prev) => applyProjectDrop(prev, stem, projectId, groups))
               }
             />
             <PanelResizeHandle

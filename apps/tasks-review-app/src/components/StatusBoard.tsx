@@ -1,3 +1,4 @@
+import { itemIdentity } from "../types.ts"
 import {
   itemStatus,
   matchesReviewFilter,
@@ -180,11 +181,11 @@ function StatusSection({
         <div className={narrow ? "flex flex-col gap-2 px-3 py-3" : "contents"}>
           {items.map((item) => (
             <TaskCard
-              key={item.stem}
+              key={itemIdentity(item)}
               item={item}
               groups={groups}
               narrow={narrow}
-              selected={item.stem === selectedStem}
+              selected={itemIdentity(item) === selectedStem}
               onSelect={onSelect}
               onMove={onMove}
             />

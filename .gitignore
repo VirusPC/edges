@@ -44,11 +44,19 @@ __pycache__/
 user-memory-backup-*.tar.gz
 user-memory-backup-*.zip
 
+# New scope-local private memory: include indexes; retain legacy rules above.
+**/.harness/memory/users/
+# Custom private types receive explicit per-scope rules from init/migrate.
+# Migration journals include private material and must never enter Git.
+**/.project-memory-migration/
+
 # Persistent /tasks/ board HTML generated on the box (ADR 0021)
 knowledge/tasks/_site/
+**/tasks/_site/
 
 # LoCoMo / evaluation caches (full upstream dump or clone)
 evaluation/.cache/
+**/.harness/evaluation/.cache/
 
 # Review shell Vite outDir (ADR 0022). Source is apps/tasks-review-app/.
 extensions/cli/src/tasks/project/assets/review-page/
@@ -62,3 +70,14 @@ extensions/cli/src/tasks/project/assets/review-page/
 *.xls
 *.pptx
 *.ppt
+
+**/.recursive-layout-migration/
+
+# Private harness type user
+.harness/memory/users/
+
+/.harness/memory/users/
+
+/teaching/.harness/memory/users/
+
+/.harness/evaluation/.harness/memory/users/

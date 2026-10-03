@@ -5,10 +5,11 @@
 # deploy does the only SSH pull and does not claim both URLs.
 # The job summary lists both paths. Do not use a teach.* hostname.
 # ECS can reach GitHub over HTTPS; do not rsync-push a path subset.
-# After pull: generate knowledge/tasks/_site for /tasks/ (always; failure
+# After pull: generate tasks/_site for /tasks/ (always; failure
 # fails the job). Then edges artifacts server install, then restart, if the
 # server env file exists. Never a combined install-and-start. nginx is
-# usually unchanged (do not call setup-nginx from this Action).
+# migrated to the new physical paths after generation (do not call setup-nginx
+# from this Action). The deploy user needs sudo for migrate-site-layout.sh.
 # Fallback if git fetch from ECS is flaky: from a machine that can reach both
 # GitHub and the box, tar the full repo over SSH, then the same two CLI
 # commands (or deploy/bootstrap.sh, which is that wrapper).
@@ -83,14 +84,15 @@ jobs:
              test -s extensions/cli/src/tasks/project/assets/review-page/review.js
              test -s extensions/cli/src/tasks/project/assets/review-page/review.css
              pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
-               --out "$PWD/knowledge/tasks/_site/index.html"
-             test -s knowledge/tasks/_site/index.html
-             grep -q "id=\"edges-review-payload\"" knowledge/tasks/_site/index.html
-             grep -q "<script type=\"module\">" knowledge/tasks/_site/index.html
-             if grep -q "src=\"./review.js\"" knowledge/tasks/_site/index.html; then
+               --scope "$PWD" --purpose all --out "$PWD/tasks/_site/index.html"
+             test -s tasks/_site/index.html
+             grep -q "id=\"edges-review-payload\"" tasks/_site/index.html
+             grep -q "<script type=\"module\">" tasks/_site/index.html
+             if grep -q "src=\"./review.js\"" tasks/_site/index.html; then
                echo "review.js must be inlined, not linked"
                exit 1
              fi
+             sudo -n bash extensions/services/artifacts-preview/deploy/migrate-site-layout.sh
              env_file="$HOME/.config/edges/artifacts-preview.env"
              token=""
              if [ -f "$env_file" ]; then

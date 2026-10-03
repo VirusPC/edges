@@ -29,7 +29,7 @@ export function addRunMessagesCommand(tasks: Command, ctx: CliContext): void {
     .addHelpText("after", RUN_MESSAGES_AFTER_HELP)
     .action(async (runId: string, opts: { task?: string; output: "table" | "json" }) => {
       await runTasksCommand(ctx, async (runtime) => {
-        const found = await findRun(runtime.repoPath, runId, opts.task, runtime.fs);
+        const found = await findRun(runtime.location, runId, opts.task, runtime.fs);
         const payload = {
           status: "success" as const,
           command: "run-messages" as const,

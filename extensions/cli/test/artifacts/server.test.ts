@@ -308,3 +308,9 @@ test("setupNginxArtifacts surfaces script failure when passwordless sudo ran", a
     },
   );
 });
+
+test('server source ignores target content scope and EDGES_REPO target', async () => {
+  const { resolveRepoRoot } = await import('../../src/artifacts/server/ops.js');
+  const { resolveEdgesRoot } = await import('../../src/utils/config.js');
+  assert.equal(resolveRepoRoot({ EDGES_SCOPE: '/tmp/child', EDGES_REPO: '/tmp/content' }), resolveEdgesRoot());
+});

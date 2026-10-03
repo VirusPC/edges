@@ -5,7 +5,7 @@ import { getTaskService } from "./utils/service.js";
 
 const GET_AFTER_HELP = `
 ARGUMENTS
-  <target>  Task stem (e.g. 2026-09-11--cli) or path under knowledge/tasks/
+  <target>  Task stem (e.g. 2026-09-11--cli) or path under tasks/
 
 FLAGS
   --json  Write JSON to stdout (always on)
@@ -23,7 +23,7 @@ export function addGetCommand(tasks: Command, ctx: CliContext): void {
     .addHelpText("after", GET_AFTER_HELP)
     .action(async (target: string) => {
       await runTasksCommand(ctx, async (runtime) => {
-        const record = await getTaskService(runtime.repoPath, target, runtime.fs);
+        const record = await getTaskService(runtime.location, target, runtime.fs);
         const { sidecarMarkdown: _sidecarMarkdown, ...task } = record;
         return succeed({ status: "success", command: "get", task });
       });

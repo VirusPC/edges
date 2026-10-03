@@ -1,622 +1,159 @@
 #!/usr/bin/env python3
-"""整棵记忆树的体检与修复：单次 init 看不见的索引不一致。"""
-
+"""Diagnose and repair adopted new-layout scopes; legacy conversion is separate."""
 from __future__ import annotations
-
+import os
 from pathlib import Path
-
-from lib.blocks import (
-    AUTO_START,
-    ENTRIES_START,
-    IMPORTANT_END,
-    IMPORTANT_START,
-    LEGACY_FLAT_INDEX_LINK_PATTERN,
-    LOCAL_END,
-    LOCAL_START,
-    MEMORY_INDEX_LINK_PATTERN,
-    block_pattern,
-    build_important_block,
-    build_local_block,
-    drop_auto_block,
-    prune_outer_region,
-    upsert_block,
-)
-from lib.paths import (
-    AGENTS_FILE_NAME,
-    MEMORY_DIR_NAME,
-    is_external_type,
-    legacy_type_dir,
-    list_type_files,
-    memory_dir,
-    relative_or_name,
-    type_content_dir,
-    type_index_path,
-    write_atomic,
-)
-from lib.types import (
-    TYPE_INDEX_NAME_PATTERN,
-    discover_layer_types,
-    ensure_seed_local_lines,
-    index_file_name,
-    layer_type_specs,
-    parse_type_meta,
-    seed_index_files,
-    upsert_local_type_line,
-)
-from nodes.agents import (
-    classify_agents_file,
-    drop_index_entries,
-    find_index_anchor,
-    read_index_entries,
-    sync_agents_blocks,
-    sync_index_entry,
-)
-from nodes.entries import (
-    expected_index_document,
-    has_legacy_flat_frontmatter,
-    memory_entry_types,
-    ordinary_memory_types,
-    refresh_index,
-    rewrite_ordinary_header,
-)
+from lib.blocks import IMPORTANT_START, LOCAL_START, LOCAL_END, block_pattern, insert_inner_block, build_important_block
+from lib.paths import AGENTS_FILE_NAME, assert_scope_path, is_scope, list_type_files, reject_legacy, relative_or_name, write_atomic
+from lib.types import layer_type_specs, selected_local_block, upsert_local_type_line
+from nodes.agents import classify_agents_file, drop_index_entries, find_index_anchor, read_index_entries, sync_index_entry, sync_target_agents
+from nodes.entries import expected_index_document, is_skill_format, parse_frontmatter, refresh_index
 
 
-def is_noise_path(parts: tuple[str, ...]) -> bool:
-    """路径里有隐藏目录（`.memory` 本身除外）或 node_modules 就当噪声跳过。"""
-    return any(
-        (part.startswith(".") and part != MEMORY_DIR_NAME) or part == "node_modules"
-        for part in parts
-    )
+def walk_owners(root: Path):
+    """Only local scope candidates; no symlinks, containers, or nested Git roots."""
+    for current, dirs, _files in os.walk(root, followlinks=False):
+        owner = Path(current)
+        dirs[:] = sorted(name for name in dirs if (not name.startswith('.') or name == '.harness') and name != 'node_modules' and not (owner / name).is_symlink() and not (owner / name / '.git').exists())
+        if owner == root or is_scope(owner) or (owner / '.memory').exists() or any((owner / '.harness' / m).exists() for m in ('memory', 'skills')):
+            yield owner
 
 
 def discover_memory_dirs(root: Path) -> list[Path]:
-    """扫出记忆根下所有带记忆的目录。"""
-    found = [root] if memory_dir(root).is_dir() else []
-    for path in sorted(root.rglob(MEMORY_DIR_NAME)):
-        owner = path.parent
-        if path.is_dir() and owner != root and not is_noise_path(path.relative_to(root).parts):
-            found.append(owner)
-    return found
+    return [owner for owner in walk_owners(root) if is_scope(owner)]
 
 
-def scan_index_entries(
-    root: Path, holders: list[Path], owned: set[Path]
-) -> tuple[list[dict[str, str]], dict[Path, list[tuple[Path, str]]]]:
-    """逐份 AGENTS.md 查下层索引：认不出的文件，和指向已无记忆目录的死条目。
+def finding(code: str, path: Path, root: Path, detail: str, **extra) -> dict:
+    return {'code': code, 'issue': code, 'path': relative_or_name(path, root), 'detail': detail, **extra}
 
-    顺带记下每个被登记的目录由哪几层登记、条目里写的描述是什么，
-    交给 scan_registrations 判断错位与重复——那一步改登记时要照原样带走描述。
-    """
-    findings: list[dict[str, str]] = []
-    seen: dict[Path, list[tuple[Path, str]]] = {}
-    for holder in holders:
-        agents_path = holder / AGENTS_FILE_NAME
-        state = classify_agents_file(agents_path)
-        if state == "foreign":
-            findings.append(
-                {
-                    "issue": "foreign-agents",
-                    "path": relative_or_name(agents_path, root),
-                    "detail": "有 AGENTS.md 但不含本套受管标记，需要补挂受管区块",
-                }
-            )
+
+def collect_findings(root: Path) -> list[dict]:
+    findings = []
+    owners = list(walk_owners(root))
+    scopes = {owner for owner in owners if is_scope(owner)}
+    for owner in owners:
+        try:
+            reject_legacy(owner)
+        except ValueError as error:
+            findings.append(finding('migration-required', owner, root, str(error)))
             continue
-        if state == "missing":
+        try:
+            specs = layer_type_specs(owner)
+            assert_scope_path(owner / AGENTS_FILE_NAME, owner)
+        except (OSError, UnicodeError, ValueError) as error:
+            findings.append(finding('unsafe-layout', owner, root, str(error)))
             continue
-        for relative, description in read_index_entries(agents_path):
-            entry_dir = (holder / relative).parent.resolve()
-            if entry_dir not in owned:
-                findings.append(
-                    {
-                        "issue": "dead-entry",
-                        "path": relative_or_name(agents_path, root),
-                        "entry": relative,
-                        "detail": "条目指向的目录已经没有记忆了",
-                    }
-                )
-                continue
-            seen.setdefault(entry_dir, []).append((holder, description))
-    return findings, seen
-
-
-def scan_registrations(
-    root: Path, memory_dirs: list[Path], seen: dict[Path, list[tuple[Path, str]]]
-) -> list[dict[str, str]]:
-    """逐个记忆目录查它登记在哪：没人登记、登记错层、还是被多处重复登记。"""
-    findings: list[dict[str, str]] = []
-    for directory in memory_dirs:
-        if directory == root:
+        if not specs and owner not in scopes:
             continue
-        anchor = find_index_anchor(directory, root)
-        holders = seen.get(directory, [])
-        if not holders:
-            findings.append(
-                {
-                    "issue": "unregistered",
-                    "path": relative_or_name(directory, root),
-                    "detail": f"有记忆但没有任何索引登记它，应登记到 {relative_or_name(anchor, root)}",
-                }
-            )
-            continue
-        for holder, description in holders:
-            if holder == anchor:
-                continue
-            findings.append(
-                {
-                    "issue": "misplaced" if len(holders) == 1 else "duplicate",
-                    "path": relative_or_name(holder / AGENTS_FILE_NAME, root),
-                    "entry": (directory.relative_to(holder) / AGENTS_FILE_NAME).as_posix(),
-                    "description": description,
-                    "detail": f"应该登记在 {relative_or_name(anchor, root)}",
-                }
-            )
-    return findings
-
-
-def scan_memory_layout(root: Path, memory_dirs: list[Path]) -> list[dict[str, str]]:
-    """检查每层 .memory/ 是否符合当前 LAYOUT；不读取条目正文。"""
-    findings: list[dict[str, str]] = []
-    for owner in memory_dirs:
-        discovered = discover_layer_types(owner)
-        specs = {spec.name: spec for spec in layer_type_specs(owner)}
-        directory = memory_dir(owner)
-        for path in sorted(directory.glob("*.md")):
-            if not TYPE_INDEX_NAME_PATTERN.fullmatch(path.name):
+        agents = owner / AGENTS_FILE_NAME
+        state = classify_agents_file(agents)
+        if state != 'managed':
+            findings.append(finding('foreign-agents' if state == 'foreign' else 'missing-agents', agents, root, 'Attach managed blocks preserving manual text'))
+        else:
+            text = agents.read_text(encoding='utf-8')
+            if IMPORTANT_START not in text:
+                findings.append(finding('missing-important', agents, root, 'Missing constraints block'))
+            match = block_pattern(LOCAL_START, LOCAL_END).search(text)
+            if not match:
+                findings.append(finding('outdated-local', agents, root, 'Missing type list'))
+            else:
+                for spec in specs:
+                    if f']({spec.index_file})' not in match.group(0):
+                        findings.append(finding('unregistered-type', owner / spec.index_file, root, 'Type is missing from scope list', owner=relative_or_name(owner, root)))
+        for spec in specs:
+            index = owner / spec.index_file
+            if not index.exists():
+                findings.append(finding('missing-index', index, root, 'Adopted type index is missing', owner=relative_or_name(owner, root), type=spec.name))
                 continue
             try:
-                text = path.read_text(encoding="utf-8")
-            except (OSError, UnicodeError):
+                expected = expected_index_document(owner, spec.name)
+                pattern = '*/SKILL.md' if is_skill_format(owner, spec.name) else f'{spec.name}_*.md'
+                for entry in list_type_files(owner, spec.name, pattern):
+                    fields = parse_frontmatter(entry)
+                    if not fields.get('description'):
+                        findings.append(finding('invalid-entry', entry, root, 'Missing closed frontmatter or description; source left unchanged'))
+            except (OSError, UnicodeError, ValueError) as error:
+                findings.append(finding('source-scan-error', index, root, str(error)))
                 continue
-            if ENTRIES_START not in text:
-                continue
-            entry_type = path.stem.lower()
-            dest = type_index_path(owner, entry_type)
-            dest_other = dest.exists() and dest.resolve() != path.resolve()
-            if dest_other:
-                try:
-                    identical = dest.is_file() and dest.read_bytes() == path.read_bytes()
-                except OSError:
-                    identical = False
-                if identical:
-                    issue = "legacy-flat-index"
-                    detail = "旧版平铺类型入口与新入口内容相同，删除旧文件"
-                else:
-                    issue = "legacy-flat-index-conflict"
-                    detail = "新旧类型入口都在，无法自动决定保留哪份"
-            else:
-                issue = "legacy-flat-index"
-                detail = "旧版平铺类型入口需要搬到对应复数目录下的 AGENTS.md"
-            findings.append(
-                {
-                    "issue": issue,
-                    "path": relative_or_name(path, root),
-                    "destination": relative_or_name(dest, root),
-                    "type": entry_type,
-                    "detail": detail,
-                }
-            )
-        for entry_type, file_name in discovered.items():
-            spec = specs.get(entry_type)
-            skip_dir = is_external_type(entry_type) or (
-                spec is not None and not spec.writable
-            )
-            content_dir = type_content_dir(owner, entry_type)
-            stale = legacy_type_dir(owner, entry_type)
-            # 外部类型的内容根归人与生态：缺了不是毛病，也轮不到我们改名或补建。
-            if skip_dir:
-                stale = None
-            if stale is not None:
-                issue = (
-                    "legacy-type-dir-conflict"
-                    if content_dir.exists()
-                    else "legacy-singular-type-dir"
-                )
-                detail = (
-                    "新旧类型目录都在，无法自动决定保留哪份"
-                    if content_dir.exists()
-                    else "旧版单数类型目录需要改名为复数"
-                )
-                findings.append(
-                    {
-                        "issue": issue,
-                        "path": relative_or_name(stale, root),
-                        "destination": relative_or_name(content_dir, root),
-                        "detail": detail,
-                    }
-                )
-            if content_dir.exists() and not content_dir.is_dir():
-                findings.append(
-                    {
-                        "issue": "invalid-type-dir",
-                        "path": relative_or_name(content_dir, root),
-                        "detail": "类型内容路径存在但不是目录，无法自动修复",
-                    }
-                )
-            elif (
-                not content_dir.is_dir()
-                and stale is None
-                and not skip_dir
-            ):
-                findings.append(
-                    {
-                        "issue": "missing-type-dir",
-                        "path": relative_or_name(content_dir, root),
-                        "detail": "缺少类型内容目录",
-                    }
-                )
-
-            index_path = directory / file_name
-            if index_path.exists() and not index_path.is_file():
-                findings.append(
-                    {
-                        "issue": "invalid-index",
-                        "path": relative_or_name(index_path, root),
-                        "detail": "类型入口路径存在但不是文件，无法自动修复",
-                    }
-                )
-            elif not index_path.is_file():
-                findings.append(
-                    {
-                        "issue": "missing-index",
-                        "path": relative_or_name(index_path, root),
-                        "type": entry_type,
-                        "detail": "缺少类型入口文件",
-                    }
-                )
-            elif index_path.read_text(encoding="utf-8") != expected_index_document(
-                owner, entry_type
-            ):
-                findings.append(
-                    {
-                        "issue": "outdated-index",
-                        "path": relative_or_name(index_path, root),
-                        "type": entry_type,
-                        "detail": "类型入口与当前内容目录不一致，需要全量重算",
-                    }
-                )
-
-        for entry_type in memory_entry_types(owner):
-            for source in sorted(directory.glob(f"{entry_type}_*.md")):
-                destination = type_content_dir(owner, entry_type) / source.name
-                issue = (
-                    "legacy-entry-conflict"
-                    if destination.exists()
-                    else "legacy-flat-entry"
-                )
-                detail = (
-                    "新旧位置都有同名文件，无法自动决定保留哪份"
-                    if destination.exists()
-                    else "旧版平铺记忆文件需要移入对应类型目录"
-                )
-                findings.append(
-                    {
-                        "issue": issue,
-                        "path": relative_or_name(source, root),
-                        "destination": relative_or_name(destination, root),
-                        "detail": detail,
-                    }
-                )
-
-        for entry_type in ordinary_memory_types(owner):
-            for entry_path in list_type_files(owner, entry_type, f"{entry_type}_*.md"):
-                if has_legacy_flat_frontmatter(entry_path):
-                    findings.append(
-                        {
-                            "issue": "legacy-flat-frontmatter",
-                            "path": relative_or_name(entry_path, root),
-                            "detail": "普通记忆的实现字段还在 YAML 顶层，应收入 metadata",
-                        }
-                    )
-
-        agents_path = owner / AGENTS_FILE_NAME
-        agents_state = classify_agents_file(agents_path)
-        if agents_state == "missing":
-            findings.append(
-                {
-                    "issue": "missing-agents",
-                    "path": relative_or_name(agents_path, root),
-                    "detail": "记忆目录缺少 AGENTS.md 入口",
-                }
-            )
-        elif agents_state == "managed":
-            document = agents_path.read_text(encoding="utf-8")
-            match = block_pattern(LOCAL_START, LOCAL_END).search(document)
-            block = match.group(0) if match else ""
-            actual_new = MEMORY_INDEX_LINK_PATTERN.findall(block)
-            actual_legacy = LEGACY_FLAT_INDEX_LINK_PATTERN.findall(block)
-            actual_rels = {f"{dir_name}/{AGENTS_FILE_NAME}" for dir_name in actual_new}
-            actual_legacy_types = {name.lower() for name in actual_legacy}
-            for entry_type, file_name in discovered.items():
-                if "/" not in file_name:
+            if index.read_text(encoding='utf-8') != expected:
+                findings.append(finding('stale-index', index, root, 'Rebuild entries from current source', owner=relative_or_name(owner, root), type=spec.name))
+        if owner in scopes:
+            seen = set()
+            for rel, description in read_index_entries(agents):
+                if rel in seen:
+                    findings.append(finding("duplicate", agents, root, rel, entry=rel, description=description))
                     continue
-                if (
-                    file_name not in actual_rels
-                    and entry_type not in actual_legacy_types
-                ):
-                    findings.append(
-                        {
-                            "issue": "unregistered-type",
-                            "path": relative_or_name(agents_path, root),
-                            "type": entry_type,
-                            "entry": f".memory/{file_name}",
-                            "detail": "入口文件在，但本层清单没有这一行",
-                        }
-                    )
-            seed_missing = any(
-                name not in discovered or index_file_name(name) not in actual_rels
-                for name in seed_index_files()
-            )
-            if actual_legacy or seed_missing:
-                findings.append(
-                    {
-                        "issue": "outdated-local",
-                        "path": relative_or_name(agents_path, root),
-                        "detail": "本层记忆入口清单与当前布局不一致",
-                    }
-                )
-            if IMPORTANT_START not in document:
-                findings.append(
-                    {
-                        "issue": "missing-important",
-                        "path": relative_or_name(agents_path, root),
-                        "detail": "记忆目录缺少本层硬约束区块",
-                    }
-                )
+                seen.add(rel)
+                child = (owner / rel).parent
+                if child.resolve() not in scopes or child.is_symlink():
+                    findings.append(finding('dead-entry', agents, root, rel, entry=rel))
+                elif find_index_anchor(child, root) != owner:
+                    findings.append(finding('misplaced', agents, root, rel, entry=rel, description=description))
+    for owner in sorted(scopes):
+        if owner == root:
+            continue
+        anchor = find_index_anchor(owner, root)
+        relative = (owner.relative_to(anchor) / AGENTS_FILE_NAME).as_posix()
+        if relative not in {rel for rel, _ in read_index_entries(anchor / AGENTS_FILE_NAME)}:
+            findings.append(finding('unregistered', owner, root, 'Register under nearest owning scope'))
     return findings
 
 
-def collect_findings(root: Path) -> list[dict[str, str]]:
-    """扫全树，找出单次 init 看不见的索引不一致。
-
-    只诊断不修改；修复由 apply_findings 按同一份结论执行。
-    """
-    memory_dirs = discover_memory_dirs(root)
-    owned = set(memory_dirs)
-    # 记忆根即使自己没有 .memory/，也可能只持有索引区块，所以必须在扫描范围内。
-    holders = memory_dirs if root in owned else [root, *memory_dirs]
-    findings, seen = scan_index_entries(root, holders, owned)
-    findings.extend(scan_registrations(root, memory_dirs, seen))
-    findings.extend(scan_memory_layout(root, memory_dirs))
-    for holder in holders:
-        agents_path = holder / AGENTS_FILE_NAME
-        if classify_agents_file(agents_path) != "managed":
+def apply_findings(root: Path, findings: list[dict]) -> list[str]:
+    repaired = []
+    blocked = {root / f['path'] for f in findings if f['code'] in {'migration-required', 'unsafe-layout'}}
+    for owner in walk_owners(root):
+        if owner in blocked:
             continue
-        if AUTO_START in agents_path.read_text(encoding="utf-8"):
-            findings.append(
-                {
-                    "issue": "stale-auto",
-                    "path": relative_or_name(agents_path, root),
-                    "detail": "已废弃的自动化策略区块，应删除",
-                }
-            )
-    return findings
-
-
-def apply_unregistered_type(root: Path, finding: dict[str, str]) -> list[str]:
-    """把已在磁盘上的类型入口补进本层清单。"""
-    agents_path = root / finding["path"]
-    if classify_agents_file(agents_path) != "managed":
-        return []
-    owner = agents_path.parent
-    document = agents_path.read_text(encoding="utf-8")
-    entry_type = finding.get("type", "")
-    entry = finding.get("entry", "")
-    rel = (
-        entry[len(".memory/") :]
-        if entry.startswith(".memory/")
-        else (index_file_name(entry_type) if entry_type else "")
-    )
-    if not rel or "/" not in rel:
-        return []
-    index_path = memory_dir(owner) / rel
-    description = f"{entry_type} 类型的记忆入口。"
-    if index_path.is_file():
-        parsed = parse_type_meta(index_path.read_text(encoding="utf-8"))
-        if parsed is not None and parsed.description:
-            description = parsed.description
-    updated = upsert_local_type_line(document, rel, description)
-    if updated == document:
-        return []
-    write_atomic(agents_path, updated)
-    return [f"unregistered-type: {finding['path']} 补上 {entry or rel}"]
-
-
-def register(directory: Path, root: Path, description: str | None, issue: str) -> list[str]:
-    """把一个目录登记回该去的那一层；没实际改动就不进修复清单。"""
-    anchor = find_index_anchor(directory, root)
-    action, _entry, _description = sync_index_entry(anchor, directory, description)
-    if action in {"preserved", "not-applicable"}:
-        return []
-    verb = "改登记到" if issue == "misplaced" else "登记到"
-    return [
-        f"{issue}: {relative_or_name(directory, root)} {verb} "
-        f"{relative_or_name(anchor, root) or '.'}"
-    ]
-
-
-def apply_findings(root: Path, findings: list[dict[str, str]]) -> list[str]:
-    """按诊断结论修复，分三段执行。
-
-    先做全部删除与区块修补，再把错位条目登记回正确层级，最后重扫补掉仍未登记的。
-    分段是必需的：`misplaced` 删掉后就变成未登记，同一次遍历里看不到这个新状态。
-    `foreign` 只补挂受管区块，绝不改动既有正文。
-    """
-    repaired: list[str] = []
-    displaced: list[tuple[Path, str]] = []
-    local_repairs = {
-        finding["path"]
-        for finding in findings
-        if finding["issue"] in {"missing-agents", "outdated-local"}
-    }
-    for finding in findings:
-        if finding["issue"] not in {
-            "legacy-flat-entry",
-            "legacy-singular-type-dir",
-            "legacy-flat-index",
-        }:
-            continue
-        source = root / finding["path"]
-        destination = root / finding["destination"]
-        if finding["issue"] in {"legacy-flat-entry", "legacy-flat-index"}:
-            if not source.is_file():
+        try:
+            specs = layer_type_specs(owner)
+            if not specs and not is_scope(owner):
                 continue
-            if destination.exists():
-                if finding["issue"] == "legacy-flat-index" and destination.is_file():
-                    try:
-                        same = destination.read_bytes() == source.read_bytes()
-                    except OSError:
-                        same = False
-                    if same:
-                        source.unlink()
-                        repaired.append(
-                            f"{finding['issue']}: {finding['path']} 与 "
-                            f"{finding['destination']} 相同，删除旧文件"
-                        )
+            path = assert_scope_path(owner / AGENTS_FILE_NAME, owner)
+            if classify_agents_file(path) == 'foreign':
+                existing = path.read_text(encoding='utf-8')
+                updated = insert_inner_block(existing, LOCAL_START, selected_local_block(specs))
+                write_atomic(path, updated)
+            action = sync_target_agents(owner, root)
+            if action != 'preserved':
+                repaired.append(f'{action}-agents: {relative_or_name(owner, root)}')
+            for spec in specs:
+                try:
+                    action = refresh_index(owner, spec.name)
+                    if action != 'preserved':
+                        repaired.append(f'{action}-index: {spec.index_file}')
+                except (OSError, UnicodeError, ValueError):
+                    # A failed scan must never replace its prior index with an empty one.
+                    continue
+        except (OSError, UnicodeError, ValueError):
+            continue
+    descriptions = {}
+    for item in findings:
+        if item['code'] in {'dead-entry', 'misplaced', 'duplicate'}:
+            path = root / item['path']
+            if path.parent in blocked:
                 continue
-            destination.parent.mkdir(parents=True, exist_ok=True)
-        elif destination.exists():
-            continue
-        elif not source.is_dir():
-            continue
-        source.rename(destination)
-        repaired.append(
-            f"{finding['issue']}: {finding['path']} 移到 {finding['destination']}"
-        )
-
-    for finding in findings:
-        issue = finding["issue"]
-        if issue == "legacy-flat-frontmatter":
-            path = root / finding["path"]
-            if path.is_file() and rewrite_ordinary_header(path):
-                repaired.append(
-                    f"legacy-flat-frontmatter: {finding['path']} 顶层实现字段收进 metadata"
-                )
-            continue
-        if issue == "missing-type-dir":
-            path = root / finding["path"]
-            if not path.exists():
-                path.mkdir(parents=True, exist_ok=True)
-                repaired.append(f"missing-type-dir: {finding['path']} 补建目录")
-            continue
-        if issue in {
-            "legacy-flat-entry",
-            "legacy-entry-conflict",
-            "legacy-singular-type-dir",
-            "legacy-type-dir-conflict",
-            "legacy-flat-index",
-            "legacy-flat-index-conflict",
-            "invalid-type-dir",
-            "missing-index",
-            "invalid-index",
-            "outdated-index",
-            "outdated-local",
-            "missing-agents",
-        }:
-            continue
-        agents_path = root / finding["path"]
-        owner = agents_path.parent
-        if issue in {"dead-entry", "misplaced", "duplicate"}:
-            if issue == "misplaced":
-                entry_dir = (owner / finding["entry"]).parent
-                displaced.append((entry_dir, finding.get("description", "")))
-            if drop_index_entries(agents_path, {finding["entry"]}):
-                repaired.append(f"{issue}: {finding['path']} 移除 {finding['entry']}")
-        elif issue == "stale-auto":
-            document = agents_path.read_text(encoding="utf-8")
-            updated = drop_auto_block(document).rstrip() + "\n"
-            if updated != document:
-                write_atomic(agents_path, updated)
-                repaired.append(f"{issue}: {finding['path']} 删除已废弃的自动化策略区块")
-        elif issue == "missing-important":
-            action = sync_agents_blocks(owner)
-            if action in {"created", "updated"}:
-                repaired.append(f"{issue}: {finding['path']} 补上硬约束区块，已有规则原样保留")
-        elif issue == "unregistered-type":
-            repaired.extend(apply_unregistered_type(root, finding))
-        elif issue == "foreign-agents":
-            # 唯一一处往他人文件里写的地方：只补挂受管区块，既有正文一字不动。
-            document = agents_path.read_text(encoding="utf-8")
-            updated = document
-            if memory_dir(owner).is_dir():
-                updated = upsert_block(
-                    updated, IMPORTANT_START, IMPORTANT_END, build_important_block()
-                )
-                updated = upsert_block(updated, LOCAL_START, LOCAL_END, build_local_block())
-            if updated != document:
-                write_atomic(agents_path, prune_outer_region(updated).rstrip() + "\n")
-                repaired.append(f"{issue}: {finding['path']} 补挂受管区块，既有正文原样保留")
-
-    # 迁移完成后才重算入口；否则旧版平铺文件会在索引里暂时消失。
+            assert_scope_path(path, path.parent)
+            if item['code'] in {'misplaced', 'duplicate'}:
+                descriptions[(path.parent / item['entry']).parent] = item.get('description')
+            if drop_index_entries(path, {item['entry']}):
+                repaired.append(f"removed-entry: {item['entry']}")
     for owner in discover_memory_dirs(root):
-        discovered = discover_layer_types(owner)
-        specs = {spec.name: spec for spec in layer_type_specs(owner)}
-        content_dirs_valid = True
-        for entry_type in discovered:
-            directory = type_content_dir(owner, entry_type)
-            if directory.exists() and not directory.is_dir():
-                content_dirs_valid = False
-                continue
-            spec = specs.get(entry_type)
-            skip_dir = is_external_type(entry_type) or (
-                spec is not None and not spec.writable
-            )
-            if skip_dir:
-                continue
-            directory.mkdir(parents=True, exist_ok=True)
-        if not content_dirs_valid:
+        if owner == root or owner in blocked:
             continue
-        for entry_type, file_name in discovered.items():
-            index_path = memory_dir(owner) / file_name
-            if index_path.exists() and not index_path.is_file():
-                continue
-            action = refresh_index(owner, entry_type)
-            if action in {"created", "updated"}:
-                repaired.append(
-                    f"{action}-index: {relative_or_name(index_path, root)}"
-                )
-        agents_path = owner / AGENTS_FILE_NAME
-        relative_agents = relative_or_name(agents_path, root)
-        if relative_agents in local_repairs:
-            if classify_agents_file(agents_path) == "missing":
-                local_action = sync_agents_blocks(owner, local=build_local_block())
-            else:
-                existing = agents_path.read_text(encoding="utf-8")
-                merged = ensure_seed_local_lines(existing)
-                match = block_pattern(LOCAL_START, LOCAL_END).search(merged)
-                local = match.group(0) if match else build_local_block()
-                if merged != existing:
-                    write_atomic(agents_path, merged)
-                local_action = sync_agents_blocks(owner, local=local)
-            if local_action in {"created", "updated"}:
-                repaired.append(
-                    f"{local_action}-agents: {relative_agents} 刷新入口清单"
-                )
-
-    for directory, description in displaced:
-        repaired.extend(register(directory.resolve(), root, description or None, "misplaced"))
-    # 重扫补登记：既覆盖原本就未登记的，也覆盖上一段删除后新暴露出来的。
-    for finding in collect_findings(root):
-        if finding["issue"] == "unregistered":
-            directory = (root / finding["path"]).resolve()
-            repaired.extend(register(directory, root, None, "unregistered"))
-        elif finding["issue"] == "unregistered-type":
-            repaired.extend(apply_unregistered_type(root, finding))
+        anchor = find_index_anchor(owner, root)
+        if anchor in blocked:
+            continue
+        action, entry, _ = sync_index_entry(anchor, owner, descriptions.get(owner))
+        if action not in {'preserved', 'not-applicable', 'needs-doctor'}:
+            repaired.append(f'registered: {entry}')
     return repaired
 
 
 def doctor_memory(root: Path, apply: bool) -> dict[str, object]:
-    """体检整棵记忆树。默认只诊断，apply 为真才写。"""
     findings = collect_findings(root)
     repaired = apply_findings(root, findings) if apply else []
     remaining = collect_findings(root) if apply else findings
-    return {
-        "operation": "doctor",
-        "rootDir": str(root),
-        "applied": apply,
-        "memoryDirs": [
-            relative_or_name(path, root) or "." for path in discover_memory_dirs(root)
-        ],
-        "findings": findings,
-        "repaired": repaired,
-        "remaining": remaining,
-    }
+    return {'operation': 'doctor', 'rootDir': str(root), 'applied': apply,
+            'memoryDirs': [relative_or_name(p, root) for p in discover_memory_dirs(root)],
+            'findings': findings, 'repaired': repaired, 'remaining': remaining}

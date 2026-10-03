@@ -14,9 +14,9 @@ LoCoMo 便宜、官方链路现成，容易被拿来当作「记忆有效」的�
 ## Consequences
 
 - 冒烟产物是评测报告，落在 Edges 评测工作区中的报告落点；不是既有 Edge，也不是知识资产。
-- [`knowledge/tasks/_default/backlog/2026-09-11--找公开benchmark证明memory有效性.md`](../../knowledge/tasks/_default/backlog/2026-09-11--找公开benchmark证明memory有效性.md) 继续拥有公开基准证明；本轮不提前用 LoCoMo 分数交差。
-- [`knowledge/tasks/_default/done/2026-09-16--LoCoMo评测流水线冒烟.md`](../../knowledge/tasks/_default/done/2026-09-16--LoCoMo评测流水线冒烟.md) 已用 hand-port 跑通链路（PR #70）。新跑优先 [`evaluation/run_locomo_official.py`](../../evaluation/run_locomo_official.py)（submodule 官方 F1）。
-- [`knowledge/tasks/_default/done/2026-09-16--LoCoMo-fork薄封装与edges-submodule.md`](../../knowledge/tasks/_default/done/2026-09-16--LoCoMo-fork薄封装与edges-submodule.md) 已把官方入口接到 edges（PR #72）。
+- [`knowledge/tasks/_default/backlog/2026-09-11--找公开benchmark证明memory有效性.md`](../../.harness/tasks/_default/backlog/2026-09-11--%E6%89%BE%E5%85%AC%E5%BC%80benchmark%E8%AF%81%E6%98%8Ememory%E6%9C%89%E6%95%88%E6%80%A7.md) 继续拥有公开基准证明；本轮不提前用 LoCoMo 分数交差。
+- [`knowledge/tasks/_default/done/2026-09-16--LoCoMo评测流水线冒烟.md`](../../.harness/tasks/_default/done/2026-09-16--LoCoMo%E8%AF%84%E6%B5%8B%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%86%92%E7%83%9F.md) 已用 hand-port 跑通链路（PR #70）。新跑优先 [`evaluation/run_locomo_official.py`](../../.harness/evaluation/run_locomo_official.py)（submodule 官方 F1）。
+- [`knowledge/tasks/_default/done/2026-09-16--LoCoMo-fork薄封装与edges-submodule.md`](../../.harness/tasks/_default/done/2026-09-16--LoCoMo-fork%E8%96%84%E5%B0%81%E8%A3%85%E4%B8%8Eedges-submodule.md) 已把官方入口接到 edges（PR #72）。
 - 把项目记忆接入 LoCoMo 当记忆后端，不在本轮冒烟范围内。四臂探索仍 paused。
 
 ## Considered Options

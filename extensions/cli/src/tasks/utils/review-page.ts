@@ -1,15 +1,21 @@
+import { parseSource, parseSourceProject, type TaskSource } from "./grouped.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { TasksError } from "./types.js";
 import type { TaskDoc } from "./task-doc.js";
 
 export type ReviewPageGroup = {
+  source?: TaskSource;
+  project?: string;
   id: string;
   title: string;
   description?: string;
 };
 
 export type ReviewPageItem = {
+  id?: string;
+  source?: TaskSource;
+  project?: string;
   stem: string;
   current: string;
   suggested: string;
@@ -70,7 +76,8 @@ function parseGroup(raw: unknown, seenIds: Set<string>): ReviewPageGroup {
   }
 
   const description = typeof raw.description === "string" ? raw.description : "";
-  return { id, title, description };
+  const source = parseSource(raw.source);
+  return { id, title, description, ...(source ? { source, project: parseSourceProject(raw.project) } : {}) };
 }
 
 function optionalString(value: unknown): string | undefined {
@@ -82,10 +89,12 @@ function parseItem(raw: unknown, groupIds: Set<string>, seenStems: Set<string>):
     fail(INVALID_ITEM_STEM);
   }
   const stem = raw.stem.trim();
-  if (seenStems.has(stem)) {
+  const source = parseSource(raw.source);
+  const id = source && typeof raw.id === "string" && raw.id ? raw.id : stem;
+  if (seenStems.has(id)) {
     fail(`duplicate review-page item stem: ${stem}`);
   }
-  seenStems.add(stem);
+  seenStems.add(id);
 
   const current = typeof raw.current === "string" ? raw.current.trim() : "";
   const suggested = typeof raw.suggested === "string" ? raw.suggested.trim() : "";
@@ -96,7 +105,7 @@ function parseItem(raw: unknown, groupIds: Set<string>, seenStems: Set<string>):
     fail(`review-page item ${stem} suggested group not found: ${suggested}`);
   }
 
-  const item: ReviewPageItem = { stem, current, suggested };
+  const item: ReviewPageItem = { stem, current, suggested, ...(source ? { id, source, project: parseSourceProject(raw.project) } : {}) };
   const title = optionalString(raw.title);
   const description = optionalString(raw.description);
   const note = optionalString(raw.note);
@@ -158,6 +167,13 @@ export function parseReviewPageInput(raw: unknown): ReviewPageInput {
   const groups = raw.groups.map((group) => parseGroup(group, seenIds));
   const seenStems = new Set<string>();
   const items = raw.items.map((item) => parseItem(item, seenIds, seenStems));
+  for (const item of items) {
+    if (!item.source) continue;
+    for (const id of [item.current, item.suggested]) {
+      const group = groups.find(group => group.id === id)!;
+      if (!group.source || group.source.scope !== item.source.scope || group.source.purpose !== item.source.purpose) fail("review-page cannot assign across source boards");
+    }
+  }
   return { groups, items };
 }
 

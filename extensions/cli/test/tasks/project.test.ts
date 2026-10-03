@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile, rm, access } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { nodeBoardWriter } from "./utils/helpers.js";
@@ -13,7 +13,7 @@ import {
 
 async function virginRepo(): Promise<string> {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-proj-"));
-  await mkdir(path.join(repo, "knowledge/tasks"), { recursive: true });
+  await mkdir(path.join(repo, "tasks"), { recursive: true });
   return repo;
 }
 
@@ -31,7 +31,7 @@ test("create/list/get/update project metadata; create default on virgin board", 
     );
     assert.equal(createdDefault.project, "default");
     assert.equal(createdDefault.dir, "_default");
-    assert.equal(createdDefault.path, "knowledge/tasks/_default/AGENTS.md");
+    assert.equal(createdDefault.path, "tasks/_default/AGENTS.md");
 
     const created = await createProject(
       repo,
@@ -39,7 +39,7 @@ test("create/list/get/update project metadata; create default on virgin board", 
       nodeBoardWriter(),
     );
     assert.equal(created.project, "cli");
-    assert.equal(created.path, "knowledge/tasks/cli/AGENTS.md");
+    assert.equal(created.path, "tasks/cli/AGENTS.md");
 
     const listed = await listProjects(repo, nodeBoardWriter());
     assert.deepEqual(
@@ -60,7 +60,7 @@ test("create/list/get/update project metadata; create default on virgin board", 
     assert.equal(updated.description, "updated CLI");
     assert.equal(updated.title, "CLI");
 
-    const root = await readFile(path.join(repo, "knowledge/tasks/AGENTS.md"), "utf8");
+    const root = await readFile(path.join(repo, "tasks/AGENTS.md"), "utf8");
     assert.match(root, /updated CLI/);
     assert.match(root, /<!-- task-projects:start -->/);
   } finally {
@@ -111,19 +111,19 @@ test("updateProject preserves pointers and does not rewrite a Task file", async 
       nodeBoardWriter(),
     );
     await writeFile(
-      path.join(repo, "knowledge/tasks/cli/AGENTS.md"),
+      path.join(repo, "tasks/cli/AGENTS.md"),
       "# CLI\n\nedges CLI work\n\n## Pointers\n\n- keep\n",
       "utf8",
     );
-    const taskRel = "knowledge/tasks/_default/backlog/2026-09-13--keep.md";
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    const taskRel = "tasks/_default/backlog/2026-09-13--keep.md";
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     await writeFile(
       path.join(repo, taskRel),
       "---\nmetadata:\n  edges-tasks-status: backlog\n  edges-task-priority: high\n---\n\nbody\n",
       "utf8",
     );
     await updateProject(repo, "cli", { title: "CLI work" }, nodeBoardWriter());
-    const agents = await readFile(path.join(repo, "knowledge/tasks/cli/AGENTS.md"), "utf8");
+    const agents = await readFile(path.join(repo, "tasks/cli/AGENTS.md"), "utf8");
     assert.match(agents, /^# CLI work\n/);
     assert.match(agents, /## Pointers\n\n- keep\n/);
     const task = await readFile(path.join(repo, taskRel), "utf8");
@@ -137,13 +137,13 @@ test("updateProject preserves pointers and does not rewrite a Task file", async 
 test("updateProject seeds AGENTS.md when the project dir exists without metadata", async () => {
   const repo = await virginRepo();
   try {
-    await mkdir(path.join(repo, "knowledge/tasks/docs/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/docs/backlog"), { recursive: true });
     await writeFile(
-      path.join(repo, "knowledge/tasks/docs/backlog/2026-09-17--orphan.md"),
+      path.join(repo, "tasks/docs/backlog/2026-09-17--orphan.md"),
       "---\nmetadata:\n  edges-tasks-status: backlog\n  edges-task-project: docs\n---\n\nbody\n",
       "utf8",
     );
-    await assert.rejects(() => readFile(path.join(repo, "knowledge/tasks/docs/AGENTS.md"), "utf8"));
+    await assert.rejects(() => readFile(path.join(repo, "tasks/docs/AGENTS.md"), "utf8"));
 
     const updated = await updateProject(
       repo,
@@ -155,9 +155,9 @@ test("updateProject seeds AGENTS.md when the project dir exists without metadata
     assert.equal(updated.dir, "docs");
     assert.equal(updated.title, "Docs");
     assert.equal(updated.description, "documentation work");
-    assert.equal(updated.path, "knowledge/tasks/docs/AGENTS.md");
+    assert.equal(updated.path, "tasks/docs/AGENTS.md");
 
-    const agents = await readFile(path.join(repo, "knowledge/tasks/docs/AGENTS.md"), "utf8");
+    const agents = await readFile(path.join(repo, "tasks/docs/AGENTS.md"), "utf8");
     assert.match(agents, /^# Docs\n/);
     assert.match(agents, /documentation work/);
   } finally {
@@ -183,4 +183,23 @@ test("createProject rejects _default as the CLI id", async () => {
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
+});
+
+test('project get returns the read-only listed project after ordinary task creation', async () => {
+  const { run } = await import('../../src/program.js');
+  const repo = await mkdtemp(path.join(tmpdir(), 'edges-project-get-'));
+  try {
+    const env = { EDGES_SCOPE: repo };
+    const created = await run(['tasks', '--purpose', 'maintenance', 'create', '--title', 'Fresh', '--project', 'cli'], { env });
+    assert.equal(created.exitCode, 0, created.stdout);
+    const listed = JSON.parse((await run(['tasks', '--purpose', 'maintenance', 'project', 'list'], { env })).stdout);
+    const got = await run(['tasks', '--purpose', 'maintenance', 'project', 'get', 'cli'], { env });
+    assert.equal(got.exitCode, 0, got.stdout);
+    const { status, command, ...record } = JSON.parse(got.stdout);
+    assert.equal(status, 'success');
+    assert.deepEqual(record, listed.projects.find((project: any) => project.project === 'cli'));
+    for (const rel of ['.harness/tasks/cli/AGENTS.md', '.harness/tasks/AGENTS.md', '.harness/tasks/_default', 'tasks']) {
+      await assert.rejects(access(path.join(repo, rel)));
+    }
+  } finally { await rm(repo, { recursive: true, force: true }); }
 });

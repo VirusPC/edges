@@ -28,14 +28,14 @@ const defaultRecord = {
   dir: "_default",
   title: "Default",
   description: "Ungrouped tasks that have not been assigned a named Task Project.",
-  path: "knowledge/tasks/_default/AGENTS.md",
+  path: "tasks/_default/AGENTS.md",
 };
 const cliRecord = {
   project: "cli",
   dir: "cli",
   title: "CLI",
   description: "edges CLI\nwork",
-  path: "knowledge/tasks/cli/AGENTS.md",
+  path: "tasks/cli/AGENTS.md",
 };
 
 test("seed copy for default and user slugs", () => {
@@ -168,23 +168,23 @@ test("rewriteRootAgents rejects a start marker without an end marker", () => {
 });
 
 test("projectAgentsRelPath uses _default for default", () => {
-  assert.equal(projectAgentsRelPath("default"), "knowledge/tasks/_default/AGENTS.md");
-  assert.equal(projectAgentsRelPath("cli"), "knowledge/tasks/cli/AGENTS.md");
+  assert.equal(projectAgentsRelPath("default"), "tasks/_default/AGENTS.md");
+  assert.equal(projectAgentsRelPath("cli"), "tasks/cli/AGENTS.md");
 });
 
 test("ensureProjectMetadata seeds _default and root index without moving Task files", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-proj-"));
   try {
-    const taskRel = "knowledge/tasks/_default/backlog/2026-09-13--keep.md";
-    await mkdir(path.join(repo, "knowledge/tasks/_default/backlog"), { recursive: true });
+    const taskRel = "tasks/_default/backlog/2026-09-13--keep.md";
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     await writeFile(path.join(repo, taskRel), "# keep\n", "utf8");
-    await mkdir(path.join(repo, "knowledge/tasks/cli/todo"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/cli/todo"), { recursive: true });
     await writeFile(
-      path.join(repo, "knowledge/tasks/cli/todo/2026-09-13--other.md"),
+      path.join(repo, "tasks/cli/todo/2026-09-13--other.md"),
       "---\nmetadata:\n  edges-task-project: cli\n  edges-tasks-status: todo\n---\n\nx\n",
       "utf8",
     );
-    const rootAgents = path.join(repo, "knowledge/tasks/AGENTS.md");
+    const rootAgents = path.join(repo, "tasks/AGENTS.md");
     await writeFile(
       rootAgents,
       `# tasks\n\n<!-- project-memory:start -->\n\n- keep-index\n<!-- project-memory:end -->\n`,
@@ -195,9 +195,9 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
     assert.equal(records[0]?.project, "default");
     assert.equal(records.some((item) => item.project === "cli"), true);
 
-    const seeded = await readFile(path.join(repo, "knowledge/tasks/_default/AGENTS.md"), "utf8");
+    const seeded = await readFile(path.join(repo, "tasks/_default/AGENTS.md"), "utf8");
     assert.match(seeded, /^# Default\n/);
-    const cliAgents = await readFile(path.join(repo, "knowledge/tasks/cli/AGENTS.md"), "utf8");
+    const cliAgents = await readFile(path.join(repo, "tasks/cli/AGENTS.md"), "utf8");
     assert.match(cliAgents, /^# cli\n/);
     assert.match(cliAgents, /Task Project cli\./);
 
@@ -216,10 +216,26 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
 test("ensureProjectMetadata skipId leaves that AGENTS.md missing", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-proj-"));
   try {
-    await mkdir(path.join(repo, "knowledge/tasks"), { recursive: true });
+    await mkdir(path.join(repo, "tasks"), { recursive: true });
     await ensureProjectMetadata(repo, nodeBoardWriter(), "default");
-    await assert.rejects(readFile(path.join(repo, "knowledge/tasks/_default/AGENTS.md"), "utf8"));
+    await assert.rejects(readFile(path.join(repo, "tasks/_default/AGENTS.md"), "utf8"));
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
+});
+
+test('project get synthesizes existing directories, rejects missing ones, and leaves metadata absent', async () => {
+  const { getProject, listProjects } = await import('../../../src/tasks/utils/project-meta.js');
+  const { access } = await import('node:fs/promises');
+  const repo = await mkdtemp(path.join(tmpdir(), 'edges-project-read-'));
+  try {
+    await mkdir(path.join(repo, 'tasks/cli/todo'), { recursive: true });
+    const fs = nodeBoardWriter();
+    const listed = await listProjects(repo, fs);
+    assert.deepEqual(await getProject(repo, 'cli', fs), listed[0]);
+    await assert.rejects(() => getProject(repo, 'missing', fs), (error: any) => error.errorCode === 'PROJECT_NOT_FOUND');
+    for (const rel of ['tasks/cli/AGENTS.md', 'tasks/AGENTS.md', 'tasks/_default', 'tasks/missing']) {
+      await assert.rejects(access(path.join(repo, rel)));
+    }
+  } finally { await rm(repo, { recursive: true, force: true }); }
 });

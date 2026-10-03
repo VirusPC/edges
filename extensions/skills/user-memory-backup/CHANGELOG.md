@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-03
+
 ### Changed
 
-- 打包 `.memory/users/`（含 ADR-0012 的 `users/AGENTS.md`）；仍接受尚未迁走的 `.memory/USER.md`。
+- 仅打包 `.harness/memory/users/`，拒绝旧布局并提示 project-memory-migrate；写入前建立忽略规则，归档权限 0600，拒绝同名覆盖和源符号链接。
 
 ## [1.0.0] - 2026-09-11
 
@@ -17,5 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 把 `.memory/USER.md` 与 `.memory/users/` 打成仓库根默认名 `user-memory-backup-<时间戳>.tar.gz`。不 `git add`。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/user-memory-backup@1.0.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/user-memory-backup@2.0.0...HEAD
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/user-memory-backup@1.0.0
+
+[2.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/user-memory-backup@2.0.0

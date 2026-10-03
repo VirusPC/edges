@@ -7,6 +7,7 @@
 
 <!-- project-memory-type:start -->
 name: {type}
+module: {module}
 description: {description}
 gitignore: {gitignore}
 writable: {writable}

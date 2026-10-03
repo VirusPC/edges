@@ -1,3 +1,4 @@
+import { itemIdentity } from "../types.ts"
 import { useEffect, useState } from "react"
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
@@ -39,7 +40,7 @@ export function MarkdownPane({
               data-section-back="edges"
               className="shrink-0 text-sm font-medium text-[#5b9fd4]"
               onClick={() => {
-                if (item?.stem) scrollReviewToCard(item.stem)
+                if (item?.stem) scrollReviewToCard(itemIdentity(item))
               }}
             >
               回到看板

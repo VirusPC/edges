@@ -1,11 +1,9 @@
 import { execFile } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import type { IngestRequest, RuntimeConfig, ScriptSuccess } from "./types.js";
 
 const execFileAsync = promisify(execFile);
-const MCP_PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 type CliPayload = {
   status: string;
@@ -19,7 +17,7 @@ type CliPayload = {
 
 function spawnArgs(cliEntry: string): { file: string; prefix: string[] } {
   if (cliEntry.endsWith(".ts")) {
-    return { file: process.execPath, prefix: ["--import", "tsx", cliEntry] };
+    return { file: process.execPath, prefix: ["--import", import.meta.resolve("tsx"), cliEntry] };
   }
   return { file: process.execPath, prefix: [cliEntry] };
 }
@@ -50,7 +48,9 @@ export async function runEdgesNote(
   config: RuntimeConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<ScriptSuccess> {
-  const { file, prefix } = spawnArgs(config.cliEntry);
+  const cwd = config.cwd ?? process.cwd();
+  const target = config.scopeDir ?? config.repoPath;
+  const { file, prefix } = spawnArgs(path.resolve(cwd, config.cliEntry));
   const args = [
     ...prefix,
     "note",
@@ -69,6 +69,7 @@ export async function runEdgesNote(
   const childEnv: NodeJS.ProcessEnv = {
     ...env,
     EDGES_REPO: config.repoPath,
+    EDGES_SCOPE: target === undefined ? undefined : path.resolve(cwd, target),
     EDGES_BASE_BRANCH: config.baseBranch,
     EDGES_MODE: config.mode,
     EDGES_DRY_RUN: config.dryRun ? "true" : env.EDGES_DRY_RUN,
@@ -78,7 +79,7 @@ export async function runEdgesNote(
   let stdout = "";
   try {
     const result = await execFileAsync(file, args, {
-      cwd: MCP_PACKAGE_ROOT,
+      cwd,
       env: childEnv,
       maxBuffer: 1024 * 1024 * 10,
     });

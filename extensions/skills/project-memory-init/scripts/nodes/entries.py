@@ -9,6 +9,7 @@ from pathlib import Path
 from lib.blocks import ENTRIES_END, ENTRIES_START, index_files, upsert_block
 from lib.types import (
     discover_layer_types,
+    ensure_layer_type_gitignore,
     index_file_name,
     layer_type_specs,
     layer_writable_types,
@@ -16,6 +17,7 @@ from lib.types import (
     type_index_template_name,
 )
 from lib.paths import (
+    assert_scope_path,
     is_external_type,
     list_type_files,
     memory_dir,
@@ -47,10 +49,10 @@ YAML_TYPED = re.compile(
 )
 
 # 正文遵循 Agent Skills 协议的类型：形态是 <name>/SKILL.md，不套普通记忆模板。
-# 「用什么格式」和「能不能写」是两回事——skills 两者都占，agent_skills 只占前者，
-# 后者由 lib.paths.is_external_type() 判定（内容根在 .memory/ 外的一律只读）。
-SKILLS_TYPE = "skills"
-AGENT_SKILLS_TYPE = "agent_skills"
+# 「用什么格式」和「能不能写」是两回事——managed 两者都占，referenced 只占前者，
+# 后者由 lib.paths.is_external_type() 判定（referenced 的原位来源只读）。
+SKILLS_TYPE = "managed"
+AGENT_SKILLS_TYPE = "referenced"
 AGENT_SKILL_FORMAT_TYPES = frozenset({SKILLS_TYPE, AGENT_SKILLS_TYPE})
 
 # Agent Skills 协议：产物名固定，目录名即 name，kebab-case 且不超过 64 字符。
@@ -215,11 +217,11 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
         try:
             for raw_line in source:
                 if raw_line.rstrip("\r\n").strip() == "---":
-                    break
+                    return _parse_frontmatter_lines(collected)
                 collected.append(raw_line)
         except UnicodeError:
             return {}
-    return _parse_frontmatter_lines(collected)
+    return {}
 
 
 def top_level_frontmatter_keys(path: Path) -> set[str]:
@@ -256,59 +258,6 @@ def has_legacy_flat_frontmatter(path: Path) -> bool:
     return bool(top_level_frontmatter_keys(path) & FLAT_COMPAT_KEYS)
 
 
-def extract_entry_body(text: str) -> str:
-    """取关闭 `---` 之后的正文。"""
-    if not text.startswith("---"):
-        return text
-    rest = text[3:]
-    if rest.startswith("\n"):
-        rest = rest[1:]
-    marker = "\n---"
-    index = rest.find(marker)
-    if index < 0:
-        return text
-    body = rest[index + len(marker) :]
-    if body.startswith("\n"):
-        body = body[1:]
-    return body
-
-
-def ordinary_memory_types(target: Path | None = None) -> tuple[str, ...]:
-    """走 type_slug 模板的可写类型，不含 skills。"""
-    return tuple(
-        name
-        for name in memory_entry_types(target)
-        if not (
-            is_skill_format(target, name)
-            if target is not None
-            else name in AGENT_SKILL_FORMAT_TYPES
-        )
-    )
-
-
-def rewrite_ordinary_header(path: Path) -> bool:
-    """把旧扁平文件头收成当前模板，正文 strip 后写回。改了返回 True。"""
-    try:
-        original = path.read_text(encoding="utf-8")
-    except (OSError, UnicodeError):
-        return False
-    fields = parse_frontmatter(path)
-    if "name" not in fields:
-        fields["name"] = path.stem
-    if "type" not in fields:
-        prefix = path.stem.split("_", 1)[0]
-        if prefix in ordinary_memory_types():
-            fields["type"] = prefix
-    body = extract_entry_body(original).strip()
-    if not body:
-        return False
-    updated = render_entry(fields, body, ENTRY_OUTPUT_PATTERN)
-    if updated == original:
-        return False
-    write_atomic(path, updated)
-    return True
-
-
 def render_entry(
     fields: dict[str, str], content: str, output_name: str = ENTRY_OUTPUT_PATTERN
 ) -> str:
@@ -341,13 +290,13 @@ def resolve_memory_path(target: Path, entry_type: str, slug: str | None) -> Path
                 f"--slug 在 {entry_type} 里是技能目录名，必须是 kebab-case 且不超过 "
                 f"{SKILL_NAME_MAX} 字符，例如 rerun-failed-e2e"
             )
-        return directory / normalized / SKILL_OUTPUT_NAME
+        return assert_scope_path(directory / normalized / SKILL_OUTPUT_NAME, target)
     if not re.fullmatch(r"[a-z0-9]+(?:_[a-z0-9]+)*", normalized):
         raise ValueError("--slug 必须是小写 snake_case，例如 reuse_existing_constants")
     prefixes = discover_layer_types(target) or index_files()
     if normalized.startswith(tuple(f"{name}_" for name in prefixes)):
         raise ValueError("--slug 不要带类型前缀，脚本会按 --type 自动加上")
-    return directory / f"{entry_type}_{normalized}.md"
+    return assert_scope_path(directory / f"{entry_type}_{normalized}.md", target)
 
 
 def build_entry_fields(
@@ -415,7 +364,7 @@ def build_entry_index(target: Path, entry_type: str) -> str:
                 ENTRY_LINE_TEMPLATE,
                 {
                     "title": title,
-                    # 入口与条目同目录；agent_skills 的内容根在 .memory/ 外，链接带 `../`。
+                    # 入口与条目同目录；referenced 的内容根在 .harness/ 外，链接带 `../`。
                     "path": relative_link(path, index_base),
                     "description": description,
                 },
@@ -429,7 +378,7 @@ def build_entry_index(target: Path, entry_type: str) -> str:
 def expected_index_document(target: Path, entry_type: str) -> str:
     """计算索引目标态但不落盘，供 refresh 与 doctor 共用。"""
     file_name = discover_layer_types(target).get(entry_type) or index_file_name(entry_type)
-    path = memory_dir(target) / file_name
+    path = assert_scope_path(target / file_name, target)
     existing = (
         path.read_text(encoding="utf-8")
         if path.is_file()
@@ -446,7 +395,10 @@ def expected_index_document(target: Path, entry_type: str) -> str:
 def refresh_index(target: Path, entry_type: str) -> str:
     """刷新索引文件里的条目清单；索引文件缺失时先按模板补建。"""
     file_name = discover_layer_types(target).get(entry_type) or index_file_name(entry_type)
-    path = memory_dir(target) / file_name
+    path = assert_scope_path(target / file_name, target)
+    ensure_layer_type_gitignore(target, entry_type)
+    if entry_type in discover_layer_types(target) and not is_external_type(entry_type):
+        path.parent.mkdir(parents=True, exist_ok=True)
     existed = path.is_file()
     existing = path.read_text(encoding="utf-8") if existed else ""
     updated = expected_index_document(target, entry_type)

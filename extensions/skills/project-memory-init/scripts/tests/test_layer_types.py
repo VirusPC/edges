@@ -26,8 +26,30 @@ from lib.types import (  # noqa: E402
     validate_type_name,
 )
 from nodes.entries import expected_index_document  # noqa: E402
-from operations.init import init_memory  # noqa: E402
+from operations.init import init_memory as _init_memory  # noqa: E402
 from operations.remember import remember  # noqa: E402
+
+
+# Explicit registration metadata is part of every custom type fixture. Missing
+# metadata is tested as damage, never inferred as public writable permissions.
+DOCS_META = (
+    "<!-- project-memory-type:start -->\nname: docs\nmodule: memory\n"
+    "description: 文档指针\ngitignore: false\nwritable: true\nformat: ordinary\n"
+    "<!-- project-memory-type:end -->\n\n"
+)
+RESEARCH_META = (
+    "<!-- project-memory-type:start -->\nname: research\nmodule: memory\n"
+    "description: Research pointers\ngitignore: false\nwritable: true\nformat: ordinary\n"
+    "<!-- project-memory-type:end -->\n\n"
+)
+
+
+def init_memory(target, root, description=None):
+    # These existing tests explicitly exercise all six official adopted types.
+    (target / '.agents/skills').mkdir(parents=True, exist_ok=True)
+    return _init_memory(target, root, description,
+        memory_types=['user', 'feedback', 'project', 'reference'],
+        skill_types=['managed', 'referenced'])
 
 
 class SeedIsolationTests(unittest.TestCase):
@@ -35,7 +57,7 @@ class SeedIsolationTests(unittest.TestCase):
         self.assertEqual(seed_index_files(), index_files())
         self.assertEqual(
             list(seed_index_files()),
-            ["user", "feedback", "project", "reference", "skills", "agent_skills"],
+            ["user", "feedback", "project", "reference", "managed", "referenced"],
         )
         self.assertEqual(SEED_TYPE_NAMES, tuple(seed_index_files()))
 
@@ -45,8 +67,8 @@ class SeedIsolationTests(unittest.TestCase):
             self.assertNotIn(name, files)
 
     def test_index_file_name_is_plural_agents(self) -> None:
-        self.assertEqual(index_file_name("docs"), "docs/AGENTS.md")
-        self.assertEqual(index_file_name("agent_skills"), "agent_skills/AGENTS.md")
+        self.assertEqual(index_file_name("docs"), ".harness/memory/docs/AGENTS.md")
+        self.assertEqual(index_file_name("referenced"), ".harness/skills/referenced/AGENTS.md")
 
 
 class ValidateTypeNameTests(unittest.TestCase):
@@ -84,20 +106,20 @@ class DiscoverLayerTypesTests(unittest.TestCase):
             text = agents.read_text(encoding="utf-8")
             text = text.replace(
                 "<!-- project-memory-local:end -->",
-                "- [.memory/docs/AGENTS.md](.memory/docs/AGENTS.md) — 文档指针\n"
+                "- [.harness/memory/docs/AGENTS.md](.harness/memory/docs/AGENTS.md) — 文档指针\n"
                 "<!-- project-memory-local:end -->",
             )
             agents.write_text(text, encoding="utf-8")
-            docs_index = target / ".memory" / "docs"
+            docs_index = target / ".harness/memory" / "docs"
             docs_index.mkdir(exist_ok=True)
             (docs_index / "AGENTS.md").write_text(
-                "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                DOCS_META + "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
             )
             discovered = discover_layer_types(target)
             self.assertIn("docs", discovered)
-            self.assertEqual(discovered["docs"], "docs/AGENTS.md")
+            self.assertEqual(discovered["docs"], ".harness/memory/docs/AGENTS.md")
             self.assertEqual(list(discovered)[:6], list(seed_index_files()))
             self.assertEqual(list(discovered)[-1], "docs")
 
@@ -105,15 +127,15 @@ class DiscoverLayerTypesTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             target = Path(raw)
             init_memory(target, target, "temp tree")
-            research = target / ".memory" / "research"
+            research = target / ".harness/memory" / "research"
             research.mkdir()
             (research / "AGENTS.md").write_text(
-                "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                RESEARCH_META + "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
             )
             discovered = discover_layer_types(target)
-            self.assertEqual(discovered["research"], "research/AGENTS.md")
+            self.assertEqual(discovered["research"], ".harness/memory/research/AGENTS.md")
 
 
 class PreserveExtraTypesTests(unittest.TestCase):
@@ -123,15 +145,15 @@ class PreserveExtraTypesTests(unittest.TestCase):
         agents.write_text(
             text.replace(
                 "<!-- project-memory-local:end -->",
-                "- [.memory/docs/AGENTS.md](.memory/docs/AGENTS.md) — 文档指针\n"
+                "- [.harness/memory/docs/AGENTS.md](.harness/memory/docs/AGENTS.md) — 文档指针\n"
                 "<!-- project-memory-local:end -->",
             ),
             encoding="utf-8",
         )
-        docs_dir = target / ".memory" / "docs"
+        docs_dir = target / ".harness/memory" / "docs"
         docs_dir.mkdir(exist_ok=True)
         (docs_dir / "AGENTS.md").write_text(
-            "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+            DOCS_META + "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
             "<!-- project-memory-entries:end -->\n",
             encoding="utf-8",
         )
@@ -143,8 +165,8 @@ class PreserveExtraTypesTests(unittest.TestCase):
             self._add_docs_line(target)
             init_memory(target, target, "temp tree")
             local = (target / "AGENTS.md").read_text(encoding="utf-8")
-            self.assertIn(".memory/docs/AGENTS.md", local)
-            self.assertIn(".memory/users/AGENTS.md", local)
+            self.assertIn(".harness/memory/docs/AGENTS.md", local)
+            self.assertIn(".harness/memory/users/AGENTS.md", local)
 
     def test_remember_does_not_drop_extra_local_line(self) -> None:
         with tempfile.TemporaryDirectory() as raw:
@@ -162,7 +184,7 @@ class PreserveExtraTypesTests(unittest.TestCase):
                 {"username": "tester", "email": "t@example.com"},
             )
             self.assertIn(
-                ".memory/docs/AGENTS.md",
+                ".harness/memory/docs/AGENTS.md",
                 (target / "AGENTS.md").read_text(encoding="utf-8"),
             )
 
@@ -176,14 +198,14 @@ class RememberDiscoveredTypeTests(unittest.TestCase):
             agents.write_text(
                 agents.read_text(encoding="utf-8").replace(
                     "<!-- project-memory-local:end -->",
-                    "- [.memory/docs/AGENTS.md](.memory/docs/AGENTS.md) — 文档指针\n"
+                    "- [.harness/memory/docs/AGENTS.md](.harness/memory/docs/AGENTS.md) — 文档指针\n"
                     "<!-- project-memory-local:end -->",
                 ),
                 encoding="utf-8",
             )
-            (target / ".memory" / "docs").mkdir()
-            (target / ".memory" / "docs" / "AGENTS.md").write_text(
-                "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+            (target / ".harness/memory" / "docs").mkdir()
+            (target / ".harness/memory" / "docs" / "AGENTS.md").write_text(
+                DOCS_META + "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
             )
@@ -198,13 +220,13 @@ class RememberDiscoveredTypeTests(unittest.TestCase):
                 "**How to apply:** discover then remember.",
                 {"username": "tester", "email": "t@example.com"},
             )
-            path = target / ".memory" / "docs" / "docs_layout_only.md"
+            path = target / ".harness/memory" / "docs" / "docs_layout_only.md"
             self.assertTrue(path.is_file(), result)
-            self.assertEqual(result["path"], ".memory/docs/docs_layout_only.md")
-            self.assertEqual(result["index"], ".memory/docs/AGENTS.md")
+            self.assertEqual(result["path"], ".harness/memory/docs/docs_layout_only.md")
+            self.assertEqual(result["index"], ".harness/memory/docs/AGENTS.md")
             self.assertIn(
                 "docs_layout_only.md",
-                (target / ".memory" / "docs" / "AGENTS.md").read_text(encoding="utf-8"),
+                (target / ".harness/memory" / "docs" / "AGENTS.md").read_text(encoding="utf-8"),
             )
 
     def test_cli_remember_type_docs(self) -> None:
@@ -214,7 +236,7 @@ class RememberDiscoveredTypeTests(unittest.TestCase):
                 [
                     sys.executable,
                     str(MEMORY_PY),
-                    "init",
+                    "init", "--memory-types", "user", "feedback", "project", "reference",
                     "--target-dir",
                     str(target),
                     "--root-dir",
@@ -229,14 +251,14 @@ class RememberDiscoveredTypeTests(unittest.TestCase):
             agents.write_text(
                 agents.read_text(encoding="utf-8").replace(
                     "<!-- project-memory-local:end -->",
-                    "- [.memory/docs/AGENTS.md](.memory/docs/AGENTS.md) — 文档指针\n"
+                    "- [.harness/memory/docs/AGENTS.md](.harness/memory/docs/AGENTS.md) — 文档指针\n"
                     "<!-- project-memory-local:end -->",
                 ),
                 encoding="utf-8",
             )
-            (target / ".memory" / "docs").mkdir()
-            (target / ".memory" / "docs" / "AGENTS.md").write_text(
-                "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+            (target / ".harness/memory" / "docs").mkdir()
+            (target / ".harness/memory" / "docs" / "AGENTS.md").write_text(
+                DOCS_META + "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
             )
@@ -271,7 +293,7 @@ class RememberDiscoveredTypeTests(unittest.TestCase):
             payload = json.loads(remember_cli.stdout)
             self.assertTrue(payload["ok"])
             self.assertTrue(
-                (target / ".memory" / "docs" / "docs_cli_layout.md").is_file()
+                (target / ".harness/memory" / "docs" / "docs_cli_layout.md").is_file()
             )
 
 
@@ -280,6 +302,7 @@ class TypeTemplateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as raw:
             target = Path(raw)
             init_memory(target, target, "temp tree")
+            (target / ".harness/memory/docs").mkdir()
             document = expected_index_document(target, "docs")
             self.assertIn("project-memory-entries:start", document)
             self.assertIn("docs", document.lower())
@@ -290,8 +313,8 @@ class LayoutHeadingTests(unittest.TestCase):
         text = template_path("AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("下面这些是索引，不是正文", text)
         self.assertNotIn("下面六个", text)
-        self.assertNotIn(".memory/DOCS.md", text)
-        self.assertNotIn(".memory/TASKS.md", text)
+        self.assertNotIn(".harness/memory/DOCS.md", text)
+        self.assertNotIn(".harness/memory/TASKS.md", text)
 
 
 if __name__ == "__main__":

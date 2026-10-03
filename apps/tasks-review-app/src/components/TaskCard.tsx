@@ -1,3 +1,5 @@
+import { sameSource } from "../export.ts"
+import { itemIdentity } from "../types.ts"
 import { useDraggable } from "@dnd-kit/core"
 import { Ellipsis } from "lucide-react"
 import { useRef, useState } from "react"
@@ -32,7 +34,7 @@ export function TaskCard({
   onSelect: (stem: string) => void
   onMove: (stem: string, projectId: string) => void
 }) {
-  const { attributes, listeners, setNodeRef } = useDraggable({ id: item.stem })
+  const { attributes, listeners, setNodeRef } = useDraggable({ id: itemIdentity(item) })
   const [picking, setPicking] = useState(false)
   const [stemOpen, setStemOpen] = useState(false)
   const holdTimer = useRef<number | null>(null)
@@ -56,7 +58,7 @@ export function TaskCard({
   return (
     <div
       ref={setNodeRef}
-      data-stem={item.stem}
+      data-stem={itemIdentity(item)}
       data-selected={selected ? "on" : undefined}
       className={
         "group flex w-full gap-1 rounded-lg border bg-[#1a2332] p-3 text-left shadow-sm" +
@@ -64,7 +66,7 @@ export function TaskCard({
       }
     >
       <div
-        data-card-body={item.stem}
+        data-card-body={itemIdentity(item)}
         className="flex min-w-0 flex-1 cursor-grab flex-col gap-2 active:cursor-grabbing"
         {...listeners}
         {...attributes}
@@ -73,7 +75,7 @@ export function TaskCard({
             held.current = false
             return
           }
-          onSelect(item.stem)
+          onSelect(itemIdentity(item))
         }}
         onPointerDown={(event) => {
           listeners?.onPointerDown?.(event)
@@ -152,10 +154,10 @@ export function TaskCard({
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           {picking ? (
-            groups.map((group) => (
+            groups.filter(group => sameSource(item, group)).map((group) => (
               <DropdownMenuItem
                 key={group.id}
-                onSelect={() => onMove(item.stem, group.id)}
+                onSelect={() => onMove(itemIdentity(item), group.id)}
               >
                 {group.title}
               </DropdownMenuItem>

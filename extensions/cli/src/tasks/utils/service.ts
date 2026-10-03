@@ -1,3 +1,4 @@
+import { type BoardTarget } from "./paths.js";
 import { getTask, listTasks, type BoardFs, type TaskListOpts } from "./board.js";
 
 export type { TaskListOpts };
@@ -5,19 +6,19 @@ import { messagesForRun, parseRunLog, resolveRunId, type TaskRun } from "./runlo
 import { TasksError, type TaskListItem, type TaskRecord } from "./types.js";
 
 export async function listTasksService(
-  repoPath: string,
+  repoPath: BoardTarget,
   opts: TaskListOpts,
   fs: BoardFs,
 ): Promise<TaskListItem[]> {
   return listTasks(repoPath, opts, fs);
 }
 
-export async function getTaskService(repoPath: string, target: string, fs: BoardFs): Promise<TaskRecord> {
+export async function getTaskService(repoPath: BoardTarget, target: string, fs: BoardFs): Promise<TaskRecord> {
   return getTask(repoPath, target, fs);
 }
 
 export async function findRun(
-  repoPath: string,
+  repoPath: BoardTarget,
   runId: string,
   taskStem: string | undefined,
   fs: BoardFs,

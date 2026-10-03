@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-03
+
+### Changed
+
+- 教学工作区使用顶层 `teaching/<topic>/`；同步 submodule 挂载、Topics 登记与 Obsidian 排除路径，新版不再使用 `knowledge/teaching/`。
+
 ## [1.0.0] - 2026-09-10
 
 ### Added
 
 - 按 semver 标记的首个版本：把要学习的外部仓库以 git submodule 挂进 `knowledge/teaching/<topic>/repos/`，并在 RESOURCES.md 登记来源、commit 与用途。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/learn-repo@1.0.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/learn-repo@2.0.0...HEAD
+[2.0.0]: https://github.com/VirusPC/edges/compare/skill/learn-repo@1.0.0...skill/learn-repo@2.0.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/learn-repo@1.0.0

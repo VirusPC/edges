@@ -1,3 +1,4 @@
+import { scopeDir, type BoardTarget } from "./paths.js";
 import path from "node:path";
 import { getTask, listProjectIds, type BoardWriter } from "./board.js";
 import { renderNewTaskDoc, replaceBody, setMetadataField, setTopLevelField } from "./frontmatter.js";
@@ -35,13 +36,13 @@ function defaultBody(title: string): string {
 }
 
 async function stemTaken(
-  repoPath: string,
+  repoPath: BoardTarget,
   project: TaskProjectId,
   status: TaskStatus,
   stem: string,
   fs: BoardWriter,
 ): Promise<boolean> {
-  if (await fs.exists(path.join(repoPath, taskRelPath(project, status, stem)))) {
+  if (await fs.exists(path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath)))) {
     return true;
   }
   const projects = await listProjectIds(repoPath, fs);
@@ -50,7 +51,7 @@ async function stemTaken(
       if (p === project && s === status) {
         continue;
       }
-      const abs = path.join(repoPath, taskRelPath(p, s, stem));
+      const abs = path.join(scopeDir(repoPath), taskRelPath(p, s, stem, repoPath));
       if (await fs.exists(abs)) {
         return true;
       }
@@ -60,7 +61,7 @@ async function stemTaken(
 }
 
 async function uniqueStem(
-  repoPath: string,
+  repoPath: BoardTarget,
   project: TaskProjectId,
   status: TaskStatus,
   base: string,
@@ -76,7 +77,7 @@ async function uniqueStem(
 }
 
 export async function createTask(
-  repoPath: string,
+  repoPath: BoardTarget,
   input: TasksCreateInput,
   io: { fs: BoardWriter; now: Date },
 ): Promise<{ stem: string; path: string; sidecarPath: string; priority: TaskPriority; project: TaskProjectId }> {
@@ -84,8 +85,8 @@ export async function createTask(
   const priority = input.priority === undefined ? "none" : parseTaskPriority(input.priority);
   await io.fs.mkdirp(statusDir(repoPath, project, input.status));
   const stem = await uniqueStem(repoPath, project, input.status, newTaskStem(input.title, io.now), io.fs);
-  const rel = taskRelPath(project, input.status, stem);
-  const sidecarRel = sidecarRelPath(project, input.status, stem);
+  const rel = taskRelPath(project, input.status, stem, repoPath);
+  const sidecarRel = sidecarRelPath(project, input.status, stem, repoPath);
   const markdown = renderNewTaskDoc({
     name: input.name ?? taskNameSlug(input.title),
     description: input.description ?? input.title,
@@ -97,13 +98,13 @@ export async function createTask(
     updatedAt: io.now.toISOString(),
     body: input.body ?? defaultBody(input.title),
   });
-  await io.fs.writeFile(path.join(repoPath, rel), markdown);
-  await io.fs.writeFile(path.join(repoPath, sidecarRel), emptyRunLog(stem));
+  await io.fs.writeFile(path.join(scopeDir(repoPath), rel), markdown);
+  await io.fs.writeFile(path.join(scopeDir(repoPath), sidecarRel), emptyRunLog(stem));
   return { stem, path: rel, sidecarPath: sidecarRel, priority, project };
 }
 
 export async function updateTask(
-  repoPath: string,
+  repoPath: BoardTarget,
   target: string,
   patch: {
     title?: string;
@@ -131,7 +132,7 @@ export async function updateTask(
   const parsedPriority = patch.priority === undefined ? undefined : parseTaskPriority(patch.priority);
   const parsedProject = patch.project === undefined ? undefined : parseTaskProject(patch.project);
   const record = await getTask(repoPath, target, io.fs);
-  let markdown = await io.fs.readFile(path.join(repoPath, record.path));
+  let markdown = await io.fs.readFile(path.join(scopeDir(repoPath), record.path));
   if (patch.title !== undefined) {
     markdown = setMetadataField(markdown, "edges-title", patch.title);
   }
@@ -154,24 +155,24 @@ export async function updateTask(
 
   let destRel = record.path;
   if (parsedProject !== undefined) {
-    destRel = taskRelPath(parsedProject, record.status, record.stem);
-    const destSidecarRel = sidecarRelPath(parsedProject, record.status, record.stem);
+    destRel = taskRelPath(parsedProject, record.status, record.stem, repoPath);
+    const destSidecarRel = sidecarRelPath(parsedProject, record.status, record.stem, repoPath);
     if (destRel !== record.path) {
-      if (await io.fs.exists(path.join(repoPath, destRel))) {
+      if (await io.fs.exists(path.join(scopeDir(repoPath), destRel))) {
         throw new TasksError("BOARD_IO_ERROR", `destination already exists: ${destRel}`);
       }
       await io.fs.mkdirp(statusDir(repoPath, parsedProject, record.status));
-      await io.fs.writeFile(path.join(repoPath, destRel), markdown);
-      const sourceSidecarAbs = path.join(repoPath, record.sidecarPath);
+      await io.fs.writeFile(path.join(scopeDir(repoPath), destRel), markdown);
+      const sourceSidecarAbs = path.join(scopeDir(repoPath), record.sidecarPath);
       if (await io.fs.exists(sourceSidecarAbs)) {
-        await io.fs.rename(sourceSidecarAbs, path.join(repoPath, destSidecarRel));
+        await io.fs.rename(sourceSidecarAbs, path.join(scopeDir(repoPath), destSidecarRel));
       }
-      await io.fs.unlink(path.join(repoPath, record.path));
+      await io.fs.unlink(path.join(scopeDir(repoPath), record.path));
     } else {
-      await io.fs.writeFile(path.join(repoPath, record.path), markdown);
+      await io.fs.writeFile(path.join(scopeDir(repoPath), record.path), markdown);
     }
   } else {
-    await io.fs.writeFile(path.join(repoPath, record.path), markdown);
+    await io.fs.writeFile(path.join(scopeDir(repoPath), record.path), markdown);
   }
 
   return {

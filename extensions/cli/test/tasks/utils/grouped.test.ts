@@ -15,8 +15,8 @@ test("buildGroupedList emits edges.tasks.grouped/v1 with groups and items", () =
       title: "Alpha",
       status: "todo",
       description: "first",
-      path: "knowledge/tasks/_default/todo/2026-09-21--alpha.md",
-      sidecarPath: "knowledge/tasks/_default/todo/.2026-09-21--alpha.log.md",
+      path: "tasks/_default/todo/2026-09-21--alpha.md",
+      sidecarPath: "tasks/_default/todo/.2026-09-21--alpha.log.md",
       runCount: 0,
       priority: "high",
       project: "default",
@@ -119,8 +119,8 @@ test("buildGroupedList copies doc and omits rawFrontmatter", () => {
       title: "Alpha",
       status: "todo",
       description: "first",
-      path: "knowledge/tasks/_default/todo/2026-09-21--alpha.md",
-      sidecarPath: "knowledge/tasks/_default/todo/.2026-09-21--alpha.log.md",
+      path: "tasks/_default/todo/2026-09-21--alpha.md",
+      sidecarPath: "tasks/_default/todo/.2026-09-21--alpha.log.md",
       runCount: 0,
       priority: "high",
       project: "default",
@@ -187,4 +187,19 @@ test("buildGroupedList omits doc when the caller has none", () => {
     [{ id: "default", title: "Default" }],
   );
   assert.equal("doc" in grouped.items[0]!, false);
+});
+
+test('source-aware grouped payload requires real project identities and stored stems', () => {
+  const source = { scope: '.', purpose: 'domain' };
+  const group = { id: '[".","domain","cli"]', title: 'CLI', source, project: 'cli' };
+  const item = { id: '[".","domain","cli","same"]', stem: 'same', group: group.id, source, project: 'cli' };
+  for (const project of [undefined, null, 1, [], { value: 'cli' }, group.id, '_default', '']) {
+    assert.throws(() => parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [{ ...group, project }], items: [item] }), /project/);
+    assert.throws(() => parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [group], items: [{ ...item, project }] }), /project/);
+  }
+  assert.throws(() => parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [group], items: [{ ...item, stem: undefined }] }), /stem/);
+  const parsed = parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [group], items: [item] });
+  assert.equal(parsed.groups[0]?.project, 'cli');
+  assert.equal(parsed.items[0]?.project, 'cli');
+  assert.equal(parsed.items[0]?.stem, 'same');
 });

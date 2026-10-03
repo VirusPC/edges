@@ -1,61 +1,19 @@
-# scripts
+# Project Memory runtime
 
-实现代码。形状看 [`../references/PROTOCOL.md`](../references/PROTOCOL.md)，落盘形态看 [`../references/LAYOUT.md`](../references/LAYOUT.md)。
+`memory.py` 是稳定 CLI 入口：init 选择类型，remember 写已采用正文，add-type 登记自定义类型，doctor 诊断/修复索引。普通运行只有 `.harness` 新布局；旧 `.memory` 仅作 migration-required 检测，转换代码属于独立迁移 Skill。
 
-**对外只有一个入口**：`python3 memory.py <init|doctor|remember|add-type>`，参数见 `--help`。四个 skill 都走这条命令，不要直接 import 子目录。
+- `lib/paths.py`：scope/root 边界、模块路径、真实路径所有权和来源扫描。`type_index_relpath` 现在是作用域相对路径。
+- `lib/types.py`：从两个容器和本层链接发现 TypeSpec，module 与 format/writable 分开，私有忽略规则。
+- `lib/blocks.py` / `templates.py`：受管标记与模板；不覆盖手写区块外文本。
+- `nodes/agents.py`：本层类型清单和稀疏子层登记。
+- `nodes/entries.py`：frontmatter、普通/Skill 格式、派生索引；失败扫描不覆盖原索引。
+- `operations/`：组合上述能力，doctor 单独扫描作用域树。
 
-四层，依赖只朝下：`memory.py` → `operations/` → `nodes/` → `lib/`。加功能时找对应那一层，别往 `memory.py` 堆。反向依赖会立刻变成找不到模块。
-
-```text
-.
-├── memory.py       # CLI：参数、JSON 输出、错误收口
-├── operations/     # 四个子命令，与 skill 对齐
-│   ├── init.py     # 单目录、只往前写
-│   ├── remember.py # 写一条记忆并重算索引
-│   ├── doctor.py   # 扫全树，修索引不一致
-│   └── add_type.py # 在指定层按 LAYOUT 登记用户 type
-├── nodes/          # 协议里的两类节点
-│   ├── agents.py   # 入口文件 AGENTS.md
-│   └── entries.py  # 类型目录、普通记忆文件与分类型入口
-└── lib/            # 公共件；不知道操作的存在
-    ├── blocks.py   # 标记与区块
-    ├── templates.py
-    ├── paths.py
-    └── provenance.py
-```
-
-各包的 `__init__.py` 只有一句职责，不向外再导出。
-
-## 改哪里
-
-| 要做的事 | 打开 |
-| --- | --- |
-| 加 CLI 参数或子命令 | `memory.py`，逻辑放到 `operations/` |
-| 改 init / remember / doctor / add-type 的行为 | 对应的 `operations/*.py` |
-| 在指定层登记用户 type | `add-type` |
-| 改 `AGENTS.md` 区块怎么维护、下层索引怎么登记 | `nodes/agents.py` |
-| 改类型目录、记忆文件读写、frontmatter、分类型入口怎么重算 | `nodes/entries.py` |
-| 改区块标记名或嵌套顺序 | `lib/blocks.py`，并同步 [`../references/LAYOUT.md`](../references/LAYOUT.md)。硬约束区块只保证存在、不覆盖已有正文 |
-| 改产物文案、字段清单、行格式、类型清单 | [`../references/templates/`](../references/templates/)，不要改脚本 |
-| 改路径约定（`.memory`、类型内容根、`AGENTS.md`、skill 根） | `lib/paths.py`。内容根越出 `.memory/` 的类型集中在 `EXTERNAL_CONTENT_DIRS`，那张表同时意味着「只读」 |
-| 改出处 / 审计字段从哪来 | `lib/provenance.py` + [`../references/frontmatter-fields.md`](../references/frontmatter-fields.md) |
-
-官方种子仍改 `AGENTS.tmpl.md` 模板（本层清单链到 `.memory/<plural>/AGENTS.md`）；类型入口正文仍由 `FEEDBACK.tmpl.md` 等渲染。用户 type 走 `add-type`，由本层 AGENTS / 类型入口产物发现。
-
-两处会岔开的地方，加类型前先想清楚落在哪一边：
-
-- **内容格式**由外部协议定义（如 `skills` 走 Agent Skills 的 `<name>/SKILL.md`）→ 官方种子仍在 `nodes/entries.py` 的 `AGENT_SKILL_FORMAT_TYPES`；用户 type 用 `add-type --skills-format` 写进 privilege 注释。两种都走 `SKILL.md` 模板，不能套 `type_slug.tmpl.md`。
-- **内容根在 `.memory/` 之外**（如 `agent_skills` 挂在 `.agents/skills/`）→ 在 `lib/paths.py` 的 `EXTERNAL_CONTENT_DIRS` 里登记。这张表同时意味着**只读**：`memory_entry_types()` 会排掉它，init 与 doctor 都不建目录、不写内容。
-
-## 怎么跑
-
-直接调 `memory.py`，不要 `python -m`。stdout 是一份 JSON：成功带 `"ok": true`，失败带 `"ok": false` 和 `"error"`。
+类型入口路径必须通过 TypeSpec.index_file / type_index_path 使用；不能再写 `memory_dir(target) / index_file`。源内容根与索引根分开：referenced 的索引在 `.harness/skills`，内容在本层 `.agents/skills`。
 
 ```bash
-python3 memory.py init --target-dir <目录> [--root-dir <工作区根>] [--description <说明>]
-python3 memory.py doctor --target-dir <记忆树里任一目录> [--apply]
-python3 memory.py remember --target-dir <目录> --type <该层已登记可写类型> --slug <slug> ...
-python3 memory.py add-type --target-dir <目录> --name <type> --description <说明> [--gitignore] [--index-only] [--skills-format]
+TMPDIR=/private/tmp PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover \
+  -s extensions/skills/project-memory-init/scripts/tests
 ```
 
-`remember` / `add-type` 的完整参数以 `--help` 为准。
+macOS `/var` 是别名，临时目录测试统一使用 `/private/tmp`。`tests/test_harness_layout.py` 使用真实文件系统与 CLI 覆盖选择、权限和扫描；`tests/legacy_layout_fixtures.txt` 保留已移出运行时的历史迁移用例意图，供独立 migrator 接管，不算运行时通过的测试。

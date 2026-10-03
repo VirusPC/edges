@@ -1,34 +1,21 @@
 ---
 name: user-memory-restore
-description: 把 user-memory-backup 归档回注到某仓库的 .memory/users/（含 users/AGENTS.md）与尚未迁走的 .memory/USER.md。换机或删仓后恢复本机用户记忆时用。目标已有条目时必须确认/--force，不要 git add。
-version: 1.0.0
+description: 将新布局 user-memory-backup 归档恢复到指定作用域的 .harness/memory/users。目标已占用时需明确授权 --force 整份替换；旧归档须先在隔离旧项目完成转换。
+version: 2.0.0
 ---
 
 # User Memory Restore
 
-把 `$user-memory-backup` 打出的归档回注进一个仓库工作树。权威副本仍是仓内 gitignore 文件，不是 git 历史。
+与同级 `user-memory-backup` 一起安装，脚本共用归档路径与忽略规则校验。按用户提供的归档和目标执行：
 
-下文的 `<skill-dir>` 是本 SKILL.md 所在目录。
+```bash
+python3 <skill-dir>/scripts/restore.py --archive <归档路径> --repo-dir <作用域目录> [--force]
+```
 
-## 什么时候用
+只写 `.harness/memory/users/`。路径穿越、绝对路径、重复成员、链接/设备成员、linked `.harness` 祖先都在覆盖前拒绝。完整归档先在权限受限的临时目录中读取验证，建立目标忽略规则后才写入；索引和正文保留归档字节与文件权限，不自动 init 或重写索引。
 
-- 用户提供一份 `user-memory-backup-*.tar.gz`（或兼容的 `.tar` / `.tar.bz2`），要写回某个仓库的 `.memory/users/`（含 `users/AGENTS.md`）与尚未迁走的 `.memory/USER.md`。
-- 不要用它把用户记忆提交进 git，也不要脱敏晋升到 `project` / `feedback`。
+已有任何正文或资产（包括不符合 user_*.md 命名的文件）都视为占用；只有与同级 `project-memory-init` 当前空索引模板逐字节一致的 init 索引允许直接恢复；模板不可用、人工说明、未知元数据或其他编辑都按已占用处理。`--force` 会整份替换 users 子树，归档中没有的旧文件也删除，符号链接仅删链接本身。若用户尚未明确授权替换，说明将被替换的目标并确认；已有授权不重复询问。
 
-## 步骤
+旧 `.memory` 归档返回 `conversion-required`，不会静默写回旧路径。转换步骤：用对应旧版恢复工具在隔离的旧项目副本中恢复，运行 `$project-memory-migrate --target-dir <旧项目副本>`，再用新版 `$user-memory-backup` 生成归档。不要直接解压不受信任归档。
 
-1. 向用户要归档路径和目标仓库目录。
-2. 若目标已有 `users/user_*.md`，或 `USER.md` 的条目区不是空的「暂无条目」，先说明会**整份替换**（不是合并），**得到确认后再加 `--force`**。空的 init 产物（只有空索引）可以直接回注。
-3. 执行：
-
-   ```bash
-   python3 <skill-dir>/scripts/restore.py \
-     --archive <归档路径> \
-     --repo-dir <仓库目录> \
-     [--force]
-   ```
-
-4. `--force` 是替换：解压前先丢掉目标 `.memory/users` 与 `.memory/USER.md`（符号链接只删链接本身，不跟随；目录用整树删除），再写入归档里的文件，然后重算索引。归档里没有的 slug **不会**留在目标目录（旧密钥/轮换掉的条目必须消失）。
-5. 脚本只写入 `.memory/users/` 与尚未迁走的 `.memory/USER.md` 下的**普通文件**。拒绝符号链接、设备文件、`..`、绝对路径，以及解析后落到 `.memory/` 之外的成员。不要依赖 Python 3.12 的 `filter="data"`。
-6. 若目标已有本套 `AGENTS.md`，只刷新 `user` 索引，不跑 init。
-7. 汇报解压了哪些路径。**不要 `git add` 回注结果。**
+汇报恢复的路径，不展示私有正文，不提交回注数据或归档。

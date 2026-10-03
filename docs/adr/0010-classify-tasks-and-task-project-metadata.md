@@ -11,7 +11,7 @@
 - **Skill：** `extensions/skills/project-tasks-classify/`，展示名 classifyTasks。独立工作流 Skill，不是通用 edges-tasks Skill+MCP CRUD。
 - **分类：** 按用户已设的 Task Project（标题 + 描述）做归属建议；agent / LLM 判断，不要求 embedding。带描述的 Task Project 是质心；对整板分类（不只 `_default`）。先出建议表，人可改目标或留 `_default`，再经 CLI 应用。不自动批量建 project。新类型不在本 skill 发明——走 proposeTypes（ADR 0011）。Embedding / 真向量分类另卡。
 - **正交：** classify 与 `update --project` 不得改 `edges-tasks-status` 或 `edges-task-priority`。
-- **元数据（Q18=A）：** Task Project 管理只在索引/描述层像 Project Memory。看板 markdown 仍是真源。不把每条 Task 升成 Memory Type（那是 Q18=B，与 [`tasks-memory与看板语义合并`](../../knowledge/tasks/_default/backlog/2026-09-13--tasks-memory与看板语义合并.md) 重叠，以后再谈）。
+- **元数据（Q18=A）：** Task Project 管理只在索引/描述层像 Project Memory。看板 markdown 仍是真源。不把每条 Task 升成 Memory Type（那是 Q18=B，与 [`tasks-memory与看板语义合并`](../../.harness/tasks/_default/backlog/2026-09-13--tasks-memory%E4%B8%8E%E7%9C%8B%E6%9D%BF%E8%AF%AD%E4%B9%89%E5%90%88%E5%B9%B6.md) 重叠，以后再谈）。
 - **AGENTS.md：** 根 `knowledge/tasks/AGENTS.md` 保留既有 project-memory 受管区块；在受管标记外增加 **Task Projects** 节，由 CLI 维护、不手改。每个 Task Project 目录（含 `_default`）有轻量 `AGENTS.md`（标题 + 描述，可选指针）。不对每个 project 跑完整 `project-memory-init`。
 - **CLI：** `edges tasks project list|get|create|update`（create 写目录 + project AGENTS.md + 刷新根索引；update 改描述；list/get 读元数据）。Task 搬家仍用 `edges tasks update --project`。本轮无公开 `edges tasks classify`。`project create` 由人确认 ADR 0011 候选后另步调用，不是 classify 的默认 apply。
 - **合并意图：** 本工作吸收「交互式主题聚类」backlog 的第一刀（人设主题 + 人确认归属）；类型发现见 ADR 0011。embedding / 真向量分类与 CLI 内 classify 已另卡，本轮不做。

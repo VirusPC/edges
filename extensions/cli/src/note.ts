@@ -40,7 +40,8 @@ EXIT CODES
   4  auth failure (no git started)
 
 ENV
-  EDGES_REPO          Target git repo (default: this Edges checkout)
+  EDGES_SCOPE         Target scope (after explicit --scope; default: cwd owner)
+  EDGES_REPO          Fallback target scope before cwd discovery
   EDGES_BASE_BRANCH   Default main
   EDGES_MODE          direct | pr
   EDGES_DRY_RUN       true to skip checkout/pull/push
