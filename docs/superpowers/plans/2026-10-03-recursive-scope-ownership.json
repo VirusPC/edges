@@ -11,7 +11,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：LoCoMo 官方 RAG 单档跟进（非冒烟范围）",
-      "sha256": "b36c6025daca5e3a19fbda7c7381313d3ead94aa4891a17ef1b002f46acf2660"
+      "sha256": "b36c6025daca5e3a19fbda7c7381313d3ead94aa4891a17ef1b002f46acf2660",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/cancelled/.2026-09-16--LoCoMo官方RAG单档跟进.log.md",
+        "target": ".harness/tasks/_default/cancelled/.2026-09-16--LoCoMo官方RAG单档跟进.log.md",
+        "sha256": "3bbd13890b45a7da02d39a1405ef439fcc12180b8f07d58efe9f59089e6f0121"
+      }
     },
     {
       "title": "project-memory 可扩展 memory type",
@@ -21,7 +26,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：project-memory 可扩展 memory type",
-      "sha256": "70c61ad61089ad74d4aebac39f2f1ac745e59688b29842f8d3e7b45cd80f4b25"
+      "sha256": "70c61ad61089ad74d4aebac39f2f1ac745e59688b29842f8d3e7b45cd80f4b25",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-09--project-memory可扩展memory-type.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-09--project-memory可扩展memory-type.log.md",
+        "sha256": "1d733a16bf3b472b6fd6824d1d90aa521db213d22db5df1e78f1268a2262585e"
+      }
     },
     {
       "title": "todos 更名为 tasks 并支持状态流转",
@@ -31,7 +41,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：todos 更名为 tasks 并支持状态流转",
-      "sha256": "c0731d07d55b1899dae7d58adfbb40d0f5d92bfd12b5337b0e72a10ff2124f16"
+      "sha256": "c0731d07d55b1899dae7d58adfbb40d0f5d92bfd12b5337b0e72a10ff2124f16",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-10--todos更名为tasks并支持状态流转.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-10--todos更名为tasks并支持状态流转.log.md",
+        "sha256": "dfdc042c66d5fe466dd705e3c6132512458c6f6ff6b2e1fa790404e1c5fd7278"
+      }
     },
     {
       "title": "todos 需支持状态字段",
@@ -41,7 +56,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：todos 需支持状态字段",
-      "sha256": "6161dd32b68a054e238a5cca2c6ec1612c9d06677f73d29a8f97e9988d2d79b0"
+      "sha256": "6161dd32b68a054e238a5cca2c6ec1612c9d06677f73d29a8f97e9988d2d79b0",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-10--todos需支持状态字段.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-10--todos需支持状态字段.log.md",
+        "sha256": "7869e79c6e0357bb0cd98ca458fe98f12d121889d825d8422ba3eddb8a027042"
+      }
     },
     {
       "title": "CLI 用 Commander.js 重构",
@@ -51,7 +71,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：CLI 用 Commander.js 重构",
-      "sha256": "241ca0d7bc9a1b4220da7f6572f531725f9a6ec3d9e098f822c8f16af21b88a1"
+      "sha256": "241ca0d7bc9a1b4220da7f6572f531725f9a6ec3d9e098f822c8f16af21b88a1",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-11--CLI用Commanderjs重构.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-11--CLI用Commanderjs重构.log.md",
+        "sha256": "6fb42681f0fe11bedb1ebed0382b33c2b8a23ea31b8613b53f4aaa6d1e805281"
+      }
     },
     {
       "title": "bin / CLI / Skill 分层",
@@ -61,7 +86,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：bin / CLI / Skill 分层",
-      "sha256": "738b97ced6b507143dcb92ef8dd16e5abde0c692f1d74a68845e12b0420f8b73"
+      "sha256": "738b97ced6b507143dcb92ef8dd16e5abde0c692f1d74a68845e12b0420f8b73",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-11--bin与CLI与Skill分层.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-11--bin与CLI与Skill分层.log.md",
+        "sha256": "6517a9ea34853d5d415f33e2e3fa57270a4ac6ea5701b98e06d2a4ef40e1becd"
+      }
     },
     {
       "title": "tasks 配套 skill：CRUD 与状态流转",
@@ -71,7 +101,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：tasks 配套 skill：CRUD 与状态流转",
-      "sha256": "cda01bb672d3cf63c15282f31267c9182dab7f23a6564195ab64944fcd5014f4"
+      "sha256": "cda01bb672d3cf63c15282f31267c9182dab7f23a6564195ab64944fcd5014f4",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-11--tasks配套skill统一CRUD与状态流转.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-11--tasks配套skill统一CRUD与状态流转.log.md",
+        "sha256": "2a1a1b498327184b1746061c34af4b99a335dce607a5c28c89b04ec5a46d4e2e"
+      }
     },
     {
       "title": "task 进一步分组（类需求管理）",
@@ -81,7 +116,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：task 进一步分组（类需求管理）",
-      "sha256": "d9127b73237a77ec99fc6c643fcd0c3946bf38d93310100dc61dcedbb3b14f8f"
+      "sha256": "d9127b73237a77ec99fc6c643fcd0c3946bf38d93310100dc61dcedbb3b14f8f",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-11--task进一步分组类需求管理.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-11--task进一步分组类需求管理.log.md",
+        "sha256": "cbea7f9d4eddcb7a115e794f9347b3d393fa2a4dce94b4bf9a183ea278b4c296"
+      }
     },
     {
       "title": "云端电脑装 Obsidian 预览 artifacts",
@@ -91,7 +131,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：云端电脑装 Obsidian 预览 artifacts",
-      "sha256": "9b36d5c42e956d4e11518fc27e30e115859639b0917d395b711de58111e7d2d3"
+      "sha256": "9b36d5c42e956d4e11518fc27e30e115859639b0917d395b711de58111e7d2d3",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-11--云端电脑装Obsidian预览artifacts.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-11--云端电脑装Obsidian预览artifacts.log.md",
+        "sha256": "4350b2fc0186e18c983258121ded6f2f13e92ce7daea3fd07a98a307a3a17e68"
+      }
     },
     {
       "title": "安全引入 user memory 与 gitignore",
@@ -101,7 +146,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：安全引入 user memory 与 gitignore",
-      "sha256": "72c3ee2315dcd3b367f113742f309c3bebe1afbc7c4c651e39a392fd7f23629c"
+      "sha256": "72c3ee2315dcd3b367f113742f309c3bebe1afbc7c4c651e39a392fd7f23629c",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-11--安全引入user-memory与gitignore.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-11--安全引入user-memory与gitignore.log.md",
+        "sha256": "3d91d7cb59bb33799b3fc02e593cd94816359018ef82da5bef4de611fc8ed574"
+      }
     },
     {
       "title": "Tasks 补充需求优先级",
@@ -111,7 +161,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Tasks 补充需求优先级",
-      "sha256": "83b4d8acc8bc301a8518bee4890148427071eb77227f8db79b3816ff867a25cf"
+      "sha256": "83b4d8acc8bc301a8518bee4890148427071eb77227f8db79b3816ff867a25cf",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-13--tasks补充需求优先级.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-13--tasks补充需求优先级.log.md",
+        "sha256": "735a19f6f659238887a9f213285205b5c3fd70d86a4889faca3bec3257cb8f0f"
+      }
     },
     {
       "title": "仓库主页展示 Deploy teach site 部署状态",
@@ -121,7 +176,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：仓库主页展示 Deploy teach site 部署状态",
-      "sha256": "37afbe83924e5756e30f0b9506287c98d2541cd23e0f1227b4580f993674a108"
+      "sha256": "37afbe83924e5756e30f0b9506287c98d2541cd23e0f1227b4580f993674a108",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-14--仓库主页展示teach站点部署状态.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-14--仓库主页展示teach站点部署状态.log.md",
+        "sha256": "2bda4d01eacc7851519e3623361b8b7bfbe7335b8553b569c6615a8a0491dc44"
+      }
     },
     {
       "title": "LoCoMo fork 薄封装 + edges submodule（替换 port harness）",
@@ -131,7 +191,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：LoCoMo fork 薄封装 + edges submodule（替换 port harness）",
-      "sha256": "2a23908398e5047ac67f4c1d80ebf3a7fcef5ea47b76590cd5adb2703beebaef"
+      "sha256": "2a23908398e5047ac67f4c1d80ebf3a7fcef5ea47b76590cd5adb2703beebaef",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-16--LoCoMo-fork薄封装与edges-submodule.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-16--LoCoMo-fork薄封装与edges-submodule.log.md",
+        "sha256": "81583423471da653c4a667f4b82189e0355a0c5101a3aed43706a7f6ff4a8b30"
+      }
     },
     {
       "title": "LoCoMo 评测流水线冒烟（先跑通，不证 project-memory）",
@@ -141,7 +206,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：LoCoMo 评测流水线冒烟（先跑通，不证 project-memory）",
-      "sha256": "3f61c92328b5f5e1db9a0f9d7f6a3e7064098097eeca944cb326a416cf857693"
+      "sha256": "3f61c92328b5f5e1db9a0f9d7f6a3e7064098097eeca944cb326a416cf857693",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-16--LoCoMo评测流水线冒烟.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-16--LoCoMo评测流水线冒烟.log.md",
+        "sha256": "78eb6ff133806fbe51cf3d6132f5805c8ecf5a9e851fcd2facbd79dd8b1a70f0"
+      }
     },
     {
       "title": "根仓库发版（自 v1.1.0 起）",
@@ -151,7 +221,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：根仓库发版（自 v1.1.0 起）",
-      "sha256": "e326e71900318a4f07c63f355735bdd7c2b1ee1594c5c3fec9deef37426dbc60"
+      "sha256": "e326e71900318a4f07c63f355735bdd7c2b1ee1594c5c3fec9deef37426dbc60",
+      "sidecar": {
+        "source": "knowledge/tasks/_default/done/.2026-09-20--根仓库发版自-v110-起.log.md",
+        "target": ".harness/tasks/_default/done/.2026-09-20--根仓库发版自-v110-起.log.md",
+        "sha256": "ccdc9bd50d4d47f79c5247787c1a925e590ba2792b6fc80d2f9d7955abf22a71"
+      }
     },
     {
       "title": "评估 Agent Plugins 客户端支持",
@@ -161,7 +236,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：评估 Agent Plugins 客户端支持",
-      "sha256": "f963090d4278fc3684f50ba7c7b2e97473a55aaa8c6c72a0da2354fe2d190c3d"
+      "sha256": "f963090d4278fc3684f50ba7c7b2e97473a55aaa8c6c72a0da2354fe2d190c3d",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-09--评估Agent-Plugins客户端支持.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-09--评估Agent-Plugins客户端支持.log.md",
+        "sha256": "4ae2c5155a3de31ca6bdb10cbd252742eb14da15b65e286a73ee8dc10833692d"
+      }
     },
     {
       "title": "需要普通记笔记 skill",
@@ -171,7 +251,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：需要普通记笔记 skill",
-      "sha256": "a1839ddf80fd16db26b57b29680cfce3490a8f7f0ed07aa11f0bd2d5f44b525b"
+      "sha256": "a1839ddf80fd16db26b57b29680cfce3490a8f7f0ed07aa11f0bd2d5f44b525b",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-09--需要普通记笔记skill.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-09--需要普通记笔记skill.log.md",
+        "sha256": "acd312cc1692066db18651603dcba77a3ef5205ef289135addbf10bd13def72d"
+      }
     },
     {
       "title": "数据与视图分离 + 本地 HTML",
@@ -181,7 +266,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：数据与视图分离 + 本地 HTML",
-      "sha256": "97f75819f0c67939cfca691bc0b01d14ba164ae3c2b1641766901d002962c722"
+      "sha256": "97f75819f0c67939cfca691bc0b01d14ba164ae3c2b1641766901d002962c722",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-11--数据与视图分离本地HTML.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-11--数据与视图分离本地HTML.log.md",
+        "sha256": "f4e2e8e3fcfa2f4e2e0c1d8d4ec47fe2512a586d835a81933f93524faa865e4e"
+      }
     },
     {
       "title": "本地 memory 可视化界面",
@@ -191,7 +281,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：本地 memory 可视化界面",
-      "sha256": "23032fc510e521fe9b9aac04af1f27e4ce4c1434b7bff8c3e5458cb04f17b9f2"
+      "sha256": "23032fc510e521fe9b9aac04af1f27e4ce4c1434b7bff8c3e5458cb04f17b9f2",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-11--本地memory可视化界面.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-11--本地memory可视化界面.log.md",
+        "sha256": "8e6b749306c9b5a70a5c778a618f11cb261a222efd1eb9d7647df01f6c7c79c0"
+      }
     },
     {
       "title": "跨设备同步桌面宠物与留言板",
@@ -201,7 +296,12 @@
       "scope": ".",
       "purpose": "domain",
       "reason": "独立桌面宠物与留言产品的交付目标；使用 Edges 管工作，不维护 Edges 能力。",
-      "sha256": "2cb3aaf7d6974d877d9fa8b948fe26b9ba9b94f00e1a555c05a913304351c898"
+      "sha256": "2cb3aaf7d6974d877d9fa8b948fe26b9ba9b94f00e1a555c05a913304351c898",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-11--跨设备同步桌面宠物与留言板.log.md",
+        "target": "tasks/agent-clients-ux/backlog/.2026-09-11--跨设备同步桌面宠物与留言板.log.md",
+        "sha256": "53eb03fcfaa3db26c737b676f38b02c32a7c0f2707b721cb018dfa9df7028fa2"
+      }
     },
     {
       "title": "输入系统接入 Rokid 眼镜",
@@ -211,7 +311,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：输入系统接入 Rokid 眼镜",
-      "sha256": "d7472a46f52be9a2535b9360fb5250d7115fc7e2c96a59df092d31eb66477fce"
+      "sha256": "d7472a46f52be9a2535b9360fb5250d7115fc7e2c96a59df092d31eb66477fce",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-11--输入系统接入Rokid眼镜.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-11--输入系统接入Rokid眼镜.log.md",
+        "sha256": "7bc9765a7db12712509b79491f58e66f8110693620325cafb1813ffb3792b49d"
+      }
     },
     {
       "title": "统计个人 skill 使用频率",
@@ -221,7 +326,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：统计个人 skill 使用频率",
-      "sha256": "b5b4afca76ad6c9b39a7380682912fc5a455f0ce39fead15196f41fc9b0c68ed"
+      "sha256": "b5b4afca76ad6c9b39a7380682912fc5a455f0ce39fead15196f41fc9b0c68ed",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-13--统计个人skill使用频率.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-13--统计个人skill使用频率.log.md",
+        "sha256": "030aa924f594fb7d9915d80957ae05d464e37622d202ff5c9cf7cf6e45a4a2e2"
+      }
     },
     {
       "title": "review页结果回传Agent客户端",
@@ -231,7 +341,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：review页结果回传Agent客户端",
-      "sha256": "0fd9cc9144b468ba4b8efb727c8104062d4dde478ee54ecda0ae380578d26c1d"
+      "sha256": "0fd9cc9144b468ba4b8efb727c8104062d4dde478ee54ecda0ae380578d26c1d",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-19--review页结果回传Agent客户端.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-19--review页结果回传Agent客户端.log.md",
+        "sha256": "fefc15236a7e16a991330563a2fae411eb4de84c9df2394701695e55b9d9bb2b"
+      }
     },
     {
       "title": "Electron 桌面端作为 edges 操作台",
@@ -241,7 +356,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Electron 桌面端作为 edges 操作台",
-      "sha256": "3dfa6c32e4b2af8904fc6ea5d8f175cb75b74437dfef2055ca28b6949d96be47"
+      "sha256": "3dfa6c32e4b2af8904fc6ea5d8f175cb75b74437dfef2055ca28b6949d96be47",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-20--Electron-桌面端作为-edges-操作台.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-20--Electron-桌面端作为-edges-操作台.log.md",
+        "sha256": "3da95c60f68af2c5b4b9ac59a4dc67b02ee5c0763d6d8402b7bb4182aa856eda"
+      }
     },
     {
       "title": "Artifacts 预览改走专用仓 + GitHub Pages",
@@ -251,7 +371,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Artifacts 预览改走专用仓 + GitHub Pages",
-      "sha256": "f3fe6d103901dc1ddcf658d4b4eeb3189966f06a390dafcbb0c3ae952db15c08"
+      "sha256": "f3fe6d103901dc1ddcf658d4b4eeb3189966f06a390dafcbb0c3ae952db15c08",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-21--Artifacts-预览改走专用仓-GitHub-Pages.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-21--Artifacts-预览改走专用仓-GitHub-Pages.log.md",
+        "sha256": "a3b52dac8ddcc552535dc937c2c1d3f96586848cf1df718bce04fc0d4b80e0cd"
+      }
     },
     {
       "title": "Tasks review / review-page 写回仓接口",
@@ -261,7 +386,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Tasks review / review-page 写回仓接口",
-      "sha256": "39ed83f711c6350edbf6116ae946b9005b1648d88894b7e339585fb73422126b"
+      "sha256": "39ed83f711c6350edbf6116ae946b9005b1648d88894b7e339585fb73422126b",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-21--Tasks-review-review-page-写回仓接口.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-21--Tasks-review-review-page-写回仓接口.log.md",
+        "sha256": "dca012489b320ce0a455047a4405c8fe0345de186f4456f6b427e19b2b16a9e9"
+      }
     },
     {
       "title": "edges 站点统一 agent 助手模块",
@@ -271,7 +401,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：edges 站点统一 agent 助手模块",
-      "sha256": "113d6bb8b73c0829eee22f3616e1fc84ef93bc43dbf4d1af315f9319085ddce4"
+      "sha256": "113d6bb8b73c0829eee22f3616e1fc84ef93bc43dbf4d1af315f9319085ddce4",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-21--edges-站点统一-agent-助手模块.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-21--edges-站点统一-agent-助手模块.log.md",
+        "sha256": "48b955c835c6e5960809d1b7e99edb21b00a3ba172677714e3cd82cfc3e7dfc4"
+      }
     },
     {
       "title": "edges 衍生站点统一鉴权",
@@ -281,7 +416,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：edges 衍生站点统一鉴权",
-      "sha256": "463369f8ae87e455a6a6140276410d0977d81b4adb3818dd1b216b9c353bf98f"
+      "sha256": "463369f8ae87e455a6a6140276410d0977d81b4adb3818dd1b216b9c353bf98f",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-21--edges-衍生站点统一鉴权.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-21--edges-衍生站点统一鉴权.log.md",
+        "sha256": "9fe8c7f8959696d7280db8674497106946b526bf1fdc78f7464033fe98e043d6"
+      }
     },
     {
       "title": "云端服务统一入口（tmp + persistent 部署目录）",
@@ -291,7 +431,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：云端服务统一入口（tmp + persistent 部署目录）",
-      "sha256": "e30491f0f6cb100733a37d7f474f7c6687967842e43153555c774df9b5032534"
+      "sha256": "e30491f0f6cb100733a37d7f474f7c6687967842e43153555c774df9b5032534",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-21--云端服务统一入口tmp-persistent-部署目录.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-21--云端服务统一入口tmp-persistent-部署目录.log.md",
+        "sha256": "93d65b7befec818fe03b35cfb2459a4fd06d542acc654e130998d76b5be0c3e0"
+      }
     },
     {
       "title": "Tasks 审阅页 / `/tasks/` 支持语义检索",
@@ -301,7 +446,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Tasks 审阅页 / `/tasks/` 支持语义检索",
-      "sha256": "d2ee8b050e2e3b07d51ff3332f980ee21f36e63e6a93df219542d2face85d779"
+      "sha256": "d2ee8b050e2e3b07d51ff3332f980ee21f36e63e6a93df219542d2face85d779",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-23--Tasks审阅页-tasks站点语义检索.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-23--Tasks审阅页-tasks站点语义检索.log.md",
+        "sha256": "7d03e7e3743ed4def29c3e8a88bec04ea2c36fe8d902e5dd2ff8da546686445e"
+      }
     },
     {
       "title": "Tasks 审阅壳 — deploy 分支 + GitHub Actions 预览部署",
@@ -311,7 +461,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Tasks 审阅壳 — deploy 分支 + GitHub Actions 预览部署",
-      "sha256": "084b302c5d4febeb3f3663dc82651ebad6514f3d8f8dddf6f912ff509ae6ff09"
+      "sha256": "084b302c5d4febeb3f3663dc82651ebad6514f3d8f8dddf6f912ff509ae6ff09",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-24--Tasks-审阅壳-deploy-分支-GitHub-Actions-预览部署.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-24--Tasks-审阅壳-deploy-分支-GitHub-Actions-预览部署.log.md",
+        "sha256": "2aeed05a480cdffcf08be3badf2b8531170a09dd64ef9715aac7e8fa89cffe92"
+      }
     },
     {
       "title": "跨 Agent 客户端通信层（解绑工作区）",
@@ -321,7 +476,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：跨 Agent 客户端通信层（解绑工作区）",
-      "sha256": "c07ae1ed1e7519717fb6c9d5b3c8b3bd79ab9745e18bd77ad91ac062d945cc5b"
+      "sha256": "c07ae1ed1e7519717fb6c9d5b3c8b3bd79ab9745e18bd77ad91ac062d945cc5b",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-25--跨Agent客户端通信层.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-25--跨Agent客户端通信层.log.md",
+        "sha256": "a561d4a2c931b2b2cdecb68c50ddd628a454e522c0fd2fe5fbbc53d77155d511"
+      }
     },
     {
       "title": "Artifacts 支持多种预览类型（不止 HTML）",
@@ -331,7 +491,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Artifacts 支持多种预览类型（不止 HTML）",
-      "sha256": "73cc1678fa2b4c4a09d88baa314f8ef2103f1333719d7e19b82a6d56c84b291f"
+      "sha256": "73cc1678fa2b4c4a09d88baa314f8ef2103f1333719d7e19b82a6d56c84b291f",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/backlog/.2026-09-27--Artifacts-支持多种预览类型不止-HTML.log.md",
+        "target": ".harness/tasks/agent-clients-ux/backlog/.2026-09-27--Artifacts-支持多种预览类型不止-HTML.log.md",
+        "sha256": "33818d78c0c77c9508f0699149eab6ebdf6a7047865180c1cf8ad60ac07d2d93"
+      }
     },
     {
       "title": "review-page 右侧增加 markdown 预览 panel",
@@ -341,7 +506,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：review-page 右侧增加 markdown 预览 panel",
-      "sha256": "94f0464b759d4529ee4f4ffa12b28cc7589caf4ecdb93f21ffb9eafacb3274d6"
+      "sha256": "94f0464b759d4529ee4f4ffa12b28cc7589caf4ecdb93f21ffb9eafacb3274d6",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/cancelled/.2026-09-21--review-page-右侧增加-markdown-预览-panel.log.md",
+        "target": ".harness/tasks/agent-clients-ux/cancelled/.2026-09-21--review-page-右侧增加-markdown-预览-panel.log.md",
+        "sha256": "9955f99253a8c81d88bebc9dafe4fe56977b9e4327c2c7f0119609c8c6aa0605"
+      }
     },
     {
       "title": "review-page 增加更丰富的辅助 filter",
@@ -351,7 +521,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：review-page 增加更丰富的辅助 filter",
-      "sha256": "2fa9fdb97072563f3184a3c1c0a40076653f602b0abe3aab06dffabb39b92f7c"
+      "sha256": "2fa9fdb97072563f3184a3c1c0a40076653f602b0abe3aab06dffabb39b92f7c",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/cancelled/.2026-09-21--review-page-增加更丰富的辅助-filter.log.md",
+        "target": ".harness/tasks/agent-clients-ux/cancelled/.2026-09-21--review-page-增加更丰富的辅助-filter.log.md",
+        "sha256": "6e83e651ed87f7b6f490535324d8454ffe3843f476c33dbdfb28b3fdfd7da3a4"
+      }
     },
     {
       "title": "自建云服务器临时托管 artifacts",
@@ -361,7 +536,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：自建云服务器临时托管 artifacts",
-      "sha256": "87e577a3bff0d2505682337a7b3cf9d57ac7ae16cd1cb93716fbd5dad313d3f1"
+      "sha256": "87e577a3bff0d2505682337a7b3cf9d57ac7ae16cd1cb93716fbd5dad313d3f1",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/done/.2026-09-18--自建云服务器临时托管artifacts.log.md",
+        "target": ".harness/tasks/agent-clients-ux/done/.2026-09-18--自建云服务器临时托管artifacts.log.md",
+        "sha256": "58e5ef778aa0c434cdfca967b076210647905e18790424aa93f271c98b9dc63f"
+      }
     },
     {
       "title": "Artifacts预览服务部署到ECS",
@@ -371,7 +551,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Artifacts预览服务部署到ECS",
-      "sha256": "4ce3d5ed59c5c194235fe8cbd424c20468295f684b2dcd8f78c0daad90109ed7"
+      "sha256": "4ce3d5ed59c5c194235fe8cbd424c20468295f684b2dcd8f78c0daad90109ed7",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/done/.2026-09-21--Artifacts预览服务部署到ECS.log.md",
+        "target": ".harness/tasks/agent-clients-ux/done/.2026-09-21--Artifacts预览服务部署到ECS.log.md",
+        "sha256": "71fc89b4678868d4737ab13b35a3a947ce97bdf998ba3dc6d696d551dbaa3c90"
+      }
     },
     {
       "title": "Tasks review 持久站点（始终反映 main）",
@@ -381,7 +566,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Tasks review 持久站点（始终反映 main）",
-      "sha256": "127a6c21db06a8c8804bb2f17c831df218e1684111f724475ebbc7e446544091"
+      "sha256": "127a6c21db06a8c8804bb2f17c831df218e1684111f724475ebbc7e446544091",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/done/.2026-09-21--Tasks-review-持久站点始终反映-main.log.md",
+        "target": ".harness/tasks/agent-clients-ux/done/.2026-09-21--Tasks-review-持久站点始终反映-main.log.md",
+        "sha256": "13026b63c61ced172292cf627fb404e476b36045049c3b5cff8d75c3a1cb5c0b"
+      }
     },
     {
       "title": "review-page 改造（三列布局 + 顶栏 filter）",
@@ -391,7 +581,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：review-page 改造（三列布局 + 顶栏 filter）",
-      "sha256": "113e6201da23d8f84dbd97016b037d347839cda56b14815ba1a6b245fd253b6b"
+      "sha256": "113e6201da23d8f84dbd97016b037d347839cda56b14815ba1a6b245fd253b6b",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/done/.2026-09-21--review-page-改造三列布局-顶栏-filter.log.md",
+        "target": ".harness/tasks/agent-clients-ux/done/.2026-09-21--review-page-改造三列布局-顶栏-filter.log.md",
+        "sha256": "6697815e9a097cd92087d304af57d3376b52b6e87dacef7d8f926530669a403f"
+      }
     },
     {
       "title": "ECS 上 Cloudflare Tunnel 对外（teaching/tasks/artifacts）",
@@ -401,7 +596,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：ECS 上 Cloudflare Tunnel 对外（teaching/tasks/artifacts）",
-      "sha256": "937c3e526c2157cd0b81cdd465b371f6f729c7013d9456f8d3bbf1f2972abbd0"
+      "sha256": "937c3e526c2157cd0b81cdd465b371f6f729c7013d9456f8d3bbf1f2972abbd0",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/done/.2026-09-22--ECS-上-Cloudflare-Tunnel-对外teachingtasksartifacts.log.md",
+        "target": ".harness/tasks/agent-clients-ux/done/.2026-09-22--ECS-上-Cloudflare-Tunnel-对外teachingtasksartifacts.log.md",
+        "sha256": "cf9092068f34c12c26d2e62e75f42deb8dab5a14caba2e550f6b1ae3b6060a2c"
+      }
     },
     {
       "title": "GitHub Deployments 展示 /tasks/ 入口",
@@ -411,7 +611,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：GitHub Deployments 展示 /tasks/ 入口",
-      "sha256": "19351a8c1279653dbfef8c732c062ffd0b553703c20970f50bd5d64c930c3b37"
+      "sha256": "19351a8c1279653dbfef8c732c062ffd0b553703c20970f50bd5d64c930c3b37",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/done/.2026-09-22--GitHub-Deployments-展示-tasks-入口.log.md",
+        "target": ".harness/tasks/agent-clients-ux/done/.2026-09-22--GitHub-Deployments-展示-tasks-入口.log.md",
+        "sha256": "b7e703524751e0d88c48206cf2728e91be5ca681615e4e23cd5354fca46b917b"
+      }
     },
     {
       "title": "teaching 与 tasks 站点挂 DNS",
@@ -421,7 +626,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：teaching 与 tasks 站点挂 DNS",
-      "sha256": "646f7a1b9bc4cf11635fbb26f8a6220239a3862e5a31f397172e5c9a3a52295c"
+      "sha256": "646f7a1b9bc4cf11635fbb26f8a6220239a3862e5a31f397172e5c9a3a52295c",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/done/.2026-09-22--teaching-与-tasks-站点挂-DNS.log.md",
+        "target": ".harness/tasks/agent-clients-ux/done/.2026-09-22--teaching-与-tasks-站点挂-DNS.log.md",
+        "sha256": "d505462d4adab9d5657ada9509d1192b9139fbd28632c384d3665f4cedcc68cb"
+      }
     },
     {
       "title": "Tasks 审阅壳 — 手机 / 窄屏适配",
@@ -431,7 +641,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Tasks 审阅壳 — 手机 / 窄屏适配",
-      "sha256": "606f443825945e4beaba27e9fa22defaf38388a4ef00d37ca2f4b4518d1901c4"
+      "sha256": "606f443825945e4beaba27e9fa22defaf38388a4ef00d37ca2f4b4518d1901c4",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/done/.2026-09-24--Tasks-审阅壳手机-窄屏适配.log.md",
+        "target": ".harness/tasks/agent-clients-ux/done/.2026-09-24--Tasks-审阅壳手机-窄屏适配.log.md",
+        "sha256": "2104dd137f51dfa1e869b75a3b26526816586d4127323931d52eb6bc72bd0dc3"
+      }
     },
     {
       "title": "minigtr 验证 Codex CLI remote-control（手机配对）",
@@ -441,7 +656,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：minigtr 验证 Codex CLI remote-control（手机配对）",
-      "sha256": "bbb96c8985f3ed04c8e340efc76e515581916c3a4e5226cdc651e06ce887f8f1"
+      "sha256": "bbb96c8985f3ed04c8e340efc76e515581916c3a4e5226cdc651e06ce887f8f1",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/done/.2026-09-25--minigtr-验证-Codex-CLI-remote-control.log.md",
+        "target": ".harness/tasks/agent-clients-ux/done/.2026-09-25--minigtr-验证-Codex-CLI-remote-control.log.md",
+        "sha256": "e0f45c484b37cef032e914338f91434780be9df49c80ecd47f820571bc02dbe1"
+      }
     },
     {
       "title": "待读 Harness Playbook",
@@ -451,7 +671,12 @@
       "scope": ".",
       "purpose": "domain",
       "reason": "阅读文章并产出学习笔记，属于知识消费。",
-      "sha256": "69f7def8e7f11179bfb66b8be2228ca4acfc74a5d75da68621ead1063d553f42"
+      "sha256": "69f7def8e7f11179bfb66b8be2228ca4acfc74a5d75da68621ead1063d553f42",
+      "sidecar": {
+        "source": "knowledge/tasks/agent-clients-ux/todo/.2026-09-09--待读-harness-playbook.log.md",
+        "target": "tasks/agent-clients-ux/todo/.2026-09-09--待读-harness-playbook.log.md",
+        "sha256": "2f6c47db943f00feb1beb4fbbcfe1ce122e4754744a3840c1c7eaa9def361dd0"
+      }
     },
     {
       "title": "CLI 与 MCP 需加鉴权",
@@ -461,7 +686,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：CLI 与 MCP 需加鉴权",
-      "sha256": "78a3c783fbe43136fcb256b1e164a4bebc647019aefe3fb90060d6424aafd33e"
+      "sha256": "78a3c783fbe43136fcb256b1e164a4bebc647019aefe3fb90060d6424aafd33e",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-cli-platform/backlog/.2026-09-09--CLI与MCP需加鉴权.log.md",
+        "target": ".harness/tasks/edges-cli-platform/backlog/.2026-09-09--CLI与MCP需加鉴权.log.md",
+        "sha256": "81a2994e2089cfcdd4ace4f2c891955d4690e692a7a3cbc1eef2895de13123fb"
+      }
     },
     {
       "title": "系统可跟项目或挂用户目录",
@@ -471,7 +701,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：系统可跟项目或挂用户目录",
-      "sha256": "846c337b738a83035369eadc12a7082a0375bcf90149f98622a35d42c5075ac5"
+      "sha256": "846c337b738a83035369eadc12a7082a0375bcf90149f98622a35d42c5075ac5",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-cli-platform/backlog/.2026-09-12--系统可跟项目或挂用户目录.log.md",
+        "target": ".harness/tasks/edges-cli-platform/backlog/.2026-09-12--系统可跟项目或挂用户目录.log.md",
+        "sha256": "a675b53a9d100d5e11c2a8be818fef0b0699992a4429179f799d9803e3867cf1"
+      }
     },
     {
       "title": "project-memory 脚本迁到 edges CLI",
@@ -481,7 +716,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：project-memory 脚本迁到 edges CLI",
-      "sha256": "825c59e4ba8a3630bdeffdefe81728121a0cd99ffe6f84031571fbcd50874ace"
+      "sha256": "825c59e4ba8a3630bdeffdefe81728121a0cd99ffe6f84031571fbcd50874ace",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-cli-platform/backlog/.2026-09-13--project-memory脚本迁到edges-CLI.log.md",
+        "target": ".harness/tasks/edges-cli-platform/backlog/.2026-09-13--project-memory脚本迁到edges-CLI.log.md",
+        "sha256": "5c9df61fc81fd666458839bb5cd5a39bbbd98568c2830db2e3ba7cbe76e1d5a2"
+      }
     },
     {
       "title": "edges CLI 发布成 package",
@@ -491,7 +731,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：edges CLI 发布成 package",
-      "sha256": "8f8098e6d0b4f0d85e7cb4d70b2f828298cb02a7a5be750a5a24fb8e5d57f465"
+      "sha256": "8f8098e6d0b4f0d85e7cb4d70b2f828298cb02a7a5be750a5a24fb8e5d57f465",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-cli-platform/backlog/.2026-09-14--edges-CLI发布成package.log.md",
+        "target": ".harness/tasks/edges-cli-platform/backlog/.2026-09-14--edges-CLI发布成package.log.md",
+        "sha256": "6ea03f727750a5cfddf0fcd174418ae394fe9a1db0e6553338cf5ef2b8856f57"
+      }
     },
     {
       "title": "edges 封装为脚手架+框架并定义升级路径",
@@ -501,7 +746,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：edges 封装为脚手架+框架并定义升级路径",
-      "sha256": "351e5e4318e6d6aff748d098e0958efe9dee02bfab51889e34d46ef1f8dd7bb4"
+      "sha256": "351e5e4318e6d6aff748d098e0958efe9dee02bfab51889e34d46ef1f8dd7bb4",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-cli-platform/backlog/.2026-09-16--edges-封装为脚手架框架并定义升级路径.log.md",
+        "target": ".harness/tasks/edges-cli-platform/backlog/.2026-09-16--edges-封装为脚手架框架并定义升级路径.log.md",
+        "sha256": "1b316f9b7df6adde194cdb0359519e5ea0f2ec08cec28fc4da7e318db0f1d3e6"
+      }
     },
     {
       "title": "project-memory 树结构操作封装为 CLI",
@@ -511,7 +761,8 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：project-memory 树结构操作封装为 CLI",
-      "sha256": "e1020546b8ae9bd37a7d7098170f77135d04363a3e8c98a4ffd626bbf669aa5e"
+      "sha256": "e1020546b8ae9bd37a7d7098170f77135d04363a3e8c98a4ffd626bbf669aa5e",
+      "sidecar": null
     },
     {
       "title": "为 Edges CLI 建立统一的工作 scope 解析",
@@ -521,7 +772,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：为 Edges CLI 建立统一的工作 scope 解析",
-      "sha256": "e98f9d691e76b9589173b0c6a31c74c60a0489077770db7a78ff8e20a846f997"
+      "sha256": "e98f9d691e76b9589173b0c6a31c74c60a0489077770db7a78ff8e20a846f997",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-cli-platform/backlog/.2026-10-01--为-Edges-CLI-建立统一的工作-scope-解析.log.md",
+        "target": ".harness/tasks/edges-cli-platform/backlog/.2026-10-01--为-Edges-CLI-建立统一的工作-scope-解析.log.md",
+        "sha256": "d66df7692efe9b5586df71fedf50aae64233da133e2a53c63c3a7bf732c1d9a4"
+      }
     },
     {
       "title": "把 extensions/clis 改名为 extensions/cli",
@@ -531,7 +787,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：把 extensions/clis 改名为 extensions/cli",
-      "sha256": "5d00fc92554ec534d95682de1b8f234ef13d8ba3d1e87fd8bdee1954033295e8"
+      "sha256": "5d00fc92554ec534d95682de1b8f234ef13d8ba3d1e87fd8bdee1954033295e8",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-cli-platform/done/.2026-09-29--把-extensionsclis-改名为-extensionscli.log.md",
+        "target": ".harness/tasks/edges-cli-platform/done/.2026-09-29--把-extensionsclis-改名为-extensionscli.log.md",
+        "sha256": "06f510bc2746a55908dba7eceb49b89ec8c7b45051c6d9be602007c6693d7599"
+      }
     },
     {
       "title": "跑通 edges-cli 完整编译（修好 command 字段撞车）",
@@ -541,7 +802,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：跑通 edges-cli 完整编译（修好 command 字段撞车）",
-      "sha256": "1faf6603c7073cff1dedb914a99fce9404c67c67338793ba2133f7205b569c31"
+      "sha256": "1faf6603c7073cff1dedb914a99fce9404c67c67338793ba2133f7205b569c31",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-cli-platform/done/.2026-09-30--跑通-edges-cli-完整编译修好-command-字段撞车.log.md",
+        "target": ".harness/tasks/edges-cli-platform/done/.2026-09-30--跑通-edges-cli-完整编译修好-command-字段撞车.log.md",
+        "sha256": "ad0d7d981c201374d4d00e2e1198f919cbfc952ff48638dbd558f2d5a4096d1a"
+      }
     },
     {
       "title": "tasks 随仓多人协作与作者区分",
@@ -551,7 +817,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：tasks 随仓多人协作与作者区分",
-      "sha256": "5efcacc5c329720873858146cf78cc8eb2bb44070beb0ce0eb3446036d49d125"
+      "sha256": "5efcacc5c329720873858146cf78cc8eb2bb44070beb0ce0eb3446036d49d125",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-11--tasks随仓多人协作与作者区分.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-11--tasks随仓多人协作与作者区分.log.md",
+        "sha256": "803bb749222b8e648c6d33fcb2e57f8e1c4f975e71a23e4a0c73284c3c8da636"
+      }
     },
     {
       "title": "task 记录仓与执行仓分离",
@@ -561,7 +832,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：task 记录仓与执行仓分离",
-      "sha256": "21dd6dcdf98af2aa422bd3b110332e17fafaf0d4e49ac477143f497cf60689ee"
+      "sha256": "21dd6dcdf98af2aa422bd3b110332e17fafaf0d4e49ac477143f497cf60689ee",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-11--task记录仓与执行仓分离.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-11--task记录仓与执行仓分离.log.md",
+        "sha256": "5562f0c589d3e509f3868ed0141c83f06982693c0d25ebf2cf1f051148b05647"
+      }
     },
     {
       "title": "tasks 机制与 GitHub 关联",
@@ -571,7 +847,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：tasks 机制与 GitHub 关联",
-      "sha256": "8f20af600d05edd73f439705f9a5f00198823653108f444319a043a3057dc29a"
+      "sha256": "8f20af600d05edd73f439705f9a5f00198823653108f444319a043a3057dc29a",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-12--tasks机制与GitHub关联.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-12--tasks机制与GitHub关联.log.md",
+        "sha256": "727e00d6cba9d51c59ac14cbf800cb4006b05771ec9e273649139addc9711dd7"
+      }
     },
     {
       "title": "tasks memory type 与看板语义合并（含 CLI 改造）",
@@ -581,7 +862,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：tasks memory type 与看板语义合并（含 CLI 改造）",
-      "sha256": "d1c87be7b453e264959d70c97d590683c958b30c048f05e567fffcdaf4ed1693"
+      "sha256": "d1c87be7b453e264959d70c97d590683c958b30c048f05e567fffcdaf4ed1693",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-13--tasks-memory与看板语义合并.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-13--tasks-memory与看板语义合并.log.md",
+        "sha256": "f2fe84f597991cc233ff68bb7c225c242cacdf8817e85edf8716c411632e8b6f"
+      }
     },
     {
       "title": "落盘时推荐相关 task 并问依赖",
@@ -591,7 +877,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：落盘时推荐相关 task 并问依赖",
-      "sha256": "6c0a00766197097079feac0d340629a590a8c02e83abc6baae02a49446ae7701"
+      "sha256": "6c0a00766197097079feac0d340629a590a8c02e83abc6baae02a49446ae7701",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-14--落盘时推荐相关task并问依赖.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-14--落盘时推荐相关task并问依赖.log.md",
+        "sha256": "31dae113f788dd2e64f75184b364b58a904d821ca699d826073825b4dd60df4e"
+      }
     },
     {
       "title": "Task 复杂可视化（状态、主题、调度）",
@@ -601,7 +892,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Task 复杂可视化（状态、主题、调度）",
-      "sha256": "cffa985900640ca81d33664c65576f9a5e63bf7004fea71e192a0f0aafa7eea5"
+      "sha256": "cffa985900640ca81d33664c65576f9a5e63bf7004fea71e192a0f0aafa7eea5",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-15--Task复杂可视化状态主题与调度.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-15--Task复杂可视化状态主题与调度.log.md",
+        "sha256": "d8bc39bb602929df71b76e182735066f9bb2df50e9dc86a3cae2cc0f5fd1a38e"
+      }
     },
     {
       "title": "交互式主题聚类（参考 K-means）",
@@ -611,7 +907,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：交互式主题聚类（参考 K-means）",
-      "sha256": "f6db96a344efbef79dfe716e731e212cffe9ebef24bf2f04a8ba2cf6306a5e95"
+      "sha256": "f6db96a344efbef79dfe716e731e212cffe9ebef24bf2f04a8ba2cf6306a5e95",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-15--交互式主题聚类参考K-means.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-15--交互式主题聚类参考K-means.log.md",
+        "sha256": "582b7e6afdd6b65a2ebe1975bae3137009e83358c75ac6e747344151878861a5"
+      }
     },
     {
       "title": "分主题后每个 task 一文件夹",
@@ -621,7 +922,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：分主题后每个 task 一文件夹",
-      "sha256": "8fce15b5c028d8aca6e065950b805a585df5ef3511db28077c93998c559e8bee"
+      "sha256": "8fce15b5c028d8aca6e065950b805a585df5ef3511db28077c93998c559e8bee",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-15--分主题后每task一文件夹.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-15--分主题后每task一文件夹.log.md",
+        "sha256": "9d8d8b91301dc485dc0a485a1104fb783573b324e71239ca92389581835738e9"
+      }
     },
     {
       "title": "按消息队列自动推送就绪 task",
@@ -631,7 +937,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：按消息队列自动推送就绪 task",
-      "sha256": "14cea95cfc537b838a6635d18485d642862b1acab37821f1780960d24fadd2a6"
+      "sha256": "14cea95cfc537b838a6635d18485d642862b1acab37821f1780960d24fadd2a6",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-15--按消息队列自动推送就绪task.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-15--按消息队列自动推送就绪task.log.md",
+        "sha256": "7f791f11dfe6250c98d62256d89c86c4e1bd97e9d32868a7faed4b4e2e5df666"
+      }
     },
     {
       "title": "Task 与外部系统绑定（PingCode / Aone / GitHub 等）",
@@ -641,7 +952,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Task 与外部系统绑定（PingCode / Aone / GitHub 等）",
-      "sha256": "a620a55779b4ec80b5b4d95fcc028b3ec722137d8b91a8db20ac73f8626f62ae"
+      "sha256": "a620a55779b4ec80b5b4d95fcc028b3ec722137d8b91a8db20ac73f8626f62ae",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-16--Task与外部系统绑定.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-16--Task与外部系统绑定.log.md",
+        "sha256": "1c45e28b5dad4614a7869390f78039ff72300e8a56970e66e22533d0a6caa803"
+      }
     },
     {
       "title": "edges tasks 的 Skill + MCP 封装",
@@ -651,7 +967,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：edges tasks 的 Skill + MCP 封装",
-      "sha256": "04436e7f1a836f3ea70327079bbf3d5091e8a2926cdd8f0595a9b32c8b5fe762"
+      "sha256": "04436e7f1a836f3ea70327079bbf3d5091e8a2926cdd8f0595a9b32c8b5fe762",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-16--edges-tasks的Skill与MCP封装.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-16--edges-tasks的Skill与MCP封装.log.md",
+        "sha256": "3082fa497f19c068df69a05413878ecfcacfd0b486483eba5158a0b070e124eb"
+      }
     },
     {
       "title": "Task Project 分类接入真正的 Embedding（本地或云端）",
@@ -661,7 +982,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Task Project 分类接入真正的 Embedding（本地或云端）",
-      "sha256": "c7c8375f9ffa1f970bd85b199bf8e1a88f06bd2d1718b792b1b415ab2c7efea3"
+      "sha256": "c7c8375f9ffa1f970bd85b199bf8e1a88f06bd2d1718b792b1b415ab2c7efea3",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-17--Task-Project分类接入真正Embedding.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-17--Task-Project分类接入真正Embedding.log.md",
+        "sha256": "38cc7a087e75926f3c78d10ad1318025d693516427996826153648f533585992"
+      }
     },
     {
       "title": "classify 沉到 edges tasks CLI（需 embedding，探讨）",
@@ -671,7 +997,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：classify 沉到 edges tasks CLI（需 embedding，探讨）",
-      "sha256": "6bba8514391ee0fd776be6a3b894189ecc9c37408226e3835a3ed56651580d14"
+      "sha256": "6bba8514391ee0fd776be6a3b894189ecc9c37408226e3835a3ed56651580d14",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-17--classify沉到edges-tasks-CLI.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-17--classify沉到edges-tasks-CLI.log.md",
+        "sha256": "3314fa5636bd80a64295287fd79b7e35dfe99c54077b4190a6c406aa0c8aa3c0"
+      }
     },
     {
       "title": "支持周期性任务与周期触发",
@@ -681,7 +1012,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：支持周期性任务与周期触发",
-      "sha256": "b8b4cf4bd96854c0a119045b06bc4acd2fdc43db4d18f33bc3d90ca1c1825897"
+      "sha256": "b8b4cf4bd96854c0a119045b06bc4acd2fdc43db4d18f33bc3d90ca1c1825897",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-19--支持周期性任务与周期触发.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-19--支持周期性任务与周期触发.log.md",
+        "sha256": "fb4215c4afc96388a954abb2cbfeab29b60cc906ce8bbca2c45f9e2215f85ffe"
+      }
     },
     {
       "title": "edges changelog CLI（切 Unreleased / 校验）",
@@ -691,7 +1027,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：edges changelog CLI（切 Unreleased / 校验）",
-      "sha256": "563785c2f70ca833912ba91fe7c9aa38860eefcb59abfe14024ef895dd6472f7"
+      "sha256": "563785c2f70ca833912ba91fe7c9aa38860eefcb59abfe14024ef895dd6472f7",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-20--edges-changelog-CLI切-Unreleased-校验.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-20--edges-changelog-CLI切-Unreleased-校验.log.md",
+        "sha256": "91a876c4cc7205f3cc56eec28e2f522459eebdb3ad82f93a497fb34276ceaf57"
+      }
     },
     {
       "title": "看板状态可视化 Skill（review-page/HTML + artifacts publish）",
@@ -701,7 +1042,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：看板状态可视化 Skill（review-page/HTML + artifacts publish）",
-      "sha256": "8cb230155d739f8db68c30be63c97aee805a0e9c2e71cb730bb64912b42d23f0"
+      "sha256": "8cb230155d739f8db68c30be63c97aee805a0e9c2e71cb730bb64912b42d23f0",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-21--看板状态可视化-Skillreview-pageHTML-artifacts-publish.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-21--看板状态可视化-Skillreview-pageHTML-artifacts-publish.log.md",
+        "sha256": "e5461a7cfd178c6b7aaa824f715a0663d31e63431133289a73d6c7277bd9e2a7"
+      }
     },
     {
       "title": "conversation-to-tasks 整理后，用 CLI 落库",
@@ -711,7 +1057,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：conversation-to-tasks 整理后，用 CLI 落库",
-      "sha256": "e5fd9583a53ae9225eb6c7a6f1f21a2d4410c0939dfd6de09788f4360779d5df"
+      "sha256": "e5fd9583a53ae9225eb6c7a6f1f21a2d4410c0939dfd6de09788f4360779d5df",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-24--conversation-to-tasks整理后调CLI落库.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-24--conversation-to-tasks整理后调CLI落库.log.md",
+        "sha256": "ca0b24a147fca8e146153501862fcb80679e1c67869c82ba31abb71281287bc2"
+      }
     },
     {
       "title": "维护看板按作用域迁入 .harness/tasks/",
@@ -721,7 +1072,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：维护看板按作用域迁入 .harness/tasks/",
-      "sha256": "742a82d83eafedf9e3e599a9539eea470c122bb3b6af2def8b191757ebf265b2"
+      "sha256": "742a82d83eafedf9e3e599a9539eea470c122bb3b6af2def8b191757ebf265b2",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-25--看板默认路径改为.edges-tasks.log.md",
+        "target": ".harness/tasks/edges-tasks/backlog/.2026-09-25--看板默认路径改为.edges-tasks.log.md",
+        "sha256": "7feded89a64444fd1e9cfe302d4684953e302c93978984bf49732bcda41c6e5c"
+      }
     },
     {
       "title": "conversation-to-task skill：按模板总结 Task 并调用 CLI",
@@ -731,7 +1087,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：conversation-to-task skill：按模板总结 Task 并调用 CLI",
-      "sha256": "fef5c2fac5cbc3f38f87f36dd71bd32a2be11cbeef9b25d067f18bf1bf80b85f"
+      "sha256": "fef5c2fac5cbc3f38f87f36dd71bd32a2be11cbeef9b25d067f18bf1bf80b85f",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/cancelled/.2026-09-13--conversation-to-task-skill调用CLI.log.md",
+        "target": ".harness/tasks/edges-tasks/cancelled/.2026-09-13--conversation-to-task-skill调用CLI.log.md",
+        "sha256": "453ed683482451754998c52a78d230aba5efc04bb52af938f7360844a32fcb15"
+      }
     },
     {
       "title": "整理 _default project tasks 的 skill",
@@ -741,7 +1102,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：整理 _default project tasks 的 skill",
-      "sha256": "b32832d82a3248ad3a20efdb7f98b125efd0a0a897100c0b7e7da3356599fa9e"
+      "sha256": "b32832d82a3248ad3a20efdb7f98b125efd0a0a897100c0b7e7da3356599fa9e",
+      "sidecar": {
+        "source": "knowledge/tasks/edges-tasks/in_progress/.2026-09-16--整理default-project的tasks-skill.log.md",
+        "target": ".harness/tasks/edges-tasks/in_progress/.2026-09-16--整理default-project的tasks-skill.log.md",
+        "sha256": "edfc499259ef09415ccbfdacd70c5bba28b9aceef0c66f6ee433622d2efc3930"
+      }
     },
     {
       "title": "找公开 benchmark 证明 memory 有效性",
@@ -751,7 +1117,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：找公开 benchmark 证明 memory 有效性",
-      "sha256": "ed3650ce03744745a1551219516c367066188496caff31998b9df430d2fc37a6"
+      "sha256": "ed3650ce03744745a1551219516c367066188496caff31998b9df430d2fc37a6",
+      "sidecar": {
+        "source": "knowledge/tasks/evaluation/backlog/.2026-09-11--找公开benchmark证明memory有效性.log.md",
+        "target": ".harness/tasks/evaluation/backlog/.2026-09-11--找公开benchmark证明memory有效性.log.md",
+        "sha256": "83b86f3a2c998224f023a05790565c6571e381e7d5924eacda2162019d3bbbdb"
+      }
     },
     {
       "title": "知识库 Evaluation 系统",
@@ -761,7 +1132,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：知识库 Evaluation 系统",
-      "sha256": "ea38f8700f63a89e7b5f74497074e672905d12fc0f00fe27b884e323b5bd260b"
+      "sha256": "ea38f8700f63a89e7b5f74497074e672905d12fc0f00fe27b884e323b5bd260b",
+      "sidecar": {
+        "source": "knowledge/tasks/evaluation/backlog/.2026-09-13--知识库Evaluation系统.log.md",
+        "target": ".harness/tasks/evaluation/backlog/.2026-09-13--知识库Evaluation系统.log.md",
+        "sha256": "46dc46ad3f1a3017364f750e30d8866d796d11434c0543a4091a4dcc1909b4d1"
+      }
     },
     {
       "title": "LoCoMo 四臂探索对照（baseline已有｜补 RAG｜PM-online｜empty）",
@@ -771,7 +1147,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：LoCoMo 四臂探索对照（baseline已有｜补 RAG｜PM-online｜empty）",
-      "sha256": "b46e8c0ca715554d404fa52ef9392f9b13b67a9b8accceda59c3ff9e7f51770f"
+      "sha256": "b46e8c0ca715554d404fa52ef9392f9b13b67a9b8accceda59c3ff9e7f51770f",
+      "sidecar": {
+        "source": "knowledge/tasks/evaluation/backlog/.2026-09-16--LoCoMo四臂探索对照.log.md",
+        "target": ".harness/tasks/evaluation/backlog/.2026-09-16--LoCoMo四臂探索对照.log.md",
+        "sha256": "4067c129c943ce7ea010ea4a6e03c4b40a0b36dccdb0a7a9366920bcc9ee94f6"
+      }
     },
     {
       "title": "SWE-ContextBench 主评测（公开基准主证据）",
@@ -781,7 +1162,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：SWE-ContextBench 主评测（公开基准主证据）",
-      "sha256": "52e8f51e09280d24788c7d787e734cd2928f9f69d1ae8684bc2fe265a1260afb"
+      "sha256": "52e8f51e09280d24788c7d787e734cd2928f9f69d1ae8684bc2fe265a1260afb",
+      "sidecar": {
+        "source": "knowledge/tasks/evaluation/backlog/.2026-09-16--SWE-ContextBench主评测.log.md",
+        "target": ".harness/tasks/evaluation/backlog/.2026-09-16--SWE-ContextBench主评测.log.md",
+        "sha256": "4047d8d0651536379ceb446a2084946540cf509dfc32fa2bead0a161d71875dd"
+      }
     },
     {
       "title": "evaluation/cases 登记可重复 case 定义",
@@ -791,7 +1177,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：evaluation/cases 登记可重复 case 定义",
-      "sha256": "08359ea5aaf112301f3d1b0bfc48345f7775108c89a4565dffdcf2baf6a450c7"
+      "sha256": "08359ea5aaf112301f3d1b0bfc48345f7775108c89a4565dffdcf2baf6a450c7",
+      "sidecar": {
+        "source": "knowledge/tasks/evaluation/backlog/.2026-09-16--evaluation-cases登记可重复用例.log.md",
+        "target": ".harness/tasks/evaluation/backlog/.2026-09-16--evaluation-cases登记可重复用例.log.md",
+        "sha256": "5ed733303d842053642dc79ad423ca54442f16bf5f0710892a47961e733c179f"
+      }
     },
     {
       "title": "知识库 Observation 系统",
@@ -801,7 +1192,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：知识库 Observation 系统",
-      "sha256": "f82cf3b703dee6fcf0d35df2566c137440f3ab1edbbe9e0b069048b6ccf9e269"
+      "sha256": "f82cf3b703dee6fcf0d35df2566c137440f3ab1edbbe9e0b069048b6ccf9e269",
+      "sidecar": {
+        "source": "knowledge/tasks/observation/backlog/.2026-09-13--知识库Observation系统.log.md",
+        "target": ".harness/tasks/observation/backlog/.2026-09-13--知识库Observation系统.log.md",
+        "sha256": "c510e607cfd2c8cac6587779c11259f0f540174cd38a3e20a322bd3233d23d50"
+      }
     },
     {
       "title": "Langfuse 公网 HTTPS 暴露（反代+证书）",
@@ -811,7 +1207,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Langfuse 公网 HTTPS 暴露（反代+证书）",
-      "sha256": "767679ea93a980c8af70e7d7b778174b4047e0defadf89f4c46b916dc1bb088a"
+      "sha256": "767679ea93a980c8af70e7d7b778174b4047e0defadf89f4c46b916dc1bb088a",
+      "sidecar": {
+        "source": "knowledge/tasks/observation/backlog/.2026-09-20--Langfuse-公网-HTTPS-暴露反代证书.log.md",
+        "target": ".harness/tasks/observation/backlog/.2026-09-20--Langfuse-公网-HTTPS-暴露反代证书.log.md",
+        "sha256": "8337ad6bb58c6c2e79a2e6b18be968416025e4aee38a9259273379a9abd3f844"
+      }
     },
     {
       "title": "Langfuse 定期备份到另一台（NAS/云盘等）",
@@ -821,7 +1222,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Langfuse 定期备份到另一台（NAS/云盘等）",
-      "sha256": "8805696b197770db23fc99aae53f2aeb078a6de864304f2f99f900887cf3bd97"
+      "sha256": "8805696b197770db23fc99aae53f2aeb078a6de864304f2f99f900887cf3bd97",
+      "sidecar": {
+        "source": "knowledge/tasks/observation/backlog/.2026-09-20--Langfuse-定期备份到另一台NAS云盘等.log.md",
+        "target": ".harness/tasks/observation/backlog/.2026-09-20--Langfuse-定期备份到另一台NAS云盘等.log.md",
+        "sha256": "61b7b2c7f81f7ef27f8c818b3c94a057dfeb5cb678e7b08fe3e6e3e13eec2805"
+      }
     },
     {
       "title": "自部署 Langfuse",
@@ -831,7 +1237,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：自部署 Langfuse",
-      "sha256": "e3498689656772ac974d84e54d46b1d3f3dec35d849734444c54be5c86fd680e"
+      "sha256": "e3498689656772ac974d84e54d46b1d3f3dec35d849734444c54be5c86fd680e",
+      "sidecar": {
+        "source": "knowledge/tasks/observation/in_progress/.2026-09-20--自部署-Langfuse.log.md",
+        "target": ".harness/tasks/observation/in_progress/.2026-09-20--自部署-Langfuse.log.md",
+        "sha256": "994dcbf0541041545926fecf4d9e0a4de45f0c10c83a9f2e2de2b748726df76f"
+      }
     },
     {
       "title": "runa-memory-ask 调用结果统计",
@@ -841,7 +1252,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：runa-memory-ask 调用结果统计",
-      "sha256": "3829b774bc46a882b94ec2a8c5ad5312ba26fb4d710ca878fef522841734d5ef"
+      "sha256": "3829b774bc46a882b94ec2a8c5ad5312ba26fb4d710ca878fef522841734d5ef",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-08--runa-memory-ask调用结果统计.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-08--runa-memory-ask调用结果统计.log.md",
+        "sha256": "c8000e8f08dd34b6ea3dc8abd17b77c9a2ceb009a24ece2d8c49a20bcedd9e98"
+      }
     },
     {
       "title": "memory 需要 assets 资源目录",
@@ -851,7 +1267,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：memory 需要 assets 资源目录",
-      "sha256": "5c9496052a7b61aef6e388a160f3b36d2a3eafb6d3819d9236b0d8fa65e6df85"
+      "sha256": "5c9496052a7b61aef6e388a160f3b36d2a3eafb6d3819d9236b0d8fa65e6df85",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-09--memory需要assets资源目录.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-09--memory需要assets资源目录.log.md",
+        "sha256": "a7cd0d6b743de99ebe43f79100cfe9817fc6bf1f772bc3bd7bbf81fea9832b5e"
+      }
     },
     {
       "title": "project-memory 跨 Agent 继承经验",
@@ -861,7 +1282,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：project-memory 跨 Agent 继承经验",
-      "sha256": "ea5ffbdf579c14b0a26897acb92820aa32382ebb203653059af4c64a81b4886a"
+      "sha256": "ea5ffbdf579c14b0a26897acb92820aa32382ebb203653059af4c64a81b4886a",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-09--project-memory跨agent继承经验.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-09--project-memory跨agent继承经验.log.md",
+        "sha256": "967d3f21b21ab138a10e3dce92e6f694f590257136bca8103cb4461f69d04260"
+      }
     },
     {
       "title": "笔记洗成 project-memory 格式",
@@ -871,7 +1297,12 @@
       "scope": ".",
       "purpose": "domain",
       "reason": "对既有笔记做内容格式转换；不是改造记忆工具实现。",
-      "sha256": "71522735011772727419e1f9733d9b0ebe0c852f43e2b48d440c840d03c6a22c"
+      "sha256": "71522735011772727419e1f9733d9b0ebe0c852f43e2b48d440c840d03c6a22c",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-09--笔记洗成project-memory格式.log.md",
+        "target": "tasks/project-memory/backlog/.2026-09-09--笔记洗成project-memory格式.log.md",
+        "sha256": "c3c0d3bd1463e6407af243011893620382abc9d5275b748b3648e16c1c1d22a6"
+      }
     },
     {
       "title": "project memory 是树结构算法",
@@ -881,7 +1312,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：project memory 是树结构算法",
-      "sha256": "5eee42d25b3be0469355083a787ace705db4bbcc05c419c3bf50a08721b2130a"
+      "sha256": "5eee42d25b3be0469355083a787ace705db4bbcc05c419c3bf50a08721b2130a",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-10--project-memory是树结构算法.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-10--project-memory是树结构算法.log.md",
+        "sha256": "29347972756fb881caef20ada1f2985e119c377108eca99bb9d4ab3bd55e7dc1"
+      }
     },
     {
       "title": "reshape 底层拆树原子操作",
@@ -891,7 +1327,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：reshape 底层拆树原子操作",
-      "sha256": "394f235f68bea95d339238b76d71380d08da5a6dc5e7ffa18d8c6658a7deb835"
+      "sha256": "394f235f68bea95d339238b76d71380d08da5a6dc5e7ffa18d8c6658a7deb835",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-10--reshape底层拆树原子操作.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-10--reshape底层拆树原子操作.log.md",
+        "sha256": "e6616c568d8a3662d0965d35cab76ad73b995e37e4aa60db833453df66b8426b"
+      }
     },
     {
       "title": "记忆条目加 private 元数据",
@@ -901,7 +1342,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：记忆条目加 private 元数据",
-      "sha256": "7706e7f8f32364d28f87418602cf885e7f2bff512f93138e5dc5ce02a377ef65"
+      "sha256": "7706e7f8f32364d28f87418602cf885e7f2bff512f93138e5dc5ce02a377ef65",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-11--记忆条目加private元数据.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-11--记忆条目加private元数据.log.md",
+        "sha256": "82111bb42ffd4f12cf0d701439f39ffed9603a1e6c299816a9ecc7d074ceca79"
+      }
     },
     {
       "title": "以递归记忆模型重构 Edges 目录架构",
@@ -911,7 +1357,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：以递归记忆模型重构 Edges 目录架构",
-      "sha256": "a90b574d5fa5ae18f4c27a7a4d352d5dc5e3f64a44aada3d66f2fcaec2190ef4"
+      "sha256": "a90b574d5fa5ae18f4c27a7a4d352d5dc5e3f64a44aada3d66f2fcaec2190ef4",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/in_progress/.2026-09-12--整仓与memory同构递归融合.log.md",
+        "target": ".harness/tasks/project-memory/in_progress/.2026-09-12--整仓与memory同构递归融合.log.md",
+        "sha256": "5fb1b771fc352ee8cb044b6873938999ffbe7334fc999675313d3bc5551d796b"
+      }
     },
     {
       "title": "reference memory 的 description 应带关键链接",
@@ -921,7 +1372,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：reference memory 的 description 应带关键链接",
-      "sha256": "27e29150540d39c93eb1cac2522a921b9a63a6960f95059df6e51429a126c909"
+      "sha256": "27e29150540d39c93eb1cac2522a921b9a63a6960f95059df6e51429a126c909",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-13--reference的description应带关键链接.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-13--reference的description应带关键链接.log.md",
+        "sha256": "ba3df51c12324fcf2ce78434a70afbf60fc8bde4d957249f7c846d91689d3b87"
+      }
     },
     {
       "title": "明确 .memory 与 docs/ 的边界",
@@ -931,7 +1387,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：明确 .memory 与 docs/ 的边界",
-      "sha256": "04ce98cc7aa26c506dcd8097bffb90aa59f90ff46cae2040a1de4b114ec97f0a"
+      "sha256": "04ce98cc7aa26c506dcd8097bffb90aa59f90ff46cae2040a1de4b114ec97f0a",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-15--明确memory与docs边界.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-15--明确memory与docs边界.log.md",
+        "sha256": "16b7c2fecf161e05a454ec64a1fd3c963d5907f1d5dc92454a997455bfb953d1"
+      }
     },
     {
       "title": "Memory 模块解耦与可插拔接口",
@@ -941,7 +1402,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：Memory 模块解耦与可插拔接口",
-      "sha256": "f28dc06b0e3774b1b06a6a43ba2a485cfada5f77a39239cf5ffd93b554599521"
+      "sha256": "f28dc06b0e3774b1b06a6a43ba2a485cfada5f77a39239cf5ffd93b554599521",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-16--Memory模块解耦与可插拔接口.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-16--Memory模块解耦与可插拔接口.log.md",
+        "sha256": "c10458a97fd7750468038863f817053a47d978b061cb9c81eb0be9e54f824feb"
+      }
     },
     {
       "title": "记忆查询 Dropout：随机屏蔽一部分记忆",
@@ -951,7 +1417,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：记忆查询 Dropout：随机屏蔽一部分记忆",
-      "sha256": "9b0f0d511e04b330b9cf747f386dab24bc03554a6df43d072216c8ba77967605"
+      "sha256": "9b0f0d511e04b330b9cf747f386dab24bc03554a6df43d072216c8ba77967605",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-16--记忆查询Dropout随机屏蔽.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-16--记忆查询Dropout随机屏蔽.log.md",
+        "sha256": "da4127af64d72cc2d82892065cb75e205f5a74dd1d233afebfd45bb68a0e9b78"
+      }
     },
     {
       "title": "重新评估 Reference memory type 是否必要",
@@ -961,7 +1432,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：重新评估 Reference memory type 是否必要",
-      "sha256": "88b4d09061360be57c489e22c769bdf75699a0dcd944d7ecb29a45aaa65ccdd9"
+      "sha256": "88b4d09061360be57c489e22c769bdf75699a0dcd944d7ecb29a45aaa65ccdd9",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/backlog/.2026-09-17--重新评估Reference-memory-type.log.md",
+        "target": ".harness/tasks/project-memory/backlog/.2026-09-17--重新评估Reference-memory-type.log.md",
+        "sha256": "8a8521cb2db37ea81e655c4cd8096b4df2346ae64398ba58a11056af6325fb6c"
+      }
     },
     {
       "title": "所有 Memory 类型支持配置沉淀正文模板",
@@ -971,7 +1447,8 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：所有 Memory 类型支持配置沉淀正文模板",
-      "sha256": "5966bdc501abd6e81060f02fc779bd76feb53d80c46481c6268081c94f82d901"
+      "sha256": "5966bdc501abd6e81060f02fc779bd76feb53d80c46481c6268081c94f82d901",
+      "sidecar": null
     },
     {
       "title": "dream — 自动整理对话记忆并产生知识",
@@ -981,7 +1458,8 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：dream — 自动整理对话记忆并产生知识",
-      "sha256": "f463cbe0bb8d8a0484c8cead4c0320643474fb33ca3d6e02156eece40f4d93d9"
+      "sha256": "f463cbe0bb8d8a0484c8cead4c0320643474fb33ca3d6e02156eece40f4d93d9",
+      "sidecar": null
     },
     {
       "title": ".memory 类型索引改为目录下 AGENTS.md",
@@ -991,7 +1469,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：.memory 类型索引改为目录下 AGENTS.md",
-      "sha256": "2160477416844fa8b62193e9ab03cc64d1030eff7e650db4f0daf498855ca950"
+      "sha256": "2160477416844fa8b62193e9ab03cc64d1030eff7e650db4f0daf498855ca950",
+      "sidecar": {
+        "source": "knowledge/tasks/project-memory/done/.2026-09-17--memory类型索引改为目录下AGENTS.log.md",
+        "target": ".harness/tasks/project-memory/done/.2026-09-17--memory类型索引改为目录下AGENTS.log.md",
+        "sha256": "78989b1666ad296784034c8df699f90a0913a833f4dd3c981480a86180fb90ef"
+      }
     },
     {
       "title": "posts 用 Astro 搭博客与 CI",
@@ -1001,7 +1484,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：posts 用 Astro 搭博客与 CI",
-      "sha256": "6535fbd88999e56515ee12eb91e8e086217f715eee84b20370ad4d661c7bf57b"
+      "sha256": "6535fbd88999e56515ee12eb91e8e086217f715eee84b20370ad4d661c7bf57b",
+      "sidecar": {
+        "source": "knowledge/tasks/site-and-content/backlog/.2026-09-10--posts用Astro搭博客与CI.log.md",
+        "target": ".harness/tasks/site-and-content/backlog/.2026-09-10--posts用Astro搭博客与CI.log.md",
+        "sha256": "dea08302a9f818a91484817ef198e5f6973adc37eabed5c3b307eb0249e14660"
+      }
     },
     {
       "title": "分类整理 edges 内容以便检索",
@@ -1011,7 +1499,12 @@
       "scope": ".",
       "purpose": "domain",
       "reason": "整理已有产品/主题知识以便检索，属于知识加工。",
-      "sha256": "abee7f629e96d80604cebe4d993bf56c8d48caf4a7510da0faf5fd0e7c14b655"
+      "sha256": "abee7f629e96d80604cebe4d993bf56c8d48caf4a7510da0faf5fd0e7c14b655",
+      "sidecar": {
+        "source": "knowledge/tasks/site-and-content/backlog/.2026-09-13--edges内容分类整理便于检索.log.md",
+        "target": "tasks/site-and-content/backlog/.2026-09-13--edges内容分类整理便于检索.log.md",
+        "sha256": "7754f14fd59a68239361f8c227af506ea1088ae5efda99800272b87b22089362"
+      }
     },
     {
       "title": "仓库主页增加更多 badge",
@@ -1021,7 +1514,12 @@
       "scope": ".",
       "purpose": "maintenance",
       "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：仓库主页增加更多 badge",
-      "sha256": "48d3123386130ad6b233011b0eb86a5e7ca94564d556632244d3889acc76a0f9"
+      "sha256": "48d3123386130ad6b233011b0eb86a5e7ca94564d556632244d3889acc76a0f9",
+      "sidecar": {
+        "source": "knowledge/tasks/site-and-content/backlog/.2026-09-14--仓库主页增加更多badge.log.md",
+        "target": ".harness/tasks/site-and-content/backlog/.2026-09-14--仓库主页增加更多badge.log.md",
+        "sha256": "f51477056b612ac4591db74d09e4847427528ca2dc5cb4bf49259c24d5749167"
+      }
     },
     {
       "title": "整理 posts 文件夹并建站",
@@ -1031,7 +1529,12 @@
       "scope": ".",
       "purpose": "domain",
       "reason": "整理待发布内容并完成内容站交付；工具栈维护另有 Astro/CI 卡，本卡保留单一领域归属且不授权编辑 posts。",
-      "sha256": "c4f36fe96cb5aab77d9ab403545d20ec352a1f8f844d995ebe1fe661c88cb97e"
+      "sha256": "c4f36fe96cb5aab77d9ab403545d20ec352a1f8f844d995ebe1fe661c88cb97e",
+      "sidecar": {
+        "source": "knowledge/tasks/site-and-content/backlog/.2026-09-14--整理posts文件夹并建站.log.md",
+        "target": "tasks/site-and-content/backlog/.2026-09-14--整理posts文件夹并建站.log.md",
+        "sha256": "aa8657ab864b7575640657561885d748934101eb479efe9e2f424094d65b8a85"
+      }
     }
   ],
   "localMemoryRecords": [
@@ -1459,5 +1962,6 @@
     "source": "evaluation/third_party/locomo",
     "target": ".harness/evaluation/third_party/locomo",
     "sha": "cb5151e32c82c3b6fc6ffdc18e72572691b9d8ea"
-  }
+  },
+  "taskSidecarCount": 100
 }
