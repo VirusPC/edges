@@ -102,7 +102,7 @@ assert subprocess.run(['git', '-C', str(scope), 'check-ignore',
 **Files:**
 - Modify: `extensions/cli/src/{program.ts,context.ts,utils/config.ts}`; create `extensions/cli/src/utils/scope.ts`.
 - Modify: `extensions/cli/src/tasks.ts`, `src/tasks/utils/{paths,board,write,move,project-meta,result,service,grouped,generate-site}.ts` and their callers; `scripts/generate-tasks-site.ts`.
-- Modify: `extensions/cli/src/note/utils/` target-path consumers and `extensions/mcp-servers/new-note/src/cliAdapter.ts`.
+- Modify: `extensions/cli/src/note/utils/` target-path consumers and `extensions/mcp-servers/new-note/src/cliAdapter.ts`; `extensions/cli/src/artifacts/server/ops.ts` and its focused tests to separate implementation-resource lookup from target-scope resolution.
 - Modify: `apps/tasks-review-app/src/` only where source identity is required for aggregate rendering/export; retain existing visual behavior.
 - Test: `extensions/cli/test/{parse,run,utils/config,tasks/parse,tasks/project,tasks/run,tasks/grouped-list,tasks/utils/paths,tasks/utils/board,tasks/utils/write,tasks/utils/move,tasks/utils/project-meta,tasks/utils/grouped,tasks/utils/generate-site,note/ingest,note/utils/git-ingest}.test.ts`, affected app and MCP tests.
 
@@ -112,7 +112,7 @@ assert subprocess.run(['git', '-C', str(scope), 'check-ignore',
 - Scope discovery recognizes AGENTS with `project-memory:start` plus a managed local or children block; a type entries block, business AGENTS or `.harness` directory alone does not establish a scope. Explicit `--scope` can select a directory without auto-initializing memory. Traverse real scope descendants under `.harness/evaluation` or managed methods while respecting nested Git and symlink boundaries.
 - Produces: internal `TaskBoardLocation { scopeDir: string; purpose: 'domain' | 'maintenance'; boardDir: string }`. Default purpose is domain; maintenance is always explicit. Real Git repo root remains separate for Git operations. All task paths and sidecars remain inside the selected board.
 - Produces: `generate-tasks-site.ts --scope S --purpose domain|maintenance|all --out D`; all renders both sources with stable source identity (scope/purpose/project/stem) without changing stored task stems or merging records. Root deployment uses all. Single-board review-page behavior remains compatible and render-only. Aggregate transport IDs must not replace stored stems or project slugs; exports retain source scope/purpose and real project identity. Prevent cross-source drag assignments that would imply an unsupported board move; same-source classification remains available.
-- Note writes below selected scope's `knowledge/notes`, Git operations use actual repo root. MCP forwards explicit target via environment/CLI rather than package cwd. Artifacts service implementation location remains root-owned.
+- Note writes below selected scope's `knowledge/notes`, Git operations use actual repo root. MCP forwards explicit target via environment/CLI rather than package cwd. Artifacts service implementation location remains root-owned; its `resolveRepoRoot()` currently consumes `loadConfig().repoPath`, so decouple that resource lookup before changing target resolution. A child scope without extensions must not become the default server installer source; keep the existing explicit server source override.
 
 - [ ] Write failing real-fixture tests for nested scope, same stem in both purposes, Task/Run co-moves, selected-board path escape rejection, and cwd differing from CLI install location.
 
