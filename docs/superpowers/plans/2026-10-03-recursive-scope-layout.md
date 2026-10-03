@@ -144,11 +144,13 @@ assert.equal(existsSync(join(root, '.harness/tasks/_default')), false);
 - Produces: unchanged public `/tasks/` and `/teaching/` served from the new physical layout; deployment migration targets only teaching location roots and preserves unrelated nginx configuration.
 - Produces: evaluation root resolution valid under `.harness/evaluation`, report links relative to actual report location, and preserved smoke-case relative relationships. LoCoMo gitlink remains `cb5151e32c82c3b6fc6ffdc18e72572691b9d8ea` (revalidate original index before movement).
 
-- [ ] Add failing deployed-config fixtures using old `.../edges/knowledge` teaching roots and unrelated location roots; test exactly the teaching source changes while public URLs/unrelated roots survive.
-- [ ] Add evaluation location tests with the module in target depth and custom report directories, then implement root/link derivation. No live benchmark calls.
-- [ ] Update deployment scripts/workflow to generate all root task sources and apply teaching physical-path config migration in existing deployment flow. Source fixtures representing old configurations remain old input.
-- [ ] Add ignores for new private types, evaluation cache and generated task sites before migration. Preserve protective old ignore patterns until private local copies are independently migrated.
-- [ ] Run artifacts-preview deployment tests, evaluation print-command/smoke tests and task site tests against fixture new layout. Commit; actual git moves remain Task 5.
+- [x] Add failing deployed-config fixtures using old `.../edges/knowledge` teaching roots and unrelated location roots; test exactly the teaching source changes while public URLs/unrelated roots survive.
+- [x] Add evaluation location tests with the module in target depth and custom report directories, then implement root/link derivation. No live benchmark calls.
+- [x] Update deployment scripts/workflow to generate all root task sources and apply teaching physical-path config migration in existing deployment flow. Source fixtures representing old configurations remain old input.
+- [x] Add ignores for new private types, evaluation cache and generated task sites before migration. Preserve protective old ignore patterns until private local copies are independently migrated.
+- [x] Run artifacts-preview deployment tests, evaluation print-command/smoke tests and task site tests against fixture new layout. Commit; actual git moves remain Task 5.
+
+**Verified:** Artifacts suite 40/40, final deployment suite 13/13, smoke suite 17/17, task-site suite 4/4 and relocated evaluation command/report fixtures passed. Task review and scoped re-review approved the prefix-homepage preservation fix. Pinned-submodule crop/no-key checks remain for Task 6 after relocation. Deployment host permissions are documented, not configured or exercised live.
 
 ### Task 5: Review ownership and migrate the Edges instance
 
