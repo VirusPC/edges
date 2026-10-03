@@ -76,7 +76,7 @@ with tempfile.TemporaryDirectory() as d:
 - Backup/restore operate on `.harness/memory/users` including its index, retain safe member/path validation and explicit force replacement. Old archives get an actionable conversion-required error, never silently restore old runtime paths.
 
 - [ ] Read the skill-creator instructions before creating the migration Skill.
-- [ ] Add fixture tests for filesystem-enumerated ignored/untracked private records, custom ordinary/Skill types with unknown metadata and flags, full managed assets, referenced sources, sparse children and nested Git boundaries. Test original bytes/hashes for unchanged body/assets and external sources.
+- [ ] Add fixture tests for filesystem-enumerated ignored/untracked private records, custom ordinary/Skill types with unknown metadata and flags, full managed assets, referenced sources, sparse children and nested Git boundaries. Test original bytes/hashes for unchanged body/assets and external sources. Include a scope nested inside an old managed Skill directory: its owner path moves with the parent and its own `.memory` must map to the new owner’s `.harness`, without a second copy or leftover old subtree. Rebase owned relative symlinks to the same mapped or external target without following them to mutate external data.
 
 ```python
 # Fixture setup writes the old layout, including a private untracked file.
