@@ -392,6 +392,56 @@ def make_plan(root, manifest):
             'legacyOwners':legacy, 'protected':manifest.get('protectedPostHashes', {}), 'phase':'planned'}
 
 
+def plan_missing_private_indexes(root, job):
+    """Complete known public adoptions, including an older pending journal.
+
+    Git omits official user indexes. Reconstruct only an explicitly adopted
+    missing official index from the runtime template and actual local records;
+    existing/planned indexes and their manual text are never replaced here.
+    """
+    from lib.blocks import LOCAL_START, LOCAL_END, block_pattern
+    from lib.types import TYPE_LINK_PATTERN
+    from nodes.entries import expected_index_document
+    from lib.templates import read_index_template
+
+    planned = {Path(op['target']): op for op in job['operations']}
+    for scope in (root, root / 'teaching', root / '.harness/evaluation'):
+        agents = scope / 'AGENTS.md'
+        if agents in planned:
+            text = decode(planned[agents]['after'])
+        elif agents.is_file():
+            text = agents.read_text()
+        else:
+            continue
+        local = block_pattern(LOCAL_START, LOCAL_END).search(text)
+        if not local:
+            continue
+        for relative, _module, _dirname in TYPE_LINK_PATTERN.findall(local[0]):
+            index = scope / relative
+            generic.safe_ancestors(index, root)
+            if index in planned or index.is_file():
+                continue
+            if generic.present(index):
+                raise ValueError('adopted-index-path-conflict: ' + str(index.relative_to(root)))
+            if relative != '.harness/memory/users/AGENTS.md':
+                raise ValueError('missing-adopted-type-index: ' + str(index.relative_to(root)) + '; restore original type metadata before migration')
+            # This is a pure runtime render; it does not create an adoption,
+            # invent body records, or write into the missing index's scope.
+            document = expected_index_document(scope, 'user') if index.parent.is_dir() else read_index_template('USER.md', 'user', 'user')
+            after = generic.file_state(document.encode(), 0o600)
+            operation = {'source': str(index), 'target': str(index), 'before': None,
+                         'after': after, 'originalTarget': None}
+            job['operations'].append(operation)
+            planned[index] = operation
+            directory = index.parent
+            if str(directory) not in job.setdefault('private', []):
+                job['private'].append(str(directory))
+            if not any(item['target'] == str(directory) for item in job.setdefault('directories', [])):
+                before_mode = stat.S_IMODE(directory.stat().st_mode) if directory.exists() else None
+                job['directories'].append({'target': str(directory), 'mode': 0o700 if before_mode is None else before_mode & 0o700,
+                                           'beforeMode': before_mode, 'sources': []})
+
+
 def check_job(root, job):
     for op in job['operations']:
         source, dest = Path(op['source']), Path(op['target'])
@@ -471,6 +521,10 @@ def run(root, manifest, apply):
     if stored and stored['root'] != str(root): raise ValueError('journal-root-mismatch')
     job = stored if stored and stored['phase'] != 'done' else make_plan(root, manifest)
     job['root'] = str(root)
+    # Check the original journal before extending it: later edits must still
+    # fail without replacing the saved plan or mutating any missing index.
+    check_job(root, job)
+    plan_missing_private_indexes(root, job)
     check_job(root, job)
     public = [{'source':str(Path(op['source']).relative_to(root)), 'target':str(Path(op['target']).relative_to(root))} for op in job['operations'] if not private_path(op['source']) and not private_path(op['target'])]
     current_diagnostics = []

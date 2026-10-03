@@ -235,6 +235,85 @@ class InstanceMigrationTest(unittest.TestCase):
                 # Separate owners each exercise a fresh private index, not an authorized merge.
                 for path in (self.root/'.harness/memory/users').iterdir(): path.unlink()
 
+    def upgraded_tree_with_missing_private_indexes(self):
+        result=self.run_script('--apply'); self.assertEqual(result.returncode,0,result.stderr)
+        for scope in ('', 'teaching/', '.harness/evaluation/'):
+            self.put(scope+'AGENTS.md','# adopted scope\n<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n- [users](.harness/memory/users/AGENTS.md) — local private memory\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n')
+        self.put('.memory/users/AGENTS.md','# original private introduction\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n')
+        self.put('teaching/.harness/memory/users/user_kept.md','---\nname: user_kept\ndescription: local description\n---\nexisting private body\n')
+
+    def test_upgraded_public_tree_plans_missing_adopted_private_indexes(self):
+        self.upgraded_tree_with_missing_private_indexes()
+        before=self.snapshot(); dry=self.run_script('--dry-run')
+        self.assertEqual(dry.returncode,0,dry.stderr)
+        self.assertEqual(json.loads(dry.stdout)['privateOperationCount'],3)
+        self.assertEqual(before,self.snapshot())
+        result=self.run_script('--apply'); self.assertEqual(result.returncode,0,result.stderr)
+        for scope in ('', 'teaching/', '.harness/evaluation/'):
+            self.assertTrue((self.root/scope/'.harness/memory/users/AGENTS.md').is_file())
+            self.git('check-ignore',scope+'.harness/memory/users/AGENTS.md')
+        self.assertIn('original private introduction',(self.root/'.harness/memory/users/AGENTS.md').read_text())
+        self.assertIn('user_kept.md',(self.root/'teaching/.harness/memory/users/AGENTS.md').read_text())
+        self.assertEqual(digest(self.root/'teaching/.harness/memory/users/user_kept.md'),before['teaching/.harness/memory/users/user_kept.md'])
+        self.assertFalse((self.root/'.memory').exists())
+        after=self.snapshot(); result=self.run_script('--apply')
+        self.assertEqual(result.returncode,0,result.stderr); self.assertEqual(json.loads(result.stdout)['operations'],0)
+        self.assertEqual(after,self.snapshot())
+
+    def test_missing_custom_adopted_index_is_actionable_preflight_conflict(self):
+        self.upgraded_tree_with_missing_private_indexes()
+        agents=self.root/'AGENTS.md'
+        agents.write_text(agents.read_text().replace('<!-- project-memory-local:end -->','- [custom](.harness/memory/customs/AGENTS.md) — private or public unknown\n<!-- project-memory-local:end -->'))
+        before=self.snapshot(); result=self.run_script('--apply')
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('missing-adopted-type-index',result.stderr)
+        self.assertIn('restore original type metadata',result.stderr)
+        self.assertEqual(before,self.snapshot())
+        self.assertFalse((self.root/'.harness/memory/users/AGENTS.md').exists())
+        self.assertTrue((self.root/'.memory/users/AGENTS.md').is_file())
+
+    def seed_pre_fix_pending_private_job(self):
+        # Reproduce the prior version's exact failure boundary: original job has
+        # copied its one root private index, saved phase=copied, not retired source.
+        spec=importlib.util.spec_from_file_location('instance_pending_adoptions',SCRIPT)
+        module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        root=self.root.resolve(); job=module.make_plan(root,self.manifest)
+        self.assertEqual(len(job['operations']),1)
+        job['root']=str(root)
+        for item in job['directories']:
+            target=Path(item['target']); target.mkdir(parents=True,exist_ok=True); target.chmod(item['mode'])
+        for operation in job['operations']:
+            module.generic.write_state(Path(operation['target']),operation['after'])
+        job['phase']='copied'
+        module.generic.save_journal(root/'.recursive-layout-migration/journal.json',job)
+        return job
+
+    def test_pending_pre_fix_journal_resumes_with_missing_private_adoptions(self):
+        self.upgraded_tree_with_missing_private_indexes()
+        original_job=self.seed_pre_fix_pending_private_job()
+        self.put('tasks/demo/backlog/domain.md','later Task edit\n')
+        self.put('.harness/evaluation/.harness/memory/users/AGENTS.md','# later manual private index\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n')
+        before=self.snapshot(); dry=self.run_script('--dry-run')
+        self.assertEqual(dry.returncode,0,dry.stderr); self.assertEqual(before,self.snapshot())
+        result=self.run_script('--apply'); self.assertEqual(result.returncode,0,result.stderr)
+        recovered=json.loads((self.root/'.recursive-layout-migration/journal.json').read_text())
+        self.assertEqual(recovered['phase'],'done')
+        self.assertEqual(recovered['operations'][0],original_job['operations'][0])
+        self.assertEqual((self.root/'tasks/demo/backlog/domain.md').read_text(),'later Task edit\n')
+        self.assertEqual(digest(self.root/'.harness/evaluation/.harness/memory/users/AGENTS.md'),before['.harness/evaluation/.harness/memory/users/AGENTS.md'])
+        self.assertTrue((self.root/'teaching/.harness/memory/users/AGENTS.md').is_file())
+        self.assertFalse((self.root/'.memory').exists())
+
+    def test_pending_journal_keeps_later_copied_target_edits_and_does_not_write(self):
+        self.upgraded_tree_with_missing_private_indexes()
+        self.seed_pre_fix_pending_private_job()
+        self.put('.harness/memory/users/AGENTS.md','# later edited root private index\n')
+        before=self.snapshot(); result=self.run_script('--apply')
+        self.assertNotEqual(result.returncode,0); self.assertIn('resume-target-edited',result.stderr)
+        self.assertEqual(before,self.snapshot())
+        self.assertFalse((self.root/'teaching/.harness/memory/users/AGENTS.md').exists())
+        self.assertTrue((self.root/'.memory/users/AGENTS.md').is_file())
+
     def test_interrupted_copy_resumes_and_preserves_newer_edits(self):
         import sys
         from unittest.mock import patch
