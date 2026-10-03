@@ -1963,5 +1963,31 @@
     "target": ".harness/evaluation/third_party/locomo",
     "sha": "cb5151e32c82c3b6fc6ffdc18e72572691b9d8ea"
   },
-  "taskSidecarCount": 100
+  "taskSidecarCount": 100,
+  "taskAssets": [
+    {
+      "source": "knowledge/tasks/agent-clients-ux/done/img/2026-09-24--Tasks-审阅壳手机-窄屏适配/01-board.png",
+      "target": ".harness/tasks/agent-clients-ux/done/img/2026-09-24--Tasks-审阅壳手机-窄屏适配/01-board.png",
+      "owner": "knowledge/tasks/agent-clients-ux/done/2026-09-24--Tasks-审阅壳手机-窄屏适配.md",
+      "sha256": "acc1b9e630b0d9ee92d35a4d8ca4f95ce44061c459b41337b1482fe5478d058e"
+    },
+    {
+      "source": "knowledge/tasks/agent-clients-ux/done/img/2026-09-24--Tasks-审阅壳手机-窄屏适配/02-scroll-or-filters.png",
+      "target": ".harness/tasks/agent-clients-ux/done/img/2026-09-24--Tasks-审阅壳手机-窄屏适配/02-scroll-or-filters.png",
+      "owner": "knowledge/tasks/agent-clients-ux/done/2026-09-24--Tasks-审阅壳手机-窄屏适配.md",
+      "sha256": "510f8226119e8644613bc186bc2e48880021f739281163d5f4ac57d13deb99ac"
+    },
+    {
+      "source": "knowledge/tasks/agent-clients-ux/done/img/2026-09-24--Tasks-审阅壳手机-窄屏适配/03-detail.png",
+      "target": ".harness/tasks/agent-clients-ux/done/img/2026-09-24--Tasks-审阅壳手机-窄屏适配/03-detail.png",
+      "owner": "knowledge/tasks/agent-clients-ux/done/2026-09-24--Tasks-审阅壳手机-窄屏适配.md",
+      "sha256": "0070742d6ce994a977f4268b7682ff4844c5fc402464e77f0d9560aa6f49e130"
+    },
+    {
+      "source": "knowledge/tasks/agent-clients-ux/done/img/2026-09-24--Tasks-审阅壳手机-窄屏适配/04-project.png",
+      "target": ".harness/tasks/agent-clients-ux/done/img/2026-09-24--Tasks-审阅壳手机-窄屏适配/04-project.png",
+      "owner": "knowledge/tasks/agent-clients-ux/done/2026-09-24--Tasks-审阅壳手机-窄屏适配.md",
+      "sha256": "d9d6a6414616d0918b4a97fc63e6686f03d5468e96ba83381638e9bd7ab7b10d"
+    }
+  ]
 }
