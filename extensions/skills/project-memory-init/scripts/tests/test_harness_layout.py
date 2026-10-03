@@ -381,3 +381,25 @@ class HarnessLayoutTests(unittest.TestCase):
                 self.assertTrue(any(f['code'] == 'invalid-entry' for f in report['remaining']))
                 self.assertEqual(source.read_bytes(), original)
                 self.assertEqual(source.stat().st_mode & 0o777, 0o600)
+
+    def test_partial_custom_privileges_never_default_to_public_writable(self):
+        subprocess.run(['git', 'init', '-q', str(self.root)], check=True)
+        self.init('--memory-types', 'project')
+        self.run_cli('add-type', '--name', 'secrets', '--description', 'private', '--gitignore', '--index-only')
+        index = self.root / '.harness/memory/secrets/AGENTS.md'
+        complete = index.read_text()
+        (self.root / '.gitignore').unlink()
+        for missing in ['writable: false\n', 'gitignore: true\n']:
+            with self.subTest(missing=missing.strip()):
+                index.write_text(complete.replace(missing, ''))
+                index.chmod(0o600)
+                original = index.read_bytes()
+                result = self.run_cli('init', ok=False)
+                self.assertIn('Missing custom type privilege', result['error'])
+                self.run_cli('remember', '--type', 'secrets', '--slug', 'leak', '--title', 'x', '--description', 'x', '--content', 'x', ok=False)
+                report = self.run_cli('doctor', '--apply')
+                self.assertTrue(any(f['code'] == 'unsafe-layout' for f in report['remaining']))
+                self.assertEqual(index.read_bytes(), original)
+                self.assertEqual(index.stat().st_mode & 0o777, 0o600)
+                self.assertFalse((self.root / '.gitignore').exists())
+                self.assertFalse((index.parent / 'secrets_leak.md').exists())

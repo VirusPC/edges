@@ -57,7 +57,7 @@ python3 <init-dir>/scripts/memory.py add-type --target-dir S \
 
 `--module memory|skills` 默认 memory。`--gitignore` 忽略整类正文及索引；`--index-only` 使 remember 拒绝写正文；`--skills-format` 采用 `<name>/SKILL.md`。模块、格式、可写性是独立维度。自定义 Skill 格式类型默认仍在 `.harness/memory/<原复数目录>`，不能因格式自动移到 skills。自定义类型身份全层唯一，跨模块重复登记报错；官方名称和路径不能被覆盖。外部自定义来源参数暂不支持。
 
-类型入口特权注释为 `project-memory-type`，字段包括 `name`、`module`、`description`、`gitignore`、`writable`、`format`。省略 module 的现有自定义元数据默认 memory；`format` 为 `ordinary|skills`，布尔字段严格使用 `true|false`。未知元数据不影响发现，刷新仅替换 entries 区块，保留原 metadata 与手写引言。没有 metadata 的官方类型按官方契约推导；自定义类型必须保留 metadata 区块；索引或区块缺失时无法安全恢复身份与权限，报告 unsafe-layout 并拒绝写入，不能从目录名猜测可写/公开默认值。
+类型入口特权注释为 `project-memory-type`，字段包括 `name`、`module`、`description`、`gitignore`、`writable`、`format`。省略 module 的现有自定义元数据默认 memory；`format` 为 `ordinary|skills`，布尔字段严格使用 `true|false`。未知元数据不影响发现，刷新仅替换 entries 区块，保留原 metadata 与手写引言。没有 metadata 的官方类型按官方契约推导；自定义类型必须保留 metadata 区块，且显式包含 writable 与 gitignore 权限字段；单个权限字段缺失也拒绝推断。索引或区块缺失时无法安全恢复身份与权限，报告 unsafe-layout 并拒绝写入，不能从目录名猜测可写/公开默认值。
 
 `TypeSpec.index_file`、`discover_layer_types()` 的值和 `type_index_relpath()` 均为**作用域相对路径**，包含 `.harness/<module>/...`。`TypeSpec.module` 记录模块。消费者使用 `type_index_path(target, type)`、`type_content_dir(target, type)`；不能把全部 type 拼到 `memory_dir()` 下。
 

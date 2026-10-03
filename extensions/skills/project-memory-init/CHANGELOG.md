@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- 自定义类型元数据缺失时拒绝推断公开可写权限；managed 保持可写 Skill 格式，doctor 能诊断未闭合 frontmatter，拒绝时保留来源与索引。
+- 自定义类型元数据区块或单个 writable/gitignore 权限字段缺失时拒绝推断公开可写权限；managed 保持可写 Skill 格式，doctor 能诊断未闭合 frontmatter，拒绝时保留来源与索引。
 
 ### Changed
 

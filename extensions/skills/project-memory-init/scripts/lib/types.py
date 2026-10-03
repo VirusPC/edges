@@ -58,6 +58,13 @@ def parse_type_meta(text: str) -> TypeSpec | None:
     name = fields.get('name', '')
     if not TYPE_NAME_PATTERN.fullmatch(name):
         raise ValueError('Invalid type metadata name')
+    if name not in SEED_TYPE_NAMES:
+        missing_privileges = {'writable', 'gitignore'} - fields.keys()
+        if missing_privileges:
+            raise ValueError(
+                'Missing custom type privilege metadata; restore original permissions: '
+                + ', '.join(sorted(missing_privileges))
+            )
     module = fields.get('module', module_for_type(name))
     if module not in {'memory', 'skills'}:
         raise ValueError('Invalid type module')
