@@ -11,7 +11,7 @@
 ## 不放什么
 
 - 个人认知资产、研究笔记、对外博客 → [`knowledge/`](../../knowledge)
-- 已采纳的决策、纠错、操作手册 → [`.memory/`](../memory)
+- 已采纳的决策、纠错、操作手册 → [`.harness/memory/`](../memory)
 - 接入 Edges 的 CLI / MCP / skill 实现 → [`extensions/`](../../extensions/README.md)
 - 野外使用记录、运行日志、仪表盘笔记 → [`observation/`](../observation/AGENTS.md)
 - 编造的数据集、假分数、尚未跑过的「结果」
@@ -23,7 +23,7 @@
 | 目录 | 关系 |
 | --- | --- |
 | [`knowledge/`](../../knowledge) | 认知资产。评测可以*调用*其中的材料当输入，但不把报告写成 Note / Edge / Post。一条评测结论若值得沉淀为可复用判断，先回到捕获入口。 |
-| [`.memory/`](../memory) | 运营账本。评测*发现*并被采纳的决策写进 `.memory`；过程、用例和分数留在本目录。 |
+| [`.harness/memory/`](../memory) | 运营账本。评测*发现*并被采纳的决策写进所属作用域的 `.harness/memory`；过程、用例和分数留在本目录。 |
 | [`extensions/`](../../extensions/README.md) | 接口层。评测对象常常是 extensions 的行为；评测用例本身不因此变成 extension。 |
 | [`observation/`](../observation/AGENTS.md) | 观测提供「野外看到了什么」；本目录把假设做成可复现对照。观测不是评测。 |
 
@@ -67,7 +67,7 @@ KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 \
   python3 .harness/evaluation/run_locomo_official.py smoke
 ```
 
-Optional official crop (keeps `observation` / `session_summary` / `event_summary` for later RAG; default out-file is gitignored under `evaluation/.cache/`):
+Optional official crop (keeps `observation` / `session_summary` / `event_summary` for later RAG; default out-file is gitignored under `.harness/evaluation/.cache/`):
 
 ```bash
 python3 .harness/evaluation/run_locomo_official.py crop
