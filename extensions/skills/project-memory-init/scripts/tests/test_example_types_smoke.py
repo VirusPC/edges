@@ -17,7 +17,7 @@ from lib.templates import template_path  # noqa: E402
 from lib.types import discover_layer_types, seed_index_files  # noqa: E402
 from operations.add_type import add_type  # noqa: E402
 from operations.doctor import doctor_memory  # noqa: E402
-from operations.init import init_memory  # noqa: E402
+from operations.init import init_memory as _init_memory  # noqa: E402
 from operations.remember import remember  # noqa: E402
 
 EXAMPLE_TYPES: tuple[tuple[str, str], ...] = (
@@ -30,15 +30,23 @@ EXAMPLE_TYPES: tuple[tuple[str, str], ...] = (
 )
 
 
+def init_memory(target, root, description=None):
+    # These existing tests explicitly exercise all six official adopted types.
+    (target / '.agents/skills').mkdir(parents=True, exist_ok=True)
+    return _init_memory(target, root, description,
+        memory_types=['user', 'feedback', 'project', 'reference'],
+        skill_types=['managed', 'referenced'])
+
+
 class ExampleTypesAreNotSeedsTests(unittest.TestCase):
     def test_template_and_seed_map_omit_examples(self) -> None:
         seeds = seed_index_files()
         template = template_path("AGENTS.md").read_text(encoding="utf-8")
         for name, _description in EXAMPLE_TYPES:
             self.assertNotIn(name, seeds)
-            self.assertNotIn(f".memory/{name.upper()}.md", template)
+            self.assertNotIn(f".harness/memory/{name.upper()}.md", template)
             self.assertNotIn(
-                f".memory/{type_dir_name(name)}/AGENTS.md", template
+                f".harness/memory/{type_dir_name(name)}/AGENTS.md", template
             )
 
 
@@ -51,18 +59,18 @@ class ExampleTypesSmokeTests(unittest.TestCase):
                 add_type(target, name, description)
                 self.assertTrue(
                     (
-                        target / ".memory" / type_dir_name(name) / "AGENTS.md"
+                        target / ".harness/memory" / type_dir_name(name) / "AGENTS.md"
                     ).is_file()
                 )
-                self.assertFalse((target / ".memory" / f"{name.upper()}.md").exists())
+                self.assertFalse((target / ".harness/memory" / f"{name.upper()}.md").exists())
                 self.assertEqual(
                     type_content_dir(target, name),
-                    target / ".memory" / type_dir_name(name),
+                    target / ".harness/memory" / type_dir_name(name),
                 )
             self.assertFalse((target / "knowledge").exists())
             self.assertEqual(
                 type_content_dir(target, "tasks"),
-                target / ".memory" / "tasks",
+                target / ".harness/memory" / "tasks",
             )
             remember(
                 target,
@@ -76,7 +84,7 @@ class ExampleTypesSmokeTests(unittest.TestCase):
                 {"username": "tester", "email": "t@example.com"},
             )
             self.assertTrue(
-                (target / ".memory" / "docs" / "docs_layout_pointer.md").is_file()
+                (target / ".harness/memory" / "docs" / "docs_layout_pointer.md").is_file()
             )
             remember(
                 target,
@@ -85,17 +93,17 @@ class ExampleTypesSmokeTests(unittest.TestCase):
                 "tasks Memory Type is not the board",
                 "ordinary memory, not knowledge/tasks status folders",
                 "Do not move board files.\n\n**Why:** ADR 0006.\n\n"
-                "**How to apply:** write .memory/tasks/ only.",
+                "**How to apply:** write .harness/memory/tasks/ only.",
                 {"username": "tester", "email": "t@example.com"},
             )
             self.assertTrue(
-                (target / ".memory" / "tasks" / "tasks_not_the_board.md").is_file()
+                (target / ".harness/memory" / "tasks" / "tasks_not_the_board.md").is_file()
             )
             self.assertEqual(doctor_memory(target, apply=False)["findings"], [])
             init_memory(target, target, "example smoke")
             agents = (target / "AGENTS.md").read_text(encoding="utf-8")
             for name, _description in EXAMPLE_TYPES:
-                self.assertIn(f".memory/{type_dir_name(name)}/AGENTS.md", agents)
+                self.assertIn(f".harness/memory/{type_dir_name(name)}/AGENTS.md", agents)
                 self.assertIn(name, discover_layer_types(target))
             self.assertEqual(doctor_memory(target, apply=True)["remaining"], [])
 

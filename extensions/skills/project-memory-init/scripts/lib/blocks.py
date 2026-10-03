@@ -54,15 +54,6 @@ INNER_BLOCK_ORDER = tuple(start for start, _end in INNER_BLOCK_PAIRS)
 # 标签取：标签带不带反引号都能解析，旧文件和手写条目一样认。
 INDEX_ENTRY_PATTERN = re.compile(r"^- \[[^\]]*\]\(([^)]+)\)(?: — (.*))?$", re.MULTILINE)
 
-# 本层清单一行：](.memory/<plural>/AGENTS.md)
-MEMORY_INDEX_LINK_PATTERN = re.compile(
-    rf"\]\({re.escape(MEMORY_DIR_NAME)}/([^/\s)]+)/{re.escape(AGENTS_FILE_NAME)}\)"
-)
-
-# 旧平铺入口：](.memory/FEEDBACK.md)
-LEGACY_FLAT_INDEX_LINK_PATTERN = re.compile(
-    rf"\]\({re.escape(MEMORY_DIR_NAME)}/([A-Z][A-Z0-9_]*)\.md\)"
-)
 
 
 @lru_cache(maxsize=None)
@@ -97,19 +88,9 @@ def load_agents_template() -> str:
 
 @lru_cache(maxsize=None)
 def index_files() -> dict[str, str]:
-    """type → 相对 `.memory/` 的类型入口路径，从本层记忆区块那几行推导。
-
-    链接是 `.memory/<plural>/AGENTS.md`；type 名由复数目录反推。
-    """
-    dirs = MEMORY_INDEX_LINK_PATTERN.findall(extract_block(LOCAL_START, LOCAL_END))
-    if not dirs:
-        raise ValueError(
-            f"{template_path(AGENTS_FILE_NAME).name} 的本层记忆区块里没有声明任何索引文件"
-        )
-    return {
-        type_from_dir_name(dir_name): f"{dir_name}/{AGENTS_FILE_NAME}"
-        for dir_name in dict.fromkeys(dirs)
-    }
+    """Official recommendations as scope-relative index paths from the template."""
+    matches = re.findall(r"\]\((\.harness/(?:memory|skills)/([^/]+)/AGENTS\.md)\)", extract_block(LOCAL_START, LOCAL_END))
+    return {type_from_dir_name(dirname): rel for rel, dirname in matches}
 
 
 def block_pattern(start: str, end: str) -> re.Pattern[str]:
@@ -127,25 +108,8 @@ def extract_block(start: str, end: str) -> str:
 
 def append_block(text: str, block: str) -> str:
     """把区块追加到文末。"""
-    return f"{text.rstrip()}\n\n{block}"
-
-
-def prune_outer_region(document: str) -> str:
-    """规范化外层区域：内层区块之间、以及与外层标记之间各空一行；内层全空则去掉外层。"""
-    match = block_pattern(OUTER_START, OUTER_END).search(document)
-    if match is None:
-        return document
-    inner = match.group(0)[len(OUTER_START) : -len(OUTER_END)]
-    blocks = []
-    for start, end in INNER_BLOCK_PAIRS:
-        found = block_pattern(start, end).search(inner)
-        if found:
-            blocks.append(found.group(0).strip("\n"))
-    region = (
-        f"{OUTER_START}\n\n" + "\n\n".join(blocks) + f"\n\n{OUTER_END}" if blocks else ""
-    )
-    updated = document[: match.start()] + region + document[match.end() :]
-    return re.sub(r"\n{3,}", "\n\n", updated)
+    separator = "" if text.endswith("\n\n") else "\n" if text.endswith("\n") else "\n\n"
+    return text + separator + block
 
 
 def ensure_important_block(document: str) -> str:
@@ -164,7 +128,7 @@ def insert_inner_block(document: str, start: str, block: str) -> str:
     anchor = next((marker for marker in later if marker in document), OUTER_END)
     position = document.find(anchor)
     head = document[:position].rstrip()
-    return prune_outer_region(f"{head}\n\n{block}\n{document[position:]}")
+    return f"{head}\n\n{block}\n{document[position:]}"
 
 
 def upsert_block(document: str, start: str, end: str, block: str) -> str:
@@ -195,14 +159,6 @@ def build_children_block(entries: str) -> str:
     return extract_block(CHILDREN_START, CHILDREN_END).replace("{index_entries}", entries)
 
 
-def drop_auto_block(document: str) -> str:
-    """删掉已废弃的自动化策略区块，并收拢外层空白。"""
-    if AUTO_START not in document:
-        return document
-    updated = block_pattern(AUTO_START, AUTO_END).sub("", document, count=1)
-    return re.sub(r"\n{3,}", "\n\n", prune_outer_region(updated))
-
-
 def render_agents_document(
     title: str, local_block: str, children_block: str
 ) -> str:
@@ -217,4 +173,4 @@ def render_agents_document(
         ((CHILDREN_START, CHILDREN_END), children_block),
     ):
         document = block_pattern(start, end).sub(lambda _match: block, document, count=1)
-    return re.sub(r"\n{3,}", "\n\n", prune_outer_region(document)).rstrip() + "\n"
+    return re.sub(r"\n{3,}", "\n\n", document).rstrip() + "\n"

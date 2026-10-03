@@ -1,12 +1,12 @@
 ---
 name: project-memory-remember
-description: 把可复用结论写入本项目 .memory 并刷新索引。用户要求记住时必须用；被纠正、用户给出可用想法/约定/约束、或任务产出已验证、以后还用得上的结论时也要主动用。
-version: 1.6.0
+description: 把可复用结论写入本项目 .harness 并刷新索引。用户要求记住时必须用；被纠正、用户给出可用想法/约定/约束、或任务产出已验证、以后还用得上的结论时也要主动用。
+version: 2.0.0
 ---
 
 # Project Memory Remember
 
-把结论写进仓库内的项目记忆。可提交类型（`feedback` / `project` / `reference` / `skills`）写入会进 git，是永久的；`--type user` 落在 gitignore 的 `.memory/users/` 与 `.memory/users/AGENTS.md`，不进版本历史。闸门按类型分开。
+把结论写进仓库内的项目记忆。可提交类型（`feedback` / `project` / `reference` / `managed`）写入会进 git，是永久的；`--type user` 落在 gitignore 的 `.harness/memory/users/` 与 `.harness/memory/users/AGENTS.md`，不进版本历史。闸门按类型分开。
 
 下文的 `<init-dir>` 指同级的 `project-memory-init` skill 目录，通常在 `.agents/skills/` 下。
 
@@ -16,8 +16,8 @@ version: 1.6.0
 - 用户纠正了你，必须写。
 - 结论已经验证过，而且以后再做这个项目还用得上，主动写。
 - 对话里用户给出的有用信息也要主动写，不限于纠正。包括可用的想法、产品或技术取舍、命名或目录约定、约束与禁区、对既有做法的澄清，以及以后接手的人仍该知道的背景。即使还没被代码验证，只要用户把它说成项目事实或意图，就写；条目正文里简短标明是用户所述还是已验证。
-- 以下内容不要写进可提交类型（`feedback` / `project` / `reference` / `skills`）：临时进度、纯会话流水账、与项目无关的个人偏好、通用常识、一次性输出、既未经用户确认也未经任务验证的猜测、密钥。
-- **个人偏好与密钥只写 `--type user`。** 绑定本仓库、不宜公开的个人材料（个人偏好而非项目共享约定、凭据与密钥、以及其他不得公开的上下文）走 `user`。gitignore 挡住 `.memory/users/`（含 `users/AGENTS.md`），所以它们不进 git。其他类型仍然禁止密钥。v1 不把 user 条目脱敏晋升到可提交类型。
+- 以下内容不要写进可提交类型（`feedback` / `project` / `reference` / `managed`）：临时进度、纯会话流水账、与项目无关的个人偏好、通用常识、一次性输出、既未经用户确认也未经任务验证的猜测、密钥。
+- **个人偏好与密钥只写 `--type user`。** 绑定本仓库、不宜公开的个人材料（个人偏好而非项目共享约定、凭据与密钥、以及其他不得公开的上下文）走 `user`。gitignore 挡住 `.harness/memory/users/`（含 `users/AGENTS.md`），所以它们不进 git。其他类型仍然禁止密钥。v1 不把 user 条目脱敏晋升到可提交类型。
 - 读代码或 git 历史就能得到的事实也不写——架构、目录结构、文件路径、某次调试的修法，写进来只会过期。`AGENTS.md` 已经写过的同样不重复。
 - **不检索就会做错事的规则不要走 remember。** 写进该层 `AGENTS.md` 的本层硬约束区块，直接列在区块里，不要另建记忆文件。那一块允许手改正文；其它受管区块（本层索引、下层索引）仍不要手改。
 
@@ -25,19 +25,19 @@ version: 1.6.0
 
 ## 怎么写
 
-1. 挑 `type`（该层已登记的可写类型：种子 + `AGENTS.md` 本层额外行；可选值和各自收什么见 `--help`，不要把 CLI 当成只有五/六个名字的闭集）和一个 `slug`（小写 snake_case，**不带类型前缀**，脚本会按 `type` 自动加；`skills` 例外，见下）。`agent_skills` 仍然只索引、不能 remember。`type` 决定这条记忆归到哪份记忆入口下，而读方是**按问题性质先挑入口**的——分错类型不只是标签错了，是让相关的人检索时压根走不到这条。
+1. 挑 `type`（该层已登记的可写类型：种子 + `AGENTS.md` 本层额外行；可选值和各自收什么见 `--help`，不要把 CLI 当成只有五/六个名字的闭集）和一个 `slug`（小写 snake_case，**不带类型前缀**，脚本会按 `type` 自动加；`managed` 例外，见下）。`referenced` 仍然只索引、不能 remember。`type` 决定这条记忆归到哪份记忆入口下，而读方是**按问题性质先挑入口**的——分错类型不只是标签错了，是让相关的人检索时压根走不到这条。
 2. 去重：先看该类型的记忆入口，已有同主题条目就复用它的 `slug` 走更新，不要另起一条近义的。入口通常已经在上下文里；不在就 `rg` 一下。
 3. 拟 `--title` 和 `--description`。`description` 是索引里那句说明，**是别人判断「要不要打开这条」的唯一依据**，写清楚适用场景。
 4. 正文按「一句结论 → `**Why:**` → `**How to apply:**`」组织。`Why` 是为了以后能自己判断边界情况。
 5. 跑 `python3 <init-dir>/scripts/memory.py remember`，**参数见 `--help`**，那份输出就是契约。除 `--title` / `--description` 外的字段都由脚本自动填，不要手传。
 
-### `skills`：沉淀流程而不是结论
+### `managed`：沉淀流程而不是结论
 
-判据是**这条东西下次要不要被执行**。可执行的重复步骤（同一串操作已经做过第二遍）→ `skills`；「以后别这么干」这类判断 → `feedback`；「为什么当初这么定」→ `project`。同一件事常常两边都要写一条，别硬塞进一条里。
+判据是**这条东西下次要不要被执行**。可执行的重复步骤（同一串操作已经做过第二遍）→ `managed`；「以后别这么干」这类判断 → `feedback`；「为什么当初这么定」→ `project`。同一件事常常两边都要写一条，别硬塞进一条里。
 
-写 `skills` 时三点不同：
+写 `managed` 时三点不同：
 
-- `--slug` 是**技能目录名**，用 kebab-case（`rerun-failed-e2e`），不是 snake_case。产物是 `.memory/skills/<slug>/SKILL.md`。
+- `--slug` 是**技能目录名**，用 kebab-case（`rerun-failed-e2e`），不是 snake_case。产物是 `.harness/skills/managed/<slug>/SKILL.md`。
 - `--title` 可省——Agent Skills 没有这个概念，给了会存进 `metadata`。普通记忆的 `title` / `type` / 出处 / 审计同样写进 `metadata.edges-*`，不要手写扁平顶层键。
 - 正文写步骤、输入输出、边界情况，不套「结论 → Why → How to apply」那套；`description` 要同时说清**做什么**和**什么时候用**，因为它是各家 agent 启动时唯一加载的那一层。
 
@@ -45,17 +45,17 @@ version: 1.6.0
 
 判据是**作用域加能否公开**，不是「像不像偏好」。项目共享约定仍走 `project` / `feedback`；只有「只对这个人、这个克隆成立，且不宜进公开仓」的才进 `user`。
 
-- 产物是 `.memory/users/user_<slug>.md`，索引是 `.memory/users/AGENTS.md`。整类都被 gitignore，**不要 `git add`**。
+- 产物是 `.harness/memory/users/user_<slug>.md`，索引是 `.harness/memory/users/AGENTS.md`。整类都被 gitignore，**不要 `git add`**。
 - `--slug` 与其他普通记忆一样，小写 snake_case，不带 `user_` 前缀。
 - 正文仍按「一句结论 → `**Why:**` → `**How to apply:**`」。
 - Agent 读的是本机这份 `users/AGENTS.md`。换机或删仓前用 `$user-memory-backup`；回注用 `$user-memory-restore`。
 - v1 不做脱敏晋升：不要把 user 条目改写进 `project` / `feedback` 来「变成可提交」。
 
-`agent_skills` 不由 remember 写入，`--type` 里也没有它。那份索引对着本层 `.agents/skills/`，内容是人写或 `npx skills` 装的，本套工具只索引不改写。要新增就手写或走 `npx skills`，然后用 init 刷新入口。
+`referenced` 不由 remember 写入，作为 `--type` 写入会被拒绝。那份索引对着本层 `.agents/skills/`，内容是人写或 `npx skills` 装的，本套工具只索引不改写。要新增就手写或走 `npx skills`，已有层可用 init 刷新已采用入口；不代为初始化新层。
 
 返回的 `path` 和 `action`（`created` / `updated`）就是写入凭据——索引是全量重算的，返回了路径就说明索引里有它，不必再查一遍。`agentsAction` 是 `needs-doctor` 时要一并说明：那表示该目录的 `AGENTS.md` 还没纳管，索引没能刷新。
 
-目标目录还没初始化（没有 `.memory/` 或本套 `AGENTS.md`）时，脚本会拒绝写入。问用户要不要 Init，得到明确同意后再跑 `$project-memory-init`；不要自己 Init。从一份已有 `AGENTS.md` 批量抽记忆、并改它的区块外正文，用 `$project-memory-reshape`，不要一条条手搬。
+目标目录还没初始化（没有已采用的可写类型或本套作用域 `AGENTS.md`）时，脚本会拒绝写入。问用户要不要 Init，得到明确同意后再跑 `$project-memory-init`；不要自己 Init。从一份已有 `AGENTS.md` 批量抽记忆、并改它的区块外正文，用 `$project-memory-reshape`，不要一条条手搬。
 
 ## 什么时候改派 subagent
 
@@ -65,8 +65,10 @@ version: 1.6.0
 
 ## 写哪一层
 
-记忆按目录分层，结构约定见 [`PROTOCOL.md`](../project-memory-init/references/PROTOCOL.md)。写到**与结论作用范围最贴近的那一层**：只对某个模块成立的写那个模块目录，整个项目都成立的写记忆根。拿不准就写记忆根——挂太高只是宽一点，挂错地方会让相关任务读不到。
+记忆按目录分层，结构约定见 [`PROTOCOL.md`](../project-memory-init/references/PROTOCOL.md)。写到**与结论作用范围最贴近的那一层**：只对已确认子作用域成立的写那个作用域；源码包目录本身不表示独立作用域，整个项目都成立的写记忆根。拿不准就写记忆根——挂太高只是宽一点，挂错地方会让相关任务读不到。
 
 **先看这次任务实际碰过哪些文件**，它们所在的目录就是候选：都落在同一个模块下，那个模块目录是第一候选；散在几个互不相干的目录，基本就是记忆根。但**作用范围不等于改动范围**——改的是某个模块，结论却可能是关于构建工具、发布流程或团队规范的，那仍然属于整仓。判据始终是「这条结论对哪些代码成立」，改动集只用来提候选。
 
-记忆入口由脚本从条目文件的 frontmatter 全量重算，**不要手改，也不要绕开脚本自己往 `.memory/` 的任何类型目录写文件**——那样入口不会更新，条目等于不存在。`.agents/skills/` 是唯一例外：它本来就归人与生态，脚本只索引它。找不到脚本就直说找不到，别改用手写。
+记忆入口由脚本从条目文件的 frontmatter 全量重算，**不要手改，也不要绕开脚本自己往 `.harness/` 的任何类型目录写文件**——那样入口不会更新，条目等于不存在。`.agents/skills/` 是唯一例外：它本来就归人与生态，脚本只索引它。找不到脚本就直说找不到，别改用手写。
+
+新版只写 `.harness`。旧布局先运行独立 `$project-memory-migrate`，不要自行改名或让 doctor 迁移。可写自定义 Skill 格式类型保留原模块，不能因格式相同就当作 managed。

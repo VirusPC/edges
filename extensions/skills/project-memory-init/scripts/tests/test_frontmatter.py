@@ -17,15 +17,13 @@ if str(SCRIPTS) not in sys.path:
 from nodes.entries import (  # noqa: E402
     FLAT_COMPAT_KEYS,
     build_entry_fields,
-    extract_entry_body,
     has_legacy_flat_frontmatter,
     parse_frontmatter,
     render_entry,
-    rewrite_ordinary_header,
     top_level_frontmatter_keys,
 )
 from operations.doctor import doctor_memory  # noqa: E402
-from operations.init import init_memory  # noqa: E402
+from operations.init import init_memory as _init_memory  # noqa: E402
 from operations.remember import remember  # noqa: E402
 
 MEMORY_PY = SCRIPTS / "memory.py"
@@ -55,6 +53,14 @@ def assert_closed_set_header(test: unittest.TestCase, text: str) -> None:
     test.assertIn("name", keys)
     test.assertIn("description", keys)
     test.assertIn("metadata", keys)
+
+
+def init_memory(target, root, description=None):
+    # These existing tests explicitly exercise all six official adopted types.
+    (target / '.agents/skills').mkdir(parents=True, exist_ok=True)
+    return _init_memory(target, root, description,
+        memory_types=['user', 'feedback', 'project', 'reference'],
+        skill_types=['managed', 'referenced'])
 
 
 class ParseRenderTests(unittest.TestCase):
@@ -192,7 +198,7 @@ class ParseRenderTests(unittest.TestCase):
                 "First body.",
                 {"username": "viruspc", "email": "a@example.com"},
             )
-            path = target / ".memory" / "projects" / "project_keep_title.md"
+            path = target / ".harness/memory" / "projects" / "project_keep_title.md"
             self.assertTrue(path.is_file())
             assert_closed_set_header(self, path.read_text(encoding="utf-8"))
             remember(
@@ -208,47 +214,6 @@ class ParseRenderTests(unittest.TestCase):
             self.assertEqual(fields["title"], "Keep This Title")
             self.assertIn("Second body, title omitted.", path.read_text(encoding="utf-8"))
 
-    def test_doctor_apply_rewrites_only_header(self) -> None:
-        with tempfile.TemporaryDirectory() as raw:
-            target = Path(raw)
-            init_memory(target, target, "temp tree")
-            path = target / ".memory" / "projects" / "project_legacy.md"
-            body = "Legacy body must survive.\n\n**Why:** doctor only touches the header."
-            path.write_text(
-                "\n".join(
-                    [
-                        "---",
-                        "name: project_legacy",
-                        "title: Legacy Title",
-                        "description: leftover flat header",
-                        "type: project",
-                        "username: viruspc",
-                        "email: a@example.com",
-                        'updatedAt: "2026-03-03T00:00:00+08:00"',
-                        "---",
-                        "",
-                        body,
-                        "",
-                    ]
-                ),
-                encoding="utf-8",
-            )
-            before_body = extract_entry_body(path.read_text(encoding="utf-8")).strip()
-            diagnosed = doctor_memory(target, apply=False)
-            issues = {item["issue"] for item in diagnosed["findings"]}
-            self.assertIn("legacy-flat-frontmatter", issues)
-            applied = doctor_memory(target, apply=True)
-            remaining_issues = {item["issue"] for item in applied["remaining"]}
-            self.assertNotIn("legacy-flat-frontmatter", remaining_issues)
-            rewritten = path.read_text(encoding="utf-8")
-            assert_closed_set_header(self, rewritten)
-            self.assertEqual(extract_entry_body(rewritten).strip(), before_body)
-            self.assertEqual(parse_frontmatter(path)["title"], "Legacy Title")
-            self.assertEqual(
-                parse_frontmatter(path)["updatedAt"], "2026-03-03T00:00:00+08:00"
-            )
-            self.assertFalse(has_legacy_flat_frontmatter(path))
-            self.assertFalse(rewrite_ordinary_header(path))
 
 
 class CliRememberTests(unittest.TestCase):
@@ -259,7 +224,7 @@ class CliRememberTests(unittest.TestCase):
                 [
                     sys.executable,
                     str(MEMORY_PY),
-                    "init",
+                    "init", "--memory-types", "user", "feedback", "project", "reference",
                     "--target-dir",
                     str(target),
                     "--root-dir",
@@ -303,7 +268,7 @@ class CliRememberTests(unittest.TestCase):
             self.assertEqual(remember_result.returncode, 0, remember_result.stderr)
             remember_payload = json.loads(remember_result.stdout)
             self.assertTrue(remember_payload.get("ok"))
-            path = target / ".memory" / "projects" / "project_cli_sample.md"
+            path = target / ".harness/memory" / "projects" / "project_cli_sample.md"
             text = path.read_text(encoding="utf-8")
             assert_closed_set_header(self, text)
             update = subprocess.run(

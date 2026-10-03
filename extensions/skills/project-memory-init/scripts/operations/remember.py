@@ -5,8 +5,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from lib.paths import AGENTS_FILE_NAME, memory_dir, resolve_root, write_atomic
-from lib.types import discover_layer_types, index_file_name
+from lib.paths import is_scope, reject_legacy, resolve_root, write_atomic
+from lib.types import discover_layer_types, ensure_layer_type_gitignore, index_file_name
 from lib.provenance import AUDIT_FIELDS, ORIGIN_FIELDS, agent_context, git_identity
 from nodes.agents import sync_target_agents
 from nodes.entries import (
@@ -30,7 +30,8 @@ def remember(
     overrides: dict[str, str],
 ) -> dict[str, object]:
     """沉淀单条项目记忆，然后重算索引与 AGENTS.md 区块。"""
-    if not memory_dir(target).is_dir() or not (target / AGENTS_FILE_NAME).is_file():
+    reject_legacy(target)
+    if not is_scope(target):
         raise ValueError("目标目录尚未初始化，请先执行 init")
     path = resolve_memory_path(target, entry_type, slug)
     action = "updated" if path.exists() else "created"
@@ -40,12 +41,11 @@ def remember(
     fields = build_entry_fields(
         name, entry_type, title, description, existing, detected, overrides, target
     )
+    ensure_layer_type_gitignore(target, entry_type)
     write_atomic(path, render_entry(fields, content, entry_output_name(entry_type, target)))
-    # 全部已发现类型一起重算：种子加本层额外 type，缺一个就是死链。
-    for declared_type in discover_layer_types(target):
-        refresh_index(target, declared_type)
+    refresh_index(target, entry_type)
     agents_action = sync_target_agents(target, resolve_root(target, None))
-    index_path = memory_dir(target) / (
+    index_path = target / (
         discover_layer_types(target).get(entry_type) or index_file_name(entry_type)
     )
     provenance_keys = (*ORIGIN_FIELDS, *AUDIT_FIELDS)

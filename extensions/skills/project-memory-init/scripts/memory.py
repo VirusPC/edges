@@ -7,7 +7,7 @@ import argparse
 import json
 from pathlib import Path
 
-from lib.paths import resolve_root, resolve_target
+from lib.paths import reject_legacy, resolve_root, resolve_target
 from lib.provenance import compact_fields
 from lib.types import layer_writable_types, reject_unwritable_type
 from operations.add_type import add_type
@@ -28,6 +28,8 @@ def build_parser() -> argparse.ArgumentParser:
     init_parser.add_argument(
         "--description", help="可选目录职责说明；写进上层 AGENTS.md 的下层记忆索引"
     )
+    init_parser.add_argument("--memory-types", nargs="+", help="Selected memory types: project feedback reference user")
+    init_parser.add_argument("--skill-types", nargs="+", help="Selected skill types: managed referenced")
     doctor_parser = subparsers.add_parser("doctor")
     doctor_parser.add_argument("--target-dir", required=True, help="记忆树里的任一目录，用于定位记忆根")
     doctor_parser.add_argument("--root-dir", help="可选工作区根；默认自动发现")
@@ -35,23 +37,23 @@ def build_parser() -> argparse.ArgumentParser:
         "--apply", action="store_true", help="默认只诊断；加上它才真的改文件"
     )
     remember_parser = subparsers.add_parser("remember")
-    remember_parser.add_argument("--target-dir", required=True, help="写入哪一层目录的 .memory/")
+    remember_parser.add_argument("--target-dir", required=True, help="写入哪个作用域已采用的 .harness 类型")
     remember_parser.add_argument(
         "--type",
         required=True,
         help=(
             "该层已登记的可写类型。官方种子: "
-            "feedback / project / reference / skills / user；"
+            "feedback / project / reference / managed / user；"
             "另加该层 AGENTS.md 本层清单里的用户类型。"
-            "agent_skills 只索引，不能 remember"
+            "referenced 只索引，不能 remember"
         ),
     )
     remember_parser.add_argument(
         "--slug",
         required=True,
-        help="小写 snake_case，不带类型前缀；skills 例外，用 kebab-case，它就是技能目录名",
+        help="小写 snake_case，不带类型前缀；Skill 格式例外，用 kebab-case，它就是技能目录名",
     )
-    remember_parser.add_argument("--title", help="索引里显示的标题；skills 可省略")
+    remember_parser.add_argument("--title", help="索引里显示的标题；Skill 格式可省略")
     remember_parser.add_argument("--description", help="索引里的一句说明；更新时可省略")
     remember_parser.add_argument("--origin-session-id", help="默认从环境变量探测")
     remember_parser.add_argument("--agent-client", help="默认从环境变量探测")
@@ -64,6 +66,7 @@ def build_parser() -> argparse.ArgumentParser:
     content_group.add_argument("--content-file", help="从文件读正文；正文较长时用它")
     add_parser = subparsers.add_parser("add-type")
     add_parser.add_argument("--target-dir", required=True, help="已 init 的记忆目录")
+    add_parser.add_argument("--module", choices=("memory", "skills"), default="memory")
     add_parser.add_argument("--name", required=True, help="小写 snake_case 类型名，不能是官方种子")
     add_parser.add_argument("--description", required=True, help="写进 AGENTS 本层清单的那句说明")
     add_parser.add_argument(
@@ -79,11 +82,11 @@ def build_parser() -> argparse.ArgumentParser:
     add_parser.add_argument(
         "--skills-format",
         action="store_true",
-        help="条目形态与 skills 相同：<name>/SKILL.md，slug 用 kebab-case",
+        help="条目形态为 Skill 格式：<name>/SKILL.md，slug 用 kebab-case",
     )
     add_parser.add_argument(
         "--external-content-dir",
-        help="本轮 stub：传入即 JSON 错误。只有官方 agent_skills 能把内容根放在 .memory/ 外",
+        help="本轮 stub：传入即 JSON 错误。只有官方 referenced 支持原位来源",
     )
     return parser
 
@@ -107,12 +110,13 @@ def main() -> int:
         arguments = build_parser().parse_args()
         target = resolve_target(arguments.target_dir)
         if arguments.operation == "remember":
+            reject_legacy(target)
             writable = layer_writable_types(target)
             if arguments.type not in writable:
                 raise ValueError(reject_unwritable_type(target, arguments.type))
         if arguments.operation == "init":
             root = resolve_root(target, arguments.root_dir)
-            result = init_memory(target, root, arguments.description)
+            result = init_memory(target, root, arguments.description, memory_types=arguments.memory_types, skill_types=arguments.skill_types)
         elif arguments.operation == "doctor":
             result = doctor_memory(resolve_root(target, arguments.root_dir), arguments.apply)
         elif arguments.operation == "add-type":
@@ -120,6 +124,7 @@ def main() -> int:
                 target,
                 arguments.name,
                 arguments.description,
+                module=arguments.module,
                 gitignore=arguments.gitignore,
                 writable=not arguments.index_only,
                 format="skills" if arguments.skills_format else "ordinary",

@@ -7,10 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-03
+
 ### Changed
 
-- 类型入口现为 `.memory/<plural>/AGENTS.md`；reshape 仍只抽条目、不手写类型入口。
-- 抽取表仍是官方六类种子；该层 `AGENTS.md` 已列出的额外 type 也可以作为 remember `--type`。
+- 重组使用选择式新布局初始化，保留模块入口和真实作用域归属；旧布局先交独立迁移器。
 
 ## [1.3.1] - 2026-09-11
 
