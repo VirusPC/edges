@@ -7,6 +7,10 @@ The format follows Keep a Changelog and Semantic Versioning.
 
 ## [1.0.0] - 2026-10-03
 
+### Fixed
+
+- 受管 Skill 资产完整遍历 dependency 命名目录，嵌套 Git 内容在预检拒绝；所有目标官方类型路径与模块组合先按新运行时纯契约校验，冲突不写忽略规则、日志或目标文件。
+
 ### Added
 
 - 用 `migrate.py --target-dir [--root-dir] [--recursive] [--dry-run]` 一次性转换旧布局，预检冲突、保留字节与权限、更新索引和 owned 链接，支持嵌套 owner 随父目录移动。

@@ -19,7 +19,7 @@ from legacy import parse, convert_index
 RUNTIME = Path(__file__).resolve().parents[2] / 'project-memory-init/scripts'
 sys.path.insert(0, str(RUNTIME))
 from lib.paths import is_scope, resolve_root, assert_scope_path
-from lib.types import layer_type_specs
+from lib.types import layer_type_specs, parse_type_meta, SEED_TYPE_NAMES, index_file_name
 from nodes.entries import parse_frontmatter
 
 JOURNAL = '.project-memory-migration'
@@ -49,13 +49,16 @@ def file_state(data, mode=0o644):
     return {'kind': 'file', 'data': base64.b64encode(data).decode(), 'mode': mode}
 
 
-def walk(root, exclude_installs=False):
-    """No Git filtering: ignored and untracked data is intentionally included."""
+def walk(root, exclude_installs=False, owned=False):
+    """Discovery can skip infrastructure; owned content is enumerated in full."""
     for base, dirs, files in os.walk(root, followlinks=False, onerror=lambda error: (_ for _ in ()).throw(error)):
         base = Path(base)
         for name in list(dirs):
             path = base / name
-            if name in {'.git', JOURNAL, 'node_modules'} or (exclude_installs and name == '.agents' and not path.is_symlink()) or (path / '.git').exists():
+            if owned and not path.is_symlink() and (name == '.git' or (path / '.git').exists()):
+                raise ValueError('nested-git-inside-moving-tree: ' + str(path))
+            noise = not owned and '.memory' not in base.relative_to(root).parts and name in {JOURNAL, 'node_modules'}
+            if name == '.git' or noise or (exclude_installs and name == '.agents' and not path.is_symlink()) or (not owned and (path / '.git').exists()):
                 dirs.remove(name)
             elif path.is_symlink():
                 dirs.remove(name)
@@ -210,6 +213,15 @@ def plan(target, recursive):
         if valid_new_scope(owner) and any(not spec.private for spec in current):
             raise ValueError('new-layout-only-allows-private-remnants: ' + str(owner))
         for spec in current:
+            # Apply pure new-runtime parsing/path contracts to the planned type,
+            # before creating ignores, journals or destination indexes. Legacy
+            # parsing has already checked official permissions/format invariants.
+            converted = parse_type_meta(convert_index('', spec))
+            planned_index = (spec.relative_target / 'AGENTS.md').as_posix()
+            if converted.name in SEED_TYPE_NAMES and planned_index != index_file_name(converted.name):
+                raise ValueError('Official type path conflict: ' + converted.name)
+            if converted.module != spec.module:
+                raise ValueError('Type module disagrees with planned path: ' + planned_index)
             if spec.synthetic:
                 diagnostics.append({'code': 'legacy-index-missing', 'path': str(spec.indexes[0]), 'detail': 'Official adoption preserved; index reconstructed only from files present on this machine. No missing body data was invented.'})
             mappings.append((spec.directory, owner / spec.relative_target))
@@ -237,7 +249,7 @@ def plan(target, recursive):
     index_specs = {index: (owner, spec) for owner, spec in types for index in spec.indexes}
     private = [mapped(owner / spec.relative_target) for owner, spec in types if spec.private]
     for owner in owners:
-        for base, dirs, files in walk(owner / '.memory'):
+        for base, dirs, files in walk(owner / '.memory', owned=True):
             if base not in owners and present(base / '.memory'):
                 raise ValueError('nested-moving-scope-requires-recursive: ' + str(base))
             directories.append(base)
@@ -405,7 +417,7 @@ def validate_source_inventory(job):
     expected_sources = {op['source'] for op in job['operations'] if op['source'] != op['target']}
     expected_dirs = set(job['directories'])
     for owner in job.get('legacyOwners', []):
-        for base, _dirs, files in walk(Path(owner) / '.memory'):
+        for base, _dirs, files in walk(Path(owner) / '.memory', owned=True):
             if str(base) not in expected_dirs:
                 raise ValueError('source-directory-added-before-retirement: ' + str(base))
             for filename in files:

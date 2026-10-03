@@ -105,6 +105,29 @@ class ArchiveTests(unittest.TestCase):
         restore_user_memory(backup_user_memory(self.src), self.dest)
         self.assertEqual((self.dest / USERS / 'AGENTS.md').read_text(), INDEX)
 
+    def test_empty_entries_with_manual_index_changes_require_force(self):
+        from operations.init import init_memory
+        init_memory(self.dest, self.dest, 'test', memory_types=['user'], skill_types=[])
+        self.source()
+        archive = backup_user_memory(self.src)
+        index = self.dest / USERS / 'AGENTS.md'
+        generated = index.read_bytes()
+        variants = [
+            b'Personal note that must survive.\n' + generated,
+            b'<!-- project-memory-type:start -->\nname: user\nunknown: private note\n<!-- project-memory-type:end -->\n' + generated,
+            generated.replace(b'# USER', b'# Personal USER'),
+        ]
+        for content in variants:
+            with self.subTest(content=content[:40]):
+                (self.dest / USERS / 'user_pref.md').unlink(missing_ok=True)
+                index.write_bytes(content)
+                with self.assertRaises(ValueError):
+                    restore_user_memory(archive, self.dest)
+                self.assertEqual(index.read_bytes(), content)
+                restore_user_memory(archive, self.dest, force=True)
+                self.assertEqual(index.read_text(), INDEX)
+                (self.dest / USERS / 'user_pref.md').unlink()
+
     def test_legacy_archive_reports_actionable_conversion_before_mutation(self):
         archive = self.tar([('.memory/USER.md', b'legacy'), ('.memory/users/user_pref.md', b'old')])
         with self.assertRaisesRegex(ValueError, 'conversion-required.*project-memory-migrate'):

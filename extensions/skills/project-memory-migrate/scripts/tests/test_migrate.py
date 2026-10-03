@@ -387,6 +387,53 @@ class MigrationTests(unittest.TestCase):
         self.assertTrue((self.root / '.memory/users/AGENTS.md').is_file())
         self.assertEqual(body.read_text(), 'later source edit')
 
+    def test_owned_dependency_named_assets_are_copied_before_retirement(self):
+        legacy(self.root, ('skills',))
+        method = self.root / '.memory/skills/method'
+        write(method / 'SKILL.md', '---\nname: method\ndescription: owned assets\n---\n')
+        for name in ('node_modules', '.project-memory-migration'):
+            asset = method / name / 'data'
+            write(asset, 'owned ' + name)
+            asset.chmod(0o640)
+        self.run_cli()
+        moved = self.root / '.harness/skills/managed/method'
+        for name in ('node_modules', '.project-memory-migration'):
+            self.assertEqual((moved / name / 'data').read_text(), 'owned ' + name)
+            self.assertEqual(stat.S_IMODE((moved / name / 'data').stat().st_mode), 0o640)
+        self.assertFalse((self.root / '.memory').exists())
+
+    def test_owned_nested_repository_is_rejected_without_mutation(self):
+        legacy(self.root, ('skills',))
+        method = self.root / '.memory/skills/method'
+        write(method / 'SKILL.md', '---\nname: method\ndescription: test\n---\n')
+        write(method / 'node_modules/nested/.git', 'gitdir: outside')
+        write(method / 'node_modules/nested/data', 'preserve')
+        before = snapshot(self.root)
+        self.run_cli(good=False)
+        self.assertEqual(snapshot(self.root), before)
+        self.assertFalse((self.root / '.project-memory-migration').exists())
+
+    def test_all_official_type_module_mismatches_fail_preflight(self):
+        for kind, directory in [('user', 'users'), ('project', 'projects'), ('feedback', 'feedbacks'), ('reference', 'references')]:
+            with self.subTest(kind=kind):
+                with tempfile.TemporaryDirectory() as raw:
+                    scope = Path(raw)
+                    legacy(scope, (kind,))
+                    # reference's fixture default spelling differs; make its official path explicit.
+                    original = scope / '.memory' / ('reference' if kind == 'reference' else directory) / 'AGENTS.md'
+                    if kind == 'reference':
+                        original.parent.rename(scope / '.memory/references')
+                        agents = scope / 'AGENTS.md'
+                        agents.write_text(agents.read_text().replace('.memory/reference/', '.memory/references/'))
+                    index = scope / '.memory' / directory / 'AGENTS.md'
+                    index.write_text('<!-- project-memory-type:start -->\nname: ' + kind + '\nformat: skills\ngitignore: ' + ('true' if kind == 'user' else 'false') + '\nwritable: true\n<!-- project-memory-type:end -->\n' + ENTRY)
+                    before = snapshot(scope)
+                    run = subprocess.run([sys.executable, str(CLI), '--target-dir', str(scope)], capture_output=True, text=True)
+                    self.assertNotEqual(run.returncode, 0)
+                    self.assertEqual(snapshot(scope), before)
+                    self.assertFalse((scope / '.project-memory-migration').exists())
+                    self.assertFalse((scope / '.harness').exists())
+
     def test_resume_failure_and_later_edits_are_not_overwritten(self):
         self.assertTrue(CLI.is_file(), 'migration CLI missing')
         import migrate

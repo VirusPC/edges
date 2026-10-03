@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.0.0] - 2026-10-03
 
+### Fixed
+
+- 仅逐字节等于当前生成模板的空用户索引可免 --force；空条目区外的人工说明、未知元数据和其他编辑均保留并视为已占用。
+
 ### Changed
 
 - 仅恢复 `.harness/memory/users/`，旧归档明确要求转换；先验证完整归档再替换，保留索引与正文原字节，拒绝重复/穿越/特殊成员及链接祖先，任何已有资产均需 --force。

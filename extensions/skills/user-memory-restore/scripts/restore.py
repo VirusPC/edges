@@ -16,7 +16,7 @@ sys.path.insert(0, str(BACKUP_SCRIPTS))
 from backup import USERS_DIR, CONVERSION, ensure_ignore, safe_parent
 
 PREFIX = USERS_DIR.as_posix() + '/'
-EMPTY_ENTRY = '- 暂无条目。'
+USER_TEMPLATE = Path(__file__).resolve().parents[2] / 'project-memory-init/references/templates/USER.tmpl.md'
 
 
 def _safe_members(tar, repo_dir, force=False):
@@ -64,12 +64,14 @@ def user_memory_occupied(repo_dir):
             return True
         if path.is_symlink() or not path.is_file():
             return True
-        text = path.read_text()
-        start, end = '<!-- project-memory-entries:start -->', '<!-- project-memory-entries:end -->'
-        if start not in text or end not in text:
-            return bool(text.strip())
-        block = text.split(start, 1)[1].split(end, 1)[0]
-        if any(line.strip() not in {'', EMPTY_ENTRY} for line in block.splitlines()):
+        # An empty entries block says nothing about personal prose or metadata.
+        # Only a byte-identical empty generated index is safe to replace without
+        # force. Missing template knowledge fails closed as occupied.
+        try:
+            generated = USER_TEMPLATE.read_bytes().rstrip() + b'\n'
+        except OSError:
+            return True
+        if path.read_bytes() != generated:
             return True
     return False
 
