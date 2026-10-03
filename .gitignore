@@ -75,3 +75,9 @@ extensions/cli/src/tasks/project/assets/review-page/
 
 # Private harness type user
 .harness/memory/users/
+
+/.harness/memory/users/
+
+/teaching/.harness/memory/users/
+
+/.harness/evaluation/.harness/memory/users/
