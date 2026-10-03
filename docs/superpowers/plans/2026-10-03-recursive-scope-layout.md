@@ -41,7 +41,7 @@ Tasks 1–2 own Python memory tools; Task 3 owns CLI/MCP/task-site consumers; Ta
 - Produces: `TypeSpec.module` and scope-relative index paths; all consumers resolve through path helpers, never assume every type belongs below memory. Existing custom types keep their identity. New official types are project/feedback/reference/user/managed/referenced; old skill names are not aliases.
 - Migrator in Task 2 consumes the CLI/path contract, not runtime legacy parsing.
 
-- [ ] Add real temporary-filesystem tests before implementing the paths/selection change. At minimum exercise the CLI contract:
+- [x] Add real temporary-filesystem tests before implementing the paths/selection change. At minimum exercise the CLI contract:
 
 ```python
 with tempfile.TemporaryDirectory() as d:
@@ -55,12 +55,14 @@ with tempfile.TemporaryDirectory() as d:
     assert not (scope / '.memory').exists()
 ```
 
-- [ ] Run the new tests and record expected failures. Run Python tests with `TMPDIR=/private/tmp` on macOS to avoid `/var` alias assumptions.
-- [ ] Refactor type/path discovery, explicit selection, index refresh, remember/add-type and doctor. Skills-only scopes must work. A type index or business AGENTS is not a new scope; scope discovery follows managed layer contracts and explicit root boundaries, skips other Git roots/submodules and external installed links.
-- [ ] Make referenced scans current-scope only, retain different sources with the same name, deduplicate aliases within a type by realpath, preserve same source across both types, and distinguish missing/unreadable sources from successful empty scans. Reject managed paths that resolve outside the selected owner, including linked ancestors. Preserve manual AGENTS text.
-- [ ] Remove old-layout repairs from normal commands. Report migration required for legacy layers; never silently re-create `.memory`. Preserve migration-era fixtures for Task 2 rather than asserting legacy repair is current runtime behavior.
-- [ ] Update affected skills/templates and LAYOUT with exact new commands, recommendation/selection semantics and two-container type discovery. Do not modify the live instance's `.memory` yet.
-- [ ] Run `TMPDIR=/private/tmp PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s extensions/skills/project-memory-init/scripts/tests`. Archive tests are explicitly deferred to Task 2 if still bound to old archive paths; report them individually, not as runtime regressions silently ignored. Commit and report RED/GREEN evidence.
+- [x] Run the new tests and record expected failures. Run Python tests with `TMPDIR=/private/tmp` on macOS to avoid `/var` alias assumptions.
+- [x] Refactor type/path discovery, explicit selection, index refresh, remember/add-type and doctor. Skills-only scopes must work. A type index or business AGENTS is not a new scope; scope discovery follows managed layer contracts and explicit root boundaries, skips other Git roots/submodules and external installed links.
+- [x] Make referenced scans current-scope only, retain different sources with the same name, deduplicate aliases within a type by realpath, preserve same source across both types, and distinguish missing/unreadable sources from successful empty scans. Reject managed paths that resolve outside the selected owner, including linked ancestors. Preserve manual AGENTS text.
+- [x] Remove old-layout repairs from normal commands. Report migration required for legacy layers; never silently re-create `.memory`. Preserve migration-era fixtures for Task 2 rather than asserting legacy repair is current runtime behavior.
+- [x] Update affected skills/templates and LAYOUT with exact new commands, recommendation/selection semantics and two-container type discovery. Do not modify the live instance's `.memory` yet.
+- [x] Run `TMPDIR=/private/tmp PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s extensions/skills/project-memory-init/scripts/tests`. Archive tests are explicitly deferred to Task 2 if still bound to old archive paths; report them individually, not as runtime regressions silently ignored. Commit and report RED/GREEN evidence.
+
+**Verified:** Runtime suite 90/90 passed; 35 harness acceptance cases. Task review and scoped fix review approved; custom permission metadata and managed format are enforced. Archive adaptation is explicitly outstanding in Task 2. Integrated commits: `c77afa1`, `c9d3b08`, `13df3f9`.
 
 ### Task 2: Deterministic migration and private-memory archives
 
