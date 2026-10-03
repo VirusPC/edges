@@ -120,7 +120,7 @@ pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
   --scope "$PWD" --purpose all --out "$PWD/tasks/_site/index.html"
 ```
 
-The generator accepts `--purpose domain|maintenance|all`. `all` walks real descendant scopes and both purposes, stopping at nested repositories and symlinks. Grouped items and HTML use stable IDs containing scope, purpose, project and stem. `source.scope` is repository-relative (`.` for root), and `source.purpose` is explicit; stored stems, project slugs, Task schema and Run IDs stay unchanged. Exports retain the real stem/project and source. The page permits classification only within one source board.
+The generator accepts `--purpose domain|maintenance|all`. `all` walks real descendant scopes and both purposes, stopping at nested repositories and symlinks. Grouped items and HTML use stable IDs containing scope, purpose, project and stem. `source.scope` is repository-relative (`.` for root), and `source.purpose` is explicit; stored stems, project slugs, Task schema and Run IDs stay unchanged. Source-aware groups and items must provide a valid real `project`; source-aware grouped items must also provide their stored `stem`. Transport IDs are never fallback project or stem values. Exports retain the real stem/project and source. The page permits classification only within one source board.
 
 Ops (one-time nginx, curl checks, PATH): [deploy/README.md](deploy/README.md). `deploy.yml` generates after pull; it does not run setup-nginx.
 

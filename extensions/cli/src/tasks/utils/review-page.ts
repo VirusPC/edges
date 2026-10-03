@@ -1,4 +1,4 @@
-import { parseSource, type TaskSource } from "./grouped.js";
+import { parseSource, parseSourceProject, type TaskSource } from "./grouped.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { TasksError } from "./types.js";
@@ -77,7 +77,7 @@ function parseGroup(raw: unknown, seenIds: Set<string>): ReviewPageGroup {
 
   const description = typeof raw.description === "string" ? raw.description : "";
   const source = parseSource(raw.source);
-  return { id, title, description, ...(source ? { source, project: String(raw.project ?? id) } : {}) };
+  return { id, title, description, ...(source ? { source, project: parseSourceProject(raw.project) } : {}) };
 }
 
 function optionalString(value: unknown): string | undefined {
@@ -105,7 +105,7 @@ function parseItem(raw: unknown, groupIds: Set<string>, seenStems: Set<string>):
     fail(`review-page item ${stem} suggested group not found: ${suggested}`);
   }
 
-  const item: ReviewPageItem = { stem, current, suggested, ...(source ? { id, source, project: String(raw.project ?? current) } : {}) };
+  const item: ReviewPageItem = { stem, current, suggested, ...(source ? { id, source, project: parseSourceProject(raw.project) } : {}) };
   const title = optionalString(raw.title);
   const description = optionalString(raw.description);
   const note = optionalString(raw.note);

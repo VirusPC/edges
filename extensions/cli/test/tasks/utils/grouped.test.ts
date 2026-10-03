@@ -188,3 +188,18 @@ test("buildGroupedList omits doc when the caller has none", () => {
   );
   assert.equal("doc" in grouped.items[0]!, false);
 });
+
+test('source-aware grouped payload requires real project identities and stored stems', () => {
+  const source = { scope: '.', purpose: 'domain' };
+  const group = { id: '[".","domain","cli"]', title: 'CLI', source, project: 'cli' };
+  const item = { id: '[".","domain","cli","same"]', stem: 'same', group: group.id, source, project: 'cli' };
+  for (const project of [undefined, null, 1, [], { value: 'cli' }, group.id, '_default', '']) {
+    assert.throws(() => parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [{ ...group, project }], items: [item] }), /project/);
+    assert.throws(() => parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [group], items: [{ ...item, project }] }), /project/);
+  }
+  assert.throws(() => parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [group], items: [{ ...item, stem: undefined }] }), /stem/);
+  const parsed = parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [group], items: [item] });
+  assert.equal(parsed.groups[0]?.project, 'cli');
+  assert.equal(parsed.items[0]?.project, 'cli');
+  assert.equal(parsed.items[0]?.stem, 'same');
+});

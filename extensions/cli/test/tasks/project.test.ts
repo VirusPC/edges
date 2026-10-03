@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
+import { mkdtemp, mkdir, readFile, writeFile, rm, access } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { nodeBoardWriter } from "./utils/helpers.js";
@@ -183,4 +183,23 @@ test("createProject rejects _default as the CLI id", async () => {
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
+});
+
+test('project get returns the read-only listed project after ordinary task creation', async () => {
+  const { run } = await import('../../src/program.js');
+  const repo = await mkdtemp(path.join(tmpdir(), 'edges-project-get-'));
+  try {
+    const env = { EDGES_SCOPE: repo };
+    const created = await run(['tasks', '--purpose', 'maintenance', 'create', '--title', 'Fresh', '--project', 'cli'], { env });
+    assert.equal(created.exitCode, 0, created.stdout);
+    const listed = JSON.parse((await run(['tasks', '--purpose', 'maintenance', 'project', 'list'], { env })).stdout);
+    const got = await run(['tasks', '--purpose', 'maintenance', 'project', 'get', 'cli'], { env });
+    assert.equal(got.exitCode, 0, got.stdout);
+    const { status, command, ...record } = JSON.parse(got.stdout);
+    assert.equal(status, 'success');
+    assert.deepEqual(record, listed.projects.find((project: any) => project.project === 'cli'));
+    for (const rel of ['.harness/tasks/cli/AGENTS.md', '.harness/tasks/AGENTS.md', '.harness/tasks/_default', 'tasks']) {
+      await assert.rejects(access(path.join(repo, rel)));
+    }
+  } finally { await rm(repo, { recursive: true, force: true }); }
 });

@@ -223,3 +223,19 @@ test("ensureProjectMetadata skipId leaves that AGENTS.md missing", async () => {
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+test('project get synthesizes existing directories, rejects missing ones, and leaves metadata absent', async () => {
+  const { getProject, listProjects } = await import('../../../src/tasks/utils/project-meta.js');
+  const { access } = await import('node:fs/promises');
+  const repo = await mkdtemp(path.join(tmpdir(), 'edges-project-read-'));
+  try {
+    await mkdir(path.join(repo, 'tasks/cli/todo'), { recursive: true });
+    const fs = nodeBoardWriter();
+    const listed = await listProjects(repo, fs);
+    assert.deepEqual(await getProject(repo, 'cli', fs), listed[0]);
+    await assert.rejects(() => getProject(repo, 'missing', fs), (error: any) => error.errorCode === 'PROJECT_NOT_FOUND');
+    for (const rel of ['tasks/cli/AGENTS.md', 'tasks/AGENTS.md', 'tasks/_default', 'tasks/missing']) {
+      await assert.rejects(access(path.join(repo, rel)));
+    }
+  } finally { await rm(repo, { recursive: true, force: true }); }
+});

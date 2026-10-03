@@ -219,7 +219,16 @@ export async function readProjectRecord(
   const rel = projectAgentsRelPath(id, repoPath);
   const abs = projectAgentsAbsPath(repoPath, id);
   if (!(await fs.exists(abs))) {
-    throw new TasksError("PROJECT_NOT_FOUND", `project not found: ${id}`);
+    if (!(await listProjectIds(repoPath, fs)).includes(id)) {
+      throw new TasksError("PROJECT_NOT_FOUND", `project not found: ${id}`);
+    }
+    return {
+      project: id,
+      dir: projectDirName(id),
+      title: seedTitleFor(id),
+      description: seedDescriptionFor(id),
+      path: rel,
+    };
   }
   const parsed = parseProjectAgents(await fs.readFile(abs));
   return {
@@ -285,11 +294,7 @@ export async function listProjects(
 ): Promise<TaskProjectRecord[]> {
   const records: TaskProjectRecord[] = [];
   for (const id of await listProjectIds(repoPath, writer)) {
-    try { records.push(await readProjectRecord(repoPath, id, writer)); }
-    catch (error) {
-      if (!(error instanceof TasksError && error.errorCode === "PROJECT_NOT_FOUND")) throw error;
-      records.push({ project: id, dir: projectDirName(id), title: seedTitleFor(id), description: seedDescriptionFor(id), path: projectAgentsRelPath(id, repoPath) });
-    }
+    records.push(await readProjectRecord(repoPath, id, writer));
   }
   return records;
 }

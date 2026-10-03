@@ -200,3 +200,17 @@ test('legacy review items cannot bypass duplicate stem validation with ignored t
     ],
   }), /duplicate/);
 });
+
+test('source-aware review payload requires valid real project identities on groups and items', () => {
+  const source = { scope: '.', purpose: 'domain' };
+  const group = { id: '[".","domain","cli"]', title: 'CLI', source, project: 'cli' };
+  const item = { id: '[".","domain","cli","same"]', stem: 'same', current: group.id, suggested: group.id, source, project: 'cli' };
+  for (const project of [undefined, null, 1, [], { value: 'cli' }, group.id, '_default', '']) {
+    assert.throws(() => parseReviewPageInput({ groups: [{ ...group, project }], items: [item] }), /project/);
+    assert.throws(() => parseReviewPageInput({ groups: [group], items: [{ ...item, project }] }), /project/);
+  }
+  const parsed = parseReviewPageInput({ groups: [group], items: [item] });
+  assert.equal(parsed.groups[0]?.project, 'cli');
+  assert.equal(parsed.items[0]?.project, 'cli');
+  assert.equal(parsed.items[0]?.stem, 'same');
+});

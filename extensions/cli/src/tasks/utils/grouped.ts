@@ -1,4 +1,5 @@
 import { scopeDir, type BoardTarget } from "./paths.js";
+import { isTaskProjectId } from "./project.js";
 import { portableScope } from "../../utils/scope.js";
 import { listProjectIds, listTasksWithDocs, type BoardFs, type TaskListOpts } from "./board.js";
 import {
@@ -97,6 +98,13 @@ export function parseSource(raw: unknown): TaskSource | undefined {
   }
   return { scope: raw.scope, purpose: raw.purpose as TaskSource["purpose"] };
 }
+export function parseSourceProject(raw: unknown): string {
+  if (typeof raw !== "string" || !isTaskProjectId(raw)) {
+    throw new TasksError("VALIDATION_ERROR", "source-aware project must be a real Task Project id (default or lowercase ASCII kebab-case slug)");
+  }
+  return raw;
+}
+
 function parseGroup(raw: unknown): GroupedListGroup {
   if (!isPlainObject(raw) || typeof raw.id !== "string" || raw.id.trim() === "") {
     throw new TasksError("VALIDATION_ERROR", "grouped list group id must be a non-empty string");
@@ -109,7 +117,7 @@ function parseGroup(raw: unknown): GroupedListGroup {
     group.description = raw.description;
   }
   const source = parseSource(raw.source);
-  if (source) { group.source = source; group.project = String(raw.project ?? raw.id); }
+  if (source) { group.source = source; group.project = parseSourceProject(raw.project); }
   return group;
 }
 
@@ -143,7 +151,11 @@ function parseItem(raw: unknown): GroupedListItem {
     item.doc = parseTaskDocField(raw.doc);
   }
   const source = parseSource(raw.source);
-  if (source) { item.source = source; item.project = String(raw.project ?? raw.group); }
+  if (source) {
+    if (!stemRaw) throw new TasksError("VALIDATION_ERROR", "source-aware item requires its stored stem");
+    item.source = source;
+    item.project = parseSourceProject(raw.project);
+  }
   return item;
 }
 
