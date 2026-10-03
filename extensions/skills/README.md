@@ -100,6 +100,8 @@ npx skills@latest add VirusPC/edges/extensions/skills --skill paper-10-questions
 
 > `project-memory-ask` / `-doctor` / `-init` / `-remember` / `-reshape` **必须一起装**。后四个靠同级目录定位 `project-memory-init`，单独装会找不到它的 `scripts/memory.py` 和 `references/`。
 
+旧 Project Memory 升级使用 [`project-memory-migrate`](project-memory-migrate/SKILL.md)，需与 `project-memory-init` 一起安装；其 `--dry-run` 可预览一次性转换，常规运行时不兼容旧 `.memory`。私有归档使用 [`user-memory-backup`](user-memory-backup/SKILL.md) 与 [`user-memory-restore`](user-memory-restore/SKILL.md)，两者一起安装，仅处理新 `.harness/memory/users`。Git 更新公共布局后，每台机器仍须迁移自己的 ignored 私有残留。
+
 维护这组 skill 时，按 [`project-memory-init/.memory/projects/project_development.md`](project-memory-init/.memory/projects/project_development.md) 的顺序修改和验证。
 
 ### 卸载

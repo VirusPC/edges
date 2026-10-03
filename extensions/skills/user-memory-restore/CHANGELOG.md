@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-03
+
 ### Changed
 
-- 回注接受 `.memory/users/AGENTS.md`（ADR-0012）以及尚未迁走的 `.memory/USER.md`。目标层已有 `AGENTS.md` 时，回注后把 leftover `USER.md` 收到 `users/AGENTS.md` 并删除旧文件。
+- 仅恢复 `.harness/memory/users/`，旧归档明确要求转换；先验证完整归档再替换，保留索引与正文原字节，拒绝重复/穿越/特殊成员及链接祖先，任何已有资产均需 --force。
 
 ## [1.0.0] - 2026-09-11
 
@@ -17,5 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 从 `user-memory-backup-*.tar.gz` 回注 `.memory/USER.md` 与 `.memory/users/`。已有条目时需 `--force`，语义是整份替换（先清空再解压），不合并。只接受普通文件成员。不 `git add`。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/user-memory-restore@1.0.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/user-memory-restore@2.0.0...HEAD
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/user-memory-restore@1.0.0
+
+[2.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/user-memory-restore@2.0.0

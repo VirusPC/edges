@@ -1,4 +1,4 @@
-Historical test fixtures from pre-.harness runtime; port to project-memory-migrate.
+Historical pre-.harness fixtures, retained as provenance. Conversion behavior is now executed in project-memory-migrate/scripts/tests/test_migrate.py: flat built-in/custom/user indexes, identical coalescing, conflicting leftovers, absent referenced sources, and unchanged ordinary body/unknown metadata. Runtime legacy-init/remember/doctor behavior is intentionally replaced by migration-required; migration does not round-trip historical frontmatter through serializers.
 
 class DoctorLegacyFlatIndexTests(unittest.TestCase):
     def test_migrates_feedback_md_then_deletes_old(self) -> None:
