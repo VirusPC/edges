@@ -18,7 +18,6 @@ SERVER_HEADER = re.compile(r"^([ \t]*)server[ \t]*\{", re.M)
 LOCATION_HEADER = re.compile(r"^([ \t]*)location[ \t]+([^{]+?)[ \t]*\{", re.M)
 LEGACY_ALIAS = re.compile(r"(alias[ \t]+\S*?)/teach/")
 HAS_TEACHING_LOCATION = re.compile(r"location[ \t]+(?:\^[~*=][ \t]+)?/teaching/")
-HAS_ROOT_LOCATION = re.compile(r"location[ \t]+=[ \t]+/\s*\{")
 HAS_TEACH_EXACT_REDIRECT = re.compile(
     r"location[ \t]+=[ \t]+/teach\s*\{[^}]*return[ \t]+30[12][ \t]+/teaching/"
 )
@@ -96,13 +95,18 @@ def rewrite_serving_legacy_locations(block):
 
 
 def insert_redirects(block, server_indent):
-    if HAS_ROOT_LOCATION.search(block) and HAS_TEACH_EXACT_REDIRECT.search(
+    # An exact redirect would override existing prefix homepage handlers too.
+    has_root_location = any(
+        location_uri(match.group(2)) == "/"
+        for match in LOCATION_HEADER.finditer(block)
+    )
+    if has_root_location and HAS_TEACH_EXACT_REDIRECT.search(
         block
     ) and HAS_TEACH_REWRITE.search(block):
         return block, False
     indent = server_indent + "    "
     parts = []
-    if not HAS_ROOT_LOCATION.search(block):
+    if not has_root_location:
         parts.append(
             indent
             + "location = / {\n"

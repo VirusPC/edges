@@ -269,3 +269,27 @@ test("deployment layout migration updates existing sites and restores both confi
     }
   } finally { await rm(dir, { recursive: true, force: true }); }
 });
+
+for (const [fixture, rootHeader] of [
+  ["teaching.conf.legacy-root-prefix", "location /"],
+  ["teaching.conf.legacy-root-priority-prefix", "location ^~ /"],
+]) {
+  test(`teaching migration preserves the unrelated ${rootHeader} homepage handler`, async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "edges-teaching-homepage-"));
+    try {
+      const conf = path.join(dir, "teaching.conf");
+      await writeFile(conf, await readFile(path.join(here, "fixtures", fixture!), "utf8"));
+      const first = spawnSync("python3", [migrateScript, conf], { encoding: "utf8" });
+      assert.equal(first.status, 0, first.stderr);
+      const migrated = await readFile(conf, "utf8");
+      assert.match(migrated, /location \/teaching\/ \{\s*root \/srv\/edges;\s*try_files \$uri \$uri\/ =404;/);
+      assert.ok(migrated.includes(`${rootHeader} {\n        proxy_pass http://127.0.0.1:8080;\n    }`));
+      assert.doesNotMatch(migrated, /location\s+=\s+\/\s*\{/);
+      const second = spawnSync("python3", [migrateScript, conf], { encoding: "utf8" });
+      assert.equal(second.status, 0, second.stderr);
+      assert.equal(await readFile(conf, "utf8"), migrated);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+}
