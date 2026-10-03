@@ -4,10 +4,16 @@ description: 基于递归记忆模型，先解析本次工作 scope，再确定�
 metadata:
   edges-type: task
   edges-title: 为 Edges CLI 建立统一的工作 scope 解析
-  edges-tasks-status: backlog
+  edges-tasks-status: in_review
   edges-task-project: edges-cli-platform
-  edges-updated-at: "2026-10-01T09:24:16.032Z"
+  edges-updated-at: "2026-10-03T08:30:42.604Z"
 ---
+
+## 2026-10-03 实施进展
+
+CLI 已在操作前统一解析工作 scope，区分目标作用域、Git 仓根与共享实现位置；Tasks 按 domain/maintenance 选板，聚合站点保留来源身份，Note/MCP 已适配目标选择。
+
+集成构建及相关测试通过，当前进入整体审查。实现与验证依据见[实施计划](../../../../docs/superpowers/plans/2026-10-03-recursive-scope-layout.md)及[PR #161](https://github.com/VirusPC/edges/pull/161)。下文保留建卡时的背景与目标，其“当前”“尚未实现”等表述属于当时状态。
 
 **背景：**
 
