@@ -30,6 +30,20 @@ from operations.init import init_memory as _init_memory  # noqa: E402
 from operations.remember import remember  # noqa: E402
 
 
+# Explicit registration metadata is part of every custom type fixture. Missing
+# metadata is tested as damage, never inferred as public writable permissions.
+DOCS_META = (
+    "<!-- project-memory-type:start -->\nname: docs\nmodule: memory\n"
+    "description: 文档指针\ngitignore: false\nwritable: true\nformat: ordinary\n"
+    "<!-- project-memory-type:end -->\n\n"
+)
+RESEARCH_META = (
+    "<!-- project-memory-type:start -->\nname: research\nmodule: memory\n"
+    "description: Research pointers\ngitignore: false\nwritable: true\nformat: ordinary\n"
+    "<!-- project-memory-type:end -->\n\n"
+)
+
+
 def init_memory(target, root, description=None):
     # These existing tests explicitly exercise all six official adopted types.
     (target / '.agents/skills').mkdir(parents=True, exist_ok=True)
@@ -99,7 +113,7 @@ class DiscoverLayerTypesTests(unittest.TestCase):
             docs_index = target / ".harness/memory" / "docs"
             docs_index.mkdir(exist_ok=True)
             (docs_index / "AGENTS.md").write_text(
-                "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                DOCS_META + "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
             )
@@ -116,7 +130,7 @@ class DiscoverLayerTypesTests(unittest.TestCase):
             research = target / ".harness/memory" / "research"
             research.mkdir()
             (research / "AGENTS.md").write_text(
-                "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                RESEARCH_META + "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
             )
@@ -139,7 +153,7 @@ class PreserveExtraTypesTests(unittest.TestCase):
         docs_dir = target / ".harness/memory" / "docs"
         docs_dir.mkdir(exist_ok=True)
         (docs_dir / "AGENTS.md").write_text(
-            "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+            DOCS_META + "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
             "<!-- project-memory-entries:end -->\n",
             encoding="utf-8",
         )
@@ -191,7 +205,7 @@ class RememberDiscoveredTypeTests(unittest.TestCase):
             )
             (target / ".harness/memory" / "docs").mkdir()
             (target / ".harness/memory" / "docs" / "AGENTS.md").write_text(
-                "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                DOCS_META + "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
             )
@@ -244,7 +258,7 @@ class RememberDiscoveredTypeTests(unittest.TestCase):
             )
             (target / ".harness/memory" / "docs").mkdir()
             (target / ".harness/memory" / "docs" / "AGENTS.md").write_text(
-                "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                DOCS_META + "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
             )

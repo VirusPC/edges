@@ -57,17 +57,17 @@ python3 <init-dir>/scripts/memory.py add-type --target-dir S \
 
 `--module memory|skills` 默认 memory。`--gitignore` 忽略整类正文及索引；`--index-only` 使 remember 拒绝写正文；`--skills-format` 采用 `<name>/SKILL.md`。模块、格式、可写性是独立维度。自定义 Skill 格式类型默认仍在 `.harness/memory/<原复数目录>`，不能因格式自动移到 skills。自定义类型身份全层唯一，跨模块重复登记报错；官方名称和路径不能被覆盖。外部自定义来源参数暂不支持。
 
-类型入口特权注释为 `project-memory-type`，字段包括 `name`、`module`、`description`、`gitignore`、`writable`、`format`。省略 module 的现有自定义元数据默认 memory；`format` 为 `ordinary|skills`，布尔字段严格使用 `true|false`。未知元数据不影响发现，刷新仅替换 entries 区块，保留原 metadata 与手写引言。没有 metadata 的官方类型按官方契约推导；自定义目录名只在无 metadata 时用作身份。
+类型入口特权注释为 `project-memory-type`，字段包括 `name`、`module`、`description`、`gitignore`、`writable`、`format`。省略 module 的现有自定义元数据默认 memory；`format` 为 `ordinary|skills`，布尔字段严格使用 `true|false`。未知元数据不影响发现，刷新仅替换 entries 区块，保留原 metadata 与手写引言。没有 metadata 的官方类型按官方契约推导；自定义类型必须保留 metadata 区块；索引或区块缺失时无法安全恢复身份与权限，报告 unsafe-layout 并拒绝写入，不能从目录名猜测可写/公开默认值。
 
 `TypeSpec.index_file`、`discover_layer_types()` 的值和 `type_index_relpath()` 均为**作用域相对路径**，包含 `.harness/<module>/...`。`TypeSpec.module` 记录模块。消费者使用 `type_index_path(target, type)`、`type_content_dir(target, type)`；不能把全部 type 拼到 `memory_dir()` 下。
 
 ## 来源和写入边界
 
-`remember --type managed --slug my-method --description '用途' --content '步骤'` 写本地 Skill。`referenced` 不接受 remember，即使元数据尝试开启 writable 也报错。类型与条目的真实路径必须留在选定 owner 内；受管容器、索引与写入路径上的符号链接不扩大权限。日常命令不更改安装链接。
+`remember --type managed --slug my-method --description '用途' --content '步骤'` 写本地 Skill。`referenced` 不接受 remember，即使元数据尝试开启 writable 也报错；`managed` 必须保持 writable: true 与 format: skills，元数据尝试改成只读或普通条目格式同样报错。类型与条目的真实路径必须留在选定 owner 内；受管容器、索引与写入路径上的符号链接不扩大权限。日常命令不更改安装链接。
 
 每类只扫描当前来源的直接条目：普通记忆 `<type>_*.md`，Skill 格式 `*/SKILL.md`。不递归吸收子作用域或全机技能。只读安装根可链接外部来源；本地内容不能越出所属 type。每类内部按 realpath 去重，同名不同真源保留；同一真源同时属于 managed 和 referenced 时两份入口各自保留。
 
-缺失、断链、无法读取/解码来源不是成功空扫描。init 返回 `complete: false` 和 `diagnostics`（含 `source-scan-error`）；doctor 在 findings/remaining 保留此诊断，刷新保持已有索引原字节。初次选择 referenced 时可以创建类型入口，但来源缺失仍报告不完整，绝不代建 `.agents/skills`。存在且可读的空来源才是成功的空清单。格式缺陷由 doctor 报 `invalid-entry`，不改原位正文。
+缺失、断链、无法读取/解码来源不是成功空扫描。init 返回 `complete: false` 和 `diagnostics`（含 `source-scan-error`）；doctor 在 findings/remaining 保留此诊断，刷新保持已有索引原字节。初次选择 referenced 时可以创建类型入口，但来源缺失仍报告不完整，绝不代建 `.agents/skills`。存在且可读的空来源才是成功的空清单。格式缺陷由 doctor 报 `invalid-entry`，不改原位正文；frontmatter 必须有起止分隔符，未闭合时即使出现 description 也不算有效。
 
 私有类型写正文或索引前先补 Git 根 ignore：`.harness/<module>/<plural>/` 与 `**/.harness/<module>/<plural>/`，包含类型入口。无 Git 时返回 skipped-no-git；不会创建仓库。已采用类型被刷新时重新保证其私有忽略规则。
 

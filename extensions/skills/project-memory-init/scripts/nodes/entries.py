@@ -217,11 +217,11 @@ def parse_frontmatter(path: Path) -> dict[str, str]:
         try:
             for raw_line in source:
                 if raw_line.rstrip("\r\n").strip() == "---":
-                    break
+                    return _parse_frontmatter_lines(collected)
                 collected.append(raw_line)
         except UnicodeError:
             return {}
-    return _parse_frontmatter_lines(collected)
+    return {}
 
 
 def top_level_frontmatter_keys(path: Path) -> set[str]:

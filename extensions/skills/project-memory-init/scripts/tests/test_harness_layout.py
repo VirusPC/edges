@@ -315,3 +315,69 @@ class HarnessLayoutTests(unittest.TestCase):
         result = self.run_cli('add-type', '--name', 'secret', '--description', 'private')
         self.assertTrue(result['flags']['gitignore'])
         self.assertFalse(result['flags']['writable'])
+
+    def test_removed_custom_metadata_cannot_restore_public_write_defaults(self):
+        import re
+        subprocess.run(['git', 'init', '-q', str(self.root)], check=True)
+        self.init('--memory-types', 'project')
+        # Use an already plural name so its identity does not change on fallback.
+        self.run_cli('add-type', '--name', 'secrets', '--description', 'private', '--gitignore', '--index-only')
+        index = self.root / '.harness/memory/secrets/AGENTS.md'
+        stripped = re.sub(r'<!-- project-memory-type:start -->.*?<!-- project-memory-type:end -->\n?', '', index.read_text(), flags=re.DOTALL)
+        index.write_text(stripped)
+        index.chmod(0o600)
+        (self.root / '.gitignore').unlink()
+        original_index = index.read_bytes()
+        original_agents = (self.root / 'AGENTS.md').read_bytes()
+        for arguments in [
+            ('remember', '--type', 'secrets', '--slug', 'leak', '--title', 'private', '--description', 'private', '--content', 'private'),
+            ('init', '--memory-types', 'feedback'),
+        ]:
+            with self.subTest(operation=arguments[0]):
+                self.run_cli(*arguments, ok=False)
+                self.assertEqual(index.read_bytes(), original_index)
+                self.assertEqual(index.stat().st_mode & 0o777, 0o600)
+                self.assertEqual((self.root / 'AGENTS.md').read_bytes(), original_agents)
+                self.assertFalse((index.parent / 'secrets_leak.md').exists())
+                self.assertFalse((self.root / '.gitignore').exists())
+                self.assertFalse((self.root / '.harness/memory/feedbacks').exists())
+        report = self.run_cli('doctor', '--apply')
+        self.assertTrue(any(f['code'] == 'unsafe-layout' for f in report['remaining']))
+        self.assertEqual(index.read_bytes(), original_index)
+
+    def test_managed_metadata_cannot_change_format_or_writability(self):
+        self.init('--skill-types', 'managed')
+        self.run_cli('remember', '--type', 'managed', '--slug', 'keep-it', '--description', 'keep', '--content', 'Existing body')
+        index = self.root / '.harness/skills/managed/AGENTS.md'
+        body = index.parent / 'keep-it/SKILL.md'
+        original_body = body.read_bytes()
+        original_index = index.read_text()
+        for format_value, writable in [('ordinary', 'true'), ('skills', 'false')]:
+            with self.subTest(format=format_value, writable=writable):
+                index.write_text(original_index + '\n<!-- project-memory-type:start -->\nname: managed\nmodule: skills\nformat: ' + format_value + '\nwritable: ' + writable + '\n<!-- project-memory-type:end -->\n')
+                index.chmod(0o600)
+                malformed = index.read_bytes()
+                self.run_cli('init', ok=False)
+                self.run_cli('remember', '--type', 'managed', '--slug', 'other', '--title', 'other', '--description', 'other', '--content', 'Other body', ok=False)
+                report = self.run_cli('doctor', '--apply')
+                self.assertTrue(any(f['code'] == 'unsafe-layout' for f in report['remaining']))
+                self.assertEqual(index.read_bytes(), malformed)
+                self.assertEqual(index.stat().st_mode & 0o777, 0o600)
+                self.assertEqual(body.read_bytes(), original_body)
+                self.assertFalse((index.parent / 'managed_other.md').exists())
+                self.assertFalse((index.parent / 'other/SKILL.md').exists())
+
+    def test_unterminated_frontmatter_is_invalid_and_body_is_preserved(self):
+        source = self.root / '.agents/skills/unfinished/SKILL.md'
+        source.parent.mkdir(parents=True)
+        source.write_text('---\nname: unfinished\ndescription: Looks valid but never closed\nBody text\n')
+        source.chmod(0o600)
+        original = source.read_bytes()
+        self.init('--skill-types', 'referenced')
+        for apply in [False, True]:
+            with self.subTest(apply=apply):
+                args = ('doctor', '--apply') if apply else ('doctor',)
+                report = self.run_cli(*args)
+                self.assertTrue(any(f['code'] == 'invalid-entry' for f in report['remaining']))
+                self.assertEqual(source.read_bytes(), original)
+                self.assertEqual(source.stat().st_mode & 0o777, 0o600)

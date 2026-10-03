@@ -267,8 +267,11 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
                 {"username": "tester", "email": "t@example.com"},
             )
             docs_index = target / ".harness/memory" / "docs" / "AGENTS.md"
+            # Drift only the derived entries, preserving registration privileges.
+            original = docs_index.read_text(encoding="utf-8")
+            start = original.index("<!-- project-memory-entries:start -->")
             docs_index.write_text(
-                "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                original[:start] + "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
             )
@@ -285,7 +288,11 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
             research = target / ".harness/memory" / "research"
             research.mkdir()
             (research / "AGENTS.md").write_text(
-                "# RESEARCH\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
+                "# RESEARCH\n\n<!-- project-memory-type:start -->\n"
+                "name: research\nmodule: memory\ndescription: Research pointers\n"
+                "gitignore: false\nwritable: true\nformat: ordinary\n"
+                "<!-- project-memory-type:end -->\n\n"
+                "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
                 "<!-- project-memory-entries:end -->\n",
                 encoding="utf-8",
             )

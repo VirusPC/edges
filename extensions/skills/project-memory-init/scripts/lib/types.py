@@ -91,7 +91,7 @@ def layer_type_specs(target: Path) -> list[TypeSpec]:
         path = assert_scope_path(target / rel, target)
         parsed = parse_type_meta(path.read_text(encoding='utf-8')) if path.is_file() else None
         name = parsed.name if parsed else type_from_dir_name(dirname)
-        if not path.is_file() and name not in SEED_TYPE_NAMES:
+        if parsed is None and name not in SEED_TYPE_NAMES:
             raise ValueError(f'Missing custom type index/metadata; restore original permissions: {rel}')
         if parsed and parsed.module != module:
             raise ValueError(f'Type module disagrees with path: {rel}')
@@ -102,6 +102,8 @@ def layer_type_specs(target: Path) -> list[TypeSpec]:
         spec = parsed or TypeSpec(name, rel, seed_description(name), name != 'referenced', name == 'user', 'skills' if name in SKILL_TYPE_NAMES else 'ordinary', module)
         if name == 'user' and not spec.gitignore:
             raise ValueError('user must remain private (gitignore: true)')
+        if name == 'managed' and (not spec.writable or spec.format != 'skills'):
+            raise ValueError('managed must remain writable skills')
         if name == 'referenced' and (spec.writable or spec.format != 'skills'):
             raise ValueError('referenced must remain index-only skills')
         result[name] = replace(spec, index_file=rel, module=module)

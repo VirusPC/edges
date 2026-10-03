@@ -71,7 +71,7 @@ def collect_findings(root: Path) -> list[dict]:
                 for entry in list_type_files(owner, spec.name, pattern):
                     fields = parse_frontmatter(entry)
                     if not fields.get('description'):
-                        findings.append(finding('invalid-entry', entry, root, 'Missing frontmatter description; source left unchanged'))
+                        findings.append(finding('invalid-entry', entry, root, 'Missing closed frontmatter or description; source left unchanged'))
             except (OSError, UnicodeError, ValueError) as error:
                 findings.append(finding('source-scan-error', index, root, str(error)))
                 continue
