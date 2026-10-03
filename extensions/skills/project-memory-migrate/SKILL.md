@@ -1,7 +1,7 @@
 ---
 name: project-memory-migrate
 description: 将明确指定作用域的旧 Project Memory .memory 一次性迁到 .harness/memory 和 .harness/skills；保留私有内容、技能资产、来源权限与稀疏子作用域。用于旧项目升级或 Git 升级后遗留的本机用户记忆，不迁业务目录。
-version: 1.0.0
+version: 1.0.1
 ---
 
 # Project Memory Migrate

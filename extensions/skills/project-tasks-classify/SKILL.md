@@ -1,7 +1,7 @@
 ---
 name: project-tasks-classify
 description: 对整板 Task 按用户已设的 Task Project（标题 + 描述）做归属建议（LLM / agent 判断，不要求 embedding），经 edges tasks project review-page 审阅页等人贴回导出 JSON 后再用 CLI 落地。无 GUI 时才退回 Markdown 表。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
-version: 1.2.0
+version: 1.2.1
 ---
 
 # classifyTasks
@@ -14,12 +14,14 @@ version: 1.2.0
 - 已有 Task Project 带标题与描述，要把它们当用户已设的分类质心。
 - 不要用它做单条 CRUD（那是后续 generic tasks Skill/MCP）；不要要求 embedding；不要调用不存在的 `edges tasks classify`。
 
+先确定内容所属的作用域 `SCOPE` 和用途 `PURPOSE`：领域工作默认 `domain`，维护该作用域本身用 `maintenance`。Task Project 只是该看板的分组，不决定作用域。后续所有 list/get/project/create/update/status 命令使用同一组 `--scope "$SCOPE" --purpose "$PURPOSE"`；仓内维护 Edges 时显式选仓根和 `maintenance`，不要依赖执行命令时的源码目录。
+
 ## 步骤（必须按序，第 4 步要停）
 
 1. **读已有质心。** 在仓库根：
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts tasks project list
+pnpm --filter edges-cli exec tsx src/index.ts tasks --scope "$SCOPE" --purpose "$PURPOSE" project list
 ```
 
 已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。解析 stdout JSON：`command` 为 `project.list`，`projects[].project|title|description` 是用户已设的质心（slug + 标题 + 描述）。若 `_default` 还没有 AGENTS.md，这条命令会 bootstrap 元数据，**不会**搬 Task 文件。
@@ -27,7 +29,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks project list
 2. **读整板 Task。**
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts tasks list
+pnpm --filter edges-cli exec tsx src/index.ts tasks --scope "$SCOPE" --purpose "$PURPOSE" list
 ```
 
 对需要正文的行再 `tasks get <stem>`。必须包含所有 project，禁止 `list --project default` 当作唯一输入。
@@ -42,7 +44,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks list
    2. 渲染（`--from` 必填；省略 `--out` 则写 OS 临时 HTML；**不要** `--open` / `--mode`，命令不会打开浏览器）：
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts tasks project review-page --from /tmp/suggestions.json
+pnpm --filter edges-cli exec tsx src/index.ts tasks --scope "$SCOPE" --purpose "$PURPOSE" project review-page --from /tmp/suggestions.json
 ```
 
    3. 解析 stdout JSON：`status` 为 `success`，`command` 为 `project.review-page`，读出绝对路径 `path`（另有 `groupCount` / `itemCount`）。`review-page` 仍只渲染，不要把 publish 并进这条命令。
@@ -71,14 +73,14 @@ pnpm --filter edges-cli exec tsx src/index.ts artifacts publish <绝对 HTML 路
    - 每个还不在 `project list` 里的 `suggested`（且不是 `default`）：先问人要 title 与 description，再
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts tasks project create <slug> --title "<title>" --description "<description>"
+pnpm --filter edges-cli exec tsx src/index.ts tasks --scope "$SCOPE" --purpose "$PURPOSE" project create <slug> --title "<title>" --description "<description>"
 ```
 
      不要自动批量编造 description，不要一次 create 未经人确认的一串 project。
    - 再对 `suggested !== current` 的每一行：
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts tasks update <stem> --project <suggested>
+pnpm --filter edges-cli exec tsx src/index.ts tasks --scope "$SCOPE" --purpose "$PURPOSE" update <stem> --project <suggested>
 ```
 
    - `keep` 或 `suggested === current`：不写盘。

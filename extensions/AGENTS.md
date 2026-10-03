@@ -1,6 +1,6 @@
 # extensions
 
-<!-- project-memory:start -->
+
 
 <!-- project-memory-important:start -->
 ## 本层硬约束
@@ -10,25 +10,4 @@
 - 不绑定 Edges 的通用 skill / MCP 配置 / plugin / hook 不放本目录，去 `shared-extensions/`。
 <!-- project-memory-important:end -->
 
-<!-- project-memory-local:start -->
-## 本层记忆
-
-下面这些是索引，不是正文。按条目说明挑要读的，再打开对应内容。
-
-- [.memory/users/AGENTS.md](.memory/users/AGENTS.md) — 绑定本仓库、不宜公开的个人材料（个人偏好、凭据与密钥）。本机文件，不进 git。
-- [.memory/feedbacks/AGENTS.md](.memory/feedbacks/AGENTS.md) — 用户的纠正、确认过的做法与必须遵守的禁止模式。
-- [.memory/projects/AGENTS.md](.memory/projects/AGENTS.md) — 进行中的工作、关键时间点，无法从代码或 git 历史推导的决策，以及项目内的规范。兜底：对不上更具体类型时走这里。
-- [.memory/references/AGENTS.md](.memory/references/AGENTS.md) — 需求文档、设计稿、接口文档、监控面板等外部资料。
-- [.memory/skills/AGENTS.md](.memory/skills/AGENTS.md) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
-- [.memory/agent_skills/AGENTS.md](.memory/agent_skills/AGENTS.md) — 本层 `.agents/skills/` 下人写或装入的标准技能，工具只索引不改写。
-<!-- project-memory-local:end -->
-
-<!-- project-memory-children:start -->
-## 下层记忆索引
-
-按任务目录加载对应 `AGENTS.md`。
-
-- [skills/project-memory-init/AGENTS.md](skills/project-memory-init/AGENTS.md) — project-memory-init 目录的项目记忆与规范入口。
-<!-- project-memory-children:end -->
-
-<!-- project-memory:end -->
+维护记录归根作用域，见[根维护知识入口](../.harness/memory/projects/AGENTS.md)；本文件保留适用于当前模块的硬约束。

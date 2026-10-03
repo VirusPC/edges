@@ -70,3 +70,8 @@ extensions/cli/src/tasks/project/assets/review-page/
 *.xls
 *.pptx
 *.ppt
+
+**/.recursive-layout-migration/
+
+# Private harness type user
+.harness/memory/users/

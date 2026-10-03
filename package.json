@@ -17,7 +17,8 @@
     "start:artifacts": "pnpm --filter edges-artifacts-preview start",
     "dev:artifacts": "pnpm --filter edges-artifacts-preview dev",
     "cli:note": "pnpm --filter edges-cli exec tsx src/index.ts note",
-    "mcp:run": "pnpm --filter"
+    "mcp:run": "pnpm --filter",
+    "migrate:recursive-layout": "python3 scripts/migrate-recursive-layout.py"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -2,7 +2,7 @@
 
 看板需要「谁先做」这一维，但不能用状态夹或 P0 事故等级表达。2026-09-15/16 grill 确认：Issue 层优先级照抄 Multica / Linear 风格词档位 `urgent | high | medium | low | none`，写在 frontmatter `metadata.edges-task-priority`；缺省或旧文件无字段视为 `none`。它与 `edges-tasks-status` 正交——改 priority 不搬状态夹、不用文件夹编码优先级。本轮只定 CONTEXT / ADR（及记忆指针），不改 CLI；后续实现叠在 ADR 0005 的 `edges tasks` 命令面上。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
 
-词档位而非 P0–P3 的依据见调研笔记 [`knowledge/projects/tasks/2026-09-15--issue-priority-words-vs-p0.md`](../../knowledge/projects/tasks/2026-09-15--issue-priority-words-vs-p0.md)：主流 tracker 用自然语言档位做 backlog triage；P0 文化来自 SRE / on-call / 云厂商 SLA。Multica 代码固定该五值，但仓内没有「为何用词而不是 P0」的书面说明。
+词档位而非 P0–P3 的依据见调研笔记 [`knowledge/projects/tasks/2026-09-15--issue-priority-words-vs-p0.md`](../../projects/tasks/2026-09-15--issue-priority-words-vs-p0.md)：主流 tracker 用自然语言档位做 backlog triage；P0 文化来自 SRE / on-call / 云厂商 SLA。Multica 代码固定该五值，但仓内没有「为何用词而不是 P0」的书面说明。
 
 **Status:** accepted（grill 确认于 2026-09-15/16）
 

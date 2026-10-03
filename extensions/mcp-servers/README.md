@@ -2,7 +2,7 @@
 
 该目录用于放置多个 MCP server 实现，每个服务独立维护自己的代码与依赖。
 
-本地、有 shell 的 agent **优先** [`../cli/`](../cli/) 的 `edges note …`，不必起 MCP 进程。本目录保留给没有 shell 的宿主。关系说明见 [`../.memory/projects/project_cli_from_mcp.md`](../.memory/projects/project_cli_from_mcp.md)。
+本地、有 shell 的 agent **优先** [`../cli/`](../cli/) 的 `edges note …`，不必起 MCP 进程。本目录保留给没有 shell 的宿主。关系说明见 [`../.memory/projects/project_cli_from_mcp.md`](../../.harness/memory/projects/project_cli_from_mcp.md)。
 
 ## Servers
 

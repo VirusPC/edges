@@ -33,7 +33,7 @@ edges --help / -v
 
 **Breaking rename:** the bin is `edges` only. There is no `edges-note` shim and no default ingest at the root. Callers must migrate to `edges note …`. Running `edges` without a subcommand is a usage error.
 
-Design decision: [`.memory/projects/project_cli_from_mcp.md`](../.memory/projects/project_cli_from_mcp.md). Agent-CLI mechanics: [`.memory/references/reference_agent_oriented_cli.md`](../.memory/references/reference_agent_oriented_cli.md).
+Design decision: [`.memory/projects/project_cli_from_mcp.md`](../../.harness/memory/projects/project_cli_from_mcp.md). Agent-CLI mechanics: [`.memory/references/reference_agent_oriented_cli.md`](../../.harness/memory/references/reference_agent_oriented_cli.md).
 
 ## Run
 

@@ -28,8 +28,8 @@
 
 本轮文档落地与后续 add-type 实现都不包含：
 
-- [`knowledge/tasks/backlog/2026-09-13--project-memory脚本迁到edges-CLI.md`](../../knowledge/tasks/backlog/2026-09-13--project-memory脚本迁到edges-CLI.md) — 把 init / remember / ask / doctor 等脚本迁到 `edges` CLI，再与 Skill / MCP 走同一契约。
-- [`knowledge/tasks/backlog/2026-09-13--tasks-memory与看板语义合并.md`](../../knowledge/tasks/backlog/2026-09-13--tasks-memory与看板语义合并.md) — 以后再谈 `tasks` Memory Type 与看板是否同一套文件或由 CLI 映射。
+- [`knowledge/tasks/backlog/2026-09-13--project-memory脚本迁到edges-CLI.md`](../../.harness/tasks/backlog/2026-09-13--project-memory%E8%84%9A%E6%9C%AC%E8%BF%81%E5%88%B0edges-CLI.md) — 把 init / remember / ask / doctor 等脚本迁到 `edges` CLI，再与 Skill / MCP 走同一契约。
+- [`knowledge/tasks/backlog/2026-09-13--tasks-memory与看板语义合并.md`](../../.harness/tasks/backlog/2026-09-13--tasks-memory%E4%B8%8E%E7%9C%8B%E6%9D%BF%E8%AF%AD%E4%B9%89%E5%90%88%E5%B9%B6.md) — 以后再谈 `tasks` Memory Type 与看板是否同一套文件或由 CLI 映射。
 
 ## Follow-up
 

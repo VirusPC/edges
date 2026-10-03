@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-03
+
+### Changed
+
+- Task 工作流先选择作用域与 domain/maintenance 用途；全流程命令显式沿用相同目标。
+
 ### Changed
 
 - 第 4 步在 `review-page` 渲出本地 HTML 之后：若人需要可达 URL，再 `edges artifacts publish` 并把公开 `url` 给人（手机不能假定 localhost）。来源是看板 Task 时加 `--from-type task --from-id <stem> --task-project <slug>`；没有关联就省略 `from`。`review-page` 仍只渲染。不实现审阅结果回传 Agent 客户端。本轮没有 artifacts MCP。

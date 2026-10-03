@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-10-03
+
+### Changed
+
+- Task 工作流先选择作用域与 domain/maintenance 用途；全流程命令显式沿用相同目标。
+
 ## [1.2.0] - 2026-09-27
 
 ### Changed

@@ -5,6 +5,12 @@ The format follows Keep a Changelog and Semantic Versioning.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-03
+
+### Fixed
+
+- 修复反引号格式链接标签的迁移；真实行内代码与 fenced 示例仍保留原文。
+
 ## [1.0.0] - 2026-10-03
 
 ### Fixed

@@ -53,6 +53,21 @@ class MigrationTests(unittest.TestCase):
             self.assertNotEqual(run.returncode, 0)
         return json.loads(run.stdout) if run.stdout else {}
 
+    def test_link_labels_with_code_are_links_but_code_examples_are_not(self):
+        from migrate import rewrite_links
+        source=self.root/'old/doc.md'; target=self.root/'new/deep/doc.md'
+        def mapped(path):
+            return self.root/'new/asset.png' if path==self.root/'old/asset.png' else path
+        text='[`asset`](asset.png)\n![image](asset.png)\n[ordinary](asset.png)\n`[example](asset.png)`\n```md\n[example](asset.png)\n```\n'
+        result=rewrite_links(text,source,target,mapped)
+        self.assertIn('[`asset`](../asset.png)',result)
+        self.assertIn('![image](../asset.png)',result)
+        self.assertIn('[ordinary](../asset.png)',result)
+        self.assertIn('`[example](asset.png)`',result)
+        self.assertIn('```md\n[example](asset.png)\n```',result)
+        example = r'`f"- [\`{x}\`]({x}) — {d}"`'
+        self.assertEqual(rewrite_links(example, source, target, mapped), example)
+
     def test_moves_private_bytes_assets_modes_and_is_idempotent(self):
         legacy(self.root)
         secret = self.root / '.memory/users/user_private.md'

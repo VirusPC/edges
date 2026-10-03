@@ -91,9 +91,11 @@ def rewrite_links(text, source, destination, mapped):
         if label == raw:
             label = value + (mark + fragment if mark else '')
         return '[' + label + '](' + value + (mark + fragment if mark else '') + ')'
-    # Fenced code examples and inline code are historical text, not live references.
-    parts = re.split(r'(```.*?```|`[^`\n]*`)', text, flags=re.S)
-    return ''.join(part if i % 2 else LINK.sub(replace, part) for i, part in enumerate(parts))
+    # Tokenize whole links before inline spans: code inside a label is part of
+    # the link, while a code span containing example link syntax stays literal.
+    tokens = re.compile(r'```.*?```|~~~.*?~~~|\[[^\]\n]*\]\([^)\n]+\)|`+[^`\n]*`+', re.S)
+    return tokens.sub(lambda match: LINK.sub(replace, match[0]) if match[0].startswith('[') else match[0], text)
+
 
 
 def safe_ancestors(path, root):

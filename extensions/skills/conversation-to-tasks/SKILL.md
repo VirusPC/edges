@@ -1,10 +1,12 @@
 ---
 name: conversation-to-tasks
 description: 把对话整理成任务（背景 → 目标 → 动作 → 完成标准；后两栏可选）。必填不足先提问；成文后交人审（对话确认或 PR），再用 CLI 落库。分支是否新建不限。
-version: 1.2.0
+version: 1.2.1
 ---
 
 从对话整理任务：**成文 → 交人审 → 落库**（人审可以是对话确认或 PR；分支是否新建不限）。正文顺序：**背景 → 目标**（必填）→ **动作** → **完成标准**（后两栏可选；完成标准可留到 `grill-with-docs` 后再补）。与 `conversation-to-notes` 主题行动指南同序（背景 → 问题/目标 → 方案/动作 → 验收/完成标准），便于从笔记开卡平移。四栏同构 STAR（Situation / Task / Action / Result）：用来**制定任务**，尤其是派给 agent 的 brief；**不要**拿 STAR 写复盘（复盘走 `conversation-to-notes`）。
+
+先确定内容所属的作用域 `SCOPE` 和用途 `PURPOSE`：领域工作默认 `domain`，维护该作用域本身用 `maintenance`。Task Project 只是该看板的分组，不决定作用域。后续所有 list/get/project/create/update/status 命令使用同一组 `--scope "$SCOPE" --purpose "$PURPOSE"`；仓内维护 Edges 时显式选仓根和 `maintenance`，不要依赖执行命令时的源码目录。
 
 ## 步骤
 

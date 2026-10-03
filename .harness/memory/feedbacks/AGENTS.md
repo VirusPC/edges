@@ -1,0 +1,106 @@
+<!-- project-memory-type:start -->
+name: feedback
+module: memory
+writable: true
+gitignore: false
+format: ordinary
+<!-- project-memory-type:end -->
+
+# FEEDBACK — 纠正与约束
+
+> 记：用户给出的纠正、明确确认过的做法，以及必须始终生效的禁止模式和它的原因。
+> 不记：读代码就能看出来的写法，以及 `AGENTS.md` 已经写过的规则。
+> 怎么写：正文先一句结论，再跟 `**Why:**`（为什么，便于以后判断边界情况）和 `**How to apply:**`（具体怎么做）。
+> 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
+
+<!-- project-memory-entries:start -->
+- [Skill 分发：能不要的不要，必须留的软链](feedback_agent_skills_hub_symlink.md) — 整理仓库或本机 .xxx/skills 时：能读 .agents/skills 的不占目录；Claude Code 只留软链，禁止实体拷贝。commands 目录不适用。
+- [AGENTS.md 本层入口顺序：user → feedback → project → reference](feedback_agents_local_type_order.md) — 改 AGENTS.md 本层记忆清单或挑类型时：先 user，再 feedback，再 project（兜底），再 reference；skills / agent_skills 仍靠后。
+- [task 是 from.type，不是顶层字段](feedback_artifact_from_task_is_kind.md) — 改 artifact meta / edges artifacts publish 的 from 时打开：task 是 from.type 的一种来源，不要再写顶层 task 或 from.kind；v1 可选 from 只允许 {type:task,id,project}；CLI 是 --from-type / --from-id / --task-project。
+- [Artifacts 文档写用例×能力，不写盒上当天状态](feedback_artifacts_docs_use_case_matrix.md) — 改 Artifacts 预览 README / edges artifacts / 根 README 指针时打开：只写用例×能力（CLI、HTTP、review-page、Action）；不要写某台机器当天是否已迁、verified 日期或当前可达状态。
+- [artifacts nginx 只认 teaching.conf 与 /teaching/](feedback_artifacts_inject_teaching_only.md) — 改 setup-nginx / inject_nginx_include.py 或盒上站点文件时打开：文件是 /etc/nginx/conf.d/teaching.conf（TEACHING_CONF）；前缀只认 /teaching/；不要双认 teach.conf 或 /teach/；遗留先改名再 migrate-teaching-nginx-prefix.py，然后 edges artifacts server setup-nginx。
+- [artifacts server CLI 用 setup-nginx，不要 snippet / server init](feedback_artifacts_server_cli_no_nginx.md) — 改 edges artifacts server 命令面时打开：公开面是 install（保证 env、不 start）/ start|stop|restart / status / setup-nginx。没有 server init。不要 nginx-snippet、nginx-setup、configure-proxy。
+- [artifacts server install 不启动进程](feedback_artifacts_server_install_not_start.md) — 改 edges artifacts server 的 install/start、或想把装 unit 和拉起进程合成一步时打开：install 保证 env、装依赖/unit/enable，不 start；start/stop/restart 只做进程生命周期。
+- [能力面必须 CLI / Skill / MCP 并列](feedback_capability_surface_three_peers.md) — 写能力面标题、Why、How-to 时：三者并列；禁止「必要时 MCP」、禁止用「一个 CLI + 一份 skill」当本仓简称。
+- [根 changelog 不要堆 schema 字段表](feedback_changelog_no_schema_dump.md) — 写根 CHANGELOG Unreleased 时打开：用人话完整句写能做什么，对照 [1.2.0] 的语气；不要把 schema 字段表、flag 汤或运维细节塞进一段。小节标题与条目前小标题只看 project_repo_changelog，不要另写一套。缘起 https://github.com/VirusPC/edges/pull/110。
+- [classifyTasks 按已有质心归类，不要求 embedding](feedback_classify_tasks_centroids_not_embeddings.md) — 写或改 project-tasks-classify / classifyTasks 时：按用户已设 Task Project（标题+描述）做归属建议，用 LLM / agent 判断；不要写成 Embedding-based 最近质心分类，不要要求 embedding，也不要把方法名写成 K-means。Embedding / 真向量分类另卡。缘起 https://github.com/VirusPC/edges/pull/78。
+- [CLI 项目放 extensions/cli，不放仓库根](feedback_cli_under_extensions.md) — 新增或移动面向 agent 的 CLI 时：放 extensions/cli，禁止仓库根 clis/。
+- [Codex 唤起 skill 用 $ 不是 /](feedback_codex_invoke_skill_with_dollar.md) — 在 Codex 里触发某个 skill 时用 $skill-name；/ 是斜杠命令。/skills 只列清单。不要把认不到 skill 当成没装上。
+- [reference 的 description 必须带关键链接](feedback_description_must_include_urls.md) — 写或更新 .memory/references/* 时：description 与 REFERENCE.md 索引行必须带关键 URL，不能只写在正文 Links。缘起 https://github.com/VirusPC/edges/pull/45。
+- [禁止动词的 help 测例锚定命令行](feedback_help_forbid_verb_line_anchor.md) — 写 edges tasks --help 测例、禁止某个动词出现时：用 ^\s+verb\b 锚定命令列表行，不要用 /\bverb\b/，以免 after-help 的 “There is no X command” 被当成命令。
+- [接口层方案进 .memory，不进 docs](feedback_interface_plans_in_memory.md) — 写 extensions 层调研或技术方案时：进 .memory（reference/project），禁止放 extensions/docs 或 knowledge/projects，否则 ask 检索不到。
+- [--root-dir 封住记忆树，不把外面的 .memory 当祖先](feedback_isolated_root_dir.md) — 目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。
+- [知识闭环的反馈回到捕获](feedback_knowledge_loop_returns_to_capture.md) — 绘制或描述知识闭环时：反馈必须重新成为输入并回到捕获，不能绕过捕获直接进入生产或沉淀。
+- [project-memory init 先留本地](feedback_memory_init_keep_local_until_asked.md) — tasks 目录 init/记忆脚手架写完后默认不提交，等用户明确说入库再推。
+- [不要加 edges-note shim 或根目录默认 ingest](feedback_no_edges_note_shim.md) — 改 edges-cli 的 bin、默认命令或兼容入口时：只保留 edges；禁止 edges-note 第二 bin / shim；根目录无子命令不得跑 note ingest。
+- [不要再给本仓库装 OpenSpec](feedback_no_openspec.md) — 规划与决策写 .memory，禁止 openspec init 以及把 skill/command vendor 进仓库里的 agent 目录。
+- [Restore --force 整份替换，不合并](feedback_restore_force_replaces.md) — 改 user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。
+- [审阅壳竖线只拖宽度](feedback_review_shell_dividers_resize_width.md) — 改审阅壳三栏分隔线或拖放时打开：两条竖线只调整左右栏宽度，不搬任务、不改状态。项目拖放仍只在左栏。2026-09-24 peng cheng 澄清。
+- [审阅壳筛选靠右、紧挨导出](feedback_review_shell_filters_before_export.md) — 改审阅壳顶栏筛选或复制导出 JSON 的位置时打开：全文和优先级、负责人、状态整组靠右，紧挨在导出按钮前面。系统名不在这一栏。
+- [改 skill 后必须升级 version、写 changelog、打 tag](feedback_skill_bump_version.md) — 更新 extensions/skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/<name>@<version> tag。
+- [teach 工作区放 knowledge/teaching，不放 .teaching](feedback_teach_workspace_location.md) — 为 teach 技能新建教学工作区时：一律放 knowledge/teaching/<topic>/ 并在 knowledge/teaching/README.md 登记；不要写到 .teaching/。
+- [断言仓库事实前先跑能证伪它的命令](feedback_verify_before_asserting.md) — 汇报仓库、git 历史或工具行为的事实时：先跑验证命令，别把推断说成查过的。工具输出的显示形态不等于文件内容。
+<!-- project-memory-entries:end -->
+
+## 原模块：extensions
+
+
+
+# FEEDBACK — 纠正与约束
+
+> 记：用户给出的纠正、明确确认过的做法，以及必须始终生效的禁止模式和它的原因。
+> 不记：读代码就能看出来的写法，以及 `AGENTS.md` 已经写过的规则。
+> 怎么写：正文先一句结论，再跟 `**Why:**`（为什么，便于以后判断边界情况）和 `**How to apply:**`（具体怎么做）。
+> 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
+
+
+
+## 原模块：shared-extensions
+
+
+
+# FEEDBACK — 纠正与约束
+
+> 记：用户给出的纠正、明确确认过的做法，以及必须始终生效的禁止模式和它的原因。
+> 不记：读代码就能看出来的写法，以及 `AGENTS.md` 已经写过的规则。
+> 怎么写：正文先一句结论，再跟 `**Why:**`（为什么，便于以后判断边界情况）和 `**How to apply:**`（具体怎么做）。
+> 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
+
+
+
+## 原模块：knowledge/notes
+
+
+
+# FEEDBACK — 纠正与约束
+
+> 记：用户给出的纠正、明确确认过的做法，以及必须始终生效的禁止模式和它的原因。
+> 不记：读代码就能看出来的写法，以及 `AGENTS.md` 已经写过的规则。
+> 怎么写：正文先一句结论，再跟 `**Why:**`（为什么，便于以后判断边界情况）和 `**How to apply:**`（具体怎么做）。
+> 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
+
+
+
+## 原模块：knowledge/tasks
+
+
+
+# FEEDBACK — 纠正与约束
+
+> 记：用户给出的纠正、明确确认过的做法，以及必须始终生效的禁止模式和它的原因。
+> 不记：读代码就能看出来的写法，以及 `AGENTS.md` 已经写过的规则。
+> 怎么写：正文先一句结论，再跟 `**Why:**`（为什么，便于以后判断边界情况）和 `**How to apply:**`（具体怎么做）。
+> 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
+
+
+
+## 原模块：extensions/skills/project-memory-init
+
+
+
+# FEEDBACK — 纠正与约束
+
+> 记：用户给出的纠正、明确确认过的做法，以及必须始终生效的禁止模式和它的原因。
+> 不记：读代码就能看出来的写法，以及 `AGENTS.md` 已经写过的规则。
+> 怎么写：正文先一句结论，再跟 `**Why:**`（为什么，便于以后判断边界情况）和 `**How to apply:**`（具体怎么做）。
+> 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
