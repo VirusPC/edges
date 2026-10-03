@@ -156,10 +156,146 @@ class MigrationTests(unittest.TestCase):
         result = self.run_cli()
         self.assertIn('incomplete', result['status'])
         self.assertFalse((self.root / '.agents').exists())
-        text = (self.root / '.harness/skills/docs/AGENTS.md').read_text()
-        for value in ['writable: false', 'gitignore: true', 'unknown: keep', 'module: skills']:
+        self.assertTrue((self.root / '.harness/memory/docs/AGENTS.md').is_file())
+        text = (self.root / '.harness/memory/docs/AGENTS.md').read_text()
+        for value in ['writable: false', 'gitignore: true', 'unknown: keep', 'module: memory']:
             self.assertIn(value, text)
         self.assertTrue((self.root / '.harness/skills/referenced/AGENTS.md').exists())
+
+    def test_custom_module_is_independent_of_format_and_preserves_original_directory(self):
+        for module, fmt, expected in [(None, 'skills', 'memory'), ('memory', 'skills', 'memory'), ('skills', 'ordinary', 'skills')]:
+            with self.subTest(module=module, format=fmt), tempfile.TemporaryDirectory() as raw:
+                root = Path(raw).resolve()
+                legacy(root, ('docs',))
+                fields = 'name: guide\nwritable: false\nindex-only: true\ngitignore: true\nformat: ' + fmt + '\nunknown: keep\n'
+                if module:
+                    fields += 'module: ' + module + '\n'
+                write(root / '.memory/docs/AGENTS.md', '<!-- project-memory-type:start -->\n' + fields + '<!-- project-memory-type:end -->\nmanual intro\n' + ENTRY)
+                rel = 'method/SKILL.md' if fmt == 'skills' else 'guide_example.md'
+                body = b'---\nname: method\ndescription: example\n---\nbody  \n'
+                source = root / '.memory/docs' / rel
+                source.parent.mkdir(parents=True, exist_ok=True)
+                source.write_bytes(body)
+                write(root / '.memory/docs/assets/data', 'asset bytes')
+                import migrate
+                result = migrate.migrate(root)
+                self.assertEqual(result['status'], 'migrated')
+                dest = root / '.harness' / expected / 'docs'
+                self.assertTrue((dest / rel).is_file(), 'custom body must retain its module and directory')
+                self.assertEqual((dest / rel).read_bytes(), body)
+                self.assertEqual((dest / 'assets/data').read_text(), 'asset bytes')
+                index = (dest / 'AGENTS.md').read_text()
+                for value in ['name: guide', 'writable: false', 'index-only: true', 'gitignore: true', 'unknown: keep', 'manual intro', f']({rel})']:
+                    self.assertIn(value, index)
+                self.assertIn(f'](.harness/{expected}/docs/AGENTS.md)', (root / 'AGENTS.md').read_text())
+                self.assertIn(f'/.harness/{expected}/docs/', (root / '.gitignore').read_text())
+                specs = migrate.layer_type_specs(root)
+                self.assertEqual([(x.name, x.module, x.format, x.writable, x.gitignore) for x in specs], [('guide', expected, fmt, False, True)])
+                before = snapshot(root)
+                self.assertEqual(migrate.migrate(root)['pathMap'], [])
+                self.assertEqual(snapshot(root), before)
+
+    def test_unsupported_custom_module_fails_before_mutation(self):
+        legacy(self.root, ('docs',))
+        write(self.root / '.memory/docs/AGENTS.md', '<!-- project-memory-type:start -->\nname: docs\nmodule: tasks\nwritable: false\ngitignore: true\nformat: skills\n<!-- project-memory-type:end -->\n' + ENTRY)
+        before = snapshot(self.root)
+        self.run_cli(good=False)
+        self.assertEqual(snapshot(self.root), before)
+        self.assertFalse((self.root / '.project-memory-migration').exists())
+
+    def test_custom_identity_cannot_take_official_destination(self):
+        for dirname, module in [('users', 'memory'), ('managed', 'skills')]:
+            with self.subTest(directory=dirname), tempfile.TemporaryDirectory() as raw:
+                root = Path(raw).resolve()
+                legacy(root, (dirname,))
+                write(root / '.memory' / dirname / 'AGENTS.md', '<!-- project-memory-type:start -->\nname: docs\nmodule: ' + module + '\nwritable: false\ngitignore: true\nformat: skills\n<!-- project-memory-type:end -->\n' + ENTRY)
+                before = snapshot(root)
+                import migrate
+                with self.assertRaisesRegex(ValueError, 'Official type path conflict'):
+                    migrate.migrate(root)
+                self.assertEqual(snapshot(root), before)
+
+    def test_private_existing_directories_protected_before_copy(self):
+        import migrate
+        for parent_mode, user_mode, existing_mode, expected in [(0o755, 0o700, 0o755, 0o700), (0o700, 0o755, 0o755, 0o700), (0o755, 0o750, 0o700, 0o700)]:
+            with self.subTest(parent=parent_mode, users=user_mode, existing=existing_mode), tempfile.TemporaryDirectory() as raw:
+                root = Path(raw).resolve()
+                legacy(root, ('user',))
+                users = root / '.memory/users'
+                write(users / 'user_secret.md', 'private bytes')
+                (users / 'user_secret.md').chmod(0o644)
+                write(users / 'assets/nested/data', 'private asset')
+                (users / 'assets').chmod(0o700)
+                users.chmod(user_mode)
+                (root / '.memory').chmod(parent_mode)
+                dest = root / '.harness/memory/users'
+                (dest / 'assets/nested').mkdir(parents=True)
+                dest.chmod(existing_mode)
+                (dest / 'assets').chmod(0o755)
+                agents = root / 'AGENTS.md'
+                agents.write_text(agents.read_text().replace('.memory/users/AGENTS.md', '.harness/memory/users/AGENTS.md'))
+                public = root / 'public'
+                public.mkdir(mode=0o755)
+                original_write = migrate.write_state
+                copied = []
+                def probe(path, value):
+                    if path.is_relative_to(dest):
+                        self.assertEqual(stat.S_IMODE(dest.stat().st_mode), expected)
+                        self.assertEqual(stat.S_IMODE((dest / 'assets').stat().st_mode), 0o700)
+                        copied.append(path)
+                    original_write(path, value)
+                with patch.object(migrate, 'write_state', side_effect=probe):
+                    migrate.migrate(root)
+                self.assertTrue(copied)
+                self.assertEqual((dest / 'user_secret.md').read_text(), 'private bytes')
+                self.assertEqual((dest / 'assets/nested/data').read_text(), 'private asset')
+                self.assertEqual(stat.S_IMODE((dest / 'user_secret.md').stat().st_mode), 0o644)
+                self.assertEqual(stat.S_IMODE(public.stat().st_mode), 0o755)
+                self.assertFalse((root / '.memory').exists())
+
+    def test_recovery_rejects_changed_source_or_target_directory_modes(self):
+        import migrate
+        for rel, changed in [('.harness/memory/users', 0o755), ('.harness/memory/users/assets', 0o750), ('.memory/users', 0o750), ('.memory', 0o700)]:
+            with self.subTest(path=rel), tempfile.TemporaryDirectory() as raw:
+                root = Path(raw).resolve()
+                legacy(root, ('user',))
+                write(root / '.memory/users/assets/data', 'private asset')
+                (root / '.memory').chmod(0o755)
+                (root / '.memory/users').chmod(0o700)
+                with patch.object(migrate, 'validate', side_effect=OSError('interrupt after copy')):
+                    with self.assertRaises(OSError):
+                        migrate.migrate(root)
+                directory = root / rel
+                original_mode = stat.S_IMODE(directory.stat().st_mode)
+                directory.chmod(changed)
+                before = snapshot(root)
+                with self.assertRaisesRegex(ValueError, 'directory-mode-changed'):
+                    migrate.migrate(root)
+                self.assertEqual(snapshot(root), before)
+                self.assertEqual(stat.S_IMODE(directory.stat().st_mode), changed)
+                directory.chmod(original_mode)
+                migrate.migrate(root)
+                self.assertFalse((root / '.memory').exists())
+
+    def test_old_pending_journal_without_directory_permissions_is_not_replayed(self):
+        import migrate
+        legacy(self.root, ('user',))
+        users = self.root / '.memory/users'
+        users.joinpath('AGENTS.md').rename(self.root / '.memory/USER.md')
+        users.rmdir()
+        self.root = self.root.resolve()
+        job = migrate.plan(self.root, False)
+        job.pop('sourceDirectoryModes')
+        job['directoryMap'] = []  # Old flat-index jobs did not plan a type directory.
+        job.update(target=str(self.root), recursive=False, phase='planned')
+        journal = self.root / migrate.JOURNAL / 'journal.json'
+        write(journal, json.dumps(job))
+        before = snapshot(self.root)
+        with self.assertRaisesRegex(ValueError, 'journal-directory-permissions-missing'):
+            migrate.migrate(self.root)
+        self.assertEqual(snapshot(self.root), before)
+        self.assertEqual(json.loads(journal.read_text()), job)
+        self.assertFalse((self.root / '.harness').exists())
 
     def test_missing_or_invalid_privileges_and_builtin_collision_conflict(self):
         for fields in ['name: docs\n', 'name: docs\nwritable: maybe\ngitignore: true\n', 'name: managed\nwritable: true\ngitignore: false\n']:

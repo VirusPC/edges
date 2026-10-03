@@ -162,7 +162,7 @@ def make_plan(root, manifest):
         rel = path.relative_to(root).as_posix()
         if rel in exact:
             return root / exact[rel]
-        for source, target in remnant_type_map.items():
+        for source, target in sorted(remnant_type_map.items(), key=lambda pair: len(pair[0].parts), reverse=True):
             if path == source or path.is_relative_to(source):
                 return target / path.relative_to(source)
         for owner in sorted(owners, key=len, reverse=True):
@@ -176,6 +176,14 @@ def make_plan(root, manifest):
             if rel == old or rel.startswith(old + '/'):
                 return root / (new + rel[len(old):])
         return path
+
+    # Preserve the generic module/type decision, then apply reviewed instance
+    # ownership. A custom skills-module type must not be remapped as memory.
+    generic_targets = {op['source']: mapped(Path(op['target'])) for op in memory['operations']}
+    generic_directories = {Path(item['source']): mapped(Path(item['target'])) for item in memory['directoryMap']}
+    for source, dest in generic_targets.items():
+        exact.setdefault(Path(source).relative_to(root).as_posix(), dest.relative_to(root).as_posix())
+    remnant_type_map.update(generic_directories)
 
     # Generic intermediate targets must also honor individually reviewed renames.
     intermediate = {}
@@ -362,19 +370,20 @@ def make_plan(root, manifest):
         if '\t' + pin['source'] in indexed:
             gitlink_move = pin
     directory_targets = {}
+    private_dirs = [str(mapped(Path(path))) for path in memory['private']]
     for item in memory['directoryMap']:
         source, target = Path(item['source']), mapped(Path(item['source']))
         generic.safe_ancestors(target / 'placeholder', root)
         if generic.present(target) and not target.is_dir():
             raise ValueError('directory-target-conflict: ' + str(target.relative_to(root)))
         before_mode = stat.S_IMODE(target.stat().st_mode) if target.exists() else None
-        desired_mode = item['mode'] if before_mode is None else item['mode'] & before_mode
+        private = any(target == Path(path) or target.is_relative_to(Path(path)) for path in private_dirs)
+        desired_mode = generic.plan_directory(source, target, root, private)['targetMode']
         key = str(target)
         if key not in directory_targets:
             directory_targets[key] = {'target': key, 'mode': desired_mode, 'beforeMode': before_mode, 'sources': []}
         directory_targets[key]['mode'] &= desired_mode
         directory_targets[key]['sources'].append({'source': str(source), 'mode': item['mode']})
-    private_dirs = [str(mapped(Path(path))) for path in memory['private']]
     # Flat legacy private indexes and synthetic official indexes have no source
     # type directory. Establish a private destination before their first copy.
     for path in private_dirs:

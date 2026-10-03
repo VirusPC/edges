@@ -5,6 +5,13 @@ The format follows Keep a Changelog and Semantic Versioning.
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-10-03
+
+### Fixed
+
+- 自定义类型默认保留 memory 归属与原目录；独立保留显式 module 和 format，官方目标路径冲突在复制前拒绝。
+- 首次复制前收紧已有私有目录，保留祖先提供的限制及更严格目标权限；恢复校验源与目标目录权限，拒绝覆盖后续 chmod。
+
 ## [1.0.1] - 2026-10-03
 
 ### Fixed

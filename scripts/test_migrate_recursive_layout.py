@@ -104,6 +104,24 @@ class InstanceMigrationTest(unittest.TestCase):
         self.assertNotIn('<!-- project-memory:start -->',(self.root/'extensions/AGENTS.md').read_text())
         self.assertFalse((self.root/'extensions/.memory').exists())
 
+    def test_generic_custom_module_mapping_survives_instance_composition(self):
+        links = []
+        for directory, fields, fmt in [('docs', '', 'skills'), ('manuals', 'module: skills\n', 'ordinary')]:
+            self.put(f'.memory/{directory}/AGENTS.md', '<!-- project-memory-type:start -->\nname: ' + directory + '\nwritable: false\ngitignore: true\nformat: ' + fmt + '\n' + fields + '<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n')
+            rel = 'example/SKILL.md' if fmt == 'skills' else 'manuals_example.md'
+            self.put(f'.memory/{directory}/{rel}', '---\nname: example\ndescription: fixture\n---\nbody\n')
+            links.append(f'- [{directory}](.memory/{directory}/AGENTS.md) — fixture')
+        agents = self.root / 'AGENTS.md'
+        agents.write_text(agents.read_text().replace('<!-- project-memory-local:end -->', '\n'.join(links) + '\n<!-- project-memory-local:end -->'))
+        result = self.run_script('--apply')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for rel in ('.harness/memory/docs/example/SKILL.md', '.harness/skills/manuals/manuals_example.md'):
+            self.assertTrue((self.root / rel).is_file(), rel)
+        before = self.snapshot()
+        result = self.run_script('--apply')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.snapshot(), before)
+
     def legacy_indexes(self, root_fields, module_fields, root_header='', module_header=''):
         for owner, fields, header in [('',root_fields,root_header),('extensions/',module_fields,module_header)]:
             index = ('<!-- project-memory-type:start -->\nname: project\n' + fields +
@@ -174,8 +192,9 @@ class InstanceMigrationTest(unittest.TestCase):
         self.put('extensions/AGENTS.md','# module constraints\n')
         self.put('extensions/.memory/users/AGENTS.md','# private\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n')
         self.put('extensions/.memory/users/assets/private.bin','private bytes')
+        (self.root/'extensions/.memory').chmod(0o700)
         for rel in ('extensions/.memory/users','extensions/.memory/users/assets'):
-            (self.root/rel).chmod(0o700)
+            (self.root/rel).chmod(0o755)
         # A pre-existing public destination directory must be tightened too.
         (self.root/'.harness/memory/users').mkdir(parents=True,exist_ok=True)
         (self.root/'.harness/memory/users').chmod(0o755)

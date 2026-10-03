@@ -97,8 +97,11 @@ def parse(scope):
                 raise ValueError('managed-requires-writable-skills')
             if name == 'agent_skills' and (writable or fmt != 'skills'):
                 raise ValueError('referenced-requires-index-only-skills')
-            module = 'skills' if fmt == 'skills' else 'memory'
-            if 'module' in fields and fields['module'] != module:
+            default_module = 'skills' if name in RENAMES else 'memory'
+            module = fields.get('module', default_module)
+            if module not in {'memory', 'skills'}:
+                raise ValueError('unsupported-legacy-module')
+            if name in BUILTINS and (module != default_module or (name not in RENAMES and fmt != 'ordinary')):
                 raise ValueError('ambiguous-legacy-module')
             dirname = BUILTINS.get(name, name if name.endswith('s') else name + 's')
             directory = memory / (path.name if path.is_dir() else dirname)

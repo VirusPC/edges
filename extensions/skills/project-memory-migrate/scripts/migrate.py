@@ -110,6 +110,28 @@ def safe_ancestors(path, root):
         current = current.parent
 
 
+def plan_directory(source, dest, root, private=False):
+    """Keep source modes distinct from the destination's conservative mode."""
+    safe_ancestors(dest / 'placeholder', root)
+    if present(dest) and not dest.is_dir():
+        raise ValueError('directory-target-conflict: ' + str(dest))
+    mode = stat.S_IMODE(source.stat().st_mode) if source.is_dir() else 0o700
+    desired = mode
+    if private:
+        # The moved type may have relied on .memory or an owning method for
+        # its protection. Retain those restrictions at its new location.
+        for ancestor in source.parents:
+            if ancestor == root:
+                break
+            if ancestor.is_relative_to(root) and ancestor.is_dir():
+                desired &= stat.S_IMODE(ancestor.stat().st_mode)
+    original = stat.S_IMODE(dest.stat().st_mode) if dest.exists() else None
+    if original is not None:
+        desired &= original
+    return {'source': str(source), 'target': str(dest), 'mode': mode,
+            'originalTargetMode': original, 'targetMode': desired}
+
+
 def valid_new_scope(scope):
     harness = scope / '.harness'
     if not present(harness):
@@ -220,7 +242,8 @@ def plan(target, recursive):
             # parsing has already checked official permissions/format invariants.
             converted = parse_type_meta(convert_index('', spec))
             planned_index = (spec.relative_target / 'AGENTS.md').as_posix()
-            if converted.name in SEED_TYPE_NAMES and planned_index != index_file_name(converted.name):
+            official_owner = next((name for name in SEED_TYPE_NAMES if index_file_name(name) == planned_index), None)
+            if (official_owner is not None and official_owner != converted.name) or (converted.name in SEED_TYPE_NAMES and planned_index != index_file_name(converted.name)):
                 raise ValueError('Official type path conflict: ' + converted.name)
             if converted.module != spec.module:
                 raise ValueError('Type module disagrees with planned path: ' + planned_index)
@@ -352,12 +375,19 @@ def plan(target, recursive):
                 old = lexical(owner / raw)
                 if mapped(old) == old:
                     raise ValueError('unresolved-legacy-adoption: ' + str(old))
-    directory_map = [{'source': str(p), 'target': str(mapped(p)), 'mode': stat.S_IMODE(p.stat().st_mode)} for p in set(directories) if p.name != '.memory']
-    for item in directory_map:
-        dest = Path(item['target'])
-        safe_ancestors(dest / 'placeholder', target)
-        if present(dest) and not dest.is_dir():
-            raise ValueError('directory-target-conflict: ' + str(dest))
+    directory_map = []
+    for source in sorted(set(directories), key=str):
+        if source.name == '.memory':
+            continue
+        dest = mapped(source)
+        is_private = any(dest == path or dest.is_relative_to(path) for path in private)
+        directory_map.append(plan_directory(source, dest, target, is_private))
+    # Flat or reconstructed private indexes can have no source type directory.
+    for owner, spec in types:
+        dest = mapped(owner / spec.relative_target)
+        if spec.private and not any(item['target'] == str(dest) for item in directory_map):
+            directory_map.append(plan_directory(spec.directory, dest, target, True))
+    source_modes = {str(path): stat.S_IMODE(path.stat().st_mode) for path in set(directories)}
     watched = []
     operations_by_source = {op['source']: op for op in operations}
     for owner, spec in types:
@@ -369,7 +399,7 @@ def plan(target, recursive):
             data = base64.b64decode(op['after']['data']) if op and op['after']['kind'] == 'file' else path.read_bytes()
             records.append({'path': str(mapped(path)), 'sha256': hashlib.sha256(data).hexdigest()})
         watched.append({'owner': str(mapped(owner)), 'records': records})
-    return {'watched': watched, 'directoryMap': directory_map, 'legacyOwners': [str(p) for p in owners], 'operations': operations, 'directories': [str(p) for p in sorted(set(directories), key=lambda p: len(p.parts), reverse=True)], 'private': [str(p) for p in private], 'diagnostics': diagnostics, 'owners': [str(mapped(p)) for p in owners]}
+    return {'sourceDirectoryModes': source_modes, 'watched': watched, 'directoryMap': directory_map, 'legacyOwners': [str(p) for p in owners], 'operations': operations, 'directories': [str(p) for p in sorted(set(directories), key=lambda p: len(p.parts), reverse=True)], 'private': [str(p) for p in private], 'diagnostics': diagnostics, 'owners': [str(mapped(p)) for p in owners]}
 
 
 def write_state(path, value):
@@ -429,11 +459,22 @@ def validate_source_inventory(job):
 
 def preflight_job(target, job):
     validate_source_inventory(job)
+    if job['operations'] and 'sourceDirectoryModes' not in job:
+        raise ValueError('journal-directory-permissions-missing: review legacy journal before recovery')
+    for raw, mode in job.get('sourceDirectoryModes', {}).items():
+        path = Path(raw)
+        safe_ancestors(path / 'placeholder', target)
+        if present(path) and (not path.is_dir() or stat.S_IMODE(path.stat().st_mode) != mode):
+            raise ValueError('resume-source-directory-mode-changed: ' + raw)
     for item in job.get('directoryMap', []):
         dest = Path(item['target'])
         safe_ancestors(dest / 'placeholder', target)
         if present(dest) and not dest.is_dir():
             raise ValueError('directory-target-conflict: ' + str(dest))
+        actual = stat.S_IMODE(dest.stat().st_mode) if dest.exists() else None
+        allowed = (item['targetMode'],) if job.get('phase') in {'copied', 'validated'} else (item['originalTargetMode'], item['targetMode'])
+        if actual not in allowed:
+            raise ValueError('resume-target-directory-mode-changed: ' + str(dest))
     for op in job['operations']:
         source, dest = Path(op['source']), Path(op['target'])
         safe_ancestors(source, target)
@@ -526,8 +567,8 @@ def migrate(target, root=None, recursive=False, dry_run=False):
     for item in sorted(job.get('directoryMap', []), key=lambda item: len(Path(item['target']).parts)):
         dest = Path(item['target'])
         if not dest.exists():
-            dest.mkdir(parents=True, mode=item['mode'])
-            dest.chmod(item['mode'])
+            dest.mkdir(parents=True, mode=item['targetMode'])
+        dest.chmod(item['targetMode'])
     for op in job['operations']:
         dest = Path(op['target'])
         if state(dest) != op['after']:

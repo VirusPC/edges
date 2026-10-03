@@ -19,6 +19,8 @@ python3 scripts/migrate-recursive-layout.py --worktree /absolute/path/to/owned-w
 
 脚本复用 `project-memory-migrate/scripts/migrate.py` 的规划、旧类型解析、元数据转换、路径保护、Markdown 链接重定位与文件状态写入接口；将通用规划的中间目标合成为审阅后的最终归属，再统一复制、验证并退役旧源。通用迁移器不内置 Edges 业务路径。观察模块的职责与导航以 `.harness/observation/AGENTS.md` 为入口；Memory、Skills 不新增容器总入口。
 
+自定义类型的模块与格式独立：未指定 module 时保留在 `memory/<原目录>`，显式 `module: memory|skills` 按原值保留；实例的 owner 合并继续使用通用迁移给出的类型目标。私有目录也保留旧 `.memory` 等祖先提供的权限限制，不仅比较类型目录自身。
+
 ## 每台机器的私有材料
 
 Git 提交只迁移公开内容，不能代表其他克隆的 ignored 用户材料已迁。即使已拉到新版公开目录，也要在需要升级的独立工作树上运行同一实例命令。普通 `project-memory-migrate --recursive` 保留旧 owner 关系，不能代替本实例的 owner 合并。
@@ -45,6 +47,8 @@ Git 提交只迁移公开内容，不能代表其他克隆的 ignored 用户材�
 `.recursive-layout-migration/journal.json` 保存恢复所需的字节状态，目录权限 0700、文件 0600，并在复制私有材料前加入 Git 忽略；禁止提交或公开这个日志。失败时保留工作树与日志，修正报出的冲突后用同一命令重跑。脚本检查源/目标是否被后来编辑，验证副本、类型索引、链接与忽略覆盖后才删除源。运行完成后再次执行应返回 `unchanged`；后来新增内容不会被覆盖。 旧版本若已复制根私有索引后因其他作用域缺少官方用户索引而停在 `copied`，保留现有日志与旧源，升级脚本后按同一工作树先 `--dry-run`、再 `--apply`。新版先验证原日志中的源/目标未被修改，再扩充缺失官方索引操作并继续；后来编辑过已复制目标时仍会停下报冲突，不丢弃日志或覆盖编辑。
 
 ## 验证与边界
+
+通用迁移器的 `.project-memory-migration/journal.json` 与上述实例日志不同。升级前的未完成通用日志缺少目录权限记录（`sourceDirectoryModes`、目录项的 `originalTargetMode` / `targetMode`），新版返回 `journal-directory-permissions-missing`，不会猜测历史权限或重放文件；已完成日志不重放，重复执行重新规划当前树，不受影响。保留原日志及两侧材料，在受保护的本机副本逐项核对文件状态与可信的迁移前目录权限；有完整备份时，在独立空目录恢复并以新版 dry-run、迁移和验证形成可审阅结果，再人工处理与原现场的差异。没有可信权限依据时交所有者裁决，不能删除日志、覆盖目标或假定旧源仍完整。具体步骤见 [迁移 Skill 的旧版日志恢复说明](../extensions/skills/project-memory-migrate/SKILL.md#旧版未完成日志的恢复)。实例日志原有的缺失索引恢复流程保持不变。
 
 ```bash
 python3 extensions/skills/project-memory-init/scripts/memory.py doctor --target-dir /absolute/path/to/owned-worktree
