@@ -116,7 +116,7 @@ assert subprocess.run(['git', '-C', str(scope), 'check-ignore',
 - Produces: `generate-tasks-site.ts --scope S --purpose domain|maintenance|all --out D`; all renders both sources with stable source identity (scope/purpose/project/stem) without changing stored task stems or merging records. Root deployment uses all. Single-board review-page behavior remains compatible and render-only. Aggregate transport IDs must not replace stored stems or project slugs; exports retain source scope/purpose and real project identity. Public HTML/export source scope uses a portable repository-relative path (`.` for its root), never an absolute local worktree/install path; absolute directories remain internal execution data. Prevent cross-source drag assignments that would imply an unsupported board move; same-source classification remains available.
 - Note writes below selected scope's `knowledge/notes`, Git operations use actual repo root. MCP forwards explicit target via environment/CLI rather than package cwd. Artifacts service implementation location remains root-owned; its `resolveRepoRoot()` currently consumes `loadConfig().repoPath`, so decouple that resource lookup before changing target resolution. A child scope without extensions must not become the default server installer source; keep the existing explicit server source override.
 
-- [ ] Write failing real-fixture tests for nested scope, same stem in both purposes, Task/Run co-moves, selected-board path escape rejection, and cwd differing from CLI install location.
+- [x] Write failing real-fixture tests for nested scope, same stem in both purposes, Task/Run co-moves, selected-board path escape rejection, and cwd differing from CLI install location.
 
 ```typescript
 // Each fixture is a real temp Git repo with root/child AGENTS entries.
@@ -125,10 +125,12 @@ assert.equal(existsSync(join(child, 'knowledge/tasks')), false);
 assert.equal(existsSync(join(root, '.harness/tasks/_default')), false);
 ```
 
-- [ ] Add scope resolver/context and thread board location through command consumers. Eliminate independent hardcodes in project metadata, migration helpers, run lookups and site generator. Reads must not initialize unrelated boards. Preserve non-index AGENTS content when inserting Task Project blocks, including entries with no Project Memory markers.
-- [ ] Preserve task state/priority/assignee/schema, Task Project semantics, sidecar association and run IDs. Explicit paths cannot bypass chosen scope/purpose; grouped aggregate identities include source to avoid duplicate stem collisions.
-- [ ] Update note/MCP target handling and persistent site generation; do not add web writeback, authentication or a second dashboard product.
-- [ ] Update help and public CLI docs with command examples; flag any generated deployment path work for Task 4. Run focused suites while developing, then CLI/app/MCP build and tests once; commit with RED/GREEN report.
+- [x] Add scope resolver/context and thread board location through command consumers. Eliminate independent hardcodes in project metadata, migration helpers, run lookups and site generator. Reads must not initialize unrelated boards. Preserve non-index AGENTS content when inserting Task Project blocks, including entries with no Project Memory markers.
+- [x] Preserve task state/priority/assignee/schema, Task Project semantics, sidecar association and run IDs. Explicit paths cannot bypass chosen scope/purpose; grouped aggregate identities include source to avoid duplicate stem collisions.
+- [x] Update note/MCP target handling and persistent site generation; do not add web writeback, authentication or a second dashboard product.
+- [x] Update help and public CLI docs with command examples; flag any generated deployment path work for Task 4. Run focused suites while developing, then CLI/app/MCP build and tests once; commit with RED/GREEN report.
+
+**Verified:** CLI 276/276, app 27/27, MCP 14/14 passed; after review fixes, focused CLI 51/51, app export/drag 6/6 and TypeScript compilation passed. Independent task review and scoped re-review approved project read-only fallback and real source identity validation. Existing Vite configuration warnings remain. Deployment and instance adoption are Tasks 4/5. Integrated commits: `8e884ab`, `1226a0f`.
 
 ### Task 4: Evaluation, teaching and deployment adapters
 
