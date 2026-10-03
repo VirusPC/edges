@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Legacy LoCoMo Evaluation Smoke runner (hand-port, truncated-context baseline).
 
-Preferred official path: ``evaluation/run_locomo_official.py`` (VirusPC/locomo
+Preferred official path: ``.harness/evaluation/run_locomo_official.py`` (VirusPC/locomo
 submodule → ``task_eval/evaluate_qa.py`` → official ``evaluation.py`` F1).
 """
 
@@ -17,19 +17,20 @@ from constants import DEFAULT_BASE_URL, DEFAULT_MODEL, DRY_RUN_MODEL, SAMPLE_ID
 from crop import crop_samples, load_locomo, write_json
 from evaluate import dry_run_evaluate
 from openai_compat import resolve_api_config
-from report import render_report
+from report import REPO_ROOT, render_report
 
 CASE_DIR = Path(__file__).resolve().parent
 EVAL_DIR = CASE_DIR.parents[1]
+EVAL_PATH = EVAL_DIR.relative_to(REPO_ROOT).as_posix()
 DEFAULT_REPORTS = EVAL_DIR / "reports"
 DEFAULT_CACHE = EVAL_DIR / ".cache" / "locomo" / "locomo10.json"
 DEFAULT_CROPPED = CASE_DIR / "data" / "locomo10-conv44-smoke.json"
 
 SUBSET = f"{SAMPLE_ID}; first 2 QA per category 1-5 in file order (take all if a category has <2)"
-DRY_RUN_COMMAND = "python3 evaluation/cases/locomo-smoke/run.py dry-run"
+DRY_RUN_COMMAND = f"python3 {EVAL_PATH}/cases/locomo-smoke/run.py dry-run"
 REAL_COMMAND = (
     "KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 "
-    "python3 evaluation/cases/locomo-smoke/run.py baseline"
+    f"python3 {EVAL_PATH}/cases/locomo-smoke/run.py baseline"
 )
 
 
@@ -97,6 +98,7 @@ def main(argv: list[str] | None = None) -> int:
             subset=SUBSET,
             command=DRY_RUN_COMMAND,
             real_command=REAL_COMMAND,
+            reports_dir=reports_dir,
         ),
         encoding="utf-8",
     )
@@ -110,7 +112,7 @@ def _add_io_flags(parser: argparse.ArgumentParser) -> None:
         "--data-file",
         type=Path,
         default=None,
-        help="Local locomo10.json (or already-cropped JSON). If omitted, fetch the pinned upstream file into evaluation/.cache/.",
+        help="Local locomo10.json (or already-cropped JSON). If omitted, fetch the pinned upstream file into the evaluation module’s .cache/.",
     )
     parser.add_argument("--cache-file", type=Path, default=DEFAULT_CACHE)
     parser.add_argument("--cropped-file", type=Path, default=DEFAULT_CROPPED)

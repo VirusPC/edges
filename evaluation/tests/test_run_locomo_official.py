@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import re
+import shutil
 import os
 import subprocess
 import sys
@@ -9,7 +11,7 @@ import unittest
 from pathlib import Path
 
 EVAL_DIR = Path(__file__).resolve().parents[1]
-REPO_ROOT = EVAL_DIR.parent
+REPO_ROOT = next(parent for parent in EVAL_DIR.parents if (parent / ".git").exists())
 WRAPPER = EVAL_DIR / "run_locomo_official.py"
 LOCOMO_ROOT = EVAL_DIR / "third_party" / "locomo"
 FIXTURE_PATH = Path(__file__).resolve().parent / "fixtures" / "tiny_locomo_with_rag.json"
@@ -158,6 +160,46 @@ class OfficialCropTests(unittest.TestCase):
             self.assertIn("event_summary", samples[0])
             self.assertIn("conversation", samples[0])
             self.assertEqual(len(samples[0]["qa"]), 9)
+
+
+class RelocatedEvaluationTests(unittest.TestCase):
+    def test_relocated_print_command_and_reports_resolve_repository_and_custom_output(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            repo = Path(tmp) / "repo"
+            repo.mkdir()
+            (repo / ".git").mkdir()
+            target = repo / ".harness" / "evaluation"
+            shutil.copytree(EVAL_DIR, target, ignore=shutil.ignore_patterns("third_party", ".cache", ".memory", "__pycache__"))
+            adr = repo / "docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md"
+            adr.parent.mkdir(parents=True)
+            adr.write_text("fixture ADR")
+            upstream = target / "third_party/locomo"
+            (upstream / "task_eval").mkdir(parents=True)
+            (upstream / "scripts").mkdir()
+            (upstream / "scripts/crop_locomo_data.py").write_text("")
+            # Only the external benchmark process is replaced: no network or model call.
+            (upstream / "task_eval/evaluate_qa.py").write_text(
+                "import pathlib, sys\npathlib.Path(sys.argv[sys.argv.index('--out-file')+1]).write_text('[]')\n"
+            )
+            env = dict(os.environ, KIMI_API_KEY="fixture-no-network", PYTHONDONTWRITEBYTECODE="1")
+            printed = subprocess.run([sys.executable, str(target / "run_locomo_official.py"), "print-command"],
+                                     cwd=repo, env=env, capture_output=True, text=True)
+            self.assertEqual(printed.returncode, 0, printed.stderr)
+            self.assertIn(".harness/evaluation/third_party/locomo/task_eval/evaluate_qa.py", printed.stdout)
+            self.assertIn("git submodule update --init .harness/evaluation/third_party/locomo", printed.stdout)
+            for reports in [target / "reports", repo / "exports/deep/reports", Path(tmp) / "outside"]:
+                for runner, mode, name in [
+                    (target / "run_locomo_official.py", "smoke", "2026-09-16-locomo-official-smoke-kimi-for-coding.md"),
+                    (target / "cases/locomo-smoke/run.py", "dry-run", "2026-09-16-locomo-smoke-dry-run.md"),
+                ]:
+                    with self.subTest(reports=reports, runner=runner):
+                        done = subprocess.run([sys.executable, str(runner), mode, "--reports-dir", str(reports)],
+                                              cwd=repo, env=env, capture_output=True, text=True)
+                        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+                        body = (reports / name).read_text()
+                        link = re.search(r"See \[.*?\]\((.*?)\)", body).group(1)
+                        self.assertEqual((reports / link).resolve(), adr)
+                        self.assertIn("python3 .harness/evaluation/", body)
 
 
 if __name__ == "__main__":

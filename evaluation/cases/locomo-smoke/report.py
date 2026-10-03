@@ -2,11 +2,17 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
 from statistics import mean
 from typing import Any
 
 from evaluate import f1_key
 from scoring import gold_answer
+
+
+EVAL_DIR = Path(__file__).resolve().parents[2]
+REPO_ROOT = next(parent for parent in EVAL_DIR.parents if (parent / ".git").exists())
 
 
 def render_report(
@@ -18,8 +24,10 @@ def render_report(
     command: str,
     real_command: str,
     sut: str = "upstream locomo (`task_eval/evaluate_qa.py` out-file schema + `eval_question_answering`)",
+    reports_dir: Path = EVAL_DIR / "reports",
     adr_path: str = "docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md",
 ) -> str:
+    adr_link = Path(os.path.relpath(REPO_ROOT / adr_path, Path(reports_dir).resolve())).as_posix()
     score_name = f1_key(model)
     rows: list[str] = []
     scores: list[float] = []
@@ -42,7 +50,7 @@ def render_report(
 
 The numbers below only show that the official-style write → retrieve → answer → score path can produce a reproducible Evaluation Report. They are **not** evidence that Project Memory or Agent Memory works. Do not cite them as project-memory gain, “记忆评测通过”, or benchmark 证明有效.
 
-See [{adr_path}](../../{adr_path}).
+See [{adr_path}]({adr_link}).
 
 | Field | Value |
 | --- | --- |

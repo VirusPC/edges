@@ -18,7 +18,8 @@ from statistics import mean
 from typing import Any
 
 EVAL_DIR = Path(__file__).resolve().parent
-REPO_ROOT = EVAL_DIR.parent
+REPO_ROOT = next(parent for parent in EVAL_DIR.parents if (parent / ".git").exists())
+EVAL_PATH = EVAL_DIR.relative_to(REPO_ROOT).as_posix()
 LOCOMO_ROOT = EVAL_DIR / "third_party" / "locomo"
 EVALUATE_QA = LOCOMO_ROOT / "task_eval" / "evaluate_qa.py"
 CROP_SCRIPT = LOCOMO_ROOT / "scripts" / "crop_locomo_data.py"
@@ -37,13 +38,13 @@ SUBSET = (
     f"{SAMPLE_ID}; first {QA_PER_CATEGORY} QA per category 1-5 in file order "
     "(take all if a category has <2)"
 )
-PRINT_COMMAND = "python3 evaluation/run_locomo_official.py print-command"
+PRINT_COMMAND = f"python3 {EVAL_PATH}/run_locomo_official.py print-command"
 SMOKE_COMMAND = (
     "KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 "
-    "python3 evaluation/run_locomo_official.py smoke"
+    f"python3 {EVAL_PATH}/run_locomo_official.py smoke"
 )
 CLONE_COMMAND = "git clone --recurse-submodules https://github.com/VirusPC/edges.git"
-INIT_COMMAND = "git submodule update --init evaluation/third_party/locomo"
+INIT_COMMAND = f"git submodule update --init {EVAL_PATH}/third_party/locomo"
 
 
 def require_submodule() -> Path:
@@ -116,8 +117,10 @@ def render_official_report(
         "VirusPC/locomo `task_eval/evaluate_qa.py` → official "
         "`task_eval/evaluation.py` (`eval_question_answering` F1)"
     ),
+    reports_dir: Path = DEFAULT_REPORTS,
     adr_path: str = "docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md",
 ) -> str:
+    adr_link = Path(os.path.relpath(REPO_ROOT / adr_path, Path(reports_dir).resolve())).as_posix()
     score_name = f"{model}_f1"
     rows: list[str] = []
     scores: list[float] = []
@@ -139,7 +142,7 @@ def render_official_report(
 
 The numbers below only show that the official write → retrieve → answer → score path can produce a reproducible Evaluation Report. They are **not** evidence that Project Memory or Agent Memory works. Do not cite them as project-memory gain, “记忆评测通过”, or benchmark 证明有效.
 
-See [{adr_path}](../../{adr_path}).
+See [{adr_path}]({adr_link}).
 
 | Field | Value |
 | --- | --- |
@@ -190,7 +193,7 @@ Real kimi-for-coding run (key via env, never commit the key):
 - Not a ranking of memory systems.
 - Not a construct-valid proof for filesystem project-memory.
 - Not an official LoCoMo leaderboard submission.
-- Not the legacy hand-port at `evaluation/cases/locomo-smoke/` (kept for history).
+- Not the legacy hand-port at `{EVAL_PATH}/cases/locomo-smoke/` (kept for history).
 """
 
 
@@ -266,7 +269,7 @@ def _format_print_command(args: argparse.Namespace) -> str:
 # or, in an existing clone:
 {INIT_COMMAND}
 # optional live-run deps (not needed for print-command / unit tests):
-# pip install -r evaluation/third_party/locomo/requirements-openai-compat.txt
+# pip install -r {EVAL_PATH}/third_party/locomo/requirements-openai-compat.txt
 
 # Official evaluate_qa.py (requires KIMI_API_KEY or OPENAI_API_KEY)
 KIMI_API_KEY=... OPENAI_BASE_URL={DEFAULT_BASE_URL} \\
@@ -297,7 +300,7 @@ def _run_smoke(args: argparse.Namespace) -> int:
         print(f"No key in CI? run: {PRINT_COMMAND}", file=sys.stderr)
         return 2
 
-    reports_dir = Path(args.reports_dir)
+    reports_dir = Path(args.reports_dir).resolve()
     reports_dir.mkdir(parents=True, exist_ok=True)
     stem = f"{args.date}-locomo-official-smoke-{_slug(args.model)}"
     out_file = reports_dir / f"{stem}.json"
@@ -324,6 +327,7 @@ def _run_smoke(args: argparse.Namespace) -> int:
             ),
             command=PRINT_COMMAND,
             real_command=SMOKE_COMMAND,
+            reports_dir=reports_dir,
         ),
         encoding="utf-8",
     )

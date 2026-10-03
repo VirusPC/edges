@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-time sudo: serve generated knowledge/tasks/_site at /tasks/ on the
+# One-time sudo: serve generated tasks/_site at /tasks/ on the
 # existing teaching.conf :80 server. Does not replace /teaching/.
 # Does not call this from deploy.yml — Action only generates HTML.
 #
@@ -29,7 +29,7 @@ if [ -n "${EDGES_REPO:-}" ]; then
 else
   REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 fi
-SITE_DIR="${REPO_ROOT}/knowledge/tasks/_site"
+SITE_DIR="${REPO_ROOT}/tasks/_site"
 SITE_DIR="${SITE_DIR%/}"
 
 install -d -m 755 /etc/nginx/snippets

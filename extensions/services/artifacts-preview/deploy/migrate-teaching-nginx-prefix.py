@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Migrate teaching.conf leftover prefixes to canonical /teaching/.
+"""Migrate teaching prefixes and physical roots to the top-level teaching workspace.
 
 Python 3.6 compatible (Alibaba Linux). No type annotations.
 Usage: migrate-teaching-nginx-prefix.py <teaching.conf>
@@ -16,14 +16,9 @@ import sys
 
 SERVER_HEADER = re.compile(r"^([ \t]*)server[ \t]*\{", re.M)
 LOCATION_HEADER = re.compile(r"^([ \t]*)location[ \t]+([^{]+?)[ \t]*\{", re.M)
-LEGACY_LOCATION = re.compile(
-    r"(location[ \t]+(?:\^[~*=][ \t]+)?)(/teach/)"
-)
 LEGACY_ALIAS = re.compile(r"(alias[ \t]+\S*?)/teach/")
 HAS_TEACHING_LOCATION = re.compile(r"location[ \t]+(?:\^[~*=][ \t]+)?/teaching/")
-HAS_ROOT_REDIRECT = re.compile(
-    r"location[ \t]+=[ \t]+/\s*\{[^}]*return[ \t]+30[12][ \t]+/teaching/"
-)
+HAS_ROOT_LOCATION = re.compile(r"location[ \t]+=[ \t]+/\s*\{")
 HAS_TEACH_EXACT_REDIRECT = re.compile(
     r"location[ \t]+=[ \t]+/teach\s*\{[^}]*return[ \t]+30[12][ \t]+/teaching/"
 )
@@ -68,41 +63,46 @@ def body_looks_like_redirect(body):
 
 
 def rewrite_serving_legacy_locations(block):
+    locations = list(iter_blocks(block, LOCATION_HEADER))
+    # Read only server-level directives, leaving roots used by other locations intact.
+    server_body = block
+    for match, loc in reversed(locations):
+        server_body = server_body[:match.start()] + server_body[match.start() + len(loc):]
+    inherited = re.search(r"^[ \t]*root\s+([^;]+);", server_body, re.M)
+    inherited_root = inherited.group(1).strip() if inherited else ""
     pieces = []
     last = 0
-    changed = False
-    for match, loc in iter_blocks(block, LOCATION_HEADER):
+    for match, loc in locations:
         header = match.group(0)
         uri = location_uri(match.group(2))
-        body = loc[len(header) :]
-        pieces.append(block[last : match.start()])
+        body = loc[len(header):]
+        pieces.append(block[last:match.start()])
         if uri in ("/teach/", "/teach") and not body_looks_like_redirect(body):
-            new_header = LEGACY_LOCATION.sub(r"\1/teaching/", header, count=1)
-            if new_header == header and uri == "/teach":
-                new_header = re.sub(
-                    r"(location[ \t]+(?:=[ \t]+)?)(/teach)(?=[ \t{])",
-                    r"\1/teaching/",
-                    header,
-                    count=1,
-                )
-            new_body = LEGACY_ALIAS.sub(r"\1/teaching/", body)
-            pieces.append(new_header + new_body)
-            changed = True
-        else:
-            pieces.append(loc)
+            header = re.sub(r"/teach/?(?=[ \t{])", "/teaching/", header, count=1)
+            body = LEGACY_ALIAS.sub(r"\1/teaching/", body)
+            uri = "/teaching/"
+        if (uri == "/teaching" or uri.startswith("/teaching/")) and not body_looks_like_redirect(body):
+            body = re.sub(r"(\broot\s+)([^;\s]+?)/knowledge/?(?=\s*;)", r"\1\2", body)
+            body = re.sub(r"(\balias\s+)([^;\s]+?)/knowledge/teaching(?=/|\s*;)", r"\1\2/teaching", body)
+            if not re.search(r"\b(?:root|alias)\s+", re.sub(r"#.*", "", body)) and inherited_root.rstrip("/").endswith("/knowledge"):
+                new_root = inherited_root.rstrip("/")[:-len("/knowledge")]
+                indent = match.group(1) + "    "
+                body = "\n" + indent + "root " + new_root + ";" + body
+        pieces.append(header + body)
         last = match.start() + len(loc)
     pieces.append(block[last:])
-    return "".join(pieces), changed
+    updated = "".join(pieces)
+    return updated, updated != block
 
 
 def insert_redirects(block, server_indent):
-    if HAS_ROOT_REDIRECT.search(block) and HAS_TEACH_EXACT_REDIRECT.search(
+    if HAS_ROOT_LOCATION.search(block) and HAS_TEACH_EXACT_REDIRECT.search(
         block
     ) and HAS_TEACH_REWRITE.search(block):
         return block, False
     indent = server_indent + "    "
     parts = []
-    if not HAS_ROOT_REDIRECT.search(block):
+    if not HAS_ROOT_LOCATION.search(block):
         parts.append(
             indent
             + "location = / {\n"
@@ -185,10 +185,10 @@ def main(argv):
         )
         return 1
     if not changed:
-        print("already uses /teaching/ (idempotent) in %s" % path)
+        print("already uses /teaching/ and current physical roots (idempotent) in %s" % path)
         return 0
     path.write_text(updated)
-    print("migrated leftover prefix to /teaching/ in %s" % path)
+    print("migrated teaching prefix/physical roots in %s" % path)
     return 0
 
 
