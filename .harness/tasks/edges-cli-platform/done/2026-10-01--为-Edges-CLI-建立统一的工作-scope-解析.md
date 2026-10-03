@@ -4,16 +4,16 @@ description: 基于递归记忆模型，先解析本次工作 scope，再确定�
 metadata:
   edges-type: task
   edges-title: 为 Edges CLI 建立统一的工作 scope 解析
-  edges-tasks-status: in_review
+  edges-tasks-status: done
   edges-task-project: edges-cli-platform
-  edges-updated-at: "2026-10-03T08:30:42.604Z"
+  edges-updated-at: "2026-10-03T09:02:30.239Z"
 ---
 
-## 2026-10-03 实施进展
+## 2026-10-03 完成记录
 
 CLI 已在操作前统一解析工作 scope，区分目标作用域、Git 仓根与共享实现位置；Tasks 按 domain/maintenance 选板，聚合站点保留来源身份，Note/MCP 已适配目标选择。
 
-集成构建及相关测试通过，当前进入整体审查。实现与验证依据见[实施计划](../../../../docs/superpowers/plans/2026-10-03-recursive-scope-layout.md)及[PR #161](https://github.com/VirusPC/edges/pull/161)。下文保留建卡时的背景与目标，其“当前”“尚未实现”等表述属于当时状态。
+集成构建、相关测试和整体审查通过；审查发现的类型归属与私有权限问题已修复并通过复审。实现与验证依据见[实施计划](../../../../docs/superpowers/plans/2026-10-03-recursive-scope-layout.md)及[PR #161](https://github.com/VirusPC/edges/pull/161)。下文保留建卡时的背景与目标，其“当前”“尚未实现”等表述属于当时状态。
 
 **背景：**
 
@@ -28,7 +28,7 @@ CLI 已在操作前统一解析工作 scope，区分目标作用域、Git 仓根
 
 本任务承接“以递归记忆模型重构 Edges 目录架构”。scope 的表示方式、显式参数与自动推断的优先级、与 `EDGES_REPO` 的兼容、适用命令范围，以及上下文规则的落实方式，留待后续 grill-with-docs 细化；完成标准一并补充。
 
-关联：[递归目录架构任务](../../project-memory/backlog/2026-09-12--%E6%95%B4%E4%BB%93%E4%B8%8Ememory%E5%90%8C%E6%9E%84%E9%80%92%E5%BD%92%E8%9E%8D%E5%90%88.md)、[CLI 配置选址](../../../../extensions/cli/src/utils/config.ts)、[Project Memory 选址](../../../../extensions/skills/project-memory-init/scripts/lib/paths.py)。
+关联：[递归目录架构任务](../../project-memory/done/2026-09-12--%E6%95%B4%E4%BB%93%E4%B8%8Ememory%E5%90%8C%E6%9E%84%E9%80%92%E5%BD%92%E8%9E%8D%E5%90%88.md)、[CLI 配置选址](../../../../extensions/cli/src/utils/config.ts)、[Project Memory 选址](../../../../extensions/skills/project-memory-init/scripts/lib/paths.py)。
 
 **目标：**
 

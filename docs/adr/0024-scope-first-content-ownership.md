@@ -116,4 +116,4 @@ Edges 自身的任务归属重分、projects/teaching 上移、evaluation/observ
 - 目录框架与分类入口已确认；旧内容的逐项归属、共享实现的接入适配及具体迁移清单留待实施计划细化；兼容边界已确定为新版只支持新布局，旧项目使用一次性迁移 Skill。
 - 本决策保留上述目标结构与取舍；2026-10-03 当前实例已完成清单内内容迁移，保护文章与 submodule 指针保持不变，两个原有 referenced 技能来源缺失诊断仍保留。整仓最终验收与其他克隆的私有材料升级分别处理；`knowledge/posts/` 仍受不得由 AI 自动修改或移动的约束。
 
-关联：[递归目录重构任务](../../.harness/tasks/project-memory/backlog/2026-09-12--%E6%95%B4%E4%BB%93%E4%B8%8Ememory%E5%90%8C%E6%9E%84%E9%80%92%E5%BD%92%E8%9E%8D%E5%90%88.md)。
+关联：[递归目录重构任务](../../.harness/tasks/project-memory/done/2026-09-12--%E6%95%B4%E4%BB%93%E4%B8%8Ememory%E5%90%8C%E6%9E%84%E9%80%92%E5%BD%92%E8%9E%8D%E5%90%88.md)。
