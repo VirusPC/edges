@@ -77,8 +77,8 @@ with tempfile.TemporaryDirectory() as d:
 - Produces: machine-readable status and source/target path map; no private body content. Recovery journal/backups are ignored, permission-restricted, and bounded to selected scope.
 - Backup/restore operate on `.harness/memory/users` including its index, retain safe member/path validation and explicit force replacement. Old archives get an actionable conversion-required error, never silently restore old runtime paths. A clone upgraded through Git can already have the valid new public layout while old ignored `.memory/users` remains; migration must merge only non-conflicting private remnants without resetting new public files, and report real target conflicts.
 
-- [ ] Read the skill-creator instructions before creating the migration Skill.
-- [ ] Add fixture tests for filesystem-enumerated ignored/untracked private records, custom ordinary/Skill types with unknown metadata and flags, full managed assets, referenced sources, sparse children and nested Git boundaries. Test original bytes/hashes for unchanged body/assets and external sources. Include a scope nested inside an old managed Skill directory: its owner path moves with the parent and its own `.memory` must map to the new owner’s `.harness`, without a second copy or leftover old subtree. Rebase owned relative symlinks to the same mapped or external target without following them to mutate external data.
+- [x] Read the skill-creator instructions before creating the migration Skill.
+- [x] Add fixture tests for filesystem-enumerated ignored/untracked private records, custom ordinary/Skill types with unknown metadata and flags, full managed assets, referenced sources, sparse children and nested Git boundaries. Test original bytes/hashes for unchanged body/assets and external sources. Include a scope nested inside an old managed Skill directory: its owner path moves with the parent and its own `.memory` must map to the new owner’s `.harness`, without a second copy or leftover old subtree. Rebase owned relative symlinks to the same mapped or external target without following them to mutate external data.
 
 ```python
 # Fixture setup writes the old layout, including a private untracked file.
@@ -91,11 +91,13 @@ assert subprocess.run(['git', '-C', str(scope), 'check-ignore',
     '.harness/memory/users/AGENTS.md'], capture_output=True).returncode == 0
 ```
 
-- [ ] Record RED, implement deterministic mapping and conflict detection before mutations: new built-in name collisions, different target contents, malformed/unknown flags, historical unrelated `.harness`, and symlink escapes stop the whole selected operation.
-- [ ] Establish private ignore coverage before any new private body/index/backup; preserve original bytes except precise existing type metadata/path references. Do not round-trip old records through `remember` or frontmatter serializers that discard unknown fields.
-- [ ] Retarget only explicitly mapped locally owned installation links; don't traverse an externally linked installation directory. Resolve known Markdown paths from original file location then rebase onto mapped targets; preserve manual sections and historical prose. Validate all transformed indexes and source inventory before deleting old source. Implement recoverable journal phases and tests injecting a failure after copying, then resuming safely.
-- [ ] Adapt backup/restore and test traversal, linked-target escape, archive occupation, force, and ignore coverage. Add the migration Skill to distribution/docs without installing or rewriting unrelated host skills.
-- [ ] Run migration suite plus complete Project Memory tests, review diff, commit and report.
+- [x] Record RED, implement deterministic mapping and conflict detection before mutations: new built-in name collisions, different target contents, malformed/unknown flags, historical unrelated `.harness`, and symlink escapes stop the whole selected operation.
+- [x] Establish private ignore coverage before any new private body/index/backup; preserve original bytes except precise existing type metadata/path references. Do not round-trip old records through `remember` or frontmatter serializers that discard unknown fields.
+- [x] Retarget only explicitly mapped locally owned installation links; don't traverse an externally linked installation directory. Resolve known Markdown paths from original file location then rebase onto mapped targets; preserve manual sections and historical prose. Validate all transformed indexes and source inventory before deleting old source. Implement recoverable journal phases and tests injecting a failure after copying, then resuming safely.
+- [x] Adapt backup/restore and test traversal, linked-target escape, archive occupation, force, and ignore coverage. Add the migration Skill to distribution/docs without installing or rewriting unrelated host skills.
+- [x] Run migration suite plus complete Project Memory tests, review diff, commit and report.
+
+**Verified:** Migration suite 31/31 and archive suite 12/12 passed after review fixes; the full runtime suite previously passed 90/90 and remained unchanged. Task review and scoped re-review approved. The source Skill validator rejects the repository-standard `version` key; a temporary normalized copy passes. No actual Edges instance migration was applied. Integrated commits: `702406d`, `cabfdf1`.
 
 ### Task 3: Scope-first CLI and two task purposes
 
