@@ -2,6 +2,7 @@
 import hashlib
 import importlib.util
 import json
+import stat
 from pathlib import Path
 import subprocess
 import tempfile
@@ -102,6 +103,109 @@ class InstanceMigrationTest(unittest.TestCase):
         self.assertEqual(index.count('<!-- project-memory-type:start -->'),1)
         self.assertNotIn('<!-- project-memory:start -->',(self.root/'extensions/AGENTS.md').read_text())
         self.assertFalse((self.root/'extensions/.memory').exists())
+
+    def legacy_indexes(self, root_fields, module_fields, root_header='', module_header=''):
+        for owner, fields, header in [('',root_fields,root_header),('extensions/',module_fields,module_header)]:
+            index = ('<!-- project-memory-type:start -->\nname: project\n' + fields +
+                     '<!-- project-memory-type:end -->\n\n' + header +
+                     '# authored intro\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n')
+            self.put(owner+'.memory/projects/AGENTS.md',index)
+            self.put(owner+'AGENTS.md','# owner\n<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n- [projects](.memory/projects/AGENTS.md) — projects\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n')
+
+    def test_consolidation_preserves_compatible_unknown_metadata_and_frontmatter(self):
+        self.legacy_indexes('shared-field: same\nroot-field: root-value\n',
+                            'shared-field: same\ncustom-field: module-value\n',
+                            '---\nroot-note: root-value\n---\n',
+                            '---\nmodule-note: module-value\nnested-note:\n  detail: preserve-value\n---\n')
+        before=self.snapshot(); dry=self.run_script('--dry-run')
+        self.assertEqual(dry.returncode,0,dry.stderr); self.assertEqual(before,self.snapshot())
+        result=self.run_script('--apply'); self.assertEqual(result.returncode,0,result.stderr)
+        text=(self.root/'.harness/memory/projects/AGENTS.md').read_text()
+        for field in ('root-field: root-value','custom-field: module-value','root-note: root-value','module-note: module-value','nested-note:\n  detail: preserve-value'):
+            self.assertIn(field,text)
+        self.assertEqual(text.count('shared-field: same'),1)
+        self.assertEqual(text.count('<!-- project-memory-type:start -->'),1)
+
+    def test_conflicting_unknown_metadata_rejects_before_any_write(self):
+        self.legacy_indexes('custom-field: root-value\n','custom-field: module-value\n')
+        before=self.snapshot(); result=self.run_script('--apply')
+        self.assertNotEqual(result.returncode,0); self.assertIn('metadata-conflict',result.stderr)
+        self.assertEqual(before,self.snapshot())
+        self.assertFalse((self.root/'.recursive-layout-migration').exists())
+        self.assertFalse((self.root/'.harness').exists())
+
+    def test_conflicting_frontmatter_rejects_before_any_write(self):
+        self.legacy_indexes('','', '---\ncustom-field: root-value\n---\n', '---\ncustom-field: module-value\n---\n')
+        before=self.snapshot(); result=self.run_script('--apply')
+        self.assertNotEqual(result.returncode,0); self.assertIn('metadata-conflict',result.stderr)
+        self.assertEqual(before,self.snapshot()); self.assertFalse((self.root/'.recursive-layout-migration').exists())
+
+    def test_private_directory_modes_exist_before_any_private_copy(self):
+        from unittest.mock import patch
+        result=self.run_script('--apply'); self.assertEqual(result.returncode,0,result.stderr)
+        self.put('extensions/AGENTS.md','# module constraints\n')
+        self.put('extensions/.memory/users/AGENTS.md','# private\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n')
+        self.put('extensions/.memory/users/assets/private.bin','private bytes')
+        for rel in ('extensions/.memory/users','extensions/.memory/users/assets'):
+            (self.root/rel).chmod(0o700)
+        # A pre-existing public destination directory must be tightened too.
+        (self.root/'.harness/memory/users').mkdir(parents=True,exist_ok=True)
+        (self.root/'.harness/memory/users').chmod(0o755)
+        spec=importlib.util.spec_from_file_location('instance_modes',SCRIPT)
+        module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        original=module.generic.write_state; copied=[]
+        def inspect_copy(path,value):
+            if '/.harness/memory/users/' in str(path):
+                copied.append(path)
+                for rel in ('.harness/memory/users','.harness/memory/users/assets'):
+                    folder=self.root/rel
+                    self.assertTrue(folder.is_dir(),'private directory absent before copy')
+                    self.assertEqual(stat.S_IMODE(folder.stat().st_mode),0o700,'private directory permissions before copy')
+                self.git('check-ignore',str(path))
+            return original(path,value)
+        with patch.object(module.generic,'write_state',side_effect=inspect_copy):
+            module.run(self.root,self.manifest,True)
+        self.assertTrue(copied)
+        for rel in ('.harness/memory/users','.harness/memory/users/assets'):
+            self.assertEqual(stat.S_IMODE((self.root/rel).stat().st_mode),0o700)
+        after=self.snapshot(); result=self.run_script('--apply')
+        self.assertEqual(result.returncode,0,result.stderr); self.assertEqual(after,self.snapshot())
+
+    def test_flat_private_index_gets_private_directory_before_copy(self):
+        from unittest.mock import patch
+        result=self.run_script('--apply'); self.assertEqual(result.returncode,0,result.stderr)
+        self.put('.memory/USER.md','# flat private\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n')
+        spec=importlib.util.spec_from_file_location('instance_flat_modes',SCRIPT)
+        module=importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+        original=module.generic.write_state; copied=[]
+        def inspect_copy(path,value):
+            if path.name=='AGENTS.md' and '/.harness/memory/users/' in str(path):
+                copied.append(path)
+                self.assertTrue(path.parent.is_dir(),'private directory absent before flat-index copy')
+                self.assertEqual(stat.S_IMODE(path.parent.stat().st_mode),0o700)
+            return original(path,value)
+        with patch.object(module.generic,'write_state',side_effect=inspect_copy):
+            module.run(self.root,self.manifest,True)
+        self.assertTrue(copied)
+
+    def test_private_remnant_root_and_module_links_keep_original_targets(self):
+        result=self.run_script('--apply'); self.assertEqual(result.returncode,0,result.stderr)
+        self.put('README.md','# root reference\n'); self.put('extensions/README.md','# module reference\n')
+        self.put('extensions/AGENTS.md','# module constraints\n')
+        for owner in ('','extensions/'):
+            with self.subTest(owner=owner):
+                index=owner+'.memory/users/AGENTS.md'
+                self.put(index,'# private\n[reference](../../README.md)\n<!-- project-memory-entries:start -->\n- [private](user_private.md) — record\n<!-- project-memory-entries:end -->\n')
+                self.put(owner+'.memory/users/user_private.md','[reference](../../README.md)\n[index](AGENTS.md)\n')
+                result=self.run_script('--apply'); self.assertEqual(result.returncode,0,result.stderr)
+                expected='../../../'+owner+'README.md'
+                for rel in ('AGENTS.md','user_private.md'):
+                    target=self.root/'.harness/memory/users'/rel
+                    self.assertIn('[reference]('+expected+')',target.read_text())
+                    self.assertEqual((target.parent/expected).resolve(),(self.root/owner/'README.md').resolve())
+                self.assertIn('[private](user_private.md)',(self.root/'.harness/memory/users/AGENTS.md').read_text())
+                # Separate owners each exercise a fresh private index, not an authorized merge.
+                for path in (self.root/'.harness/memory/users').iterdir(): path.unlink()
 
     def test_interrupted_copy_resumes_and_preserves_newer_edits(self):
         import sys

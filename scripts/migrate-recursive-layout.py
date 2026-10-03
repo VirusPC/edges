@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 
@@ -56,6 +57,55 @@ def strip_scope(text):
     return text.replace('<!-- project-memory:start -->', '').replace('<!-- project-memory:end -->', '')
 
 
+def merge_index_metadata(left, right):
+    """Union compatible fields without interpreting or discarding unknown values.
+
+    Values (including indented YAML structures) remain raw text. Different values
+    for the same key require review instead of silently choosing an owner.
+    """
+    type_pattern = re.compile(r'<!-- project-memory-type:start -->\n(.*?)<!-- project-memory-type:end -->', re.S)
+    front_pattern = re.compile(r'\A\s*---\r?\n(.*?)\r?\n---(?:\r?\n|$)', re.S)
+
+    def extract(text):
+        type_match = type_pattern.search(text)
+        type_fields = type_match[1] if type_match else ''
+        body = type_pattern.sub('', text, count=1)
+        front_match = front_pattern.match(body)
+        front_fields = front_match[1] + '\n' if front_match else ''
+        if front_match:
+            body = body[front_match.end():]
+        return type_fields, front_fields, body.lstrip('\r\n')
+
+    def union_fields(first, second):
+        fields = {}
+        comments = []
+        for document in (first, second):
+            matches = list(re.finditer(r'(?m)^([A-Za-z_][A-Za-z0-9_.-]*):', document))
+            preamble = document[:matches[0].start()] if matches else document
+            if any(line.strip() and not line.lstrip().startswith('#') for line in preamble.splitlines()):
+                raise ValueError('index-metadata-structure-needs-review')
+            if preamble.strip() and preamble not in comments:
+                comments.append(preamble)
+            local_keys = set()
+            for number, match in enumerate(matches):
+                key = match[1]
+                value = document[match.start():matches[number+1].start() if number+1<len(matches) else len(document)].rstrip('\r\n')
+                if key in local_keys or (key in fields and fields[key] != value):
+                    raise ValueError('index-metadata-conflict: ' + key)
+                local_keys.add(key)
+                fields.setdefault(key, value)
+        return ''.join(comments) + ''.join(value+'\n' for value in fields.values())
+
+    left_type, left_front, left_body = extract(left)
+    right_type, right_front, right_body = extract(right)
+    type_fields = union_fields(left_type, right_type)
+    front_fields = union_fields(left_front, right_front)
+    headers = ('---\n'+front_fields+'---\n\n') if front_fields else ''
+    if type_fields:
+        headers += '<!-- project-memory-type:start -->\n'+type_fields+'<!-- project-memory-type:end -->\n\n'
+    return headers+left_body, right_body
+
+
 def make_plan(root, manifest):
     owners = manifest.get('privateOwnerMap', OWNER_MAP)
     if owners != OWNER_MAP:
@@ -94,6 +144,8 @@ def make_plan(root, manifest):
         if sha(root / rel) != digest:
             raise ValueError('protected-post-hash-mismatch: ' + rel)
 
+    remnant_type_map = {}
+
     def mapped(path):
         path = generic.lexical(path)
         if not path.is_relative_to(root):
@@ -101,6 +153,9 @@ def make_plan(root, manifest):
         rel = path.relative_to(root).as_posix()
         if rel in exact:
             return root / exact[rel]
+        for source, target in remnant_type_map.items():
+            if path == source or path.is_relative_to(source):
+                return target / path.relative_to(source)
         for owner in sorted(owners, key=len, reverse=True):
             prefix = (owner + '/' if owner != '.' else '')
             for old, new in [('.memory/skills', '.harness/skills/managed'), ('.memory/agent_skills', '.harness/skills/referenced'), ('.memory', '.harness/memory'), ('.harness', '.harness')]:
@@ -143,8 +198,7 @@ def make_plan(root, manifest):
                 if private_path(str(source)):
                     raise ValueError('private-index-collision: ' + str(source.relative_to(root)))
                 left, right = decode(old['after']), decode(after)
-                right = re.sub(r'\A---\n.*?\n---\n', '', right, flags=re.S)
-                right = re.sub(r'<!-- project-memory-type:start -->.*?<!-- project-memory-type:end -->', '', right, flags=re.S)
+                left, right = merge_index_metadata(left, right)
                 pattern = r'<!-- project-memory-entries:start -->(.*?)<!-- project-memory-entries:end -->'
                 lines = []
                 for document in (left, right):
@@ -181,10 +235,12 @@ def make_plan(root, manifest):
     # A clone that pulled the public migration can still have ignored legacy users.
     # Do not call generic owner discovery: removed module scopes must stay removed.
     if not full_legacy:
+        private_specs = {}
         for owner in legacy:
             old = root / owner / '.memory'
             indexes = list(old.glob('*/AGENTS.md')) + list(old.glob('*.md'))
             specs = generic.parse(root / owner) if indexes else []
+            private_specs[owner] = specs
             for spec in specs:
                 if not spec.private:
                     raise ValueError('unreviewed-public-remnant: ' + owner + '/' + spec.name)
@@ -192,7 +248,16 @@ def make_plan(root, manifest):
                 if converted.module != spec.module:
                     raise ValueError('private-type-module-conflict: ' + spec.name)
                 memory['private'].append(str(root / owner / spec.relative_target))
+                target_dir = root / owners[owner] / spec.relative_target
+                remnant_type_map[spec.directory] = target_dir
+                for index in spec.indexes:
+                    exact[index.relative_to(root).as_posix()] = (target_dir / 'AGENTS.md').relative_to(root).as_posix()
+        for owner in legacy:
+            old = root / owner / '.memory'
+            specs = private_specs[owner]
             for base, dirs, files in generic.walk(old, owned=True):
+                if base != old:
+                    memory['directoryMap'].append({'source': str(base), 'target': str(mapped(base)), 'mode': stat.S_IMODE(base.stat().st_mode)})
                 for name in files:
                     source = base / name
                     spec = next((item for item in specs if source in item.indexes or source.is_relative_to(item.directory)), None)
@@ -202,11 +267,19 @@ def make_plan(root, manifest):
                     if spec is None and not (root / owners[owner] / '.harness/memory/users/AGENTS.md').is_file():
                         raise ValueError('private-index-missing: ' + owner + '/.memory/users/AGENTS.md')
                     after = generic.state(source)
-                    if spec:
-                        target_dir = root / owners[owner] / spec.relative_target
-                        target = target_dir / ('AGENTS.md' if source in spec.indexes else source.relative_to(spec.directory))
-                        if source in spec.indexes:
-                            after = generic.file_state(generic.convert_index(source.read_text(), spec).encode(), after['mode'])
+                    if after['kind'] == 'file' and source.suffix == '.md':
+                        try:
+                            text = decode(after)
+                        except UnicodeError:
+                            pass  # Binary private assets keep their bytes and mode.
+                        else:
+                            if spec and source in spec.indexes:
+                                text = generic.convert_index(text, spec)
+                            text = generic.rewrite_links(text, source, target, mapped)
+                            after = generic.file_state(text.encode(), after['mode'])
+                    elif after['kind'] == 'link':
+                        link_target = generic.lexical(source.parent / after['data'])
+                        after = dict(after, data=os.path.relpath(mapped(link_target), target.parent))
                     add(source, target, after)
 
     # Enumerate actual moving trees (including untracked/ignored assets), excluding
@@ -279,8 +352,32 @@ def make_plan(root, manifest):
             raise ValueError('gitlink-pin-mismatch')
         if '\t' + pin['source'] in indexed:
             gitlink_move = pin
-    directory_map = [{'source': item['source'], 'target': str(mapped(Path(item['source']))), 'mode': item['mode']} for item in memory['directoryMap']]
+    directory_targets = {}
+    for item in memory['directoryMap']:
+        source, target = Path(item['source']), mapped(Path(item['source']))
+        generic.safe_ancestors(target / 'placeholder', root)
+        if generic.present(target) and not target.is_dir():
+            raise ValueError('directory-target-conflict: ' + str(target.relative_to(root)))
+        before_mode = stat.S_IMODE(target.stat().st_mode) if target.exists() else None
+        desired_mode = item['mode'] if before_mode is None else item['mode'] & before_mode
+        key = str(target)
+        if key not in directory_targets:
+            directory_targets[key] = {'target': key, 'mode': desired_mode, 'beforeMode': before_mode, 'sources': []}
+        directory_targets[key]['mode'] &= desired_mode
+        directory_targets[key]['sources'].append({'source': str(source), 'mode': item['mode']})
     private_dirs = [str(mapped(Path(path))) for path in memory['private']]
+    # Flat legacy private indexes and synthetic official indexes have no source
+    # type directory. Establish a private destination before their first copy.
+    for path in private_dirs:
+        if path in directory_targets:
+            continue
+        target = Path(path)
+        generic.safe_ancestors(target / 'placeholder', root)
+        if generic.present(target) and not target.is_dir():
+            raise ValueError('directory-target-conflict: ' + str(target.relative_to(root)))
+        before_mode = stat.S_IMODE(target.stat().st_mode) if target.exists() else None
+        directory_targets[path] = {'target': path, 'mode': 0o700 if before_mode is None else before_mode & 0o700, 'beforeMode': before_mode, 'sources': []}
+    directory_map = list(directory_targets.values())
     watched_sources = sorted(sources)
     return {'directories': directory_map, 'private': private_dirs, 'watchedSources': watched_sources, 'operations':list(operations.values()), 'diagnostics':memory['diagnostics'], 'gitlink':gitlink_move,
             'legacyOwners':legacy, 'protected':manifest.get('protectedPostHashes', {}), 'phase':'planned'}
@@ -300,6 +397,18 @@ def check_job(root, job):
                 raise ValueError('resume-source-edited: ' + str(old.relative_to(root)))
             if old != dest and current is None and actual != op['after'] and item['before'] is not None:
                 raise ValueError('resume-both-missing: ' + str(old.relative_to(root)))
+    for item in job.get('directories', []):
+        target = Path(item['target'])
+        generic.safe_ancestors(target / 'placeholder', root)
+        if generic.present(target) and not target.is_dir():
+            raise ValueError('directory-target-conflict: ' + str(target.relative_to(root)))
+        actual_mode = stat.S_IMODE(target.stat().st_mode) if target.exists() else None
+        if actual_mode not in (item.get('beforeMode'), item['mode']):
+            raise ValueError('resume-directory-mode-changed: ' + str(target.relative_to(root)))
+        for source in item.get('sources', []):
+            path = Path(source['source'])
+            if path.exists() and stat.S_IMODE(path.stat().st_mode) != source['mode']:
+                raise ValueError('resume-source-directory-mode-changed: ' + str(path.relative_to(root)))
     watched = set(job.get('watchedSources', []))
     for owner in job.get('legacyOwners', []):
         old = root / owner / '.memory'
@@ -315,6 +424,10 @@ def check_job(root, job):
 def validate_copies(root, job):
     """Validate actual final index targets and states before retiring any source."""
     destinations = {Path(op['target']) for op in job['operations']}
+    for item in job.get('directories', []):
+        dest = Path(item['target'])
+        if not dest.is_dir() or stat.S_IMODE(dest.stat().st_mode) != item['mode']:
+            raise ValueError('directory-mode-validation-failed: ' + str(dest.relative_to(root)))
     for op in job['operations']:
         dest = Path(op['target'])
         if generic.state(dest) != op['after']:
@@ -357,7 +470,7 @@ def run(root, manifest, apply):
             current_diagnostics.extend(generic.referenced_diagnostics(scope))
     result = {'status':'dry-run' if not apply else 'unchanged', 'operations':len(job['operations']), 'publicPathMap':public,
               'privateOperationCount':len(job['operations'])-len(public), 'diagnostics':job['diagnostics'] or current_diagnostics, 'complete':not bool(job['diagnostics'] or current_diagnostics)}
-    if not apply or (not job['operations'] and not job['gitlink']): return result
+    if not apply or (not job['operations'] and not job['gitlink'] and not job.get('directories')): return result
     ignore = root/'.gitignore'
     text = ignore.read_text() if ignore.exists() else ''
     rules = ['**/' + JOURNAL + '/', '**/.harness/memory/users/', '**/.memory/users/'] + ['/' + Path(p).relative_to(root).as_posix() + '/' for p in job.get('private', [])]
@@ -366,11 +479,12 @@ def run(root, manifest, apply):
     ignore.write_text(text)
     journal.parent.mkdir(mode=0o700, exist_ok=True)
     generic.save_journal(journal, job)
-    for item in job.get('directories', []):
+    for item in sorted(job.get('directories', []), key=lambda value: len(Path(value['target']).parts)):
         dest = Path(item['target'])
         generic.safe_ancestors(dest / 'placeholder', root)
         if not dest.exists():
-            dest.mkdir(parents=True, mode=item['mode']); dest.chmod(item['mode'])
+            dest.mkdir(parents=True, mode=item['mode'])
+        dest.chmod(item['mode'])
     for op in job['operations']:
         if generic.state(Path(op['target'])) != op['after']:
             generic.write_state(Path(op['target']), op['after'])
