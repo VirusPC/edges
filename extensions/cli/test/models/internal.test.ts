@@ -141,3 +141,37 @@ test('CRLF type indexes preserve their markers and local ownership', () => {
   node.updateChild({ target: 'a.md', label: 'B', kind: 'local' });
   assert.match(node.serialize(), /project-memory-entries:start -->\r\n/);
 });
+
+test('linked prose within ownership sections stays ordinary and survives index edits', () => {
+  for (const [heading, kind] of [['本层记忆', 'local'], ['下层记忆索引', 'descendant']] as const) {
+    const original = `## ${heading}\n\nSee [README](README.md) for usage.\n\n- [Task](task.md) — owned\n`;
+    const node = new InternalNode('/scope/AGENTS.md').parse(original);
+    assert.deepEqual(node.children, [{ target: 'task.md', label: 'Task', description: 'owned', kind }]);
+    assert.equal(node.serialize(), original);
+    node.updateChild({ target: 'task.md', label: 'Changed', description: 'owned', kind });
+    const rendered = node.serialize();
+    assert.match(rendered, /^See \[README\]\(README\.md\) for usage\.$/m);
+    assert.match(rendered, /^- \[Changed\]\(<task\.md>\) — owned$/m);
+    assert.deepEqual(new InternalNode(node.path).parse(rendered).children, [{ target: 'task.md', label: 'Changed', description: 'owned', kind }]);
+  }
+});
+
+test('ambiguous multi-link index edits reject before changing content or Markdown', () => {
+  const original = '## 本层记忆\n\n- [One](one.md) and [Two](two.md) — shared\n';
+  const node = new InternalNode('/scope/AGENTS.md').parse(original);
+  const before = node.content;
+  for (const edit of [
+    () => node.updateChild({ target: 'one.md', label: 'Changed', kind: 'local' }),
+    () => node.updateChild({ target: 'two.md', label: 'Two', kind: 'descendant' }),
+    () => node.removeChild({ target: 'one.md' }),
+  ]) {
+    assert.throws(edit, /multi-link/i);
+    assert.deepEqual(node.content, before);
+    assert.equal(node.body, original);
+    assert.equal(node.serialize(), original);
+  }
+  node.addChild({ target: 'three.md', label: 'Three', kind: 'local' });
+  const rendered = node.serialize();
+  assert.match(rendered, /^- \[One\]\(one\.md\) and \[Two\]\(two\.md\) — shared$/m);
+  assert.match(rendered, /^- \[Three\]\(<three\.md>\)$/m);
+});

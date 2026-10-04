@@ -28,22 +28,35 @@ export class InternalNode extends BaseNode<'internal'> {
     this.#syntax = syntax;
   }
   protected override serializeBody(): string { return this.#syntax.serialize(this.#content); }
-  setConstraints(items: readonly string[]): void { this.#content.constraints = [...items]; }
+  #replaceContent(next: Content): void {
+    // Validate representability before exposing any mutation to callers.
+    this.#syntax.serialize(next);
+    this.#content = next;
+  }
+  setConstraints(items: readonly string[]): void {
+    this.#replaceContent({ ...this.#content, constraints: [...items] });
+  }
   addChild(reference: NodeReference): void {
     validateChild(reference);
     if (this.children.some(child => child.target === reference.target)) throw new Error(`Child already indexed: ${reference.target}`);
-    this.#content[section(reference.kind!)].push(entry(reference));
+    const next = structuredClone(this.#content);
+    next[section(reference.kind!)].push(entry(reference));
+    this.#replaceContent(next);
   }
   updateChild(reference: NodeReference): void {
     validateChild(reference);
     const previous = this.children.find(child => child.target === reference.target);
     if (!previous) throw new Error(`Child is not indexed: ${reference.target}`);
-    const items = this.#content[section(previous.kind!)];
+    const next = structuredClone(this.#content);
+    const items = next[section(previous.kind!)];
     const index = items.findIndex(child => child.target === reference.target);
     if (previous.kind === reference.kind) items[index] = entry(reference);
-    else { items.splice(index, 1); this.#content[section(reference.kind!)].push(entry(reference)); }
+    else { items.splice(index, 1); next[section(reference.kind!)].push(entry(reference)); }
+    this.#replaceContent(next);
   }
   removeChild(reference: NodeReference): void {
-    for (const key of ['localMemory', 'descendantMemory'] as const) this.#content[key] = this.#content[key].filter(child => child.target !== reference.target);
+    const next = structuredClone(this.#content);
+    for (const key of ['localMemory', 'descendantMemory'] as const) next[key] = next[key].filter(child => child.target !== reference.target);
+    this.#replaceContent(next);
   }
 }

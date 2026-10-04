@@ -32,14 +32,16 @@ function renderReference(reference: NodeReference): NodeItem {
     ...(reference.description === undefined ? [] : [{ kind: 'text' as const, value: ` — ${reference.description}` }]),
   ] };
 }
-function rebuildIndexes(original: NodeItem[], references: readonly Readonly<NodeReference>[]): NodeItem[] {
+function rebuildIndexes(original: NodeItem[], references: readonly Readonly<NodeReference>[], indexItems: ReadonlySet<NodeItem>): NodeItem[] {
   const remaining = [...references];
   const next: NodeItem[] = [];
   for (const item of original) {
-    const before = indexedReferences(item);
+    const before = indexItems.has(item) ? indexedReferences(item) : [];
     if (!before.length) { next.push(item); continue; }
     const selected = remaining.splice(0, before.length);
-    next.push(...(isDeepStrictEqual(before, selected) ? [item] : selected.map(renderReference)));
+    const unchanged = isDeepStrictEqual(before, selected);
+    if (before.length > 1 && !unchanged) throw new Error('Cannot edit a multi-link index item without changing surrounding authored text.');
+    next.push(...(unchanged ? [item] : selected.map(renderReference)));
   }
   return [...next, ...remaining.map(renderReference)];
 }
@@ -49,16 +51,25 @@ export class InternalSyntax {
   readonly #source: string;
   readonly #model: NodeModel;
   readonly #entries: boolean;
+  readonly #indexItems = new Set<NodeItem>();
   constructor(source: string) {
     this.#entries = /^<!-- project-memory-entries:start -->$/m.test(source);
     this.#source = adaptEntries(source);
-    this.#model = decodeBody(this.#source).model;
+    const decoded = decodeBody(this.#source);
+    this.#model = decoded.model;
+    for (const key of ['memory', 'children'] as const) {
+      decoded.bindings[key].forEach((binding, index) => {
+        const itemSource = this.#source.slice(binding.start, binding.end);
+        // Only list items carry index ownership; prose links remain source content.
+        if (/^(?:[-+*]|\d+[.)])\s/.test(itemSource)) this.#indexItems.add(this.#model[key][index]);
+      });
+    }
   }
   content(): InternalContent {
     return {
       constraints: this.#model.constraints.map(constraintText),
-      localMemory: this.#model.memory.flatMap(indexedReferences),
-      descendantMemory: this.#model.children.flatMap(indexedReferences),
+      localMemory: this.#model.memory.filter(item => this.#indexItems.has(item)).flatMap(indexedReferences),
+      descendantMemory: this.#model.children.filter(item => this.#indexItems.has(item)).flatMap(indexedReferences),
     };
   }
   serialize(content: InternalContent): string {
@@ -71,8 +82,8 @@ export class InternalSyntax {
     });
     const model: NodeModel = {
       constraints,
-      memory: rebuildIndexes(this.#model.memory, content.localMemory),
-      children: rebuildIndexes(this.#model.children, content.descendantMemory),
+      memory: rebuildIndexes(this.#model.memory, content.localMemory, this.#indexItems),
+      children: rebuildIndexes(this.#model.children, content.descendantMemory, this.#indexItems),
       references: this.#model.references,
     };
     const rendered = serializeNode(model, this.#source);
