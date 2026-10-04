@@ -7,11 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-05
+
+### Changed
+
+- 补充已审阅 Markdown 的 `--content-file --markdown` 入库，以及 `--format directory --resources` 明确资源边界；CLI 与 MCP 参数覆盖范围分别说明。
+
 ## [1.0.0] - 2026-09-11
 
 ### Added
 
 - 教 Agent 用 CLI 与 MCP 入库 Note（能力面三入口）。无 git 脚本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/edges-note@1.0.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/edges-note@1.1.0...HEAD
+[1.1.0]: https://github.com/VirusPC/edges/releases/tag/skill/edges-note@1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/edges-note@1.0.0

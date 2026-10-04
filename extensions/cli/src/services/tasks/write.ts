@@ -1,4 +1,6 @@
-import { realpathSync } from 'node:fs';
+import { realpathSync, linkSync, unlinkSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { checkPath, readEntry, validateEntry, saveEntries, type EntryFile } from '../node-files.js';
 import { NodeService } from '../node-service.js';
 import { TaskNode } from '../../models/task-node.js';
 import { setDomainField } from '../../models/fields.js';
@@ -187,19 +189,40 @@ export function taskFile(target: BoardTarget, relative: string): string {
 
 /** Standalone runlogs remain explicit business companions; directory runlogs are resources. */
 export async function moveTaskEntry(target: BoardTarget, service: NodeService, node: TaskNode, destination: string, sourceLog: string, destinationLog: string, fs: BoardWriter): Promise<void> {
-  const source = path.join(scopeDir(target), sourceLog), dest = path.join(scopeDir(target), destinationLog);
+  const dest = path.join(scopeDir(target), destinationLog);
   const alternate = node.directoryPath ? path.dirname(destination) + '.md' : path.join(destination.slice(0, -3), 'index.md');
   if (await fs.exists(path.join(scopeDir(target), alternate))) throw new TasksError('BOARD_IO_ERROR', `destination entry already exists: ${alternate}`);
   if (await fs.exists(dest)) throw new TasksError('BOARD_IO_ERROR', `destination runlog already exists: ${destinationLog}`);
   if (node.directoryPath) { await service.move(node, taskFile(target, destination)); return; }
-  const hasLog = await fs.exists(source);
-  if (hasLog) await fs.rename(source, dest);
+  const before = readEntry(taskFile(target, sourceLog));
+  const movedLog = before ? relocateRunlog(before, taskFile(target, destinationLog)) : undefined;
   try { await service.move(node, taskFile(target, destination)); }
   catch (cause) {
-    if (hasLog) {
-      try { await fs.rename(dest, source); }
-      catch { throw new TasksError('BOARD_IO_ERROR', `Task move failed; recover runlog from ${destinationLog}. ${String(cause)}`); }
+    if (movedLog && before) {
+      try { relocateRunlog(movedLog, before.path); }
+      catch (recoveryCause) {
+        const recovery = path.join(path.dirname(movedLog.path), `.node-recovery-${randomUUID()}.log.md`);
+        try { saveEntries([{ path: recovery, source: before.source, createMode: before.mode }]); }
+        catch { throw new TasksError('BOARD_IO_ERROR', `Task move failed; runlog recovery copy unavailable. Inspect ${before.path} and ${movedLog.path}. ${String(cause)}; ${String(recoveryCause)}`); }
+        throw new TasksError('BOARD_IO_ERROR', `Task move failed; recover original runlog from ${recovery}. Preserved current paths ${before.path} and ${movedLog.path}. ${String(cause)}; ${String(recoveryCause)}`);
+      }
     }
     throw cause;
+  }
+}
+
+/** Link is an exclusive destination claim; unlike rename it cannot clobber an
+ * intervening writer. Validate both identities/content before removing a name. */
+function relocateRunlog(before: EntryFile, destination: string): EntryFile {
+  validateEntry(before);
+  checkPath(destination);
+  linkSync(before.path, destination);
+  const after = { ...before, path: destination, realDirectory: realpathSync(path.dirname(destination)), realPath: destination };
+  try {
+    validateEntry(before); validateEntry(after);
+    unlinkSync(before.path);
+    return after;
+  } catch (cause) {
+    throw new TasksError('BOARD_IO_ERROR', `Runlog relocation incomplete; retained recovery paths ${before.path} and ${destination}. ${String(cause)}`);
   }
 }

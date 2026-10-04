@@ -11,6 +11,10 @@ export function memoryNodes(target: string): NodeService {
   return new NodeService({
     readOnlyReference: (parent) => layerTypeSpecs(target).some(spec => !spec.writable && parent.path === join(target, spec.indexFile)),
     createMode: () => 0o600,
+    resourceMode: (node, sourceMode) => {
+      const spec = layerTypeSpecs(target).find(spec => within(node.path, dirname(join(target, spec.indexFile))));
+      return spec?.gitignore ? 0o600 | (sourceMode & 0o100) : sourceMode;
+    },
     assertWrite: ({ node }) => {
     assertScopePath(node.path, target);
     const spec = layerTypeSpecs(target).find(spec => within(node.path, dirname(join(target, spec.indexFile))));

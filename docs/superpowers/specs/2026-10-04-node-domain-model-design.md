@@ -59,7 +59,7 @@ skills/example/scripts/... # Skill 的资源
 
 资源快照覆盖目录/文件身份、权限、文件字节与符号链接本身；更新、移动和删除前校验，不跟随资源链接写入或删除外部目标。已发现的只读目录来源同时限制资源文件的后续非类型化读取对象。销毁先将目录改名为同级 `.node-recovery-*`，保存父索引后清理；该恢复目录也在写前经过权限与私有 ignore 预检。失败时尽力恢复，若目录被替换或恢复失败则报告实际恢复路径并保留数据，不宣称跨文件原子性。调用方应重新加载失败涉及的节点。拥有 `AGENTS.md` 作用域边界、嵌套 `SKILL.md` 或已加载且已登记的独立逻辑子节点的目录拒绝整单元移动/销毁；这是保守的生命周期边界，不将任意资源 `index.md` 推断为子节点。
 
-`create(node, placement?, { resources?: absoluteDirectory })` 仅给新目录节点显式导入资源。Memory/Note 对应 `--format directory --resources <directory>`：只复制被显式选择目录内的相对路径，不猜 content-file 邻居。导入拒绝 symlink、特殊文件、入口覆盖以及 AGENTS.md/SKILL.md 边界；这是导入限制，不是节点类型推断。已有目录不接受合并导入。新资源继承 createMode（Memory 为 0600）；未指定时保留文件权限。导入失败报告仍需人工恢复的路径。
+`create(node, placement?, { resources?: absoluteDirectory })` 仅给新目录节点显式导入资源。Memory/Note 对应 `--format directory --resources <directory>`：只复制被显式选择目录内的相对路径，不猜 content-file 邻居。导入拒绝 symlink、特殊文件、入口覆盖以及 AGENTS.md/SKILL.md 边界；这是导入限制，不是节点类型推断。已有目录不接受合并导入。createMode 只决定入口权限；新资源默认保留源文件权限。可选 resourceMode(node, sourceMode) 独立返回 0 至 0o777 的整数权限位，在首次写入前校验。Memory 适配器按已登记类型策略处理：公开资源保留原权限，私有资源清除 group/other 权限，非执行文件为 0600、保留 owner execute 的脚本为 0700。导入失败报告仍需人工恢复的路径。
 
 Note `--content-file <path> --markdown` 接收已经写好和审阅过的完整 UTF-8 Markdown；保留作者正文与标题，不额外套 ingest 模板。文档仍通过标准 BaseNode.parse/serialize 和 gray-matter，YAML 可规范化，不保证 frontmatter 字节/样式/注释保真，也不把 YAML 塞进 body。`--title` 仍用于文件名和提交信息。此入口不取代 conversation-to-notes 的写作/审阅流程，也不改变鉴权、Git、PR 或发布默认值。
 
@@ -175,7 +175,7 @@ declare class NodeService {
 }
 ```
 
-实现允许构造时传入可选业务适配钩子，`new NodeService()` 仍可独立使用：`modelForReference(parent, reference, resolvedPath)` 根据已登记模块契约选择模型；`assertWrite(context)` 在所有计划写入前校验权限和来源。`readOnlyReference(parent, reference, resolvedPath)` 根据业务登记补充只读来源（例如没有类型注释的官方 referenced 索引），在跟随安装链接前判定；返回 false 不会撤销既有只读来源或真实路径别名的限制。`createMode(node)` 为新建入口及暂存文件提供 0 至 0o777 的整数权限位；不影响已有文件权限。它们不形成全局类型注册表，权限校验不执行写入。Memory 的私有忽略规则、业务来源校验仍由适配层负责；入口暂存/恢复文件在入口同目录；整资源单元的恢复目录在单元同级。私有校验覆盖这些目录而不只是入口 Markdown。
+实现允许构造时传入可选业务适配钩子，`new NodeService()` 仍可独立使用：`modelForReference(parent, reference, resolvedPath)` 根据已登记模块契约选择模型；`assertWrite(context)` 在所有计划写入前校验权限和来源。`readOnlyReference(parent, reference, resolvedPath)` 根据业务登记补充只读来源（例如没有类型注释的官方 referenced 索引），在跟随安装链接前判定；返回 false 不会撤销既有只读来源或真实路径别名的限制。`createMode(node)` 为新建入口及暂存文件提供 0 至 0o777 的整数权限位；不影响已有文件权限。`resourceMode(node, sourceMode)` 独立控制导入资源权限，默认保留源权限，不继承 createMode 的入口文件策略。它们不形成全局类型注册表，权限校验不执行写入。Memory 的私有忽略规则、业务来源校验仍由适配层负责；入口暂存/恢复文件在入口同目录；整资源单元的恢复目录在单元同级。私有校验覆盖这些目录而不只是入口 Markdown。
 
 更新与删除使用同一 service 读取或创建时记录的内容和文件身份，拒绝盲覆盖、内容漂移与文件替换。跨文件失败尽力回滚并报告实际受影响路径；回滚失败时保留可恢复的原文副本和原权限，不在错误中输出正文。
 

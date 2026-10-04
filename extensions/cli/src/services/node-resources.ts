@@ -69,10 +69,10 @@ export function writeResourceImport(root: string, resources: ImportedResource[],
   fs.mkdirSync(root, { mode: mode === undefined ? 0o777 : 0o700 });
   for (const item of resources) {
     const target = checkPath(path.join(root, item.relative));
-    if (item.bytes === undefined) fs.mkdirSync(target, { mode: mode === undefined ? item.mode | 0o700 : 0o700 });
+    if (item.bytes === undefined) fs.mkdirSync(target, { mode: item.mode | 0o700 });
     else {
-      fs.writeFileSync(target, item.bytes, { flag: 'wx', mode: mode ?? item.mode });
-      fs.chmodSync(target, mode ?? item.mode);
+      fs.writeFileSync(target, item.bytes, { flag: 'wx', mode: item.mode });
+      fs.chmodSync(target, item.mode);
     }
   }
 }

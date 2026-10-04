@@ -1,7 +1,7 @@
 ---
 name: edges-note
 description: 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 `edges note`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
-version: 1.0.0
+version: 1.1.0
 ---
 
 # edges note

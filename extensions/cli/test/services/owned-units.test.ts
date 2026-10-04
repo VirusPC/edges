@@ -58,7 +58,7 @@ test('move refuses occupied directories, format conversion and denied destinatio
 });
 test('explicit resource import copies only selected directory bytes and rejects links before entry creation', async t => {
   const root = fixture(t), source = path.join(root, 'selected'); put(path.join(source, 'image.bin'), Buffer.from([255, 0])); put(path.join(root, 'neighbor'), 'not imported');
-  const service = new NodeService({ createMode: () => 0o600 }), node = new NoteNode(path.join(root, 'note/index.md')).parse('# Note\n');
+  const service = new NodeService({ createMode: () => 0o600, resourceMode: () => 0o600 }), node = new NoteNode(path.join(root, 'note/index.md')).parse('# Note\n');
   await service.create(node, undefined, { resources: source });
   assert.deepEqual(fs.readFileSync(path.join(root, 'note/image.bin')), Buffer.from([255, 0])); assert.equal(fs.statSync(path.join(root, 'note/image.bin')).mode & 0o777, 0o600); assert.equal(fs.existsSync(path.join(root, 'note/neighbor')), false);
   fs.symlinkSync(path.join(root, 'neighbor'), path.join(source, 'link'));

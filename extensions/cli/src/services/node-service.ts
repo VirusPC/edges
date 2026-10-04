@@ -24,6 +24,8 @@ export interface NodeWriteContext {
 export interface NodeServiceOptions {
   /** New files only; validated permission bits, applied before any contents are staged. */
   createMode?: (node: BaseNode) => number;
+  /** Imported resource permissions, independent of entry permissions; default preserves source mode. */
+  resourceMode?: (node: BaseNode, sourceMode: number) => number;
   /** Supplemental module provenance, evaluated before following an installed link. */
   readOnlyReference?: (parent: BaseNode, reference: NodeReference, target: string) => boolean;
   assertWrite?: (context: NodeWriteContext) => void | Promise<void>;
@@ -259,7 +261,11 @@ export class NodeService {
     if (readEntry(node.path)) throw new Error(`Node target already exists: ${node.path}`);
     if (options.resources && !node.directoryPath) throw new Error('Resource import requires directory format');
     if (this.#isReadOnly(node.path)) throw new Error(`Read-only node source: ${node.path}`);
-    const resources = options.resources ? readResourceImport(options.resources, path.basename(node.path)) : undefined;
+    const resources = options.resources ? readResourceImport(options.resources, path.basename(node.path)).map(resource => {
+      const mode = this.#options.resourceMode ? this.#options.resourceMode(node, resource.mode) : resource.mode;
+      if (!Number.isInteger(mode) || mode < 0 || mode > 0o777) throw new Error('Invalid resource permission mode');
+      return { ...resource, mode };
+    }) : undefined;
     const writes: Write[] = [{ node, source: node.serialize(), create: true, parent: placement?.parent }];
     if (placement) {
       const { parent, kind } = placement;
