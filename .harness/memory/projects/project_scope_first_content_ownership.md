@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 节点模型：内容 setter、updateChild、统一引用、可选树关系与 local 范围；service 显式保存；设计未实施
+description: 节点模型与公共 NodeService：去掉 NodeTree，CRUD、local 作用域查询及归属协调由 service 负责；设计未实施
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T22:41:36+08:00"
+  edges-updated-at: "2026-10-04T22:50:28+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -84,7 +84,7 @@ document-model 增加可选 type，内置 base、agents、memory、task；各类
 
 ## 2026-10-04 用户确认：节点模型共同归组与实例解析
 
-采用具有操作方法的节点领域模型：BaseNode 为 InternalNode、TaskNode、MemoryNode 提供共同能力，NodeTree 组织节点关系。模型统一放在 models，services 负责完整增删改查（create、get/list、update、destroy）及文档、归属索引同步，不设置顶层 codecs。model 的领域操作只修改内存状态，不执行文件读写；NodeTree.find/walk 查询已加载节点，service 的 get/list 读取持久化文档并调用实例 parse。解析辅助代码需要拆分时留在对应模型内。
+采用具有操作方法的节点领域模型：BaseNode 为 InternalNode、TaskNode、MemoryNode 提供共同能力，公共 NodeService 协调节点关系。模型统一放在 models，services 负责完整增删改查（create、get/list、update、destroy）及文档、归属索引同步，不设置顶层 codecs。model 的领域操作只修改内存状态，不执行文件读写；service 的 get/list 读取文档并调用实例 parse，作用域遍历由 service 内部辅助函数组织。解析辅助代码需要拆分时留在对应模型内。
 
 **Why:** 用户指出此前纯数据与外部工具函数的组织不符合预期；继承应能扩展实例行为，职责分离不应机械变成顶层目录分离。
 
@@ -138,7 +138,7 @@ parent 与 children 都定义在 BaseNode，允许没有关系值；所有子类
 
 **Why:** 用户明确树结构是系统核心，应作为节点的共同能力；独立文档或叶节点通过关系缺省表达，不需要排除在树模型之外。
 
-**How to apply:** BaseNode 的 parent 与 children 均可为 undefined；InternalNode 覆盖 children 读取，从 AGENTS 归属索引派生集合，不另存第二份可修改数组。NodeTree 对任意节点的 attach/move/detach 都协调索引与 parent，不再只为 InternalNode 维护反向关系。路径定位与逻辑归属分开，树关系不自动写入 YAML。已更新 spec，此为后续重构目标，代码尚未实施。
+**How to apply:** BaseNode 的 parent 与 children 均可为 undefined；InternalNode 覆盖 children 读取，从 AGENTS 归属索引派生集合，不另存第二份可修改数组。公共 NodeService 对任意节点的 attach/reparent/detach 都协调索引、parent 与保存，不再只为 InternalNode 维护反向关系。路径定位与逻辑归属分开，树关系不自动写入 YAML。已更新 spec，此为后续重构目标，代码尚未实施。
 
 ## 2026-10-04 用户确认：children 区分本层与下层，默认只读取本层
 
@@ -146,7 +146,7 @@ children 的引用携带 kind，区分 local（本层记忆）与 descendant（�
 
 **Why:** 这一区分决定上下文读取的范围；如果混为一类，会把下层项目的内容带入本层，也无法在加载前截断无关范围。
 
-**How to apply:** BaseNode.children 使用可选的 NodeReference 集合，children 引用须带 kind，分类属于引用关系，不属于节点 type 或文件路径。InternalNode 根据索引所在章节派生 kind，不另存重复真源。service 的作用域查询和 NodeTree 遍历默认沿 local 索引链，包含多层本层类型入口；仅显式 includeDescendants 才沿 descendant 跨作用域。过滤发生在目标文件加载之前，但解析、序列化保留两类索引及本层约束，不能把不加载下层内容误做删除下层引用。此为 spec 已确认的目标行为，当前运行时尚未实施。
+**How to apply:** BaseNode.children 使用可选的 NodeReference 集合，children 引用须带 kind，分类属于引用关系，不属于节点 type 或文件路径。InternalNode 根据索引所在章节派生 kind，不另存重复真源。service 的作用域查询默认沿 local 索引链，包含多层本层类型入口；仅显式 includeDescendants 才沿 descendant 跨作用域。过滤发生在目标文件加载之前，但解析、序列化保留两类索引及本层约束，不能把不加载下层内容误做删除下层引用。此为 spec 已确认的目标行为，当前运行时尚未实施。
 
 ## 2026-10-04 用户确认：引用与索引条目统一为 NodeReference
 
@@ -162,4 +162,12 @@ children 的引用携带 kind，区分 local（本层记忆）与 descendant（�
 
 **Why:** 用户确认简洁的内存修改方式，同时需要保证索引章节、引用分类和多节点归属保持一致。索引引用的更新与目标节点内容的更新是两个操作。
 
-**How to apply:** Task 的 title/status/assignee/priority、Memory 的 memoryType/description 及 BaseNode.body 使用 setter，不重复保留对应 setX 方法。body setter 走正文扩展点，不修改 path 或 metadata。metadata 用 setMetadata/removeMetadata，约束用 setConstraints；集合和引用 getter 不泄漏内部可变对象。updateChild 按 target 替换已有引用，可选字段省略时清除，kind 必填且决定所属章节，未找到时报错；不隐式新增或修改目标文档。path/type/id 对外只读，跨节点关系由 NodeTree 协调，保存显式调用 service.update。已更新 spec，运行时尚未实施。
+**How to apply:** Task 的 title/status/assignee/priority、Memory 的 memoryType/description 及 BaseNode.body 使用 setter，不重复保留对应 setX 方法。body setter 走正文扩展点，不修改 path 或 metadata。metadata 用 setMetadata/removeMetadata，约束用 setConstraints；集合和引用 getter 不泄漏内部可变对象。updateChild 按 target 替换已有引用，可选字段省略时清除，kind 必填且决定所属章节，未找到时报错；不隐式新增或修改目标文档。path/type/id 对外只读，跨节点关系由公共 NodeService 协调，保存显式调用 service.update。已更新 spec，运行时尚未实施。
+
+## 2026-10-04 用户确认：移除 NodeTree，由公共 NodeService 组织遍历
+
+不单独定义 NodeTree。公共 NodeService 负责 CRUD、引用加载、作用域查询及跨节点归属协调；节点保留自身内容、引用和领域操作。用户要求同步更新 spec 并补全 service 接口。
+
+**Why:** children 保存的是文档引用，递归需要加载目标；service 已承担作用域读取和跨文档流程，额外的树对象与遍历入口造成职责重叠。
+
+**How to apply:** 对外提供 get/list；list 默认只沿 local，显式 includeDescendants 才跨下层。内部 traverse 辅助函数负责顺序、去重与环检测，由 service 提供加载能力，不让模型读文件，也不新增公开 walk/traverse 或树容器。NodeService 另提供 create/update/destroy 与 attach/detach/reparent；归属操作使用显式父节点，协调索引、parent 和保存，reparent 不移动文件。get 可显式传模型构造器，未传时使用 BaseNode；公共路径参数已解析为绝对路径。完整签名与读写、缺失目标行为以 spec 为准；这是后续重构设计，运行时尚未实施。

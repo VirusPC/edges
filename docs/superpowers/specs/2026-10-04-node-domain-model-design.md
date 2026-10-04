@@ -9,19 +9,17 @@ BaseNode           共同文档能力，可选 parent / children
 ├── InternalNode    AGENTS.md，从索引派生 children，组织直属节点
 ├── TaskNode        任务及其领域操作
 └── MemoryNode      记忆及其领域操作
-
-NodeTree           组织节点对象，不继承 BaseNode
 ```
 
 BaseNode 提供共同的文件路径 path、文档内容、可选 metadata、身份、可选 parent / children 及文本转换能力。树结构是共同模型的一部分，所有子类继承树关系属性，但允许没有关系值。InternalNode 扩展 AGENTS 正文与索引处理，TaskNode、MemoryNode 等内容模型扩展自身字段与领域操作。模型统一位于 `extensions/cli/src/models/`，不创建独立 package。
 
-NodeTree 组织已经加载的节点，提供查找、遍历及父子关系调整。跨文件系统层级的引用继续有效；父子关系表达逻辑归属，普通交叉引用不构成第二个 parent。
+不单独定义 NodeTree。公共 NodeService 负责引用加载、作用域查询和跨节点归属协调，节点模型只维护自身内容与索引。children 保存 NodeReference，不因递归需要就改成完整子节点对象或让模型执行文件读取。跨文件系统层级的引用继续有效；父子关系表达逻辑归属，普通交叉引用不构成第二个 parent。
 
 ## 节点路径与引用
 
 `path: string` 是 BaseNode 的必填属性，构造时传入，表示节点文档的文件位置。新节点在写入前也具有目标路径；携带路径不代表文件已经存在，模型不检查或读写文件。
 
-service 在构造节点前，结合明确的当前 scope 解析相对路径和本层简写，节点内统一保存绝对路径，避免后续操作随进程工作目录变化。本层简写依据当前作用域已登记的目录布局解析，不写死全局目录。新建或登记下层节点时显式提供目标路径；读取已登记节点时使用现有引用即可。
+构造节点或调用公共 service 接口前，结合明确的当前 scope 解析用户输入的相对路径和本层简写；公共接口的 path/scopePath 参数及节点内部 path 统一使用绝对路径，避免依赖隐含工作目录或 service 的默认根。本层简写依据当前作用域已登记的目录布局解析，不写死全局目录。新建或登记下层节点时显式提供目标路径；读取已登记节点时由 service 按引用所在文档的位置解析目标路径即可。
 
 `NodeReference.target` 表达文档中的引用目标：相对路径以持有引用的 AGENTS.md 所在目录为基准解析，定位到目标节点的 path。写入 AGENTS 时仍可使用相对链接，不将机器上的绝对路径写进索引。
 
@@ -29,7 +27,7 @@ NodeReference 同时承载索引的 label（链接文字）和 description（条
 
 path 负责文件定位，BaseNode 的可选 parent / children 表达树组织关系。内容节点可独立存在，也可建立归属关系。不能用 dirname 推导父节点，也不能把物理目录扫描当成归属树；根 AGENTS 可以直接引用跨多层目录的节点。`localMemory` / `descendantMemory` 只标识索引章节，不是目录路径，也不是 CRUD 的目标参数。
 
-path 对调用方只读，不作为普通内容字段更新。`parse()` 不改变 path，`serialize()` 不自动将 path 写进 YAML。NodeTree.move 只调整归属，不改变文件位置；物理文件迁移由 service 单独协调，不通过修改 path 后调用 update 隐式完成。
+path 对调用方只读，不作为普通内容字段更新。`parse()` 不改变 path，`serialize()` 不自动将 path 写进 YAML。service.reparent 只调整归属，不改变文件位置；物理文件迁移另行协调，不通过修改 path 后调用 update 隐式完成。
 
 ## 实例解析与序列化
 
@@ -65,7 +63,7 @@ InternalNode 以 AGENTS 三部分的结构化内容为正文真源：
 
 InternalNode 的 `children` 是后两部分中归属索引的统一派生视图，包括 Internal、Task、Memory 等所有直属节点。所有引用统一使用 NodeReference，不另设 ChildReference；kind 在通用类型中可选，用于 parent 或普通引用时可以省略，用于 children 时必须有值。本层记忆派生为 local，下层记忆索引派生为 descendant。kind 是引用关系的分类，与目标节点的 type 和物理路径无关，两类引用都可能指向 AGENTS.md。不单独保存另一份可修改数组，也不在章节条目中重复存储 kind。普通参考链接不因出现在正文里就成为归属关系。
 
-children 的 kind 约束由模型和树操作校验；InternalNode 解析时从章节补全，其他来源的 children 缺少 kind 时应报错，不能默认当作 local 或静默跳过。省略 kind 的普通 NodeReference 仍可用于 find 等按目标定位的操作。
+children 的 kind 约束由模型和 service 校验；InternalNode 解析时从章节补全，其他来源的 children 缺少 kind 时应报错，不能默认当作 local 或静默跳过。普通引用可省略 kind，由 service 解析 target 后按路径读取目标。
 
 增删子节点实际修改对应章节索引；序列化仍输出三部分，不新增 children 章节或 YAML 字段。InternalNode 的正文由三部分生成，不能同时维护可独立修改的正文与章节副本。为保留原文中的未建模内容，可以保留只读来源快照；它不是第二份当前状态。
 
@@ -73,7 +71,7 @@ parent 与 children 均定义在 BaseNode，允许值为 undefined。parent 是�
 
 Note、Task、Memory 等内容节点继承相同的可选树关系，独立存在时无需提供 parent 或 children。被挂接到树后，同样建立 parent；其归属仍以组织节点的索引为依据，普通交叉引用不算归属。
 
-InternalNode 的索引编辑针对单个文档；addChild(reference) 从 reference.kind 确定写入章节，调用时必须提供 kind，不再重复传递分类参数。章节内直接保存 NodeReference 条目，children 视图从章节派生 kind。NodeTree 协调已加载节点之间的关系：attach 按 kind 更新父节点对应章节索引并建立 child.parent，move 移除旧父索引、按目标 kind 添加新父索引并更新 child.parent，detach 移除原归属索引并清除 child.parent。上述规则适用于所有节点类型。NodeTree 的 attach/move 接收节点对象，仍显式接收 ChildKind，由 InternalNode 将 local / descendant 映射到对应章节，不再另传 IndexSection。children 缺省或为空时无子节点可遍历。文件移动、加载、保存由 services 协调，不在模型里操作磁盘。
+InternalNode 的索引编辑针对单个文档；addChild(reference) 从 reference.kind 确定写入章节，调用时必须提供 kind，不再重复传递分类参数。章节内直接保存 NodeReference 条目，children 视图从章节派生 kind。跨节点操作由 service 调用这些模型方法，协调归属索引、child.parent 及相关文件保存，规则适用于所有节点类型；模型方法本身不保存文件。children 缺省或为空时无子节点可遍历。
 
 ## 作用域读取与遍历
 
@@ -82,37 +80,80 @@ InternalNode 的索引编辑针对单个文档；addChild(reference) 从 referen
 `includeDescendants` 默认为 false；只有显式设置为 true，才同时沿 local 和 descendant 关系展开。它控制是否跨入下层作用域，不限制本层 local 索引链的层数。
 
 - service.list(scopePath, options) 在读取目标文件之前应用关系筛选，不先加载下层作用域再过滤结果。
-- NodeTree.walk(options) 从当前 root 出发，对已加载节点应用同样的规则；即使 descendant 目标已在内存中，默认遍历也不沿 descendant 关系访问它。
+- service.list 从指定作用域入口出发，对已加载节点也应用同样的规则；即使 descendant 目标已在内存中，默认查询也不沿 descendant 关系访问它。
 - service.get(path) 只读取指定文档，不自动加载其引用目标。
+
+对外保留 list 一个作用域遍历入口，不重复暴露 walk/traverse。service 内部可以拆出 traverse 辅助函数，负责遍历顺序、去重和环检测，由 service 提供节点加载能力；该函数不拥有文件系统依赖，也不形成新的领域类。已加载节点的查找属于 service 内部实现，不另设公开 find 或整树容器。
 
 解析和序列化仍保留 AGENTS 中的两类索引。只读取本层内容是一项加载、遍历策略，不能因此删除 descendant 引用或在写回时丢失下层索引。本层重要约束也不因仅选择 local 子引用而被忽略。
 
 ```ts
-tree.walk();                             // 当前根节点及 local 可达节点
-tree.walk({ includeDescendants: true }); // 显式包含下层作用域
+await service.list(scopePath);                             // 入口节点及 local 可达节点
+await service.list(scopePath, { includeDescendants: true }); // 显式包含下层作用域
 ```
 
-## Service 增删改查
+## 公共 NodeService 接口
 
-services 统一负责节点的增删改查及文档、归属索引的同步，采用以下职责边界；具体方法签名在实施时确定。
+公共 NodeService 统一负责节点增删改查、引用加载与跨节点归属协调。所有公开操作为异步方法；get/list 只读，其余操作执行文件保存。它调用模型的解析、序列化和领域方法，不接管模型内部的字段规则，也不要求每种模型机械配一个 service。
 
 | 操作 | Service 职责 |
 | --- | --- |
-| create(node) | 根据 node.path 创建节点文档，协调所属节点的索引登记并保存 |
-| get(path) | 读取指定文档，选择对应模型，以解析后的路径构造实例并调用 parse，返回节点对象 |
-| list(scopePath, options) | 按作用域入口的归属索引加载本层内容；默认只沿 local，显式 includeDescendants 才跨入下层作用域；不以递归扫描物理目录替代索引 |
-| update(node) | 协调领域操作，调用 serialize 写回 node.path，并同步受影响的归属索引 |
-| destroy(node) | 删除 node.path 对应的节点文档，并同步移除对应归属索引 |
+| create(node, placement?) | 创建 node.path；可同时显式提供 parent/kind，登记并保存父索引；目标已存在时报错 |
+| get(path, Model?) | 只读取指定文档，以解析后的路径构造实例并调用 parse；不存在返回 undefined |
+| list(scopePath, options?) | 返回作用域入口及所选引用可达的节点；默认仅 local，显式 includeDescendants 才包含下层作用域 |
+| update(node) | serialize 后写回 node.path；更新索引时协调已加载节点的反向关系；目标不存在时报错，不隐式创建 |
+| destroy(node, parent?) | 删除当前文档，按明确的归属上下文移除并保存父索引；不递归删除子文档 |
+| attach(parent, child, kind) | 将已有文档登记到父索引，更新 child.parent 并保存父文档；不创建或移动 child 文件 |
+| detach(parent, child) | 移除指定父索引中的归属，清除对应 child.parent 并保存父文档；保留 child 文件 |
+| reparent(child, oldParent, newParent, kind) | 将归属从旧父移到新父，同步引用路径、parent 并保存两份索引；不移动 child 文件 |
+
+```ts
+declare class NodeService {
+  // 无 placement 时只创建独立文档；有 placement 时同时登记父索引。
+  create(
+    node: BaseNode,
+    placement?: { parent: InternalNode; kind: ChildKind },
+  ): Promise<void>;
+
+  // 默认使用基础模型；传入具体模型构造器时返回对应类型。
+  get(path: string): Promise<BaseNode | undefined>;
+  get<T extends BaseNode>(
+    path: string,
+    Model: new (path: string) => T,
+  ): Promise<T | undefined>;
+
+  list(scopePath: string, options?: ScopeTraversalOptions): Promise<BaseNode[]>;
+  update(node: BaseNode): Promise<void>;
+  destroy(node: BaseNode, parent?: InternalNode): Promise<void>;
+
+  attach(parent: InternalNode, child: BaseNode, kind: ChildKind): Promise<void>;
+  detach(parent: InternalNode, child: BaseNode): Promise<void>;
+  reparent(
+    child: BaseNode,
+    oldParent: InternalNode,
+    newParent: InternalNode,
+    kind: ChildKind,
+  ): Promise<void>;
+}
+```
+
+get(path) 只提供基础 Markdown 模型；需要领域操作时显式传入 TaskNode、MemoryNode 或 InternalNode，不通过随意猜测 YAML 字段决定模型类型。list 的作用域入口使用 InternalNode，其他节点依据已登记的入口、模块契约加载；没有专用模型约定的普通文档使用 BaseNode，不另建全局类型注册框架。
+
+list 从 scopePath 指定的作用域入口开始，采用先序遍历并遵循索引条目顺序；按解析后的目标路径去重，遇到归属环时报错。作用域入口或被选中引用目标缺失时报错，不静默遗漏；未选择的 descendant 目标不加载、不检查。输出为节点数组，不新增树包装对象。初始作用域的 CLI 选择策略仍由命令适配层决定。
+
+归属操作使用显式传入的父节点，不根据 dirname 或全盘扫描猜父级。destroy 可以使用已建立的 node.parent 上下文加载父节点；独立加载的文档没有该上下文时，调用方须在有归属的情况下传入 parent。未给出任何归属上下文表示按独立文档处理，不宣称清理未知的外部引用。含有归属子节点的组织节点须先明确处理其子节点，再 destroy，避免隐式级联删除。
+
+attach/detach/reparent 校验参与操作的归属一致性并防止自引用、归属环。reparent 保留已有 label/description，按新父位置重新计算相对 target，并使用给定 kind；它同步内存关系与相关 AGENTS 文件。跨文件写入失败必须报告，不能宣称多个文件写入天然具有原子性；具体写入与失败恢复机制在实施时确定。
 
 已有节点对象时，写操作直接使用 node.path，不再另传一份可能与节点不一致的目标路径；尚未加载节点时，查询仍需路径输入。以下示意省略所属节点等操作上下文，不定义额外的 service 类层级：
 
 ```ts
-// taskPath 已由 service 根据当前 scope 解析为绝对路径。
+// taskPath 已根据当前 scope 解析为绝对路径。
 const task = new TaskNode(taskPath);
 task.parse(markdown);
 
 await service.create(task);
-const existing = await service.get(taskPath);
+const existing = await service.get(taskPath, TaskNode);
 
 await service.update(task);
 await service.destroy(task);
@@ -120,7 +161,7 @@ await service.destroy(task);
 
 创建时的归属上下文由业务调用方显式提供或由已加载的树获得，不能从 node.path 猜测；service 据此协调所属 AGENTS 的索引同步。
 
-model 的属性 setter 和 addChild/updateChild 等方法只改变内存中的领域状态；service 的 update 负责将变更写入文件。NodeTree.find/walk 只查询已加载的树，service 的 get/list 负责持久化内容的读取。模型及 NodeTree 不直接执行文件读写或 Git 操作。
+model 的属性 setter 和 addChild/updateChild 等方法只改变内存中的领域状态；service.update 负责将变更写入文件。读取 Task 并使用领域属性时调用 service.get(taskPath, TaskNode)。模型不直接执行文件读写或 Git 操作。
 
 ## 内存修改方式
 
@@ -132,7 +173,7 @@ model 的属性 setter 和 addChild/updateChild 等方法只改变内存中的�
 | metadata | setMetadata / removeMetadata，保留字段校验 |
 | InternalNode 的约束集合 | setConstraints |
 | InternalNode 的索引引用 | addChild / updateChild / removeChild |
-| parent、跨节点归属 | NodeTree.attach / move / detach |
+| parent、跨节点归属 | service.attach / reparent / detach，协调并保存相关文档 |
 | path、type、id | 对调用方只读；文件迁移由 service 协调 |
 
 body setter 调用正文解析扩展点，不改变 path 或 metadata。InternalNode 通过 parseBody 更新三部分内容及派生索引，不保存另一份可独立修改的正文。getter 暴露的 content、children、parent 和 metadata 不得泄漏内部可变引用；集合及引用条目提供只读视图或独立快照，metadata 的嵌套对象也不能通过外部修改绕过校验。
@@ -154,7 +195,7 @@ await service.update(task);
 await service.update(internal);
 ```
 
-上例分别修改 Task 的内容与 AGENTS 的引用信息，再显式保存；索引 label 不会因目标节点 title 赋值而自动改变。InternalNode 的单文档修改仍由 service / NodeTree 协调已加载树中的关联状态。
+上例分别修改 Task 的内容与 AGENTS 的引用信息，再显式保存；索引 label 不会因目标节点 title 赋值而自动改变。InternalNode 的单文档修改由 service 协调已加载节点中的关联状态。
 
 ## 公共类型草案
 
@@ -235,16 +276,6 @@ declare class MemoryNode extends BaseNode<"memory"> {
   get description(): string | undefined;
   set description(value: string | undefined);
 }
-
-declare class NodeTree {
-  constructor(root: InternalNode, nodes?: Iterable<BaseNode>);
-  readonly root: InternalNode;
-  find(reference: NodeReference): BaseNode | undefined;
-  walk(options?: ScopeTraversalOptions): Iterable<BaseNode>;
-  attach(parent: InternalNode, child: BaseNode, kind: ChildKind): void;
-  move(child: BaseNode, newParent: InternalNode, kind: ChildKind): void;
-  detach(child: BaseNode): void;
-}
 ```
 
 Task 的状态、负责人、优先级，以及 Memory 的内容分类，是 metadata 的类型化访问，不独立存储第二份字段。运行时节点 type 不自动写入 YAML，也不与 Memory 内容分类混为一谈。
@@ -259,9 +290,10 @@ extensions/cli/src/
 │   ├── internal-node.ts
 │   ├── task-node.ts
 │   ├── memory-node.ts
-│   ├── node-tree.ts
 │   └── types.ts
 ├── services/                 增删改查、文档与索引同步、跨对象流程协调
+│   ├── node-service.ts        公共节点服务入口
+│   └── traverse.ts            内部遍历辅助，节点加载由 service 提供
 └── utils/                    无领域含义的基础工具
 ```
 
