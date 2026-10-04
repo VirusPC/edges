@@ -1,3 +1,5 @@
+import { decodeBody } from '../../models/internal/parse.js';
+import { LOCAL_START, LOCAL_END, blockPattern, insertInnerBlock } from '../../models/internal/blocks.js';
 import { scopeDir, boardRel, type BoardTarget } from "./paths.js";
 import path from "node:path";
 import { listProjectIds, type BoardFs, type BoardWriter } from "./board.js";
@@ -54,17 +56,12 @@ export function parseProjectAgents(markdown: string): {
   title: string;
   description: string;
   pointers?: string;
+  tail?: string;
 } {
   if (markdown.startsWith("---")) {
     throw new TasksError(
       "VALIDATION_ERROR",
       "Task Project AGENTS.md must not have YAML frontmatter",
-    );
-  }
-  if (markdown.includes("<!-- project-memory:")) {
-    throw new TasksError(
-      "VALIDATION_ERROR",
-      "Task Project AGENTS.md must not contain project-memory markers",
     );
   }
 
@@ -76,23 +73,23 @@ export function parseProjectAgents(markdown: string): {
   }
   const title = parseProjectTitle(match[1]);
 
-  const rest = lines.slice(1);
-  const pointerIdx = rest.findIndex((line) => line === "## Pointers");
-  const descriptionSource =
-    pointerIdx === -1 ? rest.join("\n") : rest.slice(0, pointerIdx).join("\n");
+  const body = markdown.slice(heading.length + 1);
+  const boundary = body.search(/^(?:## |<!-- (?:project-memory|task-projects)(?::|-))/m);
+  const descriptionSource = boundary === -1 ? body : body.slice(0, boundary);
   const description = parseProjectDescription(descriptionSource);
+  if (boundary === -1) return { title, description };
+  const tail = body.slice(descriptionSource.trimEnd().length);
+  return { title, description, pointers: body.slice(boundary).startsWith('## Pointers') ? body.slice(boundary) : undefined, tail };
 
-  if (pointerIdx === -1) {
-    return { title, description };
-  }
-  return { title, description, pointers: rest.slice(pointerIdx).join("\n") };
 }
 
 export function renderProjectAgents(input: {
   title: string;
   description: string;
   pointers?: string;
+  tail?: string;
 }): string {
+  if (input.tail !== undefined) return `# ${input.title}\n\n${input.description}${input.tail}`;
   let out = `# ${input.title}\n\n${input.description}\n`;
   if (input.pointers !== undefined && input.pointers.length > 0) {
     const block = input.pointers.startsWith("## Pointers")
@@ -122,18 +119,6 @@ function sortProjectRecords(projects: TaskProjectRecord[]): TaskProjectRecord[] 
   });
 }
 
-function managedMemorySpan(markdown: string): string | null {
-  const start = markdown.indexOf(PROJECT_MEMORY_START);
-  if (start === -1) {
-    return null;
-  }
-  const end = markdown.indexOf(PROJECT_MEMORY_END, start);
-  if (end === -1) {
-    return null;
-  }
-  return markdown.slice(start, end + PROJECT_MEMORY_END.length);
-}
-
 export function renderTaskProjectsSection(projects: TaskProjectRecord[]): string {
   const bullets = sortProjectRecords(projects).map(
     (record) =>
@@ -141,7 +126,6 @@ export function renderTaskProjectsSection(projects: TaskProjectRecord[]): string
   );
   return [
     TASK_PROJECTS_START,
-    "## Task Projects",
     "",
     "CLI-maintained index of Task Project titles and descriptions. Do not hand-edit this section.",
     "",
@@ -162,30 +146,20 @@ export function rewriteRootAgents(existing: string, projects: TaskProjectRecord[
     );
   }
 
-  let next: string;
-  if (start !== -1) {
-    next = existing.slice(0, start) + block + existing.slice(end + TASK_PROJECTS_END.length);
-  } else {
-    const memoryEnd = existing.indexOf(PROJECT_MEMORY_END);
-    if (memoryEnd !== -1) {
-      const lineEnd = existing.indexOf("\n", memoryEnd);
-      const insertAt = lineEnd === -1 ? existing.length : lineEnd + 1;
-      next = `${existing.slice(0, insertAt)}\n${block}\n${existing.slice(insertAt)}`;
-    } else {
-      next = `${existing.trimEnd()}${existing.trim() ? "\n\n" : ""}${block}\n`;
-    }
+  const memorySection = decodeBody(existing).sections.memory;
+  const currentLocal = existing.match(blockPattern(LOCAL_START, LOCAL_END));
+  if (start !== -1 && ((currentLocal?.index !== undefined && start > currentLocal.index && end < currentLocal.index + currentLocal[0].length) || (memorySection.present && end < memorySection.insert && /^## 本层记忆$/m.test(existing.slice(0, start)))))
+    return existing.slice(0, start) + block + existing.slice(end + TASK_PROJECTS_END.length);
+  // Move only our owned index span; surrounding business prose stays byte-for-byte.
+  if (start !== -1) existing = existing.slice(0, start) + existing.slice(end + TASK_PROJECTS_END.length);
+  const local = existing.match(blockPattern(LOCAL_START, LOCAL_END))?.[0];
+  if (local) {
+    const updated = local.replace(LOCAL_END, () => `${block}\n${LOCAL_END}`);
+    return existing.replace(blockPattern(LOCAL_START, LOCAL_END), () => updated);
   }
-
-  const managedBefore = managedMemorySpan(existing);
-  const managedAfter = managedMemorySpan(next);
-  if (managedBefore !== null && managedAfter !== null && managedBefore !== managedAfter) {
-    throw new TasksError(
-      "VALIDATION_ERROR",
-      "refusing to write Task Projects section inside project-memory markers",
-    );
-  }
-
-  return next;
+  const section = decodeBody(existing).sections.memory;
+  if (section.present) return existing.slice(0, section.insert) + `${block}\n\n` + existing.slice(section.insert);
+  return insertInnerBlock(existing, LOCAL_START, `${LOCAL_START}\n## 本层记忆\n\n${block}\n${LOCAL_END}`);
 }
 
 export function projectAgentsRelPath(id: TaskProjectId, target: BoardTarget = ""): string {
@@ -360,7 +334,7 @@ export async function updateProject(
       : parseProjectDescription(patch.description);
   await writer.writeFile(
     abs,
-    renderProjectAgents({ title, description, pointers: parsed.pointers }),
+    renderProjectAgents({ title, description, pointers: parsed.pointers, tail: parsed.tail }),
   );
   await refreshProjectIndex(repoPath, writer);
   return {

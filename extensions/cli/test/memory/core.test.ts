@@ -154,7 +154,7 @@ test("managed symlink escapes are rejected and referenced links deduplicate by r
     assert.equal(read(targetDir, ".harness/skills/referenced/AGENTS.md").split(" — external")
         .length - 1, 1);
 });
-test("sparse scopes rehome descendants and nested git roots are excluded", async (t) => {
+test("explicit registered descendants survive intermediate adoption and nested Git roots are excluded", async (t) => {
     const targetDir = fixture(t);
     mkdirSync(join(targetDir, ".git"));
     const child = join(targetDir, "a/b");
@@ -171,8 +171,8 @@ test("sparse scopes rehome descendants and nested git roots are excluded", async
         rootDir: targetDir,
         memoryTypes: ["feedback"],
     });
-    assert.doesNotMatch(read(targetDir, "AGENTS.md"), /a\/b\/AGENTS.md/);
-    assert.match(read(targetDir, "a/AGENTS.md"), /b\/AGENTS.md/);
+    assert.match(read(targetDir, "AGENTS.md"), /a\/b\/AGENTS.md/);
+    assert.doesNotMatch(read(targetDir, "a/AGENTS.md"), /b\/AGENTS.md/);
     const nested = join(targetDir, "nested");
     mkdirSync(join(nested, ".git"), { recursive: true });
     await initMemory({ targetDir: nested, memoryTypes: ["project"] });

@@ -98,7 +98,7 @@ test("render and parse round-trip title, description, and optional pointers", ()
   assert.match(parsed.pointers ?? "", /README.md/);
 });
 
-test("parseProjectAgents rejects frontmatter and project-memory markers", () => {
+test("parseProjectAgents rejects frontmatter and accepts sparse node sections", () => {
   try {
     parseProjectAgents("---\nname: x\n---\n# T\n\nD\n");
     assert.fail("expected frontmatter throw");
@@ -106,33 +106,20 @@ test("parseProjectAgents rejects frontmatter and project-memory markers", () => 
     assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
     assert.match((error as Error).message, /must not have YAML frontmatter/);
   }
-  try {
-    parseProjectAgents("# T\n\nD\n\n<!-- project-memory:start -->\n");
-    assert.fail("expected project-memory throw");
-  } catch (error) {
-    assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
-    assert.match((error as Error).message, /must not contain project-memory markers/);
-  }
+  assert.equal(parseProjectAgents("# T\n\nD\n\n<!-- project-memory:start -->\n<!-- project-memory:end -->\n").description, "D");
 });
 
 test("oneLineDescription collapses newlines", () => {
   assert.equal(oneLineDescription("edges CLI\nwork"), "edges CLI work");
 });
 
-test("rewriteRootAgents inserts after project-memory end and does not touch the managed block", () => {
+test("rewriteRootAgents places its index in local while preserving authored constraints", () => {
   const existing = `# tasks\n\n${PROJECT_MEMORY_START}\n\n## 本层硬约束\n\n- keep me\n${PROJECT_MEMORY_END}\n`;
   const next = rewriteRootAgents(existing, [cliRecord, defaultRecord]);
-  const managed = existing.slice(
-    existing.indexOf(PROJECT_MEMORY_START),
-    existing.indexOf(PROJECT_MEMORY_END) + PROJECT_MEMORY_END.length,
-  );
-  const nextManaged = next.slice(
-    next.indexOf(PROJECT_MEMORY_START),
-    next.indexOf(PROJECT_MEMORY_END) + PROJECT_MEMORY_END.length,
-  );
-  assert.equal(nextManaged, managed);
+  assert.match(next, /## 本层硬约束\n\n- keep me/);
+  assert.ok(next.indexOf('<!-- project-memory-local:start -->') < next.indexOf(TASK_PROJECTS_START));
   assert.match(next, /<!-- task-projects:start -->/);
-  assert.ok(next.indexOf(PROJECT_MEMORY_END) < next.indexOf(TASK_PROJECTS_START));
+  assert.ok(next.indexOf(TASK_PROJECTS_END) < next.indexOf(PROJECT_MEMORY_END));
   assert.match(next, /- \[`_default`\]\(_default\/AGENTS.md\) — Ungrouped tasks that have not been assigned a named Task Project\./);
   assert.match(next, /- \[`cli`\]\(cli\/AGENTS.md\) — edges CLI work/);
   const defaultLine = next.indexOf("[`_default`]");
@@ -145,16 +132,15 @@ test("rewriteRootAgents replaces an existing Task Projects span only", () => {
   const next = rewriteRootAgents(existing, [defaultRecord]);
   assert.match(next, /# trailing/);
   assert.doesNotMatch(next, /^old$/m);
-  assert.equal(
-    next.slice(next.indexOf(PROJECT_MEMORY_START), next.indexOf(PROJECT_MEMORY_END) + PROJECT_MEMORY_END.length),
-    `${PROJECT_MEMORY_START}\nkeep\n${PROJECT_MEMORY_END}`,
-  );
+  assert.match(next, /<!-- project-memory:start -->\nkeep\n/);
+  assert.ok(next.indexOf(TASK_PROJECTS_END) < next.indexOf('<!-- project-memory-local:end -->'));
+  assert.equal(next.split(TASK_PROJECTS_START).length - 1, 1);
 });
 
-test("rewriteRootAgents on empty file writes only the Task Projects block", () => {
+test("rewriteRootAgents on empty file writes a sparse local section", () => {
   const next = rewriteRootAgents("", [defaultRecord]);
-  assert.ok(next.startsWith(TASK_PROJECTS_START));
-  assert.doesNotMatch(next, /project-memory/);
+  assert.match(next, /## 本层记忆/);
+  assert.doesNotMatch(next, /## 本层硬约束|## 下层记忆索引|## Task Projects/);
 });
 
 test("rewriteRootAgents rejects a start marker without an end marker", () => {
@@ -204,7 +190,7 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
     const root = await readFile(rootAgents, "utf8");
     assert.match(root, /- keep-index/);
     assert.match(root, /<!-- task-projects:start -->/);
-    assert.ok(root.indexOf("<!-- project-memory:end -->") < root.indexOf("<!-- task-projects:start -->"));
+    assert.ok(root.indexOf("<!-- task-projects:end -->") < root.indexOf("<!-- project-memory-local:end -->"));
 
     const task = await readFile(path.join(repo, taskRel), "utf8");
     assert.equal(task, "# keep\n");

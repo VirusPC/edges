@@ -6,7 +6,7 @@ import { loadAgentsTemplate } from "./blocks.js";
 import { AGENTS_FILE_NAME, assertScopePath, memoryDir, rejectLegacy, resolveRoot, resolveTarget, writeAtomic, } from "./paths.js";
 import { readIndexTemplate } from "./templates.js";
 import { MEMORY_TYPE_NAMES, SKILL_TYPE_NAMES, ensureTypeGitignore, findGitRoot, layerTypeSpecs, seedSpec, typeIndexTemplateName, } from "./types.js";
-import { findIndexAnchor, rehomeIndexEntries, syncIndexEntry, syncTargetAgents, } from "./agents.js";
+import { findIndexAnchor, syncIndexEntry, syncTargetAgents, } from "./agents.js";
 import { refreshIndex } from "./entries.js";
 export interface InitMemoryOptions {
     targetDir: string;
@@ -89,10 +89,10 @@ export async function initMemory(options: InitMemoryOptions) {
             });
         }
     const agentsAction = await syncTargetAgents(target, root);
-    if (target !== root)
+    if (target !== root && layerTypeSpecs(root).length)
         await syncTargetAgents(root, root);
-    const anchor = findIndexAnchor(target, root), rehomed = target !== root
-        ? await rehomeIndexEntries(target, anchor, root) : { inherited: [], detached: [] }, [indexAction, indexEntry, indexDescription] = await syncIndexEntry(anchor, target, options.description);
+    const anchor = findIndexAnchor(target, root);
+    const [indexAction, indexEntry, indexDescription] = await syncIndexEntry(anchor, target, options.description);
     return {
         operation: "init",
         targetDir: target,
@@ -105,8 +105,8 @@ export async function initMemory(options: InitMemoryOptions) {
         indexAction,
         indexEntry,
         indexDescription,
-        inheritedEntries: rehomed.inherited,
-        detachedEntries: rehomed.detached,
+        inheritedEntries: [],
+        detachedEntries: [],
         created,
         preserved,
         selectionRequired: false,

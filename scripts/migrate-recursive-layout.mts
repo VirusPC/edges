@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --import tsx
+import { InternalNode } from '../extensions/cli/src/models/internal-node.js';
 /** Reviewed Edges instance migration; generic Project Memory owns format conversion. */
 import * as fs from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
@@ -574,34 +575,25 @@ export function makeInstancePlan(
         "，那是唯一真理源。",
         "；AGENTS.md 组织入口发现，各规范正文按职责保持单一真源。",
       );
-      text = block(
-        text,
-        "children",
-        "## 下层作用域\n\n- [.harness/evaluation/AGENTS.md](.harness/evaluation/AGENTS.md) — 评测工作区及其独立验证责任。\n- [teaching/AGENTS.md](teaching/AGENTS.md) — 教学与学习状态。",
-      );
+      const node = new InternalNode(join(root, "AGENTS.md")).parse(text);
       const links = [
-        ["tasks/AGENTS.md", "领域任务"],
-        [".harness/tasks/AGENTS.md", "根维护任务"],
-        [".harness/evaluation/AGENTS.md", "评测"],
-        [".harness/observation/AGENTS.md", "观测职责与资料"],
-        ["extensions/AGENTS.md", "对外能力实现约束"],
-        [
-          "extensions/skills/project-memory-init/AGENTS.md",
-          "Project Memory 实现约束",
-        ],
-        ["shared-extensions/AGENTS.md", "共享扩展约束"],
-        ["knowledge/notes/AGENTS.md", "笔记规范"],
-        ["README.md", "目录与内容说明"],
-        ["CONTEXT.md", "领域术语"],
-        ["docs/adr/", "架构决策"],
-      ];
-      return (
-        text.trimEnd() +
-        "\n\n## 工作与模块入口\n\n" +
-        links
-          .map(([path, label]) => `- [${label}](${path}) — ${label}入口。\n`)
-          .join("")
-      );
+        ["tasks/AGENTS.md", "领域任务", "descendant"],
+        [".harness/tasks/AGENTS.md", "根维护任务", "local"],
+        [".harness/evaluation/AGENTS.md", "评测", "descendant"],
+        [".harness/observation/AGENTS.md", "观测职责与资料", "local"],
+        ["teaching/AGENTS.md", "教学与学习状态", "descendant"],
+        ["extensions/AGENTS.md", "对外能力实现约束", "descendant"],
+        ["shared-extensions/AGENTS.md", "共享扩展约束", "descendant"],
+        ["knowledge/notes/AGENTS.md", "笔记规范", "descendant"],
+        ["README.md", "目录与内容说明", "local"],
+        ["CONTEXT.md", "领域术语", "local"],
+      ] as const;
+      for (const [target, label, kind] of links) {
+        const old = node.children.find(child => child.target === target);
+        if (old) node.updateChild({ ...old, kind });
+        else node.addChild({ target, label, kind, description: `${label}入口。` });
+      }
+      return node.serialize();
     });
     const observation = join(root, "observation/README.md");
     if (fs.existsSync(observation))

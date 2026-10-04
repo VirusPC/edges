@@ -21,9 +21,9 @@
 └── .agents/skills/<name>/SKILL.md  # 原位正文或安装链接，只读
 ```
 
-`.harness/`、`memory/`、`skills/` 无必经总入口，不创建 `.harness/skills/AGENTS.md`。下层作用域可跨多层目录，也可在 `.harness/evaluation` 等模块内；目录名称、源码包或业务 `AGENTS.md` 本身不表示独立作用域。
+`.harness/`、`memory/`、`skills/` 无必经总入口，不创建 `.harness/skills/AGENTS.md`。下层作用域可跨多层目录，也可在 `.harness/evaluation` 等模块内；有可读 `AGENTS.md` 的真实目录就是节点；目录名称或业务类型不构成额外资格门槛。
 
-运行时作用域判据：本层 `AGENTS.md` 同时含 `project-memory` 外层标记和 `project-memory-local` 或 `project-memory-children` 区块。Skills-only 层同样满足；只有 Task 模块的层如要成为该树的独立作用域，也须显式提供此作用域契约。类型入口只含 entries/type 元数据，不是子层；Task 看板 AGENTS 不自动成为子层。Doctor 可发现有已采用类型但缺层入口的损坏层并修复，不把普通 `.harness` 目录当作用域。
+CLI 目标选择依次为显式 `--scope`、`EDGES_SCOPE` / `EDGES_REPO`、cwd 向上的最近可读 `AGENTS.md`，没有入口时退回 Git 根；不会穿越嵌套 Git 边界。标记只界定工具可改写的区块，不界定节点资格。显式选择目标不自动初始化 Memory。类型入口、Task 看板和 Task Project 使用同一种节点模型；已登记的本层与下层引用决定逻辑归属，普通跨目录正文链接不会自动变成所有权。Doctor 只给已采用 Memory / Skills 类型的节点补相应契约，不给普通或业务节点强加空区块。
 
 根参数优先：`--root-dir` 明确封住树，不跨其他 Git root/submodule。未给时取 Git 根，否则最近的受管层入口，否则目标自身。扫描允许穿过 `.harness` 到达真实子层，但跳过其他隐藏目录、node_modules、符号链接目录和嵌套 Git 根。
 
@@ -73,7 +73,7 @@ edges --scope S memory add-type \
 
 ## 受管区块与条目
 
-区块标记沿用 `<!-- project-memory:start -->` 外层，内部按 important → local → children；类型入口用 `project-memory-entries`，自定义特权元数据用 `project-memory-type`。层入口本层列表直接链到类型 AGENTS，下层列表只列最近的真正子层，保留原描述。修复不覆盖人工文本。
+区块标记沿用 `<!-- project-memory:start -->` 外层，内部按 important → local → children；类型入口用 `project-memory-entries`，自定义特权元数据用 `project-memory-type`。三类标题仍为「本层硬约束」（兼容「本层重要约束」）、「本层记忆」、「下层记忆索引」。本层列表登记该节点持有的类型、任务与其他内容；下层列表登记下层节点，保留显式跨层和跨目录关系及原描述。Task Project 列表的 task-projects 标记嵌在本层区块内；类型 entries 标记是本层内容的稀疏表示。不生成第四类工作与模块入口，不要求无内容的标题。修复不覆盖人工文本，也不因物理中间目录新增 AGENTS 就重归属已登记引用。
 
 普通条目为 YAML frontmatter + Markdown，前缀仍是类型原值，slug 为 snake_case。Skill 格式 slug 为 kebab-case（1–64 字符），name 为目录名。详细字段见 [`frontmatter-fields.md`](frontmatter-fields.md)：顶层遵循 Agent Skills 闭集，实现字段放 `metadata.edges-*`；读取既有顶层字段不等于支持旧目录布局，常规 doctor 不重写文件头。
 
@@ -87,4 +87,4 @@ edges --scope S memory add-type \
 
 ## Doctor
 
-默认只诊断；已有修复授权时使用 `--apply`。修复已采用官方类型的缺失入口（自定义入口丢失时无法恢复身份/权限，报告 unsafe-layout 要求恢复原索引）、漂移索引、漏登记或错位下层，补缺失硬约束区块；foreign AGENTS 只追加受管区块。不会初始化未采用类型、移动旧布局或改正文。返回 `findings`、`repaired`、`remaining`；每个 finding 同时含 `code` 与兼容消费字段 `issue`。无法读取的来源、无效正文和旧布局会留在 remaining，不宣称已全部修好。
+默认只诊断；已有修复授权时使用 `--apply`。修复已采用官方类型的缺失入口（自定义入口丢失时无法恢复身份/权限，报告 unsafe-layout 要求恢复原索引）、漂移索引、已采用 Memory 的漏登记或重复下层，补缺失硬约束区块；foreign AGENTS 只追加受管区块。不会初始化未采用类型、移动旧布局或改正文。返回 `findings`、`repaired`、`remaining`；每个 finding 同时含 `code` 与兼容消费字段 `issue`。无法读取的来源、无效正文和旧布局会留在 remaining，不宣称已全部修好。

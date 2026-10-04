@@ -1,5 +1,9 @@
 # Changelog
 
+## [3.0.1] - 2026-10-05
+
+- 统一 AGENTS 节点身份与三类内容组织；保留显式类型采用、写权限和局部归属，不用 Memory 标记或独立职责筛选节点。
+
 All notable changes to this skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),

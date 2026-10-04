@@ -742,3 +742,20 @@ for (const failure of ['missing-binary', 'broken-repository'] as const)
     assert.equal(fs.existsSync(join(root, manifest.tasks[0]!.target)), false);
     assert.deepEqual(snapshot(root), before);
   });
+
+test('instance root generator registers owned modules in three sections and preserves manual prose', async t => {
+  const { root, manifest } = fixture(t);
+  const file = join(root, 'AGENTS.md');
+  fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('<!-- project-memory-local:end -->', '- [manual](manual.md) — user pointer\n<!-- project-memory-local:end -->') + '\n## Authored guidance\nKeep this prose.\n');
+  const { runInstanceMigration } = await load();
+  runInstanceMigration(root, manifest, true);
+  const source = fs.readFileSync(file, 'utf8');
+  assert.doesNotMatch(source, /## 工作与模块入口|## 下层作用域/);
+  assert.match(source, /## Authored guidance\nKeep this prose\./);
+  assert.match(source, /\[manual\]\(manual.md\)/);
+  const { InternalNode } = await import('../../src/models/internal-node.js');
+  const node = new InternalNode(file).parse(source);
+  assert.ok(node.children.some(ref => ref.target === '.harness/tasks/AGENTS.md' && ref.kind === 'local'));
+  assert.ok(node.children.some(ref => ref.target === 'extensions/AGENTS.md' && ref.kind === 'descendant'));
+  assert.equal(node.children.filter(ref => ref.target === '.harness/evaluation/AGENTS.md').length, 1);
+});

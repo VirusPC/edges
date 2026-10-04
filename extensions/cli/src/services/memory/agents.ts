@@ -1,5 +1,7 @@
+import { InternalNode } from '../../models/internal-node.js';
+import { discoverScopes } from '../scope.js';
 import { loadMemoryDocument, saveMemoryDocument, type MemoryDocument } from './node-documents.js';
-import { join, dirname, basename, relative } from "node:path";
+import { join, dirname, basename, relative, resolve } from "node:path";
 import { AUTO_START, CHILDREN_START, CHILDREN_END, IMPORTANT_START, LOCAL_START, LOCAL_END, OUTER_START, INDEX_ENTRY_PATTERN, blockPattern, buildChildrenBlock, ensureImportantBlock, escapeRegExp, insertInnerBlock, renderAgentsDocument, upsertBlock, } from "./blocks.js";
 import { AGENTS_FILE_NAME, ancestors, assertScopePath, isFile, isScope, readText, realPath, within, writeAtomic, } from "./paths.js";
 import { ENTRY_LINE_TEMPLATE, renderLine } from "./templates.js";
@@ -62,21 +64,34 @@ export function mergeIndexEntry(document: string, relativeAgents: string, entry:
 export const ancestorsUpTo = (start: string, root: string) => within(start, root)
     ? ancestors(start).filter((p) => within(p, root))
     : [start];
-function indexEntries(source: string): [string, string][] {
-    const block = source.match(blockPattern(CHILDREN_START, CHILDREN_END))?.[0];
-    return block ? [...block.matchAll(INDEX_ENTRY_PATTERN)].map(m => [m[1]!, (m[2] ?? '').trim()]) : [];
+export function readOwnershipEntries(file: string) {
+    return isFile(file) ? new InternalNode(file).parse(readText(file)).children : [];
 }
 export function readIndexEntries(file: string): [string, string][] {
-    return isFile(file) ? indexEntries(readText(file)) : [];
+    return readOwnershipEntries(file)
+        .filter(entry => entry.kind === 'descendant' && entry.target.split(/[?#]/, 1)[0]!.endsWith('AGENTS.md'))
+        .map(entry => [entry.target, entry.description ?? '']);
+}
+export function registeredIndexAnchors(target: string, root: string): string[] {
+    return discoverScopes(root).filter(owner => readOwnershipEntries(join(owner, AGENTS_FILE_NAME))
+        .some(entry => ownershipTarget(owner, entry.target) === realPath(join(target, AGENTS_FILE_NAME))));
+}
+export function ownershipTarget(owner: string, href: string): string | undefined {
+    if (/^[a-z][a-z\d+.-]*:|^\/\//i.test(href)) return undefined;
+    try { return realPath(resolve(owner, decodeURIComponent(href.split(/[?#]/, 1)[0]!))); }
+    catch { return undefined; }
 }
 async function dropLoadedIndexEntries(document: MemoryDocument, relatives: Set<string>): Promise<boolean> {
-    const before = document.node.serialize(), block = before.match(blockPattern(CHILDREN_START, CHILDREN_END))?.[0];
-    if (!block) return false;
-    const changed = block.replace(INDEX_ENTRY_PATTERN, (full, rel: string) => relatives.has(rel) ? '' : full);
-    if (changed === block) return false;
-    await saveMemoryDocument(document, before.replace(blockPattern(CHILDREN_START, CHILDREN_END), () => changed));
+    if (!(document.node instanceof InternalNode)) throw new Error('Expected an AGENTS node');
+    const before = document.node.serialize();
+    for (const reference of document.node.children)
+        if (reference.kind === 'descendant' && relatives.has(reference.target)) document.node.removeChild(reference);
+    const after = document.node.serialize();
+    if (after === before) return false;
+    await saveMemoryDocument(document, after);
     return true;
 }
+
 export async function dropIndexEntries(file: string, relatives: Set<string>): Promise<boolean> {
     const document = await loadMemoryDocument(dirname(file), file);
     return dropLoadedIndexEntries(document, relatives);
@@ -84,6 +99,8 @@ export async function dropIndexEntries(file: string, relatives: Set<string>): Pr
 export function findIndexAnchor(target: string, root: string): string {
     if (target === root)
         return root;
+    const registered = registeredIndexAnchors(target, root);
+    if (registered.length) return registered[0]!;
     for (const candidate of ancestors(dirname(target))) {
         if (candidate === root)
             break;
@@ -103,8 +120,19 @@ export async function syncIndexEntry(anchor: string, target: string, description
     const document = await loadMemoryDocument(anchor, file);
     const existing = document.existed ? document.node.serialize() : undefined;
     const state = classifyAgentsSource(existing);
-    if (state === "foreign")
-        return ["needs-doctor", rel, normalized];
+    if (!(document.node instanceof InternalNode)) throw new Error('Expected an AGENTS node');
+    const registered = document.node.children.find(entry => ownershipTarget(anchor, entry.target) === realPath(join(target, AGENTS_FILE_NAME)));
+    if (registered) {
+        if (description === undefined || registered.description === normalized) return ["preserved", registered.target, null];
+        document.node.updateChild({ ...registered, description: normalized });
+        await saveMemoryDocument(document, document.node.serialize());
+        return ["updated", registered.target, normalized];
+    }
+    if (state === "foreign") {
+        document.node.addChild({ target: rel, description: normalized, kind: 'descendant' });
+        await saveMemoryDocument(document, document.node.serialize());
+        return ["updated", rel, normalized];
+    }
     const entry = renderLine(ENTRY_LINE_TEMPLATE, {
         title: rel,
         path: rel,
@@ -119,40 +147,4 @@ export async function syncIndexEntry(anchor: string, target: string, description
         return ["preserved", rel, changed ? normalized : null];
     await saveMemoryDocument(document, updated);
     return ["updated", rel, changed ? normalized : null];
-}
-export async function rehomeIndexEntries(target: string, anchor: string, root: string): Promise<{
-    inherited: string[];
-    detached: string[];
-}> {
-    const inherited: [
-        string,
-        string
-    ][] = [], detached: string[] = [];
-    for (const ancestor of ancestorsUpTo(dirname(target), root)) {
-        const file = join(ancestor, AGENTS_FILE_NAME);
-        const document = await loadMemoryDocument(ancestor, file);
-        if (classifyAgentsSource(document.existed ? document.node.serialize() : undefined) !== 'managed') continue;
-        const obsolete = new Set<string>();
-        for (const [rel, description] of indexEntries(document.node.serialize())) {
-            const entryDir = realPath(dirname(join(ancestor, rel)));
-            if (entryDir === target) {
-                if (ancestor !== anchor)
-                    obsolete.add(rel);
-            }
-            else if (within(entryDir, target)) {
-                obsolete.add(rel);
-                inherited.push([entryDir, description]);
-            }
-        }
-        if (obsolete.size && await dropLoadedIndexEntries(document, obsolete))
-            detached.push(...[...obsolete].sort().map((rel) => `${basename(ancestor)}:${rel}`));
-    }
-    const added: string[] = [];
-    for (const [dir, description] of inherited.sort(([a], [b]) => a.localeCompare(b))) {
-        const [action, entry] = await syncIndexEntry(target, dir, description);
-        if (entry &&
-            !["preserved", "not-applicable", "needs-doctor"].includes(action))
-            added.push(entry);
-    }
-    return { inherited: added, detached };
 }

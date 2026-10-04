@@ -3,18 +3,12 @@ import path from 'node:path';
 import { discoverDirectories, findAncestor } from '../utils/filesystem.js';
 import { InternalNode } from '../models/internal-node.js';
 
-/** Current command-selection policy, not the reusable node identity contract. */
-function selectsScope(node: InternalNode): boolean {
-  return node.body.includes('<!-- project-memory:start -->') &&
-    (node.body.includes('<!-- project-memory-local:start -->') || node.body.includes('<!-- project-memory-children:start -->'));
-}
-
 export function isScope(dir: string): boolean {
   const file = path.join(path.resolve(dir), 'AGENTS.md');
   let node: InternalNode | undefined;
   try { if (lstatSync(file).isFile()) node = new InternalNode(file).parse(readFileSync(file, 'utf8')); }
   catch (error) { if (!['ENOENT', 'ENOTDIR'].includes((error as NodeJS.ErrnoException).code ?? '')) throw error; }
-  return node !== undefined && selectsScope(node);
+  return node !== undefined;
 }
 
 function isGitBoundary(directory: string): boolean {

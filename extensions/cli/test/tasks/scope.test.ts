@@ -49,7 +49,7 @@ test('explicit nested scope separates both boards and co-moves Task/Run without 
     await assert.rejects(access(path.join(child, 'knowledge/tasks')));
   } finally { await rm(root, { recursive: true, force: true }); }
 });
-test('scope discovery follows cwd owner rather than installed CLI and ignores type/business entries', async () => {
+test('scope discovery selects the nearest type or business AGENTS independently of CLI installation', async () => {
   const { root, child } = await fixture();
   const cwd = process.cwd();
   try {
@@ -57,7 +57,7 @@ test('scope discovery follows cwd owner rather than installed CLI and ignores ty
     await mkdir(nested, { recursive: true });
     await writeFile(path.join(nested, 'AGENTS.md'), '<!-- project-memory-entries:start -->');
     process.chdir(nested);
-    assert.equal(loadConfig({}).scopeDir, child);
+    assert.equal(loadConfig({}).scopeDir, nested);
     assert.equal(loadConfig({}).repoPath, root);
     assert.equal(loadConfig({ EDGES_SCOPE: child, EDGES_REPO: root }).scopeDir, child);
     assert.equal(loadConfig({ EDGES_REPO: root }).scopeDir, root);
@@ -90,7 +90,7 @@ test('discovery crosses maintenance containers but stops at symlinks and nested 
     await symlink(child, path.join(root, 'linked'));
     await mkdir(path.join(root, 'important-only'));
     await writeFile(path.join(root, 'important-only/AGENTS.md'), '<!-- project-memory:start -->\n<!-- project-memory-important:start -->');
-    assert.deepEqual(discoverScopes(root).sort(), [root, child, evaluation, method].sort());
+    assert.deepEqual(discoverScopes(root).sort(), [root, child, evaluation, method, path.join(root, 'important-only')].sort());
   } finally { await rm(root, { recursive: true, force: true }); }
 });
 

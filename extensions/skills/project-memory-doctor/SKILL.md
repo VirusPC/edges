@@ -1,7 +1,7 @@
 ---
 name: project-memory-doctor
 description: 诊断并修复已采用的 .harness 项目记忆索引与作用域登记。默认只诊断；明确授权修复时 apply。旧布局只报告迁移需求。
-version: 3.0.0
+version: 3.0.1
 ---
 
 # Project Memory Doctor
@@ -21,13 +21,13 @@ edges memory doctor \
 | unregistered-type / outdated-local | 补本层类型链接，保留其他类型和人工说明 |
 | missing-agents / foreign-agents | 建层入口或追加受管区块，人工正文保留 |
 | missing-important | 补硬约束种子，已有规则不覆盖 |
-| dead-entry / misplaced / unregistered | 修最近真正子层登记，保留已有描述 |
+| dead-entry / duplicate / unregistered | 清理失效或重复登记；补已采用 Memory 的缺失登记，保留显式归属与描述 |
 | migration-required | 只报告，转独立迁移器 |
 | unsafe-layout | 只报告路径越界、类型冲突或非法元数据，不扩大写权限 |
 | source-scan-error | 来源缺失、断链、不可读时保留已有索引，不当空来源 |
 | invalid-entry | 只诊断正文格式，不改写原位文件 |
 
-只扫描实际作用域；类型入口和业务模块 AGENTS 不自动成为子作用域。可穿过 `.harness/evaluation` 等容器发现真实子层；跳过安装链接、依赖目录与其他 Git 根/submodule。`referenced` 仅索引本层 `.agents/skills`，不扫描子层或全机技能。
+所有可读 AGENTS 均可发现为节点，类型或业务入口允许稀疏内容，不强制添加空区块。仅对已采用 Memory / Skills 的节点修复类型契约；本层与下层登记均保留，不将已登记本层入口重复放入下层，也不按物理祖先搬动跨目录登记。可穿过 `.harness/evaluation` 等容器发现节点；跳过安装链接、依赖目录与其他 Git 根/submodule。`referenced` 仅索引本层 `.agents/skills`，不扫描子层或全机技能。
 
 `.agents` 一个字节都不写；缺失来源不代建。修复 `user` 或自定义私有类型前保证索引和正文忽略规则。索引来源无法完整读取时不写空索引；即使 `--apply` 后仍会有 remaining，应说明原因，不能宣称已修复干净或反复重试。
 

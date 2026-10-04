@@ -285,7 +285,7 @@ test("foreign and manual prose remain byte-identical outside managed blocks", as
     await doctorMemory({ targetDir: d, apply: true });
     assert.ok(read(d, "AGENTS.md").endsWith(tail));
 });
-test("doctor fixes duplicate and misplaced children preserving description and prose", async (t) => {
+test("doctor deduplicates children in their registered owner preserving description and prose", async (t) => {
     const d = await base(t), child = join(d, "mid/child");
     fs.mkdirSync(child, { recursive: true });
     await initMemory({
@@ -305,10 +305,11 @@ test("doctor fixes duplicate and misplaced children preserving description and p
     });
     assert.equal((await doctorMemory({ targetDir: d, apply: true })).remaining.length, 0);
     assert.match(read(d, "AGENTS.md"), /Manual guidance/);
-    assert.match(read(d, "mid/AGENTS.md"), /specific responsibility/);
-    assert.equal(read(d, "mid/AGENTS.md").split("](child/AGENTS.md)").length - 1, 1);
+    assert.match(read(d, "AGENTS.md"), /specific responsibility/);
+    assert.equal(read(d, "AGENTS.md").split("](mid/child/AGENTS.md)").length - 1, 1);
+    assert.doesNotMatch(read(d, "mid/AGENTS.md"), /child\/AGENTS.md/);
 });
-test("doctor discovers harness child scope but skips containers and business AGENTS", async (t) => {
+test("doctor inventories all AGENTS but does not initialize business or type nodes", async (t) => {
     const d = await base(t), child = join(d, ".harness/evaluation/suite");
     fs.mkdirSync(child, { recursive: true });
     await initMemory({ targetDir: child, rootDir: child, skillTypes: ["managed"] });
@@ -317,7 +318,11 @@ test("doctor discovers harness child scope but skips containers and business AGE
     assert.deepEqual(report.memoryDirs.sort(), [
         ".",
         ".harness/evaluation/suite",
+        ".harness/evaluation/suite/.harness/skills/managed",
+        ".harness/memory/projects",
+        "tasks",
     ]);
+    assert.equal(read(d, "tasks/AGENTS.md"), "# Business");
     assert.equal(report.remaining.length, 0);
 });
 test("unregistered custom types are rediscovered and metadata/manual introductions are preserved", async (t) => {

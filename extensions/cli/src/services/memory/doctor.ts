@@ -4,7 +4,7 @@ import { join, dirname, relative } from "node:path";
 import { IMPORTANT_START, LOCAL_START, LOCAL_END, blockPattern, insertInnerBlock, } from "./blocks.js";
 import { AGENTS_FILE_NAME, assertScopePath, isScope, isSymlink, listTypeFiles, readText, realPath, rejectLegacy, relativeOrName, resolveRoot, resolveTarget, writeAtomic, } from "./paths.js";
 import { layerTypeSpecs, selectedLocalBlock } from "./types.js";
-import { classifyAgentsSource, classifyAgentsFile, dropIndexEntries, findIndexAnchor, readIndexEntries, syncIndexEntry, syncTargetAgents, } from "./agents.js";
+import { classifyAgentsSource, classifyAgentsFile, dropIndexEntries, findIndexAnchor, readIndexEntries, syncIndexEntry, syncTargetAgents, registeredIndexAnchors, ownershipTarget, } from "./agents.js";
 import { expectedIndexDocument, isSkillFormat, parseFrontmatter, refreshIndex, } from "./entries.js";
 export interface MemoryFinding {
     code: string;
@@ -77,7 +77,7 @@ export function collectFindings(root: string): MemoryFinding[] {
             findings.push(finding("unsafe-layout", owner, root, errorText(error)));
             continue;
         }
-        if (!specs.length && !scopes.has(owner))
+        if (!specs.length)
             continue;
         const agents = join(owner, AGENTS_FILE_NAME), state = classifyAgentsFile(agents);
         if (state !== "managed")
@@ -125,23 +125,19 @@ export function collectFindings(root: string): MemoryFinding[] {
                     continue;
                 }
                 seen.add(rel);
-                const child = dirname(join(owner, rel));
-                if (!scopes.has(realPath(child)) || isSymlink(child))
+                const target = ownershipTarget(owner, rel), child = target ? dirname(target) : '';
+                if (!child || !safeScope(child) || isSymlink(child))
                     findings.push(finding("dead-entry", agents, root, rel, { entry: rel }));
-                else if (findIndexAnchor(child, root) !== owner)
-                    findings.push(finding("misplaced", agents, root, rel, {
-                        entry: rel,
-                        description,
-                    }));
+
             }
         }
     }
     for (const owner of [...scopes].sort()) {
-        if (owner === root)
-            continue;
-        const anchor = findIndexAnchor(owner, root), rel = join(relative(anchor, owner), AGENTS_FILE_NAME);
-        if (!readIndexEntries(join(anchor, AGENTS_FILE_NAME)).some(([entry]) => entry === rel))
-            findings.push(finding("unregistered", owner, root, "Register under nearest owning scope"));
+        if (owner === root) continue;
+        try {
+            if (layerTypeSpecs(owner).length && !registeredIndexAnchors(owner, root).length)
+                findings.push(finding("unregistered", owner, root, "Register adopted Memory under an entry"));
+        } catch { /* unsafe-layout was reported above */ }
     }
     return findings;
 }
@@ -154,7 +150,7 @@ export async function applyFindings(root: string, findings: MemoryFinding[]): Pr
             continue;
         try {
             const specs = layerTypeSpecs(owner);
-            if (!specs.length && !isScope(owner))
+            if (!specs.length)
                 continue;
             const file = assertScopePath(join(owner, AGENTS_FILE_NAME), owner);
             const document = await loadMemoryDocument(owner, file);
@@ -178,7 +174,7 @@ export async function applyFindings(root: string, findings: MemoryFinding[]): Pr
             /* Unsafe owners remain reported by the second scan. */
         }
     }
-    const descriptions = new Map<string, string | undefined>();
+    const registrations = new Map<string, { anchor: string; description?: string }>();
     for (const item of findings)
         if (["dead-entry", "misplaced", "duplicate"].includes(item.code) &&
             item.entry) {
@@ -187,19 +183,19 @@ export async function applyFindings(root: string, findings: MemoryFinding[]): Pr
                 continue;
             assertScopePath(file, dirname(file));
             if (["misplaced", "duplicate"].includes(item.code))
-                descriptions.set(dirname(join(dirname(file), item.entry)), item.description);
+                registrations.set(dirname(join(dirname(file), item.entry)), { anchor: dirname(file), description: item.description });
             if (await dropIndexEntries(file, new Set([item.entry])))
                 repaired.push(`removed-entry: ${item.entry}`);
         }
-    for (const owner of discoverMemoryDirs(root)) {
-        if (owner === root || blocked.has(owner))
-            continue;
-        const anchor = findIndexAnchor(owner, root);
-        if (blocked.has(anchor))
-            continue;
-        const [action, entry] = await syncIndexEntry(anchor, owner, descriptions.get(owner));
-        if (!["preserved", "not-applicable", "needs-doctor"].includes(action))
-            repaired.push(`registered: ${entry}`);
+    for (const item of findings.filter(f => f.code === 'unregistered')) {
+        const owner = join(root, item.path);
+        if (!registeredIndexAnchors(owner, root).length)
+            registrations.set(owner, { anchor: findIndexAnchor(owner, root) });
+    }
+    for (const [owner, { anchor, description }] of registrations) {
+        if (owner === root || blocked.has(owner) || blocked.has(anchor)) continue;
+        const [action, entry] = await syncIndexEntry(anchor, owner, description);
+        if (!["preserved", "not-applicable", "needs-doctor"].includes(action)) repaired.push(`registered: ${entry}`);
     }
     return repaired;
 }

@@ -1,7 +1,7 @@
 ---
 name: project-memory-init
 description: 在指定作用域按用户选择创建或刷新项目记忆与技能类型（AGENTS.md + .harness）。仅当用户明确要求初始化时使用，不覆盖已有正文。
-version: 3.0.0
+version: 3.0.1
 ---
 
 # Project Memory Init
@@ -20,7 +20,7 @@ edges memory init \
 
 新层至少选择一类；两份列表分别可省略。显式选择追加采用，不删除既有或自定义类型。自定义类型使用 `$project-memory-add-type`，不要改官方推荐模板。
 
-层入口直接链到 `.harness/memory/<plural>/AGENTS.md` 与 `.harness/skills/<type>/AGENTS.md`，固定两跳到正文，无容器总入口。真实子作用域按稀疏层级登记，模块/源码目录和类型入口不自动成为子作用域。`--root-dir` 是边界；默认先取 Git 根，否则最近受管层入口，否则目标自身，不能从工具安装目录推断目标。
+层入口直接链到 `.harness/memory/<plural>/AGENTS.md` 与 `.harness/skills/<type>/AGENTS.md`，固定两跳到正文，无容器总入口。可读 AGENTS 都是节点；本层和下层按显式登记区分，容器可跨层直达。已有登记不因中间目录新增入口而重归属，节点身份不自动采用 Memory。`--root-dir` 是边界；默认先取 Git 根，否则最近受管层入口，否则目标自身，不能从工具安装目录推断目标。
 
 `managed` 可写本地 Skill；`referenced` 仅索引当前层 `.agents/skills`，不创建来源目录、不动原位正文或安装链接。同源别名在类型内去重，不同真源同名保留。私有类型先补 ignore 再创建索引。
 
