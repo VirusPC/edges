@@ -1,4 +1,5 @@
-import { decodeDocument, parseNode } from './parse.js';
+import { decodeBody } from './parse.js';
+import { parseDocument, serializeDocument, sameValue as same } from './document.js';
 
 /** @typedef {import('../model.js').NodeModel} NodeModel */
 /** @typedef {import('../model.js').SectionKey} SectionKey */
@@ -7,13 +8,6 @@ import { decodeDocument, parseNode } from './parse.js';
 /** @type {SectionKey[]} */
 const keys = ['constraints', 'memory', 'children'];
 const names = { constraints: ['important', '本层硬约束'], memory: ['local', '本层记忆'], children: ['children', '下层记忆索引'] };
-/** @param {unknown} a @param {unknown} b */
-const same = (a, b) => JSON.stringify(a, orderedKeys) === JSON.stringify(b, orderedKeys);
-/** @param {string} _key @param {unknown} value */
-function orderedKeys(_key, value) {
-  return value && typeof value === 'object' && !Array.isArray(value)
-    ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))) : value;
-}
 /** @param {string} value */
 const escape = value => value.replace(/[\\`*_[\]{}()#+!<>|&-]/g, '\\$&').replace(/^(\d+)\./gm, '$1\\.');
 
@@ -39,14 +33,14 @@ function renderSection(key, items, newline) {
  * @param {string} [originalSource]
  * @returns {string}
  */
-export function serializeNode(model, originalSource) {
+function serializeBody(model, originalSource) {
   const newline = originalSource?.includes('\r\n') ? '\r\n' : '\n';
   if (originalSource === undefined) {
     const source = ['<!-- project-memory:start -->', ...keys.map(key => renderSection(key, model[key], newline)), '<!-- project-memory:end -->', '', ...model.references.map(ref => `- ${renderLink(ref)}`), ''].join(newline);
-    if (!same(parseNode(source), model)) throw new Error('Model cannot be represented losslessly as a node document.');
+    if (!same(decodeBody(source).model, model)) throw new Error('Model cannot be represented losslessly as a node document.');
     return source;
   }
-  const original = decodeDocument(originalSource);
+  const original = decodeBody(originalSource);
   const originalText = originalSource;
   if (same(original.model, model)) return originalSource;
   if (original.unsafe) throw new Error('Cannot edit ambiguous or unclosed node sections.');
@@ -104,6 +98,14 @@ export function serializeNode(model, originalSource) {
     source = source.slice(0, change.start) + change.value + source.slice(change.end);
     boundary = change.start;
   }
-  if (!same(parseNode(source), model)) throw new Error('Model cannot be represented losslessly without changing surrounding content.');
+  if (!same(decodeBody(source).model, model)) throw new Error('Model cannot be represented losslessly without changing surrounding content.');
   return source;
+}
+
+/** @param {NodeModel} model @param {string} [originalSource] */
+export function serializeNode(model, originalSource) {
+  const { metadata, ...content } = model;
+  const original = originalSource === undefined ? undefined : parseDocument(originalSource);
+  const body = serializeBody(content, original?.body);
+  return serializeDocument(metadata === undefined ? { body } : { metadata, body }, originalSource);
 }

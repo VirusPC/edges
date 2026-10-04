@@ -55,6 +55,8 @@ Those examples use `tsx` and do not need a `dist/` build. The installed `edges` 
 
 Node reading, ancestor search and traversal live in the independent [`@edges/node-tree`](../packages/node-tree/README.md) workspace package. `src/utils/scope.ts` is the CLI adapter: it supplies environment/argument precedence, Git fallback, directory exclusions and the current Project Memory marker selection policy. The core itself recognizes regular AGENTS entries without that policy and separately exposes logical child-index traversal. The Tasks `all` inventory below retains physical discovery; this extraction does not migrate memories or change command ownership rules. The loaded envelope separates `model` from `source`, filesystem `location`/`identity`, and resolved `links`; Markdown parsing and serialization are exposed independently through `@edges/node-tree/codec`. The core exports native JavaScript at runtime, so source commands and deployment do not require generated artifacts. CLI build and test scripts first check the core and generate its type declarations.
 
+Task Markdown uses the shared optional YAML frontmatter codec (`parseDocument` / `serializeDocument`). The Task adapter retains field meaning, nested metadata projection and body formatting; the common codec handles YAML syntax, comments and round-trip preservation. No-header documents remain valid at the format layer. Task Project AGENTS validation still applies its own no-frontmatter rule.
+
 ```bash
 edges --scope ./projects/demo tasks list
 edges --scope ./projects/demo tasks --purpose maintenance create --title "Repair build"

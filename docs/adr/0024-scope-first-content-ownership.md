@@ -46,6 +46,8 @@ status: proposed
 
 **模型、格式与存储进一步解耦（用户确认，2026-10-04 实施）：**三部分内容与引用关系由不含路径、Markdown 原文或 AST 的 `NodeModel` 表达。纯 codec 负责解析／序列化；文件适配负责原文读写、路径与文件身份校验；组合层把模型、来源与位置分字段加载，CLI 消费组合结果。带原文的序列化保留未修改片段与未知扩展，无法保留时拒绝生成有损结果。此分层可独立复用，详见[实施与验证](../superpowers/plans/2026-10-04-node-model-codec-separation.md)。
 
+**内置可选 frontmatter（用户确认，2026-10-04）：**Task、Memory 与 AGENTS.md 底层均为可选 YAML 头加 Markdown 正文。公共文档模型使用可选 `metadata`，格式层负责解析与写回；字段含义和校验由各领域负责。AGENTS.md 进一步约定三部分章节、HTML 注释标记与索引关系，不将这些约定下沉为通用 Markdown 格式。公共能力与 NodeModel 已接入，Tasks 已复用；Python Memory 接入、具体入口是否采用 description 等字段仍分别推进。见[实施与验证](../superpowers/plans/2026-10-04-optional-frontmatter.md)。
+
 ## 文件系统
 
 内容由文件系统承载，保持可读、可编辑、可迁移。`.harness` 作为节点维护空间的目录方案继续保留为复核材料；其内部布局、推荐模块、局部扩展及 Memory/Skills 类型组织，尚不能按旧 ADR 的 accepted 状态跳过确认。

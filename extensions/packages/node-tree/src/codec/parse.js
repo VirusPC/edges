@@ -1,5 +1,6 @@
 import { fromMarkdown } from 'mdast-util-from-markdown';
 import { createNodeModel } from '../model.js';
+import { parseDocument } from './document.js';
 
 /** @typedef {import('../model.js').NodeModel} NodeModel */
 /** @typedef {import('../model.js').SectionKey} SectionKey */
@@ -19,7 +20,7 @@ function start(node) { return node.position?.start.offset ?? 0; }
 function end(node) { return node.position?.end.offset ?? 0; }
 
 /** Private codec representation: source ranges/Markdown syntax never enter NodeModel. @param {string} source */
-export function decodeDocument(source) {
+export function decodeBody(source) {
   const ast = fromMarkdown(source);
   const model = createNodeModel();
   /** @type {Record<SectionKey, Binding[]>} */
@@ -177,5 +178,8 @@ export function decodeDocument(source) {
 
 /** @param {string} source @returns {NodeModel} */
 export function parseNode(source) {
-  return decodeDocument(source).model;
+  const document = parseDocument(source);
+  const model = decodeBody(document.body).model;
+  if (document.metadata !== undefined) model.metadata = document.metadata;
+  return model;
 }

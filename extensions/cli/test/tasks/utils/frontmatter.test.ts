@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseTaskDoc, setMetadataField, renderNewTaskDoc } from "../../../src/tasks/utils/frontmatter.js";
+import { parseTaskDoc, setMetadataField, setTopLevelField, replaceBody, renderNewTaskDoc } from "../../../src/tasks/utils/frontmatter.js";
 
 const SAMPLE = `---
 name: cli_refactor_commanderjs
@@ -141,4 +141,40 @@ test("setMetadataField can set edges-task-priority to none", () => {
   const next = setMetadataField(withHigh, "edges-task-priority", "none");
   assert.equal(parseTaskDoc(next).metadata["edges-task-priority"], "none");
   assert.match(next, /edges-tasks-status: todo/);
+});
+
+test("Task YAML supports multiline and single-quoted fields", () => {
+  const doc = parseTaskDoc("---\nname: 'my task'\ndescription: >-\n  first line\n  second line\nmetadata:\n  edges-title: 'A: title'\n---\nbody\n");
+  assert.equal(doc.name, "my task");
+  assert.equal(doc.description, "first line second line");
+  assert.equal(doc.metadata["edges-title"], "A: title");
+});
+
+test("Task metadata edits retain unknown nested fields and comments", () => {
+  const source = "---\nname: test\nmetadata:\n  edges-tasks-status: todo # explanation\n  extension: {nested: [one, two]}\n---\nBody without trailing newline";
+  const result = setMetadataField(source, "edges-tasks-status", "done");
+  assert.match(result, /edges-tasks-status: done # explanation/);
+  assert.match(result, /extension: \{nested: \[one, two\]\}/);
+  assert.equal(parseTaskDoc(result).body, "Body without trailing newline");
+});
+
+test("new Task titles and descriptions roundtrip YAML-significant strings", () => {
+  const doc = parseTaskDoc(renderNewTaskDoc({ name: 'null', description: 'A: value # not a comment', title: '[title]', status: 'todo', updatedAt: '2026-10-04', body: 'body' }));
+  assert.equal(doc.name, 'null');
+  assert.equal(doc.description, 'A: value # not a comment');
+  assert.equal(doc.metadata['edges-title'], '[title]');
+});
+
+
+test("Task body replacement and top-level edits share the optional document format", () => {
+  const source = "---\nname: original\ndescription: before # keep\nmetadata:\n  edges-type: task\n---\n\nOld body\n";
+  const updated = setTopLevelField(source, "description", "after: # literal");
+  assert.equal(parseTaskDoc(updated).description, "after: # literal");
+  assert.match(updated, /# keep/);
+  const replaced = replaceBody(source, "New body");
+  assert.equal(parseTaskDoc(replaced).body, "\nNew body\n");
+  assert.ok(replaced.startsWith(source.slice(0, source.indexOf("\nOld body"))));
+  assert.equal(setTopLevelField("plain body", "name", "ignored"), "plain body");
+  assert.equal(setMetadataField("plain body", "status", "ignored"), "plain body");
+  assert.equal(replaceBody("plain body", "New body"), "New body");
 });

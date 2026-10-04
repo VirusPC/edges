@@ -45,7 +45,7 @@ pnpm --filter @edges/node-tree test
 
 | 层 | 内容与边界 |
 | --- | --- |
-| `model.js` | `NodeModel` 表达 constraints（本层重要约束）、memory（本层记忆）、children（下层记忆索引），以及区块外的普通 references。各条目由文本和链接片段组成；目标保留作者给出的标识，不带原文、AST 或文件位置。 |
+| `model.js`、`document-model.ts`（纯类型） | `NodeModel` 表达 constraints（本层重要约束）、memory（本层记忆）、children（下层记忆索引），以及区块外的普通 references。可选 `metadata` 承载文档头部数据。各条目由文本和链接片段组成；目标保留作者给出的标识，不带原文、AST 或文件位置。 |
 | `codec/` | `parseNode(source)` 把 Markdown 转成模型；`serializeNode(model, originalSource?)` 转回 Markdown。源片段与 AST 只在 codec 内使用，无文件读写或路径解析。 |
 | `filesystem.js`、`paths.js` | 读取和替换文件、验证路径与文件身份、解析相对引用、发现物理目录。原文通过 `readNodeFile` / `writeNodeFile` 独立读写。 |
 | `repository.js` | 组合前三层。`readNode` 返回 `{location, source, identity, model, links}`，`saveNode(loaded, model)` 显式保存并重新加载；CLI 使用这个加载结果，领域模型本身保持独立。 |
@@ -68,3 +68,23 @@ const parsed = parseNode(markdown);
 提供原文时，未修改的往返逐字保留；修改只替换对应条目的源片段。插入、移位时匹配并复用原片段，保留其中的人工格式和未建模内容。对包含未知结构的条目进行无法保留的修改、歧义/未闭合区块、不能重新解析成目标模型的输出会报错，不生成有损结果。新建文档采用原 Project Memory 三块标题；已有“本层重要约束”与“本层硬约束”均可读取，原标题保持。
 
 `saveNode` 校验读取时的原文、真实位置和文件身份，避免陈旧快照或后续符号链接替换覆盖别的文件；通过同目录临时文件替换，保留权限。它是乐观并发校验，不提供跨进程锁。不会初始化目录或自动保存 CLI 的读取结果。
+
+
+## 可选 YAML 头与 Markdown 正文
+
+Task、Memory、AGENTS.md 共用 `MarkdownDocument = { metadata?: Metadata, body: string }`。`metadata` 是完整 YAML 头的数据，缺省表示没有头部，`{}` 表示存在空头部；`body` 是不透明的 Markdown 正文。通用格式层不要求任何业务字段，也不解释 Markdown 章节。
+
+```js
+import { parseDocument, serializeDocument } from '@edges/node-tree/codec';
+
+const source = '---\ndescription: Local knowledge\n---\n# Notes\n';
+const document = parseDocument(source);
+document.metadata.description = 'Updated description';
+const next = serializeDocument(document, source);
+```
+
+`parseNode` / `serializeNode` 在此之上解释 AGENTS.md 的三部分章节、HTML 注释标记和索引关系，`NodeModel.metadata` 同样可选。YAML 字段中的 Markdown 链接不会成为节点引用。Task 适配层负责 `name`、`description` 和其头部内嵌 `metadata` 的业务含义；该内嵌字段与公共模型中表示整个头部的 `metadata` 不同。Memory 文档可使用同一格式接口，但 Python Memory 工具尚未切换到此实现。既有 Task Project 入口禁止头部的领域约定仍由它自己的校验器执行；本次不批量给 AGENTS.md 增加字段。
+
+头部必须从文档首行 `---` 开始（允许 BOM），以独立的 `---` 或 `...` 行结束。首行 `---` 后有换行即按头部起始处理，缺少结束行会报错。数据限定为字符串键映射及 JSON 可表达的有限值；重复键、未知标签、非映射根、循环引用、超出安全范围的 YAML 整数均拒绝。`splitFrontmatter` 只切分格式，返回含完整末尾换行的 `rawFrontmatter` 或 `undefined`，不校验字段。
+
+无改动逐字保留；只改正文时保持头部原字节。修改头部时按 YAML 节点复用未改数据、注释、引号与集合样式（数组移动按相同值的出现次数匹配），但头部空白可能规范化。结束分隔符原先位于 EOF 时，新增正文会补上分隔换行。可显式新增或移除头部；别名等导致无法保持目标数据时拒绝有损写回。格式 API 不做文件 IO。

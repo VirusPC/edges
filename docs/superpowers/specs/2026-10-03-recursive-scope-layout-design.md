@@ -8,6 +8,8 @@
 
 > 同日进一步分离三部分领域模型、纯 Markdown codec 与文件适配，增加保留原文的序列化和显式保存接口；CLI 通过组合层接入。见 [模型与 codec 解耦计划](../plans/2026-10-04-node-model-codec-separation.md)。
 
+> 同日确认并实现公共文档格式：可选 YAML `metadata` 加 Markdown 正文；Tasks、Memory、AGENTS.md 共用此基础，节点章节和字段语义由上层解释。Tasks 已接入，Python Memory 尚未接入，不自动修改现有入口的字段要求。见 [可选 frontmatter 计划](../plans/2026-10-04-optional-frontmatter.md)。
+
 ## 目标与设计边界
 
 以 Project Memory 的入口、索引和扩展机制为基础，使人和 Agent 能按作用域接手工作、保留记忆并维护自身。内容按所属作用域组织，领域工作与自身维护分开；通过引用形成 graph，公共实现保持单一真源。

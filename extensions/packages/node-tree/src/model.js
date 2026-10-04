@@ -1,10 +1,12 @@
+/** @typedef {import('./document-model.js').MetadataValue} MetadataValue */
+/** @typedef {import('./document-model.js').Metadata} Metadata */
 /** @typedef {{kind: 'text', value: string}} NodeText */
 /** @typedef {{kind: 'link', label: string, target: string}} NodeLink */
 /** @typedef {{content: (NodeText | NodeLink)[]}} NodeItem */
 /** @typedef {'constraints' | 'memory' | 'children'} SectionKey */
 /**
  * Format-independent node content. Link targets remain identifiers supplied by the author.
- * @typedef {{constraints: NodeItem[], memory: NodeItem[], children: NodeItem[], references: NodeLink[]}} NodeModel
+ * @typedef {{metadata?: Metadata, constraints: NodeItem[], memory: NodeItem[], children: NodeItem[], references: NodeLink[]}} NodeModel
  */
 
 /** @returns {NodeModel} */

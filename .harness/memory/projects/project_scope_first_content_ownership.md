@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 递归节点沿用三部分入口，局部记忆不上收；CLI 与树逻辑解耦，领域模型、解析/序列化和文件适配分别承担职责。
+description: 递归节点沿用三部分入口、局部记忆不上收；CLI、领域模型、文档格式和存储解耦，可选 YAML 头为公共 Markdown 能力。
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T20:05:14+08:00"
+  edges-updated-at: "2026-10-04T20:38:44+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -49,6 +49,14 @@ metadata:
 **Why:** 把原文、AST、路径和业务内容混成一种结构，会让非 CLI 调用方继续依赖特定格式和存储；三部分节点模型应当能够独立消费和修改。
 
 **How to apply:** 模型只表达本层重要约束、本层记忆、下层记忆索引及引用关系。格式转换不解析物理路径、不读写文件；文件适配处理位置与保存，组合层再接回 CLI。序列化保留未修改原文和未知扩展，无法保留时明确拒绝；文件保存校验原文与文件身份，不静默覆盖其他编辑。本次实现与验证见[模型与 codec 解耦计划](../../../docs/superpowers/plans/2026-10-04-node-model-codec-separation.md)，不据此宣告整仓目录迁移或 Python 接入完成。
+
+## 2026-10-04 用户确认：可选 YAML 头是公共 Markdown 能力
+
+Task、Memory、AGENTS.md 底层都是可能带 YAML frontmatter 的 Markdown。公共模型提供可选 metadata 字段，AGENTS.md 进一步约定三部分章节、HTML 注释标记与索引关系；现用 project-memory 标记是 HTML 注释，不是 XML 标签。
+
+**Why:** 多类文档需要相同格式处理，但字段含义与正文约定不同。把 YAML 解析写回放在公共层，可以避免每个业务各写简化解析器。
+
+**How to apply:** 文档 codec 只处理可选 YAML 头和不透明正文；节点 codec 与 Task 适配层分别解释各自语义。无头部保持可用，不强制添加 description 等字段。公共模型 metadata 表示整个头部，不与 Task 头部里的同名嵌套字段混为一谈。已实现公共能力并接回 Tasks；Python Memory 尚未接入，Task Project 无头部规则仍由领域校验器执行。无改动与只改正文保留原头部；修改元数据保留未知数据和注释，拒绝无法无损表达的值或写回。见[可选 frontmatter 实施](../../../docs/superpowers/plans/2026-10-04-optional-frontmatter.md)。
 
 ## 先前设计与实施记录
 
