@@ -61,7 +61,9 @@ InternalNode 以 AGENTS 三部分的结构化内容为正文真源：
 | 本层记忆 | 本层直属内容的归属索引 |
 | 下层记忆索引 | 下层组织节点的归属索引 |
 
-InternalNode 的 `children` 是后两部分中归属索引的统一派生视图，包括 Internal、Task、Memory 等所有直属节点。每条 ChildReference 必须带 kind：本层记忆派生为 local，下层记忆索引派生为 descendant。kind 是引用关系的分类，与目标节点的 type 和物理路径无关，两类引用都可能指向 AGENTS.md。不单独保存另一份可修改数组，也不在章节条目中重复存储 kind。普通参考链接不因出现在正文里就成为归属关系。
+InternalNode 的 `children` 是后两部分中归属索引的统一派生视图，包括 Internal、Task、Memory 等所有直属节点。所有引用统一使用 NodeReference，不另设 ChildReference；kind 在通用类型中可选，用于 parent 或普通引用时可以省略，用于 children 时必须有值。本层记忆派生为 local，下层记忆索引派生为 descendant。kind 是引用关系的分类，与目标节点的 type 和物理路径无关，两类引用都可能指向 AGENTS.md。不单独保存另一份可修改数组，也不在章节条目中重复存储 kind。普通参考链接不因出现在正文里就成为归属关系。
+
+children 的 kind 约束由模型和树操作校验；InternalNode 解析时从章节补全，其他来源的 children 缺少 kind 时应报错，不能默认当作 local 或静默跳过。省略 kind 的普通 NodeReference 仍可用于 find 等按目标定位的操作。
 
 增删子节点实际修改对应章节索引；序列化仍输出三部分，不新增 children 章节或 YAML 字段。InternalNode 的正文由三部分生成，不能同时维护可独立修改的正文与章节副本。为保留原文中的未建模内容，可以保留只读来源快照；它不是第二份当前状态。
 
@@ -125,16 +127,14 @@ model 的 setStatus、setBody、addChild 等方法只改变内存中的领域状
 ```ts
 type Metadata = Record<string, unknown>;
 
+type ChildKind = "local" | "descendant";
+
 interface NodeReference {
   // 文档引用；相对路径以持有引用的 AGENTS.md 所在目录为基准。
   target: string;
   label?: string;
-}
-
-type ChildKind = "local" | "descendant";
-
-interface ChildReference extends NodeReference {
-  kind: ChildKind;
+  // children 中必须有值；parent 或普通引用可省略。
+  kind?: ChildKind;
 }
 
 interface ScopeTraversalOptions {
@@ -159,7 +159,7 @@ declare class BaseNode<TType extends string = string> {
   readonly type: TType;
   readonly id?: string;
   get parent(): NodeReference | undefined;
-  get children(): readonly ChildReference[] | undefined;
+  get children(): readonly NodeReference[] | undefined;
   get metadata(): Readonly<Metadata> | undefined;
   get body(): string;
 
@@ -175,7 +175,7 @@ declare class BaseNode<TType extends string = string> {
 
 declare class InternalNode extends BaseNode<"internal"> {
   get content(): InternalContent;
-  override get children(): readonly ChildReference[];
+  override get children(): readonly NodeReference[];
   protected override parseBody(markdown: string): void;
   protected override serializeBody(): string;
   setConstraints(items: readonly string[]): void;
