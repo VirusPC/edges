@@ -5,7 +5,7 @@ import { mkdtemp, mkdir, writeFile, readFile, stat, lstat, chmod, rm, symlink, r
 import { execFileSync } from 'node:child_process';
 import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
-import { gzipSync } from 'node:zlib';
+import { gzipSync, gunzipSync } from 'node:zlib';
 import { Header, type HeaderData } from 'tar';
 import { target } from '../../src/memory/utils/command.js';
 import { resolveTarget } from '../../src/services/memory/paths.js';
@@ -242,4 +242,24 @@ test('legacy dangling links cannot bypass archive layout rejection', async t => 
   await assert.rejects(backupUserMemory({ repoDir: source, timestamp: 'after' }), /migration-required|conversion-required/);
   await assert.rejects(restoreUserMemory({ archive, repoDir: destination, force: true }), /migration-required|conversion-required/);
   assert.deepEqual(await readdir(destination), ['.memory']);
+});
+
+test('raw tar restores the same bytes and modes as gzip tar', async t => {
+  const { root, source, destination } = await fixture(t);
+  const { archive } = await backupUserMemory({ repoDir: source });
+  const raw = path.join(root, 'memory.tar');
+  await writeFile(raw, gunzipSync(await readFile(archive)));
+  await restoreUserMemory({ archive: raw, repoDir: destination });
+  for (const name of ['AGENTS.md', 'user_pref.md', 'assets/image.bin']) {
+    assert.deepEqual(await readFile(path.join(destination, users, name)), await readFile(path.join(source, users, name)));
+  }
+  assert.equal((await stat(path.join(destination, users, 'user_pref.md'))).mode & 0o777, 0o600);
+});
+
+test('nested compression cannot bypass the expanded tar byte limit', async t => {
+  const { root, destination } = await fixture(t);
+  const archive = path.join(root, 'nested.tar.gz');
+  await writeFile(archive, gzipSync(gzipSync(Buffer.concat([gunzipSync(tarBytes([{ path: `${users}/small`, content: 'x' }])), Buffer.alloc(4096)]))));
+  await assert.rejects(restoreUserMemory({ archive, repoDir: destination, limits: { maxExpandedBytes: 2048 } }), /tar|limit|format|格式/);
+  assert.deepEqual(await readdir(destination), []);
 });

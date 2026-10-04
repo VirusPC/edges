@@ -1,11 +1,11 @@
 import { createReadStream, promises as fs } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { pipeline } from 'node:stream/promises';
-import { Transform } from 'node:stream';
+import { Transform, PassThrough } from 'node:stream';
 import { createGunzip, createGzip } from 'node:zlib';
 import { homedir } from 'node:os';
 import path from 'node:path';
-import { create, Parser, type ReadEntry } from 'tar';
+import { create, Header, Parser, type ReadEntry } from 'tar';
 import { rejectLegacy } from './paths.js';
 import { readTemplate } from './templates.js';
 
@@ -20,6 +20,34 @@ function expandedByteLimit(maximum: number): Transform {
     bytes += chunk.length;
     callback(bytes > maximum ? new Error('archive expanded byte limit exceeded') : null, chunk);
   } });
+}
+
+// Prevent the tar parser from auto-decompressing a second layer after the byte limiter.
+function requireTarHeader(): Transform {
+  let header = Buffer.alloc(0), checked = false;
+  return new Transform({
+    transform(chunk: Buffer, _encoding, callback) {
+      if (checked) { callback(null, chunk); return; }
+      const needed = 512 - header.length;
+      header = Buffer.concat([header, chunk.subarray(0, needed)]);
+      if (header.length < 512) { callback(); return; }
+      try {
+        const parsed = new Header(header);
+        if ((header[0] === 0x1f && header[1] === 0x8b) || (!parsed.cksumValid && !parsed.nullBlock)) throw new Error('Invalid tar format (expected raw tar or gzip tar)');
+        checked = true;
+        this.push(header);
+        callback(null, chunk.subarray(needed));
+      } catch (error) { callback(error as Error); }
+    },
+    flush(callback) { callback(checked ? null : new Error('Invalid or truncated tar format')); },
+  });
+}
+
+async function archiveDecoder(archive: string): Promise<Transform> {
+  const handle = await fs.open(archive, 'r'), magic = Buffer.alloc(2);
+  try { await handle.read(magic, 0, 2, 0); }
+  finally { await handle.close(); }
+  return magic[0] === 0x1f && magic[1] === 0x8b ? createGunzip() : new PassThrough();
 }
 
 async function rejectOldLayer(root: string): Promise<void> {
@@ -149,7 +177,7 @@ async function stageMembers(archive: string, staging: string, limits: ArchiveLim
   const pending: Promise<void>[] = [];
   const controller = new AbortController();
   let failure: unknown, declaredBytes = 0;
-  const parser = new Parser({ strict: true, onReadEntry(entry) {
+  const parser = new Parser({ strict: true, brotli: false, zstd: false, onReadEntry(entry) {
     const task = save(entry).catch(error => {
       failure ??= error;
       controller.abort(error);
@@ -185,7 +213,8 @@ async function stageMembers(archive: string, staging: string, limits: ArchiveLim
     } finally { await handle.close(); }
   }
   try {
-    await pipeline(createReadStream(archive), createGunzip(), expandedByteLimit(limits.maxExpandedBytes), parser, { signal: controller.signal });
+    const decoder = await archiveDecoder(archive);
+    await pipeline(createReadStream(archive), decoder, expandedByteLimit(limits.maxExpandedBytes), requireTarHeader(), parser, { signal: controller.signal });
   } catch (error) {
     failure ??= error;
     controller.abort(error);
