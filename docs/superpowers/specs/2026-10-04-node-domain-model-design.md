@@ -13,9 +13,21 @@ BaseNode
 NodeTree           组织节点对象，不继承 BaseNode
 ```
 
-BaseNode 提供共同的文档内容、可选 metadata、身份、parent 引用及文本转换能力。InternalNode、TaskNode、MemoryNode 是有行为的领域对象，既解释各自数据，也承担自身操作。模型统一位于 `extensions/cli/src/models/`，不创建独立 package。
+BaseNode 提供共同的文件路径 path、文档内容、可选 metadata、身份、parent 引用及文本转换能力。InternalNode、TaskNode、MemoryNode 是有行为的领域对象，既解释各自数据，也承担自身操作。模型统一位于 `extensions/cli/src/models/`，不创建独立 package。
 
 NodeTree 组织已经加载的节点，提供查找、遍历及父子关系调整。跨文件系统层级的引用继续有效；父子关系表达逻辑归属，普通交叉引用不构成第二个 parent。
+
+## 节点路径与引用
+
+`path: string` 是 BaseNode 的必填属性，构造时传入，表示节点文档的文件位置。新节点在写入前也具有目标路径；携带路径不代表文件已经存在，模型不检查或读写文件。
+
+service 在构造节点前，结合明确的当前 scope 解析相对路径和本层简写，节点内统一保存绝对路径，避免后续操作随进程工作目录变化。本层简写依据当前作用域已登记的目录布局解析，不写死全局目录。新建或登记下层节点时显式提供目标路径；读取已登记节点时使用现有引用即可。
+
+`NodeReference.target` 表达文档中的引用目标：相对路径以持有引用的 AGENTS.md 所在目录为基准解析，定位到目标节点的 path。写入 AGENTS 时仍可使用相对链接，不将机器上的绝对路径写进索引。
+
+path 负责文件定位，parent / children 负责逻辑归属。不能用 dirname 推导父节点，也不能把物理目录扫描当成归属树；根 AGENTS 可以直接引用跨多层目录的节点。`localMemory` / `descendantMemory` 只标识索引章节，不是目录路径，也不是 CRUD 的目标参数。
+
+path 对调用方只读，不作为普通内容字段更新。`parse()` 不改变 path，`serialize()` 不自动将 path 写进 YAML。NodeTree.move 只调整归属，不改变文件位置；物理文件迁移由 service 单独协调，不通过修改 path 后调用 update 隐式完成。
 
 ## 实例解析与序列化
 
@@ -63,10 +75,26 @@ services 统一负责节点的增删改查及文档、归属索引的同步，�
 
 | 操作 | Service 职责 |
 | --- | --- |
-| create | 创建节点文档，协调所属节点的索引登记并保存 |
-| get / list | 查询、读取文档，选择对应模型并调用实例 parse，返回节点对象 |
-| update | 协调领域操作，调用 serialize 保存文档，并同步受影响的归属索引 |
-| destroy | 删除节点文档，并同步移除对应归属索引 |
+| create(node) | 根据 node.path 创建节点文档，协调所属节点的索引登记并保存 |
+| get(path) / list(directory) | 按路径查询、读取文档，选择对应模型，以解析后的路径构造实例并调用 parse，返回节点对象 |
+| update(node) | 协调领域操作，调用 serialize 写回 node.path，并同步受影响的归属索引 |
+| destroy(node) | 删除 node.path 对应的节点文档，并同步移除对应归属索引 |
+
+已有节点对象时，写操作直接使用 node.path，不再另传一份可能与节点不一致的目标路径；尚未加载节点时，查询仍需路径输入。以下示意省略所属节点等操作上下文，不定义额外的 service 类层级：
+
+```ts
+// taskPath 已由 service 根据当前 scope 解析为绝对路径。
+const task = new TaskNode(taskPath);
+task.parse(markdown);
+
+await service.create(task);
+const existing = await service.get(taskPath);
+
+await service.update(task);
+await service.destroy(task);
+```
+
+创建时的归属上下文由业务调用方显式提供或由已加载的树获得，不能从 node.path 猜测；service 据此协调所属 AGENTS 的索引同步。
 
 model 的 setStatus、setBody、addChild 等方法只改变内存中的领域状态；service 的 update 负责将变更写入文件。NodeTree.find/walk 只查询已加载的树，service 的 get/list 负责持久化内容的读取。模型及 NodeTree 不直接执行文件读写或 Git 操作。
 
@@ -78,10 +106,12 @@ model 的 setStatus、setBody、addChild 等方法只改变内存中的领域状
 type Metadata = Record<string, unknown>;
 
 interface NodeReference {
+  // 文档引用；相对路径以持有引用的 AGENTS.md 所在目录为基准。
   target: string;
   label?: string;
 }
 
+// AGENTS 正文中的索引位置，不是文件路径或 CRUD 目标。
 type IndexSection = "localMemory" | "descendantMemory";
 
 interface NodeIndexEntry {
@@ -96,7 +126,8 @@ interface InternalContent {
 }
 
 declare class BaseNode<TType extends string = string> {
-  constructor();
+  constructor(path: string);
+  readonly path: string;
   readonly type: TType;
   readonly id?: string;
   get parent(): NodeReference | undefined;

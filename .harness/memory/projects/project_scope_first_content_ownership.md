@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 节点领域模型：实例解析、派生 children；service 负责文档和索引增删改查；设计确认未实施
+description: 节点模型：必填 path、实例解析、派生 children；service 增删改查使用节点路径，文件位置与归属分开；设计未实施
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T22:04:54+08:00"
+  edges-updated-at: "2026-10-04T22:17:18+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -123,3 +123,11 @@ document-model 增加可选 type，内置 base、agents、memory、task；各类
 - 用户纠正了将模块容器等同于单一类型的设计：skills 应像 memory 一样继续向下分 type；不要为了共用发现入口而消除类型扩展点。用户进一步重申支持跨文件系统层级的 AGENTS.md 直接引用：物理目录深度与入口引用跳数分开判断。用户进一步澄清不保留总入口也行，并明确两种原有 type 各有 AGENTS.md、最外层直接引用；本方案不另建 skills/AGENTS.md。目录归类无需逐层中转，不应再把物理目录层数变成必经导航要求。普通维护记忆保留类型入口，额外引用不改写实际作用域关系、正文真源、写权限及适用约束。
 - 用户指出 skills/agent_skills 的 type 命名无法体现本质区别，旧名不应当作最终新命名。结构仍为一个技能容器、两种 type、各自 AGENTS.md、最外层直接引用。用户已确认 managed（受管技能，PM 维护正文）/referenced（引用技能，PM 仅维护索引）；对应 .harness/skills/managed/AGENTS.md 与 .harness/skills/referenced/AGENTS.md，由作用域入口跨目录层级直达，不另设技能总入口。此命名是目标设计，当前运行时尚未升级；不要按人/Agent、是否本仓或是否安装错误划分。
 - 用户于 2026-10-03 在完整目标目录、最外层跨目录引用各 type 及按需递归的子作用域示意展示后确认整体目录方案。后续以整体设计为实施依据，不重复打开已确定的容器、类型命名及入口层级问题；逐项任务/局部记忆归属、工具升级及迁移仍须按实施计划落实，不把目录确认写成已迁移、已验证或已合并。
+
+## 2026-10-04 用户确认：节点携带文件路径
+
+BaseNode 包含必填 path，service 使用节点自带的位置执行 create/update/destroy；尚未加载节点时通过路径 get/list。用户要求将此方向更新进 spec。
+
+**Why:** section 只说明 AGENTS 的索引区块，不能定位真实文件；把路径和节点分开传给每次写操作也容易出现目标不一致。
+
+**How to apply:** 本层简写依据当前 scope 已登记布局解析，下层新节点或引用显式指定目标路径，已有引用按记录的路径读取。节点文件位置和 AGENTS 引用表达的逻辑归属分别建模，不能通过 dirname 自动推出 parent。parse/serialize 处理内容，不改变 path 或自动将其写入 YAML。构造类型、路径解析与 service 调用示例见[节点领域模型设计](../../../docs/superpowers/specs/2026-10-04-node-domain-model-design.md)；这是已更新的设计，运行时代码尚未按此重构。
