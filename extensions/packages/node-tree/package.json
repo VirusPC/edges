@@ -1,0 +1,35 @@
+{
+  "name": "@edges/node-tree",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Reusable filesystem nodes and recursive AGENTS indexes",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
+  "files": [
+    "src",
+    "dist/**/*.d.ts",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test --import tsx test/*.test.ts"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.11",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "@types/mdast": "^4.0.4"
+  },
+  "dependencies": {
+    "mdast-util-from-markdown": "^2.0.3"
+  }
+}

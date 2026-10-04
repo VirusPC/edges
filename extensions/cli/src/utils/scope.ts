@@ -1,55 +1,51 @@
-import { existsSync, lstatSync, readFileSync, readdirSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { TasksError } from '../tasks/utils/types.js';
+import { discoverNodes, findAncestor, readNode, type NodeEntry } from '@edges/node-tree';
 
-/** A business/type AGENTS or a .harness container is not a scope. */
+/** Current command-selection policy, not the reusable node identity contract. */
+function selectsScope(node: NodeEntry): boolean {
+  return node.content.includes('<!-- project-memory:start -->') &&
+    (node.content.includes('<!-- project-memory-local:start -->') || node.content.includes('<!-- project-memory-children:start -->'));
+}
+
 export function isScope(dir: string): boolean {
-  const file = path.join(dir, 'AGENTS.md');
-  try {
-    const stat = lstatSync(file);
-    if (!stat.isFile() || stat.isSymbolicLink()) return false;
-    const text = readFileSync(file, 'utf8');
-    return text.includes('<!-- project-memory:start -->') &&
-      (text.includes('<!-- project-memory-local:start -->') || text.includes('<!-- project-memory-children:start -->'));
-  } catch { return false; }
+  const node = readNode(path.resolve(dir));
+  return node !== undefined && selectsScope(node);
+}
+
+function isGitBoundary(directory: string): boolean {
+  return existsSync(path.join(directory, '.git'));
 }
 
 export function gitRoot(start: string): string | undefined {
-  let dir = path.resolve(start);
-  while (true) {
-    if (existsSync(path.join(dir, '.git'))) return dir;
-    const parent = path.dirname(dir);
-    if (parent === dir) return undefined;
-    dir = parent;
+  return findAncestor(path.resolve(start), isGitBoundary);
+}
+
+export class ScopeResolutionError extends Error {
+  readonly errorCode = 'VALIDATION_ERROR';
+  constructor() {
+    super('No owning scope or Git repository found. Pass --scope <directory> or set EDGES_SCOPE.');
+    this.name = 'ScopeResolutionError';
   }
 }
 
 export function resolveScope(env: NodeJS.ProcessEnv = process.env, cwd = process.cwd(), explicit?: string): string {
   const target = explicit ?? (env.EDGES_SCOPE?.trim() || env.EDGES_REPO?.trim());
   if (target) return path.resolve(cwd, target);
-  let dir = path.resolve(cwd);
-  while (true) {
-    if (isScope(dir) || existsSync(path.join(dir, '.git'))) return dir;
-    const parent = path.dirname(dir);
-    if (parent === dir) throw new TasksError('VALIDATION_ERROR', 'No owning scope or Git repository found. Pass --scope <directory> or set EDGES_SCOPE.');
-    dir = parent;
-  }
+  const found = findAncestor(path.resolve(cwd), dir => isScope(dir) || isGitBoundary(dir));
+  if (!found) throw new ScopeResolutionError();
+  return found;
 }
 
-/** Walk physical descendants, including maintenance modules, without crossing repositories. */
+/** CLI inventory policy. Logical child-index traversal is a separate core operation. */
 export function discoverScopes(root: string): string[] {
-  const found = [path.resolve(root)];
-  function visit(dir: string) {
-    for (const entry of readdirSync(dir, { withFileTypes: true }).sort((a,b) => a.name.localeCompare(b.name))) {
-      if (!entry.isDirectory() || entry.isSymbolicLink() || ['.git', 'node_modules', '.superpowers', 'dist', '_site'].includes(entry.name)) continue;
-      const child = path.join(dir, entry.name);
-      if (existsSync(path.join(child, '.git'))) continue;
-      if (isScope(child)) found.push(child);
-      visit(child);
-    }
-  }
-  visit(path.resolve(root));
-  return found;
+  root = path.resolve(root);
+  const ignored = new Set(['.git', 'node_modules', '.superpowers', 'dist', '_site']);
+  const nodes = discoverNodes(root, {
+    acceptNode: selectsScope,
+    enterDirectory: dir => !ignored.has(path.basename(dir)) && !isGitBoundary(dir),
+  });
+  return [root, ...nodes.filter(node => node.directory !== root).map(node => node.directory)];
 }
 
 export function portableScope(scopeDir: string, fallbackRoot = scopeDir): string {

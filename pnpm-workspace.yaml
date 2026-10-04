@@ -3,3 +3,4 @@ packages:
   - 'extensions/cli'
   - 'apps/*'
   - 'extensions/services/*'
+  - 'extensions/packages/*'

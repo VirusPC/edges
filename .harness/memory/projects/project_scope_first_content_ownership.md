@@ -7,7 +7,7 @@ metadata:
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T19:17:38+08:00"
+  edges-updated-at: "2026-10-04T19:36:51+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -40,7 +40,7 @@ metadata:
 
 **Why:** 递归节点模型服务整个系统，不应由 CLI 或 Tasks 独占定义，也不应让不同入口各自实现一套节点语义。
 
-**How to apply:** 后续实现设计明确公共能力、CLI 适配和业务操作的边界；公共层不依赖业务错误类型，逻辑下层引用与物理目录遍历分开表达。CLI、Project Memory 及其他调用方使用一致契约。具体代码位置、跨语言复用及接口属于待设计项，此次只记录解耦要求，未实施代码重构。
+**How to apply:** 公共能力、CLI 适配和业务操作保持边界；公共层不依赖业务错误类型，逻辑下层引用与物理目录遍历分开表达。本次已抽取公共节点能力并接回 CLI，见[实施计划](../../../docs/superpowers/plans/2026-10-04-node-tree-cli-decoupling.md)。CLI 暂保留原有识别策略和 Tasks 物理清查，以便独立验证解耦；统一节点策略切换、Python 接入及局部记忆恢复继续按整体方案推进，不将本次抽取视为整套目录重构完成。
 
 ## 先前设计与实施记录
 

@@ -42,7 +42,7 @@ status: proposed
 - CLI 适配：读取参数、环境变量和当前目录，将目标与遍历边界传给公共能力，并将结果或错误转为命令行输出。Git 根与仓库边界作为显式策略处理，不隐含等同于作用域根。
 - 业务模块：Tasks、Memory 等消费已解析的节点上下文，负责自身内容与操作，不各自重写节点识别和遍历，也不让公共层依赖 `TasksError` 等业务类型。
 
-当前 `extensions/cli/src/utils/scope.ts` 虽已独立成文件，仍混合上述职责，并依赖 Tasks 错误；`discoverScopes` 扫描物理目录，Python 另有节点识别实现。解耦需给 CLI、Project Memory 与其他调用方提供一致契约；代码放置位置、跨语言复用方式及具体接口尚待设计，不因抽取公共能力而新建一套节点规则。验收应覆盖跨目录层级引用、局部记忆归属、遍历边界，以及脱离 CLI/Tasks 的独立调用。
+2026-10-04 CLI 重构：公共实现已抽到 [`@edges/node-tree`](../../extensions/packages/node-tree/README.md)，提供节点读取、祖先查找、物理发现与按下层索引递归；`scope.ts` 保留 CLI 选择策略及 Git 回退，使用独立的验证错误，不再依赖 Tasks。公共节点读取不要求 Project Memory 标记，但 CLI 暂保留原有标记筛选，Tasks 的 `all` 也保持物理清查，避免把行为迁移混入解耦。跨层引用、去重及环、边界隔离由公共包测试覆盖；局部记忆恢复不属于本次代码重构。Python 仍有独立实现，跨语言接入和统一识别策略待后续整体迁移落实。
 
 ## 文件系统
 
@@ -60,4 +60,4 @@ Git 管理共享内容的版本与变更，`.gitignore` 将本地私有记忆排
 
 ---
 
-复核材料：[原设计](../superpowers/specs/2026-10-03-recursive-scope-layout-design.md)、[原实施计划](../superpowers/plans/2026-10-03-recursive-scope-layout.md)、[原归属清单](../superpowers/plans/2026-10-03-recursive-scope-ownership.json)、[原任务完成记录](../../.harness/tasks/project-memory/done/2026-09-12--整仓与memory同构递归融合.md)。这些材料记录此前设计及实施，不代表替代方案已确认或修复完成；本次仅整理文档，未调整运行时或恢复局部记忆。
+复核材料：[原设计](../superpowers/specs/2026-10-03-recursive-scope-layout-design.md)、[原实施计划](../superpowers/plans/2026-10-03-recursive-scope-layout.md)、[原归属清单](../superpowers/plans/2026-10-03-recursive-scope-ownership.json)、[原任务完成记录](../../.harness/tasks/project-memory/done/2026-09-12--整仓与memory同构递归融合.md)。这些材料记录此前设计及实施，不代表替代方案已确认或修复完成；此前已整理文档，本次完成上述 CLI 公共能力抽取；整体识别策略及局部记忆恢复仍未完成。

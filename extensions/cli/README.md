@@ -53,6 +53,8 @@ Those examples use `tsx` and do not need a `dist/` build. The installed `edges` 
 
 `edges --scope <directory> <command>` selects the content owner. Resolution order is `--scope`, `EDGES_SCOPE`, `EDGES_REPO`, then the nearest owning AGENTS scope or Git root above the process cwd. Relative paths resolve against cwd. The CLI install directory is never the default content target. An explicit directory does not initialize Project Memory.
 
+Node reading, ancestor search and traversal live in the independent [`@edges/node-tree`](../packages/node-tree/README.md) workspace package. `src/utils/scope.ts` is the CLI adapter: it supplies environment/argument precedence, Git fallback, directory exclusions and the current Project Memory marker selection policy. The core itself recognizes regular AGENTS entries without that policy and separately exposes logical child-index traversal. The Tasks `all` inventory below retains physical discovery; this extraction does not migrate memories or change command ownership rules. The core exports native JavaScript at runtime, so source commands and deployment do not require generated artifacts. CLI build and test scripts first check the core and generate its type declarations.
+
 ```bash
 edges --scope ./projects/demo tasks list
 edges --scope ./projects/demo tasks --purpose maintenance create --title "Repair build"
