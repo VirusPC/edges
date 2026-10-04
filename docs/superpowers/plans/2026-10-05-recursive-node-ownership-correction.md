@@ -23,7 +23,7 @@
 
 ### Task 1: Uniform node selection and three-part discovery
 
-**Files:** `extensions/cli/src/utils/scope.ts`, normal Memory scope/index helpers, AGENTS syntax/model helpers as necessary, Task project index generators, `scripts/migrate-recursive-layout.mts`, PROTOCOL/LAYOUT and corresponding Skill docs/tests.
+**Files:** `extensions/cli/src/services/scope.ts`, normal Memory scope/index helpers, AGENTS syntax/model helpers as necessary, Task project index generators, `scripts/migrate-recursive-layout.mts`, PROTOCOL/LAYOUT and corresponding Skill docs/tests.
 
 **Interfaces:** Current --scope/env/cwd precedence unchanged. Remove only the marker/independent-responsibility eligibility predicate. Domain command semantics remain explicit; adopt/init and writable types still require registered content contracts. Project/task/type indexes may have a sparse representation of the same content model, without requiring empty headings or auto-creating all modules.
 
