@@ -1,6 +1,6 @@
 # 节点领域模型设计
 
-日期：2026-10-04。状态：会话已确认模型方向、目录职责及实例解析方式；本文为汇总稿，代码尚未按此重构。整仓目录迁移、节点识别策略和局部记忆恢复仍按 ADR 0024 分别推进。
+日期：2026-10-04；2026-10-05 开始按[实施计划](../plans/2026-10-05-node-domain-model-implementation.md)继续执行。会话已确认模型方向、目录职责及实例解析方式；实现状态以该计划的验收记录为准。整仓目录迁移、节点识别策略和局部记忆恢复仍按 ADR 0024 分别推进。
 
 ## 模型与继承
 
@@ -17,7 +17,7 @@ BaseNode 提供共同的文件路径 path、文档内容、可选 metadata、身
 
 NoteNode 表达知识捕获与整理的笔记，MemoryNode 表达供作用域长期复用的项目记忆，两者不因都是 Markdown 就互相继承。NoteNode.title 沿用现有 Note 的一级标题，读写作用于 body，不另造 title YAML 字段；不把某个笔记 skill 的章节模板强加给所有 Note。
 
-SkillNode 表达 SKILL.md 文档，name/description 是现有 frontmatter 字段的类型化访问，步骤和说明由 body 承载。managed/referenced 是来源与维护职责，不是两种 SkillNode 子类；service 写入时遵守相应来源权限。scripts、references、assets 等附属文件由既有技能管理流程负责，本次文档模型不将它们自动认作 children，也不增加安装或执行技能的方法。
+SkillNode 表达以 SKILL.md 为入口的完整 Skill 目录；name/description 是入口 frontmatter 字段的类型化访问，步骤和说明由 body 承载。managed/referenced 是来源与维护职责，不是两种 SkillNode 子类；service 写入时遵守相应来源权限。scripts、references、assets 及其他附属文件属于资源目录，不自动成为 children。节点服务处理内容与目录资源的生命周期，宿主安装、链接和执行技能仍由既有流程负责。
 
 不单独定义 NodeTree。公共 NodeService 负责引用加载、作用域查询和跨节点归属协调，节点模型只维护自身内容与索引。children 保存 NodeReference，不因递归需要就改成完整子节点对象或让模型执行文件读取。跨文件系统层级的引用继续有效；父子关系表达逻辑归属，普通交叉引用不构成第二个 parent。
 
@@ -34,6 +34,24 @@ NodeReference 同时承载索引的 label（链接文字）和 description（条
 path 负责文件定位，BaseNode 的可选 parent / children 表达树组织关系。内容节点可独立存在，也可建立归属关系。不能用 dirname 推导父节点，也不能把物理目录扫描当成归属树；根 AGENTS 可以直接引用跨多层目录的节点。`localMemory` / `descendantMemory` 只标识索引章节，不是目录路径，也不是 CRUD 的目标参数。
 
 path 对调用方只读，不作为普通内容字段更新。`parse()` 不改变 path，`serialize()` 不自动将 path 写进 YAML。service.reparent 只调整归属，不改变文件位置；物理文件迁移另行协调，不通过修改 path 后调用 update 隐式完成。
+
+## 单文件、目录入口与资源归属
+
+Memory、Task、Note 支持独立 Markdown 文件和“目录入口 + 附属资源”两种形式；不批量强制转换现有内容。AGENTS 始终索引入口文件。2026-10-05 实施默认约定：普通内容的目录入口固定为 `index.md`，Skill 按标准固定为 `SKILL.md`；入口命名已向用户提供选择，在未收到不同偏好时采用此默认值。
+
+```text
+notes/example.md            # 单文件节点
+notes/example/index.md      # 目录节点的入口
+notes/example/diagram.png   # 同一节点的资源
+skills/example/SKILL.md      # Skill 的入口
+skills/example/scripts/... # Skill 的资源
+```
+
+`path` 始终指入口文件，新增只读 `directoryPath?: string` 表达完整资源单元：TaskNode、MemoryNode、NoteNode 仅在入口文件名为 `index.md` 时具有该值；SkillNode 必须使用 `SKILL.md` 并拥有其所在目录；BaseNode 和 InternalNode 不因文件恰好位于某目录而拥有整个目录。加载按具体模型与固定入口命名判断，不扫描邻居或猜测任意 Markdown 的附件归属。入口更新只修改正文；资源保持原样。单文件节点不拥有旁边的图片或其他文件。
+
+创建普通内容显式选择 `file` 或 `directory`，默认 `file` 保留现有调用行为；已有目录入口按原形式更新。目录单元的物理移动包括其附件，Task 的状态移动也包括其运行记录；不得通过修改 node.path 隐式完成。销毁目录单元可删除其资源，但须先检查逻辑 children、写权限及真实文件边界，不跟随资源内的外部符号链接删除外部目标。InternalNode 的销毁仍只针对入口文档，不自动删除整个作用域。宿主安装来源的 Skill 继续只读。
+
+目录资源与父子关系互相独立：前者决定物理文件生命周期，后者由 AGENTS 的归属索引决定。`reparent` 只修改后者，不移动资源目录。
 
 ## 实例解析与序列化
 
@@ -108,7 +126,7 @@ await service.list(scopePath, { includeDescendants: true }); // 显式包含下�
 | get(path, Model?) | 只读取指定文档，以解析后的路径构造实例并调用 parse；不存在返回 undefined |
 | list(scopePath, options?) | 返回作用域入口及所选引用可达的节点；默认仅 local，显式 includeDescendants 才包含下层作用域 |
 | update(node) | serialize 后写回 node.path；更新索引时协调已加载节点的反向关系；目标不存在时报错，不隐式创建 |
-| destroy(node, parent?) | 删除当前文档，按明确的归属上下文移除并保存父索引；不递归删除子文档 |
+| destroy(node, parent?) | 删除当前文档或其明确拥有的资源目录，按归属上下文移除并保存父索引；不隐式级联删除逻辑子节点 |
 | attach(parent, child, kind) | 将已有文档登记到父索引，更新 child.parent 并保存父文档；不创建或移动 child 文件 |
 | detach(parent, child) | 移除指定父索引中的归属，清除对应 child.parent 并保存父文档；保留 child 文件 |
 | reparent(child, oldParent, newParent, kind) | 将归属从旧父移到新父，同步引用路径、parent 并保存两份索引；不移动 child 文件 |
@@ -235,6 +253,7 @@ declare class BaseNode<TType extends string = string> {
   readonly path: string;
   readonly type: TType;
   readonly id?: string;
+  readonly directoryPath?: string; // 显式目录入口所拥有的资源目录；普通单文件及 InternalNode 无此值。
   get parent(): Readonly<NodeReference> | undefined;
   get children(): readonly Readonly<NodeReference>[] | undefined;
   get metadata(): Readonly<Metadata> | undefined;
@@ -323,7 +342,7 @@ extensions/cli/src/
 
 当前 `utils/node-tree/` 的纯数据模型、外部 codec 和仓储组合函数是重构起点，不是本设计已实现的证据。后续实施需迁移现有命令调用、AGENTS 正文处理、Task 字段操作及文件身份校验；重构过程中保留 CLI 输出契约和现有业务规则。
 
-NoteNode、SkillNode 的设计补齐不表示现有 Note 入库或技能管理流程已迁移。Note 的 Git/PR 编排、Skill 的附属文件与安装关系仍由各自服务或流程负责，不移入节点模型；通用文档 CRUD 不等于整个技能目录的增删或安装。
+Note 的 Git/PR 编排及 Skill 的宿主安装关系仍由各自服务或流程负责，不移入节点模型；入口与资源目录的生命周期按上述目录单元契约由节点 service 协调。实现完成情况逐项记录于实施计划，不因接口声明存在就宣告调用流程已迁移。
 
 本文不授权修复整仓物理目录迁移、移动 knowledge/posts、迁移 Project Memory 执行层或改变 CLI 当前作用域筛选策略。它们仍有独立范围与验收责任；Project Memory 的 TypeScript 迁移另见 [实施计划](../plans/2026-10-04-project-memory-typescript.md)。
 
