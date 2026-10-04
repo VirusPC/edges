@@ -6,14 +6,14 @@
 
 ```text
 BaseNode
-├── InternalNode    AGENTS.md，组织直属节点
+├── InternalNode    AGENTS.md，拥有 parent / children，组织直属节点
 ├── TaskNode        任务及其领域操作
 └── MemoryNode      记忆及其领域操作
 
 NodeTree           组织节点对象，不继承 BaseNode
 ```
 
-BaseNode 提供共同的文件路径 path、文档内容、可选 metadata、身份、parent 引用及文本转换能力。InternalNode、TaskNode、MemoryNode 是有行为的领域对象，既解释各自数据，也承担自身操作。模型统一位于 `extensions/cli/src/models/`，不创建独立 package。
+BaseNode 提供共同的文件路径 path、文档内容、可选 metadata、身份及文本转换能力，不定义 parent 或 children。InternalNode 集中承载 parent / children 与索引编辑；TaskNode、MemoryNode 等内容模型只扩展自身字段与领域操作，不继承树关系属性。模型统一位于 `extensions/cli/src/models/`，不创建独立 package。
 
 NodeTree 组织已经加载的节点，提供查找、遍历及父子关系调整。跨文件系统层级的引用继续有效；父子关系表达逻辑归属，普通交叉引用不构成第二个 parent。
 
@@ -25,7 +25,7 @@ service 在构造节点前，结合明确的当前 scope 解析相对路径和�
 
 `NodeReference.target` 表达文档中的引用目标：相对路径以持有引用的 AGENTS.md 所在目录为基准解析，定位到目标节点的 path。写入 AGENTS 时仍可使用相对链接，不将机器上的绝对路径写进索引。
 
-path 负责文件定位，parent / children 负责逻辑归属。不能用 dirname 推导父节点，也不能把物理目录扫描当成归属树；根 AGENTS 可以直接引用跨多层目录的节点。`localMemory` / `descendantMemory` 只标识索引章节，不是目录路径，也不是 CRUD 的目标参数。
+path 负责文件定位，InternalNode 的 parent / children 表达树组织关系。内容节点自身无需持有 parent，也能被 InternalNode 的 children 引用。不能用 dirname 推导父节点，也不能把物理目录扫描当成归属树；根 AGENTS 可以直接引用跨多层目录的节点。`localMemory` / `descendantMemory` 只标识索引章节，不是目录路径，也不是 CRUD 的目标参数。
 
 path 对调用方只读，不作为普通内容字段更新。`parse()` 不改变 path，`serialize()` 不自动将 path 写进 YAML。NodeTree.move 只调整归属，不改变文件位置；物理文件迁移由 service 单独协调，不通过修改 path 后调用 update 隐式完成。
 
@@ -65,9 +65,11 @@ InternalNode 以 AGENTS 三部分的结构化内容为正文真源：
 
 增删子节点实际修改对应章节索引；序列化仍输出三部分，不新增 children 章节或 YAML 字段。InternalNode 的正文由三部分生成，不能同时维护可独立修改的正文与章节副本。为保留原文中的未建模内容，可以保留只读来源快照；它不是第二份当前状态。
 
-parent 位于 BaseNode，表示组树过程建立的上下文。身份、parent 及由索引派生的 children 不自动写入 YAML；原有 YAML 中同名字段仍是 metadata 的数据。
+parent 与 children 均位于 InternalNode。parent 是组树时依据归属索引建立的反向引用，根组织节点或尚未挂接的组织节点为 undefined。身份、parent 及由索引派生的 children 不自动写入 YAML；原有 YAML 中同名字段仍是 metadata 的数据。
 
-InternalNode 的索引编辑针对单个文档；NodeTree 的挂接、移动负责协调已加载节点间的归属与 parent。文件移动、加载、保存由 services 协调，不在模型里操作磁盘。
+Note、Task、Memory 等内容节点可独立存在，也可被组织节点纳入 children；它们不保存反向 parent。需要查找内容节点的归属时，由 NodeTree 查询已加载组织节点的归属索引；普通交叉引用不算归属。
+
+InternalNode 的索引编辑针对单个文档；NodeTree 协调已加载节点之间的关系：attach 更新父节点索引，move 移除旧父索引并添加新父索引，detach 移除原归属索引。仅当被操作的 child 是 InternalNode 时，同时建立、更新或清除其 parent；对其他内容节点只调整归属索引。查找原归属使用树内索引，不要求 child 都具备 parent 属性。文件移动、加载、保存由 services 协调，不在模型里操作磁盘。
 
 ## Service 增删改查
 
@@ -130,7 +132,6 @@ declare class BaseNode<TType extends string = string> {
   readonly path: string;
   readonly type: TType;
   readonly id?: string;
-  get parent(): NodeReference | undefined;
   get metadata(): Readonly<Metadata> | undefined;
   get body(): string;
 
@@ -146,6 +147,7 @@ declare class BaseNode<TType extends string = string> {
 
 declare class InternalNode extends BaseNode<"internal"> {
   get content(): InternalContent;
+  get parent(): NodeReference | undefined;
   get children(): readonly NodeReference[];
   protected override parseBody(markdown: string): void;
   protected override serializeBody(): string;
