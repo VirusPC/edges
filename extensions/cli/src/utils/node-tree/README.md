@@ -32,7 +32,7 @@ const owner = findAncestor('/workspace/project/source',
 
 CLI 在 `src/utils/scope.ts` 提供适配：解析参数、环境变量和 cwd，指定 Git 回退和扫描排除目录，并保留当前命令的 Project Memory 标记筛选策略。这个策略不限制节点模型。Tasks 的 `all` 仍使用物理清查，以免重构改变现有看板覆盖范围；切换到逻辑树需单独调整调用策略。
 
-Python Project Memory 尚未接入这些工具；本次不通过子进程给 Python 引入 Node 运行时依赖，也不声称已消除跨语言重复实现。
+Project Memory 执行层已迁入 `src/services/memory/`，通过 `edges memory` 调用；其 Markdown/YAML 处理复用本目录的基础文档 codec。作用域注册与索引维护仍遵守现行 LAYOUT，尚未重构为新设计的 BaseNode / InternalNode 类模型。
 
 ```sh
 pnpm --filter edges-cli build
@@ -80,7 +80,7 @@ const parsed = parseNode(markdown);
 | --- | --- |
 | `baseDocumentCodec` | 返回带 base 类型的 MarkdownDocument，处理可选 YAML 与正文。 |
 | `agentsDocumentCodec` | 返回现有 NodeModel，处理三部分章节、HTML 注释标记及索引；仓库读写已接入。 |
-| `memoryDocumentCodec` | 返回带 memory 类型的 MarkdownDocument，暂时复用基础格式；内容分类与正文规范由消费方解释。Python Memory 运行时尚未接入。 |
+| `memoryDocumentCodec` | 返回带 memory 类型的 MarkdownDocument，暂时复用基础格式；内容分类与正文规范由消费方解释。Memory service 已复用底层文档 codec；该适配器不承担记忆索引维护。 |
 | `taskDocumentCodec` | 位于 Tasks 领域模块，返回带 task 类型的 MarkdownDocument，校验内嵌 metadata 为映射；Task 字段投影及原有读写已接入。 |
 
 调用方显式选择 codec，未选择专用处理时使用 base；不根据 YAML 字段自动猜类型。`parseDocument` / `serializeDocument` 仍是只处理头部与正文的底层格式函数，不按 type 分发。选定 codec 后可省略输入模型的 type；若明确填写其他类型，Markdown codec 会拒绝。现有 AGENTS NodeModel 不含通用文档 type 字段，由所选 codec 标明处理类型。
@@ -114,7 +114,7 @@ document.metadata = { ...document.metadata, description: 'Updated description' }
 const next = serializeDocument(document, source);
 ```
 
-`parseNode` / `serializeNode` 在此之上解释 AGENTS.md 的三部分章节、HTML 注释标记和索引关系，`NodeModel.metadata` 同样可选。YAML 字段中的 Markdown 链接不会成为节点引用。Task 适配层负责 `name`、`description` 和其头部内嵌 `metadata` 的业务含义；该内嵌字段与公共模型中表示整个头部的 `metadata` 不同。Memory 文档可使用同一格式接口，但 Python Memory 工具尚未切换到此实现。既有 Task Project 入口禁止头部的领域约定仍由它自己的校验器执行；本次不批量给 AGENTS.md 增加字段。
+`parseNode` / `serializeNode` 在此之上解释 AGENTS.md 的三部分章节、HTML 注释标记和索引关系，`NodeModel.metadata` 同样可选。YAML 字段中的 Markdown 链接不会成为节点引用。Task 适配层负责 `name`、`description` 和其头部内嵌 `metadata` 的业务含义；该内嵌字段与公共模型中表示整个头部的 `metadata` 不同。Memory service 同样复用此格式接口；记忆类型、审计字段与索引维护由 service 解释。既有 Task Project 入口禁止头部的领域约定仍由它自己的校验器执行；本次不批量给 AGENTS.md 增加字段。
 
 格式层直接调用 `gray-matter` 默认 parse/stringify，只映射 data/content 到 metadata/body，不自定义 YAML engine、schema、分隔符、日期转换、别名展开或写回规则。字段值使用 unknown，由领域收窄。仅拒绝非 YAML 语言声明，防止文档读取激活库内可执行的 JavaScript 引擎。
 

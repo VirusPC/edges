@@ -325,7 +325,7 @@ extensions/cli/src/
 
 NoteNode、SkillNode 的设计补齐不表示现有 Note 入库或技能管理流程已迁移。Note 的 Git/PR 编排、Skill 的附属文件与安装关系仍由各自服务或流程负责，不移入节点模型；通用文档 CRUD 不等于整个技能目录的增删或安装。
 
-本文不授权修复整仓物理目录迁移、移动 knowledge/posts、接入 Python Memory 或改变 CLI 当前作用域筛选策略。它们仍有独立范围与验收责任。
+本文不授权修复整仓物理目录迁移、移动 knowledge/posts、迁移 Project Memory 执行层或改变 CLI 当前作用域筛选策略。它们仍有独立范围与验收责任；Project Memory 的 TypeScript 迁移另见 [实施计划](../plans/2026-10-04-project-memory-typescript.md)。
 
 ## 参考
 

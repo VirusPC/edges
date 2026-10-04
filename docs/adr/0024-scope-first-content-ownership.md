@@ -34,7 +34,7 @@ status: proposed
 
 **现有不一致：**PROTOCOL 仍保留独立责任门槛；原迁移已将 extensions、project-memory-init、shared-extensions、tasks、notes 五个子目录的 43 条局部记忆并入根层，相关类型索引也被合并，尚未恢复。
 
-**待确认：**节点的具体识别规则，层入口、类型入口和业务入口的关系，以及下层归属与交叉引用如何区分。统一模型不等于每个目录都必须初始化，也不等于所有 `AGENTS.md` 必须含有完全相同的内容。当前 Python 与 CLI 通过 Project Memory 标记识别作用域，CONTEXT 与 PROTOCOL 仍区分不同入口契约，需要随模型确认一起复核。
+**待确认：**节点的具体识别规则，层入口、类型入口和业务入口的关系，以及下层归属与交叉引用如何区分。统一模型不等于每个目录都必须初始化，也不等于所有 `AGENTS.md` 必须含有完全相同的内容。当前 CLI 的作用域策略与 Memory service 通过 Project Memory 标记识别作用域，CONTEXT 与 PROTOCOL 仍区分不同入口契约，需要随模型确认一起复核。
 
 **CLI 解耦要求（用户确认）：**作用域、节点关系和树结构递归是公共能力，需要从 CLI 命令与各业务模块中解耦。建议按以下边界落实：
 
@@ -42,7 +42,7 @@ status: proposed
 - CLI 适配：读取参数、环境变量和当前目录，将目标与遍历边界传给公共能力，并将结果或错误转为命令行输出。Git 根与仓库边界作为显式策略处理，不隐含等同于作用域根。
 - 业务模块：Tasks、Memory 等消费已解析的节点上下文，负责自身内容与操作，不各自重写节点识别和遍历，也不让公共层依赖 `TasksError` 等业务类型。
 
-2026-10-04 CLI 重构：按用户修正，公共实现放在 [`extensions/cli/src/utils/node-tree/`](../../extensions/cli/src/utils/node-tree/README.md)，提供节点读取、祖先查找、物理发现与按下层索引递归；`scope.ts` 保留 CLI 选择策略及 Git 回退，使用独立的验证错误，不再依赖 Tasks。公共节点读取不要求 Project Memory 标记，但 CLI 暂保留原有标记筛选，Tasks 的 `all` 也保持物理清查，避免把行为迁移混入解耦。跨层引用、去重及环、边界隔离由CLI 内的节点工具测试覆盖；局部记忆恢复不属于本次代码重构。Python 仍有独立实现，跨语言接入和统一识别策略待后续整体迁移落实。 模块统一使用 TypeScript，不单独建包；模型、解析/序列化与存储仍以目录和接口解耦。frontmatter 直接使用 `gray-matter` 默认解析与序列化，不自定义 YAML 引擎、日期、别名、分隔符或格式保留，也不直接依赖 `js-yaml`。字段校验留在领域层；文档不符合约定时修正文档，不增加兼容分支。
+2026-10-04 CLI 重构：按用户修正，公共实现放在 [`extensions/cli/src/utils/node-tree/`](../../extensions/cli/src/utils/node-tree/README.md)，提供节点读取、祖先查找、物理发现与按下层索引递归；`scope.ts` 保留 CLI 选择策略及 Git 回退，使用独立的验证错误，不再依赖 Tasks。公共节点读取不要求 Project Memory 标记，但 CLI 暂保留原有标记筛选，Tasks 的 `all` 也保持物理清查，避免把行为迁移混入解耦。跨层引用、去重及环、边界隔离由CLI 内的节点工具测试覆盖；局部记忆恢复不属于本次代码重构。2026-10-05 Project Memory 执行层进一步迁入 TypeScript CLI，复用基础 Markdown/YAML codec；统一节点识别及新类模型仍待独立实施。 模块统一使用 TypeScript，不单独建包；模型、解析/序列化与存储仍以目录和接口解耦。frontmatter 直接使用 `gray-matter` 默认解析与序列化，不自定义 YAML 引擎、日期、别名、分隔符或格式保留，也不直接依赖 `js-yaml`。字段校验留在领域层；文档不符合约定时修正文档，不增加兼容分支。
 
 **后续模型设计（用户确认，代码尚未重构）：**BaseNode、InternalNode、TaskNode、MemoryNode、NoteNode、SkillNode 统一放在 models，不单独定义 NodeTree 或顶层 codecs。BaseNode 包含必填 path、可选 parent/children 及实例 parse/serialize；InternalNode 从 AGENTS 三部分索引派生 children。NodeReference 统一表达引用和索引条目，children 必须区分 local/descendant。普通内容字段通过 setter 修改，索引使用 addChild/updateChild/removeChild；模型不执行文件读写。
 
@@ -50,7 +50,7 @@ status: proposed
 
 **模型、格式与存储进一步解耦（2026-10-04 先前实施记录，后续设计见上）：**三部分内容与引用关系由不含路径、Markdown 原文或 AST 的 `NodeModel` 表达。纯 codec 负责解析／序列化；文件适配负责原文读写、路径与文件身份校验；组合层把模型、来源与位置分字段加载，CLI 消费组合结果。带原文的序列化保留未修改片段与未知扩展，无法保留时拒绝生成有损结果。此分层可独立复用，详见[实施与验证](../superpowers/plans/2026-10-04-node-model-codec-separation.md)。
 
-**内置可选 frontmatter（用户确认，2026-10-04）：**Task、Memory 与 AGENTS.md 底层均为可选 YAML 头加 Markdown 正文。公共文档模型使用可选 `metadata`，格式层负责解析与写回；字段含义和校验由各领域负责。AGENTS.md 进一步约定三部分章节、HTML 注释标记与索引关系，不将这些约定下沉为通用 Markdown 格式。公共能力与 NodeModel 已接入，Tasks 已复用；Python Memory 接入、具体入口是否采用 description 等字段仍分别推进。见[实施与验证](../superpowers/plans/2026-10-04-optional-frontmatter.md)。
+**内置可选 frontmatter（用户确认，2026-10-04）：**Task、Memory 与 AGENTS.md 底层均为可选 YAML 头加 Markdown 正文。公共文档模型使用可选 `metadata`，格式层负责解析与写回；字段含义和校验由各领域负责。AGENTS.md 进一步约定三部分章节、HTML 注释标记与索引关系，不将这些约定下沉为通用 Markdown 格式。公共能力与 NodeModel 已接入，Tasks 已复用；Memory service 已复用基础格式能力；具体入口是否采用 description 等字段仍分别推进。见[实施与验证](../superpowers/plans/2026-10-04-optional-frontmatter.md)。
 
 ## 文件系统
 
