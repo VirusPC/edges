@@ -1,0 +1,497 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import * as fs from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
+const load = () => import("../../../../scripts/migrate-recursive-layout.mts");
+function put(root: string, rel: string, text: string) {
+  const p = join(root, rel);
+  fs.mkdirSync(join(p, ".."), { recursive: true });
+  fs.writeFileSync(p, text);
+  return p;
+}
+const hash = (p: string) =>
+  createHash("sha256").update(fs.readFileSync(p)).digest("hex");
+const git = (root: string, ...args: string[]) =>
+  execFileSync("git", ["-C", root, ...args], { encoding: "utf8" }).trim();
+function fixture(t: any) {
+  const root = fs.realpathSync(
+    fs.mkdtempSync(join(tmpdir(), "instance-port-")),
+  );
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  git(root, "init", "-q");
+  put(
+    root,
+    "AGENTS.md",
+    "# root\n<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n",
+  );
+  put(root, ".gitignore", "**/.memory/users/\n**/.harness/memory/users/\n");
+  put(root, "knowledge/posts/README.md", "# protected\n");
+  put(
+    root,
+    "knowledge/teaching/lesson/page.md",
+    "[task](../../tasks/demo/backlog/domain.md)\n",
+  );
+  put(root, "knowledge/tasks/demo/AGENTS.md", "# authored project\n");
+  put(root, "knowledge/tasks/AGENTS.md", "# board manual\n");
+  put(root, "knowledge/tasks/demo/backlog/domain.md", "# domain\n");
+  put(root, "knowledge/tasks/demo/backlog/maintenance.md", "# maintenance\n");
+  put(root, "observation/README.md", "# Observation\nCurrent duties.\n");
+  git(root, "add", ".");
+  git(
+    root,
+    "-c",
+    "user.name=Fixture",
+    "-c",
+    "user.email=fixture@example.com",
+    "commit",
+    "-qm",
+    "fixture",
+  );
+  const pin = git(root, "rev-parse", "HEAD");
+  git(
+    root,
+    "update-index",
+    "--add",
+    "--cacheinfo",
+    `160000,${pin},evaluation/third_party/locomo`,
+  );
+  const manifest = {
+    tasks: ["domain", "maintenance"].map((stem) => ({
+      source: `knowledge/tasks/demo/backlog/${stem}.md`,
+      target: `${stem === "domain" ? "tasks" : ".harness/tasks"}/demo/backlog/${stem}.md`,
+      sha256: hash(join(root, `knowledge/tasks/demo/backlog/${stem}.md`)),
+    })),
+    protectedPostHashes: {
+      "knowledge/posts/README.md": hash(
+        join(root, "knowledge/posts/README.md"),
+      ),
+    },
+    gitlink: {
+      source: "evaluation/third_party/locomo",
+      target: ".harness/evaluation/third_party/locomo",
+      sha: pin,
+    },
+  };
+  return { root, manifest };
+}
+function snapshot(root: string) {
+  const r: Record<string, string> = {};
+  function scan(p: string) {
+    for (const n of fs.readdirSync(p)) {
+      if (n === ".git") continue;
+      const f = join(p, n);
+      if (fs.statSync(f).isDirectory()) scan(f);
+      else r[f] = hash(f);
+    }
+  }
+  scan(root);
+  return r;
+}
+function legacy(root: string, owner: string, title: string, extra = "") {
+  put(
+    root,
+    `${owner}.memory/projects/AGENTS.md`,
+    extra +
+      `# Projects\n${title}\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n`,
+  );
+  put(
+    root,
+    `${owner}AGENTS.md`,
+    "# scope\n<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n- [projects](.memory/projects/AGENTS.md) — projects\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n",
+  );
+}
+test("instance routes tasks and gitlink while protected posts retain bytes", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load(),
+    before = snapshot(root);
+  m.runInstanceMigration(root, manifest, false);
+  assert.deepEqual(snapshot(root), before);
+  assert.equal(m.runInstanceMigration(root, manifest, true).status, "migrated");
+  for (const item of manifest.tasks)
+    assert.equal(hash(join(root, item.target)), item.sha256);
+  assert.equal(
+    hash(join(root, "knowledge/posts/README.md")),
+    manifest.protectedPostHashes["knowledge/posts/README.md"],
+  );
+  assert.match(
+    fs.readFileSync(join(root, "teaching/lesson/page.md"), "utf8"),
+    /\.\.\/\.\.\/tasks\/demo/,
+  );
+  git(root, "add", "-A");
+  assert.match(
+    git(root, "ls-files", "--stage", manifest.gitlink.target),
+    new RegExp(manifest.gitlink.sha),
+  );
+  const after = snapshot(root);
+  m.runInstanceMigration(root, manifest, true);
+  assert.deepEqual(snapshot(root), after);
+});
+test("instance refuses unknown owners without mutation", async (t) => {
+  const { root, manifest } = fixture(t);
+  put(root, "unknown/.memory/users/private.md", "secret");
+  const before = snapshot(root),
+    m = await load();
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /unknown-legacy-owner/,
+  );
+  assert.deepEqual(snapshot(root), before);
+});
+test("instance consolidates compatible metadata and manual index introductions", async (t) => {
+  const { root, manifest } = fixture(t);
+  legacy(root, "", "root intro", "---\nvendor: shared\n---\n");
+  legacy(root, "extensions/", "module intro", "---\nother: kept\n---\n");
+  put(
+    root,
+    "extensions/.memory/projects/project_example.md",
+    "---\nname: example\ndescription: fixture\n---\nbody\n",
+  );
+  const m = await load();
+  m.runInstanceMigration(root, manifest, true);
+  const index = fs.readFileSync(
+    join(root, ".harness/memory/projects/AGENTS.md"),
+    "utf8",
+  );
+  for (const s of [
+    "root intro",
+    "module intro",
+    "vendor: shared",
+    "other: kept",
+  ])
+    assert.ok(index.includes(s));
+  assert.equal(index.match(/project-memory-type:start/g)?.length, 1);
+  assert.doesNotMatch(
+    fs.readFileSync(join(root, "extensions/AGENTS.md"), "utf8"),
+    /project-memory:start/,
+  );
+});
+test("metadata conflict cannot silently discard authored fields", async (t) => {
+  const { root, manifest } = fixture(t);
+  legacy(root, "", "root", "---\nvendor: first\n---\n");
+  legacy(root, "extensions/", "module", "---\nvendor: second\n---\n");
+  const before = snapshot(root),
+    m = await load();
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /metadata-conflict/,
+  );
+  assert.deepEqual(snapshot(root), before);
+});
+test("upgraded checkout routes ignored remnants without resurrecting module scope", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  m.runInstanceMigration(root, manifest, true);
+  put(root, "extensions/AGENTS.md", "# module\n");
+  put(
+    root,
+    "extensions/.memory/users/AGENTS.md",
+    "# private manual\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+  );
+  put(root, "extensions/.memory/users/user_x.md", "secret");
+  fs.chmodSync(join(root, "extensions/.memory"), 0o700);
+  m.runInstanceMigration(root, manifest, true);
+  assert.equal(
+    fs.readFileSync(join(root, ".harness/memory/users/user_x.md"), "utf8"),
+    "secret",
+  );
+  assert.equal(fs.existsSync(join(root, "extensions/.harness")), false);
+  assert.equal(
+    fs.statSync(join(root, ".harness/memory/users")).mode & 0o777,
+    0o700,
+  );
+  assert.match(
+    fs.readFileSync(join(root, ".harness/memory/users/AGENTS.md"), "utf8"),
+    /private manual/,
+  );
+});
+test("pending old instance journal adds missing official private index on resume", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  m.runInstanceMigration(root, manifest, true);
+  const agents = join(root, "AGENTS.md");
+  fs.writeFileSync(
+    agents,
+    fs
+      .readFileSync(agents, "utf8")
+      .replace(
+        "<!-- project-memory-local:end -->",
+        "- [users](.harness/memory/users/AGENTS.md) — users\n<!-- project-memory-local:end -->",
+      ),
+  );
+  const job = m.makeInstancePlan(root, manifest);
+  job.root = root;
+  put(root, ".recursive-layout-migration/journal.json", JSON.stringify(job));
+  m.runInstanceMigration(root, manifest, true);
+  assert.match(
+    fs.readFileSync(join(root, ".harness/memory/users/AGENTS.md"), "utf8"),
+    /project-memory-entries:start/,
+  );
+});
+test("pending instance journal detects later target edit before any write", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  const job = m.makeInstancePlan(root, manifest);
+  job.root = root;
+  put(root, ".recursive-layout-migration/journal.json", JSON.stringify(job));
+  put(root, manifest.tasks[0]!.target, "later edit");
+  const before = snapshot(root);
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /resume-target-edited/,
+  );
+  assert.deepEqual(snapshot(root), before);
+});
+
+for (const [label, field] of [
+  ["quoted", "'private-key': second"],
+  ["non-ASCII", "作者: second"],
+])
+  test(`consolidation rejects unsupported ${label} metadata keys before mutation`, async (t) => {
+    const { root, manifest } = fixture(t);
+    legacy(root, "", "root", "---\nvendor: shared\n---\n");
+    legacy(
+      root,
+      "extensions/",
+      "module",
+      `---\nvendor: shared\n${field}\n---\n`,
+    );
+    const before = snapshot(root),
+      m = await load();
+    assert.throws(
+      () => m.runInstanceMigration(root, manifest, true),
+      /metadata-structure-needs-review/,
+    );
+    assert.deepEqual(snapshot(root), before);
+  });
+test("protected post edits and links requiring rewrite refuse before migration", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  put(
+    root,
+    "knowledge/posts/README.md",
+    "[task](../tasks/demo/backlog/domain.md)\n",
+  );
+  manifest.protectedPostHashes["knowledge/posts/README.md"] = hash(
+    join(root, "knowledge/posts/README.md"),
+  );
+  const before = snapshot(root);
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /protected-post-link-needs-human/,
+  );
+  assert.deepEqual(snapshot(root), before);
+  manifest.protectedPostHashes["knowledge/posts/README.md"] = "wrong";
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /protected-post-hash-mismatch/,
+  );
+  assert.deepEqual(snapshot(root), before);
+});
+test("reviewed source and gitlink hashes cannot drift silently", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  manifest.tasks[0]!.sha256 = "wrong";
+  const before = snapshot(root);
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /reviewed-source-hash-mismatch/,
+  );
+  assert.deepEqual(snapshot(root), before);
+  manifest.tasks[0]!.sha256 = hash(join(root, manifest.tasks[0]!.source));
+  manifest.gitlink.sha = "0000000000000000000000000000000000000000";
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /gitlink-pin-mismatch/,
+  );
+  assert.deepEqual(snapshot(root), before);
+});
+test("private owner index collisions require review instead of merging secrets", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  for (const owner of ["", "extensions/"]) {
+    legacy(root, owner, "manual");
+    put(
+      root,
+      owner + ".memory/users/AGENTS.md",
+      "# private manual\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+    );
+  }
+  const before = snapshot(root);
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /private-index-collision/,
+  );
+  assert.deepEqual(snapshot(root), before);
+});
+test("missing adopted custom type refuses before ignore or journal writes", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  m.runInstanceMigration(root, manifest, true);
+  const agents = join(root, "AGENTS.md");
+  fs.writeFileSync(
+    agents,
+    fs
+      .readFileSync(agents, "utf8")
+      .replace(
+        "<!-- project-memory-local:end -->",
+        "- [custom](.harness/memory/custom/AGENTS.md) — custom\n<!-- project-memory-local:end -->",
+      ),
+  );
+  const before = snapshot(root);
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /missing-adopted-type-index/,
+  );
+  assert.deepEqual(snapshot(root), before);
+});
+test("instance interrupted private copy resumes its persisted plan", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  m.runInstanceMigration(root, manifest, true);
+  put(root, "extensions/AGENTS.md", "# module\n");
+  put(
+    root,
+    "extensions/.memory/users/AGENTS.md",
+    "# private intro\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+  );
+  put(root, "extensions/.memory/users/user_x.md", "private");
+  fs.chmodSync(join(root, "extensions/.memory"), 0o700);
+  fs.mkdirSync(join(root, ".harness/memory/users"), {
+    recursive: true,
+    mode: 0o755,
+  });
+  fs.chmodSync(join(root, ".harness/memory/users"), 0o755);
+  const moduleUrl = new URL(
+    "../../../../scripts/migrate-recursive-layout.mts",
+    import.meta.url,
+  ).href;
+  const script = `import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';import {execFileSync} from 'node:child_process';import {dirname} from 'node:path';const root=${JSON.stringify(root)};const rename=fs.renameSync;fs.renameSync=(source,target)=>{if(String(target).includes('/.harness/memory/users/')){if((fs.statSync(dirname(target)).mode&0o777)!==0o700)throw Error('privacy-mode-not-ready');execFileSync('git',['-C',root,'check-ignore','-q','--no-index',String(target)]);throw Error('injected-before-private-copy');}return rename(source,target);};syncBuiltinESMExports();const m=await import(${JSON.stringify(moduleUrl)});try{m.runInstanceMigration(root,${JSON.stringify(manifest)},true);}catch(e){console.error(e.message);process.exitCode=71;}`;
+  let error: any;
+  try {
+    execFileSync(
+      process.execPath,
+      ["--import", "tsx", "--input-type=module", "-e", script],
+      { encoding: "utf8", stdio: "pipe" },
+    );
+  } catch (e) {
+    error = e;
+  }
+  assert.equal(error.status, 71);
+  assert.match(error.stderr, /injected-before-private-copy/);
+  assert.equal(
+    fs.existsSync(join(root, "extensions/.memory/users/user_x.md")),
+    true,
+  );
+  assert.equal(m.runInstanceMigration(root, manifest, true).status, "migrated");
+  assert.equal(
+    fs.readFileSync(join(root, ".harness/memory/users/user_x.md"), "utf8"),
+    "private",
+  );
+});
+
+test("flat private index destination receives private permissions", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  m.runInstanceMigration(root, manifest, true);
+  put(
+    root,
+    ".memory/USER.md",
+    "# flat private\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+  );
+  m.runInstanceMigration(root, manifest, true);
+  assert.equal(
+    fs.statSync(join(root, ".harness/memory/users")).mode & 0o777,
+    0o700,
+  );
+  assert.match(
+    fs.readFileSync(join(root, ".harness/memory/users/AGENTS.md"), "utf8"),
+    /flat private/,
+  );
+});
+test("private remnants preserve external relative links after owner consolidation", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  m.runInstanceMigration(root, manifest, true);
+  put(root, "extensions/AGENTS.md", "# module\n");
+  put(
+    root,
+    "extensions/.memory/users/AGENTS.md",
+    "# manual\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+  );
+  put(
+    root,
+    "extensions/.memory/users/user_x.md",
+    "[target](../../target.txt)\n",
+  );
+  put(root, "extensions/target.txt", "kept");
+  m.runInstanceMigration(root, manifest, true);
+  assert.equal(
+    fs.readFileSync(join(root, ".harness/memory/users/user_x.md"), "utf8"),
+    "[target](../../../extensions/target.txt)\n",
+  );
+  assert.equal(
+    fs.readFileSync(join(root, "extensions/target.txt"), "utf8"),
+    "kept",
+  );
+});
+test("instance newly added source and changed directory permissions prevent resume", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  legacy(root, "", "manual");
+  put(root, ".memory/projects/project_x.md", "body");
+  const job = m.makeInstancePlan(root, manifest);
+  job.root = root;
+  put(root, ".recursive-layout-migration/journal.json", JSON.stringify(job));
+  put(root, ".memory/projects/new.bin", "new");
+  let before = snapshot(root);
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /legacy-source-added-after-preflight/,
+  );
+  assert.deepEqual(snapshot(root), before);
+  fs.unlinkSync(join(root, ".memory/projects/new.bin"));
+  fs.chmodSync(join(root, ".memory/projects"), 0o700);
+  before = snapshot(root);
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /resume-source-directory-mode-changed/,
+  );
+  assert.deepEqual(snapshot(root), before);
+});
+test("instance keeps custom skills module ownership after consolidation", async (t) => {
+  const { root, manifest } = fixture(t);
+  legacy(root, "", "root");
+  put(
+    root,
+    ".memory/docs/AGENTS.md",
+    "<!-- project-memory-type:start -->\nname: guide\nmodule: skills\nwritable: false\ngitignore: true\nformat: ordinary\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+  );
+  put(
+    root,
+    ".memory/docs/guide_x.md",
+    "---\nname: x\ndescription: doc\n---\nbody",
+  );
+  const m = await load();
+  m.runInstanceMigration(root, manifest, true);
+  assert.equal(
+    fs.readFileSync(join(root, ".harness/skills/docs/guide_x.md"), "utf8"),
+    "---\nname: x\ndescription: doc\n---\nbody",
+  );
+  assert.equal(fs.existsSync(join(root, ".harness/memory/docs")), false);
+  git(root, "check-ignore", ".harness/skills/docs/guide_x.md");
+});
+
+test("instance destination collision leaves source and destination unchanged", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  put(root, manifest.tasks[0]!.target, "newer target");
+  const before = snapshot(root);
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /target-content-conflict/,
+  );
+  assert.deepEqual(snapshot(root), before);
+});
