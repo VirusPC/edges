@@ -6,7 +6,7 @@ import { assertBoardPath } from './board.js';
 import { scopeDir, type BoardTarget } from "./paths.js";
 import path from "node:path";
 import { getTask, listProjectIds, type BoardWriter } from "./board.js";
-import { renderNewTaskDoc } from "../../models/tasks/frontmatter.js";
+import { renderNewTaskDoc, taskBody } from "../../models/tasks/frontmatter.js";
 import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
 import { newTaskStem, taskNameSlug } from "../../models/tasks/slug.js";
 import { parseTaskPriority } from "../../models/tasks/priority.js";
@@ -143,7 +143,7 @@ export async function updateTask(
   if (!node) throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
   if (patch.title !== undefined) node.title = patch.title;
   if (patch.description !== undefined) node.setMetadata('description', patch.description);
-  if (patch.body !== undefined) node.body = `\n${patch.body.trimEnd()}\n`;
+  if (patch.body !== undefined) node.body = node.metadata === undefined ? patch.body : taskBody(patch.body);
   if (patch.assignee !== undefined) node.assignee = patch.assignee;
   if (parsedPriority !== undefined) node.priority = parsedPriority;
   if (parsedProject !== undefined) setDomainField(node, 'edges-task-project', parsedProject);

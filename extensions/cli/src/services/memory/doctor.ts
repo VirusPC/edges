@@ -1,10 +1,10 @@
-import { saveMemoryDocument } from './node-documents.js';
+import { loadMemoryDocument, saveMemoryDocument } from './node-documents.js';
 import * as fs from "node:fs";
 import { join, dirname, relative } from "node:path";
 import { IMPORTANT_START, LOCAL_START, LOCAL_END, blockPattern, insertInnerBlock, } from "./blocks.js";
 import { AGENTS_FILE_NAME, assertScopePath, isScope, isSymlink, listTypeFiles, readText, realPath, rejectLegacy, relativeOrName, resolveRoot, resolveTarget, writeAtomic, } from "./paths.js";
 import { layerTypeSpecs, selectedLocalBlock } from "./types.js";
-import { classifyAgentsFile, dropIndexEntries, findIndexAnchor, readIndexEntries, syncIndexEntry, syncTargetAgents, } from "./agents.js";
+import { classifyAgentsSource, classifyAgentsFile, dropIndexEntries, findIndexAnchor, readIndexEntries, syncIndexEntry, syncTargetAgents, } from "./agents.js";
 import { expectedIndexDocument, isSkillFormat, parseFrontmatter, refreshIndex, } from "./entries.js";
 export interface MemoryFinding {
     code: string;
@@ -157,8 +157,10 @@ export async function applyFindings(root: string, findings: MemoryFinding[]): Pr
             if (!specs.length && !isScope(owner))
                 continue;
             const file = assertScopePath(join(owner, AGENTS_FILE_NAME), owner);
-            if (classifyAgentsFile(file) === "foreign")
-                await saveMemoryDocument(owner, file, insertInnerBlock(readText(file), LOCAL_START, selectedLocalBlock(specs)));
+            const document = await loadMemoryDocument(owner, file);
+            if (classifyAgentsSource(document.existed ? document.node.serialize() : undefined) === 'foreign') {
+                await saveMemoryDocument(document, insertInnerBlock(document.node.serialize(), LOCAL_START, selectedLocalBlock(specs)));
+            }
             const action = await syncTargetAgents(owner, root);
             if (action !== "preserved")
                 repaired.push(`${action}-agents: ${relativeOrName(owner, root)}`);

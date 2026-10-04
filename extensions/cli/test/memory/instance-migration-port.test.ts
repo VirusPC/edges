@@ -617,13 +617,10 @@ for (const flag of ["--help", "-h"])
       "../../../../scripts/migrate-recursive-layout.mts",
       import.meta.url,
     );
-    const loader = new URL(
-      "../../../../node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/loader.mjs",
-      import.meta.url,
-    );
+    const loader = import.meta.resolve('tsx');
     const output = execFileSync(
       process.execPath,
-      ["--import", loader.href, script.pathname, flag],
+      ["--import", loader, script.pathname, flag],
       { cwd: root, encoding: "utf8", stdio: "pipe" },
     );
     assert.match(output, /Usage:.*migrate-recursive-layout/);

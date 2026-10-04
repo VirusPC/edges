@@ -20,7 +20,14 @@ export function memoryNodes(target: string): NodeService {
   } });
 }
 
-export async function saveMemoryDocument(target: string, file: string, source: string): Promise<void> {
+export interface MemoryDocument {
+  service: NodeService;
+  node: InternalNode | MemoryNode | SkillNode;
+  existed: boolean;
+}
+
+/** Load once, before deriving edits or deciding creation. The handle retains that snapshot. */
+export async function loadMemoryDocument(target: string, file: string): Promise<MemoryDocument> {
   assertScopePath(file, target);
   file = join(realpathSync(target), relative(target, file));
   target = realpathSync(target);
@@ -29,6 +36,11 @@ export async function saveMemoryDocument(target: string, file: string, source: s
   const service = memoryNodes(target);
   const Model = basename(file) === 'AGENTS.md' ? InternalNode : basename(file) === 'SKILL.md' ? SkillNode : MemoryNode;
   const existing = await service.get<InternalNode | MemoryNode | SkillNode>(file, Model);
-  if (existing) { existing.parse(source); await service.update(existing); }
-  else await service.create(new Model(file).parse(source));
+  return { service, node: existing ?? new Model(file), existed: existing !== undefined };
+}
+
+export async function saveMemoryDocument(document: MemoryDocument, source: string): Promise<void> {
+  document.node.parse(source);
+  if (document.existed) await document.service.update(document.node);
+  else await document.service.create(document.node);
 }

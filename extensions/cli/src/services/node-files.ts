@@ -60,12 +60,39 @@ function validateChange(change: FileChange): void {
   if (change.before) validateEntry(change.before);
   else if (stat(change.path)) throw new Error(`Node target already exists: ${change.path}`);
 }
+/** A freshly created descriptor remains readable even when the path's final mode is
+ * 000/0200. Keep that descriptor through commit/rollback; never relax path permissions. */
+function validateCreatedEntry(before: EntryFile, fd: number): void {
+  checkPath(before.path);
+  const current = stat(before.path), opened = fs.fstatSync(fd);
+  if (!current?.isFile() || current.dev !== before.device || current.ino !== before.inode ||
+      opened.dev !== before.device || opened.ino !== before.inode ||
+      fs.realpathSync(before.path) !== before.realPath || fs.realpathSync(path.dirname(before.path)) !== before.realDirectory) {
+    throw new Error(`Node file identity changed; reload before saving: ${before.path}`);
+  }
+  const expected = Buffer.from(before.source, 'utf8');
+  if (opened.size !== expected.length) throw new Error(`Node source changed; reload before saving: ${before.path}`);
+  const actual = Buffer.alloc(expected.length);
+  let offset = 0;
+  while (offset < actual.length) {
+    const read = fs.readSync(fd, actual, offset, actual.length - offset, offset);
+    if (read === 0) throw new Error(`Node source changed; reload before saving: ${before.path}`);
+    offset += read;
+  }
+  if (!actual.equals(expected)) throw new Error(`Node source changed; reload before saving: ${before.path}`);
+}
 /** Preflight every destination. Each file is replaced in its own directory. Cross-file
  * changes are recoverable, not atomic: errors report applied and unrecovered paths. */
 export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFile | undefined> {
   changes.forEach(validateChange);
   const applied: { change: FileChange; after?: EntryFile }[] = [];
   const result = new Map<string, EntryFile | undefined>();
+  const descriptors = new Map<string, number>();
+  const validateSaved = (entry: EntryFile) => {
+    const fd = descriptors.get(entry.path);
+    if (fd !== undefined && (entry.mode & 0o400) === 0) validateCreatedEntry(entry, fd);
+    else validateEntry(entry);
+  };
   try {
     for (const change of changes) {
       validateChange(change);
@@ -79,9 +106,14 @@ export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFi
       checkPath(change.path);
       const temporary = path.join(path.dirname(change.path), `.node-${randomUUID()}.tmp`);
       try {
-        fs.writeFileSync(temporary, change.source, { flag: 'wx', mode: change.before?.mode ?? change.createMode ?? 0o666 });
-        if (change.before) fs.chmodSync(temporary, change.before.mode);
-        const staged = readEntry(temporary)!;
+        const fd = fs.openSync(temporary, fs.constants.O_RDWR | fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_NOFOLLOW,
+          change.before?.mode ?? change.createMode ?? 0o666);
+        descriptors.set(change.path, fd);
+        fs.writeFileSync(fd, change.source, 'utf8');
+        if (change.before) fs.fchmodSync(fd, change.before.mode);
+        const info = fs.fstatSync(fd);
+        const staged: EntryFile = { path: temporary, source: change.source, device: info.dev, inode: info.ino,
+          mode: info.mode & 0o777, realPath: fs.realpathSync(temporary), realDirectory: fs.realpathSync(path.dirname(temporary)) };
         // Capture identity before committing, so no post-commit reopen/cleanup can
         // leave a changed destination absent from recovery accounting.
         const after: EntryFile = { ...staged, path: change.path,
@@ -97,7 +129,7 @@ export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFi
         }
       } finally { fs.rmSync(temporary, { force: true }); }
       const after = applied[applied.length - 1]!.after!;
-      validateEntry(after);
+      validateSaved(after);
       result.set(change.path, after);
     }
     return result;
@@ -105,7 +137,7 @@ export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFi
     const recovered: string[] = [], unrecovered: string[] = [], recoveryCopies: string[] = [], unavailable: string[] = [];
     for (const { change, after } of applied.reverse()) {
       try {
-        if (after) validateEntry(after);
+        if (after) validateSaved(after);
         else if (stat(change.path)) throw new Error('Deleted destination was recreated externally');
         if (change.before) {
           saveEntries([{ path: change.path, before: after, source: change.before.source }]);
@@ -126,5 +158,7 @@ export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFi
       }
     }
     throw new Error(`Node write failed: ${String(cause)}. Affected: ${applied.map(a => a.change.path).join(', ') || '(none)'}. Recovered: ${recovered.join(', ') || '(none)'}. Unrecovered: ${unrecovered.join(', ') || '(none)'}. Recovery copies: ${recoveryCopies.join(', ') || '(none)'}. Recovery copy unavailable: ${unavailable.join(', ') || '(none)'}. Reload affected nodes.`, { cause });
+  } finally {
+    for (const fd of descriptors.values()) fs.closeSync(fd);
   }
 }

@@ -1,4 +1,4 @@
-import { saveMemoryDocument } from './node-documents.js';
+import { loadMemoryDocument, saveMemoryDocument } from './node-documents.js';
 import { join, dirname, relative } from "node:path";
 import { assertPrivateIgnored } from "./ignore.js";
 import { AGENTS_FILE_NAME, assertScopePath, isFile, isScope, readText, rejectLegacy, resolveTarget, writeAtomic, } from "./paths.js";
@@ -39,18 +39,21 @@ export async function addMemoryType(options: AddMemoryTypeOptions) {
         ensureTypeGitignore(root, name, module, indexName);
     if (gitignore)
         assertPrivateIgnored(root ?? target, [file], [dirname(file)]);
-    const existed = isFile(file);
+    const document = await loadMemoryDocument(target, file);
+    const existed = document.existed;
     if (!existed)
-        await saveMemoryDocument(target, file, readIndexTemplate(typeIndexTemplateName(name), name, description, {
+        await saveMemoryDocument(document, readIndexTemplate(typeIndexTemplateName(name), name, description, {
             module,
             gitignore: String(gitignore),
             writable: String(writable),
             format,
         }));
     await refreshIndex(target, name);
-    const agents = assertScopePath(join(target, AGENTS_FILE_NAME), target), before = readText(agents), after = upsertLocalTypeLine(before, indexName, description);
+    const agents = assertScopePath(join(target, AGENTS_FILE_NAME), target);
+    const entry = await loadMemoryDocument(target, agents);
+    const before = entry.node.serialize(), after = upsertLocalTypeLine(before, indexName, description);
     if (before !== after)
-        await saveMemoryDocument(target, agents, after);
+        await saveMemoryDocument(entry, after);
     const gitignoreAction = gitignore
         ? root
             ? ensureTypeGitignore(root, name, module, indexName)

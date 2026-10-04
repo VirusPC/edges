@@ -63,7 +63,7 @@ export function setTopLevelField(markdown: string, key: "name" | "description", 
   return document.serialize();
 }
 
-function taskBody(body: string): string {
+export function taskBody(body: string): string {
   return `\n${body.startsWith("\n") ? body.slice(1) : body}${body && !body.endsWith("\n") ? "\n" : ""}`;
 }
 

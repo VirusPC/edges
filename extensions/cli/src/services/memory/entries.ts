@@ -1,5 +1,5 @@
 import { realPath } from './paths.js';
-import { saveMemoryDocument } from './node-documents.js';
+import { loadMemoryDocument, saveMemoryDocument } from './node-documents.js';
 import { escapeIndexText, encodeIndexPath } from "../../models/memory/index-rendering.js";
 import * as fs from "node:fs";
 import { basename, dirname, join, parse } from "node:path";
@@ -100,11 +100,11 @@ export function buildEntryIndex(target: string, name: string): string {
         ENTRIES_END,
     ].join("\n");
 }
-export function expectedIndexDocument(target: string, name: string): string {
+export function expectedIndexDocument(target: string, name: string, source?: string): string {
     const file = assertScopePath(join(target, discoverLayerTypes(target)[name] ?? indexFileName(name)), target);
-    const existing = isFile(file)
+    const existing = source ?? (isFile(file)
         ? readText(file)
-        : readIndexTemplate(typeIndexTemplateName(name), name, name);
+        : readIndexTemplate(typeIndexTemplateName(name), name, name));
     return (upsertBlock(existing, ENTRIES_START, ENTRIES_END, buildEntryIndex(target, name)).trimEnd() + "\n");
 }
 export async function refreshIndex(target: string, name: string): Promise<string> {
@@ -113,9 +113,12 @@ export async function refreshIndex(target: string, name: string): Promise<string
     ensureLayerTypeGitignore(target, name);
     if (name in discoverLayerTypes(target) && !isExternalType(name))
         fs.mkdirSync(dirname(file), { recursive: true });
-    const existed = isFile(file), before = existed ? readText(file) : "", after = expectedIndexDocument(target, name);
+    const document = await loadMemoryDocument(target, file);
+    const existed = document.existed, before = document.node.serialize();
+    const source = existed ? before : readIndexTemplate(typeIndexTemplateName(name), name, name);
+    const after = expectedIndexDocument(target, name, source);
     if (!existed || before !== after) {
-        await saveMemoryDocument(target, file, after);
+        await saveMemoryDocument(document, after);
         return existed ? "updated" : "created";
     }
     return "preserved";
