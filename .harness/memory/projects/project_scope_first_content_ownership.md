@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 递归目录与 AGENTS 入口设计：采用统一节点模型，沿用本层硬约束／本层记忆／下层记忆索引三块骨架；不另造章节体系，不加独立作用域资格门槛；harness 衔接细节待定。
+description: 递归目录修订：统一节点、保留原有三块入口；各子节点记忆保留原归属，迁移只改节点内布局，不因共享实现或缺少独立作用域资格而上收根层。
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T17:13:47+08:00"
+  edges-updated-at: "2026-10-04T17:16:28+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -25,6 +25,14 @@ metadata:
 **Why:** 此次目标是基于 Project Memory 扩展统一递归节点与 harness。此前提出额外五个章节、随后压成“规则＋索引”，均未承接原有模型，用户未接受。
 
 **How to apply:** 保留三块骨架及其职责作为后续设计起点，讨论本层记忆如何承接 harness 扩展、统一节点下如何组织下层索引。不要再另造一套通用章节，也不要把具体改名、合并区块或工具改造当作已经获批；这些细节尚待讨论。本次只记录确认的设计依据，未据此修改运行时或入口。
+
+## 2026-10-04 用户纠正：子节点记忆保留原归属
+
+用户指出把子目录 .memory 汇总到仓库顶层是不正确的。统一递归节点模型应保留各节点自己的局部记忆；从 .memory 升级到 .harness 是本节点内部布局转换，不能因此将子节点材料上收根节点。
+
+**Why:** 共享实现由根层维护，不意味着源码目录、模块或内容目录的局部上下文也必须集中存储。跨层复用与发现通过引用实现，不应以撤除局部节点、合并记忆来替代递归。
+
+**How to apply:** 后续修订应按原节点归属恢复局部记忆和入口；节点目录整体搬迁时，记忆随节点搬迁，类型按已确认的 memory/skills 布局转换。停止沿用先前清单中依据“不是独立责任主体”把 extensions、shared-extensions、knowledge/notes、knowledge/tasks、extensions/skills/project-memory-init 的局部记忆并入根层的判断。对原节点被拆分等无法直接一一映射的情况，需单独明确归属，不能再次默认并入根或随意复制。这次只记录纠正，尚未搬回文件；先前清单的43条根层合并与相关索引处理仍待修订。
 
 ## 先前设计与实施记录
 
