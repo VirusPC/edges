@@ -3,7 +3,7 @@
 import * as fs from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { parseArgs } from "node:util";
 import * as generic from "../extensions/cli/src/services/memory/migrate.js";
 import {
@@ -623,9 +623,7 @@ export function makeInstancePlan(
   let gitlink: Gitlink | null = null;
   const pin = manifest.gitlink;
   if (pin) {
-    const indexed = git(root, "ls-files", "--stage", pin.source, pin.target);
-    if (!indexed.includes(pin.sha)) throw new Error("gitlink-pin-mismatch");
-    if (indexed.includes("\t" + pin.source)) gitlink = pin;
+    if (checkedGitlinkState(root, pin) === "planned") gitlink = pin;
   }
   const directoryTargets = new Map<string, InstanceDirectory>(),
     privateDirs = memory.private.map(mapped);
@@ -738,7 +736,30 @@ export function planMissingPrivateIndexes(root: string, job: InstanceJob) {
     }
   }
 }
+/** A saved pin may be replayed only from the reviewed index or its completed move. */
+function checkedGitlinkState(root: string, pin: Gitlink): "planned" | "moved" {
+  for (const path of [pin.source, pin.target])
+    generic.safeAncestors(join(root, path), root);
+  const entries = git(
+    root,
+    "ls-files",
+    "--stage",
+    "-z",
+    "--",
+    pin.source,
+    pin.target,
+  )
+    .split("\0")
+    .filter(Boolean);
+  const expected = (path: string) => `160000 ${pin.sha} 0\t${path}`;
+  if (pin.source !== pin.target && entries.length === 1) {
+    if (entries[0] === expected(pin.source)) return "planned";
+    if (entries[0] === expected(pin.target)) return "moved";
+  }
+  throw new Error("gitlink-pin-mismatch: saved source or destination changed");
+}
 export function checkInstanceJob(root: string, job: InstanceJob) {
+  if (job.gitlink) checkedGitlinkState(root, job.gitlink);
   for (const op of job.operations) {
     generic.safeAncestors(op.source, root);
     generic.safeAncestors(op.target, root);
@@ -837,19 +858,19 @@ export function validateInstanceCopies(root: string, job: InstanceJob) {
           throw new Error(
             `missing-final-type-index: ${relative(root, join(scope, spec.indexFile))}`,
           );
+  assertInstanceIgnores(root, job);
+}
+function assertInstanceIgnores(root: string, job: InstanceJob) {
+  const privateDirectories = new Set(job.private ?? []);
+  // Older journals can omit private adoption metadata; known private paths stay protected.
   for (const op of job.operations)
-    if (
-      privatePath(op.target) &&
-      spawnSync("git", [
-        "-C",
-        root,
-        "check-ignore",
-        "-q",
-        "--no-index",
-        op.target,
-      ]).status !== 0
-    )
-      throw new Error("private-ignore-coverage-failed");
+    if (privatePath(op.target)) privateDirectories.add(dirname(op.target));
+  generic.assertMigrationIgnores(
+    root,
+    [...privateDirectories],
+    job.operations.map((op) => op.target),
+    join(root, JOURNAL, "journal.json"),
+  );
 }
 export function runInstanceMigration(
   rawRoot: string,
@@ -923,6 +944,7 @@ export function runInstanceMigration(
       fs.existsSync(ignore) ? generic.mode(ignore) : 0o644,
     ),
   );
+  assertInstanceIgnores(root, job);
   fs.mkdirSync(dirname(journal), { recursive: true, mode: 0o700 });
   fs.chmodSync(dirname(journal), 0o700);
   generic.saveJournal(journal, job);
@@ -937,10 +959,7 @@ export function runInstanceMigration(
     if (!generic.equal(generic.state(op.target), op.after))
       generic.writeState(op.target, op.after);
   const pin = job.gitlink;
-  if (
-    pin &&
-    git(root, "ls-files", "--stage", pin.source).includes("\t" + pin.source)
-  ) {
+  if (pin && checkedGitlinkState(root, pin) === "planned") {
     const old = join(root, pin.source),
       next = join(root, pin.target);
     fs.mkdirSync(dirname(next), { recursive: true });
@@ -988,6 +1007,7 @@ if (
   try {
     const { values } = parseArgs({
       options: {
+        help: { type: "boolean", short: "h" },
         worktree: { type: "string" },
         manifest: {
           type: "string",
@@ -998,23 +1018,33 @@ if (
         apply: { type: "boolean" },
       },
     });
-    if (
-      !values.worktree ||
-      Boolean(values["dry-run"]) === Boolean(values.apply)
-    )
-      throw new Error(
-        "Required: --worktree PATH and exactly one of --dry-run / --apply",
+    if (values.help) {
+      console.log(
+        "Usage: migrate-recursive-layout --worktree PATH [--manifest FILE] (--dry-run | --apply)\n\nReviewed Edges instance migration.\n\n  --worktree PATH  Explicit Git worktree root\n  --manifest FILE  Reviewed ownership manifest\n  --dry-run        Plan without writing\n  --apply          Apply or resume migration\n  -h, --help       Show this help",
       );
-    const manifest = JSON.parse(
-      readText(resolve(values.worktree, values.manifest!)),
-    ) as InstanceManifest;
-    console.log(
-      JSON.stringify(
-        runInstanceMigration(values.worktree, manifest, Boolean(values.apply)),
-        null,
-        2,
-      ),
-    );
+    } else {
+      if (
+        !values.worktree ||
+        Boolean(values["dry-run"]) === Boolean(values.apply)
+      )
+        throw new Error(
+          "Required: --worktree PATH and exactly one of --dry-run / --apply",
+        );
+      const manifest = JSON.parse(
+        readText(resolve(values.worktree, values.manifest!)),
+      ) as InstanceManifest;
+      console.log(
+        JSON.stringify(
+          runInstanceMigration(
+            values.worktree,
+            manifest,
+            Boolean(values.apply),
+          ),
+          null,
+          2,
+        ),
+      );
+    }
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

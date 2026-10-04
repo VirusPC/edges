@@ -495,3 +495,189 @@ test("instance destination collision leaves source and destination unchanged", a
   );
   assert.deepEqual(snapshot(root), before);
 });
+
+for (const kind of ["users", "docs"])
+  for (const resume of [false, true])
+    test(`nested negations block ${kind} private bytes before ${resume ? "resumed" : "planned"} copy`, async (t) => {
+      const { root, manifest } = fixture(t),
+        m = await load();
+      m.runInstanceMigration(root, manifest, true);
+      const fields =
+        kind === "docs"
+          ? "<!-- project-memory-type:start -->\nname: docs\nwritable: false\ngitignore: true\nformat: ordinary\n<!-- project-memory-type:end -->\n"
+          : "";
+      put(
+        root,
+        `.memory/${kind}/AGENTS.md`,
+        fields +
+          "# private\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+      );
+      const leaf = kind === "users" ? "user_new.md" : "docs_new.md";
+      put(root, `.memory/${kind}/${leaf}`, "private bytes");
+      put(
+        root,
+        ".harness/.gitignore",
+        `!memory/${kind}/\n!memory/${kind}/**\nmemory/${kind}/AGENTS.md\n`,
+      );
+      if (resume) {
+        const job = m.makeInstancePlan(root, manifest);
+        job.root = root;
+        put(
+          root,
+          ".recursive-layout-migration/journal.json",
+          JSON.stringify(job),
+        );
+      }
+      const journal = join(root, ".recursive-layout-migration/journal.json"),
+        before = fs.readFileSync(journal);
+      assert.throws(
+        () => m.runInstanceMigration(root, manifest, true),
+        /ignore-coverage-failed/,
+      );
+      assert.equal(
+        fs.existsSync(join(root, `.harness/memory/${kind}/${leaf}`)),
+        false,
+      );
+      assert.equal(
+        fs.existsSync(join(root, `.harness/memory/${kind}/AGENTS.md`)),
+        false,
+      );
+      assert.deepEqual(fs.readFileSync(journal), before);
+      assert.equal(
+        fs.readFileSync(join(root, `.memory/${kind}/${leaf}`), "utf8"),
+        "private bytes",
+      );
+    });
+
+for (const change of ["source-sha", "source-mode", "target-sha", "target-mode"])
+  test(`saved gitlink rejects ${change} drift before any write`, async (t) => {
+    const { root, manifest } = fixture(t),
+      m = await load(),
+      job = m.makeInstancePlan(root, manifest);
+    job.root = root;
+    put(root, ".recursive-layout-migration/journal.json", JSON.stringify(job));
+    const blob = change.endsWith("mode")
+      ? git(root, "hash-object", "-w", "--stdin")
+      : git(
+          root,
+          "-c",
+          "user.name=Fixture",
+          "-c",
+          "user.email=fixture@example.com",
+          "commit-tree",
+          git(root, "rev-parse", "HEAD^{tree}"),
+          "-m",
+          "later pin",
+        );
+    const source = change.startsWith("source"),
+      path = source ? manifest.gitlink.source : manifest.gitlink.target;
+    git(
+      root,
+      "update-index",
+      "--add",
+      "--cacheinfo",
+      `${change.endsWith("mode") ? "100644" : "160000"},${blob},${path}`,
+    );
+    const before = snapshot(root),
+      index = git(root, "ls-files", "--stage");
+    assert.throws(
+      () => m.runInstanceMigration(root, manifest, true),
+      /gitlink.*mismatch/,
+    );
+    assert.deepEqual(snapshot(root), before);
+    assert.equal(git(root, "ls-files", "--stage"), index);
+  });
+test("saved gitlink accepts a completed interrupted move", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load(),
+    job = m.makeInstancePlan(root, manifest);
+  job.root = root;
+  put(root, ".recursive-layout-migration/journal.json", JSON.stringify(job));
+  git(
+    root,
+    "update-index",
+    "--add",
+    "--cacheinfo",
+    `160000,${manifest.gitlink.sha},${manifest.gitlink.target}`,
+  );
+  git(root, "update-index", "--force-remove", manifest.gitlink.source);
+  fs.mkdirSync(join(root, manifest.gitlink.target), { recursive: true });
+  assert.equal(m.runInstanceMigration(root, manifest, true).status, "migrated");
+  assert.equal(
+    git(root, "ls-files", "--stage", manifest.gitlink.target),
+    `160000 ${manifest.gitlink.sha} 0\t${manifest.gitlink.target}`,
+  );
+  assert.equal(git(root, "ls-files", "--stage", manifest.gitlink.source), "");
+});
+for (const flag of ["--help", "-h"])
+  test(`instance ${flag} exits successfully without touching filesystem`, (t) => {
+    const { root } = fixture(t),
+      before = snapshot(root);
+    const script = new URL(
+      "../../../../scripts/migrate-recursive-layout.mts",
+      import.meta.url,
+    );
+    const loader = new URL(
+      "../../node_modules/tsx/dist/loader.mjs",
+      import.meta.url,
+    );
+    const output = execFileSync(
+      process.execPath,
+      ["--import", loader.href, script.pathname, flag],
+      { cwd: root, encoding: "utf8", stdio: "pipe" },
+    );
+    assert.match(output, /Usage:.*migrate-recursive-layout/);
+    for (const option of ["--worktree", "--manifest", "--dry-run", "--apply"])
+      assert.ok(output.includes(option));
+    assert.deepEqual(snapshot(root), before);
+  });
+
+test("journal negation is rejected before recording any planned bytes", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  put(
+    root,
+    ".gitignore",
+    "**/.recursive-layout-migration/\n!.recursive-layout-migration/\n!.recursive-layout-migration/**\n",
+  );
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /ignore-coverage-failed/,
+  );
+  assert.equal(fs.existsSync(join(root, ".recursive-layout-migration")), false);
+  assert.equal(fs.existsSync(join(root, manifest.tasks[0]!.target)), false);
+});
+test("completed gitlink move rejects a later destination pin before resume", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load(),
+    job = m.makeInstancePlan(root, manifest);
+  job.root = root;
+  put(root, ".recursive-layout-migration/journal.json", JSON.stringify(job));
+  const next = git(
+    root,
+    "-c",
+    "user.name=Fixture",
+    "-c",
+    "user.email=fixture@example.com",
+    "commit-tree",
+    git(root, "rev-parse", "HEAD^{tree}"),
+    "-m",
+    "later pin",
+  );
+  git(
+    root,
+    "update-index",
+    "--add",
+    "--cacheinfo",
+    `160000,${next},${manifest.gitlink.target}`,
+  );
+  git(root, "update-index", "--force-remove", manifest.gitlink.source);
+  const before = snapshot(root),
+    index = git(root, "ls-files", "--stage");
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /gitlink.*mismatch/,
+  );
+  assert.deepEqual(snapshot(root), before);
+  assert.equal(git(root, "ls-files", "--stage"), index);
+});

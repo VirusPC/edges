@@ -591,6 +591,44 @@ export function writeState(path: string, value: FileState) {
 export function saveJournal(path: string, data: unknown) {
   writeState(path, fileState(JSON.stringify(data), 0o600));
 }
+/** Check real Git precedence before journals, staging files, or private copies exist. */
+export function assertMigrationIgnores(
+  root: string,
+  privateDirectories: readonly string[],
+  destinations: readonly string[],
+  journal: string,
+) {
+  const sensitive = destinations.filter((path) =>
+    privateDirectories.some((directory) => within(path, directory)),
+  );
+  const directories = new Set([
+    dirname(journal),
+    ...privateDirectories,
+    ...sensitive.map(dirname),
+  ]);
+  const paths = new Set([
+    journal,
+    ...sensitive,
+    ...[...directories].map((path) => path + "/"),
+  ]);
+  for (const path of paths) {
+    safeAncestors(path, root);
+    if (
+      spawnSync("git", [
+        "-C",
+        root,
+        "check-ignore",
+        "-q",
+        "--no-index",
+        "--",
+        path,
+      ]).status !== 0
+    )
+      throw new Error(
+        `private-ignore-coverage-failed: ${relative(root, path)}`,
+      );
+  }
+}
 function ignoreBeforeCopy(target: string, job: MigrationJob) {
   const ignore = join(target, ".gitignore");
   safeAncestors(ignore, target);
@@ -613,21 +651,12 @@ function ignoreBeforeCopy(target: string, job: MigrationJob) {
     spawnSync("git", ["-C", target, "rev-parse", "--show-toplevel"]).status ===
     0
   )
-    for (const rel of [
-      `${MIGRATION_JOURNAL}/journal.json`,
-      ...job.private.map((p) => relative(target, p) + "/AGENTS.md"),
-    ])
-      if (
-        spawnSync("git", [
-          "-C",
-          target,
-          "check-ignore",
-          "-q",
-          "--no-index",
-          rel,
-        ]).status !== 0
-      )
-        throw new Error(`ignore-coverage-failed: ${rel}`);
+    assertMigrationIgnores(
+      target,
+      job.private,
+      job.operations.map((op) => op.target),
+      join(target, MIGRATION_JOURNAL, "journal.json"),
+    );
 }
 function validateSourceInventory(job: MigrationJob) {
   const sources = new Set(

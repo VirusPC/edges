@@ -738,3 +738,40 @@ test("copied journal never retires sources edited after copy", async (t) => {
   );
   assert.deepEqual(snapshot(root), before);
 });
+
+test("generic checks every private target before resumed writes", async (t) => {
+  const root = fixture(t, ["user"]),
+    m = await load();
+  m.migrateMemory({ targetDir: root });
+  put(root, ".memory/users/user_new.md", "new private bytes");
+  put(
+    root,
+    ".project-memory-migration/journal.json",
+    JSON.stringify({
+      ...m.planMigration(root, false),
+      target: root,
+      recursive: false,
+      phase: "planned",
+    }),
+  );
+  put(
+    root,
+    ".harness/.gitignore",
+    "!memory/users/\n!memory/users/**\nmemory/users/AGENTS.md\n",
+  );
+  const journal = join(root, ".project-memory-migration/journal.json"),
+    before = fs.readFileSync(journal);
+  assert.throws(
+    () => m.migrateMemory({ targetDir: root }),
+    /ignore-coverage-failed/,
+  );
+  assert.equal(
+    fs.existsSync(join(root, ".harness/memory/users/user_new.md")),
+    false,
+  );
+  assert.deepEqual(fs.readFileSync(journal), before);
+  assert.equal(
+    fs.readFileSync(join(root, ".memory/users/user_new.md"), "utf8"),
+    "new private bytes",
+  );
+});
