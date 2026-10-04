@@ -70,6 +70,31 @@ const parsed = parseNode(markdown);
 `saveNode` 校验读取时的原文、真实位置和文件身份，避免陈旧快照或后续符号链接替换覆盖别的文件；通过同目录临时文件替换，保留权限。它是乐观并发校验，不提供跨进程锁。不会初始化目录或自动保存 CLI 的读取结果。
 
 
+## 文档类型与 codec
+
+`MarkdownDocument.type` 可选，内置类型为 `base`、`agents`、`memory`、`task`，省略表示未标记，由调用方选用的 codec 决定处理方式。type 是处理方式提示，不自动写入 YAML，也不等同于头部中 `metadata.edges-type` 的 project、feedback 等内容分类。
+
+统一接口为 `DocumentCodec<TModel, TType>`：含只读 type、parse(source)、serialize(model, originalSource?)。不同 codec 可以返回不同领域模型，底层 YAML 与 Markdown 处理共用现成库。
+
+| Codec | 解析与生成职责 |
+| --- | --- |
+| `baseDocumentCodec` | 返回带 base 类型的 MarkdownDocument，处理可选 YAML 与正文。 |
+| `agentsDocumentCodec` | 返回现有 NodeModel，处理三部分章节、HTML 注释标记及索引；仓库读写已接入。 |
+| `memoryDocumentCodec` | 返回带 memory 类型的 MarkdownDocument，暂时复用基础格式；内容分类与正文规范由消费方解释。Python Memory 运行时尚未接入。 |
+| `taskDocumentCodec` | 位于 Tasks 领域模块，返回带 task 类型的 MarkdownDocument，校验内嵌 metadata 为映射；Task 字段投影及原有读写已接入。 |
+
+调用方显式选择 codec，未选择专用处理时使用 base；不根据 YAML 字段自动猜类型。`parseDocument` / `serializeDocument` 仍是只处理头部与正文的底层格式函数，不按 type 分发。选定 codec 后可省略输入模型的 type；若明确填写其他类型，Markdown codec 会拒绝。现有 AGENTS NodeModel 不含通用文档 type 字段，由所选 codec 标明处理类型。
+
+```ts
+import { memoryDocumentCodec } from './codec/index.js';
+
+const doc = memoryDocumentCodec.parse(source); // doc.type === 'memory'
+doc.metadata = { ...doc.metadata, description: 'Updated memory' };
+const updated = memoryDocumentCodec.serialize(doc, source);
+```
+
+后续自定义类型可以实现 `DocumentCodec<CustomModel, 'custom'>`；只有格式与基础文档相同的类型才使用 `createMarkdownCodec('custom')`。无需新增包或全局注册框架。
+
 ## 可选文档树关系
 
 `MarkdownDocument` 可附带 `id?: string`、`parent?: DocumentReference`、`children?: DocumentReference[]`。引用形状为 `{ target: string, label?: string }`，target 保留调用方给出的文档标识或链接，由调用方解释；不嵌套完整文档对象。

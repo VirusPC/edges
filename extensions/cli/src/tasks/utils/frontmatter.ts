@@ -1,5 +1,5 @@
-import { parseDocument, serializeDocument, splitFrontmatter } from "../../utils/node-tree/codec/index.js";
-import type { Metadata, MetadataValue } from "../../utils/node-tree/document-model.js";
+import { createMarkdownCodec, splitFrontmatter } from "../../utils/node-tree/codec/index.js";
+import type { DocumentCodec, MarkdownDocument, Metadata, MetadataValue } from "../../utils/node-tree/document-model.js";
 import type { TaskPriority, TaskProjectId, TaskStatus } from "./types.js";
 
 export type ParsedTaskDoc = {
@@ -20,8 +20,22 @@ function fields(value: MetadataValue | undefined): Metadata {
   return value;
 }
 
+const taskFormat = createMarkdownCodec("task");
+export const taskDocumentCodec: DocumentCodec<MarkdownDocument<"task">, "task"> = {
+  type: "task",
+  parse(source) {
+    const document = taskFormat.parse(source);
+    fields(document.metadata?.metadata);
+    return document;
+  },
+  serialize(document, originalSource) {
+    fields(document.metadata?.metadata);
+    return taskFormat.serialize(document, originalSource);
+  },
+};
+
 export function parseTaskDoc(markdown: string): ParsedTaskDoc {
-  const document = parseDocument(markdown);
+  const document = taskDocumentCodec.parse(markdown);
   const header = document.metadata ?? {};
   const metadata = Object.fromEntries(Object.entries(fields(header.metadata))
     .filter(([, value]) => value === null || typeof value !== "object")
@@ -33,17 +47,17 @@ export function parseTaskDoc(markdown: string): ParsedTaskDoc {
 }
 
 export function setMetadataField(markdown: string, key: string, value: string): string {
-  const document = parseDocument(markdown);
+  const document = taskDocumentCodec.parse(markdown);
   if (document.metadata === undefined) return markdown;
   document.metadata = { ...document.metadata, metadata: { ...fields(document.metadata.metadata), [key]: value } };
-  return serializeDocument(document, markdown);
+  return taskDocumentCodec.serialize(document, markdown);
 }
 
 export function setTopLevelField(markdown: string, key: "name" | "description", value: string): string {
-  const document = parseDocument(markdown);
+  const document = taskDocumentCodec.parse(markdown);
   if (document.metadata === undefined) return markdown;
   document.metadata = { ...document.metadata, [key]: value };
-  return serializeDocument(document, markdown);
+  return taskDocumentCodec.serialize(document, markdown);
 }
 
 function taskBody(body: string): string {
@@ -51,9 +65,9 @@ function taskBody(body: string): string {
 }
 
 export function replaceBody(markdown: string, body: string): string {
-  const document = parseDocument(markdown);
+  const document = taskDocumentCodec.parse(markdown);
   document.body = document.metadata === undefined ? body : taskBody(body);
-  return serializeDocument(document, markdown);
+  return taskDocumentCodec.serialize(document, markdown);
 }
 
 export function renderNewTaskDoc(input: {
@@ -76,5 +90,5 @@ export function renderNewTaskDoc(input: {
   if (input.priority && input.priority !== "none") metadata["edges-task-priority"] = input.priority;
   if (input.assignee) metadata["edges-task-assignee"] = input.assignee;
   metadata["edges-updated-at"] = input.updatedAt;
-  return serializeDocument({ metadata: { name: input.name, description: input.description, metadata }, body: taskBody(input.body) });
+  return taskDocumentCodec.serialize({ metadata: { name: input.name, description: input.description, metadata }, body: taskBody(input.body) });
 }

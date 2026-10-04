@@ -108,7 +108,7 @@ function reconcile(yaml: Document, path: (string | number)[], before: MetadataVa
 }
 
 /** Serialize metadata/body only; tree context belongs to the caller. Verify edited content. */
-export function serializeDocument(document: MarkdownDocument, originalSource?: string): string {
+export function serializeDocument(document: MarkdownDocument<string>, originalSource?: string): string {
   const original = splitFrontmatter(originalSource ?? '');
   const header = original.rawFrontmatter === undefined ? undefined : readHeader(original.rawFrontmatter);
   let prefix = '';

@@ -30,3 +30,12 @@ Metadata is a string-keyed map of JSON-compatible values. No schema is required 
 - 迁入 CLI 的 48 项节点/文档测试均保留；工作区总计 418 项通过（CLI 335、MCP 14、服务 42、页面 27）。
 - 隔离目录源码经 tsx 运行；复制 CLI 编译产物后直接运行节点文档 API 和 `--help` 均通过，无独立 workspace 包依赖。
 - 独立 TypeScript review 通过，无阻断项。原有 Vite 配置/依赖警告未改变。
+
+
+## 后续文档类型与 codec 验证
+
+文档模型新增可选 type（base、agents、memory、task）和泛型 DocumentCodec 接口。调用方显式选择处理方式；AGENTS 继续返回章节 NodeModel，Task 在领域模块校验字段，Memory 暂复用基础文档格式。类型提示、树上下文与实际 YAML 分类字段分别表达，不自动互相写入或推导。
+
+- CLI build、TypeScript 检查与完整工作区测试通过：424 项（CLI 341、MCP 14、服务 42、页面 27）。
+- 新回归覆盖基础/Memory 类型标记、AGENTS 章节编辑、错误类型 codec 拒绝、Task 格式校验及保真写回；相关 66 项测试通过。
+- 独立 TypeScript review 通过。没有新增动态注册框架，Python Memory 接入仍单独待办。

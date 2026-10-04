@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 递归节点保留三部分与局部记忆；CLI utils 使用 TypeScript、文档支持可选父子引用，模型/格式/存储分层。
+description: 递归节点保留三部分与局部记忆；CLI utils 使用 TypeScript，文档支持可选树引用与 type，按类型使用 codec。
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T20:50:02+08:00"
+  edges-updated-at: "2026-10-04T20:57:22+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -73,6 +73,14 @@ MarkdownDocument 增加可选 id、parent、children；用户确认父子关系�
 **Why:** 通用 Markdown 文档也可以参与递归组织，引用支持跨物理目录层级与按需加载，不要求普通文档先成为 AGENTS 节点。
 
 **How to apply:** 这些字段由调用方组树时提供；children 省略表示未指定，空数组表示没有子文档。逻辑父节点不按目录祖先推断。通用文档 codec 只读写 metadata/body，不自动把树关系写入 YAML；头部已有同名字段仍作为普通 metadata 保留。AGENTS 的三部分章节与文件适配继续在各自层实现，不为此新增第四部分。
+
+## 2026-10-04 用户要求：文档 type 区分处理方式
+
+document-model 增加可选 type，内置 base、agents、memory、task；各类型可以使用不同的 parse、serialize。DocumentCodec 泛型允许不同的解析结果模型，公共 YAML/Markdown 处理复用底层库。
+
+**Why:** 共享文档基础格式不代表正文规范与处理方式相同；AGENTS 的章节模型、Task 的字段投影不能都塞进基础格式规则。
+
+**How to apply:** 由调用方显式选择 codec，省略 type 表示未标记；未选专用处理时使用 base，不根据 YAML 分类字段自动猜测。AGENTS codec 复用 NodeModel 解析与写回；Task codec 留在 Tasks 领域模块并接入原有字段读写；Memory 暂时复用基础格式，不据此宣称 Python Memory 已接入。type 不自动写入 YAML，与 metadata.edges-type 的 project、feedback 等内容分类不同；专用格式可实现自己的 DocumentCodec，无需独立包或全局注册框架。
 
 ## 先前设计与实施记录
 

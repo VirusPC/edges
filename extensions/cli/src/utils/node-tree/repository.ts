@@ -2,8 +2,7 @@ import type { NodeFile } from './filesystem.js';
 import type { NodeModel } from './model.js';
 import path from 'node:path';
 import { absolute, readNodeFile, writeNodeFile, discoverDirectories, isDirectory } from './filesystem.js';
-import { parseNode } from './codec/parse.js';
-import { serializeNode } from './codec/serialize.js';
+import { agentsDocumentCodec } from './codec/typed.js';
 import { nodeLinks } from './model.js';
 import { resolveNodeLinks } from './paths.js';
 import { walkTree } from './tree.js';
@@ -22,7 +21,7 @@ export interface NodeTreeOptions {
 }
 
 function load(file: NodeFile): NodeEntry {
-  const model = parseNode(file.source);
+  const model = agentsDocumentCodec.parse(file.source);
   return { ...file, model, links: resolveNodeLinks(nodeLinks(model), file.location.directory) };
 }
 
@@ -32,7 +31,7 @@ export function readNode(directory: string): NodeEntry | undefined {
 }
 
 export function saveNode(original: NodeEntry, model: NodeModel): NodeEntry {
-  return load(writeNodeFile(original, serializeNode(model, original.source)));
+  return load(writeNodeFile(original, agentsDocumentCodec.serialize(model, original.source)));
 }
 
 /** Physical inventory, not ownership. */
