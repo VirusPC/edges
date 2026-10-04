@@ -4,9 +4,9 @@ description: 这套记忆的承重点、最脆的地方，以及技术选择的�
 metadata:
   edges-title: 项目记忆的技术关键点
   edges-type: project
-  edges-username: viruspc
+  edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: "2026-09-06T13:38:38+08:00"
+  edges-updated-at: '2026-10-05T01:00:58+08:00'
 ---
 
 # 项目记忆的技术关键点
@@ -47,7 +47,7 @@ metadata:
 
 ## 六、依赖自描述的东西，而不是文档
 
-最不显然的一点。`remember` 认 `memory.py --help`，`ask` 认产物里每个链接后面那句说明——两者都**永不过期、零同步成本**，因为它们和实现是同一个东西的两面。整套系统因此几乎没有「改了 A 记得改 B」的人工同步点，仅剩 `LAYOUT` → `doctor` 那一条，已登记在 `LAYOUT` 开头。只有在确实找不到自描述物时，才需要在冻结文档和活文档之间取舍。
+最不显然的一点。`remember` 认 `edges memory remember --help`，`ask` 认产物里每个链接后面那句说明——两者都**永不过期、零同步成本**，因为它们和实现是同一个东西的两面。整套系统因此几乎没有「改了 A 记得改 B」的人工同步点，仅剩 `LAYOUT` → `doctor` 那一条，已登记在 `LAYOUT` 开头。只有在确实找不到自描述物时，才需要在冻结文档和活文档之间取舍。
 
 ## 七、模板是结构的事实源，脚本只做占位符替换
 

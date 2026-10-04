@@ -5,10 +5,18 @@ metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
-  edges-username: Codex
-  edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T23:09:00+08:00"
+  edges-username: cheng
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: '2026-10-05T01:00:57+08:00'
 ---
+
+## 2026-10-05 用户确认：Project Memory 执行层统一 TypeScript
+
+用户确认把原 Python 执行能力迁入 `edges memory`，Skill 保留推理、内容规范与人审流程，模板仍由 init Skill 提供并随 CLI 构建分发。记忆读写、索引、显式迁移及私有归档共享 CLI 的 TypeScript 实现与基础 Markdown/YAML codec。
+
+**Why:** 避免 Python 脚本与 CLI 各维护一套执行行为，也避免 Skill 安装路径成为运行时依赖。
+
+**How to apply:** 下文早期记录里的“Python 尚未接入 / Python 迁入 CLI 待完成”仅描述当时状态，已由本次迁移取代。新领域类模型、统一节点识别、43 条局部记忆归属修复仍独立推进；不得将执行语言统一视为这些工作已经完成。`conversation-to-tasks` 已调用 CLI；本次不改写 conversation-to-notes 的写作和发布流程。验证见 [TypeScript 迁移计划](../../../docs/superpowers/plans/2026-10-04-project-memory-typescript.md)。
 
 ## 2026-10-04 用户确认：统一递归节点模型
 
