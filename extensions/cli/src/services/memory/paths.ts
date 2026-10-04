@@ -62,6 +62,11 @@ export function realPath(file: string): string {
     ? absolute
     : path.join(realPath(parent), path.basename(absolute));
 }
+export function ownershipTarget(owner: string, href: string): string | undefined {
+    if (/^[a-z][a-z\d+.-]*:|^\/\//i.test(href)) return undefined;
+    try { return realPath(path.resolve(owner, decodeURIComponent(href.split(/[?#]/, 1)[0]!))); }
+    catch { return undefined; }
+}
 export function assertOwned(file: string, owner: string): string {
   if (!within(file, owner))
     throw new Error(`Path is outside selected owner: ${file}`);

@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import { join, dirname, relative } from "node:path";
 import { IMPORTANT_START, LOCAL_START, LOCAL_END, blockPattern, insertInnerBlock, } from "./blocks.js";
 import { AGENTS_FILE_NAME, assertScopePath, isScope, isSymlink, listTypeFiles, readText, realPath, rejectLegacy, relativeOrName, resolveRoot, resolveTarget, writeAtomic, } from "./paths.js";
-import { layerTypeSpecs, selectedLocalBlock } from "./types.js";
+import { layerTypeSpecs, selectedLocalBlock, localOwnershipPaths } from "./types.js";
 import { classifyAgentsSource, classifyAgentsFile, dropIndexEntries, findIndexAnchor, readIndexEntries, syncIndexEntry, syncTargetAgents, registeredIndexAnchors, ownershipTarget, } from "./agents.js";
 import { expectedIndexDocument, isSkillFormat, parseFrontmatter, refreshIndex, } from "./entries.js";
 export interface MemoryFinding {
@@ -89,10 +89,12 @@ export function collectFindings(root: string): MemoryFinding[] {
             const block = text.match(blockPattern(LOCAL_START, LOCAL_END))?.[0];
             if (!block)
                 findings.push(finding("outdated-local", agents, root, "Missing type list"));
-            else
+            else {
+                const registered = localOwnershipPaths(owner, text);
                 for (const spec of specs)
-                    if (!block.includes(`](${spec.indexFile})`))
+                    if (!registered.has(realPath(join(owner, spec.indexFile))))
                         findings.push(finding("unregistered-type", join(owner, spec.indexFile), root, "Type is missing from scope list", { owner: relativeOrName(owner, root) }));
+            }
         }
         for (const spec of specs) {
             const index = join(owner, spec.indexFile);

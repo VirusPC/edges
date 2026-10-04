@@ -1,5 +1,6 @@
+import { InternalNode } from "../../models/internal-node.js";
 import * as fs from "node:fs";
-import { join, dirname } from "node:path";
+import { join, dirname, relative, resolve } from "node:path";
 import { assertPrivateIgnored } from "./ignore.js";
 import { parseDocument } from "../../utils/markdown/document.js";
 import {
@@ -20,6 +21,8 @@ import {
   isDirectory,
   isFile,
   moduleForType,
+  ownershipTarget,
+  realPath,
   readText,
   typeFromDirName,
   typeIndexRelpath,
@@ -118,24 +121,37 @@ export function seedSpec(name: string): TypeSpec {
     module,
   };
 }
+/** Resolve only authored local ownership edges through the common node model. */
+export function localOwnershipPaths(
+  target: string,
+  source?: string,
+): Set<string> {
+  const file = join(resolve(target), AGENTS_FILE_NAME);
+  const text = source ?? (isFile(file) ? readText(file) : "");
+  const node = new InternalNode(file).parse(text);
+  return new Set(
+    node.content.localMemory.flatMap((reference) => {
+      const path = ownershipTarget(dirname(file), reference.target);
+      return path ? [path] : [];
+    }),
+  );
+}
 export function layerTypeSpecs(target: string): TypeSpec[] {
   const candidates = new Map<
     string,
     { module: "memory" | "skills"; dirname: string }
   >();
-  const agents = join(target, AGENTS_FILE_NAME);
-  if (isFile(agents)) {
-    const block = readText(agents).match(
-      blockPattern(LOCAL_START, LOCAL_END),
-    )?.[0];
-    if (block)
-      for (const m of block.matchAll(
-        /\]\((\.harness\/(memory|skills)\/([^/\s)]+)\/AGENTS\.md)\)/g,
-      ))
-        candidates.set(m[1]!, {
-          module: m[2] as "memory" | "skills",
-          dirname: m[3]!,
-        });
+  for (const file of localOwnershipPaths(target)) {
+    const rel = relative(realPath(target), file);
+    const [harness, module, directory, entry, ...rest] = rel.split("/");
+    if (
+      harness === ".harness" &&
+      (module === "memory" || module === "skills") &&
+      directory &&
+      entry === AGENTS_FILE_NAME &&
+      !rest.length
+    )
+      candidates.set(rel, { module, dirname: directory });
   }
   for (const module of ["memory", "skills"] as const) {
     const container = assertScopePath(join(target, ".harness", module), target);
@@ -241,12 +257,9 @@ export function upsertLocalTypeLine(
 ): string {
   const block = document.match(blockPattern(LOCAL_START, LOCAL_END))?.[0];
   if (!block) throw new Error("AGENTS.md 缺少本层记忆区块，请先 init");
-  if (
-    new RegExp(
-      `^- \\[[^\\]]*\\]\\(${escapeRegExp(indexFile)}\\)(?: — .*)?$`,
-      "m",
-    ).test(block)
-  )
+  const owner = process.cwd();
+  const expected = ownershipTarget(owner, indexFile);
+  if (expected && localOwnershipPaths(owner, block).has(expected))
     return document;
   const line = renderLine(ENTRY_LINE_TEMPLATE, {
     title: indexFile,

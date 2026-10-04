@@ -1,10 +1,11 @@
+export { ownershipTarget } from './paths.js';
 import { InternalNode } from '../../models/internal-node.js';
 import { InternalSyntax } from '../../models/internal-syntax.js';
 import { discoverScopes } from '../scope.js';
 import { loadMemoryDocument, saveMemoryDocument, type MemoryDocument } from './node-documents.js';
-import { join, dirname, basename, relative, resolve } from "node:path";
+import { join, dirname, basename, relative } from "node:path";
 import { AUTO_START, CHILDREN_START, CHILDREN_END, IMPORTANT_START, LOCAL_START, LOCAL_END, OUTER_START, INDEX_ENTRY_PATTERN, blockPattern, buildChildrenBlock, ensureImportantBlock, escapeRegExp, insertInnerBlock, renderAgentsDocument, upsertBlock, } from "./blocks.js";
-import { AGENTS_FILE_NAME, ancestors, assertScopePath, isFile, isScope, readText, realPath, within, writeAtomic, } from "./paths.js";
+import { AGENTS_FILE_NAME, ancestors, assertScopePath, isFile, isScope, readText, realPath, ownershipTarget, within, writeAtomic, } from "./paths.js";
 import { ENTRY_LINE_TEMPLATE, renderLine } from "./templates.js";
 import { layerTypeSpecs, selectedLocalBlock, upsertLocalTypeLine, } from "./types.js";
 export function classifyAgentsSource(source: string | undefined): "missing" | "managed" | "foreign" {
@@ -76,11 +77,6 @@ export function readIndexEntries(file: string): [string, string][] {
 export function registeredIndexAnchors(target: string, root: string): string[] {
     return discoverScopes(root).filter(owner => readOwnershipEntries(join(owner, AGENTS_FILE_NAME))
         .some(entry => ownershipTarget(owner, entry.target) === realPath(join(target, AGENTS_FILE_NAME))));
-}
-export function ownershipTarget(owner: string, href: string): string | undefined {
-    if (/^[a-z][a-z\d+.-]*:|^\/\//i.test(href)) return undefined;
-    try { return realPath(resolve(owner, decodeURIComponent(href.split(/[?#]/, 1)[0]!))); }
-    catch { return undefined; }
 }
 async function dropLoadedIndexEntries(document: MemoryDocument, relatives: Set<string>): Promise<boolean> {
     if (!(document.node instanceof InternalNode)) throw new Error('Expected an AGENTS node');
