@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { formatMarkerStdout, parseMarkers } from "../../../src/note/utils/git/markers.js";
+import { formatMarkerStdout, parseMarkers } from "../../../src/services/note/git/markers.js";
 
 test("formatMarkerStdout writes the four bash markers", () => {
   const stdout = formatMarkerStdout({

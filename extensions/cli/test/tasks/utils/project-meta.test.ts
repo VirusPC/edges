@@ -21,7 +21,7 @@ import {
   rewriteRootAgents,
   seedDescriptionFor,
   seedTitleFor,
-} from "../../../src/tasks/utils/project-meta.js";
+} from "../../../src/services/tasks/project-meta.js";
 
 const defaultRecord = {
   project: "default" as const,
@@ -225,7 +225,7 @@ test("ensureProjectMetadata skipId leaves that AGENTS.md missing", async () => {
 });
 
 test('project get synthesizes existing directories, rejects missing ones, and leaves metadata absent', async () => {
-  const { getProject, listProjects } = await import('../../../src/tasks/utils/project-meta.js');
+  const { getProject, listProjects } = await import('../../../src/services/tasks/project-meta.js');
   const { access } = await import('node:fs/promises');
   const repo = await mkdtemp(path.join(tmpdir(), 'edges-project-read-'));
   try {

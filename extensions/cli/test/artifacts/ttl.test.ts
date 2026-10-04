@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseTtlSeconds } from "../../src/artifacts/utils/ttl.js";
+import { parseTtlSeconds } from "../../src/commands/artifacts/utils/ttl.js";
 
 test("parseTtlSeconds accepts bare seconds and duration suffixes", () => {
   assert.equal(parseTtlSeconds("3600"), 3600);

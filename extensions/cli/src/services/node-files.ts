@@ -1,9 +1,9 @@
 /** File persistence for arbitrary node entry documents. Same optimistic identity/source
- * contract as utils/node-tree/filesystem; never infer an AGENTS filename here. */
+ * contract for model snapshots; never infer an AGENTS filename here. */
 import * as fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { absolute } from '../utils/node-tree/filesystem.js';
+import { absolute } from '../utils/filesystem.js';
 
 export interface EntryFile {
   path: string;
@@ -14,7 +14,7 @@ export interface EntryFile {
   realPath: string;
   realDirectory: string;
 }
-export interface FileChange { path: string; before?: EntryFile; source?: string }
+export interface FileChange { path: string; before?: EntryFile; source?: string; createMode?: number }
 function stat(file: string) {
   try { return fs.lstatSync(file); }
   catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined; throw error; }
@@ -79,7 +79,7 @@ export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFi
       checkPath(change.path);
       const temporary = path.join(path.dirname(change.path), `.node-${randomUUID()}.tmp`);
       try {
-        fs.writeFileSync(temporary, change.source, { flag: 'wx', mode: change.before?.mode ?? 0o666 });
+        fs.writeFileSync(temporary, change.source, { flag: 'wx', mode: change.before?.mode ?? change.createMode ?? 0o666 });
         if (change.before) fs.chmodSync(temporary, change.before.mode);
         const staged = readEntry(temporary)!;
         // Capture identity before committing, so no post-commit reopen/cleanup can

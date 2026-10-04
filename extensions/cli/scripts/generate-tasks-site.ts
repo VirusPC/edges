@@ -3,7 +3,7 @@ import {
   defaultTasksSiteOutPath,
   findEdgesRepo,
   generateTasksSite,
-} from "../src/tasks/utils/generate-site.js";
+} from "../src/services/tasks/generate-site.js";
 
 const parsed = parseArgs({
   options: {

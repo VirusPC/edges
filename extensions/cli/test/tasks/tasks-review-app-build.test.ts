@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 const assetDir = path.join(
   repoRoot,
-  "extensions/cli/src/tasks/project/assets/review-page",
+  "extensions/cli/src/commands/tasks/project/assets/review-page",
 );
 
 test("build:tasks-review-app emits index.html, review.js, and review.css only", () => {

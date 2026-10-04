@@ -8,7 +8,7 @@ import {
   writeFile,
   access,
 } from "node:fs/promises";
-import type { BoardFs } from "../../../src/tasks/utils/board.js";
+import type { BoardFs } from "../../../src/services/tasks/board.js";
 
 export type BoardWriter = BoardFs & {
   writeFile(abs: string, contents: string): Promise<void>;

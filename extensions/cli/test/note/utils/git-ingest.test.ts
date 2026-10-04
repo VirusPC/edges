@@ -1,7 +1,11 @@
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+function fixture(t: any) { const root = mkdtempSync(path.join(tmpdir(), 'note-ingest-')); t.after(() => rmSync(root, { recursive: true, force: true })); return root; }
 import test from "node:test";
 import assert from "node:assert/strict";
-import { runNoteIngest } from "../../../src/note/utils/git/ingest.js";
-import type { ExecFn } from "../../../src/note/utils/git/exec.js";
+import { runNoteIngest } from "../../../src/services/note/git/ingest.js";
+import type { ExecFn } from "../../../src/services/note/git/exec.js";
 
 const input = {
   title: "Hello World",
@@ -19,21 +23,16 @@ function recordingExec(calls: string[][]): ExecFn {
   };
 }
 
-test("dry-run direct writes the note, commits, skips checkout/pull/push", async () => {
+test("dry-run direct writes the note, commits, skips checkout/pull/push", async (t) => {
+  const repo = fixture(t);
   const calls: string[][] = [];
-  const writes: Record<string, string> = {};
   const result = await runNoteIngest(
     input,
-    { repoPath: "/repo", baseBranch: "main", mode: "direct", dryRun: true },
+    { repoPath: repo, baseBranch: "main", mode: "direct", dryRun: true },
     { GITHUB_TOKEN: "" },
     {
       exec: recordingExec(calls),
       now,
-      directoryExists: async () => true,
-      mkdirp: async () => undefined,
-      writeFile: async (absPath, contents) => {
-        writes[absPath] = contents;
-      },
     },
   );
 
@@ -42,7 +41,7 @@ test("dry-run direct writes the note, commits, skips checkout/pull/push", async 
   assert.equal(result.prStatus, "direct_commit");
   assert.match(result.stdout, /__EDGES_PR_STATUS__=direct_commit/);
   assert.equal(
-    writes["/repo/knowledge/notes/2026-09-11--hello-world.md"],
+    readFileSync(path.join(repo, "knowledge/notes/2026-09-11--hello-world.md"), "utf8"),
     "# Hello World\n\n> Ingested on 2026-09-11\n\nBody text\n",
   );
 
@@ -58,18 +57,16 @@ test("dry-run direct writes the note, commits, skips checkout/pull/push", async 
   assert.ok(!gitCommands.some((a) => a[0] === "push"));
 });
 
-test("dry-run pr creates local branch and does not push", async () => {
+test("dry-run pr creates local branch and does not push", async (t) => {
+  const repo = fixture(t);
   const calls: string[][] = [];
   const result = await runNoteIngest(
     input,
-    { repoPath: "/repo", baseBranch: "main", mode: "pr", dryRun: true },
+    { repoPath: repo, baseBranch: "main", mode: "pr", dryRun: true },
     {},
     {
       exec: recordingExec(calls),
       now,
-      directoryExists: async () => true,
-      mkdirp: async () => undefined,
-      writeFile: async () => undefined,
     },
   );
 
@@ -82,11 +79,12 @@ test("dry-run pr creates local branch and does not push", async () => {
   assert.ok(!gitCommands.some((a) => a[0] === "push"));
 });
 
-test("pr mode runs gh in the target repo cwd after checkout pull and push", async () => {
+test("pr mode runs gh in the target repo cwd after checkout pull and push", async (t) => {
+  const repo = fixture(t);
   const calls: Array<{ file: string; args: string[]; cwd?: string }> = [];
   const result = await runNoteIngest(
     input,
-    { repoPath: "/repo", baseBranch: "main", mode: "pr", dryRun: false },
+    { repoPath: repo, baseBranch: "main", mode: "pr", dryRun: false },
     {},
     {
       exec: async (file, args, options) => {
@@ -102,35 +100,30 @@ test("pr mode runs gh in the target repo cwd after checkout pull and push", asyn
         return { stdout: "", stderr: "" };
       },
       now,
-      directoryExists: async () => true,
-      mkdirp: async () => undefined,
-      writeFile: async () => undefined,
     },
   );
 
   assert.equal(result.prStatus, "created");
   assert.equal(result.prUrl, "https://github.com/VirusPC/edges/pull/9");
   const git = calls.filter((c) => c.file === "git");
-  assert.ok(git.some((c) => c.args[0] === "checkout" && c.args[1] === "main" && c.cwd === "/repo"));
-  assert.ok(git.some((c) => c.args[0] === "pull" && c.cwd === "/repo"));
-  assert.ok(git.some((c) => c.args[0] === "push" && c.args.includes("-u") && c.cwd === "/repo"));
+  assert.ok(git.some((c) => c.args[0] === "checkout" && c.args[1] === "main" && c.cwd === repo));
+  assert.ok(git.some((c) => c.args[0] === "pull" && c.cwd === repo));
+  assert.ok(git.some((c) => c.args[0] === "push" && c.args.includes("-u") && c.cwd === repo));
   const ghPr = calls.find((c) => c.file === "gh" && c.args[0] === "pr");
   assert.ok(ghPr);
-  assert.equal(ghPr.cwd, "/repo");
+  assert.equal(ghPr.cwd, repo);
 });
 
-test("commit message includes Co-authored-by trailer", async () => {
+test("commit message includes Co-authored-by trailer", async (t) => {
+  const repo = fixture(t);
   const calls: string[][] = [];
   await runNoteIngest(
     input,
-    { repoPath: "/repo", baseBranch: "main", mode: "direct", dryRun: true },
+    { repoPath: repo, baseBranch: "main", mode: "direct", dryRun: true },
     {},
     {
       exec: recordingExec(calls),
       now,
-      directoryExists: async () => true,
-      mkdirp: async () => undefined,
-      writeFile: async () => undefined,
     },
   );
   const commit = calls.find((c) => c[0] === "git" && c[1] === "commit");

@@ -161,7 +161,7 @@ declare class NodeService {
 }
 ```
 
-实现允许构造时传入两个可选业务适配钩子，`new NodeService()` 仍可独立使用：`modelForReference(parent, reference, resolvedPath)` 根据已登记模块契约选择模型；`assertWrite(context)` 在所有计划写入前校验权限和来源。它们不形成全局类型注册表，权限校验不执行写入。Memory 的私有忽略规则、业务来源校验仍由适配层负责；临时文件与失败恢复文件也在目标同目录，因此私有校验须覆盖目录而不只是入口 Markdown。
+实现允许构造时传入可选业务适配钩子，`new NodeService()` 仍可独立使用：`modelForReference(parent, reference, resolvedPath)` 根据已登记模块契约选择模型；`assertWrite(context)` 在所有计划写入前校验权限和来源。`readOnlyReference(parent, reference, resolvedPath)` 根据业务登记补充只读来源（例如没有类型注释的官方 referenced 索引），在跟随安装链接前判定；返回 false 不会撤销既有只读来源或真实路径别名的限制。`createMode(node)` 为新建入口及暂存文件提供 0 至 0o777 的整数权限位；不影响已有文件权限。它们不形成全局类型注册表，权限校验不执行写入。Memory 的私有忽略规则、业务来源校验仍由适配层负责；临时文件与失败恢复文件也在目标同目录，因此私有校验须覆盖目录而不只是入口 Markdown。
 
 更新与删除使用同一 service 读取或创建时记录的内容和文件身份，拒绝盲覆盖、内容漂移与文件替换。跨文件失败尽力回滚并报告实际受影响路径；回滚失败时保留可恢复的原文副本和原权限，不在错误中输出正文。
 
@@ -346,9 +346,11 @@ extensions/cli/src/
 
 ## 与当前实现的关系
 
-当前 `utils/node-tree/` 的纯数据模型、外部 codec 和仓储组合函数是重构起点，不是本设计已实现的证据。后续实施需迁移现有命令调用、AGENTS 正文处理、Task 字段操作及文件身份校验；重构过程中保留 CLI 输出契约和现有业务规则。
+2026-10-05：模型与 NodeService 已接入正常 Task create/update/status、Memory remember/索引维护及 Note ingest。命令处理器位于 `src/commands/`，保留目录即命令树；业务编排位于 `src/services/`，领域语法辅助位于 `src/models/`，通用 Markdown 与文件系统工具位于 `src/utils/`。旧纯数据仓储/树编排已删除，语法数据结构只作为模型内部实现。Task 读取保留旧优先级的容错投影；修改使用类型化字段并保留未知 vendor metadata。
 
-Note 的 Git/PR 编排及 Skill 的宿主安装关系仍由各自服务或流程负责，不移入节点模型；入口与资源目录的生命周期按上述目录单元契约由节点 service 协调。实现完成情况逐项记录于实施计划，不因接口声明存在就宣告调用流程已迁移。
+Memory 的 init、remember、add-type、doctor、refreshIndex 及写索引辅助函数现为异步接口；命令输出、来源信息、权限检查及 Task runlog 约定保持。私有类型先检查整个目的目录的 Git 忽略覆盖，新文件首次暂存即采用 0600。managed 内部别名索引指向经当前作用域边界验证的物理来源，referenced 安装 href 保留且只读。NodeReference 保留原始 href，编码的 CR/LF 文件名可加载，字面换行和 NUL 不可作为 href。
+
+Note 的 Git/PR 编排仍由业务服务负责。迁移与归档保持独立批处理；正常命令启动不导入旧布局迁移实现。目录入口的资源所有权、整目录创建/删除及格式选择仍待后续 Task 4；不能把本次入口文档接入当作目录生命周期已完成。
 
 本文不授权修复整仓物理目录迁移、移动 knowledge/posts、迁移 Project Memory 执行层或改变 CLI 当前作用域筛选策略。它们仍有独立范围与验收责任；Project Memory 的 TypeScript 迁移另见 [实施计划](../plans/2026-10-04-project-memory-typescript.md)。
 

@@ -1,7 +1,7 @@
 import { basename, extname } from 'node:path';
 import { BaseNode } from './base-node.js';
 import { domainFields, scalar, setDomainField } from './fields.js';
-import { TASK_PRIORITIES, TASK_STATUSES } from '../tasks/utils/types.js';
+import { TASK_PRIORITIES, TASK_STATUSES } from './tasks/types.js';
 import type { Metadata, TaskPriority, TaskStatus } from './types.js';
 
 export class TaskNode extends BaseNode<'task'> {

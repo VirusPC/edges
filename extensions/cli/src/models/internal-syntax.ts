@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from 'node:util';
-import { decodeBody } from '../utils/node-tree/codec/parse.js';
-import { serializeNode } from '../utils/node-tree/codec/serialize.js';
-import type { NodeItem, NodeModel } from '../utils/node-tree/model.js';
+import { decodeBody } from './internal/parse.js';
+import { serializeNode } from './internal/serialize.js';
+import type { NodeItem, NodeModel } from './internal/model.js';
 import type { InternalContent, NodeReference } from './types.js';
 
 // Existing type indexes use the same local ownership semantics, with different markers.

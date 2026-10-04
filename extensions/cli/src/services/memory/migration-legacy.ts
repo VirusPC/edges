@@ -2,7 +2,7 @@
 import * as fs from "node:fs";
 import { join, basename, extname } from "node:path";
 import { isFile, isDirectory, isSymlink, readText } from "./paths.js";
-import { parseDocument } from "../../utils/node-tree/codec/document.js";
+import { parseDocument } from "../../utils/markdown/document.js";
 export const BUILTINS: Record<string, string> = {
   user: "users",
   feedback: "feedbacks",

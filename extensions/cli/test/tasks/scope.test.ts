@@ -6,7 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
 import { loadConfig } from "../../src/utils/config.js";
-import { rewriteRootAgents } from "../../src/tasks/utils/project-meta.js";
+import { rewriteRootAgents } from "../../src/services/tasks/project-meta.js";
 const marker = '<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n<!-- project-memory-local:end -->\n<!-- project-memory:end -->';
 async function fixture() {
   const root = await realpath(await mkdtemp(path.join(tmpdir(), 'edges-scope-')));
@@ -77,7 +77,7 @@ test('project reads do not initialize absent board and manual AGENTS content sur
 test('discovery crosses maintenance containers but stops at symlinks and nested Git roots', async () => {
   const { root, child } = await fixture();
   try {
-    const { discoverScopes } = await import('../../src/utils/scope.js');
+    const { discoverScopes } = await import('../../src/services/scope.js');
     const { symlink } = await import('node:fs/promises');
     const evaluation = path.join(root, '.harness/evaluation');
     const method = path.join(root, '.harness/skills/managed/method');

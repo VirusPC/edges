@@ -1,4 +1,4 @@
-import { resolveScope, gitRoot } from "./scope.js";
+import { resolveScope, gitRoot } from "../services/scope.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 

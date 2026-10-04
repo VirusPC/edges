@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { access, mkdtemp, mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { createTask, updateTask } from "../../../src/tasks/utils/write.js";
+import { createTask, updateTask } from "../../../src/services/tasks/write.js";
 import { nodeBoardWriter } from "./helpers.js";
 
 test("createTask writes Task + empty sidecar under backlog and does not need git", async () => {

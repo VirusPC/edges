@@ -5,8 +5,8 @@ import {
   buildGroupedList,
   groupedListToReviewPageInput,
   parseGroupedList,
-} from "../../../src/tasks/utils/grouped.js";
-import { TasksError } from "../../../src/tasks/utils/types.js";
+} from "../../../src/services/tasks/grouped.js";
+import { TasksError } from "../../../src/models/tasks/types.js";
 
 test("buildGroupedList emits edges.tasks.grouped/v1 with groups and items", () => {
   const grouped = buildGroupedList(

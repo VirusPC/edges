@@ -6,10 +6,10 @@ import {
   usageError,
   usageScope,
 } from "./context.js";
-import { addArtifactsCommand } from "./artifacts.js";
-import { addNoteCommand } from "./note.js";
-import { addTasksCommand } from "./tasks.js";
-import { addMemoryCommand } from "./memory.js";
+import { addArtifactsCommand } from "./commands/artifacts.js";
+import { addNoteCommand } from "./commands/note.js";
+import { addTasksCommand } from "./commands/tasks.js";
+import { addMemoryCommand } from "./commands/memory.js";
 import { VERSION } from "./utils/version.js";
 
 export type { CliContext, CliInput, CliResult };

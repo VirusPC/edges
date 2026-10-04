@@ -1,0 +1,56 @@
+import { scopeDir, type BoardTarget } from "./paths.js";
+import path from "node:path";
+import { getTask, type BoardWriter } from "./board.js";
+import { TaskNode } from '../../models/task-node.js';
+import { setDomainField } from '../../models/fields.js';
+import { taskNodes, taskFile } from './write.js';
+import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
+import { TasksError, type TaskStatus } from "../../models/tasks/types.js";
+
+export async function moveTaskStatus(
+  repoPath: BoardTarget,
+  target: string,
+  next: TaskStatus,
+  io: { fs: BoardWriter; now: Date },
+): Promise<{ stem: string; from: TaskStatus; to: TaskStatus; path: string; sidecarPath: string }> {
+  const record = await getTask(repoPath, target, io.fs);
+  const destRel = taskRelPath(record.project, next, record.stem, repoPath);
+  const destSidecarRel = sidecarRelPath(record.project, next, record.stem, repoPath);
+  if (record.status === next) {
+    return {
+      stem: record.stem,
+      from: record.status,
+      to: next,
+      path: record.path,
+      sidecarPath: record.sidecarPath,
+    };
+  }
+
+  const destAbs = path.join(scopeDir(repoPath), destRel);
+  if (await io.fs.exists(destAbs)) {
+    throw new TasksError("BOARD_IO_ERROR", `destination already exists: ${destRel}`);
+  }
+
+  await io.fs.mkdirp(statusDir(repoPath, record.project, next));
+  const sourceAbs = path.join(scopeDir(repoPath), record.path);
+  const service = taskNodes(repoPath);
+  const node = await service.get(taskFile(repoPath, record.path), TaskNode);
+  if (!node) throw new TasksError('TASK_NOT_FOUND', `task not found: ${target}`);
+  node.status = next;
+  setDomainField(node, 'edges-updated-at', io.now.toISOString());
+  await service.create(new TaskNode(taskFile(repoPath, destRel)).parse(node.serialize()));
+
+  const sourceSidecarAbs = path.join(scopeDir(repoPath), record.sidecarPath);
+  if (await io.fs.exists(sourceSidecarAbs)) {
+    await io.fs.rename(sourceSidecarAbs, path.join(scopeDir(repoPath), destSidecarRel));
+  }
+  await service.destroy(node);
+
+  return {
+    stem: record.stem,
+    from: record.status,
+    to: next,
+    path: destRel,
+    sidecarPath: destSidecarRel,
+  };
+}

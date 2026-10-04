@@ -9,7 +9,7 @@ import {
   getProject,
   listProjects,
   updateProject,
-} from "../../src/tasks/utils/project-meta.js";
+} from "../../src/services/tasks/project-meta.js";
 
 async function virginRepo(): Promise<string> {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-proj-"));

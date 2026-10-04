@@ -618,7 +618,7 @@ for (const flag of ["--help", "-h"])
       import.meta.url,
     );
     const loader = new URL(
-      "../../node_modules/tsx/dist/loader.mjs",
+      "../../../../node_modules/.pnpm/tsx@4.21.0/node_modules/tsx/dist/loader.mjs",
       import.meta.url,
     );
     const output = execFileSync(

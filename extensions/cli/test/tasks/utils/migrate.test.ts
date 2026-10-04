@@ -4,8 +4,8 @@ import { access, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promise
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { migrateLegacyBoard } from "../../../src/tasks/utils/migrate.js";
-import { listTasks } from "../../../src/tasks/utils/board.js";
+import { migrateLegacyBoard } from "../../../src/services/tasks/migrate.js";
+import { listTasks } from "../../../src/services/tasks/board.js";
 import { nodeBoardFs, nodeBoardWriter } from "./helpers.js";
 
 test("migrateLegacyBoard moves Task + hidden sidecar and removes root status dirs", async () => {

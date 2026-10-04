@@ -4,7 +4,7 @@ import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { nodeBoardFs } from "./helpers.js";
-import { listTasks, getTask } from "../../../src/tasks/utils/board.js";
+import { listTasks, getTask } from "../../../src/services/tasks/board.js";
 
 async function seed() {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));

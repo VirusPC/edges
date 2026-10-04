@@ -1,0 +1,68 @@
+import { Command, Option } from "commander";
+import type { CliContext } from "../../context.js";
+import { TASK_PRIORITIES, type TaskPriority } from "../../models/tasks/types.js";
+import { runTasksCommand, succeed } from "../../services/tasks/result.js";
+import { updateTask } from "../../services/tasks/write.js";
+
+const UPDATE_AFTER_HELP = `
+ARGUMENTS
+  <target>  Task stem or path
+
+FLAGS
+  --title <title>
+  --description <text>
+  --body <markdown>
+  --assignee <text>
+  --priority <priority>    edges-task-priority: urgent | high | medium | low | none
+  --project <project>      reassign Task Project (moves files, same status)
+  --json  Write JSON to stdout (always on)
+
+Patches fields in place. Does not change edges-tasks-status. Use status to change status (same project). --project moves Task + sidecar to another Task Project.
+
+EXAMPLES
+  edges tasks update 2026-09-11--cli --assignee "Codex"
+  edges tasks update 2026-09-11--cli --project cli
+`;
+
+export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
+  tasks
+    .command("update")
+    .description("Patch Task fields; --project reassigns across Task Projects")
+    .argument("<target>", "stem or path")
+    .option("--title <title>")
+    .option("--description <text>")
+    .option("--body <markdown>")
+    .option("--assignee <text>")
+    .addOption(new Option("--priority <priority>", "edges-task-priority").choices([...TASK_PRIORITIES]))
+    .option("--project <project>", "reassign Task Project (moves files, same status)")
+    .option("--json", "Write JSON to stdout (always on)")
+    .addHelpText("after", UPDATE_AFTER_HELP)
+    .action(async (
+      target: string,
+      opts: {
+        title?: string;
+        description?: string;
+        body?: string;
+        assignee?: string;
+        priority?: TaskPriority;
+        project?: string;
+      },
+    ) => {
+      await runTasksCommand(ctx, async (runtime) => {
+        const updated = await updateTask(
+          runtime.location,
+          target,
+          {
+            title: opts.title,
+            description: opts.description,
+            body: opts.body,
+            assignee: opts.assignee,
+            priority: opts.priority,
+            project: opts.project,
+          },
+          { fs: runtime.writer, now: runtime.now },
+        );
+        return succeed({ status: "success", command: "update", ...updated });
+      });
+    });
+}

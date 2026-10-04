@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { runIngest } from "../../../src/note/utils/service.js";
-import type { RuntimeConfig } from "../../../src/note/utils/types.js";
+import { runIngest } from "../../../src/services/note/service.js";
+import type { RuntimeConfig } from "../../../src/services/note/types.js";
 
 const config: RuntimeConfig = {
   repoPath: "/repo",

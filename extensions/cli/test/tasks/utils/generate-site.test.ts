@@ -4,7 +4,7 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../../src/program.js";
-import { generateTasksSite } from "../../../src/tasks/utils/generate-site.js";
+import { generateTasksSite } from "../../../src/services/tasks/generate-site.js";
 
 test("generateTasksSite writes HTML with review payload and created title", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-site-"));

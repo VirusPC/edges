@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import * as codecs from '../../../src/utils/node-tree/codec/index.js';
-import type { DocumentCodec, MarkdownDocument } from '../../../src/utils/node-tree/document-model.js';
-import * as tasks from '../../../src/tasks/utils/frontmatter.js';
+import * as codecs from '../../../src/models/internal/index.js';
+import type { DocumentCodec, MarkdownDocument } from '../../../src/utils/markdown/types.js';
+import * as tasks from '../../../src/models/tasks/frontmatter.js';
 
 const source = '---\ndescription: "Scope" # keep\nmetadata:\n  edges-type: project\n---\n## 本层记忆\n\n- [Local](memory/AGENTS.md)\n';
 

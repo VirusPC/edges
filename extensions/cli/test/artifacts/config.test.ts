@@ -7,7 +7,7 @@ import {
   defaultArtifactsConfigPath,
   readArtifactsConfig,
   writeArtifactsConfig,
-} from "../../src/artifacts/utils/config.js";
+} from "../../src/commands/artifacts/utils/config.js";
 
 test("writeArtifactsConfig then readArtifactsConfig round-trips token and base URL", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-config-"));

@@ -1,6 +1,6 @@
 # edges-cli (`edges`)
 
-Multi-command Edges CLI. Humans and local agents share `edges`. Note ingest git lives in `src/note/utils/git`. npm `package.json` `"bin"` is the install hook for the `edges` binary, not a separate layer.
+Multi-command Edges CLI. Humans and local agents share `edges`. Note ingest git lives in `src/services/note/git`. npm `package.json` `"bin"` is the install hook for the `edges` binary, not a separate layer.
 
 ## Consumption
 
@@ -19,7 +19,7 @@ Day-to-day use can stay on `tsx`, as in [Run](#run). After a successful local bu
 ## Directory is the command tree
 
 - **File** = one command node: flags, after-help, `.action` (leaf) or register children (group)
-- **Folder** = children of that command, plus `utils/`
+- **Folder** under `src/commands/` = children of that command, plus command argument/output helpers
 - Root extras: `index.ts` is the bin; `program.ts` is the `edges` node and also exports `run()` (only the root is invoked as a process); `context.ts` is the per-process `CliContext` (env / stdin snapshot + command result) passed down the tree
 
 The command tree is built with [Commander.js](https://github.com/tj/commander.js):
@@ -73,9 +73,19 @@ Those examples use `tsx` and do not need a `dist/` build. The installed `edges` 
 
 `edges --scope <directory> <command>` selects the content owner. Resolution order is `--scope`, `EDGES_SCOPE`, `EDGES_REPO`, then the nearest owning AGENTS scope or Git root above the process cwd. Relative paths resolve against cwd. The CLI install directory is never the default content target. An explicit directory does not initialize Project Memory.
 
-Node reading, ancestor search and traversal live in [`src/utils/node-tree/`](src/utils/node-tree/README.md), alongside the CLI utilities. These TypeScript modules separate models, document parsing/serialization, filesystem adaptation and traversal; `src/utils/scope.ts` supplies environment/argument precedence, Git fallback, directory exclusions and the current Project Memory marker selection policy. The core recognizes regular AGENTS entries independently of that policy and exposes logical child-index traversal. Tasks `all` retains physical discovery. Loaded nodes separate `model` from `source`, filesystem `location`/`identity`, and resolved `links`. The modules build with the CLI and run through its existing `tsx` development entry; there is no separate package or prerequisite build.
+Node models live together in [`src/models/`](src/models/), with domain syntax helpers beneath that directory. [`NodeService`](src/services/node-service.ts) provides snapshot-checked document creation, loading, updates, deletion and ownership-index coordination. Task, Memory and Note business orchestration lives under `src/services/`; command handlers under `src/commands/` retain the directory-as-command-tree layout. Generic Markdown/YAML and filesystem primitives remain under `src/utils/`. There is no separate package or compatibility copy of the former `utils/node-tree` repository API.
 
-Task Markdown uses the shared optional YAML frontmatter codec (`parseDocument` / `serializeDocument`). The Task adapter retains field meaning, nested metadata projection and body formatting; the common codec calls gray-matter's default YAML parser and serializer. No custom YAML engine, schema, formatting rules or direct js-yaml dependency remains. Non-YAML language declarations are rejected so document reads cannot execute JavaScript. Fix documents that violate their conventions instead of adding compatibility behavior. No-header documents remain valid at the format layer. Task Project AGENTS validation still applies its own no-frontmatter rule. Document handling is exposed through typed codecs: base and memory reuse Markdown format handling, agents uses its section model, and the Task codec remains in the Tasks domain module. Document `type` is separate from YAML content classifications and is not written to the header automatically.
+[`src/services/scope.ts`](src/services/scope.ts) retains environment/argument precedence, Git fallback, directory exclusions and the existing Project Memory marker selection policy. It parses with InternalNode; Tasks `all` still performs physical inventory. NodeService logical traversal remains explicit and defaults to local ownership references. Scope eligibility changes and restoration of local project memories remain separate work.
+
+Normal Task create/update/status and Note ingest save actual TaskNode/NoteNode instances through NodeService. Memory remember uses MemoryNode or SkillNode, while index and scope documents save InternalNode instances. Typed mutations retain unknown vendor metadata. Task board/status movement, sidecar runlogs, Memory type privileges and Note Git/PR publishing remain business-service responsibilities. Task reads retain their tolerant legacy-priority projection; strict typed mutation validates fields. Archive and migration remain batch workflows; the legacy migration implementation loads only when the migrate command runs.
+
+Memory `initMemory`, `rememberMemory`, `addMemoryType`, `doctorMemory`, `refreshIndex` and the index-writing helpers now return promises. Programmatic callers must await them; CLI arguments, JSON and exit codes are unchanged. Note Git dependencies retain process/network substitution points; file operations use the real snapshot-checked service.
+
+NodeService accepts optional `modelForReference`, `assertWrite`, `readOnlyReference` and `createMode` hooks. The first two choose a constructor and validate planned writes. `readOnlyReference(parent, reference, resolvedPath)` supplements explicit index contracts before reading a linked source; `false` cannot remove existing read-only provenance, including a discovered physical alias. `createMode(node)` accepts integer permission bits from `0` through `0o777`, applied when staging a new document; updates retain the old permissions. Memory creates documents with `0o600` and verifies that private destination directories are ignored before any entry, index, staging or recovery write. Managed aliases are indexed through their validated in-scope physical path; referenced sources retain the authored installation path and remain read-only.
+
+NodeReference targets are authored hrefs: path encoding is decoded once after query/fragment separation. Encoded filename delimiters and encoded CR/LF are supported; literal CR/LF and NUL in hrefs are rejected. Optional frontmatter uses gray-matter's default YAML behavior; non-YAML executable language declarations are rejected. Runtime node types are independent of content classification and are not added to YAML automatically.
+
+Directory-entry resource ownership, whole-directory create/destroy and `--format` support are still planned work. Current normal CLI flows persist entry documents; this integration does not claim those resource lifecycle capabilities.
 
 ```bash
 edges --scope ./projects/demo tasks list

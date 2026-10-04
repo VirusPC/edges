@@ -1,3 +1,4 @@
+import { isScope } from '../scope.js';
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { homedir } from "node:os";
@@ -118,16 +119,7 @@ export function ancestors(start: string): string[] {
   }
   return result;
 }
-export function isScope(target: string): boolean {
-  const file = path.join(target, AGENTS_FILE_NAME);
-  if (!isFile(file) || isSymlink(file)) return false;
-  const text = readText(file);
-  return (
-    text.includes("<!-- project-memory:start -->") &&
-    (text.includes("<!-- project-memory-local:start -->") ||
-      text.includes("<!-- project-memory-children:start -->"))
-  );
-}
+export { isScope } from '../scope.js';
 export function resolveRoot(target: string, rawRoot?: string): string {
   if (rawRoot) {
     const root = resolveTarget(rawRoot);

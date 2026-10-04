@@ -6,7 +6,7 @@ This is generated HTML only. It is not Artifacts (`publish` / UUID / TTL) and no
 
 ## Generate (every deploy)
 
-After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs. The Vite output under `extensions/cli/src/tasks/project/assets/review-page/` is gitignored and must be built on the box before generate:
+After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs. The Vite output under `extensions/cli/src/commands/tasks/project/assets/review-page/` is gitignored and must be built on the box before generate:
 
 ```bash
 pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...

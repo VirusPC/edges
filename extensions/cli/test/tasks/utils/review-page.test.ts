@@ -10,8 +10,8 @@ import {
   renderReviewPageHtml,
   resolveReviewPageOutPath,
   writeReviewPage,
-} from "../../../src/tasks/utils/review-page.js";
-import { TasksError } from "../../../src/tasks/utils/types.js";
+} from "../../../src/services/tasks/review-page.js";
+import { TasksError } from "../../../src/models/tasks/types.js";
 
 const sample = {
   groups: [

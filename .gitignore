@@ -59,7 +59,7 @@ evaluation/.cache/
 **/.harness/evaluation/.cache/
 
 # Review shell Vite outDir (ADR 0022). Source is apps/tasks-review-app/.
-extensions/cli/src/tasks/project/assets/review-page/
+extensions/cli/src/commands/tasks/project/assets/review-page/
 
 # 公开仓库：不接收 Office 文档
 # 这类文件正文与元数据都不可 diff 审查，专利交底书/评审材料等极易夹带

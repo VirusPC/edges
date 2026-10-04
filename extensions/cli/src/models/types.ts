@@ -13,4 +13,4 @@ export interface InternalContent {
   readonly localMemory: readonly Readonly<NodeReference>[];
   readonly descendantMemory: readonly Readonly<NodeReference>[];
 }
-export type { TaskStatus, TaskPriority } from '../tasks/utils/types.js';
+export type { TaskStatus, TaskPriority } from './tasks/types.js';

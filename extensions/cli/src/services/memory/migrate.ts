@@ -4,7 +4,7 @@ import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 import { assertPrivateIgnored } from "./ignore.js";
-import { escapeIndexText, encodeIndexPath } from "./index-rendering.js";
+import { escapeIndexText, encodeIndexPath } from "../../models/memory/index-rendering.js";
 import {
   isDirectory,
   isFile,
@@ -24,7 +24,7 @@ import {
   SEED_TYPE_NAMES,
   indexFileName,
 } from "./types.js";
-import { frontmatterData, logicalFields } from "./documents.js";
+import { frontmatterData, logicalFields } from "../../models/memory/documents.js";
 import {
   parseLegacy,
   convertIndex,

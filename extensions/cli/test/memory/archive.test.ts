@@ -7,7 +7,7 @@ import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import { gzipSync, gunzipSync } from 'node:zlib';
 import { Header, type HeaderData } from 'tar';
-import { target } from '../../src/memory/utils/command.js';
+import { target } from '../../src/commands/memory/utils/command.js';
 import { resolveTarget } from '../../src/services/memory/paths.js';
 import { backupUserMemory, restoreUserMemory } from '../../src/services/memory/archive.js';
 

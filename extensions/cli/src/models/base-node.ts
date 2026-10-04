@@ -1,5 +1,5 @@
 import { isAbsolute } from 'node:path';
-import { parseDocument, serializeDocument } from '../utils/node-tree/codec/document.js';
+import { parseDocument, serializeDocument } from '../utils/markdown/document.js';
 import { nodeRelations } from './relations.js';
 import type { Metadata, NodeReference } from './types.js';
 

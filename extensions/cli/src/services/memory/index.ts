@@ -8,5 +8,5 @@ export * from "./templates.js";
 export * from "./blocks.js";
 export * from "./agents.js";
 export * from "./entries.js";
-export * from "./documents.js";
+export * from "../../models/memory/documents.js";
 export * from "./provenance.js";

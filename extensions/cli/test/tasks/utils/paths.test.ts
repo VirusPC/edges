@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { TASK_STATUSES } from "../../../src/tasks/utils/types.js";
+import { TASK_STATUSES } from "../../../src/models/tasks/types.js";
 import {
   isTaskStatus,
   boardRoot,
@@ -8,7 +8,7 @@ import {
   sidecarRelPath,
   isTaskMarkdownName,
   parseTarget,
-} from "../../../src/tasks/utils/paths.js";
+} from "../../../src/services/tasks/paths.js";
 
 test("TASK_STATUSES is the seven ADR 0002 values in folder order", () => {
   assert.deepEqual(TASK_STATUSES, [

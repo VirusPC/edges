@@ -4,7 +4,7 @@ import { access, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { moveTaskStatus } from "../../../src/tasks/utils/move.js";
+import { moveTaskStatus } from "../../../src/services/tasks/move.js";
 import { nodeBoardWriter } from "./helpers.js";
 
 test("moveTaskStatus updates frontmatter and moves Task + sidecar", async () => {

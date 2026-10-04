@@ -2,8 +2,8 @@ import path from 'node:path';
 import { BaseNode, InternalNode, MemoryNode, SkillNode } from '../models/index.js';
 import type { ChildKind, NodeReference, ScopeTraversalOptions } from '../models/index.js';
 import { setNodeRelations, validateChild } from '../models/relations.js';
-import { parseDocument } from '../utils/node-tree/codec/document.js';
-import { absolute } from '../utils/node-tree/filesystem.js';
+import { parseDocument } from '../utils/markdown/document.js';
+import { absolute } from '../utils/filesystem.js';
 import { checkPath, readEntry, saveEntries, validateEntry } from './node-files.js';
 import type { EntryFile, FileChange } from './node-files.js';
 import { traverse } from './traverse.js';
@@ -20,6 +20,10 @@ export interface NodeWriteContext {
  * before any mutation; it must validate, not perform writes. Discovered read-only
  * index sources cannot be made writable by omitting or supplying this hook. */
 export interface NodeServiceOptions {
+  /** New files only; validated permission bits, applied before any contents are staged. */
+  createMode?: (node: BaseNode) => number;
+  /** Supplemental module provenance, evaluated before following an installed link. */
+  readOnlyReference?: (parent: BaseNode, reference: NodeReference, target: string) => boolean;
   assertWrite?: (context: NodeWriteContext) => void | Promise<void>;
   modelForReference?: (parent: BaseNode, reference: NodeReference, target: string) => Model | undefined;
 }
@@ -41,11 +45,12 @@ function indexContract(node: BaseNode): IndexContract | undefined {
 }
 function resolveReference(parent: BaseNode, reference: NodeReference): string {
   const href = reference.target;
+  if (/[\0\r\n]/.test(href)) throw new Error('Ownership href contains invalid characters');
   if (/^[a-z][a-z\d+.-]*:/i.test(href) || href.startsWith('//')) throw new Error(`Ownership reference must target a local document: ${href}`);
   let target: string;
   try { target = decodeURIComponent(href.split(/[?#]/, 1)[0]!); }
   catch { throw new Error(`Invalid encoded ownership target: ${href}`); }
-  if (!target || /[\0\r\n]/.test(target)) throw new Error(`Invalid ownership target: ${href}`);
+  if (!target || /\0/.test(target)) throw new Error(`Invalid ownership target: ${href}`);
   return path.resolve(path.dirname(parent.path), target);
 }
 function encodePath(file: string): string {
@@ -86,7 +91,7 @@ export class NodeService {
   }
   async #loadReference(parent: BaseNode, reference: NodeReference, target: string): Promise<BaseNode> {
     const contract = indexContract(parent);
-    const readOnly = this.#state.get(parent)?.readOnly || contract?.writable === false;
+    const readOnly = this.#state.get(parent)?.readOnly || contract?.writable === false || this.#options.readOnlyReference?.(parent, reference, target) === true;
     const Model = path.basename(target) === 'AGENTS.md' ? InternalNode
       : this.#options.modelForReference?.(parent, reference, target)
         ?? (contract?.module === 'skills' || path.basename(target) === 'SKILL.md' ? SkillNode : contract?.module === 'memory' ? MemoryNode : BaseNode);
@@ -198,7 +203,9 @@ export class NodeService {
         throw new Error(`Read-only node source: ${target}`);
       }
       if (before && (write.node instanceof InternalNode || path.basename(target) === 'AGENTS.md')) previous.set(write.node, new InternalNode(target).parse(before.source));
-      changes.push({ path: target, before, source: write.source });
+      const mode = write.create ? this.#options.createMode?.(write.node) : undefined;
+      if (mode !== undefined && (!Number.isInteger(mode) || mode < 0 || mode > 0o777)) throw new Error('Invalid node creation permission mode');
+      changes.push({ path: target, before, source: write.source, createMode: mode });
       await this.#options.assertWrite?.({ operation, node: write.draft ?? write.node, parent: write.parent });
     }
     await this.#validateWrites(writes);

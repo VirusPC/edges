@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import { join, dirname } from "node:path";
 import { assertPrivateIgnored } from "./ignore.js";
-import { parseDocument } from "../../utils/node-tree/codec/document.js";
+import { parseDocument } from "../../utils/markdown/document.js";
 import {
   LOCAL_START,
   LOCAL_END,
