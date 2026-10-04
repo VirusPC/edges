@@ -101,17 +101,16 @@ projects/foo/report.md → knowledge/archive/projects/foo/report.md
 
 ## 系统实现
 
-知识管理、投资、ETL 和 Agent 从知识的组织与使用、价值积累、转化流转、持续协作与演进四个互补视角，共同服务个人 RSI。七个核心思想如下：
+知识管理、投资、ETL 和 Agent 从知识的组织与使用、价值积累、转化流转、持续协作与演进四个互补视角，共同服务个人 RSI。六个核心思想如下：
 
 - **闭环复利（投资视角）**：投入认知资本，沉淀知识资产；知识指导行动，反馈回到捕获入口，持续积累判断优势。
 - **任意输入、统一转化、多种输出（ETL 视角）**：以统一的知识模型承接不同来源与形态的输入，按消费场景转化为多种输出，贯通沉淀、转化与消费的全流程。
 - **持续协作与自进化（Agent 视角）**：以 `AGENTS.md` 为入口，人和 Agent 共用 Memory，接续长期任务（Long-horizon Tasks）、组织 Agent Teams，并将改进后的能力用于下一轮个人自我改进。
-- **递归维护**：根作用域可面向个人、团队、公司等主体，其维护空间承载系统二；各层的系统二维护和改进系统一，维护系统自身也可成为新的维护对象。
-- **树图结合**：树组织作用域与归属，交叉引用形成图；`AGENTS.md` 可跨文件系统层级直接引用，导航不必逐层经过目录，公共能力跨层复用。
+- **递归树结构**：树表达节点的层次与归属，各层沿用统一节点模型，按需拥有自己的内容与维护空间；维护系统自身也可成为新的维护对象。根节点可面向个人、团队、公司等主体，节点间通过交叉引用关联，`AGENTS.md` 可跨目录层级直达，公共能力跨层复用。
 - **文件为本**：以文件系统承载记忆，保持可读、可编辑、可迁移。
 - **Git 原生管理**：用 Git 的跟踪、忽略与版本机制管理记忆；例如 user memory 通过 `.gitignore` 不随 Git 提交与共享，同时仍属于本层记忆。
 
-这些原则指导系统演进；Project Memory 已支持分层递归，整仓目录重构仍待落地。术语定义见 [CONTEXT.md](CONTEXT.md)。
+这些原则指导系统演进。Project Memory 已支持分层递归；整仓目录重构已产生实现，整体方案正在重新确认，节点识别与局部记忆归属仍待修正。术语定义见 [CONTEXT.md](CONTEXT.md)。
 
 围绕这些原则，Edges 希望部署、接入和输出这三件事尽量一键完成。它们分别托住知识闭环的底座、把捕获接到输入侧、以及把沉淀资产部署出去。仓库按这个方向收敛。
 
@@ -122,11 +121,11 @@ projects/foo/report.md → knowledge/archive/projects/foo/report.md
 | 目录 | 职责 | 边界 |
 | --- | --- | --- |
 | [`knowledge/`](knowledge/) | 知识生产、提炼、使用与退出 | Edges 的核心资产 |
-| [`AGENTS.md`](AGENTS.md) 与 [`.harness/memory/`](.harness/memory) | 为 Agent 提供分层的规则、决策、纠错与流程记忆 | 服务项目维护，不替代长期知识库 |
+| [`AGENTS.md`](AGENTS.md) 与 [`.harness/memory/`](.harness/memory) | 为人和 Agent 提供分层的规则、决策、纠错与流程记忆 | 服务项目维护，不替代长期知识库 |
 | [`extensions/`](extensions/README.md) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关 |
 | [`shared-extensions/`](shared-extensions/README.md) | 跨机器、跨 Agent 共用的个人 harness | 离开 Edges 仍然有价值 |
 | [`scripts/`](scripts/README.md) | 初始化、构建、迁移等维护脚本 | 通过 `pnpm` 调用，不加入 `$PATH` |
-| [`.harness/evaluation/`](.harness/evaluation/README.md) | 评测整套 Edges | 系统元工作，不是知识生命周期阶段 |
+| [`.harness/evaluation/`](.harness/evaluation/AGENTS.md) | 评测整套 Edges | 系统元工作，不是知识生命周期阶段 |
 | [`.harness/observation/`](.harness/observation/AGENTS.md) | 观测运行与使用 | 运营观测，不替代 维护记忆中的决策 |
 
 `.harness/evaluation/` 与 `.harness/observation/` 是系统实现旁的支撑目录：前者对照假设，后者记录野外现象。它们不进入 notes → edges → archive 主链；观测或评测若产生新洞察，仍须回到捕获入口。
@@ -150,7 +149,7 @@ pnpm setup
 pnpm skills:link
 ```
 
-已有克隆若没有评测 submodule：`git submodule update --init .harness/evaluation/third_party/locomo`。LoCoMo 官方冒烟入口见 [`evaluation/README.md`](.harness/evaluation/README.md)。
+已有克隆若没有评测 submodule：`git submodule update --init .harness/evaluation/third_party/locomo`。LoCoMo 官方冒烟入口见 [`.harness/evaluation/README.md`](.harness/evaluation/README.md)。
 
 - `pnpm install`：安装 workspace 依赖。
 - `pnpm setup`：初始化本地环境（加载 .env；不再把仓根 bin/ 写入 PATH）。
