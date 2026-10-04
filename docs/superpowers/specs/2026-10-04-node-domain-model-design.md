@@ -120,7 +120,41 @@ await service.destroy(task);
 
 创建时的归属上下文由业务调用方显式提供或由已加载的树获得，不能从 node.path 猜测；service 据此协调所属 AGENTS 的索引同步。
 
-model 的 setStatus、setBody、addChild 等方法只改变内存中的领域状态；service 的 update 负责将变更写入文件。NodeTree.find/walk 只查询已加载的树，service 的 get/list 负责持久化内容的读取。模型及 NodeTree 不直接执行文件读写或 Git 操作。
+model 的属性 setter 和 addChild/updateChild 等方法只改变内存中的领域状态；service 的 update 负责将变更写入文件。NodeTree.find/walk 只查询已加载的树，service 的 get/list 负责持久化内容的读取。模型及 NodeTree 不直接执行文件读写或 Git 操作。
+
+## 内存修改方式
+
+节点采用可变内存模型。普通内容属性通过 setter 赋值，执行已有字段校验并更新唯一真源；不再同时提供 setTitle、setStatus、setBody 等重复入口。
+
+| 内容 | 修改入口 |
+| --- | --- |
+| body、Task 的 title/status/assignee/priority、Memory 的 memoryType/description | 属性赋值，经 setter 处理 |
+| metadata | setMetadata / removeMetadata，保留字段校验 |
+| InternalNode 的约束集合 | setConstraints |
+| InternalNode 的索引引用 | addChild / updateChild / removeChild |
+| parent、跨节点归属 | NodeTree.attach / move / detach |
+| path、type、id | 对调用方只读；文件迁移由 service 协调 |
+
+body setter 调用正文解析扩展点，不改变 path 或 metadata。InternalNode 通过 parseBody 更新三部分内容及派生索引，不保存另一份可独立修改的正文。getter 暴露的 content、children、parent 和 metadata 不得泄漏内部可变引用；集合及引用条目提供只读视图或独立快照，metadata 的嵌套对象也不能通过外部修改绕过校验。
+
+`updateChild(reference)` 按 target 定位已有索引条目，替换为传入的新引用，kind 必填；label、description 等可选字段省略时清除原值。目标条目不存在时报错，不隐式新增。修改 kind 时将条目移入对应章节；target 用于定位，此方法不重定向引用、不修改目标文档正文，也不移动文件。
+
+```ts
+task.title = "节点模型设计";
+task.status = "in_progress";
+
+internal.updateChild({
+  target: "tasks/model.md",
+  label: task.title,
+  description: "方案已确认",
+  kind: "local",
+});
+
+await service.update(task);
+await service.update(internal);
+```
+
+上例分别修改 Task 的内容与 AGENTS 的引用信息，再显式保存；索引 label 不会因目标节点 title 赋值而自动改变。InternalNode 的单文档修改仍由 service / NodeTree 协调已加载树中的关联状态。
 
 ## 公共类型草案
 
@@ -145,8 +179,8 @@ interface ScopeTraversalOptions {
 
 interface InternalContent {
   readonly constraints: readonly string[];
-  readonly localMemory: readonly NodeReference[];
-  readonly descendantMemory: readonly NodeReference[];
+  readonly localMemory: readonly Readonly<NodeReference>[];
+  readonly descendantMemory: readonly Readonly<NodeReference>[];
 }
 
 declare class BaseNode<TType extends string = string> {
@@ -154,10 +188,11 @@ declare class BaseNode<TType extends string = string> {
   readonly path: string;
   readonly type: TType;
   readonly id?: string;
-  get parent(): NodeReference | undefined;
-  get children(): readonly NodeReference[] | undefined;
+  get parent(): Readonly<NodeReference> | undefined;
+  get children(): readonly Readonly<NodeReference>[] | undefined;
   get metadata(): Readonly<Metadata> | undefined;
   get body(): string;
+  set body(markdown: string);
 
   parse(markdown: string): this;
   serialize(): string;
@@ -166,16 +201,16 @@ declare class BaseNode<TType extends string = string> {
 
   setMetadata(key: string, value: unknown): void;
   removeMetadata(key: string): void;
-  setBody(markdown: string): void;
 }
 
 declare class InternalNode extends BaseNode<"internal"> {
   get content(): InternalContent;
-  override get children(): readonly NodeReference[];
+  override get children(): readonly Readonly<NodeReference>[];
   protected override parseBody(markdown: string): void;
   protected override serializeBody(): string;
   setConstraints(items: readonly string[]): void;
   addChild(reference: NodeReference): void;
+  updateChild(reference: NodeReference): void;
   removeChild(reference: NodeReference): void;
 }
 
@@ -185,20 +220,20 @@ type TaskPriority = "urgent" | "high" | "medium" | "low" | "none";
 
 declare class TaskNode extends BaseNode<"task"> {
   get title(): string;
+  set title(value: string);
   get status(): TaskStatus;
+  set status(value: TaskStatus);
   get assignee(): string | undefined;
+  set assignee(value: string | undefined);
   get priority(): TaskPriority;
-  setTitle(title: string): void;
-  setStatus(status: TaskStatus): void;
-  assign(assignee: string | undefined): void;
-  setPriority(priority: TaskPriority): void;
+  set priority(value: TaskPriority);
 }
 
 declare class MemoryNode extends BaseNode<"memory"> {
   get memoryType(): string | undefined;
+  set memoryType(value: string | undefined);
   get description(): string | undefined;
-  setMemoryType(type: string): void;
-  setDescription(description: string): void;
+  set description(value: string | undefined);
 }
 
 declare class NodeTree {

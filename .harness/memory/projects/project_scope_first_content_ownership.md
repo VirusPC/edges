@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 节点模型：引用和索引条目统一为 NodeReference；可选树关系，children 区分 local/descendant，默认读取本层；设计未实施
+description: 节点模型：内容 setter、updateChild、统一引用、可选树关系与 local 范围；service 显式保存；设计未实施
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T22:34:36+08:00"
+  edges-updated-at: "2026-10-04T22:41:36+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -155,3 +155,11 @@ children 的引用携带 kind，区分 local（本层记忆）与 descendant（�
 **Why:** 用户连续指出子引用类型和索引包装类型增加复杂度，希望引用及其展示信息集中表达，同时保留 local/descendant 对作用域读取的区分。
 
 **How to apply:** NodeReference 包含 target、可选 label、description 和 kind。description 是当前索引条目的说明，不自动同步目标文档的同名 metadata。parent 或普通引用可省略 kind，children 中必须有 kind，由模型和树操作校验。InternalNode 从索引章节派生 kind，不重复存储分类；addChild(reference) 按 reference.kind 写入对应章节，不额外传 kind 参数。章节索引和 children 均直接使用 NodeReference 集合。作用域默认仅沿 local 的规则不变；已更新 spec，未修改运行时。
+
+## 2026-10-04 用户确认：可变内存模型与引用更新
+
+普通内容字段允许属性赋值，通过 setter 校验并更新模型；metadata、索引和树关系保留专门操作方法。InternalNode 增加 updateChild(reference)，用于更新已有索引引用。
+
+**Why:** 用户确认简洁的内存修改方式，同时需要保证索引章节、引用分类和多节点归属保持一致。索引引用的更新与目标节点内容的更新是两个操作。
+
+**How to apply:** Task 的 title/status/assignee/priority、Memory 的 memoryType/description 及 BaseNode.body 使用 setter，不重复保留对应 setX 方法。body setter 走正文扩展点，不修改 path 或 metadata。metadata 用 setMetadata/removeMetadata，约束用 setConstraints；集合和引用 getter 不泄漏内部可变对象。updateChild 按 target 替换已有引用，可选字段省略时清除，kind 必填且决定所属章节，未找到时报错；不隐式新增或修改目标文档。path/type/id 对外只读，跨节点关系由 NodeTree 协调，保存显式调用 service.update。已更新 spec，运行时尚未实施。
