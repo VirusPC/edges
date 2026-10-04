@@ -1,17 +1,19 @@
 ---
 name: project_tasks_board_mutations_via_cli
-description: 任务记录员等 agent 改 knowledge/tasks 时优先走 edges tasks CLI 与已有 tasks Skill（如 project-tasks-classify）；缺口上报用户。本条是根 prefer_repo_skills_and_cli 的看板特化。
+description: >-
+  改领域 tasks/ 或维护 .harness/tasks/ 看板时优先走 edges tasks CLI 与现有任务 Skill，按 purpose
+  选择板；缺口明确上报。
 metadata:
   edges-title: Task 看板变更优先走 edges tasks CLI
   edges-type: project
   edges-origin-session-id: bc-c0103a88-0443-5dd2-8ea4-9f76501e86ab
-  edges-agent-client: cursor
-  edges-username: Cursor Agent
-  edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-19T06:00:50+00:00"
+  edges-agent-client: codex
+  edges-username: cheng
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: '2026-10-05T05:44:52+08:00'
 ---
 
-改 knowledge/tasks 看板（状态/字段/搬家等）必须优先使用 `edges tasks`（list/get/create/update/status 等），不要默认手写 markdown 再 git push。本条是仓根 `prefer_repo_skills_and_cli` 的看板特化：已有 tasks 相关 Skill（如 `project-tasks-classify`）也要优先用；通用 CRUD Skill 仍是 backlog。
+改 `tasks/` 或 `.harness/tasks/` 看板（状态/字段/搬家等）必须优先使用 `edges tasks`（list/get/create/update/status 等），用 `--purpose domain|maintenance` 明确目标板；不要默认手写 Markdown 再 git push。本条是仓根 `prefer_repo_skills_and_cli` 的看板特化：已有 tasks 相关 Skill（如 `project-tasks-classify`）也要优先用；通用 CRUD Skill 仍是 backlog。
 
 **Why:**
 与 ADR 0005 及仓根「仓内优先用仓库 Skill 与 CLI」一致；避免双轨导致 frontmatter/路径漂移；暴露 CLI/Skill 缺口才能补齐。

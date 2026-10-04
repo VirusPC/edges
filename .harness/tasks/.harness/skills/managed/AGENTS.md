@@ -14,5 +14,5 @@ format: skills
 > 本文件只是索引，条目区块由脚本重算，正文写在 `managed/<name>/SKILL.md` 里。
 
 <!-- project-memory-entries:start -->
-- [用云端 Obsidian 预览 tasks 看板](preview-tasks-with-box-obsidian/SKILL.md) — 在 Grok Bot 云端电脑用 Obsidian 打开 /workspace/edges，浏览 knowledge/tasks 状态夹与 artifacts；适合看板预览，不适合当主编辑入口。
+- [用云端 Obsidian 预览 tasks 看板](preview-tasks-with-box-obsidian/SKILL.md) — 在 Grok Bot 云端电脑用 Obsidian 打开 /workspace/edges，浏览 .harness/tasks 状态夹与 artifacts；适合看板预览，不适合当主编辑入口。
 <!-- project-memory-entries:end -->

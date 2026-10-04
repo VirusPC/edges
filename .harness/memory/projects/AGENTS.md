@@ -51,7 +51,7 @@ format: ordinary
 - [审阅页侧栏筛选用 design A（选中染色 + 未选变淡）](project_review_page_sidebar_filter_design_a.md) — 改审阅页左栏项目筛选外观时打开：选中用 accent 实线边加面板底；未选中 opacity 0.6（hover 拉回）；拖过时外扩 outline，须和选中边叠得开。类写在 ProjectColumn，不改点击或拖放。用户 2026-09-17 选定 design A。
 - [根硬约束只留聚光灯、脱敏与 git](project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
 - [根 README 以知识闭环为唯一主线](project_root_readme_direction.md) — 设计或修改根 README 时：个人 RSI 是当前实践，知识闭环是主线；四视角六思想，递归维护与树图结合归为递归树结构，ADR 按系统实现的思想顺序组织。
-- [递归目录采用统一节点模型与自身维护空间](project_scope_first_content_ownership.md) — 节点与 NodeService 设计；Skill 须遵循标准完整目录定义，入口文档与资源、目录操作边界待修订
+- [递归目录采用统一节点模型与自身维护空间](project_scope_first_content_ownership.md) — 设计递归节点、AGENTS 三段归属与资源边界时：现行 NodeService、43 条公开局部记忆恢复与私有逐克隆审阅；下文含有明确日期的历史方案。
 - [系统一／系统二按作用域建模，区分 harness 层级与自进化](project_scoped_systems_and_harness.md) — 讨论根、作用域或 RSI 时：根可面向任意选定主体或系统，维护空间承载系统二；个人 RSI 是当前实践，角色随作用域变化，不预设唯一绝对根或固定组织层级。
 - [v1 自托管 Langfuse 落在物理机 minigtr](project_self_hosted_langfuse_on_minigtr.md) — 改自托管 Langfuse 的 v1 宿主、或默认往阿里云/云 VPS 上放时打开：宿主是物理机 minigtr，按多数时候在线的小型服务器运维；双系统仍在但 Windows 不是日常路径。不是阿里云或其它云 VPS。访问面见 ADR 0017。决策见 docs/adr/0014-self-hosted-langfuse-on-minigtr.md。
 - [跨机器跨 Agent 的 harness 放 shared-extensions](project_shared_extensions.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。

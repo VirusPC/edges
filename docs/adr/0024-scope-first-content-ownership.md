@@ -1,71 +1,39 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # 递归节点与局部记忆归属
 
-2026-10-04，整体目录方案重新确认，本 ADR 从 `accepted` 改为 `proposed`。按 [README「系统实现」](../../README.md#系统实现)的六个核心思想组织：保留已确认的原则，在对应章节说明尚未解决的设计与实现差异。
+2026-10-04 重新确认递归组织原则，2026-10-05 完成节点模型、入口识别与公开局部记忆归属纠正。按 [README「系统实现」](../../README.md#系统实现)的六个思想组织；[节点领域模型设计](../superpowers/specs/2026-10-04-node-domain-model-design.md)记录接口与资源边界，[纠正计划](../superpowers/plans/2026-10-05-recursive-node-ownership-correction.md)记录验证。此 ADR 只决定逻辑归属与目录职责；私有材料须由每个克隆按[迁移指南](../recursive-layout-migration.md)显式处理。
 
 ## 闭环复利（投资视角）
 
-目录组织服务知识进入行动、反馈再回到知识的闭环。领域内容与维护材料分别按其职责归属，不能仅因都包含知识或任务就放进同一目录。
-
-原方案已将领域任务与维护任务分到 `tasks/` 和 `.harness/tasks/`，但原 Tasks 节点自身记忆在拆分后归谁仍需确认；不能默认归根，也不能直接复制多份。
+目录服务知识进入行动、反馈再回到知识的闭环。领域任务在 `tasks/`，Edges 维护任务在 `.harness/tasks/`。原 Tasks 节点的 8 条维护记忆归 `.harness/tasks/`，领域板通过引用共用看板约定，不复制这 8 条。
 
 ## 任意输入、统一转化、多种输出（ETL 视角）
 
-统一知识模型贯通沉淀、转化与消费，不要求所有内容采用同一种文件格式或依次经过同一套目录。Notes、Projects、Teach 等内容的职责与原有生成、读取约定需要一起保留。
-
-此次重新组织目录不等于已经实现任意格式接入。projects、teaching 等工作区的最终位置与迁移对应，仍须纳入整体方案复核。
+统一节点模型承接不同内容，但不抹平 Notes、Projects、Teach、Task、Memory 与 Skill 的内容契约。普通 Task、Memory、Note 默认单文件，可显式选择以 `index.md` 为入口的资源目录；Skill 始终是 `SKILL.md` 入口的完整目录。任意外部格式接入、RAG 等仍是未来方向。
 
 ## 持续协作与自进化（Agent 视角）
 
-人和 Agent 共用 `AGENTS.md` 入口，入口结构沿用下述递归树模型。Memory、长期任务和协作支持持续改进；是否形成 RSI，还要看改进后的能力是否继续参与自身改进，不能由目录结构直接推出。
-
-**现有不一致：**根 `AGENTS.md` 仍使用“下层作用域”和“工作与模块入口”；迁移脚本也会生成这套章节。旧计划中的完成记录和测试只对应此前设计，不能作为修订方案已经完成的证据。
+人和 Agent 通过 `AGENTS.md` 发现规则、Memory 与长期任务。递归目录可支持多主体协作，但 Agent Teams 自动编排、自动复盘以及持续 RSI 循环尚非这次实现；是否形成自进化，要看改进能力是否继续用于下一轮改进。
 
 ## 递归树结构
 
-每个 `AGENTS.md` 节点沿用 Project Memory 的三部分：**本层重要约束**（现有章节名为“本层硬约束”）、**本层记忆**、**下层记忆索引**，分别承载本层规则、本层材料索引和递归下层入口。用户确认 tasks 等新增内容暂时注册在这三部分内：规则放本层约束，材料入口按本层或下层归属登记；不另增“工作与模块入口”等章节。这是入口组织约定，不要求把 Task 正文改写成普通记忆条目或搬到根层。具体登记格式与工具支持仍需落实。
+有可读 `AGENTS.md` 的真实目录可以作为节点，不再设置“独立目标、决策和验证责任”的额外资格门槛。CLI 的初始选择依次遵守显式 `--scope`、环境与最近入口，找不到时按 Git 回退；识别入口不自动初始化 Memory，类型和模块仍须显式登记。
 
-树表达节点的层次与归属，各层沿用统一节点模型。根可面向个人、团队、公司等主体；各节点按需拥有内容与维护空间，系统二维护系统一，维护系统自身也可以成为新的维护对象。节点间允许交叉引用，`AGENTS.md` 可以跨文件系统层级直达，公共能力跨层复用。
+层入口沿用三部分：**本层硬约束**、**本层记忆**、**下层记忆索引**。Task Project 索引等业务材料在本层登记。入口可跨物理目录层级直达；本层登记代表直属归属，下层索引代表子节点归属，普通 prose 链接仅用于导航，不建立第二个 parent。共享实现可供各层调用，但局部上下文留在各自节点。`NodeService` 根据已登记引用执行读取、索引同步和归属遍历；默认只读本层，显式 `includeDescendants` 才进入下层。
 
-用户已确认：不再以“独立目标、决策和验证责任”作为额外的节点资格门槛，也不把作用域与模块设为互斥节点类别。**子节点记忆保留原归属**；共享实现由根层维护，不意味着子节点上下文也归根层。节点目录搬迁时，局部记忆随节点迁移。
+2026-10-05 将此前误晋升根层的 43 条公开记录按现行源字节恢复：`extensions` 16、`extensions/skills/project-memory-init` 17、`shared-extensions` 1、`knowledge/notes` 1、原 Tasks 8（现归 `.harness/tasks`）。25 份类型入口说明与索引恢复后保留人工前缀及未知元数据。根层新增记录仍属根层。当前根共享能力的维护记录不因此一概移到源码子目录；归属按每条材料的实际责任判断。
 
-**现有不一致：**PROTOCOL 仍保留独立责任门槛；原迁移已将 extensions、project-memory-init、shared-extensions、tasks、notes 五个子目录的 43 条局部记忆并入根层，相关类型索引也被合并，尚未恢复。
-
-**待确认：**节点的具体识别规则，层入口、类型入口和业务入口的关系，以及下层归属与交叉引用如何区分。统一模型不等于每个目录都必须初始化，也不等于所有 `AGENTS.md` 必须含有完全相同的内容。当前 CLI 的作用域策略与 Memory service 通过 Project Memory 标记识别作用域，CONTEXT 与 PROTOCOL 仍区分不同入口契约，需要随模型确认一起复核。
-
-**CLI 解耦要求（用户确认）：**作用域、节点关系和树结构递归是公共能力，需要从 CLI 命令与各业务模块中解耦。建议按以下边界落实：
-
-- 公共节点与树逻辑：节点识别、归属关系、下层索引与交叉引用解析、递归遍历及去重。显式区分逻辑节点关系和物理目录位置，不能把目录扫描直接等同于节点树；交叉引用不自动成为归属边，遍历需要处理重复与环。
-- CLI 适配：读取参数、环境变量和当前目录，将目标与遍历边界传给公共能力，并将结果或错误转为命令行输出。Git 根与仓库边界作为显式策略处理，不隐含等同于作用域根。
-- 业务模块：Tasks、Memory 等消费已解析的节点上下文，负责自身内容与操作，不各自重写节点识别和遍历，也不让公共层依赖 `TasksError` 等业务类型。
-
-2026-10-04 CLI 重构：按用户修正，公共实现放在 [`extensions/cli/src/utils/node-tree/`](../../extensions/cli/src/utils/node-tree/README.md)，提供节点读取、祖先查找、物理发现与按下层索引递归；`scope.ts` 保留 CLI 选择策略及 Git 回退，使用独立的验证错误，不再依赖 Tasks。公共节点读取不要求 Project Memory 标记，但 CLI 暂保留原有标记筛选，Tasks 的 `all` 也保持物理清查，避免把行为迁移混入解耦。跨层引用、去重及环、边界隔离由CLI 内的节点工具测试覆盖；局部记忆恢复不属于本次代码重构。2026-10-05 Project Memory 执行层进一步迁入 TypeScript CLI，复用基础 Markdown/YAML codec；统一节点识别及新类模型仍待独立实施。 模块统一使用 TypeScript，不单独建包；模型、解析/序列化与存储仍以目录和接口解耦。frontmatter 直接使用 `gray-matter` 默认解析与序列化，不自定义 YAML 引擎、日期、别名、分隔符或格式保留，也不直接依赖 `js-yaml`。字段校验留在领域层；文档不符合约定时修正文档，不增加兼容分支。
-
-**后续模型设计（用户确认，代码尚未重构）：**BaseNode、InternalNode、TaskNode、MemoryNode、NoteNode、SkillNode 统一放在 models，不单独定义 NodeTree 或顶层 codecs。BaseNode 包含必填 path、可选 parent/children 及实例 parse/serialize；InternalNode 从 AGENTS 三部分索引派生 children。NodeReference 统一表达引用和索引条目，children 必须区分 local/descendant。普通内容字段通过 setter 修改，索引使用 addChild/updateChild/removeChild；模型不执行文件读写。
-
-公共 NodeService 提供 create/get/list/update/destroy 及 attach/detach/reparent，负责引用加载、索引同步与保存。list 是唯一对外作用域遍历入口，默认只沿 local，显式 includeDescendants 才跨入下层；内部 traverse 辅助函数接受加载能力，不再包装树对象。get 可显式接收模型构造器，reparent 只改逻辑归属，不移动文件；公共路径参数使用明确的绝对路径。具体签名、保存与错误语义见[节点领域模型设计](../superpowers/specs/2026-10-04-node-domain-model-design.md)。
-
-**模型、格式与存储进一步解耦（2026-10-04 先前实施记录，后续设计见上）：**三部分内容与引用关系由不含路径、Markdown 原文或 AST 的 `NodeModel` 表达。纯 codec 负责解析／序列化；文件适配负责原文读写、路径与文件身份校验；组合层把模型、来源与位置分字段加载，CLI 消费组合结果。带原文的序列化保留未修改片段与未知扩展，无法保留时拒绝生成有损结果。此分层可独立复用，详见[实施与验证](../superpowers/plans/2026-10-04-node-model-codec-separation.md)。
-
-**内置可选 frontmatter（用户确认，2026-10-04）：**Task、Memory 与 AGENTS.md 底层均为可选 YAML 头加 Markdown 正文。公共文档模型使用可选 `metadata`，格式层负责解析与写回；字段含义和校验由各领域负责。AGENTS.md 进一步约定三部分章节、HTML 注释标记与索引关系，不将这些约定下沉为通用 Markdown 格式。公共能力与 NodeModel 已接入，Tasks 已复用；Memory service 已复用基础格式能力；具体入口是否采用 description 等字段仍分别推进。见[实施与验证](../superpowers/plans/2026-10-04-optional-frontmatter.md)。
+2026-10-04 的旧阶段曾使用 `utils/node-tree`、纯数据 `NodeModel` 与独立 codec；它们是当时的实施证据，已由 `extensions/cli/src/models/{base-node,internal-node,task-node,memory-node,note-node,skill-node}.ts` 与 `src/services/node-service.ts` 取代。现行 frontmatter 直接使用标准 `gray-matter` 解析与序列化，不承诺保留 YAML 原始样式。模型的逻辑 parent/children 与资源目录生命周期分别处理，`reparent` 不移动物理资源。
 
 ## 文件系统
 
-内容由文件系统承载，保持可读、可编辑、可迁移。`.harness` 作为节点维护空间的目录方案继续保留为复核材料；其内部布局、推荐模块、局部扩展及 Memory/Skills 类型组织，尚不能按旧 ADR 的 accepted 状态跳过确认。
-
-其他 Skill 约定的 `CONTEXT.md`、`docs/adr/`、`docs/superpowers/` 等真源原位保留，通过入口引用接入。系统二的职责不受单一物理目录限制；物理目录也不要求逐层设置导航入口。
-
-**现有不一致：**CONTEXT 的 Task Project 与 Task Projects 索引仍写 `knowledge/tasks/`，与已迁移的看板位置不一致。README 的目录表也尚未完整呈现 tasks、projects、teaching 等工作区；完整目录对应需在替代方案中统一核对。
+文件系统保持内容可读、可编辑、可迁移；各节点可按需拥有 `.harness/memory/` 与 `.harness/skills/`，不要求每层预建全套目录。`CONTEXT.md`、`docs/adr/`、`docs/superpowers/` 保留各自工具约定的物理路径，通过普通导航引用发现，不作为 AGENTS 所有权条目。评测、观测、教学和领域工作各守自己的职责；目录位置不自动决定逻辑父子关系。
 
 ## Git 原生管理
 
-Git 管理共享内容的版本与变更，`.gitignore` 将本地私有记忆排除在提交之外；不被 Git 跟踪的内容仍属于所在节点。忽略规则、私有类型索引和附属文件必须随原节点保留，不能因公开记录迁移就漏掉私有材料。
+Git 跟踪公开内容，忽略规则保护本地私有记忆。公开纠正不表示其他克隆的 ignored 内容已迁移。旧实例迁移映射已经改为 owner-local；已被旧版本提升到根的私有材料只能凭可信 journal 来源、在该克隆显式 opt-in 纠正。来源缺失、旧 pending journal 或目标冲突时拒绝猜测与覆盖，留给所有者审阅。`knowledge/posts/` 仍由人维护，不属于自动迁移范围。
 
-**现有不一致：**原归属清单的 `privateOwnerMap` 同样把上述五个子目录映射到根层，后续迁移若继续使用它，会再次改变局部归属。恢复方案须覆盖正文、类型索引、人工说明与私有映射，并保留后续编辑；`knowledge/posts/` 的 AI 禁改约束继续适用。
-
----
-
-复核材料：[原设计](../superpowers/specs/2026-10-03-recursive-scope-layout-design.md)、[原实施计划](../superpowers/plans/2026-10-03-recursive-scope-layout.md)、[原归属清单](../superpowers/plans/2026-10-03-recursive-scope-ownership.json)、[原任务完成记录](../../.harness/tasks/project-memory/done/2026-09-12--整仓与memory同构递归融合.md)。这些材料记录此前设计及实施，不代表替代方案已确认或修复完成；此前已整理文档，本次完成上述 CLI 公共能力抽取；整体识别策略及局部记忆恢复仍未完成。
+历史材料：[原设计](../superpowers/specs/2026-10-03-recursive-scope-layout-design.md)、[原实施计划](../superpowers/plans/2026-10-03-recursive-scope-layout.md)、[原归属快照](../superpowers/plans/2026-10-03-recursive-scope-ownership.json)、[当时完成记录](../../.harness/tasks/project-memory/done/2026-09-12--整仓与memory同构递归融合.md)。它们保留各自日期的状态，不是现行恢复操作指令。

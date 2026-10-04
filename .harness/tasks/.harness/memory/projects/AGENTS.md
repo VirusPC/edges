@@ -16,8 +16,8 @@ format: ordinary
 <!-- project-memory-entries:start -->
 - [tasks 工作流阶段：grill → research → plan → implement → validate → close，回环按证伪](project_assign_grill_with_docs_first.md) — 写或派发 tasks 时打开：默认链为 grill→research→plan→implement→validate→close；research 是 deep-research（竞品/开源/现成方案），独立于 grill 与 plan；validate 是质量/设计/行为门禁（英文阶段名，不用「验收」），可派给非实现者，看板 in\_review 大致对应；未 validate 不标 done。回环只按证伪退回，不随便跳阶段；全程可派 subagent 做浅调研，但不占正式 research、不改看板。用户当次跳过除外。
 - [云端 Obsidian vault 选用 edges clone](project_box_obsidian_vault_for_preview.md) — 预览 tasks/artifacts 时用 /workspace/edges 作 vault、AppImage+--no-sandbox、禁用 Sync；2026-09-11 已验证。
-- [七个 Task Project 占位已确认](project_evaluation_observation_placeholder_projects.md) — 改看板 Task Project 分组或往 knowledge/tasks/\<slug\> 落卡时打开：用户已确认七个空壳质心（project-memory、edges-tasks、edges-cli-platform、evaluation、observation、site-and-content、agent-clients-ux）；现有卡仍留 \_default，等 classify/#78 再迁。仓根 evaluation/ 不是看板 project。
+- [七个 Task Project 占位已确认](project_evaluation_observation_placeholder_projects.md) — 改看板 Task Project 分组或往 .harness/tasks/\<slug\> 落卡时打开：用户已确认七个空壳质心（project-memory、edges-tasks、edges-cli-platform、evaluation、observation、site-and-content、agent-clients-ux）；现有卡仍留 \_default，等 classify/#78 再迁。仓根 evaluation/ 不是看板 project。
 - [STAR 用来制定任务（尤其给 agent），不是复盘](project_star_for_agent_task_formulation.md) — 写/派 agent 任务时用 STAR 同构排正文（背景→目标→动作→完成标准）；不要拿 STAR 写复盘。
 - [Task 正文分节事实/idea，并一句话讲清问题与结果](project_task_separate_facts_from_idea.md) — 写/改 Task 时：分节事实/idea + 一句话讲清问题与结果；对话开卡走背景→目标→动作→完成标准；STAR 用于制定 agent 任务。
-- [Task 看板变更优先走 edges tasks CLI](project_tasks_board_mutations_via_cli.md) — 任务记录员等 agent 改 knowledge/tasks 时优先走 edges tasks CLI 与已有 tasks Skill（如 project-tasks-classify）；缺口上报用户。本条是根 prefer\_repo\_skills\_and\_cli 的看板特化。
+- [Task 看板变更优先走 edges tasks CLI](project_tasks_board_mutations_via_cli.md) — 改领域 tasks/ 或维护 .harness/tasks/ 看板时优先走 edges tasks CLI 与现有任务 Skill，按 purpose 选择板；缺口明确上报。
 <!-- project-memory-entries:end -->

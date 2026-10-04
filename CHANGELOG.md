@@ -13,11 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 节点与内容管理
 
+- **节点按入口归属：** `edges tasks` 与 `edges memory` 可从显式作用域或最近的可读 `AGENTS.md` 选择节点；本层索引登记直属内容，下层索引登记子节点，普通交叉链接不改变归属。入口沿用硬约束、本层记忆、下层索引三部分，发现节点不会自动初始化 Memory。
 - **统一文档与归属操作：** Task、项目记忆、Note 和 Skill 现在由类型化节点模型与 `NodeService` 读取、保存和维护 AGENTS 索引；`edges tasks`、`edges memory remember` 和 `edges note` 沿用原命令入口。节点归属由已登记的引用决定，`NodeService.list` 默认只遍历本层引用。
 - **目录内容带着资源走：** 新建 Task、普通项目记忆和 Note 可用 `--format directory` 选用 `index.md` 目录入口，单文件仍是默认；Skill 使用 `SKILL.md` 目录入口。`edges memory remember` 与 `edges note` 的 `--resources` 可在新建目录入口时显式导入附件。已有目录节点更新正文时保留附件；Task 状态迁移及节点服务的同格式移动、删除按完整资源单元处理。`edges note --content-file <path> --markdown` 可保存已审阅的 Markdown 正文。
 
 ### 项目记忆（project-memory）
 
+- **局部记忆回到所有者：** 将先前上收根层的 43 条公开记忆按当前内容恢复到 `extensions`、`project-memory-init`、`shared-extensions`、`knowledge/notes` 和 `.harness/tasks` 的本地索引，保留人工说明；`pnpm restore:local-ownership --root <独立克隆路径> --manifest <已审阅清单> --dry-run` 可审阅符合旧状态的公开纠正。其他克隆的 ignored 私有记录须各自按 journal 显式审阅。
 - **统一 CLI 执行入口：** Project Memory 的初始化、写入、类型登记、检查、旧布局迁移和私有归档统一由 TypeScript 的 `edges memory` 执行；模板随 CLI 分发。相关 Skill 改为调用 CLI，移除原 Python 执行层。需先构建或安装 Edges CLI，再升级这些 Skill。
 - **私有内容写入前检查：** `edges memory remember` 及迁移、归档恢复命令会核对实际文件的 Git 忽略结果，遇到例外规则放行私有文件时先拒绝写入。强制恢复失败会回滚原目录，无法回滚时保留受保护的恢复副本。
 

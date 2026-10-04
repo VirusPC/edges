@@ -66,7 +66,7 @@ _避免使用_：长期知识库、会话流水账、代码事实副本
 
 **Memory Type（项目记忆）**：
 项目记忆中一条记忆归入哪份类型入口的分类；每一类型在该层有一份类型入口，与该类型的条目同处。类型集合由 LAYOUT 实现与本层登记决定，不是 PROTOCOL 闭集枚举。
-_避免使用_：把 type 写成全局 JSON 注册表键、把看板 `knowledge/tasks` 状态夹直接叫 Memory Type、把每条 Task 升成 Memory Type（Q18=B，另卡）、把类型入口与层入口当成同一种 AGENTS.md
+_避免使用_：把 type 写成全局 JSON 注册表键、把看板状态夹直接叫 Memory Type、把每条 Task 升成 Memory Type（Q18=B，另卡）、把类型入口与层入口当成同一种 AGENTS.md
 
 **层入口 AGENTS.md**：
 某一记忆层目录上的项目记忆入口，承载本层硬约束、本层类型入口清单与下层记忆索引。
@@ -253,15 +253,15 @@ Task 文件去掉 `.md` 的文件名，是 `edges tasks` 的查找键；不是�
 _避免使用_：title、name、把展示名当 CLI 查找键
 
 **Task Project（edges）**：
-看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
+选定看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；领域板目录为 `tasks/<project-slug>/`，维护板目录为 `.harness/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
 _避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type、把未确认的候选当成已有 project
 
 **Task Project 索引**：
-`knowledge/tasks/AGENTS.md` 里、project-memory 受管标记之外的 Task Projects 节；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。
+所选板 `tasks/AGENTS.md` 或 `.harness/tasks/AGENTS.md` 本层记忆区块内的 Task Projects 索引；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。
 _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件当记忆条目
 
 **Task Project AGENTS.md**：
-每个 Task Project 目录（含 `_default`）内的轻量 `AGENTS.md`，写标题与描述（可选指针）；不是对该目录做完整 `project-memory-init`。
+每个 Task Project 目录（含 `_default`）内的轻量 `AGENTS.md`，写标题与描述（可选指针）；作为可读节点入口不意味着自动初始化完整 Project Memory。
 _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
 
 **Task Project 候选（edges）**：
@@ -277,7 +277,7 @@ classifyTasks、proposeTypes、本地 `edges tasks project review-page` 与 `/ta
 _避免使用_：把它当 Task Project、当分类算法、`--mode`、把它当 Artifacts 预览服务、让 review-page 负责发布、把它当成 `/tasks/` 站点本身、status station、按用途再拆一壳
 
 **审阅壳（Review Shell）**：
-Task Project 审阅页这一份交互界面。仓库只留下源码和构建管线：源码在仓根 `apps/tasks-review-app/`（包名 `tasks-review-app`，与 CLI 分开，`apps/` 可再放别的预构建壳），产物在 `extensions/cli/src/tasks/project/assets/review-page/`（`index.html`、`review.js`、`review.css`）且不入库，由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成。Vite 把产物写进 CLI 那份目录；`review-page.ts` 只读产物，不读 `apps/` 源码。写出的页把预构建 JS/CSS 内联成一份 HTML，数据是页内 JSON script `#edges-review-payload`。导航是 hash 或 hash 上的 query，同一份产物用于 `file://`、Artifacts 与 `/tasks/`。左栏是 Task Project：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。视口不窄于 Tailwind `md`（`≥768px`）时仍是这一套三栏。窄于 `md` 时同一壳改成纵向长滚动：项目筛选区、状态板，点卡片后详情接在状态板下方，仍在同一页里滚动。每张任务卡都有「移到项目…」，桌面与窄屏都能把卡片改到另一个 Task Project；这只改页内 JSON，写回仍是 Copy JSON。桌面左栏拖放还在。
+Task Project 审阅页这一份交互界面。仓库只留下源码和构建管线：源码在仓根 `apps/tasks-review-app/`（包名 `tasks-review-app`，与 CLI 分开，`apps/` 可再放别的预构建壳），产物在 `extensions/cli/src/commands/tasks/project/assets/review-page/`（`index.html`、`review.js`、`review.css`）且不入库，由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成。Vite 把产物写进 CLI 那份目录；`review-page.ts` 只读产物，不读 `apps/` 源码。写出的页把预构建 JS/CSS 内联成一份 HTML，数据是页内 JSON script `#edges-review-payload`。导航是 hash 或 hash 上的 query，同一份产物用于 `file://`、Artifacts 与 `/tasks/`。左栏是 Task Project：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。视口不窄于 Tailwind `md`（`≥768px`）时仍是这一套三栏。窄于 `md` 时同一壳改成纵向长滚动：项目筛选区、状态板，点卡片后详情接在状态板下方，仍在同一页里滚动。每张任务卡都有「移到项目…」，桌面与窄屏都能把卡片改到另一个 Task Project；这只改页内 JSON，写回仍是 Copy JSON。桌面左栏拖放还在。
 _避免使用_：三套页面、status station、本轮在中栏改状态、把语义检索算进这份壳、用另一套看板产品充当 Task 的领域模型、在用户机器上现编这份壳、把预构建产物提交进 git、默认用 zip+base64 装载荷、path history、靠服务器 rewrite 的 react-router、窄屏只做抽屉、底栏分页、左右滑页、窄屏另做一壳、窄屏在状态列上改状态
 
 **`/tasks/` 持久看板站**：

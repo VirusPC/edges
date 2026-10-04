@@ -1,15 +1,19 @@
 ---
 name: project_type_set
-description: 官方 init 种子仍是六类；类型集合由 LAYOUT+本层登记决定，不是 PROTOCOL 闭集。可扩展见仓库根 ADR 0006。类型入口现为复数目录下 AGENTS.md（ADR 0012）。否掉把 docs 等示例写进默认种子。user 进仓且 gitignore；v1 不做晋升。
+description: >-
+  官方 init 种子仍是六类；类型集合由 LAYOUT+本层登记决定，不是 PROTOCOL 闭集。可扩展见仓库根 ADR 0006。类型入口现为复数目录下
+  AGENTS.md（ADR 0012）。否掉把 docs 等示例写进默认种子。user 进仓且 gitignore；v1 不做晋升。
 metadata:
   edges-title: 项目记忆的类型集合
   edges-type: project
   edges-origin-session-id: bc-76b9e05c-a544-4dad-adb8-bcc3ea821615
-  edges-agent-client: cursor
-  edges-username: Coding Agent 专家
-  edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-17T07:56:00+00:00"
+  edges-agent-client: codex
+  edges-username: cheng
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: '2026-10-05T05:40:35+08:00'
 ---
+
+**现行布局（2026-10-05）：**每个节点的类型入口属于本节点；Memory 条目在本节点 `.harness/memory/<plural>/`，托管 Skill 是 `.harness/skills/managed/<skill>/SKILL.md` 的完整目录，引用 Skill 的入口在 `.harness/skills/referenced/AGENTS.md`，其正文仍由原来源维护。以下 `.memory/` 与 `skills` / `agent_skills` 叫法是当时类型设计史料，不是当前实例文件路径；官方六类种子及可扩展原则保留。
 
 可写类型是 `user` / `feedback` / `project` / `reference` / `skills`；`agent_skills` 只索引不写。这六类是官方 init 种子，不是 PROTOCOL 闭集：类型集合由 LAYOUT 实现与本层登记决定。不要把 `docs` 等示例写进默认种子。用户记忆是项目记忆的一种 Memory Type，权威副本在仓库工作树内且 gitignore，按仓库路径绑定，布局与其他类型相同（`.memory/users/`、`users/AGENTS.md`、`user_<slug>.md`）。类型入口路径见仓库根 ADR 0012。本层入口清单顺序是 `user` → `feedback` → `project` → `reference`（`project` 兜底），然后才是 `skills` / `agent_skills`。skill 接线（init / remember `--type user`、备份/恢复）已做。`.memory/` 下类型目录用复数。可扩展登记见仓库根 ADR 0006；`$project-memory-add-type` 已落地。
 

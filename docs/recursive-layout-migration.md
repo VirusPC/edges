@@ -1,63 +1,29 @@
-# Edges 递归目录迁移
+# Edges 递归目录迁移与所有权纠正
 
-新版常规工具只使用新布局。根作用域的领域 Task 在 `tasks/`，维护 Edges 的 Task 在 `.harness/tasks/`；Task Project 仍只是看板分组。根维护知识在 `.harness/memory/<type>/`，技能类型入口在 `.harness/skills/{managed,referenced}/`。评测与观测归 `.harness/`；项目研究与教学分别在顶层 `projects/`、`teaching/`。
+当前根节点的领域 Task 在 `tasks/`，维护 Task 在 `.harness/tasks/`；各节点的维护记忆在自己的 `.harness/memory/<type>/`，技能类型在 `.harness/skills/{managed,referenced}/`。评测、观测归 `.harness/`，研究与教学分别在 `projects/`、`teaching/`。有可读 `AGENTS.md` 的目录可成为节点；节点发现本身不初始化 Memory。当前状态见 [ADR 0024](adr/0024-scope-first-content-ownership.md)。
 
-归属与源哈希见[审阅清单](superpowers/plans/2026-10-03-recursive-scope-ownership.json)。清单包含 103 条 Task、100 份现存 Run、4 张附件、52 条局部记忆的逐项映射。3 条 Task 原来没有 Run，不补造。Task 的 stem、状态、Project 和手写元数据保持；两个看板分别保留其项目入口。归属判断不是从 Project 名字推导子作用域。
+## 2026-10-03 目录迁移快照
 
-## 在指定工作树运行
+[原审阅清单](superpowers/plans/2026-10-03-recursive-scope-ownership.json)逐项记录当时 103 条 Task、100 份既有 Run、4 张附件、52 条局部记忆。3 条 Task 当时没有 Run，不补造。该清单及旧实施计划保留审计事实；其将五个子节点记忆上收根层的决定已在 2026-10-05 被纠正，不能用它覆盖当前记录。Git 更新已将公开纠正送到后续克隆，勿对现行公开树重放旧快照。
 
-本仓修改须使用独立 worktree。先保存自己的修改，再从工具所在 checkout 执行：
+若某独立克隆仍处于**适用旧布局的原始状态**，先核对清单源哈希和当前文件，再在其独立 worktree 上审阅旧迁移命令的 `--dry-run`；只有预检证明该克隆与旧快照完全对应，才可考虑 `--apply`。命令形式为 `pnpm migrate:recursive-layout --worktree /absolute/path/to/owned-worktree --dry-run`（再将最后一项改成 `--apply`）。这不是已经提升或后来编辑的公开记录的恢复命令。迁移保留 Task stem、状态、Project、手写元数据和资源，遇源哈希、保护文章或 submodule 指针差异即停。
 
-```bash
-pnpm migrate:recursive-layout --worktree /absolute/path/to/owned-worktree --dry-run
-pnpm migrate:recursive-layout --worktree /absolute/path/to/owned-worktree --apply
-```
+## 2026-10-05 公开纠正
 
-也可以用 `pnpm migrate:recursive-layout --worktree <path> --dry-run`。`--worktree` 必须是 Git 工作树根，所有数据写入都限于该路径；脚本不安装技能、不部署服务、不改其他 checkout。完整迁移会核验清单的源哈希、保护文章哈希与 submodule 指针，有差异先停，不覆盖。
+[现行纠正清单](superpowers/plans/2026-10-05-local-ownership-correction.json)按当前源字节恢复了 43 条公开记录：`extensions` 16、`extensions/skills/project-memory-init` 17、`shared-extensions` 1、`knowledge/notes` 1、旧 `knowledge/tasks` 的 8 条归 `.harness/tasks`。25 份类型入口保留人工说明与未知元数据；根层后来新增的记忆仍在根层。`pnpm restore:local-ownership --root <独立克隆绝对路径> --manifest <已审阅清单绝对路径> --dry-run` 是针对**仍符合这份纠正清单源状态**的公开纠正审阅入口；目标碰撞、源漂移会拒绝写入，已纠正则不再移动。普通 `edges memory migrate --recursive` 保留旧 owner 关系，不代替实例归属纠正。
 
-公共类型索引合并会保留兼容的未知类型字段和 frontmatter 字段；同名字段值冲突或无法安全合并的元数据结构会在写入前报错，不任选一份或丢弃模块字段。
+## 每个克隆的私有材料
 
-脚本复用 `extensions/cli/src/services/memory/migrate.ts` 的规划、旧类型解析、元数据转换、路径保护、Markdown 链接重定位与文件状态写入接口；将通用规划的中间目标合成为审阅后的最终归属，再统一复制、验证并退役旧源。通用迁移器不内置 Edges 业务路径。观察模块的职责与导航以 `.harness/observation/AGENTS.md` 为入口；Memory、Skills 不新增容器总入口。
+Git 不分发 ignored 用户材料，也不证明别的克隆已完成私有纠正。新实例迁移映射保留 owner-local 关系：根归根，`extensions`、`extensions/skills/project-memory-init`、`shared-extensions`、`knowledge/notes` 各归本节点，旧 `knowledge/tasks` 归 `.harness/tasks`，旧 `evaluation` 归 `.harness/evaluation`，旧 `knowledge/teaching` 归 `teaching`。不能凭标题或正文猜私有归属。
 
-自定义类型的模块与格式独立：未指定 module 时保留在 `memory/<原目录>`，显式 `module: memory|skills` 按原值保留；实例的 owner 合并继续使用通用迁移给出的类型目标。私有目录也保留旧 `.memory` 等祖先提供的权限限制，不仅比较类型目录自身。
+曾被旧版本提升到根的私有记录须在**该克隆**凭 `.recursive-layout-migration/journal.json` 的可信旧 owner 与源身份显式 opt-in 纠正。先保留原 journal 和源/目标字节，核对其权限、忽略规则和 provenance，再在隔离副本用 `pnpm restore:local-ownership --root <该克隆绝对路径> --private --dry-run` 审阅。来源缺失、歧义、目标冲突或旧版仍 pending 的提升 journal 会给出诊断并拒绝猜测；请人工核实后处理，勿删除 journal 或覆盖编辑。完成旧迁移的新 journal 可继续安全 resume，纠正过程使用独立的 ignored `.ownership-correction/private.json`，与旧实例日志分开。这里没有对当前克隆执行私有纠正。
 
-## 每台机器的私有材料
-
-Git 提交只迁移公开内容，不能代表其他克隆的 ignored 用户材料已迁。即使已拉到新版公开目录，也要在需要升级的独立工作树上运行同一实例命令。普通 `edges memory migrate --recursive` 保留旧 owner 关系，不能代替本实例的 owner 合并。
-
-清单的 `privateOwnerMap` 明确旧 owner 的目标：
-
-| 旧 owner | 新 owner |
-| --- | --- |
-| 根 `.` | 根 `.` |
-| `extensions` | 根 `.` |
-| `extensions/skills/project-memory-init` | 根 `.` |
-| `shared-extensions` | 根 `.` |
-| `knowledge/tasks` | 根 `.` |
-| `knowledge/notes` | 根 `.` |
-| `evaluation` | `.harness/evaluation` |
-| `knowledge/teaching` | `teaching` |
-
-仅按这份 owner 映射迁移，不读取私有正文推断归属。保留文件名、附件、权限和类型元数据中的未知字段；私有目录按源权限建立，已有目标目录只收紧、不放宽，并在复制任何私有文件前完成权限与忽略设置。正文及类型索引的相对链接按旧位置到最终位置重定位，引用原模块 README 等原位文件时保留其语义目标。不合并有差异的私有索引，不丢掉手写说明。未知 owner、无法判断类型身份或权限、不同目标内容碰撞都会在写入前报具体路径。先由人明确冲突的归属或保留方式，再重跑；不要删除旧文件来绕过检查。仅剩用户正文而没有旧索引时，须已有目标作用域的私有类型索引；新旧索引均不存在则预检报 `private-index-missing`，先恢复本机私有索引再迁移，不能把缺索引当作没有私有数据。
-
-新拉取的公开树可能在 teaching、evaluation 等已采用 `user` 类型的真正作用域里缺少 ignored 官方索引。实例脚本会在写入前为这些明确采用的官方用户类型规划缺失索引：已有本机用户记录时只按实际记录生成索引，无记录时使用官方空索引模板，不新增正文或类型采用。现存索引和手写说明保留；缺少自定义类型索引时，因无法恢复其原权限和未知元数据，会在预检要求先恢复原索引。
-
-已经升级的公开树允许 Task 后续变更状态、增加新记忆；私有残留迁移不重放旧公开快照，也不要求已移动 Task 仍在原来的状态路径。原模块不会因为私有残留重新成为作用域。
-
-`.recursive-layout-migration/journal.json` 保存恢复所需的字节状态，目录权限 0700、文件 0600，并在复制私有材料前加入 Git 忽略；禁止提交或公开这个日志。失败时保留工作树与日志，修正报出的冲突后用同一命令重跑。脚本检查源/目标是否被后来编辑，验证副本、类型索引、链接与忽略覆盖后才删除源。运行完成后再次执行应返回 `unchanged`；后来新增内容不会被覆盖。 旧版本若已复制根私有索引后因其他作用域缺少官方用户索引而停在 `copied`，保留现有日志与旧源，升级脚本后按同一工作树先 `--dry-run`、再 `--apply`。新版先验证原日志中的源/目标未被修改，再扩充缺失官方索引操作并继续；后来编辑过已复制目标时仍会停下报冲突，不丢弃日志或覆盖编辑。
+迁移及纠正保留文件名、附件、权限和未知元数据；已建立的目标目录只收紧私有权限，不放宽。旧私有类型索引缺失时预检拒绝，不能把缺索引当作没有私有数据。已采用官方 `user` 类型而缺 ignored 索引的教学、评测等节点，实例迁移按实际记录生成或使用官方空模板；不会凭空采用自定义类型。任何后来编辑的副本不能被旧 journal 强制重放。
 
 ## 验证与边界
 
-通用迁移器的 `.project-memory-migration/journal.json` 与上述实例日志不同。升级前的未完成通用日志缺少目录权限记录（`sourceDirectoryModes`、目录项的 `originalTargetMode` / `targetMode`），新版返回 `journal-directory-permissions-missing`，不会猜测历史权限或重放文件；已完成日志不重放，重复执行重新规划当前树，不受影响。保留原日志及两侧材料，在受保护的本机副本逐项核对文件状态与可信的迁移前目录权限；有完整备份时，在独立空目录恢复并以新版 dry-run、迁移和验证形成可审阅结果，再人工处理与原现场的差异。没有可信权限依据时交所有者裁决，不能删除日志、覆盖目标或假定旧源仍完整。具体步骤见 [迁移 Skill 的旧版日志恢复说明](../extensions/skills/project-memory-migrate/SKILL.md#旧版未完成日志的恢复)。实例日志原有的缺失索引恢复流程保持不变。
+通用迁移器的 `.project-memory-migration/journal.json` 与实例迁移、纠正 journal 各自独立。升级前未完成且缺目录权限记录的通用日志会报 `journal-directory-permissions-missing`；需在受保护副本核实可信权限及文件状态，不能删日志重跑。详见[迁移 Skill 的旧版日志恢复说明](../extensions/skills/project-memory-migrate/SKILL.md#旧版未完成日志的恢复)。
 
-```bash
-pnpm --filter edges-cli exec tsx src/index.ts memory doctor --target-dir /absolute/path/to/owned-worktree
-pnpm --filter edges-cli exec tsx src/index.ts tasks --scope /absolute/path/to/owned-worktree --purpose domain list
-pnpm --filter edges-cli exec tsx src/index.ts tasks --scope /absolute/path/to/owned-worktree --purpose maintenance list
-scripts/link-agent-skills --dry-run
-scripts/link-agent-skills --check
-```
+在独立工作树内，可只读运行 `pnpm --filter edges-cli exec tsx src/index.ts memory doctor --target-dir <节点目录>`、`edges tasks --scope <工作树> --purpose domain list` 与 `--purpose maintenance list`。Doctor 对不存在的 referenced 安装来源给出诊断，不意味着可制造空 `.agents/skills` 或正文；公共索引刷新只针对实际存在的源，并保留人工前缀。`scripts/link-agent-skills --dry-run` 与 `--check` 只检查安装关系。`project-tasks-propose-types` 尚无实际源码目录；通用 Task Skill/MCP、自动复盘与 Agent Teams 编排也不因这次归属纠正而完成。
 
-发现索引缺项时按 Doctor 的诊断处理；索引刷新保留手写引言。技能安装关系由已有 `link-agent-skills` 管理，只允许修正该工作树自己的安装入口。缺失的 referenced 来源如 `.harness/evaluation/.agents/skills`、`teaching/.agents/skills` 保持明确诊断，不制造 `.agents` 目录或正文。`project-tasks-propose-types` 在当前源码中没有实际目录/正文，因此不凭空创建；通用 Task Skill/MCP 与 Python→CLI 等 backlog 也不因此完成。
-
-`knowledge/posts/` 字节不变。若保护文章内的链接因搬迁需要改正文，预检会停下交人处理。其他 Markdown 只重定位链接，不全局替换历史文字、代码示例或旧目录叙述。未初始化的 submodule 只迁移 Git 的精确 gitlink；其内部文档仍不可读，不据此宣称 LoCoMo 已运行。此迁移不执行 benchmark、部署、全局安装、合并或发布。
+`knowledge/posts/` 保持不变；若其链接需要修改，须由人处理。未初始化 submodule 只保留精确 gitlink，不据此宣称其内部测试已运行。迁移不执行 benchmark、部署、全局安装、合并或发布。

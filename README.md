@@ -54,12 +54,12 @@ Edges 当前以个人递归自我改进（Recursive Self-Improvement，RSI）为
 | 知识生产 | [`notes/`](knowledge/notes/)、[`projects/`](projects)、[`teaching/`](teaching) | 承载研究线索与在研资产，选择性投入认知资本 |
 | 知识沉淀 | [`edges/`](knowledge/edges/) | 形成脱离原始场景仍可反复部署的核心资产 |
 | 知识使用 | 内部调用、[`posts/`](knowledge/posts/)、系统接口 | 部署资产，获得决策收益和外部反馈 |
-| 工作项 | [`tasks/`](.harness/tasks) | 跨 Agent 接力的 Task 看板，按 `edges-tasks-status` 分夹；不是知识原材料，也不是抢单队列 |
+| 工作项 | [`tasks/`](tasks/) 与 [`.harness/tasks/`](.harness/tasks/) | 分别承载领域工作和 Edges 维护任务；各板按 `edges-tasks-status` 分夹 |
 | 支撑与退出 | [`resources/`](knowledge/resources/)、[`archive/`](knowledge/archive/) | 支撑资产使用、控制持有成本并保留恢复可能 |
 
 Notes 是低成本、零散且尚未形成稳定结论的捕获。Projects 是以解决问题或交付产出为目标的专项工作区；Teach 是以学习进展和能力获得为目标的专项工作区。三者都是知识生产入口，不是依次晋级的成熟度阶段，也不要求投入相同成本。专项中的原始上下文留在工作区，只有预期能够复用、影响决策或降低不确定性的经验，才值得进一步提炼为 Edge。
 
-[`.harness/tasks/`](.harness/tasks) 存放跨 Agent 接力的工作项，按 `edges-tasks-status` 分夹。新人侧捕获默认落入 `backlog/`；执行记录写在同 stem 的 sidecar，不进入 Task 正文。它不是 Note，也不是 Multica 式可抢单队列。
+[`tasks/`](tasks/) 存放领域工作项，[`.harness/tasks/`](.harness/tasks/) 存放 Edges 维护任务；两板按 Task Project 分组，再按 `edges-tasks-status` 分夹。新人侧捕获默认落入 `backlog/`；执行记录写在同 stem 的 sidecar，不进入 Task 正文。Task 不是 Note，也不是 Multica 式可抢单队列。
 
 ### Edge 与演化
 
@@ -105,12 +105,12 @@ projects/foo/report.md → knowledge/archive/projects/foo/report.md
 
 - **闭环复利（投资视角）**：投入认知资本，沉淀知识资产；知识指导行动，反馈回到捕获入口，持续积累判断优势。
 - **任意输入、统一转化、多种输出（ETL 视角）**：以统一的知识模型承接不同来源与形态的输入，按消费场景转化为多种输出，贯通沉淀、转化与消费的全流程。
-- **持续协作与自进化（Agent 视角）**：以 `AGENTS.md` 为入口，人和 Agent 共用 Memory，接续长期任务（Long-horizon Tasks）、组织 Agent Teams，并将改进后的能力用于下一轮个人自我改进。
-- **递归树结构**：每个 `AGENTS.md` 节点沿用 Project Memory 的三部分：**本层重要约束**（现有章节名为“本层硬约束”）规定本层规则，**本层记忆**索引本层材料，**下层记忆索引**连接子节点。tasks 等新增内容也暂时注册在这三部分内，不另增入口章节。树表达层次与归属，各层递归沿用同一节点模型，维护系统自身也可继续被维护；根可面向个人、团队、公司等主体。节点间允许交叉引用，`AGENTS.md` 可跨目录层级直达，公共能力跨层复用。
+- **持续协作与自进化（Agent 视角）**：以 `AGENTS.md` 为入口，人和 Agent 共用 Memory、接续长期任务（Long-horizon Tasks）；Agent Teams 与将改进能力持续用于下一轮个人自我改进，是进一步发展的方向。
+- **递归树结构**：有可读 `AGENTS.md` 的目录可作为节点；入口沿用 Project Memory 的三部分：**本层硬约束**规定本层规则，**本层记忆**登记直属材料，**下层记忆索引**登记子节点。Task Project 等业务索引也放进这三部分。树表达逻辑归属，普通交叉引用不产生所有权；物理目录层级不必等于节点层级。各节点可按需拥有维护空间，根可面向个人、团队、公司等主体。
 - **文件系统**：以文件系统承载记忆，保持可读、可编辑、可迁移。
 - **Git 原生管理**：用 Git 的跟踪、忽略与版本机制管理记忆；例如 user memory 通过 `.gitignore` 不随 Git 提交与共享，同时仍属于本层记忆。
 
-这些原则指导系统演进。Project Memory 已支持分层递归；整仓目录重构已产生实现，整体方案正在重新确认，节点识别与局部记忆归属仍待修正。术语定义见 [CONTEXT.md](CONTEXT.md)。
+这些原则指导系统演进。目前 CLI 可选显式作用域或最近的 `AGENTS.md` 节点，节点服务按入口索引遍历所有权；Project Memory 按需登记本地类型，不会因为发现节点就自动初始化。43 条曾上收根层的公开局部记忆已返回原所有者；其他克隆的私有材料仍须各自按[迁移指南](docs/recursive-layout-migration.md)审阅与处理。术语定义见 [CONTEXT.md](CONTEXT.md)。
 
 围绕这些原则，Edges 希望部署、接入和输出这三件事尽量一键完成。它们分别托住知识闭环的底座、把捕获接到输入侧、以及把沉淀资产部署出去。仓库按这个方向收敛。
 
@@ -121,7 +121,7 @@ projects/foo/report.md → knowledge/archive/projects/foo/report.md
 | 目录 | 职责 | 边界 |
 | --- | --- | --- |
 | [`knowledge/`](knowledge/) | 知识生产、提炼、使用与退出 | Edges 的核心资产 |
-| [`AGENTS.md`](AGENTS.md) 与 [`.harness/memory/`](.harness/memory) | 为人和 Agent 提供分层的规则、决策、纠错与流程记忆 | 服务项目维护，不替代长期知识库 |
+| [`AGENTS.md`](AGENTS.md) 与各节点的 `.harness/memory/` | 为人和 Agent 提供分层的规则、决策、纠错与流程记忆 | 归属各节点，服务项目维护，不替代长期知识库 |
 | [`extensions/`](extensions/README.md) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关 |
 | [`shared-extensions/`](shared-extensions/README.md) | 跨机器、跨 Agent 共用的个人 harness | 离开 Edges 仍然有价值 |
 | [`scripts/`](scripts/README.md) | 初始化、构建、迁移等维护脚本 | 通过 `pnpm` 调用，不加入 `$PATH` |
@@ -132,7 +132,7 @@ projects/foo/report.md → knowledge/archive/projects/foo/report.md
 
 捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](extensions/cli/README.md) 的 `edges note …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](extensions/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
 
-Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；`AGENTS.md` 和 `.harness/memory/` 保存维护系统所需的运营规则、决策与经验；`knowledge/` 保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
+Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；各节点的 `AGENTS.md` 和 `.harness/memory/` 保存该节点维护所需的规则、决策与经验；`knowledge/` 保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
 
 `extensions/` 收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill 和其他接口。`shared-extensions/` 则保存不依赖 Edges、可跨机器和 Agent 客户端复用的个人 harness；两者互斥。短生命周期预览页（上传 → 可达 URL → TTL）的用例 × 能力见 [`extensions/services/artifacts-preview`](extensions/services/artifacts-preview/README.md#use-case-matrix)；命令面是 `edges artifacts`。
 
@@ -189,7 +189,7 @@ pnpm test
 - [`README.md`](README.md)：目录约定、业务逻辑和内容标准的说明；规范按职责保留单一真源，由 AGENTS.md 组织发现。
 - [`AGENTS.md`](AGENTS.md)：Agent 必须优先看到的硬约束和分层项目记忆入口。
 - [`CONTEXT.md`](CONTEXT.md)：领域术语表，不存放实现细节。
-- [`.harness/memory/`](.harness/memory)：保存无法从代码或 Git 历史直接推导的决策、反馈与参考资料。
+- 各节点的 `.harness/memory/`：保存无法从代码或 Git 历史直接推导的决策、反馈与参考资料；根目录中的 [`.harness/memory/`](.harness/memory/) 只属于根节点。
 - 仓库级变更记录在 [`CHANGELOG.md`](CHANGELOG.md)，tag 使用 `vX.Y.Z`。
 - 对外 skill 各自独立 semver；`shared-extensions/` 整层使用自己的 [`VERSION`](shared-extensions/VERSION) 与 [`CHANGELOG.md`](shared-extensions/CHANGELOG.md)。
 

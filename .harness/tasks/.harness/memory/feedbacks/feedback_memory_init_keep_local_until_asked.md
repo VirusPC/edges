@@ -5,13 +5,13 @@ metadata:
   edges-title: project-memory init 先留本地
   edges-type: feedback
   edges-origin-session-id: e783aa76-4d8c-4296-8080-7ed191474f70
-  edges-agent-client: cursor
-  edges-username: 通用-辅助-2
-  edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-11T04:59:38+00:00"
+  edges-agent-client: codex
+  edges-username: cheng
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: '2026-10-05T05:40:36+08:00'
 ---
 
-对 `knowledge/tasks` 做 project-memory-init（或同类记忆脚手架）后，默认先留本地，未经用户明确同意不要提交 / 开 PR。
+2026-09-11 用户要求对当时的 `knowledge/tasks` 做 project-memory-init（或同类记忆脚手架）后，先在本地审阅，未经明确同意不要提交 / 开 PR。现行板位于 `tasks/` 与 `.harness/tasks/`；可读 AGENTS.md 可成为节点，发现节点本身不自动 Init。此条保留当时草稿的审阅约定，不把它扩展为已授权的自动初始化。
 
 **Why:**
 用户可能要先看生成的 `AGENTS.md` / `.memory` 再决定是否入库；自动推送会打乱本机未定稿的改动。

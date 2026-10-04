@@ -1,16 +1,18 @@
 ---
 name: project_scope_first_content_ownership
-description: 节点与 NodeService 设计；Skill 须遵循标准完整目录定义，入口文档与资源、目录操作边界待修订
+description: 设计递归节点、AGENTS 三段归属与资源边界时：现行 NodeService、43 条公开局部记忆恢复与私有逐克隆审阅；下文含有明确日期的历史方案。
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-05T01:00:57+08:00'
+  edges-updated-at: '2026-10-05T05:44:51+08:00'
 ---
 
 ## 2026-10-05 用户确认：Project Memory 执行层统一 TypeScript
+
+**2026-10-05 现行状态：**节点类与 `NodeService` 已接入正常 Task、Memory、Note 操作；有可读 `AGENTS.md` 的目录可被 CLI 选择为节点，不再有独立责任资格门槛，且发现节点不自动 Init。入口保持三部分，43 条公开局部记忆已按当前字节恢复到原所有者：`extensions` 16、`project-memory-init` 17、`shared-extensions` 1、`knowledge/notes` 1、原 Tasks 8 归 `.harness/tasks`。其他克隆的私有纠正仍按可信本机 journal 显式审阅。下方带日期的“待实现”与旧目录判断是当时记录，不应替代此状态；详情见 [ADR 0024](../../../docs/adr/0024-scope-first-content-ownership.md) 与 [纠正计划](../../../docs/superpowers/plans/2026-10-05-recursive-node-ownership-correction.md)。
 
 用户确认把原 Python 执行能力迁入 `edges memory`，Skill 保留推理、内容规范与人审流程，模板仍由 init Skill 提供并随 CLI 构建分发。记忆读写、索引、显式迁移及私有归档共享 CLI 的 TypeScript 实现与基础 Markdown/YAML codec。
 

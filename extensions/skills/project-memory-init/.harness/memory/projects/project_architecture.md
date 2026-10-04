@@ -6,10 +6,13 @@ metadata:
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-05T01:00:58+08:00'
+  edges-updated-at: '2026-10-05T05:40:34+08:00'
+  edges-agent-client: codex
 ---
 
 # 项目记忆的技术关键点
+
+**现行实现（2026-10-05）：**下文保留早期技术选择与当时的 Python 路径作历史证据。当前执行层是 TypeScript `edges memory` 与 `NodeService`：可读 `AGENTS.md` 即可作为节点，逻辑归属取已登记的本层/下层索引，普通 prose 链接不产生归属；节点发现不自动 Init。本节点的记忆在自己的 `.harness/memory/`，不因共享 CLI 位于 `extensions/` 而归根。现行契约见 [`PROTOCOL.md`](../../../references/PROTOCOL.md)、[`LAYOUT.md`](../../../references/LAYOUT.md) 及 [节点模型规格](../../../../../../docs/superpowers/specs/2026-10-04-node-domain-model-design.md)。
 
 这套东西的**承重点**在哪、**最脆**的地方在哪。规范看 [`PROTOCOL.md`](../../../references/PROTOCOL.md)，当前实现看 [`LAYOUT.md`](../../../references/LAYOUT.md)，每个决定当时怎么权衡的看 [`design-decisions.md`](project_design_decisions.md)，外部证据看 [`prior-art/`](../references/reference_prior_art.md)。
 

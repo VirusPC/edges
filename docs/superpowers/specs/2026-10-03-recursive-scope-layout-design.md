@@ -1,5 +1,7 @@
 # 递归作用域目录与迁移设计
 
+**历史方案（2026-10-03）：** 当前依据为 [ADR 0024](../../adr/0024-scope-first-content-ownership.md)、[现行节点模型](2026-10-04-node-domain-model-design.md)及[所有权纠正计划](../plans/2026-10-05-recursive-node-ownership-correction.md)。下文旧节点门槛、根层汇总、第四入口段与“尚未实施”均记录当时状态，不作为现行操作依据。
+
 日期：2026-10-03；2026-10-04 状态更新：**整体方案待重新确认**。用户已纠正节点门槛、入口章节与子节点记忆上收，当前依据见 [ADR 0024](../../adr/0024-scope-first-content-ownership.md)。
 
 > 最新模型方向已确认：节点统一放在 models，使用实例 parse/serialize 和子类正文扩展点，不设置顶层 codecs；Internal.children 从原有索引派生。见[节点领域模型设计](2026-10-04-node-domain-model-design.md)。此为后续重构目标，不能与下文已实施的旧接口混为一谈。
