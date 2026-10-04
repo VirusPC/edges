@@ -161,6 +161,10 @@ declare class NodeService {
 }
 ```
 
+实现允许构造时传入两个可选业务适配钩子，`new NodeService()` 仍可独立使用：`modelForReference(parent, reference, resolvedPath)` 根据已登记模块契约选择模型；`assertWrite(context)` 在所有计划写入前校验权限和来源。它们不形成全局类型注册表，权限校验不执行写入。Memory 的私有忽略规则、业务来源校验仍由适配层负责；临时文件与失败恢复文件也在目标同目录，因此私有校验须覆盖目录而不只是入口 Markdown。
+
+更新与删除使用同一 service 读取或创建时记录的内容和文件身份，拒绝盲覆盖、内容漂移与文件替换。跨文件失败尽力回滚并报告实际受影响路径；回滚失败时保留可恢复的原文副本和原权限，不在错误中输出正文。
+
 get(path) 只提供基础 Markdown 模型；需要领域操作时显式传入 TaskNode、MemoryNode、NoteNode、SkillNode 或 InternalNode，不通过随意猜测 YAML 字段决定模型类型。list 的作用域入口使用 InternalNode，其他节点依据已登记的入口、模块契约加载；没有专用模型约定的普通文档使用 BaseNode，不把任意 Markdown 都当作 Note，不另建全局类型注册框架。
 
 list 从 scopePath 指定的作用域入口开始，采用先序遍历并遵循索引条目顺序；按解析后的目标路径去重，遇到归属环时报错。作用域入口或被选中引用目标缺失时报错，不静默遗漏；未选择的 descendant 目标不加载、不检查。输出为节点数组，不新增树包装对象。初始作用域的 CLI 选择策略仍由命令适配层决定。
