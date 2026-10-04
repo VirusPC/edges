@@ -55,24 +55,27 @@
 - [x] Wire commands to services, package canonical templates into dist and verify built CLI runs outside the repository against a temporary scope.
 - [x] Check PROTOCOL unchanged, update LAYOUT commands, then init and remaining non-doctor skills, doctor last. Skills retain reasoning/review gates. Conversation-to-tasks already uses CLI; do not add a second task-writing implementation. Conversation-to-notes publication workflow is a separate change and is not replaced with incompatible ingest output.
 - [x] Replace active script callers, retire Python runtime and obsolete tests, update relevant skill versions/changelogs without publishing tags. Preserve historical ADR/changelog evidence.
-- [ ] Run the full CLI tests/build and remaining repository checks affected by removed paths. Review TypeScript changes, address findings, commit and push to the existing draft PR.
+- [x] Run the full CLI tests/build and remaining repository checks affected by removed paths. Review TypeScript changes, address findings, commit and push to the existing draft PR.
 
 ## Verification record
 
-2026-10-05: Tasks 1–2 and CLI/distribution/skill integration implemented. Old Python runtime/tests removed after parity verification. Final broad review and draft-PR update remain the final gate.
+2026-10-05: Tasks 1–2 and CLI/distribution/skill integration implemented. Old Python runtime/tests removed after parity verification. Final review approved the execution port after the consolidated fixes and the stale-index correction; changes are delivered through draft PR161.
 
 | Verification | Result |
 | --- | --- |
 | Baseline before port | Python core/archive102, generic38, instance21 passed. |
 | Original acceptance against TS |35 core harness-layout cases and41 migration command-level cases passed; migration executed63 native commands. In-process state/fault cases have native TS equivalents. |
-| Final workspace `pnpm test` |579 passed: CLI496, MCP14, artifacts service42, review app27. Includes memory behavior, private archives, migration recovery and isolated compiled distribution. |
+| Workspace `pnpm test` before final fixes |579 passed: CLI496, MCP14, artifacts service42, review app27. |
+| Final CLI `pnpm --filter edges-cli test` at7d72d38 |519 passed after23 additional final-review regressions; other packages were unchanged by these fixes. Includes memory behavior, private archives, migration recovery and isolated compiled distribution. |
 | Final workspace `pnpm build` |Passed. Existing Vite `configLoader`/`__dirname` and `inlineDynamicImports` warnings remain in unchanged app configuration. |
 | Root script typecheck |Strict NodeNext noEmit check of `scripts/migrate-recursive-layout.mts` passed. |
 | Root script CLI |`pnpm migrate:recursive-layout --help` exits0; normal memory adapters covered through CLI integration tests. |
 | Source boundaries |No active executable references to removed Python entrypoints; `knowledge/posts/` and `.obsidian/workspace.json` unchanged by this PR. |
 
-Task reviews found and resolved malformed existing YAML overwrite, forged index display rows, forced-restore rollback, bounded archive streams, exact private path ignore coverage, Git-discovery fail-open, resumed gitlink edits and the legitimate interrupted two-entry gitlink state. Regressions use synthetic temporary repositories and archives; no live private migration or restore was performed.
+Task reviews found and resolved malformed existing YAML overwrite, forged index display rows, forced-restore rollback, bounded archive streams, exact private path ignore coverage, Git-discovery fail-open, resumed gitlink edits and the legitimate interrupted two-entry gitlink state. Final broad review additionally found bypasses at generic-migration and core private-write call sites, plus unescaped migration-generated indexes. The consolidated fix at2ca7778 invokes the shared guard even when lightweight Git discovery finds no root and reuses index escaping while preserving source bytes. Its179 focused cases and both typechecks passed. Scoped review found an ordering regression involving stale derived links;7d72d38 discards those rows before authored-link rewriting when rebuilding is possible. The45 generic migration cases and final519 CLI tests passed; the complete workspace build was repeated successfully. Final scoped review approved all corrections. Regressions use synthetic temporary repositories and archives; no live private migration or restore was performed.
 
 Archive defaults are256 MiB expanded tar bytes and10,000 members, with raw tar/gzip support; backup rejects hardlinked source files. Caught restore failures roll back, but process termination/power loss between directory renames may require the retained private recovery copy. No cross-process lock was introduced.
+
+Final-review ruling: the new stale-index regression was treated as completion-blocking and repaired despite the workflow’s final-wave cap. This added one minimal change and focused review; if unnecessary, the cost is additional migration behavior change and verification work. No finding was silently deferred.
 
 This completes the execution-language migration, not the separately proposed node class refactor or the pending correction of43 previously promoted local memories. Those remain explicit draft-PR limitations.
