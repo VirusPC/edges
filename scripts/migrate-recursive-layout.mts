@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --import tsx
-import { InternalNode } from '../extensions/cli/src/models/internal-node.js';
+import { InternalNode } from "../extensions/cli/src/models/internal-node.js";
 /** Reviewed Edges instance migration; generic Project Memory owns format conversion. */
 import * as fs from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
@@ -25,11 +25,12 @@ import type { LegacyType } from "../extensions/cli/src/services/memory/migration
 const JOURNAL = ".recursive-layout-migration";
 export const OWNER_MAP: Record<string, string> = {
   ".": ".",
-  extensions: ".",
-  "extensions/skills/project-memory-init": ".",
-  "shared-extensions": ".",
-  "knowledge/tasks": ".",
-  "knowledge/notes": ".",
+  extensions: "extensions",
+  "extensions/skills/project-memory-init":
+    "extensions/skills/project-memory-init",
+  "shared-extensions": "shared-extensions",
+  "knowledge/tasks": ".harness/tasks",
+  "knowledge/notes": "knowledge/notes",
   evaluation: ".harness/evaluation",
   "knowledge/teaching": "teaching",
 };
@@ -318,7 +319,17 @@ export function makeInstancePlan(
         basename(target) === "AGENTS.md" &&
         source.split("/").includes(".memory")
       ) {
-        if (privatePath(source))
+        if (
+          privatePath(source) ||
+          memory.private.some(
+            (p) => within(source, p) || within(target, mapped(p)),
+          ) ||
+          [old.after, after].some(
+            (state) =>
+              state.kind === "file" &&
+              parseTypeMeta(generic.decodeState(state))?.gitignore,
+          )
+        )
           throw new Error(`private-index-collision: ${relative(root, source)}`);
         let [left, right] = mergeIndexMetadata(
           generic.decodeState(old.after),
@@ -374,20 +385,6 @@ export function makeInstancePlan(
         dest,
         remapped,
       );
-      const owner = relative(root, dirname(source)) || ".";
-      if (
-        basename(source) === "AGENTS.md" &&
-        owners[owner] === "." &&
-        dirname(source) !== root
-      )
-        text = stripScope(text);
-      const indexOwner = dirname(dirname(dirname(source)));
-      if (
-        op.before === null &&
-        indexOwner !== root &&
-        owners[relative(root, indexOwner)] === "."
-      )
-        continue;
       after = generic.fileState(text, after.mode);
     }
     add(source, dest, after, op.before);
@@ -517,12 +514,6 @@ export function makeInstancePlan(
         dest,
         mapped,
       );
-      if (
-        basename(source) === "AGENTS.md" &&
-        dirname(source) !== root &&
-        owners[relative(root, dirname(source))] === "."
-      )
-        text = stripScope(text);
       after = generic.fileState(text, before.mode);
     } else if (before.kind === "link")
       after = {
@@ -534,6 +525,35 @@ export function makeInstancePlan(
       };
     add(source, dest, after, before);
   }
+  // Ignored remnants in upgraded clones restore adoption at the original node.
+  // This path is opt-in through the explicit instance migration, never public correction.
+  if (!fullLegacy)
+    for (const directory of memory.private) {
+      const destination = mapped(directory);
+      const owner = Object.values(owners)
+        .filter((value) => within(destination, join(root, value, ".harness")))
+        .sort((a, b) => b.length - a.length)[0];
+      if (owner === undefined)
+        throw new Error("private-remnant-owner-unresolved");
+      const agents = join(root, owner, "AGENTS.md"),
+        existing = operations.get(agents);
+      const current = existing?.after ?? generic.state(agents);
+      if (!current || current.kind !== "file")
+        throw new Error("private-remnant-owner-AGENTS-missing");
+      const node = new InternalNode(agents).parse(generic.decodeState(current));
+      const target = relative(dirname(agents), join(destination, "AGENTS.md"));
+      if (!node.children.some((child) => child.target === target)) {
+        node.addChild({
+          target,
+          label: target,
+          kind: "local",
+          description: "本节点的私有记忆，仅保存在本克隆。",
+        });
+        const after = generic.fileState(node.serialize(), current.mode);
+        if (existing) existing.after = after;
+        else add(agents, agents, after);
+      }
+    }
   const domainProjects = new Set(
     (manifest.tasks ?? [])
       .filter((i) => i.target.startsWith("tasks/"))
@@ -548,7 +568,8 @@ export function makeInstancePlan(
       const dest = join(root, "tasks", rel);
       let text = generic.rewriteLinks(readText(source), source, dest, mapped);
       if (rel === "AGENTS.md") {
-        text = stripScope(text);
+        text = stripScope(block(text, "important"));
+        text += "\n共同看板约定见[维护看板](../.harness/tasks/AGENTS.md)。\n";
         text = text.replace(
           /^- \[.*?\]\(([^)]+)\/AGENTS.md\).*\n/gm,
           (line, p: string) => (domainProjects.has(p) ? line : ""),
@@ -589,9 +610,10 @@ export function makeInstancePlan(
         ["CONTEXT.md", "领域术语", "local"],
       ] as const;
       for (const [target, label, kind] of links) {
-        const old = node.children.find(child => child.target === target);
+        const old = node.children.find((child) => child.target === target);
         if (old) node.updateChild({ ...old, kind });
-        else node.addChild({ target, label, kind, description: `${label}入口。` });
+        else
+          node.addChild({ target, label, kind, description: `${label}入口。` });
       }
       return node.serialize();
     });
@@ -669,9 +691,7 @@ export function makeInstancePlan(
 export function planMissingPrivateIndexes(root: string, job: InstanceJob) {
   const planned = new Map(job.operations.map((op) => [op.target, op]));
   for (const scope of [
-    root,
-    join(root, "teaching"),
-    join(root, ".harness/evaluation"),
+    ...[...new Set(Object.values(OWNER_MAP))].map((owner) => join(root, owner)),
   ]) {
     const agents = join(scope, "AGENTS.md"),
       op = planned.get(agents),
@@ -849,9 +869,7 @@ export function validateInstanceCopies(root: string, job: InstanceJob) {
       }
   }
   for (const scope of [
-    root,
-    join(root, "teaching"),
-    join(root, ".harness/evaluation"),
+    ...[...new Set(Object.values(OWNER_MAP))].map((owner) => join(root, owner)),
   ])
     if (fs.existsSync(join(scope, "AGENTS.md")))
       for (const spec of layerTypeSpecs(scope))
@@ -888,6 +906,24 @@ export function runInstanceMigration(
     ? (JSON.parse(readText(journal)) as InstanceJob)
     : undefined;
   if (stored && stored.root !== root) throw new Error("journal-root-mismatch");
+  if (stored && stored.phase !== "done") {
+    for (const op of stored.operations)
+      for (const item of [op, ...(op.retire ?? [])]) {
+        const rel = relative(root, item.source);
+        for (const [old, owner] of Object.entries(OWNER_MAP)) {
+          if (old === "." || owner === ".") continue;
+          if (
+            [`${old}/.memory/`, `${old}/.harness/`].some((prefix) =>
+              rel.startsWith(prefix),
+            ) &&
+            !within(op.target, join(root, owner, ".harness"))
+          )
+            throw new Error(
+              "historical-owner-promotion-journal-needs-review: preserve journal and source/target bytes; do not resume with obsolete ownership",
+            );
+        }
+      }
+  }
   const job =
     stored && stored.phase !== "done"
       ? stored
@@ -897,7 +933,15 @@ export function runInstanceMigration(
   planMissingPrivateIndexes(root, job);
   checkInstanceJob(root, job);
   const publicMap = job.operations
-      .filter((op) => !privatePath(op.source) && !privatePath(op.target))
+      .filter(
+        (op) =>
+          !privatePath(op.source) &&
+          !privatePath(op.target) &&
+          !(job.private ?? []).some(
+            (directory) =>
+              within(op.target, directory) || within(op.source, directory),
+          ),
+      )
       .map((op) => ({
         source: relative(root, op.source),
         target: relative(root, op.target),

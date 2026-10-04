@@ -81,3 +81,6 @@ extensions/cli/src/commands/tasks/project/assets/review-page/
 /teaching/.harness/memory/users/
 
 /.harness/evaluation/.harness/memory/users/
+
+# Owner-local correction recovery snapshots (private opt-in may contain secrets).
+**/.ownership-correction/

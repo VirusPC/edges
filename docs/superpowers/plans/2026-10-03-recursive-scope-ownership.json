@@ -1,5 +1,5 @@
 {
-  "status": "Reviewed ownership; Task5 worktree migration validated on 2026-10-03. This is a migration-time snapshot, not live Task status or all-clone private-data completion.",
+  "status": "reviewed-owner-local-correction-2026-10-05",
   "taskCount": 103,
   "domainTaskCount": 5,
   "tasks": [
@@ -1744,308 +1744,478 @@
     {
       "description": "新增或移动面向 agent 的 CLI 时：放 extensions/cli，禁止仓库根 clis/。",
       "sha256": "5e4d68c43ffb741124f2791972215606af6aedf0e394022841e9791ce14edabb",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_cli_under_extensions.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：新增或移动面向 agent 的 CLI 时：放 extensions/cli，禁止仓库根 clis/。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/feedbacks/feedback_cli_under_extensions.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/feedbacks/feedback_cli_under_extensions.md",
-      "targetSha256": "5e4d68c43ffb741124f2791972215606af6aedf0e394022841e9791ce14edabb"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_cli_under_extensions.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：新增或移动面向 agent 的 CLI 时：放 extensions/cli，禁止仓库根 clis/。",
+        "targetSha256": "5e4d68c43ffb741124f2791972215606af6aedf0e394022841e9791ce14edabb"
+      }
     },
     {
       "description": "在 Codex 里触发某个 skill 时用 $skill-name；/ 是斜杠命令。/skills 只列清单。不要把认不到 skill 当成没装上。",
       "sha256": "fc57511d7611e406203f9ce98b439deb274d1db80556b1440a428a3a6cabe8b9",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_codex_invoke_skill_with_dollar.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：在 Codex 里触发某个 skill 时用 $skill-name；/ 是斜杠命令。/skills 只列清单。不要把认不到 skill 当成没装上。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/feedbacks/feedback_codex_invoke_skill_with_dollar.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/feedbacks/feedback_codex_invoke_skill_with_dollar.md",
-      "targetSha256": "fc57511d7611e406203f9ce98b439deb274d1db80556b1440a428a3a6cabe8b9"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_codex_invoke_skill_with_dollar.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：在 Codex 里触发某个 skill 时用 $skill-name；/ 是斜杠命令。/skills 只列清单。不要把认不到 skill 当成没装上。",
+        "targetSha256": "fc57511d7611e406203f9ce98b439deb274d1db80556b1440a428a3a6cabe8b9"
+      }
     },
     {
       "description": "写 edges tasks --help 测例、禁止某个动词出现时：用 ^\\s+verb\\b 锚定命令列表行，不要用 /\\bverb\\b/，以免 after-help 的 “There is no X command” 被当成命令。",
       "sha256": "b270dc666af7c8c303ae4ef85d88b51037f6d39689d45c771bcc14163ceb4a72",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_help_forbid_verb_line_anchor.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写 edges tasks --help 测例、禁止某个动词出现时：用 ^\\s+verb\\b 锚定命令列表行，不要用 /\\bverb\\b/，以免 after-help 的 “There is no X command” 被当成命令。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/feedbacks/feedback_help_forbid_verb_line_anchor.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/feedbacks/feedback_help_forbid_verb_line_anchor.md",
-      "targetSha256": "b270dc666af7c8c303ae4ef85d88b51037f6d39689d45c771bcc14163ceb4a72"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_help_forbid_verb_line_anchor.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写 edges tasks --help 测例、禁止某个动词出现时：用 ^\\s+verb\\b 锚定命令列表行，不要用 /\\bverb\\b/，以免 after-help 的 “There is no X command” 被当成命令。",
+        "targetSha256": "b270dc666af7c8c303ae4ef85d88b51037f6d39689d45c771bcc14163ceb4a72"
+      }
     },
     {
       "description": "写 extensions 层调研或技术方案时：进 .memory（reference/project），禁止放 extensions/docs 或 knowledge/projects，否则 ask 检索不到。",
       "sha256": "c22c3985b7bba120d5a7086c3cc2213b5f2f271599ff44ed5c3c6b3291f793ac",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_interface_plans_in_memory.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写 extensions 层调研或技术方案时：进 .memory（reference/project），禁止放 extensions/docs 或 knowledge/projects，否则 ask 检索不到。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/feedbacks/feedback_interface_plans_in_memory.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/feedbacks/feedback_interface_plans_in_memory.md",
-      "targetSha256": "c22c3985b7bba120d5a7086c3cc2213b5f2f271599ff44ed5c3c6b3291f793ac"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_interface_plans_in_memory.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写 extensions 层调研或技术方案时：进 .memory（reference/project），禁止放 extensions/docs 或 knowledge/projects，否则 ask 检索不到。",
+        "targetSha256": "c22c3985b7bba120d5a7086c3cc2213b5f2f271599ff44ed5c3c6b3291f793ac"
+      }
     },
     {
       "description": "改 edges-cli 的 bin、默认命令或兼容入口时：只保留 edges；禁止 edges-note 第二 bin / shim；根目录无子命令不得跑 note ingest。",
       "sha256": "f9fae04b5851aa9fd5f42ff313d1e04d85f395a5425443eeb27eb2107b699450",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_no_edges_note_shim.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 edges-cli 的 bin、默认命令或兼容入口时：只保留 edges；禁止 edges-note 第二 bin / shim；根目录无子命令不得跑 note ingest。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/feedbacks/feedback_no_edges_note_shim.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/feedbacks/feedback_no_edges_note_shim.md",
-      "targetSha256": "f9fae04b5851aa9fd5f42ff313d1e04d85f395a5425443eeb27eb2107b699450"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_no_edges_note_shim.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 edges-cli 的 bin、默认命令或兼容入口时：只保留 edges；禁止 edges-note 第二 bin / shim；根目录无子命令不得跑 note ingest。",
+        "targetSha256": "f9fae04b5851aa9fd5f42ff313d1e04d85f395a5425443eeb27eb2107b699450"
+      }
     },
     {
       "description": "改 user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。",
       "sha256": "3f1aa01601cb86f98f63721be12abfbedbac05eb30d3e7d6daeecc146085d804",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_restore_force_replaces.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/feedbacks/feedback_restore_force_replaces.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/feedbacks/feedback_restore_force_replaces.md",
-      "targetSha256": "3f1aa01601cb86f98f63721be12abfbedbac05eb30d3e7d6daeecc146085d804"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_restore_force_replaces.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。",
+        "targetSha256": "3f1aa01601cb86f98f63721be12abfbedbac05eb30d3e7d6daeecc146085d804"
+      }
     },
     {
       "description": "改审阅壳三栏分隔线或拖放时打开：两条竖线只调整左右栏宽度，不搬任务、不改状态。项目拖放仍只在左栏。2026-09-24 peng cheng 澄清。",
       "sha256": "9e59963f057564c947b02d6f6a1de9d09474161688fd93b3676e3a30d0215221",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_review_shell_dividers_resize_width.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改审阅壳三栏分隔线或拖放时打开：两条竖线只调整左右栏宽度，不搬任务、不改状态。项目拖放仍只在左栏。2026-09-24 peng cheng 澄清。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/feedbacks/feedback_review_shell_dividers_resize_width.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/feedbacks/feedback_review_shell_dividers_resize_width.md",
-      "targetSha256": "9e59963f057564c947b02d6f6a1de9d09474161688fd93b3676e3a30d0215221"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_review_shell_dividers_resize_width.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改审阅壳三栏分隔线或拖放时打开：两条竖线只调整左右栏宽度，不搬任务、不改状态。项目拖放仍只在左栏。2026-09-24 peng cheng 澄清。",
+        "targetSha256": "9e59963f057564c947b02d6f6a1de9d09474161688fd93b3676e3a30d0215221"
+      }
     },
     {
       "description": "改审阅壳顶栏筛选或复制导出 JSON 的位置时打开：全文和优先级、负责人、状态整组靠右，紧挨在导出按钮前面。系统名不在这一栏。",
       "sha256": "05aa450872db93944871dcd1ad823bd0b07333849c9e4646edbb395ba6111db1",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_review_shell_filters_before_export.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改审阅壳顶栏筛选或复制导出 JSON 的位置时打开：全文和优先级、负责人、状态整组靠右，紧挨在导出按钮前面。系统名不在这一栏。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/feedbacks/feedback_review_shell_filters_before_export.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/feedbacks/feedback_review_shell_filters_before_export.md",
-      "targetSha256": "05aa450872db93944871dcd1ad823bd0b07333849c9e4646edbb395ba6111db1"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_review_shell_filters_before_export.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改审阅壳顶栏筛选或复制导出 JSON 的位置时打开：全文和优先级、负责人、状态整组靠右，紧挨在导出按钮前面。系统名不在这一栏。",
+        "targetSha256": "05aa450872db93944871dcd1ad823bd0b07333849c9e4646edbb395ba6111db1"
+      }
     },
     {
       "description": "更新 extensions/skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/<name>@<version> tag。",
       "sha256": "d970ffc78e14e1b3f9d45bf9c8a5c248e91f9814109a075d006b16b6644fd12f",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_skill_bump_version.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：更新 extensions/skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/<name>@<version> tag。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/feedbacks/feedback_skill_bump_version.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/feedbacks/feedback_skill_bump_version.md",
-      "targetSha256": "d970ffc78e14e1b3f9d45bf9c8a5c248e91f9814109a075d006b16b6644fd12f"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_skill_bump_version.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：更新 extensions/skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/<name>@<version> tag。",
+        "targetSha256": "d970ffc78e14e1b3f9d45bf9c8a5c248e91f9814109a075d006b16b6644fd12f"
+      }
     },
     {
       "description": "改 note ingest、new-note MCP 或 cli 时：本地 agent 走 extensions/cli 的 edges note；git 在 CLI 的 TS 模块；MCP 子进程调 edges note；鉴权 flag 留在 note 上；JSON stdout。不要把 CLI 放仓库根。",
       "sha256": "d5176ba774abc99620615d5c8bf4c87a92e40d6be731ee82f0ab96f8ca9c7e89",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_cli_from_mcp.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 note ingest、new-note MCP 或 cli 时：本地 agent 走 extensions/cli 的 edges note；git 在 CLI 的 TS 模块；MCP 子进程调 edges note；鉴权 flag 留在 note 上；JSON stdout。不要把 CLI 放仓库根。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/projects/project_cli_from_mcp.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/projects/project_cli_from_mcp.md",
-      "targetSha256": "d5176ba774abc99620615d5c8bf4c87a92e40d6be731ee82f0ab96f8ca9c7e89"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_cli_from_mcp.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 note ingest、new-note MCP 或 cli 时：本地 agent 走 extensions/cli 的 edges note；git 在 CLI 的 TS 模块；MCP 子进程调 edges note；鉴权 flag 留在 note 上；JSON stdout。不要把 CLI 放仓库根。",
+        "targetSha256": "d5176ba774abc99620615d5c8bf4c87a92e40d6be731ee82f0ab96f8ca9c7e89"
+      }
     },
     {
       "description": "跑 extensions/cli 测试时：Node 22 + tsx 下 `node --test --import tsx test` 会把 test/ 当成模块并找 test/index.json；用 './test/**/*.test.ts'。",
       "sha256": "422849c3a9b835f1ef4bc1b759a3284e1fe2527484b70c4aafda250f6094b559",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_cli_node_test_glob.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：跑 extensions/cli 测试时：Node 22 + tsx 下 `node --test --import tsx test` 会把 test/ 当成模块并找 test/index.json；用 './test/**/*.test.ts'。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/projects/project_cli_node_test_glob.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/projects/project_cli_node_test_glob.md",
-      "targetSha256": "422849c3a9b835f1ef4bc1b759a3284e1fe2527484b70c4aafda250f6094b559"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_cli_node_test_glob.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：跑 extensions/cli 测试时：Node 22 + tsx 下 `node --test --import tsx test` 会把 test/ 当成模块并找 test/index.json；用 './test/**/*.test.ts'。",
+        "targetSha256": "422849c3a9b835f1ef4bc1b759a3284e1fe2527484b70c4aafda250f6094b559"
+      }
     },
     {
       "description": "写 Node ESM TypeScript（nodenext、tsc 出 JS）时：相对 import 用 .js，不要写 .ts，也不要省略扩展名。",
       "sha256": "dc3a681533543efff9f63a2ed292acea9f4db75ca9091cf6b36d47cdcfed9d42",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_node_esm_ts_import_js.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写 Node ESM TypeScript（nodenext、tsc 出 JS）时：相对 import 用 .js，不要写 .ts，也不要省略扩展名。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/projects/project_node_esm_ts_import_js.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/projects/project_node_esm_ts_import_js.md",
-      "targetSha256": "dc3a681533543efff9f63a2ed292acea9f4db75ca9091cf6b36d47cdcfed9d42"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_node_esm_ts_import_js.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写 Node ESM TypeScript（nodenext、tsc 出 JS）时：相对 import 用 .js，不要写 .ts，也不要省略扩展名。",
+        "targetSha256": "dc3a681533543efff9f63a2ed292acea9f4db75ca9091cf6b36d47cdcfed9d42"
+      }
     },
     {
       "description": "改审阅壳外观或信息密度时打开：顶栏左侧是 Edges；项目悬停出 description；卡片以标题为主；空状态列不占宽；桌面右栏是 Markdown 抽屉。不窄于 md 的交互按 ADR 0022。窄于 md 按 ADR 0023 纵向长滚动，不是盖住看板的抽屉。",
       "sha256": "1333a62eec0551e6abeb92be6b272db1ea4eb8ff93ac28b064df0003a61c78e2",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_review_shell_chrome_2026_09_24.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改审阅壳外观或信息密度时打开：顶栏左侧是 Edges；项目悬停出 description；卡片以标题为主；空状态列不占宽；桌面右栏是 Markdown 抽屉。不窄于 md 的交互按 ADR 0022。窄于 md 按 ADR 0023 纵向长滚动，不是盖住看板的抽屉。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/projects/project_review_shell_chrome_2026_09_24.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/projects/project_review_shell_chrome_2026_09_24.md",
-      "targetSha256": "1333a62eec0551e6abeb92be6b272db1ea4eb8ff93ac28b064df0003a61c78e2"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_review_shell_chrome_2026_09_24.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改审阅壳外观或信息密度时打开：顶栏左侧是 Edges；项目悬停出 description；卡片以标题为主；空状态列不占宽；桌面右栏是 Markdown 抽屉。不窄于 md 的交互按 ADR 0022。窄于 md 按 ADR 0023 纵向长滚动，不是盖住看板的抽屉。",
+        "targetSha256": "1333a62eec0551e6abeb92be6b272db1ea4eb8ff93ac28b064df0003a61c78e2"
+      }
     },
     {
       "description": "决定 changelog、tag、semver 粒度时：每个 skill 一份，不要 extensions/skills 总 changelog。",
       "sha256": "9fc77b34f7057d3b113a811571b3d8998f430415a47807739092c61b43a6ff2d",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_skill_independent_versioning.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：决定 changelog、tag、semver 粒度时：每个 skill 一份，不要 extensions/skills 总 changelog。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/projects/project_skill_independent_versioning.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/projects/project_skill_independent_versioning.md",
-      "targetSha256": "9fc77b34f7057d3b113a811571b3d8998f430415a47807739092c61b43a6ff2d"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_skill_independent_versioning.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：决定 changelog、tag、semver 粒度时：每个 skill 一份，不要 extensions/skills 总 changelog。",
+        "targetSha256": "9fc77b34f7057d3b113a811571b3d8998f430415a47807739092c61b43a6ff2d"
+      }
     },
     {
       "description": "设计或评审给 agent 用的 CLI 时查：AXI vs raw CLI vs MCP、--help、非交互、stdout/stderr、退出码、结构化错误码，及 AXI/Scalekit/clig.dev/gh --json/checklist 来源。",
       "sha256": "8e6e5adf40fb0f1855a0b2b1be7e111e044be91053dbae5aa76ab8e37c58e7b5",
-      "scope": ".",
-      "target": ".harness/memory/references/reference_agent_oriented_cli.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：设计或评审给 agent 用的 CLI 时查：AXI vs raw CLI vs MCP、--help、非交互、stdout/stderr、退出码、结构化错误码，及 AXI/Scalekit/clig.dev/gh --json/checklist 来源。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/references/reference_agent_oriented_cli.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/references/reference_agent_oriented_cli.md",
-      "targetSha256": "8e6e5adf40fb0f1855a0b2b1be7e111e044be91053dbae5aa76ab8e37c58e7b5"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/references/reference_agent_oriented_cli.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：设计或评审给 agent 用的 CLI 时查：AXI vs raw CLI vs MCP、--help、非交互、stdout/stderr、退出码、结构化错误码，及 AXI/Scalekit/clig.dev/gh --json/checklist 来源。",
+        "targetSha256": "8e6e5adf40fb0f1855a0b2b1be7e111e044be91053dbae5aa76ab8e37c58e7b5"
+      }
     },
     {
       "description": "SKILL.md 顶层字段是闭集（六个），但生态普遍不遵守；自定义数据该放 metadata 的真实理由是撞名而非被拒。写或改 skill 前查。",
       "sha256": "ebcd8db658c5c6349a6828f31ff90d6c3a29ac02c8af54ce81526289cca5e69d",
-      "scope": ".",
-      "target": ".harness/memory/references/reference_skill_format_spec.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：SKILL.md 顶层字段是闭集（六个），但生态普遍不遵守；自定义数据该放 metadata 的真实理由是撞名而非被拒。写或改 skill 前查。",
+      "scope": "extensions",
+      "target": "extensions/.harness/memory/references/reference_skill_format_spec.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/.memory/references/reference_skill_format_spec.md",
-      "targetSha256": "ebcd8db658c5c6349a6828f31ff90d6c3a29ac02c8af54ce81526289cca5e69d"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/references/reference_skill_format_spec.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：SKILL.md 顶层字段是闭集（六个），但生态普遍不遵守；自定义数据该放 metadata 的真实理由是撞名而非被拒。写或改 skill 前查。",
+        "targetSha256": "ebcd8db658c5c6349a6828f31ff90d6c3a29ac02c8af54ce81526289cca5e69d"
+      }
     },
     {
       "description": "改 AGENTS.md 本层记忆清单或挑类型时：先 user，再 feedback，再 project（兜底），再 reference；skills / agent_skills 仍靠后。",
       "sha256": "824f6904e7f5ef8af9fc8fd5415d37fc8b39ecd32331099f22f592c252a55ac1",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_agents_local_type_order.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 AGENTS.md 本层记忆清单或挑类型时：先 user，再 feedback，再 project（兜底），再 reference；skills / agent_skills 仍靠后。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/feedbacks/feedback_agents_local_type_order.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/feedbacks/feedback_agents_local_type_order.md",
-      "targetSha256": "824f6904e7f5ef8af9fc8fd5415d37fc8b39ecd32331099f22f592c252a55ac1"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_agents_local_type_order.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 AGENTS.md 本层记忆清单或挑类型时：先 user，再 feedback，再 project（兜底），再 reference；skills / agent_skills 仍靠后。",
+        "targetSha256": "824f6904e7f5ef8af9fc8fd5415d37fc8b39ecd32331099f22f592c252a55ac1"
+      }
     },
     {
       "description": "目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。",
       "sha256": "3dd628ee0d7954c30de4cff417f8dcc49e0951323ff369af45084dc6c0770653",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_isolated_root_dir.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/feedbacks/feedback_isolated_root_dir.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/feedbacks/feedback_isolated_root_dir.md",
-      "targetSha256": "3dd628ee0d7954c30de4cff417f8dcc49e0951323ff369af45084dc6c0770653"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_isolated_root_dir.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。",
+        "targetSha256": "3dd628ee0d7954c30de4cff417f8dcc49e0951323ff369af45084dc6c0770653"
+      }
     },
     {
       "description": "改 AGENTS.md 记忆形状、增减受管区块、或决定区块外留什么时：只保留 important / local / children；不要独立 auto 区块；硬约束种子是 ask/remember 聚光灯加「写在本区块」；区块外只留身份与指针。",
       "sha256": "713dc7a531afd114a2e8199b4555f200c836867e2e4c7523c7e1ee561b3e7193",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_agents_three_blocks.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 AGENTS.md 记忆形状、增减受管区块、或决定区块外留什么时：只保留 important / local / children；不要独立 auto 区块；硬约束种子是 ask/remember 聚光灯加「写在本区块」；区块外只留身份与指针。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/projects/project_agents_three_blocks.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/projects/project_agents_three_blocks.md",
-      "targetSha256": "713dc7a531afd114a2e8199b4555f200c836867e2e4c7523c7e1ee561b3e7193"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_agents_three_blocks.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 AGENTS.md 记忆形状、增减受管区块、或决定区块外留什么时：只保留 important / local / children；不要独立 auto 区块；硬约束种子是 ask/remember 聚光灯加「写在本区块」；区块外只留身份与指针。",
+        "targetSha256": "713dc7a531afd114a2e8199b4555f200c836867e2e4c7523c7e1ee561b3e7193"
+      }
     },
     {
       "description": "这套记忆的承重点、最脆的地方，以及技术选择的判断。",
       "sha256": "a1d978ba1dda8f1924f5f1a678355c62793e5cd3417e1b09c5b6392c07662722",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_architecture.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：这套记忆的承重点、最脆的地方，以及技术选择的判断。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/projects/project_architecture.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/projects/project_architecture.md",
-      "targetSha256": "c46f0dcba46d3f371723fef83311d8347613b95d5eab2a877562f05ccb49e049"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_architecture.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：这套记忆的承重点、最脆的地方，以及技术选择的判断。",
+        "targetSha256": "c46f0dcba46d3f371723fef83311d8347613b95d5eab2a877562f05ccb49e049"
+      }
     },
     {
       "description": "成型过程中的关键取舍、翻案与待议；论证不进 PROTOCOL/LAYOUT。",
       "sha256": "a6985706ff18e4b6746d518ae95beb76912a9707a437f0db9fca624be3cc3aab",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_design_decisions.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：成型过程中的关键取舍、翻案与待议；论证不进 PROTOCOL/LAYOUT。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/projects/project_design_decisions.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/projects/project_design_decisions.md",
-      "targetSha256": "5660231c2d3ea6ebca379034b89b2c4bdab2108bfcd6807802f12c2cfbc818d8"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_design_decisions.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：成型过程中的关键取舍、翻案与待议；论证不进 PROTOCOL/LAYOUT。",
+        "targetSha256": "5660231c2d3ea6ebca379034b89b2c4bdab2108bfcd6807802f12c2cfbc818d8"
+      }
     },
     {
       "description": "修改顺序：协议 → 布局 → init → 其他非 doctor skill → doctor。",
       "sha256": "d0bb862a388752e13c8ad244ab2d7636424788416019caf67fc9e42eac3b938d",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_development.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：修改顺序：协议 → 布局 → init → 其他非 doctor skill → doctor。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/projects/project_development.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/projects/project_development.md",
-      "targetSha256": "e5eaacc19c73efac71d4eb751f916c6aec1474a09238e52ca9e5d12e9d8f5c71"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_development.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：修改顺序：协议 → 布局 → init → 其他非 doctor skill → doctor。",
+        "targetSha256": "e5eaacc19c73efac71d4eb751f916c6aec1474a09238e52ca9e5d12e9d8f5c71"
+      }
     },
     {
       "description": "改普通记忆条目的 YAML 头、或读旧扁平文件时：写入只留 name/description/metadata，实现字段进 metadata.edges-*；闭集以 https://agentskills.io/specification 为准。读取兼容顶层旧键。",
       "sha256": "53f245041d27abc72e998584c189c524d76804a2abbcb1cef251090e913aaca2",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_frontmatter_metadata.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改普通记忆条目的 YAML 头、或读旧扁平文件时：写入只留 name/description/metadata，实现字段进 metadata.edges-*；闭集以 https://agentskills.io/specification 为准。读取兼容顶层旧键。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/projects/project_frontmatter_metadata.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/projects/project_frontmatter_metadata.md",
-      "targetSha256": "53f245041d27abc72e998584c189c524d76804a2abbcb1cef251090e913aaca2"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_frontmatter_metadata.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改普通记忆条目的 YAML 头、或读旧扁平文件时：写入只留 name/description/metadata，实现字段进 metadata.edges-*；闭集以 https://agentskills.io/specification 为准。读取兼容顶层旧键。",
+        "targetSha256": "53f245041d27abc72e998584c189c524d76804a2abbcb1cef251090e913aaca2"
+      }
     },
     {
       "description": "改 AGENTS.md 记忆形状、或决定一条规则该常驻还是进 .memory 时：点名 ask/remember，加上不检索就会做错的仓规，直接写进 project-memory-important；目录细则不进这里也不进 .memory。",
       "sha256": "c054d0c392c34bbf9fecd8564a945e5ce1513b66ae1f81a1b719b42464b35400",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_important_block.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 AGENTS.md 记忆形状、或决定一条规则该常驻还是进 .memory 时：点名 ask/remember，加上不检索就会做错的仓规，直接写进 project-memory-important；目录细则不进这里也不进 .memory。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/projects/project_important_block.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/projects/project_important_block.md",
-      "targetSha256": "c054d0c392c34bbf9fecd8564a945e5ce1513b66ae1f81a1b719b42464b35400"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_important_block.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 AGENTS.md 记忆形状、或决定一条规则该常驻还是进 .memory 时：点名 ask/remember，加上不检索就会做错的仓规，直接写进 project-memory-important；目录细则不进这里也不进 .memory。",
+        "targetSha256": "c054d0c392c34bbf9fecd8564a945e5ce1513b66ae1f81a1b719b42464b35400"
+      }
     },
     {
       "description": "为什么否掉 .memory→.agents 改名，改成 skills（自动沉淀）与 agent_skills（只索引）两个类型；两份入口为什么都放 .memory/；为什么没平铺进 local 区块。",
       "sha256": "a76e7ffa91254ae801ad75fd27aee84a962876838b0f54d11f2ce6b88a6cc2b8",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_skill_ownership_split.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：为什么否掉 .memory→.agents 改名，改成 skills（自动沉淀）与 agent_skills（只索引）两个类型；两份入口为什么都放 .memory/；为什么没平铺进 local 区块。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/projects/project_skill_ownership_split.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/projects/project_skill_ownership_split.md",
-      "targetSha256": "a76e7ffa91254ae801ad75fd27aee84a962876838b0f54d11f2ce6b88a6cc2b8"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_skill_ownership_split.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：为什么否掉 .memory→.agents 改名，改成 skills（自动沉淀）与 agent_skills（只索引）两个类型；两份入口为什么都放 .memory/；为什么没平铺进 local 区块。",
+        "targetSha256": "a76e7ffa91254ae801ad75fd27aee84a962876838b0f54d11f2ce6b88a6cc2b8"
+      }
     },
     {
       "description": "决定 AGENTS.md 要不要点名 skill、或觉得 skill 自己的说明就够时：要点名 ask 和 remember，因为 skill 一多，模型不一定会自己加载它们；不要点名 init/doctor/reshape，也不要在入口里写整套工具怎么用。",
       "sha256": "89e5e29013eae6e72971a53ae99225e529020f3da45cd7ed532e29c26548cadd",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_spotlight_ask_remember.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：决定 AGENTS.md 要不要点名 skill、或觉得 skill 自己的说明就够时：要点名 ask 和 remember，因为 skill 一多，模型不一定会自己加载它们；不要点名 init/doctor/reshape，也不要在入口里写整套工具怎么用。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/projects/project_spotlight_ask_remember.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/projects/project_spotlight_ask_remember.md",
-      "targetSha256": "89e5e29013eae6e72971a53ae99225e529020f3da45cd7ed532e29c26548cadd"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_spotlight_ask_remember.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：决定 AGENTS.md 要不要点名 skill、或觉得 skill 自己的说明就够时：要点名 ask 和 remember，因为 skill 一多，模型不一定会自己加载它们；不要点名 init/doctor/reshape，也不要在入口里写整套工具怎么用。",
+        "targetSha256": "89e5e29013eae6e72971a53ae99225e529020f3da45cd7ed532e29c26548cadd"
+      }
     },
     {
       "description": "官方 init 种子仍是六类；类型集合由 LAYOUT+本层登记决定，不是 PROTOCOL 闭集。可扩展见仓库根 ADR 0006。类型入口现为复数目录下 AGENTS.md（ADR 0012）。否掉把 docs 等示例写进默认种子。user 进仓且 gitignore；v1 不做晋升。",
       "sha256": "e731e7477720dc29e00ff775d068395b27dc5d9fd1b4f20d633592268d13e11f",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_type_set.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：官方 init 种子仍是六类；类型集合由 LAYOUT+本层登记决定，不是 PROTOCOL 闭集。可扩展见仓库根 ADR 0006。类型入口现为复数目录下 AGENTS.md（ADR 0012）。否掉把 docs 等示例写进默认种子。user 进仓且 gitignore；v1 不做晋升。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/projects/project_type_set.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/projects/project_type_set.md",
-      "targetSha256": "e731e7477720dc29e00ff775d068395b27dc5d9fd1b4f20d633592268d13e11f"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_type_set.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：官方 init 种子仍是六类；类型集合由 LAYOUT+本层登记决定，不是 PROTOCOL 闭集。可扩展见仓库根 ADR 0006。类型入口现为复数目录下 AGENTS.md（ADR 0012）。否掉把 docs 等示例写进默认种子。user 进仓且 gitignore；v1 不做晋升。",
+        "targetSha256": "e731e7477720dc29e00ff775d068395b27dc5d9fd1b4f20d633592268d13e11f"
+      }
     },
     {
       "description": "记忆索引粒度、膨胀与检索的论文证据。",
       "sha256": "7375e2caee40353ffd1120cf1437373252607c10a3c336a0e7e83ec64b1f8b07",
-      "scope": ".",
-      "target": ".harness/memory/references/reference_academic_papers.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：记忆索引粒度、膨胀与检索的论文证据。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/references/reference_academic_papers.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/references/reference_academic_papers.md",
-      "targetSha256": "7375e2caee40353ffd1120cf1437373252607c10a3c336a0e7e83ec64b1f8b07"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/references/reference_academic_papers.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：记忆索引粒度、膨胀与检索的论文证据。",
+        "targetSha256": "7375e2caee40353ffd1120cf1437373252607c10a3c336a0e7e83ec64b1f8b07"
+      }
     },
     {
       "description": "各家编码 agent / AI IDE 的记忆与 AGENTS.md 实践。",
       "sha256": "effdba89a61559b2d4020627cbfe13efe989572c4b7f7ee46d4bb575013c5656",
-      "scope": ".",
-      "target": ".harness/memory/references/reference_coding_agents.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：各家编码 agent / AI IDE 的记忆与 AGENTS.md 实践。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/references/reference_coding_agents.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/references/reference_coding_agents.md",
-      "targetSha256": "effdba89a61559b2d4020627cbfe13efe989572c4b7f7ee46d4bb575013c5656"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/references/reference_coding_agents.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：各家编码 agent / AI IDE 的记忆与 AGENTS.md 实践。",
+        "targetSha256": "effdba89a61559b2d4020627cbfe13efe989572c4b7f7ee46d4bb575013c5656"
+      }
     },
     {
       "description": "索引粒度、路标 vs 摘要，以及可落地的阈值。",
       "sha256": "cb095231b6c48df27a26f6d7ff57a42a41e8a0957fc566f46e3463298cfb34bd",
-      "scope": ".",
-      "target": ".harness/memory/references/reference_index_granularity.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：索引粒度、路标 vs 摘要，以及可落地的阈值。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/references/reference_index_granularity.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/references/reference_index_granularity.md",
-      "targetSha256": "cb095231b6c48df27a26f6d7ff57a42a41e8a0957fc566f46e3463298cfb34bd"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/references/reference_index_granularity.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：索引粒度、路标 vs 摘要，以及可落地的阈值。",
+        "targetSha256": "cb095231b6c48df27a26f6d7ff57a42a41e8a0957fc566f46e3463298cfb34bd"
+      }
     },
     {
       "description": "写或核对 SKILL.md / 普通记忆 YAML 头时查：顶层闭集、name 规则、metadata 用途。规范 https://agentskills.io/specification；本仓与生态落差见 extensions 的 reference_skill_format_spec。",
       "sha256": "fb201b6b3765e2456ca81e1c6134293848585df9231c3bb1f63c5dad4b3f3056",
-      "scope": ".",
-      "target": ".harness/memory/references/reference_official_skills_spec.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写或核对 SKILL.md / 普通记忆 YAML 头时查：顶层闭集、name 规则、metadata 用途。规范 https://agentskills.io/specification；本仓与生态落差见 extensions 的 reference_skill_format_spec。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/references/reference_official_skills_spec.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/references/reference_official_skills_spec.md",
-      "targetSha256": "64338e06d81b2030adfce72f6fa55f591fee849f75e547ae3ee11d288dcaa836"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/references/reference_official_skills_spec.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写或核对 SKILL.md / 普通记忆 YAML 头时查：顶层闭集、name 规则、metadata 用途。规范 https://agentskills.io/specification；本仓与生态落差见 extensions 的 reference_skill_format_spec。",
+        "targetSha256": "64338e06d81b2030adfce72f6fa55f591fee849f75e547ae3ee11d288dcaa836"
+      }
     },
     {
       "description": "开源记忆框架的机制细节与源码取证。",
       "sha256": "46b99b1a3e4da4c2fba82f7cfa001f3b8da7a7722583337910f7e939bebc4c04",
-      "scope": ".",
-      "target": ".harness/memory/references/reference_oss_frameworks.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：开源记忆框架的机制细节与源码取证。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/references/reference_oss_frameworks.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/references/reference_oss_frameworks.md",
-      "targetSha256": "46b99b1a3e4da4c2fba82f7cfa001f3b8da7a7722583337910f7e939bebc4c04"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/references/reference_oss_frameworks.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：开源记忆框架的机制细节与源码取证。",
+        "targetSha256": "46b99b1a3e4da4c2fba82f7cfa001f3b8da7a7722583337910f7e939bebc4c04"
+      }
     },
     {
       "description": "四路并行调研的综合结论，改变本方案决策的外部证据总入口。",
       "sha256": "c0f7c52f204dcea88dc8d2be9e34a56254543a845cf1726c65a2a3a233e6d07f",
-      "scope": ".",
-      "target": ".harness/memory/references/reference_prior_art.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：四路并行调研的综合结论，改变本方案决策的外部证据总入口。",
+      "scope": "extensions/skills/project-memory-init",
+      "target": "extensions/skills/project-memory-init/.harness/memory/references/reference_prior_art.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "extensions/skills/project-memory-init/.memory/references/reference_prior_art.md",
-      "targetSha256": "c0f7c52f204dcea88dc8d2be9e34a56254543a845cf1726c65a2a3a233e6d07f"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/references/reference_prior_art.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：四路并行调研的综合结论，改变本方案决策的外部证据总入口。",
+        "targetSha256": "c0f7c52f204dcea88dc8d2be9e34a56254543a845cf1726c65a2a3a233e6d07f"
+      }
     },
     {
       "description": "改本目录的 skill / mcp / plugin / hook 或发版约定时：升 VERSION、写本层 CHANGELOG、打 shared-extensions@x.y.z。不要给单条扩展独立 semver，也不要把明细抄进根 changelog。只改 .memory 不升版本。",
       "sha256": "562fc15d6be429cefddb769b0571f04d17b66eac1cc6c842ea10bdc62b3710bc",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_bundle_versioning.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改本目录的 skill / mcp / plugin / hook 或发版约定时：升 VERSION、写本层 CHANGELOG、打 shared-extensions@x.y.z。不要给单条扩展独立 semver，也不要把明细抄进根 changelog。只改 .memory 不升版本。",
+      "scope": "shared-extensions",
+      "target": "shared-extensions/.harness/memory/projects/project_bundle_versioning.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "shared-extensions/.memory/projects/project_bundle_versioning.md",
-      "targetSha256": "562fc15d6be429cefddb769b0571f04d17b66eac1cc6c842ea10bdc62b3710bc"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_bundle_versioning.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改本目录的 skill / mcp / plugin / hook 或发版约定时：升 VERSION、写本层 CHANGELOG、打 shared-extensions@x.y.z。不要给单条扩展独立 semver，也不要把明细抄进根 changelog。只改 .memory 不升版本。",
+        "targetSha256": "562fc15d6be429cefddb769b0571f04d17b66eac1cc6c842ea10bdc62b3710bc"
+      }
     },
     {
       "description": "设计或审阅 agent-memory / long-context 类 benchmark、或判断仓内冒烟分数能不能当证明时：先看构念效度 → 数据可信 → 区分度 → 可复现公平协议；分数表是证据不是贡献。全文见 knowledge/projects/memory/2026-09-16-benchmark-review-checklist.md。LoCoMo 个案仍看十问笔记；ADR 0008：Evaluation Smoke ≠ Benchmark Proof。",
@@ -2104,74 +2274,114 @@
     {
       "description": "tasks 目录 init/记忆脚手架写完后默认不提交，等用户明确说入库再推。",
       "sha256": "04de8bcbd0604545bbf1f7fcbd46a6a1b06b6c91afbc5ec398ec2cc7df68be26",
-      "scope": ".",
-      "target": ".harness/memory/feedbacks/feedback_memory_init_keep_local_until_asked.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：tasks 目录 init/记忆脚手架写完后默认不提交，等用户明确说入库再推。",
+      "scope": ".harness/tasks",
+      "target": ".harness/tasks/.harness/memory/feedbacks/feedback_memory_init_keep_local_until_asked.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "knowledge/tasks/.memory/feedbacks/feedback_memory_init_keep_local_until_asked.md",
-      "targetSha256": "04de8bcbd0604545bbf1f7fcbd46a6a1b06b6c91afbc5ec398ec2cc7df68be26"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/feedbacks/feedback_memory_init_keep_local_until_asked.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：tasks 目录 init/记忆脚手架写完后默认不提交，等用户明确说入库再推。",
+        "targetSha256": "04de8bcbd0604545bbf1f7fcbd46a6a1b06b6c91afbc5ec398ec2cc7df68be26"
+      }
     },
     {
       "description": "写或派发 tasks 时打开：默认链为 grill→research→plan→implement→validate→close；research 是 deep-research（竞品/开源/现成方案），独立于 grill 与 plan；validate 是质量/设计/行为门禁（英文阶段名，不用「验收」），可派给非实现者，看板 in_review 大致对应；未 validate 不标 done。回环只按证伪退回，不随便跳阶段；全程可派 subagent 做浅调研，但不占正式 research、不改看板。用户当次跳过除外。",
       "sha256": "b1d003adbfba52ca13c5fd07225c96694d724aef40954e1d7d918edab8addf2b",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_assign_grill_with_docs_first.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写或派发 tasks 时打开：默认链为 grill→research→plan→implement→validate→close；research 是 deep-research（竞品/开源/现成方案），独立于 grill 与 plan；validate 是质量/设计/行为门禁（英文阶段名，不用「验收」），可派给非实现者，看板 in_review 大致对应；未 validate 不标 done。回环只按证伪退回，不随便跳阶段；全程可派 subagent 做浅调研，但不占正式 research、不改看板。用户当次跳过除外。",
+      "scope": ".harness/tasks",
+      "target": ".harness/tasks/.harness/memory/projects/project_assign_grill_with_docs_first.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "knowledge/tasks/.memory/projects/project_assign_grill_with_docs_first.md",
-      "targetSha256": "b1d003adbfba52ca13c5fd07225c96694d724aef40954e1d7d918edab8addf2b"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_assign_grill_with_docs_first.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写或派发 tasks 时打开：默认链为 grill→research→plan→implement→validate→close；research 是 deep-research（竞品/开源/现成方案），独立于 grill 与 plan；validate 是质量/设计/行为门禁（英文阶段名，不用「验收」），可派给非实现者，看板 in_review 大致对应；未 validate 不标 done。回环只按证伪退回，不随便跳阶段；全程可派 subagent 做浅调研，但不占正式 research、不改看板。用户当次跳过除外。",
+        "targetSha256": "b1d003adbfba52ca13c5fd07225c96694d724aef40954e1d7d918edab8addf2b"
+      }
     },
     {
       "description": "预览 tasks/artifacts 时用 /workspace/edges 作 vault、AppImage+--no-sandbox、禁用 Sync；2026-09-11 已验证。",
       "sha256": "0c0eb32b43450e08abe8fdcf570f562f4bd141c743f868c1bef4768f303f5c9c",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_box_obsidian_vault_for_preview.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：预览 tasks/artifacts 时用 /workspace/edges 作 vault、AppImage+--no-sandbox、禁用 Sync；2026-09-11 已验证。",
+      "scope": ".harness/tasks",
+      "target": ".harness/tasks/.harness/memory/projects/project_box_obsidian_vault_for_preview.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "knowledge/tasks/.memory/projects/project_box_obsidian_vault_for_preview.md",
-      "targetSha256": "0c0eb32b43450e08abe8fdcf570f562f4bd141c743f868c1bef4768f303f5c9c"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_box_obsidian_vault_for_preview.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：预览 tasks/artifacts 时用 /workspace/edges 作 vault、AppImage+--no-sandbox、禁用 Sync；2026-09-11 已验证。",
+        "targetSha256": "0c0eb32b43450e08abe8fdcf570f562f4bd141c743f868c1bef4768f303f5c9c"
+      }
     },
     {
       "description": "改看板 Task Project 分组或往 knowledge/tasks/<slug> 落卡时打开：用户已确认七个空壳质心（project-memory、edges-tasks、edges-cli-platform、evaluation、observation、site-and-content、agent-clients-ux）；现有卡仍留 _default，等 classify/#78 再迁。仓根 evaluation/ 不是看板 project。",
       "sha256": "1f6053106687bb74303b24e136ffe876b7955477866fd51425b0fec1707df38b",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_evaluation_observation_placeholder_projects.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改看板 Task Project 分组或往 knowledge/tasks/<slug> 落卡时打开：用户已确认七个空壳质心（project-memory、edges-tasks、edges-cli-platform、evaluation、observation、site-and-content、agent-clients-ux）；现有卡仍留 _default，等 classify/#78 再迁。仓根 evaluation/ 不是看板 project。",
+      "scope": ".harness/tasks",
+      "target": ".harness/tasks/.harness/memory/projects/project_evaluation_observation_placeholder_projects.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "knowledge/tasks/.memory/projects/project_evaluation_observation_placeholder_projects.md",
-      "targetSha256": "1f6053106687bb74303b24e136ffe876b7955477866fd51425b0fec1707df38b"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_evaluation_observation_placeholder_projects.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改看板 Task Project 分组或往 knowledge/tasks/<slug> 落卡时打开：用户已确认七个空壳质心（project-memory、edges-tasks、edges-cli-platform、evaluation、observation、site-and-content、agent-clients-ux）；现有卡仍留 _default，等 classify/#78 再迁。仓根 evaluation/ 不是看板 project。",
+        "targetSha256": "1f6053106687bb74303b24e136ffe876b7955477866fd51425b0fec1707df38b"
+      }
     },
     {
       "description": "写/派 agent 任务时用 STAR 同构排正文（背景→目标→动作→完成标准）；不要拿 STAR 写复盘。",
       "sha256": "7842be0429aff31f74c99ab00c419de3896dd56f2c213f4fa9155dceb07a1852",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_star_for_agent_task_formulation.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写/派 agent 任务时用 STAR 同构排正文（背景→目标→动作→完成标准）；不要拿 STAR 写复盘。",
+      "scope": ".harness/tasks",
+      "target": ".harness/tasks/.harness/memory/projects/project_star_for_agent_task_formulation.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "knowledge/tasks/.memory/projects/project_star_for_agent_task_formulation.md",
-      "targetSha256": "7842be0429aff31f74c99ab00c419de3896dd56f2c213f4fa9155dceb07a1852"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_star_for_agent_task_formulation.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写/派 agent 任务时用 STAR 同构排正文（背景→目标→动作→完成标准）；不要拿 STAR 写复盘。",
+        "targetSha256": "7842be0429aff31f74c99ab00c419de3896dd56f2c213f4fa9155dceb07a1852"
+      }
     },
     {
       "description": "写/改 Task 时：分节事实/idea + 一句话讲清问题与结果；对话开卡走背景→目标→动作→完成标准；STAR 用于制定 agent 任务。",
       "sha256": "b62d3acab54dae60ecd8c9c7c437f7fd8ad7601e6c0bc5b433f8c93175f8974a",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_task_separate_facts_from_idea.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写/改 Task 时：分节事实/idea + 一句话讲清问题与结果；对话开卡走背景→目标→动作→完成标准；STAR 用于制定 agent 任务。",
+      "scope": ".harness/tasks",
+      "target": ".harness/tasks/.harness/memory/projects/project_task_separate_facts_from_idea.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "knowledge/tasks/.memory/projects/project_task_separate_facts_from_idea.md",
-      "targetSha256": "b62d3acab54dae60ecd8c9c7c437f7fd8ad7601e6c0bc5b433f8c93175f8974a"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_task_separate_facts_from_idea.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写/改 Task 时：分节事实/idea + 一句话讲清问题与结果；对话开卡走背景→目标→动作→完成标准；STAR 用于制定 agent 任务。",
+        "targetSha256": "b62d3acab54dae60ecd8c9c7c437f7fd8ad7601e6c0bc5b433f8c93175f8974a"
+      }
     },
     {
       "description": "任务记录员等 agent 改 knowledge/tasks 时优先走 edges tasks CLI 与已有 tasks Skill（如 project-tasks-classify）；缺口上报用户。本条是根 prefer_repo_skills_and_cli 的看板特化。",
       "sha256": "b933731b4031a64ee557d2bf459e6ce7f9bf0abfacd0d5f12cfd4968876c1bb9",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_tasks_board_mutations_via_cli.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：任务记录员等 agent 改 knowledge/tasks 时优先走 edges tasks CLI 与已有 tasks Skill（如 project-tasks-classify）；缺口上报用户。本条是根 prefer_repo_skills_and_cli 的看板特化。",
+      "scope": ".harness/tasks",
+      "target": ".harness/tasks/.harness/memory/projects/project_tasks_board_mutations_via_cli.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "knowledge/tasks/.memory/projects/project_tasks_board_mutations_via_cli.md",
-      "targetSha256": "b933731b4031a64ee557d2bf459e6ce7f9bf0abfacd0d5f12cfd4968876c1bb9"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_tasks_board_mutations_via_cli.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：任务记录员等 agent 改 knowledge/tasks 时优先走 edges tasks CLI 与已有 tasks Skill（如 project-tasks-classify）；缺口上报用户。本条是根 prefer_repo_skills_and_cli 的看板特化。",
+        "targetSha256": "b933731b4031a64ee557d2bf459e6ce7f9bf0abfacd0d5f12cfd4968876c1bb9"
+      }
     },
     {
       "description": "在 Grok Bot 云端电脑用 Obsidian 打开 /workspace/edges，浏览 knowledge/tasks 状态夹与 artifacts；适合看板预览，不适合当主编辑入口。",
       "sha256": "5fbf5376130cf5d3cfcafa2ea99cef337c32633f8c48340cb0f4006685bd6bfc",
-      "scope": ".",
-      "target": ".harness/skills/managed/preview-tasks-with-box-obsidian/SKILL.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：在 Grok Bot 云端电脑用 Obsidian 打开 /workspace/edges，浏览 knowledge/tasks 状态夹与 artifacts；适合看板预览，不适合当主编辑入口。",
+      "scope": ".harness/tasks",
+      "target": ".harness/tasks/.harness/skills/managed/preview-tasks-with-box-obsidian/SKILL.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "knowledge/tasks/.memory/skills/preview-tasks-with-box-obsidian/SKILL.md",
-      "targetSha256": "5fbf5376130cf5d3cfcafa2ea99cef337c32633f8c48340cb0f4006685bd6bfc"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/skills/managed/preview-tasks-with-box-obsidian/SKILL.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：在 Grok Bot 云端电脑用 Obsidian 打开 /workspace/edges，浏览 knowledge/tasks 状态夹与 artifacts；适合看板预览，不适合当主编辑入口。",
+        "targetSha256": "5fbf5376130cf5d3cfcafa2ea99cef337c32633f8c48340cb0f4006685bd6bfc"
+      }
     },
     {
       "description": "对外给课页地址形如 /teaching/<topic>/...；不要用站点根下的 /changelog 或 /openhands",
@@ -2203,11 +2413,16 @@
     {
       "description": "写 knowledge/notes：2.3.2 结构；结果遗留逐点问清后交 conversation-to-tasks（一次1～2条）。",
       "sha256": "5855b789829649aad659aa6a5075ededa4a24bd66ec61a62b87bbb67e3acce35",
-      "scope": ".",
-      "target": ".harness/memory/projects/project_conversation_notes_plain_rich_human_review.md",
-      "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写 knowledge/notes：2.3.2 结构；结果遗留逐点问清后交 conversation-to-tasks（一次1～2条）。",
+      "scope": "knowledge/notes",
+      "target": "knowledge/notes/.harness/memory/projects/project_conversation_notes_plain_rich_human_review.md",
+      "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
       "source": "knowledge/notes/.memory/projects/project_conversation_notes_plain_rich_human_review.md",
-      "targetSha256": "5855b789829649aad659aa6a5075ededa4a24bd66ec61a62b87bbb67e3acce35"
+      "historicalPromotion": {
+        "scope": ".",
+        "target": ".harness/memory/projects/project_conversation_notes_plain_rich_human_review.md",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写 knowledge/notes：2.3.2 结构；结果遗留逐点问清后交 conversation-to-tasks（一次1～2条）。",
+        "targetSha256": "5855b789829649aad659aa6a5075ededa4a24bd66ec61a62b87bbb67e3acce35"
+      }
     }
   ],
   "protectedPostHashes": {
@@ -2251,15 +2466,15 @@
   ],
   "privateOwnerMap": {
     ".": ".",
-    "extensions": ".",
-    "extensions/skills/project-memory-init": ".",
-    "shared-extensions": ".",
-    "knowledge/tasks": ".",
-    "knowledge/notes": ".",
+    "extensions": "extensions",
+    "extensions/skills/project-memory-init": "extensions/skills/project-memory-init",
+    "shared-extensions": "shared-extensions",
+    "knowledge/tasks": ".harness/tasks",
+    "knowledge/notes": "knowledge/notes",
     "evaluation": ".harness/evaluation",
     "knowledge/teaching": "teaching"
   },
-  "privatePolicy": "Preserve private type identity, metadata, filenames and assets. Unknown owner/type or differing collision is a preflight conflict; never infer ownership from private body. Each local checkout must run the instance migration.",
+  "privatePolicy": "Per-clone explicit migration keeps private types at the original owner. Completed old promotions require separate opt-in provenance correction; absent or ambiguous evidence requires review without moving content.",
   "validation": {
     "tasks": {
       "byteIdentical": 101,
@@ -2282,5 +2497,21 @@
       ".harness/evaluation/.agents/skills",
       "teaching/.agents/skills"
     ]
-  }
+  },
+  "historicalPromotionAudit": {
+    "status": "Reviewed ownership; Task5 worktree migration validated on 2026-10-03. This is a migration-time snapshot, not live Task status or all-clone private-data completion.",
+    "privateOwnerMap": {
+      ".": ".",
+      "extensions": ".",
+      "extensions/skills/project-memory-init": ".",
+      "shared-extensions": ".",
+      "knowledge/tasks": ".",
+      "knowledge/notes": ".",
+      "evaluation": ".harness/evaluation",
+      "knowledge/teaching": "teaching"
+    },
+    "privatePolicy": "Preserve private type identity, metadata, filenames and assets. Unknown owner/type or differing collision is a preflight conflict; never infer ownership from private body. Each local checkout must run the instance migration.",
+    "note": "Historical 2026-10-03 promotion evidence only; superseded by owner-local correction, never replay this map."
+  },
+  "publicCorrectionManifest": "2026-10-05-local-ownership-correction.json"
 }

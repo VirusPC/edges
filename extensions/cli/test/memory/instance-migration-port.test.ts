@@ -140,7 +140,7 @@ test("instance refuses unknown owners without mutation", async (t) => {
   );
   assert.deepEqual(snapshot(root), before);
 });
-test("instance consolidates compatible metadata and manual index introductions", async (t) => {
+test("instance preserves owner-local metadata, introductions and AGENTS registrations", async (t) => {
   const { root, manifest } = fixture(t);
   legacy(root, "", "root intro", "---\nvendor: shared\n---\n");
   legacy(root, "extensions/", "module intro", "---\nother: kept\n---\n");
@@ -151,36 +151,36 @@ test("instance consolidates compatible metadata and manual index introductions",
   );
   const m = await load();
   m.runInstanceMigration(root, manifest, true);
-  const index = fs.readFileSync(
+  const rootIndex = fs.readFileSync(
     join(root, ".harness/memory/projects/AGENTS.md"),
     "utf8",
   );
-  for (const s of [
-    "root intro",
-    "module intro",
-    "vendor: shared",
-    "other: kept",
-  ])
-    assert.ok(index.includes(s));
-  assert.equal(index.match(/project-memory-type:start/g)?.length, 1);
-  assert.doesNotMatch(
+  const index = fs.readFileSync(
+    join(root, "extensions/.harness/memory/projects/AGENTS.md"),
+    "utf8",
+  );
+  assert.match(rootIndex, /root intro/);
+  assert.match(rootIndex, /vendor: shared/);
+  assert.doesNotMatch(rootIndex, /module intro/);
+  assert.match(index, /module intro/);
+  assert.match(index, /other: kept/);
+  assert.match(
     fs.readFileSync(join(root, "extensions/AGENTS.md"), "utf8"),
     /project-memory:start/,
   );
 });
-test("metadata conflict cannot silently discard authored fields", async (t) => {
-  const { root, manifest } = fixture(t);
-  legacy(root, "", "root", "---\nvendor: first\n---\n");
-  legacy(root, "extensions/", "module", "---\nvendor: second\n---\n");
-  const before = snapshot(root),
-    m = await load();
+test("metadata merge cannot silently discard authored fields", async () => {
+  const m = await load();
   assert.throws(
-    () => m.runInstanceMigration(root, manifest, true),
+    () =>
+      m.mergeIndexMetadata(
+        "---\nvendor: first\n---\n",
+        "---\nvendor: second\n---\n",
+      ),
     /metadata-conflict/,
   );
-  assert.deepEqual(snapshot(root), before);
 });
-test("upgraded checkout routes ignored remnants without resurrecting module scope", async (t) => {
+test("upgraded checkout routes ignored remnants into their original module", async (t) => {
   const { root, manifest } = fixture(t),
     m = await load();
   m.runInstanceMigration(root, manifest, true);
@@ -194,16 +194,21 @@ test("upgraded checkout routes ignored remnants without resurrecting module scop
   fs.chmodSync(join(root, "extensions/.memory"), 0o700);
   m.runInstanceMigration(root, manifest, true);
   assert.equal(
-    fs.readFileSync(join(root, ".harness/memory/users/user_x.md"), "utf8"),
+    fs.readFileSync(
+      join(root, "extensions/.harness/memory/users/user_x.md"),
+      "utf8",
+    ),
     "secret",
   );
-  assert.equal(fs.existsSync(join(root, "extensions/.harness")), false);
   assert.equal(
-    fs.statSync(join(root, ".harness/memory/users")).mode & 0o777,
+    fs.statSync(join(root, "extensions/.harness/memory/users")).mode & 0o777,
     0o700,
   );
   assert.match(
-    fs.readFileSync(join(root, ".harness/memory/users/AGENTS.md"), "utf8"),
+    fs.readFileSync(
+      join(root, "extensions/.harness/memory/users/AGENTS.md"),
+      "utf8",
+    ),
     /private manual/,
   );
 });
@@ -249,22 +254,16 @@ for (const [label, field] of [
   ["quoted", "'private-key': second"],
   ["non-ASCII", "作者: second"],
 ])
-  test(`consolidation rejects unsupported ${label} metadata keys before mutation`, async (t) => {
-    const { root, manifest } = fixture(t);
-    legacy(root, "", "root", "---\nvendor: shared\n---\n");
-    legacy(
-      root,
-      "extensions/",
-      "module",
-      `---\nvendor: shared\n${field}\n---\n`,
-    );
-    const before = snapshot(root),
-      m = await load();
+  test(`metadata merge rejects unsupported ${label} keys`, async () => {
+    const m = await load();
     assert.throws(
-      () => m.runInstanceMigration(root, manifest, true),
+      () =>
+        m.mergeIndexMetadata(
+          "---\nvendor: shared\n---\n",
+          `---\nvendor: shared\n${field}\n---\n`,
+        ),
       /metadata-structure-needs-review/,
     );
-    assert.deepEqual(snapshot(root), before);
   });
 test("protected post edits and links requiring rewrite refuse before migration", async (t) => {
   const { root, manifest } = fixture(t),
@@ -308,7 +307,7 @@ test("reviewed source and gitlink hashes cannot drift silently", async (t) => {
   );
   assert.deepEqual(snapshot(root), before);
 });
-test("private owner index collisions require review instead of merging secrets", async (t) => {
+test("private indexes of different owners remain separate", async (t) => {
   const { root, manifest } = fixture(t),
     m = await load();
   for (const owner of ["", "extensions/"]) {
@@ -316,15 +315,21 @@ test("private owner index collisions require review instead of merging secrets",
     put(
       root,
       owner + ".memory/users/AGENTS.md",
-      "# private manual\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+      `# private ${owner} manual\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n`,
     );
   }
-  const before = snapshot(root);
-  assert.throws(
-    () => m.runInstanceMigration(root, manifest, true),
-    /private-index-collision/,
+  m.runInstanceMigration(root, manifest, true);
+  assert.match(
+    fs.readFileSync(
+      join(root, "extensions/.harness/memory/users/AGENTS.md"),
+      "utf8",
+    ),
+    /private extensions/,
   );
-  assert.deepEqual(snapshot(root), before);
+  assert.doesNotMatch(
+    fs.readFileSync(join(root, ".harness/memory/users/AGENTS.md"), "utf8"),
+    /private extensions/,
+  );
 });
 test("missing adopted custom type refuses before ignore or journal writes", async (t) => {
   const { root, manifest } = fixture(t),
@@ -387,7 +392,10 @@ test("instance interrupted private copy resumes its persisted plan", async (t) =
   );
   assert.equal(m.runInstanceMigration(root, manifest, true).status, "migrated");
   assert.equal(
-    fs.readFileSync(join(root, ".harness/memory/users/user_x.md"), "utf8"),
+    fs.readFileSync(
+      join(root, "extensions/.harness/memory/users/user_x.md"),
+      "utf8",
+    ),
     "private",
   );
 });
@@ -411,7 +419,7 @@ test("flat private index destination receives private permissions", async (t) =>
     /flat private/,
   );
 });
-test("private remnants preserve external relative links after owner consolidation", async (t) => {
+test("private remnants preserve external relative links after local layout conversion", async (t) => {
   const { root, manifest } = fixture(t),
     m = await load();
   m.runInstanceMigration(root, manifest, true);
@@ -429,8 +437,11 @@ test("private remnants preserve external relative links after owner consolidatio
   put(root, "extensions/target.txt", "kept");
   m.runInstanceMigration(root, manifest, true);
   assert.equal(
-    fs.readFileSync(join(root, ".harness/memory/users/user_x.md"), "utf8"),
-    "[target](../../../extensions/target.txt)\n",
+    fs.readFileSync(
+      join(root, "extensions/.harness/memory/users/user_x.md"),
+      "utf8",
+    ),
+    "[target](../../../target.txt)\n",
   );
   assert.equal(
     fs.readFileSync(join(root, "extensions/target.txt"), "utf8"),
@@ -461,7 +472,7 @@ test("instance newly added source and changed directory permissions prevent resu
   );
   assert.deepEqual(snapshot(root), before);
 });
-test("instance keeps custom skills module ownership after consolidation", async (t) => {
+test("instance keeps custom skills module ownership after local layout conversion", async (t) => {
   const { root, manifest } = fixture(t);
   legacy(root, "", "root");
   put(
@@ -617,7 +628,7 @@ for (const flag of ["--help", "-h"])
       "../../../../scripts/migrate-recursive-layout.mts",
       import.meta.url,
     );
-    const loader = import.meta.resolve('tsx');
+    const loader = import.meta.resolve("tsx");
     const output = execFileSync(
       process.execPath,
       ["--import", loader, script.pathname, flag],
@@ -723,39 +734,173 @@ test("saved gitlink refuses an intermediate pair with a conflicted target stage"
   assert.equal(git(root, "ls-files", "--stage"), index);
 });
 
-for (const failure of ['missing-binary', 'broken-repository'] as const)
-  test(`instance migration refuses ${failure} before journal or destination writes`, async t => {
-    const { root, manifest } = fixture(t), m = await load();
-    put(root, '.gitignore', '**/.recursive-layout-migration/\n!.recursive-layout-migration/\n!.recursive-layout-migration/**\n');
-    const before = snapshot(root), oldPath = process.env.PATH;
-    if (failure === 'missing-binary') process.env.PATH = join(root, 'missing-bin');
+for (const failure of ["missing-binary", "broken-repository"] as const)
+  test(`instance migration refuses ${failure} before journal or destination writes`, async (t) => {
+    const { root, manifest } = fixture(t),
+      m = await load();
+    put(
+      root,
+      ".gitignore",
+      "**/.recursive-layout-migration/\n!.recursive-layout-migration/\n!.recursive-layout-migration/**\n",
+    );
+    const before = snapshot(root),
+      oldPath = process.env.PATH;
+    if (failure === "missing-binary")
+      process.env.PATH = join(root, "missing-bin");
     else {
-      fs.rmSync(join(root, '.git'), { recursive: true });
-      fs.symlinkSync('missing-repository', join(root, '.git'));
+      fs.rmSync(join(root, ".git"), { recursive: true });
+      fs.symlinkSync("missing-repository", join(root, ".git"));
     }
-    try { assert.throws(() => m.runInstanceMigration(root, manifest, true), /git|ENOENT/i); }
-    finally {
+    try {
+      assert.throws(
+        () => m.runInstanceMigration(root, manifest, true),
+        /git|ENOENT/i,
+      );
+    } finally {
       if (oldPath === undefined) delete process.env.PATH;
       else process.env.PATH = oldPath;
     }
-    assert.equal(fs.existsSync(join(root, '.recursive-layout-migration')), false);
+    assert.equal(
+      fs.existsSync(join(root, ".recursive-layout-migration")),
+      false,
+    );
     assert.equal(fs.existsSync(join(root, manifest.tasks[0]!.target)), false);
     assert.deepEqual(snapshot(root), before);
   });
 
-test('instance root generator registers owned modules in three sections and preserves manual prose', async t => {
+test("instance root generator registers owned modules in three sections and preserves manual prose", async (t) => {
   const { root, manifest } = fixture(t);
-  const file = join(root, 'AGENTS.md');
-  fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('<!-- project-memory-local:end -->', '- [manual](manual.md) — user pointer\n<!-- project-memory-local:end -->') + '\n## Authored guidance\nKeep this prose.\n');
+  const file = join(root, "AGENTS.md");
+  fs.writeFileSync(
+    file,
+    fs
+      .readFileSync(file, "utf8")
+      .replace(
+        "<!-- project-memory-local:end -->",
+        "- [manual](manual.md) — user pointer\n<!-- project-memory-local:end -->",
+      ) + "\n## Authored guidance\nKeep this prose.\n",
+  );
   const { runInstanceMigration } = await load();
   runInstanceMigration(root, manifest, true);
-  const source = fs.readFileSync(file, 'utf8');
+  const source = fs.readFileSync(file, "utf8");
   assert.doesNotMatch(source, /## 工作与模块入口|## 下层作用域/);
   assert.match(source, /## Authored guidance\nKeep this prose\./);
   assert.match(source, /\[manual\]\(manual.md\)/);
-  const { InternalNode } = await import('../../src/models/internal-node.js');
+  const { InternalNode } = await import("../../src/models/internal-node.js");
   const node = new InternalNode(file).parse(source);
-  assert.ok(node.children.some(ref => ref.target === '.harness/tasks/AGENTS.md' && ref.kind === 'local'));
-  assert.ok(node.children.some(ref => ref.target === 'extensions/AGENTS.md' && ref.kind === 'descendant'));
-  assert.equal(node.children.filter(ref => ref.target === '.harness/evaluation/AGENTS.md').length, 1);
+  assert.ok(
+    node.children.some(
+      (ref) =>
+        ref.target === ".harness/tasks/AGENTS.md" && ref.kind === "local",
+    ),
+  );
+  assert.ok(
+    node.children.some(
+      (ref) =>
+        ref.target === "extensions/AGENTS.md" && ref.kind === "descendant",
+    ),
+  );
+  assert.equal(
+    node.children.filter(
+      (ref) => ref.target === ".harness/evaluation/AGENTS.md",
+    ).length,
+    1,
+  );
+});
+
+test("corrected instance ownership keeps public and custom private records at their original owner", async (t) => {
+  const { root, manifest } = fixture(t);
+  legacy(root, "", "root");
+  legacy(root, "extensions/", "module");
+  put(root, "extensions/.memory/projects/project_local.md", "latest");
+  put(
+    root,
+    "extensions/.memory/docs/AGENTS.md",
+    "<!-- project-memory-type:start -->\nname: secret\nmodule: memory\nwritable: true\ngitignore: true\nformat: ordinary\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+  );
+  put(root, "extensions/.memory/docs/secret_x.md", "private fixture");
+  const m = await load();
+  m.runInstanceMigration(root, manifest, true);
+  assert.equal(
+    fs.readFileSync(
+      join(root, "extensions/.harness/memory/projects/project_local.md"),
+      "utf8",
+    ),
+    "latest",
+  );
+  assert.equal(
+    fs.readFileSync(
+      join(root, "extensions/.harness/memory/docs/secret_x.md"),
+      "utf8",
+    ),
+    "private fixture",
+  );
+  assert.match(
+    fs.readFileSync(join(root, "extensions/AGENTS.md"), "utf8"),
+    /\.harness\/memory\/projects\/AGENTS.md/,
+  );
+  assert.equal(
+    fs.existsSync(join(root, ".harness/memory/projects/project_local.md")),
+    false,
+  );
+  const before = snapshot(root);
+  m.runInstanceMigration(root, manifest, true);
+  assert.deepEqual(snapshot(root), before);
+});
+test("pending historical promotion journals refuse before replaying wrong ownership", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  put(root, "extensions/.memory/users/private.md", "private fixture");
+  const generic = await import("../../src/services/memory/migrate.js");
+  const job = {
+    root,
+    phase: "planned",
+    operations: [
+      {
+        source: join(root, "extensions/.memory/users/private.md"),
+        target: join(root, ".harness/memory/users/private.md"),
+        before: generic.fileState("private fixture"),
+        after: generic.fileState("private fixture"),
+        originalTarget: null,
+      },
+    ],
+    directories: [],
+    private: [],
+    watchedSources: [],
+    legacyOwners: [],
+    protected: {},
+    diagnostics: [],
+    gitlink: null,
+  };
+  put(root, ".recursive-layout-migration/journal.json", JSON.stringify(job));
+  const before = snapshot(root);
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /historical-owner-promotion-journal-needs-review/,
+  );
+  assert.deepEqual(snapshot(root), before);
+});
+test("private remnant adoption registers its original node and keeps custom private paths out of public diagnostics", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load();
+  m.runInstanceMigration(root, manifest, true);
+  put(root, "extensions/AGENTS.md", "# module\n");
+  put(
+    root,
+    "extensions/.memory/docs/AGENTS.md",
+    "<!-- project-memory-type:start -->\nname: secret\nmodule: skills\nwritable: false\ngitignore: true\nformat: ordinary\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+  );
+  put(root, "extensions/.memory/docs/secret_x.md", "private fixture");
+  const result = m.runInstanceMigration(root, manifest, true);
+  assert.equal(
+    result.publicPathMap.some(
+      (item) =>
+        item.source.includes("/docs/") || item.target.includes("/docs/"),
+    ),
+    false,
+  );
+  assert.match(
+    fs.readFileSync(join(root, "extensions/AGENTS.md"), "utf8"),
+    /\.harness\/skills\/docs\/AGENTS.md/,
+  );
 });
