@@ -1,5 +1,24 @@
 import { spawnSync } from "node:child_process";
-import { relative } from "node:path";
+import { lstatSync, realpathSync } from "node:fs";
+import { dirname, join, relative } from "node:path";
+
+function hasRepositoryContext(root: string): boolean {
+  if (["GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR"].some(key => process.env[key] !== undefined)) return true;
+  const present = (file: string): boolean => {
+    try { lstatSync(file); return true; }
+    catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return false;
+      throw error;
+    }
+  };
+  // Inspect physical ancestors so a worktree file, broken link, or damaged Git
+  // directory cannot turn a failed Git invocation into permission to write.
+  for (let directory = realpathSync(root); ; directory = dirname(directory)) {
+    if (present(join(directory, ".git"))) return true;
+    if (present(join(directory, "HEAD")) && present(join(directory, "objects"))) return true;
+    if (dirname(directory) === directory) return false;
+  }
+}
 
 /** Check real Git precedence for exact private paths, including not-yet-created files. */
 export function assertPrivateIgnored(
@@ -7,11 +26,18 @@ export function assertPrivateIgnored(
   files: readonly string[],
   directories: readonly string[] = [],
 ): void {
-  const repository = spawnSync("git", ["-C", root, "rev-parse", "--show-toplevel"], {
+  const repository = spawnSync("git", ["-C", root, "rev-parse", "--git-dir"], {
     encoding: "utf8",
   });
-  if (repository.error) throw new Error("private-ignore-check-failed: " + repository.error.message);
-  if (repository.status !== 0) return; // Ordinary non-Git directories remain supported.
+  if (repository.error || repository.status !== 0) {
+    try {
+      if (!hasRepositoryContext(root)) return; // Confirmed non-Git, including absent Git binary.
+    } catch (error) {
+      throw new Error("private-ignore-check-failed: " + (error as Error).message);
+    }
+    throw new Error("private-ignore-check-failed: " +
+      (repository.error?.message ?? (repository.stderr.trim() || "Git repository discovery failed")));
+  }
   const paths = [...new Set([...files, ...directories.map(directory => directory.replace(/\/$/, "") + "/")])];
   if (!paths.length) return;
   const result = spawnSync("git", ["-C", root, "check-ignore", "--no-index", "-z", "--stdin"], {

@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import {
   mkdtempSync,
   mkdirSync,
@@ -118,7 +119,7 @@ test("managed uses skill format and referenced remains read only with missing so
 });
 test("private custom privileges are preserved, ignored before writing, and cannot be inferred when lost", (t) => {
   const targetDir = fixture(t);
-  mkdirSync(join(targetDir, ".git"));
+  execFileSync("git", ["init", "-q", targetDir]);
   initMemory({ targetDir, memoryTypes: ["project"] });
   addMemoryType({
     targetDir,

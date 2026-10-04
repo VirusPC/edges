@@ -4,6 +4,7 @@ import * as fs from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { execFileSync } from "node:child_process";
+import { assertPrivateIgnored } from "../../src/services/memory/ignore.js";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import type { Nodes } from "mdast";
 import {
@@ -218,7 +219,7 @@ test("linked harness and linked managed write ancestor never escape", (t) => {
 test("linked index and gitignore reject writes before private content", (t) => {
   const d = fixture(t),
     outside = fixture(t);
-  fs.mkdirSync(join(d, ".git"));
+  execFileSync("git", ["init", "-q", d]);
   initMemory({ targetDir: d, memoryTypes: ["user"] });
   fs.unlinkSync(join(d, ".gitignore"));
   put(outside, "ignore", "Keep");
@@ -725,4 +726,59 @@ test('custom private child scopes preflight effective ignores and preserve non-G
   initMemory({ targetDir: plain, memoryTypes: ['user'] });
   remember(plain, 'user');
   assert.equal(fs.existsSync(join(plain, '.harness/memory/users/user_example.md')), true);
+});
+
+
+function temporaryEnvironment(t: TestContext, name: string, value: string) {
+  const before = process.env[name];
+  process.env[name] = value;
+  t.after(() => {
+    if (before === undefined) delete process.env[name];
+    else process.env[name] = before;
+  });
+}
+
+test('Git discovery failure cannot expose private memory through a missing GIT_DIR', t => {
+  const d = fixture(t);
+  execFileSync('git', ['init', '-q', d]);
+  initMemory({ targetDir: d, memoryTypes: ['user'] });
+  exposeTypePath(d, 'users', 'user_example.md');
+  const index = '.harness/memory/users/AGENTS.md', before = read(d, index);
+  temporaryEnvironment(t, 'GIT_DIR', join(d, 'missing-git-dir'));
+  assert.throws(() => remember(d, 'user'), /private-ignore-check-failed/);
+  assert.equal(fs.existsSync(join(d, '.harness/memory/users/user_example.md')), false);
+  assert.equal(read(d, index), before);
+});
+
+test('effective ignore checking supports genuine non-Git directories with or without Git installed', t => {
+  const d = fixture(t);
+  assert.doesNotThrow(() => assertPrivateIgnored(d, [join(d, 'private.md')]));
+  temporaryEnvironment(t, 'PATH', join(d, 'missing-bin'));
+  assert.doesNotThrow(() => assertPrivateIgnored(d, [join(d, 'private.md')]));
+});
+
+test('missing Git binary fails closed inside a real repository', t => {
+  const d = fixture(t);
+  execFileSync('git', ['init', '-q', d]);
+  temporaryEnvironment(t, 'PATH', join(d, 'missing-bin'));
+  assert.throws(() => assertPrivateIgnored(d, [join(d, 'private.md')]), /private-ignore-check-failed/);
+});
+
+test('broken ancestor worktree metadata is not mistaken for a non-Git directory', t => {
+  const d = fixture(t), child = join(d, 'child');
+  fs.mkdirSync(child);
+  put(d, '.git', 'gitdir: missing-worktree-metadata\n');
+  assert.throws(() => assertPrivateIgnored(child, [join(child, 'private.md')]), /private-ignore-check-failed/);
+});
+
+test('explicit broken Git context is rejected even outside a discovered repository', t => {
+  const d = fixture(t);
+  temporaryEnvironment(t, 'GIT_DIR', join(d, 'missing-git-dir'));
+  assert.throws(() => assertPrivateIgnored(d, [join(d, 'private.md')]), /private-ignore-check-failed/);
+});
+
+test('bare repositories cannot bypass failed effective-ignore checks', t => {
+  const d = fixture(t);
+  execFileSync('git', ['init', '--bare', '-q', d]);
+  assert.throws(() => assertPrivateIgnored(d, [join(d, 'private.md')]), /private-ignore-check-failed/);
 });
