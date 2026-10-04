@@ -28,7 +28,7 @@
 
 **Interfaces:** Implement the public types/classes exactly as in the spec's Public Types section. Constructors accept path only and never invoke overridable parsers. Base type is `base`; Internal type is `internal`. `parse(markdown):this`, `serialize():string`, protected parseBody/serializeBody. Concrete type must remain readonly. Implement model relation coordination through a package-internal helper used later by NodeService; do not expose public writable parent/children setters. Export only types/classes needed by consumers.
 
-- [ ] Add failing tests showing model behavior before implementation. Example:
+- [x] Add failing tests showing model behavior before implementation. Example:
 ```ts
 const node = new TaskNode('/scope/tasks/one.md');
 node.parse('---\nname: one\nmetadata:\n  edges-title: Before\n  edges-tasks-status: todo\n  vendor: keep\n---\nBody\n');
@@ -37,9 +37,9 @@ assert.equal(new TaskNode(node.path).parse(node.serialize()).title, 'After');
 assert.equal(node.metadata?.metadata && (node.metadata.metadata as Record<string,unknown>).vendor, 'keep');
 ```
 Also verify optional headers, subclass hooks, repeated parse reset, no path/tree context leaked into YAML, nested metadata snapshots cannot mutate state, invalid status/priority rejects before mutation, Note H1 title updates body, Skill name/description follow frontmatter, no-header base document, and invalid non-YAML language rejection.
-- [ ] Implement BaseNode with cloned metadata/read-only snapshots and protected body extension points; keep fields' canonical storage in metadata/body. Reuse existing business field names and validity, not new schemas. setMetadata/removeMetadata address outer metadata keys; reject invalid domain metadata through domain hooks.
-- [ ] Implement InternalNode using current Markdown parser/serializer as a private syntax helper, preserving authored non-index prose and section headings. Map each actual indexed link to NodeReference with label/description and derived kind. Implement setConstraints/addChild/updateChild/removeChild; updateChild requires existing target, replaces optional values, can change kind, cannot rename target. Escape generated display text and encode paths consistently. Plain references never become children. Existing type indexes with project-memory-entries map to local references and retain their existing header/body syntax; they do not acquire a new physical intermediate directory or forced extra chapters. InternalNode body getter/serialize use current content; parse/body setter replace state rather than append. Parent/children optional on other classes.
-- [ ] Run `node --test --import tsx './test/models/*.test.ts'` from CLI and root `pnpm exec tsc --noEmit -p extensions/cli/tsconfig.json`. Commit only owned classes/tests; report exact RED/GREEN evidence, exports and constraints.
+- [x] Implement BaseNode with cloned metadata/read-only snapshots and protected body extension points; keep fields' canonical storage in metadata/body. Reuse existing business field names and validity, not new schemas. setMetadata/removeMetadata address outer metadata keys; reject invalid domain metadata through domain hooks.
+- [x] Implement InternalNode using current Markdown parser/serializer as a private syntax helper, preserving authored non-index prose and section headings. Map each actual indexed link to NodeReference with label/description and derived kind. Implement setConstraints/addChild/updateChild/removeChild; updateChild requires existing target, replaces optional values, can change kind, cannot rename target. Escape generated display text and encode paths consistently. Plain references never become children. Existing type indexes with project-memory-entries map to local references and retain their existing header/body syntax; they do not acquire a new physical intermediate directory or forced extra chapters. InternalNode body getter/serialize use current content; parse/body setter replace state rather than append. Parent/children optional on other classes.
+- [x] Run `node --test --import tsx './test/models/*.test.ts'` from CLI and root `pnpm exec tsc --noEmit -p extensions/cli/tsconfig.json`. Commit only owned classes/tests; report exact RED/GREEN evidence, exports and constraints.
 
 ### Task 2: Common NodeService persistence and ownership traversal
 
