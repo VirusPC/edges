@@ -44,7 +44,9 @@ status: proposed
 
 2026-10-04 CLI 重构：按用户修正，公共实现放在 [`extensions/cli/src/utils/node-tree/`](../../extensions/cli/src/utils/node-tree/README.md)，提供节点读取、祖先查找、物理发现与按下层索引递归；`scope.ts` 保留 CLI 选择策略及 Git 回退，使用独立的验证错误，不再依赖 Tasks。公共节点读取不要求 Project Memory 标记，但 CLI 暂保留原有标记筛选，Tasks 的 `all` 也保持物理清查，避免把行为迁移混入解耦。跨层引用、去重及环、边界隔离由CLI 内的节点工具测试覆盖；局部记忆恢复不属于本次代码重构。Python 仍有独立实现，跨语言接入和统一识别策略待后续整体迁移落实。 模块统一使用 TypeScript，不单独建包；模型、解析/序列化与存储仍以目录和接口解耦。frontmatter 直接使用 `gray-matter` 默认解析与序列化，不自定义 YAML 引擎、日期、别名、分隔符或格式保留，也不直接依赖 `js-yaml`。字段校验留在领域层；文档不符合约定时修正文档，不增加兼容分支。
 
-**模型、格式与存储进一步解耦（用户确认，2026-10-04 实施）：**三部分内容与引用关系由不含路径、Markdown 原文或 AST 的 `NodeModel` 表达。纯 codec 负责解析／序列化；文件适配负责原文读写、路径与文件身份校验；组合层把模型、来源与位置分字段加载，CLI 消费组合结果。带原文的序列化保留未修改片段与未知扩展，无法保留时拒绝生成有损结果。此分层可独立复用，详见[实施与验证](../superpowers/plans/2026-10-04-node-model-codec-separation.md)。
+**后续模型设计（用户确认，代码尚未重构）：**BaseNode、InternalNode、TaskNode、MemoryNode 统一组织在 models；NodeTree 协调树关系。解析与序列化作为实例方法，Base 通过 parseBody/serializeBody 调用子类正文处理；不设置顶层 codecs。Internal 的 children 从原有三部分中的归属索引派生，不维护另一份子节点数组。services 协调加载、保存及跨对象流程。见[节点领域模型设计](../superpowers/specs/2026-10-04-node-domain-model-design.md)。
+
+**模型、格式与存储进一步解耦（2026-10-04 先前实施记录，后续设计见上）：**三部分内容与引用关系由不含路径、Markdown 原文或 AST 的 `NodeModel` 表达。纯 codec 负责解析／序列化；文件适配负责原文读写、路径与文件身份校验；组合层把模型、来源与位置分字段加载，CLI 消费组合结果。带原文的序列化保留未修改片段与未知扩展，无法保留时拒绝生成有损结果。此分层可独立复用，详见[实施与验证](../superpowers/plans/2026-10-04-node-model-codec-separation.md)。
 
 **内置可选 frontmatter（用户确认，2026-10-04）：**Task、Memory 与 AGENTS.md 底层均为可选 YAML 头加 Markdown 正文。公共文档模型使用可选 `metadata`，格式层负责解析与写回；字段含义和校验由各领域负责。AGENTS.md 进一步约定三部分章节、HTML 注释标记与索引关系，不将这些约定下沉为通用 Markdown 格式。公共能力与 NodeModel 已接入，Tasks 已复用；Python Memory 接入、具体入口是否采用 description 等字段仍分别推进。见[实施与验证](../superpowers/plans/2026-10-04-optional-frontmatter.md)。
 

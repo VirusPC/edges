@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 递归作用域与文档模型决策；frontmatter 采用 gray-matter 默认行为，不合规范修文档，不加自定义解析
+description: 节点领域模型：models共同归组、实例parse/serialize、正文扩展点、children由AGENTS索引派生；设计确认未实施
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T21:33:09+08:00"
+  edges-updated-at: "2026-10-04T21:58:09+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -42,7 +42,7 @@ metadata:
 
 **How to apply:** 公共能力、CLI 适配和业务操作保持边界；公共层不依赖业务错误类型，逻辑下层引用与物理目录遍历分开表达。本次已抽取公共节点能力并接回 CLI，见[实施计划](../../../docs/superpowers/plans/2026-10-04-node-tree-cli-decoupling.md)。CLI 暂保留原有识别策略和 Tasks 物理清查，以便独立验证解耦；统一节点策略切换、Python 接入及局部记忆恢复继续按整体方案推进，不将本次抽取视为整套目录重构完成。
 
-## 2026-10-04 用户确认：领域模型、编解码与文件适配分离
+## 2026-10-04 历史实现：领域模型、编解码与文件适配分离（后续改为实例方法）
 
 节点的领域模型、Markdown 解析与序列化、文件系统读写分别承担职责。用户在 CLI 公共能力抽取后进一步要求落实这项解耦。
 
@@ -81,6 +81,14 @@ document-model 增加可选 type，内置 base、agents、memory、task；各类
 **Why:** 共享文档基础格式不代表正文规范与处理方式相同；AGENTS 的章节模型、Task 的字段投影不能都塞进基础格式规则。
 
 **How to apply:** 由调用方显式选择 codec，省略 type 表示未标记；未选专用处理时使用 base，不根据 YAML 分类字段自动猜测。AGENTS codec 复用 NodeModel 解析与写回；Task codec 留在 Tasks 领域模块并接入原有字段读写；Memory 暂时复用基础格式，不据此宣称 Python Memory 已接入。type 不自动写入 YAML，与 metadata.edges-type 的 project、feedback 等内容分类不同；专用格式可实现自己的 DocumentCodec，无需独立包或全局注册框架。
+
+## 2026-10-04 用户确认：节点模型共同归组与实例解析
+
+采用具有操作方法的节点领域模型：BaseNode 为 InternalNode、TaskNode、MemoryNode 提供共同能力，NodeTree 组织节点关系。模型统一放在 models，services 协调加载、保存及跨对象流程，不设置顶层 codecs。解析辅助代码需要拆分时留在对应模型内。
+
+**Why:** 用户指出此前纯数据与外部工具函数的组织不符合预期；继承应能扩展实例行为，职责分离不应机械变成顶层目录分离。
+
+**How to apply:** parse(markdown): this 与 serialize(): string 均为实例方法；Base 负责通用文档流程，子类通过 parseBody/serializeBody 扩展正文处理，构造函数不调用虚方法。Internal 的 children 包含所有直属节点，但从 AGENTS 原有三部分的归属索引派生，不独立存储第二份可修改数组；普通交叉引用与归属区分。parent 为组树上下文，Task/Memory 字段从 metadata 解释，均避免重复真源。继续遵守 TypeScript、无需独立 package、gray-matter 默认 YAML 行为及不合规范修文档原则。见[节点领域模型设计](../../../docs/superpowers/specs/2026-10-04-node-domain-model-design.md)；本文记录设计确认，不表示代码重构已完成。
 
 ## 先前设计与实施记录
 
