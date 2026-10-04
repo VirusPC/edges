@@ -90,7 +90,7 @@ export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFi
     }
     return result;
   } catch (cause) {
-    const recovered: string[] = [], unrecovered: string[] = [];
+    const recovered: string[] = [], unrecovered: string[] = [], recoveryCopies: string[] = [], unavailable: string[] = [];
     for (const { change, after } of applied.reverse()) {
       try {
         if (after) validateEntry(after);
@@ -100,8 +100,19 @@ export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFi
           fs.chmodSync(change.path, change.before.mode);
         } else if (after) fs.unlinkSync(change.path);
         recovered.push(change.path);
-      } catch { unrecovered.push(change.path); }
+      } catch {
+        unrecovered.push(change.path);
+        if (change.before) {
+          const recovery = path.join(path.dirname(change.path), `.node-recovery-${randomUUID()}.md`);
+          try {
+            checkPath(recovery);
+            fs.writeFileSync(recovery, change.before.source, { flag: 'wx', mode: change.before.mode });
+            fs.chmodSync(recovery, change.before.mode);
+            recoveryCopies.push(recovery);
+          } catch { unavailable.push(change.path); }
+        }
+      }
     }
-    throw new Error(`Node write failed: ${String(cause)}. Affected: ${applied.map(a => a.change.path).join(', ') || '(none)'}. Recovered: ${recovered.join(', ') || '(none)'}. Unrecovered: ${unrecovered.join(', ') || '(none)'}. Reload affected nodes.`, { cause });
+    throw new Error(`Node write failed: ${String(cause)}. Affected: ${applied.map(a => a.change.path).join(', ') || '(none)'}. Recovered: ${recovered.join(', ') || '(none)'}. Unrecovered: ${unrecovered.join(', ') || '(none)'}. Recovery copies: ${recoveryCopies.join(', ') || '(none)'}. Recovery copy unavailable: ${unavailable.join(', ') || '(none)'}. Reload affected nodes.`, { cause });
   }
 }

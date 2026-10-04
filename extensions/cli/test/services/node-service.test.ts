@@ -330,3 +330,27 @@ test('successful index writes synchronize clean loaded copies without overwritin
   await service.destroy(child!);
   assert.equal(first!.children?.length, 0); assert.equal(second.children.length, 0);
 });
+
+test('failed rollback retains original bytes in a recovery file and reports its concrete location', async t => {
+  const { root, file, write } = fixture(t), service = new NodeService();
+  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'body'); write('next/AGENTS.md', index());
+  const [parent, child] = await service.list(root), next = (await service.get(file('next/AGENTS.md'), InternalNode))!;
+  const before = fs.readFileSync(parent!.path, 'utf8'), mode = fs.statSync(parent!.path).mode & 0o777;
+  const { default: mutableFs } = await import('node:fs');
+  const { syncBuiltinESMExports } = await import('node:module');
+  const rename = mutableFs.renameSync;
+  let firstWritten = false;
+  const mocked = t.mock.method(mutableFs, 'renameSync', (source: fs.PathLike, target: fs.PathLike) => {
+    if (target === next.path || (target === parent!.path && firstWritten)) throw new Error('Persistent rename failure');
+    rename(source, target); firstWritten = true;
+  });
+  syncBuiltinESMExports(); t.after(() => { mocked.mock.restore(); syncBuiltinESMExports(); });
+  await assert.rejects(service.reparent(child!, parent as InternalNode, next, 'local'), error => {
+    assert.match(String(error), /Unrecovered:.*AGENTS.md/);
+    const recovery = fs.readdirSync(root).find(name => name.startsWith('.node-recovery-'));
+    assert.ok(recovery); assert.ok(String(error).includes(file(recovery)));
+    assert.equal(fs.readFileSync(file(recovery), 'utf8'), before);
+    assert.equal(fs.statSync(file(recovery)).mode & 0o777, mode);
+    return true;
+  });
+});
