@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 节点模型：path 与 service CRUD；parent/children 仅由 InternalNode 持有，内容归属由树查询索引；设计未实施
+description: 节点模型：BaseNode 提供 path 与可选 parent/children，Internal 从索引派生 children；service CRUD；设计未实施
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T22:22:55+08:00"
+  edges-updated-at: "2026-10-04T22:25:33+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -88,7 +88,7 @@ document-model 增加可选 type，内置 base、agents、memory、task；各类
 
 **Why:** 用户指出此前纯数据与外部工具函数的组织不符合预期；继承应能扩展实例行为，职责分离不应机械变成顶层目录分离。
 
-**How to apply:** parse(markdown): this 与 serialize(): string 均为实例方法；Base 负责通用文档流程，子类通过 parseBody/serializeBody 扩展正文处理，构造函数不调用虚方法。Internal 的 children 包含所有直属节点，但从 AGENTS 原有三部分的归属索引派生，不独立存储第二份可修改数组；普通交叉引用与归属区分。parent 仅由 InternalNode 持有，作为组树上下文；Task/Memory 字段从 metadata 解释，均避免重复真源。继续遵守 TypeScript、无需独立 package、gray-matter 默认 YAML 行为及不合规范修文档原则。见[节点领域模型设计](../../../docs/superpowers/specs/2026-10-04-node-domain-model-design.md)；本文记录设计确认，不表示代码重构已完成。
+**How to apply:** parse(markdown): this 与 serialize(): string 均为实例方法；Base 负责通用文档流程，子类通过 parseBody/serializeBody 扩展正文处理，构造函数不调用虚方法。Internal 的 children 包含所有直属节点，但从 AGENTS 原有三部分的归属索引派生，不独立存储第二份可修改数组；普通交叉引用与归属区分。parent 与 children 由 BaseNode 提供，允许缺省；parent 为组树上下文，Task/Memory 字段从 metadata 解释，均避免重复真源。继续遵守 TypeScript、无需独立 package、gray-matter 默认 YAML 行为及不合规范修文档原则。见[节点领域模型设计](../../../docs/superpowers/specs/2026-10-04-node-domain-model-design.md)；本文记录设计确认，不表示代码重构已完成。
 
 ## 先前设计与实施记录
 
@@ -132,10 +132,10 @@ BaseNode 包含必填 path，service 使用节点自带的位置执行 create/up
 
 **How to apply:** 本层简写依据当前 scope 已登记布局解析，下层新节点或引用显式指定目标路径，已有引用按记录的路径读取。节点文件位置和 AGENTS 引用表达的逻辑归属分别建模，不能通过 dirname 自动推出 parent。parse/serialize 处理内容，不改变 path 或自动将其写入 YAML。构造类型、路径解析与 service 调用示例见[节点领域模型设计](../../../docs/superpowers/specs/2026-10-04-node-domain-model-design.md)；这是已更新的设计，运行时代码尚未按此重构。
 
-## 2026-10-04 用户确认：树关系属性集中在 InternalNode
+## 2026-10-04 用户最终确认：BaseNode 提供可选树关系
 
-parent 从 BaseNode 移到 InternalNode，与 children 放在一起。BaseNode、TaskNode、MemoryNode 等内容模型不定义 parent；InternalNode.children 仍包含所有直属节点，内容文档可独立存在或被纳入归属索引。
+parent 与 children 都定义在 BaseNode，允许没有关系值；所有子类继承。此决定替代此前将两者仅放到 InternalNode 的方案。
 
-**Why:** 通用文档不应因具有路径就被强制绑定到某棵树；children 包含某个文档，不要求该文档自身保存反向 parent。
+**Why:** 用户明确树结构是系统核心，应作为节点的共同能力；独立文档或叶节点通过关系缺省表达，不需要排除在树模型之外。
 
-**How to apply:** NodeTree 通过已加载组织节点的归属索引查询内容节点的所属关系。attach/move/detach 调整相应索引，仅当被操作子节点是 InternalNode 时同步建立、更新或清除其 parent。父级关系不由物理路径推导，普通交叉引用不算归属。用户已要求更新 spec；这是后续重构设计，不表示代码已实现。
+**How to apply:** BaseNode 的 parent 与 children 均可为 undefined；InternalNode 覆盖 children 读取，从 AGENTS 归属索引派生集合，不另存第二份可修改数组。NodeTree 对任意节点的 attach/move/detach 都协调索引与 parent，不再只为 InternalNode 维护反向关系。路径定位与逻辑归属分开，树关系不自动写入 YAML。已更新 spec，此为后续重构目标，代码尚未实施。
