@@ -1,4 +1,5 @@
 import { InternalNode } from '../../models/internal-node.js';
+import { InternalSyntax } from '../../models/internal-syntax.js';
 import { discoverScopes } from '../scope.js';
 import { loadMemoryDocument, saveMemoryDocument, type MemoryDocument } from './node-documents.js';
 import { join, dirname, basename, relative, resolve } from "node:path";
@@ -84,8 +85,11 @@ export function ownershipTarget(owner: string, href: string): string | undefined
 async function dropLoadedIndexEntries(document: MemoryDocument, relatives: Set<string>): Promise<boolean> {
     if (!(document.node instanceof InternalNode)) throw new Error('Expected an AGENTS node');
     const before = document.node.serialize();
-    for (const reference of document.node.children)
-        if (reference.kind === 'descendant' && relatives.has(reference.target)) document.node.removeChild(reference);
+    const content = document.node.content;
+    document.node.body = new InternalSyntax(document.node.body).serialize({
+        ...content,
+        descendantMemory: content.descendantMemory.filter(reference => !relatives.has(reference.target)),
+    });
     const after = document.node.serialize();
     if (after === before) return false;
     await saveMemoryDocument(document, after);

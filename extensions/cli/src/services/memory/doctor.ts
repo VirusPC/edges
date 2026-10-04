@@ -187,13 +187,19 @@ export async function applyFindings(root: string, findings: MemoryFinding[]): Pr
             if (await dropIndexEntries(file, new Set([item.entry])))
                 repaired.push(`removed-entry: ${item.entry}`);
         }
-    for (const item of findings.filter(f => f.code === 'unregistered')) {
-        const owner = join(root, item.path);
-        if (!registeredIndexAnchors(owner, root).length)
-            registrations.set(owner, { anchor: findIndexAnchor(owner, root) });
+    // Repairs above may have created missing AGENTS for already-adopted types.
+    // Re-read current eligibility; initial findings cannot inventory those nodes.
+    for (const owner of discoverMemoryDirs(root)) {
+        if (owner === root || blocked.has(owner) || registrations.has(owner)) continue;
+        try {
+            if (layerTypeSpecs(owner).length && !registeredIndexAnchors(owner, root).length)
+                registrations.set(owner, { anchor: findIndexAnchor(owner, root) });
+        } catch { /* Unsafe owners remain reported by the second scan. */ }
     }
     for (const [owner, { anchor, description }] of registrations) {
         if (owner === root || blocked.has(owner) || blocked.has(anchor)) continue;
+        // A surviving local edge already owns this node; dedup must not replace it.
+        if (registeredIndexAnchors(owner, root).length) continue;
         const [action, entry] = await syncIndexEntry(anchor, owner, description);
         if (!["preserved", "not-applicable", "needs-doctor"].includes(action)) repaired.push(`registered: ${entry}`);
     }

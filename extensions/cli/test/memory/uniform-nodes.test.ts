@@ -94,3 +94,39 @@ test('explicit init keeps an existing local owner and updates an explicitly supp
   assert.doesNotMatch(read(root, 'AGENTS.md'), /project-memory-children/);
   assert.equal(read(root, 'physical/AGENTS.md'), '# Physical parent\n');
 });
+
+test('Doctor descendant deduplication preserves an existing local edge and its authored description', async t => {
+  const root = fixture(t);
+  await initMemory({ targetDir: root, memoryTypes: ['project'] });
+  put(root, 'owned/AGENTS.md', '# Owned\n');
+  const localLine = '- [Local label](owned/AGENTS.md) — Keep this local description.';
+  put(root, 'AGENTS.md', read(root, 'AGENTS.md')
+    .replace('<!-- project-memory-local:end -->', `${localLine}\n<!-- project-memory-local:end -->`)
+    .replace('<!-- project-memory:end -->', '<!-- project-memory-children:start -->\n## 下层记忆索引\n\n- [Descendant](owned/AGENTS.md) — Old descendant description.\n- [Duplicate](owned/AGENTS.md) — Duplicate description.\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->'));
+  const beforeLocal = read(root, 'AGENTS.md').match(/<!-- project-memory-local:start -->[\s\S]*?<!-- project-memory-local:end -->/)![0];
+  const result = await doctorMemory({ targetDir: root, apply: true });
+  assert.deepEqual(result.remaining, []);
+  assert.equal(read(root, 'AGENTS.md').match(/<!-- project-memory-local:start -->[\s\S]*?<!-- project-memory-local:end -->/)![0], beforeLocal);
+  const node = (await new NodeService().list(root))[0]!;
+  assert.deepEqual(node.children!.filter(ref => ref.target === 'owned/AGENTS.md'), [{ target: 'owned/AGENTS.md', label: 'Local label', description: 'Keep this local description.', kind: 'local' }]);
+  assert.deepEqual((await doctorMemory({ targetDir: root, apply: true })).repaired, []);
+});
+
+test('Doctor repairs an adopted child missing AGENTS and its missing registration in one pass', async t => {
+  const root = fixture(t);
+  await initMemory({ targetDir: root, memoryTypes: ['project'] });
+  const child = join(root, 'child');
+  mkdirSync(child);
+  await initMemory({ targetDir: child, rootDir: child, memoryTypes: ['project'] });
+  rmSync(join(child, 'AGENTS.md'));
+  put(root, 'business/AGENTS.md', '# Business stays sparse\n');
+  const result = await doctorMemory({ targetDir: root, apply: true });
+  assert.ok(result.findings.some(finding => finding.code === 'missing-agents' && finding.path === 'child/AGENTS.md'));
+  assert.deepEqual(result.remaining, []);
+  assert.equal(isScope(child), true);
+  const node = (await new NodeService().list(root, { includeDescendants: true }))[0]!;
+  assert.ok(node.children!.some(ref => ref.target === 'child/AGENTS.md' && ref.kind === 'descendant'));
+  assert.equal(read(root, 'business/AGENTS.md'), '# Business stays sparse\n');
+  assert.equal(existsSync(join(root, 'business/.harness')), false);
+  assert.deepEqual((await doctorMemory({ targetDir: root, apply: true })).repaired, []);
+});
