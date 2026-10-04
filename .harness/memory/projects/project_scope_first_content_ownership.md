@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 递归目录修订：统一节点沿用重要约束、本层记忆、下层记忆索引三部分，tasks 等扩展暂在其中注册；子节点记忆保留原归属，不因共享实现而上收根层。
+description: 递归目录修订：统一三部分入口，tasks 等扩展在其中注册，局部记忆不上收；作用域及递归树逻辑须与 CLI、业务模块解耦。
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T19:14:18+08:00"
+  edges-updated-at: "2026-10-04T19:17:38+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -33,6 +33,14 @@ metadata:
 **Why:** 共享实现由根层维护，不意味着源码目录、模块或内容目录的局部上下文也必须集中存储。跨层复用与发现通过引用实现，不应以撤除局部节点、合并记忆来替代递归。
 
 **How to apply:** 后续修订应按原节点归属恢复局部记忆和入口；节点目录整体搬迁时，记忆随节点搬迁，类型按已确认的 memory/skills 布局转换。停止沿用先前清单中依据“不是独立责任主体”把 extensions、shared-extensions、knowledge/notes、knowledge/tasks、extensions/skills/project-memory-init 的局部记忆并入根层的判断。对原节点被拆分等无法直接一一映射的情况，需单独明确归属，不能再次默认并入根或随意复制。这次只记录纠正，尚未搬回文件；先前清单的43条根层合并与相关索引处理仍待修订。
+
+## 2026-10-04 用户确认：CLI 与公共节点逻辑解耦
+
+作用域、节点关系及树结构递归需要从 CLI 命令和各业务模块中解耦，作为可复用的公共能力。
+
+**Why:** 递归节点模型服务整个系统，不应由 CLI 或 Tasks 独占定义，也不应让不同入口各自实现一套节点语义。
+
+**How to apply:** 后续实现设计明确公共能力、CLI 适配和业务操作的边界；公共层不依赖业务错误类型，逻辑下层引用与物理目录遍历分开表达。CLI、Project Memory 及其他调用方使用一致契约。具体代码位置、跨语言复用及接口属于待设计项，此次只记录解耦要求，未实施代码重构。
 
 ## 先前设计与实施记录
 
