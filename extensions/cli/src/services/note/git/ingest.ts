@@ -70,19 +70,32 @@ export async function runNoteIngest(
   const scope = await fs.realpath(config.scopeDir ?? config.repoPath);
   const flatFile = path.join(scope, `knowledge/notes/${date}--${slug}.md`);
   const directoryFile = path.join(scope, `knowledge/notes/${date}--${slug}/index.md`);
-  if (existsSync(flatFile) && existsSync(directoryFile)) throw new Error('Ambiguous file and directory note entries');
-  const existingFormat = existsSync(directoryFile) ? 'directory' : existsSync(flatFile) ? 'file' : undefined;
-  if (input.format && existingFormat && input.format !== existingFormat) throw new Error('Existing note layout differs; implicit conversion is not supported');
-  const absFile = (input.format ?? existingFormat) === 'directory' ? directoryFile : flatFile;
-  if (input.resources && existsSync(absFile)) throw new Error('Resource import only supports new directory entries');
-  const filePath = path.relative(await fs.realpath(config.repoPath), absFile);
-  if (filePath.startsWith("..") || path.isAbsolute(filePath)) throw new Error("Note scope must be inside its Git repository");
+  const selectNoteFile = () => {
+    const flatExists = existsSync(flatFile);
+    const directoryEntryExists = existsSync(directoryFile);
+    if (flatExists && directoryEntryExists) throw new Error('Ambiguous file and directory note entries');
+    const existingFormat = directoryEntryExists ? 'directory' : flatExists ? 'file' : undefined;
+    if (input.format && existingFormat && input.format !== existingFormat) throw new Error('Existing note layout differs; implicit conversion is not supported');
+    const selectedFile = (input.format ?? existingFormat) === 'directory' ? directoryFile : flatFile;
+    if (input.resources && directoryEntryExists) throw new Error('Resource import only supports new directory entries');
+    return selectedFile;
+  };
+  const repoRoot = await fs.realpath(config.repoPath);
+  const relativeFile = (absFile: string) => {
+    const filePath = path.relative(repoRoot, absFile);
+    if (filePath.startsWith("..") || path.isAbsolute(filePath)) throw new Error("Note scope must be inside its Git repository");
+    return filePath;
+  };
+  relativeFile(selectNoteFile());
   let branch = `ingest/${date}-${slug}`;
 
   if (!config.dryRun) {
     await exec("git", ["checkout", config.baseBranch], { cwd: config.repoPath, env });
     await exec("git", ["pull", "--autostash"], { cwd: config.repoPath, env });
   }
+
+  const absFile = selectNoteFile();
+  const filePath = relativeFile(absFile);
 
   if (config.mode === "direct") {
     branch = config.baseBranch;

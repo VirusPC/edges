@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 function fixture(t: any) { const root = mkdtempSync(path.join(tmpdir(), 'note-ingest-')); t.after(() => rmSync(root, { recursive: true, force: true })); return root; }
@@ -22,6 +22,58 @@ function recordingExec(calls: string[][]): ExecFn {
     return { stdout: "", stderr: "" };
   };
 }
+
+function refreshDirectoryOnPull(repo: string, calls: string[][]): ExecFn {
+  const directory = path.join(repo, 'knowledge/notes/2026-09-11--hello-world');
+  return async (file, args) => {
+    calls.push([file, ...args]);
+    if (file === 'git' && args[0] === 'pull') {
+      mkdirSync(directory, { recursive: true });
+      writeFileSync(path.join(directory, 'index.md'), '# Base branch note\n');
+    }
+    return { stdout: file === 'git' && args[0] === '--version' ? 'git version 2.0' : '', stderr: '' };
+  };
+}
+
+test('uses the directory note that appears during Git refresh when format is implicit', async (t) => {
+  const repo = fixture(t);
+  const calls: string[][] = [];
+  const result = await runNoteIngest(input, { repoPath: repo, baseBranch: 'main', mode: 'direct', dryRun: false }, {}, {
+    exec: refreshDirectoryOnPull(repo, calls), now,
+  });
+
+  assert.equal(result.filePath, 'knowledge/notes/2026-09-11--hello-world/index.md');
+  assert.equal(readFileSync(path.join(repo, result.filePath), 'utf8'), '# Hello World\n\n> Ingested on 2026-09-11\n\nBody text\n');
+  assert.equal(existsSync(path.join(repo, 'knowledge/notes/2026-09-11--hello-world.md')), false);
+  assert.ok(calls.some((call) => call[1] === 'add' && call[2] === 'knowledge/notes/2026-09-11--hello-world'));
+});
+
+test('rejects an explicit file layout that conflicts with a note supplied by Git refresh', async (t) => {
+  const repo = fixture(t);
+  const calls: string[][] = [];
+  await assert.rejects(() => runNoteIngest({ ...input, format: 'file' },
+    { repoPath: repo, baseBranch: 'main', mode: 'direct', dryRun: false }, {},
+    { exec: refreshDirectoryOnPull(repo, calls), now }), /Existing note layout differs/);
+
+  assert.equal(readFileSync(path.join(repo, 'knowledge/notes/2026-09-11--hello-world/index.md'), 'utf8'), '# Base branch note\n');
+  assert.equal(existsSync(path.join(repo, 'knowledge/notes/2026-09-11--hello-world.md')), false);
+  assert.equal(calls.some((call) => ['add', 'commit', 'push'].includes(call[1])), false);
+});
+
+test('rejects resource import when Git refresh supplies the directory note', async (t) => {
+  const repo = fixture(t);
+  const resources = realpathSync(fixture(t));
+  writeFileSync(path.join(resources, 'asset.txt'), 'asset bytes');
+  const calls: string[][] = [];
+  await assert.rejects(() => runNoteIngest({ ...input, format: 'directory', resources },
+    { repoPath: repo, baseBranch: 'main', mode: 'direct', dryRun: false }, {},
+    { exec: refreshDirectoryOnPull(repo, calls), now }), /Resource import only supports new directory entries/);
+
+  const directory = path.join(repo, 'knowledge/notes/2026-09-11--hello-world');
+  assert.equal(readFileSync(path.join(directory, 'index.md'), 'utf8'), '# Base branch note\n');
+  assert.equal(existsSync(path.join(directory, 'asset.txt')), false);
+  assert.equal(calls.some((call) => ['add', 'commit', 'push'].includes(call[1])), false);
+});
 
 test("dry-run direct writes the note, commits, skips checkout/pull/push", async (t) => {
   const repo = fixture(t);
