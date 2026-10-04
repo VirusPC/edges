@@ -175,3 +175,14 @@ test('ambiguous multi-link index edits reject before changing content or Markdow
   assert.match(rendered, /^- \[One\]\(one\.md\) and \[Two\]\(two\.md\) — shared$/m);
   assert.match(rendered, /^- \[Three\]\(<three\.md>\)$/m);
 });
+
+test('ownership hrefs retain filename escapes, Unicode, spaces and fragments across unrelated index edits', () => {
+  const targets = ['a%23b.md#heading', 'a%3Fb.md?view=1', 'a%25b.md', 'a%2523b.md', 'plain.md#section', '目录/有 空格.md'];
+  const source = `<!-- project-memory-local:start -->\n${targets.map((target, i) => `- [item ${i}](<${target}>)`).join('\n')}\n<!-- project-memory-local:end -->\n`;
+  const node = new InternalNode('/scope/AGENTS.md').parse(source);
+  assert.deepEqual(node.children.map(reference => reference.target), targets);
+  node.updateChild({ ...node.children[0]!, label: 'changed' });
+  const saved = node.serialize();
+  assert.deepEqual(new InternalNode(node.path).parse(saved).children.map(reference => reference.target), targets);
+  assert.equal(saved.includes('a%2523b.md#heading'), false);
+});

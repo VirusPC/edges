@@ -8,12 +8,6 @@ import type { InternalContent, NodeReference } from './types.js';
 function adaptEntries(source: string): string {
   return source.replace(/^<!-- project-memory-entries:(start|end) -->$/gm, '<!-- project-memory-local:$1 -->');
 }
-function decodeTarget(target: string): string {
-  try { return decodeURIComponent(target); } catch { return target; }
-}
-function encodeTarget(target: string): string {
-  return target.split('/').map(part => encodeURIComponent(part)).join('/');
-}
 function constraintText(item: NodeItem): string {
   return item.content.map(run => run.kind === 'text' ? run.value : run.label).join('');
 }
@@ -23,12 +17,12 @@ function indexedReferences(item: NodeItem): NodeReference[] {
     let suffix = '';
     for (let i = index + 1; i < item.content.length && item.content[i].kind === 'text'; i++) suffix += (item.content[i] as { value: string }).value;
     const description = suffix.replace(/^\s*[—–-]\s*/, '').trim();
-    return [{ target: decodeTarget(run.target), label: run.label, ...(description ? { description } : {}) }];
+    return [{ target: run.target, label: run.label, ...(description ? { description } : {}) }];
   });
 }
 function renderReference(reference: NodeReference): NodeItem {
   return { content: [
-    { kind: 'link', target: encodeTarget(reference.target), label: reference.label ?? reference.target },
+    { kind: 'link', target: reference.target, label: reference.label ?? reference.target },
     ...(reference.description === undefined ? [] : [{ kind: 'text' as const, value: ` — ${reference.description}` }]),
   ] };
 }

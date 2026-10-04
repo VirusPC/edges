@@ -1,6 +1,7 @@
 export type Metadata = Record<string, unknown>;
 export type ChildKind = 'local' | 'descendant';
 export interface NodeReference {
+  /** Authored href: may contain percent-encoded path characters and a fragment. */
   target: string;
   label?: string;
   description?: string;
