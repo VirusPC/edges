@@ -15,6 +15,7 @@ import {
   indexFiles,
   parseFrontmatter,
   parseTypeMeta,
+  refreshIndex,
   validateTypeName,
 } from "../../src/services/memory/index.js";
 function fixture(t: TestContext) {
@@ -655,3 +656,73 @@ for (const type of ["project", "managed", "referenced"] as const)
     );
     assert.equal(read(d, file), source);
   });
+
+function exposeTypePath(scope: string, directory: string, filename: string) {
+  put(scope, '.harness/.gitignore', `!memory/${directory}/\nmemory/${directory}/*\n!memory/${directory}/${filename}\n`);
+}
+for (const exposed of ['user_example.md', 'AGENTS.md'])
+  test(`remember preflights private entry and index when ${exposed} is unignored`, t => {
+    const d = fixture(t);
+    execFileSync('git', ['init', '-q', d]);
+    initMemory({ targetDir: d, memoryTypes: ['user'] });
+    remember(d, 'user');
+    const index = '.harness/memory/users/AGENTS.md', entry = '.harness/memory/users/user_example.md';
+    const oldIndex = read(d, index), oldEntry = read(d, entry);
+    exposeTypePath(d, 'users', exposed);
+    assert.throws(() => rememberMemory({ targetDir: d, type: 'user', slug: 'example', content: 'replacement secret' }), /private-ignore|忽略/);
+    assert.equal(read(d, entry), oldEntry);
+    assert.equal(read(d, index), oldIndex);
+  });
+
+test('private index refresh refuses to write an exposed index', t => {
+  const d = fixture(t);
+  execFileSync('git', ['init', '-q', d]);
+  initMemory({ targetDir: d, memoryTypes: ['user'] });
+  const index = '.harness/memory/users/AGENTS.md', before = read(d, index);
+  put(d, '.harness/memory/users/user_new.md', '---\nname: user_new\ndescription: synthetic private description\n---\nsecret body\n');
+  exposeTypePath(d, 'users', 'AGENTS.md');
+  assert.throws(() => refreshIndex(d, 'user'), /private-ignore|忽略/);
+  assert.equal(read(d, index), before);
+});
+
+test('init and add-type refuse an exposed private index before creation', t => {
+  const d = fixture(t);
+  execFileSync('git', ['init', '-q', d]);
+  exposeTypePath(d, 'users', 'AGENTS.md');
+  assert.throws(() => initMemory({ targetDir: d, memoryTypes: ['user'] }), /private-ignore|忽略/);
+  assert.equal(fs.existsSync(join(d, '.harness/memory/users/AGENTS.md')), false);
+  initMemory({ targetDir: d, memoryTypes: ['project'] });
+  exposeTypePath(d, 'secrets', 'AGENTS.md');
+  assert.throws(() => addMemoryType({ targetDir: d, name: 'secrets', description: 'Synthetic private description', gitignore: true }), /private-ignore|忽略/);
+  assert.equal(fs.existsSync(join(d, '.harness/memory/secrets/AGENTS.md')), false);
+});
+
+test('doctor leaves an exposed missing private index unrepaired', t => {
+  const d = fixture(t);
+  execFileSync('git', ['init', '-q', d]);
+  initMemory({ targetDir: d, memoryTypes: ['user'] });
+  remember(d, 'user');
+  const index = '.harness/memory/users/AGENTS.md';
+  fs.unlinkSync(join(d, index));
+  exposeTypePath(d, 'users', 'AGENTS.md');
+  const report = doctorMemory({ targetDir: d, apply: true });
+  assert.equal(fs.existsSync(join(d, index)), false);
+  assert.ok(report.remaining.some(f => f.type === 'user'));
+});
+
+test('custom private child scopes preflight effective ignores and preserve non-Git support', t => {
+  const d = fixture(t), child = join(d, 'child');
+  execFileSync('git', ['init', '-q', d]);
+  fs.mkdirSync(child);
+  initMemory({ targetDir: child, rootDir: d, memoryTypes: ['project'] });
+  addMemoryType({ targetDir: child, name: 'secrets', description: 'Private', gitignore: true });
+  remember(child, 'secrets', 'allowed');
+  execFileSync('git', ['-C', d, 'check-ignore', '-q', '--no-index', 'child/.harness/memory/secrets/secrets_allowed.md']);
+  exposeTypePath(child, 'secrets', 'secrets_example.md');
+  assert.throws(() => remember(child, 'secrets'), /private-ignore|忽略/);
+  assert.equal(fs.existsSync(join(child, '.harness/memory/secrets/secrets_example.md')), false);
+  const plain = fixture(t);
+  initMemory({ targetDir: plain, memoryTypes: ['user'] });
+  remember(plain, 'user');
+  assert.equal(fs.existsSync(join(plain, '.harness/memory/users/user_example.md')), true);
+});

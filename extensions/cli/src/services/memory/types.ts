@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import { join, dirname } from "node:path";
+import { assertPrivateIgnored } from "./ignore.js";
 import { parseDocument } from "../../utils/node-tree/codec/document.js";
 import {
   LOCAL_START,
@@ -219,11 +220,19 @@ export function ensureTypeGitignore(
   );
   return "updated";
 }
-export function ensureLayerTypeGitignore(target: string, name: string): void {
+export function ensureLayerTypeGitignore(
+  target: string,
+  name: string,
+  destinations: readonly string[] = [],
+): void {
   const spec = layerTypeSpecs(target).find((s) => s.name === name),
     root = findGitRoot(target);
-  if (spec?.gitignore && root)
+  if (spec?.gitignore && root) {
     ensureTypeGitignore(root, name, spec.module, spec.indexFile);
+    const files = [join(target, spec.indexFile), ...destinations];
+    // Ignored parent directories also cover writeAtomic's private temporary files.
+    assertPrivateIgnored(root, files, files.map(dirname));
+  }
 }
 export function upsertLocalTypeLine(
   document: string,

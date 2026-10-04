@@ -1,11 +1,11 @@
 import { createReadStream, promises as fs } from 'node:fs';
-import { execFileSync } from 'node:child_process';
 import { pipeline } from 'node:stream/promises';
 import { Transform, PassThrough } from 'node:stream';
 import { createGunzip, createGzip } from 'node:zlib';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import { create, Header, Parser, type ReadEntry } from 'tar';
+import { assertPrivateIgnored } from './ignore.js';
 import { rejectLegacy } from './paths.js';
 import { readTemplate } from './templates.js';
 
@@ -101,14 +101,6 @@ async function ensureIgnore(root: string, rules: string[]): Promise<void> {
   const before = existing ? await fs.readFile(file, 'utf8') : '';
   const missing = rules.filter(rule => !before.split(/\r?\n/).includes(rule));
   if (missing.length) await fs.writeFile(file, before.trimEnd() + '\n\n# Private user memory\n' + missing.join('\n') + '\n');
-  try { execFileSync('git', ['-C', root, 'rev-parse', '--show-toplevel'], { stdio: 'pipe' }); }
-  catch { return; }
-  for (const rule of rules) {
-    let sample = rule.replace(/^\//, '').replace(/\*/g, 'sample');
-    if (sample.endsWith('/')) sample += 'AGENTS.md';
-    try { execFileSync('git', ['-C', root, 'check-ignore', '-q', '--no-index', sample], { stdio: 'pipe' }); }
-    catch { throw new Error('忽略规则未生效: ' + rule); }
-  }
 }
 
 async function collect(root: string): Promise<string[]> {
@@ -147,6 +139,8 @@ export async function backupUserMemory(options: { repoDir: string; outputDir?: s
   await fs.mkdir(destination, { recursive: true });
   await ensureIgnore(destination, ['user-memory-backup-*.tar.gz']);
   await ensureIgnore(root, ['/' + USERS + '/']);
+  assertPrivateIgnored(root, files.map(file => path.join(root, file)), [path.join(root, USERS)]);
+  assertPrivateIgnored(destination, [archive]);
   const handle = await fs.open(archive, 'wx', 0o600);
   try {
     for (const file of files) await safeParents(path.join(root, file), root);
@@ -246,13 +240,21 @@ export async function restoreUserMemory(options: { archive: string; repoDir: str
     staging = await fs.mkdtemp(path.join(root, '.private-user-memory-'));
     await fs.chmod(staging, 0o700);
     const replacement = path.join(staging, 'replacement'), previous = path.join(staging, 'previous');
+    assertPrivateIgnored(root, [previous], [staging, replacement]);
     await fs.mkdir(replacement, { mode: 0o700 });
     const members = await stageMembers(archive, replacement, limits);
     await safeParents(path.dirname(users), root);
     await fs.mkdir(path.dirname(users), { recursive: true });
-    const hadPrevious = Boolean(await info(users));
+    const previousInfo = await info(users), hadPrevious = Boolean(previousInfo);
+    const destinations = members.map(member => path.join(root, member));
+    // Git cannot check descendants of a symlink. Move only that link aside, then
+    // validate its future replacement paths inside the existing rollback boundary.
+    if (!previousInfo?.isSymbolicLink()) assertPrivateIgnored(root, destinations, [users]);
     if (hadPrevious) await fs.rename(users, previous);
-    try { await fs.rename(replacement, users); }
+    try {
+      if (previousInfo?.isSymbolicLink()) assertPrivateIgnored(root, destinations, [users]);
+      await fs.rename(replacement, users);
+    }
     catch (error) {
       if (hadPrevious) {
         try { await fs.rename(previous, users); }

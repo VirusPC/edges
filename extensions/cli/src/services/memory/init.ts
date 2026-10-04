@@ -1,5 +1,6 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
+import { assertPrivateIgnored } from "./ignore.js";
 import { loadAgentsTemplate } from "./blocks.js";
 import {
   AGENTS_FILE_NAME,
@@ -82,6 +83,8 @@ export function initMemory(options: InitMemoryOptions) {
     if (spec.gitignore && gitRoot)
       ensureTypeGitignore(gitRoot, spec.name, spec.module, spec.indexFile);
     const file = join(target, spec.indexFile);
+    if (spec.gitignore && gitRoot)
+      assertPrivateIgnored(gitRoot, [file], [dirname(file)]);
     if (existsSync(file)) preserved.push(spec.indexFile);
     else {
       writeAtomic(

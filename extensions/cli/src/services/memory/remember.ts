@@ -73,7 +73,7 @@ export function rememberMemory(options: RememberMemoryOptions) {
     entryOutputName(options.type, target),
     previousSource,
   );
-  ensureLayerTypeGitignore(target, options.type);
+  ensureLayerTypeGitignore(target, options.type, [file]);
   writeAtomic(file, rendered);
   refreshIndex(target, options.type);
   const agentsAction = syncTargetAgents(target, resolveRoot(target));

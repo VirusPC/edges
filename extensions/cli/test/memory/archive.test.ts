@@ -263,3 +263,90 @@ test('nested compression cannot bypass the expanded tar byte limit', async t => 
   await assert.rejects(restoreUserMemory({ archive, repoDir: destination, limits: { maxExpandedBytes: 2048 } }), /tar|limit|format|格式/);
   assert.deepEqual(await readdir(destination), []);
 });
+
+async function exposePrivateMember(root: string, name: string) {
+  await mkdir(path.join(root, '.harness'), { recursive: true });
+  await writeFile(path.join(root, '.harness/.gitignore'), `!memory/users/\nmemory/users/*\n!memory/users/${name}\n`);
+}
+
+test('backup refuses an actually unignored source member before creating its archive', async t => {
+  const { source } = await fixture(t);
+  execFileSync('git', ['init', '-q', source]);
+  await writeFile(path.join(source, '.gitignore'), `/${users}/\n`);
+  await exposePrivateMember(source, 'user_pref.md');
+  const before = await readFile(path.join(source, users, 'user_pref.md'));
+  await assert.rejects(backupUserMemory({ repoDir: source, timestamp: 'exposed' }), /private-ignore|忽略/);
+  await assert.rejects(stat(path.join(source, 'user-memory-backup-exposed.tar.gz')), { code: 'ENOENT' });
+  assert.deepEqual(await readFile(path.join(source, users, 'user_pref.md')), before);
+});
+
+test('restore refuses an actually unignored destination member before replacing users', async t => {
+  const { source, destination } = await fixture(t);
+  const { archive } = await backupUserMemory({ repoDir: source });
+  execFileSync('git', ['init', '-q', destination]);
+  await writeFile(path.join(destination, '.gitignore'), `/${users}/\n`);
+  await exposePrivateMember(destination, 'user_pref.md');
+  await mkdir(path.join(destination, users), { recursive: true });
+  await writeFile(path.join(destination, users, 'old.md'), 'keep original bytes');
+  await assert.rejects(restoreUserMemory({ archive, repoDir: destination, force: true }), /private-ignore|忽略/);
+  assert.deepEqual(await readdir(path.join(destination, users)), ['old.md']);
+  assert.equal(await readFile(path.join(destination, users, 'old.md'), 'utf8'), 'keep original bytes');
+});
+
+test('backup checks its exact output path against a filename-specific negation', async t => {
+  const { source } = await fixture(t);
+  execFileSync('git', ['init', '-q', source]);
+  await writeFile(path.join(source, '.gitignore'), 'user-memory-backup-*.tar.gz\n!user-memory-backup-fixed.tar.gz\n');
+  await assert.rejects(backupUserMemory({ repoDir: source, timestamp: 'fixed' }), /private-ignore|忽略/);
+  await assert.rejects(stat(path.join(source, 'user-memory-backup-fixed.tar.gz')), { code: 'ENOENT' });
+});
+
+test('restore checks the generated stage path before its first private write', async t => {
+  const { source, destination } = await fixture(t);
+  const { archive } = await backupUserMemory({ repoDir: source });
+  execFileSync('git', ['init', '-q', destination]);
+  await writeFile(path.join(destination, '.gitignore'), '/.private-user-memory-*/\n!/.private-user-memory-exposed/\n');
+  const stage = path.join(destination, '.private-user-memory-exposed');
+  t.mock.method(fs, 'mkdtemp', async () => { await mkdir(stage, { mode: 0o700 }); return stage; });
+  const open = fs.open;
+  t.mock.method(fs, 'open', async (...args: Parameters<typeof fs.open>) => {
+    if (String(args[0]).startsWith(stage + path.sep)) throw new Error('private write attempted before ignore guard');
+    return open(...args);
+  });
+  await assert.rejects(restoreUserMemory({ archive, repoDir: destination }), /private-ignore|忽略/);
+  await assert.rejects(stat(path.join(destination, users)), { code: 'ENOENT' });
+  await assert.rejects(stat(stage), { code: 'ENOENT' });
+});
+
+test('unignored sample names do not block actually ignored archive and stage paths', async t => {
+  const { source, destination } = await fixture(t);
+  for (const root of [source, destination]) execFileSync('git', ['init', '-q', root]);
+  await writeFile(path.join(source, '.gitignore'), 'user-memory-backup-*.tar.gz\n!user-memory-backup-sample.tar.gz\n');
+  await writeFile(path.join(destination, '.gitignore'), '/.private-user-memory-*/\n!/.private-user-memory-sample/\n');
+  const { archive } = await backupUserMemory({ repoDir: source, timestamp: 'fixed' });
+  await restoreUserMemory({ archive, repoDir: destination });
+  assert.equal(await readFile(path.join(destination, users, 'user_pref.md'), 'utf8'), 'private bytes\n');
+  execFileSync('git', ['-C', source, 'check-ignore', '-q', '--no-index', archive]);
+});
+
+for (const exposed of [false, true])
+  test(`Git restore of a users symlink ${exposed ? 'rolls back on exposed member' : 'preserves force replacement'}`, async t => {
+    const { root, source, destination } = await fixture(t);
+    const { archive } = await backupUserMemory({ repoDir: source });
+    execFileSync('git', ['init', '-q', destination]);
+    const external = path.join(root, 'external');
+    await mkdir(external);
+    await writeFile(path.join(external, 'keep'), 'external bytes');
+    await mkdir(path.join(destination, '.harness/memory'), { recursive: true });
+    await symlink(external, path.join(destination, users));
+    if (exposed) {
+      await exposePrivateMember(destination, 'user_pref.md');
+      await assert.rejects(restoreUserMemory({ archive, repoDir: destination, force: true }), /private-ignore/);
+      assert.equal((await lstat(path.join(destination, users))).isSymbolicLink(), true);
+    } else {
+      await restoreUserMemory({ archive, repoDir: destination, force: true });
+      assert.equal((await lstat(path.join(destination, users))).isSymbolicLink(), false);
+      assert.equal(await readFile(path.join(destination, users, 'user_pref.md'), 'utf8'), 'private bytes\n');
+    }
+    assert.equal(await readFile(path.join(external, 'keep'), 'utf8'), 'external bytes');
+  });
