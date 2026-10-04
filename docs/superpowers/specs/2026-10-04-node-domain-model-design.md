@@ -25,6 +25,8 @@ service 在构造节点前，结合明确的当前 scope 解析相对路径和�
 
 `NodeReference.target` 表达文档中的引用目标：相对路径以持有引用的 AGENTS.md 所在目录为基准解析，定位到目标节点的 path。写入 AGENTS 时仍可使用相对链接，不将机器上的绝对路径写进索引。
 
+NodeReference 同时承载索引的 label（链接文字）和 description（条目说明），不另设 NodeIndexEntry 或 reference 包装层。description 描述当前引用条目，不自动同步目标文档的 metadata.description。
+
 path 负责文件定位，BaseNode 的可选 parent / children 表达树组织关系。内容节点可独立存在，也可建立归属关系。不能用 dirname 推导父节点，也不能把物理目录扫描当成归属树；根 AGENTS 可以直接引用跨多层目录的节点。`localMemory` / `descendantMemory` 只标识索引章节，不是目录路径，也不是 CRUD 的目标参数。
 
 path 对调用方只读，不作为普通内容字段更新。`parse()` 不改变 path，`serialize()` 不自动将 path 写进 YAML。NodeTree.move 只调整归属，不改变文件位置；物理文件迁移由 service 单独协调，不通过修改 path 后调用 update 隐式完成。
@@ -71,7 +73,7 @@ parent 与 children 均定义在 BaseNode，允许值为 undefined。parent 是�
 
 Note、Task、Memory 等内容节点继承相同的可选树关系，独立存在时无需提供 parent 或 children。被挂接到树后，同样建立 parent；其归属仍以组织节点的索引为依据，普通交叉引用不算归属。
 
-InternalNode 的索引编辑针对单个文档；NodeTree 协调已加载节点之间的关系：attach 按 kind 更新父节点对应章节索引并建立 child.parent，move 移除旧父索引、按目标 kind 添加新父索引并更新 child.parent，detach 移除原归属索引并清除 child.parent。上述规则适用于所有节点类型。公开方法使用 ChildKind，由 InternalNode 将 local / descendant 映射到对应章节，不再另传 IndexSection。children 缺省或为空时无子节点可遍历。文件移动、加载、保存由 services 协调，不在模型里操作磁盘。
+InternalNode 的索引编辑针对单个文档；addChild(reference) 从 reference.kind 确定写入章节，调用时必须提供 kind，不再重复传递分类参数。章节内直接保存 NodeReference 条目，children 视图从章节派生 kind。NodeTree 协调已加载节点之间的关系：attach 按 kind 更新父节点对应章节索引并建立 child.parent，move 移除旧父索引、按目标 kind 添加新父索引并更新 child.parent，detach 移除原归属索引并清除 child.parent。上述规则适用于所有节点类型。NodeTree 的 attach/move 接收节点对象，仍显式接收 ChildKind，由 InternalNode 将 local / descendant 映射到对应章节，不再另传 IndexSection。children 缺省或为空时无子节点可遍历。文件移动、加载、保存由 services 协调，不在模型里操作磁盘。
 
 ## 作用域读取与遍历
 
@@ -133,6 +135,7 @@ interface NodeReference {
   // 文档引用；相对路径以持有引用的 AGENTS.md 所在目录为基准。
   target: string;
   label?: string;
+  description?: string;
   // children 中必须有值；parent 或普通引用可省略。
   kind?: ChildKind;
 }
@@ -142,15 +145,10 @@ interface ScopeTraversalOptions {
   includeDescendants?: boolean;
 }
 
-interface NodeIndexEntry {
-  reference: NodeReference;
-  description?: string;
-}
-
 interface InternalContent {
   readonly constraints: readonly string[];
-  readonly localMemory: readonly NodeIndexEntry[];
-  readonly descendantMemory: readonly NodeIndexEntry[];
+  readonly localMemory: readonly NodeReference[];
+  readonly descendantMemory: readonly NodeReference[];
 }
 
 declare class BaseNode<TType extends string = string> {
@@ -179,7 +177,7 @@ declare class InternalNode extends BaseNode<"internal"> {
   protected override parseBody(markdown: string): void;
   protected override serializeBody(): string;
   setConstraints(items: readonly string[]): void;
-  addChild(entry: NodeIndexEntry, kind: ChildKind): void;
+  addChild(reference: NodeReference): void;
   removeChild(reference: NodeReference): void;
 }
 

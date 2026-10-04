@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 节点模型：统一 NodeReference、可选树关系与 path；children 必须区分 local/descendant，默认读取本层；设计未实施
+description: 节点模型：引用和索引条目统一为 NodeReference；可选树关系，children 区分 local/descendant，默认读取本层；设计未实施
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T22:32:50+08:00"
+  edges-updated-at: "2026-10-04T22:34:36+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -148,10 +148,10 @@ children 的引用携带 kind，区分 local（本层记忆）与 descendant（�
 
 **How to apply:** BaseNode.children 使用可选的 NodeReference 集合，children 引用须带 kind，分类属于引用关系，不属于节点 type 或文件路径。InternalNode 根据索引所在章节派生 kind，不另存重复真源。service 的作用域查询和 NodeTree 遍历默认沿 local 索引链，包含多层本层类型入口；仅显式 includeDescendants 才沿 descendant 跨作用域。过滤发生在目标文件加载之前，但解析、序列化保留两类索引及本层约束，不能把不加载下层内容误做删除下层引用。此为 spec 已确认的目标行为，当前运行时尚未实施。
 
-## 2026-10-04 用户确认：统一 NodeReference
+## 2026-10-04 用户确认：引用与索引条目统一为 NodeReference
 
-将 ChildReference 合并到 NodeReference，parent、children 与普通引用共用一种引用结构。
+将 ChildReference 与 NodeIndexEntry 都合并到 NodeReference，parent、children、普通引用与章节索引共用一种结构，不保留 reference 包装层。
 
-**Why:** 用户认为单独的子引用类型增加复杂度，希望保持模型简单，同时保留 local/descendant 对作用域读取的区分。
+**Why:** 用户连续指出子引用类型和索引包装类型增加复杂度，希望引用及其展示信息集中表达，同时保留 local/descendant 对作用域读取的区分。
 
-**How to apply:** NodeReference 的 kind 为可选字段，parent 或普通引用可省略；children 中必须有 kind，由模型和树操作校验。InternalNode 从索引章节派生 kind，其他来源缺失分类不能默认视作 local。BaseNode.children 和 InternalNode.children 均使用 NodeReference 集合，不另建子引用接口。作用域默认仅沿 local 的规则不变；已更新 spec，未修改运行时。
+**How to apply:** NodeReference 包含 target、可选 label、description 和 kind。description 是当前索引条目的说明，不自动同步目标文档的同名 metadata。parent 或普通引用可省略 kind，children 中必须有 kind，由模型和树操作校验。InternalNode 从索引章节派生 kind，不重复存储分类；addChild(reference) 按 reference.kind 写入对应章节，不额外传 kind 参数。章节索引和 children 均直接使用 NodeReference 集合。作用域默认仅沿 local 的规则不变；已更新 spec，未修改运行时。
