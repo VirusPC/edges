@@ -736,7 +736,7 @@ export function planMissingPrivateIndexes(root: string, job: InstanceJob) {
     }
   }
 }
-/** A saved pin may be replayed only from the reviewed index or its completed move. */
+/** Accept only reviewed index records, including the add-before-remove interruption. */
 function checkedGitlinkState(root: string, pin: Gitlink): "planned" | "moved" {
   for (const path of [pin.source, pin.target])
     generic.safeAncestors(join(root, path), root);
@@ -756,6 +756,15 @@ function checkedGitlinkState(root: string, pin: Gitlink): "planned" | "moved" {
     if (entries[0] === expected(pin.source)) return "planned";
     if (entries[0] === expected(pin.target)) return "moved";
   }
+  // Uninitialized moves add the target and remove the source in separate Git calls.
+  // Replaying the exact pair is idempotent; any different SHA, mode, or stage refuses.
+  if (
+    pin.source !== pin.target &&
+    entries.length === 2 &&
+    entries.includes(expected(pin.source)) &&
+    entries.includes(expected(pin.target))
+  )
+    return "planned";
   throw new Error("gitlink-pin-mismatch: saved source or destination changed");
 }
 export function checkInstanceJob(root: string, job: InstanceJob) {

@@ -681,3 +681,47 @@ test("completed gitlink move rejects a later destination pin before resume", asy
   assert.deepEqual(snapshot(root), before);
   assert.equal(git(root, "ls-files", "--stage"), index);
 });
+
+test("saved gitlink resumes after destination was added but source was not removed", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load(),
+    job = m.makeInstancePlan(root, manifest);
+  job.root = root;
+  put(root, ".recursive-layout-migration/journal.json", JSON.stringify(job));
+  git(
+    root,
+    "update-index",
+    "--add",
+    "--cacheinfo",
+    `160000,${manifest.gitlink.sha},${manifest.gitlink.target}`,
+  );
+  assert.equal(
+    git(root, "ls-files", "--stage", manifest.gitlink.source),
+    `160000 ${manifest.gitlink.sha} 0\t${manifest.gitlink.source}`,
+  );
+  assert.equal(m.runInstanceMigration(root, manifest, true).status, "migrated");
+  assert.equal(git(root, "ls-files", "--stage", manifest.gitlink.source), "");
+  assert.equal(
+    git(root, "ls-files", "--stage", manifest.gitlink.target),
+    `160000 ${manifest.gitlink.sha} 0\t${manifest.gitlink.target}`,
+  );
+});
+test("saved gitlink refuses an intermediate pair with a conflicted target stage", async (t) => {
+  const { root, manifest } = fixture(t),
+    m = await load(),
+    job = m.makeInstancePlan(root, manifest);
+  job.root = root;
+  put(root, ".recursive-layout-migration/journal.json", JSON.stringify(job));
+  execFileSync("git", ["-C", root, "update-index", "--index-info"], {
+    input: `160000 ${manifest.gitlink.sha} 2\t${manifest.gitlink.target}\n`,
+    encoding: "utf8",
+  });
+  const before = snapshot(root),
+    index = git(root, "ls-files", "--stage");
+  assert.throws(
+    () => m.runInstanceMigration(root, manifest, true),
+    /gitlink.*mismatch/,
+  );
+  assert.deepEqual(snapshot(root), before);
+  assert.equal(git(root, "ls-files", "--stage"), index);
+});
