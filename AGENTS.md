@@ -33,7 +33,8 @@
 - [观测职责与资料](<.harness/observation/AGENTS.md>) — 观测职责与资料入口。
 - [目录与内容说明](<README.md>) — 目录与内容说明入口。
 - [领域术语](<CONTEXT.md>) — 领域术语入口。
-- [架构决策](<docs/adr/>) — 架构决策入口。
+
+[架构决策](<docs/adr/>) — 架构决策入口。
 <!-- project-memory-local:end -->
 
 <!-- project-memory-children:start -->

@@ -155,3 +155,44 @@ test("existing type files still require a local edge rather than a descendant or
     1,
   );
 });
+
+test("reviewed public root graph loads document entries and keeps ADR navigation outside ownership", async (t) => {
+  const root = fixture(t);
+  const manifest = JSON.parse(
+    fs.readFileSync(
+      join(
+        import.meta.dirname,
+        "../../../../docs/superpowers/plans/2026-10-05-local-ownership-correction.json",
+      ),
+      "utf8",
+    ),
+  );
+  const source = manifest.edits.find(
+    (edit: { path: string }) => edit.path === "AGENTS.md",
+  ).after;
+  fs.writeFileSync(join(root, "AGENTS.md"), source);
+  fs.mkdirSync(join(root, "docs/adr"), { recursive: true });
+  const { NodeService } = await import("../../src/services/node-service.js");
+  const service = new NodeService();
+  const node = await service.get(join(root, "AGENTS.md"), InternalNode);
+  assert.ok(node);
+  assert.equal(
+    node.children.some((ref) => ref.target === "docs/adr/"),
+    false,
+  );
+  assert.match(source, /\n\[架构决策\]\(<docs\/adr\/>\) — 架构决策入口。\n/);
+  for (const ref of node.children) {
+    const file = join(root, decodeURIComponent(ref.target));
+    fs.mkdirSync(join(file, ".."), { recursive: true });
+    // All graph contents are fixture placeholders, including the private adoption.
+    fs.writeFileSync(file, "# Fixture entry\n");
+    assert.ok(await service.get(file));
+  }
+  const listed = await service.list(root);
+  assert.equal(
+    listed.length,
+    1 + node.children.filter((ref) => ref.kind === "local").length,
+  );
+  assert.ok(listed.every((entry) => fs.statSync(entry.path).isFile()));
+  assert.equal(fs.readFileSync(join(root, "AGENTS.md"), "utf8"), source);
+});

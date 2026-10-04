@@ -14,6 +14,7 @@ import {
   readText,
   within,
   resolveTarget,
+  ownershipTarget,
 } from "../extensions/cli/src/services/memory/paths.js";
 import {
   layerTypeSpecs,
@@ -597,6 +598,12 @@ export function makeInstancePlan(
         "；AGENTS.md 组织入口发现，各规范正文按职责保持单一真源。",
       );
       const node = new InternalNode(join(root, "AGENTS.md")).parse(text);
+      // ADRs are a Skill-owned collection; its directory is navigation, not an entry file.
+      const adrNavigation = node.children.filter(
+        (child) =>
+          ownershipTarget(root, child.target) === join(root, "docs/adr"),
+      );
+      for (const child of adrNavigation) node.removeChild(child);
       const links = [
         ["tasks/AGENTS.md", "领域任务", "descendant"],
         [".harness/tasks/AGENTS.md", "根维护任务", "local"],
@@ -615,7 +622,13 @@ export function makeInstancePlan(
         else
           node.addChild({ target, label, kind, description: `${label}入口。` });
       }
-      return node.serialize();
+      const rendered = node.serialize();
+      return adrNavigation.length
+        ? rendered.replace(
+            "<!-- project-memory-local:end -->",
+            "\n[架构决策](<docs/adr/>) — 架构决策入口。\n<!-- project-memory-local:end -->",
+          )
+        : rendered;
     });
     const observation = join(root, "observation/README.md");
     if (fs.existsSync(observation))

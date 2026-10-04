@@ -904,3 +904,34 @@ test("private remnant adoption registers its original node and keeps custom priv
     /\.harness\/skills\/docs\/AGENTS.md/,
   );
 });
+
+test("instance root generator demotes ADR directory ownership to ordinary local navigation", async (t) => {
+  const { root, manifest } = fixture(t);
+  const file = join(root, "AGENTS.md");
+  const navigation = "[架构决策](<docs/adr/>) — 架构决策入口。";
+  fs.writeFileSync(
+    file,
+    fs
+      .readFileSync(file, "utf8")
+      .replace(
+        "<!-- project-memory-local:end -->",
+        `- ${navigation}\n<!-- authored comment -->\nKeep manual prose.\n<!-- project-memory-local:end -->`,
+      ),
+  );
+  const { runInstanceMigration } = await load();
+  runInstanceMigration(root, manifest, true);
+  const source = fs.readFileSync(file, "utf8");
+  const { InternalNode } = await import("../../src/models/internal-node.js");
+  assert.equal(
+    new InternalNode(file)
+      .parse(source)
+      .children.some((ref) => ref.target === "docs/adr/"),
+    false,
+  );
+  const local = source
+    .split("<!-- project-memory-local:start -->")[1]!
+    .split("<!-- project-memory-local:end -->")[0]!;
+  assert.ok(local.includes(`\n${navigation}\n`));
+  assert.match(source, /<!-- authored comment -->\nKeep manual prose\./);
+  assert.doesNotMatch(source, /## 工作与模块入口|## 下层作用域/);
+});
