@@ -91,6 +91,8 @@ TaskNode, MemoryNode and NoteNode own a directory only at a typed `index.md` ent
 
 `create(node, placement?, { resources })` imports an explicitly selected directory into a new owned unit. CLI Memory/Note use `--format directory --resources <directory>`; file inputs never imply ownership of neighboring files. Imports refuse symlinks, special files, AGENTS.md/SKILL.md boundaries, entry collisions and existing-unit merges. Imported files preserve source permissions by default; `resourceMode(node, sourceMode)` may supply validated permission bits independently of entry-only `createMode`. Memory uses its registered type policy: public resources preserve their source modes; private resources use 0600, retaining owner execute as 0700 for executable sources. Incomplete imports report the directory requiring recovery.
 
+Whole-unit moves require the same filesystem and entry layout. `NodeService` uses snapshots and recoverable file/index writes, but multi-file operations are not durable crash-atomic transactions. The present CLI scope selector still applies its existing eligibility policy; the independent recursive-ownership correction will remove that extra gate, restore three-part AGENTS registration and return promoted local records to their owners. The current model rollout does not perform those structural moves.
+
 ```bash
 edges --scope ./projects/demo tasks list
 edges --scope ./projects/demo tasks --purpose maintenance create --title "Repair build"
@@ -110,6 +112,8 @@ Notes go to the selected scope's `knowledge/notes/`; Git operations run at its a
 Optional: `--json`, `--dry-run`, `--mode`, `--token-file`, `--token-stdin`, `--format file|directory`, `--markdown`, `--resources <directory>`.
 
 Use `--markdown` for an already authored document: its authored title and body are retained without an ingest template; frontmatter still uses normal gray-matter parsing/serialization (YAML formatting/comments are not preserved), while `--title` names the file and commit. Without it the existing ingest title/date template remains. Resource import requires explicit directory format and a new unit. Git/PR/auth defaults are unchanged; `--dry-run` still makes a local commit.
+
+`--content-file`, `--resources`, `--format` and `--markdown` are local CLI options. The new-note HTTP/MCP adapter accepts only title, content and co-author and passes those values to `edges note`; remote requests cannot select local filesystem inputs or resource directories.
 
 ```bash
 edges note --title "Decision" --content-file /tmp/reviewed-note.md --markdown \

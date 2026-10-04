@@ -87,9 +87,13 @@ Cover local index chains of arbitrary depth, skip unreadable/missing descendants
 
 **Files:** Node spec, plan checkboxes/evidence, CLI README, root changelog, existing draft PR body; appropriate project memory via CLI.
 
-- [ ] Run workspace tests/build and standalone root-script typecheck affected by imports. Confirm no diff under knowledge/posts or .obsidian/workspace.json. Test built CLI from outside checkout with a temporary explicit scope.
+- [x] Run workspace tests/build and standalone root-script typecheck affected by imports. Confirm no diff under knowledge/posts or .obsidian/workspace.json. Test built CLI from outside checkout with a temporary explicit scope.
 - [ ] Review all task diffs and final cross-change integration; address concrete findings and keep repeated checks scoped. Record any not-yet-implemented separate ownership correction visibly rather than rewriting historical plan completion.
 - [ ] Update spec's implementation status with concrete paths, keep future directory/ownership limitations accurate, and persist reusable decisions through project-memory-remember. Push current draft PR, no merge/deploy/release.
+
+Validation evidence (2026-10-05): `pnpm test` passed 688 tests (CLI 605, new-note MCP 14, Artifacts preview 42, review app 27); `pnpm build` passed all four workspace projects. `pnpm exec tsc --noEmit --strict --skipLibCheck --module NodeNext --moduleResolution NodeNext --target ES2022 --types node scripts/migrate-recursive-layout.mts` passed. The built `dist/index.js` ran from `/private/tmp` with an explicit temporary scope: `memory init`, then directory-format `memory remember --resources` created an indexed `index.md` and copied an asset byte-for-byte. No changes appeared under `knowledge/posts/` or `.obsidian/workspace.json` against the integration base. Vite's existing `__dirname` and `inlineDynamicImports` warnings remain deferred.
+
+Delivery status: model/spec/CLI docs and a root project-memory decision have been updated. Final whole-branch review, PR body update and push remain with the integration controller. The [separate recursive ownership correction](2026-10-05-recursive-node-ownership-correction.md) is unimplemented: the scope eligibility gate, three-section AGENTS restoration, `privateOwnerMap` correction and 43 owner-local public records remain pending.
 
 ## Next independent plan
 

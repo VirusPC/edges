@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 节点与内容管理
+
+- **统一文档与归属操作：** Task、项目记忆、Note 和 Skill 现在由类型化节点模型与 `NodeService` 读取、保存和维护 AGENTS 索引；`edges tasks`、`edges memory remember` 和 `edges note` 沿用原命令入口。节点归属由已登记的引用决定，`NodeService.list` 默认只遍历本层引用。
+- **目录内容带着资源走：** 新建 Task、普通项目记忆和 Note 可用 `--format directory` 选用 `index.md` 目录入口，单文件仍是默认；Skill 使用 `SKILL.md` 目录入口。`edges memory remember` 与 `edges note` 的 `--resources` 可在新建目录入口时显式导入附件。已有目录节点更新正文时保留附件；Task 状态迁移及节点服务的同格式移动、删除按完整资源单元处理。`edges note --content-file <path> --markdown` 可保存已审阅的 Markdown 正文。
+
 ### 项目记忆（project-memory）
 
 - **统一 CLI 执行入口：** Project Memory 的初始化、写入、类型登记、检查、旧布局迁移和私有归档统一由 TypeScript 的 `edges memory` 执行；模板随 CLI 分发。相关 Skill 改为调用 CLI，移除原 Python 执行层。需先构建或安装 Edges CLI，再升级这些 Skill。

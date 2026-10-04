@@ -1,6 +1,6 @@
 # 节点领域模型设计
 
-日期：2026-10-04；2026-10-05 开始按[实施计划](../plans/2026-10-05-node-domain-model-implementation.md)继续执行。会话已确认模型方向、目录职责及实例解析方式；实现状态以该计划的验收记录为准。整仓目录迁移、节点识别策略和局部记忆恢复仍按 ADR 0024 分别推进。
+日期：2026-10-04；2026-10-05 按[实施计划](../plans/2026-10-05-node-domain-model-implementation.md)实现了节点模型、服务、CLI 接入与资源单元。会话已确认模型方向、目录职责及实例解析方式；交付检查以该计划的验收记录为准。递归节点识别和局部记忆归属修正仍按[独立计划](../plans/2026-10-05-recursive-node-ownership-correction.md)推进。
 
 ## 模型与继承
 
@@ -362,11 +362,15 @@ extensions/cli/src/
 
 2026-10-05：模型与 NodeService 已接入正常 Task create/update/status、Memory remember/索引维护及 Note ingest。命令处理器位于 `src/commands/`，保留目录即命令树；业务编排位于 `src/services/`，领域语法辅助位于 `src/models/`，通用 Markdown 与文件系统工具位于 `src/utils/`。旧纯数据仓储/树编排已删除，语法数据结构只作为模型内部实现。Task 读取保留旧优先级的容错投影；修改使用类型化字段并保留未知 vendor metadata。
 
+对应实现位于 `extensions/cli/src/models/{base-node,internal-node,task-node,memory-node,note-node,skill-node}.ts`、`extensions/cli/src/services/{node-service,traverse,node-resources}.ts`；生产适配位于 `src/services/{tasks,memory,note}/`，CLI 命令位于 `src/commands/`。`NodeService` 的所有权遍历依据已登记索引，CLI 当前作用域选择仍在 `src/services/scope.ts`。因此模型可以表示任意显式引用关系，但当前 CLI 不会自动识别每个有 AGENTS.md 的目录；这一策略调整属于独立的递归所有权计划。
+
 Memory 的 init、remember、add-type、doctor、refreshIndex 及写索引辅助函数现为异步接口；命令输出、来源信息、权限检查及 Task runlog 约定保持。私有类型先检查整个目的目录的 Git 忽略覆盖，新文件首次暂存即采用 0600。managed 内部别名索引指向经当前作用域边界验证的物理来源，referenced 安装 href 保留且只读。NodeReference 保留原始 href，编码的 CR/LF 文件名可加载，字面换行和 NUL 不可作为 href。
 
-Note 的 Git/PR 编排仍由业务服务负责。迁移与归档保持独立批处理；正常命令启动不导入旧布局迁移实现。Task 4 已补齐目录入口、资源快照、同布局移动、整目录删除和 opt-in 格式选择；不批量转换已有内容。
+Note 的 Git/PR 编排仍由业务服务负责。迁移与归档保持独立批处理；正常命令启动不导入旧布局迁移实现。Task 4 已补齐目录入口、资源快照、同布局移动、整目录删除和 opt-in 格式选择；不批量转换已有内容。资源导入仅在新建目录节点时由调用方显式指定；移动要求同一文件系统且入口格式相同，暂不支持 InternalNode/AGENTS.md 路径移动。资源单元使用快照校验与失败恢复路径，但多文件操作不承诺进程崩溃时的原子性。`note --markdown` 经 gray-matter 正常解析与序列化，不保留 YAML 原始样式。
 
-本文不授权修复整仓物理目录迁移、移动 knowledge/posts、迁移 Project Memory 执行层或改变 CLI 当前作用域筛选策略。它们仍有独立范围与验收责任；Project Memory 的 TypeScript 迁移另见 [实施计划](../plans/2026-10-04-project-memory-typescript.md)。
+尚未实施的递归所有权计划包括：取消额外的独立职责节点资格门槛、恢复 AGENTS 三部分组织、纠正实例迁移的 `privateOwnerMap`，以及将 43 条误晋升的公开局部记忆按原所有者恢复。当前模型实施不代表这些结构修正已经完成。
+
+本文不授权修复整仓物理目录归属、移动 knowledge/posts 或改变 CLI 当前作用域筛选策略；这些仍有独立范围与验收责任。Project Memory 执行层已按[单独计划](../plans/2026-10-04-project-memory-typescript.md)迁入 TypeScript，不属于本模型计划的完成项。
 
 ## 参考
 
