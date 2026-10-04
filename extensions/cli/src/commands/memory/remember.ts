@@ -7,6 +7,8 @@ export function addMemoryRememberCommand(memory: Command, ctx: CliContext): void
     scoped(memory.command('remember').description('Write an adopted memory or managed skill and refresh its index'))
         .requiredOption('--type <type>', 'An adopted writable type')
         .requiredOption('--slug <slug>', 'Entry identifier (snake_case, or kebab-case for Skill format)')
+        .addOption(new Option('--format <format>', 'New entry layout (default: file; Skill: directory)').choices(['file', 'directory']))
+        .option('--resources <directory>', 'Explicit resource directory to copy into a new directory entry')
         .option('--title <title>', 'Entry title')
         .option('--description <text>', 'Index description; required for new entries')
         .addOption(new Option('--content <markdown>', 'Markdown body').conflicts('contentFile'))
@@ -18,6 +20,8 @@ export function addMemoryRememberCommand(memory: Command, ctx: CliContext): void
         .action((options: TargetOptions & {
         type: string;
         slug: string;
+        format?: "file" | "directory";
+        resources?: string;
         title?: string;
         description?: string;
         content?: string;

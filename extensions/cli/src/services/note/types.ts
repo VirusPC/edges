@@ -13,6 +13,9 @@ export interface IngestRequest {
   title: string;
   content: string;
   coAuthor: string;
+  format?: "file" | "directory";
+  markdown?: boolean;
+  resources?: string;
 }
 
 export interface IngestSuccess {

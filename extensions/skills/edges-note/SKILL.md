@@ -27,6 +27,10 @@ pnpm --filter edges-cli exec tsx src/index.ts note \
 
 已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。`package.json` 的 `"bin": { "edges": "./dist/index.js" }` 只是安装挂钩：装过之后也可以 `npx edges note …`，不要再包一层仓根脚本。
 
+已经由 `conversation-to-notes` 等写好并审阅的完整文稿，用 `--content-file /absolute/reviewed.md --markdown` 代替 `--content`，原文不再添加 ingest 标题或日期模板。整理工作仍由写作 skill 完成。
+
+需要同篇图片等资源时显式指定 `--format directory --resources /absolute/selected-assets`，入口为 `knowledge/notes/YYYY-MM-DD--slug/index.md`。只选本篇所有的资源目录，正文使用相对链接；不猜输入文稿的邻居，不合并覆盖已有资源目录。无资源默认 file；Git/PR、鉴权与发布授权约定不变。new-note MCP 现有参数保持兼容；上述新选项目前走 CLI。
+
 可选 flags：`--dry-run`（本地 commit，不 push）、`--mode direct|pr`、`--token-file PATH`、`--token-stdin`（仅当环境变量 `EDGES_AUTH_TOKEN` 已设置）。
 
 环境变量：`EDGES_REPO`、`EDGES_BASE_BRANCH`（默认 `main`）、`EDGES_MODE`、`EDGES_DRY_RUN`、`EDGES_AUTH_TOKEN`、`GITHUB_TOKEN`（PR）。

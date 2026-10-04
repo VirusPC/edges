@@ -1,9 +1,11 @@
+import * as nodePath from 'node:path';
 import { BaseNode } from './base-node.js';
 import { domainFields, scalar, setDomainField } from './fields.js';
 import type { Metadata } from './types.js';
 
 export class MemoryNode extends BaseNode<'memory'> {
   override readonly type = 'memory' as const;
+  override get directoryPath(): string | undefined { return nodePath.basename(this.path) === 'index.md' ? nodePath.dirname(this.path) : undefined; }
   protected override validateMetadata(metadata: Metadata | undefined): void { super.validateMetadata(metadata); domainFields(metadata); }
   get memoryType(): string | undefined { return scalar(domainFields(this.metadata)['edges-type'] ?? this.metadata?.type) || undefined; }
   set memoryType(value: string | undefined) {

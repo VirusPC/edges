@@ -183,6 +183,13 @@ export type ListedTask = {
   doc: TaskDoc;
 };
 
+export async function taskFormat(repoPath: BoardTarget, project: TaskProjectId, status: TaskStatus, stem: string, fs: BoardFs): Promise<'file' | 'directory'> {
+  const flat = await fs.exists(path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath)));
+  const directory = await fs.exists(path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath, 'directory')));
+  if (flat && directory) throw new TasksError('AMBIGUOUS_TASK', `Both file and directory entries exist: ${stem}`);
+  return directory ? 'directory' : 'file';
+}
+
 async function readListItem(
   repoPath: BoardTarget,
   project: TaskProjectId,
@@ -190,8 +197,9 @@ async function readListItem(
   stem: string,
   fs: BoardFs,
 ): Promise<ListedTask> {
-  const rel = taskRelPath(project, status, stem, repoPath);
-  const sidecarRel = sidecarRelPath(project, status, stem, repoPath);
+  const format = await taskFormat(repoPath, project, status, stem, fs);
+  const rel = taskRelPath(project, status, stem, repoPath, format);
+  const sidecarRel = sidecarRelPath(project, status, stem, repoPath, format);
   const abs = path.join(scopeDir(repoPath), rel);
   const sidecarAbs = path.join(scopeDir(repoPath), sidecarRel);
   const markdown = await fs.readFile(abs);
@@ -241,10 +249,12 @@ export async function listTasksWithDocs(
       }
       const names = await fs.readdir(dir);
       for (const name of names) {
-        if (!isTaskMarkdownName(name)) {
-          continue;
-        }
-        const stem = stemFromFilename(name);
+        if (name.startsWith('.') || name === 'AGENTS.md' || name === 'README.md') continue;
+        let directory = false;
+        try { directory = await fs.exists(path.join(dir, name, 'index.md')); }
+        catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOTDIR') throw error; }
+        if (!directory && !isTaskMarkdownName(name)) continue;
+        const stem = directory ? name : stemFromFilename(name);
         if (!stem) {
           continue;
         }
@@ -283,7 +293,7 @@ async function findByStem(
   for (const project of projects) {
     for (const status of TASK_STATUSES) {
       const abs = path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath));
-      if (await fs.exists(abs)) {
+      if (await fs.exists(abs) || await fs.exists(path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath, 'directory')))) {
         hits.push({ project, status });
       }
     }
@@ -322,7 +332,7 @@ export async function getTask(repoPath: BoardTarget, target: string, fs: BoardFs
     if (!(await fs.exists(abs))) {
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
     }
-    const rel = path.relative(boardRoot(repoPath), path.dirname(abs));
+    const rel = path.relative(boardRoot(repoPath), path.basename(abs) === 'index.md' ? path.dirname(path.dirname(abs)) : path.dirname(abs));
     const parts = rel.split(path.sep).filter(Boolean);
     if (parts.length !== 2 || !TASK_STATUSES.includes(parts[1] as TaskStatus)) {
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);

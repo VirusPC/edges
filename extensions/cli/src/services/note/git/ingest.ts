@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { readResourceImport } from '../../node-resources.js';
 import { NodeService } from '../../node-service.js';
 import { NoteNode } from '../../../models/note-node.js';
 import path from "node:path";
@@ -41,6 +43,9 @@ export async function runNoteIngest(
     throw new Error('usage: new-note "title" "content" "AI Name <email>"');
   }
 
+  if (input.format !== undefined && input.format !== 'file' && input.format !== 'directory') throw new Error('Invalid note entry format');
+  if (input.resources && input.format !== 'directory') throw new Error('Resource import requires directory format');
+  if (input.resources) readResourceImport(input.resources, 'index.md');
   const exec = deps.exec ?? createExecFile();
   const now = deps.now ?? new Date();
   const directoryExists = async (absPath: string) => {
@@ -63,7 +68,13 @@ export async function runNoteIngest(
   const date = localDateYmd(now);
   const slug = titleToSlug(input.title, now);
   const scope = await fs.realpath(config.scopeDir ?? config.repoPath);
-  const absFile = path.join(scope, `knowledge/notes/${date}--${slug}.md`);
+  const flatFile = path.join(scope, `knowledge/notes/${date}--${slug}.md`);
+  const directoryFile = path.join(scope, `knowledge/notes/${date}--${slug}/index.md`);
+  if (existsSync(flatFile) && existsSync(directoryFile)) throw new Error('Ambiguous file and directory note entries');
+  const existingFormat = existsSync(directoryFile) ? 'directory' : existsSync(flatFile) ? 'file' : undefined;
+  if (input.format && existingFormat && input.format !== existingFormat) throw new Error('Existing note layout differs; implicit conversion is not supported');
+  const absFile = (input.format ?? existingFormat) === 'directory' ? directoryFile : flatFile;
+  if (input.resources && existsSync(absFile)) throw new Error('Resource import only supports new directory entries');
   const filePath = path.relative(await fs.realpath(config.repoPath), absFile);
   if (filePath.startsWith("..") || path.isAbsolute(filePath)) throw new Error("Note scope must be inside its Git repository");
   let branch = `ingest/${date}-${slug}`;
@@ -87,10 +98,11 @@ export async function runNoteIngest(
   } });
   const previous = await service.get(absFile, NoteNode);
   const note = previous ?? new NoteNode(absFile);
-  note.body = renderNoteMarkdown(input.title, input.content, date);
-  note.title = input.title;
-  if (previous) await service.update(note); else await service.create(note);
-  await exec("git", ["add", filePath], { cwd: config.repoPath, env });
+  if (input.markdown) note.parse(input.content);
+  else { note.body = renderNoteMarkdown(input.title, input.content, date); note.title = input.title; }
+  if (previous) await service.update(note); else await service.create(note, undefined, { resources: input.resources });
+  const addPath = note.directoryPath ? path.relative(await fs.realpath(config.repoPath), note.directoryPath) : filePath;
+  await exec("git", ["add", addPath], { cwd: config.repoPath, env });
   await exec(
     "git",
     ["commit", "-m", `ingest: ${input.title}\n\nCo-authored-by: ${input.coAuthor}\n`],

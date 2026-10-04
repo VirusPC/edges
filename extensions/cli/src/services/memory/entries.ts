@@ -19,7 +19,7 @@ export const isSkillFormat = (target: string, name: string) => AGENT_SKILL_FORMA
 export const entryOutputName = (name: string, target?: string) => (target ? isSkillFormat(target, name) : AGENT_SKILL_FORMAT_TYPES.has(name))
     ? SKILL_OUTPUT_NAME
     : ENTRY_OUTPUT_PATTERN;
-export const entryName = (file: string, name: string, target?: string) => entryOutputName(name, target) === SKILL_OUTPUT_NAME
+export const entryName = (file: string, name: string, target?: string) => (entryOutputName(name, target) === SKILL_OUTPUT_NAME || basename(file) === 'index.md')
     ? basename(dirname(file))
     : parse(file).name;
 export const parseFrontmatter = (file: string): Record<string, string> => logicalFields(frontmatterData(readText(file)));
@@ -39,11 +39,13 @@ export function renderEntry(fields: Record<string, string>, content: string, out
     values.content = content.trim();
     return preserveEntryMetadata(fillPlaceholders(template, values).trimEnd() + "\n", previousSource);
 }
-export function resolveMemoryPath(target: string, name: string, slug?: string): string {
+export function resolveMemoryPath(target: string, name: string, slug?: string, format?: "file" | "directory"): string {
+    if (format !== undefined && format !== "file" && format !== "directory") throw new Error("Invalid entry format");
     if (!memoryEntryTypes(target).includes(name))
         throw new Error(rejectUnwritableType(target, name));
     const normalized = (slug ?? "").trim().toLowerCase(), directory = typeContentDir(target, name);
     if (isSkillFormat(target, name)) {
+        if (format === "file") throw new Error("Skill requires directory format");
         if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalized) ||
             normalized.length > 64)
             throw new Error(`--slug 在 ${name} 里是技能目录名，必须是 kebab-case 且不超过 64 字符`);
@@ -53,7 +55,15 @@ export function resolveMemoryPath(target: string, name: string, slug?: string): 
         throw new Error("--slug 必须是小写 snake_case，例如 reuse_existing_constants");
     if (Object.keys(discoverLayerTypes(target)).some((n) => normalized.startsWith(`${n}_`)))
         throw new Error("--slug 不要带类型前缀，脚本会按 --type 自动加上");
-    return assertScopePath(join(directory, `${name}_${normalized}.md`), target);
+    const flat = assertScopePath(join(directory, `${name}_${normalized}.md`), target);
+    const owned = assertScopePath(join(directory, `${name}_${normalized}`, 'index.md'), target);
+    if (fs.existsSync(flat) && fs.existsSync(owned)) throw new Error('Ambiguous file and directory memory entries');
+    if (fs.existsSync(flat) || fs.existsSync(owned)) {
+        const existingFormat = fs.existsSync(owned) ? 'directory' : 'file';
+        if (format && format !== existingFormat) throw new Error('Existing memory layout differs; implicit conversion is not supported');
+        return existingFormat === 'directory' ? owned : flat;
+    }
+    return format === 'directory' ? owned : flat;
 }
 export function buildEntryFields(name: string, type: string, title: string | undefined, description: string | undefined, existing: Record<string, string>, detected: Record<string, string>, overrides: Record<string, string | undefined>, target?: string): Record<string, string> {
     const skill = target

@@ -1,3 +1,5 @@
+import * as fs from 'node:fs';
+import { readResourceImport, writeResourceImport, resourceSnapshot, validateResources, assertResourceBoundary, recoveryPath, type ResourceSnapshot } from './node-resources.js';
 import path from 'node:path';
 import { BaseNode, InternalNode, MemoryNode, SkillNode } from '../models/index.js';
 import type { ChildKind, NodeReference, ScopeTraversalOptions } from '../models/index.js';
@@ -9,7 +11,7 @@ import type { EntryFile, FileChange } from './node-files.js';
 import { traverse } from './traverse.js';
 
 type Model<T extends BaseNode = BaseNode> = new (path: string) => T;
-type Operation = 'create' | 'update' | 'destroy' | 'attach' | 'detach' | 'reparent';
+type Operation = 'move' | 'create' | 'update' | 'destroy' | 'attach' | 'detach' | 'reparent';
 export interface NodeWriteContext {
   operation: Operation;
   node: BaseNode;
@@ -27,8 +29,8 @@ export interface NodeServiceOptions {
   assertWrite?: (context: NodeWriteContext) => void | Promise<void>;
   modelForReference?: (parent: BaseNode, reference: NodeReference, target: string) => Model | undefined;
 }
-interface Loaded { file: EntryFile; readOnly: boolean }
-interface Write { node: BaseNode; draft?: BaseNode; source?: string; create?: boolean; parent?: InternalNode }
+interface Loaded { file: EntryFile; readOnly: boolean; resources?: ResourceSnapshot }
+interface Write { node: BaseNode; draft?: BaseNode; source?: string; create?: boolean; imported?: ResourceSnapshot; parent?: InternalNode }
 interface IndexContract { module?: 'memory' | 'skills'; writable: boolean }
 
 /** Only the explicit type-index comment is a model contract; arbitrary frontmatter
@@ -69,11 +71,15 @@ export class NodeService {
   readonly #state = new WeakMap<BaseNode, Loaded>();
   // Permission knowledge is conservative within this service, not a filesystem cache.
   readonly #readOnly = new Set<string>();
+  readonly #readOnlyDirectories = new Set<string>();
+  #isReadOnly(file: string): boolean { return this.#readOnly.has(file) || [...this.#readOnlyDirectories].some(root => file === root || file.startsWith(root + path.sep)); }
   constructor(options: NodeServiceOptions = {}) { this.#options = options; }
 
   #remember(node: BaseNode, file: EntryFile, readOnly = false): void {
-    this.#state.set(node, { file, readOnly });
-    if (readOnly) { this.#readOnly.add(file.path); this.#readOnly.add(file.realPath); }
+    this.#state.set(node, { file, readOnly, resources: node.directoryPath ? resourceSnapshot(node.directoryPath, readOnly) : undefined });
+    if (readOnly) { this.#readOnly.add(file.path); this.#readOnly.add(file.realPath);
+      if (node.directoryPath) { this.#readOnlyDirectories.add(node.directoryPath); this.#readOnlyDirectories.add(file.realDirectory); }
+    }
     const nodes = this.#loaded.get(file.path) ?? new Set<BaseNode>();
     nodes.add(node); this.#loaded.set(file.path, nodes);
   }
@@ -112,7 +118,8 @@ export class NodeService {
   #parent(node: BaseNode, parent?: BaseNode): void {
     const state = this.#state.get(node);
     if (parent && state && (this.#state.get(parent)?.readOnly || indexContract(parent)?.writable === false)) {
-      this.#remember(node, state.file, true);
+      state.readOnly = true; this.#readOnly.add(state.file.path); this.#readOnly.add(state.file.realPath);
+      if (node.directoryPath) { this.#readOnlyDirectories.add(node.directoryPath); this.#readOnlyDirectories.add(state.file.realDirectory); }
     }
     setNodeRelations(node, { parent: parent ? { target: encodePath(parent.path) } : undefined,
       ...(node instanceof InternalNode ? {} : { children: node.children }) });
@@ -133,8 +140,9 @@ export class NodeService {
   #existing(node: BaseNode): EntryFile {
     const loaded = this.#state.get(node);
     if (!loaded) throw new Error(`Node has no read snapshot; load with get/list or create before saving: ${node.path}`);
-    if (loaded.readOnly || this.#readOnly.has(node.path) || this.#readOnly.has(loaded.file.realPath)) throw new Error(`Read-only node source: ${node.path}`);
+    if (loaded.readOnly || this.#isReadOnly(node.path) || this.#isReadOnly(loaded.file.realPath)) throw new Error(`Read-only node source: ${node.path}`);
     validateEntry(loaded.file);
+    if (loaded.resources) validateResources(loaded.resources);
     return loaded.file;
   }
   #reference(parent: InternalNode, child: BaseNode): NodeReference | undefined {
@@ -198,8 +206,12 @@ export class NodeService {
     for (const write of writes) {
       const target = absolute(write.node.path);
       const before = write.create ? undefined : this.#existing(write.node);
-      if (write.create) checkPath(target);
-      if (this.#readOnly.has(target) || (write.parent && indexContract(write.parent)?.writable === false)) {
+      if (write.create) {
+        checkPath(target);
+        if (write.imported) validateResources(write.imported);
+        else if (write.node.directoryPath && fs.existsSync(write.node.directoryPath)) throw new Error(`Owned node directory already exists: ${write.node.directoryPath}`);
+      }
+      if (this.#isReadOnly(target) || (write.parent && indexContract(write.parent)?.writable === false)) {
         throw new Error(`Read-only node source: ${target}`);
       }
       if (before && (write.node instanceof InternalNode || path.basename(target) === 'AGENTS.md')) previous.set(write.node, new InternalNode(target).parse(before.source));
@@ -209,6 +221,11 @@ export class NodeService {
       await this.#options.assertWrite?.({ operation, node: write.draft ?? write.node, parent: write.parent });
     }
     await this.#validateWrites(writes);
+    for (const write of writes) {
+      if (!write.create) this.#existing(write.node);
+      else if (write.imported) validateResources(write.imported);
+      else if (write.node.directoryPath && fs.existsSync(write.node.directoryPath)) throw new Error(`Owned node directory already exists: ${write.node.directoryPath}`);
+    }
     const saved = saveEntries(changes);
     for (const write of writes) {
       const file = saved.get(absolute(write.node.path));
@@ -236,23 +253,91 @@ export class NodeService {
       }
     }
   }
-  async create(node: BaseNode, placement?: { parent: InternalNode; kind: ChildKind }): Promise<void> {
+  async create(node: BaseNode, placement?: { parent: InternalNode; kind: ChildKind }, options: { resources?: string } = {}): Promise<void> {
     checkPath(node.path);
+    if (node.directoryPath && fs.existsSync(node.directoryPath)) throw new Error(`Owned node directory already exists: ${node.directoryPath}`);
     if (readEntry(node.path)) throw new Error(`Node target already exists: ${node.path}`);
-    if (!placement) {
-      await this.#save('create', [{ node, source: node.serialize(), create: true }]); return;
+    if (options.resources && !node.directoryPath) throw new Error('Resource import requires directory format');
+    if (this.#isReadOnly(node.path)) throw new Error(`Read-only node source: ${node.path}`);
+    const resources = options.resources ? readResourceImport(options.resources, path.basename(node.path)) : undefined;
+    const writes: Write[] = [{ node, source: node.serialize(), create: true, parent: placement?.parent }];
+    if (placement) {
+      const { parent, kind } = placement;
+      this.#existing(parent); this.#knownParent(node);
+      validateChild({ target: node.path, kind });
+      if (this.#reference(parent, node)) throw new Error(`Child already indexed: ${node.path}`);
+      const draft = clone(parent); draft.addChild({ target: authoredTarget(parent, node), kind });
+      writes.push({ node: parent, draft, source: draft.serialize() });
     }
-    const { parent, kind } = placement;
-    this.#existing(parent); this.#knownParent(node);
-    validateChild({ target: node.path, kind });
-    if (this.#reference(parent, node)) throw new Error(`Child already indexed: ${node.path}`);
-    const draft = clone(parent);
-    draft.addChild({ target: authoredTarget(parent, node), kind });
-    await this.#save('create', [
-      { node, source: node.serialize(), create: true, parent },
-      { node: parent, draft, source: draft.serialize() },
-    ]);
-    this.#parent(node, parent);
+    // Validate all permissions (including private directory ignore coverage) before resources exist.
+    for (const write of writes) await this.#options.assertWrite?.({ operation: 'create', node: write.draft ?? write.node, parent: write.parent });
+    const mode = this.#options.createMode?.(node);
+    if (mode !== undefined && (!Number.isInteger(mode) || mode < 0 || mode > 0o777)) throw new Error('Invalid node creation permission mode');
+    let imported: ResourceSnapshot | undefined;
+    try {
+      if (node.directoryPath) {
+        try { writeResourceImport(node.directoryPath, resources ?? [], mode); imported = resourceSnapshot(node.directoryPath!); writes[0]!.imported = imported; }
+        catch (cause) { throw new Error(`Node directory creation failed: ${String(cause)}. Partial resources may remain at ${node.directoryPath}. Reload before retrying.`, { cause }); }
+      }
+      await this.#save('create', writes);
+    } catch (cause) {
+      if (imported) {
+        try { validateResources(imported); fs.rmSync(imported.root, { recursive: true }); }
+        catch { throw new Error(`Node create failed; resource recovery remains at ${imported.root}. Reload affected nodes.`, { cause }); }
+      }
+      throw cause;
+    }
+    if (placement) this.#parent(node, placement.parent);
+  }
+  /** Same-layout relocation. Logical scopes have their own migration workflow. */
+  async move<T extends BaseNode>(node: T, destinationEntryPath: string, parent?: InternalNode): Promise<T> {
+    this.#existing(node);
+    if (node instanceof InternalNode || node.children?.length || path.basename(node.path) === 'AGENTS.md') throw new Error('Cannot move an organization node or logical children');
+    const destination = checkPath(destinationEntryPath);
+    const moved = new (node.constructor as Model<T>)(destination).parse(node.serialize());
+    if (!!node.directoryPath !== !!moved.directoryPath || node.directoryPath && path.basename(node.path) !== path.basename(destination)) throw new Error('Move cannot change entry format/layout');
+    if (node.path === destination) { await this.update(node); return node; }
+    const sourceUnit = node.directoryPath ?? node.path, destinationUnit = moved.directoryPath ?? moved.path;
+    if (destinationUnit.startsWith(sourceUnit + path.sep) || sourceUnit.startsWith(destinationUnit + path.sep)) throw new Error('Move cannot nest owned units');
+    if (fs.existsSync(destinationUnit)) throw new Error(`Node destination already exists: ${destinationUnit}`);
+    if (this.#isReadOnly(destination)) throw new Error(`Read-only node source: ${destination}`);
+    if (node.directoryPath) {
+      assertResourceBoundary(this.#state.get(node)!.resources!);
+      for (const [file, instances] of this.#loaded) if (file !== node.path && file.startsWith(node.directoryPath + path.sep) && [...instances].some(item => item.parent)) throw new Error(`Cannot move logical child node: ${file}`);
+    }
+    parent ??= await this.#parentContext(node);
+    const writes: Write[] = [{ node: moved, source: moved.serialize(), parent }];
+    if (parent) {
+      this.#existing(parent); this.#knownParent(node, parent);
+      const reference = this.#reference(parent, node);
+      if (!reference) throw new Error(`Child is not indexed by parent: ${node.path}`);
+      const draft = clone(parent); draft.removeChild(reference);
+      draft.addChild({ ...reference, target: authoredTarget(parent, moved) + (reference.target.match(/[?#].*$/)?.[0] ?? '') });
+      writes.push({ node: parent, draft, source: draft.serialize() });
+    }
+    await this.#options.assertWrite?.({ operation: 'move', node, parent });
+    for (const write of writes) await this.#options.assertWrite?.({ operation: 'move', node: write.draft ?? write.node, parent: write.parent });
+    this.#existing(node); if (parent) this.#existing(parent);
+    checkPath(destination); if (fs.existsSync(destinationUnit)) throw new Error(`Node destination already exists: ${destinationUnit}`);
+    fs.mkdirSync(path.dirname(destinationUnit), { recursive: true });
+    const originalResources = this.#state.get(node)!.resources;
+    const originalFile = this.#state.get(node)!.file;
+    fs.renameSync(sourceUnit, destinationUnit);
+    try {
+      this.#remember(moved, readEntry(destination)!);
+      await this.#save('move', writes);
+    } catch (cause) {
+      this.#state.delete(moved); this.#loaded.get(destination)?.delete(moved);
+      try {
+        if (originalResources) validateResources({ ...originalResources, root: destinationUnit });
+        else validateEntry({ ...originalFile, path: destination, realPath: fs.realpathSync(destination), realDirectory: fs.realpathSync(path.dirname(destination)) });
+        if (fs.existsSync(sourceUnit)) throw new Error('Source recreated'); fs.renameSync(destinationUnit, sourceUnit);
+      }
+      catch { throw new Error(`Node move failed; owned unit recovery remains at ${destinationUnit}. Affected: ${sourceUnit}, ${destinationUnit}. Reload affected nodes.`, { cause }); }
+      throw new Error(`Node move failed; restored ${sourceUnit}. Reload affected nodes. ${String(cause)}`, { cause });
+    }
+    this.#state.delete(node); this.#loaded.get(node.path)?.delete(node); this.#parent(node); this.#parent(moved, parent);
+    return moved;
   }
   async update(node: BaseNode): Promise<void> {
     this.#existing(node);
@@ -313,8 +398,32 @@ export class NodeService {
       const draft = clone(parent); draft.removeChild(reference);
       writes.push({ node: parent, draft, source: draft.serialize() });
     }
-    writes.push({ node, parent });
-    await this.#save('destroy', writes);
+    if (node.directoryPath) {
+      const resources = this.#state.get(node)!.resources!;
+      assertResourceBoundary(resources);
+      for (const [file, instances] of this.#loaded) {
+        if (file !== node.path && file.startsWith(node.directoryPath + path.sep) && [...instances].some(item => item.parent)) throw new Error(`Cannot delete logical child node: ${file}`);
+      }
+      await this.#options.assertWrite?.({ operation: 'destroy', node, parent });
+      await this.#validateWrites(writes);
+      const recovery = recoveryPath(node.directoryPath);
+      const recoveryNode = new (node.constructor as Model)(path.join(recovery, path.basename(node.path))).parse(original.source);
+      await this.#options.assertWrite?.({ operation: 'destroy', node: recoveryNode, parent });
+      this.#existing(node);
+      fs.renameSync(node.directoryPath, recovery);
+      try { await this.#save('destroy', writes); }
+      catch (cause) {
+        try { validateResources({ ...resources, root: recovery }); if (fs.existsSync(node.directoryPath)) throw new Error('Source recreated'); fs.renameSync(recovery, node.directoryPath); }
+        catch { throw new Error(`Node destroy failed; recover owned resources from ${recovery}. Affected: ${node.directoryPath}`, { cause }); }
+        throw cause;
+      }
+      this.#state.delete(node); this.#loaded.get(node.path)?.delete(node);
+      try { validateResources({ ...resources, root: recovery }); fs.rmSync(recovery, { recursive: true }); }
+      catch (cause) { throw new Error(`Node removed from index; resource cleanup incomplete at ${recovery}`, { cause }); }
+    } else {
+      writes.push({ node, parent });
+      await this.#save('destroy', writes);
+    }
     this.#parent(node);
   }
 }

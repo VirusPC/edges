@@ -182,6 +182,7 @@ export function listTypeFiles(
   const paths: string[] = [],
     seen = new Set<string>();
   for (const item of fs.readdirSync(directory).sort()) {
+    if (item.startsWith('.node-')) continue;
     const child = path.join(directory, item);
     if (isSymlink(child) && !fs.existsSync(child))
       throw new Error(`source-scan-error: broken link ${child}`);
@@ -194,6 +195,9 @@ export function listTypeFiles(
           throw new Error(`source-scan-error: broken link ${candidate}`);
         continue;
       }
+    } else if (isDirectory(child) && item.startsWith(`${name}_`)) {
+      candidate = path.join(child, 'index.md');
+      if (!isFile(candidate)) continue;
     } else {
       const matches =
         pattern === "*.md"

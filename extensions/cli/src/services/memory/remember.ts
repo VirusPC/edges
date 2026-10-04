@@ -12,6 +12,8 @@ export interface RememberMemoryOptions {
     targetDir: string;
     type: string;
     slug: string;
+    format?: "file" | "directory";
+    resources?: string;
     title?: string;
     description?: string;
     content: string;
@@ -26,12 +28,14 @@ export async function rememberMemory(options: RememberMemoryOptions) {
     rejectLegacy(target);
     if (!isScope(target))
         throw new Error("目标目录尚未初始化，请先执行 init");
-    const file = resolveMemoryPath(target, options.type, options.slug);
+    const file = resolveMemoryPath(target, options.type, options.slug, options.format);
     const exists = existsSync(file), service = memoryNodes(target);
     const Model = entryOutputName(options.type, target) === 'SKILL.md' ? SkillNode : MemoryNode;
     const node = exists ? await service.get<MemoryNode | SkillNode>(file, Model) : new Model(file);
     if (!node) throw new Error(`Missing memory entry: ${file}`);
     // Derive edits from the same snapshot that NodeService will validate on save.
+    if (options.resources && exists) throw new Error('Resource import only supports new directory entries');
+    if (options.resources && !node.directoryPath) throw new Error('Resource import requires directory format');
     const previousSource = exists ? node.serialize() : undefined;
     const existing = previousSource === undefined ? {} : logicalFields(strictFrontmatterData(previousSource));
     const detected = { ...agentContext(options.env), ...gitIdentity(target) };
@@ -53,7 +57,7 @@ export async function rememberMemory(options: RememberMemoryOptions) {
     if (exists)
         await service.update(node);
     else
-        await service.create(node);
+        await service.create(node, undefined, { resources: options.resources });
     await refreshIndex(target, options.type);
     const agentsAction = await syncTargetAgents(target, resolveRoot(target));
     return {

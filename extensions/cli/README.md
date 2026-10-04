@@ -85,7 +85,11 @@ NodeService accepts optional `modelForReference`, `assertWrite`, `readOnlyRefere
 
 NodeReference targets are authored hrefs: path encoding is decoded once after query/fragment separation. Encoded filename delimiters and encoded CR/LF are supported; literal CR/LF and NUL in hrefs are rejected. Optional frontmatter uses gray-matter's default YAML behavior; non-YAML executable language declarations are rejected. Runtime node types are independent of content classification and are not added to YAML automatically.
 
-Directory-entry resource ownership, whole-directory create/destroy and `--format` support are still planned work. Current normal CLI flows persist entry documents; this integration does not claim those resource lifecycle capabilities.
+TaskNode, MemoryNode and NoteNode own a directory only at a typed `index.md` entry; SkillNode requires `SKILL.md` and owns its directory. BaseNode and InternalNode own only their entry file. Resources remain separate from logical children. New `tasks create`, `memory remember` and `note` accept `--format file|directory` (default file; Skill stays directory-only). Existing directory entries retain their layout, and indexes always link the entry file. Task directory runlogs live inside the unit and move with status/project changes. Enumeration does not recursively discover resource Markdown.
+
+`NodeService.move(node, destinationEntryPath, parent?)` returns a same-model node with a new readonly path and invalidates the old object's write snapshot. It preserves resource bytes/modes and updates the supplied/known parent's href, retaining label, description and kind. It refuses format changes, occupied destination units and organization nodes (including any AGENTS.md path). It does not rewrite unknown references or ordinary body links. Resource snapshots reject changed contents/identities/modes before writes. Known readonly units protect their resources too. Owned deletion stages a same-parent `.node-recovery-*` directory, checks private-ignore coverage there, then updates the index and cleans up; failures restore or report the retained recovery path. Reload nodes after a failed write. Explicit scope/Skill boundaries and known indexed child units prevent whole-directory move/delete; arbitrary resource index.md files do not become children.
+
+`create(node, placement?, { resources })` imports an explicitly selected directory into a new owned unit. CLI Memory/Note use `--format directory --resources <directory>`; file inputs never imply ownership of neighboring files. Imports refuse symlinks, special files, AGENTS.md/SKILL.md boundaries, entry collisions and existing-unit merges. Memory imported files use 0600; other imports retain file permissions. Incomplete imports report the directory requiring recovery.
 
 ```bash
 edges --scope ./projects/demo tasks list
@@ -100,10 +104,21 @@ Notes go to the selected scope's `knowledge/notes/`; Git operations run at its a
 ## `note` required flags
 
 - `--title` (1–120)
-- `--content` (1–50,000)
+- `--content` or `--content-file` (UTF-8, 1–50,000 chars)
 - `--co-author` (3–200), e.g. `Name <email@domain>`
 
-Optional: `--json`, `--dry-run`, `--mode`, `--token-file`, `--token-stdin`.
+Optional: `--json`, `--dry-run`, `--mode`, `--token-file`, `--token-stdin`, `--format file|directory`, `--markdown`, `--resources <directory>`.
+
+Use `--markdown` for an already authored document: its authored title and body are retained without an ingest template; frontmatter still uses normal gray-matter parsing/serialization (YAML formatting/comments are not preserved), while `--title` names the file and commit. Without it the existing ingest title/date template remains. Resource import requires explicit directory format and a new unit. Git/PR/auth defaults are unchanged; `--dry-run` still makes a local commit.
+
+```bash
+edges note --title "Decision" --content-file /tmp/reviewed-note.md --markdown \
+  --format directory --resources /tmp/selected-assets \
+  --co-author "Codex <noreply@openai.com>" --dry-run
+edges memory remember --type project --slug decision --title "Decision" \
+  --description "Reviewed decision" --content-file /tmp/body.md \
+  --format directory --resources /tmp/selected-assets
+```
 
 ## Structured output
 
@@ -129,8 +144,8 @@ Board root is `<scope>/tasks/` by default (`--purpose domain`); `tasks --purpose
 ```
 edges tasks list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
 edges tasks get <stem|path>
-edges tasks create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project]
-edges tasks update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project]
+edges tasks create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project] [--format file|directory]
+edges tasks update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project] [--format file|directory]
 edges tasks status <stem|path> <edges-tasks-status>
 edges tasks runs <stem|path> [--output table|json]
 edges tasks run-messages <run-id> [--task <stem>] [--output table|json]

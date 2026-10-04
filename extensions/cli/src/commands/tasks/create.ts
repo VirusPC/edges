@@ -29,6 +29,7 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
     .requiredOption("--title <title>", "Task title")
     .option("--description <text>", "One-line description")
     .option("--body <markdown>", "Body after frontmatter")
+    .addOption(new Option("--format <format>", "Entry layout (default: file)").choices(["file", "directory"]))
     .addOption(new Option("--status <status>", "initial edges-tasks-status").choices([...TASK_STATUSES]))
     .option("--name <name>", "frontmatter name")
     .option("--assignee <text>", "edges-task-assignee")
@@ -38,6 +39,7 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
     .addHelpText("after", CREATE_AFTER_HELP)
     .action(async (opts: {
       title: string;
+      format?: "file" | "directory";
       description?: string;
       body?: string;
       status?: TaskStatus;
@@ -51,6 +53,7 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
           runtime.location,
           {
             title: opts.title,
+            format: opts.format,
             description: opts.description,
             body: opts.body,
             status: opts.status ?? "backlog",

@@ -50,8 +50,10 @@ version: 2.3.3
 12. 白话完整句；禁止自创黑话、口头禅小标题、未解释的自创缩写。真实产品/协议名可保留。
 13. 不在本 skill 里「升为 Edge」。
 14. 输出必须为中文。
-15. **入库**（灵活，不强制单一通道）：
+15. **入库**（正文写作与审阅完成后）：
     - 路径：`knowledge/notes/YYYY-MM-DD--主题简述.md`
+    - 有 shell 时交给 `edges note --title "主题简述" --content-file /absolute/reviewed-note.md --markdown --co-author "助手名 <email>"` 确定性入库；完整 Markdown 已由本 skill 写好，CLI 不再改标题、套模板或整理正文；frontmatter 仍正常解析/序列化，不保证 YAML 样式或注释保真。鉴权、Git/PR 模式与发布授权继续遵守既有约定；`--dry-run` 仍会本地 commit。
+    - 有图片等资源时，显式整理仅属于本篇的资源目录，再加 `--format directory --resources /absolute/selected-assets`，入口变为 `knowledge/notes/YYYY-MM-DD--主题简述/index.md`。正文用相对路径引用这些资源。不要复制任意输入文件的全部邻居；不批量转换旧笔记。无附件默认保留 file 格式。
     - 仓：`VirusPC/edges`（私密 → `edges-private`）
     - 文档类笔记：已授权助手可直接 commit/push（含 PR 分支），commit 带 `Co-authored-by: <本助手名> <grok-bot@users.noreply.github.com>`
     - 大范围代码改动仍走 Cursor cloud agent

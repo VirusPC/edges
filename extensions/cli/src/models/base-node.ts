@@ -13,6 +13,7 @@ export class BaseNode<TType extends string = string> {
     if (!isAbsolute(path)) throw new Error('Node path must be absolute.');
     this.path = path;
   }
+  get directoryPath(): string | undefined { return undefined; }
   get id(): string | undefined { return typeof this.#metadata?.id === 'string' ? this.#metadata.id : undefined; }
   get parent(): Readonly<NodeReference> | undefined { return nodeRelations(this).parent; }
   get children(): readonly Readonly<NodeReference>[] | undefined { return nodeRelations(this).children; }

@@ -1,3 +1,4 @@
+import * as nodePath from 'node:path';
 import { basename, extname } from 'node:path';
 import { BaseNode } from './base-node.js';
 import { domainFields, scalar, setDomainField } from './fields.js';
@@ -6,6 +7,7 @@ import type { Metadata, TaskPriority, TaskStatus } from './types.js';
 
 export class TaskNode extends BaseNode<'task'> {
   override readonly type = 'task' as const;
+  override get directoryPath(): string | undefined { return nodePath.basename(this.path) === 'index.md' ? nodePath.dirname(this.path) : undefined; }
   protected override validateMetadata(metadata: Metadata | undefined): void {
     super.validateMetadata(metadata);
     const fields = domainFields(metadata);

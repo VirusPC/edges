@@ -53,6 +53,17 @@ skills/example/scripts/... # Skill 的资源
 
 目录资源与父子关系互相独立：前者决定物理文件生命周期，后者由 AGENTS 的归属索引决定。`reparent` 只修改后者，不移动资源目录。
 
+2026-10-05 Task 4 已实现：新建 `memory remember`、`tasks create`、`note` 可传 `--format file|directory`；Skill 固定目录。普通 Memory 的目录名沿用 `type_slug`，Task 沿用 stem，Note 沿用日期与 slug；入口均为 `index.md`。Task 目录格式的 `.{stem}.log.md` 在该目录内。枚举只检查已登记类型/看板层的独立入口及一层目录入口，不递归把资源 Markdown 当节点；索引仍写到入口文件。已有目录不因未传 format 被转成单文件；两种入口同名存在时拒绝歧义。
+
+`move<T>(node, destinationEntryPath, parent?)` 返回相同模型的新实例，旧实例不再具有有效写快照。它保持 id、资源字节和权限，不允许隐式 file/directory 转换，也不接管已经存在的目的资源目录。已知或显式父索引同步改为新入口 href，保留 label、description、kind 及 query/fragment；不猜未知外部引用，不重写普通正文链接。当前明确不支持 InternalNode 或任意模型的 `AGENTS.md` 路径移动，组织作用域迁移仍走专用流程。
+
+资源快照覆盖目录/文件身份、权限、文件字节与符号链接本身；更新、移动和删除前校验，不跟随资源链接写入或删除外部目标。已发现的只读目录来源同时限制资源文件的后续非类型化读取对象。销毁先将目录改名为同级 `.node-recovery-*`，保存父索引后清理；该恢复目录也在写前经过权限与私有 ignore 预检。失败时尽力恢复，若目录被替换或恢复失败则报告实际恢复路径并保留数据，不宣称跨文件原子性。调用方应重新加载失败涉及的节点。拥有 `AGENTS.md` 作用域边界、嵌套 `SKILL.md` 或已加载且已登记的独立逻辑子节点的目录拒绝整单元移动/销毁；这是保守的生命周期边界，不将任意资源 `index.md` 推断为子节点。
+
+`create(node, placement?, { resources?: absoluteDirectory })` 仅给新目录节点显式导入资源。Memory/Note 对应 `--format directory --resources <directory>`：只复制被显式选择目录内的相对路径，不猜 content-file 邻居。导入拒绝 symlink、特殊文件、入口覆盖以及 AGENTS.md/SKILL.md 边界；这是导入限制，不是节点类型推断。已有目录不接受合并导入。新资源继承 createMode（Memory 为 0600）；未指定时保留文件权限。导入失败报告仍需人工恢复的路径。
+
+Note `--content-file <path> --markdown` 接收已经写好和审阅过的完整 UTF-8 Markdown；保留作者正文与标题，不额外套 ingest 模板。文档仍通过标准 BaseNode.parse/serialize 和 gray-matter，YAML 可规范化，不保证 frontmatter 字节/样式/注释保真，也不把 YAML 塞进 body。`--title` 仍用于文件名和提交信息。此入口不取代 conversation-to-notes 的写作/审阅流程，也不改变鉴权、Git、PR 或发布默认值。
+
+
 ## 实例解析与序列化
 
 `parse(markdown): this` 和 `serialize(): string` 均为实例方法。构造函数只初始化状态，不调用可被子类覆盖的方法。由调用方先选择具体类型、创建实例，再解析文本。
@@ -126,6 +137,7 @@ await service.list(scopePath, { includeDescendants: true }); // 显式包含下�
 | get(path, Model?) | 只读取指定文档，以解析后的路径构造实例并调用 parse；不存在返回 undefined |
 | list(scopePath, options?) | 返回作用域入口及所选引用可达的节点；默认仅 local，显式 includeDescendants 才包含下层作用域 |
 | update(node) | serialize 后写回 node.path；更新索引时协调已加载节点的反向关系；目标不存在时报错，不隐式创建 |
+| move(node, destinationEntryPath, parent?) | 同布局移动入口与所属资源，协调已知父索引，返回同模型新实例；不支持组织入口 |
 | destroy(node, parent?) | 删除当前文档或其明确拥有的资源目录，按归属上下文移除并保存父索引；不隐式级联删除逻辑子节点 |
 | attach(parent, child, kind) | 将已有文档登记到父索引，更新 child.parent 并保存父文档；不创建或移动 child 文件 |
 | detach(parent, child) | 移除指定父索引中的归属，清除对应 child.parent 并保存父文档；保留 child 文件 |
@@ -137,6 +149,7 @@ declare class NodeService {
   create(
     node: BaseNode,
     placement?: { parent: InternalNode; kind: ChildKind },
+    options?: { resources?: string },
   ): Promise<void>;
 
   // 默认使用基础模型；传入具体模型构造器时返回对应类型。
@@ -149,6 +162,7 @@ declare class NodeService {
   list(scopePath: string, options?: ScopeTraversalOptions): Promise<BaseNode[]>;
   update(node: BaseNode): Promise<void>;
   destroy(node: BaseNode, parent?: InternalNode): Promise<void>;
+  move<T extends BaseNode>(node: T, destinationEntryPath: string, parent?: InternalNode): Promise<T>;
 
   attach(parent: InternalNode, child: BaseNode, kind: ChildKind): Promise<void>;
   detach(parent: InternalNode, child: BaseNode): Promise<void>;
@@ -161,7 +175,7 @@ declare class NodeService {
 }
 ```
 
-实现允许构造时传入可选业务适配钩子，`new NodeService()` 仍可独立使用：`modelForReference(parent, reference, resolvedPath)` 根据已登记模块契约选择模型；`assertWrite(context)` 在所有计划写入前校验权限和来源。`readOnlyReference(parent, reference, resolvedPath)` 根据业务登记补充只读来源（例如没有类型注释的官方 referenced 索引），在跟随安装链接前判定；返回 false 不会撤销既有只读来源或真实路径别名的限制。`createMode(node)` 为新建入口及暂存文件提供 0 至 0o777 的整数权限位；不影响已有文件权限。它们不形成全局类型注册表，权限校验不执行写入。Memory 的私有忽略规则、业务来源校验仍由适配层负责；临时文件与失败恢复文件也在目标同目录，因此私有校验须覆盖目录而不只是入口 Markdown。
+实现允许构造时传入可选业务适配钩子，`new NodeService()` 仍可独立使用：`modelForReference(parent, reference, resolvedPath)` 根据已登记模块契约选择模型；`assertWrite(context)` 在所有计划写入前校验权限和来源。`readOnlyReference(parent, reference, resolvedPath)` 根据业务登记补充只读来源（例如没有类型注释的官方 referenced 索引），在跟随安装链接前判定；返回 false 不会撤销既有只读来源或真实路径别名的限制。`createMode(node)` 为新建入口及暂存文件提供 0 至 0o777 的整数权限位；不影响已有文件权限。它们不形成全局类型注册表，权限校验不执行写入。Memory 的私有忽略规则、业务来源校验仍由适配层负责；入口暂存/恢复文件在入口同目录；整资源单元的恢复目录在单元同级。私有校验覆盖这些目录而不只是入口 Markdown。
 
 更新与删除使用同一 service 读取或创建时记录的内容和文件身份，拒绝盲覆盖、内容漂移与文件替换。跨文件失败尽力回滚并报告实际受影响路径；回滚失败时保留可恢复的原文副本和原权限，不在错误中输出正文。
 
@@ -350,7 +364,7 @@ extensions/cli/src/
 
 Memory 的 init、remember、add-type、doctor、refreshIndex 及写索引辅助函数现为异步接口；命令输出、来源信息、权限检查及 Task runlog 约定保持。私有类型先检查整个目的目录的 Git 忽略覆盖，新文件首次暂存即采用 0600。managed 内部别名索引指向经当前作用域边界验证的物理来源，referenced 安装 href 保留且只读。NodeReference 保留原始 href，编码的 CR/LF 文件名可加载，字面换行和 NUL 不可作为 href。
 
-Note 的 Git/PR 编排仍由业务服务负责。迁移与归档保持独立批处理；正常命令启动不导入旧布局迁移实现。目录入口的资源所有权、整目录创建/删除及格式选择仍待后续 Task 4；不能把本次入口文档接入当作目录生命周期已完成。
+Note 的 Git/PR 编排仍由业务服务负责。迁移与归档保持独立批处理；正常命令启动不导入旧布局迁移实现。Task 4 已补齐目录入口、资源快照、同布局移动、整目录删除和 opt-in 格式选择；不批量转换已有内容。
 
 本文不授权修复整仓物理目录迁移、移动 knowledge/posts、迁移 Project Memory 执行层或改变 CLI 当前作用域筛选策略。它们仍有独立范围与验收责任；Project Memory 的 TypeScript 迁移另见 [实施计划](../plans/2026-10-04-project-memory-typescript.md)。
 

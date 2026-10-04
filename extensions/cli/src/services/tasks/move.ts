@@ -3,7 +3,7 @@ import path from "node:path";
 import { getTask, type BoardWriter } from "./board.js";
 import { TaskNode } from '../../models/task-node.js';
 import { setDomainField } from '../../models/fields.js';
-import { taskNodes, taskFile } from './write.js';
+import { taskNodes, taskFile, moveTaskEntry } from './write.js';
 import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
 import { TasksError, type TaskStatus } from "../../models/tasks/types.js";
 
@@ -14,8 +14,8 @@ export async function moveTaskStatus(
   io: { fs: BoardWriter; now: Date },
 ): Promise<{ stem: string; from: TaskStatus; to: TaskStatus; path: string; sidecarPath: string }> {
   const record = await getTask(repoPath, target, io.fs);
-  const destRel = taskRelPath(record.project, next, record.stem, repoPath);
-  const destSidecarRel = sidecarRelPath(record.project, next, record.stem, repoPath);
+  const destRel = taskRelPath(record.project, next, record.stem, repoPath, path.basename(record.path) === 'index.md' ? 'directory' : 'file');
+  const destSidecarRel = sidecarRelPath(record.project, next, record.stem, repoPath, path.basename(record.path) === 'index.md' ? 'directory' : 'file');
   if (record.status === next) {
     return {
       stem: record.stem,
@@ -38,13 +38,7 @@ export async function moveTaskStatus(
   if (!node) throw new TasksError('TASK_NOT_FOUND', `task not found: ${target}`);
   node.status = next;
   setDomainField(node, 'edges-updated-at', io.now.toISOString());
-  await service.create(new TaskNode(taskFile(repoPath, destRel)).parse(node.serialize()));
-
-  const sourceSidecarAbs = path.join(scopeDir(repoPath), record.sidecarPath);
-  if (await io.fs.exists(sourceSidecarAbs)) {
-    await io.fs.rename(sourceSidecarAbs, path.join(scopeDir(repoPath), destSidecarRel));
-  }
-  await service.destroy(node);
+  await moveTaskEntry(repoPath, service, node, destRel, record.sidecarPath, destSidecarRel, io.fs);
 
   return {
     stem: record.stem,

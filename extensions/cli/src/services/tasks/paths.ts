@@ -21,12 +21,12 @@ export function statusDir(repoPath: BoardTarget, project: TaskProjectId, status:
   return path.join(boardRoot(repoPath), projectDirName(project), status);
 }
 
-export function taskRelPath(project: TaskProjectId, status: TaskStatus, stem: string, target: BoardTarget = ""): string {
-  return path.join(boardRel(target), projectDirName(project), status, `${stem}.md`);
+export function taskRelPath(project: TaskProjectId, status: TaskStatus, stem: string, target: BoardTarget = "", format: "file" | "directory" = "file"): string {
+  return path.join(boardRel(target), projectDirName(project), status, ...(format === "directory" ? [stem, "index.md"] : [`${stem}.md`]));
 }
 
-export function sidecarRelPath(project: TaskProjectId, status: TaskStatus, stem: string, target: BoardTarget = ""): string {
-  return path.join(boardRel(target), projectDirName(project), status, `.${stem}.log.md`);
+export function sidecarRelPath(project: TaskProjectId, status: TaskStatus, stem: string, target: BoardTarget = "", format: "file" | "directory" = "file"): string {
+  return path.join(boardRel(target), projectDirName(project), status, ...(format === "directory" ? [stem, `.${stem}.log.md`] : [`.${stem}.log.md`]));
 }
 
 export function stemFromFilename(name: string): string | undefined {
@@ -51,6 +51,7 @@ export function isTaskMarkdownName(name: string): boolean {
 
 export function parseTarget(target: string): { kind: "stem"; stem: string } | { kind: "path"; stem: string } {
   const base = path.basename(target);
+  if (base === "index.md" && target.includes("/")) return { kind: "path", stem: path.basename(path.dirname(target)) };
   if (target.includes("/") && base.endsWith(".md")) {
     return { kind: "path", stem: base.slice(0, -".md".length) };
   }

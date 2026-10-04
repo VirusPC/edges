@@ -17,6 +17,7 @@ export type { BoardWriter };
 
 export type TasksCreateInput = {
   title: string;
+  format?: "file" | "directory";
   description?: string;
   body?: string;
   status: TaskStatus;
@@ -47,7 +48,7 @@ async function stemTaken(
   stem: string,
   fs: BoardWriter,
 ): Promise<boolean> {
-  if (await fs.exists(path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath)))) {
+  if (await fs.exists(path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath))) || await fs.exists(path.join(statusDir(repoPath, project, status), stem))) {
     return true;
   }
   const projects = await listProjectIds(repoPath, fs);
@@ -57,7 +58,7 @@ async function stemTaken(
         continue;
       }
       const abs = path.join(scopeDir(repoPath), taskRelPath(p, s, stem, repoPath));
-      if (await fs.exists(abs)) {
+      if (await fs.exists(abs) || await fs.exists(path.join(statusDir(repoPath, p, s), stem))) {
         return true;
       }
     }
@@ -86,12 +87,13 @@ export async function createTask(
   input: TasksCreateInput,
   io: { fs: BoardWriter; now: Date },
 ): Promise<{ stem: string; path: string; sidecarPath: string; priority: TaskPriority; project: TaskProjectId }> {
+  if (input.format !== undefined && input.format !== 'file' && input.format !== 'directory') throw new TasksError('VALIDATION_ERROR', 'Invalid entry format');
   const project = input.project === undefined ? DEFAULT_TASK_PROJECT : parseTaskProject(input.project);
   const priority = input.priority === undefined ? "none" : parseTaskPriority(input.priority);
   await io.fs.mkdirp(statusDir(repoPath, project, input.status));
   const stem = await uniqueStem(repoPath, project, input.status, newTaskStem(input.title, io.now), io.fs);
-  const rel = taskRelPath(project, input.status, stem, repoPath);
-  const sidecarRel = sidecarRelPath(project, input.status, stem, repoPath);
+  const rel = taskRelPath(project, input.status, stem, repoPath, input.format);
+  const sidecarRel = sidecarRelPath(project, input.status, stem, repoPath, input.format);
   const markdown = renderNewTaskDoc({
     name: input.name ?? taskNameSlug(input.title),
     description: input.description ?? input.title,
@@ -151,19 +153,14 @@ export async function updateTask(
 
   let destRel = record.path;
   if (parsedProject !== undefined) {
-    destRel = taskRelPath(parsedProject, record.status, record.stem, repoPath);
-    const destSidecarRel = sidecarRelPath(parsedProject, record.status, record.stem, repoPath);
+    destRel = taskRelPath(parsedProject, record.status, record.stem, repoPath, node.directoryPath ? 'directory' : 'file');
+    const destSidecarRel = sidecarRelPath(parsedProject, record.status, record.stem, repoPath, node.directoryPath ? 'directory' : 'file');
     if (destRel !== record.path) {
       if (await io.fs.exists(path.join(scopeDir(repoPath), destRel))) {
         throw new TasksError("BOARD_IO_ERROR", `destination already exists: ${destRel}`);
       }
       await io.fs.mkdirp(statusDir(repoPath, parsedProject, record.status));
-      await service.create(new TaskNode(taskFile(repoPath, destRel)).parse(node.serialize()));
-      const sourceSidecarAbs = path.join(scopeDir(repoPath), record.sidecarPath);
-      if (await io.fs.exists(sourceSidecarAbs)) {
-        await io.fs.rename(sourceSidecarAbs, path.join(scopeDir(repoPath), destSidecarRel));
-      }
-      await service.destroy(node);
+      await moveTaskEntry(repoPath, service, node, destRel, record.sidecarPath, destSidecarRel, io.fs);
     } else {
       await service.update(node);
     }
@@ -186,4 +183,23 @@ export function taskNodes(target: BoardTarget): NodeService {
 
 export function taskFile(target: BoardTarget, relative: string): string {
   return path.join(realpathSync(scopeDir(target)), relative);
+}
+
+/** Standalone runlogs remain explicit business companions; directory runlogs are resources. */
+export async function moveTaskEntry(target: BoardTarget, service: NodeService, node: TaskNode, destination: string, sourceLog: string, destinationLog: string, fs: BoardWriter): Promise<void> {
+  const source = path.join(scopeDir(target), sourceLog), dest = path.join(scopeDir(target), destinationLog);
+  const alternate = node.directoryPath ? path.dirname(destination) + '.md' : path.join(destination.slice(0, -3), 'index.md');
+  if (await fs.exists(path.join(scopeDir(target), alternate))) throw new TasksError('BOARD_IO_ERROR', `destination entry already exists: ${alternate}`);
+  if (await fs.exists(dest)) throw new TasksError('BOARD_IO_ERROR', `destination runlog already exists: ${destinationLog}`);
+  if (node.directoryPath) { await service.move(node, taskFile(target, destination)); return; }
+  const hasLog = await fs.exists(source);
+  if (hasLog) await fs.rename(source, dest);
+  try { await service.move(node, taskFile(target, destination)); }
+  catch (cause) {
+    if (hasLog) {
+      try { await fs.rename(dest, source); }
+      catch { throw new TasksError('BOARD_IO_ERROR', `Task move failed; recover runlog from ${destinationLog}. ${String(cause)}`); }
+    }
+    throw cause;
+  }
 }
