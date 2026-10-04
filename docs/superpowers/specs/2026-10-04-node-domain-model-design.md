@@ -231,7 +231,7 @@ type Metadata = Record<string, unknown>;
 type ChildKind = "local" | "descendant";
 
 interface NodeReference {
-  target: string;        // 目标文档路径；相对路径以持有引用的 AGENTS.md 所在目录为基准。
+  target: string;        // 文档中的原始 href，可带百分号编码和锚点；相对路径以持有引用的入口文件为基准。
   label?: string;        // 索引链接的显示文字。
   description?: string; // 当前索引条目的说明，不自动同步目标文档的 metadata.description。
   kind?: ChildKind;     // local = 本层记忆，descendant = 下层记忆；children 中必填，parent 或普通引用可省略。
@@ -314,6 +314,8 @@ declare class SkillNode extends BaseNode<"skill"> {
   set description(value: string);
 }
 ```
+
+引用的 target 保留文档链接语义：加载时先拆分 query/fragment，再解码文件路径；从物理路径生成引用时先编码路径，渲染已有 href 不重复编码。文件名中的字面 `#`、`?`、`%` 因而不会被误读为链接结构。
 
 Task 的状态、负责人、优先级，Memory 的内容分类，以及 Skill 的 name/description，均是 metadata 的类型化访问，不独立存储第二份字段；Note.title 则从 body 的一级标题解释。运行时节点 type 不自动写入 YAML，也不与 Memory 内容分类或 Skill 的 managed/referenced 维护方式混为一谈。
 
