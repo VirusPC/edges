@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 项目记忆（project-memory）
 
 - **统一 CLI 执行入口：** Project Memory 的初始化、写入、类型登记、检查、旧布局迁移和私有归档统一由 TypeScript 的 `edges memory` 执行；模板随 CLI 分发。相关 Skill 改为调用 CLI，移除原 Python 执行层。需先构建或安装 Edges CLI，再升级这些 Skill。
+- **私有内容写入前检查：** `edges memory remember` 及迁移、归档恢复命令会核对实际文件的 Git 忽略结果，遇到例外规则放行私有文件时先拒绝写入。强制恢复失败会回滚原目录，无法回滚时保留受保护的恢复副本。
 
 ### 文档与系统
 
