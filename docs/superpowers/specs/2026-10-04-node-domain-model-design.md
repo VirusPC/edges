@@ -132,12 +132,10 @@ type Metadata = Record<string, unknown>;
 type ChildKind = "local" | "descendant";
 
 interface NodeReference {
-  // 文档引用；相对路径以持有引用的 AGENTS.md 所在目录为基准。
-  target: string;
-  label?: string;
-  description?: string;
-  // children 中必须有值；parent 或普通引用可省略。
-  kind?: ChildKind;
+  target: string;        // 目标文档路径；相对路径以持有引用的 AGENTS.md 所在目录为基准。
+  label?: string;        // 索引链接的显示文字。
+  description?: string; // 当前索引条目的说明，不自动同步目标文档的 metadata.description。
+  kind?: ChildKind;     // local = 本层记忆，descendant = 下层记忆；children 中必填，parent 或普通引用可省略。
 }
 
 interface ScopeTraversalOptions {
