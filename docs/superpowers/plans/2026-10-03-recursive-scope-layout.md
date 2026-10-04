@@ -1,5 +1,7 @@
 # Recursive Scope Layout Implementation Plan
 
+> 2026-10-04：整体方案重新确认中。下方完成记录和验收证据对应此前设计；节点识别、入口组织和局部记忆上收已被用户纠正，不能据旧计划继续执行或宣告新方案完成。修订依据见 [ADR 0024](../../adr/0024-scope-first-content-ownership.md)。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Implement the approved recursive `.harness` layout, upgrade the tools that operate it, and migrate the Edges instance without losing content, ownership, or private-data protection.
