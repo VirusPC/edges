@@ -57,6 +57,19 @@ parent 位于 BaseNode，表示组树过程建立的上下文。身份、parent 
 
 InternalNode 的索引编辑针对单个文档；NodeTree 的挂接、移动负责协调已加载节点间的归属与 parent。文件移动、加载、保存由 services 协调，不在模型里操作磁盘。
 
+## Service 增删改查
+
+services 统一负责节点的增删改查及文档、归属索引的同步，采用以下职责边界；具体方法签名在实施时确定。
+
+| 操作 | Service 职责 |
+| --- | --- |
+| create | 创建节点文档，协调所属节点的索引登记并保存 |
+| get / list | 查询、读取文档，选择对应模型并调用实例 parse，返回节点对象 |
+| update | 协调领域操作，调用 serialize 保存文档，并同步受影响的归属索引 |
+| destroy | 删除节点文档，并同步移除对应归属索引 |
+
+model 的 setStatus、setBody、addChild 等方法只改变内存中的领域状态；service 的 update 负责将变更写入文件。NodeTree.find/walk 只查询已加载的树，service 的 get/list 负责持久化内容的读取。模型及 NodeTree 不直接执行文件读写或 Git 操作。
+
 ## 公共类型草案
 
 以下声明展示职责与扩展点，不是实现代码。Task、Memory 的具体字段操作沿用现有业务规则，不新增状态转换规则或记忆类型注册机制。
@@ -157,7 +170,7 @@ extensions/cli/src/
 │   ├── memory-node.ts
 │   ├── node-tree.ts
 │   └── types.ts
-├── services/                 加载、保存及跨对象流程协调
+├── services/                 增删改查、文档与索引同步、跨对象流程协调
 └── utils/                    无领域含义的基础工具
 ```
 

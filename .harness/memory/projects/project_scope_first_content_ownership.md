@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 节点领域模型：models共同归组、实例parse/serialize、正文扩展点、children由AGENTS索引派生；设计确认未实施
+description: 节点领域模型：实例解析、派生 children；service 负责文档和索引增删改查；设计确认未实施
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T21:58:09+08:00"
+  edges-updated-at: "2026-10-04T22:04:54+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -84,7 +84,7 @@ document-model 增加可选 type，内置 base、agents、memory、task；各类
 
 ## 2026-10-04 用户确认：节点模型共同归组与实例解析
 
-采用具有操作方法的节点领域模型：BaseNode 为 InternalNode、TaskNode、MemoryNode 提供共同能力，NodeTree 组织节点关系。模型统一放在 models，services 协调加载、保存及跨对象流程，不设置顶层 codecs。解析辅助代码需要拆分时留在对应模型内。
+采用具有操作方法的节点领域模型：BaseNode 为 InternalNode、TaskNode、MemoryNode 提供共同能力，NodeTree 组织节点关系。模型统一放在 models，services 负责完整增删改查（create、get/list、update、destroy）及文档、归属索引同步，不设置顶层 codecs。model 的领域操作只修改内存状态，不执行文件读写；NodeTree.find/walk 查询已加载节点，service 的 get/list 读取持久化文档并调用实例 parse。解析辅助代码需要拆分时留在对应模型内。
 
 **Why:** 用户指出此前纯数据与外部工具函数的组织不符合预期；继承应能扩展实例行为，职责分离不应机械变成顶层目录分离。
 
