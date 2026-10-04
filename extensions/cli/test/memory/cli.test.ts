@@ -1,6 +1,6 @@
 import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, writeFile, rm, readdir, realpath } from 'node:fs/promises';
+import { mkdtemp, readFile, writeFile, rm, readdir, realpath, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { run } from '../../src/program.js';
@@ -49,8 +49,25 @@ test('memory remember rejects conflicting or absent content arguments without wr
 test('memory help exposes core operations and script arguments remain discoverable', async () => {
   const group = await run(['memory', '--help']);
   assert.equal(group.exitCode, 0, group.stdout);
-  for (const operation of ['init', 'remember', 'add-type', 'doctor']) assert.match(group.stdout, new RegExp(`\\b${operation}\\b`));
+  for (const operation of ['init', 'remember', 'add-type', 'doctor', 'migrate', 'backup', 'restore']) assert.match(group.stdout, new RegExp(`\\b${operation}\\b`));
   const remember = await run(['memory', 'remember', '--help']);
   assert.match(remember.stdout, /--content-file/);
   assert.match(remember.stdout, /--target-dir/);
+});
+
+
+test('memory migrate dry-run exposes the mapping without moving legacy files', async t => {
+  const root = await fixture(t);
+  await mkdir(path.join(root, '.memory/projects'), { recursive: true });
+  await writeFile(path.join(root, '.memory/projects/AGENTS.md'), '# Projects\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n');
+  const body = '---\nname: project_example\ndescription: Example\n---\nOriginal body\n';
+  await writeFile(path.join(root, '.memory/projects/project_example.md'), body);
+  await writeFile(path.join(root, 'AGENTS.md'), '<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n- [Projects](.memory/projects/AGENTS.md) — Projects\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n');
+  const result = await run(['--scope', root, 'memory', 'migrate', '--dry-run'], { env: {} });
+  assert.equal(result.exitCode, 0, result.stdout);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.ok, true);
+  assert.match(JSON.stringify(payload.pathMap), /\.harness\/memory\/projects/);
+  assert.equal(await readFile(path.join(root, '.memory/projects/project_example.md'), 'utf8'), body);
+  assert.deepEqual((await readdir(root)).sort(), ['.memory', 'AGENTS.md']);
 });

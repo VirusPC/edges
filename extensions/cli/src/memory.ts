@@ -5,6 +5,7 @@ import { addMemoryRememberCommand } from './memory/remember.js';
 import { addMemoryAddTypeCommand } from './memory/add-type.js';
 import { addMemoryDoctorCommand } from './memory/doctor.js';
 import { addMemoryBackupCommand } from './memory/backup.js';
+import { addMemoryMigrateCommand } from './memory/migrate.js';
 import { addMemoryRestoreCommand } from './memory/restore.js';
 
 export function addMemoryCommand(program: Command, ctx: CliContext): void {
@@ -16,4 +17,5 @@ export function addMemoryCommand(program: Command, ctx: CliContext): void {
   addMemoryDoctorCommand(memory, ctx);
   addMemoryBackupCommand(memory, ctx);
   addMemoryRestoreCommand(memory, ctx);
+  addMemoryMigrateCommand(memory, ctx);
 }
