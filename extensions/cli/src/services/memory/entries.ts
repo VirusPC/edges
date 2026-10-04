@@ -1,3 +1,4 @@
+import { escapeIndexText, encodeIndexPath } from "./index-rendering.js";
 import * as fs from "node:fs";
 import { basename, dirname, join, parse } from "node:path";
 import {
@@ -171,10 +172,13 @@ export function buildEntryIndex(target: string, name: string): string {
   const entries = files.map((file) => {
     const fields = parseFrontmatter(file);
     return renderLine(ENTRY_LINE_TEMPLATE, {
-      title: fields.title || fields.name || entryName(file, name, target),
-      path: relativeLink(file, base),
-      description:
+      title: escapeIndexText(
+        fields.title || fields.name || entryName(file, name, target),
+      ),
+      path: encodeIndexPath(relativeLink(file, base)),
+      description: escapeIndexText(
         fields.description || "缺少 description，请补齐 frontmatter。",
+      ),
     });
   });
   return [

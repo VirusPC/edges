@@ -4,6 +4,8 @@ import * as fs from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { execFileSync } from "node:child_process";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import type { Nodes } from "mdast";
 import {
   initMemory,
   rememberMemory,
@@ -592,4 +594,64 @@ for (const [label, source] of [
       ),
     );
     assert.deepEqual(fs.readFileSync(join(d, file)), beforeEntry);
+  });
+for (const type of ["project", "managed", "referenced"] as const)
+  test(`${type} index renders multiline YAML as one safe link and plain text`, (t) => {
+    const d = fixture(t),
+      directory = "tricky ) [name]\n#?.skill";
+    const file =
+      type === "project"
+        ? ".harness/memory/projects/project_source.md"
+        : type === "managed"
+          ? `.harness/skills/managed/${directory}/SKILL.md`
+          : `.agents/skills/${directory}/SKILL.md`;
+    const source =
+      "---\nname: source\nmetadata:\n  edges-title: |-\n    Safe ](../../wrong.md)\n    - [Forged title](../../elsewhere.md)\ndescription: |-\n  Good summary\n  - [Forged](../../elsewhere.md) — injected\n---\nOriginal body\n";
+    put(d, file, source);
+    const result = initMemory({
+      targetDir: d,
+      memoryTypes: type === "project" ? [type] : [],
+      skillTypes: type === "project" ? [] : [type],
+    });
+    assert.equal(result.complete, true);
+    const index = type === "project" ? pi : `.harness/skills/${type}/AGENTS.md`;
+    const text = read(d, index)
+      .split("<!-- project-memory-entries:start -->")[1]!
+      .split("<!-- project-memory-entries:end -->")[0]!
+      .trim();
+    assert.equal(text.split("\n").length, 1);
+    const nodes: Nodes[] = [],
+      visit = (node: Nodes) => {
+        nodes.push(node);
+        if ("children" in node) node.children.forEach(visit);
+      };
+    visit(fromMarkdown(text));
+    const links = nodes.filter((n) => n.type === "link");
+    assert.equal(nodes.filter((n) => n.type === "listItem").length, 1);
+    assert.equal(links.length, 1);
+    const expectedPath =
+      type === "project"
+        ? "project_source.md"
+        : type === "managed"
+          ? `${directory}/SKILL.md`
+          : `../../../.agents/skills/${directory}/SKILL.md`;
+    assert.equal(decodeURIComponent(links[0]!.url), expectedPath);
+    assert.equal(
+      links[0]!.children.map((n) => ("value" in n ? n.value : "")).join(""),
+      "Safe ](../../wrong.md) - [Forged title](../../elsewhere.md)",
+    );
+    assert.ok(
+      nodes.some(
+        (n) =>
+          n.type === "text" &&
+          n.value.includes(
+            "Good summary - [Forged](../../elsewhere.md) — injected",
+          ),
+      ),
+    );
+    assert.equal(
+      doctorMemory({ targetDir: d, apply: true }).remaining.length,
+      0,
+    );
+    assert.equal(read(d, file), source);
   });
