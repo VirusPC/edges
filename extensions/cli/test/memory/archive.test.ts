@@ -1,11 +1,14 @@
 import test, { type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, stat, lstat, chmod, rm, symlink, realpath, readdir } from 'node:fs/promises';
+import { promises as fs } from 'node:fs';
+import { mkdtemp, mkdir, writeFile, readFile, stat, lstat, chmod, rm, symlink, realpath, readdir, link } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
-import { tmpdir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 import path from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { Header, type HeaderData } from 'tar';
+import { target } from '../../src/memory/utils/command.js';
+import { resolveTarget } from '../../src/services/memory/paths.js';
 import { backupUserMemory, restoreUserMemory } from '../../src/services/memory/archive.js';
 
 const users = '.harness/memory/users';
@@ -24,7 +27,7 @@ async function fixture(t: TestContext) {
 function tarBytes(entries: (HeaderData & { content?: string })[]) {
   return gzipSync(Buffer.concat([...entries.flatMap(({ content = '', ...fields }) => {
     const bytes = Buffer.from(content);
-    const header = new Header({ type: 'File', mode: 0o600, ...fields, size: bytes.length });
+    const header = new Header({ type: 'File', mode: 0o600, size: bytes.length, ...fields });
     header.encode();
     return [header.block!, bytes, Buffer.alloc((512 - bytes.length % 512) % 512)];
   }), Buffer.alloc(1024)]));
@@ -121,4 +124,122 @@ test('restore rejects linked harness ancestors; force replaces only users link, 
   await restoreUserMemory({ archive, repoDir: destination, force: true });
   assert.equal((await lstat(path.join(destination, users))).isSymbolicLink(), false);
   assert.equal(await readFile(path.join(external, 'keep'), 'utf8'), 'external');
+});
+
+
+test('force restore retains the old bytes and modes when staging chmod fails', async t => {
+  const { source, destination } = await fixture(t);
+  const { archive } = await backupUserMemory({ repoDir: source });
+  const old = path.join(destination, users, 'old.txt');
+  await mkdir(path.dirname(old), { recursive: true });
+  await writeFile(old, 'old private bytes', { mode: 0o640 });
+  const realChmod = fs.chmod;
+  t.mock.method(fs, 'chmod', async (file: Parameters<typeof fs.chmod>[0], mode: number) => {
+    if (String(file).endsWith('user_pref.md')) throw new Error('injected chmod failure');
+    return realChmod(file, mode);
+  });
+  await assert.rejects(restoreUserMemory({ archive, repoDir: destination, force: true }), /injected chmod failure/);
+  assert.equal(await readFile(old, 'utf8'), 'old private bytes');
+  assert.equal((await stat(old)).mode & 0o777, 0o640);
+  assert.deepEqual(await readdir(path.dirname(old)), ['old.txt']);
+});
+
+test('force restore rolls back when replacement rename fails, with private ignored staging', async t => {
+  const { source, destination } = await fixture(t);
+  execFileSync('git', ['init', '-q', destination]);
+  const { archive } = await backupUserMemory({ repoDir: source });
+  const targetUsers = path.join(destination, users);
+  await mkdir(targetUsers, { recursive: true });
+  await writeFile(path.join(targetUsers, 'old.txt'), 'old private bytes');
+  const realRename = fs.rename;
+  t.mock.method(fs, 'rename', async (from: Parameters<typeof fs.rename>[0], to: Parameters<typeof fs.rename>[1]) => {
+    if (String(to) === targetUsers && await readFile(path.join(String(from), 'user_pref.md')).catch(() => undefined)) {
+      const stage = path.dirname(String(from));
+      assert.equal((await stat(stage)).mode & 0o777, 0o700);
+      execFileSync('git', ['-C', destination, 'check-ignore', '-q', '--no-index', path.join(String(from), 'user_pref.md')]);
+      throw new Error('injected replacement failure');
+    }
+    return realRename(from, to);
+  });
+  await assert.rejects(restoreUserMemory({ archive, repoDir: destination, force: true }), /injected replacement failure/);
+  assert.equal(await readFile(path.join(targetUsers, 'old.txt'), 'utf8'), 'old private bytes');
+  assert.deepEqual(await readdir(targetUsers), ['old.txt']);
+  assert.equal((await readdir(destination)).some(name => name.startsWith('.private-user-memory-')), false);
+});
+
+test('failed rollback retains a restricted ignored recovery copy', async t => {
+  const { source, destination } = await fixture(t);
+  execFileSync('git', ['init', '-q', destination]);
+  const { archive } = await backupUserMemory({ repoDir: source });
+  const targetUsers = path.join(destination, users);
+  await mkdir(targetUsers, { recursive: true });
+  await writeFile(path.join(targetUsers, 'old.txt'), 'recover me');
+  const realRename = fs.rename;
+  t.mock.method(fs, 'rename', async (from: Parameters<typeof fs.rename>[0], to: Parameters<typeof fs.rename>[1]) => {
+    if (String(to) === targetUsers) throw new Error('injected rename failure');
+    return realRename(from, to);
+  });
+  await assert.rejects(restoreUserMemory({ archive, repoDir: destination, force: true }), /recovery|恢复|rollback/i);
+  const recovery = (await readdir(destination)).find(name => name.startsWith('.private-user-memory-'));
+  assert.ok(recovery);
+  assert.equal((await stat(path.join(destination, recovery))).mode & 0o777, 0o700);
+  assert.equal(await readFile(path.join(destination, recovery, 'previous', 'old.txt'), 'utf8'), 'recover me');
+  execFileSync('git', ['-C', destination, 'check-ignore', '-q', '--no-index', `${recovery}/previous/old.txt`]);
+});
+
+test('expanded bytes, declared sizes and member count are bounded before replacement', async t => {
+  const { root, destination } = await fixture(t);
+  const old = path.join(destination, users, 'old.txt');
+  await mkdir(path.dirname(old), { recursive: true });
+  await writeFile(old, 'keep');
+  const cases = [
+    { entries: [{ path: `${users}/large`, content: 'x'.repeat(4096) }], limits: { maxExpandedBytes: 2048 } },
+    { entries: [{ path: `${users}/large`, size: 1024 * 1024 }], limits: { maxExpandedBytes: 2048 } },
+    { entries: [{ path: `${users}/a` }, { path: `${users}/b` }], limits: { maxMembers: 1 } },
+  ];
+  for (const [i, item] of cases.entries()) {
+    const archive = path.join(root, `limit-${i}.tar.gz`);
+    await writeFile(archive, tarBytes(item.entries));
+    await assert.rejects(restoreUserMemory({ archive, repoDir: destination, force: true, limits: item.limits }), /limit|限额/);
+    assert.equal(await readFile(old, 'utf8'), 'keep');
+    assert.deepEqual(await readdir(path.dirname(old)), ['old.txt']);
+  }
+});
+
+test('backup and restore reject legacy coexistence without changing either layout', async t => {
+  const { source, destination } = await fixture(t);
+  const { archive } = await backupUserMemory({ repoDir: source, timestamp: 'before' });
+  for (const root of [source, destination]) {
+    await mkdir(path.join(root, '.memory/users'), { recursive: true });
+    await writeFile(path.join(root, '.memory/users/old.md'), 'legacy bytes');
+  }
+  await mkdir(path.join(destination, users), { recursive: true });
+  await writeFile(path.join(destination, users, 'current.md'), 'current bytes');
+  await assert.rejects(backupUserMemory({ repoDir: source, timestamp: 'after' }), /migration-required|conversion-required/);
+  await assert.rejects(restoreUserMemory({ archive, repoDir: destination, force: true }), /migration-required|conversion-required/);
+  for (const root of [source, destination]) assert.equal(await readFile(path.join(root, '.memory/users/old.md'), 'utf8'), 'legacy bytes');
+  assert.equal(await readFile(path.join(destination, users, 'current.md'), 'utf8'), 'current bytes');
+  assert.equal(await readFile(path.join(source, users, 'user_pref.md'), 'utf8'), 'private bytes\n');
+  await assert.rejects(stat(path.join(source, 'user-memory-backup-after.tar.gz')), { code: 'ENOENT' });
+});
+
+test('backup refuses hardlinked sources before producing an unusable archive', async t => {
+  const { source } = await fixture(t);
+  await link(path.join(source, users, 'user_pref.md'), path.join(source, users, 'second.md'));
+  await assert.rejects(backupUserMemory({ repoDir: source, timestamp: 'hardlink' }), /hardlink|hard link|硬链接/i);
+  await assert.rejects(stat(path.join(source, 'user-memory-backup-hardlink.tar.gz')), { code: 'ENOENT' });
+});
+
+test('explicit CLI target retains home expansion for the service resolver', async () => {
+  const value = target({ targetDir: '~/' }, { env: {}, result: undefined });
+  assert.equal(resolveTarget(value), await realpath(homedir()));
+});
+
+test('legacy dangling links cannot bypass archive layout rejection', async t => {
+  const { source, destination } = await fixture(t);
+  const { archive } = await backupUserMemory({ repoDir: source, timestamp: 'before' });
+  for (const root of [source, destination]) await symlink('absent-legacy', path.join(root, '.memory'));
+  await assert.rejects(backupUserMemory({ repoDir: source, timestamp: 'after' }), /migration-required|conversion-required/);
+  await assert.rejects(restoreUserMemory({ archive, repoDir: destination, force: true }), /migration-required|conversion-required/);
+  assert.deepEqual(await readdir(destination), ['.memory']);
 });

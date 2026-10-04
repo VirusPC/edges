@@ -1,12 +1,33 @@
-import { promises as fs } from 'node:fs';
+import { createReadStream, promises as fs } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { pipeline } from 'node:stream/promises';
-import { homedir, tmpdir } from 'node:os';
+import { Transform } from 'node:stream';
+import { createGunzip, createGzip } from 'node:zlib';
+import { homedir } from 'node:os';
 import path from 'node:path';
-import { create, list } from 'tar';
+import { create, Parser, type ReadEntry } from 'tar';
+import { rejectLegacy } from './paths.js';
 import { readTemplate } from './templates.js';
 
 const USERS = '.harness/memory/users';
+const PRIVATE_STAGE_RULE = '/.private-user-memory-*/';
+export const USER_MEMORY_ARCHIVE_LIMITS = { maxExpandedBytes: 256 * 1024 * 1024, maxMembers: 10_000 } as const;
+type ArchiveLimits = { maxExpandedBytes: number; maxMembers: number };
+
+function expandedByteLimit(maximum: number): Transform {
+  let bytes = 0;
+  return new Transform({ transform(chunk: Buffer, _encoding, callback) {
+    bytes += chunk.length;
+    callback(bytes > maximum ? new Error('archive expanded byte limit exceeded') : null, chunk);
+  } });
+}
+
+async function rejectOldLayer(root: string): Promise<void> {
+  try { rejectLegacy(root); }
+  catch (error) { throw new Error(`${(error as Error).message}; ${CONVERSION}`); }
+  if (await info(path.join(root, ".memory"))) throw new Error(CONVERSION);
+}
+
 const CONVERSION = 'conversion-required: restore the old archive with its matching older tool in an isolated old project, run edges memory migrate there, then create a new user-memory-backup archive.';
 const expandHome = (value: string): string => value === '~' ? homedir() : value.startsWith('~/') ? path.join(homedir(), value.slice(2)) : value;
 
@@ -74,6 +95,7 @@ async function collect(root: string): Promise<string[]> {
     for (const name of (await fs.readdir(dir)).sort()) {
       const file = path.join(dir, name), entry = await fs.lstat(file);
       if (entry.isSymbolicLink() || (!entry.isDirectory() && !entry.isFile())) throw new Error('用户记忆含非普通文件或符号链接: ' + file);
+      if (entry.isFile() && entry.nlink > 1) throw new Error('用户记忆含硬链接 (hardlink): ' + file);
       if (entry.isDirectory()) await visit(file);
       else files.push(path.relative(root, file).split(path.sep).join('/'));
     }
@@ -85,7 +107,9 @@ async function collect(root: string): Promise<string[]> {
 
 export async function backupUserMemory(options: { repoDir: string; outputDir?: string; timestamp?: string }): Promise<{ archive: string }> {
   const root = await directory(options.repoDir);
+  await rejectOldLayer(root);
   const files = await collect(root);
+  if (files.length > USER_MEMORY_ARCHIVE_LIMITS.maxMembers) throw new Error('archive member count limit exceeded');
   const destination = await realLocation(options.outputDir ?? root);
   if (inside(destination, path.join(root, USERS))) throw new Error('归档不能写入用户记忆正文目录');
   const stamp = options.timestamp ?? new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
@@ -98,7 +122,7 @@ export async function backupUserMemory(options: { repoDir: string; outputDir?: s
   const handle = await fs.open(archive, 'wx', 0o600);
   try {
     for (const file of files) await safeParents(path.join(root, file), root);
-    await pipeline(create({ cwd: root, gzip: true, noDirRecurse: true, strict: true }, files), handle.createWriteStream());
+    await pipeline(create({ cwd: root, noDirRecurse: true, strict: true }, files), expandedByteLimit(USER_MEMORY_ARCHIVE_LIMITS.maxExpandedBytes), createGzip(), handle.createWriteStream());
   } catch (error) {
     await handle.close();
     await fs.rm(archive, { force: true });
@@ -120,68 +144,103 @@ async function occupied(root: string): Promise<boolean> {
   catch { return true; }
 }
 
-type Member = { name: string; mode: number; bytes: Buffer };
-
-async function readMembers(archive: string): Promise<Member[]> {
-  const members: Member[] = [], seen = new Set<string>();
+async function stageMembers(archive: string, staging: string, limits: ArchiveLimits): Promise<string[]> {
+  const seen = new Set<string>(), directories = new Set<string>();
   const pending: Promise<void>[] = [];
-  let failure: Error | undefined;
-  await list({ file: archive, strict: true, onReadEntry(entry) {
-    // Consume every stream, even when a member is invalid, so validation cannot hang.
-    const chunks: Buffer[] = [];
+  const controller = new AbortController();
+  let failure: unknown, declaredBytes = 0;
+  const parser = new Parser({ strict: true, onReadEntry(entry) {
+    const task = save(entry).catch(error => {
+      failure ??= error;
+      controller.abort(error);
+      entry.destroy();
+    });
+    pending.push(task);
+  } });
+  async function save(entry: ReadEntry): Promise<void> {
     let name = entry.path.replace(/\\/g, '/');
     if (name.startsWith('./')) name = name.slice(2);
-    if (name.startsWith('/') || name.split('/').includes('..') || !name) failure ??= new Error('归档含非法路径: ' + name);
-    if (name.startsWith('.memory/')) failure ??= new Error(CONVERSION);
-    if (!name.startsWith(USERS + '/')) failure ??= new Error('归档含非用户记忆路径: ' + name);
-    if (entry.type !== 'File' && entry.type !== 'OldFile') failure ??= new Error('归档含非普通文件成员: ' + name);
+    if (name.startsWith('/') || name.split('/').includes('..') || !name) throw new Error('归档含非法路径: ' + name);
+    if (name.startsWith('.memory/')) throw new Error(CONVERSION);
+    if (!name.startsWith(USERS + '/')) throw new Error('归档含非用户记忆路径: ' + name);
+    if (entry.type !== 'File' && entry.type !== 'OldFile') throw new Error('归档含非普通文件成员: ' + name);
     name = path.posix.normalize(name);
-    if (!name.startsWith(USERS + '/')) failure ??= new Error('归档含非用户记忆路径: ' + name);
-    if (seen.has(name)) failure ??= new Error('归档含重复路径: ' + name);
-    seen.add(name);
-    pending.push(new Promise<void>(resolve => {
-      entry.on('data', chunk => chunks.push(Buffer.from(chunk)));
-      entry.on('error', error => { failure ??= error instanceof Error ? error : new Error(String(error)); resolve(); });
-      entry.on('end', () => { members.push({ name, mode: (entry.mode ?? 0o600) & 0o777, bytes: Buffer.concat(chunks) }); resolve(); });
-    }));
-  } });
-  await Promise.all(pending);
-  if (failure) throw failure;
-  if (!members.length) throw new Error('归档里没有 .harness/memory/users/ 成员');
-  for (const name of seen) {
+    if (!name.startsWith(USERS + '/')) throw new Error('归档含非用户记忆路径: ' + name);
+    if (seen.has(name)) throw new Error('归档含重复路径: ' + name);
+    if (directories.has(name)) throw new Error('归档路径既是文件又是目录: ' + name);
     for (let parent = path.posix.dirname(name); parent !== '.'; parent = path.posix.dirname(parent)) {
       if (seen.has(parent)) throw new Error('归档路径既是文件又是目录: ' + name);
+      directories.add(parent);
     }
+    seen.add(name);
+    if (seen.size > limits.maxMembers) throw new Error('archive member count limit exceeded');
+    declaredBytes += entry.size;
+    if (!Number.isSafeInteger(entry.size) || entry.size < 0 || declaredBytes > limits.maxExpandedBytes) throw new Error('archive declared size limit exceeded');
+    const file = path.join(staging, name.slice(USERS.length + 1));
+    await fs.mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
+    const handle = await fs.open(file, 'wx', 0o600);
+    try {
+      await pipeline(entry, handle.createWriteStream(), { signal: controller.signal });
+      await fs.chmod(file, (entry.mode ?? 0o600) & 0o777);
+    } finally { await handle.close(); }
   }
-  return members;
+  try {
+    await pipeline(createReadStream(archive), createGunzip(), expandedByteLimit(limits.maxExpandedBytes), parser, { signal: controller.signal });
+  } catch (error) {
+    failure ??= error;
+    controller.abort(error);
+  }
+  await Promise.all(pending);
+  if (failure) throw failure;
+  if (!seen.size) throw new Error('归档里没有 .harness/memory/users/ 成员');
+  return [...seen];
 }
 
-export async function restoreUserMemory(options: { archive: string; repoDir: string; force?: boolean }) {
+export async function restoreUserMemory(options: { archive: string; repoDir: string; force?: boolean; limits?: Partial<ArchiveLimits> }) {
   const archive = await fs.realpath(expandHome(options.archive)), root = await directory(options.repoDir);
+  await rejectOldLayer(root);
   if (!(await fs.stat(archive)).isFile()) throw new Error('归档不存在或不是文件');
   const users = path.join(root, USERS);
   if (inside(archive, users)) throw new Error('先将归档移到待替换 users 目录之外');
   await safeParents(path.dirname(users), root);
-  const members = await readMembers(archive);
   if (await occupied(root) && !options.force) throw new Error('目标已有用户记忆，拒绝覆盖；确认后加 --force（替换，不合并）');
-  if (!options.force) for (const member of members) await safeParents(path.join(root, member.name), root);
-  const staging = await fs.mkdtemp(path.join(tmpdir(), 'private-user-memory-'));
+  const limits = { ...USER_MEMORY_ARCHIVE_LIMITS, ...options.limits };
+  if (Object.values(limits).some(value => !Number.isSafeInteger(value) || value <= 0)) throw new Error('Invalid archive limits');
+  const ignore = path.join(root, '.gitignore'), ignoreInfo = await info(ignore);
+  if (ignoreInfo && (!ignoreInfo.isFile() || ignoreInfo.isSymbolicLink())) throw new Error('不安全的 .gitignore');
+  const beforeIgnore = ignoreInfo ? await fs.readFile(ignore) : undefined;
+  // Stage on the target filesystem. Ignore rules and the 0700 container precede private writes.
+  await ensureIgnore(root, ['/' + USERS + '/', PRIVATE_STAGE_RULE]);
+  const temporaryIgnore = await fs.readFile(ignore);
+  let staging: string | undefined, retainRecovery = false, installed = false;
   try {
+    staging = await fs.mkdtemp(path.join(root, '.private-user-memory-'));
     await fs.chmod(staging, 0o700);
-    for (const member of members) {
-      const file = path.join(staging, member.name);
-      await fs.mkdir(path.dirname(file), { recursive: true, mode: 0o700 });
-      await fs.writeFile(file, member.bytes, { flag: 'wx', mode: 0o600 });
+    const replacement = path.join(staging, 'replacement'), previous = path.join(staging, 'previous');
+    await fs.mkdir(replacement, { mode: 0o700 });
+    const members = await stageMembers(archive, replacement, limits);
+    await safeParents(path.dirname(users), root);
+    await fs.mkdir(path.dirname(users), { recursive: true });
+    const hadPrevious = Boolean(await info(users));
+    if (hadPrevious) await fs.rename(users, previous);
+    try { await fs.rename(replacement, users); }
+    catch (error) {
+      if (hadPrevious) {
+        try { await fs.rename(previous, users); }
+        catch (rollbackError) {
+          retainRecovery = true;
+          throw new AggregateError([error, rollbackError], 'Restore rollback failed; recovery copy retained at ' + previous);
+        }
+      }
+      throw error;
     }
-    await ensureIgnore(root, ['/' + USERS + '/']);
-    if (options.force && await info(users)) await fs.rm(users, { recursive: true, force: true });
-    for (const member of members) {
-      const file = path.join(root, member.name);
-      await safeParents(file, root);
-      await fs.mkdir(path.dirname(file), { recursive: true });
-      await fs.copyFile(path.join(staging, member.name), file);
-      await fs.chmod(file, member.mode);
+    installed = true;
+    return { archive, repoDir: root, extracted: members, indexRefresh: 'preserved-archive-index' };
+  } finally {
+    if (staging && !retainRecovery) await fs.rm(staging, { recursive: true, force: true });
+    if (!installed && !retainRecovery && (await fs.readFile(ignore)).equals(temporaryIgnore)) {
+      if (beforeIgnore) await fs.writeFile(ignore, beforeIgnore);
+      else await fs.rm(ignore);
     }
-  } finally { await fs.rm(staging, { recursive: true, force: true }); }
-  return { archive, repoDir: root, extracted: members.map(member => member.name), indexRefresh: 'preserved-archive-index' };
+  }
 }

@@ -1,12 +1,11 @@
 import { Command } from 'commander';
-import path from 'node:path';
 import type { CliContext } from '../../context.js';
 import { resolveScope } from '../../utils/scope.js';
 
 export type TargetOptions = { targetDir?: string };
 
 export function target(options: TargetOptions, ctx: CliContext): string {
-  return options.targetDir ? path.resolve(options.targetDir) : resolveScope(ctx.env);
+  return options.targetDir ? options.targetDir : resolveScope(ctx.env);
 }
 
 export function operation(ctx: CliContext, execute: () => unknown | Promise<unknown>): Promise<void> {
