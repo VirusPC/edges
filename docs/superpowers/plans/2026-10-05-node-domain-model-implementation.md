@@ -47,7 +47,7 @@ Also verify optional headers, subclass hooks, repeated parse reset, no path/tree
 
 **Interfaces:** `new NodeService()` and asynchronous methods from spec; overload get(path, Model?), returns undefined only for absent target. list(scopePath,{includeDescendants?}) returns BaseNode[]; accepts a directory scope, reads its AGENTS.md. Public path args absolute. InternalNode for AGENTS; Task/Memory/Note/Skill constructors selected from explicit index/module contracts, not arbitrary YAML guessing. Type-index entries are local children without pretending they have new handwritten AGENTS sections. Keep literal references unmodified in documents; resolve relative to owning entry.
 
-- [ ] Write failing actual-filesystem tests, including:
+- [x] Write failing actual-filesystem tests, including:
 ```ts
 const root = new InternalNode(scope + '/AGENTS.md').parse(rootSource);
 await service.create(root);
@@ -57,9 +57,9 @@ assert.equal((await service.get(task.path, TaskNode))?.title, task.title);
 assert.deepEqual((await service.list(scope)).map(n => n.path), [root.path, task.path]);
 ```
 Cover local index chains of arbitrary depth, skip unreadable/missing descendants before load unless includeDescendants, explicit included missing targets error, missing get undefined, stable preorder/dedup, cycle refusal, cross-directory references, child.parent after attachment, get without fabricated parent, and all create/update/destroy failure contracts.
-- [ ] Implement safe reads and same-directory file replacement with source/identity checks and modes, no model IO. New create refuses existing targets; update refuses missing/stale/substituted files. Resolve reference links and fragment/encoding with existing path helpers. Validate public paths and filesystem symlink boundaries. Preserve existing source read-only/private policies in adapters; provide a narrow explicit policy hook only if production integration requires it, document it before integration.
-- [ ] Implement attach/detach/reparent and update InternalNode index consistency, including reciprocal state of loaded nodes. Preflight all writes before mutation; on multi-file failure report concrete affected paths and retain/recover old files rather than claiming transaction atomicity. Reject self-ownership/cycles and conflicting known parent; destroy rejects nodes with ownership children and preserves unknown external refs. The persistent indexes remain truth, not a global singleton cache.
-- [ ] Run NodeService/model tests and CLI typecheck; commit and report. Do not change all CLI adapters yet.
+- [x] Implement safe reads and same-directory file replacement with source/identity checks and modes, no model IO. New create refuses existing targets; update refuses missing/stale/substituted files. Resolve reference links and fragment/encoding with existing path helpers. Validate public paths and filesystem symlink boundaries. Preserve existing source read-only/private policies in adapters; provide a narrow explicit policy hook only if production integration requires it, document it before integration.
+- [x] Implement attach/detach/reparent and update InternalNode index consistency, including reciprocal state of loaded nodes. Preflight all writes before mutation; on multi-file failure report concrete affected paths and retain/recover old files rather than claiming transaction atomicity. Reject self-ownership/cycles and conflicting known parent; destroy rejects nodes with ownership children and preserves unknown external refs. The persistent indexes remain truth, not a global singleton cache.
+- [x] Run NodeService/model tests and CLI typecheck; commit and report. Do not change all CLI adapters yet.
 
 ### Task 3: Production consumers and source organization
 
