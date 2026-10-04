@@ -81,12 +81,24 @@ export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFi
       try {
         fs.writeFileSync(temporary, change.source, { flag: 'wx', mode: change.before?.mode ?? 0o666 });
         if (change.before) fs.chmodSync(temporary, change.before.mode);
+        const staged = readEntry(temporary)!;
+        // Capture identity before committing, so no post-commit reopen/cleanup can
+        // leave a changed destination absent from recovery accounting.
+        const after: EntryFile = { ...staged, path: change.path,
+          realPath: path.join(staged.realDirectory, path.basename(change.path)) };
         validateChange(change);
-        if (change.before) fs.renameSync(temporary, change.path);
-        else { fs.linkSync(temporary, change.path); fs.unlinkSync(temporary); }
+        if (change.before) {
+          fs.renameSync(temporary, change.path);
+          applied.push({ change, after });
+        } else {
+          fs.linkSync(temporary, change.path);
+          applied.push({ change, after });
+          fs.unlinkSync(temporary);
+        }
       } finally { fs.rmSync(temporary, { force: true }); }
-      const after = readEntry(change.path)!;
-      applied.push({ change, after }); result.set(change.path, after);
+      const after = applied[applied.length - 1]!.after!;
+      validateEntry(after);
+      result.set(change.path, after);
     }
     return result;
   } catch (cause) {

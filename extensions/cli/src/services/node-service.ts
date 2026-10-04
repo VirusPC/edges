@@ -137,21 +137,45 @@ export class NodeService {
     if (matches.length > 1) throw new Error(`Ambiguous ownership references for ${child.path} in ${parent.path}`);
     return matches[0];
   }
-  async #cycle(parent: BaseNode, child: BaseNode, replacements = new Map<string, BaseNode>()): Promise<void> {
-    const visited = new Set<string>(), active = new Set<string>();
+  /** Validate the exact combined documents about to be saved, not only the
+   * requested edge or the caller's selected model. AGENTS is authoritative. */
+  async #validateWrites(writes: readonly Write[]): Promise<void> {
+    const proposed = new Map<string, BaseNode | undefined>();
+    for (const write of writes) {
+      const target = absolute(write.node.path);
+      proposed.set(target, write.source === undefined ? undefined
+        : path.basename(target) === 'AGENTS.md' ? new InternalNode(target).parse(write.source)
+          : write.draft ?? write.node);
+    }
+    const seen = new Set<string>(), active = new Set<string>();
+    const owners = new Map<string, string>();
     const visit = async (node: BaseNode): Promise<void> => {
-      if (node.path === parent.path || active.has(node.path)) throw new Error(`Ownership cycle: ${node.path}`);
-      if (visited.has(node.path)) return;
-      visited.add(node.path); active.add(node.path);
+      const nodePath = absolute(node.path);
+      if (active.has(nodePath)) throw new Error(`Ownership cycle: ${nodePath}`);
+      if (seen.has(nodePath)) return;
+      seen.add(nodePath); active.add(nodePath);
       for (const reference of node.children ?? []) {
         validateChild(reference);
         const target = resolveReference(node, reference);
-        if (target === parent.path) throw new Error(`Ownership cycle: ${target}`);
-        await visit(replacements.get(target) ?? await this.#loadReference(node, reference, target));
+        if (active.has(target)) throw new Error(`Ownership cycle: ${target}`);
+        const owner = owners.get(target);
+        if (owner && owner !== nodePath) throw new Error(`Conflicting ownership parents for ${target}: ${owner}, ${nodePath}`);
+        owners.set(target, nodePath);
+        for (const instance of this.#loaded.get(target) ?? []) {
+          if (!instance.parent) continue;
+          const known = resolveReference(instance, instance.parent);
+          if (known === nodePath) continue;
+          const replacement = proposed.get(known);
+          const removed = proposed.has(known) && !replacement?.children?.some(entry => resolveReference(replacement, entry) === target);
+          if (!removed) throw new Error(`Conflicting known ownership parent for ${target}: ${known}`);
+        }
+        const child = proposed.has(target) ? proposed.get(target) : await this.#loadReference(node, reference, target);
+        if (!child) throw new Error(`Missing referenced node in proposed graph: ${target}`);
+        await visit(child);
       }
-      active.delete(node.path);
+      active.delete(nodePath);
     };
-    await visit(child);
+    for (const node of proposed.values()) if (node) await visit(node);
   }
   #sync(parent: InternalNode, previous: InternalNode): void {
     const next = new Set(parent.children.map(reference => resolveReference(parent, reference)));
@@ -173,16 +197,17 @@ export class NodeService {
       if (this.#readOnly.has(target) || (write.parent && indexContract(write.parent)?.writable === false)) {
         throw new Error(`Read-only node source: ${target}`);
       }
-      if (before && write.node instanceof InternalNode) previous.set(write.node, new InternalNode(target).parse(before.source));
+      if (before && (write.node instanceof InternalNode || path.basename(target) === 'AGENTS.md')) previous.set(write.node, new InternalNode(target).parse(before.source));
       changes.push({ path: target, before, source: write.source });
       await this.#options.assertWrite?.({ operation, node: write.draft ?? write.node, parent: write.parent });
     }
+    await this.#validateWrites(writes);
     const saved = saveEntries(changes);
     for (const write of writes) {
       const file = saved.get(absolute(write.node.path));
       if (write.draft) write.node.parse(write.draft.serialize());
       if (file) {
-        if (write.node instanceof InternalNode) {
+        if (write.node instanceof InternalNode || path.basename(file.path) === 'AGENTS.md') {
           const before = previous.get(write.node)?.serialize();
           for (const instance of this.#loaded.get(file.path) ?? []) {
             if (instance === write.node || !(instance instanceof InternalNode)) continue;
@@ -198,21 +223,22 @@ export class NodeService {
       else { this.#state.delete(write.node); this.#loaded.get(absolute(write.node.path))?.delete(write.node); }
     }
     for (const write of writes) {
-      if (write.node instanceof InternalNode && write.source !== undefined) this.#sync(write.node, previous.get(write.node) ?? new InternalNode(write.node.path));
+      if (write.source !== undefined && (write.node instanceof InternalNode || path.basename(write.node.path) === 'AGENTS.md')) {
+        const current = write.node instanceof InternalNode ? write.node : new InternalNode(write.node.path).parse(write.source);
+        this.#sync(current, previous.get(write.node) ?? new InternalNode(write.node.path));
+      }
     }
   }
   async create(node: BaseNode, placement?: { parent: InternalNode; kind: ChildKind }): Promise<void> {
     checkPath(node.path);
     if (readEntry(node.path)) throw new Error(`Node target already exists: ${node.path}`);
     if (!placement) {
-      if (node.children?.length) await this.#validateAdded(node);
       await this.#save('create', [{ node, source: node.serialize(), create: true }]); return;
     }
     const { parent, kind } = placement;
     this.#existing(parent); this.#knownParent(node);
     validateChild({ target: node.path, kind });
     if (this.#reference(parent, node)) throw new Error(`Child already indexed: ${node.path}`);
-    await this.#cycle(parent, node);
     const draft = clone(parent);
     draft.addChild({ target: authoredTarget(parent, node), kind });
     await this.#save('create', [
@@ -221,23 +247,8 @@ export class NodeService {
     ]);
     this.#parent(node, parent);
   }
-  async #validateAdded(node: BaseNode): Promise<void> {
-    const state = this.#state.get(node);
-    const old = state && node instanceof InternalNode ? new InternalNode(node.path).parse(state.file.source) : undefined;
-    const oldTargets = new Set(old?.children.map(reference => resolveReference(old, reference)));
-    for (const reference of node.children ?? []) {
-      validateChild(reference);
-      const target = resolveReference(node, reference);
-      if (target === node.path) throw new Error(`Ownership cycle: ${target}`);
-      if (oldTargets.has(target)) continue;
-      const child = await this.#loadReference(node, reference, target);
-      this.#knownParent(child, node);
-      await this.#cycle(node, child);
-    }
-  }
   async update(node: BaseNode): Promise<void> {
     this.#existing(node);
-    await this.#validateAdded(node);
     await this.#save('update', [{ node, source: node.serialize(), parent: await this.#parentContext(node) }]);
   }
   async #parentContext(node: BaseNode): Promise<InternalNode | undefined> {
@@ -251,7 +262,6 @@ export class NodeService {
     this.#existing(parent); this.#current(child); this.#knownParent(child, parent);
     validateChild({ target: child.path, kind });
     if (this.#reference(parent, child)) throw new Error(`Child already indexed: ${child.path}`);
-    await this.#cycle(parent, child);
     const draft = clone(parent); draft.addChild({ target: authoredTarget(parent, child), kind });
     await this.#save('attach', [{ node: parent, draft, source: draft.serialize() }]);
     this.#parent(child, parent);
@@ -276,7 +286,6 @@ export class NodeService {
     if (this.#reference(newParent, child)) throw new Error(`Child already indexed by new parent: ${child.path}`);
     const oldDraft = clone(oldParent), newDraft = clone(newParent);
     oldDraft.removeChild(reference);
-    await this.#cycle(newParent, child, new Map([[oldParent.path, oldDraft]]));
     newDraft.addChild({ ...reference, target: authoredTarget(newParent, child), kind });
     await this.#save('reparent', [
       { node: oldParent, draft: oldDraft, source: oldDraft.serialize() },

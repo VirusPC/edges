@@ -354,3 +354,144 @@ test('failed rollback retains original bytes in a recovery file and reports its 
     return true;
   });
 });
+
+for (const operation of ['update', 'create', 'attach'] as const) {
+  test(`post-commit read failure records and recovers the committed ${operation} destination`, async t => {
+    const { file, write } = fixture(t), service = new NodeService();
+    write('AGENTS.md', index()); write('child.md', 'child');
+    const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
+    const child = (await service.get(file('child.md')))!;
+    const target = operation === 'create' ? file('new.md') : operation === 'update' ? child.path : parent.path;
+    const before = operation === 'create' ? undefined : fs.readFileSync(target, 'utf8');
+    const { default: mutableFs } = await import('node:fs');
+    const { syncBuiltinESMExports } = await import('node:module');
+    const rename = mutableFs.renameSync, link = mutableFs.linkSync, open = mutableFs.openSync;
+    let committed = false, failed = false;
+    const renameMock = t.mock.method(mutableFs, 'renameSync', (source: fs.PathLike, dest: fs.PathLike) => { rename(source, dest); if (dest === target) committed = true; });
+    const linkMock = t.mock.method(mutableFs, 'linkSync', (source: fs.PathLike, dest: fs.PathLike) => { link(source, dest); if (dest === target) committed = true; });
+    const openMock = t.mock.method(mutableFs, 'openSync', (...args: Parameters<typeof open>) => {
+      if (committed && !failed && args[0] === target) { failed = true; throw new Error('Post-commit inspection failure'); }
+      return open(...args);
+    });
+    syncBuiltinESMExports();
+    t.after(() => { renameMock.mock.restore(); linkMock.mock.restore(); openMock.mock.restore(); syncBuiltinESMExports(); });
+    child.body = 'updated';
+    const action = operation === 'create' ? service.create(new BaseNode(target).parse('new'))
+      : operation === 'update' ? service.update(child) : service.attach(parent, child, 'local');
+    await assert.rejects(action, error => { assert.ok(String(error).includes(`Affected: ${target}`)); return true; });
+    if (before === undefined) assert.equal(fs.existsSync(target), false);
+    else assert.equal(fs.readFileSync(target, 'utf8'), before);
+  });
+}
+
+test('post-commit temporary cleanup failure recovers created file rather than leaving an unreported mutation', async t => {
+  const { file } = fixture(t), service = new NodeService();
+  const { default: mutableFs } = await import('node:fs');
+  const { syncBuiltinESMExports } = await import('node:module');
+  const unlink = mutableFs.unlinkSync;
+  let failed = false;
+  const mocked = t.mock.method(mutableFs, 'unlinkSync', (target: fs.PathLike) => {
+    if (!failed && String(target).endsWith('.tmp')) { failed = true; throw new Error('Temporary cleanup failure'); }
+    return unlink(target);
+  });
+  syncBuiltinESMExports(); t.after(() => { mocked.mock.restore(); syncBuiltinESMExports(); });
+  const target = file('new.md');
+  await assert.rejects(service.create(new BaseNode(target).parse('new')), error => { assert.ok(String(error).includes(`Affected: ${target}`)); return true; });
+  assert.equal(fs.existsSync(target), false);
+});
+
+test('attach checks authoritative AGENTS ownership even when child was loaded as BaseNode', async t => {
+  const { file, write } = fixture(t), service = new NodeService();
+  write('a/AGENTS.md', index('- [B](../b/AGENTS.md)')); write('b/AGENTS.md', index());
+  const a = (await service.get(file('a/AGENTS.md')))!;
+  const b = (await service.get(file('b/AGENTS.md'), InternalNode))!;
+  const before = fs.readFileSync(b.path, 'utf8');
+  await assert.rejects(service.attach(b, a, 'local'), /cycle/i);
+  assert.equal(fs.readFileSync(b.path, 'utf8'), before);
+});
+
+for (const operation of ['attach', 'detach', 'create', 'update', 'destroy', 'reparent'] as const) {
+  test(`${operation} validates pre-existing unsaved index edits before persisting the whole parent`, async t => {
+    const { file, write } = fixture(t), service = new NodeService();
+    write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'child'); write('other.md', 'other'); write('next/AGENTS.md', index());
+    const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
+    const child = (await service.get(file('child.md')))!;
+    const other = (await service.get(file('other.md')))!;
+    const next = (await service.get(file('next/AGENTS.md'), InternalNode))!;
+    const before = fs.readFileSync(parent.path, 'utf8'), nextBefore = fs.readFileSync(next.path, 'utf8');
+    parent.addChild({ target: 'AGENTS.md', kind: 'local' });
+    const action = operation === 'attach' ? service.attach(parent, other, 'local')
+      : operation === 'detach' ? service.detach(parent, child)
+      : operation === 'create' ? service.create(new BaseNode(file('new.md')).parse('new'), { parent, kind: 'local' })
+      : operation === 'update' ? service.update(parent)
+      : operation === 'destroy' ? service.destroy(child, parent)
+      : service.reparent(child, parent, next, 'local');
+    await assert.rejects(action, /cycle/i);
+    assert.equal(fs.readFileSync(parent.path, 'utf8'), before);
+    assert.equal(fs.readFileSync(next.path, 'utf8'), nextBefore);
+    assert.equal(fs.existsSync(file('new.md')), false); assert.equal(fs.existsSync(child.path), true);
+    assert.ok(parent.children.some(reference => reference.target === 'AGENTS.md'));
+  });
+}
+
+test('reparent validates combined proposed indexes and preserves legitimate unsaved index changes', async t => {
+  const { file, write } = fixture(t), service = new NodeService();
+  write('a/AGENTS.md', index('- [child](../child.md)')); write('b/AGENTS.md', index()); write('child.md', 'child');
+  const a = (await service.get(file('a/AGENTS.md'), InternalNode))!;
+  const b = (await service.get(file('b/AGENTS.md'), InternalNode))!;
+  const child = (await service.get(file('child.md')))!;
+  a.addChild({ target: '../b/AGENTS.md', kind: 'local' });
+  b.addChild({ target: '../a/AGENTS.md', kind: 'local' });
+  await assert.rejects(service.reparent(child, a, b, 'local'), /cycle/i);
+  b.removeChild({ target: '../a/AGENTS.md' });
+  a.setConstraints(['Unsaved legitimate constraint']);
+  await service.reparent(child, a, b, 'local');
+  const saved = (await service.get(a.path, InternalNode))!;
+  assert.deepEqual(saved.content.constraints, ['Unsaved legitimate constraint']);
+  assert.deepEqual(saved.children.map(reference => reference.target), ['../b/AGENTS.md']);
+  assert.equal((await service.get(b.path, InternalNode))!.children[0]?.target, '../child.md');
+});
+
+test('BaseNode create/update of AGENTS still validates the serialized ownership graph', async t => {
+  const { file, write } = fixture(t), service = new NodeService();
+  write('existing/AGENTS.md', index());
+  const existing = (await service.get(file('existing/AGENTS.md')))!;
+  existing.body = index('- [self](AGENTS.md)');
+  await assert.rejects(service.update(existing), /cycle/i);
+  await assert.rejects(service.create(new BaseNode(file('new/AGENTS.md')).parse(index('- [self](AGENTS.md)'))), /cycle/i);
+  assert.equal(fs.existsSync(file('new/AGENTS.md')), false);
+  assert.equal((await service.get(existing.path, InternalNode))!.children.length, 0);
+});
+
+test('persistent post-commit inspection failure retains original bytes with accurate affected destination', async t => {
+  const { root, file, write } = fixture(t), service = new NodeService();
+  write('entry.md', 'original'); fs.chmodSync(file('entry.md'), 0o600);
+  const node = (await service.get(file('entry.md')))!; node.body = 'new';
+  const { default: mutableFs } = await import('node:fs');
+  const { syncBuiltinESMExports } = await import('node:module');
+  const rename = mutableFs.renameSync, open = mutableFs.openSync;
+  let committed = false;
+  const renameMock = t.mock.method(mutableFs, 'renameSync', (source: fs.PathLike, dest: fs.PathLike) => { rename(source, dest); committed = true; });
+  const openMock = t.mock.method(mutableFs, 'openSync', (...args: Parameters<typeof open>) => {
+    if (committed && args[0] === node.path) throw new Error('Persistent inspection failure');
+    return open(...args);
+  });
+  syncBuiltinESMExports(); t.after(() => { renameMock.mock.restore(); openMock.mock.restore(); syncBuiltinESMExports(); });
+  await assert.rejects(service.update(node), error => {
+    assert.ok(String(error).includes(`Affected: ${node.path}`));
+    assert.ok(String(error).includes(`Unrecovered: ${node.path}`));
+    const recovery = fs.readdirSync(root).find(name => name.startsWith('.node-recovery-'))!;
+    assert.ok(recovery); assert.ok(String(error).includes(file(recovery)));
+    assert.equal(fs.readFileSync(file(recovery), 'utf8'), 'original');
+    assert.equal(fs.statSync(file(recovery)).mode & 0o777, 0o600); return true;
+  });
+});
+
+test('BaseNode updates of AGENTS synchronize authoritative ownership for loaded children and indexes', async t => {
+  const { root, file, write } = fixture(t), service = new NodeService();
+  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'child');
+  const [parent, child] = await service.list(root);
+  const base = (await service.get(file('AGENTS.md')))!;
+  base.body = index(); await service.update(base);
+  assert.equal(child!.parent, undefined); assert.equal(parent!.children?.length, 0);
+});
