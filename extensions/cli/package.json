@@ -22,15 +22,16 @@
   },
   "dependencies": {
     "commander": "^14.0.3",
-    "zod": "^3.24.2",
+    "gray-matter": "^4.0.3",
+    "js-yaml": "^5.4.2",
     "mdast-util-from-markdown": "^2.0.3",
-    "yaml": "^2.9.1"
+    "zod": "^3.24.2"
   },
   "devDependencies": {
-    "tasks-review-app": "workspace:*",
+    "@types/mdast": "^4.0.4",
     "@types/node": "^22.19.11",
+    "tasks-review-app": "workspace:*",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2",
-    "@types/mdast": "^4.0.4"
+    "typescript": "^5.8.2"
   }
 }

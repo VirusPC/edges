@@ -1,6 +1,6 @@
 # Optional Markdown frontmatter
 
-> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../extensions/cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；YAML 继续使用 `yaml` 库。下文独立包路径和验证为当时实施记录。
+> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../extensions/cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；frontmatter 改用 `gray-matter` / `js-yaml`，取消 YAML 注释和样式保留目标。下文旧包路径、旧实现与验证属于历史记录，现行约定以链接的 API 文档为准。
 
 Approved design: Task, Memory and AGENTS.md share a Markdown document envelope with optional YAML metadata. AGENTS.md adds its own comment markers, chapters and index rules. Format handling must remain independent from domain validation and filesystem operations.
 
@@ -39,3 +39,12 @@ Metadata is a string-keyed map of JSON-compatible values. No schema is required 
 - CLI build、TypeScript 检查与完整工作区测试通过：424 项（CLI 341、MCP 14、服务 42、页面 27）。
 - 新回归覆盖基础/Memory 类型标记、AGENTS 章节编辑、错误类型 codec 拒绝、Task 格式校验及保真写回；相关 66 项测试通过。
 - 独立 TypeScript review 通过。没有新增动态注册框架，Python Memory 接入仍单独待办。
+
+
+## 取消 YAML 展示格式保留目标
+
+用户确认无需保留 YAML 注释和样式；这不是原始需求。当前实现删除 YAML AST reconcile，frontmatter 读取使用 gray-matter 与 js-yaml core-schema engine，写回直接 dump 头部，避免裁剪多行字段值或给正文追加换行。数据、正文、可选头部和领域边界保留；头部注释、引号、空白与集合样式不再保证。
+
+- 相关 68 项测试、CLI TypeScript 检查及构建通过；完整工作区 426 项测试通过（CLI 343、MCP 14、服务 42、页面 27）。
+- 独立复核发现并修复分隔符前缀键被截断、别名展开缺少预算、非字符串键与根 null 被静默转换的问题；新增回归均验证失败后修复通过。
+- 独立复审通过，无剩余阻断项。AGENTS 正文编辑规则及 Python Memory 接入边界不变。

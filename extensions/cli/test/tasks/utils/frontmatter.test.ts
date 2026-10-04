@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseTaskDoc, setMetadataField, setTopLevelField, replaceBody, renderNewTaskDoc } from "../../../src/tasks/utils/frontmatter.js";
+import { parseTaskDoc, setMetadataField, setTopLevelField, replaceBody, renderNewTaskDoc, taskDocumentCodec } from "../../../src/tasks/utils/frontmatter.js";
 
 const SAMPLE = `---
 name: cli_refactor_commanderjs
@@ -150,11 +150,11 @@ test("Task YAML supports multiline and single-quoted fields", () => {
   assert.equal(doc.metadata["edges-title"], "A: title");
 });
 
-test("Task metadata edits retain unknown nested fields and comments", () => {
+test("Task metadata edits retain unknown nested fields", () => {
   const source = "---\nname: test\nmetadata:\n  edges-tasks-status: todo # explanation\n  extension: {nested: [one, two]}\n---\nBody without trailing newline";
   const result = setMetadataField(source, "edges-tasks-status", "done");
-  assert.match(result, /edges-tasks-status: done # explanation/);
-  assert.match(result, /extension: \{nested: \[one, two\]\}/);
+  assert.equal(parseTaskDoc(result).metadata["edges-tasks-status"], "done");
+  assert.deepEqual(taskDocumentCodec.parse(result).metadata!.metadata, { "edges-tasks-status": "done", extension: { nested: ["one", "two"] } });
   assert.equal(parseTaskDoc(result).body, "Body without trailing newline");
 });
 
@@ -170,10 +170,10 @@ test("Task body replacement and top-level edits share the optional document form
   const source = "---\nname: original\ndescription: before # keep\nmetadata:\n  edges-type: task\n---\n\nOld body\n";
   const updated = setTopLevelField(source, "description", "after: # literal");
   assert.equal(parseTaskDoc(updated).description, "after: # literal");
-  assert.match(updated, /# keep/);
+
   const replaced = replaceBody(source, "New body");
   assert.equal(parseTaskDoc(replaced).body, "\nNew body\n");
-  assert.ok(replaced.startsWith(source.slice(0, source.indexOf("\nOld body"))));
+  assert.deepEqual(taskDocumentCodec.parse(replaced).metadata, taskDocumentCodec.parse(source).metadata);
   assert.equal(setTopLevelField("plain body", "name", "ignored"), "plain body");
   assert.equal(setMetadataField("plain body", "status", "ignored"), "plain body");
   assert.equal(replaceBody("plain body", "New body"), "New body");

@@ -1,6 +1,6 @@
 # Node Tree / CLI Decoupling Implementation Plan
 
-> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../extensions/cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；YAML 继续使用 `yaml` 库。下文独立包路径和验证为当时实施记录。
+> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../extensions/cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；frontmatter 改用 `gray-matter` / `js-yaml`，取消 YAML 注释和样式保留目标。下文旧包路径、旧实现与验证属于历史记录，现行约定以链接的 API 文档为准。
 
 > **For agentic workers:** Use executing-plans to implement this plan task-by-task. User has authorized implementation in the current isolated worktree.
 

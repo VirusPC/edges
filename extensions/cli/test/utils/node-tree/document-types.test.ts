@@ -12,7 +12,7 @@ test('base and memory codecs tag documents without changing YAML classification'
     const doc = codec.parse(source);
     assert.equal(doc.type, codec.type);
     assert.deepEqual(doc.metadata!.metadata, { 'edges-type': 'project' });
-    assert.equal(codec.serialize(doc, source), source);
+    assert.deepEqual(codec.parse(codec.serialize(doc, source)), doc);
   }
   check(codecs.baseDocumentCodec);
   check(codecs.memoryDocumentCodec);
@@ -33,12 +33,12 @@ test('typed Markdown codec rejects documents belonging to another codec', () => 
   assert.throws(() => codecs.memoryDocumentCodec.serialize(doc), /type|codec/i);
 });
 
-test('Task codec validates Task metadata while reusing loss-preserving Markdown handling', () => {
+test('Task codec validates Task metadata while reusing shared Markdown handling', () => {
   assert.ok(tasks.taskDocumentCodec);
   const source = '---\nname: example\nmetadata:\n  edges-type: task\n  edges-title: original # keep\n---\nBody';
   const doc = tasks.taskDocumentCodec.parse(source);
   assert.equal(doc.type, 'task');
-  assert.equal(tasks.taskDocumentCodec.serialize(doc, source), source);
+  assert.deepEqual(tasks.taskDocumentCodec.parse(tasks.taskDocumentCodec.serialize(doc, source)), doc);
   assert.throws(() => tasks.taskDocumentCodec.parse('---\nmetadata: [invalid]\n---\nBody'), /mapping/);
   assert.equal(tasks.parseTaskDoc(source).name, 'example');
 });

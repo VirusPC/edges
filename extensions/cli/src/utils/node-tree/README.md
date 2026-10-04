@@ -116,6 +116,6 @@ const next = serializeDocument(document, source);
 
 `parseNode` / `serializeNode` 在此之上解释 AGENTS.md 的三部分章节、HTML 注释标记和索引关系，`NodeModel.metadata` 同样可选。YAML 字段中的 Markdown 链接不会成为节点引用。Task 适配层负责 `name`、`description` 和其头部内嵌 `metadata` 的业务含义；该内嵌字段与公共模型中表示整个头部的 `metadata` 不同。Memory 文档可使用同一格式接口，但 Python Memory 工具尚未切换到此实现。既有 Task Project 入口禁止头部的领域约定仍由它自己的校验器执行；本次不批量给 AGENTS.md 增加字段。
 
-头部必须从文档首行 `---` 开始（允许 BOM），以独立的 `---` 或 `...` 行结束。首行 `---` 后有换行即按头部起始处理，缺少结束行会报错。数据限定为字符串键映射及 JSON 可表达的有限值；重复键、未知标签、非映射根、循环引用、超出安全范围的 YAML 整数均拒绝。`splitFrontmatter` 只切分格式，返回含完整末尾换行的 `rawFrontmatter` 或 `undefined`，不校验字段。
+头部必须从文档首行 `---` 开始（允许 BOM），以独立的 `---` 或 `...` 行结束。首行 `---` 后有换行即按头部起始处理，缺少结束行会报错。数据限定为字符串键映射及 JSON 可表达的有限值；重复键、未知标签、非映射根、循环引用、超出安全范围的 YAML 整数均拒绝。转换最多访问 100,000 个值、允许 100 层祖先，限制别名展开和递归深度。`splitFrontmatter` 只切分格式，返回含完整末尾换行的 `rawFrontmatter` 或 `undefined`，不校验字段。
 
-无改动逐字保留；只改正文时保持头部原字节。修改头部时按 YAML 节点复用未改数据、注释、引号与集合样式（数组移动按相同值的出现次数匹配），但头部空白可能规范化。结束分隔符原先位于 EOF 时，新增正文会补上分隔换行。可显式新增或移除头部；别名等导致无法保持目标数据时拒绝有损写回。格式 API 不做文件 IO。
+使用 `gray-matter` 读取 frontmatter，YAML engine 使用 `js-yaml` 的 core schema，日期保持字符串。写回直接使用同一 engine 的 dump，避免 gray-matter.stringify 裁剪多行字段末尾换行或给正文追加换行。保留字段值与正文内容，不承诺保留 YAML 注释、引号、空白或集合样式；无改动写回也可能规范化头部。别名读成独立值，可显式新增或移除头部。AGENTS 正文编辑仍遵循已有的源文保留规则。格式 API 不做文件 IO。
