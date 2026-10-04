@@ -24,10 +24,17 @@ export const METADATA_KEY_MAP: Record<string, string> = {
 export function closedFrontmatter(source: string): boolean {
   return /^\uFEFF?---\s*\r?\n[\s\S]*?\r?\n---\s*(?:\r?\n|$)/.test(source);
 }
+/** Mutation callers must not interpret unreadable metadata as an empty mapping. */
+export function strictFrontmatterData(source: string): Record<string, unknown> {
+  if (!closedFrontmatter(source)) {
+    throw new Error("Invalid entry: missing closed YAML frontmatter");
+  }
+  return parseDocument(source).metadata ?? {};
+}
+/** Discovery is tolerant so doctor can report invalid entries without rewriting them. */
 export function frontmatterData(source: string): Record<string, unknown> {
-  if (!closedFrontmatter(source)) return {};
   try {
-    return parseDocument(source).metadata ?? {};
+    return strictFrontmatterData(source);
   } catch {
     return {};
   }
@@ -58,8 +65,8 @@ export function preserveEntryMetadata(
   rendered: string,
   previousSource?: string,
 ): string {
-  if (!previousSource) return rendered;
-  const previous = frontmatterData(previousSource),
+  if (previousSource === undefined) return rendered;
+  const previous = strictFrontmatterData(previousSource),
     next = parseDocument(rendered);
   for (const key of FLAT_COMPAT_KEYS) delete previous[key];
   const metadata = (value: unknown): Record<string, unknown> =>

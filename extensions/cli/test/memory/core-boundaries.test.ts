@@ -558,3 +558,38 @@ test("atomic private files keep owner-only creation mode", (t) => {
   ])
     assert.equal(fs.statSync(join(d, path)).mode & 0o777, 0o600);
 });
+for (const [label, source] of [
+  [
+    "malformed YAML",
+    "---\nname: project_broken\ndescription: [broken\nmetadata:\n  vendor: retain-me\n---\nOriginal body\n",
+  ],
+  [
+    "unterminated frontmatter",
+    "---\nname: project_broken\ndescription: missing close\nmetadata:\n  vendor: retain-me\nOriginal body\n",
+  ],
+] as const)
+  test(`remember refuses ${label} without changing entry or index`, (t) => {
+    const d = base(t),
+      file = ".harness/memory/projects/project_broken.md";
+    put(d, file, source);
+    const beforeEntry = fs.readFileSync(join(d, file)),
+      beforeIndex = fs.readFileSync(join(d, pi));
+    assert.throws(() =>
+      rememberMemory({
+        targetDir: d,
+        type: "project",
+        slug: "broken",
+        title: "Replacement",
+        description: "Replacement",
+        content: "New body",
+      }),
+    );
+    assert.deepEqual(fs.readFileSync(join(d, file)), beforeEntry);
+    assert.deepEqual(fs.readFileSync(join(d, pi)), beforeIndex);
+    assert.ok(
+      doctorMemory({ targetDir: d, apply: true }).remaining.some(
+        (f) => f.code === "invalid-entry",
+      ),
+    );
+    assert.deepEqual(fs.readFileSync(join(d, file)), beforeEntry);
+  });

@@ -21,11 +21,11 @@ import {
   buildEntryFields,
   entryName,
   entryOutputName,
-  parseFrontmatter,
   refreshIndex,
   renderEntry,
   resolveMemoryPath,
 } from "./entries.js";
+import { logicalFields, strictFrontmatterData } from "./documents.js";
 export interface RememberMemoryOptions {
   targetDir: string;
   type: string;
@@ -45,7 +45,11 @@ export function rememberMemory(options: RememberMemoryOptions) {
   if (!isScope(target)) throw new Error("目标目录尚未初始化，请先执行 init");
   const file = resolveMemoryPath(target, options.type, options.slug),
     exists = existsSync(file),
-    existing = exists ? parseFrontmatter(file) : {},
+    previousSource = exists ? readText(file) : undefined,
+    existing =
+      previousSource === undefined
+        ? {}
+        : logicalFields(strictFrontmatterData(previousSource)),
     detected = { ...agentContext(options.env), ...gitIdentity(target) },
     name = entryName(file, options.type, target);
   const fields = buildEntryFields(
@@ -67,7 +71,7 @@ export function rememberMemory(options: RememberMemoryOptions) {
     fields,
     options.content,
     entryOutputName(options.type, target),
-    exists ? readText(file) : undefined,
+    previousSource,
   );
   ensureLayerTypeGitignore(target, options.type);
   writeAtomic(file, rendered);
