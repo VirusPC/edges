@@ -49,7 +49,7 @@ edges memory backup --repo-dir /absolute/project
 edges memory restore --repo-dir /absolute/project --archive /private/archive.tar.gz
 ```
 
-Commands return JSON. Init without a selection on a new scope returns recommendations without writing; remember does not initialize missing scopes. Doctor is read-only unless `--apply` is present. Ordinary commands reject the old `.memory` layout; only migrate converts it. Restore refuses occupied user memory unless replacement is explicitly authorized with `--force`.
+Commands return JSON. Init without a selection on a new scope returns recommendations without writing; remember does not initialize missing scopes. Doctor is read-only unless `--apply` is present. Ordinary commands reject the old `.memory` layout; only migrate converts it. Restore refuses occupied user memory unless replacement is explicitly authorized with `--force`; replacement failures roll back to the original tree. Archives are streamed with a 256 MiB expanded-tar limit (including headers, padding and metadata) and a 10,000-file limit, enforced by both backup and restore. Restore accepts raw tar and gzip tar; other compression formats are unsupported. Hardlinked source files are rejected. A process interruption between directory renames can require recovery from the ignored `.private-user-memory-*/previous` directory; do not delete that recovery copy.
 
 The built CLI carries its canonical Markdown templates in `dist/assets/memory/templates`, so it can run outside the source checkout without sibling skills or Python. Business rules, source permissions and private ignore rules remain defined by [Project Memory LAYOUT](../skills/project-memory-init/references/LAYOUT.md).
 
