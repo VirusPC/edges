@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 节点模型：BaseNode 提供 path 与可选 parent/children，Internal 从索引派生 children；service CRUD；设计未实施
+description: 节点模型：可选树关系、path 与 service CRUD；children 区分 local/descendant，作用域默认只加载本层；设计未实施
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T22:25:33+08:00"
+  edges-updated-at: "2026-10-04T22:30:44+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -139,3 +139,11 @@ parent 与 children 都定义在 BaseNode，允许没有关系值；所有子类
 **Why:** 用户明确树结构是系统核心，应作为节点的共同能力；独立文档或叶节点通过关系缺省表达，不需要排除在树模型之外。
 
 **How to apply:** BaseNode 的 parent 与 children 均可为 undefined；InternalNode 覆盖 children 读取，从 AGENTS 归属索引派生集合，不另存第二份可修改数组。NodeTree 对任意节点的 attach/move/detach 都协调索引与 parent，不再只为 InternalNode 维护反向关系。路径定位与逻辑归属分开，树关系不自动写入 YAML。已更新 spec，此为后续重构目标，代码尚未实施。
+
+## 2026-10-04 用户确认：children 区分本层与下层，默认只读取本层
+
+children 的引用携带 kind，区分 local（本层记忆）与 descendant（下层记忆索引）。用户明确：给定目录作用域时只需要 local 部分，不默认展开下层作用域。
+
+**Why:** 这一区分决定上下文读取的范围；如果混为一类，会把下层项目的内容带入本层，也无法在加载前截断无关范围。
+
+**How to apply:** BaseNode.children 使用可选的 ChildReference 集合，分类属于引用关系，不属于节点 type 或文件路径。InternalNode 根据索引所在章节派生 kind，不另存重复真源。service 的作用域查询和 NodeTree 遍历默认沿 local 索引链，包含多层本层类型入口；仅显式 includeDescendants 才沿 descendant 跨作用域。过滤发生在目标文件加载之前，但解析、序列化保留两类索引及本层约束，不能把不加载下层内容误做删除下层引用。此为 spec 已确认的目标行为，当前运行时尚未实施。

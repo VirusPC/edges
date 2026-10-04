@@ -61,7 +61,7 @@ InternalNode 以 AGENTS 三部分的结构化内容为正文真源：
 | 本层记忆 | 本层直属内容的归属索引 |
 | 下层记忆索引 | 下层组织节点的归属索引 |
 
-InternalNode 的 `children` 是后两部分中归属索引的统一派生视图，包括 Internal、Task、Memory 等所有直属节点，不单独保存另一份可修改数组。普通参考链接不因出现在正文里就成为归属关系。
+InternalNode 的 `children` 是后两部分中归属索引的统一派生视图，包括 Internal、Task、Memory 等所有直属节点。每条 ChildReference 必须带 kind：本层记忆派生为 local，下层记忆索引派生为 descendant。kind 是引用关系的分类，与目标节点的 type 和物理路径无关，两类引用都可能指向 AGENTS.md。不单独保存另一份可修改数组，也不在章节条目中重复存储 kind。普通参考链接不因出现在正文里就成为归属关系。
 
 增删子节点实际修改对应章节索引；序列化仍输出三部分，不新增 children 章节或 YAML 字段。InternalNode 的正文由三部分生成，不能同时维护可独立修改的正文与章节副本。为保留原文中的未建模内容，可以保留只读来源快照；它不是第二份当前状态。
 
@@ -69,7 +69,24 @@ parent 与 children 均定义在 BaseNode，允许值为 undefined。parent 是�
 
 Note、Task、Memory 等内容节点继承相同的可选树关系，独立存在时无需提供 parent 或 children。被挂接到树后，同样建立 parent；其归属仍以组织节点的索引为依据，普通交叉引用不算归属。
 
-InternalNode 的索引编辑针对单个文档；NodeTree 协调已加载节点之间的关系：attach 更新父节点索引并建立 child.parent，move 移除旧父索引、添加新父索引并更新 child.parent，detach 移除原归属索引并清除 child.parent。上述规则适用于所有节点类型。遍历按节点提供的 children 继续递归，children 缺省或为空时无子节点可遍历。文件移动、加载、保存由 services 协调，不在模型里操作磁盘。
+InternalNode 的索引编辑针对单个文档；NodeTree 协调已加载节点之间的关系：attach 按 kind 更新父节点对应章节索引并建立 child.parent，move 移除旧父索引、按目标 kind 添加新父索引并更新 child.parent，detach 移除原归属索引并清除 child.parent。上述规则适用于所有节点类型。公开方法使用 ChildKind，由 InternalNode 将 local / descendant 映射到对应章节，不再另传 IndexSection。children 缺省或为空时无子节点可遍历。文件移动、加载、保存由 services 协调，不在模型里操作磁盘。
+
+## 作用域读取与遍历
+
+给定一个目录作用域，默认读取入口的本层约束及 local 引用的内容，不展开 descendant 所指向的下层作用域。local 入口若还有 local 子引用，继续沿 local 关系读取，覆盖本层类型入口与条目；遇到 descendant 则停止。不能因为目标文件叫 AGENTS.md 或位于物理子目录就自动跨入下层作用域。
+
+`includeDescendants` 默认为 false；只有显式设置为 true，才同时沿 local 和 descendant 关系展开。它控制是否跨入下层作用域，不限制本层 local 索引链的层数。
+
+- service.list(scopePath, options) 在读取目标文件之前应用关系筛选，不先加载下层作用域再过滤结果。
+- NodeTree.walk(options) 从当前 root 出发，对已加载节点应用同样的规则；即使 descendant 目标已在内存中，默认遍历也不沿 descendant 关系访问它。
+- service.get(path) 只读取指定文档，不自动加载其引用目标。
+
+解析和序列化仍保留 AGENTS 中的两类索引。只读取本层内容是一项加载、遍历策略，不能因此删除 descendant 引用或在写回时丢失下层索引。本层重要约束也不因仅选择 local 子引用而被忽略。
+
+```ts
+tree.walk();                             // 当前根节点及 local 可达节点
+tree.walk({ includeDescendants: true }); // 显式包含下层作用域
+```
 
 ## Service 增删改查
 
@@ -78,7 +95,8 @@ services 统一负责节点的增删改查及文档、归属索引的同步，�
 | 操作 | Service 职责 |
 | --- | --- |
 | create(node) | 根据 node.path 创建节点文档，协调所属节点的索引登记并保存 |
-| get(path) / list(directory) | 按路径查询、读取文档，选择对应模型，以解析后的路径构造实例并调用 parse，返回节点对象 |
+| get(path) | 读取指定文档，选择对应模型，以解析后的路径构造实例并调用 parse，返回节点对象 |
+| list(scopePath, options) | 按作用域入口的归属索引加载本层内容；默认只沿 local，显式 includeDescendants 才跨入下层作用域；不以递归扫描物理目录替代索引 |
 | update(node) | 协调领域操作，调用 serialize 写回 node.path，并同步受影响的归属索引 |
 | destroy(node) | 删除 node.path 对应的节点文档，并同步移除对应归属索引 |
 
@@ -113,8 +131,16 @@ interface NodeReference {
   label?: string;
 }
 
-// AGENTS 正文中的索引位置，不是文件路径或 CRUD 目标。
-type IndexSection = "localMemory" | "descendantMemory";
+type ChildKind = "local" | "descendant";
+
+interface ChildReference extends NodeReference {
+  kind: ChildKind;
+}
+
+interface ScopeTraversalOptions {
+  // 默认 false：只沿 local；true：同时沿 local 和 descendant。
+  includeDescendants?: boolean;
+}
 
 interface NodeIndexEntry {
   reference: NodeReference;
@@ -133,7 +159,7 @@ declare class BaseNode<TType extends string = string> {
   readonly type: TType;
   readonly id?: string;
   get parent(): NodeReference | undefined;
-  get children(): readonly NodeReference[] | undefined;
+  get children(): readonly ChildReference[] | undefined;
   get metadata(): Readonly<Metadata> | undefined;
   get body(): string;
 
@@ -149,11 +175,11 @@ declare class BaseNode<TType extends string = string> {
 
 declare class InternalNode extends BaseNode<"internal"> {
   get content(): InternalContent;
-  override get children(): readonly NodeReference[];
+  override get children(): readonly ChildReference[];
   protected override parseBody(markdown: string): void;
   protected override serializeBody(): string;
   setConstraints(items: readonly string[]): void;
-  addChild(entry: NodeIndexEntry, section: IndexSection): void;
+  addChild(entry: NodeIndexEntry, kind: ChildKind): void;
   removeChild(reference: NodeReference): void;
 }
 
@@ -183,9 +209,9 @@ declare class NodeTree {
   constructor(root: InternalNode, nodes?: Iterable<BaseNode>);
   readonly root: InternalNode;
   find(reference: NodeReference): BaseNode | undefined;
-  walk(): Iterable<BaseNode>;
-  attach(parent: InternalNode, child: BaseNode, section: IndexSection): void;
-  move(child: BaseNode, newParent: InternalNode, section: IndexSection): void;
+  walk(options?: ScopeTraversalOptions): Iterable<BaseNode>;
+  attach(parent: InternalNode, child: BaseNode, kind: ChildKind): void;
+  move(child: BaseNode, newParent: InternalNode, kind: ChildKind): void;
   detach(child: BaseNode): void;
 }
 ```
