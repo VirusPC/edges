@@ -1,7 +1,14 @@
 #!/usr/bin/env -S node --import tsx
 /** Reviewed instance correction. Public and private entry points never share discovery. */
 import * as fs from "node:fs";
-import { dirname, join, relative, resolve, isAbsolute } from "node:path";
+import {
+  dirname,
+  join,
+  relative,
+  resolve,
+  isAbsolute,
+  extname,
+} from "node:path";
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
@@ -87,15 +94,6 @@ function inventoryUnit(root: string, rel: string): string[] {
 function assertUnits(root: string, manifest: CorrectionManifest) {
   for (const unit of manifest.units) {
     const allowed = [...unit.files].sort();
-    for (const rel of [unit.source, unit.target]) {
-      const path = safePath(root, rel);
-      if (
-        migration.present(path) &&
-        unit.mode !== undefined &&
-        migration.mode(path) !== unit.mode
-      )
-        throw Error(`unit-mode-conflict: ${rel}`);
-    }
     const source = inventoryUnit(root, unit.source),
       target = inventoryUnit(root, unit.target);
     if (
@@ -122,7 +120,54 @@ export function runPublicCorrection(
 ) {
   const root = checkedRoot(rawRoot);
   if (manifest.version !== 1) throw Error("unsupported-correction-manifest");
+  const journal = safePath(root, JOURNAL),
+    identity = hash(JSON.stringify(manifest));
+  let saved:
+    | {
+        root: string;
+        identity: string;
+        operations: migration.MigrationOperation[];
+        unitModes?: Record<string, number>;
+      }
+    | undefined;
+  if (migration.present(journal)) {
+    saved = JSON.parse(fs.readFileSync(journal, "utf8"));
+    if (saved?.root !== root || saved.identity !== identity)
+      throw Error("correction-journal-mismatch");
+  }
   assertUnits(root, manifest);
+  const previous = new Map(
+    (saved?.operations ?? []).map((op) => [op.target, op]),
+  );
+  const unitModes: Record<string, number> = {};
+  if (
+    saved &&
+    manifest.units.some((unit) => saved.unitModes?.[unit.source] === undefined)
+  )
+    throw Error("correction-journal-missing-unit-modes-needs-review");
+  for (const unit of manifest.units) {
+    const source = safePath(root, unit.source),
+      target = safePath(root, unit.target);
+    const sourceMode = migration.present(source)
+      ? migration.mode(source)
+      : undefined;
+    const targetMode = migration.present(target)
+      ? migration.mode(target)
+      : undefined;
+    const mode =
+      saved?.unitModes?.[unit.source] ??
+      sourceMode ??
+      targetMode ??
+      unit.mode ??
+      0o755;
+    if (
+      (sourceMode !== undefined && sourceMode !== mode) ||
+      (targetMode !== undefined && targetMode !== mode)
+    )
+      throw Error(`unit-mode-conflict: ${unit.source}`);
+    unitModes[unit.source] = mode;
+  }
+
   const operations: migration.MigrationOperation[] = [];
   const paths = new Set<string>();
   const reserve = (rel: string) => {
@@ -138,7 +183,12 @@ export function runPublicCorrection(
       throw Error("public-private-path-refused");
     const before = migration.state(source),
       current = migration.state(target);
-    const mode = move.mode ?? before?.mode ?? current?.mode ?? 0o644;
+    const prior = previous.get(target);
+    // Checkout read/write bits are not portable Git identity. Snapshot this clone.
+    const mode =
+      prior?.after.mode ?? before?.mode ?? current?.mode ?? move.mode ?? 0o644;
+    if (prior && before && !migration.equal(before, prior.before))
+      throw Error(`source-state-mismatch: ${move.source}`);
     const after = migration.fileState(move.after, mode);
     if (hash(move.after) !== move.afterSha256)
       throw Error(`manifest-output-hash-mismatch: ${move.target}`);
@@ -165,9 +215,17 @@ export function runPublicCorrection(
   for (const edit of manifest.edits) {
     const path = reserve(edit.path),
       before = migration.state(path);
+    const prior = previous.get(path);
+    if (
+      prior &&
+      ![prior.before, prior.after].some((state) =>
+        migration.equal(before, state),
+      )
+    )
+      throw Error(`index-or-link-conflict: ${edit.path}`);
     const after = migration.fileState(
       edit.after,
-      edit.mode ?? before?.mode ?? 0o644,
+      prior?.after.mode ?? before?.mode ?? edit.mode ?? 0o644,
     );
     if (migration.equal(before, after)) continue;
     if (before?.kind === "link" || stateHash(before) !== edit.beforeSha256)
@@ -179,20 +237,6 @@ export function runPublicCorrection(
       after,
       originalTarget: before,
     });
-  }
-  const journal = safePath(root, JOURNAL),
-    identity = hash(JSON.stringify(manifest));
-  let saved:
-    | {
-        root: string;
-        identity: string;
-        operations: migration.MigrationOperation[];
-      }
-    | undefined;
-  if (migration.present(journal)) {
-    saved = JSON.parse(fs.readFileSync(journal, "utf8"));
-    if (saved?.root !== root || saved.identity !== identity)
-      throw Error("correction-journal-mismatch");
   }
   const result = {
     status: !apply ? "dry-run" : operations.length ? "restored" : "unchanged",
@@ -226,11 +270,14 @@ export function runPublicCorrection(
   }
   fs.mkdirSync(dirname(journal), { recursive: true, mode: 0o700 });
   fs.chmodSync(dirname(journal), 0o700);
-  migration.saveJournal(journal, saved ?? { root, identity, operations });
+  migration.saveJournal(
+    journal,
+    saved ?? { root, identity, operations, unitModes },
+  );
   for (const unit of manifest.units) {
     const target = safePath(root, unit.target);
-    fs.mkdirSync(target, { recursive: true, mode: unit.mode ?? 0o755 });
-    if (unit.mode !== undefined) fs.chmodSync(target, unit.mode);
+    fs.mkdirSync(target, { recursive: true, mode: unitModes[unit.source]! });
+    fs.chmodSync(target, unitModes[unit.source]!);
   }
   for (const op of operations) {
     migration.safeAncestors(op.target, root);
@@ -528,15 +575,20 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
     };
     for (const candidate of candidates) {
       for (const op of candidate.operations) {
-        const after = migration.fileState(
-          migration.rewriteLinks(
-            migration.decodeState(op.after),
-            op.target,
-            mapping(op.target),
-            mapping,
-          ),
-          op.after.mode & 0o600,
-        );
+        // Opaque resources retain their base64 payload; only Markdown links rebase.
+        const after: migration.FileState = {
+          ...op.after,
+          mode: op.after.mode & 0o700,
+        };
+        if (extname(op.target) === ".md")
+          after.data = migration.fileState(
+            migration.rewriteLinks(
+              migration.decodeState(op.after),
+              op.target,
+              mapping(op.target),
+              mapping,
+            ),
+          ).data;
         operations.push({
           source: op.target,
           target: mapping(op.target),

@@ -412,7 +412,7 @@ async function interruptPrivate(f: Awaited<ReturnType<typeof privateFixture>>) {
         ["--import", "tsx", "--input-type=module", "-e", code],
         { stdio: "pipe" },
       ),
-    /injected-before-retire/,
+    /Error: injected-before-retire/,
   );
 }
 test("private correction resumes a verified copy interruption without leaking or losing snapshots", async (t) => {
@@ -434,4 +434,199 @@ test("private correction rejects an unrecorded resource added after interruption
   const before = snapshot(f.root);
   assert.equal(m.runPrivateCorrection(f.root, true).status, "needs-review");
   assert.deepEqual(snapshot(f.root), before);
+});
+
+function publicModeFixture(t: any) {
+  const f = fixture(t);
+  const manifest = {
+    ...f.manifest,
+    moves: f.manifest.moves.map((move) => ({ ...move, mode: 0o644 })),
+    edits: f.manifest.edits.map((edit) => ({ ...edit, mode: 0o644 })),
+  };
+  fs.chmodSync(join(f.root, f.source), 0o600);
+  fs.chmodSync(join(f.root, manifest.edits[0]!.path), 0o600);
+  return { ...f, manifest };
+}
+async function interruptPublic(f: ReturnType<typeof publicModeFixture>) {
+  const moduleUrl = new URL(
+    "../../../../scripts/restore-local-ownership.mts",
+    import.meta.url,
+  ).href;
+  const code = `import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';const unlink=fs.unlinkSync;fs.unlinkSync=(path)=>{if(String(path)===${JSON.stringify(join(f.root, f.source))})throw Error('injected-before-retire');return unlink(path);};syncBuiltinESMExports();const m=await import(${JSON.stringify(moduleUrl)});m.runPublicCorrection(${JSON.stringify(f.root)},${JSON.stringify(f.manifest)},true);`;
+  assert.throws(
+    () =>
+      execFileSync(
+        process.execPath,
+        ["--import", "tsx", "--input-type=module", "-e", code],
+        { stdio: "pipe" },
+      ),
+    /Error: injected-before-retire/,
+  );
+}
+test("public correction preserves clone-local source and existing index modes instead of preparation checkout modes", async (t) => {
+  const f = publicModeFixture(t),
+    m = await load(),
+    before = snapshot(f.root);
+  assert.equal(
+    m.runPublicCorrection(f.root, f.manifest, false).status,
+    "dry-run",
+  );
+  assert.deepEqual(snapshot(f.root), before);
+  assert.equal(
+    m.runPublicCorrection(f.root, f.manifest, true).status,
+    "restored",
+  );
+  assert.equal(fs.statSync(join(f.root, f.target)).mode & 0o777, 0o600);
+  assert.equal(
+    fs.statSync(join(f.root, f.manifest.edits[0]!.path)).mode & 0o777,
+    0o600,
+  );
+  assert.equal(
+    fs.statSync(join(f.root, f.manifest.edits[1]!.path)).mode & 0o777,
+    0o644,
+  );
+  const journal = JSON.parse(
+    fs.readFileSync(join(f.root, ".ownership-correction/public.json"), "utf8"),
+  );
+  assert.equal(
+    journal.operations.find((op: any) => op.source === join(f.root, f.source))
+      .before.mode,
+    0o600,
+  );
+  assert.equal(
+    journal.operations.find(
+      (op: any) => op.source === join(f.root, f.manifest.edits[0]!.path),
+    ).before.mode,
+    0o600,
+  );
+  assert.equal(
+    m.runPublicCorrection(f.root, f.manifest, true).status,
+    "unchanged",
+  );
+  fs.chmodSync(join(f.root, f.target), 0o644);
+  assert.throws(
+    () => m.runPublicCorrection(f.root, f.manifest, true),
+    /conflict|mismatch/,
+  );
+});
+test("public mode snapshots survive interruption and reject later source and edited-index mode drift", async (t) => {
+  const f = publicModeFixture(t),
+    m = await load();
+  await interruptPublic(f);
+  fs.chmodSync(join(f.root, f.source), 0o644);
+  assert.throws(
+    () => m.runPublicCorrection(f.root, f.manifest, true),
+    /conflict|mismatch/,
+  );
+  fs.chmodSync(join(f.root, f.source), 0o600);
+  fs.chmodSync(join(f.root, f.manifest.edits[0]!.path), 0o644);
+  assert.throws(
+    () => m.runPublicCorrection(f.root, f.manifest, true),
+    /conflict|mismatch/,
+  );
+  fs.chmodSync(join(f.root, f.manifest.edits[0]!.path), 0o600);
+  assert.equal(
+    m.runPublicCorrection(f.root, f.manifest, true).status,
+    "restored",
+  );
+  assert.equal(fs.statSync(join(f.root, f.target)).mode & 0o777, 0o600);
+  assert.equal(
+    m.runPublicCorrection(f.root, f.manifest, true).status,
+    "unchanged",
+  );
+});
+async function privateAsset(
+  f: Awaited<ReturnType<typeof privateFixture>>,
+  name: string,
+  bytes: Buffer | string,
+  mode = 0o600,
+) {
+  const g = await import("../../src/services/memory/migrate.js");
+  const path = join(f.root, f.current, name);
+  fs.writeFileSync(path, bytes);
+  fs.chmodSync(path, mode);
+  f.journal.operations.push({
+    source: join(f.root, "extensions/.memory/secrets", name),
+    target: path,
+    before: g.fileState(bytes, mode),
+    after: g.fileState(bytes, mode),
+    originalTarget: null,
+  });
+  f.journal.watchedSources = f.journal.operations.map((op) => op.source);
+  fs.writeFileSync(
+    join(f.root, ".recursive-layout-migration/journal.json"),
+    JSON.stringify(f.journal),
+  );
+}
+for (const [name, bytes] of [
+  ["asset.bin", Buffer.from([0xff, 0x00, 0xfe, 0x80])],
+  ["config.json", Buffer.from('{"pattern":"[x](../../../README.md)"}\n')],
+] as const)
+  test(`private correction preserves opaque ${name} bytes through apply and resume`, async (t) => {
+    const f = await privateFixture(t),
+      m = await load();
+    await privateAsset(f, name, bytes);
+    await privateAsset(f, "linked.md", "[x](../../../README.md)\n");
+    await interruptPrivate(f);
+    assert.deepEqual(fs.readFileSync(join(f.root, f.target, name)), bytes);
+    assert.equal(m.runPrivateCorrection(f.root, true).status, "restored");
+    assert.deepEqual(fs.readFileSync(join(f.root, f.target, name)), bytes);
+    assert.equal(
+      fs.readFileSync(join(f.root, f.target, "linked.md"), "utf8"),
+      "[x](../../../../README.md)\n",
+    );
+    assert.equal(m.runPrivateCorrection(f.root, true).status, "unchanged");
+  });
+test("private correction retains owner execution and ordinary private modes through interrupted apply", async (t) => {
+  const f = await privateFixture(t),
+    m = await load();
+  await privateAsset(f, "run.sh", "#!/bin/sh\nprintf fixture-ok\n", 0o700);
+  await interruptPrivate(f);
+  assert.equal(
+    fs.statSync(join(f.root, f.target, "run.sh")).mode & 0o777,
+    0o700,
+  );
+  assert.equal(m.runPrivateCorrection(f.root, true).status, "restored");
+  assert.equal(
+    fs.statSync(join(f.root, f.target, "secret_x.md")).mode & 0o777,
+    0o600,
+  );
+  assert.equal(
+    execFileSync(join(f.root, f.target, "run.sh"), { encoding: "utf8" }),
+    "fixture-ok",
+  );
+  assert.equal(m.runPrivateCorrection(f.root, true).status, "unchanged");
+});
+test("public Skill unit preserves actual directory mode across clones and repeat", async (t) => {
+  const f = fixture(t),
+    m = await load();
+  const source = ".harness/skills/managed/demo",
+    target = "child/.harness/skills/managed/demo";
+  put(f.root, `${source}/SKILL.md`, f.latest);
+  fs.chmodSync(join(f.root, source), 0o700);
+  const manifest = {
+    ...f.manifest,
+    moves: [
+      {
+        ...f.manifest.moves[0]!,
+        source: `${source}/SKILL.md`,
+        target: `${target}/SKILL.md`,
+      },
+    ],
+    units: [{ source, target, files: ["SKILL.md"], mode: 0o755 }],
+  };
+  assert.equal(
+    m.runPublicCorrection(f.root, manifest, true).status,
+    "restored",
+  );
+  assert.equal(fs.statSync(join(f.root, target)).mode & 0o777, 0o700);
+  assert.equal(
+    m.runPublicCorrection(f.root, manifest, true).status,
+    "unchanged",
+  );
+  fs.chmodSync(join(f.root, target), 0o755);
+  assert.throws(
+    () => m.runPublicCorrection(f.root, manifest, true),
+    /unit-mode-conflict/,
+  );
 });
