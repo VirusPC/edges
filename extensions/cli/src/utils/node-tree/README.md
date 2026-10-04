@@ -70,9 +70,15 @@ const parsed = parseNode(markdown);
 `saveNode` 校验读取时的原文、真实位置和文件身份，避免陈旧快照或后续符号链接替换覆盖别的文件；通过同目录临时文件替换，保留权限。它是乐观并发校验，不提供跨进程锁。不会初始化目录或自动保存 CLI 的读取结果。
 
 
+## 可选文档树关系
+
+`MarkdownDocument` 可附带 `id?: string`、`parent?: DocumentReference`、`children?: DocumentReference[]`。引用形状为 `{ target: string, label?: string }`，target 保留调用方给出的文档标识或链接，由调用方解释；不嵌套完整文档对象。
+
+这些字段是加载或组树时的上下文，不属于 YAML 数据。`id` 的唯一性范围由调用方确定，`parent` 表示逻辑父节点，不由物理目录推断。`children` 按索引顺序排列，省略表示未指定，`[]` 表示没有子文档。通用解析不自动推导关系，序列化仅写 metadata/body，原对象上的关系保持不变。重新 parseDocument 不会恢复树上下文，调用方需要保留或重新关联；YAML 中恰好同名的字段仍完整保留在 metadata 内。AGENTS.md 的三部分 NodeModel 与通用文档关系分别表达，现有章节解析和遍历规则保持不变。
+
 ## 可选 YAML 头与 Markdown 正文
 
-Task、Memory、AGENTS.md 共用 `MarkdownDocument = { metadata?: Metadata, body: string }`。`metadata` 是完整 YAML 头的数据，缺省表示没有头部，`{}` 表示存在空头部；`body` 是不透明的 Markdown 正文。通用格式层不要求任何业务字段，也不解释 Markdown 章节。
+Task、Memory、AGENTS.md 共用 `MarkdownDocument`，内容字段为 `{ metadata?: Metadata, body: string }`。`metadata` 是完整 YAML 头的数据，缺省表示没有头部，`{}` 表示存在空头部；`body` 是不透明的 Markdown 正文。通用格式层不要求任何业务字段，也不解释 Markdown 章节。
 
 ```ts
 import { parseDocument, serializeDocument } from './codec/index.js';

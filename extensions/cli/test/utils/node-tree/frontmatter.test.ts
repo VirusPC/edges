@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as codec from '../../../src/utils/node-tree/codec/index.js';
+import type { MarkdownDocument } from '../../../src/utils/node-tree/document-model.js';
 
 const body = '## 本层记忆\n\n- [Memory](memory/AGENTS.md)\n';
 const source = '---\ndescription: "[Not a node](fake/AGENTS.md)" # keep\nextra:\n  tags: [one, two]\n---\n' + body;
@@ -151,4 +152,31 @@ test('metadata type changes preserve comments attached to the replaced node', ()
   assert.match(second, /# Field explanation/);
   assert.match(second, /# Preserve this note/);
   assert.deepEqual(codec.parseDocument(second), doc);
+});
+
+test('document tree context does not alter persisted YAML or Markdown', () => {
+  const doc: MarkdownDocument = {
+    ...codec.parseDocument(source),
+    id: 'memory-scope',
+    parent: { target: 'root', label: 'Root scope' },
+    children: [{ target: 'nested-scope' }, { target: '../shared/AGENTS.md', label: 'Shared' }],
+  };
+  assert.equal(codec.serializeDocument(doc, source), source);
+  doc.body += '\nNew note.\n';
+  const result = codec.serializeDocument(doc, source);
+  assert.equal(result, source + '\nNew note.\n');
+  assert.deepEqual(doc.children, [{ target: 'nested-scope' }, { target: '../shared/AGENTS.md', label: 'Shared' }]);
+});
+
+test('tree context is optional and independent from similarly named YAML keys', () => {
+  const doc: MarkdownDocument = {
+    metadata: { id: 'yaml-id', parent: 'yaml-parent', children: ['yaml-child'] },
+    body: '# Note\n',
+    id: 'loaded-id', parent: { target: 'loaded-parent' }, children: [],
+  };
+  const result = codec.serializeDocument(doc);
+  assert.deepEqual(codec.parseDocument(result), {
+    metadata: { id: 'yaml-id', parent: 'yaml-parent', children: ['yaml-child'] }, body: '# Note\n',
+  });
+  assert.equal(codec.serializeDocument({ body: '# Plain\n' }), '# Plain\n');
 });

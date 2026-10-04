@@ -7,4 +7,4 @@ export { readNode, saveNode, discoverNodes, readNodeTree } from './repository.js
 
 export type { NodeModel, NodeItem, NodeLink } from './model.js';
 export type { NodeEntry, DiscoverOptions, NodeTreeOptions } from './repository.js';
-export type { Metadata, MetadataValue, MarkdownDocument } from './document-model.js';
+export type { Metadata, MetadataValue, DocumentReference, MarkdownDocument } from './document-model.js';

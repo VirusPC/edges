@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 递归节点保留三部分与局部记忆；公共工具放 CLI utils，统一 TypeScript，模型/格式/存储分层，YAML 使用现成库。
+description: 递归节点保留三部分与局部记忆；CLI utils 使用 TypeScript、文档支持可选父子引用，模型/格式/存储分层。
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T20:43:27+08:00"
+  edges-updated-at: "2026-10-04T20:50:02+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -65,6 +65,14 @@ Task、Memory、AGENTS.md 底层都是可能带 YAML frontmatter 的 Markdown。
 **Why:** 模型、格式与存储的解耦是模块边界，不等于必须增加包、workspace 依赖和预构建流程；复用成熟库可避免自制语法解析器。
 
 **How to apply:** 保留 model、codec、filesystem、repository 与遍历接口，通过 CLI 内相对导入复用，随 CLI 编译、通过现有 tsx 运行源码。保留可选 YAML 头和保真写回要求；本地封装只处理文档边界、数据校验与编辑保留。已删除独立包及其构建依赖，测试并入 CLI。这里的 utils 位置不改变作用域归属或节点模型语义，也不代表 Python Memory 已接入。
+
+## 2026-10-04 用户确认：document-model 支持可选树关系
+
+MarkdownDocument 增加可选 id、parent、children；用户确认父子关系使用文档引用，不直接嵌套子文档对象。引用包含 target 和可选 label。
+
+**Why:** 通用 Markdown 文档也可以参与递归组织，引用支持跨物理目录层级与按需加载，不要求普通文档先成为 AGENTS 节点。
+
+**How to apply:** 这些字段由调用方组树时提供；children 省略表示未指定，空数组表示没有子文档。逻辑父节点不按目录祖先推断。通用文档 codec 只读写 metadata/body，不自动把树关系写入 YAML；头部已有同名字段仍作为普通 metadata 保留。AGENTS 的三部分章节与文件适配继续在各自层实现，不为此新增第四部分。
 
 ## 先前设计与实施记录
 

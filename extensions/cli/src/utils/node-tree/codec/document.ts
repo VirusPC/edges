@@ -107,7 +107,7 @@ function reconcile(yaml: Document, path: (string | number)[], before: MetadataVa
   }
 }
 
-/** Exact unchanged round trips; verify edited output before returning. */
+/** Serialize metadata/body only; tree context belongs to the caller. Verify edited content. */
 export function serializeDocument(document: MarkdownDocument, originalSource?: string): string {
   const original = splitFrontmatter(originalSource ?? '');
   const header = original.rawFrontmatter === undefined ? undefined : readHeader(original.rawFrontmatter);
@@ -127,6 +127,7 @@ export function serializeDocument(document: MarkdownDocument, originalSource?: s
   }
   if (prefix && document.body && !prefix.endsWith('\n')) prefix += originalSource?.includes('\r\n') ? '\r\n' : '\n';
   const result = original.bom + prefix + document.body;
-  if (!sameValue(parseDocument(result), document)) throw new Error('Document cannot be represented losslessly with the requested metadata and body.');
+  const content = { metadata: document.metadata, body: document.body };
+  if (!sameValue(parseDocument(result), content)) throw new Error('Document cannot be represented losslessly with the requested metadata and body.');
   return result;
 }
