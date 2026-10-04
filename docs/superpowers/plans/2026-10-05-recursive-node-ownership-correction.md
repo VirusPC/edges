@@ -27,10 +27,12 @@
 
 **Interfaces:** Current --scope/env/cwd precedence unchanged. Remove only the marker/independent-responsibility eligibility predicate. Domain command semantics remain explicit; adopt/init and writable types still require registered content contracts. Project/task/type indexes may have a sparse representation of the same content model, without requiring empty headings or auto-creating all modules.
 
-- [ ] Add failing temporary-file tests for an unmarked AGENTS node, nested type/business entry, explicit target without init, local vs descendant traversal and cross-directory registered references. Verify valid authored extra prose survives while newly generated organization is only three-part.
-- [ ] Make node identification consume common model/service. Update source generators to register modules in local or descendant based on actual logical ownership. Keep task-project marker-owned list inside the existing local section, preserving business metadata and non-index prose; no duplicate index listing.
-- [ ] Update protocol statements that retained the rejected eligibility gate; retain sparse explicit adoption, type permissions and cross-layer direct links. Upgrade changed Skill versions/changelogs without publishing tags. Do not rewrite historical examples as current facts.
-- [ ] Run scope/model/memory/task-project and migrator tests affected by changed predicates/entry output; commit and report exact evidence.
+- [x] Add failing temporary-file tests for an unmarked AGENTS node, nested type/business entry, explicit target without init, local vs descendant traversal and cross-directory registered references. Verify valid authored extra prose survives while newly generated organization is only three-part.
+- [x] Make node identification consume common model/service. Update source generators to register modules in local or descendant based on actual logical ownership. Keep task-project marker-owned list inside the existing local section, preserving business metadata and non-index prose; no duplicate index listing.
+- [x] Update protocol statements that retained the rejected eligibility gate; retain sparse explicit adoption, type permissions and cross-layer direct links. Upgrade changed Skill versions/changelogs without publishing tags. Do not rewrite historical examples as current facts.
+- [x] Run scope/model/memory/task-project and migrator tests affected by changed predicates/entry output; commit and report exact evidence.
+
+Task 1 evidence (2026-10-05): `ca4e97d` and `1a4ea0f`; 291 targeted tests and CLI/root migrator typechecks, then 103 focused tests for Doctor ownership/registration fixes. Spec and quality re-review approved. Physical ownership restoration remains Task 2.
 
 ### Task 2: Restore current public records and correct future migration ownership
 
