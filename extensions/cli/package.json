@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build:tasks-review-app": "pnpm --filter tasks-review-app run build",
-    "build": "pnpm run build:tasks-review-app && tsc -p tsconfig.json && node ./scripts/copy-review-page-asset.mjs",
+    "build": "pnpm run build:tasks-review-app && tsc -p tsconfig.json && node ./scripts/copy-review-page-asset.mjs && node --import tsx ./scripts/copy-memory-templates.ts",
     "prepack": "pnpm run build",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
@@ -24,6 +24,7 @@
     "commander": "^14.0.3",
     "gray-matter": "^4.0.3",
     "mdast-util-from-markdown": "^2.0.3",
+    "tar": "^7.5.22",
     "zod": "^3.24.2"
   },
   "devDependencies": {

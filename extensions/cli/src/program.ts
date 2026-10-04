@@ -9,6 +9,7 @@ import {
 import { addArtifactsCommand } from "./artifacts.js";
 import { addNoteCommand } from "./note.js";
 import { addTasksCommand } from "./tasks.js";
+import { addMemoryCommand } from "./memory.js";
 import { VERSION } from "./utils/version.js";
 
 export type { CliContext, CliInput, CliResult };
@@ -20,6 +21,8 @@ EXAMPLES
   edges note --help
   edges tasks --help
   edges artifacts --help
+  edges --scope ./projects/demo memory init --memory-types project feedback
+  edges memory --help
 
 BREAKING RENAME
   The bin is edges only (not edges-note). There is no shim.
@@ -81,6 +84,7 @@ function addRootCommand(ctx: CliContext, output: CommanderTextConfigure): Comman
 
   addNoteCommand(program, ctx);
   addTasksCommand(program, ctx);
+  addMemoryCommand(program, ctx);
   addArtifactsCommand(program, ctx);
   program.addHelpText("after", ROOT_AFTER_HELP);
   applyOutput(program, output);

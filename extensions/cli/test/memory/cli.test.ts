@@ -1,0 +1,56 @@
+import test, { type TestContext } from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, readFile, writeFile, rm, readdir, realpath } from 'node:fs/promises';
+import path from 'node:path';
+import { tmpdir } from 'node:os';
+import { run } from '../../src/program.js';
+
+async function fixture(t: TestContext) {
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), 'edges-memory-cli-')));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  return root;
+}
+
+test('memory init without selected types is a nonmutating recommendation', async t => {
+  const root = await fixture(t);
+  const result = await run(['--scope', root, 'memory', 'init'], { env: {} });
+  assert.equal(result.exitCode, 0, result.stdout);
+  assert.equal(JSON.parse(result.stdout).selectionRequired, true);
+  assert.deepEqual(await readdir(root), []);
+});
+
+test('CLI initializes selected types and remembers a supplied Markdown file in that scope', async t => {
+  const root = await fixture(t);
+  const init = await run(['--scope', root, 'memory', 'init', '--memory-types', 'project'], { env: {} });
+  assert.equal(init.exitCode, 0, init.stdout);
+  const source = path.join(root, 'draft.md');
+  await writeFile(source, 'A decision with **context**.\n');
+  const result = await run(['--scope', root, 'memory', 'remember', '--type', 'project', '--slug', 'decision',
+    '--title', 'Decision', '--description', 'A reusable decision', '--content-file', source,
+    '--agent-client', 'codex', '--username', 'Test Agent', '--email', 'test@example.com'], { env: {} });
+  assert.equal(result.exitCode, 0, result.stdout);
+  const output = JSON.parse(result.stdout);
+  assert.equal(output.path, '.harness/memory/projects/project_decision.md');
+  assert.match(await readFile(path.join(root, output.path), 'utf8'), /A decision with \*\*context\*\*\./);
+  assert.match(await readFile(path.join(root, output.index), 'utf8'), /project_decision\.md/);
+  assert.match(await readFile(path.join(root, 'AGENTS.md'), 'utf8'), /\.harness\/memory\/projects\/AGENTS\.md/);
+});
+
+test('memory remember rejects conflicting or absent content arguments without writes', async t => {
+  const root = await fixture(t);
+  for (const flags of [[], ['--content', 'body', '--content-file', 'missing.md']]) {
+    const result = await run(['memory', 'remember', '--target-dir', root, '--type', 'project', '--slug', 'test', ...flags], { env: {} });
+    assert.notEqual(result.exitCode, 0);
+    assert.match(result.stdout, /content/);
+    assert.deepEqual(await readdir(root), []);
+  }
+});
+
+test('memory help exposes core operations and script arguments remain discoverable', async () => {
+  const group = await run(['memory', '--help']);
+  assert.equal(group.exitCode, 0, group.stdout);
+  for (const operation of ['init', 'remember', 'add-type', 'doctor']) assert.match(group.stdout, new RegExp(`\\b${operation}\\b`));
+  const remember = await run(['memory', 'remember', '--help']);
+  assert.match(remember.stdout, /--content-file/);
+  assert.match(remember.stdout, /--target-dir/);
+});
