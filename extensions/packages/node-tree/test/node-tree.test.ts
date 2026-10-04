@@ -30,9 +30,9 @@ test('node identity does not require Project Memory adoption or a task board', (
   const f = fixture();
   try {
     const module = f.node('module', '# Module\n\nKeep local rules.');
-    assert.equal(readNode(module)?.directory, module);
+    assert.equal(readNode(module)?.location.directory, module);
     assert.equal(readNode(f.root), undefined);
-    assert.deepEqual(discoverNodes(f.root).map(node => node.directory), [module]);
+    assert.deepEqual(discoverNodes(f.root).map(node => node.location.directory), [module]);
   } finally { f.cleanup(); }
 });
 
@@ -54,9 +54,9 @@ test('logical traversal follows only child links, skipping filesystem levels and
     const child = f.node('deep/container/child', children('- [Root](../../../AGENTS.md)'));
     f.node('reference');
     f.node('unregistered');
-    assert.deepEqual(readNodeTree(f.root).map(node => node.directory), [f.root, child]);
-    assert.deepEqual(readNode(f.root)?.references, [path.join(f.root, 'reference/AGENTS.md')]);
-    assert.deepEqual(readNode(f.root)?.children, [path.join(child, 'AGENTS.md')]);
+    assert.deepEqual(readNodeTree(f.root).map(node => node.location.directory), [f.root, child]);
+    assert.deepEqual(readNode(f.root)?.links.references, [path.join(f.root, 'reference/AGENTS.md')]);
+    assert.deepEqual(readNode(f.root)?.links.children, [path.join(child, 'AGENTS.md')]);
   } finally { f.cleanup(); }
 });
 
@@ -69,7 +69,7 @@ test('heading-only entries and local encoded/angle links work; examples and remo
     const c = f.node('group(x)');
     f.node('example');
     f.node('other');
-    assert.deepEqual(readNodeTree(f.root).map(node => node.directory), [f.root, a, b, c]);
+    assert.deepEqual(readNodeTree(f.root).map(node => node.location.directory), [f.root, a, b, c]);
   } finally { f.cleanup(); }
 });
 
@@ -81,8 +81,8 @@ test('reference traversal respects explicit boundaries, symlinks, missing entrie
     const vendor = f.node('root/vendor');
     mkdirSync(path.join(vendor, '.git'));
     symlinkSync(outside, path.join(root, 'linked'));
-    assert.deepEqual(readNodeTree(root, { canVisit: dir => !existsSync(path.join(dir, '.git')) }).map(node => node.directory), [root]);
-    assert.deepEqual(readNodeTree(root, { boundary: f.root, canVisit: dir => !existsSync(path.join(dir, '.git')) }).map(node => node.directory), [root, outside]);
+    assert.deepEqual(readNodeTree(root, { canVisit: dir => !existsSync(path.join(dir, '.git')) }).map(node => node.location.directory), [root]);
+    assert.deepEqual(readNodeTree(root, { boundary: f.root, canVisit: dir => !existsSync(path.join(dir, '.git')) }).map(node => node.location.directory), [root, outside]);
   } finally { f.cleanup(); }
 });
 
@@ -95,8 +95,8 @@ test('physical discovery traverses containers, without following symlinks or cal
     mkdirSync(path.join(f.root, 'vendor/.git'));
     symlinkSync(child, path.join(f.root, 'alias'));
     const nodes = discoverNodes(f.root, { enterDirectory: dir => !existsSync(path.join(dir, '.git')) });
-    assert.deepEqual(nodes.map(node => node.directory), [f.root, child]);
-    assert.deepEqual(discoverNodes(f.root, { acceptNode: node => node.directory === child }).map(node => node.directory), [child]);
+    assert.deepEqual(nodes.map(node => node.location.directory), [f.root, child]);
+    assert.deepEqual(discoverNodes(f.root, { acceptNode: node => node.location.directory === child }).map(node => node.location.directory), [child]);
   } finally { f.cleanup(); }
 });
 
@@ -115,7 +115,7 @@ test('indented code, escaped syntax and multiline code spans never become owners
     f.node('', '## 下层记忆索引\n\n    [Indented](fake/AGENTS.md)\n\n\\[Escaped](fake/AGENTS.md)\n\n`example\n[Multiline](fake/AGENTS.md)\n`\n\n[Real](real/AGENTS.md)');
     f.node('fake');
     const real = f.node('real');
-    assert.deepEqual(readNodeTree(f.root).map(node => node.directory), [f.root, real]);
+    assert.deepEqual(readNodeTree(f.root).map(node => node.location.directory), [f.root, real]);
   } finally { f.cleanup(); }
 });
 
@@ -125,7 +125,7 @@ test('comment delimiters in code and fences in comments do not hide following re
     f.node('', 'Use `<!--` in examples.\n\n<!--\n```\n[Hidden](fake/AGENTS.md)\n-->\n\n## 下层记忆索引\n\n[Real](real/AGENTS.md)');
     f.node('fake');
     const real = f.node('real');
-    assert.deepEqual(readNodeTree(f.root).map(node => node.directory), [f.root, real]);
+    assert.deepEqual(readNodeTree(f.root).map(node => node.location.directory), [f.root, real]);
   } finally { f.cleanup(); }
 });
 
@@ -135,7 +135,7 @@ test('logical links cannot jump through an excluded repository to a deeper node'
     f.node('', children('[Deep](vendor/src/AGENTS.md)'));
     f.node('vendor/src');
     mkdirSync(path.join(f.root, 'vendor/.git'));
-    assert.deepEqual(readNodeTree(f.root, { canVisit: dir => !existsSync(path.join(dir, '.git')) }).map(node => node.directory), [f.root]);
+    assert.deepEqual(readNodeTree(f.root, { canVisit: dir => !existsSync(path.join(dir, '.git')) }).map(node => node.location.directory), [f.root]);
   } finally { f.cleanup(); }
 });
 
@@ -149,7 +149,7 @@ for (const definitions of [
       f.node('', `## 下层记忆索引\n\n[Child][child]\n\n${definitions}\n`);
       const first = f.node('first');
       f.node('second');
-      assert.deepEqual(readNodeTree(f.root).map(node => node.directory), [f.root, first]);
+      assert.deepEqual(readNodeTree(f.root).map(node => node.location.directory), [f.root, first]);
     } finally { f.cleanup(); }
   });
 }

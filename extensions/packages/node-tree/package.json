@@ -9,6 +9,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./src/index.js"
+    },
+    "./model": {
+      "types": "./dist/model.d.ts",
+      "import": "./src/model.js"
+    },
+    "./codec": {
+      "types": "./dist/codec/index.d.ts",
+      "import": "./src/codec/index.js"
     }
   },
   "files": [

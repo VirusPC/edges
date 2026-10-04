@@ -1,17 +1,15 @@
-import { lstatSync, readFileSync, readdirSync } from 'node:fs';
+import { lstatSync, readFileSync, readdirSync, writeFileSync, chmodSync, renameSync, rmSync, realpathSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
 import path from 'node:path';
-import { parseNodeLinks } from './links.js';
 import { walkTree } from './tree.js';
 
-/**
- * @typedef {import('./links.js').NodeLinks & {
- *   directory: string, entryPath: string, content: string
- * }} NodeEntry
- */
+/** @typedef {{directory: string, entryPath: string}} NodeLocation */
+/** @typedef {{directory: string, entryPath: string, device: number, inode: number}} FileIdentity */
+/** @typedef {{location: NodeLocation, source: string, identity: FileIdentity}} NodeFile */
 
 /** @param {string} directory */
-function absolute(directory) {
-  if (!path.isAbsolute(directory)) throw new TypeError('Node paths must be absolute; resolve caller-relative paths before invoking the core.');
+export function absolute(directory) {
+  if (!path.isAbsolute(directory)) throw new TypeError('Node paths must be absolute; resolve caller-relative paths before invoking storage.');
   return path.normalize(directory);
 }
 
@@ -24,14 +22,54 @@ function stat(entry) {
   }
 }
 
-/** @param {string} directory @returns {NodeEntry | undefined} */
-export function readNode(directory) {
+/** @param {string} directory */
+export function isDirectory(directory) { return stat(directory)?.isDirectory() ?? false; }
+
+/** Read bytes only; no parsing, node policy or link interpretation. @param {string} directory @returns {NodeFile | undefined} */
+export function readNodeFile(directory) {
   directory = absolute(directory);
-  if (!stat(directory)?.isDirectory()) return undefined;
+  if (!isDirectory(directory)) return undefined;
   const entryPath = path.join(directory, 'AGENTS.md');
-  if (!stat(entryPath)?.isFile()) return undefined;
-  const content = readFileSync(entryPath, 'utf8');
-  return { directory, entryPath, content, ...parseNodeLinks(content, directory) };
+  const info = stat(entryPath);
+  if (!info?.isFile()) return undefined;
+  return {
+    location: { directory, entryPath }, source: readFileSync(entryPath, 'utf8'),
+    identity: { directory: realpathSync(directory), entryPath: realpathSync(entryPath), device: info.dev, inode: info.ino },
+  };
+}
+
+/**
+ * Explicit atomic replacement with optimistic stale-source checks. No initialization.
+ * @param {NodeFile} original
+ * @param {string} source
+ * @returns {NodeFile}
+ */
+export function writeNodeFile(original, source) {
+  const directory = absolute(original.location.directory);
+  const entryPath = path.join(directory, 'AGENTS.md');
+  if (entryPath !== original.location.entryPath) throw new Error('Node entry path does not match its directory.');
+  function validate() {
+    const info = stat(entryPath);
+    if (!isDirectory(directory) || !info?.isFile()) throw new Error('Node entry must remain a regular file, not a symlink.');
+    const identity = original.identity;
+    if (realpathSync(directory) !== identity.directory || realpathSync(entryPath) !== identity.entryPath || info.dev !== identity.device || info.ino !== identity.inode) {
+      throw new Error('Node location or file identity changed since it was read; reload before saving.');
+    }
+    if (readFileSync(entryPath, 'utf8') !== original.source) throw new Error('Node source changed since it was read; reload before saving.');
+    return info;
+  }
+  const info = validate();
+  if (source === original.source) return original;
+  const temporary = path.join(directory, `.AGENTS.${randomUUID()}.tmp`);
+  try {
+    writeFileSync(temporary, source, { flag: 'wx', mode: info.mode & 0o777 });
+    chmodSync(temporary, info.mode & 0o777);
+    validate();
+    renameSync(temporary, entryPath);
+  } finally { rmSync(temporary, { force: true }); }
+  const saved = readNodeFile(directory);
+  if (!saved || saved.source !== source || saved.identity.entryPath !== original.identity.entryPath) throw new Error('Node changed during save; reload its current contents.');
+  return saved;
 }
 
 /**
@@ -53,65 +91,16 @@ export function findAncestor(start, matches, stopAt) {
 }
 
 /**
- * @typedef {object} DiscoverOptions
- * @property {(node: NodeEntry) => boolean} [acceptNode]
- * @property {(directory: string) => boolean} [enterDirectory] Applied to descendants, including non-node containers.
- */
-
-/**
- * Physical inventory only: it does not infer ownership between nodes.
+ * Physical directories only; callers decide which entries to read or parse.
  * @param {string} root
- * @param {DiscoverOptions} [options]
- * @returns {NodeEntry[]}
+ * @param {(directory: string) => boolean} [enterDirectory]
  */
-export function discoverNodes(root, options = {}) {
+export function discoverDirectories(root, enterDirectory) {
   root = absolute(root);
-  if (!stat(root)?.isDirectory()) return [];
-  const directories = walkTree(root, directory => readdirSync(directory, { withFileTypes: true })
+  if (!isDirectory(root)) return [];
+  return walkTree(root, directory => readdirSync(directory, { withFileTypes: true })
     .sort((a, b) => a.name.localeCompare(b.name))
     .filter(entry => entry.isDirectory() && !entry.isSymbolicLink())
     .map(entry => path.join(directory, entry.name))
-    .filter(child => options.enterDirectory?.(child) ?? true), directory => directory);
-  return directories.flatMap(directory => {
-    const node = readNode(directory);
-    return node && (options.acceptNode?.(node) ?? true) ? [node] : [];
-  });
-}
-
-/**
- * @typedef {object} NodeTreeOptions
- * @property {string} [boundary] Default: root. Explicitly widen it for non-descendant child links.
- * @property {(directory: string) => boolean} [canVisit] Applied to intervening directories, excluding explicit root/boundary.
- */
-
-/**
- * Logical child-index traversal; ordinary cross-references are not followed.
- * @param {string} root
- * @param {NodeTreeOptions} [options]
- * @returns {NodeEntry[]}
- */
-export function readNodeTree(root, options = {}) {
-  root = absolute(root);
-  const boundary = absolute(options.boundary ?? root);
-  /** @param {string} directory */
-  function allowed(directory) {
-    const relative = path.relative(boundary, directory);
-    if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) return false;
-    let current = boundary;
-    if (!stat(current)?.isDirectory()) return false;
-    for (const segment of relative.split(path.sep).filter(Boolean)) {
-      current = path.join(current, segment);
-      if (!stat(current)?.isDirectory()) return false;
-      if (current !== root && options.canVisit && !options.canVisit(current)) return false;
-    }
-    return true;
-  }
-  if (!allowed(root)) return [];
-  const first = readNode(root);
-  if (!first) return [];
-  return walkTree(first, node => node.children.flatMap(entry => {
-    const directory = path.dirname(entry);
-    const child = allowed(directory) ? readNode(directory) : undefined;
-    return child ? [child] : [];
-  }), node => node.directory);
+    .filter(child => enterDirectory?.(child) ?? true), directory => directory);
 }

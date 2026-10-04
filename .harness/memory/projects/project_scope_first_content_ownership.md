@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 递归目录修订：统一三部分入口，tasks 等扩展在其中注册，局部记忆不上收；作用域及递归树逻辑须与 CLI、业务模块解耦。
+description: 递归节点沿用三部分入口，局部记忆不上收；CLI 与树逻辑解耦，领域模型、解析/序列化和文件适配分别承担职责。
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T19:36:51+08:00"
+  edges-updated-at: "2026-10-04T20:05:14+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -41,6 +41,14 @@ metadata:
 **Why:** 递归节点模型服务整个系统，不应由 CLI 或 Tasks 独占定义，也不应让不同入口各自实现一套节点语义。
 
 **How to apply:** 公共能力、CLI 适配和业务操作保持边界；公共层不依赖业务错误类型，逻辑下层引用与物理目录遍历分开表达。本次已抽取公共节点能力并接回 CLI，见[实施计划](../../../docs/superpowers/plans/2026-10-04-node-tree-cli-decoupling.md)。CLI 暂保留原有识别策略和 Tasks 物理清查，以便独立验证解耦；统一节点策略切换、Python 接入及局部记忆恢复继续按整体方案推进，不将本次抽取视为整套目录重构完成。
+
+## 2026-10-04 用户确认：领域模型、编解码与文件适配分离
+
+节点的领域模型、Markdown 解析与序列化、文件系统读写分别承担职责。用户在 CLI 公共能力抽取后进一步要求落实这项解耦。
+
+**Why:** 把原文、AST、路径和业务内容混成一种结构，会让非 CLI 调用方继续依赖特定格式和存储；三部分节点模型应当能够独立消费和修改。
+
+**How to apply:** 模型只表达本层重要约束、本层记忆、下层记忆索引及引用关系。格式转换不解析物理路径、不读写文件；文件适配处理位置与保存，组合层再接回 CLI。序列化保留未修改原文和未知扩展，无法保留时明确拒绝；文件保存校验原文与文件身份，不静默覆盖其他编辑。本次实现与验证见[模型与 codec 解耦计划](../../../docs/superpowers/plans/2026-10-04-node-model-codec-separation.md)，不据此宣告整仓目录迁移或 Python 接入完成。
 
 ## 先前设计与实施记录
 

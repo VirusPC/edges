@@ -21,7 +21,7 @@ const owner = findAncestor('/workspace/project/source',
 | API | 职责 |
 | --- | --- |
 | `walkTree(root, children, key)` | 通用、有序深度优先遍历，按 key 去重并终止环；不依赖文件系统。 |
-| `readNode(directory)` | 读取普通 `AGENTS.md` 文件，返回正文、子节点链接与普通引用；不要求已初始化 Project Memory。 |
+| `readNode(directory)` | 组合文件适配与 codec，返回位置、原文、文件身份、领域模型及已解析的节点路径。 |
 | `findAncestor(start, matches, stopAt?)` | 从起点向上查找；边界节点先匹配、后停止，没有匹配返回 `undefined`。 |
 | `discoverNodes(root, options?)` | 清查物理目录；`acceptNode` 筛选结果，`enterDirectory` 决定是否进入子目录。 |
 | `readNodeTree(root, options?)` | 沿下层索引读取逻辑节点树；返回的普通引用不会自动成为子节点。 |
@@ -40,3 +40,31 @@ pnpm --filter @edges/node-tree test
 ```
 
 运行时代码为原生 ESM JavaScript，使用 JSDoc 与 TypeScript checkJs 校验并生成类型声明。安装依赖后即可运行，源码调用和部署脚本无需预先构建此包；CLI 编译时会先构建类型声明。
+
+## 模型、格式与存储
+
+| 层 | 内容与边界 |
+| --- | --- |
+| `model.js` | `NodeModel` 表达 constraints（本层重要约束）、memory（本层记忆）、children（下层记忆索引），以及区块外的普通 references。各条目由文本和链接片段组成；目标保留作者给出的标识，不带原文、AST 或文件位置。 |
+| `codec/` | `parseNode(source)` 把 Markdown 转成模型；`serializeNode(model, originalSource?)` 转回 Markdown。源片段与 AST 只在 codec 内使用，无文件读写或路径解析。 |
+| `filesystem.js`、`paths.js` | 读取和替换文件、验证路径与文件身份、解析相对引用、发现物理目录。原文通过 `readNodeFile` / `writeNodeFile` 独立读写。 |
+| `repository.js` | 组合前三层。`readNode` 返回 `{location, source, identity, model, links}`，`saveNode(loaded, model)` 显式保存并重新加载；CLI 使用这个加载结果，领域模型本身保持独立。 |
+
+纯模型和 codec 可通过子入口单独导入，不加载文件系统模块：
+
+```js
+import { createNodeModel } from '@edges/node-tree/model';
+import { parseNode, serializeNode } from '@edges/node-tree/codec';
+
+const model = createNodeModel();
+model.constraints.push({ content: [{ kind: 'text', value: '保留本层私有材料。' }] });
+model.memory.push({ content: [{ kind: 'link', label: 'Tasks', target: 'tasks/AGENTS.md' }] });
+const markdown = serializeNode(model);
+const parsed = parseNode(markdown);
+```
+
+模型中的 `references` 是区块外已有链接的关系信息，不新增第四个入口章节。memory、children 中的条目也可以包含人工说明；代码、图片、HTML 等尚未建模的内容由 codec 的原始文档保留。
+
+提供原文时，未修改的往返逐字保留；修改只替换对应条目的源片段。插入、移位时匹配并复用原片段，保留其中的人工格式和未建模内容。对包含未知结构的条目进行无法保留的修改、歧义/未闭合区块、不能重新解析成目标模型的输出会报错，不生成有损结果。新建文档采用原 Project Memory 三块标题；已有“本层重要约束”与“本层硬约束”均可读取，原标题保持。
+
+`saveNode` 校验读取时的原文、真实位置和文件身份，避免陈旧快照或后续符号链接替换覆盖别的文件；通过同目录临时文件替换，保留权限。它是乐观并发校验，不提供跨进程锁。不会初始化目录或自动保存 CLI 的读取结果。

@@ -4,8 +4,8 @@ import { discoverNodes, findAncestor, readNode, type NodeEntry } from '@edges/no
 
 /** Current command-selection policy, not the reusable node identity contract. */
 function selectsScope(node: NodeEntry): boolean {
-  return node.content.includes('<!-- project-memory:start -->') &&
-    (node.content.includes('<!-- project-memory-local:start -->') || node.content.includes('<!-- project-memory-children:start -->'));
+  return node.source.includes('<!-- project-memory:start -->') &&
+    (node.source.includes('<!-- project-memory-local:start -->') || node.source.includes('<!-- project-memory-children:start -->'));
 }
 
 export function isScope(dir: string): boolean {
@@ -45,7 +45,7 @@ export function discoverScopes(root: string): string[] {
     acceptNode: selectsScope,
     enterDirectory: dir => !ignored.has(path.basename(dir)) && !isGitBoundary(dir),
   });
-  return [root, ...nodes.filter(node => node.directory !== root).map(node => node.directory)];
+  return [root, ...nodes.filter(node => node.location.directory !== root).map(node => node.location.directory)];
 }
 
 export function portableScope(scopeDir: string, fallbackRoot = scopeDir): string {
