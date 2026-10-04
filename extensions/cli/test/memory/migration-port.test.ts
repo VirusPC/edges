@@ -837,3 +837,18 @@ test('migration renders multiline display fields and special filenames as one sa
   assert.ok(nodes.some(n => n.type === 'text' && n.value.includes('line one - [forged](evil.md) — line two')));
   assert.equal(fs.readFileSync(join(root, `.harness/memory/users/${filename}`), 'utf8'), source);
 });
+
+test('migration discards stale derived links with raw percent signs before rewriting source links', async t => {
+  const root = fixture(t, ['project']), m = await load();
+  const source = '---\nname: project_current\ndescription: Current entry\n---\nCurrent body\n';
+  put(root, '.memory/projects/project_current.md', source);
+  put(root, '.memory/projects/AGENTS.md', '# Projects\nmanual intro\n<!-- project-memory-entries:start -->\n- [Old](project_100%.md) — deleted entry\n<!-- project-memory-entries:end -->\n');
+  const before = snapshot(root);
+  assert.equal(m.migrateMemory({ targetDir: root, dryRun: true }).status, 'dry-run');
+  assert.deepEqual(snapshot(root), before);
+  assert.equal(m.migrateMemory({ targetDir: root }).status, 'migrated');
+  const index = fs.readFileSync(join(root, '.harness/memory/projects/AGENTS.md'), 'utf8');
+  assert.ok(index.includes('- [project\\_current](project_current.md) — Current entry'));
+  assert.doesNotMatch(index, /project_100%|deleted entry/);
+  assert.equal(fs.readFileSync(join(root, '.harness/memory/projects/project_current.md'), 'utf8'), source);
+});

@@ -444,7 +444,18 @@ export function planMigration(target: string, recursive = false): MigrationJob {
         text = decodeState(initial);
       } catch {}
       if (text !== undefined) {
+        const rebuild =
+          entry &&
+          (entry.spec.name !== "agent_skills" ||
+            !referencedDiagnostics(entry.owner).length);
         if (entry) text = convertIndex(text, entry.spec);
+        // Obsolete derived links need not be valid URLs. Discard them before
+        // rewriting authored links, only when the source inventory is available.
+        if (rebuild)
+          text = text.replace(
+            /<!-- project-memory-entries:start -->[\s\S]*?<!-- project-memory-entries:end -->/,
+            "<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->",
+          );
         if (
           basename(source) === "SKILL.md" &&
           types.some(
@@ -465,11 +476,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
         text = rewriteLinks(text, source, dest, mapped);
         // Render derived rows after rewriting source links: display text must not
         // be interpreted as another link, and targets use their final locations.
-        if (
-          entry &&
-          (entry.spec.name !== "agent_skills" ||
-            !referencedDiagnostics(entry.owner).length)
-        )
+        if (rebuild)
           text = rebuildEntries(text, entry.owner, entry.spec, dest, mapped);
         if (
           basename(source) === "AGENTS.md" &&
