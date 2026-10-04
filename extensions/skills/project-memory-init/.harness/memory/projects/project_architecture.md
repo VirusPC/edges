@@ -11,7 +11,7 @@ metadata:
 
 # 项目记忆的技术关键点
 
-这套东西的**承重点**在哪、**最脆**的地方在哪。规范看 [`PROTOCOL.md`](../../../extensions/skills/project-memory-init/references/PROTOCOL.md)，当前实现看 [`LAYOUT.md`](../../../extensions/skills/project-memory-init/references/LAYOUT.md)，每个决定当时怎么权衡的看 [`design-decisions.md`](project_design_decisions.md)，外部证据看 [`prior-art/`](../references/reference_prior_art.md)。
+这套东西的**承重点**在哪、**最脆**的地方在哪。规范看 [`PROTOCOL.md`](../../../references/PROTOCOL.md)，当前实现看 [`LAYOUT.md`](../../../references/LAYOUT.md)，每个决定当时怎么权衡的看 [`design-decisions.md`](project_design_decisions.md)，外部证据看 [`prior-art/`](../references/reference_prior_art.md)。
 
 先说判断：难点从来不是「怎么存」，是**凭什么 agent 会去读**，以及**怎么不让它膨胀**。所有技术选择都是在这两件事上做取舍。
 

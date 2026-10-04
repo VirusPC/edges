@@ -28,6 +28,12 @@
 - [.harness/memory/references/AGENTS.md](.harness/memory/references/AGENTS.md) — 需求文档、设计稿、接口文档、监控面板等外部资料。
 - [.harness/skills/managed/AGENTS.md](.harness/skills/managed/AGENTS.md) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
 - [.harness/skills/referenced/AGENTS.md](.harness/skills/referenced/AGENTS.md) — 本层 `.agents/skills/` 下人写或装入的标准技能，工具只索引不改写。
+
+- [根维护任务](<.harness/tasks/AGENTS.md>) — 根维护任务入口。
+- [观测职责与资料](<.harness/observation/AGENTS.md>) — 观测职责与资料入口。
+- [目录与内容说明](<README.md>) — 目录与内容说明入口。
+- [领域术语](<CONTEXT.md>) — 领域术语入口。
+- [架构决策](<docs/adr/>) — 架构决策入口。
 <!-- project-memory-local:end -->
 
 <!-- project-memory-children:start -->
@@ -35,20 +41,11 @@
 
 - [.harness/evaluation/AGENTS.md](.harness/evaluation/AGENTS.md) — 评测工作区及其独立验证责任。
 - [teaching/AGENTS.md](teaching/AGENTS.md) — 教学与学习状态。
+
+- [领域任务](<tasks/AGENTS.md>) — 领域任务入口。
+- [对外能力实现约束](<extensions/AGENTS.md>) — 对外能力实现约束入口。
+- [共享扩展约束](<shared-extensions/AGENTS.md>) — 共享扩展约束入口。
+- [笔记规范](<knowledge/notes/AGENTS.md>) — 笔记规范入口。
 <!-- project-memory-children:end -->
 
 <!-- project-memory:end -->
-
-## 工作与模块入口
-
-- [领域任务](tasks/AGENTS.md) — 领域任务入口。
-- [根维护任务](.harness/tasks/AGENTS.md) — 根维护任务入口。
-- [评测](.harness/evaluation/AGENTS.md) — 评测入口。
-- [观测职责与资料](.harness/observation/AGENTS.md) — 观测职责与资料入口。
-- [对外能力实现约束](extensions/AGENTS.md) — 对外能力实现约束入口。
-- [Project Memory 实现约束](extensions/skills/project-memory-init/AGENTS.md) — Project Memory 实现约束入口。
-- [共享扩展约束](shared-extensions/AGENTS.md) — 共享扩展约束入口。
-- [笔记规范](knowledge/notes/AGENTS.md) — 笔记规范入口。
-- [目录与内容说明](README.md) — 目录与内容说明入口。
-- [领域术语](CONTEXT.md) — 领域术语入口。
-- [架构决策](docs/adr/) — 架构决策入口。

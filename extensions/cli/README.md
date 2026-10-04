@@ -53,7 +53,7 @@ Commands return JSON. Init without a selection on a new scope returns recommenda
 
 The built CLI carries its canonical Markdown templates in `dist/assets/memory/templates`, so it can run outside the source checkout without sibling skills or Python. Business rules, source permissions and private ignore rules remain defined by [Project Memory LAYOUT](../skills/project-memory-init/references/LAYOUT.md).
 
-Design decision: [`.memory/projects/project_cli_from_mcp.md`](../../.harness/memory/projects/project_cli_from_mcp.md). Agent-CLI mechanics: [`.memory/references/reference_agent_oriented_cli.md`](../../.harness/memory/references/reference_agent_oriented_cli.md).
+Design decision: [`.memory/projects/project_cli_from_mcp.md`](../.harness/memory/projects/project_cli_from_mcp.md). Agent-CLI mechanics: [`.memory/references/reference_agent_oriented_cli.md`](../.harness/memory/references/reference_agent_oriented_cli.md).
 
 ## Run
 

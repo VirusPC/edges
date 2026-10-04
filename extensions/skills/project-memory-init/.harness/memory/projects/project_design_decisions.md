@@ -12,7 +12,7 @@ metadata:
 # project-memory 设计决策记录
 
 记录 `project-memory-init` / `-ask` / `-remember` 三个 skill 成型过程中的关键取舍与依据。
-「形状是什么」看 [`PROTOCOL.md`](../../../extensions/skills/project-memory-init/references/PROTOCOL.md)，「实现长什么样」看 [`LAYOUT.md`](../../../extensions/skills/project-memory-init/references/LAYOUT.md)，本文只回答「为什么是这样」。**那两份文件只说重点，所有论证都在这里**——早期章节里出现的 `memory-layout.md` 是 `LAYOUT.md` 的旧名，叙述保留原样。
+「形状是什么」看 [`PROTOCOL.md`](../../../references/PROTOCOL.md)，「实现长什么样」看 [`LAYOUT.md`](../../../references/LAYOUT.md)，本文只回答「为什么是这样」。**那两份文件只说重点，所有论证都在这里**——早期章节里出现的 `memory-layout.md` 是 `LAYOUT.md` 的旧名，叙述保留原样。
 
 按时间追加，不改写历史。2026-08-25 之前的章节记录的是初版形态，其中被 [2026-08-26 的结构改造](#2026-08-26改为-memory--索引内容分离)取代的结论已在该节列出，读到旧结论时先对照那份清单。
 
@@ -571,7 +571,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 
 同时定住 policy 区块的预算：吸收 ask 的四条后从 8 行到 10 行左右，**到此为止**。允许 ask 折进来的前提正是「常驻字节数最小化」这条目标函数，如果折完 AGENTS.md 变胖了，这笔交换就白做了。
 
-**递归也不用文字讲。** 每份 `AGENTS.md` 的 `project-memory-index` 区块列出自己的直接下级，顺着跳就到底——递归是数据，不是指令。所以 policy 里只留一句「往深层顺着子目录索引一级级跳」，结构细节继续由 [`PROTOCOL.md`](../../../extensions/skills/project-memory-init/references/PROTOCOL.md) 承担，agent 没把握时去读，不必常驻。
+**递归也不用文字讲。** 每份 `AGENTS.md` 的 `project-memory-index` 区块列出自己的直接下级，顺着跳就到底——递归是数据，不是指令。所以 policy 里只留一句「往深层顺着子目录索引一级级跳」，结构细节继续由 [`PROTOCOL.md`](../../../references/PROTOCOL.md) 承担，agent 没把握时去读，不必常驻。
 
 ### 契约是产物格式，不是 skill 之间的文件引用
 
@@ -584,7 +584,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 
 **要买到的东西是版本偏斜容忍**：任一 skill 单独升级后其余仍能工作。即使 init 升级、现存 `AGENTS.md` 还是旧格式，ask 和 remember 也不受影响。
 
-**冻结的核心契约**现在单独成文，见 [`PROTOCOL.md`](../../../extensions/skills/project-memory-init/references/PROTOCOL.md)（抽离过程见下面「协议单独成文」一节）。
+**冻结的核心契约**现在单独成文，见 [`PROTOCOL.md`](../../../references/PROTOCOL.md)（抽离过程见下面「协议单独成文」一节）。
 
 **其中「按实际读到的内容走」那条是整套东西成立的关键**，而它成立是因为消费方是 LLM 而不是 parser：读 markdown 不需要知道标记名，看见链接就能跳。所以契约可以定得足够弱，弱到几乎不可能被格式升级破坏。
 
@@ -615,7 +615,7 @@ type_slug.tmpl.md  → .memory/<type>_<slug>.md
 
 ### 协议单独成文
 
-**决策**：抽出 [`PROTOCOL.md`](../../../extensions/skills/project-memory-init/references/PROTOCOL.md)，只写冻结的抽象约定；`memory-layout.md` 降为「当前实现」。
+**决策**：抽出 [`PROTOCOL.md`](../../../references/PROTOCOL.md)，只写冻结的抽象约定；`memory-layout.md` 降为「当前实现」。
 
 **动机是 `memory-layout.md` 混了两种变更频率的东西**：嵌套树、入口文件、两类索引这些几乎永不变；而具体索引文件名、四个区块标记、frontmatter 字段清单、模板命名会随实现升级。混在一份文件里，消费方就没法只依赖不变的那部分——上一轮我把「冻结契约」塞进它开头，是把协议写在了实现文档里，位置错了。
 
