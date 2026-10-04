@@ -782,3 +782,49 @@ test('bare repositories cannot bypass failed effective-ignore checks', t => {
   execFileSync('git', ['init', '--bare', '-q', d]);
   assert.throws(() => assertPrivateIgnored(d, [join(d, 'private.md')]), /private-ignore-check-failed/);
 });
+
+for (const context of ['broken-link', 'broken-environment', 'selected-environment'] as const)
+  for (const operation of ['init', 'add-type', 'remember', 'refresh', 'doctor'] as const)
+    test(`${operation} guards private writes with ${context} and no discoverable Git root`, t => {
+      const d = fixture(t), index = '.harness/memory/users/AGENTS.md';
+      initMemory({ targetDir: d, memoryTypes: operation === 'init' || operation === 'add-type' ? ['project'] : ['user'] });
+      if (operation === 'refresh')
+        put(d, '.harness/memory/users/user_new.md', '---\nname: user_new\ndescription: private synthetic description\n---\nbody\n');
+      if (operation === 'doctor') fs.unlinkSync(join(d, index));
+      const before = fs.existsSync(join(d, index)) ? read(d, index) : undefined;
+      if (context === 'broken-link') fs.symlinkSync('missing-repository', join(d, '.git'));
+      else if (context === 'broken-environment') temporaryEnvironment(t, 'GIT_DIR', join(d, 'missing-repository'));
+      else {
+        const repository = fixture(t);
+        execFileSync('git', ['init', '-q', repository]);
+        temporaryEnvironment(t, 'GIT_DIR', join(repository, '.git'));
+        temporaryEnvironment(t, 'GIT_WORK_TREE', d);
+      }
+      const calls = {
+        init: () => initMemory({ targetDir: d, memoryTypes: ['user'] }),
+        'add-type': () => addMemoryType({ targetDir: d, name: 'secrets', description: 'Private', gitignore: true }),
+        remember: () => remember(d, 'user'),
+        refresh: () => refreshIndex(d, 'user'),
+        doctor: () => doctorMemory({ targetDir: d, apply: true }),
+      };
+      if (operation === 'doctor') assert.ok(calls.doctor().remaining.some(f => f.type === 'user'));
+      else assert.throws(calls[operation], /private-ignore-(?:check|coverage)-failed/);
+      assert.equal(fs.existsSync(join(d, '.harness/memory/secrets/AGENTS.md')), false);
+      assert.equal(fs.existsSync(join(d, '.harness/memory/users/user_example.md')), false);
+      assert.equal(fs.existsSync(join(d, index)) ? read(d, index) : undefined, before);
+    });
+
+test('all private callers still work in a confirmed non-Git scope without a Git binary', t => {
+  const d = fixture(t), index = '.harness/memory/users/AGENTS.md';
+  temporaryEnvironment(t, 'PATH', join(d, 'missing-bin'));
+  initMemory({ targetDir: d, memoryTypes: ['user'] });
+  addMemoryType({ targetDir: d, name: 'secrets', description: 'Private', gitignore: true });
+  remember(d, 'user');
+  remember(d, 'secrets');
+  refreshIndex(d, 'user');
+  fs.unlinkSync(join(d, index));
+  assert.equal(doctorMemory({ targetDir: d, apply: true }).remaining.length, 0);
+  assert.ok(fs.existsSync(join(d, index)));
+  assert.ok(fs.existsSync(join(d, '.harness/memory/users/user_example.md')));
+  assert.ok(fs.existsSync(join(d, '.harness/memory/secrets/secrets_example.md')));
+});

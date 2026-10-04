@@ -227,11 +227,11 @@ export function ensureLayerTypeGitignore(
 ): void {
   const spec = layerTypeSpecs(target).find((s) => s.name === name),
     root = findGitRoot(target);
-  if (spec?.gitignore && root) {
-    ensureTypeGitignore(root, name, spec.module, spec.indexFile);
+  if (spec?.gitignore) {
+    if (root) ensureTypeGitignore(root, name, spec.module, spec.indexFile);
     const files = [join(target, spec.indexFile), ...destinations];
     // Ignored parent directories also cover writeAtomic's private temporary files.
-    assertPrivateIgnored(root, files, files.map(dirname));
+    assertPrivateIgnored(root ?? target, files, files.map(dirname));
   }
 }
 export function upsertLocalTypeLine(

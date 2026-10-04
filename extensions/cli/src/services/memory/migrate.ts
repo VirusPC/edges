@@ -2,8 +2,9 @@
 import * as fs from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
-import { spawnSync } from "node:child_process";
 import { isDeepStrictEqual } from "node:util";
+import { assertPrivateIgnored } from "./ignore.js";
+import { escapeIndexText, encodeIndexPath } from "./index-rendering.js";
 import {
   isDirectory,
   isFile,
@@ -276,6 +277,7 @@ function rebuildEntries(
   owner: string,
   spec: LegacyType,
   index: string,
+  mapped: (path: string) => string,
 ) {
   const lines = inventory(owner, spec).map((path) => {
     const f = logicalFields(frontmatterData(readText(path))),
@@ -283,7 +285,7 @@ function rebuildEntries(
         spec.format === "skills"
           ? basename(dirname(path))
           : basename(path, ".md");
-    return `- [${f.title || f.name || name}](${relative(dirname(index), path)}) — ${f.description || "缺少 description，请补齐 frontmatter。"}`;
+    return `- [${escapeIndexText(f.title || f.name || name)}](${encodeIndexPath(relative(dirname(index), mapped(path)))}) — ${escapeIndexText(f.description || "缺少 description，请补齐 frontmatter。")}`;
   });
   return text.replace(
     /<!-- project-memory-entries:start -->[\s\S]*?<!-- project-memory-entries:end -->/,
@@ -442,14 +444,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
         text = decodeState(initial);
       } catch {}
       if (text !== undefined) {
-        if (entry) {
-          text = convertIndex(text, entry.spec);
-          if (
-            entry.spec.name !== "agent_skills" ||
-            !referencedDiagnostics(entry.owner).length
-          )
-            text = rebuildEntries(text, entry.owner, entry.spec, source);
-        }
+        if (entry) text = convertIndex(text, entry.spec);
         if (
           basename(source) === "SKILL.md" &&
           types.some(
@@ -468,6 +463,14 @@ export function planMigration(target: string, recursive = false): MigrationJob {
           );
         }
         text = rewriteLinks(text, source, dest, mapped);
+        // Render derived rows after rewriting source links: display text must not
+        // be interpreted as another link, and targets use their final locations.
+        if (
+          entry &&
+          (entry.spec.name !== "agent_skills" ||
+            !referencedDiagnostics(entry.owner).length)
+        )
+          text = rebuildEntries(text, entry.owner, entry.spec, dest, mapped);
         if (
           basename(source) === "AGENTS.md" &&
           owners.includes(dirname(source))
@@ -606,28 +609,9 @@ export function assertMigrationIgnores(
     ...privateDirectories,
     ...sensitive.map(dirname),
   ]);
-  const paths = new Set([
-    journal,
-    ...sensitive,
-    ...[...directories].map((path) => path + "/"),
-  ]);
-  for (const path of paths) {
-    safeAncestors(path, root);
-    if (
-      spawnSync("git", [
-        "-C",
-        root,
-        "check-ignore",
-        "-q",
-        "--no-index",
-        "--",
-        path,
-      ]).status !== 0
-    )
-      throw new Error(
-        `private-ignore-coverage-failed: ${relative(root, path)}`,
-      );
-  }
+  const paths = [journal, ...sensitive];
+  for (const path of [...paths, ...directories]) safeAncestors(path, root);
+  assertPrivateIgnored(root, paths, [...directories]);
 }
 function ignoreBeforeCopy(target: string, job: MigrationJob) {
   const ignore = join(target, ".gitignore");
@@ -647,16 +631,12 @@ function ignoreBeforeCopy(target: string, job: MigrationJob) {
         fs.existsSync(ignore) ? mode(ignore) : 0o644,
       ),
     );
-  if (
-    spawnSync("git", ["-C", target, "rev-parse", "--show-toplevel"]).status ===
-    0
-  )
-    assertMigrationIgnores(
-      target,
-      job.private,
-      job.operations.map((op) => op.target),
-      join(target, MIGRATION_JOURNAL, "journal.json"),
-    );
+  assertMigrationIgnores(
+    target,
+    job.private,
+    job.operations.map((op) => op.target),
+    join(target, MIGRATION_JOURNAL, "journal.json"),
+  );
 }
 function validateSourceInventory(job: MigrationJob) {
   const sources = new Set(

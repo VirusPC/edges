@@ -725,3 +725,23 @@ test("saved gitlink refuses an intermediate pair with a conflicted target stage"
   assert.deepEqual(snapshot(root), before);
   assert.equal(git(root, "ls-files", "--stage"), index);
 });
+
+for (const failure of ['missing-binary', 'broken-repository'] as const)
+  test(`instance migration refuses ${failure} before journal or destination writes`, async t => {
+    const { root, manifest } = fixture(t), m = await load();
+    put(root, '.gitignore', '**/.recursive-layout-migration/\n!.recursive-layout-migration/\n!.recursive-layout-migration/**\n');
+    const before = snapshot(root), oldPath = process.env.PATH;
+    if (failure === 'missing-binary') process.env.PATH = join(root, 'missing-bin');
+    else {
+      fs.rmSync(join(root, '.git'), { recursive: true });
+      fs.symlinkSync('missing-repository', join(root, '.git'));
+    }
+    try { assert.throws(() => m.runInstanceMigration(root, manifest, true), /git|ENOENT/i); }
+    finally {
+      if (oldPath === undefined) delete process.env.PATH;
+      else process.env.PATH = oldPath;
+    }
+    assert.equal(fs.existsSync(join(root, '.recursive-layout-migration')), false);
+    assert.equal(fs.existsSync(join(root, manifest.tasks[0]!.target)), false);
+    assert.deepEqual(snapshot(root), before);
+  });

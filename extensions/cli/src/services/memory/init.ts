@@ -83,8 +83,8 @@ export function initMemory(options: InitMemoryOptions) {
     if (spec.gitignore && gitRoot)
       ensureTypeGitignore(gitRoot, spec.name, spec.module, spec.indexFile);
     const file = join(target, spec.indexFile);
-    if (spec.gitignore && gitRoot)
-      assertPrivateIgnored(gitRoot, [file], [dirname(file)]);
+    if (spec.gitignore)
+      assertPrivateIgnored(gitRoot ?? target, [file], [dirname(file)]);
     if (existsSync(file)) preserved.push(spec.indexFile);
     else {
       writeAtomic(

@@ -775,3 +775,65 @@ test("generic checks every private target before resumed writes", async (t) => {
     "new private bytes",
   );
 });
+
+for (const failure of ['missing-binary', 'broken-repository'] as const)
+  test(`migration refuses ${failure} before private journal or copies despite an ineffective existing rule`, async t => {
+    const root = fixture(t, ['user']), m = await load();
+    const source = '---\nname: user_probe\ndescription: synthetic\n---\nsynthetic secret\n';
+    put(root, '.memory/users/user_probe.md', source);
+    put(root, '.gitignore', '/.project-memory-migration/\n!/.project-memory-migration/\n');
+    const oldPath = process.env.PATH;
+    if (failure === 'missing-binary') process.env.PATH = join(root, 'missing-bin');
+    else {
+      fs.rmSync(join(root, '.git'), { recursive: true });
+      fs.symlinkSync('missing-repository', join(root, '.git'));
+    }
+    try {
+      assert.throws(() => m.migrateMemory({ targetDir: root }), /private-ignore-check-failed/);
+    } finally {
+      if (oldPath === undefined) delete process.env.PATH;
+      else process.env.PATH = oldPath;
+    }
+    assert.equal(fs.existsSync(join(root, '.project-memory-migration')), false);
+    assert.equal(fs.existsSync(join(root, '.harness')), false);
+    assert.equal(fs.readFileSync(join(root, '.memory/users/user_probe.md'), 'utf8'), source);
+  });
+
+test('migration supports a confirmed non-Git scope even without Git installed', async t => {
+  const root = fixture(t, ['user']), m = await load();
+  fs.rmSync(join(root, '.git'), { recursive: true });
+  put(root, '.memory/users/user_probe.md', '---\nname: user_probe\ndescription: synthetic\n---\nbody\n');
+  const oldPath = process.env.PATH;
+  process.env.PATH = join(root, 'missing-bin');
+  try { assert.equal(m.migrateMemory({ targetDir: root }).status, 'migrated'); }
+  finally {
+    if (oldPath === undefined) delete process.env.PATH;
+    else process.env.PATH = oldPath;
+  }
+  assert.ok(fs.existsSync(join(root, '.harness/memory/users/user_probe.md')));
+});
+
+test('migration renders multiline display fields and special filenames as one safe entry without changing source bytes', async t => {
+  const root = fixture(t, ['user']), m = await load();
+  const filename = 'user_tricky ) [name] #?.md';
+  const source = '---\nname: user_probe\ntitle: "A [test] title"\ndescription: "line one\\n- [forged](evil.md) — line two"\n---\nbody\n';
+  put(root, `.memory/users/${filename}`, source);
+  assert.equal(m.migrateMemory({ targetDir: root }).status, 'migrated');
+  const index = fs.readFileSync(join(root, '.harness/memory/users/AGENTS.md'), 'utf8');
+  const text = index.split('<!-- project-memory-entries:start -->')[1]!.split('<!-- project-memory-entries:end -->')[0]!.trim();
+  assert.equal(text.split('\n').length, 1);
+  const { fromMarkdown } = await import('mdast-util-from-markdown');
+  const nodes: import('mdast').Nodes[] = [];
+  const visit = (node: import('mdast').Nodes) => {
+    nodes.push(node);
+    if ('children' in node) node.children.forEach(visit);
+  };
+  visit(fromMarkdown(text));
+  assert.equal(nodes.filter(n => n.type === 'listItem').length, 1);
+  const links = nodes.filter(n => n.type === 'link');
+  assert.equal(links.length, 1);
+  assert.equal(links[0]!.url, 'user_tricky%20%29%20%5Bname%5D%20%23%3F.md');
+  assert.equal(links[0]!.children.map(n => 'value' in n ? n.value : '').join(''), 'A [test] title');
+  assert.ok(nodes.some(n => n.type === 'text' && n.value.includes('line one - [forged](evil.md) — line two')));
+  assert.equal(fs.readFileSync(join(root, `.harness/memory/users/${filename}`), 'utf8'), source);
+});

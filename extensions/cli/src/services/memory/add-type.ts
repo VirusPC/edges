@@ -63,7 +63,7 @@ export function addMemoryType(options: AddMemoryTypeOptions) {
     format = adopted?.format ?? (options.skillsFormat ? "skills" : "ordinary"),
     root = findGitRoot(target);
   if (gitignore && root) ensureTypeGitignore(root, name, module, indexName);
-  if (gitignore && root) assertPrivateIgnored(root, [file], [dirname(file)]);
+  if (gitignore) assertPrivateIgnored(root ?? target, [file], [dirname(file)]);
   const existed = isFile(file);
   if (!existed)
     writeAtomic(

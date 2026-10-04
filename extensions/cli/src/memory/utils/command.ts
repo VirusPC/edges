@@ -20,4 +20,3 @@ export function operation(ctx: CliContext, execute: () => unknown | Promise<unkn
 export function scoped(command: Command): Command {
   return command.option('--target-dir <directory>', 'Explicit target scope (otherwise use --scope or scope discovery)');
 }
-
