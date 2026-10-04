@@ -9,21 +9,21 @@
 本仓修改须使用独立 worktree。先保存自己的修改，再从工具所在 checkout 执行：
 
 ```bash
-python3 scripts/migrate-recursive-layout.py --worktree /absolute/path/to/owned-worktree --dry-run
-python3 scripts/migrate-recursive-layout.py --worktree /absolute/path/to/owned-worktree --apply
+pnpm migrate:recursive-layout --worktree /absolute/path/to/owned-worktree --dry-run
+pnpm migrate:recursive-layout --worktree /absolute/path/to/owned-worktree --apply
 ```
 
 也可以用 `pnpm migrate:recursive-layout --worktree <path> --dry-run`。`--worktree` 必须是 Git 工作树根，所有数据写入都限于该路径；脚本不安装技能、不部署服务、不改其他 checkout。完整迁移会核验清单的源哈希、保护文章哈希与 submodule 指针，有差异先停，不覆盖。
 
 公共类型索引合并会保留兼容的未知类型字段和 frontmatter 字段；同名字段值冲突或无法安全合并的元数据结构会在写入前报错，不任选一份或丢弃模块字段。
 
-脚本复用 `project-memory-migrate/scripts/migrate.py` 的规划、旧类型解析、元数据转换、路径保护、Markdown 链接重定位与文件状态写入接口；将通用规划的中间目标合成为审阅后的最终归属，再统一复制、验证并退役旧源。通用迁移器不内置 Edges 业务路径。观察模块的职责与导航以 `.harness/observation/AGENTS.md` 为入口；Memory、Skills 不新增容器总入口。
+脚本复用 `extensions/cli/src/services/memory/migrate.ts` 的规划、旧类型解析、元数据转换、路径保护、Markdown 链接重定位与文件状态写入接口；将通用规划的中间目标合成为审阅后的最终归属，再统一复制、验证并退役旧源。通用迁移器不内置 Edges 业务路径。观察模块的职责与导航以 `.harness/observation/AGENTS.md` 为入口；Memory、Skills 不新增容器总入口。
 
 自定义类型的模块与格式独立：未指定 module 时保留在 `memory/<原目录>`，显式 `module: memory|skills` 按原值保留；实例的 owner 合并继续使用通用迁移给出的类型目标。私有目录也保留旧 `.memory` 等祖先提供的权限限制，不仅比较类型目录自身。
 
 ## 每台机器的私有材料
 
-Git 提交只迁移公开内容，不能代表其他克隆的 ignored 用户材料已迁。即使已拉到新版公开目录，也要在需要升级的独立工作树上运行同一实例命令。普通 `project-memory-migrate --recursive` 保留旧 owner 关系，不能代替本实例的 owner 合并。
+Git 提交只迁移公开内容，不能代表其他克隆的 ignored 用户材料已迁。即使已拉到新版公开目录，也要在需要升级的独立工作树上运行同一实例命令。普通 `edges memory migrate --recursive` 保留旧 owner 关系，不能代替本实例的 owner 合并。
 
 清单的 `privateOwnerMap` 明确旧 owner 的目标：
 
@@ -51,7 +51,7 @@ Git 提交只迁移公开内容，不能代表其他克隆的 ignored 用户材�
 通用迁移器的 `.project-memory-migration/journal.json` 与上述实例日志不同。升级前的未完成通用日志缺少目录权限记录（`sourceDirectoryModes`、目录项的 `originalTargetMode` / `targetMode`），新版返回 `journal-directory-permissions-missing`，不会猜测历史权限或重放文件；已完成日志不重放，重复执行重新规划当前树，不受影响。保留原日志及两侧材料，在受保护的本机副本逐项核对文件状态与可信的迁移前目录权限；有完整备份时，在独立空目录恢复并以新版 dry-run、迁移和验证形成可审阅结果，再人工处理与原现场的差异。没有可信权限依据时交所有者裁决，不能删除日志、覆盖目标或假定旧源仍完整。具体步骤见 [迁移 Skill 的旧版日志恢复说明](../extensions/skills/project-memory-migrate/SKILL.md#旧版未完成日志的恢复)。实例日志原有的缺失索引恢复流程保持不变。
 
 ```bash
-python3 extensions/skills/project-memory-init/scripts/memory.py doctor --target-dir /absolute/path/to/owned-worktree
+pnpm --filter edges-cli exec tsx src/index.ts memory doctor --target-dir /absolute/path/to/owned-worktree
 pnpm --filter edges-cli exec tsx src/index.ts tasks --scope /absolute/path/to/owned-worktree --purpose domain list
 pnpm --filter edges-cli exec tsx src/index.ts tasks --scope /absolute/path/to/owned-worktree --purpose maintenance list
 scripts/link-agent-skills --dry-run

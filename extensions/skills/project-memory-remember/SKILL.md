@@ -1,14 +1,14 @@
 ---
 name: project-memory-remember
 description: 把可复用结论写入本项目 .harness 并刷新索引。用户要求记住时必须用；被纠正、用户给出可用想法/约定/约束、或任务产出已验证、以后还用得上的结论时也要主动用。
-version: 2.0.0
+version: 3.0.0
 ---
 
 # Project Memory Remember
 
 把结论写进仓库内的项目记忆。可提交类型（`feedback` / `project` / `reference` / `managed`）写入会进 git，是永久的；`--type user` 落在 gitignore 的 `.harness/memory/users/` 与 `.harness/memory/users/AGENTS.md`，不进版本历史。闸门按类型分开。
 
-下文的 `<init-dir>` 指同级的 `project-memory-init` skill 目录，通常在 `.agents/skills/` 下。
+执行能力由 Edges CLI 的 `edges memory remember` 提供；布局参考同级 project-memory-init 的 LAYOUT。
 
 ## 什么时候写
 
@@ -25,11 +25,11 @@ version: 2.0.0
 
 ## 怎么写
 
-1. 挑 `type`（该层已登记的可写类型：种子 + `AGENTS.md` 本层额外行；可选值和各自收什么见 `--help`，不要把 CLI 当成只有五/六个名字的闭集）和一个 `slug`（小写 snake_case，**不带类型前缀**，脚本会按 `type` 自动加；`managed` 例外，见下）。`referenced` 仍然只索引、不能 remember。`type` 决定这条记忆归到哪份记忆入口下，而读方是**按问题性质先挑入口**的——分错类型不只是标签错了，是让相关的人检索时压根走不到这条。
+1. 挑 `type`（该层已登记的可写类型：种子 + `AGENTS.md` 本层额外行；可选值和各自收什么见 `--help`，不要把 CLI 当成只有五/六个名字的闭集）和一个 `slug`（小写 snake_case，**不带类型前缀**，CLI 会按 `type` 自动加；`managed` 例外，见下）。`referenced` 仍然只索引、不能 remember。`type` 决定这条记忆归到哪份记忆入口下，而读方是**按问题性质先挑入口**的——分错类型不只是标签错了，是让相关的人检索时压根走不到这条。
 2. 去重：先看该类型的记忆入口，已有同主题条目就复用它的 `slug` 走更新，不要另起一条近义的。入口通常已经在上下文里；不在就 `rg` 一下。
 3. 拟 `--title` 和 `--description`。`description` 是索引里那句说明，**是别人判断「要不要打开这条」的唯一依据**，写清楚适用场景。
 4. 正文按「一句结论 → `**Why:**` → `**How to apply:**`」组织。`Why` 是为了以后能自己判断边界情况。
-5. 跑 `python3 <init-dir>/scripts/memory.py remember`，**参数见 `--help`**，那份输出就是契约。除 `--title` / `--description` 外的字段都由脚本自动填，不要手传。
+5. 跑 `edges --scope <目标作用域> memory remember`，**参数见 `--help`**，那份输出就是契约。除 `--title` / `--description` 外的审计与来源字段由 CLI 自动填，不要手传。
 
 ### `managed`：沉淀流程而不是结论
 
@@ -55,7 +55,7 @@ version: 2.0.0
 
 返回的 `path` 和 `action`（`created` / `updated`）就是写入凭据——索引是全量重算的，返回了路径就说明索引里有它，不必再查一遍。`agentsAction` 是 `needs-doctor` 时要一并说明：那表示该目录的 `AGENTS.md` 还没纳管，索引没能刷新。
 
-目标目录还没初始化（没有已采用的可写类型或本套作用域 `AGENTS.md`）时，脚本会拒绝写入。问用户要不要 Init，得到明确同意后再跑 `$project-memory-init`；不要自己 Init。从一份已有 `AGENTS.md` 批量抽记忆、并改它的区块外正文，用 `$project-memory-reshape`，不要一条条手搬。
+目标目录还没初始化（没有已采用的可写类型或本套作用域 `AGENTS.md`）时，CLI 会拒绝写入。问用户要不要 Init，得到明确同意后再跑 `$project-memory-init`；不要自己 Init。从一份已有 `AGENTS.md` 批量抽记忆、并改它的区块外正文，用 `$project-memory-reshape`，不要一条条手搬。
 
 ## 什么时候改派 subagent
 
@@ -69,6 +69,6 @@ version: 2.0.0
 
 **先看这次任务实际碰过哪些文件**，它们所在的目录就是候选：都落在同一个模块下，那个模块目录是第一候选；散在几个互不相干的目录，基本就是记忆根。但**作用范围不等于改动范围**——改的是某个模块，结论却可能是关于构建工具、发布流程或团队规范的，那仍然属于整仓。判据始终是「这条结论对哪些代码成立」，改动集只用来提候选。
 
-记忆入口由脚本从条目文件的 frontmatter 全量重算，**不要手改，也不要绕开脚本自己往 `.harness/` 的任何类型目录写文件**——那样入口不会更新，条目等于不存在。`.agents/skills/` 是唯一例外：它本来就归人与生态，脚本只索引它。找不到脚本就直说找不到，别改用手写。
+记忆入口由 CLI 从条目文件的 frontmatter 全量重算，**不要手改，也不要绕开 CLI 自己往 `.harness/` 的任何类型目录写文件**——那样入口不会更新，条目等于不存在。`.agents/skills/` 是唯一例外：它本来就归人与生态，CLI 只索引它。命令不可用时明确报告缺口，别改用手写或临时脚本。
 
 新版只写 `.harness`。旧布局先运行独立 `$project-memory-migrate`，不要自行改名或让 doctor 迁移。可写自定义 Skill 格式类型保留原模块，不能因格式相同就当作 managed。

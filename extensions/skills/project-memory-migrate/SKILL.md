@@ -1,17 +1,17 @@
 ---
 name: project-memory-migrate
 description: 将明确指定作用域的旧 Project Memory .memory 一次性迁到 .harness/memory 和 .harness/skills；保留私有内容、技能资产、来源权限与稀疏子作用域。用于旧项目升级或 Git 升级后遗留的本机用户记忆，不迁业务目录。
-version: 1.0.2
+version: 2.0.0
 ---
 
 # Project Memory Migrate
 
-新版 Project Memory 只读写 `.harness`；旧格式解析只在本 Skill 中。须与同级 `project-memory-init` 一起分发，脚本借用其新布局校验器。布局契约见 [LAYOUT](../project-memory-init/references/LAYOUT.md)。
+新版 Project Memory 只读写 `.harness`；旧格式解析只在 CLI 的显式迁移服务中。本 Skill 调用 `edges memory migrate`，复用 CLI 的新布局校验器。布局契约见 [LAYOUT](../project-memory-init/references/LAYOUT.md)。
 
 明确目标作用域后直接运行；仓库要求 worktree 时先遵守仓规。`--recursive` 包含其下实际记忆层，不创建普通目录的作用域，不跨 Git 仓库或 submodule，不沿外部安装目录链接写入。
 
 ```bash
-python3 <skill-dir>/scripts/migrate.py --target-dir <作用域> [--root-dir <记忆根>] [--recursive] [--dry-run]
+edges memory migrate --target-dir <作用域> [--root-dir <记忆根>] [--recursive] [--dry-run]
 ```
 
 不加 `--dry-run` 时，一次调用完成全范围预检、忽略规则、复制、校验和旧真源清理。`--dry-run` 只返回路径映射与诊断。`skills` → `skills/managed`、`agent_skills` → `skills/referenced`；自定义类型默认保留在 `memory/<原目录>`，显式 `module: memory|skills` 按原值保留，模块归属不由 `format` 决定。自定义类型保留身份、格式、未知元数据和显式 writable/gitignore 权限，缺失、占用官方路径或冲突时停止，不猜权限。

@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 节点模型与 NodeService：补齐 Note/Skill，与 Task/Memory 并列；local 查询、引用和归属协调；设计未实施
+description: 节点与 NodeService 设计；Skill 须遵循标准完整目录定义，入口文档与资源、目录操作边界待修订
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T22:56:34+08:00"
+  edges-updated-at: "2026-10-04T23:09:00+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -179,3 +179,11 @@ children 的引用携带 kind，区分 local（本层记忆）与 descendant（�
 **Why:** 知识笔记、项目记忆、可执行方法具有不同领域职责，即使共用 Markdown/frontmatter 也不应全部归入 MemoryNode；当前已有 Note 入库和 Skill 文档契约可作为依据。
 
 **How to apply:** NoteNode.title 按现有 Note 一级标题读写 body，不另造标题 YAML 字段或强制统一笔记章节；SkillNode.name/description 读取现有 frontmatter，body 承载方法说明。managed/referenced 保留为维护职责，由 service 遵守来源写权限，不拆成 Skill 子类。技能附属文件与安装、Note 的 Git/PR 流程继续由相应服务或工作流负责，不搬入模型。公共 NodeService 可显式使用这两种构造器，文档 CRUD 不代表技能目录安装管理。此为已补齐的设计，运行时尚未迁移。
+
+## 2026-10-04 用户纠正：Skill 按标准 Agent Skills 的完整目录定义
+
+Skill 是至少包含 SKILL.md 的目录，可以包含 scripts、references、assets 及其他文件或目录。用户强调直接采用标准定义，不能把 Skill 概念缩成单份 Markdown 文档。
+
+**Why:** 仅建模入口文档不足以覆盖技能资源及整个技能的复制、移动、删除；当前 SkillNode 说明把完整目录问题推给既有流程，未充分表达技能边界。
+
+**How to apply:** 以 [Agent Skills Specification](https://agentskills.io/specification) 为格式依据；三类常见附属目录都是可选约定，不是封闭清单。入口内容与附属资源支持按需读取，不能为适配 BaseNode 将脚本、图片等强制视为 Markdown 子节点。NodeReference.children 的逻辑归属与目录资源清单分开。SkillNode 的入口路径、目录属性及目录级 service 接口需要据此修订；具体 TypeScript 映射仍在讨论，不将已确认的标准定义等同于接口已定稿或实现已完成。

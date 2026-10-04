@@ -1,7 +1,7 @@
 ---
 name: project-memory-reshape
 description: 把已有 AGENTS.md 按 project-memory-init 的形状重新组织：硬约束写进入口对应区块，区块外只留身份与指针，长规范进 important 或 README，记忆内容抽到 .harness/memory，其余受管区块只留索引。用户要求整理、改造、迁移、重组已有 AGENTS.md 时使用；init/doctor 不改正文，不要用它们代替本 skill。
-version: 2.0.0
+version: 3.0.0
 ---
 
 # Project Memory Reshape
@@ -45,7 +45,7 @@ version: 2.0.0
 2. **结构先就位。** 用户要求 reshape 这份文件，视为同时同意对该目录 Init。$project-memory-init 的新层需先按实际需求选择 Memory/Skills 类型；没有已采用类型就跑 `$project-memory-init`；它返回 `needs-doctor` 时先跑 `$project-memory-doctor --apply`（只补挂区块），再 init。Ask / Remember / Doctor 仍然不得代为 Init。
 3. 只读受管区块**之外**的正文，按上一节分类，列出计划：留 / 抽（`type` + `slug` + 一句 description）/ 删。已有同主题记忆就复用 slug 走更新。
 4. 把计划讲给用户。得到同意后再改。用户已经把「重组这份 AGENTS.md」连同范围说清楚了，仍要先列出拆分再动手。
-5. 抽取走 `$project-memory-remember`，参数见 `python3 <init-dir>/scripts/memory.py remember --help`。
+5. 抽取走 `$project-memory-remember`，参数见 `edges memory remember --help`。
 6. 改 `AGENTS.md` 时：硬约束写进对应区块正文；**其它受管区块不要手写索引行**，交给 init / remember / doctor 刷新。别的工具的受管块（标记名不是 `project-memory`）原样保留。
 7. 跑一次 doctor（先诊断）。有结构 finding 再请用户确认后 `--apply`。汇报：留下了哪些常驻段落、新建/更新了哪些记忆、删了什么。
 

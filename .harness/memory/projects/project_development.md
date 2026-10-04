@@ -4,9 +4,10 @@ description: 修改顺序：协议 → 布局 → init → 其他非 doctor skil
 metadata:
   edges-title: Project Memory 系列 Skill 开发流程
   edges-type: project
-  edges-username: viruspc
+  edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: "2026-09-06T13:38:38+08:00"
+  edges-updated-at: '2026-10-05T00:06:56+08:00'
+  edges-agent-client: codex
 ---
 
 # Project Memory 系列 Skill 开发流程
@@ -39,11 +40,11 @@ project-memory-doctor
 
 把协议落实成目标布局：文件与目录、类型入口、区块标记、模板映射及其他由本实现拥有的约定都在 [`LAYOUT.md`](../../../extensions/skills/project-memory-init/references/LAYOUT.md) 里先定清楚。
 
-完成判据：它描述的是修改完成后的唯一目标态。若改动已发布产物的名字，同时登记 `project-memory-doctor` 需要承担的旧结构识别与迁移义务。
+完成判据：它描述的是修改完成后的唯一目标态。若改动已发布产物的名字，同时登记显式迁移命令承担的转换义务，以及 doctor 对旧结构的诊断边界。
 
 ## 3. 修改 `project-memory-init`
 
-按目标布局修改 `project-memory-init` 的 `SKILL.md`、模板、共享脚本和相关说明。系列共用的落盘实现与 CLI 都以这里为家；代码分层与修改入口见 [`scripts/OVERVIEW.md`](../../../extensions/skills/project-memory-init/scripts/OVERVIEW.md)。
+按目标布局修改 `project-memory-init` 的 `SKILL.md`、模板和相关说明。用户确认执行能力统一进入 TypeScript CLI；Skill 保留推理、内容规范与审阅流程，避免维护 Python 与 CLI 两套行为。模板仍以 init Skill 为真源，CLI 构建时携带。执行边界见 [runtime.md](../../../extensions/skills/project-memory-init/references/runtime.md)。
 
 完成判据：新建产物符合 `LAYOUT.md`，重复执行保持幂等，对外 CLI 与输出能支撑下游 skill。
 
@@ -55,13 +56,13 @@ project-memory-doctor
 
 ## 5. 最后修改 `project-memory-doctor`
 
-最后才修改 `project-memory-doctor`。此时协议、目标布局、生成端和其他消费方都已稳定，doctor 才能以最终状态为准补齐诊断、旧结构迁移和修复逻辑。
+最后才修改 `project-memory-doctor`。此时协议、目标布局、生成端和其他消费方都已稳定，doctor 才能以最终状态为准补齐诊断与修复逻辑；旧结构转换由显式 `edges memory migrate` 承担。
 
 完成判据：doctor 能识别需要支持的旧状态，修复后收敛到 `LAYOUT.md`，再次检查没有同类 finding；既有正文与不归本套管理的内容保持不变。
 
 ## 收尾检查
 
-- 核对 `PROTOCOL.md`、`LAYOUT.md`、模板、脚本与各 SKILL.md 没有相互矛盾。
+- 核对 `PROTOCOL.md`、`LAYOUT.md`、模板、CLI 与各 SKILL.md 没有相互矛盾。
 - 搜索旧路径、旧名字和旧类型，区分应迁移的兼容代码与应清理的过期引用。
 - 在临时目录验证 init、remember、ask 所依赖的产物，以及 doctor 的诊断、修复和二次运行幂等性。
 - 如果修改了 skill 目录，按 [`extensions/skills/README.md`](../../../extensions/skills/README.md) 的分发说明复核安装后的文件集合。

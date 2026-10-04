@@ -23,14 +23,14 @@
 
 `.harness/`、`memory/`、`skills/` 无必经总入口，不创建 `.harness/skills/AGENTS.md`。下层作用域可跨多层目录，也可在 `.harness/evaluation` 等模块内；目录名称、源码包或业务 `AGENTS.md` 本身不表示独立作用域。
 
-运行时 `is_scope()` 判据：本层 `AGENTS.md` 同时含 `project-memory` 外层标记和 `project-memory-local` 或 `project-memory-children` 区块。Skills-only 层同样满足；只有 Task 模块的层如要成为该树的独立作用域，也须显式提供此作用域契约。类型入口只含 entries/type 元数据，不是子层；Task 看板 AGENTS 不自动成为子层。Doctor 可发现有已采用类型但缺层入口的损坏层并修复，不把普通 `.harness` 目录当作用域。
+运行时作用域判据：本层 `AGENTS.md` 同时含 `project-memory` 外层标记和 `project-memory-local` 或 `project-memory-children` 区块。Skills-only 层同样满足；只有 Task 模块的层如要成为该树的独立作用域，也须显式提供此作用域契约。类型入口只含 entries/type 元数据，不是子层；Task 看板 AGENTS 不自动成为子层。Doctor 可发现有已采用类型但缺层入口的损坏层并修复，不把普通 `.harness` 目录当作用域。
 
 根参数优先：`--root-dir` 明确封住树，不跨其他 Git root/submodule。未给时取 Git 根，否则最近的受管层入口，否则目标自身。扫描允许穿过 `.harness` 到达真实子层，但跳过其他隐藏目录、node_modules、符号链接目录和嵌套 Git 根。
 
 ## 选择式初始化
 
 ```bash
-python3 <init-dir>/scripts/memory.py init --target-dir S --root-dir R \
+edges --scope S memory init --root-dir R \
   --memory-types project feedback reference user \
   --skill-types managed referenced
 ```
@@ -51,15 +51,15 @@ python3 <init-dir>/scripts/memory.py init --target-dir S --root-dir R \
 ## 自定义类型与格式
 
 ```bash
-python3 <init-dir>/scripts/memory.py add-type --target-dir S \
+edges --scope S memory add-type \
   --module memory --name recipes --description '可复用操作手册' --skills-format
 ```
 
 `--module memory|skills` 默认 memory。`--gitignore` 忽略整类正文及索引；`--index-only` 使 remember 拒绝写正文；`--skills-format` 采用 `<name>/SKILL.md`。模块、格式、可写性是独立维度。自定义 Skill 格式类型默认仍在 `.harness/memory/<原复数目录>`，不能因格式自动移到 skills。自定义类型身份全层唯一，跨模块重复登记报错；官方名称和路径不能被覆盖。外部自定义来源参数暂不支持。
 
-类型入口特权注释为 `project-memory-type`，字段包括 `name`、`module`、`description`、`gitignore`、`writable`、`format`。省略 module 的现有自定义元数据默认 memory；`format` 为 `ordinary|skills`，布尔字段严格使用 `true|false`。未知元数据不影响发现，刷新仅替换 entries 区块，保留原 metadata 与手写引言。没有 metadata 的官方类型按官方契约推导；自定义类型必须保留 metadata 区块，且显式包含 writable 与 gitignore 权限字段；单个权限字段缺失也拒绝推断。索引或区块缺失时无法安全恢复身份与权限，报告 unsafe-layout 并拒绝写入，不能从目录名猜测可写/公开默认值。
+类型入口特权注释为 `project-memory-type`，字段包括 `name`、`module`、`description`、`gitignore`、`writable`、`format`。省略 module 的现有自定义元数据默认 memory；`format` 为 `ordinary|skills`，布尔字段必须解析为 YAML boolean，推荐写成 `true` / `false`，不接受字符串。未知元数据不影响发现，刷新仅替换 entries 区块，保留原 metadata 与手写引言。没有 metadata 的官方类型按官方契约推导；自定义类型必须保留 metadata 区块，且显式包含 writable 与 gitignore 权限字段；单个权限字段缺失也拒绝推断。索引或区块缺失时无法安全恢复身份与权限，报告 unsafe-layout 并拒绝写入，不能从目录名猜测可写/公开默认值。
 
-`TypeSpec.index_file`、`discover_layer_types()` 的值和 `type_index_relpath()` 均为**作用域相对路径**，包含 `.harness/<module>/...`。`TypeSpec.module` 记录模块。消费者使用 `type_index_path(target, type)`、`type_content_dir(target, type)`；不能把全部 type 拼到 `memory_dir()` 下。
+类型入口地址均为**作用域相对路径**，包含 `.harness/<module>/...`，类型描述同时记录所属模块。消费者通过 CLI 的类型发现与路径解析能力定位索引和正文；不能把全部 type 拼到 memory 容器下。
 
 ## 来源和写入边界
 
@@ -77,7 +77,13 @@ python3 <init-dir>/scripts/memory.py add-type --target-dir S \
 
 普通条目为 YAML frontmatter + Markdown，前缀仍是类型原值，slug 为 snake_case。Skill 格式 slug 为 kebab-case（1–64 字符），name 为目录名。详细字段见 [`frontmatter-fields.md`](frontmatter-fields.md)：顶层遵循 Agent Skills 闭集，实现字段放 `metadata.edges-*`；读取既有顶层字段不等于支持旧目录布局，常规 doctor 不重写文件头。
 
-模板在 `templates/`：层入口 `AGENTS.tmpl.md`；官方类型 `USER/FEEDBACK/PROJECT/REFERENCE/MANAGED/REFERENCED.tmpl.md`；自定义类型 `TYPE.tmpl.md`；普通正文 `type_slug.tmpl.md`、Skill 正文 `SKILL.tmpl.md`；列表行 `entry_line.tmpl.md`。模板官方全集用于推荐与选中类型渲染，不自动采用全部类型。
+模板在 `templates/`：层入口 `AGENTS.tmpl.md`；官方类型 `USER/FEEDBACK/PROJECT/REFERENCE/MANAGED/REFERENCED.tmpl.md`；自定义类型 `TYPE.tmpl.md`；普通正文 `type_slug.tmpl.md`、Skill 正文 `SKILL.tmpl.md`；列表行 `entry_line.tmpl.md`。模板官方全集用于推荐与选中类型渲染，不自动采用全部类型。CLI 构建时携带这些模板；运行已构建的 CLI 不依赖另一个已安装 Skill 的源码目录。
+
+## 执行入口
+
+执行实现位于 `extensions/cli`，使用 TypeScript。`edges memory` 提供 init、remember、add-type、doctor、migrate、backup、restore；完整参数以各命令 `--help` 为准。目标通过根参数 `--scope` 选择；`--target-dir` 可显式指定同一目标，归档命令沿用 `--repo-dir`。JSON 输出保留操作结果与诊断；Skill 承担内容判断、选择及人审，不再分发 Python 执行层。
+
+作用域和目录 IO、类型发现、索引维护由 service 承担；Markdown/YAML 解析复用 CLI 内置的 gray-matter 默认行为，不另写 YAML 解析器。迁移器单独保留旧布局解析和恢复日志，日常操作仍不兼容旧布局。
 
 ## Doctor
 

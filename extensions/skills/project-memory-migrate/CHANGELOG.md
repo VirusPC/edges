@@ -5,6 +5,12 @@ The format follows Keep a Changelog and Semantic Versioning.
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-04
+
+### Changed
+
+- 执行入口迁至 TypeScript `edges memory` CLI；使用前需安装或构建 CLI，模板随构建产物分发，保留原有工作流与权限边界。
+
 ## [1.0.2] - 2026-10-03
 
 ### Fixed

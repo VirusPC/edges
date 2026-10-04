@@ -1,7 +1,7 @@
 ---
 name: project-memory-doctor
 description: 诊断并修复已采用的 .harness 项目记忆索引与作用域登记。默认只诊断；明确授权修复时 apply。旧布局只报告迁移需求。
-version: 2.0.0
+version: 3.0.0
 ---
 
 # Project Memory Doctor
@@ -9,7 +9,7 @@ version: 2.0.0
 用户要求检查、修复项目记忆，或 init 返回 needs-doctor 时使用。目标态见 [LAYOUT](../project-memory-init/references/LAYOUT.md)。默认只诊断；用户已明确要求修复可直接 apply，否则先说明具体 findings 再获得授权。
 
 ```bash
-python3 <init-dir>/scripts/memory.py doctor \
+edges memory doctor \
   --target-dir <scope> [--root-dir <boundary>] [--apply]
 ```
 

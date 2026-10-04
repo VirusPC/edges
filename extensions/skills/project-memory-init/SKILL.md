@@ -1,7 +1,7 @@
 ---
 name: project-memory-init
 description: 在指定作用域按用户选择创建或刷新项目记忆与技能类型（AGENTS.md + .harness）。仅当用户明确要求初始化时使用，不覆盖已有正文。
-version: 2.0.0
+version: 3.0.0
 ---
 
 # Project Memory Init
@@ -11,7 +11,7 @@ version: 2.0.0
 模块默认推荐 memory、skills、tasks，按作用域目标采用；Project Memory 只负责前两者的类型。新层先展示 memory 的 project / feedback / reference / user 与 skills 的 managed / referenced 用途，让用户选择，不预建全部。用户已明确选择时直接执行；未选择时命令返回 `selectionRequired` 和推荐清单且不改文件。已有层不传选择只刷新已采用类型。
 
 ```bash
-python3 <skill-dir>/scripts/memory.py init \
+edges memory init \
   --target-dir <scope> [--root-dir <root>] \
   [--memory-types project feedback reference user] \
   [--skill-types managed referenced] \
@@ -26,4 +26,4 @@ python3 <skill-dir>/scripts/memory.py init \
 
 按 JSON 汇报 created / preserved、agentsAction / indexAction 和下层条目移动。`needs-doctor` 表示只有人工 AGENTS，文件未被覆盖；交给 doctor 追加区块。`complete: false` 的 diagnostics 必须说明，尤其来源缺失或不可读时保留原索引，不能称为空来源刷新成功。旧层返回 `migration-required`，转 `$project-memory-migrate`，不让 doctor 迁移。
 
-工具只维护自己的区块，现有硬约束与手写正文不覆盖。实现分层见 [scripts/OVERVIEW.md](scripts/OVERVIEW.md)，类型和字段结构由 references/templates 定义。
+工具只维护自己的区块，现有硬约束与手写正文不覆盖。需先安装提供 `edges memory` 的 Edges CLI；运行 `edges memory init --help` 检查命令可用性。模板随 CLI 构建分发，类型和字段结构见 references/templates。实现分层见 [运行时说明](references/runtime.md)。

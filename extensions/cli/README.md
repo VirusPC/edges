@@ -28,10 +28,30 @@ The command tree is built with [Commander.js](https://github.com/tj/commander.js
 edges note …          # ingest a note (required flags on this command)
 edges tasks …         # Task board (list/get/create/update/status + project + read-only runs)
 edges artifacts …     # short-lived preview publish / rm (thin client)
+edges memory …        # init / remember / add-type / doctor / migrate / backup / restore
 edges --help / -v
 ```
 
 **Breaking rename:** the bin is `edges` only. There is no `edges-note` shim and no default ingest at the root. Callers must migrate to `edges note …`. Running `edges` without a subcommand is a usage error.
+
+## Project Memory
+
+Project Memory runs in TypeScript through `edges memory`; skills describe the workflow and invoke these commands. Select a content scope explicitly, independently of the installed CLI location:
+
+```bash
+edges --scope /absolute/project memory init --memory-types project feedback
+edges --scope /absolute/project memory remember --type project --slug decision \
+  --description 'Why the project chose this approach' --content-file /tmp/decision.md
+edges --scope /absolute/project memory doctor
+edges --scope /absolute/project memory doctor --apply
+edges --scope /absolute/legacy-project memory migrate --recursive --dry-run
+edges memory backup --repo-dir /absolute/project
+edges memory restore --repo-dir /absolute/project --archive /private/archive.tar.gz
+```
+
+Commands return JSON. Init without a selection on a new scope returns recommendations without writing; remember does not initialize missing scopes. Doctor is read-only unless `--apply` is present. Ordinary commands reject the old `.memory` layout; only migrate converts it. Restore refuses occupied user memory unless replacement is explicitly authorized with `--force`.
+
+The built CLI carries its canonical Markdown templates in `dist/assets/memory/templates`, so it can run outside the source checkout without sibling skills or Python. Business rules, source permissions and private ignore rules remain defined by [Project Memory LAYOUT](../skills/project-memory-init/references/LAYOUT.md).
 
 Design decision: [`.memory/projects/project_cli_from_mcp.md`](../../.harness/memory/projects/project_cli_from_mcp.md). Agent-CLI mechanics: [`.memory/references/reference_agent_oriented_cli.md`](../../.harness/memory/references/reference_agent_oriented_cli.md).
 

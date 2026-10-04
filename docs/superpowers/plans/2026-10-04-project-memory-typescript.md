@@ -35,12 +35,13 @@
 
 ### Task 2: Port explicit migration and private archives
 
-**Files:** Create `extensions/cli/src/services/memory/migrate.ts` and migration helpers; `archive.ts` for user backup/restore; tests under `extensions/cli/test/memory/` with distinct names. Existing Python references: project-memory-migrate/scripts and user-memory-backup/restore/scripts. Dependency updates only if needed for a maintained archive library.
+**Files:** Create `extensions/cli/src/services/memory/migrate.ts` and migration helpers; `archive.ts` for user backup/restore; tests under `extensions/cli/test/memory/` with distinct names. Also port the direct runtime consumer `scripts/migrate-recursive-layout.py` to `scripts/migrate-recursive-layout.mts`, with tests ported from `scripts/test_migrate_recursive_layout.py`. Existing Python references: project-memory-migrate/scripts and user-memory-backup/restore/scripts. Dependency updates only if needed for a maintained archive library.
 
 **Interfaces:** `migrateMemory({targetDir,rootDir?,recursive?,dryRun?})`, `backupUserMemory({repoDir,outputDir?,timestamp?})`, `restoreUserMemory({archive,repoDir,force?})`; preserve JSON result fields and migration journal semantics. Consume Task 1's path/type/index helpers without duplicated ordinary runtime.
 
 - [ ] Write regression tests before porting: readonly dry-run, conflict nonmutation, resume/journal validation, private ignored files and attached resources, nested scope mapping, backup/restore roundtrip, occupied-target refusal, forced replacement, archive traversal/link/duplicate rejection.
 - [ ] Port the migration state machine without changing original Markdown bytes except intended indexes/links. Archives must stage and validate before replacement; no shell interpolation or unsafe extraction.
+- [ ] Keep the Edges instance migration as a separate repository tool using the generic migration exports. Preserve its reviewed owner map, protected-post hashes, submodule pointers and resume behavior; do not embed Edges business paths in the generic command.
 - [ ] Run the new tests, typecheck, and compare representative old/new command results in temporary fixtures. Never use live user data for destructive tests.
 - [ ] Commit owned files and provide evidence for review.
 
