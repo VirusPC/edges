@@ -31,7 +31,7 @@ format: ordinary
 - [可扩展 Memory Type：LAYOUT 登记，不另开注册表](project_extensible_memory_types.md) — 可扩展 Memory Type：扩展面只在 LAYOUT，用 project-memory-add-type 登记；官方种子仍是六类。决策见 docs/adr/0006-extensible-project-memory-types.md。
 - [前端图标默认 Lucide](project_frontend_icon_set.md) — 改审阅壳或后续前端图标时打开：默认 Lucide（按需、可调 size/color/stroke）。同一产品不混搭。tasks-review 折叠用 ChevronDown/ChevronRight，筛选关闭用 X，不要可见文字收起/展开/关闭。正文在 knowledge/notes/2026-09-25--前端图标选型.md。
 - [Git 管理记忆的版本与共享范围](project_git_memory_management.md) — 概括 Edges 核心思想时：Git 管理还包括跟踪与忽略规则，例如 user memory 通过 gitignore 不随 Git 提交与共享；不能只解释成版本历史、分支和回滚。
-- [idea→task→专家→Cloud Agent→改状态](project_idea_todo_expert_cloud_loop.md) — 工作流：idea 记到 knowledge/tasks（Task 记录员）→ 有空时专家 Agent 细聊 → Cursor Cloud Agent 开发 → 开发完改 Task 状态
+- [idea→task→专家→Cloud Agent→改状态](project_idea_todo_expert_cloud_loop.md) — 工作流：idea 在领域 tasks/ 或维护 .harness/tasks/ 落卡，经专家细聊、开发、回写 Task 状态；旧 knowledge/tasks/ 与直推 main 仅是 2026-09-10 历史。
 - [v1 Langfuse 用官方 docker compose](project_langfuse_docker_compose.md) — 选自托管 Langfuse 的 v1 编排、或有人提出上 Kubernetes 时打开：用官方 docker compose（文档里的 Postgres + Langfuse 栈及其官方依赖），不用 k8s；本仓不提交带密钥的 compose。决策见 docs/adr/0016-langfuse-docker-compose.md。
 - [自部署 Langfuse 与 Observation 产品卡分开](project_langfuse_infra_vs_observation_product.md) — 改自部署 Langfuse 卡、知识库 Observation 系统、或想把两者并成一条时打开：前者只做实例部署/运维/鉴权/备份；后者是 traces/logs/dashboard 产品语义。v1 验收先 UI 再 1–2 个客户端（ADR 0020）；更广接线留产品卡。决策见 docs/adr/0015-langfuse-infra-vs-observation-product.md。
 - [v1 Langfuse 用 named volume + 偶发 tar](project_langfuse_named_volumes_manual_backup.md) — 选自托管 Langfuse 的 v1 数据面、HA 或备份方案时打开：Docker named volume + 偶尔手工/脚本 tar；无 HA。定时机外备份（NAS/云）是后续未做。决策见 docs/adr/0019-langfuse-named-volumes-manual-backup.md。
@@ -59,9 +59,9 @@ format: ordinary
 - [Task Doc 字段真源是 JSON Schema](project_task_doc_json_schema.md) — 改 Task frontmatter、CLI 的 Task 文档类型，或看板条目的 doc 时打开：字段真源是 extensions/cli/schemas/task-doc.v1.json（name、description、metadata、body）；不要自造轻量配置，也不要另开看板顶层 schema。决策见 docs/adr/0022。
 - [Task Project 审阅页是 render-only CLI](project_task_project_review_page_render_only_cli.md) — 改审阅壳或 edges tasks project review-page 时打开：仍只渲染、无 --mode。桌面三栏见 ADR 0022。窄屏同一页纵向分段，滚动必须能到顶也能到 Details。章节头是过渡色面，状态行贴背景且比章节小一档。筛选入口是 ListFilter 图标。双击章节标题滚到该节，回到看板滚到当前卡片。不要视口面板。源码在 apps/tasks-review-app/。
 - [Tasks 核心思想：与 /goal、loop engineering 同构](project_tasks_align_goal_and_loop_engineering.md) — 设计或验收 tasks 时：目标+完成标准要与 /goal、loop engineering 一起想；开卡时完成标准可暂缺、grill 后补；沉淀结论时同时写清背景上下文。
-- [tasks 只追加直接推 main](project_tasks_direct_main.md) — 往 knowledge/tasks/ 写只追加速记时，直接提交 main、不提 PR
+- [2026-09-10 Task 速记直推 main（历史约定）](project_tasks_direct_main.md) — 2026-09-10 旧 knowledge/tasks 只追加速记曾约定直推 main；当前领域 tasks/ 与维护 .harness/tasks/ 通过 CLI 和独立 worktree 操作，发布按当次流程。
 - [持久 /tasks/ 看板站：复用 review-page，扩展 Deploy](project_tasks_persistent_board_site.md) — 改 /tasks/ 持久入口、list --group-by、或看板站 vs Artifacts 时打开：不新开 status station；复用同一审阅壳。不窄于 md 时为三栏且不写回 git。窄屏布局见 ADR 0023。决策见 docs/adr/0021、0022 与 0023。
-- [工作项叫 tasks，支持状态流转](project_tasks_with_status_not_todos.md) — idea→专家→Cloud 工作流下，目录与概念用 knowledge/tasks/（非 todos），按 Task Project 再按 edges-tasks-status 分夹流转
+- [工作项叫 tasks，支持状态流转](project_tasks_with_status_not_todos.md) — Task 工作项按 Task Project 与 edges-tasks-status 分夹；当前领域板在 tasks/，Edges 维护板在 .harness/tasks/，旧 knowledge/tasks/ 仅是迁移史料。
 - [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push.md) — 改 teaching、/tasks/ 或 ECS 部署时：SSH 只在 deploy.yml 的 deploy job；production 不挂 url；site-teaching 与 site-tasks 都 needs deploy，分别登记 https://edges.viruspc.tech/teaching/ 与 /tasks/；summary 列两个 URL。不要拆成两次 SSH，不要用 teach.\* 或裸 IP。不要新开 workflow（ADR 0021）。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks\_direct\_main
 <!-- project-memory-entries:end -->
