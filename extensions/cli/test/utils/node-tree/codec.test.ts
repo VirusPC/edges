@@ -17,9 +17,9 @@ test('pure parsing returns the three-part model with unresolved references and n
   assert.deepEqual(model.children, [{ content: [{ kind: 'link', label: 'Child', target: 'nested/AGENTS.md' }] }]);
 });
 
-test('unchanged serialization preserves source exactly including CRLF, BOM and unknown extensions', () => {
+test('unchanged serialization preserves body CRLF and unknown extensions after default BOM removal', () => {
   const original = '\uFEFF' + source.replaceAll('\n', '\r\n');
-  assert.equal(serializeNode(parseNode(original), original), original);
+  assert.equal(serializeNode(parseNode(original), original), original.slice(1));
 });
 
 test('editing one constraint preserves every other original source fragment', () => {

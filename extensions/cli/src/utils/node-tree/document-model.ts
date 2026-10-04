@@ -1,5 +1,6 @@
 /** Shared document data; no YAML syntax, AST, file location or domain schema. */
-export type MetadataValue = string | number | boolean | null | MetadataValue[] | Metadata;
+/** YAML values follow the library; domains narrow them to their own field types. */
+export type MetadataValue = unknown;
 export interface Metadata { [key: string]: MetadataValue }
 
 /** Document handling family, distinct from Memory content types such as project/feedback. */

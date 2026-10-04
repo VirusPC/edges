@@ -151,11 +151,11 @@ test("Task YAML supports multiline and single-quoted fields", () => {
 });
 
 test("Task metadata edits retain unknown nested fields", () => {
-  const source = "---\nname: test\nmetadata:\n  edges-tasks-status: todo # explanation\n  extension: {nested: [one, two]}\n---\nBody without trailing newline";
+  const source = "---\nname: test\nmetadata:\n  edges-tasks-status: todo # explanation\n  extension: {nested: [one, two]}\n---\nBody with a trailing newline\n";
   const result = setMetadataField(source, "edges-tasks-status", "done");
   assert.equal(parseTaskDoc(result).metadata["edges-tasks-status"], "done");
   assert.deepEqual(taskDocumentCodec.parse(result).metadata!.metadata, { "edges-tasks-status": "done", extension: { nested: ["one", "two"] } });
-  assert.equal(parseTaskDoc(result).body, "Body without trailing newline");
+  assert.equal(parseTaskDoc(result).body, "Body with a trailing newline\n");
 });
 
 test("new Task titles and descriptions roundtrip YAML-significant strings", () => {

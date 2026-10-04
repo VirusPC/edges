@@ -42,7 +42,7 @@ status: proposed
 - CLI 适配：读取参数、环境变量和当前目录，将目标与遍历边界传给公共能力，并将结果或错误转为命令行输出。Git 根与仓库边界作为显式策略处理，不隐含等同于作用域根。
 - 业务模块：Tasks、Memory 等消费已解析的节点上下文，负责自身内容与操作，不各自重写节点识别和遍历，也不让公共层依赖 `TasksError` 等业务类型。
 
-2026-10-04 CLI 重构：按用户修正，公共实现放在 [`extensions/cli/src/utils/node-tree/`](../../extensions/cli/src/utils/node-tree/README.md)，提供节点读取、祖先查找、物理发现与按下层索引递归；`scope.ts` 保留 CLI 选择策略及 Git 回退，使用独立的验证错误，不再依赖 Tasks。公共节点读取不要求 Project Memory 标记，但 CLI 暂保留原有标记筛选，Tasks 的 `all` 也保持物理清查，避免把行为迁移混入解耦。跨层引用、去重及环、边界隔离由CLI 内的节点工具测试覆盖；局部记忆恢复不属于本次代码重构。Python 仍有独立实现，跨语言接入和统一识别策略待后续整体迁移落实。 模块统一使用 TypeScript，不单独建包；模型、解析/序列化与存储仍以目录和接口解耦。frontmatter 读取使用 `gray-matter`，YAML 数据由 `js-yaml` core schema 解析与生成。用户已明确无需保留 YAML 注释和样式；只保证字段值与正文内容，删除 YAML AST 编辑机制。
+2026-10-04 CLI 重构：按用户修正，公共实现放在 [`extensions/cli/src/utils/node-tree/`](../../extensions/cli/src/utils/node-tree/README.md)，提供节点读取、祖先查找、物理发现与按下层索引递归；`scope.ts` 保留 CLI 选择策略及 Git 回退，使用独立的验证错误，不再依赖 Tasks。公共节点读取不要求 Project Memory 标记，但 CLI 暂保留原有标记筛选，Tasks 的 `all` 也保持物理清查，避免把行为迁移混入解耦。跨层引用、去重及环、边界隔离由CLI 内的节点工具测试覆盖；局部记忆恢复不属于本次代码重构。Python 仍有独立实现，跨语言接入和统一识别策略待后续整体迁移落实。 模块统一使用 TypeScript，不单独建包；模型、解析/序列化与存储仍以目录和接口解耦。frontmatter 直接使用 `gray-matter` 默认解析与序列化，不自定义 YAML 引擎、日期、别名、分隔符或格式保留，也不直接依赖 `js-yaml`。字段校验留在领域层；文档不符合约定时修正文档，不增加兼容分支。
 
 **模型、格式与存储进一步解耦（用户确认，2026-10-04 实施）：**三部分内容与引用关系由不含路径、Markdown 原文或 AST 的 `NodeModel` 表达。纯 codec 负责解析／序列化；文件适配负责原文读写、路径与文件身份校验；组合层把模型、来源与位置分字段加载，CLI 消费组合结果。带原文的序列化保留未修改片段与未知扩展，无法保留时拒绝生成有损结果。此分层可独立复用，详见[实施与验证](../superpowers/plans/2026-10-04-node-model-codec-separation.md)。
 

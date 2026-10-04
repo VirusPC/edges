@@ -1,6 +1,7 @@
 import type { NodeModel, SectionKey, NodeLink, NodeItem } from '../model.js';
 import { decodeBody } from './parse.js';
-import { parseDocument, serializeDocument, sameValue as same } from './document.js';
+import { isDeepStrictEqual as same } from 'node:util';
+import { parseDocument, serializeDocument } from './document.js';
 
 const keys: SectionKey[] = ['constraints', 'memory', 'children'];
 const names = { constraints: ['important', '本层硬约束'], memory: ['local', '本层记忆'], children: ['children', '下层记忆索引'] };

@@ -1,5 +1,6 @@
-import { createMarkdownCodec, splitFrontmatter } from "../../utils/node-tree/codec/index.js";
+import { createMarkdownCodec } from "../../utils/node-tree/codec/index.js";
 import type { DocumentCodec, MarkdownDocument, Metadata, MetadataValue } from "../../utils/node-tree/document-model.js";
+import matter from "gray-matter";
 import type { TaskPriority, TaskProjectId, TaskStatus } from "./types.js";
 
 export type ParsedTaskDoc = {
@@ -16,8 +17,8 @@ function scalar(value: MetadataValue | undefined): string {
 
 function fields(value: MetadataValue | undefined): Metadata {
   if (value === undefined || value === null) return {};
-  if (typeof value !== "object" || Array.isArray(value)) throw new Error("Task metadata must be a mapping.");
-  return value;
+  if (typeof value !== "object" || (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)) throw new Error("Task metadata must be a mapping.");
+  return value as Metadata;
 }
 
 const taskFormat = createMarkdownCodec("task");
@@ -25,11 +26,11 @@ export const taskDocumentCodec: DocumentCodec<MarkdownDocument<"task">, "task"> 
   type: "task",
   parse(source) {
     const document = taskFormat.parse(source);
-    fields(document.metadata?.metadata);
+    fields(fields(document.metadata).metadata);
     return document;
   },
   serialize(document, originalSource) {
-    fields(document.metadata?.metadata);
+    fields(fields(document.metadata).metadata);
     return taskFormat.serialize(document, originalSource);
   },
 };
@@ -42,7 +43,7 @@ export function parseTaskDoc(markdown: string): ParsedTaskDoc {
     .map(([key, value]) => [key, scalar(value)]));
   return {
     name: scalar(header.name), description: scalar(header.description), metadata,
-    body: document.body, rawFrontmatter: (splitFrontmatter(markdown).rawFrontmatter ?? "").replace(/\r?\n$/, ""),
+    body: document.body, rawFrontmatter: matter(markdown, {}).matter ?? "",
   };
 }
 

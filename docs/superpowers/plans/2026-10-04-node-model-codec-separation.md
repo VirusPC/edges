@@ -1,6 +1,6 @@
 # Node Model / Codec / Storage Separation
 
-> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../extensions/cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；frontmatter 改用 `gray-matter` / `js-yaml`，取消 YAML 注释和样式保留目标。下文旧包路径、旧实现与验证属于历史记录，现行约定以链接的 API 文档为准。
+> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../extensions/cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；frontmatter 直接采用 `gray-matter` 默认解析/序列化，删除自定义格式行为及 `js-yaml` 直接依赖；不合约定的文档直接修正。下文旧包路径、旧实现与验证属于历史记录，现行约定以链接的 API 文档为准。
 
 > **For agentic workers:** Use executing-plans. The user approved this continuation in the current isolated worktree.
 

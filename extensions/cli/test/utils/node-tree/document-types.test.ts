@@ -35,7 +35,7 @@ test('typed Markdown codec rejects documents belonging to another codec', () => 
 
 test('Task codec validates Task metadata while reusing shared Markdown handling', () => {
   assert.ok(tasks.taskDocumentCodec);
-  const source = '---\nname: example\nmetadata:\n  edges-type: task\n  edges-title: original # keep\n---\nBody';
+  const source = '---\nname: example\nmetadata:\n  edges-type: task\n  edges-title: original # keep\n---\nBody\n';
   const doc = tasks.taskDocumentCodec.parse(source);
   assert.equal(doc.type, 'task');
   assert.deepEqual(tasks.taskDocumentCodec.parse(tasks.taskDocumentCodec.serialize(doc, source)), doc);

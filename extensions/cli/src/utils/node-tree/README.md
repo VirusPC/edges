@@ -65,7 +65,7 @@ const parsed = parseNode(markdown);
 
 模型中的 `references` 是区块外已有链接的关系信息，不新增第四个入口章节。memory、children 中的条目也可以包含人工说明；代码、图片、HTML 等尚未建模的内容由 codec 的原始文档保留。
 
-提供原文时，未修改的往返逐字保留；修改只替换对应条目的源片段。插入、移位时匹配并复用原片段，保留其中的人工格式和未建模内容。对包含未知结构的条目进行无法保留的修改、歧义/未闭合区块、不能重新解析成目标模型的输出会报错，不生成有损结果。新建文档采用原 Project Memory 三块标题；已有“本层重要约束”与“本层硬约束”均可读取，原标题保持。
+在 gray-matter 解析后的正文范围内，提供原文时只替换修改条目的源片段；文档外层的 BOM、头部和末尾换行采用库默认行为。插入、移位时匹配并复用原片段，保留其中的人工格式和未建模内容。对包含未知结构的条目进行无法保留的修改、歧义/未闭合区块、不能重新解析成目标模型的输出会报错，不生成有损结果。新建文档采用原 Project Memory 三块标题；已有“本层重要约束”与“本层硬约束”均可读取，原标题保持。
 
 `saveNode` 校验读取时的原文、真实位置和文件身份，避免陈旧快照或后续符号链接替换覆盖别的文件；通过同目录临时文件替换，保留权限。它是乐观并发校验，不提供跨进程锁。不会初始化目录或自动保存 CLI 的读取结果。
 
@@ -103,7 +103,7 @@ const updated = memoryDocumentCodec.serialize(doc, source);
 
 ## 可选 YAML 头与 Markdown 正文
 
-Task、Memory、AGENTS.md 共用 `MarkdownDocument`，内容字段为 `{ metadata?: Metadata, body: string }`。`metadata` 是完整 YAML 头的数据，缺省表示没有头部，`{}` 表示存在空头部；`body` 是不透明的 Markdown 正文。通用格式层不要求任何业务字段，也不解释 Markdown 章节。
+Task、Memory、AGENTS.md 共用 `MarkdownDocument`，内容字段为 `{ metadata?: Metadata, body: string }`。`metadata` 是完整 YAML 头的数据，缺省表示没有头部；空头部读为 `{}`，写回按库默认行为省略；`body` 是不透明的 Markdown 正文。通用格式层不要求任何业务字段，也不解释 Markdown 章节。
 
 ```ts
 import { parseDocument, serializeDocument } from './codec/index.js';
@@ -116,6 +116,6 @@ const next = serializeDocument(document, source);
 
 `parseNode` / `serializeNode` 在此之上解释 AGENTS.md 的三部分章节、HTML 注释标记和索引关系，`NodeModel.metadata` 同样可选。YAML 字段中的 Markdown 链接不会成为节点引用。Task 适配层负责 `name`、`description` 和其头部内嵌 `metadata` 的业务含义；该内嵌字段与公共模型中表示整个头部的 `metadata` 不同。Memory 文档可使用同一格式接口，但 Python Memory 工具尚未切换到此实现。既有 Task Project 入口禁止头部的领域约定仍由它自己的校验器执行；本次不批量给 AGENTS.md 增加字段。
 
-头部必须从文档首行 `---` 开始（允许 BOM），以独立的 `---` 或 `...` 行结束。首行 `---` 后有换行即按头部起始处理，缺少结束行会报错。数据限定为字符串键映射及 JSON 可表达的有限值；重复键、未知标签、非映射根、循环引用、超出安全范围的 YAML 整数均拒绝。转换最多访问 100,000 个值、允许 100 层祖先，限制别名展开和递归深度。`splitFrontmatter` 只切分格式，返回含完整末尾换行的 `rawFrontmatter` 或 `undefined`，不校验字段。
+格式层直接调用 `gray-matter` 默认 parse/stringify，只映射 data/content 到 metadata/body，不自定义 YAML engine、schema、分隔符、日期转换、别名展开或写回规则。字段值使用 unknown，由领域收窄。仅拒绝非 YAML 语言声明，防止文档读取激活库内可执行的 JavaScript 引擎。
 
-使用 `gray-matter` 读取 frontmatter，YAML engine 使用 `js-yaml` 的 core schema，日期保持字符串。写回直接使用同一 engine 的 dump，避免 gray-matter.stringify 裁剪多行字段末尾换行或给正文追加换行。保留字段值与正文内容，不承诺保留 YAML 注释、引号、空白或集合样式；无改动写回也可能规范化头部。别名读成独立值，可显式新增或移除头部。AGENTS 正文编辑仍遵循已有的源文保留规则。格式 API 不做文件 IO。
+库默认行为包括日期解析为 Date、空数据写回省略头部、写回添加末尾换行、解析移除 BOM，不承诺逐字往返。空 options 仅关闭共享可变解析缓存，避免编辑结果污染后续读取。需要字符串的日期等按文档约定加引号；文档不符合约定时修正文档，不增加解析器兼容分支。Task 字段校验和 AGENTS 章节规则留在各自领域。格式 API 不做文件 IO。

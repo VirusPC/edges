@@ -1,6 +1,6 @@
 export { walkTree } from './tree.js';
 export { createNodeModel, nodeLinks } from './model.js';
-export { parseNode, serializeNode, parseDocument, serializeDocument, splitFrontmatter } from './codec/index.js';
+export { parseNode, serializeNode, parseDocument, serializeDocument } from './codec/index.js';
 export { createMarkdownCodec, baseDocumentCodec, agentsDocumentCodec, memoryDocumentCodec } from './codec/index.js';
 export { findAncestor, readNodeFile, writeNodeFile } from './filesystem.js';
 export { resolveNodeLinks } from './paths.js';
