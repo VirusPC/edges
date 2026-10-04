@@ -8,10 +8,16 @@
 BaseNode           共同文档能力，可选 parent / children
 ├── InternalNode    AGENTS.md，从索引派生 children，组织直属节点
 ├── TaskNode        任务及其领域操作
-└── MemoryNode      记忆及其领域操作
+├── MemoryNode      项目记忆及其领域操作
+├── NoteNode        笔记及其领域操作
+└── SkillNode       SKILL.md 及其领域操作
 ```
 
-BaseNode 提供共同的文件路径 path、文档内容、可选 metadata、身份、可选 parent / children 及文本转换能力。树结构是共同模型的一部分，所有子类继承树关系属性，但允许没有关系值。InternalNode 扩展 AGENTS 正文与索引处理，TaskNode、MemoryNode 等内容模型扩展自身字段与领域操作。模型统一位于 `extensions/cli/src/models/`，不创建独立 package。
+BaseNode 提供共同的文件路径 path、文档内容、可选 metadata、身份、可选 parent / children 及文本转换能力。树结构是共同模型的一部分，所有子类继承树关系属性，但允许没有关系值。InternalNode 扩展 AGENTS 正文与索引处理，TaskNode、MemoryNode、NoteNode、SkillNode 扩展自身字段与领域操作，彼此并列继承 BaseNode。模型统一位于 `extensions/cli/src/models/`，不创建独立 package。
+
+NoteNode 表达知识捕获与整理的笔记，MemoryNode 表达供作用域长期复用的项目记忆，两者不因都是 Markdown 就互相继承。NoteNode.title 沿用现有 Note 的一级标题，读写作用于 body，不另造 title YAML 字段；不把某个笔记 skill 的章节模板强加给所有 Note。
+
+SkillNode 表达 SKILL.md 文档，name/description 是现有 frontmatter 字段的类型化访问，步骤和说明由 body 承载。managed/referenced 是来源与维护职责，不是两种 SkillNode 子类；service 写入时遵守相应来源权限。scripts、references、assets 等附属文件由既有技能管理流程负责，本次文档模型不将它们自动认作 children，也不增加安装或执行技能的方法。
 
 不单独定义 NodeTree。公共 NodeService 负责引用加载、作用域查询和跨节点归属协调，节点模型只维护自身内容与索引。children 保存 NodeReference，不因递归需要就改成完整子节点对象或让模型执行文件读取。跨文件系统层级的引用继续有效；父子关系表达逻辑归属，普通交叉引用不构成第二个 parent。
 
@@ -47,7 +53,7 @@ serialize()
   → 返回 Markdown
 ```
 
-InternalNode 在正文扩展点处理 AGENTS 三部分与索引。TaskNode、MemoryNode 复用普通 Markdown 正文处理，必要的字段校验和领域操作在各自模型内实现。重复解析表示用新文档替换当前文档内容，不能累加旧的章节或索引。
+InternalNode 在正文扩展点处理 AGENTS 三部分与索引。TaskNode、MemoryNode、NoteNode、SkillNode 复用共同的 Markdown/frontmatter 流程，必要的正文解释、字段校验和领域操作在各自模型内实现。重复解析表示用新文档替换当前文档内容，不能累加旧的章节或索引。
 
 不自定义 YAML engine、schema、日期、别名或格式保留，不直接依赖 js-yaml。不符合文档约定时修正文档，不加兼容分支。保留既有的非 YAML 语言声明拒绝，以防读取文档时激活 JavaScript 引擎；这不改变 YAML 数据解析方式。
 
@@ -137,7 +143,7 @@ declare class NodeService {
 }
 ```
 
-get(path) 只提供基础 Markdown 模型；需要领域操作时显式传入 TaskNode、MemoryNode 或 InternalNode，不通过随意猜测 YAML 字段决定模型类型。list 的作用域入口使用 InternalNode，其他节点依据已登记的入口、模块契约加载；没有专用模型约定的普通文档使用 BaseNode，不另建全局类型注册框架。
+get(path) 只提供基础 Markdown 模型；需要领域操作时显式传入 TaskNode、MemoryNode、NoteNode、SkillNode 或 InternalNode，不通过随意猜测 YAML 字段决定模型类型。list 的作用域入口使用 InternalNode，其他节点依据已登记的入口、模块契约加载；没有专用模型约定的普通文档使用 BaseNode，不把任意 Markdown 都当作 Note，不另建全局类型注册框架。
 
 list 从 scopePath 指定的作用域入口开始，采用先序遍历并遵循索引条目顺序；按解析后的目标路径去重，遇到归属环时报错。作用域入口或被选中引用目标缺失时报错，不静默遗漏；未选择的 descendant 目标不加载、不检查。输出为节点数组，不新增树包装对象。初始作用域的 CLI 选择策略仍由命令适配层决定。
 
@@ -169,7 +175,7 @@ model 的属性 setter 和 addChild/updateChild 等方法只改变内存中的�
 
 | 内容 | 修改入口 |
 | --- | --- |
-| body、Task 的 title/status/assignee/priority、Memory 的 memoryType/description | 属性赋值，经 setter 处理 |
+| body、Task 的 title/status/assignee/priority、Memory 的 memoryType/description、Note 的 title、Skill 的 name/description | 属性赋值，经 setter 处理 |
 | metadata | setMetadata / removeMetadata，保留字段校验 |
 | InternalNode 的约束集合 | setConstraints |
 | InternalNode 的索引引用 | addChild / updateChild / removeChild |
@@ -199,7 +205,7 @@ await service.update(internal);
 
 ## 公共类型草案
 
-以下声明展示职责与扩展点，不是实现代码。Task、Memory 的具体字段操作沿用现有业务规则，不新增状态转换规则或记忆类型注册机制。
+以下声明展示职责与扩展点，不是实现代码。各模型的字段操作沿用现有业务规则，不新增 Task 状态转换规则、记忆类型注册机制或统一笔记模板。
 
 ```ts
 type Metadata = Record<string, unknown>;
@@ -276,9 +282,21 @@ declare class MemoryNode extends BaseNode<"memory"> {
   get description(): string | undefined;
   set description(value: string | undefined);
 }
+
+declare class NoteNode extends BaseNode<"note"> {
+  get title(): string; // 笔记一级标题，真源在 body。
+  set title(value: string);
+}
+
+declare class SkillNode extends BaseNode<"skill"> {
+  get name(): string; // SKILL.md frontmatter 中的 name。
+  set name(value: string);
+  get description(): string; // SKILL.md frontmatter 中的 description。
+  set description(value: string);
+}
 ```
 
-Task 的状态、负责人、优先级，以及 Memory 的内容分类，是 metadata 的类型化访问，不独立存储第二份字段。运行时节点 type 不自动写入 YAML，也不与 Memory 内容分类混为一谈。
+Task 的状态、负责人、优先级，Memory 的内容分类，以及 Skill 的 name/description，均是 metadata 的类型化访问，不独立存储第二份字段；Note.title 则从 body 的一级标题解释。运行时节点 type 不自动写入 YAML，也不与 Memory 内容分类或 Skill 的 managed/referenced 维护方式混为一谈。
 
 ## 源码组织
 
@@ -290,6 +308,8 @@ extensions/cli/src/
 │   ├── internal-node.ts
 │   ├── task-node.ts
 │   ├── memory-node.ts
+│   ├── note-node.ts
+│   ├── skill-node.ts
 │   └── types.ts
 ├── services/                 增删改查、文档与索引同步、跨对象流程协调
 │   ├── node-service.ts        公共节点服务入口
@@ -302,6 +322,8 @@ extensions/cli/src/
 ## 与当前实现的关系
 
 当前 `utils/node-tree/` 的纯数据模型、外部 codec 和仓储组合函数是重构起点，不是本设计已实现的证据。后续实施需迁移现有命令调用、AGENTS 正文处理、Task 字段操作及文件身份校验；重构过程中保留 CLI 输出契约和现有业务规则。
+
+NoteNode、SkillNode 的设计补齐不表示现有 Note 入库或技能管理流程已迁移。Note 的 Git/PR 编排、Skill 的附属文件与安装关系仍由各自服务或流程负责，不移入节点模型；通用文档 CRUD 不等于整个技能目录的增删或安装。
 
 本文不授权修复整仓物理目录迁移、移动 knowledge/posts、接入 Python Memory 或改变 CLI 当前作用域筛选策略。它们仍有独立范围与验收责任。
 

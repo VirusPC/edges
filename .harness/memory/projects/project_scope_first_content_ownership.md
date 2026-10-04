@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 节点模型与公共 NodeService：去掉 NodeTree，CRUD、local 作用域查询及归属协调由 service 负责；设计未实施
+description: 节点模型与 NodeService：补齐 Note/Skill，与 Task/Memory 并列；local 查询、引用和归属协调；设计未实施
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T22:50:28+08:00"
+  edges-updated-at: "2026-10-04T22:56:34+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -171,3 +171,11 @@ children 的引用携带 kind，区分 local（本层记忆）与 descendant（�
 **Why:** children 保存的是文档引用，递归需要加载目标；service 已承担作用域读取和跨文档流程，额外的树对象与遍历入口造成职责重叠。
 
 **How to apply:** 对外提供 get/list；list 默认只沿 local，显式 includeDescendants 才跨下层。内部 traverse 辅助函数负责顺序、去重与环检测，由 service 提供加载能力，不让模型读文件，也不新增公开 walk/traverse 或树容器。NodeService 另提供 create/update/destroy 与 attach/detach/reparent；归属操作使用显式父节点，协调索引、parent 和保存，reparent 不移动文件。get 可显式传模型构造器，未传时使用 BaseNode；公共路径参数已解析为绝对路径。完整签名与读写、缺失目标行为以 spec 为准；这是后续重构设计，运行时尚未实施。
+
+## 2026-10-04 补齐 NoteNode 与 SkillNode
+
+用户指出节点模型清单遗漏 Note 和 Skill，设计补齐 NoteNode 与 SkillNode，与 InternalNode、TaskNode、MemoryNode 并列继承 BaseNode。
+
+**Why:** 知识笔记、项目记忆、可执行方法具有不同领域职责，即使共用 Markdown/frontmatter 也不应全部归入 MemoryNode；当前已有 Note 入库和 Skill 文档契约可作为依据。
+
+**How to apply:** NoteNode.title 按现有 Note 一级标题读写 body，不另造标题 YAML 字段或强制统一笔记章节；SkillNode.name/description 读取现有 frontmatter，body 承载方法说明。managed/referenced 保留为维护职责，由 service 遵守来源写权限，不拆成 Skill 子类。技能附属文件与安装、Note 的 Git/PR 流程继续由相应服务或工作流负责，不搬入模型。公共 NodeService 可显式使用这两种构造器，文档 CRUD 不代表技能目录安装管理。此为已补齐的设计，运行时尚未迁移。
