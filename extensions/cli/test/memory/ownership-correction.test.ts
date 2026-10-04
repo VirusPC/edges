@@ -630,3 +630,62 @@ test("public Skill unit preserves actual directory mode across clones and repeat
     /unit-mode-conflict/,
   );
 });
+
+for (const [spelling, href] of [
+  ["fragment", ".harness/memory/secrets/AGENTS.md#private"],
+  ["query", ".harness/memory/secrets/AGENTS.md?view=private"],
+  ["encoded", ".harness/memory/%73ecrets/AGENTS.md"],
+] as const) {
+  for (const location of ["old root", "destination"] as const) {
+    test(`private correction resolves ${spelling} ${location} ownership and preserves traversal on repeat`, async (t) => {
+      const f = await privateFixture(t),
+        m = await load();
+      const { InternalNode } =
+        await import("../../src/models/internal-node.js");
+      const { NodeService } =
+        await import("../../src/services/node-service.js");
+      const rootEntry = join(f.root, "AGENTS.md"),
+        ownerEntry = join(f.root, "extensions/AGENTS.md");
+      let rootSource = fs.readFileSync(rootEntry, "utf8");
+      if (location === "old root")
+        rootSource = rootSource.replace(
+          ".harness/memory/secrets/AGENTS.md",
+          href,
+        );
+      rootSource +=
+        "<!-- project-memory-children:start -->\n- [owner](extensions/AGENTS.md)\n<!-- project-memory-children:end -->\n";
+      fs.writeFileSync(rootEntry, rootSource);
+      const ownerSource = `# extensions\n<!-- authored: preserve -->\n<!-- project-memory-local:start -->\n- [authored secret](<${href}>) — authored description\n<!-- project-memory-local:end -->\n`;
+      if (location === "destination") fs.writeFileSync(ownerEntry, ownerSource);
+      const before = snapshot(f.root);
+      assert.equal(m.runPrivateCorrection(f.root, false).status, "dry-run");
+      assert.deepEqual(snapshot(f.root), before);
+      assert.equal(m.runPrivateCorrection(f.root, true).status, "restored");
+      assert.equal(
+        new InternalNode(rootEntry).parse(fs.readFileSync(rootEntry, "utf8"))
+          .content.localMemory.length,
+        0,
+      );
+      const ownerAfter = fs.readFileSync(ownerEntry, "utf8");
+      const owner = new InternalNode(ownerEntry).parse(ownerAfter);
+      assert.equal(owner.content.localMemory.length, 1);
+      if (location === "destination") assert.equal(ownerAfter, ownerSource);
+      assert.equal(fs.existsSync(join(f.root, f.current, "AGENTS.md")), false);
+      const expected = [
+        rootEntry,
+        ownerEntry,
+        join(f.root, f.target, "AGENTS.md"),
+        join(f.root, f.target, "secret_x.md"),
+      ].sort();
+      const list = async () =>
+        (await new NodeService().list(f.root, { includeDescendants: true }))
+          .map((node) => node.path)
+          .sort();
+      assert.deepEqual(await list(), expected);
+      const restored = snapshot(f.root);
+      assert.equal(m.runPrivateCorrection(f.root, true).status, "unchanged");
+      assert.deepEqual(snapshot(f.root), restored);
+      assert.deepEqual(await list(), expected);
+    });
+  }
+}

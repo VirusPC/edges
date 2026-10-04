@@ -20,6 +20,7 @@ import {
   within,
   isDirectory,
   isSymlink,
+  ownershipTarget,
 } from "../extensions/cli/src/services/memory/paths.js";
 export interface CorrectionManifest {
   version: 1;
@@ -601,7 +602,12 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
         indexPath = join(candidate.target, "AGENTS.md");
       const local = node(ownerPath),
         target = relative(dirname(ownerPath), indexPath);
-      if (!local.children.some((child) => child.target === target))
+      if (
+        !local.children.some(
+          (child) =>
+            ownershipTarget(dirname(ownerPath), child.target) === indexPath,
+        )
+      )
         local.addChild({
           target,
           kind: "local",
@@ -610,7 +616,10 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
         });
       const parent = node(join(root, "AGENTS.md"));
       for (const child of parent.children)
-        if (resolve(root, child.target) === join(candidate.source, "AGENTS.md"))
+        if (
+          ownershipTarget(root, child.target) ===
+          join(candidate.source, "AGENTS.md")
+        )
           parent.removeChild(child);
     }
     for (const [path, doc] of edits) {
