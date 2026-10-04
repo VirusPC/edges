@@ -1,5 +1,5 @@
 {
-  "attachmentFolderPath": "knowledge/resources",
+  "attachmentFolderPath": "./",
   "readableLineLength": false,
   "showUnsupportedFiles": true,
   "userIgnoreFilters": [
