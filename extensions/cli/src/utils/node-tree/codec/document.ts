@@ -1,19 +1,15 @@
+import type { Metadata, MetadataValue, MarkdownDocument } from '../document-model.js';
 import { Document, isMap, isNode, isScalar, isSeq, parseDocument as parseYaml } from 'yaml';
 
-/** @typedef {import('../document-model.js').Metadata} Metadata */
-/** @typedef {import('../document-model.js').MetadataValue} MetadataValue */
-/** @typedef {import('../document-model.js').MarkdownDocument} MarkdownDocument */
+export const sameValue = (a: unknown, b: unknown) => JSON.stringify(a, orderedKeys) === JSON.stringify(b, orderedKeys);
 
-/** @param {unknown} a @param {unknown} b */
-export const sameValue = (a, b) => JSON.stringify(a, orderedKeys) === JSON.stringify(b, orderedKeys);
-/** @param {string} _key @param {unknown} value */
-function orderedKeys(_key, value) {
+function orderedKeys(_key: string, value: unknown): unknown {
   return value && typeof value === 'object' && !Array.isArray(value)
     ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b))) : value;
 }
 
-/** Split syntax only; header presence is distinct from an empty header. @param {string} source */
-export function splitFrontmatter(source) {
+/** Split syntax only; header presence is distinct from an empty header. */
+export function splitFrontmatter(source: string) {
   const bom = source.startsWith('\uFEFF') ? '\uFEFF' : '';
   const text = source.slice(bom.length);
   const open = /^---[\t ]*\r?\n/.exec(text);
@@ -29,10 +25,8 @@ export function splitFrontmatter(source) {
   };
 }
 
-/** Convert YAML maps without coercing keys; reject values outside the public model.
- * @param {unknown} value @param {Set<object>} [ancestors] @param {boolean} [fromYaml] @returns {MetadataValue}
- */
-function readValue(value, ancestors = new Set(), fromYaml = false) {
+/** Convert YAML maps without coercing keys; reject values outside the public model. */
+function readValue(value: unknown, ancestors = new Set<object>(), fromYaml = false): MetadataValue {
   if (fromYaml && typeof value === 'bigint') {
     if (value > BigInt(Number.MAX_SAFE_INTEGER) || value < BigInt(Number.MIN_SAFE_INTEGER)) throw new Error('YAML integer cannot be represented as a safe JSON number.');
     return Number(value);
@@ -53,11 +47,10 @@ function readValue(value, ancestors = new Set(), fromYaml = false) {
     throw new Error('Unsupported frontmatter value.');
   } finally { ancestors.delete(value); }
 }
-/** @param {MetadataValue} value @returns {value is Metadata} */
-function isRecord(value) { return value !== null && typeof value === 'object' && !Array.isArray(value); }
 
-/** @param {string} raw */
-function readHeader(raw) {
+function isRecord(value: MetadataValue): value is Metadata { return value !== null && typeof value === 'object' && !Array.isArray(value); }
+
+function readHeader(raw: string) {
   const yaml = parseYaml(raw, { version: '1.2', schema: 'core', uniqueKeys: true, intAsBigInt: true });
   if (yaml.errors.length || yaml.warnings.length) throw new Error(`Invalid YAML frontmatter: ${[...yaml.errors, ...yaml.warnings].map(error => error.message).join('; ')}`);
   if (yaml.contents !== null && !isMap(yaml.contents)) throw new Error('Frontmatter must be a mapping.');
@@ -66,18 +59,14 @@ function readHeader(raw) {
   return { yaml, metadata };
 }
 
-/** Optional YAML metadata plus opaque Markdown; no domain rules or IO.
- * @param {string} source @returns {MarkdownDocument}
- */
-export function parseDocument(source) {
+/** Optional YAML metadata plus opaque Markdown; no domain rules or IO. */
+export function parseDocument(source: string): MarkdownDocument {
   const { rawFrontmatter, body } = splitFrontmatter(source);
   return rawFrontmatter === undefined ? { body } : { metadata: readHeader(rawFrontmatter).metadata, body };
 }
 
-/** Mutate only changed YAML nodes, retaining untouched comments/styles/order.
- * @param {Document} yaml @param {(string | number)[]} path @param {MetadataValue} before @param {MetadataValue} after
- */
-function reconcile(yaml, path, before, after) {
+/** Mutate only changed YAML nodes, retaining untouched comments/styles/order. */
+function reconcile(yaml: Document, path: (string | number)[], before: MetadataValue, after: MetadataValue): void {
   if (sameValue(before, after)) return;
   const node = yaml.getIn(path, true);
   if (isMap(node) && isRecord(before) && isRecord(after)) {
@@ -88,7 +77,7 @@ function reconcile(yaml, path, before, after) {
     }
   } else if (isSeq(node) && Array.isArray(before) && Array.isArray(after)) {
     const previousNodes = [...node.items];
-    const used = new Set();
+    const used = new Set<number>();
     const matches = after.map(value => {
       const index = before.findIndex((old, i) => !used.has(i) && sameValue(old, value));
       if (index >= 0) used.add(index);
@@ -118,10 +107,8 @@ function reconcile(yaml, path, before, after) {
   }
 }
 
-/** Exact unchanged round trips; verify edited output before returning.
- * @param {MarkdownDocument} document @param {string} [originalSource] @returns {string}
- */
-export function serializeDocument(document, originalSource) {
+/** Exact unchanged round trips; verify edited output before returning. */
+export function serializeDocument(document: MarkdownDocument, originalSource?: string): string {
   const original = splitFrontmatter(originalSource ?? '');
   const header = original.rawFrontmatter === undefined ? undefined : readHeader(original.rawFrontmatter);
   let prefix = '';
@@ -131,8 +118,8 @@ export function serializeDocument(document, originalSource) {
     if (header && sameValue(header.metadata, metadata)) prefix = original.prefix;
     else {
       const newline = originalSource?.includes('\r\n') ? '\r\n' : '\n';
-      /** @type {Document} */
-      const yaml = header?.yaml ?? new Document({});
+
+      const yaml: Document = header?.yaml ?? new Document({});
       if (yaml.contents === null) yaml.contents = yaml.createNode({});
       reconcile(yaml, [], header?.metadata ?? {}, metadata);
       prefix = `---${newline}${yaml.toString({ lineWidth: 0, flowCollectionPadding: false }).replace(/\n/g, newline)}---${newline}`;

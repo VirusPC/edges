@@ -1,5 +1,7 @@
 # Node Model / Codec / Storage Separation
 
+> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../extensions/cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；YAML 继续使用 `yaml` 库。下文独立包路径和验证为当时实施记录。
+
 > **For agentic workers:** Use executing-plans. The user approved this continuation in the current isolated worktree.
 
 **Goal:** Separate the three-part node model, Markdown codec, filesystem adapter and CLI consumers; support loss-preserving serialization and explicit saves.

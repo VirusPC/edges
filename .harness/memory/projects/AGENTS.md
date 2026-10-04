@@ -65,7 +65,7 @@ format: ordinary
 - [审阅壳外观 2026-09-24 收口](project_review_shell_chrome_2026_09_24.md) — 改审阅壳外观或信息密度时打开：顶栏左侧是 Edges；项目悬停出 description；卡片以标题为主；空状态列不占宽；桌面右栏是 Markdown 抽屉。不窄于 md 的交互按 ADR 0022。窄于 md 按 ADR 0023 纵向长滚动，不是盖住看板的抽屉。
 - [根硬约束只留聚光灯、脱敏与 git](project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
 - [根 README 以知识闭环为唯一主线](project_root_readme_direction.md) — 设计或修改根 README 时：个人 RSI 是当前实践，知识闭环是主线；四视角六思想，递归维护与树图结合归为递归树结构，ADR 按系统实现的思想顺序组织。
-- [递归目录采用统一节点模型与自身维护空间](project_scope_first_content_ownership.md) — 递归节点沿用三部分入口、局部记忆不上收；CLI、领域模型、文档格式和存储解耦，可选 YAML 头为公共 Markdown 能力。
+- [递归目录采用统一节点模型与自身维护空间](project_scope_first_content_ownership.md) — 递归节点保留三部分与局部记忆；公共工具放 CLI utils，统一 TypeScript，模型/格式/存储分层，YAML 使用现成库。
 - [系统一／系统二按作用域建模，区分 harness 层级与自进化](project_scoped_systems_and_harness.md) — 讨论根、作用域或 RSI 时：根可面向任意选定主体或系统，维护空间承载系统二；个人 RSI 是当前实践，角色随作用域变化，不预设唯一绝对根或固定组织层级。
 - [v1 自托管 Langfuse 落在物理机 minigtr](project_self_hosted_langfuse_on_minigtr.md) — 改自托管 Langfuse 的 v1 宿主、或默认往阿里云/云 VPS 上放时打开：宿主是物理机 minigtr，按多数时候在线的小型服务器运维；双系统仍在但 Windows 不是日常路径。不是阿里云或其它云 VPS。访问面见 ADR 0017。决策见 docs/adr/0014-self-hosted-langfuse-on-minigtr.md。
 - [跨机器跨 Agent 的 harness 放 shared-extensions](project_shared_extensions.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。

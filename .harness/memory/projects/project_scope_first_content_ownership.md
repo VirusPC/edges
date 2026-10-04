@@ -1,13 +1,13 @@
 ---
 name: project_scope_first_content_ownership
-description: 递归节点沿用三部分入口、局部记忆不上收；CLI、领域模型、文档格式和存储解耦，可选 YAML 头为公共 Markdown 能力。
+description: 递归节点保留三部分与局部记忆；公共工具放 CLI utils，统一 TypeScript，模型/格式/存储分层，YAML 使用现成库。
 metadata:
   edges-title: 递归目录采用统一节点模型与自身维护空间
   edges-type: project
   edges-agent-client: codex
   edges-username: Codex
   edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T20:38:44+08:00"
+  edges-updated-at: "2026-10-04T20:43:27+08:00"
 ---
 
 ## 2026-10-04 用户确认：统一递归节点模型
@@ -57,6 +57,14 @@ Task、Memory、AGENTS.md 底层都是可能带 YAML frontmatter 的 Markdown。
 **Why:** 多类文档需要相同格式处理，但字段含义与正文约定不同。把 YAML 解析写回放在公共层，可以避免每个业务各写简化解析器。
 
 **How to apply:** 文档 codec 只处理可选 YAML 头和不透明正文；节点 codec 与 Task 适配层分别解释各自语义。无头部保持可用，不强制添加 description 等字段。公共模型 metadata 表示整个头部，不与 Task 头部里的同名嵌套字段混为一谈。已实现公共能力并接回 Tasks；Python Memory 尚未接入，Task Project 无头部规则仍由领域校验器执行。无改动与只改正文保留原头部；修改元数据保留未知数据和注释，拒绝无法无损表达的值或写回。见[可选 frontmatter 实施](../../../docs/superpowers/plans/2026-10-04-optional-frontmatter.md)。
+
+## 2026-10-04 用户修正：工具放 CLI utils，统一 TypeScript
+
+公共节点与文档能力直接放在 extensions/cli/src/utils/node-tree，不必单独创建 package；使用 TypeScript，不用 JavaScript + JSDoc 代替。YAML 语法解析与生成使用现成的 yaml 库。
+
+**Why:** 模型、格式与存储的解耦是模块边界，不等于必须增加包、workspace 依赖和预构建流程；复用成熟库可避免自制语法解析器。
+
+**How to apply:** 保留 model、codec、filesystem、repository 与遍历接口，通过 CLI 内相对导入复用，随 CLI 编译、通过现有 tsx 运行源码。保留可选 YAML 头和保真写回要求；本地封装只处理文档边界、数据校验与编辑保留。已删除独立包及其构建依赖，测试并入 CLI。这里的 utils 位置不改变作用域归属或节点模型语义，也不代表 Python Memory 已接入。
 
 ## 先前设计与实施记录
 

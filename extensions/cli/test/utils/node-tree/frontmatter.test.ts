@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import * as codec from '../src/codec/index.js';
+import * as codec from '../../../src/utils/node-tree/codec/index.js';
 
 const body = '## 本层记忆\n\n- [Memory](memory/AGENTS.md)\n';
 const source = '---\ndescription: "[Not a node](fake/AGENTS.md)" # keep\nextra:\n  tags: [one, two]\n---\n' + body;

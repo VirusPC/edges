@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, writeFileSync, readFileSync, rmSync, symlinkSync, mkdirSync, renameSync } from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
-import { readNode, saveNode } from '../src/index.js';
+import { readNode, saveNode } from '../../../src/utils/node-tree/index.js';
 
 test('repository composes model, source and location; save reloads through the codec', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'edges-codec-save-'));

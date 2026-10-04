@@ -1,5 +1,5 @@
-import { parseDocument, serializeDocument, splitFrontmatter } from "@edges/node-tree/codec";
-import type { Metadata, MetadataValue } from "@edges/node-tree/model";
+import { parseDocument, serializeDocument, splitFrontmatter } from "../../utils/node-tree/codec/index.js";
+import type { Metadata, MetadataValue } from "../../utils/node-tree/document-model.js";
 import type { TaskPriority, TaskProjectId, TaskStatus } from "./types.js";
 
 export type ParsedTaskDoc = {

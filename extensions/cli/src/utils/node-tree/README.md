@@ -1,9 +1,9 @@
-# @edges/node-tree
+# 节点与文档工具
 
-Edges 的公共节点与树遍历能力。它独立于 CLI、Tasks 和具体记忆类型，不读取环境变量或当前工作目录，也不把 Git 仓库当作节点定义。所有起始路径由调用方以绝对路径传入。
+位于 `extensions/cli/src/utils/node-tree/` 的 TypeScript 模块。模型、格式、存储与树遍历各自分层，独立于命令行适配、Tasks 和具体记忆类型，不读取环境变量或当前工作目录，也不把 Git 仓库当作节点定义。所有起始路径由调用方以绝对路径传入。
 
 ```ts
-import { readNodeTree, discoverNodes, findAncestor } from '@edges/node-tree';
+import { readNodeTree, discoverNodes, findAncestor } from './index.js';
 
 // 按 AGENTS.md 的下层记忆索引递归；允许跨过物理目录层级。
 const tree = readNodeTree('/workspace/project');
@@ -30,31 +30,31 @@ const owner = findAncestor('/workspace/project/source',
 
 逻辑遍历默认限制在 root 内；需要访问兄弟目录时，调用方显式传入更大的 `boundary`。`canVisit` 对边界内途经的目录生效，显式 root 和 boundary 本身除外，可用来隔离嵌套 Git 仓库。缺失的节点链接跳过；符号链接不跟随；其他文件系统错误抛给调用方。扫描无效或不存在的目录返回空结果。这里处理重复和环，不验证每个节点是否只有一个归属父节点。
 
-CLI 在 `src/utils/scope.ts` 提供适配：解析参数、环境变量和 cwd，指定 Git 回退和扫描排除目录，并保留当前命令的 Project Memory 标记筛选策略。这个策略不限制公共包的节点模型。Tasks 的 `all` 仍使用物理清查，以免重构改变现有看板覆盖范围；切换到逻辑树需单独调整调用策略。
+CLI 在 `src/utils/scope.ts` 提供适配：解析参数、环境变量和 cwd，指定 Git 回退和扫描排除目录，并保留当前命令的 Project Memory 标记筛选策略。这个策略不限制节点模型。Tasks 的 `all` 仍使用物理清查，以免重构改变现有看板覆盖范围；切换到逻辑树需单独调整调用策略。
 
-Python Project Memory 尚未接入此包；本次不通过子进程给 Python 引入 Node 运行时依赖，也不声称已消除跨语言重复实现。
+Python Project Memory 尚未接入这些工具；本次不通过子进程给 Python 引入 Node 运行时依赖，也不声称已消除跨语言重复实现。
 
 ```sh
-pnpm --filter @edges/node-tree build
-pnpm --filter @edges/node-tree test
+pnpm --filter edges-cli build
+pnpm --filter edges-cli test
 ```
 
-运行时代码为原生 ESM JavaScript，使用 JSDoc 与 TypeScript checkJs 校验并生成类型声明。安装依赖后即可运行，源码调用和部署脚本无需预先构建此包；CLI 编译时会先构建类型声明。
+实现全部使用 TypeScript，随 CLI 一起构建为 `dist/utils/node-tree/`。开发时由现有 `tsx` 运行源码，部署时使用 CLI 的编译结果；没有单独的 workspace package 或预构建步骤。示例中的 `.js` 导入扩展名遵循项目现有 NodeNext 编译约定，对应源码仍为 `.ts`。
 
 ## 模型、格式与存储
 
 | 层 | 内容与边界 |
 | --- | --- |
-| `model.js`、`document-model.ts`（纯类型） | `NodeModel` 表达 constraints（本层重要约束）、memory（本层记忆）、children（下层记忆索引），以及区块外的普通 references。可选 `metadata` 承载文档头部数据。各条目由文本和链接片段组成；目标保留作者给出的标识，不带原文、AST 或文件位置。 |
+| `model.ts`、`document-model.ts`（纯类型） | `NodeModel` 表达 constraints（本层重要约束）、memory（本层记忆）、children（下层记忆索引），以及区块外的普通 references。可选 `metadata` 承载文档头部数据。各条目由文本和链接片段组成；目标保留作者给出的标识，不带原文、AST 或文件位置。 |
 | `codec/` | `parseNode(source)` 把 Markdown 转成模型；`serializeNode(model, originalSource?)` 转回 Markdown。源片段与 AST 只在 codec 内使用，无文件读写或路径解析。 |
-| `filesystem.js`、`paths.js` | 读取和替换文件、验证路径与文件身份、解析相对引用、发现物理目录。原文通过 `readNodeFile` / `writeNodeFile` 独立读写。 |
-| `repository.js` | 组合前三层。`readNode` 返回 `{location, source, identity, model, links}`，`saveNode(loaded, model)` 显式保存并重新加载；CLI 使用这个加载结果，领域模型本身保持独立。 |
+| `filesystem.ts`、`paths.ts` | 读取和替换文件、验证路径与文件身份、解析相对引用、发现物理目录。原文通过 `readNodeFile` / `writeNodeFile` 独立读写。 |
+| `repository.ts` | 组合前三层。`readNode` 返回 `{location, source, identity, model, links}`，`saveNode(loaded, model)` 显式保存并重新加载；CLI 使用这个加载结果，领域模型本身保持独立。 |
 
-纯模型和 codec 可通过子入口单独导入，不加载文件系统模块：
+纯模型和 codec 可通过相对路径单独导入，不加载文件系统模块：
 
-```js
-import { createNodeModel } from '@edges/node-tree/model';
-import { parseNode, serializeNode } from '@edges/node-tree/codec';
+```ts
+import { createNodeModel } from './model.js';
+import { parseNode, serializeNode } from './codec/index.js';
 
 const model = createNodeModel();
 model.constraints.push({ content: [{ kind: 'text', value: '保留本层私有材料。' }] });
@@ -74,12 +74,12 @@ const parsed = parseNode(markdown);
 
 Task、Memory、AGENTS.md 共用 `MarkdownDocument = { metadata?: Metadata, body: string }`。`metadata` 是完整 YAML 头的数据，缺省表示没有头部，`{}` 表示存在空头部；`body` 是不透明的 Markdown 正文。通用格式层不要求任何业务字段，也不解释 Markdown 章节。
 
-```js
-import { parseDocument, serializeDocument } from '@edges/node-tree/codec';
+```ts
+import { parseDocument, serializeDocument } from './codec/index.js';
 
 const source = '---\ndescription: Local knowledge\n---\n# Notes\n';
 const document = parseDocument(source);
-document.metadata.description = 'Updated description';
+document.metadata = { ...document.metadata, description: 'Updated description' };
 const next = serializeDocument(document, source);
 ```
 

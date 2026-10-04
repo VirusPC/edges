@@ -1,39 +1,29 @@
+import type { NodeModel, SectionKey, NodeLink, NodeItem } from '../model.js';
 import { decodeBody } from './parse.js';
 import { parseDocument, serializeDocument, sameValue as same } from './document.js';
 
-/** @typedef {import('../model.js').NodeModel} NodeModel */
-/** @typedef {import('../model.js').SectionKey} SectionKey */
-/** @typedef {import('../model.js').NodeLink} NodeLink */
-/** @typedef {import('../model.js').NodeItem} NodeItem */
-/** @type {SectionKey[]} */
-const keys = ['constraints', 'memory', 'children'];
+const keys: SectionKey[] = ['constraints', 'memory', 'children'];
 const names = { constraints: ['important', '本层硬约束'], memory: ['local', '本层记忆'], children: ['children', '下层记忆索引'] };
-/** @param {string} value */
-const escape = value => value.replace(/[\\`*_[\]{}()#+!<>|&-]/g, '\\$&').replace(/^(\d+)\./gm, '$1\\.');
 
-/** @param {NodeLink} value */
-function renderLink(value) {
+const escape = (value: string): string => value.replace(/[\\`*_[\]{}()#+!<>|&-]/g, '\\$&').replace(/^(\d+)\./gm, '$1\\.');
+
+function renderLink(value: NodeLink): string {
   if (/[\r\n]/.test(value.target)) throw new Error('Link targets cannot contain line breaks.');
   return `[${escape(value.label)}](<${value.target.replace(/[\\<>]/g, '\\$&')}>)`;
 }
-/** @param {NodeItem} item @param {string} prefix @param {string} newline */
-function renderItem(item, prefix, newline) {
+
+function renderItem(item: NodeItem, prefix: string, newline: string): string {
   const content = item.content.map(run => run.kind === 'link' ? renderLink(run) : escape(run.value)).join('');
   return prefix + content.replace(/\r?\n/g, newline + ' '.repeat(prefix.length));
 }
-/** @param {SectionKey} key @param {NodeItem[]} items @param {string} newline */
-function renderSection(key, items, newline) {
+
+function renderSection(key: SectionKey, items: NodeItem[], newline: string): string {
   const [marker, title] = names[key];
   return [`<!-- project-memory-${marker}:start -->`, `## ${title}`, '', ...items.map(item => renderItem(item, '- ', newline)), `<!-- project-memory-${marker}:end -->`, ''].join(newline);
 }
 
-/**
- * Pure serialization. Original source enables loss-preserving edits; no IO occurs here.
- * @param {NodeModel} model
- * @param {string} [originalSource]
- * @returns {string}
- */
-function serializeBody(model, originalSource) {
+/** Pure serialization. Original source enables loss-preserving edits; no IO occurs here. */
+function serializeBody(model: NodeModel, originalSource?: string): string {
   const newline = originalSource?.includes('\r\n') ? '\r\n' : '\n';
   if (originalSource === undefined) {
     const source = ['<!-- project-memory:start -->', ...keys.map(key => renderSection(key, model[key], newline)), '<!-- project-memory:end -->', '', ...model.references.map(ref => `- ${renderLink(ref)}`), ''].join(newline);
@@ -44,15 +34,15 @@ function serializeBody(model, originalSource) {
   const originalText = originalSource;
   if (same(original.model, model)) return originalSource;
   if (original.unsafe) throw new Error('Cannot edit ambiguous or unclosed node sections.');
-  /** @type {{start: number, end: number, value: string, order: number}[]} */
-  const edits = [];
-  /** @param {number} start @param {number} end @param {string} value */
-  const edit = (start, end, value) => edits.push({ start, end, value, order: edits.length });
+
+  const edits: { start: number; end: number; value: string; order: number }[] = [];
+
+  const edit = (start: number, end: number, value: string) => edits.push({ start, end, value, order: edits.length });
   for (const key of keys) {
     const previous = original.model[key];
     const next = model[key];
     const bindings = original.bindings[key];
-    const used = new Set();
+    const used = new Set<number>();
     const matches = next.map(item => {
       const found = previous.findIndex((old, index) => !used.has(index) && same(old, item));
       if (found >= 0) used.add(found);
@@ -61,8 +51,8 @@ function serializeBody(model, originalSource) {
     if (bindings.some((binding, index) => binding.protected && !used.has(index))) {
       throw new Error('Cannot replace unsupported content; preserve the original item.');
     }
-    /** @param {number} index @param {string} prefix */
-    function renderNext(index, prefix) {
+
+    function renderNext(index: number, prefix: string): string {
       const match = matches[index];
       return match >= 0 ? originalText.slice(bindings[match].start, bindings[match].end)
         : next[index] ? renderItem(next[index], prefix, newline) : '';
@@ -102,8 +92,7 @@ function serializeBody(model, originalSource) {
   return source;
 }
 
-/** @param {NodeModel} model @param {string} [originalSource] */
-export function serializeNode(model, originalSource) {
+export function serializeNode(model: NodeModel, originalSource?: string): string {
   const { metadata, ...content } = model;
   const original = originalSource === undefined ? undefined : parseDocument(originalSource);
   const body = serializeBody(content, original?.body);

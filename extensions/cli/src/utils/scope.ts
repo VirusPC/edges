@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import path from 'node:path';
-import { discoverNodes, findAncestor, readNode, type NodeEntry } from '@edges/node-tree';
+import { discoverNodes, findAncestor, readNode, type NodeEntry } from './node-tree/index.js';
 
 /** Current command-selection policy, not the reusable node identity contract. */
 function selectsScope(node: NodeEntry): boolean {

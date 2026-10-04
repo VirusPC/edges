@@ -3,30 +3,27 @@ import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { walkTree } from './tree.js';
 
-/** @typedef {{directory: string, entryPath: string}} NodeLocation */
-/** @typedef {{directory: string, entryPath: string, device: number, inode: number}} FileIdentity */
-/** @typedef {{location: NodeLocation, source: string, identity: FileIdentity}} NodeFile */
+export interface NodeLocation { directory: string; entryPath: string }
+export interface FileIdentity { directory: string; entryPath: string; device: number; inode: number }
+export interface NodeFile { location: NodeLocation; source: string; identity: FileIdentity }
 
-/** @param {string} directory */
-export function absolute(directory) {
+export function absolute(directory: string) {
   if (!path.isAbsolute(directory)) throw new TypeError('Node paths must be absolute; resolve caller-relative paths before invoking storage.');
   return path.normalize(directory);
 }
 
-/** @param {string} entry */
-function stat(entry) {
+function stat(entry: string) {
   try { return lstatSync(entry); }
   catch (error) {
-    if (['ENOENT', 'ENOTDIR'].includes(/** @type {NodeJS.ErrnoException} */ (error).code ?? '')) return undefined;
+    if (['ENOENT', 'ENOTDIR'].includes((error as NodeJS.ErrnoException).code ?? '')) return undefined;
     throw error;
   }
 }
 
-/** @param {string} directory */
-export function isDirectory(directory) { return stat(directory)?.isDirectory() ?? false; }
+export function isDirectory(directory: string) { return stat(directory)?.isDirectory() ?? false; }
 
-/** Read bytes only; no parsing, node policy or link interpretation. @param {string} directory @returns {NodeFile | undefined} */
-export function readNodeFile(directory) {
+/** Read bytes only; no parsing, node policy or link interpretation. */
+export function readNodeFile(directory: string): NodeFile | undefined {
   directory = absolute(directory);
   if (!isDirectory(directory)) return undefined;
   const entryPath = path.join(directory, 'AGENTS.md');
@@ -38,13 +35,8 @@ export function readNodeFile(directory) {
   };
 }
 
-/**
- * Explicit atomic replacement with optimistic stale-source checks. No initialization.
- * @param {NodeFile} original
- * @param {string} source
- * @returns {NodeFile}
- */
-export function writeNodeFile(original, source) {
+/** Explicit atomic replacement with optimistic stale-source checks. No initialization. */
+export function writeNodeFile(original: NodeFile, source: string): NodeFile {
   const directory = absolute(original.location.directory);
   const entryPath = path.join(directory, 'AGENTS.md');
   if (entryPath !== original.location.entryPath) throw new Error('Node entry path does not match its directory.');
@@ -72,14 +64,8 @@ export function writeNodeFile(original, source) {
   return saved;
 }
 
-/**
- * The boundary is checked after the candidate so a boundary can itself match.
- * @param {string} start
- * @param {(directory: string) => boolean} matches
- * @param {(directory: string) => boolean} [stopAt]
- * @returns {string | undefined}
- */
-export function findAncestor(start, matches, stopAt) {
+/** The boundary is checked after the candidate so a boundary can itself match. */
+export function findAncestor(start: string, matches: (directory: string) => boolean, stopAt?: (directory: string) => boolean): string | undefined {
   let directory = absolute(start);
   while (true) {
     if (matches(directory)) return directory;
@@ -90,12 +76,8 @@ export function findAncestor(start, matches, stopAt) {
   }
 }
 
-/**
- * Physical directories only; callers decide which entries to read or parse.
- * @param {string} root
- * @param {(directory: string) => boolean} [enterDirectory]
- */
-export function discoverDirectories(root, enterDirectory) {
+/** Physical directories only; callers decide which entries to read or parse. */
+export function discoverDirectories(root: string, enterDirectory?: (directory: string) => boolean): string[] {
   root = absolute(root);
   if (!isDirectory(root)) return [];
   return walkTree(root, directory => readdirSync(directory, { withFileTypes: true })

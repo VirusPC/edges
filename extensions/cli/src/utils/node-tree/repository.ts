@@ -1,3 +1,5 @@
+import type { NodeFile } from './filesystem.js';
+import type { NodeModel } from './model.js';
 import path from 'node:path';
 import { absolute, readNodeFile, writeNodeFile, discoverDirectories, isDirectory } from './filesystem.js';
 import { parseNode } from './codec/parse.js';
@@ -6,57 +8,46 @@ import { nodeLinks } from './model.js';
 import { resolveNodeLinks } from './paths.js';
 import { walkTree } from './tree.js';
 
-/** @typedef {import('./model.js').NodeModel} NodeModel */
-/**
- * Loaded envelope, not the domain model. Storage and codec can also be used independently.
- * @typedef {import('./filesystem.js').NodeFile & {
- *   model: NodeModel, links: {children: string[], references: string[]}
- * }} NodeEntry
- */
+/** Loaded envelope, not the domain model. */
+export type NodeEntry = NodeFile & { model: NodeModel; links: { children: string[]; references: string[] } };
+export interface DiscoverOptions {
+  acceptNode?: (node: NodeEntry) => boolean;
+  enterDirectory?: (directory: string) => boolean;
+}
+export interface NodeTreeOptions {
+  /** Default: root. Explicitly widen for non-descendant child links. */
+  boundary?: string;
+  /** Applies to intervening directories, excluding explicit root/boundary. */
+  canVisit?: (directory: string) => boolean;
+}
 
-/** @param {import('./filesystem.js').NodeFile} file @returns {NodeEntry} */
-function load(file) {
+function load(file: NodeFile): NodeEntry {
   const model = parseNode(file.source);
   return { ...file, model, links: resolveNodeLinks(nodeLinks(model), file.location.directory) };
 }
 
-/** @param {string} directory @returns {NodeEntry | undefined} */
-export function readNode(directory) {
+export function readNode(directory: string): NodeEntry | undefined {
   const file = readNodeFile(directory);
   return file ? load(file) : undefined;
 }
 
-/** @param {NodeEntry} original @param {NodeModel} model @returns {NodeEntry} */
-export function saveNode(original, model) {
+export function saveNode(original: NodeEntry, model: NodeModel): NodeEntry {
   return load(writeNodeFile(original, serializeNode(model, original.source)));
 }
 
-/**
- * @typedef {object} DiscoverOptions
- * @property {(node: NodeEntry) => boolean} [acceptNode]
- * @property {(directory: string) => boolean} [enterDirectory]
- */
-
-/** Physical inventory, not ownership. @param {string} root @param {DiscoverOptions} [options] @returns {NodeEntry[]} */
-export function discoverNodes(root, options = {}) {
+/** Physical inventory, not ownership. */
+export function discoverNodes(root: string, options: DiscoverOptions = {}): NodeEntry[] {
   return discoverDirectories(root, options.enterDirectory).flatMap(directory => {
     const node = readNode(directory);
     return node && (options.acceptNode?.(node) ?? true) ? [node] : [];
   });
 }
 
-/**
- * @typedef {object} NodeTreeOptions
- * @property {string} [boundary] Default: root. Explicitly widen it for non-descendant child links.
- * @property {(directory: string) => boolean} [canVisit] Applied to intervening directories, excluding explicit root/boundary.
- */
-
-/** @param {string} root @param {NodeTreeOptions} [options] @returns {NodeEntry[]} */
-export function readNodeTree(root, options = {}) {
+export function readNodeTree(root: string, options: NodeTreeOptions = {}): NodeEntry[] {
   root = absolute(root);
   const boundary = absolute(options.boundary ?? root);
-  /** @param {string} directory */
-  function allowed(directory) {
+
+  function allowed(directory: string): boolean {
     const relative = path.relative(boundary, directory);
     if (relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative)) return false;
     let current = boundary;

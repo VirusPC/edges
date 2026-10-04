@@ -10,13 +10,12 @@
   },
   "scripts": {
     "build:tasks-review-app": "pnpm --filter tasks-review-app run build",
-    "build": "pnpm run build:node-tree && pnpm run build:tasks-review-app && tsc -p tsconfig.json && node ./scripts/copy-review-page-asset.mjs",
+    "build": "pnpm run build:tasks-review-app && tsc -p tsconfig.json && node ./scripts/copy-review-page-asset.mjs",
     "prepack": "pnpm run build",
     "start": "node dist/index.js",
     "dev": "tsx src/index.ts",
     "dev:tasks-review-app": "pnpm --filter tasks-review-app run dev",
-    "test": "pnpm run build:node-tree && pnpm run build:tasks-review-app && node --test --import tsx './test/**/*.test.ts'",
-    "build:node-tree": "pnpm --filter @edges/node-tree run build"
+    "test": "pnpm run build:tasks-review-app && node --test --import tsx './test/**/*.test.ts'"
   },
   "engines": {
     "node": ">=20"
@@ -24,12 +23,14 @@
   "dependencies": {
     "commander": "^14.0.3",
     "zod": "^3.24.2",
-    "@edges/node-tree": "workspace:*"
+    "mdast-util-from-markdown": "^2.0.3",
+    "yaml": "^2.9.1"
   },
   "devDependencies": {
     "tasks-review-app": "workspace:*",
     "@types/node": "^22.19.11",
     "tsx": "^4.19.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "@types/mdast": "^4.0.4"
   }
 }

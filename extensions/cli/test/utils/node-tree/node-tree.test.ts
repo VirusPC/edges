@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { walkTree, findAncestor, readNode, discoverNodes, readNodeTree } from '../src/index.js';
+import { walkTree, findAncestor, readNode, discoverNodes, readNodeTree } from '../../../src/utils/node-tree/index.js';
 
 function fixture() {
   const root = mkdtempSync(path.join(tmpdir(), 'edges-node-tree-'));
@@ -154,14 +154,14 @@ for (const definitions of [
   });
 }
 
-test('installed runtime can be imported without generated output or a TypeScript loader', () => {
+test('CLI source utilities work through tsx without generated output or a workspace package', () => {
   const f = fixture();
   try {
-    const packageRoot = fileURLToPath(new URL('..', import.meta.url));
-    cpSync(path.join(packageRoot, 'src'), path.join(f.root, 'src'), { recursive: true });
-    cpSync(path.join(packageRoot, 'package.json'), path.join(f.root, 'package.json'));
-    symlinkSync(path.join(packageRoot, 'node_modules'), path.join(f.root, 'node_modules'));
-    const output = execFileSync(process.execPath, ['--input-type=module', '-e', "import {walkTree} from '@edges/node-tree'; console.log(walkTree('root', () => [], x => x).join(','))"], { cwd: f.root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
-    assert.equal(output.trim(), 'root');
+    const cliRoot = fileURLToPath(new URL('../../../', import.meta.url));
+    cpSync(path.join(cliRoot, 'src/utils/node-tree'), path.join(f.root, 'src/utils/node-tree'), { recursive: true });
+    writeFileSync(path.join(f.root, 'package.json'), JSON.stringify({ type: 'module' }));
+    symlinkSync(path.join(cliRoot, 'node_modules'), path.join(f.root, 'node_modules'));
+    const output = execFileSync(process.execPath, ['--import', 'tsx', '--input-type=module', '-e', "import {parseNode} from './src/utils/node-tree/index.ts'; console.log(parseNode('---\\ndescription: scope\\n---\\n# Node').metadata.description)"], { cwd: f.root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    assert.equal(output.trim(), 'scope');
   } finally { f.cleanup(); }
 });
