@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import {
   existsSync,
   mkdirSync,
@@ -81,7 +82,7 @@ test("uses the directory note that appears during Git refresh when format is imp
     calls.some(
       (call) =>
         call[1] === "add" &&
-        call[2] === "knowledge/notes/2026-09-11--hello-world",
+        call[2] === "knowledge/notes/2026-09-11--hello-world/index.md",
     ),
   );
 });
@@ -307,4 +308,43 @@ test("nested Note targets content scope while committing relative to actual Git 
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test("document update commits only entry and leaves unrelated siblings unstaged", async (t) => {
+  const repo = fixture(t);
+  const git = (...args: string[]) =>
+    execFileSync("git", args, { cwd: repo, encoding: "utf8" });
+  git("init", "-q");
+  git("config", "user.name", "Tester");
+  git("config", "user.email", "test@example.com");
+  const config = {
+    repoPath: repo,
+    baseBranch: "main",
+    mode: "direct" as const,
+    dryRun: true,
+  };
+  const first = await runNoteIngest(input, config, {}, { now });
+  const attachment = path.join(path.dirname(first.filePath), "attachment.txt");
+  const unrelated = path.join(path.dirname(first.filePath), "unrelated.txt");
+  writeFileSync(path.join(repo, attachment), "original");
+  git("add", attachment);
+  git("commit", "-qm", "attachment");
+  writeFileSync(path.join(repo, attachment), "modified");
+  writeFileSync(path.join(repo, unrelated), "untracked");
+  await runNoteIngest(
+    { ...input, content: "Updated body" },
+    config,
+    {},
+    { now },
+  );
+  assert.deepEqual(
+    git("diff-tree", "--no-commit-id", "--name-only", "-r", "HEAD")
+      .trim()
+      .split("\n"),
+    [first.filePath],
+  );
+  assert.equal(git("show", "HEAD:" + attachment), "original");
+  assert.match(git("status", "--porcelain"), / M .*attachment.txt/);
+  assert.match(git("status", "--porcelain"), /\?\? .*unrelated.txt/);
+  assert.equal(git("diff", "--cached", "--name-only"), "");
 });

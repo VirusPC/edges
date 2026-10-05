@@ -226,3 +226,26 @@ test("command defaults to dry-run and encoded registered note hrefs retain query
     /a%20b\/index.md\?q=1#part/,
   );
 });
+
+test("nested scoped Note resources stay opaque while legacy topic notes migrate", (t) => {
+  const root = fixture(t);
+  const base = "projects/demo/knowledge/notes";
+  put(root, base + "/kept/index.md", "# Existing Note");
+  put(root, base + "/kept/resource.md", "# Opaque resource");
+  put(root, base + "/topics/legacy.md", "# Legacy Note");
+  track(root);
+  const plan = planDirectoryMigration(root);
+  assert.deepEqual(
+    plan.moves.map((m) => path.relative(root, m.from)),
+    [base + "/topics/legacy.md"],
+  );
+  applyDirectoryMigration(plan);
+  assert.equal(
+    fs.readFileSync(path.join(root, base, "kept/resource.md"), "utf8"),
+    "# Opaque resource",
+  );
+  assert.equal(
+    fs.existsSync(path.join(root, base, "topics/legacy/index.md")),
+    true,
+  );
+});

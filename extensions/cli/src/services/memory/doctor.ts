@@ -21,7 +21,7 @@ import {
   relativeOrName,
   resolveRoot,
   resolveTarget,
-  writeAtomic,
+  within,
 } from "./paths.js";
 import {
   layerTypeSpecs,
@@ -32,11 +32,9 @@ import {
   classifyAgentsSource,
   classifyAgentsFile,
   dropIndexEntries,
-  findIndexAnchor,
   readIndexEntries,
   syncIndexEntry,
   syncTargetAgents,
-  registeredIndexAnchors,
   ownershipTarget,
 } from "./agents.js";
 import {
@@ -106,8 +104,45 @@ export const finding = (
 });
 const errorText = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
+// Invalid composition documents block only their own subtree and operations
+// relying on that subtree. Sibling scopes remain independently repairable.
+const blockedBy = (directory: string, invalid: Set<string>) =>
+  [...invalid].some((owner) => within(directory, owner));
+function validAnchors(
+  target: string,
+  root: string,
+  invalid: Set<string>,
+): string[] {
+  return [...walkOwners(root)].filter((owner) => {
+    if (blockedBy(owner, invalid) || !safeScope(owner)) return false;
+    return new InternalNode(join(owner, AGENTS_FILE_NAME))
+      .parse(readText(join(owner, AGENTS_FILE_NAME)))
+      .children.some(
+        (entry) =>
+          realPath(entry.id) === realPath(join(target, AGENTS_FILE_NAME)),
+      );
+  });
+}
+function validAnchor(
+  target: string,
+  root: string,
+  invalid: Set<string>,
+): string {
+  const registered = validAnchors(target, root, invalid);
+  if (registered.length) return registered[0]!;
+  for (
+    let owner = dirname(target);
+    within(owner, root);
+    owner = dirname(owner)
+  ) {
+    if (!blockedBy(owner, invalid) && safeScope(owner)) return owner;
+    if (owner === root) break;
+  }
+  return root;
+}
 export function collectFindings(root: string): MemoryFinding[] {
   const findings: MemoryFinding[] = [],
+    invalid = new Set<string>(),
     owners = [...walkOwners(root)],
     scopes = new Set(owners.filter(safeScope));
   for (const owner of owners) {
@@ -116,6 +151,7 @@ export function collectFindings(root: string): MemoryFinding[] {
       try {
         new InternalNode(file).parse(readText(file)).validate();
       } catch (error) {
+        invalid.add(owner);
         findings.push(
           finding(
             "invalid-entry",
@@ -126,8 +162,8 @@ export function collectFindings(root: string): MemoryFinding[] {
         );
       }
   }
-  if (findings.length) return findings;
   for (const owner of owners) {
+    if (blockedBy(owner, invalid)) continue;
     try {
       rejectLegacy(owner);
     } catch (error) {
@@ -258,6 +294,7 @@ export function collectFindings(root: string): MemoryFinding[] {
         seen.add(rel);
         const target = ownershipTarget(owner, rel),
           child = target ? dirname(target) : "";
+        if (child && blockedBy(child, invalid)) continue;
         if (!child || !safeScope(child) || isSymlink(child))
           findings.push(
             finding("dead-entry", agents, root, rel, { entry: rel }),
@@ -266,11 +303,11 @@ export function collectFindings(root: string): MemoryFinding[] {
     }
   }
   for (const owner of [...scopes].sort()) {
-    if (owner === root) continue;
+    if (owner === root || blockedBy(owner, invalid)) continue;
     try {
       if (
         layerTypeSpecs(owner).length &&
-        !registeredIndexAnchors(owner, root).length
+        !validAnchors(owner, root, invalid).length
       )
         findings.push(
           finding(
@@ -290,12 +327,13 @@ export async function applyFindings(
   root: string,
   findings: MemoryFinding[],
 ): Promise<string[]> {
-  if (
-    findings.some(
-      (f) => f.code === "invalid-entry" && f.path.endsWith(AGENTS_FILE_NAME),
-    )
-  )
-    return [];
+  const invalid = new Set(
+    findings
+      .filter(
+        (f) => f.code === "invalid-entry" && f.path.endsWith(AGENTS_FILE_NAME),
+      )
+      .map((f) => dirname(join(root, f.path))),
+  );
   const repaired: string[] = [],
     blocked = new Set(
       findings
@@ -303,7 +341,7 @@ export async function applyFindings(
         .map((f) => join(root, f.path)),
     );
   for (const owner of walkOwners(root)) {
-    if (blocked.has(owner)) continue;
+    if (blocked.has(owner) || blockedBy(owner, invalid)) continue;
     try {
       const specs = layerTypeSpecs(owner);
       if (!specs.length) continue;
@@ -328,6 +366,8 @@ export async function applyFindings(
         repaired.push(`${action}-agents: ${relativeOrName(owner, root)}`);
       for (const spec of specs)
         try {
+          if (blockedBy(dirname(join(owner, spec.indexFile)), invalid))
+            continue;
           const action = await refreshIndex(owner, spec.name);
           if (action !== "preserved")
             repaired.push(`${action}-index: ${spec.indexFile}`);
@@ -348,7 +388,12 @@ export async function applyFindings(
       item.entry
     ) {
       const file = join(root, item.path);
-      if (blocked.has(dirname(file))) continue;
+      if (
+        blocked.has(dirname(file)) ||
+        blockedBy(dirname(file), invalid) ||
+        blockedBy(dirname(join(dirname(file), item.entry)), invalid)
+      )
+        continue;
       assertScopePath(file, dirname(file));
       if (["misplaced", "duplicate"].includes(item.code))
         registrations.set(dirname(join(dirname(file), item.entry)), {
@@ -361,22 +406,30 @@ export async function applyFindings(
   // Repairs above may have created missing AGENTS for already-adopted types.
   // Re-read current eligibility; initial findings cannot inventory those nodes.
   for (const owner of discoverMemoryDirs(root)) {
+    if (blockedBy(owner, invalid)) continue;
     if (owner === root || blocked.has(owner) || registrations.has(owner))
       continue;
     try {
       if (
         layerTypeSpecs(owner).length &&
-        !registeredIndexAnchors(owner, root).length
+        !validAnchors(owner, root, invalid).length
       )
-        registrations.set(owner, { anchor: findIndexAnchor(owner, root) });
+        registrations.set(owner, { anchor: validAnchor(owner, root, invalid) });
     } catch {
       /* Unsafe owners remain reported by the second scan. */
     }
   }
   for (const [owner, { anchor, description }] of registrations) {
-    if (owner === root || blocked.has(owner) || blocked.has(anchor)) continue;
+    if (
+      owner === root ||
+      blocked.has(owner) ||
+      blocked.has(anchor) ||
+      blockedBy(owner, invalid) ||
+      blockedBy(anchor, invalid)
+    )
+      continue;
     // A surviving local edge already owns this node; dedup must not replace it.
-    if (registeredIndexAnchors(owner, root).length) continue;
+    if (validAnchors(owner, root, invalid).length) continue;
     const [action, entry] = await syncIndexEntry(anchor, owner, description);
     if (!["preserved", "not-applicable", "needs-doctor"].includes(action))
       repaired.push(`registered: ${entry}`);

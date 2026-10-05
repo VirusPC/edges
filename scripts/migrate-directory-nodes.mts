@@ -165,7 +165,7 @@ export function planDirectoryMigration(
           ? "task"
           : /(?:^|\/)knowledge\/notes\/(?!.*(?:^|\/)\.harness\/).+\.md$/.test(
                 relative,
-              ) && !hasEntryAncestor(from, path.join(root, "knowledge/notes"))
+              ) && !hasEntryAncestor(from, root)
             ? "note"
             : undefined;
     if (!kind) continue;

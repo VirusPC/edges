@@ -164,7 +164,10 @@ export async function runNoteIngest(
     if (previous) await service.update(note, fields);
     else await service.create(note, fields);
   }
-  const addPath = path.relative(repoRoot, note.directoryPath);
+  const addPath = path.relative(
+    repoRoot,
+    input.importEntry ? note.directoryPath : note.path,
+  );
   const addPaths = [addPath];
   if (
     parentBefore !== undefined &&

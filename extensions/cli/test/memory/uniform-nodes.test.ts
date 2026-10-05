@@ -289,3 +289,40 @@ test("Doctor repairs an adopted child missing AGENTS and its missing registratio
     [],
   );
 });
+
+test("doctor repairs independent valid index while retaining invalid sibling and its reference", async (t) => {
+  const root = fixture(t);
+  await initMemory({ targetDir: root, memoryTypes: ["project"] });
+  const index = ".harness/memory/projects/AGENTS.md";
+  put(
+    root,
+    ".harness/memory/projects/project_new/index.md",
+    "---\nname: project_new\ndescription: New\n---\nBody",
+  );
+  const broken =
+    "<!-- project-memory-local:start -->\n- [one](child/AGENTS.md)\n- [two](child/AGENTS.md)\n<!-- project-memory-local:end -->";
+  put(root, "broken/AGENTS.md", broken);
+  put(root, "broken/child/AGENTS.md", "# Child");
+  const agents = read(root, "AGENTS.md").replace(
+    "<!-- project-memory:end -->",
+    "<!-- project-memory-children:start -->\n- [Broken](broken/AGENTS.md) — retain\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->",
+  );
+  put(root, "AGENTS.md", agents);
+  const result = await doctorMemory({
+    targetDir: root,
+    rootDir: root,
+    apply: true,
+  });
+  assert.ok(
+    result.findings.some((f) => f.code === "stale-index" && f.path === index),
+  );
+  assert.ok(result.repaired.some((f) => f.includes(index)));
+  assert.match(read(root, index), /project_new\/index.md/);
+  assert.equal(read(root, "broken/AGENTS.md"), broken);
+  assert.match(read(root, "AGENTS.md"), /broken\/AGENTS.md/);
+  assert.ok(
+    result.remaining.some(
+      (f) => f.code === "invalid-entry" && f.path === "broken/AGENTS.md",
+    ),
+  );
+});
