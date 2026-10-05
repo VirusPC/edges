@@ -141,7 +141,7 @@ Same optional gate as MCP HTTP. If `EDGES_AUTH_TOKEN` is set, present it with `-
 
 ## `tasks`
 
-Board root is `<scope>/tasks/` by default (`--purpose domain`); `tasks --purpose maintenance` selects `<scope>/.harness/tasks/`. Paths cannot escape the selected board. Writes are filesystem-only (no git). Cancel with `status cancelled`. There is no `delete` command and no top-level `log` verb.
+Board root is `<scope>/.harness/tasks/` by default (`--purpose maintenance`); `tasks --purpose domain` explicitly selects `<scope>/tasks/`. The same default applies to root and nested scopes and to both reads and writes. Paths cannot escape the selected board. Writes are filesystem-only (no git). Cancel with `status cancelled`. There is no `delete` command and no top-level `log` verb.
 
 ```
 edges tasks list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]

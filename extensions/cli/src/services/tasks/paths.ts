@@ -11,6 +11,7 @@ export function isTaskStatus(value: string): value is TaskStatus {
 }
 
 export type TaskPurpose = "domain" | "maintenance";
+export const DEFAULT_TASK_PURPOSE: TaskPurpose = "maintenance";
 export type TaskBoardLocation = {
   scopeDir: string;
   purpose: TaskPurpose;
@@ -19,7 +20,7 @@ export type TaskBoardLocation = {
 export type BoardTarget = string | TaskBoardLocation;
 export function taskBoardLocation(
   scopeDir: string,
-  purpose: TaskPurpose = "domain",
+  purpose: TaskPurpose = DEFAULT_TASK_PURPOSE,
 ): TaskBoardLocation {
   return {
     scopeDir,

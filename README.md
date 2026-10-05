@@ -223,4 +223,4 @@ pnpm test
 
 本仓库使用 [MIT License](LICENSE)。系统演进记录见 [`CHANGELOG.md`](CHANGELOG.md)。
 
-目录升级与本机私有材料迁移见[迁移指南](docs/recursive-layout-migration.md)。领域 Task 命令默认操作选定作用域的 `tasks/`；维护任务显式传 `--purpose maintenance`。
+目录升级与本机私有材料迁移见[迁移指南](docs/recursive-layout-migration.md)。Task 命令默认操作选定作用域的 `.harness/tasks/`；领域任务显式传 `--purpose domain`，选择该作用域的 `tasks/`。根与子作用域遵循同一规则，读取和写入不会选择不同的默认板。
