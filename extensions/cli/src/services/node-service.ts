@@ -122,6 +122,8 @@ export class NodeService {
     this.#cache.remember(node, entry, readOnly, resources);
     return node;
   }
+  /** Read an entry and its resource snapshot for lifecycle operations.
+   * Also upgrades matching instances previously loaded through query(). */
   async get(file: string): Promise<BaseNode | undefined>;
   async get<T extends BaseNode>(
     file: string,
@@ -159,6 +161,8 @@ export class NodeService {
     if (!node) throw new Error(`Missing referenced node: ${reference.id}`);
     return node;
   }
+  /** Deferred, streaming reads with entry snapshots only. Before moving or
+   * destroying a returned node, call get(node.path) to capture its resources. */
   query(scopePath: string, options: NodeQueryOptions = {}): AsyncQuery<BaseNode> {
     const service = this;
     return query(async function* () {
@@ -179,8 +183,12 @@ export class NodeService {
       }, (parent, reference) => service.#reference(parent, reference, options.types, false));
     });
   }
+  /** Compatibility collection: materialize query and capture lifecycle resource
+   * snapshots before resolving, so later directory drift remains detectable. */
   async list(scopePath: string, options: ScopeTraversalOptions = {}): Promise<BaseNode[]> {
-    return this.query(scopePath, options).toArray().value();
+    const nodes = await this.query(scopePath, options).toArray().value();
+    for (const node of nodes) this.#cache.captureResources(node);
+    return nodes;
   }
   #existing(node: BaseNode, resources = false): EntryFile {
     const state = this.#cache.state.get(node);

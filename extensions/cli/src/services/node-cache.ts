@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import { BaseNode } from "../models/index.js";
 import { harnessPath } from "../models/layout.js";
 import { setNodeRelations, setNodePath } from "../models/relations.js";
-import { readEntry, type EntryFile } from "./node-files.js";
+import { readEntry, validateEntry, type EntryFile } from "./node-files.js";
 import { resourceSnapshot, type ResourceSnapshot } from "./node-resources.js";
 import {
   physicalParent,
@@ -34,10 +34,14 @@ export class NodeCache {
     });
   }
   remember(node: BaseNode, file: EntryFile, readOnly = false, captureResources = true): void {
-    const resources =
-      !captureResources || node.directoryPath === this.managedRoot || readOnly
-        ? undefined
-        : resourceSnapshot(node.directoryPath);
+    let resources: ResourceSnapshot | undefined;
+    if (captureResources && node.directoryPath !== this.managedRoot && !readOnly) {
+      // Preserve the entry snapshot retained by traversal; a fresh read must not
+      // silently bless an edit that happened before resource capture.
+      validateEntry(file);
+      resources = resourceSnapshot(node.directoryPath);
+      validateEntry(file);
+    }
     this.state.set(node, { file, readOnly, resources });
     if (readOnly) {
       this.readOnly.add(node.directoryPath);
@@ -46,12 +50,18 @@ export class NodeCache {
     const instances = this.loaded.get(node.path) ?? new Set();
     if (resources) for (const instance of instances) {
       const previous = this.state.get(instance)!;
-      if (!previous.resources && previous.file.source === file.source && previous.file.inode === file.inode && previous.file.device === file.device)
+      if (!previous.resources && previous.file.source === file.source && previous.file.inode === file.inode && previous.file.device === file.device && previous.file.realPath === file.realPath && previous.file.realDirectory === file.realDirectory)
         previous.resources = resources;
     }
     instances.add(node);
     this.loaded.set(node.path, instances);
     this.relations(node);
+  }
+  /** Upgrade a materialized query result while retaining its entry identity. */
+  captureResources(node: BaseNode): void {
+    const state = this.state.get(node);
+    if (!state || state.resources || state.readOnly || node.directoryPath === this.managedRoot) return;
+    this.remember(node, state.file, state.readOnly);
   }
   #mergedSource(
     node: BaseNode,

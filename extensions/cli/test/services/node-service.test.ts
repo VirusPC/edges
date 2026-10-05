@@ -487,3 +487,40 @@ test('typed navigation through a readonly leaf retains readonly origin for its h
   assert.equal(tasks.length,1);
   await assert.rejects(service.update(tasks[0]!,{description:'changed'}),/Read-only/);
 });
+
+for (const operation of ['move', 'destroy'] as const) {
+  test(`legacy list supports ${operation} with the resource snapshot taken before returning`, async t => {
+    const { root, write, file, service } = fixture(t);
+    write('AGENTS.md', index('- [item](item/index.md)'));
+    write('item/index.md', 'Item');
+    write('item/attachment.txt', 'original');
+    const node = (await service.list(root))[1]!;
+    if (operation === 'move') {
+      await service.move(node, file('moved/index.md'));
+      assert.equal(fs.readFileSync(file('moved/attachment.txt'), 'utf8'), 'original');
+    } else {
+      await service.destroy(node);
+      assert.equal(fs.existsSync(file('item')), false);
+    }
+  });
+  test(`legacy list rejects resource drift before ${operation}`, async t => {
+    const { root, write, file, service } = fixture(t);
+    write('AGENTS.md', index('- [item](item/index.md)'));
+    write('item/index.md', 'Item');
+    write('item/attachment.txt', 'original');
+    const node = (await service.list(root))[1]!;
+    write('item/attachment.txt', 'external edit');
+    await assert.rejects(operation === 'move' ? service.move(node, file('moved/index.md')) : service.destroy(node), /Node resources changed/);
+    assert.equal(fs.readFileSync(file('item/attachment.txt'), 'utf8'), 'external edit');
+  });
+}
+test('legacy list refuses entry changes between traversal and resource snapshot capture', async t => {
+  const { root, write } = fixture(t);
+  write('AGENTS.md', index('- [first](first/index.md)\n- [later](later/index.md)'));
+  write('first/index.md', 'first'); write('later/index.md', 'later');
+  const service = new NodeService({ managedRoot: root, modelForReference: (_parent, reference) => {
+    if (reference.id.endsWith('/later/index.md')) write('first/index.md', 'changed during traversal');
+    return undefined;
+  } });
+  await assert.rejects(service.list(root), /Node source changed/);
+});
