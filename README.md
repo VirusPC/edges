@@ -61,6 +61,8 @@ Notes 是低成本、零散且尚未形成稳定结论的捕获。Projects 是�
 
 [`tasks/`](tasks/) 存放领域工作项，[`.harness/tasks/`](.harness/tasks/) 存放 Edges 维护任务；两板按 Task Project 分组，再按 `edges-tasks-status` 分夹。新人侧捕获默认落入 `backlog/`；执行记录写在同 stem 的 sidecar，不进入 Task 正文。Task 不是 Note，也不是 Multica 式可抢单队列。
 
+任务按作用域存放，但 **全仓看板必须汇总各作用域的领域任务与维护任务**，不能因分层而让用户漏看。持久 `/tasks/` 站用 `generate-tasks-site.ts --scope <仓库根> --purpose all` 生成，保留来源作用域和任务性质；同名任务不互相覆盖。普通 `edges tasks list` 只列所选作用域的一张板，不代表全仓总览。
+
 ### Edge 与演化
 
 Edge 是已经提炼出理由与适用边界、可检验且能相对原有判断或替代方案改善未来决策的可复用判断。单条 Edge 是判断优势；多个相互补充、交叉检验并服务于不同决策的 Edge，共同构成认知资产组合。
