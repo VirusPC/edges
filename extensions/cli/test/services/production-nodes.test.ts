@@ -16,8 +16,9 @@ test('task update adds typed metadata to a headerless task and status preserves 
   const folder = path.join(scope, 'tasks/_default/todo');
   mkdirSync(folder, { recursive: true });
   const stem = '2026-10-05--plain';
-  writeFileSync(path.join(folder, `${stem}.md`), '# Original\n\nBody stays.\n');
-  writeFileSync(path.join(folder, `.${stem}.log.md`), 'Run evidence\n');
+  mkdirSync(path.join(folder, stem), { recursive: true });
+  writeFileSync(path.join(folder, stem, 'index.md'), '# Original\n\nBody stays.\n');
+  writeFileSync(path.join(folder, stem, 'run.log.md'), 'Run evidence\n');
   const call = (args: string[]) => run(['--scope', scope, 'tasks', ...args], { env: { EDGES_SCOPE: root } });
   const updated = await call(['update', stem, '--title', 'Typed title', '--priority', 'high']);
   assert.equal(updated.exitCode, 0, updated.stdout);
@@ -26,8 +27,8 @@ test('task update adds typed metadata to a headerless task and status preserves 
   assert.match(got.stdout, /high/);
   const moved = await call(['status', stem, 'done']);
   assert.equal(moved.exitCode, 0, moved.stdout);
-  assert.match(readFileSync(path.join(scope, 'tasks/_default/done', `${stem}.md`), 'utf8'), /Body stays/);
-  assert.equal(readFileSync(path.join(scope, 'tasks/_default/done', `.${stem}.log.md`), 'utf8'), 'Run evidence\n');
+  assert.match(readFileSync(path.join(scope, 'tasks/_default/done', stem, 'index.md'), 'utf8'), /Body stays/);
+  assert.equal(readFileSync(path.join(scope, 'tasks/_default/done', stem, 'run.log.md'), 'utf8'), 'Run evidence\n');
 });
 test('memory remember rejects malformed domain metadata without erasing the original entry', async t => {
   const root = fixture(t);
@@ -52,16 +53,6 @@ test('note ingest refuses a linked destination before changing the outside note'
     { repoPath: root, mode: 'direct', dryRun: true, baseBranch: 'main' }, {},
     { now: date, exec: async () => ({ stdout: '', stderr: '' }) }), /symbolic link/);
   assert.equal(readFileSync(target, 'utf8'), 'Outside original\n');
-});
-
-test('node creation rejects invalid permissions before creating a destination', async t => {
-  const { NodeService } = await import('../../src/services/node-service.js');
-  const { BaseNode } = await import('../../src/models/base-node.js');
-  const { existsSync } = await import('node:fs');
-  const file = path.join(fixture(t), 'private.md');
-  const service = new NodeService({ createMode: () => -1 });
-  await assert.rejects(() => service.create(new BaseNode(file).parse('body')), /mode|permission/i);
-  assert.equal(existsSync(file), false);
 });
 
 test('ordinary CLI startup works without the optional legacy migration implementation', async t => {

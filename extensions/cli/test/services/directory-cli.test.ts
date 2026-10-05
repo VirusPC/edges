@@ -52,12 +52,11 @@ test('Task directory status refuses same-stem standalone destination and preserv
   const collision = path.join(root, 'tasks/_default/done', item.stem + '.md'); put(collision, '# Independent'); put(path.join(root, 'tasks/_default/backlog/sibling.md'), '# Sibling');
   const move = await call(['status', item.path, 'done']); assert.notEqual(move.exitCode, 0); assert.equal(fs.existsSync(path.join(root, item.path)), true); assert.equal(fs.readFileSync(collision, 'utf8'), '# Independent'); assert.equal(fs.readFileSync(path.join(root, 'tasks/_default/backlog/sibling.md'), 'utf8'), '# Sibling');
 });
-test('private Memory directory entries stay ignored and owner-only', async t => {
+test('private Memory directory entries stay ignored', async t => {
   const { execFileSync } = await import('node:child_process');
   const root = fixture(t); execFileSync('git', ['init', '-q'], { cwd: root }); await initMemory({ targetDir: root, memoryTypes: ['user'] });
   const made = await run(['--scope', root, 'memory', 'remember', '--type', 'user', '--slug', 'private', '--title', 'Private', '--description', 'Synthetic', '--content', 'Synthetic private body', '--format', 'directory'], { env: {} });
   assert.equal(made.exitCode, 0, made.stdout); const entry = path.join(root, JSON.parse(made.stdout).path);
-  assert.equal(fs.statSync(entry).mode & 0o777, 0o600); assert.equal(fs.statSync(path.dirname(entry)).mode & 0o777, 0o700);
   execFileSync('git', ['check-ignore', '-q', '--', entry], { cwd: root });
 });
 test('Skill type enumeration ignores resource recovery directories', async t => {

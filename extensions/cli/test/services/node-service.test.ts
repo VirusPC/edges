@@ -1,497 +1,408 @@
-import assert from 'node:assert/strict';
-import { test } from 'node:test';
-import * as fs from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
-import { BaseNode, InternalNode, MemoryNode, NoteNode, SkillNode, TaskNode } from '../../src/models/index.js';
-import { NodeService } from '../../src/services/node-service.js';
-
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import * as fs from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import {
+  BaseNode,
+  InternalNode,
+  LeafNode,
+  MemoryNode,
+  NoteNode,
+  SkillNode,
+  TaskNode,
+} from "../../src/models/index.js";
+import { NodeService } from "../../src/services/node-service.js";
 function fixture(t: { after(fn: () => void): void }) {
-  const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), 'node-service-'));
+  const root = fs.mkdtempSync(
+    path.join(fs.realpathSync(tmpdir()), "node-service-"),
+  );
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const file = (name: string) => path.join(root, name);
-  const write = (name: string, source: string) => { fs.mkdirSync(path.dirname(file(name)), { recursive: true }); fs.writeFileSync(file(name), source); return file(name); };
-  return { root, file, write };
+  const write = (name: string, source: string) => {
+    fs.mkdirSync(path.dirname(file(name)), { recursive: true });
+    fs.writeFileSync(file(name), source);
+    return file(name);
+  };
+  return { root, file, write, service: new NodeService({ managedRoot: root }) };
 }
-function index(local = '', descendants = '') {
+function index(local = "", descendants = "") {
   return `# Scope\n\n<!-- project-memory-important:start -->\nKeep constraints.\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n${local}\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n${descendants}\n<!-- project-memory-children:end -->\n`;
 }
-const taskSource = '---\nname: One\nmetadata:\n  edges-tasks-status: todo\n---\nTask body.\n';
-
-test('create with placement persists task and index and establishes reciprocal context', async t => {
-  const { root, file } = fixture(t), service = new NodeService();
-  const parent = new InternalNode(file('AGENTS.md')).parse(index());
-  await service.create(parent);
-  const task = new TaskNode(file('tasks/one.md')).parse(taskSource);
-  await service.create(task, { parent, kind: 'local' });
-  assert.equal((await service.get(task.path, TaskNode))?.title, 'One');
-  assert.equal(task.parent?.target, parent.path);
-  assert.equal(parent.children[0]?.target, 'tasks/one.md');
-  assert.deepEqual((await service.list(root)).map(n => n.path), [parent.path, task.path]);
-  assert.match(fs.readFileSync(parent.path, 'utf8'), /Keep constraints/);
-});
-
-test('get is explicit, independent of YAML fields and physical ancestors, and only absence returns undefined', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [task](one.md)'));
-  write('one.md', taskSource);
-  const node = await service.get(file('one.md'));
-  assert.equal(node?.type, 'base'); assert.equal(node?.parent, undefined);
-  assert.equal((await service.get(file('one.md'), TaskNode))?.title, 'One');
-  assert.equal(await service.get(file('missing.md')), undefined);
-  await assert.rejects(service.get('one.md'), /absolute/);
-  await assert.rejects(service.get(file('')), /regular file/);
-});
-
-test('list follows unlimited local chains in stable preorder and filters descendants before loading', async t => {
-  const { root, write, file } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [A](a/AGENTS.md)\n- [A again](a/AGENTS.md#second)', '- [missing](missing/AGENTS.md)'));
-  write('a/AGENTS.md', index('- [B](../elsewhere/b/AGENTS.md)', '- [not a file](../unreadable/AGENTS.md)'));
-  write('unreadable/AGENTS.md/placeholder', '');
-  write('elsewhere/b/AGENTS.md', index('- [entry](../../data/a%20b.md#heading)'));
-  write('data/a b.md', '# Entry');
-  assert.deepEqual((await service.list(root)).map(n => n.path), ['AGENTS.md', 'a/AGENTS.md', 'elsewhere/b/AGENTS.md', 'data/a b.md'].map(file));
-  await assert.rejects(service.list(root, { includeDescendants: true }), /regular file|Missing/);
-  assert.match(fs.readFileSync(file('elsewhere/b/AGENTS.md'), 'utf8'), /a%20b.md#heading/);
-});
-
-test('included descendant traversal remains opt-in after previous loads and rejects missing roots and local targets', async t => {
-  const { root, write, file } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('', '- [child](child/AGENTS.md)')); write('child/AGENTS.md', index());
-  assert.equal((await service.list(root, { includeDescendants: true })).length, 2);
-  assert.equal((await service.list(root)).length, 1);
-  await assert.rejects(service.list(file('missing')), /Missing/);
-  write('AGENTS.md', index('- [missing](missing.md)'));
-  await assert.rejects(service.list(root), /Missing/);
-});
-
-test('list refuses ownership cycles but deduplicates repeated references', async t => {
-  const { root, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [A](a/AGENTS.md)')); write('a/AGENTS.md', index('- [root](../AGENTS.md)'));
-  await assert.rejects(service.list(root), /cycle/i);
-});
-
-test('type indexes select Memory and Skill without treating ordinary YAML as a type registry', async t => {
-  const { root, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [memory](mem/AGENTS.md)\n- [skills](skills/AGENTS.md)'));
-  write('mem/AGENTS.md', '<!-- project-memory-type:start -->\nname: project\nmodule: memory\nwritable: true\ngitignore: false\nformat: ordinary\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n- [entry](entry.md)\n<!-- project-memory-entries:end -->\n');
-  write('mem/entry.md', '---\ndescription: Memory\n---\nBody');
-  write('skills/AGENTS.md', '<!-- project-memory-type:start -->\nname: managed\nmodule: skills\nwritable: true\ngitignore: false\nformat: skills\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n- [skill](sample/SKILL.md)\n<!-- project-memory-entries:end -->\n');
-  write('skills/sample/SKILL.md', '---\nname: sample\ndescription: Skill\n---\nSteps');
-  const nodes = await service.list(root);
-  assert.deepEqual(nodes.map(n => n.type), ['internal', 'internal', 'memory', 'internal', 'skill']);
-  assert.ok(nodes[2] instanceof MemoryNode); assert.ok(nodes[4] instanceof SkillNode);
-});
-
-test('update preserves permissions, refuses missing/stale/substituted sources and does not create', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('note.md', '# Before\n'); fs.chmodSync(file('note.md'), 0o640);
-  const note = (await service.get(file('note.md'), NoteNode))!;
-  note.title = 'After'; await service.update(note);
-  assert.equal(fs.statSync(note.path).mode & 0o777, 0o640);
-  assert.match(fs.readFileSync(note.path, 'utf8'), /# After/);
-  write('note.md', '# External\n'); note.title = 'Wrong';
-  await assert.rejects(service.update(note), /source changed|stale/i);
-  assert.equal(fs.readFileSync(note.path, 'utf8'), '# External\n');
-  const fresh = (await service.get(note.path))!;
-  fs.renameSync(note.path, file('old.md')); write('note.md', '# External\n');
-  await assert.rejects(service.update(fresh), /identity|changed/i);
-  fs.unlinkSync(note.path); await assert.rejects(service.update(fresh), /missing|regular file/i);
-  await assert.rejects(service.update(new BaseNode(file('new.md')).parse('new')), /load|read|snapshot/i);
-  assert.equal(fs.existsSync(file('new.md')), false);
-});
-
-test('create refuses any existing target, and invalid placement leaves no child file or changed index', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index()); const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
-  await assert.rejects(service.create(new BaseNode(parent.path)), /exist/i);
-  const child = new BaseNode(file('new.md')).parse('new');
-  write('AGENTS.md', index('External edit'));
-  await assert.rejects(service.create(child, { parent, kind: 'local' }), /source changed|stale/i);
-  assert.equal(fs.existsSync(child.path), false); assert.equal(parent.children.length, 0); assert.equal(child.parent, undefined);
-});
-
-test('reads and writes reject symlink files and directories without touching their targets', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('real/one.md', 'original'); fs.symlinkSync(file('real/one.md'), file('link.md'));
-  fs.symlinkSync(file('real'), file('alias'));
-  for (const target of ['link.md', 'alias/one.md']) {
-    await assert.rejects(service.get(file(target)), /symbolic|symlink/i);
-    await assert.rejects(service.create(new BaseNode(file(target)).parse('bad')), /symbolic|symlink|exist/i);
-  }
-  const loaded = (await service.get(file('real/one.md')))!;
-  fs.renameSync(file('real'), file('moved')); fs.symlinkSync(file('moved'), file('real'));
-  await assert.rejects(service.update(loaded), /symbolic|symlink|identity/i);
-  assert.equal(fs.readFileSync(file('moved/one.md'), 'utf8'), 'original');
-});
-
-test('attach, reparent and detach persist ownership without moving files, preserving authored label and description', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('old/AGENTS.md', index('- [Custom label](../content.md) — authored description'));
-  write('new/deep/AGENTS.md', index()); write('content.md', 'body');
-  const oldParent = (await service.get(file('old/AGENTS.md'), InternalNode))!;
-  const newParent = (await service.get(file('new/deep/AGENTS.md'), InternalNode))!;
-  const child = (await service.get(file('content.md')))!;
-  await service.reparent(child, oldParent, newParent, 'descendant');
-  assert.equal(oldParent.children.length, 0);
-  assert.deepEqual(newParent.children, [{ target: '../../content.md', label: 'Custom label', description: 'authored description', kind: 'descendant' }]);
-  assert.equal(child.parent?.target, newParent.path); assert.equal(fs.readFileSync(child.path, 'utf8'), 'body');
-  await service.detach(newParent, child);
-  assert.equal(child.parent, undefined); assert.equal(newParent.children.length, 0);
-  await service.attach(oldParent, child, 'local'); assert.equal(child.parent?.target, oldParent.path);
-  assert.equal((await service.get(oldParent.path, InternalNode))!.children.length, 1);
-});
-
-test('ownership edits reject conflicts, missing documents and cycles before changing any document', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index()); write('child/AGENTS.md', index()); write('other/AGENTS.md', index());
-  const root = (await service.get(file('AGENTS.md'), InternalNode))!;
-  const child = (await service.get(file('child/AGENTS.md'), InternalNode))!;
-  const other = (await service.get(file('other/AGENTS.md'), InternalNode))!;
-  await service.attach(root, child, 'local');
-  await assert.rejects(service.attach(other, child, 'local'), /parent|ownership/i);
-  await assert.rejects(service.attach(child, root, 'local'), /cycle/i);
-  await assert.rejects(service.attach(root, root, 'local'), /self|cycle/i);
-  await assert.rejects(service.detach(other, child), /indexed|parent|ownership/i);
-  await assert.rejects(service.attach(root, new BaseNode(file('absent.md')), 'local'), /missing|load|read|snapshot/i);
-  assert.equal(other.children.length, 0); assert.equal(child.children.length, 0);
-});
-
-test('update index synchronizes all loaded reciprocal relations and rejects a introduced cycle', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'child');
-  const nodes = await service.list(root), parent = nodes[0] as InternalNode, child = nodes[1]!;
-  parent.removeChild({ target: 'child.md' }); await service.update(parent);
-  assert.equal(child.parent, undefined);
-  parent.addChild({ target: 'child.md', kind: 'local' }); await service.update(parent);
-  assert.equal(child.parent?.target, parent.path);
-  parent.addChild({ target: 'AGENTS.md', kind: 'local' });
-  await assert.rejects(service.update(parent), /cycle|self/i);
-  assert.equal((await service.get(file('AGENTS.md'), InternalNode))!.children.length, 1);
-});
-
-test('destroy rejects children, detaches using known context and leaves unknown external references alone', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'child');
-  const [parent, child] = await service.list(root);
-  await assert.rejects(service.destroy(parent!), /children/i);
-  await service.destroy(child!);
-  assert.equal(fs.existsSync(file('child.md')), false);
-  assert.equal((await service.get(file('AGENTS.md'), InternalNode))!.children.length, 0);
-  write('child.md', 'child'); write('external/AGENTS.md', index('- [child](../child.md)'));
-  await service.destroy((await service.get(file('child.md')))!);
-  assert.match(fs.readFileSync(file('external/AGENTS.md'), 'utf8'), /child.md/);
-});
-
-test('reparent preflights both parents and preserves every file and relation on stale destination', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'child'); write('new/AGENTS.md', index());
-  const [parent, child] = await service.list(root), next = (await service.get(file('new/AGENTS.md'), InternalNode))!;
-  const before = fs.readFileSync(parent!.path, 'utf8'); write('new/AGENTS.md', 'external');
-  await assert.rejects(service.reparent(child!, parent as InternalNode, next, 'local'), /source changed|stale/i);
-  assert.equal(fs.readFileSync(parent!.path, 'utf8'), before); assert.equal(child!.parent?.target, parent!.path);
-});
-
-test('explicit referenced indexes can read linked skills but their discovered source remains read-only', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [reference index](refs/AGENTS.md)'));
-  write('refs/AGENTS.md', '<!-- project-memory-type:start -->\nname: referenced\nmodule: skills\nwritable: false\ngitignore: false\nformat: skills\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n- [skill](linked/SKILL.md)\n<!-- project-memory-entries:end -->\n');
-  write('installed/SKILL.md', '---\nname: installed\ndescription: source\n---\nOriginal');
-  fs.symlinkSync(file('installed'), file('refs/linked'));
-  const nodes = await service.list(root), skill = nodes[2]!;
-  assert.equal(skill.type, 'skill'); skill.body = 'modified';
-  await assert.rejects(service.update(skill), /read.only/i);
-  await assert.rejects(service.destroy(skill), /read.only/i);
-  assert.match(fs.readFileSync(file('installed/SKILL.md'), 'utf8'), /Original/);
-});
-
-test('production hooks supply module constructors and preflight write permissions', async t => {
-  const { root, file, write } = fixture(t);
-  const service = new NodeService({
-    modelForReference: (_parent, _reference, target) => target.endsWith('task.md') ? TaskNode : undefined,
-    assertWrite: context => { if (context.node.path.endsWith('task.md')) throw new Error('Private destination is not ignored'); },
-  });
-  write('AGENTS.md', index('- [task](task.md)')); write('task.md', taskSource);
-  const nodes = await service.list(root); assert.equal(nodes[1]?.type, 'task');
-  await assert.rejects(service.update(nodes[1]!), /Private destination/);
-  await assert.rejects(service.destroy(nodes[1]!), /Private destination/);
-  assert.equal(fs.existsSync(file('task.md')), true);
-});
-
-test('destroy cannot bypass persisted AGENTS children by loading a BaseNode or removing children only in memory', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'child');
-  await assert.rejects(service.destroy((await service.get(file('AGENTS.md')))! ), /children/i);
-  const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
-  parent.removeChild({ target: 'child.md' });
-  await assert.rejects(service.destroy(parent), /children/i);
-  assert.equal(fs.existsSync(parent.path), true);
-});
-
-test('destroy updates the already loaded parent document as well as the child back reference', async t => {
-  const { root, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'child');
-  const [parent, child] = await service.list(root);
-  await service.destroy(child!);
-  assert.equal(parent!.children?.length, 0); assert.equal(child!.parent, undefined);
-});
-
-test('index-only ownership operations can detach a read-only linked source without writing that source', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [reference index](refs/AGENTS.md)'));
-  write('refs/AGENTS.md', '<!-- project-memory-type:start -->\nname: referenced\nmodule: skills\nwritable: false\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n- [skill](linked/SKILL.md)\n<!-- project-memory-entries:end -->\n');
-  write('installed/SKILL.md', 'Original'); fs.symlinkSync(file('installed'), file('refs/linked'));
-  const nodes = await service.list(root), parent = nodes[1] as InternalNode, skill = nodes[2]!;
-  await service.detach(parent, skill);
-  assert.equal(skill.parent, undefined); assert.equal(parent.children.length, 0);
-  await service.attach(parent, skill, 'local');
-  assert.equal(skill.parent?.target, parent.path); assert.equal(fs.readFileSync(file('installed/SKILL.md'), 'utf8'), 'Original');
-});
-
-test('multi-file write failure recovers previous bytes and reports affected paths instead of claiming atomicity', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'child'); write('next/AGENTS.md', index());
-  const [parent, child] = await service.list(root), next = (await service.get(file('next/AGENTS.md'), InternalNode))!;
-  const before = fs.readFileSync(parent!.path, 'utf8'), destination = fs.readFileSync(next.path, 'utf8');
-  // All filesystem effects remain real; only the second rename's OS failure is injected.
-  const { default: mutableFs } = await import('node:fs');
-  const { syncBuiltinESMExports } = await import('node:module');
-  const rename = mutableFs.renameSync;
-  let failed = false;
-  const mocked = t.mock.method(mutableFs, 'renameSync', (source: fs.PathLike, target: fs.PathLike) => {
-    if (target === next.path && !failed) { failed = true; throw new Error('Simulated second-file rename failure'); }
-    return rename(source, target);
-  });
-  syncBuiltinESMExports();
-  t.after(() => { mocked.mock.restore(); syncBuiltinESMExports(); });
-  await assert.rejects(service.reparent(child!, parent as InternalNode, next, 'local'), error => {
-    assert.match(String(error), /Affected:.*AGENTS.md/); assert.match(String(error), /Recovered:.*AGENTS.md/);
-    assert.match(String(error), /Unrecovered: \(none\)/); return true;
-  });
-  assert.equal(fs.readFileSync(parent!.path, 'utf8'), before);
-  assert.equal(fs.readFileSync(next.path, 'utf8'), destination);
-  assert.equal(child!.parent?.target, parent!.path); assert.equal(parent!.children?.length, 1);
-  assert.equal(fs.readdirSync(root).some(name => name.startsWith('.node-')), false);
-});
-
-test('create and attach preserve discovered index-only source permissions across later writes', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('refs/AGENTS.md', '<!-- project-memory-type:start -->\nname: referenced\nmodule: skills\nwritable: false\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n');
-  const parent = (await service.get(file('refs/AGENTS.md'), InternalNode))!;
-  const fresh = new SkillNode(file('fresh/SKILL.md')).parse('Original');
-  await assert.rejects(service.create(fresh, { parent, kind: 'local' }), /read.only/i);
-  assert.equal(fs.existsSync(fresh.path), false);
-  write('existing/SKILL.md', 'Original'); const existing = (await service.get(file('existing/SKILL.md'), SkillNode))!;
-  await service.attach(parent, existing, 'local'); existing.body = 'changed';
-  await assert.rejects(service.update(existing), /read.only/i);
-  await assert.rejects(service.destroy(existing), /read.only/i);
-  assert.equal(fs.readFileSync(existing.path, 'utf8'), 'Original');
-});
-
-test('ambiguous authored multi-link index edits reject before writing or clearing child context', async t => {
-  const { root, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [one](one.md) and [two](two.md)')); write('one.md', 'one'); write('two.md', 'two');
-  const [parent, one] = await service.list(root), before = fs.readFileSync(parent!.path, 'utf8');
-  await assert.rejects(service.detach(parent as InternalNode, one!), /multi-link/i);
-  assert.equal(fs.readFileSync(parent!.path, 'utf8'), before); assert.equal(one!.parent?.target, parent!.path);
-});
-
-test('encoded filename delimiters stay distinct from query and fragment and survive newly authored ownership', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [hash](a%23b.md#heading)\n- [percent](a%2523b.md?view=1)\n- [question](a%3Fb.md)\n- [literal percent](a%25b.md)'));
-  write('a#b.md', 'hash'); write('a%23b.md', 'percent'); write('a?b.md', 'question'); write('a%b.md', 'literal percent');
-  assert.deepEqual((await service.list(root)).map(n => n.path), ['AGENTS.md', 'a#b.md', 'a%23b.md', 'a?b.md', 'a%b.md'].map(file));
-  const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
-  const newChild = new BaseNode(file('has space.md')).parse('space');
-  await service.create(newChild, { parent, kind: 'local' });
-  assert.deepEqual((await service.list(root)).map(n => n.path), ['AGENTS.md', 'a#b.md', 'a%23b.md', 'a?b.md', 'a%b.md', 'has space.md'].map(file));
-});
-
-test('parent context resolves encoded scope directory names for destroy after list', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('scope#one/AGENTS.md', index('- [child](child.md)')); write('scope#one/child.md', 'body');
-  const [parent, child] = await service.list(file('scope#one'));
-  await service.destroy(child!);
-  assert.equal(parent!.children?.length, 0);
-  assert.equal(fs.existsSync(file('scope#one/child.md')), false);
-});
-
-test('successful index writes synchronize clean loaded copies without overwriting unsaved edits', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'body');
-  const [first, child] = await service.list(root);
-  const second = (await service.get(file('AGENTS.md'), InternalNode))!;
-  const dirty = (await service.get(file('AGENTS.md'), InternalNode))!;
-  dirty.setConstraints(['Unsaved constraints']);
-  second.updateChild({ target: 'child.md', label: 'changed', kind: 'local' });
-  await service.update(second);
-  assert.equal(first!.children?.[0]?.label, 'changed');
-  assert.deepEqual(dirty.content.constraints, ['Unsaved constraints']);
-  await service.destroy(child!);
-  assert.equal(first!.children?.length, 0); assert.equal(second.children.length, 0);
-});
-
-test('failed rollback retains original bytes in a recovery file and reports its concrete location', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'body'); write('next/AGENTS.md', index());
-  const [parent, child] = await service.list(root), next = (await service.get(file('next/AGENTS.md'), InternalNode))!;
-  const before = fs.readFileSync(parent!.path, 'utf8'), mode = fs.statSync(parent!.path).mode & 0o777;
-  const { default: mutableFs } = await import('node:fs');
-  const { syncBuiltinESMExports } = await import('node:module');
-  const rename = mutableFs.renameSync;
-  let firstWritten = false;
-  const mocked = t.mock.method(mutableFs, 'renameSync', (source: fs.PathLike, target: fs.PathLike) => {
-    if (target === next.path || (target === parent!.path && firstWritten)) throw new Error('Persistent rename failure');
-    rename(source, target); firstWritten = true;
-  });
-  syncBuiltinESMExports(); t.after(() => { mocked.mock.restore(); syncBuiltinESMExports(); });
-  await assert.rejects(service.reparent(child!, parent as InternalNode, next, 'local'), error => {
-    assert.match(String(error), /Unrecovered:.*AGENTS.md/);
-    const recovery = fs.readdirSync(root).find(name => name.startsWith('.node-recovery-'));
-    assert.ok(recovery); assert.ok(String(error).includes(file(recovery)));
-    assert.equal(fs.readFileSync(file(recovery), 'utf8'), before);
-    assert.equal(fs.statSync(file(recovery)).mode & 0o777, mode);
-    return true;
-  });
-});
-
-for (const operation of ['update', 'create', 'attach'] as const) {
-  test(`post-commit read failure records and recovers the committed ${operation} destination`, async t => {
-    const { file, write } = fixture(t), service = new NodeService();
-    write('AGENTS.md', index()); write('child.md', 'child');
-    const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
-    const child = (await service.get(file('child.md')))!;
-    const target = operation === 'create' ? file('new.md') : operation === 'update' ? child.path : parent.path;
-    const before = operation === 'create' ? undefined : fs.readFileSync(target, 'utf8');
-    const { default: mutableFs } = await import('node:fs');
-    const { syncBuiltinESMExports } = await import('node:module');
-    const rename = mutableFs.renameSync, link = mutableFs.linkSync, open = mutableFs.openSync;
-    let committed = false, failed = false;
-    const renameMock = t.mock.method(mutableFs, 'renameSync', (source: fs.PathLike, dest: fs.PathLike) => { rename(source, dest); if (dest === target) committed = true; });
-    const linkMock = t.mock.method(mutableFs, 'linkSync', (source: fs.PathLike, dest: fs.PathLike) => { link(source, dest); if (dest === target) committed = true; });
-    const openMock = t.mock.method(mutableFs, 'openSync', (...args: Parameters<typeof open>) => {
-      if (committed && !failed && args[0] === target) { failed = true; throw new Error('Post-commit inspection failure'); }
-      return open(...args);
-    });
+function typeIndex(module: string, writable: boolean, entries = "") {
+  return `<!-- project-memory-type:start -->\nname: ${writable ? "managed" : "referenced"}\nmodule: ${module}\nwritable: ${writable}\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n${entries}\n<!-- project-memory-entries:end -->\n`;
+}
+for (const operation of ["update", "create", "attach"] as const) {
+  test(`post-commit read failure records and recovers the committed ${operation} destination`, async (t) => {
+    const { file, write, service } = fixture(t);
+    write("AGENTS.md", index());
+    write("child/index.md", "child");
+    const parent = (await service.get(file("AGENTS.md"), InternalNode))!;
+    const child = (await service.get(file("child/index.md")))!;
+    const target =
+      operation === "create"
+        ? file("new/index.md")
+        : operation === "update"
+          ? child.path
+          : parent.path;
+    const before =
+      operation === "create" ? undefined : fs.readFileSync(target, "utf8");
+    const { default: mutableFs } = await import("node:fs");
+    const { syncBuiltinESMExports } = await import("node:module");
+    const rename = mutableFs.renameSync,
+      link = mutableFs.linkSync,
+      open = mutableFs.openSync;
+    let committed = false,
+      failed = false;
+    const renameMock = t.mock.method(
+      mutableFs,
+      "renameSync",
+      (source: fs.PathLike, dest: fs.PathLike) => {
+        rename(source, dest);
+        if (dest === target) committed = true;
+      },
+    );
+    const linkMock = t.mock.method(
+      mutableFs,
+      "linkSync",
+      (source: fs.PathLike, dest: fs.PathLike) => {
+        link(source, dest);
+        if (dest === target) committed = true;
+      },
+    );
+    const openMock = t.mock.method(
+      mutableFs,
+      "openSync",
+      (...args: Parameters<typeof open>) => {
+        if (committed && !failed && args[0] === target) {
+          failed = true;
+          throw new Error("Post-commit inspection failure");
+        }
+        return open(...args);
+      },
+    );
     syncBuiltinESMExports();
-    t.after(() => { renameMock.mock.restore(); linkMock.mock.restore(); openMock.mock.restore(); syncBuiltinESMExports(); });
-    child.body = 'updated';
-    const action = operation === 'create' ? service.create(new BaseNode(target).parse('new'))
-      : operation === 'update' ? service.update(child) : service.attach(parent, child, 'local');
-    await assert.rejects(action, error => { assert.ok(String(error).includes(`Affected: ${target}`)); return true; });
+    t.after(() => {
+      renameMock.mock.restore();
+      linkMock.mock.restore();
+      openMock.mock.restore();
+      syncBuiltinESMExports();
+    });
+    child.body = "updated";
+    const action =
+      operation === "create"
+        ? service.create(new LeafNode(target), { body: "new" })
+        : operation === "update"
+          ? service.update(child, {})
+          : attach(service, parent, child, "local");
+    await assert.rejects(action, (error) => {
+      assert.ok(String(error).includes(`Affected: ${target}`));
+      return true;
+    });
     if (before === undefined) assert.equal(fs.existsSync(target), false);
-    else assert.equal(fs.readFileSync(target, 'utf8'), before);
+    else assert.equal(fs.readFileSync(target, "utf8"), before);
   });
 }
 
-test('post-commit temporary cleanup failure recovers created file rather than leaving an unreported mutation', async t => {
-  const { file } = fixture(t), service = new NodeService();
-  const { default: mutableFs } = await import('node:fs');
-  const { syncBuiltinESMExports } = await import('node:module');
+test("post-commit temporary cleanup failure recovers created file rather than leaving an unreported mutation", async (t) => {
+  const { file, service } = fixture(t);
+  const { default: mutableFs } = await import("node:fs");
+  const { syncBuiltinESMExports } = await import("node:module");
   const unlink = mutableFs.unlinkSync;
   let failed = false;
-  const mocked = t.mock.method(mutableFs, 'unlinkSync', (target: fs.PathLike) => {
-    if (!failed && String(target).endsWith('.tmp')) { failed = true; throw new Error('Temporary cleanup failure'); }
-    return unlink(target);
+  const mocked = t.mock.method(
+    mutableFs,
+    "unlinkSync",
+    (target: fs.PathLike) => {
+      if (!failed && String(target).endsWith(".tmp")) {
+        failed = true;
+        throw new Error("Temporary cleanup failure");
+      }
+      return unlink(target);
+    },
+  );
+  syncBuiltinESMExports();
+  t.after(() => {
+    mocked.mock.restore();
+    syncBuiltinESMExports();
   });
-  syncBuiltinESMExports(); t.after(() => { mocked.mock.restore(); syncBuiltinESMExports(); });
-  const target = file('new.md');
-  await assert.rejects(service.create(new BaseNode(target).parse('new')), error => { assert.ok(String(error).includes(`Affected: ${target}`)); return true; });
+  const target = file("new/index.md");
+  await assert.rejects(
+    service.create(new LeafNode(target), { body: "new" }),
+    (error) => {
+      assert.ok(String(error).includes(`Affected: ${target}`));
+      return true;
+    },
+  );
   assert.equal(fs.existsSync(target), false);
 });
 
-test('attach checks authoritative AGENTS ownership even when child was loaded as BaseNode', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('a/AGENTS.md', index('- [B](../b/AGENTS.md)')); write('b/AGENTS.md', index());
-  const a = (await service.get(file('a/AGENTS.md')))!;
-  const b = (await service.get(file('b/AGENTS.md'), InternalNode))!;
-  const before = fs.readFileSync(b.path, 'utf8');
-  await assert.rejects(service.attach(b, a, 'local'), /cycle/i);
-  assert.equal(fs.readFileSync(b.path, 'utf8'), before);
+test("structured create dispatches task defaults and refuses conflicts before changing the input", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index());
+  const task = new TaskNode(file("tasks/backlog/one/index.md"));
+  assert.equal(
+    await service.create(task, { title: "One", body: "body" }),
+    task,
+  );
+  assert.equal(task.title, "One");
+  assert.equal(task.status, "backlog");
+  assert.equal(task.parent?.id, file("AGENTS.md"));
+  const fresh = new LeafNode(task.path);
+  await assert.rejects(service.create(fresh, { body: "wrong" }), /exists/);
+  assert.equal(fresh.body, "");
+});
+test("default get uses layout and physical ancestors, ignoring YAML type claims and ordinary navigation", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [one](one/index.md)"));
+  write("one/index.md", "---\ntype: task\n---\nbody");
+  write("README.md", "docs");
+  const node = (await service.get(file("one/index.md")))!;
+  assert.equal(node.type, "leaf");
+  assert.equal(node.parent?.id, file("AGENTS.md"));
+  assert.equal(await service.get(file("README.md")), undefined);
+  assert.equal(await service.get(file("missing/index.md")), undefined);
+  write("invalid/index.md", "---\nname: [\n---\n");
+  await assert.rejects(service.get(file("invalid/index.md")));
+});
+test("local traversal supports cross-layer discovery and skips descendants before loading", async (t) => {
+  const { root, file, write, service } = fixture(t);
+  write(
+    "AGENTS.md",
+    index("- [A](a/AGENTS.md)", "- [Missing](missing/AGENTS.md)"),
+  );
+  write("a/AGENTS.md", index("- [B](../elsewhere/b/AGENTS.md)"));
+  write(
+    "elsewhere/b/AGENTS.md",
+    index("- [Leaf](../../data/a%20b/index.md#part)"),
+  );
+  write("data/a b/index.md", "leaf");
+  assert.deepEqual(
+    (await service.list(root)).map((n) => n.path),
+    [
+      "AGENTS.md",
+      "a/AGENTS.md",
+      "elsewhere/b/AGENTS.md",
+      "data/a b/index.md",
+    ].map(file),
+  );
+  await assert.rejects(
+    service.list(root, { includeDescendants: true }),
+    /Missing/,
+  );
+  await assert.rejects(service.list(file("absent")), /Missing/);
+  assert.equal(
+    (await service.get(file("data/a b/index.md")))!.parent?.id,
+    file("AGENTS.md"),
+  );
+});
+test("composition cycles reject while diamond crossreferences do not invent conflicting parents", async (t) => {
+  const { root, file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [A](a/AGENTS.md)\n- [B](b/AGENTS.md)"));
+  write("a/AGENTS.md", index("- [Leaf](../leaf/index.md)"));
+  write("b/AGENTS.md", index("- [Leaf](../leaf/index.md)"));
+  write("leaf/index.md", "leaf");
+  assert.equal((await service.list(root)).length, 4);
+  assert.equal(
+    (await service.get(file("leaf/index.md")))!.parent?.id,
+    file("AGENTS.md"),
+  );
+  write("b/AGENTS.md", index("- [root](../AGENTS.md)"));
+  await assert.rejects(service.list(root), /cycle/i);
+});
+test("registered type contracts choose memory and custom constructors without YAML inference", async (t) => {
+  const { root, file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Memory](mem/AGENTS.md)"));
+  write("mem/AGENTS.md", typeIndex("memory", true, "- [One](one/index.md)"));
+  write("mem/one/index.md", "body");
+  assert.ok((await service.list(root))[2] instanceof MemoryNode);
+  assert.ok(
+    (await service.get(file("mem/one/index.md"))) instanceof MemoryNode,
+  );
+  const custom = new NodeService({
+    managedRoot: root,
+    modelForReference: (_p, _r, target) =>
+      target === file("mem/one/index.md") ? NoteNode : undefined,
+  });
+  assert.ok((await custom.list(root))[2] instanceof NoteNode);
+});
+test("update refuses missing, stale and substituted sources and retains ordinary existing file mode", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("note/index.md", "# Before\n");
+  fs.chmodSync(file("note/index.md"), 0o640);
+  const note = (await service.get(file("note/index.md"), NoteNode))!;
+  await service.update(note, { body: "# After\n" });
+  assert.equal(fs.statSync(note.path).mode & 0o777, 0o640);
+  write("note/index.md", "# External\n");
+  await assert.rejects(
+    service.update(note, { body: "wrong" }),
+    /source changed/i,
+  );
+  assert.equal(note.title, "After");
+  const fresh = (await service.get(note.path))!;
+  fs.renameSync(note.path, file("note/old.md"));
+  write("note/index.md", "# External\n");
+  await assert.rejects(service.update(fresh, {}), /identity|changed/i);
+  fs.unlinkSync(note.path);
+  await assert.rejects(service.update(fresh, {}), /Missing/);
+  await assert.rejects(
+    service.update(new LeafNode(file("new/index.md")), {}),
+    /snapshot/,
+  );
+});
+test("symlink reads and destination writes fail without changing targets", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("outside/index.md", "safe");
+  fs.symlinkSync(file("outside"), file("linked"));
+  await assert.rejects(service.get(file("linked/index.md")), /symbolic/);
+  await assert.rejects(
+    service.create(new LeafNode(file("linked/new/index.md")), { body: "bad" }),
+    /symbolic/,
+  );
+  assert.equal(fs.readFileSync(file("outside/index.md"), "utf8"), "safe");
+});
+test("index-only attach and detach retain physical parent, label and prose", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index());
+  write("a/AGENTS.md", index());
+  write("b/index.md", "child");
+  const parent = (await service.get(file("a/AGENTS.md"), InternalNode))!,
+    child = (await service.get(file("b/index.md")))!;
+  await attach(service, parent, child, "descendant");
+  parent.updateChild(child.id, { name: "Kept", description: "Details" });
+  await service.update(parent, {});
+  assert.equal(child.parent?.id, file("AGENTS.md"));
+  assert.equal(parent.descendantChildren[0]?.name, "Kept");
+  await detach(service, parent, child);
+  assert.equal(child.parent?.id, file("AGENTS.md"));
+  assert.equal(parent.children.length, 0);
+});
+test("authoritative AGENTS graph validation catches cycles from typed BaseNode and unsaved edits", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("a/AGENTS.md", index("- [B](../b/AGENTS.md)"));
+  write("b/AGENTS.md", index());
+  const a = (await service.get(file("a/AGENTS.md"), BaseNode))!,
+    b = (await service.get(file("b/AGENTS.md"), InternalNode))!;
+  await assert.rejects(attach(service, b, a, "local"), /cycle/i);
+  assert.equal(b.children.length, 0);
+  await assert.rejects(
+    service.update(a, { body: index("- [self](AGENTS.md)") }),
+    /cycle/i,
+  );
+  assert.equal(a.children.length, 0);
+  await assert.rejects(
+    service.create(new BaseNode(file("new/AGENTS.md")), {
+      body: index("- [self](AGENTS.md)"),
+    }),
+    /cycle/i,
+  );
+  assert.equal(fs.existsSync(file("new/AGENTS.md")), false);
+});
+test("referenced indexes permit linked reads and index detach but retain conservative readonly origin", async (t) => {
+  const { root, file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Refs](refs/AGENTS.md)"));
+  write(
+    "refs/AGENTS.md",
+    typeIndex("skills", false, "- [Skill](linked/SKILL.md)"),
+  );
+  write("installed/SKILL.md", "original");
+  fs.symlinkSync(file("installed"), file("refs/linked"));
+  const nodes = await service.list(root),
+    parent = nodes[1] as InternalNode,
+    skill = nodes[2]!;
+  await assert.rejects(
+    service.update(skill, { body: "bad" }),
+    /read.only|symbolic/i,
+  );
+  await detach(service, parent, skill);
+  const alias = (await service.get(file("installed/SKILL.md")))!;
+  await assert.rejects(service.destroy(alias), /read.only/i);
+  assert.equal(fs.readFileSync(alias.path, "utf8"), "original");
+});
+test("business write hook denies mutations before index or source bytes change", async (t) => {
+  const { root, file, write } = fixture(t);
+  write("AGENTS.md", index());
+  const service = new NodeService({
+    managedRoot: root,
+    assertWrite: ({ node }) => {
+      if (node.path.includes("/private/"))
+        throw new Error("Private destination is not ignored");
+    },
+  });
+  await assert.rejects(
+    service.create(new LeafNode(file("private/index.md")), { body: "secret" }),
+    /not ignored/,
+  );
+  assert.equal(fs.existsSync(file("private/index.md")), false);
+  assert.equal(
+    (await service.get(file("AGENTS.md"), InternalNode))!.children.length,
+    0,
+  );
+});
+test("ambiguous multi-link source edit refuses deletion without losing prose or relations", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [One](one/index.md) and [Two](two/index.md)"));
+  write("one/index.md", "one");
+  write("two/index.md", "two");
+  const parent = (await service.get(file("AGENTS.md"), InternalNode))!,
+    one = (await service.get(file("one/index.md")))!;
+  const before = fs.readFileSync(parent.path, "utf8");
+  await assert.rejects(detach(service, parent, one), /multi-link/i);
+  assert.equal(fs.readFileSync(parent.path, "utf8"), before);
+  assert.equal(one.parent?.id, parent.id);
+});
+test("encoded directory delimiters stay distinct from href query and fragment", async (t) => {
+  const { root, file, write, service } = fixture(t);
+  write(
+    "AGENTS.md",
+    index(
+      "- [Hash](a%23b/index.md#heading)\n- [Percent](a%2523b/index.md?q=1)\n- [Question](a%3Fb/index.md)\n- [Literal](a%25b/index.md)",
+    ),
+  );
+  for (const name of ["a#b", "a%23b", "a?b", "a%b"])
+    write(`${name}/index.md`, "body");
+  assert.deepEqual(
+    (await service.list(root)).map((n) => n.path),
+    [
+      "AGENTS.md",
+      "a#b/index.md",
+      "a%23b/index.md",
+      "a?b/index.md",
+      "a%b/index.md",
+    ].map(file),
+  );
+});
+test("cached clean copies update while unrelated unsaved constraints survive", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Child](child/index.md)"));
+  write("child/index.md", "child");
+  const first = (await service.get(file("AGENTS.md"), InternalNode))!,
+    second = (await service.get(first.path, InternalNode))!,
+    dirty = (await service.get(first.path, InternalNode))!;
+  dirty.setConstraints(["Unsaved"]);
+  second.updateChild(file("child/index.md"), { name: "Changed" });
+  await service.update(second, {});
+  assert.equal(first.children[0]?.name, "Changed");
+  assert.deepEqual(dirty.constraints, ["Unsaved"]);
 });
 
-for (const operation of ['attach', 'detach', 'create', 'update', 'destroy', 'reparent'] as const) {
-  test(`${operation} validates pre-existing unsaved index edits before persisting the whole parent`, async t => {
-    const { file, write } = fixture(t), service = new NodeService();
-    write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'child'); write('other.md', 'other'); write('next/AGENTS.md', index());
-    const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
-    const child = (await service.get(file('child.md')))!;
-    const other = (await service.get(file('other.md')))!;
-    const next = (await service.get(file('next/AGENTS.md'), InternalNode))!;
-    const before = fs.readFileSync(parent.path, 'utf8'), nextBefore = fs.readFileSync(next.path, 'utf8');
-    parent.addChild({ target: 'AGENTS.md', kind: 'local' });
-    const action = operation === 'attach' ? service.attach(parent, other, 'local')
-      : operation === 'detach' ? service.detach(parent, child)
-      : operation === 'create' ? service.create(new BaseNode(file('new.md')).parse('new'), { parent, kind: 'local' })
-      : operation === 'update' ? service.update(parent)
-      : operation === 'destroy' ? service.destroy(child, parent)
-      : service.reparent(child, parent, next, 'local');
-    await assert.rejects(action, /cycle/i);
-    assert.equal(fs.readFileSync(parent.path, 'utf8'), before);
-    assert.equal(fs.readFileSync(next.path, 'utf8'), nextBefore);
-    assert.equal(fs.existsSync(file('new.md')), false); assert.equal(fs.existsSync(child.path), true);
-    assert.ok(parent.children.some(reference => reference.target === 'AGENTS.md'));
-  });
+/** Tests exercise the public model-edit + service-update composition. */
+async function attach(
+  service: NodeService,
+  parent: InternalNode,
+  child: BaseNode,
+  group: "local" | "descendant",
+) {
+  const draft = new InternalNode(parent.path).parse(parent.serialize());
+  draft.addChild(group, child);
+  await service.update(parent, { body: draft.body });
 }
-
-test('reparent validates combined proposed indexes and preserves legitimate unsaved index changes', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('a/AGENTS.md', index('- [child](../child.md)')); write('b/AGENTS.md', index()); write('child.md', 'child');
-  const a = (await service.get(file('a/AGENTS.md'), InternalNode))!;
-  const b = (await service.get(file('b/AGENTS.md'), InternalNode))!;
-  const child = (await service.get(file('child.md')))!;
-  a.addChild({ target: '../b/AGENTS.md', kind: 'local' });
-  b.addChild({ target: '../a/AGENTS.md', kind: 'local' });
-  await assert.rejects(service.reparent(child, a, b, 'local'), /cycle/i);
-  b.removeChild({ target: '../a/AGENTS.md' });
-  a.setConstraints(['Unsaved legitimate constraint']);
-  await service.reparent(child, a, b, 'local');
-  const saved = (await service.get(a.path, InternalNode))!;
-  assert.deepEqual(saved.content.constraints, ['Unsaved legitimate constraint']);
-  assert.deepEqual(saved.children.map(reference => reference.target), ['../b/AGENTS.md']);
-  assert.equal((await service.get(b.path, InternalNode))!.children[0]?.target, '../child.md');
-});
-
-test('BaseNode create/update of AGENTS still validates the serialized ownership graph', async t => {
-  const { file, write } = fixture(t), service = new NodeService();
-  write('existing/AGENTS.md', index());
-  const existing = (await service.get(file('existing/AGENTS.md')))!;
-  existing.body = index('- [self](AGENTS.md)');
-  await assert.rejects(service.update(existing), /cycle/i);
-  await assert.rejects(service.create(new BaseNode(file('new/AGENTS.md')).parse(index('- [self](AGENTS.md)'))), /cycle/i);
-  assert.equal(fs.existsSync(file('new/AGENTS.md')), false);
-  assert.equal((await service.get(existing.path, InternalNode))!.children.length, 0);
-});
-
-test('persistent post-commit inspection failure retains original bytes with accurate affected destination', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('entry.md', 'original'); fs.chmodSync(file('entry.md'), 0o600);
-  const node = (await service.get(file('entry.md')))!; node.body = 'new';
-  const { default: mutableFs } = await import('node:fs');
-  const { syncBuiltinESMExports } = await import('node:module');
-  const rename = mutableFs.renameSync, open = mutableFs.openSync;
-  let committed = false;
-  const renameMock = t.mock.method(mutableFs, 'renameSync', (source: fs.PathLike, dest: fs.PathLike) => { rename(source, dest); committed = true; });
-  const openMock = t.mock.method(mutableFs, 'openSync', (...args: Parameters<typeof open>) => {
-    if (committed && args[0] === node.path) throw new Error('Persistent inspection failure');
-    return open(...args);
-  });
-  syncBuiltinESMExports(); t.after(() => { renameMock.mock.restore(); openMock.mock.restore(); syncBuiltinESMExports(); });
-  await assert.rejects(service.update(node), error => {
-    assert.ok(String(error).includes(`Affected: ${node.path}`));
-    assert.ok(String(error).includes(`Unrecovered: ${node.path}`));
-    const recovery = fs.readdirSync(root).find(name => name.startsWith('.node-recovery-'))!;
-    assert.ok(recovery); assert.ok(String(error).includes(file(recovery)));
-    assert.equal(fs.readFileSync(file(recovery), 'utf8'), 'original');
-    assert.equal(fs.statSync(file(recovery)).mode & 0o777, 0o600); return true;
-  });
-});
-
-test('BaseNode updates of AGENTS synchronize authoritative ownership for loaded children and indexes', async t => {
-  const { root, file, write } = fixture(t), service = new NodeService();
-  write('AGENTS.md', index('- [child](child.md)')); write('child.md', 'child');
-  const [parent, child] = await service.list(root);
-  const base = (await service.get(file('AGENTS.md')))!;
-  base.body = index(); await service.update(base);
-  assert.equal(child!.parent, undefined); assert.equal(parent!.children?.length, 0);
-});
+async function detach(
+  service: NodeService,
+  parent: InternalNode,
+  child: BaseNode,
+) {
+  const draft = new InternalNode(parent.path).parse(parent.serialize());
+  draft.removeChild(child.id);
+  await service.update(parent, { body: draft.body });
+}

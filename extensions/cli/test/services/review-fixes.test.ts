@@ -1,11 +1,9 @@
-import { createRequire, syncBuiltinESMExports } from 'node:module';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as fs from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { NodeService } from '../../src/services/node-service.js';
-import { BaseNode } from '../../src/models/base-node.js';
 import { syncAgentsBlocks } from '../../src/services/memory/agents.js';
 import { initMemory } from '../../src/services/memory/init.js';
 import { updateTask } from '../../src/services/tasks/write.js';
@@ -43,27 +41,8 @@ test('Memory does not overwrite a destination that appears before its creation s
   assert.equal(fs.readFileSync(file, 'utf8'), '# Human-created entry\n');
 });
 
-for (const mode of [0o000, 0o200, 0o004]) test(`createMode ${mode.toString(8)} succeeds without reopening the unreadable document`, async t => {
-  if (process.getuid?.() === 0) return t.skip('Permission enforcement must be exercised by a regular user');
-  const file = path.join(fixture(t), 'restricted.md');
-  const mutableFs = createRequire(import.meta.url)('node:fs') as typeof fs;
-  const write = mutableFs.writeFileSync, observedModes: number[] = [];
-  const hook = t.mock.method(mutableFs, 'writeFileSync', (...args: Parameters<typeof write>) => {
-    if (typeof args[0] === 'number') observedModes.push(fs.fstatSync(args[0]).mode & 0o777);
-    return write(...args);
-  });
-  syncBuiltinESMExports();
-  t.after(() => { hook.mock.restore(); syncBuiltinESMExports(); });
-  await new NodeService({ createMode: () => mode }).create(new BaseNode(file).parse('Restricted bytes\n'));
-  assert.equal(fs.statSync(file).mode & 0o777, mode);
-  assert.deepEqual(observedModes, [mode], 'first content write must already have final restricted permissions');
-  assert.throws(() => fs.readFileSync(file), /EACCES/);
-  fs.chmodSync(file, 0o600); // Test-only inspection after the operation succeeded.
-  assert.equal(fs.readFileSync(file, 'utf8'), 'Restricted bytes\n');
-});
-
 test('Task body update preserves supplied blank lines and trailing spaces', async t => {
-  const root = fixture(t), rel = 'tasks/_default/todo/2026-10-05--body.md';
+  const root = fixture(t), rel = 'tasks/_default/todo/2026-10-05--body/index.md';
   fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
   fs.writeFileSync(path.join(root, rel), '---\nname: body\nmetadata:\n  edges-tasks-status: todo\n---\nOld\n');
   await updateTask(root, '2026-10-05--body', { body: '\nBody  \n\n' }, { fs: createNodeBoardWriter(root), now: new Date('2026-10-05T00:00:00Z') });

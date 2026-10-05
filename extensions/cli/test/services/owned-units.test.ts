@@ -1,109 +1,354 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import * as fs from 'node:fs';
-import path from 'node:path';
-import { tmpdir } from 'node:os';
-import { NodeService } from '../../src/services/node-service.js';
-import { BaseNode, InternalNode, MemoryNode, NoteNode, SkillNode, TaskNode } from '../../src/models/index.js';
-function fixture(t: any) { const dir = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'owned-units-'))); t.after(() => fs.rmSync(dir, { recursive: true, force: true })); return dir; }
-function put(file: string, body: string | Buffer) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, body); }
-test('typed entry ownership preserves binary resources on update and destroys only its own unit', async t => {
-  const root = fixture(t), entry = path.join(root, 'unit/index.md'), asset = path.join(root, 'unit/image.bin');
-  put(entry, '# Title\n'); put(asset, Buffer.from([0, 255, 1])); put(path.join(root, 'other.md'), 'independent');
-  const service = new NodeService(), node = (await service.get(entry, NoteNode))!;
-  assert.equal(node.directoryPath, path.dirname(entry)); node.body = '# Changed\n'; await service.update(node);
-  assert.deepEqual(fs.readFileSync(asset), Buffer.from([0, 255, 1]));
-  await service.destroy(node); assert.equal(fs.existsSync(path.dirname(entry)), false); assert.equal(fs.readFileSync(path.join(root, 'other.md'), 'utf8'), 'independent');
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import * as fs from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import {
+  BaseNode,
+  InternalNode,
+  LeafNode,
+  MemoryNode,
+  NoteNode,
+  SkillNode,
+  TaskNode,
+} from "../../src/models/index.js";
+import { NodeService } from "../../src/services/node-service.js";
+function fixture(t: { after(fn: () => void): void }) {
+  const root = fs.mkdtempSync(
+    path.join(fs.realpathSync(tmpdir()), "node-service-"),
+  );
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const file = (name: string) => path.join(root, name);
+  const write = (name: string, source: string) => {
+    fs.mkdirSync(path.dirname(file(name)), { recursive: true });
+    fs.writeFileSync(file(name), source);
+    return file(name);
+  };
+  return { root, file, write, service: new NodeService({ managedRoot: root }) };
+}
+function index(local = "", descendants = "") {
+  return `# Scope\n\n<!-- project-memory-important:start -->\nKeep constraints.\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n${local}\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n${descendants}\n<!-- project-memory-children:end -->\n`;
+}
+function typeIndex(module: string, writable: boolean, entries = "") {
+  return `<!-- project-memory-type:start -->\nname: ${writable ? "managed" : "referenced"}\nmodule: ${module}\nwritable: ${writable}\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n${entries}\n<!-- project-memory-entries:end -->\n`;
+}
+test("update leaves binary bytes untouched and destroy removes only the selected unit", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("unit/index.md", "body");
+  fs.writeFileSync(file("unit/image.bin"), Buffer.from([0, 255, 1]));
+  write("other.md", "ordinary");
+  const node = (await service.get(file("unit/index.md")))!;
+  await service.update(node, { body: "changed" });
+  assert.deepEqual(
+    fs.readFileSync(file("unit/image.bin")),
+    Buffer.from([0, 255, 1]),
+  );
+  await service.destroy(node);
+  assert.equal(fs.existsSync(file("unit")), false);
+  assert.equal(fs.readFileSync(file("other.md"), "utf8"), "ordinary");
 });
-test('standalone and organization models never own the containing directory; Skill requires SKILL.md', async t => {
-  const root = fixture(t); put(path.join(root, 'note.md'), 'note'); put(path.join(root, 'image.png'), 'asset');
-  const service = new NodeService(), node = (await service.get(path.join(root, 'note.md'), MemoryNode))!;
-  assert.equal(node.directoryPath, undefined); assert.equal(new BaseNode(path.join(root, 'index.md')).directoryPath, undefined); assert.equal(new InternalNode(path.join(root, 'AGENTS.md')).directoryPath, undefined);
-  assert.throws(() => new SkillNode(path.join(root, 'other.md')), /SKILL.md/);
-  await service.destroy(node); assert.equal(fs.readFileSync(path.join(root, 'image.png'), 'utf8'), 'asset');
+test("resource inode drift since load prevents destructive directory movement and deletion", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("unit/index.md", "body");
+  write("unit/asset", "same");
+  const node = (await service.get(file("unit/index.md")))!;
+  fs.renameSync(file("unit/asset"), file("unit/old"));
+  write("unit/asset", "same");
+  fs.unlinkSync(file("unit/old"));
+  await assert.rejects(
+    service.move(node, file("moved/index.md")),
+    /resources changed/,
+  );
+  await assert.rejects(service.destroy(node), /resources changed/);
+  assert.equal(fs.existsSync(node.path), true);
 });
-test('resource drift rejects update and deletion from the original read snapshot', async t => {
-  const root = fixture(t), entry = path.join(root, 'skill/SKILL.md'), asset = path.join(root, 'skill/scripts/a.sh'); put(entry, '---\nname: demo\ndescription: demo\n---\nBody\n'); put(asset, 'before');
-  const service = new NodeService(), node = (await service.get(entry, SkillNode))!; put(asset, 'after'); node.body = 'replacement';
-  await assert.rejects(() => service.update(node), /resource.*changed/i); await assert.rejects(() => service.destroy(node), /resource.*changed/i); assert.match(fs.readFileSync(entry, 'utf8'), /Body/);
+test("move persists requested unsaved body and keeps all aliases usable after relocation", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Kept](old/index.md) — Details"));
+  write("old/index.md", "---\nid: user-data\n---\nBefore\n");
+  write("old/tool", "tool");
+  const node = (await service.get(file("old/index.md")))!;
+  const copy = (await service.get(node.path))!;
+  node.body = "Changed\n";
+  const parent = (await service.get(file("AGENTS.md"), InternalNode))!;
+  assert.equal(await service.move(node, file("new/index.md")), node);
+  assert.equal(copy.path, node.path);
+  assert.equal(node.id, file("new/index.md"));
+  assert.equal(node.metadata?.id, "user-data");
+  assert.equal(fs.readFileSync(node.path, "utf8").includes("Changed"), true);
+  assert.equal(parent.children[0]?.name, "Kept");
+  assert.equal(parent.children[0]?.description, "Details");
+  await service.update(node, { body: "again" });
+  assert.equal(copy.body, node.body);
 });
-test('owned deletion removes symlinks themselves and refuses nested logical node units', async t => {
-  const root = fixture(t), external = path.join(root, 'external.txt'); put(external, 'outside');
-  const entry = path.join(root, 'unit/index.md'); put(entry, 'unit'); fs.symlinkSync(external, path.join(root, 'unit/link'));
-  const service = new NodeService(); await service.destroy((await service.get(entry, TaskNode))!); assert.equal(fs.readFileSync(external, 'utf8'), 'outside');
-  put(entry, 'unit'); put(path.join(root, 'unit/child/AGENTS.md'), '# Child scope');
-  await assert.rejects(async () => service.destroy((await service.get(entry, TaskNode))!), /nested|logical|ambiguous/i); assert.equal(fs.existsSync(entry), true);
+test("move changes image and reference definitions but leaves ordinary files and code examples alone", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Unit](old/index.md)"));
+  write(
+    "old/index.md",
+    '![asset](../shared/image.png "Title")\n\n[ref]: ../shared/page.md?q=1#part "Definition"\n\n```md\n[example](../shared/page.md)\n```\n',
+  );
+  write("shared/image.png", "img");
+  write("shared/page.md", "external");
+  write("README.md", "[unchanged](old/index.md)");
+  await service.move(
+    (await service.get(file("old/index.md")))!,
+    file("deep/new/index.md"),
+  );
+  const text = fs.readFileSync(file("deep/new/index.md"), "utf8");
+  assert.match(text, /!\[asset\]\(\.\.\/\.\.\/shared\/image.png "Title"\)/);
+  assert.match(
+    text,
+    /\[ref\]: \.\.\/\.\.\/shared\/page.md\?q=1#part "Definition"/,
+  );
+  assert.match(text, /\[example\]\(\.\.\/shared\/page.md\)/);
+  assert.equal(
+    fs.readFileSync(file("README.md"), "utf8"),
+    "[unchanged](old/index.md)",
+  );
 });
-test('owned create rejects adoption of a preexisting resource directory', async t => {
-  const root = fixture(t); put(path.join(root, 'unit/asset'), 'existing');
-  await assert.rejects(() => new NodeService().create(new NoteNode(path.join(root, 'unit/index.md')).parse('new')), /exists|owned/i);
+test("move preflights destination business policies and restores source on post-rename policy failure", async (t) => {
+  const { root, file, write } = fixture(t);
+  write("AGENTS.md", index("- [Unit](old/index.md)"));
+  write("old/index.md", "original");
+  write("old/asset", "bytes");
+  const service = new NodeService({
+    managedRoot: root,
+    assertWrite: ({ operation, node }) => {
+      if (
+        operation === "move" &&
+        node.path === file("new/index.md") &&
+        fs.existsSync(node.path)
+      )
+        throw new Error("Changed policy");
+    },
+  });
+  const node = (await service.get(file("old/index.md")))!;
+  await assert.rejects(service.move(node, file("new/index.md")), /restored/);
+  assert.equal(fs.readFileSync(node.path, "utf8"), "original");
+  assert.equal(fs.readFileSync(file("old/asset"), "utf8"), "bytes");
+  assert.equal(fs.existsSync(file("new")), false);
 });
-test('move keeps unit bytes, permissions, identity and parent labels while returning a new path', async t => {
-  const root = fixture(t), entry = path.join(root, 'old/index.md'), dest = path.join(root, 'new/index.md'); put(entry, '---\nid: stable\n---\nBefore\n'); put(path.join(root, 'old/tool'), 'tool'); fs.chmodSync(path.join(root, 'old/tool'), 0o700);
-  const service = new NodeService(), node = (await service.get(entry, TaskNode))!;
-  const parent = new InternalNode(path.join(root, 'AGENTS.md')); await service.create(parent); await service.attach(parent, node, 'local'); parent.updateChild({ target: 'old/index.md', kind: 'local', label: 'Kept', description: 'Details' }); await service.update(parent);
-  node.body = 'Changed\n'; const moved = await service.move(node, dest, parent);
-  assert.equal(node.path, entry); assert.equal(moved.path, dest); assert.equal(moved.id, 'stable'); assert.equal(moved.body, 'Changed\n'); assert.equal(fs.existsSync(path.dirname(entry)), false);
-  assert.equal(fs.readFileSync(path.join(root, 'new/tool'), 'utf8'), 'tool'); assert.equal(fs.statSync(path.join(root, 'new/tool')).mode & 0o777, 0o700);
-  assert.deepEqual(parent.children, [{ target: 'new/index.md', label: 'Kept', description: 'Details', kind: 'local' }]);
-  await assert.rejects(() => service.update(node), /snapshot/);
+test("multi-document move rollback restores directory and both parent indexes after later file failure", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [A](a/AGENTS.md)\n- [B](b/AGENTS.md)"));
+  write("a/AGENTS.md", index("- [Unit](unit/index.md)"));
+  write("b/AGENTS.md", index());
+  write("a/unit/index.md", "[outside](../../outside.md)");
+  write("outside.md", "outside");
+  const node = (await service.get(file("a/unit/index.md")))!;
+  const before = fs.readFileSync(file("a/AGENTS.md"), "utf8");
+  const { default: mutableFs } = await import("node:fs");
+  const { syncBuiltinESMExports } = await import("node:module");
+  const rename = mutableFs.renameSync;
+  let failed = false;
+  const mocked = t.mock.method(
+    mutableFs,
+    "renameSync",
+    (a: fs.PathLike, b: fs.PathLike) => {
+      if (b === file("b/AGENTS.md") && !failed) {
+        failed = true;
+        throw new Error("Second parent fails");
+      }
+      return rename(a, b);
+    },
+  );
+  syncBuiltinESMExports();
+  t.after(() => {
+    mocked.mock.restore();
+    syncBuiltinESMExports();
+  });
+  await assert.rejects(service.move(node, file("b/unit/index.md")), /restored/);
+  assert.equal(node.path, file("a/unit/index.md"));
+  assert.equal(fs.existsSync(file("b/unit")), false);
+  assert.equal(fs.readFileSync(file("a/AGENTS.md"), "utf8"), before);
 });
-test('move refuses occupied directories, format conversion and denied destination before touching resources', async t => {
-  const root = fixture(t), entry = path.join(root, 'old/index.md'); put(entry, 'Before'); put(path.join(root, 'old/asset'), 'bytes'); put(path.join(root, 'occupied/other'), 'other');
-  const service = new NodeService({ assertWrite: ({ node }) => { if (node.path.includes('/denied/')) throw new Error('Denied'); } }), node = (await service.get(entry, NoteNode))!;
-  await assert.rejects(() => service.move(node, path.join(root, 'occupied/index.md')), /exists/);
-  await assert.rejects(() => service.move(node, path.join(root, 'flat.md')), /format|layout/);
-  await assert.rejects(() => service.move(node, path.join(root, 'denied/index.md')), /Denied/);
-  assert.equal(fs.readFileSync(path.join(root, 'old/asset'), 'utf8'), 'bytes');
+test("failed index rollback retains original source in a named recovery document", async (t) => {
+  const { root, file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [A](a/AGENTS.md)\n- [B](b/AGENTS.md)"));
+  write("a/AGENTS.md", index("- [Unit](unit/index.md)"));
+  write("b/AGENTS.md", index());
+  write("a/unit/index.md", "original");
+  const node = (await service.get(file("a/unit/index.md")))!;
+  const before = fs.readFileSync(file("a/AGENTS.md"), "utf8");
+  const { default: mutableFs } = await import("node:fs");
+  const { syncBuiltinESMExports } = await import("node:module");
+  const rename = mutableFs.renameSync;
+  let changed = false;
+  const mocked = t.mock.method(
+    mutableFs,
+    "renameSync",
+    (a: fs.PathLike, b: fs.PathLike) => {
+      if (b === file("b/AGENTS.md") || (b === file("a/AGENTS.md") && changed))
+        throw new Error("Persistent failure");
+      rename(a, b);
+      if (b === file("a/AGENTS.md")) changed = true;
+    },
+  );
+  syncBuiltinESMExports();
+  t.after(() => {
+    mocked.mock.restore();
+    syncBuiltinESMExports();
+  });
+  await assert.rejects(service.move(node, file("b/unit/index.md")), (error) => {
+    const recovery = fs
+      .readdirSync(file("a"))
+      .find((n) => n.startsWith(".node-recovery-"));
+    assert.ok(recovery);
+    assert.ok(String(error).includes(file(`a/${recovery}`)));
+    assert.equal(fs.readFileSync(file(`a/${recovery}`), "utf8"), before);
+    return true;
+  });
+  assert.equal(fs.existsSync(root), true);
 });
-test('explicit resource import copies only selected directory bytes and rejects links before entry creation', async t => {
-  const root = fixture(t), source = path.join(root, 'selected'); put(path.join(source, 'image.bin'), Buffer.from([255, 0])); put(path.join(root, 'neighbor'), 'not imported');
-  const service = new NodeService({ createMode: () => 0o600, resourceMode: () => 0o600 }), node = new NoteNode(path.join(root, 'note/index.md')).parse('# Note\n');
-  await service.create(node, undefined, { resources: source });
-  assert.deepEqual(fs.readFileSync(path.join(root, 'note/image.bin')), Buffer.from([255, 0])); assert.equal(fs.statSync(path.join(root, 'note/image.bin')).mode & 0o777, 0o600); assert.equal(fs.existsSync(path.join(root, 'note/neighbor')), false);
-  fs.symlinkSync(path.join(root, 'neighbor'), path.join(source, 'link'));
-  await assert.rejects(() => service.create(new NoteNode(path.join(root, 'bad/index.md')), undefined, { resources: source }), /symbolic|symlink/i); assert.equal(fs.existsSync(path.join(root, 'bad')), false);
+test("destroy authorizes staging location before moving private bytes", async (t) => {
+  const { root, file, write } = fixture(t);
+  write("unit/index.md", "private");
+  write("unit/secret", "bytes");
+  const service = new NodeService({
+    managedRoot: root,
+    assertWrite: ({ node }) => {
+      if (node.path.includes(".node-recovery-"))
+        throw new Error("Recovery is not ignored");
+    },
+  });
+  await assert.rejects(
+    service.destroy((await service.get(file("unit/index.md")))!),
+    /not ignored/,
+  );
+  assert.equal(fs.readFileSync(file("unit/secret"), "utf8"), "bytes");
 });
-test('move restores resource bytes and original index when a post-rename permission check fails', async t => {
-  const root = fixture(t), source = path.join(root, 'old/index.md'), destination = path.join(root, 'new/index.md'); put(source, 'original'); put(path.join(root, 'old/asset'), 'resource');
-  const service = new NodeService({ assertWrite: ({ operation, node }) => { if (operation === 'move' && node.path === destination && fs.existsSync(destination)) throw new Error('Changed policy'); } });
-  const node = (await service.get(source, NoteNode))!, parent = new InternalNode(path.join(root, 'AGENTS.md')); await service.create(parent); await service.attach(parent, node, 'local'); const before = fs.readFileSync(parent.path, 'utf8'); node.body = 'new';
-  await assert.rejects(() => service.move(node, destination, parent), /restored/); assert.equal(fs.readFileSync(source, 'utf8'), 'original'); assert.equal(fs.readFileSync(path.join(root, 'old/asset'), 'utf8'), 'resource'); assert.equal(fs.readFileSync(parent.path, 'utf8'), before); assert.equal(fs.existsSync(destination), false);
+test("destroy never deletes a replaced staged directory and reports its location", async (t) => {
+  const { root, file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Unit](unit/index.md)"));
+  write("unit/index.md", "original");
+  write("unit/asset", "owned");
+  const node = (await service.get(file("unit/index.md")))!;
+  const { default: mutableFs } = await import("node:fs");
+  const { syncBuiltinESMExports } = await import("node:module");
+  const rename = mutableFs.renameSync;
+  let recovery = "";
+  const mocked = t.mock.method(
+    mutableFs,
+    "renameSync",
+    (a: fs.PathLike, b: fs.PathLike) => {
+      rename(a, b);
+      if (a === file("unit")) {
+        recovery = String(b);
+        rename(b, String(b) + "-original");
+        fs.mkdirSync(b);
+        fs.writeFileSync(path.join(String(b), "unrelated"), "keep");
+      }
+    },
+  );
+  syncBuiltinESMExports();
+  t.after(() => {
+    mocked.mock.restore();
+    syncBuiltinESMExports();
+  });
+  await assert.rejects(service.destroy(node), (error) => {
+    assert.ok(String(error).includes(recovery));
+    return true;
+  });
+  assert.equal(
+    fs.readFileSync(path.join(recovery, "unrelated"), "utf8"),
+    "keep",
+  );
+  assert.equal(fs.existsSync(root), true);
 });
-test('destroy checks the owned recovery directory before staging private resources', async t => {
-  const root = fixture(t), entry = path.join(root, 'unit/index.md'); put(entry, 'private'); put(path.join(root, 'unit/secret'), 'bytes');
-  const service = new NodeService({ assertWrite: ({ node }) => { if (node.path.includes('.node-recovery-')) throw new Error('Recovery directory is not ignored'); } }), node = (await service.get(entry, MemoryNode))!;
-  await assert.rejects(() => service.destroy(node), /not ignored/); assert.equal(fs.readFileSync(entry, 'utf8'), 'private'); assert.equal(fs.readFileSync(path.join(root, 'unit/secret'), 'utf8'), 'bytes');
+test("import leaves source and parent index untouched when preflight validation fails", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index());
+  write("source/SKILL.md", "source");
+  write("source/.harness/AGENTS.md", index("- [Missing](missing/index.md)"));
+  const before = fs.readFileSync(file("AGENTS.md"), "utf8");
+  await assert.rejects(
+    service.import(file("source/SKILL.md"), file("new/SKILL.md")),
+    /Missing/,
+  );
+  assert.equal(fs.existsSync(file("new")), false);
+  assert.equal(fs.readFileSync(file("source/SKILL.md"), "utf8"), "source");
+  assert.equal(fs.readFileSync(file("AGENTS.md"), "utf8"), before);
 });
-test('owned write refuses a replaced resource inode and known readonly source', async t => {
-  const root = fixture(t), entry = path.join(root, 'unit/index.md'), asset = path.join(root, 'unit/asset'); put(entry, 'body'); put(asset, 'same');
-  const service = new NodeService(), node = (await service.get(entry, MemoryNode))!; fs.renameSync(asset, asset + '.old'); put(asset, 'same'); fs.unlinkSync(asset + '.old');
-  await assert.rejects(() => service.move(node, path.join(root, 'moved/index.md')), /resources changed/);
-  const index = path.join(root, 'AGENTS.md'); put(index, '<!-- project-memory-type:start -->\nname: referenced\nmodule: memory\nwritable: false\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n- [Unit](unit/index.md) — readonly\n<!-- project-memory-entries:end -->\n');
-  const readonly = new NodeService(); await readonly.list(root); const alias = (await readonly.get(entry, MemoryNode))!;
-  await assert.rejects(() => readonly.destroy(alias), /Read-only/); assert.equal(fs.existsSync(asset), true);
+test("destroy refreshes a dirty cached index without leaving references to the deleted entry", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Child](child/index.md)"));
+  write("child/index.md", "child");
+  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!;
+  dirty.setConstraints(["Unsaved"]);
+  await service.destroy((await service.get(file("child/index.md")))!);
+  assert.deepEqual(dirty.constraints, ["Unsaved"]);
+  assert.equal(dirty.children.length, 0);
 });
-test('destroy detects replacement of a staged resource directory and never deletes the replacement', async t => {
-  const root = fixture(t), entry = path.join(root, 'unit/index.md'); put(entry, 'original'); put(path.join(root, 'unit/asset'), 'owned');
-  let replaced = false;
-  const service = new NodeService({ assertWrite: ({ operation, node }) => {
-    if (operation !== 'destroy' || path.basename(node.path) !== 'AGENTS.md') return;
-    const staged = fs.readdirSync(root).find(name => name.startsWith('.node-recovery-'));
-    if (staged && !replaced) { replaced = true; fs.renameSync(path.join(root, staged), path.join(root, 'saved-original')); put(path.join(root, staged, 'unrelated'), 'leave alone'); }
-  } });
-  const node = (await service.get(entry, NoteNode))!, parent = new InternalNode(path.join(root, 'AGENTS.md')); await service.create(parent); await service.attach(parent, node, 'local');
-  await assert.rejects(() => service.destroy(node, parent), /changed|cleanup|recovery/i);
-  const staged = fs.readdirSync(root).find(name => name.startsWith('.node-recovery-'))!;
-  assert.equal(fs.readFileSync(path.join(root, staged, 'unrelated'), 'utf8'), 'leave alone'); assert.equal(fs.readFileSync(path.join(root, 'saved-original/asset'), 'utf8'), 'owned');
+test("an unrelated update does not silently bless an externally changed loaded snapshot", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("one/index.md", "one");
+  write("two/index.md", "two");
+  const one = (await service.get(file("one/index.md")))!;
+  const two = (await service.get(file("two/index.md")))!;
+  write("two/index.md", "human");
+  await service.update(one, { body: "updated" });
+  await assert.rejects(
+    service.update(two, { body: "overwrite" }),
+    /source changed/,
+  );
+  assert.equal(fs.readFileSync(two.path, "utf8"), "human");
 });
-test('known readonly unit provenance covers its resources even through untyped file loads', async t => {
-  const root = fixture(t), asset = path.join(root, 'unit/resource.md'); put(path.join(root, 'unit/SKILL.md'), '---\nname: unit\ndescription: read only\n---\nBody'); put(asset, 'original');
-  put(path.join(root, 'AGENTS.md'), '<!-- project-memory-type:start -->\nname: referenced\nmodule: skills\nwritable: false\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n- [Skill](unit/SKILL.md) — installed\n<!-- project-memory-entries:end -->\n');
-  const service = new NodeService(); await service.list(root); const resource = (await service.get(asset))!; resource.body = 'changed';
-  await assert.rejects(() => service.update(resource), /Read-only/); await assert.rejects(() => service.create(new BaseNode(path.join(root, 'unit/new.md'))), /Read-only/); assert.equal(fs.readFileSync(asset, 'utf8'), 'original');
+test("import outside managedRoot validates nested registered memory nodes using source directory contracts", async (t) => {
+  const { root, file, write, service } = fixture(t);
+  const outside = fs.mkdtempSync(
+    path.join(fs.realpathSync(tmpdir()), "outside-import-"),
+  );
+  t.after(() => fs.rmSync(outside, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(outside, "memory/bad"), { recursive: true });
+  fs.writeFileSync(
+    path.join(outside, "AGENTS.md"),
+    index("- [Memory](memory/AGENTS.md)"),
+  );
+  fs.writeFileSync(
+    path.join(outside, "memory/AGENTS.md"),
+    typeIndex("memory", true, "- [Bad](bad/index.md)"),
+  );
+  fs.writeFileSync(
+    path.join(outside, "memory/bad/index.md"),
+    "---\nmetadata:\n  edges-type: 123\n---\nbody",
+  );
+  await assert.rejects(
+    service.import(path.join(outside, "AGENTS.md"), file("imported/AGENTS.md")),
+    /edges-type|memory/i,
+  );
+  assert.equal(fs.existsSync(file("imported")), false);
+  assert.equal(fs.existsSync(root), true);
 });
-test('owned creation does not adopt a directory introduced during asynchronous permission checks', async t => {
-  const root = fixture(t), entry = path.join(root, 'unit/index.md');
-  const service = new NodeService({ assertWrite: () => { if (!fs.existsSync(path.dirname(entry))) put(path.join(root, 'unit/independent'), 'outside ownership'); } });
-  await assert.rejects(() => service.create(new NoteNode(entry)), /exists/); assert.equal(fs.existsSync(entry), false); assert.equal(fs.readFileSync(path.join(root, 'unit/independent'), 'utf8'), 'outside ownership');
+test("move does not rewrite unrelated registered documents that need no link changes", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [A](a/index.md)\n- [B](b/index.md)"));
+  write("a/index.md", "a");
+  const untouched =
+    '---\n# authored YAML comment\nname: "B"\n---\nUnrelated body  \n';
+  write("b/index.md", untouched);
+  await service.move(
+    (await service.get(file("a/index.md")))!,
+    file("moved/index.md"),
+  );
+  assert.equal(fs.readFileSync(file("b/index.md"), "utf8"), untouched);
+});
+test("cross-parent move transfers authored query and fragment to the new parent registration", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [A](a/AGENTS.md)\n- [B](b/AGENTS.md)"));
+  write(
+    "a/AGENTS.md",
+    index("- [Child](child/index.md?view=compact#details) — Kept"),
+  );
+  write("b/AGENTS.md", index());
+  write("a/child/index.md", "child");
+  await service.move(
+    (await service.get(file("a/child/index.md")))!,
+    file("b/child/index.md"),
+  );
+  assert.match(
+    fs.readFileSync(file("b/AGENTS.md"), "utf8"),
+    /child\/index.md\?view=compact#details/,
+  );
+  assert.match(fs.readFileSync(file("b/AGENTS.md"), "utf8"), /Kept/);
 });

@@ -1,5 +1,4 @@
 import { existsSync } from 'node:fs';
-import { readResourceImport } from '../../node-resources.js';
 import { NodeService } from '../../node-service.js';
 import { NoteNode } from '../../../models/note-node.js';
 import path from "node:path";
@@ -45,7 +44,7 @@ export async function runNoteIngest(
 
   if (input.format !== undefined && input.format !== 'file' && input.format !== 'directory') throw new Error('Invalid note entry format');
   if (input.resources && input.format !== 'directory') throw new Error('Resource import requires directory format');
-  if (input.resources) readResourceImport(input.resources, 'index.md');
+  if (input.resources) throw new Error('Import an entry directory with NodeService.import; resource-only imports are no longer supported');
   const exec = deps.exec ?? createExecFile();
   const now = deps.now ?? new Date();
   const directoryExists = async (absPath: string) => {
@@ -105,7 +104,7 @@ export async function runNoteIngest(
     await exec("git", ["checkout", "-b", branch], { cwd: config.repoPath, env });
   }
 
-  const service = new NodeService({ assertWrite: ({ node }) => {
+  const service = new NodeService({ managedRoot: path.join(scope, 'knowledge/notes'), assertWrite: ({ node }) => {
     const relative = path.relative(path.join(scope, 'knowledge/notes'), node.path);
     if (relative.startsWith('..') || path.isAbsolute(relative)) throw new Error('Note must remain in the selected scope');
   } });
@@ -113,7 +112,7 @@ export async function runNoteIngest(
   const note = previous ?? new NoteNode(absFile);
   if (input.markdown) note.parse(input.content);
   else { note.body = renderNoteMarkdown(input.title, input.content, date); note.title = input.title; }
-  if (previous) await service.update(note); else await service.create(note, undefined, { resources: input.resources });
+  if (previous) await service.update(note, {}); else await service.create(note, { metadata: note.metadata, body: note.body });
   const addPath = note.directoryPath ? path.relative(await fs.realpath(config.repoPath), note.directoryPath) : filePath;
   await exec("git", ["add", addPath], { cwd: config.repoPath, env });
   await exec(

@@ -108,7 +108,8 @@ export async function createTask(
     body: input.body ?? defaultBody(input.title),
   });
   const service = taskNodes(repoPath);
-  await service.create(new TaskNode(taskFile(repoPath, rel)).parse(markdown));
+  const node = new TaskNode(taskFile(repoPath, rel)).parse(markdown);
+  await service.create(node, { metadata: node.metadata, body: node.body });
   await io.fs.writeFile(path.join(scopeDir(repoPath), sidecarRel), emptyRunLog(stem));
   return { stem, path: rel, sidecarPath: sidecarRel, priority, project };
 }
@@ -164,10 +165,10 @@ export async function updateTask(
       await io.fs.mkdirp(statusDir(repoPath, parsedProject, record.status));
       await moveTaskEntry(repoPath, service, node, destRel, record.sidecarPath, destSidecarRel, io.fs);
     } else {
-      await service.update(node);
+      await service.update(node, {});
     }
   } else {
-    await service.update(node);
+    await service.update(node, {});
   }
 
   return {
@@ -180,7 +181,7 @@ export async function updateTask(
 
 /** Scope and board authorization remain with Tasks, including every NodeService write. */
 export function taskNodes(target: BoardTarget): NodeService {
-  return new NodeService({ assertWrite: ({ node }) => assertBoardPath(target, path.join(scopeDir(target), path.relative(realpathSync(scopeDir(target)), node.path))) });
+  return new NodeService({ managedRoot: realpathSync(scopeDir(target)), assertWrite: ({ node }) => assertBoardPath(target, path.join(scopeDir(target), path.relative(realpathSync(scopeDir(target)), node.path))) });
 }
 
 export function taskFile(target: BoardTarget, relative: string): string {

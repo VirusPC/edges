@@ -34,8 +34,7 @@ export async function rememberMemory(options: RememberMemoryOptions) {
     const node = exists ? await service.get<MemoryNode | SkillNode>(file, Model) : new Model(file);
     if (!node) throw new Error(`Missing memory entry: ${file}`);
     // Derive edits from the same snapshot that NodeService will validate on save.
-    if (options.resources && exists) throw new Error('Resource import only supports new directory entries');
-    if (options.resources && !node.directoryPath) throw new Error('Resource import requires directory format');
+    if (options.resources) throw new Error('Import an entry directory with NodeService.import; resource-only imports are no longer supported');
     const previousSource = exists ? node.serialize() : undefined;
     const existing = previousSource === undefined ? {} : logicalFields(strictFrontmatterData(previousSource));
     const detected = { ...agentContext(options.env), ...gitIdentity(target) };
@@ -55,9 +54,9 @@ export async function rememberMemory(options: RememberMemoryOptions) {
     else
         node.name = name;
     if (exists)
-        await service.update(node);
+        await service.update(node, {});
     else
-        await service.create(node, undefined, { resources: options.resources });
+        await service.create(node, { metadata: node.metadata, body: node.body });
     await refreshIndex(target, options.type);
     const agentsAction = await syncTargetAgents(target, resolveRoot(target));
     return {

@@ -9,12 +9,8 @@ import { assertPrivateIgnored } from './ignore.js';
 /** Memory owns type permissions and private-directory coverage, including staging/recovery. */
 export function memoryNodes(target: string): NodeService {
   return new NodeService({
+    managedRoot: target,
     readOnlyReference: (parent) => layerTypeSpecs(target).some(spec => !spec.writable && parent.path === join(target, spec.indexFile)),
-    createMode: () => 0o600,
-    resourceMode: (node, sourceMode) => {
-      const spec = layerTypeSpecs(target).find(spec => within(node.path, dirname(join(target, spec.indexFile))));
-      return spec?.gitignore ? 0o600 | (sourceMode & 0o100) : sourceMode;
-    },
     assertWrite: ({ node }) => {
     assertScopePath(node.path, target);
     const spec = layerTypeSpecs(target).find(spec => within(node.path, dirname(join(target, spec.indexFile))));
@@ -45,6 +41,6 @@ export async function loadMemoryDocument(target: string, file: string): Promise<
 
 export async function saveMemoryDocument(document: MemoryDocument, source: string): Promise<void> {
   document.node.parse(source);
-  if (document.existed) await document.service.update(document.node);
-  else await document.service.create(document.node);
+  if (document.existed) await document.service.update(document.node, { metadata: document.node.metadata, body: document.node.body });
+  else await document.service.create(document.node, { metadata: document.node.metadata, body: document.node.body });
 }
