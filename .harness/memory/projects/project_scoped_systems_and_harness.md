@@ -1,13 +1,13 @@
 ---
 name: project_scoped_systems_and_harness
-description: 讨论根、作用域或 RSI 时：根可面向任意选定主体或系统，维护空间承载系统二；个人 RSI 是当前实践，角色随作用域变化，不预设唯一绝对根或固定组织层级。
+description: 设计作用域与遍历时：系统一／二是相对角色；检索当前系统二不自动进入其系统二，同层分类索引仍可递归。
 metadata:
   edges-title: 系统一／系统二按作用域建模，区分 harness 层级与自进化
   edges-type: project
   edges-agent-client: codex
-  edges-username: Codex
-  edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-02T01:01:06+08:00"
+  edges-username: cheng
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: '2026-10-05T15:34:40+08:00'
 ---
 
 Edges 的递归模型以选定主体或系统的自我改进为目标，根代表当前选择的作用域，其中的维护空间承载系统二。主体可以是个人、Agent、团队、公司、社会等；当前仓库以个人 RSI 为实践目标。系统一／系统二是相对于作用域的角色，根的选择也相对于建模范围，不预设唯一绝对根；Agent 场景中的 harness／meta-harness 是具体工程形态。
@@ -26,3 +26,12 @@ Edges 的递归模型以选定主体或系统的自我改进为目标，根代�
 参考用法：[Anthropic Managed Agents](https://www.anthropic.com/engineering/managed-agents) 将支撑不同 harness 的基础设施称为 meta-harness；[Meta-Harness 论文](https://arxiv.org/html/2603.28052v1#S3) 则用该词描述优化任务 harness 的外循环。这里采用的是用户确认的 Edges 建模约定，不宣称行业已有唯一术语定义。
 
 RSI 参考：[Darwin Gödel Machine 论文](https://arxiv.org/abs/2505.22954)与[研究方说明](https://sakana.ai/dgm/)展示了修改自身代码、验证改进并将能力用于后续自我修改的循环，同时保留人类监督。这支持区分治理方式与递归关系；个人 RSI 是 Edges 的设计目标，不是该研究已经验证的个人成长效果。
+
+
+## 2026-10-05 用户明确：系统二检索不自动进入系统二的系统二
+
+给定系统一，检索维护它的系统二时，不继续检索该系统二自身的系统二。
+
+**Why:** 用户指出组织入口与内容入口的区别，本质上要落到系统一／系统二的相对职责与检索边界。工作所需的维护上下文与维护这套上下文的元维护材料应分开，避免递归加载无关层级。
+
+**How to apply:** 遍历应允许完整读取同一系统二内部的分类索引与内容，但默认不跨入维护这些模块自身的下一层系统二。边界依据逻辑维护关系，不等同于只递归一层物理目录、只读取一个 AGENTS.md，或简单地把所有 descendant 都当作 meta-harness。切换维护对象后，相同机制可相对新对象运行。具体领域模型、关系字段及遍历接口仍在重新设计；不能将此要求表述为当前实现已支持。目录统一的最新决定见[节点目录单元与组织关系设计](project_node_resource_unit_decision.md)，讨论过程见[讨论稿](../../../docs/discussions/2026-10-05-implementation-rulings.md)。

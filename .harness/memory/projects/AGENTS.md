@@ -18,6 +18,7 @@ format: ordinary
 - [理想链路：AGENTS.md → Skill → CLI](project_agents_md_to_skill_to_cli.md) — peng cheng 理想发现链路——读目录 AGENTS.md，被指引到可加载 Skill，再由统一 Skill 调用 edges CLI；记忆 skills 类型不是自动加载层。
 - [Artifacts 预览 ECS：user unit + nginx :80](project_artifacts_preview_ecs_ops.md) — 改 artifacts 在阿里云 ECS 上怎么跑、客户端 BASE\_URL，或 POST 被 Cloudflare 1010 拦住时打开：和 teaching 同机；客户端 init --base-url https://edges.viruspc.tech；对该主机 POST /artifacts 缺浏览器式 User-Agent 会 1010，带上则 201，GET 通常正常；install 不启动；teaching.conf 必须带 /teaching/；不要公网 8787。已有盒上 env 的 BASE\_URL 在 ECS 上手动改。
 - [个人 Artifacts 预览服务：上传→URL→TTL](project_artifacts_preview_service.md) — 改 Artifacts 预览服务、edges artifacts、或审阅页如何给人打开时打开：稳定短生命周期托管 + 真浏览器可开 URL；聊天内嵌预览是绕开的不可靠路径；review-page 仍只渲染；结果回传另卡。ECS 手机 URL 走与 teach 同机的 :80 反代，不要假定 localhost。与 /tasks/ 持久站硬边界见 ADR 0021。决策见 docs/adr/0013-artifacts-preview-service.md。
+- [tasks 工作流阶段：grill → research → plan → implement → validate → close，回环按证伪](project_assign_grill_with_docs_first.md) — 所有层级 .harness/tasks 的通用执行约定：grill→research→plan→implement→validate→close；按证伪回退，用户可明确跳过；不自动扩展到领域 tasks。
 - [能力面：CLI / Skill / MCP](project_capability_surface_cli_skill_mcp.md) — 能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 extensions/cli 的 TS；MCP 子进程调 edges note。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。
 - [Changelog 自动化：调研过，暂不生成正文](project_changelog_automation.md) — 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。
 - [classifyTasks 与 Task Project 元数据](project_classify_tasks_and_project_metadata.md) — 实现或改 edges tasks project / project-tasks-classify Skill 时打开：能力面 CLI + Skill + MCP；按用户已设质心做 LLM / agent 判断；无 embedding、无 classify 动词。第 4 步人闸是 project review-page（Markdown 表仅无 GUI 回退）。四个 project 动词都会 ensure。Skill 目录/id 是 project-tasks-classify（展示名 classifyTasks）。
@@ -41,7 +42,7 @@ format: ordinary
 - [记忆研究笔记落 knowledge/projects/memory](project_memory_research_notes_in_knowledge_projects.md) — 写 project-memory 的调研、优点、related work 等研究笔记时：落到 knowledge/projects/memory/；skill 层 .memory 只记协议与设计决策，不当成对外研究笔记落点。
 - [整仓 MIT，不拆 knowledge 许可证](project_mit_license.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
 - [new-note MCP 的 ingest 约束](project_new_note_ingest.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges note，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
-- [节点逻辑归属与资源单元分离](project_node_resource_unit_decision.md) — 设计或修改节点目录生命周期时：资源归属由明确入口决定、导入须显式；逻辑父子与物理资源分离。
+- [节点目录单元与组织关系设计](project_node_resource_unit_decision.md) — 八项节点重构讨论已收口：Node 多态与 Service IO 分工、目录一致移动与导入；保留非受控正文，系统权限交 OS，其他体系内容暂不改造。
 - [定期从目录职责提炼通用维护规范](project_periodic_architecture_review.md) — 复盘 Edges 目录架构时：按实际职责与维护对象识别可跨作用域复用的系统二模块，输出规范候选；维护任务管理是例子，当前仅记规范、不启用自动运行。
 - [posts 对外展示，Astro 博客 + Actions CI](project_posts_public_astro_blog.md) — posts 面向对外展示；后续以 posts 为数据用 Astro 搭博客，并用 GitHub Actions 在服务器做 CI
 - [仓内任务优先用仓库 Skill 与 CLI](project_prefer_repo_skills_and_cli.md) — 执行 VirusPC/edges 仓内工作时，优先调用本仓 Skill 与 edges CLI；不可用须向用户说明缺口，勿默认手搓绕过。
@@ -50,15 +51,17 @@ format: ordinary
 - [仓库用根 CHANGELOG 和 v 标签发版](project_repo_changelog.md) — 仓库发版先提 PR，合并后给 main 的合并提交打 tag 并发布。写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 v 标签。Unreleased 的 ### 用功能模块原名（如笔记入库与能力面、文档与系统、任务看板与项目、Artifacts 预览），不要改成「模块：摘要」或只留摘要；每条前面写成 \`- \*\*小标题：\*\* 正文\`，小标题白话摘要，正文不因精简文风大段删实现说明（示例 commit a80d1b0）。用人话写清「现在能做什么」，同一条里立刻给出真实命令名；对照 \[1.2.0\] 的完整句，不要堆 schema 字段表。枚举写仓库英文原值（优先级是 urgent/high/medium/low/none）。不要摊成扁平长列表，也不要把决策/术语/计划逐条写进去。 新版本不留 Changed 等未按模块归类的兜底小节；切版时检查重复、条目顺序与已落地范围。
 - [审阅页侧栏筛选用 design A（选中染色 + 未选变淡）](project_review_page_sidebar_filter_design_a.md) — 改审阅页左栏项目筛选外观时打开：选中用 accent 实线边加面板底；未选中 opacity 0.6（hover 拉回）；拖过时外扩 outline，须和选中边叠得开。类写在 ProjectColumn，不改点击或拖放。用户 2026-09-17 选定 design A。
 - [根硬约束只留聚光灯、脱敏与 git](project_root_important_scope.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
-- [根 README 以知识闭环为唯一主线](project_root_readme_direction.md) — 设计或修改根 README 时：个人 RSI 是当前实践，知识闭环是主线；四视角六思想，递归维护与树图结合归为递归树结构，ADR 按系统实现的思想顺序组织。
+- [根 README 以知识闭环为唯一主线](project_root_readme_direction.md) — 修改根 README 时：个人 RSI 与知识闭环为主线，保留四视角六思想；递归树结构区分仓内共享与扩展对外分发，跨仓安装复用为目标，局部记忆不默认分发。
 - [递归目录采用统一节点模型与自身维护空间](project_scope_first_content_ownership.md) — 设计递归节点、AGENTS 三段归属与资源边界时：现行 NodeService、43 条公开局部记忆恢复与私有逐克隆审阅；下文含有明确日期的历史方案。
-- [系统一／系统二按作用域建模，区分 harness 层级与自进化](project_scoped_systems_and_harness.md) — 讨论根、作用域或 RSI 时：根可面向任意选定主体或系统，维护空间承载系统二；个人 RSI 是当前实践，角色随作用域变化，不预设唯一绝对根或固定组织层级。
+- [系统一／系统二按作用域建模，区分 harness 层级与自进化](project_scoped_systems_and_harness.md) — 设计作用域与遍历时：系统一／二是相对角色；检索当前系统二不自动进入其系统二，同层分类索引仍可递归。
 - [v1 自托管 Langfuse 落在物理机 minigtr](project_self_hosted_langfuse_on_minigtr.md) — 改自托管 Langfuse 的 v1 宿主、或默认往阿里云/云 VPS 上放时打开：宿主是物理机 minigtr，按多数时候在线的小型服务器运维；双系统仍在但 Windows 不是日常路径。不是阿里云或其它云 VPS。访问面见 ADR 0017。决策见 docs/adr/0014-self-hosted-langfuse-on-minigtr.md。
 - [跨机器跨 Agent 的 harness 放 shared-extensions](project_shared_extensions.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。
 - [系统设计目标：三件事尽量一键](project_system_one_click_deploy_ingest_output.md) — 改根 README 的系统实现、或讨论 Edges 产品方向时打开：设计目标是一键部署底座、一键接入 Agent 客户端、一键产出对外资产；这是方向，仓库按这个方向收敛。不要另开顶级章节，也不要用它取代知识闭环主线。
 - [Task Doc 字段真源是 JSON Schema](project_task_doc_json_schema.md) — 改 Task frontmatter、CLI 的 Task 文档类型，或看板条目的 doc 时打开：字段真源是 extensions/cli/schemas/task-doc.v1.json（name、description、metadata、body）；不要自造轻量配置，也不要另开看板顶层 schema。决策见 docs/adr/0022。
 - [Task Project 审阅页是 render-only CLI](project_task_project_review_page_render_only_cli.md) — 改审阅壳或 edges tasks project review-page 时打开：仍只渲染、无 --mode。桌面三栏见 ADR 0022。窄屏同一页纵向分段，滚动必须能到顶也能到 Details。章节头是过渡色面，状态行贴背景且比章节小一档。筛选入口是 ListFilter 图标。双击章节标题滚到该节，回到看板滚到当前卡片。不要视口面板。源码在 apps/tasks-review-app/。
+- [Tasks 旧记忆逐条审阅后的共享范围与归属](project_task_shared_conventions_ownership.md) — Tasks 执行流程与 CLI 约定存根 Project Memory；STAR 记忆仅保留原因范围并引用 Skill；extensions/memory 留后续高优待办，其他条目按职责归属。
 - [Tasks 核心思想：与 /goal、loop engineering 同构](project_tasks_align_goal_and_loop_engineering.md) — 设计或验收 tasks 时：目标+完成标准要与 /goal、loop engineering 一起想；开卡时完成标准可暂缺、grill 后补；沉淀结论时同时写清背景上下文。
+- [Task 看板变更优先走 edges tasks CLI](project_tasks_board_mutations_via_cli.md) — 所有层级的领域 tasks 与维护 .harness/tasks 看板变更，优先走 edges tasks CLI 和已有任务 Skill；能力缺口明确反馈，不长期绕过工具直接改文件。
 - [2026-09-10 Task 速记直推 main（历史约定）](project_tasks_direct_main.md) — 2026-09-10 旧 knowledge/tasks 只追加速记曾约定直推 main；当前领域 tasks/ 与维护 .harness/tasks/ 通过 CLI 和独立 worktree 操作，发布按当次流程。
 - [持久 /tasks/ 看板站：复用 review-page，扩展 Deploy](project_tasks_persistent_board_site.md) — 改 /tasks/ 持久入口、list --group-by、或看板站 vs Artifacts 时打开：不新开 status station；复用同一审阅壳。不窄于 md 时为三栏且不写回 git。窄屏布局见 ADR 0023。决策见 docs/adr/0021、0022 与 0023。
 - [工作项叫 tasks，支持状态流转](project_tasks_with_status_not_todos.md) — Task 工作项按 Task Project 与 edges-tasks-status 分夹；当前领域板在 tasks/，Edges 维护板在 .harness/tasks/，旧 knowledge/tasks/ 仅是迁移史料。

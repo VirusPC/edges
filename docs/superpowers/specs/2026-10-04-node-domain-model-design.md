@@ -1,3 +1,5 @@
+> 2026-10-05：模型、生命周期与目录格式以 [目录节点模型](2026-10-05-directory-node-model.md) 为准；本文保留上一轮实现历史。
+
 # 节点领域模型设计
 
 日期：2026-10-04；2026-10-05 按[实施计划](../plans/2026-10-05-node-domain-model-implementation.md)实现了节点模型、服务、CLI 接入与资源单元。递归节点识别和公开局部记忆归属已按[独立计划](../plans/2026-10-05-recursive-node-ownership-correction.md)纠正；其他克隆的私有纠正仍需各自显式审阅。

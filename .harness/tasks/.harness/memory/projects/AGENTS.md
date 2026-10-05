@@ -14,10 +14,8 @@ format: ordinary
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- [tasks 工作流阶段：grill → research → plan → implement → validate → close，回环按证伪](project_assign_grill_with_docs_first.md) — 写或派发 tasks 时打开：默认链为 grill→research→plan→implement→validate→close；research 是 deep-research（竞品/开源/现成方案），独立于 grill 与 plan；validate 是质量/设计/行为门禁（英文阶段名，不用「验收」），可派给非实现者，看板 in\_review 大致对应；未 validate 不标 done。回环只按证伪退回，不随便跳阶段；全程可派 subagent 做浅调研，但不占正式 research、不改看板。用户当次跳过除外。
-- [云端 Obsidian vault 选用 edges clone](project_box_obsidian_vault_for_preview.md) — 预览 tasks/artifacts 时用 /workspace/edges 作 vault、AppImage+--no-sandbox、禁用 Sync；2026-09-11 已验证。
-- [七个 Task Project 占位已确认](project_evaluation_observation_placeholder_projects.md) — 改看板 Task Project 分组或往 .harness/tasks/\<slug\> 落卡时打开：用户已确认七个空壳质心（project-memory、edges-tasks、edges-cli-platform、evaluation、observation、site-and-content、agent-clients-ux）；现有卡仍留 \_default，等 classify/#78 再迁。仓根 evaluation/ 不是看板 project。
-- [STAR 用来制定任务（尤其给 agent），不是复盘](project_star_for_agent_task_formulation.md) — 写/派 agent 任务时用 STAR 同构排正文（背景→目标→动作→完成标准）；不要拿 STAR 写复盘。
-- [Task 正文分节事实/idea，并一句话讲清问题与结果](project_task_separate_facts_from_idea.md) — 写/改 Task 时：分节事实/idea + 一句话讲清问题与结果；对话开卡走背景→目标→动作→完成标准；STAR 用于制定 agent 任务。
-- [Task 看板变更优先走 edges tasks CLI](project_tasks_board_mutations_via_cli.md) — 改领域 tasks/ 或维护 .harness/tasks/ 看板时优先走 edges tasks CLI 与现有任务 Skill，按 purpose 选择板；缺口明确上报。
+- [Edges 云端部署：Obsidian vault 使用仓库 clone](project_box_obsidian_vault_for_preview.md) — Edges 仓库部署约定：云端 Obsidian 使用独立 Edges clone，不连接本机 Sync；归根节点部署记忆，具体环境为 2026-09-11 的验证记录。
+- [根维护看板的七个 Task Project 初始分组决策](project_evaluation_observation_placeholder_projects.md) — 根 .harness/tasks 看板的局部历史决策：2026-09-17 确认七个初始分组；空壳与暂缓迁移是当时状态，当前分组以看板索引为准，不推广到其他层级。
+- [STAR 用来制定任务（尤其给 agent），不是复盘](project_star_for_agent_task_formulation.md) — 各层维护与领域任务采用 STAR 的原因和适用范围；具体写作方法引用 conversation-to-tasks，不重复维护正文、不固定版本，不用于复盘。
+- [Task 正文分节事实/idea，并一句话讲清问题与结果](project_task_separate_facts_from_idea.md) — 所有层级的维护与领域任务须区分事实与想法，简述问题与预期结果；写作规则与 STAR 结构统一由 conversation-to-tasks Skill 维护。
 <!-- project-memory-entries:end -->

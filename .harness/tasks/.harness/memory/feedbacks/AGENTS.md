@@ -14,5 +14,5 @@ format: ordinary
 > 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>.md` 里。
 
 <!-- project-memory-entries:start -->
-- [project-memory init 先留本地](feedback_memory_init_keep_local_until_asked.md) — tasks 目录 init/记忆脚手架写完后默认不提交，等用户明确说入库再推。
+- 暂无条目。
 <!-- project-memory-entries:end -->

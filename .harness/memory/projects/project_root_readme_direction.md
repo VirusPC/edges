@@ -1,14 +1,14 @@
 ---
 name: project_root_readme_direction
-description: 设计或修改根 README 时：个人 RSI 是当前实践，知识闭环是主线；四视角六思想，递归维护与树图结合归为递归树结构，ADR 按系统实现的思想顺序组织。
+description: 修改根 README 时：个人 RSI 与知识闭环为主线，保留四视角六思想；递归树结构区分仓内共享与扩展对外分发，跨仓安装复用为目标，局部记忆不默认分发。
 metadata:
   edges-title: 根 README 以知识闭环为唯一主线
   edges-type: project
   edges-origin-session-id: bc-0cc3a85a-15e3-508e-88c6-9349ff47fbf1
   edges-agent-client: codex
-  edges-username: Codex
-  edges-email: noreply@openai.com
-  edges-updated-at: "2026-10-04T19:11:07+08:00"
+  edges-username: cheng
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: '2026-10-05T18:14:25+08:00'
 ---
 
 根 README 以个人 RSI 为当前实践目标，以知识闭环为唯一叙事主线，按「理念：知识只有进入闭环，才能产生复利 → 知识模型 → 系统实现 → 使用与维护 → 公开仓库边界」组织；新增概念必须替换或收编旧结构，不能继续叠加平行章节。
@@ -56,3 +56,9 @@ README 描述新增内容与后续维护的目标约定，集中用一处说明�
 在系统实现的核心思想列表中保留“任意输入、统一转化、多种输出”的精炼表述，与现有知识闭环和部署、接入、输出目标衔接；具体输入格式与输出能力仍以各能力面的实际实现为准。
 
 2026-10-04 用户确认：将“递归维护”与“树图结合”合并，标题同时体现树与递归，采用“递归树结构”。树表达归属，各层沿用统一节点模型，交叉引用与跨层复用在正文说明。ADR 的组织顺序对齐 README“系统实现”，避免另起一套章节分类。
+
+
+2026-10-05 用户要求：在系统实现的“递归树结构”内简要说明全局共享内容的处理，不另开平行章节。全局约定与维护记忆归根节点，共享能力由所属模块维护；Edges 专属能力在 extensions，不依赖 Edges 的通用能力在 shared-extensions，各层通过引用复用。共享不改变归属，不因跨层使用而将局部记忆上收根层。
+
+
+2026-10-05 用户进一步明确“全局共享”与“对外分发”的区别：根 AGENTS.md 与 .harness 服务本仓，只有提炼到 extensions 或 shared-extensions 的能力才进入对外安装分发范围。目标是任意仓库安装后复用整套能力，在自己的作用域中管理节点与维护内容；不把源仓局部记忆默认随扩展分发。README 应在“递归树结构／全局共享”中简要写清楚，同时将整套能力安装复用表述为设计目标，不能因内容进入某目录就宣称已完成打包、发布或统一安装。
