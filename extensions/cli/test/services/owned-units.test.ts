@@ -558,3 +558,17 @@ test("committed suffix removal merges into an alias with unrelated dirty constra
   assert.doesNotMatch(dirty.body, /#old/);
   assert.deepEqual(dirty.constraints, ["unsaved"]);
 });
+test("image labels containing a link preserve label syntax while the outer destination relocates", async (t) => {
+  const { file, write, service } = fixture(t);
+  const source = '![a [b](../page.md)](../asset.png "title")';
+  write("a/index.md", source);
+  write("asset.png", "asset");
+  await service.move(
+    (await service.get(file("a/index.md")))!,
+    file("deep/a/index.md"),
+  );
+  assert.equal(
+    fs.readFileSync(file("deep/a/index.md"), "utf8"),
+    '![a [b](../page.md)](../../asset.png "title")',
+  );
+});

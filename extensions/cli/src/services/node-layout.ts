@@ -6,7 +6,7 @@ import { resolveEntryHref } from "../models/layout.js";
 /** Filesystem facts and source-preserving relocation; no domain resources. */
 import * as fs from "node:fs";
 import path from "node:path";
-import { fromMarkdown } from "mdast-util-from-markdown";
+import { fromMarkdown, type Handle } from "mdast-util-from-markdown";
 import type { Nodes } from "mdast";
 import {
   BaseNode,
@@ -121,6 +121,36 @@ export function rewriteLinks(
   relocate: (target: string) => string,
 ): string {
   const changes: { start: number; end: number; value: string }[] = [];
+  const destinations = new WeakMap<Nodes, { start: number; end: number }>();
+  // Observe container tokens that have no built-in compiler handler. Retain the
+  // parser's actual ranges without replacing its destination decoding handlers.
+  const captureDestination: Handle = function (token) {
+    const owner = this.stack.at(-1);
+    if (
+      !owner ||
+      (owner.type !== "link" &&
+        owner.type !== "image" &&
+        owner.type !== "definition")
+    )
+      return;
+    let start = token.start.offset,
+      end = token.end.offset;
+    if (source[start] === "<") {
+      start++;
+      end--;
+    }
+    destinations.set(owner, { start, end });
+  };
+  const tree = fromMarkdown(source, {
+    mdastExtensions: [
+      {
+        enter: {
+          resourceDestination: captureDestination,
+          definitionDestination: captureDestination,
+        },
+      },
+    ],
+  });
   function visit(node: Nodes) {
     if (
       (node.type === "link" ||
@@ -128,62 +158,9 @@ export function rewriteLinks(
         node.type === "definition") &&
       node.position
     ) {
-      const start = node.position.start.offset!,
-        end = node.position.end.offset!;
-      const text = source.slice(start, end);
-      // Parsed child bounds already account for code spans, escapes and nested markup.
-      // Images expose alt text rather than children, so parse their equivalent link label.
-      let labelEnd: number;
-      if (node.type === "link") {
-        labelEnd =
-          (node.children.at(-1)?.position?.end.offset ?? start + 1) - start;
-      } else if (node.type === "image") {
-        const paragraph = fromMarkdown(text.slice(1)).children[0];
-        const link =
-          paragraph?.type === "paragraph" ? paragraph.children[0] : undefined;
-        if (link?.type !== "link") return;
-        labelEnd = (link.children.at(-1)?.position?.end.offset ?? 1) + 1;
-      } else {
-        // Definition labels are not parsed as inline Markdown; escaped brackets stay literal.
-        labelEnd = 1;
-        while (labelEnd < text.length) {
-          if (text[labelEnd] === "\\") {
-            labelEnd += 2;
-            continue;
-          }
-          if (text[labelEnd] === "]") break;
-          labelEnd++;
-        }
-      }
-      const delimiter = node.type === "definition" ? "]:" : "](";
-      const marker = text.indexOf(delimiter, labelEnd);
-      if (marker < 0) return;
-      const opening = marker + 2;
-      let a = opening;
-      while (/\s/.test(text[a] ?? "") && a < text.length) a++;
-      let b = a;
-      if (text[a] === "<") {
-        a++;
-        b = text.indexOf(">", a);
-      } else {
-        let depth = 0;
-        while (b < text.length) {
-          const c = text[b]!;
-          if (c === "\\") {
-            b += 2;
-            continue;
-          }
-          if (c === "(") depth++;
-          if (c === ")") {
-            if (!depth) break;
-            depth--;
-          }
-          if (/\s/.test(c) && !depth) break;
-          b++;
-        }
-      }
-      if (b < a) return;
-      const href = text.slice(a, b);
+      const span = destinations.get(node);
+      if (!span) return;
+      const href = source.slice(span.start, span.end);
       let target: string | undefined;
       try {
         target = resolveHref(oldEntry, href.replace(/\\([\\()])/g, "$1"));
@@ -201,15 +178,15 @@ export function rewriteLinks(
           .map((part) => encodeURIComponent(part))
           .join("/") || ".";
       changes.push({
-        start: start + a,
-        end: start + b,
+        start: span.start,
+        end: span.end,
         value: relative + suffix,
       });
     }
     if ("children" in node)
       for (const child of node.children) visit(child as Nodes);
   }
-  visit(fromMarkdown(source));
+  visit(tree);
   for (const edit of changes.sort((a, b) => b.start - a.start))
     source = source.slice(0, edit.start) + edit.value + source.slice(edit.end);
   return source;
