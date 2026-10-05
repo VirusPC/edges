@@ -97,7 +97,7 @@ export function renderProjectAgents(input: {
       : `## Pointers\n\n${input.pointers.trim()}`;
     out += `\n${block}\n`;
   }
-  return out;
+  return out + `\n<!-- project-memory:start -->\n<!-- project-memory-important:start -->\n## 本层硬约束\n\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n## 本层记忆\n\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n## 下层记忆索引\n\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n`;
 }
 
 export function oneLineDescription(description: string): string {

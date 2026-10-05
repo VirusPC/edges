@@ -10,7 +10,8 @@ import { taskBody } from "../../models/tasks/frontmatter.js";
 import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
 import { newTaskStem, taskNameSlug } from "../../models/tasks/slug.js";
 import { parseTaskPriority } from "../../models/tasks/priority.js";
-import { parseTaskProject } from "../../models/tasks/project.js";
+import { parseTaskProject, projectDirName } from "../../models/tasks/project.js";
+import { ensureProjectMetadata } from "./project-meta.js";
 import {
   DEFAULT_TASK_PROJECT,
   TASK_STATUSES,
@@ -119,7 +120,7 @@ export async function createTask(
       : parseTaskProject(input.project);
   const priority =
     input.priority === undefined ? "none" : parseTaskPriority(input.priority);
-  await io.fs.mkdirp(statusDir(repoPath, project, input.status));
+  await ensureTaskDestination(repoPath, project, input.status, io.fs);
   const stem = await uniqueStem(
     repoPath,
     project,
@@ -223,7 +224,7 @@ export async function updateTask(
           `destination already exists: ${destRel}`,
         );
       }
-      await io.fs.mkdirp(statusDir(repoPath, parsedProject, record.status));
+      await ensureTaskDestination(repoPath, parsedProject, record.status, io.fs);
       await moveTaskEntry(
         repoPath,
         service,
@@ -265,6 +266,17 @@ export function taskNodes(target: BoardTarget): NodeService {
 
 export function taskFile(target: BoardTarget, relative: string): string {
   return path.join(realpathSync(scopeDir(target)), relative);
+}
+
+export async function ensureTaskDestination(
+  target: BoardTarget,
+  project: TaskProjectId,
+  status: TaskStatus,
+  writer: BoardWriter,
+): Promise<void> {
+  await writer.mkdirp(path.join(boardRoot(target), projectDirName(project)));
+  await ensureProjectMetadata(target, writer);
+  await writer.mkdirp(statusDir(target, project, status));
 }
 
 /** Runlogs and resources travel with the complete task directory. */

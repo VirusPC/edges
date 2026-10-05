@@ -100,14 +100,14 @@ test("render and parse round-trip title, description, and optional pointers", ()
     title: "Default",
     description: DEFAULT_PROJECT_DESCRIPTION,
   });
-  assert.equal(
-    rendered,
-    `# Default\n\nUngrouped tasks that have not been assigned a named Task Project.\n`,
-  );
-  assert.deepEqual(parseProjectAgents(rendered), {
-    title: "Default",
-    description: DEFAULT_PROJECT_DESCRIPTION,
-  });
+  assert.match(rendered, /^# Default\n\nUngrouped tasks that have not been assigned a named Task Project\.\n/);
+  assert.match(rendered, /<!-- project-memory-important:start -->/);
+  assert.match(rendered, /<!-- project-memory-local:start -->/);
+  assert.match(rendered, /<!-- project-memory-children:start -->/);
+  const defaultParsed = parseProjectAgents(rendered);
+  assert.equal(defaultParsed.title, "Default");
+  assert.equal(defaultParsed.description, DEFAULT_PROJECT_DESCRIPTION);
+  assert.match(defaultParsed.tail ?? "", /<!-- project-memory-children:end -->/);
 
   const withPointers = renderProjectAgents({
     title: "CLI",

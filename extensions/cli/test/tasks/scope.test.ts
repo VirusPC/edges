@@ -200,7 +200,7 @@ test("selected board rejects symlink escape on writes", async () => {
     await mkdir(path.join(root, "outside"));
     await symlink(path.join(root, "outside"), path.join(child, "tasks"));
     const result = await run(
-      ["--scope", child, "tasks", "create", "--title", "Escape"],
+      ["--scope", child, "tasks", "--purpose", "domain", "create", "--title", "Escape"],
       { env: {} },
     );
     assert.equal(result.exitCode, 2, result.stdout);
@@ -255,7 +255,7 @@ test("project list exposes existing project directories without creating metadat
   const { root, child } = await fixture();
   try {
     await mkdir(path.join(child, "tasks/cli/todo"), { recursive: true });
-    const result = await run(["--scope", child, "tasks", "project", "list"], {
+    const result = await run(["--scope", child, "tasks", "--purpose", "domain", "project", "list"], {
       env: {},
     });
     assert.equal(result.exitCode, 0, result.stdout);

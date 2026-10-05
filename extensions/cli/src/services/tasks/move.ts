@@ -3,8 +3,8 @@ import path from "node:path";
 import { getTask, type BoardWriter } from "./board.js";
 import { TaskNode } from "../../models/task-node.js";
 import { setDomainField } from "../../models/fields.js";
-import { taskNodes, taskFile, moveTaskEntry } from "./write.js";
-import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
+import { taskNodes, taskFile, moveTaskEntry, ensureTaskDestination } from "./write.js";
+import { sidecarRelPath, taskRelPath } from "./paths.js";
 import { TasksError, type TaskStatus } from "../../models/tasks/types.js";
 
 export async function moveTaskStatus(
@@ -45,7 +45,7 @@ export async function moveTaskStatus(
     );
   }
 
-  await io.fs.mkdirp(statusDir(repoPath, record.project, next));
+  await ensureTaskDestination(repoPath, record.project, next, io.fs);
   const sourceAbs = path.join(scopeDir(repoPath), record.path);
   const service = taskNodes(repoPath);
   const node = await service.get(taskFile(repoPath, record.path), TaskNode);
