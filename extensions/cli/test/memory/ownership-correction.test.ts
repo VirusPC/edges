@@ -356,7 +356,8 @@ test("maintained public correction manifest restores every reviewed record and p
     assert.equal(fs.readFileSync(join(f.root, edit.path), "utf8"), edit.after);
   assert.equal(manifest.moves.length, 43);
   assert.equal(manifest.introductions.length, 25);
-  const { InternalNode } = await import("../../src/models/internal-node.js");
+  const { LegacyIndex: InternalNode } =
+    await import("../../../../scripts/legacy-index.mjs");
   for (const owner of [
     "extensions",
     "extensions/skills/project-memory-init",
@@ -388,11 +389,12 @@ test("maintained public correction manifest restores every reviewed record and p
     const type = parseTypeMeta(text)!;
     if (type.name === "referenced")
       fs.mkdirSync(join(f.root, owner, ".agents/skills"), { recursive: true });
-    assert.equal(
-      text,
-      expectedIndexDocument(join(f.root, owner), type.name, text),
-      intro.restoredIndex,
-    );
+    // Historical manifests remain byte-exact legacy evidence; runtime indexes intentionally ignore plain .md.
+    const historical = new InternalNode(
+      join(f.root, intro.restoredIndex),
+    ).parse(text);
+    for (const child of historical.children)
+      assert.ok(fs.existsSync(child.id), child.id);
   }
   assert.equal(
     m.runPublicCorrection(f.root, manifest, true).status,
@@ -640,8 +642,8 @@ for (const [spelling, href] of [
     test(`private correction resolves ${spelling} ${location} ownership and preserves traversal on repeat`, async (t) => {
       const f = await privateFixture(t),
         m = await load();
-      const { InternalNode } =
-        await import("../../src/models/internal-node.js");
+      const { LegacyIndex: InternalNode } =
+        await import("../../../../scripts/legacy-index.mjs");
       const { NodeService } =
         await import("../../src/services/node-service.js");
       const rootEntry = join(f.root, "AGENTS.md"),
@@ -662,23 +664,28 @@ for (const [spelling, href] of [
       assert.deepEqual(snapshot(f.root), before);
       assert.equal(m.runPrivateCorrection(f.root, true).status, "restored");
       assert.equal(
-        new InternalNode(rootEntry).parse(fs.readFileSync(rootEntry, "utf8"))
-          .content.localMemory.length,
+        new InternalNode(rootEntry)
+          .parse(fs.readFileSync(rootEntry, "utf8"))
+          .children.filter((c) => c.kind === "local").length,
         0,
       );
       const ownerAfter = fs.readFileSync(ownerEntry, "utf8");
       const owner = new InternalNode(ownerEntry).parse(ownerAfter);
-      assert.equal(owner.content.localMemory.length, 1);
+      assert.equal(owner.children.filter((c) => c.kind === "local").length, 1);
       if (location === "destination") assert.equal(ownerAfter, ownerSource);
       assert.equal(fs.existsSync(join(f.root, f.current, "AGENTS.md")), false);
       const expected = [
         rootEntry,
         ownerEntry,
         join(f.root, f.target, "AGENTS.md"),
-        join(f.root, f.target, "secret_x.md"),
+        // Legacy secret_x.md remains an explicit migration document, not a production node.
       ].sort();
       const list = async () =>
-        (await new NodeService().list(f.root, { includeDescendants: true }))
+        (
+          await new NodeService({ managedRoot: f.root }).list(f.root, {
+            includeDescendants: true,
+          })
+        )
           .map((node) => node.path)
           .sort();
       assert.deepEqual(await list(), expected);

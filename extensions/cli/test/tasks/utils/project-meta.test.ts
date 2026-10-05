@@ -1,6 +1,18 @@
+import { mkdir as fixtureMkdir } from "node:fs/promises";
+import { dirname as fixtureDirname } from "node:path";
+async function writeFile(...args: Parameters<typeof fixtureRawWriteFile>) {
+  await fixtureMkdir(fixtureDirname(String(args[0])), { recursive: true });
+  return fixtureRawWriteFile(...args);
+}
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, writeFile, rm } from "node:fs/promises";
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  writeFile as fixtureRawWriteFile,
+  rm,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { nodeBoardWriter } from "./helpers.js";
@@ -27,7 +39,8 @@ const defaultRecord = {
   project: "default" as const,
   dir: "_default",
   title: "Default",
-  description: "Ungrouped tasks that have not been assigned a named Task Project.",
+  description:
+    "Ungrouped tasks that have not been assigned a named Task Project.",
   path: "tasks/_default/AGENTS.md",
 };
 const cliRecord = {
@@ -58,7 +71,10 @@ test("parseProjectTitle and parseProjectDescription accept trimmed bounds", () =
       parseProjectTitle(raw);
       assert.fail(`expected title throw for ${JSON.stringify(raw)}`);
     } catch (error) {
-      assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
+      assert.equal(
+        (error as { errorCode: string }).errorCode,
+        "VALIDATION_ERROR",
+      );
       assert.match((error as Error).message, /invalid Task Project title/);
     }
   }
@@ -67,8 +83,14 @@ test("parseProjectTitle and parseProjectDescription accept trimmed bounds", () =
       parseProjectDescription(raw);
       assert.fail(`expected description throw for ${JSON.stringify(raw)}`);
     } catch (error) {
-      assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
-      assert.match((error as Error).message, /invalid Task Project description/);
+      assert.equal(
+        (error as { errorCode: string }).errorCode,
+        "VALIDATION_ERROR",
+      );
+      assert.match(
+        (error as Error).message,
+        /invalid Task Project description/,
+      );
     }
   }
 });
@@ -103,10 +125,18 @@ test("parseProjectAgents rejects frontmatter and accepts sparse node sections", 
     parseProjectAgents("---\nname: x\n---\n# T\n\nD\n");
     assert.fail("expected frontmatter throw");
   } catch (error) {
-    assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
+    assert.equal(
+      (error as { errorCode: string }).errorCode,
+      "VALIDATION_ERROR",
+    );
     assert.match((error as Error).message, /must not have YAML frontmatter/);
   }
-  assert.equal(parseProjectAgents("# T\n\nD\n\n<!-- project-memory:start -->\n<!-- project-memory:end -->\n").description, "D");
+  assert.equal(
+    parseProjectAgents(
+      "# T\n\nD\n\n<!-- project-memory:start -->\n<!-- project-memory:end -->\n",
+    ).description,
+    "D",
+  );
 });
 
 test("oneLineDescription collapses newlines", () => {
@@ -117,10 +147,16 @@ test("rewriteRootAgents places its index in local while preserving authored cons
   const existing = `# tasks\n\n${PROJECT_MEMORY_START}\n\n## 本层硬约束\n\n- keep me\n${PROJECT_MEMORY_END}\n`;
   const next = rewriteRootAgents(existing, [cliRecord, defaultRecord]);
   assert.match(next, /## 本层硬约束\n\n- keep me/);
-  assert.ok(next.indexOf('<!-- project-memory-local:start -->') < next.indexOf(TASK_PROJECTS_START));
+  assert.ok(
+    next.indexOf("<!-- project-memory-local:start -->") <
+      next.indexOf(TASK_PROJECTS_START),
+  );
   assert.match(next, /<!-- task-projects:start -->/);
   assert.ok(next.indexOf(TASK_PROJECTS_END) < next.indexOf(PROJECT_MEMORY_END));
-  assert.match(next, /- \[`_default`\]\(_default\/AGENTS.md\) — Ungrouped tasks that have not been assigned a named Task Project\./);
+  assert.match(
+    next,
+    /- \[`_default`\]\(_default\/AGENTS.md\) — Ungrouped tasks that have not been assigned a named Task Project\./,
+  );
   assert.match(next, /- \[`cli`\]\(cli\/AGENTS.md\) — edges CLI work/);
   const defaultLine = next.indexOf("[`_default`]");
   const cliLine = next.indexOf("[`cli`]");
@@ -133,7 +169,10 @@ test("rewriteRootAgents replaces an existing Task Projects span only", () => {
   assert.match(next, /# trailing/);
   assert.doesNotMatch(next, /^old$/m);
   assert.match(next, /<!-- project-memory:start -->\nkeep\n/);
-  assert.ok(next.indexOf(TASK_PROJECTS_END) < next.indexOf('<!-- project-memory-local:end -->'));
+  assert.ok(
+    next.indexOf(TASK_PROJECTS_END) <
+      next.indexOf("<!-- project-memory-local:end -->"),
+  );
   assert.equal(next.split(TASK_PROJECTS_START).length - 1, 1);
 });
 
@@ -145,10 +184,15 @@ test("rewriteRootAgents on empty file writes a sparse local section", () => {
 
 test("rewriteRootAgents rejects a start marker without an end marker", () => {
   try {
-    rewriteRootAgents(`${TASK_PROJECTS_START}\n## Task Projects\n`, [defaultRecord]);
+    rewriteRootAgents(`${TASK_PROJECTS_START}\n## Task Projects\n`, [
+      defaultRecord,
+    ]);
     assert.fail("expected throw");
   } catch (error) {
-    assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
+    assert.equal(
+      (error as { errorCode: string }).errorCode,
+      "VALIDATION_ERROR",
+    );
     assert.match((error as Error).message, /malformed Task Projects markers/);
   }
 });
@@ -161,12 +205,12 @@ test("projectAgentsRelPath uses _default for default", () => {
 test("ensureProjectMetadata seeds _default and root index without moving Task files", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-proj-"));
   try {
-    const taskRel = "tasks/_default/backlog/2026-09-13--keep.md";
+    const taskRel = "tasks/_default/backlog/2026-09-13--keep/index.md";
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     await writeFile(path.join(repo, taskRel), "# keep\n", "utf8");
     await mkdir(path.join(repo, "tasks/cli/todo"), { recursive: true });
     await writeFile(
-      path.join(repo, "tasks/cli/todo/2026-09-13--other.md"),
+      path.join(repo, "tasks/cli/todo/2026-09-13--other/index.md"),
       "---\nmetadata:\n  edges-task-project: cli\n  edges-tasks-status: todo\n---\n\nx\n",
       "utf8",
     );
@@ -179,18 +223,30 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
 
     const records = await ensureProjectMetadata(repo, nodeBoardWriter());
     assert.equal(records[0]?.project, "default");
-    assert.equal(records.some((item) => item.project === "cli"), true);
+    assert.equal(
+      records.some((item) => item.project === "cli"),
+      true,
+    );
 
-    const seeded = await readFile(path.join(repo, "tasks/_default/AGENTS.md"), "utf8");
+    const seeded = await readFile(
+      path.join(repo, "tasks/_default/AGENTS.md"),
+      "utf8",
+    );
     assert.match(seeded, /^# Default\n/);
-    const cliAgents = await readFile(path.join(repo, "tasks/cli/AGENTS.md"), "utf8");
+    const cliAgents = await readFile(
+      path.join(repo, "tasks/cli/AGENTS.md"),
+      "utf8",
+    );
     assert.match(cliAgents, /^# cli\n/);
     assert.match(cliAgents, /Task Project cli\./);
 
     const root = await readFile(rootAgents, "utf8");
     assert.match(root, /- keep-index/);
     assert.match(root, /<!-- task-projects:start -->/);
-    assert.ok(root.indexOf("<!-- task-projects:end -->") < root.indexOf("<!-- project-memory-local:end -->"));
+    assert.ok(
+      root.indexOf("<!-- task-projects:end -->") <
+        root.indexOf("<!-- project-memory-local:end -->"),
+    );
 
     const task = await readFile(path.join(repo, taskRel), "utf8");
     assert.equal(task, "# keep\n");
@@ -204,24 +260,37 @@ test("ensureProjectMetadata skipId leaves that AGENTS.md missing", async () => {
   try {
     await mkdir(path.join(repo, "tasks"), { recursive: true });
     await ensureProjectMetadata(repo, nodeBoardWriter(), "default");
-    await assert.rejects(readFile(path.join(repo, "tasks/_default/AGENTS.md"), "utf8"));
+    await assert.rejects(
+      readFile(path.join(repo, "tasks/_default/AGENTS.md"), "utf8"),
+    );
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
 });
 
-test('project get synthesizes existing directories, rejects missing ones, and leaves metadata absent', async () => {
-  const { getProject, listProjects } = await import('../../../src/services/tasks/project-meta.js');
-  const { access } = await import('node:fs/promises');
-  const repo = await mkdtemp(path.join(tmpdir(), 'edges-project-read-'));
+test("project get synthesizes existing directories, rejects missing ones, and leaves metadata absent", async () => {
+  const { getProject, listProjects } =
+    await import("../../../src/services/tasks/project-meta.js");
+  const { access } = await import("node:fs/promises");
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-project-read-"));
   try {
-    await mkdir(path.join(repo, 'tasks/cli/todo'), { recursive: true });
+    await mkdir(path.join(repo, "tasks/cli/todo"), { recursive: true });
     const fs = nodeBoardWriter();
     const listed = await listProjects(repo, fs);
-    assert.deepEqual(await getProject(repo, 'cli', fs), listed[0]);
-    await assert.rejects(() => getProject(repo, 'missing', fs), (error: any) => error.errorCode === 'PROJECT_NOT_FOUND');
-    for (const rel of ['tasks/cli/AGENTS.md', 'tasks/AGENTS.md', 'tasks/_default', 'tasks/missing']) {
+    assert.deepEqual(await getProject(repo, "cli", fs), listed[0]);
+    await assert.rejects(
+      () => getProject(repo, "missing", fs),
+      (error: any) => error.errorCode === "PROJECT_NOT_FOUND",
+    );
+    for (const rel of [
+      "tasks/cli/AGENTS.md",
+      "tasks/AGENTS.md",
+      "tasks/_default",
+      "tasks/missing",
+    ]) {
       await assert.rejects(access(path.join(repo, rel)));
     }
-  } finally { await rm(repo, { recursive: true, force: true }); }
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
 });

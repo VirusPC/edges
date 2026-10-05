@@ -1,4 +1,4 @@
-import { readFile } from 'node:fs/promises';
+import { readFile } from "node:fs/promises";
 import { Command, Option } from "commander";
 import { ZodError } from "zod";
 import { type CliContext, type CliResult, usageError } from "../context.js";
@@ -59,9 +59,8 @@ type IngestCliOptions = {
   title?: string;
   content?: string;
   contentFile?: string;
-  format?: "file" | "directory";
   markdown?: boolean;
-  resources?: string;
+  importEntry?: string;
   coAuthor?: string;
   json?: boolean;
   dryRun?: boolean;
@@ -78,16 +77,17 @@ function fail(failure: IngestFailure): CliResult {
   };
 }
 
-function validateNoteOptions(opts: IngestCliOptions): CliResult | {
-  title: string;
-  content: string;
-  coAuthor: string;
-  dryRun: boolean;
-  mode?: "pr" | "direct";
-  tokenFile?: string;
-  tokenStdin: boolean;
-} {
-  if (opts.resources && opts.format !== "directory") return usageError("--resources requires --format directory", "note");
+function validateNoteOptions(opts: IngestCliOptions):
+  | CliResult
+  | {
+      title: string;
+      content: string;
+      coAuthor: string;
+      dryRun: boolean;
+      mode?: "pr" | "direct";
+      tokenFile?: string;
+      tokenStdin: boolean;
+    } {
   const mode = opts.mode;
   if (mode !== undefined && mode !== "pr" && mode !== "direct") {
     return usageError('--mode must be "direct" or "pr"', "note");
@@ -125,34 +125,92 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
   const note = program
     .command("note")
     .description("Ingest a note into the Edges knowledge repo")
-    .usage("--title <title> --content <content> --co-author <name-email> [options]")
+    .usage(
+      "--title <title> --content <content> --co-author <name-email> [options]",
+    )
     .allowExcessArguments(false)
     .showHelpAfterError(false)
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help")
     .option("--title <title>", "Note title (1–120 chars)")
-    .addOption(new Option("--content <content>", "Note body (1–50,000 chars)").conflicts('contentFile'))
-    .addOption(new Option("--content-file <path>", "Read UTF-8 Markdown from a file").conflicts('content'))
-    .option("--markdown", "Preserve authored Markdown without adding a title or template")
-    .addOption(new Option("--format <format>", "New entry layout (default: file)").choices(['file', 'directory']))
-    .option("--resources <directory>", "Explicit resource directory for a new directory entry")
-    .option("--co-author <name-email>", 'Git co-author, e.g. "Name <email@domain>" (3–200 chars)')
-    .option("--json", "Write a machine-parseable JSON result to stdout (always on; flag kept for agents)")
-    .option("--dry-run", "Set EDGES_DRY_RUN=true: write and commit locally, do not push")
     .addOption(
-      new Option("--mode <mode>", "direct | pr  (default: EDGES_MODE or direct)").choices(["pr", "direct"]),
+      new Option("--content <content>", "Note body (1–50,000 chars)").conflicts(
+        "contentFile",
+      ),
     )
     .addOption(
-      new Option("--token-file <path>", "Present EDGES_AUTH_TOKEN from a file (never pass the token on argv)"),
+      new Option(
+        "--content-file <path>",
+        "Read UTF-8 Markdown from a file",
+      ).conflicts("content"),
+    )
+    .option(
+      "--markdown",
+      "Preserve authored Markdown without adding a title or template",
     )
     .addOption(
-      new Option("--token-stdin", "Present EDGES_AUTH_TOKEN from a non-TTY stdin").conflicts("tokenFile"),
+      new Option(
+        "--import-entry <path>",
+        "Validate and import the complete entry directory",
+      ).conflicts(["content", "contentFile", "markdown"]),
+    )
+    .option(
+      "--co-author <name-email>",
+      'Git co-author, e.g. "Name <email@domain>" (3–200 chars)',
+    )
+    .option(
+      "--json",
+      "Write a machine-parseable JSON result to stdout (always on; flag kept for agents)",
+    )
+    .option(
+      "--dry-run",
+      "Set EDGES_DRY_RUN=true: write and commit locally, do not push",
+    )
+    .addOption(
+      new Option(
+        "--mode <mode>",
+        "direct | pr  (default: EDGES_MODE or direct)",
+      ).choices(["pr", "direct"]),
+    )
+    .addOption(
+      new Option(
+        "--token-file <path>",
+        "Present EDGES_AUTH_TOKEN from a file (never pass the token on argv)",
+      ),
+    )
+    .addOption(
+      new Option(
+        "--token-stdin",
+        "Present EDGES_AUTH_TOKEN from a non-TTY stdin",
+      ).conflicts("tokenFile"),
     );
 
   note.action(async (opts: IngestCliOptions) => {
+    if (opts.importEntry) {
+      try {
+        opts.content = new TextDecoder("utf-8", { fatal: true }).decode(
+          await readFile(opts.importEntry),
+        );
+      } catch (error) {
+        ctx.result = usageError(
+          `Cannot read --import-entry: ${String(error)}`,
+          "note",
+        );
+        return;
+      }
+    }
     if (opts.contentFile) {
-      try { opts.content = new TextDecoder('utf-8', { fatal: true }).decode(await readFile(opts.contentFile)); }
-      catch (error) { ctx.result = usageError(`Cannot read --content-file: ${String(error)}`, 'note'); return; }
+      try {
+        opts.content = new TextDecoder("utf-8", { fatal: true }).decode(
+          await readFile(opts.contentFile),
+        );
+      } catch (error) {
+        ctx.result = usageError(
+          `Cannot read --content-file: ${String(error)}`,
+          "note",
+        );
+        return;
+      }
     }
     const parsed = validateNoteOptions(opts);
     if ("exitCode" in parsed) {
@@ -200,9 +258,19 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
       return;
     }
 
-    const result = await runIngest({ ...request, format: opts.format, markdown: opts.markdown, resources: opts.resources }, config, runNoteIngest, env);
-    const stderrLines = result.status === "success" ? result.diagnostics : result.stderrSummary;
-    const stderr = stderrLines ? (stderrLines.endsWith("\n") ? stderrLines : `${stderrLines}\n`) : "";
+    const result = await runIngest(
+      { ...request, markdown: opts.markdown, importEntry: opts.importEntry },
+      config,
+      runNoteIngest,
+      env,
+    );
+    const stderrLines =
+      result.status === "success" ? result.diagnostics : result.stderrSummary;
+    const stderr = stderrLines
+      ? stderrLines.endsWith("\n")
+        ? stderrLines
+        : `${stderrLines}\n`
+      : "";
     ctx.result = {
       exitCode: exitCodeFor(result),
       stdout: formatResult(result),

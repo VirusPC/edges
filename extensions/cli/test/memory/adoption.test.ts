@@ -71,10 +71,9 @@ for (const kind of ["descendant", "prose", "local-prose"] as const)
 test("InternalNode generated local references are recognized as adopted types", async (t) => {
   const root = fixture(t),
     node = new InternalNode(join(root, "AGENTS.md")).parse(ownerText(""));
-  node.addChild({
-    target: ".harness/memory/projects/AGENTS.md",
-    kind: "local",
-    label: "projects",
+  node.addChild("local", {
+    id: join(root, ".harness/memory/projects/AGENTS.md"),
+    name: "projects",
     description: "project context",
   });
   fs.writeFileSync(node.path, node.serialize());
@@ -124,8 +123,17 @@ test("reviewed restored owner AGENTS and type indexes have no false Doctor adopt
     fs.mkdirSync(join(root, move.target, ".."), { recursive: true });
     fs.writeFileSync(join(root, move.target), move.after);
   }
+  const { execFileSync } = await import("node:child_process");
+  const { planDirectoryMigration, applyDirectoryMigration } =
+    await import("../../../../scripts/migrate-directory-nodes.mjs");
+  execFileSync("git", ["init", "-q"], { cwd: root });
+  execFileSync("git", ["add", "."], { cwd: root });
+  applyDirectoryMigration(planDirectoryMigration(root));
   for (const owner of owners) {
-    const report = await doctorMemory({ targetDir: join(root, owner) });
+    const report = await doctorMemory({
+      targetDir: join(root, owner),
+      rootDir: join(root, owner),
+    });
     assert.deepEqual(
       report.findings.filter((f) => !["source-scan-error"].includes(f.code)),
       [],
@@ -173,26 +181,23 @@ test("reviewed public root graph loads document entries and keeps ADR navigation
   fs.writeFileSync(join(root, "AGENTS.md"), source);
   fs.mkdirSync(join(root, "docs/adr"), { recursive: true });
   const { NodeService } = await import("../../src/services/node-service.js");
-  const service = new NodeService();
+  const service = new NodeService({ managedRoot: root });
   const node = await service.get(join(root, "AGENTS.md"), InternalNode);
   assert.ok(node);
   assert.equal(
-    node.children.some((ref) => ref.target === "docs/adr/"),
+    node.children.some((ref) => ref.id === join(root, "docs/adr")),
     false,
   );
   assert.match(source, /\n\[架构决策\]\(<docs\/adr\/>\) — 架构决策入口。\n/);
   for (const ref of node.children) {
-    const file = join(root, decodeURIComponent(ref.target));
+    const file = ref.id;
     fs.mkdirSync(join(file, ".."), { recursive: true });
     // All graph contents are fixture placeholders, including the private adoption.
     fs.writeFileSync(file, "# Fixture entry\n");
     assert.ok(await service.get(file));
   }
   const listed = await service.list(root);
-  assert.equal(
-    listed.length,
-    1 + node.children.filter((ref) => ref.kind === "local").length,
-  );
+  assert.equal(listed.length, 1 + node.localChildren.length);
   assert.ok(listed.every((entry) => fs.statSync(entry.path).isFile()));
   assert.equal(fs.readFileSync(join(root, "AGENTS.md"), "utf8"), source);
 });

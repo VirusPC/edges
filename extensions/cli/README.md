@@ -81,15 +81,15 @@ Normal Task create/update/status and Note ingest save actual TaskNode/NoteNode i
 
 Memory `initMemory`, `rememberMemory`, `addMemoryType`, `doctorMemory`, `refreshIndex` and the index-writing helpers now return promises. Programmatic callers must await them; CLI arguments, JSON and exit codes are unchanged. Note Git dependencies retain process/network substitution points; file operations use the real snapshot-checked service.
 
-NodeService accepts optional `modelForReference`, `assertWrite`, `readOnlyReference`, `createMode` and `resourceMode` hooks. The first two choose a constructor and validate planned writes. `readOnlyReference(parent, reference, resolvedPath)` supplements explicit index contracts before reading a linked source; `false` cannot remove existing read-only provenance, including a discovered physical alias. `createMode(node)` accepts integer permission bits from `0` through `0o777`, applied when staging a new document; updates retain the old permissions. Memory creates documents with `0o600` and verifies that private destination directories are ignored before any entry, index, staging or recovery write. Managed aliases are indexed through their validated in-scope physical path; referenced sources retain the authored installation path and remain read-only.
+NodeService accepts model selection, write validation and read-only reference hooks. Read-only provenance cannot be removed by a hook. Managed mutations require physical containment within managedRoot; referenced sources remain read-only. Existing file permissions are preserved, without introducing a business permission policy.
 
-NodeReference targets are authored hrefs: path encoding is decoded once after query/fragment separation. Encoded filename delimiters and encoded CR/LF are supported; literal CR/LF and NUL in hrefs are rejected. Optional frontmatter uses gray-matter's default YAML behavior; non-YAML executable language declarations are rejected. Runtime node types are independent of content classification and are not added to YAML automatically.
+NodeReference carries a stable logical id and an authored href. Paths are decoded once after query/fragment separation; ids reject control characters. References support discovery and link rewriting, while physical parent directories determine ownership. Optional frontmatter uses safe YAML parsing; runtime node types are inferred from canonical entry layout and explicit context.
 
-TaskNode, MemoryNode and NoteNode own a directory only at a typed `index.md` entry; SkillNode requires `SKILL.md` and owns its directory. BaseNode and InternalNode own only their entry file. Resources remain separate from logical children. New `tasks create`, `memory remember` and `note` accept `--format file|directory` (default file; Skill stays directory-only). Existing directory entries retain their layout, and indexes always link the entry file. Task directory runlogs live inside the unit and move with status/project changes. Enumeration does not recursively discover resource Markdown.
+All content nodes use directory entries: index.md for Task/Memory/Note and SKILL.md for Skills. InternalNode uses AGENTS.md with separate local/descendant references; a co-located AGENTS is the content node's harness. Ordinary Markdown is not a runtime node. Moves preserve instance identity, move the complete directory, and relocate registered references and authored relative links. Resources remain opaque files.
 
-`NodeService.move(node, destinationEntryPath, parent?)` returns a same-model node with a new readonly path and invalidates the old object's write snapshot. It preserves resource bytes/modes and updates the supplied/known parent's href, retaining label, description and kind. It refuses format changes, occupied destination units and organization nodes (including any AGENTS.md path). It does not rewrite unknown references or ordinary body links. Resource snapshots reject changed contents/identities/modes before writes. Known readonly units protect their resources too. Owned deletion stages a same-parent `.node-recovery-*` directory, checks private-ignore coverage there, then updates the index and cleans up; failures restore or report the retained recovery path. Reload nodes after a failed write. Explicit scope/Skill boundaries and known indexed child units prevent whole-directory move/delete; arbitrary resource index.md files do not become children.
+NodeService requires managedRoot and accepts structured create/update inputs. Whole-directory import validates every managed entry before writing. Skill validation requires a standard name and nonempty description. Existing file modes are preserved without a business permission policy. Conflicts fail before writes; recovery errors identify retained paths.
 
-`create(node, placement?, { resources })` imports an explicitly selected directory into a new owned unit. CLI Memory/Note use `--format directory --resources <directory>`; file inputs never imply ownership of neighboring files. Imports refuse symlinks, special files, AGENTS.md/SKILL.md boundaries, entry collisions and existing-unit merges. Imported files preserve source permissions by default; `resourceMode(node, sourceMode)` may supply validated permission bits independently of entry-only `createMode`. Memory uses its registered type policy: public resources preserve their source modes; private resources use 0600, retaining owner execute as 0700 for executable sources. Incomplete imports report the directory requiring recovery.
+Legacy tracked/public documents use the explicit [directory migration Skill](../skills/migrate-directory-nodes/SKILL.md): pnpm migrate:directory-nodes --root <worktree> previews; --apply converts. Existing legacy journals require manual review; this tool does not open their potentially private snapshots.
 
 Whole-unit moves require the same filesystem and entry layout. `NodeService` uses snapshots and recoverable file/index writes, but multi-file operations are not durable crash-atomic transactions. The present CLI scope selector still applies its existing eligibility policy; the independent recursive-ownership correction will remove that extra gate, restore three-part AGENTS registration and return promoted local records to their owners. The current model rollout does not perform those structural moves.
 
@@ -109,19 +109,17 @@ Notes go to the selected scope's `knowledge/notes/`; Git operations run at its a
 - `--content` or `--content-file` (UTF-8, 1–50,000 chars)
 - `--co-author` (3–200), e.g. `Name <email@domain>`
 
-Optional: `--json`, `--dry-run`, `--mode`, `--token-file`, `--token-stdin`, `--format file|directory`, `--markdown`, `--resources <directory>`.
+Optional: `--json`, `--dry-run`, `--mode`, `--token-file`, `--token-stdin`, `--markdown`, `--import-entry <path>`.
 
-Use `--markdown` for an already authored document: its authored title and body are retained without an ingest template; frontmatter still uses normal gray-matter parsing/serialization (YAML formatting/comments are not preserved), while `--title` names the file and commit. Without it the existing ingest title/date template remains. Resource import requires explicit directory format and a new unit. Git/PR/auth defaults are unchanged; `--dry-run` still makes a local commit.
+Use `--markdown` for an already authored document: its authored title and body are retained without an ingest template; frontmatter still uses normal gray-matter parsing/serialization (YAML formatting/comments are not preserved), while `--title` names the file and commit. Without it the existing ingest title/date template remains. `--import-entry` validates and copies a complete canonical entry directory into a new unit; it conflicts with body/file/markdown inputs. `--content-file --markdown` validates only the document and does not copy its neighbors. Git/PR/auth defaults are unchanged; `--dry-run` still makes a local commit.
 
-`--content-file`, `--resources`, `--format` and `--markdown` are local CLI options. The new-note HTTP/MCP adapter accepts only title, content and co-author and passes those values to `edges note`; remote requests cannot select local filesystem inputs or resource directories.
+`--content-file`, `--import-entry` and `--markdown` are local CLI options. The new-note HTTP/MCP adapter accepts only title, content and co-author and passes those values to `edges note`; remote requests cannot select local filesystem inputs or resource directories.
 
 ```bash
 edges note --title "Decision" --content-file /tmp/reviewed-note.md --markdown \
-  --format directory --resources /tmp/selected-assets \
   --co-author "Codex <noreply@openai.com>" --dry-run
 edges memory remember --type project --slug decision --title "Decision" \
-  --description "Reviewed decision" --content-file /tmp/body.md \
-  --format directory --resources /tmp/selected-assets
+  --description "Reviewed decision" --content-file /tmp/body.md
 ```
 
 ## Structured output
@@ -148,7 +146,7 @@ Board root is `<scope>/tasks/` by default (`--purpose domain`); `tasks --purpose
 ```
 edges tasks list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
 edges tasks get <stem|path>
-edges tasks create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project] [--format file|directory]
+edges tasks create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project]
 edges tasks update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project]
 edges tasks status <stem|path> <edges-tasks-status>
 edges tasks runs <stem|path> [--output table|json]
@@ -160,7 +158,7 @@ edges tasks project update <project> [--title] [--description]
 edges tasks project review-page --from <path|-> [--out <path>]
 ```
 
-Issue-layer stdout is always JSON (`--json` is accepted and ignored). `runs` / `run-messages` default to a table; pass `--output json` for JSON. Run layer is read-only (no append). `create` writes the Task file plus an empty sidecar `.{stem}.log.md`.
+Issue-layer stdout is always JSON (`--json` is accepted and ignored). `runs` / `run-messages` default to a table; pass `--output json` for JSON. Run layer is read-only (no append). `create` writes `<stem>/index.md` and `<stem>/.<stem>.log.md`; status/project changes move the complete directory.
 
 Default `list` stays `{ status, command: "list", tasks: [...] }`. `list --group-by project` (optional `--format json`) emits loose-coupled `edges.tasks.grouped/v1`: `{ schema, groups[{id,title,description?}], items[{id|stem, group, title?, status?, …}] }`. Existing `--status` / `--priority` / `--project` / `--sort` still apply **before** grouping. That schema is not named for review-page.
 

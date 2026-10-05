@@ -1,6 +1,17 @@
+import { mkdir as fixtureMkdir } from "node:fs/promises";
+import { dirname as fixtureDirname } from "node:path";
+async function writeFile(...args: Parameters<typeof fixtureRawWriteFile>) {
+  await fixtureMkdir(fixtureDirname(String(args[0])), { recursive: true });
+  return fixtureRawWriteFile(...args);
+}
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import {
+  mkdtemp,
+  mkdir,
+  writeFile as fixtureRawWriteFile,
+  rm,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { nodeBoardFs } from "./helpers.js";
@@ -11,7 +22,7 @@ async function seed() {
   const dir = path.join(repo, "tasks/_default/todo");
   await mkdir(dir, { recursive: true });
   await writeFile(
-    path.join(dir, "2026-09-13--demo.md"),
+    path.join(dir, "2026-09-13--demo/index.md"),
     `---
 name: demo
 description: demo task
@@ -26,7 +37,7 @@ body
     "utf8",
   );
   await writeFile(
-    path.join(dir, ".2026-09-13--demo.log.md"),
+    path.join(dir, "2026-09-13--demo/.2026-09-13--demo.log.md"),
     `# Run log: 2026-09-13--demo
 
 | # | agent | started_at | ended_at | status | error_code |
@@ -67,7 +78,11 @@ test("getTask by stem and by path", async () => {
   const repo = await seed();
   try {
     const byStem = await getTask(repo, "2026-09-13--demo", nodeBoardFs());
-    const byPath = await getTask(repo, "tasks/_default/todo/2026-09-13--demo.md", nodeBoardFs());
+    const byPath = await getTask(
+      repo,
+      "tasks/_default/todo/2026-09-13--demo/index.md",
+      nodeBoardFs(),
+    );
     assert.equal(byStem.body.trim(), "body");
     assert.equal(byPath.stem, "2026-09-13--demo");
   } finally {
@@ -78,7 +93,7 @@ test("getTask by stem and by path", async () => {
 test("getTask by old layout path is TASK_NOT_FOUND", async () => {
   const repo = await seed();
   try {
-    await getTask(repo, "tasks/todo/2026-09-13--demo.md", nodeBoardFs());
+    await getTask(repo, "tasks/todo/2026-09-13--demo/index.md", nodeBoardFs());
     assert.fail("expected throw");
   } catch (error) {
     assert.equal((error as { errorCode: string }).errorCode, "TASK_NOT_FOUND");
@@ -133,7 +148,7 @@ test("listTasks sees named project dirs and ignores root status folders", async 
     await mkdir(named, { recursive: true });
     await mkdir(legacy, { recursive: true });
     await writeFile(
-      path.join(named, "2026-09-16--named.md"),
+      path.join(named, "2026-09-16--named/index.md"),
       `---
 name: named
 description: named
@@ -149,7 +164,7 @@ body
       "utf8",
     );
     await writeFile(
-      path.join(legacy, "2026-09-16--legacy.md"),
+      path.join(legacy, "2026-09-16--legacy/index.md"),
       `---
 name: legacy
 description: legacy
@@ -167,7 +182,10 @@ body
     assert.equal(items.length, 1);
     assert.equal(items[0]?.stem, "2026-09-16--named");
     assert.equal(items[0]?.project, "cli");
-    assert.equal(items[0]?.path, "tasks/cli/backlog/2026-09-16--named.md");
+    assert.equal(
+      items[0]?.path,
+      "tasks/cli/backlog/2026-09-16--named/index.md",
+    );
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -179,7 +197,7 @@ test("listTasks throws VALIDATION_ERROR on dual-write mismatch", async () => {
     const dir = path.join(repo, "tasks/cli/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, "2026-09-16--drift.md"),
+      path.join(dir, "2026-09-16--drift/index.md"),
       `---
 name: drift
 description: drift
@@ -198,7 +216,10 @@ body
       await listTasks(repo, {}, nodeBoardFs());
       assert.fail("expected throw");
     } catch (error) {
-      assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
+      assert.equal(
+        (error as { errorCode: string }).errorCode,
+        "VALIDATION_ERROR",
+      );
       assert.match((error as Error).message, /dual-write mismatch/);
     }
   } finally {
@@ -210,14 +231,29 @@ test("listTasks --project default OR cli filters after board walk", async () => 
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     for (const spec of [
-      { project: "default" as const, dir: "_default", field: "", stem: "2026-09-16--def" },
-      { project: "cli", dir: "cli", field: "  edges-task-project: cli\n", stem: "2026-09-16--cli" },
-      { project: "docs", dir: "docs", field: "  edges-task-project: docs\n", stem: "2026-09-16--docs" },
+      {
+        project: "default" as const,
+        dir: "_default",
+        field: "",
+        stem: "2026-09-16--def",
+      },
+      {
+        project: "cli",
+        dir: "cli",
+        field: "  edges-task-project: cli\n",
+        stem: "2026-09-16--cli",
+      },
+      {
+        project: "docs",
+        dir: "docs",
+        field: "  edges-task-project: docs\n",
+        stem: "2026-09-16--docs",
+      },
     ]) {
       const folder = path.join(repo, "tasks", spec.dir, "backlog");
       await mkdir(folder, { recursive: true });
       await writeFile(
-        path.join(folder, `${spec.stem}.md`),
+        path.join(folder, `${spec.stem}/index.md`),
         `---
 name: ${spec.stem}
 description: ${spec.stem}
@@ -232,7 +268,11 @@ body
         "utf8",
       );
     }
-    const filtered = await listTasks(repo, { projects: ["default", "cli"] }, nodeBoardFs());
+    const filtered = await listTasks(
+      repo,
+      { projects: ["default", "cli"] },
+      nodeBoardFs(),
+    );
     assert.deepEqual(
       filtered.map((item) => `${item.project}:${item.stem}`),
       ["default:2026-09-16--def", "cli:2026-09-16--cli"],
@@ -248,7 +288,7 @@ test("listTasks and getTask expose written edges-task-priority", async () => {
     const dir = path.join(repo, "tasks/_default/backlog");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, "2026-09-16--hot.md"),
+      path.join(dir, "2026-09-16--hot/index.md"),
       `---
 name: hot
 description: hot
@@ -279,7 +319,7 @@ test("listTasks treats on-disk P0 as none so the board still lists", async () =>
     const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, "2026-09-16--legacy.md"),
+      path.join(dir, "2026-09-16--legacy/index.md"),
       `---
 name: legacy
 description: legacy
@@ -304,18 +344,38 @@ body
 
 async function seedPriorities() {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
-  const docs: Array<{ status: "backlog" | "todo"; stem: string; priorityLine: string }> = [
+  const docs: Array<{
+    status: "backlog" | "todo";
+    stem: string;
+    priorityLine: string;
+  }> = [
     { status: "backlog", stem: "2026-09-16--none-one", priorityLine: "" },
-    { status: "backlog", stem: "2026-09-16--high-one", priorityLine: "  edges-task-priority: high\n" },
-    { status: "todo", stem: "2026-09-16--urgent-one", priorityLine: "  edges-task-priority: urgent\n" },
-    { status: "todo", stem: "2026-09-16--high-two", priorityLine: "  edges-task-priority: high\n" },
-    { status: "todo", stem: "2026-09-16--low-one", priorityLine: "  edges-task-priority: low\n" },
+    {
+      status: "backlog",
+      stem: "2026-09-16--high-one",
+      priorityLine: "  edges-task-priority: high\n",
+    },
+    {
+      status: "todo",
+      stem: "2026-09-16--urgent-one",
+      priorityLine: "  edges-task-priority: urgent\n",
+    },
+    {
+      status: "todo",
+      stem: "2026-09-16--high-two",
+      priorityLine: "  edges-task-priority: high\n",
+    },
+    {
+      status: "todo",
+      stem: "2026-09-16--low-one",
+      priorityLine: "  edges-task-priority: low\n",
+    },
   ];
   for (const doc of docs) {
     const dir = path.join(repo, "tasks/_default", doc.status);
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, `${doc.stem}.md`),
+      path.join(dir, `${doc.stem}/index.md`),
       `---
 name: ${doc.stem}
 description: ${doc.stem}
@@ -340,10 +400,17 @@ test("listTasks default order is board walk not priority", async () => {
     const stems = items.map((item) => item.stem);
     const backlog = stems.slice(0, 2);
     const todo = stems.slice(2);
-    assert.deepEqual(new Set(backlog), new Set(["2026-09-16--none-one", "2026-09-16--high-one"]));
+    assert.deepEqual(
+      new Set(backlog),
+      new Set(["2026-09-16--none-one", "2026-09-16--high-one"]),
+    );
     assert.deepEqual(
       new Set(todo),
-      new Set(["2026-09-16--urgent-one", "2026-09-16--high-two", "2026-09-16--low-one"]),
+      new Set([
+        "2026-09-16--urgent-one",
+        "2026-09-16--high-two",
+        "2026-09-16--low-one",
+      ]),
     );
     assert.notEqual(stems[0], "2026-09-16--urgent-one");
   } finally {
@@ -373,11 +440,19 @@ test("listTasks --sort priority is urgent to none and stable", async () => {
 test("listTasks repeatable --priority is OR and ANDs with --status", async () => {
   const repo = await seedPriorities();
   try {
-    const or = await listTasks(repo, { priorities: ["urgent", "high"] }, nodeBoardFs());
+    const or = await listTasks(
+      repo,
+      { priorities: ["urgent", "high"] },
+      nodeBoardFs(),
+    );
     const orStems = or.map((item) => item.stem);
     assert.deepEqual(
       new Set(orStems),
-      new Set(["2026-09-16--high-one", "2026-09-16--urgent-one", "2026-09-16--high-two"]),
+      new Set([
+        "2026-09-16--high-one",
+        "2026-09-16--urgent-one",
+        "2026-09-16--high-two",
+      ]),
     );
     assert.equal(orStems[0], "2026-09-16--high-one");
     assert.notEqual(orStems[0], "2026-09-16--urgent-one");

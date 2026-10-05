@@ -12,7 +12,7 @@ import {
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { InternalNode } from "../extensions/cli/src/models/internal-node.js";
+import { LegacyIndex as InternalNode } from "./legacy-index.mjs";
 import { parseTypeMeta } from "../extensions/cli/src/services/memory/types.js";
 import { OWNER_MAP, type InstanceJob } from "./migrate-recursive-layout.mjs";
 import * as migration from "../extensions/cli/src/services/memory/migrate.js";
@@ -602,12 +602,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
         indexPath = join(candidate.target, "AGENTS.md");
       const local = node(ownerPath),
         target = relative(dirname(ownerPath), indexPath);
-      if (
-        !local.children.some(
-          (child) =>
-            child.id === indexPath,
-        )
-      )
+      if (!local.children.some((child) => child.id === indexPath))
         local.addChild({
           target,
           kind: "local",
@@ -616,10 +611,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
         });
       const parent = node(join(root, "AGENTS.md"));
       for (const child of parent.children)
-        if (
-          child.id ===
-          join(candidate.source, "AGENTS.md")
-        )
+        if (child.id === join(candidate.source, "AGENTS.md"))
           parent.removeChild(child);
     }
     for (const [path, doc] of edits) {

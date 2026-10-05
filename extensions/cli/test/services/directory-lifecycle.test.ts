@@ -29,7 +29,10 @@ test("directory loading separates physical parent, composition and recursive har
       "- [Other](other/index.md)",
     ),
   );
-  put("skills/a/SKILL.md", "# Skill");
+  put(
+    "skills/a/SKILL.md",
+    "---\nname: fixture\ndescription: Test fixture\n---\n# Skill",
+  );
   put("skills/a/AGENTS.md", index("- [Memory](memory/index.md)"));
   put("skills/a/memory/index.md", "memory");
   put("skills/a/.harness/AGENTS.md", index());
@@ -73,7 +76,7 @@ test("move keeps instances and relocates resources, harness and authored href su
   put("AGENTS.md", index("- [A](a/SKILL.md?view=1#top)"));
   put(
     "a/SKILL.md",
-    "# A\n[out](../outside/index.md?q=1#x)\n[asset](image%23one.png)",
+    "---\nname: fixture\ndescription: Test fixture\n---\n# A\n[out](../outside/index.md?q=1#x)\n[asset](image%23one.png)",
   );
   put("a/image#one.png", "bytes");
   put("a/AGENTS.md", index());
@@ -123,7 +126,10 @@ test("destroy co-located harness preserves content; destroy Internal deletes uni
   const { file, put, service } = fixture(t);
   put("AGENTS.md", index("- [A](a/SKILL.md)\n- [B](b/AGENTS.md)"));
   put("b/AGENTS.md", index("- [external](../a/SKILL.md)"));
-  put("a/SKILL.md", "skill");
+  put(
+    "a/SKILL.md",
+    "---\nname: fixture\ndescription: Test fixture\n---\nskill",
+  );
   put("a/AGENTS.md", index());
   put("a/.harness/AGENTS.md", index());
   put("a/asset", "asset");
@@ -141,7 +147,7 @@ test("destroy co-located harness preserves content; destroy Internal deletes uni
 });
 test("move preflights occupied destinations, layout changes, roots, symlinks and co-located harness", async (t) => {
   const { root, file, put, service } = fixture(t);
-  put("a/SKILL.md", "a");
+  put("a/SKILL.md", "---\nname: fixture\ndescription: Test fixture\n---\na");
   put("a/AGENTS.md", index());
   put("occupied/asset", "x");
   put("AGENTS.md", index());
@@ -166,13 +172,19 @@ test("move preflights occupied destinations, layout changes, roots, symlinks and
     service.destroy((await service.get(file("AGENTS.md")))!),
     /root/i,
   );
-  assert.equal(fs.readFileSync(a.path, "utf8"), "a");
+  assert.equal(
+    fs.readFileSync(a.path, "utf8"),
+    "---\nname: fixture\ndescription: Test fixture\n---\na",
+  );
   assert.equal(fs.existsSync(root), true);
 });
 test("import validates complete directory before writes and leaves source untouched", async (t) => {
   const { root, file, put, service } = fixture(t);
   put("AGENTS.md", index());
-  put("source/SKILL.md", "source");
+  put(
+    "source/SKILL.md",
+    "---\nname: fixture\ndescription: Test fixture\n---\nsource",
+  );
   put("source/AGENTS.md", index());
   put("source/asset", "bytes");
   const imported = await service.import(
@@ -181,8 +193,14 @@ test("import validates complete directory before writes and leaves source untouc
   );
   assert.equal(imported.path, file("target/SKILL.md"));
   assert.equal(fs.readFileSync(file("target/asset"), "utf8"), "bytes");
-  assert.equal(fs.readFileSync(file("source/SKILL.md"), "utf8"), "source");
-  put("bad/SKILL.md", "source");
+  assert.equal(
+    fs.readFileSync(file("source/SKILL.md"), "utf8"),
+    "---\nname: fixture\ndescription: Test fixture\n---\nsource",
+  );
+  put(
+    "bad/SKILL.md",
+    "---\nname: fixture\ndescription: Test fixture\n---\nsource",
+  );
   put("bad/sub/index.md", "---\nname: [\n---\n");
   await assert.rejects(
     service.import(file("bad/SKILL.md"), file("failed/SKILL.md")),

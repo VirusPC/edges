@@ -1,7 +1,19 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
-function fixture(t: any) { const root = mkdtempSync(path.join(tmpdir(), 'note-ingest-')); t.after(() => rmSync(root, { recursive: true, force: true })); return root; }
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  realpathSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+function fixture(t: any) {
+  const root = mkdtempSync(path.join(tmpdir(), "note-ingest-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  return root;
+}
 import test from "node:test";
 import assert from "node:assert/strict";
 import { runNoteIngest } from "../../../src/services/note/git/ingest.js";
@@ -18,61 +30,89 @@ const now = new Date("2026-09-11T12:00:00+00:00");
 function recordingExec(calls: string[][]): ExecFn {
   return async (file, args) => {
     calls.push([file, ...args]);
-    if (file === "git" && args[0] === "--version") return { stdout: "git version 2.0", stderr: "" };
+    if (file === "git" && args[0] === "--version")
+      return { stdout: "git version 2.0", stderr: "" };
     return { stdout: "", stderr: "" };
   };
 }
 
 function refreshDirectoryOnPull(repo: string, calls: string[][]): ExecFn {
-  const directory = path.join(repo, 'knowledge/notes/2026-09-11--hello-world');
+  const directory = path.join(repo, "knowledge/notes/2026-09-11--hello-world");
   return async (file, args) => {
     calls.push([file, ...args]);
-    if (file === 'git' && args[0] === 'pull') {
+    if (file === "git" && args[0] === "pull") {
       mkdirSync(directory, { recursive: true });
-      writeFileSync(path.join(directory, 'index.md'), '# Base branch note\n');
+      writeFileSync(path.join(directory, "index.md"), "# Base branch note\n");
     }
-    return { stdout: file === 'git' && args[0] === '--version' ? 'git version 2.0' : '', stderr: '' };
+    return {
+      stdout:
+        file === "git" && args[0] === "--version" ? "git version 2.0" : "",
+      stderr: "",
+    };
   };
 }
 
-test('uses the directory note that appears during Git refresh when format is implicit', async (t) => {
+test("uses the directory note that appears during Git refresh when format is implicit", async (t) => {
   const repo = fixture(t);
   const calls: string[][] = [];
-  const result = await runNoteIngest(input, { repoPath: repo, baseBranch: 'main', mode: 'direct', dryRun: false }, {}, {
-    exec: refreshDirectoryOnPull(repo, calls), now,
-  });
+  const result = await runNoteIngest(
+    input,
+    { repoPath: repo, baseBranch: "main", mode: "direct", dryRun: false },
+    {},
+    {
+      exec: refreshDirectoryOnPull(repo, calls),
+      now,
+    },
+  );
 
-  assert.equal(result.filePath, 'knowledge/notes/2026-09-11--hello-world/index.md');
-  assert.equal(readFileSync(path.join(repo, result.filePath), 'utf8'), '# Hello World\n\n> Ingested on 2026-09-11\n\nBody text\n');
-  assert.equal(existsSync(path.join(repo, 'knowledge/notes/2026-09-11--hello-world.md')), false);
-  assert.ok(calls.some((call) => call[1] === 'add' && call[2] === 'knowledge/notes/2026-09-11--hello-world'));
+  assert.equal(
+    result.filePath,
+    "knowledge/notes/2026-09-11--hello-world/index.md",
+  );
+  assert.equal(
+    readFileSync(path.join(repo, result.filePath), "utf8"),
+    "# Hello World\n\n> Ingested on 2026-09-11\n\nBody text\n",
+  );
+  assert.equal(
+    existsSync(path.join(repo, "knowledge/notes/2026-09-11--hello-world.md")),
+    false,
+  );
+  assert.ok(
+    calls.some(
+      (call) =>
+        call[1] === "add" &&
+        call[2] === "knowledge/notes/2026-09-11--hello-world",
+    ),
+  );
 });
 
-test('rejects an explicit file layout that conflicts with a note supplied by Git refresh', async (t) => {
-  const repo = fixture(t);
-  const calls: string[][] = [];
-  await assert.rejects(() => runNoteIngest({ ...input, format: 'file' },
-    { repoPath: repo, baseBranch: 'main', mode: 'direct', dryRun: false }, {},
-    { exec: refreshDirectoryOnPull(repo, calls), now }), /Existing note layout differs/);
-
-  assert.equal(readFileSync(path.join(repo, 'knowledge/notes/2026-09-11--hello-world/index.md'), 'utf8'), '# Base branch note\n');
-  assert.equal(existsSync(path.join(repo, 'knowledge/notes/2026-09-11--hello-world.md')), false);
-  assert.equal(calls.some((call) => ['add', 'commit', 'push'].includes(call[1])), false);
-});
-
-test('rejects resource import when Git refresh supplies the directory note', async (t) => {
+test("rejects whole-directory import when Git refresh supplies the directory note", async (t) => {
   const repo = fixture(t);
   const resources = realpathSync(fixture(t));
-  writeFileSync(path.join(resources, 'asset.txt'), 'asset bytes');
+  writeFileSync(path.join(resources, "asset.txt"), "asset bytes");
+  writeFileSync(path.join(resources, "index.md"), "# Imported");
   const calls: string[][] = [];
-  await assert.rejects(() => runNoteIngest({ ...input, format: 'directory', resources },
-    { repoPath: repo, baseBranch: 'main', mode: 'direct', dryRun: false }, {},
-    { exec: refreshDirectoryOnPull(repo, calls), now }), /Resource import only supports new directory entries/);
+  await assert.rejects(
+    () =>
+      runNoteIngest(
+        { ...input, importEntry: path.join(resources, "index.md") },
+        { repoPath: repo, baseBranch: "main", mode: "direct", dryRun: false },
+        {},
+        { exec: refreshDirectoryOnPull(repo, calls), now },
+      ),
+    /destination already exists/,
+  );
 
-  const directory = path.join(repo, 'knowledge/notes/2026-09-11--hello-world');
-  assert.equal(readFileSync(path.join(directory, 'index.md'), 'utf8'), '# Base branch note\n');
-  assert.equal(existsSync(path.join(directory, 'asset.txt')), false);
-  assert.equal(calls.some((call) => ['add', 'commit', 'push'].includes(call[1])), false);
+  const directory = path.join(repo, "knowledge/notes/2026-09-11--hello-world");
+  assert.equal(
+    readFileSync(path.join(directory, "index.md"), "utf8"),
+    "# Base branch note\n",
+  );
+  assert.equal(existsSync(path.join(directory, "asset.txt")), false);
+  assert.equal(
+    calls.some((call) => ["add", "commit", "push"].includes(call[1])),
+    false,
+  );
 });
 
 test("dry-run direct writes the note, commits, skips checkout/pull/push", async (t) => {
@@ -88,20 +128,31 @@ test("dry-run direct writes the note, commits, skips checkout/pull/push", async 
     },
   );
 
-  assert.equal(result.filePath, "knowledge/notes/2026-09-11--hello-world.md");
+  assert.equal(
+    result.filePath,
+    "knowledge/notes/2026-09-11--hello-world/index.md",
+  );
   assert.equal(result.branch, "main");
   assert.equal(result.prStatus, "direct_commit");
   assert.match(result.stdout, /__EDGES_PR_STATUS__=direct_commit/);
   assert.equal(
-    readFileSync(path.join(repo, "knowledge/notes/2026-09-11--hello-world.md"), "utf8"),
+    readFileSync(
+      path.join(repo, "knowledge/notes/2026-09-11--hello-world/index.md"),
+      "utf8",
+    ),
     "# Hello World\n\n> Ingested on 2026-09-11\n\nBody text\n",
   );
 
-  const gitCommands = calls.filter((c) => c[0] === "git").map((c) => c.slice(1));
+  const gitCommands = calls
+    .filter((c) => c[0] === "git")
+    .map((c) => c.slice(1));
   assert.ok(gitCommands.some((a) => a[0] === "add"));
   assert.ok(
     gitCommands.some(
-      (a) => a[0] === "commit" && a.includes("-m") && a.some((x) => x.startsWith("ingest: Hello World")),
+      (a) =>
+        a[0] === "commit" &&
+        a.includes("-m") &&
+        a.some((x) => x.startsWith("ingest: Hello World")),
     ),
   );
   assert.ok(!gitCommands.some((a) => a[0] === "checkout"));
@@ -125,8 +176,17 @@ test("dry-run pr creates local branch and does not push", async (t) => {
   assert.equal(result.branch, "ingest/2026-09-11-hello-world");
   assert.equal(result.prStatus, "unavailable");
   assert.match(result.stdout, /__EDGES_PR_STATUS__=unavailable/);
-  const gitCommands = calls.filter((c) => c[0] === "git").map((c) => c.slice(1));
-  assert.ok(gitCommands.some((a) => a[0] === "checkout" && a[1] === "-b" && a[2] === "ingest/2026-09-11-hello-world"));
+  const gitCommands = calls
+    .filter((c) => c[0] === "git")
+    .map((c) => c.slice(1));
+  assert.ok(
+    gitCommands.some(
+      (a) =>
+        a[0] === "checkout" &&
+        a[1] === "-b" &&
+        a[2] === "ingest/2026-09-11-hello-world",
+    ),
+  );
   assert.ok(!gitCommands.some((a) => a[0] === "pull"));
   assert.ok(!gitCommands.some((a) => a[0] === "push"));
 });
@@ -141,13 +201,21 @@ test("pr mode runs gh in the target repo cwd after checkout pull and push", asyn
     {
       exec: async (file, args, options) => {
         calls.push({ file, args, cwd: options?.cwd });
-        if (file === "git" && args[0] === "--version") return { stdout: "git version 2.0", stderr: "" };
+        if (file === "git" && args[0] === "--version")
+          return { stdout: "git version 2.0", stderr: "" };
         if (file === "git" && args[0] === "remote") {
-          return { stdout: "https://github.com/VirusPC/edges.git\n", stderr: "" };
+          return {
+            stdout: "https://github.com/VirusPC/edges.git\n",
+            stderr: "",
+          };
         }
-        if (file === "gh" && args[0] === "auth") return { stdout: "ok", stderr: "" };
+        if (file === "gh" && args[0] === "auth")
+          return { stdout: "ok", stderr: "" };
         if (file === "gh" && args[0] === "pr") {
-          return { stdout: "https://github.com/VirusPC/edges/pull/9\n", stderr: "" };
+          return {
+            stdout: "https://github.com/VirusPC/edges/pull/9\n",
+            stderr: "",
+          };
         }
         return { stdout: "", stderr: "" };
       },
@@ -158,9 +226,17 @@ test("pr mode runs gh in the target repo cwd after checkout pull and push", asyn
   assert.equal(result.prStatus, "created");
   assert.equal(result.prUrl, "https://github.com/VirusPC/edges/pull/9");
   const git = calls.filter((c) => c.file === "git");
-  assert.ok(git.some((c) => c.args[0] === "checkout" && c.args[1] === "main" && c.cwd === repo));
+  assert.ok(
+    git.some(
+      (c) => c.args[0] === "checkout" && c.args[1] === "main" && c.cwd === repo,
+    ),
+  );
   assert.ok(git.some((c) => c.args[0] === "pull" && c.cwd === repo));
-  assert.ok(git.some((c) => c.args[0] === "push" && c.args.includes("-u") && c.cwd === repo));
+  assert.ok(
+    git.some(
+      (c) => c.args[0] === "push" && c.args.includes("-u") && c.cwd === repo,
+    ),
+  );
   const ghPr = calls.find((c) => c.file === "gh" && c.args[0] === "pr");
   assert.ok(ghPr);
   assert.equal(ghPr.cwd, repo);
@@ -181,24 +257,54 @@ test("commit message includes Co-authored-by trailer", async (t) => {
   const commit = calls.find((c) => c[0] === "git" && c[1] === "commit");
   assert.ok(commit);
   const message = commit[commit.indexOf("-m") + 1];
-  assert.equal(message, "ingest: Hello World\n\nCo-authored-by: Tester <tester@example.com>\n");
+  assert.equal(
+    message,
+    "ingest: Hello World\n\nCo-authored-by: Tester <tester@example.com>\n",
+  );
 });
 
-test('nested Note targets content scope while committing relative to actual Git root', async () => {
-  const { mkdtemp, mkdir, readFile, rm } = await import('node:fs/promises');
-  const { execFileSync } = await import('node:child_process');
-  const { tmpdir } = await import('node:os');
-  const path = await import('node:path');
-  const root = await mkdtemp(path.join(tmpdir(), 'edges-note-scope-'));
+test("nested Note targets content scope while committing relative to actual Git root", async () => {
+  const { mkdtemp, mkdir, readFile, rm } = await import("node:fs/promises");
+  const { execFileSync } = await import("node:child_process");
+  const { tmpdir } = await import("node:os");
+  const path = await import("node:path");
+  const root = await mkdtemp(path.join(tmpdir(), "edges-note-scope-"));
   try {
-    execFileSync('git', ['init', '-q', root]);
-    execFileSync('git', ['config', 'user.email', 'test@example.com'], { cwd: root });
-    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: root });
-    const child = path.join(root, 'projects/child');
+    execFileSync("git", ["init", "-q", root]);
+    execFileSync("git", ["config", "user.email", "test@example.com"], {
+      cwd: root,
+    });
+    execFileSync("git", ["config", "user.name", "Test"], { cwd: root });
+    const child = path.join(root, "projects/child");
     await mkdir(child, { recursive: true });
-    const result = await runNoteIngest(input, { repoPath: root, scopeDir: child, baseBranch: 'main', mode: 'direct', dryRun: true }, process.env, { now });
-    assert.equal(result.filePath, 'projects/child/knowledge/notes/2026-09-11--hello-world.md');
-    assert.match(await readFile(path.join(root, result.filePath), 'utf8'), /Body text/);
-    assert.equal(execFileSync('git', ['show', '--format=', '--name-only', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), result.filePath);
-  } finally { await rm(root, { recursive: true, force: true }); }
+    const result = await runNoteIngest(
+      input,
+      {
+        repoPath: root,
+        scopeDir: child,
+        baseBranch: "main",
+        mode: "direct",
+        dryRun: true,
+      },
+      process.env,
+      { now },
+    );
+    assert.equal(
+      result.filePath,
+      "projects/child/knowledge/notes/2026-09-11--hello-world/index.md",
+    );
+    assert.match(
+      await readFile(path.join(root, result.filePath), "utf8"),
+      /Body text/,
+    );
+    assert.equal(
+      execFileSync("git", ["show", "--format=", "--name-only", "HEAD"], {
+        cwd: root,
+        encoding: "utf8",
+      }).trim(),
+      result.filePath,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });

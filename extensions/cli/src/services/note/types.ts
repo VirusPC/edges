@@ -13,9 +13,8 @@ export interface IngestRequest {
   title: string;
   content: string;
   coAuthor: string;
-  format?: "file" | "directory";
   markdown?: boolean;
-  resources?: string;
+  importEntry?: string;
 }
 
 export interface IngestSuccess {

@@ -1,7 +1,7 @@
 ---
 name: project-memory-init
 description: 在指定作用域按用户选择创建或刷新项目记忆与技能类型（AGENTS.md + .harness）。仅当用户明确要求初始化时使用，不覆盖已有正文。
-version: 3.0.1
+version: 3.1.0
 ---
 
 # Project Memory Init
@@ -27,3 +27,5 @@ edges memory init \
 按 JSON 汇报 created / preserved、agentsAction / indexAction 和下层条目移动。`needs-doctor` 表示只有人工 AGENTS，文件未被覆盖；交给 doctor 追加区块。`complete: false` 的 diagnostics 必须说明，尤其来源缺失或不可读时保留原索引，不能称为空来源刷新成功。旧层返回 `migration-required`，转 `$project-memory-migrate`，不让 doctor 迁移。
 
 工具只维护自己的区块，现有硬约束与手写正文不覆盖。需先安装提供 `edges memory` 的 Edges CLI；运行 `edges memory init --help` 检查命令可用性。模板随 CLI 构建分发，类型和字段结构见 references/templates。实现分层见 [运行时说明](references/runtime.md)。
+
+普通记忆正文统一为 `<type>_<slug>/index.md`；Skill 保持 `<name>/SKILL.md`。Init 不转换旧单文件；公开 tracked 内容转换使用 `$migrate-directory-nodes`。

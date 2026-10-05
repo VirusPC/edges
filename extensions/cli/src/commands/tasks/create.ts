@@ -1,6 +1,11 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../../context.js";
-import { TASK_PRIORITIES, TASK_STATUSES, type TaskPriority, type TaskStatus } from "../../models/tasks/types.js";
+import {
+  TASK_PRIORITIES,
+  TASK_STATUSES,
+  type TaskPriority,
+  type TaskStatus,
+} from "../../models/tasks/types.js";
 import { runTasksCommand, succeed } from "../../services/tasks/result.js";
 import { createTask } from "../../services/tasks/write.js";
 
@@ -29,42 +34,52 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
     .requiredOption("--title <title>", "Task title")
     .option("--description <text>", "One-line description")
     .option("--body <markdown>", "Body after frontmatter")
-    .addOption(new Option("--format <format>", "Entry layout (default: file)").choices(["file", "directory"]))
-    .addOption(new Option("--status <status>", "initial edges-tasks-status").choices([...TASK_STATUSES]))
+    .addOption(
+      new Option("--status <status>", "initial edges-tasks-status").choices([
+        ...TASK_STATUSES,
+      ]),
+    )
     .option("--name <name>", "frontmatter name")
     .option("--assignee <text>", "edges-task-assignee")
-    .addOption(new Option("--priority <priority>", "edges-task-priority").choices([...TASK_PRIORITIES]))
-    .option("--project <project>", "edges-task-project (default, or lowercase kebab slug)")
+    .addOption(
+      new Option("--priority <priority>", "edges-task-priority").choices([
+        ...TASK_PRIORITIES,
+      ]),
+    )
+    .option(
+      "--project <project>",
+      "edges-task-project (default, or lowercase kebab slug)",
+    )
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", CREATE_AFTER_HELP)
-    .action(async (opts: {
-      title: string;
-      format?: "file" | "directory";
-      description?: string;
-      body?: string;
-      status?: TaskStatus;
-      name?: string;
-      assignee?: string;
-      priority?: TaskPriority;
-      project?: string;
-    }) => {
-      await runTasksCommand(ctx, async (runtime) => {
-        const created = await createTask(
-          runtime.location,
-          {
-            title: opts.title,
-            format: opts.format,
-            description: opts.description,
-            body: opts.body,
-            status: opts.status ?? "backlog",
-            name: opts.name,
-            assignee: opts.assignee,
-            priority: opts.priority,
-            project: opts.project,
-          },
-          { fs: runtime.writer, now: runtime.now },
-        );
-        return succeed({ status: "success", command: "create", ...created });
-      });
-    });
+    .action(
+      async (opts: {
+        title: string;
+        description?: string;
+        body?: string;
+        status?: TaskStatus;
+        name?: string;
+        assignee?: string;
+        priority?: TaskPriority;
+        project?: string;
+      }) => {
+        await runTasksCommand(ctx, async (runtime) => {
+          const created = await createTask(
+            runtime.location,
+            {
+              title: opts.title,
+              description: opts.description,
+              body: opts.body,
+              status: opts.status ?? "backlog",
+              name: opts.name,
+              assignee: opts.assignee,
+              priority: opts.priority,
+              project: opts.project,
+            },
+            { fs: runtime.writer, now: runtime.now },
+          );
+          return succeed({ status: "success", command: "create", ...created });
+        });
+      },
+    );
 }

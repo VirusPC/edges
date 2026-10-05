@@ -786,7 +786,8 @@ test("instance root generator registers owned modules in three sections and pres
   assert.doesNotMatch(source, /## 工作与模块入口|## 下层作用域/);
   assert.match(source, /## Authored guidance\nKeep this prose\./);
   assert.match(source, /\[manual\]\(manual.md\)/);
-  const { InternalNode } = await import("../../src/models/internal-node.js");
+  const { LegacyIndex: InternalNode } =
+    await import("../../../../scripts/legacy-index.mjs");
   const node = new InternalNode(file).parse(source);
   assert.ok(
     node.children.some(

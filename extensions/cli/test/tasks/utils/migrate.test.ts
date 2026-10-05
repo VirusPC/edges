@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { access, mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  access,
+  mkdir,
+  readdir,
+  readFile,
+  rm,
+  writeFile,
+} from "node:fs/promises";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -33,7 +40,11 @@ body
 `,
       "utf8",
     );
-    await writeFile(path.join(backlog, ".2026-09-16--open.log.md"), "# Run log: 2026-09-16--open\n", "utf8");
+    await writeFile(
+      path.join(backlog, ".2026-09-16--open.log.md"),
+      "# Run log: 2026-09-16--open\n",
+      "utf8",
+    );
     await writeFile(
       path.join(done, "2026-09-16--closed.md"),
       `---
@@ -51,22 +62,33 @@ body
     );
     const result = await migrateLegacyBoard(repo, nodeBoardWriter());
     assert.equal(result.moved, 3);
-    assert.deepEqual(new Set(result.removedStatusDirs), new Set(["backlog", "done"]));
+    assert.deepEqual(
+      new Set(result.removedStatusDirs),
+      new Set(["backlog", "done"]),
+    );
     await access(path.join(repo, "tasks/_default/backlog/2026-09-16--open.md"));
-    await access(path.join(repo, "tasks/_default/backlog/.2026-09-16--open.log.md"));
+    await access(
+      path.join(repo, "tasks/_default/backlog/.2026-09-16--open.log.md"),
+    );
     await access(path.join(repo, "tasks/_default/done/2026-09-16--closed.md"));
     await assert.rejects(access(backlog));
     await assert.rejects(access(done));
     const agents = await readFile(path.join(repo, "tasks/AGENTS.md"), "utf8");
     assert.equal(agents, "# tasks\n");
     await access(path.join(repo, "tasks/.memory"));
+    const { execFileSync } = await import("node:child_process");
+    const { planDirectoryMigration, applyDirectoryMigration } =
+      await import("../../../../../scripts/migrate-directory-nodes.mjs");
+    execFileSync("git", ["init", "-q"], { cwd: repo });
+    execFileSync("git", ["add", "."], { cwd: repo });
+    applyDirectoryMigration(planDirectoryMigration(repo));
     const items = await listTasks(repo, {}, nodeBoardFs());
     assert.deepEqual(
       items.map((item) => `${item.project}:${item.status}:${item.stem}`).sort(),
       ["default:backlog:2026-09-16--open", "default:done:2026-09-16--closed"],
     );
     const open = await readFile(
-      path.join(repo, "tasks/_default/backlog/2026-09-16--open.md"),
+      path.join(repo, "tasks/_default/backlog/2026-09-16--open/index.md"),
       "utf8",
     );
     assert.doesNotMatch(open, /edges-task-project/);
@@ -85,20 +107,31 @@ test("migrateLegacyBoard refuses dest collision and unexpected subdirectory", as
     const dest = path.join(repo, "tasks/_default/todo");
     await mkdir(legacy, { recursive: true });
     await mkdir(dest, { recursive: true });
-    await writeFile(path.join(legacy, "2026-09-16--dup.md"), "legacy\n", "utf8");
+    await writeFile(
+      path.join(legacy, "2026-09-16--dup.md"),
+      "legacy\n",
+      "utf8",
+    );
     await writeFile(path.join(dest, "2026-09-16--dup.md"), "kept\n", "utf8");
     await assert.rejects(
       () => migrateLegacyBoard(repo, nodeBoardWriter()),
-      (error: unknown) => (error as { errorCode: string }).errorCode === "BOARD_IO_ERROR",
+      (error: unknown) =>
+        (error as { errorCode: string }).errorCode === "BOARD_IO_ERROR",
     );
-    assert.equal(await readFile(path.join(dest, "2026-09-16--dup.md"), "utf8"), "kept\n");
+    assert.equal(
+      await readFile(path.join(dest, "2026-09-16--dup.md"), "utf8"),
+      "kept\n",
+    );
     await rm(path.join(dest, "2026-09-16--dup.md"));
     await mkdir(path.join(legacy, "nested"), { recursive: true });
     await assert.rejects(
       () => migrateLegacyBoard(repo, nodeBoardWriter()),
       (error: unknown) => {
         const err = error as { errorCode: string; message: string };
-        return err.errorCode === "BOARD_IO_ERROR" && /unexpected subdirectory/.test(err.message);
+        return (
+          err.errorCode === "BOARD_IO_ERROR" &&
+          /unexpected subdirectory/.test(err.message)
+        );
       },
     );
   } finally {

@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --import tsx
-import { InternalNode } from "../extensions/cli/src/models/internal-node.js";
+import { LegacyIndex as InternalNode } from "./legacy-index.mjs";
 /** Reviewed Edges instance migration; generic Project Memory owns format conversion. */
 import * as fs from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";

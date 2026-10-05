@@ -1,6 +1,6 @@
 # 条目 frontmatter 的字段来源
 
-字段清单与顺序看 [`templates/type_slug.tmpl.md`](templates/type_slug.tmpl.md)。这里只讲值从哪来，以及更新已有条目时谁覆盖谁。落盘时内部名映射到 `metadata.edges-*`（`title` → `edges-title`，以此类推）；读的时候顶层旧键和 `metadata:` 都认，后者优先。
+字段清单与顺序看 [`templates/index.tmpl.md`](templates/index.tmpl.md)。这里只讲值从哪来，以及更新已有条目时谁覆盖谁。落盘时内部名映射到 `metadata.edges-*`（`title` → `edges-title`，以此类推）；读的时候顶层旧键和 `metadata:` 都认，后者优先。
 
 本文件只适用于 `feedback`、`project`、`reference` 三种普通记忆；`skills/` 的内容遵循其自身协议，但出处 / 审计同样进 `metadata:`。
 

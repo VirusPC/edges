@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.0] - 2026-10-05
+
+- 统一目录入口、验证后的整目录导入与显式公开迁移；保留非受控正文，非法入口诊断后由调用方修正。
+
 All notable changes to this skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),

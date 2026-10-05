@@ -305,7 +305,10 @@ test("referenced indexes permit linked reads and index detach but retain conserv
     "refs/AGENTS.md",
     typeIndex("skills", false, "- [Skill](linked/SKILL.md)"),
   );
-  write("installed/SKILL.md", "original");
+  write(
+    "installed/SKILL.md",
+    "---\nname: fixture\ndescription: Test fixture\n---\noriginal",
+  );
   fs.symlinkSync(file("installed"), file("refs/linked"));
   const nodes = await service.list(root),
     parent = nodes[1] as InternalNode,
@@ -317,7 +320,10 @@ test("referenced indexes permit linked reads and index detach but retain conserv
   await detach(service, parent, skill);
   const alias = (await service.get(file("installed/SKILL.md")))!;
   await assert.rejects(service.destroy(alias), /read.only/i);
-  assert.equal(fs.readFileSync(alias.path, "utf8"), "original");
+  assert.equal(
+    fs.readFileSync(alias.path, "utf8"),
+    "---\nname: fixture\ndescription: Test fixture\n---\noriginal",
+  );
 });
 test("business write hook denies mutations before index or source bytes change", async (t) => {
   const { root, file, write } = fixture(t);

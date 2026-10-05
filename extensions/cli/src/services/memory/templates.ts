@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { dirname, join, parse } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readText, typeDirName } from "./paths.js";
-export const ENTRY_OUTPUT_PATTERN = "type_slug.md";
+export const ENTRY_OUTPUT_PATTERN = "index.md";
 export const ENTRY_LINE_TEMPLATE = "entry_line.md";
 export function templateRoot(): string {
   const here = dirname(fileURLToPath(import.meta.url));

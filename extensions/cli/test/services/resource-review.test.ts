@@ -92,7 +92,7 @@ test("move refuses a directory created during asynchronous preflight", async (t)
 test("whole-directory import retains ordinary executable resource mode without a permission policy", async (t) => {
   const root = fixture(t);
   const source = path.join(root, "source/SKILL.md");
-  put(source, "Skill");
+  put(source, "---\nname: fixture\ndescription: Test fixture\n---\nSkill");
   put(path.join(root, "source/run.sh"), "#!/bin/sh\n");
   fs.chmodSync(path.join(root, "source/run.sh"), 0o755);
   const service = new NodeService({ managedRoot: root });
@@ -101,13 +101,16 @@ test("whole-directory import retains ordinary executable resource mode without a
     fs.statSync(path.join(root, "target/run.sh")).mode & 0o777,
     0o755,
   );
-  assert.equal(fs.readFileSync(source, "utf8"), "Skill");
+  assert.equal(
+    fs.readFileSync(source, "utf8"),
+    "---\nname: fixture\ndescription: Test fixture\n---\nSkill",
+  );
 });
 test("failed import preserves an intervening replacement directory instead of deleting it", async (t) => {
   const root = fixture(t),
     source = path.join(root, "source/SKILL.md"),
     destination = path.join(root, "target/SKILL.md");
-  put(source, "Skill");
+  put(source, "---\nname: fixture\ndescription: Test fixture\n---\nSkill");
   const service = new NodeService({ managedRoot: root });
   const { default: mutableFs } = await import("node:fs");
   const { syncBuiltinESMExports } = await import("node:module");
@@ -132,13 +135,16 @@ test("failed import preserves an intervening replacement directory instead of de
     fs.readFileSync(path.join(root, "target/unrelated"), "utf8"),
     "keep",
   );
-  assert.equal(fs.readFileSync(source, "utf8"), "Skill");
+  assert.equal(
+    fs.readFileSync(source, "utf8"),
+    "---\nname: fixture\ndescription: Test fixture\n---\nSkill",
+  );
 });
 test("import detects source changes during asynchronous preflight before creating destination", async (t) => {
   const root = fixture(t),
     source = path.join(root, "source/SKILL.md"),
     destination = path.join(root, "target/SKILL.md");
-  put(source, "Original");
+  put(source, "---\nname: fixture\ndescription: Test fixture\n---\nOriginal");
   put(path.join(root, "source/asset"), "old");
   const service = new NodeService({
     managedRoot: root,
@@ -160,7 +166,7 @@ test("import rejects symlinks even inside unmodeled installation directories", a
   const root = fixture(t),
     source = path.join(root, "source/SKILL.md"),
     destination = path.join(root, "target/SKILL.md");
-  put(source, "Skill");
+  put(source, "---\nname: fixture\ndescription: Test fixture\n---\nSkill");
   put(path.join(root, "outside"), "outside");
   fs.mkdirSync(path.join(root, "source/.agents"));
   fs.symlinkSync(

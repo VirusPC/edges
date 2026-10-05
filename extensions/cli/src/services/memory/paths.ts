@@ -1,4 +1,4 @@
-import { isScope } from '../scope.js';
+import { isScope } from "../scope.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { homedir } from "node:os";
@@ -62,10 +62,18 @@ export function realPath(file: string): string {
     ? absolute
     : path.join(realPath(parent), path.basename(absolute));
 }
-export function ownershipTarget(owner: string, href: string): string | undefined {
-    if (/^[a-z][a-z\d+.-]*:|^\/\//i.test(href)) return undefined;
-    try { return realPath(path.resolve(owner, decodeURIComponent(href.split(/[?#]/, 1)[0]!))); }
-    catch { return undefined; }
+export function ownershipTarget(
+  owner: string,
+  href: string,
+): string | undefined {
+  if (/^[a-z][a-z\d+.-]*:|^\/\//i.test(href)) return undefined;
+  try {
+    return realPath(
+      path.resolve(owner, decodeURIComponent(href.split(/[?#]/, 1)[0]!)),
+    );
+  } catch {
+    return undefined;
+  }
 }
 export function assertOwned(file: string, owner: string): string {
   if (!within(file, owner))
@@ -124,7 +132,7 @@ export function ancestors(start: string): string[] {
   }
   return result;
 }
-export { isScope } from '../scope.js';
+export { isScope } from "../scope.js";
 export function resolveRoot(target: string, rawRoot?: string): string {
   if (rawRoot) {
     const root = resolveTarget(rawRoot);
@@ -187,10 +195,19 @@ export function listTypeFiles(
   const paths: string[] = [],
     seen = new Set<string>();
   for (const item of fs.readdirSync(directory).sort()) {
-    if (item.startsWith('.node-')) continue;
+    if (item.startsWith(".node-")) continue;
     const child = path.join(directory, item);
     if (isSymlink(child) && !fs.existsSync(child))
       throw new Error(`source-scan-error: broken link ${child}`);
+    if (
+      pattern !== "*/SKILL.md" &&
+      item.startsWith(`${name}_`) &&
+      item.endsWith(".md") &&
+      isFile(child)
+    )
+      throw new Error(
+        `migration-required: legacy standalone memory entry ${child}; use explicit directory migration`,
+      );
     let candidate: string;
     if (pattern === "*/SKILL.md") {
       if (!isDirectory(child)) continue;
@@ -201,15 +218,10 @@ export function listTypeFiles(
         continue;
       }
     } else if (isDirectory(child) && item.startsWith(`${name}_`)) {
-      candidate = path.join(child, 'index.md');
+      candidate = path.join(child, "index.md");
       if (!isFile(candidate)) continue;
     } else {
-      const matches =
-        pattern === "*.md"
-          ? item.endsWith(".md")
-          : item.startsWith(`${name}_`) && item.endsWith(".md");
-      if (!matches || !isFile(child)) continue;
-      candidate = child;
+      continue;
     }
     if (!external) assertOwned(candidate, directory);
     readText(candidate);

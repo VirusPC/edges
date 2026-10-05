@@ -19,7 +19,8 @@
     "cli:note": "pnpm --filter edges-cli exec tsx src/index.ts note",
     "mcp:run": "pnpm --filter",
     "migrate:recursive-layout": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-recursive-layout.mts",
-    "restore:local-ownership": "pnpm --filter edges-cli exec tsx ../../scripts/restore-local-ownership.mts"
+    "restore:local-ownership": "pnpm --filter edges-cli exec tsx ../../scripts/restore-local-ownership.mts",
+    "migrate:directory-nodes": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-directory-nodes.mts"
   },
   "engines": {
     "node": ">=20.0.0"

@@ -33,15 +33,15 @@ test("paths join tasks/<project-dir>/<status> and sidecar dotfile", () => {
   assert.equal(boardRoot("/repo"), "/repo/tasks");
   assert.equal(
     taskRelPath("default", "in_progress", "2026-09-11--cli"),
-    "tasks/_default/in_progress/2026-09-11--cli.md",
+    "tasks/_default/in_progress/2026-09-11--cli/index.md",
   );
   assert.equal(
     sidecarRelPath("default", "in_progress", "2026-09-11--cli"),
-    "tasks/_default/in_progress/.2026-09-11--cli.log.md",
+    "tasks/_default/in_progress/2026-09-11--cli/.2026-09-11--cli.log.md",
   );
   assert.equal(
     taskRelPath("cli", "todo", "2026-09-11--cli"),
-    "tasks/cli/todo/2026-09-11--cli.md",
+    "tasks/cli/todo/2026-09-11--cli/index.md",
   );
 });
 
@@ -53,12 +53,18 @@ test("isTaskMarkdownName skips sidecar, AGENTS, README", () => {
 });
 
 test("parseTarget still accepts stem or new-layout path", () => {
-  assert.deepEqual(parseTarget("2026-09-11--cli"), { kind: "stem", stem: "2026-09-11--cli" });
-  assert.deepEqual(parseTarget("tasks/_default/done/2026-09-11--cli.md"), {
-    kind: "path",
+  assert.deepEqual(parseTarget("2026-09-11--cli"), {
+    kind: "stem",
     stem: "2026-09-11--cli",
   });
-  assert.deepEqual(parseTarget("tasks/cli/todo/2026-09-11--cli.md"), {
+  assert.deepEqual(
+    parseTarget("tasks/_default/done/2026-09-11--cli/index.md"),
+    {
+      kind: "path",
+      stem: "2026-09-11--cli",
+    },
+  );
+  assert.deepEqual(parseTarget("tasks/cli/todo/2026-09-11--cli/index.md"), {
     kind: "path",
     stem: "2026-09-11--cli",
   });

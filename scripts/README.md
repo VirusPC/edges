@@ -39,3 +39,5 @@
 | `link-agent-skills` | `pnpm skills:link` | 把 `extensions/skills` 里每个 skill 软链到 `.agents/skills` |
 
 `pnpm skills:link -- --check` 只校验不写；`--dry-run` 打印动作；`--self-test` 在临时目录跑一遍。vendor 拷贝（`.agents/skills` 里的实体目录）不碰；source 里删掉的 skill，对应软链会清掉。
+
+统一目录转换：`pnpm migrate:directory-nodes --root <worktree>` 默认预览，`--apply` 写入。实现使用 TypeScript `.mts`（NodeNext ESM），仅迁移 tracked/public 受管内容。完整边界与故障处理见 [迁移 Skill](../extensions/skills/migrate-directory-nodes/SKILL.md)。

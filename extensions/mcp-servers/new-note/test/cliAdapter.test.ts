@@ -8,7 +8,10 @@ import { runEdgesNote } from "../src/cliAdapter.js";
 import { classifyError } from "../src/errors.js";
 import type { RuntimeConfig } from "../src/types.js";
 
-const mcpPackageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const mcpPackageRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 
 test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () => {
   const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "edges-mcp-cli-"));
@@ -49,7 +52,11 @@ test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () =>
   process.chdir(tmp);
   try {
     const result = await runEdgesNote(
-      { title: "Demo", content: "Body", coAuthor: "OpenAI Codex <codex@openai.com>" },
+      {
+        title: "Demo",
+        content: "Body",
+        coAuthor: "OpenAI Codex <codex@openai.com>",
+      },
       config,
       {
         ...process.env,
@@ -108,7 +115,11 @@ test("runEdgesNote maps CLI failure JSON to a thrown error with errorCode", asyn
   await assert.rejects(
     () =>
       runEdgesNote(
-        { title: "Demo", content: "Body", coAuthor: "OpenAI Codex <codex@openai.com>" },
+        {
+          title: "Demo",
+          content: "Body",
+          coAuthor: "OpenAI Codex <codex@openai.com>",
+        },
         config,
         { ...process.env },
       ),
@@ -128,7 +139,11 @@ test("runEdgesNote maps a missing CLI entry to SCRIPT_NOT_FOUND", async () => {
   const config: RuntimeConfig = {
     repoPath: "/repo",
     baseBranch: "main",
-    cliEntry: path.join(os.tmpdir(), "edges-cli-missing", `index-${Date.now()}.js`),
+    cliEntry: path.join(
+      os.tmpdir(),
+      "edges-cli-missing",
+      `index-${Date.now()}.js`,
+    ),
     skillsPath: "/skills",
     mode: "direct",
     dryRun: false,
@@ -136,57 +151,129 @@ test("runEdgesNote maps a missing CLI entry to SCRIPT_NOT_FOUND", async () => {
 
   try {
     await runEdgesNote(
-      { title: "Demo", content: "Body", coAuthor: "OpenAI Codex <codex@openai.com>" },
+      {
+        title: "Demo",
+        content: "Body",
+        coAuthor: "OpenAI Codex <codex@openai.com>",
+      },
       config,
       { ...process.env },
     );
     assert.fail("expected runEdgesNote to throw");
   } catch (error) {
-    const err = error as NodeJS.ErrnoException & { stdout?: string; stderr?: string };
+    const err = error as NodeJS.ErrnoException & {
+      stdout?: string;
+      stderr?: string;
+    };
     assert.equal(
-      classifyError({ stdout: err.stdout, stderr: err.stderr, message: err.message, code: err.code }),
+      classifyError({
+        stdout: err.stdout,
+        stderr: err.stderr,
+        message: err.message,
+        code: err.code,
+      }),
       "SCRIPT_NOT_FOUND",
     );
   }
 });
 
-test('default MCP target follows captured caller scope, with implementation resources kept separate', async () => {
-  const { loadConfig } = await import('../src/config.js');
-  const { execFileSync } = await import('node:child_process');
-  const root = await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(), 'edges-mcp-real-')));
+test("default MCP target follows captured caller scope, with implementation resources kept separate", async () => {
+  const { loadConfig } = await import("../src/config.js");
+  const { execFileSync } = await import("node:child_process");
+  const root = await fs.realpath(
+    await fs.mkdtemp(path.join(os.tmpdir(), "edges-mcp-real-")),
+  );
   const previousCwd = process.cwd();
   try {
-    execFileSync('git', ['init', '-q', root]);
-    execFileSync('git', ['config', 'user.name', 'Test'], { cwd: root });
-    execFileSync('git', ['config', 'user.email', 'test@example.com'], { cwd: root });
-    const child = path.join(root, 'projects/child');
+    execFileSync("git", ["init", "-q", root]);
+    execFileSync("git", ["config", "user.name", "Test"], { cwd: root });
+    execFileSync("git", ["config", "user.email", "test@example.com"], {
+      cwd: root,
+    });
+    const child = path.join(root, "projects/child");
     await fs.mkdir(child, { recursive: true });
-    await fs.writeFile(path.join(child, 'AGENTS.md'), '<!-- project-memory:start -->\n<!-- project-memory-local:start -->');
+    await fs.writeFile(
+      path.join(child, "AGENTS.md"),
+      "<!-- project-memory:start -->\n<!-- project-memory-local:start -->",
+    );
     process.chdir(child);
-    const config = loadConfig({ EDGES_DRY_RUN: 'true', EDGES_CLI: path.resolve(mcpPackageRoot, '../../cli/src/index.ts') });
+    const config = loadConfig({
+      EDGES_DRY_RUN: "true",
+      EDGES_CLI: path.resolve(mcpPackageRoot, "../../cli/src/index.ts"),
+    });
     // Stops the old implementation before it could mutate the source checkout.
     assert.equal(config.repoPath, undefined);
     assert.equal(config.scopeDir, undefined);
     assert.equal(config.cwd, child);
-    assert.equal(config.skillsPath, path.resolve(mcpPackageRoot, '../../skills'));
+    assert.equal(
+      config.skillsPath,
+      path.resolve(mcpPackageRoot, "../../skills"),
+    );
     process.chdir(previousCwd);
-    const result = await runEdgesNote({ title: 'Caller Scope', content: 'Fixture', coAuthor: 'Codex <noreply@openai.com>' }, config, { ...process.env, EDGES_SCOPE: '/unrelated/ambient', EDGES_REPO: '/unrelated/ambient' });
-    assert.match(result.filePath, /^projects\/child\/knowledge\/notes\/\d{4}-\d{2}-\d{2}--caller-scope\.md$/);
-    assert.match(await fs.readFile(path.join(root, result.filePath), 'utf8'), /Fixture/);
-    assert.equal(execFileSync('git', ['show', '--format=', '--name-only', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(), result.filePath);
-  } finally { process.chdir(previousCwd); await fs.rm(root, { recursive: true, force: true }); }
+    const result = await runEdgesNote(
+      {
+        title: "Caller Scope",
+        content: "Fixture",
+        coAuthor: "Codex <noreply@openai.com>",
+      },
+      config,
+      {
+        ...process.env,
+        EDGES_SCOPE: "/unrelated/ambient",
+        EDGES_REPO: "/unrelated/ambient",
+      },
+    );
+    assert.match(
+      result.filePath,
+      /^projects\/child\/knowledge\/notes\/\d{4}-\d{2}-\d{2}--caller-scope\/index\.md$/,
+    );
+    assert.match(
+      await fs.readFile(path.join(root, result.filePath), "utf8"),
+      /Fixture/,
+    );
+    assert.equal(
+      execFileSync("git", ["show", "--format=", "--name-only", "HEAD"], {
+        cwd: root,
+        encoding: "utf8",
+      }).trim(),
+      result.filePath,
+    );
+  } finally {
+    process.chdir(previousCwd);
+    await fs.rm(root, { recursive: true, force: true });
+  }
 });
 
-test('MCP with no target and no cwd owner returns actionable validation instead of writing installation', async () => {
-  const { loadConfig } = await import('../src/config.js');
-  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'edges-mcp-no-owner-'));
+test("MCP with no target and no cwd owner returns actionable validation instead of writing installation", async () => {
+  const { loadConfig } = await import("../src/config.js");
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "edges-mcp-no-owner-"));
   const previousCwd = process.cwd();
   try {
     process.chdir(tmp);
-    const config = loadConfig({ EDGES_DRY_RUN: 'true', EDGES_CLI: path.resolve(mcpPackageRoot, '../../cli/src/index.ts') });
+    const config = loadConfig({
+      EDGES_DRY_RUN: "true",
+      EDGES_CLI: path.resolve(mcpPackageRoot, "../../cli/src/index.ts"),
+    });
     assert.equal(config.repoPath, undefined);
     process.chdir(previousCwd);
-    await assert.rejects(() => runEdgesNote({ title: 'No owner', content: 'Fixture', coAuthor: 'Codex <noreply@openai.com>' }, config, {}), (error: Error & { errorCode?: string }) => error.errorCode === 'VALIDATION_ERROR' && error.message.includes('--scope'));
-    await assert.rejects(fs.access(path.join(tmp, 'knowledge')));
-  } finally { process.chdir(previousCwd); await fs.rm(tmp, { recursive: true, force: true }); }
+    await assert.rejects(
+      () =>
+        runEdgesNote(
+          {
+            title: "No owner",
+            content: "Fixture",
+            coAuthor: "Codex <noreply@openai.com>",
+          },
+          config,
+          {},
+        ),
+      (error: Error & { errorCode?: string }) =>
+        error.errorCode === "VALIDATION_ERROR" &&
+        error.message.includes("--scope"),
+    );
+    await assert.rejects(fs.access(path.join(tmp, "knowledge")));
+  } finally {
+    process.chdir(previousCwd);
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
 });

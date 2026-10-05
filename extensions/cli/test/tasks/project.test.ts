@@ -1,6 +1,19 @@
+import { mkdir as fixtureMkdir } from "node:fs/promises";
+import { dirname as fixtureDirname } from "node:path";
+async function writeFile(...args: Parameters<typeof fixtureRawWriteFile>) {
+  await fixtureMkdir(fixtureDirname(String(args[0])), { recursive: true });
+  return fixtureRawWriteFile(...args);
+}
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, readFile, writeFile, rm, access } from "node:fs/promises";
+import {
+  mkdtemp,
+  mkdir,
+  readFile,
+  writeFile as fixtureRawWriteFile,
+  rm,
+  access,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { nodeBoardWriter } from "./utils/helpers.js";
@@ -25,7 +38,8 @@ test("create/list/get/update project metadata; create default on virgin board", 
       {
         project: "default",
         title: "Default",
-        description: "Ungrouped tasks that have not been assigned a named Task Project.",
+        description:
+          "Ungrouped tasks that have not been assigned a named Task Project.",
       },
       nodeBoardWriter(),
     );
@@ -84,7 +98,10 @@ test("createProject duplicate and getProject missing", async () => {
           nodeBoardWriter(),
         ),
       (error: unknown) => {
-        assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
+        assert.equal(
+          (error as { errorCode: string }).errorCode,
+          "VALIDATION_ERROR",
+        );
         assert.match((error as Error).message, /project already exists: cli/);
         return true;
       },
@@ -92,7 +109,10 @@ test("createProject duplicate and getProject missing", async () => {
     await assert.rejects(
       () => getProject(repo, "docs", nodeBoardWriter()),
       (error: unknown) => {
-        assert.equal((error as { errorCode: string }).errorCode, "PROJECT_NOT_FOUND");
+        assert.equal(
+          (error as { errorCode: string }).errorCode,
+          "PROJECT_NOT_FOUND",
+        );
         assert.match((error as Error).message, /project not found: docs/);
         return true;
       },
@@ -115,7 +135,7 @@ test("updateProject preserves pointers and does not rewrite a Task file", async 
       "# CLI\n\nedges CLI work\n\n## Pointers\n\n- keep\n",
       "utf8",
     );
-    const taskRel = "tasks/_default/backlog/2026-09-13--keep.md";
+    const taskRel = "tasks/_default/backlog/2026-09-13--keep/index.md";
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     await writeFile(
       path.join(repo, taskRel),
@@ -123,7 +143,10 @@ test("updateProject preserves pointers and does not rewrite a Task file", async 
       "utf8",
     );
     await updateProject(repo, "cli", { title: "CLI work" }, nodeBoardWriter());
-    const agents = await readFile(path.join(repo, "tasks/cli/AGENTS.md"), "utf8");
+    const agents = await readFile(
+      path.join(repo, "tasks/cli/AGENTS.md"),
+      "utf8",
+    );
     assert.match(agents, /^# CLI work\n/);
     assert.match(agents, /## Pointers\n\n- keep\n/);
     const task = await readFile(path.join(repo, taskRel), "utf8");
@@ -139,11 +162,13 @@ test("updateProject seeds AGENTS.md when the project dir exists without metadata
   try {
     await mkdir(path.join(repo, "tasks/docs/backlog"), { recursive: true });
     await writeFile(
-      path.join(repo, "tasks/docs/backlog/2026-09-17--orphan.md"),
+      path.join(repo, "tasks/docs/backlog/2026-09-17--orphan/index.md"),
       "---\nmetadata:\n  edges-tasks-status: backlog\n  edges-task-project: docs\n---\n\nbody\n",
       "utf8",
     );
-    await assert.rejects(() => readFile(path.join(repo, "tasks/docs/AGENTS.md"), "utf8"));
+    await assert.rejects(() =>
+      readFile(path.join(repo, "tasks/docs/AGENTS.md"), "utf8"),
+    );
 
     const updated = await updateProject(
       repo,
@@ -157,7 +182,10 @@ test("updateProject seeds AGENTS.md when the project dir exists without metadata
     assert.equal(updated.description, "documentation work");
     assert.equal(updated.path, "tasks/docs/AGENTS.md");
 
-    const agents = await readFile(path.join(repo, "tasks/docs/AGENTS.md"), "utf8");
+    const agents = await readFile(
+      path.join(repo, "tasks/docs/AGENTS.md"),
+      "utf8",
+    );
     assert.match(agents, /^# Docs\n/);
     assert.match(agents, /documentation work/);
   } finally {
@@ -176,7 +204,10 @@ test("createProject rejects _default as the CLI id", async () => {
           nodeBoardWriter(),
         ),
       (error: unknown) => {
-        assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
+        assert.equal(
+          (error as { errorCode: string }).errorCode,
+          "VALIDATION_ERROR",
+        );
         return true;
       },
     );
@@ -185,21 +216,52 @@ test("createProject rejects _default as the CLI id", async () => {
   }
 });
 
-test('project get returns the read-only listed project after ordinary task creation', async () => {
-  const { run } = await import('../../src/program.js');
-  const repo = await mkdtemp(path.join(tmpdir(), 'edges-project-get-'));
+test("project get returns the read-only listed project after ordinary task creation", async () => {
+  const { run } = await import("../../src/program.js");
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-project-get-"));
   try {
     const env = { EDGES_SCOPE: repo };
-    const created = await run(['tasks', '--purpose', 'maintenance', 'create', '--title', 'Fresh', '--project', 'cli'], { env });
+    const created = await run(
+      [
+        "tasks",
+        "--purpose",
+        "maintenance",
+        "create",
+        "--title",
+        "Fresh",
+        "--project",
+        "cli",
+      ],
+      { env },
+    );
     assert.equal(created.exitCode, 0, created.stdout);
-    const listed = JSON.parse((await run(['tasks', '--purpose', 'maintenance', 'project', 'list'], { env })).stdout);
-    const got = await run(['tasks', '--purpose', 'maintenance', 'project', 'get', 'cli'], { env });
+    const listed = JSON.parse(
+      (
+        await run(["tasks", "--purpose", "maintenance", "project", "list"], {
+          env,
+        })
+      ).stdout,
+    );
+    const got = await run(
+      ["tasks", "--purpose", "maintenance", "project", "get", "cli"],
+      { env },
+    );
     assert.equal(got.exitCode, 0, got.stdout);
     const { status, command, ...record } = JSON.parse(got.stdout);
-    assert.equal(status, 'success');
-    assert.deepEqual(record, listed.projects.find((project: any) => project.project === 'cli'));
-    for (const rel of ['.harness/tasks/cli/AGENTS.md', '.harness/tasks/AGENTS.md', '.harness/tasks/_default', 'tasks']) {
+    assert.equal(status, "success");
+    assert.deepEqual(
+      record,
+      listed.projects.find((project: any) => project.project === "cli"),
+    );
+    for (const rel of [
+      ".harness/tasks/cli/AGENTS.md",
+      ".harness/tasks/AGENTS.md",
+      ".harness/tasks/_default",
+      "tasks",
+    ]) {
       await assert.rejects(access(path.join(repo, rel)));
     }
-  } finally { await rm(repo, { recursive: true, force: true }); }
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
 });

@@ -10,17 +10,20 @@ import { TasksError } from "../../../src/models/tasks/types.js";
 
 test("buildGroupedList emits edges.tasks.grouped/v1 with groups and items", () => {
   const grouped = buildGroupedList(
-    [{
-      stem: "2026-09-21--alpha",
-      title: "Alpha",
-      status: "todo",
-      description: "first",
-      path: "tasks/_default/todo/2026-09-21--alpha.md",
-      sidecarPath: "tasks/_default/todo/.2026-09-21--alpha.log.md",
-      runCount: 0,
-      priority: "high",
-      project: "default",
-    }],
+    [
+      {
+        stem: "2026-09-21--alpha",
+        title: "Alpha",
+        status: "todo",
+        description: "first",
+        path: "tasks/_default/todo/2026-09-21--alpha/index.md",
+        sidecarPath:
+          "tasks/_default/todo/2026-09-21--alpha/.2026-09-21--alpha.log.md",
+        runCount: 0,
+        priority: "high",
+        project: "default",
+      },
+    ],
     [{ id: "default", title: "Default", description: "ungrouped" }],
   );
   assert.equal(grouped.schema, "edges.tasks.grouped/v1");
@@ -114,30 +117,33 @@ test("groupedListToReviewPageInput maps group → current/suggested without rena
 
 test("buildGroupedList copies doc and omits rawFrontmatter", () => {
   const grouped = buildGroupedList(
-    [{
-      stem: "2026-09-21--alpha",
-      title: "Alpha",
-      status: "todo",
-      description: "first",
-      path: "tasks/_default/todo/2026-09-21--alpha.md",
-      sidecarPath: "tasks/_default/todo/.2026-09-21--alpha.log.md",
-      runCount: 0,
-      priority: "high",
-      project: "default",
-      doc: {
-        name: "alpha",
+    [
+      {
+        stem: "2026-09-21--alpha",
+        title: "Alpha",
+        status: "todo",
         description: "first",
-        metadata: {
-          "edges-type": "task",
-          "edges-title": "Alpha",
-          "edges-tasks-status": "todo",
-          "edges-task-priority": "high",
-          "edges-task-assignee": "Ada",
-          "edges-updated-at": "2026-09-21T00:00:00.000Z",
+        path: "tasks/_default/todo/2026-09-21--alpha/index.md",
+        sidecarPath:
+          "tasks/_default/todo/2026-09-21--alpha/.2026-09-21--alpha.log.md",
+        runCount: 0,
+        priority: "high",
+        project: "default",
+        doc: {
+          name: "alpha",
+          description: "first",
+          metadata: {
+            "edges-type": "task",
+            "edges-title": "Alpha",
+            "edges-tasks-status": "todo",
+            "edges-task-priority": "high",
+            "edges-task-assignee": "Ada",
+            "edges-updated-at": "2026-09-21T00:00:00.000Z",
+          },
+          body: "hello body",
         },
-        body: "hello body",
       },
-    }],
+    ],
     [{ id: "default", title: "Default", description: "ungrouped" }],
   );
   assert.equal(grouped.items[0]?.doc?.body, "hello body");
@@ -149,19 +155,21 @@ test("groupedListToReviewPageInput copies status, priority, and doc", () => {
   const page = groupedListToReviewPageInput({
     schema: "edges.tasks.grouped/v1",
     groups: [{ id: "cli", title: "CLI" }],
-    items: [{
-      id: "2026-09-21--beta",
-      group: "cli",
-      title: "Beta",
-      status: "todo",
-      priority: "high",
-      doc: {
-        name: "beta",
-        description: "d",
-        metadata: { "edges-task-assignee": "Ada" },
-        body: "body",
+    items: [
+      {
+        id: "2026-09-21--beta",
+        group: "cli",
+        title: "Beta",
+        status: "todo",
+        priority: "high",
+        doc: {
+          name: "beta",
+          description: "d",
+          metadata: { "edges-task-assignee": "Ada" },
+          body: "body",
+        },
       },
-    }],
+    ],
   });
   assert.equal(page.items[0]?.status, "todo");
   assert.equal(page.items[0]?.priority, "high");
@@ -173,33 +181,83 @@ test("groupedListToReviewPageInput copies status, priority, and doc", () => {
 
 test("buildGroupedList omits doc when the caller has none", () => {
   const grouped = buildGroupedList(
-    [{
-      stem: "2026-09-21--alpha",
-      title: "Alpha",
-      status: "todo",
-      description: "first",
-      path: "p",
-      sidecarPath: "s",
-      runCount: 0,
-      priority: "none",
-      project: "default",
-    }],
+    [
+      {
+        stem: "2026-09-21--alpha",
+        title: "Alpha",
+        status: "todo",
+        description: "first",
+        path: "p",
+        sidecarPath: "s",
+        runCount: 0,
+        priority: "none",
+        project: "default",
+      },
+    ],
     [{ id: "default", title: "Default" }],
   );
   assert.equal("doc" in grouped.items[0]!, false);
 });
 
-test('source-aware grouped payload requires real project identities and stored stems', () => {
-  const source = { scope: '.', purpose: 'domain' };
-  const group = { id: '[".","domain","cli"]', title: 'CLI', source, project: 'cli' };
-  const item = { id: '[".","domain","cli","same"]', stem: 'same', group: group.id, source, project: 'cli' };
-  for (const project of [undefined, null, 1, [], { value: 'cli' }, group.id, '_default', '']) {
-    assert.throws(() => parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [{ ...group, project }], items: [item] }), /project/);
-    assert.throws(() => parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [group], items: [{ ...item, project }] }), /project/);
+test("source-aware grouped payload requires real project identities and stored stems", () => {
+  const source = { scope: ".", purpose: "domain" };
+  const group = {
+    id: '[".","domain","cli"]',
+    title: "CLI",
+    source,
+    project: "cli",
+  };
+  const item = {
+    id: '[".","domain","cli","same"]',
+    stem: "same",
+    group: group.id,
+    source,
+    project: "cli",
+  };
+  for (const project of [
+    undefined,
+    null,
+    1,
+    [],
+    { value: "cli" },
+    group.id,
+    "_default",
+    "",
+  ]) {
+    assert.throws(
+      () =>
+        parseGroupedList({
+          schema: GROUPED_LIST_SCHEMA,
+          groups: [{ ...group, project }],
+          items: [item],
+        }),
+      /project/,
+    );
+    assert.throws(
+      () =>
+        parseGroupedList({
+          schema: GROUPED_LIST_SCHEMA,
+          groups: [group],
+          items: [{ ...item, project }],
+        }),
+      /project/,
+    );
   }
-  assert.throws(() => parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [group], items: [{ ...item, stem: undefined }] }), /stem/);
-  const parsed = parseGroupedList({ schema: GROUPED_LIST_SCHEMA, groups: [group], items: [item] });
-  assert.equal(parsed.groups[0]?.project, 'cli');
-  assert.equal(parsed.items[0]?.project, 'cli');
-  assert.equal(parsed.items[0]?.stem, 'same');
+  assert.throws(
+    () =>
+      parseGroupedList({
+        schema: GROUPED_LIST_SCHEMA,
+        groups: [group],
+        items: [{ ...item, stem: undefined }],
+      }),
+    /stem/,
+  );
+  const parsed = parseGroupedList({
+    schema: GROUPED_LIST_SCHEMA,
+    groups: [group],
+    items: [item],
+  });
+  assert.equal(parsed.groups[0]?.project, "cli");
+  assert.equal(parsed.items[0]?.project, "cli");
+  assert.equal(parsed.items[0]?.stem, "same");
 });

@@ -259,7 +259,10 @@ test("destroy never deletes a replaced staged directory and reports its location
 test("import leaves source and parent index untouched when preflight validation fails", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index());
-  write("source/SKILL.md", "source");
+  write(
+    "source/SKILL.md",
+    "---\nname: fixture\ndescription: Test fixture\n---\nsource",
+  );
   write("source/.harness/AGENTS.md", index("- [Missing](missing/index.md)"));
   const before = fs.readFileSync(file("AGENTS.md"), "utf8");
   await assert.rejects(
@@ -267,7 +270,10 @@ test("import leaves source and parent index untouched when preflight validation 
     /Missing/,
   );
   assert.equal(fs.existsSync(file("new")), false);
-  assert.equal(fs.readFileSync(file("source/SKILL.md"), "utf8"), "source");
+  assert.equal(
+    fs.readFileSync(file("source/SKILL.md"), "utf8"),
+    "---\nname: fixture\ndescription: Test fixture\n---\nsource",
+  );
   assert.equal(fs.readFileSync(file("AGENTS.md"), "utf8"), before);
 });
 test("destroy refreshes a dirty cached index without leaving references to the deleted entry", async (t) => {

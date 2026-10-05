@@ -12,8 +12,15 @@ import {
 } from "node:fs/promises";
 import path from "node:path";
 import { parseTaskDoc } from "../../models/tasks/frontmatter.js";
-import { taskDocFromParsed, type TaskDoc } from "../../models/tasks/task-doc.js";
-import { filterTasksByPriority, priorityFromMetadata, sortTasksByPriority } from "../../models/tasks/priority.js";
+import {
+  taskDocFromParsed,
+  type TaskDoc,
+} from "../../models/tasks/task-doc.js";
+import {
+  filterTasksByPriority,
+  priorityFromMetadata,
+  sortTasksByPriority,
+} from "../../models/tasks/priority.js";
 import {
   assertProjectDualWrite,
   DEFAULT_TASK_PROJECT,
@@ -25,11 +32,9 @@ import {
 } from "../../models/tasks/project.js";
 import {
   boardRoot,
-  isTaskMarkdownName,
   parseTarget,
   sidecarRelPath,
   statusDir,
-  stemFromFilename,
   taskRelPath,
 } from "./paths.js";
 import {
@@ -55,19 +60,32 @@ export type BoardWriter = BoardFs & {
   rmdir(abs: string): Promise<void>;
 };
 
-export async function assertBoardPath(target: BoardTarget | undefined, abs: string): Promise<void> {
+export async function assertBoardPath(
+  target: BoardTarget | undefined,
+  abs: string,
+): Promise<void> {
   if (target === undefined) return;
   const scope = path.resolve(scopeDir(target));
   const board = path.resolve(boardRoot(target));
   const rel = path.relative(board, path.resolve(abs));
   if (rel === ".." || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel)) {
-    throw new TasksError("VALIDATION_ERROR", "path is outside selected task board");
+    throw new TasksError(
+      "VALIDATION_ERROR",
+      "path is outside selected task board",
+    );
   }
   let cursor = scope;
-  for (const part of path.relative(scope, path.resolve(abs)).split(path.sep).filter(Boolean)) {
+  for (const part of path
+    .relative(scope, path.resolve(abs))
+    .split(path.sep)
+    .filter(Boolean)) {
     cursor = path.join(cursor, part);
     try {
-      if ((await lstat(cursor)).isSymbolicLink()) throw new TasksError("VALIDATION_ERROR", "task board paths must not cross symlinks");
+      if ((await lstat(cursor)).isSymbolicLink())
+        throw new TasksError(
+          "VALIDATION_ERROR",
+          "task board paths must not cross symlinks",
+        );
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") break;
       throw error;
@@ -125,7 +143,9 @@ export function createNodeBoardWriter(target?: BoardTarget): BoardWriter {
 }
 
 function countSidecarRuns(markdown: string): number {
-  const rows = markdown.split(/\r?\n/).filter((line) => line.trim().startsWith("|"));
+  const rows = markdown
+    .split(/\r?\n/)
+    .filter((line) => line.trim().startsWith("|"));
   let seenHeader = false;
   let count = 0;
   for (const row of rows) {
@@ -142,7 +162,10 @@ function countSidecarRuns(markdown: string): number {
   return count;
 }
 
-export async function listProjectIds(repoPath: BoardTarget, fs: BoardFs): Promise<TaskProjectId[]> {
+export async function listProjectIds(
+  repoPath: BoardTarget,
+  fs: BoardFs,
+): Promise<TaskProjectId[]> {
   const root = boardRoot(repoPath);
   if (!(await fs.exists(root))) {
     return [];
@@ -183,13 +206,6 @@ export type ListedTask = {
   doc: TaskDoc;
 };
 
-export async function taskFormat(repoPath: BoardTarget, project: TaskProjectId, status: TaskStatus, stem: string, fs: BoardFs): Promise<'file' | 'directory'> {
-  const flat = await fs.exists(path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath)));
-  const directory = await fs.exists(path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath, 'directory')));
-  if (flat && directory) throw new TasksError('AMBIGUOUS_TASK', `Both file and directory entries exist: ${stem}`);
-  return directory ? 'directory' : 'file';
-}
-
 async function readListItem(
   repoPath: BoardTarget,
   project: TaskProjectId,
@@ -197,15 +213,17 @@ async function readListItem(
   stem: string,
   fs: BoardFs,
 ): Promise<ListedTask> {
-  const format = await taskFormat(repoPath, project, status, stem, fs);
-  const rel = taskRelPath(project, status, stem, repoPath, format);
-  const sidecarRel = sidecarRelPath(project, status, stem, repoPath, format);
+  const rel = taskRelPath(project, status, stem, repoPath);
+  const sidecarRel = sidecarRelPath(project, status, stem, repoPath);
   const abs = path.join(scopeDir(repoPath), rel);
   const sidecarAbs = path.join(scopeDir(repoPath), sidecarRel);
   const markdown = await fs.readFile(abs);
   const parsed = parseTaskDoc(markdown);
   const doc = taskDocFromParsed(parsed);
-  const resolvedProject = assertProjectDualWrite(projectDirName(project), doc.metadata);
+  const resolvedProject = assertProjectDualWrite(
+    projectDirName(project),
+    doc.metadata,
+  );
   let runCount = 0;
   if (await fs.exists(sidecarAbs)) {
     runCount = countSidecarRuns(await fs.readFile(sidecarAbs));
@@ -249,12 +267,20 @@ export async function listTasksWithDocs(
       }
       const names = await fs.readdir(dir);
       for (const name of names) {
-        if (name.startsWith('.') || name === 'AGENTS.md' || name === 'README.md') continue;
+        if (
+          name.startsWith(".") ||
+          name === "AGENTS.md" ||
+          name === "README.md"
+        )
+          continue;
         let directory = false;
-        try { directory = await fs.exists(path.join(dir, name, 'index.md')); }
-        catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOTDIR') throw error; }
-        if (!directory && !isTaskMarkdownName(name)) continue;
-        const stem = directory ? name : stemFromFilename(name);
+        try {
+          directory = await fs.exists(path.join(dir, name, "index.md"));
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== "ENOTDIR") throw error;
+        }
+        if (!directory) continue;
+        const stem = name;
         if (!stem) {
           continue;
         }
@@ -269,7 +295,10 @@ export async function listTasksWithDocs(
     return sortTasksByPriority(filtered);
   }
   if (opts.sort !== undefined) {
-    throw new TasksError("VALIDATION_ERROR", `invalid --sort: ${String(opts.sort)} (expected priority)`);
+    throw new TasksError(
+      "VALIDATION_ERROR",
+      `invalid --sort: ${String(opts.sort)} (expected priority)`,
+    );
   }
   return filtered;
 }
@@ -292,8 +321,11 @@ async function findByStem(
   const projects = await listProjectIds(repoPath, fs);
   for (const project of projects) {
     for (const status of TASK_STATUSES) {
-      const abs = path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath));
-      if (await fs.exists(abs) || await fs.exists(path.join(scopeDir(repoPath), taskRelPath(project, status, stem, repoPath, 'directory')))) {
+      const abs = path.join(
+        scopeDir(repoPath),
+        taskRelPath(project, status, stem, repoPath),
+      );
+      if (await fs.exists(abs)) {
         hits.push({ project, status });
       }
     }
@@ -314,7 +346,9 @@ async function loadRecord(
   const markdown = await fs.readFile(abs);
   const doc = parseTaskDoc(markdown);
   const sidecarExists = await fs.exists(sidecarAbs);
-  const sidecarMarkdown = sidecarExists ? await fs.readFile(sidecarAbs) : undefined;
+  const sidecarMarkdown = sidecarExists
+    ? await fs.readFile(sidecarAbs)
+    : undefined;
   return {
     ...item,
     name: doc.name,
@@ -325,23 +359,39 @@ async function loadRecord(
   };
 }
 
-export async function getTask(repoPath: BoardTarget, target: string, fs: BoardFs): Promise<TaskRecord> {
+export async function getTask(
+  repoPath: BoardTarget,
+  target: string,
+  fs: BoardFs,
+): Promise<TaskRecord> {
   const parsed = parseTarget(target);
   if (parsed.kind === "path") {
-    const abs = path.isAbsolute(target) ? target : path.join(scopeDir(repoPath), target);
-    if (!(await fs.exists(abs))) {
+    const abs = path.isAbsolute(target)
+      ? target
+      : path.join(scopeDir(repoPath), target);
+    if (path.basename(abs) !== "index.md" || !(await fs.exists(abs))) {
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
     }
-    const rel = path.relative(boardRoot(repoPath), path.basename(abs) === 'index.md' ? path.dirname(path.dirname(abs)) : path.dirname(abs));
+    const rel = path.relative(
+      boardRoot(repoPath),
+      path.dirname(path.dirname(abs)),
+    );
     const parts = rel.split(path.sep).filter(Boolean);
     if (parts.length !== 2 || !TASK_STATUSES.includes(parts[1] as TaskStatus)) {
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
     }
-    const project = parts[0] === DEFAULT_TASK_PROJECT_DIR ? DEFAULT_TASK_PROJECT : parts[0];
+    const project =
+      parts[0] === DEFAULT_TASK_PROJECT_DIR ? DEFAULT_TASK_PROJECT : parts[0];
     if (project !== DEFAULT_TASK_PROJECT && !isUserProjectSlug(project)) {
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
     }
-    return loadRecord(repoPath, project, parts[1] as TaskStatus, parsed.stem, fs);
+    return loadRecord(
+      repoPath,
+      project,
+      parts[1] as TaskStatus,
+      parsed.stem,
+      fs,
+    );
   }
 
   const hits = await findByStem(repoPath, parsed.stem, fs);
@@ -354,5 +404,11 @@ export async function getTask(repoPath: BoardTarget, target: string, fs: BoardFs
       `stem ${parsed.stem} exists in multiple project/status folders`,
     );
   }
-  return loadRecord(repoPath, hits[0]!.project, hits[0]!.status, parsed.stem, fs);
+  return loadRecord(
+    repoPath,
+    hits[0]!.project,
+    hits[0]!.status,
+    parsed.stem,
+    fs,
+  );
 }

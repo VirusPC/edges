@@ -4,7 +4,7 @@
 > 不记：项目共享约定（走 `project` / `feedback`）、可提交的团队知识。v1 不做脱敏晋升到可提交类型。
 > 怎么写：正文先一句结论，再跟 `**Why:**`（为什么，便于以后判断边界情况）和 `**How to apply:**`（具体怎么做）。
 > **本入口与 `users/` 被 gitignore，绝不提交。** Agent 读的是本机这份类型入口；克隆里默认没有它。换机或删仓前用 `$user-memory-backup`，回注用 `$user-memory-restore`。
-> 本文件只是索引，条目区块由脚本重算，正文写在 `users/user_<slug>.md` 里。
+> 本文件只是索引，条目区块由脚本重算，正文写在 `users/user_<slug>/index.md` 里。
 
 <!-- project-memory-entries:start -->
 - 暂无条目。

@@ -1,7 +1,7 @@
 ---
 name: project-memory-remember
 description: 把可复用结论写入本项目 .harness 并刷新索引。用户要求记住时必须用；被纠正、用户给出可用想法/约定/约束、或任务产出已验证、以后还用得上的结论时也要主动用。
-version: 3.0.1
+version: 3.1.0
 ---
 
 # Project Memory Remember
@@ -45,7 +45,7 @@ version: 3.0.1
 
 判据是**作用域加能否公开**，不是「像不像偏好」。项目共享约定仍走 `project` / `feedback`；只有「只对这个人、这个克隆成立，且不宜进公开仓」的才进 `user`。
 
-- 产物是 `.harness/memory/users/user_<slug>.md`，索引是 `.harness/memory/users/AGENTS.md`。整类都被 gitignore，**不要 `git add`**。
+- 产物是 `.harness/memory/users/user_<slug>/index.md`，索引是 `.harness/memory/users/AGENTS.md`。整类都被 gitignore，**不要 `git add`**。
 - `--slug` 与其他普通记忆一样，小写 snake_case，不带 `user_` 前缀。
 - 正文仍按「一句结论 → `**Why:**` → `**How to apply:**`」。
 - Agent 读的是本机这份 `users/AGENTS.md`。换机或删仓前用 `$user-memory-backup`；回注用 `$user-memory-restore`。
@@ -72,3 +72,5 @@ version: 3.0.1
 记忆入口由 CLI 从条目文件的 frontmatter 全量重算，**不要手改，也不要绕开 CLI 自己往 `.harness/` 的任何类型目录写文件**——那样入口不会更新，条目等于不存在。`.agents/skills/` 是唯一例外：它本来就归人与生态，CLI 只索引它。命令不可用时明确报告缺口，别改用手写或临时脚本。
 
 新版只写 `.harness`。旧布局先运行独立 `$project-memory-migrate`，不要自行改名或让 doctor 迁移。可写自定义 Skill 格式类型保留原模块，不能因格式相同就当作 managed。
+
+所有新条目使用目录入口，不再提供 `--format` / `--resources`。已有完整目录用 `--import-entry /absolute/path/index.md`（Skill 用 SKILL.md），与正文参数互斥；校验失败返回路径与字段，修正来源再重跑，不自动纠错。导入不修改来源，入口及附件一并复制。
