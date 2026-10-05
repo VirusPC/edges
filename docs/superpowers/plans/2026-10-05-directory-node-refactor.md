@@ -37,7 +37,7 @@
 
 **Interfaces:** consumes gray-matter document utility and existing lossless Internal syntax. Produces all Node classes and NodeReference/ChildGroup/inputs/NodeContext from spec. Preserve current Service ability to compile using mechanical interface adaptation, leaving lifecycle rewrite to Task 2. Do not introduce deprecated aliases target/label/kind or localMemory/descendantMemory.
 
-- [ ] Add failing behavior cases:
+- [x] Add failing behavior cases:
 ```ts
 const skill = new SkillNode('/repo/skills/a/SKILL.md');
 assert.equal(skill.id, '/repo/skills/a/SKILL.md');
@@ -49,16 +49,18 @@ assert.equal(root.serialize().includes('my untouched comment'), true);
 assert.equal(root.serialize().includes('skills/a/SKILL.md'), true);
 assert.throws(() => root.addChild('descendant', { id: skill.id }));
 ```
-- [ ] Run `pnpm --filter edges-cli exec node --test --import tsx './test/models/*.test.ts'`; record meaningful failing baseline.
-- [ ] Implement `BaseNode implements NodeReference`, generics Create/Update, path ID, fixed isLeaf, common fields, Leaf subclass and polymorphic create/update/destroy/validate. Make mutations validate first; preserve unedited metadata/body.
+- [x] Run `pnpm --filter edges-cli exec node --test --import tsx './test/models/*.test.ts'`; record meaningful failing baseline.
+- [x] Implement `BaseNode implements NodeReference`, generics Create/Update, path ID, fixed isLeaf, common fields, Leaf subclass and polymorphic create/update/destroy/validate. Make mutations validate first; preserve unedited metadata/body.
 ```ts
 // Controlled relation changes remain package internal; reference projection copies only three fields.
 const reference = { id: node.id, ...(node.name ? {name:node.name} : {}), ...(node.description ? {description:node.description} : {}) };
 // Internal serialize converts absolute IDs to href relative to its entry directory.
 ```
-- [ ] Adapt direct consumers mechanically to new reference and group API, resolve IDs at parse boundary, retain authored href for untouched source/fragment fidelity. Add validation/creation tests for Task/Memory/Skill and rollback-on-invalid-update; no filesystem in nodes.
-- [ ] Run model tests and `pnpm --filter edges-cli exec tsc --noEmit`; fix compile regressions, report runtime behavior intentionally pending Task 2/3.
-- [ ] Commit `refactor: define directory nodes and recursive harness layout` with Co-authored-by trailer. Task reviewer gates spec + code quality.
+- [x] Adapt direct consumers mechanically to new reference and group API, resolve IDs at parse boundary, retain authored href for untouched source/fragment fidelity. Add validation/creation tests for Task/Memory/Skill and rollback-on-invalid-update; no filesystem in nodes.
+- [x] Run model tests and `pnpm --filter edges-cli exec tsc --noEmit`; fix compile regressions, report runtime behavior intentionally pending Task 2/3.
+- [x] Commit `refactor: define directory nodes and recursive harness layout` with Co-authored-by trailer. Task reviewer gates spec + code quality.
+
+**Evidence:** Models31/31、CLI TypeScript 通过；独立审阅与修复复审通过。提交 be1d4fc、6d6d4d8。Service/CLI 仍由后续任务完成。
 
 ### Task 2: Service lifecycle and traversal
 
