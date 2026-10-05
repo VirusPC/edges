@@ -1,13 +1,15 @@
 ---
 name: preview-tasks-with-box-obsidian
-description: 在 Grok Bot 云端电脑用 Obsidian 打开 /workspace/edges，浏览 .harness/tasks 状态夹与 artifacts；适合看板预览，不适合当主编辑入口。
+description: >-
+  在 Grok Bot 云端电脑用 Obsidian 打开 /workspace/edges，浏览 .harness/tasks 状态夹与
+  artifacts；适合看板预览，不适合当主编辑入口。
 metadata:
   edges-title: 用云端 Obsidian 预览 tasks 看板
   edges-origin-session-id: e783aa76-4d8c-4296-8080-7ed191474f70
   edges-agent-client: cursor
   edges-username: 通用-辅助-2
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-11T04:59:38+00:00"
+  edges-updated-at: '2026-09-11T04:59:38+00:00'
 ---
 
 # Preview edges tasks board with Obsidian on the Grok Bot box

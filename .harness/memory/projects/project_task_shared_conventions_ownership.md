@@ -1,14 +1,14 @@
 ---
 name: project_task_shared_conventions_ownership
 description: >-
-  Tasks 执行流程与 CLI 约定存根 Project Memory；STAR 记忆仅保留原因范围并引用 Skill；extensions/memory
-  留后续高优待办，其他条目按职责归属。
+  跨层任务约定存根 Project Memory；写法引用 conversation-to-tasks；部署记录与预览 Skill 已归根，局部看板分组仍留
+  Tasks，对外分发留待办。
 metadata:
   edges-title: Tasks 旧记忆逐条审阅后的共享范围与归属
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-05T18:35:32+08:00'
+  edges-updated-at: '2026-10-05T19:55:26+08:00'
 ---
 
 原 Tasks 的 8 条内容已按实际适用范围逐条审阅，不能整批认定为根维护看板的局部规则。
@@ -24,7 +24,7 @@ metadata:
 - 初始化后先留本地：用户要求删除；这是一次性要求，不继续作为活跃规则。该条及索引已删除，不应重新恢复成通用审批门槛。
 - preview-tasks-with-box-obsidian：用户确认归根 .harness/skills/managed/preview-tasks-with-box-obsidian/SKILL.md；它保存操作步骤，第六条保存部署约定与缘由。
 
-上述是 2026-10-05 用户逐条确认的范围与归属决定。指定删除、前两条向根 Project Memory 的迁移和 STAR 记忆精简已执行；其余物理迁移与第 4 条写作规范整理尚未执行，不得将设计确认表述为全部迁移完成。详见 docs/discussions/2026-10-05-implementation-rulings.md 第 3 项。
+上述是 2026-10-05 用户逐条确认的范围与归属决定。指定删除、共享流程与 CLI 约定向根 Project Memory 的迁移、STAR 记忆精简，以及云端部署记忆和预览技能向根层的移动均已执行。第 4 条写法已并入 conversation-to-tasks，原记忆保留原因范围和 Skill 引用；对外分发仍是独立待办。详见 docs/discussions/2026-10-05-implementation-rulings.md 第 3 项。
 
 
 2026-10-05 后续提议：用户提出 extensions/memory，用于对外分发预定义 Project Memory。该方向可能承接需跨仓复用的通用任务约定；尚未确认目录配置与安装方式，不把原始历史记忆直接视为分发内容，也不因此推翻写作方法归 conversation-to-tasks 的决定。现有 init 模板负责结构，预定义 memory 负责可选的复用内容；默认引用安装内容是助手建议，仍待讨论。
@@ -36,4 +36,4 @@ metadata:
 2026-10-05 用户纠正：extensions/memory 是后续高优待办，当前先存 Project Memory。前两条执行流程与 CLI 操作约定已通过 Memory 服务移动到根 .harness/memory/projects/ 并同步两端索引；回复路径时须区分当前存放位置与未来分发目标。
 
 
-2026-10-05 用户确认第 3 条的整理方式：conversation-to-tasks 已覆盖 STAR，无需重复合并；Skill 保持现状。STAR 记忆只保留采用原因与适用范围，引用 Skill，去掉重复方法正文和固定版本号。已通过 CLI 完成精简与索引更新，原记忆路径保持不变；第 4 条仍需单独整理。
+2026-10-05 用户确认第 3 条的整理方式：conversation-to-tasks 已覆盖 STAR，无需重复合并；Skill 保持现状。STAR 记忆只保留采用原因与适用范围，引用 Skill，去掉重复方法正文和固定版本号。已通过 CLI 完成精简与索引更新，原记忆路径保持不变；第 4 条随后单独整理，方法已并入同一 Skill。

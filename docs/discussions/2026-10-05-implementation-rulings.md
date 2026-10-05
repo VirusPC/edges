@@ -838,3 +838,10 @@ flowchart LR
 - [节点逻辑归属与资源单元分离](../../.harness/memory/projects/project_node_resource_unit_decision.md)
 - [递归节点与自身维护空间](../../.harness/memory/projects/project_scope_first_content_ownership.md)
 - [PR #161](https://github.com/VirusPC/edges/pull/161)
+
+
+## 实施衔接
+
+2026-10-05 用户授权执行。正式约定收敛至 [目录节点模型](../superpowers/specs/2026-10-05-directory-node-model.md)，执行进度见 [实施计划](../superpowers/plans/2026-10-05-directory-node-refactor.md)。本文前文的“尚未实现”描述各轮讨论时点，不能替代实施计划的最新证据。
+
+第 3 项剩余归属已落实：云端 Obsidian 部署记忆与预览 Skill 经 Service 移到根层，事实/想法写法并入 conversation-to-tasks，历史记忆改为原因范围与引用。两个优化待办不在本次实现中。

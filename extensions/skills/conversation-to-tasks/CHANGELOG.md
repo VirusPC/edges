@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- 区分任务背景中的可核对事实、未验证判断与候选做法，简介说明问题与预期结果；沿用原有 STAR 正文与必填规则。
+
 ## [1.2.1] - 2026-10-03
 
 ### Changed
