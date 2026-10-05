@@ -12,6 +12,7 @@ const { values } = parseArgs({
     apply: { type: "boolean" },
     "copy-shared": { type: "boolean" },
     "archive-unreferenced": { type: "boolean" },
+    "archive-unused-img": { type: "boolean" },
     report: { type: "string" },
   },
 });
@@ -20,6 +21,7 @@ if (!values.root)
 const plan = planContentUnits(values.root, {
   shared: values["copy-shared"] ? "copy" : "retain",
   unreferenced: values["archive-unreferenced"] ? "archive" : "retain",
+  archiveUnusedImages: values["archive-unused-img"],
 });
 const report = {
   mode: values.apply ? "apply" : "preview",

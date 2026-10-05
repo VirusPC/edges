@@ -24,6 +24,33 @@ function fixture(t: TestContext) {
     read: (file: string) => fs.readFileSync(path.join(root, file), "utf8"),
   };
 }
+test("unused img archives preserve source hierarchy, referenced files and repeatability", (t) => {
+  const { root, put, read } = fixture(t);
+  put("edges/a/index.md", "![keep](img/keep.png)");
+  put("edges/a/img/keep.png", "referenced");
+  put("edges/a/img/same.png", "first");
+  put("notes/b/img/same.png", "second");
+  put("archive/img/already.png", "archived");
+  put("archive/unassigned-resources/resources/old.png", "other archive");
+  put("notes/b/other.png", "outside img");
+  assert.equal(planContentUnits(root).writes.length, 0);
+  const plan = planContentUnits(root, { archiveUnusedImages: true });
+  assert.equal(plan.writes.length, 2);
+  applyContentUnits(plan);
+  assert.equal(read("archive/img/edges/a/img/same.png"), "first");
+  assert.equal(read("archive/img/notes/b/img/same.png"), "second");
+  assert.equal(read("edges/a/img/keep.png"), "referenced");
+  assert.equal(read("archive/img/already.png"), "archived");
+  assert.equal(
+    read("archive/unassigned-resources/resources/old.png"),
+    "other archive",
+  );
+  assert.equal(read("notes/b/other.png"), "outside img");
+  assert.equal(
+    planContentUnits(root, { archiveUnusedImages: true }).writes.length,
+    0,
+  );
+});
 test("directory entries, attachments and incoming links preserve labels, fragments, HTML and code", (t) => {
   const { root, put, read } = fixture(t);
   put(

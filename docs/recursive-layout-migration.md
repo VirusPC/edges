@@ -56,16 +56,18 @@ Git 不分发 ignored 用户材料，也不证明别的克隆已完成私有纠�
 
 - 独占附件随引用它的内容进入目录；多个内容共用时用 `--copy-shared` 各自保存字节相同的副本。
 - `--archive-unreferenced` 将根 `resources/` 中未找到引用的附件移入 `archive/unassigned-resources/resources/`，保留原文件名，不删除。
-- 其他旧 `img/` 中没有明确引用的附件保留原位并列入报告，不猜测所属内容。
+- 用户进一步要求：旧 `img/` 中未找到引用的附件用 `--archive-unused-img` 迁入 `archive/img/<原仓库相对路径>`，保留层级和文件名。已有 archive 不会再次归档，已找到引用或不在 img 目录中的附件不受该选项影响。
 
 ```bash
 pnpm migrate:content-units --root /absolute/worktree --copy-shared --archive-unreferenced --report /tmp/content-preview.json
 # 审阅后应用；报告路径必须尚不存在。
 pnpm migrate:content-units --root /absolute/worktree --copy-shared --archive-unreferenced --apply --report /tmp/content-applied.json
+# 归档旧 img 中未找到引用的附件；默认预览，加 --apply 写入。
+pnpm migrate:content-units --root /absolute/worktree --archive-unused-img
 ```
 
 脚本处理公开的 tracked 与非忽略 untracked 内容；排除用户记忆、第三方目录、私有迁移日志和 Obsidian workspace。它利用 Markdown/HTML 标准解析器定位引用，并支持 Obsidian wikilink；只改实际引用目标，保留标题、别名、正文、代码示例与 YAML。歧义 Wiki 链接要求先改成明确路径，碰撞、忽略的目标、符号链接或预览后文件变化都会拒绝写入。IO 失败在当前进程内回滚；不承诺断电／强杀后的事务恢复，应在可审阅、可恢复的独立 Git worktree 执行。
 
-2026-10-05 本仓转换 787 篇内容（785 篇 Edge、2 篇归档文档），既有目录 Note 保持入口；`posts/` 当前只有目录说明，没有待转换文章。2,157 个原附件产生 2,167 个新目标（5 个共用附件各复制给 3 篇文章）。根 `resources/` 的 71 个附件全部迁出，其中 13 个未找到引用的附件进入归档；其余旧 `img/` 中 320 个未解析到引用的附件保留。
+2026-10-05 本仓转换 787 篇内容（785 篇 Edge、2 篇归档文档），既有目录 Note 保持入口；`posts/` 当前只有目录说明，没有待转换文章。2,157 个原附件产生 2,167 个新目标（5 个共用附件各复制给 3 篇文章）。根 `resources/` 的 71 个附件全部迁出，其中 13 个未找到引用的附件进入归档；其余旧 `img/` 中 320 个未解析到引用的附件按用户后续决定迁入 `archive/img/`。这 320 项与原清单逐一比对，迁移后核验全部 4,785 个公开文件字节不变，重复运行零写入。
 
 迁移前后独立核验了 1,707 份 Markdown 的非引用正文、2,861 个原本有效的引用，以及 4,784 个目标文件的字节；第二次计划为零写入。迁移报告还列出 16 处原有无法解析的引用，其中 2 处核实实际目标后补正；剩余 14 处为示例占位符及一张本就缺失的图片，不把它们当作新迁移丢失。此步骤明确授权 posts 的结构与必要引用调整，不扩大为今后自动改写博客正文的许可。

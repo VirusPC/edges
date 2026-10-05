@@ -37,6 +37,7 @@ export interface ContentPlan {
 export interface Options {
   shared?: "retain" | "copy";
   unreferenced?: "retain" | "archive";
+  archiveUnusedImages?: boolean;
 }
 const contentPath = (f: string) =>
   /^(edges|notes|posts|archive)\//.test(f) && !f.includes("/.harness/");
@@ -370,7 +371,7 @@ export function planContentUnits(
     const readers = [...owners.get(asset)!],
       owned = readers.filter((f) => entrySet.has(f));
     if (!owned.length) {
-      // Only the former root attachment pool is retired automatically; other opaque resources stay put.
+      // Retire only explicitly selected pools, retaining their original source hierarchy.
       if (
         !readers.length &&
         asset.startsWith("resources/") &&
@@ -379,6 +380,12 @@ export function planContentUnits(
         plan.mapping.set(asset, [
           claim(asset, "archive/unassigned-resources/" + asset),
         ]);
+      else if (
+        !readers.length &&
+        options.archiveUnusedImages &&
+        /^(?:edges|notes|posts)\/(?:.*\/)?img\//.test(asset)
+      )
+        plan.mapping.set(asset, [claim(asset, "archive/img/" + asset)]);
       else if (asset.startsWith("resources/") || !readers.length)
         plan.retained.push({
           file: asset,
