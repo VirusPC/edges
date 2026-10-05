@@ -47,7 +47,7 @@ InternalNode 有 constraints、localChildren、descendantChildren，children 是
 
 ## Node 方法
 
-所有方法是实例方法，不含文件系统或 Git IO；构造器不调用可覆写方法。先验证再提交内存变更；失败不留下半成品。
+所有方法是实例方法，不含文件系统或 Git IO；构造器接受入口路径且不调用可覆写方法。扩展节点的 parseBody/serializeBody 必须能够无损往返，同一正文重复解析序列化不应不断改变内容；模型可用同类草稿进行校验。先验证再提交内存变更；失败不留下半成品。
 
 ```ts
 interface NodeCreateInput { name?: string; description?: string; metadata?: Record<string, unknown>; body?: string }
