@@ -388,7 +388,7 @@ assert.deepEqual(domainListed.map(task => task.title), ["domain"]);
 - [x] 按 project-memory-remember 更新用户决定：分层存放但保留全仓视图、默认当前作用域维护任务、Task 沿统一节点树递归索引；全仓显式跨所有维护层级，普通查询默认不跨 harness。不把一次性测试数量当长期记忆。
 - [x] 同步记录通用查询约定：采用原生 AsyncIterable 驱动延迟查询链，filter/map/find/groupBy/toArray/mapValues/values/thru 不执行，value() 才执行；分组为普通对象且继续链式，同一条链重复 value 会重跑，不自动缓存；类型条件尽早排除无关加载，任意 predicate 不自动剪枝，不公开 enter / shouldEnter；不引入流处理库。CLI 架构文档展示同一原语用于 Task 和非 Task 节点。
 - [x] 运行完整 `pnpm test`，再顺序运行 `pnpm build`；对迁移脚本运行 strict NodeNext 类型检查。失败时修复真实假设，不删除旧业务断言来获得通过。
-- [ ] 独立审查调用链与数据迁移报告，重点确认正常 Task 查询不再调用 `readdir`／discoverScopes，也没有绕开 NodeService 的第二套 DFS。
+- [x] 独立审查调用链与数据迁移报告，重点确认正常 Task 查询不再调用 `readdir`／discoverScopes，也没有绕开 NodeService 的第二套 DFS。
 - [ ] 用户确认集成方式后更新原 PR；保留 worktree，不自动合并、发布或部署。
 
 ## 最终验收
@@ -409,7 +409,7 @@ assert.deepEqual(domainListed.map(task => task.title), ["domain"]);
 
 ## 2026-10-06 集成验收记录
 
-Task 1–3 已由 controller 独立审阅并整合至 Task 4 基线 b06dbfb；本节记录 Task 4 实现者的集成验证，Task 4 的 task-review 已通过；最终整体审查提出的两项 Important 修复见下节，修复后复审及 PR 更新仍待 controller 执行。保留工作树，不推送、合并或部署。
+Task 1–3 已由 controller 独立审阅并整合至 Task 4 基线 b06dbfb；本节记录 Task 4 实现者的集成验证，Task 4 的 task-review 已通过；最终整体审查提出的两项 Important 修复见下节，804b367 的独立复审已通过。PR 更新不在本轮执行授权内；保留工作树，不推送、合并主分支或部署。
 
 - CLI 新增 list --all-scopes，按 Commander 参数来源区分默认 maintenance 与显式 purpose。范围由已解析 scope 定位 Git 根，无 Git 回退该 scope。只对 list 开放；普通各读写命令仍共享 maintenance 默认。
 - CLI 使用与看板相同的 listRepositoryTaskNodes / NodeService 查询与领域投影，未加 DFS 或物理发现回退。全仓非分组行去除 doc，保留原 JSON envelope、来源与入口 path；分组继续保留 Task Doc，并补出入口 path。同名 project/stem 按来源区分，空项目保留。
@@ -433,13 +433,22 @@ pnpm --filter edges-cli exec node --test --import tsx test/tasks/all-scopes.test
 
 ## 2026-10-06 最终整体审查修复
 
-最终整体审查针对 26e3291 提出两项 Important/P2；本节记录修复与验证，最终复审仍待 controller，未提前标记 approved。Task 1–3 的 checklist 按 controller 已审阅完成状态补齐；Task 4 task-review 已通过，最终整体审查项与 PR 更新继续保持未完成。
+最终整体审查针对 26e3291 提出两项 Important/P2；本节记录修复与验证。独立复审已确认 804b367 中 F1、F2 均 ADDRESSED，无新增阻断问题，技术结论为 APPROVE。Task 1–4 与整体审查已完成；PR 更新等待另外授权。
 
 - 显式创建任务／项目时，通过 InternalNode 将任务板登记到已有所属 AGENTS，使用共享 readEntry/saveEntries 对 owner 做源快照校验与安全写入。maintenance 归 local；新增 domain 归 descendant，已有 domain 关系、引用名称与说明保留。内容节点使用 co-located AGENTS harness，不新造拓扑。无 AGENTS 的 fresh scope 保持局部写入，不自动初始化 Project Memory；全仓仍要求已登记入口。
 - 迁移 discover 复用 scope 的 isGitBoundary，在每个非 root 目录遇到 .git 文件或目录即停止，所选 root 自身可扫描；apply 的 rediscovery 使用同一边界，预览后新增边界拒绝写入。
 - RED：owner-board / index-migration 两文件共 28 项中 5 项失败：首个 project 创建后全仓 groups 为空、两种 foreign 边界触发内容读取、两种新增 Git 边界未拒绝。实现后 28 项全绿，补强直接 first-task、维护关系与坏 owner 后相关查询／写生命周期／scope／migration 共 60 项通过。
 - 生产 tsc 与 strict NodeNext 的 migration/query types 通过。完整 pnpm test → pnpm build 顺序成功：CLI 789、artifacts-preview 42、new-note MCP 14、tasks-review-app 27，共 872 tests。初次 full test 因本 worktree 缺 vitest 链接未开始，按现有锁文件 pnpm install --frozen-lockfile 恢复后通过，无依赖／锁文件改动。构建仅既有 Vite native-loader/__dirname 与 inlineDynamicImports 提示。
-- 公开迁移仅 preview：105 tasks、edits=[]、applied=false。未重复真实 apply，不读取真实 users/journal/posts，不运行真实 root global query。未 push、merge、部署；等待独立复审与后续集成授权。
+- 公开迁移仅 preview：105 tasks、edits=[]、applied=false。未重复真实 apply，不读取真实 users/journal/posts，不运行真实 root global query。未 push、合并主分支或部署；修复已整合到本地交付分支，后续 PR 更新另行授权。
+
+## 执行中的裁定及调整成本
+
+1. 全仓模式按最新确认递归跨 harness，取代旧 spec 的无条件禁止；普通查询不变。若调整，只需修改显式范围选项及聚合覆盖。
+2. 保留已批准的 maintenance 默认值，旧领域测试显式选择 domain。执行中允许暂时出现旧假设导致的失败，最终全部修复；没有把兼容参数藏进 helper。
+3. 全仓查询跳过 managedRoot 外的引用，普通外部只读查询保持原合同。若改变，需要调整范围策略和测试，不必迁移索引。
+4. 非法 Task 元数据严格报错，不将旧 P0 静默转成 none。代价是历史不合法文档须修正；合法缺省仍保留。
+5. 兼容 list 保留资源快照，轻量 query 结果在目录 move/destroy 前须 get。代价是调用方需区分两种读取合同；直接 update 仍使用入口快照。
+6. 真实公开板加受控公开投影用于验收，未运行可能读取私有 users 的真实根全仓查询。代价是没有声称验证真实私有上下文；递归边界由隔离 fixture 验证。
 
 复现修复验证：
 
