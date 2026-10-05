@@ -28,7 +28,7 @@
 - models/{task,memory,skill,note}-node.ts: leaf business implementations.
 - services/node-service.ts, traverse.ts, node-files.ts and focused helper modules: filesystem coordination and snapshots, no resource domain.
 - services/{memory,tasks,note}/ and commands/: business CLI adaptation.
-- scripts/migrate-directory-nodes.ts + matching test + migration Skill: one-time old file conversion.
+- scripts/migrate-directory-nodes.mts + matching test + migration Skill: one-time old file conversion.
 - README, CONTEXT, ADR, current specs, protocols, indexed memories: current contract and ownership.
 
 ### Task 1: Node models and layout
@@ -94,29 +94,31 @@ assert.notEqual(destinationEntry, original); // no-op separately supported
 
 ### Task 3: CLI adapters and explicit uniform-directory migration
 
-**Files:** services/memory/{node-documents,entries,remember,types,doctor,init}.ts plus related modules; services/tasks/{write,paths,...}.ts; services/note/git/ingest.ts; command input wiring; scripts/migrate-directory-nodes.ts; package.json; new extensions/skills/migrate-directory-nodes/SKILL.md; relevant test/{memory,tasks,note,services}; migration tests.
+**Files:** services/memory/{node-documents,entries,remember,types,doctor,init}.ts plus related modules; services/tasks/{write,paths,...}.ts; services/note/git/ingest.ts; command input wiring; scripts/migrate-directory-nodes.mts; package.json; new extensions/skills/migrate-directory-nodes/SKILL.md; relevant test/{memory,tasks,note,services}; migration tests.
 
 **Interfaces:** consumes new NodeService/model interfaces. Produces directory-only new writes/recognition; explicit migration with dry-run default, --apply, --root and public tracked scope. Existing Markdown note ingest becomes validated import/create, no blind permissive parser. Keep observable useful CLI parameter names unless they advertise legacy formats.
 
-- [ ] Add failing CLI integration: memory remember returns `<slug>/index.md`, Tasks create always directory, Note ingest stores directory; invalid document reports path/field and does not write, extra sections survive update.
+- [x] Add failing CLI integration: memory remember returns `<slug>/index.md`, Tasks create always directory, Note ingest stores directory; invalid document reports path/field and does not write, extra sections survive update.
 ```ts
 await initMemory({ targetDir: fixtureRoot, memoryTypes: ['project'] });
 const result = await rememberMemory({ targetDir: fixtureRoot, type: 'project', slug: 'demo', title: 'Demo', description: 'When testing', content: 'extra user prose' });
 assert.equal(basename(result.path), 'index.md');
 assert.equal(readFileSync(join(fixtureRoot, result.path), 'utf8').includes('extra user prose'), true);
 ```
-- [ ] Run focused actual test files via node --test --import tsx; record behavioral failures.
-- [ ] Make SkillNode.validate enforce standard required name/description after full input is applied (not in each partial field setter); test malformed imported SKILL rejected before writing. Keep Base/Memory/Task frontmatter optional where their own contract permits.
-- [ ] Adapt adapters to prepare context and structured inputs then call node/service. Remove file/directory choice from user-facing options; do not move domain logic into generic Service. Task sidecars move with directory. Memory indices reconstruct relative entry links. Update template/protocol paths.
-- [ ] Implement migration plan using tracked public managed entries only, target `<stem>/index.md`, rewrite registered node hrefs and moved-document relative resource links, no source content loss. Fail target collision before mutation. No scanning private content; no guessing asset ownership. Exclude posts/thirdparty/ADRs. Existing Skill dirs/entry dirs unchanged.
+- [x] Run focused actual test files via node --test --import tsx; record behavioral failures.
+- [x] Make SkillNode.validate enforce standard required name/description after full input is applied (not in each partial field setter); test malformed imported SKILL rejected before writing. Keep Base/Memory/Task frontmatter optional where their own contract permits.
+- [x] Adapt adapters to prepare context and structured inputs then call node/service. Remove file/directory choice from user-facing options; do not move domain logic into generic Service. Task sidecars move with directory. Memory indices reconstruct relative entry links. Update template/protocol paths.
+- [x] Implement migration plan using tracked public managed entries only, target `<stem>/index.md`, rewrite registered node hrefs and moved-document relative resource links, no source content loss. Fail target collision before mutation. No scanning private content; no guessing asset ownership. Exclude posts/thirdparty/ADRs. Existing Skill dirs/entry dirs unchanged.
 ```ts
 const plan = planDirectoryMigration(root);
 assert.deepEqual(plan.moves.map(x => x.to), [join(root, '.harness/memory/projects/project_demo/index.md')]);
 applyDirectoryMigration(plan);
 assert.equal(planDirectoryMigration(root).moves.length, 0);
 ```
-- [ ] Test dry-run unchanged, real apply correct, rerun idempotent, collision unchanged, fragment/encoded href, relative assets preserved, private and external documents excluded; old interrupted journal rejected with actionable path.
-- [ ] Run affected CLI/service/model tests + build/typecheck; commit `feat: use directory nodes across cli and provide migration`; task review.
+- [x] Test dry-run unchanged, real apply correct, rerun idempotent, collision unchanged, fragment/encoded href, relative assets preserved, private and external documents excluded; old interrupted journal rejected with actionable path.
+- [x] Run affected CLI/service/model tests + build/typecheck; commit `feat: use directory nodes across cli and provide migration`; task review.
+
+**Evidence:** 受影响CLI376/376、MCP14/14、构建/类型检查通过；独立审查三项边界修复后115/115与复审通过。提交43f2afd、0af84ab；真实迁移、全工作区验证与三处活跃文档修正留Task4。
 
 ### Task 4: Repository adoption, ownership completion and validation
 
