@@ -12,6 +12,8 @@
 
 ## Global Constraints
 
+- 重复批量操作先写可重复执行的 TypeScript 脚本；迁移须 dry-run、冲突检查与幂等性验证。
+
 - TypeScript，Node >=20，NodeNext 相对导入使用 .js。YAML 仅使用 gray-matter 默认能力，不增加自定义引擎或容错语义。
 - 不建 Resource 模型。图片、脚本等按整个目录随生命周期操作，不作为 children。
 - 不强制改造 ADR、第三方技能约定目录、README、CONTEXT、knowledge/posts 或其他体系的普通文件；无有效入口的目录只是导航目标。
