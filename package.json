@@ -22,7 +22,8 @@
     "restore:local-ownership": "pnpm --filter edges-cli exec tsx ../../scripts/restore-local-ownership.mts",
     "migrate:directory-nodes": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-directory-nodes.mts",
     "migrate:top-level-layout": "pnpm --filter edges-cli exec tsx ../../scripts/flatten-content-layout.mts",
-    "migrate:content-units": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-content-units.mts"
+    "migrate:content-units": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-content-units.mts",
+    "migrate:task-indexes": "pnpm --filter edges-cli exec tsx ../../scripts/index-task-nodes.mts"
   },
   "engines": {
     "node": ">=20.0.0"
