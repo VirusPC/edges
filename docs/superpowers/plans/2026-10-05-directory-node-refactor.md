@@ -68,7 +68,7 @@ const reference = { id: node.id, ...(node.name ? {name:node.name} : {}), ...(nod
 
 **Interfaces:** consumes models/layout and spec model methods. Produces spec NodeService CRUD/move/import/list, with explicit managedRoot and typed get overload; returns same node for mutations. No public reparent. Business assertWrite/read-only hooks retained; no createMode/resourceMode. Task 3 replaces legacy production file paths; this task migrates relevant test fixtures to directories.
 
-- [ ] Add real tempfile tests before implementation for Skill directory with AGENTS harness and .harness/AGENTS; list must visit composition only, never nested harness. Explicit get(harness.id) loads maintenance tree when requested.
+- [x] Add real tempfile tests before implementation for Skill directory with AGENTS harness and .harness/AGENTS; list must visit composition only, never nested harness. Explicit get(harness.id) loads maintenance tree when requested.
 ```ts
 const node = await service.get('/managed/skills/a/SKILL.md');
 const moved = await service.move(node!, '/managed/skills/b/SKILL.md');
@@ -77,18 +77,20 @@ assert.equal(node!.id, '/managed/skills/b/SKILL.md');
 assert.equal(existsSync('/managed/skills/b/AGENTS.md'), true);
 assert.equal(existsSync('/managed/skills/a'), false);
 ```
-- [ ] Run `pnpm --filter edges-cli exec node --test --import tsx './test/services/*.test.ts'` and capture failures showing missing new behavior.
-- [ ] Implement layout-based loading, physical parent + harness references, group traversal, optional generic navigation skipping, model-dispatched operations and managed-root boundary checks.
-- [ ] Implement directory lifecycle plan: preflight conflicts, proposed parent/index changes, relative link rewrites in managed nodes preserving source/query/fragment, snapshots and IO, then in-place path/relations state refresh. Reuse safe existing file operations; split focused helpers rather than growing a monolith.
+- [x] Run `pnpm --filter edges-cli exec node --test --import tsx './test/services/*.test.ts'` and capture failures showing missing new behavior.
+- [x] Implement layout-based loading, physical parent + harness references, group traversal, optional generic navigation skipping, model-dispatched operations and managed-root boundary checks.
+- [x] Implement directory lifecycle plan: preflight conflicts, proposed parent/index changes, relative link rewrites in managed nodes preserving source/query/fragment, snapshots and IO, then in-place path/relations state refresh. Reuse safe existing file operations; split focused helpers rather than growing a monolith.
 ```ts
 const original = node.path;
 // Compute all file changes and validate before writing any; only commit model state after IO succeeds.
 // Destination entry keeps basename(original); ownership unit determined by layout incl. co-located harness.
 assert.notEqual(destinationEntry, original); // no-op separately supported
 ```
-- [ ] Tests: nested Internal move; old/new parent; outside-to-moved and moved-to-outside refs; cached instances; occupied target; path escaping; Skill destroy removes harness; deleting co-located harness preserves Skill; import entire directory validates before writes; source untouched on error; business read-only origin; symlink boundary; private-ignore adapter remains.
-- [ ] Remove reparent tests in favor of physical move invariants; no tests asserting intentionally removed permission policies. Run service/model tests + tsc and affected adapters tests.
-- [ ] Commit `refactor: coordinate node directory lifecycle through services`; task review.
+- [x] Tests: nested Internal move; old/new parent; outside-to-moved and moved-to-outside refs; cached instances; occupied target; path escaping; Skill destroy removes harness; deleting co-located harness preserves Skill; import entire directory validates before writes; source untouched on error; business read-only origin; symlink boundary; private-ignore adapter remains.
+- [x] Remove reparent tests in favor of physical move invariants; no tests asserting intentionally removed permission policies. Run service/model tests + tsc and affected adapters tests.
+- [x] Commit `refactor: coordinate node directory lifecycle through services`; task review.
+
+**Evidence:** 模型与服务105/105、CLI TypeScript通过；独立审阅三轮修复复审通过。提交37eab12、f1d2eef、6c2d665、3f664a3。四项业务CLI接入失败归Task3，未作为已通过项。
 
 ### Task 3: CLI adapters and explicit uniform-directory migration
 
