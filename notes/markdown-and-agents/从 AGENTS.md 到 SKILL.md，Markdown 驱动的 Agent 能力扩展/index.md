@@ -39,8 +39,8 @@ graph LR A["单体规则<br/>AGENTS.md"] --> B["模块化规则&技能<br/>Rules
 碎片化的痛点最终催生了标准化运动。2025年5月，Sourcegraph 的 [AMP 团队](https://ampcode.com/manual)率先在其产品中使用 `AGENT.md`（单数形式）作为项目指导文件。随后，[OpenAI 正式宣布](https://developers.openai.com/codex/guides/agents-md) `AGENTS.md`（复数形式）为跨工具的供应商中立标准。作为"AI Agent的README"，它在2025年12月被交由 [Agentic AI Foundation](https://www.linuxfoundation.org/press/linux-foundation-announces-the-formation-of-the-agentic-ai-foundation) 维护，并迅速被[超过六万个开源项目采用](https://openai.com/index/agentic-ai-foundation/)。`AGENTS.md` 的巧妙之处在于它的多重身份：同一个文件既是行为规则（定义编码标准和架构约束），也是项目记忆（承载构建命令和技术栈信息），还是多Agent协调接口（规范不同Agent在微服务边界之间的访问规则）。这种"一个文件，多重角色"的特性，使得跨工具配置第一次有了统一的事实来源。
 
 但是。虽然AGENTS.md已经被大部分Agent所接受，仍有小部分没有支持，例如 Claude Code 和部分公司自研 Agent。落地前建议先拉一张团队常用工具的兼容性矩阵。
-![[Pasted image 20260403153618.png]]
-![[Pasted image 20260403153648.png]]
+![[notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展/Pasted image 20260403153618.png]]
+![[notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展/Pasted image 20260403153648.png]]
 > **行动指南：** 在项目根目录创建 `AGENTS.md`（或对应工具的规则文件），写入技术栈、命名规范、目录结构和构建命令。先从一个文件开始，让AI了解你的项目基本情况。许多工具也提供了/init命令来直接根据项目内容和你的需求描述生成合适的AGENTS.md
 
 
@@ -70,7 +70,7 @@ TODO: 此处应有表格。
 
 这类能力最先在 CLI Agent 场景里长出来，并不偶然。终端本来就是开发者处理重复劳动的地方：运行测试、查看 diff、读 issue、批量改文件、调用 `gh` 或 `git` 命令，这些动作本来就天然具有“**可参数化、可重复、可封装**”的特征。对聊天式产品来说，很多操作还只是“让模型说该怎么做”；但对 CLI Agent 来说，用户真正需要的是“把这一套动作下次还原出来”。一旦进入终端，Markdown 模板就不再只是解释性的文档，而更像一个可复用的操作脚本外壳。
 
-![[Pasted image 20260403151132.png]]
+![[notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展/Pasted image 20260403151132.png]]
 
 从工程视角看，CLI 还有三个天然优势。第一，输入输出边界很清楚，`/review foo.ts` 这样的调用形式天然适合把 `$ARGUMENTS` 注入模板。第二，工具环境是现成的，命令模板可以直接围绕 `git diff`、测试命令、Issue 编号、文件路径展开，不必先把上下文重新翻译成 UI 操作。第三，CLI 用户往往本来就在追求“把一次有效操作固化成下次可重复调用的入口”，所以 Markdown 命令模板在这里很容易被接受，也很容易沉淀成团队习惯。
 
@@ -178,11 +178,11 @@ OpenClaw 的记忆检索采用 **关键词搜索 + 向量语义搜索的混合�
 ### Claude Code：自动记忆与专题化整理
 
 [Claude Code 的 auto memory 系统](https://code.claude.com/docs/en/memory) 也采用了markdown形式
-![[Pasted image 20260403151952.png]]
+![[notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展/Pasted image 20260403151952.png]]
 
-![[Pasted image 20260403152413.png]]
+![[notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展/Pasted image 20260403152413.png]]
 
-![[Pasted image 20260403152452.png]]
+![[notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展/Pasted image 20260403152452.png]]
 `MEMORY.md` 是核心索引，**前 200 行（或 25KB）在每次会话启动时自动加载**——超出部分不加载。Claude 被指示保持 `MEMORY.md` 简洁，将详细内容拆分到专题文件（如 `debugging.md`、`api-conventions.md`），并在索引中记录引用关系。专题文件不自动加载，Agent 在需要时用标准文件读取工具按需访问。
 
 Claude 并非每次会话都保存记忆，而是自主判断信息是否对未来会话有价值。典型保存内容包括：构建命令和测试约定、调试方案和错误模式、架构笔记和模块关系、用户偏好和工作流习惯。当用户明确说”记住这个”时，Claude 保存到 auto memory；只有明确说”加到 CLAUDE.md”时才写入指令文件——两者的区别在于：`CLAUDE.md` 是开发者手动维护的**指令**，auto memory 是 Agent 自主积累的**认知**。
@@ -374,10 +374,10 @@ https://claude.com/blog/complete-guide-to-building-skills-for-claude
 
 以下是RN大仓当时的 description 和 content 要求
 
-![[Pasted image 20260403160717.png]]
-![[Pasted image 20260403160808.png]]
+![[notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展/Pasted image 20260403160717.png]]
+![[notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展/Pasted image 20260403160808.png]]
 
-![[Pasted image 20260403160717.png]]
+![[notes/markdown-and-agents/从 AGENTS.md 到 SKILL.md，Markdown 驱动的 Agent 能力扩展/Pasted image 20260403160717.png]]
 
 
 ### 如何验证 Skill 的有效性

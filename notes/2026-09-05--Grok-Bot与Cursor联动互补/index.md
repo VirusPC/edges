@@ -46,6 +46,6 @@
 - 同日入库 PR（Tailscale 互通笔记）：https://github.com/VirusPC/edges/pull/7
 - conversation-to-notes skill（仓库内）：`extensions/skills/conversation-to-notes`
 
-![Grok Bot 手机端 PR 任务卡](../img/2026-09-05--Grok-Bot%E4%B8%8ECursor%E8%81%94%E5%8A%A8%E4%BA%92%E8%A1%A5/01-grokbot-pr-card.png)
+![Grok Bot 手机端 PR 任务卡](01-grokbot-pr-card.png)
 
-![Cursor 云端 agent 完成页](../img/2026-09-05--Grok-Bot%E4%B8%8ECursor%E8%81%94%E5%8A%A8%E4%BA%92%E8%A1%A5/02-cursor-agent-done.png)
+![Cursor 云端 agent 完成页](02-cursor-agent-done.png)

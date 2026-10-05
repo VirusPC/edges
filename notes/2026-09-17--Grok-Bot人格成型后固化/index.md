@@ -31,4 +31,4 @@
 - 同系列：`knowledge/notes/2026-09-05--Grok-Bot与Cursor联动互补.md`、`knowledge/notes/2026-09-05--Grok-Bot云电脑与Tailscale互通.md`
 - 相关但不等同：`knowledge/notes/2026-09-16--edges-无缝接入agent与日常无单独入口.md`
 
-![记录员拒答架构题并转架构师](../img/2026-09-17--Grok-Bot%E4%BA%BA%E6%A0%BC%E6%88%90%E5%9E%8B%E5%90%8E%E5%9B%BA%E5%8C%96/01-recorder-role-boundary.png)
+![记录员拒答架构题并转架构师](01-recorder-role-boundary.png)

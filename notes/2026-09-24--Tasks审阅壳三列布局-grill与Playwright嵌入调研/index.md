@@ -6,7 +6,7 @@
 
 相关材料：
 
-- 进行中任务：[2026-09-21--review-page-改造三列布局-顶栏-filter](../../.harness/tasks/agent-clients-ux/in_progress/2026-09-21--review-page-%E6%94%B9%E9%80%A0%E4%B8%89%E5%88%97%E5%B8%83%E5%B1%80-%E9%A1%B6%E6%A0%8F-filter.md)
+- 进行中任务：[2026-09-21--review-page-改造三列布局-顶栏-filter](../../.harness/tasks/agent-clients-ux/done/2026-09-21--review-page-%E6%94%B9%E9%80%A0%E4%B8%89%E5%88%97%E5%B8%83%E5%B1%80-%E9%A1%B6%E6%A0%8F-filter/index.md)
 - 语义检索 backlog：[2026-09-23--Tasks审阅页-tasks站点语义检索](../../.harness/tasks/agent-clients-ux/backlog/2026-09-23--Tasks%E5%AE%A1%E9%98%85%E9%A1%B5-tasks%E7%AB%99%E7%82%B9%E8%AF%AD%E4%B9%89%E6%A3%80%E7%B4%A2/index.md)
 - 相关 draft PR：[VirusPC/edges#124](https://github.com/VirusPC/edges/pull/124)（ADR 0022 + Task Doc JSON Schema）
 

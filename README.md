@@ -55,7 +55,7 @@ Edges 当前以个人递归自我改进（Recursive Self-Improvement，RSI）为
 | 知识沉淀 | [`edges/`](edges) | 形成脱离原始场景仍可反复部署的核心资产 |
 | 知识使用 | 内部调用、[`posts/`](posts)、系统接口 | 部署资产，获得决策收益和外部反馈 |
 | 工作项 | [`tasks/`](tasks/) 与 [`.harness/tasks/`](.harness/tasks/) | 分别承载领域工作和 Edges 维护任务；各板按 `edges-tasks-status` 分夹 |
-| 支撑与退出 | [`resources/`](resources)、[`archive/`](archive) | 支撑资产使用、控制持有成本并保留恢复可能 |
+| 支撑与退出 | 内容目录中的附件、[`archive/`](archive) | 支撑资产使用、控制持有成本并保留恢复可能 |
 
 Notes 是低成本、零散且尚未形成稳定结论的捕获。Projects 是以解决问题或交付产出为目标的专项工作区；Teach 是以学习进展和能力获得为目标的专项工作区。三者都是知识生产入口，不是依次晋级的成熟度阶段，也不要求投入相同成本。专项中的原始上下文留在工作区，只有预期能够复用、影响决策或降低不确定性的经验，才值得进一步提炼为 Edge。
 
@@ -86,13 +86,13 @@ Edge 至少应说明结论、理由、适用边界和检验方式，并满足四
 
 ### 支撑与退出
 
-[`resources/`](resources) 存放跨知识区域共享的图片、音频等附件，不作为独立知识阅读；只属于某个专项的附件与专项共置。
+图片、音频等附件与所属内容的入口文档共置。多个内容单元需要同一附件时，各自保存副本，保持目录可以独立迁移；不再集中放入根层 `resources/`。旧附件没有明确引用时保留待整理，不凭文件名猜测归属。
 
 [`archive/`](archive) 类似整个知识空间的回收站：过时、重复、错误或低活跃度内容退出活跃区域，以降低持有成本，但仍保留来源和恢复可能性。它不是知识出口，也不限于失效 Edge。归档保留内容从仓库根起的原始相对路径：
 
 ```text
-notes/a.md → archive/notes/a.md
-projects/foo/report.md → archive/projects/foo/report.md
+notes/a/ → archive/notes/a/
+projects/foo/report/ → archive/projects/foo/report/
 ```
 
 曾经有意义或被引用过的内容应归档，并写明原因；误建、空白或纯临时文件可以直接删除。
@@ -116,7 +116,7 @@ projects/foo/report.md → archive/projects/foo/report.md
 
 - **文件系统**：
 
-  - **目录单元**：将入口文档与所属资源放在一起，保持可读、可编辑、可迁移；单文件不再作为与目录并列的长期形式。
+  - **目录单元**：Note、Edge、Post、Task、Memory 等内容均使用目录，普通内容以 `index.md` 为入口，Skill 以 `SKILL.md` 为入口；所属附件与入口共置。`AGENTS.md` 仍承担组织与索引，目录说明 `README.md` 不当作内容条目。单文件不再作为与目录并列的长期形式。
   - **入口引用**：索引指向明确的入口文件，附件与物理子目录不自动成为逻辑子节点。
 
 - **Git 原生管理**：用 Git 的跟踪、忽略与版本机制管理记忆；例如 user memory 通过 `.gitignore` 不随 Git 提交与共享，同时仍属于本层记忆。
@@ -131,7 +131,7 @@ CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使�
 
 | 目录 | 职责 | 边界 |
 | --- | --- | --- |
-| [`notes/`](notes/)、[`edges/`](edges/)、[`posts/`](posts/)、[`resources/`](resources/)、[`archive/`](archive/) | 知识生产、提炼、使用与退出 | 平铺在根目录的知识资产与支撑内容 |
+| [`notes/`](notes/)、[`edges/`](edges/)、[`posts/`](posts/)、[`archive/`](archive/) | 知识生产、提炼、使用与退出 | 平铺在根目录；每篇内容使用目录入口，附件共置 |
 | [`AGENTS.md`](AGENTS.md) 与各节点的 `.harness/memory/` | 为人和 Agent 提供分层的规则、决策、纠错与流程记忆 | 归属各节点，服务项目维护，不替代长期知识库 |
 | [`extensions/`](extensions/README.md) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关 |
 | [`extensions/apps/`](extensions/apps/) | 可跨作用域复用的对外应用，如任务审阅页 | 属于共享扩展实现，不属于根层知识内容 |

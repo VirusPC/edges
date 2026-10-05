@@ -8,11 +8,11 @@
 
 在 Cursor 手机端看 cloud agent 做页面/看板类改动时，截图预览已经能用；火花点在于：静态图只回答「看起来对不对」，交互与手机布局还缺一层预览能力——进而想到 Grok Bot 是否该提供手机模拟器或可分享的 mobile viewport 预览。
 
-![Cursor 手机端（截图预览视觉效果）：cloud agent PR 更新与看板截图预览](../img/grok-bot-mobile-preview-sim/cursor-mobile-pr-preview.png)
+![Cursor 手机端（截图预览视觉效果）：cloud agent PR 更新与看板截图预览](cursor-mobile-pr-preview.png)
 
-![Grok Bot 手机端（Coding 专家会话；含临时 artifacts 预览链接 http://182.92.131.89/artifacts/…，已改域名，约 2026-09-25 01:47 CST 过期；PR #126）](../img/grok-bot-mobile-preview-sim/grok-bot-mobile-pr-preview.png)
+![Grok Bot 手机端（Coding 专家会话；含临时 artifacts 预览链接 http://182.92.131.89/artifacts/…，已改域名，约 2026-09-25 01:47 CST 过期；PR #126）](grok-bot-mobile-pr-preview.png)
 
-![Grok Bot 手机端（Coding 专家；390×844 mobile viewport 预览）](../img/grok-bot-mobile-preview-sim/grok-bot-mobile-viewport-390.png)
+![Grok Bot 手机端（Coding 专家；390×844 mobile viewport 预览）](grok-bot-mobile-viewport-390.png)
 
 【新增移动视口证据】
 (事实 / Facts)
@@ -35,7 +35,7 @@
 - 判断：computer + 内置浏览器、桌面应用，能**超越一切 artifacts 浏览能力**（可交互 vs 只看）。
 - 证据图：左 chat（Coding 专家、窄屏结论 + backlog 卡）+ 右 computer 桌面 Chrome 打开 `file:///workspace/mobile-preview/task-review.html?project=agent-clients-ux`。
 
-![聊天左栏 + 右侧 Coding 专家's screen（computer 侧栏预览，需进二级页才可互动）](../img/grok-bot-mobile-preview-sim/grok-bot-computer-side-pane.png)
+![聊天左栏 + 右侧 Coding 专家's screen（computer 侧栏预览，需进二级页才可互动）](grok-bot-computer-side-pane.png)
 
 【主要结论】
 (事实 / Facts)
