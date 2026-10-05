@@ -131,24 +131,34 @@ export function rewriteLinks(
       const start = node.position.start.offset!,
         end = node.position.end.offset!;
       const text = source.slice(start, end);
-      // Locate the close of the outer label, never delimiters in the title.
-      let cursor = node.type === "image" ? 1 : 0,
-        brackets = 0,
-        opening = -1;
-      for (; cursor < text.length; cursor++) {
-        const character = text[cursor];
-        if (character === "\\") {
-          cursor++;
-          continue;
-        }
-        if (character === "[") brackets++;
-        else if (character === "]" && --brackets === 0) {
-          const delimiter = node.type === "definition" ? ":" : "(";
-          if (text[cursor + 1] === delimiter) opening = cursor + 2;
-          break;
+      // Parsed child bounds already account for code spans, escapes and nested markup.
+      // Images expose alt text rather than children, so parse their equivalent link label.
+      let labelEnd: number;
+      if (node.type === "link") {
+        labelEnd =
+          (node.children.at(-1)?.position?.end.offset ?? start + 1) - start;
+      } else if (node.type === "image") {
+        const paragraph = fromMarkdown(text.slice(1)).children[0];
+        const link =
+          paragraph?.type === "paragraph" ? paragraph.children[0] : undefined;
+        if (link?.type !== "link") return;
+        labelEnd = (link.children.at(-1)?.position?.end.offset ?? 1) + 1;
+      } else {
+        // Definition labels are not parsed as inline Markdown; escaped brackets stay literal.
+        labelEnd = 1;
+        while (labelEnd < text.length) {
+          if (text[labelEnd] === "\\") {
+            labelEnd += 2;
+            continue;
+          }
+          if (text[labelEnd] === "]") break;
+          labelEnd++;
         }
       }
-      if (opening < 0) return;
+      const delimiter = node.type === "definition" ? "]:" : "](";
+      const marker = text.indexOf(delimiter, labelEnd);
+      if (marker < 0) return;
+      const opening = marker + 2;
       let a = opening;
       while (/\s/.test(text[a] ?? "") && a < text.length) a++;
       let b = a;
@@ -205,37 +215,53 @@ export function rewriteLinks(
   return source;
 }
 
-/** Carry syntax that deliberately does not belong in NodeReference across parent edits. */
+/** Source syntax fields stay outside the domain's NodeReference projection. */
+export function referenceSuffix(
+  node: InternalNode,
+  id: string,
+): string | undefined {
+  const content = new InternalSyntax(
+    node.body,
+    (href) => resolveEntryHref(node.path, href) !== undefined,
+  ).content();
+  const reference = [
+    ...content.localChildren,
+    ...content.descendantChildren,
+  ].find((ref) => resolveEntryHref(node.path, ref.target) === id);
+  return reference
+    ? (reference.target.match(/[?#][\s\S]*$/)?.[0] ?? "")
+    : undefined;
+}
+export function setReferenceSuffix(
+  node: InternalNode,
+  id: string,
+  suffix: string,
+): void {
+  if (referenceSuffix(node, id) === suffix) return;
+  const syntax = new InternalSyntax(
+    node.body,
+    (href) => resolveEntryHref(node.path, href) !== undefined,
+  );
+  const content = syntax.content();
+  const patch = (refs: readonly SyntaxReference[]) =>
+    refs.map((ref) =>
+      resolveEntryHref(node.path, ref.target) === id
+        ? { ...ref, target: ref.target.split(/[?#]/, 1)[0]! + suffix }
+        : ref,
+    );
+  node.body = syntax.serialize({
+    ...content,
+    localChildren: patch(content.localChildren),
+    descendantChildren: patch(content.descendantChildren),
+  });
+}
+/** Transfer syntax when an index registration moves to a different parent. */
 export function carryReferenceSuffix(
   from: InternalNode,
   to: InternalNode,
   oldId: string,
   newId: string,
 ): void {
-  const original = new InternalSyntax(
-    from.body,
-    (href) => resolveEntryHref(from.path, href) !== undefined,
-  ).content();
-  const reference = [
-    ...original.localChildren,
-    ...original.descendantChildren,
-  ].find((ref) => resolveEntryHref(from.path, ref.target) === oldId);
-  const suffix = reference?.target.match(/[?#][\s\S]*$/)?.[0];
-  if (!suffix) return;
-  const syntax = new InternalSyntax(
-    to.body,
-    (href) => resolveEntryHref(to.path, href) !== undefined,
-  );
-  const content = syntax.content();
-  const patch = (refs: readonly SyntaxReference[]) =>
-    refs.map((ref) =>
-      resolveEntryHref(to.path, ref.target) === newId
-        ? { ...ref, target: ref.target.split(/[?#]/, 1)[0]! + suffix }
-        : ref,
-    );
-  to.body = syntax.serialize({
-    ...content,
-    localChildren: patch(content.localChildren),
-    descendantChildren: patch(content.descendantChildren),
-  });
+  const suffix = referenceSuffix(from, oldId);
+  if (suffix !== undefined) setReferenceSuffix(to, newId, suffix);
 }

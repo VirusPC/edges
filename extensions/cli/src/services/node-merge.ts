@@ -2,7 +2,7 @@
 import { isDeepStrictEqual as equal } from "node:util";
 import { InternalNode } from "../models/index.js";
 import type { ChildGroup, NodeReference } from "../models/index.js";
-import { carryReferenceSuffix } from "./node-layout.js";
+import { referenceSuffix, setReferenceSuffix } from "./node-layout.js";
 function choose<T>(
   base: T,
   dirty: T,
@@ -66,6 +66,13 @@ export function mergeInternal(
         ),
       };
     else merged = choose(b, d, c, dirty.path, id);
+    const suffix = choose(
+      referenceSuffix(base, id),
+      referenceSuffix(dirty, id),
+      referenceSuffix(committed, id),
+      dirty.path,
+      `${id} href suffix`,
+    );
     if (!merged) {
       if (d) draft.removeChild(id);
       continue;
@@ -78,7 +85,7 @@ export function mergeInternal(
         description: merged.description,
       });
     }
-    if (c) carryReferenceSuffix(committed, draft, id, id);
+    setReferenceSuffix(draft, id, suffix ?? "");
   }
   const oldMeta = base.metadata ?? {},
     dirtyMeta = dirty.metadata ?? {},

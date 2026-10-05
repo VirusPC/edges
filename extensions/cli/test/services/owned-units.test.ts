@@ -502,3 +502,59 @@ test("readonly indexes remain editable while relocation into a readonly subtree 
   assert.equal(fs.readFileSync(refs.path, "utf8"), before);
   assert.equal(fs.readFileSync(file("tree/child/index.md"), "utf8"), "body");
 });
+for (const label of ["a `[` b", "a `]` b", "a ``[`]`` b", "a ```]``[` ``` b"]) {
+  test(`relocation uses parsed label bounds for inline code: ${label}`, async (t) => {
+    const { file, write, service } = fixture(t);
+    const source = `[${label}](../asset.png "title ](literal)")\n![${label}](../asset.png)`;
+    write("a/index.md", source);
+    write("asset.png", "asset");
+    await service.move(
+      (await service.get(file("a/index.md")))!,
+      file("deep/a/index.md"),
+    );
+    assert.equal(
+      fs.readFileSync(file("deep/a/index.md"), "utf8"),
+      `[${label}](../../asset.png "title ](literal)")\n![${label}](../../asset.png)`,
+    );
+  });
+}
+test("unrelated create preserves dirty query and fragment through refresh and subsequent save", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [A](a/index.md?old=1#old)"));
+  write("a/index.md", "a");
+  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!;
+  dirty.body = dirty.body.replace("?old=1#old", "?dirty=1#dirty");
+  await service.create(new LeafNode(file("b/index.md")), { body: "b" });
+  assert.match(dirty.body, /a\/index.md\?dirty=1#dirty/);
+  assert.equal(dirty.children.length, 2);
+  await service.update(dirty, {});
+  assert.match(
+    fs.readFileSync(dirty.path, "utf8"),
+    /a\/index.md\?dirty=1#dirty/,
+  );
+});
+test("divergent suffix edits conflict before writes while leaving dirty syntax intact", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [A](a/index.md#old)"));
+  write("a/index.md", "a");
+  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!,
+    other = (await service.get(file("AGENTS.md"), InternalNode))!;
+  dirty.body = dirty.body.replace("#old", "#dirty");
+  other.body = other.body.replace("#old", "?committed=1#other");
+  const before = fs.readFileSync(dirty.path, "utf8");
+  await assert.rejects(service.update(other, {}), /conflict/i);
+  assert.equal(fs.readFileSync(dirty.path, "utf8"), before);
+  assert.match(dirty.body, /#dirty/);
+});
+test("committed suffix removal merges into an alias with unrelated dirty constraints", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [A](a/index.md#old)"));
+  write("a/index.md", "a");
+  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!,
+    other = (await service.get(file("AGENTS.md"), InternalNode))!;
+  dirty.setConstraints(["unsaved"]);
+  other.body = other.body.replace("#old", "");
+  await service.update(other, {});
+  assert.doesNotMatch(dirty.body, /#old/);
+  assert.deepEqual(dirty.constraints, ["unsaved"]);
+});
