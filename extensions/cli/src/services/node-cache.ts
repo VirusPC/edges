@@ -1,3 +1,4 @@
+import { mergeInternal } from "./node-merge.js";
 /** Loaded instance identity and optimistic snapshots. Not a public domain API. */
 import * as fs from "node:fs";
 import { BaseNode, InternalNode } from "../models/index.js";
@@ -47,6 +48,47 @@ export class NodeCache {
     this.loaded.set(node.path, instances);
     this.relations(node);
   }
+  #mergedSource(
+    node: BaseNode,
+    file: string,
+    source: string,
+    primary: BaseNode | undefined,
+    relocate: (file: string) => string,
+  ): string {
+    const previous = this.state.get(node)!.file;
+    const baseline = new (node.constructor as Model)(node.path).parse(
+      previous.source,
+    );
+    if (node === primary || node.serialize() === baseline.serialize())
+      return source;
+    const dirtySource = rewriteLinks(
+      node.serialize(),
+      node.path,
+      file,
+      relocate,
+    );
+    if (node instanceof InternalNode) {
+      const before = new InternalNode(file).parse(
+        rewriteLinks(previous.source, node.path, file, relocate),
+      );
+      const dirty = new InternalNode(file).parse(dirtySource);
+      return mergeInternal(before, dirty, new InternalNode(file).parse(source));
+    }
+    return dirtySource;
+  }
+  assertRefresh(
+    sources: ReadonlyMap<string, string>,
+    primary?: BaseNode,
+    relocate: (file: string) => string = (file) => file,
+  ): void {
+    for (const aliases of this.loaded.values())
+      for (const node of aliases) {
+        const file = relocate(node.path),
+          source = sources.get(file);
+        if (source !== undefined)
+          this.#mergedSource(node, file, source, primary, relocate);
+      }
+  }
   refresh(
     relocate: (file: string) => string = (file) => file,
     removed: (file: string) => boolean = () => false,
@@ -82,20 +124,15 @@ export class NodeCache {
         setNodeRelations(node, {});
         continue;
       }
-      const clean =
-        node === primary ||
-        node.serialize() ===
-          new (node.constructor as Model)(old)
-            .parse(state.file.source)
-            .serialize();
-      const unsaved = clean
-        ? undefined
-        : rewriteLinks(node.serialize(), old, file, relocate);
+      const merged = this.#mergedSource(
+        node,
+        file,
+        entry.source,
+        primary,
+        relocate,
+      );
       setNodePath(node, file);
-      node.parse(unsaved ?? entry.source);
-      if (unsaved !== undefined && node instanceof InternalNode)
-        for (const ref of node.children)
-          if (removed(ref.id)) node.removeChild(ref.id);
+      node.parse(merged);
       this.remember(node, entry, state.readOnly);
     }
   }

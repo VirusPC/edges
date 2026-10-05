@@ -352,3 +352,153 @@ test("cross-parent move transfers authored query and fragment to the new parent 
   );
   assert.match(fs.readFileSync(file("b/AGENTS.md"), "utf8"), /Kept/);
 });
+test("dirty constraints merge committed creation and survive the next save", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index());
+  const parent = (await service.get(file("AGENTS.md"), InternalNode))!;
+  parent.setConstraints(["unsaved"]);
+  await service.create(new LeafNode(file("child/index.md")), { body: "child" });
+  assert.equal(parent.children[0]?.id, file("child/index.md"));
+  assert.deepEqual(parent.constraints, ["unsaved"]);
+  await service.update(parent, {});
+  assert.match(fs.readFileSync(parent.path, "utf8"), /child\/index.md/);
+});
+test("dirty old and new parent aliases merge cross-parent move registration", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [A](a/AGENTS.md)\n- [B](b/AGENTS.md)"));
+  write("a/AGENTS.md", index("- [Child](child/index.md)"));
+  write("b/AGENTS.md", index());
+  write("a/child/index.md", "child");
+  const a = (await service.get(file("a/AGENTS.md"), InternalNode))!,
+    b = (await service.get(file("b/AGENTS.md"), InternalNode))!;
+  a.setConstraints(["A dirty"]);
+  b.setConstraints(["B dirty"]);
+  await service.move(
+    (await service.get(file("a/child/index.md")))!,
+    file("b/child/index.md"),
+  );
+  assert.equal(a.children.length, 0);
+  assert.equal(b.children[0]?.id, file("b/child/index.md"));
+  await service.update(a, {});
+  await service.update(b, {});
+  assert.match(fs.readFileSync(b.path, "utf8"), /child\/index.md/);
+  assert.deepEqual(a.constraints, ["A dirty"]);
+  assert.deepEqual(b.constraints, ["B dirty"]);
+});
+test("overlapping dirty reference edits conflict before a committed update writes", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Original](child/index.md)"));
+  write("child/index.md", "child");
+  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!,
+    other = (await service.get(dirty.path, InternalNode))!;
+  dirty.updateChild(file("child/index.md"), { name: "Dirty" });
+  other.updateChild(file("child/index.md"), { name: "Other" });
+  const before = fs.readFileSync(dirty.path, "utf8");
+  await assert.rejects(service.update(other, {}), /conflict/i);
+  assert.equal(fs.readFileSync(dirty.path, "utf8"), before);
+  assert.equal(dirty.children[0]?.name, "Dirty");
+});
+test("move rejects destination readonly type contract without changing either index or source", async (t) => {
+  const { file, write, service } = fixture(t);
+  write(
+    "AGENTS.md",
+    index("- [Source](src/index.md)\n- [Refs](refs/AGENTS.md)"),
+  );
+  write("src/index.md", "source");
+  write("refs/AGENTS.md", typeIndex("skills", false));
+  const before = fs.readFileSync(file("AGENTS.md"), "utf8"),
+    refs = fs.readFileSync(file("refs/AGENTS.md"), "utf8");
+  await assert.rejects(
+    service.move(
+      (await service.get(file("src/index.md")))!,
+      file("refs/target/index.md"),
+    ),
+    /read.only/i,
+  );
+  assert.equal(fs.readFileSync(file("src/index.md"), "utf8"), "source");
+  assert.equal(fs.readFileSync(file("AGENTS.md"), "utf8"), before);
+  assert.equal(fs.readFileSync(file("refs/AGENTS.md"), "utf8"), refs);
+});
+test("Internal move refuses descendant loss of known Note layout type", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Notes](notes/group/AGENTS.md)"));
+  write("notes/group/AGENTS.md", index("- [One](one/index.md)"));
+  write("notes/group/one/index.md", "# Note");
+  const node = (await service.get(file("notes/group/AGENTS.md")))!,
+    child = (await service.get(file("notes/group/one/index.md")))!;
+  const before = fs.readFileSync(file("AGENTS.md"), "utf8");
+  assert.equal(child.type, "note");
+  await assert.rejects(
+    service.move(node, file("elsewhere/AGENTS.md")),
+    /business type/i,
+  );
+  assert.equal(fs.existsSync(child.path), true);
+  assert.equal(fs.readFileSync(file("AGENTS.md"), "utf8"), before);
+  assert.equal(fs.existsSync(file("elsewhere")), false);
+});
+test("Internal relocation resolves descendant type with its proposed moved Memory contract", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Memory](old/AGENTS.md)"));
+  write("old/AGENTS.md", typeIndex("memory", true, "- [One](one/index.md)"));
+  write("old/one/index.md", "body");
+  const node = (await service.get(file("old/AGENTS.md")))!,
+    child = (await service.get(file("old/one/index.md")))!;
+  await service.move(node, file("new/AGENTS.md"));
+  assert.equal(child.type, "memory");
+  assert.equal((await service.get(child.path))!.type, "memory");
+});
+test("link relocation distinguishes destination from title delimiters and escaped nested labels", async (t) => {
+  const { file, write, service } = fixture(t);
+  write(
+    "a/index.md",
+    '[x](../asset.png "see ](example)")\n![a [nested] label](../asset.png "title ](foo)")\n[escaped \\] label](../asset.png "safe")',
+  );
+  write("asset.png", "asset");
+  await service.move(
+    (await service.get(file("a/index.md")))!,
+    file("deep/a/index.md"),
+  );
+  assert.equal(
+    fs.readFileSync(file("deep/a/index.md"), "utf8"),
+    '[x](../../asset.png "see ](example)")\n![a [nested] label](../../asset.png "title ](foo)")\n[escaped \\] label](../../asset.png "safe")',
+  );
+});
+test("dirty reference name and committed group changes merge independently", async (t) => {
+  const { file, write, service } = fixture(t);
+  write("AGENTS.md", index("- [Original](child/index.md)"));
+  write("child/index.md", "child");
+  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!,
+    other = (await service.get(file("AGENTS.md"), InternalNode))!;
+  dirty.updateChild(file("child/index.md"), { name: "Dirty name" });
+  other.moveChild(file("child/index.md"), "descendant");
+  await service.update(other, {});
+  assert.equal(dirty.localChildren.length, 0);
+  assert.equal(dirty.descendantChildren[0]?.name, "Dirty name");
+  await service.update(dirty, {});
+  assert.equal(
+    (await service.get(dirty.path, InternalNode))!.descendantChildren[0]?.name,
+    "Dirty name",
+  );
+});
+test("readonly indexes remain editable while relocation into a readonly subtree is denied", async (t) => {
+  const { file, write, service } = fixture(t);
+  write(
+    "AGENTS.md",
+    index("- [Refs](refs/AGENTS.md)\n- [Tree](tree/AGENTS.md)"),
+  );
+  write("refs/AGENTS.md", typeIndex("skills", false));
+  write("tree/AGENTS.md", index("- [Child](child/index.md)"));
+  write("tree/child/index.md", "body");
+  const refs = (await service.get(file("refs/AGENTS.md"), InternalNode))!;
+  await service.update(refs, { metadata: { description: "editable index" } });
+  const before = fs.readFileSync(refs.path, "utf8");
+  await assert.rejects(
+    service.move(
+      (await service.get(file("tree/AGENTS.md")))!,
+      file("refs/tree/AGENTS.md"),
+    ),
+    /read.only/i,
+  );
+  assert.equal(fs.readFileSync(refs.path, "utf8"), before);
+  assert.equal(fs.readFileSync(file("tree/child/index.md"), "utf8"), "body");
+});

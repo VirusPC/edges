@@ -226,12 +226,30 @@ export class NodeService {
     };
     for (const write of plan.values()) await visit(write.node);
   }
+  #proposedParent(
+    file: string,
+    plan: ReadonlyMap<string, Planned>,
+  ): InternalNode | undefined {
+    const parent = physicalParent(
+      file,
+      this.managedRoot,
+      (candidate) => plan.has(candidate) || fs.existsSync(candidate),
+    );
+    if (!parent) return undefined;
+    const proposed = plan.get(parent);
+    if (proposed) return new InternalNode(parent).parse(proposed.source);
+    const entry = readEntry(parent);
+    return entry ? new InternalNode(parent).parse(entry.source) : undefined;
+  }
   async #preflight(
     operation: Operation,
     plan: Map<string, Planned>,
   ): Promise<void> {
     for (const write of plan.values()) {
       this.#boundary(write.node.path);
+      const parent = this.#proposedParent(write.node.path, plan);
+      if (parent && indexContract(parent)?.writable === false)
+        throw new Error(`Read-only destination contract: ${write.node.path}`);
       if (
         this.#cache.isReadOnly(write.node.path) ||
         (write.before && this.#cache.isReadOnly(write.before.path))
@@ -270,6 +288,10 @@ export class NodeService {
   ): Promise<void> {
     await this.#validateGraph(plan);
     await this.#preflight(operation, plan);
+    this.#cache.assertRefresh(
+      new Map([...plan].map(([file, write]) => [file, write.source])),
+      primary,
+    );
     saveEntries(
       [...plan.values()].map((w) => ({
         path: w.node.path,
@@ -457,6 +479,28 @@ export class NodeService {
     // Destination snapshots still point at the source until the rename commits.
     await this.#validateGraph(plan, (file) => within(file, sourceRoot));
     await this.#preflight("move", plan);
+    for (const write of plan.values())
+      if (write.before && within(write.before.path, sourceRoot)) {
+        const oldType = identifyNodeType(
+          write.before.path,
+          indexContract(this.#parentNode(write.before.path) ?? write.node),
+        );
+        const newType = identifyNodeType(
+          write.node.path,
+          indexContract(
+            this.#proposedParent(write.node.path, plan) ?? write.node,
+          ),
+        );
+        if (oldType !== newType)
+          throw new Error(
+            `Move cannot change known business type: ${write.before.path} (${oldType} -> ${newType})`,
+          );
+      }
+    this.#cache.assertRefresh(
+      new Map([...plan].map(([file, write]) => [file, write.source])),
+      node,
+      relocate,
+    );
     const snapshot = resourceSnapshot(sourceRoot);
     this.#existing(node, true);
     validateResources(snapshot);
@@ -523,6 +567,9 @@ export class NodeService {
       }
     await this.#validateGraph(plan, removed);
     await this.#preflight("destroy", plan);
+    this.#cache.assertRefresh(
+      new Map([...plan].map(([file, write]) => [file, write.source])),
+    );
     await this.#options.assertWrite?.({
       operation: "destroy",
       node,
@@ -674,6 +721,9 @@ export class NodeService {
     if (registration) plan.set(registration.node.path, registration);
     await this.#validateGraph(plan);
     await this.#preflight("import", plan);
+    this.#cache.assertRefresh(
+      new Map([...plan].map(([file, write]) => [file, write.source])),
+    );
     validateResources(snapshot);
     fs.mkdirSync(path.dirname(destRoot), { recursive: true });
     checkPath(destRoot);

@@ -39,6 +39,7 @@ export function coLocated(entry: string): boolean {
 export function physicalParent(
   entry: string,
   root: string,
+  exists: (entry: string) => boolean = fs.existsSync,
 ): string | undefined {
   let dir = path.dirname(path.dirname(entry));
   // The .harness directory is a maintenance relation, never composition of its host.
@@ -46,7 +47,7 @@ export function physicalParent(
     dir = path.dirname(dir);
   while (within(dir, root)) {
     const candidate = path.join(dir, "AGENTS.md");
-    if (fs.existsSync(candidate)) return candidate;
+    if (exists(candidate)) return candidate;
     if (dir === root) break;
     dir = path.dirname(dir);
   }
@@ -130,11 +131,24 @@ export function rewriteLinks(
       const start = node.position.start.offset!,
         end = node.position.end.offset!;
       const text = source.slice(start, end);
-      const opening =
-        node.type === "definition"
-          ? text.indexOf("]:") + 2
-          : text.lastIndexOf("](") + 2;
-      if (opening < 2) return;
+      // Locate the close of the outer label, never delimiters in the title.
+      let cursor = node.type === "image" ? 1 : 0,
+        brackets = 0,
+        opening = -1;
+      for (; cursor < text.length; cursor++) {
+        const character = text[cursor];
+        if (character === "\\") {
+          cursor++;
+          continue;
+        }
+        if (character === "[") brackets++;
+        else if (character === "]" && --brackets === 0) {
+          const delimiter = node.type === "definition" ? ":" : "(";
+          if (text[cursor + 1] === delimiter) opening = cursor + 2;
+          break;
+        }
+      }
+      if (opening < 0) return;
       let a = opening;
       while (/\s/.test(text[a] ?? "") && a < text.length) a++;
       let b = a;
