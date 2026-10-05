@@ -140,7 +140,7 @@ get 恢复 parent 和 harness 的轻量引用，不递归加载 harness 正文�
 
 ## 业务接入与迁移
 
-Task / Memory / Note / Skill 生产路径接入新节点方法。Note 已有 Markdown 输入属于已有文档导入：验证而非强行取消该入口。Tasks CLI 接收结构化字段，节点生成 metadata；侧日志随任务目录移动。
+Task / Memory / Note / Skill 生产路径接入新节点方法。Tasks CLI 接收结构化字段，节点生成 metadata；侧日志随任务目录移动。Memory / Note 通过显式 `--import-entry` 导入完整目录，入口须符合该命令的领域合同；冲突的正文参数直接报错。Note 的 `--content-file --markdown` 保留为验证后的单份文档输入，保留正文和合法元数据，不隐式复制其父目录；整目录复制由 `--import-entry` 表达。
 
 新增显式一次性迁移工具和迁移 Skill：dry-run 给出旧单文件到 `<stem>/index.md` 的计划、引用更新与冲突；apply 只操作明示作用域的 tracked/public 内容，幂等。对于无可靠资源归属的历史附件不猜测迁移；保留原链接目标并重新计算相对路径。若同名目录已有附件但没有入口，迁移计划明确列出复用该目录，只新增 index.md、不移动或覆盖附件；已有目标入口或符号链接则冲突报错。排除 knowledge/posts、私有记忆、第三方体系和历史 spec 中示例路径。迁移真实本工作树内的受管 public Memory/Tasks/Notes 时使用该工具；旧快照/journal 审计材料保持历史语义。
 
