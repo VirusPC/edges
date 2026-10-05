@@ -30,6 +30,7 @@ interface Snapshot {
   root: string;
   files: Map<string, EntryFile>;
   discovery: string[];
+  owners: Map<string, EntryFile | undefined>;
   edits: TaskIndexMigrationPlan["edits"];
 }
 const snapshots = new WeakMap<TaskIndexMigrationPlan, Snapshot>();
@@ -86,6 +87,7 @@ export async function planTaskIndexes(
   const discovery = discover(root);
   const files = new Map(discovery.map((file) => [file, readEntry(file)!]));
   const nodes = new Map<string, InternalNode>();
+  const owners = new Map<string, EntryFile | undefined>();
   const tasks = discovery.filter((file) => identifyNodeType(file) === "task");
   const get = (
     file: string,
@@ -219,9 +221,15 @@ export async function planTaskIndexes(
     const owner = path.dirname(board);
     const scope =
       path.basename(owner) === ".harness" ? path.dirname(owner) : owner;
-    const content = ["index.md", "SKILL.md"]
-      .map((name) => path.join(scope, name))
-      .find((file) => fs.existsSync(file));
+    // Snapshot both present and absent candidates: adding an entry can change
+    // whether this selected public scope is an InternalNode or a content node.
+    const candidates = ["index.md", "SKILL.md"].map((name) =>
+      path.join(scope, name),
+    );
+    for (const file of candidates)
+      if (!owners.has(file))
+        owners.set(file, files.get(file) ?? readEntry(file));
+    const content = candidates.find((file) => owners.get(file) !== undefined);
     const scopeEntry = path.join(scope, "AGENTS.md");
     if (!content && !files.has(scopeEntry) && !nodes.has(scopeEntry))
       throw new Error(`Missing owning scope index: ${scopeEntry}`);
@@ -250,6 +258,7 @@ export async function planTaskIndexes(
     root,
     files,
     discovery,
+    owners,
     edits: structuredClone(edits),
   });
   return plan;
@@ -272,6 +281,11 @@ export async function applyTaskIndexes(
     throw new Error(`Discovery changed; plan again: ${changed}`);
   }
   for (const entry of snapshot.files.values()) validateEntry(entry);
+  for (const [file, entry] of snapshot.owners) {
+    if (entry) validateEntry(entry);
+    else if (fs.existsSync(checkPath(file)))
+      throw new Error(`Owner entry added; plan again: ${file}`);
+  }
   if (JSON.stringify(plan.edits) !== JSON.stringify(snapshot.edits))
     throw new Error(`Migration plan edits changed: ${plan.root}`);
   saveEntries(

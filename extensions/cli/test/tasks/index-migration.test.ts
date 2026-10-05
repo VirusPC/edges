@@ -209,3 +209,50 @@ test("adopts legacy task-projects-only board index into a readable local section
   );
   assert.equal((await planTaskIndexes(root)).edits.length, 0);
 });
+
+for (const entryName of ["index.md", "SKILL.md"] as const)
+  for (const drift of ["addition", "deletion", "content", "identity"] as const)
+    test(`rejects ${entryName} owner ${drift} after preview without index writes`, async (t) => {
+      const { root, write, task } = fixture(t);
+      write("tools/foo/AGENTS.md", "# Owner\n");
+      task("tools/foo/.harness/tasks/_default/todo/owned/index.md");
+      const relative = `tools/foo/${entryName}`;
+      if (drift !== "addition") write(relative, "# Owner content\n");
+      const plan = await planTaskIndexes(root);
+      const entry = path.join(root, relative);
+      if (drift === "addition") write(relative, "# Added owner\n");
+      if (drift === "deletion") fs.unlinkSync(entry);
+      if (drift === "content") fs.appendFileSync(entry, "Changed\n");
+      if (drift === "identity") {
+        const replacement = write(
+          "replacement.md",
+          fs.readFileSync(entry, "utf8"),
+        );
+        fs.renameSync(replacement, entry);
+      }
+      await assert.rejects(applyTaskIndexes(plan), (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.ok(error.message.includes(entry), error.message);
+        return true;
+      });
+      for (const edit of plan.edits) {
+        const file = path.join(root, edit.path);
+        if (edit.before === null) assert.ok(!fs.existsSync(file), edit.path);
+        else
+          assert.equal(fs.readFileSync(file, "utf8"), edit.before, edit.path);
+      }
+    });
+
+test("tracks both possible owner entries, while unrelated content does not cause drift", async (t) => {
+  const { root, write, task } = fixture(t);
+  write("tools/foo/index.md", "# Owner\n");
+  task("tools/foo/.harness/tasks/_default/todo/owned/index.md");
+  const plan = await planTaskIndexes(root);
+  write("tools/foo/SKILL.md", "# New alternative owner\n");
+  await assert.rejects(applyTaskIndexes(plan), /tools\/foo\/SKILL.md/);
+  const next = await planTaskIndexes(root);
+  write("unrelated/index.md", "# Unrelated content\n");
+  write("unrelated/SKILL.md", "# Unrelated skill\n");
+  await applyTaskIndexes(next);
+  assert.equal((await planTaskIndexes(root)).edits.length, 0);
+});
