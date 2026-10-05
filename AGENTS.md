@@ -36,18 +36,20 @@
 - [领域术语](<CONTEXT.md>) — 领域术语入口。
 
 [架构决策](<docs/adr/>) — 架构决策入口。
+
+- [.harness/evaluation/AGENTS.md](<.harness/evaluation/AGENTS.md>) — 根作用域的评测维护模块，评测整套 Edges。
 <!-- project-memory-local:end -->
 
 <!-- project-memory-children:start -->
 ## 下层作用域
 
-- [.harness/evaluation/AGENTS.md](.harness/evaluation/AGENTS.md) — 评测工作区及其独立验证责任。
 - [teaching/AGENTS.md](teaching/AGENTS.md) — 教学与学习状态。
-
 - [领域任务](<tasks/AGENTS.md>) — 领域任务入口。
+
 - [对外能力实现约束](<extensions/AGENTS.md>) — 对外能力实现约束入口。
 - [共享扩展约束](<shared-extensions/AGENTS.md>) — 共享扩展约束入口。
 - [笔记规范](<knowledge/notes/AGENTS.md>) — 笔记规范入口。
+
 <!-- project-memory-children:end -->
 
 <!-- project-memory:end -->
