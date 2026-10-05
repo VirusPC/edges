@@ -8,7 +8,7 @@
 
 | 字段组 | 来源 | 更新时 |
 | --- | --- | --- |
-| 身份与语义 `name` `type` | `name` 等于文件名去后缀，写在顶层；`type` 就是 `--type`，写在 `metadata.edges-type` | 不变 |
+| 身份与语义 `name` `type` | `name` 等于内容目录名（如 `project_example`），写在顶层，不是入口文件名 `index`；`type` 就是 `--type`，写在 `metadata.edges-type` | 不变 |
 | 语义 `title` `description` | 同名命令行参数；`description` 顶层，`title` 在 `metadata.edges-title` | 不传则保留原值 |
 | 出处 `originSessionId` `agentClient` | 环境变量：`CURSOR_CONVERSATION_ID` / `CLAUDE_SESSION_ID`，以及 `CURSOR_AGENT` → `cursor`、`CLAUDECODE` → `claude-code`；落盘为 `edges-origin-session-id` / `edges-agent-client` | **保留创建时的值** |
 | 审计 `username` `email` `updatedAt` | 前两个取 `git -C <目录> config`，后一个取本地时区 ISO 8601；落盘为 `edges-username` / `edges-email` / `edges-updated-at` | **每次覆盖** |

@@ -38,6 +38,8 @@ parse/serialize 使用 gray-matter 默认 YAML 能力；保留 Markdown 非受�
 
 ## Git 原生管理
 
-Git 跟踪公开内容，忽略规则保护本地私有记忆。公开迁移不能证明其他克隆的 ignored 内容已经处理；私有材料须由每个克隆按[迁移指南](../recursive-layout-migration.md)明确审阅。来源不明、旧规则未完成 journal 或目标冲突直接报错，按当前规则处理，不建立旧日志自动转换体系。`knowledge/posts/` 由人维护，不属于自动迁移范围。
+Git 跟踪公开内容，忽略规则保护本地私有记忆。公开迁移不能证明其他克隆的 ignored 内容已经处理；私有材料须由每个克隆按[迁移指南](../recursive-layout-migration.md)明确审阅。目录转换只要发现已知旧 journal 就拒绝，不读取其中可能存在的私有快照，不自动删除、归档或续跑；来源不明或目标冲突同样报错。`knowledge/posts/` 由人维护，不属于自动迁移范围。
+
+目录模型、业务 CLI 与本仓公开内容已采用上述约定。具体转换数量、幂等性及排除范围记录在[迁移指南](../recursive-layout-migration.md#2026-10-05-目录入口采用)，测试与独立审阅进度以实施计划为准。
 
 历史实施：[原设计](../superpowers/specs/2026-10-03-recursive-scope-layout-design.md)、[上一轮模型](../superpowers/specs/2026-10-04-node-domain-model-design.md)、[43 条公开局部记忆归属纠正](../superpowers/plans/2026-10-05-recursive-node-ownership-correction.md)。这些记录保留当时状态，当前规则以本 ADR 与新 spec 为准。

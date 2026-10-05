@@ -2,6 +2,8 @@
 
 状态：用户已确认，2026-10-05 收敛；本文件取代 2026-10-04-node-domain-model-design.md 中与其冲突的模型、双格式、reparent、权限与导入设计。历史讨论见 ../../discussions/2026-10-05-implementation-rulings.md。
 
+实现状态：模型、Service 与 CLI 已接入，本仓 tracked/public 内容已按[迁移指南](../../recursive-layout-migration.md#2026-10-05-目录入口采用)转换并验证幂等性。私有克隆材料未迁移；最终独立审阅与 PR 状态见[实施计划](../plans/2026-10-05-directory-node-refactor.md)。下文“旧 Tasks 记忆剩余归属”描述的所有权调整已完成，不需重复移动。
+
 ## 目标与边界
 
 统一目录承载节点；只为 Markdown 入口建立领域对象。节点定义自身业务操作，Service 执行文件 IO 与一致性维护。组成树和 harness 关系分开，保持 AGENTS 原有三部分及非受控正文。

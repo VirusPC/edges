@@ -12,6 +12,16 @@
 
 [现行纠正清单](superpowers/plans/2026-10-05-local-ownership-correction.json)按当前源字节恢复了 43 条公开记录：`extensions` 16、`extensions/skills/project-memory-init` 17、`shared-extensions` 1、`knowledge/notes` 1、旧 `knowledge/tasks` 的 8 条归 `.harness/tasks`。25 份类型入口保留人工说明与未知元数据；根层后来新增的记忆仍在根层。`pnpm restore:local-ownership --root <独立克隆绝对路径> --manifest <已审阅清单绝对路径> --dry-run` 是针对**仍符合这份纠正清单源状态**的公开纠正审阅入口；目标碰撞、源漂移会拒绝写入，已纠正则不再移动。普通 `edges memory migrate --recursive` 保留旧 owner 关系，不代替实例归属纠正。
 
+## 2026-10-05 目录入口采用
+
+本仓已用 `pnpm migrate:directory-nodes --root <独立工作树绝对路径> --apply` 转换 117 条公开 Memory、103 条 Task、88 条 Note 和 100 份 Task runlog；原有 2 条目录 Task 保留。17 份既有引用文档同步更新；一条 Note 复用同 stem 附件目录，附件没有移动或覆盖。应用后 425 份计划写入的内容与权限符合预览，4,072 份无关 tracked/public 文件内容未变；第二次计划为零移动、零更新。
+
+此工具从具备依赖的 Edges checkout 运行，默认 dry-run，显式 `--apply` 才写入；安装日常 CLI 或 Skill 不会分发该仓库维护脚本。它只选择目标工作树中的 tracked、非 ignored、公开受管条目，排除 users/private、文章、第三方/安装目录与历史 ADR/spec。转换保持本地 owner、未知元数据、权限、相对链接的目标与 fragment/query；既有 canonical 节点内的资源不重新解释为 Note。详情见[目录迁移 Skill](../extensions/skills/migrate-directory-nodes/SKILL.md)。
+
+存在 `.recursive-layout-migration/journal.json`、`.ownership-correction/public.json` 或 `.ownership-correction/private.json` 时，**目录转换一律拒绝**，无论旧流程是否看似完成；只检查存在性，不读取 payload，也不自动删除、归档或续跑。先人工核实旧状态，或在无这些本机日志的独立工作树审阅公开转换。下文旧流程的 resume/权限规则仅适用于对应旧迁移器，不是新目录转换器的行为。
+
+日常创建与读取已采用目录入口；`edges memory remember --import-entry` 和 `edges note --import-entry` 导入完整目录，`edges note --content-file --markdown` 仅输入一份文档。旧单文件由显式转换处理，Doctor 不代为迁移；重复或跨组重叠的 AGENTS 需修正作者意图，Doctor 不自动去重。这里不包含真实私有内容的目录转换，也不证明其他克隆已迁移。
+
 ## 每个克隆的私有材料
 
 Git 不分发 ignored 用户材料，也不证明别的克隆已完成私有纠正。新实例迁移映射保留 owner-local 关系：根归根，`extensions`、`extensions/skills/project-memory-init`、`shared-extensions`、`knowledge/notes` 各归本节点，旧 `knowledge/tasks` 归 `.harness/tasks`，旧 `evaluation` 归 `.harness/evaluation`，旧 `knowledge/teaching` 归 `teaching`。不能凭标题或正文猜私有归属。

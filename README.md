@@ -121,7 +121,7 @@ projects/foo/report.md → knowledge/archive/projects/foo/report.md
 
 - **Git 原生管理**：用 Git 的跟踪、忽略与版本机制管理记忆；例如 user memory 通过 `.gitignore` 不随 Git 提交与共享，同时仍属于本层记忆。
 
-这些原则指导系统演进。目前 CLI 可选显式作用域或最近的 `AGENTS.md` 节点，节点服务按入口索引遍历所有权；Project Memory 按需登记本地类型，不会因为发现节点就自动初始化。**统一目录形式与上述系统二检索边界是已确定的设计要求，基础领域模型与遍历实现仍在重新设计；当前代码仍支持单文件／目录两种形式，历史内容尚未统一转换。** 43 条曾上收根层的公开局部记忆已返回原所有者；其他克隆的私有材料仍须各自按[迁移指南](docs/recursive-layout-migration.md)审阅与处理。术语定义见 [CONTEXT.md](CONTEXT.md)。
+这些原则已接入 CLI 与节点服务：CLI 可选显式作用域或最近的 `AGENTS.md` 节点，`NodeService.list` 默认沿 `localChildren` 展开，显式 `includeDescendants` 才同时展开 `descendantChildren`，两者都不自动跟随 harness。Project Memory 按需登记本地类型，不会因为发现节点就自动初始化。Task、Memory、Note 统一使用目录中的 `index.md`，Skill 使用 `SKILL.md`；旧单文件仅经显式迁移转换。2026-10-05 已转换本仓 tracked/public 的 117 条 Memory、103 条 Task、88 条 Note 及 100 份 Task runlog，保持局部所有权与附件链接；原有 2 条目录 Task 保留。43 条曾上收根层的公开局部记忆已返回原所有者；其他克隆的私有材料仍须各自按[迁移指南](docs/recursive-layout-migration.md)审阅与处理。术语定义见 [CONTEXT.md](CONTEXT.md)。
 
 围绕这些原则，Edges 希望部署、接入和输出这三件事尽量一键完成。它们分别托住知识闭环的底座、把捕获接到输入侧、以及把沉淀资产部署出去。仓库按这个方向收敛。
 

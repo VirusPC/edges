@@ -75,7 +75,7 @@ Those examples use `tsx` and do not need a `dist/` build. The installed `edges` 
 
 Node models live together in [`src/models/`](src/models/), with domain syntax helpers beneath that directory. [`NodeService`](src/services/node-service.ts) provides snapshot-checked document creation, loading, updates, deletion and ownership-index coordination. Task, Memory and Note business orchestration lives under `src/services/`; command handlers under `src/commands/` retain the directory-as-command-tree layout. Generic Markdown/YAML and filesystem primitives remain under `src/utils/`. There is no separate package or compatibility copy of the former `utils/node-tree` repository API.
 
-[`src/services/scope.ts`](src/services/scope.ts) retains environment/argument precedence, Git fallback, directory exclusions and the existing Project Memory marker selection policy. It parses with InternalNode; Tasks `all` still performs physical inventory. NodeService logical traversal remains explicit and defaults to local ownership references. Scope eligibility changes and restoration of local project memories remain separate work.
+[`src/services/scope.ts`](src/services/scope.ts) retains environment/argument precedence, Git fallback and directory exclusions. Readable AGENTS entries are eligible without a Memory marker or separate responsibility requirement; selection does not initialize Memory. Tasks `all` still performs physical inventory. NodeService traversal defaults to localChildren; includeDescendants also follows descendantChildren. Neither follows harness automatically.
 
 Normal Task create/update/status and Note ingest save actual TaskNode/NoteNode instances through NodeService. Memory remember uses MemoryNode or SkillNode, while index and scope documents save InternalNode instances. Typed mutations retain unknown vendor metadata. Task board/status movement, sidecar runlogs, Memory type privileges and Note Git/PR publishing remain business-service responsibilities. Task reads retain their tolerant legacy-priority projection; strict typed mutation validates fields. Archive and migration remain batch workflows; the legacy migration implementation loads only when the migrate command runs.
 
@@ -83,7 +83,7 @@ Memory `initMemory`, `rememberMemory`, `addMemoryType`, `doctorMemory`, `refresh
 
 NodeService accepts model selection, write validation and read-only reference hooks. Read-only provenance cannot be removed by a hook. Managed mutations require physical containment within managedRoot; referenced sources remain read-only. Existing file permissions are preserved, without introducing a business permission policy.
 
-NodeReference carries a stable logical id and an authored href. Paths are decoded once after query/fragment separation; ids reject control characters. References support discovery and link rewriting, while physical parent directories determine ownership. Optional frontmatter uses safe YAML parsing; runtime node types are inferred from canonical entry layout and explicit context.
+NodeReference contains id (the normalized absolute entry path), optional name and optional description. Authored Markdown links remain relative to their source, with query/fragment preserved during rewriting; href is not a reference field. References support discovery, while physical parent directories determine ownership. Frontmatter uses gray-matter's default YAML parser; runtime node types are inferred from canonical entry layout and explicit context.
 
 All content nodes use directory entries: index.md for Task/Memory/Note and SKILL.md for Skills. InternalNode uses AGENTS.md with separate local/descendant references; a co-located AGENTS is the content node's harness. Ordinary Markdown is not a runtime node. Moves preserve instance identity, move the complete directory, and relocate registered references and authored relative links. Resources remain opaque files.
 
@@ -91,7 +91,7 @@ NodeService requires managedRoot and accepts structured create/update inputs. Wh
 
 Legacy tracked/public documents use the explicit [directory migration Skill](../skills/migrate-directory-nodes/SKILL.md): pnpm migrate:directory-nodes --root <worktree> previews; --apply converts. Existing legacy journals require manual review; this tool does not open their potentially private snapshots.
 
-Whole-unit moves require the same filesystem and entry layout. `NodeService` uses snapshots and recoverable file/index writes, but multi-file operations are not durable crash-atomic transactions. The present CLI scope selector still applies its existing eligibility policy; the independent recursive-ownership correction will remove that extra gate, restore three-part AGENTS registration and return promoted local records to their owners. The current model rollout does not perform those structural moves.
+Whole-unit moves retain canonical entry layout and known business type. `NodeService` uses snapshots and recoverable file/index writes, but multi-file operations are not durable crash-atomic transactions. The repository has adopted directory entries and restored local public memories to their owners; per-clone private migration remains explicit. See the [migration guide](../../docs/recursive-layout-migration.md).
 
 ```bash
 edges --scope ./projects/demo tasks list

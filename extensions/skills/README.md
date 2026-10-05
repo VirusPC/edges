@@ -102,7 +102,7 @@ npx skills@latest add VirusPC/edges/extensions/skills --skill paper-10-questions
 
 旧 Project Memory 升级使用 [`project-memory-migrate`](project-memory-migrate/SKILL.md) 调用 `edges memory migrate`；其 `--dry-run` 可预览一次性转换，常规运行时不兼容旧 `.memory`。私有归档使用 [`user-memory-backup`](user-memory-backup/SKILL.md) 与 [`user-memory-restore`](user-memory-restore/SKILL.md) 调用同一 CLI 的 backup/restore，仅处理新 `.harness/memory/users`。Git 更新公共布局后，每台机器仍须迁移自己的 ignored 私有残留。
 
-维护这组 skill 时，按 [Project Memory 开发规范](project-memory-init/.harness/memory/projects/project_development.md) 的顺序修改和验证。
+维护这组 skill 时，按 [Project Memory 开发规范](project-memory-init/.harness/memory/projects/project_development/index.md) 的顺序修改和验证。
 
 ### 卸载
 

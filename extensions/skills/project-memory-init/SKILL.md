@@ -1,7 +1,7 @@
 ---
 name: project-memory-init
 description: 在指定作用域按用户选择创建或刷新项目记忆与技能类型（AGENTS.md + .harness）。仅当用户明确要求初始化时使用，不覆盖已有正文。
-version: 3.1.0
+version: 3.1.1
 ---
 
 # Project Memory Init

@@ -23,7 +23,7 @@
 
 `.harness/`、`memory/`、`skills/` 无必经总入口，不创建 `.harness/skills/AGENTS.md`。下层作用域可跨多层目录，也可在 `.harness/evaluation` 等模块内；有可读 `AGENTS.md` 的真实目录就是节点；目录名称或业务类型不构成额外资格门槛。
 
-CLI 目标选择依次为显式 `--scope`、`EDGES_SCOPE` / `EDGES_REPO`、cwd 向上的最近可读 `AGENTS.md`，没有入口时退回 Git 根；不会穿越嵌套 Git 边界。标记只界定工具可改写的区块，不界定节点资格。显式选择目标不自动初始化 Memory。类型入口、Task 看板和 Task Project 使用同一种节点模型；已登记的本层与下层引用决定逻辑归属，普通跨目录正文链接不会自动变成所有权。Doctor 只给已采用 Memory / Skills 类型的节点补相应契约，不给普通或业务节点强加空区块。
+CLI 目标选择依次为显式 `--scope`、`EDGES_SCOPE` / `EDGES_REPO`、cwd 向上的最近可读 `AGENTS.md`，没有入口时退回 Git 根；不会穿越嵌套 Git 边界。标记只界定工具可改写的区块，不界定节点资格。显式选择目标不自动初始化 Memory。类型入口、Task 看板和 Task Project 使用同一种节点模型；本层与下层引用决定发现路径，唯一 parent 遵循实际目录的最近有效组织入口，普通跨目录正文链接不会变成所有权。Doctor 只给已采用 Memory / Skills 类型的节点补相应契约，不给普通或业务节点强加空区块。
 
 根参数优先：`--root-dir` 明确封住树，不跨其他 Git root/submodule。未给时取 Git 根，否则最近的受管层入口，否则目标自身。扫描允许穿过 `.harness` 到达真实子层，但跳过其他隐藏目录、node_modules、符号链接目录和嵌套 Git 根。
 
@@ -87,7 +87,7 @@ edges --scope S memory add-type \
 
 ## Doctor
 
-默认只诊断；已有修复授权时使用 `--apply`。修复已采用官方类型的缺失入口（自定义入口丢失时无法恢复身份/权限，报告 unsafe-layout 要求恢复原索引）、漂移索引、已采用 Memory 的漏登记或重复下层，补缺失硬约束区块；foreign AGENTS 只追加受管区块。不会初始化未采用类型、移动旧布局或改正文。返回 `findings`、`repaired`、`remaining`；每个 finding 同时含 `code` 与兼容消费字段 `issue`。无法读取的来源、无效正文和旧布局会留在 remaining，不宣称已全部修好。
+默认只诊断；已有修复授权时使用 `--apply`。修复已采用官方类型的缺失入口（自定义入口丢失时无法恢复身份/权限，报告 unsafe-layout 要求恢复原索引）、有效节点上的漂移索引和已采用 Memory 的漏登记，补缺失硬约束区块；foreign AGENTS 只追加受管区块。重复组成引用或跨组重叠使 AGENTS 无效：报告路径、区块与原因，保留原文，不猜测该保留哪条；其依赖修复暂缓，独立有效节点仍可修复。不会初始化未采用类型、移动旧布局或改正文。返回 `findings`、`repaired`、`remaining`；每个 finding 同时含 `code` 与兼容消费字段 `issue`。无法读取的来源、无效正文和旧布局会留在 remaining，不宣称已全部修好。
 
 ## 统一目录节点与显式导入
 
