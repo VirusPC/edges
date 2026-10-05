@@ -109,6 +109,8 @@ InternalCreateInput/UpdateInput 为通用输入加可选 constraints/localChildr
 
 create 生成受控内容；update 只更新指定字段，未传字段保留。metadata patch 合并已有字段，未知合法 YAML 字段保留。parse/serialize 使用 gray-matter 默认语法。validate 报出文件、字段/章节和原因，让 AI 修正文档；不自动修复非标准输入。Node body 的未受控章节、注释、正文必须保留；不要求保留 YAML 注释/样式。结构化 Internal 变更沿用源文本补丁式序列化。
 
+Doctor 遇到组成引用重复或跨组重叠等无效 AGENTS，报告路径、区块与原因并保留原文；即使显式 `--fix`，也不猜测应该保留哪条或哪组。修正文档后可重跑；有效节点上的明确索引修复能力继续保留。
+
 ## Service 接口与读取
 
 ```ts
