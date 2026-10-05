@@ -110,7 +110,7 @@ get 恢复 parent 和 harness 的轻量引用，不递归加载 harness 正文�
 
 Task / Memory / Note / Skill 生产路径接入新节点方法。Note 已有 Markdown 输入属于已有文档导入：验证而非强行取消该入口。Tasks CLI 接收结构化字段，节点生成 metadata；侧日志随任务目录移动。
 
-新增显式一次性迁移工具和迁移 Skill：dry-run 给出旧单文件到 `<stem>/index.md` 的计划、引用更新与冲突；apply 只操作明示作用域的 tracked/public 内容，幂等。对于无可靠资源归属的历史附件不猜测迁移；保留原链接目标并重新计算相对路径。排除 knowledge/posts、私有记忆、第三方体系和历史 spec 中示例路径。迁移真实本工作树内的受管 public Memory/Tasks/Notes 时使用该工具；旧快照/journal 审计材料保持历史语义。
+新增显式一次性迁移工具和迁移 Skill：dry-run 给出旧单文件到 `<stem>/index.md` 的计划、引用更新与冲突；apply 只操作明示作用域的 tracked/public 内容，幂等。对于无可靠资源归属的历史附件不猜测迁移；保留原链接目标并重新计算相对路径。若同名目录已有附件但没有入口，迁移计划明确列出复用该目录，只新增 index.md、不移动或覆盖附件；已有目标入口或符号链接则冲突报错。排除 knowledge/posts、私有记忆、第三方体系和历史 spec 中示例路径。迁移真实本工作树内的受管 public Memory/Tasks/Notes 时使用该工具；旧快照/journal 审计材料保持历史语义。
 
 旧 Tasks 记忆剩余归属：云端 Obsidian 部署记忆移根 Project Memory；preview-tasks-with-box-obsidian 移根 managed Skill；事实/想法写法归 conversation-to-tasks（保留现有 STAR，不强加新的必填字段）；七个 Task Project 分类留 Tasks 本层。不建设 extensions/memory。
 
