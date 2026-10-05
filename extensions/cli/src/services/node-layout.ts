@@ -23,10 +23,13 @@ import {
   type DirectoryContract,
 } from "../models/layout.js";
 import { parseDocument } from "../utils/markdown/document.js";
-import { checkPath } from "./node-files.js";
+import { checkPath, readEntry } from "./node-files.js";
 export type Model<T extends BaseNode = BaseNode> = new (file: string) => T;
 export function within(file: string, root: string): boolean {
-  return file === root || file.startsWith(root + path.sep);
+  return (
+    file === root ||
+    file.startsWith(root.endsWith(path.sep) ? root : root + path.sep)
+  );
 }
 export function coLocated(entry: string): boolean {
   return (
@@ -52,6 +55,17 @@ export function physicalParent(
     dir = path.dirname(dir);
   }
   return undefined;
+}
+/** Runtime and import classification use exactly the same physical owner. */
+export function physicalParentNode(
+  entry: string,
+  root: string,
+): InternalNode | undefined {
+  const parent = physicalParent(entry, root);
+  const document = parent ? readEntry(parent) : undefined;
+  return document
+    ? new InternalNode(document.path).parse(document.source)
+    : undefined;
 }
 export function indexContract(
   node: BaseNode,

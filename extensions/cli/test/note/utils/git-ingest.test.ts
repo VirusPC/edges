@@ -348,3 +348,72 @@ test("document update commits only entry and leaves unrelated siblings unstaged"
   assert.match(git("status", "--porcelain"), /\?\? .*unrelated.txt/);
   assert.equal(git("diff", "--cached", "--name-only"), "");
 });
+
+test("nested known Memory import rejects before Git or destination mutation", async (t) => {
+  const repo = realpathSync(fixture(t));
+  execFileSync("git", ["init", "-q", repo]);
+  const sourceRoot = realpathSync(fixture(t));
+  const typeDir = path.join(sourceRoot, ".harness/memory/projects");
+  const source = path.join(typeDir, "group/project_one/index.md");
+  mkdirSync(path.dirname(source), { recursive: true });
+  writeFileSync(
+    path.join(typeDir, "AGENTS.md"),
+    "<!-- project-memory-type:start -->\nname: project\nmodule: memory\nwritable: true\n<!-- project-memory-type:end -->\n",
+  );
+  writeFileSync(source, "# Source memory\n");
+  const { NodeService } = await import("../../../src/services/node-service.js");
+  assert.equal(
+    (await new NodeService({ managedRoot: sourceRoot }).get(source))?.type,
+    "memory",
+  );
+  const beforeHead = readFileSync(path.join(repo, ".git/HEAD"), "utf8");
+  await assert.rejects(
+    runNoteIngest(
+      { ...input, content: "# Source memory\n", importEntry: source },
+      { repoPath: repo, baseBranch: "main", mode: "pr", dryRun: false },
+      {},
+      { now },
+    ),
+    /source type memory cannot be imported as note/,
+  );
+  assert.equal(readFileSync(path.join(repo, ".git/HEAD"), "utf8"), beforeHead);
+  assert.equal(existsSync(path.join(repo, "knowledge")), false);
+  assert.equal(readFileSync(source, "utf8"), "# Source memory\n");
+});
+
+test("unclassified external entry imports with its resources and commits as Note", async (t) => {
+  const repo = realpathSync(fixture(t));
+  const git = (...args: string[]) =>
+    execFileSync("git", args, { cwd: repo, encoding: "utf8" });
+  git("init", "-q");
+  git("config", "user.name", "Tester");
+  git("config", "user.email", "test@example.com");
+  const sourceRoot = realpathSync(fixture(t));
+  writeFileSync(
+    path.join(sourceRoot, "index.md"),
+    "# External\n\nImported body\n",
+  );
+  writeFileSync(path.join(sourceRoot, "asset.txt"), "bytes");
+  const result = await runNoteIngest(
+    {
+      ...input,
+      content: "# External\n\nImported body\n",
+      importEntry: path.join(sourceRoot, "index.md"),
+    },
+    { repoPath: repo, baseBranch: "main", mode: "direct", dryRun: true },
+    {},
+    { now },
+  );
+  assert.equal(
+    readFileSync(path.join(repo, result.filePath), "utf8"),
+    "# External\n\nImported body\n",
+  );
+  assert.equal(
+    readFileSync(
+      path.join(repo, path.dirname(result.filePath), "asset.txt"),
+      "utf8",
+    ),
+    "bytes",
+  );
+  assert.match(git("show", "--format=", "--name-only", "HEAD"), /asset.txt/);
+});

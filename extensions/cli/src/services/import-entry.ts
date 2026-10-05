@@ -1,19 +1,37 @@
 import { dirname, join, resolve } from "node:path";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { identifyNodeType } from "../models/layout.js";
-import { InternalNode } from "../models/internal-node.js";
-import { indexContract } from "./node-layout.js";
+import { indexContract, physicalParentNode, within } from "./node-layout.js";
 import { checkPath } from "./node-files.js";
+
+/** A source checkout/worktree bounds discovery; standalone files use filesystem ancestry. */
+function sourceBoundary(source: string): string {
+  let directory = dirname(source);
+  while (!existsSync(join(directory, ".git"))) {
+    const parent = dirname(directory);
+    if (parent === directory) break;
+    directory = parent;
+  }
+  return directory;
+}
 /** Business adapters may import an unclassified external entry, but never retype a known domain. */
-export function assertImportType(rawSource: string, expected: string): string {
+export function assertImportType(
+  rawSource: string,
+  expected: string,
+  sourceRoot?: string,
+): string {
   const source = checkPath(resolve(rawSource));
-  const parent = join(dirname(dirname(source)), "AGENTS.md");
-  const contract = existsSync(parent)
-    ? indexContract(
-        new InternalNode(parent).parse(readFileSync(parent, "utf8")),
-      )
-    : undefined;
-  const type = identifyNodeType(source, contract);
+  const boundary =
+    sourceRoot === undefined
+      ? sourceBoundary(source)
+      : checkPath(resolve(sourceRoot));
+  if (!within(source, boundary))
+    throw new Error(`${source}: source escapes discovery boundary ${boundary}`);
+  const parent = physicalParentNode(source, boundary);
+  const type = identifyNodeType(
+    source,
+    parent ? indexContract(parent) : undefined,
+  );
   if (type !== expected && type !== "leaf")
     throw new Error(
       `${source}: source type ${type ?? "unknown"} cannot be imported as ${expected}`,

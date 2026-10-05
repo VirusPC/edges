@@ -1,7 +1,7 @@
-import { mergeInternal } from "./node-merge.js";
+import { mergeNode } from "./node-merge.js";
 /** Loaded instance identity and optimistic snapshots. Not a public domain API. */
 import * as fs from "node:fs";
-import { BaseNode, InternalNode } from "../models/index.js";
+import { BaseNode } from "../models/index.js";
 import { harnessPath } from "../models/layout.js";
 import { setNodeRelations, setNodePath } from "../models/relations.js";
 import { readEntry, type EntryFile } from "./node-files.js";
@@ -67,14 +67,15 @@ export class NodeCache {
       file,
       relocate,
     );
-    if (node instanceof InternalNode) {
-      const before = new InternalNode(file).parse(
-        rewriteLinks(previous.source, node.path, file, relocate),
-      );
-      const dirty = new InternalNode(file).parse(dirtySource);
-      return mergeInternal(before, dirty, new InternalNode(file).parse(source));
-    }
-    return dirtySource;
+    const Model = node.constructor as Model;
+    const before = new Model(file).parse(
+      rewriteLinks(previous.source, node.path, file, relocate),
+    );
+    return mergeNode(
+      before,
+      new Model(file).parse(dirtySource),
+      new Model(file).parse(source),
+    );
   }
   assertRefresh(
     sources: ReadonlyMap<string, string>,

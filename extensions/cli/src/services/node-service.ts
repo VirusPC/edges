@@ -33,6 +33,7 @@ import {
   indexContract,
   modelAt,
   physicalParent,
+  physicalParentNode,
   rewriteLinks,
   within,
   type Model,
@@ -90,10 +91,7 @@ export class NodeService {
     return file;
   }
   #parentNode(file: string): InternalNode | undefined {
-    const parent = physicalParent(file, this.managedRoot);
-    if (!parent) return undefined;
-    const entry = readEntry(parent);
-    return entry ? new InternalNode(parent).parse(entry.source) : undefined;
+    return physicalParentNode(file, this.managedRoot);
   }
   #model(file: string): Model | undefined {
     return modelAt(
