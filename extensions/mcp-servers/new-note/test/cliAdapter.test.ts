@@ -29,7 +29,7 @@ test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () =>
       "if (process.env.EDGES_REPO !== '/repo') { console.error('repo'); process.exit(1); }",
       "const json = {",
       "  status: 'success',",
-      "  filePath: 'knowledge/notes/2026-09-11--demo.md',",
+      "  filePath: 'notes/2026-09-11--demo.md',",
       "  branch: 'ingest/2026-09-11-demo',",
       "  prStatus: 'created',",
       "  prUrl: 'https://github.com/org/repo/pull/9'",
@@ -67,7 +67,7 @@ test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () =>
       },
     );
 
-    assert.equal(result.filePath, "knowledge/notes/2026-09-11--demo.md");
+    assert.equal(result.filePath, "notes/2026-09-11--demo.md");
     assert.equal(result.branch, "ingest/2026-09-11-demo");
     assert.equal(result.prStatus, "created");
     assert.equal(result.prUrl, "https://github.com/org/repo/pull/9");
@@ -225,7 +225,7 @@ test("default MCP target follows captured caller scope, with implementation reso
     );
     assert.match(
       result.filePath,
-      /^projects\/child\/knowledge\/notes\/\d{4}-\d{2}-\d{2}--caller-scope\/index\.md$/,
+      /^projects\/child\/notes\/\d{4}-\d{2}-\d{2}--caller-scope\/index\.md$/,
     );
     assert.match(
       await fs.readFile(path.join(root, result.filePath), "utf8"),

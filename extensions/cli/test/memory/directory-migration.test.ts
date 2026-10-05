@@ -249,3 +249,15 @@ test("nested scoped Note resources stay opaque while legacy topic notes migrate"
     true,
   );
 });
+
+test('current root notes namespace is converted while root posts remain protected', t => {
+  const root = fixture(t);
+  put(root, 'notes/topic/demo.md', '# Current note');
+  put(root, 'posts/notes/private-post.md', '# Do not convert');
+  track(root);
+  const plan = planDirectoryMigration(root);
+  assert.deepEqual(plan.moves.map(move => path.relative(root, move.from)), ['notes/topic/demo.md']);
+  applyDirectoryMigration(plan);
+  assert(fs.existsSync(path.join(root, 'notes/topic/demo/index.md')));
+  assert.equal(fs.readFileSync(path.join(root, 'posts/notes/private-post.md'), 'utf8'), '# Do not convert');
+});

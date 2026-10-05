@@ -9,7 +9,7 @@ TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 in
 - 暴露 MCP 工具 `new_note`
 - 接收结构化输入：`title`、`content`、`coAuthor`
 - 子进程调用 `edges note`（与 CLI 同一套 flags / JSON 契约）：
-  - 生成 `knowledge/notes/YYYY-MM-DD--slug.md`
+  - 生成 `notes/YYYY-MM-DD--slug.md`
   - `git checkout -b ingest/...`
   - `git commit` + `git push`
   - 可选创建 PR
@@ -97,7 +97,7 @@ MCP tool 名称：`new_note`
 ```json
 {
   "status": "success",
-  "filePath": "knowledge/notes/2026-02-18--daily-summary.md",
+  "filePath": "notes/2026-02-18--daily-summary.md",
   "branch": "ingest/2026-02-18-daily-summary",
   "prUrl": "https://github.com/org/repo/compare/main...ingest/2026-02-18-daily-summary?expand=1",
   "prStatus": "unavailable",
@@ -140,7 +140,7 @@ MCP tool 名称：`new_note`
 }
 ```
 
-**提示**：配置 `EDGES_SCOPE` 可固定笔记归属；否则从启动 cwd 查找所属作用域。Server 安装位置不决定写入目标。笔记写入作用域的 `knowledge/notes/`，Git 操作使用实际仓库根。
+**提示**：配置 `EDGES_SCOPE` 可固定笔记归属；否则从启动 cwd 查找所属作用域。Server 安装位置不决定写入目标。笔记写入作用域的 `notes/`，Git 操作使用实际仓库根。
 
 如需源码直跑（开发环境）：
 

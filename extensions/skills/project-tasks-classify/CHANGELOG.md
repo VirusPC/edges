@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.2] - 2026-10-05
+
+- 同步根层 notes 与 extensions/apps 的目录调整，保持原工作流和内容规范。
+
 ## [1.2.1] - 2026-10-03
 
 ### Changed

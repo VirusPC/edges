@@ -66,6 +66,7 @@ function safePath(root: string, rel: string) {
     rel === ".git" ||
     rel.startsWith(".git/") ||
     rel.startsWith("knowledge/posts/") ||
+    rel.startsWith("posts/") ||
     rel === ".obsidian/workspace.json"
   )
     throw Error(`protected-path: ${rel}`);

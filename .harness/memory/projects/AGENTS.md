@@ -68,4 +68,5 @@ format: ordinary
 - [工作项叫 tasks，支持状态流转](project_tasks_with_status_not_todos/index.md) — Task 工作项按 Task Project 与 edges-tasks-status 分夹；当前领域板在 tasks/，Edges 维护板在 .harness/tasks/，旧 knowledge/tasks/ 仅是迁移史料。
 - [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push/index.md) — 改 teaching、/tasks/ 或 ECS 部署时：SSH 只在 deploy.yml 的 deploy job；production 不挂 url；site-teaching 与 site-tasks 都 needs deploy，分别登记 https://edges.viruspc.tech/teaching/ 与 /tasks/；summary 列两个 URL。不要拆成两次 SSH，不要用 teach.\* 或裸 IP。不要新开 workflow（ADR 0021）。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main/index.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks\_direct\_main
+- [知识目录平铺与扩展应用归属](project_top_level_content_and_extension_apps/index.md) — 目录布局现行决定：去掉 knowledge 层；notes、edges、posts、resources、archive 位于根；apps 属于 extensions 的全局共享应用实现。
 <!-- project-memory-entries:end -->

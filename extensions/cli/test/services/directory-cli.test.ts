@@ -313,7 +313,7 @@ test("Note import commits its parent registration and keeps source bytes unchang
   git("config", "user.name", "Test");
   git("config", "user.email", "test@example.test");
   put(path.join(root, "AGENTS.md"), "# Root");
-  put(path.join(root, "knowledge/notes/AGENTS.md"), "# Notes");
+  put(path.join(root, "notes/AGENTS.md"), "# Notes");
   git("add", ".");
   git("commit", "-m", "init");
   const source = path.join(root, "source/index.md"),
@@ -339,7 +339,7 @@ test("Note import commits its parent registration and keeps source bytes unchang
   assert.equal(fs.readFileSync(source, "utf8"), original);
   assert.match(
     git("show", "--pretty=format:", "--name-only", "HEAD"),
-    /knowledge\/notes\/AGENTS.md/,
+    /notes\/AGENTS.md/,
   );
   assert.equal(git("diff", "--name-only").trim(), "");
 });
@@ -438,5 +438,5 @@ test("Note Markdown file input preserves extras without copying neighbors and in
   assert.notEqual(invalid.exitCode, 0);
   assert.match(invalid.stdout, /index.md.*description/);
   assert.equal(git("rev-parse", "HEAD"), head);
-  assert.equal(fs.readdirSync(path.join(root, "knowledge/notes")).length, 1);
+  assert.equal(fs.readdirSync(path.join(root, "notes")).length, 1);
 });

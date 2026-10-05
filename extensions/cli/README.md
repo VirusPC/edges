@@ -101,7 +101,7 @@ edges --scope ./projects/demo note --title "Decision" --content "..." --co-autho
 
 The new-note MCP snapshots its caller cwd when no target is configured; an explicit configured scope/repo wins over ambient child-process environment. Its CLI and Skill resources remain tied to the implementation checkout.
 
-Notes go to the selected scope's `knowledge/notes/`; Git operations run at its actual repository root. Artifacts server installation uses the CLI implementation checkout, independently of content scope; the existing server operations `repoRoot` source override remains available.
+Notes go to the selected scope's `notes/`; Git operations run at its actual repository root. Artifacts server installation uses the CLI implementation checkout, independently of content scope; the existing server operations `repoRoot` source override remains available.
 
 ## `note` required flags
 

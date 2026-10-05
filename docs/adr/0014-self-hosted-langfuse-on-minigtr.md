@@ -4,7 +4,7 @@
 
 **Status:** accepted（ADR 0014；grill 确认于 2026-09-20）
 
-**See also:** ADR 0015（[与 Observation 产品卡的边界](0015-langfuse-infra-vs-observation-product.md)）；ADR 0016（[官方 docker compose，不用 k8s](0016-langfuse-docker-compose.md)）；ADR 0017（[v1 仅 Tailscale](0017-langfuse-tailscale-only-access.md)）；ADR 0018（[密钥留 minigtr](0018-langfuse-secrets-stay-on-minigtr.md)）；ADR 0019（[named volume + 偶发 tar](0019-langfuse-named-volumes-manual-backup.md)）；ADR 0020（[先 UI，再 1–2 个客户端](0020-langfuse-ui-then-few-clients.md)）；[`knowledge/notes/2026-09-20--机械师Mini-GTR-Ubuntu双系统安装.md`](../../knowledge/notes/2026-09-20--机械师Mini-GTR-Ubuntu双系统安装.md)（宿主从何而来，不含本决策）
+**See also:** ADR 0015（[与 Observation 产品卡的边界](0015-langfuse-infra-vs-observation-product.md)）；ADR 0016（[官方 docker compose，不用 k8s](0016-langfuse-docker-compose.md)）；ADR 0017（[v1 仅 Tailscale](0017-langfuse-tailscale-only-access.md)）；ADR 0018（[密钥留 minigtr](0018-langfuse-secrets-stay-on-minigtr.md)）；ADR 0019（[named volume + 偶发 tar](0019-langfuse-named-volumes-manual-backup.md)）；ADR 0020（[先 UI，再 1–2 个客户端](0020-langfuse-ui-then-few-clients.md)）；[`knowledge/notes/2026-09-20--机械师Mini-GTR-Ubuntu双系统安装.md`](../../notes/2026-09-20--%E6%9C%BA%E6%A2%B0%E5%B8%88Mini-GTR-Ubuntu%E5%8F%8C%E7%B3%BB%E7%BB%9F%E5%AE%89%E8%A3%85.md)（宿主从何而来，不含本决策）
 
 ## Decision
 

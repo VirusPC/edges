@@ -50,7 +50,7 @@ test("dry-run ingest against an isolated repo returns parseable success", async 
     prStatus: string;
   };
   assert.equal(parsed.status, "success");
-  assert.ok(parsed.filePath.startsWith("knowledge/notes/"));
+  assert.ok(parsed.filePath.startsWith("notes/"));
   assert.equal(parsed.prStatus, "direct_commit");
   await fs.access(path.join(repo, parsed.filePath));
 });

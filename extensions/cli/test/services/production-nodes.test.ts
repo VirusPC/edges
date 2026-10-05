@@ -100,13 +100,13 @@ test("note ingest refuses a linked destination before changing the outside note"
   const root = fixture(t),
     outside = fixture(t),
     date = new Date("2026-10-05T12:00:00Z");
-  mkdirSync(path.join(root, "knowledge/notes"), { recursive: true });
+  mkdirSync(path.join(root, "notes"), { recursive: true });
   const target = path.join(outside, "source.md");
   writeFileSync(target, "Outside original\n");
-  mkdirSync(path.join(root, "knowledge/notes/2026-10-05--hello"));
+  mkdirSync(path.join(root, "notes/2026-10-05--hello"));
   symlinkSync(
     target,
-    path.join(root, "knowledge/notes/2026-10-05--hello/index.md"),
+    path.join(root, "notes/2026-10-05--hello/index.md"),
   );
   await assert.rejects(
     () =>

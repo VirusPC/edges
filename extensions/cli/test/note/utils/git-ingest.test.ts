@@ -38,7 +38,7 @@ function recordingExec(calls: string[][]): ExecFn {
 }
 
 function refreshDirectoryOnPull(repo: string, calls: string[][]): ExecFn {
-  const directory = path.join(repo, "knowledge/notes/2026-09-11--hello-world");
+  const directory = path.join(repo, "notes/2026-09-11--hello-world");
   return async (file, args) => {
     calls.push([file, ...args]);
     if (file === "git" && args[0] === "pull") {
@@ -68,21 +68,21 @@ test("uses the directory note that appears during Git refresh when format is imp
 
   assert.equal(
     result.filePath,
-    "knowledge/notes/2026-09-11--hello-world/index.md",
+    "notes/2026-09-11--hello-world/index.md",
   );
   assert.equal(
     readFileSync(path.join(repo, result.filePath), "utf8"),
     "# Hello World\n\n> Ingested on 2026-09-11\n\nBody text\n",
   );
   assert.equal(
-    existsSync(path.join(repo, "knowledge/notes/2026-09-11--hello-world.md")),
+    existsSync(path.join(repo, "notes/2026-09-11--hello-world.md")),
     false,
   );
   assert.ok(
     calls.some(
       (call) =>
         call[1] === "add" &&
-        call[2] === "knowledge/notes/2026-09-11--hello-world/index.md",
+        call[2] === "notes/2026-09-11--hello-world/index.md",
     ),
   );
 });
@@ -104,7 +104,7 @@ test("rejects whole-directory import when Git refresh supplies the directory not
     /destination already exists/,
   );
 
-  const directory = path.join(repo, "knowledge/notes/2026-09-11--hello-world");
+  const directory = path.join(repo, "notes/2026-09-11--hello-world");
   assert.equal(
     readFileSync(path.join(directory, "index.md"), "utf8"),
     "# Base branch note\n",
@@ -131,14 +131,14 @@ test("dry-run direct writes the note, commits, skips checkout/pull/push", async 
 
   assert.equal(
     result.filePath,
-    "knowledge/notes/2026-09-11--hello-world/index.md",
+    "notes/2026-09-11--hello-world/index.md",
   );
   assert.equal(result.branch, "main");
   assert.equal(result.prStatus, "direct_commit");
   assert.match(result.stdout, /__EDGES_PR_STATUS__=direct_commit/);
   assert.equal(
     readFileSync(
-      path.join(repo, "knowledge/notes/2026-09-11--hello-world/index.md"),
+      path.join(repo, "notes/2026-09-11--hello-world/index.md"),
       "utf8",
     ),
     "# Hello World\n\n> Ingested on 2026-09-11\n\nBody text\n",
@@ -292,7 +292,7 @@ test("nested Note targets content scope while committing relative to actual Git 
     );
     assert.equal(
       result.filePath,
-      "projects/child/knowledge/notes/2026-09-11--hello-world/index.md",
+      "projects/child/notes/2026-09-11--hello-world/index.md",
     );
     assert.match(
       await readFile(path.join(root, result.filePath), "utf8"),

@@ -1,7 +1,7 @@
 ---
 name: project-tasks-classify
 description: 对整板 Task 按用户已设的 Task Project（标题 + 描述）做归属建议（LLM / agent 判断，不要求 embedding），经 edges tasks project review-page 审阅页等人贴回导出 JSON 后再用 CLI 落地。无 GUI 时才退回 Markdown 表。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
-version: 1.2.1
+version: 1.2.2
 ---
 
 # classifyTasks
@@ -54,7 +54,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks --scope "$SCOPE" --purpose "
 pnpm --filter edges-cli exec tsx src/index.ts artifacts publish <绝对 HTML 路径>
 ```
 
-      若这条预览的来源是看板 Task，再加上 `--from-type task --from-id <stem> --task-project <slug>`（`from.id` 是 task stem）。没有 Task 关联就不要带 `from` 相关 flag。不要用 `--from-name` / `--task-stem`，也不要写 `--from-type skill`。解析 stdout：`command` 为 `artifacts.publish`，把 `url` 给人。告诉人用 **系统浏览器**（Chrome / Safari / Firefox）打开该 URL。手机必须用 ECS / 公开的 `EDGES_ARTIFACTS_BASE_URL`，不能给 `localhost`。未 `edges artifacts init`、或服务没起来时，说明缺口，不要手搓上传。不要用聊天 HTML 预览当闸门——Grok Bot 预览里拖拽不可靠，见 `knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`。本步不实现审阅结果回传 Agent 客户端。
+      若这条预览的来源是看板 Task，再加上 `--from-type task --from-id <stem> --task-project <slug>`（`from.id` 是 task stem）。没有 Task 关联就不要带 `from` 相关 flag。不要用 `--from-name` / `--task-stem`，也不要写 `--from-type skill`。解析 stdout：`command` 为 `artifacts.publish`，把 `url` 给人。告诉人用 **系统浏览器**（Chrome / Safari / Firefox）打开该 URL。手机必须用 ECS / 公开的 `EDGES_ARTIFACTS_BASE_URL`，不能给 `localhost`。未 `edges artifacts init`、或服务没起来时，说明缺口，不要手搓上传。不要用聊天 HTML 预览当闸门——Grok Bot 预览里拖拽不可靠，见 `notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`。本步不实现审阅结果回传 Agent 客户端。
    5. **停止。** 等人在页上拖拽改组、点「复制导出 JSON」，把导出数组贴回聊天。在此之前不要 `project create` / `update --project`。
 
    恢复后校验贴回的审阅导出行：每行含 `stem`、`current`、`suggested`、`action`，`note` 可缺省或为空串。`action` 为 `keep`（`suggested === current`）或 `move`。页上**没有** `create-then-move`；若 `suggested` 还不在 `project list` 里，第 5 步仍可先 `project create` 再 `update --project`。校验失败就停，不要猜。

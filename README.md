@@ -51,11 +51,11 @@ Edges 当前以个人递归自我改进（Recursive Self-Improvement，RSI）为
 
 | 角色 | 目录或机制 | 作用 |
 | --- | --- | --- |
-| 知识生产 | [`notes/`](knowledge/notes/)、[`projects/`](projects)、[`teaching/`](teaching) | 承载研究线索与在研资产，选择性投入认知资本 |
-| 知识沉淀 | [`edges/`](knowledge/edges/) | 形成脱离原始场景仍可反复部署的核心资产 |
-| 知识使用 | 内部调用、[`posts/`](knowledge/posts/)、系统接口 | 部署资产，获得决策收益和外部反馈 |
+| 知识生产 | [`notes/`](notes)、[`projects/`](projects)、[`teaching/`](teaching) | 承载研究线索与在研资产，选择性投入认知资本 |
+| 知识沉淀 | [`edges/`](edges) | 形成脱离原始场景仍可反复部署的核心资产 |
+| 知识使用 | 内部调用、[`posts/`](posts)、系统接口 | 部署资产，获得决策收益和外部反馈 |
 | 工作项 | [`tasks/`](tasks/) 与 [`.harness/tasks/`](.harness/tasks/) | 分别承载领域工作和 Edges 维护任务；各板按 `edges-tasks-status` 分夹 |
-| 支撑与退出 | [`resources/`](knowledge/resources/)、[`archive/`](knowledge/archive/) | 支撑资产使用、控制持有成本并保留恢复可能 |
+| 支撑与退出 | [`resources/`](resources)、[`archive/`](archive) | 支撑资产使用、控制持有成本并保留恢复可能 |
 
 Notes 是低成本、零散且尚未形成稳定结论的捕获。Projects 是以解决问题或交付产出为目标的专项工作区；Teach 是以学习进展和能力获得为目标的专项工作区。三者都是知识生产入口，不是依次晋级的成熟度阶段，也不要求投入相同成本。专项中的原始上下文留在工作区，只有预期能够复用、影响决策或降低不确定性的经验，才值得进一步提炼为 Edge。
 
@@ -80,19 +80,19 @@ Edge 至少应说明结论、理由、适用边界和检验方式，并满足四
 - **内部调用**：在新问题中检索并部署 Edge，使其影响判断与行动；产生的决策收益再回到知识生产入口。
 - **外部扩环**：Post 或系统接口把活跃知识部署给外部参与者；读者反馈、使用结果和新证据回流后，形成更大的知识闭环。
 
-[`knowledge/posts/`](knowledge/posts/) 存放准备公开发表的成稿。Post 可以取材于 Note、Edge 或专项成果，但不会替代内部知识真源。该目录由人仔细维护；AI 不得自动创建、编辑、移动、删除、重构或重写其中的任何文件，可以在其他位置协助起草，再由人审阅后放入。
+[`posts/`](posts) 存放准备公开发表的成稿。Post 可以取材于 Note、Edge 或专项成果，但不会替代内部知识真源。该目录由人仔细维护；AI 不得自动创建、编辑、移动、删除、重构或重写其中的任何文件，可以在其他位置协助起草，再由人审阅后放入。
 
 知识资产只有能够被及时找到、理解并带着必要上下文投入决策，才具有流动性。当前主要通过文件、Obsidian 和人工检索调用知识；后续计划接入 RAG、PageIndex 等索引方式，并经 [`extensions/`](extensions/) 向外部系统提供机器可读的知识访问能力。它们旨在提高知识流动性，但仍属于规划方向，尚不是现有能力。
 
 ### 支撑与退出
 
-[`knowledge/resources/`](knowledge/resources/) 存放跨知识区域共享的图片、音频等附件，不作为独立知识阅读；只属于某个专项的附件与专项共置。
+[`resources/`](resources) 存放跨知识区域共享的图片、音频等附件，不作为独立知识阅读；只属于某个专项的附件与专项共置。
 
-[`knowledge/archive/`](knowledge/archive/) 类似整个知识空间的回收站：过时、重复、错误或低活跃度内容退出活跃区域，以降低持有成本，但仍保留来源和恢复可能性。它不是知识出口，也不限于失效 Edge。归档必须保留内容在 `knowledge/` 下的原始相对路径：
+[`archive/`](archive) 类似整个知识空间的回收站：过时、重复、错误或低活跃度内容退出活跃区域，以降低持有成本，但仍保留来源和恢复可能性。它不是知识出口，也不限于失效 Edge。归档保留内容从仓库根起的原始相对路径：
 
 ```text
-knowledge/notes/a.md → knowledge/archive/notes/a.md
-projects/foo/report.md → knowledge/archive/projects/foo/report.md
+notes/a.md → archive/notes/a.md
+projects/foo/report.md → archive/projects/foo/report.md
 ```
 
 曾经有意义或被引用过的内容应归档，并写明原因；误建、空白或纯临时文件可以直接删除。
@@ -131,9 +131,10 @@ CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使�
 
 | 目录 | 职责 | 边界 |
 | --- | --- | --- |
-| [`knowledge/`](knowledge/) | 知识生产、提炼、使用与退出 | Edges 的核心资产 |
+| [`notes/`](notes/)、[`edges/`](edges/)、[`posts/`](posts/)、[`resources/`](resources/)、[`archive/`](archive/) | 知识生产、提炼、使用与退出 | 平铺在根目录的知识资产与支撑内容 |
 | [`AGENTS.md`](AGENTS.md) 与各节点的 `.harness/memory/` | 为人和 Agent 提供分层的规则、决策、纠错与流程记忆 | 归属各节点，服务项目维护，不替代长期知识库 |
 | [`extensions/`](extensions/README.md) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关 |
+| [`extensions/apps/`](extensions/apps/) | 可跨作用域复用的对外应用，如任务审阅页 | 属于共享扩展实现，不属于根层知识内容 |
 | [`shared-extensions/`](shared-extensions/README.md) | 跨机器、跨 Agent 共用的个人 harness | 离开 Edges 仍然有价值 |
 | [`scripts/`](scripts/README.md) | 初始化、构建、迁移等维护脚本 | 通过 `pnpm` 调用，不加入 `$PATH` |
 | [`.harness/evaluation/`](.harness/evaluation/AGENTS.md) | 评测整套 Edges | 系统元工作，不是知识生命周期阶段 |
@@ -143,7 +144,7 @@ CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使�
 
 捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](extensions/cli/README.md) 的 `edges note …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](extensions/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
 
-Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；各节点的 `AGENTS.md` 和 `.harness/memory/` 保存该节点维护所需的规则、决策与经验；`knowledge/` 保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
+Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；各节点的 `AGENTS.md` 和 `.harness/memory/` 保存该节点维护所需的规则、决策与经验；根层的 `notes/`、`edges/` 等目录保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
 
 `extensions/` 收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill 和其他接口。`shared-extensions/` 则保存不依赖 Edges、可跨机器和 Agent 客户端复用的个人 harness；两者互斥。短生命周期预览页（上传 → 可达 URL → TTL）的用例 × 能力见 [`extensions/services/artifacts-preview`](extensions/services/artifacts-preview/README.md#use-case-matrix)；命令面是 `edges artifacts`。
 

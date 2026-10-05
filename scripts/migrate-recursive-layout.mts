@@ -498,7 +498,7 @@ export function makeInstancePlan(
     const rel = relative(root, source);
     if (
       sources.has(source) ||
-      ["knowledge/posts/", ".agents/", ".claude/", ".superpowers/"].some((p) =>
+      ["knowledge/posts/", "posts/", ".agents/", ".claude/", ".superpowers/"].some((p) =>
         rel.startsWith(p),
       ) ||
       basename(source) === ".git" ||

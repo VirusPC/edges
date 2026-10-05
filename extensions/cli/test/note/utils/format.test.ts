@@ -5,7 +5,7 @@ import { formatResult } from "../../../src/commands/note/format.js";
 test("formatted success includes file path, branch, and pr status", () => {
   const json = formatResult({
     status: "success",
-    filePath: "knowledge/notes/2026-09-07--title.md",
+    filePath: "notes/2026-09-07--title.md",
     branch: "main",
     prStatus: "direct_commit",
     stdoutSummary: "done",
@@ -20,7 +20,7 @@ test("formatted success includes file path, branch, and pr status", () => {
   };
 
   assert.equal(parsed.status, "success");
-  assert.equal(parsed.filePath, "knowledge/notes/2026-09-07--title.md");
+  assert.equal(parsed.filePath, "notes/2026-09-07--title.md");
   assert.equal(parsed.branch, "main");
   assert.equal(parsed.prStatus, "direct_commit");
   assert.equal(parsed.diagnostics, undefined);

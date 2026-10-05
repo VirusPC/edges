@@ -15,7 +15,7 @@
 - 本仓公开（`github.com/VirusPC/edges`）。凭据、个人信息、未公开 IP、办公文档不入库；内部信息脱敏后再写；截图按「能不能上公开博客」判断。细则见 README 的「隐私与脱敏」。
 - Git：`type: subject`；AI 参与加 `Co-authored-by`；不提交 `.obsidian/workspace.json`；`pull` / `rebase` 加 `--autostash`。
 - 本机修改本仓（commit/push 或改工作树文件）必须通过独立 `git worktree`：每个 Agent/任务一个 worktree + 独立分支；禁止多 Agent 共用同一工作树并行改文件或切分支；同一分支不得挂两个 worktree。Cursor 云端 Agent 等已在独立 clone/环境中的任务视为已隔离，不要求再套本机 worktree；只读查询可不建 worktree。
-- `knowledge/posts/` 存放对外博客（将公开发表的成稿），由人仔细维护。AI 不得自动创建、编辑、移动、删除、重构或重写该路径下的任何文件。
+- `posts/` 存放对外博客（将公开发表的成稿），由人仔细维护。AI 不得自动创建、编辑、移动、删除、重构或重写该路径下的任何文件。
 <!-- project-memory-important:end -->
 
 <!-- project-memory-local:start -->
@@ -29,15 +29,12 @@
 - [.harness/memory/references/AGENTS.md](.harness/memory/references/AGENTS.md) — 需求文档、设计稿、接口文档、监控面板等外部资料。
 - [.harness/skills/managed/AGENTS.md](.harness/skills/managed/AGENTS.md) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
 - [.harness/skills/referenced/AGENTS.md](.harness/skills/referenced/AGENTS.md) — 本层 `.agents/skills/` 下人写或装入的标准技能，工具只索引不改写。
-
+- [.harness/evaluation/AGENTS.md](<.harness/evaluation/AGENTS.md>) — 根作用域的评测维护模块，评测整套 Edges。
 - [根维护任务](<.harness/tasks/AGENTS.md>) — 根维护任务入口。
 - [观测职责与资料](<.harness/observation/AGENTS.md>) — 观测职责与资料入口。
 - [目录与内容说明](<README.md>) — 目录与内容说明入口。
 - [领域术语](<CONTEXT.md>) — 领域术语入口。
-
-[架构决策](<docs/adr/>) — 架构决策入口。
-
-- [.harness/evaluation/AGENTS.md](<.harness/evaluation/AGENTS.md>) — 根作用域的评测维护模块，评测整套 Edges。
+- [架构决策](<docs/adr/>) — 架构决策入口。
 <!-- project-memory-local:end -->
 
 <!-- project-memory-children:start -->
@@ -45,10 +42,9 @@
 
 - [teaching/AGENTS.md](teaching/AGENTS.md) — 教学与学习状态。
 - [领域任务](<tasks/AGENTS.md>) — 领域任务入口。
-
 - [对外能力实现约束](<extensions/AGENTS.md>) — 对外能力实现约束入口。
 - [共享扩展约束](<shared-extensions/AGENTS.md>) — 共享扩展约束入口。
-- [笔记规范](<knowledge/notes/AGENTS.md>) — 笔记规范入口。
+- [笔记规范](<notes/AGENTS.md>) — 笔记规范入口。
 
 <!-- project-memory-children:end -->
 

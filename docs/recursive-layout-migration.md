@@ -36,4 +36,12 @@ Git 不分发 ignored 用户材料，也不证明别的克隆已完成私有纠�
 
 在独立工作树内，可只读运行 `pnpm --filter edges-cli exec tsx src/index.ts memory doctor --target-dir <节点目录>`、`edges tasks --scope <工作树> --purpose domain list` 与 `--purpose maintenance list`。Doctor 对不存在的 referenced 安装来源给出诊断，不意味着可制造空 `.agents/skills` 或正文；公共索引刷新只针对实际存在的源，并保留人工前缀。`scripts/link-agent-skills --dry-run` 与 `--check` 只检查安装关系。`project-tasks-propose-types` 尚无实际源码目录；通用 Task Skill/MCP、自动复盘与 Agent Teams 编排也不因这次归属纠正而完成。
 
-`knowledge/posts/` 保持不变；若其链接需要修改，须由人处理。未初始化 submodule 只保留精确 gitlink，不据此宣称其内部测试已运行。迁移不执行 benchmark、部署、全局安装、合并或发布。
+前述归属及目录入口迁移不改动博客。2026-10-05 用户另行明确要求去掉 `knowledge/` 层：当前博客目录为 `posts/`，本次只移动目录、保留文件字节；今后仍禁止 AI 自动修改博客正文。未初始化 submodule 只保留精确 gitlink，不据此宣称其内部测试已运行。迁移不执行 benchmark、部署、全局安装、合并或发布。
+
+## 根层目录与扩展应用
+
+当前 `notes/`、`edges/`、`posts/`、`resources/`、`archive/` 直接位于根目录；全局共享的应用实现位于 `extensions/apps/`。Note CLI 写入所选作用域的 `notes/<条目>/index.md`。旧清单中的 `knowledge/notes` 是当时的归属路径，内容上移时其局部 `.harness` 随目录一起移动，不提升到根记忆。
+
+旧布局的独立工作树可用 `pnpm migrate:top-level-layout --root <绝对路径>` 预览，确认目标无碰撞后加 `--apply`。工具只读取、重写 tracked/public 文件的引用；目录中的 ignored 材料随目录原样搬迁，不读取或重写其内容，必要的私有链接调整留给所有者。`posts` 文件字节保持不变。遇目标目录已存在、symlink 或预览后源文件变化即拒绝；普通 IO 失败尽力恢复，不承诺进程崩溃原子性。
+
+此工具只做本次仓库目录调整，不改写旧迁移 manifest 的源状态，也不读取／续跑旧 journal。旧版归属清单与迁移工具中的路径保留历史含义；先完成适用的旧归属／目录入口迁移，再做本次平铺。Git 更新已交付公开搬迁的克隆无需重复 apply。

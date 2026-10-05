@@ -77,7 +77,7 @@ export async function runNoteIngest(
   const scope = await fs.realpath(config.scopeDir ?? config.repoPath);
   const directoryFile = path.join(
     scope,
-    `knowledge/notes/${date}--${slug}/index.md`,
+    `notes/${date}--${slug}/index.md`,
   );
   const selectNoteFile = () => directoryFile;
   // Validate document input before any Git branch or destination changes.
@@ -125,7 +125,7 @@ export async function runNoteIngest(
     });
   }
 
-  const parentIndex = path.join(scope, "knowledge/notes/AGENTS.md");
+  const parentIndex = path.join(scope, "notes/AGENTS.md");
   const parentBefore = existsSync(parentIndex)
     ? await fs.readFile(parentIndex, "utf8")
     : undefined;
@@ -141,10 +141,10 @@ export async function runNoteIngest(
       );
   }
   const service = new NodeService({
-    managedRoot: path.join(scope, "knowledge/notes"),
+    managedRoot: path.join(scope, "notes"),
     assertWrite: ({ node }) => {
       const relative = path.relative(
-        path.join(scope, "knowledge/notes"),
+        path.join(scope, "notes"),
         node.path,
       );
       if (relative.startsWith("..") || path.isAbsolute(relative))

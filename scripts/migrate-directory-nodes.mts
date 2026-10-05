@@ -53,7 +53,7 @@ function excluded(file: string): boolean {
     /(?:^|\/)(?:\.git|\.obsidian|\.agents|node_modules|thirdparty|third-party|vendor|\.superpowers)(?:\/|$)/.test(
       file,
     ) ||
-    /(?:^|\/)knowledge\/posts(?:\/|$)/.test(file) ||
+    /(?:^|\/)(?:knowledge\/)?posts(?:\/|$)/.test(file) ||
     /(?:^|\/)docs\/(?:adr|superpowers|discussions)(?:\/|$)/.test(file) ||
     /(?:^|\/)(?:\.memory|\.harness\/memory)\/(?:users|private)(?:\/|$)/.test(
       file,
@@ -163,7 +163,7 @@ export function planDirectoryMigration(
               relative,
             )
           ? "task"
-          : /(?:^|\/)knowledge\/notes\/(?!.*(?:^|\/)\.harness\/).+\.md$/.test(
+          : /(?:^|\/)(?:knowledge\/)?notes\/(?!.*(?:^|\/)\.harness\/).+\.md$/.test(
                 relative,
               ) && !hasEntryAncestor(from, root)
             ? "note"
