@@ -134,6 +134,7 @@ get 恢复 parent 和 harness 的轻量引用，不递归加载 harness 正文�
 ## 生命周期与一致性
 
 - 原地更新：成功 create/update/move 返回原实例；move 同步实例 path/id/关系。该 Service 已加载的同路径实例、受影响子节点也需刷新，不能静默保持过期引用。
+- 已修改但未保存的副本，按旧快照、当前副本与将提交的文档合并完整状态：元数据按键递归合并，正文保留源文本并合并不重叠的行改动。Internal 先合并结构字段，再处理非受控正文。重叠分歧在 IO 前报错，不推进快照；同一行的不同字词也保守视为冲突。后续保存副本不能回退其他已提交字段或正文。
 - 禁止公开 reparent；Internal.moveChild 仅改索引组。物理移动才改变归属。
 - create 调用 node.create + validate + serialize，并在存在的物理父入口登记。新登记默认 local；这是创建时的默认选择，不把 Leaf/Internal 与索引组绑定，后续可用 Internal.moveChild 改组。AI 传结构化参数，不手拼完整任务 Markdown。
 - move 自动搬整个所属目录，不留孤立 harness/资源。校验目标不存在、不能移动到自身子目录、不能把固定入口名改掉、不能越出 managedRoot/改变已知业务类型。不移动管理根本身。
@@ -145,6 +146,8 @@ get 恢复 parent 和 harness 的轻量引用，不递归加载 harness 正文�
 ## 业务接入与迁移
 
 Task / Memory / Note / Skill 生产路径接入新节点方法。Tasks CLI 接收结构化字段，节点生成 metadata；侧日志随任务目录移动。Memory / Note 通过显式 `--import-entry` 导入完整目录，入口须符合该命令的领域合同；冲突的正文参数直接报错。Note 的 `--content-file --markdown` 保留为验证后的单份文档输入，保留正文和合法元数据，不隐式复制其父目录；整目录复制由 `--import-entry` 表达。
+
+导入领域检查与正常加载共用最近物理父入口解析，跨过没有 AGENTS 的中间目录，但不跳过最近入口去找更远的领域合同。检查器接受显式 sourceRoot；缺省取最近含 `.git` 的祖先目录（含 worktree），没有则到文件系统根。已知领域不允许借导入改型；真正未分类的外部入口仍可导入。
 
 新增显式一次性迁移工具和迁移 Skill：dry-run 给出旧单文件到 `<stem>/index.md` 的计划、引用更新与冲突；apply 只操作明示作用域的 tracked/public 内容，幂等。对于无可靠资源归属的历史附件不猜测迁移；保留原链接目标并重新计算相对路径。若同名目录已有附件但没有入口，迁移计划明确列出复用该目录，只新增 index.md、不移动或覆盖附件；已有目标入口或符号链接则冲突报错。排除 knowledge/posts、私有记忆、第三方体系和历史 spec 中示例路径。迁移真实本工作树内的受管 public Memory/Tasks/Notes 时使用该工具；旧快照/journal 审计材料保持历史语义。
 
