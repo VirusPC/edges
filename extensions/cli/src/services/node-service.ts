@@ -5,6 +5,7 @@ import type {
   ChildGroup,
   NodeReference,
   ScopeTraversalOptions,
+  NodeQueryOptions,
 } from "../models/index.js";
 import {
   lifecycleUnits,
@@ -38,6 +39,7 @@ import {
   within,
   type Model,
 } from "./node-layout.js";
+import { query, type AsyncQuery } from "../utils/async-query.js";
 import { traverse } from "./traverse.js";
 import { NodeCache } from "./node-cache.js";
 
@@ -75,6 +77,7 @@ export class NodeService {
   readonly managedRoot: string;
   readonly #options: NodeServiceOptions;
   readonly #cache: NodeCache;
+  readonly #navigationReadOnly = new WeakSet<BaseNode>();
   constructor(options: NodeServiceOptions) {
     if (!options?.managedRoot)
       throw new Error("NodeService requires an explicit managedRoot");
@@ -104,6 +107,7 @@ export class NodeService {
     file: string,
     Model?: Model,
     readOnly = false,
+    resources = true,
   ): Promise<BaseNode | undefined> {
     Model ??= this.#model(file);
     if (!Model) return undefined;
@@ -115,7 +119,7 @@ export class NodeService {
     if (!entry) return undefined;
     const node = new Model(entry.path).parse(entry.source);
     node.validate();
-    this.#cache.remember(node, entry, readOnly);
+    this.#cache.remember(node, entry, readOnly, resources);
     return node;
   }
   async get(file: string): Promise<BaseNode | undefined>;
@@ -129,35 +133,54 @@ export class NodeService {
   async #reference(
     parent: BaseNode,
     reference: NodeReference,
+    types?: readonly string[],
+    resources = true,
   ): Promise<BaseNode> {
     const readonly =
       this.#cache.state.get(parent)?.readOnly ||
+      this.#navigationReadOnly.has(parent) ||
       indexContract(parent)?.writable === false ||
       this.#options.readOnlyReference?.(parent, reference, reference.id) ===
         true;
     const Model =
       this.#options.modelForReference?.(parent, reference, reference.id) ??
       modelAt(reference.id, indexContract(parent), this.#options.models);
-    const node = await this.#read(reference.id, Model, readonly);
+    if (types && Model) {
+      const navigation = new Model(reference.id);
+      if (navigation.isLeaf && !types.includes(navigation.type)) {
+        // The directory contract proves this body cannot contribute children.
+        // Keep layout-defined maintenance discovery even when its body is omitted.
+        this.#cache.relations(navigation);
+        if (readonly) this.#navigationReadOnly.add(navigation);
+        return navigation;
+      }
+    }
+    const node = await this.#read(reference.id, Model, readonly, resources);
     if (!node) throw new Error(`Missing referenced node: ${reference.id}`);
     return node;
   }
-  async list(
-    scopePath: string,
-    options: ScopeTraversalOptions = {},
-  ): Promise<BaseNode[]> {
-    const entry =
-      path.basename(scopePath) === "AGENTS.md"
-        ? path.resolve(scopePath)
-        : path.join(path.resolve(scopePath), "AGENTS.md");
-    const root = await this.#read(entry, InternalNode);
-    if (!root) throw new Error(`Missing scope entry: ${entry}`);
-    return traverse(
-      root,
-      options,
-      (_parent, reference) => reference.id,
-      (parent, reference) => this.#reference(parent, reference),
-    );
+  query(scopePath: string, options: NodeQueryOptions = {}): AsyncQuery<BaseNode> {
+    const service = this;
+    return query(async function* () {
+      const entry = path.basename(scopePath) === "AGENTS.md"
+        ? path.resolve(scopePath) : path.join(path.resolve(scopePath), "AGENTS.md");
+      const root = await service.#read(entry, InternalNode, false, false);
+      if (!root) throw new Error(`Missing scope entry: ${entry}`);
+      yield* traverse(root, options, (_parent, reference) => {
+        if (options.includeHarness) {
+          if (!within(reference.id, service.managedRoot)) return undefined;
+          try {
+            if (!within(fs.realpathSync(reference.id), service.managedRoot)) return undefined;
+          } catch (error) {
+            if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+          }
+        }
+        return reference.id;
+      }, (parent, reference) => service.#reference(parent, reference, options.types, false));
+    });
+  }
+  async list(scopePath: string, options: ScopeTraversalOptions = {}): Promise<BaseNode[]> {
+    return this.query(scopePath, options).toArray().value();
   }
   #existing(node: BaseNode, resources = false): EntryFile {
     const state = this.#cache.state.get(node);
@@ -173,6 +196,8 @@ export class NodeService {
     )
       throw new Error(`Read-only node source: ${node.path}`);
     validateEntry(state.file);
+    if (resources && !state.resources && node.directoryPath !== this.managedRoot)
+      throw new Error(`Query has no resource snapshot; reload with get before moving or destroying: ${node.path}`);
     if (resources && state.resources) validateResources(state.resources);
     return state.file;
   }

@@ -33,9 +33,9 @@ export class NodeCache {
       harness: fs.existsSync(harness) ? { id: harness } : undefined,
     });
   }
-  remember(node: BaseNode, file: EntryFile, readOnly = false): void {
+  remember(node: BaseNode, file: EntryFile, readOnly = false, captureResources = true): void {
     const resources =
-      node.directoryPath === this.managedRoot || readOnly
+      !captureResources || node.directoryPath === this.managedRoot || readOnly
         ? undefined
         : resourceSnapshot(node.directoryPath);
     this.state.set(node, { file, readOnly, resources });
@@ -44,6 +44,11 @@ export class NodeCache {
       this.readOnly.add(file.realDirectory);
     }
     const instances = this.loaded.get(node.path) ?? new Set();
+    if (resources) for (const instance of instances) {
+      const previous = this.state.get(instance)!;
+      if (!previous.resources && previous.file.source === file.source && previous.file.inode === file.inode && previous.file.device === file.device)
+        previous.resources = resources;
+    }
     instances.add(node);
     this.loaded.set(node.path, instances);
     this.relations(node);

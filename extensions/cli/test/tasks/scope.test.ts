@@ -251,17 +251,15 @@ test("render-only review-page works outside a repository and explicit fresh scop
   }
 });
 
-test("project list exposes existing project directories without creating metadata", async () => {
+test("project list rejects unindexed project directories without creating metadata", async () => {
   const { root, child } = await fixture();
   try {
     await mkdir(path.join(child, "tasks/cli/todo"), { recursive: true });
     const result = await run(["--scope", child, "tasks", "--purpose", "domain", "project", "list"], {
       env: {},
     });
-    assert.equal(result.exitCode, 0, result.stdout);
-    assert.ok(
-      JSON.parse(result.stdout).projects.some((p: any) => p.project === "cli"),
-    );
+    assert.equal(result.exitCode, 2, result.stdout);
+    assert.match(JSON.parse(result.stdout).reason, /index missing.*migrate/i);
     await assert.rejects(access(path.join(child, "tasks/cli/AGENTS.md")));
     await assert.rejects(access(path.join(child, "tasks/_default")));
   } finally {

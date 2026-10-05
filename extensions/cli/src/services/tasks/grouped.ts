@@ -1,7 +1,13 @@
+import path from "node:path";
+import { realpathSync } from "node:fs";
+import { InternalNode } from "../../models/index.js";
+import { query } from "../../utils/async-query.js";
+import { repositoryNodeQuery, projectLocationOf } from "./node-query.js";
+import { taskBoardLocation, type TaskPurpose } from "./paths.js";
 import { scopeDir, type BoardTarget } from "./paths.js";
 import { isTaskProjectId } from "../../models/tasks/project.js";
 import { portableScope } from "../scope.js";
-import { listProjectIds, listTasksWithDocs, type BoardFs, type TaskListOpts } from "./board.js";
+import { listRepositoryTasksWithDocs, createNodeBoardFs, listProjectIds, listTasksWithDocs, type BoardFs, type TaskListOpts } from "./board.js";
 import {
   DEFAULT_PROJECT_DESCRIPTION,
   DEFAULT_PROJECT_TITLE,
@@ -258,11 +264,12 @@ export async function listGroupedByProject(
   sourceScope = portableScope(scopeDir(repoPath)),
 ): Promise<GroupedList> {
   const tasks = await listTasksWithDocs(repoPath, opts, fs);
+  const groupedTasks = await query(async function* () { yield* tasks; }).groupBy(task => task.project).value();
   const requested = opts.projects ?? [];
   const ids =
     requested.length > 0
       ? requested
-      : [...(await listProjectIds(repoPath, fs)), ...tasks.map((task) => task.project)];
+      : [...(await listProjectIds(repoPath, fs)), ...Object.keys(groupedTasks)];
   const groups: GroupedListGroup[] = [];
   for (const id of sortGroupIds(ids)) {
     groups.push(await resolveGroup(repoPath, id, fs));
@@ -274,4 +281,38 @@ export async function listGroupedByProject(
     groups: grouped.groups.map(group => ({ ...group, source, project: group.id, id: sourceIdentity(source, group.id) })),
     items: grouped.items.map(item => ({ ...item, source, project: item.group, id: sourceIdentity(source, item.group, item.stem), group: sourceIdentity(source, item.group) })),
   };
+}
+
+/** Repository groups use physical source identity, retaining registered empty projects. */
+export async function listRepositoryGroupedByProject(
+  root: string, opts: TaskListOpts = {}, purpose?: TaskPurpose,
+): Promise<GroupedList> {
+  root = realpathSync(root);
+  const tasks = await listRepositoryTasksWithDocs(root, opts, purpose);
+  const groupedTasks = await query(async function* () { yield* tasks; })
+    .groupBy(task => sourceIdentity(task.source, task.project)).value();
+  const groups = new Map<string, GroupedListGroup>();
+  const projects = await repositoryNodeQuery(root, ['internal'])
+    .filter((node): node is InternalNode => node instanceof InternalNode)
+    .map(node => projectLocationOf(node, root))
+    .filter((entry): entry is NonNullable<typeof entry> => !!entry)
+    .filter(entry => !purpose || entry.source.purpose === purpose)
+    .filter(entry => !opts.projects?.length || opts.projects.includes(entry.project)).value();
+  for (const { location, project, source } of projects) {
+    const record = await readProjectRecord(location, project, createNodeBoardFs(location));
+    const id = sourceIdentity(source, project);
+    groups.set(id, { id, project, source, title: record.title, description: record.description });
+  }
+  for (const [id, rows] of Object.entries(groupedTasks)) {
+    if (groups.has(id)) continue;
+    const { source, project } = rows[0]!;
+    const target = taskBoardLocation(path.resolve(root, source.scope), source.purpose);
+    const record = await resolveGroup(target, project, createNodeBoardFs(target));
+    groups.set(id, { ...record, id, source, project });
+  }
+  return { schema: GROUPED_LIST_SCHEMA, groups: [...groups.values()], items: tasks.map(task => ({
+    id: sourceIdentity(task.source, task.project, task.stem), stem: task.stem,
+    group: sourceIdentity(task.source, task.project), source: task.source, project: task.project,
+    title: task.title, status: task.status, description: task.description, priority: task.priority, doc: task.doc,
+  })) };
 }

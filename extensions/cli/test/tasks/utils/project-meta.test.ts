@@ -1,16 +1,10 @@
-import { mkdir as fixtureMkdir } from "node:fs/promises";
-import { dirname as fixtureDirname } from "node:path";
-async function writeFile(...args: Parameters<typeof fixtureRawWriteFile>) {
-  await fixtureMkdir(fixtureDirname(String(args[0])), { recursive: true });
-  return fixtureRawWriteFile(...args);
-}
+import { writeIndexedTaskFixture as writeFile } from "./helpers.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
   mkdtemp,
   mkdir,
   readFile,
-  writeFile as fixtureRawWriteFile,
   rm,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -268,7 +262,7 @@ test("ensureProjectMetadata skipId leaves that AGENTS.md missing", async () => {
   }
 });
 
-test("project get synthesizes existing directories, rejects missing ones, and leaves metadata absent", async () => {
+test("project reads reject unindexed directories without creating metadata", async () => {
   const { getProject, listProjects } =
     await import("../../../src/services/tasks/project-meta.js");
   const { access } = await import("node:fs/promises");
@@ -276,12 +270,8 @@ test("project get synthesizes existing directories, rejects missing ones, and le
   try {
     await mkdir(path.join(repo, "tasks/cli/todo"), { recursive: true });
     const fs = nodeBoardWriter();
-    const listed = await listProjects(repo, fs);
-    assert.deepEqual(await getProject(repo, "cli", fs), listed[0]);
-    await assert.rejects(
-      () => getProject(repo, "missing", fs),
-      (error: any) => error.errorCode === "PROJECT_NOT_FOUND",
-    );
+    await assert.rejects(listProjects(repo, fs), /index missing.*migrate/i);
+    await assert.rejects(getProject(repo, 'cli', fs), /index missing.*migrate/i);
     for (const rel of [
       "tasks/cli/AGENTS.md",
       "tasks/AGENTS.md",
@@ -293,4 +283,12 @@ test("project get synthesizes existing directories, rejects missing ones, and le
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
+});
+
+test('refreshing a board adopts existing project references without duplicating composition', async () => {
+  const { InternalNode } = await import('../../../src/models/internal-node.js');
+  const file = '/fixture/tasks/AGENTS.md';
+  const before = new InternalNode(file).create({localChildren:[{id:'/fixture/tasks/_default/AGENTS.md'}]},{operation:'create'}).serialize();
+  const after = rewriteRootAgents(before,[defaultRecord]);
+  assert.deepEqual(new InternalNode(file).parse(after).children.map(ref=>ref.id), ['/fixture/tasks/_default/AGENTS.md']);
 });

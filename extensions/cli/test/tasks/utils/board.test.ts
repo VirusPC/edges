@@ -1,15 +1,9 @@
-import { mkdir as fixtureMkdir } from "node:fs/promises";
-import { dirname as fixtureDirname } from "node:path";
-async function writeFile(...args: Parameters<typeof fixtureRawWriteFile>) {
-  await fixtureMkdir(fixtureDirname(String(args[0])), { recursive: true });
-  return fixtureRawWriteFile(...args);
-}
+import { writeIndexedTaskFixture as writeFile } from "./helpers.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
   mkdtemp,
   mkdir,
-  writeFile as fixtureRawWriteFile,
   rm,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
@@ -313,7 +307,7 @@ body
   }
 });
 
-test("listTasks treats on-disk P0 as none so the board still lists", async () => {
+test("listTasks rejects invalid priority in a registered Task", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const dir = path.join(repo, "tasks/_default/todo");
@@ -334,9 +328,7 @@ body
 `,
       "utf8",
     );
-    const items = await listTasks(repo, {}, nodeBoardFs());
-    assert.equal(items.length, 1);
-    assert.equal(items[0]?.priority, "none");
+    await assert.rejects(listTasks(repo, {}, nodeBoardFs()), /Invalid edges-task-priority: P0/);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }

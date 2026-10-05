@@ -35,6 +35,10 @@ export interface MemoryCreateInput extends NodeCreateInput {
 export interface MemoryUpdateInput extends MemoryCreateInput {}
 export interface ScopeTraversalOptions {
   includeDescendants?: boolean;
+  includeHarness?: boolean;
+}
+export interface NodeQueryOptions extends ScopeTraversalOptions {
+  types?: readonly string[];
 }
 export interface InternalContent {
   readonly constraints: readonly string[];

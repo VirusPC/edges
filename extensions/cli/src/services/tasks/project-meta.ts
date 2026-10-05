@@ -1,3 +1,4 @@
+import { InternalNode } from "../../models/internal-node.js";
 import { decodeBody } from '../../models/internal/parse.js';
 import { LOCAL_START, LOCAL_END, blockPattern, insertInnerBlock } from '../../models/internal/blocks.js';
 import { scopeDir, boardRel, type BoardTarget } from "./paths.js";
@@ -134,8 +135,17 @@ export function renderTaskProjectsSection(projects: TaskProjectRecord[]): string
   ].join("\n");
 }
 
-export function rewriteRootAgents(existing: string, projects: TaskProjectRecord[]): string {
+export function rewriteRootAgents(existing: string, projects: TaskProjectRecord[], entryPath = path.resolve("tasks/AGENTS.md")): string {
   const block = renderTaskProjectsSection(projects);
+  // Existing ordinary project links are adopted into the owned index, not duplicated.
+  if (!existing.includes(TASK_PROJECTS_START)) {
+    const node = new InternalNode(entryPath).parse(existing);
+    for (const project of projects) {
+      const id = path.resolve(path.dirname(entryPath), project.dir, 'AGENTS.md');
+      if (node.children.some(ref => ref.id === id)) node.removeChild(id);
+    }
+    existing = node.serialize();
+  }
   const start = existing.indexOf(TASK_PROJECTS_START);
   const end = existing.indexOf(TASK_PROJECTS_END);
 
@@ -174,10 +184,10 @@ function rootAgentsAbsPath(repoPath: BoardTarget): string {
   return path.join(boardRoot(repoPath), "AGENTS.md");
 }
 
-async function collectProjectIds(repoPath: BoardTarget, fs: BoardFs): Promise<TaskProjectId[]> {
-  const listed = await listProjectIds(repoPath, fs);
+async function collectProjectIds(repoPath: BoardTarget, fs: BoardFs, additional: readonly TaskProjectId[] = []): Promise<TaskProjectId[]> {
+  const listed = await fs.exists(rootAgentsAbsPath(repoPath)) ? await listProjectIds(repoPath, fs) : [];
   const ids: TaskProjectId[] = [DEFAULT_TASK_PROJECT];
-  for (const id of listed) {
+  for (const id of new Set([...listed, ...additional])) {
     if (id !== DEFAULT_TASK_PROJECT) {
       ids.push(id);
     }
@@ -217,9 +227,10 @@ export async function readProjectRecord(
 export async function refreshProjectIndex(
   repoPath: BoardTarget,
   writer: BoardWriter,
+  additional: readonly TaskProjectId[] = [],
 ): Promise<TaskProjectRecord[]> {
   const records: TaskProjectRecord[] = [];
-  for (const id of await collectProjectIds(repoPath, writer)) {
+  for (const id of await collectProjectIds(repoPath, writer, additional)) {
     const abs = projectAgentsAbsPath(repoPath, id);
     if (!(await writer.exists(abs))) {
       continue;
@@ -229,7 +240,7 @@ export async function refreshProjectIndex(
 
   const rootAbs = rootAgentsAbsPath(repoPath);
   const existing = (await writer.exists(rootAbs)) ? await writer.readFile(rootAbs) : "";
-  await writer.writeFile(rootAbs, rewriteRootAgents(existing, records));
+  await writer.writeFile(rootAbs, rewriteRootAgents(existing, records, rootAbs));
   return records;
 }
 
@@ -237,10 +248,11 @@ export async function ensureProjectMetadata(
   repoPath: BoardTarget,
   writer: BoardWriter,
   skipId?: TaskProjectId,
+  additional: readonly TaskProjectId[] = [],
 ): Promise<TaskProjectRecord[]> {
   await writer.mkdirp(path.join(boardRoot(repoPath), projectDirName(DEFAULT_TASK_PROJECT)));
 
-  for (const id of await collectProjectIds(repoPath, writer)) {
+  for (const id of await collectProjectIds(repoPath, writer, additional)) {
     await writer.mkdirp(path.join(boardRoot(repoPath), projectDirName(id)));
     if (skipId === id) {
       continue;
@@ -259,7 +271,7 @@ export async function ensureProjectMetadata(
     }
   }
 
-  return refreshProjectIndex(repoPath, writer);
+  return refreshProjectIndex(repoPath, writer, additional);
 }
 
 export async function listProjects(
@@ -297,7 +309,7 @@ export async function createProject(
   }
   await writer.mkdirp(path.join(boardRoot(repoPath), projectDirName(id)));
   await writer.writeFile(path.join(scopeDir(repoPath), rel), renderProjectAgents({ title, description }));
-  await refreshProjectIndex(repoPath, writer);
+  await refreshProjectIndex(repoPath, writer, [id]);
   return {
     project: id,
     dir: projectDirName(id),

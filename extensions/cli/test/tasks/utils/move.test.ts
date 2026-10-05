@@ -1,9 +1,4 @@
-import { mkdir as fixtureMkdir } from "node:fs/promises";
-import { dirname as fixtureDirname } from "node:path";
-async function writeFile(...args: Parameters<typeof fixtureRawWriteFile>) {
-  await fixtureMkdir(fixtureDirname(String(args[0])), { recursive: true });
-  return fixtureRawWriteFile(...args);
-}
+import { writeIndexedTaskFixture as writeFile } from "./helpers.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -11,7 +6,6 @@ import {
   mkdir,
   readFile,
   rm,
-  writeFile as fixtureRawWriteFile,
 } from "node:fs/promises";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";

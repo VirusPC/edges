@@ -412,3 +412,78 @@ async function detach(
   draft.removeChild(child.id);
   await service.update(parent, { body: draft.body });
 }
+
+test('query defers reads and find closes before hit children or later siblings', async t => {
+  const { root, write, service } = fixture(t);
+  const pending = service.query(root);
+  write('AGENTS.md', index('- [branch](branch/AGENTS.md)\n- [missing](missing/AGENTS.md)'));
+  write('branch/AGENTS.md', index('- [hit](hit/AGENTS.md)'));
+  write('branch/hit/AGENTS.md', '---\ncategory: hit\n---\n' + index('- [missing](missing/AGENTS.md)'));
+  const hit = await pending.find(node => node.metadata?.category === 'hit').value();
+  assert.equal(hit?.path, path.join(root, 'branch/hit/AGENTS.md'));
+  await assert.rejects(pending.toArray().value(), /Missing referenced node/);
+});
+test('typed queries keep internal navigation, skip unrelated bodies and preserve harness discovery', async t => {
+  const { root, write, service } = fixture(t);
+  write('AGENTS.md', index('- [tasks](tasks/AGENTS.md)\n- [memory](memory/AGENTS.md)', '- [child](child/AGENTS.md)'));
+  write('tasks/AGENTS.md', index('- [one](_default/todo/one/index.md)'));
+  write('tasks/_default/todo/one/index.md', '---\nname: one\nmetadata:\n  edges-tasks-status: todo\n---\nOne');
+  write('memory/AGENTS.md', typeIndex('memory', true, '- [bad](bad/index.md)'));
+  write('memory/bad/index.md', '---\nbad: [\n---\n');
+  write('memory/bad/AGENTS.md', index('- [maintenance](.harness/tasks/AGENTS.md)'));
+  write('memory/bad/.harness/tasks/AGENTS.md', index('- [two](_default/todo/two/index.md)'));
+  write('memory/bad/.harness/tasks/_default/todo/two/index.md', 'Two');
+  write('child/AGENTS.md', index('- [third](tasks/_default/todo/three/index.md)'));
+  write('child/tasks/_default/todo/three/index.md', 'Three');
+  assert.deepEqual((await service.query(root, { types: ['task'] }).value()).map(n => path.basename(n.directoryPath)), ['one']);
+  assert.deepEqual((await service.query(root, { types: ['task'], includeDescendants: true }).value()).map(n => path.basename(n.directoryPath)), ['one','three']);
+  assert.deepEqual((await service.query(root, { types: ['task'], includeDescendants: true, includeHarness: true }).value()).map(n => path.basename(n.directoryPath)), ['one','two','three']);
+  await assert.rejects(service.list(root), /bad\/index.md/);
+  write('tasks/_default/todo/one/index.md', '---\nbad: [\n---\n');
+  await assert.rejects(service.query(root, { types: ['task'] }).value(), /one\/index.md/);
+});
+test('harness traversal deduplicates composition arrivals and detects cycles', async t => {
+  const { root, write, service } = fixture(t);
+  write('AGENTS.md', index('- [harness](.harness/AGENTS.md)'));
+  write('.harness/AGENTS.md', index());
+  assert.equal((await service.query(root, { includeHarness: true }).value()).length, 2);
+  write('.harness/AGENTS.md', index('- [root](../AGENTS.md)'));
+  await assert.rejects(service.query(root, { includeHarness: true }).value(), /Composition cycle/);
+});
+
+test('query reads do not snapshot unselected physical resources; explicit get upgrades lifecycle snapshot', async t => {
+  const { root, write, file, service } = fixture(t);
+  write('AGENTS.md', index('- [branch](branch/AGENTS.md)'));
+  write('branch/AGENTS.md', index());
+  fs.symlinkSync('/unselected/missing', file('branch/unselected'));
+  const nodes = await service.query(root).value();
+  assert.equal(nodes.length,2);
+  fs.unlinkSync(file('branch/unselected'));
+  await assert.rejects(service.move(nodes[1]!, file('new/AGENTS.md')), /reload|snapshot/i);
+  await service.get(file('branch/AGENTS.md'));
+  await service.move(nodes[1]!, file('new/AGENTS.md'));
+  assert.equal(fs.existsSync(file('new/AGENTS.md')), true);
+});
+test('global query omits out-of-root references and linked installations while missing local entries still fail', async t => {
+  const { root, write, file, service } = fixture(t);
+  const outside = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()),'external-node-'));
+  t.after(()=>fs.rmSync(outside,{recursive:true,force:true}));
+  fs.writeFileSync(path.join(outside,'SKILL.md'),'---\nbad: [\n---\n');
+  write('AGENTS.md', index(`- [external](${outside}/SKILL.md)\n- [installed](installed/SKILL.md)`));
+  fs.symlinkSync(outside,file('installed'));
+  assert.equal((await service.query(root,{includeHarness:true}).value()).length,1);
+  write('AGENTS.md',index('- [missing](missing/AGENTS.md)'));
+  await assert.rejects(service.query(root,{includeHarness:true}).value(),/Missing referenced node/);
+});
+
+test('typed navigation through a readonly leaf retains readonly origin for its harness children', async t => {
+  const { root, write, service } = fixture(t);
+  write('AGENTS.md',index('- [memory](memory/AGENTS.md)'));
+  write('memory/AGENTS.md',typeIndex('memory',false,'- [leaf](leaf/index.md)'));
+  write('memory/leaf/index.md','---\nbad: [\n---\n');
+  write('memory/leaf/AGENTS.md',index('- [task](.harness/tasks/_default/todo/one/index.md)'));
+  write('memory/leaf/.harness/tasks/_default/todo/one/index.md','Task');
+  const tasks=await service.query(root,{types:['task'],includeHarness:true}).value();
+  assert.equal(tasks.length,1);
+  await assert.rejects(service.update(tasks[0]!,{description:'changed'}),/Read-only/);
+});

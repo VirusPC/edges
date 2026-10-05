@@ -13,8 +13,8 @@ test("flat list is unchanged without --group-by", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-grouped-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
-    await run(["tasks", "create", "--title", "Alpha", "--status", "todo"], { env });
-    const result = await run(["tasks", "list"], { env });
+    await run(["tasks", "--purpose", "domain", "create", "--title", "Alpha", "--status", "todo"], { env });
+    const result = await run(["tasks", "--purpose", "domain", "list"], { env });
     assert.equal(result.exitCode, 0);
     const body = JSON.parse(result.stdout) as {
       status: string;
@@ -39,8 +39,8 @@ test("list --group-by project --format json emits edges.tasks.grouped/v1", async
   const repo = await mkdtemp(path.join(tmpdir(), "edges-grouped-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
-    await run(["tasks", "create", "--title", "Alpha", "--status", "todo"], { env });
-    const result = await run(["tasks", "list", "--group-by", "project", "--format", "json"], { env });
+    await run(["tasks", "--purpose", "domain", "create", "--title", "Alpha", "--status", "todo"], { env });
+    const result = await run(["tasks", "--purpose", "domain", "list", "--group-by", "project", "--format", "json"], { env });
     assert.equal(result.exitCode, 0);
     const body = JSON.parse(result.stdout) as {
       status: string;
@@ -81,28 +81,30 @@ test("list filters apply before grouping", async () => {
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     await run(
-      ["tasks", "create", "--title", "KeepHigh", "--status", "todo", "--project", "cli", "--priority", "high"],
+      ["tasks", "--purpose", "domain", "create", "--title", "KeepHigh", "--status", "todo", "--project", "cli", "--priority", "high"],
       { env },
     );
     await run(
-      ["tasks", "create", "--title", "KeepUrgent", "--status", "todo", "--project", "docs", "--priority", "urgent"],
+      ["tasks", "--purpose", "domain", "create", "--title", "KeepUrgent", "--status", "todo", "--project", "docs", "--priority", "urgent"],
       { env },
     );
     await run(
-      ["tasks", "create", "--title", "SkipStatus", "--status", "backlog", "--project", "cli", "--priority", "high"],
+      ["tasks", "--purpose", "domain", "create", "--title", "SkipStatus", "--status", "backlog", "--project", "cli", "--priority", "high"],
       { env },
     );
     await run(
-      ["tasks", "create", "--title", "SkipPriority", "--status", "todo", "--project", "docs", "--priority", "low"],
+      ["tasks", "--purpose", "domain", "create", "--title", "SkipPriority", "--status", "todo", "--project", "docs", "--priority", "low"],
       { env },
     );
     await run(
-      ["tasks", "create", "--title", "SkipProject", "--status", "todo", "--project", "other", "--priority", "high"],
+      ["tasks", "--purpose", "domain", "create", "--title", "SkipProject", "--status", "todo", "--project", "other", "--priority", "high"],
       { env },
     );
     const result = await run(
       [
         "tasks",
+        "--purpose",
+        "domain",
         "list",
         "--group-by",
         "project",
@@ -146,17 +148,17 @@ test("list filters apply before grouping", async () => {
 });
 
 test("list --group-by status and --format table are VALIDATION_ERROR", async () => {
-  const byStatus = await run(["tasks", "list", "--group-by", "status"]);
+  const byStatus = await run(["tasks", "--purpose", "domain", "list", "--group-by", "status"]);
   assert.equal(byStatus.exitCode, 2);
   assert.equal(failedJson(byStatus.stdout).errorCode, "VALIDATION_ERROR");
 
-  const table = await run(["tasks", "list", "--format", "table"]);
+  const table = await run(["tasks", "--purpose", "domain", "list", "--format", "table"]);
   assert.equal(table.exitCode, 2);
   assert.equal(failedJson(table.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("list --help documents grouped schema and omits review-page", async () => {
-  const result = await run(["tasks", "list", "--help"]);
+  const result = await run(["tasks", "--purpose", "domain", "list", "--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /--group-by/);
   assert.match(result.stdout, /edges\.tasks\.grouped\/v1/);

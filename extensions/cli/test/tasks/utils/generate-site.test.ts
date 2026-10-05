@@ -1,3 +1,4 @@
+import { indexTaskFixtureBoard, writeFixtureIndex } from "./helpers.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
@@ -11,7 +12,7 @@ test("generateTasksSite writes HTML with review payload and created title", asyn
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(
-      ["tasks", "create", "--title", "Board Alpha", "--status", "todo"],
+      ["tasks", "--purpose", "domain", "create", "--title", "Board Alpha", "--status", "todo"],
       { env },
     );
     assert.equal(created.exitCode, 0);
@@ -66,6 +67,8 @@ test("aggregate site preserves duplicate stems with portable scope/purpose/proje
         "edges-task-project: cli",
       ),
     );
+    await indexTaskFixtureBoard(path.join(repo,'tasks'));
+    await writeFixtureIndex(path.join(repo,'AGENTS.md'), ['tasks/AGENTS.md','.harness/tasks/AGENTS.md']);
     const outPath = path.join(repo, "site/index.html");
     await generateTasksSite({ repoPath: repo, outPath, env, purpose: "all" });
     const html = await readFile(outPath, "utf8");
@@ -100,10 +103,7 @@ test("standalone scope aggregate resolves nested sources relative to selected ro
   try {
     const child = path.join(root, ".harness/evaluation");
     await mkdir(child, { recursive: true });
-    await writeFile(
-      path.join(child, "AGENTS.md"),
-      "<!-- project-memory:start -->\n<!-- project-memory-children:start -->",
-    );
+    await writeFixtureIndex(path.join(child,'AGENTS.md'), ['.harness/tasks/AGENTS.md']);
     for (const scope of [root, child]) {
       const result = await run(
         ["--scope", scope, "tasks", "create", "--title", "Same"],
@@ -111,6 +111,7 @@ test("standalone scope aggregate resolves nested sources relative to selected ro
       );
       assert.equal(result.exitCode, 0, result.stdout);
     }
+    await writeFixtureIndex(path.join(root,'AGENTS.md'), ['.harness/tasks/AGENTS.md'], ['.harness/evaluation/AGENTS.md']);
     const outPath = path.join(root, "site/index.html");
     await generateTasksSite({ repoPath: root, outPath, purpose: "all" });
     const html = await readFile(outPath, "utf8");

@@ -275,7 +275,7 @@ export async function ensureTaskDestination(
   writer: BoardWriter,
 ): Promise<void> {
   await writer.mkdirp(path.join(boardRoot(target), projectDirName(project)));
-  await ensureProjectMetadata(target, writer);
+  await ensureProjectMetadata(target, writer, undefined, [project]);
   await writer.mkdirp(statusDir(target, project, status));
 }
 
