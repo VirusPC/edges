@@ -130,8 +130,8 @@ export function localOwnershipPaths(
   const text = source ?? (isFile(file) ? readText(file) : "");
   const node = new InternalNode(file).parse(text);
   return new Set(
-    node.content.localMemory.flatMap((reference) => {
-      const path = ownershipTarget(dirname(file), reference.target);
+    node.localChildren.flatMap((reference) => {
+      const path = realPath(reference.id);
       return path ? [path] : [];
     }),
   );

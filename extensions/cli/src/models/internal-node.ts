@@ -1,62 +1,201 @@
-import { BaseNode } from './base-node.js';
-import { InternalSyntax } from './internal-syntax.js';
-import { validateChild } from './relations.js';
-import type { ChildKind, InternalContent, NodeReference } from './types.js';
-
-type Content = { constraints: string[]; localMemory: NodeReference[]; descendantMemory: NodeReference[] };
-const section = (kind: ChildKind) => kind === 'local' ? 'localMemory' : 'descendantMemory';
-function entry(reference: NodeReference): NodeReference {
-  const { kind: _kind, ...value } = reference;
-  return structuredClone(value);
-}
-
-export class InternalNode extends BaseNode<'internal'> {
-  override readonly type = 'internal' as const;
-  #content: Content = { constraints: [], localMemory: [], descendantMemory: [] };
-  #syntax = new InternalSyntax('');
-  get content(): InternalContent { return structuredClone(this.#content); }
+import { relative, dirname } from "node:path";
+import { BaseNode } from "./base-node.js";
+import {
+  InternalSyntax,
+  type SyntaxContent,
+  type SyntaxReference,
+} from "./internal-syntax.js";
+import { referenceOf, validateChild, validateGroup } from "./relations.js";
+import { resolveHref, identifyNodeType } from "./layout.js";
+import type {
+  ChildGroup,
+  InternalContent,
+  NodeReference,
+  InternalCreateInput,
+  InternalUpdateInput,
+} from "./types.js";
+type Content = {
+  constraints: string[];
+  localChildren: NodeReference[];
+  descendantChildren: NodeReference[];
+};
+const section = (group: ChildGroup) =>
+  group === "local" ? "localChildren" : "descendantChildren";
+export class InternalNode extends BaseNode<
+  InternalCreateInput,
+  InternalUpdateInput
+> {
+  override readonly type = "internal";
+  #content: Content = {
+    constraints: [],
+    localChildren: [],
+    descendantChildren: [],
+  };
+  #syntax = new InternalSyntax("");
+  #hrefs = new Map<string, string>();
+  get content(): InternalContent {
+    return structuredClone(this.#content);
+  }
+  get constraints(): readonly string[] {
+    return [...this.#content.constraints];
+  }
+  get localChildren(): readonly Readonly<NodeReference>[] {
+    return structuredClone(this.#content.localChildren);
+  }
+  get descendantChildren(): readonly Readonly<NodeReference>[] {
+    return structuredClone(this.#content.descendantChildren);
+  }
   override get children(): readonly Readonly<NodeReference>[] {
-    return [
-      ...this.#content.localMemory.map(reference => ({ ...reference, kind: 'local' as const })),
-      ...this.#content.descendantMemory.map(reference => ({ ...reference, kind: 'descendant' as const })),
-    ];
+    return [...this.localChildren, ...this.descendantChildren];
   }
   protected override parseBody(markdown: string): void {
-    const syntax = new InternalSyntax(markdown);
-    const content = syntax.content();
-    this.#content = { constraints: [...content.constraints], localMemory: [...content.localMemory], descendantMemory: [...content.descendantMemory] };
-    this.#syntax = syntax;
-  }
-  protected override serializeBody(): string { return this.#syntax.serialize(this.#content); }
-  #replaceContent(next: Content): void {
-    // Validate representability before exposing any mutation to callers.
-    this.#syntax.serialize(next);
+    const syntax = new InternalSyntax(markdown, (href) => {
+        const id = resolveHref(this.path, href);
+        return !!id && identifyNodeType(id) !== undefined;
+      }),
+      parsed = syntax.content(),
+      hrefs = new Map<string, string>();
+    const references = (entries: readonly SyntaxReference[]): NodeReference[] =>
+      entries.flatMap((entry) => {
+        const id = resolveHref(this.path, entry.target);
+        if (!id) return [];
+        hrefs.set(id, entry.target);
+        return [
+          {
+            id,
+            ...(entry.label === undefined ? {} : { name: entry.label }),
+            ...(entry.description === undefined
+              ? {}
+              : { description: entry.description }),
+          },
+        ];
+      });
+    const next = {
+      constraints: [...parsed.constraints],
+      localChildren: references(parsed.localChildren),
+      descendantChildren: references(parsed.descendantChildren),
+    };
+    this.#validateContent(next);
     this.#content = next;
+    this.#syntax = syntax;
+    this.#hrefs = hrefs;
   }
-  setConstraints(items: readonly string[]): void {
-    this.#replaceContent({ ...this.#content, constraints: [...items] });
+  #syntaxContent(content: Content): SyntaxContent {
+    const references = (items: NodeReference[]): SyntaxReference[] =>
+      items.map((ref) => ({
+        target:
+          this.#hrefs.get(ref.id) ??
+          relative(dirname(this.path), ref.id)
+            .split("/")
+            .map((part) => encodeURIComponent(part))
+            .join("/"),
+        ...(ref.name === undefined ? {} : { label: ref.name }),
+        ...(ref.description === undefined
+          ? {}
+          : { description: ref.description }),
+      }));
+    return {
+      constraints: content.constraints,
+      localChildren: references(content.localChildren),
+      descendantChildren: references(content.descendantChildren),
+    };
   }
-  addChild(reference: NodeReference): void {
+  protected override serializeBody(): string {
+    return this.#syntax.serialize(this.#syntaxContent(this.#content));
+  }
+  #validateContent(content: Content): void {
+    const seen = new Set<string>();
+    for (const reference of [
+      ...content.localChildren,
+      ...content.descendantChildren,
+    ]) {
+      validateChild(reference);
+      if (identifyNodeType(reference.id) === undefined)
+        throw new Error(
+          `${this.path}: child must identify a directory entry: ${reference.id}`,
+        );
+      if (seen.has(reference.id))
+        throw new Error(
+          `${this.path}: child already indexed in local/descendant sections: ${reference.id}`,
+        );
+      seen.add(reference.id);
+    }
+    if (content.constraints.some((value) => typeof value !== "string"))
+      throw new Error(`${this.path}: constraints must be strings.`);
+  }
+  #replaceContent(next: Content): this {
+    this.#validateContent(next);
+    this.#syntax.serialize(this.#syntaxContent(next));
+    this.#content = next;
+    return this;
+  }
+  override validate(): void {
+    super.validate();
+    this.#validateContent(this.#content);
+    this.serializeBody();
+  }
+  protected override applyInput(input: InternalCreateInput): void {
+    const structured =
+      input.constraints !== undefined ||
+      input.localChildren !== undefined ||
+      input.descendantChildren !== undefined;
+    if (input.body !== undefined && structured)
+      throw new Error(
+        `${this.path}: body conflicts with structured Internal sections.`,
+      );
+    super.applyInput(input);
+    this.#replaceContent({
+      constraints: [...(input.constraints ?? this.#content.constraints)],
+      localChildren: (input.localChildren ?? this.#content.localChildren).map(
+        referenceOf,
+      ),
+      descendantChildren: (
+        input.descendantChildren ?? this.#content.descendantChildren
+      ).map(referenceOf),
+    });
+  }
+  setConstraints(items: readonly string[]): this {
+    return this.#replaceContent({ ...this.#content, constraints: [...items] });
+  }
+  addChild(group: ChildGroup, reference: NodeReference): this {
+    validateGroup(group);
     validateChild(reference);
-    if (this.children.some(child => child.target === reference.target)) throw new Error(`Child already indexed: ${reference.target}`);
+    if (this.children.some((child) => child.id === reference.id))
+      throw new Error(`${this.path}: Child already indexed: ${reference.id}`);
     const next = structuredClone(this.#content);
-    next[section(reference.kind!)].push(entry(reference));
-    this.#replaceContent(next);
+    next[section(group)].push(referenceOf(reference));
+    return this.#replaceContent(next);
   }
-  updateChild(reference: NodeReference): void {
-    validateChild(reference);
-    const previous = this.children.find(child => child.target === reference.target);
-    if (!previous) throw new Error(`Child is not indexed: ${reference.target}`);
+  updateChild(
+    id: string,
+    patch: Partial<Pick<NodeReference, "name" | "description">>,
+  ): this {
+    if (!this.children.some((child) => child.id === id))
+      throw new Error(`${this.path}: Child is not indexed: ${id}`);
     const next = structuredClone(this.#content);
-    const items = next[section(previous.kind!)];
-    const index = items.findIndex(child => child.target === reference.target);
-    if (previous.kind === reference.kind) items[index] = entry(reference);
-    else { items.splice(index, 1); next[section(reference.kind!)].push(entry(reference)); }
-    this.#replaceContent(next);
+    for (const group of ["localChildren", "descendantChildren"] as const)
+      next[group] = next[group].map((child) =>
+        child.id === id ? referenceOf({ ...child, ...patch, id }) : child,
+      );
+    return this.#replaceContent(next);
   }
-  removeChild(reference: NodeReference): void {
+  removeChild(id: string): this {
     const next = structuredClone(this.#content);
-    for (const key of ['localMemory', 'descendantMemory'] as const) next[key] = next[key].filter(child => child.target !== reference.target);
-    this.#replaceContent(next);
+    for (const group of ["localChildren", "descendantChildren"] as const)
+      next[group] = next[group].filter((child) => child.id !== id);
+    return this.#replaceContent(next);
+  }
+  moveChild(id: string, group: ChildGroup): this {
+    validateGroup(group);
+    const reference = this.children.find((child) => child.id === id);
+    if (!reference)
+      throw new Error(`${this.path}: Child is not indexed: ${id}`);
+    if (this.#content[section(group)].some((child) => child.id === id))
+      return this;
+    const next = structuredClone(this.#content);
+    for (const key of ["localChildren", "descendantChildren"] as const)
+      next[key] = next[key].filter((child) => child.id !== id);
+    next[section(group)].push(reference);
+    return this.#replaceContent(next);
   }
 }

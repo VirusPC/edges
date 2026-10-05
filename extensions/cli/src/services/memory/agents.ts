@@ -1,6 +1,5 @@
 export { ownershipTarget } from './paths.js';
 import { InternalNode } from '../../models/internal-node.js';
-import { InternalSyntax } from '../../models/internal-syntax.js';
 import { discoverScopes } from '../scope.js';
 import { loadMemoryDocument, saveMemoryDocument, type MemoryDocument } from './node-documents.js';
 import { join, dirname, basename, relative } from "node:path";
@@ -70,22 +69,18 @@ export function readOwnershipEntries(file: string) {
     return isFile(file) ? new InternalNode(file).parse(readText(file)).children : [];
 }
 export function readIndexEntries(file: string): [string, string][] {
-    return readOwnershipEntries(file)
-        .filter(entry => entry.kind === 'descendant' && entry.target.split(/[?#]/, 1)[0]!.endsWith('AGENTS.md'))
-        .map(entry => [entry.target, entry.description ?? '']);
+    return (isFile(file) ? new InternalNode(file).parse(readText(file)).descendantChildren : [])
+        .filter(entry => entry.id.endsWith('AGENTS.md'))
+        .map(entry => [relative(dirname(file), entry.id), entry.description ?? '']);
 }
 export function registeredIndexAnchors(target: string, root: string): string[] {
     return discoverScopes(root).filter(owner => readOwnershipEntries(join(owner, AGENTS_FILE_NAME))
-        .some(entry => ownershipTarget(owner, entry.target) === realPath(join(target, AGENTS_FILE_NAME))));
+        .some(entry => realPath(entry.id) === realPath(join(target, AGENTS_FILE_NAME))));
 }
 async function dropLoadedIndexEntries(document: MemoryDocument, relatives: Set<string>): Promise<boolean> {
     if (!(document.node instanceof InternalNode)) throw new Error('Expected an AGENTS node');
     const before = document.node.serialize();
-    const content = document.node.content;
-    document.node.body = new InternalSyntax(document.node.body).serialize({
-        ...content,
-        descendantMemory: content.descendantMemory.filter(reference => !relatives.has(reference.target)),
-    });
+    for (const reference of document.node.descendantChildren) if (relatives.has(relative(document.node.directoryPath, reference.id))) document.node.removeChild(reference.id);
     const after = document.node.serialize();
     if (after === before) return false;
     await saveMemoryDocument(document, after);
@@ -121,15 +116,15 @@ export async function syncIndexEntry(anchor: string, target: string, description
     const existing = document.existed ? document.node.serialize() : undefined;
     const state = classifyAgentsSource(existing);
     if (!(document.node instanceof InternalNode)) throw new Error('Expected an AGENTS node');
-    const registered = document.node.children.find(entry => ownershipTarget(anchor, entry.target) === realPath(join(target, AGENTS_FILE_NAME)));
+    const registered = document.node.children.find(entry => realPath(entry.id) === realPath(join(target, AGENTS_FILE_NAME)));
     if (registered) {
-        if (description === undefined || registered.description === normalized) return ["preserved", registered.target, null];
-        document.node.updateChild({ ...registered, description: normalized });
+        if (description === undefined || registered.description === normalized) return ["preserved", relative(anchor, registered.id), null];
+        document.node.updateChild(registered.id, { description: normalized });
         await saveMemoryDocument(document, document.node.serialize());
-        return ["updated", registered.target, normalized];
+        return ["updated", relative(anchor, registered.id), normalized];
     }
     if (state === "foreign") {
-        document.node.addChild({ target: rel, description: normalized, kind: 'descendant' });
+        document.node.addChild('descendant', { id: join(anchor, rel), description: normalized });
         await saveMemoryDocument(document, document.node.serialize());
         return ["updated", rel, normalized];
     }

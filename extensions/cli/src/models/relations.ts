@@ -1,19 +1,52 @@
-import type { BaseNode } from './base-node.js';
-import type { NodeReference } from './types.js';
-
-type Relations = { parent?: NodeReference; children?: readonly NodeReference[] };
+import { isAbsolute, normalize } from "node:path";
+import type { BaseNode } from "./base-node.js";
+import type { ChildGroup, NodeReference } from "./types.js";
+type Relations = { parent?: NodeReference; harness?: NodeReference };
 const relations = new WeakMap<BaseNode, Relations>();
-
+const paths = new WeakMap<BaseNode, string>();
 export function validateChild(reference: NodeReference): void {
-  if (reference.kind !== 'local' && reference.kind !== 'descendant') throw new Error('Child reference kind must be local or descendant.');
-  if (!reference.target || /[\r\n]/.test(reference.target)) throw new Error('Child target must be a nonempty path without line breaks.');
+  if (
+    !reference ||
+    typeof reference.id !== "string" ||
+    !isAbsolute(reference.id) ||
+    normalize(reference.id) !== reference.id ||
+    /[\r\n]/.test(reference.id)
+  )
+    throw new Error(
+      "Child id must be a normalized absolute path without line breaks.",
+    );
+  for (const key of ["name", "description"] as const)
+    if (reference[key] !== undefined && typeof reference[key] !== "string")
+      throw new Error(`Child ${key} must be a string.`);
 }
-
-/** Package-internal coordination for NodeService; never exported from the model entrypoint. */
+export function validateGroup(group: ChildGroup): void {
+  if (group !== "local" && group !== "descendant")
+    throw new Error("Child group must be local or descendant.");
+}
+export function referenceOf(node: NodeReference): NodeReference {
+  validateChild(node);
+  return {
+    id: node.id,
+    ...(node.name === undefined ? {} : { name: node.name }),
+    ...(node.description === undefined
+      ? {}
+      : { description: node.description }),
+  };
+}
+/** Package-internal lifecycle coordination; not exported from the public model entrypoint. */
 export function setNodeRelations(node: BaseNode, value: Relations): void {
-  value.children?.forEach(validateChild);
-  relations.set(node, structuredClone(value));
+  relations.set(node, {
+    ...(value.parent ? { parent: referenceOf(value.parent) } : {}),
+    ...(value.harness ? { harness: referenceOf(value.harness) } : {}),
+  });
 }
 export function nodeRelations(node: BaseNode): Relations {
   return structuredClone(relations.get(node) ?? {});
+}
+export function setNodePath(node: BaseNode, path: string): void {
+  validateChild({ id: path });
+  paths.set(node, path);
+}
+export function nodePath(node: BaseNode): string | undefined {
+  return paths.get(node);
 }

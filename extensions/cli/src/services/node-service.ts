@@ -2,7 +2,7 @@ import * as fs from 'node:fs';
 import { readResourceImport, writeResourceImport, resourceSnapshot, validateResources, assertResourceBoundary, recoveryPath, type ResourceSnapshot } from './node-resources.js';
 import path from 'node:path';
 import { BaseNode, InternalNode, MemoryNode, SkillNode } from '../models/index.js';
-import type { ChildKind, NodeReference, ScopeTraversalOptions } from '../models/index.js';
+import type { ChildGroup, NodeReference, ScopeTraversalOptions } from '../models/index.js';
 import { setNodeRelations, validateChild } from '../models/relations.js';
 import { parseDocument } from '../utils/markdown/document.js';
 import { absolute } from '../utils/filesystem.js';
@@ -47,22 +47,7 @@ function indexContract(node: BaseNode): IndexContract | undefined {
   // referenced is an index-only source even if malformed metadata attempts to enable it.
   return { module: fields.module as IndexContract['module'], writable: fields.name !== 'referenced' && fields.writable !== false };
 }
-function resolveReference(parent: BaseNode, reference: NodeReference): string {
-  const href = reference.target;
-  if (/[\0\r\n]/.test(href)) throw new Error('Ownership href contains invalid characters');
-  if (/^[a-z][a-z\d+.-]*:/i.test(href) || href.startsWith('//')) throw new Error(`Ownership reference must target a local document: ${href}`);
-  let target: string;
-  try { target = decodeURIComponent(href.split(/[?#]/, 1)[0]!); }
-  catch { throw new Error(`Invalid encoded ownership target: ${href}`); }
-  if (!target || /\0/.test(target)) throw new Error(`Invalid ownership target: ${href}`);
-  return path.resolve(path.dirname(parent.path), target);
-}
-function encodePath(file: string): string {
-  return file.split(path.sep).map(segment => encodeURIComponent(segment)).join('/');
-}
-function authoredTarget(parent: BaseNode, child: BaseNode): string {
-  return encodePath(path.relative(path.dirname(parent.path), child.path));
-}
+function resolveReference(_parent: BaseNode, reference: NodeReference): string { validateChild(reference); return reference.id; }
 function clone<T extends BaseNode>(node: T): T {
   return new (node.constructor as Model<T>)(node.path).parse(node.serialize());
 }
@@ -123,13 +108,12 @@ export class NodeService {
       state.readOnly = true; this.#readOnly.add(state.file.path); this.#readOnly.add(state.file.realPath);
       if (node.directoryPath) { this.#readOnlyDirectories.add(node.directoryPath); this.#readOnlyDirectories.add(state.file.realDirectory); }
     }
-    setNodeRelations(node, { parent: parent ? { target: encodePath(parent.path) } : undefined,
-      ...(node instanceof InternalNode ? {} : { children: node.children }) });
+    setNodeRelations(node, { parent: parent ? { id: parent.path } : undefined, harness: node.harness });
   }
   #knownParent(child: BaseNode, permitted?: BaseNode): void {
     for (const instance of new Set([child, ...(this.#loaded.get(absolute(child.path)) ?? [])])) {
       if (instance.parent && resolveReference(instance, instance.parent) !== permitted?.path) {
-        throw new Error(`Conflicting known ownership parent for ${child.path}: ${instance.parent.target}`);
+        throw new Error(`Conflicting known ownership parent for ${child.path}: ${instance.parent.id}`);
       }
     }
   }
@@ -255,7 +239,7 @@ export class NodeService {
       }
     }
   }
-  async create(node: BaseNode, placement?: { parent: InternalNode; kind: ChildKind }, options: { resources?: string } = {}): Promise<void> {
+  async create(node: BaseNode, placement?: { parent: InternalNode; kind: ChildGroup }, options: { resources?: string } = {}): Promise<void> {
     checkPath(node.path);
     if (node.directoryPath && fs.existsSync(node.directoryPath)) throw new Error(`Owned node directory already exists: ${node.directoryPath}`);
     if (readEntry(node.path)) throw new Error(`Node target already exists: ${node.path}`);
@@ -270,9 +254,9 @@ export class NodeService {
     if (placement) {
       const { parent, kind } = placement;
       this.#existing(parent); this.#knownParent(node);
-      validateChild({ target: node.path, kind });
+      validateChild({ id: node.path });
       if (this.#reference(parent, node)) throw new Error(`Child already indexed: ${node.path}`);
-      const draft = clone(parent); draft.addChild({ target: authoredTarget(parent, node), kind });
+      const draft = clone(parent); draft.addChild(kind, { id: node.path });
       writes.push({ node: parent, draft, source: draft.serialize() });
     }
     // Validate all permissions (including private directory ignore coverage) before resources exist.
@@ -317,8 +301,8 @@ export class NodeService {
       this.#existing(parent); this.#knownParent(node, parent);
       const reference = this.#reference(parent, node);
       if (!reference) throw new Error(`Child is not indexed by parent: ${node.path}`);
-      const draft = clone(parent); draft.removeChild(reference);
-      draft.addChild({ ...reference, target: authoredTarget(parent, moved) + (reference.target.match(/[?#].*$/)?.[0] ?? '') });
+      const draft = clone(parent); draft.removeChild(reference.id);
+      draft.addChild(parent.localChildren.some(child => child.id === reference.id) ? 'local' : 'descendant', { ...reference, id: moved.path });
       writes.push({ node: parent, draft, source: draft.serialize() });
     }
     await this.#options.assertWrite?.({ operation: 'move', node, parent });
@@ -356,11 +340,11 @@ export class NodeService {
     if (!parent) throw new Error(`Missing ownership parent: ${target}`);
     return parent;
   }
-  async attach(parent: InternalNode, child: BaseNode, kind: ChildKind): Promise<void> {
+  async attach(parent: InternalNode, child: BaseNode, kind: ChildGroup): Promise<void> {
     this.#existing(parent); this.#current(child); this.#knownParent(child, parent);
-    validateChild({ target: child.path, kind });
+    validateChild({ id: child.path });
     if (this.#reference(parent, child)) throw new Error(`Child already indexed: ${child.path}`);
-    const draft = clone(parent); draft.addChild({ target: authoredTarget(parent, child), kind });
+    const draft = clone(parent); draft.addChild(kind, { id: child.path });
     await this.#save('attach', [{ node: parent, draft, source: draft.serialize() }]);
     this.#parent(child, parent);
   }
@@ -368,23 +352,23 @@ export class NodeService {
     this.#existing(parent); this.#current(child); this.#knownParent(child, parent);
     const reference = this.#reference(parent, child);
     if (!reference) throw new Error(`Child is not indexed by parent: ${child.path}`);
-    const draft = clone(parent); draft.removeChild(reference);
+    const draft = clone(parent); draft.removeChild(reference.id);
     await this.#save('detach', [{ node: parent, draft, source: draft.serialize() }]);
     this.#parent(child);
   }
-  async reparent(child: BaseNode, oldParent: InternalNode, newParent: InternalNode, kind: ChildKind): Promise<void> {
+  async reparent(child: BaseNode, oldParent: InternalNode, newParent: InternalNode, kind: ChildGroup): Promise<void> {
     this.#current(child); this.#existing(oldParent); this.#existing(newParent); this.#knownParent(child, oldParent);
-    validateChild({ target: child.path, kind });
+    validateChild({ id: child.path });
     const reference = this.#reference(oldParent, child);
     if (!reference) throw new Error(`Child is not indexed by old parent: ${child.path}`);
     if (oldParent.path === newParent.path) {
-      const draft = clone(oldParent); draft.updateChild({ ...reference, kind });
+      const draft = clone(oldParent); draft.moveChild(reference.id, kind);
       await this.#save('reparent', [{ node: oldParent, draft, source: draft.serialize() }]); return;
     }
     if (this.#reference(newParent, child)) throw new Error(`Child already indexed by new parent: ${child.path}`);
     const oldDraft = clone(oldParent), newDraft = clone(newParent);
-    oldDraft.removeChild(reference);
-    newDraft.addChild({ ...reference, target: authoredTarget(newParent, child), kind });
+    oldDraft.removeChild(reference.id);
+    newDraft.addChild(kind, { ...reference, id: child.path });
     await this.#save('reparent', [
       { node: oldParent, draft: oldDraft, source: oldDraft.serialize() },
       { node: newParent, draft: newDraft, source: newDraft.serialize() },
@@ -401,7 +385,7 @@ export class NodeService {
       this.#existing(parent); this.#knownParent(node, parent);
       const reference = this.#reference(parent, node);
       if (!reference) throw new Error(`Child is not indexed by parent: ${node.path}`);
-      const draft = clone(parent); draft.removeChild(reference);
+      const draft = clone(parent); draft.removeChild(reference.id);
       writes.push({ node: parent, draft, source: draft.serialize() });
     }
     if (node.directoryPath) {

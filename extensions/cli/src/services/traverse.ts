@@ -1,3 +1,4 @@
+import { InternalNode } from '../models/index.js';
 import type { BaseNode, NodeReference, ScopeTraversalOptions } from '../models/index.js';
 import { validateChild } from '../models/relations.js';
 
@@ -13,9 +14,8 @@ export async function traverse(
     if (active.has(node.path)) throw new Error(`Ownership cycle: ${node.path}`);
     if (seen.has(node.path)) return;
     seen.add(node.path); active.add(node.path); result.push(node);
-    for (const reference of node.children ?? []) {
+    for (const reference of node instanceof InternalNode && !options.includeDescendants ? node.localChildren : node.children) {
       validateChild(reference);
-      if (reference.kind === 'descendant' && !options.includeDescendants) continue;
       const target = resolve(node, reference);
       if (active.has(target)) throw new Error(`Ownership cycle: ${target}`);
       if (!seen.has(target)) await visit(await load(node, reference, target));

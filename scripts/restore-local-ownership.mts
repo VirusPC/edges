@@ -605,7 +605,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
       if (
         !local.children.some(
           (child) =>
-            ownershipTarget(dirname(ownerPath), child.target) === indexPath,
+            child.id === indexPath,
         )
       )
         local.addChild({
@@ -617,7 +617,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
       const parent = node(join(root, "AGENTS.md"));
       for (const child of parent.children)
         if (
-          ownershipTarget(root, child.target) ===
+          child.id ===
           join(candidate.source, "AGENTS.md")
         )
           parent.removeChild(child);

@@ -1,25 +1,49 @@
-import type { NodeModel, SectionKey, NodeItem, NodeLink } from './model.js';
-import type { Nodes as AstNode } from 'mdast';
-import { fromMarkdown } from 'mdast-util-from-markdown';
-import { createNodeModel } from './model.js';
-import { parseDocument } from '../../utils/markdown/document.js';
+import { CODEC_SECTIONS } from "../layout.js";
+import type { NodeModel, SectionKey, NodeItem, NodeLink } from "./model.js";
+import type { Nodes as AstNode } from "mdast";
+import { fromMarkdown } from "mdast-util-from-markdown";
+import { createNodeModel } from "./model.js";
+import { parseDocument } from "../../utils/markdown/document.js";
 
-type Binding = { start: number; end: number; prefix: string; protected: boolean };
+type Binding = {
+  start: number;
+  end: number;
+  prefix: string;
+  protected: boolean;
+};
 
-const markers: Record<string, SectionKey> = { important: 'constraints', local: 'memory', children: 'children' };
+const markers = Object.fromEntries(
+  Object.entries(CODEC_SECTIONS).map(([key, value]) => [
+    value.marker.replace("project-memory-", ""),
+    key,
+  ]),
+) as Record<string, SectionKey>;
 
-const titles: Record<string, SectionKey> = { 本层硬约束: 'constraints', 本层重要约束: 'constraints', 本层记忆: 'memory', 下层记忆索引: 'children' };
+const titles: Record<string, SectionKey> = {
+  ...Object.fromEntries(
+    Object.entries(CODEC_SECTIONS).map(([key, value]) => [value.heading, key]),
+  ),
+  本层重要约束: "constraints",
+};
 
-function start(node: AstNode): number { return node.position?.start.offset ?? 0; }
+function start(node: AstNode): number {
+  return node.position?.start.offset ?? 0;
+}
 
-function end(node: AstNode): number { return node.position?.end.offset ?? 0; }
+function end(node: AstNode): number {
+  return node.position?.end.offset ?? 0;
+}
 
 /** Private codec representation: source ranges/Markdown syntax never enter NodeModel. */
 export function decodeBody(source: string) {
   const ast = fromMarkdown(source);
   const model = createNodeModel();
 
-  const bindings: Record<SectionKey, Binding[]> = { constraints: [], memory: [], children: [] };
+  const bindings: Record<SectionKey, Binding[]> = {
+    constraints: [],
+    memory: [],
+    children: [],
+  };
 
   const sections: Record<SectionKey, { present: boolean; insert: number }> = {
     constraints: { present: false, insert: source.length },
@@ -35,63 +59,92 @@ export function decodeBody(source: string) {
   while (pending.length) {
     const node = pending.pop();
     if (!node) continue;
-    if (node.type === 'definition' && !definitions.has(node.identifier)) definitions.set(node.identifier, node.url);
-    if ('children' in node) for (let i = node.children.length - 1; i >= 0; i--) pending.push(node.children[i]);
+    if (node.type === "definition" && !definitions.has(node.identifier))
+      definitions.set(node.identifier, node.url);
+    if ("children" in node)
+      for (let i = node.children.length - 1; i >= 0; i--)
+        pending.push(node.children[i]);
   }
 
   function text(node: AstNode): string {
-    if ('value' in node) return node.value;
-    if ('children' in node) return node.children.map(text).join('');
-    return node.type === 'break' ? '\n' : '';
+    if ("value" in node) return node.value;
+    if ("children" in node) return node.children.map(text).join("");
+    return node.type === "break" ? "\n" : "";
   }
 
   function link(node: AstNode): NodeLink | undefined {
-    const target = node.type === 'link' ? node.url : node.type === 'linkReference' ? definitions.get(node.identifier) : undefined;
-    return target === undefined ? undefined : { kind: 'link', label: text(node), target };
+    const target =
+      node.type === "link"
+        ? node.url
+        : node.type === "linkReference"
+          ? definitions.get(node.identifier)
+          : undefined;
+    return target === undefined
+      ? undefined
+      : { kind: "link", label: text(node), target };
   }
 
-  function runs(node: AstNode): NodeItem['content'] {
+  function runs(node: AstNode): NodeItem["content"] {
     const value = link(node);
     if (value) return [value];
-    if (node.type === 'text' || node.type === 'inlineCode') return [{ kind: 'text', value: node.value }];
-    if (node.type === 'break') return [{ kind: 'text', value: '\n' }];
-    if (!('children' in node)) return [];
+    if (node.type === "text" || node.type === "inlineCode")
+      return [{ kind: "text", value: node.value }];
+    if (node.type === "break") return [{ kind: "text", value: "\n" }];
+    if (!("children" in node)) return [];
 
-    const result: NodeItem['content'] = [];
-    for (const child of node.children) for (const run of runs(child)) {
-      const last = result.at(-1);
-      if (last?.kind === 'text' && run.kind === 'text') last.value += run.value;
-      else result.push(run);
-    }
+    const result: NodeItem["content"] = [];
+    for (const child of node.children)
+      for (const run of runs(child)) {
+        const last = result.at(-1);
+        if (last?.kind === "text" && run.kind === "text")
+          last.value += run.value;
+        else result.push(run);
+      }
     return result;
   }
 
   function unsupported(node: AstNode): boolean {
-    if (['image', 'imageReference', 'html', 'code'].includes(node.type)) return true;
-    return 'children' in node && node.children.some(unsupported);
+    if (["image", "imageReference", "html", "code"].includes(node.type))
+      return true;
+    return "children" in node && node.children.some(unsupported);
   }
 
   function ordinaryReferences(node: AstNode): void {
     const value = link(node);
     if (value) {
       model.references.push(value);
-      references.push({ start: start(node), end: end(node), prefix: '', protected: unsupported(node) });
+      references.push({
+        start: start(node),
+        end: end(node),
+        prefix: "",
+        protected: unsupported(node),
+      });
       return;
     }
-    if ('children' in node) node.children.forEach(ordinaryReferences);
+    if ("children" in node) node.children.forEach(ordinaryReferences);
   }
 
   function item(node: AstNode, section: SectionKey): void {
     const content = runs(node);
     if (!content.length) return;
-    const list = node.type === 'listItem';
-    const paragraph = list && node.children.length === 1 && node.children[0].type === 'paragraph' ? node.children[0] : undefined;
+    const list = node.type === "listItem";
+    const paragraph =
+      list &&
+      node.children.length === 1 &&
+      node.children[0].type === "paragraph"
+        ? node.children[0]
+        : undefined;
     model[section].push({ content });
     bindings[section].push({
-      start: start(node), end: end(node),
-      prefix: paragraph ? source.slice(start(node), start(paragraph))
-        : node.type === 'heading' && node.children.length ? source.slice(start(node), start(node.children[0])) : '',
-      protected: unsupported(node) || (list && !paragraph) || node.type === 'blockquote',
+      start: start(node),
+      end: end(node),
+      prefix: paragraph
+        ? source.slice(start(node), start(paragraph))
+        : node.type === "heading" && node.children.length
+          ? source.slice(start(node), start(node.children[0]))
+          : "",
+      protected:
+        unsupported(node) || (list && !paragraph) || node.type === "blockquote",
     });
   }
 
@@ -117,11 +170,15 @@ export function decodeBody(source: string) {
 
   for (const block of ast.children) {
     if (!active) outsideInsert = start(block);
-    if (block.type === 'html') {
-      const marker = block.value.trim().match(/^<!-- project-memory-(important|local|children):(start|end) -->$/);
+    if (block.type === "html") {
+      const marker = block.value
+        .trim()
+        .match(
+          /^<!-- project-memory-(important|local|children):(start|end) -->$/,
+        );
       if (marker) {
         const section = markers[marker[1]];
-        if (marker[2] === 'start') {
+        if (marker[2] === "start") {
           if (marked) unsafe = true;
           close(start(block));
           open(section);
@@ -134,14 +191,14 @@ export function decodeBody(source: string) {
         if (!active) outsideInsert = end(block);
         continue;
       }
-      if (block.value.trim() === '<!-- project-memory:end -->') {
+      if (block.value.trim() === "<!-- project-memory:end -->") {
         appendAt = start(block);
         if (!marked) close(start(block));
       }
       if (!active) outsideInsert = end(block);
       continue;
     }
-    if (block.type === 'heading') {
+    if (block.type === "heading") {
       let isSectionHeading = false;
       if (!marked) {
         if (active && block.depth <= headingDepth) close(start(block));
@@ -154,19 +211,33 @@ export function decodeBody(source: string) {
         }
       }
       if (!active) ordinaryReferences(block);
-      else if (!isSectionHeading && runs(block).some(run => run.kind === 'link')) item(block, active);
+      else if (
+        !isSectionHeading &&
+        runs(block).some((run) => run.kind === "link")
+      )
+        item(block, active);
       if (!active) outsideInsert = end(block);
       continue;
     }
     if (!active) ordinaryReferences(block);
-    else if (block.type === 'list') { for (const child of block.children) item(child, active); }
-    else if (block.type === 'paragraph' || block.type === 'blockquote') item(block, active);
+    else if (block.type === "list") {
+      for (const child of block.children) item(child, active);
+    } else if (block.type === "paragraph" || block.type === "blockquote")
+      item(block, active);
     if (!active) outsideInsert = end(block);
   }
   if (marked) unsafe = true;
   const referencesInsert = active ? outsideInsert : source.length;
   close(source.length);
-  return { model, bindings, references, sections, unsafe, appendAt, referencesInsert };
+  return {
+    model,
+    bindings,
+    references,
+    sections,
+    unsafe,
+    appendAt,
+    referencesInsert,
+  };
 }
 
 export function parseNode(source: string): NodeModel {

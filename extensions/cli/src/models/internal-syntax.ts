@@ -1,40 +1,88 @@
-import { isDeepStrictEqual } from 'node:util';
-import { decodeBody } from './internal/parse.js';
-import { serializeNode } from './internal/serialize.js';
-import type { NodeItem, NodeModel } from './internal/model.js';
-import type { InternalContent, NodeReference } from './types.js';
+import { isDeepStrictEqual } from "node:util";
+import { decodeBody } from "./internal/parse.js";
+import { serializeNode } from "./internal/serialize.js";
+import type { NodeItem, NodeModel } from "./internal/model.js";
+export interface SyntaxReference {
+  target: string;
+  label?: string;
+  description?: string;
+}
+export interface SyntaxContent {
+  constraints: readonly string[];
+  localChildren: readonly SyntaxReference[];
+  descendantChildren: readonly SyntaxReference[];
+}
 
 // Existing type indexes use the same local ownership semantics, with different markers.
 function adaptEntries(source: string): string {
-  return source.replace(/^<!-- project-memory-entries:(start|end) -->$/gm, '<!-- project-memory-local:$1 -->');
+  return source.replace(
+    /^<!-- project-memory-entries:(start|end) -->$/gm,
+    "<!-- project-memory-local:$1 -->",
+  );
 }
 function constraintText(item: NodeItem): string {
-  return item.content.map(run => run.kind === 'text' ? run.value : run.label).join('');
+  return item.content
+    .map((run) => (run.kind === "text" ? run.value : run.label))
+    .join("");
 }
-function indexedReferences(item: NodeItem): NodeReference[] {
+function indexedReferences(item: NodeItem): SyntaxReference[] {
   return item.content.flatMap((run, index) => {
-    if (run.kind !== 'link') return [];
-    let suffix = '';
-    for (let i = index + 1; i < item.content.length && item.content[i].kind === 'text'; i++) suffix += (item.content[i] as { value: string }).value;
-    const description = suffix.replace(/^\s*[—–-]\s*/, '').trim();
-    return [{ target: run.target, label: run.label, ...(description ? { description } : {}) }];
+    if (run.kind !== "link") return [];
+    let suffix = "";
+    for (
+      let i = index + 1;
+      i < item.content.length && item.content[i].kind === "text";
+      i++
+    )
+      suffix += (item.content[i] as { value: string }).value;
+    const description = suffix.replace(/^\s*[—–-]\s*/, "").trim();
+    return [
+      {
+        target: run.target,
+        label: run.label,
+        ...(description ? { description } : {}),
+      },
+    ];
   });
 }
-function renderReference(reference: NodeReference): NodeItem {
-  return { content: [
-    { kind: 'link', target: reference.target, label: reference.label ?? reference.target },
-    ...(reference.description === undefined ? [] : [{ kind: 'text' as const, value: ` — ${reference.description}` }]),
-  ] };
+function renderReference(reference: SyntaxReference): NodeItem {
+  return {
+    content: [
+      {
+        kind: "link",
+        target: reference.target,
+        label: reference.label ?? reference.target,
+      },
+      ...(reference.description === undefined
+        ? []
+        : [{ kind: "text" as const, value: ` — ${reference.description}` }]),
+    ],
+  };
 }
-function rebuildIndexes(original: NodeItem[], references: readonly Readonly<NodeReference>[], indexItems: ReadonlySet<NodeItem>): NodeItem[] {
+function rebuildIndexes(
+  original: NodeItem[],
+  references: readonly Readonly<SyntaxReference>[],
+  indexItems: ReadonlySet<NodeItem>,
+  isIndexed: (href: string) => boolean,
+): NodeItem[] {
   const remaining = [...references];
   const next: NodeItem[] = [];
   for (const item of original) {
-    const before = indexItems.has(item) ? indexedReferences(item) : [];
-    if (!before.length) { next.push(item); continue; }
+    const before = indexItems.has(item)
+      ? indexedReferences(item).filter((reference) =>
+          isIndexed(reference.target),
+        )
+      : [];
+    if (!before.length) {
+      next.push(item);
+      continue;
+    }
     const selected = remaining.splice(0, before.length);
     const unchanged = isDeepStrictEqual(before, selected);
-    if (before.length > 1 && !unchanged) throw new Error('Cannot edit a multi-link index item without changing surrounding authored text.');
+    if (indexedReferences(item).length > 1 && !unchanged)
+      throw new Error(
+        "Cannot edit a multi-link index item without changing surrounding authored text.",
+      );
     next.push(...(unchanged ? [item] : selected.map(renderReference)));
   }
   return [...next, ...remaining.map(renderReference)];
@@ -46,44 +94,92 @@ export class InternalSyntax {
   readonly #model: NodeModel;
   readonly #entries: boolean;
   readonly #taskProjects: boolean;
+  readonly #isIndexed: (href: string) => boolean;
   readonly #indexItems = new Set<NodeItem>();
-  constructor(source: string) {
+  constructor(
+    source: string,
+    isIndexed: (href: string) => boolean = () => true,
+  ) {
+    this.#isIndexed = isIndexed;
     this.#entries = /^<!-- project-memory-entries:start -->$/m.test(source);
-    this.#taskProjects = /^<!-- task-projects:start -->$/m.test(source) && !decodeBody(adaptEntries(source)).sections.memory.present;
-    this.#source = this.#taskProjects ? source.replace(/^<!-- task-projects:(start|end) -->$/gm, '<!-- project-memory-local:$1 -->') : adaptEntries(source);
+    this.#taskProjects =
+      /^<!-- task-projects:start -->$/m.test(source) &&
+      !decodeBody(adaptEntries(source)).sections.memory.present;
+    this.#source = this.#taskProjects
+      ? source.replace(
+          /^<!-- task-projects:(start|end) -->$/gm,
+          "<!-- project-memory-local:$1 -->",
+        )
+      : adaptEntries(source);
     const decoded = decodeBody(this.#source);
     this.#model = decoded.model;
-    for (const key of ['memory', 'children'] as const) {
+    for (const key of ["memory", "children"] as const) {
       decoded.bindings[key].forEach((binding, index) => {
         const itemSource = this.#source.slice(binding.start, binding.end);
         // Only list items carry index ownership; prose links remain source content.
-        if (/^(?:[-+*]|\d+[.)])\s/.test(itemSource)) this.#indexItems.add(this.#model[key][index]);
+        if (
+          /^(?:[-+*]|\d+[.)])\s/.test(itemSource) &&
+          indexedReferences(this.#model[key][index]).some((reference) =>
+            isIndexed(reference.target),
+          )
+        )
+          this.#indexItems.add(this.#model[key][index]);
       });
     }
   }
-  content(): InternalContent {
+  content(): SyntaxContent {
     return {
       constraints: this.#model.constraints.map(constraintText),
-      localMemory: this.#model.memory.filter(item => this.#indexItems.has(item)).flatMap(indexedReferences),
-      descendantMemory: this.#model.children.filter(item => this.#indexItems.has(item)).flatMap(indexedReferences),
+      localChildren: this.#model.memory
+        .filter((item) => this.#indexItems.has(item))
+        .flatMap(indexedReferences)
+        .filter((reference) => this.#isIndexed(reference.target)),
+      descendantChildren: this.#model.children
+        .filter((item) => this.#indexItems.has(item))
+        .flatMap(indexedReferences)
+        .filter((reference) => this.#isIndexed(reference.target)),
     };
   }
-  serialize(content: InternalContent): string {
+  serialize(content: SyntaxContent): string {
     const originalConstraints = this.#model.constraints;
     const used = new Set<number>();
-    const constraints = content.constraints.map(value => {
-      const index = originalConstraints.findIndex((item, i) => !used.has(i) && constraintText(item) === value);
-      if (index >= 0) { used.add(index); return originalConstraints[index]; }
-      return { content: [{ kind: 'text' as const, value }] };
+    const constraints = content.constraints.map((value) => {
+      const index = originalConstraints.findIndex(
+        (item, i) => !used.has(i) && constraintText(item) === value,
+      );
+      if (index >= 0) {
+        used.add(index);
+        return originalConstraints[index];
+      }
+      return { content: [{ kind: "text" as const, value }] };
     });
     const model: NodeModel = {
       constraints,
-      memory: rebuildIndexes(this.#model.memory, content.localMemory, this.#indexItems),
-      children: rebuildIndexes(this.#model.children, content.descendantMemory, this.#indexItems),
+      memory: rebuildIndexes(
+        this.#model.memory,
+        content.localChildren,
+        this.#indexItems,
+        this.#isIndexed,
+      ),
+      children: rebuildIndexes(
+        this.#model.children,
+        content.descendantChildren,
+        this.#indexItems,
+        this.#isIndexed,
+      ),
       references: this.#model.references,
     };
     const rendered = serializeNode(model, this.#source);
-    if (this.#taskProjects) return rendered.replace(/^<!-- project-memory-local:(start|end) -->$/gm, '<!-- task-projects:$1 -->');
-    return this.#entries ? rendered.replace(/^<!-- project-memory-local:(start|end) -->$/gm, '<!-- project-memory-entries:$1 -->') : rendered;
+    if (this.#taskProjects)
+      return rendered.replace(
+        /^<!-- project-memory-local:(start|end) -->$/gm,
+        "<!-- task-projects:$1 -->",
+      );
+    return this.#entries
+      ? rendered.replace(
+          /^<!-- project-memory-local:(start|end) -->$/gm,
+          "<!-- project-memory-entries:$1 -->",
+        )
+      : rendered;
   }
 }
