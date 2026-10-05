@@ -25,6 +25,38 @@
 
 ## 数据结构
 
+```mermaid
+classDiagram
+  NodeReference <|.. BaseNode
+  BaseNode <|-- InternalNode
+  BaseNode <|-- LeafNode
+  LeafNode <|-- TaskNode
+  LeafNode <|-- MemoryNode
+  LeafNode <|-- SkillNode
+  LeafNode <|-- NoteNode
+  BaseNode --> NodeReference : parent / harness（可选）
+  InternalNode --> NodeReference : localChildren / descendantChildren
+  class NodeReference {
+    <<interface>>
+    id: string
+    name?: string
+    description?: string
+  }
+  class BaseNode {
+    path: string
+    directoryPath: string
+    type: string
+    isLeaf: boolean
+    parse(markdown)
+    serialize()
+    create(input, context)
+    update(input, context)
+    destroy(context)
+    validate()
+  }
+```
+
+
 ```ts
 interface NodeReference {
   /** 规范化绝对入口路径，唯一标识运行时节点。 */
