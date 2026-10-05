@@ -98,9 +98,10 @@ assert.notEqual(destinationEntry, original); // no-op separately supported
 
 - [ ] Add failing CLI integration: memory remember returns `<slug>/index.md`, Tasks create always directory, Note ingest stores directory; invalid document reports path/field and does not write, extra sections survive update.
 ```ts
-const result = remember(fixtureRoot, input); // use existing actual API/CLI test helper
+await initMemory({ targetDir: fixtureRoot, memoryTypes: ['project'] });
+const result = await rememberMemory({ targetDir: fixtureRoot, type: 'project', slug: 'demo', title: 'Demo', description: 'When testing', content: 'extra user prose' });
 assert.equal(basename(result.path), 'index.md');
-assert.equal(readFileSync(result.path, 'utf8').includes('extra user prose'), true);
+assert.equal(readFileSync(join(fixtureRoot, result.path), 'utf8').includes('extra user prose'), true);
 ```
 - [ ] Run focused actual test files via node --test --import tsx; record behavioral failures.
 - [ ] Adapt adapters to prepare context and structured inputs then call node/service. Remove file/directory choice from user-facing options; do not move domain logic into generic Service. Task sidecars move with directory. Memory indices reconstruct relative entry links. Update template/protocol paths.
