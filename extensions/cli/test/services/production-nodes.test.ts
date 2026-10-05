@@ -10,6 +10,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { indexTaskFixtureBoard } from "../tasks/utils/helpers.js";
 import { run } from "../../src/program.js";
 import { initMemory } from "../../src/services/memory/init.js";
 
@@ -20,7 +21,7 @@ function fixture(t: any) {
   t.after(() => rmSync(root, { recursive: true, force: true }));
   return root;
 }
-test("task update adds typed metadata to a headerless task and status preserves its runlog", async (t) => {
+test("task update adds title and priority metadata to an indexed task and status preserves its runlog", async (t) => {
   const root = fixture(t),
     scope = path.join(root, "nested");
   const folder = path.join(scope, "tasks/_default/todo");
@@ -29,11 +30,12 @@ test("task update adds typed metadata to a headerless task and status preserves 
   mkdirSync(path.join(folder, stem), { recursive: true });
   writeFileSync(
     path.join(folder, stem, "index.md"),
-    "# Original\n\nBody stays.\n",
+    "---\nmetadata:\n  edges-type: task\n  edges-tasks-status: todo\n---\n# Original\n\nBody stays.\n",
   );
   writeFileSync(path.join(folder, stem, "run.log.md"), "Run evidence\n");
+  await indexTaskFixtureBoard(path.join(scope, "tasks"));
   const call = (args: string[]) =>
-    run(["--scope", scope, "tasks", ...args], { env: { EDGES_SCOPE: root } });
+    run(["--scope", scope, "tasks", "--purpose", "domain", ...args], { env: { EDGES_SCOPE: root } });
   const updated = await call([
     "update",
     stem,
@@ -153,4 +155,17 @@ test("ordinary CLI startup works without the optional legacy migration implement
     { cwd: isolated, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
   );
   assert.match(output, /create/);
+});
+
+test("indexed task with malformed status is rejected without changing its body or runlog", async t => {
+  const root = fixture(t), folder = path.join(root, "tasks/_default/todo/bad");
+  mkdirSync(folder, { recursive: true });
+  const original = "---\nmetadata:\n  edges-type: task\n  edges-tasks-status: invalid\n---\nOriginal\n";
+  writeFileSync(path.join(folder, "index.md"), original);
+  writeFileSync(path.join(folder, "run.log.md"), "Evidence\n");
+  await indexTaskFixtureBoard(path.join(root, "tasks"));
+  const result = await run(["--scope", root, "tasks", "--purpose", "domain", "update", "bad", "--title", "Changed"], { env: {} });
+  assert.notEqual(result.exitCode, 0); assert.match(result.stdout, /Invalid edges-tasks-status/);
+  assert.equal(readFileSync(path.join(folder, "index.md"), "utf8"), original);
+  assert.equal(readFileSync(path.join(folder, "run.log.md"), "utf8"), "Evidence\n");
 });

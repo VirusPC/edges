@@ -1,8 +1,6 @@
 ---
 name: project_tasks_persistent_board_site
-description: >-
-  任务分层不能影响全仓总览；持久看板汇总各作用域的 domain 与 maintenance，保留来源，复用 review-page，不另开看板或按项目拆
-  URL。
+description: 任务分层与全仓视图、局部维护板默认及通用延迟查询的边界和取舍；持久看板部署与 UI 既有决定。
 metadata:
   edges-title: 持久 tasks 看板：分层存放、全仓汇总
   edges-type: project
@@ -10,7 +8,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T00:04:33+08:00'
+  edges-updated-at: '2026-10-06T03:49:51+08:00'
 ---
 
 `/tasks/` 是与 teaching 同机的持久看板入口，始终反映 main：`edges tasks list --group-by project` 产出松耦合 `edges.tasks.grouped/v1`，薄映射后喂现有 `review-page`；CI 扩展 `deploy.yml`，不新开 status station。已落地（2026-09-21 实现轮）。ADR 0022 起仍是这一份壳：不窄于 Tailwind `md` 时为三栏，grouped item 可带可选 Task Doc（`doc`），不写回 git。2026-09-23 实现轮已把 `doc` 带进审阅页，并在生成 `/tasks/` 前构建审阅壳。用户所述，grill 确认于 2026-09-23；接线已验证。2026-09-24 ADR 0023：同一壳在窄于 `md` 时改为纵向长滚动，双端「移到项目…」只改页内 JSON；`/tasks/` 不另做一壳。
@@ -36,3 +34,20 @@ metadata:
 **Why:** 文件归属服务局部维护，用户的全局视图需要覆盖全部作用域；根领域板不能代表全仓任务，维护板和子作用域也不能被漏掉。
 
 **How to apply:** 持久看板从仓库根以 purpose=all 汇总每个可发现作用域的 domain 与 maintenance 板，保留来源身份并区分同名任务。新增或迁移子层任务板时核对汇总数量及来源，保留一个全仓入口；普通局部 list 不冒充全仓结果。网站仍跟随 main，未合并分支的验证不等于线上已部署。
+
+
+## 局部默认与全仓查询边界（2026-10-06 用户确认）
+
+用户决定：普通 Task 命令默认当前作用域的维护板；分层存放仍须保留 CLI 与持久看板一致的全仓视图，全仓显式涵盖所有维护层级。
+
+**Why:** 局部维护需要稳定归属，全仓总览不能遗漏任务或模块自身的维护工作。自动物理扫描会掩盖未登记入口；另建 Task 遍历会使它与其他节点的发现规则分叉。
+
+**How to apply:** 普通命令选当前作用域 maintenance，领域工作显式 purpose=domain；list --all-scopes 从所在 Git 根汇总，未显式 purpose 时包含两种用途，无 Git 则用解析出的 scope。持久看板继续 purpose=all。两者共享已登记节点树查询并保留 scope/purpose/project/stem 来源身份，缺入口应诊断和显式迁移，不回退扫描。普通查询不跨节点自身 harness；全仓显式开启下层组成与独立维护关系，递归包含所有维护层级。网站部署/UI 的既有决定继续适用。
+
+## 通用延迟查询的取舍（2026-10-06 用户确认）
+
+采用原生 AsyncIterable 的显式延迟链，保留统一节点语义，不引入流处理库或任意遍历剪枝回调。
+
+**Why:** 同一原语要支持 Task 与非 Task 属性和 metadata；把 filter 不匹配误作剪枝会漏掉匹配的孩子。调用方需要清楚知道何时执行、何时消耗完整范围，不能让隐式缓存掩盖后续变化。
+
+**How to apply:** filter/map/find/groupBy/toArray/mapValues/values/thru 只构建计算，value() 才执行；重复 value() 重跑，不自动缓存。groupBy 给普通对象且继续链式；find 可接 thru，执行中提前结束并关闭上游，但上游物化边界仍先完整消费。类型条件尽早排除无关叶子加载，保留必要导航；任意 predicate 不自动剪枝，不公开 enter/shouldEnter。query 仅入口快照，目录移动/删除前 get 获取资源快照；兼容 list 保留完整资源快照，避免破坏原生命周期合同。

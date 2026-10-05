@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os';
 import { NodeService } from '../../src/services/node-service.js';
 import { syncAgentsBlocks } from '../../src/services/memory/agents.js';
 import { initMemory } from '../../src/services/memory/init.js';
+import { indexTaskFixtureBoard } from '../tasks/utils/helpers.js';
 import { updateTask } from '../../src/services/tasks/write.js';
 import { createNodeBoardWriter } from '../../src/services/tasks/board.js';
 import { parseDocument } from '../../src/utils/markdown/document.js';
@@ -45,6 +46,7 @@ test('Task body update preserves supplied blank lines and trailing spaces', asyn
   const root = fixture(t), rel = 'tasks/_default/todo/2026-10-05--body/index.md';
   fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
   fs.writeFileSync(path.join(root, rel), '---\nname: body\nmetadata:\n  edges-tasks-status: todo\n---\nOld\n');
+  await indexTaskFixtureBoard(path.join(root, 'tasks'));
   await updateTask(root, '2026-10-05--body', { body: '\nBody  \n\n' }, { fs: createNodeBoardWriter(root), now: new Date('2026-10-05T00:00:00Z') });
   assert.equal(parseDocument(fs.readFileSync(path.join(root, rel), 'utf8')).body, '\nBody  \n\n');
 });

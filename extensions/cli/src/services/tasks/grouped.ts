@@ -37,6 +37,7 @@ export type GroupedListGroup = {
 export type GroupedTaskInput = TaskListItem & { doc?: TaskDoc };
 
 export type GroupedListItem = {
+  path?: string;
   source?: TaskSource;
   project?: string;
   id: string;
@@ -313,6 +314,6 @@ export async function listRepositoryGroupedByProject(
   return { schema: GROUPED_LIST_SCHEMA, groups: [...groups.values()], items: tasks.map(task => ({
     id: sourceIdentity(task.source, task.project, task.stem), stem: task.stem,
     group: sourceIdentity(task.source, task.project), source: task.source, project: task.project,
-    title: task.title, status: task.status, description: task.description, priority: task.priority, doc: task.doc,
+    path: task.path, title: task.title, status: task.status, description: task.description, priority: task.priority, doc: task.doc,
   })) };
 }

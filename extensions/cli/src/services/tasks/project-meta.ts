@@ -332,7 +332,9 @@ export async function updateProject(
     );
   }
   const id = parseTaskProject(raw);
-  await ensureProjectMetadata(repoPath, writer);
+  // A named write may seed its existing project directory without discovering siblings.
+  const projectExists = await writer.exists(path.join(boardRoot(repoPath), projectDirName(id)));
+  await ensureProjectMetadata(repoPath, writer, undefined, projectExists ? [id] : []);
   const rel = projectAgentsRelPath(id, repoPath);
   const abs = path.join(scopeDir(repoPath), rel);
   if (!(await writer.exists(abs))) {

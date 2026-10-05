@@ -75,9 +75,24 @@ Those examples use `tsx` and do not need a `dist/` build. The installed `edges` 
 
 Node models live together in [`src/models/`](src/models/), with domain syntax helpers beneath that directory. [`NodeService`](src/services/node-service.ts) provides snapshot-checked document creation, loading, updates, deletion and ownership-index coordination. Task, Memory and Note business orchestration lives under `src/services/`; command handlers under `src/commands/` retain the directory-as-command-tree layout. Generic Markdown/YAML and filesystem primitives remain under `src/utils/`. There is no separate package or compatibility copy of the former `utils/node-tree` repository API.
 
-[`src/services/scope.ts`](src/services/scope.ts) retains environment/argument precedence, Git fallback and directory exclusions. Readable AGENTS entries are eligible without a Memory marker or separate responsibility requirement; selection does not initialize Memory. Tasks `all` still performs physical inventory. NodeService traversal defaults to localChildren; includeDescendants also follows descendantChildren. Neither follows harness automatically.
+[`src/services/scope.ts`](src/services/scope.ts) retains environment/argument precedence, Git fallback and directory exclusions. Readable AGENTS entries are eligible without a Memory marker or separate responsibility requirement; selection does not initialize Memory. Task lists and the global dashboard follow registered NodeService relations, with no discovery scan or missing-index fallback. Traversal defaults to localChildren; includeDescendants also follows descendantChildren. Only explicit includeHarness follows each node’s independent maintenance relation, recursively through all maintenance levels.
 
-Normal Task create/update/status and Note ingest save actual TaskNode/NoteNode instances through NodeService. Memory remember uses MemoryNode or SkillNode, while index and scope documents save InternalNode instances. Typed mutations retain unknown vendor metadata. Task board/status movement, sidecar runlogs, Memory type privileges and Note Git/PR publishing remain business-service responsibilities. Task reads retain their tolerant legacy-priority projection; strict typed mutation validates fields. Archive and migration remain batch workflows; the legacy migration implementation loads only when the migrate command runs.
+Normal Task create/update/status and Note ingest save actual TaskNode/NoteNode instances through NodeService. Memory remember uses MemoryNode or SkillNode, while index and scope documents save InternalNode instances. Typed mutations retain unknown vendor metadata. Task board/status movement, sidecar runlogs, Memory type privileges and Note Git/PR publishing remain business-service responsibilities. Task reads and mutations validate typed fields and status/project dual writes; malformed indexed entries fail instead of being silently repaired. Archive and migration remain batch workflows; the legacy migration implementation loads only when the migrate command runs.
+
+NodeService.query returns a deferred chain backed by native AsyncIterable. Construction and filter/map/find/groupBy/toArray/mapValues/values/thru only describe computation; value() executes it. Repeating value() reruns the chain, without an implicit result cache. groupBy yields an ordinary object and supports further mapValues/values/filter/map operations; find supports thru and closes its upstream at the first match. Upstream toArray/groupBy/thru materialization still consumes its input before a downstream find can stop. Arbitrary filter predicates do not prune parents or children; there is no public enter/shouldEnter callback. Type conditions can exclude unrelated leaf bodies early while retaining required Internal navigation and maintenance discovery. No stream-processing library is used.
+
+```ts
+const tasks = service.query(scope, { types: ["task"] })
+  .filter((node): node is TaskNode => node instanceof TaskNode)
+  .filter(task => task.priority === "high").groupBy(task => task.status)
+  .mapValues(rows => rows.map(task => task.title));
+const memories = service.query(scope, { types: ["memory"], includeDescendants: true })
+  .filter((node): node is MemoryNode => node instanceof MemoryNode)
+  .groupBy(memory => memory.memoryType).mapValues(rows => rows.length);
+const [taskGroups, memoryCounts] = await Promise.all([tasks.value(), memories.value()]);
+```
+
+query() loads entry snapshots only. Before directory move/destroy, reload with get(node.path) to capture the resource snapshot. get() obtains full resource snapshots without recursively loading harness bodies; legacy list() still resolves full resource snapshots and its returned nodes remain directly movable/deletable. These lifecycle reads must not be described as resource-lazy.
 
 Memory `initMemory`, `rememberMemory`, `addMemoryType`, `doctorMemory`, `refreshIndex` and the index-writing helpers now return promises. Programmatic callers must await them; CLI arguments, JSON and exit codes are unchanged. Note Git dependencies retain process/network substitution points; file operations use the real snapshot-checked service.
 
@@ -144,7 +159,7 @@ Same optional gate as MCP HTTP. If `EDGES_AUTH_TOKEN` is set, present it with `-
 Board root is `<scope>/.harness/tasks/` by default (`--purpose maintenance`); `tasks --purpose domain` explicitly selects `<scope>/tasks/`. The same default applies to root and nested scopes and to both reads and writes. Paths cannot escape the selected board. Writes are filesystem-only (no git). Cancel with `status cancelled`. There is no `delete` command and no top-level `log` verb.
 
 ```
-edges tasks list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
+edges tasks list [--all-scopes] [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
 edges tasks get <stem|path>
 edges tasks create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project]
 edges tasks update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project]
@@ -160,6 +175,18 @@ edges tasks project review-page --from <path|-> [--out <path>]
 
 Issue-layer stdout is always JSON (`--json` is accepted and ignored). `runs` / `run-messages` default to a table; pass `--output json` for JSON. Run layer is read-only (no append). `create` writes `<stem>/index.md` and `<stem>/.<stem>.log.md`; status/project changes move the complete directory.
 
+`list --all-scopes` selects the Git root containing the resolved scope (including when invoked from a child cwd); without Git, the resolved scope is the range root. The root must have a valid AGENTS entry. Both purposes are included unless the user explicitly supplies `tasks --purpose domain|maintenance`; Commander's default does not become a filter. Only list accepts --all-scopes; create/update/status/project/runs retain their single-board target.
+
+```bash
+edges tasks list                              # current scope maintenance
+edges tasks list --all-scopes                 # repository, both purposes, every maintenance level
+edges tasks --purpose domain list --all-scopes
+edges tasks list --all-scopes --status todo --priority high --sort priority
+edges tasks list --all-scopes --group-by project
+```
+
+An ungrouped global row retains its stored identity and root-relative entry, for example `{"source":{"scope":"extensions/cli","purpose":"maintenance"},"project":"default","stem":"2026-10-06--repair","path":"extensions/cli/.harness/tasks/_default/todo/2026-10-06--repair/index.md",…}`. It omits doc, just like local ungrouped rows. Global groups use scope + purpose + project identities, preserve registered empty projects, and global grouped items also expose their entry path. No cross-source name merging occurs.
+
 Default `list` stays `{ status, command: "list", tasks: [...] }`. `list --group-by project` (optional `--format json`) emits loose-coupled `edges.tasks.grouped/v1`: `{ schema, groups[{id,title,description?}], items[{id|stem, group, title?, status?, …}] }`. Existing `--status` / `--priority` / `--project` / `--sort` still apply **before** grouping. That schema is not named for review-page.
 
 `project review-page` still only renders. It reads `groups` + `items` JSON (`--from` file or `-` for stdin). It inlines the prebuilt shell (`pnpm --filter edges-cli run build:tasks-review-app` or `prepack`) into one HTML file. Data is `#edges-review-payload`. Items may omit `doc`. It writes that HTML (default: OS temp; `--out` overrides) and prints `{status, command: "project.review-page", path, groupCount, itemCount}`. It does not call `updateTask`, `createProject`, or any board mutator, and it does not open a browser. Open the printed `path` in a system browser. Local UI work uses `pnpm --filter edges-cli run dev:tasks-review-app`. There is no `edges tasks classify` / `--mode` / `--open`. `review-page` still only renders; publish is a separate step (`edges artifacts publish`).
@@ -171,7 +198,7 @@ pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
   --scope "$PWD" --purpose all --out "$PWD/tasks/_site/index.html"
 ```
 
-The generator accepts `--purpose domain|maintenance|all`. `all` walks real descendant scopes and both purposes, stopping at nested repositories and symlinks. Grouped items and HTML use stable IDs containing scope, purpose, project and stem. `source.scope` is repository-relative (`.` for root), and `source.purpose` is explicit; stored stems, project slugs, Task schema and Run IDs stay unchanged. Source-aware groups and items must provide a valid real `project`; source-aware grouped items must also provide their stored `stem`. Transport IDs are never fallback project or stem values. Exports retain the real stem/project and source. The page permits classification only within one source board.
+The generator accepts `--purpose domain|maintenance|all`. `all` uses the same registered recursive query as CLI `list --all-scopes`, following composition and every maintenance level; it does not inventory physical directories. Grouped items and HTML use stable IDs containing scope, purpose, project and stem. `source.scope` is repository-relative (`.` for root), and `source.purpose` is explicit; stored stems, project slugs, Task schema and Run IDs stay unchanged. Source-aware groups and items must provide a valid real `project`; source-aware grouped items must also provide their stored `stem`. Transport IDs are never fallback project or stem values. Exports retain the real stem/project and source. The page permits classification only within one source board.
 
 Ops (one-time nginx, curl checks, PATH): [deploy/README.md](deploy/README.md). `deploy.yml` generates after pull; it does not run setup-nginx.
 

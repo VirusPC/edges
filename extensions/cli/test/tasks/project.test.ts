@@ -235,6 +235,8 @@ test("project get returns the read-only listed project after ordinary task creat
       { env },
     );
     assert.equal(created.exitCode, 0, created.stdout);
+    const indexedPaths = [".harness/tasks/cli/AGENTS.md", ".harness/tasks/AGENTS.md", ".harness/tasks/_default/AGENTS.md"];
+    const before = await Promise.all(indexedPaths.map(rel => readFile(path.join(repo, rel), "utf8")));
     const listed = JSON.parse(
       (
         await run(["tasks", "--purpose", "maintenance", "project", "list"], {
@@ -253,12 +255,8 @@ test("project get returns the read-only listed project after ordinary task creat
       record,
       listed.projects.find((project: any) => project.project === "cli"),
     );
-    for (const rel of [
-      ".harness/tasks/cli/AGENTS.md",
-      ".harness/tasks/AGENTS.md",
-      ".harness/tasks/_default",
-      "tasks",
-    ]) {
+    assert.deepEqual(await Promise.all(indexedPaths.map(rel => readFile(path.join(repo, rel), "utf8"))), before);
+    for (const rel of ["tasks"]) {
       await assert.rejects(access(path.join(repo, rel)));
     }
   } finally {

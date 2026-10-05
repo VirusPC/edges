@@ -64,7 +64,7 @@ format: ordinary
 - [Tasks 核心思想：与 /goal、loop engineering 同构](project_tasks_align_goal_and_loop_engineering/index.md) — 设计或验收 tasks 时：目标+完成标准要与 /goal、loop engineering 一起想；开卡时完成标准可暂缺、grill 后补；沉淀结论时同时写清背景上下文。
 - [Task 看板变更优先走 edges tasks CLI](project_tasks_board_mutations_via_cli/index.md) — 所有层级的领域 tasks 与维护 .harness/tasks 看板变更，优先走 edges tasks CLI 和已有任务 Skill；能力缺口明确反馈，不长期绕过工具直接改文件。
 - [2026-09-10 Task 速记直推 main（历史约定）](project_tasks_direct_main/index.md) — 2026-09-10 旧 knowledge/tasks 只追加速记曾约定直推 main；当前领域 tasks/ 与维护 .harness/tasks/ 通过 CLI 和独立 worktree 操作，发布按当次流程。
-- [持久 tasks 看板：分层存放、全仓汇总](project_tasks_persistent_board_site/index.md) — 任务分层不能影响全仓总览；持久看板汇总各作用域的 domain 与 maintenance，保留来源，复用 review-page，不另开看板或按项目拆 URL。
+- [持久 tasks 看板：分层存放、全仓汇总](project_tasks_persistent_board_site/index.md) — 任务分层与全仓视图、局部维护板默认及通用延迟查询的边界和取舍；持久看板部署与 UI 既有决定。
 - [工作项叫 tasks，支持状态流转](project_tasks_with_status_not_todos/index.md) — Task 工作项按 Task Project 与 edges-tasks-status 分夹；当前领域板在 tasks/，Edges 维护板在 .harness/tasks/，旧 knowledge/tasks/ 仅是迁移史料。
 - [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push/index.md) — 改 teaching、/tasks/ 或 ECS 部署时：SSH 只在 deploy.yml 的 deploy job；production 不挂 url；site-teaching 与 site-tasks 都 needs deploy，分别登记 https://edges.viruspc.tech/teaching/ 与 /tasks/；summary 列两个 URL。不要拆成两次 SSH，不要用 teach.\* 或裸 IP。不要新开 workflow（ADR 0021）。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main/index.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks\_direct\_main

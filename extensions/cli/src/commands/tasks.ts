@@ -14,8 +14,9 @@ const TASKS_AFTER_HELP = `
 TARGET
   edges --scope <directory> tasks --purpose domain|maintenance ...
   maintenance (default): <scope>/.harness/tasks; domain: <scope>/tasks
+  list --all-scopes: repository-wide, both purposes unless --purpose is explicit; includes all maintenance levels
 COMMANDS
-  list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
+  list [--all-scopes] [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
   get <stem|path>
   create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project]
   update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project]
@@ -42,6 +43,8 @@ Generic tasks Skill/MCP CRUD is a later backlog on this same contract.
 Capability Surface is CLI + Skill + MCP.
 
 EXAMPLES
+  edges tasks list --all-scopes
+  edges tasks --purpose domain list --all-scopes
   edges tasks list --status in_progress
   edges tasks get 2026-09-11--cli
   edges tasks runs 2026-09-11--cli --output json

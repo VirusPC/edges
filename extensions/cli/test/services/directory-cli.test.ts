@@ -166,7 +166,7 @@ test("Task directory status refuses same-stem standalone destination and preserv
   const root = fixture(t);
   put(path.join(root, "AGENTS.md"), "# Scope");
   const call = (args: string[]) =>
-    run(["--scope", root, "tasks", ...args], { env: {} });
+    run(["--scope", root, "tasks", "--purpose", "domain", ...args], { env: {} });
   const result = await call(["create", "--title", "Collision"]);
   assert.equal(result.exitCode, 0, result.stdout);
   const item = JSON.parse(result.stdout);

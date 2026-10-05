@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   access,
+  realpath,
   mkdir,
   readdir,
   readFile,
@@ -82,6 +83,10 @@ body
     execFileSync("git", ["init", "-q"], { cwd: repo });
     execFileSync("git", ["add", "."], { cwd: repo });
     applyDirectoryMigration(planDirectoryMigration(repo));
+    // Legacy layout migration and registered-index migration are separate explicit steps.
+    const { planTaskIndexes, applyTaskIndexes } = await import("../../../src/services/tasks/index-migration.js");
+    await writeFile(path.join(repo, "AGENTS.md"), "# Scope\n");
+    await applyTaskIndexes(await planTaskIndexes(await realpath(repo)));
     const items = await listTasks(repo, {}, nodeBoardFs());
     assert.deepEqual(
       items.map((item) => `${item.project}:${item.status}:${item.stem}`).sort(),

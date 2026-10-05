@@ -62,7 +62,7 @@ AGENTS.md                                  根作用域入口
 
 ## 当前缺口和执行起点
 
-已提交基线为 `935d3de`。当前公开任务：根领域板 5 条、根维护板 100 条，子作用域尚无任务，共 105 条；执行前须重新盘点，不能把这个数量硬编码进工具。
+以下是执行前调查快照，不代表完成后的现状。已提交基线为 `935d3de`。当时公开任务：根领域板 5 条、根维护板 100 条，子作用域尚无任务，共 105 条；执行前须重新盘点，不能把这个数量硬编码进工具。
 
 1. Task 总入口已引用项目分组，但多数项目 AGENTS 只有标题和说明，没有任务 children。
 2. `board.ts:listTasksWithDocs` 和 `findByStem` 按项目／状态目录查询；`listProjectIds` 也扫描目录。
@@ -369,11 +369,11 @@ pnpm migrate:task-indexes --root /absolute/worktree --apply --report /tmp/task-i
 
 **Produces:** 根与子作用域的 CLI 读写默认一致；新增 list --all-scopes，与全仓看板共享任务覆盖和来源语义。
 
-- [ ] 为 list 新增 --all-scopes，复用 listRepositoryTaskNodes；以显式参数来源区分 purpose 用户输入与默认值，其他写命令不接受全仓选项。
-- [ ] 先写全仓 CLI 回归：根与子目录执行得到相同全仓集合；无 --all-scopes 保持局部默认；显式用途筛选生效；非 Task 节点及多层 harness 中任务不漏；同名 stem/project 按来源区分，筛选、排序、分组和 JSON envelope 均正确。
-- [ ] 对同一 fixture 比较全仓 CLI 与看板 payload 的任务身份集合，必须精确相等；缺失相关入口不得静默退回目录扫描。验证无 Git 时使用已解析作用域作为范围根。
-- [ ] 审阅当前默认值差异：维护任务 `maintenance` 为 CLI 默认，领域任务通过 `--purpose domain` 选择。create/get/list/update/status/project/runs 必须选同一张板，不能只改 list。
-- [ ] 保留独立测试 `default-purpose.test.ts`：根与子作用域都创建两种任务，默认 list 仅见维护任务、默认 create 落维护板；显式 domain 仅见领域任务。
+- [x] 为 list 新增 --all-scopes，复用 listRepositoryTaskNodes；以显式参数来源区分 purpose 用户输入与默认值，其他写命令不接受全仓选项。
+- [x] 先写全仓 CLI 回归：根与子目录执行得到相同全仓集合；无 --all-scopes 保持局部默认；显式用途筛选生效；非 Task 节点及多层 harness 中任务不漏；同名 stem/project 按来源区分，筛选、排序、分组和 JSON envelope 均正确。
+- [x] 对同一 fixture 比较全仓 CLI 与看板 payload 的任务身份集合，必须精确相等；缺失相关入口不得静默退回目录扫描。验证无 Git 时使用已解析作用域作为范围根。
+- [x] 审阅当前默认值差异：维护任务 `maintenance` 为 CLI 默认，领域任务通过 `--purpose domain` 选择。create/get/list/update/status/project/runs 必须选同一张板，不能只改 list。
+- [x] 保留独立测试 `default-purpose.test.ts`：根与子作用域都创建两种任务，默认 list 仅见维护任务、默认 create 落维护板；显式 domain 仅见领域任务。
 
 ```ts
 assert.equal(taskBoardLocation(scope).purpose, "maintenance");
@@ -382,12 +382,12 @@ assert.deepEqual(defaultListed.map(task => task.title), ["maintenance"]);
 assert.deepEqual(domainListed.map(task => task.title), ["domain"]);
 ```
 
-- [ ] 检查旧测试的意图：专门测领域板的 fixture 改为显式 domain；不要全局改 helper，使测试偷偷自动补参数，从而掩盖生产默认值。需要大量同类修改时写 TypeScript 脚本，并审阅结果。
-- [ ] README、CLI help、CLI README、迁移指南和本模型 spec 同步，补充 --all-scopes、用途筛选和来源输出示例，删除“历史 Task 未登记、Task list 仍扫描目录”的过时现状说明。历史迁移数量保留审计意义，当前行为另写清楚。
-- [ ] 核对调用 Task 的 Skills 是否都明确选择用途；变更 Skill 内容时按仓库版本／CHANGELOG 约定执行，不静默留下相反示例。看板部署继续显式 `--purpose all`，本轮不改线上部署。
-- [ ] 按 project-memory-remember 更新用户决定：分层存放但保留全仓视图、默认当前作用域维护任务、Task 沿统一节点树递归索引；全仓显式跨所有维护层级，普通查询默认不跨 harness。不把一次性测试数量当长期记忆。
-- [ ] 同步记录通用查询约定：采用原生 AsyncIterable 驱动延迟查询链，filter/map/find/groupBy/toArray/mapValues/values/thru 不执行，value() 才执行；分组为普通对象且继续链式，同一条链重复 value 会重跑，不自动缓存；类型条件尽早排除无关加载，任意 predicate 不自动剪枝，不公开 enter / shouldEnter；不引入流处理库。CLI 架构文档展示同一原语用于 Task 和非 Task 节点。
-- [ ] 运行完整 `pnpm test`，再顺序运行 `pnpm build`；对迁移脚本运行 strict NodeNext 类型检查。失败时修复真实假设，不删除旧业务断言来获得通过。
+- [x] 检查旧测试的意图：专门测领域板的 fixture 改为显式 domain；不要全局改 helper，使测试偷偷自动补参数，从而掩盖生产默认值。需要大量同类修改时写 TypeScript 脚本，并审阅结果。
+- [x] README、CLI help、CLI README、迁移指南和本模型 spec 同步，补充 --all-scopes、用途筛选和来源输出示例，删除“历史 Task 未登记、Task list 仍扫描目录”的过时现状说明。历史迁移数量保留审计意义，当前行为另写清楚。
+- [x] 核对调用 Task 的 Skills 是否都明确选择用途；变更 Skill 内容时按仓库版本／CHANGELOG 约定执行，不静默留下相反示例。看板部署继续显式 `--purpose all`，本轮不改线上部署。
+- [x] 按 project-memory-remember 更新用户决定：分层存放但保留全仓视图、默认当前作用域维护任务、Task 沿统一节点树递归索引；全仓显式跨所有维护层级，普通查询默认不跨 harness。不把一次性测试数量当长期记忆。
+- [x] 同步记录通用查询约定：采用原生 AsyncIterable 驱动延迟查询链，filter/map/find/groupBy/toArray/mapValues/values/thru 不执行，value() 才执行；分组为普通对象且继续链式，同一条链重复 value 会重跑，不自动缓存；类型条件尽早排除无关加载，任意 predicate 不自动剪枝，不公开 enter / shouldEnter；不引入流处理库。CLI 架构文档展示同一原语用于 Task 和非 Task 节点。
+- [x] 运行完整 `pnpm test`，再顺序运行 `pnpm build`；对迁移脚本运行 strict NodeNext 类型检查。失败时修复真实假设，不删除旧业务断言来获得通过。
 - [ ] 独立审查调用链与数据迁移报告，重点确认正常 Task 查询不再调用 `readdir`／discoverScopes，也没有绕开 NodeService 的第二套 DFS。
 - [ ] 用户确认集成方式后更新原 PR；保留 worktree，不自动合并、发布或部署。
 
@@ -405,3 +405,27 @@ assert.deepEqual(domainListed.map(task => task.title), ["domain"]);
 ## 执行边界
 
 用户已授权提交及执行本计划，包括工作树内的索引迁移与验证；不自动推送、合并、发布或部署。真实私有内容及用户维护的 posts 不在修改范围。
+
+
+## 2026-10-06 集成验收记录
+
+Task 1–3 已由 controller 独立审阅并整合至 Task 4 基线 b06dbfb；本节记录 Task 4 实现者的集成验证，独立最终审查及 PR 更新仍待 controller 执行。保留工作树，不推送、合并或部署。
+
+- CLI 新增 list --all-scopes，按 Commander 参数来源区分默认 maintenance 与显式 purpose。范围由已解析 scope 定位 Git 根，无 Git 回退该 scope。只对 list 开放；普通各读写命令仍共享 maintenance 默认。
+- CLI 使用与看板相同的 listRepositoryTaskNodes / NodeService 查询与领域投影，未加 DFS 或物理发现回退。全仓非分组行去除 doc，保留原 JSON envelope、来源与入口 path；分组继续保留 Task Doc，并补出入口 path。同名 project/stem 按来源区分，空项目保留。
+- 新 all-scopes 回归先因 unknown option '--all-scopes' 失败，再通过实现转绿。七个同名来源覆盖根/子作用域、非 Task 节点维护和两层 Task harness；从根、子 scope 与子 cwd 查询精确一致，并与实际生成 HTML 中的 payload 身份集合精确一致。用途、状态、优先级、项目、排序、分组、无 Git、缺根/子入口报错与未登记目录不扫描均覆盖。
+- 默认用途独立测试覆盖根与子作用域 create/get/list/update/status/project/runs/run-messages，领域板必须显式选择。旧领域测试逐调用显式补 purpose=domain，手写 fixture 显式登记索引；没有让通用 CLI helper 偷补用途。
+- 真实回归修复：updateProject 对明确指定且已存在的项目目录恢复补建 metadata/index，仍不扫描同级目录。旧业务断言保留。project get 在任务创建已登记索引后改验证读取前后全部既有索引字节不变；旧平铺迁移测试串接显式目录入口迁移及索引迁移。正文空白与 runlog 保留断言仍在；非法 status 增加拒绝且字节不变验证。
+- 2026-10-06 顺序运行根 pnpm test → pnpm build，均退出 0；CLI 778 项通过，其余 workspace tests 通过。其后仅补强测试断言，相关 all-scopes/project 9 项复跑通过。strict NodeNext 的 index-task-nodes.mts 与 async-query.types.ts 合并类型检查通过。构建仅有既有 Vite __dirname/native loader 与 inlineDynamicImports 弃用提示。
+- 自审调用链：Task list/get-by-stem/project-list 和全仓看板的发现只沿 NodeService 登记关系；BoardFs 的 readdir 仍为迁移/写入依赖保留，但查询发现不调用它。get/兼容 list 的资源快照读取属于原生命周期合同，文档明确 query/get/list 区别；没有宣称所有 IO 都不读取资源。
+- Task 3 证据已复核并保存于[迁移指南](../../recursive-layout-migration.md#2026-10-06-task-递归索引采用)：11 个项目索引、105 个入口、277 个非索引文件路径/字节/blob 保持一致，复跑零修改。公开受控投影的 NodeService/HTML payload 105 条身份精确一致；摘要见指南。不对可能读取私有 users 的真实根执行全仓查询，fixture 证明更深层覆盖，不宣称真实私有覆盖。
+- 根 README、CLI README/help、模型 spec、迁移指南已同步。conversation-to-tasks 与 project-tasks-classify 原已贯穿显式 scope/purpose；其他技能仅概述 CLI 无相反用途指令，因此无技能版本 churn。部署仍 purpose=all 且本轮未执行。既有持久看板项目记忆通过 memory remember 更新，保留原部署与 UI 决策，追加局部/全仓边界和原生延迟查询取舍。
+
+复现命令：
+
+```bash
+pnpm test
+pnpm build
+pnpm exec tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck scripts/index-task-nodes.mts extensions/cli/test/utils/async-query.types.ts
+pnpm --filter edges-cli exec node --test --import tsx test/tasks/all-scopes.test.ts test/tasks/project.test.ts
+```

@@ -71,3 +71,19 @@ pnpm migrate:content-units --root /absolute/worktree --archive-unused-img
 2026-10-05 本仓转换 787 篇内容（785 篇 Edge、2 篇归档文档），既有目录 Note 保持入口；`posts/` 当前只有目录说明，没有待转换文章。2,157 个原附件产生 2,167 个新目标（5 个共用附件各复制给 3 篇文章）。根 `resources/` 的 71 个附件全部迁出，其中 13 个未找到引用的附件进入归档；其余旧 `img/` 中 320 个未解析到引用的附件按用户后续决定迁入 `archive/img/`。这 320 项与原清单逐一比对，迁移后核验全部 4,785 个公开文件字节不变，重复运行零写入。
 
 迁移前后独立核验了 1,707 份 Markdown 的非引用正文、2,861 个原本有效的引用，以及 4,784 个目标文件的字节；第二次计划为零写入。迁移报告还列出 16 处原有无法解析的引用，其中 2 处核实实际目标后补正；剩余 14 处为示例占位符及一张本就缺失的图片，不把它们当作新迁移丢失。此步骤明确授权 posts 的结构与必要引用调整，不扩大为今后自动改写博客正文的许可。
+
+## 2026-10-06 Task 递归索引采用
+
+目录入口迁移与组成索引采用是独立步骤。Task 正常查询现已只沿登记的 AGENTS 链调用 NodeService；无入口的旧板须先显式迁移，不再回退为目录扫描。板和项目是 InternalNode，单条任务是 TaskNode，状态目录不增加 AGENTS 或新节点类型。
+
+```bash
+pnpm migrate:task-indexes --root /absolute/worktree --report /tmp/task-index-preview.json
+pnpm migrate:task-indexes --root /absolute/worktree --apply --report /tmp/task-index-applied.json
+pnpm migrate:task-indexes --root /absolute/worktree
+```
+
+默认只预览；apply 在同一进程重新形成并核验计划。报告记录来源／目的与索引前后文本，不是可重放的事务日志。工具通过 InternalNode 补登记，保留人工正文、约束、项目标题／描述及非 Task 引用。冲突、格式错误、越界引用，以及预览后 Task、AGENTS 或归属入口的新增／删除／修改／身份替换均拒绝写入；当前进程 IO 失败回滚，不承诺断电恢复。私有 users、journal、博客与第三方目录排除；不读取或续跑旧私有日志。
+
+本次公开迁移为 11 个项目索引登记 105 个 Task（领域 5、维护 100）。迁移前后入口路径集合精确一致，277 个非索引文件的路径、字节与 Git blob 不变，包括正文、元数据、附件与 runlog；重复预览零修改。非索引路径→SHA-256 映射的摘要为 `ba3789fd6dc6227157f8b7da7fc93028c43efd865246407fc725373f854247a1`，105 个有序入口路径的摘要为 `011680194a7a6703b0bafeb3aa66e9578cda28971e4ba74a51fa6eebfb2de641`。这些数字是本次迁移审计基线，不是将来任务数量约束。
+
+真实全仓验证使用仅复制 tracked/public 任务板的受控临时投影，NodeService、分组输出与 HTML payload 的 105 条来源身份逐项一致（12 组）。未对可能访问私有 users 索引的真实根执行全仓查询，不据此声称私有材料已覆盖。多层任务 harness、非 Task 节点维护任务与重复引用由隔离 fixture 验证。正常 `list` 默认当前作用域维护板；`list --all-scopes` 与持久看板共享登记查询、涵盖所有维护层级，显式 `--purpose domain|maintenance` 才缩小用途。索引补齐与查询切换应一起交付；本次未部署线上站点。

@@ -123,7 +123,7 @@ projects/foo/report/ → archive/projects/foo/report/
 
 - **Git 原生管理**：用 Git 的跟踪、忽略与版本机制管理记忆；例如 user memory 通过 `.gitignore` 不随 Git 提交与共享，同时仍属于本层记忆。
 
-CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使用目录中的 `index.md`，Skill 使用 `SKILL.md`；各层公开旧内容已转换并保留原归属与附件目标。通用遍历只展开已登记的 `localChildren`，显式开启时也展开 `descendantChildren`，不自动跟随 harness。目录转换不会自动补齐历史 Task/Note 的组成索引；Task 业务列表仍按目录读取。Project Memory 按需登记本地类型，不因发现节点而自动初始化。迁移与私有副本边界见[迁移指南](docs/recursive-layout-migration.md)，术语见 [CONTEXT.md](CONTEXT.md)。
+CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使用目录中的 `index.md`，Skill 使用 `SKILL.md`；各层公开旧内容已转换并保留原归属与附件目标。通用遍历只展开已登记的 `localChildren`，显式开启时也展开 `descendantChildren`，不自动跟随 harness。历史 Task 组成索引已通过显式迁移补齐；Task 列表和全仓看板共用 NodeService 的已登记节点查询，不扫描目录补漏。Note 的目录转换仍不自动补齐组成索引。Project Memory 按需登记本地类型，不因发现节点而自动初始化。迁移与私有副本边界见[迁移指南](docs/recursive-layout-migration.md)，术语见 [CONTEXT.md](CONTEXT.md)。
 
 围绕这些原则，Edges 希望部署、接入和输出这三件事尽量一键完成。它们分别托住知识闭环的底座、把捕获接到输入侧、以及把沉淀资产部署出去。仓库按这个方向收敛。
 
@@ -223,4 +223,4 @@ pnpm test
 
 本仓库使用 [MIT License](LICENSE)。系统演进记录见 [`CHANGELOG.md`](CHANGELOG.md)。
 
-目录升级与本机私有材料迁移见[迁移指南](docs/recursive-layout-migration.md)。Task 命令默认操作选定作用域的 `.harness/tasks/`；领域任务显式传 `--purpose domain`，选择该作用域的 `tasks/`。根与子作用域遵循同一规则，读取和写入不会选择不同的默认板。
+目录升级与本机私有材料迁移见[迁移指南](docs/recursive-layout-migration.md)。Task 命令默认操作选定作用域的 `.harness/tasks/`；领域任务显式传 `--purpose domain`，选择该作用域的 `tasks/`。根与子作用域遵循同一规则，读取和写入不会选择不同的默认板。`edges tasks list --all-scopes` 从所选作用域所在 Git 仓库根汇总两种用途及所有维护层级；无 Git 时以解析出的作用域为根。显式 `edges tasks --purpose maintenance list --all-scopes` 只筛用途，不缩小空间范围。全仓结果保留 `source.scope`、`source.purpose`、project、stem 与仓库相对入口 path，同名任务不会跨来源合并。

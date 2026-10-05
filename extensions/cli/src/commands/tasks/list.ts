@@ -4,11 +4,15 @@ import { parseTaskProject } from "../../models/tasks/project.js";
 import { parseTaskPriority } from "../../models/tasks/priority.js";
 import { TASK_PRIORITIES, TASK_STATUSES, type TaskPriority, type TaskProjectId, type TaskStatus } from "../../models/tasks/types.js";
 import { runTasksCommand, succeed } from "../../services/tasks/result.js";
-import { GROUPED_LIST_SCHEMA, listGroupedByProject } from "../../services/tasks/grouped.js";
+import { GROUPED_LIST_SCHEMA, listGroupedByProject, listRepositoryGroupedByProject } from "../../services/tasks/grouped.js";
 import { listTasksService } from "../../services/tasks/service.js";
+
+import { listRepositoryTasksWithDocs } from "../../services/tasks/board.js";
+import { gitRoot } from "../../services/scope.js";
 
 const LIST_AFTER_HELP = `
 FLAGS
+  --all-scopes           All registered repository scopes and maintenance levels; both purposes unless explicitly filtered
   --status <edges-tasks-status>  Filter: backlog | todo | in_progress | in_review | done | blocked | cancelled
   --priority <priority>  Repeatable OR filter: urgent | high | medium | low | none
   --project <project>  Repeatable OR filter: default or kebab slug
@@ -21,6 +25,8 @@ Grouped stdout (edges.tasks.grouped/v1) is { schema, groups, items }. Items may 
 
 EXAMPLES
   edges tasks list
+  edges tasks list --all-scopes
+  edges tasks --purpose maintenance list --all-scopes
   edges tasks list --status in_progress
   edges tasks list --sort priority
   edges tasks list --priority urgent --priority high
@@ -33,6 +39,7 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
   tasks
     .command("list")
     .description("List Task files on the board")
+    .option("--all-scopes", "List all registered repository tasks, including every maintenance level")
     .addOption(new Option("--status <status>", "edges-tasks-status").choices([...TASK_STATUSES]))
     .addOption(
       new Option("--priority <priority>", "edges-task-priority (repeatable, OR)")
@@ -55,6 +62,7 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", LIST_AFTER_HELP)
     .action(async (opts: {
+      allScopes?: boolean;
       status?: TaskStatus;
       priority?: TaskPriority[];
       project?: TaskProjectId[];
@@ -69,8 +77,14 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
           projects: opts.project,
           sort: opts.sort,
         };
+        const repositoryRoot = opts.allScopes
+          ? gitRoot(runtime.location.scopeDir) ?? runtime.location.scopeDir
+          : undefined;
+        const purpose = tasks.getOptionValueSource("purpose") === "cli" ? ctx.purpose : undefined;
         if (opts.groupBy === "project") {
-          const grouped = await listGroupedByProject(runtime.location, listOpts, runtime.fs);
+          const grouped = repositoryRoot
+            ? await listRepositoryGroupedByProject(repositoryRoot, listOpts, purpose)
+            : await listGroupedByProject(runtime.location, listOpts, runtime.fs);
           return succeed({
             status: "success",
             command: "list",
@@ -79,7 +93,9 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
             items: grouped.items,
           });
         }
-        const listed = await listTasksService(runtime.location, listOpts, runtime.fs);
+        const listed = repositoryRoot
+          ? (await listRepositoryTasksWithDocs(repositoryRoot, listOpts, purpose)).map(({ doc: _doc, ...item }) => item)
+          : await listTasksService(runtime.location, listOpts, runtime.fs);
         return succeed({ status: "success", command: "list", tasks: listed });
       });
     });
