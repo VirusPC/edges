@@ -99,7 +99,7 @@ get 恢复 parent 和 harness 的轻量引用，不递归加载 harness 正文�
 
 - 原地更新：成功 create/update/move 返回原实例；move 同步实例 path/id/关系。该 Service 已加载的同路径实例、受影响子节点也需刷新，不能静默保持过期引用。
 - 禁止公开 reparent；Internal.moveChild 仅改索引组。物理移动才改变归属。
-- create 调用 node.create + validate + serialize；AI 传结构化参数，不手拼完整任务 Markdown。
+- create 调用 node.create + validate + serialize，并在存在的物理父入口登记。新登记默认 local；这是创建时的默认选择，不把 Leaf/Internal 与索引组绑定，后续可用 Internal.moveChild 改组。AI 传结构化参数，不手拼完整任务 Markdown。
 - move 自动搬整个所属目录，不留孤立 harness/资源。校验目标不存在、不能移动到自身子目录、不能把固定入口名改掉、不能越出 managedRoot/改变已知业务类型。不移动管理根本身。
 - move 同时更新旧/新物理父索引、目录内的相对引用（包括对外引用）、managedRoot 内已登记节点对旧路径的引用。保存 fragment/query 与非受控正文。不扫描改写外部仓库或任意非节点文档。索引中原有组保留，新父缺少该引用时按原组登记，无原组默认 descendant。
 - destroy 清除 managedRoot 内对被删除节点的受控索引，删除完整所属目录；共址 harness 按 layout 特殊生命周期处理。范围外引用不会自动修复。
