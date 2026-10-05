@@ -104,6 +104,7 @@ assert.equal(basename(result.path), 'index.md');
 assert.equal(readFileSync(join(fixtureRoot, result.path), 'utf8').includes('extra user prose'), true);
 ```
 - [ ] Run focused actual test files via node --test --import tsx; record behavioral failures.
+- [ ] Make SkillNode.validate enforce standard required name/description after full input is applied (not in each partial field setter); test malformed imported SKILL rejected before writing. Keep Base/Memory/Task frontmatter optional where their own contract permits.
 - [ ] Adapt adapters to prepare context and structured inputs then call node/service. Remove file/directory choice from user-facing options; do not move domain logic into generic Service. Task sidecars move with directory. Memory indices reconstruct relative entry links. Update template/protocol paths.
 - [ ] Implement migration plan using tracked public managed entries only, target `<stem>/index.md`, rewrite registered node hrefs and moved-document relative resource links, no source content loss. Fail target collision before mutation. No scanning private content; no guessing asset ownership. Exclude posts/thirdparty/ADRs. Existing Skill dirs/entry dirs unchanged.
 ```ts

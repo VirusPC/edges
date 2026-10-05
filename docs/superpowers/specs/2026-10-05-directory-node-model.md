@@ -105,7 +105,7 @@ class InternalNode extends BaseNode<InternalCreateInput, InternalUpdateInput> {
 }
 ```
 
-InternalCreateInput/UpdateInput 为通用输入加可选 constraints/localChildren/descendantChildren；显式 body 与结构字段同次传入有冲突时直接报错。Task 输入增 title/status/priority/assignee；Memory 输入增 memoryType；Skill 使用标准 name/description。子类实现实际验证/生成业务元数据，业务 Service 仍负责外部事实（作者、当前时间、目标路径、Git ignore、看板状态目录）准备，不在泛型 NodeService 中写业务类型分支。
+InternalCreateInput/UpdateInput 为通用输入加可选 constraints/localChildren/descendantChildren；显式 body 与结构字段同次传入有冲突时直接报错。Task 输入增 title/status/priority/assignee；Memory 输入增 memoryType；Skill 使用标准 name/description，在 validate 中要求有效的标准技能名称与非空 description；公共基类字段可选不代表 Skill 入口可省略它们。子类实现实际验证/生成业务元数据，业务 Service 仍负责外部事实（作者、当前时间、目标路径、Git ignore、看板状态目录）准备，不在泛型 NodeService 中写业务类型分支。
 
 create 生成受控内容；update 只更新指定字段，未传字段保留。metadata patch 合并已有字段，未知合法 YAML 字段保留。parse/serialize 使用 gray-matter 默认语法。validate 报出文件、字段/章节和原因，让 AI 修正文档；不自动修复非标准输入。Node body 的未受控章节、注释、正文必须保留；不要求保留 YAML 注释/样式。结构化 Internal 变更沿用源文本补丁式序列化。
 
