@@ -4,7 +4,7 @@
 
 本文保存本轮对话中的说明、具体例子和架构图，供后续逐项讨论。文中的文件名为示意，当前行为对应上述实现基线；替代方案尚未采用。
 
-**状态：八项讨论均已收口，以各项后续用户确认与纠正为准。前面的旧实现和被替代提案保留为讨论过程，不代表仍有效。新模型、Service、CLI 和目录迁移工具已实现并通过分阶段审查；真实公开内容迁移及总体验收进行中，进度以实施计划为准。**
+**状态：八项讨论均已收口，以各项后续用户确认与纠正为准。前面的旧实现和被替代提案保留为讨论过程，不代表仍有效。新模型、Service、CLI 和目录迁移工具已实现并通过分阶段审查；公开内容迁移与全量测试、构建已完成，最终整体审查与 PR 更新进行中，进度以实施计划为准。**
 
 “执行中的裁定”指总体方向已定、细节尚无唯一答案时，实施者补上的具体选择。“改变成本”分别考虑代码、调用方、已有文件与引用，不表示这些选择不可撤销。
 
@@ -835,8 +835,8 @@ flowchart LR
 
 - [节点模型 spec](../superpowers/specs/2026-10-04-node-domain-model-design.md)
 - [归属修正实施计划](../superpowers/plans/2026-10-05-recursive-node-ownership-correction.md)
-- [节点逻辑归属与资源单元分离](../../.harness/memory/projects/project_node_resource_unit_decision.md)
-- [递归节点与自身维护空间](../../.harness/memory/projects/project_scope_first_content_ownership.md)
+- [节点逻辑归属与资源单元分离](../../.harness/memory/projects/project_node_resource_unit_decision/index.md)
+- [递归节点与自身维护空间](../../.harness/memory/projects/project_scope_first_content_ownership/index.md)
 - [PR #161](https://github.com/VirusPC/edges/pull/161)
 
 
@@ -866,3 +866,11 @@ flowchart LR
 | Doctor 对重复／跨组重叠的组成索引报错并保留原文；继续处理独立有效节点。 | 不猜测作者要保留哪条引用，也不让一处错误阻断无关安全修复。 | 以前依赖自动去重的输入，需要先由人或模型修正文档后重跑。 |
 
 可重复批量操作均使用脚本；正式目录转换工具为 `scripts/migrate-directory-nodes.mts`，先 dry-run，再显式 apply。代码验证和审查结果记录在实施计划中，历史验证结果不冒充本轮验收。
+
+## 公开迁移验收
+
+已转换 308 个内容入口（117 Memory、103 Task、88 Note）及 100 份 Task runlog，并更新 17 份引用文档。原归属与附件目标保持不变；干净隔离工作树再次预览为 0 moves / 0 updates。全量 772 项测试及构建通过，详细命令见实施计划。
+
+转换保留原索引覆盖范围：117 条 Memory 已登记，迁移的 103 条 Task 和 88 条 Note 原本未登记，未自动补入组成索引。因此通用 NodeService.list 不会凭文件目录扫描这些历史内容；Task 业务列表仍能读取全部 105 条任务（含原有 2 条目录 Task）。这是目录转换与索引登记两项不同操作的实际边界。
+
+本机 Doctor 仍报告 3 个缺失的 ignored 用户索引、7 个未安装的 Skill 来源，没有补造内容。其他工作树的旧 journal 保持原位且未读取；本次迁移与幂等证据来自没有旧 journal 的隔离工作树。
