@@ -11,7 +11,7 @@ export function isScope(dir: string): boolean {
   return node !== undefined;
 }
 
-function isGitBoundary(directory: string): boolean {
+export function isGitBoundary(directory: string): boolean {
   return existsSync(path.join(directory, '.git'));
 }
 

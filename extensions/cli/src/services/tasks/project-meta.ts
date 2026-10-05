@@ -3,6 +3,8 @@ import { decodeBody } from '../../models/internal/parse.js';
 import { LOCAL_START, LOCAL_END, blockPattern, insertInnerBlock } from '../../models/internal/blocks.js';
 import { scopeDir, boardRel, type BoardTarget } from "./paths.js";
 import path from "node:path";
+import { realpathSync } from "node:fs";
+import { readEntry, saveEntries, type FileChange } from "../node-files.js";
 import { listProjectIds, type BoardFs, type BoardWriter } from "./board.js";
 import { boardRoot } from "./paths.js";
 import { parseTaskProject, projectDirName } from "../../models/tasks/project.js";
@@ -224,6 +226,28 @@ export async function readProjectRecord(
   };
 }
 
+/** Register only an existing owner entry. For a content scope this is its
+ * co-located AGENTS harness; a fresh scope does not opt into Project Memory. */
+function ownerBoardChange(target: BoardTarget): FileChange | undefined {
+  const scope = realpathSync(scopeDir(target));
+  const entry = path.join(scope, "AGENTS.md");
+  const before = readEntry(entry);
+  if (!before) return undefined;
+  const node = new InternalNode(entry).parse(before.source);
+  if (decodeBody(node.body).unsafe)
+    throw new TasksError("VALIDATION_ERROR", "Malformed owning scope index: " + entry);
+
+  const board = path.resolve(scope, boardRel(target), "AGENTS.md");
+  const maintenance = boardRel(target) === path.join(".harness", "tasks");
+  if (!node.children.some(ref => ref.id === board))
+    node.addChild(maintenance ? "local" : "descendant", { id: board });
+  else if (maintenance && node.descendantChildren.some(ref => ref.id === board))
+    node.moveChild(board, "local");
+  // Keep existing domain relation groups, labels, descriptions and source spelling.
+  const source = node.serialize();
+  return source === before.source ? undefined : { path: entry, before, source };
+}
+
 export async function refreshProjectIndex(
   repoPath: BoardTarget,
   writer: BoardWriter,
@@ -240,7 +264,9 @@ export async function refreshProjectIndex(
 
   const rootAbs = rootAgentsAbsPath(repoPath);
   const existing = (await writer.exists(rootAbs)) ? await writer.readFile(rootAbs) : "";
+  const owner = ownerBoardChange(repoPath);
   await writer.writeFile(rootAbs, rewriteRootAgents(existing, records, rootAbs));
+  if (owner) saveEntries([owner]);
   return records;
 }
 

@@ -98,7 +98,7 @@ AGENTS.md                                  根作用域入口
 
 **Produces:** 新建 Task Project 即为可组织 children 的 InternalNode；Task CRUD 后索引与实际入口一致。
 
-- [ ] 先写生命周期测试，在临时目录创建板、分组和任务，直接用 NodeService.list 验证发现链；当前没有完整索引时应失败。
+- [x] 先写生命周期测试，在临时目录创建板、分组和任务，直接用 NodeService.list 验证发现链；当前没有完整索引时应失败。
 
 ```ts
 // root 是测试创建的临时作用域；显式 purpose 保证测试目标不随默认值变化。
@@ -109,12 +109,12 @@ const nodes = await new NodeService({ managedRoot: board }).list(board);
 assert.equal(nodes.filter(node => node instanceof TaskNode).length, 1);
 ```
 
-- [ ] 修改项目入口生成：保留标题与说明，在原 AGENTS 协议内初始化三部分；现有 `task-projects` 块继续位于总入口本层区块，不新增并行索引。
-- [ ] 创建任务前确保目标项目入口存在并登记到任务板；随后让 NodeService.create 自动登记任务，不能“先创建文件，再由另一套扫描刷新列表”。
-- [ ] 用已有 NodeService.move 处理状态与分组变化；验证旧引用消失、新引用可解析，runlog 和附件随原有目录生命周期移动。
-- [ ] 验证 `project update` 只改标题／说明，不覆盖任务 children、本层约束、Pointers、其他人工正文；保留现有 Task 元数据校验行为。
-- [ ] 写失败路径测试：目标冲突、非法元数据或受控区块损坏时，不留下成功任务与失败索引的半成品。只有通用 NodeService 确实缺少一致性保障时才修通用层。
-- [ ] 运行 `pnpm --filter edges-cli exec node --test --import tsx test/tasks/node-index.test.ts test/tasks/scope.test.ts`。通过后提交独立变更：`refactor: maintain task composition indexes through node service`。
+- [x] 修改项目入口生成：保留标题与说明，在原 AGENTS 协议内初始化三部分；现有 `task-projects` 块继续位于总入口本层区块，不新增并行索引。
+- [x] 创建任务前确保目标项目入口存在并登记到任务板；随后让 NodeService.create 自动登记任务，不能“先创建文件，再由另一套扫描刷新列表”。
+- [x] 用已有 NodeService.move 处理状态与分组变化；验证旧引用消失、新引用可解析，runlog 和附件随原有目录生命周期移动。
+- [x] 验证 `project update` 只改标题／说明，不覆盖任务 children、本层约束、Pointers、其他人工正文；保留现有 Task 元数据校验行为。
+- [x] 写失败路径测试：目标冲突、非法元数据或受控区块损坏时，不留下成功任务与失败索引的半成品。只有通用 NodeService 确实缺少一致性保障时才修通用层。
+- [x] 运行 `pnpm --filter edges-cli exec node --test --import tsx test/tasks/node-index.test.ts test/tasks/scope.test.ts`。通过后提交独立变更：`refactor: maintain task composition indexes through node service`。
 
 ## Task 2：延迟查询链、显式执行与 Task 适配
 
@@ -272,7 +272,7 @@ export function taskLocationOf(node: TaskNode, root: string): {
 };
 ```
 
-- [ ] 先写通用延迟执行测试。源是可观察执行次数的真实异步生成器：仅构建 filter/map/groupBy/mapValues/values/find/toArray/thru 时工厂和回调均未执行；`.value()` 后才消费。测试源无关节点业务，不引用 Task 路径。
+- [x] 先写通用延迟执行测试。源是可观察执行次数的真实异步生成器：仅构建 filter/map/groupBy/mapValues/values/find/toArray/thru 时工厂和回调均未执行；`.value()` 后才消费。测试源无关节点业务，不引用 Task 路径。
 
 ```ts
 let started = 0;
@@ -300,13 +300,13 @@ assert.equal(await input.find(n => n === 2).thru(n => n! * 10).value(), 20);
 assert.equal(started, 4);
 ```
 
-- [ ] 增加 find 命中后不执行后续生成器语句、源 finally 执行、异步条件顺序等待、回调异常传播、空输入、对象键转换（1/"1" 合组、undefined、symbol）、__proto__ 安全写入及对象枚举顺序测试。多条派生查询互不修改；同一条链重复 value 使用新生成器并重新执行回调。补类型检查 fixture，验证类型守卫、map 改类型、groupBy 后 filter 接收组数组、mapValues 保留键、values 后继续 map/filter、toArray 后继续链式、find 后 thru。验证分组后 find 仍须消费完整分组上游；使用官方 Lodash 的固定输入／预期结果作为语义对照，不新增生产依赖。
-- [ ] 最小实现通用延迟包装：源工厂保存为函数；filter/map 构造新的生成器工厂；find/groupBy/toArray 将消费循环包在延迟执行函数中；分组结果通过同一包装继续组合，mapValues/values/thru 也只追加延迟操作。禁止提前创建执行中的 Promise；包装中不出现文件系统、Task 或 NodeService 依赖。
-- [ ] 将既有 DFS 改成 async function*，内部递归 yield*；NodeService.query 延迟创建并消费该源，list 只显式收集。测试构建查询后修改源 fixture，value 才能观察读取结果；完整查询和旧 list 保持原有错误与范围行为。
-- [ ] 建立“Internal→Task＋Memory＋下层 Internal→Task”fixture。只查 task 时应得到两条任务，不因 Internal 类型不同剪断路径。无关 Memory 正文放无效 YAML，证明没有被读取／解析；相关 Task 放坏入口则必须失败。无法预先识别类型时不能静默丢弃。
-- [ ] 验证范围规则及可证明的类型排除：不在选择范围内的引用不加载；范围内且无法证明无关的缺失引用必须报错。仅当已有合同能证明整枝无关时测试分支裁剪，不能为通过测试臆造合同。独立覆盖 includeDescendants、去重、环检测、默认不进入任务自身 harness、过滤父节点仍能命中孩子。
-- [ ] 建跨维护层级 fixture：根领域板、根维护板、笔记与 CLI 的维护任务、单条 Task 的维护任务以及该维护任务更深一层的维护任务。普通查询只返回选中板的组成 Task；全仓查询精确包含所有这些 Task，按实际来源归属，不凭 stem 去重。覆盖两种关系重复指向同一入口只输出一次、真实环报错、类型排除不阻断非 Task 节点的维护入口发现；全部用临时公开测试数据。
-- [ ] 为提前终止建 fixture：root→branch→hit，hit 有缺失孩子，root 有后续缺失兄弟。find 命中后两处均不访问；toArray 的完整执行仍必须失败。
+- [x] 增加 find 命中后不执行后续生成器语句、源 finally 执行、异步条件顺序等待、回调异常传播、空输入、对象键转换（1/"1" 合组、undefined、symbol）、__proto__ 安全写入及对象枚举顺序测试。多条派生查询互不修改；同一条链重复 value 使用新生成器并重新执行回调。补类型检查 fixture，验证类型守卫、map 改类型、groupBy 后 filter 接收组数组、mapValues 保留键、values 后继续 map/filter、toArray 后继续链式、find 后 thru。验证分组后 find 仍须消费完整分组上游；使用官方 Lodash 的固定输入／预期结果作为语义对照，不新增生产依赖。
+- [x] 最小实现通用延迟包装：源工厂保存为函数；filter/map 构造新的生成器工厂；find/groupBy/toArray 将消费循环包在延迟执行函数中；分组结果通过同一包装继续组合，mapValues/values/thru 也只追加延迟操作。禁止提前创建执行中的 Promise；包装中不出现文件系统、Task 或 NodeService 依赖。
+- [x] 将既有 DFS 改成 async function*，内部递归 yield*；NodeService.query 延迟创建并消费该源，list 只显式收集。测试构建查询后修改源 fixture，value 才能观察读取结果；完整查询和旧 list 保持原有错误与范围行为。
+- [x] 建立“Internal→Task＋Memory＋下层 Internal→Task”fixture。只查 task 时应得到两条任务，不因 Internal 类型不同剪断路径。无关 Memory 正文放无效 YAML，证明没有被读取／解析；相关 Task 放坏入口则必须失败。无法预先识别类型时不能静默丢弃。
+- [x] 验证范围规则及可证明的类型排除：不在选择范围内的引用不加载；范围内且无法证明无关的缺失引用必须报错。仅当已有合同能证明整枝无关时测试分支裁剪，不能为通过测试臆造合同。独立覆盖 includeDescendants、去重、环检测、默认不进入任务自身 harness、过滤父节点仍能命中孩子。
+- [x] 建跨维护层级 fixture：根领域板、根维护板、笔记与 CLI 的维护任务、单条 Task 的维护任务以及该维护任务更深一层的维护任务。普通查询只返回选中板的组成 Task；全仓查询精确包含所有这些 Task，按实际来源归属，不凭 stem 去重。覆盖两种关系重复指向同一入口只输出一次、真实环报错、类型排除不阻断非 Task 节点的维护入口发现；全部用临时公开测试数据。
+- [x] 为提前终止建 fixture：root→branch→hit，hit 有缺失孩子，root 有后续缺失兄弟。find 命中后两处均不访问；toArray 的完整执行仍必须失败。
 
 ```ts
 const found = await service.query(root)
@@ -315,8 +315,8 @@ assert.equal(found?.id, hit.id);
 await assert.rejects(service.query(root).toArray().value(), /Missing referenced node/);
 ```
 
-- [ ] 运行 `pnpm --filter edges-cli exec node --test --import tsx test/utils/async-query.test.ts test/services/node-service.test.ts`，确保先红后绿，再接 Tasks。
-- [ ] 实现 listTaskNodes：不存在板返回空；已存在但没有合法入口给出迁移错误；正常通过以下同一查询内核读取，不扫描项目／状态目录。
+- [x] 运行 `pnpm --filter edges-cli exec node --test --import tsx test/utils/async-query.test.ts test/services/node-service.test.ts`，确保先红后绿，再接 Tasks。
+- [x] 实现 listTaskNodes：不存在板返回空；已存在但没有合法入口给出迁移错误；正常通过以下同一查询内核读取，不扫描项目／状态目录。
 
 ```ts
 return service.query(target.boardDir, { types: ["task"] })
@@ -324,12 +324,12 @@ return service.query(target.boardDir, { types: ["task"] })
   .toArray().value();
 ```
 
-- [ ] list/get 的 stem 查找与项目发现使用登记树，保留同名歧义检查；taskLocationOf 集中解释既有布局，验证 project/status 与 metadata 一致。显式路径 get 保留原板边界检查。
-- [ ] status／priority／project 转换为链上 filter 条件；分组使用 groupBy(...).value()，结果按 scope／purpose／project 保留来源，不能按同名 stem 覆盖。保留 Task Doc、runCount、优先级排序与稳定输出顺序，排序规则留在 Tasks。
-- [ ] listRepositoryTaskNodes 从仓库根入口调用同一 NodeService.query，显式开启 includeDescendants、includeHarness 并选择 task 类型，汇总 domain 与 maintenance；Tasks 层解释板归属和展示来源。不得排除模块自身或更深层维护任务，不新增 Task DFS、不把 Task 路径特判塞进通用层；板识别复用 layout/任务路径规则。
-- [ ] generate-site 接统一查询与 GroupedList，不再调用 discoverScopes 或扫描各板；已登记空项目保留，其他普通分类不制造空任务分组。覆盖根两张板、登记子作用域任务、相同 stem、相关坏 Task 入口、未登记目录不被偷偷收录。Memory/Skill 正文与维护入口发现分开测试：类型不匹配可避免读取无关正文，但其维护入口中的 Task 必须纳入；为解析范围内关系必须访问的坏入口仍报错，不能以“非 Task”静默排除。
-- [ ] 若现有板索引把自身维护材料登记成组成关系，核对协议后修正确认的错误关系或通用边界；不得用 Tasks 的临时路径排除规则掩盖矛盾，也不擅自删除非 Task 索引。
-- [ ] 运行节点与看板测试，通过后提交 `refactor: query task trees with deferred node queries`。以上步骤已获执行授权，完成后记录验证结果。
+- [x] list/get 的 stem 查找与项目发现使用登记树，保留同名歧义检查；taskLocationOf 集中解释既有布局，验证 project/status 与 metadata 一致。显式路径 get 保留原板边界检查。
+- [x] status／priority／project 转换为链上 filter 条件；分组使用 groupBy(...).value()，结果按 scope／purpose／project 保留来源，不能按同名 stem 覆盖。保留 Task Doc、runCount、优先级排序与稳定输出顺序，排序规则留在 Tasks。
+- [x] listRepositoryTaskNodes 从仓库根入口调用同一 NodeService.query，显式开启 includeDescendants、includeHarness 并选择 task 类型，汇总 domain 与 maintenance；Tasks 层解释板归属和展示来源。不得排除模块自身或更深层维护任务，不新增 Task DFS、不把 Task 路径特判塞进通用层；板识别复用 layout/任务路径规则。
+- [x] generate-site 接统一查询与 GroupedList，不再调用 discoverScopes 或扫描各板；已登记空项目保留，其他普通分类不制造空任务分组。覆盖根两张板、登记子作用域任务、相同 stem、相关坏 Task 入口、未登记目录不被偷偷收录。Memory/Skill 正文与维护入口发现分开测试：类型不匹配可避免读取无关正文，但其维护入口中的 Task 必须纳入；为解析范围内关系必须访问的坏入口仍报错，不能以“非 Task”静默排除。
+- [x] 若现有板索引把自身维护材料登记成组成关系，核对协议后修正确认的错误关系或通用边界；不得用 Tasks 的临时路径排除规则掩盖矛盾，也不擅自删除非 Task 索引。
+- [x] 运行节点与看板测试，通过后提交 `refactor: query task trees with deferred node queries`。以上步骤已获执行授权，完成后记录验证结果。
 
 ## Task 3：用脚本补齐历史递归索引并证明不漏任务
 
@@ -347,21 +347,21 @@ export function planTaskIndexes(root: string): Promise<TaskIndexMigrationPlan>;
 export function applyTaskIndexes(plan: TaskIndexMigrationPlan): Promise<void>;
 ```
 
-- [ ] 先写 fixture：两张板、不同项目、同名任务、已有约束／人工正文、部分已登记任务。预览必须无写入，apply 后由 NodeService 得到精确相同的任务集合，复跑 edits 为零。
-- [ ] 只在迁移器中枚举旧物理目录，以 TaskNode 校验任务；按现有归属补齐“作用域→任务板→项目→任务”索引链。根维护板仍登记为本层；不把子层任务提升到根板。
-- [ ] 通过 InternalNode 修改引用，不手拼另一套受控区块。保留正确的非 Task 引用、重要约束、下层索引及区块外正文；遇重复冲突、越界引用或格式错误，报告路径并拒绝整批 apply。
-- [ ] 源快照同时覆盖将修改的 AGENTS 和发现的 Task 入口；预览后新增／删除／修改任务或索引则重新计划。对所有目标预检后写入，当前进程失败时回滚；不承诺崩溃事务恢复。
-- [ ] 包装 `scripts/index-task-nodes.mts`：必需 `--root`，默认预览，`--apply` 才写入，`--report` 保存来源／目的与校验结果；添加 shebang、执行权限和 package.json 入口。
-- [ ] 执行真实工作树预览，逐项审阅索引位置，再 apply：
+- [x] 先写 fixture：两张板、不同项目、同名任务、已有约束／人工正文、部分已登记任务。预览必须无写入，apply 后由 NodeService 得到精确相同的任务集合，复跑 edits 为零。
+- [x] 只在迁移器中枚举旧物理目录，以 TaskNode 校验任务；按现有归属补齐“作用域→任务板→项目→任务”索引链。根维护板仍登记为本层；不把子层任务提升到根板。
+- [x] 通过 InternalNode 修改引用，不手拼另一套受控区块。保留正确的非 Task 引用、重要约束、下层索引及区块外正文；遇重复冲突、越界引用或格式错误，报告路径并拒绝整批 apply。
+- [x] 源快照同时覆盖将修改的 AGENTS 和发现的 Task 入口；预览后新增／删除／修改任务或索引则重新计划。对所有目标预检后写入，当前进程失败时回滚；不承诺崩溃事务恢复。
+- [x] 包装 `scripts/index-task-nodes.mts`：必需 `--root`，默认预览，`--apply` 才写入，`--report` 保存来源／目的与校验结果；添加 shebang、执行权限和 package.json 入口。
+- [x] 执行真实工作树预览，逐项审阅索引位置，再 apply：
 
 ```bash
 pnpm migrate:task-indexes --root /absolute/worktree --report /tmp/task-index-preview.json
 pnpm migrate:task-indexes --root /absolute/worktree --apply --report /tmp/task-index-applied.json
 ```
 
-- [ ] 迁移前后比较任务入口路径集合，不能只比较数量。当前基线应为 105 条（领域 5、维护 100）；Task 正文、所有元数据、runlog、附件字节及路径必须完全相同。
-- [ ] 运行 `pnpm migrate:task-indexes --root /absolute/worktree`，验证零修改；用真正的 `listRepositoryTaskNodes` 与生成的 HTML payload 再次逐项对齐。
-- [ ] 提交：`refactor: register existing tasks in recursive indexes`。索引补齐与查询切换一起交付，不能部署“新查询＋旧索引”的中间状态。
+- [x] 迁移前后比较任务入口路径集合，不能只比较数量。当前基线应为 105 条（领域 5、维护 100）；Task 正文、所有元数据、runlog、附件字节及路径必须完全相同。
+- [x] 运行 `pnpm migrate:task-indexes --root /absolute/worktree`，验证零修改；用真正的 `listRepositoryTaskNodes` 与生成的 HTML payload 再次逐项对齐。
+- [x] 提交：`refactor: register existing tasks in recursive indexes`。索引补齐与查询切换一起交付，不能部署“新查询＋旧索引”的中间状态。
 
 ## Task 4：交付全仓 CLI，确认默认维护板并完成验收
 
@@ -409,7 +409,7 @@ assert.deepEqual(domainListed.map(task => task.title), ["domain"]);
 
 ## 2026-10-06 集成验收记录
 
-Task 1–3 已由 controller 独立审阅并整合至 Task 4 基线 b06dbfb；本节记录 Task 4 实现者的集成验证，独立最终审查及 PR 更新仍待 controller 执行。保留工作树，不推送、合并或部署。
+Task 1–3 已由 controller 独立审阅并整合至 Task 4 基线 b06dbfb；本节记录 Task 4 实现者的集成验证，Task 4 的 task-review 已通过；最终整体审查提出的两项 Important 修复见下节，修复后复审及 PR 更新仍待 controller 执行。保留工作树，不推送、合并或部署。
 
 - CLI 新增 list --all-scopes，按 Commander 参数来源区分默认 maintenance 与显式 purpose。范围由已解析 scope 定位 Git 根，无 Git 回退该 scope。只对 list 开放；普通各读写命令仍共享 maintenance 默认。
 - CLI 使用与看板相同的 listRepositoryTaskNodes / NodeService 查询与领域投影，未加 DFS 或物理发现回退。全仓非分组行去除 doc，保留原 JSON envelope、来源与入口 path；分组继续保留 Task Doc，并补出入口 path。同名 project/stem 按来源区分，空项目保留。
@@ -428,4 +428,26 @@ pnpm test
 pnpm build
 pnpm exec tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck scripts/index-task-nodes.mts extensions/cli/test/utils/async-query.types.ts
 pnpm --filter edges-cli exec node --test --import tsx test/tasks/all-scopes.test.ts test/tasks/project.test.ts
+```
+
+
+## 2026-10-06 最终整体审查修复
+
+最终整体审查针对 26e3291 提出两项 Important/P2；本节记录修复与验证，最终复审仍待 controller，未提前标记 approved。Task 1–3 的 checklist 按 controller 已审阅完成状态补齐；Task 4 task-review 已通过，最终整体审查项与 PR 更新继续保持未完成。
+
+- 显式创建任务／项目时，通过 InternalNode 将任务板登记到已有所属 AGENTS，使用共享 readEntry/saveEntries 对 owner 做源快照校验与安全写入。maintenance 归 local；新增 domain 归 descendant，已有 domain 关系、引用名称与说明保留。内容节点使用 co-located AGENTS harness，不新造拓扑。无 AGENTS 的 fresh scope 保持局部写入，不自动初始化 Project Memory；全仓仍要求已登记入口。
+- 迁移 discover 复用 scope 的 isGitBoundary，在每个非 root 目录遇到 .git 文件或目录即停止，所选 root 自身可扫描；apply 的 rediscovery 使用同一边界，预览后新增边界拒绝写入。
+- RED：owner-board / index-migration 两文件共 28 项中 5 项失败：首个 project 创建后全仓 groups 为空、两种 foreign 边界触发内容读取、两种新增 Git 边界未拒绝。实现后 28 项全绿，补强直接 first-task、维护关系与坏 owner 后相关查询／写生命周期／scope／migration 共 60 项通过。
+- 生产 tsc 与 strict NodeNext 的 migration/query types 通过。完整 pnpm test → pnpm build 顺序成功：CLI 789、artifacts-preview 42、new-note MCP 14、tasks-review-app 27，共 872 tests。初次 full test 因本 worktree 缺 vitest 链接未开始，按现有锁文件 pnpm install --frozen-lockfile 恢复后通过，无依赖／锁文件改动。构建仅既有 Vite native-loader/__dirname 与 inlineDynamicImports 提示。
+- 公开迁移仅 preview：105 tasks、edits=[]、applied=false。未重复真实 apply，不读取真实 users/journal/posts，不运行真实 root global query。未 push、merge、部署；等待独立复审与后续集成授权。
+
+复现修复验证：
+
+```bash
+pnpm --filter edges-cli exec node --test --import tsx test/tasks/owner-board.test.ts test/tasks/index-migration.test.ts test/tasks/node-index.test.ts test/tasks/node-query.test.ts test/tasks/all-scopes.test.ts test/tasks/default-purpose.test.ts test/tasks/project.test.ts test/tasks/scope.test.ts test/utils/scope.test.ts
+pnpm --filter edges-cli exec tsc --noEmit -p tsconfig.json
+pnpm exec tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck scripts/index-task-nodes.mts extensions/cli/test/utils/async-query.types.ts
+pnpm test
+pnpm build
+pnpm migrate:task-indexes --root /absolute/worktree
 ```

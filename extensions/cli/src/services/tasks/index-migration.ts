@@ -12,6 +12,7 @@ import {
   type EntryFile,
 } from "../node-files.js";
 import { within } from "../node-layout.js";
+import { isGitBoundary } from "../scope.js";
 import { taskLocationOf } from "./node-query.js";
 import {
   parseProjectAgents,
@@ -50,6 +51,7 @@ const excluded = new Set([
 function discover(root: string): string[] {
   const entries: string[] = [];
   function visit(dir: string) {
+    if (dir !== root && isGitBoundary(dir)) return;
     for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
       const file = path.join(dir, item.name);
       if (

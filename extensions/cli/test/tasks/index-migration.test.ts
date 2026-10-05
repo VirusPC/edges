@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import fs from "node:fs";
+import { syncBuiltinESMExports } from "node:module";
 import path from "node:path";
 import { tmpdir } from "node:os";
 import { InternalNode, TaskNode } from "../../src/models/index.js";
@@ -256,3 +257,46 @@ test("tracks both possible owner entries, while unrelated content does not cause
   await applyTaskIndexes(next);
   assert.equal((await planTaskIndexes(root)).edits.length, 0);
 });
+
+for (const kind of ['directory', 'file'] as const) {
+  test('migration excludes foreign Git ' + kind + ' boundaries before reading content', async t => {
+    const { root, write, task } = fixture(t);
+    fs.mkdirSync(path.join(root, '.git')); // The selected root itself remains eligible.
+    write('ordinary/AGENTS.md', '# Ordinary scope\n');
+    task('ordinary/.harness/tasks/_default/todo/local/index.md');
+    write('vendor/upstream/AGENTS.md', '# Foreign scope\n');
+    task('vendor/upstream/tasks/_default/todo/foreign/index.md');
+    if (kind === 'directory') fs.mkdirSync(path.join(root, 'vendor/upstream/.git'));
+    else write('vendor/upstream/.git', 'gitdir: /not-opened\n');
+    const original = fs.openSync;
+    const guard = t.mock.method(fs, 'openSync', ((file: any, ...args: any[]) => {
+      if (String(file).startsWith(path.join(root, 'vendor/upstream'))) throw new Error('foreign content read');
+      return (original as any)(file, ...args);
+    }) as typeof fs.openSync);
+    syncBuiltinESMExports();
+    t.after(() => { guard.mock.restore(); syncBuiltinESMExports(); });
+    const plan = await planTaskIndexes(root);
+    assert.equal(plan.tasks.length, 3);
+    assert.ok(plan.tasks.includes('ordinary/.harness/tasks/_default/todo/local/index.md'));
+    assert.ok(plan.tasks.every(file => !file.startsWith('vendor/')));
+    assert.ok(plan.edits.every(edit => !edit.path.startsWith('vendor/')));
+    await applyTaskIndexes(plan);
+    guard.mock.restore();
+    assert.equal(fs.readFileSync(path.join(root, 'vendor/upstream/AGENTS.md'), 'utf8'), '# Foreign scope\n');
+    assert.ok(!fs.existsSync(path.join(root, 'vendor/upstream/tasks/AGENTS.md')));
+  });
+  test('introduced Git ' + kind + ' boundary invalidates preview before any write', async t => {
+    const { root, write, task } = fixture(t);
+    write('ordinary/AGENTS.md', '# Ordinary scope\n');
+    task('ordinary/tasks/_default/todo/local/index.md');
+    const plan = await planTaskIndexes(root);
+    if (kind === 'directory') fs.mkdirSync(path.join(root, 'ordinary/.git'));
+    else write('ordinary/.git', 'gitdir: /not-opened\n');
+    await assert.rejects(applyTaskIndexes(plan), /Discovery changed/);
+    for (const edit of plan.edits) {
+      const file = path.join(root, edit.path);
+      if (edit.before === null) assert.ok(!fs.existsSync(file));
+      else assert.equal(fs.readFileSync(file, 'utf8'), edit.before);
+    }
+  });
+}

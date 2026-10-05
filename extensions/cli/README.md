@@ -177,6 +177,8 @@ Issue-layer stdout is always JSON (`--json` is accepted and ignored). `runs` / `
 
 `list --all-scopes` selects the Git root containing the resolved scope (including when invoked from a child cwd); without Git, the resolved scope is the range root. The root must have a valid AGENTS entry. Both purposes are included unless the user explicitly supplies `tasks --purpose domain|maintenance`; Commander's default does not become a filter. Only list accepts --all-scopes; create/update/status/project/runs retain their single-board target.
 
+Explicit task/project writes register their board in an existing owning AGENTS entry, including a content node’s co-located AGENTS harness. Maintenance boards belong to localChildren; a new domain board uses descendantChildren while existing domain relations and authored labels are preserved. A fresh scope without AGENTS still supports local task/project creation without initializing Project Memory. Such a board is not globally discoverable until its owner and board are explicitly indexed; a missing global root entry remains an error.
+
 ```bash
 edges tasks list                              # current scope maintenance
 edges tasks list --all-scopes                 # repository, both purposes, every maintenance level
