@@ -107,6 +107,12 @@ function updatedText(
       /(?<![\w/.-])apps\//g,
       "extensions/apps/",
     );
+  if (oldFile === "pnpm-lock.yaml")
+    // Relocate this repository's app importers and CLI -> app workspace link;
+    // keep package versions, integrity records and dependency snapshots intact.
+    source = source
+      .replace(/^  apps\//gm, "  extensions/apps/")
+      .replace(/(version: link:)\.\.\/\.\.\/apps\//g, "$1../apps/");
   if (
     oldFile === "extensions/cli/src/services/note/git/ingest.ts" ||
     /^extensions\/(?:cli\/test\/note\/|mcp-servers\/new-note\/test\/)/.test(

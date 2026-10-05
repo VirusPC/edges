@@ -45,3 +45,5 @@ Git 不分发 ignored 用户材料，也不证明别的克隆已完成私有纠�
 旧布局的独立工作树可用 `pnpm migrate:top-level-layout --root <绝对路径>` 预览，确认目标无碰撞后加 `--apply`。工具只读取、重写 tracked/public 文件的引用；目录中的 ignored 材料随目录原样搬迁，不读取或重写其内容，必要的私有链接调整留给所有者。`posts` 文件字节保持不变。遇目标目录已存在、symlink 或预览后源文件变化即拒绝；普通 IO 失败尽力恢复，不承诺进程崩溃原子性。
 
 此工具只做本次仓库目录调整，不改写旧迁移 manifest 的源状态，也不读取／续跑旧 journal。旧版归属清单与迁移工具中的路径保留历史含义；先完成适用的旧归属／目录入口迁移，再做本次平铺。Git 更新已交付公开搬迁的克隆无需重复 apply。
+
+迁移同时更新 pnpm workspace 与 lockfile 中的应用路径，不升级依赖版本。迁移或拉取后运行 `pnpm install --frozen-lockfile` 重建本机依赖链接，再执行构建。

@@ -144,3 +144,58 @@ test("reruns preserve current extension-relative app links and memory index desc
   track(root);
   assert.equal(planTopLevelLayout(root).edits.length, 0);
 });
+
+test("migrated workspace keeps a frozen-installable lockfile without dependency resolution", (t) => {
+  const root = fixture(t);
+  put(root, "package.json", JSON.stringify({ name: "fixture", private: true }));
+  put(
+    root,
+    "pnpm-workspace.yaml",
+    "packages:\n  - 'apps/*'\n  - 'extensions/cli'\n",
+  );
+  put(
+    root,
+    "apps/tasks-review-app/package.json",
+    JSON.stringify({
+      name: "tasks-review-app",
+      version: "1.0.0",
+      dependencies: { react: "19.2.8" },
+    }),
+  );
+  put(
+    root,
+    "extensions/cli/package.json",
+    JSON.stringify({
+      name: "cli",
+      version: "1.0.0",
+      devDependencies: { "tasks-review-app": "workspace:*" },
+    }),
+  );
+  put(
+    root,
+    "pnpm-lock.yaml",
+    "lockfileVersion: '9.0'\nsettings:\n  autoInstallPeers: true\n  excludeLinksFromLockfile: false\nimporters:\n  .: {}\n  apps/tasks-review-app:\n    dependencies:\n      react:\n        specifier: 19.2.8\n        version: 19.2.8\n  extensions/cli:\n    devDependencies:\n      tasks-review-app:\n        specifier: workspace:*\n        version: link:../../apps/tasks-review-app\n",
+  );
+  track(root);
+  applyTopLevelLayout(planTopLevelLayout(root));
+  execFileSync(
+    "pnpm",
+    [
+      "install",
+      "--lockfile-only",
+      "--frozen-lockfile",
+      "--ignore-scripts",
+      "--offline",
+    ],
+    { cwd: root, stdio: "pipe" },
+  );
+  const link = fs
+    .readFileSync(path.join(root, "pnpm-lock.yaml"), "utf8")
+    .match(/version: link:(.+)/)?.[1];
+  assert(link);
+  assert(
+    fs.existsSync(path.resolve(root, "extensions/cli", link, "package.json")),
+  );
+  assert.equal(planTopLevelLayout(root).edits.length, 0);
+  assert.equal(planTopLevelLayout(root).moves.length, 0);
+});
