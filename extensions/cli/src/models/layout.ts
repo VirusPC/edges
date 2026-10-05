@@ -113,3 +113,20 @@ export function resolveHref(
     throw new Error(`${entryPath}: invalid encoded child href ${href}`);
   }
 }
+
+/** Exclude ordinary navigation before applying strict child-path decoding. */
+export function resolveEntryHref(
+  entryPath: string,
+  href: string,
+): string | undefined {
+  const pathname = href.split(/[?#]/, 1)[0]!;
+  let filename: string;
+  try {
+    filename = basename(decodeURIComponent(basename(pathname)));
+  } catch {
+    return undefined;
+  }
+  if (!(Object.values(ENTRY_NAMES) as string[]).includes(filename))
+    return undefined;
+  return resolveHref(entryPath, href);
+}

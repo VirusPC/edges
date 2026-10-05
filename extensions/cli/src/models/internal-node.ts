@@ -6,7 +6,7 @@ import {
   type SyntaxReference,
 } from "./internal-syntax.js";
 import { referenceOf, validateChild, validateGroup } from "./relations.js";
-import { resolveHref, identifyNodeType } from "./layout.js";
+import { resolveEntryHref, identifyNodeType } from "./layout.js";
 import type {
   ChildGroup,
   InternalContent,
@@ -50,14 +50,14 @@ export class InternalNode extends BaseNode<
   }
   protected override parseBody(markdown: string): void {
     const syntax = new InternalSyntax(markdown, (href) => {
-        const id = resolveHref(this.path, href);
+        const id = resolveEntryHref(this.path, href);
         return !!id && identifyNodeType(id) !== undefined;
       }),
       parsed = syntax.content(),
       hrefs = new Map<string, string>();
     const references = (entries: readonly SyntaxReference[]): NodeReference[] =>
       entries.flatMap((entry) => {
-        const id = resolveHref(this.path, entry.target);
+        const id = resolveEntryHref(this.path, entry.target);
         if (!id) return [];
         hrefs.set(id, entry.target);
         return [

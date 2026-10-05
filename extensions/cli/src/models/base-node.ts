@@ -12,6 +12,12 @@ import type {
   NodeContext,
 } from "./types.js";
 
+/**
+ * Extension contract: subclasses support construction with only an absolute path.
+ * Body hooks must round-trip their serialized representation: parsing a value
+ * returned by serializeBody() and serializing again must preserve that value.
+ * Lifecycle drafts use that inverse pair to copy subclass-owned body state.
+ */
 export class BaseNode<
   CreateInput extends NodeCreateInput = NodeCreateInput,
   UpdateInput extends NodeUpdateInput = NodeUpdateInput,
@@ -123,13 +129,15 @@ export class BaseNode<
     const draft = new (this.constructor as new (path: string) => BaseNode)(
       this.path,
     );
+    const originalBody = fresh ? undefined : this.serializeBody();
     if (!fresh) {
       draft.#metadata = structuredClone(this.#metadata);
-      draft.parseBody(this.serializeBody());
+      draft.parseBody(originalBody!);
     }
     draft.applyInput(input);
     draft.validate();
-    this.parseBody(draft.serializeBody());
+    const nextBody = draft.serializeBody();
+    if (fresh || nextBody !== originalBody) this.parseBody(nextBody);
     this.#metadata = structuredClone(draft.#metadata);
     return this;
   }
@@ -141,8 +149,7 @@ export class BaseNode<
   }
   destroy(_context: NodeContext): void {
     this.validate();
-    if (this.children.length)
-      throw new Error(`${this.path}: cannot destroy node with children.`);
+    // Physical deletion units and affected references are coordinated by Service.
   }
   validate(): void {
     this.validateMetadata(this.#metadata);

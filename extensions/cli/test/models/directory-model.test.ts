@@ -88,9 +88,9 @@ test("internal structured updates preserve prose and reject body conflicts atomi
     root.update({ body: "Replacement", constraints: ["other"] }, update),
   );
   assert.equal(root.serialize(), before);
-  assert.throws(() => root.destroy({ operation: "destroy" }), /children/);
-  root.removeChild("/repo/a/index.md");
   root.destroy({ operation: "destroy" });
+  assert.equal(root.serialize(), before);
+  assert.equal(root.children.length, 1);
 });
 test("ordinary navigation links remain authored prose rather than children", () => {
   const source =
@@ -200,4 +200,47 @@ test("mixed navigation/index items expose nodes without discarding their authore
   assert.ok(
     root.serialize().includes("- [A](a/index.md) and [Guide](README.md)"),
   );
+});
+
+test("ordinary percent filenames stay navigation while malformed entry paths fail", () => {
+  const source = "## 本层记忆\n\n- [Guide](docs/100%.md)\n- [A](a/index.md)\n";
+  const root = new InternalNode("/repo/AGENTS.md").parse(source);
+  assert.deepEqual(
+    root.children.map((child) => child.id),
+    ["/repo/a/index.md"],
+  );
+  assert.equal(root.serialize(), source);
+  root.updateChild("/repo/a/index.md", { name: "Changed" });
+  assert.ok(root.serialize().includes("- [Guide](docs/100%.md)"));
+  const before = root.serialize();
+  assert.throws(
+    () => root.parse("## 本层记忆\n\n- [Bad](docs/100%/index.md)\n"),
+    /invalid encoded child href/,
+  );
+  assert.equal(root.serialize(), before);
+});
+
+test("round-tripping extension hooks support create and avoid reparsing unchanged body on update", () => {
+  class JsonBodyNode extends BaseNode {
+    value: unknown = {};
+    parseCount = 0;
+    protected override parseBody(body: string): void {
+      this.value = JSON.parse(body);
+      this.parseCount++;
+    }
+    protected override serializeBody(): string {
+      return JSON.stringify(this.value);
+    }
+  }
+  const node = new JsonBodyNode("/repo/index.md").create(
+    { body: '{"keep":true}' },
+    create,
+  );
+  assert.equal(node.body, '{"keep":true}');
+  const parses = node.parseCount;
+  node.update({ name: "Changed" }, update);
+  assert.equal(node.parseCount, parses);
+  assert.equal(node.body, '{"keep":true}');
+  node.update({ body: '{"next":true}' }, update);
+  assert.equal(node.body, '{"next":true}');
 });
