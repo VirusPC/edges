@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { Command, Option } from "commander";
 import { ZodError } from "zod";
 import { type CliContext, type CliResult, usageError } from "../context.js";
-import { loadConfig } from "../utils/config.js";
+import { loadConfig } from "../services/config.js";
 import { exitCodeFor, exitCodeForError } from "../utils/exit.js";
 import { VERSION } from "../utils/version.js";
 import { checkAuth } from "../services/note/auth.js";

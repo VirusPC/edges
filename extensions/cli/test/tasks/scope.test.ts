@@ -19,7 +19,7 @@ import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
-import { loadConfig } from "../../src/utils/config.js";
+import { loadConfig } from "../../src/services/config.js";
 
 const marker =
   "<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n<!-- project-memory-local:end -->\n<!-- project-memory:end -->";

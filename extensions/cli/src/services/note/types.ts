@@ -38,7 +38,7 @@ export interface IngestFailure {
 
 export type IngestResult = IngestSuccess | IngestFailure;
 
-export type { RuntimeConfig } from "../../utils/config.js";
+export type { RuntimeConfig } from "../config.js";
 
 export interface ScriptSuccess {
   filePath: string;

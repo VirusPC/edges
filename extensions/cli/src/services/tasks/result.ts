@@ -1,6 +1,6 @@
 import { taskBoardLocation } from "./paths.js";
 import type { CliContext, CliResult } from "../../context.js";
-import { loadConfig } from "../../utils/config.js";
+import { loadConfig } from "../config.js";
 import { exitCodeForTasksError } from "../../utils/exit.js";
 import { createNodeBoardFs, createNodeBoardWriter } from "./board.js";
 import { formatTasksResult, type TasksFailure } from "./format.js";
