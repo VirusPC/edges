@@ -1,7 +1,7 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../../context.js";
 import { formatRunsTable } from "../../services/tasks/format.js";
-import { runTasksCommand, succeed } from "../../services/tasks/result.js";
+import { runTasksCommand, succeed } from "./run.js";
 import { parseRunLog } from "../../services/tasks/runlog.js";
 import { getTaskService } from "../../services/tasks/service.js";
 
@@ -36,10 +36,11 @@ export function addRunsCommand(tasks: Command, ctx: CliContext): void {
           stem: record.stem,
           runs: parsedLog.runs,
         };
+        const result = succeed(payload);
         if (opts.output === "json") {
-          return succeed(payload);
+          return result;
         }
-        return succeed(payload, formatRunsTable(parsedLog.runs));
+        return { ...result, stdout: formatRunsTable(parsedLog.runs) };
       });
     });
 }

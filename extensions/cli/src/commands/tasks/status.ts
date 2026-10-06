@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
 import { isTaskStatus } from "../../services/tasks/paths.js";
-import { fail, runTasksCommand, succeed } from "../../services/tasks/result.js";
+import { failTask, runTasksCommand, succeed } from "./run.js";
 import { moveTaskStatus } from "../../services/tasks/move.js";
 
 const STATUS_AFTER_HELP = `
@@ -30,7 +30,7 @@ export function addStatusCommand(tasks: Command, ctx: CliContext): void {
     .action(async (target: string, status: string) => {
       await runTasksCommand(ctx, async (runtime) => {
         if (!isTaskStatus(status)) {
-          return fail("VALIDATION_ERROR", `invalid edges-tasks-status: ${status}`);
+          return failTask("VALIDATION_ERROR", `invalid edges-tasks-status: ${status}`);
         }
         const moved = await moveTaskStatus(runtime.location, target, status, {
           fs: runtime.writer,

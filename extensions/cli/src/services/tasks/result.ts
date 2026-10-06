@@ -1,54 +1,20 @@
 import { taskBoardLocation } from "./paths.js";
-import type { CliContext, CliResult } from "../../context.js";
 import { loadConfig } from "../config.js";
-import { exitCodeForTasksError } from "../../utils/exit.js";
 import { createNodeBoardFs, createNodeBoardWriter } from "./board.js";
-import { formatTasksResult, type TasksFailure } from "./format.js";
 import { TasksError, type TasksErrorCode } from "../../domain/models/tasks/types.js";
 
-export type { CliResult };
-
-export function tasksRuntime(ctx: CliContext) {
-  const location = taskBoardLocation(loadConfig(ctx.env).scopeDir, ctx.purpose);
-  location.indexGroup = ctx.indexGroup;
+export function openTasksRuntime(input: {
+  env: NodeJS.ProcessEnv;
+  purpose?: "domain" | "maintenance";
+  indexGroup?: "local" | "descendant";
+}) {
+  const location = taskBoardLocation(loadConfig(input.env).scopeDir, input.purpose);
+  location.indexGroup = input.indexGroup;
   return {
     location,
     fs: createNodeBoardFs(location),
     now: new Date(),
     writer: createNodeBoardWriter(location),
-  };
-}
-
-/**
- * Run a tasks subcommand: resolve the production board runtime, run the body,
- * and store the result on `ctx` — mapping any thrown error to a `CliResult`.
- */
-export async function runTasksCommand(
-  ctx: CliContext,
-  fn: (runtime: ReturnType<typeof tasksRuntime>) => Promise<CliResult>,
-): Promise<void> {
-  try {
-    ctx.result = await fn(tasksRuntime(ctx));
-  } catch (error) {
-    const mapped = asTasksError(error);
-    ctx.result = fail(mapped.errorCode, mapped.message);
-  }
-}
-
-export function fail(errorCode: TasksErrorCode, reason: string): CliResult {
-  const payload: TasksFailure = { status: "failed", errorCode, reason };
-  return {
-    exitCode: exitCodeForTasksError(errorCode),
-    stdout: formatTasksResult(payload),
-    stderr: "See edges tasks --help for usage.\n",
-  };
-}
-
-export function succeed(payload: Parameters<typeof formatTasksResult>[0], stdout?: string): CliResult {
-  return {
-    exitCode: 0,
-    stdout: stdout ?? formatTasksResult(payload),
-    stderr: "",
   };
 }
 

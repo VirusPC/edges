@@ -3,7 +3,7 @@ import type { CliContext } from "../../context.js";
 import { parseTaskProject } from "../../domain/models/tasks/project.js";
 import { parseTaskPriority } from "../../domain/models/tasks/priority.js";
 import { TASK_PRIORITIES, TASK_STATUSES, type TaskPriority, type TaskProjectId, type TaskStatus } from "../../domain/models/tasks/types.js";
-import { runTasksCommand, succeed } from "../../services/tasks/result.js";
+import { runTasksCommand, succeed } from "./run.js";
 import { GROUPED_LIST_SCHEMA, listGroupedByProject, listRepositoryGroupedByProject } from "../../services/tasks/grouped.js";
 import { listTasksService } from "../../services/tasks/service.js";
 

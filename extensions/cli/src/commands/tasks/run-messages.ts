@@ -1,7 +1,7 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../../context.js";
 import { formatRunMessagesTable } from "../../services/tasks/format.js";
-import { runTasksCommand, succeed } from "../../services/tasks/result.js";
+import { runTasksCommand, succeed } from "./run.js";
 import { findRun } from "../../services/tasks/service.js";
 
 const RUN_MESSAGES_AFTER_HELP = `
@@ -36,10 +36,11 @@ export function addRunMessagesCommand(tasks: Command, ctx: CliContext): void {
           run: found.run,
           messages: found.messages,
         };
+        const result = succeed(payload);
         if (opts.output === "json") {
-          return succeed(payload);
+          return result;
         }
-        return succeed(payload, formatRunMessagesTable(found.run, found.messages));
+        return { ...result, stdout: formatRunMessagesTable(found.run, found.messages) };
       });
     });
 }

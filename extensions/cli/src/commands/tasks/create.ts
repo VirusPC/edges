@@ -6,7 +6,7 @@ import {
   type TaskPriority,
   type TaskStatus,
 } from "../../domain/models/tasks/types.js";
-import { runTasksCommand, succeed } from "../../services/tasks/result.js";
+import { runTasksCommand, succeed } from "./run.js";
 import { createTask } from "../../services/tasks/write.js";
 
 const CREATE_AFTER_HELP = `

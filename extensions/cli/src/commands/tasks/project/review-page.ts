@@ -9,8 +9,9 @@ import {
   resolveReviewPageOutPath,
   writeReviewPage,
 } from "../../../services/tasks/review-page.js";
-import { asTasksError, fail, succeed } from "../../../services/tasks/result.js";
 import { TasksError } from "../../../domain/models/tasks/types.js";
+import { asTasksError } from "../../../services/tasks/result.js";
+import { failTask, succeed } from "../run.js";
 
 export function addProjectReviewPageCommand(project: Command, ctx: CliContext): void {
   project
@@ -44,7 +45,7 @@ export function addProjectReviewPageCommand(project: Command, ctx: CliContext): 
         });
       } catch (error) {
         const mapped = asTasksError(error);
-        ctx.result = fail(mapped.errorCode, mapped.message);
+        ctx.result = failTask(mapped.errorCode, mapped.message);
       }
     });
 }
