@@ -44,6 +44,28 @@ edges schema get task-doc/v1 > task-doc.v1.json
 | Zod 作为统一定义源 | 能统一校验和类型，但要求用 Zod 表达式定义数据；本次选择普通 TS 类型。已有 Note 的 Zod 校验不因本决策自动重写 |
 | 直接从带行为的节点类生成 | 当前类含私有状态、getter 与方法；临时验证的产物不能准确代表对外数据，需要显式契约 |
 
+## Ajv 的选择依据
+
+2026-10-06 用户确认采用 Ajv。它接收标准 JSON Schema，适合消费构建时从 TS 导出的契约，避免再用另一套校验 DSL 重写字段。选择 Ajv 8，并使用 ajv-formats 3 提供 date-time 校验；关闭数据修正选项，使不合法数据得到明确错误，由调用方修正。
+
+生态依据来自项目官方资料：Fastify 文档说明默认使用 Ajv 8；webpack 的 schema-utils 依赖 Ajv 8 和 ajv-formats；ESLint 也依赖 Ajv，但核实时是 6.x，不能将它当作 Ajv 8 的采用证据。这些足以说明 Ajv 是 Node JSON Schema 校验领域的主流选择之一，不能据此断言它在所有 Node 校验库中排名第一；Zod 与 Joi 的用途及定义方式也不能直接与它混为一个排名。
+
+本次先把 Ajv/formats 接到生成契约的兼容性测试，作为开发依赖。只有明确的生产数据边界需要该契约校验时，才将其作为运行时依赖接入；schema list/get 不执行校验。相较自写校验器，它减少标准语义和格式规则的维护；代价是跟随其 Schema 方言支持、插件和版本管理。编译校验函数可复用，不在每条记录上重新编译。
+
+## 决策过程与重新评估条件
+
+讨论曾从“所有节点都有 Schema、独立 domain/schemas 层”延伸到“去掉 Model 方法、采用 DOM 或 React 风格”。最终回到实际问题：消除数据定义重复，保留单节点 Model 行为和集合 operations 分工。DOM/React 是架构类比，不是已评测或采用的依赖；也没有因本次讨论取消现有 Note Zod 校验。
+
+| 决定 | 接受的成本 | 何时重新评估 |
+| --- | --- | --- |
+| 普通 TS 契约 + 独立生成器 | 构建步骤、JSDoc 约束与 TS 语法支持限制 | 真实契约无法用标准类型及生成器支持的约束表达，且兼容测试不能通过；先报告具体缺口，不偷偷修补产物 |
+| TaskDoc 先行 | 其他节点尚无统一对外 Schema | 出现明确消费者或输入/输出接口时按契约增量登记 |
+| Node 22 单基线 | 运行环境也需升级，放弃 Node 20 兼容 | 项目支持周期或部署需求变化时另做版本基线决策 |
+| 构建产物不入 Git | 干净构建、消费者准备与发布校验必须可靠 | 构建分发需求变化时评估，不能因开发机缺少 dist 回退到运行时生成 |
+| Ajv 消费生成契约 | 方言、格式插件、编译及错误呈现需要适配 | 校验用途或契约标准变化；仍以契约一致性为验收，不以 star 数代替适配验证 |
+
+技术选型记录保留候选、未采用理由、一手来源、探针证据及限制、迁移成本。此处的“accepted”表示设计已确认，不代表探针已覆盖生产环境或接入已完成。
+
 ## 验证证据与限制
 
 2026-10-06 在仓库外临时目录，以 ts-json-schema-generator 2.9.0、Ajv 8、ajv-formats 3 做小样验证，未修改仓库依赖。探针运行于本机 Node 25.6.1，因此不能声称已通过 Node 22 验收；正式接入需在 Node 22 重跑。
@@ -63,7 +85,7 @@ Task Doc 继续保持 name、description、metadata、body；metadata 的未知�
 
 CI 从无 dist 的干净状态构建，验证生成物存在、符合对应方言和既有契约样例；重复生成比较临时产物以检查确定性，不以已提交的生成文件作基准。从不含 TS 源码及开发依赖的分发包，在仓库外执行 list/get，验证命令可用、stdout 是纯 JSON、未知 key/缺失产物报错，且 Git 中没有新增生成的 Schema。
 
-此选型与[通用能力收敛计划](../superpowers/plans/2026-10-06-shared-node-capabilities.md)相互独立：该计划继续执行已确认的 Model/operations/Service 分工；Schema 接入从 TaskDoc 开始，不借此扩大成全节点重构。
+此选型纳入[通用能力收敛计划](../superpowers/plans/2026-10-06-shared-node-capabilities.md)的 Task 5：生成与分发 TaskDoc、接入兼容性校验、提供 schema list/get。Task 0–4 继续执行已确认的 Model/operations/Service 分工，不借 Schema 接入扩大成全节点重构。ADR 保存选型与取舍，spec 保存约束，plan 保存实施和验收步骤，项目记忆提供检索入口。
 
 ## 一手资料
 
@@ -72,3 +94,4 @@ CI 从无 dist 的干净状态构建，验证生成物存在、符合对应方�
 - [Typia setup](https://typia.io/docs/setup/)：编译转换接入要求。
 - [Zod JSON Schema](https://zod.dev/json-schema)：从运行时定义导出 Schema 的替代路线。
 - [Ajv 配置](https://ajv.js.org/options.html)与[Schema 方言](https://ajv.js.org/json-schema.html)：非修改式校验及方言选择。
+- [Fastify Validation and Serialization](https://fastify.dev/docs/latest/Reference/Validation-and-Serialization/)、[webpack schema-utils 依赖](https://github.com/webpack/schema-utils/blob/main/package.json)、[ESLint 依赖](https://github.com/eslint/eslint/blob/main/package.json)：2026-10-06 核实的生态采用依据；链接随上游更新，以上记录不代表永远固定的版本。

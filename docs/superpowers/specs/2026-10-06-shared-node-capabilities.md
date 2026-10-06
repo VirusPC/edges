@@ -1,10 +1,10 @@
 # Tasks、Memory、Note 通用能力收敛
 
-状态：待实施；本次根据用户对文件过散的质疑及 Service 边界的纠正重新梳理。四项目标不变，替代上一版新增文档包装和查询包装的方案。
+状态：待实施；本次根据用户对文件过散的质疑及 Service 边界的纠正重新梳理。保留四项收敛目标，补充已确认的 Schema 生成与获取；替代上一版新增文档包装和查询包装的方案。
 
 ## 目标
 
-统一节点保存、AGENTS 结构与索引维护、物理路径原语及登记树查询。减少重复基础设施与调用方需要理解的概念，保留 Tasks、Memory、Note 的业务行为。
+统一节点保存、AGENTS 结构与索引维护、物理路径原语及登记树查询。减少重复基础设施与调用方需要理解的概念，保留 Tasks、Memory、Note 的业务行为。以 TS 数据契约生成 TaskDoc Schema，供校验和 CLI 导出使用。
 
 ## 架构与调用方向
 
@@ -47,7 +47,7 @@ flowchart TD
 
 保留带行为的节点类与现有继承关系，不实施“Model 仅保留数据、全部行为搬到 operations”的方案；也不因 React 类比引入 reducer、dispatch 或不可变快照。既有同路径共享实例和原地更新决策继续有效。
 
-JSON Schema 描述对外交换的数据或操作参数，与上述分工独立。生成源应是明确的 TS 数据契约，不直接扫描包含 getter、方法和私有状态的完整节点类；不为生成 Schema 搬迁 Model 方法，也不要求所有节点立即配齐 Schema。本计划不引入生成器或 Ajv；Schema 生成接入另按明确的契约范围实施。
+JSON Schema 描述对外交换的数据或操作参数，与上述分工独立。生成源应是明确的 TS 数据契约，不直接扫描包含 getter、方法和私有状态的完整节点类；不为生成 Schema 搬迁 Model 方法，也不要求所有节点立即配齐 Schema。本计划 Task 5 从 TaskDoc 接入生成器和 Ajv 契约测试；不扩大为全节点 Schema 重构。
 
 Schema 技术选型及决策原因见 [ADR 0025](../../adr/0025-typescript-source-generated-json-schema.md)：ts-json-schema-generator、Node 22，运行时结构校验按需使用 Ajv；先迁移 TaskDoc，保留本节职责边界。
 
@@ -123,21 +123,31 @@ Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Not
 
 不改变默认局部范围；只有 value() 执行查询；filter 不自动剪枝；types 可跳过无关叶子正文，但不能遗漏其 harness。禁止加入物理扫描兜底。Memory 的 doctor / 索引重建需要盘点未登记文件，继续保留物理扫描。
 
+## Schema 生成、校验与获取
+
+按 ADR 0025 实施 TaskDoc 首个契约：普通 TS 数据类型及公共枚举是定义源，生成器只在构建期运行；JSON Schema 与最小清单输出到 dist/schemas/，不提交 Git，随 CLI 包分发。保留旧 v1 的字段、开放 metadata 与约束，显式验证 draft-07 与原 2020-12 的接受/拒绝语义，不能只改方言标签或静默收窄契约。
+
+新增 edges schema list 和 edges schema get task-doc/v1。list 返回 key/id/title/description；get 直接输出 Schema。命令仅从安装包相对路径读取产物，不解析 scope、不取锁、不等待 stdin、不回退源码或现场生成。未知 key、无效参数及产物缺失时 stderr 报错并非零退出，不能输出业务命令的 JSON 错误包装。
+
+Ajv 8 与 ajv-formats 3 先用于兼容性测试，关闭 coerceTypes/useDefaults/removeAdditional。不在 schema get 中执行校验，不把完整 TaskDoc 输出契约用于校验可省略字段的原始 Markdown。后续生产校验必须选用用途匹配的契约。
+
+审阅页切换到纯契约公共常量/类型，去掉手写 JSON 路径与内联 properties 假设；消费者的独立 dev/build/test/typecheck 不依赖残留 dist。通过兼容性验收后删除旧手写 Schema。干净构建、重复生成确定性、仓库外无源码及开发依赖的分发包 list/get 都是验收项。选型、替代路线、探针及采用依据保留在 ADR 0025。
+
 ## 全局约束
 
-- TypeScript；Node >=22，以 Node 22 作为运行、构建和测试基线；本计划不新增运行时依赖或独立 package。
+- TypeScript；Node >=22，以 Node 22 作为运行、构建和测试基线；不新增独立 package。Task 5 增加 ts-json-schema-generator 2.9.0、Ajv 8、ajv-formats 3 开发依赖；无明确生产校验边界时不增加运行时校验依赖。
 - 仅在独立 worktree 修改；不迁移仓库真实内容或用户私有数据。
 - 创建、更新、删除、导入与持久化通过 Service 协调；Model 保留纯内存领域行为。
 - 保留 NodeService 内同路径单实例、原地更新与实际受影响节点保存语义。
 - 保留命令写锁、文件快照冲突检查、单文件原子保存与既有失败恢复。
 - 保留 Markdown 非受控区域；不要求保留 YAML 注释或 YAML 样式。
-- 保留 CLI 参数、输出协议、默认 scope 与查询范围；不新增 CLI 命令。
+- 保留既有 CLI 参数、输出协议、默认 scope 与查询范围；新增全局只读 schema list/get，成功输出纯 JSON，失败仅写 stderr 并非零退出。
 - domain/models 与 domain/operations 同级，算法按文件拆分；domain 不依赖 services（含类型依赖），不直接读写文件；不引入 NodeTree、全局 Service 或事务框架。
 
 ## 取舍与验收
 
 接受业务操作中少量直接调用 create/update/query 的重复代码，换取更少的公开概念和调用层次；业务政策本身仍需集中。文件数不是唯一指标，不能把独立的锁、文件恢复或模型语法全部塞进 node-service.ts。
 
-验收重点：四个目标都落实；项目/看板 AGENTS 不再直接 writeFile；无 NodeDocument/MemoryDocument 保存状态包装；无另一套 Memory 原子写；全仓查询复用已有 query；通用底层无业务 Service 反向依赖；涉及 Service 的运行时导入图无循环。保留现有单次生命周期操作的失败恢复，但不承诺整条业务命令的多个调用构成多文件 ACID。
+验收重点：四个收敛目标与 Schema 生成/获取均落实；项目/看板 AGENTS 不再直接 writeFile；无 NodeDocument/MemoryDocument 保存状态包装；无另一套 Memory 原子写；全仓查询复用已有 query；通用底层无业务 Service 反向依赖；涉及 Service 的运行时导入图无循环。保留现有单次生命周期操作的失败恢复，但不承诺整条业务命令的多个调用构成多文件 ACID。
 
 参考的是 [Service Layer](https://martinfowler.com/eaaCatalog/serviceLayer.html) 协调操作与 [Domain Model](https://martinfowler.com/eaaCatalog/domainModel.html) 承载数据/行为的分工，不要求额外引入 Repository 框架。步骤见[实施计划](../plans/2026-10-06-shared-node-capabilities.md)。

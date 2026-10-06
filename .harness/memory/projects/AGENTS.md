@@ -58,7 +58,7 @@ format: ordinary
 - [v1 自托管 Langfuse 落在物理机 minigtr](project_self_hosted_langfuse_on_minigtr/index.md) — 改自托管 Langfuse 的 v1 宿主、或默认往阿里云/云 VPS 上放时打开：宿主是物理机 minigtr，按多数时候在线的小型服务器运维；双系统仍在但 Windows 不是日常路径。不是阿里云或其它云 VPS。访问面见 ADR 0017。决策见 docs/adr/0014-self-hosted-langfuse-on-minigtr.md。
 - [跨机器跨 Agent 的 harness 放 shared-extensions](project_shared_extensions/index.md) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放 shared-extensions；接入 Edges 的能力仍走 extensions。不要用「换机器带得走」当进 extensions 的充分条件。
 - [系统设计目标：三件事尽量一键](project_system_one_click_deploy_ingest_output/index.md) — 改根 README 的系统实现、或讨论 Edges 产品方向时打开：设计目标是一键部署底座、一键接入 Agent 客户端、一键产出对外资产；这是方向，仓库按这个方向收敛。不要另开顶级章节，也不要用它取代知识闭环主线。
-- [TS 数据契约生成 JSON Schema](project_task_doc_json_schema/index.md) — Schema 决策：TS 定义源、ts-json-schema-generator、Node 22；产物仅随构建包分发，CLI schema list/get 获取，保留 Model 行为。ADR 0025，待实施。
+- [TS 数据契约生成 JSON Schema](project_task_doc_json_schema/index.md) — Schema 选型与取舍：TS 源、生成器、Node 22、Ajv 生态证据及边界；构建分发与 CLI 获取。ADR 0025，plan Task 5 待实施。
 - [Task Project 审阅页是 render-only CLI](project_task_project_review_page_render_only_cli/index.md) — 改审阅壳或 edges tasks project review-page 时打开：仍只渲染、无 --mode。桌面三栏见 ADR 0022。窄屏同一页纵向分段，滚动必须能到顶也能到 Details。章节头是过渡色面，状态行贴背景且比章节小一档。筛选入口是 ListFilter 图标。双击章节标题滚到该节，回到看板滚到当前卡片。不要视口面板。源码在 apps/tasks-review-app/。
 - [Tasks 旧记忆逐条审阅后的共享范围与归属](project_task_shared_conventions_ownership/index.md) — 跨层任务约定存根 Project Memory；写法引用 conversation-to-tasks；部署记录与预览 Skill 已归根，局部看板分组仍留 Tasks，对外分发留待办。
 - [Tasks 核心思想：与 /goal、loop engineering 同构](project_tasks_align_goal_and_loop_engineering/index.md) — 设计或验收 tasks 时：目标+完成标准要与 /goal、loop engineering 一起想；开卡时完成标准可暂缺、grill 后补；沉淀结论时同时写清背景上下文。

@@ -1,8 +1,8 @@
 ---
 name: project_task_doc_json_schema
 description: >-
-  Schema 决策：TS 定义源、ts-json-schema-generator、Node 22；产物仅随构建包分发，CLI schema
-  list/get 获取，保留 Model 行为。ADR 0025，待实施。
+  Schema 选型与取舍：TS 源、生成器、Node 22、Ajv 生态证据及边界；构建分发与 CLI 获取。ADR 0025，plan Task 5
+  待实施。
 metadata:
   edges-title: TS 数据契约生成 JSON Schema
   edges-type: project
@@ -10,7 +10,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T15:29:55+08:00'
+  edges-updated-at: '2026-10-06T15:42:26+08:00'
 ---
 
 2026-10-06 用户确认：Task Doc 等对外数据契约以普通 TypeScript interface/type 为定义源，使用 ts-json-schema-generator 生成 JSON Schema；需要运行时结构校验时使用 Ajv。项目统一 Node 22 基线。选型及原因见 docs/adr/0025-typescript-source-generated-json-schema.md；本次已接受决策，尚未实施接入。
@@ -36,3 +36,11 @@ metadata:
 **Why:** 避免源码与生成物双重维护，让外部系统获取与当前安装版本匹配的契约，而不必读取仓库路径或运行 TS 生成器。
 
 **How to apply:** 目标命令为 edges schema list 和 edges schema get task-doc/v1；get 直接输出 JSON Schema，错误写 stderr 并非零退出。不依赖 scope、不等待 stdin、不取写锁，只读取包内 dist/schemas/，不现场生成。干净构建须先准备产物再供消费者使用；发布包包含 Schema，源码仓库不提交它。兼容性验收后移除旧手写 JSON 和路径依赖，验证仓库外无源码/开发依赖的安装包也能运行 list/get。
+
+## 选型证据与实施衔接
+
+2026-10-06 用户要求技术选型完整留档，保留候选与未采用理由、实际验证与限制、迁移成本及重新评估条件，而不只记录库名。ADR 0025 为本主题的决策记录；通用能力收敛 plan 的 Task 5 实施生成器、兼容性校验、消费者迁移与 CLI 获取，spec 已同步，均待实施。
+
+**Why:** 以后需要知道当时为什么这样选，避免把生态采用等同于绝对排名、把探针成功等同于生产验收，或重复讨论已明确的取舍。
+
+**How to apply:** Ajv 是 Node JSON Schema 校验的主流选择之一，证据来自 Fastify、webpack schema-utils 及 ESLint 官方资料；ESLint 使用的 6.x 不作为 Ajv 8 的证据。Ajv 8 与 ajv-formats 3 先进入契约测试开发依赖，只有用途匹配的生产边界需要时才接运行时；schema list/get 只读取产物。保留 generator 与其他方案的对照、Node 22 基线、构建产物分发和 Model/operations 边界，详见 ADR 0025。计划与决策记录不代表代码已经接入。
