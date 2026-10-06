@@ -552,3 +552,40 @@ test('graph validation excludes harness relations while query explicitly include
   assert.equal(parent.description, 'composition remains acyclic');
   await assert.rejects(service.query(root, {includeHarness: true}).value(), /Composition cycle/);
 });
+
+for (const operation of ['query', 'validate', 'destroy'] as const) {
+  test(`${operation} checks a later readonly diamond edge before deduplication`, async t => {
+    const {root, file, write} = fixture(t);
+    const originals = new Map([
+      ['AGENTS.md', index('- [A](a/AGENTS.md)\n- [B](b/AGENTS.md)')],
+      ['a/AGENTS.md', index('- [Target](../target/index.md)')],
+      ['b/AGENTS.md', index('- [Target](../target/index.md)')],
+      ['target/index.md', 'target'],
+    ]);
+    for (const [name, body] of originals) write(name, body);
+    let laterEdgeChecks = 0;
+    let targetLoads = 0;
+    const service = new NodeService({managedRoot: root,
+      readOnlyReference: (parent, ref) => {
+        const readonly = parent.path === file('b/AGENTS.md') && ref.id === file('target/index.md');
+        if (readonly) laterEdgeChecks++;
+        return readonly;
+      },
+      modelForReference: (_parent, _ref, target) => {if(target === file('target/index.md')) targetLoads++; return undefined;},
+    });
+    const target = (await service.get(file('target/index.md')))!;
+    target.body = 'caller unsaved body';
+    if (operation === 'query') await service.query(root).value();
+    if (operation === 'validate') {
+      const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
+      await service.update(parent, {});
+      originals.set('AGENTS.md', fs.readFileSync(file('AGENTS.md'), 'utf8'));
+    }
+    await assert.rejects(service.destroy(target), /Read-only node source/);
+    assert.ok(laterEdgeChecks > 0);
+    assert.equal(targetLoads, 1);
+    assert.strictEqual(await service.get(target.path), target);
+    assert.equal(target.body, 'caller unsaved body');
+    for (const [name, body] of originals) assert.equal(fs.readFileSync(file(name),'utf8'), body);
+  });
+}

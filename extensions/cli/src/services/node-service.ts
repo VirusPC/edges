@@ -151,18 +151,24 @@ export class NodeService {
   async get(file: string, Model?: Model): Promise<BaseNode | undefined> {
     return this.#read(path.resolve(file), Model);
   }
+  /** Per-edge policy must run even when traversal has already loaded the target. */
+  #referenceReadOnly(parent: BaseNode, reference: NodeReference): boolean {
+    const readonly =
+      this.#cache.state.get(parent)?.readOnly === true ||
+      this.#navigationReadOnly.has(parent) ||
+      indexContract(parent)?.writable === false ||
+      this.#options.readOnlyReference?.(parent, reference, reference.id) === true;
+    const cached = this.#cache.loaded.get(reference.id);
+    if (readonly && cached) this.#cache.markReadOnly(cached);
+    return readonly;
+  }
   async #reference(
     parent: BaseNode,
     reference: NodeReference,
+    readonly: boolean,
     types?: readonly string[],
     resources = true,
   ): Promise<BaseNode> {
-    const readonly =
-      this.#cache.state.get(parent)?.readOnly ||
-      this.#navigationReadOnly.has(parent) ||
-      indexContract(parent)?.writable === false ||
-      this.#options.readOnlyReference?.(parent, reference, reference.id) ===
-        true;
     const Model =
       this.#options.modelForReference?.(parent, reference, reference.id) ??
       modelAt(reference.id, indexContract(parent), this.#options.models);
@@ -193,7 +199,9 @@ export class NodeService {
         ? path.resolve(scopePath) : path.join(path.resolve(scopePath), "AGENTS.md");
       const root = await service.#read(entry, InternalNode, false, false);
       if (!root) throw new Error(`Missing scope entry: ${entry}`);
-      yield* traverse(root, options, (_parent, reference) => {
+      // resolve and load are sequential; carry this edge's policy into its one load.
+      let readonly = false;
+      yield* traverse(root, options, (parent, reference) => {
         if (options.includeHarness) {
           if (!within(reference.id, service.managedRoot)) return undefined;
           try {
@@ -202,8 +210,9 @@ export class NodeService {
             if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
           }
         }
+        readonly = service.#referenceReadOnly(parent, reference);
         return reference.id;
-      }, (parent, reference) => service.#reference(parent, reference, options.types, false));
+      }, (parent, reference) => service.#reference(parent, reference, readonly, options.types, false));
     });
   }
   /** Compatibility collection: materialize query and capture lifecycle resource
@@ -248,6 +257,7 @@ export class NodeService {
     }
     const maintenanceOnly = (node: BaseNode, ref: NodeReference) =>
       node.harness?.id === ref.id && !node.children.some(child => child.id === ref.id);
+    let readonly = false;
     for await (const node of traverse(
       roots(),
       { includeDescendants: true, includeHarness: true },
@@ -256,6 +266,8 @@ export class NodeService {
         // Maintenance discovery tolerates a missing optional entry; composition does not.
         if (maintenanceOnly(parent, ref) &&
             !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id)) return undefined;
+        // Optional harness reads retain their existing #read policy.
+        readonly = maintenanceOnly(parent, ref) ? false : this.#referenceReadOnly(parent, ref);
         return ref.id;
       },
       async (parent, ref) => {
@@ -264,7 +276,7 @@ export class NodeService {
           if (!harness) throw new Error(`Missing referenced node: ${ref.id}`);
           return harness;
         }
-        return this.#reference(parent, ref);
+        return this.#reference(parent, ref, readonly);
       },
     )) result.set(node.path, node);
     return result;
@@ -276,17 +288,19 @@ export class NodeService {
     function* roots(): Iterable<BaseNode> {
       for (const write of plan.values()) yield write.node;
     }
+    let readonly = false;
     for await (const _node of traverse(
       roots(),
       { includeDescendants: true },
-      (_parent, ref) => {
+      (parent, ref) => {
         if (removed(ref.id))
           throw new Error(`Reference to removed node: ${ref.id}`);
+        readonly = this.#referenceReadOnly(parent, ref);
         return ref.id;
       },
       (parent, ref, target) => {
         const proposed = plan.get(target);
-        return proposed ? Promise.resolve(proposed.node) : this.#reference(parent, ref);
+        return proposed ? Promise.resolve(proposed.node) : this.#reference(parent, ref, readonly);
       },
     )) { /* Exhaust the graph before any write IO. */ }
   }
@@ -617,6 +631,8 @@ export class NodeService {
         plan.set(entry.path, this.#plan(draft, draft.serialize(), before));
       }
     await this.#validateGraph(plan, removed);
+    // Registered discovery may have found a later read-only edge to this target.
+    this.#existing(node, true);
     await this.#preflight("destroy", plan);
     await this.#options.assertWrite?.({
       operation: "destroy",
