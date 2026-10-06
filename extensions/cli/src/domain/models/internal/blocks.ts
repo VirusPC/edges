@@ -74,6 +74,14 @@ export function rewriteLayerSurface(source: string): string {
   for (const [from, to] of TITLE_REWRITES) next = next.replace(from, to);
   return next;
 }
+export const hasConstraintsMarker = (source: string) =>
+  source.includes(CONSTRAINTS_START) || source.includes(LEGACY_IMPORTANT_START);
+export const extractLocalBlock = (source: string) =>
+  source.match(blockPattern(LOCAL_START, LOCAL_END))?.[0] ??
+  source.match(blockPattern(LEGACY_LOCAL_START, LEGACY_LOCAL_END))?.[0];
+export const extractDescendantsBlock = (source: string) =>
+  source.match(blockPattern(DESCENDANTS_START, DESCENDANTS_END))?.[0] ??
+  source.match(blockPattern(LEGACY_CHILDREN_START, LEGACY_CHILDREN_END))?.[0];
 
 export function insertInnerBlock(
   document: string,

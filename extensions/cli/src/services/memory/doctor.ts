@@ -7,10 +7,9 @@ import { parseDocument } from '../../utils/markdown/document.js';
 import * as fs from "node:fs";
 import { join, dirname, relative } from "node:path";
 import {
-  IMPORTANT_START,
   LOCAL_START,
-  LOCAL_END,
-  blockPattern,
+  extractLocalBlock,
+  hasConstraintsMarker,
   insertInnerBlock,
 } from "./blocks.js";
 import {
@@ -196,7 +195,7 @@ export function collectFindings(root: string): MemoryFinding[] {
       );
     else {
       const text = readText(agents);
-      if (!text.includes(IMPORTANT_START))
+      if (!hasConstraintsMarker(text))
         findings.push(
           finding(
             "missing-important",
@@ -205,7 +204,7 @@ export function collectFindings(root: string): MemoryFinding[] {
             "Missing constraints block",
           ),
         );
-      const block = text.match(blockPattern(LOCAL_START, LOCAL_END))?.[0];
+      const block = extractLocalBlock(text);
       if (!block)
         findings.push(
           finding("outdated-local", agents, root, "Missing type list"),
