@@ -19,6 +19,7 @@ import {
 } from "../../domain/models/index.js";
 import {
   identifyNodeType,
+  legacyNodeType,
   resolveHref,
   type DirectoryContract,
 } from "../../domain/models/layout.js";
@@ -121,10 +122,11 @@ export function modelAt(
   if (!type) return undefined;
   const model =
     models?.[type] ??
+    models?.[legacyNodeType(type)] ??
     (
       {
-        internal: InternalNode,
-        leaf: LeafNode,
+        agents: InternalNode,
+        text: LeafNode,
         readme: ReadmeNode,
         skill: SkillNode,
         task: TaskNode,

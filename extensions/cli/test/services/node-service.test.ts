@@ -158,7 +158,7 @@ test("default get uses layout and physical ancestors, ignoring YAML type claims 
   write("one/index.md", "---\ntype: task\n---\nbody");
   write("README.md", "docs");
   const node = (await service.get(file("one/index.md")))!;
-  assert.equal(node.type, "leaf");
+  assert.equal(node.type, "text");
   assert.equal(node.parent?.id, file("AGENTS.md"));
   assert.equal((await service.get(file("README.md")))?.type, "readme");
   write("notes.txt", "plain");

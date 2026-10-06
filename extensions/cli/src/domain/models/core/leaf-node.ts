@@ -4,7 +4,7 @@ export class LeafNode<
   CreateInput extends NodeCreateInput = NodeCreateInput,
   UpdateInput extends NodeUpdateInput = NodeUpdateInput,
 > extends BaseNode<CreateInput, UpdateInput> {
-  override readonly type: string = "leaf";
+  override readonly type: string = "text";
   override get isLeaf(): boolean {
     return true;
   }

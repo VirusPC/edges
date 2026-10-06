@@ -34,7 +34,7 @@ export class InternalNode extends BaseNode<
   InternalCreateInput,
   InternalUpdateInput
 > {
-  override readonly type = "internal";
+  override readonly type = "agents";
   #content: Content = {
     constraints: [],
     localChildren: [],

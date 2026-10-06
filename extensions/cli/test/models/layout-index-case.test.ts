@@ -4,6 +4,7 @@ import {
   ENTRY_NAMES,
   identifyNodeType,
   isLeafEntryName,
+  normalizeNodeType,
   resolveEntryHref,
 } from "../../src/domain/models/layout.js";
 import { TASK_STATUSES } from "../../src/domain/models/tasks/types.js";
@@ -27,7 +28,7 @@ test("identifyNodeType recognises INDEX.md and legacy index.md alike", () => {
       "memory",
     );
     assert.equal(identifyNodeType(`/repo/notes/a/${name}`), "note");
-    assert.equal(identifyNodeType(`/repo/misc/a/${name}`), "leaf");
+    assert.equal(identifyNodeType(`/repo/misc/a/${name}`), "text");
   }
   assert.equal(identifyNodeType("/repo/misc/Index.md"), undefined);
 });
@@ -59,4 +60,16 @@ test("rewriteLinks can swap only the entry basename and keep authored href text"
     out,
     "- [A](<家 庭/a/INDEX.md#x>) and [B](plain/index.md)\n\n[ref]: <家 庭/a/INDEX.md>\n",
   );
+});
+
+test("identifyNodeType maps AGENTS.md to agents and unknown INDEX.md to text", () => {
+  assert.equal(identifyNodeType("/repo/AGENTS.md"), "agents");
+  assert.equal(identifyNodeType("/repo/misc/INDEX.md"), "text");
+  assert.equal(identifyNodeType("/repo/README.md"), "readme");
+});
+
+test("normalizeNodeType reads legacy internal/leaf as agents/text", () => {
+  assert.equal(normalizeNodeType("internal"), "agents");
+  assert.equal(normalizeNodeType("leaf"), "text");
+  assert.equal(normalizeNodeType("task"), "task");
 });

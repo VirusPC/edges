@@ -155,7 +155,7 @@ export async function listProjectIds(
   fs: BoardFs,
 ): Promise<TaskProjectId[]> {
   const target = typeof repoPath === 'string' ? taskBoardLocation(repoPath, 'domain') : repoPath;
-  const nodes = await (await taskBoardQuery(target, ['internal', 'readme'])).value();
+  const nodes = await (await taskBoardQuery(target, ['agents', 'readme'])).value();
   const board = await fs.exists(boardRoot(repoPath)) ? realpathSync(boardRoot(repoPath)) : boardRoot(repoPath);
   const names = new Set(nodes
     .filter(node => (node instanceof InternalNode || node instanceof ReadmeNode) && path.dirname(node.directoryPath) === board)

@@ -9,6 +9,7 @@ import {
   lifecycleUnits,
   assertMovableLayout,
   identifyNodeType,
+  normalizeNodeType,
 } from "../../domain/models/layout.js";
 import { referenceOf } from "../../domain/models/core/relations.js";
 import {
@@ -177,7 +178,7 @@ export class NodeService {
       modelAt(reference.id, indexContract(parent), this.#options.models);
     if (types && Model) {
       const navigation = new Model(reference.id);
-      if (navigation.isLeaf && !types.includes(navigation.type)) {
+      if (navigation.isLeaf && !types.map(normalizeNodeType).includes(navigation.type)) {
         // The directory contract proves this body cannot contribute children.
         // Keep layout-defined maintenance discovery even when its body is omitted.
         this.#cache.relations(navigation);

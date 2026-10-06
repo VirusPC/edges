@@ -33,7 +33,7 @@ export function assertImportType(
     source,
     parent ? indexContract(parent) : undefined,
   );
-  if (type !== expected && type !== "leaf")
+  if (type !== expected && type !== "text")
     throw new Error(
       `${source}: source type ${type ?? "unknown"} cannot be imported as ${expected}`,
     );

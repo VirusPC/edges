@@ -2,7 +2,7 @@ import { basename, dirname, join } from "node:path";
 import { BaseNode } from "../models/core/base-node.js";
 import { InternalNode } from "../models/internal/internal-node.js";
 import { ReadmeNode } from "../models/readme/readme-node.js";
-import { ENTRY_NAMES } from "../models/layout.js";
+import { ENTRY_NAMES, normalizeNodeType } from "../models/layout.js";
 import type { NodeReference } from "../models/core/types.js";
 import { validateChild } from "../models/core/relations.js";
 
@@ -73,7 +73,7 @@ export async function* traverse(
     seen.add(node.path);
     active.add(node.path);
     try {
-      if (!options.types || options.types.includes(node.type)) yield node;
+      if (!options.types || options.types.map(normalizeNodeType).includes(node.type)) yield node;
       for (const reference of [
         ...expandedChildren(node, options),
         ...(options.includeHarness && node.harness ? [node.harness] : []),

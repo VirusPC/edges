@@ -122,7 +122,7 @@ test("layout follows canonical task statuses, registered contracts and recursive
     "memory",
   );
   assert.equal(identifyNodeType("/repo/notes/a/index.md"), "note");
-  assert.equal(identifyNodeType("/repo/misc/a/index.md"), "leaf");
+  assert.equal(identifyNodeType("/repo/misc/a/index.md"), "text");
   assert.equal(identifyNodeType("/repo/misc/a.md"), undefined);
   const unregister = registerDirectoryClassifier((path) =>
     path.includes("/custom/") ? "custom" : undefined,

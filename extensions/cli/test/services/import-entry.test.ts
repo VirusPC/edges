@@ -57,7 +57,7 @@ test("nearest unclassified physical owner stops inherited Memory classification"
   const entry = write("scope/group/item/index.md", "# Generic\n");
   assert.equal(
     (await new NodeService({ managedRoot: root }).get(entry))?.type,
-    "leaf",
+    "text",
   );
   assert.equal(assertImportType(entry, "note"), entry);
 });

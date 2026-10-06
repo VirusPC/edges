@@ -39,7 +39,24 @@ export const INDEX_MARKERS = {
   entries: "project-memory-entries",
 } as const;
 export type NodeType =
-  "internal" | "readme" | "skill" | "task" | "memory" | "note" | "leaf" | (string & {});
+  "agents" | "readme" | "skill" | "task" | "memory" | "note" | "text" | (string & {});
+
+const LEGACY_NODE_TYPES: Readonly<Record<string, NodeType>> = {
+  internal: "agents",
+  leaf: "text",
+};
+
+/** Old spelling of a canonical type, so registries keyed by it keep resolving. */
+export function legacyNodeType(type: string): string {
+  for (const [old, current] of Object.entries(LEGACY_NODE_TYPES))
+    if (current === type) return old;
+  return type;
+}
+
+/** Old persisted/queried spellings still read; new writes only use agents/text. */
+export function normalizeNodeType(type: string): NodeType {
+  return LEGACY_NODE_TYPES[type] ?? type;
+}
 export interface DirectoryContract {
   module?: string;
   format?: string;
@@ -75,7 +92,7 @@ export function identifyNodeType(
   contract?: DirectoryContract,
 ): NodeType | undefined {
   const filename = basename(entryPath);
-  if (filename === ENTRY_NAMES.internal) return "internal";
+  if (filename === ENTRY_NAMES.internal) return "agents";
   if (filename === ENTRY_NAMES.readme) return "readme";
   if (filename === ENTRY_NAMES.skill) return "skill";
   if (!isLeafEntryName(filename)) return undefined;
@@ -83,7 +100,7 @@ export function identifyNodeType(
     const type = classify(entryPath, contract);
     if (type !== undefined) return type;
   }
-  return "leaf";
+  return "text";
 }
 export function harnessPath(entryPath: string): string {
   return join(

@@ -277,7 +277,7 @@ export async function listRepositoryGroupedByProject(
   const groups = new Map<string, GroupedListGroup>();
   const service = new NodeService({ managedRoot: root });
   const projects = await service.query(root, {
-    types: ["internal"], includeHarness: true,
+    types: ["agents"], includeHarness: true,
   })
     .filter((node): node is InternalNode => node instanceof InternalNode)
     .map(node => projectLocationOf(node, root))
