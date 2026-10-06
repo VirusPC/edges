@@ -122,11 +122,13 @@ export function resolveHref(
   }
 }
 
-/** README under `.harness/` is system-two material (type indexes), unlike ordinary navigation READMEs. */
+/** README under `.harness/` (type indexes) or `tasks/<project>/` (Task Project org lists)
+ * is composition a layer AGENTS may own, unlike ordinary navigation READMEs. */
 export function isHarnessMaterial(id: string): boolean {
   return (
     basename(id) === ENTRY_NAMES.readme &&
-    dirname(id).split("/").includes(".harness")
+    (dirname(id).split("/").includes(".harness") ||
+      basename(dirname(dirname(id))) === "tasks")
   );
 }
 

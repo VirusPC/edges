@@ -1,7 +1,7 @@
 import { isWithinPath, firstSymlink } from "../../utils/filesystem.js";
 import { query } from "../../domain/operations/query.js";
 import { realpathSync } from "node:fs";
-import { TaskNode, InternalNode } from "../../domain/models/index.js";
+import { TaskNode, InternalNode, ReadmeNode } from "../../domain/models/index.js";
 import { taskBoardQuery, taskLocationOf, listRepositoryTaskNodes } from "./node-query.js";
 import { taskBoardLocation } from "./paths.js";
 import { scopeDir, type BoardTarget } from "./paths.js";
@@ -153,11 +153,12 @@ export async function listProjectIds(
   fs: BoardFs,
 ): Promise<TaskProjectId[]> {
   const target = typeof repoPath === 'string' ? taskBoardLocation(repoPath, 'domain') : repoPath;
-  const nodes = await (await taskBoardQuery(target, ['internal'])).value();
+  const nodes = await (await taskBoardQuery(target, ['internal', 'readme'])).value();
   const board = await fs.exists(boardRoot(repoPath)) ? realpathSync(boardRoot(repoPath)) : boardRoot(repoPath);
-  const ids: TaskProjectId[] = nodes
-    .filter(node => node instanceof InternalNode && path.dirname(node.directoryPath) === board)
-    .map(node => path.basename(node.directoryPath))
+  const names = new Set(nodes
+    .filter(node => (node instanceof InternalNode || node instanceof ReadmeNode) && path.dirname(node.directoryPath) === board)
+    .map(node => path.basename(node.directoryPath)));
+  const ids: TaskProjectId[] = [...names]
     .filter(name => name === DEFAULT_TASK_PROJECT_DIR || isUserProjectSlug(name))
     .map(name => name === DEFAULT_TASK_PROJECT_DIR ? DEFAULT_TASK_PROJECT : name);
   return ids.sort((a, b) => {

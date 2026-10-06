@@ -1,4 +1,5 @@
 import { InternalNode } from "../../domain/models/internal/internal-node.js";
+import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { decodeBody } from '../../domain/models/internal/parse.js';
 import { createAgentsDocument } from "../../domain/models/internal/document.js";
 import { serializeNode } from '../../domain/models/internal/serialize.js';
@@ -79,7 +80,7 @@ export function parseProjectAgents(markdown: string): {
 
   const body = markdown.slice(heading.length + 1);
   const boundary = body.search(
-    /^(?:## |<!-- (?:project-harness|project-memory|task-projects)(?::|-))/m,
+    /^(?:## |<!-- (?:project-harness|project-memory|project-entries|task-projects)(?::|-))/m,
   );
   const descriptionSource = boundary === -1 ? body : body.slice(0, boundary);
   const description = parseProjectDescription(descriptionSource);
@@ -129,8 +130,25 @@ export function projectAgentsRelPath(id: TaskProjectId, target: BoardTarget = ""
   return `${boardRel(target)}/${projectDirName(id)}/AGENTS.md`;
 }
 
-function projectAgentsAbsPath(repoPath: BoardTarget, id: TaskProjectId): string {
-  return path.join(realpathSync(scopeDir(repoPath)), projectAgentsRelPath(id, repoPath));
+function projectReadmeRelPath(id: TaskProjectId, target: BoardTarget = ""): string {
+  return `${boardRel(target)}/${projectDirName(id)}/README.md`;
+}
+
+/** A Task Project's entry: its own AGENTS.md (real system entry or seed) or, once migrated,
+ * the README.md that holds its project-entries org list. AGENTS wins when both exist. */
+async function resolveProjectEntry(
+  repoPath: BoardTarget,
+  id: TaskProjectId,
+  fs: BoardFs,
+): Promise<{ rel: string; abs: string; exists: boolean; kind: "agents" | "readme" }> {
+  const scope = realpathSync(scopeDir(repoPath));
+  const agents = projectAgentsRelPath(id, repoPath);
+  if (await fs.exists(path.join(scope, agents)))
+    return { rel: agents, abs: path.join(scope, agents), exists: true, kind: "agents" };
+  const readme = projectReadmeRelPath(id, repoPath);
+  if (await fs.exists(path.join(scope, readme)))
+    return { rel: readme, abs: path.join(scope, readme), exists: true, kind: "readme" };
+  return { rel: agents, abs: path.join(scope, agents), exists: false, kind: "agents" };
 }
 
 function rootAgentsAbsPath(repoPath: BoardTarget): string {
@@ -153,9 +171,8 @@ export async function readProjectRecord(
   id: TaskProjectId,
   fs: BoardFs,
 ): Promise<TaskProjectRecord> {
-  const rel = projectAgentsRelPath(id, repoPath);
-  const abs = projectAgentsAbsPath(repoPath, id);
-  if (!(await fs.exists(abs))) {
+  const entry = await resolveProjectEntry(repoPath, id, fs);
+  if (!entry.exists) {
     if (!(await listProjectIds(repoPath, fs)).includes(id)) {
       throw new TasksError("PROJECT_NOT_FOUND", `project not found: ${id}`);
     }
@@ -164,16 +181,16 @@ export async function readProjectRecord(
       dir: projectDirName(id),
       title: seedTitleFor(id),
       description: seedDescriptionFor(id),
-      path: rel,
+      path: entry.rel,
     };
   }
-  const parsed = parseProjectAgents(await fs.readFile(abs));
+  const parsed = parseProjectAgents(await fs.readFile(entry.abs));
   return {
     project: id,
     dir: projectDirName(id),
     title: parsed.title,
     description: parsed.description,
-    path: rel,
+    path: entry.rel,
   };
 }
 
@@ -209,8 +226,7 @@ export async function refreshProjectIndex(
   await prepareProjectWrite(repoPath, service);
   const records: TaskProjectRecord[] = [];
   for (const id of await collectProjectIds(repoPath, writer, additional)) {
-    const abs = projectAgentsAbsPath(repoPath, id);
-    if (!(await writer.exists(abs))) {
+    if (!(await resolveProjectEntry(repoPath, id, writer)).exists) {
       continue;
     }
     records.push(await readProjectRecord(repoPath, id, writer));
@@ -219,7 +235,7 @@ export async function refreshProjectIndex(
   const rootAbs = rootAgentsAbsPath(repoPath);
   let board = await service.get(rootAbs, InternalNode);
   if (!board) board = await service.create(new InternalNode(rootAbs), { body: '# Tasks\n\n' + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
-  const updates = new Map(sortProjectRecords(records).map(record => [path.resolve(path.dirname(rootAbs), record.dir, 'AGENTS.md'), { name: record.title, description: oneLineDescription(record.description) }]));
+  const updates = new Map(sortProjectRecords(records).map(record => [path.resolve(path.dirname(rootAbs), record.dir, path.basename(record.path)), { name: record.title, description: oneLineDescription(record.description) }]));
   const update = (refs: typeof board.localChildren) => refs.map(ref => updates.has(ref.id) ? { ...ref, ...updates.get(ref.id) } : ref);
   const localChildren = update(board.localChildren), descendantChildren = update(board.descendantChildren);
   for (const [id, fields] of updates) if (!board.children.some(ref => ref.id === id)) localChildren.push({ id, ...fields });
@@ -250,9 +266,9 @@ export async function ensureProjectMetadata(
     if (skipId === id) {
       continue;
     }
-    const abs = projectAgentsAbsPath(repoPath, id);
-    if (!(await writer.exists(abs))) {
-      await service.create(new InternalNode(abs), { body: renderProjectAgents({
+    const entry = await resolveProjectEntry(repoPath, id, writer);
+    if (!entry.exists) {
+      await service.create(new InternalNode(entry.abs), { body: renderProjectAgents({
           title: seedTitleFor(id),
           description: seedDescriptionFor(id),
         }) }, { indexGroup: "local" });
@@ -295,7 +311,7 @@ export async function createProject(
   const service = projectNodes(repoPath);
   await ensureProjectMetadata(repoPath, writer, id, [], service);
   const rel = projectAgentsRelPath(id, repoPath);
-  if (await writer.exists(path.join(scopeDir(repoPath), rel))) {
+  if ((await resolveProjectEntry(repoPath, id, writer)).exists) {
     throw new TasksError("VALIDATION_ERROR", `project already exists: ${id}`);
   }
   await service.create(new InternalNode(path.join(realpathSync(scopeDir(repoPath)), rel)), { body: renderProjectAgents({ title, description }) }, { indexGroup: "local" });
@@ -326,19 +342,28 @@ export async function updateProject(
   const projectExists = await writer.exists(path.join(boardRoot(repoPath), projectDirName(id)));
   const service = projectNodes(repoPath);
   await ensureProjectMetadata(repoPath, writer, undefined, projectExists ? [id] : [], service);
-  const rel = projectAgentsRelPath(id, repoPath);
-  const abs = path.join(realpathSync(scopeDir(repoPath)), rel);
-  if (!(await writer.exists(abs))) {
+  const entry = await resolveProjectEntry(repoPath, id, writer);
+  const rel = entry.rel;
+  if (!entry.exists) {
     throw new TasksError("PROJECT_NOT_FOUND", `project not found: ${id}`);
   }
-  const node = (await service.get(abs, InternalNode))!;
+  const node = entry.kind === "readme"
+    ? (await service.get(entry.abs, ReadmeNode))!
+    : (await service.get(entry.abs, InternalNode))!;
   const parsed = parseProjectAgents(node.body);
   const title = patch.title === undefined ? parsed.title : parseProjectTitle(patch.title);
   const description =
     patch.description === undefined
       ? parsed.description
       : parseProjectDescription(patch.description);
-  await service.update(node, { body: renderProjectAgents({ title, description, pointers: parsed.pointers, tail: parsed.tail }) });
+  const body = renderProjectAgents({
+    title,
+    description,
+    pointers: parsed.pointers,
+    tail: parsed.tail ?? (entry.kind === "readme" ? "\n" : undefined),
+  });
+  if (entry.kind === "readme") await service.update(node as ReadmeNode, { body });
+  else await service.update(node as InternalNode, { body });
   await refreshProjectIndex(repoPath, writer, [], service);
   return {
     project: id,
