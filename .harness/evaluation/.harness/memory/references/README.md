@@ -15,5 +15,5 @@ format: ordinary
 <!-- project-entries-local:start -->
 ## 本层内容
 
-- [snap-research/locomo 官方数据与评测脚本](reference_snap_research_locomo/index.md) — 取 LoCoMo 数据或对照官方打分时：首选 submodule evaluation/third\_party/locomo（https://github.com/VirusPC/locomo @ cb5151e32c82c3b6fc6ffdc18e72572691b9d8ea）；上游基线 https://github.com/snap-research/locomo @ 3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376 ；QA 入口 task\_eval/evaluate\_qa.py，打分 task\_eval/evaluation.py。fork 唯一有意差异是 OpenAI-compatible 模型后端。
+- [snap-research/locomo 官方数据与评测脚本](reference_snap_research_locomo/INDEX.md) — 取 LoCoMo 数据或对照官方打分时：首选 submodule evaluation/third\_party/locomo（https://github.com/VirusPC/locomo @ cb5151e32c82c3b6fc6ffdc18e72572691b9d8ea）；上游基线 https://github.com/snap-research/locomo @ 3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376 ；QA 入口 task\_eval/evaluate\_qa.py，打分 task\_eval/evaluation.py。fork 唯一有意差异是 OpenAI-compatible 模型后端。
 <!-- project-entries-local:end -->

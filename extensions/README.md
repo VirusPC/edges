@@ -2,7 +2,7 @@
 
 `extensions/` 是 Edges 系统与外部世界（AI Agent、IDE 客户端、第三方系统）通信的**接口层**。
 
-这里的代码不是用来开发 Edges 系统本身的，而是作为“连接器”，实现 **“终端捕获，核心沉淀”** 的设计思想：让 ChatGPT、Cursor、Claude Code 等终端生成的思考，能够通过 CLI、Skill 或 MCP 流入核心资产库。三条入口并列：[`cli/`](cli/)（`edges note …`）、[`skills/`](skills/)（何时如何调用）、[`mcp-servers/`](mcp-servers/)（没有 shell 的宿主）。决策见 [能力面决策](../.harness/memory/projects/project_capability_surface_cli_skill_mcp/index.md)。
+这里的代码不是用来开发 Edges 系统本身的，而是作为“连接器”，实现 **“终端捕获，核心沉淀”** 的设计思想：让 ChatGPT、Cursor、Claude Code 等终端生成的思考，能够通过 CLI、Skill 或 MCP 流入核心资产库。三条入口并列：[`cli/`](cli/)（`edges note …`）、[`skills/`](skills/)（何时如何调用）、[`mcp-servers/`](mcp-servers/)（没有 shell 的宿主）。决策见 [能力面决策](../.harness/memory/projects/project_capability_surface_cli_skill_mcp/INDEX.md)。
 
 ## 收录标准
 

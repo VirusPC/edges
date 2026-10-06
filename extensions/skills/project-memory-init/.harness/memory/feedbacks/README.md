@@ -16,6 +16,6 @@ format: ordinary
 <!-- project-entries-local:start -->
 ## 本层内容
 
-- [AGENTS.md 本层入口顺序：user → feedback → project → reference](feedback_agents_local_type_order/index.md) — 改 AGENTS.md 本层记忆清单或挑类型时：先 user，再 feedback，再 project（兜底），再 reference；skills / agent\_skills 仍靠后。
-- [--root-dir 封住记忆树，不把外面的 .memory 当祖先](feedback_isolated_root_dir/index.md) — 目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。
+- [AGENTS.md 本层入口顺序：user → feedback → project → reference](feedback_agents_local_type_order/INDEX.md) — 改 AGENTS.md 本层记忆清单或挑类型时：先 user，再 feedback，再 project（兜底），再 reference；skills / agent\_skills 仍靠后。
+- [--root-dir 封住记忆树，不把外面的 .memory 当祖先](feedback_isolated_root_dir/INDEX.md) — 目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。
 <!-- project-entries-local:end -->

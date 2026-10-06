@@ -59,7 +59,7 @@ flowchart TD
 
 Model 的 create/update/destroy 是内存领域方法；创建目录、保存文档等完整动作通过 Service 完成。operations 通过回调取得加载能力，不反向依赖 Service。不要让业务调用方重新拼装模型修改与文件读写。
 
-这张图表达职责边界，不代表所有历史代码都已整理完：Tasks 的结果适配仍引用 CliContext，审阅页命令还有流程编排，Artifacts 的部分部署逻辑仍在 commands 下。进一步解耦已登记为[后续任务](../../.harness/tasks/edges-cli-platform/backlog/2026-10-06--解耦-CLI-commands-与-Service/index.md)，不能把当前 commands 全部描述成“只调用 Service”。
+这张图表达职责边界，不代表所有历史代码都已整理完：Tasks 的结果适配仍引用 CliContext，审阅页命令还有流程编排，Artifacts 的部分部署逻辑仍在 commands 下。进一步解耦已登记为[后续任务](../../.harness/tasks/edges-cli-platform/backlog/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md)，不能把当前 commands 全部描述成“只调用 Service”。
 
 详细设计按职责分开阅读：
 

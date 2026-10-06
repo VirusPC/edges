@@ -16,5 +16,5 @@ format: ordinary
 <!-- project-entries-local:start -->
 ## 本层内容
 
-- [对话笔记：主题难点、过程结果、取舍补充、遗留转任务](project_conversation_notes_plain_rich_human_review/index.md) — 写 knowledge/notes：2.3.2 结构；结果遗留逐点问清后交 conversation-to-tasks（一次1～2条）。
+- [对话笔记：主题难点、过程结果、取舍补充、遗留转任务](project_conversation_notes_plain_rich_human_review/INDEX.md) — 写 knowledge/notes：2.3.2 结构；结果遗留逐点问清后交 conversation-to-tasks（一次1～2条）。
 <!-- project-entries-local:end -->

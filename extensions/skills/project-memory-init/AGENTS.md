@@ -1,6 +1,6 @@
 # project-memory-init
 
-本目录是 project-memory 系列 skill 的共享家。协议与布局在 `references/`，开发流程与设计决策见本层维护记忆，见[开发规范](.harness/memory/projects/project_development/index.md)。
+本目录是 project-memory 系列 skill 的共享家。协议与布局在 `references/`，开发流程与设计决策见本层维护记忆，见[开发规范](.harness/memory/projects/project_development/INDEX.md)。
 
 
 

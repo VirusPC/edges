@@ -16,5 +16,5 @@ format: ordinary
 <!-- project-entries-local:start -->
 ## 本层内容
 
-- [公网 /teaching/ 用 HTML 主题首页](project_teach_html_index_homepage/index.md) — 改 teach 站点首页或 Topics 时：公网 /teaching/ 由 knowledge/teaching/index.html 做主题索引，与 README Topics 同步重建
+- [公网 /teaching/ 用 HTML 主题首页](project_teach_html_index_homepage/INDEX.md) — 改 teach 站点首页或 Topics 时：公网 /teaching/ 由 knowledge/teaching/index.html 做主题索引，与 README Topics 同步重建
 <!-- project-entries-local:end -->

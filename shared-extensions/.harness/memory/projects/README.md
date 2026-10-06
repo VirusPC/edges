@@ -16,5 +16,5 @@ format: ordinary
 <!-- project-entries-local:start -->
 ## 本层内容
 
-- [shared-extensions 整层一份版本，不按条目发版](project_bundle_versioning/index.md) — 改本目录的 skill / mcp / plugin / hook 或发版约定时：升 VERSION、写本层 CHANGELOG、打 shared-extensions@x.y.z。不要给单条扩展独立 semver，也不要把明细抄进根 changelog。只改 .memory 不升版本。
+- [shared-extensions 整层一份版本，不按条目发版](project_bundle_versioning/INDEX.md) — 改本目录的 skill / mcp / plugin / hook 或发版约定时：升 VERSION、写本层 CHANGELOG、打 shared-extensions@x.y.z。不要给单条扩展独立 semver，也不要把明细抄进根 changelog。只改 .memory 不升版本。
 <!-- project-entries-local:end -->
