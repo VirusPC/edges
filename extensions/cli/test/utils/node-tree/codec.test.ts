@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseNode } from '../../../src/domain/models/internal/parse.js';
 import { serializeNode } from '../../../src/domain/models/internal/serialize.js';
-import { createNodeModel } from '../../../src/domain/models/internal/model.js';
+import { createAgentsDocument } from "../../../src/domain/models/internal/document.js";
 
 const source = '# Manual identity\n\nKeep this introduction.\n\n<!-- project-memory:start -->\n<!-- project-memory-important:start -->\n## 本层硬约束\n\n- Keep **secrets** private.\n<!-- project-memory-important:end -->\n\n<!-- project-memory-local:start -->\n## 本层记忆\n\nHuman explanation.\n\n- [Tasks](tasks/AGENTS.md) — work in progress\n<!-- custom-extension: untouched -->\n<!-- project-memory-local:end -->\n\n<!-- project-memory-children:start -->\n## 下层记忆索引\n\n- [Child](nested/AGENTS.md)\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n\n## Custom module\n\nDo not rewrite `this`.\n';
 
@@ -43,7 +43,7 @@ test('adding, changing and removing entries preserves unknown sections and manua
 });
 
 test('new model serialization escapes Markdown syntax without changing text or targets', () => {
-  const model = createNodeModel();
+  const model = createAgentsDocument();
   model.constraints.push({ content: [{ kind: 'text', value: 'Keep *literal* &copy; [text].' }] });
   model.memory.push({ content: [{ kind: 'link', label: 'a [label]', target: 'a space/AGENTS.md' }] });
   model.references.push({ kind: 'link', label: 'Outside', target: 'https://example.com/a?q=1&x=2' });
@@ -86,7 +86,7 @@ test('editing ordinary references leaves surrounding prose intact', () => {
 });
 
 test('model equality and serialization do not depend on JSON property order', () => {
-  const model = createNodeModel();
+  const model = createAgentsDocument();
   model.memory.push({ content: [{ target: 'tasks/AGENTS.md', label: 'Tasks', kind: 'link' }] });
   assert.deepEqual(parseNode(serializeNode(model)), model);
 });

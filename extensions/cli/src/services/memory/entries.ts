@@ -1,4 +1,4 @@
-import { InternalNode } from '../../domain/models/internal-node.js';
+import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { listTypeFiles, typeContentDir, typeIndexPath } from './types.js';
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 

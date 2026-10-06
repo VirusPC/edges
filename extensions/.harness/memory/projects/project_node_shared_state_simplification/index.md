@@ -6,7 +6,7 @@ metadata:
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T17:35:22+08:00'
+  edges-updated-at: '2026-10-06T18:07:01+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -154,8 +154,8 @@ metadata:
 
 ## 模型按节点归组，避免类与专属规则分散
 
-2026-10-06 用户认可先收拢 models：core、internal、tasks、memory、notes、skills 按职责归组，同一模型的类与专属规则集中阅读。commands 与 Service 的解耦随后单独处理。此处确认的是组织原则，具体迁移设计仍待审阅。
+2026-10-06 用户认可先收拢 models：core、internal、tasks、memory、notes、skills 按职责归组，同一模型的类与专属规则集中阅读。commands 与 Service 的解耦随后单独处理。随后用户批准具体设计并要求执行；后续变更继续遵守这一组织原则。
 
 **Why:** 用户在上一轮合并后指出 models 文件仍显得散乱；仅把 models 和 operations 放进 domain，尚未解决模型内部的理解成本。
 
-**How to apply:** 不为统一外观强制每个节点新增 types、codec、factory 文件；通用格式能力不得寄居于某个业务模型目录。保留 Model 单节点行为、operations 集合操作、Service 完整用例的边界。Schema 的纯数据契约有独立消费者，不能为减少文件数并入带运行时依赖的节点类。详细提案见[模型组织设计](../../../../../docs/superpowers/specs/2026-10-06-model-module-organization-design.md)，不要把提案中的迁移视为已经实施。
+**How to apply:** 不为统一外观强制每个节点新增 types、codec、factory 文件；通用格式能力不得寄居于某个业务模型目录。保留 Model 单节点行为、operations 集合操作、Service 完整用例的边界。Schema 的纯数据契约有独立消费者，不能为减少文件数并入带运行时依赖的节点类。设计与边界见[模型组织设计](../../../../../docs/superpowers/specs/2026-10-06-model-module-organization-design.md)，实施结果与验证证据以该设计关联的 plan 为准。

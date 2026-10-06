@@ -1,15 +1,9 @@
 import { basename, extname } from "node:path";
-import { LeafNode } from "./leaf-node.js";
-import { domainFields, scalar, setDomainField } from "./fields.js";
-import { TASK_PRIORITIES, TASK_STATUSES } from "./tasks/types.js";
-import type {
-  Metadata,
-  TaskPriority,
-  TaskStatus,
-  TaskCreateInput,
-  TaskUpdateInput,
-  NodeContext,
-} from "./types.js";
+import { LeafNode } from "../core/leaf-node.js";
+import { domainFields, scalar, setDomainField } from "../core/fields.js";
+import { TASK_PRIORITIES, TASK_STATUSES } from "./types.js";
+import type { Metadata, NodeContext } from "../core/types.js";
+import type { TaskPriority, TaskStatus, TaskCreateInput, TaskUpdateInput } from "./types.js";
 
 export class TaskNode extends LeafNode<TaskCreateInput, TaskUpdateInput> {
   override readonly type = "task" as const;

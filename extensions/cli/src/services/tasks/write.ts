@@ -1,7 +1,7 @@
 import { realpathSync } from "node:fs";
 import { NodeService } from "../node-service.js";
-import { TaskNode } from "../../domain/models/task-node.js";
-import { setDomainField } from "../../domain/models/fields.js";
+import { TaskNode } from "../../domain/models/tasks/task-node.js";
+import { setDomainField } from "../../domain/models/core/fields.js";
 import { assertBoardPath } from "./board.js";
 import { scopeDir, boardRoot, type BoardTarget } from "./paths.js";
 import path from "node:path";

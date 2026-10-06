@@ -1,6 +1,6 @@
 import { readEntry, saveEntries } from '../node-files.js';
 import { canonicalPath, findAncestor } from "../../utils/filesystem.js";
-import { InternalNode } from "../../domain/models/internal-node.js";
+import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import * as fs from "node:fs";
 import { join, dirname, relative, resolve } from "node:path";
 import { assertPrivateIgnored } from "./ignore.js";

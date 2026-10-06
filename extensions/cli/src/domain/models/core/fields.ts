@@ -1,5 +1,5 @@
-import type { BaseNode } from './base-node.js';
-import type { Metadata } from './types.js';
+import type { BaseNode } from "./base-node.js";
+import type { Metadata } from "./types.js";
 
 export function domainFields(metadata: Readonly<Metadata> | undefined): Metadata {
   const value = metadata?.metadata;

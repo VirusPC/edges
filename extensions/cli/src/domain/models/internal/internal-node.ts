@@ -1,26 +1,31 @@
 import { relative, dirname } from "node:path";
-import { BaseNode } from "./base-node.js";
-import {
-  InternalSyntax,
-  type SyntaxContent,
-  type SyntaxReference,
-} from "./internal-syntax.js";
-import { referenceOf, validateChild, validateGroup } from "./relations.js";
-import { resolveEntryHref, identifyNodeType } from "./layout.js";
-import type {
-  ChildGroup,
-  InternalContent,
-  NodeReference,
-  InternalCreateInput,
-  InternalUpdateInput,
-} from "./types.js";
+import { BaseNode } from "../core/base-node.js";
+import { InternalSyntax, type SyntaxContent, type SyntaxReference } from "./syntax.js";
+import { referenceOf, validateChild, validateGroup } from "../core/relations.js";
+import { resolveEntryHref, identifyNodeType } from "../layout.js";
+import type { ChildGroup, NodeReference, NodeCreateInput } from "../core/types.js";
+
 type Content = {
-  constraints: string[];
-  localChildren: NodeReference[];
-  descendantChildren: NodeReference[];
+  -readonly [Key in keyof InternalContent]: Array<InternalContent[Key][number]>;
 };
+
+export interface InternalCreateInput extends NodeCreateInput {
+  constraints?: readonly string[];
+  localChildren?: readonly NodeReference[];
+  descendantChildren?: readonly NodeReference[];
+}
+
+export interface InternalUpdateInput extends InternalCreateInput {}
+
+export interface InternalContent {
+  readonly constraints: readonly string[];
+  readonly localChildren: readonly Readonly<NodeReference>[];
+  readonly descendantChildren: readonly Readonly<NodeReference>[];
+}
+
 const section = (group: ChildGroup) =>
   group === "local" ? "localChildren" : "descendantChildren";
+
 export class InternalNode extends BaseNode<
   InternalCreateInput,
   InternalUpdateInput

@@ -1,8 +1,7 @@
 import { CODEC_SECTIONS } from "../layout.js";
-import type { NodeModel, SectionKey, NodeItem, NodeLink } from "./model.js";
+import type { AgentsDocument, SectionKey, AgentsItem, AgentsLink } from "./document.js";
 import type { Nodes as AstNode } from "mdast";
 import { fromMarkdown } from "mdast-util-from-markdown";
-import { createNodeModel } from "./model.js";
 import { parseDocument } from "../../../utils/markdown/document.js";
 
 type Binding = {
@@ -34,10 +33,10 @@ function end(node: AstNode): number {
   return node.position?.end.offset ?? 0;
 }
 
-/** Private codec representation: source ranges/Markdown syntax never enter NodeModel. */
+/** Private codec representation: source ranges never enter AgentsDocument. */
 export function decodeBody(source: string) {
   const ast = fromMarkdown(source);
-  const model = createNodeModel();
+  const model: AgentsDocument = { constraints: [], memory: [], children: [], references: [] };
 
   const bindings: Record<SectionKey, Binding[]> = {
     constraints: [],
@@ -72,7 +71,7 @@ export function decodeBody(source: string) {
     return node.type === "break" ? "\n" : "";
   }
 
-  function link(node: AstNode): NodeLink | undefined {
+  function link(node: AstNode): AgentsLink | undefined {
     const target =
       node.type === "link"
         ? node.url
@@ -84,7 +83,7 @@ export function decodeBody(source: string) {
       : { kind: "link", label: text(node), target };
   }
 
-  function runs(node: AstNode): NodeItem["content"] {
+  function runs(node: AstNode): AgentsItem["content"] {
     const value = link(node);
     if (value) return [value];
     if (node.type === "text" || node.type === "inlineCode")
@@ -92,7 +91,7 @@ export function decodeBody(source: string) {
     if (node.type === "break") return [{ kind: "text", value: "\n" }];
     if (!("children" in node)) return [];
 
-    const result: NodeItem["content"] = [];
+    const result: AgentsItem["content"] = [];
     for (const child of node.children)
       for (const run of runs(child)) {
         const last = result.at(-1);
@@ -240,7 +239,7 @@ export function decodeBody(source: string) {
   };
 }
 
-export function parseNode(source: string): NodeModel {
+export function parseNode(source: string): AgentsDocument {
   const document = parseDocument(source);
   const model = decodeBody(document.body).model;
   if (document.metadata !== undefined) model.metadata = document.metadata;

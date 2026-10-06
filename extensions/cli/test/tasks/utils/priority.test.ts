@@ -1,14 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  TASK_PRIORITIES,
-  compareTaskPriority,
-  filterTasksByPriority,
-  isTaskPriority,
-  parseTaskPriority,
-  priorityFromMetadata,
-  sortTasksByPriority,
-} from "../../../src/domain/models/tasks/priority.js";
+import { TASK_PRIORITIES, compareTaskPriority, isTaskPriority, parseTaskPriority, priorityFromMetadata } from "../../../src/domain/models/tasks/priority.js";
+import { filterTasksByPriority, sortTasksByPriority } from "../../../src/domain/operations/tasks.js";
 
 test("TASK_PRIORITIES is urgent high medium low none", () => {
   assert.deepEqual([...TASK_PRIORITIES], ["urgent", "high", "medium", "low", "none"]);

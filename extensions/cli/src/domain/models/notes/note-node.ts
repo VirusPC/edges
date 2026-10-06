@@ -1,6 +1,6 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
 import type { Nodes } from "mdast";
-import { LeafNode } from "./leaf-node.js";
+import { LeafNode } from "../core/leaf-node.js";
 function text(node: Nodes): string {
   return "value" in node
     ? node.value

@@ -1,5 +1,5 @@
 import * as nodePath from "node:path";
-import { LeafNode } from "./leaf-node.js";
+import { LeafNode } from "../core/leaf-node.js";
 export class SkillNode extends LeafNode {
   override readonly type = "skill" as const;
   override validate(): void {

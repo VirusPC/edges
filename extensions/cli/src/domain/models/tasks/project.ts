@@ -65,14 +65,3 @@ export function assertProjectDualWrite(
   }
   return dirId;
 }
-
-export function filterTasksByProject<T extends { project: TaskProjectId }>(
-  items: T[],
-  allowed: readonly TaskProjectId[],
-): T[] {
-  if (allowed.length === 0) {
-    return items;
-  }
-  const set = new Set(allowed);
-  return items.filter((item) => set.has(item.project));
-}

@@ -174,7 +174,7 @@ test("sparse Task Project markers are local content and a heading-only local sec
   );
   const source =
     "# Board\n\n## 本层记忆\n\nManual local prose.\n\n## Authored\nKeep me.\n";
-  const { InternalNode } = await import('../../src/domain/models/internal-node.js');
+  const { InternalNode } = await import("../../src/domain/models/internal/internal-node.js");
   const node = new InternalNode(join(root, 'AGENTS.md')).parse(source);
   node.addChild('local', { id: join(root, 'demo/AGENTS.md'), name: 'Demo', description: 'Business' });
   const updated = node.serialize();

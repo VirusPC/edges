@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import * as codecs from '../../../src/domain/models/internal/index.js';
+import { baseDocumentCodec } from "../../../src/utils/markdown/document.js";
+import { memoryDocumentCodec } from "../../../src/domain/models/memory/documents.js";
+import { agentsDocumentCodec } from "../../../src/domain/models/internal/document.js";
 import type { DocumentCodec, MarkdownDocument } from '../../../src/utils/markdown/types.js';
 import * as tasks from '../../../src/domain/models/tasks/frontmatter.js';
 
@@ -14,23 +16,23 @@ test('base and memory codecs tag documents without changing YAML classification'
     assert.deepEqual(doc.metadata!.metadata, { 'edges-type': 'project' });
     assert.deepEqual(codec.parse(codec.serialize(doc, source)), doc);
   }
-  check(codecs.baseDocumentCodec);
-  check(codecs.memoryDocumentCodec);
+  check(baseDocumentCodec);
+  check(memoryDocumentCodec);
 });
 
 test('agents codec uses the existing section model and preserves original source', () => {
-  assert.ok(codecs.agentsDocumentCodec);
-  const model = codecs.agentsDocumentCodec.parse(source);
-  assert.equal(codecs.agentsDocumentCodec.type, 'agents');
+  assert.ok(agentsDocumentCodec);
+  const model = agentsDocumentCodec.parse(source);
+  assert.equal(agentsDocumentCodec.type, 'agents');
   assert.equal(model.memory.length, 1);
   model.memory.push({ content: [{ kind: 'text', value: 'Extra rule' }] });
-  assert.deepEqual(codecs.agentsDocumentCodec.parse(codecs.agentsDocumentCodec.serialize(model, source)), model);
+  assert.deepEqual(agentsDocumentCodec.parse(agentsDocumentCodec.serialize(model, source)), model);
 });
 
 test('typed Markdown codec rejects documents belonging to another codec', () => {
-  assert.ok(codecs.memoryDocumentCodec);
+  assert.ok(memoryDocumentCodec);
   const doc = { type: 'task', body: 'body' } as unknown as MarkdownDocument<'memory'>;
-  assert.throws(() => codecs.memoryDocumentCodec.serialize(doc), /type|codec/i);
+  assert.throws(() => memoryDocumentCodec.serialize(doc), /type|codec/i);
 });
 
 test('Task codec validates Task metadata while reusing shared Markdown handling', () => {

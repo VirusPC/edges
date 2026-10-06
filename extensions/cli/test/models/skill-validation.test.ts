@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { SkillNode } from "../../src/domain/models/skill-node.js";
+import { SkillNode } from "../../src/domain/models/skills/skill-node.js";
 test("Skill validates required standard fields only after staged input is complete", () => {
   const node = new SkillNode("/tmp/example/SKILL.md");
   node.name = "example";

@@ -1,7 +1,7 @@
 import { existsSync, lstatSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { discoverDirectories, findAncestor } from '../utils/filesystem.js';
-import { InternalNode } from '../domain/models/internal-node.js';
+import { InternalNode } from "../domain/models/internal/internal-node.js";
 
 export function isScope(dir: string): boolean {
   const file = path.join(path.resolve(dir), 'AGENTS.md');

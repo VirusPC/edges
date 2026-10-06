@@ -1,7 +1,16 @@
-import { BaseNode } from "../models/base-node.js";
-import { InternalNode } from "../models/internal-node.js";
-import type { NodeReference, NodeQueryOptions } from "../models/types.js";
-import { validateChild } from "../models/relations.js";
+import { BaseNode } from "../models/core/base-node.js";
+import { InternalNode } from "../models/internal/internal-node.js";
+import type { NodeReference } from "../models/core/types.js";
+import { validateChild } from "../models/core/relations.js";
+
+export interface ScopeTraversalOptions {
+  includeDescendants?: boolean;
+  includeHarness?: boolean;
+}
+
+export interface NodeQueryOptions extends ScopeTraversalOptions {
+  types?: readonly string[];
+}
 
 /** Preorder, demand-driven traversal; IO and directory contracts belong to the service. */
 export async function* traverse(

@@ -1,17 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  DEFAULT_TASK_PROJECT,
-  DEFAULT_TASK_PROJECT_DIR,
-  TASK_PROJECT_FIELD,
-  assertProjectDualWrite,
-  filterTasksByProject,
-  isTaskProjectId,
-  isUserProjectSlug,
-  parseTaskProject,
-  projectDirName,
-  projectIdFromDir,
-} from "../../../src/domain/models/tasks/project.js";
+import { DEFAULT_TASK_PROJECT, DEFAULT_TASK_PROJECT_DIR, TASK_PROJECT_FIELD, assertProjectDualWrite, isTaskProjectId, isUserProjectSlug, parseTaskProject, projectDirName, projectIdFromDir } from "../../../src/domain/models/tasks/project.js";
+import { filterTasksByProject } from "../../../src/domain/operations/tasks.js";
 
 test("sentinels and field name", () => {
   assert.equal(DEFAULT_TASK_PROJECT, "default");
