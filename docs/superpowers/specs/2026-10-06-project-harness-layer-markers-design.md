@@ -1,6 +1,6 @@
 # 层入口表面命名：project-memory → project-harness
 
-状态：2026-10-06 对话已确认命名与范围；本文待人审后写实施计划。不替代 [目录节点模型](2026-10-05-directory-node-model.md) 的组成关系。
+状态：2026-10-06 用户批准。实施计划见 [project-harness-layer-markers](../plans/2026-10-06-project-harness-layer-markers.md)。不替代 [目录节点模型](2026-10-05-directory-node-model.md) 的组成关系。
 
 基线：`main` @ `ac7b5a8a`（#165）。
 
