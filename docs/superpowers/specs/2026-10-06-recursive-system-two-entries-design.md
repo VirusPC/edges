@@ -196,6 +196,7 @@ flowchart TB
 | 架构审 3 | 下层同合同递归：AGENTS→AGENTS，README→README |
 | 架构审 4 | 虚拟根须显式 flag；缺 AGENTS 不自动虚拟化 |
 | Q17 | 取消 Internal/Leaf/internal；各节点直继 BaseNode；`type` 扩展 `agents`/`readme`/`text`，不另造 entryKind |
+| Q18=A | 类型入口统一为 `README.md` + `project-entries-*`（`type=readme`）；迁移后不用 `project-memory-entries` |
 
 ## 入口合同
 
@@ -234,9 +235,10 @@ flowchart TB
 
 给人看的说明可写在区块外；工具只改标记区块。根 README 的本层内容应能指向 `tasks/` 等本层入口（Q9b）；下层内容只登记其它 `README.md`。
 
-### 类型入口（本轮不动）
+### 类型入口（Q18=A）
 
-`project-memory-type` / `project-memory-entries` 仍给类型目录索引用。是否把类型索引改成 README+`project-entries-*`、或保留类型专用标记，属实施计划里的迁移子题；本 spec 不强制本轮改类型标记前缀。
+类型入口（如 `.harness/memory/projects/` 下的索引）**统一为组织清单**：`README.md`，`type=readme`，组成用 `project-entries-*`。层 `AGENTS.md` 的本层系统维护信息链到这些 README。  
+读兼容旧 `AGENTS.md` + `project-memory-type` / `project-memory-entries`；写与迁移后只发 README 规范。`project-memory-type` 身份头若仍需要区分「这是哪类记忆目录」，可留在 README 或目录约定里——实施计划定落点，但**列表区块不再用 `project-memory-entries`**。
 
 ## 遍历规则（核心）
 
@@ -294,7 +296,6 @@ flowchart TB
 
 ## 开放实施题（不阻塞本 spec 语义）
 
-- 类型入口是否迁到 README+`project-entries-*`，或暂时保留 `project-memory-entries`。
 - 旧 `InternalNode` / `LeafNode` 类是删除还是短暂兼容别名（语义上已取消）。
-- PROTOCOL 文件名合同（类型入口仍写 AGENTS 还是改 README）的改稿顺序。
+- 类型目录里原 `project-memory-type` 身份信息迁到 README 何处（YAML / HTML 注释 / 文件名约定）。
 - 虚拟根显式 flag 的具体名字（如 `--virtual-root`）与挂载默认值。

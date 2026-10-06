@@ -89,4 +89,6 @@ format: ordinary
 - [四种入口可组织；README 下层仍 README；虚拟根须显式 flag](<project_grill_arch_all_org_readme_virtual_flag/index.md>) — 改 traverse/架构图时：AGENTS/README/INDEX/SKILL 均可因组成登记成组织节点；README 下层内容只挂 README；虚拟系统入口须显式 flag，不因缺 AGENTS 自动合成。entryKind 枚举另议。
 
 - [BaseNode 直继；type 含 agents/readme/text](<project_grill_basenode_type_agents_readme_text/index.md>) — 改节点类层次或 type 时：取消 Internal/Leaf/internal；各节点直继 BaseNode；type 为 agents\|readme\|task\|memory\|note\|skill\|text（普通文本兜底）；不另造 entryKind。
+
+- [类型入口统一为 README \+ project\-entries](<project_grill_type_index_as_readme/index.md>) — 改类型索引、init/remember/doctor 或 PROTOCOL 时：类型入口用 README.md（type=readme）\+ project\-entries\-\*；层 AGENTS 链到这些 README；迁移后不用 project\-memory\-entries / 类型目录 AGENTS 当索引。
 <!-- project-memory-entries:end -->
