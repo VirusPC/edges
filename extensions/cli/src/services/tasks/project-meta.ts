@@ -78,7 +78,9 @@ export function parseProjectAgents(markdown: string): {
   const title = parseProjectTitle(match[1]);
 
   const body = markdown.slice(heading.length + 1);
-  const boundary = body.search(/^(?:## |<!-- (?:project-memory|task-projects)(?::|-))/m);
+  const boundary = body.search(
+    /^(?:## |<!-- (?:project-harness|project-memory|task-projects)(?::|-))/m,
+  );
   const descriptionSource = boundary === -1 ? body : body.slice(0, boundary);
   const description = parseProjectDescription(descriptionSource);
   if (boundary === -1) return { title, description };

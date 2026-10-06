@@ -17,7 +17,7 @@ export interface SyntaxContent {
 function adaptEntries(source: string): string {
   return source.replace(
     /^<!-- project-memory-entries:(start|end) -->$/gm,
-    "<!-- project-memory-local:$1 -->",
+    "<!-- project-harness-local:$1 -->",
   );
 }
 function constraintText(item: AgentsItem): string {
@@ -164,10 +164,15 @@ export class InternalSyntax {
     };
     const rendered = serializeNode(model, this.#source);
     return this.#entries
-      ? rendered.replace(
-          /^<!-- project-memory-local:(start|end) -->$/gm,
-          "<!-- project-memory-entries:$1 -->",
-        )
+      ? rendered
+          .replace(
+            /^<!-- project-harness-local:(start|end) -->$/gm,
+            "<!-- project-memory-entries:$1 -->",
+          )
+          .replace(
+            /^<!-- project-memory-local:(start|end) -->$/gm,
+            "<!-- project-memory-entries:$1 -->",
+          )
       : rendered;
   }
 }

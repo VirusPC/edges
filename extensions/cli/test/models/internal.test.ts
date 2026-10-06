@@ -29,6 +29,21 @@ Authored **introduction**, kept verbatim.
 Footer stays.
 `;
 
+const modern = source
+  .replaceAll("project-memory-important", "project-harness-constraints")
+  .replaceAll("project-memory-local", "project-harness-local")
+  .replaceAll("project-memory-children", "project-harness-descendants")
+  .replaceAll("本层重要约束", "本层硬约束")
+  .replaceAll("本层记忆", "本层组成")
+  .replaceAll("下层记忆索引", "下层节点");
+
+test("legacy and canonical layer markers parse to the same ownership", () => {
+  const oldNode = new InternalNode("/scope/AGENTS.md").parse(source);
+  const newNode = new InternalNode("/scope/AGENTS.md").parse(modern);
+  assert.deepEqual(oldNode.content.constraints, newNode.content.constraints);
+  assert.deepEqual(oldNode.children, newNode.children);
+});
+
 test("internal nodes derive only indexed ownership and preserve authored source", () => {
   const node = new InternalNode("/scope/AGENTS.md").parse(source);
   assert.deepEqual(node.content.constraints, ["Keep the rule."]);
@@ -166,7 +181,7 @@ module: memory
   assert.match(rendered, /> Authored purpose\./);
   assert.doesNotMatch(
     rendered,
-    /## 本层记忆|project-memory-local|project-memory-children/,
+    /## 本层记忆|## 本层组成|project-memory-local|project-harness-local|project-memory-children/,
   );
   assert.deepEqual(
     new InternalNode(node.path).parse(rendered).children.map((ref) => ref.id),
