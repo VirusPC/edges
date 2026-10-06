@@ -23,7 +23,7 @@ format: ordinary
 - [能力面必须 CLI / Skill / MCP 并列](feedback_capability_surface_three_peers/index.md) — 写能力面标题、Why、How-to 时：三者并列；禁止「必要时 MCP」、禁止用「一个 CLI + 一份 skill」当本仓简称。
 - [根 changelog 不要堆 schema 字段表](feedback_changelog_no_schema_dump/index.md) — 写根 CHANGELOG Unreleased 时打开：用人话完整句写能做什么，对照 \[1.2.0\] 的语气；不要把 schema 字段表、flag 汤或运维细节塞进一段。小节标题与条目前小标题只看 project\_repo\_changelog，不要另写一套。缘起 https://github.com/VirusPC/edges/pull/110。
 - [classifyTasks 按已有质心归类，不要求 embedding](feedback_classify_tasks_centroids_not_embeddings/index.md) — 写或改 project-tasks-classify / classifyTasks 时：按用户已设 Task Project（标题+描述）做归属建议，用 LLM / agent 判断；不要写成 Embedding-based 最近质心分类，不要要求 embedding，也不要把方法名写成 K-means。Embedding / 真向量分类另卡。缘起 https://github.com/VirusPC/edges/pull/78。
-- [reference 的 description 必须带关键链接](feedback_description_must_include_urls/index.md) — 写或更新 .memory/references/\* 时：description 与 REFERENCE.md 索引行必须带关键 URL，不能只写在正文 Links。缘起 https://github.com/VirusPC/edges/pull/45。
+- [reference 的 description 必须带关键链接](feedback_description_must_include_urls/index.md) — 写或更新 .harness/memory/references/\* 时：description 与类型入口索引行必须带关键 URL，不能只写在正文 Links。缘起 https://github.com/VirusPC/edges/pull/45。
 - [本作用域的维护模块登记在本层](feedback_harness_modules_are_local_scope/index.md) — 划分 AGENTS 本层与下层索引时：维护当前作用域的 evaluation、tasks、observation 等属于本层，不因模块有独立入口或验证职责就归下层。
 - [知识闭环的反馈回到捕获](feedback_knowledge_loop_returns_to_capture/index.md) — 绘制或描述知识闭环时：反馈必须重新成为输入并回到捕获，不能绕过捕获直接进入生产或沉淀。
 - [不要再给本仓库装 OpenSpec](feedback_no_openspec/index.md) — 规划与决策写 .memory，禁止 openspec init 以及把 skill/command vendor 进仓库里的 agent 目录。

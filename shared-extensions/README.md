@@ -47,7 +47,7 @@
 4. 对**同一个 commit** 打 annotated tag：`shared-extensions@<version>`，message 用该版本 changelog 正文
 5. `git push origin main --follow-tags`
 
-只改 `.memory/` 或 `AGENTS.md` 索引，不升版本——记忆是本层维护笔记，不随 harness 装到各机器。
+只改 `.harness/memory/` 或 `AGENTS.md` 索引，不升版本——记忆是本层维护笔记，不随 harness 装到各机器。
 
 查找：
 
