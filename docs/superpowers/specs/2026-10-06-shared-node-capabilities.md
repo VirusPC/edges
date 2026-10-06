@@ -113,6 +113,8 @@ Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Not
 
 受控区块只改指定 start/end 内的内容；外部正文、空白、注释、其他模块索引及未修改链接拼写保留。半缺失、重复、逆序或位置不明确时报错。新 task-projects 放在 local；Memory entries 可在文档级。不得用某个业务的索引列表覆盖整个 localChildren。
 
+通用区块函数拒绝跨段更新不等于删除 Tasks 既有的合法旧索引迁位：唯一完整的 task-projects 区块迁回 local 仍由 Tasks 业务适配处理，再调用通用函数。新建看板时同样保留业务归属：NodeService 自动登记的 local 不能误当作用户原有的 domain 分组；依据操作前的 owner 状态区分新登记与既有关系，前者 domain 归 descendant，后者保留原分组。maintenance 归 local，缺失 owner 不自动创建。
+
 ### 3. 路径工具提供机制，Service 保留政策
 
 公共工具判断目录包含、解析缺失叶子的真实路径、定位范围内符号链接及查找祖先；业务 Service 决定允许范围、是否允许链接及错误信息。保持各选项既有的 `~`、显式 root、Git 边界语义。`..draft` 与 `..` 区分，目录同名前缀不表示包含。
@@ -133,6 +135,8 @@ Ajv 8 与 ajv-formats 3 先用于兼容性测试，关闭 coerceTypes/useDefault
 
 审阅页切换到纯契约公共常量/类型，去掉手写 JSON 路径与内联 properties 假设；消费者的独立 dev/build/test/typecheck 不依赖残留 dist。通过兼容性验收后删除旧手写 Schema。干净构建、重复生成确定性、仓库外无源码及开发依赖的分发包 list/get 都是验收项。选型、替代路线、探针及采用依据保留在 ADR 0025。
 
+grouped/review-page 的 TaskDoc JSON 输入适配器也纳入迁移：旧 Schema 允许未知 metadata 的 JSON 值，但现有适配器一律要求字符串，应修复此既有差异，验证对象、数组、数字、布尔、null 均无损通过。Markdown parser 的现有标量行为不变；不借机强制对所有旧输入执行完整 Schema 校验。
+
 ## 全局约束
 
 - TypeScript；Node >=22，以 Node 22 作为运行、构建和测试基线；不新增独立 package。Task 5 增加 ts-json-schema-generator 2.9.0、Ajv 8、ajv-formats 3 开发依赖；无明确生产校验边界时不增加运行时校验依赖。
@@ -147,6 +151,8 @@ Ajv 8 与 ajv-formats 3 先用于兼容性测试，关闭 coerceTypes/useDefault
 ## 取舍与验收
 
 接受业务操作中少量直接调用 create/update/query 的重复代码，换取更少的公开概念和调用层次；业务政策本身仍需集中。文件数不是唯一指标，不能把独立的锁、文件恢复或模型语法全部塞进 node-service.ts。
+
+同一用例内同根、同政策的 NodeService 向内部操作传递复用，避免 helper 重建缓存；不同政策仍可有独立视图。扩展复用现有模型 hooks、集合组合和契约清单，不新增插件引擎或跨命令全局缓存。简化验收分别记录 Task 1–4 删除的重复机制和 Task 5 新增的工具链成本，不以总行数必然减少作为承诺。
 
 验收重点：四个收敛目标与 Schema 生成/获取均落实；项目/看板 AGENTS 不再直接 writeFile；无 NodeDocument/MemoryDocument 保存状态包装；无另一套 Memory 原子写；全仓查询复用已有 query；通用底层无业务 Service 反向依赖；涉及 Service 的运行时导入图无循环。保留现有单次生命周期操作的失败恢复，但不承诺整条业务命令的多个调用构成多文件 ACID。
 

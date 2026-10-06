@@ -83,6 +83,8 @@ Task Doc 继续保持 name、description、metadata、body；metadata 的未知�
 
 生成结果可能使用 $ref/definitions，不能假定原先手写 Schema 的内联布局不变。现有审阅页直接读取 properties.metadata.properties 中的枚举，实施时必须验证并调整消费者；优先复用契约源码中的公共常量，避免另写手工枚举或自定义 Schema 展开器。消费者不能继续依赖已删除的源码侧 Schema 文件。
 
+整体计划审查发现，grouped/review-page 两个 JSON 输入适配器同样使用 Record<string, string> 并拒绝非字符串 metadata；这是既有消费者与旧 Schema 的差异。Task 5 一并修复未知扩展字段的无损接受，并测试真实入口，而非只验证生成物。此项与 Markdown parser 的标量处理分开，也不等于本轮把所有运行时输入改用 Ajv 或收紧原本可接受的数据。
+
 CI 从无 dist 的干净状态构建，验证生成物存在、符合对应方言和既有契约样例；重复生成比较临时产物以检查确定性，不以已提交的生成文件作基准。从不含 TS 源码及开发依赖的分发包，在仓库外执行 list/get，验证命令可用、stdout 是纯 JSON、未知 key/缺失产物报错，且 Git 中没有新增生成的 Schema。
 
 此选型纳入[通用能力收敛计划](../superpowers/plans/2026-10-06-shared-node-capabilities.md)的 Task 5：生成与分发 TaskDoc、接入兼容性校验、提供 schema list/get。Task 0–4 继续执行已确认的 Model/operations/Service 分工，不借 Schema 接入扩大成全节点重构。ADR 保存选型与取舍，spec 保存约束，plan 保存实施和验收步骤，项目记忆提供检索入口。

@@ -1,8 +1,8 @@
 ---
 name: project_task_doc_json_schema
 description: >-
-  Schema 选型与取舍：TS 源、生成器、Node 22、Ajv 生态证据及边界；构建分发与 CLI 获取。ADR 0025，plan Task 5
-  待实施。
+  Schema 选型与取舍：TS 源、生成器、Node 22、Ajv 生态证据及边界；构建分发、真实消费者与 CLI 获取。ADR 0025，plan
+  Task 5 待实施。
 metadata:
   edges-title: TS 数据契约生成 JSON Schema
   edges-type: project
@@ -10,7 +10,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T15:42:26+08:00'
+  edges-updated-at: '2026-10-06T15:46:41+08:00'
 ---
 
 2026-10-06 用户确认：Task Doc 等对外数据契约以普通 TypeScript interface/type 为定义源，使用 ts-json-schema-generator 生成 JSON Schema；需要运行时结构校验时使用 Ajv。项目统一 Node 22 基线。选型及原因见 docs/adr/0025-typescript-source-generated-json-schema.md；本次已接受决策，尚未实施接入。
@@ -44,3 +44,10 @@ metadata:
 **Why:** 以后需要知道当时为什么这样选，避免把生态采用等同于绝对排名、把探针成功等同于生产验收，或重复讨论已明确的取舍。
 
 **How to apply:** Ajv 是 Node JSON Schema 校验的主流选择之一，证据来自 Fastify、webpack schema-utils 及 ESLint 官方资料；ESLint 使用的 6.x 不作为 Ajv 8 的证据。Ajv 8 与 ajv-formats 3 先进入契约测试开发依赖，只有用途匹配的生产边界需要时才接运行时；schema list/get 只读取产物。保留 generator 与其他方案的对照、Node 22 基线、构建产物分发和 Model/operations 边界，详见 ADR 0025。计划与决策记录不代表代码已经接入。
+
+
+## 契约迁移必须覆盖真实消费者
+
+整体审查已验证：grouped/review-page 的 JSON 输入适配器拒绝旧 Schema 已允许的非字符串扩展 metadata。Task 5 纳入修复及公开入口回归，不能只验证生成物就宣称统一契约完成。
+
+**Why:** 字段真源统一后，实际入口仍可能保留较窄的历史约束。**How to apply:** 对象、数组、数字、布尔、null 扩展值无损通过两个入口；Markdown parser 标量约定保持，运行时全面采用 Ajv 或收紧旧输入另作兼容性变更。详见 ADR 0025 与当前 plan。

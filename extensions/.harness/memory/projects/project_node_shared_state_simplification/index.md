@@ -1,14 +1,12 @@
 ---
 name: project_node_shared_state_simplification
-description: >-
-  节点与 Service 边界：Model 单节点职责、operations 集合遍历、Schema 独立性、共享实例、domain 归组及 Node 22
-  基线。
+description: 节点与 Service 边界、domain 归组、Node 22、共享实例；简化按重复机制与扩展成本验收，保留业务分组和索引迁位。
 metadata:
   edges-title: 节点共享状态与职责简化
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T15:25:48+08:00'
+  edges-updated-at: '2026-10-06T15:46:40+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -68,9 +66,9 @@ metadata:
 
 **How to apply:** 通用层提供机制，Tasks 的状态/项目规则、Memory 的类型/私有内容规则、Note 的 Git 发布流程仍由各自模块负责。保留非受控 Markdown、外部修改检查及已有单实例/命令锁合同。范围与步骤见[补充设计](../../../../../docs/superpowers/specs/2026-10-06-shared-node-capabilities.md)和[实施计划](../../../../../docs/superpowers/plans/2026-10-06-shared-node-capabilities.md)；不要据此把 Memory 发现未登记文件的物理盘点改成只查登记树。
 
-## 通用能力计划的文件划分待复核
+## 通用能力计划的文件划分质疑（历史，已由后续方案替代）
 
-用户确认通用能力收敛的目标，但质疑已提交计划的实际文件划分过散、过于复杂。四项目标仍成立，文件划分和新增抽象需重新讨论；尚未确认替代方案。
+用户确认通用能力收敛的目标，但质疑已提交计划的实际文件划分过散、过于复杂。四项目标仍成立，当时要求重新讨论文件划分和新增抽象；后续已由本文 Service 边界、domain 归组及当前 shared-node-capabilities spec/plan 替代。
 
 **Why:** 将重复代码抽到公共位置，不等于应该新增一层公开接口或中间状态。用户关心的是架构理解与使用成本，不能仅以拆出更多小文件作为完成收敛的依据。
 
@@ -107,3 +105,12 @@ metadata:
 **Why:** 用户接受提高项目基线以简化工具链兼容。
 
 **How to apply:** 实施时同步 engines、已有版本选择/CI 配置与当前开发文档，并在 Node 22 下验收；此决定不表示已经升级本机 Node 或修改 package.json。Node 22 选择不自动批准全部候选依赖或 Schema 接入实现。
+
+
+## 整体简化的判断标准
+
+2026-10-06 用户要求从架构清晰、复用、扩展和代码简洁四个角度整体复核 plan。当前设计保留同一用例内同根同政策的 NodeService 复用，不因删除文档句柄而让每个 helper 重建缓存；业务语义不因通用机制收敛而丢失。
+
+**Why:** 减少重复实现和调用概念才是简化；搬目录、减少文件数或增加通用包装本身不是收益。Schema 消除了类型定义重复，但新增生成、分发及验收成本，不能承诺总行数必然降低。
+
+**How to apply:** Task 1–4 汇报删除的重复机制，Task 5 单列工具链成本；使用现有模型 hooks、操作组合和契约清单扩展，不引入插件引擎。迁移保留 Tasks 合法旧索引迁位以及新 domain/maintenance 与原有分组的差异；具体回归要求以 plan 的整体审查表和 Task 2/3/5 为准。
