@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: project-memory
-  edges-updated-at: '2026-10-06T16:21:19.042Z'
+  edges-updated-at: '2026-10-06T20:15:00.000Z'
   edges-title: project harness init skill
-  edges-tasks-status: backlog
+  edges-tasks-status: done
   edges-task-priority: medium
 name: project_harness_init_skill
 description: 把系统入口初始化做成 project harness init（演进或包装 project-memory-init），供用户对任意选定目录自行 init。

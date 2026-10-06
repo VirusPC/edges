@@ -40,6 +40,18 @@ test("type index path is README.md", () => {
   );
 });
 
+test("init creates system entry AGENTS.md only at scope root, not organization README.md", async (t) => {
+  const dir = fixture(t);
+  await initMemory({
+    indexGroup: "descendant",
+    targetDir: dir,
+    memoryTypes: ["project"],
+  });
+  assert.equal(existsSync(join(dir, "README.md")), false);
+  assert.match(read(dir, AGENTS_FILE_NAME), /## 本层系统维护信息/);
+  assert.match(read(dir, AGENTS_FILE_NAME), /project-harness-local:start/);
+});
+
 test("init writes README type indexes with project-entries markers", async (t) => {
   const dir = fixture(t);
   await initMemory({
