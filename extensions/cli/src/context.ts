@@ -1,3 +1,5 @@
+import { fail } from "./commands/result.js";
+
 /**
  * One `edges` process invocation.
  *
@@ -42,11 +44,7 @@ export function usageError(reason: string, scope: "root" | "note" | "tasks" | "a
           : scope === "memory"
             ? "See edges memory --help for usage.\n"
         : "See edges --help for usage.\n";
-  return {
-    exitCode: 2,
-    stdout: `${JSON.stringify({ status: "failed", errorCode: "VALIDATION_ERROR", reason })}\n`,
-    stderr: usage,
-  };
+  return fail("VALIDATION_ERROR", reason, usage);
 }
 
 export function usageScope(argv: string[]): "root" | "note" | "tasks" | "artifacts" | "memory" | "schema" {
