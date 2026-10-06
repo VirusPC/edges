@@ -1,12 +1,12 @@
 ---
 name: project_node_shared_state_simplification
-description: Model/operations/Service 分工、共享实例和统一索引；LLM 指定本层/下层，CLI 不推断归属，移动保留登记状态。
+description: Model/operations/Service 分工、模型按节点归组、共享实例与统一索引；LLM 指定归属，CLI 执行。
 metadata:
   edges-title: 节点共享状态与职责简化
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T17:07:27+08:00'
+  edges-updated-at: '2026-10-06T17:35:22+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -150,3 +150,12 @@ metadata:
 **Why:** 原实现默认补 descendant 会让文件移动隐含决定语义归属，与 LLM 判断位置的原则冲突。
 
 **How to apply:** 不通过移动补默认关系，不开放脱离目录的 reparent。以后需要移动时新增登记，应提供明确输入，而不是按用途或目录深度推断。已有看板缺少 owner 引用时，显式分组的写操作可以补登记，但须保留 owner 的其他引用。
+
+
+## 模型按节点归组，避免类与专属规则分散
+
+2026-10-06 用户认可先收拢 models：core、internal、tasks、memory、notes、skills 按职责归组，同一模型的类与专属规则集中阅读。commands 与 Service 的解耦随后单独处理。此处确认的是组织原则，具体迁移设计仍待审阅。
+
+**Why:** 用户在上一轮合并后指出 models 文件仍显得散乱；仅把 models 和 operations 放进 domain，尚未解决模型内部的理解成本。
+
+**How to apply:** 不为统一外观强制每个节点新增 types、codec、factory 文件；通用格式能力不得寄居于某个业务模型目录。保留 Model 单节点行为、operations 集合操作、Service 完整用例的边界。Schema 的纯数据契约有独立消费者，不能为减少文件数并入带运行时依赖的节点类。详细提案见[模型组织设计](../../../../../docs/superpowers/specs/2026-10-06-model-module-organization-design.md)，不要把提案中的迁移视为已经实施。
