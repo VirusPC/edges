@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { runTasksCommand, succeed } from "../../services/tasks/result.js";
+import { runTasksCommand, succeed } from "./run.js";
 import { getTaskService } from "../../services/tasks/service.js";
 
 const GET_AFTER_HELP = `

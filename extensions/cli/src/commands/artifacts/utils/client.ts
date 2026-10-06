@@ -71,6 +71,40 @@ export async function publishArtifact(options: {
   return parseWriteResponse(response, 201) as Promise<PublishResult>;
 }
 
+export async function createArtifact(options: {
+  baseUrl: string;
+  token: string;
+  files: PublishFile[];
+  entry?: string;
+  from?: ArtifactFrom;
+  fetch: typeof fetch;
+}): Promise<{ id: string; from?: ArtifactFrom }> {
+  const body: Record<string, unknown> = { publish: false, files: options.files };
+  if (options.entry) body.entry = options.entry;
+  if (options.from) body.from = options.from;
+  const response = await options.fetch(`${options.baseUrl.replace(/\/$/, "")}/artifacts`, {
+    method: "POST",
+    headers: clientHeaders(options.token, { "content-type": "application/json" }),
+    body: JSON.stringify(body),
+  });
+  const payload = await parseWriteResponse(response, 201, false);
+  return payload as { id: string; from?: ArtifactFrom };
+}
+
+export async function publishArtifactById(options: {
+  baseUrl: string;
+  token: string;
+  id: string;
+  ttlSeconds: number;
+  fetch: typeof fetch;
+}): Promise<PublishResult> {
+  const response = await options.fetch(`${options.baseUrl.replace(/\/$/, "")}/artifacts/${options.id}/publish`, {
+    method: "POST",
+    headers: clientHeaders(options.token, { "content-type": "application/json" }),
+    body: JSON.stringify({ ttlSeconds: options.ttlSeconds }),
+  });
+  return parseWriteResponse(response, 200) as Promise<PublishResult>;
+}
 export async function deleteArtifact(options: {
   baseUrl: string;
   token: string;
@@ -87,7 +121,7 @@ export async function deleteArtifact(options: {
   await parseWriteResponse(response, 204);
 }
 
-async function parseWriteResponse(response: Response, expected: number): Promise<PublishResult | void> {
+async function parseWriteResponse(response: Response, expected: number, requireUrl = true): Promise<PublishResult | { id: string } | void> {
   if (response.status === 401 || response.status === 403) {
     const payload = await safeJson(response);
     const reason = typeof payload.reason === "string" ? payload.reason : "authorization failed";
@@ -107,7 +141,7 @@ async function parseWriteResponse(response: Response, expected: number): Promise
     return;
   }
   const payload = (await response.json()) as PublishResult;
-  if (!payload?.id || !payload.url) {
+  if (!payload?.id || (requireUrl && !payload.url)) {
     throw new Error("publish response missing id or url");
   }
   return payload;

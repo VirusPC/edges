@@ -1,7 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { resolveEdgesRoot } from "../../../utils/config.js";
-import { ArtifactsError } from "../utils/result.js";
+import { ArtifactsError } from "../error.js";
 import {
   UNIT_NAME,
   assertUsableToken,

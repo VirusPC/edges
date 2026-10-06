@@ -1,7 +1,7 @@
-import { isWithinPath, findAncestor } from "../utils/filesystem.js";
+import { isWithinPath, findAncestor } from "../../utils/filesystem.js";
 import { WRITE_LOCK_NAME } from "./node-lock.js";
-import { InternalSyntax, type SyntaxReference } from "../domain/models/internal/syntax.js";
-import { resolveEntryHref } from "../domain/models/layout.js";
+import { InternalSyntax, type SyntaxReference } from "../../domain/models/internal/syntax.js";
+import { resolveEntryHref } from "../../domain/models/layout.js";
 /** Filesystem facts and source-preserving relocation; no domain resources. */
 import * as fs from "node:fs";
 import path from "node:path";
@@ -15,13 +15,13 @@ import {
   MemoryNode,
   NoteNode,
   SkillNode,
-} from "../domain/models/index.js";
+} from "../../domain/models/index.js";
 import {
   identifyNodeType,
   resolveHref,
   type DirectoryContract,
-} from "../domain/models/layout.js";
-import { parseDocument } from "../utils/markdown/document.js";
+} from "../../domain/models/layout.js";
+import { parseDocument } from "../../utils/markdown/document.js";
 import { checkPath, readEntry } from "./node-files.js";
 export type Model<T extends BaseNode = BaseNode> = new (file: string) => T;
 export function coLocated(entry: string): boolean {

@@ -1,4 +1,4 @@
-import { readEntry, saveEntries } from '../node-files.js';
+import { readEntry, saveEntries } from '../node/node-files.js';
 import { canonicalPath, findAncestor } from "../../utils/filesystem.js";
 import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import * as fs from "node:fs";

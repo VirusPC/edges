@@ -18,9 +18,9 @@ import {
   rememberMemory,
   addMemoryType,
   doctorMemory,
-  layerTypeSpecs,
-  parseFrontmatter,
 } from "../../src/services/memory/index.js";
+import { layerTypeSpecs } from "../../src/services/memory/types.js";
+import { parseFrontmatter } from "../../src/services/memory/entries.js";
 function fixture(t: any) {
   const dir = mkdtempSync(join(tmpdir(), "memory-core-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));

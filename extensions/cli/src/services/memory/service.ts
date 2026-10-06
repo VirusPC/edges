@@ -1,7 +1,7 @@
 import { isWithinPath } from '../../utils/filesystem.js';
 import { realpathSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
-import { NodeService } from '../node-service.js';
+import { NodeService } from '../node/node-service.js';
 import { assertScopePath } from './paths.js';
 import { layerTypeSpecs, ensureLayerTypeGitignore, findGitRoot } from './types.js';
 import { assertPrivateIgnored } from './ignore.js';

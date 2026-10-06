@@ -38,7 +38,7 @@ test('migration deduplicates matching identities and preserves unrelated links',
 });
 test('migration honors the shared write lock before any backup or document writes',async t=>{
  const {root,file}=fixture(t,legacy);const plan=planAgentsIndexes(root);
- const {acquireWriteLock}=await import('../../src/services/node-lock.js');const release=await acquireWriteLock(root);
+ const {acquireWriteLock}=await import('../../src/services/node/node-lock.js');const release=await acquireWriteLock(root);
  try {await assert.rejects(async()=>applyAgentsIndexes(plan),/write lock busy/);assert.equal(fs.readFileSync(file,'utf8'),legacy);}
  finally {await release();}
 });

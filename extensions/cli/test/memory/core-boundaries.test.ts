@@ -12,13 +12,17 @@ import {
   rememberMemory,
   addMemoryType,
   doctorMemory,
-  layerTypeSpecs,
-  indexFiles,
-  parseFrontmatter,
-  parseTypeMeta,
-  refreshIndex,
-  validateTypeName,
 } from "../../src/services/memory/index.js";
+import {
+  layerTypeSpecs,
+  parseTypeMeta,
+  validateTypeName,
+} from "../../src/services/memory/types.js";
+import { indexFiles } from "../../src/services/memory/blocks.js";
+import {
+  parseFrontmatter,
+  refreshIndex,
+} from "../../src/services/memory/entries.js";
 function fixture(t: TestContext) {
   const dir = fs.mkdtempSync(join(tmpdir(), "memory-boundary-"));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
@@ -1010,7 +1014,7 @@ test("all private callers still work in a confirmed non-Git scope without a Git 
 test("type scan functions remain public after moving out of path primitives", async t => {
   const target = await base(t);
   await remember(target, "project");
-  const { typeIndexPath, typeContentDir, listTypeFiles } = await import("../../src/services/memory/index.js");
+  const { typeIndexPath, typeContentDir, listTypeFiles } = await import("../../src/services/memory/types.js");
   assert.equal(typeIndexPath(target, "project"), join(target, pi));
   assert.equal(typeContentDir(target, "project"), dirname(join(target, pi)));
   assert.deepEqual(listTypeFiles(target, "project"), [join(target, ".harness/memory/projects/project_example/index.md")]);

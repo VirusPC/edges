@@ -87,3 +87,6 @@ extensions/cli/src/commands/tasks/project/assets/review-page/
 
 # Worktree-local runtime write lock (proper-lockfile directory).
 /.edges-write.lock/
+
+# Local git worktrees for isolated implementation.
+.worktrees/

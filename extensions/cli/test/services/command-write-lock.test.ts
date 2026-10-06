@@ -76,7 +76,7 @@ for (const git of [false, true])
   });
 
 test("explicit memory targets choose the mutation tree; errors release the lock", async (t) => {
-  const { acquireWriteLock } = await import("../../src/services/node-lock.js");
+  const { acquireWriteLock } = await import("../../src/services/node/node-lock.js");
   const root = fs.mkdtempSync(
     path.join(fs.realpathSync(tmpdir()), "lock-target-"),
   );
@@ -170,7 +170,7 @@ test("explicit memory targets choose the mutation tree; errors release the lock"
 
 test("independent Git worktrees can hold locks concurrently, including canonical aliases", async (t) => {
   const { acquireWriteLock, writeLockPath } =
-    await import("../../src/services/node-lock.js");
+    await import("../../src/services/node/node-lock.js");
   const { execFileSync } = await import("node:child_process");
   const root = fs.mkdtempSync(
     path.join(fs.realpathSync(tmpdir()), "lock-worktrees-"),
@@ -222,7 +222,7 @@ test(
   "lock compromise fails a live writer instead of reporting success",
   { timeout: 20000 },
   async (t) => {
-    const { writeLockPath } = await import("../../src/services/node-lock.js");
+    const { writeLockPath } = await import("../../src/services/node/node-lock.js");
     const root = fs.mkdtempSync(
       path.join(fs.realpathSync(tmpdir()), "lock-loss-"),
     );
@@ -234,7 +234,7 @@ test(
         "tsx",
         "--input-type=module",
         "-e",
-        `const {acquireWriteLock}=await import('./src/services/node-lock.ts'); await acquireWriteLock(${JSON.stringify(root)});process.send('locked');setInterval(()=>{},1000);`,
+        `const {acquireWriteLock}=await import('./src/services/node/node-lock.ts'); await acquireWriteLock(${JSON.stringify(root)});process.send('locked');setInterval(()=>{},1000);`,
       ],
       { stdio: ["ignore", "pipe", "pipe", "ipc"] },
     );
@@ -253,7 +253,7 @@ test(
 );
 
 test("all node-writing command groups lock; validation and persistence failures release", async (t) => {
-  const { acquireWriteLock } = await import("../../src/services/node-lock.js");
+  const { acquireWriteLock } = await import("../../src/services/node/node-lock.js");
   const { syncBuiltinESMExports } = await import("node:module");
   const root = fs.mkdtempSync(
     path.join(fs.realpathSync(tmpdir()), "lock-errors-"),
@@ -265,6 +265,7 @@ test("all node-writing command groups lock; validation and persistence failures 
     for (const args of [
       [
         "note",
+        "create",
         "--title",
         "Test",
         "--content",
@@ -317,7 +318,7 @@ test("all node-writing command groups lock; validation and persistence failures 
 });
 
 test("non-Git lock roots ignore AGENTS symlinks and directories as scope markers", async (t) => {
-  const { writeLockPath } = await import("../../src/services/node-lock.js");
+  const { writeLockPath } = await import("../../src/services/node/node-lock.js");
   const root = fs.mkdtempSync(
     path.join(fs.realpathSync(tmpdir()), "lock-markers-"),
   );
@@ -339,7 +340,7 @@ test("non-Git lock roots ignore AGENTS symlinks and directories as scope markers
 });
 
 test("lock normalization follows scope/env literals and explicit Memory home expansion", async (t) => {
-  const { acquireWriteLock } = await import("../../src/services/node-lock.js");
+  const { acquireWriteLock } = await import("../../src/services/node/node-lock.js");
   const root = fs.mkdtempSync(
     path.join(fs.realpathSync(tmpdir()), "lock-normalize-"),
   );
@@ -448,7 +449,7 @@ test("lock normalization follows scope/env literals and explicit Memory home exp
 
 test("fresh non-Git ancestor init shares a stable lock before and after creating markers", async (t) => {
   const { acquireWriteLock, writeLockPath } =
-    await import("../../src/services/node-lock.js");
+    await import("../../src/services/node/node-lock.js");
   const root = fs.mkdtempSync(
     path.join(fs.realpathSync(tmpdir()), "lock-bootstrap-"),
   );
@@ -497,7 +498,7 @@ test("fresh non-Git ancestor init shares a stable lock before and after creating
 });
 
 test("persistence diagnostics survive a simultaneous lock release failure", async (t) => {
-  const { writeLockPath } = await import("../../src/services/node-lock.js");
+  const { writeLockPath } = await import("../../src/services/node/node-lock.js");
   const { syncBuiltinESMExports } = await import("node:module");
   const root = fs.mkdtempSync(
     path.join(fs.realpathSync(tmpdir()), "lock-double-failure-"),

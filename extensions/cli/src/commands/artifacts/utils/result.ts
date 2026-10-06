@@ -1,24 +1,15 @@
 import type { CliContext, CliResult } from "../../../context.js";
+import { exitCodeForErrorCode } from "../../exit.js";
+import {
+  ArtifactsError,
+  type ArtifactsErrorCode,
+} from "../../../services/artifacts/error.js";
 
-export type ArtifactsErrorCode =
-  | "VALIDATION_ERROR"
-  | "AUTH_MISSING"
-  | "AUTH_INVALID_FORMAT"
-  | "AUTH_INVALID_TOKEN"
-  | "UNKNOWN_ERROR";
-
-export class ArtifactsError extends Error {
-  readonly errorCode: ArtifactsErrorCode;
-
-  constructor(errorCode: ArtifactsErrorCode, message: string) {
-    super(message);
-    this.errorCode = errorCode;
-  }
-}
+export { ArtifactsError, type ArtifactsErrorCode };
 
 export function fail(errorCode: ArtifactsErrorCode, reason: string): CliResult {
   return {
-    exitCode: errorCode === "VALIDATION_ERROR" ? 2 : errorCode.startsWith("AUTH_") ? 4 : 1,
+    exitCode: exitCodeForErrorCode(errorCode),
     stdout: `${JSON.stringify({ status: "failed", errorCode, reason })}\n`,
     stderr: "See edges artifacts --help for usage.\n",
   };

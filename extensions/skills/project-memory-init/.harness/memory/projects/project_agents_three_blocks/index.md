@@ -9,7 +9,7 @@ metadata:
   edges-updated-at: "2026-09-06T21:51:03+08:00"
 ---
 
-`AGENTS.md` 作为记忆入口只含三类：本层硬约束、本层记忆索引、下层记忆索引（没有下层则整块不出现）。不要独立的 `project-memory-auto` 区块。硬约束种子只有两句：ask / remember 聚光灯，以及「硬约束写在本区块、不要链到 `.memory`」。各层仓规手写追加。区块外只留标题、身份和指向真理源的指针。
+`AGENTS.md` 作为记忆入口只含三类：本层硬约束、本层记忆索引、下层记忆索引（没有下层则整块不出现）。不要独立的 `project-memory-auto` 区块。硬约束种子只有两句：ask / remember 聚光灯，以及「硬约束写在本区块，不要通过记忆正文链接代替」。各层仓规手写追加。区块外只留标题、身份和指向真理源的指针。
 
 **Why:** 协议写的就是这三类。独立 auto 是第四块，和协议打架。ask / remember 必须常驻点名，否则会淹在海量 skill 里；点名即可，不写用法、不编排 init / doctor / reshape。硬约束写什么见 `project_important_block`。
 

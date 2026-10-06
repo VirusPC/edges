@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { loadConfig } from "../../src/utils/config.js";
+import { loadConfig } from "../../src/services/config.js";
 
 test("loadConfig defaults repo, branch, mode, dryRun and has no scriptPath", () => {
   const config = loadConfig({

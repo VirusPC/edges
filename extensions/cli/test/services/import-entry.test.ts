@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { assertImportType } from "../../src/services/import-entry.js";
-import { NodeService } from "../../src/services/node-service.js";
+import { NodeService } from "../../src/services/node/node-service.js";
 function fixture(t: { after(fn: () => void): void }) {
   const root = fs.mkdtempSync(
     path.join(fs.realpathSync(tmpdir()), "source-boundary-"),
@@ -67,7 +67,7 @@ test("physical parent discovery and containment support the filesystem root boun
   const entry = write("nested/item/index.md", "body\n");
   const owner = write("AGENTS.md", contract);
   const { physicalParent } =
-    await import("../../src/services/node-layout.js");
+    await import("../../src/services/node/node-layout.js");
   const filesystemRoot = path.parse(entry).root;
   const { isWithinPath } = await import("../../src/utils/filesystem.js");
   assert.equal(isWithinPath(entry, filesystemRoot), true);

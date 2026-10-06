@@ -13,7 +13,8 @@ import { addArtifactsCommand } from "./commands/artifacts.js";
 import { addNoteCommand } from "./commands/note.js";
 import { addTasksCommand } from "./commands/tasks.js";
 import { addMemoryCommand } from "./commands/memory.js";
-import { acquireWriteLock } from "./services/node-lock.js";
+import { addSkillCommand } from "./commands/skill.js";
+import { acquireWriteLock } from "./services/node/node-lock.js";
 import { VERSION } from "./utils/version.js";
 
 export type { CliContext, CliInput, CliResult };
@@ -21,7 +22,7 @@ export type { CliContext, CliInput, CliResult };
 const ROOT_AFTER_HELP = `
 EXAMPLES
   edges --scope ./projects/demo tasks --purpose maintenance list
-  edges note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
+  edges note create --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
   edges note --help
   edges tasks --help
   edges artifacts --help
@@ -30,7 +31,7 @@ EXAMPLES
 
 BREAKING RENAME
   The bin is edges only (not edges-note). There is no shim.
-  Callers must migrate to: edges note --title … --content … --co-author …
+  Callers must migrate to: edges note create --title … --content … --co-author …
 `;
 
 /**
@@ -100,6 +101,7 @@ function addRootCommand(
   addNoteCommand(program, ctx);
   addTasksCommand(program, ctx);
   addMemoryCommand(program, ctx);
+  addSkillCommand(program, ctx);
   addArtifactsCommand(program, ctx);
   addSchemaCommand(program, ctx);
   program.addHelpText("after", ROOT_AFTER_HELP);
@@ -117,13 +119,13 @@ function commandWriteTarget(
     parent = command.parent?.name();
   const options = command.opts();
   const writes =
-    (parent === "edges" && name === "note") ||
+    (parent === "note" && ["create", "update", "delete"].includes(name)) ||
     (parent === "tasks" && ["create", "update", "status"].includes(name)) ||
     (parent === "project" &&
       command.parent?.parent?.name() === "tasks" &&
       ["create", "update"].includes(name)) ||
     (parent === "memory" &&
-      (["init", "add-type", "remember", "restore"].includes(name) ||
+      (["init", "add-type", "remember", "restore", "delete"].includes(name) ||
         (name === "doctor" && options.apply) ||
         (name === "migrate" && !options.dryRun)));
   if (!writes) return undefined;

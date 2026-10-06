@@ -1,6 +1,6 @@
 ---
 name: project_skill_ownership_split
-description: 为什么否掉 .memory→.agents 改名，改成 skills（自动沉淀）与 agent_skills（只索引）两个类型；两份入口为什么都放 .memory/；为什么没平铺进 local 区块。
+description: skills（managed）与 referenced 按谁有权改写分开，现行入口都在 .harness/skills/。2026-09-07 否掉把 .memory 改名为 .agents；当时两份入口都在 .memory/。
 metadata:
   edges-title: skills 按「谁有权改写」分成两类
   edges-type: project
@@ -10,7 +10,7 @@ metadata:
   edges-updated-at: "2026-09-07T17:38:29+08:00"
 ---
 
-`skills` 收 remember 自动沉淀的流程（`.memory/skills/`），`agent_skills` 只索引人写或 `npx skills` 装入的（`.agents/skills/`），工具对后者一个字节都不写。两份入口都放 `.memory/`。
+`skills`（现行 managed）收 remember 自动沉淀的流程，`agent_skills`（现行 referenced）只索引人写或装入的技能，工具对后者一个字节都不写。现行两份入口都在 `.harness/skills/`。2026-09-07 它们都在 `.memory/`。
 
 **Why:**
 
@@ -26,7 +26,8 @@ metadata:
 
 **How to apply:**
 
+- 现行目录是 `.harness/skills/managed` 与 `.harness/skills/referenced`，不要再写到 `.memory/`。
 - 判断一条东西进哪个类型：下次要不要被**执行** → `skills`；「以后别这么干」→ `feedback`；「当初为什么这么定」→ `project`。
-- 再有人提议改 `.memory/` 的名字、或让工具往 `.agents/` 写东西，先问「**哪个 agent 在哪一层会读它**」，别停在「这是标准目录」。
+- 再有人提议改维护目录的名字、或让工具往 `.agents/` 写东西，先问「**哪个 agent 在哪一层会读它**」，别停在「这是标准目录」。
 - `EXTERNAL_CONTENT_DIRS`（`lib/paths.py`）这张表**同时表示「内容根越界」和「只读」**。加类型时先分清落在「格式由外部定义」（`AGENT_SKILL_FORMAT_TYPES`）还是「内容根在外部」（`EXTERNAL_CONTENT_DIRS`）哪一边，两者正交。
 - 副作用：类型名多了以后，`--slug` 不能再以 `skills_` / `agent_skills_` 开头。

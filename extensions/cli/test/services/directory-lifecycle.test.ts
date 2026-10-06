@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
-import { NodeService } from "../../src/services/node-service.js";
+import { NodeService } from "../../src/services/node/node-service.js";
 import { InternalNode, LeafNode, SkillNode } from "../../src/domain/models/index.js";
 function fixture(t: any) {
   const root = fs.realpathSync(

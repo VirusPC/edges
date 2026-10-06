@@ -11,7 +11,7 @@ Project Memory 类型/索引/reshape/与 docs 边界等。
 - [project\_memory\_tree\_algorithm](<backlog/2026-09-10--project-memory%E6%98%AF%E6%A0%91%E7%BB%93%E6%9E%84%E7%AE%97%E6%B3%95/index.md>) — 整体从树理解 memory；不同 type 只是不同节点；与 page index 相通
 - [reshape底层拆树原子操作](<backlog/2026-09-10--reshape%E5%BA%95%E5%B1%82%E6%8B%86%E6%A0%91%E5%8E%9F%E5%AD%90%E6%93%8D%E4%BD%9C/index.md>) — project\-memory reshape 后续重构方向：底层拆出树相关原子操作
 - [memory\_entry\_private\_metadata](<backlog/2026-09-11--%E8%AE%B0%E5%BF%86%E6%9D%A1%E7%9B%AE%E5%8A%A0private%E5%85%83%E6%95%B0%E6%8D%AE/index.md>) — 记忆条目增加 private 元数据（从
-- [reference\_description\_must\_include\_key\_urls](<backlog/2026-09-13--reference%E7%9A%84description%E5%BA%94%E5%B8%A6%E5%85%B3%E9%94%AE%E9%93%BE%E6%8E%A5/index.md>) — 写/改 .memory/references 时，description 与 INDEX 摘要必须带可点击的关键 URL
+- [reference\_description\_must\_include\_key\_urls](<backlog/2026-09-13--reference%E7%9A%84description%E5%BA%94%E5%B8%A6%E5%85%B3%E9%94%AE%E9%93%BE%E6%8E%A5/index.md>) — 写或改 .harness/memory/references 时，description 与类型入口索引行必须带可点击的关键 URL
 - [clarify\_memory\_vs\_docs\_boundary](<backlog/2026-09-15--%E6%98%8E%E7%A1%AEmemory%E4%B8%8Edocs%E8%BE%B9%E7%95%8C/index.md>) — 明确 .memory 与 docs/ 的边界：成文给人读 vs 短记忆给维护者/agent
 - [memory\_module\_decoupled\_pluggable\_interface](<backlog/2026-09-16--Memory%E6%A8%A1%E5%9D%97%E8%A7%A3%E8%80%A6%E4%B8%8E%E5%8F%AF%E6%8F%92%E6%8B%94%E6%8E%A5%E5%8F%A3/index.md>) — 框架解耦：Memory 模块接口明确，可接入多种 Memory 实现
 - [memory\_query\_dropout\_random\_mask](<backlog/2026-09-16--%E8%AE%B0%E5%BF%86%E6%9F%A5%E8%AF%A2Dropout%E9%9A%8F%E6%9C%BA%E5%B1%8F%E8%94%BD/index.md>) — 查询/使用记忆时随机屏蔽一部分（类 Dropout），减轻过去记忆拉偏

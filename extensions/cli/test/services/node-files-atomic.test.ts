@@ -4,7 +4,7 @@ import fs from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
 import path from "node:path";
 import { tmpdir } from "node:os";
-import { readEntry, saveEntries } from "../../src/services/node-files.js";
+import { readEntry, saveEntries } from "../../src/services/node/node-files.js";
 
 for (const failure of ["writeSync", "fsyncSync", "renameSync"] as const)
   test(`atomic overwrite preserves original and cleans staging on ${failure} failure`, (t) => {
@@ -56,8 +56,8 @@ test("atomic overwrite refreshes identity for the next save and still rejects ex
 
 test("runtime lock is excluded from snapshots/import while active locks block relocation", async (t) => {
   const { resourceSnapshot, validateResources } =
-    await import("../../src/services/node-resources.js");
-  const { NodeService } = await import("../../src/services/node-service.js");
+    await import("../../src/services/node/node-resources.js");
+  const { NodeService } = await import("../../src/services/node/node-service.js");
   const root = fs.mkdtempSync(
     path.join(fs.realpathSync(tmpdir()), "node-runtime-lock-"),
   );

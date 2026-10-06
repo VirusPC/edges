@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
-import { rewriteLinks } from "../extensions/cli/src/services/node-layout.js";
+import { rewriteLinks } from "../extensions/cli/src/services/node/node-layout.js";
 
 const relocations = [
   ["knowledge/archive", "archive"],

@@ -3,7 +3,7 @@ import { listTypeFiles, typeContentDir, typeIndexPath } from './types.js';
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 
 import { memoryNodes, prepareMemoryWrite } from './service.js';
-import { NodeService } from '../node-service.js';
+import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
 import {
   escapeIndexText,

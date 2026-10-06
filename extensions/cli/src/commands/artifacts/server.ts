@@ -6,7 +6,7 @@ import {
   DEFAULT_PORT,
   DEFAULT_PUBLIC_BASE_URL,
   loadServerEnv,
-} from "./server/env.js";
+} from "../../services/artifacts/server/env.js";
 import {
   installArtifactsServer,
   restartArtifactsServer,
@@ -14,7 +14,7 @@ import {
   startArtifactsServer,
   statusArtifactsServer,
   stopArtifactsServer,
-} from "./server/ops.js";
+} from "../../services/artifacts/server/ops.js";
 
 const SERVER_AFTER_HELP = `
 COMMANDS
@@ -46,7 +46,7 @@ After a deploy.yml pull (env already on the box):
 Laptop client (same token as the server env):
   edges artifacts init --base-url https://edges.viruspc.tech
   edges artifacts publish <path>
-  edges artifacts rm <id|url>
+  edges artifacts delete <id|url>
 
 Rotate token:
   edges artifacts server install --force

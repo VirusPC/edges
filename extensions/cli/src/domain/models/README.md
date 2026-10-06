@@ -141,7 +141,7 @@ flowchart TD
     S --> F[文件 IO、快照检查与写入协调]
 ```
 
-Model 的 `create/update/destroy` 是内存领域方法，不会创建、写入或删除文件。业务调用方通过 [NodeService](../../services/node-service.ts) 或 Tasks/Memory/Note 业务 Service 完成持久化，而不是自行拼接模型更新和文件写入。`destroy` 当前提供删除前校验，实际目录删除由 Service 执行。
+Model 的 `create/update/destroy` 是内存领域方法，不会创建、写入或删除文件。业务调用方通过 [NodeService](../../services/node/node-service.ts) 或 Tasks/Memory/Note 业务 Service 完成持久化，而不是自行拼接模型更新和文件写入。`destroy` 当前提供删除前校验，实际目录删除由 Service 执行。
 
 模型采用可变实例。同一个 NodeService 内，同路径节点共享实例；`create/update` 使用临时草稿校验后再更新当前实例，减少失败时的半修改状态。这不等于 immutable，也不构成跨进程事务。metadata 和关系 getter 返回受保护的视图/副本；修改 getter 返回值不会更新节点，内容应通过字段 setter 或模型方法更新。
 

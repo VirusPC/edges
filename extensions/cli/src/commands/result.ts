@@ -1,0 +1,30 @@
+import type { CliResult } from "../context.js";
+import { exitCodeForErrorCode } from "./exit.js";
+
+const USAGE_CODES = new Set([
+  "commander.unknownOption",
+  "commander.missingArgument",
+  "commander.invalidArgument",
+  "commander.excessArguments",
+  "commander.missingMandatoryOptionValue",
+]);
+
+export function usageErrorCode(commandCode: string): "VALIDATION_ERROR" | null {
+  return USAGE_CODES.has(commandCode) ? "VALIDATION_ERROR" : null;
+}
+
+export function fail(errorCode: string, reason: string, stderrHint: string): CliResult {
+  return {
+    exitCode: exitCodeForErrorCode(errorCode),
+    stdout: `${JSON.stringify({ status: "failed", errorCode, reason })}\n`,
+    stderr: stderrHint,
+  };
+}
+
+export function succeed(payload: Record<string, unknown>, stderrNote = ""): CliResult {
+  return {
+    exitCode: 0,
+    stdout: `${JSON.stringify({ status: "success", ...payload })}\n`,
+    stderr: stderrNote,
+  };
+}

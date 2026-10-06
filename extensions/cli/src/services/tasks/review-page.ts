@@ -230,3 +230,33 @@ export async function writeReviewPage(
 ): Promise<void> {
   await writeFile(absPath, html, "utf8");
 }
+
+export type RenderReviewPageDeps = {
+  readFile: (abs: string) => Promise<string>;
+  writeFile: ReviewPageWriteFile;
+  nowMs: number;
+  tmpDir: string;
+  assetDir?: string;
+};
+
+export async function renderReviewPageFromText(
+  text: string,
+  out: string | undefined,
+  deps: RenderReviewPageDeps,
+): Promise<{ path: string; groupCount: number; itemCount: number }> {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(text);
+  } catch {
+    throw new TasksError(
+      "VALIDATION_ERROR",
+      "review-page input must be a JSON object with groups[] and items[]",
+    );
+  }
+  const input = parseReviewPageInput(raw);
+  const shell = await loadBuiltReviewShell(deps.readFile, deps.assetDir);
+  const html = renderReviewPageHtml(input, shell);
+  const path = resolveReviewPageOutPath(out, deps.nowMs, deps.tmpDir);
+  await writeReviewPage(path, html, deps.writeFile);
+  return { path, groupCount: input.groups.length, itemCount: input.items.length };
+}

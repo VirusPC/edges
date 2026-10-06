@@ -3,7 +3,7 @@ export { ownershipTarget } from './paths.js';
 import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { discoverScopes } from '../scope.js';
 import { memoryNodes, prepareMemoryWrite } from './service.js';
-import { NodeService } from '../node-service.js';
+import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
 import { join, dirname, basename, relative } from "node:path";
 import { AUTO_START, CHILDREN_START, CHILDREN_END, IMPORTANT_START, LOCAL_START, LOCAL_END, OUTER_START, INDEX_ENTRY_PATTERN, blockPattern, buildChildrenBlock, ensureImportantBlock, escapeRegExp, insertInnerBlock, renderAgentsDocument, upsertBlock, } from "./blocks.js";

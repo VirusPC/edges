@@ -1,4 +1,4 @@
-import type { RuntimeConfig } from "../../utils/config.js";
+import type { RuntimeConfig } from "../config.js";
 import type { IngestRequest, IngestResult, ScriptSuccess } from "./types.js";
 import { classifyError, summarize } from "./errors.js";
 import { parseMarkers } from "./git/markers.js";

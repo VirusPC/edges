@@ -8,7 +8,7 @@
 ## 本层硬约束
 
 - 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
-- 本层硬约束直接写在这个区块里，不要链到 `.memory` 文件。
+- 本层硬约束直接写在这个区块里，不要通过记忆正文链接代替本区块的硬约束。
 - 改这套 skill 的顺序：`PROTOCOL.md` → `LAYOUT.md` → `project-memory-init` → 其他非 doctor skill → `project-memory-doctor`。不能跳到下游再反过来定义上游。
 - Init 只在用户明确要求时运行；Remember / Ask / Doctor 不得代为 Init。
 <!-- project-memory-important:end -->

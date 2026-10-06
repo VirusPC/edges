@@ -645,7 +645,7 @@ for (const [spelling, href] of [
       const { LegacyIndex: InternalNode } =
         await import("../../../../scripts/legacy-index.mjs");
       const { NodeService } =
-        await import("../../src/services/node-service.js");
+        await import("../../src/services/node/node-service.js");
       const rootEntry = join(f.root, "AGENTS.md"),
         ownerEntry = join(f.root, "extensions/AGENTS.md");
       let rootSource = fs.readFileSync(rootEntry, "utf8");

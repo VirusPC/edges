@@ -4,7 +4,7 @@ import * as fs from 'node:fs';
 import path from 'node:path';
 import writeFileAtomic from 'write-file-atomic';
 import { randomUUID } from 'node:crypto';
-import { absolute, firstSymlink } from '../utils/filesystem.js';
+import { absolute, firstSymlink } from '../../utils/filesystem.js';
 
 export interface EntryFile {
   path: string;

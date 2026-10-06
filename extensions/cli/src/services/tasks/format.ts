@@ -1,47 +1,4 @@
-import type { GroupedListGroup, GroupedListItem } from "./grouped.js";
 import type { TaskRun } from "./runlog.js";
-import type {
-  TaskListItem,
-  TaskProjectId,
-  TaskProjectRecord,
-  TaskRecord,
-  TasksErrorCode,
-} from "../../domain/models/tasks/types.js";
-
-export type TasksFailure = {
-  status: "failed";
-  errorCode: TasksErrorCode;
-  reason: string;
-};
-
-export type TasksSuccess = {
-  status: "success";
-  command: string;
-  tasks?: TaskListItem[];
-  task?: Omit<TaskRecord, "sidecarMarkdown">;
-  stem?: string;
-  path?: string;
-  sidecarPath?: string;
-  from?: string;
-  to?: string;
-  runs?: unknown[];
-  run?: unknown;
-  messages?: unknown[];
-  projects?: TaskProjectRecord[];
-  project?: TaskProjectId;
-  dir?: string;
-  title?: string;
-  description?: string;
-  groupCount?: number;
-  itemCount?: number;
-  schema?: string;
-  groups?: GroupedListGroup[];
-  items?: GroupedListItem[];
-};
-
-export function formatTasksResult(payload: TasksSuccess | TasksFailure): string {
-  return `${JSON.stringify(payload)}\n`;
-}
 
 export function formatRunsTable(runs: TaskRun[]): string {
   const header = ["run-id", "agent", "status", "started_at", "ended_at"];

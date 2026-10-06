@@ -35,7 +35,7 @@ flowchart TD
 | 怎样创建目录、登记父索引、检查外部修改并保存？ | services |
 | 怎样把命令参数变成请求、返回 JSON 或表格？ | commands |
 
-Model 不做 IO，不依赖 Service 或 operations；operations 不依赖 Service。通用格式工具不依赖业务模型。这不表示整个 CLI 的历史分层问题都已消除：`utils/exit.ts` 仍引用业务错误类型，部分命令仍有用例编排，留待 commands/Service 解耦处理。
+Model 不做 IO，不依赖 Service 或 operations；operations 不依赖 Service。通用格式工具不依赖业务模型。这不表示整个 CLI 的历史分层问题都已消除：退出码表在 `commands/exit.ts`，不再经 utils 引用业务错误类型；部分命令仍有用例编排。
 
 ## 共同的数据基础
 
@@ -93,4 +93,4 @@ Schema 从登记的 TS 数据契约生成，不扫描完整模型类，生成物
 - 涉及文件、多个节点、发布或权限策略的完整动作由 Service 编排。
 - 新外部 JSON 合同用纯 TS 类型定义，按实际需求登记到 Schema 生成器。
 
-不要为一种新节点复制 IO、查询或 YAML 解析实现。理解模型从 [models/index.ts](models/index.ts) 开始，理解查询从 [operations/query.ts](operations/query.ts) 开始，理解持久化从 [NodeService](../services/node-service.ts) 开始。构建、测试与 CLI 用法见 [CLI README](../../README.md)。
+不要为一种新节点复制 IO、查询或 YAML 解析实现。理解模型从 [models/index.ts](models/index.ts) 开始，理解查询从 [operations/query.ts](operations/query.ts) 开始，理解持久化从 [NodeService](../services/node/node-service.ts) 开始。构建、测试与 CLI 用法见 [CLI README](../../README.md)。

@@ -11,7 +11,7 @@ import {
   saveEntries,
   checkPath,
   type EntryFile,
-} from "../node-files.js";
+} from "../node/node-files.js";
 
 import { isGitBoundary } from "../scope.js";
 import { taskLocationOf } from "./node-query.js";

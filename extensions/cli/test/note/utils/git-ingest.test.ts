@@ -362,7 +362,7 @@ test("nested known Memory import rejects before Git or destination mutation", as
     "<!-- project-memory-type:start -->\nname: project\nmodule: memory\nwritable: true\n<!-- project-memory-type:end -->\n",
   );
   writeFileSync(source, "# Source memory\n");
-  const { NodeService } = await import("../../../src/services/node-service.js");
+  const { NodeService } = await import("../../../src/services/node/node-service.js");
   assert.equal(
     (await new NodeService({ managedRoot: sourceRoot }).get(source))?.type,
     "memory",

@@ -3,12 +3,12 @@ import type { CliContext } from "../../context.js";
 import { parseTaskProject } from "../../domain/models/tasks/project.js";
 import { parseTaskPriority } from "../../domain/models/tasks/priority.js";
 import { TASK_PRIORITIES, TASK_STATUSES, type TaskPriority, type TaskProjectId, type TaskStatus } from "../../domain/models/tasks/types.js";
-import { runTasksCommand, succeed } from "../../services/tasks/result.js";
-import { GROUPED_LIST_SCHEMA, listGroupedByProject, listRepositoryGroupedByProject } from "../../services/tasks/grouped.js";
+import { runTasksCommand, succeed } from "./run.js";
 import { listTasksService } from "../../services/tasks/service.js";
-
-import { listRepositoryTasksWithDocs } from "../../services/tasks/board.js";
+import { listRepositoryTasksWithDocs, listTasksWithDocs } from "../../services/tasks/board.js";
 import { gitRoot } from "../../services/scope.js";
+import { TasksError } from "../../domain/models/tasks/types.js";
+import { groupRecords, matchesFilters, parseFieldFilter, type FieldFilter } from "../../services/list-query.js";
 
 const LIST_AFTER_HELP = `
 FLAGS
@@ -17,11 +17,10 @@ FLAGS
   --priority <priority>  Repeatable OR filter: urgent | high | medium | low | none
   --project <project>  Repeatable OR filter: default or kebab slug
   --sort priority        urgent → high → medium → low → none (stable). Default stays board order
-  --group-by project     After filters, emit grouped snapshot ${GROUPED_LIST_SCHEMA}
-  --format json          stdout format (always json)
-  --json                          Write JSON to stdout (always on)
+  --group-by <field>    After filters, emit { groupBy, groups: [{ key, items }] }
+  --filter <field=value>  Repeatable. Same field is OR, different fields are AND
 
-Grouped stdout (edges.tasks.grouped/v1) is { schema, groups, items }. Items may include optional doc (name, description, metadata, body). Without --group-by the envelope stays { status, command: "list", tasks: [...] } and tasks do not include doc.
+Grouped stdout is { status, command, groupBy, groups }. Items may include optional doc. Without --group-by the envelope stays { status, command: "list", tasks: [...] } and tasks do not include doc.
 
 EXAMPLES
   edges tasks list
@@ -57,8 +56,12 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
         ]),
     )
     .addOption(new Option("--sort <field>", "sort list").choices(["priority"]))
-    .addOption(new Option("--group-by <field>", "group filtered tasks").choices(["project"]))
+    .addOption(new Option("--group-by <field>", "group filtered tasks by one field"))
     .addOption(new Option("--format <format>", "stdout format (always json)").choices(["json"]))
+    .option("--filter <field=value>", "Repeatable field filter", (value: string, previous: string[] = []) => [
+      ...previous,
+      value,
+    ])
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", LIST_AFTER_HELP)
     .action(async (opts: {
@@ -67,10 +70,20 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
       priority?: TaskPriority[];
       project?: TaskProjectId[];
       sort?: "priority";
-      groupBy?: "project";
+      groupBy?: string;
       format?: "json";
+      filter?: string[];
     }) => {
       await runTasksCommand(ctx, async (runtime) => {
+        let filters: FieldFilter[];
+        try {
+          filters = (opts.filter ?? []).map(parseFieldFilter);
+        } catch (error) {
+          throw new TasksError(
+            "VALIDATION_ERROR",
+            error instanceof Error ? error.message : String(error),
+          );
+        }
         const listOpts = {
           status: opts.status,
           priorities: opts.priority,
@@ -81,22 +94,27 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
           ? gitRoot(runtime.location.scopeDir) ?? runtime.location.scopeDir
           : undefined;
         const purpose = tasks.getOptionValueSource("purpose") === "cli" ? ctx.purpose : undefined;
-        if (opts.groupBy === "project") {
-          const grouped = repositoryRoot
-            ? await listRepositoryGroupedByProject(repositoryRoot, listOpts, purpose)
-            : await listGroupedByProject(runtime.location, listOpts, runtime.fs);
+        const listed = repositoryRoot
+          ? await listRepositoryTasksWithDocs(repositoryRoot, listOpts, purpose)
+          : opts.groupBy
+            ? await listTasksWithDocs(runtime.location, listOpts, runtime.fs)
+            : await listTasksService(runtime.location, listOpts, runtime.fs);
+        const filtered = listed.filter((item) =>
+          matchesFilters(item as unknown as Record<string, unknown>, filters),
+        );
+        if (opts.groupBy) {
           return succeed({
             status: "success",
             command: "list",
-            schema: grouped.schema,
-            groups: grouped.groups,
-            items: grouped.items,
+            groupBy: opts.groupBy,
+            groups: groupRecords(filtered as unknown as Record<string, unknown>[], opts.groupBy),
           });
         }
-        const listed = repositoryRoot
-          ? (await listRepositoryTasksWithDocs(repositoryRoot, listOpts, purpose)).map(({ doc: _doc, ...item }) => item)
-          : await listTasksService(runtime.location, listOpts, runtime.fs);
-        return succeed({ status: "success", command: "list", tasks: listed });
+        const tasksOnly = filtered.map((item) => {
+          const { doc: _doc, ...rest } = item as { doc?: unknown };
+          return rest;
+        });
+        return succeed({ status: "success", command: "list", tasks: tasksOnly });
       });
     });
 }

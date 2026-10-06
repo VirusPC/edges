@@ -292,9 +292,9 @@ _避免使用_：三套页面、status station、本轮在中栏改状态、把�
 固定公网路径 `/tasks/` 上的持久入口，始终反映 main 看板；部署链从看板生成分组列表，经薄映射喂给同一审阅壳。页内文档来自分组条目嵌入的 Task Doc。不是新的 status station 产品，也不是 Artifacts 短 TTL 预览。
 _避免使用_：status station、Artifacts 预览服务、把它当 Task Project 审阅页命令本身、本轮按 project 拆 URL 树、本地 HTML 视图、教学站点、浏览器去读仓内 `.md`、本轮把页上拖拽写回 git
 
-**分组列表 schema（edges.tasks.grouped）**：
-`edges tasks list --group-by project` 产出的松耦合分组契约（`edges.tasks.grouped/v1`）：`groups[]` 与 `items[]` 组成的看板快照，不按审阅页命名、也不专属于 review-page。条目可带可选字段，尤其是对齐 Task Doc 的 `doc`；审阅页经薄映射使用同一对象。
-_避免使用_：review-page 输入 schema、把它叫 review-page JSON、把扁平 list 当成分组契约、平行的看板顶层 schema
+**列表分组**：
+四种叶子的 `list --group-by` 共用的输出：`{ status: "success", groupBy, groups: [{ key, items }] }`。字段只认一层键。缺字段的 `key` 是 `__undefined__`，过滤也把缺字段当成这个值。对象和数组按键名排序后的 JSON 文本参加比较和分组。`/tasks/` 把任务的这份输出映射成审阅页自己的 groups 与 items，这一组的 id 和 title 同样是 `__undefined__`。审阅页输入不是列表输出。
+_避免使用_：`edges.tasks.grouped/v1`、`a.b` 路径取值、按资源各做一种分组契约、`null`、`unspecified`、review-page 输入 schema、把扁平 list 当成分组结果
 
 **doc（看板条目）**：
 分组列表 `items[]` 上可选嵌入的 Task Doc（`name`、`description`、`metadata`、`body`）。审阅页只读页内 JSON 里的这份文档。
@@ -329,7 +329,7 @@ Task 的指派，写在 frontmatter `metadata.edges-task-assignee`；与 edges-t
 _避免使用_：用状态夹或 Task Project 表达谁负责、在看板条目上再造一份与 Task Doc 平行的必填指派字段
 
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`list --group-by project` 产出分组列表 schema（`edges.tasks.grouped/v1`，不绑 review-page），条目可嵌入可选的 Task Doc（`doc`）；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；`project review-page` 只读不入库的预构建审阅壳，把 JS/CSS 内联成单份 HTML，把 groups+items 写成 `#edges-review-payload` 的 JSON script，不算分类、不落地、不托管，运行时不现编，页只读载荷里的 `doc`，导航用 hash 或 hash 上的 query。`/tasks/` 持久看板站是部署链消费者，不新开看板动词。
+以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；`delete` 不删除文件，只提示改用 `status <target> cancelled`；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`list --group-by` 产出列表分组，条目可嵌入可选的 Task Doc（`doc`）；`/tasks/` 再把它映射成审阅页输入；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；`project review-page` 只读不入库的预构建审阅壳，把 JS/CSS 内联成单份 HTML，把 groups+items 写成 `#edges-review-payload` 的 JSON script，不算分类、不落地、不托管，运行时不现编，页只读载荷里的 `doc`，导航用 hash 或 hash 上的 query。`/tasks/` 持久看板站是部署链消费者，不新开看板动词。
 _避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）、把 review-page 扩成 Artifacts 预览服务或 `/tasks/` 托管、把分组 schema 命名成 review-page 专属、为看板另开顶层 schema、让浏览器读仓内 `.md`、在用户机器上现编审阅壳、把预构建产物提交进 git、默认用 zip+base64 装载荷、path history、靠服务器 rewrite 的 react-router
 
 **Artifacts 预览服务**：
@@ -337,12 +337,16 @@ _避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 r
 _避免使用_：长期站点/博客、Astro、site-and-content、本地 HTML 视图、聊天 HTML 预览、审阅结果回传 Agent 客户端（若指同一件事）、`/tasks/` 持久看板站、教学站点
 
 **Artifact（edges）**：
-一次短生命周期托管的静态包（通常是交互 HTML）；不是知识资产，也不是对外 Post。
+一次短生命周期托管的静态包（通常是交互 HTML）；不是知识资产，也不是对外 Post。上传后先是草稿，公开后才有可打开的 URL。
 _避免使用_：Post、知识资产、长期站点页面、聊天附件预览、`/tasks/` 持久看板站
 
+**Artifact 草稿**：
+已上传、尚未公开的 Artifact。没有公开 URL，存活时间尚未起算。
+_避免使用_：已公开的 Artifact、本地 HTML 文件、把上传直接当成已经可以打开
+
 **edges artifacts（CLI）**：
-`edges artifacts` 命令面：薄 `init`/token 与 `publish`/`rm`。`edges tasks project review-page` 仍只渲染，不发布。
-_避免使用_：把 review-page 扩成托管、手搓上传绕过 CLI
+`edges artifacts` 命令面：`init` 准备 token；`create` 只保存草稿；`publish` 公开已有草稿，或对本地路径先保存再公开；`delete` 删除草稿或已公开的包。`edges tasks project review-page` 仍只渲染，不发布。
+_避免使用_：把 review-page 扩成托管、手搓上传绕过 CLI、`rm`、把 `create` 当成已经公开
 
 **聊天 HTML 预览**：
 Agent 客户端把 HTML 嵌进聊天窗口的预览（如 Grok Bot HTML preview）。
