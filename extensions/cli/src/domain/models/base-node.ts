@@ -2,7 +2,7 @@ import { dirname, isAbsolute, normalize } from "node:path";
 import {
   parseDocument,
   serializeDocument,
-} from "../utils/markdown/document.js";
+} from "../../utils/markdown/document.js";
 import { nodeRelations, nodePath } from "./relations.js";
 import type {
   Metadata,

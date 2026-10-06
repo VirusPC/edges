@@ -8,7 +8,7 @@ import {
   parseTaskPriority,
   priorityFromMetadata,
   sortTasksByPriority,
-} from "../../../src/models/tasks/priority.js";
+} from "../../../src/domain/models/tasks/priority.js";
 
 test("TASK_PRIORITIES is urgent high medium low none", () => {
   assert.deepEqual([...TASK_PRIORITIES], ["urgent", "high", "medium", "low", "none"]);

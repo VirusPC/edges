@@ -1,6 +1,6 @@
-import type { DocumentCodec, MarkdownDocument } from '../../utils/markdown/types.js';
+import type { DocumentCodec, MarkdownDocument } from '../../../utils/markdown/types.js';
 import type { NodeModel } from './model.js';
-import { parseDocument, serializeDocument } from '../../utils/markdown/document.js';
+import { parseDocument, serializeDocument } from '../../../utils/markdown/document.js';
 import { parseNode } from './parse.js';
 import { serializeNode } from './serialize.js';
 

@@ -11,7 +11,7 @@ import {
   resolveReviewPageOutPath,
   writeReviewPage,
 } from "../../../src/services/tasks/review-page.js";
-import { TasksError } from "../../../src/models/tasks/types.js";
+import { TasksError } from "../../../src/domain/models/tasks/types.js";
 
 const sample = {
   groups: [

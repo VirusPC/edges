@@ -1,11 +1,11 @@
 import path from "node:path";
 import { realpathSync } from "node:fs";
-import { InternalNode } from "../../models/index.js";
-import { query } from "../../operations/query.js";
+import { InternalNode } from "../../domain/models/index.js";
+import { query } from "../../domain/operations/query.js";
 import { repositoryNodeQuery, projectLocationOf } from "./node-query.js";
 import { taskBoardLocation, type TaskPurpose } from "./paths.js";
 import { scopeDir, type BoardTarget } from "./paths.js";
-import { isTaskProjectId } from "../../models/tasks/project.js";
+import { isTaskProjectId } from "../../domain/models/tasks/project.js";
 import { portableScope } from "../scope.js";
 import { listRepositoryTasksWithDocs, createNodeBoardFs, listProjectIds, listTasksWithDocs, type BoardFs, type TaskListOpts } from "./board.js";
 import {
@@ -16,8 +16,8 @@ import {
   seedTitleFor,
 } from "./project-meta.js";
 import type { ReviewPageInput, ReviewPageItem } from "./review-page.js";
-import { DEFAULT_TASK_PROJECT, TasksError, type TaskListItem, type TaskProjectId } from "../../models/tasks/types.js";
-import type { TaskDoc } from "../../models/tasks/task-doc.js";
+import { DEFAULT_TASK_PROJECT, TasksError, type TaskListItem, type TaskProjectId } from "../../domain/models/tasks/types.js";
+import type { TaskDoc } from "../../domain/models/tasks/task-doc.js";
 
 export const GROUPED_LIST_SCHEMA = "edges.tasks.grouped/v1";
 

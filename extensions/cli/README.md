@@ -4,6 +4,8 @@ Multi-command Edges CLI. Humans and local agents share `edges`. Note ingest git 
 
 ## Consumption
 
+Runtime, build, and tests use Node.js 22 or newer; Node 22 is the project baseline.
+
 `edges-cli` is **not** published to the npm registry. `package.json` sets `"private": true` for that reason: this package stays in the repo and is not an install target on npm.
 
 The installable `edges` binary is the **local** `dist/` build. `"bin"` points at `./dist/index.js`. Produce that file with:
@@ -73,7 +75,7 @@ Those examples use `tsx` and do not need a `dist/` build. The installed `edges` 
 
 `edges --scope <directory> <command>` selects the content owner. Resolution order is `--scope`, `EDGES_SCOPE`, `EDGES_REPO`, then the nearest owning AGENTS scope or Git root above the process cwd. Relative paths resolve against cwd. The CLI install directory is never the default content target. An explicit directory does not initialize Project Memory.
 
-Node models live together in [`src/models/`](src/models/), with domain syntax helpers beneath that directory. [`src/operations/`](src/operations/) contains the shared traversal kernel, generic lazy query chain and individual collection algorithms; traversal receives loading callbacks from the Service and performs no filesystem IO. Query, registered-node collection and proposed graph validation reuse it with their existing relation policies. [`NodeService`](src/services/node-service.ts) provides snapshot-checked document creation, loading, updates, deletion and ownership-index coordination. Task, Memory and Note business orchestration lives under `src/services/`; command handlers under `src/commands/` retain the directory-as-command-tree layout. Generic Markdown/YAML and filesystem primitives remain under `src/utils/`. There is no separate package or compatibility copy of the former `utils/node-tree` repository API.
+Node models live together in [`src/domain/models/`](src/domain/models/), with domain syntax helpers beneath that directory. [`src/domain/operations/`](src/domain/operations/) contains the shared traversal kernel, generic lazy query chain and individual collection algorithms; traversal receives loading callbacks from the Service and performs no filesystem IO. Query, registered-node collection and proposed graph validation reuse it with their existing relation policies. [`NodeService`](src/services/node-service.ts) provides snapshot-checked document creation, loading, updates, deletion and ownership-index coordination. Task, Memory and Note business orchestration lives under `src/services/`; command handlers under `src/commands/` retain the directory-as-command-tree layout. Generic Markdown/YAML and filesystem primitives remain under `src/utils/`. There is no separate package or compatibility copy of the former `utils/node-tree` repository API.
 
 [`src/services/scope.ts`](src/services/scope.ts) retains environment/argument precedence, Git fallback and directory exclusions. Readable AGENTS entries are eligible without a Memory marker or separate responsibility requirement; selection does not initialize Memory. Task lists and the global dashboard follow registered NodeService relations, with no discovery scan or missing-index fallback. Traversal defaults to localChildren; includeDescendants also follows descendantChildren. Only explicit includeHarness follows each node’s independent maintenance relation, recursively through all maintenance levels.
 

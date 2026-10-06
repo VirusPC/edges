@@ -4,7 +4,7 @@ import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { resolveScope, gitRoot, portableScope } from '../../src/services/scope.js';
-import { TasksError } from '../../src/models/tasks/types.js';
+import { TasksError } from '../../src/domain/models/tasks/types.js';
 
 test('missing scope remains a validation error without belonging to Tasks', () => {
   const root = mkdtempSync(path.join(tmpdir(), 'edges-scope-adapter-'));

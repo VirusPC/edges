@@ -3,7 +3,7 @@ import type { NodeModel, SectionKey, NodeItem, NodeLink } from "./model.js";
 import type { Nodes as AstNode } from "mdast";
 import { fromMarkdown } from "mdast-util-from-markdown";
 import { createNodeModel } from "./model.js";
-import { parseDocument } from "../../utils/markdown/document.js";
+import { parseDocument } from "../../../utils/markdown/document.js";
 
 type Binding = {
   start: number;

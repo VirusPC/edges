@@ -5,7 +5,7 @@ import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { run } from '../../src/program.js';
-import { InternalNode } from '../../src/models/index.js';
+import { InternalNode } from '../../src/domain/models/index.js';
 import { generateTasksSite } from '../../src/services/tasks/generate-site.js';
 
 function fixture(t: { after(fn: () => void): void }) {

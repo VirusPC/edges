@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { BaseNode, InternalNode, LeafNode } from '../../src/models/index.js';
-import { traverse } from '../../src/operations/traverse.js';
-import { setNodeRelations } from '../../src/models/relations.js';
-import type { NodeQueryOptions } from '../../src/models/types.js';
+import { BaseNode, InternalNode, LeafNode } from '../../src/domain/models/index.js';
+import { traverse } from '../../src/domain/operations/traverse.js';
+import { setNodeRelations } from '../../src/domain/models/relations.js';
+import type { NodeQueryOptions } from '../../src/domain/models/types.js';
 const leaf = (name: string) => new LeafNode(`/root/${name}/index.md`);
 const scope = (name: string, local: BaseNode[] = [], descendants: BaseNode[] = []) =>
   new InternalNode(`/root/${name}/AGENTS.md`).create({ localChildren: local.map(n => ({ id: n.id })), descendantChildren: descendants.map(n => ({ id: n.id })) }, { operation: 'create' });

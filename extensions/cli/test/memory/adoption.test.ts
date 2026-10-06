@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { InternalNode } from "../../src/models/internal-node.js";
+import { InternalNode } from "../../src/domain/models/internal-node.js";
 import {
   initMemory,
   doctorMemory,

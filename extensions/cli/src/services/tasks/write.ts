@@ -1,16 +1,16 @@
 import { realpathSync } from "node:fs";
 import { NodeService } from "../node-service.js";
-import { TaskNode } from "../../models/task-node.js";
-import { setDomainField } from "../../models/fields.js";
+import { TaskNode } from "../../domain/models/task-node.js";
+import { setDomainField } from "../../domain/models/fields.js";
 import { assertBoardPath } from "./board.js";
 import { scopeDir, boardRoot, type BoardTarget } from "./paths.js";
 import path from "node:path";
 import { getTask, listProjectIds, type BoardWriter } from "./board.js";
-import { taskBody } from "../../models/tasks/frontmatter.js";
+import { taskBody } from "../../domain/models/tasks/frontmatter.js";
 import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
-import { newTaskStem, taskNameSlug } from "../../models/tasks/slug.js";
-import { parseTaskPriority } from "../../models/tasks/priority.js";
-import { parseTaskProject, projectDirName } from "../../models/tasks/project.js";
+import { newTaskStem, taskNameSlug } from "../../domain/models/tasks/slug.js";
+import { parseTaskPriority } from "../../domain/models/tasks/priority.js";
+import { parseTaskProject, projectDirName } from "../../domain/models/tasks/project.js";
 import { ensureProjectMetadata } from "./project-meta.js";
 import {
   DEFAULT_TASK_PROJECT,
@@ -19,7 +19,7 @@ import {
   type TaskPriority,
   type TaskProjectId,
   type TaskStatus,
-} from "../../models/tasks/types.js";
+} from "../../domain/models/tasks/types.js";
 
 export type { BoardWriter };
 

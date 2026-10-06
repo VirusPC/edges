@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { validateInput } from "../../../src/models/note/validation.js";
+import { validateInput } from "../../../src/services/note/validation.js";
 
 test("validateInput accepts valid payload", () => {
   const parsed = validateInput({

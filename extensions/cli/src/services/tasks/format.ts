@@ -6,7 +6,7 @@ import type {
   TaskProjectRecord,
   TaskRecord,
   TasksErrorCode,
-} from "../../models/tasks/types.js";
+} from "../../domain/models/tasks/types.js";
 
 export type TasksFailure = {
   status: "failed";

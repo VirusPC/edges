@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { InternalNode } from "../../src/models/index.js";
+import { InternalNode } from "../../src/domain/models/index.js";
 
 const source = `# Context
 

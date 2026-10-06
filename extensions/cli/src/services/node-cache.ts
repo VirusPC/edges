@@ -1,8 +1,8 @@
 /** Loaded instance identity and optimistic snapshots. Not a public domain API. */
 import * as fs from "node:fs";
-import { BaseNode } from "../models/index.js";
-import { harnessPath } from "../models/layout.js";
-import { setNodeRelations, setNodePath } from "../models/relations.js";
+import { BaseNode } from "../domain/models/index.js";
+import { harnessPath } from "../domain/models/layout.js";
+import { setNodeRelations, setNodePath } from "../domain/models/relations.js";
 import { readEntry, validateEntry, type EntryFile } from "./node-files.js";
 import { resourceSnapshot, type ResourceSnapshot } from "./node-resources.js";
 import { physicalParent, within } from "./node-layout.js";

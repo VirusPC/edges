@@ -1,17 +1,17 @@
 import * as fs from "node:fs";
 import path from "node:path";
-import { BaseNode, InternalNode, TaskNode } from "../../models/index.js";
-import { domainFields, scalar } from "../../models/fields.js";
-import { decodeBody } from "../../models/internal/parse.js";
+import { BaseNode, InternalNode, TaskNode } from "../../domain/models/index.js";
+import { domainFields, scalar } from "../../domain/models/fields.js";
+import { decodeBody } from "../../domain/models/internal/parse.js";
 import {
   assertProjectDualWrite,
   projectIdFromDir,
-} from "../../models/tasks/project.js";
-import { TasksError } from "../../models/tasks/types.js";
+} from "../../domain/models/tasks/project.js";
+import { TasksError } from "../../domain/models/tasks/types.js";
 import { checkPath } from "../node-files.js";
 import { within } from "../node-layout.js";
 import { NodeService } from "../node-service.js";
-import { query } from "../../operations/query.js";
+import { query } from "../../domain/operations/query.js";
 import {
   isTaskStatus,
   taskBoardLocation,

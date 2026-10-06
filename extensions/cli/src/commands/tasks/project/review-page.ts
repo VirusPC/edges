@@ -10,7 +10,7 @@ import {
   writeReviewPage,
 } from "../../../services/tasks/review-page.js";
 import { asTasksError, fail, succeed } from "../../../services/tasks/result.js";
-import { TasksError } from "../../../models/tasks/types.js";
+import { TasksError } from "../../../domain/models/tasks/types.js";
 
 export function addProjectReviewPageCommand(project: Command, ctx: CliContext): void {
   project

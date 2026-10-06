@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseTaskDoc, setMetadataField, setTopLevelField, replaceBody, renderNewTaskDoc, taskDocumentCodec } from "../../../src/models/tasks/frontmatter.js";
+import { parseTaskDoc, setMetadataField, setTopLevelField, replaceBody, renderNewTaskDoc, taskDocumentCodec } from "../../../src/domain/models/tasks/frontmatter.js";
 
 const SAMPLE = `---
 name: cli_refactor_commanderjs

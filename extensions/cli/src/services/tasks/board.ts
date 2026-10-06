@@ -1,6 +1,6 @@
-import { query } from "../../operations/query.js";
+import { query } from "../../domain/operations/query.js";
 import { realpathSync } from "node:fs";
-import { TaskNode, InternalNode } from "../../models/index.js";
+import { TaskNode, InternalNode } from "../../domain/models/index.js";
 import { taskBoardQuery, taskLocationOf, listRepositoryTaskNodes } from "./node-query.js";
 import { taskBoardLocation } from "./paths.js";
 import { scopeDir, type BoardTarget } from "./paths.js";
@@ -16,15 +16,15 @@ import {
   writeFile,
 } from "node:fs/promises";
 import path from "node:path";
-import { parseTaskDoc } from "../../models/tasks/frontmatter.js";
+import { parseTaskDoc } from "../../domain/models/tasks/frontmatter.js";
 import {
   taskDocFromParsed,
   type TaskDoc,
-} from "../../models/tasks/task-doc.js";
+} from "../../domain/models/tasks/task-doc.js";
 import {
   priorityFromMetadata,
   sortTasksByPriority,
-} from "../../models/tasks/priority.js";
+} from "../../domain/models/tasks/priority.js";
 import {
   assertProjectDualWrite,
   DEFAULT_TASK_PROJECT,
@@ -32,7 +32,7 @@ import {
   isUserProjectSlug,
   projectDirName,
   type TaskProjectId,
-} from "../../models/tasks/project.js";
+} from "../../domain/models/tasks/project.js";
 import {
   boardRoot,
   parseTarget,
@@ -46,7 +46,7 @@ import {
   type TaskPriority,
   type TaskRecord,
   type TaskStatus,
-} from "../../models/tasks/types.js";
+} from "../../domain/models/tasks/types.js";
 
 export type BoardFs = {
   readFile(abs: string): Promise<string>;

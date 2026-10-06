@@ -3,7 +3,7 @@ import { test } from "node:test";
 import * as fs from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { InternalNode, LeafNode, TaskNode } from "../../src/models/index.js";
+import { InternalNode, LeafNode, TaskNode } from "../../src/domain/models/index.js";
 import { NodeService } from "../../src/services/node-service.js";
 function fixture(t: { after(fn: () => void): void }) {
   const root = fs.mkdtempSync(

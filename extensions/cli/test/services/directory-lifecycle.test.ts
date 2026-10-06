@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 import { NodeService } from "../../src/services/node-service.js";
-import { InternalNode, LeafNode, SkillNode } from "../../src/models/index.js";
+import { InternalNode, LeafNode, SkillNode } from "../../src/domain/models/index.js";
 function fixture(t: any) {
   const root = fs.realpathSync(
     fs.mkdtempSync(path.join(os.tmpdir(), "directory-lifecycle-")),

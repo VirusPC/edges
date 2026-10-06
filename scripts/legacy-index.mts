@@ -1,10 +1,10 @@
 /** Migration-only reader/editor for pre-directory Markdown indexes. Never used by production CLI. */
-import { resolveHref } from "../extensions/cli/src/models/layout.js";
+import { resolveHref } from "../extensions/cli/src/domain/models/layout.js";
 import {
   InternalSyntax,
   type SyntaxContent,
   type SyntaxReference,
-} from "../extensions/cli/src/models/internal-syntax.js";
+} from "../extensions/cli/src/domain/models/internal-syntax.js";
 import {
   parseDocument,
   serializeDocument,

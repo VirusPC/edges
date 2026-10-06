@@ -1,10 +1,10 @@
 import path from "node:path";
-import { projectDirName } from "../../models/tasks/project.js";
+import { projectDirName } from "../../domain/models/tasks/project.js";
 import {
   TASK_STATUSES,
   type TaskProjectId,
   type TaskStatus,
-} from "../../models/tasks/types.js";
+} from "../../domain/models/tasks/types.js";
 
 export function isTaskStatus(value: string): value is TaskStatus {
   return TASK_STATUSES.includes(value as TaskStatus);

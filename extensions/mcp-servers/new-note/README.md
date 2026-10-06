@@ -17,7 +17,7 @@ TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 in
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 22+
 - git
 - 可用的仓库凭据（SSH key 或 token）
 - 可选：`gh` / `curl` / `python3`（如果需要自动创建 PR 或复用现有脚本能力）

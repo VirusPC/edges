@@ -3,7 +3,7 @@ import { test } from "node:test";
 import * as fs from "node:fs";
 import path from "node:path";
 import { tmpdir } from "node:os";
-import { InternalNode, TaskNode } from "../../src/models/index.js";
+import { InternalNode, TaskNode } from "../../src/domain/models/index.js";
 import {
   listTaskNodes,
   listRepositoryTaskNodes,

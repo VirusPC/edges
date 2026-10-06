@@ -9,7 +9,7 @@ import {
   MemoryNode,
   NoteNode,
   TaskNode,
-} from "../extensions/cli/src/models/index.js";
+} from "../extensions/cli/src/domain/models/index.js";
 import {
   indexContract,
   rewriteLinks,

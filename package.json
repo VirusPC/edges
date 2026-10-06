@@ -26,7 +26,7 @@
     "migrate:task-indexes": "pnpm --filter edges-cli exec tsx ../../scripts/index-task-nodes.mts"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22"
   },
   "devDependencies": {
     "@types/node": "^22.19.11",

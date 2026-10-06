@@ -5,7 +5,7 @@ import {
   TASK_STATUSES,
   type TaskPriority,
   type TaskStatus,
-} from "../../models/tasks/types.js";
+} from "../../domain/models/tasks/types.js";
 import { runTasksCommand, succeed } from "../../services/tasks/result.js";
 import { createTask } from "../../services/tasks/write.js";
 

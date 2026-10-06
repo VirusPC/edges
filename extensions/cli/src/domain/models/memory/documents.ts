@@ -1,7 +1,7 @@
 import {
   parseDocument,
   serializeDocument,
-} from "../../utils/markdown/document.js";
+} from "../../../utils/markdown/document.js";
 export const FLAT_COMPAT_KEYS = [
   "title",
   "type",

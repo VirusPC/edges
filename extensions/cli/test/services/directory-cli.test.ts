@@ -152,7 +152,7 @@ test("Note CLI preserves authored Markdown and commits only its explicit owned r
   const created = JSON.parse(result.stdout);
   assert.match(created.filePath, /--filename-title\/index.md$/);
   const saved = fs.readFileSync(path.join(root, created.filePath), "utf8");
-  const { NoteNode } = await import("../../src/models/note-node.js");
+  const { NoteNode } = await import("../../src/domain/models/note-node.js");
   const note = new NoteNode(path.join(root, created.filePath)).parse(saved);
   assert.equal(note.metadata?.custom, "keep this exact formatting");
   assert.equal(note.title, "Authored title");

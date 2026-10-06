@@ -3,7 +3,7 @@ import { getTask, listTasks, type BoardFs, type TaskListOpts } from "./board.js"
 
 export type { TaskListOpts };
 import { messagesForRun, parseRunLog, resolveRunId, type TaskRun } from "./runlog.js";
-import { TasksError, type TaskListItem, type TaskRecord } from "../../models/tasks/types.js";
+import { TasksError, type TaskListItem, type TaskRecord } from "../../domain/models/tasks/types.js";
 
 export async function listTasksService(
   repoPath: BoardTarget,

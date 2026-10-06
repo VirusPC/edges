@@ -5,7 +5,7 @@ import { isDeepStrictEqual as same } from "node:util";
 import {
   parseDocument,
   serializeDocument,
-} from "../../utils/markdown/document.js";
+} from "../../../utils/markdown/document.js";
 
 const keys: SectionKey[] = ["constraints", "memory", "children"];
 

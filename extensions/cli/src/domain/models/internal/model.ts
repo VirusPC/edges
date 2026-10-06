@@ -1,6 +1,6 @@
-import type { Metadata } from '../../utils/markdown/types.js';
+import type { Metadata } from '../../../utils/markdown/types.js';
 
-export type { Metadata, MetadataValue } from '../../utils/markdown/types.js';
+export type { Metadata, MetadataValue } from '../../../utils/markdown/types.js';
 
 export type NodeText = { kind: 'text'; value: string };
 export type NodeLink = { kind: 'link'; label: string; target: string };

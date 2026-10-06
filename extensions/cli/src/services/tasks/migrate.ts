@@ -2,8 +2,8 @@ import { type BoardTarget } from "./paths.js";
 import path from "node:path";
 import type { BoardWriter } from "./board.js";
 import { boardRoot } from "./paths.js";
-import { DEFAULT_TASK_PROJECT, TASK_STATUSES, TasksError } from "../../models/tasks/types.js";
-import { projectDirName } from "../../models/tasks/project.js";
+import { DEFAULT_TASK_PROJECT, TASK_STATUSES, TasksError } from "../../domain/models/tasks/types.js";
+import { projectDirName } from "../../domain/models/tasks/project.js";
 
 export async function migrateLegacyBoard(
   repoPath: BoardTarget,

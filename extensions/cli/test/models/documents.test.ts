@@ -6,8 +6,8 @@ import {
   MemoryNode,
   NoteNode,
   SkillNode,
-} from "../../src/models/index.js";
-import { setNodeRelations } from "../../src/models/relations.js";
+} from "../../src/domain/models/index.js";
+import { setNodeRelations } from "../../src/domain/models/relations.js";
 
 test("base documents replace parsed content without injecting path or tree context", () => {
   const node = new BaseNode("/scope/one.md");

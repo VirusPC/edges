@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { InternalNode, TaskNode } from "../../models/index.js";
-import { identifyNodeType } from "../../models/layout.js";
-import { decodeBody } from "../../models/internal/parse.js";
-import { projectIdFromDir } from "../../models/tasks/project.js";
+import { InternalNode, TaskNode } from "../../domain/models/index.js";
+import { identifyNodeType } from "../../domain/models/layout.js";
+import { decodeBody } from "../../domain/models/internal/parse.js";
+import { projectIdFromDir } from "../../domain/models/tasks/project.js";
 import {
   readEntry,
   validateEntry,

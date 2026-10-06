@@ -1,6 +1,6 @@
 import { dirname, join, resolve } from "node:path";
 import { existsSync } from "node:fs";
-import { identifyNodeType } from "../models/layout.js";
+import { identifyNodeType } from "../domain/models/layout.js";
 import { indexContract, physicalParentNode, within } from "./node-layout.js";
 import { checkPath } from "./node-files.js";
 

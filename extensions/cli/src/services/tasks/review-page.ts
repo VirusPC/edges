@@ -1,8 +1,8 @@
 import { parseSource, parseSourceProject, type TaskSource } from "./grouped.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { TasksError } from "../../models/tasks/types.js";
-import type { TaskDoc } from "../../models/tasks/task-doc.js";
+import { TasksError } from "../../domain/models/tasks/types.js";
+import type { TaskDoc } from "../../domain/models/tasks/task-doc.js";
 
 export type ReviewPageGroup = {
   source?: TaskSource;

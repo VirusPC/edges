@@ -1,19 +1,19 @@
-import { InternalNode } from "../../models/internal-node.js";
-import { decodeBody } from '../../models/internal/parse.js';
-import { LOCAL_START, LOCAL_END, blockPattern, insertInnerBlock } from '../../models/internal/blocks.js';
+import { InternalNode } from "../../domain/models/internal-node.js";
+import { decodeBody } from '../../domain/models/internal/parse.js';
+import { LOCAL_START, LOCAL_END, blockPattern, insertInnerBlock } from '../../domain/models/internal/blocks.js';
 import { scopeDir, boardRel, type BoardTarget } from "./paths.js";
 import path from "node:path";
 import { realpathSync } from "node:fs";
 import { readEntry, saveEntries, type FileChange } from "../node-files.js";
 import { listProjectIds, type BoardFs, type BoardWriter } from "./board.js";
 import { boardRoot } from "./paths.js";
-import { parseTaskProject, projectDirName } from "../../models/tasks/project.js";
+import { parseTaskProject, projectDirName } from "../../domain/models/tasks/project.js";
 import {
   DEFAULT_TASK_PROJECT,
   TasksError,
   type TaskProjectId,
   type TaskProjectRecord,
-} from "../../models/tasks/types.js";
+} from "../../domain/models/tasks/types.js";
 
 export type { TaskProjectRecord };
 

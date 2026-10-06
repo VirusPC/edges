@@ -1,5 +1,5 @@
 import { assertImportType } from "../import-entry.js";
-import { MemoryNode, SkillNode } from "../../models/index.js";
+import { MemoryNode, SkillNode } from "../../domain/models/index.js";
 import { memoryNodes } from "./node-documents.js";
 import { existsSync, readFileSync } from "node:fs";
 import { relative, resolve, basename } from "node:path";
@@ -29,7 +29,7 @@ import {
 import {
   logicalFields,
   strictFrontmatterData,
-} from "../../models/memory/documents.js";
+} from "../../domain/models/memory/documents.js";
 export interface RememberMemoryOptions {
   targetDir: string;
   type: string;

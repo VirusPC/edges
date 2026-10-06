@@ -1,19 +1,19 @@
 import { WRITE_LOCK_NAME, assertNoWriteLock } from "./node-lock.js";
 import * as fs from "node:fs";
 import path from "node:path";
-import { BaseNode, InternalNode } from "../models/index.js";
+import { BaseNode, InternalNode } from "../domain/models/index.js";
 import type {
   ChildGroup,
   NodeReference,
   ScopeTraversalOptions,
   NodeQueryOptions,
-} from "../models/index.js";
+} from "../domain/models/index.js";
 import {
   lifecycleUnits,
   assertMovableLayout,
   identifyNodeType,
-} from "../models/layout.js";
-import { referenceOf } from "../models/relations.js";
+} from "../domain/models/layout.js";
+import { referenceOf } from "../domain/models/relations.js";
 import {
   checkPath,
   readEntry,
@@ -40,8 +40,8 @@ import {
   within,
   type Model,
 } from "./node-layout.js";
-import { query, type AsyncQuery } from "../operations/query.js";
-import { traverse } from "../operations/traverse.js";
+import { query, type AsyncQuery } from "../domain/operations/query.js";
+import { traverse } from "../domain/operations/traverse.js";
 import { NodeCache } from "./node-cache.js";
 
 type Operation = "create" | "update" | "move" | "destroy" | "import";

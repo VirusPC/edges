@@ -1,5 +1,5 @@
 export { ownershipTarget } from './paths.js';
-import { InternalNode } from '../../models/internal-node.js';
+import { InternalNode } from '../../domain/models/internal-node.js';
 import { discoverScopes } from '../scope.js';
 import { loadMemoryDocument, saveMemoryDocument, type MemoryDocument } from './node-documents.js';
 import { join, dirname, basename, relative } from "node:path";

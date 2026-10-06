@@ -11,7 +11,7 @@ import {
   NoteNode,
   SkillNode,
   TaskNode,
-} from "../../src/models/index.js";
+} from "../../src/domain/models/index.js";
 import { NodeService } from "../../src/services/node-service.js";
 function fixture(t: { after(fn: () => void): void }) {
   const root = fs.mkdtempSync(

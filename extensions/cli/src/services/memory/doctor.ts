@@ -1,4 +1,4 @@
-import { InternalNode } from "../../models/internal-node.js";
+import { InternalNode } from "../../domain/models/internal-node.js";
 import { loadMemoryDocument, saveMemoryDocument } from "./node-documents.js";
 import * as fs from "node:fs";
 import { join, dirname, relative } from "node:path";

@@ -10,7 +10,7 @@ import { formatResult } from "./note/format.js";
 import { runNoteIngest } from "../services/note/git/ingest.js";
 import { runIngest } from "../services/note/service.js";
 import type { IngestFailure } from "../services/note/types.js";
-import { formatZodReason, validateInput } from "../models/note/validation.js";
+import { formatZodReason, validateInput } from "../services/note/validation.js";
 
 const NOTE_AFTER_HELP = `
 STRUCTURED OUTPUT

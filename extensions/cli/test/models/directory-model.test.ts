@@ -6,7 +6,7 @@ import {
   SkillNode,
   TaskNode,
   MemoryNode,
-} from "../../src/models/index.js";
+} from "../../src/domain/models/index.js";
 const create = { operation: "create" as const },
   update = { operation: "update" as const };
 test("directory identity is independent of YAML and references project only public fields", () => {
@@ -111,7 +111,7 @@ test("layout follows canonical task statuses, registered contracts and recursive
     assertMovableLayout,
     registerDirectoryClassifier,
     resolveHref,
-  } = await import("../../src/models/layout.js");
+  } = await import("../../src/domain/models/layout.js");
   for (const status of ["cancelled", "in_review", "blocked"])
     assert.equal(
       identifyNodeType(`/repo/tasks/_default/${status}/a/index.md`),

@@ -1,7 +1,7 @@
 import { readTemplate } from "./templates.js";
 import { typeFromDirName } from "./paths.js";
-import { OUTER_START, OUTER_END, IMPORTANT_START, IMPORTANT_END, LOCAL_START, LOCAL_END, CHILDREN_START, CHILDREN_END, AUTO_START, AUTO_END, ENTRIES_START, ENTRIES_END, TYPE_META_START, TYPE_META_END, INNER_BLOCK_ORDER, INDEX_ENTRY_PATTERN, escapeRegExp, blockPattern, appendBlock, insertInnerBlock, upsertBlock } from '../../models/internal/blocks.js';
-export * from '../../models/internal/blocks.js';
+import { OUTER_START, OUTER_END, IMPORTANT_START, IMPORTANT_END, LOCAL_START, LOCAL_END, CHILDREN_START, CHILDREN_END, AUTO_START, AUTO_END, ENTRIES_START, ENTRIES_END, TYPE_META_START, TYPE_META_END, INNER_BLOCK_ORDER, INDEX_ENTRY_PATTERN, escapeRegExp, blockPattern, appendBlock, insertInnerBlock, upsertBlock } from '../../domain/models/internal/blocks.js';
+export * from '../../domain/models/internal/blocks.js';
 export function loadAgentsTemplate(): string {
   const text = readTemplate("AGENTS.md");
   let position = -1;

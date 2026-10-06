@@ -4,7 +4,7 @@ import { loadConfig } from "../../utils/config.js";
 import { exitCodeForTasksError } from "../../utils/exit.js";
 import { createNodeBoardFs, createNodeBoardWriter } from "./board.js";
 import { formatTasksResult, type TasksFailure } from "./format.js";
-import { TasksError, type TasksErrorCode } from "../../models/tasks/types.js";
+import { TasksError, type TasksErrorCode } from "../../domain/models/tasks/types.js";
 
 export type { CliResult };
 

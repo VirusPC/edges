@@ -1,7 +1,7 @@
 import { realpathSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 import { NodeService } from '../node-service.js';
-import { InternalNode, MemoryNode, SkillNode } from '../../models/index.js';
+import { InternalNode, MemoryNode, SkillNode } from '../../domain/models/index.js';
 import { assertScopePath, within } from './paths.js';
 import { layerTypeSpecs, ensureLayerTypeGitignore, findGitRoot } from './types.js';
 import { assertPrivateIgnored } from './ignore.js';

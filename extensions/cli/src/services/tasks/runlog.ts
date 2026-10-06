@@ -1,4 +1,4 @@
-import { TasksError } from "../../models/tasks/types.js";
+import { TasksError } from "../../domain/models/tasks/types.js";
 
 export type TaskRun = {
   runId: string;

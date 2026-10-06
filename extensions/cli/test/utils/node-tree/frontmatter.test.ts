@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import * as codec from '../../../src/models/internal/index.js';
+import * as codec from '../../../src/domain/models/internal/index.js';
 import type { MarkdownDocument } from '../../../src/utils/markdown/types.js';
 
 const body = '## 本层记忆\n\n- [Memory](memory/AGENTS.md)\n';

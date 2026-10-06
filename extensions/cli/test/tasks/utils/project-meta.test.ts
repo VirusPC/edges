@@ -286,7 +286,7 @@ test("project reads reject unindexed directories without creating metadata", asy
 });
 
 test('refreshing a board adopts existing project references without duplicating composition', async () => {
-  const { InternalNode } = await import('../../../src/models/internal-node.js');
+  const { InternalNode } = await import('../../../src/domain/models/internal-node.js');
   const file = '/fixture/tasks/AGENTS.md';
   const before = new InternalNode(file).create({localChildren:[{id:'/fixture/tasks/_default/AGENTS.md'}]},{operation:'create'}).serialize();
   const after = rewriteRootAgents(before,[defaultRecord]);

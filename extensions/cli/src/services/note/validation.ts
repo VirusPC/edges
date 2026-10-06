@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { IngestRequest } from "../../services/note/types.js";
+import type { IngestRequest } from "./types.js";
 
 export const ingestInputSchema = z.object({
   title: z.string().min(1).max(120),

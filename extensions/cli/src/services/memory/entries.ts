@@ -3,7 +3,7 @@ import { loadMemoryDocument, saveMemoryDocument } from "./node-documents.js";
 import {
   escapeIndexText,
   encodeIndexPath,
-} from "../../models/memory/index-rendering.js";
+} from "../../domain/models/memory/index-rendering.js";
 import * as fs from "node:fs";
 import { basename, dirname, join, parse } from "node:path";
 import {
@@ -45,7 +45,7 @@ import {
   logicalFields,
   FLAT_COMPAT_KEYS,
   preserveEntryMetadata,
-} from "../../models/memory/documents.js";
+} from "../../domain/models/memory/documents.js";
 import { ORIGIN_FIELDS, AUDIT_FIELDS, nowTimestamp } from "./provenance.js";
 export const SKILL_OUTPUT_NAME = "SKILL.md";
 export const AGENT_SKILL_FORMAT_TYPES = new Set(["managed", "referenced"]);

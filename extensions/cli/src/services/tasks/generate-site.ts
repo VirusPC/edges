@@ -5,7 +5,7 @@ import { createNodeBoardFs } from "./board.js";
 import { groupedListToReviewPageInput, listGroupedByProject, listRepositoryGroupedByProject } from "./grouped.js";
 import { taskBoardLocation, type TaskPurpose } from "./paths.js";
 import { loadBuiltReviewShell, parseReviewPageInput, renderReviewPageHtml } from "./review-page.js";
-import { TasksError } from "../../models/tasks/types.js";
+import { TasksError } from "../../domain/models/tasks/types.js";
 
 export const DEFAULT_TASKS_SITE_REL = "tasks/_site/index.html";
 export function defaultTasksSiteOutPath(scopeDir: string): string { return path.join(scopeDir, DEFAULT_TASKS_SITE_REL); }
