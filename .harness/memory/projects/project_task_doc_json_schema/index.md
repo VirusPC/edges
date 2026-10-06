@@ -1,8 +1,8 @@
 ---
 name: project_task_doc_json_schema
 description: >-
-  改 Task Doc、对外数据类型或 Schema 时：普通 TS 为定义源，ts-json-schema-generator 生成，Ajv
-  按需校验，Node 22；保留 Model 行为。ADR 0025 修订 0022，接入待实施。
+  Schema 决策：TS 定义源、ts-json-schema-generator、Node 22；产物仅随构建包分发，CLI schema
+  list/get 获取，保留 Model 行为。ADR 0025，待实施。
 metadata:
   edges-title: TS 数据契约生成 JSON Schema
   edges-type: project
@@ -10,7 +10,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T15:28:05+08:00'
+  edges-updated-at: '2026-10-06T15:29:55+08:00'
 ---
 
 2026-10-06 用户确认：Task Doc 等对外数据契约以普通 TypeScript interface/type 为定义源，使用 ts-json-schema-generator 生成 JSON Schema；需要运行时结构校验时使用 Ajv。项目统一 Node 22 基线。选型及原因见 docs/adr/0025-typescript-source-generated-json-schema.md；本次已接受决策，尚未实施接入。
@@ -21,9 +21,18 @@ metadata:
 **How to apply:**
 - ADR 0025 修订 ADR 0022 的字段定义源，外部系统仍共用 Task Doc JSON Schema；既有手写文件暂时保留，待生成与兼容性验收后替换。不要把目标状态描述为已经实施。
 - 首先迁移 TaskDoc；按对外需要扩展，不为所有节点机械创建 Schema。生成目标是明确的 TS 数据类型，不是包含私有状态、getter、方法的整个节点类。
-- ts-json-schema-generator 为构建开发依赖，选型探针版本 2.9.0；schemas/ 保存生成产物，禁止独立手改。Ajv 按需校验，关闭类型转换、默认值填充与字段删除；格式约束使用 ajv-formats。
+- ts-json-schema-generator 为构建开发依赖，选型探针版本 2.9.0；dist/schemas/ 保存生成产物，随构建/发布包分发，不提交 Git、不独立手改。Ajv 按需校验，关闭类型转换、默认值填充与字段删除；格式约束使用 ajv-formats。
 - 定义仍为 name、description、metadata、body，metadata 允许未知键，body 是 Markdown。TS 现有 Record<string, string> 的窄化与 draft-07/2020-12 方言差异要显式处理；生成后的 $ref 不能破坏前端的枚举读取。
 - 不把 rawFrontmatter 或 bodyHtml 写进契约。浏览器不读仓内 .md，不另开看板顶层 schema。
 - 状态仍为 backlog、todo、in_progress、in_review、done、blocked、cancelled；优先级为 urgent、high、medium、low、none。edges-task-project 省略表示 default；不写目录名 _default 或状态夹名，保留既有项目 id 约束。
 - 看板继续使用 edges.tasks.grouped/v1 的可选 items[].doc；指派保留在 metadata.edges-task-assignee。
 - 旧决定于 2026-09-23 将 JSON Schema 作为手工字段真源；新决定改为 TS 源码生成，保留外部契约共享原则。完整候选比较、临时探针证据、Node 22 验收和接入边界以 ADR 0025 为准。
+
+
+## Schema 获取命令与产物分发
+
+2026-10-06 用户纠正生成物分发方案：仓库只保存 TS 定义、生成脚本与测试，Schema 仅作构建产物；CLI 应提供获取命令。ADR 0025 已撤销初稿的“生成物可提交”建议，仍是待实施状态。
+
+**Why:** 避免源码与生成物双重维护，让外部系统获取与当前安装版本匹配的契约，而不必读取仓库路径或运行 TS 生成器。
+
+**How to apply:** 目标命令为 edges schema list 和 edges schema get task-doc/v1；get 直接输出 JSON Schema，错误写 stderr 并非零退出。不依赖 scope、不等待 stdin、不取写锁，只读取包内 dist/schemas/，不现场生成。干净构建须先准备产物再供消费者使用；发布包包含 Schema，源码仓库不提交它。兼容性验收后移除旧手写 JSON 和路径依赖，验证仓库外无源码/开发依赖的安装包也能运行 list/get。
