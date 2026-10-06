@@ -219,3 +219,23 @@ test("selected board rejects a registered reference into another board", async (
     /outside selected task board/,
   );
 });
+
+test('board query grouping keeps chaining lazy and repeatable after operations migration', async t => {
+  const {root, index, task} = fixture(t);
+  index('tasks/AGENTS.md', ['_default/AGENTS.md']);
+  index('tasks/_default/AGENTS.md', ['todo/same/index.md']);
+  task('tasks/_default/todo/same/index.md');
+  const { taskBoardQuery } = await import('../../src/services/tasks/node-query.js');
+  const source = await taskBoardQuery(taskBoardLocation(root, 'domain'));
+  let calls = 0;
+  const chain = source.filter((node): node is TaskNode => node instanceof TaskNode)
+    .map(node => {calls++; return node;})
+    .groupBy(node => node.type)
+    .filter(nodes => nodes.length > 0)
+    .map(nodes => nodes.map(node => node.id));
+  assert.equal(calls, 0);
+  const expected = [[path.join(root, 'tasks/_default/todo/same/index.md')]];
+  assert.deepEqual(await chain.value(), expected);
+  assert.deepEqual(await chain.value(), expected);
+  assert.equal(calls, 2);
+});

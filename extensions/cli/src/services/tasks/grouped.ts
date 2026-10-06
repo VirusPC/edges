@@ -1,7 +1,7 @@
 import path from "node:path";
 import { realpathSync } from "node:fs";
 import { InternalNode } from "../../models/index.js";
-import { query } from "../../utils/async-query.js";
+import { query } from "../../operations/query.js";
 import { repositoryNodeQuery, projectLocationOf } from "./node-query.js";
 import { taskBoardLocation, type TaskPurpose } from "./paths.js";
 import { scopeDir, type BoardTarget } from "./paths.js";

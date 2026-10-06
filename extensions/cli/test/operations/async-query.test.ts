@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { query } from "../../src/utils/async-query.js";
+import { query } from "../../src/operations/query.js";
 
 test("chains defer every callback and factory, rerun and leave ancestors unchanged", async () => {
   let started = 0,

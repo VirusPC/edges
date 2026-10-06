@@ -1,4 +1,4 @@
-import { query } from "../../utils/async-query.js";
+import { query } from "../../operations/query.js";
 import { realpathSync } from "node:fs";
 import { TaskNode, InternalNode } from "../../models/index.js";
 import { taskBoardQuery, taskLocationOf, listRepositoryTaskNodes } from "./node-query.js";

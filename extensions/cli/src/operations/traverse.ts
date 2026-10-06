@@ -1,14 +1,11 @@
-import { InternalNode } from "../models/index.js";
-import type {
-  BaseNode,
-  NodeReference,
-  NodeQueryOptions,
-} from "../models/index.js";
+import { BaseNode } from "../models/base-node.js";
+import { InternalNode } from "../models/internal-node.js";
+import type { NodeReference, NodeQueryOptions } from "../models/types.js";
 import { validateChild } from "../models/relations.js";
 
 /** Preorder, demand-driven traversal; IO and directory contracts belong to the service. */
 export async function* traverse(
-  root: BaseNode,
+  roots: BaseNode | Iterable<BaseNode>,
   options: NodeQueryOptions,
   resolve: (parent: BaseNode, reference: NodeReference) => string | undefined,
   load: (
@@ -46,5 +43,6 @@ export async function* traverse(
       active.delete(node.path);
     }
   }
-  yield* visit(root);
+  for (const root of roots instanceof BaseNode ? [roots] : roots)
+    yield* visit(root);
 }

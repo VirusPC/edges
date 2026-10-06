@@ -11,7 +11,7 @@ import { TasksError } from "../../models/tasks/types.js";
 import { checkPath } from "../node-files.js";
 import { within } from "../node-layout.js";
 import { NodeService } from "../node-service.js";
-import { query } from "../../utils/async-query.js";
+import { query } from "../../operations/query.js";
 import {
   isTaskStatus,
   taskBoardLocation,

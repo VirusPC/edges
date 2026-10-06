@@ -1,3 +1,10 @@
+import { filter as filterItems } from "./filter.js";
+import { map as mapItems } from "./map.js";
+import { find as findItem } from "./find.js";
+import { groupBy } from "./group-by.js";
+import { mapValues } from "./map-values.js";
+import { toArray } from "./to-array.js";
+
 /** Explicit, repeatable async computation. Only value() executes a chain. */
 export interface Deferred<T> {
   value(): Promise<T>;
@@ -32,11 +39,6 @@ function deferred<T>(evaluate: () => T | Promise<T>): Deferred<T> {
     },
   };
 }
-async function collect<T>(source: AsyncIterable<T>): Promise<T[]> {
-  const result: T[] = [];
-  for await (const item of source) result.push(item);
-  return result;
-}
 function collection<T, R>(
   source: () => AsyncIterable<T>,
   evaluate: () => Promise<R>,
@@ -50,9 +52,7 @@ function collection<T, R>(
   function filter(
     predicate: (item: T) => boolean | Promise<boolean>,
   ): AsyncQuery<T> {
-    return query(async function* () {
-      for await (const item of source()) if (await predicate(item)) yield item;
-    });
+    return query(() => filterItems(source(), predicate));
   }
   function find<S extends T>(
     predicate: (item: T) => item is S,
@@ -63,43 +63,21 @@ function collection<T, R>(
   function find(
     predicate: (item: T) => boolean | Promise<boolean>,
   ): Deferred<T | undefined> {
-    return deferred(async () => {
-      for await (const item of source()) if (await predicate(item)) return item;
-      return undefined;
-    });
+    return deferred(() => findItem(source(), predicate));
   }
   return {
     ...deferred(evaluate),
     filter,
     find,
     map<U>(transform: (item: T) => U | Promise<U>) {
-      return query(async function* () {
-        for await (const item of source()) yield await transform(item);
-      });
+      return query(() => mapItems(source(), transform));
     },
     groupBy<K>(keyOf: (item: T) => K | Promise<K>) {
-      return objectQuery(async () => {
-        const result: Record<PropertyKey, T[]> = {};
-        for await (const item of source()) {
-          // Computed property keys use ToPropertyKey (including symbol wrappers).
-          const key = Reflect.ownKeys({
-            [(await keyOf(item)) as PropertyKey]: true,
-          })[0]!;
-          if (Object.hasOwn(result, key)) result[key]!.push(item);
-          else
-            Object.defineProperty(result, key, {
-              value: [item],
-              writable: true,
-              enumerable: true,
-              configurable: true,
-            });
-        }
-        return result;
-      });
+      return objectQuery(() => groupBy(source(), keyOf));
     },
     toArray() {
       return query(async function* () {
-        yield* await collect(source());
+        yield* await toArray(source());
       });
     },
   };
@@ -113,17 +91,7 @@ function objectQuery<V>(
   return {
     ...collection(source, evaluate),
     mapValues<U>(transform: (value: V, key: string) => U | Promise<U>) {
-      return objectQuery(async () => {
-        const result: Record<PropertyKey, U> = {};
-        for (const [key, value] of Object.entries(await evaluate()))
-          Object.defineProperty(result, key, {
-            value: await transform(value, key),
-            writable: true,
-            enumerable: true,
-            configurable: true,
-          });
-        return result;
-      });
+      return objectQuery(async () => mapValues(await evaluate(), transform));
     },
     values() {
       return query(source);
@@ -131,5 +99,5 @@ function objectQuery<V>(
   };
 }
 export function query<T>(source: () => AsyncIterable<T>): AsyncQuery<T> {
-  return collection(source, () => collect(source()));
+  return collection(source, () => toArray(source()));
 }

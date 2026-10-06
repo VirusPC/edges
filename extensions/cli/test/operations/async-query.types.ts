@@ -3,7 +3,7 @@ import {
   type Deferred,
   type AsyncQuery,
   type ObjectQuery,
-} from "../../src/utils/async-query.js";
+} from "../../src/operations/query.js";
 const input = query(async function* (): AsyncGenerator<string | number> {
   yield "one";
   yield 2;

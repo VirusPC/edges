@@ -582,3 +582,59 @@ test("image labels containing a link preserve label syntax while the outer desti
     '![a [b](../page.md)](../../asset.png "title")',
   );
 });
+
+for (const operation of ['move', 'destroy'] as const) {
+  test(`${operation} maintains references from explicitly loaded unregistered nodes and their harness`, async t => {
+    const {file, write, service} = fixture(t);
+    write('AGENTS.md', index());
+    write('target/index.md', 'target');
+    write('unregistered/index.md', 'unregistered');
+    write('unregistered/AGENTS.md', index('- [Target](../target/index.md)'));
+    const target = (await service.get(file('target/index.md')))!;
+    await service.get(file('unregistered/index.md'));
+    if (operation === 'move') await service.move(target, file('moved/index.md'));
+    else await service.destroy(target);
+    const maintained = (await service.get(file('unregistered/AGENTS.md'), InternalNode))!;
+    assert.deepEqual(maintained.children.map(child => child.id), operation === 'move' ? [file('moved/index.md')] : []);
+    assert.equal(fs.existsSync(file('target/index.md')), false);
+    assert.equal(fs.readFileSync(file('unregistered/index.md'),'utf8'), 'unregistered');
+  });
+}
+
+test('move shares traversal across overlapping planned index roots', async t => {
+  const {root, file, write} = fixture(t);
+  write('AGENTS.md', index('- [A](a/AGENTS.md)\n- [B](b/AGENTS.md)'));
+  const links = '- [Target](../target/index.md)\n- [Shared](../shared/index.md)';
+  write('a/AGENTS.md', index(links));
+  write('b/AGENTS.md', index(links));
+  write('target/index.md', 'target');
+  write('shared/index.md', 'shared');
+  let sharedArrivals = 0;
+  const service = new NodeService({managedRoot: root, modelForReference: (_parent, _ref, target) => {
+    if (target === file('shared/index.md')) sharedArrivals++;
+    return undefined;
+  }});
+  const target = (await service.get(file('target/index.md')))!;
+  await service.move(target, file('moved/index.md'));
+  // One registered-graph traversal and one planned-graph traversal.
+  assert.equal(sharedArrivals, 2);
+  for (const name of ['a', 'b']) {
+    const node = (await service.get(file(`${name}/AGENTS.md`), InternalNode))!;
+    assert.deepEqual(node.children.map(ref => ref.id), [file('moved/index.md'), file('shared/index.md')]);
+  }
+});
+
+test('registered collection skips an optional harness removed after its owner was loaded', async t => {
+  const {file, write, service} = fixture(t);
+  write('AGENTS.md', index());
+  write('owner/index.md', 'owner');
+  write('owner/AGENTS.md', index());
+  write('target/index.md', 'target');
+  const owner = (await service.get(file('owner/index.md')))!;
+  assert.equal(owner.harness?.id, file('owner/AGENTS.md'));
+  fs.unlinkSync(file('owner/AGENTS.md'));
+  const target = (await service.get(file('target/index.md')))!;
+  await service.move(target, file('moved/index.md'));
+  assert.equal(fs.readFileSync(file('moved/index.md'), 'utf8'), 'target');
+  assert.equal(fs.existsSync(file('owner/AGENTS.md')), false);
+});

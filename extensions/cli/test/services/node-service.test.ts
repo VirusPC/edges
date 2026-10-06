@@ -525,3 +525,30 @@ test('legacy list refuses entry changes between traversal and resource snapshot 
   } });
   await assert.rejects(service.list(root), /Node source changed/);
 });
+
+test('planned graph validation resolves a diamond target once and keeps managed identities', async t => {
+  const {root, file, write} = fixture(t);
+  write('AGENTS.md', index('- [A](a/AGENTS.md)\n- [B](b/AGENTS.md)'));
+  write('a/AGENTS.md', index('- [Shared](../shared/index.md)'));
+  write('b/AGENTS.md', index('- [Shared](../shared/index.md)'));
+  write('shared/index.md', 'shared');
+  const arrivals: string[] = [];
+  const service = new NodeService({managedRoot: root, modelForReference: (_parent, _ref, target) => { arrivals.push(target); return undefined; }});
+  const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
+  const shared = (await service.get(file('shared/index.md')))!;
+  await service.update(parent, {description: 'updated'});
+  assert.equal(arrivals.filter(target => target === shared.id).length, 1);
+  assert.strictEqual(await service.get(shared.id), shared);
+  assert.strictEqual(await service.get(parent.id), parent);
+});
+
+test('graph validation excludes harness relations while query explicitly includes them', async t => {
+  const {root, file, write, service} = fixture(t);
+  write('AGENTS.md', index('- [Item](item/index.md)'));
+  write('item/index.md', 'item');
+  write('item/AGENTS.md', index('- [Root](../AGENTS.md)'));
+  const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
+  await service.update(parent, {description: 'composition remains acyclic'});
+  assert.equal(parent.description, 'composition remains acyclic');
+  await assert.rejects(service.query(root, {includeHarness: true}).value(), /Composition cycle/);
+});

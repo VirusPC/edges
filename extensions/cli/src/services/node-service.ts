@@ -39,8 +39,8 @@ import {
   within,
   type Model,
 } from "./node-layout.js";
-import { query, type AsyncQuery } from "../utils/async-query.js";
-import { traverse } from "./traverse.js";
+import { query, type AsyncQuery } from "../operations/query.js";
+import { traverse } from "../operations/traverse.js";
 import { NodeCache } from "./node-cache.js";
 
 type Operation = "create" | "update" | "move" | "destroy" | "import";
@@ -236,49 +236,59 @@ export class NodeService {
    * list deliberately has a narrower traversal policy and never uses this helper. */
   async #registered(): Promise<Map<string, BaseNode>> {
     const result = new Map<string, BaseNode>();
-    const visit = async (node: BaseNode): Promise<void> => {
-      if (result.has(node.path) || !within(node.path, this.managedRoot)) return;
-      result.set(node.path, node);
-      for (const ref of node.children)
-        if (within(ref.id, this.managedRoot))
-          await visit(await this.#reference(node, ref));
-      if (node.harness && within(node.harness.id, this.managedRoot)) {
-        const harness = await this.#read(node.harness.id, InternalNode);
-        if (harness) await visit(harness);
-      }
-    };
     const root = await this.#read(
       path.join(this.managedRoot, "AGENTS.md"),
       InternalNode,
     );
-    if (root) await visit(root);
-    for (const [file, node] of [...this.#cache.loaded])
-      if (!result.has(file) && fs.existsSync(file))
-        await visit(node);
+    const service = this;
+    function* roots(): Iterable<BaseNode> {
+      if (root) yield root;
+      for (const [file, node] of [...service.#cache.loaded])
+        if (within(file, service.managedRoot) && fs.existsSync(file)) yield node;
+    }
+    const maintenanceOnly = (node: BaseNode, ref: NodeReference) =>
+      node.harness?.id === ref.id && !node.children.some(child => child.id === ref.id);
+    for await (const node of traverse(
+      roots(),
+      { includeDescendants: true, includeHarness: true },
+      (parent, ref) => {
+        if (!within(ref.id, this.managedRoot)) return undefined;
+        // Maintenance discovery tolerates a missing optional entry; composition does not.
+        if (maintenanceOnly(parent, ref) &&
+            !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id)) return undefined;
+        return ref.id;
+      },
+      async (parent, ref) => {
+        if (maintenanceOnly(parent, ref)) {
+          const harness = await this.#read(ref.id, InternalNode);
+          if (!harness) throw new Error(`Missing referenced node: ${ref.id}`);
+          return harness;
+        }
+        return this.#reference(parent, ref);
+      },
+    )) result.set(node.path, node);
     return result;
   }
   async #validateGraph(
     plan: Map<string, Planned>,
     removed: (file: string) => boolean = () => false,
   ): Promise<void> {
-    const seen = new Set<string>(),
-      active = new Set<string>();
-    const visit = async (node: BaseNode): Promise<void> => {
-      if (active.has(node.path))
-        throw new Error(`Composition cycle: ${node.path}`);
-      if (seen.has(node.path)) return;
-      active.add(node.path);
-      seen.add(node.path);
-      for (const ref of node.children) {
+    function* roots(): Iterable<BaseNode> {
+      for (const write of plan.values()) yield write.node;
+    }
+    for await (const _node of traverse(
+      roots(),
+      { includeDescendants: true },
+      (_parent, ref) => {
         if (removed(ref.id))
           throw new Error(`Reference to removed node: ${ref.id}`);
-        const proposed = plan.get(ref.id);
-        const child = proposed?.node ?? (await this.#reference(node, ref));
-        await visit(child);
-      }
-      active.delete(node.path);
-    };
-    for (const write of plan.values()) await visit(write.node);
+        return ref.id;
+      },
+      (parent, ref, target) => {
+        const proposed = plan.get(target);
+        return proposed ? Promise.resolve(proposed.node) : this.#reference(parent, ref);
+      },
+    )) { /* Exhaust the graph before any write IO. */ }
   }
   #proposedParent(
     file: string,
