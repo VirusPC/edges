@@ -184,7 +184,7 @@ export async function* traverse(
 ): AsyncGenerator<BaseNode>;
 ```
 
-- [ ] **Step 1：先写纯模型测试并确认 RED。** 使用内存 Map 提供 load，不读写文件、不实例化 NodeService。以下用例验证重叠根只加载一次、返回原对象以及生成器创建不触发加载：
+- [x] **Step 1：先写纯模型测试并确认 RED。** 使用内存 Map 提供 load，不读写文件、不实例化 NodeService。以下用例验证重叠根只加载一次、返回原对象以及生成器创建不触发加载：
 
 ```ts
 import assert from "node:assert/strict";
@@ -215,7 +215,7 @@ test("multiple roots share traversal identity and load on demand", async () => {
 ```
 
 在 extensions/cli 运行 `node --test --import tsx test/operations/traverse.test.ts`；预期先因 operations/traverse 尚不存在失败。补充单根前序、默认 local、显式 descendant/harness、菱形去重、跨根环、types 仅筛结果不误剪父节点、resolve 返回 undefined、load 报错、break 后无额外 load 用例。
-- [ ] **Step 2：移动现有算法，最小扩展根集合。** 将 seen/active 放在一次 traverse 调用内，内部 visit 沿用既有流程；外层按根顺序调用 visit。单根等价于一元素集合，不为每个根重建 seen/active。traverse 直接导入 ../models 下的 base-node/internal-node/types/relations，operations/index.ts 导出遍历及泛型查询 API；内部不反向导入自身 barrel。用可重复执行的 TS 脚本迁移查询链、拆出算法、移动测试并更新所有引用。query.ts 保留 fluent interfaces 和薄的 deferred/collection/object 链式适配；filter/map/find/group-by/map-values/to-array 各文件承载对应算法，不反向导入 query.ts；保留延迟求值及可重复执行，不保留 async-query 转发文件，不把查询链改为 Node 专用类型。
+- [x] **Step 2：移动现有算法，最小扩展根集合。** 将 seen/active 放在一次 traverse 调用内，内部 visit 沿用既有流程；外层按根顺序调用 visit。单根等价于一元素集合，不为每个根重建 seen/active。traverse 直接导入 ../models 下的 base-node/internal-node/types/relations，operations/index.ts 导出遍历及泛型查询 API；内部不反向导入自身 barrel。用可重复执行的 TS 脚本迁移查询链、拆出算法、移动测试并更新所有引用。query.ts 保留 fluent interfaces 和薄的 deferred/collection/object 链式适配；filter/map/find/group-by/map-values/to-array 各文件承载对应算法，不反向导入 query.ts；保留延迟求值及可重复执行，不保留 async-query 转发文件，不把查询链改为 Node 专用类型。
 
 ```ts
 // 放在同一次遍历的 seen/active 和 visit 定义之后。
@@ -224,7 +224,7 @@ for (const root of roots instanceof BaseNode ? [roots] : roots)
 ```
 
 不改变前序、早停、yield 时机和类型过滤。resolve/load 沿用原参数，不新建 children-provider、公开剪枝回调或 IO 接口层。删除旧 services/traverse.ts，NodeService 改导入 operations/traverse。
-- [ ] **Step 3：替换 Service 的重复递归，逐项保留策略差异。** 不把三条调用链强行设成相同 options，也不将草稿注册到单实例缓存。
+- [x] **Step 3：替换 Service 的重复递归，逐项保留策略差异。** 不把三条调用链强行设成相同 options，也不将草稿注册到单实例缓存。
 
 | 调用链 | roots / options | resolve / load 的 Service 责任 |
 | --- | --- | --- |
@@ -233,9 +233,9 @@ for (const root of roots instanceof BaseNode ? [roots] : roots)
 | #validateGraph | plan 中所有 write.node；descendants 开启，harness 关闭 | resolve 检查 removed；load 优先 plan.get(target)?.node，再通过 Service 加载。所有 roots 共用去重及环检查 |
 
 `#registered` 的候选根先按既有 managedRoot 和文件存在性规则筛选，不能只在 resolve 中限制子引用而让仓外缓存根直接进入结果。可将候选根作为按需迭代的 Iterable 提供，避免已经从根到达的缓存子树反复走 DFS；即使收集 roots，不能为了组成它而预先加载全部树。拟提交图校验的删除检查发生在引用解析阶段，仍先于已访问目标的跳过；不能因为目标 seen 而漏报待删除引用。overlay 草稿只用于验证，不替换已缓存实例。
-- [ ] **Step 4：确认消除的是重复算法而非业务检查。** 删除 #registered / #validateGraph 各自的递归 visit 与 seen/active；保留它们薄的范围/计划适配与结果收集。node-layout 的 directoryEntries 是生命周期物理目录枚举，Task 索引迁移的 discover 是显式迁移扫描，均不改用逻辑节点遍历。不因“基本树操作”扩展到未使用的 BFS/排序/全图框架。
-- [ ] **Step 5：回归 producer/consumer 边界。** 在已有 service fixture 中验证：创建或更新形成的计划草稿环在 IO 前报错、被删引用不因去重漏检、相交多个计划根不重复加载、move/destroy 仍覆盖已加载但根未登记的节点及其维护关系。纯模型测试只证明算法；现有 query 类型早跳过、多层 harness、只读来源及全仓同名任务 fixture 继续证明 Service 的加载策略。
-- [ ] **Step 6：验证、记录实际删减并提交。** 在仓根运行：
+- [x] **Step 4：确认消除的是重复算法而非业务检查。** 删除 #registered / #validateGraph 各自的递归 visit 与 seen/active；保留它们薄的范围/计划适配与结果收集。node-layout 的 directoryEntries 是生命周期物理目录枚举，Task 索引迁移的 discover 是显式迁移扫描，均不改用逻辑节点遍历。不因“基本树操作”扩展到未使用的 BFS/排序/全图框架。
+- [x] **Step 5：回归 producer/consumer 边界。** 在已有 service fixture 中验证：创建或更新形成的计划草稿环在 IO 前报错、被删引用不因去重漏检、相交多个计划根不重复加载、move/destroy 仍覆盖已加载但根未登记的节点及其维护关系。纯模型测试只证明算法；现有 query 类型早跳过、多层 harness、只读来源及全仓同名任务 fixture 继续证明 Service 的加载策略。
+- [x] **Step 6：验证、记录实际删减并提交。** 在仓根运行：
 
 ```bash
 pnpm --filter edges-cli exec node --test --import tsx test/operations/traverse.test.ts test/services/node-service.test.ts test/services/owned-units.test.ts test/tasks/node-query.test.ts test/tasks/all-scopes.test.ts test/operations/async-query.test.ts
@@ -316,3 +316,5 @@ git diff --stat
 
 - Task 1 已完成：共享实例与完整状态保存；实现 b584d30，边界修复 83e0bab。100 项相关测试、类型检查通过，独立审查两项发现均修复并复审通过。
 - 用户更新布局：operations 与 models 同级，统一 traverse 与泛型 async-query；Task 2 按更新后的范围执行。
+
+- Task 2 已完成：operations 同级布局及各算法分文件；traverse 统一查询、登记收集和图校验。114 项相关测试与生产/查询类型检查通过；重复引用只读检查修复后独立复审通过。Tasks 专用模块仅调整通用方法引用。
