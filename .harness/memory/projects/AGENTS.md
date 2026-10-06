@@ -75,4 +75,6 @@ format: ordinary
 - [递归系统二：系统入口 AGENTS.md 带组成登记](<project_recursive_system_two_entry/index.md>) — 改节点模型、AGENTS.md、Project Harness 或 layout 时打开：核心是递归系统二；系统入口为 AGENTS.md 且必须带组成登记；从 scope 系统入口经登记可达才算节点；无 isLeaf；Task/Note/Skill 由登记挂入。曾议 AGENTS 不带 entries 已否。谁必须有真实 AGENTS 见 grill Q10。
 
 - [虚拟系统入口用于个人根与个人任务查询](<project_virtual_system_entry_personal_root/index.md>) — 设计个人任务或无 AGENTS.md 的主体根时打开：虚拟系统入口不落盘，用于「人」为根、Edges 为其系统二时查询个人相关任务等；把可识别顶层入口挂进组成。实现节奏与 local 挂载形状见 grill Q9b/Q11′。
+
+- [grill：README entries、任意目录 init、虚拟入口另卡](<project_grill_system_entry_q9b_q10_q11/index.md>) — 续节点模型 grill：Q9b 根 README 增 entries 指向 tasks 等；Q11=A 虚拟入口先术语后另卡；Q10 任意目录可有系统入口、用户自行 init，并开 project harness init skill 待办。Q12 叶子入口名仍待答。
 <!-- project-memory-entries:end -->
