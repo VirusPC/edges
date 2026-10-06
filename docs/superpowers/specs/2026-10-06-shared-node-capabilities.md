@@ -29,6 +29,16 @@ flowchart TD
 
 锁继续覆盖整个 CLI 写命令，必须早于业务读取。它不因本次分层说明被缩小为单次 NodeService 方法调用；NodeService 的直接调用不被描述为自动取得 CLI 命令锁。
 
+## Service 依赖约束
+
+依赖方向固定为 `CLI → 各业务 Service → NodeService → 模型 / operations / 文件实现`。Tasks、Memory、Note 是并列业务模块，当前用例不需要互相调用；共享机制下沉至 NodeService，不能由 Tasks 调 Memory.init 等业务操作获得。NodeService 不导入业务 Service；业务需要的写政策通过现有构造选项传入。
+
+scope 解析和命令锁由入口编排，先确定目标并获取写锁，再执行写用例。node-files、node-cache、node-lock 等是通用内部实现，位于 services 目录不表示它们是需要业务逐层调用的 Service。memoryNodes/projectNodes 仅构造带政策的 NodeService，也不构成额外的 CRUD 服务层。业务模块内部直接导入实际定义文件，不通过自身 index.ts 聚合导出绕回入口。
+
+当前运行时静态导入检查未发现 Tasks/Memory/Note 跨模块依赖，也未发现通用 node 模块反向导入业务 Service；但 Memory 的 paths.ts、types.ts、blocks.ts、templates.ts 构成循环。具体有 `paths → types → paths` 及 `paths → types → blocks → templates → paths`，不能把目标架构描述成已经完成。
+
+在现有文件内断环：将依赖 discoverLayerTypes 的 typeIndexPath、typeContentDir，以及调用它们的 listTypeFiles 从 paths.ts 移至 types.ts。paths.ts 保留不读取类型登记的路径/命名原语；templates.ts 和 blocks.ts 可以依赖这些原语，types.ts 可以依赖模板和区块，但 paths.ts 不再依赖 types.ts。类型相关的盘点依旧是 Memory 的业务能力，不下放到公共 filesystem，也不改成登记树查询。
+
 ## 文件归属
 
 保留现有 models / services / operations / utils 顶层布局，不增加 package，不为四个目标分别建立公共入口文件。
@@ -90,6 +100,6 @@ Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Not
 
 接受业务操作中少量直接调用 create/update/query 的重复代码，换取更少的公开概念和调用层次；业务政策本身仍需集中。文件数不是唯一指标，不能把独立的锁、文件恢复或模型语法全部塞进 node-service.ts。
 
-验收重点：四个目标都落实；项目/看板 AGENTS 不再直接 writeFile；无 NodeDocument/MemoryDocument 保存状态包装；无另一套 Memory 原子写；全仓查询复用已有 query；通用底层无业务 Service 反向依赖。保留现有单次生命周期操作的失败恢复，但不承诺整条业务命令的多个调用构成多文件 ACID。
+验收重点：四个目标都落实；项目/看板 AGENTS 不再直接 writeFile；无 NodeDocument/MemoryDocument 保存状态包装；无另一套 Memory 原子写；全仓查询复用已有 query；通用底层无业务 Service 反向依赖；涉及 Service 的运行时导入图无循环。保留现有单次生命周期操作的失败恢复，但不承诺整条业务命令的多个调用构成多文件 ACID。
 
 参考的是 [Service Layer](https://martinfowler.com/eaaCatalog/serviceLayer.html) 协调操作与 [Domain Model](https://martinfowler.com/eaaCatalog/domainModel.html) 承载数据/行为的分工，不要求额外引入 Repository 框架。步骤见[实施计划](../plans/2026-10-06-shared-node-capabilities.md)。
