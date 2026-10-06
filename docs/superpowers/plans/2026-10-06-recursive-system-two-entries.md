@@ -8,7 +8,124 @@
 
 **Tech Stack:** TypeScript、Node ≥22、`node:test`、tsx、现有 `edges-cli`。不新增依赖。
 
-**Spec:** `docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md`（ADR 0029）
+**Spec:** `docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md`（ADR 0029）  
+完整目标模型图见 spec「[架构图（目标模型）](../specs/2026-10-06-recursive-system-two-entries-design.md#架构图目标模型)」；下图是实施向系统架构（模块边界 + 运行时树 + Wave 落点）。
+
+## 系统架构图
+
+### 1. 模块分层（谁改哪里）
+
+```mermaid
+flowchart TB
+  subgraph cli["CLI / skills"]
+    CMD["edges --scope …"]
+    INIT["memory init / remember / doctor"]
+    MIG["migrate scripts"]
+    SK["project-memory-* skills → 演进 harness init"]
+  end
+
+  subgraph services["services"]
+    NS["NodeService"]
+    MS["memory/* 类型索引与层入口"]
+    TS["tasks/*"]
+  end
+
+  subgraph domain["domain"]
+    OP["operations/traverse"]
+    LAY["models/layout 入口名·章节常量"]
+    SYN["internal/syntax+blocks 参数化组成"]
+    NODES["BaseNode 子类"]
+  end
+
+  CMD --> NS
+  INIT --> MS
+  MIG --> NS
+  SK --> INIT
+  NS --> OP
+  NS --> NODES
+  MS --> NODES
+  MS --> LAY
+  OP --> NODES
+  NODES --> SYN
+  NODES --> LAY
+```
+
+| 层 | 职责 | Wave |
+| --- | --- | --- |
+| layout / syntax / blocks | 标记、标题、入口文件名 | A1–A2 |
+| ReadmeNode + Agents 组成 | 两套 entries 表 | A2 |
+| traverse / NodeService | 双文件边、不扫盘 | A3 |
+| memory paths + 模板 + 迁移 | 类型入口 README | A4–A5 |
+| 根 README | Q9b 本层内容 | A6 |
+| INDEX 迁移 | 叶子文件名 | A7 |
+| type / 类层次 | agents·text·直继 BaseNode | B8–B9 |
+| `--virtual-root` | 运行时根 | B10 |
+| harness init skill | 任意目录系统入口 | B11 |
+
+### 2. 运行时树：系统二 vs 系统一
+
+```mermaid
+flowchart TB
+  VR["VirtualSystemEntry<br/>仅 --virtual-root"] -.->|挂| RR
+  Scope["--scope → AGENTS.md<br/>type=agents"] --> Maint["本层系统维护信息<br/>project-harness-local"]
+  Scope --> DownA["下层系统维护信息<br/>→ 其它 AGENTS.md"]
+  Scope -.同目录.-> RR["README.md<br/>type=readme"]
+
+  Maint --> TypeIdx[".harness/memory/*/README.md<br/>类型入口"]
+  Maint --> HTasks[".harness/tasks/…"]
+  TypeIdx -->|"project-entries-local<br/>本层内容"| MemLeaf["memory 条目 INDEX.md"]
+
+  RR -->|"本层内容"| Tasks["tasks/… 本层入口"]
+  RR -->|"本层内容"| Notes["notes/…"]
+  RR -->|"下层内容"| NestedR["其它 README.md"]
+
+  Tasks --> Task["INDEX.md type=task"]
+  Notes --> Note["INDEX.md type=note"]
+
+  DownA --> ChildA["下级 AGENTS.md"]
+```
+
+实线 = 组成边（traverse 默认/显式组）；点划线 = 同目录双文件规则或显式虚拟根。`harness` 边默认不跟随（既有约定）。
+
+### 3. 目标类图（Wave B 终点）
+
+```mermaid
+classDiagram
+  class BaseNode {
+    type: agents|readme|task|memory|note|skill|text
+    constraints?
+    localChildren
+    descendantChildren
+    parent? harness?
+    addChild(group, ref)
+  }
+  BaseNode <|-- AgentsNode
+  BaseNode <|-- ReadmeNode
+  BaseNode <|-- TaskNode
+  BaseNode <|-- MemoryNode
+  BaseNode <|-- NoteNode
+  BaseNode <|-- SkillNode
+  BaseNode <|-- TextNode
+  class VirtualSystemEntry {
+    <<runtime>>
+    --virtual-root
+  }
+```
+
+Wave A 允许暂留 `InternalNode` 类名、`type` 仍写 `internal` 读兼容；不得再把系统一孩子写进 AGENTS 组成。
+
+### 4. 同目录双文件（traverse 核心）
+
+```mermaid
+flowchart LR
+  subgraph dir["同一 directoryPath"]
+    A["AGENTS.md"]
+    R["README.md"]
+  end
+  A -->|只挂系统二材料<br/>+ 下级 AGENTS| S2["系统维护信息"]
+  R -->|只挂系统一孩子<br/>+ 下级 README| S1["本层/下层内容"]
+  A -.->|traverse 并边<br/>不写入 AGENTS.children| R
+```
 
 ## Global Constraints
 
