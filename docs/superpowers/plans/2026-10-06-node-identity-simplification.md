@@ -125,7 +125,7 @@ this.loaded.set(node.path, node);
 ```
 
 - [x] **Step 4：保留 snapshot、资源及只读语义。** 缓存命中不重读并 parse 覆盖用户修改、不更新 EntryFile.source。首次 query 的对象在 get/list 时调用既有 captureResources 补资源；该升级校验旧 EntryFile 并保持对象相等。已有资源快照不重拍。保留 readonly 路径的传播及 symlink 写拒绝，不能由于可写对象先入表而绕过后来遇到的只读来源。类型跳过的导航对象不入表、不作为正常结果返回。
-- [x] **Step 5：统一生命周期计划来源。** create/import 的父索引、move 的旧/新父及被搬子节点、destroy 的存活引用方都从唯一实例当前 `serialize()` 构造草稿；旧 EntryFile 仅用于乐观校验。删除 move 中只对主节点选当前 source、对其他节点退回 before.source 的分支。主 update 的 input 仍按现有模型方法覆盖对应字段。
+- [x] **Step 5：统一生命周期计划来源。** create/import 的父索引、move 的旧/新父及被搬子节点、destroy 的存活引用方都从唯一实例当前 `serialize()` 构造草稿；旧 EntryFile 用于乐观校验及受影响关系判定，不作为输出内容来源。删除 move 中只对主节点选当前 source、对其他节点退回 before.source 的分支。主 update 的 input 仍按现有模型方法覆盖对应字段。
 
 ```ts
 // 每一个实际受影响节点采用相同规则，不特殊区分 primary/dirty alias。
@@ -136,7 +136,7 @@ const source = rewriteLinks(currentSource, entry.path, target, relocate);
 // before 仍是最初读取/上次成功提交的 EntryFile，而非新读磁盘基线。
 ```
 
-必须先确定是否真的有移动/登记/移除/引用改写，再把节点列入 plan；比较“施加结构操作前的当前序列化”与“施加后序列化”，不能仅比较当前序列化与旧磁盘 source，否则会误 flush 无关 dirty 节点。无需索引变更的已登记父不额外保存。
+必须先确定是否真的有移动/登记/移除/引用改写，再把节点列入 plan：对当前状态或保留的持久化基线施加本次结构操作，任一存在相关关系变化就判为受影响。这样，当前实例已提前移除或改写旧引用、目标父已提前添加登记时，仍会保存尚未同步的持久化关系。基线仅用于分类，输出始终来自完整当前状态，不合并或恢复基线内容；不能仅比较当前序列化与旧磁盘 source，否则会误 flush 无关 dirty 节点。两份状态均无需索引变更的已登记父不额外保存。move 收集时将指向尚不存在的目标子树的引用留到拟提交图校验，由搬移草稿解析；其他缺失引用仍报错。
 
 - [x] **Step 6：提交后回填及失效。** 删除 `#mergedSource` 和 `assertRefresh` 及全部调用；refresh 简化为按已成功提交的文档回填唯一实例并更新基线。移动改键时先校验目标缓存/文件冲突，保留对象身份；删除清除 loaded/state，旧实例保存拒绝。未受影响节点保持修改与快照。用计划草稿避免 validate/IO 失败时提前污染共享实例；保留已有部分失败恢复位置报告。
 - [x] **Step 7：把旧 alias 用例改成新合同，新增边界断言。** 以下矩阵全部落实为有实际行为断言的测试；重复转换先写 TS 脚本，逐类检查，不全局替换期待值。

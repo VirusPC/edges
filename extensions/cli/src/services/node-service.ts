@@ -244,7 +244,7 @@ export class NodeService {
   }
   /** Reachable registered nodes plus explicitly loaded nodes, including maintenance trees.
    * list deliberately has a narrower traversal policy and never uses this helper. */
-  async #registered(): Promise<Map<string, BaseNode>> {
+  async #registered(deferred: (file: string) => boolean = () => false): Promise<Map<string, BaseNode>> {
     const result = new Map<string, BaseNode>();
     const root = await this.#read(
       path.join(this.managedRoot, "AGENTS.md"),
@@ -263,7 +263,7 @@ export class NodeService {
       roots(),
       { includeDescendants: true, includeHarness: true },
       (parent, ref) => {
-        if (!within(ref.id, this.managedRoot)) return undefined;
+        if (!within(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
         // Maintenance discovery tolerates a missing optional entry; composition does not.
         if (maintenanceOnly(parent, ref) &&
             !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id)) return undefined;
@@ -477,7 +477,8 @@ export class NodeService {
     for (const file of this.#cache.loaded.keys())
       if (within(file, destRoot))
         throw new Error(`Node destination already managed: ${file}`);
-    const registered = await this.#registered();
+    // Pending references into the destination resolve against relocated drafts in #validateGraph.
+    const registered = await this.#registered((file) => within(file, destRoot));
     registered.set(node.path, node);
     for (const parentPath of [
       physicalParent(node.path, this.managedRoot),
@@ -536,7 +537,13 @@ export class NodeService {
         source = draft.serialize();
       }
       const text = source;
-      if (target !== entry.path || text !== currentSource)
+      // Baselines classify affected references only; output always uses current state.
+      const persistedReferenceMoves =
+        rewriteLinks(before.source, entry.path, target, relocate) !== before.source;
+      const needsRegistration = entry.path === newParent && oldParent !== newParent &&
+        entry instanceof InternalNode &&
+        !new InternalNode(entry.path).parse(before.source).children.some(ref => ref.id === destination);
+      if (target !== entry.path || text !== currentSource || persistedReferenceMoves || needsRegistration)
         plan.set(target, this.#plan(draft, text, before));
     }
     if (newParent && !registered.has(newParent)) {
@@ -627,9 +634,10 @@ export class NodeService {
       if (!removed(entry.path) && entry instanceof InternalNode) {
         const draft = clone(entry);
         const deleted = draft.children.filter((ref) => removed(ref.id));
-        if (deleted.length === 0) continue;
-        for (const ref of deleted) draft.removeChild(ref.id);
         const before = this.#cache.state.get(entry)!.file;
+        const persistedReferences = new InternalNode(entry.path).parse(before.source).children;
+        if (deleted.length === 0 && !persistedReferences.some(ref => removed(ref.id))) continue;
+        for (const ref of deleted) draft.removeChild(ref.id);
         plan.set(entry.path, this.#plan(draft, draft.serialize(), before));
       }
     await this.#validateGraph(plan, removed);
