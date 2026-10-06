@@ -13,7 +13,7 @@ EXAMPLES
   edges artifacts delete http://127.0.0.1:8787/artifacts/2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab/
 `;
 
-export function addArtifactsRmCommand(artifacts: Command, ctx: CliContext): void {
+export function addArtifactsDeleteCommand(artifacts: Command, ctx: CliContext): void {
   artifacts
     .command("delete")
     .description("Delete a draft or published artifact by id or URL")

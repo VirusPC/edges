@@ -22,7 +22,7 @@ export type { CliContext, CliInput, CliResult };
 const ROOT_AFTER_HELP = `
 EXAMPLES
   edges --scope ./projects/demo tasks --purpose maintenance list
-  edges note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
+  edges note create --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
   edges note --help
   edges tasks --help
   edges artifacts --help

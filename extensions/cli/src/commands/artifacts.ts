@@ -3,7 +3,7 @@ import { type CliContext, usageError } from "../context.js";
 import { addArtifactsCreateCommand } from "./artifacts/create.js";
 import { addArtifactsInitCommand } from "./artifacts/init.js";
 import { addArtifactsPublishCommand } from "./artifacts/publish.js";
-import { addArtifactsRmCommand } from "./artifacts/rm.js";
+import { addArtifactsDeleteCommand } from "./artifacts/delete.js";
 import { addArtifactsServerCommand } from "./artifacts/server.js";
 
 const ARTIFACTS_AFTER_HELP = `
@@ -46,7 +46,7 @@ export function addArtifactsCommand(program: Command, ctx: CliContext): void {
   addArtifactsCreateCommand(artifacts, ctx);
   addArtifactsInitCommand(artifacts, ctx);
   addArtifactsPublishCommand(artifacts, ctx);
-  addArtifactsRmCommand(artifacts, ctx);
+  addArtifactsDeleteCommand(artifacts, ctx);
   addArtifactsServerCommand(artifacts, ctx);
   artifacts.action(() => {
     ctx.result = usageError("missing artifacts subcommand. Use edges artifacts --help.", "artifacts");
