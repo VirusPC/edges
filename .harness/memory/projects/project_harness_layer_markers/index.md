@@ -1,9 +1,9 @@
 ---
 name: project_harness_layer_markers
 description: >-
-  改 AGENTS.md 层入口注释或章节标题时：外层与三章改为 project-harness / constraints / local /
-  descendants，标题为本层硬约束 / 本层组成 / 下层节点；type 与 entries 仍用 project-memory-*。设计见
-  docs/superpowers/specs/2026-10-06-project-harness-layer-markers-design.md。
+  改 AGENTS.md 层入口注释或章节标题时：标记为 project-harness / constraints / local /
+  descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；type 与 entries 仍用
+  project-memory-*。README 的 project-entries-* 见 grill_entries 条。
 metadata:
   edges-title: 层入口表面命名改为 project-harness
   edges-type: project
@@ -11,11 +11,18 @@ metadata:
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: '2026-10-06T13:54:04+00:00'
+  edges-updated-at: '2026-10-06T16:38:27+00:00'
 ---
 
-AGENTS.md 层入口三章是 Project Harness（Git 项目上的系统二写法）。表面标记从 `project-memory` 改为 `project-harness` / `project-harness-constraints` / `project-harness-local` / `project-harness-descendants`，标题改为本层硬约束 / 本层组成 / 下层节点。类型入口的 `project-memory-type` / `project-memory-entries` 本轮不改。
+AGENTS.md 层入口三章是 Project Harness（Git 项目上的系统二写法）。表面标记为 `project-harness` / `project-harness-constraints` / `project-harness-local` / `project-harness-descendants`。
 
-**Why:** 三章服务于系统二，不是 Project Memory 目录。旧标题「本层记忆」已经装不下 tasks / evaluation / observation。type / entries 只给工具读写类型目录，没有同样的名实冲突，不跟这轮绑在一起。用户 2026-10-06 确认：只改表面、前缀用 `project-harness`、类型标记不动。
+**现行标题（2026-10-06 Q15c 翻案后）：**
+- `本层硬约束`
+- `本层系统维护信息`（取代本轮曾落地的 `本层组成`，以及更早的 `本层记忆`）
+- `下层系统维护信息`（取代 `下层节点` / `下层记忆索引` / `下层作用域`）
 
-**How to apply:** 改协议/模板/codec 时按 [设计](../../../../docs/superpowers/specs/2026-10-06-project-harness-layer-markers-design.md)。读兼容旧 `project-memory` 层标记，写只发新标记。存量用 `pnpm migrate:project-harness-markers -- --root <作用域>` 预览，加 `--apply` 写入。不要改 type/entries 前缀，不要改 `.harness/` 目录名、skill 名 `project-memory-*` 或 `edges memory` 命令名，不要重划三章职责。blocks.ts 的标记工厂必须拆开层前缀与类型前缀。
+类型入口的 `project-memory-type` / `project-memory-entries` 仍不改。README 组织清单另用 `project-entries-*` 与「本层内容 / 下层内容」，见 `project_grill_entries_markers_and_titles`。
+
+**Why:** 层标记改名那轮用「本层组成 / 下层节点」；节点模型 grill 后与 README「内容」对仗，用户改为「系统维护信息」。
+
+**How to apply:** 序列化 AGENTS 只发新标题；读兼容 `本层组成`、`下层节点` 及更早别名。完整条目标记与 README 分工以 `docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md` 为准。旧设计 docs/superpowers/specs/2026-10-06-project-harness-layer-markers-design.md 的标题表已过期于 Q15c，以本条与新 spec 为准。

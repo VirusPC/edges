@@ -13,16 +13,16 @@ _避免使用_：把内容叶子当成系统入口、把虚拟入口默认落盘
 _避免使用_：仅指文件夹、磁盘上未登记的 md
 
 **组织清单（README.md）**：
-用 `README.md` 承载组成登记的文档节点：列出本目录作为系统一的孩子（如根 README 指向 `tasks/`、Task Project 列出任务、类型索引列出条目）。给人看的说明与 entries 可同文件；工具只改标记区块。
-_避免使用_：把叶子正文写成 README、把 README 当成系统入口、无 entries 的普通包说明自动当节点
+用 `README.md` 承载组成登记的文档节点：列出本目录作为系统一的孩子（如根 README 指向 `tasks/`、Task Project 列出任务、类型索引列出条目）。标记为 `project-entries-local` / `project-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。
+_避免使用_：把叶子正文写成 README、把 README 当成系统入口、无 entries 的普通包说明自动当节点、把 README 组成写成 project-harness-*
 
 **内容叶子入口（INDEX.md）**：
 Task / Note / Memory 等的入口文件，名为 `INDEX.md`。Skill 仍为 `SKILL.md`。有无子项仍看是否出现组成登记，不靠文件名分 Internal / Leaf。
 _避免使用_：index.md（迁移前史料）、把叶子叫 README.md、把 INDEX.md 当成系统入口
 
-**组成登记（entries / project-harness local·descendants）**：
-系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——这是树遍历的核心规则。
-_避免使用_：目录扫描结果、把任意 Markdown 链接当子节点、宣称 AGENTS.md 永不登记子项、把系统一孩子双写进 AGENTS 与 README
+**组成登记（entries）**：
+系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口用 `project-harness-local` / `project-harness-descendants`（标题「本层系统维护信息 / 下层系统维护信息」）；组织清单用 `project-entries-local` / `project-entries-descendants`（标题「本层内容 / 下层内容」）。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——这是树遍历的核心规则。
+_避免使用_：目录扫描结果、把任意 Markdown 链接当子节点、宣称 AGENTS.md 永不登记子项、把系统一孩子双写进 AGENTS 与 README、两套标记混用
 
 **组织节点 / 叶子节点（派生状态）**：
 同一文档节点的当前状态：有组成登记为组织节点，否则为叶子。不是固定类型，模型不持久化 isLeaf，任意节点都可增加子节点。
@@ -213,8 +213,8 @@ _避免使用_：仅指第三方技能、全部 Agent 技能、Project Memory �
 _避免使用_：唯一入口、替代 CLI、直连仓根脚本（已否决）
 
 **Project Harness（Edges 语境）**：
-Git 项目里递归系统二落在系统入口 `AGENTS.md` 上的写法：硬约束、本层组成、下层系统入口；`.harness/` 是材料目录，不是另一套入口形状。内容节点由组成登记挂入，不必自身也是系统入口。
-_避免使用_：Agent Harness 的同义词、只等于 `.harness/` 目录、Project Memory 三章的旧称、要求每个内容目录都有 AGENTS.md
+Git 项目里递归系统二落在系统入口 `AGENTS.md` 上的写法：本层硬约束、本层系统维护信息、下层系统维护信息；`.harness/` 是材料目录，不是另一套入口形状。内容节点由组织清单或系统入口的组成登记挂入，不必自身也是系统入口。
+_避免使用_：Agent Harness 的同义词、只等于 `.harness/` 目录、本层组成/下层节点（旧标题）、Project Memory 三章的旧称、要求每个内容目录都有 AGENTS.md
 
 **Agent Harness（Edges 语境）**：
 让 Agent 持续有效工作的支撑机制，组织上下文、记忆、工具、约束与反馈；它可承担系统二的角色，也可作为被维护的系统一，不与系统二严格同义。

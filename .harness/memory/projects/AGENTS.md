@@ -70,7 +70,7 @@ format: ordinary
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main/index.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks\_direct\_main
 - [知识目录单元与扩展应用归属](project_top_level_content_and_extension_apps/index.md) — 目录单元适用于全部知识内容；共用附件复制，未引用旧 img 归 archive/img，根共享池无引用附件归档；apps 属于 extensions，局部记忆保留归属。
 
-- [层入口表面命名改为 project\-harness](<project_harness_layer_markers/index.md>) — 改 AGENTS.md 层入口注释或章节标题时：外层与三章改为 project\-harness / constraints / local / descendants，标题为本层硬约束 / 本层组成 / 下层节点；type 与 entries 仍用 project\-memory\-\*。设计见 docs/superpowers/specs/2026\-10\-06\-project\-harness\-layer\-markers\-design.md。
+- [层入口表面命名改为 project\-harness](<project_harness_layer_markers/index.md>) — 改 AGENTS.md 层入口注释或章节标题时：标记为 project\-harness / constraints / local / descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；type 与 entries 仍用 project\-memory\-\*。README 的 project\-entries\-\* 见 grill\_entries 条。
 
 - [递归系统二：系统入口 AGENTS.md 带组成登记](<project_recursive_system_two_entry/index.md>) — 改节点模型、AGENTS.md、Project Harness 或 layout 时打开：核心是递归系统二；系统入口为 AGENTS.md 且必须带组成登记；从 scope 系统入口经登记可达才算节点；无 isLeaf；Task/Note/Skill 由登记挂入。曾议 AGENTS 不带 entries 已否。谁必须有真实 AGENTS 见 grill Q10。
 
@@ -81,4 +81,8 @@ format: ordinary
 - [组织清单 README.md，内容叶子 INDEX.md](<project_document_entry_readme_index/index.md>) — 改节点入口文件名、Task/Note/Memory 路径或类型索引形状时：组织清单一律 README.md\+entries；内容叶子为 INDEX.md；Skill 仍 SKILL.md；系统入口仍 AGENTS.md。不要把 Task 正文写成 README。
 
 - [grill：README/AGENTS 组成分工与 INDEX 迁移脚本](<project_grill_system_entry_q13_q14/index.md>) — 改树遍历或入口迁移时：同目录系统一孩子只在 README entries，AGENTS 只挂系统二材料与下级系统入口；index.md→INDEX.md 用可预览脚本套 CLI traverse，含 posts（本轮改名授权）。原则见 models/README 设计原则节。
+
+- [README entries 与 AGENTS 章节标题定稿](<project_grill_entries_markers_and_titles/index.md>) — 改 README entries 或 AGENTS 三章标题时：README 用 project\-entries\-local/descendants，标题本层内容/下层内容；AGENTS 标题为本层硬约束/本层系统维护信息/下层系统维护信息（标记仍 project\-harness\-\*）。
+
+- [节点模型落地前先写 spec 与 ADR](<project_grill_q16_spec_and_adr_first/index.md>) — 改递归系统二入口、entries 标记或 INDEX 迁移前：先完成设计 spec 与 ADR 并经人审，再 writing\-plans；本步不写生产代码。
 <!-- project-memory-entries:end -->
