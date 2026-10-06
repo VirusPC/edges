@@ -6,7 +6,7 @@ import {
   DEFAULT_PORT,
   DEFAULT_PUBLIC_BASE_URL,
   loadServerEnv,
-} from "./server/env.js";
+} from "../../services/artifacts/server/env.js";
 import {
   installArtifactsServer,
   restartArtifactsServer,
@@ -14,7 +14,7 @@ import {
   startArtifactsServer,
   statusArtifactsServer,
   stopArtifactsServer,
-} from "./server/ops.js";
+} from "../../services/artifacts/server/ops.js";
 
 const SERVER_AFTER_HELP = `
 COMMANDS
