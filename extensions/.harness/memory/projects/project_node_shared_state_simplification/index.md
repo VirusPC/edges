@@ -6,7 +6,7 @@ metadata:
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T14:11:33+08:00'
+  edges-updated-at: '2026-10-06T14:39:48+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -63,3 +63,19 @@ metadata:
 **Why:** 用户要求再次检查 Tasks、Memory、Note 是否还有通用能力可沉淀，并接受了全部四项建议。目标是删掉业务模块各自实现的基础设施，而不是继续搬迁业务专用操作或增加抽象层。
 
 **How to apply:** 通用层提供机制，Tasks 的状态/项目规则、Memory 的类型/私有内容规则、Note 的 Git 发布流程仍由各自模块负责。保留非受控 Markdown、外部修改检查及已有单实例/命令锁合同。范围与步骤见[补充设计](../../../../../docs/superpowers/specs/2026-10-06-shared-node-capabilities.md)和[实施计划](../../../../../docs/superpowers/plans/2026-10-06-shared-node-capabilities.md)；不要据此把 Memory 发现未登记文件的物理盘点改成只查登记树。
+
+## 通用能力计划的文件划分待复核
+
+用户确认通用能力收敛的目标，但质疑已提交计划的实际文件划分过散、过于复杂。四项目标仍成立，文件划分和新增抽象需重新讨论；尚未确认替代方案。
+
+**Why:** 将重复代码抽到公共位置，不等于应该新增一层公开接口或中间状态。用户关心的是架构理解与使用成本，不能仅以拆出更多小文件作为完成收敛的依据。
+
+**How to apply:** 执行 shared-node-capabilities 计划前，先复核 NodeDocument 包装、独立查询入口及 AGENTS 文档辅助模块的必要性，优先评估既有 NodeService、InternalNode 与序列化实现能否直接承担。这里记录待复核事项，不代表用户已批准合并具体文件或取消已确认的 operations 分文件约定。
+
+## 创建与保存的 Service 边界
+
+用户进一步强调：保存、创建等完整操作应通过 Service，不应要求调用方直接操作 Model 后自行协调落盘。
+
+**Why:** 上一轮“Model 管内容、Service 管 IO”的表述容易被理解成业务调用方需要自己拼接模型修改和保存流程。用户要求参照后端分层明确统一的操作入口，同时继续减少过散的文件和包装。
+
+**How to apply:** Service 协调加载、调用模型规则、关联索引与持久化；Model 保留纯内存领域方法及 parse/serialize/validate，不执行文件 IO。对业务调用方提供完整的 Service 操作；模型内部可变实现与原地更新决策仍保留，不借此引入 immutable。通用能力应优先复用已有 NodeService 与模型实现；重新梳理的 spec/plan 已据此修订，具体实现尚未开始。

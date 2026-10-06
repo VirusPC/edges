@@ -2,45 +2,42 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 将 Tasks、Memory、Note 重复的路径、节点文档保存、AGENTS 索引维护和全仓查询能力收敛到通用层，四项全部实现。
+**Goal:** 完成节点保存、AGENTS 索引维护、路径机制和登记树查询四项收敛，同时减少调用层与重复状态。
 
-**Architecture:** 沿用 models / operations / services / utils 分层。格式与树规则归模型，加载与保存归 Service，业务模块传入模型与边界政策；不建立第二套缓存或事务机制。按路径 → 文档保存 → 索引维护 → 查询顺序实施，每项独立验证。
+**Architecture:** CLI 调用业务 Service；业务 Service 复用 NodeService；NodeService 调用模型、operations 与现有文件保存实现。Model 保留纯内存领域行为，完整创建/更新/保存由 Service 协调。优先使用现有接口，不新增文档句柄或查询包装层。
 
-**Tech Stack:** TypeScript、Node >=20、node:test、tsx、现有 NodeService 与 operations；沿用 gray-matter、proper-lockfile、write-file-atomic。
+**Tech Stack:** TypeScript、Node >=20、node:test、tsx、现有 NodeService、InternalNode、operations、gray-matter、proper-lockfile 与 write-file-atomic。
 
-**Spec:** [2026-10-06-shared-node-capabilities.md](../specs/2026-10-06-shared-node-capabilities.md)
+**Spec:** [通用能力收敛设计](../specs/2026-10-06-shared-node-capabilities.md)
 
-状态：待实施。本文只制定计划，所有复选框保持未完成。它承接已完成的 [节点职责简化计划](2026-10-06-node-identity-simplification.md)，不重新执行旧计划。
+状态：待实施。本版替代最初新增 node-documents、node-query、internal/documents、utils/markdown/index-rendering 文件的方案。此前[节点职责简化计划](2026-10-06-node-identity-simplification.md)已经完成，不重复执行。
 
 ## Global Constraints
 
 - TypeScript；Node >=20；不新增运行时依赖或独立 package。
 - 仅在独立 worktree 修改；不迁移仓库真实内容或用户私有数据。
+- 创建、更新、删除、导入与持久化通过 Service 协调；Model 保留纯内存领域行为。
 - 保留 NodeService 内同路径单实例、原地更新与实际受影响节点保存语义。
 - 保留命令写锁、文件快照冲突检查、单文件原子保存与既有失败恢复。
 - 保留 Markdown 非受控区域；不要求保留 YAML 注释或 YAML 样式。
 - 保留 CLI 参数、输出协议、默认 scope 与查询范围；不新增 CLI 命令。
-- 通用 operations 与 models/services 同级，算法按文件拆分；不引入 NodeTree、全局 Service 或事务框架。
+- operations 与 models/services 同级，算法按文件拆分；不引入 NodeTree、全局 Service 或事务框架。
 
-## 文件与职责
+## 文件划分与实施顺序
 
-以下路径相对仓库根。测试命令也从仓库根执行。
-
-| 文件 | 改动与职责 |
+| 现有位置 | 职责与本次改动 |
 | --- | --- |
-| `extensions/cli/src/utils/filesystem.ts` | 补齐包含关系、缺失路径 canonical 化、范围内链接检查；复用已有 findAncestor |
-| `extensions/cli/src/services/node-layout.ts`、`node-files.ts` | 消费公共路径原语；继续承载节点布局和快照/原子保存 |
-| `extensions/cli/src/services/node-documents.ts`（新增） | 显式 Service + Model 的薄文档句柄与保存函数 |
-| `extensions/cli/src/models/internal/documents.ts`（新增） | 共用 AGENTS 新文档骨架与完整模板结构检查 |
-| `extensions/cli/src/models/internal/blocks.ts` | 单一受控区块替换/插入算法，支持指定三段内的放置位置 |
-| `extensions/cli/src/utils/markdown/index-rendering.ts`（迁入） | 现有 Memory 索引转义与路径编码；不引入新语法 |
-| `extensions/cli/src/services/node-query.ts`（新增） | 从显式根查询全仓登记树，不拥有业务模型判断 |
-| `extensions/cli/src/services/tasks/project-meta.ts`、`board.ts`、`node-query.ts`、`grouped.ts` | 保留 Tasks 政策，替换基础设施调用 |
-| `extensions/cli/src/services/memory/node-documents.ts`、`paths.ts`、`types.ts`、`blocks.ts`、`entries.ts`、`agents.ts`、`remember.ts` | 保留 Memory 政策，删除重复保存与区块/路径实现 |
-| `extensions/cli/src/services/note/git/ingest.ts` | 保留发布编排，复用路径判断与文档保存 |
-| `extensions/cli/src/models/memory/index-rendering.ts`（移除旧路径） | 所有引用切换到 utils，不留转发文件 |
+| `src/services/node-service.ts` | 节点 get/create/update/move/destroy/import/query；保留接口，补齐业务接入 |
+| `src/services/node-files.ts`、`node-lock.ts`、`node-cache.ts` | 保存、锁、缓存的内部实现；职责不合并、不套新包装 |
+| `src/models/internal-node.ts`、`internal/{parse,serialize,blocks}.ts` | AGENTS 解析/序列化及受控区块；复用已有骨架生成，索引编码收在 serialize.ts |
+| `src/utils/filesystem.ts` | 公共路径原语 |
+| `src/services/memory/node-documents.ts` → `service.ts` | 保留 Memory 特有的 Service 配置与写前准备，删除文档句柄及 load/save 包装 |
+| `src/services/tasks/`、`src/services/note/` | 现有业务流程直接调用通用 Service，保留业务规则 |
+| `src/operations/` | 保留现有惰性查询与遍历，不新增全仓查询包装 |
 
-Tasks 专用操作仍留在 Tasks。Memory 的模板装载/填充、provenance 与物理盘点仍留在 Memory。测试 fixture 只使用临时目录中的合成内容。
+表内 src 相对 `extensions/cli/`。执行顺序：路径 → AGENTS 格式 → 保存调用链 → 全仓查询。后两项复用的核心接口已存在，先跑基线再迁移；不要为了制造 RED 添加没有用户行为意义的实现断言。新增格式/路径行为则先补失败用例。
+
+不把“删除所有小文件”作为目标；本轮不新增通用生产入口文件。Memory 的 service.ts 是原文件改名并删职责，不是增加一层服务。
 
 ## Task 1：统一物理路径原语，保留业务边界
 
@@ -109,276 +106,210 @@ if (linked) throw new Error(`Managed path contains a symbolic link: ${linked}`);
 - [ ] GREEN：运行 `pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/utils/filesystem.test.ts test/utils/scope.test.ts test/services/node-service.test.ts test/memory/core-boundaries.test.ts test/note/utils/git-ingest.test.ts test/tasks/utils/board.test.ts`。全部通过；检查 Note 位于合法 `..draft` 路径时不被拒绝，链接越界仍拒绝。
 - [ ] 提交本任务文件：`git commit -m "refactor: share filesystem path primitives" -m "Co-authored-by: Codex <noreply@openai.com>"`。
 
-## Task 2：统一节点文档保存与普通文本的原子写
+## Task 2：在现有模型格式实现中统一 AGENTS
 
 **Files:**
-- Create: `extensions/cli/src/services/node-documents.ts`
-- Modify: `extensions/cli/src/services/tasks/project-meta.ts`, `extensions/cli/src/services/tasks/board.ts`
-- Modify: `extensions/cli/src/services/memory/node-documents.ts`, `extensions/cli/src/services/memory/remember.ts`, `extensions/cli/src/services/memory/types.ts`, `extensions/cli/src/services/memory/paths.ts`, `extensions/cli/src/services/memory/entries.ts`, `extensions/cli/src/services/memory/agents.ts`
-- Modify: `extensions/cli/src/services/note/git/ingest.ts`
-- Create test: `extensions/cli/test/services/node-documents.test.ts`
-- Extend tests: `extensions/cli/test/tasks/owner-board.test.ts`, `extensions/cli/test/tasks/project.test.ts`, `extensions/cli/test/memory/core-boundaries.test.ts`, `extensions/cli/test/note/utils/git-ingest.test.ts`
+- Modify: `extensions/cli/src/models/internal/blocks.ts`, `extensions/cli/src/models/internal/serialize.ts`
+- Remove after migration: `extensions/cli/src/models/memory/index-rendering.ts`
+- Modify: `extensions/cli/src/services/tasks/project-meta.ts`
+- Modify: `extensions/cli/src/services/memory/blocks.ts`, `extensions/cli/src/services/memory/entries.ts`, `extensions/cli/src/services/memory/agents.ts`
+- Extend test: `extensions/cli/test/models/internal.test.ts`, `extensions/cli/test/tasks/utils/project-meta.test.ts`, `extensions/cli/test/memory/core.test.ts`
 
 **Interfaces:**
-- Consumes Task 1 path functions; existing `Model<T>` from `services/node-layout.ts`; `NodeService.get/create/update`; `readEntry(file: string, allowLinkedRead?: boolean): EntryFile | undefined`; `saveEntries(changes: readonly FileChange[]): Map<string, EntryFile | undefined>`.
-- Produces:
+- Consumes existing `createNodeModel(): NodeModel`, `serializeNode(model: NodeModel, originalSource?: string): string`, `decodeBody` and layout.CODEC_SECTIONS.
+- Produces in **existing** `models/internal/serialize.ts`: `escapeIndexText(value: string): string`, `encodeIndexPath(value: string): string`，原样迁入现有实现，不改变转义规则。
+- Extends existing `upsertBlock(document: string, start: string, end: string, block: string, section?: SectionKey): string`；SectionKey 使用已有 `'constraints' | 'memory' | 'children'`。
+
+block 包含完整 start/end。已有区块原位替换；指定 section 而区块在别处则报错。无目标标记才插入指定 section；section 省略时沿用文档级插入规则。完整模板的“必须有三段”检查仍归 Memory 模板加载；不强迫已有局部 AGENTS 自动扩成完整模板。
+
+- [ ] 在 internal.test.ts 增加以下用例及已有模块 imports，验证保留正文、幂等和错误标记：
 
 ```ts
-export interface NodeDocument<T extends BaseNode> {
-  readonly service: NodeService;
-  readonly node: T;
-  existed: boolean;
-}
-export function loadNodeDocument<T extends BaseNode>(
-  service: NodeService, file: string, Model: Model<T>,
-): Promise<NodeDocument<T>>;
-export function saveNodeDocument<T extends BaseNode>(
-  document: NodeDocument<T>, source: string,
-): Promise<void>;
-```
-
-source 是业务层已经生成的完整文档。parse/validate 仍由对应模型完成；此函数不是新的 CLI Markdown 导入通道。结构化 create/update API 保持原样，TaskNode CRUD 不强制先转 Markdown。
-
-- [ ] 新建以下完整基础测试，验证重复保存继续使用同一实例，以及外部修改不能被覆盖：
-
-```ts
-import assert from 'node:assert/strict';
-import test from 'node:test';
-import * as fs from 'node:fs';
-import path from 'node:path';
-import { tmpdir } from 'node:os';
-import { InternalNode } from '../../src/models/index.js';
-import { NodeService } from '../../src/services/node-service.js';
-import { loadNodeDocument, saveNodeDocument } from '../../src/services/node-documents.js';
-
-test('document save retains identity, supports repeated updates and detects drift', async t => {
-  const root = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'node-documents-')));
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const file = path.join(root, 'AGENTS.md');
-  const service = new NodeService({ managedRoot: root });
-  const document = await loadNodeDocument(service, file, InternalNode);
-  await saveNodeDocument(document, '# Root\n\nAuthored text.\n');
-  assert.equal(document.existed, true);
-  assert.equal(await service.get(file, InternalNode), document.node);
-  await saveNodeDocument(document, '# Root\n\nUpdated text.\n');
-  assert.match(fs.readFileSync(file, 'utf8'), /Updated text/);
-  fs.writeFileSync(file, '# External editor\n');
-  await assert.rejects(saveNodeDocument(document, '# CLI replacement\n'));
-  assert.equal(fs.readFileSync(file, 'utf8'), '# External editor\n');
-});
-
-test('document creation does not overwrite a file that appeared after load', async t => {
-  const root = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'node-create-')));
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const file = path.join(root, 'AGENTS.md');
-  const document = await loadNodeDocument(new NodeService({ managedRoot: root }), file, InternalNode);
-  fs.writeFileSync(file, '# External creator\n');
-  await assert.rejects(saveNodeDocument(document, '# CLI creator\n'));
-  assert.equal(fs.readFileSync(file, 'utf8'), '# External creator\n');
-});
-```
-
-- [ ] RED：运行 `pnpm --filter edges-cli exec node --test --import tsx test/services/node-documents.test.ts`；预期缺失新模块。
-- [ ] 实现薄包装：get 命中直接复用；未命中才 new；保存前调用模型 parse/validate，已有走 update、新建走 create，成功后更新 existed。以当前 Memory 包装为起点，不引入第二个受管对象或从磁盘重新读取来掩盖冲突。
-
-```ts
-const existing = await service.get(file, Model);
-return { service, node: existing ?? new Model(file), existed: existing !== undefined };
-// saveNodeDocument 内：
-document.node.parse(source);
-document.node.validate();
-const input = { metadata: document.node.metadata, body: document.node.body };
-if (document.existed) await document.service.update(document.node, input);
-else await document.service.create(document.node, input);
-document.existed = true;
-```
-
-- [ ] Memory 的 loadMemoryDocument 保留 canonical target、assertScopePath、ensureLayerTypeGitignore、模型选择和 memoryNodes，然后调用 loadNodeDocument；saveMemoryDocument 删除，调用方直接使用 saveNodeDocument。remember 的文本生成路径也复用此包装；import 路径继续 service.import，保留来源审计与只读类型校验。
-- [ ] Tasks 项目/看板文档改用 NodeService。`project-meta.ts` 内创建业务工厂 `projectNodes(target: BoardTarget): NodeService`：managedRoot 为 canonical scope；assertWrite 仅允许当前 board 内节点及**已经存在**的 owner AGENTS。board 写继续 assertBoardPath；owner 路径必须精确匹配。所有待修改文档先 load，再计算文本；ownerBoardChange 改为在此 Service 的 InternalNode 上修改关联，而非另走 raw FileChange 保存。
-
-```ts
-// 文档保存调用形态；service 由当前业务操作共享。
-const document = await loadNodeDocument(service, projectAgentsPath, InternalNode);
-const source = renderProjectAgents(projectInput);
-await saveNodeDocument(document, source);
-```
-
-此代码中的 projectAgentsPath/projectInput 使用 create/updateProject 的现有局部值。项目创建时 NodeService 自动维护父索引后，后续刷新必须读取同一 Service 中的最新节点正文，不能继续使用此前缓存的字符串。缺失 owner 不创建；maintenance board 登记到 local，domain board 保留 descendant。BoardWriter 普通资源接口和测试 seam 保留，但项目/看板 AGENTS 不再调用 writer.writeFile。
-- [ ] Note 在 checkout/pull 后，用该命令自己的 Service 调用 loadNodeDocument/saveNodeDocument；保留现有 draftNoteNode 验证、已有父索引 Git 状态检查、附件 import、git add/commit/push/PR 行为。不要挪动发布流程的读写时序。
-- [ ] `.gitignore` 在 ensureTypeGitignore 中用 readEntry 捕获原文再生成文本；变更时 saveEntries，原文件保留 mode、新建使用原实现的 `0o600`。删 Memory.writeAtomic 和无用导入；普通资源不必包装成 Node。
-
-```ts
-const before = readEntry(ignorePath);
-const previous = before?.source ?? '';
-// 使用 ensureTypeGitignore 现有规则从 previous 追加缺失 patterns，得到 next。
-if (next !== previous) saveEntries([{ path: ignorePath, before, source: next, createMode: 0o600 }]);
-```
-
-- [ ] 扩展已有业务测试 fixture：项目/看板/owner 修改分别保留自定义正文；缺失 owner 不创建；Memory 私有类型仍先验证 ignore；Note 的发布目标更新保留父索引检查。对现有 node-files-atomic 注入失败测试继续运行，不能只测试写入成功。
-- [ ] GREEN：运行 `pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/services/node-documents.test.ts test/services/node-files-atomic.test.ts test/services/shared-node-state.test.ts test/tasks/project.test.ts test/tasks/owner-board.test.ts test/memory/core-boundaries.test.ts test/note/utils/git-ingest.test.ts`；全部通过。
-- [ ] 提交本任务文件：`git commit -m "refactor: unify node document persistence" -m "Co-authored-by: Codex <noreply@openai.com>"`。
-
-## Task 3：统一 AGENTS 骨架与受控索引区块
-
-**Files:**
-- Create: `extensions/cli/src/models/internal/documents.ts`
-- Modify: `extensions/cli/src/models/internal/blocks.ts`
-- Move: `extensions/cli/src/models/memory/index-rendering.ts` → `extensions/cli/src/utils/markdown/index-rendering.ts`
-- Modify: `extensions/cli/src/services/tasks/project-meta.ts`, `extensions/cli/src/services/memory/blocks.ts`, `extensions/cli/src/services/memory/entries.ts`, `extensions/cli/src/services/memory/agents.ts`
-- Create test: `extensions/cli/test/models/internal-documents.test.ts`
-- Extend tests: `extensions/cli/test/tasks/utils/project-meta.test.ts`, `extensions/cli/test/memory/core.test.ts`, `extensions/cli/test/models/internal.test.ts`
-
-**Interfaces:**
-- Consumes existing `createNodeModel(): NodeModel`, `serializeNode(model: NodeModel, originalSource?: string): string`, `decodeBody`, `SectionKey = 'constraints' | 'memory' | 'children'` and CODEC_SECTIONS.
-- Produces:
-
-```ts
-// models/internal/documents.ts
-export function createAgentsDocument(introduction: string): string;
-export function validateAgentsStructure(source: string): void;
-// models/internal/blocks.ts：扩展现有函数，不新增并存的另一套 upsert。
-export function upsertBlock(
-  document: string, start: string, end: string, block: string, section?: SectionKey,
-): string;
-// utils/markdown/index-rendering.ts：原样迁移已有接口与编码规则。
-export function escapeIndexText(value: string): string;
-export function encodeIndexPath(value: string): string;
-```
-
-block 包含完整 start/end 标记。已有目标区块仅原位替换；若 section 有值而现有区块位于错误位置，报错，由业务迁移流程显式处理。没有区块时：section 有值则插入对应段落；无 section 沿用现有 document 级插入规则。标记半缺失/重复/逆序报错。缺少指定三段之一时通过现有 insertInnerBlock 和 layout 补齐该段，不重建整篇文档。
-
-- [ ] 新建测试文件，使用如下可直接运行的区块保留用例：
-
-```ts
-import assert from 'node:assert/strict';
-import test from 'node:test';
-import { createAgentsDocument, validateAgentsStructure } from '../../src/models/internal/documents.js';
+import { createNodeModel } from '../../src/models/internal/model.js';
+import { serializeNode } from '../../src/models/internal/serialize.js';
 import { upsertBlock, LOCAL_START, LOCAL_END } from '../../src/models/internal/blocks.js';
 
-const start = '<!-- task-projects:start -->';
-const end = '<!-- task-projects:end -->';
-const block = `${start}\n- [A](a/AGENTS.md)\n${end}`;
-
-test('owned index changes leave authored text and other indexes intact', () => {
-  const source = createAgentsDocument('# Board\n\nAuthored introduction.')
-    .replace(LOCAL_END, `<!-- other-index:start -->\nKeep exactly.\n<!-- other-index:end -->\n${LOCAL_END}`)
-    + '\nAuthored tail.\n';
-  validateAgentsStructure(source);
+test('owned block updates preserve surrounding Markdown and reject ambiguity', () => {
+  const start = '<!-- task-projects:start -->';
+  const end = '<!-- task-projects:end -->';
+  const block = `${start}\n- [A](a/AGENTS.md)\n${end}`;
+  const source = '# Board\n\nIntro.  \n\n' + serializeNode(createNodeModel())
+    .replace(LOCAL_END, `<!-- keep -->\nOther text.  \n${LOCAL_END}`) + '\nTail.  \n';
   const next = upsertBlock(source, start, end, block, 'memory');
+  assert.ok(next.startsWith('# Board\n\nIntro.  \n\n'));
+  assert.ok(next.includes('<!-- keep -->\nOther text.  \n'));
+  assert.ok(next.endsWith('\nTail.  \n'));
   assert.ok(next.indexOf(start) > next.indexOf(LOCAL_START));
   assert.ok(next.indexOf(end) < next.indexOf(LOCAL_END));
-  assert.ok(next.includes('<!-- other-index:start -->\nKeep exactly.\n<!-- other-index:end -->'));
-  assert.ok(next.endsWith('\nAuthored tail.\n'));
   assert.equal(upsertBlock(next, start, end, block, 'memory'), next);
-  const changed = upsertBlock(next, start, end, block.replace('[A]', '[B]'), 'memory');
-  assert.equal(changed, next.replace('[A]', '[B]'));
-  assert.throws(() => upsertBlock(source + start, start, end, block, 'memory'));
-  assert.throws(() => upsertBlock(next + '\n' + block, start, end, block, 'memory'));
+  assert.equal(upsertBlock(next, start, end, block.replace('[A]', '[B]'), 'memory'),
+    next.replace('[A]', '[B]'));
+  assert.throws(() => upsertBlock(source + start, start, end, block));
+  assert.throws(() => upsertBlock(next + '\n' + block, start, end, block));
   assert.throws(() => upsertBlock(source + end + '\n' + start, start, end, block));
 });
 ```
 
-- [ ] RED：运行 `pnpm --filter edges-cli exec node --test --import tsx test/models/internal-documents.test.ts`；预期新模块缺失，或新位置/异常断言失败。
-- [ ] 新骨架调用已有 serializer，禁止重新复制三段标题和标记。完整模板校验迁移 Memory.loadAgentsTemplate 中的唯一性/顺序检查，使用现有 marker 常量。该校验面向完整模板，不强制所有既有 AGENTS 都先变成完整模板才允许局部修改。
+- [ ] RED：`pnpm --filter edges-cli exec node --test --import tsx test/models/internal.test.ts`。预期新增的 section 定位或畸形标记断言失败。
+- [ ] 扩展已有 blocks.ts：统计目标标记、验证成对/唯一/顺序，用 decodeBody 定位插入点；按原换行风格生成新边界。insertInnerBlock 不再 trimEnd 原前缀；不得全局折叠空行。重复/半缺失/跨段不明确均报错，不自动迁移畸形正文。
+- [ ] Tasks 新建项目的三段骨架直接复用 serializeNode，不再复制标记/标题字符串。已存在的 tail 分支保持逐字保留；不要为两个函数新增 documents.ts。
 
 ```ts
-export function createAgentsDocument(introduction: string): string {
-  return `${introduction.trimEnd()}\n\n${serializeNode(createNodeModel())}`;
-}
+// renderProjectAgents 的新文档分支，在保留既有标题/描述/Pointers 后：
+return `${out}\n${serializeNode(createNodeModel())}`;
 ```
 
-- [ ] 扩展 upsertBlock：先统计目标标记并验证顺序，再定位替换区间；插入时复用 decodeBody 的 section 位置及 layout 的 marker。根据原文换行风格生成新增边界；替换不能全局 trim、折叠空行或重写文档。同步去掉 insertInnerBlock 对原文前缀的 trimEnd，只追加插入所需分隔符；否则仅修改 upsertBlock 仍会丢掉非受控空白。测试补充 CRLF、目标文档级 entries、缺少 local 段和未知段内文本四个 fixture。
-- [ ] Tasks.renderProjectAgents 的新文档分支使用 createAgentsDocument；已有 tail 分支继续逐字保留。rewriteRootAgents 中保留“旧项目链接显式收编”和项目排序，只把 marker 操作交给公共 upsertBlock，指定 `'memory'`；不得把所有 localChildren 替换为项目列表。
+- [ ] Tasks 的旧项目引用收编、排序与提示文字留在业务格式适配中；只把区块定位交给 upsertBlock。Memory 的 entries 更新也复用它。纯函数生成文本后交由后续 Service.update，不直接变更受管模型。
 
 ```ts
-return upsertBlock(existing, TASK_PROJECTS_START, TASK_PROJECTS_END,
+const source = upsertBlock(existing, TASK_PROJECTS_START, TASK_PROJECTS_END,
   renderTaskProjectsSection(projects), 'memory');
 ```
 
-- [ ] Memory.renderAgentsDocument 使用 validateAgentsStructure 和共用 upsertBlock 填充模板，保留模板中的硬约束、说明文字及占位符契约。refreshIndex 仍先 loadNodeDocument，再根据快照生成 entries 并保存。Memory 类型文件盘点保持物理扫描用途，不改成树查询。
-- [ ] 迁移 index-rendering 两个函数及全部引用；Tasks 对新生成链接复用这些函数，已有 authored href 不重写。用一个临时 TypeScript 脚本批量更新 import，限定精确旧模块路径，不改真实 Markdown 内容；完成后删除临时脚本，不保留旧路径转发。
-- [ ] GREEN：运行 `pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/models/internal-documents.test.ts test/models/internal.test.ts test/tasks/utils/project-meta.test.ts test/tasks/owner-board.test.ts test/memory/core.test.ts test/memory/distribution.test.ts`；全部通过，分发模板仍可用。
-- [ ] 提交本任务文件：`git commit -m "refactor: share AGENTS structure and index editing" -m "Co-authored-by: Codex <noreply@openai.com>"`。
+- [ ] Memory 继续读取原分发模板并验证必需标记顺序；替换区块共用 blocks.ts，不能删除模板说明。将 escapeIndexText/encodeIndexPath 迁入现有 internal/serialize.ts；用临时 TypeScript 脚本更新精确 import 路径后删除旧文件，无转发文件。Tasks 新生成链接复用编码；已有 authored href 保留。
+- [ ] 补充 CRLF 与文档级 entries 用例：同一 source 转 CRLF 后插入，原文片段保持；entries 未指定 section 时保留文档级位置。旧 AGENTS 缺少 local 时只补该段，不重建其他段。
+- [ ] GREEN：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/models/internal.test.ts test/tasks/utils/project-meta.test.ts test/tasks/owner-board.test.ts test/memory/core.test.ts test/memory/distribution.test.ts`。
+- [ ] 提交：`git commit -m "refactor: consolidate AGENTS formatting" -m "Co-authored-by: Codex <noreply@openai.com>"`。
 
-## Task 4：迁出通用全仓查询，验证业务范围不变
+## Task 3：业务写操作统一经过 NodeService
 
 **Files:**
-- Create: `extensions/cli/src/services/node-query.ts`
-- Modify: `extensions/cli/src/services/tasks/node-query.ts`, `extensions/cli/src/services/tasks/grouped.ts`
-- Create test: `extensions/cli/test/services/node-query.test.ts`
-- Extend tests: `extensions/cli/test/tasks/all-scopes.test.ts`, `extensions/cli/test/tasks/node-query.test.ts`
+- Rename/reduce: `extensions/cli/src/services/memory/node-documents.ts` → `extensions/cli/src/services/memory/service.ts`
+- Modify: `extensions/cli/src/services/memory/{init,add-type,agents,entries,doctor,remember,types,paths}.ts`
+- Modify: `extensions/cli/src/services/tasks/project-meta.ts`, `extensions/cli/src/services/tasks/board.ts`
+- Modify only duplicated persistence/path calls: `extensions/cli/src/services/note/git/ingest.ts`
+- Extend tests: `extensions/cli/test/tasks/{project,owner-board}.test.ts`, `extensions/cli/test/memory/core-boundaries.test.ts`, `extensions/cli/test/note/utils/git-ingest.test.ts`
+- Reuse tests: `extensions/cli/test/services/{node-service,shared-node-state,node-files-atomic}.test.ts`
 
 **Interfaces:**
-- Consumes existing `NodeService.query(root: string, options?: NodeQueryOptions): AsyncQuery<BaseNode>` and `operations/query.ts` 的 AsyncQuery。
-- Produces `repositoryNodeQuery(root: string, types?: readonly string[]): AsyncQuery<BaseNode>` from `services/node-query.ts`.
-- Tasks.listRepositoryTaskNodes 显式传 `['task']`，grouped 项目发现显式传 `['internal']`。Tasks 的 boardLocationOf/taskLocationOf/projectLocationOf 留在原文件。
-
-- [ ] 新建下列混合节点与惰性测试；只写临时 fixture，不遍历真实仓库：
+- Consumes existing NodeService methods (不新增 save/upsert 接口)：
 
 ```ts
-import assert from 'node:assert/strict';
-import test from 'node:test';
-import * as fs from 'node:fs';
-import path from 'node:path';
-import { tmpdir } from 'node:os';
-import { InternalNode } from '../../src/models/index.js';
-import { repositoryNodeQuery } from '../../src/services/node-query.js';
-
-test('repository query defaults to all types and remains deferred', async t => {
-  const root = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'repository-query-')));
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const entry = path.join(root, 'AGENTS.md');
-  const note = path.join(root, 'notes/example/index.md');
-  fs.mkdirSync(path.dirname(note), { recursive: true });
-  fs.writeFileSync(note, '# Note\n');
-  fs.writeFileSync(entry, new InternalNode(entry).create({
-    localChildren: [{ id: note }],
-  }, { operation: 'create' }).serialize());
-  let seen = 0;
-  const all = repositoryNodeQuery(root).map(node => { seen += 1; return node; });
-  const grouped = all.groupBy(node => node.type).mapValues(nodes => nodes.length);
-  assert.equal(seen, 0);
-  const result = await grouped.value();
-  assert.equal(result.note, 1);
-  assert.ok(seen > 0);
-  fs.writeFileSync(note, '---\nbroken: [\n---\n');
-  assert.deepEqual(await repositoryNodeQuery(root, ['task']).value(), []);
-  await assert.rejects(repositoryNodeQuery(root).value());
-});
+get<T extends BaseNode>(file: string, Model: Model<T>): Promise<T | undefined>;
+create<T extends BaseNode>(node: T, input: Parameters<T['create']>[0]): Promise<T>;
+update<T extends BaseNode>(node: T, input: Parameters<T['update']>[0]): Promise<T>;
 ```
 
-- [ ] RED：运行 `pnpm --filter edges-cli exec node --test --import tsx test/services/node-query.test.ts`；预期通用入口模块缺失。
-- [ ] 迁移现有函数，去掉默认 task 类型，root canonical 化一次；不引入额外加载逻辑或业务模型 imports。
+- Existing `readEntry(file: string, allowLinkedRead?: boolean): EntryFile | undefined` and `saveEntries(changes: readonly FileChange[]): Map<string, EntryFile | undefined>` handle普通文本。
+- Memory.service.ts retains `memoryNodes(target: string): NodeService` and provides **业务准备函数** `prepareMemoryWrite(target: string, file: string): string`：校验 scope、canonical 化目标、按类型准备 gitignore，返回 canonical entry path。它不读/解析节点、不持有 existed、不保存。
+- Tasks.project-meta.ts 的私有 `projectNodes(target: BoardTarget): NodeService` 构造带限定写政策的 scope Service。
+
+Service 内可以实例化具体 Model 作为 create 的目标参数；这不等于绕过 Service 创建文件。CLI/Skills 提交业务参数；不让它们自行 new/parse/update 模型或拼接“先修改，再保存”的流程。本轮不为隐藏一个构造器另改所有 NodeService 方法签名。
+
+- [ ] 先运行本任务列出的现有 service / tasks / memory / note 测试，记录基线。已有服务冲突、身份和恢复合同不应因本轮代码整理而变化。
+- [ ] Memory 原文件改名 service.ts，保留 memoryNodes 的 readOnlyReference/assertWrite；把加载前检查抽成 prepareMemoryWrite。删除 MemoryDocument/loadMemoryDocument/saveMemoryDocument，全部消费者改为直接获取节点并调用 NodeService.create/update。重复批量 import/命名变更使用临时 TypeScript 脚本。
+- [ ] 修改内存节点之前，通过 Service 加载现有对象和快照。现有文档更新走 input，不先 node.parse(source) 或 node.body = source：
 
 ```ts
-export function repositoryNodeQuery(root: string, types?: readonly string[]): AsyncQuery<BaseNode> {
-  root = fs.realpathSync(root);
-  return new NodeService({ managedRoot: root }).query(root, {
-    includeDescendants: true, includeHarness: true, types,
-  });
+// Memory 业务 Service 内；NodeService 本身调用 InternalNode.parse/validate。
+const file = prepareMemoryWrite(target, entryPath);
+const node = await service.get(file, InternalNode);
+if (node) {
+  const source = upsertBlock(node.body, start, end, block);
+  await service.update(node, { body: source });
+} else {
+  await service.create(new InternalNode(file), { body: template });
 }
 ```
 
-- [ ] 更新两个 Tasks 调用点；原 Tasks 文件不留同名转发。复用 all-scopes fixture 验证 local/default board、domain/maintenance、重复引用、未登记目录和递归 harness 范围。对选定类型的 filter/groupBy/find 继续通过原有 operations 测试，不重写集合算法。
+这里 entryPath/start/end/block/template 来自对应操作已有参数、标记和模板。完整模板含 frontmatter 时，用现有 parseDocument 得到 metadata/body 作为 create input；不把整篇含头 Markdown 当 body。已有节点只修改正文时不覆盖未知 metadata。
+- [ ] Memory.remember 保留 fields/provenance 生成与未知 metadata 合并规则，用模型对应的结构化 input 调用 update/create；完整 Markdown 导入继续 NodeService.import。init/add-type/refreshIndex 同一目标视图可传递同一个 service；跨 owner 的 syncIndexEntry 为明确的独立视图，不建立全局 Service。
+- [ ] Tasks 项目/看板/owner 入口先通过 projectNodes 加载，再生成输入并更新。projectNodes managedRoot 为 canonical scope；assertWrite 只允许当前 board 内节点及精确匹配、已存在的 scope/AGENTS.md；board 仍执行 assertBoardPath。缺失 owner 不创建。ownerBoardChange 的独立 raw FileChange 写入移除，关系更新经 Service.update 的 InternalUpdateInput 提交。
 
 ```ts
-return repositoryNodeQuery(root, ['task'])
-  .filter((node): node is TaskNode => node instanceof TaskNode)
-  .value();
+// owner 已通过同一 service 加载；保留已有其他关系，不直接 owner.addChild。
+const localChildren = owner.localChildren.filter(ref => ref.id !== boardEntry);
+const descendantChildren = owner.descendantChildren.filter(ref => ref.id !== boardEntry);
+const existingReference = owner.children.find(ref => ref.id === boardEntry);
+await service.update(owner, {
+  localChildren: [...localChildren, existingReference ?? { id: boardEntry }],
+  descendantChildren,
+});
 ```
 
-- [ ] GREEN：运行 `pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/services/node-query.test.ts test/tasks/all-scopes.test.ts test/tasks/node-query.test.ts test/operations/async-query.test.ts test/operations/traverse.test.ts`；全部通过。
-- [ ] 提交本任务文件：`git commit -m "refactor: expose generic repository node query" -m "Co-authored-by: Codex <noreply@openai.com>"`。
+该示例仅对应需要登记/纠正的 maintenance board。若已在 local 则不改；domain 新登记使用 descendant，已登记则保留原分组。不要借示例重新排序无变化的引用。新建项目自动维护 board 索引后，后续刷新从同一 Service 对象取当前 body，不能沿用创建前字符串。
+- [ ] TaskNode CRUD 已经走 NodeService，保持其现有接口；run log/附件仍是资源。project-meta 的 AGENTS 保存不得再调用 BoardWriter.writeFile；BoardWriter 继续用于业务盘点和资源，不增加第二套节点持久化。
+- [ ] Note 保留 Git 操作顺序与现有 NodeService.create/update/import；去掉重复保存机制即可，不强迫经过新的公共 helper。校验草稿在业务 Service 内仍可使用 Model，但只由 NodeService 更新受管节点和文件。不得提前到 checkout/pull 之前加载。
+- [ ] `.gitignore` 的原子写改用既有文件 IO，删除 Memory.writeAtomic 及无用导入。保持模式和私有类型准备顺序：
 
-## 最终验收与交付
+```ts
+const before = readEntry(ignorePath);
+const previous = before?.source ?? '';
+const missing = patterns.filter(pattern => !previous.split(/\r?\n/).includes(pattern));
+if (missing.length) {
+  const source = `${previous.trimEnd()}\n\n# Private harness type ${name}\n${missing.join('\n')}\n`;
+  saveEntries([{ path: ignorePath, before, source, createMode: 0o600 }]);
+}
+```
 
-- [ ] 静态检查重复实现已清理：`rg -n 'repositoryNodeQuery|writeAtomic|saveMemoryDocument|writer\.writeFile|models/memory/index-rendering' extensions/cli/src`。逐项确认：repositoryNodeQuery 只在通用层定义；旧 Memory 原子写与保存函数无残留；project-meta 不再直接 writeFile；资源 writer 允许保留。
-- [ ] 检查通用层无反向依赖：`rg -n 'services/(tasks|memory|note)|from .*\./(tasks|memory|note)/' extensions/cli/src/utils extensions/cli/src/models/internal extensions/cli/src/services/node-documents.ts extensions/cli/src/services/node-query.ts`。模型/模板适配不得导入业务 Service。
-- [ ] 运行 `pnpm test`、`pnpm build`、`pnpm --filter edges-cli exec tsc --noEmit --strict -p tsconfig.json`。相较上一轮 934 项通过基线，既有用例必须保留通过，新用例计入实际结果；不拿旧结果冒充本轮验证。CLI 测试继续串行执行文件，保留显式多进程锁测试。
-- [ ] 依照 requesting-code-review 审查实现，重点检查：Tasks owner 自动索引与手工刷新是否重复/冲突；保存读取快照是否早于编辑；模板非受控内容是否完整；默认任务查询是否仍传类型筛选；私有类型/链接边界是否退化。修复明确问题后只重跑受影响验证，必要时再跑全量。
-- [ ] 更新本计划的实际完成记录及 spec 状态；仅同步受此重构影响的开发文档，不改 README 的系统设计含义。通过 CLI 更新相关项目记忆中的决策适用边界，不手改受管索引。
-- [ ] 提交文档并更新当前 PR 的变更说明和本轮验证结果；保持待合并，不能把实施授权当作合并授权。
+- [ ] 为实际业务调用补充至少一个回归：createProject → updateProject 后，项目正文 tail、board 的外部索引与 owner 自定义约束保持，缺失 owner 仍缺失。用已有 project/owner-board fixture，保留返回值和路径断言；继续运行已有文件漂移/创建竞争/保存失败恢复用例。
+- [ ] GREEN：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/services/node-service.test.ts test/services/shared-node-state.test.ts test/services/node-files-atomic.test.ts test/tasks/project.test.ts test/tasks/owner-board.test.ts test/memory/core-boundaries.test.ts test/memory/adoption.test.ts test/note/utils/git-ingest.test.ts`。
+- [ ] 提交：`git commit -m "refactor: route node writes through services" -m "Co-authored-by: Codex <noreply@openai.com>"`。
 
-## 计划自查
+## Task 4：直接复用 NodeService.query
 
-四项需求分别由 Task 1–4 覆盖。保存和索引共享同一基础设施，故保留在一个计划中。核心约束由针对性测试与最终全量回归共同验收；通用查询直接实施，没有等待未来消费者的分支。本文所有新增公开接口在对应任务中给出了签名，业务规则不被提升为 BaseNode 的条件逻辑。
+**Files:**
+- Modify: `extensions/cli/src/services/tasks/node-query.ts`, `extensions/cli/src/services/tasks/grouped.ts`
+- Extend test: `extensions/cli/test/services/node-service.test.ts`
+- Reuse tests: `extensions/cli/test/tasks/{all-scopes,node-query}.test.ts`, `extensions/cli/test/operations/{async-query,traverse}.test.ts`
+
+**Interfaces:**
+- Consumes existing `NodeService.query(scopePath: string, options?: NodeQueryOptions): AsyncQuery<BaseNode>`。
+- Produces no new公共接口；删除 repositoryNodeQuery，保留 Tasks 专用 listRepositoryTaskNodes 与布局归属函数。
+
+- [ ] 给现有 NodeService 测试增加混合类型及惰性断言。下列测试自行创建 fixture，不依赖其他测试状态；imports 使用现有同名 fs/path/test/assert/tmpdir 或补齐。
+
+```ts
+test('generic query supports all types and explicit task-only deferred execution', async t => {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'generic-query-')));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const note = path.join(root, 'notes/example/index.md');
+  const service = new NodeService({ managedRoot: root });
+  await service.create(new InternalNode(path.join(root, 'AGENTS.md')), {});
+  await service.create(new NoteNode(note), { body: '# Note\n' });
+  let seen = 0;
+  const all = service.query(root, { includeDescendants: true, includeHarness: true })
+    .map(node => { seen += 1; return node; }).groupBy(node => node.type)
+    .mapValues(nodes => nodes.length);
+  assert.equal(seen, 0);
+  assert.equal((await all.value()).note, 1);
+  assert.ok(seen > 0);
+  fs.writeFileSync(note, '---\nbroken: [\n---\n');
+  // 新 Service 视图观察当前磁盘，不用缓存掩盖类型筛选的正文跳过。
+  const fresh = new NodeService({ managedRoot: root });
+  assert.deepEqual(await fresh.query(root, {
+    types: ['task'], includeDescendants: true, includeHarness: true,
+  }).value(), []);
+  await assert.rejects(new NodeService({ managedRoot: root }).query(root, {
+    includeDescendants: true, includeHarness: true,
+  }).value());
+});
+```
+
+- [ ] 基线：`pnpm --filter edges-cli exec node --test --import tsx test/services/node-service.test.ts`。这些能力已存在，预期通过；迁移不要求改写查询算法。
+- [ ] Tasks 的 listRepositoryTaskNodes 直接使用以下调用；NodeService 构造保留在业务 Service 内：
+
+```ts
+const canonicalRoot = fs.realpathSync(root);
+const service = new NodeService({ managedRoot: canonicalRoot });
+return service.query(canonicalRoot, {
+  types: ['task'], includeDescendants: true, includeHarness: true,
+}).filter((node): node is TaskNode => node instanceof TaskNode).value();
+```
+
+- [ ] grouped.ts 的全仓项目发现使用同一 query API，显式 `types: ['internal']`；删除 repositoryNodeQuery 的定义和导入。boardLocationOf/taskLocationOf/projectLocationOf、CLI Git-root 发现保持 Tasks 业务职责。不新增 services/node-query.ts，不改变默认 query 的 local 范围。
+- [ ] GREEN：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/services/node-service.test.ts test/tasks/all-scopes.test.ts test/tasks/node-query.test.ts test/operations/async-query.test.ts test/operations/traverse.test.ts`。覆盖局部板、全仓双方用途、重复引用、叶子 harness、未登记目录与惰性链。
+- [ ] 提交：`git commit -m "refactor: reuse node service queries directly" -m "Co-authored-by: Codex <noreply@openai.com>"`。
+
+## 最终验收
+
+- [ ] `rg -n 'MemoryDocument|loadMemoryDocument|saveMemoryDocument|repositoryNodeQuery|writeAtomic|models/memory/index-rendering' extensions/cli/src`：本轮移除的包装与旧路径无残留。不新增 NodeDocument/DocumentService/save 包装。
+- [ ] 检查 project-meta.ts 的 AGENTS 保存已通过 NodeService；检查业务更新采用 Service input，未因删除包装变成直接修改对象后 raw writeFile。Model 内存方法与内部校验草稿仍可存在。
+- [ ] 检查 shared models/operations/utils 无业务 Service 反向依赖。Memory 的未登记文件盘点保持物理扫描，不能以 query 替代。
+- [ ] 运行 `pnpm test`、`pnpm build`、`pnpm --filter edges-cli exec tsc --noEmit --strict -p tsconfig.json`、`git diff --check`。上一轮 934 项是历史基线，本轮报告实际结果。CLI 测试文件继续串行，保留真实多进程锁用例。
+- [ ] 使用 requesting-code-review 审查：owner/board 自动索引和手工刷新是否冲突；节点快照是否早于生成更新；未受控 Markdown 是否完整；模型仍可变而保存受 Service 管理；私有类型、模板分发、scope 与查询范围是否保持。
+- [ ] 完成后更新本计划和 spec 状态、相关开发文档及项目记忆，提交并更新当前 PR；保持待合并。只按此计划修改 CLI 基础设施，不迁移真实内容。
+
+## 自查映射
+
+四项目标分别对应 Task 1 路径、Task 2 格式、Task 3 保存、Task 4 查询。取消了四个拟新增的公共入口文件以及 NodeDocument 状态包装；Memory 原业务文件改名并减职责。保留各模块政策和此前已确认的 operations 拆分。新方案不将 Service 的创建/保存职责转移给调用方或 Model，也不把所有代码合并进一个大文件。
