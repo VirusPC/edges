@@ -24,7 +24,8 @@
     "migrate:top-level-layout": "pnpm --filter edges-cli exec tsx ../../scripts/flatten-content-layout.mts",
     "migrate:content-units": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-content-units.mts",
     "migrate:task-indexes": "pnpm --filter edges-cli exec tsx ../../scripts/index-task-nodes.mts",
-    "migrate:project-harness-markers": "pnpm --filter edges-cli exec tsx ../../scripts/rewrite-project-harness-markers.mts"
+    "migrate:project-harness-markers": "pnpm --filter edges-cli exec tsx ../../scripts/rewrite-project-harness-markers.mts",
+    "migrate:type-index-readme": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-type-index-to-readme.mts"
   },
   "engines": {
     "node": ">=22"
