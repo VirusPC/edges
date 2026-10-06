@@ -180,7 +180,7 @@ test("local traversal supports cross-layer discovery and skips descendants befor
   );
   write("data/a b/index.md", "leaf");
   assert.deepEqual(
-    (await service.list(root)).map((n) => n.path),
+    (await service.list(root, { localOnly: true })).map((n) => n.path),
     [
       "AGENTS.md",
       "a/AGENTS.md",
@@ -438,9 +438,9 @@ test('typed queries keep internal navigation, skip unrelated bodies and preserve
   write('memory/bad/.harness/tasks/_default/todo/two/index.md', 'Two');
   write('child/AGENTS.md', index('- [third](tasks/_default/todo/three/index.md)'));
   write('child/tasks/_default/todo/three/index.md', 'Three');
-  assert.deepEqual((await service.query(root, { types: ['task'] }).value()).map(n => path.basename(n.directoryPath)), ['one']);
-  assert.deepEqual((await service.query(root, { types: ['task'], includeDescendants: true }).value()).map(n => path.basename(n.directoryPath)), ['one','three']);
-  assert.deepEqual((await service.query(root, { types: ['task'], includeDescendants: true, includeHarness: true }).value()).map(n => path.basename(n.directoryPath)), ['one','two','three']);
+  assert.deepEqual((await service.query(root, { types: ['task'], localOnly: true }).value()).map(n => path.basename(n.directoryPath)), ['one']);
+  assert.deepEqual((await service.query(root, { types: ['task'] }).value()).map(n => path.basename(n.directoryPath)), ['one','three']);
+  assert.deepEqual((await service.query(root, { types: ['task'], includeHarness: true }).value()).map(n => path.basename(n.directoryPath)), ['one','two','three']);
   await assert.rejects(service.list(root), /bad\/index.md/);
   write('tasks/_default/todo/one/index.md', '---\nbad: [\n---\n');
   await assert.rejects(new NodeService({managedRoot: root}).query(root, { types: ['task'] }).value(), /one\/index.md/);

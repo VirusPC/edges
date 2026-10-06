@@ -117,9 +117,11 @@ roots 是一个已加载节点或一组节点。resolve 返回 undefined 可跳�
 | --- | --- |
 | 默认 | 展开全部组成 `children`（local ∪ descendants） |
 | `localOnly: true` | 只展开 localChildren |
-| `includeDescendants` | 旧选项；目标默认视为 true，`false` 等价 `localOnly`（实施中迁移） |
+| `includeDescendants` | 已弃用；默认视为 true，`false` 等价 `localOnly`。新代码用 `localOnly` |
 | `includeHarness: true` | 额外沿独立 harness 关系递归，不只进入一层 |
 | `types` | 选择输出类型，不自动删掉通往目标的导航节点 |
+
+**双文件。** 从 scope 的 `AGENTS.md` 出发时，traverse 在其自身 children 之后并入同目录 `README.md` 的组成边（`README.md` 同样遵守 `localOnly`）。这是遍历期合并，不写入 AGENTS 的 localChildren/descendantChildren；同目录 README 是否存在由 resolve 决定（返回 undefined 即跳过）。NodeService 的 `query/list` 对固定路径 `README.md` 做存在性判断，不扫描目录；写入校验与注册遍历（move/destroy）暂不并入 README 边。
 
 遍历按需进行深度优先、先序访问，已访问路径去重；遇到仍在当前递归路径中的节点时报组成环错误。同一节点被多处引用时只输出一次。解析或加载失败向上传递，不自动修复或回退到扫描。
 

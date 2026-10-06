@@ -56,7 +56,7 @@ export async function taskBoardQuery(
       "VALIDATION_ERROR",
       `Task board index missing; migrate this board: ${entry}`,
     );
-  return service.query(root, { types });
+  return service.query(root, { types, localOnly: true });
 }
 export async function listTaskNodes(
   target: TaskBoardLocation,
@@ -71,7 +71,7 @@ export async function listRepositoryTaskNodes(
   const canonicalRoot = fs.realpathSync(root);
   const service = new NodeService({ managedRoot: canonicalRoot });
   return service.query(canonicalRoot, {
-    types: ["task"], includeDescendants: true, includeHarness: true,
+    types: ["task"], includeHarness: true,
   })
     .filter((node): node is TaskNode => node instanceof TaskNode)
     .value();

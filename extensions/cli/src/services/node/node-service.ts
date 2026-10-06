@@ -37,7 +37,7 @@ import {
   type Model,
 } from "./node-layout.js";
 import { query, type AsyncQuery } from "../../domain/operations/query.js";
-import { traverse } from "../../domain/operations/traverse.js";
+import { traverse, isCompanionReadme } from "../../domain/operations/traverse.js";
 import { NodeCache } from "./node-cache.js";
 
 type Operation = "create" | "update" | "move" | "destroy" | "import";
@@ -202,6 +202,8 @@ export class NodeService {
       // resolve and load are sequential; carry this edge's policy into its one load.
       let readonly = false;
       yield* traverse(root, options, (parent, reference) => {
+        // Dual-file scope: the same-directory README is optional composition.
+        if (isCompanionReadme(parent, reference) && !fs.existsSync(reference.id)) return undefined;
         if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           try {
@@ -260,8 +262,9 @@ export class NodeService {
     let readonly = false;
     for await (const node of traverse(
       roots(),
-      { includeDescendants: true, includeHarness: true },
+      { includeHarness: true },
       (parent, ref) => {
+        if (isCompanionReadme(parent, ref)) return undefined;
         if (!isWithinPath(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
         // Maintenance discovery tolerates a missing optional entry; composition does not.
         if (maintenanceOnly(parent, ref) &&
@@ -291,8 +294,9 @@ export class NodeService {
     let readonly = false;
     for await (const _node of traverse(
       roots(),
-      { includeDescendants: true },
+      {},
       (parent, ref) => {
+        if (isCompanionReadme(parent, ref)) return undefined;
         if (removed(ref.id))
           throw new Error(`Reference to removed node: ${ref.id}`);
         readonly = this.#referenceReadOnly(parent, ref);

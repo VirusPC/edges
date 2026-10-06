@@ -1,11 +1,52 @@
+import { basename, dirname, join } from "node:path";
 import { BaseNode } from "../models/core/base-node.js";
 import { InternalNode } from "../models/internal/internal-node.js";
+import { ReadmeNode } from "../models/readme/readme-node.js";
+import { ENTRY_NAMES } from "../models/layout.js";
 import type { NodeReference } from "../models/core/types.js";
 import { validateChild } from "../models/core/relations.js";
 
 export interface ScopeTraversalOptions {
+  /** When true, expand only localChildren. Default false: local ∪ descendants. */
+  localOnly?: boolean;
+  /** @deprecated Prefer localOnly. Default true; false is equivalent to localOnly. */
   includeDescendants?: boolean;
   includeHarness?: boolean;
+}
+
+/**
+ * Dual-file scope contract: a scope AGENTS.md is accompanied by the README.md
+ * in the same directory. The edge exists only at traversal time; it is never
+ * written into the AGENTS composition fields. Callers decide, in resolve,
+ * whether the companion file exists.
+ */
+export function companionReadme(node: BaseNode): NodeReference | undefined {
+  if (!(node instanceof InternalNode)) return undefined;
+  if (basename(node.path) !== ENTRY_NAMES.internal) return undefined;
+  return { id: join(dirname(node.path), ENTRY_NAMES.readme) };
+}
+
+export function isCompanionReadme(
+  parent: BaseNode,
+  reference: NodeReference,
+): boolean {
+  return (
+    companionReadme(parent)?.id === reference.id &&
+    !parent.children.some((child) => child.id === reference.id)
+  );
+}
+
+function expandedChildren(
+  node: BaseNode,
+  options: ScopeTraversalOptions,
+): readonly NodeReference[] {
+  const localOnly = options.localOnly ?? options.includeDescendants === false;
+  const own =
+    localOnly && (node instanceof InternalNode || node instanceof ReadmeNode)
+      ? node.localChildren
+      : node.children;
+  const companion = companionReadme(node);
+  return companion ? [...own, companion] : own;
 }
 
 export interface NodeQueryOptions extends ScopeTraversalOptions {
@@ -33,12 +74,8 @@ export async function* traverse(
     active.add(node.path);
     try {
       if (!options.types || options.types.includes(node.type)) yield node;
-      const children =
-        node instanceof InternalNode && !options.includeDescendants
-          ? node.localChildren
-          : node.children;
       for (const reference of [
-        ...children,
+        ...expandedChildren(node, options),
         ...(options.includeHarness && node.harness ? [node.harness] : []),
       ]) {
         validateChild(reference);

@@ -10,7 +10,7 @@ const scope = (name: string, local: BaseNode[] = [], descendants: BaseNode[] = [
 function graph(nodes: BaseNode[]) {
   const entries = new Map(nodes.map(n => [n.id, n]));
   const loads: string[] = [];
-  const run = (roots: BaseNode | Iterable<BaseNode>, options: NodeQueryOptions = {}) => traverse(roots, options, (_p, ref) => ref.id, async (_p, _r, id) => { loads.push(id); return entries.get(id)!; });
+  const run = (roots: BaseNode | Iterable<BaseNode>, options: NodeQueryOptions = {}) => traverse(roots, options, (_p, ref) => entries.has(ref.id) ? ref.id : undefined, async (_p, _r, id) => { loads.push(id); return entries.get(id)!; });
   return { run, loads };
 }
 async function collect(source: AsyncIterable<BaseNode>) { const result: BaseNode[] = []; for await (const n of source) result.push(n); return result; }
@@ -24,13 +24,16 @@ test('multiple roots share traversal identity and load on demand', async () => {
   assert.strictEqual(result[0], root); assert.strictEqual(result[1], item);
   assert.deepEqual(loads, [item.id]);
 });
-test('single-root preorder defaults to local and explicitly includes descendants and harness', async () => {
+test('single-root preorder defaults to all children; localOnly narrows; harness is opt-in', async () => {
   const a = leaf('a'), b = leaf('b'), maintenance = scope('maintenance');
   const child = scope('child', [a]), root = scope('root', [child], [b]);
   setNodeRelations(root, { harness: { id: maintenance.id } });
   const {run} = graph([root, child, a, b, maintenance]);
-  assert.deepEqual(await collect(run(root)), [root, child, a]);
-  assert.deepEqual(await collect(run(root, {includeDescendants: true, includeHarness: true})), [root, child, a, b, maintenance]);
+  assert.deepEqual(await collect(run(root)), [root, child, a, b]);
+  assert.deepEqual(await collect(run(root, {localOnly: true})), [root, child, a]);
+  assert.deepEqual(await collect(run(root, {includeDescendants: false})), [root, child, a]);
+  assert.deepEqual(await collect(run(root, {includeHarness: true})), [root, child, a, b, maintenance]);
+  assert.deepEqual(await collect(run(root, {localOnly: true, includeHarness: true})), [root, child, a, maintenance]);
 });
 test('diamond references and overlapping roots load each target once', async () => {
   const item = leaf('item'), a = scope('a', [item]), b = scope('b', [item]), root = scope('root', [a, b]);

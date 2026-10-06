@@ -107,14 +107,12 @@ test("Doctor preserves sparse generic nodes and registered cross-directory local
     before,
   );
   const service = new NodeService({ managedRoot: root });
-  const local = await service.list(join(root, "business"));
+  const local = await service.list(join(root, "business"), { localOnly: true });
   assert.deepEqual(
     local.map((node) => node.path),
     [join(root, "business/AGENTS.md"), join(root, "shared/AGENTS.md")],
   );
-  const all = await service.list(join(root, "business"), {
-    includeDescendants: true,
-  });
+  const all = await service.list(join(root, "business"));
   assert.deepEqual(
     all.map((node) => node.path),
     [

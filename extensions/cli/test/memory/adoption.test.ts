@@ -202,7 +202,7 @@ test("reviewed public root graph loads document entries and keeps ADR navigation
     fs.writeFileSync(file, "# Fixture entry\n");
     assert.ok(await service.get(file));
   }
-  const listed = await service.list(root);
+  const listed = await service.list(root, { localOnly: true });
   assert.equal(listed.length, 1 + node.localChildren.length);
   assert.ok(listed.every((entry) => fs.statSync(entry.path).isFile()));
   assert.equal(fs.readFileSync(join(root, "AGENTS.md"), "utf8"), source);

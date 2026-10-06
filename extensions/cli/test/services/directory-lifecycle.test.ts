@@ -37,7 +37,7 @@ test("directory loading separates physical parent, composition and recursive har
   put("skills/a/memory/index.md", "memory");
   put("skills/a/.harness/AGENTS.md", index());
   put("other/index.md", "other");
-  const nodes = await service.list(root);
+  const nodes = await service.list(root, { localOnly: true });
   assert.deepEqual(
     nodes.map((n) => n.path),
     [file("AGENTS.md"), file("skills/a/SKILL.md")],
@@ -47,11 +47,11 @@ test("directory loading separates physical parent, composition and recursive har
   const harness = (await service.get(nodes[1]!.harness!.id))!;
   assert.equal(harness.harness?.id, file("skills/a/.harness/AGENTS.md"));
   assert.deepEqual(
-    (await service.list(harness.path)).map((n) => n.path),
+    (await service.list(harness.path, { localOnly: true })).map((n) => n.path),
     [harness.path, file("skills/a/memory/index.md")],
   );
   assert.equal(
-    (await service.list(root, { includeDescendants: true })).length,
+    (await service.list(root)).length,
     3,
   );
 });
