@@ -75,7 +75,7 @@ edges --scope S memory add-type \
 
 ## 受管区块与条目
 
-区块标记改为 `<!-- project-harness:start -->` 外层，内部按 constraints → local → descendants。类型入口是 `README.md`，列表用 `project-entries-*`（旧 `project-memory-entries` 仅读兼容），自定义特权元数据仍用 `project-memory-type`。三类标题为「本层硬约束」（读兼容旧标题：本层重要约束、本层记忆、本层组成、下层记忆索引、下层作用域、下层节点；写入只发新标题）、「本层系统维护信息」、「下层系统维护信息」。本层列表登记该节点持有的类型、任务与其他内容；下层列表登记下层节点，保留显式跨层和跨目录关系及原描述。读兼容旧 `project-memory` 层标记；写入只发 `project-harness`。Task Project 列表的 task-projects 标记嵌在本层区块内；类型入口 README 的 entries 标记是本层内容（系统一）的稀疏表示，不进入 `project-harness-*` 区块。不生成第四类工作与模块入口，不要求无内容的标题。修复不覆盖人工文本，也不因物理中间目录新增 AGENTS 就重归属已登记引用。
+区块标记改为 `<!-- project-harness:start -->` 外层，内部按 constraints → local → descendants。类型入口是 `README.md`，列表用 `project-entries-*`（旧 `project-memory-entries` 仅读兼容），自定义特权元数据仍用 `project-memory-type`。三类标题为「本层硬约束」（读兼容旧标题：本层重要约束、本层记忆、本层组成、下层记忆索引、下层作用域、下层节点；写入只发新标题）、「本层系统维护信息」、「下层系统维护信息」。本层列表登记该节点持有的类型、任务与其他内容；下层列表登记下层节点，保留显式跨层和跨目录关系及原描述。读兼容旧 `project-memory` 层标记；写入只发 `project-harness`。Task Project 列表在看板 `README.md` 的 `project-entries-local`（系统一），看板 AGENTS 只登记用户 init 过的 `<project>/AGENTS.md`；旧 `task-projects` 标记只作迁移输入；类型入口 README 的 entries 标记是本层内容（系统一）的稀疏表示，不进入 `project-harness-*` 区块。不生成第四类工作与模块入口，不要求无内容的标题。修复不覆盖人工文本，也不因物理中间目录新增 AGENTS 就重归属已登记引用。
 
 普通条目为 YAML frontmatter + Markdown，前缀仍是类型原值，slug 为 snake_case。Skill 格式 slug 为 kebab-case（1–64 字符），name 为目录名。详细字段见 [`frontmatter-fields.md`](frontmatter-fields.md)：顶层遵循 Agent Skills 闭集，实现字段放 `metadata.edges-*`；读取既有顶层字段不等于支持旧目录布局，常规 doctor 不重写文件头。
 

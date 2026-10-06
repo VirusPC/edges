@@ -285,11 +285,11 @@ _避免使用_：title、name、把展示名当 CLI 查找键
 _避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type、把未确认的候选当成已有 project
 
 **Task Project 索引**：
-所选板 `tasks/AGENTS.md` 或 `.harness/tasks/AGENTS.md` 本层记忆区块内的 Task Projects 索引；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。
+所选板 `tasks/README.md` 或 `.harness/tasks/README.md` 的 `project-entries-local` 列表；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。用户 init 为系统入口的 `<project>/AGENTS.md` 仍登记在看板 `AGENTS.md`。
 _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件当记忆条目
 
-**Task Project AGENTS.md**：
-每个 Task Project 目录（含 `_default`）内的轻量 `AGENTS.md`，写标题与描述（可选指针）；作为可读节点入口不意味着自动初始化完整 Project Memory。
+**Task Project README.md**：
+每个 Task Project 目录（含 `_default`）内的 `README.md` 组织清单：标题、描述（可选指针）与列出 Task 的 `project-entries-local`。CLI 新建 project 只写 README；用户明确 init 时才有 `AGENTS.md` 系统入口。
 _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
 
 **Task Project 候选（edges）**：

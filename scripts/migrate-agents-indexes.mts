@@ -11,7 +11,7 @@ const start = '<!-- task-projects:start -->', end = '<!-- task-projects:end -->'
 const excluded = new Set(['.git', 'node_modules', 'dist', 'build', 'posts', '.agents', '.superpowers']);
 export interface AgentsIndexPlan { root: string; edits: Array<{ path: string; before: string; after: string }>; }
 const snapshots = new WeakMap<AgentsIndexPlan, { files: EntryFile[]; edits: string; root: string }>();
-function convert(file: string, source: string): string {
+export function convert(file: string, source: string): string {
  const starts = source.split(start).length - 1, ends = source.split(end).length - 1;
  if (!starts && !ends) return source;
  if (starts !== 1 || ends !== 1 || source.indexOf(start) > source.indexOf(end)) throw new Error(`${file}: malformed or duplicate legacy markers`);

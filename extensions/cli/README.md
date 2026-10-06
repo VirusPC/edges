@@ -249,4 +249,11 @@ pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts \
   --root /absolute/scope --write
 ```
 
-脚本先检查所有候选再写入，保留原文备份，跳过符号链接、依赖目录、受保护的 posts 和嵌套 Git 边界；重复执行无变更。目录迁移与本机私有内容恢复见[迁移指南](../../docs/recursive-layout-migration.md)。
+脚本先检查所有候选再写入，保留原文备份，跳过符号链接、依赖目录、受保护的 posts 和嵌套 Git 边界；重复执行无变更。
+
+Task Project 列表属于看板 `README.md`（`project-entries-local`）；看板 `AGENTS.md` 只登记 `<project>/AGENTS.md` 系统入口。把看板 AGENTS 里的 README 型 project 链接（含旧 task-projects 区块）一次性移过去：
+
+```bash
+pnpm migrate:task-project-lists -- --root /absolute/scope          # 预览
+pnpm migrate:task-project-lists -- --root /absolute/scope --apply
+```目录迁移与本机私有内容恢复见[迁移指南](../../docs/recursive-layout-migration.md)。
