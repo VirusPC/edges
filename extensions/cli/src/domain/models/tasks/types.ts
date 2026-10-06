@@ -1,3 +1,5 @@
+import type { NodeCreateInput } from "../core/types.js";
+
 export const TASK_STATUSES = [
   "backlog",
   "todo",
@@ -12,6 +14,15 @@ export type TaskStatus = (typeof TASK_STATUSES)[number];
 
 export const TASK_PRIORITIES = ["urgent", "high", "medium", "low", "none"] as const;
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
+
+export interface TaskCreateInput extends NodeCreateInput {
+  title?: string;
+  status?: TaskStatus;
+  priority?: TaskPriority;
+  assignee?: string;
+}
+
+export interface TaskUpdateInput extends TaskCreateInput {}
 
 export const DEFAULT_TASK_PROJECT = "default";
 export const DEFAULT_TASK_PROJECT_DIR = "_default";
@@ -74,5 +85,3 @@ export class TasksError extends Error {
     this.errorCode = errorCode;
   }
 }
-
-export type TasksOutput = "table" | "json";

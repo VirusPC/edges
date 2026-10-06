@@ -1,16 +1,7 @@
 import { dirname, isAbsolute, normalize } from "node:path";
-import {
-  parseDocument,
-  serializeDocument,
-} from "../../utils/markdown/document.js";
+import { parseDocument, serializeDocument } from "../../../utils/markdown/document.js";
 import { nodeRelations, nodePath } from "./relations.js";
-import type {
-  Metadata,
-  NodeReference,
-  NodeCreateInput,
-  NodeUpdateInput,
-  NodeContext,
-} from "./types.js";
+import type { Metadata, NodeReference, NodeCreateInput, NodeUpdateInput, NodeContext } from "./types.js";
 
 /**
  * Extension contract: subclasses support construction with only an absolute path.

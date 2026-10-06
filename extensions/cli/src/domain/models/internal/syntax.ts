@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
-import { decodeBody } from "./internal/parse.js";
-import { serializeNode } from "./internal/serialize.js";
-import type { NodeItem, NodeModel } from "./internal/model.js";
+import { decodeBody } from "./parse.js";
+import { serializeNode } from "./serialize.js";
+import type { AgentsItem, AgentsDocument } from "./document.js";
 export interface SyntaxReference {
   target: string;
   label?: string;
@@ -20,12 +20,12 @@ function adaptEntries(source: string): string {
     "<!-- project-memory-local:$1 -->",
   );
 }
-function constraintText(item: NodeItem): string {
+function constraintText(item: AgentsItem): string {
   return item.content
     .map((run) => (run.kind === "text" ? run.value : run.label))
     .join("");
 }
-function indexedReferences(item: NodeItem): SyntaxReference[] {
+function indexedReferences(item: AgentsItem): SyntaxReference[] {
   return item.content.flatMap((run, index) => {
     if (run.kind !== "link") return [];
     let suffix = "";
@@ -45,7 +45,7 @@ function indexedReferences(item: NodeItem): SyntaxReference[] {
     ];
   });
 }
-function renderReference(reference: SyntaxReference): NodeItem {
+function renderReference(reference: SyntaxReference): AgentsItem {
   return {
     content: [
       {
@@ -60,13 +60,13 @@ function renderReference(reference: SyntaxReference): NodeItem {
   };
 }
 function rebuildIndexes(
-  original: NodeItem[],
+  original: AgentsItem[],
   references: readonly Readonly<SyntaxReference>[],
-  indexItems: ReadonlySet<NodeItem>,
+  indexItems: ReadonlySet<AgentsItem>,
   isIndexed: (href: string) => boolean,
-): NodeItem[] {
+): AgentsItem[] {
   const remaining = [...references];
-  const next: NodeItem[] = [];
+  const next: AgentsItem[] = [];
   for (const item of original) {
     const before = indexItems.has(item)
       ? indexedReferences(item).filter((reference) =>
@@ -91,10 +91,10 @@ function rebuildIndexes(
 /** Immutable source snapshot used only to preserve unmodeled Markdown during edits. */
 export class InternalSyntax {
   readonly #source: string;
-  readonly #model: NodeModel;
+  readonly #model: AgentsDocument;
   readonly #entries: boolean;
   readonly #isIndexed: (href: string) => boolean;
-  readonly #indexItems = new Set<NodeItem>();
+  readonly #indexItems = new Set<AgentsItem>();
   constructor(
     source: string,
     isIndexed: (href: string) => boolean = () => true,
@@ -146,7 +146,7 @@ export class InternalSyntax {
       }
       return { content: [{ kind: "text" as const, value }] };
     });
-    const model: NodeModel = {
+    const model: AgentsDocument = {
       constraints,
       memory: rebuildIndexes(
         this.#model.memory,

@@ -1,6 +1,6 @@
-import { InternalNode } from "../../domain/models/internal-node.js";
+import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { decodeBody } from '../../domain/models/internal/parse.js';
-import { createNodeModel } from '../../domain/models/internal/model.js';
+import { createAgentsDocument } from "../../domain/models/internal/document.js";
 import { serializeNode } from '../../domain/models/internal/serialize.js';
 import { NodeService } from '../node-service.js';
 import { assertBoardPath } from './board.js';
@@ -101,7 +101,7 @@ export function renderProjectAgents(input: {
       : `## Pointers\n\n${input.pointers.trim()}`;
     out += `\n${block}\n`;
   }
-  return out + "\n" + serializeNode(createNodeModel());
+  return out + "\n" + serializeNode(createAgentsDocument());
 }
 
 export function oneLineDescription(description: string): string {
@@ -216,7 +216,7 @@ export async function refreshProjectIndex(
 
   const rootAbs = rootAgentsAbsPath(repoPath);
   let board = await service.get(rootAbs, InternalNode);
-  if (!board) board = await service.create(new InternalNode(rootAbs), { body: '# Tasks\n\n' + serializeNode(createNodeModel()) }, { indexGroup: selectedGroup(repoPath) });
+  if (!board) board = await service.create(new InternalNode(rootAbs), { body: '# Tasks\n\n' + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
   const updates = new Map(sortProjectRecords(records).map(record => [path.resolve(path.dirname(rootAbs), record.dir, 'AGENTS.md'), { name: record.title, description: oneLineDescription(record.description) }]));
   const update = (refs: typeof board.localChildren) => refs.map(ref => updates.has(ref.id) ? { ...ref, ...updates.get(ref.id) } : ref);
   const localChildren = update(board.localChildren), descendantChildren = update(board.descendantChildren);
@@ -242,7 +242,7 @@ export async function ensureProjectMetadata(
 ): Promise<TaskProjectRecord[]> {
   await prepareProjectWrite(repoPath, service);
   const rootAbs = rootAgentsAbsPath(repoPath);
-  if (!await service.get(rootAbs, InternalNode)) await service.create(new InternalNode(rootAbs), { body: "# Tasks\n\n" + serializeNode(createNodeModel()) }, { indexGroup: selectedGroup(repoPath) });
+  if (!await service.get(rootAbs, InternalNode)) await service.create(new InternalNode(rootAbs), { body: "# Tasks\n\n" + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
 
   for (const id of await collectProjectIds(repoPath, writer, additional)) {
     if (skipId === id) {

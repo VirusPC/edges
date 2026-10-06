@@ -3,18 +3,14 @@ import { WRITE_LOCK_NAME, assertNoWriteLock } from "./node-lock.js";
 import * as fs from "node:fs";
 import path from "node:path";
 import { BaseNode, InternalNode } from "../domain/models/index.js";
-import type {
-  ChildGroup,
-  NodeReference,
-  ScopeTraversalOptions,
-  NodeQueryOptions,
-} from "../domain/models/index.js";
+import type { ChildGroup, NodeReference } from "../domain/models/index.js";
+import type { ScopeTraversalOptions, NodeQueryOptions } from "../domain/operations/traverse.js";
 import {
   lifecycleUnits,
   assertMovableLayout,
   identifyNodeType,
 } from "../domain/models/layout.js";
-import { referenceOf } from "../domain/models/relations.js";
+import { referenceOf } from "../domain/models/core/relations.js";
 import {
   checkPath,
   readEntry,

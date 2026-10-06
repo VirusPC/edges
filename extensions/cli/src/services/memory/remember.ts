@@ -1,4 +1,4 @@
-import { InternalNode } from '../../domain/models/internal-node.js';
+import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { typeIndexPath } from './types.js';
 import { assertImportType } from "../import-entry.js";
 import { MemoryNode, SkillNode } from "../../domain/models/index.js";

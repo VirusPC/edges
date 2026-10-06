@@ -1,6 +1,6 @@
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 export { ownershipTarget } from './paths.js';
-import { InternalNode } from '../../domain/models/internal-node.js';
+import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { discoverScopes } from '../scope.js';
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node-service.js';
@@ -111,7 +111,7 @@ export function findIndexAnchor(target: string, root: string): string {
     }
     return root;
 }
-export async function syncIndexEntry(anchor: string, target: string, description?: string, indexGroup?: import('../../domain/models/types.js').ChildGroup): Promise<[string, string | null, string | null]> {
+export async function syncIndexEntry(anchor: string, target: string, description?: string, indexGroup?: import("../../domain/models/core/types.js").ChildGroup): Promise<[string, string | null, string | null]> {
     if (anchor === target) return ['not-applicable', null, null];
     const service = memoryNodes(anchor);
     const file = prepareMemoryWrite(anchor, join(anchor, AGENTS_FILE_NAME));

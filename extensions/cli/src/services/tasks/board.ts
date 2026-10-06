@@ -21,10 +21,8 @@ import {
   taskDocFromParsed,
   type TaskDoc,
 } from "../../domain/models/tasks/task-doc.js";
-import {
-  priorityFromMetadata,
-  sortTasksByPriority,
-} from "../../domain/models/tasks/priority.js";
+import { priorityFromMetadata } from "../../domain/models/tasks/priority.js";
+import { sortTasksByPriority } from "../../domain/operations/tasks.js";
 import {
   assertProjectDualWrite,
   DEFAULT_TASK_PROJECT,
@@ -364,11 +362,11 @@ export async function getTask(
 
 export type RepositoryTaskItem = TaskListItem & {
   doc: TaskDoc;
-  source: { scope: string; purpose: import('./paths.js').TaskPurpose };
+  source: { scope: string; purpose: import("./paths.js").TaskPurpose };
 };
 /** Shared projection for repository CLI lists and the persistent dashboard. */
 export async function listRepositoryTasksWithDocs(
-  root: string, opts: TaskListOpts = {}, purpose?: import('./paths.js').TaskPurpose,
+  root: string, opts: TaskListOpts = {}, purpose?: import("./paths.js").TaskPurpose,
 ): Promise<RepositoryTaskItem[]> {
   root = realpathSync(root);
   const nodes = await listRepositoryTaskNodes(root);

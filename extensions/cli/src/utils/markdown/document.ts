@@ -1,5 +1,5 @@
 import matter from 'gray-matter';
-import type { MarkdownDocument } from './types.js';
+import type { DocumentCodec, MarkdownDocument } from './types.js';
 
 /** Adapt gray-matter's default YAML behavior to the shared document model. */
 export function parseDocument(source: string): MarkdownDocument {
@@ -21,3 +21,20 @@ export function serializeDocument(document: MarkdownDocument<string>, _originalS
     ? document.body
     : matter.stringify({ content: document.body }, document.metadata);
 }
+
+export function createMarkdownCodec<TType extends string>(
+  type: TType,
+): DocumentCodec<MarkdownDocument<TType>, TType> {
+  return {
+    type,
+    parse(source) { return { ...parseDocument(source), type }; },
+    serialize(document, originalSource) {
+      if (document.type !== undefined && document.type !== type) {
+        throw new Error(`Document type ${document.type} does not match codec ${type}.`);
+      }
+      return serializeDocument(document, originalSource);
+    },
+  };
+}
+
+export const baseDocumentCodec = createMarkdownCodec('base');

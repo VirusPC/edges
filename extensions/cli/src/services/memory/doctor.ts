@@ -1,6 +1,6 @@
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 import { listTypeFiles } from './types.js';
-import { InternalNode } from "../../domain/models/internal-node.js";
+import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
@@ -327,7 +327,7 @@ export function collectFindings(root: string): MemoryFinding[] {
 export async function applyFindings(
   root: string,
   findings: MemoryFinding[],
-  indexGroup?: import("../../domain/models/types.js").ChildGroup,
+  indexGroup?: import("../../domain/models/core/types.js").ChildGroup,
 ): Promise<string[]> {
   const invalid = new Set(
     findings
@@ -451,7 +451,7 @@ export interface DoctorMemoryOptions {
   targetDir: string;
   rootDir?: string;
   apply?: boolean;
-  indexGroup?: import("../../domain/models/types.js").ChildGroup;
+  indexGroup?: import("../../domain/models/core/types.js").ChildGroup;
 }
 export async function doctorMemory(options: DoctorMemoryOptions) {
   const target = resolveTarget(options.targetDir);

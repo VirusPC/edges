@@ -1,4 +1,4 @@
-import { InternalNode } from '../../domain/models/internal-node.js';
+import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';

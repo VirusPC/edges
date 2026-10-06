@@ -1,5 +1,5 @@
 import { CODEC_SECTIONS } from "../layout.js";
-import type { NodeModel, SectionKey, NodeLink, NodeItem } from "./model.js";
+import type { AgentsDocument, SectionKey, AgentsLink, AgentsItem } from "./document.js";
 import { decodeBody } from "./parse.js";
 import { isDeepStrictEqual as same } from "node:util";
 import {
@@ -14,13 +14,13 @@ const escape = (value: string): string =>
     .replace(/[\\`*_[\]{}()#+!<>|&-]/g, "\\$&")
     .replace(/^(\d+)\./gm, "$1\\.");
 
-function renderLink(value: NodeLink): string {
+function renderLink(value: AgentsLink): string {
   if (/[\r\n]/.test(value.target))
     throw new Error("Link targets cannot contain line breaks.");
   return `[${escape(value.label)}](<${value.target.replace(/[\\<>]/g, "\\$&")}>)`;
 }
 
-function renderItem(item: NodeItem, prefix: string, newline: string): string {
+function renderItem(item: AgentsItem, prefix: string, newline: string): string {
   const content = item.content
     .map((run) => (run.kind === "link" ? renderLink(run) : escape(run.value)))
     .join("");
@@ -31,7 +31,7 @@ function renderItem(item: NodeItem, prefix: string, newline: string): string {
 
 function renderSection(
   key: SectionKey,
-  items: NodeItem[],
+  items: AgentsItem[],
   newline: string,
 ): string {
   const { marker, heading: title } = CODEC_SECTIONS[key];
@@ -46,7 +46,7 @@ function renderSection(
 }
 
 /** Pure serialization. Original source enables loss-preserving edits; no IO occurs here. */
-function serializeBody(model: NodeModel, originalSource?: string): string {
+function serializeBody(model: AgentsDocument, originalSource?: string): string {
   const newline = originalSource?.includes("\r\n") ? "\r\n" : "\n";
   if (originalSource === undefined) {
     const source = [
@@ -175,7 +175,7 @@ function serializeBody(model: NodeModel, originalSource?: string): string {
 }
 
 export function serializeNode(
-  model: NodeModel,
+  model: AgentsDocument,
   originalSource?: string,
 ): string {
   const { metadata, ...content } = model;

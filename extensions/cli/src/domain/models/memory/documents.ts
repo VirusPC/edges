@@ -1,7 +1,6 @@
-import {
-  parseDocument,
-  serializeDocument,
-} from "../../../utils/markdown/document.js";
+import { parseDocument, serializeDocument } from "../../../utils/markdown/document.js";
+import { createMarkdownCodec } from '../../../utils/markdown/document.js';
+
 export const FLAT_COMPAT_KEYS = [
   "title",
   "type",
@@ -11,6 +10,7 @@ export const FLAT_COMPAT_KEYS = [
   "email",
   "updatedAt",
 ];
+
 export const METADATA_KEY_MAP: Record<string, string> = {
   "edges-title": "title",
   "edges-type": "type",
@@ -21,9 +21,11 @@ export const METADATA_KEY_MAP: Record<string, string> = {
   "edges-updated-at": "updatedAt",
   ...Object.fromEntries(FLAT_COMPAT_KEYS.map((k) => [k, k])),
 };
+
 export function closedFrontmatter(source: string): boolean {
   return /^\uFEFF?---\s*\r?\n[\s\S]*?\r?\n---\s*(?:\r?\n|$)/.test(source);
 }
+
 /** Mutation callers must not interpret unreadable metadata as an empty mapping. */
 export function strictFrontmatterData(source: string): Record<string, unknown> {
   if (!closedFrontmatter(source)) {
@@ -31,6 +33,7 @@ export function strictFrontmatterData(source: string): Record<string, unknown> {
   }
   return parseDocument(source).metadata ?? {};
 }
+
 /** Discovery is tolerant so doctor can report invalid entries without rewriting them. */
 export function frontmatterData(source: string): Record<string, unknown> {
   try {
@@ -39,6 +42,7 @@ export function frontmatterData(source: string): Record<string, unknown> {
     return {};
   }
 }
+
 export function logicalFields(
   data: Record<string, unknown>,
 ): Record<string, string> {
@@ -60,6 +64,7 @@ export function logicalFields(
     }
   return fields;
 }
+
 /** Keep vendor metadata and spec fields while migrating known implementation keys. */
 export function preserveEntryMetadata(
   rendered: string,
@@ -85,3 +90,5 @@ export function preserveEntryMetadata(
     },
   });
 }
+
+export const memoryDocumentCodec = createMarkdownCodec('memory');

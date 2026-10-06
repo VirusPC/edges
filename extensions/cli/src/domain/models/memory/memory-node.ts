@@ -1,10 +1,12 @@
-import { LeafNode } from "./leaf-node.js";
-import { domainFields, scalar, setDomainField } from "./fields.js";
-import type {
-  Metadata,
-  MemoryCreateInput,
-  MemoryUpdateInput,
-} from "./types.js";
+import { LeafNode } from "../core/leaf-node.js";
+import { domainFields, scalar, setDomainField } from "../core/fields.js";
+import type { Metadata, NodeCreateInput } from "../core/types.js";
+
+export interface MemoryCreateInput extends NodeCreateInput {
+  memoryType?: string;
+}
+
+export interface MemoryUpdateInput extends MemoryCreateInput {}
 
 export class MemoryNode extends LeafNode<MemoryCreateInput, MemoryUpdateInput> {
   override readonly type = "memory" as const;

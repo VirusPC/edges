@@ -5,8 +5,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
 import { NodeService } from "../../src/services/node-service.js";
-import { InternalNode } from "../../src/domain/models/internal-node.js";
-import { TaskNode } from "../../src/domain/models/task-node.js";
+import { InternalNode } from "../../src/domain/models/internal/internal-node.js";
+import { TaskNode } from "../../src/domain/models/tasks/task-node.js";
 
 async function fixture() {
   const root = await realpath(await mkdtemp(path.join(tmpdir(), "edges-task-index-")));

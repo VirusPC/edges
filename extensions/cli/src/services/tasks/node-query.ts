@@ -2,7 +2,7 @@ import { isWithinPath } from '../../utils/filesystem.js';
 import * as fs from "node:fs";
 import path from "node:path";
 import { BaseNode, InternalNode, TaskNode } from "../../domain/models/index.js";
-import { domainFields, scalar } from "../../domain/models/fields.js";
+import { domainFields, scalar } from "../../domain/models/core/fields.js";
 import { decodeBody } from "../../domain/models/internal/parse.js";
 import {
   assertProjectDualWrite,

@@ -15,4 +15,6 @@ edges CLI/脚手架/发布/鉴权等平台层。
 - [extensions\_clis\_extensions\_cli](<done/2026-09-29--%E6%8A%8A-extensionsclis-%E6%94%B9%E5%90%8D%E4%B8%BA-extensionscli/index.md>) — 目录实际是一套统一 edges 命令，复数名容易让人以为有多套 CLI。
 - [edges\_cli\_command](<done/2026-09-30--%E8%B7%91%E9%80%9A-edges-cli-%E5%AE%8C%E6%95%B4%E7%BC%96%E8%AF%91%E4%BF%AE%E5%A5%BD-command-%E5%AD%97%E6%AE%B5%E6%92%9E%E8%BD%A6/index.md>) — 拆开装 nginx 结果里两个都叫 command 的字段，让 pnpm \-\-filter edges\-cli build 通过。
 - [edges\_cli\_scope](<done/2026-10-01--%E4%B8%BA-Edges-CLI-%E5%BB%BA%E7%AB%8B%E7%BB%9F%E4%B8%80%E7%9A%84%E5%B7%A5%E4%BD%9C-scope-%E8%A7%A3%E6%9E%90/index.md>) — 基于递归记忆模型，先解析本次工作 scope，再确定操作归属、适用上下文和读写位置，使共享 CLI 能力可服务不同作用域。
+
+- [commands\-service\-decoupling](<backlog/2026-10-06--%E8%A7%A3%E8%80%A6-CLI-commands-%E4%B8%8E-Service/index.md>) — 明确命令适配与完整业务用例的边界，移除 Service 对 CLI 上下文的依赖，整理审阅页与 Artifacts 编排。
 <!-- project-memory-local:end -->

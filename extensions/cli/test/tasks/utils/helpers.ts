@@ -61,7 +61,7 @@ export function nodeBoardWriter(): BoardWriter {
 
 /** Legacy fixtures opt into the real index model; production never performs this scan. */
 export async function indexTaskFixtureBoard(board: string): Promise<void> {
-  const { InternalNode } = await import('../../../src/domain/models/internal-node.js');
+  const { InternalNode } = await import("../../../src/domain/models/internal/internal-node.js");
   const { TASK_STATUSES } = await import('../../../src/domain/models/tasks/types.js');
   const { isUserProjectSlug } = await import('../../../src/domain/models/tasks/project.js');
   const { renderProjectAgents, seedTitleFor, seedDescriptionFor } = await import('../../../src/services/tasks/project-meta.js');
@@ -106,7 +106,7 @@ export async function writeIndexedTaskFixture(...args: Parameters<typeof writeFi
 }
 
 export async function writeFixtureIndex(file: string, children: string[], descendants: string[] = []): Promise<void> {
-  const { InternalNode } = await import('../../../src/domain/models/internal-node.js');
+  const { InternalNode } = await import("../../../src/domain/models/internal/internal-node.js");
   const path = await import('node:path');
   const { realpath } = await import('node:fs/promises');
   await mkdir(path.dirname(file),{recursive:true});
