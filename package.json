@@ -23,7 +23,8 @@
     "migrate:directory-nodes": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-directory-nodes.mts",
     "migrate:top-level-layout": "pnpm --filter edges-cli exec tsx ../../scripts/flatten-content-layout.mts",
     "migrate:content-units": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-content-units.mts",
-    "migrate:task-indexes": "pnpm --filter edges-cli exec tsx ../../scripts/index-task-nodes.mts"
+    "migrate:task-indexes": "pnpm --filter edges-cli exec tsx ../../scripts/index-task-nodes.mts",
+    "migrate:project-harness-markers": "pnpm --filter edges-cli exec tsx ../../scripts/rewrite-project-harness-markers.mts"
   },
   "engines": {
     "node": ">=22"
