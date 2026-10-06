@@ -30,5 +30,7 @@ format: ordinary
 - [teach 工作区放 knowledge/teaching，不放 .teaching](feedback_teach_workspace_location/index.md) — 为 teach 技能新建教学工作区时：一律放 knowledge/teaching/\<topic\>/ 并在 knowledge/teaching/README.md 登记；不要写到 .teaching/。
 - [断言仓库事实前先跑能证伪它的命令](feedback_verify_before_asserting/index.md) — 汇报仓库、git 历史或工具行为的事实时：先跑验证命令，别把推断说成查过的。工具输出的显示形态不等于文件内容。
 
-- [project\-harness 标记不贴在系统二材料索引上](<feedback_harness_markers_not_task_project_indexes/index.md>) — 解释或改 AGENTS.md 层标记时：project\-harness 代表 git 项目上的系统二层入口；.harness/tasks/\<project\>/AGENTS.md 这类 Task Project 索引已经在系统二材料里，不该再套同一套标签。不要用「每个 InternalNode 都是一份系统二」来解释。
+- [Task Project 是否用系统入口取决于 Q10](<feedback_harness_markers_not_task_project_indexes/index.md>) — 解释或改 Task Project / 类型目录上的 AGENTS.md 与 project\-harness 标记时：系统入口带组成是基础假设；Task Project 是否应有真实系统入口取决于未决 Q10，答出前不要批量剥标记或删文件。
+
+- [grill 与设计讨论必须当轮 remember](<feedback_grill_must_remember_settlements/index.md>) — 做节点模型/系统二设计讨论或 grill 时：用户确认的取舍与纠正当轮用 edges memory remember 落库；不能只改 CONTEXT 或留在对话里。翻案则更新同一 slug。
 <!-- project-memory-entries:end -->

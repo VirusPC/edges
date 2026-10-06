@@ -71,4 +71,8 @@ format: ordinary
 - [知识目录单元与扩展应用归属](project_top_level_content_and_extension_apps/index.md) — 目录单元适用于全部知识内容；共用附件复制，未引用旧 img 归 archive/img，根共享池无引用附件归档；apps 属于 extensions，局部记忆保留归属。
 
 - [层入口表面命名改为 project\-harness](<project_harness_layer_markers/index.md>) — 改 AGENTS.md 层入口注释或章节标题时：外层与三章改为 project\-harness / constraints / local / descendants，标题为本层硬约束 / 本层组成 / 下层节点；type 与 entries 仍用 project\-memory\-\*。设计见 docs/superpowers/specs/2026\-10\-06\-project\-harness\-layer\-markers\-design.md。
+
+- [递归系统二：系统入口 AGENTS.md 带组成登记](<project_recursive_system_two_entry/index.md>) — 改节点模型、AGENTS.md、Project Harness 或 layout 时打开：核心是递归系统二；系统入口为 AGENTS.md 且必须带组成登记；从 scope 系统入口经登记可达才算节点；无 isLeaf；Task/Note/Skill 由登记挂入。曾议 AGENTS 不带 entries 已否。谁必须有真实 AGENTS 见 grill Q10。
+
+- [虚拟系统入口用于个人根与个人任务查询](<project_virtual_system_entry_personal_root/index.md>) — 设计个人任务或无 AGENTS.md 的主体根时打开：虚拟系统入口不落盘，用于「人」为根、Edges 为其系统二时查询个人相关任务等；把可识别顶层入口挂进组成。实现节奏与 local 挂载形状见 grill Q9b/Q11′。
 <!-- project-memory-entries:end -->
