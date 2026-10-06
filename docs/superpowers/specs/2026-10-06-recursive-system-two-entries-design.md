@@ -1,6 +1,6 @@
 # 递归系统二入口与组成登记
 
-状态：2026-10-06 用户批准。实施计划见 [recursive-system-two-entries](../plans/2026-10-06-recursive-system-two-entries.md)。不替代 [目录节点模型](2026-10-05-directory-node-model.md) 的已落地部分；与之冲突处以本文件与 ADR 0029 为准。层入口标记改名见 [project-harness-layer-markers](2026-10-06-project-harness-layer-markers-design.md)（该文标题表已被本文件 Q15c 翻案，见下「标题」）。
+状态：已落地（2026-10-06 用户批准；实施 Task 1–12 完成）。实施计划见 [recursive-system-two-entries](../plans/2026-10-06-recursive-system-two-entries.md)。不替代 [目录节点模型](2026-10-05-directory-node-model.md) 的已落地部分；与之冲突处以本文件与 ADR 0029 为准。层入口标记改名见 [project-harness-layer-markers](2026-10-06-project-harness-layer-markers-design.md)（该文标题表已被本文件 Q15c 翻案，见下「标题」）。
 
 基线：本分支既有 CONTEXT / 记忆沉淀。
 

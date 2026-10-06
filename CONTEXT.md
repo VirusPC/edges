@@ -5,7 +5,7 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 ## Language
 
 **系统入口（System Entry）**：
-引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层组成与下层系统入口，并可写硬约束；从作用域根起经组成登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$project-memory-init` / project harness init；命令 `edges memory init`），以标记该目录为重点维护作用域；不是路径白名单。默认遍历根是 `--scope` 下的真实 `AGENTS.md`。
+引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层系统维护信息与下层系统维护信息，并可写硬约束；从作用域根起经系统维护信息登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$project-memory-init` / project harness init；命令 `edges memory init`），以标记该目录为重点维护作用域；不是路径白名单。默认遍历根是 `--scope` 下的真实 `AGENTS.md`。
 _避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md
 
 **虚拟超节点（SuperAgentsNode）**：

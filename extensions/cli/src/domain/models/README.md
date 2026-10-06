@@ -117,7 +117,7 @@ flowchart LR
 
 同目录的 SKILL.md 与 AGENTS.md 是两个节点，入口和角色不同。一般叶节点的 harness 入口是同目录 AGENTS.md；AgentsNode 的下一层 harness 是 `.harness/AGENTS.md`，可以继续递归。目录的移动、删除及附件随迁由 Service 根据布局确定完整操作单位。
 
-遍历策略属于 [operations/traverse.ts](../operations/traverse.ts)：**目标默认**走全部组成 `children`（local∪descendants）；只要本层时显式 `localOnly`。`includeHarness` 仍默认 false——例如从 `/repo/.harness/AGENTS.md` 检索且 `includeHarness: false` 时，不沿维护边进入下一层 harness。现行代码若仍默认只 local，以实施计划 Q20 收口为准。
+遍历策略属于 [operations/traverse.ts](../operations/traverse.ts)：**目标默认**走全部组成 `children`（local∪descendants）；只要本层时显式 `localOnly`。`includeHarness` 仍默认 false——例如从 `/repo/.harness/AGENTS.md` 检索且 `includeHarness: false` 时，不沿维护边进入下一层 harness。
 
 ## 文件按什么规则组织
 

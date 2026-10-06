@@ -88,7 +88,7 @@ AGENTS 的本层硬约束、本层记忆、下层索引分别对应 constraints�
 
 每个节点可以有独立的 harness。内容叶节点的 harness 是同目录 AGENTS.md；InternalNode 的下一层 harness 位于 `.harness/AGENTS.md`。harness 不混入 children，普通查询不会自动进入维护系统的下一层。
 
-新增父级登记时，调用方明确选择 `--index-group local|descendant`，CLI 校验并执行，不按用途或目录深度推断。已有关系保留原分组，传入该参数不等于移动已有关系。缺少 owner 时不会自动初始化；生成的 Task 项目与 Memory 类型入口使用其固定本层组成关系。
+新增父级登记时，调用方明确选择 `--index-group local|descendant`，CLI 校验并执行，不按用途或目录深度推断。已有关系保留原分组，传入该参数不等于移动已有关系。缺少 owner 时不会自动初始化；生成的 Task 项目与 Memory 类型入口使用其固定本层系统维护信息关系。
 
 ### 查询遵循索引
 
