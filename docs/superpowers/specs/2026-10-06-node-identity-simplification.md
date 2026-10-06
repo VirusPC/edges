@@ -14,15 +14,15 @@
 
 ## 树操作与分层
 
-纯节点关系算法归 models：遍历次序、本层/下层/harness 关系选择、去重、环检测。将现有 `services/traverse.ts` 移至 `models/operations/traverse.ts`，保留独立函数，不新增 NodeTree 类，也不把文件加载放入 BaseNode。
+纯节点关系算法归 operations：遍历次序、本层/下层/harness 关系选择、去重、环检测。将现有 `services/traverse.ts` 移至 `operations/traverse.ts`，保留独立函数，不新增 NodeTree 类，也不把文件加载放入 BaseNode。
 
-用户要求树操作集中到 operations；选择 models 的子目录，因为这些操作直接依赖节点领域模型。`models/operations/` 不承担文件 IO、CLI 编排或通用集合查询；不另造与 models 平级的独立架构层。
+用户随后确认采用通用布局：`src/operations/` 与 models、services、utils 同级，包含 traverse.ts 和从 utils 移来的 async-query.ts。traverse 依赖领域模型，async-query 保持泛型，不限定 Node；两者均不承担文件 IO 或 CLI 编排。此决定替代早先仅把树操作放入 models/operations 的布局。
 
-Service 提供引用解析、范围限制与节点加载的现有回调，负责身份表、持久化、文件/资源快照及生命周期写计划。`traverse` 不导入 services、文件读写或 NodeCache。异步遍历是按需调用加载回调，不代表模型拥有文件系统。
+Service 提供引用解析、范围限制与节点加载的现有回调，负责身份表、持久化、文件/资源快照及生命周期写计划。`operations` 不导入 services、文件读写或 NodeCache。异步遍历是按需调用加载回调，不代表模型拥有文件系统。
 
 复用同一遍历内核处理三条调用链：query 的读取遍历、`#registered` 的登记节点收集、`#validateGraph` 的拟提交关系校验。后两者的根集合、关系范围、计划草稿覆盖、删除检查及范围外处理保留在 Service；只消除重复 DFS、seen/active 和环检测，不统一它们不同的业务范围。多根调用在一次遍历中共用去重和当前递归路径，不依次创建多个独立遍历来重复加载相交子树。
 
-普通查询仍默认只走 localChildren，显式选项才走 descendantChildren/harness；写入前图校验仍只检查原有 composition 关系，不借重构扩大成 harness 校验。已登记节点收集仍保留既有维护关系范围和显式加载节点补集。`filter/map/groupBy/find` 属于通用集合查询，继续放 `utils/async-query.ts`；不下沉 Task 业务条件、不新增公共 enter/shouldEnter 回调。
+普通查询仍默认只走 localChildren，显式选项才走 descendantChildren/harness；写入前图校验仍只检查原有 composition 关系，不借重构扩大成 harness 校验。已登记节点收集仍保留既有维护关系范围和显式加载节点补集。`filter/map/groupBy/find` 属于通用集合查询，集中到 `operations/async-query.ts`，保持泛型能力；不下沉 Task 业务条件、不新增公共 enter/shouldEnter 回调。
 
 ## 实例身份
 
