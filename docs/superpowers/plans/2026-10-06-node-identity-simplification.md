@@ -186,8 +186,8 @@ export async function* traverse(
 ```ts
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { BaseNode, InternalNode, LeafNode } from "../../src/models/index.js";
-import { traverse } from "../../src/models/operations/traverse.js";
+import { BaseNode, InternalNode, LeafNode } from "../../../src/models/index.js";
+import { traverse } from "../../../src/models/operations/traverse.js";
 
 test("multiple roots share traversal identity and load on demand", async () => {
   const leaf = new LeafNode("/root/item/index.md");
