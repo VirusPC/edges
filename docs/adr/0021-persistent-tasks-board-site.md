@@ -4,7 +4,7 @@
 
 **Status:** accepted（ADR 0021；grill 确认于 2026-09-21；2026-09-23 由 ADR 0022 修订壳与文档载荷）
 
-**See also:** ADR 0012（[Task Project 审阅页仍是 render-only CLI](0012-task-project-review-page-is-render-only-cli.md)）；ADR 0022（[审阅壳三栏与 Task Doc](0022-review-shell-three-column-task-doc.md)）；ADR 0013（[Artifacts 预览服务：短 TTL](0013-artifacts-preview-service.md)）；看板 [`knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--Tasks-review-持久站点始终反映-main.md`](../../knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--Tasks-review-持久站点始终反映-main.md)
+**See also:** ADR 0012（[Task Project 审阅页仍是 render-only CLI](0012-task-project-review-page-is-render-only-cli.md)）；ADR 0022（[审阅壳三栏与 Task Doc](0022-review-shell-three-column-task-doc.md)）；ADR 0013（[Artifacts 预览服务：短 TTL](0013-artifacts-preview-service.md)）；看板 [`knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--Tasks-review-持久站点始终反映-main.md`](../../.harness/tasks/agent-clients-ux/in_progress/2026-09-21--Tasks-review-%E6%8C%81%E4%B9%85%E7%AB%99%E7%82%B9%E5%A7%8B%E7%BB%88%E5%8F%8D%E6%98%A0-main.md)
 
 ## Decision
 
@@ -13,9 +13,9 @@
 - **公网路径：** `/tasks/`，与 teaching 同一阿里云 ECS、同一路径心智（固定前缀，不是子域）。本轮一页一站，不按 Task Project 拆 URL 树。
 - **谁生成内容：** 现有 GitHub Actions 部署链。main 更新后与 teaching 一样 SSH 整仓 pull，再在盒上从看板生成数据并渲染。不要另开 workflow。
 - **数据面（Option B）：** CI 先读看板，跑 `edges tasks list --group-by project [--format json]`，得到松耦合**分组列表 schema**（如 `edges.tasks.grouped/v1`）。该 schema **不**按 review-page 命名、也不专属于它。需要 HTML 时，经薄映射变成现有 groups+items，再调用 `edges tasks project review-page`。review-page 仍只渲染（ADR 0012）。
-- **鉴权后做：** 本轮公开只读。统一鉴权已有 backlog：[`knowledge/tasks/agent-clients-ux/backlog/2026-09-21--edges-衍生站点统一鉴权.md`](../../knowledge/tasks/agent-clients-ux/backlog/2026-09-21--edges-衍生站点统一鉴权.md)。
-- **本轮不写回 git：** 人在页上拖拽不落盘。写回仓与 classify 审阅页是否分模式，见 [`knowledge/tasks/agent-clients-ux/backlog/2026-09-21--Tasks-review-review-page-写回仓接口.md`](../../knowledge/tasks/agent-clients-ux/backlog/2026-09-21--Tasks-review-review-page-写回仓接口.md)。本轮不加 `--mode`。
-- **部署形状：** **扩展** `.github/workflows/deploy.yml`（同一 SSH pull / 同一心智）。不要新开 workflow。tmp + persistent 部署目录统一入口另卡：[`knowledge/tasks/agent-clients-ux/backlog/2026-09-21--云端服务统一入口tmp-persistent-部署目录.md`](../../knowledge/tasks/agent-clients-ux/backlog/2026-09-21--云端服务统一入口tmp-persistent-部署目录.md)。
+- **鉴权后做：** 本轮公开只读。统一鉴权已有 backlog：[`knowledge/tasks/agent-clients-ux/backlog/2026-09-21--edges-衍生站点统一鉴权.md`](../../.harness/tasks/agent-clients-ux/backlog/2026-09-21--edges-%E8%A1%8D%E7%94%9F%E7%AB%99%E7%82%B9%E7%BB%9F%E4%B8%80%E9%89%B4%E6%9D%83.md)。
+- **本轮不写回 git：** 人在页上拖拽不落盘。写回仓与 classify 审阅页是否分模式，见 [`knowledge/tasks/agent-clients-ux/backlog/2026-09-21--Tasks-review-review-page-写回仓接口.md`](../../.harness/tasks/agent-clients-ux/backlog/2026-09-21--Tasks-review-review-page-%E5%86%99%E5%9B%9E%E4%BB%93%E6%8E%A5%E5%8F%A3.md)。本轮不加 `--mode`。
+- **部署形状：** **扩展** `.github/workflows/deploy.yml`（同一 SSH pull / 同一心智）。不要新开 workflow。tmp + persistent 部署目录统一入口另卡：[`knowledge/tasks/agent-clients-ux/backlog/2026-09-21--云端服务统一入口tmp-persistent-部署目录.md`](../../.harness/tasks/agent-clients-ux/backlog/2026-09-21--%E4%BA%91%E7%AB%AF%E6%9C%8D%E5%8A%A1%E7%BB%9F%E4%B8%80%E5%85%A5%E5%8F%A3tmp-persistent-%E9%83%A8%E7%BD%B2%E7%9B%AE%E5%BD%95.md)。
 - **本轮范围：** 只落地 glossary + 本 ADR。不实现 `list --group-by`、不改 review-page、不改 nginx、不改 CI、不改看板状态。
 
 ## Considered Options

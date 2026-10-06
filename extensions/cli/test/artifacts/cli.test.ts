@@ -5,7 +5,7 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
-import { deleteArtifact, publishArtifact } from "../../src/artifacts/utils/client.js";
+import { deleteArtifact, publishArtifact } from "../../src/commands/artifacts/utils/client.js";
 
 test("root help lists artifacts", async () => {
   const result = await run(["--help"]);

@@ -99,7 +99,7 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
   console.error(`[new-note] Starting server in ${transportType} mode`);
   console.error(`[new-note] ------------------------------------------`);
   console.error(`[new-note] Configuration:`);
-  console.error(`  - Repo path: ${config.repoPath}`);
+  console.error(`  - Scope target: ${config.scopeDir ?? config.repoPath ?? `owner of ${config.cwd ?? process.cwd()}`}`);
   console.error(`  - Base branch: ${config.baseBranch}`);
   console.error(`  - Mode: ${config.mode.toUpperCase()}${config.mode === 'pr' ? ' (Create branch + PR)' : ' (Direct commit to base)'}`);
   console.error(`  - CLI entry: ${config.cliEntry}`);

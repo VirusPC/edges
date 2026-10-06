@@ -2,14 +2,14 @@
 
 TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 ingest（落盘、commit、push）。
 
-本地有 shell 的 agent 请用 [`cli` 的 `edges note`](../../cli/README.md)，不要默认走 MCP。本 server 留给没有 shell 的宿主。决策：[`.memory/projects/project_cli_from_mcp.md`](../../.memory/projects/project_cli_from_mcp.md)。
+本地有 shell 的 agent 请用 [`cli` 的 `edges note`](../../cli/README.md)，不要默认走 MCP。本 server 留给没有 shell 的宿主。决策：[`.memory/projects/project_cli_from_mcp.md`](../../.harness/memory/projects/project_cli_from_mcp.md)。
 
 ## What It Does
 
 - 暴露 MCP 工具 `new_note`
 - 接收结构化输入：`title`、`content`、`coAuthor`
 - 子进程调用 `edges note`（与 CLI 同一套 flags / JSON 契约）：
-  - 生成 `knowledge/notes/YYYY-MM-DD--slug.md`
+  - 生成 `notes/YYYY-MM-DD--slug.md`
   - `git checkout -b ingest/...`
   - `git commit` + `git push`
   - 可选创建 PR
@@ -17,7 +17,7 @@ TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 in
 
 ## Requirements
 
-- Node.js 20+
+- Node.js 22+
 - git
 - 可用的仓库凭据（SSH key 或 token）
 - 可选：`gh` / `curl` / `python3`（如果需要自动创建 PR 或复用现有脚本能力）
@@ -69,7 +69,8 @@ HTTP 模式将在以下端点启动服务器：
 
 ## Environment Variables
 
-- `EDGES_REPO`: 目标仓库路径，默认当前仓库根目录（自动通过相对路径解析）
+- `EDGES_SCOPE`: 显式目标作用域；优先于 `EDGES_REPO`。相对路径按 MCP 启动 cwd 解析。
+- `EDGES_REPO`: 未设置 `EDGES_SCOPE` 时的显式目标。两者均未设置时捕获 MCP 启动 cwd，由 CLI 找最近所属作用域或 Git 根；找不到则返回可操作的校验错误。CLI 和 Skill 资源独立从实现仓库读取。
 - `EDGES_BASE_BRANCH`: 基线分支，默认 `main`
 - `EDGES_MODE`: (可选) 提交模式。
   - `direct` (默认): 直接在基线分支上提交并推送。
@@ -96,7 +97,7 @@ MCP tool 名称：`new_note`
 ```json
 {
   "status": "success",
-  "filePath": "knowledge/notes/2026-02-18--daily-summary.md",
+  "filePath": "notes/2026-02-18--daily-summary.md",
   "branch": "ingest/2026-02-18-daily-summary",
   "prUrl": "https://github.com/org/repo/compare/main...ingest/2026-02-18-daily-summary?expand=1",
   "prStatus": "unavailable",
@@ -139,7 +140,7 @@ MCP tool 名称：`new_note`
 }
 ```
 
-**提示**：如果 MCP Server 位于仓库的标准 `extensions/mcp-servers/new-note` 路径下，通常不需要设置 `EDGES_REPO`，它会自动识别。
+**提示**：配置 `EDGES_SCOPE` 可固定笔记归属；否则从启动 cwd 查找所属作用域。Server 安装位置不决定写入目标。笔记写入作用域的 `notes/`，Git 操作使用实际仓库根。
 
 如需源码直跑（开发环境）：
 

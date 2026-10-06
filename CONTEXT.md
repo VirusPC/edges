@@ -4,6 +4,22 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 
 ## Language
 
+**文档节点（Document Node）**：
+以目录中的 Markdown 入口为身份、包含内容与自身操作的单位。入口路径唯一标识节点，父归属遵循文件目录；入口索引可跨越多个目录层级发现节点。
+_避免使用_：仅指文件夹、仅指作用域入口
+
+**组织节点（Internal Node）**：
+通过入口索引组织直属内容与下层组织节点的节点，在本系统中由 AGENTS.md 承载。直属节点可以是任务、记忆或其他组织节点，普通交叉引用不表示归属。
+_避免使用_：私有节点、仅能包含其他 AGENTS.md 的节点
+
+**叶子节点（Leaf Node）**：
+承载具体内容、没有组成子节点的节点。Task、Memory、Skill 与 Note 属于此类，叶子仍可拥有独立 harness。
+_避免使用_：无维护能力的节点、目录中没有其他文件的节点
+
+**维护关系（harness）**：
+节点指向自身维护系统的独立关系；不属于组成 children。读取某个系统二时展开其组成内容，不自动进入它及其组成节点的 harness。
+_避免使用_：组成子节点、固定深度截断
+
 **Edges**：
 采用通用递归模型、当前以个人递归自我改进为目标的支撑系统，其根节点在个人作用域中承载人的系统二。进入 Edges 自身的维护作用域时，Edges 又作为被维护的系统一；模型中的根主体不限于个人。
 _避免使用_：Agent 工具箱、skill 合集
@@ -23,6 +39,14 @@ _避免使用_：固定目录或永久身份、快思考系统
 **系统二（System Two，作用域角色）**：
 在同一作用域内，负责支撑、维护与改进系统一，使其持续实现目标的系统；当它自身成为维护对象时，可在相应作用域作为系统一。
 _避免使用_：全部过程记录、单纯的记忆集合、慢思考系统
+
+**自身维护空间（Self-maintenance Space）**：
+在某一作用域内，归属支撑、维护和改进其系统一的工作、记忆与机制的空间，承载该作用域的系统二职责。它按独立维护需求建立，既可集中承载材料，也可通过引用组织保留在工具约定位置的材料。
+_避免使用_：全部领域内容、单纯的维护记忆、每层必建的目录
+
+**维护知识（Maintenance Knowledge）**：
+为接手、判断和改进某个作用域而持续保留的上下文、决策理由、纠正与资料指针，是其自身维护空间内的独立内容分组。任务进度、原始运行记录和评测结果保留在各自模块，形成可复用结论后通过引用关联维护知识。
+_避免使用_：全部持久化内容、维护空间本身、原始记录的另一份副本
 
 **知识资产（Knowledge Asset）**：
 以未来产生决策收益为目的，被投入认知资本持续管理的材料或判断；Note 和专项承载在研资产，Edge 是能够反复部署的核心收益资产。
@@ -49,15 +73,15 @@ _避免使用_：单一目录、全部上下文、知识资产
 _避免使用_：长期知识库、会话流水账、代码事实副本
 
 **Memory Type（项目记忆）**：
-项目记忆中一条记忆归入哪份类型入口的分类；每一类型在该层有一份类型入口，与该类型的条目同处。类型集合由 LAYOUT 实现与本层登记决定，不是 PROTOCOL 闭集枚举。
-_避免使用_：把 type 写成全局 JSON 注册表键、把看板 `knowledge/tasks` 状态夹直接叫 Memory Type、把每条 Task 升成 Memory Type（Q18=B，另卡）、把类型入口与层入口当成同一种 AGENTS.md
+项目记忆中一条记忆归入哪份类型入口的分类；每一类型在该层有一份类型入口，与该类型的条目同处。类型集合由 LAYOUT 实现与本层登记决定，不是 PROTOCOL 闭集枚举；类型入口与条目入口均复用统一节点模型。
+_避免使用_：把 type 写成全局 JSON 注册表键、把看板状态夹直接叫 Memory Type、把每条 Task 升成 Memory Type（Q18=B，另卡）
 
 **层入口 AGENTS.md**：
 某一记忆层目录上的项目记忆入口，承载本层硬约束、本层类型入口清单与下层记忆索引。
 _避免使用_：类型入口 AGENTS.md、把类型目录里的 AGENTS.md 当成层入口、Task Project AGENTS.md（若指项目记忆层入口）
 
 **类型入口 AGENTS.md**：
-某一 Memory Type 在该层的记忆入口，只含该类型引言与条目清单，与该类型条目同处；契约不同于层入口。
+某一 Memory Type 在该层的记忆入口，承载该类型引言与条目索引，与条目目录同处；用途和受管标记可不同于层入口，但同属 InternalNode。
 _避免使用_：层入口 AGENTS.md、记忆层根上另立一套入口文件名、把类型入口写成全局注册表、Task Project AGENTS.md
 
 **用户记忆（User Memory）**：
@@ -160,9 +184,17 @@ _避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成�
 以 `edges` 为名的命令行界面（含 `note`、`tasks`、`artifacts` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
 _避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
 
-**Skill（调用说明）**：
-教 Agent 何时、如何调用能力面的说明性能力包：有 shell 则调 CLI，无 shell 则调作为对等能力面入口的 MCP；不承载 git 或入库实现。
+**Skill（Edges 接入语境）**：
+用于接入 Edges、教 Agent 何时及如何调用能力面的说明性能力包：有 shell 则调 CLI，无 shell 则调作为对等能力面入口的 MCP；不承载 git 或入库实现。
 _避免使用_：实现脚本目录、仓根 `bin/` 封装、业务逻辑真源
+
+**受管技能（Managed Skill）**：
+由 Project Memory 沉淀并维护正文与索引的可复用方法；受管关系描述正文维护职责，与作者身份、来源和是否安装无关。
+_避免使用_：仅指 Agent 生成的技能、未安装技能、全部本地技能
+
+**引用技能（Referenced Skill）**：
+由 Project Memory 维护发现索引、正文及安装关系由原有机制维护的技能；可以是本仓自写或接入的技能。
+_避免使用_：仅指第三方技能、全部 Agent 技能、Project Memory 可直接改写的正文
 
 **MCP（Edges）**：
 在无 shell 宿主上暴露 Edges 扩展能力的机器入口；与 CLI、Skill 同属能力面，调用同一套领域契约而非另一套产品。
@@ -229,15 +261,15 @@ Task 文件去掉 `.md` 的文件名，是 `edges tasks` 的查找键；不是�
 _避免使用_：title、name、把展示名当 CLI 查找键
 
 **Task Project（edges）**：
-看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；约定目录为 `knowledge/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
+选定看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；领域板目录为 `tasks/<project-slug>/`，维护板目录为 `.harness/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
 _避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type、把未确认的候选当成已有 project
 
 **Task Project 索引**：
-`knowledge/tasks/AGENTS.md` 里、project-memory 受管标记之外的 Task Projects 节；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。
+所选板 `tasks/AGENTS.md` 或 `.harness/tasks/AGENTS.md` 本层记忆区块内的 Task Projects 索引；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。
 _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件当记忆条目
 
 **Task Project AGENTS.md**：
-每个 Task Project 目录（含 `_default`）内的轻量 `AGENTS.md`，写标题与描述（可选指针）；不是对该目录做完整 `project-memory-init`。
+每个 Task Project 目录（含 `_default`）内的轻量 `AGENTS.md`，写标题与描述（可选指针）；作为可读节点入口不意味着自动初始化完整 Project Memory。
 _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
 
 **Task Project 候选（edges）**：
@@ -253,7 +285,7 @@ classifyTasks、proposeTypes、本地 `edges tasks project review-page` 与 `/ta
 _避免使用_：把它当 Task Project、当分类算法、`--mode`、把它当 Artifacts 预览服务、让 review-page 负责发布、把它当成 `/tasks/` 站点本身、status station、按用途再拆一壳
 
 **审阅壳（Review Shell）**：
-Task Project 审阅页这一份交互界面。仓库只留下源码和构建管线：源码在仓根 `apps/tasks-review-app/`（包名 `tasks-review-app`，与 CLI 分开，`apps/` 可再放别的预构建壳），产物在 `extensions/cli/src/tasks/project/assets/review-page/`（`index.html`、`review.js`、`review.css`）且不入库，由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成。Vite 把产物写进 CLI 那份目录；`review-page.ts` 只读产物，不读 `apps/` 源码。写出的页把预构建 JS/CSS 内联成一份 HTML，数据是页内 JSON script `#edges-review-payload`。导航是 hash 或 hash 上的 query，同一份产物用于 `file://`、Artifacts 与 `/tasks/`。左栏是 Task Project：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。视口不窄于 Tailwind `md`（`≥768px`）时仍是这一套三栏。窄于 `md` 时同一壳改成纵向长滚动：项目筛选区、状态板，点卡片后详情接在状态板下方，仍在同一页里滚动。每张任务卡都有「移到项目…」，桌面与窄屏都能把卡片改到另一个 Task Project；这只改页内 JSON，写回仍是 Copy JSON。桌面左栏拖放还在。
+Task Project 审阅页这一份交互界面。仓库只留下源码和构建管线：源码在仓根 `extensions/apps/tasks-review-app/`（包名 `tasks-review-app`，与 CLI 分开，`extensions/apps/` 可再放别的预构建壳），产物在 `extensions/cli/src/commands/tasks/project/assets/review-page/`（`index.html`、`review.js`、`review.css`）且不入库，由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成。Vite 把产物写进 CLI 那份目录；`review-page.ts` 只读产物，不读 `extensions/apps/` 源码。写出的页把预构建 JS/CSS 内联成一份 HTML，数据是页内 JSON script `#edges-review-payload`。导航是 hash 或 hash 上的 query，同一份产物用于 `file://`、Artifacts 与 `/tasks/`。左栏是 Task Project：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。视口不窄于 Tailwind `md`（`≥768px`）时仍是这一套三栏。窄于 `md` 时同一壳改成纵向长滚动：项目筛选区、状态板，点卡片后详情接在状态板下方，仍在同一页里滚动。每张任务卡都有「移到项目…」，桌面与窄屏都能把卡片改到另一个 Task Project；这只改页内 JSON，写回仍是 Copy JSON。桌面左栏拖放还在。
 _避免使用_：三套页面、status station、本轮在中栏改状态、把语义检索算进这份壳、用另一套看板产品充当 Task 的领域模型、在用户机器上现编这份壳、把预构建产物提交进 git、默认用 zip+base64 装载荷、path history、靠服务器 rewrite 的 react-router、窄屏只做抽屉、底栏分页、左右滑页、窄屏另做一壳、窄屏在状态列上改状态
 
 **`/tasks/` 持久看板站**：

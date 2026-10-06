@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { taskFileSlug, taskNameSlug, newTaskStem } from "../../../src/tasks/utils/slug.js";
+import { taskFileSlug, taskNameSlug, newTaskStem } from "../../../src/domain/models/tasks/slug.js";
 
 test("taskFileSlug keeps CJK and hyphenates spaces", () => {
   assert.equal(taskFileSlug("tasks 配套 skill"), "tasks-配套-skill");

@@ -10,24 +10,40 @@
   },
   "scripts": {
     "build:tasks-review-app": "pnpm --filter tasks-review-app run build",
-    "build": "pnpm run build:tasks-review-app && tsc -p tsconfig.json && node ./scripts/copy-review-page-asset.mjs",
+    "build": "node --input-type=module -e \"import {rmSync} from 'node:fs'; rmSync('dist', {recursive:true, force:true})\" && pnpm run build:schemas && pnpm run build:tasks-review-app && tsc -p tsconfig.json && node ./scripts/copy-review-page-asset.mjs && node --import tsx ./scripts/copy-memory-templates.ts",
     "prepack": "pnpm run build",
     "start": "node dist/index.js",
-    "dev": "tsx src/index.ts",
+    "dev": "pnpm run build:schemas && tsx src/index.ts",
     "dev:tasks-review-app": "pnpm --filter tasks-review-app run dev",
-    "test": "pnpm run build:tasks-review-app && node --test --import tsx './test/**/*.test.ts'"
+    "test": "pnpm run build:schemas && pnpm run build:tasks-review-app && node --test --test-concurrency=1 --import tsx './test/**/*.test.ts'",
+    "build:schemas": "node --import tsx ./scripts/generate-schemas.ts"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
+    "ajv": "^8.18.0",
+    "ajv-formats": "^3.0.1",
     "commander": "^14.0.3",
+    "gray-matter": "^4.0.3",
+    "mdast-util-from-markdown": "^2.0.3",
+    "proper-lockfile": "4.1.2",
+    "tar": "^7.5.22",
+    "write-file-atomic": "5.0.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
-    "tasks-review-app": "workspace:*",
+    "@types/mdast": "^4.0.4",
     "@types/node": "^22.19.11",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/write-file-atomic": "^4.0.3",
+    "parse5": "8.0.1",
+    "tasks-review-app": "workspace:*",
+    "ts-json-schema-generator": "2.9.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }

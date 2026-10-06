@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { repoPathFromRemote, buildCompareUrl, createPullRequest } from "../../../src/note/utils/git/pr.js";
+import { repoPathFromRemote, buildCompareUrl, createPullRequest } from "../../../src/services/note/git/pr.js";
 
 test("repoPathFromRemote accepts ssh and https", () => {
   assert.equal(repoPathFromRemote("git@github.com:VirusPC/edges.git"), "VirusPC/edges");

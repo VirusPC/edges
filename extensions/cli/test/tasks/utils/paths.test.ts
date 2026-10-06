@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { TASK_STATUSES } from "../../../src/tasks/utils/types.js";
+import { TASK_STATUSES } from "../../../src/domain/models/tasks/types.js";
 import {
   isTaskStatus,
   boardRoot,
@@ -8,7 +8,7 @@ import {
   sidecarRelPath,
   isTaskMarkdownName,
   parseTarget,
-} from "../../../src/tasks/utils/paths.js";
+} from "../../../src/services/tasks/paths.js";
 
 test("TASK_STATUSES is the seven ADR 0002 values in folder order", () => {
   assert.deepEqual(TASK_STATUSES, [
@@ -29,19 +29,19 @@ test("isTaskStatus rejects Run-layer and old enums", () => {
   assert.equal(isTaskStatus("status"), false);
 });
 
-test("paths join knowledge/tasks/<project-dir>/<status> and sidecar dotfile", () => {
-  assert.equal(boardRoot("/repo"), "/repo/knowledge/tasks");
+test("paths join tasks/<project-dir>/<status> and sidecar dotfile", () => {
+  assert.equal(boardRoot("/repo"), "/repo/tasks");
   assert.equal(
     taskRelPath("default", "in_progress", "2026-09-11--cli"),
-    "knowledge/tasks/_default/in_progress/2026-09-11--cli.md",
+    "tasks/_default/in_progress/2026-09-11--cli/index.md",
   );
   assert.equal(
     sidecarRelPath("default", "in_progress", "2026-09-11--cli"),
-    "knowledge/tasks/_default/in_progress/.2026-09-11--cli.log.md",
+    "tasks/_default/in_progress/2026-09-11--cli/.2026-09-11--cli.log.md",
   );
   assert.equal(
     taskRelPath("cli", "todo", "2026-09-11--cli"),
-    "knowledge/tasks/cli/todo/2026-09-11--cli.md",
+    "tasks/cli/todo/2026-09-11--cli/index.md",
   );
 });
 
@@ -53,12 +53,18 @@ test("isTaskMarkdownName skips sidecar, AGENTS, README", () => {
 });
 
 test("parseTarget still accepts stem or new-layout path", () => {
-  assert.deepEqual(parseTarget("2026-09-11--cli"), { kind: "stem", stem: "2026-09-11--cli" });
-  assert.deepEqual(parseTarget("knowledge/tasks/_default/done/2026-09-11--cli.md"), {
-    kind: "path",
+  assert.deepEqual(parseTarget("2026-09-11--cli"), {
+    kind: "stem",
     stem: "2026-09-11--cli",
   });
-  assert.deepEqual(parseTarget("knowledge/tasks/cli/todo/2026-09-11--cli.md"), {
+  assert.deepEqual(
+    parseTarget("tasks/_default/done/2026-09-11--cli/index.md"),
+    {
+      kind: "path",
+      stem: "2026-09-11--cli",
+    },
+  );
+  assert.deepEqual(parseTarget("tasks/cli/todo/2026-09-11--cli/index.md"), {
     kind: "path",
     stem: "2026-09-11--cli",
   });

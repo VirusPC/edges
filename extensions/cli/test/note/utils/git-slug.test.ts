@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { titleToSlug, localDateYmd } from "../../../src/note/utils/git/slug.js";
+import { titleToSlug, localDateYmd } from "../../../src/services/note/git/slug.js";
 
 test("titleToSlug lowercases, hyphens spaces, strips other chars", () => {
   assert.equal(titleToSlug("Hello World!"), "hello-world");

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { messagesForRun, parseRunLog, resolveRunId } from "../../../src/tasks/utils/runlog.js";
-import { emptyRunLog } from "../../../src/tasks/utils/write.js";
+import { messagesForRun, parseRunLog, resolveRunId } from "../../../src/services/tasks/runlog.js";
+import { emptyRunLog } from "../../../src/services/tasks/write.js";
 
 const STEM = "2026-09-11--CLI用Commanderjs重构";
 const LOG = `# Run log: ${STEM}

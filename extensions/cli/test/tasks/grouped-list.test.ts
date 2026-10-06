@@ -13,8 +13,8 @@ test("flat list is unchanged without --group-by", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-grouped-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
-    await run(["tasks", "create", "--title", "Alpha", "--status", "todo"], { env });
-    const result = await run(["tasks", "list"], { env });
+    await run(["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "Alpha", "--status", "todo"], { env });
+    const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list"], { env });
     assert.equal(result.exitCode, 0);
     const body = JSON.parse(result.stdout) as {
       status: string;
@@ -39,8 +39,8 @@ test("list --group-by project --format json emits edges.tasks.grouped/v1", async
   const repo = await mkdtemp(path.join(tmpdir(), "edges-grouped-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
-    await run(["tasks", "create", "--title", "Alpha", "--status", "todo"], { env });
-    const result = await run(["tasks", "list", "--group-by", "project", "--format", "json"], { env });
+    await run(["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "Alpha", "--status", "todo"], { env });
+    const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list", "--group-by", "project", "--format", "json"], { env });
     assert.equal(result.exitCode, 0);
     const body = JSON.parse(result.stdout) as {
       status: string;
@@ -60,11 +60,11 @@ test("list --group-by project --format json emits edges.tasks.grouped/v1", async
     assert.equal(body.status, "success");
     assert.equal(body.command, "list");
     assert.equal(body.schema, "edges.tasks.grouped/v1");
-    assert.ok(body.groups.some((group) => group.id === "default" && group.title));
+    assert.ok(body.groups.some((group) => group.id === '[".","domain","default"]' && group.title));
     assert.equal(body.tasks, undefined);
     const item = body.items[0];
     assert.ok(item?.id || item?.stem);
-    assert.equal(item?.group, "default");
+    assert.equal(item?.group, '[".","domain","default"]');
     assert.equal(item?.title, "Alpha");
     assert.equal(item?.status, "todo");
     assert.equal(item?.doc?.name !== undefined, true);
@@ -81,28 +81,30 @@ test("list filters apply before grouping", async () => {
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     await run(
-      ["tasks", "create", "--title", "KeepHigh", "--status", "todo", "--project", "cli", "--priority", "high"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "KeepHigh", "--status", "todo", "--project", "cli", "--priority", "high"],
       { env },
     );
     await run(
-      ["tasks", "create", "--title", "KeepUrgent", "--status", "todo", "--project", "docs", "--priority", "urgent"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "KeepUrgent", "--status", "todo", "--project", "docs", "--priority", "urgent"],
       { env },
     );
     await run(
-      ["tasks", "create", "--title", "SkipStatus", "--status", "backlog", "--project", "cli", "--priority", "high"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "SkipStatus", "--status", "backlog", "--project", "cli", "--priority", "high"],
       { env },
     );
     await run(
-      ["tasks", "create", "--title", "SkipPriority", "--status", "todo", "--project", "docs", "--priority", "low"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "SkipPriority", "--status", "todo", "--project", "docs", "--priority", "low"],
       { env },
     );
     await run(
-      ["tasks", "create", "--title", "SkipProject", "--status", "todo", "--project", "other", "--priority", "high"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "SkipProject", "--status", "todo", "--project", "other", "--priority", "high"],
       { env },
     );
     const result = await run(
       [
-        "tasks",
+        "tasks", "--index-group", "local",
+        "--purpose",
+        "domain",
         "list",
         "--group-by",
         "project",
@@ -130,7 +132,7 @@ test("list filters apply before grouping", async () => {
     };
     assert.deepEqual(
       body.groups.map((group) => group.id),
-      ["cli", "docs"],
+      ['[".","domain","cli"]', '[".","domain","docs"]'],
     );
     assert.deepEqual(
       body.items.map((item) => item.title),
@@ -146,17 +148,17 @@ test("list filters apply before grouping", async () => {
 });
 
 test("list --group-by status and --format table are VALIDATION_ERROR", async () => {
-  const byStatus = await run(["tasks", "list", "--group-by", "status"]);
+  const byStatus = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list", "--group-by", "status"]);
   assert.equal(byStatus.exitCode, 2);
   assert.equal(failedJson(byStatus.stdout).errorCode, "VALIDATION_ERROR");
 
-  const table = await run(["tasks", "list", "--format", "table"]);
+  const table = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list", "--format", "table"]);
   assert.equal(table.exitCode, 2);
   assert.equal(failedJson(table.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("list --help documents grouped schema and omits review-page", async () => {
-  const result = await run(["tasks", "list", "--help"]);
+  const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list", "--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /--group-by/);
   assert.match(result.stdout, /edges\.tasks\.grouped\/v1/);

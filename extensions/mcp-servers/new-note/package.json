@@ -16,7 +16,7 @@
     "test:integration": "./test/integration.sh"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.4",

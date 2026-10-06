@@ -63,7 +63,7 @@ git tag -l 'shared-extensions@*'
 
 本目录是一层项目记忆。提问或改这里的约定前用 `$project-memory-ask`，沉淀用 `$project-memory-remember`，入口 [`AGENTS.md`](AGENTS.md)。
 
-`.memory/` 只给在本仓库里维护 harness 的人/Agent 读，不是装到各机器的那份扩展。方案和决策写本层 `.memory`，不要写进 `docs/` 或 `knowledge/`。
+`.harness/memory/` 只给在本仓库里维护 harness 的人/Agent 读，不是装到各机器的那份扩展。局部方案和决策写本层记忆，不因跨层复用而写入根层知识目录。
 
 ## 分发
 

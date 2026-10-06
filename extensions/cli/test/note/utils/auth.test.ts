@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import os from "node:os";
 import path from "node:path";
 import { promises as fs } from "node:fs";
-import { checkAuth } from "../../../src/note/utils/auth.js";
+import { checkAuth } from "../../../src/services/note/auth.js";
 
 test("checkAuth skips when no expected token", async () => {
   const result = await checkAuth({ expectedToken: undefined });

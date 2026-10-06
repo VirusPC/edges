@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { runIngest } from "../../../src/note/utils/service.js";
-import type { RuntimeConfig } from "../../../src/note/utils/types.js";
+import { runIngest } from "../../../src/services/note/service.js";
+import type { RuntimeConfig } from "../../../src/services/note/types.js";
 
 const config: RuntimeConfig = {
   repoPath: "/repo",
@@ -19,18 +19,18 @@ test("runIngest returns success payload", async () => {
     },
     config,
     async () => ({
-      filePath: "knowledge/notes/2026-02-18--title.md",
+      filePath: "notes/2026-02-18--title.md",
       branch: "ingest/2026-02-18-title",
       prStatus: "created",
       prUrl: "https://github.com/org/repo/pull/1",
-      stdout: "done\n__EDGES_FILE__=knowledge/notes/2026-02-18--title.md\n",
+      stdout: "done\n__EDGES_FILE__=notes/2026-02-18--title.md\n",
     }),
   );
 
   assert.equal(result.status, "success");
   if (result.status === "success") {
     assert.equal(result.branch, "ingest/2026-02-18-title");
-    assert.equal(result.filePath, "knowledge/notes/2026-02-18--title.md");
+    assert.equal(result.filePath, "notes/2026-02-18--title.md");
     assert.equal(result.prStatus, "created");
   }
 });

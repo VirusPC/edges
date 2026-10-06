@@ -27,7 +27,7 @@ version: <semver>
 
 没改到的 skill 不要动版本；目录级 README 不算单个 skill 的版本。一次 commit 改了多个 skill，每个改过的各写 changelog、各打一条 tag。
 
-仓库级变更另记根目录 [`CHANGELOG.md`](../../../CHANGELOG.md)，用 `vX.Y.Z` tag，**不是** skill 总账。只改某个 skill 的补丁不必升仓库版本。
+仓库级变更另记根目录 [`CHANGELOG.md`](../../CHANGELOG.md)，用 `vX.Y.Z` tag，**不是** skill 总账。只改某个 skill 的补丁不必升仓库版本。
 
 查找某个版本对应的 commit：
 
@@ -98,9 +98,11 @@ npx skills@latest add VirusPC/edges/extensions/skills
 npx skills@latest add VirusPC/edges/extensions/skills --skill paper-10-questions
 ```
 
-> `project-memory-ask` / `-doctor` / `-init` / `-remember` / `-reshape` **必须一起装**。后四个靠同级目录定位 `project-memory-init`，单独装会找不到它的 `scripts/memory.py` 和 `references/`。
+> Project Memory 系列依赖提供 `edges memory` 的 Edges CLI。先构建或安装 CLI，并验证 `edges memory --help`；Skill 的安装不等于安装 CLI。建议一起安装 `project-memory-ask` / `-doctor` / `-init` / `-remember` / `-reshape`，以保留互相引用的工作流与协议资料。执行命令不再定位其他 Skill 的 Python 脚本，模板随 CLI 构建分发。
 
-维护这组 skill 时，按 [`project-memory-init/.memory/projects/project_development.md`](project-memory-init/.memory/projects/project_development.md) 的顺序修改和验证。
+旧 Project Memory 升级使用 [`project-memory-migrate`](project-memory-migrate/SKILL.md) 调用 `edges memory migrate`；其 `--dry-run` 可预览一次性转换，常规运行时不兼容旧 `.memory`。私有归档使用 [`user-memory-backup`](user-memory-backup/SKILL.md) 与 [`user-memory-restore`](user-memory-restore/SKILL.md) 调用同一 CLI 的 backup/restore，仅处理新 `.harness/memory/users`。Git 更新公共布局后，每台机器仍须迁移自己的 ignored 私有残留。
+
+维护这组 skill 时，按 [Project Memory 开发规范](project-memory-init/.harness/memory/projects/project_development/index.md) 的顺序修改和验证。
 
 ### 卸载
 

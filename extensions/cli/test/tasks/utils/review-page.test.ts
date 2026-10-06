@@ -10,8 +10,8 @@ import {
   renderReviewPageHtml,
   resolveReviewPageOutPath,
   writeReviewPage,
-} from "../../../src/tasks/utils/review-page.js";
-import { TasksError } from "../../../src/tasks/utils/types.js";
+} from "../../../src/services/tasks/review-page.js";
+import { TasksError } from "../../../src/domain/models/tasks/types.js";
 
 const sample = {
   groups: [
@@ -185,8 +185,43 @@ test("parseReviewPageInput rejects a doc that is missing body", () => {
       }),
     (error: unknown) => {
       assert.equal((error as TasksError).errorCode, "VALIDATION_ERROR");
-      assert.match((error as Error).message, /review-page doc requires name, description, and body strings/);
+      assert.match((error as Error).message, /review-page doc\/body/);
       return true;
     },
   );
+});
+
+test('legacy review items cannot bypass duplicate stem validation with ignored transport IDs', () => {
+  assert.throws(() => parseReviewPageInput({
+    groups: [{ id: 'default', title: 'Default' }],
+    items: [
+      { id: 'one', stem: 'same', current: 'default', suggested: 'default' },
+      { id: 'two', stem: 'same', current: 'default', suggested: 'default' },
+    ],
+  }), /duplicate/);
+});
+
+test('source-aware review payload requires valid real project identities on groups and items', () => {
+  const source = { scope: '.', purpose: 'domain' };
+  const group = { id: '[".","domain","cli"]', title: 'CLI', source, project: 'cli' };
+  const item = { id: '[".","domain","cli","same"]', stem: 'same', current: group.id, suggested: group.id, source, project: 'cli' };
+  for (const project of [undefined, null, 1, [], { value: 'cli' }, group.id, '_default', '']) {
+    assert.throws(() => parseReviewPageInput({ groups: [{ ...group, project }], items: [item] }), /project/);
+    assert.throws(() => parseReviewPageInput({ groups: [group], items: [{ ...item, project }] }), /project/);
+  }
+  const parsed = parseReviewPageInput({ groups: [group], items: [item] });
+  assert.equal(parsed.groups[0]?.project, 'cli');
+  assert.equal(parsed.items[0]?.project, 'cli');
+  assert.equal(parsed.items[0]?.stem, 'same');
+});
+
+test('review JSON preserves extended metadata and rejects invalid contract fields', () => {
+  const doc = { name: '', description: '', metadata: { custom: { nested: true }, tags: ['a'], count: 1, enabled: false, extra: null }, body: '' };
+  const input = { groups: sample.groups, items: [{ ...sample.items[0], doc }] };
+  const before = structuredClone(input);
+  assert.deepEqual(parseReviewPageInput(input).items[0]?.doc, doc);
+  assert.deepEqual(input, before);
+  for (const badDoc of [ { ...doc, extra: true }, { ...doc, metadata: { 'edges-tasks-status': 'unknown' } }, { ...doc, metadata: { 'edges-updated-at': 'today' } }, { ...doc, metadata: { 'edges-title': 1 } } ]) {
+    assert.throws(() => parseReviewPageInput({ ...input, items: [{ ...input.items[0], doc: badDoc }] }), /doc/);
+  }
 });

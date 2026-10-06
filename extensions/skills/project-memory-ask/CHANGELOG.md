@@ -1,5 +1,9 @@
 # Changelog
 
+## [2.0.1] - 2026-10-05
+
+- 统一 AGENTS 节点身份与三类内容组织；保留显式类型采用、写权限和局部归属，不用 Memory 标记或独立职责筛选节点。
+
 All notable changes to this skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -7,10 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-03
+
 ### Changed
 
-- 本层清单链到 `.memory/<plural>/AGENTS.md` 类型入口（ADR-0012）；层入口与类型入口同名但契约不同。
-- 本层清单里多出来的入口就是用户登记的 Memory Type，与种子同一跳规则；不要假定只有六份。
+- 按作用域直接发现 Memory 与 Skills 类型入口；容器和业务 AGENTS 不自动成为子层，引用不扩散来源规则。
 
 ## [1.2.1] - 2026-09-08
 

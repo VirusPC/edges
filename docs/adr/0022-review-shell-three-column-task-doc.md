@@ -4,9 +4,11 @@ classifyTasks、proposeTypes、本地 `edges tasks project review-page` 与持�
 
 **Status:** accepted（ADR 0022；grill 确认于 2026-09-23；同日写死：产物不入库，默认内联壳 + `#edges-review-payload`，hash 或 hash+query，三层推荐路径已定。同日 peng cheng 把源码从 CLI 包内挪到仓根 `apps/tasks-review-app/`，包名 `tasks-review-app`，脚本 `build:tasks-review-app`；产物目录仍是 `extensions/cli/src/tasks/project/assets/review-page/`，给以后其它预构建壳留 `apps/` 并列位置。2026-09-24 由 ADR 0023 修订窄屏布局：窄于 `md` 为纵向长滚动，双端「移到项目…」；不窄于 `md` 的三栏不变）
 
-**See also:** ADR 0012（[审阅页仍是 render-only CLI](0012-task-project-review-page-is-render-only-cli.md)）；ADR 0021（[持久 `/tasks/` 看板站](0021-persistent-tasks-board-site.md)）；Task Doc 契约 [`extensions/cli/schemas/task-doc.v1.json`](../../extensions/cli/schemas/task-doc.v1.json)；进行中的壳改造 [`knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--review-page-改造三列布局-顶栏-filter.md`](../../knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--review-page-改造三列布局-顶栏-filter.md)（本 ADR 不挪这张卡）；语义检索 backlog [`knowledge/tasks/agent-clients-ux/backlog/2026-09-23--Tasks审阅页-tasks站点语义检索.md`](../../knowledge/tasks/agent-clients-ux/backlog/2026-09-23--Tasks审阅页-tasks站点语义检索.md)；写回仓 backlog [`knowledge/tasks/agent-clients-ux/backlog/2026-09-21--Tasks-review-review-page-写回仓接口.md`](../../knowledge/tasks/agent-clients-ux/backlog/2026-09-21--Tasks-review-review-page-写回仓接口.md)；ADR 0023（[审阅壳窄屏纵向长滚动](0023-review-shell-narrow-vertical-layout.md)）
+**See also:** ADR 0012（[审阅页仍是 render-only CLI](0012-task-project-review-page-is-render-only-cli.md)）；ADR 0021（[持久 `/tasks/` 看板站](0021-persistent-tasks-board-site.md)）；Task Doc 契约 [`extensions/cli/schemas/task-doc.v1.json`](../../extensions/cli/schemas/task-doc.v1.json)；进行中的壳改造 [`knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--review-page-改造三列布局-顶栏-filter.md`](../../.harness/tasks/agent-clients-ux/in_progress/2026-09-21--review-page-%E6%94%B9%E9%80%A0%E4%B8%89%E5%88%97%E5%B8%83%E5%B1%80-%E9%A1%B6%E6%A0%8F-filter.md)（本 ADR 不挪这张卡）；语义检索 backlog [`knowledge/tasks/agent-clients-ux/backlog/2026-09-23--Tasks审阅页-tasks站点语义检索.md`](../../.harness/tasks/agent-clients-ux/backlog/2026-09-23--Tasks%E5%AE%A1%E9%98%85%E9%A1%B5-tasks%E7%AB%99%E7%82%B9%E8%AF%AD%E4%B9%89%E6%A3%80%E7%B4%A2.md)；写回仓 backlog [`knowledge/tasks/agent-clients-ux/backlog/2026-09-21--Tasks-review-review-page-写回仓接口.md`](../../.harness/tasks/agent-clients-ux/backlog/2026-09-21--Tasks-review-review-page-%E5%86%99%E5%9B%9E%E4%BB%93%E6%8E%A5%E5%8F%A3.md)；ADR 0023（[审阅壳窄屏纵向长滚动](0023-review-shell-narrow-vertical-layout.md)）
 
 ## Decision
+
+2026-10-06 补充：Task Doc 字段定义源由 [ADR 0025](0025-typescript-source-generated-json-schema.md) 修订为普通 TS 数据契约，使用 ts-json-schema-generator 生成对外 JSON Schema；外部共享契约和本 ADR 的其他决定继续有效。该迁移待实施，现有手写 Schema 仍保留至兼容性验收通过。
 
 - **一份审阅壳：** classifyTasks、proposeTypes、本地 `edges tasks project review-page`、持久 `/tasks/` 继续共用这一份壳。不按用途拆页，不加 `--mode`。
 - **三栏：** 左栏是 Task Project。点左栏项目 = 筛选，同时是拖放落点（与今天同一语义）。拖到左栏**只改 project**。中栏是按 `edges-tasks-status` 自绘的状态列，**只读**；状态写回仍走写回仓 backlog，不在本轮。右栏渲染当前条目的 `doc.body`。
@@ -47,8 +49,8 @@ classifyTasks、proposeTypes、本地 `edges tasks project review-page` 与持�
 - 实现 `build:tasks-review-app`、prepack、gitignore 条目、hash 导航与内联注入（本 ADR 已定行为与推荐路径）
 - 为严格 CSP 把 JS/CSS 拆成旁路文件（Playwright `doNotInlineAssets` 同类；本轮默认内联）
 - CLI import 或校验 `task-doc.v1.json`（实现轮）
-- 状态写回与 git 写回（[写回仓接口](../../knowledge/tasks/agent-clients-ux/backlog/2026-09-21--Tasks-review-review-page-写回仓接口.md)）
-- 语义检索（[2026-09-23 backlog](../../knowledge/tasks/agent-clients-ux/backlog/2026-09-23--Tasks审阅页-tasks站点语义检索.md)）
+- 状态写回与 git 写回（[写回仓接口](../../.harness/tasks/agent-clients-ux/backlog/2026-09-21--Tasks-review-review-page-%E5%86%99%E5%9B%9E%E4%BB%93%E6%8E%A5%E5%8F%A3.md)）
+- 语义检索（[2026-09-23 backlog](../../.harness/tasks/agent-clients-ux/backlog/2026-09-23--Tasks%E5%AE%A1%E9%98%85%E9%A1%B5-tasks%E7%AB%99%E7%82%B9%E8%AF%AD%E4%B9%89%E6%A3%80%E7%B4%A2.md)）
 - `--mode`、review-page MCP、公开 `classify` / `apply-review`
 - 衍生站统一鉴权、站点统一 agent 助手、Artifacts 预览改走 Pages
 - 改看板状态文件，或移动 `in_progress/2026-09-21--review-page-改造三列布局-顶栏-filter`

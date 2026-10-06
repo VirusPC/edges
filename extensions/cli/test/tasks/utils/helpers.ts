@@ -8,7 +8,7 @@ import {
   writeFile,
   access,
 } from "node:fs/promises";
-import type { BoardFs } from "../../../src/tasks/utils/board.js";
+import type { BoardFs } from "../../../src/services/tasks/board.js";
 
 export type BoardWriter = BoardFs & {
   writeFile(abs: string, contents: string): Promise<void>;
@@ -57,4 +57,60 @@ export function nodeBoardWriter(): BoardWriter {
       await fsRmdir(abs);
     },
   };
+}
+
+/** Legacy fixtures opt into the real index model; production never performs this scan. */
+export async function indexTaskFixtureBoard(board: string): Promise<void> {
+  const { InternalNode } = await import('../../../src/domain/models/internal-node.js');
+  const { TASK_STATUSES } = await import('../../../src/domain/models/tasks/types.js');
+  const { isUserProjectSlug } = await import('../../../src/domain/models/tasks/project.js');
+  const { renderProjectAgents, seedTitleFor, seedDescriptionFor } = await import('../../../src/services/tasks/project-meta.js');
+  const path = await import('node:path');
+  const { realpath } = await import('node:fs/promises');
+  board = await realpath(board);
+  const loadIndex = async (file: string, fallback: string) => {
+    let source = fallback;
+    try { source = await readFile(file,'utf8'); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+    return new InternalNode(file).parse(source);
+  };
+  const root = await loadIndex(path.join(board,'AGENTS.md'),'# Tasks\n');
+  for (const name of await readdir(board)) {
+    if (name !== '_default' && !isUserProjectSlug(name)) continue;
+    const project = name === '_default' ? 'default' : name;
+    const dir = path.join(board,name);
+    try { await readdir(dir); } catch { continue; }
+    const node = await loadIndex(path.join(dir,'AGENTS.md'),renderProjectAgents({title:seedTitleFor(project),description:seedDescriptionFor(project)}));
+    for (const status of TASK_STATUSES) {
+      let names: string[];
+      try { names = await readdir(path.join(dir,status)); } catch { continue; }
+      for (const stem of names) {
+        const entry = path.join(dir,status,stem,'index.md');
+        try { await access(entry); } catch { continue; }
+        if (!node.children.some(ref=>ref.id===entry)) node.addChild('local',{id:entry});
+      }
+    }
+    await writeFile(node.path,node.serialize());
+    if (!root.children.some(ref=>ref.id===node.path)) root.addChild('local',{id:node.path});
+  }
+  await writeFile(root.path,root.serialize());
+}
+
+export async function writeIndexedTaskFixture(...args: Parameters<typeof writeFile>): Promise<void> {
+  const path = await import('node:path');
+  const file = String(args[0]);
+  await mkdir(path.dirname(file),{recursive:true});
+  await writeFile(...args);
+  const match = file.match(/^(.*\/tasks)\/[^/]+\/(?:backlog|todo|in_progress|in_review|done|blocked|cancelled)\/[^/]+\/index\.md$/);
+  if (match) await indexTaskFixtureBoard(match[1]!);
+  else if (path.basename(file)==='AGENTS.md' && path.basename(path.dirname(file))==='tasks') await indexTaskFixtureBoard(path.dirname(file));
+}
+
+export async function writeFixtureIndex(file: string, children: string[], descendants: string[] = []): Promise<void> {
+  const { InternalNode } = await import('../../../src/domain/models/internal-node.js');
+  const path = await import('node:path');
+  const { realpath } = await import('node:fs/promises');
+  await mkdir(path.dirname(file),{recursive:true});
+  file=path.join(await realpath(path.dirname(file)),path.basename(file));
+  const references = (paths: string[]) => paths.map(id=>({id:path.resolve(path.dirname(file),id)}));
+  await writeFile(file,new InternalNode(file).create({localChildren:references(children),descendantChildren:references(descendants)},{operation:'create'}).serialize());
 }

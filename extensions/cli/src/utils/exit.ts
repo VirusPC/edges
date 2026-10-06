@@ -1,5 +1,5 @@
-import type { IngestErrorCode, IngestResult } from "../note/utils/types.js";
-import type { TasksErrorCode } from "../tasks/utils/types.js";
+import type { IngestErrorCode, IngestResult } from "../services/note/types.js";
+import type { TasksErrorCode } from "../domain/models/tasks/types.js";
 
 export function exitCodeFor(result: IngestResult): number {
   if (result.status === "success") {

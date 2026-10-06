@@ -1,3 +1,4 @@
+import { usageScope } from "../context.js";
 export type ProcessInput = {
   argv: string[];
   stdinText?: string;
@@ -41,6 +42,6 @@ export async function readProcessInput(
 ): Promise<ProcessInput> {
   const commandArgv = argv.slice(2);
   const stdinIsTTY = io.isTTY;
-  const stdinText = wantsStdin(commandArgv) && !stdinIsTTY ? await readStdin(io.stdin) : undefined;
+  const stdinText = usageScope(commandArgv) !== "schema" && wantsStdin(commandArgv) && !stdinIsTTY ? await readStdin(io.stdin) : undefined;
   return { argv: commandArgv, stdinText, stdinIsTTY };
 }

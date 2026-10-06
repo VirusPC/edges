@@ -1,9 +1,9 @@
 {
-  "attachmentFolderPath": "knowledge/resources",
+  "attachmentFolderPath": "./",
   "readableLineLength": false,
   "showUnsupportedFiles": true,
   "userIgnoreFilters": [
-    "knowledge/teaching/*/repos/",
-    "evaluation/third_party/"
+    "teaching/*/repos/",
+    ".harness/evaluation/third_party/"
   ]
 }

@@ -2,7 +2,7 @@
 
 跨机器、跨 Agent 共享的个人 harness。目录约定与收录标准看 [README.md](README.md)。
 
-<!-- project-memory:start -->
+
 
 <!-- project-memory-important:start -->
 ## 本层硬约束
@@ -15,17 +15,13 @@
 - 本目录整层一份版本：改 `skills/` / `mcp/` / `plugins/` / `hooks/` 或发版约定后，升 `VERSION`、写 `CHANGELOG.md`、同一 commit 打 `shared-extensions@<version>`。禁止给单条扩展另开 version 或 changelog。只改 `.memory/` 不升版本。
 <!-- project-memory-important:end -->
 
+
 <!-- project-memory-local:start -->
 ## 本层记忆
 
-下面这些是索引，不是正文。按条目说明挑要读的，再打开对应内容。
-
-- [.memory/users/AGENTS.md](.memory/users/AGENTS.md) — 绑定本仓库、不宜公开的个人材料（个人偏好、凭据与密钥）。本机文件，不进 git。
-- [.memory/feedbacks/AGENTS.md](.memory/feedbacks/AGENTS.md) — 用户的纠正、确认过的做法与必须遵守的禁止模式。
-- [.memory/projects/AGENTS.md](.memory/projects/AGENTS.md) — 进行中的工作、关键时间点，无法从代码或 git 历史推导的决策，以及项目内的规范。兜底：对不上更具体类型时走这里。
-- [.memory/references/AGENTS.md](.memory/references/AGENTS.md) — 需求文档、设计稿、接口文档、监控面板等外部资料。
-- [.memory/skills/AGENTS.md](.memory/skills/AGENTS.md) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
-- [.memory/agent_skills/AGENTS.md](.memory/agent_skills/AGENTS.md) — 本层 `.agents/skills/` 下人写或装入的标准技能，工具只索引不改写。
+- [.harness/memory/feedbacks/AGENTS.md](<.harness/memory/feedbacks/AGENTS.md>) — 用户的纠正、确认过的做法与必须遵守的禁止模式。
+- [.harness/memory/projects/AGENTS.md](<.harness/memory/projects/AGENTS.md>) — 进行中的工作、关键时间点，无法从代码或 git 历史推导的决策，以及项目内的规范。兜底：对不上更具体类型时走这里。
+- [.harness/memory/references/AGENTS.md](<.harness/memory/references/AGENTS.md>) — 需求文档、设计稿、接口文档、监控面板等外部资料。
+- [.harness/skills/managed/AGENTS.md](<.harness/skills/managed/AGENTS.md>) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
+- [.harness/skills/referenced/AGENTS.md](<.harness/skills/referenced/AGENTS.md>) — 本层 .agents/skills/ 下人写或装入的标准技能，工具只索引不改写。
 <!-- project-memory-local:end -->
-
-<!-- project-memory:end -->

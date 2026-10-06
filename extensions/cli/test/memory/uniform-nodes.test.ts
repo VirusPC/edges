@@ -1,0 +1,321 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  rmSync,
+  existsSync,
+  realpathSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import {
+  resolveScope,
+  isScope,
+  discoverScopes,
+} from "../../src/services/scope.js";
+import {
+  initMemory,
+  doctorMemory,
+  rememberMemory,
+} from "../../src/services/memory/index.js";
+import { NodeService } from "../../src/services/node-service.js";
+import {
+  refreshProjectIndex,
+  parseProjectAgents,
+  updateProject,
+} from "../../src/services/tasks/project-meta.js";
+import { nodeBoardWriter } from "../tasks/utils/helpers.js";
+function fixture(t: any) {
+  const root = realpathSync(mkdtempSync(join(tmpdir(), "uniform-nodes-")));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  return root;
+}
+function put(root: string, file: string, text: string) {
+  mkdirSync(join(root, file, ".."), { recursive: true });
+  writeFileSync(join(root, file), text);
+}
+const read = (root: string, file: string) =>
+  readFileSync(join(root, file), "utf8");
+test("nearest unmarked, type and business AGENTS are CLI nodes without adopting Memory", async (t) => {
+  const root = fixture(t);
+  mkdirSync(join(root, ".git"));
+  for (const [dir, text] of [
+    ["plain", "# Plain\n"],
+    [
+      "plain/type",
+      "<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+    ],
+    ["tasks", "# Business\n"],
+  ]) {
+    put(root, `${dir}/AGENTS.md`, text);
+    assert.equal(isScope(join(root, dir)), true);
+    assert.equal(resolveScope({}, join(root, dir)), join(root, dir));
+  }
+  assert.equal(discoverScopes(root).length, 4);
+  const target = resolveScope({}, root, "uninitialized");
+  mkdirSync(target);
+  assert.equal(
+    (await initMemory({ indexGroup: "descendant", targetDir: target, rootDir: target }))
+      .selectionRequired,
+    true,
+  );
+  await assert.rejects(
+    rememberMemory({
+      targetDir: target,
+      type: "project",
+      slug: "no",
+      content: "no",
+    }),
+    /type|init|初始化/i,
+  );
+  assert.equal(existsSync(join(target, ".harness")), false);
+});
+test("Doctor preserves sparse generic nodes and registered cross-directory local and descendant ownership", async (t) => {
+  const root = fixture(t);
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
+  put(
+    root,
+    "business/AGENTS.md",
+    "# Business\n\n## 本层记忆\n- [shared](../shared/AGENTS.md) — shared content\n\n## 下层记忆索引\n- [deep](../nested/deep/AGENTS.md) — custom descendant\n\n## Authored\n[ordinary](../unowned/AGENTS.md)\n",
+  );
+  put(root, "shared/AGENTS.md", "# Shared\n");
+  put(root, "nested/AGENTS.md", "# Physical intermediate\n");
+  mkdirSync(join(root, "nested/deep"), { recursive: true });
+  await initMemory({ indexGroup: "descendant",
+    targetDir: join(root, "nested/deep"),
+    rootDir: join(root, "nested/deep"),
+    memoryTypes: ["project"],
+  });
+  put(root, "unowned/AGENTS.md", "# Unowned\n");
+  const files = [
+    "AGENTS.md",
+    "business/AGENTS.md",
+    "shared/AGENTS.md",
+    "nested/AGENTS.md",
+    "nested/deep/AGENTS.md",
+    "unowned/AGENTS.md",
+    ".harness/memory/projects/AGENTS.md",
+  ];
+  const before = files.map((file) => read(root, file));
+  const report = await doctorMemory({ indexGroup: "descendant", targetDir: root, apply: true });
+  assert.deepEqual(report.remaining, []);
+  assert.deepEqual(
+    files.map((file) => read(root, file)),
+    before,
+  );
+  const service = new NodeService({ managedRoot: root });
+  const local = await service.list(join(root, "business"));
+  assert.deepEqual(
+    local.map((node) => node.path),
+    [join(root, "business/AGENTS.md"), join(root, "shared/AGENTS.md")],
+  );
+  const all = await service.list(join(root, "business"), {
+    includeDescendants: true,
+  });
+  assert.deepEqual(
+    all.map((node) => node.path),
+    [
+      join(root, "business/AGENTS.md"),
+      join(root, "shared/AGENTS.md"),
+      join(root, "nested/deep/AGENTS.md"),
+      join(root, "nested/deep/.harness/memory/projects/AGENTS.md"),
+    ],
+  );
+});
+test("Task Project index lives once in local ownership while preserving authored sections", async (t) => {
+  const root = fixture(t);
+  const source =
+    "# Board\n\n<!-- project-memory-local:start -->\n## 本层记忆\n\n- [guide](guide.md) — authored\n<!-- project-memory-local:end -->\n\n## Authored\nkeep this\n";
+  const project = {
+    project: "demo",
+    dir: "demo",
+    title: "Demo",
+    description: "Business purpose",
+    path: "tasks/demo/AGENTS.md",
+  };
+  put(root, "tasks/AGENTS.md", source);
+  put(root, "tasks/guide.md", "guide");
+  const tail =
+    "\n<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n## 本层记忆\n\n- [guide](../guide.md) — shared guide\n<!-- project-memory-local:end -->\n<!-- project-memory:end -->\n\n## Authored\nkeep exactly\n";
+  put(root, "tasks/demo/AGENTS.md", "# Demo\n\nBusiness purpose\n" + tail);
+  const parsed = parseProjectAgents(read(root, "tasks/demo/AGENTS.md"));
+  assert.equal(parsed.description, "Business purpose");
+  await updateProject(root, "demo", { title: "New title" }, nodeBoardWriter());
+  assert.ok(read(root, "tasks/demo/AGENTS.md").endsWith(tail));
+  const index = read(root, "tasks/AGENTS.md");
+  assert.match(index, /## Authored\nkeep this/);
+  assert.doesNotMatch(index, /## Task Projects/);
+  assert.equal(index.split("demo/AGENTS.md").length - 1, 1);
+  const node = (
+    await new NodeService({ managedRoot: root }).list(join(root, "tasks"))
+  )[0]!;
+  assert.ok(
+    node.localChildren.some(
+      (child) => child.id === join(root, "tasks/demo/AGENTS.md"),
+    ),
+  );
+  await refreshProjectIndex(root, nodeBoardWriter());
+  assert.equal(read(root, "tasks/AGENTS.md"), index);
+});
+test("sparse Task Project markers are local content and a heading-only local section is reused", async (t) => {
+  const root = fixture(t);
+  put(
+    root,
+    "AGENTS.md",
+    "# Board\n<!-- project-memory-local:start -->\n## Task Projects\n\n- [demo](demo/AGENTS.md) — business\n<!-- project-memory-local:end -->\n",
+  );
+  put(root, "demo/AGENTS.md", "# Demo\n");
+  assert.equal(
+    (await new NodeService({ managedRoot: root }).list(root)).length,
+    2,
+  );
+  const source =
+    "# Board\n\n## 本层记忆\n\nManual local prose.\n\n## Authored\nKeep me.\n";
+  const { InternalNode } = await import('../../src/domain/models/internal-node.js');
+  const node = new InternalNode(join(root, 'AGENTS.md')).parse(source);
+  node.addChild('local', { id: join(root, 'demo/AGENTS.md'), name: 'Demo', description: 'Business' });
+  const updated = node.serialize();
+  assert.equal(updated.split("## 本层记忆").length - 1, 1);
+  assert.match(updated, /## Authored\nKeep me\./);
+});
+test("explicit init keeps an existing local owner and updates an explicitly supplied description", async (t) => {
+  const root = fixture(t);
+  put(
+    root,
+    "AGENTS.md",
+    "# Root\n\n## 本层记忆\n- [owned](physical/deep/AGENTS.md) — old description\n",
+  );
+  put(root, "physical/AGENTS.md", "# Physical parent\n");
+  put(root, "physical/deep/AGENTS.md", "# Owned\n");
+  const result = await initMemory({ indexGroup: "descendant",
+    targetDir: join(root, "physical/deep"),
+    rootDir: root,
+    memoryTypes: ["project"],
+    description: "Updated description",
+  });
+  assert.equal(result.indexAnchor, root);
+  assert.match(read(root, "AGENTS.md"), /Updated description/);
+  assert.doesNotMatch(read(root, "AGENTS.md"), /project-memory-children/);
+  assert.equal(read(root, "physical/AGENTS.md"), "# Physical parent\n");
+});
+
+test("Doctor diagnoses overlapping ownership groups without choosing an authored edge", async (t) => {
+  const root = fixture(t);
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
+  put(root, "owned/AGENTS.md", "# Owned\n");
+  const localLine =
+    "- [Local label](owned/AGENTS.md) — Keep this local description.";
+  put(
+    root,
+    "AGENTS.md",
+    read(root, "AGENTS.md")
+      .replace(
+        "<!-- project-memory-local:end -->",
+        `${localLine}\n<!-- project-memory-local:end -->`,
+      )
+      .replace(
+        "<!-- project-memory:end -->",
+        "<!-- project-memory-children:start -->\n## 下层记忆索引\n\n- [Descendant](owned/AGENTS.md) — Old descendant description.\n- [Duplicate](owned/AGENTS.md) — Duplicate description.\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->",
+      ),
+  );
+  const beforeLocal = read(root, "AGENTS.md").match(
+    /<!-- project-memory-local:start -->[\s\S]*?<!-- project-memory-local:end -->/,
+  )![0];
+  const result = await doctorMemory({ indexGroup: "descendant", targetDir: root, apply: true });
+  assert.ok(
+    result.remaining.some(
+      (f) =>
+        f.code === "invalid-entry" && /child already indexed/.test(f.detail),
+    ),
+  );
+  assert.equal(
+    read(root, "AGENTS.md").match(
+      /<!-- project-memory-local:start -->[\s\S]*?<!-- project-memory-local:end -->/,
+    )![0],
+    beforeLocal,
+  );
+  assert.equal(read(root, "AGENTS.md").split("owned/AGENTS.md").length - 1, 3);
+  assert.deepEqual(
+    (await doctorMemory({ indexGroup: "descendant", targetDir: root, apply: true })).repaired,
+    [],
+  );
+});
+
+test("Doctor repairs an adopted child missing AGENTS and its missing registration in one pass", async (t) => {
+  const root = fixture(t);
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
+  const child = join(root, "child");
+  mkdirSync(child);
+  await initMemory({ indexGroup: "descendant",
+    targetDir: child,
+    rootDir: child,
+    memoryTypes: ["project"],
+  });
+  rmSync(join(child, "AGENTS.md"));
+  put(root, "business/AGENTS.md", "# Business stays sparse\n");
+  const result = await doctorMemory({ indexGroup: "descendant", targetDir: root, apply: true });
+  assert.ok(
+    result.findings.some(
+      (finding) =>
+        finding.code === "missing-agents" && finding.path === "child/AGENTS.md",
+    ),
+  );
+  assert.deepEqual(result.remaining, []);
+  assert.equal(isScope(child), true);
+  const node = (
+    await new NodeService({ managedRoot: root }).list(root, {
+      includeDescendants: true,
+    })
+  )[0]!;
+  assert.ok(
+    node.descendantChildren.some(
+      (ref) => ref.id === join(root, "child/AGENTS.md"),
+    ),
+  );
+  assert.equal(read(root, "business/AGENTS.md"), "# Business stays sparse\n");
+  assert.equal(existsSync(join(root, "business/.harness")), false);
+  assert.deepEqual(
+    (await doctorMemory({ indexGroup: "descendant", targetDir: root, apply: true })).repaired,
+    [],
+  );
+});
+
+test("doctor repairs independent valid index while retaining invalid sibling and its reference", async (t) => {
+  const root = fixture(t);
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
+  const index = ".harness/memory/projects/AGENTS.md";
+  put(
+    root,
+    ".harness/memory/projects/project_new/index.md",
+    "---\nname: project_new\ndescription: New\n---\nBody",
+  );
+  const broken =
+    "<!-- project-memory-local:start -->\n- [one](child/AGENTS.md)\n- [two](child/AGENTS.md)\n<!-- project-memory-local:end -->";
+  put(root, "broken/AGENTS.md", broken);
+  put(root, "broken/child/AGENTS.md", "# Child");
+  const agents = read(root, "AGENTS.md").replace(
+    "<!-- project-memory:end -->",
+    "<!-- project-memory-children:start -->\n- [Broken](broken/AGENTS.md) — retain\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->",
+  );
+  put(root, "AGENTS.md", agents);
+  const result = await doctorMemory({ indexGroup: "descendant",
+    targetDir: root,
+    rootDir: root,
+    apply: true,
+  });
+  assert.ok(
+    result.findings.some((f) => f.code === "stale-index" && f.path === index),
+  );
+  assert.ok(result.repaired.some((f) => f.includes(index)));
+  assert.match(read(root, index), /project_new\/index.md/);
+  assert.equal(read(root, "broken/AGENTS.md"), broken);
+  assert.match(read(root, "AGENTS.md"), /broken\/AGENTS.md/);
+  assert.ok(
+    result.remaining.some(
+      (f) => f.code === "invalid-entry" && f.path === "broken/AGENTS.md",
+    ),
+  );
+});

@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, writeFile, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
-import { ensureServerEnv } from "../../src/artifacts/server/env.js";
+import { ensureServerEnv } from "../../src/commands/artifacts/server/env.js";
 import {
   installArtifactsServer,
   restartArtifactsServer,
@@ -12,7 +12,7 @@ import {
   startArtifactsServer,
   statusArtifactsServer,
   stopArtifactsServer,
-} from "../../src/artifacts/server/ops.js";
+} from "../../src/commands/artifacts/server/ops.js";
 
 test("artifacts help lists server", async () => {
   const result = await run(["artifacts", "--help"]);
@@ -307,4 +307,10 @@ test("setupNginxArtifacts surfaces script failure when passwordless sudo ran", a
       return true;
     },
   );
+});
+
+test('server source ignores target content scope and EDGES_REPO target', async () => {
+  const { resolveRepoRoot } = await import('../../src/commands/artifacts/server/ops.js');
+  const { resolveEdgesRoot } = await import('../../src/utils/config.js');
+  assert.equal(resolveRepoRoot({ EDGES_SCOPE: '/tmp/child', EDGES_REPO: '/tmp/content' }), resolveEdgesRoot());
 });

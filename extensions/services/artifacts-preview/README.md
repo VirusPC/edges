@@ -58,7 +58,7 @@ There is no `server init` (client `edges artifacts init` is the laptop command).
 
 ### First time on the ECS
 
-1. **Node ≥ 20 + pnpm** on `cheng-dev` PATH (user systemd cannot sudo-install them). `corepack enable` then `corepack prepare pnpm@latest --activate` is enough if Node is already there.
+1. **Node ≥ 22 + pnpm** on `cheng-dev` PATH (user systemd cannot sudo-install them). `corepack enable` then `corepack prepare pnpm@latest --activate` is enough if Node is already there.
 2. **Install (config + unit, no process):**
 
    ```bash
@@ -147,7 +147,7 @@ Phone opens the printed `https://edges.viruspc.tech/artifacts/<uuid>/` in a syst
 
 ### After each main pull
 
-GitHub Actions [`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). **Only when** `~/.config/edges/artifacts-preview.env` exists, it runs `edges artifacts server install` then `edges artifacts server restart` (skipped until the one-time token file is in place, so teach deploys stay green). After the env exists, a failure fails the job so the restart is visible; the tree is already at `origin/main`. nginx is usually unchanged — do not re-run `setup-nginx` from the Action.
+GitHub Actions [`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). **Only when** `~/.config/edges/artifacts-preview.env` exists, it runs `edges artifacts server install` then `edges artifacts server restart` (skipped until the one-time token file is in place, so teach deploys stay green). After the env exists, a failure fails the job so the restart is visible; the tree is already at `origin/main`. After task-site generation, the Action runs `sudo -n bash extensions/services/artifacts-preview/deploy/migrate-site-layout.sh` even without the artifacts env. It migrates teaching roots to `<repo>/teaching/` and the installed tasks alias to `<repo>/tasks/_site/`, keeping public URLs and unrelated roots. The wrapper backs up both configs, validates with `nginx -t`, restores on failure, and reloads only when changed. Provision sudo permission for that wrapper; do not re-run `setup-nginx` from the Action.
 
 If the unit files did not change, `restart` alone is enough; `install` then `restart` is the conservative path the Action uses.
 

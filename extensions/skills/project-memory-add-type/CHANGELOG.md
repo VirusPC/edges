@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-10-04
+
 ### Changed
 
-- 登记产物改为 `.memory/<plural>/AGENTS.md`（与条目同处），不再写根部 `.memory/<TYPE>.md`（ADR-0012）。
+- 执行入口迁至 TypeScript `edges memory` CLI；使用前需安装或构建 CLI，模板随构建产物分发，保留原有工作流与权限边界。
+
+## [2.0.0] - 2026-10-03
+
+### Changed
+
+- 新增 `--module memory|skills`，模块与格式独立；保留自定义类型身份，跨模块冲突和非法特权元数据拒绝写入。
 
 ## [1.0.0] - 2026-09-13
 

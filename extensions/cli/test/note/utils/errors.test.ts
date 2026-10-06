@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { classifyError, summarize } from "../../../src/note/utils/errors.js";
+import { classifyError, summarize } from "../../../src/services/note/errors.js";
 
 test("classifyError detects auth failures", () => {
   const code = classifyError({ stderr: "Permission denied (publickey)." });

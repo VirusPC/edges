@@ -32,7 +32,7 @@ test("run note --help documents ingest flags and structured output", async () =>
 });
 
 test("run tasks --help lists subcommands and not the placeholder", async () => {
-  const result = await run(["tasks", "--help"]);
+  const result = await run(["tasks", "--index-group", "local", "--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /\blist\b/);
   assert.match(result.stdout, /\brun-messages\b/);
@@ -40,7 +40,7 @@ test("run tasks --help lists subcommands and not the placeholder", async () => {
 });
 
 test("run tasks without subcommand is usage JSON", async () => {
-  const result = await run(["tasks"]);
+  const result = await run(["tasks", "--index-group", "local"]);
   assert.equal(result.exitCode, 2);
   const parsed = JSON.parse(result.stdout) as { status: string; errorCode: string };
   assert.equal(parsed.status, "failed");

@@ -6,25 +6,27 @@ This is generated HTML only. It is not Artifacts (`publish` / UUID / TTL) and no
 
 ## Generate (every deploy)
 
-After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs. The Vite output under `extensions/cli/src/tasks/project/assets/review-page/` is gitignored and must be built on the box before generate:
+After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs. The Vite output under `extensions/cli/src/commands/tasks/project/assets/review-page/` is gitignored and must be built on the box before generate:
 
 ```bash
 pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...
 pnpm --filter tasks-review-app run build
 pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
-  --out "$PWD/knowledge/tasks/_site/index.html"
+  --scope "$PWD" --purpose all --out "$PWD/tasks/_site/index.html"
 ```
 
 From a checkout with PATH already set (same as the Action):
 
 ```bash
-pnpm --filter edges-cli exec -- tsx extensions/cli/scripts/generate-tasks-site.ts \
-  --out "$PWD/knowledge/tasks/_site/index.html"
+pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
+  --scope "$PWD" --purpose all --out "$PWD/tasks/_site/index.html"
 ```
 
-If dependencies are missing, `pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...` then `pnpm --filter tasks-review-app run build`. The Vite files are gitignored and are not in the git checkout. Output HTML is gitignored (`knowledge/tasks/_site/`). A failed generate fails the Action; nginx keeps serving the last good `index.html` until the next success.
+If dependencies are missing, `pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...` then `pnpm --filter tasks-review-app run build`. The Vite files are gitignored and are not in the git checkout. Output HTML is gitignored (`tasks/_site/`). A failed generate fails the Action; nginx keeps serving the last good `index.html` until the next success.
 
-The Action does **not** re-run nginx setup.
+`--scope "$PWD" --purpose all` gathers the root and actual descendant scopes, including domain and maintenance tasks. Public `/tasks/` remains one aggregated board.
+
+The Action does **not** re-run nginx setup. After generation it runs `sudo -n bash extensions/services/artifacts-preview/deploy/migrate-site-layout.sh` to update existing physical paths: teaching locations serve `<repo>/teaching/`, and the installed tasks snippet serves `<repo>/tasks/_site/`. The wrapper preserves inherited server roots and unrelated locations, backs up both configs, validates with `nginx -t`, and reloads only on change. Failure restores both configs and fails the deployment. Provision the deploy user's sudo permission for this wrapper before deploying the layout change. This runs regardless of the artifacts token/env file; fresh hosts still need the one-time nginx setup below.
 
 ## One-time nginx (sudo)
 
@@ -34,7 +36,7 @@ Requires `/etc/nginx/conf.d/teaching.conf` with `/teaching/` already in a `serve
 sudo bash /home/cheng-dev/projects/edges/extensions/cli/deploy/setup-nginx-tasks.sh
 ```
 
-That installs `/etc/nginx/snippets/edges-tasks.conf` (`/tasks/` → `<repo>/knowledge/tasks/_site/`) and includes it only in `teaching.conf` servers that contain `/teaching/`. Do not add `/tasks/` to the artifacts snippet. Do not dual-recognize `/teach/`.
+That installs `/etc/nginx/snippets/edges-tasks.conf` (`/tasks/` → `<repo>/tasks/_site/`) and includes it only in `teaching.conf` servers that contain `/teaching/`. Do not add `/tasks/` to the artifacts snippet. Do not dual-recognize `/teach/`.
 
 ## Checks
 

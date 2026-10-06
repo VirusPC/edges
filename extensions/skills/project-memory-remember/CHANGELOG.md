@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.1.0] - 2026-10-05
+
+- 统一目录入口、验证后的整目录导入与显式公开迁移；保留非受控正文，非法入口诊断后由调用方修正。
+
+## [3.0.1] - 2026-10-05
+
+- 统一 AGENTS 节点身份与三类内容组织；保留显式类型采用、写权限和局部归属，不用 Memory 标记或独立职责筛选节点。
+
 All notable changes to this skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -7,10 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0] - 2026-10-04
+
 ### Changed
 
-- `--type user` 的索引改为 `.memory/users/AGENTS.md`（ADR-0012）。`.memory/users/` 整类仍 gitignore。
-- `--type` 是该层已登记的可写类型（官方种子 + AGENTS 本层额外行），不再当成五/六个名字的闭集。`agent_skills` 仍不可写。
+- 执行入口迁至 TypeScript `edges memory` CLI；使用前需安装或构建 CLI，模板随构建产物分发，保留原有工作流与权限边界。
+
+## [2.0.0] - 2026-10-03
+
+### Changed
+
+- 正文写入新布局已采用的类型；managed 可写本地 Skill，referenced 只索引，私有类型先保证忽略规则。
 
 ## [1.6.0] - 2026-09-11
 

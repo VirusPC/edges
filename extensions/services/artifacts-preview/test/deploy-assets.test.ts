@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile, access, constants } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile, access, constants, mkdir, chmod } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -158,7 +158,7 @@ test("teaching nginx prefix migrator rewrites both 80 and 443 servers toward /te
   assert.match(migrated, /listen 443[\s\S]*rewrite \^\/teach\/\(\.\*\)\$ \/teaching\/\$1 permanent;/);
   assert.match(migrated, /ssl_certificate /);
   assert.match(migrated, /root \/home\/cheng-dev\/projects\/edges\/knowledge;/);
-  assert.match(migrated, /location \/teaching\/\s*\{\s*try_files \$uri \$uri\/ =404;/);
+  assert.match(migrated, /location \/teaching\/\s*\{\s*root \/home\/cheng-dev\/projects\/edges;\s*try_files \$uri \$uri\/ =404;/);
 
   const second = spawnSync("python3", [migrateScript, confPath], { encoding: "utf8" });
   assert.equal(second.status, 0, second.stderr);
@@ -208,3 +208,88 @@ test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts 
   assert.doesNotMatch(workflow, /^\s*rsync\b/m);
   assert.match(workflow, /do not rsync-push a path subset/);
 });
+
+
+test("teaching migration updates inherited and explicit physical roots while preserving other locations", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-teaching-roots-"));
+  try {
+    const conf = path.join(dir, "teaching.conf");
+    const original = await readFile(path.join(here, "fixtures/teaching.conf.legacy-roots"), "utf8");
+    await writeFile(conf, original);
+    const result = spawnSync("python3", [migrateScript, conf], { encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    const changed = await readFile(conf, "utf8");
+    assert.equal((changed.match(/location \/teaching\/ \{\s*root \/srv\/edges;/g) || []).length, 2);
+    assert.match(changed, /location \/teaching\/assets\/ \{ alias \/srv\/edges\/teaching\/assets\/;/);
+    assert.match(changed, /location \/other\/ \{ root \/srv\/edges\/knowledge; \}/);
+    assert.match(changed, /location \/assets\/ \{ alias \/srv\/edges\/knowledge\/teaching\/assets\/; \}/);
+    assert.ok(changed.endsWith(original.slice(original.lastIndexOf("server {"))));
+    assert.equal((changed.split("server {")[1]!.match(/location = \/ \{/g) || []).length, 1);
+    assert.match(changed, /location = \/ \{ return 200 "other homepage"; \}/);
+    assert.match(changed, /listen 80;\s*# shared root for unrelated locations\s*root \/srv\/edges\/knowledge;/);
+    const again = spawnSync("python3", [migrateScript, conf], { encoding: "utf8" });
+    assert.equal(again.status, 0, again.stderr);
+    assert.equal(await readFile(conf, "utf8"), changed);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test("deployment layout migration updates existing sites and restores both configs when nginx validation fails", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-deploy-layout-"));
+  try {
+    const conf = path.join(dir, "teaching.conf");
+    const tasks = path.join(dir, "tasks.conf");
+    const bin = path.join(dir, "bin");
+    await mkdir(bin);
+    const log = path.join(dir, "nginx.log");
+    await writeFile(path.join(bin, "nginx"), '#!/bin/sh\nprintf "%s\n" "$*" >> "$NGINX_LOG"\nif [ "$*" = "-t" ]; then exit "${NGINX_STATUS:-0}"; fi\n');
+    await chmod(path.join(bin, "nginx"), 0o755);
+    const before = await readFile(path.join(here, "fixtures/teaching.conf.legacy-roots"), "utf8");
+    const beforeTasks = "location /tasks/ { alias /srv/edges/knowledge/tasks/_site/; }\n# leave /srv/edges/knowledge alone\n";
+    const env = { ...process.env, PATH: `${bin}:${process.env.PATH}`, TEACHING_CONF: conf, TASKS_CONF: tasks, NGINX_LOG: log };
+    const script = path.join(deployDir, "migrate-site-layout.sh");
+    for (const status of ["1", "0"]) {
+      await writeFile(conf, before);
+      await writeFile(tasks, beforeTasks);
+      await writeFile(log, "");
+      const result = spawnSync("bash", [script], { env: { ...env, NGINX_STATUS: status }, encoding: "utf8" });
+      if (status === "1") {
+        assert.notEqual(result.status, 0);
+        assert.equal(await readFile(conf, "utf8"), before);
+        assert.equal(await readFile(tasks, "utf8"), beforeTasks);
+        assert.equal(await readFile(log, "utf8"), "-t\n");
+      } else {
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(await readFile(conf, "utf8"), /root \/srv\/edges;/);
+        assert.equal(await readFile(tasks, "utf8"), "location /tasks/ { alias /srv/edges/tasks/_site/; }\n# leave /srv/edges/knowledge alone\n");
+        assert.equal(await readFile(log, "utf8"), "-t\n-s reload\n");
+        const again = spawnSync("bash", [script], { env, encoding: "utf8" });
+        assert.equal(again.status, 0, again.stderr);
+        assert.equal(await readFile(log, "utf8"), "-t\n-s reload\n");
+      }
+    }
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+for (const [fixture, rootHeader] of [
+  ["teaching.conf.legacy-root-prefix", "location /"],
+  ["teaching.conf.legacy-root-priority-prefix", "location ^~ /"],
+]) {
+  test(`teaching migration preserves the unrelated ${rootHeader} homepage handler`, async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "edges-teaching-homepage-"));
+    try {
+      const conf = path.join(dir, "teaching.conf");
+      await writeFile(conf, await readFile(path.join(here, "fixtures", fixture!), "utf8"));
+      const first = spawnSync("python3", [migrateScript, conf], { encoding: "utf8" });
+      assert.equal(first.status, 0, first.stderr);
+      const migrated = await readFile(conf, "utf8");
+      assert.match(migrated, /location \/teaching\/ \{\s*root \/srv\/edges;\s*try_files \$uri \$uri\/ =404;/);
+      assert.ok(migrated.includes(`${rootHeader} {\n        proxy_pass http://127.0.0.1:8080;\n    }`));
+      assert.doesNotMatch(migrated, /location\s+=\s+\/\s*\{/);
+      const second = spawnSync("python3", [migrateScript, conf], { encoding: "utf8" });
+      assert.equal(second.status, 0, second.stderr);
+      assert.equal(await readFile(conf, "utf8"), migrated);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+}

@@ -1,7 +1,7 @@
 ---
 name: edges-note
 description: 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 `edges note`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
-version: 1.0.0
+version: 2.0.1
 ---
 
 # edges note
@@ -10,7 +10,7 @@ version: 1.0.0
 
 ## 什么时候用
 
-- 用户或任务要把一条 Note 写进 `knowledge/notes/YYYY-MM-DD--slug.md` 并 commit（可选 push / PR）。
+- 用户或任务要把一条 Note 写进 `notes/YYYY-MM-DD--slug/index.md` 并 commit（可选 push / PR）。
 - 不要用它整理对话（改用 `conversation-to-notes`）、不要用它改 tasks 看板、不要自己 `git commit`。
 
 ## 有 shell：调用 CLI
@@ -27,6 +27,10 @@ pnpm --filter edges-cli exec tsx src/index.ts note \
 
 已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。`package.json` 的 `"bin": { "edges": "./dist/index.js" }` 只是安装挂钩：装过之后也可以 `npx edges note …`，不要再包一层仓根脚本。
 
+已经由 `conversation-to-notes` 等写好并审阅的完整文稿，用 `--content-file /absolute/reviewed.md --markdown` 代替 `--content`，原文不再添加 ingest 标题或日期模板。整理工作仍由写作 skill 完成。
+
+所有 Note 都写入 `notes/YYYY-MM-DD--slug/index.md`。已有整目录用 `--import-entry /absolute/note/index.md`；入口及附件整体校验和复制，来源保持不变。`--content-file --markdown` 只创建经过验证的文档，不复制邻居；与 `--import-entry` 互斥。不提供 `--format` / `--resources`，不合并覆盖已有目录。new-note MCP 仍只接受 title/content/co-author。
+
 可选 flags：`--dry-run`（本地 commit，不 push）、`--mode direct|pr`、`--token-file PATH`、`--token-stdin`（仅当环境变量 `EDGES_AUTH_TOKEN` 已设置）。
 
 环境变量：`EDGES_REPO`、`EDGES_BASE_BRANCH`（默认 `main`）、`EDGES_MODE`、`EDGES_DRY_RUN`、`EDGES_AUTH_TOKEN`、`GITHUB_TOKEN`（PR）。
@@ -36,7 +40,7 @@ pnpm --filter edges-cli exec tsx src/index.ts note \
 成功 exit 0：
 
 ```json
-{"status":"success","filePath":"knowledge/notes/2026-09-11--slug.md","branch":"main","prStatus":"direct_commit"}
+{"status":"success","filePath":"notes/2026-09-11--slug.md","branch":"main","prStatus":"direct_commit"}
 ```
 
 `prStatus` 为 `created` | `unavailable` | `direct_commit`。失败时 `status` 为 `failed`，带 `errorCode` 与 `reason`。
@@ -61,3 +65,5 @@ pnpm --filter edges-cli exec tsx src/index.ts note \
 - 不要在本 skill 下写 `scripts/` 去跑 git。
 - 不要教 Agent 把仓根 `bin/` 加入 PATH。
 - 不要把 npm `bin` 说成能力面的一层。能力面是 CLI + Skill + MCP（见仓库 `CONTEXT.md` 与 `docs/adr/0004-capability-surface-cli-skill-mcp.md`）。
+
+新建父级索引关系时，由调用本技能的 Agent 根据语义明确选择 `local` 或 `descendant`，并传给 CLI 的 `--index-group`；Tasks 将选项放在 `tasks` 后，Memory 放在 `init` / `doctor` 后，Note 放在 `note` 后。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。

@@ -25,10 +25,13 @@ export type CliContext = {
   env: NodeJS.ProcessEnv;
   stdinText?: string;
   stdinIsTTY?: boolean;
+  indexGroup?: "local" | "descendant";
+  purpose?: "domain" | "maintenance";
   result: CliResult | undefined;
 };
 
-export function usageError(reason: string, scope: "root" | "note" | "tasks" | "artifacts"): CliResult {
+export function usageError(reason: string, scope: "root" | "note" | "tasks" | "artifacts" | "memory" | "schema"): CliResult {
+  if (scope === "schema") return { exitCode: 2, stdout: "", stderr: `${reason}\nSee edges schema --help for usage.\n` };
   const usage =
     scope === "note"
       ? "See edges note --help for usage.\n"
@@ -36,6 +39,8 @@ export function usageError(reason: string, scope: "root" | "note" | "tasks" | "a
         ? "See edges tasks --help for usage.\n"
         : scope === "artifacts"
           ? "See edges artifacts --help for usage.\n"
+          : scope === "memory"
+            ? "See edges memory --help for usage.\n"
         : "See edges --help for usage.\n";
   return {
     exitCode: 2,
@@ -44,9 +49,12 @@ export function usageError(reason: string, scope: "root" | "note" | "tasks" | "a
   };
 }
 
-export function usageScope(argv: string[]): "root" | "note" | "tasks" | "artifacts" {
-  if (argv[0] === "note") return "note";
-  if (argv[0] === "tasks") return "tasks";
-  if (argv[0] === "artifacts") return "artifacts";
+export function usageScope(argv: string[]): "root" | "note" | "tasks" | "artifacts" | "memory" | "schema" {
+  const command = argv.filter((arg, i) => arg !== "--scope" && argv[i - 1] !== "--scope" && !arg.startsWith("--scope="))[0];
+  if (command === "note") return "note";
+  if (command === "tasks") return "tasks";
+  if (command === "artifacts") return "artifacts";
+  if (command === "schema") return "schema";
+  if (command === "memory") return "memory";
   return "root";
 }

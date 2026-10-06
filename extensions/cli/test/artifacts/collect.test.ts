@@ -4,7 +4,7 @@ import { mkdir, symlink, writeFile } from "node:fs/promises";
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { collectPublishFiles } from "../../src/artifacts/utils/collect.js";
+import { collectPublishFiles } from "../../src/commands/artifacts/utils/collect.js";
 
 test("collectPublishFiles from a single file uses the basename", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-collect-"));
@@ -24,4 +24,15 @@ test("collectPublishFiles walks a directory and skips hidden files and symlinks"
   const collected = await collectPublishFiles(dir);
   const paths = collected.map((file) => file.path).sort();
   assert.deepEqual(paths, ["css/app.css", "index.html"]);
+});
+
+test('JavaScript assets retain text encoding after command relocation', async t => {
+  const { rm } = await import('node:fs/promises');
+  const dir = await mkdtemp(path.join(tmpdir(), 'edges-artifacts-script-'));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  for (const extension of ['js', 'mjs']) {
+    const file = path.join(dir, `app.${extension}`);
+    await writeFile(file, 'export const label = "中文";');
+    assert.deepEqual(await collectPublishFiles(file), [{ path: `app.${extension}`, content: 'export const label = "中文";' }]);
+  }
 });

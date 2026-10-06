@@ -11,7 +11,7 @@ import {
   parseTaskProject,
   projectDirName,
   projectIdFromDir,
-} from "../../../src/tasks/utils/project.js";
+} from "../../../src/domain/models/tasks/project.js";
 
 test("sentinels and field name", () => {
   assert.equal(DEFAULT_TASK_PROJECT, "default");
