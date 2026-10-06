@@ -1,24 +1,16 @@
-import type { IngestErrorCode, IngestResult } from "../services/note/types.js";
 import type { TasksErrorCode } from "../domain/models/tasks/types.js";
 
-export function exitCodeFor(result: IngestResult): number {
+export function exitCodeFor(result: { status: string; errorCode?: string }): number {
   if (result.status === "success") {
     return 0;
   }
-  return exitCodeForError(result.errorCode);
+  return exitCodeForError(result.errorCode ?? "");
 }
 
-export function exitCodeForError(errorCode: IngestErrorCode): number {
-  switch (errorCode) {
-    case "VALIDATION_ERROR":
-      return 2;
-    case "AUTH_MISSING":
-    case "AUTH_INVALID_FORMAT":
-    case "AUTH_INVALID_TOKEN":
-      return 4;
-    default:
-      return 1;
-  }
+export function exitCodeForError(errorCode: string): number {
+  if (errorCode === "VALIDATION_ERROR") return 2;
+  if (errorCode.startsWith("AUTH_")) return 4;
+  return 1;
 }
 
 export function exitCodeForTasksError(code: TasksErrorCode): number {
