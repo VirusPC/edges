@@ -2,11 +2,12 @@
 
 2026-10-06 用户确认：以普通 TypeScript 数据契约为定义源，使用 ts-json-schema-generator 导出 JSON Schema，需要运行时结构校验时使用 Ajv。目的是消除 TS 类型、JSON Schema 和消费者之间的重复定义，保留现有 Model 行为及 Service 边界，不为了生成器重写领域架构。
 
-**Status:** accepted，待实施。本次只记录选型与决策原因，未安装仓库依赖、修改节点实现或替换现有 Schema。修订 [ADR 0022](0022-review-shell-three-column-task-doc.md) 的字段定义源：由手工维护 JSON Schema 改为 TS 契约生成；外部消费者共用 Task Doc 契约及审阅壳其他决策继续有效。
+**Status:** accepted，已实施并在 Node 22 验收（2026-10-06）。TS 契约生成、构建分发、CLI 获取和完整 TaskDoc JSON 输入校验均已接入。修订 [ADR 0022](0022-review-shell-three-column-task-doc.md) 的字段定义源：由手工维护 JSON Schema 改为 TS 契约生成；外部消费者共用 Task Doc 契约及审阅壳其他决策继续有效。
 
 ## 选择与边界
 
 - **定义源：** 明确的 TS interface/type，复用现有枚举与公共类型，放在对应 Model 模块内。首个迁移对象是 TaskDoc；完整节点数据、创建参数、更新参数是不同契约，不混用，也不为尚无对外需求的节点机械新增 Schema。
+- **前端依赖边界：** TaskDoc 数据定义单独放在模型目录的 `task-doc-contract.ts`；`task-doc.ts` 保留解析适配并重导出类型。实施时真实前端类型检查发现，只使用 type import 仍会检查原文件引入的 Node 解析模块。这个最小拆分避免为浏览器补 Node typings，也不引入独立 Schema 层；代价是同目录多一个纯契约文件。
 - **生成器：** ts-json-schema-generator，选型验证版本为 2.9.0，作为构建期开发依赖；接入时锁定版本。使用标准类型与受支持的 JSDoc 约束，不自写 AST 生成器、自定义 formatter 或字符串修补生成结果。
 - **运行环境：** 项目运行、构建、测试统一以 Node 22 为基线，最低 Node >=22；不保留运行 Node 20、构建 Node 22 的双基线。2.9.0 的包元数据要求 Node >=22。
 - **产物：** 仓库只提交 TS 契约、TypeScript 生成脚本和必要的测试。JSON Schema 生成到 extensions/cli/dist/schemas/，不提交 Git，随构建/发布包分发；不增加 domain/schemas 手写定义层。2026-10-06 用户进一步纠正：撤销本 ADR 初稿中“生成产物可提交、源码侧 schema 路径保持稳定”的建议。对外稳定的是契约标识及 CLI 获取方式，不是源码中的文件路径。这与 ADR 0022 的预构建资源分发原则一致。
@@ -21,7 +22,7 @@
 
 ## CLI 获取与构建分发
 
-目标命令如下，首批只登记 Task Doc；这里记录命令设计，命令尚未实现：
+已提供以下命令，首批只登记 Task Doc：
 
 ```sh
 edges schema list
@@ -64,11 +65,11 @@ edges schema get task-doc/v1 > task-doc.v1.json
 | 构建产物不入 Git | 干净构建、消费者准备与发布校验必须可靠 | 构建分发需求变化时评估，不能因开发机缺少 dist 回退到运行时生成 |
 | Ajv 消费生成契约 | 方言、格式插件、编译及错误呈现需要适配 | 校验用途或契约标准变化；仍以契约一致性为验收，不以 star 数代替适配验证 |
 
-技术选型记录保留候选、未采用理由、一手来源、探针证据及限制、迁移成本。此处的“accepted”表示设计已确认，不代表探针已覆盖生产环境或接入已完成。
+技术选型记录保留候选、未采用理由、一手来源、探针证据及限制、迁移成本。选型探针与正式接入验收分开记录，不能以探针结果代替生产分发验证。
 
-## 验证证据与限制
+## 选型探针的证据与限制
 
-2026-10-06 在仓库外临时目录，以 ts-json-schema-generator 2.9.0、Ajv 8、ajv-formats 3 做小样验证，未修改仓库依赖。探针运行于本机 Node 25.6.1，因此不能声称已通过 Node 22 验收；正式接入需在 Node 22 重跑。
+正式接入前，2026-10-06 在仓库外临时目录，以 ts-json-schema-generator 2.9.0、Ajv 8、ajv-formats 3 做小样验证，未修改仓库依赖。探针运行于本机 Node 25.6.1，因此不能声称已通过 Node 22 验收；正式接入需在 Node 22 重跑。
 
 - 直接使用现有 NodeReference、InternalCreateInput、TaskCreateInput：生成成功，合法数据通过，缺少引用 id 或非法任务状态被拒绝。
 - 合成样例：继承、引用、readonly 数组、开放 metadata、枚举及 JSDoc 的 pattern/maxLength/date-time 约束通过正反例；失败校验不改变输入。
@@ -77,7 +78,7 @@ edges schema get task-doc/v1 > task-doc.v1.json
 
 ## 接入时必须保留的契约
 
-生成器 2.9.0 输出 draft-07，现有 task-doc.v1.json 声明 2020-12。先保留现有文件；正式替换时显式审查方言变化、$id 和消费者，不只替换 $schema 字符串。使用对应方言的校验器对既有与新产物比较正反例；不能证明兼容的变化须另行版本化，不能悄悄改 v1。
+生成器 2.9.0 输出 draft-07，现有 task-doc.v1.json 声明 2020-12。迁移时先保留原文件用于比较，再显式审查方言变化、$id 和消费者，不只替换 $schema 字符串；正式验收后已删除手写文件。使用对应方言的校验器对既有与新产物比较正反例；不能证明兼容的变化须另行版本化，不能悄悄改 v1。
 
 Task Doc 继续保持 name、description、metadata、body；metadata 的未知键仍允许，body 是 Markdown；保留七态、优先级、项目 id 正则/长度/排除状态名、指派及时间格式规则。现有 TS 的 Record<string, string> 比 Schema 的未知键规则更窄，接入时要显式建模并验证，不能直接生成后悄悄收窄契约。TS 无法表达的规则用生成器支持的声明补充；业务行为不能从 validate 方法体自动推断。
 
@@ -85,9 +86,17 @@ Task Doc 继续保持 name、description、metadata、body；metadata 的未知�
 
 整体计划审查发现，grouped/review-page 两个 JSON 输入适配器同样使用 Record<string, string> 并拒绝非字符串 metadata；这是既有消费者与旧 Schema 的差异。Task 5 一并修复未知扩展字段的无损接受，并测试真实入口，而非只验证生成物。此项与 Markdown parser 的标量处理分开。后续以 Schema 为准的执行决策使这两个完整 TaskDoc 入口也统一执行字段约束；非法状态等此前宽松放行的输入将被拒绝，需在迁移说明中明确，其他输入用途不扩大。
 
-CI 从无 dist 的干净状态构建，验证生成物存在、符合对应方言和既有契约样例；重复生成比较临时产物以检查确定性，不以已提交的生成文件作基准。从不含 TS 源码及开发依赖的分发包，在仓库外执行 list/get，验证命令可用、stdout 是纯 JSON、未知 key/缺失产物报错，且 Git 中没有新增生成的 Schema。
+正式验收从无 dist 的干净状态构建，验证生成物存在、符合对应方言和既有契约样例；重复生成比较临时产物以检查确定性，不以已提交的生成文件作基准。从不含 TS 源码及开发依赖的分发包，在仓库外执行 list/get，验证命令可用、stdout 是纯 JSON、未知 key/缺失产物报错，且 Git 中没有新增生成的 Schema。
 
 此选型纳入[通用能力收敛计划](../superpowers/plans/2026-10-06-shared-node-capabilities.md)的 Task 5：生成与分发 TaskDoc、接入兼容性校验、提供 schema list/get。Task 0–4 继续执行已确认的 Model/operations/Service 分工，不借 Schema 接入扩大成全节点重构。ADR 保存选型与取舍，spec 保存约束，plan 保存实施和验收步骤，项目记忆提供检索入口。
+
+## 正式接入验收
+
+在 Node 22.23.3 下，旧 2020-12 与生成的 draft-07 使用独立 Ajv 实例，对同一组 52 个边界样例得到一致结果（20 个接受、32 个拒绝），校验不修改输入。生成结果保留完整 references/definitions，两个临时输出目录的文件集合与字节一致。旧手写 Schema 已删除，dist 未纳入 Git。
+
+CLI 的 list/get、错误输出、不解析 scope 和不等待 stdin 已用真实子进程验证；生产 tarball 在仓库外仅安装 production 依赖，编译后的命令与共享校验器可用，模板及审阅页资源完整。暂移 Schema 或清单后明确报错，不现场生成。开发入口显式先生成产物，避免干净工作区缺失或沿用旧契约。
+
+两个公开 JSON 入口接受嵌套 metadata，拒绝 Schema 不允许的已知字段及顶层扩展；Markdown 的原有标量解析未改。审阅页的真实 tsc 项目检查、独立构建与测试通过。整仓 963 项测试及构建通过；分步和整体审查结论、移除的重复机制与新增成本见[实施计划](../superpowers/plans/2026-10-06-shared-node-capabilities.md)。已有 Vite 配置与弃用警告保留，没有将警告抑制冒充修复。
 
 ## 一手资料
 

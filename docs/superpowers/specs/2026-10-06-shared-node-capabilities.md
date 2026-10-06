@@ -1,6 +1,6 @@
 # Tasks、Memory、Note 通用能力收敛
 
-状态：执行中；本次根据用户对文件过散的质疑及 Service 边界的纠正重新梳理。保留四项收敛目标，补充已确认的 Schema 生成与获取；替代上一版新增文档包装和查询包装的方案。
+状态：已实施并验收（2026-10-06）；本次根据用户对文件过散的质疑及 Service 边界的纠正重新梳理。保留四项收敛目标，补充已确认的 Schema 生成与获取；替代上一版新增文档包装和查询包装的方案。
 
 ## 目标
 
@@ -48,6 +48,8 @@ flowchart TD
 保留带行为的节点类与现有继承关系，不实施“Model 仅保留数据、全部行为搬到 operations”的方案；也不因 React 类比引入 reducer、dispatch 或不可变快照。既有同路径共享实例和原地更新决策继续有效。
 
 JSON Schema 描述对外交换的数据或操作参数，与上述分工独立。生成源应是明确的 TS 数据契约，不直接扫描包含 getter、方法和私有状态的完整节点类；不为生成 Schema 搬迁 Model 方法，也不要求所有节点立即配齐 Schema。本计划 Task 5 从 TaskDoc 接入生成器和 Ajv 契约测试；不扩大为全节点 Schema 重构。
+
+TaskDoc 的纯数据定义位于对应模型目录的 `tasks/task-doc-contract.ts`，前端与生成器直接消费；`task-doc.ts` 保留 Markdown 解析适配并重导出类型。仅使用 `import type` 仍会让 TypeScript 检查被引用模块的解析依赖，因此通过文件边界隔离 Node 运行时依赖，不给浏览器补 Node 类型来掩盖问题。
 
 Schema 技术选型及决策原因见 [ADR 0025](../../adr/0025-typescript-source-generated-json-schema.md)：ts-json-schema-generator、Node 22，运行时结构校验按需使用 Ajv；先迁移 TaskDoc，保留本节职责边界。
 

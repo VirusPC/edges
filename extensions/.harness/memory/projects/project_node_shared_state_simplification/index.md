@@ -1,12 +1,12 @@
 ---
 name: project_node_shared_state_simplification
-description: Model/operations/Service 分工、共享实例和统一索引；LLM 判断目录与本层/下层位置，CLI 显式执行，不按任务用途推断。
+description: Model/operations/Service 分工、共享实例和统一索引；LLM 指定本层/下层，CLI 不推断归属，移动保留登记状态。
 metadata:
   edges-title: 节点共享状态与职责简化
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T16:07:23+08:00'
+  edges-updated-at: '2026-10-06T17:07:27+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -80,7 +80,7 @@ metadata:
 
 **Why:** 上一轮“Model 管内容、Service 管 IO”的表述容易被理解成业务调用方需要自己拼接模型修改和保存流程。用户要求参照后端分层明确统一的操作入口，同时继续减少过散的文件和包装。
 
-**How to apply:** Service 协调加载、调用模型规则、关联索引与持久化；Model 保留纯内存领域方法及 parse/serialize/validate，不执行文件 IO。对业务调用方提供完整的 Service 操作；模型内部可变实现与原地更新决策仍保留，不借此引入 immutable。通用能力应优先复用已有 NodeService 与模型实现；重新梳理的 spec/plan 已据此修订，具体实现尚未开始。
+**How to apply:** Service 协调加载、调用模型规则、关联索引与持久化；Model 保留纯内存领域方法及 parse/serialize/validate，不执行文件 IO。对业务调用方提供完整的 Service 操作；模型内部可变实现与原地更新决策仍保留，不借此引入 immutable。通用能力应优先复用已有 NodeService 与模型实现；重新梳理的 spec/plan 已据此修订，通用能力收敛已实施，验收和改变成本见对应 plan。
 
 ## models 与 operations 共同归入 domain
 
@@ -88,7 +88,7 @@ metadata:
 
 **Why:** 模型和节点操作共同构成领域核心，归组能明确其与 Service 执行编排的边界；这是一处目录归组，不应引入新的调用层、DomainService 或 package。
 
-**How to apply:** 用 TypeScript 脚本批量迁移并重算相对导入，operations 的算法分文件和泛型查询链继续保留。domain 不反向依赖 Service，类型依赖也纳入检查；服务提供遍历所需加载回调。Node 请求校验按实际职责归业务 Service，不能为了搬目录把已有反向依赖一起固化。以 shared-node-capabilities spec/plan 的 Task 0 和新布局为准；本轮仅改计划，代码目录尚未迁移。
+**How to apply:** 用 TypeScript 脚本批量迁移并重算相对导入，operations 的算法分文件和泛型查询链继续保留。domain 不反向依赖 Service，类型依赖也纳入检查；服务提供遍历所需加载回调。Node 请求校验按实际职责归业务 Service，不能为了搬目录把已有反向依赖一起固化。以 shared-node-capabilities spec/plan 的 Task 0 和新布局为准；目录归组已实施，不保留旧路径转发。
 
 ## 单节点与集合操作边界，以及 Schema 的独立性
 
@@ -96,7 +96,7 @@ metadata:
 
 **Why:** 讨论 Schema 生成时曾探索把全部节点行为移入 operations，以及 DOM/React 的设计类比；用户要求回到简单的职责分工。这些探索不构成全面数据与行为分离或 immutable 重构的最终决策。
 
-**How to apply:** InternalNode.addChild 只维护自身索引，仍属 Model；创建子目录并登记父索引由 Service 协调。traverse 从一个根开始也属于 operations，由 Service 提供加载回调。Schema 描述对外数据契约，生成源是明确的 TS 数据类型，不直接扫描完整节点类，不为生成器搬迁方法，也不要求所有节点立即补齐 Schema。当前 shared-node-capabilities spec/plan 已写明边界；本轮仅改文档。
+**How to apply:** InternalNode.addChild 只维护自身索引，仍属 Model；创建子目录并登记父索引由 Service 协调。traverse 从一个根开始也属于 operations，由 Service 提供加载回调。Schema 描述对外数据契约，生成源是明确的 TS 数据类型，不直接扫描完整节点类，不为生成器搬迁方法，也不要求所有节点立即补齐 Schema。当前 shared-node-capabilities spec/plan 是已实施边界及验收的依据。
 
 ## Node 22 基线
 
@@ -104,7 +104,7 @@ metadata:
 
 **Why:** 用户接受提高项目基线以简化工具链兼容。
 
-**How to apply:** 实施时同步 engines、已有版本选择/CI 配置与当前开发文档，并在 Node 22 下验收；此决定不表示已经升级本机 Node 或修改 package.json。Node 22 选择不自动批准全部候选依赖或 Schema 接入实现。
+**How to apply:** engines 与当前开发文档采用统一基线，验收运行于隔离的 Node 22；这不表示已经替换宿主机器的全局 Node。Node 22 选择不自动批准全部候选依赖或 Schema 接入实现。
 
 
 ## 整体简化的判断标准
@@ -122,7 +122,7 @@ metadata:
 
 **Why:** 不能为了历史格式在通用索引之外继续维护 Tasks 专属渲染和搬迁分支，增加长期复杂度。
 
-**How to apply:** 正常 Tasks 使用 InternalNode 通用关系和 NodeService 更新索引，不生成 task-projects 标记。独立迁移脚本显式选范围、预览、检查冲突并幂等转为普通索引，保留自定义正文；正常操作遇到冲突旧格式给迁移提示。计划已替代“Tasks 自动搬旧区块”的审查建议，脚本尚待实施，不能自行迁移真实内容。
+**How to apply:** 正常 Tasks 使用 InternalNode 通用关系和 NodeService 更新索引，不生成 task-projects 标记。独立迁移脚本显式选范围、预览、检查冲突并幂等转为普通索引，保留自定义正文；正常操作遇到冲突旧格式给迁移提示。计划已替代“Tasks 自动搬旧区块”的审查建议，脚本已提供，须显式选定范围并审阅，不自行迁移真实内容；跳过嵌套 Git 根，避免跨越独立写锁边界。
 
 
 ## 不把任务用途等同于索引作用域
@@ -141,3 +141,12 @@ metadata:
 **Why:** 本层与下层表达语义归属，目录深度、节点类型和 domain/maintenance 用途不能代替这个判断。将判断写成 CLI 推断规则会制造错误归属与额外补救逻辑。
 
 **How to apply:** LLM 给出目标路径及 local/descendant；CLI/Service 校验路径、格式和关系一致性并执行，不推断分组，不先写错再改。更新未明确改组时保留原位置；新增关系缺少必要输入在写前报错。保持目录所有权和独立 harness 关系，不开放脱离物理目录的 reparent。具体命令与服务参数贯穿实施计划的 Task 3。
+
+
+## 移动保留登记状态
+
+移动已有节点延续原关系的分组；原来未登记的节点移动后仍未登记。
+
+**Why:** 原实现默认补 descendant 会让文件移动隐含决定语义归属，与 LLM 判断位置的原则冲突。
+
+**How to apply:** 不通过移动补默认关系，不开放脱离目录的 reparent。以后需要移动时新增登记，应提供明确输入，而不是按用途或目录深度推断。已有看板缺少 owner 引用时，显式分组的写操作可以补登记，但须保留 owner 的其他引用。

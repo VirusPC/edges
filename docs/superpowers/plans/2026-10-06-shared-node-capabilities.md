@@ -10,7 +10,7 @@
 
 **Spec:** [通用能力收敛设计](../specs/2026-10-06-shared-node-capabilities.md)
 
-状态：执行中；本轮已确认统一索引与独立旧格式迁移。关系位置由 LLM 判断、CLI 显式执行已确认；按本轮执行授权，完整 TaskDoc JSON 输入统一使用生成 Schema 校验，不能按旧补救流程实施。本版替代最初新增 node-documents、node-query、internal/documents、utils/markdown/index-rendering 文件的方案。此前[节点职责简化计划](2026-10-06-node-identity-simplification.md)已经完成，不重复执行。
+状态：已完成（2026-10-06）；本轮已确认统一索引与独立旧格式迁移。关系位置由 LLM 判断、CLI 显式执行已确认；按本轮执行授权，完整 TaskDoc JSON 输入统一使用生成 Schema 校验，不能按旧补救流程实施。本版替代最初新增 node-documents、node-query、internal/documents、utils/markdown/index-rendering 文件的方案。此前[节点职责简化计划](2026-10-06-node-identity-simplification.md)已经完成，不重复执行。
 
 ## 架构审查结论与简化验收
 
@@ -423,7 +423,7 @@ test('generic query supports all types and explicit task-only deferred execution
   const note = path.join(root, 'notes/example/index.md');
   const service = new NodeService({ managedRoot: root });
   await service.create(new InternalNode(path.join(root, 'AGENTS.md')), {});
-  await service.create(new NoteNode(note), { body: '# Note\n' });
+  await service.create(new NoteNode(note), { body: '# Note\n' }, { indexGroup: 'local' });
   let seen = 0;
   const all = service.query(root, { includeDescendants: true, includeHarness: true })
     .map(node => { seen += 1; return node; }).groupBy(node => node.type)
@@ -462,6 +462,7 @@ return service.query(canonicalRoot, {
 
 **Files:**
 - Modify: `extensions/cli/src/domain/models/tasks/task-doc.ts`、`tasks/types.ts`；Task 0 后的路径，数据契约及公共枚举留在对应模型模块
+- Create: `extensions/cli/src/domain/models/tasks/task-doc-contract.ts`；纯数据契约与生成约束。前端及生成器直接引用，`task-doc.ts` 保留解析适配函数并重导出类型，避免前端类型检查沿解析依赖进入 Node 文件模块。
 - Create: `extensions/cli/scripts/generate-schemas.ts`、`extensions/cli/scripts/schema-contracts.ts`；生成脚本及唯一源清单，不建立运行时服务层
 - Create: `extensions/cli/src/commands/schema.ts`、`extensions/cli/src/services/tasks/task-doc.ts`（两个 JSON 入口共用的契约校验边界）
 - Modify: `extensions/cli/src/program.ts`、`context.ts`、`utils/process-input.ts`；注册命令、限定 Schema 错误输出及 stdin 行为
@@ -480,11 +481,11 @@ return service.query(canonicalRoot, {
 
 ### 5.1 契约和兼容性
 
-- [ ] 先建立正反例表，旧文件删除前同时验证旧、新 Schema；两种方言用独立 Ajv 实例，避免相同 `$id` 冲突。旧 Schema 通过 `git show` 读取迁移前提交的版本做迁移对比，不在仓库增加另一份长期手写 Schema。提交后保留行为用例作为回归基准。
-- [ ] 安装锁定的 ts-json-schema-generator 2.9.0，开发依赖，以及 Ajv 8、ajv-formats 3 运行时依赖。在 Node 22 下执行，不用此前 Node 25 探针代替正式验收。
-- [ ] 保留四个必填字段，允许空字符串，顶层不允许额外字段；metadata 已知字段有约束，未知字段接受 JSON 值而非仅字符串。复用七态与优先级常量；项目 id 保留正则、64 字符上限及排除状态名，允许 default，拒绝 _default。日期格式、task 类型常量、指派字段约束不遗漏。
-- [ ] 在 TS 契约上使用生成器支持的声明/JSDoc 表达约束，显式检查生成结果。无法表达的旧约束先报告具体缺口，不能用 formatter、字符串修补、删约束或仅替换 `$schema` 达成通过。若接受语义不兼容，不覆盖 v1，先记录需要版本化的差异。
-- [ ] 为生成物加入测试。以下是核心断言形状；`generated` 为 build:schemas 的 JSON，补齐上述每个字段的边界样例：
+- [x] 先建立正反例表，旧文件删除前同时验证旧、新 Schema；两种方言用独立 Ajv 实例，避免相同 `$id` 冲突。旧 Schema 通过 `git show` 读取迁移前提交的版本做迁移对比，不在仓库增加另一份长期手写 Schema。提交后保留行为用例作为回归基准。
+- [x] 安装锁定的 ts-json-schema-generator 2.9.0，开发依赖，以及 Ajv 8、ajv-formats 3 运行时依赖。在 Node 22 下执行，不用此前 Node 25 探针代替正式验收。
+- [x] 保留四个必填字段，允许空字符串，顶层不允许额外字段；metadata 已知字段有约束，未知字段接受 JSON 值而非仅字符串。复用七态与优先级常量；项目 id 保留正则、64 字符上限及排除状态名，允许 default，拒绝 _default。日期格式、task 类型常量、指派字段约束不遗漏。
+- [x] 在 TS 契约上使用生成器支持的声明/JSDoc 表达约束，显式检查生成结果。无法表达的旧约束先报告具体缺口，不能用 formatter、字符串修补、删约束或仅替换 `$schema` 达成通过。若接受语义不兼容，不覆盖 v1，先记录需要版本化的差异。
+- [x] 为生成物加入测试。以下是核心断言形状；`generated` 为 build:schemas 的 JSON，补齐上述每个字段的边界样例：
 
 ```ts
 const ajv = new Ajv({ coerceTypes: false, useDefaults: false, removeAdditional: false });
@@ -503,17 +504,17 @@ assert.deepEqual(invalid, before);
 
 ### 5.2 构建和消费者迁移
 
-- [ ] 实现生成器脚本及最小清单；复用 generator API 的 `createGenerator({ path, tsconfig, type }).createSchema(type)`，采用支持的配置/JSDoc 提供约束和标识。输出完整 draft-07 Schema，不展开或手工改写 `$ref`。生成脚本允许测试指定临时输出目录，以便两次独立生成比较。
-- [ ] 在干净状态运行 build:schemas，再执行兼容性测试；相同输入在两个临时目录生成的文件集合和字节应一致，不带时间戳或机器绝对路径。
-- [ ] 审阅页优先直接复用纯 TS 公共常量和 TaskDoc 类型，去掉读取内联 `properties.metadata.properties` 的依赖；类型导入不牵入节点运行时或文件 IO。新契约不能顺带改变当前 Markdown parser 的标量处理行为。
-- [ ] 在 services/tasks/task-doc.ts 放一个共享 TaskDoc 输入校验函数（明确的边界，不是新服务层），读取已生成的契约并惰性编译、复用 Ajv 验证器；grouped.ts 和 review-page.ts 调用它，删除重复手写结构/字段校验。Schema 缺失时报构建错误，不回退源码。非法输入报告字段路径，不转换、不填默认值、不删字段；合法数据包括扩展 metadata 原样保留。已知字段、未知顶层字段的接受语义以 Schema 为准，记录对旧宽松输入的影响。domain 不读文件或依赖此 Service；前端仍只导入纯类型/常量。
-- [ ] 在现有合法 grouped/review-page fixture 的 item.doc 上依次放入 `metadata: { custom: { nested: true }, tags: ['a'], count: 1, enabled: false, extra: null }`；分别调用 parseGroupedList、parseReviewPageInput，断言 doc 深度相等、输入未变。保留已知字段类型错误用例，添加非法状态、日期、未知顶层字段等反例，两入口与 Schema 一致拒绝；这是用户选择 Schema 权威后的显式兼容性调整，文档说明。
-- [ ] 调整 scripts：Schema 消费前运行 build:schemas；CLI build/prepack 包含生成，清理 dist 必须发生在生成之前。独立 app dev/build/test/typecheck 若仍读取产物，显式调用 build:schemas，不能调用整个 CLI build 形成构建环。只依赖 TS 公共常量/类型的步骤不需无意义生成。
-- [ ] package 的发布文件包含编译代码、Schema 和 manifest，生成器仍在 devDependencies，Ajv/formats 在 dependencies；完成兼容性对照并切换消费者后删除旧 JSON。检索旧路径，生产/测试消费者应无残留；历史 ADR 可保留旧路径背景。
+- [x] 实现生成器脚本及最小清单；复用 generator API 的 `createGenerator({ path, tsconfig, type }).createSchema(type)`，采用支持的配置/JSDoc 提供约束和标识。输出完整 draft-07 Schema，不展开或手工改写 `$ref`。生成脚本允许测试指定临时输出目录，以便两次独立生成比较。
+- [x] 在干净状态运行 build:schemas，再执行兼容性测试；相同输入在两个临时目录生成的文件集合和字节应一致，不带时间戳或机器绝对路径。
+- [x] 审阅页优先直接复用纯 TS 公共常量和 TaskDoc 类型，去掉读取内联 `properties.metadata.properties` 的依赖；类型导入不牵入节点运行时或文件 IO。新契约不能顺带改变当前 Markdown parser 的标量处理行为。
+- [x] 在 services/tasks/task-doc.ts 放一个共享 TaskDoc 输入校验函数（明确的边界，不是新服务层），读取已生成的契约并惰性编译、复用 Ajv 验证器；grouped.ts 和 review-page.ts 调用它，删除重复手写结构/字段校验。Schema 缺失时报构建错误，不回退源码。非法输入报告字段路径，不转换、不填默认值、不删字段；合法数据包括扩展 metadata 原样保留。已知字段、未知顶层字段的接受语义以 Schema 为准，记录对旧宽松输入的影响。domain 不读文件或依赖此 Service；前端仍只导入纯类型/常量。
+- [x] 在现有合法 grouped/review-page fixture 的 item.doc 上依次放入 `metadata: { custom: { nested: true }, tags: ['a'], count: 1, enabled: false, extra: null }`；分别调用 parseGroupedList、parseReviewPageInput，断言 doc 深度相等、输入未变。保留已知字段类型错误用例，添加非法状态、日期、未知顶层字段等反例，两入口与 Schema 一致拒绝；这是用户选择 Schema 权威后的显式兼容性调整，文档说明。
+- [x] 调整 scripts：Schema 消费前运行 build:schemas；CLI build/prepack 包含生成，清理 dist 必须发生在生成之前。独立 app dev/build/test/typecheck 若仍读取产物，显式调用 build:schemas，不能调用整个 CLI build 形成构建环。只依赖 TS 公共常量/类型的步骤不需无意义生成。
+- [x] package 的发布文件包含编译代码、Schema 和 manifest，生成器仍在 devDependencies，Ajv/formats 在 dependencies；完成兼容性对照并切换消费者后删除旧 JSON。检索旧路径，生产/测试消费者应无残留；历史 ADR 可保留旧路径背景。
 
 ### 5.3 CLI 与安装包验收
 
-- [ ] RED：先以现有 `run(argv, input)` 编写 list/get 用例，确认未注册时失败。最小示例：
+- [x] RED：先以现有 `run(argv, input)` 编写 list/get 用例，确认未注册时失败。最小示例：
 
 ```ts
 const listed = await run(['schema', 'list'], { env: {}, stdinIsTTY: true });
@@ -529,26 +530,50 @@ assert.equal(missing.stdout, '');
 assert.ok(missing.stderr.length > 0);
 ```
 
-- [ ] 实现只读命令。通过清单查找固定文件，不把 key 当路径；未知 key、缺少参数、未知选项和缺失产物均非零、stderr 报错。调整全局错误处理时只影响 schema 分支，其他命令保持原协议。缺失产物提示重新构建/安装，不现场生成。
-- [ ] schema 命令不解析 scope、不获取写锁或读取节点。进程入口对 schema 分支跳过 stdin 消费，包括错误参数 `--from -`；用子进程保持 stdin 未关闭验证能及时退出，超时清理子进程。验证无效 scope/仓库外 cwd 不阻止正常 list/get，也没有创建工作区文件。
-- [ ] GREEN：`pnpm --filter edges-cli run build:schemas` 后运行 `pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx 'test/schema/*.test.ts'`；测试包含生成确定性、正反例、纯 JSON 输出、异常参数与无 stdin 等待。
-- [ ] 消费者回归：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/tasks/utils/grouped.test.ts test/tasks/utils/review-page.test.ts test/tasks/grouped-list.test.ts`；合法扩展 metadata 不在 CLI JSON 适配阶段被拒绝，前端类型检查与显示同样通过。
-- [ ] 从干净构建打包，将安装包放到仓库外临时目录，仅安装 production 依赖，确保没有 TS 源码或生成器开发依赖，只有生产依赖；执行编译后的 list/get。暂移一份临时包内 Schema 验证明确报错及不生成兜底。此测试不能拿工作树源码执行代替分发包。
-- [ ] 运行 CLI 与审阅页独立构建/测试/typecheck，记录实际 Node 22 结果；确认 `git ls-files extensions/cli/dist` 无输出。更新 README 的命令及构建说明、ADR 实施状态，提交 `feat: generate and expose TaskDoc JSON Schema`，带 Co-authored-by。
+- [x] 实现只读命令。通过清单查找固定文件，不把 key 当路径；未知 key、缺少参数、未知选项和缺失产物均非零、stderr 报错。调整全局错误处理时只影响 schema 分支，其他命令保持原协议。缺失产物提示重新构建/安装，不现场生成。
+- [x] schema 命令不解析 scope、不获取写锁或读取节点。进程入口对 schema 分支跳过 stdin 消费，包括错误参数 `--from -`；用子进程保持 stdin 未关闭验证能及时退出，超时清理子进程。验证无效 scope/仓库外 cwd 不阻止正常 list/get，也没有创建工作区文件。
+- [x] GREEN：`pnpm --filter edges-cli run build:schemas` 后运行 `pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx 'test/schema/*.test.ts'`；测试包含生成确定性、正反例、纯 JSON 输出、异常参数与无 stdin 等待。
+- [x] 消费者回归：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/tasks/utils/grouped.test.ts test/tasks/utils/review-page.test.ts test/tasks/grouped-list.test.ts`；合法扩展 metadata 不在 CLI JSON 适配阶段被拒绝，前端类型检查与显示同样通过。
+- [x] 从干净构建打包，将安装包放到仓库外临时目录，仅安装 production 依赖，确保没有 TS 源码或生成器开发依赖，只有生产依赖；执行编译后的 list/get。暂移一份临时包内 Schema 验证明确报错及不生成兜底。此测试不能拿工作树源码执行代替分发包。
+- [x] 运行 CLI 与审阅页独立构建/测试/typecheck，记录实际 Node 22 结果；确认 `git ls-files extensions/cli/dist` 无输出。更新 README 的命令及构建说明、ADR 实施状态，提交 `feat: generate and expose TaskDoc JSON Schema`，带 Co-authored-by。
 
 ## 最终验收
 
-- [ ] 审查职责边界：parse/serialize/validate、字段更新与自身索引维护仍归 Model；operations 保留集合/遍历/查询职责；完整文件与跨节点变更通过 Service。没有为 Schema 生成搬迁节点方法或替换继承体系。
-- [ ] 对照“架构审查结论与简化验收”报告被删除的重复机制、公共概念和新增构建成本；验证 Tasks 使用通用索引、旧区块仅由独立脚本迁移及创建关系分组符合最终决策，同一用例内同政策 Service 复用。不能仅用移动目录、行数或文件数证明简化完成。
-- [ ] Task 5 全部通过：TS 为字段唯一源，v1 兼容性与方言已验证；干净构建和仓库外分发包可获取 Schema，生成物不入 Git；Ajv 不修改输入，也未误用到可省略字段的原始 Markdown。ADR 中保留选型依据、候选取舍、探针限制与实际验收结果。
-- [ ] `rg -n 'MemoryDocument|loadMemoryDocument|saveMemoryDocument|repositoryNodeQuery|writeAtomic|domain/models/memory/index-rendering' extensions/cli/src`：本轮移除的包装与旧路径无残留。不新增 NodeDocument/DocumentService/save 包装。
-- [ ] 检查 project-meta.ts 的 AGENTS 保存已通过 NodeService；检查业务更新采用 Service input，未因删除包装变成直接修改对象后 raw writeFile。Model 内存方法与内部校验草稿仍可存在。
-- [ ] 检查 domain 与纯 utils 无业务 Service 反向依赖（含 type-only import/export），domain/models 不依赖 domain/operations。Memory 的未登记文件盘点保持物理扫描，不能以 query 替代。
-- [ ] 用 TypeScript compiler API 扫描 src 的 import/export，排除 type-only 边，将相对 .js 路径解析到 .ts 后检查强连通分量。涉及 services 的运行时循环必须为零；Tasks/Memory/Note 之间及 node-* → 业务 Service 的导入边保持为零。重点确认 paths.ts 不再导入或转发 types.ts；不能只用声明图掩盖实现循环。
-- [ ] 运行 `pnpm test`、`pnpm build`、`pnpm --filter edges-cli exec tsc --noEmit --strict -p tsconfig.json`、`git diff --check`。上一轮 934 项是历史基线，本轮报告实际结果。CLI 测试文件继续串行，保留真实多进程锁用例。
-- [ ] 使用 requesting-code-review 审查：owner/board 自动索引和手工刷新是否冲突；节点快照是否早于生成更新；未受控 Markdown 是否完整；模型仍可变而保存受 Service 管理；私有类型、模板分发、scope 与查询范围是否保持。
-- [ ] 完成后更新本计划和 spec 状态、相关开发文档及项目记忆，提交并更新当前 PR；保持待合并。只按此计划修改 CLI 基础设施，不迁移真实内容。
+- [x] 审查职责边界：parse/serialize/validate、字段更新与自身索引维护仍归 Model；operations 保留集合/遍历/查询职责；完整文件与跨节点变更通过 Service。没有为 Schema 生成搬迁节点方法或替换继承体系。
+- [x] 对照“架构审查结论与简化验收”报告被删除的重复机制、公共概念和新增构建成本；验证 Tasks 使用通用索引、旧区块仅由独立脚本迁移及创建关系分组符合最终决策，同一用例内同政策 Service 复用。不能仅用移动目录、行数或文件数证明简化完成。
+- [x] Task 5 全部通过：TS 为字段唯一源，v1 兼容性与方言已验证；干净构建和仓库外分发包可获取 Schema，生成物不入 Git；Ajv 不修改输入，也未误用到可省略字段的原始 Markdown。ADR 中保留选型依据、候选取舍、探针限制与实际验收结果。
+- [x] `rg -n 'MemoryDocument|loadMemoryDocument|saveMemoryDocument|repositoryNodeQuery|writeAtomic|domain/models/memory/index-rendering' extensions/cli/src`：本轮移除的包装与旧路径无残留。不新增 NodeDocument/DocumentService/save 包装。
+- [x] 检查 project-meta.ts 的 AGENTS 保存已通过 NodeService；检查业务更新采用 Service input，未因删除包装变成直接修改对象后 raw writeFile。Model 内存方法与内部校验草稿仍可存在。
+- [x] 检查 domain 与纯 utils 无业务 Service 反向依赖（含 type-only import/export），domain/models 不依赖 domain/operations。Memory 的未登记文件盘点保持物理扫描，不能以 query 替代。
+- [x] 用 TypeScript compiler API 扫描 src 的 import/export，排除 type-only 边，将相对 .js 路径解析到 .ts 后检查强连通分量。涉及 services 的运行时循环必须为零；Tasks/Memory/Note 之间及 node-* → 业务 Service 的导入边保持为零。重点确认 paths.ts 不再导入或转发 types.ts；不能只用声明图掩盖实现循环。
+- [x] 运行 `pnpm test`、`pnpm build`、`pnpm --filter edges-cli exec tsc --noEmit --strict -p tsconfig.json`、`git diff --check`。上一轮 934 项是历史基线，本轮报告实际结果。CLI 测试文件继续串行，保留真实多进程锁用例。
+- [x] 使用 requesting-code-review 审查：owner/board 自动索引和手工刷新是否冲突；节点快照是否早于生成更新；未受控 Markdown 是否完整；模型仍可变而保存受 Service 管理；私有类型、模板分发、scope 与查询范围是否保持。
+- [x] 完成后更新本计划和 spec 状态、相关开发文档及项目记忆，提交并更新当前 PR；保持待合并。只按此计划修改 CLI 基础设施，不迁移真实内容。
 
 ## 自查映射
 
 Task 0 先完成 domain 归组并消除类型反向依赖；四项收敛目标分别对应 Task 1 路径、Task 2 格式、Task 3 保存、Task 4 查询；Task 5 落实 Schema 选型、生成链路、消费者迁移、CLI 获取与分发验收。取消了四个拟新增的公共入口文件以及 NodeDocument 状态包装；Memory 原业务文件改名并减职责。保留各模块政策和此前已确认的 operations 拆分；models/operations 从原 src 顶层共同迁入 domain，二者保持同级。新方案不将 Service 的创建/保存职责转移给调用方或 Model，也不把所有代码合并进一个大文件。
+
+## 执行裁定与改变成本
+
+以下记录执行中对边界的解释及实际调整，便于审阅；不改变正文中的职责分工。
+
+| 裁定 | 理由 | 后续改变的成本 |
+| --- | --- | --- |
+| 完整 TaskDoc JSON 入口使用运行时 Ajv，生成器仍为开发依赖 | 用户提出以 Schema 为准并授权执行；仅测试生成物不能消除入口的重复校验 | 局部替换共享校验函数和依赖即可，但需重新明确输入接受规则 |
+| 正常命令不维护旧 task-projects，真实内容不在本次自动迁移 | 遵循用户明确的统一索引与独立迁移脚本决定 | 旧工作区需显式运行迁移；若保留双格式，会恢复重复维护成本 |
+| 新关系不推断 local/descendant，已知协议组成由内部调用显式传入 | 语义位置由 LLM/调用方判断，目录深度和用途不能代替判断 | 调用方需要提供位置；若改回推断，需新增政策及兼容性测试 |
+| 用隔离的 Node 22 执行验收，不替换机器的全局 Node | 验证已选版本，同时保留宿主环境 | 后续日常使用仍需自行选择符合基线的 Node |
+| Task 2 与 Task 3 合批实施、共同审查 | 两者同时修改 Tasks 项目索引和 Memory 保存链，分开会制造中间重复实现 | 改为独立实施时需要重新切分这些耦合修改；最终模块职责不受影响 |
+| 未登记节点移动后仍未登记 | 移动不应凭空发明 descendant 关系，已有关系保留原组 | 若以后需要移动时登记，可增添明确参数，无需引入独立 reparent |
+| 纯 TaskDoc 契约单独放在原模型目录 | 前端真实类型检查会沿原文件的解析依赖检查 Node 模块，type import 不足以隔离 | 增加一个小契约文件及类型重导出；可逆，未引入新 Schema 层 |
+
+## 实施验收记录
+
+2026-10-06，在 Node 22.23.3 下完成整仓 `pnpm test`：963 项通过（CLI 880、new-note 14、artifacts-preview 42、tasks-review-app 27）；`pnpm build` 通过。CLI strict 类型检查、查询链类型用例、三个受影响的根迁移脚本 strict 检查通过。TypeScript compiler API 扫描 140 个源文件，涉及 Service 的运行时强连通分量为零，domain 反向依赖及 Tasks/Memory/Note 交叉依赖为零。
+
+TaskDoc 的 52 个边界样例在旧 2020-12 与新 draft-07 上接受/拒绝一致；两次临时生成字节一致。仓库外仅装生产依赖的安装包验证了编译后的命令、Ajv 校验、模板和审阅页资源、缺失产物报错。生成物没有进入 Git。已有 Vite 配置/deprecation 警告不属于本次新增故障。
+
+实际删除的是 MemoryDocument/load/save 包装、重复路径原语、Memory 原子写、Tasks 专属索引渲染、repositoryNodeQuery 包装、手写 JSON Schema、前端重复类型和两个 JSON 入口的重复校验。新增成本限于生成器、运行时 Ajv/formats、构建产物读取以及相应的兼容性/分发验证。保留 Memory 物理盘点、业务政策、非受控 Markdown 和文件冲突检查；不以减少总文件数代替简化验收。
+
+分步审查与整体审查已通过。审查修复了已有看板补 owner 登记、普通 remember 的 Service 复用、迁移跳过嵌套 Git 根，以及开发入口先生成 Schema。最后一项以无 dist 的独立工作树验证；本次未运行真实内容迁移。

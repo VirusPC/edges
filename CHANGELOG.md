@@ -15,8 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **节点按入口归属：** `edges tasks` 与 `edges memory` 可从显式作用域或最近的可读 `AGENTS.md` 选择节点；本层索引登记直属内容，下层索引登记子节点，普通交叉链接不改变归属。入口沿用硬约束、本层记忆、下层索引三部分，发现节点不会自动初始化 Memory。
 - **统一文档与归属操作：** Task、项目记忆、Note 和 Skill 由类型化节点模型与 `NodeService` 读取、保存和维护 AGENTS 索引；`edges tasks`、`edges memory remember` 和 `edges note` 沿用原命令入口。唯一父归属遵循物理目录，索引用于发现；默认只展开本层组成引用，显式选择下层后继续展开，两者都不自动读取节点自身的 harness。
+- **显式选择索引归属：** `edges tasks --index-group local|descendant`、`edges memory init --index-group local|descendant` 和 `edges note --index-group local|descendant` 接收调用方选择的本层或下层归属；需要新增父索引却未指定时，在写入前报错。已有关系保留分组，移动未登记节点不会凭空增加下层引用。Tasks 与 Memory 共用普通 AGENTS 索引和节点保存流程；旧 `task-projects` 区块通过 `pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root <作用域> --check` 显式审阅，改用 `--write` 才迁移。
 - **目录内容带着资源走：** Task、普通项目记忆和 Note 统一使用目录中的 `index.md`，Skill 使用 `SKILL.md`；不再提供单文件创建或资源清单参数。`edges memory remember --import-entry` 与 `edges note --import-entry` 校验并复制完整目录，保留来源；Task 状态流转以及节点移动、删除按目录处理。`edges note --content-file <path> --markdown` 只保存已审阅文档，不复制旁边的附件。
 - **显式采用目录入口：** `pnpm migrate:directory-nodes --root <工作树>` 先预览，再通过 `--apply` 转换 tracked/public 内容。本仓已转换 117 条 Memory、103 条 Task、88 条 Note 和 100 份 runlog，保留附件、权限及引用目标，重复预览为空；私有内容、文章、第三方目录与旧审计材料不在范围内。
+
+### 任务看板与项目
+
+- **获取当前版本的数据契约：** `edges schema list` 列出可用契约，`edges schema get task-doc/v1` 直接输出 TaskDoc JSON Schema，无需进入仓库或选择 scope。契约从 TS 数据定义生成，随构建包分发，不再手工维护仓库内的 JSON 文件。分组 JSON 与审阅页输入使用同一契约校验：保留对象、数组等扩展 metadata；非法状态、日期和未知顶层字段会明确报错，不自动修正输入。
 
 ### 项目记忆（project-memory）
 
@@ -26,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 文档与系统
 
+- **统一 Node 22 环境：** CLI、MCP 和扩展应用的运行与构建最低要求为 Node 22；从源码使用 `pnpm test`、`pnpm build` 时也采用同一版本基线。
 - **按归属迁移目录：** 根维护记忆、技能、任务、评测和观测进入 `.harness/`，领域任务位于 `tasks/`，研究与教学分别位于 `projects/`、`teaching/`。`pnpm migrate:recursive-layout --worktree <独立工作树绝对路径> --dry-run` 审阅实例清单，改用 `--apply` 执行并保留本机恢复记录；各克隆的私有旧材料须分别迁移。任务命令通过 `--scope` 与 `--purpose domain|maintenance` 选择真源。
 
 ## [1.3.0] - 2026-09-30
