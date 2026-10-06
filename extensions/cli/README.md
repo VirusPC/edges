@@ -31,10 +31,28 @@ edges note …          # ingest a note (required flags on this command)
 edges tasks …         # Task board (list/get/create/update/status + project + read-only runs)
 edges artifacts …     # short-lived preview publish / rm (thin client)
 edges memory …        # init / remember / add-type / doctor / migrate / backup / restore
+edges schema list     # list available packaged contracts as JSON
+edges schema get task-doc/v1  # print the complete Task Doc JSON Schema
 edges --help / -v
 ```
 
 **Breaking rename:** the bin is `edges` only. There is no `edges-note` shim and no default ingest at the root. Callers must migrate to `edges note …`. Running `edges` without a subcommand is a usage error.
+
+## JSON Schema contracts
+
+```bash
+edges schema list
+edges schema get task-doc/v1 > task-doc.schema.json
+pnpm --filter edges-cli run build:schemas
+```
+
+`schema list` prints a JSON array containing key, id, title and description. `schema get` accepts a listed key and prints the full draft-07 Schema, including definitions and references. These read-only commands work outside a content repository, ignore content scope, and never consume stdin. Success is pure JSON on stdout; invalid arguments, unknown keys and missing build artifacts return a nonzero exit code with diagnostics only on stderr. Missing artifacts require rebuilding or reinstalling; commands never generate them at runtime.
+
+The field source is the data-only TypeScript contract in `src/domain/models/tasks/task-doc-contract.ts`. Shared status and priority constants live in `tasks/types.ts`; the review app imports these constants and the contract type directly. `scripts/schema-contracts.ts` is the single build-time registry of keys, ids, type entries and output files. `build:schemas` uses ts-json-schema-generator 2.9.0 to write deterministic `dist/schemas/task-doc.v1.json` and `manifest.json`; these artifacts remain untracked. `build` cleans dist before generating schemas, then compiles and copies the app and Memory templates. `test` generates schemas before the JSON consumers run. The app's independent dev/build/test/typecheck commands use pure types/constants and need no schema generation.
+
+Task Doc requires name, description, metadata and body, permits empty strings, and rejects unknown top-level fields. Grouped-list and review-page JSON input adapters share an Ajv validator over the packaged contract. Known metadata fields enforce their types, seven statuses, five priorities, project slug/reserved-name rules and date-time format. Unknown metadata keys retain nested objects, arrays, numbers, booleans and null. The validator does not coerce values, add defaults or delete fields. This deliberately tightens earlier JSON adapters that allowed invalid known string values or silently dropped unknown top-level fields, while broadening their former string-only extension metadata. Raw Markdown parsing keeps its existing scalar conversion policy and does not use this JSON boundary validator.
+
+Although the package remains private to the registry, `pnpm --filter edges-cli pack` creates an installable local archive. Its files include compiled code, generated contracts, review app assets and Memory templates; production dependencies include Ajv 8 and ajv-formats 3, while the generator stays a development dependency. The package test installs this archive outside the repository with production dependencies only and checks the compiled commands and validator.
 
 ## Project Memory
 

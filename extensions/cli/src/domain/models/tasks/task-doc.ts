@@ -1,13 +1,12 @@
 import { parseTaskDoc, type ParsedTaskDoc } from "./frontmatter.js";
 
-export type TaskDoc = {
-  name: string;
-  description: string;
-  metadata: Record<string, string>;
-  body: string;
-};
+import type { TaskDoc } from "./task-doc-contract.js";
+export type { TaskDoc, TaskMetadata, TaskJsonValue } from "./task-doc-contract.js";
 
-export function taskDocFromParsed(doc: ParsedTaskDoc): TaskDoc {
+/** Preserve the Markdown parser's existing scalar metadata policy. */
+type ScalarTaskDoc = TaskDoc & { metadata: Record<string, string> };
+
+export function taskDocFromParsed(doc: ParsedTaskDoc): ScalarTaskDoc {
   return {
     name: doc.name,
     description: doc.description,
@@ -16,6 +15,6 @@ export function taskDocFromParsed(doc: ParsedTaskDoc): TaskDoc {
   };
 }
 
-export function taskDocFromMarkdown(markdown: string): TaskDoc {
+export function taskDocFromMarkdown(markdown: string): ScalarTaskDoc {
   return taskDocFromParsed(parseTaskDoc(markdown));
 }

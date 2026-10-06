@@ -1,3 +1,4 @@
+import { validateTaskDocInput } from "./task-doc.js";
 import { parseSource, parseSourceProject, type TaskSource } from "./grouped.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -127,29 +128,9 @@ function parseItem(raw: unknown, groupIds: Set<string>, seenStems: Set<string>):
     item.priority = priority;
   }
   if ("doc" in raw && raw.doc !== undefined) {
-    item.doc = parseReviewDoc(raw.doc);
+    item.doc = validateTaskDocInput(raw.doc, "review-page doc");
   }
   return item;
-}
-
-function parseReviewDoc(raw: unknown): TaskDoc {
-  if (!isPlainObject(raw)) {
-    fail("review-page doc must be an object");
-  }
-  if (typeof raw.name !== "string" || typeof raw.description !== "string" || typeof raw.body !== "string") {
-    fail("review-page doc requires name, description, and body strings");
-  }
-  if (!isPlainObject(raw.metadata)) {
-    fail("review-page doc.metadata must be an object");
-  }
-  const metadata: Record<string, string> = {};
-  for (const [key, value] of Object.entries(raw.metadata)) {
-    if (typeof value !== "string") {
-      fail(`review-page doc.metadata.${key} must be a string`);
-    }
-    metadata[key] = value;
-  }
-  return { name: raw.name, description: raw.description, metadata, body: raw.body };
 }
 
 export function parseReviewPageInput(raw: unknown): ReviewPageInput {

@@ -30,7 +30,8 @@ export type CliContext = {
   result: CliResult | undefined;
 };
 
-export function usageError(reason: string, scope: "root" | "note" | "tasks" | "artifacts" | "memory"): CliResult {
+export function usageError(reason: string, scope: "root" | "note" | "tasks" | "artifacts" | "memory" | "schema"): CliResult {
+  if (scope === "schema") return { exitCode: 2, stdout: "", stderr: `${reason}\nSee edges schema --help for usage.\n` };
   const usage =
     scope === "note"
       ? "See edges note --help for usage.\n"
@@ -48,11 +49,12 @@ export function usageError(reason: string, scope: "root" | "note" | "tasks" | "a
   };
 }
 
-export function usageScope(argv: string[]): "root" | "note" | "tasks" | "artifacts" | "memory" {
+export function usageScope(argv: string[]): "root" | "note" | "tasks" | "artifacts" | "memory" | "schema" {
   const command = argv.filter((arg, i) => arg !== "--scope" && argv[i - 1] !== "--scope" && !arg.startsWith("--scope="))[0];
   if (command === "note") return "note";
   if (command === "tasks") return "tasks";
   if (command === "artifacts") return "artifacts";
+  if (command === "schema") return "schema";
   if (command === "memory") return "memory";
   return "root";
 }

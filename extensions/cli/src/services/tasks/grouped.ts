@@ -1,3 +1,4 @@
+import { validateTaskDocInput } from "./task-doc.js";
 import path from "node:path";
 import { realpathSync } from "node:fs";
 import { InternalNode } from "../../domain/models/index.js";
@@ -156,7 +157,7 @@ function parseItem(raw: unknown): GroupedListItem {
     item.priority = raw.priority;
   }
   if ("doc" in raw && raw.doc !== undefined) {
-    item.doc = parseTaskDocField(raw.doc);
+    item.doc = validateTaskDocInput(raw.doc, "grouped list doc");
   }
   const source = parseSource(raw.source);
   if (source) {
@@ -165,26 +166,6 @@ function parseItem(raw: unknown): GroupedListItem {
     item.project = parseSourceProject(raw.project);
   }
   return item;
-}
-
-function parseTaskDocField(raw: unknown): TaskDoc {
-  if (!isPlainObject(raw)) {
-    throw new TasksError("VALIDATION_ERROR", "grouped list doc must be an object");
-  }
-  if (typeof raw.name !== "string" || typeof raw.description !== "string" || typeof raw.body !== "string") {
-    throw new TasksError("VALIDATION_ERROR", "grouped list doc requires name, description, and body strings");
-  }
-  if (!isPlainObject(raw.metadata)) {
-    throw new TasksError("VALIDATION_ERROR", "grouped list doc.metadata must be an object");
-  }
-  const metadata: Record<string, string> = {};
-  for (const [key, value] of Object.entries(raw.metadata)) {
-    if (typeof value !== "string") {
-      throw new TasksError("VALIDATION_ERROR", `grouped list doc.metadata.${key} must be a string`);
-    }
-    metadata[key] = value;
-  }
-  return { name: raw.name, description: raw.description, metadata, body: raw.body };
 }
 
 export function groupedListToReviewPageInput(grouped: GroupedList): ReviewPageInput {

@@ -185,7 +185,7 @@ test("parseReviewPageInput rejects a doc that is missing body", () => {
       }),
     (error: unknown) => {
       assert.equal((error as TasksError).errorCode, "VALIDATION_ERROR");
-      assert.match((error as Error).message, /review-page doc requires name, description, and body strings/);
+      assert.match((error as Error).message, /review-page doc\/body/);
       return true;
     },
   );
@@ -213,4 +213,15 @@ test('source-aware review payload requires valid real project identities on grou
   assert.equal(parsed.groups[0]?.project, 'cli');
   assert.equal(parsed.items[0]?.project, 'cli');
   assert.equal(parsed.items[0]?.stem, 'same');
+});
+
+test('review JSON preserves extended metadata and rejects invalid contract fields', () => {
+  const doc = { name: '', description: '', metadata: { custom: { nested: true }, tags: ['a'], count: 1, enabled: false, extra: null }, body: '' };
+  const input = { groups: sample.groups, items: [{ ...sample.items[0], doc }] };
+  const before = structuredClone(input);
+  assert.deepEqual(parseReviewPageInput(input).items[0]?.doc, doc);
+  assert.deepEqual(input, before);
+  for (const badDoc of [ { ...doc, extra: true }, { ...doc, metadata: { 'edges-tasks-status': 'unknown' } }, { ...doc, metadata: { 'edges-updated-at': 'today' } }, { ...doc, metadata: { 'edges-title': 1 } } ]) {
+    assert.throws(() => parseReviewPageInput({ ...input, items: [{ ...input.items[0], doc: badDoc }] }), /doc/);
+  }
 });

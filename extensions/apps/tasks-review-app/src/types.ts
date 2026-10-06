@@ -1,11 +1,7 @@
 import type { ReviewPriority, ReviewStatus } from "./statuses.ts";
 
-export type TaskDoc = {
-  name: string;
-  description: string;
-  metadata: Record<string, string>;
-  body: string;
-};
+import type { TaskDoc } from "../../../cli/src/domain/models/tasks/task-doc-contract.js";
+export type { TaskDoc };
 
 export type TaskSource = { scope: string; purpose: "domain" | "maintenance" };
 export const itemIdentity = (item: ReviewItem): string => item.id ?? item.stem;

@@ -8,6 +8,7 @@ import {
   usageError,
   usageScope,
 } from "./context.js";
+import { addSchemaCommand } from "./commands/schema.js";
 import { addArtifactsCommand } from "./commands/artifacts.js";
 import { addNoteCommand } from "./commands/note.js";
 import { addTasksCommand } from "./commands/tasks.js";
@@ -100,6 +101,7 @@ function addRootCommand(
   addTasksCommand(program, ctx);
   addMemoryCommand(program, ctx);
   addArtifactsCommand(program, ctx);
+  addSchemaCommand(program, ctx);
   program.addHelpText("after", ROOT_AFTER_HELP);
   applyOutput(program, output);
   return program;

@@ -261,3 +261,14 @@ test("source-aware grouped payload requires real project identities and stored s
   assert.equal(parsed.items[0]?.project, "cli");
   assert.equal(parsed.items[0]?.stem, "same");
 });
+
+test('grouped JSON preserves extended metadata and rejects invalid contract fields', () => {
+  const doc = { name: '', description: '', metadata: { custom: { nested: true }, tags: ['a'], count: 1, enabled: false, extra: null }, body: '' };
+  const input = { schema: 'edges.tasks.grouped/v1', groups: [{ id: 'default', title: 'Default' }], items: [{ id: 'demo', group: 'default', doc }] };
+  const before = structuredClone(input);
+  assert.deepEqual(parseGroupedList(input).items[0]?.doc, doc);
+  assert.deepEqual(input, before);
+  for (const badDoc of [ { ...doc, extra: true }, { ...doc, metadata: { 'edges-tasks-status': 'unknown' } }, { ...doc, metadata: { 'edges-updated-at': 'today' } }, { ...doc, metadata: { 'edges-title': 1 } } ]) {
+    assert.throws(() => parseGroupedList({ ...input, items: [{ ...input.items[0], doc: badDoc }] }), /doc/);
+  }
+});
