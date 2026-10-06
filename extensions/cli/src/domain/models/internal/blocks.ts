@@ -64,9 +64,8 @@ const COMMENT_REWRITES: Array<[RegExp, string]> = [
 ];
 const TITLE_REWRITES: Array<[RegExp, string]> = [
   [/^## 本层重要约束\s*$/gm, "## 本层硬约束"],
-  [/^## 本层记忆\s*$/gm, "## 本层组成"],
-  [/^## 下层记忆索引\s*$/gm, "## 下层节点"],
-  [/^## 下层作用域\s*$/gm, "## 下层节点"],
+  [/^## (?:本层记忆|本层组成)\s*$/gm, "## 本层系统维护信息"],
+  [/^## (?:下层记忆索引|下层作用域|下层节点)\s*$/gm, "## 下层系统维护信息"],
 ];
 export function rewriteLayerSurface(source: string): string {
   let next = source;

@@ -7,9 +7,9 @@ export const ENTRY_NAMES = {
 } as const;
 export const INTERNAL_SECTIONS = {
   constraints: { heading: "本层硬约束", marker: "project-harness-constraints" },
-  localChildren: { heading: "本层组成", marker: "project-harness-local" },
+  localChildren: { heading: "本层系统维护信息", marker: "project-harness-local" },
   descendantChildren: {
-    heading: "下层节点",
+    heading: "下层系统维护信息",
     marker: "project-harness-descendants",
   },
 } as const;

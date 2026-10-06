@@ -4,7 +4,7 @@
 
 ## 作用域与采用范围
 
-`AGENTS.md` 是人和 Agent 的入口。本层硬约束直接写在所属层的硬约束区块，已有规则不覆盖；本层组成和下层节点只放链接与描述。区块外手写内容、其他工具区块和业务模块入口保持原文。
+`AGENTS.md` 是人和 Agent 的入口。本层硬约束直接写在所属层的硬约束区块，已有规则不覆盖；本层系统维护信息和下层系统维护信息只放链接与描述。区块外手写内容、其他工具区块和业务模块入口保持原文。
 
 通用推荐模块为 `memory`、`skills`、`tasks`；推荐不代表自动创建。Project Memory 只初始化用户选择的 Memory / Skills 类型，Tasks 和其他模块使用自己的契约。未采用的模块和类型不创建空目录。
 
@@ -73,7 +73,7 @@ edges --scope S memory add-type \
 
 ## 受管区块与条目
 
-区块标记改为 `<!-- project-harness:start -->` 外层，内部按 constraints → local → descendants。类型入口仍用 `project-memory-entries`，自定义特权元数据仍用 `project-memory-type`。三类标题为「本层硬约束」（兼容「本层重要约束」）、「本层组成」、「下层节点」。本层列表登记该节点持有的类型、任务与其他内容；下层列表登记下层节点，保留显式跨层和跨目录关系及原描述。读兼容旧 `project-memory` 层标记；写入只发 `project-harness`。Task Project 列表的 task-projects 标记嵌在本层区块内；类型 entries 标记是本层内容的稀疏表示。不生成第四类工作与模块入口，不要求无内容的标题。修复不覆盖人工文本，也不因物理中间目录新增 AGENTS 就重归属已登记引用。
+区块标记改为 `<!-- project-harness:start -->` 外层，内部按 constraints → local → descendants。类型入口仍用 `project-memory-entries`，自定义特权元数据仍用 `project-memory-type`。三类标题为「本层硬约束」（读兼容旧标题：本层重要约束、本层记忆、本层组成、下层记忆索引、下层作用域、下层节点；写入只发新标题）、「本层系统维护信息」、「下层系统维护信息」。本层列表登记该节点持有的类型、任务与其他内容；下层列表登记下层节点，保留显式跨层和跨目录关系及原描述。读兼容旧 `project-memory` 层标记；写入只发 `project-harness`。Task Project 列表的 task-projects 标记嵌在本层区块内；类型 entries 标记是本层内容的稀疏表示。不生成第四类工作与模块入口，不要求无内容的标题。修复不覆盖人工文本，也不因物理中间目录新增 AGENTS 就重归属已登记引用。
 
 普通条目为 YAML frontmatter + Markdown，前缀仍是类型原值，slug 为 snake_case。Skill 格式 slug 为 kebab-case（1–64 字符），name 为目录名。详细字段见 [`frontmatter-fields.md`](frontmatter-fields.md)：顶层遵循 Agent Skills 闭集，实现字段放 `metadata.edges-*`；读取既有顶层字段不等于支持旧目录布局，常规 doctor 不重写文件头。
 

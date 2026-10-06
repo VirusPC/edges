@@ -3,7 +3,7 @@
 看板与 Task 工作流（协作、绑定、Skill/MCP、分类与调度）。
 
 <!-- project-harness-local:start -->
-## 本层组成
+## 本层系统维护信息
 - [tasks\_multiplayer\_author\_claim](<backlog/2026-09-11--tasks%E9%9A%8F%E4%BB%93%E5%A4%9A%E4%BA%BA%E5%8D%8F%E4%BD%9C%E4%B8%8E%E4%BD%9C%E8%80%85%E5%8C%BA%E5%88%86/index.md>) — tasks 随代码仓库时，应考虑同一仓库多人协作，区分任务写入与领取的作者等
 - [task\_record\_vs\_execution\_repo](<backlog/2026-09-11--task%E8%AE%B0%E5%BD%95%E4%BB%93%E4%B8%8E%E6%89%A7%E8%A1%8C%E4%BB%93%E5%88%86%E7%A6%BB/index.md>) — 应考虑 task 记录处与领取执行处可能分属不同仓库的问题
 - [tasks\_board\_github\_association](<backlog/2026-09-12--tasks%E6%9C%BA%E5%88%B6%E4%B8%8EGitHub%E5%85%B3%E8%81%94/index.md>) — edges knowledge/tasks 机制与 GitHub Issues/PR/Projects 如何关联

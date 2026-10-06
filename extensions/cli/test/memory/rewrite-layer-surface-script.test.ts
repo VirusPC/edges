@@ -78,7 +78,7 @@ test("plan rewrites layer entries and skips type indexes", (t) => {
     ["AGENTS.md"],
   );
   assert.match(plan.edits[0]!.after, /<!-- project-harness:start -->/);
-  assert.match(plan.edits[0]!.after, /## 本层组成/);
+  assert.match(plan.edits[0]!.after, /## 本层系统维护信息/);
   assert.doesNotMatch(plan.edits[0]!.after, /project-memory-important/);
   assert.equal(planLayerMarkerRewrite(root).edits.length, 1);
 });

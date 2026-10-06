@@ -31,6 +31,8 @@ const titles: Record<string, SectionKey> = {
   下层记忆索引: "children",
   下层节点: "children",
   下层作用域: "children",
+  本层系统维护信息: "memory",
+  下层系统维护信息: "children",
 };
 
 function start(node: AstNode): number {

@@ -12,7 +12,7 @@
 
 
 <!-- project-harness-local:start -->
-## 本层组成
+## 本层系统维护信息
 - [.harness/memory/feedbacks/AGENTS.md](<.harness/memory/feedbacks/AGENTS.md>) — 用户的纠正、确认过的做法与必须遵守的禁止模式。
 - [.harness/memory/projects/AGENTS.md](<.harness/memory/projects/AGENTS.md>) — 进行中的工作、关键时间点，无法从代码或 git 历史推导的决策，以及项目内的规范。兜底：对不上更具体类型时走这里。
 - [.harness/memory/references/AGENTS.md](<.harness/memory/references/AGENTS.md>) — 需求文档、设计稿、接口文档、监控面板等外部资料。
@@ -21,6 +21,6 @@
 <!-- project-harness-local:end -->
 
 <!-- project-harness-descendants:start -->
-## 下层节点
+## 下层系统维护信息
 - [skills/project\-memory\-init/AGENTS.md](<skills/project-memory-init/AGENTS.md>) — project\-memory\-init 目录的项目记忆与规范入口。
 <!-- project-harness-descendants:end -->

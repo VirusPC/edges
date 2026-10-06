@@ -3,7 +3,7 @@
 Ungrouped tasks that have not been assigned a named Task Project.
 
 <!-- project-harness-local:start -->
-## 本层组成
+## 本层系统维护信息
 - [locomo\_official\_rag\_single\_file\_followup](<cancelled/2026-09-16--LoCoMo%E5%AE%98%E6%96%B9RAG%E5%8D%95%E6%A1%A3%E8%B7%9F%E8%BF%9B/index.md>) — LoCoMo 官方 RAG 单档（rag\-mode dialog、单一 top\-k）——冒烟基线过关后的可选跟进
 - [project\-memory可扩展memory\-type](<done/2026-09-09--project-memory%E5%8F%AF%E6%89%A9%E5%B1%95memory-type/index.md>) — project\-memory 可扩展 memory type；如无必要勿增实体，可用目录\+skill 新增 type，未必需要单独 JSON
 - [todos更名为tasks并支持状态流转](<done/2026-09-10--todos%E6%9B%B4%E5%90%8D%E4%B8%BAtasks%E5%B9%B6%E6%94%AF%E6%8C%81%E7%8A%B6%E6%80%81%E6%B5%81%E8%BD%AC/index.md>) — 工作项从 todos 更名为 tasks，并支持状态流转

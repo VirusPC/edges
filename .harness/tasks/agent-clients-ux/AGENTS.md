@@ -3,7 +3,7 @@
 客户端/插件/外设与本地 UX 实验。
 
 <!-- project-harness-local:start -->
-## 本层组成
+## 本层系统维护信息
 - [评估Agent\-Plugins客户端支持](<backlog/2026-09-09--%E8%AF%84%E4%BC%B0Agent-Plugins%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%94%AF%E6%8C%81/index.md>) — 评估给哪些 agent 客户端提供 / 补齐 Agent Plugins 支持更合适
 - [需要普通记笔记skill](<backlog/2026-09-09--%E9%9C%80%E8%A6%81%E6%99%AE%E9%80%9A%E8%AE%B0%E7%AC%94%E8%AE%B0skill/index.md>) — 除 conversation\-to\-notes 外，还需要一个面向日常记事的普通笔记 skill
 - [data\_view\_separation\_local\_html](<backlog/2026-09-11--%E6%95%B0%E6%8D%AE%E4%B8%8E%E8%A7%86%E5%9B%BE%E5%88%86%E7%A6%BB%E6%9C%AC%E5%9C%B0HTML/index.md>) — 从复杂系统角度，可能需要数据与视图分离，并提供本地 HTML

@@ -3,7 +3,7 @@
 Project Memory 类型/索引/reshape/与 docs 边界等。
 
 <!-- project-harness-local:start -->
-## 本层组成
+## 本层系统维护信息
 - [runa\-memory\-ask调用结果统计](<backlog/2026-09-08--runa-memory-ask%E8%B0%83%E7%94%A8%E7%BB%93%E6%9E%9C%E7%BB%9F%E8%AE%A1/index.md>) — 为 runa\-memory\-ask skill 补充「调用后最终结果」统计
 - [memory需要assets资源目录](<backlog/2026-09-09--memory%E9%9C%80%E8%A6%81assets%E8%B5%84%E6%BA%90%E7%9B%AE%E5%BD%95/index.md>) — 为 project \`.memory\` 增加资源存档目录的想法
 - [project\-memory跨agent继承经验](<backlog/2026-09-09--project-memory%E8%B7%A8agent%E7%BB%A7%E6%89%BF%E7%BB%8F%E9%AA%8C/index.md>) — Project Memory 的一个核心作用是跨 Agent / 账号切换时继承经验

@@ -218,7 +218,7 @@ test("Doctor diagnoses overlapping ownership groups without choosing an authored
       )
       .replace(
         "<!-- project-harness:end -->",
-        "<!-- project-harness-descendants:start -->\n## 下层节点\n\n- [Descendant](owned/AGENTS.md) — Old descendant description.\n- [Duplicate](owned/AGENTS.md) — Duplicate description.\n<!-- project-harness-descendants:end -->\n<!-- project-harness:end -->",
+        "<!-- project-harness-descendants:start -->\n## 下层系统维护信息\n\n- [Descendant](owned/AGENTS.md) — Old descendant description.\n- [Duplicate](owned/AGENTS.md) — Duplicate description.\n<!-- project-harness-descendants:end -->\n<!-- project-harness:end -->",
       ),
   );
   const beforeLocal = read(root, "AGENTS.md").match(

@@ -3,7 +3,7 @@
 edges CLI/脚手架/发布/鉴权等平台层。
 
 <!-- project-harness-local:start -->
-## 本层组成
+## 本层系统维护信息
 - [CLI与MCP需加鉴权](<backlog/2026-09-09--CLI%E4%B8%8EMCP%E9%9C%80%E5%8A%A0%E9%89%B4%E6%9D%83/index.md>) — CLI 与 MCP 后续需要加鉴权（产品/基建待办）
 - [system\_project\_or\_user\_home](<backlog/2026-09-12--%E7%B3%BB%E7%BB%9F%E5%8F%AF%E8%B7%9F%E9%A1%B9%E7%9B%AE%E6%88%96%E6%8C%82%E7%94%A8%E6%88%B7%E7%9B%AE%E5%BD%95/index.md>) — 系统很通用：可跟随项目，也可放到用户目录（tasks 可做用户级）；像 Claude Code auto memory 的扩展
 - [project\_memory\_scripts\_to\_edges\_cli](<backlog/2026-09-13--project-memory%E8%84%9A%E6%9C%AC%E8%BF%81%E5%88%B0edges-CLI/index.md>) — 把 project\-memory\-init/remember/ask/doctor 等 Python scripts 迁到 edges CLI

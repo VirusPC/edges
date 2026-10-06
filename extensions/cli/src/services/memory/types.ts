@@ -258,7 +258,7 @@ export function upsertLocalTypeLine(
 ): string {
   document = rewriteLayerSurface(document);
   const block = document.match(blockPattern(LOCAL_START, LOCAL_END))?.[0];
-  if (!block) throw new Error("AGENTS.md 缺少本层组成区块，请先 init");
+  if (!block) throw new Error("AGENTS.md 缺少本层系统维护信息区块，请先 init");
   const owner = process.cwd();
   const expected = ownershipTarget(owner, indexFile);
   if (expected && localOwnershipPaths(owner, block).has(expected))

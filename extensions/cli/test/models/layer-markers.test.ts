@@ -25,8 +25,8 @@ test("canonical layer markers are project-harness, type markers stay project-mem
     "project-harness-descendants",
   );
   assert.equal(INTERNAL_SECTIONS.constraints.heading, "本层硬约束");
-  assert.equal(INTERNAL_SECTIONS.localChildren.heading, "本层组成");
-  assert.equal(INTERNAL_SECTIONS.descendantChildren.heading, "下层节点");
+  assert.equal(INTERNAL_SECTIONS.localChildren.heading, "本层系统维护信息");
+  assert.equal(INTERNAL_SECTIONS.descendantChildren.heading, "下层系统维护信息");
   assert.equal(INDEX_MARKERS.type, "project-memory-type");
   assert.equal(INDEX_MARKERS.entries, "project-memory-entries");
   assert.equal(OUTER_START, "<!-- project-harness:start -->");
@@ -68,8 +68,8 @@ test("rewriteLayerSurface upgrades layer comments and titles without touching ty
   assert.match(out, /<!-- project-harness:start -->/);
   assert.match(out, /<!-- project-harness-constraints:start -->/);
   assert.match(out, /## 本层硬约束/);
-  assert.match(out, /## 本层组成/);
-  assert.match(out, /## 下层节点/);
+  assert.match(out, /## 本层系统维护信息/);
+  assert.match(out, /## 下层系统维护信息/);
   assert.doesNotMatch(out, /project-memory-(important|local|children)/);
   assert.equal(rewriteLayerSurface(out), out);
 

@@ -10,7 +10,7 @@
 <!-- project-harness-constraints:end -->
 
 <!-- project-harness-local:start -->
-## 本层组成
+## 本层系统维护信息
 
 下面这些是索引，不是正文。按条目说明挑要读的，再打开对应内容。
 
@@ -23,7 +23,7 @@
 <!-- project-harness-local:end -->
 
 <!-- project-harness-descendants:start -->
-## 下层节点
+## 下层系统维护信息
 
 按任务目录加载对应 `AGENTS.md`。
 

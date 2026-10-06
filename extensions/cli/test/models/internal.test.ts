@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { InternalNode } from "../../src/domain/models/index.js";
+import { INTERNAL_SECTIONS } from "../../src/domain/models/layout.js";
 
 const source = `# Context
 
@@ -34,8 +35,8 @@ const modern = source
   .replaceAll("project-memory-local", "project-harness-local")
   .replaceAll("project-memory-children", "project-harness-descendants")
   .replaceAll("本层重要约束", "本层硬约束")
-  .replaceAll("本层记忆", "本层组成")
-  .replaceAll("下层记忆索引", "下层节点");
+  .replaceAll("本层记忆", "本层系统维护信息")
+  .replaceAll("下层记忆索引", "下层系统维护信息");
 
 test("legacy and canonical layer markers parse to the same ownership", () => {
   const oldNode = new InternalNode("/scope/AGENTS.md").parse(source);
@@ -181,7 +182,7 @@ module: memory
   assert.match(rendered, /> Authored purpose\./);
   assert.doesNotMatch(
     rendered,
-    /## 本层记忆|## 本层组成|project-memory-local|project-harness-local|project-memory-children/,
+    /## 本层记忆|## 本层组成|## 本层系统维护信息|project-memory-local|project-harness-local|project-memory-children/,
   );
   assert.deepEqual(
     new InternalNode(node.path).parse(rendered).children.map((ref) => ref.id),
@@ -312,4 +313,9 @@ test('managed block replacement preserves CRLF and refuses malformed boundaries'
  const source='Intro  \r\n'+start+'\r\nOld\r\n'+end+'\r\nTail  \r\n';
  assert.equal(upsertBlock(source,start,end,start+'\nNew\n'+end),'Intro  \r\n'+start+'\r\nNew\r\n'+end+'\r\nTail  \r\n');
  assert.throws(()=>upsertBlock('Intro\n'+start,start,end,start+'\nNew\n'+end),/marker|boundary|unclosed/i);
+});
+
+test("AGENTS section headings are system-maintenance titles", () => {
+  assert.equal(INTERNAL_SECTIONS.localChildren.heading, "本层系统维护信息");
+  assert.equal(INTERNAL_SECTIONS.descendantChildren.heading, "下层系统维护信息");
 });
