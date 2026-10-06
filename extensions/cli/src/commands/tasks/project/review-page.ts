@@ -2,13 +2,7 @@ import { readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { Command } from "commander";
 import type { CliContext } from "../../../context.js";
-import {
-  loadBuiltReviewShell,
-  parseReviewPageInput,
-  renderReviewPageHtml,
-  resolveReviewPageOutPath,
-  writeReviewPage,
-} from "../../../services/tasks/review-page.js";
+import { renderReviewPageFromText } from "../../../services/tasks/review-page.js";
 import { TasksError } from "../../../domain/models/tasks/types.js";
 import { asTasksError } from "../../../services/tasks/result.js";
 import { failTask, succeed } from "../run.js";
@@ -22,26 +16,18 @@ export function addProjectReviewPageCommand(project: Command, ctx: CliContext): 
     .action(async (opts: { from: string; out?: string }) => {
       try {
         const rawText = await readReviewPageSource(opts.from, ctx);
-        let raw: unknown;
-        try {
-          raw = JSON.parse(rawText);
-        } catch {
-          throw new TasksError(
-            "VALIDATION_ERROR",
-            "review-page input must be a JSON object with groups[] and items[]",
-          );
-        }
-        const input = parseReviewPageInput(raw);
-        const shell = await loadBuiltReviewShell((abs) => readFile(abs, "utf8"));
-        const html = renderReviewPageHtml(input, shell);
-        const outPath = resolveReviewPageOutPath(opts.out, Date.now(), tmpdir());
-        await writeReviewPage(outPath, html, writeFile);
+        const rendered = await renderReviewPageFromText(rawText, opts.out, {
+          readFile: (abs) => readFile(abs, "utf8"),
+          writeFile,
+          nowMs: Date.now(),
+          tmpDir: tmpdir(),
+        });
         ctx.result = succeed({
           status: "success",
           command: "project.review-page",
-          path: outPath,
-          groupCount: input.groups.length,
-          itemCount: input.items.length,
+          path: rendered.path,
+          groupCount: rendered.groupCount,
+          itemCount: rendered.itemCount,
         });
       } catch (error) {
         const mapped = asTasksError(error);
