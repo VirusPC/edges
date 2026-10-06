@@ -1,3 +1,4 @@
+import { WRITE_LOCK_NAME } from "./node-lock.js";
 import {
   InternalSyntax,
   type SyntaxReference,
@@ -112,6 +113,7 @@ export function directoryEntries(root: string): string[] {
   const result: string[] = [];
   function visit(dir: string) {
     for (const name of fs.readdirSync(dir)) {
+      if (name === WRITE_LOCK_NAME) continue;
       const file = path.join(dir, name),
         stat = fs.lstatSync(file);
       if (stat.isSymbolicLink())

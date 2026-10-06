@@ -2,7 +2,7 @@ import { createReadStream, promises as fs } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import { Transform, PassThrough } from 'node:stream';
 import { createGunzip, createGzip } from 'node:zlib';
-import { homedir } from 'node:os';
+import { expandHomePath } from '../../utils/filesystem.js';
 import path from 'node:path';
 import { create, Header, Parser, type ReadEntry } from 'tar';
 import { assertPrivateIgnored } from './ignore.js';
@@ -57,7 +57,7 @@ async function rejectOldLayer(root: string): Promise<void> {
 }
 
 const CONVERSION = 'conversion-required: restore the old archive with its matching older tool in an isolated old project, run edges memory migrate there, then create a new user-memory-backup archive.';
-const expandHome = (value: string): string => value === '~' ? homedir() : value.startsWith('~/') ? path.join(homedir(), value.slice(2)) : value;
+const expandHome = (value: string): string => expandHomePath(value, true);
 
 function inside(file: string, root: string): boolean {
   const relative = path.relative(root, file);

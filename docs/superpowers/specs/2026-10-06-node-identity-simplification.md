@@ -67,8 +67,8 @@ NodeService 生命周期限定在一次 CLI 命令内，相关修改属于同一
 
 - **锁的范围：** 锁属于工作树，不属于单个 Node 或当前子 scope。父子 scope、兄弟 scope 的写命令取得同一把锁，独立 Git worktree 各用自己的锁；不能使用 Git common-dir 使独立工作树误共用锁。scope 仍决定业务操作范围，锁不会使操作自动加载或保存全树。
 - **锁的生命周期：** 先解析稳定的工作树锁身份，再取得锁，然后创建本次命令的 Service、读取业务节点并执行写操作；完成或失败均释放。锁占用直接报错，用户重试，不引入任务队列。只读命令不加锁，不承诺多文件读取是一致性快照。
-- **实现边界：** 命令编排在读操作前取得锁，服务层封装锁及文件 IO，models 不感知锁。直接调用 NodeService 不等于自动获得整个 CLI 命令的锁；不能只锁 save，因为那时可能已基于过期状态生成计划。实际锁根为规范化后的最近 Git worktree 根（不使用 common-dir）；非 Git 目录使用最外层物理 AGENTS.md 祖先，找不到时使用实际目标。发现阶段仅查文件元数据，不解析业务文档；不存在的目标按已存在祖先 realpath 加剩余后缀确定身份。锁路径为 `<os.tmpdir()>/edges-node-write-locks/<sha256(canonical-root)>.lock`，不进入内容目录、资源快照或 Git。
-- **锁的机制：** `proper-lockfile` 使用原子 mkdir 创建空 `.lock` 目录，定期更新目录 mtime 作为心跳；释放时删除目录，过期后可尝试回收。它是协作式锁，不是 OS 强制文件权限。检测到持锁失效时采用 proper-lockfile 默认 compromised 处理器抛出错误并终止进程，不能吞掉错误继续写入。正常结束或业务异常在命令 finally 释放，释放失败也返回失败。
+- **实现边界：** 命令编排在读操作前取得锁，服务层封装锁及文件 IO，models 不感知锁。直接调用 NodeService 不等于自动获得整个 CLI 命令的锁；不能只锁 save，因为那时可能已基于过期状态生成计划。实际锁根为规范化后的最近 Git worktree 根（不使用 common-dir）；非 Git 写命令统一使用一个固定临时锁；init 可创建或更新祖先 AGENTS，不能用会在命令中变化的 marker 选择锁身份。代价是共享该临时目录的互不相关非 Git 写入也串行，Git worktree 仍保持独立锁域。发现阶段仅查文件元数据，不解析业务文档；不存在的目标按已存在祖先 realpath 加剩余后缀确定身份。Git 锁路径为 `<canonical-worktree-root>/.edges-write.lock/`；非 Git 为 `<os.tmpdir()>/.edges-write.lock/`，不使用 hash 或父级注册表。保留精确 basename `.edges-write.lock` 作为运行时产物：资源快照、入口发现及 import 复制排除它；move/destroy 遇到单元内的该锁时拒绝，避免搬走活跃锁。相似附件名不排除。本仓 .gitignore 加 `/.edges-write.lock/`；CLI 不自动改外部仓 .gitignore，文档提示调用方自行采用。正常锁是空目录，Git 不跟踪目录本身。
+- **锁的机制：** `proper-lockfile` 使用原子 mkdir 创建空 `.lock` 目录，定期更新目录 mtime 作为心跳；释放时删除目录，过期后可尝试回收。它是协作式锁，不是 OS 强制文件权限。检测到持锁失效时采用 proper-lockfile 默认 compromised 处理器抛出错误并终止进程，不能吞掉错误继续写入。正常结束或业务异常在命令 finally 释放，释放失败也返回失败；若业务同时失败，保留原结构化错误及恢复路径，并在 stderr 追加释放失败，不以释放错误覆盖原诊断。
 - **文件划分：** 新增 `services/node-lock.ts` 薄封装工作树锁；在已有 `services/node-files.ts` 接入原子写入并保留读取、快照检查和失败恢复。锁覆盖整个命令，原子写入处理每个文件，两种生命周期分别表达；不新增子目录、package、LockManager 或 AtomicWriter 类。
 - **文件的保存：** `write-file-atomic` 负责临时文件写入、默认 fsync、rename 替换和清理。已有文件覆盖接入该能力；新建目标的存在性检查、目录移动/删除、附件处理和失败恢复仍遵守原有合同。替换成功后重新取得实际文件身份/快照再回填缓存，不能沿用被替换文件的 inode；不得放宽“外部同字节替换文件仍报错”的检查。
 - **外部冲突：** 保留读取时原文及已有文件/资源身份快照，写入前检测变化，有冲突直接报错。不新增仅凭 mtime 的版本协议。编辑器不遵守 CLI 锁，检查与替换之间仍有竞态窗口；此方案不声称完全排除任意外部写入。
@@ -101,7 +101,7 @@ NodeService 生命周期限定在一次 CLI 命令内，相关修改属于同一
 
 选型已接入：proper-lockfile 4.1.2、write-file-atomic 5.0.1（Node engines 为 ^14.17.0 || ^16.13.0 || >=18.0.0，覆盖本仓 >=20；不提高本仓引擎下限）。实现与整体回归的完成状态以实施计划及独立审阅为准。
 
-实际加锁命令：note（其 dry-run 仍有本地写入）、tasks create/update/status、tasks project create/update、memory init/add-type/remember/restore、doctor --apply、非 --dry-run 的 migrate。Memory --target-dir、restore --repo-dir 是实际目标覆盖项；--root-dir 只是遍历边界，不改变被写入的目标。Note 沿现有配置从 scope 确定 Git 工作树。只读 doctor、migrate --dry-run、列表与查询不锁；Artifacts 配置/网络/服务器操作不属于节点锁范围。
+实际加锁命令：note（其 dry-run 仍有本地写入）、tasks create/update/status、tasks project create/update、memory init/add-type/remember/restore、doctor --apply、非 --dry-run 的 migrate。Memory --target-dir、restore --repo-dir 选择内容 scope；init 还可创建或更新直到 --root-dir 的祖先索引。归一化按既有参数来源区分：scope/环境路径直接 path.resolve，显式 Memory target-dir 只展开 ~/ 而不展开裸 ~，restore repo-dir 两者都展开；归一化后再发现锁根，过程中不读取业务文档。Note 沿现有配置从 scope 确定 Git 工作树。只读 doctor、migrate --dry-run、列表与查询不锁；Artifacts 配置/网络/服务器操作不属于节点锁范围。
 
 现有文件由 write-file-atomic.sync 接管临时写入、fsync、rename 与失败清理；tmpfileCreated 时保存将要替换的 inode 与描述符，返回后先登记已写记录，再检查目标并回填快照，保证提交后检查失败仍被恢复统计覆盖。新建目标继续用原有独占硬链接提交，保留不可读最终 mode 的描述符与恢复路径。单文件替换及多文件恢复不扩大为崩溃事务保证。
 

@@ -1,8 +1,7 @@
 /** Cooperative command lock. Metadata discovery deliberately does not parse nodes. */
 import fs from "node:fs";
 import path from "node:path";
-import { tmpdir, homedir } from "node:os";
-import { createHash } from "node:crypto";
+import { tmpdir } from "node:os";
 import lockfile from "proper-lockfile";
 
 function metadata(file: string): fs.Stats | undefined {
@@ -25,46 +24,45 @@ function canonical(file: string): string {
     ? file
     : path.join(canonical(parent), path.basename(file));
 }
-/** Nearest Git boundary wins; otherwise all physical AGENTS ancestors share the
- * outermost owner. Missing explicit targets retain their suffix when canonicalized. */
-export function writeLockRoot(target: string): string {
-  target = canonical(
-    path.resolve(
-      target.startsWith("~/") ? path.join(homedir(), target.slice(2)) : target,
-    ),
-  );
-  let owner: string | undefined;
+/** Reserved runtime artifact, never a node resource or imported attachment. */
+export const WRITE_LOCK_NAME = ".edges-write.lock";
+/** Git worktrees keep their lock locally; one fixed temporary lock serializes
+ * non-Git writers even when init creates ancestor scope markers. */
+export function writeLockPath(target: string): string {
+  target = canonical(path.resolve(target));
   for (let current = target; ; current = path.dirname(current)) {
-    if (metadata(path.join(current, ".git"))) return current;
-    if (metadata(path.join(current, "AGENTS.md"))?.isFile()) owner = current;
-    if (path.dirname(current) === current) break;
+    if (metadata(path.join(current, ".git")))
+      return path.join(current, WRITE_LOCK_NAME);
+    if (path.dirname(current) === current)
+      return path.join(fs.realpathSync(tmpdir()), WRITE_LOCK_NAME);
   }
-  return owner ?? target;
+}
+/** A directory rename/removal must not carry away a lock held by another command. */
+export function assertNoWriteLock(file: string): void {
+  if (!metadata(file)?.isDirectory()) return;
+  for (const name of fs.readdirSync(file)) {
+    if (name === WRITE_LOCK_NAME)
+      throw new Error(
+        `Cannot relocate or destroy unit with active node write lock: ${path.join(file, name)}`,
+      );
+    assertNoWriteLock(path.join(file, name));
+  }
 }
 /** Fail immediately on contention. proper-lockfile's default compromised handler
  * throws, terminating the command instead of allowing work after heartbeat loss. */
 export async function acquireWriteLock(
   target: string,
 ): Promise<() => Promise<void>> {
-  const root = writeLockRoot(target);
-  const directory = path.join(
-    fs.realpathSync(tmpdir()),
-    "edges-node-write-locks",
-  );
-  fs.mkdirSync(directory, { recursive: true });
-  const lockPath = path.join(
-    directory,
-    createHash("sha256").update(root).digest("hex") + ".lock",
-  );
+  const lockPath = writeLockPath(target);
   try {
-    return await lockfile.lock(root, {
+    return await lockfile.lock(lockPath, {
       realpath: false,
       lockfilePath: lockPath,
       retries: 0,
     });
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ELOCKED")
-      throw new Error(`Node write lock busy: ${root}`, { cause: error });
+      throw new Error(`Node write lock busy: ${lockPath}`, { cause: error });
     throw error;
   }
 }

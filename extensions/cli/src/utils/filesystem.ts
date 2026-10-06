@@ -1,5 +1,6 @@
 import { lstatSync, readdirSync } from 'node:fs';
 import path from 'node:path';
+import { homedir } from 'node:os';
 import { walkTree } from './tree.js';
 
 export function absolute(directory: string) {
@@ -38,4 +39,9 @@ export function discoverDirectories(root: string, enterDirectory?: (directory: s
     .filter(entry => entry.isDirectory() && !entry.isSymbolicLink())
     .map(entry => path.join(directory, entry.name))
     .filter(child => enterDirectory?.(child) ?? true), directory => directory);
+}
+
+/** Match each option's established home shorthand without reading documents. */
+export function expandHomePath(value: string, bareHome = false): string {
+  return bareHome && value === '~' ? homedir() : value.startsWith('~/') ? path.join(homedir(), value.slice(2)) : value;
 }

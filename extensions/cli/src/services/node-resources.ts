@@ -3,6 +3,7 @@ import * as fs from "node:fs";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
 import { checkPath } from "./node-files.js";
+import { WRITE_LOCK_NAME } from "./node-lock.js";
 export interface ResourceSnapshot {
   root: string;
   entries: Map<string, string>;
@@ -25,7 +26,7 @@ export function resourceSnapshot(
     if (stat.isDirectory()) {
       entries.set(relative, `${identity}:directory`);
       for (const name of fs.readdirSync(file).sort())
-        visit(path.join(file, name));
+        if (name !== WRITE_LOCK_NAME) visit(path.join(file, name));
     } else if (stat.isFile()) {
       const fd = fs.openSync(
         file,

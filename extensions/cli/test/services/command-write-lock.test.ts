@@ -84,7 +84,7 @@ test("explicit memory targets choose the mutation tree; errors release the lock"
   const other = path.join(root, "other"),
     actual = path.join(root, "actual");
   for (const dir of [other, actual]) {
-    fs.mkdirSync(dir);
+    fs.mkdirSync(path.join(dir, ".git"), { recursive: true });
     fs.writeFileSync(path.join(dir, "AGENTS.md"), "# Scope\n");
   }
   const release = await acquireWriteLock(actual);
@@ -169,7 +169,7 @@ test("explicit memory targets choose the mutation tree; errors release the lock"
 });
 
 test("independent Git worktrees can hold locks concurrently, including canonical aliases", async (t) => {
-  const { acquireWriteLock, writeLockRoot } =
+  const { acquireWriteLock, writeLockPath } =
     await import("../../src/services/node-lock.js");
   const { execFileSync } = await import("node:child_process");
   const root = fs.mkdtempSync(
@@ -199,8 +199,15 @@ test("independent Git worktrees can hold locks concurrently, including canonical
     stdio: "ignore",
   });
   fs.symlinkSync(tree, path.join(root, "alias"));
-  assert.equal(writeLockRoot(path.join(root, "alias", "missing")), tree);
+  assert.equal(
+    writeLockPath(path.join(root, "alias", "missing")),
+    path.join(tree, ".edges-write.lock"),
+  );
   const release = await acquireWriteLock(repo);
+  assert.equal(
+    fs.statSync(path.join(repo, ".edges-write.lock")).isDirectory(),
+    true,
+  );
   try {
     await (
       await acquireWriteLock(tree)
@@ -208,13 +215,14 @@ test("independent Git worktrees can hold locks concurrently, including canonical
   } finally {
     await release();
   }
+  assert.equal(fs.existsSync(path.join(repo, ".edges-write.lock")), false);
 });
 
 test(
   "lock compromise fails a live writer instead of reporting success",
   { timeout: 20000 },
   async (t) => {
-    const { createHash } = await import("node:crypto");
+    const { writeLockPath } = await import("../../src/services/node-lock.js");
     const root = fs.mkdtempSync(
       path.join(fs.realpathSync(tmpdir()), "lock-loss-"),
     );
@@ -237,13 +245,7 @@ test(
     });
     assert.equal((await once(child, "message"))[0], "locked");
     const exited = once(child, "exit");
-    fs.rmdirSync(
-      path.join(
-        fs.realpathSync(tmpdir()),
-        "edges-node-write-locks",
-        createHash("sha256").update(root).digest("hex") + ".lock",
-      ),
-    );
+    fs.rmdirSync(writeLockPath(root));
     const [code] = await exited;
     assert.notEqual(code, 0);
     assert.match(stderr, /ECOMPROMISED|ENOENT/);
@@ -315,7 +317,7 @@ test("all node-writing command groups lock; validation and persistence failures 
 });
 
 test("non-Git lock roots ignore AGENTS symlinks and directories as scope markers", async (t) => {
-  const { writeLockRoot } = await import("../../src/services/node-lock.js");
+  const { writeLockPath } = await import("../../src/services/node-lock.js");
   const root = fs.mkdtempSync(
     path.join(fs.realpathSync(tmpdir()), "lock-markers-"),
   );
@@ -324,8 +326,247 @@ test("non-Git lock roots ignore AGENTS symlinks and directories as scope markers
   fs.mkdirSync(child);
   fs.writeFileSync(path.join(child, "AGENTS.md"), "# Scope");
   fs.symlinkSync(path.join(child, "AGENTS.md"), path.join(root, "AGENTS.md"));
-  assert.equal(writeLockRoot(child), child);
+  assert.equal(
+    writeLockPath(child),
+    path.join(fs.realpathSync(tmpdir()), ".edges-write.lock"),
+  );
   fs.unlinkSync(path.join(root, "AGENTS.md"));
   fs.mkdirSync(path.join(root, "AGENTS.md"));
-  assert.equal(writeLockRoot(child), child);
+  assert.equal(
+    writeLockPath(child),
+    path.join(fs.realpathSync(tmpdir()), ".edges-write.lock"),
+  );
 });
+
+test("lock normalization follows scope/env literals and explicit Memory home expansion", async (t) => {
+  const { acquireWriteLock } = await import("../../src/services/node-lock.js");
+  const root = fs.mkdtempSync(
+    path.join(fs.realpathSync(tmpdir()), "lock-normalize-"),
+  );
+  const cwd = process.cwd(),
+    home = process.env.HOME;
+  t.after(() => {
+    process.chdir(cwd);
+    if (home === undefined) delete process.env.HOME;
+    else process.env.HOME = home;
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+  const literal = path.join(root, "~", "scope"),
+    expanded = path.join(root, "home", "scope");
+  for (const dir of [literal, expanded, path.join(root, "home")]) {
+    fs.mkdirSync(path.join(dir, ".git"), { recursive: true });
+    fs.writeFileSync(path.join(dir, "AGENTS.md"), "# Scope\n");
+  }
+  process.chdir(root);
+  process.env.HOME = path.join(root, "home");
+  const cases: { target: string; args: string[]; env: NodeJS.ProcessEnv }[] = [
+    {
+      target: literal,
+      args: [
+        "--scope",
+        "~/scope",
+        "memory",
+        "init",
+        "--memory-types",
+        "project",
+      ],
+      env: {},
+    },
+    {
+      target: literal,
+      args: ["memory", "init", "--memory-types", "project"],
+      env: { EDGES_SCOPE: "~/scope" },
+    },
+    {
+      target: literal,
+      args: ["memory", "init", "--memory-types", "project"],
+      env: { EDGES_REPO: "~/scope" },
+    },
+    {
+      target: expanded,
+      args: [
+        "memory",
+        "init",
+        "--target-dir",
+        "~/scope",
+        "--memory-types",
+        "project",
+      ],
+      env: {},
+    },
+    {
+      target: path.join(root, "~"),
+      args: [
+        "memory",
+        "init",
+        "--target-dir",
+        "~",
+        "--memory-types",
+        "project",
+      ],
+      env: {},
+    },
+    {
+      target: expanded,
+      args: [
+        "memory",
+        "restore",
+        "--repo-dir",
+        "~/scope",
+        "--archive",
+        "missing.tar.gz",
+      ],
+      env: {},
+    },
+    {
+      target: path.join(root, "home"),
+      args: [
+        "memory",
+        "restore",
+        "--repo-dir",
+        "~",
+        "--archive",
+        "missing.tar.gz",
+      ],
+      env: {},
+    },
+  ];
+  for (const { target, args, env } of cases) {
+    const release = await acquireWriteLock(target);
+    try {
+      const result = await run(args, { env });
+      assert.match(
+        result.stdout,
+        /write lock.*busy/i,
+        JSON.stringify({ args, env, result }),
+      );
+    } finally {
+      await release();
+    }
+  }
+});
+
+test("fresh non-Git ancestor init shares a stable lock before and after creating markers", async (t) => {
+  const { acquireWriteLock, writeLockPath } =
+    await import("../../src/services/node-lock.js");
+  const root = fs.mkdtempSync(
+    path.join(fs.realpathSync(tmpdir()), "lock-bootstrap-"),
+  );
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const child = path.join(root, "child");
+  fs.mkdirSync(child);
+  const before = writeLockPath(child);
+  const release = await acquireWriteLock(root);
+  try {
+    const blocked = await run(
+      [
+        "memory",
+        "init",
+        "--target-dir",
+        child,
+        "--root-dir",
+        root,
+        "--memory-types",
+        "project",
+      ],
+      { env: {} },
+    );
+    assert.match(blocked.stdout, /write lock.*busy/i);
+    assert.equal(fs.existsSync(path.join(root, "AGENTS.md")), false);
+  } finally {
+    await release();
+  }
+  const result = await run(
+    [
+      "memory",
+      "init",
+      "--target-dir",
+      child,
+      "--root-dir",
+      root,
+      "--memory-types",
+      "project",
+    ],
+    { env: {} },
+  );
+  assert.equal(result.exitCode, 0, result.stdout);
+  assert.equal(fs.existsSync(path.join(root, "AGENTS.md")), true);
+  assert.equal(writeLockPath(child), before);
+  assert.equal(writeLockPath(root), before);
+});
+
+test("persistence diagnostics survive a simultaneous lock release failure", async (t) => {
+  const { writeLockPath } = await import("../../src/services/node-lock.js");
+  const { syncBuiltinESMExports } = await import("node:module");
+  const root = fs.mkdtempSync(
+    path.join(fs.realpathSync(tmpdir()), "lock-double-failure-"),
+  );
+  fs.mkdirSync(path.join(root, ".git"));
+  fs.writeFileSync(path.join(root, "AGENTS.md"), "# Scope\n");
+  const lock = writeLockPath(root);
+  t.after(() => {
+    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(lock, { recursive: true, force: true });
+  });
+  const mock = t.mock.method(fs, "fsyncSync", () => {
+    fs.writeFileSync(path.join(lock, "obstruction"), "x");
+    throw Error("injected persistence cause");
+  });
+  syncBuiltinESMExports();
+  try {
+    const result = await run(
+      ["--scope", root, "memory", "init", "--memory-types", "project"],
+      { env: {} },
+    );
+    assert.notEqual(result.exitCode, 0);
+    const output = result.stdout + result.stderr;
+    for (const text of [
+      "injected persistence cause",
+      "Affected:",
+      "Recovery copies:",
+      "Reload affected nodes",
+      "Node write lock release failed",
+    ])
+      assert.ok(output.includes(text), `${text}: ${output}`);
+  } finally {
+    mock.mock.restore();
+    syncBuiltinESMExports();
+  }
+});
+
+test(
+  "another process cannot enter non-Git init after ancestor marker creation",
+  { timeout: 20000 },
+  async (t) => {
+    const root = fs.mkdtempSync(
+      path.join(fs.realpathSync(tmpdir()), "lock-bootstrap-process-"),
+    );
+    t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+    const childDir = path.join(root, "child");
+    fs.mkdirSync(childDir);
+    const code = `import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';const link=fs.linkSync;fs.linkSync=(a,b)=>{link(a,b);if(String(b)===${JSON.stringify(path.join(root, "AGENTS.md"))}){process.send('created');fs.readSync(0,Buffer.alloc(1),0,1,null);}};syncBuiltinESMExports();const {run}=await import('./src/program.ts');process.send(await run(${JSON.stringify(["memory", "init", "--target-dir", childDir, "--root-dir", root, "--memory-types", "project"])},{env:{}}));process.disconnect();`;
+    const first = spawn(
+      process.execPath,
+      ["--import", "tsx", "--input-type=module", "-e", code],
+      { stdio: ["pipe", "pipe", "pipe", "ipc"] },
+    );
+    t.after(() => first.kill());
+    assert.equal((await once(first, "message"))[0], "created");
+    try {
+      assert.match(
+        (
+          await run(
+            ["--scope", root, "memory", "init", "--memory-types", "project"],
+            { env: {} },
+          )
+        ).stdout,
+        /write lock.*busy/i,
+      );
+    } finally {
+      first.stdin!.write("x");
+    }
+    const [result] = await once(first, "message");
+    assert.equal(result.exitCode, 0, result.stdout);
+    await once(first, "exit");
+  },
+);

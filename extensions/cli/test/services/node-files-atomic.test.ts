@@ -53,3 +53,59 @@ test("atomic overwrite refreshes identity for the next save and still rejects ex
     /identity changed/,
   );
 });
+
+test("runtime lock is excluded from snapshots/import while active locks block relocation", async (t) => {
+  const { resourceSnapshot, validateResources } =
+    await import("../../src/services/node-resources.js");
+  const { NodeService } = await import("../../src/services/node-service.js");
+  const root = fs.mkdtempSync(
+    path.join(fs.realpathSync(tmpdir()), "node-runtime-lock-"),
+  );
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const source = path.join(root, "source");
+  fs.mkdirSync(source);
+  fs.writeFileSync(path.join(source, "index.md"), "Source\n");
+  fs.writeFileSync(
+    path.join(source, ".edges-write.lock-notes"),
+    "keep ordinary attachment",
+  );
+  const lock = path.join(source, "nested", ".edges-write.lock");
+  fs.mkdirSync(path.dirname(lock));
+  // Baseline includes the ordinary nested directory; only the exact runtime name
+  // is excluded, so unrelated files and directories remain in the snapshot.
+  const baseline = resourceSnapshot(source);
+  fs.mkdirSync(lock);
+  fs.writeFileSync(path.join(lock, "AGENTS.md"), "runtime data");
+  assert.doesNotThrow(() => validateResources(baseline));
+  assert.ok(
+    ![...resourceSnapshot(source).entries.keys()].some((name) =>
+      name.includes(".edges-write.lock/"),
+    ),
+  );
+  const service = new NodeService({ managedRoot: root });
+  const imported = await service.import(
+    path.join(source, "index.md"),
+    path.join(root, "copy", "index.md"),
+  );
+  assert.equal(
+    fs.existsSync(
+      path.join(imported.directoryPath, "nested", ".edges-write.lock"),
+    ),
+    false,
+  );
+  assert.equal(
+    fs.readFileSync(
+      path.join(imported.directoryPath, ".edges-write.lock-notes"),
+      "utf8",
+    ),
+    "keep ordinary attachment",
+  );
+  const node = (await service.get(path.join(source, "index.md")))!;
+  await assert.rejects(
+    service.move(node, path.join(root, "moved", "index.md")),
+    /active.*write lock/i,
+  );
+  await assert.rejects(service.destroy(node), /active.*write lock/i);
+  assert.equal(fs.existsSync(lock), true);
+  assert.equal(fs.readFileSync(node.path, "utf8"), "Source\n");
+});

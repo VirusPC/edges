@@ -1,3 +1,5 @@
+import path from "node:path";
+import { expandHomePath } from "./utils/filesystem.js";
 import { Command, CommanderError } from "commander";
 import {
   type CliContext,
@@ -103,8 +105,8 @@ function addRootCommand(
   return program;
 }
 
-/** Inventory of content mutations. rootDir limits traversal; targetDir/repoDir
- * select the actual scope. Artifacts operations do not use the node repository. */
+/** Inventory of content mutations. init may also write ancestors up to rootDir.
+ * Normalize each option as its action does, without reading business documents. */
 function commandWriteTarget(
   command: Command,
   env: NodeJS.ProcessEnv,
@@ -123,11 +125,17 @@ function commandWriteTarget(
         (name === "doctor" && options.apply) ||
         (name === "migrate" && !options.dryRun)));
   if (!writes) return undefined;
-  return (
-    (parent === "memory"
-      ? (options.targetDir ?? options.repoDir)
-      : undefined) ??
-    (env.EDGES_SCOPE?.trim() || env.EDGES_REPO?.trim() || process.cwd())
+  if (parent === "memory" && options.targetDir)
+    return path.resolve(expandHomePath(options.targetDir));
+  if (
+    parent === "memory" &&
+    name === "restore" &&
+    options.repoDir !== undefined
+  )
+    return path.resolve(expandHomePath(options.repoDir, true));
+  // Scope/environment values are literal paths, including a quoted tilde.
+  return path.resolve(
+    env.EDGES_SCOPE?.trim() || env.EDGES_REPO?.trim() || process.cwd(),
   );
 }
 
@@ -182,27 +190,49 @@ export async function run(
         err.code === "commander.helpDisplayed" ||
         err.code === "commander.help"
       ) {
-        return { exitCode: 0, stdout: helpText(capture.text()), stderr: "" };
+        ctx.result = {
+          exitCode: 0,
+          stdout: helpText(capture.text()),
+          stderr: "",
+        };
+      } else if (err.code === "commander.version") {
+        ctx.result = { exitCode: 0, stdout: `${VERSION}\n`, stderr: "" };
+      } else {
+        ctx.result = usageError(
+          err.message.replace(/^error:\s*/i, ""),
+          usageScope(argv),
+        );
       }
-      if (err.code === "commander.version") {
-        return { exitCode: 0, stdout: `${VERSION}\n`, stderr: "" };
-      }
-      const reason = err.message.replace(/^error:\s*/i, "");
-      return usageError(reason, usageScope(argv));
+    } else {
+      ctx.result = usageError(
+        err instanceof Error ? err.message : String(err),
+        usageScope(argv),
+      );
     }
-    const message = err instanceof Error ? err.message : String(err);
-    return usageError(message, usageScope(argv));
   } finally {
     try {
       await release?.();
     } catch (error) {
-      return usageError(
-        `Node write lock release failed: ${String(error)}`,
-        usageScope(argv),
-      );
+      const message = `Node write lock release failed: ${String(error)}`;
+      if (ctx.result && ctx.result.exitCode !== 0) {
+        // Preserve the original structured error and every recovery path verbatim.
+        ctx.result = {
+          ...ctx.result,
+          stderr:
+            ctx.result.stderr +
+            (ctx.result.stderr && !ctx.result.stderr.endsWith("\n")
+              ? "\n"
+              : "") +
+            message +
+            "\n",
+        };
+      } else {
+        const previousStderr = ctx.result?.stderr ?? "";
+        ctx.result = usageError(message, usageScope(argv));
+        ctx.result.stderr = previousStderr + ctx.result.stderr;
+      }
     }
   }
-
   return (
     ctx.result ??
     usageError("missing command. Use edges --help.", usageScope(argv))

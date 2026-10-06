@@ -140,7 +140,7 @@ Task 普通 CLI 默认当前作用域 maintenance，领域板显式 --purpose do
 
 ## 生命周期与一致性
 
-2026-10-06 简化已接入共享实例、operations 遍历、命令锁与单文件原子保存；整体完成状态仍待对应简化计划的独立复核。写命令在业务读取前取得稳定工作树锁，独立 worktree 不互锁，非 Git 树以最外层物理 AGENTS 祖先为锁根；锁文件置于系统临时目录。命令内既有 Service 工厂保留不同 managedRoot 与 hooks，不跨命令复用。保存后更新替换文件身份；外部原文/身份检查和多文件失败恢复仍保留。具体命令范围及路径见[补充设计](2026-10-06-node-identity-simplification.md#命令锁与单文件原子保存)。
+2026-10-06 简化已接入共享实例、operations 遍历、命令锁与单文件原子保存；整体完成状态仍待对应简化计划的独立复核。写命令在业务读取前取得稳定工作树锁，独立 worktree 不互锁，非 Git 写入共享一个固定临时锁；init 可创建或更新 --root-dir 范围内的祖先索引，互不相关的非 Git 树也串行。Git 锁位于工作树根 .edges-write.lock/，非 Git 锁位于系统临时目录同名路径。保留名不作为资源或导入内容，包含活跃锁的单元拒绝搬移或删除。命令内既有 Service 工厂保留不同 managedRoot 与 hooks，不跨命令复用。保存后更新替换文件身份；外部原文/身份检查和多文件失败恢复仍保留。具体命令范围及路径见[补充设计](2026-10-06-node-identity-simplification.md#命令锁与单文件原子保存)。
 
 - 原地更新：同一 NodeService 内同一规范化入口路径只保留一个受管可变实例，get/query/list 复用该实例。首次非 AGENTS 叶子加载保留显式构造器与 models/modelForReference 扩展选择；缓存后的 typed get 只作兼容类型约束，BaseNode 请求沿用解析模型，AGENTS 保持权威 InternalNode。成功 create/update/move 返回原实例；move 同步实例 path/id/关系及受影响子节点的身份表键，destroy 移除被删节点的受管身份。
 - 多个调用方共享实例上的顺序修改，保存节点时写入完整当前状态。create/import/move/destroy 维护索引或引用时，同样保存实际受影响节点的完整当前状态；不自动保存无关节点。以当前实例生成校验草稿，以旧入口及资源快照检测外部变化，失败保留调用方原修改，不做多副本三方合并。详细合同见[节点共享状态简化](2026-10-06-node-identity-simplification.md)。

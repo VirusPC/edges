@@ -84,3 +84,6 @@ extensions/cli/src/commands/tasks/project/assets/review-page/
 
 # Owner-local correction recovery snapshots (private opt-in may contain secrets).
 **/.ownership-correction/
+
+# Worktree-local runtime write lock (proper-lockfile directory).
+/.edges-write.lock/

@@ -1,7 +1,7 @@
 import { isScope } from "../scope.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { homedir } from "node:os";
+import { expandHomePath } from "../../utils/filesystem.js";
 import { randomUUID } from "node:crypto";
 import { discoverLayerTypes } from "./types.js";
 export const AGENTS_FILE_NAME = "AGENTS.md";
@@ -118,7 +118,7 @@ export function writeAtomic(file: string, content: string): void {
 }
 export function resolveTarget(raw: string): string {
   const target = realPath(
-    raw.startsWith("~/") ? path.join(homedir(), raw.slice(2)) : raw,
+    expandHomePath(raw),
   );
   if (!isDirectory(target))
     throw new Error(`目标目录不存在或不是目录: ${target}`);

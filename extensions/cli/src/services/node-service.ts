@@ -1,3 +1,4 @@
+import { WRITE_LOCK_NAME, assertNoWriteLock } from "./node-lock.js";
 import * as fs from "node:fs";
 import path from "node:path";
 import { BaseNode, InternalNode } from "../models/index.js";
@@ -441,6 +442,7 @@ export class NodeService {
       checkPath(unit);
       if (unit === this.managedRoot || !within(unit, this.managedRoot))
         throw new Error(`Cannot relocate or destroy managed root: ${unit}`);
+      assertNoWriteLock(unit);
     }
     return units;
   }
@@ -790,6 +792,7 @@ export class NodeService {
     let copied: ResourceSnapshot | undefined;
     try {
       fs.cpSync(sourceRoot, destRoot, {
+        filter: source => path.basename(source) !== WRITE_LOCK_NAME,
         recursive: true,
         errorOnExist: true,
         force: false,
