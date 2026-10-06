@@ -28,6 +28,7 @@
 - 纯树算法归 operations；Service 通过现有 resolve/load 回调提供引用边界和加载。operations/traverse 不导入 services、文件 IO 或 NodeCache。
 - query、登记节点收集、拟提交图校验复用同一树算法，各自关系范围、删除检查、计划草稿覆盖和错误处理不变；不新增公共 enter/shouldEnter。
 - 通用 filter/map/groupBy/find 随 async-query.ts 从 utils 移至 operations，继续泛型化；不改变链式惰性语义、不扩大算法种类。
+- 本轮只迁通用方法；Tasks 等业务专用操作不抽取、不搬迁，仅更新对通用 operations 的引用。
 - 不新增 NodeTree、事务/session 框架、事件总线、dirty 合并替代物、OS 权限系统、公共 reload API 或流处理库。
 - 只在独立 worktree 修改；不读取私有 users/journal，不改 posts、Obsidian workspace 或真实节点内容；不运行会进入真实私有索引的根全仓查询。
 - 重复批量修改测试时使用 TypeScript 脚本并检查差异。保留正文、附件、runlog、引用、回滚等业务断言，不通过删除断言掩盖回归。

@@ -18,6 +18,8 @@
 
 用户随后确认采用通用布局：`src/operations/` 与 models、services、utils 同级，包含 traverse.ts 和从 utils 移来的 async-query.ts。traverse 依赖领域模型，async-query 保持泛型，不限定 Node；两者均不承担文件 IO 或 CLI 编排。此决定替代早先仅把树操作放入 models/operations 的布局。
 
+本轮只迁通用方法。用户讨论过将 Tasks 专用操作一起迁入，随后明确暂不执行；现有业务模块保持原位，仅更新对通用 operations 的引用。
+
 Service 提供引用解析、范围限制与节点加载的现有回调，负责身份表、持久化、文件/资源快照及生命周期写计划。`operations` 不导入 services、文件读写或 NodeCache。异步遍历是按需调用加载回调，不代表模型拥有文件系统。
 
 复用同一遍历内核处理三条调用链：query 的读取遍历、`#registered` 的登记节点收集、`#validateGraph` 的拟提交关系校验。后两者的根集合、关系范围、计划草稿覆盖、删除检查及范围外处理保留在 Service；只消除重复 DFS、seen/active 和环检测，不统一它们不同的业务范围。多根调用在一次遍历中共用去重和当前递归路径，不依次创建多个独立遍历来重复加载相交子树。
