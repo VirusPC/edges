@@ -1,7 +1,7 @@
 import { isWithinPath } from '../../utils/filesystem.js';
 import * as fs from "node:fs";
 import path from "node:path";
-import { BaseNode, InternalNode, TaskNode } from "../../domain/models/index.js";
+import { BaseNode, AgentsNode, TaskNode } from "../../domain/models/index.js";
 import { domainFields, scalar } from "../../domain/models/core/fields.js";
 import { decodeBody } from "../../domain/models/internal/parse.js";
 import {
@@ -50,7 +50,7 @@ export async function taskBoardQuery(
       return undefined;
     },
   });
-  const board = await service.get(entry, InternalNode);
+  const board = await service.get(entry, AgentsNode);
   if (!board || !decodeBody(board.body).sections.memory.present)
     throw new TasksError(
       "VALIDATION_ERROR",
@@ -144,7 +144,7 @@ export function taskLocationOf(node: TaskNode, root: string) {
     stem,
   };
 }
-export function projectLocationOf(node: InternalNode, root: string) {
+export function projectLocationOf(node: AgentsNode, root: string) {
   const board = path.dirname(node.directoryPath);
   if (path.basename(board) !== "tasks") return undefined;
   const location = boardLocationOf(board, root);

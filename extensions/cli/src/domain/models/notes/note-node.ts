@@ -1,6 +1,6 @@
 import { fromMarkdown } from "mdast-util-from-markdown";
 import type { Nodes } from "mdast";
-import { LeafNode } from "../core/leaf-node.js";
+import { BaseNode } from "../core/base-node.js";
 function text(node: Nodes): string {
   return "value" in node
     ? node.value
@@ -8,7 +8,7 @@ function text(node: Nodes): string {
       ? node.children.map(text).join("")
       : "";
 }
-export class NoteNode extends LeafNode {
+export class NoteNode extends BaseNode {
   override readonly type = "note" as const;
   get title(): string {
     const heading = fromMarkdown(this.body).children.find(

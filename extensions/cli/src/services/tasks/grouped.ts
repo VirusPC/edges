@@ -1,7 +1,7 @@
 import { validateTaskDocInput } from "./task-doc.js";
 import path from "node:path";
 import { realpathSync } from "node:fs";
-import { InternalNode } from "../../domain/models/index.js";
+import { AgentsNode } from "../../domain/models/index.js";
 import { query } from "../../domain/operations/query.js";
 import { projectLocationOf } from "./node-query.js";
 import { taskBoardLocation, type TaskPurpose } from "./paths.js";
@@ -279,7 +279,7 @@ export async function listRepositoryGroupedByProject(
   const projects = await service.query(root, {
     types: ["agents"], includeHarness: true,
   })
-    .filter((node): node is InternalNode => node instanceof InternalNode)
+    .filter((node): node is AgentsNode => node instanceof AgentsNode)
     .map(node => projectLocationOf(node, root))
     .filter((entry): entry is NonNullable<typeof entry> => !!entry)
     .filter(entry => !purpose || entry.source.purpose === purpose)

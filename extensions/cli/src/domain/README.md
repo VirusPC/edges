@@ -39,9 +39,9 @@ Model 不做 IO，不依赖 Service 或 operations；operations 不依赖 Servic
 
 ## 共同的数据基础
 
-节点跟随文件系统，以目录组织、以入口 Markdown 标识。`BaseNode` 实现只有 `id/name/description` 的 `NodeReference`；ID 是规范化的绝对入口路径。`InternalNode` 对应 AGENTS，`LeafNode` 派生 Task、Memory、Note、Skill。
+节点跟随文件系统，以目录组织、以入口 Markdown 标识。`BaseNode` 实现只有 `id/name/description` 的 `NodeReference`；ID 是规范化的绝对入口路径。`AgentsNode`、`ReadmeNode` 及 Task、Memory、Note、Skill 均直继 `BaseNode`。
 
-InternalNode 分开维护 `localChildren` 和 `descendantChildren`，分别表达本层与下层索引。`harness` 是独立的维护关系，不混入 children；遍历因此可以选择是否跨维护层。引用可以跨目录，parent 的恢复仍遵循物理目录与 Service 的管理边界。
+AgentsNode 分开维护 `localChildren` 和 `descendantChildren`，分别表达本层与下层索引。`harness` 是独立的维护关系，不混入 children；遍历因此可以选择是否跨维护层。引用可以跨目录，parent 的恢复仍遵循物理目录与 Service 的管理边界。
 
 节点只建模 Markdown 入口，附件不扩展成资源节点。目录识别、入口名称、AGENTS 章节与生命周期单位集中在 [models/layout.ts](models/layout.ts)；Service 在此基础上读取实际文件并决定操作范围。完整类图、目录职责、解析流程和扩展方式见 [models/README.md](models/README.md)。
 

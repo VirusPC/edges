@@ -1,4 +1,4 @@
-import { InternalNode } from "../../domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import {
   ENTRIES_SECTIONS,
@@ -195,8 +195,8 @@ export function buildEntryFields(
   return fields;
 }
 /** README type indexes use ReadmeNode; a not-yet-migrated AGENTS.md index keeps its legacy model. */
-export const typeIndexNode = (file: string): InternalNode | ReadmeNode =>
-  basename(file) === "README.md" ? new ReadmeNode(file) : new InternalNode(file);
+export const typeIndexNode = (file: string): AgentsNode | ReadmeNode =>
+  basename(file) === "README.md" ? new ReadmeNode(file) : new AgentsNode(file);
 /** A missing legacy AGENTS.md index is recreated in its own legacy dialect until migrated. */
 export function typeIndexTemplate(file: string, name: string): string {
   const template = readIndexTemplate(typeIndexTemplateName(name), name, name);
@@ -283,7 +283,7 @@ export async function refreshIndex(
   if (name in discoverLayerTypes(target) && !isExternalType(name))
     fs.mkdirSync(dirname(file), { recursive: true });
   const entry = prepareMemoryWrite(target, file);
-  const node = (await service.get(entry)) as InternalNode | ReadmeNode | undefined;
+  const node = (await service.get(entry)) as AgentsNode | ReadmeNode | undefined;
   const existed = !!node, before = node?.body ?? "";
   const source = existed
     ? before

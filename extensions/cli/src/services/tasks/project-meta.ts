@@ -1,4 +1,4 @@
-import { InternalNode } from "../../domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { decodeBody } from '../../domain/models/internal/parse.js';
 import { createAgentsDocument } from "../../domain/models/internal/document.js";
@@ -204,11 +204,11 @@ function projectNodes(target: BoardTarget): NodeService {
 function selectedGroup(target: BoardTarget) { return typeof target === 'string' ? undefined : target.indexGroup; }
 async function prepareProjectWrite(target: BoardTarget, service: NodeService): Promise<void> {
   await assertBoardPath(target, rootAgentsAbsPath(target));
-  const owner = await service.get(path.join(realpathSync(scopeDir(target)), 'AGENTS.md'), InternalNode);
+  const owner = await service.get(path.join(realpathSync(scopeDir(target)), 'AGENTS.md'), AgentsNode);
   const board = path.join(realpathSync(scopeDir(target)), boardRel(target), 'AGENTS.md');
   for (const file of [owner?.path, board]) {
     if (!file) continue;
-    const node = file === owner?.path ? owner : await service.get(file, InternalNode);
+    const node = file === owner?.path ? owner : await service.get(file, AgentsNode);
     if (node && /<!-- task-projects:(?:start|end) -->/.test(node.body))
       throw new TasksError('VALIDATION_ERROR', 'migration-required: run pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root ' + scopeDir(target) + ' --write');
   }
@@ -233,14 +233,14 @@ export async function refreshProjectIndex(
   }
 
   const rootAbs = rootAgentsAbsPath(repoPath);
-  let board = await service.get(rootAbs, InternalNode);
-  if (!board) board = await service.create(new InternalNode(rootAbs), { body: '# Tasks\n\n' + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
+  let board = await service.get(rootAbs, AgentsNode);
+  if (!board) board = await service.create(new AgentsNode(rootAbs), { body: '# Tasks\n\n' + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
   const updates = new Map(sortProjectRecords(records).map(record => [path.resolve(path.dirname(rootAbs), record.dir, path.basename(record.path)), { name: record.title, description: oneLineDescription(record.description) }]));
   const update = (refs: typeof board.localChildren) => refs.map(ref => updates.has(ref.id) ? { ...ref, ...updates.get(ref.id) } : ref);
   const localChildren = update(board.localChildren), descendantChildren = update(board.descendantChildren);
   for (const [id, fields] of updates) if (!board.children.some(ref => ref.id === id)) localChildren.push({ id, ...fields });
   await service.update(board, { localChildren, descendantChildren });
-  const owner = await service.get(path.join(realpathSync(scopeDir(repoPath)), 'AGENTS.md'), InternalNode);
+  const owner = await service.get(path.join(realpathSync(scopeDir(repoPath)), 'AGENTS.md'), AgentsNode);
   if (owner && !owner.children.some(ref => ref.id === board.id)) {
     const group = selectedGroup(repoPath)!; // prepareProjectWrite requires an explicit choice.
     await service.update(owner, {
@@ -260,7 +260,7 @@ export async function ensureProjectMetadata(
 ): Promise<TaskProjectRecord[]> {
   await prepareProjectWrite(repoPath, service);
   const rootAbs = rootAgentsAbsPath(repoPath);
-  if (!await service.get(rootAbs, InternalNode)) await service.create(new InternalNode(rootAbs), { body: "# Tasks\n\n" + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
+  if (!await service.get(rootAbs, AgentsNode)) await service.create(new AgentsNode(rootAbs), { body: "# Tasks\n\n" + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
 
   for (const id of await collectProjectIds(repoPath, writer, additional)) {
     if (skipId === id) {
@@ -268,7 +268,7 @@ export async function ensureProjectMetadata(
     }
     const entry = await resolveProjectEntry(repoPath, id, writer);
     if (!entry.exists) {
-      await service.create(new InternalNode(entry.abs), { body: renderProjectAgents({
+      await service.create(new AgentsNode(entry.abs), { body: renderProjectAgents({
           title: seedTitleFor(id),
           description: seedDescriptionFor(id),
         }) }, { indexGroup: "local" });
@@ -314,7 +314,7 @@ export async function createProject(
   if ((await resolveProjectEntry(repoPath, id, writer)).exists) {
     throw new TasksError("VALIDATION_ERROR", `project already exists: ${id}`);
   }
-  await service.create(new InternalNode(path.join(realpathSync(scopeDir(repoPath)), rel)), { body: renderProjectAgents({ title, description }) }, { indexGroup: "local" });
+  await service.create(new AgentsNode(path.join(realpathSync(scopeDir(repoPath)), rel)), { body: renderProjectAgents({ title, description }) }, { indexGroup: "local" });
   await refreshProjectIndex(repoPath, writer, [id], service);
   return {
     project: id,
@@ -349,7 +349,7 @@ export async function updateProject(
   }
   const node = entry.kind === "readme"
     ? (await service.get(entry.abs, ReadmeNode))!
-    : (await service.get(entry.abs, InternalNode))!;
+    : (await service.get(entry.abs, AgentsNode))!;
   const parsed = parseProjectAgents(node.body);
   const title = patch.title === undefined ? parsed.title : parseProjectTitle(patch.title);
   const description =
@@ -363,7 +363,7 @@ export async function updateProject(
     tail: parsed.tail ?? (entry.kind === "readme" ? "\n" : undefined),
   });
   if (entry.kind === "readme") await service.update(node as ReadmeNode, { body });
-  else await service.update(node as InternalNode, { body });
+  else await service.update(node as AgentsNode, { body });
   await refreshProjectIndex(repoPath, writer, [], service);
   return {
     project: id,

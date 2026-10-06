@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   BaseNode,
-  InternalNode,
+  AgentsNode,
   SkillNode,
   TaskNode,
   MemoryNode,
@@ -13,7 +13,7 @@ test("directory identity is independent of YAML and references project only publ
   const skill = new SkillNode("/repo/skills/../skills/a/SKILL.md");
   assert.equal(skill.id, "/repo/skills/a/SKILL.md");
   assert.equal(skill.isLeaf, true);
-  const root = new InternalNode("/repo/AGENTS.md").parse(
+  const root = new AgentsNode("/repo/AGENTS.md").parse(
     "my untouched comment\n",
   );
   root.addChild("local", skill);
@@ -73,7 +73,7 @@ test("memory and skill use validated structured fields and preserve unknown meta
   assert.deepEqual(skill.metadata?.vendor, { keep: true });
 });
 test("internal structured updates preserve prose and reject body conflicts atomically", () => {
-  const root = new InternalNode("/repo/AGENTS.md").parse(
+  const root = new AgentsNode("/repo/AGENTS.md").parse(
     "my untouched comment\n",
   );
   root.update(
@@ -95,7 +95,7 @@ test("internal structured updates preserve prose and reject body conflicts atomi
 test("ordinary navigation links remain authored prose rather than children", () => {
   const source =
     "## 本层记忆\n\n- [Guide](README.md) — guide\n- [Web](https://example.test/)\n- [A](a/index.md#section)\n";
-  const node = new InternalNode("/repo/AGENTS.md").parse(source);
+  const node = new AgentsNode("/repo/AGENTS.md").parse(source);
   assert.deepEqual(node.children, [{ id: "/repo/a/index.md", name: "A" }]);
   assert.equal(node.serialize(), source);
   node.updateChild("/repo/a/index.md", { name: "Changed" });
@@ -155,7 +155,7 @@ test("updates preserve unedited body bytes and reject non-entry child identities
   );
   node.update({ priority: "high" }, update);
   assert.equal(node.body, "Body without trailing newline");
-  const root = new InternalNode("/repo/AGENTS.md").parse("Keep\n");
+  const root = new AgentsNode("/repo/AGENTS.md").parse("Keep\n");
   assert.throws(
     () => root.addChild("local", { id: "/repo/README.md" }),
     /entry/,
@@ -185,7 +185,7 @@ test("structured defaults preserve explicitly supplied task metadata and diagnos
 
 test("mixed navigation/index items expose nodes without discarding their authored links", () => {
   const source = "## 本层记忆\n\n- [A](a/index.md) and [Guide](README.md)\n";
-  const root = new InternalNode("/repo/AGENTS.md").parse(source);
+  const root = new AgentsNode("/repo/AGENTS.md").parse(source);
   assert.deepEqual(
     root.children.map((child) => child.id),
     ["/repo/a/index.md"],
@@ -204,7 +204,7 @@ test("mixed navigation/index items expose nodes without discarding their authore
 
 test("ordinary percent filenames stay navigation while malformed entry paths fail", () => {
   const source = "## 本层记忆\n\n- [Guide](docs/100%.md)\n- [A](a/index.md)\n";
-  const root = new InternalNode("/repo/AGENTS.md").parse(source);
+  const root = new AgentsNode("/repo/AGENTS.md").parse(source);
   assert.deepEqual(
     root.children.map((child) => child.id),
     ["/repo/a/index.md"],

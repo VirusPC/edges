@@ -1,6 +1,6 @@
 import { readEntry, saveEntries } from '../node/node-files.js';
 import { canonicalPath, findAncestor } from "../../utils/filesystem.js";
-import { InternalNode } from "../../domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import * as fs from "node:fs";
 import { ENTRY_NAMES, LEGACY_LEAF_ENTRY } from "../../domain/models/layout.js";
 import { join, dirname, relative, resolve } from "node:path";
@@ -140,7 +140,7 @@ export function localOwnershipPaths(
 ): Set<string> {
   const file = join(resolve(target), AGENTS_FILE_NAME);
   const text = source ?? (isFile(file) ? readText(file) : "");
-  const node = new InternalNode(file).parse(text);
+  const node = new AgentsNode(file).parse(text);
   return new Set(
     node.localChildren.flatMap((reference) => {
       const path = canonicalPath(reference.id);

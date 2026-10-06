@@ -171,10 +171,10 @@ format: ordinary
 });
 
 test("layer AGENTS owns README type indexes under .harness but not ordinary README links", async () => {
-  const { InternalNode } = await import(
-    "../../src/domain/models/internal/internal-node.js"
+  const { AgentsNode } = await import(
+    "../../src/domain/models/internal/agents-node.js"
   );
-  const node = new InternalNode("/repo/AGENTS.md").parse(
+  const node = new AgentsNode("/repo/AGENTS.md").parse(
     [
       "<!-- project-harness-local:start -->",
       "## 本层系统维护信息",

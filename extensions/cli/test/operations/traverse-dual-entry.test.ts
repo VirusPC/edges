@@ -4,13 +4,13 @@ import * as fs from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { NodeService } from "../../src/services/node/node-service.js";
-import { BaseNode, InternalNode, LeafNode, ReadmeNode } from "../../src/domain/models/index.js";
+import { BaseNode, AgentsNode, LeafNode, ReadmeNode } from "../../src/domain/models/index.js";
 import { traverse } from "../../src/domain/operations/traverse.js";
 import type { NodeQueryOptions } from "../../src/domain/operations/traverse.js";
 
 const refs = (nodes: BaseNode[]) => nodes.map((n) => ({ id: n.id }));
 const agents = (dir: string, local: BaseNode[] = [], descendants: BaseNode[] = []) =>
-  new InternalNode(`/r/${dir}/AGENTS.md`).create(
+  new AgentsNode(`/r/${dir}/AGENTS.md`).create(
     { localChildren: refs(local), descendantChildren: refs(descendants) },
     { operation: "create" },
   );
@@ -140,7 +140,7 @@ test("NodeService reaches README composition from scope AGENTS; localOnly narrow
   const rel = (nodes: BaseNode[]) => nodes.map((n) => path.relative(root, n.path));
   assert.deepEqual(rel(await service.list(root)), ["AGENTS.md", "README.md", "tasks/README.md", "lower/README.md"]);
   assert.deepEqual(rel(await service.list(root, { localOnly: true })), ["AGENTS.md", "README.md", "tasks/README.md"]);
-  const agentsNode = (await service.list(root))[0] as InternalNode;
+  const agentsNode = (await service.list(root))[0] as AgentsNode;
   assert.equal(agentsNode.children.length, 0);
 
   fs.rmSync(path.join(root, "README.md"));

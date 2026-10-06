@@ -61,7 +61,7 @@ export function nodeBoardWriter(): BoardWriter {
 
 /** Legacy fixtures opt into the real index model; production never performs this scan. */
 export async function indexTaskFixtureBoard(board: string): Promise<void> {
-  const { InternalNode } = await import("../../../src/domain/models/internal/internal-node.js");
+  const { AgentsNode } = await import("../../../src/domain/models/internal/agents-node.js");
   const { TASK_STATUSES } = await import('../../../src/domain/models/tasks/types.js');
   const { isUserProjectSlug } = await import('../../../src/domain/models/tasks/project.js');
   const { renderProjectAgents, seedTitleFor, seedDescriptionFor } = await import('../../../src/services/tasks/project-meta.js');
@@ -71,7 +71,7 @@ export async function indexTaskFixtureBoard(board: string): Promise<void> {
   const loadIndex = async (file: string, fallback: string) => {
     let source = fallback;
     try { source = await readFile(file,'utf8'); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-    return new InternalNode(file).parse(source);
+    return new AgentsNode(file).parse(source);
   };
   const root = await loadIndex(path.join(board,'AGENTS.md'),'# Tasks\n');
   for (const name of await readdir(board)) {
@@ -109,11 +109,11 @@ export async function writeIndexedTaskFixture(...args: Parameters<typeof writeFi
 }
 
 export async function writeFixtureIndex(file: string, children: string[], descendants: string[] = []): Promise<void> {
-  const { InternalNode } = await import("../../../src/domain/models/internal/internal-node.js");
+  const { AgentsNode } = await import("../../../src/domain/models/internal/agents-node.js");
   const path = await import('node:path');
   const { realpath } = await import('node:fs/promises');
   await mkdir(path.dirname(file),{recursive:true});
   file=path.join(await realpath(path.dirname(file)),path.basename(file));
   const references = (paths: string[]) => paths.map(id=>({id:path.resolve(path.dirname(file),id)}));
-  await writeFile(file,new InternalNode(file).create({localChildren:references(children),descendantChildren:references(descendants)},{operation:'create'}).serialize());
+  await writeFile(file,new AgentsNode(file).create({localChildren:references(children),descendantChildren:references(descendants)},{operation:'create'}).serialize());
 }

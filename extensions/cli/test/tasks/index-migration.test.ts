@@ -5,7 +5,7 @@ import fs from "node:fs";
 import { syncBuiltinESMExports } from "node:module";
 import path from "node:path";
 import { tmpdir } from "node:os";
-import { InternalNode, TaskNode } from "../../src/domain/models/index.js";
+import { AgentsNode, TaskNode } from "../../src/domain/models/index.js";
 import {
   planTaskIndexes,
   applyTaskIndexes,
@@ -63,7 +63,7 @@ test("preview preserves prose and bytes; apply indexes exact task identities, in
   write("tools/cli/AGENTS.md", "# CLI\n");
   write("tasks/alpha/resources.txt", "resource");
   const project = path.join(root, "tasks/alpha/AGENTS.md");
-  const node = new InternalNode(project).parse(
+  const node = new AgentsNode(project).parse(
     fs.readFileSync(project, "utf8"),
   );
   node.setConstraints(["Preserve this rule"]);

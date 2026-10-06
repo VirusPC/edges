@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { InternalNode } from "../../src/domain/models/index.js";
+import { AgentsNode } from "../../src/domain/models/index.js";
 import { INTERNAL_SECTIONS } from "../../src/domain/models/layout.js";
 
 const source = `# Context
@@ -39,14 +39,14 @@ const modern = source
   .replaceAll("下层记忆索引", "下层系统维护信息");
 
 test("legacy and canonical layer markers parse to the same ownership", () => {
-  const oldNode = new InternalNode("/scope/AGENTS.md").parse(source);
-  const newNode = new InternalNode("/scope/AGENTS.md").parse(modern);
+  const oldNode = new AgentsNode("/scope/AGENTS.md").parse(source);
+  const newNode = new AgentsNode("/scope/AGENTS.md").parse(modern);
   assert.deepEqual(oldNode.content.constraints, newNode.content.constraints);
   assert.deepEqual(oldNode.children, newNode.children);
 });
 
 test("internal nodes derive only indexed ownership and preserve authored source", () => {
-  const node = new InternalNode("/scope/AGENTS.md").parse(source);
+  const node = new AgentsNode("/scope/AGENTS.md").parse(source);
   assert.deepEqual(node.content.constraints, ["Keep the rule."]);
   assert.deepEqual(node.children, [
     {
@@ -74,7 +74,7 @@ test("internal nodes derive only indexed ownership and preserve authored source"
 });
 
 test("index edits replace optional fields, move group, and retain non-index prose", () => {
-  const node = new InternalNode("/scope/AGENTS.md").parse(source);
+  const node = new AgentsNode("/scope/AGENTS.md").parse(source);
   node.updateChild("/scope/one/index.md", {
     name: undefined,
     description: undefined,
@@ -95,7 +95,7 @@ test("index edits replace optional fields, move group, and retain non-index pros
   });
   node.setConstraints(["New *literal* rule"]);
   const rendered = node.serialize();
-  const read = new InternalNode(node.path).parse(rendered);
+  const read = new AgentsNode(node.path).parse(rendered);
   assert.deepEqual(read.children, [
     {
       id: "/scope/dir/a space (#1)/index.md",
@@ -116,13 +116,13 @@ test("index edits replace optional fields, move group, and retain non-index pros
   assert.match(rendered, /Footer stays\./);
   node.removeChild("/scope/one/index.md");
   assert.equal(
-    new InternalNode(node.path).parse(node.serialize()).children.length,
+    new AgentsNode(node.path).parse(node.serialize()).children.length,
     2,
   );
 });
 
 test("index mutation validates group and identity before changing document", () => {
-  const node = new InternalNode("/scope/AGENTS.md").parse(source);
+  const node = new AgentsNode("/scope/AGENTS.md").parse(source);
   for (const action of [
     () => node.addChild("bad" as any, { id: "/scope/new.md" }),
     () => node.addChild("local", { id: "/scope/one/index.md" }),
@@ -136,7 +136,7 @@ test("index mutation validates group and identity before changing document", () 
 });
 
 test("parse and body replacement discard old sections and indexes", () => {
-  const node = new InternalNode("/scope/AGENTS.md").parse(source);
+  const node = new AgentsNode("/scope/AGENTS.md").parse(source);
   node.body = "## 本层记忆\n\n- [Second](second/index.md)\n";
   assert.deepEqual(node.children, [
     { id: "/scope/second/index.md", name: "Second" },
@@ -147,7 +147,7 @@ test("parse and body replacement discard old sections and indexes", () => {
   assert.equal(node.body, "A standalone entry.\n");
   node.addChild("local", { id: "/scope/fresh/index.md" });
   assert.equal(
-    new InternalNode(node.path).parse(node.body).children[0].id,
+    new AgentsNode(node.path).parse(node.body).children[0].id,
     "/scope/fresh/index.md",
   );
 });
@@ -166,7 +166,7 @@ module: memory
 - [First](first/index.md) — keep
 <!-- project-memory-entries:end -->
 `;
-  const node = new InternalNode("/scope/types/AGENTS.md").parse(original);
+  const node = new AgentsNode("/scope/types/AGENTS.md").parse(original);
   assert.deepEqual(node.children, [
     { id: "/scope/types/first/index.md", name: "First", description: "keep" },
   ]);
@@ -185,7 +185,7 @@ module: memory
     /## 本层记忆|## 本层组成|## 本层系统维护信息|project-memory-local|project-harness-local|project-memory-children/,
   );
   assert.deepEqual(
-    new InternalNode(node.path).parse(rendered).children.map((ref) => ref.id),
+    new AgentsNode(node.path).parse(rendered).children.map((ref) => ref.id),
     ["/scope/types/first/index.md", "/scope/types/second/index.md"],
   );
 });
@@ -193,7 +193,7 @@ module: memory
 test("multiple actual indexed links are exposed while ordinary prose remains unchanged", () => {
   const original =
     "## 本层记忆\n\n- [One](one/index.md) and [Two](two/index.md) — shared\n\nAn introduction.\n";
-  const node = new InternalNode("/scope/AGENTS.md").parse(original);
+  const node = new AgentsNode("/scope/AGENTS.md").parse(original);
   assert.deepEqual(
     node.children.map((ref) => ref.id),
     ["/scope/one/index.md", "/scope/two/index.md"],
@@ -202,7 +202,7 @@ test("multiple actual indexed links are exposed while ordinary prose remains unc
 });
 
 test("re-added children serialize in the same order as the current view", () => {
-  const node = new InternalNode("/scope/AGENTS.md").parse(
+  const node = new AgentsNode("/scope/AGENTS.md").parse(
     "## 本层记忆\n\n- [A](a/index.md)\n- [B](b/index.md)\n",
   );
   node.removeChild("/scope/a/index.md");
@@ -212,7 +212,7 @@ test("re-added children serialize in the same order as the current view", () => 
     ["/scope/b/index.md", "/scope/a/index.md"],
   );
   assert.deepEqual(
-    new InternalNode(node.path)
+    new AgentsNode(node.path)
       .parse(node.serialize())
       .children.map((ref) => ref.id),
     ["/scope/b/index.md", "/scope/a/index.md"],
@@ -222,7 +222,7 @@ test("re-added children serialize in the same order as the current view", () => 
 test("CRLF type indexes preserve their markers and local ownership", () => {
   const original =
     "# Type\r\n\r\n<!-- project-memory-entries:start -->\r\n- [A](a/index.md)\r\n<!-- project-memory-entries:end -->\r\n";
-  const node = new InternalNode("/scope/types/AGENTS.md").parse(original);
+  const node = new AgentsNode("/scope/types/AGENTS.md").parse(original);
   assert.deepEqual(node.children, [
     { id: "/scope/types/a/index.md", name: "A" },
   ]);
@@ -237,7 +237,7 @@ test("linked prose within ownership sections stays ordinary and survives index e
     ["下层记忆索引", "descendant"],
   ] as const) {
     const original = `## ${heading}\n\nSee [README](README.md) for usage.\n\n- [Task](task/index.md) — owned\n`;
-    const node = new InternalNode("/scope/AGENTS.md").parse(original);
+    const node = new AgentsNode("/scope/AGENTS.md").parse(original);
     assert.deepEqual(node.children, [
       { id: "/scope/task/index.md", name: "Task", description: "owned" },
     ]);
@@ -249,7 +249,7 @@ test("linked prose within ownership sections stays ordinary and survives index e
     const rendered = node.serialize();
     assert.match(rendered, /^See \[README\]\(README\.md\) for usage\.$/m);
     assert.match(rendered, /^- \[Changed\]\(<task\/index\.md>\) — owned$/m);
-    assert.deepEqual(new InternalNode(node.path).parse(rendered).children, [
+    assert.deepEqual(new AgentsNode(node.path).parse(rendered).children, [
       { id: "/scope/task/index.md", name: "Changed", description: "owned" },
     ]);
   }
@@ -258,7 +258,7 @@ test("linked prose within ownership sections stays ordinary and survives index e
 test("ambiguous multi-link index edits reject before changing content or Markdown", () => {
   const original =
     "## 本层记忆\n\n- [One](one/index.md) and [Two](two/index.md) — shared\n";
-  const node = new InternalNode("/scope/AGENTS.md").parse(original);
+  const node = new AgentsNode("/scope/AGENTS.md").parse(original);
   const before = node.content;
   for (const edit of [
     () => node.updateChild("/scope/one/index.md", { name: "Changed" }),
@@ -289,7 +289,7 @@ test("ownership hrefs retain filename escapes, Unicode, spaces and fragments acr
     "目录/有 空格/index.md",
   ];
   const source = `<!-- project-memory-local:start -->\n${targets.map((target, i) => `- [item ${i}](<${target}>)`).join("\n")}\n<!-- project-memory-local:end -->\n`;
-  const node = new InternalNode("/scope/AGENTS.md").parse(source);
+  const node = new AgentsNode("/scope/AGENTS.md").parse(source);
   assert.deepEqual(
     node.children.map((reference) => reference.id),
     targets.map(
@@ -299,7 +299,7 @@ test("ownership hrefs retain filename escapes, Unicode, spaces and fragments acr
   node.updateChild(node.children[0]!.id, { name: "changed" });
   const saved = node.serialize();
   assert.deepEqual(
-    new InternalNode(node.path)
+    new AgentsNode(node.path)
       .parse(saved)
       .children.map((reference) => reference.id),
     node.children.map((reference) => reference.id),

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { tmpdir } from 'node:os';
-import { InternalNode } from "../../src/domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../src/domain/models/internal/agents-node.js";
 import { planAgentsIndexes, applyAgentsIndexes } from '../../../../scripts/migrate-agents-indexes.mts';
 function fixture(t: { after(fn: () => void): void }, source: string) {
  const root=fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()),'agents-migration-'));
@@ -18,7 +18,7 @@ for(const nested of [false,true]) for(const crlf of [false,true]) test(`migratio
  assert.equal(fs.readFileSync(file,'utf8'),source);assert.equal(plan.edits.length,1);
  await applyAgentsIndexes(plan); const after=fs.readFileSync(file,'utf8');
  assert.match(after,/Custom prose/);assert.match(after,/Tail/);assert.doesNotMatch(after,/task-projects:/);
- const node=new InternalNode(file).parse(after);assert.deepEqual(node.localChildren,[{id:path.join(root,'project/AGENTS.md'),name:'Project',description:'Description'}]);
+ const node=new AgentsNode(file).parse(after);assert.deepEqual(node.localChildren,[{id:path.join(root,'project/AGENTS.md'),name:'Project',description:'Description'}]);
  assert.equal(planAgentsIndexes(root).edits.length,0);if(crlf)assert.equal(after.replaceAll('\r\n','').includes('\n'),false);
 });
 test('migration rejects conflicts and source drift before writing',async t=>{
@@ -33,7 +33,7 @@ for(const source of ['<!-- task-projects:start -->',legacy+'\n'+legacy,'<!-- tas
 test('migration deduplicates matching identities and preserves unrelated links',async t=>{
  const source='<!-- project-memory-local:start -->\n- [Other](other/AGENTS.md) — Keep\n- [Project](project/AGENTS.md) — Description\n<!-- project-memory-local:end -->\n'+legacy.replace('<!-- task-projects:end -->','- [Project](<project/AGENTS.md>) — Description\n<!-- task-projects:end -->');
  const {root,file}=fixture(t,source);await applyAgentsIndexes(planAgentsIndexes(root));
- const node=new InternalNode(file).parse(fs.readFileSync(file,'utf8'));
+ const node=new AgentsNode(file).parse(fs.readFileSync(file,'utf8'));
  assert.equal(node.children.length,2);assert.equal(node.children[0].name,'Other');
 });
 test('migration honors the shared write lock before any backup or document writes',async t=>{

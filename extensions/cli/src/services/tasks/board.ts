@@ -1,7 +1,7 @@
 import { isWithinPath, firstSymlink } from "../../utils/filesystem.js";
 import { query } from "../../domain/operations/query.js";
 import { realpathSync } from "node:fs";
-import { TaskNode, InternalNode, ReadmeNode } from "../../domain/models/index.js";
+import { TaskNode, AgentsNode, ReadmeNode } from "../../domain/models/index.js";
 import { taskBoardQuery, taskLocationOf, listRepositoryTaskNodes } from "./node-query.js";
 import { taskBoardLocation } from "./paths.js";
 import { scopeDir, type BoardTarget } from "./paths.js";
@@ -158,7 +158,7 @@ export async function listProjectIds(
   const nodes = await (await taskBoardQuery(target, ['agents', 'readme'])).value();
   const board = await fs.exists(boardRoot(repoPath)) ? realpathSync(boardRoot(repoPath)) : boardRoot(repoPath);
   const names = new Set(nodes
-    .filter(node => (node instanceof InternalNode || node instanceof ReadmeNode) && path.dirname(node.directoryPath) === board)
+    .filter(node => (node instanceof AgentsNode || node instanceof ReadmeNode) && path.dirname(node.directoryPath) === board)
     .map(node => path.basename(node.directoryPath)));
   const ids: TaskProjectId[] = [...names]
     .filter(name => name === DEFAULT_TASK_PROJECT_DIR || isUserProjectSlug(name))

@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   BaseNode,
-  InternalNode,
+  AgentsNode,
   LeafNode,
   MemoryNode,
   NoteNode,
@@ -70,7 +70,7 @@ test("move persists requested unsaved body and keeps shared references usable af
   const node = (await service.get(file("old/index.md")))!;
   const copy = (await service.get(node.path))!;
   node.body = "Changed\n";
-  const parent = (await service.get(file("AGENTS.md"), InternalNode))!;
+  const parent = (await service.get(file("AGENTS.md"), AgentsNode))!;
   assert.equal(await service.move(node, file("new/index.md")), node);
   assert.equal(copy.path, node.path);
   assert.equal(node.id, file("new/index.md"));
@@ -138,7 +138,7 @@ test("multi-document move rollback restores directory and both parent indexes af
   write("outside.md", "outside");
   const node = (await service.get(file("a/unit/index.md")))!;
   const before = fs.readFileSync(file("a/AGENTS.md"), "utf8");
-  const parent = (await service.get(file("a/AGENTS.md"), InternalNode))!;
+  const parent = (await service.get(file("a/AGENTS.md"), AgentsNode))!;
   parent.setConstraints(["Pending parent"]);
   const { default: mutableFs } = await import("node:fs");
   const { syncBuiltinESMExports } = await import("node:module");
@@ -284,7 +284,7 @@ test("destroy refreshes a dirty cached index without leaving references to the d
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [Child](child/index.md)"));
   write("child/index.md", "child");
-  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!;
+  const dirty = (await service.get(file("AGENTS.md"), AgentsNode))!;
   dirty.setConstraints(["Unsaved"]);
   await service.destroy((await service.get(file("child/index.md")))!);
   assert.deepEqual(dirty.constraints, ["Unsaved"]);
@@ -365,7 +365,7 @@ test("cross-parent move transfers authored query and fragment to the new parent 
 test("dirty constraints are saved with creation and survive the next save", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index());
-  const parent = (await service.get(file("AGENTS.md"), InternalNode))!;
+  const parent = (await service.get(file("AGENTS.md"), AgentsNode))!;
   parent.setConstraints(["unsaved"]);
   await service.create(new LeafNode(file("child/index.md")), { body: "child" }, { indexGroup: "local" });
   assert.equal(parent.children[0]?.id, file("child/index.md"));
@@ -379,8 +379,8 @@ test("dirty old and new parents save cross-parent move registration", async (t) 
   write("a/AGENTS.md", index("- [Child](child/index.md)"));
   write("b/AGENTS.md", index());
   write("a/child/index.md", "child");
-  const a = (await service.get(file("a/AGENTS.md"), InternalNode))!,
-    b = (await service.get(file("b/AGENTS.md"), InternalNode))!;
+  const a = (await service.get(file("a/AGENTS.md"), AgentsNode))!,
+    b = (await service.get(file("b/AGENTS.md"), AgentsNode))!;
   a.setConstraints(["A dirty"]);
   b.setConstraints(["B dirty"]);
   await service.move(
@@ -399,8 +399,8 @@ test("shared reference edits save the latest assigned label", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [Original](child/index.md)"));
   write("child/index.md", "child");
-  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!,
-    other = (await service.get(dirty.path, InternalNode))!;
+  const dirty = (await service.get(file("AGENTS.md"), AgentsNode))!,
+    other = (await service.get(dirty.path, AgentsNode))!;
   dirty.updateChild(file("child/index.md"), { name: "Dirty" });
   other.updateChild(file("child/index.md"), { name: "Other" });
   assert.strictEqual(dirty, other);
@@ -477,8 +477,8 @@ test("shared reference name and group changes save together", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [Original](child/index.md)"));
   write("child/index.md", "child");
-  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!,
-    other = (await service.get(file("AGENTS.md"), InternalNode))!;
+  const dirty = (await service.get(file("AGENTS.md"), AgentsNode))!,
+    other = (await service.get(file("AGENTS.md"), AgentsNode))!;
   dirty.updateChild(file("child/index.md"), { name: "Dirty name" });
   other.moveChild(file("child/index.md"), "descendant");
   await service.update(other, {});
@@ -486,7 +486,7 @@ test("shared reference name and group changes save together", async (t) => {
   assert.equal(dirty.descendantChildren[0]?.name, "Dirty name");
   await service.update(dirty, {});
   assert.equal(
-    (await service.get(dirty.path, InternalNode))!.descendantChildren[0]?.name,
+    (await service.get(dirty.path, AgentsNode))!.descendantChildren[0]?.name,
     "Dirty name",
   );
 });
@@ -499,7 +499,7 @@ test("readonly indexes remain editable while relocation into a readonly subtree 
   write("refs/AGENTS.md", typeIndex("skills", false));
   write("tree/AGENTS.md", index("- [Child](child/index.md)"));
   write("tree/child/index.md", "body");
-  const refs = (await service.get(file("refs/AGENTS.md"), InternalNode))!;
+  const refs = (await service.get(file("refs/AGENTS.md"), AgentsNode))!;
   await service.update(refs, { metadata: { description: "editable index" } });
   const before = fs.readFileSync(refs.path, "utf8");
   await assert.rejects(
@@ -532,7 +532,7 @@ test("unrelated create preserves dirty query and fragment through refresh and su
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [A](a/index.md?old=1#old)"));
   write("a/index.md", "a");
-  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!;
+  const dirty = (await service.get(file("AGENTS.md"), AgentsNode))!;
   dirty.body = dirty.body.replace("?old=1#old", "?dirty=1#dirty");
   await service.create(new LeafNode(file("b/index.md")), { body: "b" }, { indexGroup: "local" });
   assert.match(dirty.body, /a\/index.md\?dirty=1#dirty/);
@@ -547,8 +547,8 @@ test("shared suffix edits follow sequential assignment", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [A](a/index.md#old)"));
   write("a/index.md", "a");
-  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!,
-    other = (await service.get(file("AGENTS.md"), InternalNode))!;
+  const dirty = (await service.get(file("AGENTS.md"), AgentsNode))!,
+    other = (await service.get(file("AGENTS.md"), AgentsNode))!;
   dirty.body = dirty.body.replace("#old", "#dirty");
   other.body = other.body.replace("#dirty", "?committed=1#other");
   assert.strictEqual(dirty, other);
@@ -560,8 +560,8 @@ test("shared suffix removal saves current dirty constraints", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [A](a/index.md#old)"));
   write("a/index.md", "a");
-  const dirty = (await service.get(file("AGENTS.md"), InternalNode))!,
-    other = (await service.get(file("AGENTS.md"), InternalNode))!;
+  const dirty = (await service.get(file("AGENTS.md"), AgentsNode))!,
+    other = (await service.get(file("AGENTS.md"), AgentsNode))!;
   dirty.setConstraints(["unsaved"]);
   other.body = other.body.replace("#old", "");
   await service.update(other, {});
@@ -594,7 +594,7 @@ for (const operation of ['move', 'destroy'] as const) {
     await service.get(file('unregistered/index.md'));
     if (operation === 'move') await service.move(target, file('moved/index.md'));
     else await service.destroy(target);
-    const maintained = (await service.get(file('unregistered/AGENTS.md'), InternalNode))!;
+    const maintained = (await service.get(file('unregistered/AGENTS.md'), AgentsNode))!;
     assert.deepEqual(maintained.children.map(child => child.id), operation === 'move' ? [file('moved/index.md')] : []);
     assert.equal(fs.existsSync(file('target/index.md')), false);
     assert.equal(fs.readFileSync(file('unregistered/index.md'),'utf8'), 'unregistered');
@@ -619,7 +619,7 @@ test('move shares traversal across overlapping planned index roots', async t => 
   // One registered-graph traversal and one planned-graph traversal.
   assert.equal(sharedArrivals, 2);
   for (const name of ['a', 'b']) {
-    const node = (await service.get(file(`${name}/AGENTS.md`), InternalNode))!;
+    const node = (await service.get(file(`${name}/AGENTS.md`), AgentsNode))!;
     assert.deepEqual(node.children.map(ref => ref.id), [file('moved/index.md'), file('shared/index.md')]);
   }
 });

@@ -786,9 +786,9 @@ test("instance root generator registers owned modules in three sections and pres
   assert.doesNotMatch(source, /## 工作与模块入口|## 下层作用域/);
   assert.match(source, /## Authored guidance\nKeep this prose\./);
   assert.match(source, /\[manual\]\(manual.md\)/);
-  const { LegacyIndex: InternalNode } =
+  const { LegacyIndex: AgentsNode } =
     await import("../../../../scripts/legacy-index.mjs");
-  const node = new InternalNode(file).parse(source);
+  const node = new AgentsNode(file).parse(source);
   assert.ok(
     node.children.some(
       (ref) =>
@@ -922,9 +922,9 @@ test("instance root generator demotes ADR directory ownership to ordinary local 
   const { runInstanceMigration } = await load();
   runInstanceMigration(root, manifest, true);
   const source = fs.readFileSync(file, "utf8");
-  const { InternalNode } = await import("../../src/domain/models/internal/internal-node.js");
+  const { AgentsNode } = await import("../../src/domain/models/internal/agents-node.js");
   assert.equal(
-    new InternalNode(file)
+    new AgentsNode(file)
       .parse(source)
       .children.some((ref) => ref.target === "docs/adr/"),
     false,

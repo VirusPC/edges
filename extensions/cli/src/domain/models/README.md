@@ -6,7 +6,7 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 
 ## 设计原则（树与入口）
 
-下列原则以 2026-10-06 grill 与根 `CONTEXT.md` 为准；**下文类图仍反映当前实现**（InternalNode / LeafNode / `index.md`），落地前以本节与记忆条目为准。
+下列原则以 2026-10-06 grill 与根 `CONTEXT.md` 为准；类图已与现行实现一致：`AgentsNode` / `ReadmeNode` 与各业务节点直继 `BaseNode`，无 Internal/Leaf 层次。
 
 1. **递归系统二：** 系统入口是 `AGENTS.md`，带组成登记。默认从 CLI scope 的系统入口出发；显式 `--super` 时从 `SuperAgentsNode`（继承 `AgentsNode` 的虚拟超节点）出发。经登记可达才算节点。
 2. **组成边 ≠ 维护边：** `harness` 不进 `children`。默认遍历不跟随 harness；读某一系统二的组成时，不自动进入其子节点自己的系统入口。
@@ -17,9 +17,9 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 
 设计真源与**目标架构图**：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md#架构图目标模型)。相关记忆：`project_grill_entries_markers_and_titles`、`project_recursive_system_two_entry`、`project_document_entry_readme_index`、`project_grill_system_entry_q13_q14`。
 
-## 类与节点关系（当前实现）
+## 类与节点关系
 
-> 目标语义见上链「架构图」：各节点直继 BaseNode；`type` 含 `agents`/`readme`/`text`；无 Internal/Leaf/internal；组成登记派生组织/叶子。下图仍是**现行代码**形状，落地前勿当作目标合同。
+> 各节点直继 BaseNode；`type` 含 `agents`/`readme`/`text`；组成登记（`localChildren` 是否存在）派生组织/叶子。`AgentsNode` 仅作为 `AgentsNode` 的 deprecated 别名保留一个版本；`LeafNode` 仅为 deprecated 的纯 text 节点，业务节点不再继承它。
 
 ```mermaid
 classDiagram
@@ -34,6 +34,8 @@ classDiagram
         directoryPath: string
         type: string
         isLeaf: boolean
+        localChildren?: NodeReference[]
+        descendantChildren?: NodeReference[]
         parent?: NodeReference
         harness?: NodeReference
         children: NodeReference[]
@@ -46,8 +48,8 @@ classDiagram
         update(input, context)
         destroy(context)
     }
-    class InternalNode {
-        isLeaf = false
+    class AgentsNode {
+        type = "agents"
         constraints: string[]
         localChildren: NodeReference[]
         descendantChildren: NodeReference[]
@@ -56,30 +58,33 @@ classDiagram
         removeChild(id)
         moveChild(id, group)
     }
-    class LeafNode {
-        isLeaf = true
+    class ReadmeNode {
+        type = "readme"
+        localChildren: NodeReference[]
+        descendantChildren: NodeReference[]
+        addChild(group, reference)
     }
     NodeReference <|.. BaseNode
-    BaseNode <|-- InternalNode
-    BaseNode <|-- LeafNode
-    LeafNode <|-- TaskNode
-    LeafNode <|-- MemoryNode
-    LeafNode <|-- NoteNode
-    LeafNode <|-- SkillNode
+    BaseNode <|-- AgentsNode
+    BaseNode <|-- ReadmeNode
+    BaseNode <|-- TaskNode
+    BaseNode <|-- MemoryNode
+    BaseNode <|-- NoteNode
+    BaseNode <|-- SkillNode
     BaseNode ..> NodeReference : parent / harness / children
 ```
 
-图中列出可读取的关系；不表示这些属性允许随意赋值。具体签名与只读限定见 [BaseNode](core/base-node.ts)、[NodeReference](core/types.ts) 和 [InternalNode](internal/internal-node.ts)。
+图中列出可读取的关系；不表示这些属性允许随意赋值。具体签名与只读限定见 [BaseNode](core/base-node.ts)、[NodeReference](core/types.ts) 和 [AgentsNode](internal/agents-node.ts)。
 
 - `id` 等于规范化的绝对入口路径，例如 `/repo/notes/example/index.md`；`directoryPath` 是入口所在目录。移动节点会改变路径与 ID，由 Service 协调。
 - `name`、`description` 是可选内容字段。引用只携带 `id/name/description`，无需先加载完整节点。
-- `type`（现行）区分 `internal/task/memory/note/skill/leaf`；**目标**为 `agents/readme/task/memory/note/skill/text`（见设计 spec）。Memory 的 `memoryType` 是另一个维度。
-- `isLeaf`（现行）区分 Internal/Leaf；**目标**取消该持久字段，组织/叶子看组成登记。
+- `type` 区分 `agents/readme/task/memory/note/skill/text`。Memory 的 `memoryType` 是另一个维度。
+- `isLeaf` 不持久化，由组成登记派生（`localChildren` 缺省且无 children 即叶子）；`traverse` 用 `localChildren` 是否存在而非类判断。
 - `parent` 由 Service 根据物理目录和管理边界恢复。跨目录引用可以组成图，但不另行改变被引用节点的 parent；没有脱离目录的公开 `reparent` 操作。
 
 ### 本层、下层与 harness
 
-InternalNode 对应 `AGENTS.md`，把三个受管部分映射为：
+AgentsNode 对应 `AGENTS.md`，把三个受管部分映射为：
 
 | AGENTS 内容 | 内存模型 | 含义 |
 | --- | --- | --- |
@@ -89,27 +94,27 @@ InternalNode 对应 `AGENTS.md`，把三个受管部分映射为：
 
 `children` 是 `localChildren` 与 `descendantChildren` 的有序合并。这里的 descendant 是下层索引组，不是已经加载完的所有后代；两组存的都只是当前入口登记的引用。物理目录深度或节点类型不能替代本层/下层的判断，新增登记由调用方明确给出 `local` 或 `descendant`。`moveChild` 只修改当前 AGENTS 中引用的分组，不移动目录、不改变 parent。
 
-已有 Memory 类型入口的 `project-memory-entries` 区块也按本层索引处理；不要求为了使用 InternalNode 而改写成另一套标题。普通导航链接和非受控 Markdown 保持为正文。
+已有 Memory 类型入口的 `project-memory-entries` 区块也按本层索引处理；不要求为了使用 AgentsNode 而改写成另一套标题。普通导航链接和非受控 Markdown 保持为正文。
 
 每个节点还可以有独立的 `harness` 引用。它不加入 `children`，所以普通树遍历不会自动跨进维护系统。当前[布局协议](layout.ts)约定：
 
 ```text
 example-skill/
 ├── SKILL.md                 ← SkillNode：内容入口
-├── AGENTS.md                ← InternalNode：该 Skill 的 harness
+├── AGENTS.md                ← AgentsNode：该 Skill 的 harness
 ├── assets/                  ← 附件，Model 不为其建资源节点
 └── .harness/
-    └── AGENTS.md            ← 上一个 InternalNode 的 harness
+    └── AGENTS.md            ← 上一个 AgentsNode 的 harness
 ```
 
 ```mermaid
 flowchart LR
-    S[SkillNode · SKILL.md] -. harness .-> A[InternalNode · AGENTS.md]
-    A -. harness .-> H[InternalNode · .harness/AGENTS.md]
+    S[SkillNode · SKILL.md] -. harness .-> A[AgentsNode · AGENTS.md]
+    A -. harness .-> H[AgentsNode · .harness/AGENTS.md]
     A -->|localChildren / descendantChildren| C[登记的节点引用]
 ```
 
-同目录的 SKILL.md 与 AGENTS.md 是两个节点，入口和角色不同。一般叶节点的 harness 入口是同目录 AGENTS.md；InternalNode 的下一层 harness 是 `.harness/AGENTS.md`，可以继续递归。目录的移动、删除及附件随迁由 Service 根据布局确定完整操作单位。
+同目录的 SKILL.md 与 AGENTS.md 是两个节点，入口和角色不同。一般叶节点的 harness 入口是同目录 AGENTS.md；AgentsNode 的下一层 harness 是 `.harness/AGENTS.md`，可以继续递归。目录的移动、删除及附件随迁由 Service 根据布局确定完整操作单位。
 
 遍历策略属于 [operations/traverse.ts](../operations/traverse.ts)：**目标默认**走全部组成 `children`（local∪descendants）；只要本层时显式 `localOnly`。`includeHarness` 仍默认 false——例如从 `/repo/.harness/AGENTS.md` 检索且 `includeHarness: false` 时，不沿维护边进入下一层 harness。现行代码若仍默认只 local，以实施计划 Q20 收口为准。
 
@@ -120,7 +125,7 @@ models/
 ├── index.ts                 # 节点类、输入类型与布局的公共出口
 ├── layout.ts                # 跨模型的目录、入口、区块和生命周期单位协议
 ├── core/                    # BaseNode、LeafNode、引用、共享字段与关系协调
-├── internal/                # InternalNode 与 AGENTS 文档解析、索引维护
+├── internal/                # AgentsNode 与 AGENTS 文档解析、索引维护
 ├── tasks/                   # TaskNode、任务字段规则、TaskDoc 契约和文档适配
 ├── memory/                  # MemoryNode 与记忆文档规则
 ├── notes/                   # NoteNode：当前主要是正文标题访问与更新
@@ -142,7 +147,7 @@ models/
 | 动作 | 归属 | 原因 |
 | --- | --- | --- |
 | Task 标题、优先级更新与校验 | Model | 一个节点自己的规则 |
-| InternalNode.addChild/updateChild | Model | 只改当前节点持有的索引内容 |
+| AgentsNode.addChild/updateChild | Model | 只改当前节点持有的索引内容 |
 | Markdown parse/serialize | Model 使用格式工具 | 从文本恢复自身内容或把自身内容输出为文本 |
 | traverse、filter、groupBy、Task 数组排序 | operations | 处理多个节点或集合；遍历通过回调加载 |
 | 创建任务并登记父入口、保存、移动目录、删除 | Service | 涉及文件 IO、多个节点和完整用例 |
@@ -171,12 +176,12 @@ flowchart LR
     MD[Markdown 文本] --> GM[gray-matter：metadata / body]
     GM --> B[BaseNode.parse]
     B --> L[LeafNode 子类：领域字段 / 正文]
-    B --> I[InternalNode：AGENTS 结构]
+    B --> I[AgentsNode：AGENTS 结构]
     I --> X[InternalSyntax]
     X --> D[AgentsDocument：文本项与链接项]
 ```
 
-InternalNode 将索引链接变成具有绝对入口 ID 的 NodeReference；AgentsDocument 保存文档中的链接目标与文本项，InternalSyntax 和解析器负责保留原文及位置信息。**AgentsDocument 是文档表示，InternalNode 是领域节点**，两者职责不同。原文位置等解析细节不进入公共节点模型。
+AgentsNode 将索引链接变成具有绝对入口 ID 的 NodeReference；AgentsDocument 保存文档中的链接目标与文本项，InternalSyntax 和解析器负责保留原文及位置信息。**AgentsDocument 是文档表示，AgentsNode 是领域节点**，两者职责不同。原文位置等解析细节不进入公共节点模型。
 
 序列化保留 AGENTS 的非受控正文、可保留的原链接及区块结构；YAML 使用库的正常输出，不承诺编辑后仍保留 YAML 注释和排版。`parse` 会执行解析与 metadata 校验，完整领域校验仍通过 `validate` 及 Service 的写前检查完成；不要把所有节点的 parse 等同于完整写入校验。
 
@@ -200,7 +205,7 @@ TaskNode 负责节点行为；TaskDoc 是可交换的纯数据。契约与节点
 
 ## 扩展一个节点
 
-1. 在所属类型目录定义类。普通内容继承 LeafNode，维护索引结构的节点按需要扩展 InternalNode；没有专属行为的 index.md 可继续使用 LeafNode。
+1. 在所属类型目录定义类。普通内容继承 LeafNode，维护索引结构的节点按需要扩展 AgentsNode；没有专属行为的 index.md 可继续使用 LeafNode。
 2. 保持只传绝对入口路径即可构造。通过现有 hooks 扩展字段、校验及解析序列化；正文的 serialize → parse 必须能恢复状态，因为生命周期草稿复用这条路径。
 3. 定义该类型的输入与规则；共享后再下沉，不预先新增空抽象层。
 4. 若需要自动识别，通过 layout 的目录分类机制和 NodeService 的 `models` 映射接入。分类只决定模型类型，不推断 local/descendant 归属。

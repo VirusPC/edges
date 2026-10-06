@@ -184,8 +184,8 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
     const root = await readFile(rootAgents, "utf8");
     assert.match(root, /- keep-index/);
     assert.doesNotMatch(root, /task-projects:/);
-    const { InternalNode } = await import("../../../src/domain/models/internal/internal-node.js");
-    assert.equal(new InternalNode(rootAgents).parse(root).localChildren.length, 2);
+    const { AgentsNode } = await import("../../../src/domain/models/internal/agents-node.js");
+    assert.equal(new AgentsNode(rootAgents).parse(root).localChildren.length, 2);
 
     const task = await readFile(path.join(repo, taskRel), "utf8");
     assert.equal(task, "# keep\n");

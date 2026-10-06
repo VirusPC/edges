@@ -1,7 +1,5 @@
 import { basename, dirname, join } from "node:path";
 import { BaseNode } from "../models/core/base-node.js";
-import { InternalNode } from "../models/internal/internal-node.js";
-import { ReadmeNode } from "../models/readme/readme-node.js";
 import { ENTRY_NAMES, normalizeNodeType } from "../models/layout.js";
 import type { NodeReference } from "../models/core/types.js";
 import { validateChild } from "../models/core/relations.js";
@@ -21,7 +19,7 @@ export interface ScopeTraversalOptions {
  * whether the companion file exists.
  */
 export function companionReadme(node: BaseNode): NodeReference | undefined {
-  if (!(node instanceof InternalNode)) return undefined;
+  if (node.type !== "agents") return undefined;
   if (basename(node.path) !== ENTRY_NAMES.internal) return undefined;
   return { id: join(dirname(node.path), ENTRY_NAMES.readme) };
 }
@@ -41,10 +39,7 @@ function expandedChildren(
   options: ScopeTraversalOptions,
 ): readonly NodeReference[] {
   const localOnly = options.localOnly ?? options.includeDescendants === false;
-  const own =
-    localOnly && (node instanceof InternalNode || node instanceof ReadmeNode)
-      ? node.localChildren
-      : node.children;
+  const own = localOnly ? (node.localChildren ?? node.children) : node.children;
   const companion = companionReadme(node);
   return companion ? [...own, companion] : own;
 }

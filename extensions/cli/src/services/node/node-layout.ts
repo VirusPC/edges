@@ -9,7 +9,7 @@ import { fromMarkdown, type Handle } from "mdast-util-from-markdown";
 import type { Nodes } from "mdast";
 import {
   BaseNode,
-  InternalNode,
+  AgentsNode,
   LeafNode,
   TaskNode,
   MemoryNode,
@@ -79,13 +79,13 @@ export function physicalParent(
   return found;
 }
 /** Nodes whose body lists composition children. */
-export type CompositeNode = InternalNode | ReadmeNode;
+export type CompositeNode = AgentsNode | ReadmeNode;
 export const isComposite = (node: unknown): node is CompositeNode =>
-  node instanceof InternalNode || node instanceof ReadmeNode;
+  node instanceof AgentsNode || node instanceof ReadmeNode;
 export function parseComposite(file: string, source: string): CompositeNode {
   return path.basename(file) === "README.md"
     ? new ReadmeNode(file).parse(source)
-    : new InternalNode(file).parse(source);
+    : new AgentsNode(file).parse(source);
 }
 /** Runtime and import classification use exactly the same physical owner. */
 export function physicalParentNode(
@@ -125,7 +125,7 @@ export function modelAt(
     models?.[legacyNodeType(type)] ??
     (
       {
-        agents: InternalNode,
+        agents: AgentsNode,
         text: LeafNode,
         readme: ReadmeNode,
         skill: SkillNode,

@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import { test } from "node:test";
 import { NodeService } from "../../src/services/node/node-service.js";
-import { InternalNode, LeafNode, SkillNode } from "../../src/domain/models/index.js";
+import { AgentsNode, LeafNode, SkillNode } from "../../src/domain/models/index.js";
 function fixture(t: any) {
   const root = fs.realpathSync(
     fs.mkdtempSync(path.join(os.tmpdir(), "directory-lifecycle-")),
@@ -59,14 +59,14 @@ test("structured creation in existing directory registers a node and updates all
   const { file, put, service } = fixture(t);
   put("AGENTS.md", index());
   put("a/asset", "asset");
-  const parent = (await service.get(file("AGENTS.md"), InternalNode))!;
+  const parent = (await service.get(file("AGENTS.md"), AgentsNode))!;
   const node = new LeafNode(file("a/index.md"));
   assert.equal(await service.create(node, { name: "A", body: "first" }, { indexGroup: "local" }), node);
   assert.equal(parent.localChildren[0]?.id, node.path);
   const copy = (await service.get(node.path))!;
   assert.equal(await service.update(node, { body: "second" }), node);
   assert.equal(copy.body, "second\n");
-  const harness = new InternalNode(file("a/AGENTS.md"));
+  const harness = new AgentsNode(file("a/AGENTS.md"));
   await service.create(harness, { constraints: ["rule"] }, { indexGroup: "local" });
   assert.equal(node.harness?.id, harness.id);
   assert.equal(fs.readFileSync(file("a/asset"), "utf8"), "asset");
@@ -82,7 +82,7 @@ test("move keeps instances and relocates resources, harness and authored href su
   put("a/AGENTS.md", index());
   put("a/.harness/AGENTS.md", index());
   put("outside/index.md", "extra prose [back](../a/SKILL.md#anchor)");
-  const root = (await service.get(file("AGENTS.md"), InternalNode))!;
+  const root = (await service.get(file("AGENTS.md"), AgentsNode))!;
   root.addChild("local", { id: file("outside/index.md") });
   await service.update(root, {});
   const node = (await service.get(file("a/SKILL.md")))!;
@@ -111,8 +111,8 @@ test("moving nested Internal preserves child instances and old group under new p
   put("b/AGENTS.md", index());
   put("a/tree/AGENTS.md", index("- [Leaf](child/index.md)"));
   put("a/tree/child/index.md", "leaf");
-  const a = (await service.get(file("a/AGENTS.md"), InternalNode))!,
-    b = (await service.get(file("b/AGENTS.md"), InternalNode))!;
+  const a = (await service.get(file("a/AGENTS.md"), AgentsNode))!,
+    b = (await service.get(file("b/AGENTS.md"), AgentsNode))!;
   const node = (await service.get(file("a/tree/AGENTS.md")))!;
   const child = (await service.get(file("a/tree/child/index.md")))!;
   await service.move(node, file("b/tree/AGENTS.md"));

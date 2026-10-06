@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import {
   BaseNode,
-  InternalNode,
+  AgentsNode,
   LeafNode,
   MemoryNode,
   NoteNode,
@@ -37,7 +37,7 @@ for (const operation of ["update", "create", "attach"] as const) {
     const { file, write, service } = fixture(t);
     write("AGENTS.md", index());
     write("child/index.md", "child");
-    const parent = (await service.get(file("AGENTS.md"), InternalNode))!;
+    const parent = (await service.get(file("AGENTS.md"), AgentsNode))!;
     const child = (await service.get(file("child/index.md")))!;
     const target =
       operation === "create"
@@ -268,7 +268,7 @@ test("index-only attach and detach retain physical parent, label and prose", asy
   write("AGENTS.md", index());
   write("a/AGENTS.md", index());
   write("b/index.md", "child");
-  const parent = (await service.get(file("a/AGENTS.md"), InternalNode))!,
+  const parent = (await service.get(file("a/AGENTS.md"), AgentsNode))!,
     child = (await service.get(file("b/index.md")))!;
   await attach(service, parent, child, "descendant");
   parent.updateChild(child.id, { name: "Kept", description: "Details" });
@@ -284,7 +284,7 @@ test("authoritative AGENTS graph validation catches cycles from typed BaseNode a
   write("a/AGENTS.md", index("- [B](../b/AGENTS.md)"));
   write("b/AGENTS.md", index());
   const a = (await service.get(file("a/AGENTS.md"), BaseNode))!,
-    b = (await service.get(file("b/AGENTS.md"), InternalNode))!;
+    b = (await service.get(file("b/AGENTS.md"), AgentsNode))!;
   await assert.rejects(attach(service, b, a, "local"), /cycle/i);
   assert.equal(b.children.length, 0);
   await assert.rejects(
@@ -294,7 +294,7 @@ test("authoritative AGENTS graph validation catches cycles from typed BaseNode a
   assert.equal(a.children.length, 1);
   assert.equal(a.children[0]?.id, file("b/AGENTS.md"));
   await assert.rejects(
-    service.create(new InternalNode(file("new/AGENTS.md")), {
+    service.create(new AgentsNode(file("new/AGENTS.md")), {
       body: index("- [self](AGENTS.md)"),
     }, { indexGroup: "local" }),
     /cycle/i,
@@ -314,7 +314,7 @@ test("referenced indexes permit linked reads and index detach but retain conserv
   );
   fs.symlinkSync(file("installed"), file("refs/linked"));
   const nodes = await service.list(root),
-    parent = nodes[1] as InternalNode,
+    parent = nodes[1] as AgentsNode,
     skill = nodes[2]!;
   await assert.rejects(
     service.update(skill, { body: "bad" }),
@@ -344,7 +344,7 @@ test("business write hook denies mutations before index or source bytes change",
   );
   assert.equal(fs.existsSync(file("private/index.md")), false);
   assert.equal(
-    (await service.get(file("AGENTS.md"), InternalNode))!.children.length,
+    (await service.get(file("AGENTS.md"), AgentsNode))!.children.length,
     0,
   );
 });
@@ -353,7 +353,7 @@ test("ambiguous multi-link source edit refuses deletion without losing prose or 
   write("AGENTS.md", index("- [One](one/index.md) and [Two](two/index.md)"));
   write("one/index.md", "one");
   write("two/index.md", "two");
-  const parent = (await service.get(file("AGENTS.md"), InternalNode))!,
+  const parent = (await service.get(file("AGENTS.md"), AgentsNode))!,
     one = (await service.get(file("one/index.md")))!;
   const before = fs.readFileSync(parent.path, "utf8");
   await assert.rejects(detach(service, parent, one), /multi-link/i);
@@ -385,9 +385,9 @@ test("shared cached references save current constraints and reference changes", 
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [Child](child/index.md)"));
   write("child/index.md", "child");
-  const first = (await service.get(file("AGENTS.md"), InternalNode))!,
-    second = (await service.get(first.path, InternalNode))!,
-    dirty = (await service.get(first.path, InternalNode))!;
+  const first = (await service.get(file("AGENTS.md"), AgentsNode))!,
+    second = (await service.get(first.path, AgentsNode))!,
+    dirty = (await service.get(first.path, AgentsNode))!;
   dirty.setConstraints(["Unsaved"]);
   second.updateChild(file("child/index.md"), { name: "Changed" });
   await service.update(second, {});
@@ -398,20 +398,20 @@ test("shared cached references save current constraints and reference changes", 
 /** Tests exercise the public model-edit + service-update composition. */
 async function attach(
   service: NodeService,
-  parent: InternalNode,
+  parent: AgentsNode,
   child: BaseNode,
   group: "local" | "descendant",
 ) {
-  const draft = new InternalNode(parent.path).parse(parent.serialize());
+  const draft = new AgentsNode(parent.path).parse(parent.serialize());
   draft.addChild(group, child);
   await service.update(parent, { body: draft.body });
 }
 async function detach(
   service: NodeService,
-  parent: InternalNode,
+  parent: AgentsNode,
   child: BaseNode,
 ) {
-  const draft = new InternalNode(parent.path).parse(parent.serialize());
+  const draft = new AgentsNode(parent.path).parse(parent.serialize());
   draft.removeChild(child.id);
   await service.update(parent, { body: draft.body });
 }
@@ -536,7 +536,7 @@ test('planned graph validation resolves a diamond target once and keeps managed 
   write('shared/index.md', 'shared');
   const arrivals: string[] = [];
   const service = new NodeService({managedRoot: root, modelForReference: (_parent, _ref, target) => { arrivals.push(target); return undefined; }});
-  const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
+  const parent = (await service.get(file('AGENTS.md'), AgentsNode))!;
   const shared = (await service.get(file('shared/index.md')))!;
   await service.update(parent, {description: 'updated'});
   assert.equal(arrivals.filter(target => target === shared.id).length, 1);
@@ -549,7 +549,7 @@ test('graph validation excludes harness relations while query explicitly include
   write('AGENTS.md', index('- [Item](item/index.md)'));
   write('item/index.md', 'item');
   write('item/AGENTS.md', index('- [Root](../AGENTS.md)'));
-  const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
+  const parent = (await service.get(file('AGENTS.md'), AgentsNode))!;
   await service.update(parent, {description: 'composition remains acyclic'});
   assert.equal(parent.description, 'composition remains acyclic');
   await assert.rejects(service.query(root, {includeHarness: true}).value(), /Composition cycle/);
@@ -579,7 +579,7 @@ for (const operation of ['query', 'validate', 'destroy'] as const) {
     target.body = 'caller unsaved body';
     if (operation === 'query') await service.query(root).value();
     if (operation === 'validate') {
-      const parent = (await service.get(file('AGENTS.md'), InternalNode))!;
+      const parent = (await service.get(file('AGENTS.md'), AgentsNode))!;
       await service.update(parent, {});
       originals.set('AGENTS.md', fs.readFileSync(file('AGENTS.md'), 'utf8'));
     }
@@ -595,10 +595,10 @@ for (const operation of ['query', 'validate', 'destroy'] as const) {
 test('new registrations require a caller group before any directory creation', async t => {
   const { file, write, service } = fixture(t);
   write('AGENTS.md', index());
-  await assert.rejects(service.create(new InternalNode(file('new/AGENTS.md')), { body: '# New\n' }), /index.?group|registration group/i);
+  await assert.rejects(service.create(new AgentsNode(file('new/AGENTS.md')), { body: '# New\n' }), /index.?group|registration group/i);
   assert.equal(fs.existsSync(file('new')), false);
-  await service.create(new InternalNode(file('new/AGENTS.md')), { body: '# New\n' }, { indexGroup: 'descendant' });
-  const owner = (await service.get(file('AGENTS.md'), InternalNode))!;
+  await service.create(new AgentsNode(file('new/AGENTS.md')), { body: '# New\n' }, { indexGroup: 'descendant' });
+  const owner = (await service.get(file('AGENTS.md'), AgentsNode))!;
   assert.deepEqual(owner.localChildren, []);
   assert.equal(owner.descendantChildren[0]?.id, file('new/AGENTS.md'));
 });
@@ -610,13 +610,13 @@ test('import refuses missing registration choice before copying source resources
  assert.equal(fs.existsSync(file('imported')),false);
  await service.import(path.join(source,'index.md'),file('imported/index.md'),{indexGroup:'descendant'});
  assert.equal(fs.readFileSync(file('imported/asset.bin'),'utf8'),'resource');
- assert.equal((await service.get(file('AGENTS.md'),InternalNode))?.descendantChildren.length,1);
+ assert.equal((await service.get(file('AGENTS.md'),AgentsNode))?.descendantChildren.length,1);
 });
 test('moving an unregistered node does not invent a descendant registration',async t=>{
  const {file,write,service}=fixture(t);write('AGENTS.md',index());write('source/AGENTS.md',index());write('source/item/index.md','Body');write('destination/AGENTS.md',index());
  const node=(await service.get(file('source/item/index.md')))!;
  await service.move(node,file('destination/item/index.md'));
- assert.deepEqual((await service.get(file('destination/AGENTS.md'),InternalNode))?.children,[]);
+ assert.deepEqual((await service.get(file('destination/AGENTS.md'),AgentsNode))?.children,[]);
  assert.equal(fs.readFileSync(file('destination/item/index.md'),'utf8'),'Body');
 });
 
@@ -625,7 +625,7 @@ test('generic query supports all types and explicit task-only deferred execution
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const note = path.join(root, 'notes/example/index.md');
   const service = new NodeService({ managedRoot: root });
-  await service.create(new InternalNode(path.join(root, 'AGENTS.md')), {});
+  await service.create(new AgentsNode(path.join(root, 'AGENTS.md')), {});
   await service.create(new NoteNode(note), { body: '# Note\n' }, { indexGroup: 'local' });
   let seen = 0;
   const all = service.query(root, { includeDescendants: true, includeHarness: true })

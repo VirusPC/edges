@@ -2,7 +2,7 @@ import { isWithinPath } from '../../utils/filesystem.js';
 import { WRITE_LOCK_NAME, assertNoWriteLock } from "./node-lock.js";
 import * as fs from "node:fs";
 import path from "node:path";
-import { BaseNode, InternalNode } from "../../domain/models/index.js";
+import { BaseNode, AgentsNode } from "../../domain/models/index.js";
 import type { ChildGroup, NodeReference } from "../../domain/models/index.js";
 import type { ScopeTraversalOptions, NodeQueryOptions } from "../../domain/operations/traverse.js";
 import {
@@ -173,9 +173,8 @@ export class NodeService {
     types?: readonly string[],
     resources = true,
   ): Promise<BaseNode> {
-    const Model =
-      this.#options.modelForReference?.(parent, reference, reference.id) ??
-      modelAt(reference.id, indexContract(parent), this.#options.models);
+    const explicit = this.#options.modelForReference?.(parent, reference, reference.id);
+    const Model = explicit ?? modelAt(reference.id, indexContract(parent), this.#options.models);
     if (types && Model) {
       const navigation = new Model(reference.id);
       if (navigation.isLeaf && !types.map(normalizeNodeType).includes(navigation.type)) {
@@ -190,7 +189,8 @@ export class NodeService {
         return navigation;
       }
     }
-    const node = await this.#read(reference.id, Model, readonly, resources);
+    // A layout-derived model is only a navigation hint; #read resolves the authoritative one.
+    const node = await this.#read(reference.id, explicit, readonly, resources);
     if (!node) throw new Error(`Missing referenced node: ${reference.id}`);
     return node;
   }
@@ -201,7 +201,7 @@ export class NodeService {
     return query(async function* () {
       const entry = path.basename(scopePath) === "AGENTS.md"
         ? path.resolve(scopePath) : path.join(path.resolve(scopePath), "AGENTS.md");
-      const root = await service.#read(entry, InternalNode, false, false);
+      const root = await service.#read(entry, AgentsNode, false, false);
       if (!root) throw new Error(`Missing scope entry: ${entry}`);
       // resolve and load are sequential; carry this edge's policy into its one load.
       let readonly = false;
@@ -253,7 +253,7 @@ export class NodeService {
     const result = new Map<string, BaseNode>();
     const root = await this.#read(
       path.join(this.managedRoot, "AGENTS.md"),
-      InternalNode,
+      AgentsNode,
     );
     const service = this;
     function* roots(): Iterable<BaseNode> {
@@ -279,7 +279,7 @@ export class NodeService {
       },
       async (parent, ref) => {
         if (maintenanceOnly(parent, ref)) {
-          const harness = await this.#read(ref.id, InternalNode);
+          const harness = await this.#read(ref.id, AgentsNode);
           if (!harness) throw new Error(`Missing referenced node: ${ref.id}`);
           return harness;
         }
@@ -363,7 +363,7 @@ export class NodeService {
     // An explicit typed get cannot bypass authoritative AGENTS validation.
     const authoritative =
       path.basename(node.path) === "AGENTS.md"
-        ? new InternalNode(node.path).parse(source)
+        ? new AgentsNode(node.path).parse(source)
         : draft;
     return { node: authoritative, before, source };
   }
@@ -411,8 +411,8 @@ export class NodeService {
     registrationOptions: NodeRegistrationOptions = {},
   ): Promise<T> {
     this.#boundary(node.path);
-    if (path.basename(node.path) === "AGENTS.md" && !(node instanceof InternalNode))
-      throw new Error(`AGENTS creation requires an InternalNode model: ${node.path}`);
+    if (path.basename(node.path) === "AGENTS.md" && !(node instanceof AgentsNode))
+      throw new Error(`AGENTS creation requires an AgentsNode model: ${node.path}`);
     if (this.#cache.loaded.has(node.path) || fs.existsSync(node.path))
       throw new Error(`Node target already exists: ${node.path}`);
     const draft = clone(node);

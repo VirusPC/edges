@@ -356,7 +356,7 @@ test("maintained public correction manifest restores every reviewed record and p
     assert.equal(fs.readFileSync(join(f.root, edit.path), "utf8"), edit.after);
   assert.equal(manifest.moves.length, 43);
   assert.equal(manifest.introductions.length, 25);
-  const { LegacyIndex: InternalNode } =
+  const { LegacyIndex: AgentsNode } =
     await import("../../../../scripts/legacy-index.mjs");
   for (const owner of [
     "extensions",
@@ -365,7 +365,7 @@ test("maintained public correction manifest restores every reviewed record and p
     "knowledge/notes",
     ".harness/tasks",
   ]) {
-    const node = new InternalNode(join(f.root, owner, "AGENTS.md")).parse(
+    const node = new AgentsNode(join(f.root, owner, "AGENTS.md")).parse(
       fs.readFileSync(join(f.root, owner, "AGENTS.md"), "utf8"),
     );
     assert.equal(
@@ -390,7 +390,7 @@ test("maintained public correction manifest restores every reviewed record and p
     if (type.name === "referenced")
       fs.mkdirSync(join(f.root, owner, ".agents/skills"), { recursive: true });
     // Historical manifests remain byte-exact legacy evidence; runtime indexes intentionally ignore plain .md.
-    const historical = new InternalNode(
+    const historical = new AgentsNode(
       join(f.root, intro.restoredIndex),
     ).parse(text);
     for (const child of historical.children)
@@ -642,7 +642,7 @@ for (const [spelling, href] of [
     test(`private correction resolves ${spelling} ${location} ownership and preserves traversal on repeat`, async (t) => {
       const f = await privateFixture(t),
         m = await load();
-      const { LegacyIndex: InternalNode } =
+      const { LegacyIndex: AgentsNode } =
         await import("../../../../scripts/legacy-index.mjs");
       const { NodeService } =
         await import("../../src/services/node/node-service.js");
@@ -664,13 +664,13 @@ for (const [spelling, href] of [
       assert.deepEqual(snapshot(f.root), before);
       assert.equal(m.runPrivateCorrection(f.root, true).status, "restored");
       assert.equal(
-        new InternalNode(rootEntry)
+        new AgentsNode(rootEntry)
           .parse(fs.readFileSync(rootEntry, "utf8"))
           .children.filter((c) => c.kind === "local").length,
         0,
       );
       const ownerAfter = fs.readFileSync(ownerEntry, "utf8");
-      const owner = new InternalNode(ownerEntry).parse(ownerAfter);
+      const owner = new AgentsNode(ownerEntry).parse(ownerAfter);
       assert.equal(owner.children.filter((c) => c.kind === "local").length, 1);
       if (location === "destination") assert.equal(ownerAfter, ownerSource);
       assert.equal(fs.existsSync(join(f.root, f.current, "AGENTS.md")), false);

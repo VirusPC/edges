@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { InternalNode } from "../../src/domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../src/domain/models/internal/agents-node.js";
 import { initMemory, doctorMemory } from "../../src/services/memory/index.js";
 import { layerTypeSpecs } from "../../src/services/memory/types.js";
 import { rewriteLayerSurface } from "../../src/domain/models/internal/blocks.js";
@@ -72,9 +72,9 @@ for (const kind of ["descendant", "prose", "local-prose"] as const)
       false,
     );
   });
-test("InternalNode generated local references are recognized as adopted types", async (t) => {
+test("AgentsNode generated local references are recognized as adopted types", async (t) => {
   const root = fixture(t),
-    node = new InternalNode(join(root, "AGENTS.md")).parse(ownerText(""));
+    node = new AgentsNode(join(root, "AGENTS.md")).parse(ownerText(""));
   node.addChild("local", {
     id: join(root, ".harness/memory/projects/README.md"),
     name: "projects",
@@ -188,7 +188,7 @@ test("reviewed public root graph loads document entries and keeps ADR navigation
   fs.mkdirSync(join(root, "docs/adr"), { recursive: true });
   const { NodeService } = await import("../../src/services/node/node-service.js");
   const service = new NodeService({ managedRoot: root });
-  const node = await service.get(join(root, "AGENTS.md"), InternalNode);
+  const node = await service.get(join(root, "AGENTS.md"), AgentsNode);
   assert.ok(node);
   assert.equal(
     node.children.some((ref) => ref.id === join(root, "docs/adr")),

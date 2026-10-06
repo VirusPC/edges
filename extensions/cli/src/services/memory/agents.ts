@@ -1,6 +1,6 @@
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 export { ownershipTarget } from './paths.js';
-import { InternalNode } from "../../domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import { discoverScopes } from '../scope.js';
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node/node-service.js';
@@ -57,12 +57,12 @@ export function classifyAgentsSource(source: string | undefined): "missing" | "m
 export function classifyAgentsFile(file: string): "missing" | "managed" | "foreign" {
     return classifyAgentsSource(isFile(file) ? readText(file) : undefined);
 }
-async function syncLoadedAgents(service: NodeService, node: InternalNode | undefined, file: string, directory: string, local: string, children: string): Promise<string> {
+async function syncLoadedAgents(service: NodeService, node: AgentsNode | undefined, file: string, directory: string, local: string, children: string): Promise<string> {
     const existing = node?.body;
     const state = classifyAgentsSource(existing);
     if (state === 'foreign') return 'needs-doctor';
     if (!node) {
-        await service.create(new InternalNode(file), parseDocument(renderAgentsDocument(basename(directory), local, children)), { indexGroup: 'local' });
+        await service.create(new AgentsNode(file), parseDocument(renderAgentsDocument(basename(directory), local, children)), { indexGroup: 'local' });
         return 'created';
     }
     let updated = rewriteLayerSurface(existing!);
@@ -76,11 +76,11 @@ async function syncLoadedAgents(service: NodeService, node: InternalNode | undef
 }
 export async function syncAgentsBlocks(directory: string, local = "", children = "", service = memoryNodes(directory)): Promise<string> {
     const file = prepareMemoryWrite(directory, join(directory, AGENTS_FILE_NAME));
-    return syncLoadedAgents(service, await service.get(file, InternalNode), file, directory, local, children);
+    return syncLoadedAgents(service, await service.get(file, AgentsNode), file, directory, local, children);
 }
 export async function syncTargetAgents(target: string, _root: string, service = memoryNodes(target)): Promise<string> {
     const file = prepareMemoryWrite(target, join(target, AGENTS_FILE_NAME));
-    const node = await service.get(file, InternalNode);
+    const node = await service.get(file, AgentsNode);
     const specs = layerTypeSpecs(target);
     const surface = node ? rewriteLayerSurface(node.body) : undefined;
     let local =
@@ -115,10 +115,10 @@ export const ancestorsUpTo = (start: string, root: string) => isWithinPath(start
     ? ancestors(start).filter((p) => isWithinPath(p, root))
     : [start];
 export function readOwnershipEntries(file: string) {
-    return isFile(file) ? new InternalNode(file).parse(readText(file)).children : [];
+    return isFile(file) ? new AgentsNode(file).parse(readText(file)).children : [];
 }
 export function readIndexEntries(file: string): [string, string][] {
-    return (isFile(file) ? new InternalNode(file).parse(readText(file)).descendantChildren : [])
+    return (isFile(file) ? new AgentsNode(file).parse(readText(file)).descendantChildren : [])
         .filter(entry => entry.id.endsWith('AGENTS.md'))
         .map(entry => [relative(dirname(file), entry.id), entry.description ?? '']);
 }
@@ -128,7 +128,7 @@ export function registeredIndexAnchors(target: string, root: string): string[] {
 }
 export async function dropIndexEntries(file: string, relatives: Set<string>): Promise<boolean> {
     const service = memoryNodes(dirname(file));
-    const node = await service.get(prepareMemoryWrite(dirname(file), file), InternalNode);
+    const node = await service.get(prepareMemoryWrite(dirname(file), file), AgentsNode);
     if (!node) return false;
     const descendantChildren = node.descendantChildren.filter(ref => !relatives.has(relative(node.directoryPath, ref.id)));
     if (descendantChildren.length === node.descendantChildren.length) return false;
@@ -152,7 +152,7 @@ export async function syncIndexEntry(anchor: string, target: string, description
     if (anchor === target) return ['not-applicable', null, null];
     const service = memoryNodes(anchor);
     const file = prepareMemoryWrite(anchor, join(anchor, AGENTS_FILE_NAME));
-    const node = await service.get(file, InternalNode);
+    const node = await service.get(file, AgentsNode);
     if (!node) return ['missing-owner', null, null];
     const id = canonicalPath(join(target, AGENTS_FILE_NAME));
     const registered = node.children.find(ref => canonicalPath(ref.id) === id);

@@ -1,4 +1,4 @@
-import { InternalNode } from "../../domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
@@ -56,7 +56,7 @@ export async function addMemoryType(options: AddMemoryTypeOptions) {
         })), { indexGroup: "local" });
     await refreshIndex(target, name, service);
     const agents = assertScopePath(join(target, AGENTS_FILE_NAME), target);
-    const entry = (await service.get(prepareMemoryWrite(target, agents), InternalNode))!;
+    const entry = (await service.get(prepareMemoryWrite(target, agents), AgentsNode))!;
     const before = entry.body, after = upsertLocalTypeLine(before, indexName, description);
     if (before !== after)
         await service.update(entry, { body: after });

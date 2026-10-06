@@ -5,7 +5,7 @@ import path from "node:path";
 import { execFileSync, spawnSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import {
-  InternalNode,
+  AgentsNode,
   MemoryNode,
   NoteNode,
   TaskNode,
@@ -124,7 +124,7 @@ export function planDirectoryMigration(
     if (!present(abs)) continue;
     checkPath(abs);
     const contract = indexContract(
-      new InternalNode(abs).parse(fs.readFileSync(abs, "utf8")),
+      new AgentsNode(abs).parse(fs.readFileSync(abs, "utf8")),
     );
     contracts.set(path.dirname(abs), contract);
     const source = fs.readFileSync(abs, "utf8");

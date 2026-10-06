@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
 import { NodeService } from "../../src/services/node/node-service.js";
-import { InternalNode } from "../../src/domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../src/domain/models/internal/agents-node.js";
 import { TaskNode } from "../../src/domain/models/tasks/task-node.js";
 
 async function fixture() {
@@ -32,7 +32,7 @@ test("created projects and tasks are recursively discoverable, then moves replac
     let nodes = await service.list(board);
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
     assert.ok(nodes.some((node) => node.path === path.join(board, "cli/AGENTS.md")));
-    const projectNode = await service.get(path.join(board, "cli/AGENTS.md"), InternalNode);
+    const projectNode = await service.get(path.join(board, "cli/AGENTS.md"), AgentsNode);
     assert.ok(projectNode?.children.some((child) => child.id === path.join(board, `cli/backlog/${stem}/INDEX.md`)));
     const { access } = await import("node:fs/promises");
     await assert.rejects(access(path.join(board, "cli/backlog/AGENTS.md")));
@@ -42,7 +42,7 @@ test("created projects and tasks are recursively discoverable, then moves replac
     nodes = await new NodeService({ managedRoot: board }).list(board);
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
     assert.ok(nodes.some((node) => node.path === path.join(board, `cli/done/${stem}/INDEX.md`)));
-    const old = await new NodeService({ managedRoot: board }).get(path.join(board, "cli/AGENTS.md"), InternalNode);
+    const old = await new NodeService({ managedRoot: board }).get(path.join(board, "cli/AGENTS.md"), AgentsNode);
     assert.ok(old);
     assert.equal(old.children.some((child) => child.id === path.join(board, `cli/backlog/${stem}/INDEX.md`)), false);
 
@@ -51,7 +51,7 @@ test("created projects and tasks are recursively discoverable, then moves replac
     nodes = await new NodeService({ managedRoot: board }).list(board);
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
     assert.ok(nodes.some((node) => node.path === path.join(board, `_default/done/${stem}/INDEX.md`)));
-    const destinationProject = await new NodeService({ managedRoot: board }).get(path.join(board, "_default/AGENTS.md"), InternalNode);
+    const destinationProject = await new NodeService({ managedRoot: board }).get(path.join(board, "_default/AGENTS.md"), AgentsNode);
     assert.ok(destinationProject?.children.some((child) => child.id === path.join(board, `_default/done/${stem}/INDEX.md`)));
     await assert.rejects(access(path.join(board, "_default/done/AGENTS.md")));
   } finally {
@@ -78,7 +78,7 @@ test("invalid project update leaves child index and authored project prose intac
     assert.match(after, /^# CLI Tools\n/);
     assert.match(after, /Keep constraint/);
     assert.match(after, /Keep this\./);
-    const indexed = await new NodeService({ managedRoot: board }).get(file, InternalNode);
+    const indexed = await new NodeService({ managedRoot: board }).get(file, AgentsNode);
     assert.equal(indexed?.children.length, 1);
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -111,7 +111,7 @@ test("creating in a new named project registers its full discovery chain", async
     const nodes = await new NodeService({ managedRoot: board }).list(board);
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
     assert.ok(nodes.some((node) => node.path === path.join(board, "cli/AGENTS.md")));
-    const projectNode = await new NodeService({ managedRoot: board }).get(path.join(board, "cli/AGENTS.md"), InternalNode);
+    const projectNode = await new NodeService({ managedRoot: board }).get(path.join(board, "cli/AGENTS.md"), AgentsNode);
     assert.equal(projectNode?.children.length, 1);
     const { access } = await import("node:fs/promises");
     await assert.rejects(access(path.join(board, "cli/backlog/AGENTS.md")));

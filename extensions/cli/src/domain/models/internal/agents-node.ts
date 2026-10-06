@@ -10,18 +10,18 @@ import {
 import type { ChildGroup, NodeReference, NodeCreateInput } from "../core/types.js";
 
 type Content = {
-  -readonly [Key in keyof InternalContent]: Array<InternalContent[Key][number]>;
+  -readonly [Key in keyof AgentsContent]: Array<AgentsContent[Key][number]>;
 };
 
-export interface InternalCreateInput extends NodeCreateInput {
+export interface AgentsCreateInput extends NodeCreateInput {
   constraints?: readonly string[];
   localChildren?: readonly NodeReference[];
   descendantChildren?: readonly NodeReference[];
 }
 
-export interface InternalUpdateInput extends InternalCreateInput {}
+export interface AgentsUpdateInput extends AgentsCreateInput {}
 
-export interface InternalContent {
+export interface AgentsContent {
   readonly constraints: readonly string[];
   readonly localChildren: readonly Readonly<NodeReference>[];
   readonly descendantChildren: readonly Readonly<NodeReference>[];
@@ -30,9 +30,9 @@ export interface InternalContent {
 const section = (group: ChildGroup) =>
   group === "local" ? "localChildren" : "descendantChildren";
 
-export class InternalNode extends BaseNode<
-  InternalCreateInput,
-  InternalUpdateInput
+export class AgentsNode extends BaseNode<
+  AgentsCreateInput,
+  AgentsUpdateInput
 > {
   override readonly type = "agents";
   #content: Content = {
@@ -42,7 +42,7 @@ export class InternalNode extends BaseNode<
   };
   #syntax = new InternalSyntax("");
   #hrefs = new Map<string, string>();
-  get content(): InternalContent {
+  get content(): AgentsContent {
     return structuredClone(this.#content);
   }
   get constraints(): readonly string[] {
@@ -147,7 +147,7 @@ export class InternalNode extends BaseNode<
     this.#validateContent(this.#content);
     this.serializeBody();
   }
-  protected override applyInput(input: InternalCreateInput): void {
+  protected override applyInput(input: AgentsCreateInput): void {
     const structured =
       input.constraints !== undefined ||
       input.localChildren !== undefined ||

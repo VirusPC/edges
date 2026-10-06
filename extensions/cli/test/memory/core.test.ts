@@ -298,6 +298,6 @@ test('cross-scope init preflights explicit placement before creating harness fil
  await assert.rejects(initMemory({targetDir:join(targetDir,'child'),rootDir:targetDir,memoryTypes:['project']}),/index-group/);
  assert.equal(existsSync(join(targetDir,'child/.harness')),false);
  await initMemory({targetDir:join(targetDir,'child'),rootDir:targetDir,memoryTypes:['project'],indexGroup:'local'});
- const {InternalNode}=await import("../../src/domain/models/internal/internal-node.js");
- assert.equal(new InternalNode(join(targetDir,'AGENTS.md')).parse(read(targetDir,'AGENTS.md')).localChildren.length,1);
+ const {AgentsNode}=await import("../../src/domain/models/internal/agents-node.js");
+ assert.equal(new AgentsNode(join(targetDir,'AGENTS.md')).parse(read(targetDir,'AGENTS.md')).localChildren.length,1);
 });

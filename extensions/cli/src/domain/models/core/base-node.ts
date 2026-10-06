@@ -31,7 +31,14 @@ export class BaseNode<
     return this.path;
   }
   get isLeaf(): boolean {
-    return false;
+    return this.localChildren === undefined && this.children.length === 0;
+  }
+  /** Present only on nodes that own composition; undefined means no composition fields. */
+  get localChildren(): readonly Readonly<NodeReference>[] | undefined {
+    return undefined;
+  }
+  get descendantChildren(): readonly Readonly<NodeReference>[] | undefined {
+    return undefined;
   }
   get name(): string | undefined {
     return this.#metadata?.name as string | undefined;
