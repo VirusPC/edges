@@ -4,8 +4,7 @@
 
 **Goal:** 落地系统一 / 系统二入口分工：`AGENTS.md` 只挂系统维护信息；`README.md` 用 `project-entries-*` 挂内容；类型入口改 README；`type` 扩展为 `agents|readme|…|text`；存量迁 `INDEX.md`。
 
-**Architecture:** Wave A 先改标记/标题、README 组成 codec、memory 类型索引路径与 migrate、根 README entries、traverse 双文件规则——立刻分清系统一/二。Wave B 再扁平类层次（取消 Internal/Leaf）、`type` 改名、显式 `--super`、project harness init 演进。组成解析复用并参数化现有 `InternalSyntax` / blocks，不要另起一套 Markdown 引擎。
-
+**Architecture:** Wave A 先改标记/标题、README 组成 codec、traverse（**默认全部 children** + 双文件并边）、memory 类型索引与 Task Project 等「伪系统入口」迁 README、根 README entries、INDEX 改名——立刻分清系统一/二。Wave B 再扁平类层次、`type` 收口、`SuperAgentsNode` + `--super`、harness init。组成解析参数化现有 `InternalSyntax` / blocks，不另起 Markdown 引擎。
 **Tech Stack:** TypeScript、Node ≥22、`node:test`、tsx、现有 `edges-cli`。不新增依赖。
 
 **Spec:** `docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md`（ADR 0029）  
@@ -54,7 +53,7 @@ flowchart TB
 | --- | --- | --- |
 | layout / syntax / blocks | 标记、标题、入口文件名 | A1–A2 |
 | ReadmeNode + Agents 组成 | 两套 entries 表 | A2 |
-| traverse / NodeService | 双文件边、不扫盘 | A3 |
+| traverse / NodeService | 默认全部 children、双文件边、不扫盘 | A3 |
 | memory paths + 模板 + 迁移 | 类型入口 README | A4–A5 |
 | 根 README | Q9b 本层内容 | A6 |
 | INDEX 迁移 | 叶子文件名 | A7 |
@@ -85,8 +84,7 @@ flowchart TB
   DownA --> ChildA["下级 AGENTS.md"]
 ```
 
-实线 = 组成边（traverse 默认/显式组）；点划线 = 同目录双文件规则或显式 `--super` 虚拟超节点。`harness` 边默认不跟随（既有约定）。
-
+实线 = 组成边（traverse **默认**走全部 children；`localOnly` 才收窄）；点划线 = 同目录双文件并边或显式 `--super`。`harness` 默认不跟随。
 ### 3. 目标类图（Wave B 终点）
 
 ```mermaid
@@ -138,6 +136,7 @@ flowchart LR
 - 类型入口 → `README.md` + `project-entries-*`；`project-memory-type` 身份头保留在 README 顶部；列表不用 `project-memory-entries`（读兼容至迁完）。
 - 叶子入口文件名目标 **`INDEX.md`**；读兼容 `index.md` 至迁完。
 - 虚拟超节点须显式 **`--super`**；默认取当前 scope 的 `AGENTS.md`；缺 AGENTS 不自动合成超节点。
+- traverse **默认**走全部 `children`（local∪descendants）；本层-only 用显式 `localOnly: true`；`includeHarness` 仍默认 false（Q20）。
 - 类层次：Wave B 各节点直继 BaseNode；本计划默认 **删除** `LeafNode`/`isLeaf` 持久语义，`InternalNode` 先改 `type=agents` 再改名为 `AgentsNode`（可短暂 `export { AgentsNode as InternalNode }`）。
 - 不改：`.harness/` 目录名、`edges memory` 命令名、skill 目录名 `project-memory-*`、posts 正文（仅 INDEX 改名）。
 - 批量迁移：可预览、冲突检查、幂等；禁止逐文件手改。
@@ -205,19 +204,21 @@ export const INTERNAL_SECTIONS = {
 } as const;
 ```
 
-在 parse/serialize/rewrite 路径中把旧标题 `本层组成`/`下层节点` 列入读别名（与既有 `本层记忆` 等并列）；**写**只发新标题。更新 `internal.test.ts` 里 `modern` fixture 的标题替换目标。
+在 parse/serialize/rewrite 路径中把旧标题列入读别名（与 spec 一致）：`本层组成`、`本层记忆`、`下层节点`、`下层记忆索引`、`下层作用域`、`本层重要约束`；**写**只发新标题。更新 `internal.test.ts` 里 `modern` fixture 的标题替换目标。`rewriteLayerSurface`（或等价）刷新存量层入口标题，禁止手改。
 
 - [ ] **Step 4: 改 PROTOCOL / LAYOUT 称呼与 `AGENTS.tmpl.md` 两处 H2**
 
 模板本层/下层标题改为「本层系统维护信息」「下层系统维护信息」。层 local 里链到类型索引的路径本 Task 仍可写 `AGENTS.md`（Task 4 再改 README）。
 
-- [ ] **Step 5: 跑测试通过并 commit**
+- [ ] **Step 5: 对本仓已跟踪的层入口跑标题刷新（dry-run → apply），再跑测试通过并 commit**
 
 ```bash
 pnpm --filter edges-cli exec node --test --import tsx test/models/internal.test.ts
+# apply 后一并 stage 被 rewrite 的各层 AGENTS.md（勿手改标题）
 git add extensions/cli/src/domain/models/layout.ts \
   extensions/cli/test/models/internal.test.ts \
-  extensions/skills/project-memory-init/references/
+  extensions/skills/project-memory-init/references/ \
+  $(git diff --name-only -- '**/AGENTS.md')
 git commit -m "$(cat <<'EOF'
 feat: AGENTS 章节标题改为系统维护信息
 
@@ -362,11 +363,12 @@ test("localOnly skips descendant group", async () => {
   assert.ok(!paths.some((p) => p.endsWith("nested/AGENTS.md")));
 });
 
-// 双文件夹具
+// 双文件夹具（硬断言）
 // scope/AGENTS.md local → .harness/memory/projects/README.md
 // scope/README.md local → tasks/README.md
 // 默认 traverse(scopeAgents) 应经并边到达 tasks/README.md
-// 且 scopeAgents.localChildren 不含 tasks
+// assert: scopeAgents.localChildren / descendantChildren 都不含 tasks
+// assert: README descendants 目标 basename 均为 README.md（下层同合同）
 ```
 
 - [ ] **Step 2: 跑测试确认失败**（现行默认不进 descendants）
@@ -386,6 +388,8 @@ export interface ScopeTraversalOptions {
 ```
 
 同目录 AGENTS+README：并入 README 组成边，不扫盘。全仓 `rg includeDescendants` / 依赖旧默认的测试与 memory/tasks 调用方：要本层-only 的改为 `localOnly: true`。
+
+**中态注意：** Task 5 完成前，存量可能仍把系统一孩子挂在 AGENTS local；本 Task **不得**把系统一孩子再写入 AGENTS，也不得为「能 traverse 到」去扫盘补边。Task 5B 负责剥伪系统入口；在那之前单测用夹具表达目标形状，不要依赖脏仓。
 
 - [ ] **Step 4: 测试通过并 commit**
 
@@ -447,37 +451,40 @@ EOF
 
 ---
 
-### Task 5: 迁移脚本 — 类型索引 AGENTS→README + 仓内应用
+### Task 5: 迁移脚本 — 类型索引 +「列表型」AGENTS→README
 
 **Files:**
 - Create: `scripts/migrate-type-index-to-readme.mts`（或 CLI 包内 scripts，与 `migrate:project-harness-markers` 同注册方式）
-- Modify: 根与各层 `.harness/memory/*/AGENTS.md`、`.harness/skills/*/AGENTS.md` → README；更新所有指向它们的链接
-- Modify: `package.json` script 入口（若有 migrate 命名空间则跟上）
+- Modify: 根与各层 `.harness/memory/*/AGENTS.md`、`.harness/skills/*/AGENTS.md` → README
+- Modify: **Task Project 等仅列系统一孩子、无真实系统二材料的目录**（如 `.harness/tasks/<project>/AGENTS.md`、`tasks/<project>/AGENTS.md` 若只是任务列表）：组成迁到同目录 `README.md` + `project-entries-*`；若该目录未用户 init 为系统入口，删除或不再维持伪 AGENTS（与 Q10/Q18 一致——有列表 ≠ 系统入口）
+- 更新所有指向旧路径的链接；`package.json` script 入口
 
 **Interfaces:**
-- CLI: `pnpm migrate:type-index-readme -- --root <abs> [--apply]`
-- dry-run 默认；`--apply` 写入；冲突（目标 README 已存在且不等价）报错退出
+- CLI: `pnpm migrate:type-index-readme -- --root <abs> [--apply]`（可拆第二个脚本 `migrate:org-lists-to-readme`，但须同一验收：系统一列表不在 `project-harness-local`）
+- dry-run 默认；冲突报错退出
 
 - [ ] **Step 1: 脚本骨架（preview）**
 
-遍历 `--root` 下 `.harness/memory/*/` 与 `.harness/skills/*/`：若存在 `AGENTS.md` 且含 `project-memory-type` 或 `project-memory-entries`，计划：
+**A. 类型索引：** `.harness/memory/*/`、`.harness/skills/*/` 下含 `project-memory-type` / `project-memory-entries` 的 `AGENTS.md` →
 
-1. 将 entries 标记改写为 `project-entries-*`，标题改「本层内容」（类型索引通常无下层；有则改「下层内容」）
-2. 保留 `project-memory-type` 块
-3. 写入同目录 `README.md`，删除旧 `AGENTS.md`（apply 时）
-4. 更新层 AGENTS 与其它文件中指向旧路径的链接
+1. entries → `project-entries-*`，标题「本层内容」（有下层则「下层内容」）
+2. 保留 `project-memory-type` 头
+3. 写入 `README.md`，apply 时删旧 AGENTS
+4. 更新层 AGENTS 链接
 
-复用 edges traverse / 已有 migrate 工具函数，不要手枚举业务目录以外的随意 md。
+**B. 组织清单误用 AGENTS：** dry-run 列出「`project-harness-local` 主要是 Task/内容叶子、几乎无 `.harness` 系统二材料」的目录，预览迁 README；**不**自动剥掉用户已 init、含硬约束/维护模块的真系统入口。
 
-- [ ] **Step 2: 对本仓 `--root /workspace` dry-run，检查计划无冲突**
+复用 traverse；不要手扫无关 md。
 
-- [ ] **Step 3: `--apply` 后 `edges memory doctor`（或现有检查）通过**
+- [ ] **Step 2: 对本仓 dry-run，人工确认 B 类名单无误伤**
 
-- [ ] **Step 4: Commit 脚本 + 本仓迁移结果**
+- [ ] **Step 3: `--apply` 后 doctor / 抽查：原 edges-cli-platform 等 Task Project 列表在 README，不在 AGENTS local**
+
+- [ ] **Step 4: Commit**
 
 ```bash
 git commit -m "$(cat <<'EOF'
-feat: 迁移类型索引 AGENTS 为 README
+feat: 类型索引与列表型入口迁 README
 
 Co-authored-by: Cursor Agent <cursoragent@cursor.com>
 EOF
@@ -489,10 +496,16 @@ EOF
 ### Task 6: 根 README 本层内容（Q9b）
 
 **Files:**
-- Modify: `/README.md` — 追加 `project-entries-local`（及如需要的 descendants），链到 `tasks/`、`notes/` 等本层入口（入口文件以当时 layout 为准：`tasks/AGENTS.md` 或未来 `tasks/README.md`；领域板若仍是 AGENTS 系统入口则链系统入口，若是组织清单则链 README）
+- Modify: `/README.md` — 追加 `project-entries-local`（及如需要的 descendants）
 - Test: 可选小测试读根 README 的 localChildren 含 tasks
 
-- [ ] **Step 1: 确定链目标**（读现有 `tasks/AGENTS.md`、`notes/` 布局，按「本层内容挂本层入口」登记，不扁平挂每个 Task）
+**链目标锁定（本仓现行）：**
+- `tasks/AGENTS.md` — 领域板仍是系统入口则链 AGENTS；若 Task 5 已把某层改成纯组织清单则链其 README
+- `notes/` — 链组织清单或约定入口（有 README 用 README，否则按 layout 识别的入口）
+- 不扁平挂每个 Task / Note 叶子
+- 下层内容若需要，只链其它 `README.md`
+
+- [ ] **Step 1: 按上表核对磁盘入口后写区块**
 
 - [ ] **Step 2: 只改标记区块，保留 README 既有人文**
 
@@ -593,22 +606,34 @@ EOF
 
 ---
 
-### Task 10: 显式 `--super`（虚拟超节点）
+### Task 10: 显式 `--super`（`SuperAgentsNode`）
 
 **Files:**
-- Modify: CLI scope 解析（`extensions/cli/src/commands/` 或 context）
-- Modify: NodeService / query 入口
-- Test: 无 AGENTS + 无 flag → 错误；有 `--super` → 运行时根挂仓根 README entries
+- Create: `extensions/cli/src/domain/models/agents/super-agents-node.ts`（或与 AgentsNode 同目录）
+- Modify: CLI 全局/`--scope` 旁增加 `--super`；query/list 入口传入
+- Modify: NodeService：无 AGENTS 且无 `--super` → 明确错误；有 `--super` → 构造不落盘 `SuperAgentsNode`（语义：相对当前 scope **再上一级**），其组成挂 **Edges 根 `README.md`**（Q9b），再按默认 traverse 下钻
+- Test: `test/…/super-agents-node.test.ts`
 
-- [ ] **Step 1: 失败测试覆盖两种行为**
+**语义锁定：** 不是「缺 AGENTS 时的自动根」；有真实 AGENTS 时默认仍用真实入口。`--super` 才造运行时超节点；Edges 仓内挂载经根 README entries，不在超节点上扁平挂全部 Task 叶子。
 
-- [ ] **Step 2: 实现 `SuperAgentsNode extends AgentsNode`（不落盘）+ `--super` 接线**
+- [ ] **Step 1: 失败测试**
+
+```ts
+test("scope without AGENTS fails without --super", async () => { /* expect throw */ });
+test("with --super roots at SuperAgentsNode over root README", async () => {
+  // SuperAgentsNode instanceof AgentsNode
+  // traverse reaches tasks via root README entries
+  // does not write any AGENTS.md
+});
+```
+
+- [ ] **Step 2: 实现类 + flag 接线（不落盘、不写文件）**
 
 - [ ] **Step 3: commit**
 
 ```bash
 git commit -m "$(cat <<'EOF'
-feat: 显式 --super 虚拟超节点
+feat: --super 启用 SuperAgentsNode
 
 Co-authored-by: Cursor Agent <cursoragent@cursor.com>
 EOF
@@ -635,11 +660,11 @@ EOF
 ### Task 12: 收尾文档与 ADR 状态
 
 **Files:**
-- Modify: spec 状态 → 实施中/已落地；ADR 0029 `proposed` → `accepted`
-- Modify: `CONTEXT.md` / models README 若仍有过期「本层组成」
-- Modify: ADR 0012 加 superseded 指针（若尚未）
+- Modify: spec 状态 → 已落地（ADR 0029 已是 `accepted`，勿再改 proposed）
+- Modify: `CONTEXT.md` / models README / operations README 扫掉过期「默认只 local」「本层组成」现行语气
+- Modify: ADR 0012 加 superseded/修订指针（类型入口改 README）
 
-- [ ] **Step 1: 对照 spec「验收」清单逐条勾掉**
+- [ ] **Step 1: 对照下方验收 + spec「验收」逐条勾掉**
 
 - [ ] **Step 2: commit**
 
@@ -658,17 +683,36 @@ EOF
 
 | Spec 要求 | Task |
 | --- | --- |
-| AGENTS 标题系统维护信息 | 1 |
+| AGENTS 标题系统维护信息 + 存量刷新 | 1 |
 | README project-entries + 标题 | 2 |
-| 下层同合同递归 | 2（登记目标）+ 3（traverse） |
+| 下层同合同递归 | 2 + 3 |
 | 双文件遍历分工 | 3 |
-| 类型入口 README | 4–5 |
-| 根 README entries | 6 |
-| INDEX.md 迁移含 posts | 7 |
-| type agents/readme/text | 8 |
+| traverse 默认全部 children / `localOnly`（Q20） | 3 |
+| 类型入口 README（Q18） | 4–5 |
+| 列表型伪系统入口迁 README（缘起问题） | 5B |
+| 根 README entries（Q9b） | 6 |
+| INDEX.md 迁移含 posts（Q14） | 7 |
+| type agents/readme/text（Q17） | 8 |
 | 无 Internal/Leaf | 9 |
-| 虚拟超节点 `--super` | 10 |
-| project harness init | 11 |
+| `SuperAgentsNode` + `--super` | 10 |
+| project harness init（Q10） | 11 |
 | 文档/ADR | 12 |
 
-开放题锁定：类删除（非长期别名，仅允许短暂 re-export）；`project-memory-type` 留 README 顶；`--super` → `SuperAgentsNode extends AgentsNode`。
+## 验收（实施后，对齐 spec）
+
+- 新写 AGENTS 只有系统维护信息标题与 `project-harness-*`；README 只有 `project-entries-*` / 本层·下层内容
+- 旧 AGENTS 标题仍能 parse；写回只发新标题
+- 默认 traverse 进入 descendants；`localOnly` 不进入
+- 同目录双文件：系统一孩子不在 AGENTS 组成字段里，却能经并边 traverse 到；不扫盘
+- README 下层组目标均为其它 `README.md`；AGENTS 下层组目标均为其它 `AGENTS.md`
+- 类型索引与 Task Project 任务列表在 README，不在 `project-harness-local`
+- `index.md`→`INDEX.md` 幂等；posts 仅改名
+- 无 `--super` 且无 AGENTS → 失败；有 `--super` → `SuperAgentsNode` 经根 README 下钻且不落盘
+
+## 残留风险（不阻塞开工，实施时盯）
+
+- Wave A 中态：Task 5B 前仓内可能仍有「伪 AGENTS 挂系统一列表」；以夹具测目标形状，迁移脚本须可预览且勿误伤真系统入口。
+- 双写校验：spec 禁止同一批系统一孩子写进 AGENTS+README；本计划不单开 validate Task——serialize/迁移路径自觉只写边界，必要时在 Task 3/5 加断言。
+- INDEX/SKILL 带组成：Wave B 上收 BaseNode 后自然支持；Wave A 不单独做 INDEX entries codec。
+
+开放题锁定：类删除（可短暂 `InternalNode` re-export）；`project-memory-type` 留 README 顶 HTML 头；`--super` → `SuperAgentsNode extends AgentsNode`。
