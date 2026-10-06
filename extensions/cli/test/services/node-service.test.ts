@@ -617,3 +617,28 @@ test('moving an unregistered node does not invent a descendant registration',asy
  assert.deepEqual((await service.get(file('destination/AGENTS.md'),InternalNode))?.children,[]);
  assert.equal(fs.readFileSync(file('destination/item/index.md'),'utf8'),'Body');
 });
+
+test('generic query supports all types and explicit task-only deferred execution', async t => {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'generic-query-')));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const note = path.join(root, 'notes/example/index.md');
+  const service = new NodeService({ managedRoot: root });
+  await service.create(new InternalNode(path.join(root, 'AGENTS.md')), {});
+  await service.create(new NoteNode(note), { body: '# Note\n' }, { indexGroup: 'local' });
+  let seen = 0;
+  const all = service.query(root, { includeDescendants: true, includeHarness: true })
+    .map(node => { seen += 1; return node; }).groupBy(node => node.type)
+    .mapValues(nodes => nodes.length);
+  assert.equal(seen, 0);
+  assert.equal((await all.value()).note, 1);
+  assert.ok(seen > 0);
+  fs.writeFileSync(note, '---\nbroken: [\n---\n');
+  // A fresh Service observes disk changes without a cached body masking type filtering.
+  const fresh = new NodeService({ managedRoot: root });
+  assert.deepEqual(await fresh.query(root, {
+    types: ['task'], includeDescendants: true, includeHarness: true,
+  }).value(), []);
+  await assert.rejects(new NodeService({ managedRoot: root }).query(root, {
+    includeDescendants: true, includeHarness: true,
+  }).value());
+});

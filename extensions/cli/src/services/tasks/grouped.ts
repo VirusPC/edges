@@ -2,10 +2,11 @@ import path from "node:path";
 import { realpathSync } from "node:fs";
 import { InternalNode } from "../../domain/models/index.js";
 import { query } from "../../domain/operations/query.js";
-import { repositoryNodeQuery, projectLocationOf } from "./node-query.js";
+import { projectLocationOf } from "./node-query.js";
 import { taskBoardLocation, type TaskPurpose } from "./paths.js";
 import { scopeDir, type BoardTarget } from "./paths.js";
 import { isTaskProjectId } from "../../domain/models/tasks/project.js";
+import { NodeService } from "../node-service.js";
 import { portableScope } from "../scope.js";
 import { listRepositoryTasksWithDocs, createNodeBoardFs, listProjectIds, listTasksWithDocs, type BoardFs, type TaskListOpts } from "./board.js";
 import {
@@ -293,7 +294,10 @@ export async function listRepositoryGroupedByProject(
   const groupedTasks = await query(async function* () { yield* tasks; })
     .groupBy(task => sourceIdentity(task.source, task.project)).value();
   const groups = new Map<string, GroupedListGroup>();
-  const projects = await repositoryNodeQuery(root, ['internal'])
+  const service = new NodeService({ managedRoot: root });
+  const projects = await service.query(root, {
+    types: ["internal"], includeDescendants: true, includeHarness: true,
+  })
     .filter((node): node is InternalNode => node instanceof InternalNode)
     .map(node => projectLocationOf(node, root))
     .filter((entry): entry is NonNullable<typeof entry> => !!entry)

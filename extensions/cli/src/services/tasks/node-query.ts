@@ -65,23 +65,14 @@ export async function listTaskNodes(
     .filter((node): node is TaskNode => node instanceof TaskNode)
     .value();
 }
-export function repositoryNodeQuery(
-  root: string,
-  types: readonly string[] = ["task"],
-) {
-  return new NodeService({ managedRoot: fs.realpathSync(root) }).query(
-    fs.realpathSync(root),
-    {
-      includeDescendants: true,
-      includeHarness: true,
-      types,
-    },
-  );
-}
 export async function listRepositoryTaskNodes(
   root: string,
 ): Promise<TaskNode[]> {
-  return repositoryNodeQuery(root)
+  const canonicalRoot = fs.realpathSync(root);
+  const service = new NodeService({ managedRoot: canonicalRoot });
+  return service.query(canonicalRoot, {
+    types: ["task"], includeDescendants: true, includeHarness: true,
+  })
     .filter((node): node is TaskNode => node instanceof TaskNode)
     .value();
 }
