@@ -35,7 +35,7 @@ COMMANDS
 There is no classify command. Task moves stay on update --project (same status and priority).
 
 Issue layer stdout is JSON. runs / run-messages default to a table; pass --output json.
-list --group-by project emits edges.tasks.grouped/v1 ({ schema, groups[], items[] }).
+list --group-by <field> emits { groupBy, groups: [{ key, items }] }.
 
 Cancel a Task with: edges tasks status <stem> cancelled
 delete only prints that command. It does not remove the Task file or sidecar.

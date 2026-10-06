@@ -35,7 +35,7 @@ test("flat list is unchanged without --group-by", async () => {
   }
 });
 
-test("list --group-by project --format json emits edges.tasks.grouped/v1", async () => {
+test("list --group-by project emits groups of items", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-grouped-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
@@ -45,32 +45,21 @@ test("list --group-by project --format json emits edges.tasks.grouped/v1", async
     const body = JSON.parse(result.stdout) as {
       status: string;
       command: string;
-      schema: string;
-      groups: Array<{ id: string; title: string; description?: string }>;
-      items: Array<{
-        id?: string;
-        stem?: string;
-        group: string;
-        title?: string;
-        status?: string;
-        doc?: { name?: string; body?: unknown; metadata: Record<string, string> };
-      }>;
+      groupBy: string;
+      groups: Array<{ key: string; items: Array<{ stem?: string; title?: string; status?: string; doc?: { name?: string; body?: unknown; metadata: Record<string, string> } }> }>;
       tasks?: unknown;
+      schema?: string;
     };
     assert.equal(body.status, "success");
     assert.equal(body.command, "list");
-    assert.equal(body.schema, "edges.tasks.grouped/v1");
-    assert.ok(body.groups.some((group) => group.id === '[".","domain","default"]' && group.title));
+    assert.equal(body.groupBy, "project");
+    assert.equal(body.schema, undefined);
     assert.equal(body.tasks, undefined);
-    const item = body.items[0];
-    assert.ok(item?.id || item?.stem);
-    assert.equal(item?.group, '[".","domain","default"]');
-    assert.equal(item?.title, "Alpha");
-    assert.equal(item?.status, "todo");
-    assert.equal(item?.doc?.name !== undefined, true);
-    assert.equal(typeof item?.doc?.body, "string");
-    assert.equal(item?.doc?.metadata["edges-tasks-status"], "todo");
-    assert.equal("rawFrontmatter" in (item?.doc ?? {}), false);
+    const group = body.groups.find((entry) => entry.key === "default");
+    assert.ok(group);
+    assert.equal(group?.items[0]?.title, "Alpha");
+    assert.equal(group?.items[0]?.status, "todo");
+    assert.equal(typeof group?.items[0]?.doc?.body, "string");
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -127,30 +116,27 @@ test("list filters apply before grouping", async () => {
     );
     assert.equal(result.exitCode, 0);
     const body = JSON.parse(result.stdout) as {
-      groups: Array<{ id: string }>;
-      items: Array<{ title?: string; group: string; priority?: string }>;
+      groups: Array<{ key: string; items: Array<{ title?: string; priority?: string }> }>;
     };
-    assert.deepEqual(
-      body.groups.map((group) => group.id),
-      ['[".","domain","cli"]', '[".","domain","docs"]'],
-    );
-    assert.deepEqual(
-      body.items.map((item) => item.title),
-      ["KeepUrgent", "KeepHigh"],
-    );
-    assert.deepEqual(
-      body.items.map((item) => item.priority),
-      ["urgent", "high"],
-    );
+    const titles = body.groups.flatMap((group) => group.items.map((item) => item.title));
+    assert.deepEqual(titles.sort(), ["KeepHigh", "KeepUrgent"]);
+    assert.deepEqual(body.groups.map((group) => group.key).sort(), ["cli", "docs"]);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
 });
 
-test("list --group-by status and --format table are VALIDATION_ERROR", async () => {
-  const byStatus = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list", "--group-by", "status"]);
-  assert.equal(byStatus.exitCode, 2);
-  assert.equal(failedJson(byStatus.stdout).errorCode, "VALIDATION_ERROR");
+test("list --format table is VALIDATION_ERROR and --group-by status is allowed", async () => {
+  const repo = await mkdtemp(path.join(tmpdir(), "edges-grouped-"));
+  try {
+    const byStatus = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list", "--group-by", "status"], {
+      env: { ...process.env, EDGES_REPO: repo },
+    });
+    assert.equal(byStatus.exitCode, 0);
+    assert.equal(JSON.parse(byStatus.stdout).groupBy, "status");
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
 
   const table = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list", "--format", "table"]);
   assert.equal(table.exitCode, 2);
@@ -161,6 +147,7 @@ test("list --help documents grouped schema and omits review-page", async () => {
   const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list", "--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /--group-by/);
-  assert.match(result.stdout, /edges\.tasks\.grouped\/v1/);
+  assert.match(result.stdout, /--filter/);
+  assert.doesNotMatch(result.stdout, /edges\.tasks\.grouped\/v1/);
   assert.doesNotMatch(result.stdout, /review-page/);
 });

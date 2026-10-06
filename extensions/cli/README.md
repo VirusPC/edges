@@ -145,7 +145,7 @@ edges tasks project review-page --from /tmp/tasks.json --out /tmp/review.html
 
 list --all-scopes 从选定作用域所属 Git 根出发，无 Git 时从该作用域出发，递归查询登记树及各维护层；默认包括两种 purpose，只有显式传入 purpose 才筛选。全局根必须有有效 AGENTS，未登记的看板不会因物理存在而自动出现。其他写命令仍只操作选定看板。
 
-普通任务命令 stdout 为 JSON；runs、run-messages 只读，默认表格，可用 `--output json`。未分组 list 返回 tasks 数组；分组输出使用 `edges.tasks.grouped/v1`，先筛选再分组。全局数据携带 scope、purpose、project、stem 和入口 path，不合并不同来源的同名项目。
+普通任务命令 stdout 为 JSON；runs、run-messages 只读，默认表格，可用 `--output json`。未分组 list 返回 tasks 数组；分组输出是 `{ groupBy, groups: [{ key, items }] }`，先筛选再分组。全局数据携带 scope、purpose、project、stem 和入口 path。
 
 review-page 只把 groups/items JSON 渲染成 HTML，不改任务、不打开浏览器、不自动发布。需要公开预览时再调用 artifacts publish。固定任务站点的生成、部署与路径配置见[部署说明](deploy/README.md)。
 

@@ -1,11 +1,11 @@
 import { mkdir, writeFile, readFile } from "node:fs/promises";
 import path from "node:path";
-import { portableScope, resolveScope } from "../scope.js";
-import { createNodeBoardFs } from "./board.js";
-import { groupedListToReviewPageInput, listGroupedByProject, listRepositoryGroupedByProject } from "./grouped.js";
+import { resolveScope } from "../scope.js";
+import { createNodeBoardFs, listRepositoryTasksWithDocs, listTasksWithDocs } from "./board.js";
 import { taskBoardLocation, type TaskPurpose } from "./paths.js";
 import { loadBuiltReviewShell, parseReviewPageInput, renderReviewPageHtml } from "./review-page.js";
-import { TasksError } from "../../domain/models/tasks/types.js";
+import { DEFAULT_TASK_PROJECT, TasksError } from "../../domain/models/tasks/types.js";
+import { fieldText } from "../list-query.js";
 
 export const DEFAULT_TASKS_SITE_REL = "tasks/_site/index.html";
 export function defaultTasksSiteOutPath(scopeDir: string): string { return path.join(scopeDir, DEFAULT_TASKS_SITE_REL); }
@@ -19,11 +19,47 @@ export async function generateTasksSite(input: {
 }): Promise<{ path: string; groupCount: number; itemCount: number }> {
   const purpose = input.purpose ?? "domain";
   if (!["domain", "maintenance", "all"].includes(purpose)) throw new TasksError("VALIDATION_ERROR", "purpose must be domain, maintenance, or all");
-  const location = taskBoardLocation(input.repoPath, purpose === 'all' ? 'domain' : purpose);
-  const grouped = purpose === 'all'
-    ? await listRepositoryGroupedByProject(input.repoPath)
-    : await listGroupedByProject(location, {}, createNodeBoardFs(location), portableScope(input.repoPath, input.repoPath));
-  const page = parseReviewPageInput(groupedListToReviewPageInput(grouped));
+  const location = taskBoardLocation(input.repoPath, purpose === "all" ? "domain" : purpose);
+  const records = (purpose === "all"
+    ? await listRepositoryTasksWithDocs(input.repoPath)
+    : await listTasksWithDocs(location, {}, createNodeBoardFs(location))) as unknown as Record<string, unknown>[];
+  const buckets = new Map<string, { id: string; title: string; source?: unknown; project?: unknown; items: Record<string, unknown>[] }>();
+  for (const item of records) {
+    const title = fieldText(item, "project");
+    const source = item.source as { scope?: string; purpose?: string } | undefined;
+    const id = source ? `${source.scope}:${source.purpose}:${title}` : title;
+    const bucket = buckets.get(id) ?? { id, title, source, project: item.project, items: [] };
+    bucket.items.push(item);
+    buckets.set(id, bucket);
+  }
+  const groups = buckets.size > 0 ? [...buckets.values()] : [{ id: DEFAULT_TASK_PROJECT, title: DEFAULT_TASK_PROJECT, items: [] as Record<string, unknown>[] }];
+  const page = parseReviewPageInput({
+    groups: groups.map((group) => ({
+      id: group.id,
+      title: group.title,
+      description: "",
+      ...(group.source ? { source: group.source, project: group.project } : {}),
+    })),
+    items: groups.flatMap((group) =>
+      group.items.map((item) => ({
+        stem: String(item.stem),
+        current: group.id,
+        suggested: group.id,
+        ...(typeof item.title === "string" ? { title: item.title } : {}),
+        ...(typeof item.description === "string" ? { description: item.description } : {}),
+        ...(typeof item.status === "string" ? { status: item.status } : {}),
+        ...(typeof item.priority === "string" ? { priority: item.priority } : {}),
+        ...(item.doc ? { doc: item.doc } : {}),
+        ...(item.source
+          ? {
+              id: `${String((item.source as { scope: string }).scope)}:${String((item.source as { purpose: string }).purpose)}:${String(item.stem)}`,
+              source: item.source,
+              project: item.project,
+            }
+          : {}),
+      })),
+    ),
+  });
   const shell = await loadBuiltReviewShell(abs => readFile(abs, "utf8"));
   const outPath = path.resolve(input.outPath);
   await mkdir(path.dirname(outPath), { recursive: true });

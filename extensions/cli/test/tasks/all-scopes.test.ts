@@ -57,11 +57,10 @@ test('all-scopes resolves the Git root, preserves physical identities and matche
     const grouped = await call(scope, ['list', '--all-scopes', '--group-by', 'project']);
     assert.equal(grouped.exitCode, 0, grouped.stdout);
     const snapshot = JSON.parse(grouped.stdout);
-    assert.equal(snapshot.schema, 'edges.tasks.grouped/v1');
-    assert.deepEqual(snapshot.items.map((x: any) => x.id).sort(), dashboard.items.map((x: any) => x.id).sort());
-    assert.equal(new Set(snapshot.items.map((x: any) => x.id)).size, 7);
-    assert.equal(snapshot.groups.length, 14);
-    assert.deepEqual(snapshot.items.map((x: any) => x.path).sort(), entries.sort());
+    assert.equal(snapshot.groupBy, 'project');
+    const items = snapshot.groups.flatMap((group: { items: Array<{ path: string }> }) => group.items);
+    assert.deepEqual(items.map((item) => item.path).sort(), entries.sort());
+    assert.equal(items.length, dashboard.items.length);
   }
   const oldCwd = process.cwd();
   try { process.chdir(path.join(root, 'child')); const result = await run(['tasks', "--index-group", "local", 'list', '--all-scopes'], { env: {} }); assert.equal(result.exitCode, 0, result.stdout); assert.equal(JSON.parse(result.stdout).tasks.length, 7); }
@@ -82,7 +81,7 @@ test('explicit purpose and existing filters apply to the repository collection',
   const sorted = JSON.parse((await call('.', ['list', '--all-scopes', '--sort', 'priority'])).stdout);
   assert.deepEqual(sorted.tasks.slice(0, 2).map((x: any) => x.priority), ['high', 'high']);
   const empty = JSON.parse((await call('.', ['list', '--all-scopes', '--status', 'done', '--project', 'empty', '--group-by', 'project'])).stdout);
-  assert.equal(empty.items.length, 0); assert.equal(empty.groups.length, 7);
+  assert.equal(empty.groups.length, 0);
   for (const args of [['create', '--title', 'No'], ['update', 'same', '--title', 'No'], ['status', 'same', 'done']]) {
     assert.equal((await call('.', [...args, '--all-scopes'])).exitCode, 2);
   }
