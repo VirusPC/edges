@@ -48,7 +48,7 @@ test("run tasks without subcommand is usage JSON", async () => {
 });
 
 test("missing note flags fail with JSON error before ingest", async () => {
-  const result = await run(["note", "--title", "Only title"]);
+  const result = await run(["note", "create", "--title", "Only title"]);
 
   assert.equal(result.exitCode, 2);
   const parsed = JSON.parse(result.stdout) as { status: string; errorCode: string };
@@ -64,7 +64,7 @@ test("root without a subcommand is a usage error", async () => {
 });
 
 test("too-long title is rejected before ingest", async () => {
-  const result = await run(["note", "--title", "x".repeat(121), "--content", "body", "--co-author", "OpenAI Codex <codex@openai.com>"]);
+  const result = await run(["note", "create", "--title", "x".repeat(121), "--content", "body", "--co-author", "OpenAI Codex <codex@openai.com>"]);
 
   assert.equal(result.exitCode, 2);
   const parsed = JSON.parse(result.stdout) as { errorCode: string };
@@ -72,7 +72,7 @@ test("too-long title is rejected before ingest", async () => {
 });
 
 test("AUTH_MISSING does not start ingest", async () => {
-  const result = await run(["note", ...requiredNoteFlags], {
+  const result = await run(["note", "create", ...requiredNoteFlags], {
     env: { EDGES_AUTH_TOKEN: "secret" },
   });
 

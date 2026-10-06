@@ -46,7 +46,7 @@ After a deploy.yml pull (env already on the box):
 Laptop client (same token as the server env):
   edges artifacts init --base-url https://edges.viruspc.tech
   edges artifacts publish <path>
-  edges artifacts rm <id|url>
+  edges artifacts delete <id|url>
 
 Rotate token:
   edges artifacts server install --force

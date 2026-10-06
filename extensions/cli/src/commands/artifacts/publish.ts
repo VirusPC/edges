@@ -1,8 +1,8 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
 import { parseArtifactFromFlags } from "./utils/from.js";
-import { publishArtifact } from "./utils/client.js";
 import { collectPublishFiles } from "./utils/collect.js";
+import { createArtifact, publishArtifactById, extractArtifactId } from "./utils/client.js";
 import { loadArtifactsConfig } from "./utils/config.js";
 import { ArtifactsError, runArtifactsCommand, succeed } from "./utils/result.js";
 import { parseTtlSeconds } from "./utils/ttl.js";
@@ -71,43 +71,59 @@ export function addArtifactsPublishCommand(artifacts: Command, ctx: CliContext):
             error instanceof Error ? error.message : String(error),
           );
         }
-        let files;
+        let published;
         try {
-          files = await collectPublishFiles(inputPath);
-        } catch (error) {
-          throw new ArtifactsError(
-            "VALIDATION_ERROR",
-            error instanceof Error ? error.message : String(error),
-          );
-        }
-        let from;
-        try {
-          from = parseArtifactFromFlags({
-            type: opts.fromType,
-            fromId: opts.fromId,
-            taskProject: opts.taskProject,
+          const id = extractArtifactId(inputPath);
+          published = await publishArtifactById({
+            baseUrl: config.baseUrl,
+            token: config.token,
+            id,
+            ttlSeconds,
+            fetch: globalThis.fetch,
           });
-        } catch (error) {
-          throw new ArtifactsError(
-            "VALIDATION_ERROR",
-            error instanceof Error ? error.message : String(error),
-          );
+        } catch {
+          const files = await collectPublishFiles(inputPath).catch((error: unknown) => {
+            throw new ArtifactsError(
+              "VALIDATION_ERROR",
+              error instanceof Error ? error.message : String(error),
+            );
+          });
+          let from;
+          try {
+            from = parseArtifactFromFlags({
+              type: opts.fromType,
+              fromId: opts.fromId,
+              taskProject: opts.taskProject,
+            });
+          } catch (error) {
+            throw new ArtifactsError(
+              "VALIDATION_ERROR",
+              error instanceof Error ? error.message : String(error),
+            );
+          }
+          const created = await createArtifact({
+            baseUrl: config.baseUrl,
+            token: config.token,
+            files,
+            entry: opts.entry,
+            from,
+            fetch: globalThis.fetch,
+          });
+          published = await publishArtifactById({
+            baseUrl: config.baseUrl,
+            token: config.token,
+            id: created.id,
+            ttlSeconds,
+            fetch: globalThis.fetch,
+          });
+          if (from) published = { ...published, from: published.from ?? from };
         }
-        const published = await publishArtifact({
-          baseUrl: config.baseUrl,
-          token: config.token,
-          files,
-          ttlSeconds,
-          entry: opts.entry,
-          from,
-          fetch: globalThis.fetch,
-        });
         return succeed({
           command: "artifacts.publish",
           id: published.id,
           url: published.url,
           expiresAt: published.expiresAt,
-          ...(published.from ?? from ? { from: published.from ?? from } : {}),
+          ...(published.from ? { from: published.from } : {}),
         });
       });
     });

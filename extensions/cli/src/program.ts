@@ -31,7 +31,7 @@ EXAMPLES
 
 BREAKING RENAME
   The bin is edges only (not edges-note). There is no shim.
-  Callers must migrate to: edges note --title … --content … --co-author …
+  Callers must migrate to: edges note create --title … --content … --co-author …
 `;
 
 /**
@@ -119,13 +119,13 @@ function commandWriteTarget(
     parent = command.parent?.name();
   const options = command.opts();
   const writes =
-    (parent === "edges" && name === "note") ||
+    (parent === "note" && ["create", "update", "delete"].includes(name)) ||
     (parent === "tasks" && ["create", "update", "status"].includes(name)) ||
     (parent === "project" &&
       command.parent?.parent?.name() === "tasks" &&
       ["create", "update"].includes(name)) ||
     (parent === "memory" &&
-      (["init", "add-type", "remember", "restore"].includes(name) ||
+      (["init", "add-type", "remember", "restore", "delete"].includes(name) ||
         (name === "doctor" && options.apply) ||
         (name === "migrate" && !options.dryRun)));
   if (!writes) return undefined;

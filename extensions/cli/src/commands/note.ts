@@ -11,6 +11,9 @@ import { runNoteIngest } from "../services/note/git/ingest.js";
 import { runIngest } from "../services/note/service.js";
 import type { IngestFailure } from "../services/note/types.js";
 import { formatZodReason, validateInput } from "../services/note/validation.js";
+import { resolveScope } from "../services/scope.js";
+import { deleteNote, getNote, listNotes, updateNote } from "../services/note/records.js";
+import { fail as failCommand, succeed } from "./result.js";
 
 const NOTE_AFTER_HELP = `
 STRUCTURED OUTPUT
@@ -50,8 +53,8 @@ ENV
   GITHUB_TOKEN        Passed through to git ingest for PR creation
 
 EXAMPLES
-  edges note --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
-  edges note --dry-run --title "Daily" --content "..." --co-author "Codex <codex@openai.com>"
+  edges note create --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
+  edges note create --dry-run --title "Daily" --content "..." --co-author "Codex <codex@openai.com>"
   edges note --help
 `;
 
@@ -132,7 +135,15 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
     .allowExcessArguments(false)
     .showHelpAfterError(false)
     .version(VERSION, "-v, --version", "Print version")
-    .helpOption("-h, --help", "Show this help")
+    .helpOption("-h, --help", "Show this help");
+
+  note.action(() => {
+    ctx.result = usageError("missing note command. Use: edges note create …", "note");
+  });
+
+  const create = note
+    .command("create")
+    .description("Ingest a note into the Edges knowledge repo")
     .option("--title <title>", "Note title (1–120 chars)")
     .addOption(
       new Option("--content <content>", "Note body (1–50,000 chars)").conflicts(
@@ -187,7 +198,7 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
       ).conflicts("tokenFile"),
     );
 
-  note.action(async (opts: IngestCliOptions) => {
+  create.action(async (opts: IngestCliOptions) => {
     if (opts.importEntry) {
       try {
         opts.content = new TextDecoder("utf-8", { fatal: true }).decode(
@@ -279,6 +290,51 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
       stderr,
     };
   });
+
+  const repoOf = () => resolveScope(ctx.env);
+  const noteFail = (error: unknown) => {
+    const message = error instanceof Error ? error.message : String(error);
+    ctx.result = failCommand(
+      message.includes("not found") || message.includes("must be") ? "VALIDATION_ERROR" : "UNKNOWN_ERROR",
+      message,
+      "See edges note --help for usage.\n",
+    );
+  };
+  note.command("list").description("List note entries under notes/").action(() => {
+    try {
+      ctx.result = succeed({ command: "note.list", items: listNotes(repoOf()) });
+    } catch (error) {
+      noteFail(error);
+    }
+  });
+  note.command("get").description("Read one note").argument("<path>", "notes/<stem>/index.md").action((entryPath: string) => {
+    try {
+      ctx.result = succeed({ command: "note.get", ...getNote(repoOf(), entryPath) });
+    } catch (error) {
+      noteFail(error);
+    }
+  });
+  note.command("delete").description("Delete one note directory").argument("<path>", "notes/<stem>/index.md").action((entryPath: string) => {
+    try {
+      ctx.result = succeed({ command: "note.delete", ...deleteNote(repoOf(), entryPath) });
+    } catch (error) {
+      noteFail(error);
+    }
+  });
+  note
+    .command("update")
+    .description("Update a note title or body without git ingest")
+    .argument("<path>", "notes/<stem>/index.md")
+    .option("--title <title>", "New title")
+    .option("--body <markdown>", "New body")
+    .action((entryPath: string, opts: { title?: string; body?: string }) => {
+      try {
+        ctx.result = succeed({ command: "note.update", ...updateNote(repoOf(), entryPath, opts) });
+      } catch (error) {
+        noteFail(error);
+      }
+    });
+
   note.addHelpText("after", NOTE_AFTER_HELP);
   return note;
 }

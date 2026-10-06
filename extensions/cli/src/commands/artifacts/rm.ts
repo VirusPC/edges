@@ -9,14 +9,14 @@ Accepts an artifact UUID or a public URL containing /artifacts/<uuid>.
 Reads EDGES_ARTIFACTS_TOKEN and EDGES_ARTIFACTS_BASE_URL from config or env.
 
 EXAMPLES
-  edges artifacts rm 2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab
-  edges artifacts rm http://127.0.0.1:8787/artifacts/2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab/
+  edges artifacts delete 2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab
+  edges artifacts delete http://127.0.0.1:8787/artifacts/2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab/
 `;
 
 export function addArtifactsRmCommand(artifacts: Command, ctx: CliContext): void {
   artifacts
-    .command("rm")
-    .description("Delete a published artifact by id or URL")
+    .command("delete")
+    .description("Delete a draft or published artifact by id or URL")
     .argument("<id-or-url>", "Artifact UUID or public URL")
     .option("--config <path>", "Config file path")
     .addHelpText("after", RM_AFTER_HELP)

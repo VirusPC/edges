@@ -36,7 +36,7 @@ test("real entry --help lists note and tasks", async () => {
 });
 
 test("real entry note --help documents ingest flags", async () => {
-  const result = await launch(["note", "--help"]);
+  const result = await launch(["note", "create", "--help"]);
   assert.equal(result.status, 0);
   assert.match(result.stdout, /--title/);
   assert.match(result.stdout, /--content/);

@@ -16,7 +16,7 @@ function failedJson(stdout: string): { status: string; errorCode: string; reason
 }
 
 test("run note rejects missing required flags", async () => {
-  const result = await run(["note", "--title", "Daily summary"]);
+  const result = await run(["note", "create", "--title", "Daily summary"]);
   assert.equal(result.exitCode, 2);
   const parsed = failedJson(result.stdout);
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
@@ -25,7 +25,7 @@ test("run note rejects missing required flags", async () => {
 });
 
 test("run note rejects unknown flags", async () => {
-  const result = await run(["note", ...requiredNoteFlags, "--nope"]);
+  const result = await run(["note", "create", ...requiredNoteFlags, "--nope"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
@@ -55,7 +55,7 @@ test("run tasks without a subcommand is a validation error", async () => {
 });
 
 test("run rejects unexpected positionals on note", async () => {
-  const result = await run(["note", ...requiredNoteFlags, "leftover"]);
+  const result = await run(["note", "create", ...requiredNoteFlags, "leftover"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
@@ -63,6 +63,7 @@ test("run rejects unexpected positionals on note", async () => {
 test("run note rejects --token-file together with --token-stdin", async () => {
   const result = await run([
     "note",
+    "create",
     ...requiredNoteFlags,
     "--token-file",
     "/tmp/token",
@@ -75,7 +76,7 @@ test("run note rejects --token-file together with --token-stdin", async () => {
 });
 
 test("run note rejects invalid --mode", async () => {
-  const result = await run(["note", ...requiredNoteFlags, "--mode", "merge"]);
+  const result = await run(["note", "create", ...requiredNoteFlags, "--mode", "merge"]);
   assert.equal(result.exitCode, 2);
   const parsed = failedJson(result.stdout);
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");

@@ -13,10 +13,10 @@ test("root help lists artifacts", async () => {
   assert.match(result.stdout, /^\s+artifacts\b/m);
 });
 
-test("artifacts help lists init publish rm", async () => {
+test("artifacts help lists init publish delete create", async () => {
   const result = await run(["artifacts", "--help"]);
   assert.equal(result.exitCode, 0);
-  for (const verb of ["init", "publish", "rm"]) {
+  for (const verb of ["init", "publish", "delete", "create"]) {
     assert.match(result.stdout, new RegExp(`^\\s+${verb}\\b`, "m"));
   }
 });
@@ -181,11 +181,12 @@ test("artifacts publish via run omits from when flags are absent", async () => {
     const chunks: Buffer[] = [];
     req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
     req.on("end", () => {
+      const publishing = (req.url ?? "").endsWith("/publish");
       const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as {
         from?: unknown;
       };
-      seen.push(body.from);
-      res.writeHead(201, { "content-type": "application/json" });
+      if (!publishing) seen.push(body.from);
+      res.writeHead(publishing ? 200 : 201, { "content-type": "application/json" });
       res.end(
         JSON.stringify({
           id: "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab",
@@ -226,12 +227,13 @@ test("artifacts publish --from-type task forwards id then project", async () => 
     const chunks: Buffer[] = [];
     req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
     req.on("end", () => {
+      const publishing = (req.url ?? "").endsWith("/publish");
       const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as {
         from?: Record<string, unknown>;
         task?: unknown;
       };
-      seen.push({ from: body.from, hasTask: "task" in body });
-      res.writeHead(201, { "content-type": "application/json" });
+      if (!publishing) seen.push({ from: body.from, hasTask: "task" in body });
+      res.writeHead(publishing ? 200 : 201, { "content-type": "application/json" });
       res.end(
         JSON.stringify({
           id: "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab",
@@ -397,9 +399,10 @@ test("artifacts publish via run uses a local HTTP stub", async () => {
     const chunks: Buffer[] = [];
     req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
     req.on("end", () => {
-      const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as { files: { path: string }[] };
-      assert.equal(body.files[0]?.path, "page.html");
-      res.writeHead(201, { "content-type": "application/json" });
+      const publishing = (req.url ?? "").endsWith("/publish");
+      const body = JSON.parse(Buffer.concat(chunks).toString("utf8")) as { files?: { path: string }[] };
+      if (!publishing) assert.equal(body.files?.[0]?.path, "page.html");
+      res.writeHead(publishing ? 200 : 201, { "content-type": "application/json" });
       res.end(
         JSON.stringify({
           id: "2c1d3e4f-5a6b-4c7d-8e9f-0123456789ab",

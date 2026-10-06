@@ -265,6 +265,7 @@ test("all node-writing command groups lock; validation and persistence failures 
     for (const args of [
       [
         "note",
+        "create",
         "--title",
         "Test",
         "--content",
