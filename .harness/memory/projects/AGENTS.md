@@ -97,4 +97,6 @@ format: ordinary
 - [虚拟超节点与 \-\-super flag](<project_grill_virtual_super_node_super_flag/index.md>) — 改遍历根或 CLI scope 时：默认 scope/AGENTS.md；显式 \-\-super 启用 SuperAgentsNode（继承 AgentsNode，不落盘）；勿用 VirtualSuperNode/virtual\-root。
 
 - [SuperAgentsNode 继承 AgentsNode](<project_grill_super_agents_node_extends_agents/index.md>) — 改虚拟超节点实现时：类名 SuperAgentsNode，继承 AgentsNode；flag 仍 \-\-super；勿用 VirtualSuperNode。
+
+- [traverse 默认走全部 children](<project_grill_traverse_default_all_children/index.md>) — 改 operations/traverse 或依赖其默认的调用方时：默认展开 local∪descendants；本层\-only 用显式 localOnly；includeHarness 仍默认 false。
 <!-- project-memory-entries:end -->

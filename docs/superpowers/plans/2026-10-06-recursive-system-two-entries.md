@@ -328,41 +328,70 @@ EOF
 
 ---
 
-### Task 3: traverse 双文件规则
+### Task 3: traverse 默认全部 children + 双文件规则
 
 **Files:**
 - Modify: `extensions/cli/src/domain/operations/traverse.ts`
-- Modify: NodeService 加载回调（若同目录需同时展开 README）
-- Test: `extensions/cli/test/operations/traverse-dual-entry.test.ts`（路径按现有 operations 测试目录调整）
+- Modify: `extensions/cli/src/domain/operations/README.md`
+- Modify: NodeService 加载回调（同目录 README 并边）；审计所有依赖「默认只 local」的调用方，改为显式 `localOnly: true` 如需要
+- Test: `extensions/cli/test/operations/traverse-dual-entry.test.ts`（及既有 traverse 默认行为测试）
 
 **Interfaces:**
 - Consumes: AgentsNode + ReadmeNode
-- Produces: 从 scope AGENTS 出发时，系统一孩子来自同目录 README entries，不来自 AGENTS localChildren 里的系统一路径；AGENTS local 仍展开系统二材料
+- Produces:
+  - 默认：`children` = local ∪ descendants
+  - `localOnly: true`：仅 localChildren（取代旧默认；若暂留 `includeDescendants`，则默认 `true`，`false` 等价 localOnly）
+  - `includeHarness` 仍默认 false
+  - 双文件：从 scope AGENTS 出发时并入同目录 README 的组成边；AGENTS 字段本身不含系统一孩子
 
-- [ ] **Step 1: 写失败测试（夹具目录）**
+- [ ] **Step 1: 写失败测试**
 
-用 `os.tmpdir()` 建：
+```ts
+// 默认展开 descendants
+test("traverse defaults to all children", async () => {
+  // AGENTS local → mem/README；descendants → nested/AGENTS.md
+  const paths = [];
+  for await (const n of traverse(rootAgents, {}, resolve, load)) paths.push(n.path);
+  assert.ok(paths.some((p) => p.endsWith("nested/AGENTS.md")));
+});
 
-```text
-scope/AGENTS.md   — local → .harness/memory/projects/README.md（或过渡 AGENTS）
-scope/README.md   — local → tasks/README.md
-scope/tasks/README.md
-scope/.harness/memory/projects/README.md
+test("localOnly skips descendant group", async () => {
+  const paths = [];
+  for await (const n of traverse(rootAgents, { localOnly: true }, resolve, load))
+    paths.push(n.path);
+  assert.ok(!paths.some((p) => p.endsWith("nested/AGENTS.md")));
+});
+
+// 双文件夹具
+// scope/AGENTS.md local → .harness/memory/projects/README.md
+// scope/README.md local → tasks/README.md
+// 默认 traverse(scopeAgents) 应经并边到达 tasks/README.md
+// 且 scopeAgents.localChildren 不含 tasks
 ```
 
-断言 traverse(scopeAgents, { includeDescendants:false }) 的路径集合包含 harness 材料与（经双文件规则）tasks README，且 **AGENTS 的 children 列表本身不含 tasks**。
-
-- [ ] **Step 2: 跑测试确认失败**
+- [ ] **Step 2: 跑测试确认失败**（现行默认不进 descendants）
 
 - [ ] **Step 3: 实现**
 
-在 traverse 或 NodeService.query 中：当节点为 AGENTS 且同目录存在可读 README 组成节点时，把 README 的 `localChildren`（及可选 descendants）并入遍历边，**不**要求这些边出现在 AGENTS 的 `localChildren` 字段里。不要目录扫描补孩子。
+```ts
+export interface ScopeTraversalOptions {
+  /** When true, only localChildren. Default false = all children. */
+  localOnly?: boolean;
+  includeHarness?: boolean;
+  /** @deprecated Prefer localOnly; if kept, default true. */
+  includeDescendants?: boolean;
+}
+// visit: use localOnly ? localChildren : children
+// (map includeDescendants === false → localOnly for one release if needed)
+```
+
+同目录 AGENTS+README：并入 README 组成边，不扫盘。全仓 `rg includeDescendants` / 依赖旧默认的测试与 memory/tasks 调用方：要本层-only 的改为 `localOnly: true`。
 
 - [ ] **Step 4: 测试通过并 commit**
 
 ```bash
 git commit -m "$(cat <<'EOF'
-feat: traverse 同目录 AGENTS/README 组成分工
+feat: traverse 默认全部 children；双文件并边
 
 Co-authored-by: Cursor Agent <cursoragent@cursor.com>
 EOF

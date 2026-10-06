@@ -24,7 +24,7 @@ Task、Memory、Note 等统一采用目录与 `index.md` 入口，标准 Skill �
 
 每个 Markdown 入口对应一个节点：BaseNode 下分 InternalNode 与 LeafNode，Task、Memory、Skill 等继承 LeafNode（类层次为当时实现；组织/叶子现为派生状态，见 ADR 0029）。AGENTS.md 是系统入口，沿用硬约束与两组直属索引 `localChildren`、`descendantChildren`；现行标题为**本层硬约束、本层系统维护信息、下层系统维护信息**。系统一孩子改由组织清单 `README.md` 的 entries 登记（ADR 0029）。
 
-父归属遵循文件目录，一个节点至多一个 parent。索引可以跨目录层级发现节点，普通交叉引用不增加 parent。引用仅含路径派生的 id 和可选 name、description。默认展开本层索引，显式选择后再展开下层索引。
+父归属遵循文件目录，一个节点至多一个 parent。索引可以跨目录层级发现节点，普通交叉引用不增加 parent。引用仅含路径派生的 id 和可选 name、description。遍历默认展开全部组成 `children`（本层∪下层）；只要本层时显式收窄（见 ADR 0029 / Q20）。
 
 任意节点可拥有独立 harness，承载它的系统二。组成遍历不自动跟随 harness：读取当前系统二的组成内容，不继续检索它或其组成节点的系统二。同目录 SKILL.md 与 AGENTS.md 分别是 Skill 叶子与它的 harness；AGENTS 的 harness 则可继续位于 `.harness/AGENTS.md`。叶子没有组成子节点，也可以拥有 harness；空组织节点仍是 InternalNode。
 

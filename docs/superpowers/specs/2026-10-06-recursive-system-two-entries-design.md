@@ -155,7 +155,7 @@ flowchart LR
   Content --> Local
 ```
 
-默认：走本层组成；`includeDescendants` 才进下层组；`includeHarness` 才沿 harness。组成边 ≠ 维护边。
+默认：走全部组成边 `children`（local ∪ descendants）。只要本层时显式 `localOnly`（或等价）。`includeHarness` 仍默认 false。组成边 ≠ 维护边。
 
 ### 5. 仓库根实例（示意）
 
@@ -190,6 +190,7 @@ flowchart TB
 | Q9 / Q11′=A | **虚拟超节点**不落盘：主体（如「人」）无真实 AGENTS 时用；个人任务查询是用例；实现另卡 |
 | Q9b | Edges 根 `README.md` 增组成登记，指向 `tasks/` 等；`--super` 超节点经此再下钻 |
 | 术语 | 对外名「虚拟超节点」；flag **`--super`**；类名 **`SuperAgentsNode` extends `AgentsNode`**（废止 VirtualSuperNode / virtual-root） |
+| Q20=A | traverse 默认走全部 `children`（local∪descendants）；本层-only 用显式 `localOnly`；`includeHarness` 仍默认 false |
 | Q10 | 任意目录可由用户 init 真实系统入口；配套 **project harness init** skill（演进现 `project-memory-init`） |
 | Q12 | 组织清单 → `README.md`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md` |
 | Q13=A | 同目录双文件：系统一孩子**只**在 README entries；AGENTS **只**挂系统二材料与下级系统入口（遍历核心规则） |
@@ -251,7 +252,7 @@ flowchart TB
 2. 展开系统入口的 **系统维护信息**：系统二材料 + 下层 `AGENTS.md`。默认不跟随 `harness`。
 3. 同目录（或登记路径上的）`README.md` 的本层/下层内容展开系统一树；**不**从同目录 AGENTS 找系统一孩子。README 下层组只跟到其它 `README.md`。
 4. `INDEX.md` / `SKILL.md` 无组成登记则不再下钻；有登记则按其 local/descendant 继续。
-5. `includeDescendants` / `includeHarness` 显式才扩展；不得用目录扫描冒充组成。
+5. 默认展开全部 `children`；`localOnly` 才限制本层；`includeHarness` 显式才跟维护边。不得用目录扫描冒充组成。
 
 ## 虚拟超节点
 

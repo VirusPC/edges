@@ -115,10 +115,11 @@ roots 是一个已加载节点或一组节点。resolve 返回 undefined 可跳�
 
 | 选项 | 行为 |
 | --- | --- |
-| 默认 | InternalNode 只展开 localChildren |
-| `includeDescendants: true` | 同时展开 descendantChildren |
+| 默认 | 展开全部组成 `children`（local ∪ descendants） |
+| `localOnly: true` | 只展开 localChildren |
+| `includeDescendants` | 旧选项；目标默认视为 true，`false` 等价 `localOnly`（实施中迁移） |
 | `includeHarness: true` | 额外沿独立 harness 关系递归，不只进入一层 |
-| `types` | 选择输出类型，不自动删掉通往目标的 Internal 导航节点 |
+| `types` | 选择输出类型，不自动删掉通往目标的导航节点 |
 
 遍历按需进行深度优先、先序访问，已访问路径去重；遇到仍在当前递归路径中的节点时报组成环错误。同一节点被多处引用时只输出一次。解析或加载失败向上传递，不自动修复或回退到扫描。
 
