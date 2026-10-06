@@ -19,7 +19,7 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 
 ## 类与节点关系
 
-> 各节点直继 BaseNode；`type` 含 `agents`/`readme`/`text`；组成登记（`localChildren` 是否存在）派生组织/叶子。`AgentsNode` 仅作为 `AgentsNode` 的 deprecated 别名保留一个版本；`LeafNode` 仅为 deprecated 的纯 text 节点，业务节点不再继承它。
+> 各节点直继 BaseNode；`type` 含 `agents`/`readme`/`text`；组成登记（`localChildren` 是否存在）派生组织/叶子。`InternalNode` 仅作为 `AgentsNode` 的 deprecated 别名保留一个版本；`LeafNode` 仅为 deprecated 的纯 text 节点，业务节点不再继承它。
 
 ```mermaid
 classDiagram
@@ -39,6 +39,7 @@ classDiagram
         parent?: NodeReference
         harness?: NodeReference
         children: NodeReference[]
+        addChild(group, reference)
         metadata?: Metadata
         body: string
         parse(markdown)
@@ -205,7 +206,7 @@ TaskNode 负责节点行为；TaskDoc 是可交换的纯数据。契约与节点
 
 ## 扩展一个节点
 
-1. 在所属类型目录定义类。普通内容继承 LeafNode，维护索引结构的节点按需要扩展 AgentsNode；没有专属行为的 index.md 可继续使用 LeafNode。
+1. 在所属类型目录定义类。普通内容直继 BaseNode，维护索引结构的节点按需要扩展 AgentsNode；没有专属行为的 index.md 可使用（deprecated 的）LeafNode 或 BaseNode。
 2. 保持只传绝对入口路径即可构造。通过现有 hooks 扩展字段、校验及解析序列化；正文的 serialize → parse 必须能恢复状态，因为生命周期草稿复用这条路径。
 3. 定义该类型的输入与规则；共享后再下沉，不预先新增空抽象层。
 4. 若需要自动识别，通过 layout 的目录分类机制和 NodeService 的 `models` 映射接入。分类只决定模型类型，不推断 local/descendant 归属。

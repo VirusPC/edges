@@ -244,3 +244,10 @@ test("round-tripping extension hooks support create and avoid reparsing unchange
   node.update({ body: '{"next":true}' }, update);
   assert.equal(node.body, '{"next":true}');
 });
+test("BaseNode exposes addChild: non-composite nodes reject, composite nodes accept", () => {
+  assert.throws(() => new SkillNode("/repo/skills/a/SKILL.md").addChild("local", { id: "/repo/x/INDEX.md" }), /composition/);
+  const root = new AgentsNode("/repo/AGENTS.md").parse("");
+  const viaBase: BaseNode = root;
+  viaBase.addChild("local", { id: "/repo/skills/a/SKILL.md" });
+  assert.equal(root.localChildren.length, 1);
+});
