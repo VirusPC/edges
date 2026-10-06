@@ -19,6 +19,12 @@ export class NodeCache {
   isReadOnly(file: string): boolean {
     return [...this.readOnly].some((root) => within(file, root));
   }
+  markReadOnly(node: BaseNode): void {
+    const state = this.state.get(node)!;
+    state.readOnly = true;
+    this.readOnly.add(node.directoryPath);
+    this.readOnly.add(state.file.realDirectory);
+  }
   relations(node: BaseNode): void {
     const parent = physicalParent(node.path, this.managedRoot),
       harness = harnessPath(node.path);
@@ -40,10 +46,7 @@ export class NodeCache {
       validateEntry(file);
     }
     this.state.set(node, { file, readOnly, resources });
-    if (readOnly) {
-      this.readOnly.add(node.directoryPath);
-      this.readOnly.add(file.realDirectory);
-    }
+    if (readOnly) this.markReadOnly(node);
     this.loaded.set(node.path, node);
     this.relations(node);
   }

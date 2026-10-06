@@ -292,7 +292,7 @@ test("authoritative AGENTS graph validation catches cycles from typed BaseNode a
   assert.equal(a.children.length, 1);
   assert.equal(a.children[0]?.id, file("b/AGENTS.md"));
   await assert.rejects(
-    service.create(new BaseNode(file("new/AGENTS.md")), {
+    service.create(new InternalNode(file("new/AGENTS.md")), {
       body: index("- [self](AGENTS.md)"),
     }),
     /cycle/i,

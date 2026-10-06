@@ -237,3 +237,37 @@ test('first typed leaf load selects its constructor, later requests constrain th
   await service.update(selected, {});
   assert.match(fs.readFileSync(file, 'utf8'), /Pending/);
 });
+test('typed query skipping a cached leaf still propagates readonly discovery', async t => {
+  const { root, entry } = fixture(t);
+  const file = path.join(root, 'child/index.md');
+  fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, 'Child\n');
+  const parent = new InternalNode(entry).parse(fs.readFileSync(entry, 'utf8'));
+  parent.addChild('local', { id: file }); fs.writeFileSync(entry, parent.serialize());
+  const service = new NodeService({ managedRoot: root, readOnlyReference: () => true });
+  const child = (await service.get(file))!;
+  child.description = 'Pending';
+  assert.deepEqual(await service.query(root, { types: ['task'] }).value(), []);
+  assert.strictEqual(await service.get(file), child);
+  await assert.rejects(service.update(child, {}), /read.only/i);
+  assert.equal(child.description, 'Pending');
+  assert.equal(fs.readFileSync(file, 'utf8'), 'Child\n');
+});
+test('AGENTS create rejects incompatible constructors before IO and keeps Internal identity', async t => {
+  const { root, service } = fixture(t);
+  const file = path.join(root, 'scope/AGENTS.md');
+  const incompatible = new BaseNode(file);
+  incompatible.description = 'Pending';
+  await assert.rejects(service.create(incompatible, { body: '# Scope\n' }), /InternalNode|model/i);
+  assert.equal(fs.existsSync(path.dirname(file)), false);
+  assert.equal(incompatible.description, 'Pending');
+  assert.equal(await service.get(file), undefined);
+  class CustomInternal extends InternalNode {}
+  const node = new CustomInternal(file);
+  assert.strictEqual(await service.create(node, { body: '# Scope\n' }), node);
+  assert.strictEqual(await service.get(file, InternalNode), node);
+  assert.strictEqual(await service.get(file, BaseNode), node);
+  assert.strictEqual((await service.query(path.dirname(file)).value())[0], node);
+  const child = await service.create(new LeafNode(path.join(root, 'scope/child/index.md')), { body: 'Child\n' });
+  assert.equal(node.children[0]?.id, child.id);
+  assert.match(fs.readFileSync(file, 'utf8'), /child\/index.md/);
+});

@@ -130,12 +130,7 @@ export class NodeService {
       this.#cache.isReadOnly(file) ||
       (!!parent && indexContract(parent)?.writable === false);
     if (cached) {
-      if (readOnly) {
-        const state = this.#cache.state.get(cached)!;
-        state.readOnly = true;
-        this.#cache.readOnly.add(cached.directoryPath);
-        this.#cache.readOnly.add(state.file.realDirectory);
-      }
+      if (readOnly) this.#cache.markReadOnly(cached);
       if (resources) this.#cache.captureResources(cached);
       return cached;
     }
@@ -177,7 +172,11 @@ export class NodeService {
         // The directory contract proves this body cannot contribute children.
         // Keep layout-defined maintenance discovery even when its body is omitted.
         this.#cache.relations(navigation);
-        if (readonly) this.#navigationReadOnly.add(navigation);
+        if (readonly) {
+          this.#navigationReadOnly.add(navigation);
+          const cached = this.#cache.loaded.get(reference.id);
+          if (cached) this.#cache.markReadOnly(cached);
+        }
         return navigation;
       }
     }
@@ -377,6 +376,8 @@ export class NodeService {
     input: Parameters<T["create"]>[0],
   ): Promise<T> {
     this.#boundary(node.path);
+    if (path.basename(node.path) === "AGENTS.md" && !(node instanceof InternalNode))
+      throw new Error(`AGENTS creation requires an InternalNode model: ${node.path}`);
     if (this.#cache.loaded.has(node.path) || fs.existsSync(node.path))
       throw new Error(`Node target already exists: ${node.path}`);
     const draft = clone(node);
