@@ -2,8 +2,8 @@ import { isWithinPath } from '../utils/filesystem.js';
 import { dirname, join, resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { identifyNodeType } from "../domain/models/layout.js";
-import { indexContract, physicalParentNode } from "./node-layout.js";
-import { checkPath } from "./node-files.js";
+import { indexContract, physicalParentNode } from "./node/node-layout.js";
+import { checkPath } from "./node/node-files.js";
 
 /** A source checkout/worktree bounds discovery; standalone files use filesystem ancestry. */
 function sourceBoundary(source: string): string {

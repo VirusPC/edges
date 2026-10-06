@@ -93,4 +93,4 @@ Schema 从登记的 TS 数据契约生成，不扫描完整模型类，生成物
 - 涉及文件、多个节点、发布或权限策略的完整动作由 Service 编排。
 - 新外部 JSON 合同用纯 TS 类型定义，按实际需求登记到 Schema 生成器。
 
-不要为一种新节点复制 IO、查询或 YAML 解析实现。理解模型从 [models/index.ts](models/index.ts) 开始，理解查询从 [operations/query.ts](operations/query.ts) 开始，理解持久化从 [NodeService](../services/node-service.ts) 开始。构建、测试与 CLI 用法见 [CLI README](../../README.md)。
+不要为一种新节点复制 IO、查询或 YAML 解析实现。理解模型从 [models/index.ts](models/index.ts) 开始，理解查询从 [operations/query.ts](operations/query.ts) 开始，理解持久化从 [NodeService](../services/node/node-service.ts) 开始。构建、测试与 CLI 用法见 [CLI README](../../README.md)。

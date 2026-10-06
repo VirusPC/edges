@@ -9,9 +9,9 @@ import {
   projectIdFromDir,
 } from "../../domain/models/tasks/project.js";
 import { TasksError } from "../../domain/models/tasks/types.js";
-import { checkPath } from "../node-files.js";
+import { checkPath } from "../node/node-files.js";
 
-import { NodeService } from "../node-service.js";
+import { NodeService } from "../node/node-service.js";
 import { query } from "../../domain/operations/query.js";
 import {
   isTaskStatus,

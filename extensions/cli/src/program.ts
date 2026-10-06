@@ -14,7 +14,7 @@ import { addNoteCommand } from "./commands/note.js";
 import { addTasksCommand } from "./commands/tasks.js";
 import { addMemoryCommand } from "./commands/memory.js";
 import { addSkillCommand } from "./commands/skill.js";
-import { acquireWriteLock } from "./services/node-lock.js";
+import { acquireWriteLock } from "./services/node/node-lock.js";
 import { VERSION } from "./utils/version.js";
 
 export type { CliContext, CliInput, CliResult };

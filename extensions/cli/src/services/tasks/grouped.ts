@@ -7,7 +7,7 @@ import { projectLocationOf } from "./node-query.js";
 import { taskBoardLocation, type TaskPurpose } from "./paths.js";
 import { scopeDir, type BoardTarget } from "./paths.js";
 import { isTaskProjectId } from "../../domain/models/tasks/project.js";
-import { NodeService } from "../node-service.js";
+import { NodeService } from "../node/node-service.js";
 import { portableScope } from "../scope.js";
 import { listRepositoryTasksWithDocs, createNodeBoardFs, listProjectIds, listTasksWithDocs, type BoardFs, type TaskListOpts } from "./board.js";
 import {

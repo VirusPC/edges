@@ -1,4 +1,4 @@
-import { acquireWriteLock } from '../extensions/cli/src/services/node-lock.js';
+import { acquireWriteLock } from '../extensions/cli/src/services/node/node-lock.js';
 import { isGitBoundary } from '../extensions/cli/src/services/scope.js';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { randomUUID } from 'node:crypto';
 import { InternalNode } from "../extensions/cli/src/domain/models/internal/internal-node.js";
 import { decodeBody } from '../extensions/cli/src/domain/models/internal/parse.js';
-import { readEntry, saveEntries, validateEntry, checkPath, type EntryFile } from '../extensions/cli/src/services/node-files.js';
+import { readEntry, saveEntries, validateEntry, checkPath, type EntryFile } from '../extensions/cli/src/services/node/node-files.js';
 const start = '<!-- task-projects:start -->', end = '<!-- task-projects:end -->';
 const excluded = new Set(['.git', 'node_modules', 'dist', 'build', 'posts', '.agents', '.superpowers']);
 export interface AgentsIndexPlan { root: string; edits: Array<{ path: string; before: string; after: string }>; }

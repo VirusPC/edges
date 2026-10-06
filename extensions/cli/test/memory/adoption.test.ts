@@ -4,11 +4,8 @@ import * as fs from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { InternalNode } from "../../src/domain/models/internal/internal-node.js";
-import {
-  initMemory,
-  doctorMemory,
-  layerTypeSpecs,
-} from "../../src/services/memory/index.js";
+import { initMemory, doctorMemory } from "../../src/services/memory/index.js";
+import { layerTypeSpecs } from "../../src/services/memory/types.js";
 function fixture(t: any) {
   const root = fs.realpathSync(
     fs.mkdtempSync(join(tmpdir(), "memory-adoption-")),
@@ -182,7 +179,7 @@ test("reviewed public root graph loads document entries and keeps ADR navigation
   ).after;
   fs.writeFileSync(join(root, "AGENTS.md"), source);
   fs.mkdirSync(join(root, "docs/adr"), { recursive: true });
-  const { NodeService } = await import("../../src/services/node-service.js");
+  const { NodeService } = await import("../../src/services/node/node-service.js");
   const service = new NodeService({ managedRoot: root });
   const node = await service.get(join(root, "AGENTS.md"), InternalNode);
   assert.ok(node);

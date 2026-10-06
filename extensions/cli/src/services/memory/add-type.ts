@@ -1,6 +1,6 @@
 import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { memoryNodes, prepareMemoryWrite } from './service.js';
-import { NodeService } from '../node-service.js';
+import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
 import { join, dirname, relative } from "node:path";
 import { assertPrivateIgnored } from "./ignore.js";

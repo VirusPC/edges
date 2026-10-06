@@ -1,7 +1,7 @@
 import { isWithinPath } from "../../../utils/filesystem.js";
 import { assertImportType } from "../../import-entry.js";
 import { existsSync } from "node:fs";
-import { NodeService } from "../../node-service.js";
+import { NodeService } from "../../node/node-service.js";
 import { NoteNode } from "../../../domain/models/notes/note-node.js";
 import path from "node:path";
 import { promises as fs } from "node:fs";

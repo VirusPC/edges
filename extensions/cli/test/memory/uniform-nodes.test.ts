@@ -21,7 +21,7 @@ import {
   doctorMemory,
   rememberMemory,
 } from "../../src/services/memory/index.js";
-import { NodeService } from "../../src/services/node-service.js";
+import { NodeService } from "../../src/services/node/node-service.js";
 import {
   refreshProjectIndex,
   parseProjectAgents,

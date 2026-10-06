@@ -13,14 +13,14 @@ import {
 import {
   indexContract,
   rewriteLinks,
-} from "../extensions/cli/src/services/node-layout.js";
+} from "../extensions/cli/src/services/node/node-layout.js";
 import {
   checkPath,
   readEntry,
   saveEntries,
   validateEntry,
   type EntryFile,
-} from "../extensions/cli/src/services/node-files.js";
+} from "../extensions/cli/src/services/node/node-files.js";
 
 export interface DirectoryMove {
   from: string;

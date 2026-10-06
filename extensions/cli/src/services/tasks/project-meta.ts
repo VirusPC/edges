@@ -2,7 +2,7 @@ import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { decodeBody } from '../../domain/models/internal/parse.js';
 import { createAgentsDocument } from "../../domain/models/internal/document.js";
 import { serializeNode } from '../../domain/models/internal/serialize.js';
-import { NodeService } from '../node-service.js';
+import { NodeService } from '../node/node-service.js';
 import { assertBoardPath } from './board.js';
 import { scopeDir, boardRel, type BoardTarget } from "./paths.js";
 import path from "node:path";
