@@ -87,10 +87,11 @@ classDiagram
   class TextNode {
     普通文本内容
   }
-  class VirtualSystemEntry {
+  class VirtualSuperNode {
     <<runtime only>>
+    虚拟超节点
     不落盘
-    须显式 flag
+    --super
   }
 
   NodeReference <|.. BaseNode
@@ -102,7 +103,7 @@ classDiagram
   BaseNode <|-- SkillNode
   BaseNode <|-- TextNode
   BaseNode ..> NodeReference : parent / harness / children
-  VirtualSystemEntry ..> NodeReference : 挂顶层入口
+  VirtualSuperNode ..> NodeReference : 挂顶层入口
 ```
 
 组成能力在基类；组织/叶子由是否有组成登记派生。旧 `type: "internal"` 读兼容，写只发 `agents`。
@@ -128,9 +129,9 @@ flowchart TB
   M -. harness；默认不跟随 .-> AGENTS
 ```
 
-### 4. 真实 scope vs 显式虚拟根
+### 4. 默认 scope/AGENTS vs 显式 `--super` 虚拟超节点
 
-虚拟系统入口**必须**显式 flag；不得因 scope 下没有 `AGENTS.md` 自动合成。
+虚拟超节点**必须**显式 `--super`；默认用当前 `--scope` 下 `AGENTS.md`。不得因 scope 下没有 `AGENTS.md` 自动合成。
 
 ```mermaid
 flowchart LR
@@ -138,7 +139,7 @@ flowchart LR
   HasAgents -->|是| Real["真实系统入口"]
   HasAgents -->|否| Err["报错 / 既有发现失败<br/>不自动虚拟化"]
 
-  Flag["显式虚拟根 flag"] --> Virtual["虚拟系统入口<br/>不落盘"]
+  Flag["--super"] --> Virtual["虚拟超节点<br/>不落盘"]
   Virtual --> RootReadme["Edges 根 README<br/>本层内容"]
   RootReadme --> Local["本层：INDEX/SKILL/…"]
   RootReadme -->|下层内容| NestedReadme["下层 README.md"]
@@ -177,14 +178,15 @@ flowchart TB
 
 | 题 | 决定 |
 | --- | --- |
-| Q1=B | 节点身份：从 scope 对应的系统入口（或虚拟系统入口）经组成登记可达 |
+| Q1=B | 节点身份：从 scope 对应的系统入口（或虚拟超节点）经组成登记可达 |
 | Q2/Q5/Q6 | 入口概念是**系统入口**；文件名为 `AGENTS.md` |
 | Q3=A | 不持久化 `isLeaf`；任意节点可 `addChildren`；有无组成登记只表示当前状态 |
 | Q4 | CLI 传 `--scope`；正常以该 scope 下系统入口为根 |
 | Q7=A | 系统入口**必须**带组成登记（推翻「AGENTS 不带 entries」） |
 | Q8=A | Task / Note / Memory / Skill 由某系统入口（或组织清单）的组成登记挂入 |
-| Q9 / Q11′=A | **虚拟系统入口**不落盘：主体（如「人」）无真实 AGENTS 时用；个人任务查询是用例；实现另卡 |
-| Q9b | Edges 根 `README.md` 增组成登记，指向 `tasks/` 等；虚拟根经此再下钻 |
+| Q9 / Q11′=A | **虚拟超节点**不落盘：主体（如「人」）无真实 AGENTS 时用；个人任务查询是用例；实现另卡 |
+| Q9b | Edges 根 `README.md` 增组成登记，指向 `tasks/` 等；`--super` 超节点经此再下钻 |
+| 术语 | 对外名「虚拟超节点」；flag **`--super`**（废止 virtual-root / 虚拟根 / 虚拟系统入口） |
 | Q10 | 任意目录可由用户 init 真实系统入口；配套 **project harness init** skill（演进现 `project-memory-init`） |
 | Q12 | 组织清单 → `README.md`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md` |
 | Q13=A | 同目录双文件：系统一孩子**只**在 README entries；AGENTS **只**挂系统二材料与下级系统入口（遍历核心规则） |
@@ -194,7 +196,7 @@ flowchart TB
 | Q16=A | 先本 spec + ADR，人审后再实施计划 |
 | 架构审 1 | 四种入口均可因组成登记成为组织节点 |
 | 架构审 3 | 下层同合同递归：AGENTS→AGENTS，README→README |
-| 架构审 4 | 虚拟根须显式 flag；缺 AGENTS 不自动虚拟化 |
+| 架构审 4 | 虚拟超节点须显式 `--super`；默认 scope/AGENTS；缺 AGENTS 不自动合成 |
 | Q17 | 取消 Internal/Leaf/internal；各节点直继 BaseNode；`type` 扩展 `agents`/`readme`/`text`，不另造 entryKind |
 | Q18=A | 类型入口统一为 `README.md` + `project-entries-*`（`type=readme`）；迁移后不用 `project-memory-entries` |
 
@@ -242,19 +244,20 @@ flowchart TB
 
 ## 遍历规则（核心）
 
-1. 默认从 `--scope` 下真实 `AGENTS.md` 出发；**仅当显式虚拟根 flag** 时才用虚拟系统入口。缺 AGENTS 且未开 flag → 报错 / 发现失败，不静默虚拟化。
+1. 默认从 `--scope` 下真实 `AGENTS.md` 出发；**仅当显式 `--super`** 时才用虚拟超节点。缺 AGENTS 且未开 flag → 报错 / 发现失败，不静默虚拟化。
 2. 展开系统入口的 **系统维护信息**：系统二材料 + 下层 `AGENTS.md`。默认不跟随 `harness`。
 3. 同目录（或登记路径上的）`README.md` 的本层/下层内容展开系统一树；**不**从同目录 AGENTS 找系统一孩子。README 下层组只跟到其它 `README.md`。
 4. `INDEX.md` / `SKILL.md` 无组成登记则不再下钻；有登记则按其 local/descendant 继续。
 5. `includeDescendants` / `includeHarness` 显式才扩展；不得用目录扫描冒充组成。
 
-## 虚拟系统入口
+## 虚拟超节点
 
-- 不落盘；仅运行时对象。
-- **须显式 flag**（CLI/API）开启；不因 scope 无 AGENTS 自动出现。
+- 不落盘；仅运行时对象。语义：相对当前 scope **再上一级** 的超节点。
+- **须显式 `--super`**（CLI/API）开启；默认仍取 scope 下真实 `AGENTS.md`。
+- 不因 scope 无 AGENTS 自动出现。
 - 用途：主体无 AGENTS（个人根）时查询个人相关任务等。
-- 挂载形状：经 Edges 根 README 的组成登记进入仓内树（Q9b）；不在虚拟层扁平挂全部 Task 叶子。
-- flag 具体名字与 API 形状实施时定；本 spec 锁定「必须显式」。
+- 挂载形状：经 Edges 根 README 的组成登记进入仓内树（Q9b）；不在超节点上扁平挂全部 Task 叶子。
+- 实现类名建议 `VirtualSuperNode`。
 
 ## 谁拥有系统入口
 
@@ -275,9 +278,9 @@ flowchart TB
 
 - 本轮不改 `.harness/` 目录名、`edges memory` 命令名、skill 目录名 `project-memory-*`。
 - 不自动给所有目录铺 AGENTS。
-- 不把虚拟入口默认写成文件。
+- 不把虚拟超节点默认写成文件。
 - 不借迁移改写 `posts/` 正文（改名除外）。
-- 不在人审本 spec 前开实施或改生产 codec。
+- （已批准）实施按计划分 Wave A/B，勿跳过迁移预览。
 
 ## 文档关系
 
@@ -298,4 +301,4 @@ flowchart TB
 
 - 旧 `InternalNode` / `LeafNode` 类是删除还是短暂兼容别名（语义上已取消）。
 - 类型目录里原 `project-memory-type` 身份信息迁到 README 何处（YAML / HTML 注释 / 文件名约定）。
-- 虚拟根显式 flag 的具体名字（如 `--virtual-root`）与挂载默认值。
+- 已锁定 flag 名 `--super`；挂载默认经根 README 组成（Q9b）。

@@ -21,7 +21,7 @@ description: 把系统入口初始化做成 project harness init（演进或包�
 
 - grill / 设计：init 与 project-memory-init 的关系（改名、包装、还是并存）
 - 实现 Skill（及必要 CLI）与文档
-- 与根 README entries、虚拟系统入口个人查询对齐验收
+- 与根 README entries、`--super` 虚拟超节点个人查询对齐验收
 
 ## 完成标准
 

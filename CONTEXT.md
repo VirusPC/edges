@@ -5,11 +5,15 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 ## Language
 
 **系统入口（System Entry）**：
-引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层组成与下层系统入口，并可写硬约束；从作用域根起经组成登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（现 `$project-memory-init`，待演进为 project harness init），以标记该目录为重点维护作用域；不是路径白名单。无真实文件时，可使用虚拟系统入口（不落盘）：主体本身没有可给 Agent 读的 `AGENTS.md`（例如以「人」为根、Edges 是其系统二），却要查询横跨该主体系统一的内容（例如个人相关任务）。虚拟入口**须显式 flag** 开启，不得因 scope 缺少 AGENTS 自动合成；经 Edges 根 `README.md` 的组成登记等指向 `tasks/` 等入口后再遍历；实现节奏另卡。
-_避免使用_：把内容叶子当成系统入口、把虚拟入口默认落盘、缺 AGENTS 就静默虚拟化、未经用户 init 就自动给所有目录铺 AGENTS.md
+引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层组成与下层系统入口，并可写硬约束；从作用域根起经组成登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（现 `$project-memory-init`，待演进为 project harness init），以标记该目录为重点维护作用域；不是路径白名单。默认遍历根是 `--scope` 下的真实 `AGENTS.md`。
+_避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md
+
+**虚拟超节点（Virtual Super-node）**：
+相对当前 `--scope` 再上一级的运行时节点，不落盘。仅当显式 **`--super`** 时启用：把可识别的顶层入口挂进其组成后再遍历（例如以「人」为根、Edges 为其系统二时查个人相关任务，经根 `README.md` 的组成登记下钻）。缺 AGENTS 且未开 `--super` 不得自动合成。
+_避免使用_：虚拟系统入口、虚拟根、virtual-root、virtual node、缺 AGENTS 就静默加上超节点、把超节点落盘
 
 **文档节点（Document Node）**：
-模型中的 Markdown 单位：系统入口，组织清单，或内容叶子（Task / Note / Memory / Skill 等）。从作用域根（CLI scope 对应的系统入口、根 README 组成、或虚拟入口）起经登记可达才算节点。
+模型中的 Markdown 单位：系统入口，组织清单，或内容叶子（Task / Note / Memory / Skill 等）。从作用域根（CLI scope 对应的系统入口、根 README 组成、或显式 `--super` 的虚拟超节点）起经登记可达才算节点。
 _避免使用_：仅指文件夹、磁盘上未登记的 md
 
 **组织清单（README.md）**：

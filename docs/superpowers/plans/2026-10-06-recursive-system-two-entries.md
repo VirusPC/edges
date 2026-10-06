@@ -4,7 +4,7 @@
 
 **Goal:** 落地系统一 / 系统二入口分工：`AGENTS.md` 只挂系统维护信息；`README.md` 用 `project-entries-*` 挂内容；类型入口改 README；`type` 扩展为 `agents|readme|…|text`；存量迁 `INDEX.md`。
 
-**Architecture:** Wave A 先改标记/标题、README 组成 codec、memory 类型索引路径与 migrate、根 README entries、traverse 双文件规则——立刻分清系统一/二。Wave B 再扁平类层次（取消 Internal/Leaf）、`type` 改名、显式 `--virtual-root`、project harness init 演进。组成解析复用并参数化现有 `InternalSyntax` / blocks，不要另起一套 Markdown 引擎。
+**Architecture:** Wave A 先改标记/标题、README 组成 codec、memory 类型索引路径与 migrate、根 README entries、traverse 双文件规则——立刻分清系统一/二。Wave B 再扁平类层次（取消 Internal/Leaf）、`type` 改名、显式 `--super`、project harness init 演进。组成解析复用并参数化现有 `InternalSyntax` / blocks，不要另起一套 Markdown 引擎。
 
 **Tech Stack:** TypeScript、Node ≥22、`node:test`、tsx、现有 `edges-cli`。不新增依赖。
 
@@ -59,14 +59,14 @@ flowchart TB
 | 根 README | Q9b 本层内容 | A6 |
 | INDEX 迁移 | 叶子文件名 | A7 |
 | type / 类层次 | agents·text·直继 BaseNode | B8–B9 |
-| `--virtual-root` | 运行时根 | B10 |
+| `--super` | 虚拟超节点（scope 上一级） | B10 |
 | harness init skill | 任意目录系统入口 | B11 |
 
 ### 2. 运行时树：系统二 vs 系统一
 
 ```mermaid
 flowchart TB
-  VR["VirtualSystemEntry<br/>仅 --virtual-root"] -.->|挂| RR
+  VR["VirtualSuperNode<br/>虚拟超节点 · --super"] -.->|挂| RR
   Scope["--scope → AGENTS.md<br/>type=agents"] --> Maint["本层系统维护信息<br/>project-harness-local"]
   Scope --> DownA["下层系统维护信息<br/>→ 其它 AGENTS.md"]
   Scope -.同目录.-> RR["README.md<br/>type=readme"]
@@ -85,7 +85,7 @@ flowchart TB
   DownA --> ChildA["下级 AGENTS.md"]
 ```
 
-实线 = 组成边（traverse 默认/显式组）；点划线 = 同目录双文件规则或显式虚拟根。`harness` 边默认不跟随（既有约定）。
+实线 = 组成边（traverse 默认/显式组）；点划线 = 同目录双文件规则或显式 `--super` 虚拟超节点。`harness` 边默认不跟随（既有约定）。
 
 ### 3. 目标类图（Wave B 终点）
 
@@ -106,9 +106,9 @@ classDiagram
   BaseNode <|-- NoteNode
   BaseNode <|-- SkillNode
   BaseNode <|-- TextNode
-  class VirtualSystemEntry {
+  class VirtualSuperNode {
     <<runtime>>
-    --virtual-root
+    --super
   }
 ```
 
@@ -135,7 +135,7 @@ flowchart LR
 - `type` 目标：`agents|readme|task|memory|note|skill|text`。旧 `internal`/`leaf` 读兼容；写不发 `internal`。
 - 类型入口 → `README.md` + `project-entries-*`；`project-memory-type` 身份头保留在 README 顶部；列表不用 `project-memory-entries`（读兼容至迁完）。
 - 叶子入口文件名目标 **`INDEX.md`**；读兼容 `index.md` 至迁完。
-- 虚拟根须 **`--virtual-root`**（或等价 API 布尔）；缺 AGENTS 不自动虚拟化。
+- 虚拟超节点须显式 **`--super`**；默认取当前 scope 的 `AGENTS.md`；缺 AGENTS 不自动合成超节点。
 - 类层次：Wave B 各节点直继 BaseNode；本计划默认 **删除** `LeafNode`/`isLeaf` 持久语义，`InternalNode` 先改 `type=agents` 再改名为 `AgentsNode`（可短暂 `export { AgentsNode as InternalNode }`）。
 - 不改：`.harness/` 目录名、`edges memory` 命令名、skill 目录名 `project-memory-*`、posts 正文（仅 INDEX 改名）。
 - 批量迁移：可预览、冲突检查、幂等；禁止逐文件手改。
@@ -509,7 +509,7 @@ EOF
 
 ---
 
-## Wave B — 模型收口与虚拟根
+## Wave B — 模型收口与虚拟超节点（`--super`）
 
 ### Task 8: `type` 收口 — `agents` / `text`，去掉 `internal`/`leaf` 写入
 
@@ -562,22 +562,22 @@ EOF
 
 ---
 
-### Task 10: `--virtual-root` 显式 flag
+### Task 10: 显式 `--super`（虚拟超节点）
 
 **Files:**
 - Modify: CLI scope 解析（`extensions/cli/src/commands/` 或 context）
 - Modify: NodeService / query 入口
-- Test: 无 AGENTS + 无 flag → 错误；有 `--virtual-root` → 运行时根挂仓根 README entries
+- Test: 无 AGENTS + 无 flag → 错误；有 `--super` → 运行时根挂仓根 README entries
 
 - [ ] **Step 1: 失败测试覆盖两种行为**
 
-- [ ] **Step 2: 实现 VirtualSystemEntry（不落盘）+ flag 接线**
+- [ ] **Step 2: 实现 VirtualSuperNode（不落盘虚拟超节点）+ `--super` 接线**
 
 - [ ] **Step 3: commit**
 
 ```bash
 git commit -m "$(cat <<'EOF'
-feat: 显式 --virtual-root 虚拟系统入口
+feat: 显式 --super 虚拟超节点
 
 Co-authored-by: Cursor Agent <cursoragent@cursor.com>
 EOF
@@ -636,8 +636,8 @@ EOF
 | INDEX.md 迁移含 posts | 7 |
 | type agents/readme/text | 8 |
 | 无 Internal/Leaf | 9 |
-| 虚拟根显式 flag | 10 |
+| 虚拟超节点 `--super` | 10 |
 | project harness init | 11 |
 | 文档/ADR | 12 |
 
-开放题锁定：类删除（非长期别名，仅允许短暂 re-export）；`project-memory-type` 留 README 顶；flag 名 `--virtual-root`。
+开放题锁定：类删除（非长期别名，仅允许短暂 re-export）；`project-memory-type` 留 README 顶；flag 名 `--super`（虚拟超节点）。
