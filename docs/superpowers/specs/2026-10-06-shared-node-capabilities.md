@@ -101,6 +101,8 @@ Tasks 的项目、看板及 owner AGENTS.md 改走 NodeService。业务 Service 
 
 Tasks 索引操作采用 managedRoot 为 canonical scope 的 Service，assertWrite 仅覆盖当前 board 及已存在的 owner AGENTS。TaskNode CRUD 原来的 board 边界保持。缺失 owner 不自动创建；分组执行调用方明确选择，已有关系分组、标签和链接拼写保留。
 
+移动节点保留原登记状态：已有关系随目录移动保留原分组；原来未登记的节点移动后仍未登记，不凭空增加 descendant 引用。本轮不增加独立 reparent 或隐式位置推断。
+
 Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Note 保留 checkout/pull 后才加载节点，以及父索引 Git 状态检查和附件导入流程。不同 managedRoot 或策略可以使用不同 Service；同一操作链、相同视图复用已加载对象。
 
 完整 Markdown 输入只在 import 或既有文本适配路径中出现；在 Service 内先校验，再应用到受管节点并持久化。普通结构化创建不要求调用方先组装 Markdown。

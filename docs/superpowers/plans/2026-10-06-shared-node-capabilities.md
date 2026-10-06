@@ -384,6 +384,7 @@ await service.update(owner, {
 
 - [ ] 将 LLM/调用方明确选择的位置从 CLI 输入传递至业务 Service 和通用登记操作；已有 localChildren/descendantChildren 是最终关系表达，复用现有 ChildGroup，不引入新位置模型。删除 Tasks 根据 purpose 自动选组/改组的分支。需要新建 owner 引用但未提供位置时在任何写入前返回参数错误；已有引用更新未显式要求移动时保留原分组。根节点或独立 harness 关系不虚构父级 children 登记。
 - [ ] 回归：对同一合法目录入口，显式 local 与 descendant 均按输入登记，purpose 不改变选择；缺少必要位置时无文件写入；重复更新保持原位置及标签/链接拼写；非法路径、组成环等仍报错。同一用例内复用 Service，缺失 owner 不自动创建。
+- [x] 移动未登记节点保持未登记，不自动推断 descendant；已有登记移动仍保留原分组。由真实跨父目录移动用例验证，不新增 public reparent 或扩大 move 参数。
 - [ ] TaskNode CRUD 已经走 NodeService，保持其现有接口；run log/附件仍是资源。project-meta 的 AGENTS 保存不得再调用 BoardWriter.writeFile；BoardWriter 继续用于业务盘点和资源，不增加第二套节点持久化。
 - [ ] Note 保留 Git 操作顺序与现有 NodeService.create/update/import；去掉重复保存机制即可，不强迫经过新的公共 helper。校验草稿在业务 Service 内仍可使用 Model，但只由 NodeService 更新受管节点和文件。不得提前到 checkout/pull 之前加载。
 - [ ] `.gitignore` 的原子写改用既有文件 IO，删除 Memory.writeAtomic 及无用导入。保持模式和私有类型准备顺序：
