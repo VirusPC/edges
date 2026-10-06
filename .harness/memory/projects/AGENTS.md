@@ -76,5 +76,7 @@ format: ordinary
 
 - [虚拟系统入口用于个人根与个人任务查询](<project_virtual_system_entry_personal_root/index.md>) — 设计个人任务或无 AGENTS.md 的主体根时打开：虚拟系统入口不落盘，用于「人」为根、Edges 为其系统二时查询个人相关任务等；把可识别顶层入口挂进组成。实现节奏与 local 挂载形状见 grill Q9b/Q11′。
 
-- [grill：README entries、任意目录 init、虚拟入口另卡](<project_grill_system_entry_q9b_q10_q11/index.md>) — 续节点模型 grill：Q9b 根 README 增 entries 指向 tasks 等；Q11=A 虚拟入口先术语后另卡；Q10 任意目录可有系统入口、用户自行 init，并开 project harness init skill 待办。Q12 叶子入口名仍待答。
+- [grill：README entries、任意目录 init、叶子 INDEX.md](<project_grill_system_entry_q9b_q10_q11/index.md>) — 续节点模型 grill：Q9b 根 README 增 entries；Q10 任意目录用户 init；Q11 虚拟入口另卡；Q12 组织清单 README.md、内容叶子 INDEX.md。同目录 AGENTS 组成与 README entries 分工待下一问。
+
+- [组织清单 README.md，内容叶子 INDEX.md](<project_document_entry_readme_index/index.md>) — 改节点入口文件名、Task/Note/Memory 路径或类型索引形状时：组织清单一律 README.md\+entries；内容叶子为 INDEX.md；Skill 仍 SKILL.md；系统入口仍 AGENTS.md。不要把 Task 正文写成 README。
 <!-- project-memory-entries:end -->

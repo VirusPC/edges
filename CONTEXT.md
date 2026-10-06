@@ -9,8 +9,16 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 _避免使用_：把内容叶子当成系统入口、把虚拟入口默认落盘、未经用户 init 就自动给所有目录铺 AGENTS.md
 
 **文档节点（Document Node）**：
-模型中的 Markdown 单位：系统入口，或由某系统入口组成登记指向的内容节点（Task / Note / Memory / Skill 等）。从作用域根（CLI scope 对应的系统入口，或上述虚拟入口）起经登记可达才算节点。
+模型中的 Markdown 单位：系统入口，组织清单，或内容叶子（Task / Note / Memory / Skill 等）。从作用域根（CLI scope 对应的系统入口、根 README 组成、或虚拟入口）起经登记可达才算节点。
 _避免使用_：仅指文件夹、磁盘上未登记的 md
+
+**组织清单（README.md）**：
+用 `README.md` 承载组成登记的文档节点：列出本目录作为系统一的孩子（如根 README 指向 `tasks/`、Task Project 列出任务、类型索引列出条目）。给人看的说明与 entries 可同文件；工具只改标记区块。
+_避免使用_：把叶子正文写成 README、把 README 当成系统入口、无 entries 的普通包说明自动当节点
+
+**内容叶子入口（INDEX.md）**：
+Task / Note / Memory 等的入口文件，名为 `INDEX.md`。Skill 仍为 `SKILL.md`。有无子项仍看是否出现组成登记，不靠文件名分 Internal / Leaf。
+_避免使用_：index.md（迁移前史料）、把叶子叫 README.md、把 INDEX.md 当成系统入口
 
 **组成登记（entries / project-harness local·descendants）**：
 系统入口（及需要组织子项的文档节点）正文里受管 HTML 注释所登记的直属子节点；有登记则当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口带组成登记是递归系统二的基础假设。
