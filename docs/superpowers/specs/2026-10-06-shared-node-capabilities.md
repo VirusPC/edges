@@ -99,7 +99,7 @@ src/
 
 Tasks 的项目、看板及 owner AGENTS.md 改走 NodeService。业务 Service 加载原节点后生成更新参数并调用 update；新建由 create 调用模型初始化并落盘。简单的“get 后判断创建还是更新”可保留在业务操作内，不再抽取带 existed 状态的文档句柄。
 
-Tasks 索引操作采用 managedRoot 为 canonical scope 的 Service，assertWrite 仅覆盖当前 board 及已存在的 owner AGENTS。TaskNode CRUD 原来的 board 边界保持。缺失 owner 不自动创建；maintenance 归 local；domain 已有关系分组、标签和链接拼写保留。
+Tasks 索引操作采用 managedRoot 为 canonical scope 的 Service，assertWrite 仅覆盖当前 board 及已存在的 owner AGENTS。TaskNode CRUD 原来的 board 边界保持。缺失 owner 不自动创建；分组执行调用方明确选择，已有关系分组、标签和链接拼写保留。
 
 Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Note 保留 checkout/pull 后才加载节点，以及父索引 Git 状态检查和附件导入流程。不同 managedRoot 或策略可以使用不同 Service；同一操作链、相同视图复用已加载对象。
 
@@ -115,7 +115,7 @@ Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Not
 
 旧 task-projects 的转换由独立 scripts/migrate-agents-indexes.mts 承担，支持显式范围、预览、冲突检查、可恢复原文和幂等执行；正常写入遇到冲突旧格式只提示迁移，不夹带兼容性搬迁分支。通用区块工具保留必要的 Memory 模板用途，不能因统一索引删掉类型约定或用户正文。
 
-创建分组另待讨论：领域/维护是用途，本层/下层是相对于当前节点的作用域归属，两者不能直接等同。当前 Tasks 新 domain 登记为 descendant 的实现不作为通用规则；若看板组织当前作用域自身的内容，可以是 local，独立下层作用域才是 descendant。撤回“新领域看板必属下层”及据此提出的先登记后纠正要求；现有数据不自动重分类，接口是否需要扩展待归属语义确认。
+用户确认：位置由 LLM 根据语义和上下文判断，CLI 只负责执行明确输入。本层/下层分组不根据任务用途、节点类型或物理目录深度自动推导；CLI 接收目标路径及 local/descendant，验证路径、格式与关系一致性，并通过 Service 完成登记。更新未要求改组时保留既有位置；新增关系缺少必要位置输入则在写前报错，不采用隐式默认或先登记后纠正。harness 独立关系继续遵循原协议，不混成 children。
 
 ### 3. 路径工具提供机制，Service 保留政策
 
@@ -149,7 +149,7 @@ grouped/review-page 的 TaskDoc JSON 输入适配器也纳入迁移：旧 Schema
 - 保留 NodeService 内同路径单实例、原地更新与实际受影响节点保存语义。
 - 保留命令写锁、文件快照冲突检查、单文件原子保存与既有失败恢复。
 - 保留 Markdown 非受控区域；不要求保留 YAML 注释或 YAML 样式。
-- 保留既有 CLI 参数、输出协议、默认 scope 与查询范围；新增全局只读 schema list/get，成功输出纯 JSON，失败仅写 stderr 并非零退出。
+- 保留既有 CLI 输出协议、默认 scope 与查询范围；涉及新关系登记的入口补充显式位置输入，不保留隐式猜测分组。新增全局只读 schema list/get，成功输出纯 JSON，失败仅写 stderr 并非零退出。
 - domain/models 与 domain/operations 同级，算法按文件拆分；domain 不依赖 services（含类型依赖），不直接读写文件；不引入 NodeTree、全局 Service 或事务框架。
 
 ## 取舍与验收

@@ -1,12 +1,12 @@
 ---
 name: project_node_shared_state_simplification
-description: Model/operations/Service 分工、共享实例；统一索引与独立迁移；任务用途不直接决定本层/下层，创建分组待讨论。
+description: Model/operations/Service 分工、共享实例和统一索引；LLM 判断目录与本层/下层位置，CLI 显式执行，不按任务用途推断。
 metadata:
   edges-title: 节点共享状态与职责简化
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T16:01:12+08:00'
+  edges-updated-at: '2026-10-06T16:07:23+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -113,7 +113,7 @@ metadata:
 
 **Why:** 减少重复实现和调用概念才是简化；搬目录、减少文件数或增加通用包装本身不是收益。Schema 消除了类型定义重复，但新增生成、分发及验收成本，不能承诺总行数必然降低。
 
-**How to apply:** Task 1–4 汇报删除的重复机制，Task 5 单列工具链成本；使用现有模型 hooks、操作组合和契约清单扩展，不引入插件引擎。索引迁移按后续用户纠正：Tasks 不保留旧区块迁位兼容分支，改用独立迁移脚本；创建分组的具体接口继续讨论；具体回归要求以 plan 的整体审查表和 Task 2/3/5 为准。
+**How to apply:** Task 1–4 汇报删除的重复机制，Task 5 单列工具链成本；使用现有模型 hooks、操作组合和契约清单扩展，不引入插件引擎。索引迁移按后续用户纠正：Tasks 不保留旧区块迁位兼容分支，改用独立迁移脚本；创建分组按后续 LLM 判断、CLI 执行的决策落实；具体回归要求以 plan 的整体审查表和 Task 2/3/5 为准。
 
 
 ## 统一索引，旧区块独立迁移
@@ -131,4 +131,13 @@ metadata:
 
 **Why:** 之前把现有 Tasks 新 domain 登记为 descendant 的实现策略当成通用模型必然要求，从而引出了不必要的登记后纠正方案。
 
-**How to apply:** 已撤回该前提和补救要求。先讨论看板相对 owner 的实际归属，再确定是否需要创建分组参数；不自动重分组已有数据。看板如果只是组织本层内容，可采用 local；若代表独立下层作用域，再采用 descendant。
+**How to apply:** 已撤回该前提和补救要求。按后续确认，由 LLM 判断看板相对 owner 的归属，CLI 接收明确分组并执行；不自动重分组已有数据。看板如果只是组织本层内容，可采用 local；若代表独立下层作用域，再采用 descendant。
+
+
+## LLM 判断位置，CLI 执行
+
+用户确认：位置应由 LLM 判断，CLI 只负责执行。
+
+**Why:** 本层与下层表达语义归属，目录深度、节点类型和 domain/maintenance 用途不能代替这个判断。将判断写成 CLI 推断规则会制造错误归属与额外补救逻辑。
+
+**How to apply:** LLM 给出目标路径及 local/descendant；CLI/Service 校验路径、格式和关系一致性并执行，不推断分组，不先写错再改。更新未明确改组时保留原位置；新增关系缺少必要输入在写前报错。保持目录所有权和独立 harness 关系，不开放脱离物理目录的 reparent。具体命令与服务参数贯穿实施计划的 Task 3。

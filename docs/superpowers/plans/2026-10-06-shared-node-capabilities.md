@@ -10,7 +10,7 @@
 
 **Spec:** [通用能力收敛设计](../specs/2026-10-06-shared-node-capabilities.md)
 
-状态：待实施；本轮已确认统一索引与独立旧格式迁移。创建时关系分组及生产 Schema 校验的后续建议见下节，尚待讨论，不能按旧补救流程直接实施。本版替代最初新增 node-documents、node-query、internal/documents、utils/markdown/index-rendering 文件的方案。此前[节点职责简化计划](2026-10-06-node-identity-simplification.md)已经完成，不重复执行。
+状态：待实施；本轮已确认统一索引与独立旧格式迁移。关系位置由 LLM 判断、CLI 显式执行已确认；生产 Schema 校验建议仍见下节待确认，不能按旧补救流程实施。本版替代最初新增 node-documents、node-query、internal/documents、utils/markdown/index-rendering 文件的方案。此前[节点职责简化计划](2026-10-06-node-identity-simplification.md)已经完成，不重复执行。
 
 ## 架构审查结论与简化验收
 
@@ -27,9 +27,9 @@
 
 Task 5 在同一 plan 内作为独立可验收的后续步骤；其工具链接入失败不应迫使 Task 0–4 改变领域分工。实施报告分别说明“删除了什么重复机制”和“为新能力增加了什么”，保留实际行为与边界测试的证据。
 
-## 当前讨论中的两点
+## 关系位置决策与剩余讨论
 
-- **创建时分组：** 先确认作用域归属，不以领域/维护用途直接推导 local/descendant。现有 Tasks 把新 domain board 登记为 descendant，是当前实现策略，不是通用节点约定的必然结论。上一版“默认 local 与领域任务必为 descendant 冲突”的前提不成立，撤回据此提出的自动改组补救要求。是否需要新增创建分组参数，须在真实本层/下层场景确定后讨论；既有引用不自动重分组。
+- **位置判断（已确认）：** LLM 根据当前对象的语义与上下文决定目录位置和本层/下层关系，CLI 接收明确的目标与 local/descendant 参数并执行。CLI 不根据 domain/maintenance、目录深度或节点类型代做作用域判断，不先自动登记后纠正；只检查路径、格式和关系一致性。更新未指定重新分类时保留已有位置；新增关系缺少必要位置输入时报参数错误，不猜测、不落盘后再补救。
 - **Schema 为校验标准：** 用户提出是否直接以 Schema 为准。建议 grouped/review-page 接收完整 TaskDoc 的边界使用同一生成 Schema + Ajv，删除各自字段校验；届时 Ajv/formats 改为运行时依赖，增加共享校验入口、生产产物准备及真实输入验收。当前 Task 5 的“仅放宽 metadata、Ajv 仅测试”是上一版，确认后须整体替换，不可当作已确定的最终方案。Markdown 输入、创建参数等用途不同，不能套完整 TaskDoc Schema。
 
 ## Global Constraints
@@ -40,7 +40,7 @@ Task 5 在同一 plan 内作为独立可验收的后续步骤；其工具链接�
 - 保留 NodeService 内同路径单实例、原地更新与实际受影响节点保存语义。
 - 保留命令写锁、文件快照冲突检查、单文件原子保存与既有失败恢复。
 - 保留 Markdown 非受控区域；不要求保留 YAML 注释或 YAML 样式。
-- 保留既有 CLI 参数、输出协议、默认 scope 与查询范围；新增全局只读 schema list/get，成功输出纯 JSON，失败仅写 stderr 并非零退出。
+- 保留既有 CLI 输出协议、默认 scope 与查询范围；涉及新关系登记的入口补充显式位置输入，不保留隐式猜测分组。新增全局只读 schema list/get，成功输出纯 JSON，失败仅写 stderr 并非零退出。
 - domain/models 与 domain/operations 同级，算法按文件拆分；domain 不依赖 services（含类型依赖），不直接读写文件；不引入 NodeTree、全局 Service 或事务框架。
 
 ## 整体架构
@@ -306,7 +306,7 @@ export const typeContentDir = (target: string, name: string): string =>
 - [ ] 基线盘点所有 task-projects 标记及其生产者/消费者；代码与测试用例分别处理，不迁移仓库真实内容。Task 3 的 refreshProjectIndex 后续只负责用通用关系接口对齐当前项目引用，不生成专属 Markdown 块。
 - [ ] 先为普通 local 索引加行为用例：创建/更新项目后只有一条通用引用，标题/描述正确；不出现 task-projects 标记；其他关系、约束和非受控正文保留；重复更新幂等。用现有 InternalNode 读取结果断言，而非依赖 Tasks 专属标记。
 - [ ] Tasks 新项目骨架复用 serializeNode(createNodeModel())，保留标题/描述及原 tail。删除 renderTaskProjectsSection、Tasks 专属区块 upsert/迁位分支；相关逻辑仅允许存在于迁移脚本，不让运行时代码 import 脚本。
-- [ ] 更新项目索引时从当前 InternalNode 取得引用，按实际项目入口 id 修改属于本操作的条目，其余原样保留；通过 NodeService.update 保存。新登记项目属于看板的 localChildren；不把整个 localChildren 替换为项目列表，也不把 NodeService 自动登记和项目描述更新做成两套索引。
+- [ ] 更新项目索引时从当前 InternalNode 取得引用，按实际项目入口 id 修改属于本操作的条目，其余原样保留；通过 NodeService.update 保存。新登记项目的分组使用明确的调用参数；不把整个 localChildren 替换为项目列表，也不把 NodeService 自动登记和项目描述更新做成两套索引。
 - [ ] 将 escapeIndexText/encodeIndexPath 原实现迁入 internal/serialize.ts，批量引用修改使用 TS 脚本，删除旧路径。Memory 模板仍校验必需区块，纯区块更新保留外部正文/CRLF；畸形区块返回错误，不自动修复。
 - [ ] 实现独立脚本接口：默认 --check 只输出显式 --root 范围内候选和差异；--write 才应用。跳过 Git/依赖目录、符号链接和受保护的 posts；不扫描范围外路径，不自动运行全仓迁移。批量写入前全量检查冲突并保留可恢复原文；写操作使用既有锁/快照/原子保存机制，不自写另一套。
 
@@ -378,9 +378,10 @@ await service.update(owner, {
 });
 ```
 
-该示例仅展示关系更新 API，不作为按 purpose 决定分组的通用规则。看板本层/下层归属尚在讨论，先不实施自动改组。不要借示例重新排序无变化的引用。新建项目自动维护 board 索引后，后续刷新从同一 Service 对象取当前 body，不能沿用创建前字符串。
+该示例仅展示调用方明确选择 local 后的执行路径；同样支持显式 descendant。位置由 LLM 决定，CLI 不按 purpose 推导或自动改组。不要借示例重新排序无变化的引用。新建项目自动维护 board 索引后，后续刷新从同一 Service 对象取当前 body，不能沿用创建前字符串。
 
-- [ ] **待讨论：** 先明确看板相对 owner 的作用域归属，再确定创建分组接口及回归用例；不能仅按 purpose 自动分组，也不先实现上一版的自动 local 后纠正流程。保留同一用例内 Service 复用、现有标签/描述/链接拼写和缺失 owner 不创建的边界。
+- [ ] 将 LLM/调用方明确选择的位置从 CLI 输入传递至业务 Service 和通用登记操作；已有 localChildren/descendantChildren 是最终关系表达，复用现有 ChildGroup，不引入新位置模型。删除 Tasks 根据 purpose 自动选组/改组的分支。需要新建 owner 引用但未提供位置时在任何写入前返回参数错误；已有引用更新未显式要求移动时保留原分组。根节点或独立 harness 关系不虚构父级 children 登记。
+- [ ] 回归：对同一合法目录入口，显式 local 与 descendant 均按输入登记，purpose 不改变选择；缺少必要位置时无文件写入；重复更新保持原位置及标签/链接拼写；非法路径、组成环等仍报错。同一用例内复用 Service，缺失 owner 不自动创建。
 - [ ] TaskNode CRUD 已经走 NodeService，保持其现有接口；run log/附件仍是资源。project-meta 的 AGENTS 保存不得再调用 BoardWriter.writeFile；BoardWriter 继续用于业务盘点和资源，不增加第二套节点持久化。
 - [ ] Note 保留 Git 操作顺序与现有 NodeService.create/update/import；去掉重复保存机制即可，不强迫经过新的公共 helper。校验草稿在业务 Service 内仍可使用 Model，但只由 NodeService 更新受管节点和文件。不得提前到 checkout/pull 之前加载。
 - [ ] `.gitignore` 的原子写改用既有文件 IO，删除 Memory.writeAtomic 及无用导入。保持模式和私有类型准备顺序：
