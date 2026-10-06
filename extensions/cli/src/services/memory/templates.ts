@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { dirname, join, parse } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readText, typeDirName } from "./paths.js";
-export const ENTRY_OUTPUT_PATTERN = "index.md";
+export const ENTRY_OUTPUT_PATTERN = "INDEX.md";
 export const ENTRY_LINE_TEMPLATE = "entry_line.md";
 export function templateRoot(): string {
   const here = dirname(fileURLToPath(import.meta.url));
@@ -16,7 +16,7 @@ export function templateRoot(): string {
   return root;
 }
 export const templatePath = (name: string) =>
-  join(templateRoot(), `${parse(name).name}.tmpl.md`);
+  join(templateRoot(), `${parse(name).name.toLowerCase() === "index" ? "index" : parse(name).name}.tmpl.md`);
 export const readTemplate = (name: string) => readText(templatePath(name));
 export function fillPlaceholders(
   text: string,

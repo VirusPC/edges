@@ -2,7 +2,11 @@ import { isWithinPath, findAncestor } from '../../utils/filesystem.js';
 import fs from "node:fs";
 import path from "node:path";
 import { InternalNode, TaskNode } from "../../domain/models/index.js";
-import { identifyNodeType } from "../../domain/models/layout.js";
+import {
+  LEAF_ENTRY_NAMES,
+  identifyNodeType,
+  isLeafEntryName,
+} from "../../domain/models/layout.js";
 import { decodeBody } from "../../domain/models/internal/parse.js";
 import { projectIdFromDir } from "../../domain/models/tasks/project.js";
 import {
@@ -63,7 +67,7 @@ function discover(root: string): string[] {
         // Never follow links into other workspaces. Entry links are unsafe targets.
         if (
           item.name === "AGENTS.md" ||
-          item.name === "index.md" ||
+          isLeafEntryName(item.name) ||
           item.name === "tasks"
         )
           throw new Error(`Symbolic link in migration discovery: ${file}`);
@@ -200,7 +204,7 @@ export async function planTaskIndexes(
       path.basename(owner) === ".harness" ? path.dirname(owner) : owner;
     // Snapshot both present and absent candidates: adding an entry can change
     // whether this selected public scope is an InternalNode or a content node.
-    const candidates = ["index.md", "SKILL.md"].map((name) =>
+    const candidates = [...LEAF_ENTRY_NAMES, "SKILL.md"].map((name) =>
       path.join(scope, name),
     );
     for (const file of candidates)

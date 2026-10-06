@@ -161,7 +161,7 @@ test("old skills name is not a runtime alias but can be a custom ordinary type",
   });
   await remember(d, "skills");
   assert.ok(
-    fs.existsSync(join(d, ".harness/memory/skills/skills_example/index.md")),
+    fs.existsSync(join(d, ".harness/memory/skills/skills_example/INDEX.md")),
   );
 });
 for (const change of [
@@ -253,7 +253,7 @@ test("linked index and gitignore reject writes before private content", async (t
   fs.symlinkSync(join(outside, "ignore"), join(d, ".gitignore"));
   await assert.rejects(async () => await remember(d, "user"));
   assert.equal(
-    fs.existsSync(join(d, ".harness/memory/users/user_example/index.md")),
+    fs.existsSync(join(d, ".harness/memory/users/user_example/INDEX.md")),
     false,
   );
   assert.equal(read(outside, "ignore"), "Keep");
@@ -268,7 +268,7 @@ test("private ignore is reestablished before remember and applies to nested user
   await remember(nested, "user");
   for (const file of [
     "nested/.harness/memory/users/README.md",
-    "nested/.harness/memory/users/user_example/index.md",
+    "nested/.harness/memory/users/user_example/INDEX.md",
   ])
     assert.ok(
       execFileSync("git", ["-C", d, "check-ignore", file], {
@@ -326,7 +326,7 @@ test("broken and unreadable referenced sources preserve exact index bytes", asyn
 });
 test("legacy owner or legacy explicit root rejects all daily mutation", async (t) => {
   const d = fixture(t);
-  put(d, ".memory/projects/project_old/index.md", "old");
+  put(d, ".memory/projects/project_old/INDEX.md", "old");
   const child = join(d, "child");
   fs.mkdirSync(child);
   await assert.rejects(
@@ -353,7 +353,7 @@ test("legacy owner or legacy explicit root rejects all daily mutation", async (t
       (f) => f.code === "migration-required",
     ),
   );
-  assert.equal(read(d, ".memory/projects/project_old/index.md"), "old");
+  assert.equal(read(d, ".memory/projects/project_old/INDEX.md"), "old");
   assert.equal(fs.existsSync(join(d, ".harness")), false);
 });
 for (const remove of ["index", "directory", "scope"])
@@ -504,7 +504,7 @@ test("unregistered custom types are rediscovered and metadata/manual introductio
 });
 test("standard YAML parsing supports quoted, multiline and nested metadata; nested values win", async (t) => {
   const d = await base(t);
-  const file = ".harness/memory/projects/project_yaml/index.md";
+  const file = ".harness/memory/projects/project_yaml/INDEX.md";
   put(
     d,
     file,
@@ -570,7 +570,7 @@ test("slug and content validation fail before writing", async (t) => {
       }),
   );
   assert.equal(
-    fs.existsSync(join(d, ".harness/memory/projects/project_empty/index.md")),
+    fs.existsSync(join(d, ".harness/memory/projects/project_empty/INDEX.md")),
     false,
   );
 });
@@ -583,7 +583,7 @@ test("custom privilege YAML rejects string booleans and executable language head
     /Invalid type flag/,
   );
   const d = await base(t),
-    file = ".harness/memory/projects/project_js/index.md";
+    file = ".harness/memory/projects/project_js/INDEX.md";
   put(d, file, '---js\n{description: "should not execute"}\n---\nBody');
   assert.deepEqual(parseFrontmatter(join(d, file)), {});
   assert.ok(
@@ -607,7 +607,7 @@ test("private entry updates preserve existing OS permissions", async (t) => {
   const d = fixture(t);
   await initMemory({ indexGroup: "descendant", targetDir: d, memoryTypes: ["user"] });
   await remember(d, "user");
-  const file = join(d, ".harness/memory/users/user_example/index.md");
+  const file = join(d, ".harness/memory/users/user_example/INDEX.md");
   fs.chmodSync(file, 0o640);
   await remember(d, "user", "example");
   assert.equal(fs.statSync(file).mode & 0o777, 0o640);
@@ -624,7 +624,7 @@ for (const [label, source] of [
 ] as const)
   test(`remember refuses ${label} without changing entry or index`, async (t) => {
     const d = await base(t),
-      file = ".harness/memory/projects/project_broken/index.md";
+      file = ".harness/memory/projects/project_broken/INDEX.md";
     put(d, file, source);
     const beforeEntry = fs.readFileSync(join(d, file)),
       beforeIndex = fs.readFileSync(join(d, pi));
@@ -654,7 +654,7 @@ for (const type of ["project", "managed", "referenced"] as const)
       directory = "tricky ) [name] #?.skill";
     const file =
       type === "project"
-        ? ".harness/memory/projects/project_source/index.md"
+        ? ".harness/memory/projects/project_source/INDEX.md"
         : type === "managed"
           ? `.harness/skills/managed/${directory}/SKILL.md`
           : `.agents/skills/${directory}/SKILL.md`;
@@ -685,7 +685,7 @@ for (const type of ["project", "managed", "referenced"] as const)
     assert.equal(links.length, 1);
     const expectedPath =
       type === "project"
-        ? "project_source/index.md"
+        ? "project_source/INDEX.md"
         : type === "managed"
           ? `${directory}/SKILL.md`
           : `../../../.agents/skills/${directory}/SKILL.md`;
@@ -716,14 +716,14 @@ function exposeTypePath(scope: string, directory: string, filename: string) {
     `!memory/${directory}/\nmemory/${directory}/*\n${filename.includes("/") ? `!memory/${directory}/${filename.split("/")[0]}/\n` : ""}!memory/${directory}/${filename}\n`,
   );
 }
-for (const exposed of ["user_example/index.md", "README.md"])
+for (const exposed of ["user_example/INDEX.md", "README.md"])
   test(`remember preflights private entry and index when ${exposed} is unignored`, async (t) => {
     const d = fixture(t);
     execFileSync("git", ["init", "-q", d]);
     await initMemory({ indexGroup: "descendant", targetDir: d, memoryTypes: ["user"] });
     await remember(d, "user");
     const index = ".harness/memory/users/README.md",
-      entry = ".harness/memory/users/user_example/index.md";
+      entry = ".harness/memory/users/user_example/INDEX.md";
     const oldIndex = read(d, index),
       oldEntry = read(d, entry);
     exposeTypePath(d, "users", exposed);
@@ -748,7 +748,7 @@ test("private index refresh refuses to write an exposed index", async (t) => {
     before = read(d, index);
   put(
     d,
-    ".harness/memory/users/user_new/index.md",
+    ".harness/memory/users/user_new/INDEX.md",
     "---\nname: user_new\ndescription: synthetic private description\n---\nsecret body\n",
   );
   exposeTypePath(d, "users", "README.md");
@@ -818,16 +818,16 @@ test("custom private child scopes preflight effective ignores and preserve non-G
     "check-ignore",
     "-q",
     "--no-index",
-    "child/.harness/memory/secrets/secrets_allowed/index.md",
+    "child/.harness/memory/secrets/secrets_allowed/INDEX.md",
   ]);
-  exposeTypePath(child, "secrets", "secrets_example/index.md");
+  exposeTypePath(child, "secrets", "secrets_example/INDEX.md");
   await assert.rejects(
     async () => await remember(child, "secrets"),
     /private-ignore|忽略/,
   );
   assert.equal(
     fs.existsSync(
-      join(child, ".harness/memory/secrets/secrets_example/index.md"),
+      join(child, ".harness/memory/secrets/secrets_example/INDEX.md"),
     ),
     false,
   );
@@ -835,7 +835,7 @@ test("custom private child scopes preflight effective ignores and preserve non-G
   await initMemory({ indexGroup: "descendant", targetDir: plain, memoryTypes: ["user"] });
   await remember(plain, "user");
   assert.equal(
-    fs.existsSync(join(plain, ".harness/memory/users/user_example/index.md")),
+    fs.existsSync(join(plain, ".harness/memory/users/user_example/INDEX.md")),
     true,
   );
 });
@@ -851,7 +851,7 @@ test("Git discovery failure cannot expose private memory through a missing GIT_D
   const d = fixture(t);
   execFileSync("git", ["init", "-q", d]);
   await initMemory({ indexGroup: "descendant", targetDir: d, memoryTypes: ["user"] });
-  exposeTypePath(d, "users", "user_example/index.md");
+  exposeTypePath(d, "users", "user_example/INDEX.md");
   const index = ".harness/memory/users/README.md",
     before = read(d, index);
   temporaryEnvironment(t, "GIT_DIR", join(d, "missing-git-dir"));
@@ -860,7 +860,7 @@ test("Git discovery failure cannot expose private memory through a missing GIT_D
     /private-ignore-check-failed/,
   );
   assert.equal(
-    fs.existsSync(join(d, ".harness/memory/users/user_example/index.md")),
+    fs.existsSync(join(d, ".harness/memory/users/user_example/INDEX.md")),
     false,
   );
   assert.equal(read(d, index), before);
@@ -931,7 +931,7 @@ for (const context of [
       if (operation === "refresh")
         put(
           d,
-          ".harness/memory/users/user_new/index.md",
+          ".harness/memory/users/user_new/INDEX.md",
           "---\nname: user_new\ndescription: private synthetic description\n---\nbody\n",
         );
       if (operation === "doctor") fs.unlinkSync(join(d, index));
@@ -974,7 +974,7 @@ for (const context of [
         false,
       );
       assert.equal(
-        fs.existsSync(join(d, ".harness/memory/users/user_example/index.md")),
+        fs.existsSync(join(d, ".harness/memory/users/user_example/INDEX.md")),
         false,
       );
       assert.equal(
@@ -1003,10 +1003,10 @@ test("all private callers still work in a confirmed non-Git scope without a Git 
   );
   assert.ok(fs.existsSync(join(d, index)));
   assert.ok(
-    fs.existsSync(join(d, ".harness/memory/users/user_example/index.md")),
+    fs.existsSync(join(d, ".harness/memory/users/user_example/INDEX.md")),
   );
   assert.ok(
-    fs.existsSync(join(d, ".harness/memory/secrets/secrets_example/index.md")),
+    fs.existsSync(join(d, ".harness/memory/secrets/secrets_example/INDEX.md")),
   );
 });
 
@@ -1016,6 +1016,6 @@ test("type scan functions remain public after moving out of path primitives", as
   const { typeIndexPath, typeContentDir, listTypeFiles } = await import("../../src/services/memory/types.js");
   assert.equal(typeIndexPath(target, "project"), join(target, pi));
   assert.equal(typeContentDir(target, "project"), dirname(join(target, pi)));
-  assert.deepEqual(listTypeFiles(target, "project"), [join(target, ".harness/memory/projects/project_example/index.md")]);
+  assert.deepEqual(listTypeFiles(target, "project"), [join(target, ".harness/memory/projects/project_example/INDEX.md")]);
   assert.equal(typeContentDir(target, "referenced"), join(target, ".agents/skills"));
 });

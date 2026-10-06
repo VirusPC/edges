@@ -33,7 +33,7 @@ test("created projects and tasks are recursively discoverable, then moves replac
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
     assert.ok(nodes.some((node) => node.path === path.join(board, "cli/AGENTS.md")));
     const projectNode = await service.get(path.join(board, "cli/AGENTS.md"), InternalNode);
-    assert.ok(projectNode?.children.some((child) => child.id === path.join(board, `cli/backlog/${stem}/index.md`)));
+    assert.ok(projectNode?.children.some((child) => child.id === path.join(board, `cli/backlog/${stem}/INDEX.md`)));
     const { access } = await import("node:fs/promises");
     await assert.rejects(access(path.join(board, "cli/backlog/AGENTS.md")));
 
@@ -41,18 +41,18 @@ test("created projects and tasks are recursively discoverable, then moves replac
     assert.equal(moved.exitCode, 0, moved.stdout);
     nodes = await new NodeService({ managedRoot: board }).list(board);
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
-    assert.ok(nodes.some((node) => node.path === path.join(board, `cli/done/${stem}/index.md`)));
+    assert.ok(nodes.some((node) => node.path === path.join(board, `cli/done/${stem}/INDEX.md`)));
     const old = await new NodeService({ managedRoot: board }).get(path.join(board, "cli/AGENTS.md"), InternalNode);
     assert.ok(old);
-    assert.equal(old.children.some((child) => child.id === path.join(board, `cli/backlog/${stem}/index.md`)), false);
+    assert.equal(old.children.some((child) => child.id === path.join(board, `cli/backlog/${stem}/INDEX.md`)), false);
 
     const regrouped = await call(root, ["update", stem, "--project", "default"]);
     assert.equal(regrouped.exitCode, 0, regrouped.stdout);
     nodes = await new NodeService({ managedRoot: board }).list(board);
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
-    assert.ok(nodes.some((node) => node.path === path.join(board, `_default/done/${stem}/index.md`)));
+    assert.ok(nodes.some((node) => node.path === path.join(board, `_default/done/${stem}/INDEX.md`)));
     const destinationProject = await new NodeService({ managedRoot: board }).get(path.join(board, "_default/AGENTS.md"), InternalNode);
-    assert.ok(destinationProject?.children.some((child) => child.id === path.join(board, `_default/done/${stem}/index.md`)));
+    assert.ok(destinationProject?.children.some((child) => child.id === path.join(board, `_default/done/${stem}/INDEX.md`)));
     await assert.rejects(access(path.join(board, "_default/done/AGENTS.md")));
   } finally {
     await rm(root, { recursive: true, force: true });

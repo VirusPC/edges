@@ -31,10 +31,12 @@ import {
   projectDirName,
   type TaskProjectId,
 } from "../../domain/models/tasks/project.js";
+import { isLeafEntryName } from "../../domain/models/layout.js";
 import {
   boardRoot,
   parseTarget,
   sidecarRelPath,
+  legacyTaskRelPath,
   taskRelPath,
 } from "./paths.js";
 import {
@@ -185,8 +187,20 @@ async function readListItem(
   fs: BoardFs,
   providedNode?: TaskNode,
 ): Promise<ListedTask> {
-  const rel = taskRelPath(project, status, stem, repoPath);
+  let rel = taskRelPath(project, status, stem, repoPath);
+  if (
+    !providedNode &&
+    !(await fs.exists(path.join(scopeDir(repoPath), rel)))
+  )
+    rel = legacyTaskRelPath(project, status, stem, repoPath);
   const sidecarRel = sidecarRelPath(project, status, stem, repoPath);
+  if (providedNode) {
+    const actual = path.relative(
+      realpathSync(scopeDir(repoPath)),
+      providedNode.path,
+    );
+    if (actual && !actual.startsWith("..")) rel = actual;
+  }
   const abs = path.join(scopeDir(repoPath), rel);
   const sidecarAbs = path.join(scopeDir(repoPath), sidecarRel);
   const markdown = providedNode?.serialize() ?? await fs.readFile(abs);
@@ -317,7 +331,7 @@ export async function getTask(
     const abs = path.isAbsolute(target)
       ? target
       : path.join(scopeDir(repoPath), target);
-    if (path.basename(abs) !== "index.md" || !(await fs.exists(abs))) {
+    if (!isLeafEntryName(path.basename(abs)) || !(await fs.exists(abs))) {
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
     }
     const rel = path.relative(

@@ -2,6 +2,7 @@ import { readEntry, saveEntries } from '../node/node-files.js';
 import { canonicalPath, findAncestor } from "../../utils/filesystem.js";
 import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import * as fs from "node:fs";
+import { ENTRY_NAMES, LEGACY_LEAF_ENTRY } from "../../domain/models/layout.js";
 import { join, dirname, relative, resolve } from "node:path";
 import { assertPrivateIgnored } from "./ignore.js";
 import { parseDocument } from "../../utils/markdown/document.js";
@@ -359,7 +360,8 @@ export function listTypeFiles(
         continue;
       }
     } else if (isDirectory(child) && item.startsWith(`${name}_`)) {
-      candidate = join(child, "index.md");
+      candidate = join(child, ENTRY_NAMES.leaf);
+      if (!isFile(candidate)) candidate = join(child, LEGACY_LEAF_ENTRY);
       if (!isFile(candidate)) continue;
     } else {
       continue;

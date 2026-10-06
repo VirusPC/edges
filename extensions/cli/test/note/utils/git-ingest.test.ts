@@ -44,7 +44,7 @@ function refreshDirectoryOnPull(repo: string, calls: string[][]): ExecFn {
     calls.push([file, ...args]);
     if (file === "git" && args[0] === "pull") {
       mkdirSync(directory, { recursive: true });
-      writeFileSync(path.join(directory, "index.md"), "# Base branch note\n");
+      writeFileSync(path.join(directory, "INDEX.md"), "# Base branch note\n");
     }
     return {
       stdout:
@@ -69,7 +69,7 @@ test("uses the directory note that appears during Git refresh when format is imp
 
   assert.equal(
     result.filePath,
-    "notes/2026-09-11--hello-world/index.md",
+    "notes/2026-09-11--hello-world/INDEX.md",
   );
   assert.equal(
     readFileSync(path.join(repo, result.filePath), "utf8"),
@@ -83,7 +83,7 @@ test("uses the directory note that appears during Git refresh when format is imp
     calls.some(
       (call) =>
         call[1] === "add" &&
-        call[2] === "notes/2026-09-11--hello-world/index.md",
+        call[2] === "notes/2026-09-11--hello-world/INDEX.md",
     ),
   );
 });
@@ -92,12 +92,12 @@ test("rejects whole-directory import when Git refresh supplies the directory not
   const repo = fixture(t);
   const resources = realpathSync(fixture(t));
   writeFileSync(path.join(resources, "asset.txt"), "asset bytes");
-  writeFileSync(path.join(resources, "index.md"), "# Imported");
+  writeFileSync(path.join(resources, "INDEX.md"), "# Imported");
   const calls: string[][] = [];
   await assert.rejects(
     () =>
       runNoteIngest(
-        { ...input, importEntry: path.join(resources, "index.md") },
+        { ...input, importEntry: path.join(resources, "INDEX.md") },
         { repoPath: repo, baseBranch: "main", mode: "direct", dryRun: false },
         {},
         { exec: refreshDirectoryOnPull(repo, calls), now },
@@ -107,7 +107,7 @@ test("rejects whole-directory import when Git refresh supplies the directory not
 
   const directory = path.join(repo, "notes/2026-09-11--hello-world");
   assert.equal(
-    readFileSync(path.join(directory, "index.md"), "utf8"),
+    readFileSync(path.join(directory, "INDEX.md"), "utf8"),
     "# Base branch note\n",
   );
   assert.equal(existsSync(path.join(directory, "asset.txt")), false);
@@ -132,14 +132,14 @@ test("dry-run direct writes the note, commits, skips checkout/pull/push", async 
 
   assert.equal(
     result.filePath,
-    "notes/2026-09-11--hello-world/index.md",
+    "notes/2026-09-11--hello-world/INDEX.md",
   );
   assert.equal(result.branch, "main");
   assert.equal(result.prStatus, "direct_commit");
   assert.match(result.stdout, /__EDGES_PR_STATUS__=direct_commit/);
   assert.equal(
     readFileSync(
-      path.join(repo, "notes/2026-09-11--hello-world/index.md"),
+      path.join(repo, "notes/2026-09-11--hello-world/INDEX.md"),
       "utf8",
     ),
     "# Hello World\n\n> Ingested on 2026-09-11\n\nBody text\n",
@@ -293,7 +293,7 @@ test("nested Note targets content scope while committing relative to actual Git 
     );
     assert.equal(
       result.filePath,
-      "projects/child/notes/2026-09-11--hello-world/index.md",
+      "projects/child/notes/2026-09-11--hello-world/INDEX.md",
     );
     assert.match(
       await readFile(path.join(root, result.filePath), "utf8"),
@@ -355,7 +355,7 @@ test("nested known Memory import rejects before Git or destination mutation", as
   execFileSync("git", ["init", "-q", repo]);
   const sourceRoot = realpathSync(fixture(t));
   const typeDir = path.join(sourceRoot, ".harness/memory/projects");
-  const source = path.join(typeDir, "group/project_one/index.md");
+  const source = path.join(typeDir, "group/project_one/INDEX.md");
   mkdirSync(path.dirname(source), { recursive: true });
   writeFileSync(
     path.join(typeDir, "AGENTS.md"),
@@ -391,7 +391,7 @@ test("unclassified external entry imports with its resources and commits as Note
   git("config", "user.email", "test@example.com");
   const sourceRoot = realpathSync(fixture(t));
   writeFileSync(
-    path.join(sourceRoot, "index.md"),
+    path.join(sourceRoot, "INDEX.md"),
     "# External\n\nImported body\n",
   );
   writeFileSync(path.join(sourceRoot, "asset.txt"), "bytes");
@@ -399,7 +399,7 @@ test("unclassified external entry imports with its resources and commits as Note
     {
       ...input,
       content: "# External\n\nImported body\n",
-      importEntry: path.join(sourceRoot, "index.md"),
+      importEntry: path.join(sourceRoot, "INDEX.md"),
     },
     { repoPath: repo, baseBranch: "main", mode: "direct", dryRun: true },
     {},
@@ -425,7 +425,7 @@ test('accepts a scope whose directory name begins with two dots', async t => {
   const result = await runNoteIngest(input,
     { repoPath: repo, scopeDir: scope, baseBranch: 'main', mode: 'direct', dryRun: true },
     {}, { exec: recordingExec([]), now });
-  assert.equal(result.filePath, '..draft/notes/2026-09-11--hello-world/index.md');
+  assert.equal(result.filePath, '..draft/notes/2026-09-11--hello-world/INDEX.md');
 });
 
 test('rejects a linked scope that resolves outside its Git repository', async t => {

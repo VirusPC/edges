@@ -1,5 +1,10 @@
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import {
+  ENTRY_NAMES,
+  LEGACY_LEAF_ENTRY,
+  isLeafEntryName,
+} from "../../domain/models/layout.js";
 import { NoteNode } from "../../domain/models/notes/note-node.js";
 
 function notesDir(repo: string): string {
@@ -9,8 +14,8 @@ function notesDir(repo: string): string {
 function entryFile(repo: string, entryPath: string): string {
   const abs = path.resolve(repo, entryPath);
   const root = notesDir(repo);
-  if (!abs.startsWith(root + path.sep) || path.basename(abs) !== "index.md") {
-    throw new Error("note path must be notes/<stem>/index.md");
+  if (!abs.startsWith(root + path.sep) || !isLeafEntryName(path.basename(abs))) {
+    throw new Error("note path must be notes/<stem>/INDEX.md");
   }
   return abs;
 }
@@ -21,7 +26,9 @@ export function listNotes(repo: string) {
   return readdirSync(dir)
     .sort()
     .flatMap((name) => {
-      const file = path.join(dir, name, "index.md");
+      const file = [ENTRY_NAMES.leaf, LEGACY_LEAF_ENTRY]
+        .map((entry) => path.join(dir, name, entry))
+        .find((candidate) => existsSync(candidate)) ?? path.join(dir, name, ENTRY_NAMES.leaf);
       return existsSync(file) ? [{ stem: name, path: path.relative(repo, file) }] : [];
     });
 }

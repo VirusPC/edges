@@ -135,7 +135,7 @@ models/
 | [internal](internal/internal-node.ts) | `internal-node.ts` 管领域引用；`syntax.ts` 转换领域内容与 Markdown 索引；`document.ts` 定义 AgentsDocument；`parse.ts`/`serialize.ts` 保留原文并处理格式；`blocks.ts` 处理受控区块 |
 | [tasks](tasks/task-node.ts) | `types.ts` 放任务枚举、输入及数据类型；`priority.ts`/`project.ts` 放单值规则；`frontmatter.ts`/`task-doc.ts` 适配文档；`task-doc-contract.ts` 单独服务前端与 Schema 生成 |
 | [memory](memory/memory-node.ts) | `memory-node.ts` 管 memoryType；`documents.ts` 管已有记忆字段的读取、兼容和保留 |
-| [layout.ts](layout.ts) | 集中管理 AGENTS.md、SKILL.md、index.md 的识别、章节标记及 harness 路径。它涉及 Tasks 状态目录，因此保留在 models 根层，不伪装成业务无关的 core |
+| [layout.ts](layout.ts) | 集中管理 AGENTS.md、SKILL.md、INDEX.md（兼容旧 index.md）的识别、章节标记及 harness 路径。它涉及 Tasks 状态目录，因此保留在 models 根层，不伪装成业务无关的 core |
 
 ## Model、operations 与 Service 的边界
 

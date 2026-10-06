@@ -1,10 +1,11 @@
+import { ENTRY_NAMES, isLeafEntryName } from "../../domain/models/layout.js";
 import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { typeIndexPath } from './types.js';
 import { assertImportType } from "../import-entry.js";
 import { MemoryNode, SkillNode } from "../../domain/models/index.js";
 import { memoryNodes } from "./service.js";
 import { existsSync, readFileSync } from "node:fs";
-import { relative, resolve, basename } from "node:path";
+import { relative, resolve, basename, dirname, join } from "node:path";
 import { isScope, rejectLegacy, resolveRoot, resolveTarget } from "./paths.js";
 import { ensureLayerTypeGitignore } from "./types.js";
 import {
@@ -54,8 +55,12 @@ export async function rememberMemory(options: RememberMemoryOptions) {
     const expected =
       entryOutputName(options.type, target) === "SKILL.md"
         ? "SKILL.md"
-        : "index.md";
-    if (basename(source) !== expected)
+        : ENTRY_NAMES.leaf;
+    if (
+      expected === "SKILL.md"
+        ? basename(source) !== expected
+        : !isLeafEntryName(basename(source))
+    )
       throw new Error(`${source}: expected ${expected} entry`);
     assertImportType(source, expected === "SKILL.md" ? "skill" : "memory");
     const imported =
@@ -67,17 +72,18 @@ export async function rememberMemory(options: RememberMemoryOptions) {
       imported.memoryType !== options.type
     )
       throw new Error(`${source}: memoryType must be ${options.type}`);
-    ensureLayerTypeGitignore(target, options.type, [file]);
-    await service.import(source, file, { indexGroup: "local" });
+    const destination = join(dirname(file), basename(source));
+    ensureLayerTypeGitignore(target, options.type, [destination]);
+    await service.import(source, destination, { indexGroup: "local" });
     await refreshIndex(target, options.type, service);
     const agentsAction = await syncTargetAgents(target, resolveRoot(target), service);
     return {
       operation: "remember",
       targetDir: target,
       type: options.type,
-      name: entryName(file, options.type, target),
+      name: entryName(destination, options.type, target),
       title: options.title || imported.name,
-      path: relative(target, file),
+      path: relative(target, destination),
       index: relative(target, typeIndexPath(target, options.type)),
       action: "created",
       agentsAction,

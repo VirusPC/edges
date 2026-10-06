@@ -60,7 +60,7 @@ test("remember refreshes index and preserves YAML metadata and origin on update"
     content: "Original",
     originSessionId: "first",
   });
-  const path = ".harness/memory/projects/project_decision/index.md";
+  const path = ".harness/memory/projects/project_decision/INDEX.md";
   put(
     targetDir,
     path,
@@ -80,7 +80,7 @@ test("remember refreshes index and preserves YAML metadata and origin on update"
   assert.match(read(targetDir, path), /license: MIT/);
   assert.match(
     read(targetDir, projectIndex),
-    /\[Decision\]\(<project_decision\/index.md>\) — When deciding/,
+    /\[Decision\]\(<project_decision\/INDEX.md>\) — When deciding/,
   );
   assert.equal((await doctorMemory({ indexGroup: "descendant", targetDir })).remaining.length, 0);
 });
@@ -162,7 +162,7 @@ test("doctor diagnoses without writes and apply repairs foreign agents and stale
   put(targetDir, "AGENTS.md", "# Manual\nKeep this.\n");
   put(
     targetDir,
-    ".harness/memory/projects/project_a/index.md",
+    ".harness/memory/projects/project_a/INDEX.md",
     "---\nname: a\ndescription: test\n---\nBody\n",
   );
   const before = read(targetDir, projectIndex);
@@ -185,7 +185,7 @@ test("source read errors preserve existing indexes and invalid frontmatter remai
   const before = read(targetDir, projectIndex);
   put(
     targetDir,
-    ".harness/memory/projects/project_bad/index.md",
+    ".harness/memory/projects/project_bad/INDEX.md",
     Buffer.from([0xff]),
   );
   assert.equal((await initMemory({ indexGroup: "descendant", targetDir })).complete, false);
@@ -197,7 +197,7 @@ test("source read errors preserve existing indexes and invalid frontmatter remai
   );
   put(
     targetDir,
-    ".harness/memory/projects/project_bad/index.md",
+    ".harness/memory/projects/project_bad/INDEX.md",
     "---\ndescription: unclosed\n",
   );
   assert.ok(

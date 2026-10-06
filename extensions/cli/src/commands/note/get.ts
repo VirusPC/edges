@@ -17,7 +17,7 @@ export function addNoteGetCommand(note: Command, ctx: CliContext): void {
   note
     .command("get")
     .description("Read one note")
-    .argument("<path>", "notes/<stem>/index.md")
+    .argument("<path>", "notes/<stem>/INDEX.md")
     .action((entryPath: string) => {
       try {
         ctx.result = succeed({ command: "note.get", ...getNote(resolveScope(ctx.env), entryPath) });

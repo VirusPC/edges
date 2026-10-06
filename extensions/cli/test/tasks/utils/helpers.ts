@@ -84,8 +84,11 @@ export async function indexTaskFixtureBoard(board: string): Promise<void> {
       let names: string[];
       try { names = await readdir(path.join(dir,status)); } catch { continue; }
       for (const stem of names) {
-        const entry = path.join(dir,status,stem,'index.md');
-        try { await access(entry); } catch { continue; }
+        let entry = '';
+        for (const leaf of ['INDEX.md','index.md']) {
+          try { await access(path.join(dir,status,stem,leaf)); entry = path.join(dir,status,stem,leaf); break; } catch { /* try legacy spelling */ }
+        }
+        if (!entry) continue;
         if (!node.children.some(ref=>ref.id===entry)) node.addChild('local',{id:entry});
       }
     }
@@ -100,7 +103,7 @@ export async function writeIndexedTaskFixture(...args: Parameters<typeof writeFi
   const file = String(args[0]);
   await mkdir(path.dirname(file),{recursive:true});
   await writeFile(...args);
-  const match = file.match(/^(.*\/tasks)\/[^/]+\/(?:backlog|todo|in_progress|in_review|done|blocked|cancelled)\/[^/]+\/index\.md$/);
+  const match = file.match(/^(.*\/tasks)\/[^/]+\/(?:backlog|todo|in_progress|in_review|done|blocked|cancelled)\/[^/]+\/(?:INDEX|index)\.md$/);
   if (match) await indexTaskFixtureBoard(match[1]!);
   else if (path.basename(file)==='AGENTS.md' && path.basename(path.dirname(file))==='tasks') await indexTaskFixtureBoard(path.dirname(file));
 }

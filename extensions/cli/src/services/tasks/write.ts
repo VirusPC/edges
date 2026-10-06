@@ -7,7 +7,12 @@ import { scopeDir, boardRoot, type BoardTarget } from "./paths.js";
 import path from "node:path";
 import { getTask, listProjectIds, type BoardWriter } from "./board.js";
 import { taskBody } from "../../domain/models/tasks/frontmatter.js";
-import { sidecarRelPath, statusDir, taskRelPath } from "./paths.js";
+import {
+  sidecarRelPath,
+  statusDir,
+  taskRelPath,
+  withEntryName,
+} from "./paths.js";
 import { newTaskStem, taskNameSlug } from "../../domain/models/tasks/slug.js";
 import { parseTaskPriority } from "../../domain/models/tasks/priority.js";
 import { parseTaskProject, projectDirName } from "../../domain/models/tasks/project.js";
@@ -210,7 +215,10 @@ export async function updateTask(
 
   let destRel = record.path;
   if (parsedProject !== undefined) {
-    destRel = taskRelPath(parsedProject, record.status, record.stem, repoPath);
+    destRel = withEntryName(
+      taskRelPath(parsedProject, record.status, record.stem, repoPath),
+      record.path,
+    );
     const destSidecarRel = sidecarRelPath(
       parsedProject,
       record.status,

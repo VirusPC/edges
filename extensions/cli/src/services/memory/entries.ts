@@ -1,6 +1,11 @@
 import { InternalNode } from "../../domain/models/internal/internal-node.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
-import { ENTRIES_SECTIONS } from "../../domain/models/layout.js";
+import {
+  ENTRIES_SECTIONS,
+  ENTRY_NAMES,
+  LEGACY_LEAF_ENTRY,
+  isLeafEntryName,
+} from "../../domain/models/layout.js";
 import { listTypeFiles, typeContentDir, typeIndexPath } from './types.js';
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 
@@ -67,7 +72,7 @@ export const entryOutputName = (name: string, target?: string) =>
     : ENTRY_OUTPUT_PATTERN;
 export const entryName = (file: string, name: string, target?: string) =>
   entryOutputName(name, target) === SKILL_OUTPUT_NAME ||
-  basename(file) === "index.md"
+  isLeafEntryName(basename(file))
     ? basename(dirname(file))
     : parse(file).name;
 export const parseFrontmatter = (file: string): Record<string, string> =>
@@ -141,8 +146,12 @@ export function resolveMemoryPath(
     join(directory, `${name}_${normalized}.md`),
     target,
   );
+  const ownedDir = join(directory, `${name}_${normalized}`);
   const owned = assertScopePath(
-    join(directory, `${name}_${normalized}`, "index.md"),
+    !fs.existsSync(join(ownedDir, ENTRY_NAMES.leaf)) &&
+      fs.existsSync(join(ownedDir, LEGACY_LEAF_ENTRY))
+      ? join(ownedDir, LEGACY_LEAF_ENTRY)
+      : join(ownedDir, ENTRY_NAMES.leaf),
     target,
   );
   if (fs.existsSync(flat))

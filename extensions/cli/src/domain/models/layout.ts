@@ -4,8 +4,16 @@ export const ENTRY_NAMES = {
   internal: "AGENTS.md",
   readme: "README.md",
   skill: "SKILL.md",
-  leaf: "index.md",
+  leaf: "INDEX.md",
 } as const;
+/** Pre-migration spelling of the leaf entry; still read everywhere, never created. */
+export const LEGACY_LEAF_ENTRY = "index.md";
+export const LEAF_ENTRY_NAMES: readonly string[] = [
+  ENTRY_NAMES.leaf,
+  LEGACY_LEAF_ENTRY,
+];
+export const isLeafEntryName = (name: string): boolean =>
+  LEAF_ENTRY_NAMES.includes(name);
 export const INTERNAL_SECTIONS = {
   constraints: { heading: "本层硬约束", marker: "project-harness-constraints" },
   localChildren: { heading: "本层系统维护信息", marker: "project-harness-local" },
@@ -45,12 +53,12 @@ const classifiers: DirectoryClassifier[] = [
   (_entry, contract) => (contract?.module === "memory" ? "memory" : undefined),
   (entry) =>
     new RegExp(
-      `(?:^|/)tasks/(?:[^/]+/)*(?:${TASK_STATUSES.join("|")})/[^/]+/index\\.md$`,
+      `(?:^|/)tasks/(?:[^/]+/)*(?:${TASK_STATUSES.join("|")})/[^/]+/(?:INDEX|index)\\.md$`,
     ).test(entry)
       ? "task"
       : undefined,
   (entry) =>
-    /(?:^|\/)notes\/(?:[^/]+\/)+index\.md$/.test(entry) ? "note" : undefined,
+    /(?:^|\/)notes\/(?:[^/]+\/)+(?:INDEX|index)\.md$/.test(entry) ? "note" : undefined,
 ];
 /** Register a directory contract; return a disposer for scoped registrations. */
 export function registerDirectoryClassifier(
@@ -70,7 +78,7 @@ export function identifyNodeType(
   if (filename === ENTRY_NAMES.internal) return "internal";
   if (filename === ENTRY_NAMES.readme) return "readme";
   if (filename === ENTRY_NAMES.skill) return "skill";
-  if (filename !== ENTRY_NAMES.leaf) return undefined;
+  if (!isLeafEntryName(filename)) return undefined;
   for (const classify of classifiers) {
     const type = classify(entryPath, contract);
     if (type !== undefined) return type;
@@ -145,7 +153,7 @@ export function resolveEntryHref(
   } catch {
     return undefined;
   }
-  const names = Object.values(ENTRY_NAMES) as string[];
+  const names = [...Object.values(ENTRY_NAMES), LEGACY_LEAF_ENTRY] as string[];
   if (!names.includes(filename)) return undefined;
   const resolved = resolveHref(entryPath, href);
   if (

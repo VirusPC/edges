@@ -85,7 +85,7 @@ test("remember lists the entry in README project-entries-local and registers it 
   const text = read(dir, ".harness/memory/projects/README.md");
   assert.match(text, /<!-- project-entries-local:start -->\n## 本层内容/);
   assert.equal(
-    text.match(/\]\(<?project_decision\/index\.md>?\)/g)?.length,
+    text.match(/\]\(<?project_decision\/INDEX\.md>?\)/g)?.length,
     1,
   );
   assert.doesNotMatch(text, /project-memory-entries/);

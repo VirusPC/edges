@@ -1,7 +1,7 @@
 import { isWithinPath, findAncestor } from "../../utils/filesystem.js";
 import { WRITE_LOCK_NAME } from "./node-lock.js";
 import { InternalSyntax, type SyntaxReference } from "../../domain/models/internal/syntax.js";
-import { resolveEntryHref } from "../../domain/models/layout.js";
+import { LEAF_ENTRY_NAMES, resolveEntryHref } from "../../domain/models/layout.js";
 /** Filesystem facts and source-preserving relocation; no domain resources. */
 import * as fs from "node:fs";
 import path from "node:path";
@@ -28,7 +28,7 @@ export type Model<T extends BaseNode = BaseNode> = new (file: string) => T;
 export function coLocated(entry: string): boolean {
   return (
     path.basename(entry) === "AGENTS.md" &&
-    ["SKILL.md", "index.md"].some((name) =>
+    ["SKILL.md", ...LEAF_ENTRY_NAMES].some((name) =>
       fs.existsSync(path.join(path.dirname(entry), name)),
     )
   );
@@ -163,6 +163,7 @@ export function rewriteLinks(
   oldEntry: string,
   newEntry: string,
   relocate: (target: string) => string,
+  options: { preserveHref?: boolean } = {},
 ): string {
   const changes: { start: number; end: number; value: string }[] = [];
   const destinations = new WeakMap<Nodes, { start: number; end: number }>();
@@ -215,6 +216,26 @@ export function rewriteLinks(
       const moved = relocate(target);
       if (moved === target && oldEntry === newEntry) return;
       const suffix = href.match(/[?#][\s\S]*$/)?.[0] ?? "";
+      if (
+        options.preserveHref &&
+        oldEntry === newEntry &&
+        path.dirname(moved) === path.dirname(target)
+      ) {
+        // Only the entry filename changed; keep the authored directory spelling.
+        const pathname = href.slice(0, href.length - suffix.length);
+        const name = path.basename(target);
+        if (pathname === name || pathname.endsWith(`/${name}`)) {
+          changes.push({
+            start: span.start,
+            end: span.end,
+            value:
+              pathname.slice(0, pathname.length - name.length) +
+              path.basename(moved) +
+              suffix,
+          });
+          return;
+        }
+      }
       const relative =
         path
           .relative(path.dirname(newEntry), moved)
