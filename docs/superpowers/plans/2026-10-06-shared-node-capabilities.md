@@ -305,12 +305,12 @@ export const typeContentDir = (target: string, name: string): string =>
 - 新 AGENTS 骨架使用 createNodeModel/serializeNode；通用受控区块工具仍服务必要的模板填充，保留非受控正文与换行。不增加新的 Document/IndexService 或 moveBlock 框架。
 - 旧格式只由显式运行的迁移脚本转换；正常写命令若发现会与通用索引冲突的旧标记，返回 migration-required 并给出脚本命令，不能暗中迁移、继续维护旧区块或重复登记。
 
-- [ ] 基线盘点所有 task-projects 标记及其生产者/消费者；代码与测试用例分别处理，不迁移仓库真实内容。Task 3 的 refreshProjectIndex 后续只负责用通用关系接口对齐当前项目引用，不生成专属 Markdown 块。
-- [ ] 先为普通 local 索引加行为用例：创建/更新项目后只有一条通用引用，标题/描述正确；不出现 task-projects 标记；其他关系、约束和非受控正文保留；重复更新幂等。用现有 InternalNode 读取结果断言，而非依赖 Tasks 专属标记。
-- [ ] Tasks 新项目骨架复用 serializeNode(createNodeModel())，保留标题/描述及原 tail。删除 renderTaskProjectsSection、Tasks 专属区块 upsert/迁位分支；相关逻辑仅允许存在于迁移脚本，不让运行时代码 import 脚本。
-- [ ] 更新项目索引时从当前 InternalNode 取得引用，按实际项目入口 id 修改属于本操作的条目，其余原样保留；通过 NodeService.update 保存。新登记项目的分组使用明确的调用参数；不把整个 localChildren 替换为项目列表，也不把 NodeService 自动登记和项目描述更新做成两套索引。
-- [ ] 将 escapeIndexText/encodeIndexPath 原实现迁入 internal/serialize.ts，批量引用修改使用 TS 脚本，删除旧路径。Memory 模板仍校验必需区块，纯区块更新保留外部正文/CRLF；畸形区块返回错误，不自动修复。
-- [ ] 实现独立脚本接口：默认 --check 只输出显式 --root 范围内候选和差异；--write 才应用。跳过 Git/依赖目录、符号链接和受保护的 posts；不扫描范围外路径，不自动运行全仓迁移。批量写入前全量检查冲突并保留可恢复原文；写操作使用既有锁/快照/原子保存机制，不自写另一套。
+- [x] 基线盘点所有 task-projects 标记及其生产者/消费者；代码与测试用例分别处理，不迁移仓库真实内容。Task 3 的 refreshProjectIndex 后续只负责用通用关系接口对齐当前项目引用，不生成专属 Markdown 块。
+- [x] 先为普通 local 索引加行为用例：创建/更新项目后只有一条通用引用，标题/描述正确；不出现 task-projects 标记；其他关系、约束和非受控正文保留；重复更新幂等。用现有 InternalNode 读取结果断言，而非依赖 Tasks 专属标记。
+- [x] Tasks 新项目骨架复用 serializeNode(createNodeModel())，保留标题/描述及原 tail。删除 renderTaskProjectsSection、Tasks 专属区块 upsert/迁位分支；相关逻辑仅允许存在于迁移脚本，不让运行时代码 import 脚本。
+- [x] 更新项目索引时从当前 InternalNode 取得引用，按实际项目入口 id 修改属于本操作的条目，其余原样保留；通过 NodeService.update 保存。新登记项目的分组使用明确的调用参数；不把整个 localChildren 替换为项目列表，也不把 NodeService 自动登记和项目描述更新做成两套索引。
+- [x] 将 escapeIndexText/encodeIndexPath 原实现迁入 internal/serialize.ts，批量引用修改使用 TS 脚本，删除旧路径。Memory 模板仍校验必需区块，纯区块更新保留外部正文/CRLF；畸形区块返回错误，不自动修复。
+- [x] 实现独立脚本接口：默认 --check 只输出显式 --root 范围内候选和差异；--write 才应用。跳过 Git/依赖目录、符号链接和受保护的 posts；不扫描范围外路径，不自动运行全仓迁移。批量写入前全量检查冲突并保留可恢复原文；写操作使用既有锁/快照/原子保存机制，不自写另一套。
 
 目标用法（待实施）：
 
@@ -319,10 +319,10 @@ pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root
 pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root /absolute/scope --write
 ~~~
 
-- [ ] 迁移时解析唯一完整的旧区块，将链接转为普通 local 引用，按解析后的入口 id 去重；仅去掉旧标记与可识别的机器提示，保留自定义正文、链接标题/描述及其他章节。与已有引用分组或描述冲突、链接无法识别、重复/半缺失/逆序标记时明确报告该文件，不猜测或静默覆盖。全部成功迁移的文件再次 --check 不产生差异。
-- [ ] 迁移测试覆盖旧区块在 local 内/外、已有相同引用、冲突引用、自定义正文、CRLF、畸形标记；检查预览不写、重复执行幂等、源文件在预览后变化时报错。正常 Tasks 测试覆盖旧格式得到迁移提示，迁移后同一操作成功。旧“自动搬区块”测试改为脚本测试，不继续约束正常命令。
-- [ ] 回归运行：pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/models/internal.test.ts test/tasks/utils/project-meta.test.ts test/tasks/owner-board.test.ts test/tasks/agents-index-migration.test.ts test/memory/core.test.ts test/memory/distribution.test.ts。
-- [ ] 提交统一格式及脚本，附 Co-authored-by；不在本次实现时自动迁移真实仓库内容。
+- [x] 迁移时解析唯一完整的旧区块，将链接转为普通 local 引用，按解析后的入口 id 去重；仅去掉旧标记与可识别的机器提示，保留自定义正文、链接标题/描述及其他章节。与已有引用分组或描述冲突、链接无法识别、重复/半缺失/逆序标记时明确报告该文件，不猜测或静默覆盖。全部成功迁移的文件再次 --check 不产生差异。
+- [x] 迁移测试覆盖旧区块在 local 内/外、已有相同引用、冲突引用、自定义正文、CRLF、畸形标记；检查预览不写、重复执行幂等、源文件在预览后变化时报错。正常 Tasks 测试覆盖旧格式得到迁移提示，迁移后同一操作成功。旧“自动搬区块”测试改为脚本测试，不继续约束正常命令。
+- [x] 回归运行：pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/models/internal.test.ts test/tasks/utils/project-meta.test.ts test/tasks/owner-board.test.ts test/tasks/agents-index-migration.test.ts test/memory/core.test.ts test/memory/distribution.test.ts。
+- [x] 提交统一格式及脚本，附 Co-authored-by；不在本次实现时自动迁移真实仓库内容。
 
 ## Task 3：业务写操作统一经过 NodeService
 
@@ -349,9 +349,9 @@ update<T extends BaseNode>(node: T, input: Parameters<T['update']>[0]): Promise<
 
 Service 内可以实例化具体 Model 作为 create 的目标参数；这不等于绕过 Service 创建文件。CLI/Skills 提交业务参数；不让它们自行 new/parse/update 模型或拼接“先修改，再保存”的流程。本轮不为隐藏一个构造器另改所有 NodeService 方法签名。
 
-- [ ] 先运行本任务列出的现有 service / tasks / memory / note 测试，记录基线。已有服务冲突、身份和恢复合同不应因本轮代码整理而变化。
-- [ ] Memory 原文件改名 service.ts，保留 memoryNodes 的 readOnlyReference/assertWrite；把加载前检查抽成 prepareMemoryWrite。删除 MemoryDocument/loadMemoryDocument/saveMemoryDocument，全部消费者改为直接获取节点并调用 NodeService.create/update。重复批量 import/命名变更使用临时 TypeScript 脚本。
-- [ ] 修改内存节点之前，通过 Service 加载现有对象和快照。现有文档更新走 input，不先 node.parse(source) 或 node.body = source：
+- [x] 先运行本任务列出的现有 service / tasks / memory / note 测试，记录基线。已有服务冲突、身份和恢复合同不应因本轮代码整理而变化。
+- [x] Memory 原文件改名 service.ts，保留 memoryNodes 的 readOnlyReference/assertWrite；把加载前检查抽成 prepareMemoryWrite。删除 MemoryDocument/loadMemoryDocument/saveMemoryDocument，全部消费者改为直接获取节点并调用 NodeService.create/update。重复批量 import/命名变更使用临时 TypeScript 脚本。
+- [x] 修改内存节点之前，通过 Service 加载现有对象和快照。现有文档更新走 input，不先 node.parse(source) 或 node.body = source：
 
 ```ts
 // Memory 业务 Service 内；NodeService 本身调用 InternalNode.parse/validate。
@@ -366,8 +366,8 @@ if (node) {
 ```
 
 这里 entryPath/start/end/block/template 来自对应操作已有参数、标记和模板。完整模板含 frontmatter 时，用现有 parseDocument 得到 metadata/body 作为 create input；不把整篇含头 Markdown 当 body。已有节点只修改正文时不覆盖未知 metadata。
-- [ ] Memory.remember 保留 fields/provenance 生成与未知 metadata 合并规则，用模型对应的结构化 input 调用 update/create；完整 Markdown 导入继续 NodeService.import。init/add-type/refreshIndex 同一目标视图可传递同一个 service；跨 owner 的 syncIndexEntry 为明确的独立视图，不建立全局 Service。
-- [ ] Tasks 项目/看板/owner 入口先通过 projectNodes 加载，再生成输入并更新。projectNodes managedRoot 为 canonical scope；assertWrite 只允许当前 board 内节点及精确匹配、已存在的 scope/AGENTS.md；board 仍执行 assertBoardPath。缺失 owner 不创建。ownerBoardChange 的独立 raw FileChange 写入移除，关系更新经 Service.update 的 InternalUpdateInput 提交。
+- [x] Memory.remember 保留 fields/provenance 生成与未知 metadata 合并规则，用模型对应的结构化 input 调用 update/create；完整 Markdown 导入继续 NodeService.import。init/add-type/refreshIndex 同一目标视图可传递同一个 service；跨 owner 的 syncIndexEntry 为明确的独立视图，不建立全局 Service。
+- [x] Tasks 项目/看板/owner 入口先通过 projectNodes 加载，再生成输入并更新。projectNodes managedRoot 为 canonical scope；assertWrite 只允许当前 board 内节点及精确匹配、已存在的 scope/AGENTS.md；board 仍执行 assertBoardPath。缺失 owner 不创建。ownerBoardChange 的独立 raw FileChange 写入移除，关系更新经 Service.update 的 InternalUpdateInput 提交。
 
 ```ts
 // owner 已通过同一 service 加载；保留已有其他关系，不直接 owner.addChild。
@@ -382,12 +382,12 @@ await service.update(owner, {
 
 该示例仅展示调用方明确选择 local 后的执行路径；同样支持显式 descendant。位置由 LLM 决定，CLI 不按 purpose 推导或自动改组。不要借示例重新排序无变化的引用。新建项目自动维护 board 索引后，后续刷新从同一 Service 对象取当前 body，不能沿用创建前字符串。
 
-- [ ] 将 LLM/调用方明确选择的位置从 CLI 输入传递至业务 Service 和通用登记操作；已有 localChildren/descendantChildren 是最终关系表达，复用现有 ChildGroup，不引入新位置模型。删除 Tasks 根据 purpose 自动选组/改组的分支。需要新建 owner 引用但未提供位置时在任何写入前返回参数错误；已有引用更新未显式要求移动时保留原分组。根节点或独立 harness 关系不虚构父级 children 登记。
-- [ ] 回归：对同一合法目录入口，显式 local 与 descendant 均按输入登记，purpose 不改变选择；缺少必要位置时无文件写入；重复更新保持原位置及标签/链接拼写；非法路径、组成环等仍报错。同一用例内复用 Service，缺失 owner 不自动创建。
+- [x] 将 LLM/调用方明确选择的位置从 CLI 输入传递至业务 Service 和通用登记操作；已有 localChildren/descendantChildren 是最终关系表达，复用现有 ChildGroup，不引入新位置模型。删除 Tasks 根据 purpose 自动选组/改组的分支。需要新建 owner 引用但未提供位置时在任何写入前返回参数错误；已有引用更新未显式要求移动时保留原分组。根节点或独立 harness 关系不虚构父级 children 登记。
+- [x] 回归：对同一合法目录入口，显式 local 与 descendant 均按输入登记，purpose 不改变选择；缺少必要位置时无文件写入；重复更新保持原位置及标签/链接拼写；非法路径、组成环等仍报错。同一用例内复用 Service，缺失 owner 不自动创建。
 - [x] 移动未登记节点保持未登记，不自动推断 descendant；已有登记移动仍保留原分组。由真实跨父目录移动用例验证，不新增 public reparent 或扩大 move 参数。
-- [ ] TaskNode CRUD 已经走 NodeService，保持其现有接口；run log/附件仍是资源。project-meta 的 AGENTS 保存不得再调用 BoardWriter.writeFile；BoardWriter 继续用于业务盘点和资源，不增加第二套节点持久化。
-- [ ] Note 保留 Git 操作顺序与现有 NodeService.create/update/import；去掉重复保存机制即可，不强迫经过新的公共 helper。校验草稿在业务 Service 内仍可使用 Model，但只由 NodeService 更新受管节点和文件。不得提前到 checkout/pull 之前加载。
-- [ ] `.gitignore` 的原子写改用既有文件 IO，删除 Memory.writeAtomic 及无用导入。保持模式和私有类型准备顺序：
+- [x] TaskNode CRUD 已经走 NodeService，保持其现有接口；run log/附件仍是资源。project-meta 的 AGENTS 保存不得再调用 BoardWriter.writeFile；BoardWriter 继续用于业务盘点和资源，不增加第二套节点持久化。
+- [x] Note 保留 Git 操作顺序与现有 NodeService.create/update/import；去掉重复保存机制即可，不强迫经过新的公共 helper。校验草稿在业务 Service 内仍可使用 Model，但只由 NodeService 更新受管节点和文件。不得提前到 checkout/pull 之前加载。
+- [x] `.gitignore` 的原子写改用既有文件 IO，删除 Memory.writeAtomic 及无用导入。保持模式和私有类型准备顺序：
 
 ```ts
 const before = readEntry(ignorePath);
@@ -399,9 +399,9 @@ if (missing.length) {
 }
 ```
 
-- [ ] 为实际业务调用补充至少一个回归：createProject → updateProject 后，项目正文 tail、board 的外部索引与 owner 自定义约束保持，缺失 owner 仍缺失。用已有 project/owner-board fixture，保留返回值和路径断言；继续运行已有文件漂移/创建竞争/保存失败恢复用例。
-- [ ] GREEN：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/services/node-service.test.ts test/services/shared-node-state.test.ts test/services/node-files-atomic.test.ts test/tasks/project.test.ts test/tasks/owner-board.test.ts test/memory/core-boundaries.test.ts test/memory/adoption.test.ts test/note/utils/git-ingest.test.ts`。
-- [ ] 提交：`git commit -m "refactor: route node writes through services" -m "Co-authored-by: Codex <noreply@openai.com>"`。
+- [x] 为实际业务调用补充至少一个回归：createProject → updateProject 后，项目正文 tail、board 的外部索引与 owner 自定义约束保持，缺失 owner 仍缺失。用已有 project/owner-board fixture，保留返回值和路径断言；继续运行已有文件漂移/创建竞争/保存失败恢复用例。
+- [x] GREEN：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/services/node-service.test.ts test/services/shared-node-state.test.ts test/services/node-files-atomic.test.ts test/tasks/project.test.ts test/tasks/owner-board.test.ts test/memory/core-boundaries.test.ts test/memory/adoption.test.ts test/note/utils/git-ingest.test.ts`。
+- [x] 提交：`git commit -m "refactor: route node writes through services" -m "Co-authored-by: Codex <noreply@openai.com>"`。
 
 ## Task 4：直接复用 NodeService.query
 
@@ -414,7 +414,7 @@ if (missing.length) {
 - Consumes existing `NodeService.query(scopePath: string, options?: NodeQueryOptions): AsyncQuery<BaseNode>`。
 - Produces no new公共接口；删除 repositoryNodeQuery，保留 Tasks 专用 listRepositoryTaskNodes 与布局归属函数。
 
-- [ ] 给现有 NodeService 测试增加混合类型及惰性断言。下列测试自行创建 fixture，不依赖其他测试状态；imports 使用现有同名 fs/path/test/assert/tmpdir 或补齐。
+- [x] 给现有 NodeService 测试增加混合类型及惰性断言。下列测试自行创建 fixture，不依赖其他测试状态；imports 使用现有同名 fs/path/test/assert/tmpdir 或补齐。
 
 ```ts
 test('generic query supports all types and explicit task-only deferred execution', async t => {
@@ -443,8 +443,8 @@ test('generic query supports all types and explicit task-only deferred execution
 });
 ```
 
-- [ ] 基线：`pnpm --filter edges-cli exec node --test --import tsx test/services/node-service.test.ts`。这些能力已存在，预期通过；迁移不要求改写查询算法。
-- [ ] Tasks 的 listRepositoryTaskNodes 直接使用以下调用；NodeService 构造保留在业务 Service 内：
+- [x] 基线：`pnpm --filter edges-cli exec node --test --import tsx test/services/node-service.test.ts`。这些能力已存在，预期通过；迁移不要求改写查询算法。
+- [x] Tasks 的 listRepositoryTaskNodes 直接使用以下调用；NodeService 构造保留在业务 Service 内：
 
 ```ts
 const canonicalRoot = fs.realpathSync(root);
@@ -454,9 +454,9 @@ return service.query(canonicalRoot, {
 }).filter((node): node is TaskNode => node instanceof TaskNode).value();
 ```
 
-- [ ] grouped.ts 的全仓项目发现使用同一 query API，显式 `types: ['internal']`；删除 repositoryNodeQuery 的定义和导入。boardLocationOf/taskLocationOf/projectLocationOf、CLI Git-root 发现保持 Tasks 业务职责。不新增 services/node-query.ts，不改变默认 query 的 local 范围。
-- [ ] GREEN：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/services/node-service.test.ts test/tasks/all-scopes.test.ts test/tasks/node-query.test.ts test/operations/async-query.test.ts test/operations/traverse.test.ts`。覆盖局部板、全仓双方用途、重复引用、叶子 harness、未登记目录与惰性链。
-- [ ] 提交：`git commit -m "refactor: reuse node service queries directly" -m "Co-authored-by: Codex <noreply@openai.com>"`。
+- [x] grouped.ts 的全仓项目发现使用同一 query API，显式 `types: ['internal']`；删除 repositoryNodeQuery 的定义和导入。boardLocationOf/taskLocationOf/projectLocationOf、CLI Git-root 发现保持 Tasks 业务职责。不新增 services/node-query.ts，不改变默认 query 的 local 范围。
+- [x] GREEN：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/services/node-service.test.ts test/tasks/all-scopes.test.ts test/tasks/node-query.test.ts test/operations/async-query.test.ts test/operations/traverse.test.ts`。覆盖局部板、全仓双方用途、重复引用、叶子 harness、未登记目录与惰性链。
+- [x] 提交：`git commit -m "refactor: reuse node service queries directly" -m "Co-authored-by: Codex <noreply@openai.com>"`。
 
 ## Task 5：从 TS 契约生成 TaskDoc Schema，提供 CLI 获取命令
 
