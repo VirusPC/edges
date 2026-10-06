@@ -1,6 +1,6 @@
 # Tasks、Memory、Note 通用能力收敛
 
-状态：待实施；本次根据用户对文件过散的质疑及 Service 边界的纠正重新梳理。保留四项收敛目标，补充已确认的 Schema 生成与获取；替代上一版新增文档包装和查询包装的方案。
+状态：执行中；本次根据用户对文件过散的质疑及 Service 边界的纠正重新梳理。保留四项收敛目标，补充已确认的 Schema 生成与获取；替代上一版新增文档包装和查询包装的方案。
 
 ## 目标
 
@@ -129,21 +129,21 @@ Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Not
 
 ## Schema 生成、校验与获取
 
-后续建议待确认：完整 TaskDoc JSON 入口以生成 Schema 为校验标准，改为共享 Ajv 运行时校验，替代下文上一版“只放宽未知 metadata、Ajv 仅测试”的步骤。Markdown 与创建参数不混用该完整文档契约；确认后同步依赖与分发验收。
+本轮执行采用 Schema 为准：完整 TaskDoc JSON 输入共享生成 Schema + Ajv 校验，删除两个入口各自的字段判断；Ajv/formats 是运行时依赖，生成器仍是开发依赖。以下约束以此裁定为准。
 
 按 ADR 0025 实施 TaskDoc 首个契约：普通 TS 数据类型及公共枚举是定义源，生成器只在构建期运行；JSON Schema 与最小清单输出到 dist/schemas/，不提交 Git，随 CLI 包分发。保留旧 v1 的字段、开放 metadata 与约束，显式验证 draft-07 与原 2020-12 的接受/拒绝语义，不能只改方言标签或静默收窄契约。
 
 新增 edges schema list 和 edges schema get task-doc/v1。list 返回 key/id/title/description；get 直接输出 Schema。命令仅从安装包相对路径读取产物，不解析 scope、不取锁、不等待 stdin、不回退源码或现场生成。未知 key、无效参数及产物缺失时 stderr 报错并非零退出，不能输出业务命令的 JSON 错误包装。
 
-Ajv 8 与 ajv-formats 3 先用于兼容性测试，关闭 coerceTypes/useDefaults/removeAdditional。不在 schema get 中执行校验，不把完整 TaskDoc 输出契约用于校验可省略字段的原始 Markdown。后续生产校验必须选用用途匹配的契约。
+Ajv 8 与 ajv-formats 3 用于完整 TaskDoc JSON 输入及兼容性测试，关闭 coerceTypes/useDefaults/removeAdditional。不在 schema get 中执行校验，不把完整 TaskDoc 输出契约用于校验可省略字段的原始 Markdown。grouped/review-page 共用同一 TaskDoc 校验函数，其他输入须选用途匹配的契约。
 
 审阅页切换到纯契约公共常量/类型，去掉手写 JSON 路径与内联 properties 假设；消费者的独立 dev/build/test/typecheck 不依赖残留 dist。通过兼容性验收后删除旧手写 Schema。干净构建、重复生成确定性、仓库外无源码及开发依赖的分发包 list/get 都是验收项。选型、替代路线、探针及采用依据保留在 ADR 0025。
 
-grouped/review-page 的 TaskDoc JSON 输入适配器也纳入迁移：旧 Schema 允许未知 metadata 的 JSON 值，但现有适配器一律要求字符串，应修复此既有差异，验证对象、数组、数字、布尔、null 均无损通过。Markdown parser 的现有标量行为不变；不借机强制对所有旧输入执行完整 Schema 校验。
+grouped/review-page 的 TaskDoc JSON 输入适配器也纳入迁移：旧 Schema 允许未知 metadata 的 JSON 值，但现有适配器一律要求字符串，应修复此既有差异，验证对象、数组、数字、布尔、null 均无损通过。Markdown parser 的现有标量行为不变；完整 TaskDoc 输入以 Schema 为准，其他契约保持原有行为。
 
 ## 全局约束
 
-- TypeScript；Node >=22，以 Node 22 作为运行、构建和测试基线；不新增独立 package。Task 5 增加 ts-json-schema-generator 2.9.0、Ajv 8、ajv-formats 3 开发依赖；无明确生产校验边界时不增加运行时校验依赖。
+- TypeScript；Node >=22，以 Node 22 作为运行、构建和测试基线；不新增独立 package。Task 5 增加 ts-json-schema-generator 2.9.0 开发依赖及 Ajv 8、ajv-formats 3 运行时依赖；仅在适用的数据边界校验。
 - 仅在独立 worktree 修改；不迁移仓库真实内容或用户私有数据。
 - 创建、更新、删除、导入与持久化通过 Service 协调；Model 保留纯内存领域行为。
 - 保留 NodeService 内同路径单实例、原地更新与实际受影响节点保存语义。
