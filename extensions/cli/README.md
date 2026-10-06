@@ -92,7 +92,7 @@ AGENTS 的本层硬约束、本层记忆、下层索引分别对应 constraints�
 
 ### 查询遵循索引
 
-NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认只走 localChildren；includeDescendants 才进入下层组，includeHarness 才沿维护关系递归。
+NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认走全部组成 children（local∪descendants）；显式 `localOnly` 才只走 localChildren；includeHarness 才沿维护关系递归。
 
 ```ts
 const pending = service.query(scope, { types: ["task"] })

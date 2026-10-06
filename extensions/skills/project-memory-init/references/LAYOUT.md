@@ -13,7 +13,7 @@
 ├── AGENTS.md
 ├── .harness/
 │   ├── memory/<plural>/README.md
-│   │                  └── <type>_<slug>/index.md
+│   │                  └── <type>_<slug>/INDEX.md
 │   └── skills/
 │       ├── managed/README.md
 │       │           └── <name>/SKILL.md
@@ -39,7 +39,7 @@ edges --scope S memory init --root-dir R \
 
 | type | 模块与入口（相对作用域） | 正文与权限 |
 | --- | --- | --- |
-| `user` | `.harness/memory/users/README.md` | `user_<slug>/index.md`；正文和索引整类 gitignore |
+| `user` | `.harness/memory/users/README.md` | `user_<slug>/INDEX.md`；正文和索引整类 gitignore |
 | `feedback` | `.harness/memory/feedbacks/README.md` | 用户纠正、有效做法和禁止模式 |
 | `project` | `.harness/memory/projects/README.md` | 接手背景、决策、约定；不记可从代码推出的事实 |
 | `reference` | `.harness/memory/references/README.md` | 资料指针 |
@@ -67,7 +67,7 @@ edges --scope S memory add-type \
 
 `remember --type managed --slug my-method --description '用途' --content '步骤'` 写本地 Skill。`referenced` 不接受 remember，即使元数据尝试开启 writable 也报错；`managed` 必须保持 writable: true 与 format: skills，元数据尝试改成只读或普通条目格式同样报错。类型与条目的真实路径必须留在选定 owner 内；受管容器、索引与写入路径上的符号链接不扩大权限。日常命令不更改安装链接。
 
-每类只扫描当前来源的直接条目：普通记忆 `<type>_*/index.md`，Skill 格式 `*/SKILL.md`。不递归吸收子作用域或全机技能。只读安装根可链接外部来源；本地内容不能越出所属 type。每类内部按 realpath 去重，同名不同真源保留；同一真源同时属于 managed 和 referenced 时两份入口各自保留。
+每类只扫描当前来源的直接条目：普通记忆 `<type>_*/INDEX.md`，Skill 格式 `*/SKILL.md`。不递归吸收子作用域或全机技能。只读安装根可链接外部来源；本地内容不能越出所属 type。每类内部按 realpath 去重，同名不同真源保留；同一真源同时属于 managed 和 referenced 时两份入口各自保留。
 
 缺失、断链、无法读取/解码来源不是成功空扫描。init 返回 `complete: false` 和 `diagnostics`（含 `source-scan-error`）；doctor 在 findings/remaining 保留此诊断，刷新保持已有索引原字节。初次选择 referenced 时可以创建类型入口，但来源缺失仍报告不完整，绝不代建 `.agents/skills`。存在且可读的空来源才是成功的空清单。格式缺陷由 doctor 报 `invalid-entry`，不改原位正文；frontmatter 必须有起止分隔符，未闭合时即使出现 description 也不算有效。
 
@@ -93,6 +93,6 @@ edges --scope S memory add-type \
 
 ## 统一目录节点与显式导入
 
-普通记忆、Task、Note 只识别目录内 index.md；Skill 使用 SKILL.md，name 必须是 1–64 字符小写 kebab-case，description 非空。AGENTS 的 local/descendant 是发现组成，两组不重叠；同目录内容的 AGENTS 是 harness，不是内容的 parent。资源与 harness 随整个内容目录移动，不成为 children。未受控正文保留。
+普通记忆、Task、Note 只识别目录内 INDEX.md（读兼容 index.md）；Skill 使用 SKILL.md，name 必须是 1–64 字符小写 kebab-case，description 非空。AGENTS 的 local/descendant 是发现组成，两组不重叠；同目录内容的 AGENTS 是 harness，不是内容的 parent。资源与 harness 随整个内容目录移动，不成为 children。未受控正文保留。
 
 新建不提供 file/directory 选项。remember 的 --import-entry 指向 canonical 入口，验证完整目录后整体复制；与 --content/--content-file 冲突，不修改来源。旧单文件通过仓库维护命令 pnpm migrate:directory-nodes --root <worktree> 显式预览，--apply 才执行，只迁移 tracked/public 内容。普通运行不读取旧单文件为节点；Doctor 不代为转换，不读取或迁移真实私有内容。
