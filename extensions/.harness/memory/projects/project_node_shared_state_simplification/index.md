@@ -1,12 +1,12 @@
 ---
 name: project_node_shared_state_simplification
-description: 简化 NodeService 时：共享实例；同级 operations 统一树遍历与泛型查询链；工作树锁、原子保存与冲突检查的取舍。
+description: 简化 NodeService 时：共享实例；同级 operations 按文件拆分通用树遍历与查询操作；工作树锁和原子保存的取舍。
 metadata:
   edges-title: 节点共享状态与职责简化
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T12:35:25+08:00'
+  edges-updated-at: '2026-10-06T12:40:44+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -33,8 +33,8 @@ metadata:
 
 ## 树操作的目录归属
 
-用户最终确认采用通用布局：src/operations/ 与 models、services 同级，包含 traverse.ts 和 async-query.ts。替代此前仅收树操作的 models/operations 子目录建议。
+用户最终确认本轮只迁通用方法，Tasks 专用操作保持原位；采用通用布局：src/operations/ 与 models、services 同级，包含 traverse.ts、query.ts 与独立算法文件。替代此前仅收树操作的 models/operations 子目录建议。
 
 **Why:** 用户指出除了 traverse，还应统一组织 filter、map、groupBy、find 等可组合操作。统一目录便于发现整条操作链，同时通用集合查询不应归为 Node 专用模型能力。
 
-**How to apply:** traverse 依赖节点模型、由 Service 注入加载；async-query 保持泛型和显式 value 求值，更新全部导入及运行时/类型测试，不保留旧路径转发文件。锁放 services/node-lock.ts，原子保存放已有 services/node-files.ts，保持薄封装。具体完成状态以实施计划为准。
+**How to apply:** traverse 依赖节点模型、由 Service 注入加载；query 保持泛型和显式 value 求值；filter、map、groupBy、find 等算法分别放独立文件，由 query 组合且不反向依赖查询链，更新全部导入及运行时/类型测试，不保留旧路径转发文件。锁放 services/node-lock.ts，原子保存放已有 services/node-files.ts，保持薄封装。具体完成状态以实施计划为准。

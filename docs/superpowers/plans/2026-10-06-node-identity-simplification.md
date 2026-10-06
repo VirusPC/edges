@@ -27,7 +27,7 @@
 - 同目录 index.md 与 AGENTS.md 仍是不同节点；parent、localChildren、descendantChildren、harness、目录生命周期及外部只读合同不变。
 - 纯树算法归 operations；Service 通过现有 resolve/load 回调提供引用边界和加载。operations/traverse 不导入 services、文件 IO 或 NodeCache。
 - query、登记节点收集、拟提交图校验复用同一树算法，各自关系范围、删除检查、计划草稿覆盖和错误处理不变；不新增公共 enter/shouldEnter。
-- 通用 filter/map/groupBy/find 随 async-query.ts 从 utils 移至 operations，继续泛型化；不改变链式惰性语义、不扩大算法种类。
+- 通用查询链从 utils/async-query.ts 迁入 operations/query.ts，各算法拆为独立文件，继续泛型化；不改变链式惰性语义、不扩大算法种类。
 - 本轮只迁通用方法；Tasks 等业务专用操作不抽取、不搬迁，仅更新对通用 operations 的引用。
 - 不新增 NodeTree、事务/session 框架、事件总线、dirty 合并替代物、OS 权限系统、公共 reload API 或流处理库。
 - 只在独立 worktree 修改；不读取私有 users/journal，不改 posts、Obsidian workspace 或真实节点内容；不运行会进入真实私有索引的根全仓查询。
@@ -45,7 +45,7 @@
 | `extensions/cli/src/services/node-service.ts` | 共用实例及完整状态计划；成功回填；通过加载/范围适配复用 operations 遍历 |
 | `extensions/cli/src/services/traverse.ts` → `extensions/cli/src/operations/traverse.ts` | 移动纯树算法；单根/多根共用 DFS、去重和环检测；删除旧实现，不保留第二份 |
 | `extensions/cli/src/operations/index.ts` | 导出 traverse 和泛型查询 API；内部直接模块导入，避免 barrel 循环依赖 |
-| `extensions/cli/src/utils/async-query.ts` → `extensions/cli/src/operations/async-query.ts` | 移动泛型惰性查询链，更新全部生产及测试消费者；删除旧文件，不留转发副本 |
+| `extensions/cli/src/utils/async-query.ts` → `extensions/cli/src/operations/query.ts` | 查询链与独立算法文件分开，更新全部生产及测试消费者；删除旧文件，不留转发副本 |
 | `extensions/cli/test/utils/async-query.{test,types}.ts` → `extensions/cli/test/operations/async-query.{test,types}.ts` | 保留运行时及类型断言，同步 strict 验证路径 |
 | `extensions/cli/test/operations/traverse.test.ts` | 纯内存模型及加载回调验证次序、关系范围、惰性、环、多根和提前结束 |
 | `extensions/cli/src/services/node-layout.ts` | 仅在模型选择需要共用既有逻辑时调整；不改变 layout/路径/引用协议 |
@@ -168,7 +168,7 @@ git diff --check
 
 ## Task 2：将树遍历和查询链集中到 operations 并复用递归内核
 
-**Files:** 移动 `extensions/cli/src/services/traverse.ts` 到 `extensions/cli/src/operations/traverse.ts`；新增 operations/index.ts；移动 utils/async-query.ts 及其 test/types 到对应 operations 目录，并用 TS 脚本更新全部消费者；修改 services/node-service.ts；新增 test/operations/traverse.test.ts；补强 test/services/node-service.test.ts、owned-units.test.ts 和 test/tasks/node-query.test.ts。
+**Files:** 移动 `extensions/cli/src/services/traverse.ts` 到 `extensions/cli/src/operations/traverse.ts`；新增 operations/index.ts；将 utils/async-query.ts 拆为 operations/query.ts、filter.ts、map.ts、find.ts、group-by.ts、map-values.ts、to-array.ts，并移动其 test/types 到 operations 测试目录，并用 TS 脚本更新全部消费者；修改 services/node-service.ts；新增 test/operations/traverse.test.ts；补强 test/services/node-service.test.ts、owned-units.test.ts 和 test/tasks/node-query.test.ts。
 
 **Interfaces:**
 
@@ -215,7 +215,7 @@ test("multiple roots share traversal identity and load on demand", async () => {
 ```
 
 在 extensions/cli 运行 `node --test --import tsx test/operations/traverse.test.ts`；预期先因 operations/traverse 尚不存在失败。补充单根前序、默认 local、显式 descendant/harness、菱形去重、跨根环、types 仅筛结果不误剪父节点、resolve 返回 undefined、load 报错、break 后无额外 load 用例。
-- [ ] **Step 2：移动现有算法，最小扩展根集合。** 将 seen/active 放在一次 traverse 调用内，内部 visit 沿用既有流程；外层按根顺序调用 visit。单根等价于一元素集合，不为每个根重建 seen/active。traverse 直接导入 ../models 下的 base-node/internal-node/types/relations，operations/index.ts 导出遍历及泛型查询 API；内部不反向导入自身 barrel。用可重复执行的 TS 脚本迁移 async-query 及测试并更新所有引用；不保留 utils 转发文件，不把查询链改为 Node 专用类型。
+- [ ] **Step 2：移动现有算法，最小扩展根集合。** 将 seen/active 放在一次 traverse 调用内，内部 visit 沿用既有流程；外层按根顺序调用 visit。单根等价于一元素集合，不为每个根重建 seen/active。traverse 直接导入 ../models 下的 base-node/internal-node/types/relations，operations/index.ts 导出遍历及泛型查询 API；内部不反向导入自身 barrel。用可重复执行的 TS 脚本迁移查询链、拆出算法、移动测试并更新所有引用。query.ts 保留 fluent interfaces 和薄的 deferred/collection/object 链式适配；filter/map/find/group-by/map-values/to-array 各文件承载对应算法，不反向导入 query.ts；保留延迟求值及可重复执行，不保留 async-query 转发文件，不把查询链改为 Node 专用类型。
 
 ```ts
 // 放在同一次遍历的 seen/active 和 visit 定义之后。
