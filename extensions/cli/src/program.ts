@@ -13,6 +13,7 @@ import { addArtifactsCommand } from "./commands/artifacts.js";
 import { addNoteCommand } from "./commands/note.js";
 import { addTasksCommand } from "./commands/tasks.js";
 import { addMemoryCommand } from "./commands/memory.js";
+import { addSkillCommand } from "./commands/skill.js";
 import { acquireWriteLock } from "./services/node-lock.js";
 import { VERSION } from "./utils/version.js";
 
@@ -100,6 +101,7 @@ function addRootCommand(
   addNoteCommand(program, ctx);
   addTasksCommand(program, ctx);
   addMemoryCommand(program, ctx);
+  addSkillCommand(program, ctx);
   addArtifactsCommand(program, ctx);
   addSchemaCommand(program, ctx);
   program.addHelpText("after", ROOT_AFTER_HELP);

@@ -69,14 +69,17 @@ test("run tasks get/create/update/status/runs/run-messages", async () => {
   }
 });
 
-test("run has no delete command", async () => {
-  const result = await run(["tasks", "--index-group", "local", "delete", "stem"]);
+test("run tasks delete points at status cancelled and does not require a board", async () => {
+  const result = await run(["tasks", "delete", "2026-09-11--cli"]);
   assert.equal(result.exitCode, 2);
-  assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
+  const body = JSON.parse(result.stdout) as { status: string; errorCode: string; reason: string };
+  assert.equal(body.status, "failed");
+  assert.equal(body.errorCode, "VALIDATION_ERROR");
+  assert.match(body.reason, /edges tasks status 2026-09-11--cli cancelled/);
 });
 
-test("run rejects tasks delete, log, and missing subcommand", async () => {
-  for (const argv of [["tasks"], ["tasks", "delete", "x"], ["tasks", "log", "x"]] as string[][]) {
+test("run rejects tasks log and a missing subcommand", async () => {
+  for (const argv of [["tasks"], ["tasks", "log", "x"]] as string[][]) {
     const result = await run(argv);
     assert.equal(result.exitCode, 2);
     assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");

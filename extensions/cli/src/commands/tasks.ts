@@ -1,6 +1,7 @@
 import { Command, Option } from "commander";
 import { type CliContext, usageError } from "../context.js";
 import { addCreateCommand } from "./tasks/create.js";
+import { addDeleteCommand } from "./tasks/delete.js";
 import { addGetCommand } from "./tasks/get.js";
 import { addListCommand } from "./tasks/list.js";
 import { addRunMessagesCommand } from "./tasks/run-messages.js";
@@ -20,6 +21,8 @@ COMMANDS
   get <stem|path>
   create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project]
   update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project]
+  delete <stem|path>
+    Does not delete files. Run: edges tasks status <stem|path> cancelled
   status <stem|path> <edges-tasks-status>
   runs <stem|path> [--output table|json]
   run-messages <run-id> [--task <stem>] [--output table|json]
@@ -35,7 +38,7 @@ Issue layer stdout is JSON. runs / run-messages default to a table; pass --outpu
 list --group-by project emits edges.tasks.grouped/v1 ({ schema, groups[], items[] }).
 
 Cancel a Task with: edges tasks status <stem> cancelled
-There is no delete command.
+delete only prints that command. It does not remove the Task file or sidecar.
 
 Run layer is read-only (no append).
 classifyTasks Skill (extensions/skills/project-tasks-classify) uses these project verbs plus update --project.
@@ -65,6 +68,7 @@ export function addTasksCommand(program: Command, ctx: CliContext): void {
   addListCommand(tasks, ctx);
   addGetCommand(tasks, ctx);
   addCreateCommand(tasks, ctx);
+  addDeleteCommand(tasks, ctx);
   addUpdateCommand(tasks, ctx);
   addProjectCommand(tasks, ctx);
   addStatusCommand(tasks, ctx);

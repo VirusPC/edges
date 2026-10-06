@@ -2,6 +2,7 @@ import { Command } from 'commander';
 import { type CliContext, usageError } from '../context.js';
 import { addMemoryInitCommand } from './memory/init.js';
 import { addMemoryRememberCommand } from './memory/remember.js';
+import { addMemoryCreateCommand, addMemoryUpdateCommand } from './memory/hint.js';
 import { addMemoryAddTypeCommand } from './memory/add-type.js';
 import { addMemoryDoctorCommand } from './memory/doctor.js';
 import { addMemoryBackupCommand } from './memory/backup.js';
@@ -13,6 +14,8 @@ export function addMemoryCommand(program: Command, ctx: CliContext): void {
   memory.action(() => { ctx.result = usageError('missing memory command. Use edges memory --help.', 'memory'); });
   addMemoryInitCommand(memory, ctx);
   addMemoryRememberCommand(memory, ctx);
+  addMemoryCreateCommand(memory, ctx);
+  addMemoryUpdateCommand(memory, ctx);
   addMemoryAddTypeCommand(memory, ctx);
   addMemoryDoctorCommand(memory, ctx);
   addMemoryBackupCommand(memory, ctx);
