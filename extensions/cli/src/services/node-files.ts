@@ -2,6 +2,7 @@
  * contract for model snapshots; never infer an AGENTS filename here. */
 import * as fs from 'node:fs';
 import path from 'node:path';
+import writeFileAtomic from 'write-file-atomic';
 import { randomUUID } from 'node:crypto';
 import { absolute } from '../utils/filesystem.js';
 
@@ -104,13 +105,34 @@ export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFi
       if (change.source === change.before?.source) { result.set(change.path, change.before); continue; }
       fs.mkdirSync(path.dirname(change.path), { recursive: true });
       checkPath(change.path);
+      if (change.before) {
+        let after: EntryFile | undefined;
+        writeFileAtomic.sync(change.path, change.source, {
+          mode: change.before.mode,
+          tmpfileCreated(temporary) {
+            // Capture the replacement inode before rename. Keep a descriptor so
+            // recovery accounting does not depend on reopening after commit.
+            checkPath(temporary);
+            const fd = fs.openSync(temporary, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
+            descriptors.set(change.path, fd);
+            const info = fs.fstatSync(fd);
+            after = { path: change.path, source: change.source!, device: info.dev, inode: info.ino,
+              mode: change.before!.mode, realPath: change.before!.realPath,
+              realDirectory: fs.realpathSync(path.dirname(temporary)) };
+            validateChange(change);
+          },
+        });
+        applied.push({ change, after: after! });
+        validateSaved(after!);
+        result.set(change.path, after!);
+        continue;
+      }
       const temporary = path.join(path.dirname(change.path), `.node-${randomUUID()}.tmp`);
       try {
         const fd = fs.openSync(temporary, fs.constants.O_RDWR | fs.constants.O_CREAT | fs.constants.O_EXCL | fs.constants.O_NOFOLLOW,
-          change.before?.mode ?? change.createMode ?? 0o666);
+          change.createMode ?? 0o666);
         descriptors.set(change.path, fd);
         fs.writeFileSync(fd, change.source, 'utf8');
-        if (change.before) fs.fchmodSync(fd, change.before.mode);
         const info = fs.fstatSync(fd);
         const staged: EntryFile = { path: temporary, source: change.source, device: info.dev, inode: info.ino,
           mode: info.mode & 0o777, realPath: fs.realpathSync(temporary), realDirectory: fs.realpathSync(path.dirname(temporary)) };
@@ -119,14 +141,9 @@ export function saveEntries(changes: readonly FileChange[]): Map<string, EntryFi
         const after: EntryFile = { ...staged, path: change.path,
           realPath: path.join(staged.realDirectory, path.basename(change.path)) };
         validateChange(change);
-        if (change.before) {
-          fs.renameSync(temporary, change.path);
-          applied.push({ change, after });
-        } else {
-          fs.linkSync(temporary, change.path);
-          applied.push({ change, after });
-          fs.unlinkSync(temporary);
-        }
+        fs.linkSync(temporary, change.path);
+        applied.push({ change, after });
+        fs.unlinkSync(temporary);
       } finally { fs.rmSync(temporary, { force: true }); }
       const after = applied[applied.length - 1]!.after!;
       validateSaved(after);

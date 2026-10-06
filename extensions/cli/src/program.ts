@@ -10,6 +10,7 @@ import { addArtifactsCommand } from "./commands/artifacts.js";
 import { addNoteCommand } from "./commands/note.js";
 import { addTasksCommand } from "./commands/tasks.js";
 import { addMemoryCommand } from "./commands/memory.js";
+import { acquireWriteLock } from "./services/node-lock.js";
 import { VERSION } from "./utils/version.js";
 
 export type { CliContext, CliInput, CliResult };
@@ -44,7 +45,9 @@ function captureCommanderText() {
   };
 }
 
-type CommanderTextConfigure = ReturnType<typeof captureCommanderText>["configure"];
+type CommanderTextConfigure = ReturnType<
+  typeof captureCommanderText
+>["configure"];
 
 function applyOutput(cmd: Command, output: CommanderTextConfigure): void {
   cmd.configureOutput(output);
@@ -60,11 +63,18 @@ function applyExitOverride(cmd: Command): void {
   }
 }
 
-function addRootCommand(ctx: CliContext, output: CommanderTextConfigure): Command {
+function addRootCommand(
+  ctx: CliContext,
+  output: CommanderTextConfigure,
+  beforeWrite?: (target: string) => Promise<void>,
+): Command {
   const program = new Command();
   program
     .name("edges")
-    .option("--scope <directory>", "Target content scope (default: EDGES_SCOPE, EDGES_REPO, or cwd owner)")
+    .option(
+      "--scope <directory>",
+      "Target content scope (default: EDGES_SCOPE, EDGES_REPO, or cwd owner)",
+    )
     .description("Edges CLI: notes, tasks, artifacts, and more")
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help")
@@ -73,9 +83,11 @@ function addRootCommand(ctx: CliContext, output: CommanderTextConfigure): Comman
     .showSuggestionAfterError(false)
     .helpCommand(false);
 
-  program.hook("preAction", () => {
+  program.hook("preAction", async (_program, command) => {
     const scope = program.opts<{ scope?: string }>().scope;
     if (scope !== undefined) ctx.env = { ...ctx.env, EDGES_SCOPE: scope };
+    const target = commandWriteTarget(command, ctx.env);
+    if (target !== undefined) await beforeWrite?.(target);
   });
 
   program.action(() => {
@@ -91,6 +103,34 @@ function addRootCommand(ctx: CliContext, output: CommanderTextConfigure): Comman
   return program;
 }
 
+/** Inventory of content mutations. rootDir limits traversal; targetDir/repoDir
+ * select the actual scope. Artifacts operations do not use the node repository. */
+function commandWriteTarget(
+  command: Command,
+  env: NodeJS.ProcessEnv,
+): string | undefined {
+  const name = command.name(),
+    parent = command.parent?.name();
+  const options = command.opts();
+  const writes =
+    (parent === "edges" && name === "note") ||
+    (parent === "tasks" && ["create", "update", "status"].includes(name)) ||
+    (parent === "project" &&
+      command.parent?.parent?.name() === "tasks" &&
+      ["create", "update"].includes(name)) ||
+    (parent === "memory" &&
+      (["init", "add-type", "remember", "restore"].includes(name) ||
+        (name === "doctor" && options.apply) ||
+        (name === "migrate" && !options.dryRun)));
+  if (!writes) return undefined;
+  return (
+    (parent === "memory"
+      ? (options.targetDir ?? options.repoDir)
+      : undefined) ??
+    (env.EDGES_SCOPE?.trim() || env.EDGES_REPO?.trim() || process.cwd())
+  );
+}
+
 function helpText(text: string): string {
   if (text.trim().length === 0) {
     return formatHelp();
@@ -100,7 +140,10 @@ function helpText(text: string): string {
 
 export function formatHelp(): string {
   const capture = captureCommanderText();
-  const program = addRootCommand({ env: process.env, result: undefined }, capture.configure);
+  const program = addRootCommand(
+    { env: process.env, result: undefined },
+    capture.configure,
+  );
   program.outputHelp();
   const text = capture.text();
   return text.endsWith("\n") ? text : `${text}\n`;
@@ -110,7 +153,10 @@ export function formatHelp(): string {
  * Root-only: invoke the command tree as a process. Leaves and groups do not
  * have a sibling `run.ts`; they register on a parent and execute in `.action`.
  */
-export async function run(argv: string[], input: CliInput = {}): Promise<CliResult> {
+export async function run(
+  argv: string[],
+  input: CliInput = {},
+): Promise<CliResult> {
   if (argv[0] === "ingest") {
     return usageError("ingest was renamed to note. Use: edges note …", "root");
   }
@@ -122,14 +168,20 @@ export async function run(argv: string[], input: CliInput = {}): Promise<CliResu
     result: undefined,
   };
   const capture = captureCommanderText();
-  const program = addRootCommand(ctx, capture.configure);
+  let release: (() => Promise<void>) | undefined;
+  const program = addRootCommand(ctx, capture.configure, async (target) => {
+    release = await acquireWriteLock(target);
+  });
   applyExitOverride(program);
 
   try {
     await program.parseAsync(argv, { from: "user" });
   } catch (err) {
     if (err instanceof CommanderError) {
-      if (err.code === "commander.helpDisplayed" || err.code === "commander.help") {
+      if (
+        err.code === "commander.helpDisplayed" ||
+        err.code === "commander.help"
+      ) {
         return { exitCode: 0, stdout: helpText(capture.text()), stderr: "" };
       }
       if (err.code === "commander.version") {
@@ -140,7 +192,19 @@ export async function run(argv: string[], input: CliInput = {}): Promise<CliResu
     }
     const message = err instanceof Error ? err.message : String(err);
     return usageError(message, usageScope(argv));
+  } finally {
+    try {
+      await release?.();
+    } catch (error) {
+      return usageError(
+        `Node write lock release failed: ${String(error)}`,
+        usageScope(argv),
+      );
+    }
   }
 
-  return ctx.result ?? usageError("missing command. Use edges --help.", usageScope(argv));
+  return (
+    ctx.result ??
+    usageError("missing command. Use edges --help.", usageScope(argv))
+  );
 }
