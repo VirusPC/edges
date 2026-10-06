@@ -52,7 +52,7 @@ export async function generateTasksSite(input: {
         ...(item.doc ? { doc: item.doc } : {}),
         ...(item.source
           ? {
-              id: `${String((item.source as { scope: string }).scope)}:${String((item.source as { purpose: string }).purpose)}:${String(item.stem)}`,
+              id: `${String((item.source as { scope: string }).scope)}:${String((item.source as { purpose: string }).purpose)}:${String(item.project)}:${String(item.stem)}`,
               source: item.source,
               project: item.project,
             }
