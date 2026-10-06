@@ -213,16 +213,16 @@ test("Doctor diagnoses overlapping ownership groups without choosing an authored
     "AGENTS.md",
     read(root, "AGENTS.md")
       .replace(
-        "<!-- project-memory-local:end -->",
-        `${localLine}\n<!-- project-memory-local:end -->`,
+        "<!-- project-harness-local:end -->",
+        `${localLine}\n<!-- project-harness-local:end -->`,
       )
       .replace(
-        "<!-- project-memory:end -->",
-        "<!-- project-memory-children:start -->\n## 下层记忆索引\n\n- [Descendant](owned/AGENTS.md) — Old descendant description.\n- [Duplicate](owned/AGENTS.md) — Duplicate description.\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->",
+        "<!-- project-harness:end -->",
+        "<!-- project-harness-descendants:start -->\n## 下层节点\n\n- [Descendant](owned/AGENTS.md) — Old descendant description.\n- [Duplicate](owned/AGENTS.md) — Duplicate description.\n<!-- project-harness-descendants:end -->\n<!-- project-harness:end -->",
       ),
   );
   const beforeLocal = read(root, "AGENTS.md").match(
-    /<!-- project-memory-local:start -->[\s\S]*?<!-- project-memory-local:end -->/,
+    /<!-- project-harness-local:start -->[\s\S]*?<!-- project-harness-local:end -->/,
   )![0];
   const result = await doctorMemory({ indexGroup: "descendant", targetDir: root, apply: true });
   assert.ok(
@@ -233,7 +233,7 @@ test("Doctor diagnoses overlapping ownership groups without choosing an authored
   );
   assert.equal(
     read(root, "AGENTS.md").match(
-      /<!-- project-memory-local:start -->[\s\S]*?<!-- project-memory-local:end -->/,
+      /<!-- project-harness-local:start -->[\s\S]*?<!-- project-harness-local:end -->/,
     )![0],
     beforeLocal,
   );
@@ -297,8 +297,8 @@ test("doctor repairs independent valid index while retaining invalid sibling and
   put(root, "broken/AGENTS.md", broken);
   put(root, "broken/child/AGENTS.md", "# Child");
   const agents = read(root, "AGENTS.md").replace(
-    "<!-- project-memory:end -->",
-    "<!-- project-memory-children:start -->\n- [Broken](broken/AGENTS.md) — retain\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->",
+    "<!-- project-harness:end -->",
+    "<!-- project-harness-descendants:start -->\n- [Broken](broken/AGENTS.md) — retain\n<!-- project-harness-descendants:end -->\n<!-- project-harness:end -->",
   );
   put(root, "AGENTS.md", agents);
   const result = await doctorMemory({ indexGroup: "descendant",

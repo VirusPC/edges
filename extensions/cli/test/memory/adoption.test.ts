@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import { InternalNode } from "../../src/domain/models/internal/internal-node.js";
 import { initMemory, doctorMemory } from "../../src/services/memory/index.js";
 import { layerTypeSpecs } from "../../src/services/memory/types.js";
+import { rewriteLayerSurface } from "../../src/domain/models/internal/blocks.js";
 function fixture(t: any) {
   const root = fs.realpathSync(
     fs.mkdtempSync(join(tmpdir(), "memory-adoption-")),
@@ -27,7 +28,10 @@ for (const [kind, href] of [
     fs.writeFileSync(join(root, "AGENTS.md"), text);
     assert.deepEqual((await doctorMemory({ indexGroup: "descendant", targetDir: root })).findings, []);
     await doctorMemory({ indexGroup: "descendant", targetDir: root, apply: true });
-    assert.equal(fs.readFileSync(join(root, "AGENTS.md"), "utf8"), text);
+    assert.equal(
+      fs.readFileSync(join(root, "AGENTS.md"), "utf8"),
+      rewriteLayerSurface(text),
+    );
     fs.unlinkSync(join(root, ".harness/memory/projects/AGENTS.md"));
     assert.deepEqual(
       layerTypeSpecs(root).map((spec) => spec.name),
@@ -39,7 +43,10 @@ for (const [kind, href] of [
       findings.some((f) => f.code === "unregistered-type"),
       false,
     );
-    assert.equal(fs.readFileSync(join(root, "AGENTS.md"), "utf8"), text);
+    assert.equal(
+      fs.readFileSync(join(root, "AGENTS.md"), "utf8"),
+      rewriteLayerSurface(text),
+    );
   });
 }
 for (const kind of ["descendant", "prose", "local-prose"] as const)

@@ -20,7 +20,7 @@ Task、Memory、Note 等统一采用目录与 `index.md` 入口，标准 Skill �
 
 ## 递归树结构
 
-每个 Markdown 入口对应一个节点：BaseNode 下分 InternalNode 与 LeafNode，Task、Memory、Skill 等继承 LeafNode。AGENTS.md 是组织入口，沿用**本层硬约束、本层记忆、下层记忆索引**三部分，对应约束及两组直属索引 `localChildren`、`descendantChildren`；Task Project 等材料也在其中登记。
+每个 Markdown 入口对应一个节点：BaseNode 下分 InternalNode 与 LeafNode，Task、Memory、Skill 等继承 LeafNode。AGENTS.md 是组织入口，沿用**本层硬约束、本层组成、下层节点**三部分，对应约束及两组直属索引 `localChildren`、`descendantChildren`；Task Project 等材料也在其中登记。
 
 父归属遵循文件目录，一个节点至多一个 parent。索引可以跨目录层级发现节点，普通交叉引用不增加 parent。引用仅含路径派生的 id 和可选 name、description。默认展开本层组成索引，显式选择后再展开下层索引。
 

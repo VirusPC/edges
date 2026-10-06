@@ -2,9 +2,8 @@
 
 edges CLI/脚手架/发布/鉴权等平台层。
 
-<!-- project-memory-local:start -->
-## 本层记忆
-
+<!-- project-harness-local:start -->
+## 本层组成
 - [CLI与MCP需加鉴权](<backlog/2026-09-09--CLI%E4%B8%8EMCP%E9%9C%80%E5%8A%A0%E9%89%B4%E6%9D%83/index.md>) — CLI 与 MCP 后续需要加鉴权（产品/基建待办）
 - [system\_project\_or\_user\_home](<backlog/2026-09-12--%E7%B3%BB%E7%BB%9F%E5%8F%AF%E8%B7%9F%E9%A1%B9%E7%9B%AE%E6%88%96%E6%8C%82%E7%94%A8%E6%88%B7%E7%9B%AE%E5%BD%95/index.md>) — 系统很通用：可跟随项目，也可放到用户目录（tasks 可做用户级）；像 Claude Code auto memory 的扩展
 - [project\_memory\_scripts\_to\_edges\_cli](<backlog/2026-09-13--project-memory%E8%84%9A%E6%9C%AC%E8%BF%81%E5%88%B0edges-CLI/index.md>) — 把 project\-memory\-init/remember/ask/doctor 等 Python scripts 迁到 edges CLI
@@ -17,4 +16,4 @@ edges CLI/脚手架/发布/鉴权等平台层。
 - [edges\_cli\_scope](<done/2026-10-01--%E4%B8%BA-Edges-CLI-%E5%BB%BA%E7%AB%8B%E7%BB%9F%E4%B8%80%E7%9A%84%E5%B7%A5%E4%BD%9C-scope-%E8%A7%A3%E6%9E%90/index.md>) — 基于递归记忆模型，先解析本次工作 scope，再确定操作归属、适用上下文和读写位置，使共享 CLI 能力可服务不同作用域。
 
 - [commands\-service\-decoupling](<backlog/2026-10-06--%E8%A7%A3%E8%80%A6-CLI-commands-%E4%B8%8E-Service/index.md>) — 明确命令适配与完整业务用例的边界，移除 Service 对 CLI 上下文的依赖，整理审阅页与 Artifacts 编排。
-<!-- project-memory-local:end -->
+<!-- project-harness-local:end -->

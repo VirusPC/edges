@@ -18,4 +18,4 @@ AGENTS.md 层入口三章是 Project Harness（Git 项目上的系统二写法�
 
 **Why:** 三章服务于系统二，不是 Project Memory 目录。旧标题「本层记忆」已经装不下 tasks / evaluation / observation。type / entries 只给工具读写类型目录，没有同样的名实冲突，不跟这轮绑在一起。用户 2026-10-06 确认：只改表面、前缀用 `project-harness`、类型标记不动。
 
-**How to apply:** 改协议/模板/codec 时按 [设计](../../../../docs/superpowers/specs/2026-10-06-project-harness-layer-markers-design.md)。读兼容旧 `project-memory` 层标记，写只发新标记。不要改 type/entries 前缀，不要改 `.harness/` 目录名，不要重划三章职责。blocks.ts 的标记工厂必须拆开层前缀与类型前缀。
+**How to apply:** 改协议/模板/codec 时按 [设计](../../../../docs/superpowers/specs/2026-10-06-project-harness-layer-markers-design.md)。读兼容旧 `project-memory` 层标记，写只发新标记。存量用 `pnpm migrate:project-harness-markers -- --root <作用域>` 预览，加 `--apply` 写入。不要改 type/entries 前缀，不要改 `.harness/` 目录名、skill 名 `project-memory-*` 或 `edges memory` 命令名，不要重划三章职责。blocks.ts 的标记工厂必须拆开层前缀与类型前缀。

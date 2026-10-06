@@ -2,33 +2,19 @@
 
 
 
-<!-- project-memory-important:start -->
+<!-- project-harness-constraints:start -->
 ## 本层硬约束
 
 - 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
 - 本层硬约束直接写在这个区块里，不要通过记忆正文链接代替本区块的硬约束。
-<!-- project-memory-important:end -->
+<!-- project-harness-constraints:end -->
 
 
 
 
 
-<!-- project-memory-local:start -->
-## 本层记忆
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<!-- project-harness-local:start -->
+## 本层组成
 - [.harness/memory/feedbacks/AGENTS.md](<.harness/memory/feedbacks/AGENTS.md>) — 用户的纠正、确认过的做法与必须遵守的禁止模式。
 - [.harness/memory/projects/AGENTS.md](<.harness/memory/projects/AGENTS.md>) — 进行中的工作、关键时间点，无法从代码或 git 历史推导的决策，以及项目内的规范。兜底：对不上更具体类型时走这里。
 - [.harness/memory/references/AGENTS.md](<.harness/memory/references/AGENTS.md>) — 需求文档、设计稿、接口文档、监控面板等外部资料。
@@ -44,4 +30,4 @@
 - [Project Memory](<project-memory/AGENTS.md>) — Project Memory 类型/索引/reshape/与 docs 边界等。
 - [Site and Content](<site-and-content/AGENTS.md>) — 站点/posts/badge/内容整理检索。
 - [技术阅读](<tech-reading/AGENTS.md>) — 记录所有技术阅读相关进展（论文、长文、官方文档、源码精读等）。看板管阅读工作项与进度；可读笔记仍可落 notes。
-<!-- project-memory-local:end -->
+<!-- project-harness-local:end -->

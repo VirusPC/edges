@@ -162,7 +162,7 @@ if (
   import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href
 ) {
   try {
-    const args = process.argv.slice(2);
+    const args = process.argv.slice(2).filter((arg) => arg !== "--");
     const at = args.indexOf("--root");
     if (
       at < 0 ||
