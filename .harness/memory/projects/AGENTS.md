@@ -74,7 +74,7 @@ format: ordinary
 
 - [递归系统二：系统入口 AGENTS.md 带组成登记](<project_recursive_system_two_entry/index.md>) — 改节点模型、AGENTS.md、Project Harness 或 layout 时打开：核心是递归系统二；系统入口为 AGENTS.md 且必须带组成登记；从 scope 系统入口经登记可达才算节点；无 isLeaf；Task/Note/Skill 由登记挂入。曾议 AGENTS 不带 entries 已否。谁必须有真实 AGENTS 见 grill Q10。
 
-- [虚拟超节点用于个人根与个人任务查询](<project_virtual_system_entry_personal_root/index.md>) — 设计个人任务或无 AGENTS.md 的主体根时打开：默认 scope/AGENTS.md；显式 \-\-super 启用不落盘虚拟超节点（上一级），挂顶层入口后再遍历。勿用 virtual\-root 旧名。
+- [虚拟超节点用于个人根与个人任务查询](<project_virtual_system_entry_personal_root/index.md>) — 设计个人任务或无 AGENTS.md 的主体根时：默认 scope/AGENTS.md；显式 \-\-super 启用 SuperAgentsNode（继承 AgentsNode，不落盘）。勿用 VirtualSuperNode。
 
 - [grill：README entries、任意目录 init、叶子 INDEX.md](<project_grill_system_entry_q9b_q10_q11/index.md>) — 续节点模型 grill：Q9b 根 README 增 entries 供 \-\-super 虚拟超节点下钻；Q10 任意目录用户 init；Q11 虚拟超节点另卡；Q12 组织清单 README、内容叶子 INDEX.md。
 
@@ -88,11 +88,13 @@ format: ordinary
 
 - [四种入口可组织；README 下层仍 README；虚拟超节点须 \-\-super](<project_grill_arch_all_org_readme_virtual_flag/index.md>) — 改 traverse/架构图时：四入口可组织；README 下层只挂 README；虚拟超节点须显式 \-\-super，默认 scope/AGENTS.md，不因缺 AGENTS 自动合成。
 
-- [BaseNode 直继；type 含 agents/readme/text](<project_grill_basenode_type_agents_readme_text/index.md>) — 改节点类层次或 type 时：取消 Internal/Leaf/internal；各节点直继 BaseNode；type 为 agents\|readme\|task\|memory\|note\|skill\|text；运行时虚拟超节点用 \-\-super，不是落盘 type。
+- [BaseNode 直继；type 含 agents/readme/text](<project_grill_basenode_type_agents_readme_text/index.md>) — 改节点类层次或 type 时：各节点直继 BaseNode；type 含 agents/readme/text；虚拟超节点为 SuperAgentsNode 继承 AgentsNode，用 \-\-super。
 
 - [类型入口统一为 README \+ project\-entries](<project_grill_type_index_as_readme/index.md>) — 改类型索引、init/remember/doctor 或 PROTOCOL 时：类型入口用 README.md（type=readme）\+ project\-entries\-\*；层 AGENTS 链到这些 README；迁移后不用 project\-memory\-entries / 类型目录 AGENTS 当索引。
 
 - [递归系统二 spec 已批准可实施](<project_grill_spec_approved_start_impl/index.md>) — 改节点模型/codec 时：2026\-10\-06 recursive\-system\-two\-entries spec 与 ADR 0029 已获用户批准；按实施计划落地，系统一孩子只进 README entries。
 
-- [虚拟超节点与 \-\-super flag](<project_grill_virtual_super_node_super_flag/index.md>) — 改遍历根或 CLI scope 时：默认用 scope 下 AGENTS.md；显式 \-\-super 启用不落盘的虚拟超节点（上一级）；勿用 virtual\-root/虚拟根/虚拟系统入口作现行对外名。
+- [虚拟超节点与 \-\-super flag](<project_grill_virtual_super_node_super_flag/index.md>) — 改遍历根或 CLI scope 时：默认 scope/AGENTS.md；显式 \-\-super 启用 SuperAgentsNode（继承 AgentsNode，不落盘）；勿用 VirtualSuperNode/virtual\-root。
+
+- [SuperAgentsNode 继承 AgentsNode](<project_grill_super_agents_node_extends_agents/index.md>) — 改虚拟超节点实现时：类名 SuperAgentsNode，继承 AgentsNode；flag 仍 \-\-super；勿用 VirtualSuperNode。
 <!-- project-memory-entries:end -->

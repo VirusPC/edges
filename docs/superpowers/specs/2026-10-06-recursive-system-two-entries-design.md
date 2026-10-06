@@ -78,7 +78,16 @@ classDiagram
     parse / serialize / validate
   }
 
-  class AgentsNode
+  class AgentsNode {
+    <<AGENTS.md>>
+    type = agents
+  }
+  class SuperAgentsNode {
+    <<runtime>>
+    虚拟超节点
+    不落盘
+    --super
+  }
   class ReadmeNode
   class TaskNode
   class MemoryNode
@@ -87,15 +96,10 @@ classDiagram
   class TextNode {
     普通文本内容
   }
-  class VirtualSuperNode {
-    <<runtime only>>
-    虚拟超节点
-    不落盘
-    --super
-  }
 
   NodeReference <|.. BaseNode
   BaseNode <|-- AgentsNode
+  AgentsNode <|-- SuperAgentsNode
   BaseNode <|-- ReadmeNode
   BaseNode <|-- TaskNode
   BaseNode <|-- MemoryNode
@@ -103,10 +107,9 @@ classDiagram
   BaseNode <|-- SkillNode
   BaseNode <|-- TextNode
   BaseNode ..> NodeReference : parent / harness / children
-  VirtualSuperNode ..> NodeReference : 挂顶层入口
 ```
 
-组成能力在基类；组织/叶子由是否有组成登记派生。旧 `type: "internal"` 读兼容，写只发 `agents`。
+组成能力在基类；组织/叶子由是否有组成登记派生。旧 `type: "internal"` 读兼容，写只发 `agents`。`SuperAgentsNode` 继承 `AgentsNode`（同为系统入口形状），无磁盘文件。
 
 ### 3. 同目录双文件 + 同合同下层递归
 
@@ -186,7 +189,7 @@ flowchart TB
 | Q8=A | Task / Note / Memory / Skill 由某系统入口（或组织清单）的组成登记挂入 |
 | Q9 / Q11′=A | **虚拟超节点**不落盘：主体（如「人」）无真实 AGENTS 时用；个人任务查询是用例；实现另卡 |
 | Q9b | Edges 根 `README.md` 增组成登记，指向 `tasks/` 等；`--super` 超节点经此再下钻 |
-| 术语 | 对外名「虚拟超节点」；flag **`--super`**（废止 virtual-root / 虚拟根 / 虚拟系统入口） |
+| 术语 | 对外名「虚拟超节点」；flag **`--super`**；类名 **`SuperAgentsNode` extends `AgentsNode`**（废止 VirtualSuperNode / virtual-root） |
 | Q10 | 任意目录可由用户 init 真实系统入口；配套 **project harness init** skill（演进现 `project-memory-init`） |
 | Q12 | 组织清单 → `README.md`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md` |
 | Q13=A | 同目录双文件：系统一孩子**只**在 README entries；AGENTS **只**挂系统二材料与下级系统入口（遍历核心规则） |
@@ -257,7 +260,7 @@ flowchart TB
 - 不因 scope 无 AGENTS 自动出现。
 - 用途：主体无 AGENTS（个人根）时查询个人相关任务等。
 - 挂载形状：经 Edges 根 README 的组成登记进入仓内树（Q9b）；不在超节点上扁平挂全部 Task 叶子。
-- 实现类名建议 `VirtualSuperNode`。
+- 实现类名：**`SuperAgentsNode` extends `AgentsNode`**（勿用 VirtualSuperNode）。
 
 ## 谁拥有系统入口
 

@@ -66,7 +66,7 @@ flowchart TB
 
 ```mermaid
 flowchart TB
-  VR["VirtualSuperNode<br/>虚拟超节点 · --super"] -.->|挂| RR
+  VR["SuperAgentsNode<br/>虚拟超节点 · --super"] -.->|挂| RR
   Scope["--scope → AGENTS.md<br/>type=agents"] --> Maint["本层系统维护信息<br/>project-harness-local"]
   Scope --> DownA["下层系统维护信息<br/>→ 其它 AGENTS.md"]
   Scope -.同目录.-> RR["README.md<br/>type=readme"]
@@ -106,13 +106,15 @@ classDiagram
   BaseNode <|-- NoteNode
   BaseNode <|-- SkillNode
   BaseNode <|-- TextNode
-  class VirtualSuperNode {
+  class SuperAgentsNode {
     <<runtime>>
+    虚拟超节点
     --super
   }
+  AgentsNode <|-- SuperAgentsNode
 ```
 
-Wave A 允许暂留 `InternalNode` 类名、`type` 仍写 `internal` 读兼容；不得再把系统一孩子写进 AGENTS 组成。
+Wave A 允许暂留 `InternalNode` 类名、`type` 仍写 `internal` 读兼容；不得再把系统一孩子写进 AGENTS 组成。Wave B：`SuperAgentsNode extends AgentsNode`。
 
 ### 4. 同目录双文件（traverse 核心）
 
@@ -571,7 +573,7 @@ EOF
 
 - [ ] **Step 1: 失败测试覆盖两种行为**
 
-- [ ] **Step 2: 实现 VirtualSuperNode（不落盘虚拟超节点）+ `--super` 接线**
+- [ ] **Step 2: 实现 `SuperAgentsNode extends AgentsNode`（不落盘）+ `--super` 接线**
 
 - [ ] **Step 3: commit**
 
@@ -640,4 +642,4 @@ EOF
 | project harness init | 11 |
 | 文档/ADR | 12 |
 
-开放题锁定：类删除（非长期别名，仅允许短暂 re-export）；`project-memory-type` 留 README 顶；flag 名 `--super`（虚拟超节点）。
+开放题锁定：类删除（非长期别名，仅允许短暂 re-export）；`project-memory-type` 留 README 顶；`--super` → `SuperAgentsNode extends AgentsNode`。
