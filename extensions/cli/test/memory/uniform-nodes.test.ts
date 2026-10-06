@@ -97,7 +97,7 @@ test("Doctor preserves sparse generic nodes and registered cross-directory local
     "nested/AGENTS.md",
     "nested/deep/AGENTS.md",
     "unowned/AGENTS.md",
-    ".harness/memory/projects/AGENTS.md",
+    ".harness/memory/projects/README.md",
   ];
   const before = files.map((file) => read(root, file));
   const report = await doctorMemory({ indexGroup: "descendant", targetDir: root, apply: true });
@@ -119,7 +119,7 @@ test("Doctor preserves sparse generic nodes and registered cross-directory local
       join(root, "business/AGENTS.md"),
       join(root, "shared/AGENTS.md"),
       join(root, "nested/deep/AGENTS.md"),
-      join(root, "nested/deep/.harness/memory/projects/AGENTS.md"),
+      join(root, "nested/deep/.harness/memory/projects/README.md"),
     ],
   );
 });
@@ -284,7 +284,7 @@ test("Doctor repairs an adopted child missing AGENTS and its missing registratio
 test("doctor repairs independent valid index while retaining invalid sibling and its reference", async (t) => {
   const root = fixture(t);
   await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
-  const index = ".harness/memory/projects/AGENTS.md";
+  const index = ".harness/memory/projects/README.md";
   put(
     root,
     ".harness/memory/projects/project_new/index.md",

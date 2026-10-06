@@ -7,7 +7,7 @@ import { assertPrivateIgnored } from "./ignore.js";
 import { AGENTS_FILE_NAME, assertScopePath, isFile, isScope, readText, rejectLegacy, resolveTarget, } from "./paths.js";
 import { readIndexTemplate } from "./templates.js";
 import { ensureTypeGitignore, findGitRoot, indexFileName, layerTypeSpecs, typeIndexTemplateName, upsertLocalTypeLine, validateTypeName, } from "./types.js";
-import { refreshIndex } from "./entries.js";
+import { refreshIndex, typeIndexNode } from "./entries.js";
 export interface AddMemoryTypeOptions {
     targetDir: string;
     name: string;
@@ -31,9 +31,10 @@ export async function addMemoryType(options: AddMemoryTypeOptions) {
         throw new Error("add-type 必须提供 --description");
     if (!isScope(target))
         throw new Error("目标目录尚未初始化，请先执行 init");
-    const indexName = indexFileName(name, module), file = assertScopePath(join(target, indexName), target), existing = layerTypeSpecs(target), adopted = existing.find((s) => s.name === name);
-    if (adopted && adopted.indexFile !== indexName)
+    const existing = layerTypeSpecs(target), adopted = existing.find((s) => s.name === name);
+    if (adopted && adopted.module !== module)
         throw new Error("Type already belongs to another module");
+    const indexName = adopted?.indexFile ?? indexFileName(name, module), file = assertScopePath(join(target, indexName), target);
     const conflict = existing.find((s) => s.indexFile === indexName && s.name !== name);
     if (conflict)
         throw new Error(`Type path already belongs to ${conflict.name}: ${indexName}`);
@@ -44,10 +45,10 @@ export async function addMemoryType(options: AddMemoryTypeOptions) {
         assertPrivateIgnored(root ?? target, [file], [dirname(file)]);
     const service = memoryNodes(target);
     const entryPath = prepareMemoryWrite(target, file);
-    const node = await service.get(entryPath, InternalNode);
+    const node = await service.get(entryPath);
     const existed = !!node;
     if (!existed)
-        await service.create(new InternalNode(entryPath), parseDocument(readIndexTemplate(typeIndexTemplateName(name), name, description, {
+        await service.create(typeIndexNode(entryPath), parseDocument(readIndexTemplate(typeIndexTemplateName(name), name, description, {
             module,
             gitignore: String(gitignore),
             writable: String(writable),

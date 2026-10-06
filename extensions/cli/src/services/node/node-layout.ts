@@ -33,6 +33,29 @@ export function coLocated(entry: string): boolean {
     )
   );
 }
+const TYPE_HEADER = "<!-- project-memory-type:start -->";
+const TYPE_DIRECTORY = /(?:^|\/)\.harness\/(?:memory|skills)\/[^/]+$/;
+
+/** A type-index README acts as the physical parent of its entries when no AGENTS.md shares its directory. */
+function isTypeIndexReadme(file: string): boolean {
+  if (TYPE_DIRECTORY.test(path.dirname(file))) return true;
+  try {
+    return fs.readFileSync(file, "utf8").includes(TYPE_HEADER);
+  } catch (error) {
+    if (["ENOENT", "ENOTDIR", "EISDIR"].includes((error as NodeJS.ErrnoException).code ?? ""))
+      return false;
+    throw error;
+  }
+}
+function parentEntryIn(
+  directory: string,
+  exists: (entry: string) => boolean,
+): string | undefined {
+  const agents = path.join(directory, "AGENTS.md");
+  if (exists(agents)) return agents;
+  const readme = path.join(directory, "README.md");
+  return exists(readme) && isTypeIndexReadme(readme) ? readme : undefined;
+}
 export function physicalParent(
   entry: string,
   root: string,
@@ -43,24 +66,39 @@ export function physicalParent(
   if (path.basename(path.dirname(entry)) === ".harness")
     dir = path.dirname(dir);
   if (!isWithinPath(dir, root)) return undefined;
-  const parent = findAncestor(dir, directory => exists(path.join(directory, "AGENTS.md")), directory => directory === root);
-  return parent ? path.join(parent, "AGENTS.md") : undefined;
+  let found: string | undefined;
+  findAncestor(
+    dir,
+    (directory) => {
+      found = parentEntryIn(directory, exists);
+      return found !== undefined;
+    },
+    (directory) => directory === root,
+  );
+  return found;
+}
+/** Nodes whose body lists composition children. */
+export type CompositeNode = InternalNode | ReadmeNode;
+export const isComposite = (node: unknown): node is CompositeNode =>
+  node instanceof InternalNode || node instanceof ReadmeNode;
+export function parseComposite(file: string, source: string): CompositeNode {
+  return path.basename(file) === "README.md"
+    ? new ReadmeNode(file).parse(source)
+    : new InternalNode(file).parse(source);
 }
 /** Runtime and import classification use exactly the same physical owner. */
 export function physicalParentNode(
   entry: string,
   root: string,
-): InternalNode | undefined {
+): CompositeNode | undefined {
   const parent = physicalParent(entry, root);
   const document = parent ? readEntry(parent) : undefined;
-  return document
-    ? new InternalNode(document.path).parse(document.source)
-    : undefined;
+  return document ? parseComposite(document.path, document.source) : undefined;
 }
 export function indexContract(
   node: BaseNode,
 ): (DirectoryContract & { writable: boolean }) | undefined {
-  if (!(node instanceof InternalNode)) return undefined;
+  if (!isComposite(node)) return undefined;
   const match = node.body.match(
     /<!-- project-memory-type:start -->([\s\S]*?)<!-- project-memory-type:end -->/,
   );
@@ -199,36 +237,40 @@ export function rewriteLinks(
 }
 
 /** Source syntax fields stay outside the domain's NodeReference projection. */
+function syntaxOf(node: CompositeNode): InternalSyntax {
+  const readme = node instanceof ReadmeNode;
+  return new InternalSyntax(
+    node.body,
+    (href) => resolveEntryHref(node.path, href, readme) !== undefined,
+    readme ? "entries" : "agents",
+  );
+}
 export function referenceSuffix(
-  node: InternalNode,
+  node: CompositeNode,
   id: string,
 ): string | undefined {
-  const content = new InternalSyntax(
-    node.body,
-    (href) => resolveEntryHref(node.path, href) !== undefined,
-  ).content();
+  const readme = node instanceof ReadmeNode;
+  const content = syntaxOf(node).content();
   const reference = [
     ...content.localChildren,
     ...content.descendantChildren,
-  ].find((ref) => resolveEntryHref(node.path, ref.target) === id);
+  ].find((ref) => resolveEntryHref(node.path, ref.target, readme) === id);
   return reference
     ? (reference.target.match(/[?#][\s\S]*$/)?.[0] ?? "")
     : undefined;
 }
 export function setReferenceSuffix(
-  node: InternalNode,
+  node: CompositeNode,
   id: string,
   suffix: string,
 ): void {
   if (referenceSuffix(node, id) === suffix) return;
-  const syntax = new InternalSyntax(
-    node.body,
-    (href) => resolveEntryHref(node.path, href) !== undefined,
-  );
+  const readme = node instanceof ReadmeNode;
+  const syntax = syntaxOf(node);
   const content = syntax.content();
   const patch = (refs: readonly SyntaxReference[]) =>
     refs.map((ref) =>
-      resolveEntryHref(node.path, ref.target) === id
+      resolveEntryHref(node.path, ref.target, readme) === id
         ? { ...ref, target: ref.target.split(/[?#]/, 1)[0]! + suffix }
         : ref,
     );
@@ -240,8 +282,8 @@ export function setReferenceSuffix(
 }
 /** Transfer syntax when an index registration moves to a different parent. */
 export function carryReferenceSuffix(
-  from: InternalNode,
-  to: InternalNode,
+  from: CompositeNode,
+  to: CompositeNode,
   oldId: string,
   newId: string,
 ): void {

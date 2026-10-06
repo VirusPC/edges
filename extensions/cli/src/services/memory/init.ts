@@ -10,7 +10,7 @@ import { AGENTS_FILE_NAME, assertScopePath, memoryDir, rejectLegacy, resolveRoot
 import { readIndexTemplate } from "./templates.js";
 import { MEMORY_TYPE_NAMES, SKILL_TYPE_NAMES, ensureTypeGitignore, findGitRoot, layerTypeSpecs, seedSpec, typeIndexTemplateName, } from "./types.js";
 import { findIndexAnchor, syncIndexEntry, syncTargetAgents, } from "./agents.js";
-import { refreshIndex } from "./entries.js";
+import { refreshIndex, typeIndexNode } from "./entries.js";
 export interface InitMemoryOptions {
     targetDir: string;
     rootDir?: string;
@@ -76,11 +76,11 @@ export async function initMemory(options: InitMemoryOptions) {
         if (spec.gitignore)
             assertPrivateIgnored(gitRoot ?? target, [file], [dirname(file)]);
         const entry = prepareMemoryWrite(target, file);
-        const node = await service.get(entry, InternalNode);
+        const node = await service.get(entry);
         if (node)
             preserved.push(spec.indexFile);
         else {
-            await service.create(new InternalNode(entry), parseDocument(readIndexTemplate(typeIndexTemplateName(spec.name), spec.name, spec.description, {
+            await service.create(typeIndexNode(entry), parseDocument(readIndexTemplate(typeIndexTemplateName(spec.name), spec.name, spec.description, {
                 module: spec.module,
                 format: spec.format,
                 writable: String(spec.writable),

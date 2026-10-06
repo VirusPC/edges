@@ -85,7 +85,7 @@ test("CLI initializes selected types and remembers a supplied Markdown file in t
   );
   assert.match(
     await readFile(path.join(root, "AGENTS.md"), "utf8"),
-    /\.harness\/memory\/projects\/AGENTS\.md/,
+    /\.harness\/memory\/projects\/README\.md/,
   );
 });
 

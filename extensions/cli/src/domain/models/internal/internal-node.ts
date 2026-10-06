@@ -2,7 +2,11 @@ import { relative, dirname } from "node:path";
 import { BaseNode } from "../core/base-node.js";
 import { InternalSyntax, type SyntaxContent, type SyntaxReference } from "./syntax.js";
 import { referenceOf, validateChild, validateGroup } from "../core/relations.js";
-import { resolveEntryHref, identifyNodeType } from "../layout.js";
+import {
+  resolveEntryHref,
+  identifyNodeType,
+  isHarnessMaterial,
+} from "../layout.js";
 import type { ChildGroup, NodeReference, NodeCreateInput } from "../core/types.js";
 
 type Content = {
@@ -116,7 +120,10 @@ export class InternalNode extends BaseNode<
     ]) {
       validateChild(reference);
       const childType = identifyNodeType(reference.id);
-      if (childType === undefined || childType === "readme")
+      if (
+        childType === undefined ||
+        (childType === "readme" && !isHarnessMaterial(reference.id))
+      )
         throw new Error(
           `${this.path}: child must identify a directory entry: ${reference.id}`,
         );

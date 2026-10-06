@@ -33,7 +33,7 @@ const put = (dir: string, file: string, body: string | Buffer) => {
   mkdirSync(join(path, ".."), { recursive: true });
   writeFileSync(path, body);
 };
-const projectIndex = ".harness/memory/projects/AGENTS.md";
+const projectIndex = ".harness/memory/projects/README.md";
 test("init requires selection without mutation and reruns preserve selected adoption", async (t) => {
   const targetDir = fixture(t);
   assert.equal((await initMemory({ indexGroup: "descendant", targetDir })).selectionRequired, true);
@@ -144,7 +144,7 @@ test("private custom privileges are preserved, ignored before writing, and canno
     layerTypeSpecs(targetDir).find((s) => s.name === "recipes")?.gitignore,
     true,
   );
-  const index = ".harness/memory/recipes/AGENTS.md";
+  const index = ".harness/memory/recipes/README.md";
   put(targetDir, index, read(targetDir, index).replace("writable: true\n", ""));
   await assert.rejects(
     async () => await initMemory({ indexGroup: "descendant", targetDir }),
@@ -237,7 +237,7 @@ test("managed symlink escapes are rejected and referenced links deduplicate by r
   const initialized = await initMemory({ indexGroup: "descendant", targetDir });
   assert.equal(initialized.complete, true, JSON.stringify(initialized));
   assert.equal(
-    read(targetDir, ".harness/skills/referenced/AGENTS.md").split(" — external")
+    read(targetDir, ".harness/skills/referenced/README.md").split(" — external")
       .length - 1,
     1,
   );
@@ -285,12 +285,12 @@ test("explicit registered descendants survive intermediate adoption and nested G
 test('refreshing a memory type preserves a separately authored relation', async t => {
  const targetDir=fixture(t);await initMemory({targetDir,memoryTypes:['project']});
  put(targetDir,'other/AGENTS.md','# Other\n');
- const {InternalNode}=await import("../../src/domain/models/internal/internal-node.js");
- const file=join(targetDir,projectIndex), node=new InternalNode(file).parse(read(targetDir,projectIndex));
+ const {ReadmeNode}=await import("../../src/domain/models/readme/readme-node.js");
+ const file=join(targetDir,projectIndex), node=new ReadmeNode(file).parse(read(targetDir,projectIndex));
  node.addChild('local',{id:join(targetDir,'other/AGENTS.md'),name:'Other',description:'Authored relation'});
  put(targetDir,projectIndex,node.serialize());
  await rememberMemory({targetDir,type:'project',slug:'example',title:'Example',description:'Memory',content:'Body'});
- const saved=new InternalNode(file).parse(read(targetDir,projectIndex));
+ const saved=new ReadmeNode(file).parse(read(targetDir,projectIndex));
  assert.ok(saved.localChildren.some(ref=>ref.name==='Other'&&ref.description==='Authored relation'));
 });
 test('cross-scope init preflights explicit placement before creating harness files',async t=>{

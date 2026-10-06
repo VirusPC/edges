@@ -20,8 +20,7 @@ import {
   layerTypeSpecs,
   parseTypeMeta,
 } from "../extensions/cli/src/services/memory/types.js";
-import { expectedIndexDocument } from "../extensions/cli/src/services/memory/entries.js";
-import { readIndexTemplate } from "../extensions/cli/src/services/memory/templates.js";
+import { expectedIndexDocument, typeIndexTemplate } from "../extensions/cli/src/services/memory/entries.js";
 import type { LegacyType } from "../extensions/cli/src/services/memory/migration-legacy.js";
 const JOURNAL = ".recursive-layout-migration";
 export const OWNER_MAP: Record<string, string> = {
@@ -734,7 +733,7 @@ export function planMissingPrivateIndexes(root: string, job: InstanceJob) {
         );
       const document = isDirectory(dirname(index))
         ? expectedIndexDocument(scope, "user")
-        : readIndexTemplate("USER.md", "user", "user");
+        : typeIndexTemplate(index, "user");
       const operation: generic.MigrationOperation = {
         source: index,
         target: index,

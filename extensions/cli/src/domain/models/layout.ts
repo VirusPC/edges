@@ -122,6 +122,14 @@ export function resolveHref(
   }
 }
 
+/** README under `.harness/` is system-two material (type indexes), unlike ordinary navigation READMEs. */
+export function isHarnessMaterial(id: string): boolean {
+  return (
+    basename(id) === ENTRY_NAMES.readme &&
+    dirname(id).split("/").includes(".harness")
+  );
+}
+
 /** Exclude ordinary navigation before applying strict child-path decoding. */
 export function resolveEntryHref(
   entryPath: string,
@@ -135,9 +143,15 @@ export function resolveEntryHref(
   } catch {
     return undefined;
   }
-  const names = (Object.values(ENTRY_NAMES) as string[]).filter(
-    (name) => includeReadme || name !== ENTRY_NAMES.readme,
-  );
+  const names = Object.values(ENTRY_NAMES) as string[];
   if (!names.includes(filename)) return undefined;
-  return resolveHref(entryPath, href);
+  const resolved = resolveHref(entryPath, href);
+  if (
+    resolved &&
+    filename === ENTRY_NAMES.readme &&
+    !includeReadme &&
+    !isHarnessMaterial(resolved)
+  )
+    return undefined;
+  return resolved;
 }

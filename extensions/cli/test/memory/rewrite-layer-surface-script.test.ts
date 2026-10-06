@@ -69,7 +69,7 @@ const modernLayer = `# T
 test("plan rewrites layer entries and skips type indexes", (t) => {
   const root = fixture(t, {
     "AGENTS.md": legacyLayer,
-    ".harness/memory/projects/AGENTS.md": typeIndex,
+    ".harness/memory/projects/README.md": typeIndex,
     "notes/AGENTS.md": modernLayer,
   });
   const plan = planLayerMarkerRewrite(root);
@@ -86,7 +86,7 @@ test("plan rewrites layer entries and skips type indexes", (t) => {
 test("plan is empty when every layer file is already canonical", (t) => {
   const root = fixture(t, {
     "AGENTS.md": modernLayer,
-    ".harness/memory/projects/AGENTS.md": typeIndex,
+    ".harness/memory/projects/README.md": typeIndex,
   });
   assert.equal(planLayerMarkerRewrite(root).edits.length, 0);
 });

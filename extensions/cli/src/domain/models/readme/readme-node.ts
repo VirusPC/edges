@@ -1,9 +1,17 @@
 import { dirname, relative } from "node:path";
 import { BaseNode } from "../core/base-node.js";
 import { InternalSyntax, type SyntaxReference } from "../internal/syntax.js";
-import { referenceOf, validateChild } from "../core/relations.js";
+import {
+  referenceOf,
+  validateChild,
+  validateGroup,
+} from "../core/relations.js";
 import { identifyNodeType, resolveEntryHref } from "../layout.js";
-import type { NodeCreateInput, NodeReference } from "../core/types.js";
+import type {
+  ChildGroup,
+  NodeCreateInput,
+  NodeReference,
+} from "../core/types.js";
 
 export interface ReadmeCreateInput extends NodeCreateInput {
   localChildren?: readonly NodeReference[];
@@ -14,6 +22,9 @@ interface Content {
   localChildren: NodeReference[];
   descendantChildren: NodeReference[];
 }
+
+const section = (group: ChildGroup) =>
+  group === "local" ? "localChildren" : "descendantChildren";
 
 /** README.md composition: project-entries-local / project-entries-descendants. */
 export class ReadmeNode extends BaseNode<ReadmeCreateInput, ReadmeCreateInput> {
@@ -122,6 +133,61 @@ export class ReadmeNode extends BaseNode<ReadmeCreateInput, ReadmeCreateInput> {
     };
     this.#validate(next);
     this.#content = next;
+  }
+
+  #replaceContent(next: Content): this {
+    this.#validate(next);
+    this.#syntax.serialize({
+      constraints: [],
+      localChildren: this.#refs(next.localChildren),
+      descendantChildren: this.#refs(next.descendantChildren),
+    });
+    this.#content = next;
+    return this;
+  }
+
+  addChild(group: ChildGroup, reference: NodeReference): this {
+    validateGroup(group);
+    validateChild(reference);
+    if (this.children.some((child) => child.id === reference.id))
+      throw new Error(`${this.path}: Child already listed: ${reference.id}`);
+    const next = structuredClone(this.#content);
+    next[section(group)].push(referenceOf(reference));
+    return this.#replaceContent(next);
+  }
+
+  updateChild(
+    id: string,
+    patch: Partial<Pick<NodeReference, "name" | "description">>,
+  ): this {
+    if (!this.children.some((child) => child.id === id))
+      throw new Error(`${this.path}: Child is not listed: ${id}`);
+    const next = structuredClone(this.#content);
+    for (const group of ["localChildren", "descendantChildren"] as const)
+      next[group] = next[group].map((child) =>
+        child.id === id ? referenceOf({ ...child, ...patch, id }) : child,
+      );
+    return this.#replaceContent(next);
+  }
+
+  removeChild(id: string): this {
+    const next = structuredClone(this.#content);
+    for (const group of ["localChildren", "descendantChildren"] as const)
+      next[group] = next[group].filter((child) => child.id !== id);
+    return this.#replaceContent(next);
+  }
+
+  moveChild(id: string, group: ChildGroup): this {
+    validateGroup(group);
+    const reference = this.children.find((child) => child.id === id);
+    if (!reference) throw new Error(`${this.path}: Child is not listed: ${id}`);
+    if (this.#content[section(group)].some((child) => child.id === id))
+      return this;
+    const next = structuredClone(this.#content);
+    for (const key of ["localChildren", "descendantChildren"] as const)
+      next[key] = next[key].filter((child) => child.id !== id);
+    next[section(group)].push(reference);
+    return this.#replaceContent(next);
   }
 
   override validate(): void {

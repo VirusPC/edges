@@ -23,5 +23,5 @@ test('compiled memory CLI includes templates and runs with no source skills chec
   await mkdir(scope);
   const output = execFileSync(process.execPath, [path.join(runtime, 'dist/index.js'), '--scope', scope, 'memory', 'init', '--memory-types', 'project'], { cwd: scope, encoding: 'utf8' });
   assert.equal(JSON.parse(output).ok, true);
-  assert.match(await readFile(path.join(scope, 'AGENTS.md'), 'utf8'), /\.harness\/memory\/projects\/AGENTS\.md/);
+  assert.match(await readFile(path.join(scope, 'AGENTS.md'), 'utf8'), /\.harness\/memory\/projects\/README\.md/);
 });

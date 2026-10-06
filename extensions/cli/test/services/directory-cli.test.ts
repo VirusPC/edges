@@ -373,7 +373,7 @@ test("business imports reject known source directory types instead of silently r
 test("doctor reports legacy memory migration without erasing the existing index", async (t) => {
   const root = fixture(t);
   await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
-  const index = path.join(root, ".harness/memory/projects/AGENTS.md");
+  const index = path.join(root, ".harness/memory/projects/README.md");
   const original = fs
     .readFileSync(index, "utf8")
     .replace("- 暂无条目。", "- [Old](project_old.md) — Legacy");

@@ -30,7 +30,10 @@ import {
   carryReferenceSuffix,
   directoryEntries,
   indexContract,
+  isComposite,
   modelAt,
+  parseComposite,
+  type CompositeNode,
   physicalParent,
   physicalParentNode,
   rewriteLinks,
@@ -44,7 +47,7 @@ type Operation = "create" | "update" | "move" | "destroy" | "import";
 export interface NodeWriteContext {
   operation: Operation;
   node: BaseNode;
-  parent?: InternalNode;
+  parent?: CompositeNode;
 }
 export interface NodeRegistrationOptions {
   indexGroup?: ChildGroup;
@@ -93,7 +96,7 @@ export class NodeService {
       throw new Error(`Unsupported node entry layout: ${file}`);
     return file;
   }
-  #parentNode(file: string): InternalNode | undefined {
+  #parentNode(file: string): CompositeNode | undefined {
     return physicalParentNode(file, this.managedRoot);
   }
   #model(file: string): Model | undefined {
@@ -311,7 +314,7 @@ export class NodeService {
   #proposedParent(
     file: string,
     plan: ReadonlyMap<string, Planned>,
-  ): InternalNode | undefined {
+  ): CompositeNode | undefined {
     const parent = physicalParent(
       file,
       this.managedRoot,
@@ -319,9 +322,9 @@ export class NodeService {
     );
     if (!parent) return undefined;
     const proposed = plan.get(parent);
-    if (proposed) return new InternalNode(parent).parse(proposed.source);
+    if (proposed) return parseComposite(parent, proposed.source);
     const entry = readEntry(parent);
-    return entry ? new InternalNode(parent).parse(entry.source) : undefined;
+    return entry ? parseComposite(parent, entry.source) : undefined;
   }
   async #preflight(
     operation: Operation,
@@ -389,8 +392,8 @@ export class NodeService {
       return undefined;
     const parentPath = physicalParent(node.path, this.managedRoot);
     if (!parentPath) return undefined;
-    const parent = await this.get(parentPath, InternalNode);
-    if (!parent) return undefined;
+    const parent = await this.get(parentPath);
+    if (!isComposite(parent)) return undefined;
     if (indexContract(parent)?.writable === false)
       throw new Error(`Read-only node source: ${node.path}`);
     const before = this.#existing(parent),
@@ -491,8 +494,8 @@ export class NodeService {
       physicalParent(destination, this.managedRoot),
     ])
       if (parentPath && !registered.has(parentPath)) {
-        const parent = await this.get(parentPath, InternalNode);
-        if (parent) registered.set(parentPath, parent);
+        const parent = await this.get(parentPath);
+        if (isComposite(parent)) registered.set(parentPath, parent);
       }
     for (const file of directoryEntries(sourceRoot))
       if (!registered.has(file)) {
@@ -504,7 +507,7 @@ export class NodeService {
     let group: ChildGroup | undefined,
       reference: NodeReference = referenceOf(node);
     const old = oldParent
-      ? (registered.get(oldParent) as InternalNode | undefined)
+      ? (registered.get(oldParent) as CompositeNode | undefined)
       : undefined;
     if (old) {
       const match = old.children.find((ref) => ref.id === node.path);
@@ -525,7 +528,7 @@ export class NodeService {
       if (
         entry.path === oldParent &&
         oldParent !== newParent &&
-        draft instanceof InternalNode
+        isComposite(draft)
       ) {
         draft.removeChild(node.path);
         authored = draft.serialize();
@@ -536,7 +539,7 @@ export class NodeService {
         entry.path === newParent &&
         group !== undefined &&
         oldParent !== newParent &&
-        draft instanceof InternalNode &&
+        isComposite(draft) &&
         !draft.children.some((ref) => ref.id === destination)
       ) {
         draft.addChild(group, { ...reference, id: destination });
@@ -548,13 +551,13 @@ export class NodeService {
       const persistedReferenceMoves =
         rewriteLinks(before.source, entry.path, target, relocate) !== before.source;
       const needsRegistration = group !== undefined && entry.path === newParent && oldParent !== newParent &&
-        entry instanceof InternalNode &&
-        !new InternalNode(entry.path).parse(before.source).children.some(ref => ref.id === destination);
+        isComposite(entry) &&
+        !parseComposite(entry.path, before.source).children.some(ref => ref.id === destination);
       if (target !== entry.path || text !== currentSource || persistedReferenceMoves || needsRegistration)
         plan.set(target, this.#plan(draft, text, before));
     }
     if (group !== undefined && newParent && !registered.has(newParent)) {
-      const parent = (await this.get(newParent, InternalNode))!,
+      const parent = (await this.get(newParent)) as CompositeNode,
         draft = clone(parent);
       draft.addChild(group, { ...reference, id: destination });
       if (old) carryReferenceSuffix(old, draft, node.path, destination);
@@ -638,11 +641,11 @@ export class NodeService {
     const removed = (file: string) => units.some((unit) => isWithinPath(file, unit));
     const plan = new Map<string, Planned>();
     for (const entry of (await this.#registered()).values())
-      if (!removed(entry.path) && entry instanceof InternalNode) {
+      if (!removed(entry.path) && isComposite(entry)) {
         const draft = clone(entry);
         const deleted = draft.children.filter((ref) => removed(ref.id));
         const before = this.#cache.state.get(entry)!.file;
-        const persistedReferences = new InternalNode(entry.path).parse(before.source).children;
+        const persistedReferences = parseComposite(entry.path, before.source).children;
         if (deleted.length === 0 && !persistedReferences.some(ref => removed(ref.id))) continue;
         for (const ref of deleted) draft.removeChild(ref.id);
         plan.set(entry.path, this.#plan(draft, draft.serialize(), before));
@@ -775,9 +778,7 @@ export class NodeService {
       const sourceParent = physicalParent(file, sourceRoot);
       const parentEntry = sourceParent ? readEntry(sourceParent) : undefined;
       const contract = parentEntry
-        ? indexContract(
-            new InternalNode(parentEntry.path).parse(parentEntry.source),
-          )
+        ? indexContract(parseComposite(parentEntry.path, parentEntry.source))
         : undefined;
       const Model = modelAt(
         relocate(file),
