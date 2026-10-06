@@ -33,6 +33,22 @@ flowchart TD
 
 锁继续覆盖整个 CLI 写命令，必须早于业务读取。它不因本次分层说明被缩小为单次 NodeService 方法调用；NodeService 的直接调用不被描述为自动取得 CLI 命令锁。
 
+### 单个节点、集合操作与完整用例的边界
+
+2026-10-06 用户确认：Model 管单个节点自身的职责，operations 管集合处理与树遍历，Service 协调跨节点和文件系统操作。按职责归属判断，不按方法参数中是否出现数组判断。
+
+| 归属 | 负责 | 示例 |
+| --- | --- | --- |
+| domain/models | 单个节点的内容、有效状态与纯内存行为 | parse、serialize、validate、字段更新，以及 InternalNode 自身的子节点索引维护 |
+| domain/operations | 节点关系遍历与集合算法 | traverse、filter、map、groupBy、find、惰性查询链；通用集合算法不强制依赖节点类型 |
+| services | 完整用例的加载、关联协调与持久化 | 创建、更新、移动、删除，维护受影响节点、文件冲突检查与保存 |
+
+例如，InternalNode.addChild 修改该节点持有的 localChildren/descendantChildren 索引，属于 Model；它不创建子目录、不加载或修改其他节点、不保存文件。创建子节点并登记父索引的完整过程由 Service 协调。traverse 虽可从一个根开始，仍属于 operations；Service 注入加载回调，遍历算法不自行访问文件系统。
+
+保留带行为的节点类与现有继承关系，不实施“Model 仅保留数据、全部行为搬到 operations”的方案；也不因 React 类比引入 reducer、dispatch 或不可变快照。既有同路径共享实例和原地更新决策继续有效。
+
+JSON Schema 描述对外交换的数据或操作参数，与上述分工独立。生成源应是明确的 TS 数据契约，不直接扫描包含 getter、方法和私有状态的完整节点类；不为生成 Schema 搬迁 Model 方法，也不要求所有节点立即配齐 Schema。本计划不引入生成器或 Ajv；Schema 生成接入另按明确的契约范围实施。
+
 ## Service 依赖约束
 
 依赖方向固定为 `CLI → 各业务 Service → NodeService → 模型 / operations / 文件实现`。Tasks、Memory、Note 是并列业务模块，当前用例不需要互相调用；共享机制下沉至 NodeService，不能由 Tasks 调 Memory.init 等业务操作获得。NodeService 不导入业务 Service；业务需要的写政策通过现有构造选项传入。
@@ -107,7 +123,7 @@ Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Not
 
 ## 全局约束
 
-- TypeScript；Node >=20；不新增运行时依赖或独立 package。
+- TypeScript；Node >=22，以 Node 22 作为运行、构建和测试基线；本计划不新增运行时依赖或独立 package。
 - 仅在独立 worktree 修改；不迁移仓库真实内容或用户私有数据。
 - 创建、更新、删除、导入与持久化通过 Service 协调；Model 保留纯内存领域行为。
 - 保留 NodeService 内同路径单实例、原地更新与实际受影响节点保存语义。

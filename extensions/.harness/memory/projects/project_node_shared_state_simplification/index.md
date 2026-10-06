@@ -1,12 +1,14 @@
 ---
 name: project_node_shared_state_simplification
-description: 节点与 Service 边界：共享实例、domain 内 models/operations 同级、通用能力收敛及命令锁取舍。
+description: >-
+  节点与 Service 边界：Model 单节点职责、operations 集合遍历、Schema 独立性、共享实例、domain 归组及 Node 22
+  基线。
 metadata:
   edges-title: 节点共享状态与职责简化
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T14:49:29+08:00'
+  edges-updated-at: '2026-10-06T15:25:48+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -89,3 +91,19 @@ metadata:
 **Why:** 模型和节点操作共同构成领域核心，归组能明确其与 Service 执行编排的边界；这是一处目录归组，不应引入新的调用层、DomainService 或 package。
 
 **How to apply:** 用 TypeScript 脚本批量迁移并重算相对导入，operations 的算法分文件和泛型查询链继续保留。domain 不反向依赖 Service，类型依赖也纳入检查；服务提供遍历所需加载回调。Node 请求校验按实际职责归业务 Service，不能为了搬目录把已有反向依赖一起固化。以 shared-node-capabilities spec/plan 的 Task 0 和新布局为准；本轮仅改计划，代码目录尚未迁移。
+
+## 单节点与集合操作边界，以及 Schema 的独立性
+
+2026-10-06 用户最终确认：Model 管单个节点自身的内容、校验、解析序列化、字段更新和自身子节点索引；operations 管集合处理、树遍历和查询组合；Service 管完整用例的加载、跨节点协调与文件读写。保留现有带行为的节点类、继承、同路径共享实例与原地更新。
+
+**Why:** 讨论 Schema 生成时曾探索把全部节点行为移入 operations，以及 DOM/React 的设计类比；用户要求回到简单的职责分工。这些探索不构成全面数据与行为分离或 immutable 重构的最终决策。
+
+**How to apply:** InternalNode.addChild 只维护自身索引，仍属 Model；创建子目录并登记父索引由 Service 协调。traverse 从一个根开始也属于 operations，由 Service 提供加载回调。Schema 描述对外数据契约，生成源是明确的 TS 数据类型，不直接扫描完整节点类，不为生成器搬迁方法，也不要求所有节点立即补齐 Schema。当前 shared-node-capabilities spec/plan 已写明边界；本轮仅改文档。
+
+## Node 22 基线
+
+用户在 Schema 技术选型讨论中明确决定使用 Node 22，运行、构建和测试统一以 Node 22 为基线，不再保留“生成阶段 Node 22、CLI 运行阶段 Node 20”的分裂约定。
+
+**Why:** 用户接受提高项目基线以简化工具链兼容。
+
+**How to apply:** 实施时同步 engines、已有版本选择/CI 配置与当前开发文档，并在 Node 22 下验收；此决定不表示已经升级本机 Node 或修改 package.json。Node 22 选择不自动批准全部候选依赖或 Schema 接入实现。

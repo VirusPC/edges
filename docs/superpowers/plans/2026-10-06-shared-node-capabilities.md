@@ -6,7 +6,7 @@
 
 **Architecture:** CLI 调用业务 Service；业务 Service 复用 NodeService；NodeService 调用 domain/models、domain/operations 与现有文件保存实现。Model 保留纯内存领域行为，完整创建/更新/保存由 Service 协调。优先使用现有接口，不新增文档句柄或查询包装层。
 
-**Tech Stack:** TypeScript、Node >=20、node:test、tsx、现有 NodeService、InternalNode、operations、gray-matter、proper-lockfile 与 write-file-atomic。
+**Tech Stack:** TypeScript、Node >=22（Node 22 基线）、node:test、tsx、现有 NodeService、InternalNode、operations、gray-matter、proper-lockfile 与 write-file-atomic。
 
 **Spec:** [通用能力收敛设计](../specs/2026-10-06-shared-node-capabilities.md)
 
@@ -14,7 +14,7 @@
 
 ## Global Constraints
 
-- TypeScript；Node >=20；不新增运行时依赖或独立 package。
+- TypeScript；Node >=22，以 Node 22 作为运行、构建和测试基线；本计划不新增运行时依赖或独立 package。
 - 仅在独立 worktree 修改；不迁移仓库真实内容或用户私有数据。
 - 创建、更新、删除、导入与持久化通过 Service 协调；Model 保留纯内存领域行为。
 - 保留 NodeService 内同路径单实例、原地更新与实际受影响节点保存语义。
@@ -22,6 +22,14 @@
 - 保留 Markdown 非受控区域；不要求保留 YAML 注释或 YAML 样式。
 - 保留 CLI 参数、输出协议、默认 scope 与查询范围；不新增 CLI 命令。
 - domain/models 与 domain/operations 同级，算法按文件拆分；domain 不依赖 services（含类型依赖），不直接读写文件；不引入 NodeTree、全局 Service 或事务框架。
+
+## Model、operations 与 Schema 边界
+
+Model 保留单个节点的内容、校验、parse/serialize、字段更新与自身子节点索引维护；operations 只承载集合处理、树遍历和查询组合，不接收从 Model 搬出的全部领域行为。Service 协调加载、跨节点关系及物理目录操作和保存。
+
+InternalNode.addChild 虽接触子节点引用，修改的仍是自身索引，留在 Model；创建子目录并登记父索引由 Service 完成。traverse 从单个根出发也属于 operations，其文件加载回调由 Service 提供。集合算法保持泛型；关系维护不是对外脱离物理目录的 reparent 操作。
+
+Schema 仅描述明确的 TS 对外数据契约，不要求节点类变成纯数据，也不为生成器搬迁方法或重写继承。本计划不引入 Schema 生成器、Ajv、reducer、dispatch 或 immutable；原地更新与共享实例继续保留。详见 spec 的“单个节点、集合操作与完整用例的边界”。
 
 ## 文件划分与实施顺序
 
@@ -50,6 +58,7 @@
 - Update imports: `extensions/cli/src/**/*.ts`、`extensions/cli/test/**/*.ts`、`scripts/legacy-index.mts`、`scripts/migrate-directory-nodes.mts`，以及仓内静态搜索发现的其他源码消费者
 - Update live docs: `extensions/cli/README.md`；本次 spec/plan 已使用目标布局；不批量改写已完成的历史设计记录
 - Verify: `extensions/cli/tsconfig.json` 仍覆盖 `src/**/*.ts`，无须新增 package、path alias 或 domain 总入口
+- Align runtime baseline: 根及 workspace `package.json` 的 Node engines、现有 Node 版本选择/CI 配置与当前开发文档；历史完成记录不批量改写
 
 **Interfaces:**
 - Exported names、类型与函数签名保持；仅导入路径改变。
@@ -57,6 +66,7 @@
 - `validateInput(input: unknown): IngestRequest` 与 `formatZodReason(error: z.ZodError): string` 原样移至 `services/note/validation.ts`，命令和测试改为从此处导入。
 - domain 不导入 services/commands，包含 type-only import/export；models 不导入 operations；domain 使用的仓内 utils 必须不造成间接的 Service/文件 IO 依赖。
 
+- [ ] 用 TypeScript 脚本盘点根及 workspace 的 Node engines 和已有版本选择/CI 配置，预览后将低于 22 的项目基线提升至 >=22；保留依赖自身更严格的要求。当前开发说明同步为 Node 22，基线与最终验收在 Node 22 下执行并记录 `node --version`。这是待实施步骤，本次文档更新不改变本机 Node 安装。
 - [ ] 先盘点全部静态/动态模块引用及文本路径：`rg -n 'src/(models|operations)/|models/note/validation|from .*models/|from .*operations/' extensions scripts`。对 import/export 用 TypeScript compiler API 解析，不把示例文字当模块引用。
 - [ ] 用临时 TypeScript 脚本建立文件映射，先列出待移动文件和待修改引用；`--check` 只输出清单，`--write` 才执行。执行前检查目标冲突，禁止覆盖已有文件；不保留两份模块。映射优先级如下：
 
@@ -355,6 +365,7 @@ return service.query(canonicalRoot, {
 
 ## 最终验收
 
+- [ ] 审查职责边界：parse/serialize/validate、字段更新与自身索引维护仍归 Model；operations 保留集合/遍历/查询职责；完整文件与跨节点变更通过 Service。没有为 Schema 生成搬迁节点方法或替换继承体系。
 - [ ] `rg -n 'MemoryDocument|loadMemoryDocument|saveMemoryDocument|repositoryNodeQuery|writeAtomic|domain/models/memory/index-rendering' extensions/cli/src`：本轮移除的包装与旧路径无残留。不新增 NodeDocument/DocumentService/save 包装。
 - [ ] 检查 project-meta.ts 的 AGENTS 保存已通过 NodeService；检查业务更新采用 Service input，未因删除包装变成直接修改对象后 raw writeFile。Model 内存方法与内部校验草稿仍可存在。
 - [ ] 检查 domain 与纯 utils 无业务 Service 反向依赖（含 type-only import/export），domain/models 不依赖 domain/operations。Memory 的未登记文件盘点保持物理扫描，不能以 query 替代。
