@@ -1,6 +1,6 @@
 # 节点系统简化：单实例、完整保存与树操作归属
 
-状态：用户已授权实施，执行中。基线为 `e1283b7`；完成状态以实施计划的验收记录为准。
+状态：实现与自动验收已完成，等待独立复核；基线为 `e1283b7`。整体完成状态以实施计划的审阅记录为准。
 
 ## 目的与取舍
 
@@ -59,7 +59,7 @@ await service.update(a!, {}); // 新约束、新说明一起写入
 
 写入失败前不把操作新增的结构变更或路径提前提交到共享实例；调用方原有的修改保留。已有多文件恢复和错误报告继续使用，不新增事务框架，也不扩大为崩溃原子性保证。成功后只按实际提交结果回填实例和快照，不再 refresh 合并 dirty 副本。
 
-一次 CLI 命令使用一个 NodeService 生命周期，相关修改属于同一次操作；同一 Service 内的写调用按 await 顺序执行，不跨命令保留编辑会话。共享对象不提供独立编辑会话隔离。不引入 Unit of Work、事件总线或自动 flush 全部缓存。跨进程写协调采用下节的工作树锁，替代本设计早期“不引入并发写入锁”的范围说明。
+NodeService 生命周期限定在一次 CLI 命令内，相关修改属于同一次操作；既有 Task 查询/写入与 Memory 工厂可因 managedRoot 或 hooks 不同而创建多个 Service，全部处于同一次写命令锁内，不跨命令保留实例。单实例身份只在各 Service 内成立，不通过全局 cache、session 或 DI 框架强行统一不同业务边界；未来若需跨这些视图共享对象，应另行设计边界。同一 Service 内的写调用按 await 顺序执行，不跨命令保留编辑会话。共享对象不提供独立编辑会话隔离。不引入 Unit of Work、事件总线或自动 flush 全部缓存。跨进程写协调采用下节的工作树锁，替代本设计早期“不引入并发写入锁”的范围说明。
 
 ## 命令锁与单文件原子保存
 
@@ -67,8 +67,8 @@ await service.update(a!, {}); // 新约束、新说明一起写入
 
 - **锁的范围：** 锁属于工作树，不属于单个 Node 或当前子 scope。父子 scope、兄弟 scope 的写命令取得同一把锁，独立 Git worktree 各用自己的锁；不能使用 Git common-dir 使独立工作树误共用锁。scope 仍决定业务操作范围，锁不会使操作自动加载或保存全树。
 - **锁的生命周期：** 先解析稳定的工作树锁身份，再取得锁，然后创建本次命令的 Service、读取业务节点并执行写操作；完成或失败均释放。锁占用直接报错，用户重试，不引入任务队列。只读命令不加锁，不承诺多文件读取是一致性快照。
-- **实现边界：** 命令编排在读操作前取得锁，服务层封装锁及文件 IO，models 不感知锁。直接调用 NodeService 不等于自动获得整个 CLI 命令的锁；不能只锁 save，因为那时可能已基于过期状态生成计划。实际锁路径及非 Git 目录下的稳定管理根映射，在实施时沿既有根发现规则统一确定；不得回退为“每个当前 scope 一把锁”。
-- **锁的机制：** `proper-lockfile` 使用原子 mkdir 创建空 `.lock` 目录，定期更新目录 mtime 作为心跳；释放时删除目录，过期后可尝试回收。它是协作式锁，不是 OS 强制文件权限。持锁失效必须使命令失败，不能吞掉错误继续写入。
+- **实现边界：** 命令编排在读操作前取得锁，服务层封装锁及文件 IO，models 不感知锁。直接调用 NodeService 不等于自动获得整个 CLI 命令的锁；不能只锁 save，因为那时可能已基于过期状态生成计划。实际锁根为规范化后的最近 Git worktree 根（不使用 common-dir）；非 Git 目录使用最外层物理 AGENTS.md 祖先，找不到时使用实际目标。发现阶段仅查文件元数据，不解析业务文档；不存在的目标按已存在祖先 realpath 加剩余后缀确定身份。锁路径为 `<os.tmpdir()>/edges-node-write-locks/<sha256(canonical-root)>.lock`，不进入内容目录、资源快照或 Git。
+- **锁的机制：** `proper-lockfile` 使用原子 mkdir 创建空 `.lock` 目录，定期更新目录 mtime 作为心跳；释放时删除目录，过期后可尝试回收。它是协作式锁，不是 OS 强制文件权限。检测到持锁失效时采用 proper-lockfile 默认 compromised 处理器抛出错误并终止进程，不能吞掉错误继续写入。正常结束或业务异常在命令 finally 释放，释放失败也返回失败。
 - **文件划分：** 新增 `services/node-lock.ts` 薄封装工作树锁；在已有 `services/node-files.ts` 接入原子写入并保留读取、快照检查和失败恢复。锁覆盖整个命令，原子写入处理每个文件，两种生命周期分别表达；不新增子目录、package、LockManager 或 AtomicWriter 类。
 - **文件的保存：** `write-file-atomic` 负责临时文件写入、默认 fsync、rename 替换和清理。已有文件覆盖接入该能力；新建目标的存在性检查、目录移动/删除、附件处理和失败恢复仍遵守原有合同。替换成功后重新取得实际文件身份/快照再回填缓存，不能沿用被替换文件的 inode；不得放宽“外部同字节替换文件仍报错”的检查。
 - **外部冲突：** 保留读取时原文及已有文件/资源身份快照，写入前检测变化，有冲突直接报错。不新增仅凭 mtime 的版本协议。编辑器不遵守 CLI 锁，检查与替换之间仍有竞态窗口；此方案不声称完全排除任意外部写入。
@@ -99,7 +99,11 @@ await service.update(a!, {}); // 新约束、新说明一起写入
 - [Next.js canary 的 next-dev 调用](https://github.com/vercel/next.js/blob/canary/packages/next/src/cli/next-dev.ts)：使用随 Next.js 编译打包的 write-file-atomic 保存开发状态，不代表其全部 IO 都使用该库。
 - [write-file-atomic 实现](https://github.com/npm/write-file-atomic/blob/main/lib/index.js)：单文件原子替换；进程内排队不等于跨进程锁。
 
-以上记录设计与选型依据，尚未实现；实施验收须覆盖父子 scope 争锁、异常释放、外部漂移和原子替换后的快照更新。
+选型已接入：proper-lockfile 4.1.2、write-file-atomic 5.0.1（Node engines 为 ^14.17.0 || ^16.13.0 || >=18.0.0，覆盖本仓 >=20；不提高本仓引擎下限）。实现与整体回归的完成状态以实施计划及独立审阅为准。
+
+实际加锁命令：note（其 dry-run 仍有本地写入）、tasks create/update/status、tasks project create/update、memory init/add-type/remember/restore、doctor --apply、非 --dry-run 的 migrate。Memory --target-dir、restore --repo-dir 是实际目标覆盖项；--root-dir 只是遍历边界，不改变被写入的目标。Note 沿现有配置从 scope 确定 Git 工作树。只读 doctor、migrate --dry-run、列表与查询不锁；Artifacts 配置/网络/服务器操作不属于节点锁范围。
+
+现有文件由 write-file-atomic.sync 接管临时写入、fsync、rename 与失败清理；tmpfileCreated 时保存将要替换的 inode 与描述符，返回后先登记已写记录，再检查目标并回填快照，保证提交后检查失败仍被恢复统计覆盖。新建目标继续用原有独占硬链接提交，保留不可读最终 mode 的描述符与恢复路径。单文件替换及多文件恢复不扩大为崩溃事务保证。
 
 ## 与惰性查询、资源及只读边界的关系
 

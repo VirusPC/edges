@@ -73,7 +73,7 @@ Those examples use `tsx` and do not need a `dist/` build. The installed `edges` 
 
 `edges --scope <directory> <command>` selects the content owner. Resolution order is `--scope`, `EDGES_SCOPE`, `EDGES_REPO`, then the nearest owning AGENTS scope or Git root above the process cwd. Relative paths resolve against cwd. The CLI install directory is never the default content target. An explicit directory does not initialize Project Memory.
 
-Node models live together in [`src/models/`](src/models/), with domain syntax helpers beneath that directory. [`NodeService`](src/services/node-service.ts) provides snapshot-checked document creation, loading, updates, deletion and ownership-index coordination. Task, Memory and Note business orchestration lives under `src/services/`; command handlers under `src/commands/` retain the directory-as-command-tree layout. Generic Markdown/YAML and filesystem primitives remain under `src/utils/`. There is no separate package or compatibility copy of the former `utils/node-tree` repository API.
+Node models live together in [`src/models/`](src/models/), with domain syntax helpers beneath that directory. [`src/operations/`](src/operations/) contains the shared traversal kernel, generic lazy query chain and individual collection algorithms; traversal receives loading callbacks from the Service and performs no filesystem IO. Query, registered-node collection and proposed graph validation reuse it with their existing relation policies. [`NodeService`](src/services/node-service.ts) provides snapshot-checked document creation, loading, updates, deletion and ownership-index coordination. Task, Memory and Note business orchestration lives under `src/services/`; command handlers under `src/commands/` retain the directory-as-command-tree layout. Generic Markdown/YAML and filesystem primitives remain under `src/utils/`. There is no separate package or compatibility copy of the former `utils/node-tree` repository API.
 
 [`src/services/scope.ts`](src/services/scope.ts) retains environment/argument precedence, Git fallback and directory exclusions. Readable AGENTS entries are eligible without a Memory marker or separate responsibility requirement; selection does not initialize Memory. Task lists and the global dashboard follow registered NodeService relations, with no discovery scan or missing-index fallback. Traversal defaults to localChildren; includeDescendants also follows descendantChildren. Only explicit includeHarness follows each node’s independent maintenance relation, recursively through all maintenance levels.
 
@@ -92,7 +92,30 @@ const memories = service.query(scope, { types: ["memory"], includeDescendants: t
 const [taskGroups, memoryCounts] = await Promise.all([tasks.value(), memories.value()]);
 ```
 
-query() loads entry snapshots only. Before directory move/destroy, reload with get(node.path) to capture the resource snapshot. get() obtains full resource snapshots without recursively loading harness bodies; legacy list() still resolves full resource snapshots and its returned nodes remain directly movable/deletable. These lifecycle reads must not be described as resource-lazy.
+query() initially loads entry snapshots only. Before directory move/destroy, use get(node.path) to add the resource snapshot to that same instance. get() and list() reuse existing resource snapshots without refreshing their baseline or discarding pending edits; get() does not recursively load harness bodies. list() results remain directly movable/deletable.
+
+Within one NodeService, each normalized entry path has one mutable instance:
+
+```ts
+const a = await service.get(parentPath, InternalNode);
+const b = await service.get(parentPath, InternalNode);
+console.assert(a === b);
+a!.setConstraints(["Keep authored context"]);
+b!.description = "Updated parent";
+await service.create(new NoteNode(childPath), { body: "New child" });
+// When childPath belongs to parentPath, parent registration saves its pending
+// constraints and description together with the new child reference.
+```
+
+update() saves the node's full current state. create/import/move/destroy also save the complete current state of indexes they actually affect, never unrelated dirty nodes. move retains identity; destroy invalidates it. Different Services retain separate snapshots and reject external content or identity changes; no three-way merge remains.
+
+Services live within one command. Existing Task query/write and Memory factories keep their distinct managed roots and policy hooks; all Services used by a writing command share its lock, and none is retained across commands. Identity is shared within a Service, not across these separate views. Sharing identity across those views in future requires explicit boundary design.
+
+Node-writing commands acquire a worktree lock before business reads and release it after success or failure: note (including its locally mutating dry-run), tasks create/update/status, tasks project create/update, memory init/add-type/remember/restore, doctor --apply, and migrate without --dry-run. Read-only commands do not acquire it; unrelated Artifacts operations are outside this node lock. --target-dir and restore --repo-dir determine the mutation target; Memory --root-dir is only a traversal boundary.
+
+The lock belongs to the nearest Git worktree root, never the common Git directory. Non-Git trees use the outermost physical AGENTS.md ancestor, falling back to the actual target; discovery checks metadata only. Existing ancestors are canonicalized for missing targets and symlink aliases. The lock is stored outside the content tree at `<os.tmpdir()>/edges-node-write-locks/<sha256(canonical-root)>.lock`, so it cannot enter node resources, indexes or Git commits. Parent, child and sibling scopes share it; independent worktrees can write concurrently. Contention fails immediately with “Node write lock busy”. proper-lockfile's default compromised handler fails the process on detected heartbeat loss; it does not continue writing. Direct NodeService library calls do not automatically acquire a command lock.
+
+Existing-file saves use write-file-atomic with fsync and rename; exclusive new-file creation retains its hardlink commit. Snapshots capture replacement identity before rename, validate the saved entry, and feed that identity back to the cached instance. External editors do not honor this cooperative lock: original source and identity checks remain, with a check-to-replace race window. Single-file atomic replacement does not make a multi-file operation transactional; recovery and retained-path reports remain in force.
 
 Memory `initMemory`, `rememberMemory`, `addMemoryType`, `doctorMemory`, `refreshIndex` and the index-writing helpers now return promises. Programmatic callers must await them; CLI arguments, JSON and exit codes are unchanged. Note Git dependencies retain process/network substitution points; file operations use the real snapshot-checked service.
 

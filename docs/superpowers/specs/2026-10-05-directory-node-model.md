@@ -132,13 +132,15 @@ class NodeService {
 
 get 恢复 parent 和 harness 的轻量引用，不递归加载 harness 正文，但会取得目录资源快照。query 按 AGENTS 已登记的 composition 索引递归，默认只 localChildren；includeDescendants 时也走 descendantChildren。普通查询不跟随 harness；显式 includeHarness 才递归进入独立维护关系，包含维护节点自身更深层的维护任务。不把任意 MD 导航链接或资源当组成节点；防止实际组成环与重复遍历，不把多处发现等同多父归属。
 
-query 只载入入口快照；对其结果做目录 move/destroy 前须 get(node.path) 取得资源快照。兼容 list 在 resolve 前保留完整资源快照，所得节点可直接移动／删除；不能宣称所有读路径都不读取资源。
+query 首次只载入入口快照；对其结果做目录 move/destroy 前须 get(node.path) 在同一实例上补充资源快照。get/list 不覆盖已取得的资源快照，不推进旧入口基线或清除内存编辑；兼容 list 所得节点可直接移动／删除。纯遍历及泛型查询链归同级 operations，各算法分文件；Service 提供加载回调，query、登记收集及拟提交图校验复用遍历内核并保留各自关系范围。
 
 查询链以原生 AsyncIterable 实现：filter/map/find/groupBy/toArray/mapValues/values/thru 均延迟，只有 value() 执行，同一链重复 value 会重跑且不自动缓存。groupBy 返回普通对象并继续链式；find 可接 thru，执行时提前结束并关闭上游。上游 toArray/groupBy/thru 物化边界仍先完整消费范围。types 有证据时排除无关叶子正文、保留必要导航；任意 predicate 不自动剪枝，不公开 enter/shouldEnter，不引入流处理库。Task 与 Memory 等复用该原语，状态、用途、优先级和项目筛选留在业务层。
 
 Task 普通 CLI 默认当前作用域 maintenance，领域板显式 --purpose domain；list --all-scopes 从所在 Git 根（无 Git 则解析出的 scope）沿登记链开启 includeDescendants 与 includeHarness，默认两种用途，显式 purpose 只筛用途。全仓 CLI 与看板共用查询，按 scope/purpose/project/stem 保留身份，输出入口路径及来源；缺入口报错，不扫描补漏。
 
 ## 生命周期与一致性
+
+2026-10-06 简化已接入共享实例、operations 遍历、命令锁与单文件原子保存；整体完成状态仍待对应简化计划的独立复核。写命令在业务读取前取得稳定工作树锁，独立 worktree 不互锁，非 Git 树以最外层物理 AGENTS 祖先为锁根；锁文件置于系统临时目录。命令内既有 Service 工厂保留不同 managedRoot 与 hooks，不跨命令复用。保存后更新替换文件身份；外部原文/身份检查和多文件失败恢复仍保留。具体命令范围及路径见[补充设计](2026-10-06-node-identity-simplification.md#命令锁与单文件原子保存)。
 
 - 原地更新：同一 NodeService 内同一规范化入口路径只保留一个受管可变实例，get/query/list 复用该实例。首次非 AGENTS 叶子加载保留显式构造器与 models/modelForReference 扩展选择；缓存后的 typed get 只作兼容类型约束，BaseNode 请求沿用解析模型，AGENTS 保持权威 InternalNode。成功 create/update/move 返回原实例；move 同步实例 path/id/关系及受影响子节点的身份表键，destroy 移除被删节点的受管身份。
 - 多个调用方共享实例上的顺序修改，保存节点时写入完整当前状态。create/import/move/destroy 维护索引或引用时，同样保存实际受影响节点的完整当前状态；不自动保存无关节点。以当前实例生成校验草稿，以旧入口及资源快照检测外部变化，失败保留调用方原修改，不做多副本三方合并。详细合同见[节点共享状态简化](2026-10-06-node-identity-simplification.md)。
