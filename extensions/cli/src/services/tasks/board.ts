@@ -1,3 +1,4 @@
+import { isWithinPath, firstSymlink } from "../../utils/filesystem.js";
 import { query } from "../../domain/operations/query.js";
 import { realpathSync } from "node:fs";
 import { TaskNode, InternalNode } from "../../domain/models/index.js";
@@ -6,7 +7,6 @@ import { taskBoardLocation } from "./paths.js";
 import { scopeDir, type BoardTarget } from "./paths.js";
 import {
   access,
-  lstat,
   mkdir,
   readdir,
   readFile,
@@ -69,30 +69,14 @@ export async function assertBoardPath(
   if (target === undefined) return;
   const scope = path.resolve(scopeDir(target));
   const board = path.resolve(boardRoot(target));
-  const rel = path.relative(board, path.resolve(abs));
-  if (rel === ".." || rel.startsWith(`..${path.sep}`) || path.isAbsolute(rel)) {
+  if (!isWithinPath(abs, board)) {
     throw new TasksError(
       "VALIDATION_ERROR",
       "path is outside selected task board",
     );
   }
-  let cursor = scope;
-  for (const part of path
-    .relative(scope, path.resolve(abs))
-    .split(path.sep)
-    .filter(Boolean)) {
-    cursor = path.join(cursor, part);
-    try {
-      if ((await lstat(cursor)).isSymbolicLink())
-        throw new TasksError(
-          "VALIDATION_ERROR",
-          "task board paths must not cross symlinks",
-        );
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") break;
-      throw error;
-    }
-  }
+  if (firstSymlink(abs, scope))
+    throw new TasksError("VALIDATION_ERROR", "task board paths must not cross symlinks");
 }
 
 export function createNodeBoardFs(target?: BoardTarget): BoardFs {

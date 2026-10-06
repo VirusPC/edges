@@ -1,7 +1,8 @@
+import { isWithinPath } from '../utils/filesystem.js';
 import { dirname, join, resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { identifyNodeType } from "../domain/models/layout.js";
-import { indexContract, physicalParentNode, within } from "./node-layout.js";
+import { indexContract, physicalParentNode } from "./node-layout.js";
 import { checkPath } from "./node-files.js";
 
 /** A source checkout/worktree bounds discovery; standalone files use filesystem ancestry. */
@@ -25,7 +26,7 @@ export function assertImportType(
     sourceRoot === undefined
       ? sourceBoundary(source)
       : checkPath(resolve(sourceRoot));
-  if (!within(source, boundary))
+  if (!isWithinPath(source, boundary))
     throw new Error(`${source}: source escapes discovery boundary ${boundary}`);
   const parent = physicalParentNode(source, boundary);
   const type = identifyNodeType(

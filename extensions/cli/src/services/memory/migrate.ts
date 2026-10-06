@@ -1,3 +1,4 @@
+import { isWithinPath, canonicalPath } from '../../utils/filesystem.js';
 /** Explicit, journaled legacy migration. All planning is read-only. */
 import * as fs from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
@@ -10,12 +11,10 @@ import {
   isFile,
   isSymlink,
   readText,
-  within,
   resolveTarget,
   resolveRoot,
   isScope,
   assertScopePath,
-  realPath,
   ancestors,
 } from "./paths.js";
 import {
@@ -129,7 +128,7 @@ export function* walk(
     yield* walk(join(root, name), excludeInstalls, owned);
 }
 export function safeAncestors(path: string, root: string) {
-  if (!within(path, root)) throw new Error(`outside-selected-scope: ${path}`);
+  if (!isWithinPath(path, root)) throw new Error(`outside-selected-scope: ${path}`);
   for (const p of ancestors(dirname(path))) {
     if (isSymlink(p)) throw new Error(`symlink-ancestor: ${p}`);
     if (p === root) break;
@@ -183,7 +182,7 @@ export function planDirectory(
   if (priv)
     for (const p of ancestors(dirname(source))) {
       if (p === root) break;
-      if (within(p, root) && isDirectory(p)) targetMode &= mode(p);
+      if (isWithinPath(p, root) && isDirectory(p)) targetMode &= mode(p);
     }
   const originalTargetMode = fs.existsSync(target) ? mode(target) : null;
   if (originalTargetMode !== null) targetMode &= originalTargetMode;
@@ -240,10 +239,10 @@ export function inventory(
           )
     )
       continue;
-    const real = realPath(path);
+    const real = canonicalPath(path);
     if (
       spec.name !== "agent_skills" &&
-      !within(real, realPath(spec.directory!))
+      !isWithinPath(real, canonicalPath(spec.directory!))
     )
       throw new Error(`owned-body-symlink-escape: ${path}`);
     if (!seen.has(real)) {
@@ -367,7 +366,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
     path = resolve(path);
     let result = exact.get(path) ?? path;
     if (result === path) {
-      const mapping = mappings.find((m) => within(path, m.old));
+      const mapping = mappings.find((m) => isWithinPath(path, m.old));
       if (mapping) result = join(mapping.next, relative(mapping.old, path));
     }
     return result !== path ? mapped(result) : result;
@@ -534,7 +533,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
         source,
         dest,
         target,
-        privateDirs.some((p) => within(dest, p)),
+        privateDirs.some((p) => isWithinPath(dest, p)),
       ),
     );
   }
@@ -548,7 +547,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
     if (spec.name !== "agent_skills" || referencedDiagnostics(owner).length)
       continue;
     const records = inventory(owner, spec).map((path) => {
-      const op = operations.find((op) => op.source === realPath(path));
+      const op = operations.find((op) => op.source === canonicalPath(path));
       return {
         path: mapped(path),
         sha256: sha(
@@ -609,7 +608,7 @@ export function assertMigrationIgnores(
   journal: string,
 ) {
   const sensitive = destinations.filter((path) =>
-    privateDirectories.some((directory) => within(path, directory)),
+    privateDirectories.some((directory) => isWithinPath(path, directory)),
   );
   const directories = new Set([
     dirname(journal),

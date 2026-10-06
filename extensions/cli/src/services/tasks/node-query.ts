@@ -1,3 +1,4 @@
+import { isWithinPath } from '../../utils/filesystem.js';
 import * as fs from "node:fs";
 import path from "node:path";
 import { BaseNode, InternalNode, TaskNode } from "../../domain/models/index.js";
@@ -9,7 +10,7 @@ import {
 } from "../../domain/models/tasks/project.js";
 import { TasksError } from "../../domain/models/tasks/types.js";
 import { checkPath } from "../node-files.js";
-import { within } from "../node-layout.js";
+
 import { NodeService } from "../node-service.js";
 import { query } from "../../domain/operations/query.js";
 import {
@@ -41,7 +42,7 @@ export async function taskBoardQuery(
   const service = new NodeService({
     managedRoot: root,
     modelForReference: (_parent, _reference, entry) => {
-      if (!within(entry, root))
+      if (!isWithinPath(entry, root))
         throw new TasksError(
           "VALIDATION_ERROR",
           "path is outside selected task board",

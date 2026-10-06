@@ -1,3 +1,4 @@
+import { isWithinPath, findAncestor } from '../../utils/filesystem.js';
 import fs from "node:fs";
 import path from "node:path";
 import { InternalNode, TaskNode } from "../../domain/models/index.js";
@@ -11,7 +12,7 @@ import {
   checkPath,
   type EntryFile,
 } from "../node-files.js";
-import { within } from "../node-layout.js";
+
 import { isGitBoundary } from "../scope.js";
 import { taskLocationOf } from "./node-query.js";
 import {
@@ -95,7 +96,7 @@ export async function planTaskIndexes(
     file: string,
     seed = `# ${path.basename(path.dirname(file))}\n`,
   ) => {
-    if (!within(file, root))
+    if (!isWithinPath(file, root))
       throw new Error(`Index outside migration root: ${file}`);
     let node = nodes.get(file);
     if (!node) {
@@ -103,7 +104,7 @@ export async function planTaskIndexes(
       if (decodeBody(node.body).unsafe)
         throw new Error(`Malformed index sections: ${file}`);
       for (const child of node.children)
-        if (!within(child.id, root))
+        if (!isWithinPath(child.id, root))
           throw new Error(
             `${file}: reference outside migration root: ${child.id}`,
           );
@@ -136,16 +137,15 @@ export async function planTaskIndexes(
   const connect = (entry: string) => {
     if (entry === path.join(root, "AGENTS.md") || connected.has(entry)) return;
     connected.add(entry);
-    let dir = path.dirname(path.dirname(entry));
-    while (within(dir, root)) {
-      const parent = path.join(dir, "AGENTS.md");
-      if (files.has(parent) || nodes.has(parent)) {
-        add(parent, entry, "descendant");
-        connect(parent);
-        return;
-      }
-      if (dir === root) break;
-      dir = path.dirname(dir);
+    const dir = path.dirname(path.dirname(entry));
+    const owner = isWithinPath(dir, root) ? findAncestor(dir,
+      directory => files.has(path.join(directory, "AGENTS.md")) || nodes.has(path.join(directory, "AGENTS.md")),
+      directory => directory === root) : undefined;
+    if (owner) {
+      const parent = path.join(owner, "AGENTS.md");
+      add(parent, entry, "descendant");
+      connect(parent);
+      return;
     }
     throw new Error(`No owning scope index for ${entry}`);
   };

@@ -4,7 +4,7 @@ import * as fs from 'node:fs';
 import path from 'node:path';
 import writeFileAtomic from 'write-file-atomic';
 import { randomUUID } from 'node:crypto';
-import { absolute } from '../utils/filesystem.js';
+import { absolute, firstSymlink } from '../utils/filesystem.js';
 
 export interface EntryFile {
   path: string;
@@ -24,13 +24,8 @@ function stat(file: string) {
 export function checkPath(file: string, allowLinkedRead = false): string {
   file = absolute(file);
   if (!allowLinkedRead) {
-    let current = file;
-    while (true) {
-      if (stat(current)?.isSymbolicLink()) throw new Error(`Node path contains a symbolic link: ${current}`);
-      const parent = path.dirname(current);
-      if (parent === current) break;
-      current = parent;
-    }
+    const linked = firstSymlink(file);
+    if (linked) throw new Error(`Node path contains a symbolic link: ${linked}`);
   }
   return file;
 }

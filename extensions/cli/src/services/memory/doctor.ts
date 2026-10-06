@@ -1,3 +1,5 @@
+import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
+import { listTypeFiles } from './types.js';
 import { InternalNode } from "../../domain/models/internal-node.js";
 import { loadMemoryDocument, saveMemoryDocument } from "./node-documents.js";
 import * as fs from "node:fs";
@@ -14,14 +16,11 @@ import {
   assertScopePath,
   isScope,
   isSymlink,
-  listTypeFiles,
   readText,
-  realPath,
   rejectLegacy,
   relativeOrName,
   resolveRoot,
   resolveTarget,
-  within,
 } from "./paths.js";
 import {
   layerTypeSpecs,
@@ -107,7 +106,7 @@ const errorText = (error: unknown) =>
 // Invalid composition documents block only their own subtree and operations
 // relying on that subtree. Sibling scopes remain independently repairable.
 const blockedBy = (directory: string, invalid: Set<string>) =>
-  [...invalid].some((owner) => within(directory, owner));
+  [...invalid].some((owner) => isWithinPath(directory, owner));
 function validAnchors(
   target: string,
   root: string,
@@ -119,7 +118,7 @@ function validAnchors(
       .parse(readText(join(owner, AGENTS_FILE_NAME)))
       .children.some(
         (entry) =>
-          realPath(entry.id) === realPath(join(target, AGENTS_FILE_NAME)),
+          canonicalPath(entry.id) === canonicalPath(join(target, AGENTS_FILE_NAME)),
       );
   });
 }
@@ -132,7 +131,7 @@ function validAnchor(
   if (registered.length) return registered[0]!;
   for (
     let owner = dirname(target);
-    within(owner, root);
+    isWithinPath(owner, root);
     owner = dirname(owner)
   ) {
     if (!blockedBy(owner, invalid) && safeScope(owner)) return owner;
@@ -212,7 +211,7 @@ export function collectFindings(root: string): MemoryFinding[] {
       else {
         const registered = localOwnershipPaths(owner, text);
         for (const spec of specs)
-          if (!registered.has(realPath(join(owner, spec.indexFile))))
+          if (!registered.has(canonicalPath(join(owner, spec.indexFile))))
             findings.push(
               finding(
                 "unregistered-type",

@@ -1006,3 +1006,13 @@ test("all private callers still work in a confirmed non-Git scope without a Git 
     fs.existsSync(join(d, ".harness/memory/secrets/secrets_example/index.md")),
   );
 });
+
+test("type scan functions remain public after moving out of path primitives", async t => {
+  const target = await base(t);
+  await remember(target, "project");
+  const { typeIndexPath, typeContentDir, listTypeFiles } = await import("../../src/services/memory/index.js");
+  assert.equal(typeIndexPath(target, "project"), join(target, pi));
+  assert.equal(typeContentDir(target, "project"), dirname(join(target, pi)));
+  assert.deepEqual(listTypeFiles(target, "project"), [join(target, ".harness/memory/projects/project_example/index.md")]);
+  assert.equal(typeContentDir(target, "referenced"), join(target, ".agents/skills"));
+});

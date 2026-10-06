@@ -1,3 +1,4 @@
+import { isWithinPath } from '../utils/filesystem.js';
 /** Loaded instance identity and optimistic snapshots. Not a public domain API. */
 import * as fs from "node:fs";
 import { BaseNode } from "../domain/models/index.js";
@@ -5,7 +6,7 @@ import { harnessPath } from "../domain/models/layout.js";
 import { setNodeRelations, setNodePath } from "../domain/models/relations.js";
 import { readEntry, validateEntry, type EntryFile } from "./node-files.js";
 import { resourceSnapshot, type ResourceSnapshot } from "./node-resources.js";
-import { physicalParent, within } from "./node-layout.js";
+import { physicalParent } from "./node-layout.js";
 interface Loaded {
   file: EntryFile;
   readOnly: boolean;
@@ -17,7 +18,7 @@ export class NodeCache {
   readonly readOnly = new Set<string>();
   constructor(readonly managedRoot: string) {}
   isReadOnly(file: string): boolean {
-    return [...this.readOnly].some((root) => within(file, root));
+    return [...this.readOnly].some((root) => isWithinPath(file, root));
   }
   markReadOnly(node: BaseNode): void {
     const state = this.state.get(node)!;
@@ -77,7 +78,7 @@ export class NodeCache {
         this.relations(node);
         if (
           state.resources &&
-          [...changed].some((target) => within(target, node.directoryPath))
+          [...changed].some((target) => isWithinPath(target, node.directoryPath))
         )
           state.resources = resourceSnapshot(node.directoryPath);
         continue;

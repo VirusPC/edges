@@ -1,3 +1,4 @@
+import { isWithinPath } from "../../../utils/filesystem.js";
 import { assertImportType } from "../../import-entry.js";
 import { existsSync } from "node:fs";
 import { NodeService } from "../../node-service.js";
@@ -96,7 +97,7 @@ export async function runNoteIngest(
   const repoRoot = await fs.realpath(config.repoPath);
   const relativeFile = (absFile: string) => {
     const filePath = path.relative(repoRoot, absFile);
-    if (filePath.startsWith("..") || path.isAbsolute(filePath))
+    if (!isWithinPath(absFile, repoRoot))
       throw new Error("Note scope must be inside its Git repository");
     return filePath;
   };
@@ -143,11 +144,7 @@ export async function runNoteIngest(
   const service = new NodeService({
     managedRoot: path.join(scope, "notes"),
     assertWrite: ({ node }) => {
-      const relative = path.relative(
-        path.join(scope, "notes"),
-        node.path,
-      );
-      if (relative.startsWith("..") || path.isAbsolute(relative))
+      if (!isWithinPath(node.path, path.join(scope, "notes")))
         throw new Error("Note must remain in the selected scope");
     },
   });

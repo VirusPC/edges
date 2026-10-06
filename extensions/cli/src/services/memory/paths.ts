@@ -1,9 +1,14 @@
 import { isScope } from "../scope.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { expandHomePath } from "../../utils/filesystem.js";
+import {
+  expandHomePath,
+  canonicalPath,
+  isWithinPath,
+  firstSymlink,
+  findAncestor,
+} from "../../utils/filesystem.js";
 import { randomUUID } from "node:crypto";
-import { discoverLayerTypes } from "./types.js";
 export const AGENTS_FILE_NAME = "AGENTS.md";
 export const MEMORY_DIR_NAME = ".harness/memory";
 export function readText(file: string): string {
@@ -38,37 +43,13 @@ export function isSymlink(file: string): boolean {
     throw e;
   }
 }
-export function within(file: string, owner: string): boolean {
-  const rel = path.relative(owner, file);
-  return (
-    !rel ||
-    (!rel.startsWith(`..${path.sep}`) && rel !== ".." && !path.isAbsolute(rel))
-  );
-}
-/** Resolve missing leaves while still following existing symbolic ancestors. */
-export function realPath(file: string): string {
-  const absolute = path.resolve(file);
-  try {
-    return fs.realpathSync(absolute);
-  } catch (e) {
-    if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
-  }
-  if (isSymlink(absolute))
-    return realPath(
-      path.resolve(path.dirname(absolute), fs.readlinkSync(absolute)),
-    );
-  const parent = path.dirname(absolute);
-  return parent === absolute
-    ? absolute
-    : path.join(realPath(parent), path.basename(absolute));
-}
 export function ownershipTarget(
   owner: string,
   href: string,
 ): string | undefined {
   if (/^[a-z][a-z\d+.-]*:|^\/\//i.test(href)) return undefined;
   try {
-    return realPath(
+    return canonicalPath(
       path.resolve(owner, decodeURIComponent(href.split(/[?#]/, 1)[0]!)),
     );
   } catch {
@@ -76,17 +57,16 @@ export function ownershipTarget(
   }
 }
 export function assertOwned(file: string, owner: string): string {
-  if (!within(file, owner))
+  if (!isWithinPath(file, owner))
     throw new Error(`Path is outside selected owner: ${file}`);
-  if (!within(realPath(file), realPath(owner)))
+  if (!isWithinPath(canonicalPath(file), canonicalPath(owner)))
     throw new Error(`Path resolves outside selected owner: ${file}`);
   return file;
 }
 export function assertScopePath(file: string, target: string): string {
   assertOwned(file, target);
-  for (let current = file; current !== target; current = path.dirname(current))
-    if (isSymlink(current))
-      throw new Error(`Managed path contains a symbolic link: ${current}`);
+  const linked = firstSymlink(file, target);
+  if (linked) throw new Error(`Managed path contains a symbolic link: ${linked}`);
   return file;
 }
 export function rejectLegacy(target: string): void {
@@ -117,7 +97,7 @@ export function writeAtomic(file: string, content: string): void {
   }
 }
 export function resolveTarget(raw: string): string {
-  const target = realPath(
+  const target = canonicalPath(
     expandHomePath(raw),
   );
   if (!isDirectory(target))
@@ -136,18 +116,17 @@ export { isScope } from "../scope.js";
 export function resolveRoot(target: string, rawRoot?: string): string {
   if (rawRoot) {
     const root = resolveTarget(rawRoot);
-    if (!within(target, root))
+    if (!isWithinPath(target, root))
       throw new Error(`root-dir 必须是 target-dir 的祖先目录: ${root}`);
-    for (const parent of ancestors(target)) {
-      if (parent === root) break;
-      if (fs.existsSync(path.join(parent, ".git")))
-        throw new Error("root-dir cannot cross another Git root or submodule");
-    }
+    const crossed = findAncestor(target,
+      directory => directory !== root && fs.existsSync(path.join(directory, ".git")),
+      directory => directory === root);
+    if (crossed) throw new Error("root-dir cannot cross another Git root or submodule");
     return root;
   }
   return (
-    ancestors(target).find((p) => fs.existsSync(path.join(p, ".git"))) ??
-    ancestors(target).find(isScope) ??
+    findAncestor(target, p => fs.existsSync(path.join(p, ".git"))) ??
+    findAncestor(target, isScope) ??
     target
   );
 }
@@ -169,67 +148,8 @@ export const typeFromDirName = (name: string) =>
   )[name] ?? name;
 export const typeIndexRelpath = (name: string, module = moduleForType(name)) =>
   `.harness/${module}/${typeDirName(name)}/AGENTS.md`;
-export const typeIndexPath = (target: string, name: string) =>
-  path.join(target, discoverLayerTypes(target)[name] ?? typeIndexRelpath(name));
 export const isExternalType = (name: string) => name === "referenced";
-export const typeContentDir = (target: string, name: string) =>
-  isExternalType(name)
-    ? path.join(target, ".agents/skills")
-    : path.dirname(typeIndexPath(target, name));
 export const relativeOrName = (file: string, root: string) =>
-  within(file, root) ? path.relative(root, file) || "." : path.basename(file);
+  isWithinPath(file, root) ? path.relative(root, file) || "." : path.basename(file);
 export const relativeLink = (file: string, base: string) =>
   path.relative(base, file).split(path.sep).join("/");
-export function listTypeFiles(
-  target: string,
-  name: string,
-  pattern = "*.md",
-): string[] {
-  const directory = typeContentDir(target, name),
-    external = isExternalType(name);
-  if (!external) assertScopePath(directory, target);
-  if (!fs.existsSync(directory))
-    throw new Error(`source-scan-error: missing source ${directory}`);
-  if (!isDirectory(directory))
-    throw new Error(`source-scan-error: not a directory ${directory}`);
-  const paths: string[] = [],
-    seen = new Set<string>();
-  for (const item of fs.readdirSync(directory).sort()) {
-    if (item.startsWith(".node-")) continue;
-    const child = path.join(directory, item);
-    if (isSymlink(child) && !fs.existsSync(child))
-      throw new Error(`source-scan-error: broken link ${child}`);
-    if (
-      pattern !== "*/SKILL.md" &&
-      item.startsWith(`${name}_`) &&
-      item.endsWith(".md") &&
-      isFile(child)
-    )
-      throw new Error(
-        `migration-required: legacy standalone memory entry ${child}; use explicit directory migration`,
-      );
-    let candidate: string;
-    if (pattern === "*/SKILL.md") {
-      if (!isDirectory(child)) continue;
-      candidate = path.join(child, "SKILL.md");
-      if (!fs.existsSync(candidate)) {
-        if (isSymlink(candidate))
-          throw new Error(`source-scan-error: broken link ${candidate}`);
-        continue;
-      }
-    } else if (isDirectory(child) && item.startsWith(`${name}_`)) {
-      candidate = path.join(child, "index.md");
-      if (!isFile(candidate)) continue;
-    } else {
-      continue;
-    }
-    if (!external) assertOwned(candidate, directory);
-    readText(candidate);
-    const real = realPath(candidate);
-    if (!seen.has(real)) {
-      seen.add(real);
-      paths.push(candidate);
-    }
-  }
-  return paths;
-}

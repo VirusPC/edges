@@ -1,10 +1,20 @@
+import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 export { ownershipTarget } from './paths.js';
 import { InternalNode } from '../../domain/models/internal-node.js';
 import { discoverScopes } from '../scope.js';
 import { loadMemoryDocument, saveMemoryDocument, type MemoryDocument } from './node-documents.js';
 import { join, dirname, basename, relative } from "node:path";
 import { AUTO_START, CHILDREN_START, CHILDREN_END, IMPORTANT_START, LOCAL_START, LOCAL_END, OUTER_START, INDEX_ENTRY_PATTERN, blockPattern, buildChildrenBlock, ensureImportantBlock, escapeRegExp, insertInnerBlock, renderAgentsDocument, upsertBlock, } from "./blocks.js";
-import { AGENTS_FILE_NAME, ancestors, assertScopePath, isFile, isScope, readText, realPath, ownershipTarget, within, writeAtomic, } from "./paths.js";
+import {
+  AGENTS_FILE_NAME,
+  ancestors,
+  assertScopePath,
+  isFile,
+  isScope,
+  readText,
+  ownershipTarget,
+  writeAtomic,
+} from "./paths.js";
 import { ENTRY_LINE_TEMPLATE, renderLine } from "./templates.js";
 import { layerTypeSpecs, selectedLocalBlock, upsertLocalTypeLine, } from "./types.js";
 export function classifyAgentsSource(source: string | undefined): "missing" | "managed" | "foreign" {
@@ -62,8 +72,8 @@ export function mergeIndexEntry(document: string, relativeAgents: string, entry:
         ? [document, false]
         : [document.replace(pattern, () => updated), true];
 }
-export const ancestorsUpTo = (start: string, root: string) => within(start, root)
-    ? ancestors(start).filter((p) => within(p, root))
+export const ancestorsUpTo = (start: string, root: string) => isWithinPath(start, root)
+    ? ancestors(start).filter((p) => isWithinPath(p, root))
     : [start];
 export function readOwnershipEntries(file: string) {
     return isFile(file) ? new InternalNode(file).parse(readText(file)).children : [];
@@ -75,7 +85,7 @@ export function readIndexEntries(file: string): [string, string][] {
 }
 export function registeredIndexAnchors(target: string, root: string): string[] {
     return discoverScopes(root).filter(owner => readOwnershipEntries(join(owner, AGENTS_FILE_NAME))
-        .some(entry => realPath(entry.id) === realPath(join(target, AGENTS_FILE_NAME))));
+        .some(entry => canonicalPath(entry.id) === canonicalPath(join(target, AGENTS_FILE_NAME))));
 }
 async function dropLoadedIndexEntries(document: MemoryDocument, relatives: Set<string>): Promise<boolean> {
     if (!(document.node instanceof InternalNode)) throw new Error('Expected an AGENTS node');
@@ -116,7 +126,7 @@ export async function syncIndexEntry(anchor: string, target: string, description
     const existing = document.existed ? document.node.serialize() : undefined;
     const state = classifyAgentsSource(existing);
     if (!(document.node instanceof InternalNode)) throw new Error('Expected an AGENTS node');
-    const registered = document.node.children.find(entry => realPath(entry.id) === realPath(join(target, AGENTS_FILE_NAME)));
+    const registered = document.node.children.find(entry => canonicalPath(entry.id) === canonicalPath(join(target, AGENTS_FILE_NAME)));
     if (registered) {
         if (description === undefined || registered.description === normalized) return ["preserved", relative(anchor, registered.id), null];
         document.node.updateChild(registered.id, { description: normalized });

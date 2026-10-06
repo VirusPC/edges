@@ -1,3 +1,4 @@
+import { isWithinPath, findAncestor } from "../utils/filesystem.js";
 import { WRITE_LOCK_NAME } from "./node-lock.js";
 import {
   InternalSyntax,
@@ -26,12 +27,6 @@ import {
 import { parseDocument } from "../utils/markdown/document.js";
 import { checkPath, readEntry } from "./node-files.js";
 export type Model<T extends BaseNode = BaseNode> = new (file: string) => T;
-export function within(file: string, root: string): boolean {
-  return (
-    file === root ||
-    file.startsWith(root.endsWith(path.sep) ? root : root + path.sep)
-  );
-}
 export function coLocated(entry: string): boolean {
   return (
     path.basename(entry) === "AGENTS.md" &&
@@ -49,13 +44,9 @@ export function physicalParent(
   // The .harness directory is a maintenance relation, never composition of its host.
   if (path.basename(path.dirname(entry)) === ".harness")
     dir = path.dirname(dir);
-  while (within(dir, root)) {
-    const candidate = path.join(dir, "AGENTS.md");
-    if (exists(candidate)) return candidate;
-    if (dir === root) break;
-    dir = path.dirname(dir);
-  }
-  return undefined;
+  if (!isWithinPath(dir, root)) return undefined;
+  const parent = findAncestor(dir, directory => exists(path.join(directory, "AGENTS.md")), directory => directory === root);
+  return parent ? path.join(parent, "AGENTS.md") : undefined;
 }
 /** Runtime and import classification use exactly the same physical owner. */
 export function physicalParentNode(

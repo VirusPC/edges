@@ -1,15 +1,10 @@
+import { typeIndexPath } from './types.js';
 import { assertImportType } from "../import-entry.js";
 import { MemoryNode, SkillNode } from "../../domain/models/index.js";
 import { memoryNodes } from "./node-documents.js";
 import { existsSync, readFileSync } from "node:fs";
 import { relative, resolve, basename } from "node:path";
-import {
-  isScope,
-  rejectLegacy,
-  resolveRoot,
-  resolveTarget,
-  typeIndexPath,
-} from "./paths.js";
+import { isScope, rejectLegacy, resolveRoot, resolveTarget } from "./paths.js";
 import { ensureLayerTypeGitignore } from "./types.js";
 import {
   AUDIT_FIELDS,

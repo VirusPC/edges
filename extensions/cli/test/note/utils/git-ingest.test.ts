@@ -6,6 +6,7 @@ import {
   readFileSync,
   realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
@@ -416,4 +417,24 @@ test("unclassified external entry imports with its resources and commits as Note
     "bytes",
   );
   assert.match(git("show", "--format=", "--name-only", "HEAD"), /asset.txt/);
+});
+
+test('accepts a scope whose directory name begins with two dots', async t => {
+  const repo = fixture(t), scope = path.join(repo, '..draft');
+  mkdirSync(scope);
+  const result = await runNoteIngest(input,
+    { repoPath: repo, scopeDir: scope, baseBranch: 'main', mode: 'direct', dryRun: true },
+    {}, { exec: recordingExec([]), now });
+  assert.equal(result.filePath, '..draft/notes/2026-09-11--hello-world/index.md');
+});
+
+test('rejects a linked scope that resolves outside its Git repository', async t => {
+  const repo = fixture(t), outside = fixture(t), scope = path.join(repo, 'linked');
+  symlinkSync(outside, scope);
+  const calls: string[][] = [];
+  await assert.rejects(() => runNoteIngest(input,
+    { repoPath: repo, scopeDir: scope, baseBranch: 'main', mode: 'direct', dryRun: true },
+    {}, { exec: recordingExec(calls), now }), /Note scope must be inside its Git repository/);
+  assert.deepEqual(calls, [['git', '--version']]);
+  assert.equal(existsSync(path.join(outside, "notes")), false);
 });

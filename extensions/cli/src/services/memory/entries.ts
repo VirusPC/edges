@@ -1,4 +1,6 @@
-import { realPath } from "./paths.js";
+import { listTypeFiles, typeContentDir, typeIndexPath } from './types.js';
+import { canonicalPath } from '../../utils/filesystem.js';
+
 import { loadMemoryDocument, saveMemoryDocument } from "./node-documents.js";
 import {
   escapeIndexText,
@@ -16,11 +18,8 @@ import {
   assertScopePath,
   isExternalType,
   isFile,
-  listTypeFiles,
   readText,
   relativeLink,
-  typeContentDir,
-  typeIndexPath,
   writeAtomic,
 } from "./paths.js";
 import {
@@ -194,7 +193,7 @@ export function buildEntryIndex(target: string, name: string): string {
         fields.title || fields.name || entryName(file, name, target),
       ),
       path: encodeIndexPath(
-        relativeLink(isExternalType(name) ? file : realPath(file), base),
+        relativeLink(isExternalType(name) ? file : canonicalPath(file), base),
       ),
       description: escapeIndexText(
         fields.description || "缺少 description，请补齐 frontmatter。",
@@ -234,7 +233,7 @@ export async function refreshIndex(
   target: string,
   name: string,
 ): Promise<string> {
-  target = realPath(target);
+  target = canonicalPath(target);
   const file = assertScopePath(
     join(target, discoverLayerTypes(target)[name] ?? indexFileName(name)),
     target,

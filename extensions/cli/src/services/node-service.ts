@@ -1,3 +1,4 @@
+import { isWithinPath } from '../utils/filesystem.js';
 import { WRITE_LOCK_NAME, assertNoWriteLock } from "./node-lock.js";
 import * as fs from "node:fs";
 import path from "node:path";
@@ -37,7 +38,6 @@ import {
   physicalParent,
   physicalParentNode,
   rewriteLinks,
-  within,
   type Model,
 } from "./node-layout.js";
 import { query, type AsyncQuery } from "../domain/operations/query.js";
@@ -88,7 +88,7 @@ export class NodeService {
   }
   #boundary(file: string): string {
     file = checkPath(file);
-    if (!within(file, this.managedRoot))
+    if (!isWithinPath(file, this.managedRoot))
       throw new Error(`Node path escapes managedRoot: ${file}`);
     if (!identifyNodeType(file))
       throw new Error(`Unsupported node entry layout: ${file}`);
@@ -204,9 +204,9 @@ export class NodeService {
       let readonly = false;
       yield* traverse(root, options, (parent, reference) => {
         if (options.includeHarness) {
-          if (!within(reference.id, service.managedRoot)) return undefined;
+          if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           try {
-            if (!within(fs.realpathSync(reference.id), service.managedRoot)) return undefined;
+            if (!isWithinPath(fs.realpathSync(reference.id), service.managedRoot)) return undefined;
           } catch (error) {
             if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
           }
@@ -254,7 +254,7 @@ export class NodeService {
     function* roots(): Iterable<BaseNode> {
       if (root) yield root;
       for (const [file, node] of [...service.#cache.loaded])
-        if (within(file, service.managedRoot) && fs.existsSync(file)) yield node;
+        if (isWithinPath(file, service.managedRoot) && fs.existsSync(file)) yield node;
     }
     const maintenanceOnly = (node: BaseNode, ref: NodeReference) =>
       node.harness?.id === ref.id && !node.children.some(child => child.id === ref.id);
@@ -263,7 +263,7 @@ export class NodeService {
       roots(),
       { includeDescendants: true, includeHarness: true },
       (parent, ref) => {
-        if (!within(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
+        if (!isWithinPath(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
         // Maintenance discovery tolerates a missing optional entry; composition does not.
         if (maintenanceOnly(parent, ref) &&
             !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id)) return undefined;
@@ -440,7 +440,7 @@ export class NodeService {
     const units = lifecycleUnits(node.path, coLocated(node.path));
     for (const unit of units) {
       checkPath(unit);
-      if (unit === this.managedRoot || !within(unit, this.managedRoot))
+      if (unit === this.managedRoot || !isWithinPath(unit, this.managedRoot))
         throw new Error(`Cannot relocate or destroy managed root: ${unit}`);
       assertNoWriteLock(unit);
     }
@@ -466,19 +466,19 @@ export class NodeService {
       )
     )
       throw new Error("Move cannot change known business type");
-    if (within(destRoot, sourceRoot) || within(sourceRoot, destRoot))
+    if (isWithinPath(destRoot, sourceRoot) || isWithinPath(sourceRoot, destRoot))
       throw new Error("Move cannot nest owned directories");
     if (fs.existsSync(destRoot))
       throw new Error(`Node destination already exists: ${destRoot}`);
     const relocate = (file: string) =>
-      within(file, sourceRoot)
+      isWithinPath(file, sourceRoot)
         ? path.join(destRoot, path.relative(sourceRoot, file))
         : file;
     for (const file of this.#cache.loaded.keys())
-      if (within(file, destRoot))
+      if (isWithinPath(file, destRoot))
         throw new Error(`Node destination already managed: ${file}`);
     // Pending references into the destination resolve against relocated drafts in #validateGraph.
-    const registered = await this.#registered((file) => within(file, destRoot));
+    const registered = await this.#registered((file) => isWithinPath(file, destRoot));
     registered.set(node.path, node);
     for (const parentPath of [
       physicalParent(node.path, this.managedRoot),
@@ -557,10 +557,10 @@ export class NodeService {
       );
     }
     // Destination snapshots still point at the source until the rename commits.
-    await this.#validateGraph(plan, (file) => within(file, sourceRoot));
+    await this.#validateGraph(plan, (file) => isWithinPath(file, sourceRoot));
     await this.#preflight("move", plan);
     for (const write of plan.values())
-      if (write.before && within(write.before.path, sourceRoot)) {
+      if (write.before && isWithinPath(write.before.path, sourceRoot)) {
         const oldType = identifyNodeType(
           write.before.path,
           indexContract(this.#parentNode(write.before.path) ?? write.node),
@@ -588,7 +588,7 @@ export class NodeService {
       const changes: FileChange[] = [...plan.values()].map((w) => ({
         path: w.node.path,
         before:
-          w.before && within(w.before.path, sourceRoot)
+          w.before && isWithinPath(w.before.path, sourceRoot)
             ? {
                 ...w.before,
                 path: relocate(w.before.path),
@@ -628,7 +628,7 @@ export class NodeService {
     this.#existing(node, true);
     node.destroy({ operation: "destroy", parent: this.#parentNode(node.path) });
     const units = this.#unit(node).filter((unit) => fs.existsSync(unit));
-    const removed = (file: string) => units.some((unit) => within(file, unit));
+    const removed = (file: string) => units.some((unit) => isWithinPath(file, unit));
     const plan = new Map<string, Planned>();
     for (const entry of (await this.#registered()).values())
       if (!removed(entry.path) && entry instanceof InternalNode) {
@@ -748,12 +748,12 @@ export class NodeService {
       path.basename(source) !== path.basename(destination)
     )
       throw new Error("Import cannot change entry layout");
-    if (within(destRoot, sourceRoot) || within(sourceRoot, destRoot))
+    if (isWithinPath(destRoot, sourceRoot) || isWithinPath(sourceRoot, destRoot))
       throw new Error("Import cannot nest source and destination");
     if (fs.existsSync(destRoot))
       throw new Error(`Node destination already exists: ${destRoot}`);
     const relocate = (file: string) =>
-      within(file, sourceRoot)
+      isWithinPath(file, sourceRoot)
         ? path.join(destRoot, path.relative(sourceRoot, file))
         : file;
     const snapshot = resourceSnapshot(sourceRoot);
@@ -809,7 +809,7 @@ export class NodeService {
       validateResources(snapshot);
       const changes = [...plan.values()].map((w) => ({
         path: w.node.path,
-        before: within(w.node.path, destRoot)
+        before: isWithinPath(w.node.path, destRoot)
           ? readEntry(w.node.path)
           : w.before,
         source: w.source,

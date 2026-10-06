@@ -1,3 +1,4 @@
+import { canonicalPath, findAncestor } from "../../utils/filesystem.js";
 import { InternalNode } from "../../domain/models/internal-node.js";
 import * as fs from "node:fs";
 import { join, dirname, relative, resolve } from "node:path";
@@ -17,12 +18,13 @@ import {
 import {
   AGENTS_FILE_NAME,
   assertScopePath,
-  ancestors,
+  assertOwned,
+  isExternalType,
+  isSymlink,
   isDirectory,
   isFile,
   moduleForType,
   ownershipTarget,
-  realPath,
   readText,
   typeFromDirName,
   typeIndexRelpath,
@@ -131,7 +133,7 @@ export function localOwnershipPaths(
   const node = new InternalNode(file).parse(text);
   return new Set(
     node.localChildren.flatMap((reference) => {
-      const path = realPath(reference.id);
+      const path = canonicalPath(reference.id);
       return path ? [path] : [];
     }),
   );
@@ -142,7 +144,7 @@ export function layerTypeSpecs(target: string): TypeSpec[] {
     { module: "memory" | "skills"; dirname: string }
   >();
   for (const file of localOwnershipPaths(target)) {
-    const rel = relative(realPath(target), file);
+    const rel = relative(canonicalPath(target), file);
     const [harness, module, directory, entry, ...rest] = rel.split("/");
     if (
       harness === ".harness" &&
@@ -216,7 +218,7 @@ export function gitignorePatterns(
   return [`${directory}/`, `**/${directory}/`];
 }
 export const findGitRoot = (start: string) =>
-  ancestors(start).find((p) => fs.existsSync(join(p, ".git")));
+  findAncestor(start, p => fs.existsSync(join(p, ".git")));
 export function ensureTypeGitignore(
   root: string,
   name: string,
@@ -282,4 +284,64 @@ export function selectedLocalBlock(specs: TypeSpec[]): string {
       spec.description || spec.name,
     );
   return block;
+}
+
+export const typeIndexPath = (target: string, name: string) =>
+  join(target, discoverLayerTypes(target)[name] ?? typeIndexRelpath(name));
+export const typeContentDir = (target: string, name: string) =>
+  isExternalType(name)
+    ? join(target, ".agents/skills")
+    : dirname(typeIndexPath(target, name));
+export function listTypeFiles(
+  target: string,
+  name: string,
+  pattern = "*.md",
+): string[] {
+  const directory = typeContentDir(target, name),
+    external = isExternalType(name);
+  if (!external) assertScopePath(directory, target);
+  if (!fs.existsSync(directory))
+    throw new Error(`source-scan-error: missing source ${directory}`);
+  if (!isDirectory(directory))
+    throw new Error(`source-scan-error: not a directory ${directory}`);
+  const paths: string[] = [],
+    seen = new Set<string>();
+  for (const item of fs.readdirSync(directory).sort()) {
+    if (item.startsWith(".node-")) continue;
+    const child = join(directory, item);
+    if (isSymlink(child) && !fs.existsSync(child))
+      throw new Error(`source-scan-error: broken link ${child}`);
+    if (
+      pattern !== "*/SKILL.md" &&
+      item.startsWith(`${name}_`) &&
+      item.endsWith(".md") &&
+      isFile(child)
+    )
+      throw new Error(
+        `migration-required: legacy standalone memory entry ${child}; use explicit directory migration`,
+      );
+    let candidate: string;
+    if (pattern === "*/SKILL.md") {
+      if (!isDirectory(child)) continue;
+      candidate = join(child, "SKILL.md");
+      if (!fs.existsSync(candidate)) {
+        if (isSymlink(candidate))
+          throw new Error(`source-scan-error: broken link ${candidate}`);
+        continue;
+      }
+    } else if (isDirectory(child) && item.startsWith(`${name}_`)) {
+      candidate = join(child, "index.md");
+      if (!isFile(candidate)) continue;
+    } else {
+      continue;
+    }
+    if (!external) assertOwned(candidate, directory);
+    readText(candidate);
+    const real = canonicalPath(candidate);
+    if (!seen.has(real)) {
+      seen.add(real);
+      paths.push(candidate);
+    }
+  }
+  return paths;
 }
