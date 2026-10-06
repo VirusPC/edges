@@ -87,4 +87,6 @@ format: ordinary
 - [节点模型落地前先写 spec 与 ADR](<project_grill_q16_spec_and_adr_first/index.md>) — 改递归系统二入口、entries 标记或 INDEX 迁移前：先完成设计 spec 与 ADR 并经人审，再 writing\-plans；本步不写生产代码。
 
 - [四种入口可组织；README 下层仍 README；虚拟根须显式 flag](<project_grill_arch_all_org_readme_virtual_flag/index.md>) — 改 traverse/架构图时：AGENTS/README/INDEX/SKILL 均可因组成登记成组织节点；README 下层内容只挂 README；虚拟系统入口须显式 flag，不因缺 AGENTS 自动合成。entryKind 枚举另议。
+
+- [BaseNode 直继；type 含 agents/readme/text](<project_grill_basenode_type_agents_readme_text/index.md>) — 改节点类层次或 type 时：取消 Internal/Leaf/internal；各节点直继 BaseNode；type 为 agents\|readme\|task\|memory\|note\|skill\|text（普通文本兜底）；不另造 entryKind。
 <!-- project-memory-entries:end -->

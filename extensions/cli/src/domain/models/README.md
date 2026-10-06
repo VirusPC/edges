@@ -19,7 +19,7 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 
 ## 类与节点关系（当前实现）
 
-> 目标语义见上链「架构图」：统一文档节点 + 组成登记派生组织/叶子，无持久 `isLeaf`。下图仍是**现行代码**形状，落地前勿当作目标合同。
+> 目标语义见上链「架构图」：各节点直继 BaseNode；`type` 含 `agents`/`readme`/`text`；无 Internal/Leaf/internal；组成登记派生组织/叶子。下图仍是**现行代码**形状，落地前勿当作目标合同。
 
 ```mermaid
 classDiagram
@@ -73,8 +73,8 @@ classDiagram
 
 - `id` 等于规范化的绝对入口路径，例如 `/repo/notes/example/index.md`；`directoryPath` 是入口所在目录。移动节点会改变路径与 ID，由 Service 协调。
 - `name`、`description` 是可选内容字段。引用只携带 `id/name/description`，无需先加载完整节点。
-- `type` 区分 `internal/task/memory/note/skill/leaf` 等模型；Memory 的 `memoryType` 是另一个维度，用于区分 project、feedback 等记忆内容。
-- `isLeaf` 表示是否为内容叶节点。目录中存在图片、附件、子文件夹或自己的 harness，都不会把 SkillNode 等叶节点变成 InternalNode。
+- `type`（现行）区分 `internal/task/memory/note/skill/leaf`；**目标**为 `agents/readme/task/memory/note/skill/text`（见设计 spec）。Memory 的 `memoryType` 是另一个维度。
+- `isLeaf`（现行）区分 Internal/Leaf；**目标**取消该持久字段，组织/叶子看组成登记。
 - `parent` 由 Service 根据物理目录和管理边界恢复。跨目录引用可以组成图，但不另行改变被引用节点的 parent；没有脱离目录的公开 `reparent` 操作。
 
 ### 本层、下层与 harness

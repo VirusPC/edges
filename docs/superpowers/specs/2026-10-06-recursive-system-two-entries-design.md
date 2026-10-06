@@ -42,9 +42,17 @@ flowchart TB
   S --> Leaf
 ```
 
-### 2. 目标领域形状（无 Internal / Leaf 类层次）
+### 2. 目标领域形状：BaseNode 直继 + `type`
 
-`entryKind`（或等价判别）**枚举待定**（见开放题）。类图须显式包含 `AGENTS.md` 对应节点，不能只有 Task/Memory/Note/Skill。下图用文件合同标注角色，避免未定枚举名。
+取消 `InternalNode` / `LeafNode` / `internal`。所有具体节点**直接**继承 `BaseNode`。沿用并扩展既有 `type` 字段，**不另造 `entryKind`**。
+
+| `type` | 入口文件 | 含义 |
+| --- | --- | --- |
+| `agents` | `AGENTS.md` | 系统入口 |
+| `readme` | `README.md` | 组织清单 |
+| `task` / `memory` / `note` | `INDEX.md` | 业务内容 |
+| `skill` | `SKILL.md` | Skill |
+| `text` | 通常 `INDEX.md` | 兜底：普通文本内容 |
 
 ```mermaid
 classDiagram
@@ -55,9 +63,10 @@ classDiagram
     description?: string
   }
 
-  class DocumentNode {
+  class BaseNode {
     path: string
     directoryPath: string
+    type: agents|readme|task|memory|note|skill|text
     constraints?: string[]
     localChildren: NodeReference[]
     descendantChildren: NodeReference[]
@@ -69,41 +78,34 @@ classDiagram
     parse / serialize / validate
   }
 
-  class AgentsNode {
-    <<AGENTS.md>>
-    系统入口
-  }
-  class ReadmeNode {
-    <<README.md>>
-    组织清单
-  }
-  class IndexNode {
-    <<INDEX.md>>
-    Task / Note / Memory 等
-  }
-  class SkillNode {
-    <<SKILL.md>>
+  class AgentsNode
+  class ReadmeNode
+  class TaskNode
+  class MemoryNode
+  class NoteNode
+  class SkillNode
+  class TextNode {
+    普通文本内容
   }
   class VirtualSystemEntry {
     <<runtime only>>
     不落盘
     须显式 flag
-    localChildren: NodeReference[]
   }
 
-  NodeReference <|.. DocumentNode
-  DocumentNode <|-- AgentsNode
-  DocumentNode <|-- ReadmeNode
-  DocumentNode <|-- IndexNode
-  DocumentNode <|-- SkillNode
-  IndexNode <|-- TaskNode
-  IndexNode <|-- MemoryNode
-  IndexNode <|-- NoteNode
-  DocumentNode ..> NodeReference : parent / harness / children
+  NodeReference <|.. BaseNode
+  BaseNode <|-- AgentsNode
+  BaseNode <|-- ReadmeNode
+  BaseNode <|-- TaskNode
+  BaseNode <|-- MemoryNode
+  BaseNode <|-- NoteNode
+  BaseNode <|-- SkillNode
+  BaseNode <|-- TextNode
+  BaseNode ..> NodeReference : parent / harness / children
   VirtualSystemEntry ..> NodeReference : 挂顶层入口
 ```
 
-说明：`DocumentNode` 是语义名，实施时可继续叫 `BaseNode`；**任意节点都可持有组成**。业务子类（Task/Memory/Note）挂在 `INDEX.md` 合同下；系统入口与组织清单是一等节点，不是「缺了的 entryKind」。
+组成能力在基类；组织/叶子由是否有组成登记派生。旧 `type: "internal"` 读兼容，写只发 `agents`。
 
 ### 3. 同目录双文件 + 同合同下层递归
 
@@ -193,7 +195,7 @@ flowchart TB
 | 架构审 1 | 四种入口均可因组成登记成为组织节点 |
 | 架构审 3 | 下层同合同递归：AGENTS→AGENTS，README→README |
 | 架构审 4 | 虚拟根须显式 flag；缺 AGENTS 不自动虚拟化 |
-| 架构审 2 | `entryKind` 枚举待定；类图须含 AGENTS 节点（见开放题） |
+| Q17 | 取消 Internal/Leaf/internal；各节点直继 BaseNode；`type` 扩展 `agents`/`readme`/`text`，不另造 entryKind |
 
 ## 入口合同
 
@@ -264,7 +266,7 @@ flowchart TB
 - 根 README 增加本层内容登记（Q9b）。
 - 可预览脚本：`index.md`→`INDEX.md`，复用 `operations/traverse`，含 `posts/`（仅改名；不改博客正文）。
 - project harness init skill 待办（已有卡则跟卡）。
-- 弱化 InternalNode/LeafNode 固定类层次（或文档标明过时）；领域不持久化 isLeaf。
+- 去掉 InternalNode/LeafNode/internal；`type` 写入 `agents`/`readme`/`text`；领域不持久化 isLeaf。
 - CONTEXT / ADR 0029 / models README 与本 spec 对齐（文档可在审前先改术语）。
 
 **非目标：**
@@ -292,8 +294,7 @@ flowchart TB
 
 ## 开放实施题（不阻塞本 spec 语义）
 
-- **入口判别 / `entryKind`：** 用户指出原 `system | organization | content | skill` 待商榷，且类图曾漏掉 AGENTS。候选见下问；定稿前代码勿写死该枚举。
 - 类型入口是否迁到 README+`project-entries-*`，或暂时保留 `project-memory-entries`。
-- InternalNode 类是删除还是降为兼容别名。
+- 旧 `InternalNode` / `LeafNode` 类是删除还是短暂兼容别名（语义上已取消）。
 - PROTOCOL 文件名合同（类型入口仍写 AGENTS 还是改 README）的改稿顺序。
 - 虚拟根显式 flag 的具体名字（如 `--virtual-root`）与挂载默认值。
