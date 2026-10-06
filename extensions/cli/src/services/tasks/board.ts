@@ -382,9 +382,10 @@ export type RepositoryTaskItem = TaskListItem & {
 /** Shared projection for repository CLI lists and the persistent dashboard. */
 export async function listRepositoryTasksWithDocs(
   root: string, opts: TaskListOpts = {}, purpose?: import("./paths.js").TaskPurpose,
+  traversal: { super?: boolean } = {},
 ): Promise<RepositoryTaskItem[]> {
   root = realpathSync(root);
-  const nodes = await listRepositoryTaskNodes(root);
+  const nodes = await listRepositoryTaskNodes(root, traversal);
   const rows = await query(async function* () { yield* nodes; })
     .map(node => ({ node, location: taskLocationOf(node, root) }))
     .filter(({ location }) => !purpose || location.source.purpose === purpose)

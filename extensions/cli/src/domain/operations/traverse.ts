@@ -10,6 +10,8 @@ export interface ScopeTraversalOptions {
   /** @deprecated Prefer localOnly. Default true; false is equivalent to localOnly. */
   includeDescendants?: boolean;
   includeHarness?: boolean;
+  /** Explicit `--super`: root traversal at a runtime SuperAgentsNode over the Edges root README.md. */
+  super?: boolean;
 }
 
 /**

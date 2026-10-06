@@ -79,6 +79,10 @@ function addRootCommand(
       "--scope <directory>",
       "Target content scope (default: EDGES_SCOPE, EDGES_REPO, or cwd owner)",
     )
+    .option(
+      "--super",
+      "Root at a runtime SuperAgentsNode over the Edges root README.md (never written to disk)",
+    )
     .description("Edges CLI: notes, tasks, artifacts, and more")
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help")
@@ -88,7 +92,8 @@ function addRootCommand(
     .helpCommand(false);
 
   program.hook("preAction", async (_program, command) => {
-    const scope = program.opts<{ scope?: string }>().scope;
+    const { scope, super: useSuper } = program.opts<{ scope?: string; super?: boolean }>();
+    if (useSuper) ctx.super = true;
     if (scope !== undefined) ctx.env = { ...ctx.env, EDGES_SCOPE: scope };
     const target = commandWriteTarget(command, ctx.env);
     if (target !== undefined) await beforeWrite?.(target);

@@ -67,11 +67,12 @@ export async function listTaskNodes(
 }
 export async function listRepositoryTaskNodes(
   root: string,
+  options: { super?: boolean } = {},
 ): Promise<TaskNode[]> {
   const canonicalRoot = fs.realpathSync(root);
   const service = new NodeService({ managedRoot: canonicalRoot });
   return service.query(canonicalRoot, {
-    types: ["task"], includeHarness: true,
+    types: ["task"], includeHarness: true, super: options.super,
   })
     .filter((node): node is TaskNode => node instanceof TaskNode)
     .value();

@@ -1,8 +1,9 @@
-import { isWithinPath } from '../../utils/filesystem.js';
+import { isWithinPath, findAncestor } from '../../utils/filesystem.js';
+import { isGitBoundary } from '../scope.js';
 import { WRITE_LOCK_NAME, assertNoWriteLock } from "./node-lock.js";
 import * as fs from "node:fs";
 import path from "node:path";
-import { BaseNode, AgentsNode } from "../../domain/models/index.js";
+import { BaseNode, AgentsNode, SuperAgentsNode } from "../../domain/models/index.js";
 import type { ChildGroup, NodeReference } from "../../domain/models/index.js";
 import type { ScopeTraversalOptions, NodeQueryOptions } from "../../domain/operations/traverse.js";
 import {
@@ -194,6 +195,16 @@ export class NodeService {
     if (!node) throw new Error(`Missing referenced node: ${reference.id}`);
     return node;
   }
+  /** Runtime-only super entry: one level above the scope, mounting the Edges root README.md. */
+  #superRoot(scopePath: string): SuperAgentsNode {
+    const scopeDir = path.basename(scopePath) === "AGENTS.md"
+      ? path.dirname(path.resolve(scopePath)) : path.resolve(scopePath);
+    const edgesRoot = findAncestor(scopeDir, isGitBoundary) ?? scopeDir;
+    const readme = path.join(edgesRoot, "README.md");
+    if (!fs.existsSync(readme))
+      throw new Error(`--super requires the Edges root README.md: ${readme}`);
+    return new SuperAgentsNode(scopeDir, [{ id: readme }]);
+  }
   /** Deferred, streaming reads with entry snapshots only. Before moving or
    * destroying a returned node, call get(node.path) to capture its resources. */
   query(scopePath: string, options: NodeQueryOptions = {}): AsyncQuery<BaseNode> {
@@ -201,8 +212,13 @@ export class NodeService {
     return query(async function* () {
       const entry = path.basename(scopePath) === "AGENTS.md"
         ? path.resolve(scopePath) : path.join(path.resolve(scopePath), "AGENTS.md");
-      const root = await service.#read(entry, AgentsNode, false, false);
-      if (!root) throw new Error(`Missing scope entry: ${entry}`);
+      const root = options.super
+        ? service.#superRoot(scopePath)
+        : await service.#read(entry, AgentsNode, false, false);
+      if (!root)
+        throw new Error(
+          `Missing scope entry: ${entry}. Add AGENTS.md or pass --super to root at the Edges root README.md.`,
+        );
       // resolve and load are sequential; carry this edge's policy into its one load.
       let readonly = false;
       yield* traverse(root, options, (parent, reference) => {

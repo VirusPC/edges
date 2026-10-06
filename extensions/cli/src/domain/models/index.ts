@@ -6,6 +6,7 @@ export { MemoryNode } from "./memory/memory-node.js";
 export { NoteNode } from "./notes/note-node.js";
 export { SkillNode } from "./skills/skill-node.js";
 export { AgentsNode } from "./internal/agents-node.js";
+export { SuperAgentsNode } from "./internal/super-agents-node.js";
 /** @deprecated Use AgentsNode. */
 export { AgentsNode as InternalNode } from "./internal/agents-node.js";
 export { ReadmeNode } from "./readme/readme-node.js";
