@@ -1,4 +1,3 @@
-import { mergeNode } from "./node-merge.js";
 /** Loaded instance identity and optimistic snapshots. Not a public domain API. */
 import * as fs from "node:fs";
 import { BaseNode } from "../models/index.js";
@@ -6,19 +5,14 @@ import { harnessPath } from "../models/layout.js";
 import { setNodeRelations, setNodePath } from "../models/relations.js";
 import { readEntry, validateEntry, type EntryFile } from "./node-files.js";
 import { resourceSnapshot, type ResourceSnapshot } from "./node-resources.js";
-import {
-  physicalParent,
-  within,
-  rewriteLinks,
-  type Model,
-} from "./node-layout.js";
+import { physicalParent, within } from "./node-layout.js";
 interface Loaded {
   file: EntryFile;
   readOnly: boolean;
   resources?: ResourceSnapshot;
 }
 export class NodeCache {
-  readonly loaded = new Map<string, Set<BaseNode>>();
+  readonly loaded = new Map<string, BaseNode>();
   readonly state = new WeakMap<BaseNode, Loaded>();
   readonly readOnly = new Set<string>();
   constructor(readonly managedRoot: string) {}
@@ -34,6 +28,9 @@ export class NodeCache {
     });
   }
   remember(node: BaseNode, file: EntryFile, readOnly = false, captureResources = true): void {
+    const current = this.loaded.get(node.path);
+    if (current && current !== node)
+      throw new Error(`Node already managed: ${node.path}`);
     let resources: ResourceSnapshot | undefined;
     if (captureResources && node.directoryPath !== this.managedRoot && !readOnly) {
       // Preserve the entry snapshot retained by traversal; a fresh read must not
@@ -47,14 +44,7 @@ export class NodeCache {
       this.readOnly.add(node.directoryPath);
       this.readOnly.add(file.realDirectory);
     }
-    const instances = this.loaded.get(node.path) ?? new Set();
-    if (resources) for (const instance of instances) {
-      const previous = this.state.get(instance)!;
-      if (!previous.resources && previous.file.source === file.source && previous.file.inode === file.inode && previous.file.device === file.device && previous.file.realPath === file.realPath && previous.file.realDirectory === file.realDirectory)
-        previous.resources = resources;
-    }
-    instances.add(node);
-    this.loaded.set(node.path, instances);
+    this.loaded.set(node.path, node);
     this.relations(node);
   }
   /** Upgrade a materialized query result while retaining its entry identity. */
@@ -63,55 +53,12 @@ export class NodeCache {
     if (!state || state.resources || state.readOnly || node.directoryPath === this.managedRoot) return;
     this.remember(node, state.file, state.readOnly);
   }
-  #mergedSource(
-    node: BaseNode,
-    file: string,
-    source: string,
-    primary: BaseNode | undefined,
-    relocate: (file: string) => string,
-  ): string {
-    const previous = this.state.get(node)!.file;
-    const baseline = new (node.constructor as Model)(node.path).parse(
-      previous.source,
-    );
-    if (node === primary || node.serialize() === baseline.serialize())
-      return source;
-    const dirtySource = rewriteLinks(
-      node.serialize(),
-      node.path,
-      file,
-      relocate,
-    );
-    const Model = node.constructor as Model;
-    const before = new Model(file).parse(
-      rewriteLinks(previous.source, node.path, file, relocate),
-    );
-    return mergeNode(
-      before,
-      new Model(file).parse(dirtySource),
-      new Model(file).parse(source),
-    );
-  }
-  assertRefresh(
-    sources: ReadonlyMap<string, string>,
-    primary?: BaseNode,
-    relocate: (file: string) => string = (file) => file,
-  ): void {
-    for (const aliases of this.loaded.values())
-      for (const node of aliases) {
-        const file = relocate(node.path),
-          source = sources.get(file);
-        if (source !== undefined)
-          this.#mergedSource(node, file, source, primary, relocate);
-      }
-  }
   refresh(
     relocate: (file: string) => string = (file) => file,
     removed: (file: string) => boolean = () => false,
-    primary?: BaseNode,
     changed: ReadonlySet<string> = new Set(),
   ): void {
-    const instances = [...this.loaded.values()].flatMap((set) => [...set]);
+    const instances = [...this.loaded.values()];
     this.loaded.clear();
     for (const node of instances) {
       const old = node.path,
@@ -123,9 +70,7 @@ export class NodeCache {
       }
       const file = relocate(old);
       if (file === old && !changed.has(file)) {
-        const group = this.loaded.get(file) ?? new Set<BaseNode>();
-        group.add(node);
-        this.loaded.set(file, group);
+        this.loaded.set(file, node);
         this.relations(node);
         if (
           state.resources &&
@@ -140,15 +85,8 @@ export class NodeCache {
         setNodeRelations(node, {});
         continue;
       }
-      const merged = this.#mergedSource(
-        node,
-        file,
-        entry.source,
-        primary,
-        relocate,
-      );
       setNodePath(node, file);
-      node.parse(merged);
+      node.parse(entry.source);
       this.remember(node, entry, state.readOnly);
     }
   }

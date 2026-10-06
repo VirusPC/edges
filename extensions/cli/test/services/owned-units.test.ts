@@ -62,7 +62,7 @@ test("resource inode drift since load prevents destructive directory movement an
   await assert.rejects(service.destroy(node), /resources changed/);
   assert.equal(fs.existsSync(node.path), true);
 });
-test("move persists requested unsaved body and keeps all aliases usable after relocation", async (t) => {
+test("move persists requested unsaved body and keeps shared references usable after relocation", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [Kept](old/index.md) — Details"));
   write("old/index.md", "---\nid: user-data\n---\nBefore\n");
@@ -138,6 +138,8 @@ test("multi-document move rollback restores directory and both parent indexes af
   write("outside.md", "outside");
   const node = (await service.get(file("a/unit/index.md")))!;
   const before = fs.readFileSync(file("a/AGENTS.md"), "utf8");
+  const parent = (await service.get(file("a/AGENTS.md"), InternalNode))!;
+  parent.setConstraints(["Pending parent"]);
   const { default: mutableFs } = await import("node:fs");
   const { syncBuiltinESMExports } = await import("node:module");
   const rename = mutableFs.renameSync;
@@ -162,6 +164,8 @@ test("multi-document move rollback restores directory and both parent indexes af
   assert.equal(node.path, file("a/unit/index.md"));
   assert.equal(fs.existsSync(file("b/unit")), false);
   assert.equal(fs.readFileSync(file("a/AGENTS.md"), "utf8"), before);
+  assert.deepEqual(parent.constraints, ["Pending parent"]);
+  assert.equal(parent.children[0]?.id, node.path);
 });
 test("failed index rollback retains original source in a named recovery document", async (t) => {
   const { root, file, write, service } = fixture(t);
@@ -358,7 +362,7 @@ test("cross-parent move transfers authored query and fragment to the new parent 
   );
   assert.match(fs.readFileSync(file("b/AGENTS.md"), "utf8"), /Kept/);
 });
-test("dirty constraints merge committed creation and survive the next save", async (t) => {
+test("dirty constraints are saved with creation and survive the next save", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index());
   const parent = (await service.get(file("AGENTS.md"), InternalNode))!;
@@ -369,7 +373,7 @@ test("dirty constraints merge committed creation and survive the next save", asy
   await service.update(parent, {});
   assert.match(fs.readFileSync(parent.path, "utf8"), /child\/index.md/);
 });
-test("dirty old and new parent aliases merge cross-parent move registration", async (t) => {
+test("dirty old and new parents save cross-parent move registration", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [A](a/AGENTS.md)\n- [B](b/AGENTS.md)"));
   write("a/AGENTS.md", index("- [Child](child/index.md)"));
@@ -391,7 +395,7 @@ test("dirty old and new parent aliases merge cross-parent move registration", as
   assert.deepEqual(a.constraints, ["A dirty"]);
   assert.deepEqual(b.constraints, ["B dirty"]);
 });
-test("overlapping dirty reference edits conflict before a committed update writes", async (t) => {
+test("shared reference edits save the latest assigned label", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [Original](child/index.md)"));
   write("child/index.md", "child");
@@ -399,10 +403,10 @@ test("overlapping dirty reference edits conflict before a committed update write
     other = (await service.get(dirty.path, InternalNode))!;
   dirty.updateChild(file("child/index.md"), { name: "Dirty" });
   other.updateChild(file("child/index.md"), { name: "Other" });
-  const before = fs.readFileSync(dirty.path, "utf8");
-  await assert.rejects(service.update(other, {}), /conflict/i);
-  assert.equal(fs.readFileSync(dirty.path, "utf8"), before);
-  assert.equal(dirty.children[0]?.name, "Dirty");
+  assert.strictEqual(dirty, other);
+  await service.update(other, {});
+  assert.match(fs.readFileSync(dirty.path, "utf8"), /Other/);
+  assert.equal(dirty.children[0]?.name, "Other");
 });
 test("move rejects destination readonly type contract without changing either index or source", async (t) => {
   const { file, write, service } = fixture(t);
@@ -469,7 +473,7 @@ test("link relocation distinguishes destination from title delimiters and escape
     '[x](../../asset.png "see ](example)")\n![a [nested] label](../../asset.png "title ](foo)")\n[escaped \\] label](../../asset.png "safe")',
   );
 });
-test("dirty reference name and committed group changes merge independently", async (t) => {
+test("shared reference name and group changes save together", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [Original](child/index.md)"));
   write("child/index.md", "child");
@@ -539,20 +543,20 @@ test("unrelated create preserves dirty query and fragment through refresh and su
     /a\/index.md\?dirty=1#dirty/,
   );
 });
-test("divergent suffix edits conflict before writes while leaving dirty syntax intact", async (t) => {
+test("shared suffix edits follow sequential assignment", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [A](a/index.md#old)"));
   write("a/index.md", "a");
   const dirty = (await service.get(file("AGENTS.md"), InternalNode))!,
     other = (await service.get(file("AGENTS.md"), InternalNode))!;
   dirty.body = dirty.body.replace("#old", "#dirty");
-  other.body = other.body.replace("#old", "?committed=1#other");
-  const before = fs.readFileSync(dirty.path, "utf8");
-  await assert.rejects(service.update(other, {}), /conflict/i);
-  assert.equal(fs.readFileSync(dirty.path, "utf8"), before);
-  assert.match(dirty.body, /#dirty/);
+  other.body = other.body.replace("#dirty", "?committed=1#other");
+  assert.strictEqual(dirty, other);
+  await service.update(other, {});
+  assert.match(fs.readFileSync(dirty.path, "utf8"), /\?committed=1#other/);
+  assert.match(dirty.body, /\?committed=1#other/);
 });
-test("committed suffix removal merges into an alias with unrelated dirty constraints", async (t) => {
+test("shared suffix removal saves current dirty constraints", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [A](a/index.md#old)"));
   write("a/index.md", "a");

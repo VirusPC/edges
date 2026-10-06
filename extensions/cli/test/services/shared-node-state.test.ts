@@ -7,7 +7,7 @@ import { InternalNode, LeafNode, TaskNode } from "../../src/models/index.js";
 import { NodeService } from "../../src/services/node-service.js";
 function fixture(t: { after(fn: () => void): void }) {
   const root = fs.mkdtempSync(
-    path.join(fs.realpathSync(tmpdir()), "alias-merge-"),
+    path.join(fs.realpathSync(tmpdir()), "shared-state-"),
   );
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(path.join(root, "child"));
@@ -18,7 +18,7 @@ function fixture(t: { after(fn: () => void): void }) {
   };
 }
 for (const operation of ["move", "update"] as const) {
-  test(`dirty Leaf body retains committed nested metadata after ${operation} and subsequent save`, async (t) => {
+  test(`shared Leaf body saves sequential nested metadata after ${operation} and subsequent save`, async (t) => {
     const { file, service } = fixture(t);
     const primary = await service.create(
       new TaskNode(file("tasks/demo/todo/one/index.md")),
@@ -45,7 +45,6 @@ for (const operation of ["move", "update"] as const) {
     assert.deepEqual(alias.metadata?.vendor, {
       keep: true,
       version: 2,
-      local: "pending",
     });
     await service.update(alias, {});
     const saved = (await service.get(alias.path, TaskNode))!;
@@ -56,11 +55,10 @@ for (const operation of ["move", "update"] as const) {
     assert.deepEqual(saved.metadata?.vendor, {
       keep: true,
       version: 2,
-      local: "pending",
     });
   });
 }
-test("dirty Leaf metadata retains committed body and metadata removal after subsequent save", async (t) => {
+test("shared Leaf metadata retains updated body and metadata removal after subsequent save", async (t) => {
   const { file, service } = fixture(t);
   const primary = await service.create(new LeafNode(file("one/index.md")), {
     body: "Before\n",
@@ -79,7 +77,7 @@ test("dirty Leaf metadata retains committed body and metadata removal after subs
   assert.deepEqual(saved.metadata?.vendor, { keep: 1 });
 });
 const body = `# Root\n\nIntro unchanged.\n\n<!-- project-memory-important:start -->\n- Original constraint\n<!-- project-memory-important:end -->\n\n<!-- project-memory-local:start -->\n- [Child](child/index.md) — Original description\n<!-- keep this comment -->\n<!-- project-memory-local:end -->\n\nTail unchanged.\n`;
-test("dirty Internal constraints and reference edits retain committed authored prose and structural changes", async (t) => {
+test("shared Internal constraints and reference edits retain authored prose and structural changes", async (t) => {
   const { file, service } = fixture(t);
   const primary = await service.create(new InternalNode(file("AGENTS.md")), {
     body,
@@ -107,7 +105,7 @@ test("dirty Internal constraints and reference edits retain committed authored p
   assert.deepEqual(saved.constraints, ["Pending constraint"]);
   assert.equal(saved.descendantChildren[0]?.name, "Pending label");
 });
-test("independent Leaf body edits merge without losing authored whitespace", async (t) => {
+test("sequential shared Leaf body edits preserve authored whitespace", async (t) => {
   const { file, service } = fixture(t);
   const primary = await service.create(new LeafNode(file("one/index.md")), {
     body: "# First\n\nMiddle  \n\nLast\n",
@@ -124,71 +122,47 @@ test("independent Leaf body edits merge without losing authored whitespace", asy
   );
 });
 for (const field of ["body", "metadata", "internal prose"] as const) {
-  test(`divergent ${field} conflicts reject before IO and leave snapshots usable`, async (t) => {
+  test(`sequential shared ${field} edits save the last assignment`, async (t) => {
     const { file, service } = fixture(t);
-    const primary =
-      field === "internal prose"
-        ? await service.create(new InternalNode(file("AGENTS.md")), { body })
-        : await service.create(new LeafNode(file("one/index.md")), {
-            body: "Original\n",
-            metadata: { vendor: { version: 1 } },
-          });
+    const primary = field === "internal prose"
+      ? await service.create(new InternalNode(file("AGENTS.md")), { body })
+      : await service.create(new LeafNode(file("one/index.md")), { body: "Original\n", metadata: { vendor: { version: 1 } } });
     const alias = (await service.get(primary.path))!;
+    assert.strictEqual(alias, primary);
     if (field === "metadata") {
-      alias.setMetadata("vendor", { version: 2 });
+      alias.setMetadata("vendor", { version: 2, pending: true });
       primary.setMetadata("vendor", { version: 3 });
+      assert.deepEqual(alias.metadata?.vendor, { version: 3 });
     } else {
-      alias.body = alias.body.replace(
-        field === "body" ? "Original" : "# Root",
-        "Local",
-      );
-      primary.body = primary.body.replace(
-        field === "body" ? "Original" : "# Root",
-        "Committed",
-      );
+      alias.body = "Local\n";
+      primary.body = "Committed\n";
+      assert.equal(alias.body, "Committed\n");
     }
-    const before = fs.readFileSync(primary.path, "utf8");
-    await assert.rejects(service.update(primary, {}), /conflict/i);
-    assert.equal(fs.readFileSync(primary.path, "utf8"), before);
-    primary.parse(before);
-    await service.update(alias, {});
+    await service.update(primary, {});
     assert.equal(fs.readFileSync(alias.path, "utf8"), alias.serialize());
   });
 }
-test("conflicting Task metadata rejects directory movement before any path changes", async (t) => {
+test("shared Task status assignment survives directory movement", async (t) => {
   const { file, service } = fixture(t);
-  const primary = await service.create(
-    new TaskNode(file("tasks/demo/todo/one/index.md")),
-    { status: "todo", body: "Original\n" },
-  );
+  const primary = await service.create(new TaskNode(file("tasks/demo/todo/one/index.md")), { status: "todo", body: "Original\n" });
   const alias = (await service.get(primary.path, TaskNode))!;
   alias.status = "backlog";
   primary.status = "done";
-  const before = fs.readFileSync(primary.path, "utf8");
-  await assert.rejects(
-    service.move(primary, file("tasks/demo/done/one/index.md")),
-    /conflict/i,
-  );
-  assert.equal(fs.existsSync(file("tasks/demo/done/one")), false);
-  assert.equal(fs.readFileSync(primary.path, "utf8"), before);
-  assert.equal(alias.path, primary.path);
+  const oldPath = primary.path;
+  await service.move(primary, file("tasks/demo/done/one/index.md"));
+  assert.equal(fs.existsSync(oldPath), false);
+  assert.strictEqual(alias, primary);
+  assert.equal(alias.status, "done");
+  assert.match(fs.readFileSync(alias.path, "utf8"), /Original/);
+  assert.strictEqual(await service.get(primary.path), primary);
 });
-
-test("different edits on the same authored line conflict before writing or advancing either alias", async (t) => {
+test("update input overwrites the shared body's latest assignment", async (t) => {
   const { file, service } = fixture(t);
-  const primary = await service.create(new LeafNode(file("one/index.md")), {
-    body: "First and last\n",
-  });
+  const primary = await service.create(new LeafNode(file("one/index.md")), { body: "First and last\n" });
   const alias = (await service.get(primary.path))!;
   alias.body = "Local first and last\n";
-  const before = fs.readFileSync(primary.path, "utf8");
-  await assert.rejects(
-    service.update(primary, { body: "First and committed last\n" }),
-    /conflict.*body/i,
-  );
-  assert.equal(fs.readFileSync(primary.path, "utf8"), before);
-  assert.equal(alias.body, "Local first and last\n");
-  assert.equal(primary.body, "First and last\n");
-  await service.update(alias, {});
-  assert.equal(fs.readFileSync(alias.path, "utf8"), "Local first and last\n");
+  await service.update(primary, { body: "First and committed last\n" });
+  assert.strictEqual(primary, alias);
+  assert.equal(alias.body, "First and committed last\n");
+  assert.equal(fs.readFileSync(alias.path, "utf8"), alias.body);
 });

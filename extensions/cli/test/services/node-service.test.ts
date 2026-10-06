@@ -208,7 +208,7 @@ test("composition cycles reject while diamond crossreferences do not invent conf
     file("AGENTS.md"),
   );
   write("b/AGENTS.md", index("- [root](../AGENTS.md)"));
-  await assert.rejects(service.list(root), /cycle/i);
+  await assert.rejects(new NodeService({managedRoot: root}).list(root), /cycle/i);
 });
 test("registered type contracts choose memory and custom constructors without YAML inference", async (t) => {
   const { root, file, write, service } = fixture(t);
@@ -289,7 +289,8 @@ test("authoritative AGENTS graph validation catches cycles from typed BaseNode a
     service.update(a, { body: index("- [self](AGENTS.md)") }),
     /cycle/i,
   );
-  assert.equal(a.children.length, 0);
+  assert.equal(a.children.length, 1);
+  assert.equal(a.children[0]?.id, file("b/AGENTS.md"));
   await assert.rejects(
     service.create(new BaseNode(file("new/AGENTS.md")), {
       body: index("- [self](AGENTS.md)"),
@@ -378,7 +379,7 @@ test("encoded directory delimiters stay distinct from href query and fragment", 
     ].map(file),
   );
 });
-test("cached clean copies update while unrelated unsaved constraints survive", async (t) => {
+test("shared cached references save current constraints and reference changes", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index("- [Child](child/index.md)"));
   write("child/index.md", "child");
@@ -440,7 +441,7 @@ test('typed queries keep internal navigation, skip unrelated bodies and preserve
   assert.deepEqual((await service.query(root, { types: ['task'], includeDescendants: true, includeHarness: true }).value()).map(n => path.basename(n.directoryPath)), ['one','two','three']);
   await assert.rejects(service.list(root), /bad\/index.md/);
   write('tasks/_default/todo/one/index.md', '---\nbad: [\n---\n');
-  await assert.rejects(service.query(root, { types: ['task'] }).value(), /one\/index.md/);
+  await assert.rejects(new NodeService({managedRoot: root}).query(root, { types: ['task'] }).value(), /one\/index.md/);
 });
 test('harness traversal deduplicates composition arrivals and detects cycles', async t => {
   const { root, write, service } = fixture(t);
@@ -448,7 +449,7 @@ test('harness traversal deduplicates composition arrivals and detects cycles', a
   write('.harness/AGENTS.md', index());
   assert.equal((await service.query(root, { includeHarness: true }).value()).length, 2);
   write('.harness/AGENTS.md', index('- [root](../AGENTS.md)'));
-  await assert.rejects(service.query(root, { includeHarness: true }).value(), /Composition cycle/);
+  await assert.rejects(new NodeService({managedRoot: root}).query(root, { includeHarness: true }).value(), /Composition cycle/);
 });
 
 test('query reads do not snapshot unselected physical resources; explicit get upgrades lifecycle snapshot', async t => {
@@ -473,7 +474,7 @@ test('global query omits out-of-root references and linked installations while m
   fs.symlinkSync(outside,file('installed'));
   assert.equal((await service.query(root,{includeHarness:true}).value()).length,1);
   write('AGENTS.md',index('- [missing](missing/AGENTS.md)'));
-  await assert.rejects(service.query(root,{includeHarness:true}).value(),/Missing referenced node/);
+  await assert.rejects(new NodeService({managedRoot: root}).query(root,{includeHarness:true}).value(),/Missing referenced node/);
 });
 
 test('typed navigation through a readonly leaf retains readonly origin for its harness children', async t => {

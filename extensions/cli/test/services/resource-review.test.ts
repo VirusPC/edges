@@ -51,10 +51,14 @@ for (const conflict of [
       },
     });
     const node = (await service.get(source, TaskNode))!;
+    node.description = "Pending caller edit";
+    assert.strictEqual(await service.get(source, TaskNode), node);
     await assert.rejects(
       service.move(node, destination),
       conflict === "source" ? /resources changed/ : /recover directory/,
     );
+    assert.equal(node.path, source);
+    assert.equal(node.description, "Pending caller edit");
     if (conflict === "source") {
       assert.equal(fs.readFileSync(source, "utf8"), "Task");
       assert.equal(fs.readFileSync(sourceLog, "utf8"), "Human log");

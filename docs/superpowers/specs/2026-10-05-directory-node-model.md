@@ -140,8 +140,8 @@ Task 普通 CLI 默认当前作用域 maintenance，领域板显式 --purpose do
 
 ## 生命周期与一致性
 
-- 原地更新：成功 create/update/move 返回原实例；move 同步实例 path/id/关系。该 Service 已加载的同路径实例、受影响子节点也需刷新，不能静默保持过期引用。
-- 已修改但未保存的副本，按旧快照、当前副本与将提交的文档合并完整状态：元数据按键递归合并，正文保留源文本并合并不重叠的行改动。Internal 先合并结构字段，再处理非受控正文。重叠分歧在 IO 前报错，不推进快照；同一行的不同字词也保守视为冲突。后续保存副本不能回退其他已提交字段或正文。
+- 原地更新：同一 NodeService 内同一规范化入口路径只保留一个受管可变实例，get/query/list 复用该实例。首次非 AGENTS 叶子加载保留显式构造器与 models/modelForReference 扩展选择；缓存后的 typed get 只作兼容类型约束，BaseNode 请求沿用解析模型，AGENTS 保持权威 InternalNode。成功 create/update/move 返回原实例；move 同步实例 path/id/关系及受影响子节点的身份表键，destroy 移除被删节点的受管身份。
+- 多个调用方共享实例上的顺序修改，保存节点时写入完整当前状态。create/import/move/destroy 维护索引或引用时，同样保存实际受影响节点的完整当前状态；不自动保存无关节点。以当前实例生成校验草稿，以旧入口及资源快照检测外部变化，失败保留调用方原修改，不做多副本三方合并。详细合同见[节点共享状态简化](2026-10-06-node-identity-simplification.md)。
 - 禁止公开 reparent；Internal.moveChild 仅改索引组。物理移动才改变归属。
 - create 调用 node.create + validate + serialize，并在存在的物理父入口登记。新登记默认 local；这是创建时的默认选择，不把 Leaf/Internal 与索引组绑定，后续可用 Internal.moveChild 改组。AI 传结构化参数，不手拼完整任务 Markdown。
 - move 自动搬整个所属目录，不留孤立 harness/资源。校验目标不存在、不能移动到自身子目录、不能把固定入口名改掉、不能越出 managedRoot/改变已知业务类型。不移动管理根本身。

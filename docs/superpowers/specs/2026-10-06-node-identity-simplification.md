@@ -29,7 +29,7 @@ Service 提供引用解析、范围限制与节点加载的现有回调，负责
 - 身份表属于一个 NodeService，不是进程全局单例；同一 Service 的 get、query、list 和内部已加载节点使用同一个对象。
 - 键是规范化后的绝对入口文件路径，沿用现有路径处理；`index.md` 与同目录 `AGENTS.md` 是两个节点。不改为目录键、inode 键或全量 realpath 去重，避免混淆共址 harness 及外部只读链接。
 - 重复 get 不重新 parse 磁盘正文覆盖内存修改，不推进原始写入快照。首次读取保留 EntryFile 快照；外部变化仍由现有校验拒绝。需要读取外部新版本时新建 NodeService，本次不增加 reload、reset 或合并 API。
-- `get(path, Model)` 是对唯一受管实例的类型约束，不是创建同一路径第二种视图的请求。AGENTS 的权威模型仍是 InternalNode；BaseNode 类型请求可返回其子类。保留现有 layout、models 和 modelForReference 扩展机制；不相容的模型声明报错，不能替换已缓存实例或做原型转换。
+- 首次加载非 AGENTS 叶子时，保留现有显式非 BaseNode 构造器选择及 models/modelForReference 扩展机制；未指定构造器或请求 BaseNode 时沿用模型解析。AGENTS 的权威模型仍是 InternalNode。缓存建立后，`get(path, Model)` 只约束唯一受管实例的类型，BaseNode 请求可返回子类；不相容请求报错，不能创建另一视图、替换实例或转换原型。代价是首次加载者决定叶子构造器，后续不同类型的调用方必须兼容该实例；将来若收紧为仅按布局选择，须另行迁移现有调用方。
 - typed query 为跳过不匹配叶子而创建的导航占位对象，不是已加载节点，不得进入身份表或返回给结果消费者；不能为了满足单实例而加载原本跳过的正文。
 - create 成功登记并返回传入实例；import 返回目标路径的唯一实例；失败或临时校验草稿不进入身份表。
 - move 后更新同一对象的 path/id/关系和身份表键，覆盖已加载的被搬子节点；旧路径释放。destroy 从表中移除对应节点及所属被删节点，使旧对象不能再保存。之后同路径重新创建是新节点，不复活旧对象。

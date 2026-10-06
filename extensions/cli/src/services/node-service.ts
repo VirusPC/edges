@@ -109,12 +109,36 @@ export class NodeService {
     readOnly = false,
     resources = true,
   ): Promise<BaseNode | undefined> {
-    Model ??= this.#model(file);
+    file = path.resolve(file);
+    const cached = this.#cache.loaded.get(file);
+    const Requested = Model;
+    // Base requests constrain the authoritative model rather than downgrade it.
+    Model = cached
+      ? cached.constructor as Model
+      : !Model || Model === BaseNode || path.basename(file) === "AGENTS.md"
+        ? this.#model(file)
+        : Model;
     if (!Model) return undefined;
+    if (
+      Requested &&
+      !(Model.prototype instanceof Requested) &&
+      Model !== Requested
+    )
+      throw new Error(`Incompatible node model for ${file}: ${Requested.name}`);
     const parent = this.#parentNode(file);
     readOnly ||=
       this.#cache.isReadOnly(file) ||
       (!!parent && indexContract(parent)?.writable === false);
+    if (cached) {
+      if (readOnly) {
+        const state = this.#cache.state.get(cached)!;
+        state.readOnly = true;
+        this.#cache.readOnly.add(cached.directoryPath);
+        this.#cache.readOnly.add(state.file.realDirectory);
+      }
+      if (resources) this.#cache.captureResources(cached);
+      return cached;
+    }
     const entry = readEntry(file, readOnly);
     if (!entry) return undefined;
     const node = new Model(entry.path).parse(entry.source);
@@ -123,7 +147,7 @@ export class NodeService {
     return node;
   }
   /** Read an entry and its resource snapshot for lifecycle operations.
-   * Also upgrades matching instances previously loaded through query(). */
+   * Also upgrades the same instance previously loaded through query(). */
   async get(file: string): Promise<BaseNode | undefined>;
   async get<T extends BaseNode>(
     file: string,
@@ -229,9 +253,9 @@ export class NodeService {
       InternalNode,
     );
     if (root) await visit(root);
-    for (const [file, instances] of [...this.#cache.loaded])
+    for (const [file, node] of [...this.#cache.loaded])
       if (!result.has(file) && fs.existsSync(file))
-        await visit(instances.values().next().value!);
+        await visit(node);
     return result;
   }
   async #validateGraph(
@@ -287,7 +311,7 @@ export class NodeService {
       )
         throw new Error(`Read-only node source: ${write.node.path}`);
       if (write.before) validateEntry(write.before);
-      else if (fs.existsSync(write.node.path))
+      else if (this.#cache.loaded.has(write.node.path) || fs.existsSync(write.node.path))
         throw new Error(`Node target already exists: ${write.node.path}`);
       write.node.validate();
       await this.#options.assertWrite?.({
@@ -315,14 +339,9 @@ export class NodeService {
   async #save(
     operation: Operation,
     plan: Map<string, Planned>,
-    primary?: BaseNode,
   ): Promise<void> {
     await this.#validateGraph(plan);
     await this.#preflight(operation, plan);
-    this.#cache.assertRefresh(
-      new Map([...plan].map(([file, write]) => [file, write.source])),
-      primary,
-    );
     saveEntries(
       [...plan.values()].map((w) => ({
         path: w.node.path,
@@ -330,7 +349,7 @@ export class NodeService {
         source: w.source,
       })),
     );
-    this.#cache.refresh(undefined, undefined, primary, new Set(plan.keys()));
+    this.#cache.refresh(undefined, undefined, new Set(plan.keys()));
   }
   async #registration(
     node: BaseNode,
@@ -349,8 +368,8 @@ export class NodeService {
       throw new Error(`Read-only node source: ${node.path}`);
     const before = this.#existing(parent),
       draft = clone(parent);
-    if (!draft.children.some((ref) => ref.id === node.id))
-      draft.addChild(group, referenceOf(node));
+    if (draft.children.some((ref) => ref.id === node.id)) return undefined;
+    draft.addChild(group, referenceOf(node));
     return this.#plan(draft, draft.serialize(), before);
   }
   async create<T extends BaseNode>(
@@ -358,7 +377,7 @@ export class NodeService {
     input: Parameters<T["create"]>[0],
   ): Promise<T> {
     this.#boundary(node.path);
-    if (fs.existsSync(node.path))
+    if (this.#cache.loaded.has(node.path) || fs.existsSync(node.path))
       throw new Error(`Node target already exists: ${node.path}`);
     const draft = clone(node);
     draft.create(input, {
@@ -388,7 +407,6 @@ export class NodeService {
     await this.#save(
       "update",
       new Map([[node.path, this.#plan(draft, draft.serialize(), before)]]),
-      node,
     );
     return node;
   }
@@ -429,6 +447,9 @@ export class NodeService {
       within(file, sourceRoot)
         ? path.join(destRoot, path.relative(sourceRoot, file))
         : file;
+    for (const file of this.#cache.loaded.keys())
+      if (within(file, destRoot))
+        throw new Error(`Node destination already managed: ${file}`);
     const registered = await this.#registered();
     registered.set(node.path, node);
     for (const parentPath of [
@@ -465,14 +486,8 @@ export class NodeService {
       const before = this.#cache.state.get(entry)!.file,
         target = relocate(entry.path);
       let draft = clone(entry);
-      let authored =
-        entry === node &&
-        node.serialize() !==
-          new (node.constructor as Model)(node.path)
-            .parse(before.source)
-            .serialize()
-          ? node.serialize()
-          : before.source;
+      const currentSource = entry.serialize();
+      let authored = currentSource;
       if (
         entry.path === oldParent &&
         oldParent !== newParent &&
@@ -494,7 +509,7 @@ export class NodeService {
         source = draft.serialize();
       }
       const text = source;
-      if (target !== entry.path || text !== before.source)
+      if (target !== entry.path || text !== currentSource)
         plan.set(target, this.#plan(draft, text, before));
     }
     if (newParent && !registered.has(newParent)) {
@@ -527,11 +542,6 @@ export class NodeService {
             `Move cannot change known business type: ${write.before.path} (${oldType} -> ${newType})`,
           );
       }
-    this.#cache.assertRefresh(
-      new Map([...plan].map(([file, write]) => [file, write.source])),
-      node,
-      relocate,
-    );
     const snapshot = resourceSnapshot(sourceRoot);
     this.#existing(node, true);
     validateResources(snapshot);
@@ -577,7 +587,7 @@ export class NodeService {
         { cause },
       );
     }
-    this.#cache.refresh(relocate, undefined, node, new Set(plan.keys()));
+    this.#cache.refresh(relocate, undefined, new Set(plan.keys()));
     return node;
   }
   async destroy(node: BaseNode): Promise<void> {
@@ -593,14 +603,10 @@ export class NodeService {
         if (deleted.length === 0) continue;
         for (const ref of deleted) draft.removeChild(ref.id);
         const before = this.#cache.state.get(entry)!.file;
-        if (draft.serialize() !== before.source)
-          plan.set(entry.path, this.#plan(draft, draft.serialize(), before));
+        plan.set(entry.path, this.#plan(draft, draft.serialize(), before));
       }
     await this.#validateGraph(plan, removed);
     await this.#preflight("destroy", plan);
-    this.#cache.assertRefresh(
-      new Map([...plan].map(([file, write]) => [file, write.source])),
-    );
     await this.#options.assertWrite?.({
       operation: "destroy",
       node,
@@ -679,7 +685,6 @@ export class NodeService {
         this.#cache.refresh(
           undefined,
           removed,
-          undefined,
           new Set([...plan.keys(), ...units]),
         );
         throw new Error(
@@ -690,7 +695,6 @@ export class NodeService {
     this.#cache.refresh(
       undefined,
       removed,
-      undefined,
       new Set([...plan.keys(), ...units]),
     );
   }
@@ -752,9 +756,6 @@ export class NodeService {
     if (registration) plan.set(registration.node.path, registration);
     await this.#validateGraph(plan);
     await this.#preflight("import", plan);
-    this.#cache.assertRefresh(
-      new Map([...plan].map(([file, write]) => [file, write.source])),
-    );
     validateResources(snapshot);
     fs.mkdirSync(path.dirname(destRoot), { recursive: true });
     checkPath(destRoot);
@@ -790,7 +791,7 @@ export class NodeService {
       }
       throw cause;
     }
-    this.#cache.refresh(undefined, undefined, undefined, new Set(plan.keys()));
+    this.#cache.refresh(undefined, undefined, new Set(plan.keys()));
     return (await this.#read(destination, main.node.constructor as Model))!;
   }
 }
