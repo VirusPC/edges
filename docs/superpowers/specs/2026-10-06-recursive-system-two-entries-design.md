@@ -10,6 +10,138 @@
 
 本轮只定模型、入口合同、标记/标题、遍历规则与迁移边界。**不写生产代码**（Q16=A）；批准后另开 writing-plans。
 
+## 架构图（目标模型）
+
+下列图描述**目标语义**；现行代码仍可能是 InternalNode / LeafNode / `index.md`，落地前以本节为准。
+
+### 1. 入口合同与派生状态
+
+```mermaid
+flowchart TB
+  subgraph entries["入口合同（文件名）"]
+    A["系统入口<br/>AGENTS.md"]
+    R["组织清单<br/>README.md"]
+    I["内容叶子<br/>INDEX.md"]
+    S["Skill<br/>SKILL.md"]
+  end
+
+  subgraph state["派生状态（不持久化 isLeaf）"]
+    Org["当前有组成登记 → 组织节点"]
+    Leaf["当前无组成登记 → 叶子"]
+  end
+
+  A -->|必有组成| Org
+  R -->|有 project-entries-*| Org
+  R -->|无 entries| Leaf
+  I -->|通常无 entries| Leaf
+  I -->|若出现 entries| Org
+  S -->|通常无 entries| Leaf
+  S -->|若出现 entries| Org
+```
+
+### 2. 目标领域形状（无 Internal / Leaf 类层次）
+
+```mermaid
+classDiagram
+  class NodeReference {
+    <<interface>>
+    id: string
+    name?: string
+    description?: string
+  }
+
+  class DocumentNode {
+    path: string
+    directoryPath: string
+    entryKind: system | organization | content | skill
+    constraints?: string[]
+    localChildren: NodeReference[]
+    descendantChildren: NodeReference[]
+    parent?: NodeReference
+    harness?: NodeReference
+    metadata?: Metadata
+    body: string
+    addChild(group, ref)
+    parse / serialize / validate
+  }
+
+  class TaskNode
+  class MemoryNode
+  class NoteNode
+  class SkillNode
+  class VirtualSystemEntry {
+    <<runtime only>>
+    不落盘
+    localChildren: NodeReference[]
+  }
+
+  NodeReference <|.. DocumentNode
+  DocumentNode <|-- TaskNode
+  DocumentNode <|-- MemoryNode
+  DocumentNode <|-- NoteNode
+  DocumentNode <|-- SkillNode
+  DocumentNode ..> NodeReference : parent / harness / children
+  VirtualSystemEntry ..> NodeReference : 挂顶层入口
+```
+
+说明：`DocumentNode` 是语义名，实施时可继续叫 `BaseNode`；关键是**任意节点都可持有组成**，不再用 `InternalNode` / `LeafNode` / 持久 `isLeaf` 分叉。`entryKind` 由入口文件合同决定，不是组织/叶子。
+
+### 3. 同目录双文件 + 两种组成边
+
+```mermaid
+flowchart TB
+  subgraph dir["某一目录（如仓根）"]
+    AGENTS["AGENTS.md<br/>系统入口"]
+    README["README.md<br/>组织清单"]
+  end
+
+  AGENTS -->|project-harness-local<br/>本层系统维护信息| M["系统二材料<br/>.harness/memory · skills · 维护看板 …"]
+  AGENTS -->|project-harness-descendants<br/>下层系统维护信息| ChildAgents["下级系统入口<br/>其它目录 AGENTS.md"]
+
+  README -->|project-entries-local<br/>本层内容| Sys1["系统一孩子<br/>tasks/ · notes/ · …"]
+  README -->|project-entries-descendants<br/>下层内容| Deep["下层内容入口"]
+
+  Sys1 -. 若该目录另有系统入口 .-> ChildAgents
+  M -. harness 边；默认 traverse 不跟随 .-> AGENTS
+```
+
+### 4. 从 scope / 虚拟根出发的遍历
+
+```mermaid
+flowchart LR
+  CLI["edges --scope"] --> Real["真实系统入口<br/>scope/AGENTS.md"]
+  Person["个人根<br/>无 AGENTS"] --> Virtual["虚拟系统入口<br/>不落盘"]
+  Virtual --> RootReadme["Edges 根 README<br/>本层内容"]
+  RootReadme --> Tasks["tasks/ 等"]
+  Real --> Maint["展开系统维护信息"]
+  Real --> MaybeReadme["同目录 README？"]
+  MaybeReadme -->|有| Content["展开本层/下层内容"]
+  Maint --> NextSys["下级 AGENTS"]
+  Content --> Leaves["INDEX.md / SKILL.md / …"]
+  NextSys --> Maint
+```
+
+默认：走本层组成；`includeDescendants` 才进下层组；`includeHarness` 才沿 harness。组成边 ≠ 维护边。
+
+### 5. 仓库根实例（示意）
+
+```mermaid
+flowchart TB
+  RootAgents["/AGENTS.md<br/>本层系统维护信息 → .harness/*<br/>下层系统维护信息 → teaching/ …"]
+  RootReadme["/README.md<br/>本层内容 → tasks/ notes/ …"]
+
+  RootAgents --> HMem[".harness/memory/…"]
+  RootAgents --> HTasks[".harness/tasks/…"]
+  RootAgents --> Teaching["teaching/AGENTS.md"]
+
+  RootReadme --> DomainTasks["tasks/…"]
+  RootReadme --> Notes["notes/…"]
+
+  DomainTasks --> TP["Task Project<br/>README+entries 或另 init 的 AGENTS"]
+  TP --> TaskLeaf["Task · INDEX.md"]
+  Notes --> NoteLeaf["Note · INDEX.md"]
+```
+
 ## 已确认模型（grill Q1–Q16）
 
 | 题 | 决定 |

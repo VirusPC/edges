@@ -15,9 +15,11 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 5. **谁拥有系统入口：** 任意目录可由用户自行 init；不是路径白名单。
 6. **存量迁 `INDEX.md`：** 可预览脚本，复用本包 `operations` 树遍历更新引用与改名；含 `posts/`（仅本轮改名迁移经用户授权）。不要手改、不要另写扫盘发现逻辑。
 
-设计真源：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md)。相关记忆：`project_grill_entries_markers_and_titles`、`project_recursive_system_two_entry`、`project_document_entry_readme_index`、`project_grill_system_entry_q13_q14`。
+设计真源与**目标架构图**：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md#架构图目标模型)。相关记忆：`project_grill_entries_markers_and_titles`、`project_recursive_system_two_entry`、`project_document_entry_readme_index`、`project_grill_system_entry_q13_q14`。
 
-## 类与节点关系
+## 类与节点关系（当前实现）
+
+> 目标语义见上链「架构图」：统一文档节点 + 组成登记派生组织/叶子，无持久 `isLeaf`。下图仍是**现行代码**形状，落地前勿当作目标合同。
 
 ```mermaid
 classDiagram
