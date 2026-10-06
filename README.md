@@ -224,3 +224,13 @@ pnpm test
 本仓库使用 [MIT License](LICENSE)。系统演进记录见 [`CHANGELOG.md`](CHANGELOG.md)。
 
 目录升级与本机私有材料迁移见[迁移指南](docs/recursive-layout-migration.md)。Task 命令默认操作选定作用域的 `.harness/tasks/`；领域任务显式传 `--purpose domain`，选择该作用域的 `tasks/`。根与子作用域遵循同一规则，读取和写入不会选择不同的默认板。`edges tasks list --all-scopes` 从所选作用域所在 Git 仓库根汇总两种用途及所有维护层级；无 Git 时以解析出的作用域为根。显式 `edges tasks --purpose maintenance list --all-scopes` 只筛用途，不缩小空间范围。全仓结果保留 `source.scope`、`source.purpose`、project、stem 与仓库相对入口 path，同名任务不会跨来源合并。
+
+<!-- project-entries-local:start -->
+## 本层内容
+
+- [领域任务](tasks/AGENTS.md) — 根作用域领域工作项看板。
+- [笔记](notes/README.md) — 低成本捕获与在研想法。
+- [教学](teaching/README.md) — 有状态的教学工作区与主题课页。
+- [认知优势](edges/README.md) — 已提炼、可复用的判断资产。
+- [对外成稿](posts/README.md) — 准备公开发表的博客成稿（人维护）。
+<!-- project-entries-local:end -->
