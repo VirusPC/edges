@@ -101,4 +101,5 @@ format: ordinary
 - [SuperAgentsNode 继承 AgentsNode](<project_grill_super_agents_node_extends_agents/INDEX.md>) — 改虚拟超节点实现时：类名 SuperAgentsNode，继承 AgentsNode；flag 仍 \-\-super；勿用 VirtualSuperNode。
 
 - [traverse 默认走全部 children](<project_grill_traverse_default_all_children/INDEX.md>) — 改 operations/traverse 或依赖其默认的调用方时：默认展开 local∪descendants；本层\-only 用显式 localOnly；includeHarness 仍默认 false。
+- [Task Project 组织清单用 README](<project_task_project_readme_org_lists/INDEX.md>) — 改 Task Project / 看板列表或 physicalParent 时：Task Project 与看板项目列表用 README\+project\-entries；新项目默认 README 种子，勿伪造 AGENTS；任务叶子的物理父是项目 README。
 <!-- project-entries-local:end -->
