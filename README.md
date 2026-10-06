@@ -228,7 +228,7 @@ pnpm test
 <!-- project-entries-local:start -->
 ## 本层内容
 
-- [领域任务](tasks/AGENTS.md) — 根作用域领域工作项看板。
+- [领域任务](tasks/README.md) — 根作用域领域工作项看板（系统入口见同目录 AGENTS.md）。
 - [笔记](notes/README.md) — 低成本捕获与在研想法。
 - [教学](teaching/README.md) — 有状态的教学工作区与主题课页。
 - [认知优势](edges/README.md) — 已提炼、可复用的判断资产。
