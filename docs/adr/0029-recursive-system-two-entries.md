@@ -4,7 +4,7 @@ status: proposed
 
 # 递归系统二入口与 README / INDEX 组成分工
 
-2026-10-06 grill 把 Edges 的核心定为**递归系统二**：系统入口是 `AGENTS.md`，必须带组成登记；节点身份是从 CLI `--scope`（或虚拟系统入口）经登记可达。组织清单用 `README.md` + `project-entries-*`（标题「本层内容 / 下层内容」）；内容叶子用 `INDEX.md`；Skill 仍 `SKILL.md`。同目录并存 AGENTS 与 README 时，系统一孩子只登记在 README，AGENTS 的 `project-harness-local` / `descendants` 只挂系统二材料与下级系统入口（标题「本层系统维护信息 / 下层系统维护信息」）——这是树遍历的核心规则。任意目录可由用户 init 系统入口，不是路径白名单；无真实 AGENTS 的主体根用虚拟系统入口（不落盘）。存量 `index.md` 迁 `INDEX.md`（含 `posts/`，本轮仅改名授权）。设计见 [recursive-system-two-entries-design](../superpowers/specs/2026-10-06-recursive-system-two-entries-design.md)。
+2026-10-06 grill 把 Edges 的核心定为**递归系统二**：系统入口是 `AGENTS.md`，必须带组成登记；节点身份是从 CLI `--scope`（或**显式 flag** 开启的虚拟系统入口）经登记可达。组织清单用 `README.md` + `project-entries-*`（标题「本层内容 / 下层内容」）；内容入口用 `INDEX.md`；Skill 仍 `SKILL.md`。四种入口均可因组成登记成为组织节点。下层同合同递归：AGENTS→AGENTS，README→README。同目录并存时，系统一孩子只登记在 README，AGENTS 只挂系统二材料与下级系统入口（标题「本层系统维护信息 / 下层系统维护信息」）。任意目录可由用户 init 系统入口；虚拟根不得因缺 AGENTS 自动合成。存量 `index.md` 迁 `INDEX.md`（含 `posts/`，本轮仅改名授权）。设计见 [recursive-system-two-entries-design](../superpowers/specs/2026-10-06-recursive-system-two-entries-design.md)。
 
 本 ADR **修订** [ADR 0024](0024-scope-first-content-ownership.md) 中与下列冲突的表述：以 InternalNode/LeafNode 固定类层次与持久 `isLeaf` 区分组织/叶子；一律 `index.md` 作叶子入口；把 AGENTS 当作登记一切组成（含系统一孩子）的唯一组织入口；以及「无有效入口的 README 只是导航」在组织清单带 entries 时不再成立。0024 其余（harness 不进 children、目录为生命周期单元、Git/私有记忆边界等）仍有效。
 

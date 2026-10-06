@@ -14,32 +14,37 @@
 
 下列图描述**目标语义**；现行代码仍可能是 InternalNode / LeafNode / `index.md`，落地前以本节为准。
 
-### 1. 入口合同与派生状态
+### 1. 四种入口 × 派生状态
+
+四种入口文件**都可以**成为组织节点：有组成登记 → 组织；无 → 叶子。`AGENTS.md` 作为系统入口时组成登记为必有（故通常总是组织节点）。
 
 ```mermaid
 flowchart TB
   subgraph entries["入口合同（文件名）"]
-    A["系统入口<br/>AGENTS.md"]
-    R["组织清单<br/>README.md"]
-    I["内容叶子<br/>INDEX.md"]
-    S["Skill<br/>SKILL.md"]
+    A["AGENTS.md"]
+    R["README.md"]
+    I["INDEX.md"]
+    S["SKILL.md"]
   end
 
   subgraph state["派生状态（不持久化 isLeaf）"]
-    Org["当前有组成登记 → 组织节点"]
-    Leaf["当前无组成登记 → 叶子"]
+    Org["有组成登记 → 组织节点"]
+    Leaf["无组成登记 → 叶子"]
   end
 
-  A -->|必有组成| Org
-  R -->|有 project-entries-*| Org
-  R -->|无 entries| Leaf
-  I -->|通常无 entries| Leaf
-  I -->|若出现 entries| Org
-  S -->|通常无 entries| Leaf
-  S -->|若出现 entries| Org
+  A --> Org
+  A --> Leaf
+  R --> Org
+  R --> Leaf
+  I --> Org
+  I --> Leaf
+  S --> Org
+  S --> Leaf
 ```
 
 ### 2. 目标领域形状（无 Internal / Leaf 类层次）
+
+`entryKind`（或等价判别）**枚举待定**（见开放题）。类图须显式包含 `AGENTS.md` 对应节点，不能只有 Task/Memory/Note/Skill。下图用文件合同标注角色，避免未定枚举名。
 
 ```mermaid
 classDiagram
@@ -53,7 +58,6 @@ classDiagram
   class DocumentNode {
     path: string
     directoryPath: string
-    entryKind: system | organization | content | skill
     constraints?: string[]
     localChildren: NodeReference[]
     descendantChildren: NodeReference[]
@@ -65,28 +69,45 @@ classDiagram
     parse / serialize / validate
   }
 
-  class TaskNode
-  class MemoryNode
-  class NoteNode
-  class SkillNode
+  class AgentsNode {
+    <<AGENTS.md>>
+    系统入口
+  }
+  class ReadmeNode {
+    <<README.md>>
+    组织清单
+  }
+  class IndexNode {
+    <<INDEX.md>>
+    Task / Note / Memory 等
+  }
+  class SkillNode {
+    <<SKILL.md>>
+  }
   class VirtualSystemEntry {
     <<runtime only>>
     不落盘
+    须显式 flag
     localChildren: NodeReference[]
   }
 
   NodeReference <|.. DocumentNode
-  DocumentNode <|-- TaskNode
-  DocumentNode <|-- MemoryNode
-  DocumentNode <|-- NoteNode
+  DocumentNode <|-- AgentsNode
+  DocumentNode <|-- ReadmeNode
+  DocumentNode <|-- IndexNode
   DocumentNode <|-- SkillNode
+  IndexNode <|-- TaskNode
+  IndexNode <|-- MemoryNode
+  IndexNode <|-- NoteNode
   DocumentNode ..> NodeReference : parent / harness / children
   VirtualSystemEntry ..> NodeReference : 挂顶层入口
 ```
 
-说明：`DocumentNode` 是语义名，实施时可继续叫 `BaseNode`；关键是**任意节点都可持有组成**，不再用 `InternalNode` / `LeafNode` / 持久 `isLeaf` 分叉。`entryKind` 由入口文件合同决定，不是组织/叶子。
+说明：`DocumentNode` 是语义名，实施时可继续叫 `BaseNode`；**任意节点都可持有组成**。业务子类（Task/Memory/Note）挂在 `INDEX.md` 合同下；系统入口与组织清单是一等节点，不是「缺了的 entryKind」。
 
-### 3. 同目录双文件 + 两种组成边
+### 3. 同目录双文件 + 同合同下层递归
+
+下层索引与本层入口**同合同**：`AGENTS` 下层 → `AGENTS`；`README` 下层 → `README`。本层内容可挂 INDEX / SKILL / 其它本层入口。
 
 ```mermaid
 flowchart TB
@@ -96,29 +117,36 @@ flowchart TB
   end
 
   AGENTS -->|project-harness-local<br/>本层系统维护信息| M["系统二材料<br/>.harness/memory · skills · 维护看板 …"]
-  AGENTS -->|project-harness-descendants<br/>下层系统维护信息| ChildAgents["下级系统入口<br/>其它目录 AGENTS.md"]
+  AGENTS -->|project-harness-descendants<br/>下层系统维护信息| ChildAgents["其它目录 AGENTS.md"]
 
-  README -->|project-entries-local<br/>本层内容| Sys1["系统一孩子<br/>tasks/ · notes/ · …"]
-  README -->|project-entries-descendants<br/>下层内容| Deep["下层内容入口"]
+  README -->|project-entries-local<br/>本层内容| Sys1["INDEX / SKILL / 本层入口<br/>如 tasks/…、notes/…"]
+  README -->|project-entries-descendants<br/>下层内容| ChildReadme["其它目录 README.md"]
 
-  Sys1 -. 若该目录另有系统入口 .-> ChildAgents
-  M -. harness 边；默认 traverse 不跟随 .-> AGENTS
+  Sys1 -. 该目录若另有系统入口 .-> ChildAgents
+  M -. harness；默认不跟随 .-> AGENTS
 ```
 
-### 4. 从 scope / 虚拟根出发的遍历
+### 4. 真实 scope vs 显式虚拟根
+
+虚拟系统入口**必须**显式 flag；不得因 scope 下没有 `AGENTS.md` 自动合成。
 
 ```mermaid
 flowchart LR
-  CLI["edges --scope"] --> Real["真实系统入口<br/>scope/AGENTS.md"]
-  Person["个人根<br/>无 AGENTS"] --> Virtual["虚拟系统入口<br/>不落盘"]
+  CLI["edges --scope"] --> HasAgents{scope 有 AGENTS?}
+  HasAgents -->|是| Real["真实系统入口"]
+  HasAgents -->|否| Err["报错 / 既有发现失败<br/>不自动虚拟化"]
+
+  Flag["显式虚拟根 flag"] --> Virtual["虚拟系统入口<br/>不落盘"]
   Virtual --> RootReadme["Edges 根 README<br/>本层内容"]
-  RootReadme --> Tasks["tasks/ 等"]
-  Real --> Maint["展开系统维护信息"]
+  RootReadme --> Local["本层：INDEX/SKILL/…"]
+  RootReadme -->|下层内容| NestedReadme["下层 README.md"]
+
+  Real --> Maint["本层系统维护信息"]
   Real --> MaybeReadme["同目录 README？"]
-  MaybeReadme -->|有| Content["展开本层/下层内容"]
-  Maint --> NextSys["下级 AGENTS"]
-  Content --> Leaves["INDEX.md / SKILL.md / …"]
-  NextSys --> Maint
+  MaybeReadme -->|有| Content["本层/下层内容"]
+  Maint --> NextSys["下层 AGENTS"]
+  Content --> NestedReadme
+  Content --> Local
 ```
 
 默认：走本层组成；`includeDescendants` 才进下层组；`includeHarness` 才沿 harness。组成边 ≠ 维护边。
@@ -127,17 +155,18 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-  RootAgents["/AGENTS.md<br/>本层系统维护信息 → .harness/*<br/>下层系统维护信息 → teaching/ …"]
-  RootReadme["/README.md<br/>本层内容 → tasks/ notes/ …"]
+  RootAgents["/AGENTS.md<br/>本层系统维护信息 → .harness/*<br/>下层系统维护信息 → teaching/AGENTS.md …"]
+  RootReadme["/README.md<br/>本层内容 → tasks/ notes/ …<br/>下层内容 → 其它 README.md"]
 
   RootAgents --> HMem[".harness/memory/…"]
   RootAgents --> HTasks[".harness/tasks/…"]
   RootAgents --> Teaching["teaching/AGENTS.md"]
 
-  RootReadme --> DomainTasks["tasks/…"]
-  RootReadme --> Notes["notes/…"]
+  RootReadme --> DomainTasks["tasks/… 本层入口"]
+  RootReadme --> Notes["notes/… 本层入口"]
+  RootReadme --> NestedR["某下层 README.md"]
 
-  DomainTasks --> TP["Task Project<br/>README+entries 或另 init 的 AGENTS"]
+  DomainTasks --> TP["Task Project README 或另 init 的 AGENTS"]
   TP --> TaskLeaf["Task · INDEX.md"]
   Notes --> NoteLeaf["Note · INDEX.md"]
 ```
@@ -161,17 +190,21 @@ flowchart TB
 | Q15 | README 标记 `project-entries-local` / `project-entries-descendants`；标题见下 |
 | Q15c | AGENTS 两章标题改为「系统维护信息」；硬约束标题不变 |
 | Q16=A | 先本 spec + ADR，人审后再实施计划 |
+| 架构审 1 | 四种入口均可因组成登记成为组织节点 |
+| 架构审 3 | 下层同合同递归：AGENTS→AGENTS，README→README |
+| 架构审 4 | 虚拟根须显式 flag；缺 AGENTS 不自动虚拟化 |
+| 架构审 2 | `entryKind` 枚举待定；类图须含 AGENTS 节点（见开放题） |
 
 ## 入口合同
 
-| 角色 | 文件 | 组成登记 |
-| --- | --- | --- |
-| 系统入口 | `AGENTS.md` | 必有：`project-harness-local` / `project-harness-descendants`（外加 constraints） |
-| 组织清单 | `README.md` | 可选：`project-entries-local` / `project-entries-descendants` |
-| 内容叶子 | `INDEX.md` | 通常无；出现登记则当前为组织状态 |
-| Skill | `SKILL.md` | 同叶子规则；同目录可另有 `AGENTS.md` 作其系统入口（harness） |
+| 角色 | 文件 | 组成登记 | 下层组指向 |
+| --- | --- | --- | --- |
+| 系统入口 | `AGENTS.md` | 必有：`project-harness-*`（外加 constraints） | 其它 `AGENTS.md` |
+| 组织清单 | `README.md` | 可选：`project-entries-*` | 其它 `README.md` |
+| 内容入口 | `INDEX.md` | 可选；有则当前为组织状态 | （若有下层组）同合同或按登记 |
+| Skill | `SKILL.md` | 同 INDEX；同目录可另有 `AGENTS.md` 作 harness | 同上 |
 
-不按文件名区分 Internal / Leaf 类；实现可保留过渡类名，模型语义以「有无组成登记」为准。
+四种入口都支持组织节点状态。不按文件名区分 Internal / Leaf 类；实现可保留过渡类名。
 
 同一目录可以同时有 `AGENTS.md` 与 `README.md`（根目录即此形状）。**禁止**把同一批系统一孩子双写进两份文件。
 
@@ -197,7 +230,7 @@ flowchart TB
 | 本层 | `project-entries-local` | `本层内容` |
 | 下层 | `project-entries-descendants` | `下层内容` |
 
-给人看的说明可写在区块外；工具只改标记区块。根 README 的本层内容应能指向 `tasks/` 等系统一入口（Q9b）。
+给人看的说明可写在区块外；工具只改标记区块。根 README 的本层内容应能指向 `tasks/` 等本层入口（Q9b）；下层内容只登记其它 `README.md`。
 
 ### 类型入口（本轮不动）
 
@@ -205,18 +238,19 @@ flowchart TB
 
 ## 遍历规则（核心）
 
-1. 从 `--scope` 解析到的系统入口（真实 `AGENTS.md`）或虚拟系统入口出发。
-2. 展开该入口的 **系统维护信息** 组成：得到系统二材料节点与下级系统入口引用。默认不跟随 `harness` 边进入「材料节点自己的系统入口」（既有约定）。
-3. 若当前目录（或被登记的组织清单路径）存在带 `project-entries-*` 的 `README.md`，系统一孩子从 README 的本层/下层内容展开，**不**从同目录 AGENTS 的系统维护信息里找系统一孩子。
-4. 内容叶子以 `INDEX.md`（或 `SKILL.md`）为入口；无组成登记则不再下钻。
-5. `includeDescendants` / `includeHarness` 语义保持「显式才扩展」；不得用目录扫描冒充组成。
+1. 默认从 `--scope` 下真实 `AGENTS.md` 出发；**仅当显式虚拟根 flag** 时才用虚拟系统入口。缺 AGENTS 且未开 flag → 报错 / 发现失败，不静默虚拟化。
+2. 展开系统入口的 **系统维护信息**：系统二材料 + 下层 `AGENTS.md`。默认不跟随 `harness`。
+3. 同目录（或登记路径上的）`README.md` 的本层/下层内容展开系统一树；**不**从同目录 AGENTS 找系统一孩子。README 下层组只跟到其它 `README.md`。
+4. `INDEX.md` / `SKILL.md` 无组成登记则不再下钻；有登记则按其 local/descendant 继续。
+5. `includeDescendants` / `includeHarness` 显式才扩展；不得用目录扫描冒充组成。
 
 ## 虚拟系统入口
 
 - 不落盘；仅运行时对象。
+- **须显式 flag**（CLI/API）开启；不因 scope 无 AGENTS 自动出现。
 - 用途：主体无 AGENTS（个人根）时查询个人相关任务等。
 - 挂载形状：经 Edges 根 README 的组成登记进入仓内树（Q9b）；不在虚拟层扁平挂全部 Task 叶子。
-- 实现另卡；本 spec 只锁定术语与挂钩点。
+- flag 具体名字与 API 形状实施时定；本 spec 锁定「必须显式」。
 
 ## 谁拥有系统入口
 
@@ -258,6 +292,8 @@ flowchart TB
 
 ## 开放实施题（不阻塞本 spec 语义）
 
+- **入口判别 / `entryKind`：** 用户指出原 `system | organization | content | skill` 待商榷，且类图曾漏掉 AGENTS。候选见下问；定稿前代码勿写死该枚举。
 - 类型入口是否迁到 README+`project-entries-*`，或暂时保留 `project-memory-entries`。
 - InternalNode 类是删除还是降为兼容别名。
 - PROTOCOL 文件名合同（类型入口仍写 AGENTS 还是改 README）的改稿顺序。
+- 虚拟根显式 flag 的具体名字（如 `--virtual-root`）与挂载默认值。

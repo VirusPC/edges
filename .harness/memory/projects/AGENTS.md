@@ -85,4 +85,6 @@ format: ordinary
 - [README entries 与 AGENTS 章节标题定稿](<project_grill_entries_markers_and_titles/index.md>) — 改 README entries 或 AGENTS 三章标题时：README 用 project\-entries\-local/descendants，标题本层内容/下层内容；AGENTS 标题为本层硬约束/本层系统维护信息/下层系统维护信息（标记仍 project\-harness\-\*）。
 
 - [节点模型落地前先写 spec 与 ADR](<project_grill_q16_spec_and_adr_first/index.md>) — 改递归系统二入口、entries 标记或 INDEX 迁移前：先完成设计 spec 与 ADR 并经人审，再 writing\-plans；本步不写生产代码。
+
+- [四种入口可组织；README 下层仍 README；虚拟根须显式 flag](<project_grill_arch_all_org_readme_virtual_flag/index.md>) — 改 traverse/架构图时：AGENTS/README/INDEX/SKILL 均可因组成登记成组织节点；README 下层内容只挂 README；虚拟系统入口须显式 flag，不因缺 AGENTS 自动合成。entryKind 枚举另议。
 <!-- project-memory-entries:end -->
