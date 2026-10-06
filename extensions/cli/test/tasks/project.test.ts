@@ -21,6 +21,7 @@ import {
   createProject,
   getProject,
   listProjects,
+  renderProjectAgents,
   updateProject,
 } from "../../src/services/tasks/project-meta.js";
 
@@ -45,7 +46,7 @@ test("create/list/get/update project metadata; create default on virgin board", 
     );
     assert.equal(createdDefault.project, "default");
     assert.equal(createdDefault.dir, "_default");
-    assert.equal(createdDefault.path, "tasks/_default/AGENTS.md");
+    assert.equal(createdDefault.path, "tasks/_default/README.md");
 
     const created = await createProject(
       repo,
@@ -53,7 +54,7 @@ test("create/list/get/update project metadata; create default on virgin board", 
       nodeBoardWriter(),
     );
     assert.equal(created.project, "cli");
-    assert.equal(created.path, "tasks/cli/AGENTS.md");
+    assert.equal(created.path, "tasks/cli/README.md");
 
     const listed = await listProjects(repo, nodeBoardWriter());
     assert.deepEqual(
@@ -75,9 +76,12 @@ test("create/list/get/update project metadata; create default on virgin board", 
     assert.equal(updated.title, "CLI");
 
     const root = await readFile(path.join(repo, "tasks/AGENTS.md"), "utf8");
-    assert.match(root, /updated CLI/);
+    assert.doesNotMatch(root, /updated CLI/);
     assert.doesNotMatch(root, /task-projects:/);
     assert.match(root, /<!-- project-harness-local:start -->/);
+    const list = await readFile(path.join(repo, "tasks/README.md"), "utf8");
+    assert.match(list, /\[CLI\]\(<cli\/README\.md>\) — updated CLI/);
+    assert.match(list, /<!-- project-entries-local:start -->/);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -132,7 +136,7 @@ test("updateProject preserves pointers and does not rewrite a Task file", async 
       nodeBoardWriter(),
     );
     await writeFile(
-      path.join(repo, "tasks/cli/AGENTS.md"),
+      path.join(repo, "tasks/cli/README.md"),
       "# CLI\n\nedges CLI work\n\n## Pointers\n\n- keep\n",
       "utf8",
     );
@@ -144,12 +148,12 @@ test("updateProject preserves pointers and does not rewrite a Task file", async 
       "utf8",
     );
     await updateProject(repo, "cli", { title: "CLI work" }, nodeBoardWriter());
-    const agents = await readFile(
-      path.join(repo, "tasks/cli/AGENTS.md"),
+    const readme = await readFile(
+      path.join(repo, "tasks/cli/README.md"),
       "utf8",
     );
-    assert.match(agents, /^# CLI work\n/);
-    assert.match(agents, /## Pointers\n\n- keep\n/);
+    assert.match(readme, /^# CLI work\n/);
+    assert.match(readme, /## Pointers\n\n- keep\n/);
     const task = await readFile(path.join(repo, taskRel), "utf8");
     assert.match(task, /edges-tasks-status: backlog/);
     assert.match(task, /edges-task-priority: high/);
@@ -158,7 +162,7 @@ test("updateProject preserves pointers and does not rewrite a Task file", async 
   }
 });
 
-test("updateProject seeds AGENTS.md when the project dir exists without metadata", async () => {
+test("updateProject seeds a README org list when the project dir exists without metadata", async () => {
   const repo = await virginRepo();
   try {
     await mkdir(path.join(repo, "tasks/docs/backlog"), { recursive: true });
@@ -168,7 +172,7 @@ test("updateProject seeds AGENTS.md when the project dir exists without metadata
       "utf8",
     );
     await assert.rejects(() =>
-      readFile(path.join(repo, "tasks/docs/AGENTS.md"), "utf8"),
+      readFile(path.join(repo, "tasks/docs/README.md"), "utf8"),
     );
 
     const updated = await updateProject(
@@ -181,14 +185,16 @@ test("updateProject seeds AGENTS.md when the project dir exists without metadata
     assert.equal(updated.dir, "docs");
     assert.equal(updated.title, "Docs");
     assert.equal(updated.description, "documentation work");
-    assert.equal(updated.path, "tasks/docs/AGENTS.md");
+    assert.equal(updated.path, "tasks/docs/README.md");
 
-    const agents = await readFile(
-      path.join(repo, "tasks/docs/AGENTS.md"),
+    const readme = await readFile(
+      path.join(repo, "tasks/docs/README.md"),
       "utf8",
     );
-    assert.match(agents, /^# Docs\n/);
-    assert.match(agents, /documentation work/);
+    assert.match(readme, /^# Docs\n/);
+    assert.match(readme, /documentation work/);
+    assert.match(readme, /<!-- project-entries-local:start -->/);
+    await assert.rejects(access(path.join(repo, "tasks/docs/AGENTS.md")));
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -236,7 +242,7 @@ test("project get returns the read-only listed project after ordinary task creat
       { env },
     );
     assert.equal(created.exitCode, 0, created.stdout);
-    const indexedPaths = [".harness/tasks/cli/AGENTS.md", ".harness/tasks/AGENTS.md", ".harness/tasks/_default/AGENTS.md"];
+    const indexedPaths = [".harness/tasks/cli/README.md", ".harness/tasks/AGENTS.md", ".harness/tasks/README.md", ".harness/tasks/_default/README.md"];
     const before = await Promise.all(indexedPaths.map(rel => readFile(path.join(repo, rel), "utf8")));
     const listed = JSON.parse(
       (
@@ -265,35 +271,23 @@ test("project get returns the read-only listed project after ordinary task creat
   }
 });
 
-async function migrateProjectToReadme(repo: string, dir: string): Promise<void> {
-  const agents = path.join(repo, "tasks", dir, "AGENTS.md");
-  const original = await readFile(agents, "utf8");
-  const head = original.split("<!-- project-harness")[0]!.trimEnd();
-  await fixtureRawWriteFile(
-    path.join(repo, "tasks", dir, "README.md"),
-    `${head}\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- 暂无条目。\n<!-- project-entries-local:end -->\n`,
-  );
-  await rm(agents);
-  const board = path.join(repo, "tasks/AGENTS.md");
-  await fixtureRawWriteFile(
-    board,
-    (await readFile(board, "utf8")).replaceAll(`${dir}/AGENTS.md`, `${dir}/README.md`),
-  );
-}
-
-test("README-held Task Projects are discovered, read, updated and never get a seed AGENTS", async () => {
+test("README Task Projects are discovered, read and updated; a user-initialised AGENTS project stays a system entry", async () => {
   const repo = await virginRepo();
   try {
     const writer = nodeBoardWriter();
     await createProject(repo, { project: "cli", title: "CLI", description: "edges CLI work" }, writer);
-    await createProject(repo, { project: "site", title: "Site", description: "site work" }, writer);
-    await migrateProjectToReadme(repo, "cli");
+    const board = path.join(repo, "tasks/AGENTS.md");
+    await writeFile(path.join(repo, "tasks/legacy/AGENTS.md"), renderProjectAgents({ title: "Legacy", description: "legacy work" }));
+    await fixtureRawWriteFile(
+      board,
+      (await readFile(board, "utf8")).replace("<!-- project-harness-local:end -->", "- [Legacy](legacy/AGENTS.md) — legacy work\n<!-- project-harness-local:end -->"),
+    );
 
     const listed = await listProjects(repo, writer);
     assert.deepEqual(listed.map((item) => [item.project, path.basename(item.path)]).sort(), [
       ["cli", "README.md"],
-      ["default", "AGENTS.md"],
-      ["site", "AGENTS.md"],
+      ["default", "README.md"],
+      ["legacy", "AGENTS.md"],
     ]);
     const got = await getProject(repo, "cli", writer);
     assert.equal(got.title, "CLI");
@@ -304,16 +298,17 @@ test("README-held Task Projects are discovered, read, updated and never get a se
     assert.equal(updated.path, "tasks/cli/README.md");
     const readme = await readFile(path.join(repo, "tasks/cli/README.md"), "utf8");
     assert.match(readme, /^# CLI\n\nupdated CLI\n/);
-    assert.match(readme, /<!-- project-entries-local:start -->\n## 本层内容\n\n- 暂无条目。/);
+    assert.match(readme, /<!-- project-entries-local:start -->\n## 本层内容\n/);
     await assert.rejects(access(path.join(repo, "tasks/cli/AGENTS.md")));
 
-    await updateProject(repo, "site", { description: "site v2" }, writer);
-    await assert.rejects(access(path.join(repo, "tasks/cli/AGENTS.md")));
-    const board = await readFile(path.join(repo, "tasks/AGENTS.md"), "utf8");
-    assert.match(board, /cli\/README\.md/);
-    assert.match(board, /updated CLI/);
-    assert.doesNotMatch(board, /cli\/AGENTS\.md/);
-    assert.deepEqual((await listProjects(repo, writer)).map((p) => p.project).sort(), ["cli", "default", "site"]);
+    await updateProject(repo, "legacy", { description: "legacy v2" }, writer);
+    await assert.rejects(access(path.join(repo, "tasks/legacy/README.md")));
+    const agentsBoard = await readFile(board, "utf8");
+    assert.match(agentsBoard, /\[Legacy\]\(<?legacy\/AGENTS\.md>?\) — legacy v2/);
+    assert.doesNotMatch(agentsBoard, /README\.md/);
+    const list = await readFile(path.join(repo, "tasks/README.md"), "utf8");
+    assert.match(list, /cli\/README\.md>?\) — updated CLI/);
+    assert.doesNotMatch(list, /legacy/);
 
     await assert.rejects(
       createProject(repo, { project: "cli", title: "X", description: "dup" }, writer),
@@ -324,7 +319,7 @@ test("README-held Task Projects are discovered, read, updated and never get a se
   }
 });
 
-test("maintenance board: README-held project stays listed via CLI and gets no seed AGENTS", async () => {
+test("maintenance board: CLI-created project is a README org list and never gets a seed AGENTS", async () => {
   const { run } = await import("../../src/program.js");
   const repo = await mkdtemp(path.join(tmpdir(), "edges-project-readme-"));
   try {
@@ -332,14 +327,7 @@ test("maintenance board: README-held project stays listed via CLI and gets no se
     const args = ["tasks", "--index-group", "local", "--purpose", "maintenance"];
     assert.equal((await run([...args, "create", "--title", "Fresh", "--project", "cli"], { env })).exitCode, 0);
     const dir = path.join(repo, ".harness/tasks/cli");
-    const original = await readFile(path.join(dir, "AGENTS.md"), "utf8");
-    await fixtureRawWriteFile(
-      path.join(dir, "README.md"),
-      `${original.split("<!-- project-harness")[0]!.trimEnd()}\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- 暂无条目。\n<!-- project-entries-local:end -->\n`,
-    );
-    await rm(path.join(dir, "AGENTS.md"));
-    const board = path.join(repo, ".harness/tasks/AGENTS.md");
-    await fixtureRawWriteFile(board, (await readFile(board, "utf8")).replaceAll("cli/AGENTS.md", "cli/README.md"));
+    await assert.rejects(access(path.join(dir, "AGENTS.md")));
 
     const listed = JSON.parse((await run([...args, "project", "list"], { env })).stdout);
     const cli = listed.projects.find((p: any) => p.project === "cli");

@@ -5,7 +5,7 @@ import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { run } from '../../src/program.js';
-import { AgentsNode } from '../../src/domain/models/index.js';
+import { AgentsNode, ReadmeNode } from '../../src/domain/models/index.js';
 import { generateTasksSite } from '../../src/services/tasks/generate-site.js';
 
 function fixture(t: { after(fn: () => void): void }) {
@@ -149,8 +149,10 @@ test('new owner registration requires explicit group and preserves purpose-indep
   assert.equal(created.exitCode, 0, created.stdout);
   assert.equal(read('.').descendantChildren[0]?.id, path.join(root, '.harness/tasks/AGENTS.md'));
   const board = new AgentsNode(path.join(root, '.harness/tasks/AGENTS.md')).parse(fs.readFileSync(path.join(root, '.harness/tasks/AGENTS.md'), 'utf8'));
-  assert.equal(board.localChildren.filter(ref => ref.name === 'Example').length, 1);
+  assert.equal(board.localChildren.length, 0);
   assert.doesNotMatch(board.serialize(), /task-projects:/);
+  const list = new ReadmeNode(path.join(root, '.harness/tasks/README.md')).parse(fs.readFileSync(path.join(root, '.harness/tasks/README.md'), 'utf8'));
+  assert.equal(list.localChildren.filter(ref => ref.name === 'Example').length, 1);
 });
 
 for (const group of ['local', 'descendant'] as const) test('existing board registers missing owner relation as ' + group, async t => {

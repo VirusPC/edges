@@ -2,11 +2,14 @@ import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { decodeBody } from '../../domain/models/internal/parse.js';
 import { createAgentsDocument } from "../../domain/models/internal/document.js";
+import { ENTRIES_SECTIONS } from "../../domain/models/layout.js";
 import { serializeNode } from '../../domain/models/internal/serialize.js';
 import { NodeService } from '../node/node-service.js';
 import { assertBoardPath } from './board.js';
 import { scopeDir, boardRel, type BoardTarget } from "./paths.js";
 import path from "node:path";
+import { isDeepStrictEqual } from "node:util";
+import type { NodeReference } from "../../domain/models/core/types.js";
 import { realpathSync } from "node:fs";
 import { existsSync } from "node:fs";
 import { listProjectIds, type BoardFs, type BoardWriter } from "./board.js";
@@ -107,6 +110,14 @@ export function renderProjectAgents(input: {
   return out + "\n" + serializeNode(createAgentsDocument());
 }
 
+const EMPTY_ENTRIES = `<!-- ${ENTRIES_SECTIONS.localChildren.marker}:start -->\n## ${ENTRIES_SECTIONS.localChildren.heading}\n<!-- ${ENTRIES_SECTIONS.localChildren.marker}:end -->\n`;
+const ENTRIES_MARKER = /^<!-- project-entries-(?:local|descendants):start -->$/m;
+
+/** Task Project org list: title, description and an (initially empty) project-entries list. */
+export function renderProjectReadme(input: { title: string; description: string }): string {
+  return `# ${input.title}\n\n${input.description}\n\n${EMPTY_ENTRIES}`;
+}
+
 export function oneLineDescription(description: string): string {
   return description.replace(/\r?\n/g, " ").replace(/[ \t]+/g, " ").trim();
 }
@@ -134,8 +145,8 @@ function projectReadmeRelPath(id: TaskProjectId, target: BoardTarget = ""): stri
   return `${boardRel(target)}/${projectDirName(id)}/README.md`;
 }
 
-/** A Task Project's entry: its own AGENTS.md (real system entry or seed) or, once migrated,
- * the README.md that holds its project-entries org list. AGENTS wins when both exist. */
+/** A Task Project's entry: its README.md org list, or an AGENTS.md when the user initialised the
+ * project as a system entry. AGENTS wins when both exist; new projects get a README. */
 async function resolveProjectEntry(
   repoPath: BoardTarget,
   id: TaskProjectId,
@@ -148,11 +159,14 @@ async function resolveProjectEntry(
   const readme = projectReadmeRelPath(id, repoPath);
   if (await fs.exists(path.join(scope, readme)))
     return { rel: readme, abs: path.join(scope, readme), exists: true, kind: "readme" };
-  return { rel: agents, abs: path.join(scope, agents), exists: false, kind: "agents" };
+  return { rel: readme, abs: path.join(scope, readme), exists: false, kind: "readme" };
 }
 
 function rootAgentsAbsPath(repoPath: BoardTarget): string {
   return path.join(realpathSync(scopeDir(repoPath)), boardRel(repoPath), "AGENTS.md");
+}
+function boardReadmeAbsPath(repoPath: BoardTarget): string {
+  return path.join(path.dirname(rootAgentsAbsPath(repoPath)), "README.md");
 }
 
 async function collectProjectIds(repoPath: BoardTarget, fs: BoardFs, additional: readonly TaskProjectId[] = []): Promise<TaskProjectId[]> {
@@ -232,14 +246,25 @@ export async function refreshProjectIndex(
     records.push(await readProjectRecord(repoPath, id, writer));
   }
 
-  const rootAbs = rootAgentsAbsPath(repoPath);
-  let board = await service.get(rootAbs, AgentsNode);
-  if (!board) board = await service.create(new AgentsNode(rootAbs), { body: '# Tasks\n\n' + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
-  const updates = new Map(sortProjectRecords(records).map(record => [path.resolve(path.dirname(rootAbs), record.dir, path.basename(record.path)), { name: record.title, description: oneLineDescription(record.description) }]));
-  const update = (refs: typeof board.localChildren) => refs.map(ref => updates.has(ref.id) ? { ...ref, ...updates.get(ref.id) } : ref);
-  const localChildren = update(board.localChildren), descendantChildren = update(board.descendantChildren);
-  for (const [id, fields] of updates) if (!board.children.some(ref => ref.id === id)) localChildren.push({ id, ...fields });
-  await service.update(board, { localChildren, descendantChildren });
+  const board = await ensureBoardAgents(repoPath, service);
+  const list = await ensureBoardReadme(repoPath, service);
+  const sorted = sortProjectRecords(records);
+  const updatesFor = (kind: "AGENTS.md" | "README.md") => new Map(sorted
+    .filter(record => path.basename(record.path) === kind)
+    .map(record => [path.resolve(board.directoryPath, record.dir, kind), { name: record.title, description: oneLineDescription(record.description) }]));
+  // System-entry projects stay under the board AGENTS; org-list projects belong to the board README (Q13).
+  const agentsUpdates = updatesFor("AGENTS.md"), readmeUpdates = updatesFor("README.md");
+  const synced = (node: AgentsNode | ReadmeNode, updates: Map<string, { name: string; description: string }>, moved: ReadonlySet<string> = new Set()) => {
+    const update = (refs: readonly NodeReference[]) => refs.filter(ref => !moved.has(ref.id)).map(ref => updates.has(ref.id) ? { ...ref, ...updates.get(ref.id) } : ref);
+    const localChildren = update(node.localChildren), descendantChildren = update(node.descendantChildren);
+    for (const [id, fields] of updates) if (!node.children.some(ref => ref.id === id)) localChildren.push({ id, ...fields });
+    const unchanged = isDeepStrictEqual([localChildren, descendantChildren], [node.localChildren, node.descendantChildren]);
+    return unchanged ? undefined : { localChildren, descendantChildren };
+  };
+  const boardChildren = synced(board, agentsUpdates, new Set(readmeUpdates.keys()));
+  if (boardChildren) await service.update(board, boardChildren);
+  const listChildren = synced(list, readmeUpdates);
+  if (listChildren) await service.update(list, listChildren);
   const owner = await service.get(path.join(realpathSync(scopeDir(repoPath)), 'AGENTS.md'), AgentsNode);
   if (owner && !owner.children.some(ref => ref.id === board.id)) {
     const group = selectedGroup(repoPath)!; // prepareProjectWrite requires an explicit choice.
@@ -251,6 +276,22 @@ export async function refreshProjectIndex(
   return records;
 }
 
+async function ensureBoardAgents(repoPath: BoardTarget, service: NodeService): Promise<AgentsNode> {
+  const abs = rootAgentsAbsPath(repoPath);
+  return await service.get(abs, AgentsNode)
+    ?? await service.create(new AgentsNode(abs), { body: "# Tasks\n\n" + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
+}
+
+/** The board's Task Project org list; an existing prose README gains an empty project-entries list. */
+async function ensureBoardReadme(repoPath: BoardTarget, service: NodeService): Promise<ReadmeNode> {
+  const abs = boardReadmeAbsPath(repoPath);
+  const existing = await service.get(abs, ReadmeNode);
+  if (!existing) return service.create(new ReadmeNode(abs), { body: "# Tasks\n\n" + EMPTY_ENTRIES });
+  if (!ENTRIES_MARKER.test(existing.body))
+    await service.update(existing, { body: existing.body.trimEnd() + "\n\n" + EMPTY_ENTRIES });
+  return existing;
+}
+
 export async function ensureProjectMetadata(
   repoPath: BoardTarget,
   writer: BoardWriter,
@@ -259,8 +300,8 @@ export async function ensureProjectMetadata(
   service = projectNodes(repoPath),
 ): Promise<TaskProjectRecord[]> {
   await prepareProjectWrite(repoPath, service);
-  const rootAbs = rootAgentsAbsPath(repoPath);
-  if (!await service.get(rootAbs, AgentsNode)) await service.create(new AgentsNode(rootAbs), { body: "# Tasks\n\n" + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
+  await ensureBoardAgents(repoPath, service);
+  await ensureBoardReadme(repoPath, service);
 
   for (const id of await collectProjectIds(repoPath, writer, additional)) {
     if (skipId === id) {
@@ -268,7 +309,7 @@ export async function ensureProjectMetadata(
     }
     const entry = await resolveProjectEntry(repoPath, id, writer);
     if (!entry.exists) {
-      await service.create(new AgentsNode(entry.abs), { body: renderProjectAgents({
+      await service.create(new ReadmeNode(entry.abs), { body: renderProjectReadme({
           title: seedTitleFor(id),
           description: seedDescriptionFor(id),
         }) }, { indexGroup: "local" });
@@ -310,11 +351,12 @@ export async function createProject(
   const description = parseProjectDescription(input.description);
   const service = projectNodes(repoPath);
   await ensureProjectMetadata(repoPath, writer, id, [], service);
-  const rel = projectAgentsRelPath(id, repoPath);
-  if ((await resolveProjectEntry(repoPath, id, writer)).exists) {
+  const entry = await resolveProjectEntry(repoPath, id, writer);
+  if (entry.exists) {
     throw new TasksError("VALIDATION_ERROR", `project already exists: ${id}`);
   }
-  await service.create(new AgentsNode(path.join(realpathSync(scopeDir(repoPath)), rel)), { body: renderProjectAgents({ title, description }) }, { indexGroup: "local" });
+  const rel = entry.rel;
+  await service.create(new ReadmeNode(entry.abs), { body: renderProjectReadme({ title, description }) }, { indexGroup: "local" });
   await refreshProjectIndex(repoPath, writer, [id], service);
   return {
     project: id,
