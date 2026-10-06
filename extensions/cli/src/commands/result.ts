@@ -21,10 +21,10 @@ export function fail(errorCode: string, reason: string, stderrHint: string): Cli
   };
 }
 
-export function succeed(payload: Record<string, unknown>, stderr = ""): CliResult {
+export function succeed(payload: Record<string, unknown>, stderrNote = ""): CliResult {
   return {
     exitCode: 0,
     stdout: `${JSON.stringify({ status: "success", ...payload })}\n`,
-    stderr,
+    stderr: stderrNote,
   };
 }

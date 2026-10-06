@@ -35,7 +35,7 @@ flowchart TD
 | 怎样创建目录、登记父索引、检查外部修改并保存？ | services |
 | 怎样把命令参数变成请求、返回 JSON 或表格？ | commands |
 
-Model 不做 IO，不依赖 Service 或 operations；operations 不依赖 Service。通用格式工具不依赖业务模型。这不表示整个 CLI 的历史分层问题都已消除：`utils/exit.ts` 仍引用业务错误类型，部分命令仍有用例编排，留待 commands/Service 解耦处理。
+Model 不做 IO，不依赖 Service 或 operations；operations 不依赖 Service。通用格式工具不依赖业务模型。这不表示整个 CLI 的历史分层问题都已消除：退出码表在 `commands/exit.ts`，不再经 utils 引用业务错误类型；部分命令仍有用例编排。
 
 ## 共同的数据基础
 

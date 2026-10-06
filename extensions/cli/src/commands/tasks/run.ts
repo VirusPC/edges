@@ -2,7 +2,7 @@ import type { CliContext, CliResult } from "../../context.js";
 import { asTasksError, openTasksRuntime } from "../../services/tasks/result.js";
 import { fail, succeed } from "../result.js";
 
-export { fail, succeed };
+export { succeed };
 
 export function failTask(errorCode: string, reason: string) {
   return fail(errorCode, reason, "See edges tasks --help for usage.\n");

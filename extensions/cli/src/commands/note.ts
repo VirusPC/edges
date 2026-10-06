@@ -3,7 +3,7 @@ import { Command, Option } from "commander";
 import { ZodError } from "zod";
 import { type CliContext, type CliResult, usageError } from "../context.js";
 import { loadConfig } from "../services/config.js";
-import { exitCodeFor, exitCodeForError } from "../utils/exit.js";
+import { exitCodeForErrorCode } from "./exit.js";
 import { VERSION } from "../utils/version.js";
 import { checkAuth } from "../services/note/auth.js";
 import { formatResult } from "./note/format.js";
@@ -72,7 +72,7 @@ type IngestCliOptions = {
 
 function fail(failure: IngestFailure): CliResult {
   return {
-    exitCode: exitCodeForError(failure.errorCode),
+    exitCode: exitCodeForErrorCode(failure.errorCode),
     stdout: formatResult(failure),
     stderr: "",
   };
@@ -274,7 +274,7 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
         : `${stderrLines}\n`
       : "";
     ctx.result = {
-      exitCode: exitCodeFor(result),
+      exitCode: result.status === "success" ? 0 : exitCodeForErrorCode(result.errorCode),
       stdout: formatResult(result),
       stderr,
     };
