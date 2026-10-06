@@ -58,7 +58,7 @@ There is no `server init` (client `edges artifacts init` is the laptop command).
 
 ### First time on the ECS
 
-1. **Node ≥ 20 + pnpm** on `cheng-dev` PATH (user systemd cannot sudo-install them). `corepack enable` then `corepack prepare pnpm@latest --activate` is enough if Node is already there.
+1. **Node ≥ 22 + pnpm** on `cheng-dev` PATH (user systemd cannot sudo-install them). `corepack enable` then `corepack prepare pnpm@latest --activate` is enough if Node is already there.
 2. **Install (config + unit, no process):**
 
    ```bash
