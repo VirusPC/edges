@@ -10,7 +10,7 @@
 
 **Spec:** [节点系统简化设计](../specs/2026-10-06-node-identity-simplification.md)，替代[原节点模型](../specs/2026-10-05-directory-node-model.md)的多副本合并合同，并明确树算法下沉的职责边界。两者冲突以本次用户确认的补充设计为准。
 
-**Status:** 用户已授权实施，执行中；基线 `e1283b7`。本计划不构成推送、合并、部署或真实内容迁移授权。
+**Status:** 实现、分步审阅与自动验收已完成，等待整体复核；基线 `e1283b7`。本计划不构成推送、合并、部署或真实内容迁移授权。
 
 ## Global Constraints
 
@@ -256,8 +256,8 @@ git diff --stat
 - Consumes：Task 1 的单实例和完整保存合同，以及 Task 2 的 operations 遍历及三个 Service 消费方；公共 CRUD/query API 保持不变。
 - Produces：无 node-merge/node-text-merge 生产引用、无 Service 重复 DFS；命令级工作树锁与单文件原子保存；完整业务回归和构建通过；文档说明新的实例、分层及并发合同。
 
-- [ ] **Step 1：检查生产依赖，删除无调用代码。** 用 `rg` 查源码中 `mergeNode`、`mergeText`、`node-merge`、`node-text-merge`、`assertRefresh` 及 `from "diff"`。Task 1 应已删除缓存调用；若还有调用，回到同一缓存/写计划合同修复，不保留兼容合并分支。删除两个源文件，移除仅服务于它们的 import 和 types。
-- [ ] **Step 2：由包管理器删除直接依赖。** 在仓根确认 diff 的实际消费者后运行：
+- [x] **Step 1：检查生产依赖，删除无调用代码。** 用 `rg` 查源码中 `mergeNode`、`mergeText`、`node-merge`、`node-text-merge`、`assertRefresh` 及 `from "diff"`。Task 1 应已删除缓存调用；若还有调用，回到同一缓存/写计划合同修复，不保留兼容合并分支。删除两个源文件，移除仅服务于它们的 import 和 types。
+- [x] **Step 2：由包管理器删除直接依赖。** 在仓根确认 diff 的实际消费者后运行：
 
 ```bash
 rg -n 'from ["\x27]diff["\x27]|mergeNode|mergeText|node-text-merge|node-merge' extensions/cli/src
@@ -267,8 +267,8 @@ git diff -- extensions/cli/package.json pnpm-lock.yaml
 
 预期源码查询没有命中；只移除 edges-cli 的直接 diff 依赖，锁文件中其他合法依赖的 diff 记录不手工删。不要删除历史讨论/旧计划中的术语作为“通过检查”的手段。
 
-- [ ] **Step 2a：先验证命令写边界，再接入锁。** 盘点现有 CLI 写命令及其 NodeService 创建位置，以一次命令为操作边界，业务读取前获取锁，finally 释放，不在每次内部 CRUD 重复获取。锁身份来自稳定工作树根，独立 worktree 不共用 Git common-dir；非 Git 管理目录沿既有根发现规则保持同一树的父子 scope 使用同一身份。锁目录不得进入节点索引、资源快照、Git 提交或后续打包。明确路径后补到 spec。通过包管理器选择兼容 Node engines 的 proper-lockfile、write-file-atomic 与必要类型依赖，记录版本依据；不要顺带提高 Node 最低版本。
-- [ ] **Step 2b：先写失败用例再实现原子保存。** 在原有 node-files 保存边界接入 write-file-atomic，保留新建不覆盖、路径/符号链接检查、目录生命周期、附件和恢复逻辑。成功替换后采集新文件身份及 source，再回填唯一实例；不以关闭 inode 检查来掩盖自写替换。锁失效报错，不吞错继续；冲突检查仍比较原始内容及既有身份快照，不增加 mtime-only 协议或自动重试合并。
+- [x] **Step 2a：先验证命令写边界，再接入锁。** 盘点现有 CLI 写命令及其 NodeService 创建位置，以一次命令为操作边界，业务读取前获取锁，finally 释放，不在每次内部 CRUD 重复获取。锁身份来自稳定工作树根，独立 worktree 不共用 Git common-dir；非 Git 管理目录沿既有根发现规则保持同一树的父子 scope 使用同一身份。锁目录不得进入节点索引、资源快照、Git 提交或后续打包。明确路径后补到 spec。通过包管理器选择兼容 Node engines 的 proper-lockfile、write-file-atomic 与必要类型依赖，记录版本依据；不要顺带提高 Node 最低版本。
+- [x] **Step 2b：先写失败用例再实现原子保存。** 在原有 node-files 保存边界接入 write-file-atomic，保留新建不覆盖、路径/符号链接检查、目录生命周期、附件和恢复逻辑。成功替换后采集新文件身份及 source，再回填唯一实例；不以关闭 inode 检查来掩盖自写替换。锁失效报错，不吞错继续；冲突检查仍比较原始内容及既有身份快照，不增加 mtime-only 协议或自动重试合并。
 
 | 补充验收场景 | 必须验证 |
 | --- | --- |
@@ -280,15 +280,15 @@ git diff -- extensions/cli/package.json pnpm-lock.yaml
 | 临时文件写入/rename 故障及多文件部分失败 | 单文件替换前原文完整、临时文件清理；既有多文件恢复继续有效，不宣称崩溃原子性 |
 
 锁测试采用隔离临时目录和进程间握手，避免依赖固定 sleep；不得对真实仓库节点发起并发写。运行新增锁测试、相关 node-files/Service 及 CLI 集成测试，记录 RED/GREEN，再进入整体回归。
-- [ ] **Step 3：验证真实业务调用。** 跑下列已有集成回归，确认 Tasks 的 create/status/project/index、Memory/Note 的 update/import、Skill+harness 生命周期和全仓结果不变：
+- [x] **Step 3：验证真实业务调用。** 跑下列已有集成回归，确认 Tasks 的 create/status/project/index、Memory/Note 的 update/import、Skill+harness 生命周期和全仓结果不变：
 
 ```bash
 pnpm --filter edges-cli exec node --test --import tsx test/services/production-nodes.test.ts test/services/directory-cli.test.ts test/tasks/node-index.test.ts test/tasks/owner-board.test.ts test/tasks/node-query.test.ts test/tasks/all-scopes.test.ts test/tasks/default-purpose.test.ts
 ```
 
 若调用方依赖不同对象隔离，改为复用 Service 的实例并按当前模型方法组合修改；需要短命校验副本时用现有 clone 模式且不登记。不能另写 merge/copy cache。新增回归先证明具体业务错误再修复，不改任务状态、用途、索引归属规则来迁就缓存。
-- [ ] **Step 4：同步文档和用户决定。** CLI README 给出 `a === b`、父节点完整保存的例子，说明 models 管领域模型、operations 管树算法和泛型查询链、Service 管加载与持久化；原 spec 移除副本三方合并条款、改写 get/query/list 资源升级和遍历归属描述；本补充设计与计划状态只在实现、验证后标为完成。说明不同 Service/进程之间仍检查文件冲突，并说明受影响节点的未保存修改会随生命周期操作落盘。项目记忆只记录用户为何选择共享状态及合并计划，不能把临时测试数量写成长期约定。
-- [ ] **Step 5：完整验收。** 在仓根顺序执行：
+- [x] **Step 4：同步文档和用户决定。** CLI README 给出 `a === b`、父节点完整保存的例子，说明 models 管领域模型、operations 管树算法和泛型查询链、Service 管加载与持久化；原 spec 移除副本三方合并条款、改写 get/query/list 资源升级和遍历归属描述；本补充设计与计划状态只在实现、验证后标为完成。说明不同 Service/进程之间仍检查文件冲突，并说明受影响节点的未保存修改会随生命周期操作落盘。项目记忆只记录用户为何选择共享状态及合并计划，不能把临时测试数量写成长期约定。
+- [x] **Step 5：完整验收。** 在仓根顺序执行：
 
 ```bash
 pnpm test
@@ -299,7 +299,7 @@ git diff --stat
 ```
 
 预期全绿；分别报告状态/遍历简化的删减和锁/原子保存的新增，不新增替代合并模块。严格类型检查继续证明迁移脚本和惰性查询消费方兼容。只运行隔离 fixture；不执行真实数据迁移或可能读取私有用户索引的根全仓查询。锁接入和合并清理可按可审查边界分别提交，附 Codex Co-authored-by。
-- [ ] **Step 6：独立复核。** 审查重点是“缓存命中是否保持用户编辑与旧快照”“父/子/引用方是否都基于当前状态计划”“无关 dirty 节点是否被误保存”“删除/移动后是否仍有旧键和可写旧对象”“只读或模型声明是否能绕开身份表”；另核对树算法对 Service 无反向依赖，query/registered/validateGraph 复用内核且范围不同仍正确，多根去重和计划草稿覆盖不漏环。tests 不得删除正文、资源和外部冲突断言。报告净删除文件/依赖、实际测试结果及任何未解决限制。
+- [x] **Step 6：独立复核。** 审查重点是“缓存命中是否保持用户编辑与旧快照”“父/子/引用方是否都基于当前状态计划”“无关 dirty 节点是否被误保存”“删除/移动后是否仍有旧键和可写旧对象”“只读或模型声明是否能绕开身份表”；另核对树算法对 Service 无反向依赖，query/registered/validateGraph 复用内核且范围不同仍正确，多根去重和计划草稿覆盖不漏环。tests 不得删除正文、资源和外部冲突断言。报告净删除文件/依赖、实际测试结果及任何未解决限制。
 
 ## 最终完成标准
 
@@ -318,6 +318,9 @@ git diff --stat
 - 用户更新布局：operations 与 models 同级，统一 traverse 与泛型 async-query；Task 2 按更新后的范围执行。
 
 - Task 2 已完成：operations 同级布局及各算法分文件；traverse 统一查询、登记收集和图校验。114 项相关测试与生产/查询类型检查通过；重复引用只读检查修复后独立复审通过。Tasks 专用模块仅调整通用方法引用。
+
+- Task 3 已完成：删除两个 merge 模块及 CLI 直接 diff 依赖；接入写命令锁与单文件原子覆盖保存。初次审查发现路径解释、非 Git 初始化锁身份和恢复信息丢失三项问题，修复后复审通过。根据用户要求，Git 锁改放根目录，非 Git 使用固定临时锁；保留跨进程测试，CLI 测试文件串行运行。
+- 集成验收：`pnpm test` 927 项通过（CLI 844、artifacts-preview 42、new-note MCP 14、tasks-review-app 27）；`pnpm build`、迁移脚本及查询链 strict 类型检查、diff 检查通过。CLI 全套约 62 秒。保留现有 Vite loader / inlineDynamicImports 工具链提示，不在本次隐藏或扩展修复范围。
 
 ## 执行中的裁定
 

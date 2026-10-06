@@ -1,6 +1,6 @@
 # 节点系统简化：单实例、完整保存与树操作归属
 
-状态：实现与自动验收已完成，等待独立复核；基线为 `e1283b7`。整体完成状态以实施计划的审阅记录为准。
+状态：实现、自动验收和分步独立审阅已完成，等待整体复核；基线为 `e1283b7`。整体完成状态以实施计划的审阅记录为准。
 
 ## 目的与取舍
 
@@ -24,7 +24,7 @@ Service 提供引用解析、范围限制与节点加载的现有回调，负责
 
 复用同一遍历内核处理三条调用链：query 的读取遍历、`#registered` 的登记节点收集、`#validateGraph` 的拟提交关系校验。后两者的根集合、关系范围、计划草稿覆盖、删除检查及范围外处理保留在 Service；只消除重复 DFS、seen/active 和环检测，不统一它们不同的业务范围。多根调用在一次遍历中共用去重和当前递归路径，不依次创建多个独立遍历来重复加载相交子树。
 
-普通查询仍默认只走 localChildren，显式选项才走 descendantChildren/harness；写入前图校验仍只检查原有 composition 关系，不借重构扩大成 harness 校验。已登记节点收集仍保留既有维护关系范围和显式加载节点补集。`filter/map/groupBy/find` 属于通用集合查询，集中到 `operations/query.ts`，保持泛型能力；不下沉 Task 业务条件、不新增公共 enter/shouldEnter 回调。
+普通查询仍默认只走 localChildren，显式选项才走 descendantChildren/harness；写入前图校验仍只检查原有 composition 关系，不借重构扩大成 harness 校验。已登记节点收集仍保留既有维护关系范围和显式加载节点补集。`filter/map/groupBy/find` 等通用集合算法各放独立文件，由 `operations/query.ts` 组合为惰性查询链，保持泛型能力；不下沉 Task 业务条件、不新增公共 enter/shouldEnter 回调。
 
 ## 实例身份
 
