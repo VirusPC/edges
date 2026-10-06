@@ -14,8 +14,12 @@
 flowchart TD
     CLI[CLI / MCP / Skills] --> Business[Tasks / Memory / Note 业务 Service]
     Business --> Nodes[NodeService]
-    Nodes --> Models[Node 模型：领域变更、校验、parse / serialize]
-    Nodes --> Operations[operations：遍历与查询算法]
+    subgraph Domain[domain]
+      Models[models：领域变更、校验、parse / serialize]
+      Operations[operations：遍历与查询算法] --> Models
+    end
+    Nodes --> Models
+    Nodes --> Operations
     Nodes --> Files[已有文件持久化实现：快照、原子写、恢复]
 ```
 
@@ -41,14 +45,30 @@ scope 解析和命令锁由入口编排，先确定目标并获取写锁，再�
 
 ## 文件归属
 
-保留现有 models / services / operations / utils 顶层布局，不增加 package，不为四个目标分别建立公共入口文件。
+将现有 models 与 operations 一起归入 domain/，二者保持同级；services、commands、utils 保持在 src 顶层。不增加 package 或调用层，不为四个目标分别建立公共入口文件。
+
+```text
+src/
+├─ domain/
+│  ├─ models/
+│  └─ operations/
+├─ services/
+├─ commands/
+└─ utils/
+```
+
+依赖为 `services → domain/operations → domain/models`，services 也可以直接使用 domain/models。models 不反向依赖 operations，domain 不依赖任何业务 Service（包括类型依赖），不直接执行文件 IO；可以使用纯 Markdown/日期/路径工具。traverse 的 resolve/load 回调继续由 Service 注入，filter/groupBy 等仍保持泛型，不因为归入 domain 而绑定节点类型。
+
+迁移时一并纠正现有 `models/note/validation.ts → services/note/types.ts` 的类型反向依赖：该文件校验的是入库请求，应移至 `services/note/validation.ts`，与 IngestRequest 同属 Note 业务 Service。保持原校验行为、错误信息与 CLI 返回结果，不把请求类型下沉到领域模型。
+
+批量移动和引用重算使用 TypeScript 脚本，覆盖源码、测试、仓库迁移脚本及当前开发文档；相对导入仍使用 .js。原 src/models、src/operations 不留转发目录。测试目录暂不搬迁。已完成的历史 spec/plan 保留其当时路径，本次 spec/plan 对新布局有优先解释权。
 
 | 能力 | 落点 | 本次收敛 |
 | --- | --- | --- |
 | 节点 CRUD、查询与关联保存 | `services/node-service.ts` | 业务直接复用已有接口；不新增 `services/node-documents.ts` 或 `services/node-query.ts` |
 | 文件冲突检查、原子保存、恢复 | `services/node-files.ts` | 保持现有实现；Memory 的 `.gitignore` 写也复用它 |
-| AGENTS 结构与文本格式 | `models/internal-node.ts`、已有 `models/internal/` | 骨架使用现有 serializeNode；区块算法集中到 blocks.ts；不新增 internal/documents.ts |
-| 索引转义与路径编码 | 现有 `models/internal/serialize.ts` | 迁入 Memory 的两个纯函数，所有索引生成者复用；不新建 utils/markdown/index-rendering.ts |
+| AGENTS 结构与文本格式 | `domain/models/internal-node.ts`、已有 `domain/models/internal/` | 骨架使用现有 serializeNode；区块算法集中到 blocks.ts；不新增 internal/documents.ts |
+| 索引转义与路径编码 | 现有 `domain/models/internal/serialize.ts` | 迁入 Memory 的两个纯函数，所有索引生成者复用；不新建 utils/markdown/index-rendering.ts |
 | 基础路径机制 | 现有 `utils/filesystem.ts` | 包含关系、真实路径、链接检查与祖先查找共用 |
 | Memory 的节点访问政策 | `services/memory/node-documents.ts` 改名为 `service.ts` | 保留 Service 构造和写入准备政策，删除 MemoryDocument/load/save 包装 |
 | Tasks / Note 业务流程 | 各自现有 Service | 删除重复基础机制，不迁走业务规则 |
@@ -94,7 +114,7 @@ Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Not
 - 保留命令写锁、文件快照冲突检查、单文件原子保存与既有失败恢复。
 - 保留 Markdown 非受控区域；不要求保留 YAML 注释或 YAML 样式。
 - 保留 CLI 参数、输出协议、默认 scope 与查询范围；不新增 CLI 命令。
-- operations 与 models/services 同级，算法按文件拆分；不引入 NodeTree、全局 Service 或事务框架。
+- domain/models 与 domain/operations 同级，算法按文件拆分；domain 不依赖 services（含类型依赖），不直接读写文件；不引入 NodeTree、全局 Service 或事务框架。
 
 ## 取舍与验收
 

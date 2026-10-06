@@ -1,12 +1,12 @@
 ---
 name: project_node_shared_state_simplification
-description: 简化 NodeService 时：共享实例；同级 operations 按文件拆分通用树遍历与查询操作；工作树锁和原子保存的取舍。
+description: 节点与 Service 边界：共享实例、domain 内 models/operations 同级、通用能力收敛及命令锁取舍。
 metadata:
   edges-title: 节点共享状态与职责简化
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T14:39:48+08:00'
+  edges-updated-at: '2026-10-06T14:49:29+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -32,6 +32,8 @@ metadata:
 **How to apply:** 写命令在读取业务节点前取得稳定工作树锁，失败或成功均释放；占用时报错，由用户重试。独立 Git worktree 不共用锁，只读命令不加锁；scope 决定操作范围而不是锁范围。保留原文及文件/资源身份快照，不新增只凭时间戳的协议。原子替换后更新实际文件身份，继续沿用已有多文件失败恢复；不承诺多文件 ACID 或阻止任意外部编辑器写入。具体职责、未采用方案及官方证据集中在[补充设计](../../../../../docs/superpowers/specs/2026-10-06-node-identity-simplification.md#命令锁与单文件原子保存)，[实施计划](../../../../../docs/superpowers/plans/2026-10-06-node-identity-simplification.md)同步补齐验证步骤。
 
 ## 树操作的目录归属
+
+以下为此前的 src 顶层位置决策；本条目末尾的 domain 归组决策已更新物理位置，算法分文件及 models/operations 同级的要求仍保留。
 
 用户最终确认本轮只迁通用方法，Tasks 专用操作保持原位；采用通用布局：src/operations/ 与 models、services 同级，包含 traverse.ts、query.ts 与独立算法文件。替代此前仅收树操作的 models/operations 子目录建议。
 
@@ -79,3 +81,11 @@ metadata:
 **Why:** 上一轮“Model 管内容、Service 管 IO”的表述容易被理解成业务调用方需要自己拼接模型修改和保存流程。用户要求参照后端分层明确统一的操作入口，同时继续减少过散的文件和包装。
 
 **How to apply:** Service 协调加载、调用模型规则、关联索引与持久化；Model 保留纯内存领域方法及 parse/serialize/validate，不执行文件 IO。对业务调用方提供完整的 Service 操作；模型内部可变实现与原地更新决策仍保留，不借此引入 immutable。通用能力应优先复用已有 NodeService 与模型实现；重新梳理的 spec/plan 已据此修订，具体实现尚未开始。
+
+## models 与 operations 共同归入 domain
+
+用户提出用 domain 目录包裹 models 和 operations，并要求将该布局一起写入计划。两者在 domain 内保持同级，services/commands/utils 留在 src 顶层。
+
+**Why:** 模型和节点操作共同构成领域核心，归组能明确其与 Service 执行编排的边界；这是一处目录归组，不应引入新的调用层、DomainService 或 package。
+
+**How to apply:** 用 TypeScript 脚本批量迁移并重算相对导入，operations 的算法分文件和泛型查询链继续保留。domain 不反向依赖 Service，类型依赖也纳入检查；服务提供遍历所需加载回调。Node 请求校验按实际职责归业务 Service，不能为了搬目录把已有反向依赖一起固化。以 shared-node-capabilities spec/plan 的 Task 0 和新布局为准；本轮仅改计划，代码目录尚未迁移。
