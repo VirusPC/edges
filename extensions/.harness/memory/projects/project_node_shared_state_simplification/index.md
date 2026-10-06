@@ -1,12 +1,14 @@
 ---
 name: project_node_shared_state_simplification
-description: 节点与 Service 边界、domain 归组、Node 22、共享实例；简化按重复机制与扩展成本验收，保留业务分组和索引迁位。
+description: >-
+  Model/operations/Service 分工、共享实例和 domain；索引统一，旧 task-projects
+  只由独立迁移脚本处理，创建分组接口待讨论。
 metadata:
   edges-title: 节点共享状态与职责简化
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T15:46:40+08:00'
+  edges-updated-at: '2026-10-06T15:58:37+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -113,4 +115,13 @@ metadata:
 
 **Why:** 减少重复实现和调用概念才是简化；搬目录、减少文件数或增加通用包装本身不是收益。Schema 消除了类型定义重复，但新增生成、分发及验收成本，不能承诺总行数必然降低。
 
-**How to apply:** Task 1–4 汇报删除的重复机制，Task 5 单列工具链成本；使用现有模型 hooks、操作组合和契约清单扩展，不引入插件引擎。迁移保留 Tasks 合法旧索引迁位以及新 domain/maintenance 与原有分组的差异；具体回归要求以 plan 的整体审查表和 Task 2/3/5 为准。
+**How to apply:** Task 1–4 汇报删除的重复机制，Task 5 单列工具链成本；使用现有模型 hooks、操作组合和契约清单扩展，不引入插件引擎。索引迁移按后续用户纠正：Tasks 不保留旧区块迁位兼容分支，改用独立迁移脚本；创建分组的具体接口继续讨论；具体回归要求以 plan 的整体审查表和 Task 2/3/5 为准。
+
+
+## 统一索引，旧区块独立迁移
+
+用户明确纠正：索引能力统一，task-projects 旧区块不在正常业务中兼容；存在旧格式时提供 AGENTS.md 迁移脚本即可。
+
+**Why:** 不能为了历史格式在通用索引之外继续维护 Tasks 专属渲染和搬迁分支，增加长期复杂度。
+
+**How to apply:** 正常 Tasks 使用 InternalNode 通用关系和 NodeService 更新索引，不生成 task-projects 标记。独立迁移脚本显式选范围、预览、检查冲突并幂等转为普通索引，保留自定义正文；正常操作遇到冲突旧格式给迁移提示。计划已替代“Tasks 自动搬旧区块”的审查建议，脚本尚待实施，不能自行迁移真实内容。

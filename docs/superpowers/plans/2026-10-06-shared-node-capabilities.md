@@ -10,7 +10,7 @@
 
 **Spec:** [通用能力收敛设计](../specs/2026-10-06-shared-node-capabilities.md)
 
-状态：待实施。本版替代最初新增 node-documents、node-query、internal/documents、utils/markdown/index-rendering 文件的方案。此前[节点职责简化计划](2026-10-06-node-identity-simplification.md)已经完成，不重复执行。
+状态：待实施；本轮已确认统一索引与独立旧格式迁移。创建时关系分组及生产 Schema 校验的后续建议见下节，尚待讨论，不能按旧补救流程直接实施。本版替代最初新增 node-documents、node-query、internal/documents、utils/markdown/index-rendering 文件的方案。此前[节点职责简化计划](2026-10-06-node-identity-simplification.md)已经完成，不重复执行。
 
 ## 架构审查结论与简化验收
 
@@ -26,6 +26,11 @@
 扩展边界仍是目录协议和已有 NodeServiceOptions；新增入口布局须显式修改 layout 及测试，不宣称能零改动支持任意格式。每个业务用例内，同一 managedRoot 和模型/写政策的 Service 应复用并向内部函数传递，不能每次 helper 调用都 new 一个来绕开共享实例；不同根或不同政策才是独立视图。不建立容器或跨命令全局缓存。
 
 Task 5 在同一 plan 内作为独立可验收的后续步骤；其工具链接入失败不应迫使 Task 0–4 改变领域分工。实施报告分别说明“删除了什么重复机制”和“为新能力增加了什么”，保留实际行为与边界测试的证据。
+
+## 当前讨论中的两点
+
+- **创建时分组：** NodeService.create 默认登记 local 与新领域看板应归 descendant 冲突。上一版“记录操作前状态、自动登记后再纠正”仅为补救方案，暂不作为最终实施要求。建议创建时显式传入关系分组，由 Service 一次完成正确登记；具体接口及默认推导规则待本轮讨论确认。已有人写的关系不能因创建新节点被随意改组。
+- **Schema 为校验标准：** 用户提出是否直接以 Schema 为准。建议 grouped/review-page 接收完整 TaskDoc 的边界使用同一生成 Schema + Ajv，删除各自字段校验；届时 Ajv/formats 改为运行时依赖，增加共享校验入口、生产产物准备及真实输入验收。当前 Task 5 的“仅放宽 metadata、Ajv 仅测试”是上一版，确认后须整体替换，不可当作已确定的最终方案。Markdown 输入、创建参数等用途不同，不能套完整 TaskDoc Schema。
 
 ## Global Constraints
 
@@ -282,74 +287,40 @@ export const typeContentDir = (target: string, name: string): string =>
 - [ ] GREEN：运行 `pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/utils/filesystem.test.ts test/utils/scope.test.ts test/services/node-service.test.ts test/memory/core-boundaries.test.ts test/note/utils/git-ingest.test.ts test/tasks/utils/board.test.ts`。全部通过；检查 Note 位于合法 `..draft` 路径时不被拒绝，链接越界仍拒绝。
 - [ ] 提交本任务文件：`git commit -m "refactor: share filesystem path primitives" -m "Co-authored-by: Codex <noreply@openai.com>"`。
 
-## Task 2：在现有模型格式实现中统一 AGENTS
+## Task 2：统一 AGENTS 索引，旧 task-projects 由独立脚本迁移
 
 **Files:**
-- Modify: `extensions/cli/src/domain/models/internal/blocks.ts`, `extensions/cli/src/domain/models/internal/serialize.ts`
-- Remove after migration: `extensions/cli/src/domain/models/memory/index-rendering.ts`
-- Modify: `extensions/cli/src/services/tasks/project-meta.ts`
-- Modify: `extensions/cli/src/services/memory/blocks.ts`, `extensions/cli/src/services/memory/entries.ts`, `extensions/cli/src/services/memory/agents.ts`
-- Extend test: `extensions/cli/test/models/internal.test.ts`, `extensions/cli/test/tasks/utils/project-meta.test.ts`, `extensions/cli/test/memory/core.test.ts`
+- Modify: extensions/cli/src/domain/models/internal/{blocks,serialize}.ts、internal-node.ts 的既有索引接口（只在已有接口确实缺能力时修改）
+- Remove after migration: extensions/cli/src/domain/models/memory/index-rendering.ts
+- Modify: extensions/cli/src/services/tasks/project-meta.ts、services/memory/{blocks,entries,agents}.ts
+- Create: scripts/migrate-agents-indexes.mts（只处理显式选定范围的旧 task-projects 索引）
+- Extend tests: extensions/cli/test/models/internal.test.ts、test/tasks/utils/project-meta.test.ts、test/tasks/owner-board.test.ts、test/memory/core.test.ts
+- Create: extensions/cli/test/tasks/agents-index-migration.test.ts
 
-**Interfaces:**
-- Consumes existing `createNodeModel(): NodeModel`, `serializeNode(model: NodeModel, originalSource?: string): string`, `decodeBody` and layout.CODEC_SECTIONS.
-- Produces in **existing** `domain/models/internal/serialize.ts`: `escapeIndexText(value: string): string`, `encodeIndexPath(value: string): string`，原样迁入现有实现，不改变转义规则。
-- Extends existing `upsertBlock(document: string, start: string, end: string, block: string, section?: SectionKey): string`；SectionKey 使用已有 `'constraints' | 'memory' | 'children'`。
+**Interfaces and policy:**
+- 所有 Tasks 项目引用使用 InternalNode 的 localChildren/descendantChildren 和既有 serializer；正常命令不生成、更新或搬迁 task-projects 专属区块，不保留第二套业务索引渲染器。
+- Tasks 只决定项目标题、描述、排序及哪些项目应登记；NodeService 协调关系更新和保存，Model 负责通用索引表达。Memory 也复用既有索引和序列化机制，其类型发现/模板/私有政策保留，不能将其他模块的索引全部覆盖。
+- 新 AGENTS 骨架使用 createNodeModel/serializeNode；通用受控区块工具仍服务必要的模板填充，保留非受控正文与换行。不增加新的 Document/IndexService 或 moveBlock 框架。
+- 旧格式只由显式运行的迁移脚本转换；正常写命令若发现会与通用索引冲突的旧标记，返回 migration-required 并给出脚本命令，不能暗中迁移、继续维护旧区块或重复登记。
 
-block 包含完整 start/end。已有区块原位替换；指定 section 而区块在别处则报错。无目标标记才插入指定 section；section 省略时沿用文档级插入规则。完整模板的“必须有三段”检查仍归 Memory 模板加载；不强迫已有局部 AGENTS 自动扩成完整模板。
+- [ ] 基线盘点所有 task-projects 标记及其生产者/消费者；代码与测试用例分别处理，不迁移仓库真实内容。Task 3 的 refreshProjectIndex 后续只负责用通用关系接口对齐当前项目引用，不生成专属 Markdown 块。
+- [ ] 先为普通 local 索引加行为用例：创建/更新项目后只有一条通用引用，标题/描述正确；不出现 task-projects 标记；其他关系、约束和非受控正文保留；重复更新幂等。用现有 InternalNode 读取结果断言，而非依赖 Tasks 专属标记。
+- [ ] Tasks 新项目骨架复用 serializeNode(createNodeModel())，保留标题/描述及原 tail。删除 renderTaskProjectsSection、Tasks 专属区块 upsert/迁位分支；相关逻辑仅允许存在于迁移脚本，不让运行时代码 import 脚本。
+- [ ] 更新项目索引时从当前 InternalNode 取得引用，按实际项目入口 id 修改属于本操作的条目，其余原样保留；通过 NodeService.update 保存。新登记项目属于看板的 localChildren；不把整个 localChildren 替换为项目列表，也不把 NodeService 自动登记和项目描述更新做成两套索引。
+- [ ] 将 escapeIndexText/encodeIndexPath 原实现迁入 internal/serialize.ts，批量引用修改使用 TS 脚本，删除旧路径。Memory 模板仍校验必需区块，纯区块更新保留外部正文/CRLF；畸形区块返回错误，不自动修复。
+- [ ] 实现独立脚本接口：默认 --check 只输出显式 --root 范围内候选和差异；--write 才应用。跳过 Git/依赖目录、符号链接和受保护的 posts；不扫描范围外路径，不自动运行全仓迁移。批量写入前全量检查冲突并保留可恢复原文；写操作使用既有锁/快照/原子保存机制，不自写另一套。
 
-- [ ] 在 internal.test.ts 增加以下用例及已有模块 imports，验证保留正文、幂等和错误标记：
+目标用法（待实施）：
 
-```ts
-import { createNodeModel } from '../../src/domain/models/internal/model.js';
-import { serializeNode } from '../../src/domain/models/internal/serialize.js';
-import { upsertBlock, LOCAL_START, LOCAL_END } from '../../src/domain/models/internal/blocks.js';
+~~~sh
+pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root /absolute/scope --check
+pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root /absolute/scope --write
+~~~
 
-test('owned block updates preserve surrounding Markdown and reject ambiguity', () => {
-  const start = '<!-- task-projects:start -->';
-  const end = '<!-- task-projects:end -->';
-  const block = `${start}\n- [A](a/AGENTS.md)\n${end}`;
-  const source = '# Board\n\nIntro.  \n\n' + serializeNode(createNodeModel())
-    .replace(LOCAL_END, `<!-- keep -->\nOther text.  \n${LOCAL_END}`) + '\nTail.  \n';
-  const next = upsertBlock(source, start, end, block, 'memory');
-  assert.ok(next.startsWith('# Board\n\nIntro.  \n\n'));
-  assert.ok(next.includes('<!-- keep -->\nOther text.  \n'));
-  assert.ok(next.endsWith('\nTail.  \n'));
-  assert.ok(next.indexOf(start) > next.indexOf(LOCAL_START));
-  assert.ok(next.indexOf(end) < next.indexOf(LOCAL_END));
-  assert.equal(upsertBlock(next, start, end, block, 'memory'), next);
-  assert.equal(upsertBlock(next, start, end, block.replace('[A]', '[B]'), 'memory'),
-    next.replace('[A]', '[B]'));
-  assert.throws(() => upsertBlock(source + start, start, end, block));
-  assert.throws(() => upsertBlock(next + '\n' + block, start, end, block));
-  assert.throws(() => upsertBlock(source + end + '\n' + start, start, end, block));
-});
-```
-
-- [ ] RED：`pnpm --filter edges-cli exec node --test --import tsx test/models/internal.test.ts`。预期新增的 section 定位或畸形标记断言失败。
-- [ ] 扩展已有 blocks.ts：统计目标标记、验证成对/唯一/顺序，用 decodeBody 定位插入点；按原换行风格生成新边界。insertInnerBlock 不再 trimEnd 原前缀；不得全局折叠空行。重复/半缺失/跨段不明确均报错，不自动迁移畸形正文。
-- [ ] Tasks 新建项目的三段骨架直接复用 serializeNode，不再复制标记/标题字符串。已存在的 tail 分支保持逐字保留；不要为两个函数新增 documents.ts。
-
-```ts
-// renderProjectAgents 的新文档分支，在保留既有标题/描述/Pointers 后：
-return `${out}\n${serializeNode(createNodeModel())}`;
-```
-
-- [ ] Tasks 的旧项目引用收编、排序与提示文字留在业务格式适配中；只把区块定位交给 upsertBlock。Memory 的 entries 更新也复用它。纯函数生成文本后交由后续 Service.update，不直接变更受管模型。
-
-这里须保留 Tasks 现有的合法旧索引迁位：rewriteRootAgents 遇到唯一、完整且位于 local 之外的 task-projects 区块时，只移除该旧区块，再调用 upsertBlock 放入 local。通用 upsertBlock 本身仍拒绝跨段原位更新；不能把原函数直接替换为一次 upsertBlock 而使既有合法文档报错。畸形、重复、逆序标记在搬迁前就拒绝，未受控前后正文保持。旧普通项目链接收编同样留在 Tasks，不增加通用 moveBlock API。
-
-```ts
-const source = upsertBlock(existing, TASK_PROJECTS_START, TASK_PROJECTS_END,
-  renderTaskProjectsSection(projects), 'memory');
-```
-
-此处 existing 已经完成上述 Tasks 特有的旧区块收编。沿用 test/tasks/utils/project-meta.test.ts 中的 “replaces an existing Task Projects span only” 用例，并断言重复刷新不再次迁位、尾部正文保留。
-
-- [ ] Memory 继续读取原分发模板并验证必需标记顺序；替换区块共用 blocks.ts，不能删除模板说明。将 escapeIndexText/encodeIndexPath 迁入现有 internal/serialize.ts；用临时 TypeScript 脚本更新精确 import 路径后删除旧文件，无转发文件。Tasks 新生成链接复用编码；已有 authored href 保留。
-- [ ] 补充 CRLF 与文档级 entries 用例：同一 source 转 CRLF 后插入，原文片段保持；entries 未指定 section 时保留文档级位置。旧 AGENTS 缺少 local 时只补该段，不重建其他段。
-- [ ] GREEN：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/models/internal.test.ts test/tasks/utils/project-meta.test.ts test/tasks/owner-board.test.ts test/memory/core.test.ts test/memory/distribution.test.ts`。
-- [ ] 提交：`git commit -m "refactor: consolidate AGENTS formatting" -m "Co-authored-by: Codex <noreply@openai.com>"`。
+- [ ] 迁移时解析唯一完整的旧区块，将链接转为普通 local 引用，按解析后的入口 id 去重；仅去掉旧标记与可识别的机器提示，保留自定义正文、链接标题/描述及其他章节。与已有引用分组或描述冲突、链接无法识别、重复/半缺失/逆序标记时明确报告该文件，不猜测或静默覆盖。全部成功迁移的文件再次 --check 不产生差异。
+- [ ] 迁移测试覆盖旧区块在 local 内/外、已有相同引用、冲突引用、自定义正文、CRLF、畸形标记；检查预览不写、重复执行幂等、源文件在预览后变化时报错。正常 Tasks 测试覆盖旧格式得到迁移提示，迁移后同一操作成功。旧“自动搬区块”测试改为脚本测试，不继续约束正常命令。
+- [ ] 回归运行：pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/models/internal.test.ts test/tasks/utils/project-meta.test.ts test/tasks/owner-board.test.ts test/tasks/agents-index-migration.test.ts test/memory/core.test.ts test/memory/distribution.test.ts。
+- [ ] 提交统一格式及脚本，附 Co-authored-by；不在本次实现时自动迁移真实仓库内容。
 
 ## Task 3：业务写操作统一经过 NodeService
 
@@ -409,7 +380,7 @@ await service.update(owner, {
 
 该示例仅对应需要登记/纠正的 maintenance board。若已在 local 则不改；domain 新登记使用 descendant，已登记则保留原分组。不要借示例重新排序无变化的引用。新建项目自动维护 board 索引后，后续刷新从同一 Service 对象取当前 body，不能沿用创建前字符串。
 
-- [ ] 处理自动登记与业务分组的衔接：NodeService.create 当前默认向物理父索引登记 local。Tasks 在创建 board 前，通过同一 projectNodes 实例记录 owner 中是否已有 board 引用及其分组；新 domain board 创建后的自动 local 引用须由业务通过 Service.update 调整为 descendant，不能误当成用户原有分组而保留。maintenance 始终归 local；命令开始前已经存在的 domain 分组、标签和链接拼写仍保留。先创建并加载 board，再创建项目，再刷新业务索引，避免从已过期字符串覆盖自动登记。不修改通用 create 的默认分组，不添加跨操作事务框架。
+- [ ] **待讨论，不执行旧补救方案：** 处理自动登记与业务分组的衔接：NodeService.create 当前默认向物理父索引登记 local。Tasks 在创建 board 前，通过同一 projectNodes 实例记录 owner 中是否已有 board 引用及其分组；新 domain board 创建后的自动 local 引用须由业务通过 Service.update 调整为 descendant，不能误当成用户原有分组而保留。maintenance 始终归 local；命令开始前已经存在的 domain 分组、标签和链接拼写仍保留。先创建并加载 board，再创建项目，再刷新业务索引，避免从已过期字符串覆盖自动登记。不修改通用 create 的默认分组，不添加跨操作事务框架。
 - [ ] 用已有 owner-board.test.ts 验证新 domain/maintenance、原 domain local/descendant、缺失 owner 四种情况；新增测试明确覆盖 NodeService 自动注册之后再刷新，连续两次写入不得重复引用或改变已登记的 domain 分组。项目写流程内部传递同一 Service，不让 ensure/refresh 各自重建独立缓存。
 - [ ] TaskNode CRUD 已经走 NodeService，保持其现有接口；run log/附件仍是资源。project-meta 的 AGENTS 保存不得再调用 BoardWriter.writeFile；BoardWriter 继续用于业务盘点和资源，不增加第二套节点持久化。
 - [ ] Note 保留 Git 操作顺序与现有 NodeService.create/update/import；去掉重复保存机制即可，不强迫经过新的公共 helper。校验草稿在业务 Service 内仍可使用 Model，但只由 NodeService 更新受管节点和文件。不得提前到 checkout/pull 之前加载。
@@ -565,7 +536,7 @@ assert.ok(missing.stderr.length > 0);
 ## 最终验收
 
 - [ ] 审查职责边界：parse/serialize/validate、字段更新与自身索引维护仍归 Model；operations 保留集合/遍历/查询职责；完整文件与跨节点变更通过 Service。没有为 Schema 生成搬迁节点方法或替换继承体系。
-- [ ] 对照“架构审查结论与简化验收”报告被删除的重复机制、公共概念和新增构建成本；验证 Tasks 旧区块迁位及自动登记后的业务分组未退化，同一用例内同政策 Service 复用。不能仅用移动目录、行数或文件数证明简化完成。
+- [ ] 对照“架构审查结论与简化验收”报告被删除的重复机制、公共概念和新增构建成本；验证 Tasks 使用通用索引、旧区块仅由独立脚本迁移及创建关系分组符合最终决策，同一用例内同政策 Service 复用。不能仅用移动目录、行数或文件数证明简化完成。
 - [ ] Task 5 全部通过：TS 为字段唯一源，v1 兼容性与方言已验证；干净构建和仓库外分发包可获取 Schema，生成物不入 Git；Ajv 不修改输入，也未误用到可省略字段的原始 Markdown。ADR 中保留选型依据、候选取舍、探针限制与实际验收结果。
 - [ ] `rg -n 'MemoryDocument|loadMemoryDocument|saveMemoryDocument|repositoryNodeQuery|writeAtomic|domain/models/memory/index-rendering' extensions/cli/src`：本轮移除的包装与旧路径无残留。不新增 NodeDocument/DocumentService/save 包装。
 - [ ] 检查 project-meta.ts 的 AGENTS 保存已通过 NodeService；检查业务更新采用 Service input，未因删除包装变成直接修改对象后 raw writeFile。Model 内存方法与内部校验草稿仍可存在。

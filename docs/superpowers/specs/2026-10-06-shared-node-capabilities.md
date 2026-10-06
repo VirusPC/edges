@@ -111,9 +111,11 @@ Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Not
 
 三段名称和顺序继续由 layout/serializer 定义。Tasks 新文档骨架调用现有 serializeNode(createNodeModel())；Memory 的分发模板保留其内容与占位符，区块填充共用已有 blocks.ts。Model 仍负责最终解析与校验，不增加第二个 Document 模型。
 
-受控区块只改指定 start/end 内的内容；外部正文、空白、注释、其他模块索引及未修改链接拼写保留。半缺失、重复、逆序或位置不明确时报错。新 task-projects 放在 local；Memory entries 可在文档级。不得用某个业务的索引列表覆盖整个 localChildren。
+所有 Tasks 项目索引统一使用 InternalNode 通用关系与序列化能力，不再生成或维护 task-projects 专属区块。正常服务保留业务标题/描述、所属范围和排序政策，通过 NodeService 更新相关引用；其他模块引用及非受控正文保留。
 
-通用区块函数拒绝跨段更新不等于删除 Tasks 既有的合法旧索引迁位：唯一完整的 task-projects 区块迁回 local 仍由 Tasks 业务适配处理，再调用通用函数。新建看板时同样保留业务归属：NodeService 自动登记的 local 不能误当作用户原有的 domain 分组；依据操作前的 owner 状态区分新登记与既有关系，前者 domain 归 descendant，后者保留原分组。maintenance 归 local，缺失 owner 不自动创建。
+旧 task-projects 的转换由独立 scripts/migrate-agents-indexes.mts 承担，支持显式范围、预览、冲突检查、可恢复原文和幂等执行；正常写入遇到冲突旧格式只提示迁移，不夹带兼容性搬迁分支。通用区块工具保留必要的 Memory 模板用途，不能因统一索引删掉类型约定或用户正文。
+
+创建分组另待讨论：上一版自动 local 后再纠正的方案不作为最终实施要求，建议创建时明确 local/descendant，由通用服务完成正确登记。新维护看板属于本层，新领域看板属于下层；既有引用如何保留及创建接口细节按后续确认落实。
 
 ### 3. 路径工具提供机制，Service 保留政策
 
@@ -126,6 +128,8 @@ Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Not
 不改变默认局部范围；只有 value() 执行查询；filter 不自动剪枝；types 可跳过无关叶子正文，但不能遗漏其 harness。禁止加入物理扫描兜底。Memory 的 doctor / 索引重建需要盘点未登记文件，继续保留物理扫描。
 
 ## Schema 生成、校验与获取
+
+后续建议待确认：完整 TaskDoc JSON 入口以生成 Schema 为校验标准，改为共享 Ajv 运行时校验，替代下文上一版“只放宽未知 metadata、Ajv 仅测试”的步骤。Markdown 与创建参数不混用该完整文档契约；确认后同步依赖与分发验收。
 
 按 ADR 0025 实施 TaskDoc 首个契约：普通 TS 数据类型及公共枚举是定义源，生成器只在构建期运行；JSON Schema 与最小清单输出到 dist/schemas/，不提交 Git，随 CLI 包分发。保留旧 v1 的字段、开放 metadata 与约束，显式验证 draft-07 与原 2020-12 的接受/拒绝语义，不能只改方言标签或静默收窄契约。
 
