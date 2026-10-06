@@ -1,4 +1,5 @@
 import { acquireWriteLock } from '../extensions/cli/src/services/node-lock.js';
+import { isGitBoundary } from '../extensions/cli/src/services/scope.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -54,6 +55,7 @@ export function planAgentsIndexes(inputRoot: string): AgentsIndexPlan {
  const root=checkPath(inputRoot);if(root.split(path.sep).includes('posts'))throw new Error('Protected posts cannot be migrated');
  const files:EntryFile[]=[], edits:AgentsIndexPlan['edits']=[];
  function visit(dir:string) {
+  if (dir !== root && isGitBoundary(dir)) return;
   for(const item of fs.readdirSync(dir,{withFileTypes:true})) {
    if(item.isSymbolicLink() || excluded.has(item.name))continue;
    const file=path.join(dir,item.name);

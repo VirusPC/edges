@@ -151,3 +151,19 @@ test('new owner registration requires explicit group and preserves purpose-indep
   assert.equal(board.localChildren.filter(ref => ref.name === 'Example').length, 1);
   assert.doesNotMatch(board.serialize(), /task-projects:/);
 });
+
+for (const group of ['local', 'descendant'] as const) test('existing board registers missing owner relation as ' + group, async t => {
+  const { root, write, read } = fixture(t);
+  const owner = new InternalNode(path.join(root, 'AGENTS.md')).parse('# Owner\n\nKeep prose\n');
+  owner.setConstraints(['Keep rule']);
+  owner.addChild('local', { id: path.join(root, 'other/AGENTS.md'), name: 'Authored', description: 'Keep' });
+  write('AGENTS.md', owner.serialize()); write('other/AGENTS.md', '# Other\n');
+  write('tasks/AGENTS.md', '# Existing board\n<!-- project-memory-local:start -->\n<!-- project-memory-local:end -->\n');
+  const result = await run(['--scope', root, 'tasks', '--purpose', 'domain', '--index-group', group, 'project', 'create', 'example', '--title', 'Example', '--description', 'Description'], { env: {} });
+  assert.equal(result.exitCode, 0, result.stdout);
+  const updated = read('.');
+  assert.ok((group === 'local' ? updated.localChildren : updated.descendantChildren).some(ref => ref.id === path.join(root, 'tasks/AGENTS.md')));
+  assert.deepEqual(updated.localChildren.find(ref => ref.id === path.join(root, 'other/AGENTS.md')), owner.localChildren[0]);
+  assert.deepEqual(updated.constraints, ['Keep rule']);
+  assert.match(updated.body, /Keep prose/);
+});

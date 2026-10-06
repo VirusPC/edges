@@ -132,8 +132,8 @@ export async function rememberMemory(options: RememberMemoryOptions) {
   };
   if (exists) await service.update(node, input);
   else await service.create(node, input, { indexGroup: "local" });
-  await refreshIndex(target, options.type);
-  const agentsAction = await syncTargetAgents(target, resolveRoot(target));
+  await refreshIndex(target, options.type, service);
+  const agentsAction = await syncTargetAgents(target, resolveRoot(target), service);
   return {
     operation: "remember",
     targetDir: target,

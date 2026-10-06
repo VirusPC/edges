@@ -222,6 +222,14 @@ export async function refreshProjectIndex(
   const localChildren = update(board.localChildren), descendantChildren = update(board.descendantChildren);
   for (const [id, fields] of updates) if (!board.children.some(ref => ref.id === id)) localChildren.push({ id, ...fields });
   await service.update(board, { localChildren, descendantChildren });
+  const owner = await service.get(path.join(realpathSync(scopeDir(repoPath)), 'AGENTS.md'), InternalNode);
+  if (owner && !owner.children.some(ref => ref.id === board.id)) {
+    const group = selectedGroup(repoPath)!; // prepareProjectWrite requires an explicit choice.
+    await service.update(owner, {
+      localChildren: group === 'local' ? [...owner.localChildren, { id: board.id }] : owner.localChildren,
+      descendantChildren: group === 'descendant' ? [...owner.descendantChildren, { id: board.id }] : owner.descendantChildren,
+    });
+  }
   return records;
 }
 

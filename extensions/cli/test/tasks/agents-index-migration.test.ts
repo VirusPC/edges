@@ -42,3 +42,15 @@ test('migration honors the shared write lock before any backup or document write
  try {await assert.rejects(async()=>applyAgentsIndexes(plan),/write lock busy/);assert.equal(fs.readFileSync(file,'utf8'),legacy);}
  finally {await release();}
 });
+
+for (const gitForm of ['directory', 'file'] as const) test('migration skips nested Git boundary with ' + gitForm + ' marker', async t => {
+ const { root, file } = fixture(t, legacy);
+ const nested = path.join(root, 'nested'); fs.mkdirSync(nested);
+ if (gitForm === 'directory') fs.mkdirSync(path.join(nested, '.git'));
+ else fs.writeFileSync(path.join(nested, '.git'), 'gitdir: ../external-git\n');
+ const nestedFile = path.join(nested, 'AGENTS.md'); fs.writeFileSync(nestedFile, legacy);
+ const plan = planAgentsIndexes(root);
+ assert.deepEqual(plan.edits.map(edit => edit.path), [file]);
+ await applyAgentsIndexes(plan);
+ assert.equal(fs.readFileSync(nestedFile, 'utf8'), legacy);
+});
