@@ -90,11 +90,14 @@ test("move changes image and reference definitions but leaves ordinary files and
   );
   write("shared/image.png", "img");
   write("shared/page.md", "external");
-  write("README.md", "[unchanged](old/index.md)");
+  write("other.md", "[unchanged](old/index.md)");
+  write("README.md", "[companion](old/index.md)");
   await service.move(
     (await service.get(file("old/index.md")))!,
     file("deep/new/index.md"),
   );
+  // The same-directory README is dual-file composition, so its references move too.
+  assert.equal(fs.readFileSync(file("README.md"), "utf8"), "[companion](deep/new/index.md)");
   const text = fs.readFileSync(file("deep/new/index.md"), "utf8");
   assert.match(text, /!\[asset\]\(\.\.\/\.\.\/shared\/image.png "Title"\)/);
   assert.match(
@@ -103,7 +106,7 @@ test("move changes image and reference definitions but leaves ordinary files and
   );
   assert.match(text, /\[example\]\(\.\.\/shared\/page.md\)/);
   assert.equal(
-    fs.readFileSync(file("README.md"), "utf8"),
+    fs.readFileSync(file("other.md"), "utf8"),
     "[unchanged](old/index.md)",
   );
 });

@@ -146,3 +146,35 @@ test("NodeService reaches README composition from scope AGENTS; localOnly narrow
   fs.rmSync(path.join(root, "README.md"));
   assert.deepEqual(rel(await new NodeService({ managedRoot: root }).list(root)), ["AGENTS.md"]);
 });
+
+test("harness discovery walks a dual-file pair reached from its README without a composition cycle", async (t) => {
+  const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "dual-entry-harness-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const write = (name: string, text: string) => {
+    fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true });
+    fs.writeFileSync(path.join(root, name), text);
+  };
+  write("AGENTS.md", scopeAgentsMd);
+  write("README.md", "# Root\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Notes](notes/README.md)\n<!-- project-entries-local:end -->\n");
+  write("notes/AGENTS.md", scopeAgentsMd);
+  write("notes/README.md", "# Notes\n");
+  const rel = (nodes: BaseNode[]) => nodes.map((n) => path.relative(root, n.path));
+  const nodes = await new NodeService({ managedRoot: root }).query(root, { includeHarness: true }).toArray().value();
+  assert.deepEqual(rel(nodes), ["AGENTS.md", "README.md", "notes/README.md", "notes/AGENTS.md"]);
+});
+
+test("harness discovery skips symlinked mirrors of entries reachable by their real path", async (t) => {
+  const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "dual-entry-symlink-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const write = (name: string, text: string) => {
+    fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true });
+    fs.writeFileSync(path.join(root, name), text);
+  };
+  write("AGENTS.md", scopeAgentsMd.replace("## 本层系统维护信息\n", "## 本层系统维护信息\n\n- [Skills](.harness/skills/referenced/README.md)\n"));
+  write("skills/real/SKILL.md", "---\nname: real\ndescription: Real skill.\n---\n\nBody\n");
+  fs.mkdirSync(path.join(root, ".agents/skills"), { recursive: true });
+  fs.symlinkSync("../../skills/real", path.join(root, ".agents/skills/real"));
+  write(".harness/skills/referenced/README.md", "<!-- project-memory-type:start -->\nname: referenced\nmodule: skills\nwritable: false\n<!-- project-memory-type:end -->\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [real](../../../.agents/skills/real/SKILL.md) — Real skill.\n<!-- project-entries-local:end -->\n");
+  const nodes = await new NodeService({ managedRoot: root }).query(root, { includeHarness: true }).toArray().value();
+  assert.deepEqual(nodes.map((n) => path.relative(root, n.path)), ["AGENTS.md", ".harness/skills/referenced/README.md"]);
+});

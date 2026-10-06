@@ -37,30 +37,44 @@ export function coLocated(entry: string): boolean {
 const TYPE_HEADER = "<!-- project-memory-type:start -->";
 const TYPE_DIRECTORY = /(?:^|\/)\.harness\/(?:memory|skills)\/[^/]+$/;
 
-/** A type-index README acts as the physical parent of its entries when no AGENTS.md shares its directory. */
-function isTypeIndexReadme(file: string): boolean {
-  if (TYPE_DIRECTORY.test(path.dirname(file))) return true;
+const ENTRIES_MARKER = /^<!-- project-entries-(?:local|descendants):start -->$/m;
+
+export type EntrySource = (entry: string) => string | undefined;
+const readSource: EntrySource = (file) => {
   try {
-    return fs.readFileSync(file, "utf8").includes(TYPE_HEADER);
+    return fs.readFileSync(file, "utf8");
   } catch (error) {
     if (["ENOENT", "ENOTDIR", "EISDIR"].includes((error as NodeJS.ErrnoException).code ?? ""))
-      return false;
+      return undefined;
     throw error;
   }
+};
+/** A type-index README acts as the physical parent of its entries when no AGENTS.md shares its directory. */
+function isTypeIndexReadme(file: string, read: EntrySource): boolean {
+  return TYPE_DIRECTORY.test(path.dirname(file)) || !!read(file)?.includes(TYPE_HEADER);
 }
+/** Q13: system-one children belong to the README org list; system entries and harness material to AGENTS. */
 function parentEntryIn(
   directory: string,
+  child: string,
   exists: (entry: string) => boolean,
+  read: EntrySource,
 ): string | undefined {
   const agents = path.join(directory, "AGENTS.md");
-  if (exists(agents)) return agents;
   const readme = path.join(directory, "README.md");
-  return exists(readme) && isTypeIndexReadme(readme) ? readme : undefined;
+  const systemOne =
+    path.basename(child) !== "AGENTS.md" &&
+    !path.relative(directory, child).split(path.sep).includes(".harness");
+  if (systemOne && exists(readme) && ENTRIES_MARKER.test(read(readme) ?? ""))
+    return readme;
+  if (exists(agents)) return agents;
+  return exists(readme) && isTypeIndexReadme(readme, read) ? readme : undefined;
 }
 export function physicalParent(
   entry: string,
   root: string,
   exists: (entry: string) => boolean = fs.existsSync,
+  read: EntrySource = readSource,
 ): string | undefined {
   let dir = path.dirname(path.dirname(entry));
   // The .harness directory is a maintenance relation, never composition of its host.
@@ -71,7 +85,7 @@ export function physicalParent(
   findAncestor(
     dir,
     (directory) => {
-      found = parentEntryIn(directory, exists);
+      found = parentEntryIn(directory, entry, exists, read);
       return found !== undefined;
     },
     (directory) => directory === root,

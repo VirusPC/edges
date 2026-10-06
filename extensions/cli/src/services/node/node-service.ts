@@ -1,4 +1,4 @@
-import { isWithinPath, findAncestor } from '../../utils/filesystem.js';
+import { isWithinPath, findAncestor, firstSymlink } from '../../utils/filesystem.js';
 import { isGitBoundary } from '../scope.js';
 import { WRITE_LOCK_NAME, assertNoWriteLock } from "./node-lock.js";
 import * as fs from "node:fs";
@@ -226,6 +226,8 @@ export class NodeService {
         if (isCompanionReadme(parent, reference) && !fs.existsSync(reference.id)) return undefined;
         if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
+          // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.
+          if (firstSymlink(reference.id, service.managedRoot)) return undefined;
           try {
             if (!isWithinPath(fs.realpathSync(reference.id), service.managedRoot)) return undefined;
           } catch (error) {
@@ -284,7 +286,8 @@ export class NodeService {
       roots(),
       { includeHarness: true },
       (parent, ref) => {
-        if (isCompanionReadme(parent, ref)) return undefined;
+        if (isCompanionReadme(parent, ref) && !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id))
+          return undefined;
         if (!isWithinPath(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
         // Maintenance discovery tolerates a missing optional entry; composition does not.
         if (maintenanceOnly(parent, ref) &&
@@ -316,7 +319,9 @@ export class NodeService {
       roots(),
       {},
       (parent, ref) => {
-        if (isCompanionReadme(parent, ref)) return undefined;
+        if (isCompanionReadme(parent, ref) &&
+            (removed(ref.id) || (!plan.has(ref.id) && !fs.existsSync(ref.id))))
+          return undefined;
         if (removed(ref.id))
           throw new Error(`Reference to removed node: ${ref.id}`);
         readonly = this.#referenceReadOnly(parent, ref);
@@ -336,6 +341,7 @@ export class NodeService {
       file,
       this.managedRoot,
       (candidate) => plan.has(candidate) || fs.existsSync(candidate),
+      (candidate) => plan.get(candidate)?.source ?? readEntry(candidate)?.source,
     );
     if (!parent) return undefined;
     const proposed = plan.get(parent);
@@ -402,9 +408,12 @@ export class NodeService {
     node: BaseNode,
     group?: ChildGroup,
   ): Promise<Planned | undefined> {
+    // A same-directory README is reached through the dual-file companion edge, never registered.
     if (
       coLocated(node.path) ||
-      path.basename(node.directoryPath) === ".harness"
+      path.basename(node.directoryPath) === ".harness" ||
+      (path.basename(node.path) === "README.md" &&
+        fs.existsSync(path.join(node.directoryPath, "AGENTS.md")))
     )
       return undefined;
     const parentPath = physicalParent(node.path, this.managedRoot);

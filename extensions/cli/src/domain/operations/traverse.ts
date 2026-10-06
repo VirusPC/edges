@@ -71,14 +71,19 @@ export async function* traverse(
     active.add(node.path);
     try {
       if (!options.types || options.types.map(normalizeNodeType).includes(node.type)) yield node;
+      const harness = options.includeHarness ? node.harness : undefined;
       for (const reference of [
         ...expandedChildren(node, options),
-        ...(options.includeHarness && node.harness ? [node.harness] : []),
+        ...(harness ? [harness] : []),
       ]) {
         validateChild(reference);
         const target = resolve(node, reference);
         if (target === undefined) continue;
-        if (active.has(target)) throw new Error(`Composition cycle: ${target}`);
+        if (active.has(target)) {
+          // The dual-file pair links both ways at runtime: README harness → AGENTS → companion README.
+          if (reference === harness || isCompanionReadme(node, reference)) continue;
+          throw new Error(`Composition cycle: ${target}`);
+        }
         if (!seen.has(target))
           yield* visit(await load(node, reference, target));
       }
