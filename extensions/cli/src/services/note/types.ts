@@ -15,6 +15,7 @@ export interface IngestRequest {
   coAuthor: string;
   markdown?: boolean;
   importEntry?: string;
+  indexGroup?: "local" | "descendant";
 }
 
 export interface IngestSuccess {

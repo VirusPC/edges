@@ -16,7 +16,7 @@ async function fixture() {
 }
 
 const call = (root: string, args: string[]) =>
-  run(["--scope", root, "tasks", "--purpose", "maintenance", ...args], {
+  run(["--scope", root, "tasks", "--index-group", "local", "--purpose", "maintenance", ...args], {
     env: { EDGES_REPO: root, EDGES_SCOPE: root },
   });
 

@@ -1,10 +1,13 @@
 import { InternalNode } from "../../domain/models/internal-node.js";
 import { decodeBody } from '../../domain/models/internal/parse.js';
-import { LOCAL_START, LOCAL_END, blockPattern, insertInnerBlock } from '../../domain/models/internal/blocks.js';
+import { createNodeModel } from '../../domain/models/internal/model.js';
+import { serializeNode } from '../../domain/models/internal/serialize.js';
+import { NodeService } from '../node-service.js';
+import { assertBoardPath } from './board.js';
 import { scopeDir, boardRel, type BoardTarget } from "./paths.js";
 import path from "node:path";
 import { realpathSync } from "node:fs";
-import { readEntry, saveEntries, type FileChange } from "../node-files.js";
+import { existsSync } from "node:fs";
 import { listProjectIds, type BoardFs, type BoardWriter } from "./board.js";
 import { boardRoot } from "./paths.js";
 import { parseTaskProject, projectDirName } from "../../domain/models/tasks/project.js";
@@ -17,8 +20,6 @@ import {
 
 export type { TaskProjectRecord };
 
-export const TASK_PROJECTS_START = "<!-- task-projects:start -->";
-export const TASK_PROJECTS_END = "<!-- task-projects:end -->";
 export const PROJECT_MEMORY_START = "<!-- project-memory:start -->";
 export const PROJECT_MEMORY_END = "<!-- project-memory:end -->";
 
@@ -100,7 +101,7 @@ export function renderProjectAgents(input: {
       : `## Pointers\n\n${input.pointers.trim()}`;
     out += `\n${block}\n`;
   }
-  return out + `\n<!-- project-memory:start -->\n<!-- project-memory-important:start -->\n## 本层硬约束\n\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n## 本层记忆\n\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n## 下层记忆索引\n\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n`;
+  return out + "\n" + serializeNode(createNodeModel());
 }
 
 export function oneLineDescription(description: string): string {
@@ -122,68 +123,16 @@ function sortProjectRecords(projects: TaskProjectRecord[]): TaskProjectRecord[] 
   });
 }
 
-export function renderTaskProjectsSection(projects: TaskProjectRecord[]): string {
-  const bullets = sortProjectRecords(projects).map(
-    (record) =>
-      `- [\`${record.dir}\`](${record.dir}/AGENTS.md) — ${oneLineDescription(record.description)}`,
-  );
-  return [
-    TASK_PROJECTS_START,
-    "",
-    "CLI-maintained index of Task Project titles and descriptions. Do not hand-edit this section.",
-    "",
-    ...bullets,
-    TASK_PROJECTS_END,
-  ].join("\n");
-}
-
-export function rewriteRootAgents(existing: string, projects: TaskProjectRecord[], entryPath = path.resolve("tasks/AGENTS.md")): string {
-  const block = renderTaskProjectsSection(projects);
-  // Existing ordinary project links are adopted into the owned index, not duplicated.
-  if (!existing.includes(TASK_PROJECTS_START)) {
-    const node = new InternalNode(entryPath).parse(existing);
-    for (const project of projects) {
-      const id = path.resolve(path.dirname(entryPath), project.dir, 'AGENTS.md');
-      if (node.children.some(ref => ref.id === id)) node.removeChild(id);
-    }
-    existing = node.serialize();
-  }
-  const start = existing.indexOf(TASK_PROJECTS_START);
-  const end = existing.indexOf(TASK_PROJECTS_END);
-
-  if (start !== -1 && (end === -1 || end < start)) {
-    throw new TasksError(
-      "VALIDATION_ERROR",
-      "malformed Task Projects markers in tasks/AGENTS.md",
-    );
-  }
-
-  const memorySection = decodeBody(existing).sections.memory;
-  const currentLocal = existing.match(blockPattern(LOCAL_START, LOCAL_END));
-  if (start !== -1 && ((currentLocal?.index !== undefined && start > currentLocal.index && end < currentLocal.index + currentLocal[0].length) || (memorySection.present && end < memorySection.insert && /^## 本层记忆$/m.test(existing.slice(0, start)))))
-    return existing.slice(0, start) + block + existing.slice(end + TASK_PROJECTS_END.length);
-  // Move only our owned index span; surrounding business prose stays byte-for-byte.
-  if (start !== -1) existing = existing.slice(0, start) + existing.slice(end + TASK_PROJECTS_END.length);
-  const local = existing.match(blockPattern(LOCAL_START, LOCAL_END))?.[0];
-  if (local) {
-    const updated = local.replace(LOCAL_END, () => `${block}\n${LOCAL_END}`);
-    return existing.replace(blockPattern(LOCAL_START, LOCAL_END), () => updated);
-  }
-  const section = decodeBody(existing).sections.memory;
-  if (section.present) return existing.slice(0, section.insert) + `${block}\n\n` + existing.slice(section.insert);
-  return insertInnerBlock(existing, LOCAL_START, `${LOCAL_START}\n## 本层记忆\n\n${block}\n${LOCAL_END}`);
-}
-
 export function projectAgentsRelPath(id: TaskProjectId, target: BoardTarget = ""): string {
   return `${boardRel(target)}/${projectDirName(id)}/AGENTS.md`;
 }
 
 function projectAgentsAbsPath(repoPath: BoardTarget, id: TaskProjectId): string {
-  return path.join(scopeDir(repoPath), projectAgentsRelPath(id, repoPath));
+  return path.join(realpathSync(scopeDir(repoPath)), projectAgentsRelPath(id, repoPath));
 }
 
 function rootAgentsAbsPath(repoPath: BoardTarget): string {
-  return path.join(boardRoot(repoPath), "AGENTS.md");
+  return path.join(realpathSync(scopeDir(repoPath)), boardRel(repoPath), "AGENTS.md");
 }
 
 async function collectProjectIds(repoPath: BoardTarget, fs: BoardFs, additional: readonly TaskProjectId[] = []): Promise<TaskProjectId[]> {
@@ -226,33 +175,36 @@ export async function readProjectRecord(
   };
 }
 
-/** Register only an existing owner entry. For a content scope this is its
- * co-located AGENTS harness; a fresh scope does not opt into Project Memory. */
-function ownerBoardChange(target: BoardTarget): FileChange | undefined {
-  const scope = realpathSync(scopeDir(target));
-  const entry = path.join(scope, "AGENTS.md");
-  const before = readEntry(entry);
-  if (!before) return undefined;
-  const node = new InternalNode(entry).parse(before.source);
-  if (decodeBody(node.body).unsafe)
-    throw new TasksError("VALIDATION_ERROR", "Malformed owning scope index: " + entry);
-
-  const board = path.resolve(scope, boardRel(target), "AGENTS.md");
-  const maintenance = boardRel(target) === path.join(".harness", "tasks");
-  if (!node.children.some(ref => ref.id === board))
-    node.addChild(maintenance ? "local" : "descendant", { id: board });
-  else if (maintenance && node.descendantChildren.some(ref => ref.id === board))
-    node.moveChild(board, "local");
-  // Keep existing domain relation groups, labels, descriptions and source spelling.
-  const source = node.serialize();
-  return source === before.source ? undefined : { path: entry, before, source };
+function projectNodes(target: BoardTarget): NodeService {
+  const scope = realpathSync(scopeDir(target)), owner = path.join(scope, 'AGENTS.md');
+  return new NodeService({ managedRoot: scope, assertWrite: async ({ node }) => {
+    if (node.path === owner && existsSync(owner)) return;
+    await assertBoardPath({ scopeDir: scope, purpose: typeof target === "string" ? "domain" : target.purpose, boardDir: path.join(scope, boardRel(target)) }, node.path);
+  } });
+}
+function selectedGroup(target: BoardTarget) { return typeof target === 'string' ? undefined : target.indexGroup; }
+async function prepareProjectWrite(target: BoardTarget, service: NodeService): Promise<void> {
+  await assertBoardPath(target, rootAgentsAbsPath(target));
+  const owner = await service.get(path.join(realpathSync(scopeDir(target)), 'AGENTS.md'), InternalNode);
+  const board = path.join(realpathSync(scopeDir(target)), boardRel(target), 'AGENTS.md');
+  for (const file of [owner?.path, board]) {
+    if (!file) continue;
+    const node = file === owner?.path ? owner : await service.get(file, InternalNode);
+    if (node && /<!-- task-projects:(?:start|end) -->/.test(node.body))
+      throw new TasksError('VALIDATION_ERROR', 'migration-required: run pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root ' + scopeDir(target) + ' --write');
+  }
+  if (owner && decodeBody(owner.body).unsafe) throw new TasksError('VALIDATION_ERROR', 'Malformed owning scope index: ' + owner.path);
+  if (owner && !owner.children.some(ref => ref.id === board) && !selectedGroup(target))
+    throw new TasksError('VALIDATION_ERROR', 'New owner registration requires --index-group local|descendant');
 }
 
 export async function refreshProjectIndex(
   repoPath: BoardTarget,
   writer: BoardWriter,
   additional: readonly TaskProjectId[] = [],
+  service = projectNodes(repoPath),
 ): Promise<TaskProjectRecord[]> {
+  await prepareProjectWrite(repoPath, service);
   const records: TaskProjectRecord[] = [];
   for (const id of await collectProjectIds(repoPath, writer, additional)) {
     const abs = projectAgentsAbsPath(repoPath, id);
@@ -263,10 +215,13 @@ export async function refreshProjectIndex(
   }
 
   const rootAbs = rootAgentsAbsPath(repoPath);
-  const existing = (await writer.exists(rootAbs)) ? await writer.readFile(rootAbs) : "";
-  const owner = ownerBoardChange(repoPath);
-  await writer.writeFile(rootAbs, rewriteRootAgents(existing, records, rootAbs));
-  if (owner) saveEntries([owner]);
+  let board = await service.get(rootAbs, InternalNode);
+  if (!board) board = await service.create(new InternalNode(rootAbs), { body: '# Tasks\n\n' + serializeNode(createNodeModel()) }, { indexGroup: selectedGroup(repoPath) });
+  const updates = new Map(sortProjectRecords(records).map(record => [path.resolve(path.dirname(rootAbs), record.dir, 'AGENTS.md'), { name: record.title, description: oneLineDescription(record.description) }]));
+  const update = (refs: typeof board.localChildren) => refs.map(ref => updates.has(ref.id) ? { ...ref, ...updates.get(ref.id) } : ref);
+  const localChildren = update(board.localChildren), descendantChildren = update(board.descendantChildren);
+  for (const [id, fields] of updates) if (!board.children.some(ref => ref.id === id)) localChildren.push({ id, ...fields });
+  await service.update(board, { localChildren, descendantChildren });
   return records;
 }
 
@@ -275,29 +230,28 @@ export async function ensureProjectMetadata(
   writer: BoardWriter,
   skipId?: TaskProjectId,
   additional: readonly TaskProjectId[] = [],
+  service = projectNodes(repoPath),
 ): Promise<TaskProjectRecord[]> {
-  await writer.mkdirp(path.join(boardRoot(repoPath), projectDirName(DEFAULT_TASK_PROJECT)));
+  await prepareProjectWrite(repoPath, service);
+  const rootAbs = rootAgentsAbsPath(repoPath);
+  if (!await service.get(rootAbs, InternalNode)) await service.create(new InternalNode(rootAbs), { body: "# Tasks\n\n" + serializeNode(createNodeModel()) }, { indexGroup: selectedGroup(repoPath) });
 
   for (const id of await collectProjectIds(repoPath, writer, additional)) {
-    await writer.mkdirp(path.join(boardRoot(repoPath), projectDirName(id)));
     if (skipId === id) {
       continue;
     }
     const abs = projectAgentsAbsPath(repoPath, id);
     if (!(await writer.exists(abs))) {
-      await writer.writeFile(
-        abs,
-        renderProjectAgents({
+      await service.create(new InternalNode(abs), { body: renderProjectAgents({
           title: seedTitleFor(id),
           description: seedDescriptionFor(id),
-        }),
-      );
+        }) }, { indexGroup: "local" });
     } else {
       await readProjectRecord(repoPath, id, writer);
     }
   }
 
-  return refreshProjectIndex(repoPath, writer, additional);
+  return refreshProjectIndex(repoPath, writer, additional, service);
 }
 
 export async function listProjects(
@@ -328,14 +282,14 @@ export async function createProject(
   const id = parseTaskProject(input.project);
   const title = parseProjectTitle(input.title);
   const description = parseProjectDescription(input.description);
-  await ensureProjectMetadata(repoPath, writer, id);
+  const service = projectNodes(repoPath);
+  await ensureProjectMetadata(repoPath, writer, id, [], service);
   const rel = projectAgentsRelPath(id, repoPath);
   if (await writer.exists(path.join(scopeDir(repoPath), rel))) {
     throw new TasksError("VALIDATION_ERROR", `project already exists: ${id}`);
   }
-  await writer.mkdirp(path.join(boardRoot(repoPath), projectDirName(id)));
-  await writer.writeFile(path.join(scopeDir(repoPath), rel), renderProjectAgents({ title, description }));
-  await refreshProjectIndex(repoPath, writer, [id]);
+  await service.create(new InternalNode(path.join(realpathSync(scopeDir(repoPath)), rel)), { body: renderProjectAgents({ title, description }) }, { indexGroup: "local" });
+  await refreshProjectIndex(repoPath, writer, [id], service);
   return {
     project: id,
     dir: projectDirName(id),
@@ -360,23 +314,22 @@ export async function updateProject(
   const id = parseTaskProject(raw);
   // A named write may seed its existing project directory without discovering siblings.
   const projectExists = await writer.exists(path.join(boardRoot(repoPath), projectDirName(id)));
-  await ensureProjectMetadata(repoPath, writer, undefined, projectExists ? [id] : []);
+  const service = projectNodes(repoPath);
+  await ensureProjectMetadata(repoPath, writer, undefined, projectExists ? [id] : [], service);
   const rel = projectAgentsRelPath(id, repoPath);
-  const abs = path.join(scopeDir(repoPath), rel);
+  const abs = path.join(realpathSync(scopeDir(repoPath)), rel);
   if (!(await writer.exists(abs))) {
     throw new TasksError("PROJECT_NOT_FOUND", `project not found: ${id}`);
   }
-  const parsed = parseProjectAgents(await writer.readFile(abs));
+  const node = (await service.get(abs, InternalNode))!;
+  const parsed = parseProjectAgents(node.body);
   const title = patch.title === undefined ? parsed.title : parseProjectTitle(patch.title);
   const description =
     patch.description === undefined
       ? parsed.description
       : parseProjectDescription(patch.description);
-  await writer.writeFile(
-    abs,
-    renderProjectAgents({ title, description, pointers: parsed.pointers, tail: parsed.tail }),
-  );
-  await refreshProjectIndex(repoPath, writer);
+  await service.update(node, { body: renderProjectAgents({ title, description, pointers: parsed.pointers, tail: parsed.tail }) });
+  await refreshProjectIndex(repoPath, writer, [], service);
   return {
     project: id,
     dir: projectDirName(id),

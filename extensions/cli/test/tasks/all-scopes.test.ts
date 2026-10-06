@@ -36,7 +36,7 @@ function fixture(t: { after(fn: () => void): void }, git = true) {
   write('notes/example/index.md', '---\nbad: [\n---\n');
   index('AGENTS.md', ['tasks/AGENTS.md', '.harness/tasks/AGENTS.md', 'child/AGENTS.md', 'notes/example/index.md', 'aliases/AGENTS.md']);
   index('aliases/AGENTS.md', ['../child/AGENTS.md']);
-  const call = (scope: string, args: string[]) => run(['--scope', path.join(root, scope), 'tasks', ...args], { env: {} });
+  const call = (scope: string, args: string[]) => run(['--scope', path.join(root, scope), 'tasks', "--index-group", "local", ...args], { env: {} });
   return { root, entries, call, write, index };
 }
 
@@ -64,7 +64,7 @@ test('all-scopes resolves the Git root, preserves physical identities and matche
     assert.deepEqual(snapshot.items.map((x: any) => x.path).sort(), entries.sort());
   }
   const oldCwd = process.cwd();
-  try { process.chdir(path.join(root, 'child')); const result = await run(['tasks', 'list', '--all-scopes'], { env: {} }); assert.equal(result.exitCode, 0, result.stdout); assert.equal(JSON.parse(result.stdout).tasks.length, 7); }
+  try { process.chdir(path.join(root, 'child')); const result = await run(['tasks', "--index-group", "local", 'list', '--all-scopes'], { env: {} }); assert.equal(result.exitCode, 0, result.stdout); assert.equal(JSON.parse(result.stdout).tasks.length, 7); }
   finally { process.chdir(oldCwd); }
 });
 

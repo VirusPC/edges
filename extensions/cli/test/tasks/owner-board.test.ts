@@ -16,7 +16,7 @@ function fixture(t: { after(fn: () => void): void }) {
     const file = path.join(root, rel);
     fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, source);
   };
-  const call = (scope: string, purpose: string, args: string[]) => run(['--scope', path.join(root, scope), 'tasks', '--purpose', purpose, ...args], { env: {} });
+  const call = (scope: string, purpose: string, args: string[]) => run(['--scope', path.join(root, scope), 'tasks', '--index-group', purpose === 'domain' ? 'descendant' : 'local', '--purpose', purpose, ...args], { env: {} });
   const read = (scope: string) => new InternalNode(path.join(root, scope, 'AGENTS.md')).parse(fs.readFileSync(path.join(root, scope, 'AGENTS.md'), 'utf8'));
   return { root, write, call, read };
 }
@@ -36,7 +36,7 @@ test('CLI first projects and tasks connect existing root, child and content scop
     for (const purpose of ['maintenance', 'domain']) {
       const project = await call(scope, purpose, ['project', 'create', 'empty', '--title', 'Empty', '--description', 'No tasks yet']);
       assert.equal(project.exitCode, 0, project.stdout);
-      const globalEmpty = await run(['--scope', root, 'tasks', 'list', '--all-scopes', '--group-by', 'project'], { env: {} });
+      const globalEmpty = await run(['--scope', root, 'tasks', "--index-group", "local", 'list', '--all-scopes', '--group-by', 'project'], { env: {} });
       assert.equal(globalEmpty.exitCode, 0, globalEmpty.stdout);
       assert.ok(JSON.parse(globalEmpty.stdout).groups.some((g: any) => g.source.scope === scope && g.source.purpose === purpose && g.project === 'empty'), globalEmpty.stdout);
       const created = await call(scope, purpose, ['create', '--title', 'Same']);
@@ -46,7 +46,7 @@ test('CLI first projects and tasks connect existing root, child and content scop
       assert.equal(local.exitCode, 0, local.stdout); assert.equal(JSON.parse(local.stdout).tasks.length, 1);
     }
   }
-  const global = await run(['--scope', root, 'tasks', 'list', '--all-scopes', '--group-by', 'project'], { env: {} });
+  const global = await run(['--scope', root, 'tasks', "--index-group", "local", 'list', '--all-scopes', '--group-by', 'project'], { env: {} });
   assert.equal(global.exitCode, 0, global.stdout);
   const payload = JSON.parse(global.stdout);
   assert.deepEqual(payload.items.map((x: any) => x.path).sort(), expected.sort());
@@ -94,7 +94,7 @@ test('fresh scope writes remain authorized without initializing Project Memory o
   }
   assert.ok(!fs.existsSync(path.join(root, 'AGENTS.md')));
   assert.ok(!fs.existsSync(path.join(root, '.harness/memory')));
-  const global = await run(['--scope', root, 'tasks', 'list', '--all-scopes'], { env: {} });
+  const global = await run(['--scope', root, 'tasks', "--index-group", "local", 'list', '--all-scopes'], { env: {} });
   assert.notEqual(global.exitCode, 0);
 });
 
@@ -109,13 +109,13 @@ test('first task creation registers both purposes without an earlier project com
     assert.equal(created.exitCode, 0, created.stdout);
     expected.push(path.join(scope, JSON.parse(created.stdout).path));
   }
-  const global = await run(['--scope', root, 'tasks', 'list', '--all-scopes'], { env: {} });
+  const global = await run(['--scope', root, 'tasks', "--index-group", "local", 'list', '--all-scopes'], { env: {} });
   assert.equal(global.exitCode, 0, global.stdout);
   assert.deepEqual(JSON.parse(global.stdout).tasks.map((x: any) => x.path).sort(), expected.sort());
   assert.equal(read('.').localChildren.length, 1);
 });
 
-test('maintenance registration corrects a descendant relation while retaining authored reference metadata', async t => {
+test('maintenance registration preserves an existing descendant relation and authored metadata', async t => {
   const { root, write, call, read } = fixture(t);
   const node = new InternalNode(path.join(root, 'AGENTS.md')).parse('# Root\n\nKeep prose\n');
   const reference = { id: path.join(root, '.harness/tasks/AGENTS.md'), name: 'My upkeep', description: 'Keep description' };
@@ -123,8 +123,8 @@ test('maintenance registration corrects a descendant relation while retaining au
   write('AGENTS.md', node.serialize());
   const result = await call('.', 'maintenance', ['create', '--title', 'First']);
   assert.equal(result.exitCode, 0, result.stdout);
-  assert.deepEqual(read('.').localChildren, [reference]);
-  assert.deepEqual(read('.').descendantChildren, []);
+  assert.deepEqual(read('.').localChildren, []);
+  assert.deepEqual(read('.').descendantChildren, [reference]);
 });
 
 test('unsafe owner indexes are refused without overwriting their source', async t => {
@@ -135,4 +135,19 @@ test('unsafe owner indexes are refused without overwriting their source', async 
   assert.notEqual(result.exitCode, 0);
   assert.equal(fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8'), source);
   assert.ok(!fs.existsSync(path.join(root, '.harness/tasks/_default/backlog')));
+});
+
+test('new owner registration requires explicit group and preserves purpose-independent choice', async t => {
+  const { root, write, read } = fixture(t);
+  write('AGENTS.md', '# Owner\n');
+  const args = ['--scope', root, 'tasks', '--purpose', 'maintenance', 'project', 'create', 'example', '--title', 'Example', '--description', 'Description'];
+  const missing = await run(args, { env: {} });
+  assert.notEqual(missing.exitCode, 0);
+  assert.equal(fs.existsSync(path.join(root, '.harness')), false);
+  const created = await run([...args.slice(0, 5), '--index-group', 'descendant', ...args.slice(5)], { env: {} });
+  assert.equal(created.exitCode, 0, created.stdout);
+  assert.equal(read('.').descendantChildren[0]?.id, path.join(root, '.harness/tasks/AGENTS.md'));
+  const board = new InternalNode(path.join(root, '.harness/tasks/AGENTS.md')).parse(fs.readFileSync(path.join(root, '.harness/tasks/AGENTS.md'), 'utf8'));
+  assert.equal(board.localChildren.filter(ref => ref.name === 'Example').length, 1);
+  assert.doesNotMatch(board.serialize(), /task-projects:/);
 });

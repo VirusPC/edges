@@ -2,7 +2,9 @@ import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 export { ownershipTarget } from './paths.js';
 import { InternalNode } from '../../domain/models/internal-node.js';
 import { discoverScopes } from '../scope.js';
-import { loadMemoryDocument, saveMemoryDocument, type MemoryDocument } from './node-documents.js';
+import { memoryNodes, prepareMemoryWrite } from './service.js';
+import { NodeService } from '../node-service.js';
+import { parseDocument } from '../../utils/markdown/document.js';
 import { join, dirname, basename, relative } from "node:path";
 import { AUTO_START, CHILDREN_START, CHILDREN_END, IMPORTANT_START, LOCAL_START, LOCAL_END, OUTER_START, INDEX_ENTRY_PATTERN, blockPattern, buildChildrenBlock, ensureImportantBlock, escapeRegExp, insertInnerBlock, renderAgentsDocument, upsertBlock, } from "./blocks.js";
 import {
@@ -13,7 +15,6 @@ import {
   isScope,
   readText,
   ownershipTarget,
-  writeAtomic,
 } from "./paths.js";
 import { ENTRY_LINE_TEMPLATE, renderLine } from "./templates.js";
 import { layerTypeSpecs, selectedLocalBlock, upsertLocalTypeLine, } from "./types.js";
@@ -24,31 +25,32 @@ export function classifyAgentsSource(source: string | undefined): "missing" | "m
 export function classifyAgentsFile(file: string): "missing" | "managed" | "foreign" {
     return classifyAgentsSource(isFile(file) ? readText(file) : undefined);
 }
-async function syncLoadedAgents(document: MemoryDocument, directory: string, local: string, children: string): Promise<string> {
-    const existing = document.existed ? document.node.serialize() : undefined;
+async function syncLoadedAgents(service: NodeService, node: InternalNode | undefined, file: string, directory: string, local: string, children: string): Promise<string> {
+    const existing = node?.body;
     const state = classifyAgentsSource(existing);
     if (state === 'foreign') return 'needs-doctor';
-    if (existing === undefined) {
-        await saveMemoryDocument(document, renderAgentsDocument(basename(directory), local, children));
+    if (!node) {
+        await service.create(new InternalNode(file), parseDocument(renderAgentsDocument(basename(directory), local, children)), { indexGroup: 'local' });
         return 'created';
     }
-    let updated = ensureImportantBlock(existing);
+    let updated = ensureImportantBlock(existing!);
     if (local) updated = upsertBlock(updated, LOCAL_START, LOCAL_END, local);
     if (children) updated = upsertBlock(updated, CHILDREN_START, CHILDREN_END, children);
     if (updated === existing) return 'preserved';
-    await saveMemoryDocument(document, updated);
+    await service.update(node, { body: updated });
     return 'updated';
 }
-export async function syncAgentsBlocks(directory: string, local = "", children = ""): Promise<string> {
-    const document = await loadMemoryDocument(directory, join(directory, AGENTS_FILE_NAME));
-    return syncLoadedAgents(document, directory, local, children);
+export async function syncAgentsBlocks(directory: string, local = "", children = "", service = memoryNodes(directory)): Promise<string> {
+    const file = prepareMemoryWrite(directory, join(directory, AGENTS_FILE_NAME));
+    return syncLoadedAgents(service, await service.get(file, InternalNode), file, directory, local, children);
 }
-export async function syncTargetAgents(target: string, _root: string): Promise<string> {
-    const document = await loadMemoryDocument(target, join(target, AGENTS_FILE_NAME));
+export async function syncTargetAgents(target: string, _root: string, service = memoryNodes(target)): Promise<string> {
+    const file = prepareMemoryWrite(target, join(target, AGENTS_FILE_NAME));
+    const node = await service.get(file, InternalNode);
     const specs = layerTypeSpecs(target);
-    let local = document.node.serialize().match(blockPattern(LOCAL_START, LOCAL_END))?.[0] ?? selectedLocalBlock([]);
+    let local = node?.body.match(blockPattern(LOCAL_START, LOCAL_END))?.[0] ?? selectedLocalBlock([]);
     for (const spec of specs) local = upsertLocalTypeLine(local, spec.indexFile, spec.description || spec.name);
-    return syncLoadedAgents(document, target, local, '');
+    return syncLoadedAgents(service, node, file, target, local, '');
 }
 export const normalizeIndexDescription = (target: string, description?: string) => description?.trim().replace(/\s+/g, " ") ||
     `${basename(target)} 目录的项目记忆与规范入口。`;
@@ -87,19 +89,14 @@ export function registeredIndexAnchors(target: string, root: string): string[] {
     return discoverScopes(root).filter(owner => readOwnershipEntries(join(owner, AGENTS_FILE_NAME))
         .some(entry => canonicalPath(entry.id) === canonicalPath(join(target, AGENTS_FILE_NAME))));
 }
-async function dropLoadedIndexEntries(document: MemoryDocument, relatives: Set<string>): Promise<boolean> {
-    if (!(document.node instanceof InternalNode)) throw new Error('Expected an AGENTS node');
-    const before = document.node.serialize();
-    for (const reference of document.node.descendantChildren) if (relatives.has(relative(document.node.directoryPath, reference.id))) document.node.removeChild(reference.id);
-    const after = document.node.serialize();
-    if (after === before) return false;
-    await saveMemoryDocument(document, after);
-    return true;
-}
-
 export async function dropIndexEntries(file: string, relatives: Set<string>): Promise<boolean> {
-    const document = await loadMemoryDocument(dirname(file), file);
-    return dropLoadedIndexEntries(document, relatives);
+    const service = memoryNodes(dirname(file));
+    const node = await service.get(prepareMemoryWrite(dirname(file), file), InternalNode);
+    if (!node) return false;
+    const descendantChildren = node.descendantChildren.filter(ref => !relatives.has(relative(node.directoryPath, ref.id)));
+    if (descendantChildren.length === node.descendantChildren.length) return false;
+    await service.update(node, { descendantChildren });
+    return true;
 }
 export function findIndexAnchor(target: string, root: string): string {
     if (target === root)
@@ -114,42 +111,20 @@ export function findIndexAnchor(target: string, root: string): string {
     }
     return root;
 }
-export async function syncIndexEntry(anchor: string, target: string, description?: string): Promise<[
-    string,
-    string | null,
-    string | null
-]> {
-    if (anchor === target)
-        return ["not-applicable", null, null];
-    const file = assertScopePath(join(anchor, AGENTS_FILE_NAME), anchor), rel = join(relative(anchor, target), AGENTS_FILE_NAME), normalized = normalizeIndexDescription(target, description);
-    const document = await loadMemoryDocument(anchor, file);
-    const existing = document.existed ? document.node.serialize() : undefined;
-    const state = classifyAgentsSource(existing);
-    if (!(document.node instanceof InternalNode)) throw new Error('Expected an AGENTS node');
-    const registered = document.node.children.find(entry => canonicalPath(entry.id) === canonicalPath(join(target, AGENTS_FILE_NAME)));
-    if (registered) {
-        if (description === undefined || registered.description === normalized) return ["preserved", relative(anchor, registered.id), null];
-        document.node.updateChild(registered.id, { description: normalized });
-        await saveMemoryDocument(document, document.node.serialize());
-        return ["updated", relative(anchor, registered.id), normalized];
-    }
-    if (state === "foreign") {
-        document.node.addChild('descendant', { id: join(anchor, rel), description: normalized });
-        await saveMemoryDocument(document, document.node.serialize());
-        return ["updated", rel, normalized];
-    }
-    const entry = renderLine(ENTRY_LINE_TEMPLATE, {
-        title: rel,
-        path: rel,
-        description: normalized,
-    });
-    if (state === "missing") {
-        await saveMemoryDocument(document, renderAgentsDocument(basename(anchor), selectedLocalBlock(layerTypeSpecs(anchor)), buildChildrenBlock(entry)));
-        return ["created", rel, normalized];
-    }
-    const [updated, changed] = mergeIndexEntry(existing!, rel, entry, description !== undefined);
-    if (updated === existing)
-        return ["preserved", rel, changed ? normalized : null];
-    await saveMemoryDocument(document, updated);
-    return ["updated", rel, changed ? normalized : null];
+export async function syncIndexEntry(anchor: string, target: string, description?: string, indexGroup?: import('../../domain/models/types.js').ChildGroup): Promise<[string, string | null, string | null]> {
+    if (anchor === target) return ['not-applicable', null, null];
+    const service = memoryNodes(anchor);
+    const file = prepareMemoryWrite(anchor, join(anchor, AGENTS_FILE_NAME));
+    const node = await service.get(file, InternalNode);
+    if (!node) return ['missing-owner', null, null];
+    const id = canonicalPath(join(target, AGENTS_FILE_NAME));
+    const registered = node.children.find(ref => canonicalPath(ref.id) === id);
+    const rel = relative(anchor, id), normalized = normalizeIndexDescription(target, description);
+    if (registered && (description === undefined || registered.description === normalized)) return ['preserved', rel, null];
+    if (!registered && !indexGroup) throw new Error('New owner registration requires --index-group local|descendant');
+    const patch = (refs: typeof node.localChildren) => refs.map(ref => ref.id === registered?.id ? { ...ref, description: normalized } : ref);
+    const localChildren = patch(node.localChildren), descendantChildren = patch(node.descendantChildren);
+    if (!registered) (indexGroup === 'local' ? localChildren : descendantChildren).push({ id, name: rel, description: normalized });
+    await service.update(node, { localChildren, descendantChildren });
+    return ['updated', rel, normalized];
 }

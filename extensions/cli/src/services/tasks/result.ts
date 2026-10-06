@@ -10,6 +10,7 @@ export type { CliResult };
 
 export function tasksRuntime(ctx: CliContext) {
   const location = taskBoardLocation(loadConfig(ctx.env).scopeDir, ctx.purpose);
+  location.indexGroup = ctx.indexGroup;
   return {
     location,
     fs: createNodeBoardFs(location),

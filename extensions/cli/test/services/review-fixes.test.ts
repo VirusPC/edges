@@ -19,7 +19,7 @@ function fixture(t: any) {
 
 test('Memory derives an index edit from the snapshot loaded after an intervening human edit', async t => {
   const root = fixture(t);
-  await initMemory({ targetDir: root, memoryTypes: ['project'] });
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ['project'] });
   const file = path.join(root, 'AGENTS.md'), original = fs.readFileSync(file, 'utf8');
   const get = NodeService.prototype.get;
   let edited = false;
@@ -53,7 +53,7 @@ test('Task body update preserves supplied blank lines and trailing spaces', asyn
 
 for (const exists of [false, true]) test(`Memory rejects ${exists ? 'edits' : 'creation'} after its loaded snapshot`, async t => {
   const root = fixture(t), file = path.join(root, 'AGENTS.md');
-  if (exists) await initMemory({ targetDir: root, memoryTypes: ['project'] });
+  if (exists) await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ['project'] });
   const humanSource = exists ? fs.readFileSync(file, 'utf8') + '\nLater human edit\n' : '# Later human creation\n';
   const get = NodeService.prototype.get;
   let changed = false;

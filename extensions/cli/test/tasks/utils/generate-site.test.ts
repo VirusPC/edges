@@ -12,7 +12,7 @@ test("generateTasksSite writes HTML with review payload and created title", asyn
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(
-      ["tasks", "--purpose", "domain", "create", "--title", "Board Alpha", "--status", "todo"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "Board Alpha", "--status", "todo"],
       { env },
     );
     assert.equal(created.exitCode, 0);
@@ -40,7 +40,7 @@ test("aggregate site preserves duplicate stems with portable scope/purpose/proje
         [
           "--scope",
           repo,
-          "tasks",
+          "tasks", "--index-group", "local",
           "--purpose",
           purpose,
           "create",
@@ -54,7 +54,7 @@ test("aggregate site preserves duplicate stems with portable scope/purpose/proje
     // Existing records may share a stem across Task Projects; no stored rename is permitted.
     const { mkdir, writeFile } = await import("node:fs/promises");
     const listed = JSON.parse(
-      (await run(["--scope", repo, "tasks", "list"], { env })).stdout,
+      (await run(["--scope", repo, "tasks", "--index-group", "local", "list"], { env })).stdout,
     );
     const original = listed.tasks[0];
     await mkdir(path.join(repo, "tasks/cli/backlog", original.stem), {
@@ -106,7 +106,7 @@ test("standalone scope aggregate resolves nested sources relative to selected ro
     await writeFixtureIndex(path.join(child,'AGENTS.md'), ['.harness/tasks/AGENTS.md']);
     for (const scope of [root, child]) {
       const result = await run(
-        ["--scope", scope, "tasks", "create", "--title", "Same"],
+        ["--scope", scope, "tasks", "--index-group", "local", "create", "--title", "Same"],
         { env: {} },
       );
       assert.equal(result.exitCode, 0, result.stdout);

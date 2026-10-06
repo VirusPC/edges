@@ -27,7 +27,7 @@ for (const operation of ["move", "update"] as const) {
         status: "todo",
         body: "Original\n",
         metadata: { vendor: { keep: true, version: 1 } },
-      },
+      }, { indexGroup: "local" }
     );
     const alias = (await service.get(primary.path, TaskNode))!;
     alias.body = "Unsaved body\n";
@@ -63,7 +63,7 @@ test("shared Leaf metadata retains updated body and metadata removal after subse
   const primary = await service.create(new LeafNode(file("one/index.md")), {
     body: "Before\n",
     metadata: { vendor: { old: "remove", keep: 1 }, obsolete: true },
-  });
+  }, { indexGroup: "local" });
   const alias = (await service.get(primary.path))!;
   alias.description = "Pending";
   primary.removeMetadata("obsolete");
@@ -81,7 +81,7 @@ test("shared Internal constraints and reference edits retain authored prose and 
   const { file, service } = fixture(t);
   const primary = await service.create(new InternalNode(file("AGENTS.md")), {
     body,
-  });
+  }, { indexGroup: "local" });
   const alias = (await service.get(primary.path, InternalNode))!;
   alias.setConstraints(["Pending constraint"]);
   alias.updateChild(file("child/index.md"), { name: "Pending label" });
@@ -109,7 +109,7 @@ test("sequential shared Leaf body edits preserve authored whitespace", async (t)
   const { file, service } = fixture(t);
   const primary = await service.create(new LeafNode(file("one/index.md")), {
     body: "# First\n\nMiddle  \n\nLast\n",
-  });
+  }, { indexGroup: "local" });
   const alias = (await service.get(primary.path))!;
   alias.body = alias.body.replace("Last", "Local last");
   await service.update(primary, {
@@ -125,8 +125,8 @@ for (const field of ["body", "metadata", "internal prose"] as const) {
   test(`sequential shared ${field} edits save the last assignment`, async (t) => {
     const { file, service } = fixture(t);
     const primary = field === "internal prose"
-      ? await service.create(new InternalNode(file("AGENTS.md")), { body })
-      : await service.create(new LeafNode(file("one/index.md")), { body: "Original\n", metadata: { vendor: { version: 1 } } });
+      ? await service.create(new InternalNode(file("AGENTS.md")), { body }, { indexGroup: "local" })
+      : await service.create(new LeafNode(file("one/index.md")), { body: "Original\n", metadata: { vendor: { version: 1 } } }, { indexGroup: "local" });
     const alias = (await service.get(primary.path))!;
     assert.strictEqual(alias, primary);
     if (field === "metadata") {
@@ -144,7 +144,7 @@ for (const field of ["body", "metadata", "internal prose"] as const) {
 }
 test("shared Task status assignment survives directory movement", async (t) => {
   const { file, service } = fixture(t);
-  const primary = await service.create(new TaskNode(file("tasks/demo/todo/one/index.md")), { status: "todo", body: "Original\n" });
+  const primary = await service.create(new TaskNode(file("tasks/demo/todo/one/index.md")), { status: "todo", body: "Original\n" }, { indexGroup: "local" });
   const alias = (await service.get(primary.path, TaskNode))!;
   alias.status = "backlog";
   primary.status = "done";
@@ -158,7 +158,7 @@ test("shared Task status assignment survives directory movement", async (t) => {
 });
 test("update input overwrites the shared body's latest assignment", async (t) => {
   const { file, service } = fixture(t);
-  const primary = await service.create(new LeafNode(file("one/index.md")), { body: "First and last\n" });
+  const primary = await service.create(new LeafNode(file("one/index.md")), { body: "First and last\n" }, { indexGroup: "local" });
   const alias = (await service.get(primary.path))!;
   alias.body = "Local first and last\n";
   await service.update(primary, { body: "First and committed last\n" });
@@ -171,13 +171,13 @@ for (const operation of ["move", "destroy"] as const) {
   for (const pending of ["removal", "rewrite"] as const) {
     test(`${operation} persists current indexes after pending reference ${pending}`, async (t) => {
       const { file, service } = fixture(t);
-      const parent = await service.create(new InternalNode(file("AGENTS.md")), { body });
+      const parent = await service.create(new InternalNode(file("AGENTS.md")), { body }, { indexGroup: "local" });
       // This explicitly loaded index is not registered under the root.
       fs.mkdirSync(file("referrer"));
       fs.writeFileSync(file("referrer/AGENTS.md"), body.replace("child/index.md", "../child/index.md"));
       const referrer = (await service.get(file("referrer/AGENTS.md"), InternalNode))!;
       const child = (await service.get(file("child/index.md")))!;
-      const unrelated = await service.create(new LeafNode(file("unrelated/index.md")), { body: "Persisted unrelated\n" });
+      const unrelated = await service.create(new LeafNode(file("unrelated/index.md")), { body: "Persisted unrelated\n" }, { indexGroup: "local" });
       fs.mkdirSync(file("replacement"));
       fs.writeFileSync(file("replacement/index.md"), "Replacement\n");
       const replacement = (await service.get(file("replacement/index.md")))!;
@@ -210,8 +210,8 @@ for (const operation of ["move", "destroy"] as const) {
 
 test("move persists a destination parent's pending registration", async (t) => {
   const { file, service } = fixture(t);
-  await service.create(new InternalNode(file("AGENTS.md")), { body });
-  const destination = await service.create(new InternalNode(file("destination/AGENTS.md")), { body: "# Destination\n" });
+  await service.create(new InternalNode(file("AGENTS.md")), { body }, { indexGroup: "local" });
+  const destination = await service.create(new InternalNode(file("destination/AGENTS.md")), { body: "# Destination\n" }, { indexGroup: "local" });
   const child = (await service.get(file("child/index.md")))!;
   const target = file("destination/moved/index.md");
   destination.addChild("local", { id: target, name: "Pending label" });
@@ -240,7 +240,7 @@ test("move persists pre-rewritten prose links in a loaded non-parent referrer", 
 
 test("move rejects a dangling pending destination reference before changing files", async (t) => {
   const { file, service } = fixture(t);
-  const parent = await service.create(new InternalNode(file("AGENTS.md")), { body });
+  const parent = await service.create(new InternalNode(file("AGENTS.md")), { body }, { indexGroup: "local" });
   const child = (await service.get(file("child/index.md")))!;
   const persisted = fs.readFileSync(parent.path, "utf8");
   parent.addChild("local", { id: file("moved/missing/index.md") });

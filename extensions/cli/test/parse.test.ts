@@ -43,13 +43,13 @@ test("run note --help is help, not a validation error", async () => {
 });
 
 test("run tasks --help is help", async () => {
-  const result = await run(["tasks", "--help"]);
+  const result = await run(["tasks", "--index-group", "local", "--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /\blist\b/);
 });
 
 test("run tasks without a subcommand is a validation error", async () => {
-  const result = await run(["tasks"]);
+  const result = await run(["tasks", "--index-group", "local"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });

@@ -65,3 +65,5 @@ pnpm --filter edges-cli exec tsx src/index.ts note \
 - 不要在本 skill 下写 `scripts/` 去跑 git。
 - 不要教 Agent 把仓根 `bin/` 加入 PATH。
 - 不要把 npm `bin` 说成能力面的一层。能力面是 CLI + Skill + MCP（见仓库 `CONTEXT.md` 与 `docs/adr/0004-capability-surface-cli-skill-mcp.md`）。
+
+新建父级索引关系时，由调用本技能的 Agent 根据语义明确选择 `local` 或 `descendant`，并传给 CLI 的 `--index-group`；Tasks 将选项放在 `tasks` 后，Memory 放在 `init` / `doctor` 后，Note 放在 `note` 后。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。

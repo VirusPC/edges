@@ -1,7 +1,8 @@
+import { InternalNode } from '../../domain/models/internal-node.js';
 import { typeIndexPath } from './types.js';
 import { assertImportType } from "../import-entry.js";
 import { MemoryNode, SkillNode } from "../../domain/models/index.js";
-import { memoryNodes } from "./node-documents.js";
+import { memoryNodes } from "./service.js";
 import { existsSync, readFileSync } from "node:fs";
 import { relative, resolve, basename } from "node:path";
 import { isScope, rejectLegacy, resolveRoot, resolveTarget } from "./paths.js";
@@ -67,9 +68,9 @@ export async function rememberMemory(options: RememberMemoryOptions) {
     )
       throw new Error(`${source}: memoryType must be ${options.type}`);
     ensureLayerTypeGitignore(target, options.type, [file]);
-    await service.import(source, file);
-    await refreshIndex(target, options.type);
-    const agentsAction = await syncTargetAgents(target, resolveRoot(target));
+    await service.import(source, file, { indexGroup: "local" });
+    await refreshIndex(target, options.type, service);
+    const agentsAction = await syncTargetAgents(target, resolveRoot(target), service);
     return {
       operation: "remember",
       targetDir: target,
@@ -130,7 +131,7 @@ export async function rememberMemory(options: RememberMemoryOptions) {
     ...(node instanceof MemoryNode ? { memoryType: options.type } : {}),
   };
   if (exists) await service.update(node, input);
-  else await service.create(node, input);
+  else await service.create(node, input, { indexGroup: "local" });
   await refreshIndex(target, options.type);
   const agentsAction = await syncTargetAgents(target, resolveRoot(target));
   return {

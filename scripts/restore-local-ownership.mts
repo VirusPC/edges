@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --import tsx
+import { isWithinPath } from '../extensions/cli/src/utils/filesystem.js';
 /** Reviewed instance correction. Public and private entry points never share discovery. */
 import * as fs from "node:fs";
 import {
@@ -17,7 +18,6 @@ import { parseTypeMeta } from "../extensions/cli/src/services/memory/types.js";
 import { OWNER_MAP, type InstanceJob } from "./migrate-recursive-layout.mjs";
 import * as migration from "../extensions/cli/src/services/memory/migrate.js";
 import {
-  within,
   isDirectory,
   isSymlink,
   ownershipTarget,
@@ -71,7 +71,7 @@ function safePath(root: string, rel: string) {
   )
     throw Error(`protected-path: ${rel}`);
   const path = resolve(root, rel);
-  if (!within(path, root) || path === root) throw Error(`unsafe-path: ${rel}`);
+  if (!isWithinPath(path, root) || path === root) throw Error(`unsafe-path: ${rel}`);
   migration.safeAncestors(path, root);
   if (isSymlink(path)) throw Error(`unsafe-path-symlink: ${rel}`);
   return path;
@@ -431,13 +431,13 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
       if (
         typeof directory !== "string" ||
         !isAbsolute(directory) ||
-        !within(directory, root)
+        !isWithinPath(directory, root)
       )
         return review(".harness", "private-directory-outside-clone");
       const rel = relative(root, directory);
       if (!/^\.harness\/(memory|skills)\/[^/]+$/.test(rel)) continue;
       safePath(root, rel);
-      const ops = old.operations.filter((op) => within(op.target, directory));
+      const ops = old.operations.filter((op) => isWithinPath(op.target, directory));
       const promoted = ops.filter((op) =>
         Object.keys(OWNER_MAP).some(
           (owner) =>
@@ -526,7 +526,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
         safePath(root, relative(root, op.source));
         safePath(root, relative(root, op.target));
         if (
-          !within(op.source, sourceDir) ||
+          !isWithinPath(op.source, sourceDir) ||
           relative(sourceDir, op.source) !== relative(directory, op.target) ||
           old.operations.filter(
             (other) => other.source === op.source || other.target === op.target,
@@ -555,7 +555,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
         "no-uniquely-proven-promoted-private-types; ownership remains unresolved",
       );
     const mapping = (path: string) => {
-      const candidate = candidates.find((c) => within(path, c.source));
+      const candidate = candidates.find((c) => isWithinPath(path, c.source));
       return candidate
         ? join(candidate.target, relative(candidate.source, path))
         : path;
@@ -645,7 +645,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
       .filter((op) => op.source !== op.target)
       .flatMap((op) =>
         [op.source, op.target]
-          .filter((path) => within(path, directory))
+          .filter((path) => isWithinPath(path, directory))
           .map((path) => relative(directory, path)),
       );
     if (
@@ -714,7 +714,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
         fs.mkdirSync(dirname(op.target), { recursive: true, mode: 0o700 });
         for (
           let dir = dirname(op.target);
-          job.privateDirectories.some((p) => within(dir, p));
+          job.privateDirectories.some((p) => isWithinPath(dir, p));
           dir = dirname(dir)
         )
           fs.chmodSync(dir, 0o700);

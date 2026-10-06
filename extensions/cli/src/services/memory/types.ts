@@ -1,3 +1,4 @@
+import { readEntry, saveEntries } from '../node-files.js';
 import { canonicalPath, findAncestor } from "../../utils/filesystem.js";
 import { InternalNode } from "../../domain/models/internal-node.js";
 import * as fs from "node:fs";
@@ -28,7 +29,6 @@ import {
   readText,
   typeFromDirName,
   typeIndexRelpath,
-  writeAtomic,
 } from "./paths.js";
 import { ENTRY_LINE_TEMPLATE, renderLine } from "./templates.js";
 export const MEMORY_TYPE_NAMES = [
@@ -227,15 +227,13 @@ export function ensureTypeGitignore(
 ): string {
   if (!fs.existsSync(join(root, ".git"))) return "skipped-no-git";
   const file = assertScopePath(join(root, ".gitignore"), root);
-  const before = fs.existsSync(file) ? readText(file) : "";
+  const entry = readEntry(file);
+  const before = entry?.source ?? "";
   const missing = gitignorePatterns(name, module, indexFile).filter(
     (p) => !before.split(/\r?\n/).includes(p),
   );
   if (!missing.length) return "preserved";
-  writeAtomic(
-    file,
-    `${before.trimEnd()}\n\n# Private harness type ${name}\n${missing.join("\n")}\n`,
-  );
+  saveEntries([{ path: file, before: entry, source: `${before.trimEnd()}\n\n# Private harness type ${name}\n${missing.join("\n")}\n`, createMode: 0o600 }]);
   return "updated";
 }
 export function ensureLayerTypeGitignore(
@@ -248,7 +246,7 @@ export function ensureLayerTypeGitignore(
   if (spec?.gitignore) {
     if (root) ensureTypeGitignore(root, name, spec.module, spec.indexFile);
     const files = [join(target, spec.indexFile), ...destinations];
-    // Ignored parent directories also cover writeAtomic's private temporary files.
+    // Ignored parent directories also cover the shared writer's private temporary files.
     assertPrivateIgnored(root ?? target, files, files.map(dirname));
   }
 }

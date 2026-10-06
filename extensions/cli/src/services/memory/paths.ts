@@ -8,7 +8,6 @@ import {
   firstSymlink,
   findAncestor,
 } from "../../utils/filesystem.js";
-import { randomUUID } from "node:crypto";
 export const AGENTS_FILE_NAME = "AGENTS.md";
 export const MEMORY_DIR_NAME = ".harness/memory";
 export function readText(file: string): string {
@@ -78,23 +77,6 @@ export function rejectLegacy(target: string): void {
     throw new Error(
       "migration-required: run project-memory-migrate before using this legacy layer",
     );
-}
-export function writeAtomic(file: string, content: string): void {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  const temporary = path.join(
-    path.dirname(file),
-    `.memory-${randomUUID()}.tmp`,
-  );
-  try {
-    fs.writeFileSync(temporary, content, {
-      encoding: "utf8",
-      flag: "wx",
-      mode: 0o600,
-    });
-    fs.renameSync(temporary, file);
-  } finally {
-    fs.rmSync(temporary, { force: true });
-  }
 }
 export function resolveTarget(raw: string): string {
   const target = canonicalPath(

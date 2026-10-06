@@ -1,7 +1,10 @@
-import { loadMemoryDocument, saveMemoryDocument } from './node-documents.js';
+import { InternalNode } from '../../domain/models/internal-node.js';
+import { memoryNodes, prepareMemoryWrite } from './service.js';
+import { NodeService } from '../node-service.js';
+import { parseDocument } from '../../utils/markdown/document.js';
 import { join, dirname, relative } from "node:path";
 import { assertPrivateIgnored } from "./ignore.js";
-import { AGENTS_FILE_NAME, assertScopePath, isFile, isScope, readText, rejectLegacy, resolveTarget, writeAtomic, } from "./paths.js";
+import { AGENTS_FILE_NAME, assertScopePath, isFile, isScope, readText, rejectLegacy, resolveTarget, } from "./paths.js";
 import { readIndexTemplate } from "./templates.js";
 import { ensureTypeGitignore, findGitRoot, indexFileName, layerTypeSpecs, typeIndexTemplateName, upsertLocalTypeLine, validateTypeName, } from "./types.js";
 import { refreshIndex } from "./entries.js";
@@ -39,21 +42,23 @@ export async function addMemoryType(options: AddMemoryTypeOptions) {
         ensureTypeGitignore(root, name, module, indexName);
     if (gitignore)
         assertPrivateIgnored(root ?? target, [file], [dirname(file)]);
-    const document = await loadMemoryDocument(target, file);
-    const existed = document.existed;
+    const service = memoryNodes(target);
+    const entryPath = prepareMemoryWrite(target, file);
+    const node = await service.get(entryPath, InternalNode);
+    const existed = !!node;
     if (!existed)
-        await saveMemoryDocument(document, readIndexTemplate(typeIndexTemplateName(name), name, description, {
+        await service.create(new InternalNode(entryPath), parseDocument(readIndexTemplate(typeIndexTemplateName(name), name, description, {
             module,
             gitignore: String(gitignore),
             writable: String(writable),
             format,
-        }));
-    await refreshIndex(target, name);
+        })), { indexGroup: "local" });
+    await refreshIndex(target, name, service);
     const agents = assertScopePath(join(target, AGENTS_FILE_NAME), target);
-    const entry = await loadMemoryDocument(target, agents);
-    const before = entry.node.serialize(), after = upsertLocalTypeLine(before, indexName, description);
+    const entry = (await service.get(prepareMemoryWrite(target, agents), InternalNode))!;
+    const before = entry.body, after = upsertLocalTypeLine(before, indexName, description);
     if (before !== after)
-        await saveMemoryDocument(entry, after);
+        await service.update(entry, { body: after });
     const gitignoreAction = gitignore
         ? root
             ? ensureTypeGitignore(root, name, module, indexName)

@@ -61,13 +61,13 @@ test("structured creation in existing directory registers a node and updates all
   put("a/asset", "asset");
   const parent = (await service.get(file("AGENTS.md"), InternalNode))!;
   const node = new LeafNode(file("a/index.md"));
-  assert.equal(await service.create(node, { name: "A", body: "first" }), node);
+  assert.equal(await service.create(node, { name: "A", body: "first" }, { indexGroup: "local" }), node);
   assert.equal(parent.localChildren[0]?.id, node.path);
   const copy = (await service.get(node.path))!;
   assert.equal(await service.update(node, { body: "second" }), node);
   assert.equal(copy.body, "second\n");
   const harness = new InternalNode(file("a/AGENTS.md"));
-  await service.create(harness, { constraints: ["rule"] });
+  await service.create(harness, { constraints: ["rule"] }, { indexGroup: "local" });
   assert.equal(node.harness?.id, harness.id);
   assert.equal(fs.readFileSync(file("a/asset"), "utf8"), "asset");
 });
@@ -189,7 +189,7 @@ test("import validates complete directory before writes and leaves source untouc
   put("source/asset", "bytes");
   const imported = await service.import(
     file("source/SKILL.md"),
-    file("target/SKILL.md"),
+    file("target/SKILL.md"), { indexGroup: "local" }
   );
   assert.equal(imported.path, file("target/SKILL.md"));
   assert.equal(fs.readFileSync(file("target/asset"), "utf8"), "bytes");
@@ -203,16 +203,16 @@ test("import validates complete directory before writes and leaves source untouc
   );
   put("bad/sub/index.md", "---\nname: [\n---\n");
   await assert.rejects(
-    service.import(file("bad/SKILL.md"), file("failed/SKILL.md")),
+    service.import(file("bad/SKILL.md"), file("failed/SKILL.md"), { indexGroup: "local" }),
   );
   assert.equal(fs.existsSync(file("failed")), false);
   await assert.rejects(
-    service.import(file("source/SKILL.md"), file("target/SKILL.md")),
+    service.import(file("source/SKILL.md"), file("target/SKILL.md"), { indexGroup: "local" }),
     /exists/,
   );
   fs.symlinkSync(root, file("source/link"));
   await assert.rejects(
-    service.import(file("source/SKILL.md"), file("linked/SKILL.md")),
+    service.import(file("source/SKILL.md"), file("linked/SKILL.md"), { indexGroup: "local" }),
     /symbolic/i,
   );
 });

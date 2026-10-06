@@ -34,3 +34,5 @@ edges memory doctor \
 按返回 JSON 汇报 findings / repaired / remaining。内容合并、抽象、遗忘不属于 doctor；对已有 AGENTS 人工正文的重组使用 `$project-memory-reshape`。
 
 旧单文件不作为生产节点。目录转换用 `$migrate-directory-nodes`，Doctor 不自动迁移。若 AGENTS 本身无效，本次 apply 保留文件并返回诊断，不猜测应保留的索引组或条目。
+
+新建父级索引关系时，由调用本技能的 Agent 根据语义明确选择 `local` 或 `descendant`，并传给 CLI 的 `--index-group`；Tasks 将选项放在 `tasks` 后，Memory 放在 `init` / `doctor` 后，Note 放在 `note` 后。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。

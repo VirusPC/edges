@@ -13,10 +13,10 @@ test("run tasks list [--status]", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
-    const listed = await run(["tasks", "list"], { env: { ...process.env, EDGES_REPO: repo } });
+    const listed = await run(["tasks", "--index-group", "local", "list"], { env: { ...process.env, EDGES_REPO: repo } });
     assert.equal(listed.exitCode, 0);
     assert.equal(JSON.parse(listed.stdout).command, "list");
-    const filtered = await run(["tasks", "list", "--status", "in_progress"], {
+    const filtered = await run(["tasks", "--index-group", "local", "list", "--status", "in_progress"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(filtered.exitCode, 0);
@@ -27,7 +27,7 @@ test("run tasks list [--status]", async () => {
 });
 
 test("run tasks list rejects Run status values", async () => {
-  const result = await run(["tasks", "list", "--status", "completed"]);
+  const result = await run(["tasks", "--index-group", "local", "list", "--status", "completed"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
@@ -37,31 +37,31 @@ test("run tasks get/create/update/status/runs/run-messages", async () => {
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const env = { ...process.env, EDGES_REPO: repo };
-    const created = await run(["tasks", "create", "--title", "Hello"], { env });
+    const created = await run(["tasks", "--index-group", "local", "create", "--title", "Hello"], { env });
     assert.equal(created.exitCode, 0);
     assert.equal(JSON.parse(created.stdout).command, "create");
 
-    const get = await run(["tasks", "get", "stem-1"], { env });
+    const get = await run(["tasks", "--index-group", "local", "get", "stem-1"], { env });
     assert.equal(get.exitCode, 1);
     assert.equal(failedJson(get.stdout).errorCode, "TASK_NOT_FOUND");
 
-    const updated = await run(["tasks", "update", "stem-1", "--title", "N"], { env });
+    const updated = await run(["tasks", "--index-group", "local", "update", "stem-1", "--title", "N"], { env });
     assert.equal(updated.exitCode, 1);
     assert.equal(failedJson(updated.stdout).errorCode, "TASK_NOT_FOUND");
 
-    const moved = await run(["tasks", "status", "stem-1", "cancelled"], { env });
+    const moved = await run(["tasks", "--index-group", "local", "status", "stem-1", "cancelled"], { env });
     assert.equal(moved.exitCode, 1);
     assert.equal(failedJson(moved.stdout).errorCode, "TASK_NOT_FOUND");
 
-    const runs = await run(["tasks", "runs", "stem-1"], { env });
+    const runs = await run(["tasks", "--index-group", "local", "runs", "stem-1"], { env });
     assert.equal(runs.exitCode, 1);
     assert.equal(failedJson(runs.stdout).errorCode, "TASK_NOT_FOUND");
 
-    const jsonRuns = await run(["tasks", "runs", "stem-1", "--output", "json"], { env });
+    const jsonRuns = await run(["tasks", "--index-group", "local", "runs", "stem-1", "--output", "json"], { env });
     assert.equal(jsonRuns.exitCode, 1);
     assert.equal(failedJson(jsonRuns.stdout).errorCode, "TASK_NOT_FOUND");
 
-    const msgs = await run(["tasks", "run-messages", "stem-1--1"], { env });
+    const msgs = await run(["tasks", "--index-group", "local", "run-messages", "stem-1--1"], { env });
     assert.equal(msgs.exitCode, 1);
     assert.ok(["TASK_NOT_FOUND", "RUN_NOT_FOUND"].includes(failedJson(msgs.stdout).errorCode));
   } finally {
@@ -70,7 +70,7 @@ test("run tasks get/create/update/status/runs/run-messages", async () => {
 });
 
 test("run has no delete command", async () => {
-  const result = await run(["tasks", "delete", "stem"]);
+  const result = await run(["tasks", "--index-group", "local", "delete", "stem"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
@@ -84,55 +84,55 @@ test("run rejects tasks delete, log, and missing subcommand", async () => {
 });
 
 test("run tasks list --sort status is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "list", "--sort", "status"]);
+  const result = await run(["tasks", "--index-group", "local", "list", "--sort", "status"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("run tasks list --priority P0 is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "list", "--priority", "P0"]);
+  const result = await run(["tasks", "--index-group", "local", "list", "--priority", "P0"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("run tasks update --priority Urgent is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "update", "stem", "--priority", "Urgent"]);
+  const result = await run(["tasks", "--index-group", "local", "update", "stem", "--priority", "Urgent"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("run tasks create --priority P0 is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "create", "--title", "Pri", "--priority", "P0"]);
+  const result = await run(["tasks", "--index-group", "local", "create", "--title", "Pri", "--priority", "P0"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("run tasks create --project Default is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "create", "--title", "Pri", "--project", "Default"]);
+  const result = await run(["tasks", "--index-group", "local", "create", "--title", "Pri", "--project", "Default"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("run tasks create --project in_progress is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "create", "--title", "Pri", "--project", "in_progress"]);
+  const result = await run(["tasks", "--index-group", "local", "create", "--title", "Pri", "--project", "in_progress"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("run tasks update --project Default is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "update", "stem", "--project", "Default"]);
+  const result = await run(["tasks", "--index-group", "local", "update", "stem", "--project", "Default"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("run tasks list --project in_progress is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "list", "--project", "in_progress"]);
+  const result = await run(["tasks", "--index-group", "local", "list", "--project", "in_progress"]);
   assert.equal(result.exitCode, 2);
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("run tasks --help is help and lists subcommands", async () => {
-  const result = await run(["tasks", "--help"]);
+  const result = await run(["tasks", "--index-group", "local", "--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /\blist\b/);
   assert.match(result.stdout, /\brun-messages\b/);
@@ -140,7 +140,7 @@ test("run tasks --help is help and lists subcommands", async () => {
 });
 
 test("run tasks classify is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "classify"]);
+  const result = await run(["tasks", "--index-group", "local", "classify"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
@@ -164,7 +164,7 @@ test("run tasks project review-page --from fixture writes html and returns path"
       "utf8",
     );
     const result = await run(
-      ["tasks", "project", "review-page", "--from", fixture, "--out", out],
+      ["tasks", "--index-group", "local", "project", "review-page", "--from", fixture, "--out", out],
       { env: { ...process.env, EDGES_REPO: dir } },
     );
     assert.equal(result.exitCode, 0);
@@ -189,7 +189,7 @@ test("run tasks project review-page --from bad json is VALIDATION_ERROR", async 
     await writeFile(fixture, "{", "utf8");
     const out = path.join(dir, "out.html");
     const result = await run(
-      ["tasks", "project", "review-page", "--from", fixture, "--out", out],
+      ["tasks", "--index-group", "local", "project", "review-page", "--from", fixture, "--out", out],
       { env: { ...process.env, EDGES_REPO: dir } },
     );
     assert.equal(result.exitCode, 2);
@@ -206,7 +206,7 @@ test("run tasks project review-page --from missing file is VALIDATION_ERROR", as
   const dir = await mkdtemp(path.join(tmpdir(), "edges-rp-miss-"));
   try {
     const missing = path.join(dir, "nope.json");
-    const result = await run(["tasks", "project", "review-page", "--from", missing], {
+    const result = await run(["tasks", "--index-group", "local", "project", "review-page", "--from", missing], {
       env: { ...process.env, EDGES_REPO: dir },
     });
     assert.equal(result.exitCode, 2);
@@ -224,7 +224,7 @@ test("run tasks project review-page --from - writes html from stdinText", async 
   try {
     const out = path.join(dir, "out.html");
     const result = await run(
-      ["tasks", "project", "review-page", "--from", "-", "--out", out],
+      ["tasks", "--index-group", "local", "project", "review-page", "--from", "-", "--out", out],
       {
         env: { ...process.env, EDGES_REPO: dir },
         stdinText: JSON.stringify({
@@ -244,7 +244,7 @@ test("run tasks project review-page --from - writes html from stdinText", async 
 });
 
 test("run tasks project review-page --from - with empty stdin is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "project", "review-page", "--from", "-"], {
+  const result = await run(["tasks", "--index-group", "local", "project", "review-page", "--from", "-"], {
     stdinText: "",
   });
   assert.equal(result.exitCode, 2);
@@ -255,7 +255,7 @@ test("run tasks project review-page --from - with empty stdin is VALIDATION_ERRO
 });
 
 test("run tasks project without subcommand is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "project"]);
+  const result = await run(["tasks", "--index-group", "local", "project"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
   assert.match(JSON.parse(result.stdout).reason, /missing project subcommand/);

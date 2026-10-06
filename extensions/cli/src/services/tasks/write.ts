@@ -147,7 +147,7 @@ export async function createTask(
       },
     },
     body: input.body ?? defaultBody(input.title),
-  });
+  }, { indexGroup: "local" });
   await io.fs.writeFile(
     path.join(scopeDir(repoPath), sidecarRel),
     emptyRunLog(stem),
@@ -274,7 +274,6 @@ export async function ensureTaskDestination(
   status: TaskStatus,
   writer: BoardWriter,
 ): Promise<void> {
-  await writer.mkdirp(path.join(boardRoot(target), projectDirName(project)));
   await ensureProjectMetadata(target, writer, undefined, [project]);
   await writer.mkdirp(statusDir(target, project, status));
 }

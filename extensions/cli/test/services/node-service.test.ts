@@ -91,7 +91,7 @@ for (const operation of ["update", "create", "attach"] as const) {
     child.body = "updated";
     const action =
       operation === "create"
-        ? service.create(new LeafNode(target), { body: "new" })
+        ? service.create(new LeafNode(target), { body: "new" }, { indexGroup: "local" })
         : operation === "update"
           ? service.update(child, {})
           : attach(service, parent, child, "local");
@@ -128,7 +128,7 @@ test("post-commit temporary cleanup failure recovers created file rather than le
   });
   const target = file("new/index.md");
   await assert.rejects(
-    service.create(new LeafNode(target), { body: "new" }),
+    service.create(new LeafNode(target), { body: "new" }, { indexGroup: "local" }),
     (error) => {
       assert.ok(String(error).includes(`Affected: ${target}`));
       return true;
@@ -142,14 +142,14 @@ test("structured create dispatches task defaults and refuses conflicts before ch
   write("AGENTS.md", index());
   const task = new TaskNode(file("tasks/backlog/one/index.md"));
   assert.equal(
-    await service.create(task, { title: "One", body: "body" }),
+    await service.create(task, { title: "One", body: "body" }, { indexGroup: "local" }),
     task,
   );
   assert.equal(task.title, "One");
   assert.equal(task.status, "backlog");
   assert.equal(task.parent?.id, file("AGENTS.md"));
   const fresh = new LeafNode(task.path);
-  await assert.rejects(service.create(fresh, { body: "wrong" }), /exists/);
+  await assert.rejects(service.create(fresh, { body: "wrong" }, { indexGroup: "local" }), /exists/);
   assert.equal(fresh.body, "");
 });
 test("default get uses layout and physical ancestors, ignoring YAML type claims and ordinary navigation", async (t) => {
@@ -256,7 +256,7 @@ test("symlink reads and destination writes fail without changing targets", async
   fs.symlinkSync(file("outside"), file("linked"));
   await assert.rejects(service.get(file("linked/index.md")), /symbolic/);
   await assert.rejects(
-    service.create(new LeafNode(file("linked/new/index.md")), { body: "bad" }),
+    service.create(new LeafNode(file("linked/new/index.md")), { body: "bad" }, { indexGroup: "local" }),
     /symbolic/,
   );
   assert.equal(fs.readFileSync(file("outside/index.md"), "utf8"), "safe");
@@ -294,7 +294,7 @@ test("authoritative AGENTS graph validation catches cycles from typed BaseNode a
   await assert.rejects(
     service.create(new InternalNode(file("new/AGENTS.md")), {
       body: index("- [self](AGENTS.md)"),
-    }),
+    }, { indexGroup: "local" }),
     /cycle/i,
   );
   assert.equal(fs.existsSync(file("new/AGENTS.md")), false);
@@ -337,7 +337,7 @@ test("business write hook denies mutations before index or source bytes change",
     },
   });
   await assert.rejects(
-    service.create(new LeafNode(file("private/index.md")), { body: "secret" }),
+    service.create(new LeafNode(file("private/index.md")), { body: "secret" }, { indexGroup: "local" }),
     /not ignored/,
   );
   assert.equal(fs.existsSync(file("private/index.md")), false);
@@ -589,3 +589,31 @@ for (const operation of ['query', 'validate', 'destroy'] as const) {
     for (const [name, body] of originals) assert.equal(fs.readFileSync(file(name),'utf8'), body);
   });
 }
+
+test('new registrations require a caller group before any directory creation', async t => {
+  const { file, write, service } = fixture(t);
+  write('AGENTS.md', index());
+  await assert.rejects(service.create(new InternalNode(file('new/AGENTS.md')), { body: '# New\n' }), /index.?group|registration group/i);
+  assert.equal(fs.existsSync(file('new')), false);
+  await service.create(new InternalNode(file('new/AGENTS.md')), { body: '# New\n' }, { indexGroup: 'descendant' });
+  const owner = (await service.get(file('AGENTS.md'), InternalNode))!;
+  assert.deepEqual(owner.localChildren, []);
+  assert.equal(owner.descendantChildren[0]?.id, file('new/AGENTS.md'));
+});
+test('import refuses missing registration choice before copying source resources', async t => {
+ const {root,file,write,service}=fixture(t);write('AGENTS.md',index());
+ const source=fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()),'registration-import-'));t.after(()=>fs.rmSync(source,{recursive:true,force:true}));
+ fs.writeFileSync(path.join(source,'index.md'),'Imported body');fs.writeFileSync(path.join(source,'asset.bin'),'resource');
+ await assert.rejects(service.import(path.join(source,'index.md'),file('imported/index.md')),/indexGroup/);
+ assert.equal(fs.existsSync(file('imported')),false);
+ await service.import(path.join(source,'index.md'),file('imported/index.md'),{indexGroup:'descendant'});
+ assert.equal(fs.readFileSync(file('imported/asset.bin'),'utf8'),'resource');
+ assert.equal((await service.get(file('AGENTS.md'),InternalNode))?.descendantChildren.length,1);
+});
+test('moving an unregistered node does not invent a descendant registration',async t=>{
+ const {file,write,service}=fixture(t);write('AGENTS.md',index());write('source/AGENTS.md',index());write('source/item/index.md','Body');write('destination/AGENTS.md',index());
+ const node=(await service.get(file('source/item/index.md')))!;
+ await service.move(node,file('destination/item/index.md'));
+ assert.deepEqual((await service.get(file('destination/AGENTS.md'),InternalNode))?.children,[]);
+ assert.equal(fs.readFileSync(file('destination/item/index.md'),'utf8'),'Body');
+});

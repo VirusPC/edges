@@ -490,7 +490,8 @@ test("fresh non-Git ancestor init shares a stable lock before and after creating
     { env: {} },
   );
   assert.equal(result.exitCode, 0, result.stdout);
-  assert.equal(fs.existsSync(path.join(root, "AGENTS.md")), true);
+  assert.equal(fs.existsSync(path.join(root, "AGENTS.md")), false);
+  assert.equal(fs.existsSync(path.join(child, "AGENTS.md")), true);
   assert.equal(writeLockPath(child), before);
   assert.equal(writeLockPath(root), before);
 });
@@ -544,7 +545,7 @@ test(
     t.after(() => fs.rmSync(root, { recursive: true, force: true }));
     const childDir = path.join(root, "child");
     fs.mkdirSync(childDir);
-    const code = `import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';const link=fs.linkSync;fs.linkSync=(a,b)=>{link(a,b);if(String(b)===${JSON.stringify(path.join(root, "AGENTS.md"))}){process.send('created');fs.readSync(0,Buffer.alloc(1),0,1,null);}};syncBuiltinESMExports();const {run}=await import('./src/program.ts');process.send(await run(${JSON.stringify(["memory", "init", "--target-dir", childDir, "--root-dir", root, "--memory-types", "project"])},{env:{}}));process.disconnect();`;
+    const code = `import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';const link=fs.linkSync;fs.linkSync=(a,b)=>{link(a,b);if(String(b)===${JSON.stringify(path.join(childDir, "AGENTS.md"))}){process.send('created');fs.readSync(0,Buffer.alloc(1),0,1,null);}};syncBuiltinESMExports();const {run}=await import('./src/program.ts');process.send(await run(${JSON.stringify(["memory", "init", "--target-dir", childDir, "--root-dir", root, "--memory-types", "project"])},{env:{}}));process.disconnect();`;
     const first = spawn(
       process.execPath,
       ["--import", "tsx", "--input-type=module", "-e", code],

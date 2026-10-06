@@ -1,4 +1,5 @@
 #!/usr/bin/env -S node --import tsx
+import { isWithinPath } from '../extensions/cli/src/utils/filesystem.js';
 import { LegacyIndex as InternalNode } from "./legacy-index.mjs";
 /** Reviewed Edges instance migration; generic Project Memory owns format conversion. */
 import * as fs from "node:fs";
@@ -12,7 +13,6 @@ import {
   isDirectory,
   isSymlink,
   readText,
-  within,
   resolveTarget,
   ownershipTarget,
 } from "../extensions/cli/src/services/memory/paths.js";
@@ -251,13 +251,13 @@ export function makeInstancePlan(
   const remnantMap = new Map<string, string>();
   function mapped(path: string): string {
     path = resolve(path);
-    if (!within(path, root)) return path;
+    if (!isWithinPath(path, root)) return path;
     const rel = relative(root, path);
     if (exact.has(rel)) return join(root, exact.get(rel)!);
     for (const [source, target] of [...remnantMap].sort(
       ([a], [b]) => b.split("/").length - a.split("/").length,
     ))
-      if (within(path, source)) return join(target, relative(source, path));
+      if (isWithinPath(path, source)) return join(target, relative(source, path));
     for (const owner of Object.keys(owners).sort(
       (a, b) => b.length - a.length,
     )) {
@@ -323,7 +323,7 @@ export function makeInstancePlan(
         if (
           privatePath(source) ||
           memory.private.some(
-            (p) => within(source, p) || within(target, mapped(p)),
+            (p) => isWithinPath(source, p) || isWithinPath(target, mapped(p)),
           ) ||
           [old.after, after].some(
             (state) =>
@@ -433,7 +433,7 @@ export function makeInstancePlan(
         for (const name of files) {
           const source = join(base, name),
             spec = specs.find(
-              (s) => s.indexes.includes(source) || within(source, s.directory),
+              (s) => s.indexes.includes(source) || isWithinPath(source, s.directory),
             );
           if (!spec && relative(old, source).split("/")[0] !== "users")
             throw new Error(
@@ -532,7 +532,7 @@ export function makeInstancePlan(
     for (const directory of memory.private) {
       const destination = mapped(directory);
       const owner = Object.values(owners)
-        .filter((value) => within(destination, join(root, value, ".harness")))
+        .filter((value) => isWithinPath(destination, join(root, value, ".harness")))
         .sort((a, b) => b.length - a.length)[0];
       if (owner === undefined)
         throw new Error("private-remnant-owner-unresolved");
@@ -661,7 +661,7 @@ export function makeInstancePlan(
     if (generic.present(target) && !isDirectory(target))
       throw new Error(`directory-target-conflict: ${relative(root, target)}`);
     const beforeMode = fs.existsSync(target) ? generic.mode(target) : null,
-      priv = privateDirs.some((p) => within(target, p)),
+      priv = privateDirs.some((p) => isWithinPath(target, p)),
       desiredMode = generic.planDirectory(
         source,
         target,
@@ -929,7 +929,7 @@ export function runInstanceMigration(
             [`${old}/.memory/`, `${old}/.harness/`].some((prefix) =>
               rel.startsWith(prefix),
             ) &&
-            !within(op.target, join(root, owner, ".harness"))
+            !isWithinPath(op.target, join(root, owner, ".harness"))
           )
             throw new Error(
               "historical-owner-promotion-journal-needs-review: preserve journal and source/target bytes; do not resume with obsolete ownership",
@@ -952,7 +952,7 @@ export function runInstanceMigration(
           !privatePath(op.target) &&
           !(job.private ?? []).some(
             (directory) =>
-              within(op.target, directory) || within(op.source, directory),
+              isWithinPath(op.target, directory) || isWithinPath(op.source, directory),
           ),
       )
       .map((op) => ({

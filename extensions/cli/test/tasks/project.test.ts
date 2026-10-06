@@ -76,7 +76,8 @@ test("create/list/get/update project metadata; create default on virgin board", 
 
     const root = await readFile(path.join(repo, "tasks/AGENTS.md"), "utf8");
     assert.match(root, /updated CLI/);
-    assert.match(root, /<!-- task-projects:start -->/);
+    assert.doesNotMatch(root, /task-projects:/);
+    assert.match(root, /<!-- project-memory-local:start -->/);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -223,7 +224,7 @@ test("project get returns the read-only listed project after ordinary task creat
     const env = { EDGES_SCOPE: repo };
     const created = await run(
       [
-        "tasks",
+        "tasks", "--index-group", "local",
         "--purpose",
         "maintenance",
         "create",
@@ -239,13 +240,13 @@ test("project get returns the read-only listed project after ordinary task creat
     const before = await Promise.all(indexedPaths.map(rel => readFile(path.join(repo, rel), "utf8")));
     const listed = JSON.parse(
       (
-        await run(["tasks", "--purpose", "maintenance", "project", "list"], {
+        await run(["tasks", "--index-group", "local", "--purpose", "maintenance", "project", "list"], {
           env,
         })
       ).stdout,
     );
     const got = await run(
-      ["tasks", "--purpose", "maintenance", "project", "get", "cli"],
+      ["tasks", "--index-group", "local", "--purpose", "maintenance", "project", "get", "cli"],
       { env },
     );
     assert.equal(got.exitCode, 0, got.stdout);

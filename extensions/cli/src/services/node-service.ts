@@ -50,6 +50,9 @@ export interface NodeWriteContext {
   node: BaseNode;
   parent?: InternalNode;
 }
+export interface NodeRegistrationOptions {
+  indexGroup?: ChildGroup;
+}
 export interface NodeServiceOptions {
   managedRoot: string;
   models?: Readonly<Record<string, Model>>;
@@ -377,7 +380,7 @@ export class NodeService {
   }
   async #registration(
     node: BaseNode,
-    group: ChildGroup = "local",
+    group?: ChildGroup,
   ): Promise<Planned | undefined> {
     if (
       coLocated(node.path) ||
@@ -393,12 +396,15 @@ export class NodeService {
     const before = this.#existing(parent),
       draft = clone(parent);
     if (draft.children.some((ref) => ref.id === node.id)) return undefined;
+    if (group !== "local" && group !== "descendant")
+      throw new Error(`New parent registration requires indexGroup (local or descendant): ${node.path}`);
     draft.addChild(group, referenceOf(node));
     return this.#plan(draft, draft.serialize(), before);
   }
   async create<T extends BaseNode>(
     node: T,
     input: Parameters<T["create"]>[0],
+    registrationOptions: NodeRegistrationOptions = {},
   ): Promise<T> {
     this.#boundary(node.path);
     if (path.basename(node.path) === "AGENTS.md" && !(node instanceof InternalNode))
@@ -412,7 +418,7 @@ export class NodeService {
     });
     draft.validate();
     const plan = new Map<string, Planned>([[draft.path, this.#plan(draft)]]);
-    const registration = await this.#registration(draft);
+    const registration = await this.#registration(draft, registrationOptions.indexGroup);
     if (registration) plan.set(registration.node.path, registration);
     await this.#save("create", plan);
     node.parse(draft.serialize());
@@ -495,7 +501,7 @@ export class NodeService {
       }
     const oldParent = physicalParent(node.path, this.managedRoot),
       newParent = physicalParent(destination, this.managedRoot);
-    let group: ChildGroup = "descendant",
+    let group: ChildGroup | undefined,
       reference: NodeReference = referenceOf(node);
     const old = oldParent
       ? (registered.get(oldParent) as InternalNode | undefined)
@@ -528,6 +534,7 @@ export class NodeService {
       draft = clone(draft, target).parse(source);
       if (
         entry.path === newParent &&
+        group !== undefined &&
         oldParent !== newParent &&
         draft instanceof InternalNode &&
         !draft.children.some((ref) => ref.id === destination)
@@ -540,13 +547,13 @@ export class NodeService {
       // Baselines classify affected references only; output always uses current state.
       const persistedReferenceMoves =
         rewriteLinks(before.source, entry.path, target, relocate) !== before.source;
-      const needsRegistration = entry.path === newParent && oldParent !== newParent &&
+      const needsRegistration = group !== undefined && entry.path === newParent && oldParent !== newParent &&
         entry instanceof InternalNode &&
         !new InternalNode(entry.path).parse(before.source).children.some(ref => ref.id === destination);
       if (target !== entry.path || text !== currentSource || persistedReferenceMoves || needsRegistration)
         plan.set(target, this.#plan(draft, text, before));
     }
-    if (newParent && !registered.has(newParent)) {
+    if (group !== undefined && newParent && !registered.has(newParent)) {
       const parent = (await this.get(newParent, InternalNode))!,
         draft = clone(parent);
       draft.addChild(group, { ...reference, id: destination });
@@ -738,6 +745,7 @@ export class NodeService {
   async import(
     sourceEntry: string,
     destinationEntry: string,
+    registrationOptions: NodeRegistrationOptions = {},
   ): Promise<BaseNode> {
     const source = checkPath(sourceEntry),
       destination = this.#boundary(destinationEntry),
@@ -789,7 +797,7 @@ export class NodeService {
     }
     const main = plan.get(destination);
     if (!main) throw new Error(`Missing source entry: ${source}`);
-    const registration = await this.#registration(main.node);
+    const registration = await this.#registration(main.node, registrationOptions.indexGroup);
     if (registration) plan.set(registration.node.path, registration);
     await this.#validateGraph(plan);
     await this.#preflight("import", plan);

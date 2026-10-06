@@ -55,3 +55,5 @@ version: 1.2.2
 - 输出用中文；栏名与说明都用中文，不要中英混写栏名。
 - 写给人审阅，白话完整句；不添加对话里没有的新需求。
 - 不要把复盘四栏或记忆结论塞进任务顶替背景；不写执行流水。
+
+新建父级索引关系时，由调用本技能的 Agent 根据语义明确选择 `local` 或 `descendant`，并传给 CLI 的 `--index-group`；Tasks 将选项放在 `tasks` 后，Memory 放在 `init` / `doctor` 后，Note 放在 `note` 后。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。

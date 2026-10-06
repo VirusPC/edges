@@ -1,7 +1,9 @@
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 import { listTypeFiles } from './types.js';
 import { InternalNode } from "../../domain/models/internal-node.js";
-import { loadMemoryDocument, saveMemoryDocument } from "./node-documents.js";
+import { memoryNodes, prepareMemoryWrite } from './service.js';
+import { NodeService } from '../node-service.js';
+import { parseDocument } from '../../utils/markdown/document.js';
 import * as fs from "node:fs";
 import { join, dirname, relative } from "node:path";
 import {
@@ -325,6 +327,7 @@ export function collectFindings(root: string): MemoryFinding[] {
 export async function applyFindings(
   root: string,
   findings: MemoryFinding[],
+  indexGroup?: import("../../domain/models/types.js").ChildGroup,
 ): Promise<string[]> {
   const invalid = new Set(
     findings
@@ -339,35 +342,44 @@ export async function applyFindings(
         .filter((f) => ["migration-required", "unsafe-layout"].includes(f.code))
         .map((f) => join(root, f.path)),
     );
+  if (!indexGroup) for (const owner of discoverMemoryDirs(root)) {
+    if (owner === root || blocked.has(owner) || blockedBy(owner, invalid)) continue;
+    if (!validAnchors(owner, root, invalid).length) {
+      const anchor = validAnchor(owner, root, invalid);
+      if (fs.existsSync(join(anchor, AGENTS_FILE_NAME)))
+        throw new Error('New owner registration requires --index-group local|descendant');
+    }
+  }
   for (const owner of walkOwners(root)) {
     if (blocked.has(owner) || blockedBy(owner, invalid)) continue;
     try {
       const specs = layerTypeSpecs(owner);
       if (!specs.length) continue;
       const file = assertScopePath(join(owner, AGENTS_FILE_NAME), owner);
-      const document = await loadMemoryDocument(owner, file);
+      const service = memoryNodes(owner);
+      const node = await service.get(prepareMemoryWrite(owner, file), InternalNode);
       if (
         classifyAgentsSource(
-          document.existed ? document.node.serialize() : undefined,
+          node?.body,
         ) === "foreign"
       ) {
-        await saveMemoryDocument(
-          document,
+        await service.update(
+          node!, { body:
           insertInnerBlock(
-            document.node.serialize(),
+            node!.body,
             LOCAL_START,
             selectedLocalBlock(specs),
-          ),
+          ) },
         );
       }
-      const action = await syncTargetAgents(owner, root);
+      const action = await syncTargetAgents(owner, root, service);
       if (action !== "preserved")
         repaired.push(`${action}-agents: ${relativeOrName(owner, root)}`);
       for (const spec of specs)
         try {
           if (blockedBy(dirname(join(owner, spec.indexFile)), invalid))
             continue;
-          const action = await refreshIndex(owner, spec.name);
+          const action = await refreshIndex(owner, spec.name, service);
           if (action !== "preserved")
             repaired.push(`${action}-index: ${spec.indexFile}`);
         } catch {
@@ -429,8 +441,8 @@ export async function applyFindings(
       continue;
     // A surviving local edge already owns this node; dedup must not replace it.
     if (validAnchors(owner, root, invalid).length) continue;
-    const [action, entry] = await syncIndexEntry(anchor, owner, description);
-    if (!["preserved", "not-applicable", "needs-doctor"].includes(action))
+    const [action, entry] = await syncIndexEntry(anchor, owner, description, indexGroup);
+    if (!["preserved", "not-applicable", "needs-doctor", "missing-owner"].includes(action))
       repaired.push(`registered: ${entry}`);
   }
   return repaired;
@@ -439,6 +451,7 @@ export interface DoctorMemoryOptions {
   targetDir: string;
   rootDir?: string;
   apply?: boolean;
+  indexGroup?: import("../../domain/models/types.js").ChildGroup;
 }
 export async function doctorMemory(options: DoctorMemoryOptions) {
   const target = resolveTarget(options.targetDir);
@@ -453,7 +466,7 @@ export async function doctorMemory(options: DoctorMemoryOptions) {
   }
   const applied = options.apply ?? false,
     findings = collectFindings(root),
-    repaired = applied ? await applyFindings(root, findings) : [],
+    repaired = applied ? await applyFindings(root, findings, options.indexGroup) : [],
     remaining = applied ? collectFindings(root) : findings;
   return {
     operation: "doctor",

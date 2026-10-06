@@ -55,12 +55,13 @@ export function addTasksCommand(program: Command, ctx: CliContext): void {
   const tasks = program
     .command("tasks")
     .description("Task board commands")
+    .addOption(new Option("--index-group <group>", "caller-selected group for a new owner index relation").choices(["local", "descendant"]))
     .addOption(new Option("--purpose <purpose>", "domain tasks or scope maintenance tasks").choices(["domain", "maintenance"]).default(DEFAULT_TASK_PURPOSE))
     .allowExcessArguments(false)
     .showHelpAfterError(false)
     .helpOption("-h, --help", "Show this help");
 
-  tasks.hook("preAction", () => { ctx.purpose = tasks.opts().purpose; });
+  tasks.hook("preAction", () => { ctx.purpose = tasks.opts().purpose; ctx.indexGroup = tasks.opts().indexGroup; });
   addListCommand(tasks, ctx);
   addGetCommand(tasks, ctx);
   addCreateCommand(tasks, ctx);

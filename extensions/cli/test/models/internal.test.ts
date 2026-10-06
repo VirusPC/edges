@@ -290,3 +290,11 @@ test("ownership hrefs retain filename escapes, Unicode, spaces and fragments acr
   );
   assert.equal(saved.includes("a%2523b/index.md#heading"), false);
 });
+
+test('managed block replacement preserves CRLF and refuses malformed boundaries', async () => {
+ const {upsertBlock}=await import('../../src/domain/models/internal/blocks.js');
+ const start='<!-- project-memory-local:start -->',end='<!-- project-memory-local:end -->';
+ const source='Intro  \r\n'+start+'\r\nOld\r\n'+end+'\r\nTail  \r\n';
+ assert.equal(upsertBlock(source,start,end,start+'\nNew\n'+end),'Intro  \r\n'+start+'\r\nNew\r\n'+end+'\r\nTail  \r\n');
+ assert.throws(()=>upsertBlock('Intro\n'+start,start,end,start+'\nNew\n'+end),/marker|boundary|unclosed/i);
+});

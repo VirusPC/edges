@@ -42,7 +42,7 @@ x
 `,
       "utf8",
     );
-    const result = await run(["tasks", "--purpose", "domain", "list"], {
+    const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(result.exitCode, 0);
@@ -65,12 +65,12 @@ test("run tasks list --project default --project cli ANDs with --status", async 
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
-    await run(["tasks", "--purpose", "domain", "create", "--title", "A", "--status", "backlog"], {
+    await run(["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "A", "--status", "backlog"], {
       env,
     });
     await run(
       [
-        "tasks",
+        "tasks", "--index-group", "local",
         "--purpose", "domain",
         "create",
         "--title",
@@ -84,7 +84,7 @@ test("run tasks list --project default --project cli ANDs with --status", async 
     );
     await run(
       [
-        "tasks",
+        "tasks", "--index-group", "local",
         "--purpose", "domain",
         "create",
         "--title",
@@ -98,7 +98,7 @@ test("run tasks list --project default --project cli ANDs with --status", async 
     );
     const result = await run(
       [
-        "tasks",
+        "tasks", "--index-group", "local",
         "--purpose", "domain",
         "list",
         "--status",
@@ -144,7 +144,7 @@ hello body
 `,
       "utf8",
     );
-    const result = await run(["tasks", "--purpose", "domain", "get", "2026-09-13--got"], {
+    const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "get", "2026-09-13--got"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(result.exitCode, 0);
@@ -166,7 +166,7 @@ test("run tasks get missing exits 1 with TASK_NOT_FOUND", async () => {
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     await indexTaskFixtureBoard(path.join(repo, "tasks"));
-    const result = await run(["tasks", "--purpose", "domain", "get", "missing"], {
+    const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "get", "missing"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(result.exitCode, 1);
@@ -181,7 +181,7 @@ test("run tasks create is JSON and skips git", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
-    const result = await run(["tasks", "--purpose", "domain", "create", "--title", "From CLI"], {
+    const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "From CLI"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(result.exitCode, 0);
@@ -203,7 +203,7 @@ test("run tasks create --priority high returns JSON priority and writes the fiel
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(
-      ["tasks", "--purpose", "domain", "create", "--title", "Pri", "--priority", "high"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "Pri", "--priority", "high"],
       { env },
     );
     assert.equal(created.exitCode, 0);
@@ -229,7 +229,7 @@ test("run tasks create --project cli returns JSON project and writes the field",
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(
-      ["tasks", "--purpose", "domain", "create", "--title", "Pri", "--project", "cli"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "Pri", "--project", "cli"],
       { env },
     );
     assert.equal(created.exitCode, 0);
@@ -251,7 +251,7 @@ test("run tasks create --project _default is VALIDATION_ERROR and writes nothing
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const result = await run(
-      ["tasks", "--purpose", "domain", "create", "--title", "Pri", "--project", "_default"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "Pri", "--project", "_default"],
       {
         env: { ...process.env, EDGES_REPO: repo },
       },
@@ -266,7 +266,7 @@ test("run tasks create --project _default is VALIDATION_ERROR and writes nothing
 test("run tasks create without --project JSON project is default", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const result = await run(["tasks", "--purpose", "domain", "create", "--title", "None"], {
+    const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "None"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(result.exitCode, 0);
@@ -282,7 +282,7 @@ test("run tasks create --priority P0 is VALIDATION_ERROR and writes nothing", as
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const result = await run(
-      ["tasks", "--purpose", "domain", "create", "--title", "Pri", "--priority", "P0"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "Pri", "--priority", "P0"],
       {
         env: { ...process.env, EDGES_REPO: repo },
       },
@@ -300,7 +300,7 @@ test("run tasks create without --priority JSON priority is none", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
-    const result = await run(["tasks", "--purpose", "domain", "create", "--title", "From CLI"], {
+    const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "From CLI"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(result.exitCode, 0);
@@ -311,7 +311,7 @@ test("run tasks create without --priority JSON priority is none", async () => {
 });
 
 test("run tasks update without flags is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "--purpose", "domain", "update", "stem"]);
+  const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "update", "stem"]);
   assert.equal(result.exitCode, 2);
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
@@ -321,11 +321,11 @@ test("run tasks update --priority high JSON and in-place path", async () => {
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
-    const created = await run(["tasks", "--purpose", "domain", "create", "--title", "PatchPri"], {
+    const created = await run(["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "PatchPri"], {
       env,
     });
     const stem = JSON.parse(created.stdout).stem as string;
-    const updated = await run(["tasks", "--purpose", "domain", "update", stem, "--priority", "high"], {
+    const updated = await run(["tasks", "--index-group", "local", "--purpose", "domain", "update", stem, "--priority", "high"], {
       env,
     });
     assert.equal(updated.exitCode, 0);
@@ -343,7 +343,7 @@ test("run tasks update --priority high JSON and in-place path", async () => {
 });
 
 test("run tasks update --priority Urgent is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "--purpose", "domain", "update", "stem", "--priority", "Urgent"]);
+  const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "update", "stem", "--priority", "Urgent"]);
   assert.equal(result.exitCode, 2);
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
@@ -353,11 +353,11 @@ test("run tasks update --project cli JSON and new path", async () => {
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(
-      ["tasks", "--purpose", "domain", "create", "--title", "Go", "--status", "todo"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "Go", "--status", "todo"],
       { env },
     );
     const stem = JSON.parse(created.stdout).stem as string;
-    const updated = await run(["tasks", "--purpose", "domain", "update", stem, "--project", "cli"], {
+    const updated = await run(["tasks", "--index-group", "local", "--purpose", "domain", "update", stem, "--project", "cli"], {
       env,
     });
     assert.equal(updated.exitCode, 0);
@@ -375,7 +375,7 @@ test("run tasks update --project cli JSON and new path", async () => {
 });
 
 test("run tasks update --project Default is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "--purpose", "domain", "update", "stem", "--project", "Default"]);
+  const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "update", "stem", "--project", "Default"]);
   assert.equal(result.exitCode, 2);
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
@@ -400,7 +400,7 @@ body
 `,
       "utf8",
     );
-    const result = await run(["tasks", "--purpose", "domain", "status", "2026-09-13--mv", "done"], {
+    const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "status", "2026-09-13--mv", "done"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(result.exitCode, 0);
@@ -442,7 +442,7 @@ body
 `,
       "utf8",
     );
-    const json = await run(["tasks", "--purpose", "domain", "runs", stem, "--output", "json"], {
+    const json = await run(["tasks", "--index-group", "local", "--purpose", "domain", "runs", stem, "--output", "json"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(json.exitCode, 0);
@@ -453,7 +453,7 @@ body
     assert.equal(body.command, "runs");
     assert.equal(body.runs[0]?.runId, `${stem}--1`);
 
-    const table = await run(["tasks", "--purpose", "domain", "runs", stem], {
+    const table = await run(["tasks", "--index-group", "local", "--purpose", "domain", "runs", stem], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(table.exitCode, 0);
@@ -470,7 +470,7 @@ test("run tasks runs missing task is TASK_NOT_FOUND", async () => {
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     await indexTaskFixtureBoard(path.join(repo, "tasks"));
-    const result = await run(["tasks", "--purpose", "domain", "runs", "nope"], {
+    const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "runs", "nope"], {
       env: { ...process.env, EDGES_REPO: repo },
     });
     assert.equal(result.exitCode, 1);
@@ -516,7 +516,7 @@ body
       "utf8",
     );
     const full = await run(
-      ["tasks", "--purpose", "domain", "run-messages", `${stem}--1`, "--output", "json"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "run-messages", `${stem}--1`, "--output", "json"],
       {
         env: { ...process.env, EDGES_REPO: repo },
       },
@@ -532,7 +532,7 @@ body
     assert.match(body.messages[0]?.text ?? "", /hello from the run/);
 
     const short = await run(
-      ["tasks", "--purpose", "domain", "run-messages", "1", "--task", stem, "--output", "json"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "run-messages", "1", "--task", stem, "--output", "json"],
       {
         env: { ...process.env, EDGES_REPO: repo },
       },
@@ -545,7 +545,7 @@ body
 });
 
 test("run tasks run-messages 1 without --task is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "--purpose", "domain", "run-messages", "1"]);
+  const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "run-messages", "1"]);
   assert.equal(result.exitCode, 2);
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
@@ -577,7 +577,7 @@ body
       "utf8",
     );
     const result = await run(
-      ["tasks", "--purpose", "domain", "run-messages", `${stem}--9`, "--output", "json"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "run-messages", `${stem}--9`, "--output", "json"],
       {
         env: { ...process.env, EDGES_REPO: repo },
       },
@@ -645,7 +645,7 @@ test("run tasks list --priority urgent --priority high --sort priority", async (
   try {
     const result = await run(
       [
-        "tasks",
+        "tasks", "--index-group", "local",
         "--purpose", "domain",
         "list",
         "--priority",
@@ -672,13 +672,13 @@ test("run tasks list --priority urgent --priority high --sort priority", async (
 });
 
 test("run tasks list --sort status is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "--purpose", "domain", "list", "--sort", "status"]);
+  const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list", "--sort", "status"]);
   assert.equal(result.exitCode, 2);
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
 test("run tasks list --priority P0 is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "--purpose", "domain", "list", "--priority", "P0"]);
+  const result = await run(["tasks", "--index-group", "local", "--purpose", "domain", "list", "--priority", "P0"]);
   assert.equal(result.exitCode, 2);
   assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
 });
@@ -704,7 +704,7 @@ body
       "utf8",
     );
     const result = await run(
-      ["tasks", "--purpose", "domain", "status", "2026-09-16--stay", "--project", "cli"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "status", "2026-09-16--stay", "--project", "cli"],
       {
         env: { ...process.env, EDGES_REPO: repo },
       },
@@ -729,11 +729,11 @@ test("run tasks status JSON has no project key and stays under _default", async 
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(
-      ["tasks", "--purpose", "domain", "create", "--title", "Stat", "--status", "todo"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "Stat", "--status", "todo"],
       { env },
     );
     const stem = JSON.parse(created.stdout).stem as string;
-    const moved = await run(["tasks", "--purpose", "domain", "status", stem, "in_progress"], { env });
+    const moved = await run(["tasks", "--index-group", "local", "--purpose", "domain", "status", stem, "in_progress"], { env });
     assert.equal(moved.exitCode, 0);
     const body = JSON.parse(moved.stdout) as { path: string; project?: string };
     assert.equal(body.path, `tasks/_default/in_progress/${stem}/index.md`);
@@ -749,7 +749,7 @@ test("run tasks project create/list/get/update and update --project keeps status
     const env = { ...process.env, EDGES_REPO: repo };
     const createdProj = await run(
       [
-        "tasks",
+        "tasks", "--index-group", "local",
         "--purpose", "domain",
         "project",
         "create",
@@ -767,7 +767,7 @@ test("run tasks project create/list/get/update and update --project keeps status
     assert.equal(createdBody.project, "cli");
     assert.equal(createdBody.dir, "cli");
 
-    const listed = await run(["tasks", "--purpose", "domain", "project", "list"], { env });
+    const listed = await run(["tasks", "--index-group", "local", "--purpose", "domain", "project", "list"], { env });
     assert.equal(listed.exitCode, 0);
     const listedBody = JSON.parse(listed.stdout) as {
       command: string;
@@ -779,13 +779,13 @@ test("run tasks project create/list/get/update and update --project keeps status
       ["default", "cli"],
     );
 
-    const got = await run(["tasks", "--purpose", "domain", "project", "get", "default"], { env });
+    const got = await run(["tasks", "--index-group", "local", "--purpose", "domain", "project", "get", "default"], { env });
     assert.equal(got.exitCode, 0);
     assert.equal(JSON.parse(got.stdout).command, "project.get");
     assert.equal(JSON.parse(got.stdout).dir, "_default");
 
     const updatedMeta = await run(
-      ["tasks", "--purpose", "domain", "project", "update", "cli", "--description", "updated"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "project", "update", "cli", "--description", "updated"],
       { env },
     );
     assert.equal(updatedMeta.exitCode, 0);
@@ -793,7 +793,7 @@ test("run tasks project create/list/get/update and update --project keeps status
 
     const createdTask = await run(
       [
-        "tasks",
+        "tasks", "--index-group", "local",
         "--purpose", "domain",
         "create",
         "--title",
@@ -807,14 +807,14 @@ test("run tasks project create/list/get/update and update --project keeps status
     );
     assert.equal(createdTask.exitCode, 0);
     const stem = JSON.parse(createdTask.stdout).stem as string;
-    const moved = await run(["tasks", "--purpose", "domain", "update", stem, "--project", "cli"], {
+    const moved = await run(["tasks", "--index-group", "local", "--purpose", "domain", "update", stem, "--project", "cli"], {
       env,
     });
     assert.equal(moved.exitCode, 0);
     const movedBody = JSON.parse(moved.stdout);
     assert.equal(movedBody.project, "cli");
     assert.equal(movedBody.priority, "high");
-    const gotTask = await run(["tasks", "--purpose", "domain", "get", stem], { env });
+    const gotTask = await run(["tasks", "--index-group", "local", "--purpose", "domain", "get", stem], { env });
     const task = JSON.parse(gotTask.stdout).task as {
       status: string;
       priority: string;
@@ -824,13 +824,13 @@ test("run tasks project create/list/get/update and update --project keeps status
     assert.equal(task.priority, "high");
     assert.equal(task.project, "cli");
 
-    const missing = await run(["tasks", "--purpose", "domain", "project", "get", "docs"], { env });
+    const missing = await run(["tasks", "--index-group", "local", "--purpose", "domain", "project", "get", "docs"], { env });
     assert.equal(missing.exitCode, 1);
     assert.equal(JSON.parse(missing.stdout).errorCode, "PROJECT_NOT_FOUND");
 
     const badSlug = await run(
       [
-        "tasks",
+        "tasks", "--index-group", "local",
         "--purpose", "domain",
         "project",
         "create",
@@ -871,7 +871,7 @@ body
       "utf8",
     );
     const result = await run(
-      ["tasks", "--purpose", "domain", "status", "2026-09-16--stay", "--priority", "low"],
+      ["tasks", "--index-group", "local", "--purpose", "domain", "status", "2026-09-16--stay", "--priority", "low"],
       {
         env: { ...process.env, EDGES_REPO: repo },
       },

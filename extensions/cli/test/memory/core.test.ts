@@ -36,21 +36,21 @@ const put = (dir: string, file: string, body: string | Buffer) => {
 const projectIndex = ".harness/memory/projects/AGENTS.md";
 test("init requires selection without mutation and reruns preserve selected adoption", async (t) => {
   const targetDir = fixture(t);
-  assert.equal((await initMemory({ targetDir })).selectionRequired, true);
+  assert.equal((await initMemory({ indexGroup: "descendant", targetDir })).selectionRequired, true);
   assert.deepEqual(readdirSync(targetDir), []);
-  await initMemory({ targetDir, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir, memoryTypes: ["project"] });
   assert.deepEqual(
     layerTypeSpecs(targetDir).map((s) => s.name),
     ["project"],
   );
   const before = read(targetDir, "AGENTS.md");
-  await initMemory({ targetDir });
+  await initMemory({ indexGroup: "descendant", targetDir });
   assert.equal(read(targetDir, "AGENTS.md"), before);
   assert.equal(existsSync(join(targetDir, ".harness/memory/users")), false);
 });
 test("remember refreshes index and preserves YAML metadata and origin on update", async (t) => {
   const targetDir = fixture(t);
-  await initMemory({ targetDir, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir, memoryTypes: ["project"] });
   await rememberMemory({
     targetDir,
     type: "project",
@@ -80,13 +80,13 @@ test("remember refreshes index and preserves YAML metadata and origin on update"
   assert.match(read(targetDir, path), /license: MIT/);
   assert.match(
     read(targetDir, projectIndex),
-    /\[Decision\]\(project_decision\/index.md\) — When deciding/,
+    /\[Decision\]\(<project_decision\/index.md>\) — When deciding/,
   );
-  assert.equal((await doctorMemory({ targetDir })).remaining.length, 0);
+  assert.equal((await doctorMemory({ indexGroup: "descendant", targetDir })).remaining.length, 0);
 });
 test("managed uses skill format and referenced remains read only with missing source diagnostics", async (t) => {
   const targetDir = fixture(t);
-  const result = await initMemory({
+  const result = await initMemory({ indexGroup: "descendant",
     targetDir,
     skillTypes: ["managed", "referenced"],
   });
@@ -120,7 +120,7 @@ test("managed uses skill format and referenced remains read only with missing so
 test("private custom privileges are preserved, ignored before writing, and cannot be inferred when lost", async (t) => {
   const targetDir = fixture(t);
   execFileSync("git", ["init", "-q", targetDir]);
-  await initMemory({ targetDir, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir, memoryTypes: ["project"] });
   await addMemoryType({
     targetDir,
     name: "recipes",
@@ -147,18 +147,18 @@ test("private custom privileges are preserved, ignored before writing, and canno
   const index = ".harness/memory/recipes/AGENTS.md";
   put(targetDir, index, read(targetDir, index).replace("writable: true\n", ""));
   await assert.rejects(
-    async () => await initMemory({ targetDir }),
+    async () => await initMemory({ indexGroup: "descendant", targetDir }),
     /privilege/,
   );
   assert.ok(
-    (await doctorMemory({ targetDir, apply: true })).remaining.some(
+    (await doctorMemory({ indexGroup: "descendant", targetDir, apply: true })).remaining.some(
       (f) => f.code === "unsafe-layout",
     ),
   );
 });
 test("doctor diagnoses without writes and apply repairs foreign agents and stale indexes idempotently", async (t) => {
   const targetDir = fixture(t);
-  await initMemory({ targetDir, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir, memoryTypes: ["project"] });
   put(targetDir, "AGENTS.md", "# Manual\nKeep this.\n");
   put(
     targetDir,
@@ -166,32 +166,32 @@ test("doctor diagnoses without writes and apply repairs foreign agents and stale
     "---\nname: a\ndescription: test\n---\nBody\n",
   );
   const before = read(targetDir, projectIndex);
-  const report = await doctorMemory({ targetDir });
+  const report = await doctorMemory({ indexGroup: "descendant", targetDir });
   assert.ok(report.findings.length);
   assert.equal(read(targetDir, projectIndex), before);
   assert.equal(
-    (await doctorMemory({ targetDir, apply: true })).remaining.length,
+    (await doctorMemory({ indexGroup: "descendant", targetDir, apply: true })).remaining.length,
     0,
   );
   assert.match(read(targetDir, "AGENTS.md"), /^# Manual\nKeep this/);
   assert.deepEqual(
-    (await doctorMemory({ targetDir, apply: true })).repaired,
+    (await doctorMemory({ indexGroup: "descendant", targetDir, apply: true })).repaired,
     [],
   );
 });
 test("source read errors preserve existing indexes and invalid frontmatter remains diagnosed", async (t) => {
   const targetDir = fixture(t);
-  await initMemory({ targetDir, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir, memoryTypes: ["project"] });
   const before = read(targetDir, projectIndex);
   put(
     targetDir,
     ".harness/memory/projects/project_bad/index.md",
     Buffer.from([0xff]),
   );
-  assert.equal((await initMemory({ targetDir })).complete, false);
+  assert.equal((await initMemory({ indexGroup: "descendant", targetDir })).complete, false);
   assert.equal(read(targetDir, projectIndex), before);
   assert.ok(
-    (await doctorMemory({ targetDir, apply: true })).remaining.some(
+    (await doctorMemory({ indexGroup: "descendant", targetDir, apply: true })).remaining.some(
       (f) => f.code === "source-scan-error",
     ),
   );
@@ -201,7 +201,7 @@ test("source read errors preserve existing indexes and invalid frontmatter remai
     "---\ndescription: unclosed\n",
   );
   assert.ok(
-    (await doctorMemory({ targetDir, apply: true })).remaining.some(
+    (await doctorMemory({ indexGroup: "descendant", targetDir, apply: true })).remaining.some(
       (f) => f.code === "invalid-entry",
     ),
   );
@@ -209,7 +209,7 @@ test("source read errors preserve existing indexes and invalid frontmatter remai
 test("managed symlink escapes are rejected and referenced links deduplicate by realpath", async (t) => {
   const targetDir = fixture(t);
   const external = fixture(t);
-  await initMemory({
+  await initMemory({ indexGroup: "descendant",
     targetDir,
     memoryTypes: ["project"],
     skillTypes: ["referenced"],
@@ -234,7 +234,7 @@ test("managed symlink escapes are rejected and referenced links deduplicate by r
   mkdirSync(join(targetDir, ".agents/skills"), { recursive: true });
   symlinkSync(external, join(targetDir, ".agents/skills/a"));
   symlinkSync(external, join(targetDir, ".agents/skills/b"));
-  const initialized = await initMemory({ targetDir });
+  const initialized = await initMemory({ indexGroup: "descendant", targetDir });
   assert.equal(initialized.complete, true, JSON.stringify(initialized));
   assert.equal(
     read(targetDir, ".harness/skills/referenced/AGENTS.md").split(" — external")
@@ -245,16 +245,17 @@ test("managed symlink escapes are rejected and referenced links deduplicate by r
 test("explicit registered descendants survive intermediate adoption and nested Git roots are excluded", async (t) => {
   const targetDir = fixture(t);
   mkdirSync(join(targetDir, ".git"));
+  put(targetDir, "AGENTS.md", "# Existing owner\n");
   const child = join(targetDir, "a/b");
   mkdirSync(child, { recursive: true });
-  await initMemory({
+  await initMemory({ indexGroup: "descendant",
     targetDir: child,
     rootDir: targetDir,
     memoryTypes: ["project"],
     description: "Child",
   });
   assert.match(read(targetDir, "AGENTS.md"), /a\/b\/AGENTS.md/);
-  await initMemory({
+  await initMemory({ indexGroup: "descendant",
     targetDir: join(targetDir, "a"),
     rootDir: targetDir,
     memoryTypes: ["feedback"],
@@ -263,10 +264,10 @@ test("explicit registered descendants survive intermediate adoption and nested G
   assert.doesNotMatch(read(targetDir, "a/AGENTS.md"), /b\/AGENTS.md/);
   const nested = join(targetDir, "nested");
   mkdirSync(join(nested, ".git"), { recursive: true });
-  await initMemory({ targetDir: nested, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir: nested, memoryTypes: ["project"] });
   await assert.rejects(
     async () =>
-      await initMemory({
+      await initMemory({ indexGroup: "descendant",
         targetDir: nested,
         rootDir: targetDir,
         memoryTypes: ["project"],
@@ -274,9 +275,29 @@ test("explicit registered descendants survive intermediate adoption and nested G
     /Git root/,
   );
   assert.equal(
-    (await doctorMemory({ targetDir, apply: true })).memoryDirs.includes(
+    (await doctorMemory({ indexGroup: "descendant", targetDir, apply: true })).memoryDirs.includes(
       "nested",
     ),
     false,
   );
+});
+
+test('refreshing a memory type preserves a separately authored relation', async t => {
+ const targetDir=fixture(t);await initMemory({targetDir,memoryTypes:['project']});
+ put(targetDir,'other/AGENTS.md','# Other\n');
+ const {InternalNode}=await import('../../src/domain/models/internal-node.js');
+ const file=join(targetDir,projectIndex), node=new InternalNode(file).parse(read(targetDir,projectIndex));
+ node.addChild('local',{id:join(targetDir,'other/AGENTS.md'),name:'Other',description:'Authored relation'});
+ put(targetDir,projectIndex,node.serialize());
+ await rememberMemory({targetDir,type:'project',slug:'example',title:'Example',description:'Memory',content:'Body'});
+ const saved=new InternalNode(file).parse(read(targetDir,projectIndex));
+ assert.ok(saved.localChildren.some(ref=>ref.name==='Other'&&ref.description==='Authored relation'));
+});
+test('cross-scope init preflights explicit placement before creating harness files',async t=>{
+ const targetDir=fixture(t);put(targetDir,'AGENTS.md','# Owner\n');mkdirSync(join(targetDir,'child'));
+ await assert.rejects(initMemory({targetDir:join(targetDir,'child'),rootDir:targetDir,memoryTypes:['project']}),/index-group/);
+ assert.equal(existsSync(join(targetDir,'child/.harness')),false);
+ await initMemory({targetDir:join(targetDir,'child'),rootDir:targetDir,memoryTypes:['project'],indexGroup:'local'});
+ const {InternalNode}=await import('../../src/domain/models/internal-node.js');
+ assert.equal(new InternalNode(join(targetDir,'AGENTS.md')).parse(read(targetDir,'AGENTS.md')).localChildren.length,1);
 });

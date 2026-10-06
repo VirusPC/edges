@@ -153,13 +153,14 @@ export async function runNoteIngest(
     note = (await service.import(
       path.resolve(input.importEntry),
       absFile,
+      { indexGroup: input.indexGroup },
     )) as NoteNode;
   else {
     const previous = await service.get(absFile, NoteNode);
     note = previous ?? new NoteNode(absFile);
     const fields = { metadata: draft.metadata, body: draft.body };
     if (previous) await service.update(note, fields);
-    else await service.create(note, fields);
+    else await service.create(note, fields, { indexGroup: input.indexGroup });
   }
   const addPath = path.relative(
     repoRoot,

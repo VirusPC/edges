@@ -16,6 +16,7 @@ export type TaskBoardLocation = {
   scopeDir: string;
   purpose: TaskPurpose;
   boardDir: string;
+  indexGroup?: import("../../domain/models/types.js").ChildGroup;
 };
 export type BoardTarget = string | TaskBoardLocation;
 export function taskBoardLocation(

@@ -85,7 +85,7 @@ test("runtime lock is excluded from snapshots/import while active locks block re
   const service = new NodeService({ managedRoot: root });
   const imported = await service.import(
     path.join(source, "index.md"),
-    path.join(root, "copy", "index.md"),
+    path.join(root, "copy", "index.md"), { indexGroup: "local" }
   );
   assert.equal(
     fs.existsSync(

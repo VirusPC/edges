@@ -12,7 +12,7 @@ test('root and child scopes default to their own maintenance board for list and 
  const child=path.join(root,'projects/demo');await mkdir(child,{recursive:true});
  for(const scope of [root,child]){
   await writeFile(path.join(scope,'AGENTS.md'),'# Scope\n');
-  const call=(args:string[])=>run(['--scope',scope,'tasks',...args],{env:{}});
+  const call=(args:string[])=>run(['--scope',scope,'tasks', "--index-group", "local",...args],{env:{}});
   for(const purpose of ['domain','maintenance']){
    const created=await call(['--purpose',purpose,'create','--title',purpose]);assert.equal(created.exitCode,0,created.stdout);
   }

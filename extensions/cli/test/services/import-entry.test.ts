@@ -66,9 +66,10 @@ test("physical parent discovery and containment support the filesystem root boun
   const { write } = fixture(t);
   const entry = write("nested/item/index.md", "body\n");
   const owner = write("AGENTS.md", contract);
-  const { physicalParent, within } =
+  const { physicalParent } =
     await import("../../src/services/node-layout.js");
   const filesystemRoot = path.parse(entry).root;
-  assert.equal(within(entry, filesystemRoot), true);
+  const { isWithinPath } = await import("../../src/utils/filesystem.js");
+  assert.equal(isWithinPath(entry, filesystemRoot), true);
   assert.equal(physicalParent(entry, filesystemRoot), owner);
 });

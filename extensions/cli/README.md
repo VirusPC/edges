@@ -104,7 +104,7 @@ const b = await service.get(parentPath, InternalNode);
 console.assert(a === b);
 a!.setConstraints(["Keep authored context"]);
 b!.description = "Updated parent";
-await service.create(new NoteNode(childPath), { body: "New child" });
+await service.create(new NoteNode(childPath), { body: "New child" }, { indexGroup: "local" });
 // When childPath belongs to parentPath, parent registration saves its pending
 // constraints and description together with the new child reference.
 ```
@@ -113,13 +113,13 @@ update() saves the node's full current state. create/import/move/destroy also sa
 
 Services live within one command. Existing Task query/write and Memory factories keep their distinct managed roots and policy hooks; all Services used by a writing command share its lock, and none is retained across commands. Identity is shared within a Service, not across these separate views. Sharing identity across those views in future requires explicit boundary design.
 
-Node-writing commands acquire a worktree lock before business reads and release it after success or failure: note (including its locally mutating dry-run), tasks create/update/status, tasks project create/update, memory init/add-type/remember/restore, doctor --apply, and migrate without --dry-run. Read-only commands do not acquire it; unrelated Artifacts operations are outside this node lock. --target-dir and restore --repo-dir select the content scope. Memory init can also create or update ancestor indexes up to --root-dir. Scope/environment paths use literal path.resolve semantics; explicit Memory --target-dir expands ~/ (but not bare ~), while restore --repo-dir expands both forms.
+Node-writing commands acquire a worktree lock before business reads and release it after success or failure: note (including its locally mutating dry-run), tasks create/update/status, tasks project create/update, memory init/add-type/remember/restore, doctor --apply, and migrate without --dry-run. Read-only commands do not acquire it; unrelated Artifacts operations are outside this node lock. --target-dir and restore --repo-dir select the content scope. Memory init can update an existing ancestor index up to --root-dir; a missing owner is not initialized. Scope/environment paths use literal path.resolve semantics; explicit Memory --target-dir expands ~/ (but not bare ~), while restore --repo-dir expands both forms.
 
 The lock belongs to the nearest Git worktree root, never the common Git directory. Non-Git writers share one fixed temporary lock; this stays stable when init creates ancestor AGENTS.md files and conservatively serializes unrelated non-Git trees. Git worktrees retain their own independent lock domains. Discovery checks metadata only. Existing ancestors are canonicalized for missing targets and symlink aliases. Git locks live at `<canonical-worktree-root>/.edges-write.lock/`; non-Git locks use `<os.tmpdir()>/.edges-write.lock/`. No hashing or parent registry is needed. The exact `.edges-write.lock` basename is reserved for runtime state: resource snapshots, directory entry discovery and imports exclude it, and moving/deleting a unit containing it is refused. Similar attachment names remain ordinary resources. This repository ignores `/.edges-write.lock/`; other repositories should add the same ignore rule themselves, since the CLI does not edit their .gitignore. The runtime directory is empty under normal proper-lockfile operation, so Git does not track it. Parent, child and sibling scopes share it; independent worktrees can write concurrently. Contention fails immediately with “Node write lock busy”. proper-lockfile's default compromised handler fails the process on detected heartbeat loss; it does not continue writing. Direct NodeService library calls do not automatically acquire a command lock.
 
 Existing-file saves use write-file-atomic with fsync and rename; exclusive new-file creation retains its hardlink commit. Snapshots capture replacement identity before rename, validate the saved entry, and feed that identity back to the cached instance. External editors do not honor this cooperative lock: original source and identity checks remain, with a check-to-replace race window. Single-file atomic replacement does not make a multi-file operation transactional; recovery and retained-path reports remain in force.
 
-Memory `initMemory`, `rememberMemory`, `addMemoryType`, `doctorMemory`, `refreshIndex` and the index-writing helpers now return promises. Programmatic callers must await them; CLI arguments, JSON and exit codes are unchanged. Note Git dependencies retain process/network substitution points; file operations use the real snapshot-checked service.
+Memory `initMemory`, `rememberMemory`, `addMemoryType`, `doctorMemory`, `refreshIndex` and the index-writing helpers now return promises. Programmatic callers must await them; New parent registration requires the caller to select --index-group local|descendant. Note Git dependencies retain process/network substitution points; file operations use the real snapshot-checked service.
 
 NodeService accepts model selection, write validation and read-only reference hooks. Read-only provenance cannot be removed by a hook. Managed mutations require physical containment within managedRoot; referenced sources remain read-only. Existing file permissions are preserved, without introducing a business permission policy.
 
@@ -135,7 +135,7 @@ Whole-unit moves retain canonical entry layout and known business type. `NodeSer
 
 ```bash
 edges --scope ./projects/demo tasks list
-edges --scope ./projects/demo tasks --purpose maintenance create --title "Repair build"
+edges --scope ./projects/demo tasks --purpose maintenance --index-group local create --title "Repair build"
 edges --scope ./projects/demo note --title "Decision" --content "..." --co-author "Codex <codex@openai.com>"
 ```
 
@@ -263,3 +263,18 @@ Phone review needs a reachable `EDGES_ARTIFACTS_BASE_URL`. The public example is
 ```bash
 pnpm --filter edges-cli test
 ```
+
+### Caller-selected index registration
+
+When creating a new owner relation, the caller chooses local or descendant from the intended relationship, then passes `--index-group local|descendant` to `tasks`, `note`, `memory init`, or `memory doctor --apply`. The CLI does not infer placement from purpose or directory depth. Existing relationships retain their group, label and link spelling unless their fields are explicitly updated; passing the flag does not move them. Missing owners are not initialized. Internal generated Task projects and Memory type entries use their fixed local composition.
+
+Programmatic `NodeService.create(node, input, { indexGroup })` and `import(source, destination, { indexGroup })` require the choice only when a new parent registration is needed. Missing choices fail before creating node files or directories. Root nodes and independent harness relationships need no children group. Use one Service per scope and policy throughout a business operation.
+
+Tasks and Memory share ordinary local/descendant AGENTS indexes. Old task-projects markers produce migration-required; normal writes never convert them. Explicitly preview a selected directory, then apply:
+
+```sh
+pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root /absolute/scope --check
+pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root /absolute/scope --write
+```
+
+The script checks all candidates before writing, rejects conflicting or malformed indexes, skips symlinks/dependencies/protected posts, and preserves original documents in a private .agents-index-backup-*.json file. Repeat --check produces no edits after successful migration.

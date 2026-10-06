@@ -25,6 +25,7 @@ export type CliContext = {
   env: NodeJS.ProcessEnv;
   stdinText?: string;
   stdinIsTTY?: boolean;
+  indexGroup?: "local" | "descendant";
   purpose?: "domain" | "maintenance";
   result: CliResult | undefined;
 };

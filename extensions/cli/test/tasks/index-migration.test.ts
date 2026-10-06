@@ -1,3 +1,4 @@
+import { planAgentsIndexes, applyAgentsIndexes } from '../../../../scripts/migrate-agents-indexes.mts';
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import fs from "node:fs";
@@ -199,6 +200,7 @@ test("adopts legacy task-projects-only board index into a readable local section
     "tasks/AGENTS.md",
     "# Board\n\nHuman board prose\n\n<!-- task-projects:start -->\n- [Alpha](alpha/AGENTS.md) — existing\n<!-- task-projects:end -->\n",
   );
+  await applyAgentsIndexes(planAgentsIndexes(root));
   await applyTaskIndexes(await planTaskIndexes(root));
   assert.equal(
     (await listTaskNodes(taskBoardLocation(root, "domain"))).length,

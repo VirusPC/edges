@@ -1,11 +1,14 @@
+import { InternalNode } from '../../domain/models/internal-node.js';
 import { listTypeFiles, typeContentDir, typeIndexPath } from './types.js';
-import { canonicalPath } from '../../utils/filesystem.js';
+import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 
-import { loadMemoryDocument, saveMemoryDocument } from "./node-documents.js";
+import { memoryNodes, prepareMemoryWrite } from './service.js';
+import { NodeService } from '../node-service.js';
+import { parseDocument } from '../../utils/markdown/document.js';
 import {
   escapeIndexText,
   encodeIndexPath,
-} from "../../domain/models/memory/index-rendering.js";
+} from "../../domain/models/internal/serialize.js";
 import * as fs from "node:fs";
 import { basename, dirname, join, parse } from "node:path";
 import {
@@ -20,7 +23,6 @@ import {
   isFile,
   readText,
   relativeLink,
-  writeAtomic,
 } from "./paths.js";
 import {
   discoverLayerTypes,
@@ -220,18 +222,24 @@ export function expectedIndexDocument(
     (isFile(file)
       ? readText(file)
       : readIndexTemplate(typeIndexTemplateName(name), name, name));
-  return (
-    upsertBlock(
-      existing,
-      ENTRIES_START,
-      ENTRIES_END,
-      buildEntryIndex(target, name),
-    ).trimEnd() + "\n"
-  );
+  const generated = new InternalNode(file).parse(buildEntryIndex(target, name));
+  const node = new InternalNode(file).parse(generated.localChildren.length ? existing.replace(/^- 暂无条目。\r?\n/gm, "") : existing);
+  const desired = new Map(generated.localChildren.map(ref => [ref.id, ref]));
+  const base = canonicalPath(typeContentDir(target, name));
+  const own = (id: string) => isWithinPath(id, base) && (isSkillFormat(target, name) || basename(dirname(id)).startsWith(name + '_') || basename(id).startsWith(name + '_'));
+  const localChildren = node.localChildren.flatMap(ref => {
+    const next = desired.get(ref.id);
+    if (next) { desired.delete(ref.id); return [next]; }
+    return own(ref.id) ? [] : [ref];
+  });
+  localChildren.push(...desired.values());
+  node.update({ localChildren }, { operation: "update" });
+  return node.serialize();
 }
 export async function refreshIndex(
   target: string,
   name: string,
+  service = memoryNodes(target),
 ): Promise<string> {
   target = canonicalPath(target);
   const file = assertScopePath(
@@ -241,15 +249,16 @@ export async function refreshIndex(
   ensureLayerTypeGitignore(target, name);
   if (name in discoverLayerTypes(target) && !isExternalType(name))
     fs.mkdirSync(dirname(file), { recursive: true });
-  const document = await loadMemoryDocument(target, file);
-  const existed = document.existed,
-    before = document.node.serialize();
+  const entry = prepareMemoryWrite(target, file);
+  const node = await service.get(entry, InternalNode);
+  const existed = !!node, before = node?.body ?? "";
   const source = existed
     ? before
     : readIndexTemplate(typeIndexTemplateName(name), name, name);
   const after = expectedIndexDocument(target, name, source);
   if (!existed || before !== after) {
-    await saveMemoryDocument(document, after);
+    if (node) await service.update(node, { body: after });
+    else await service.create(new InternalNode(entry), parseDocument(after), { indexGroup: "local" });
     return existed ? "updated" : "created";
   }
   return "preserved";

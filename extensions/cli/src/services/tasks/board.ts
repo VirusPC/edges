@@ -67,8 +67,10 @@ export async function assertBoardPath(
   abs: string,
 ): Promise<void> {
   if (target === undefined) return;
-  const scope = path.resolve(scopeDir(target));
-  const board = path.resolve(boardRoot(target));
+  const originalScope = path.resolve(scopeDir(target));
+  const scope = realpathSync(originalScope);
+  const board = path.join(scope, path.relative(originalScope, boardRoot(target)));
+  if (isWithinPath(abs, originalScope)) abs = path.join(scope, path.relative(originalScope, abs));
   if (!isWithinPath(abs, board)) {
     throw new TasksError(
       "VALIDATION_ERROR",

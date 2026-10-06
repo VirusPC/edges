@@ -93,7 +93,6 @@ export class InternalSyntax {
   readonly #source: string;
   readonly #model: NodeModel;
   readonly #entries: boolean;
-  readonly #taskProjects: boolean;
   readonly #isIndexed: (href: string) => boolean;
   readonly #indexItems = new Set<NodeItem>();
   constructor(
@@ -102,15 +101,7 @@ export class InternalSyntax {
   ) {
     this.#isIndexed = isIndexed;
     this.#entries = /^<!-- project-memory-entries:start -->$/m.test(source);
-    this.#taskProjects =
-      /^<!-- task-projects:start -->$/m.test(source) &&
-      !decodeBody(adaptEntries(source)).sections.memory.present;
-    this.#source = this.#taskProjects
-      ? source.replace(
-          /^<!-- task-projects:(start|end) -->$/gm,
-          "<!-- project-memory-local:$1 -->",
-        )
-      : adaptEntries(source);
+    this.#source = adaptEntries(source);
     const decoded = decodeBody(this.#source);
     this.#model = decoded.model;
     for (const key of ["memory", "children"] as const) {
@@ -141,6 +132,8 @@ export class InternalSyntax {
     };
   }
   serialize(content: SyntaxContent): string {
+    if (/<!-- task-projects:(?:start|end) -->/.test(this.#source))
+      throw new Error("migration-required: run pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root /absolute/scope --write");
     const originalConstraints = this.#model.constraints;
     const used = new Set<number>();
     const constraints = content.constraints.map((value) => {
@@ -170,11 +163,6 @@ export class InternalSyntax {
       references: this.#model.references,
     };
     const rendered = serializeNode(model, this.#source);
-    if (this.#taskProjects)
-      return rendered.replace(
-        /^<!-- project-memory-local:(start|end) -->$/gm,
-        "<!-- task-projects:$1 -->",
-      );
     return this.#entries
       ? rendered.replace(
           /^<!-- project-memory-local:(start|end) -->$/gm,

@@ -100,7 +100,7 @@ test("whole-directory import retains ordinary executable resource mode without a
   put(path.join(root, "source/run.sh"), "#!/bin/sh\n");
   fs.chmodSync(path.join(root, "source/run.sh"), 0o755);
   const service = new NodeService({ managedRoot: root });
-  await service.import(source, path.join(root, "target/SKILL.md"));
+  await service.import(source, path.join(root, "target/SKILL.md"), { indexGroup: "local" });
   assert.equal(
     fs.statSync(path.join(root, "target/run.sh")).mode & 0o777,
     0o755,
@@ -134,7 +134,7 @@ test("failed import preserves an intervening replacement directory instead of de
     mocked.mock.restore();
     syncBuiltinESMExports();
   });
-  await assert.rejects(service.import(source, destination), /recovery remains/);
+  await assert.rejects(service.import(source, destination, { indexGroup: "local" }), /recovery remains/);
   assert.equal(
     fs.readFileSync(path.join(root, "target/unrelated"), "utf8"),
     "keep",
@@ -157,7 +157,7 @@ test("import detects source changes during asynchronous preflight before creatin
     },
   });
   await assert.rejects(
-    service.import(source, destination),
+    service.import(source, destination, { indexGroup: "local" }),
     /resources changed/,
   );
   assert.equal(fs.existsSync(path.dirname(destination)), false);
@@ -178,7 +178,7 @@ test("import rejects symlinks even inside unmodeled installation directories", a
     path.join(root, "source/.agents/linked"),
   );
   await assert.rejects(
-    new NodeService({ managedRoot: root }).import(source, destination),
+    new NodeService({ managedRoot: root }).import(source, destination, { indexGroup: "local" }),
     /symbolic/,
   );
   assert.equal(fs.existsSync(path.dirname(destination)), false);

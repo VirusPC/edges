@@ -270,7 +270,7 @@ test("import leaves source and parent index untouched when preflight validation 
   write("source/.harness/AGENTS.md", index("- [Missing](missing/index.md)"));
   const before = fs.readFileSync(file("AGENTS.md"), "utf8");
   await assert.rejects(
-    service.import(file("source/SKILL.md"), file("new/SKILL.md")),
+    service.import(file("source/SKILL.md"), file("new/SKILL.md"), { indexGroup: "local" }),
     /Missing/,
   );
   assert.equal(fs.existsSync(file("new")), false);
@@ -324,7 +324,7 @@ test("import outside managedRoot validates nested registered memory nodes using 
     "---\nmetadata:\n  edges-type: 123\n---\nbody",
   );
   await assert.rejects(
-    service.import(path.join(outside, "AGENTS.md"), file("imported/AGENTS.md")),
+    service.import(path.join(outside, "AGENTS.md"), file("imported/AGENTS.md"), { indexGroup: "local" }),
     /edges-type|memory/i,
   );
   assert.equal(fs.existsSync(file("imported")), false);
@@ -367,7 +367,7 @@ test("dirty constraints are saved with creation and survive the next save", asyn
   write("AGENTS.md", index());
   const parent = (await service.get(file("AGENTS.md"), InternalNode))!;
   parent.setConstraints(["unsaved"]);
-  await service.create(new LeafNode(file("child/index.md")), { body: "child" });
+  await service.create(new LeafNode(file("child/index.md")), { body: "child" }, { indexGroup: "local" });
   assert.equal(parent.children[0]?.id, file("child/index.md"));
   assert.deepEqual(parent.constraints, ["unsaved"]);
   await service.update(parent, {});
@@ -534,7 +534,7 @@ test("unrelated create preserves dirty query and fragment through refresh and su
   write("a/index.md", "a");
   const dirty = (await service.get(file("AGENTS.md"), InternalNode))!;
   dirty.body = dirty.body.replace("?old=1#old", "?dirty=1#dirty");
-  await service.create(new LeafNode(file("b/index.md")), { body: "b" });
+  await service.create(new LeafNode(file("b/index.md")), { body: "b" }, { indexGroup: "local" });
   assert.match(dirty.body, /a\/index.md\?dirty=1#dirty/);
   assert.equal(dirty.children.length, 2);
   await service.update(dirty, {});

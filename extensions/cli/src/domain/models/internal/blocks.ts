@@ -46,6 +46,11 @@ export function upsertBlock(
   end: string,
   block: string,
 ): string {
+  const starts = document.split(start).length - 1, ends = document.split(end).length - 1;
+  if (starts !== ends || starts > 1 || (starts === 1 && document.indexOf(end) < document.indexOf(start)))
+    throw new Error("Malformed managed block markers");
+  const newline = document.includes("\r\n") ? "\r\n" : "\n";
+  block = block.replace(/\r?\n/g, newline);
   const pattern = blockPattern(start, end);
   return pattern.test(document)
     ? document.replace(pattern, () => block)

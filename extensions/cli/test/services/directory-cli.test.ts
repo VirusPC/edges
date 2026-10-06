@@ -20,7 +20,7 @@ test("Task directory create/get/update/status/project keep assets and runlog tog
   const root = fixture(t);
   put(path.join(root, "AGENTS.md"), "# Scope");
   const call = (args: string[]) =>
-    run(["--scope", root, "tasks", ...args], { env: {} });
+    run(["--scope", root, "tasks", "--index-group", "local", ...args], { env: {} });
   const made = await call(["create", "--title", "Unit"]);
   assert.equal(made.exitCode, 0, made.stdout);
   const item = JSON.parse(made.stdout);
@@ -61,7 +61,7 @@ test("Task directory create/get/update/status/project keep assets and runlog tog
 });
 test("Memory directory format indexes only entry, updates by same slug and doctor sees actual entry", async (t) => {
   const root = fixture(t);
-  await initMemory({ targetDir: root, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
   const source = path.join(root, "selected");
   put(path.join(source, "image.png"), "image");
   put(path.join(source, "details.md"), "resource");
@@ -137,7 +137,7 @@ test("Note CLI preserves authored Markdown and commits only its explicit owned r
     [
       "--scope",
       root,
-      "note",
+      "note", "--index-group", "local",
       "--title",
       "Filename title",
       "--import-entry",
@@ -166,7 +166,7 @@ test("Task directory status refuses same-stem standalone destination and preserv
   const root = fixture(t);
   put(path.join(root, "AGENTS.md"), "# Scope");
   const call = (args: string[]) =>
-    run(["--scope", root, "tasks", "--purpose", "domain", ...args], { env: {} });
+    run(["--scope", root, "tasks", "--index-group", "local", "--purpose", "domain", ...args], { env: {} });
   const result = await call(["create", "--title", "Collision"]);
   assert.equal(result.exitCode, 0, result.stdout);
   const item = JSON.parse(result.stdout);
@@ -189,7 +189,7 @@ test("private Memory directory entries stay ignored", async (t) => {
   const { execFileSync } = await import("node:child_process");
   const root = fixture(t);
   execFileSync("git", ["init", "-q"], { cwd: root });
-  await initMemory({ targetDir: root, memoryTypes: ["user"] });
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["user"] });
   const made = await run(
     [
       "--scope",
@@ -215,7 +215,7 @@ test("private Memory directory entries stay ignored", async (t) => {
 });
 test("Skill type enumeration ignores resource recovery directories", async (t) => {
   const root = fixture(t);
-  await initMemory({ targetDir: root, skillTypes: ["managed"] });
+  await initMemory({ indexGroup: "descendant", targetDir: root, skillTypes: ["managed"] });
   put(
     path.join(root, ".harness/skills/managed/kept/SKILL.md"),
     "---\nname: kept\ndescription: Kept\n---\nBody",
@@ -232,7 +232,7 @@ test("Skill type enumeration ignores resource recovery directories", async (t) =
 });
 test("Skill import validates full fields before writing and preserves its source", async (t) => {
   const root = fixture(t);
-  await initMemory({ targetDir: root, skillTypes: ["managed"] });
+  await initMemory({ indexGroup: "descendant", targetDir: root, skillTypes: ["managed"] });
   const source = path.join(root, "source/SKILL.md");
   put(source, "# Invalid skill");
   const result = await run(
@@ -260,7 +260,7 @@ test("Skill import validates full fields before writing and preserves its source
 });
 test("Memory and Note reject conflicting import content and wrong entry types before writing", async (t) => {
   const root = fixture(t);
-  await initMemory({ targetDir: root, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
   const source = path.join(root, "source/SKILL.md");
   put(source, "---\nname: example\ndescription: Example\n---\nBody");
   const conflict = await run(
@@ -324,7 +324,7 @@ test("Note import commits its parent registration and keeps source bytes unchang
     [
       "--scope",
       root,
-      "note",
+      "note", "--index-group", "local",
       "--title",
       "Imported",
       "--import-entry",
@@ -345,7 +345,7 @@ test("Note import commits its parent registration and keeps source bytes unchang
 });
 test("business imports reject known source directory types instead of silently retyping them", async (t) => {
   const root = fixture(t);
-  await initMemory({ targetDir: root, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
   const source = path.join(root, "tasks/_default/backlog/task/index.md");
   put(source, "# Task");
   const result = await run(
@@ -372,7 +372,7 @@ test("business imports reject known source directory types instead of silently r
 });
 test("doctor reports legacy memory migration without erasing the existing index", async (t) => {
   const root = fixture(t);
-  await initMemory({ targetDir: root, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
   const index = path.join(root, ".harness/memory/projects/AGENTS.md");
   const original = fs
     .readFileSync(index, "utf8")
@@ -408,7 +408,7 @@ test("Note Markdown file input preserves extras without copying neighbors and in
       [
         "--scope",
         root,
-        "note",
+        "note", "--index-group", "local",
         "--title",
         title,
         "--content-file",

@@ -21,7 +21,6 @@ export const CODEC_SECTIONS = {
 export const INDEX_MARKERS = {
   type: "project-memory-type",
   entries: "project-memory-entries",
-  taskProjects: "task-projects",
 } as const;
 export type NodeType =
   "internal" | "skill" | "task" | "memory" | "note" | "leaf" | (string & {});

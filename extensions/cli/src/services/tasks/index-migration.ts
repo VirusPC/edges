@@ -20,7 +20,6 @@ import {
   renderProjectAgents,
   seedTitleFor,
   seedDescriptionFor,
-  rewriteRootAgents,
 } from "./project-meta.js";
 
 export interface TaskIndexMigrationPlan {
@@ -196,30 +195,6 @@ export async function planTaskIndexes(
   for (const board of [...boards].sort()) {
     const boardEntry = path.join(board, "AGENTS.md");
     const boardNode = get(boardEntry);
-    if (!decodeBody(boardNode.body).sections.memory.present) {
-      const references = boardNode.localChildren;
-      const records = references
-        .filter((ref) => path.dirname(path.dirname(ref.id)) === board)
-        .map((ref) => {
-          const dir = path.basename(path.dirname(ref.id));
-          const meta = parseProjectAgents(get(ref.id).body);
-          return {
-            project: projectIdFromDir(dir),
-            dir,
-            title: meta.title,
-            description: meta.description,
-            path: path.relative(root, ref.id),
-          };
-        });
-      boardNode.parse(
-        rewriteRootAgents(boardNode.serialize(), records, boardEntry),
-      );
-      for (const ref of references)
-        boardNode.updateChild(ref.id, {
-          name: ref.name,
-          description: ref.description,
-        });
-    }
     const owner = path.dirname(board);
     const scope =
       path.basename(owner) === ".harness" ? path.dirname(owner) : owner;

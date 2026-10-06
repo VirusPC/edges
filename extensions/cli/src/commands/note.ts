@@ -61,6 +61,7 @@ type IngestCliOptions = {
   contentFile?: string;
   markdown?: boolean;
   importEntry?: string;
+  indexGroup?: "local" | "descendant";
   coAuthor?: string;
   json?: boolean;
   dryRun?: boolean;
@@ -144,6 +145,7 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
         "Read UTF-8 Markdown from a file",
       ).conflicts("content"),
     )
+    .addOption(new Option("--index-group <group>", "Caller-selected parent index group").choices(["local", "descendant"]))
     .option(
       "--markdown",
       "Preserve authored Markdown without adding a title or template",
@@ -259,7 +261,7 @@ export function addNoteCommand(program: Command, ctx: CliContext): Command {
     }
 
     const result = await runIngest(
-      { ...request, markdown: opts.markdown, importEntry: opts.importEntry },
+      { ...request, indexGroup: opts.indexGroup, markdown: opts.markdown, importEntry: opts.importEntry },
       config,
       runNoteIngest,
       env,

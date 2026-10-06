@@ -35,7 +35,7 @@ test("task update adds title and priority metadata to an indexed task and status
   writeFileSync(path.join(folder, stem, "run.log.md"), "Run evidence\n");
   await indexTaskFixtureBoard(path.join(scope, "tasks"));
   const call = (args: string[]) =>
-    run(["--scope", scope, "tasks", "--purpose", "domain", ...args], { env: { EDGES_SCOPE: root } });
+    run(["--scope", scope, "tasks", "--index-group", "local", "--purpose", "domain", ...args], { env: { EDGES_SCOPE: root } });
   const updated = await call([
     "update",
     stem,
@@ -67,7 +67,7 @@ test("task update adds title and priority metadata to an indexed task and status
 });
 test("memory remember rejects malformed domain metadata without erasing the original entry", async (t) => {
   const root = fixture(t);
-  await initMemory({ targetDir: root, memoryTypes: ["project"] });
+  await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
   const file = path.join(root, ".harness/memory/projects/project_example.md");
   const source =
     "---\nname: example\ndescription: Existing\nmetadata: malformed\n---\nOriginal\n";
@@ -164,7 +164,7 @@ test("indexed task with malformed status is rejected without changing its body o
   writeFileSync(path.join(folder, "index.md"), original);
   writeFileSync(path.join(folder, "run.log.md"), "Evidence\n");
   await indexTaskFixtureBoard(path.join(root, "tasks"));
-  const result = await run(["--scope", root, "tasks", "--purpose", "domain", "update", "bad", "--title", "Changed"], { env: {} });
+  const result = await run(["--scope", root, "tasks", "--index-group", "local", "--purpose", "domain", "update", "bad", "--title", "Changed"], { env: {} });
   assert.notEqual(result.exitCode, 0); assert.match(result.stdout, /Invalid edges-tasks-status/);
   assert.equal(readFileSync(path.join(folder, "index.md"), "utf8"), original);
   assert.equal(readFileSync(path.join(folder, "run.log.md"), "utf8"), "Evidence\n");
