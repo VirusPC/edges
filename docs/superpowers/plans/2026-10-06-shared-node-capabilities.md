@@ -23,6 +23,97 @@
 - 保留 CLI 参数、输出协议、默认 scope 与查询范围；不新增 CLI 命令。
 - domain/models 与 domain/operations 同级，算法按文件拆分；domain 不依赖 services（含类型依赖），不直接读写文件；不引入 NodeTree、全局 Service 或事务框架。
 
+## 整体架构
+
+以下是目标架构，不表示代码已迁移。Task 0–4 实施通用能力收敛；Schema 构建和 schema list/get 是 ADR 0025 已确认、另行接入的能力，也画入全图以说明边界。上面的“不新增运行时依赖/CLI 命令”限定 Task 0–4，不否定后续 Schema 接入。
+
+### 运行时调用
+
+实线表示调用或数据读取；虚线表示使用数据契约/节点类型。两条命令路径分别处理内容与读取安装包契约。
+
+```mermaid
+flowchart TD
+    Client["人 / Agent / MCP / Skills"] --> CLI["commands：解析参数与输出结果"]
+    CLI --> Scope["内容命令：确定 scope；写命令先取得命令锁"]
+    Scope --> Business["Tasks / Memory / Note 业务 Service"]
+    Business --> NS["NodeService：加载、CRUD、关联协调、查询"]
+
+    subgraph Domain["domain：领域核心，不直接读写文件"]
+        Models["models：单节点内容与行为<br/>parse / serialize / validate / 字段与自身索引"]
+        Contracts["models 中的 TS 数据契约与公共枚举<br/>数据、创建参数、更新参数按用途定义"]
+        Ops["operations：集合与树算法<br/>traverse / filter / map / groupBy / find / query"]
+        Models -.-> Contracts
+        Ops -.-> Models
+    end
+
+    NS --> Models
+    NS --> Ops
+    NS --> Cache["node-cache：当前 Service 内同路径共享实例"]
+    NS --> IO["node-files：快照、冲突检查、原子写与失败恢复"]
+    IO --> Content["scope 中的 AGENTS.md / index.md / SKILL.md"]
+    Models --> Pure["utils 中的纯 Markdown / 日期 / 路径工具"]
+
+    CLI --> Schema["schema list / get：全局只读命令，待实现"]
+    Schema --> Built["当前安装包的 dist/schemas/ 与契约清单"]
+    Schema --> JSON["stdout：清单或原始 JSON Schema"]
+```
+
+- Tasks、Memory、Note Service 并列，不互相调用；NodeService 不反向依赖业务 Service。业务政策留在各自模块，完整节点操作由 NodeService 协调。
+- operations 不导入 Service；遍历所需 resolve/load 由 NodeService 注入。调用加载回调不表示 operations 拥有文件 IO。filter/map/groupBy 等保留泛型，图中的节点类型依赖主要适用于 traverse。
+- InternalNode.addChild 仅维护自身索引；创建子目录、维护其他节点及保存归 Service。Model 单点职责不等于“不允许操作数组”。
+- 内容命令的锁覆盖整个写命令，而不是每个 Model/Service 方法各取锁。读取 Schema 不走 scope、业务文档、节点缓存或写锁，不等待 stdin，也不在运行时生成 Schema。
+- 按需使用的 Ajv 是结构校验工具，不增加服务层。它消费生成的契约，采用位置必须与该契约的输入/输出用途匹配；schema get 本身只负责读取产物，不运行校验或生成。
+
+### Schema 的构建与分发
+
+图中箭头表示生成与消费顺序；生成器只在构建期运行。此链路不从完整节点类推断 Schema，也不要求移动 Model 方法。
+
+```mermaid
+flowchart LR
+    subgraph Source["Git 保存的源码"]
+        TS["domain/models：TS 数据契约与公共枚举<br/>首批 TaskDoc"]
+        Script["TypeScript 生成脚本与最小契约清单"]
+        Test["兼容性用例与测试"]
+    end
+    TS --> Generate["Node 22 构建<br/>ts-json-schema-generator"]
+    Script --> Generate
+    Generate --> Artifacts["dist/schemas/ 与生成清单<br/>不提交 Git"]
+    Artifacts --> Package["CLI 分发包<br/>JS 代码与对应版本 Schema"]
+    Package --> Get["edges schema list / get"]
+    Get --> External["外部系统 / Agent / 用户导出"]
+    Artifacts --> Validate["Ajv 结构校验<br/>对应契约、按需接入"]
+    Artifacts --> Check["CI：兼容性、确定性、分发包测试"]
+    Test --> Check
+    Artifacts --> Consumer["依赖 Schema 的消费者构建/测试<br/>生成必须在消费之前完成"]
+```
+
+稳定边界是契约 key/$id 与 CLI 获取接口。现有审阅页的手写 JSON 路径及内联枚举读取方式需要迁移；消费者可以复用纯契约模块的公共常量，不能复制枚举或依赖完整节点实现。独立 dev/build/test/typecheck 必须准备其依赖的生成物，不能靠本机残留 dist。生成器留在 devDependencies；分发包在仓库外、无 TS 源码和开发依赖时仍可运行 schema list/get。
+
+### 目录与职责对照
+
+这是目标布局；Schema 命令文件及构建脚本为后续接入位置，尚未创建。
+
+```text
+extensions/cli/
+├── src/
+│   ├── commands/                 # 用户命令入口
+│   │   └── schema.ts             # 后续：schema list/get，只读编译产物
+│   ├── services/
+│   │   ├── tasks/ memory/ note/  # 各业务用例与政策
+│   │   ├── node-service.ts      # 节点 CRUD、查询与关联协调
+│   │   └── node-*.ts            # 锁、缓存、文件保存等内部实现
+│   ├── domain/
+│   │   ├── models/              # 节点类、局部行为、TS 数据契约
+│   │   └── operations/          # 各集合/遍历/查询算法按文件拆分
+│   └── utils/                  # 通用工具；domain 只使用无 IO 的部分
+├── scripts/                    # 后续：Schema 的 TS 生成脚本
+├── test/                       # 模型、服务、集合操作及契约测试
+└── dist/                       # 编译/分发产物，不提交 Git
+    └── schemas/                # 后续：生成的 JSON Schema 与清单
+```
+
+不增加 domain/schemas 手写层，不增加 SchemaService、DocumentService、NodeTree 或 reducer。旧源码侧 schemas/task-doc.v1.json 在兼容性验收和消费者切换后移除。领域职责与存储位置相互独立：Node 内存结构不替代 Markdown 文件，JSON Schema 也不是节点持久化格式。
+
 ## Model、operations 与 Schema 边界
 
 Model 保留单个节点的内容、校验、parse/serialize、字段更新与自身子节点索引维护；operations 只承载集合处理、树遍历和查询组合，不接收从 Model 搬出的全部领域行为。Service 协调加载、跨节点关系及物理目录操作和保存。
