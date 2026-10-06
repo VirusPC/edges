@@ -4,6 +4,19 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 
 **Model 处理单节点，operations 处理集合与树，Service 完成用例与持久化。** 整体依赖见 [Domain 架构](../README.md)，查询组合见 [operations](../operations/README.md)；仓库的系统设计与内容目录约定仍以[根 README](../../../../../README.md)为准。
 
+## 设计原则（树与入口）
+
+下列原则以 2026-10-06 grill 与根 `CONTEXT.md` 为准；**下文类图仍反映当前实现**（InternalNode / LeafNode / `index.md`），落地前以本节与记忆条目为准。
+
+1. **递归系统二：** 系统入口是 `AGENTS.md`，带组成登记。从 CLI scope 的系统入口（或虚拟系统入口）出发，经登记可达才算节点。
+2. **组成边 ≠ 维护边：** `harness` 不进 `children`。默认遍历不跟随 harness；读某一系统二的组成时，不自动进入其子节点自己的系统入口。
+3. **同目录双文件分工（遍历核心规则）：** 若同时存在 `AGENTS.md` 与 `README.md`，系统一的孩子只挂在 `README.md` 的 entries；`AGENTS.md` 的组成只挂系统二材料（如 `.harness/memory`、skills、维护看板）与下级系统入口。两套组成不得混写同一批系统一孩子。
+4. **入口合同：** 组织清单 → `README.md` + entries；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md`。有无子节点看是否出现组成登记，不持久化 `isLeaf`，任意节点都可增加 children。
+5. **谁拥有系统入口：** 任意目录可由用户自行 init；不是路径白名单。
+6. **存量迁 `INDEX.md`：** 可预览脚本，复用本包 `operations` 树遍历更新引用与改名；含 `posts/`（仅本轮改名迁移经用户授权）。不要手改、不要另写扫盘发现逻辑。
+
+相关记忆：`project_recursive_system_two_entry`、`project_document_entry_readme_index`、`project_grill_system_entry_q13_q14`。
+
 ## 类与节点关系
 
 ```mermaid

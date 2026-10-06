@@ -79,4 +79,6 @@ format: ordinary
 - [grill：README entries、任意目录 init、叶子 INDEX.md](<project_grill_system_entry_q9b_q10_q11/index.md>) — 续节点模型 grill：Q9b 根 README 增 entries；Q10 任意目录用户 init；Q11 虚拟入口另卡；Q12 组织清单 README.md、内容叶子 INDEX.md。同目录 AGENTS 组成与 README entries 分工待下一问。
 
 - [组织清单 README.md，内容叶子 INDEX.md](<project_document_entry_readme_index/index.md>) — 改节点入口文件名、Task/Note/Memory 路径或类型索引形状时：组织清单一律 README.md\+entries；内容叶子为 INDEX.md；Skill 仍 SKILL.md；系统入口仍 AGENTS.md。不要把 Task 正文写成 README。
+
+- [grill：README/AGENTS 组成分工与 INDEX 迁移脚本](<project_grill_system_entry_q13_q14/index.md>) — 改树遍历或入口迁移时：同目录系统一孩子只在 README entries，AGENTS 只挂系统二材料与下级系统入口；index.md→INDEX.md 用可预览脚本套 CLI traverse，含 posts（本轮改名授权）。原则见 models/README 设计原则节。
 <!-- project-memory-entries:end -->

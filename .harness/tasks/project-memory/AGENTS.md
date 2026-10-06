@@ -22,4 +22,6 @@ Project Memory 类型/索引/reshape/与 docs 边界等。
 - [memory\_type\_indexes\_as\_folder\_agents\_md](<done/2026-09-17--memory%E7%B1%BB%E5%9E%8B%E7%B4%A2%E5%BC%95%E6%94%B9%E4%B8%BA%E7%9B%AE%E5%BD%95%E4%B8%8BAGENTS/index.md>) — 协议级改造：.memory 内类型索引改为类型目录下的 AGENTS.md（如 feedbacks/AGENTS.md），求一致与可扩展
 
 - [project\_harness\_init\_skill](<backlog/2026-10-06--project-harness-init-skill/index.md>) — 把系统入口初始化做成 project harness init（演进或包装 project\-memory\-init），供用户对任意选定目录自行 init。
+
+- [index\_md\_index\_md\_posts](<backlog/2026-10-06--%E8%84%9A%E6%9C%ACindexmd-%E8%BF%81-INDEXmd%E5%90%AB-posts/index.md>) — 可预览迁移脚本，套 CLI 树遍历，将内容叶子 index.md 改为 INDEX.md 并改引用；含 posts 仅改名。
 <!-- project-harness-local:end -->
