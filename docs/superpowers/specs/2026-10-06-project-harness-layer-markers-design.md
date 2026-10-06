@@ -8,7 +8,7 @@
 
 `AGENTS.md` 层入口的三章是 **Project Harness**：给一个 Git 项目搭的系统二如何落在文件上。现行注释族 `project-memory-*` 和标题「本层记忆 / 下层记忆索引」仍停在 Project Memory 时期，和 `.harness/` 布局、本层已登记的 tasks / evaluation / observation 对不上。
 
-本轮只改**层入口表面**（HTML 注释、章节标题、协议与术语里对这三章的称呼）。三章职责、索引语义、类型入口标记、`.harness/` 目录名都不动。
+本轮只改**层入口表面**（HTML 注释、章节标题、协议与术语里对这三章的称呼），以及 skill / CLI 里读写这些注释的逻辑。三章职责、索引语义、类型入口标记、`.harness/` 目录名、skill 目录名、`edges memory` 命令名都不动。
 
 ## 已确认的模型
 
@@ -38,9 +38,9 @@
 
 - `project-memory-type` / `project-memory-entries`：类型入口身份与条目清单。几乎只给 doctor / remember 读写，没有层入口那种名实不符。需要时另做机械替换。
 - `task-projects` 嵌套标记。
-- `.harness/` 路径、Memory Type 名称、skill 名 `project-memory-*`。
+- `.harness/` 路径、Memory Type 名称、skill 名 `project-memory-*`、`edges memory` 命令名。
 - 组成关系、parent / harnessPath、遍历默认只走 localChildren。
-- 硬约束种子正文（ask / remember 聚光灯）；只改包裹它的标记和章节标题。
+- 硬约束种子点名 `$project-memory-ask` / `$project-memory-remember`；只改包裹它的标记和章节标题。
 
 实现约束：`internal/blocks.ts` 今天用同一个 `project-memory` 工厂生成外层、三章、type、entries。实施时必须拆开前缀，不能把 type / entries 一并改成 `project-harness-*`。
 
