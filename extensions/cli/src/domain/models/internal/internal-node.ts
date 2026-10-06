@@ -115,7 +115,8 @@ export class InternalNode extends BaseNode<
       ...content.descendantChildren,
     ]) {
       validateChild(reference);
-      if (identifyNodeType(reference.id) === undefined)
+      const childType = identifyNodeType(reference.id);
+      if (childType === undefined || childType === "readme")
         throw new Error(
           `${this.path}: child must identify a directory entry: ${reference.id}`,
         );

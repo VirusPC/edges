@@ -5,6 +5,7 @@ export { MemoryNode } from "./memory/memory-node.js";
 export { NoteNode } from "./notes/note-node.js";
 export { SkillNode } from "./skills/skill-node.js";
 export { InternalNode } from "./internal/internal-node.js";
+export { ReadmeNode } from "./readme/readme-node.js";
 export type * from "./core/types.js";
 export type { TaskCreateInput, TaskUpdateInput, TaskStatus, TaskPriority } from "./tasks/types.js";
 export type { MemoryCreateInput, MemoryUpdateInput } from "./memory/memory-node.js";

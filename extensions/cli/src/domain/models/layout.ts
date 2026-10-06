@@ -2,6 +2,7 @@ import { basename, dirname, join, resolve } from "node:path";
 import { TASK_STATUSES } from "./tasks/types.js";
 export const ENTRY_NAMES = {
   internal: "AGENTS.md",
+  readme: "README.md",
   skill: "SKILL.md",
   leaf: "index.md",
 } as const;
@@ -11,6 +12,13 @@ export const INTERNAL_SECTIONS = {
   descendantChildren: {
     heading: "下层系统维护信息",
     marker: "project-harness-descendants",
+  },
+} as const;
+export const ENTRIES_SECTIONS = {
+  localChildren: { heading: "本层内容", marker: "project-entries-local" },
+  descendantChildren: {
+    heading: "下层内容",
+    marker: "project-entries-descendants",
   },
 } as const;
 export const CODEC_SECTIONS = {
@@ -23,7 +31,7 @@ export const INDEX_MARKERS = {
   entries: "project-memory-entries",
 } as const;
 export type NodeType =
-  "internal" | "skill" | "task" | "memory" | "note" | "leaf" | (string & {});
+  "internal" | "readme" | "skill" | "task" | "memory" | "note" | "leaf" | (string & {});
 export interface DirectoryContract {
   module?: string;
   format?: string;
@@ -60,6 +68,7 @@ export function identifyNodeType(
 ): NodeType | undefined {
   const filename = basename(entryPath);
   if (filename === ENTRY_NAMES.internal) return "internal";
+  if (filename === ENTRY_NAMES.readme) return "readme";
   if (filename === ENTRY_NAMES.skill) return "skill";
   if (filename !== ENTRY_NAMES.leaf) return undefined;
   for (const classify of classifiers) {
@@ -117,6 +126,7 @@ export function resolveHref(
 export function resolveEntryHref(
   entryPath: string,
   href: string,
+  includeReadme = false,
 ): string | undefined {
   const pathname = href.split(/[?#]/, 1)[0]!;
   let filename: string;
@@ -125,7 +135,9 @@ export function resolveEntryHref(
   } catch {
     return undefined;
   }
-  if (!(Object.values(ENTRY_NAMES) as string[]).includes(filename))
-    return undefined;
+  const names = (Object.values(ENTRY_NAMES) as string[]).filter(
+    (name) => includeReadme || name !== ENTRY_NAMES.readme,
+  );
+  if (!names.includes(filename)) return undefined;
   return resolveHref(entryPath, href);
 }

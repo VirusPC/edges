@@ -15,6 +15,7 @@ import {
   MemoryNode,
   NoteNode,
   SkillNode,
+  ReadmeNode,
 } from "../../domain/models/index.js";
 import {
   identifyNodeType,
@@ -86,6 +87,7 @@ export function modelAt(
       {
         internal: InternalNode,
         leaf: LeafNode,
+        readme: ReadmeNode,
         skill: SkillNode,
         task: TaskNode,
         memory: MemoryNode,

@@ -1,6 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
 import { decodeBody } from "./parse.js";
 import { serializeNode } from "./serialize.js";
+import { ENTRIES_SECTIONS, INTERNAL_SECTIONS } from "../layout.js";
 import type { AgentsItem, AgentsDocument } from "./document.js";
 export interface SyntaxReference {
   target: string;
@@ -20,6 +21,35 @@ function adaptEntries(source: string): string {
     "<!-- project-harness-local:$1 -->",
   );
 }
+export type SyntaxProfile = "agents" | "entries";
+
+const PAIRS = [
+  [ENTRIES_SECTIONS.localChildren, INTERNAL_SECTIONS.localChildren],
+  [ENTRIES_SECTIONS.descendantChildren, INTERNAL_SECTIONS.descendantChildren],
+] as const;
+
+function toEntriesProfile(source: string): string {
+  let out = source;
+  for (const [entries, agents] of PAIRS)
+    out = out.replaceAll(`<!-- ${entries.marker}:`, `<!-- ${agents.marker}:`);
+  return out;
+}
+
+function fromEntriesProfile(rendered: string): string {
+  let out = rendered;
+  for (const [entries, agents] of PAIRS)
+    out = out
+      .replaceAll(`<!-- ${agents.marker}:`, `<!-- ${entries.marker}:`)
+      .replaceAll(
+        new RegExp(
+          `(<!-- ${entries.marker}:start -->\\r?\\n)## ${agents.heading}`,
+          "g",
+        ),
+        `$1## ${entries.heading}`,
+      );
+  return out;
+}
+
 function constraintText(item: AgentsItem): string {
   return item.content
     .map((run) => (run.kind === "text" ? run.value : run.label))
@@ -93,15 +123,20 @@ export class InternalSyntax {
   readonly #source: string;
   readonly #model: AgentsDocument;
   readonly #entries: boolean;
+  readonly #profile: SyntaxProfile;
   readonly #isIndexed: (href: string) => boolean;
   readonly #indexItems = new Set<AgentsItem>();
   constructor(
     source: string,
     isIndexed: (href: string) => boolean = () => true,
+    profile: SyntaxProfile = "agents",
   ) {
+    this.#profile = profile;
     this.#isIndexed = isIndexed;
     this.#entries = /^<!-- project-memory-entries:start -->$/m.test(source);
-    this.#source = adaptEntries(source);
+    this.#source = adaptEntries(
+      this.#profile === "entries" ? toEntriesProfile(source) : source,
+    );
     const decoded = decodeBody(this.#source);
     this.#model = decoded.model;
     for (const key of ["memory", "children"] as const) {
@@ -163,6 +198,7 @@ export class InternalSyntax {
       references: this.#model.references,
     };
     const rendered = serializeNode(model, this.#source);
+    if (this.#profile === "entries") return fromEntriesProfile(rendered);
     return this.#entries
       ? rendered
           .replace(
