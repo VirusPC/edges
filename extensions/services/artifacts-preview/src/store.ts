@@ -186,15 +186,19 @@ export function createArtifactStore(options: {
 
   async function expireIfNeeded(id: string, now: Date): Promise<boolean> {
     const meta = await readMeta(id);
-    if (!meta || meta.published === false) {
+    if (!meta) {
+      await remove(id);
+      return true;
+    }
+    if (meta.published === false) {
       return false;
     }
     const expiresAt = meta.expiresAt ? Date.parse(meta.expiresAt) : Number.NaN;
-    if (Number.isNaN(expiresAt) || expiresAt > now.getTime()) {
-      return false;
+    if (Number.isNaN(expiresAt) || expiresAt <= now.getTime()) {
+      await remove(id);
+      return true;
     }
-    await remove(id);
-    return true;
+    return false;
   }
 
   return {
