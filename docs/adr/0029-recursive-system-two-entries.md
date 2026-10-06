@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # 递归系统二入口与 README / INDEX 组成分工
@@ -19,6 +19,6 @@ status: proposed
 ## Consequences
 
 - 实现须拆开「系统维护信息组成」与「内容组成」两套标记；traverse 默认遵守双文件分工。
-- Task Project / 类型目录若只需列孩子、用户未 init，应走向 README+entries，而不是仅因有列表就当作系统入口。
+- Task Project / 类型目录若只需列孩子、用户未 init，应走向 README+entries，而不是仅因有列表就当作系统入口。类型入口明确为 README+`project-entries-*`（Q18）；ADR 0012「类型目录下 AGENTS.md」在迁移后由本条覆盖。
 - 层入口标题从「本层组成 / 下层节点」再改为「系统维护信息」；[layer-markers 设计](../superpowers/specs/2026-10-06-project-harness-layer-markers-design.md) 的标题表以本 ADR 与新 spec 为准。
 - `posts/` 的 INDEX 改名是用户对本轮迁移的明确授权，不扩大为可自动改博客正文。
