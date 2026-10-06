@@ -1,14 +1,12 @@
 ---
 name: project_node_shared_state_simplification
-description: >-
-  Model/operations/Service 分工、共享实例和 domain；索引统一，旧 task-projects
-  只由独立迁移脚本处理，创建分组接口待讨论。
+description: Model/operations/Service 分工、共享实例；统一索引与独立迁移；任务用途不直接决定本层/下层，创建分组待讨论。
 metadata:
   edges-title: 节点共享状态与职责简化
   edges-type: project
   edges-username: cheng
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T15:58:37+08:00'
+  edges-updated-at: '2026-10-06T16:01:12+08:00'
 ---
 
 用户确认：同一 NodeService 内，同路径节点共享同一个可变实例；多个调用方的修改可以同时存在于该实例中，保存时一起落盘。不要为了隔离调用方的未保存修改，引入多副本自动合并或要求先保存 dirty 父节点的闸门。
@@ -125,3 +123,12 @@ metadata:
 **Why:** 不能为了历史格式在通用索引之外继续维护 Tasks 专属渲染和搬迁分支，增加长期复杂度。
 
 **How to apply:** 正常 Tasks 使用 InternalNode 通用关系和 NodeService 更新索引，不生成 task-projects 标记。独立迁移脚本显式选范围、预览、检查冲突并幂等转为普通索引，保留自定义正文；正常操作遇到冲突旧格式给迁移提示。计划已替代“Tasks 自动搬旧区块”的审查建议，脚本尚待实施，不能自行迁移真实内容。
+
+
+## 不把任务用途等同于索引作用域
+
+用户追问“领域看板为什么必须属于下层”后，复核既有节点约定：local/descendant 表达本层与下层作用域归属，不能仅由 domain/maintenance 用途或物理目录深度推导。
+
+**Why:** 之前把现有 Tasks 新 domain 登记为 descendant 的实现策略当成通用模型必然要求，从而引出了不必要的登记后纠正方案。
+
+**How to apply:** 已撤回该前提和补救要求。先讨论看板相对 owner 的实际归属，再确定是否需要创建分组参数；不自动重分组已有数据。看板如果只是组织本层内容，可采用 local；若代表独立下层作用域，再采用 descendant。

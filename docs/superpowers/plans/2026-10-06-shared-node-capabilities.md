@@ -29,7 +29,7 @@ Task 5 在同一 plan 内作为独立可验收的后续步骤；其工具链接�
 
 ## 当前讨论中的两点
 
-- **创建时分组：** NodeService.create 默认登记 local 与新领域看板应归 descendant 冲突。上一版“记录操作前状态、自动登记后再纠正”仅为补救方案，暂不作为最终实施要求。建议创建时显式传入关系分组，由 Service 一次完成正确登记；具体接口及默认推导规则待本轮讨论确认。已有人写的关系不能因创建新节点被随意改组。
+- **创建时分组：** 先确认作用域归属，不以领域/维护用途直接推导 local/descendant。现有 Tasks 把新 domain board 登记为 descendant，是当前实现策略，不是通用节点约定的必然结论。上一版“默认 local 与领域任务必为 descendant 冲突”的前提不成立，撤回据此提出的自动改组补救要求。是否需要新增创建分组参数，须在真实本层/下层场景确定后讨论；既有引用不自动重分组。
 - **Schema 为校验标准：** 用户提出是否直接以 Schema 为准。建议 grouped/review-page 接收完整 TaskDoc 的边界使用同一生成 Schema + Ajv，删除各自字段校验；届时 Ajv/formats 改为运行时依赖，增加共享校验入口、生产产物准备及真实输入验收。当前 Task 5 的“仅放宽 metadata、Ajv 仅测试”是上一版，确认后须整体替换，不可当作已确定的最终方案。Markdown 输入、创建参数等用途不同，不能套完整 TaskDoc Schema。
 
 ## Global Constraints
@@ -378,10 +378,9 @@ await service.update(owner, {
 });
 ```
 
-该示例仅对应需要登记/纠正的 maintenance board。若已在 local 则不改；domain 新登记使用 descendant，已登记则保留原分组。不要借示例重新排序无变化的引用。新建项目自动维护 board 索引后，后续刷新从同一 Service 对象取当前 body，不能沿用创建前字符串。
+该示例仅展示关系更新 API，不作为按 purpose 决定分组的通用规则。看板本层/下层归属尚在讨论，先不实施自动改组。不要借示例重新排序无变化的引用。新建项目自动维护 board 索引后，后续刷新从同一 Service 对象取当前 body，不能沿用创建前字符串。
 
-- [ ] **待讨论，不执行旧补救方案：** 处理自动登记与业务分组的衔接：NodeService.create 当前默认向物理父索引登记 local。Tasks 在创建 board 前，通过同一 projectNodes 实例记录 owner 中是否已有 board 引用及其分组；新 domain board 创建后的自动 local 引用须由业务通过 Service.update 调整为 descendant，不能误当成用户原有分组而保留。maintenance 始终归 local；命令开始前已经存在的 domain 分组、标签和链接拼写仍保留。先创建并加载 board，再创建项目，再刷新业务索引，避免从已过期字符串覆盖自动登记。不修改通用 create 的默认分组，不添加跨操作事务框架。
-- [ ] 用已有 owner-board.test.ts 验证新 domain/maintenance、原 domain local/descendant、缺失 owner 四种情况；新增测试明确覆盖 NodeService 自动注册之后再刷新，连续两次写入不得重复引用或改变已登记的 domain 分组。项目写流程内部传递同一 Service，不让 ensure/refresh 各自重建独立缓存。
+- [ ] **待讨论：** 先明确看板相对 owner 的作用域归属，再确定创建分组接口及回归用例；不能仅按 purpose 自动分组，也不先实现上一版的自动 local 后纠正流程。保留同一用例内 Service 复用、现有标签/描述/链接拼写和缺失 owner 不创建的边界。
 - [ ] TaskNode CRUD 已经走 NodeService，保持其现有接口；run log/附件仍是资源。project-meta 的 AGENTS 保存不得再调用 BoardWriter.writeFile；BoardWriter 继续用于业务盘点和资源，不增加第二套节点持久化。
 - [ ] Note 保留 Git 操作顺序与现有 NodeService.create/update/import；去掉重复保存机制即可，不强迫经过新的公共 helper。校验草稿在业务 Service 内仍可使用 Model，但只由 NodeService 更新受管节点和文件。不得提前到 checkout/pull 之前加载。
 - [ ] `.gitignore` 的原子写改用既有文件 IO，删除 Memory.writeAtomic 及无用导入。保持模式和私有类型准备顺序：
