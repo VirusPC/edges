@@ -200,9 +200,13 @@ _避免使用_：仅指第三方技能、全部 Agent 技能、Project Memory �
 在无 shell 宿主上暴露 Edges 扩展能力的机器入口；与 CLI、Skill 同属能力面，调用同一套领域契约而非另一套产品。
 _避免使用_：唯一入口、替代 CLI、直连仓根脚本（已否决）
 
+**Project Harness（Edges 语境）**：
+Git 项目里系统二落在 `AGENTS.md` 层入口上的写法，三章为硬约束、本层组成、下层节点。`.harness/` 是这份系统二的材料目录，不是另一套入口形状。
+_避免使用_：Agent Harness 的同义词、只等于 `.harness/` 目录、Project Memory 三章的旧称
+
 **Agent Harness（Edges 语境）**：
 让 Agent 持续有效工作的支撑机制，组织上下文、记忆、工具、约束与反馈；它可承担系统二的角色，也可作为被维护的系统一，不与系统二严格同义。
-_避免使用_：系统二的通用名称、单纯的记忆库、固定归属某一层的组件
+_避免使用_：Project Harness 的同义词、系统二落在 AGENTS 层入口上的名称、单纯的记忆库、固定归属某一层的组件
 
 **Meta-harness（Edges 语境）**：
 以 harness 为支撑、维护与改进对象的系统，相对于该 harness 承担系统二的角色；meta 表示相对层级，本身不承诺自动优化或自我修改。

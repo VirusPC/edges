@@ -69,4 +69,6 @@ format: ordinary
 - [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push/index.md) — 改 teaching、/tasks/ 或 ECS 部署时：SSH 只在 deploy.yml 的 deploy job；production 不挂 url；site-teaching 与 site-tasks 都 needs deploy，分别登记 https://edges.viruspc.tech/teaching/ 与 /tasks/；summary 列两个 URL。不要拆成两次 SSH，不要用 teach.\* 或裸 IP。不要新开 workflow（ADR 0021）。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main/index.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks\_direct\_main
 - [知识目录单元与扩展应用归属](project_top_level_content_and_extension_apps/index.md) — 目录单元适用于全部知识内容；共用附件复制，未引用旧 img 归 archive/img，根共享池无引用附件归档；apps 属于 extensions，局部记忆保留归属。
+
+- [层入口表面命名改为 project\-harness](<project_harness_layer_markers/index.md>) — 改 AGENTS.md 层入口注释或章节标题时：外层与三章改为 project\-harness / constraints / local / descendants，标题为本层硬约束 / 本层组成 / 下层节点；type 与 entries 仍用 project\-memory\-\*。设计见 docs/superpowers/specs/2026\-10\-06\-project\-harness\-layer\-markers\-design.md。
 <!-- project-memory-entries:end -->

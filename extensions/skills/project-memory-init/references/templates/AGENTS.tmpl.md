@@ -1,16 +1,16 @@
 # {title}
 
-<!-- project-memory:start -->
+<!-- project-harness:start -->
 
-<!-- project-memory-important:start -->
+<!-- project-harness-constraints:start -->
 ## 本层硬约束
 
 - 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
 - 本层硬约束直接写在这个区块里，不要链到记忆正文文件。
-<!-- project-memory-important:end -->
+<!-- project-harness-constraints:end -->
 
-<!-- project-memory-local:start -->
-## 本层记忆
+<!-- project-harness-local:start -->
+## 本层组成
 
 下面这些是索引，不是正文。按条目说明挑要读的，再打开对应内容。
 
@@ -20,14 +20,14 @@
 - [.harness/memory/references/AGENTS.md](.harness/memory/references/AGENTS.md) — 需求文档、设计稿、接口文档、监控面板等外部资料。
 - [.harness/skills/managed/AGENTS.md](.harness/skills/managed/AGENTS.md) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
 - [.harness/skills/referenced/AGENTS.md](.harness/skills/referenced/AGENTS.md) — 本层 `.agents/skills/` 的原位技能或安装链接，只维护索引，不改正文。
-<!-- project-memory-local:end -->
+<!-- project-harness-local:end -->
 
-<!-- project-memory-children:start -->
-## 下层记忆索引
+<!-- project-harness-descendants:start -->
+## 下层节点
 
 按任务目录加载对应 `AGENTS.md`。
 
 {index_entries}
-<!-- project-memory-children:end -->
+<!-- project-harness-descendants:end -->
 
-<!-- project-memory:end -->
+<!-- project-harness:end -->

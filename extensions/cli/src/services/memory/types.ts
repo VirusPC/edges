@@ -15,6 +15,7 @@ import {
   buildLocalBlock,
   escapeRegExp,
   indexFiles,
+  rewriteLayerSurface,
 } from "./blocks.js";
 import {
   AGENTS_FILE_NAME,
@@ -255,8 +256,9 @@ export function upsertLocalTypeLine(
   indexFile: string,
   description: string,
 ): string {
+  document = rewriteLayerSurface(document);
   const block = document.match(blockPattern(LOCAL_START, LOCAL_END))?.[0];
-  if (!block) throw new Error("AGENTS.md 缺少本层记忆区块，请先 init");
+  if (!block) throw new Error("AGENTS.md 缺少本层组成区块，请先 init");
   const owner = process.cwd();
   const expected = ownershipTarget(owner, indexFile);
   if (expected && localOwnershipPaths(owner, block).has(expected))

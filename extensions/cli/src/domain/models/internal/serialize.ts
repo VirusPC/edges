@@ -1,3 +1,4 @@
+import { OUTER_END, OUTER_START } from "./blocks.js";
 import { CODEC_SECTIONS } from "../layout.js";
 import type { AgentsDocument, SectionKey, AgentsLink, AgentsItem } from "./document.js";
 import { decodeBody } from "./parse.js";
@@ -50,9 +51,9 @@ function serializeBody(model: AgentsDocument, originalSource?: string): string {
   const newline = originalSource?.includes("\r\n") ? "\r\n" : "\n";
   if (originalSource === undefined) {
     const source = [
-      "<!-- project-memory:start -->",
+      OUTER_START,
       ...keys.map((key) => renderSection(key, model[key], newline)),
-      "<!-- project-memory:end -->",
+      OUTER_END,
       "",
       ...model.references.map((ref) => `- ${renderLink(ref)}`),
       "",

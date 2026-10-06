@@ -49,9 +49,11 @@ test('new model serialization escapes Markdown syntax without changing text or t
   model.references.push({ kind: 'link', label: 'Outside', target: 'https://example.com/a?q=1&x=2' });
   const rendered = serializeNode(model);
   assert.deepEqual(parseNode(rendered), model);
+  assert.match(rendered, /<!-- project-harness:start -->/);
+  assert.doesNotMatch(rendered, /<!-- project-memory:start -->/);
   assert.match(rendered, /## 本层硬约束/);
-  assert.match(rendered, /## 本层记忆/);
-  assert.match(rendered, /## 下层记忆索引/);
+  assert.match(rendered, /## 本层组成/);
+  assert.match(rendered, /## 下层节点/);
 });
 
 test('missing sections can be added without overwriting manual node text', () => {

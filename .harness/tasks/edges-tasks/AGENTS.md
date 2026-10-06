@@ -2,9 +2,8 @@
 
 看板与 Task 工作流（协作、绑定、Skill/MCP、分类与调度）。
 
-<!-- project-memory-local:start -->
-## 本层记忆
-
+<!-- project-harness-local:start -->
+## 本层组成
 - [tasks\_multiplayer\_author\_claim](<backlog/2026-09-11--tasks%E9%9A%8F%E4%BB%93%E5%A4%9A%E4%BA%BA%E5%8D%8F%E4%BD%9C%E4%B8%8E%E4%BD%9C%E8%80%85%E5%8C%BA%E5%88%86/index.md>) — tasks 随代码仓库时，应考虑同一仓库多人协作，区分任务写入与领取的作者等
 - [task\_record\_vs\_execution\_repo](<backlog/2026-09-11--task%E8%AE%B0%E5%BD%95%E4%BB%93%E4%B8%8E%E6%89%A7%E8%A1%8C%E4%BB%93%E5%88%86%E7%A6%BB/index.md>) — 应考虑 task 记录处与领取执行处可能分属不同仓库的问题
 - [tasks\_board\_github\_association](<backlog/2026-09-12--tasks%E6%9C%BA%E5%88%B6%E4%B8%8EGitHub%E5%85%B3%E8%81%94/index.md>) — edges knowledge/tasks 机制与 GitHub Issues/PR/Projects 如何关联
@@ -25,4 +24,4 @@
 - [tasks\_board\_default\_path\_dot\_edges\_tasks](<backlog/2026-09-25--%E7%9C%8B%E6%9D%BF%E9%BB%98%E8%AE%A4%E8%B7%AF%E5%BE%84%E6%94%B9%E4%B8%BA.edges-tasks/index.md>) — 按作用域分流任务：维护看板迁入 .harness/tasks/，领域任务归 tasks/；保留 Task/Run 契约并同步工具，新版仅新布局、旧内容一次性迁移。
 - [conversation\_to\_task\_skill\_via\_cli](<cancelled/2026-09-13--conversation-to-task-skill%E8%B0%83%E7%94%A8CLI/index.md>) — conversation\-to\-task skill：按模板从对话总结 Task，并调用 edges tasks CLI 落盘
 - [organize\_default\_project\_tasks\_skill](<in_progress/2026-09-16--%E6%95%B4%E7%90%86default-project%E7%9A%84tasks-skill/index.md>) — Skill：整理 \_default 下的 tasks——归入已有 project、新建 project、或继续留在 \_default
-<!-- project-memory-local:end -->
+<!-- project-harness-local:end -->

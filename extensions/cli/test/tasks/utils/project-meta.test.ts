@@ -13,8 +13,6 @@ import { nodeBoardWriter } from "./helpers.js";
 import {
   DEFAULT_PROJECT_DESCRIPTION,
   DEFAULT_PROJECT_TITLE,
-  PROJECT_MEMORY_END,
-  PROJECT_MEMORY_START,
   ensureProjectMetadata,
   oneLineDescription,
   parseProjectAgents,
@@ -92,13 +90,13 @@ test("render and parse round-trip title, description, and optional pointers", ()
     description: DEFAULT_PROJECT_DESCRIPTION,
   });
   assert.match(rendered, /^# Default\n\nUngrouped tasks that have not been assigned a named Task Project\.\n/);
-  assert.match(rendered, /<!-- project-memory-important:start -->/);
-  assert.match(rendered, /<!-- project-memory-local:start -->/);
-  assert.match(rendered, /<!-- project-memory-children:start -->/);
+  assert.match(rendered, /<!-- project-harness-constraints:start -->/);
+  assert.match(rendered, /<!-- project-harness-local:start -->/);
+  assert.match(rendered, /<!-- project-harness-descendants:start -->/);
   const defaultParsed = parseProjectAgents(rendered);
   assert.equal(defaultParsed.title, "Default");
   assert.equal(defaultParsed.description, DEFAULT_PROJECT_DESCRIPTION);
-  assert.match(defaultParsed.tail ?? "", /<!-- project-memory-children:end -->/);
+  assert.match(defaultParsed.tail ?? "", /<!-- project-harness-descendants:end -->/);
 
   const withPointers = renderProjectAgents({
     title: "CLI",
@@ -125,6 +123,12 @@ test("parseProjectAgents rejects frontmatter and accepts sparse node sections", 
   assert.equal(
     parseProjectAgents(
       "# T\n\nD\n\n<!-- project-memory:start -->\n<!-- project-memory:end -->\n",
+    ).description,
+    "D",
+  );
+  assert.equal(
+    parseProjectAgents(
+      "# T\n\nD\n\n<!-- project-harness:start -->\n<!-- project-harness:end -->\n",
     ).description,
     "D",
   );

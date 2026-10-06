@@ -2,9 +2,8 @@
 
 Project Memory 类型/索引/reshape/与 docs 边界等。
 
-<!-- project-memory-local:start -->
-## 本层记忆
-
+<!-- project-harness-local:start -->
+## 本层组成
 - [runa\-memory\-ask调用结果统计](<backlog/2026-09-08--runa-memory-ask%E8%B0%83%E7%94%A8%E7%BB%93%E6%9E%9C%E7%BB%9F%E8%AE%A1/index.md>) — 为 runa\-memory\-ask skill 补充「调用后最终结果」统计
 - [memory需要assets资源目录](<backlog/2026-09-09--memory%E9%9C%80%E8%A6%81assets%E8%B5%84%E6%BA%90%E7%9B%AE%E5%BD%95/index.md>) — 为 project \`.memory\` 增加资源存档目录的想法
 - [project\-memory跨agent继承经验](<backlog/2026-09-09--project-memory%E8%B7%A8agent%E7%BB%A7%E6%89%BF%E7%BB%8F%E9%AA%8C/index.md>) — Project Memory 的一个核心作用是跨 Agent / 账号切换时继承经验
@@ -21,4 +20,4 @@ Project Memory 类型/索引/reshape/与 docs 边界等。
 - [predefined\-project\-memory\-distribution](<backlog/2026-10-05--%E6%8F%90%E4%BE%9B%E5%8F%AF%E5%88%86%E5%8F%91%E7%9A%84%E9%A2%84%E5%AE%9A%E4%B9%89-Project-Memory/index.md>) — 设计 extensions/memory 的预定义记忆分发，并以已确认的 Tasks 执行流程、CLI 操作约定及写作规范引用为首批内容。
 - [edges\_repo\_isomorhic\_to\_memory](<done/2026-09-12--%E6%95%B4%E4%BB%93%E4%B8%8Ememory%E5%90%8C%E6%9E%84%E9%80%92%E5%BD%92%E8%9E%8D%E5%90%88/index.md>) — 基于 Project Memory 重构 Edges 目录架构，以 AGENTS.md 组织递归记忆，通过交叉引用形成 graph，明确跨层共享能力的归属，并完成相应迁移。
 - [memory\_type\_indexes\_as\_folder\_agents\_md](<done/2026-09-17--memory%E7%B1%BB%E5%9E%8B%E7%B4%A2%E5%BC%95%E6%94%B9%E4%B8%BA%E7%9B%AE%E5%BD%95%E4%B8%8BAGENTS/index.md>) — 协议级改造：.memory 内类型索引改为类型目录下的 AGENTS.md（如 feedbacks/AGENTS.md），求一致与可扩展
-<!-- project-memory-local:end -->
+<!-- project-harness-local:end -->

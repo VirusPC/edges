@@ -69,8 +69,8 @@ InternalNode 对应 `AGENTS.md`，把三个受管部分映射为：
 | AGENTS 内容 | 内存模型 | 含义 |
 | --- | --- | --- |
 | 本层硬约束 | `constraints` | 本节点的重要约束 |
-| 本层记忆 | `localChildren` | 属于本层作用域的节点引用 |
-| 下层记忆索引 | `descendantChildren` | 下层作用域的入口引用 |
+| 本层组成 | `localChildren` | 属于本层作用域的节点引用 |
+| 下层节点 | `descendantChildren` | 下层作用域的入口引用 |
 
 `children` 是 `localChildren` 与 `descendantChildren` 的有序合并。这里的 descendant 是下层索引组，不是已经加载完的所有后代；两组存的都只是当前入口登记的引用。物理目录深度或节点类型不能替代本层/下层的判断，新增登记由调用方明确给出 `local` 或 `descendant`。`moveChild` 只修改当前 AGENTS 中引用的分组，不移动目录、不改变 parent。
 

@@ -6,11 +6,11 @@ export const ENTRY_NAMES = {
   leaf: "index.md",
 } as const;
 export const INTERNAL_SECTIONS = {
-  constraints: { heading: "本层硬约束", marker: "project-memory-important" },
-  localChildren: { heading: "本层记忆", marker: "project-memory-local" },
+  constraints: { heading: "本层硬约束", marker: "project-harness-constraints" },
+  localChildren: { heading: "本层组成", marker: "project-harness-local" },
   descendantChildren: {
-    heading: "下层记忆索引",
-    marker: "project-memory-children",
+    heading: "下层节点",
+    marker: "project-harness-descendants",
   },
 } as const;
 export const CODEC_SECTIONS = {

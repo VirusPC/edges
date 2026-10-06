@@ -77,7 +77,7 @@ test("create/list/get/update project metadata; create default on virgin board", 
     const root = await readFile(path.join(repo, "tasks/AGENTS.md"), "utf8");
     assert.match(root, /updated CLI/);
     assert.doesNotMatch(root, /task-projects:/);
-    assert.match(root, /<!-- project-memory-local:start -->/);
+    assert.match(root, /<!-- project-harness-local:start -->/);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }

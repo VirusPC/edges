@@ -11,18 +11,26 @@ type Binding = {
   protected: boolean;
 };
 
-const markers = Object.fromEntries(
-  Object.entries(CODEC_SECTIONS).map(([key, value]) => [
-    value.marker.replace("project-memory-", ""),
-    key,
-  ]),
-) as Record<string, SectionKey>;
+const LAYER_TO_KEY: Record<string, SectionKey> = {
+  "project-harness-constraints": "constraints",
+  "project-memory-important": "constraints",
+  "project-harness-local": "memory",
+  "project-memory-local": "memory",
+  "project-harness-descendants": "children",
+  "project-memory-children": "children",
+};
 
 const titles: Record<string, SectionKey> = {
   ...Object.fromEntries(
     Object.entries(CODEC_SECTIONS).map(([key, value]) => [value.heading, key]),
   ),
   本层重要约束: "constraints",
+  本层硬约束: "constraints",
+  本层记忆: "memory",
+  本层组成: "memory",
+  下层记忆索引: "children",
+  下层节点: "children",
+  下层作用域: "children",
 };
 
 function start(node: AstNode): number {
@@ -173,10 +181,10 @@ export function decodeBody(source: string) {
       const marker = block.value
         .trim()
         .match(
-          /^<!-- project-memory-(important|local|children):(start|end) -->$/,
+          /^<!-- (project-harness-constraints|project-harness-local|project-harness-descendants|project-memory-important|project-memory-local|project-memory-children):(start|end) -->$/,
         );
       if (marker) {
-        const section = markers[marker[1]];
+        const section = LAYER_TO_KEY[marker[1]];
         if (marker[2] === "start") {
           if (marked) unsafe = true;
           close(start(block));
@@ -190,7 +198,10 @@ export function decodeBody(source: string) {
         if (!active) outsideInsert = end(block);
         continue;
       }
-      if (block.value.trim() === "<!-- project-memory:end -->") {
+      if (
+        block.value.trim() === "<!-- project-harness:end -->" ||
+        block.value.trim() === "<!-- project-memory:end -->"
+      ) {
         appendAt = start(block);
         if (!marked) close(start(block));
       }

@@ -1,18 +1,17 @@
 # evaluation
 
-<!-- project-memory:start -->
+<!-- project-harness:start -->
 
-<!-- project-memory-important:start -->
+<!-- project-harness-constraints:start -->
 ## 本层硬约束
 
 - 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
 - 本层硬约束直接写在这个区块里，不要通过记忆正文链接代替本区块的硬约束。
 - LoCoMo 本轮只做评测冒烟（Evaluation Smoke），不是公开基准证明（Benchmark Proof）。SUT 是上游 snap-research/locomo 打分/脚本；分数不得写成项目记忆或 Agent Memory 有效。不要把 `.memory` / Project Memory 接到 LoCoMo 当后端。见 `docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`。
-<!-- project-memory-important:end -->
+<!-- project-harness-constraints:end -->
 
-<!-- project-memory-local:start -->
-## 本层记忆
-
+<!-- project-harness-local:start -->
+## 本层组成
 下面这些是索引，不是正文。按条目说明挑要读的，再打开对应内容。
 
 - [.harness/memory/users/AGENTS.md](.harness/memory/users/AGENTS.md) — 绑定本仓库、不宜公开的个人材料（个人偏好、凭据与密钥）。本机文件，不进 git。
@@ -21,6 +20,6 @@
 - [.harness/memory/references/AGENTS.md](.harness/memory/references/AGENTS.md) — 需求文档、设计稿、接口文档、监控面板等外部资料。
 - [.harness/skills/managed/AGENTS.md](.harness/skills/managed/AGENTS.md) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
 - [.harness/skills/referenced/AGENTS.md](.harness/skills/referenced/AGENTS.md) — 本层 `.agents/skills/` 下人写或装入的标准技能，工具只索引不改写。
-<!-- project-memory-local:end -->
+<!-- project-harness-local:end -->
 
-<!-- project-memory:end -->
+<!-- project-harness:end -->

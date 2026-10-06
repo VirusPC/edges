@@ -2,9 +2,8 @@
 
 客户端/插件/外设与本地 UX 实验。
 
-<!-- project-memory-local:start -->
-## 本层记忆
-
+<!-- project-harness-local:start -->
+## 本层组成
 - [评估Agent\-Plugins客户端支持](<backlog/2026-09-09--%E8%AF%84%E4%BC%B0Agent-Plugins%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%94%AF%E6%8C%81/index.md>) — 评估给哪些 agent 客户端提供 / 补齐 Agent Plugins 支持更合适
 - [需要普通记笔记skill](<backlog/2026-09-09--%E9%9C%80%E8%A6%81%E6%99%AE%E9%80%9A%E8%AE%B0%E7%AC%94%E8%AE%B0skill/index.md>) — 除 conversation\-to\-notes 外，还需要一个面向日常记事的普通笔记 skill
 - [data\_view\_separation\_local\_html](<backlog/2026-09-11--%E6%95%B0%E6%8D%AE%E4%B8%8E%E8%A7%86%E5%9B%BE%E5%88%86%E7%A6%BB%E6%9C%AC%E5%9C%B0HTML/index.md>) — 从复杂系统角度，可能需要数据与视图分离，并提供本地 HTML
@@ -33,4 +32,4 @@
 - [teaching\_tasks\_dns](<done/2026-09-22--teaching-%E4%B8%8E-tasks-%E7%AB%99%E7%82%B9%E6%8C%82-DNS/index.md>) — DNS 已挂 edges.viruspc.tech，域名 HTTPS/Flexible 因未备案不可用；2026\-09\-22 稍后改口采用 ECS\+Tunnel，此前「放弃隧道」作废为对外策略。本卡保持 done。
 - [tasks\_review\_shell\_mobile\_narrow](<done/2026-09-24--Tasks-%E5%AE%A1%E9%98%85%E5%A3%B3%E6%89%8B%E6%9C%BA-%E7%AA%84%E5%B1%8F%E9%80%82%E9%85%8D/index.md>) — \#126 三列桌面可用；390×844 横向溢出。2026\-09\-24 grill 已锁窄屏纵向长滚动与双端「移到项目…」，见 ADR 0023
 - [minigtr\_codex\_cli\_remote\_control](<done/2026-09-25--minigtr-%E9%AA%8C%E8%AF%81-Codex-CLI-remote-control/index.md>) — 结论：minigtr Ubuntu 上 Codex CLI remote\-control 可用手机 ChatGPT 配对（codex\-cli 0.157.0；需先 device\-auth 登录）。
-<!-- project-memory-local:end -->
+<!-- project-harness-local:end -->

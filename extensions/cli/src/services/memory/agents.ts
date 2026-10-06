@@ -6,7 +6,29 @@ import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
 import { join, dirname, basename, relative } from "node:path";
-import { AUTO_START, CHILDREN_START, CHILDREN_END, IMPORTANT_START, LOCAL_START, LOCAL_END, OUTER_START, INDEX_ENTRY_PATTERN, blockPattern, buildChildrenBlock, ensureImportantBlock, escapeRegExp, insertInnerBlock, renderAgentsDocument, upsertBlock, } from "./blocks.js";
+import {
+  AUTO_START,
+  CHILDREN_START,
+  CHILDREN_END,
+  IMPORTANT_START,
+  LOCAL_START,
+  LOCAL_END,
+  OUTER_START,
+  LEGACY_OUTER_START,
+  LEGACY_IMPORTANT_START,
+  LEGACY_LOCAL_START,
+  LEGACY_CHILDREN_START,
+  INDEX_ENTRY_PATTERN,
+  blockPattern,
+  buildChildrenBlock,
+  ensureImportantBlock,
+  escapeRegExp,
+  extractLocalBlock,
+  insertInnerBlock,
+  renderAgentsDocument,
+  rewriteLayerSurface,
+  upsertBlock,
+} from "./blocks.js";
 import {
   AGENTS_FILE_NAME,
   ancestors,
@@ -20,7 +42,17 @@ import { ENTRY_LINE_TEMPLATE, renderLine } from "./templates.js";
 import { layerTypeSpecs, selectedLocalBlock, upsertLocalTypeLine, } from "./types.js";
 export function classifyAgentsSource(source: string | undefined): "missing" | "managed" | "foreign" {
     if (source === undefined) return 'missing';
-    return [OUTER_START, IMPORTANT_START, LOCAL_START, CHILDREN_START, AUTO_START].some(marker => source.includes(marker)) ? 'managed' : 'foreign';
+    return [
+      OUTER_START,
+      LEGACY_OUTER_START,
+      IMPORTANT_START,
+      LEGACY_IMPORTANT_START,
+      LOCAL_START,
+      LEGACY_LOCAL_START,
+      CHILDREN_START,
+      LEGACY_CHILDREN_START,
+      AUTO_START,
+    ].some(marker => source.includes(marker)) ? 'managed' : 'foreign';
 }
 export function classifyAgentsFile(file: string): "missing" | "managed" | "foreign" {
     return classifyAgentsSource(isFile(file) ? readText(file) : undefined);
@@ -33,9 +65,11 @@ async function syncLoadedAgents(service: NodeService, node: InternalNode | undef
         await service.create(new InternalNode(file), parseDocument(renderAgentsDocument(basename(directory), local, children)), { indexGroup: 'local' });
         return 'created';
     }
-    let updated = ensureImportantBlock(existing!);
+    let updated = rewriteLayerSurface(existing!);
+    updated = ensureImportantBlock(updated);
     if (local) updated = upsertBlock(updated, LOCAL_START, LOCAL_END, local);
     if (children) updated = upsertBlock(updated, CHILDREN_START, CHILDREN_END, children);
+    updated = rewriteLayerSurface(updated);
     if (updated === existing) return 'preserved';
     await service.update(node, { body: updated });
     return 'updated';
@@ -48,7 +82,9 @@ export async function syncTargetAgents(target: string, _root: string, service = 
     const file = prepareMemoryWrite(target, join(target, AGENTS_FILE_NAME));
     const node = await service.get(file, InternalNode);
     const specs = layerTypeSpecs(target);
-    let local = node?.body.match(blockPattern(LOCAL_START, LOCAL_END))?.[0] ?? selectedLocalBlock([]);
+    const surface = node ? rewriteLayerSurface(node.body) : undefined;
+    let local =
+      extractLocalBlock(surface ?? "") ?? selectedLocalBlock([]);
     for (const spec of specs) local = upsertLocalTypeLine(local, spec.indexFile, spec.description || spec.name);
     return syncLoadedAgents(service, node, file, target, local, '');
 }
@@ -58,6 +94,7 @@ export function mergeIndexEntry(document: string, relativeAgents: string, entry:
     string,
     boolean
 ] {
+    document = rewriteLayerSurface(document);
     const pattern = blockPattern(CHILDREN_START, CHILDREN_END), block = document.match(pattern)?.[0];
     if (!block)
         return [

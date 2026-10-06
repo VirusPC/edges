@@ -2,19 +2,18 @@
 
 
 
-<!-- project-memory-important:start -->
+<!-- project-harness-constraints:start -->
 ## 本层硬约束
 
 共同看板约定见[维护看板](../.harness/tasks/AGENTS.md)。
-<!-- project-memory-important:end -->
+<!-- project-harness-constraints:end -->
 
 
 
 
 
-<!-- project-memory-local:start -->
-## 本层记忆
-
+<!-- project-harness-local:start -->
+## 本层组成
 <!-- task-projects:start -->
 CLI-maintained index of Task Project titles and descriptions. Do not hand-edit this section.
 
@@ -22,4 +21,4 @@ CLI-maintained index of Task Project titles and descriptions. Do not hand-edit t
 - [`project-memory`](project-memory/AGENTS.md) — Project Memory 类型/索引/reshape/与 docs 边界等。
 - [`site-and-content`](site-and-content/AGENTS.md) — 站点/posts/badge/内容整理检索。
 <!-- task-projects:end -->
-<!-- project-memory-local:end -->
+<!-- project-harness-local:end -->
