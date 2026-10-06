@@ -31,6 +31,8 @@ InternalNode.addChild 虽接触子节点引用，修改的仍是自身索引，�
 
 Schema 仅描述明确的 TS 对外数据契约，不要求节点类变成纯数据，也不为生成器搬迁方法或重写继承。本计划不引入 Schema 生成器、Ajv、reducer、dispatch 或 immutable；原地更新与共享实例继续保留。详见 spec 的“单个节点、集合操作与完整用例的边界”。
 
+另已接受 [ADR 0025 的 Schema 选型](../../adr/0025-typescript-source-generated-json-schema.md)；依赖接入和 TaskDoc 生成不在本计划 Task 0–4 内。此处链接决策，不能据此宣称已实现或为生成器扩大领域重构。
+
 ## 文件划分与实施顺序
 
 | 现有位置 | 职责与本次改动 |

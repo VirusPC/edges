@@ -49,6 +49,8 @@ flowchart TD
 
 JSON Schema 描述对外交换的数据或操作参数，与上述分工独立。生成源应是明确的 TS 数据契约，不直接扫描包含 getter、方法和私有状态的完整节点类；不为生成 Schema 搬迁 Model 方法，也不要求所有节点立即配齐 Schema。本计划不引入生成器或 Ajv；Schema 生成接入另按明确的契约范围实施。
 
+Schema 技术选型及决策原因见 [ADR 0025](../../adr/0025-typescript-source-generated-json-schema.md)：ts-json-schema-generator、Node 22，运行时结构校验按需使用 Ajv；先迁移 TaskDoc，保留本节职责边界。
+
 ## Service 依赖约束
 
 依赖方向固定为 `CLI → 各业务 Service → NodeService → 模型 / operations / 文件实现`。Tasks、Memory、Note 是并列业务模块，当前用例不需要互相调用；共享机制下沉至 NodeService，不能由 Tasks 调 Memory.init 等业务操作获得。NodeService 不导入业务 Service；业务需要的写政策通过现有构造选项传入。

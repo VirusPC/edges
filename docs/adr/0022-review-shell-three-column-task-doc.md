@@ -8,6 +8,8 @@ classifyTasks、proposeTypes、本地 `edges tasks project review-page` 与持�
 
 ## Decision
 
+2026-10-06 补充：Task Doc 字段定义源由 [ADR 0025](0025-typescript-source-generated-json-schema.md) 修订为普通 TS 数据契约，使用 ts-json-schema-generator 生成对外 JSON Schema；外部共享契约和本 ADR 的其他决定继续有效。该迁移待实施，现有手写 Schema 仍保留至兼容性验收通过。
+
 - **一份审阅壳：** classifyTasks、proposeTypes、本地 `edges tasks project review-page`、持久 `/tasks/` 继续共用这一份壳。不按用途拆页，不加 `--mode`。
 - **三栏：** 左栏是 Task Project。点左栏项目 = 筛选，同时是拖放落点（与今天同一语义）。拖到左栏**只改 project**。中栏是按 `edges-tasks-status` 自绘的状态列，**只读**；状态写回仍走写回仓 backlog，不在本轮。右栏渲染当前条目的 `doc.body`。
 - **Task Doc 契约：** 字段约定是独立、可复用的 JSON Schema [`extensions/cli/schemas/task-doc.v1.json`](../../extensions/cli/schemas/task-doc.v1.json)（`$id`: `edges.task-doc/v1`），不是自造轻量配置。形状是 `name`、`description`、`metadata`、`body`。`metadata` 允许未知键。`edges-tasks-status` 取 ADR 0002 的七态；`edges-task-priority` 取 ADR 0007 的 `urgent | high | medium | low | none`。键与 `extensions/cli` 现有 frontmatter 对齐（含 `edges-title`、`edges-task-project`、`edges-task-assignee`、`edges-updated-at`、`edges-type`）。CLI 类型与 frontmatter、看板 `doc` 都对齐这份 Schema。以后也可作 LLM 结构化输出的形状。本轮只提交文件；CLI 何时 import / 校验留到实现轮。
