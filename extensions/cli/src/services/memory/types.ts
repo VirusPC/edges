@@ -3,7 +3,7 @@ import { canonicalPath, findAncestor } from "../../utils/filesystem.js";
 import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import * as fs from "node:fs";
 import { ENTRY_NAMES, LEGACY_LEAF_ENTRY } from "../../domain/models/layout.js";
-import { join, dirname, relative, resolve } from "node:path";
+import { join, dirname, basename, relative, resolve } from "node:path";
 import { assertPrivateIgnored } from "./ignore.js";
 import { parseDocument } from "../../utils/markdown/document.js";
 import {
@@ -316,8 +316,15 @@ export function selectedLocalBlock(specs: TypeSpec[]): string {
   return block;
 }
 
-export const typeIndexPath = (target: string, name: string) =>
-  join(target, discoverLayerTypes(target)[name] ?? typeIndexRelpath(name));
+/** Existing leftover AGENTS indexes stay readable. A missing index is always the README path. */
+export function typeIndexPath(target: string, name: string): string {
+  const rel = discoverLayerTypes(target)[name];
+  if (!rel) return join(target, typeIndexRelpath(name));
+  const preferred = join(target, rel);
+  if (basename(preferred) !== TYPE_INDEX_FILE_NAME && !isFile(preferred))
+    return join(target, typeIndexRelpath(name));
+  return preferred;
+}
 export const typeContentDir = (target: string, name: string) =>
   isExternalType(name)
     ? join(target, ".agents/skills")

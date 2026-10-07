@@ -92,7 +92,7 @@ format: ordinary
 
 - [BaseNode 直继；type 含 agents/readme/text](<project_grill_basenode_type_agents_readme_text/INDEX.md>) — 改节点类层次或 type 时：各节点直继 BaseNode；type 含 agents/readme/text；虚拟超节点为 SuperAgentsNode 继承 AgentsNode，用 \-\-super。
 
-- [类型入口统一为 README \+ project\-entries](<project_grill_type_index_as_readme/INDEX.md>) — 改类型索引、init/remember/doctor 或 PROTOCOL 时：类型索引用 README\+project\-entries；层 AGENTS 链到这些 README。已有类型目录 AGENTS 留下作系统入口，不删、不抄名单、不挂同目录 README。
+- [类型入口只写 README，空的类型 AGENTS 桩删除](<project_grill_type_index_as_readme/INDEX.md>) — 改类型索引、init/remember/doctor 或 PROTOCOL 时：memory 与 skills 的类型索引只写 README\+project\-entries。空的同目录 AGENTS 桩删除；缺失索引不补 AGENTS。层系统入口仍是 AGENTS.md。
 
 - [递归系统二 spec 已批准可实施](<project_grill_spec_approved_start_impl/INDEX.md>) — 改节点模型/codec 时：2026\-10\-06 recursive\-system\-two\-entries spec 与 ADR 0029 已获用户批准；按实施计划落地，系统一孩子只进 README entries。
 
@@ -102,5 +102,5 @@ format: ordinary
 
 - [traverse 默认走全部 children](<project_grill_traverse_default_all_children/INDEX.md>) — 改 operations/traverse 或依赖其默认的调用方时：默认展开 local∪descendants；本层\-only 用显式 localOnly；不再接受 includeDescendants；includeHarness 仍默认 false。
 - [Task Project 组织清单用 README](<project_task_project_readme_org_lists/INDEX.md>) — 改 Task Project / 看板列表或 physicalParent 时：Task Project 与看板项目列表用 README\+project\-entries；新项目默认 README 种子，勿伪造 AGENTS；任务叶子的物理父是项目 README。
-- [层 AGENTS 挂材料 README，list 顺着 children](<project_list_all_forest/INDEX.md>) — 改 tasks 登记、根 AGENTS 或 list 时：层入口挂材料 README（尤其 .harness/tasks/README.md），条目留在 project\-entries；不抄进看板 AGENTS，不另写 walker。\-\-super 仍只接 scope 目录。
+- [层 AGENTS 挂材料 README，list 顺着 children](<project_list_all_forest/INDEX.md>) — 改 tasks 登记、根 AGENTS 或 list 时：层入口挂材料 README（尤其 .harness/tasks/README.md），条目留在 project\-entries。类型目录空 AGENTS 桩删除。不另写 walker。\-\-super 仍只接 scope 目录。
 <!-- project-entries-local:end -->

@@ -1,16 +1,18 @@
 #!/usr/bin/env node
 /**
- * Split type-index AGENTS.md into a README org list and a kept system entry.
+ * Type indexes live only in README.md. Empty co-located AGENTS.md stubs
+ * under `.harness/{memory,skills}/<type>/` are removed.
  *
- * Type directories `.harness/{memory,skills}/<type>/AGENTS.md` that carry
- * `project-memory-type` get a sibling README.md (`project-entries-*`,
- * titles 本层内容 / 下层内容). The AGENTS.md file stays as system-two
- * (constraints only). It does not keep the entry list and does not link to
- * the same-directory README.
+ * An AGENTS.md that still carries `project-memory-type` is converted to a
+ * sibling README (`project-entries-*`, titles 本层内容 / 下层内容) and then
+ * deleted. A boilerplate stub next to an existing type README is deleted
+ * when it has no composition links. Memory and skills type directories are
+ * treated the same. Private `users/` indexes are not rewritten.
  *
- * Layer links to those AGENTS indexes, and links to `.harness/{tasks,
- * evaluation,observation}/AGENTS.md` when a sibling README exists, are
- * retargeted to README.md. Private `users/` indexes are not rewritten.
+ * Layer links to those deleted files, and registration links to
+ * `.harness/{tasks,evaluation,observation}/AGENTS.md` when a sibling README
+ * exists, are retargeted to README.md. Layer and package AGENTS.md outside
+ * type directories stay.
  *
  * Preview by default; `--apply` writes. Safe to re-run.
  */
@@ -41,26 +43,16 @@ const TYPE_DIR = /(?:^|\/)\.harness\/(memory|skills)\/([^/]+)\/AGENTS\.md$/;
 const PRIVATE_TYPE = /(?:^|\/)\.harness\/memory\/(?:users|private)\//;
 const MATERIAL_BOARDS = ["tasks", "evaluation", "observation"] as const;
 
-const CONSTRAINTS = [
-  "<!-- project-harness:start -->",
-  "",
-  "<!-- project-harness-constraints:start -->",
-  "## 本层硬约束",
-  "",
-  "- 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。",
-  "- 本层硬约束直接写在这个区块里，不要通过记忆正文链接代替本区块的硬约束。",
-  "<!-- project-harness-constraints:end -->",
-  "",
-  "<!-- project-harness:end -->",
-  "",
-].join("\n");
-
 export interface SplitMigration {
   from: string;
   to: string;
   before: EntryFile;
   readme: string;
-  agents: string;
+}
+export interface StubDeletion {
+  path: string;
+  before: EntryFile;
+  readme: string;
 }
 export interface LinkEdit {
   path: string;
@@ -70,6 +62,7 @@ export interface LinkEdit {
 export interface SplitPlan {
   root: string;
   migrations: SplitMigration[];
+  deletions: StubDeletion[];
   linkEdits: LinkEdit[];
   skipped: { path: string; reason: string }[];
   conflicts: string[];
@@ -88,9 +81,13 @@ export function convertTypeIndexSource(source: string): string {
   return out.replace(/\n{3,}/g, "\n\n").replace(/\s*$/, "\n");
 }
 
-export function systemTwoShell(source: string): string {
-  const title = source.match(/^# .+$/m)?.[0] ?? "# 类型目录";
-  return `${title}\n\n${CONSTRAINTS}`;
+function isOrgIndex(source: string): boolean {
+  return (
+    source.includes("<!-- project-memory-type:start -->") ||
+    source.includes("<!-- project-entries-local:start -->") ||
+    source.includes("<!-- project-entries-descendants:start -->") ||
+    source.includes("<!-- project-memory-entries:start -->")
+  );
 }
 
 function* walk(root: string): Generator<string> {
@@ -176,6 +173,7 @@ export function planTypeIndexSplit(inputRoot: string): SplitPlan {
   if (root.split(path.sep).includes("posts"))
     throw new Error("Protected posts cannot be migrated");
   const migrations: SplitMigration[] = [];
+  const deletions: StubDeletion[] = [];
   const skipped: SplitPlan["skipped"] = [];
   const conflicts: string[] = [];
   const snapshots: EntryFile[] = [];
@@ -193,11 +191,23 @@ export function planTypeIndexSplit(inputRoot: string): SplitPlan {
       skipped.push({ path: id, reason: "private user memory is not migrated" });
       continue;
     }
+    const readmePath = path.join(path.dirname(file), "README.md");
     if (!before.source.includes("<!-- project-memory-type:start -->")) {
-      skipped.push({ path: id, reason: "already a system entry, not a type index" });
+      const readme = fs.existsSync(readmePath) ? readEntry(readmePath) : undefined;
+      const hasLink = LINK.test(before.source);
+      LINK.lastIndex = 0;
+      if (readme && isOrgIndex(readme.source) && !hasLink) {
+        snapshots.push(before);
+        deletions.push({ path: file, before, readme: readmePath });
+      } else {
+        skipped.push({
+          path: id,
+          reason: "layer or registered system entry, not an empty type stub",
+        });
+      }
       continue;
     }
-    const to = path.join(path.dirname(file), "README.md");
+    const to = readmePath;
     if (fs.existsSync(to)) {
       const existing = readEntry(to);
       snapshots.push(before);
@@ -212,11 +222,13 @@ export function planTypeIndexSplit(inputRoot: string): SplitPlan {
       to,
       before,
       readme: convertTypeIndexSource(before.source),
-      agents: systemTwoShell(before.source),
     });
   }
 
-  const moved = new Map<string, string>(migrations.map((m) => [m.from, m.to]));
+  const moved = new Map<string, string>([
+    ...migrations.map((m) => [m.from, m.to] as const),
+    ...deletions.map((d) => [d.path, d.readme] as const),
+  ]);
   const registrationOnly = new Set<string>();
   for (const board of MATERIAL_BOARDS) {
     for (const file of markdown) {
@@ -233,8 +245,10 @@ export function planTypeIndexSplit(inputRoot: string): SplitPlan {
   }
 
   const linkEdits: LinkEdit[] = [];
+  const deleting = new Set(deletions.map((d) => d.path));
   if (moved.size)
     for (const file of markdown) {
+      if (deleting.has(file)) continue;
       const migration = migrations.find((m) => m.from === file);
       const entry = migration ? undefined : readEntry(file);
       const source = migration ? migration.readme : entry?.source;
@@ -243,8 +257,6 @@ export function planTypeIndexSplit(inputRoot: string): SplitPlan {
       const next = retargetLinks(migration ? migration.to : file, base, moved, registrationOnly);
       if (migration) {
         migration.readme = next;
-        const agentsNext = retargetLinks(file, migration.agents, moved, registrationOnly);
-        migration.agents = agentsNext;
         continue;
       }
       if (!entry || next === entry.source) continue;
@@ -252,7 +264,7 @@ export function planTypeIndexSplit(inputRoot: string): SplitPlan {
       linkEdits.push({ path: file, before: entry, source: next });
     }
 
-  return { root, migrations, linkEdits, skipped, conflicts, snapshots };
+  return { root, migrations, deletions, linkEdits, skipped, conflicts, snapshots };
 }
 
 function applyPlan(plan: SplitPlan): void {
@@ -262,21 +274,17 @@ function applyPlan(plan: SplitPlan): void {
   const changes: FileChange[] = [
     ...plan.migrations.flatMap((m): FileChange[] => {
       const readmeBefore = fs.existsSync(m.to) ? readEntry(m.to) : null;
-      const writes: FileChange[] = [
-        {
-          path: m.from,
-          before: m.before,
-          source: m.agents,
-        },
-      ];
+      const writes: FileChange[] = [];
       if (!readmeBefore || readmeBefore.source !== m.readme)
         writes.push({
           path: m.to,
           ...(readmeBefore ? { before: readmeBefore } : {}),
           source: m.readme,
         });
+      writes.push({ path: m.from, before: m.before });
       return writes;
     }),
+    ...plan.deletions.map((d) => ({ path: d.path, before: d.before })),
     ...plan.linkEdits.map((edit) => ({
       path: edit.path,
       before: edit.before,
@@ -300,7 +308,10 @@ export function formatSplitPlan(plan: SplitPlan): string {
   const rootRel = (file: string) => rel(plan.root, file);
   lines.push(
     `## type indexes split (${plan.migrations.length})`,
-    ...plan.migrations.map((m) => `- ${rootRel(m.from)} → README.md (AGENTS.md kept)`),
+    ...plan.migrations.map((m) => `- ${rootRel(m.from)} → README.md (AGENTS.md deleted)`),
+    "",
+    `## empty type stubs deleted (${plan.deletions.length})`,
+    ...plan.deletions.map((d) => `- ${rootRel(d.path)}`),
     "",
     `## link edits (${plan.linkEdits.length})`,
     ...plan.linkEdits.map((e) => `- ${rootRel(e.path)}`),
@@ -336,7 +347,7 @@ if (
     if (args.includes("--apply")) {
       await applyTypeIndexSplit(plan);
       process.stdout.write(
-        `applied: ${plan.migrations.length} splits, ${plan.linkEdits.length} link edits\n`,
+        `applied: ${plan.migrations.length} splits, ${plan.deletions.length} stub deletions, ${plan.linkEdits.length} link edits\n`,
       );
     } else process.stdout.write("dry-run only; pass --apply to write\n");
   } catch (error) {

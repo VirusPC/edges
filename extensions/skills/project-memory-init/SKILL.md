@@ -10,7 +10,7 @@ version: 3.3.0
 
 **谁该 init：** 用户认定需要重点维护、要挂 Memory / Skills 模块或登记下层系统入口的目录——空目录或已有内容目录均可。Init 写出合法**系统入口** `AGENTS.md`（`project-harness-*` 区块，标题「本层硬约束 / 本层系统维护信息 / 下层系统维护信息」），并按选择创建 `.harness` 下类型入口 `README.md`（`project-entries-*`，标题「本层内容 / 下层内容」）。层入口的本层系统维护信息链到这些 README。
 
-**谁不该 init：** 仅为列系统一孩子、尚未需要系统二材料的目录（用同目录 `README.md` + `project-entries-*`，或迁移脚本另建）；未经用户要求不要给全仓或批量目录铺 `AGENTS.md`。看板和类型目录上的 README 是组织清单，不是系统入口。不要把组织清单里的条目再抄进同目录 `AGENTS.md`，也不要让 list 另开一套 README 遍历。目录已经有 `AGENTS.md` 时保留它作系统入口，不要挂同目录 README。Init **不会**在作用域根自动创建组织清单 `README.md`——那是系统一入口，由用户或迁移单独建立。
+**谁不该 init：** 仅为列系统一孩子、尚未需要系统二材料的目录（用同目录 `README.md` + `project-entries-*`，或迁移脚本另建）；未经用户要求不要给全仓或批量目录铺 `AGENTS.md`。看板和类型目录上的 README 是组织清单，不是系统入口。不要在类型目录上 init `AGENTS.md` 来装组织清单，空的同目录桩删掉。不要让 list 另开一套 README 遍历。层系统入口仍是 `AGENTS.md`。Init **不会**在作用域根自动创建组织清单 `README.md`——那是系统一入口，由用户或迁移单独建立。
 
 模块默认推荐 memory、skills、tasks，按作用域目标采用；本 Skill 只负责 memory / skills 类型选择与系统入口同步。新层先展示 memory 的 project / feedback / reference / user 与 skills 的 managed / referenced 用途，让用户选择，不预建全部。用户已明确选择时直接执行；未选择时命令返回 `selectionRequired` 和推荐清单且不改文件。已有层不传选择只刷新已采用类型。
 
@@ -25,7 +25,7 @@ edges --scope <目录> memory init \
 
 新层至少选择一类 memory 或 skill；两份列表分别可省略。显式选择追加采用，不删除既有或自定义类型。自定义类型使用 `$project-memory-add-type`，不要改官方推荐模板。
 
-层入口直接链到 `.harness/memory/<plural>/README.md` 与 `.harness/skills/<type>/README.md`，固定两跳到正文，无容器总入口。残留的 `AGENTS.md` 类型入口只读兼容，不要再把新索引写成 AGENTS。可读 AGENTS 都是节点；本层和下层按显式登记区分，容器可跨层直达。已有登记不因中间目录新增入口而重归属，节点身份不自动采用 Memory。`--root-dir` 是边界；默认先取 Git 根，否则最近受管层入口，否则目标自身，不能从工具安装目录推断目标。
+层入口直接链到 `.harness/memory/<plural>/README.md` 与 `.harness/skills/<type>/README.md`，固定两跳到正文，无容器总入口。新索引只写 README。尚未迁走、仍带条目列表的旧 `AGENTS.md` 类型入口只读兼容；空桩不是索引。可读 AGENTS 都是节点；本层和下层按显式登记区分，容器可跨层直达。已有登记不因中间目录新增入口而重归属，节点身份不自动采用 Memory。`--root-dir` 是边界；默认先取 Git 根，否则最近受管层入口，否则目标自身，不能从工具安装目录推断目标。
 
 `managed` 可写本地 Skill；`referenced` 仅索引当前层 `.agents/skills`，不创建来源目录、不动原位正文或安装链接。同源别名在类型内去重，不同真源同名保留。私有类型先补 ignore 再创建索引。
 

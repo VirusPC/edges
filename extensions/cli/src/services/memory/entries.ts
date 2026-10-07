@@ -36,7 +36,6 @@ import {
 import {
   discoverLayerTypes,
   ensureLayerTypeGitignore,
-  indexFileName,
   layerTypeSpecs,
   layerWritableTypes,
   rejectUnwritableType,
@@ -197,7 +196,7 @@ export function buildEntryFields(
 /** README type indexes use ReadmeNode; a not-yet-migrated AGENTS.md index keeps its legacy model. */
 export const typeIndexNode = (file: string): AgentsNode | ReadmeNode =>
   basename(file) === "README.md" ? new ReadmeNode(file) : new AgentsNode(file);
-/** A missing legacy AGENTS.md index is recreated in its own legacy dialect until migrated. */
+/** An existing legacy AGENTS.md index keeps its dialect. A missing index is created as README. */
 export function typeIndexTemplate(file: string, name: string): string {
   const template = readIndexTemplate(typeIndexTemplateName(name), name, name);
   if (basename(file) === "README.md") return template;
@@ -245,10 +244,7 @@ export function expectedIndexDocument(
   name: string,
   source?: string,
 ): string {
-  const file = assertScopePath(
-    join(target, discoverLayerTypes(target)[name] ?? indexFileName(name)),
-    target,
-  );
+  const file = assertScopePath(typeIndexPath(target, name), target);
   const existing =
     source ??
     (isFile(file)
@@ -275,10 +271,7 @@ export async function refreshIndex(
   service = memoryNodes(target),
 ): Promise<string> {
   target = canonicalPath(target);
-  const file = assertScopePath(
-    join(target, discoverLayerTypes(target)[name] ?? indexFileName(name)),
-    target,
-  );
+  const file = assertScopePath(typeIndexPath(target, name), target);
   ensureLayerTypeGitignore(target, name);
   if (name in discoverLayerTypes(target) && !isExternalType(name))
     fs.mkdirSync(dirname(file), { recursive: true });

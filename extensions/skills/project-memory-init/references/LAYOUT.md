@@ -40,11 +40,11 @@ edges --scope S memory init --root-dir R \
 | type | 模块与入口（相对作用域） | 正文与权限 |
 | --- | --- | --- |
 | `user` | `.harness/memory/users/AGENTS.md` | `user_<slug>/INDEX.md`；正文和索引整类 gitignore |
-| `feedback` | `.harness/memory/feedbacks/AGENTS.md` | 用户纠正、有效做法和禁止模式 |
-| `project` | `.harness/memory/projects/AGENTS.md` | 接手背景、决策、约定；不记可从代码推出的事实 |
-| `reference` | `.harness/memory/references/AGENTS.md` | 资料指针 |
-| `managed` | `.harness/skills/managed/AGENTS.md` | `<name>/SKILL.md` 及附属文件；工具可维护 |
-| `referenced` | `.harness/skills/referenced/AGENTS.md` | 只索引当前层 `.agents/skills/<name>/SKILL.md`；不写正文或安装关系 |
+| `feedback` | `.harness/memory/feedbacks/README.md` | 用户纠正、有效做法和禁止模式 |
+| `project` | `.harness/memory/projects/README.md` | 接手背景、决策、约定；不记可从代码推出的事实 |
+| `reference` | `.harness/memory/references/README.md` | 资料指针 |
+| `managed` | `.harness/skills/managed/README.md` | `<name>/SKILL.md` 及附属文件；工具可维护 |
+| `referenced` | `.harness/skills/referenced/README.md` | 只索引当前层 `.agents/skills/<name>/SKILL.md`；不写正文或安装关系 |
 
 这六个名字是可选官方类型，不是每层必建集合。旧 `skills` / `agent_skills` 不是运行时别名。官方入口优先级仍为 user → feedback → project → reference → managed → referenced。
 
@@ -57,7 +57,7 @@ edges --scope S memory add-type \
 
 `--module memory|skills` 默认 memory。`--gitignore` 忽略整类正文及索引；`--index-only` 使 remember 拒绝写正文；`--skills-format` 采用 `<name>/SKILL.md`。模块、格式、可写性是独立维度。自定义 Skill 格式类型默认仍在 `.harness/memory/<原复数目录>`，不能因格式自动移到 skills。自定义类型身份全层唯一，跨模块重复登记报错；官方名称和路径不能被覆盖。外部自定义来源参数暂不支持。
 
-类型入口是组织清单 `README.md`：`.harness/<module>/<plural>/README.md`，列表用 `project-entries-local` / `project-entries-descendants`，标题「本层内容 / 下层内容」。层 `AGENTS.md` 的本层系统维护信息链到这些 README。写入只发 README 与 `project-entries-*`。尚未迁走的旧 `AGENTS.md` 类型入口只读兼容（`project-memory-entries` 或曾误写成的 `project-harness-*` 列表）；README 与旧 AGENTS 并存时以 README 为准。不要把类型条目或 Task Project 列表从 README 再抄进同目录 `AGENTS.md`。目录若已经 init、磁盘上已有 `AGENTS.md`，保留它作系统入口（硬约束与系统维护信息），不要删，也不要让它再挂同目录 README。
+类型入口是组织清单 `README.md`：`.harness/<module>/<plural>/README.md`（memory 与 skills 相同），列表用 `project-entries-local` / `project-entries-descendants`，标题「本层内容 / 下层内容」。层 `AGENTS.md` 的本层系统维护信息链到这些 README。写入只发 README 与 `project-entries-*`。不要在类型目录上 init 一份 `AGENTS.md` 来装组织清单。空的同目录类型 `AGENTS.md` 桩删掉。尚未迁走、仍带条目列表的旧 `AGENTS.md` 类型入口只读兼容（`project-memory-entries` 或曾误写成的 `project-harness-*` 列表）；README 与这份旧索引并存时以 README 为准，空桩不留。层系统入口仍是 `AGENTS.md`。
 
 类型入口特权注释为 `project-memory-type`，字段包括 `name`、`module`、`description`、`gitignore`、`writable`、`format`。省略 module 的现有自定义元数据默认 memory；`format` 为 `ordinary|skills`，布尔字段必须解析为 YAML boolean，推荐写成 `true` / `false`，不接受字符串。未知元数据不影响发现。刷新只替换当前索引的本层列表区块（README 上是 `project-entries-local`，残留 AGENTS 上是旧列表标记），保留原 metadata 与手写引言。没有 metadata 的官方类型按官方契约推导；自定义类型必须保留 metadata 区块，且显式包含 writable 与 gitignore 权限字段；单个权限字段缺失也拒绝推断。索引或区块缺失时无法安全恢复身份与权限，报告 unsafe-layout 并拒绝写入，不能从目录名猜测可写/公开默认值。
 
