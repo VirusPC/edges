@@ -1,7 +1,10 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
+import { deleteDatedLeaf, PROJECT_LEAF } from "../../services/node/dated-leaf.js";
+import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
-import { failProject, loadProject, relPath } from "./node.js";
+
+const HELP = "See edges projects --help for usage.\n";
 
 export function addProjectDeleteCommand(project: Command, ctx: CliContext): void {
   project
@@ -10,11 +13,10 @@ export function addProjectDeleteCommand(project: Command, ctx: CliContext): void
     .argument("<path>", "projects/<stem>/INDEX.md")
     .action(async (entryPath: string) => {
       try {
-        const { scope, service, node, file } = await loadProject(ctx, entryPath);
-        await service.destroy(node);
-        ctx.result = succeed({ command: "projects.delete", path: relPath(scope, file) });
+        const removed = await deleteDatedLeaf(ctx.env, PROJECT_LEAF, entryPath);
+        ctx.result = succeed({ command: "projects.delete", path: removed.path });
       } catch (error) {
-        failProject(ctx, error);
+        failNodeCommand(ctx, error, HELP);
       }
     });
 }

@@ -1,7 +1,10 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
+import { getSkill } from "../../services/skills/service.js";
+import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
-import { failSkill, relPath, resolveSkill } from "./node.js";
+
+const HELP = "See edges skills --help for usage.\n";
 
 export function addSkillGetCommand(skill: Command, ctx: CliContext): void {
   skill
@@ -10,16 +13,16 @@ export function addSkillGetCommand(skill: Command, ctx: CliContext): void {
     .argument("<target>", "SKILL.md path or skill name")
     .action(async (target: string) => {
       try {
-        const { scope, node } = await resolveSkill(ctx, target);
+        const loaded = await getSkill(ctx.env, target, { all: ctx.all, super: ctx.super });
         ctx.result = succeed({
           command: "skills.get",
-          name: node.name,
-          path: relPath(scope, node.path),
-          description: node.description,
-          body: node.body,
+          name: loaded.name,
+          path: loaded.path,
+          description: loaded.description,
+          body: loaded.body,
         });
       } catch (error) {
-        failSkill(ctx, error);
+        failNodeCommand(ctx, error, HELP);
       }
     });
 }

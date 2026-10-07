@@ -72,6 +72,16 @@ test("notes and skills commands do not keep a records or git ingest bypass", () 
   }
 });
 
+test("notes skills and projects commands adapt argv and leave node ops in services", () => {
+  const src = path.resolve(here, "../../src");
+  for (const name of ["notes", "projects", "skills"] as const) {
+    assert.equal(existsSync(path.join(src, "commands", name, "node.ts")), false, name);
+    const source = readTree(path.join(src, "commands", name));
+    assert.doesNotMatch(source, /NodeService|resolveScope|buildSystemForest|isWithinPath|gitRoot/);
+    assert.doesNotMatch(source, /from ["']\.\.\/\.\.\/domain\/models\//);
+  }
+});
+
 test("notes create get update delete and list go through a local leaf", async (t) => {
   const root = scope(t);
   put(root, "AGENTS.md", agents("", "- [notes](notes/AGENTS.md) — notes"));

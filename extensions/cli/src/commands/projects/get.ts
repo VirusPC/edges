@@ -1,7 +1,10 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
+import { getDatedLeaf, PROJECT_LEAF } from "../../services/node/dated-leaf.js";
+import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
-import { failProject, loadProject, relPath } from "./node.js";
+
+const HELP = "See edges projects --help for usage.\n";
 
 export function addProjectGetCommand(project: Command, ctx: CliContext): void {
   project
@@ -10,15 +13,15 @@ export function addProjectGetCommand(project: Command, ctx: CliContext): void {
     .argument("<path>", "projects/<stem>/INDEX.md")
     .action(async (entryPath: string) => {
       try {
-        const { scope, node, file } = await loadProject(ctx, entryPath);
+        const loaded = await getDatedLeaf(ctx.env, PROJECT_LEAF, entryPath);
         ctx.result = succeed({
           command: "projects.get",
-          path: relPath(scope, file),
-          title: node.title,
-          body: node.body,
+          path: loaded.path,
+          title: loaded.title,
+          body: loaded.body,
         });
       } catch (error) {
-        failProject(ctx, error);
+        failNodeCommand(ctx, error, HELP);
       }
     });
 }

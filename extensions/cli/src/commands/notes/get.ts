@@ -1,7 +1,10 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
+import { getDatedLeaf, NOTE_LEAF } from "../../services/node/dated-leaf.js";
+import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
-import { failNote, loadNote, relPath } from "./node.js";
+
+const HELP = "See edges notes --help for usage.\n";
 
 export function addNoteGetCommand(note: Command, ctx: CliContext): void {
   note
@@ -10,15 +13,15 @@ export function addNoteGetCommand(note: Command, ctx: CliContext): void {
     .argument("<path>", "notes/<stem>/INDEX.md")
     .action(async (entryPath: string) => {
       try {
-        const { scope, node, file } = await loadNote(ctx, entryPath);
+        const loaded = await getDatedLeaf(ctx.env, NOTE_LEAF, entryPath);
         ctx.result = succeed({
           command: "notes.get",
-          path: relPath(scope, file),
-          title: node.title,
-          body: node.body,
+          path: loaded.path,
+          title: loaded.title,
+          body: loaded.body,
         });
       } catch (error) {
-        failNote(ctx, error);
+        failNodeCommand(ctx, error, HELP);
       }
     });
 }

@@ -1,12 +1,12 @@
-import path from "node:path";
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { ProjectNode } from "../../domain/models/projects/project-node.js";
-import { buildSystemForest } from "../../services/node/system-forest-service.js";
+import { listDatedLeaves, PROJECT_LEAF } from "../../services/node/dated-leaf.js";
 import { presentListed } from "../../services/list-query.js";
 import { collectRepeat } from "../metadata.js";
+import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
-import { failProject, projectService } from "./node.js";
+
+const HELP = "See edges projects --help for usage.\n";
 
 export function addProjectListCommand(project: Command, ctx: CliContext): void {
   project
@@ -16,20 +16,10 @@ export function addProjectListCommand(project: Command, ctx: CliContext): void {
     .option("--group-by <field>", "Group filtered projects by one field")
     .action(async (opts: { filter?: string[]; groupBy?: string }) => {
       try {
-        const { scope, service } = projectService(ctx);
-        const nodes = ctx.all
-          ? (await buildSystemForest(scope, { includeSuper: ctx.super === true, form: "independent" })).flat()
-          : await service
-            .query(scope, { types: ["project"], ...(ctx.super ? { super: true as const } : {}) })
-            .value();
-        const items = nodes.flatMap((node) => {
-          if (!(node instanceof ProjectNode)) return [];
-          const rel = path.relative(scope, node.path).split(path.sep).join("/");
-          return [{ stem: path.basename(path.dirname(node.path)), path: rel, title: node.title }];
-        });
+        const items = await listDatedLeaves(ctx.env, PROJECT_LEAF, { all: ctx.all, super: ctx.super });
         ctx.result = succeed(presentListed("projects.list", items, opts));
       } catch (error) {
-        failProject(ctx, error);
+        failNodeCommand(ctx, error, HELP);
       }
     });
 }

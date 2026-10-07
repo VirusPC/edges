@@ -1,9 +1,11 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { SkillNode } from "../../domain/models/skills/skill-node.js";
-import { collectRepeat, parseMetadata } from "../metadata.js";
+import { createManagedSkill } from "../../services/skills/service.js";
+import { collectRepeat } from "../metadata.js";
+import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
-import { failSkill, managedSkillFile, relPath, skillService } from "./node.js";
+
+const HELP = "See edges skills --help for usage.\n";
 
 export function addSkillCreateCommand(skill: Command, ctx: CliContext): void {
   skill
@@ -15,24 +17,20 @@ export function addSkillCreateCommand(skill: Command, ctx: CliContext): void {
     .option("--metadata <key=value>", "Repeatable frontmatter field", collectRepeat, [])
     .action(async (name: string, opts: { description: string; body?: string; metadata?: string[] }) => {
       try {
-        if (!opts.description.trim()) throw new Error("description must be nonempty");
-        const metadata = parseMetadata(opts.metadata);
-        const { scope, service } = skillService(ctx);
-        const file = managedSkillFile(scope, name, ctx.super === true);
-        const node = new SkillNode(file);
-        await service.create(node, {
+        const created = await createManagedSkill(ctx.env, {
           name,
           description: opts.description,
-          body: opts.body ?? "",
-          ...(metadata ? { metadata } : {}),
+          body: opts.body,
+          metadata: opts.metadata,
+          super: ctx.super === true,
         });
         ctx.result = succeed({
           command: "skills.create",
-          name,
-          path: relPath(scope, file),
+          name: created.name,
+          path: created.path,
         });
       } catch (error) {
-        failSkill(ctx, error);
+        failNodeCommand(ctx, error, HELP);
       }
     });
 }

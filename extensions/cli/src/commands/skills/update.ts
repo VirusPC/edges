@@ -1,8 +1,11 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { collectRepeat, parseMetadata } from "../metadata.js";
+import { updateSkill } from "../../services/skills/service.js";
+import { collectRepeat } from "../metadata.js";
+import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
-import { failSkill, relPath, resolveSkill } from "./node.js";
+
+const HELP = "See edges skills --help for usage.\n";
 
 export function addSkillUpdateCommand(skill: Command, ctx: CliContext): void {
   skill
@@ -14,23 +17,23 @@ export function addSkillUpdateCommand(skill: Command, ctx: CliContext): void {
     .option("--metadata <key=value>", "Repeatable frontmatter field", collectRepeat, [])
     .action(async (target: string, opts: { description?: string; body?: string; metadata?: string[] }) => {
       try {
-        const metadata = parseMetadata(opts.metadata);
-        if (opts.description === undefined && opts.body === undefined && metadata === undefined) {
-          throw new Error("update must be --description, --body, or --metadata");
-        }
-        const { scope, service, node } = await resolveSkill(ctx, target);
-        const updated = await service.update(node, {
-          ...(opts.description !== undefined ? { description: opts.description } : {}),
-          ...(opts.body !== undefined ? { body: opts.body } : {}),
-          ...(metadata ? { metadata } : {}),
-        });
+        const updated = await updateSkill(
+          ctx.env,
+          target,
+          {
+            description: opts.description,
+            body: opts.body,
+            metadata: opts.metadata,
+          },
+          { all: ctx.all, super: ctx.super },
+        );
         ctx.result = succeed({
           command: "skills.update",
           name: updated.name,
-          path: relPath(scope, updated.path),
+          path: updated.path,
         });
       } catch (error) {
-        failSkill(ctx, error);
+        failNodeCommand(ctx, error, HELP);
       }
     });
 }

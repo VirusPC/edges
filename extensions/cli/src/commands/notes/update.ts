@@ -1,9 +1,11 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { NoteNode } from "../../domain/models/notes/note-node.js";
-import { collectRepeat, parseMetadata } from "../metadata.js";
+import { NOTE_LEAF, updateDatedLeaf } from "../../services/node/dated-leaf.js";
+import { collectRepeat } from "../metadata.js";
+import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
-import { failNote, loadNote, relPath } from "./node.js";
+
+const HELP = "See edges notes --help for usage.\n";
 
 export function addNoteUpdateCommand(note: Command, ctx: CliContext): void {
   note
@@ -15,32 +17,18 @@ export function addNoteUpdateCommand(note: Command, ctx: CliContext): void {
     .option("--metadata <key=value>", "Repeatable frontmatter field", collectRepeat, [])
     .action(async (entryPath: string, opts: { title?: string; body?: string; metadata?: string[] }) => {
       try {
-        const metadata = parseMetadata(opts.metadata);
-        if (opts.title === undefined && opts.body === undefined && metadata === undefined) {
-          throw new Error("update must be --title, --body, or --metadata");
-        }
-        const { scope, service, node, file } = await loadNote(ctx, entryPath);
-        let body = opts.body;
-        if (opts.title !== undefined) {
-          if (opts.title.length < 1 || opts.title.length > 120) {
-            throw new Error("note title must be 1–120 characters");
-          }
-          const draft = new NoteNode(file).parse(node.serialize());
-          if (body !== undefined) draft.body = body;
-          draft.title = opts.title;
-          body = draft.body;
-        }
-        const updated = await service.update(node, {
-          ...(body !== undefined ? { body } : {}),
-          ...(metadata ? { metadata } : {}),
+        const updated = await updateDatedLeaf(ctx.env, NOTE_LEAF, entryPath, {
+          title: opts.title,
+          body: opts.body,
+          metadata: opts.metadata,
         });
         ctx.result = succeed({
           command: "notes.update",
-          path: relPath(scope, file),
+          path: updated.path,
           title: updated.title,
         });
       } catch (error) {
-        failNote(ctx, error);
+        failNodeCommand(ctx, error, HELP);
       }
     });
 }
