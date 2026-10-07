@@ -2,7 +2,7 @@
 
 可执行入口为 `edges memory`，实现位于 Edges CLI 的 TypeScript service。Skill 保留工作流与内容规范；不再通过同级 Skill 路径查找 Python 脚本。
 
-- `init`：在用户选定目录写出/刷新系统入口 `AGENTS.md`，只采用显式选择的 memory/skill 类型；类型入口写 `.harness/<module>/<plural>/AGENTS.md`；不在作用域根自动创建组织清单 `README.md`；重复调用刷新已采用类型。
+- `init`：在用户选定目录写出/刷新系统入口 `AGENTS.md`，只采用显式选择的 memory/skill 类型；类型入口写 `.harness/<module>/<plural>/README.md`（`project-entries-*`）；不在作用域根自动创建组织清单 `README.md`；重复调用刷新已采用类型。已有类型目录 `AGENTS.md` 保留为系统入口，不删除。
 - `remember`：写入条目并刷新其类型索引和层入口。
 - `add-type`：登记自定义格式与权限；不会隐式初始化作用域。
 - `doctor`：诊断作用域和索引，只有 `--apply` 写修复。

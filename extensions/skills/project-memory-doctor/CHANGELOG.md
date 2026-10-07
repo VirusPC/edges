@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- 缺失类型入口补 `README.md`（`project-entries-*`），不再把类型索引进 `AGENTS.md`。
+
 ## [3.2.0] - 2026-10-07
 
 ### Changed

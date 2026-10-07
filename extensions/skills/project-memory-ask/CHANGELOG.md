@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- 类型入口路径改为 `.harness/memory/<plural>/README.md` 与 `.harness/skills/<type>/README.md`。残留 AGENTS 类型入口只读兼容。
+
 ## [2.0.0] - 2026-10-03
 
 ### Changed

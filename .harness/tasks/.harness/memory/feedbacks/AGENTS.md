@@ -1,20 +1,12 @@
-<!-- project-memory-type:start -->
-name: feedback
-module: memory
-writable: true
-gitignore: false
-format: ordinary
-<!-- project-memory-type:end -->
-
 # FEEDBACK — 纠正与约束
 
-> 记：用户给出的纠正、明确确认过的做法，以及必须始终生效的禁止模式和它的原因。
-> 不记：读代码就能看出来的写法，以及 `AGENTS.md` 已经写过的规则。
-> 怎么写：正文先一句结论，再跟 `**Why:**`（为什么，便于以后判断边界情况）和 `**How to apply:**`（具体怎么做）。
-> 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>/index.md` 里。
+<!-- project-harness:start -->
 
-<!-- project-harness-local:start -->
-## 本层系统维护信息
+<!-- project-harness-constraints:start -->
+## 本层硬约束
 
-- 暂无条目。
-<!-- project-harness-local:end -->
+- 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
+- 本层硬约束直接写在这个区块里，不要通过记忆正文链接代替本区块的硬约束。
+<!-- project-harness-constraints:end -->
+
+<!-- project-harness:end -->

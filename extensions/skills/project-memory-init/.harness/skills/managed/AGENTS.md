@@ -1,18 +1,12 @@
-<!-- project-memory-type:start -->
-name: managed
-module: skills
-writable: true
-gitignore: false
-format: skills
-<!-- project-memory-type:end -->
-
 # SKILLS — 可复用技能
 
-> 记：项目内可复用的能力说明、操作流程与使用规范。
-> 本文件只是索引，内容放在 `managed/`，其内部结构遵循 Agent Skills 自身协议。
+<!-- project-harness:start -->
 
-<!-- project-harness-local:start -->
-## 本层系统维护信息
+<!-- project-harness-constraints:start -->
+## 本层硬约束
 
-- 暂无条目。
-<!-- project-harness-local:end -->
+- 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
+- 本层硬约束直接写在这个区块里，不要通过记忆正文链接代替本区块的硬约束。
+<!-- project-harness-constraints:end -->
+
+<!-- project-harness:end -->

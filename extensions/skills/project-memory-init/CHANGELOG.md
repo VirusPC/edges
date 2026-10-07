@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- 类型入口回到 `.harness/<module>/<plural>/README.md`，列表用 `project-entries-*`（本层内容 / 下层内容），与 ADR 0029 一致。层入口链到这些 README。已 init 的类型目录 `AGENTS.md` 保留为系统入口，不抄条目列表，也不挂同目录 README。
+
 ## [3.0.0] - 2026-10-04
 
 ### Changed

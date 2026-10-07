@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 任务看板与项目
 
+- **仓库根列出维护任务：** 在仓库根运行 `edges tasks list` 会顺着根入口登记的 `.harness/tasks/README.md` 列出维护任务。`--super` 仍只列出领域目录 `tasks/` 下的任务。材料与类型的名单留在各自 README 的组织清单里；这些目录里已有的 `AGENTS.md` 保留为系统入口。列出命令本身没有改。
 - **获取当前版本的数据契约：** `edges schema list` 列出可用契约，`edges schema get task-doc/v1` 直接输出 TaskDoc JSON Schema，无需进入仓库或选择 scope。契约从 TS 数据定义生成，随构建包分发，不再手工维护仓库内的 JSON 文件。分组 JSON 与审阅页输入使用同一契约校验：保留对象、数组等扩展 metadata；非法状态、日期和未知顶层字段会明确报错，不自动修正输入。
 
 ### 项目记忆（project-memory）

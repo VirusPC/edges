@@ -25,8 +25,8 @@ Task / Note / Memory 等的入口文件，名为 `INDEX.md`。Skill 仍为 `SKIL
 _避免使用_：index.md（迁移前史料）、把叶子叫 README.md、把 INDEX.md 当成系统入口
 
 **组成登记（entries）**：
-系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口用 `project-harness-local` / `project-harness-descendants`（标题「本层系统维护信息 / 下层系统维护信息」）；组织清单用 `project-entries-local` / `project-entries-descendants`（标题「本层内容 / 下层内容」）。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——两套登记并列，持久化上互不为对方的 child。目标模型下真 AGENTS 的 traverse **不**自动并 README 边；要逛内容面须换根到 `SuperAgentsNode`。
-_避免使用_：目录扫描结果、把任意 Markdown 链接当子节点、宣称 AGENTS.md 永不登记子项、把系统一孩子双写进 AGENTS 与 README、两套标记混用、把 README 持久化挂进 AGENTS.children
+系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口用 `project-harness-local` / `project-harness-descendants`（标题「本层系统维护信息 / 下层系统维护信息」）；组织清单用 `project-entries-local` / `project-entries-descendants`（标题「本层内容 / 下层内容」）。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——两套登记并列，持久化上互不为对方的 child。上层系统入口可以把 `.harness/` 下的材料组织清单 README（类型入口、任务看板）登记进本层系统维护信息，这条边是该上层 AGENTS 的 child。目标模型下真 AGENTS 的 traverse **不**自动并同目录 README 边；要逛当前 scope 的内容面须换根到 `SuperAgentsNode`。
+_避免使用_：目录扫描结果、把任意 Markdown 链接当子节点、宣称 AGENTS.md 永不登记子项、把系统一孩子双写进 AGENTS 与 README、两套标记混用、把同目录 README 持久化挂成该 AGENTS 的 child
 
 **组织节点 / 叶子节点（派生状态）**：
 同一文档节点的当前状态：有组成登记为组织节点，否则为叶子。不是固定类型，模型不持久化 isLeaf，任意节点都可增加子节点。具体节点直接继承 BaseNode；`type` 为 `agents` / `readme` / `task` / `memory` / `note` / `skill` / `text`（普通文本兜底），无 `internal`。

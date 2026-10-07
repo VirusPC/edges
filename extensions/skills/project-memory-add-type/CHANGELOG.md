@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- 新类型入口写 `.harness/<module>/<plural>/README.md`，层入口一行链到这份 README。
+
 ## [3.0.0] - 2026-10-04
 
 ### Changed
