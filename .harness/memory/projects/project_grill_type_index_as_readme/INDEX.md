@@ -1,21 +1,22 @@
 ---
 name: project_grill_type_index_as_readme
 description: >-
-  改类型索引、init/remember/doctor 或 PROTOCOL 时：类型入口用 README.md（type=readme）+
-  project-entries-*；层 AGENTS 链到这些 README；迁移后不用 project-memory-entries / 类型目录
-  AGENTS 当索引。
+  改类型索引、init/remember/doctor 或 PROTOCOL 时：memory 与 skills 的类型索引只写
+  README+project-entries。空的同目录 AGENTS 桩删除；缺失索引不补 AGENTS。层系统入口仍是 AGENTS.md。
 metadata:
-  edges-title: 类型入口统一为 README + project-entries
+  edges-title: 类型入口只写 README，空的类型 AGENTS 桩删除
   edges-type: project
   edges-origin-session-id: bc-01a11167-6384-72b0-a940-c268664860c1
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: '2026-10-06T17:14:51+00:00'
+  edges-updated-at: '2026-10-07T13:54:54+00:00'
 ---
 
-节点模型 grill（2026-10-06）Q18=A：类型入口（Memory Type / Skills 类型索引）统一为组织清单规范——文件 `README.md`，`type=readme`，组成用 `project-entries-local` / `project-entries-descendants`（标题本层内容 / 下层内容）。层系统入口 `AGENTS.md` 的本层系统维护信息链到这些 README。迁移后不再用类型专用 `project-memory-entries` / 类型目录下的 `AGENTS.md` 当索引（除非该目录另经用户 init 成真正系统入口）。
+节点模型 grill（2026-10-06）Q18=A。类型入口（Memory Type 与 Skills 类型索引）只是组织清单 `README.md`，组成用 `project-entries-local` / `project-entries-descendants`（标题本层内容 / 下层内容）。层系统入口 `AGENTS.md` 链到这些 README。memory 与 skills 相同。
 
-**Why:** 用户要统一规范；类型入口本质是列条目的组织清单，不是系统二。
+不要在类型目录上 init `AGENTS.md` 来装组织清单。空的同目录桩删掉，不留系统入口。尚未迁走、文件还在且仍带条目列表的旧 `AGENTS.md` 类型索引只读兼容；缺失时新建的是 README，不补 AGENTS。层系统入口、看板和技能包自己的 `AGENTS.md` 仍保留。
 
-**How to apply:** init/remember/doctor 写类型索引时发 README+project-entries-*；读兼容旧 `AGENTS.md`+`project-memory-entries` 直至迁移完成。PROTOCOL/LAYOUT/模板与 ADR 0012 路径表述随实施更新。不要把「类型目录有列表」自动当成系统入口。
+**Why:** 用户 2026-10-07 先要求类型索引用 README，随后明确空的类型目录 AGENTS 桩（含 `.harness/skills/managed` 与 `referenced`）没有登记价值，应删除。硬约束若只是迁移时生成的两行套话，不是需要保留的系统入口。
+
+**How to apply:** init / add-type / doctor / remember 写类型索引时只发 README + `project-entries-*`。`TYPE_INDEX_FILE_NAME` 与 `typeIndexRelpath` 指向 README。已存在的旧 AGENTS 类型索引可以原地更新；文件不在时不要重建它。不要把名单抄进同目录 AGENTS，也不要让它挂同目录 README。

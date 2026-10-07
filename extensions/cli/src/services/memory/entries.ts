@@ -36,7 +36,6 @@ import {
 import {
   discoverLayerTypes,
   ensureLayerTypeGitignore,
-  indexFileName,
   layerTypeSpecs,
   layerWritableTypes,
   rejectUnwritableType,
@@ -194,17 +193,16 @@ export function buildEntryFields(
   fields.updatedAt = nowTimestamp();
   return fields;
 }
-/** AGENTS.md type indexes use AgentsNode. A leftover README.md index stays a ReadmeNode. */
+/** README type indexes use ReadmeNode; a not-yet-migrated AGENTS.md index keeps its legacy model. */
 export const typeIndexNode = (file: string): AgentsNode | ReadmeNode =>
   basename(file) === "README.md" ? new ReadmeNode(file) : new AgentsNode(file);
-/** Current indexes are AGENTS.md. A leftover README.md keeps the entries dialect. */
+/** An existing legacy AGENTS.md index keeps its dialect. A missing index is created as README. */
 export function typeIndexTemplate(file: string, name: string): string {
   const template = readIndexTemplate(typeIndexTemplateName(name), name, name);
   if (basename(file) === "README.md") return template;
   return template
-    .replaceAll("project-entries-", "project-harness-")
-    .replaceAll("## 本层内容", "## 本层系统维护信息")
-    .replaceAll("## 下层内容", "## 下层系统维护信息");
+    .replace(`${ENTRIES_LOCAL_START}\n## ${ENTRIES_SECTIONS.localChildren.heading}\n\n`, `${ENTRIES_START}\n`)
+    .replace(ENTRIES_LOCAL_END, ENTRIES_END);
 }
 export function buildEntryIndex(
   target: string,
@@ -246,22 +244,14 @@ export function expectedIndexDocument(
   name: string,
   source?: string,
 ): string {
-  const file = assertScopePath(
-    join(target, discoverLayerTypes(target)[name] ?? indexFileName(name)),
-    target,
-  );
+  const file = assertScopePath(typeIndexPath(target, name), target);
   const existing =
     source ??
     (isFile(file)
       ? readText(file)
       : typeIndexTemplate(file, name));
-  const generatedSource = basename(file) === "README.md"
-    ? buildEntryIndex(target, name, false)
-    : buildEntryIndex(target, name, false)
-        .replaceAll("project-entries-", "project-harness-")
-        .replaceAll("## 本层内容", "## 本层系统维护信息")
-        .replaceAll("## 下层内容", "## 下层系统维护信息");
-  const generated = typeIndexNode(file).parse(generatedSource);
+  const legacy = basename(file) !== "README.md";
+  const generated = typeIndexNode(file).parse(buildEntryIndex(target, name, legacy));
   const node = typeIndexNode(file).parse(generated.localChildren.length ? existing.replace(/^- 暂无条目。\r?\n/gm, "") : existing);
   const desired = new Map(generated.localChildren.map(ref => [ref.id, ref]));
   const base = canonicalPath(typeContentDir(target, name));
@@ -281,10 +271,7 @@ export async function refreshIndex(
   service = memoryNodes(target),
 ): Promise<string> {
   target = canonicalPath(target);
-  const file = assertScopePath(
-    join(target, discoverLayerTypes(target)[name] ?? indexFileName(name)),
-    target,
-  );
+  const file = assertScopePath(typeIndexPath(target, name), target);
   ensureLayerTypeGitignore(target, name);
   if (name in discoverLayerTypes(target) && !isExternalType(name))
     fs.mkdirSync(dirname(file), { recursive: true });

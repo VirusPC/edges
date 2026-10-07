@@ -136,6 +136,29 @@ test("add-type creates a README index and links it from layer AGENTS", async (t)
   );
 });
 
+test("a missing type index is created as README.md for memory and skills", async (t) => {
+  const dir = fixture(t);
+  await initMemory({
+    indexGroup: "descendant",
+    targetDir: dir,
+    memoryTypes: ["project"],
+    skillTypes: ["managed"],
+  });
+  const projects = join(dir, ".harness/memory/projects");
+  const managed = join(dir, ".harness/skills/managed");
+  rmSync(join(projects, "README.md"));
+  rmSync(join(managed, "README.md"));
+  const { refreshIndex } = await import("../../src/services/memory/entries.js");
+  await refreshIndex(dir, "project");
+  await refreshIndex(dir, "managed");
+  assert.equal(existsSync(join(projects, "README.md")), true);
+  assert.equal(existsSync(join(projects, "AGENTS.md")), false);
+  assert.equal(existsSync(join(managed, "README.md")), true);
+  assert.equal(existsSync(join(managed, "AGENTS.md")), false);
+  assert.match(read(dir, ".harness/memory/projects/README.md"), /project-entries-local/);
+  assert.match(read(dir, ".harness/skills/managed/README.md"), /project-entries-local/);
+});
+
 test("legacy AGENTS.md type index still discovers and loads until migrated", async (t) => {
   const dir = fixture(t);
   await initMemory({ indexGroup: "descendant", targetDir: dir, memoryTypes: ["project"] });

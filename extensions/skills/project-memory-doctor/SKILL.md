@@ -17,7 +17,7 @@ edges --scope <目录> memory doctor \
 
 | code / issue | 处理 |
 | --- | --- |
-| missing-index / stale-index | 补已采用类型入口 `AGENTS.md`，或重算其本层列表区块 |
+| missing-index / stale-index | 补已采用类型入口 `README.md`（memory 与 skills），或重算其本层列表区块。不新建类型目录 `AGENTS.md` |
 | unregistered-type / outdated-local | 补本层类型链接，保留其他类型和人工说明 |
 | missing-agents / foreign-agents | 建层入口或追加受管区块，人工正文保留 |
 | missing-important | 补硬约束种子，已有规则不覆盖 |

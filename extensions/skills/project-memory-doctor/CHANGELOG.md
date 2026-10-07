@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- 缺失类型入口补 `README.md`（`project-entries-*`），memory 与 skills 都一样。不补类型目录 `AGENTS.md`；已存在的旧 AGENTS 类型索引仍可原地更新。
+
 ## [3.2.0] - 2026-10-07
 
 ### Changed
