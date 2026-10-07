@@ -27,6 +27,7 @@ import {
   recoveryPath,
   type ResourceSnapshot,
 } from "./node-resources.js";
+import { createSuperAgentsNode } from "./super-root.js";
 import {
   coLocated,
   carryReferenceSuffix,
@@ -196,24 +197,11 @@ export class NodeService {
     return node;
   }
   /**
-   * Runtime-only super entry for this scope: mounts the content-face README
-   * (scope README, else git-root README) as the virtual system's system two.
+   * Runtime-only super entry for this scope: mounts harness-materials README
+   * paths that exist under the scope harness root (empty mounts allowed).
    */
   #superRoot(scopePath: string): SuperAgentsNode {
-    const scopeDir = path.basename(scopePath) === "AGENTS.md"
-      ? path.dirname(path.resolve(scopePath)) : path.resolve(scopePath);
-    const scopeReadme = path.join(scopeDir, "README.md");
-    if (fs.existsSync(scopeReadme))
-      return new SuperAgentsNode(scopeDir, [{ id: scopeReadme }]);
-    const edgesRoot = findAncestor(scopeDir, isGitBoundary) ?? scopeDir;
-    const rootReadme = path.join(edgesRoot, "README.md");
-    if (fs.existsSync(rootReadme))
-      return new SuperAgentsNode(scopeDir, [{ id: rootReadme }]);
-    throw new Error(
-      `--super requires a content-face README.md at the scope or Edges root (tried ${scopeReadme}` +
-        (rootReadme !== scopeReadme ? ` and ${rootReadme}` : "") +
-        `).`,
-    );
+    return createSuperAgentsNode(scopePath);
   }
   /** Deferred, streaming reads with entry snapshots only. Before moving or
    * destroying a returned node, call get(node.path) to capture its resources. */

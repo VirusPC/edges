@@ -59,9 +59,24 @@ test("a real AGENTS stays the default entry; --super still builds the super node
   assert.ok(superNodes[0] instanceof SuperAgentsNode);
 });
 
-test("--super without a root README fails clearly", async () => {
+test("--super with no materials mounts empty SuperAgentsNode", async () => {
   const root = fixture();
   fs.rmSync(path.join(root, "README.md"));
   const service = new NodeService({ managedRoot: root });
-  await assert.rejects(() => service.list(root, { super: true }), /README\.md/);
+  const nodes = await service.list(root, { super: true });
+  assert.ok(nodes[0] instanceof SuperAgentsNode);
+  assert.deepEqual(nodes[0]!.children, []);
+});
+
+test("super mounts configured README materials under .harness, not root AGENTS", async (t) => {
+  const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "super-m-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
+  fs.writeFileSync(path.join(root, "AGENTS.md"), "# Scope\n");
+  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# Tasks\n");
+  const service = new NodeService({ managedRoot: root });
+  const nodes = await service.list(root, { super: true });
+  const rel = nodes.map((n) => path.relative(root, n.path));
+  assert.ok(rel.some((p) => p === path.join(".harness", "tasks", "README.md")));
+  assert.ok(!rel.includes("AGENTS.md"));
 });

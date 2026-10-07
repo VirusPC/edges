@@ -81,7 +81,7 @@ function addRootCommand(
     )
     .option(
       "--super",
-      "Root at a runtime SuperAgentsNode over the scope content-face README (never written to disk)",
+      "Root at a runtime SuperAgentsNode mounting harness-materials README paths (never written to disk)",
     )
     .description("Edges CLI: notes, tasks, artifacts, and more")
     .version(VERSION, "-v, --version", "Print version")

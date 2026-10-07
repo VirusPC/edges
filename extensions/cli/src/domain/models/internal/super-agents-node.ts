@@ -7,8 +7,8 @@ export const SUPER_ENTRY_DIR = ".super";
 
 /**
  * Virtual AGENTS for `scopeDir`, created only by an explicit `--super`.
- * Composition is the content-face README (supplied by the caller) treated as
- * this virtual system's system two. Never parsed from or written to disk.
+ * Composition is harness-materials README mounts (supplied by the caller)
+ * treated as this virtual system's system two. Never parsed from or written to disk.
  */
 export class SuperAgentsNode extends AgentsNode {
   readonly scopeDir: string;
