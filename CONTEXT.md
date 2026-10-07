@@ -5,36 +5,36 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 ## Language
 
 **系统入口（System Entry）**：
-引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层系统维护信息与下层系统维护信息，并可写硬约束；从作用域根起经系统维护信息登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$project-memory-init` / project harness init；命令 `edges memory init`），以标记该目录为重点维护作用域；不是路径白名单。默认遍历根是 `--scope` 下的真实 `AGENTS.md`。
-_避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md
+引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层系统维护信息与下层系统维护信息，并可写硬约束；从作用域根起经系统维护信息登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$project-memory-init` / project harness init；命令 `edges memory init`），以标记该目录为重点维护作用域；不是路径白名单。CLI 默认遍历根是 `--scope` 下的真实 `AGENTS.md`，只覆盖该系统的系统二；从真 AGENTS 出发到不了同目录 README 上的 tasks/notes 等是预期。
+_避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md、从真 AGENTS 遍历时自动并进 README 组成边
 
 **虚拟超节点（SuperAgentsNode）**：
-相对当前 `--scope` 再上一级的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用：把可识别的顶层入口挂进其组成后再遍历（例如以「人」为根、Edges 为其系统二时查个人相关任务，经根 `README.md` 的组成登记下钻）。缺 AGENTS 且未开 `--super` 不得自动合成。
-_避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNode、缺 AGENTS 就静默加上超节点、把超节点落盘
+相对当前 `--scope` 的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用。用途：把该 scope 下挂在组织清单（README）上的内容面（tasks/notes 等）**当作一个虚拟系统的系统二**，从该节点开始遍历——不是从真 AGENTS「旁路」过去。挂载形状经内容面组成登记（如根或该 scope 的 `README.md` entries）下钻，不在超节点上扁平挂全部 Task 叶子。缺 AGENTS 且未开 `--super` 不得自动合成。
+_避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNode、缺 AGENTS 就静默加上超节点、把超节点落盘、用真 AGENTS 遍历并边代替 `--super`
 
 **文档节点（Document Node）**：
-模型中的 Markdown 单位：系统入口，组织清单，或内容叶子（Task / Note / Memory / Skill 等）。从作用域根（CLI scope 对应的系统入口、根 README 组成、或显式 `--super` 的虚拟超节点）起经登记可达才算节点。
+模型中的 Markdown 单位：系统入口，组织清单，或内容叶子（Task / Note / Memory / Skill 等）。从作用域根（CLI scope 对应的真系统入口，或显式 `--super` 的虚拟超节点）起经登记可达才算节点。
 _避免使用_：仅指文件夹、磁盘上未登记的 md
 
 **组织清单（README.md）**：
-用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `project-entries-local` / `project-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。
-_避免使用_：把叶子正文写成 README、把 README 当成系统入口、无 entries 的普通包说明自动当节点、把 README 组成写成 project-harness-*、下层内容挂成 INDEX/SKILL
+用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `project-entries-local` / `project-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。在「真系统」视角下这些是系统一材料；经 `SuperAgentsNode` 遍历时，同一批材料被当作**虚拟系统的系统二**展开。
+_避免使用_：把叶子正文写成 README、把 README 当成真系统入口、无 entries 的普通包说明自动当节点、把 README 组成写成 project-harness-*、下层内容挂成 INDEX/SKILL
 
 **内容叶子入口（INDEX.md）**：
 Task / Note / Memory 等的入口文件，名为 `INDEX.md`。Skill 仍为 `SKILL.md`。有无子项仍看是否出现组成登记，不靠文件名分 Internal / Leaf。
 _避免使用_：index.md（迁移前史料）、把叶子叫 README.md、把 INDEX.md 当成系统入口
 
 **组成登记（entries）**：
-系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口用 `project-harness-local` / `project-harness-descendants`（标题「本层系统维护信息 / 下层系统维护信息」）；组织清单用 `project-entries-local` / `project-entries-descendants`（标题「本层内容 / 下层内容」）。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——这是树遍历的核心规则。
-_避免使用_：目录扫描结果、把任意 Markdown 链接当子节点、宣称 AGENTS.md 永不登记子项、把系统一孩子双写进 AGENTS 与 README、两套标记混用
+系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口用 `project-harness-local` / `project-harness-descendants`（标题「本层系统维护信息 / 下层系统维护信息」）；组织清单用 `project-entries-local` / `project-entries-descendants`（标题「本层内容 / 下层内容」）。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——两套登记并列，持久化上互不为对方的 child。目标模型下真 AGENTS 的 traverse **不**自动并 README 边；要逛内容面须换根到 `SuperAgentsNode`。
+_避免使用_：目录扫描结果、把任意 Markdown 链接当子节点、宣称 AGENTS.md 永不登记子项、把系统一孩子双写进 AGENTS 与 README、两套标记混用、把 README 持久化挂进 AGENTS.children
 
 **组织节点 / 叶子节点（派生状态）**：
 同一文档节点的当前状态：有组成登记为组织节点，否则为叶子。不是固定类型，模型不持久化 isLeaf，任意节点都可增加子节点。具体节点直接继承 BaseNode；`type` 为 `agents` / `readme` / `task` / `memory` / `note` / `skill` / `text`（普通文本兜底），无 `internal`。
 _避免使用_：InternalNode/LeafNode 类层次、type internal、按文件名区分组织/叶子、另造 entryKind
 
 **维护关系（harness）**：
-节点指向自身维护系统（系统二）的独立关系；系统入口即该关系在文件上的落点。读取某个系统二时展开其组成登记中的系统一内容，不自动进入那些内容节点自己的系统入口（若有）。
-_避免使用_：组成子节点、固定深度截断
+节点指向自身维护系统（系统二）的独立关系；系统入口即该关系在文件上的落点。默认不跟随 harness。真系统入口上的组成是该系统的系统二材料；内容面另经组织清单或 `SuperAgentsNode` 进入，不自动从真 AGENTS 并进。
+_避免使用_：组成子节点、固定深度截断、把 harness 与「遍历时并 README 边」混为一谈
 
 **Edges**：
 采用通用递归模型、当前以个人递归自我改进为目标的支撑系统，其根节点在个人作用域中承载人的系统二。进入 Edges 自身的维护作用域时，Edges 又作为被维护的系统一；模型中的根主体不限于个人。

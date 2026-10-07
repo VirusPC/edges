@@ -122,7 +122,16 @@ roots 是一个已加载节点或一组节点。resolve 返回 undefined 可跳�
 
 不再接受 `includeDescendants`；要本层-only 一律传 `localOnly: true`。
 
-**双文件。** 从 scope 的 `AGENTS.md` 出发时，traverse 在其自身 children 之后并入同目录 `README.md` 的组成边（`README.md` 同样遵守 `localOnly`）。这是遍历期合并，不写入 AGENTS 的 localChildren/descendantChildren；同目录 README 是否存在由 resolve 决定（返回 undefined 即跳过）。NodeService 的 `query/list` 对固定路径 `README.md` 做存在性判断，不扫描目录；写入校验与注册遍历（move/destroy）暂不并入 README 边。
+### 遍历根：真系统二 vs 虚拟系统二
+
+| 根 | 何时 | 走到什么 |
+| --- | --- | --- |
+| 真 `AGENTS.md` | CLI 默认（`--scope`） | 仅该系统的系统二（维护信息、下层 AGENTS） |
+| `SuperAgentsNode` | 显式 `--super` | 内容面（README 上的 tasks/notes 等），**当作虚拟系统的系统二** |
+
+同目录 `AGENTS.md` 与 `README.md` 在磁盘上是**并列登记**：系统一孩子只写在 README，不写进 AGENTS 组成字段。目标模型下，从真 AGENTS 出发**不要**再临时并一条 README 边；到不了内容面是预期。要逛内容面须换根到 `SuperAgentsNode`（见 [models README 设计原则](../models/README.md#设计原则树与入口)）。
+
+**现行代码残留：** 若 `companionReadme` / 遍历仍从 AGENTS 并同目录 README，属于待对齐目标模型的实现，新逻辑勿再依赖该并边。
 
 遍历按需进行深度优先、先序访问，已访问路径去重；遇到仍在当前递归路径中的节点时报组成环错误。同一节点被多处引用时只输出一次。解析或加载失败向上传递，不自动修复或回退到扫描。
 

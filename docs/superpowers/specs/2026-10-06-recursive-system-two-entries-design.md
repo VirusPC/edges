@@ -249,18 +249,24 @@ flowchart TB
 ## 遍历规则（核心）
 
 1. 默认从 `--scope` 下真实 `AGENTS.md` 出发；**仅当显式 `--super`** 时才用虚拟超节点。缺 AGENTS 且未开 flag → 报错 / 发现失败，不静默虚拟化。
-2. 展开系统入口的 **系统维护信息**：系统二材料 + 下层 `AGENTS.md`。默认不跟随 `harness`。
-3. 同目录（或登记路径上的）`README.md` 的本层/下层内容展开系统一树；**不**从同目录 AGENTS 找系统一孩子。README 下层组只跟到其它 `README.md`。
+2. 从真 AGENTS 展开 **系统维护信息**：系统二材料 + 下层 `AGENTS.md`。默认不跟随 `harness`。到不了同目录 README 上的 tasks/notes 是预期——CLI 默认是对该系统的系统二操作。
+3. **不要**在从真 AGENTS 的 traverse 里临时并同目录 README 边。内容面换根见下节 `SuperAgentsNode`。README 下层组只跟到其它 `README.md`；AGENTS 下层组只跟到其它 `AGENTS.md`。
 4. `INDEX.md` / `SKILL.md` 无组成登记则不再下钻；有登记则按其 local/descendant 继续。
-5. 默认展开全部 `children`；`localOnly` 才限制本层；`includeHarness` 显式才跟维护边。不得用目录扫描冒充组成。
+5. 默认展开全部 `children`；`localOnly` 才限制本层（不再使用 `includeDescendants`）；`includeHarness` 显式才跟维护边。不得用目录扫描冒充组成。
+
+### 设计澄清（2026-10-07）
+
+- 同目录 AGENTS / README：持久化上**并列**，互不为对方 child；登记分工不变（系统二 vs 系统一材料）。
+- 真 AGENTS traverse ≠ 「整个 scope 的完整视图」。
+- 要操作 tasks/notes 等：创建该 scope 的 **SuperAgentsNode**，把内容面看作**虚拟系统的系统二**再遍历。
 
 ## 虚拟超节点
 
-- 不落盘；仅运行时对象。语义：相对当前 scope **再上一级** 的超节点。
+- 不落盘；仅运行时对象。
 - **须显式 `--super`**（CLI/API）开启；默认仍取 scope 下真实 `AGENTS.md`。
 - 不因 scope 无 AGENTS 自动出现。
-- 用途：主体无 AGENTS（个人根）时查询个人相关任务等。
-- 挂载形状：经 Edges 根 README 的组成登记进入仓内树（Q9b）；不在超节点上扁平挂全部 Task 叶子。
+- 用途：把该 scope 内容面（README 上的 tasks/notes 等）当作虚拟系统的系统二来查询；亦覆盖「主体无 AGENTS（个人根）」等用例。
+- 挂载形状：经内容面组成登记进入树（如根或该 scope 的 `README.md` entries，Q9b）；不在超节点上扁平挂全部 Task 叶子；**不**靠真 AGENTS 并边到达内容。
 - 实现类名：**`SuperAgentsNode` extends `AgentsNode`**（勿用 VirtualSuperNode）。
 
 ## 谁拥有系统入口

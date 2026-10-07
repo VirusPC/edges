@@ -6,16 +6,31 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 
 ## 设计原则（树与入口）
 
-下列原则以 2026-10-06 grill 与根 `CONTEXT.md` 为准；类图已与现行实现一致：`AgentsNode` / `ReadmeNode` 与各业务节点直继 `BaseNode`，无 Internal/Leaf 层次。
+下列原则以 2026-10-06 grill、2026-10-07 澄清与根 `CONTEXT.md` 为准；类图已与现行实现一致：`AgentsNode` / `ReadmeNode` 与各业务节点直继 `BaseNode`，无 Internal/Leaf 层次。
 
-1. **递归系统二：** 系统入口是 `AGENTS.md`，带组成登记。默认从 CLI scope 的系统入口出发；显式 `--super` 时从 `SuperAgentsNode`（继承 `AgentsNode` 的虚拟超节点）出发。经登记可达才算节点。
-2. **组成边 ≠ 维护边：** `harness` 不进 `children`。默认遍历不跟随 harness；读某一系统二的组成时，不自动进入其子节点自己的系统入口。
-3. **同目录双文件分工（遍历核心规则）：** 若同时存在 `AGENTS.md` 与 `README.md`，系统一的孩子只挂在 `README.md` 的 `project-entries-*`（标题「本层内容 / 下层内容」）；`AGENTS.md` 的 `project-harness-local` / `descendants`（标题「本层系统维护信息 / 下层系统维护信息」）只挂系统二材料与下级系统入口。两套组成不得混写同一批系统一孩子。
-4. **入口合同：** 组织清单 → `README.md` + `project-entries-*`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md`。有无子节点看是否出现组成登记，不持久化 `isLeaf`，任意节点都可增加 children。
-5. **谁拥有系统入口：** 任意目录可由用户自行 init；不是路径白名单。
-6. **存量迁 `INDEX.md`：** 可预览脚本，复用本包 `operations` 树遍历更新引用与改名；含 `posts/`（仅本轮改名迁移经用户授权）。不要手改、不要另写扫盘发现逻辑。
+1. **递归系统二：** 系统入口是 `AGENTS.md`，带组成登记。CLI **默认**从 scope 下真 `AGENTS.md` 出发，只做该系统的**系统二**操作。经登记可达才算节点。
+2. **组成边 ≠ 维护边：** `harness` 不进 `children`。默认遍历不跟随 harness。
+3. **同目录双文件：登记分工，不是 traverse 并边：** 若同时存在 `AGENTS.md` 与 `README.md`，系统一孩子只挂在 README 的 `project-entries-*`；AGENTS 的 `project-harness-*` 只挂系统二材料与下级 AGENTS。持久化上互不为对方的 child。从真 AGENTS 出发**到不了** README 上的 tasks/notes 是预期。
+4. **内容面换根：`SuperAgentsNode`：** 若需要 tasks/notes 等（真系统视角下的系统一），在该 scope 创建运行时 `SuperAgentsNode`（`--super`），把内容面**当作虚拟系统的系统二**再遍历。不要从真 AGENTS 临时并一条 README 边来「顺便」逛内容。
+5. **入口合同：** 组织清单 → `README.md` + `project-entries-*`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md`。有无子节点看是否出现组成登记，不持久化 `isLeaf`。
+6. **谁拥有系统入口：** 任意目录可由用户自行 init；不是路径白名单。有列表 ≠ 系统入口。
+7. **存量迁 `INDEX.md`：** 可预览脚本；含 `posts/`（仅改名）。不要手改、不要另写扫盘冒充组成。
 
-设计真源与**目标架构图**：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md#架构图目标模型)。相关记忆：`project_grill_entries_markers_and_titles`、`project_recursive_system_two_entry`、`project_document_entry_readme_index`、`project_grill_system_entry_q13_q14`。
+```mermaid
+flowchart TB
+  subgraph real["真系统 — 默认 CLI"]
+    A["scope/AGENTS.md"] --> H[".harness / 下层 AGENTS<br/>真系统二"]
+  end
+  subgraph virt["虚拟系统 — 显式 --super"]
+    S["SuperAgentsNode<br/>不落盘"] --> R["README 内容面<br/>当作虚拟系统二"]
+    R --> T["tasks / notes / …"]
+  end
+  A -. "不并边" .- R
+```
+
+**与现行代码的差距：** `operations/traverse` 里若仍有「从 AGENTS 临时并同目录 README」的 companion 逻辑，视为待删的实现残留；目标模型以本节与 `CONTEXT.md` 为准。
+
+设计真源：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md)。相关记忆：`feedback_cli_is_system_two_ops`、`feedback_content_via_super_agents_node`、`project_grill_traverse_default_all_children`。
 
 ## 类与节点关系
 
