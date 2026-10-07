@@ -9,8 +9,8 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 _避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md、从真 AGENTS 遍历时自动并进 README 组成边
 
 **虚拟超节点（SuperAgentsNode）**：
-相对当前 `--scope` 的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用。典型叙事：把整个仓库视为上一级主体（如个人）的系统二，向上为该系统构建虚拟根。traverse 时**当作普通 AgentsNode**（只走 `children`，无跨系统特判）。挂载按虚拟 scope 下、对齐 `.harness` 的固定相对路径；`<scope>/README.md` 可缺（读兼容）。缺 AGENTS 且未开 `--super` 不得自动合成。系统森林（多个 `project-harness` 根）在 traverse 之外拼装，且任意一棵树不得包含另一棵树的根。
-_避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNode、缺 AGENTS 就静默加上超节点、把超节点落盘、用真 AGENTS 遍历并边代替 `--super`、让一次 traverse 跨系统拼森林
+相对当前 `--scope` 的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用。典型叙事：把整个仓库视为上一级主体（如个人）的系统二，向上为该系统构建虚拟根。traverse 时**当作普通 AgentsNode**（只走 `children`，无跨系统特判）。挂载表来自 `extensions/cli/src/domain/config/harness-materials.json`（材料 README；`scope`+path；不挂其它系统 `AGENTS.md`；可空）。缺 AGENTS 且未开 `--super` 不得自动合成。系统森林在 traverse 之外由 `SystemForestService` / `edges forest list` 拼装为 `BaseNode[][]`（`independent` 早停；`innermost` 只留内层）。
+_避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNode、缺 AGENTS 就静默加上超节点、把超节点落盘、用真 AGENTS 遍历并边代替 `--super`、让一次 traverse 跨系统拼森林、Super 挂其它系统 AGENTS
 
 **文档节点（Document Node）**：
 模型中的 Markdown 单位：系统入口，组织清单，或内容叶子（Task / Note / Memory / Skill 等）。从作用域根（CLI scope 对应的真系统入口，或显式 `--super` 的虚拟超节点）起经登记可达才算节点。

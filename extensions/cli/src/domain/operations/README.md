@@ -106,8 +106,8 @@ groupBy 调用时不触发计算，但 value 执行后需要物化分组。先 f
 
 1. **traverse 只跑单个系统**：只走该入口的 `children`（系统二组成），**不跨系统**，不做森林拼装。
 2. **`SuperAgentsNode` 无特判**：traverse 时当作普通 `AgentsNode`（同一套 `children` 规则）。
-3. **森林在 traverse 之外**：scope 内凡带 `project-harness` 标识的 `AGENTS.md` 皆可收为根；对每根各自调用 traverse。收根可「全部独立」；展开时 **任意一棵树不得包含另一棵树的根节点**（互不吞根）。
-4. **仓库可视为 `.harness`**：整仓可当作上一级主体（如个人）的系统二；向上建虚拟 `SuperAgentsNode` 作该系统的虚拟根。Super 挂载按虚拟 scope 下、对齐 `.harness` 的固定相对路径；`<scope>/README.md` 可缺（仅读兼容）。
+3. **森林在 traverse 之外**：`collectSystemRoots` 扫盘收带 `project-harness` 标记的 `AGENTS.md`；`SystemForestService` / `edges forest list` 对每根各自 traverse，`resolve` 遇其它根早停。形式：`independent`（默认，全部独立）或 `innermost`（从 B 可达 A 则丢掉外层 B，只留内层）。
+4. **仓库可视为个人系统二 + Super**：整仓可当作上一级主体的系统二；`SuperAgentsNode` 按 `domain/config/harness-materials.json` 挂**存在的**材料 README（`scope` + path；材料 path 不带 `.harness/` 前缀；harness 根 = `<scope>/.harness` 若存在否则 `scope`）。零个材料时允许空挂载；**不**挂其它系统的 `AGENTS.md`。
 
 真源记忆：`feedback_traverse_single_system_and_forest_roots`。
 
@@ -136,7 +136,7 @@ roots 是一个已加载节点或一组节点（多根时仍是「多棵单系�
 | 根 | 何时 | 走到什么 |
 | --- | --- | --- |
 | 真 `AGENTS.md` | CLI 默认（`--scope`） | 仅该系统的系统二（维护信息、下层 AGENTS） |
-| `SuperAgentsNode` | 显式 `--super` | 按虚拟 scope 固定相对路径挂载的组成（常为内容面）；**遍历语义同普通 AgentsNode** |
+| `SuperAgentsNode` | 显式 `--super` | 按 `harness-materials.json` 挂载的材料 README；**遍历语义同普通 AgentsNode** |
 
 同目录 `AGENTS.md` 与 `README.md` 在磁盘上是**并列登记**：系统一孩子只写在 README，不写进 AGENTS 组成字段。从真 AGENTS 的 **query/list 不到内容面**是预期。要逛内容面须换根到 `SuperAgentsNode`。没有查询并边，也没有 `includeContentFace` 兼容开关。
 
