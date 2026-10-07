@@ -17,4 +17,5 @@
 - [.harness/memory/references/README.md](<.harness/memory/references/README.md>) — 需求文档、设计稿、接口文档、监控面板等外部资料。
 - [.harness/skills/managed/README.md](<.harness/skills/managed/README.md>) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
 - [.harness/skills/referenced/README.md](<.harness/skills/referenced/README.md>) — 本层 .agents/skills/ 下人写或装入的标准技能，工具只索引不改写。
+- [2026\-10\-07\-\-osmo\-maldives\-ingest\-and\-highlight\-preview/INDEX.md](<2026-10-07--osmo-maldives-ingest-and-highlight-preview/INDEX.md>)
 <!-- project-harness-local:end -->
