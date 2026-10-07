@@ -92,7 +92,7 @@ AGENTS 的本层硬约束、本层记忆、下层索引分别对应 constraints�
 
 ### 查询遵循索引
 
-NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认走全部组成 children（local∪descendants）；显式 `localOnly` 才只走 localChildren；includeHarness 才沿维护关系递归。
+NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认走全部组成 children（local∪descendants）；显式 `localOnly` 才只走 localChildren；includeHarness 才沿维护关系递归。默认根是 scope 下真 `AGENTS.md`（该系统的系统二）；要逛 README 上的 tasks/notes 等，目标模型是显式 `--super` / `SuperAgentsNode`（内容面当作虚拟系统二），不是从真 AGENTS 并 README 边——详见 [models 设计原则](src/domain/models/README.md#设计原则树与入口)。
 
 ```ts
 const pending = service.query(scope, { types: ["task"] })
