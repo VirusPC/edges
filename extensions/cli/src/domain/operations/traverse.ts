@@ -1,11 +1,35 @@
+import { basename, dirname, join } from "node:path";
 import { BaseNode } from "../models/core/base-node.js";
-import { InternalNode } from "../models/internal/internal-node.js";
+import { ENTRY_NAMES, normalizeNodeType } from "../models/layout.js";
 import type { NodeReference } from "../models/core/types.js";
 import { validateChild } from "../models/core/relations.js";
 
 export interface ScopeTraversalOptions {
-  includeDescendants?: boolean;
+  /** When true, expand only localChildren. Default false: local ∪ descendants. */
+  localOnly?: boolean;
   includeHarness?: boolean;
+  /** Explicit `--super`: root traversal at a runtime SuperAgentsNode. */
+  super?: boolean;
+  /**
+   * Forest assembly: do not descend into these absolute entry paths
+   * (other system roots). Used outside traverse's single-system contract.
+   */
+  excludeRoots?: ReadonlySet<string>;
+}
+/** Same-directory README next to an AGENTS.md (content face). Not an AGENTS child. */
+export function contentFaceReadme(node: BaseNode): NodeReference | undefined {
+  if (node.type !== "agents") return undefined;
+  if (basename(node.path) !== ENTRY_NAMES.internal) return undefined;
+  return { id: join(dirname(node.path), ENTRY_NAMES.readme) };
+}
+
+function expandedChildren(
+  node: BaseNode,
+  options: ScopeTraversalOptions,
+): readonly NodeReference[] {
+  return options.localOnly
+    ? (node.localChildren ?? node.children)
+    : node.children;
 }
 
 export interface NodeQueryOptions extends ScopeTraversalOptions {
@@ -32,19 +56,20 @@ export async function* traverse(
     seen.add(node.path);
     active.add(node.path);
     try {
-      if (!options.types || options.types.includes(node.type)) yield node;
-      const children =
-        node instanceof InternalNode && !options.includeDescendants
-          ? node.localChildren
-          : node.children;
+      if (!options.types || options.types.map(normalizeNodeType).includes(node.type)) yield node;
+      const harness = options.includeHarness ? node.harness : undefined;
       for (const reference of [
-        ...children,
-        ...(options.includeHarness && node.harness ? [node.harness] : []),
+        ...expandedChildren(node, options),
+        ...(harness ? [harness] : []),
       ]) {
         validateChild(reference);
         const target = resolve(node, reference);
         if (target === undefined) continue;
-        if (active.has(target)) throw new Error(`Composition cycle: ${target}`);
+        if (active.has(target)) {
+          // README harness → AGENTS is a dual link, not a composition cycle.
+          if (reference === harness) continue;
+          throw new Error(`Composition cycle: ${target}`);
+        }
         if (!seen.has(target))
           yield* visit(await load(node, reference, target));
       }

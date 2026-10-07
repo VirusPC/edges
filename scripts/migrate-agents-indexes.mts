@@ -4,14 +4,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { randomUUID } from 'node:crypto';
-import { InternalNode } from "../extensions/cli/src/domain/models/internal/internal-node.js";
+import { AgentsNode } from "../extensions/cli/src/domain/models/internal/agents-node.js";
 import { decodeBody } from '../extensions/cli/src/domain/models/internal/parse.js';
 import { readEntry, saveEntries, validateEntry, checkPath, type EntryFile } from '../extensions/cli/src/services/node/node-files.js';
 const start = '<!-- task-projects:start -->', end = '<!-- task-projects:end -->';
 const excluded = new Set(['.git', 'node_modules', 'dist', 'build', 'posts', '.agents', '.superpowers']);
 export interface AgentsIndexPlan { root: string; edits: Array<{ path: string; before: string; after: string }>; }
 const snapshots = new WeakMap<AgentsIndexPlan, { files: EntryFile[]; edits: string; root: string }>();
-function convert(file: string, source: string): string {
+export function convert(file: string, source: string): string {
  const starts = source.split(start).length - 1, ends = source.split(end).length - 1;
  if (!starts && !ends) return source;
  if (starts !== 1 || ends !== 1 || source.indexOf(start) > source.indexOf(end)) throw new Error(`${file}: malformed or duplicate legacy markers`);
@@ -28,7 +28,7 @@ function convert(file: string, source: string): string {
   if(!/^(?:[-+*]|\d+[.)])\s/.test(text)) continue;
   const links=item.content.filter(run=>run.kind==='link');
   if(links.length!==1) { if(/\[|\]\(/.test(text)) throw new Error(`${file}: unrecognized legacy link`); continue; }
-  const parsed=new InternalNode(file).parse('<!-- project-memory-local:start -->\n'+text+'\n<!-- project-memory-local:end -->');
+  const parsed=new AgentsNode(file).parse('<!-- project-memory-local:start -->\n'+text+'\n<!-- project-memory-local:end -->');
   if(parsed.children.length!==1) throw new Error(`${file}: unrecognized legacy link`);
   const ref=parsed.children[0], previous=legacy.get(ref.id);
   if(previous && (previous.name!==ref.name || previous.description!==ref.description))throw new Error(`${file}: conflicting legacy reference: ${ref.id}`);
@@ -39,7 +39,7 @@ function convert(file: string, source: string): string {
  for(const range of removed.reverse()) prose=prose.slice(0,range.start)+prose.slice(range.end);
  prose=prose.replace(/^CLI-maintained index of Task Project titles and descriptions\. Do not hand-edit this section\.\r?\n?/gm,'');
  const clean=source.slice(0,from)+prose+source.slice(to);
- const node=new InternalNode(file).parse(clean);
+ const node=new AgentsNode(file).parse(clean);
  if(decodeBody(clean).unsafe) throw new Error(`${file}: malformed generic markers`);
  for(const ref of legacy.values()) {
   const existing=node.children.find(entry=>entry.id===ref.id);

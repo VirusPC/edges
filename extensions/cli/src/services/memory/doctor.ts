@@ -1,6 +1,6 @@
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 import { listTypeFiles } from './types.js';
-import { InternalNode } from "../../domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
@@ -115,7 +115,7 @@ function validAnchors(
 ): string[] {
   return [...walkOwners(root)].filter((owner) => {
     if (blockedBy(owner, invalid) || !safeScope(owner)) return false;
-    return new InternalNode(join(owner, AGENTS_FILE_NAME))
+    return new AgentsNode(join(owner, AGENTS_FILE_NAME))
       .parse(readText(join(owner, AGENTS_FILE_NAME)))
       .children.some(
         (entry) =>
@@ -149,7 +149,7 @@ export function collectFindings(root: string): MemoryFinding[] {
     const file = join(owner, AGENTS_FILE_NAME);
     if (fs.existsSync(file))
       try {
-        new InternalNode(file).parse(readText(file)).validate();
+        new AgentsNode(file).parse(readText(file)).validate();
       } catch (error) {
         invalid.add(owner);
         findings.push(
@@ -356,7 +356,7 @@ export async function applyFindings(
       if (!specs.length) continue;
       const file = assertScopePath(join(owner, AGENTS_FILE_NAME), owner);
       const service = memoryNodes(owner);
-      const node = await service.get(prepareMemoryWrite(owner, file), InternalNode);
+      const node = await service.get(prepareMemoryWrite(owner, file), AgentsNode);
       if (
         classifyAgentsSource(
           node?.body,

@@ -21,8 +21,8 @@ import {
   layerTypeSpecs,
   parseTypeMeta,
   SEED_TYPE_NAMES,
-  indexFileName,
 } from "./types.js";
+import { legacyTypeIndexRelpath as indexFileName } from "./paths.js";
 import { frontmatterData, logicalFields } from "../../domain/models/memory/documents.js";
 import {
   parseLegacy,

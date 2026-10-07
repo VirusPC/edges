@@ -1,7 +1,8 @@
 import { readEntry, saveEntries } from '../node/node-files.js';
 import { canonicalPath, findAncestor } from "../../utils/filesystem.js";
-import { InternalNode } from "../../domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import * as fs from "node:fs";
+import { ENTRY_NAMES, LEGACY_LEAF_ENTRY } from "../../domain/models/layout.js";
 import { join, dirname, relative, resolve } from "node:path";
 import { assertPrivateIgnored } from "./ignore.js";
 import { parseDocument } from "../../utils/markdown/document.js";
@@ -11,6 +12,7 @@ import {
   TYPE_META_START,
   TYPE_META_END,
   ENTRIES_START,
+  ENTRIES_LOCAL_START,
   blockPattern,
   buildLocalBlock,
   escapeRegExp,
@@ -28,8 +30,10 @@ import {
   moduleForType,
   ownershipTarget,
   readText,
+  TYPE_INDEX_FILE_NAME,
   typeFromDirName,
   typeIndexRelpath,
+  legacyTypeIndexRelpath,
 } from "./paths.js";
 import { ENTRY_LINE_TEMPLATE, renderLine } from "./templates.js";
 export const MEMORY_TYPE_NAMES = [
@@ -58,6 +62,11 @@ export const typeIndexTemplateName = (name: string) =>
   `${name.toUpperCase()}.md`;
 export const indexFileName = (name: string, module?: "memory" | "skills") =>
   typeIndexRelpath(name, module);
+const isTypeIndexSource = (text: string) =>
+  [ENTRIES_START, ENTRIES_LOCAL_START, TYPE_META_START].some((m) =>
+    text.includes(m),
+  );
+const TYPE_INDEX_FILES = [TYPE_INDEX_FILE_NAME, AGENTS_FILE_NAME];
 export function validateTypeName(value: string): string {
   const name = value.trim();
   if (SEED_TYPE_NAMES.includes(name.toLowerCase()))
@@ -131,13 +140,26 @@ export function localOwnershipPaths(
 ): Set<string> {
   const file = join(resolve(target), AGENTS_FILE_NAME);
   const text = source ?? (isFile(file) ? readText(file) : "");
-  const node = new InternalNode(file).parse(text);
+  const node = new AgentsNode(file).parse(text);
   return new Set(
     node.localChildren.flatMap((reference) => {
       const path = canonicalPath(reference.id);
       return path ? [path] : [];
     }),
   );
+}
+/** One type directory has one index; README wins over a not-yet-migrated AGENTS.md. */
+function setCandidate(
+  candidates: Map<string, { module: "memory" | "skills"; dirname: string }>,
+  rel: string,
+  module: "memory" | "skills",
+  dirname: string,
+): void {
+  const readme = `.harness/${module}/${dirname}/${TYPE_INDEX_FILE_NAME}`;
+  if (rel !== readme && candidates.has(readme)) return;
+  if (rel === readme)
+    candidates.delete(`.harness/${module}/${dirname}/${AGENTS_FILE_NAME}`);
+  candidates.set(rel, { module, dirname });
 }
 export function layerTypeSpecs(target: string): TypeSpec[] {
   const candidates = new Map<
@@ -151,23 +173,27 @@ export function layerTypeSpecs(target: string): TypeSpec[] {
       harness === ".harness" &&
       (module === "memory" || module === "skills") &&
       directory &&
-      entry === AGENTS_FILE_NAME &&
+      entry !== undefined &&
+      TYPE_INDEX_FILES.includes(entry) &&
       !rest.length
     )
-      candidates.set(rel, { module, dirname: directory });
+      setCandidate(candidates, rel, module, directory);
   }
   for (const module of ["memory", "skills"] as const) {
     const container = assertScopePath(join(target, ".harness", module), target);
     if (isDirectory(container))
-      for (const child of fs.readdirSync(container).sort()) {
-        const file = join(container, child, AGENTS_FILE_NAME);
-        assertScopePath(file, target);
-        if (isFile(file) && readText(file).includes(ENTRIES_START))
-          candidates.set(`.harness/${module}/${child}/AGENTS.md`, {
-            module,
-            dirname: child,
-          });
-      }
+      for (const child of fs.readdirSync(container).sort())
+        for (const name of TYPE_INDEX_FILES) {
+          const file = join(container, child, name);
+          assertScopePath(file, target);
+          if (isFile(file) && isTypeIndexSource(readText(file)))
+            setCandidate(
+              candidates,
+              `.harness/${module}/${child}/${name}`,
+              module,
+              child,
+            );
+        }
   }
   const result = new Map<string, TypeSpec>();
   for (const [rel, { module, dirname }] of candidates) {
@@ -180,7 +206,11 @@ export function layerTypeSpecs(target: string): TypeSpec[] {
       );
     if (parsed && parsed.module !== module)
       throw new Error(`Type module disagrees with path: ${rel}`);
-    if (SEED_TYPE_NAMES.includes(name) && rel !== indexFileName(name))
+    if (
+      SEED_TYPE_NAMES.includes(name) &&
+      rel !== indexFileName(name) &&
+      rel !== legacyTypeIndexRelpath(name)
+    )
       throw new Error(`Official type path conflict: ${name}`);
     if (result.has(name) && result.get(name)!.indexFile !== rel)
       throw new Error(`Duplicate type identity: ${name}`);
@@ -258,7 +288,7 @@ export function upsertLocalTypeLine(
 ): string {
   document = rewriteLayerSurface(document);
   const block = document.match(blockPattern(LOCAL_START, LOCAL_END))?.[0];
-  if (!block) throw new Error("AGENTS.md 缺少本层组成区块，请先 init");
+  if (!block) throw new Error("AGENTS.md 缺少本层系统维护信息区块，请先 init");
   const owner = process.cwd();
   const expected = ownershipTarget(owner, indexFile);
   if (expected && localOwnershipPaths(owner, block).has(expected))
@@ -330,7 +360,8 @@ export function listTypeFiles(
         continue;
       }
     } else if (isDirectory(child) && item.startsWith(`${name}_`)) {
-      candidate = join(child, "index.md");
+      candidate = join(child, ENTRY_NAMES.leaf);
+      if (!isFile(candidate)) candidate = join(child, LEGACY_LEAF_ENTRY);
       if (!isFile(candidate)) continue;
     } else {
       continue;

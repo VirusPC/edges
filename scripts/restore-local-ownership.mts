@@ -13,7 +13,7 @@ import {
 import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
-import { LegacyIndex as InternalNode } from "./legacy-index.mjs";
+import { LegacyIndex as AgentsNode } from "./legacy-index.mjs";
 import { parseTypeMeta } from "../extensions/cli/src/services/memory/types.js";
 import { OWNER_MAP, type InstanceJob } from "./migrate-recursive-layout.mjs";
 import * as migration from "../extensions/cli/src/services/memory/migrate.js";
@@ -561,7 +561,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
         : path;
     };
     const operations: migration.MigrationOperation[] = [];
-    const edits = new Map<string, InternalNode>();
+    const edits = new Map<string, AgentsNode>();
     const node = (path: string) => {
       safePath(root, relative(root, path));
       if (!edits.has(path)) {
@@ -570,7 +570,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
           throw Error("private-owner-AGENTS-missing");
         edits.set(
           path,
-          new InternalNode(path).parse(migration.decodeState(value)),
+          new AgentsNode(path).parse(migration.decodeState(value)),
         );
       }
       return edits.get(path)!;

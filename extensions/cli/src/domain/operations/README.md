@@ -102,6 +102,29 @@ groupBy 调用时不触发计算，但 value 执行后需要物化分组。先 f
 
 ## 遍历与加载边界
 
+### 原则（单系统 traverse / 森林在外）
+
+1. **traverse 只跑单个系统**：只走该入口的 `children`（系统二组成），**不跨系统**，不做森林拼装。
+2. **`SuperAgentsNode` 无特判**：traverse 时当作普通 `AgentsNode`（同一套 `children` 规则）。
+3. **森林在 traverse 之外**：`collectSystemRoots` 扫盘收带 `project-harness` 标记的 `AGENTS.md`；`SystemForestService` / `edges forest list` 对每根各自 traverse，`resolve` 遇其它根早停。形式：`independent`（默认，全部独立）或 `innermost`（从 B 可达 A 则丢掉外层 B，只留内层）。
+4. **仓库可视为个人系统二 + Super**：整仓可当作上一级主体的系统二；`SuperAgentsNode` 按 `domain/config/harness-materials.json` 挂**存在的**材料 README（`scope` + path；材料 path 不带 `.harness/` 前缀；harness 根 = `<scope>/.harness` 若存在否则 `scope`）。零个材料时允许空挂载；**不**挂其它系统的 `AGENTS.md`。
+
+真源记忆：`feedback_traverse_single_system_and_forest_roots`。
+
+```mermaid
+flowchart LR
+  subgraph outside["森林在外"]
+    SCAN["collectSystemRoots"] --> ROOTS["根集合<br/>+ Super"]
+    ROOTS --> SFS["SystemForestService"]
+    SFS --> ARR["BaseNode[][]"]
+  end
+  subgraph inside["每次 traverse"]
+    T["单根 children"] --> STOP["excludeRoots 早停"]
+  end
+  SFS --> T
+  ARR --> CLI["edges forest list"]
+```
+
 ```ts
 traverse(
   roots,
@@ -111,14 +134,27 @@ traverse(
 );
 ```
 
-roots 是一个已加载节点或一组节点。resolve 返回 undefined 可跳过引用；load 提供实际加载能力。traverse 不自己打开文件，也不扫描目录发现未登记节点。
+roots 是一个已加载节点或一组节点（多根时仍是「多棵单系统树」的入口集合，不是跨系统一次走完）。resolve 返回 undefined 可跳过引用；load 提供实际加载能力。traverse 不自己打开文件，也不扫描目录发现未登记节点。
 
 | 选项 | 行为 |
 | --- | --- |
-| 默认 | InternalNode 只展开 localChildren |
-| `includeDescendants: true` | 同时展开 descendantChildren |
+| 默认 | 展开全部组成 `children`（local ∪ descendants） |
+| `localOnly: true` | 只展开 localChildren |
 | `includeHarness: true` | 额外沿独立 harness 关系递归，不只进入一层 |
-| `types` | 选择输出类型，不自动删掉通往目标的 Internal 导航节点 |
+| `types` | 选择输出类型，不自动删掉通往目标的导航节点 |
+
+不再接受 `includeDescendants`；要本层-only 一律传 `localOnly: true`。
+
+### 遍历根：真系统二 vs 虚拟系统二
+
+| 根 | 何时 | 走到什么 |
+| --- | --- | --- |
+| 真 `AGENTS.md` | CLI 默认（`--scope`） | 仅该系统的系统二（维护信息、下层 AGENTS） |
+| `SuperAgentsNode` | 显式 `--super` | 按 `harness-materials.json` 挂载的材料 README；**遍历语义同普通 AgentsNode** |
+
+同目录 `AGENTS.md` 与 `README.md` 在磁盘上是**并列登记**：系统一孩子只写在 README，不写进 AGENTS 组成字段。从真 AGENTS 的 **query/list 不到内容面**是预期。要逛内容面须换根到 `SuperAgentsNode`。没有查询并边，也没有 `includeContentFace` 兼容开关。
+
+Task 板发现（`taskBoardQuery`）默认**并查两面**：内容面（org-list 项目与其 Task）+ 真 AGENTS（系统入口项目与遗留链）。单面排查时显式传 `super: true|false`。仓级扫描先找到各板 AGENTS，再对每板做 dual-face 查询。写路径 `#registered` 在系统二图之外，把每个 AGENTS 同目录 README **另起根**遍历（不是 AGENTS 的 child 边）。
 
 遍历按需进行深度优先、先序访问，已访问路径去重；遇到仍在当前递归路径中的节点时报组成环错误。同一节点被多处引用时只输出一次。解析或加载失败向上传递，不自动修复或回退到扫描。
 

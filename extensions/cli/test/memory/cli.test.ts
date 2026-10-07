@@ -73,7 +73,7 @@ test("CLI initializes selected types and remembers a supplied Markdown file in t
   const output = JSON.parse(result.stdout);
   assert.equal(
     output.path,
-    ".harness/memory/projects/project_decision/index.md",
+    ".harness/memory/projects/project_decision/INDEX.md",
   );
   assert.match(
     await readFile(path.join(root, output.path), "utf8"),
@@ -81,11 +81,11 @@ test("CLI initializes selected types and remembers a supplied Markdown file in t
   );
   assert.match(
     await readFile(path.join(root, output.index), "utf8"),
-    /project_decision\/index.md/,
+    /project_decision\/INDEX.md/,
   );
   assert.match(
     await readFile(path.join(root, "AGENTS.md"), "utf8"),
-    /\.harness\/memory\/projects\/AGENTS\.md/,
+    /\.harness\/memory\/projects\/README\.md/,
   );
 });
 
@@ -143,7 +143,7 @@ test("memory migrate dry-run exposes the mapping without moving legacy files", a
   const body =
     "---\nname: project_example\ndescription: Example\n---\nOriginal body\n";
   await writeFile(
-    path.join(root, ".memory/projects/project_example/index.md"),
+    path.join(root, ".memory/projects/project_example/INDEX.md"),
     body,
   );
   await writeFile(
@@ -160,7 +160,7 @@ test("memory migrate dry-run exposes the mapping without moving legacy files", a
   assert.match(JSON.stringify(payload.pathMap), /\.harness\/memory\/projects/);
   assert.equal(
     await readFile(
-      path.join(root, ".memory/projects/project_example/index.md"),
+      path.join(root, ".memory/projects/project_example/INDEX.md"),
       "utf8",
     ),
     body,

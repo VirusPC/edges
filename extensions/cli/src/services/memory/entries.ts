@@ -1,4 +1,11 @@
-import { InternalNode } from "../../domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../domain/models/internal/agents-node.js";
+import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
+import {
+  ENTRIES_SECTIONS,
+  ENTRY_NAMES,
+  LEGACY_LEAF_ENTRY,
+  isLeafEntryName,
+} from "../../domain/models/layout.js";
 import { listTypeFiles, typeContentDir, typeIndexPath } from './types.js';
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 
@@ -14,6 +21,8 @@ import { basename, dirname, join, parse } from "node:path";
 import {
   ENTRIES_START,
   ENTRIES_END,
+  ENTRIES_LOCAL_START,
+  ENTRIES_LOCAL_END,
   indexFiles,
   upsertBlock,
 } from "./blocks.js";
@@ -63,7 +72,7 @@ export const entryOutputName = (name: string, target?: string) =>
     : ENTRY_OUTPUT_PATTERN;
 export const entryName = (file: string, name: string, target?: string) =>
   entryOutputName(name, target) === SKILL_OUTPUT_NAME ||
-  basename(file) === "index.md"
+  isLeafEntryName(basename(file))
     ? basename(dirname(file))
     : parse(file).name;
 export const parseFrontmatter = (file: string): Record<string, string> =>
@@ -137,8 +146,12 @@ export function resolveMemoryPath(
     join(directory, `${name}_${normalized}.md`),
     target,
   );
+  const ownedDir = join(directory, `${name}_${normalized}`);
   const owned = assertScopePath(
-    join(directory, `${name}_${normalized}`, "index.md"),
+    !fs.existsSync(join(ownedDir, ENTRY_NAMES.leaf)) &&
+      fs.existsSync(join(ownedDir, LEGACY_LEAF_ENTRY))
+      ? join(ownedDir, LEGACY_LEAF_ENTRY)
+      : join(ownedDir, ENTRY_NAMES.leaf),
     target,
   );
   if (fs.existsSync(flat))
@@ -181,7 +194,22 @@ export function buildEntryFields(
   fields.updatedAt = nowTimestamp();
   return fields;
 }
-export function buildEntryIndex(target: string, name: string): string {
+/** README type indexes use ReadmeNode; a not-yet-migrated AGENTS.md index keeps its legacy model. */
+export const typeIndexNode = (file: string): AgentsNode | ReadmeNode =>
+  basename(file) === "README.md" ? new ReadmeNode(file) : new AgentsNode(file);
+/** A missing legacy AGENTS.md index is recreated in its own legacy dialect until migrated. */
+export function typeIndexTemplate(file: string, name: string): string {
+  const template = readIndexTemplate(typeIndexTemplateName(name), name, name);
+  if (basename(file) === "README.md") return template;
+  return template
+    .replace(`${ENTRIES_LOCAL_START}\n## ${ENTRIES_SECTIONS.localChildren.heading}\n\n`, `${ENTRIES_START}\n`)
+    .replace(ENTRIES_LOCAL_END, ENTRIES_END);
+}
+export function buildEntryIndex(
+  target: string,
+  name: string,
+  legacy = false,
+): string {
   const base = dirname(typeIndexPath(target, name));
   const files = listTypeFiles(
     target,
@@ -202,10 +230,14 @@ export function buildEntryIndex(target: string, name: string): string {
       ),
     });
   });
+  const lines = entries.join("\n") || "- 暂无条目。";
+  if (legacy) return [ENTRIES_START, lines, ENTRIES_END].join("\n");
   return [
-    ENTRIES_START,
-    entries.join("\n") || "- 暂无条目。",
-    ENTRIES_END,
+    ENTRIES_LOCAL_START,
+    `## ${ENTRIES_SECTIONS.localChildren.heading}`,
+    "",
+    lines,
+    ENTRIES_LOCAL_END,
   ].join("\n");
 }
 export function expectedIndexDocument(
@@ -221,9 +253,10 @@ export function expectedIndexDocument(
     source ??
     (isFile(file)
       ? readText(file)
-      : readIndexTemplate(typeIndexTemplateName(name), name, name));
-  const generated = new InternalNode(file).parse(buildEntryIndex(target, name));
-  const node = new InternalNode(file).parse(generated.localChildren.length ? existing.replace(/^- 暂无条目。\r?\n/gm, "") : existing);
+      : typeIndexTemplate(file, name));
+  const legacy = basename(file) !== "README.md";
+  const generated = typeIndexNode(file).parse(buildEntryIndex(target, name, legacy));
+  const node = typeIndexNode(file).parse(generated.localChildren.length ? existing.replace(/^- 暂无条目。\r?\n/gm, "") : existing);
   const desired = new Map(generated.localChildren.map(ref => [ref.id, ref]));
   const base = canonicalPath(typeContentDir(target, name));
   const own = (id: string) => isWithinPath(id, base) && (isSkillFormat(target, name) || basename(dirname(id)).startsWith(name + '_') || basename(id).startsWith(name + '_'));
@@ -250,15 +283,15 @@ export async function refreshIndex(
   if (name in discoverLayerTypes(target) && !isExternalType(name))
     fs.mkdirSync(dirname(file), { recursive: true });
   const entry = prepareMemoryWrite(target, file);
-  const node = await service.get(entry, InternalNode);
+  const node = (await service.get(entry)) as AgentsNode | ReadmeNode | undefined;
   const existed = !!node, before = node?.body ?? "";
   const source = existed
     ? before
-    : readIndexTemplate(typeIndexTemplateName(name), name, name);
+    : typeIndexTemplate(file, name);
   const after = expectedIndexDocument(target, name, source);
   if (!existed || before !== after) {
     if (node) await service.update(node, { body: after });
-    else await service.create(new InternalNode(entry), parseDocument(after), { indexGroup: "local" });
+    else await service.create(typeIndexNode(entry), parseDocument(after), { indexGroup: "local" });
     return existed ? "updated" : "created";
   }
   return "preserved";

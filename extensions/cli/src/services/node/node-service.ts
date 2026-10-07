@@ -1,14 +1,16 @@
-import { isWithinPath } from '../../utils/filesystem.js';
+import { isWithinPath, findAncestor, firstSymlink } from '../../utils/filesystem.js';
+import { isGitBoundary } from '../scope.js';
 import { WRITE_LOCK_NAME, assertNoWriteLock } from "./node-lock.js";
 import * as fs from "node:fs";
 import path from "node:path";
-import { BaseNode, InternalNode } from "../../domain/models/index.js";
+import { BaseNode, AgentsNode, SuperAgentsNode } from "../../domain/models/index.js";
 import type { ChildGroup, NodeReference } from "../../domain/models/index.js";
 import type { ScopeTraversalOptions, NodeQueryOptions } from "../../domain/operations/traverse.js";
 import {
   lifecycleUnits,
   assertMovableLayout,
   identifyNodeType,
+  normalizeNodeType,
 } from "../../domain/models/layout.js";
 import { referenceOf } from "../../domain/models/core/relations.js";
 import {
@@ -25,26 +27,30 @@ import {
   recoveryPath,
   type ResourceSnapshot,
 } from "./node-resources.js";
+import { createSuperAgentsNode } from "./super-root.js";
 import {
   coLocated,
   carryReferenceSuffix,
   directoryEntries,
   indexContract,
+  isComposite,
   modelAt,
+  parseComposite,
+  type CompositeNode,
   physicalParent,
   physicalParentNode,
   rewriteLinks,
   type Model,
 } from "./node-layout.js";
 import { query, type AsyncQuery } from "../../domain/operations/query.js";
-import { traverse } from "../../domain/operations/traverse.js";
+import { traverse, contentFaceReadme } from "../../domain/operations/traverse.js";
 import { NodeCache } from "./node-cache.js";
 
 type Operation = "create" | "update" | "move" | "destroy" | "import";
 export interface NodeWriteContext {
   operation: Operation;
   node: BaseNode;
-  parent?: InternalNode;
+  parent?: CompositeNode;
 }
 export interface NodeRegistrationOptions {
   indexGroup?: ChildGroup;
@@ -93,7 +99,7 @@ export class NodeService {
       throw new Error(`Unsupported node entry layout: ${file}`);
     return file;
   }
-  #parentNode(file: string): InternalNode | undefined {
+  #parentNode(file: string): CompositeNode | undefined {
     return physicalParentNode(file, this.managedRoot);
   }
   #model(file: string): Model | undefined {
@@ -169,12 +175,11 @@ export class NodeService {
     types?: readonly string[],
     resources = true,
   ): Promise<BaseNode> {
-    const Model =
-      this.#options.modelForReference?.(parent, reference, reference.id) ??
-      modelAt(reference.id, indexContract(parent), this.#options.models);
+    const explicit = this.#options.modelForReference?.(parent, reference, reference.id);
+    const Model = explicit ?? modelAt(reference.id, indexContract(parent), this.#options.models);
     if (types && Model) {
       const navigation = new Model(reference.id);
-      if (navigation.isLeaf && !types.includes(navigation.type)) {
+      if (navigation.isLeaf && !types.map(normalizeNodeType).includes(navigation.type)) {
         // The directory contract proves this body cannot contribute children.
         // Keep layout-defined maintenance discovery even when its body is omitted.
         this.#cache.relations(navigation);
@@ -186,9 +191,17 @@ export class NodeService {
         return navigation;
       }
     }
-    const node = await this.#read(reference.id, Model, readonly, resources);
+    // A layout-derived model is only a navigation hint; #read resolves the authoritative one.
+    const node = await this.#read(reference.id, explicit, readonly, resources);
     if (!node) throw new Error(`Missing referenced node: ${reference.id}`);
     return node;
+  }
+  /**
+   * Runtime-only super entry for this scope: mounts harness-materials README
+   * paths that exist under the scope harness root (empty mounts allowed).
+   */
+  #superRoot(scopePath: string): SuperAgentsNode {
+    return createSuperAgentsNode(scopePath);
   }
   /** Deferred, streaming reads with entry snapshots only. Before moving or
    * destroying a returned node, call get(node.path) to capture its resources. */
@@ -197,13 +210,21 @@ export class NodeService {
     return query(async function* () {
       const entry = path.basename(scopePath) === "AGENTS.md"
         ? path.resolve(scopePath) : path.join(path.resolve(scopePath), "AGENTS.md");
-      const root = await service.#read(entry, InternalNode, false, false);
-      if (!root) throw new Error(`Missing scope entry: ${entry}`);
+      const root = options.super
+        ? service.#superRoot(scopePath)
+        : await service.#read(entry, AgentsNode, false, false);
+      if (!root)
+        throw new Error(
+          `Missing scope entry: ${entry}. Add AGENTS.md or pass --super to traverse the content face (README) as a virtual system.`,
+        );
       // resolve and load are sequential; carry this edge's policy into its one load.
       let readonly = false;
       yield* traverse(root, options, (parent, reference) => {
+        if (options.excludeRoots?.has(reference.id)) return undefined;
         if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
+          // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.
+          if (firstSymlink(reference.id, service.managedRoot)) return undefined;
           try {
             if (!isWithinPath(fs.realpathSync(reference.id), service.managedRoot)) return undefined;
           } catch (error) {
@@ -215,8 +236,8 @@ export class NodeService {
       }, (parent, reference) => service.#reference(parent, reference, readonly, options.types, false));
     });
   }
-  /** Compatibility collection: materialize query and capture lifecycle resource
-   * snapshots before resolving, so later directory drift remains detectable. */
+  /** Materialize query and capture lifecycle resource snapshots before resolving,
+   * so later directory drift remains detectable. */
   async list(scopePath: string, options: ScopeTraversalOptions = {}): Promise<BaseNode[]> {
     const nodes = await this.query(scopePath, options).toArray().value();
     for (const node of nodes) this.#cache.captureResources(node);
@@ -242,12 +263,13 @@ export class NodeService {
     return state.file;
   }
   /** Reachable registered nodes plus explicitly loaded nodes, including maintenance trees.
-   * list deliberately has a narrower traversal policy and never uses this helper. */
+   * list deliberately has a narrower traversal policy and never uses this helper.
+   * Content faces are separate roots (not AGENTS child edges). */
   async #registered(deferred: (file: string) => boolean = () => false): Promise<Map<string, BaseNode>> {
     const result = new Map<string, BaseNode>();
     const root = await this.#read(
       path.join(this.managedRoot, "AGENTS.md"),
-      InternalNode,
+      AgentsNode,
     );
     const service = this;
     function* roots(): Iterable<BaseNode> {
@@ -258,27 +280,37 @@ export class NodeService {
     const maintenanceOnly = (node: BaseNode, ref: NodeReference) =>
       node.harness?.id === ref.id && !node.children.some(child => child.id === ref.id);
     let readonly = false;
-    for await (const node of traverse(
-      roots(),
-      { includeDescendants: true, includeHarness: true },
-      (parent, ref) => {
-        if (!isWithinPath(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
-        // Maintenance discovery tolerates a missing optional entry; composition does not.
-        if (maintenanceOnly(parent, ref) &&
-            !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id)) return undefined;
-        // Optional harness reads retain their existing #read policy.
-        readonly = maintenanceOnly(parent, ref) ? false : this.#referenceReadOnly(parent, ref);
-        return ref.id;
-      },
-      async (parent, ref) => {
-        if (maintenanceOnly(parent, ref)) {
-          const harness = await this.#read(ref.id, InternalNode);
-          if (!harness) throw new Error(`Missing referenced node: ${ref.id}`);
-          return harness;
-        }
-        return this.#reference(parent, ref, readonly);
-      },
-    )) result.set(node.path, node);
+    const resolve = (parent: BaseNode, ref: NodeReference) => {
+      if (!isWithinPath(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
+      // Maintenance discovery tolerates a missing optional entry; composition does not.
+      if (maintenanceOnly(parent, ref) &&
+          !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id)) return undefined;
+      // Optional harness reads retain their existing #read policy.
+      readonly = maintenanceOnly(parent, ref) ? false : this.#referenceReadOnly(parent, ref);
+      return ref.id;
+    };
+    const load = async (parent: BaseNode, ref: NodeReference) => {
+      if (maintenanceOnly(parent, ref)) {
+        const harness = await this.#read(ref.id, AgentsNode);
+        if (!harness) throw new Error(`Missing referenced node: ${ref.id}`);
+        return harness;
+      }
+      return this.#reference(parent, ref, readonly);
+    };
+    const agentsFaces: BaseNode[] = [];
+    for await (const node of traverse(roots(), { includeHarness: true }, resolve, load)) {
+      result.set(node.path, node);
+      if (contentFaceReadme(node)) agentsFaces.push(node);
+    }
+    // Walk each co-located README as its own root — virtual system two, not an AGENTS edge.
+    for (const agents of agentsFaces) {
+      const face = contentFaceReadme(agents);
+      if (!face || result.has(face.id) || deferred(face.id) || !fs.existsSync(face.id)) continue;
+      const readme = await this.#read(face.id);
+      if (!readme) continue;
+      for await (const node of traverse(readme, {}, resolve, load))
+        result.set(node.path, node);
+    }
     return result;
   }
   async #validateGraph(
@@ -291,11 +323,11 @@ export class NodeService {
     let readonly = false;
     for await (const _node of traverse(
       roots(),
-      { includeDescendants: true },
-      (parent, ref) => {
+      {},
+      (_parent, ref) => {
         if (removed(ref.id))
           throw new Error(`Reference to removed node: ${ref.id}`);
-        readonly = this.#referenceReadOnly(parent, ref);
+        readonly = this.#referenceReadOnly(_parent, ref);
         return ref.id;
       },
       (parent, ref, target) => {
@@ -307,17 +339,18 @@ export class NodeService {
   #proposedParent(
     file: string,
     plan: ReadonlyMap<string, Planned>,
-  ): InternalNode | undefined {
+  ): CompositeNode | undefined {
     const parent = physicalParent(
       file,
       this.managedRoot,
       (candidate) => plan.has(candidate) || fs.existsSync(candidate),
+      (candidate) => plan.get(candidate)?.source ?? readEntry(candidate)?.source,
     );
     if (!parent) return undefined;
     const proposed = plan.get(parent);
-    if (proposed) return new InternalNode(parent).parse(proposed.source);
+    if (proposed) return parseComposite(parent, proposed.source);
     const entry = readEntry(parent);
-    return entry ? new InternalNode(parent).parse(entry.source) : undefined;
+    return entry ? parseComposite(parent, entry.source) : undefined;
   }
   async #preflight(
     operation: Operation,
@@ -355,7 +388,7 @@ export class NodeService {
     // An explicit typed get cannot bypass authoritative AGENTS validation.
     const authoritative =
       path.basename(node.path) === "AGENTS.md"
-        ? new InternalNode(node.path).parse(source)
+        ? new AgentsNode(node.path).parse(source)
         : draft;
     return { node: authoritative, before, source };
   }
@@ -378,15 +411,18 @@ export class NodeService {
     node: BaseNode,
     group?: ChildGroup,
   ): Promise<Planned | undefined> {
+    // Same-dir README next to AGENTS is the content face, not registered as AGENTS' child.
     if (
       coLocated(node.path) ||
-      path.basename(node.directoryPath) === ".harness"
+      path.basename(node.directoryPath) === ".harness" ||
+      (path.basename(node.path) === "README.md" &&
+        fs.existsSync(path.join(node.directoryPath, "AGENTS.md")))
     )
       return undefined;
     const parentPath = physicalParent(node.path, this.managedRoot);
     if (!parentPath) return undefined;
-    const parent = await this.get(parentPath, InternalNode);
-    if (!parent) return undefined;
+    const parent = await this.get(parentPath);
+    if (!isComposite(parent)) return undefined;
     if (indexContract(parent)?.writable === false)
       throw new Error(`Read-only node source: ${node.path}`);
     const before = this.#existing(parent),
@@ -403,8 +439,8 @@ export class NodeService {
     registrationOptions: NodeRegistrationOptions = {},
   ): Promise<T> {
     this.#boundary(node.path);
-    if (path.basename(node.path) === "AGENTS.md" && !(node instanceof InternalNode))
-      throw new Error(`AGENTS creation requires an InternalNode model: ${node.path}`);
+    if (path.basename(node.path) === "AGENTS.md" && !(node instanceof AgentsNode))
+      throw new Error(`AGENTS creation requires an AgentsNode model: ${node.path}`);
     if (this.#cache.loaded.has(node.path) || fs.existsSync(node.path))
       throw new Error(`Node target already exists: ${node.path}`);
     const draft = clone(node);
@@ -487,8 +523,8 @@ export class NodeService {
       physicalParent(destination, this.managedRoot),
     ])
       if (parentPath && !registered.has(parentPath)) {
-        const parent = await this.get(parentPath, InternalNode);
-        if (parent) registered.set(parentPath, parent);
+        const parent = await this.get(parentPath);
+        if (isComposite(parent)) registered.set(parentPath, parent);
       }
     for (const file of directoryEntries(sourceRoot))
       if (!registered.has(file)) {
@@ -500,7 +536,7 @@ export class NodeService {
     let group: ChildGroup | undefined,
       reference: NodeReference = referenceOf(node);
     const old = oldParent
-      ? (registered.get(oldParent) as InternalNode | undefined)
+      ? (registered.get(oldParent) as CompositeNode | undefined)
       : undefined;
     if (old) {
       const match = old.children.find((ref) => ref.id === node.path);
@@ -521,7 +557,7 @@ export class NodeService {
       if (
         entry.path === oldParent &&
         oldParent !== newParent &&
-        draft instanceof InternalNode
+        isComposite(draft)
       ) {
         draft.removeChild(node.path);
         authored = draft.serialize();
@@ -532,7 +568,7 @@ export class NodeService {
         entry.path === newParent &&
         group !== undefined &&
         oldParent !== newParent &&
-        draft instanceof InternalNode &&
+        isComposite(draft) &&
         !draft.children.some((ref) => ref.id === destination)
       ) {
         draft.addChild(group, { ...reference, id: destination });
@@ -544,13 +580,13 @@ export class NodeService {
       const persistedReferenceMoves =
         rewriteLinks(before.source, entry.path, target, relocate) !== before.source;
       const needsRegistration = group !== undefined && entry.path === newParent && oldParent !== newParent &&
-        entry instanceof InternalNode &&
-        !new InternalNode(entry.path).parse(before.source).children.some(ref => ref.id === destination);
+        isComposite(entry) &&
+        !parseComposite(entry.path, before.source).children.some(ref => ref.id === destination);
       if (target !== entry.path || text !== currentSource || persistedReferenceMoves || needsRegistration)
         plan.set(target, this.#plan(draft, text, before));
     }
     if (group !== undefined && newParent && !registered.has(newParent)) {
-      const parent = (await this.get(newParent, InternalNode))!,
+      const parent = (await this.get(newParent)) as CompositeNode,
         draft = clone(parent);
       draft.addChild(group, { ...reference, id: destination });
       if (old) carryReferenceSuffix(old, draft, node.path, destination);
@@ -634,11 +670,11 @@ export class NodeService {
     const removed = (file: string) => units.some((unit) => isWithinPath(file, unit));
     const plan = new Map<string, Planned>();
     for (const entry of (await this.#registered()).values())
-      if (!removed(entry.path) && entry instanceof InternalNode) {
+      if (!removed(entry.path) && isComposite(entry)) {
         const draft = clone(entry);
         const deleted = draft.children.filter((ref) => removed(ref.id));
         const before = this.#cache.state.get(entry)!.file;
-        const persistedReferences = new InternalNode(entry.path).parse(before.source).children;
+        const persistedReferences = parseComposite(entry.path, before.source).children;
         if (deleted.length === 0 && !persistedReferences.some(ref => removed(ref.id))) continue;
         for (const ref of deleted) draft.removeChild(ref.id);
         plan.set(entry.path, this.#plan(draft, draft.serialize(), before));
@@ -771,9 +807,7 @@ export class NodeService {
       const sourceParent = physicalParent(file, sourceRoot);
       const parentEntry = sourceParent ? readEntry(sourceParent) : undefined;
       const contract = parentEntry
-        ? indexContract(
-            new InternalNode(parentEntry.path).parse(parentEntry.source),
-          )
+        ? indexContract(parseComposite(parentEntry.path, parentEntry.source))
         : undefined;
       const Model = modelAt(
         relocate(file),

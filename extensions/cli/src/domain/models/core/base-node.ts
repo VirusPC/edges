@@ -1,7 +1,7 @@
 import { dirname, isAbsolute, normalize } from "node:path";
 import { parseDocument, serializeDocument } from "../../../utils/markdown/document.js";
 import { nodeRelations, nodePath } from "./relations.js";
-import type { Metadata, NodeReference, NodeCreateInput, NodeUpdateInput, NodeContext } from "./types.js";
+import type { ChildGroup, Metadata, NodeReference, NodeCreateInput, NodeUpdateInput, NodeContext } from "./types.js";
 
 /**
  * Extension contract: subclasses support construction with only an absolute path.
@@ -31,7 +31,14 @@ export class BaseNode<
     return this.path;
   }
   get isLeaf(): boolean {
-    return false;
+    return this.localChildren === undefined && this.children.length === 0;
+  }
+  /** Present only on nodes that own composition; undefined means no composition fields. */
+  get localChildren(): readonly Readonly<NodeReference>[] | undefined {
+    return undefined;
+  }
+  get descendantChildren(): readonly Readonly<NodeReference>[] | undefined {
+    return undefined;
   }
   get name(): string | undefined {
     return this.#metadata?.name as string | undefined;
@@ -55,6 +62,10 @@ export class BaseNode<
   }
   get children(): readonly Readonly<NodeReference>[] {
     return [];
+  }
+  /** Composite nodes (AgentsNode, ReadmeNode) override; other nodes own no composition. */
+  addChild(_group: ChildGroup, _reference: NodeReference): this {
+    throw new Error(`${this.path}: node does not own composition; cannot add child.`);
   }
   get metadata(): Readonly<Metadata> | undefined {
     return structuredClone(this.#metadata);

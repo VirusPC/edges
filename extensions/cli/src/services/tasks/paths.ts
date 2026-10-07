@@ -1,4 +1,5 @@
 import path from "node:path";
+import { ENTRY_NAMES, LEGACY_LEAF_ENTRY, isLeafEntryName } from "../../domain/models/layout.js";
 import { projectDirName } from "../../domain/models/tasks/project.js";
 import {
   TASK_STATUSES,
@@ -63,8 +64,26 @@ export function taskRelPath(
     projectDirName(project),
     status,
     stem,
-    "index.md",
+    ENTRY_NAMES.leaf,
   );
+}
+
+/** Same task location with the pre-migration `index.md` entry name. */
+export function legacyTaskRelPath(
+  project: TaskProjectId,
+  status: TaskStatus,
+  stem: string,
+  target: BoardTarget = "",
+): string {
+  return path.join(
+    path.dirname(taskRelPath(project, status, stem, target)),
+    LEGACY_LEAF_ENTRY,
+  );
+}
+
+/** Keep an existing entry's spelling when a move relocates its directory. */
+export function withEntryName(destination: string, source: string): string {
+  return path.join(path.dirname(destination), path.basename(source));
 }
 
 export function sidecarRelPath(
@@ -106,7 +125,7 @@ export function parseTarget(
   target: string,
 ): { kind: "stem"; stem: string } | { kind: "path"; stem: string } {
   const base = path.basename(target);
-  if (base === "index.md" && target.includes("/"))
+  if (isLeafEntryName(base) && target.includes("/"))
     return { kind: "path", stem: path.basename(path.dirname(target)) };
   if (target.includes("/") && base.endsWith(".md")) {
     return { kind: "path", stem: base.slice(0, -".md".length) };

@@ -17,7 +17,7 @@ export function addNoteDeleteCommand(note: Command, ctx: CliContext): void {
   note
     .command("delete")
     .description("Delete one note directory")
-    .argument("<path>", "notes/<stem>/index.md")
+    .argument("<path>", "notes/<stem>/INDEX.md")
     .action((entryPath: string) => {
       try {
         ctx.result = succeed({ command: "note.delete", ...deleteNote(resolveScope(ctx.env), entryPath) });

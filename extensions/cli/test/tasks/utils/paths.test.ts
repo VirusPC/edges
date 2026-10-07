@@ -33,7 +33,7 @@ test("paths join tasks/<project-dir>/<status> and sidecar dotfile", () => {
   assert.equal(boardRoot("/repo"), "/repo/tasks");
   assert.equal(
     taskRelPath("default", "in_progress", "2026-09-11--cli"),
-    "tasks/_default/in_progress/2026-09-11--cli/index.md",
+    "tasks/_default/in_progress/2026-09-11--cli/INDEX.md",
   );
   assert.equal(
     sidecarRelPath("default", "in_progress", "2026-09-11--cli"),
@@ -41,7 +41,7 @@ test("paths join tasks/<project-dir>/<status> and sidecar dotfile", () => {
   );
   assert.equal(
     taskRelPath("cli", "todo", "2026-09-11--cli"),
-    "tasks/cli/todo/2026-09-11--cli/index.md",
+    "tasks/cli/todo/2026-09-11--cli/INDEX.md",
   );
 });
 
@@ -58,13 +58,13 @@ test("parseTarget still accepts stem or new-layout path", () => {
     stem: "2026-09-11--cli",
   });
   assert.deepEqual(
-    parseTarget("tasks/_default/done/2026-09-11--cli/index.md"),
+    parseTarget("tasks/_default/done/2026-09-11--cli/INDEX.md"),
     {
       kind: "path",
       stem: "2026-09-11--cli",
     },
   );
-  assert.deepEqual(parseTarget("tasks/cli/todo/2026-09-11--cli/index.md"), {
+  assert.deepEqual(parseTarget("tasks/cli/todo/2026-09-11--cli/INDEX.md"), {
     kind: "path",
     stem: "2026-09-11--cli",
   });

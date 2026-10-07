@@ -5,6 +5,8 @@
 > 每个条目链接相对本类型入口，指向当前作用域来源；不同真源同名保留，同真源别名去重。
 > 可读且为空的来源才是空清单；来源缺失、断链或不可读会报告诊断，不能声称刷新完整。
 
-<!-- project-memory-entries:start -->
+<!-- project-entries-local:start -->
+## 本层内容
+
 - 暂无条目。
-<!-- project-memory-entries:end -->
+<!-- project-entries-local:end -->

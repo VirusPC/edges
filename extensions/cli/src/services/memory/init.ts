@@ -1,4 +1,4 @@
-import { InternalNode } from "../../domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
@@ -10,7 +10,7 @@ import { AGENTS_FILE_NAME, assertScopePath, memoryDir, rejectLegacy, resolveRoot
 import { readIndexTemplate } from "./templates.js";
 import { MEMORY_TYPE_NAMES, SKILL_TYPE_NAMES, ensureTypeGitignore, findGitRoot, layerTypeSpecs, seedSpec, typeIndexTemplateName, } from "./types.js";
 import { findIndexAnchor, syncIndexEntry, syncTargetAgents, } from "./agents.js";
-import { refreshIndex } from "./entries.js";
+import { refreshIndex, typeIndexNode } from "./entries.js";
 export interface InitMemoryOptions {
     targetDir: string;
     rootDir?: string;
@@ -58,7 +58,7 @@ export async function initMemory(options: InitMemoryOptions) {
         assertScopePath(join(target, spec.indexFile), target);
     const anchor = findIndexAnchor(target, root);
     if (anchor !== target) {
-      const owner = await memoryNodes(anchor).get(join(anchor, AGENTS_FILE_NAME), InternalNode);
+      const owner = await memoryNodes(anchor).get(join(anchor, AGENTS_FILE_NAME), AgentsNode);
       if (owner && !owner.children.some(ref => ref.id === join(target, AGENTS_FILE_NAME)) && !options.indexGroup)
         throw new Error("New owner registration requires --index-group local|descendant");
     }
@@ -76,11 +76,11 @@ export async function initMemory(options: InitMemoryOptions) {
         if (spec.gitignore)
             assertPrivateIgnored(gitRoot ?? target, [file], [dirname(file)]);
         const entry = prepareMemoryWrite(target, file);
-        const node = await service.get(entry, InternalNode);
+        const node = await service.get(entry);
         if (node)
             preserved.push(spec.indexFile);
         else {
-            await service.create(new InternalNode(entry), parseDocument(readIndexTemplate(typeIndexTemplateName(spec.name), spec.name, spec.description, {
+            await service.create(typeIndexNode(entry), parseDocument(readIndexTemplate(typeIndexTemplateName(spec.name), spec.name, spec.description, {
                 module: spec.module,
                 format: spec.format,
                 writable: String(spec.writable),

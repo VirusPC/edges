@@ -4,6 +4,8 @@
 > 不记：链接里的内容本身，也不记密钥。
 > 本文件只是索引，条目区块由脚本重算，正文写在 `references/reference_<slug>/index.md` 里。
 
-<!-- project-memory-entries:start -->
+<!-- project-entries-local:start -->
+## 本层内容
+
 - 暂无条目。
-<!-- project-memory-entries:end -->
+<!-- project-entries-local:end -->

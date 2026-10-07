@@ -4,6 +4,7 @@ import { existsSync } from "node:fs";
 import { NodeService } from "../../node/node-service.js";
 import { NoteNode } from "../../../domain/models/notes/note-node.js";
 import path from "node:path";
+import { ENTRY_NAMES, isLeafEntryName } from "../../../domain/models/layout.js";
 import { promises as fs } from "node:fs";
 import type { IngestRequest, ScriptSuccess } from "../types.js";
 import { createExecFile, type ExecFn } from "./exec.js";
@@ -78,15 +79,16 @@ export async function runNoteIngest(
   const scope = await fs.realpath(config.scopeDir ?? config.repoPath);
   const directoryFile = path.join(
     scope,
-    `notes/${date}--${slug}/index.md`,
+    `notes/${date}--${slug}`,
+    input.importEntry ? path.basename(input.importEntry) : ENTRY_NAMES.leaf,
   );
   const selectNoteFile = () => directoryFile;
   // Validate document input before any Git branch or destination changes.
   const draft = new NoteNode(
     input.importEntry ? path.resolve(input.importEntry) : directoryFile,
   );
-  if (input.importEntry && path.basename(input.importEntry) !== "index.md")
-    throw new Error(`${input.importEntry}: Note import requires index.md`);
+  if (input.importEntry && !isLeafEntryName(path.basename(input.importEntry)))
+    throw new Error(`${input.importEntry}: Note import requires INDEX.md`);
   if (input.importEntry) assertImportType(input.importEntry, "note");
   if (input.markdown || input.importEntry) draft.parse(input.content);
   else {

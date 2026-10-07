@@ -106,16 +106,29 @@ function serializeBody(model: AgentsDocument, originalSource?: string): string {
     for (let index = 0; index < previous.length; index++) {
       if (matches[index] === index) continue;
       const binding = bindings[index];
-      edit(binding.start, binding.end, renderNext(index, binding.prefix));
+      const value = renderNext(index, binding.prefix);
+      // A removed item takes its line break with it instead of leaving a blank line.
+      const end =
+        value === "" && originalText.startsWith(newline, binding.end)
+          ? binding.end + newline.length
+          : binding.end;
+      edit(binding.start, end, value);
     }
     if (next.length > previous.length) {
       const extra = next.slice(previous.length);
       if (original.sections[key].present) {
         const offset = original.sections[key].insert;
+        const before = originalText.slice(0, offset);
+        // Continue an existing list directly; keep one blank line under a bare heading.
+        const lead =
+          before.endsWith(newline + newline) ||
+          (previous.length > 0 && before.endsWith(newline))
+            ? ""
+            : newline;
         edit(
           offset,
           offset,
-          newline +
+          lead +
             extra
               .map((_, index) => renderNext(previous.length + index, "- "))
               .join(newline) +

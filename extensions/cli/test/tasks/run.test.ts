@@ -3,7 +3,7 @@ import { dirname as fixtureDirname } from "node:path";
 async function writeFile(...args: Parameters<typeof fixtureRawWriteFile>) {
   await fixtureMkdir(fixtureDirname(String(args[0])), { recursive: true });
   await fixtureRawWriteFile(...args);
-  const match = String(args[0]).match(/^(.*\/tasks)\/[^/]+\/(?:backlog|todo|in_progress|in_review|done|blocked|cancelled)\/[^/]+\/index\.md$/);
+  const match = String(args[0]).match(/^(.*\/tasks)\/[^/]+\/(?:backlog|todo|in_progress|in_review|done|blocked|cancelled)\/[^/]+\/(?:INDEX|index)\.md$/);
   if (match) await indexTaskFixtureBoard(match[1]!);
 }
 import test from "node:test";
@@ -28,7 +28,7 @@ test("run tasks list returns JSON tasks from EDGES_REPO", async () => {
     const dir = path.join(repo, "tasks/_default/backlog");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, "2026-09-13--listed/index.md"),
+      path.join(dir, "2026-09-13--listed/INDEX.md"),
       `---
 name: listed
 description: listed
@@ -130,7 +130,7 @@ test("run tasks get returns the task body", async () => {
     const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, "2026-09-13--got/index.md"),
+      path.join(dir, "2026-09-13--got/INDEX.md"),
       `---
 name: got
 description: got
@@ -368,7 +368,7 @@ test("run tasks update --project cli JSON and new path", async () => {
     };
     assert.equal(body.command, "update");
     assert.equal(body.project, "cli");
-    assert.equal(body.path, `tasks/cli/todo/${stem}/index.md`);
+    assert.equal(body.path, `tasks/cli/todo/${stem}/INDEX.md`);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -386,7 +386,7 @@ test("run tasks status returns command status", async () => {
     const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, "2026-09-13--mv/index.md"),
+      path.join(dir, "2026-09-13--mv/INDEX.md"),
       `---
 name: mv
 description: mv
@@ -418,7 +418,7 @@ test("run tasks runs --output json lists derived run-id", async () => {
     const dir = path.join(repo, "tasks/_default/done");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, `${stem}/index.md`),
+      path.join(dir, `${stem}/INDEX.md`),
       `---
 name: with_run
 description: with run
@@ -487,7 +487,7 @@ test("run tasks run-messages returns notes for a stable run-id", async () => {
     const dir = path.join(repo, "tasks/_default/in_progress");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, `${stem}/index.md`),
+      path.join(dir, `${stem}/INDEX.md`),
       `---
 name: msg
 description: msg
@@ -557,7 +557,7 @@ test("run tasks run-messages unknown id is RUN_NOT_FOUND", async () => {
     const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, `${stem}/index.md`),
+      path.join(dir, `${stem}/INDEX.md`),
       `---
 name: msg
 description: msg
@@ -622,7 +622,7 @@ async function seedPriorities() {
     const dir = path.join(repo, "tasks/_default", doc.status);
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, `${doc.stem}/index.md`),
+      path.join(dir, `${doc.stem}/INDEX.md`),
       `---
 name: ${doc.stem}
 description: ${doc.stem}
@@ -689,7 +689,7 @@ test("run tasks status rejects --project and does not move", async () => {
     const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, "2026-09-16--stay/index.md"),
+      path.join(dir, "2026-09-16--stay/INDEX.md"),
       `---
 name: stay
 description: stay
@@ -712,12 +712,12 @@ body
     assert.equal(result.exitCode, 2);
     assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
     const md = await readFile(
-      path.join(dir, "2026-09-16--stay/index.md"),
+      path.join(dir, "2026-09-16--stay/INDEX.md"),
       "utf8",
     );
     assert.match(md, /edges-tasks-status: todo/);
     await assert.rejects(
-      access(path.join(repo, "tasks/cli/todo/2026-09-16--stay/index.md")),
+      access(path.join(repo, "tasks/cli/todo/2026-09-16--stay/INDEX.md")),
     );
   } finally {
     await rm(repo, { recursive: true, force: true });
@@ -736,7 +736,7 @@ test("run tasks status JSON has no project key and stays under _default", async 
     const moved = await run(["tasks", "--index-group", "local", "--purpose", "domain", "status", stem, "in_progress"], { env });
     assert.equal(moved.exitCode, 0);
     const body = JSON.parse(moved.stdout) as { path: string; project?: string };
-    assert.equal(body.path, `tasks/_default/in_progress/${stem}/index.md`);
+    assert.equal(body.path, `tasks/_default/in_progress/${stem}/INDEX.md`);
     assert.equal(body.project, undefined);
   } finally {
     await rm(repo, { recursive: true, force: true });
@@ -855,7 +855,7 @@ test("run tasks status rejects --priority and does not move", async () => {
     const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
     await writeFile(
-      path.join(dir, "2026-09-16--stay/index.md"),
+      path.join(dir, "2026-09-16--stay/INDEX.md"),
       `---
 name: stay
 description: stay
@@ -879,7 +879,7 @@ body
     assert.equal(result.exitCode, 2);
     assert.equal(JSON.parse(result.stdout).errorCode, "VALIDATION_ERROR");
     const md = await readFile(
-      path.join(dir, "2026-09-16--stay/index.md"),
+      path.join(dir, "2026-09-16--stay/INDEX.md"),
       "utf8",
     );
     assert.match(md, /edges-tasks-status: todo/);

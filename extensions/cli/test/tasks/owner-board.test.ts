@@ -5,7 +5,7 @@ import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { run } from '../../src/program.js';
-import { InternalNode } from '../../src/domain/models/index.js';
+import { AgentsNode, ReadmeNode } from '../../src/domain/models/index.js';
 import { generateTasksSite } from '../../src/services/tasks/generate-site.js';
 
 function fixture(t: { after(fn: () => void): void }) {
@@ -17,13 +17,13 @@ function fixture(t: { after(fn: () => void): void }) {
     fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, source);
   };
   const call = (scope: string, purpose: string, args: string[]) => run(['--scope', path.join(root, scope), 'tasks', '--index-group', purpose === 'domain' ? 'descendant' : 'local', '--purpose', purpose, ...args], { env: {} });
-  const read = (scope: string) => new InternalNode(path.join(root, scope, 'AGENTS.md')).parse(fs.readFileSync(path.join(root, scope, 'AGENTS.md'), 'utf8'));
+  const read = (scope: string) => new AgentsNode(path.join(root, scope, 'AGENTS.md')).parse(fs.readFileSync(path.join(root, scope, 'AGENTS.md'), 'utf8'));
   return { root, write, call, read };
 }
 
 test('CLI first projects and tasks connect existing root, child and content scopes to global CLI and HTML', async t => {
   const { root, write, call, read } = fixture(t);
-  const owner = new InternalNode(path.join(root, 'AGENTS.md')).parse('# Scope\n\nHuman introduction\n');
+  const owner = new AgentsNode(path.join(root, 'AGENTS.md')).parse('# Scope\n\nHuman introduction\n');
   owner.setConstraints(['Keep this']);
   owner.addChild('descendant', { id: path.join(root, 'child/AGENTS.md'), name: 'Child', description: 'Authored child' });
   owner.addChild('local', { id: path.join(root, 'notes/example/index.md'), name: 'Note' });
@@ -73,7 +73,7 @@ test('CLI first projects and tasks connect existing root, child and content scop
 for (const domainGroup of ['local', 'descendant'] as const)
   test('existing board labels and domain ' + domainGroup + ' relation remain unchanged across repeated writes', async t => {
     const { root, write, call, read } = fixture(t);
-    const node = new InternalNode(path.join(root, 'AGENTS.md')).parse('# Scope\n\nIntro\n');
+    const node = new AgentsNode(path.join(root, 'AGENTS.md')).parse('# Scope\n\nIntro\n');
     node.setConstraints(['Rule']);
     node.addChild(domainGroup, { id: path.join(root, 'tasks/AGENTS.md'), name: 'Domain label', description: 'Domain description' });
     node.addChild('local', { id: path.join(root, '.harness/tasks/AGENTS.md'), name: 'Maintenance label', description: 'Maintenance description' });
@@ -101,7 +101,7 @@ test('fresh scope writes remain authorized without initializing Project Memory o
 
 test('first task creation registers both purposes without an earlier project command', async t => {
   const { root, write, call, read } = fixture(t);
-  const owner = new InternalNode(path.join(root, 'AGENTS.md')).parse('# Root\n');
+  const owner = new AgentsNode(path.join(root, 'AGENTS.md')).parse('# Root\n');
   owner.addChild('descendant', { id: path.join(root, 'child/AGENTS.md') });
   write('AGENTS.md', owner.serialize()); write('child/AGENTS.md', '# Child\n');
   const expected: string[] = [];
@@ -118,7 +118,7 @@ test('first task creation registers both purposes without an earlier project com
 
 test('maintenance registration preserves an existing descendant relation and authored metadata', async t => {
   const { root, write, call, read } = fixture(t);
-  const node = new InternalNode(path.join(root, 'AGENTS.md')).parse('# Root\n\nKeep prose\n');
+  const node = new AgentsNode(path.join(root, 'AGENTS.md')).parse('# Root\n\nKeep prose\n');
   const reference = { id: path.join(root, '.harness/tasks/AGENTS.md'), name: 'My upkeep', description: 'Keep description' };
   node.addChild('descendant', reference);
   write('AGENTS.md', node.serialize());
@@ -148,14 +148,16 @@ test('new owner registration requires explicit group and preserves purpose-indep
   const created = await run([...args.slice(0, 5), '--index-group', 'descendant', ...args.slice(5)], { env: {} });
   assert.equal(created.exitCode, 0, created.stdout);
   assert.equal(read('.').descendantChildren[0]?.id, path.join(root, '.harness/tasks/AGENTS.md'));
-  const board = new InternalNode(path.join(root, '.harness/tasks/AGENTS.md')).parse(fs.readFileSync(path.join(root, '.harness/tasks/AGENTS.md'), 'utf8'));
-  assert.equal(board.localChildren.filter(ref => ref.name === 'Example').length, 1);
+  const board = new AgentsNode(path.join(root, '.harness/tasks/AGENTS.md')).parse(fs.readFileSync(path.join(root, '.harness/tasks/AGENTS.md'), 'utf8'));
+  assert.equal(board.localChildren.length, 0);
   assert.doesNotMatch(board.serialize(), /task-projects:/);
+  const list = new ReadmeNode(path.join(root, '.harness/tasks/README.md')).parse(fs.readFileSync(path.join(root, '.harness/tasks/README.md'), 'utf8'));
+  assert.equal(list.localChildren.filter(ref => ref.name === 'Example').length, 1);
 });
 
 for (const group of ['local', 'descendant'] as const) test('existing board registers missing owner relation as ' + group, async t => {
   const { root, write, read } = fixture(t);
-  const owner = new InternalNode(path.join(root, 'AGENTS.md')).parse('# Owner\n\nKeep prose\n');
+  const owner = new AgentsNode(path.join(root, 'AGENTS.md')).parse('# Owner\n\nKeep prose\n');
   owner.setConstraints(['Keep rule']);
   owner.addChild('local', { id: path.join(root, 'other/AGENTS.md'), name: 'Authored', description: 'Keep' });
   write('AGENTS.md', owner.serialize()); write('other/AGENTS.md', '# Other\n');

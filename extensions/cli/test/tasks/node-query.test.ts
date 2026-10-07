@@ -3,7 +3,7 @@ import { test } from "node:test";
 import * as fs from "node:fs";
 import path from "node:path";
 import { tmpdir } from "node:os";
-import { InternalNode, TaskNode } from "../../src/domain/models/index.js";
+import { AgentsNode, TaskNode } from "../../src/domain/models/index.js";
 import {
   listTaskNodes,
   listRepositoryTaskNodes,
@@ -36,7 +36,7 @@ function fixture(t: { after(fn: () => void): void }) {
     const file = path.join(root, rel);
     write(
       rel,
-      new InternalNode(file)
+      new AgentsNode(file)
         .create(
           {
             localChildren: children.map((id) => ({

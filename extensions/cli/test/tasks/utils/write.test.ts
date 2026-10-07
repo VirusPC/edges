@@ -219,7 +219,7 @@ test("createTask writes default edges-task-project on disk and returns project d
     assert.equal(created.project, "default");
     assert.equal(
       created.path,
-      "tasks/_default/backlog/2026-09-16--No-Proj/index.md",
+      "tasks/_default/backlog/2026-09-16--No-Proj/INDEX.md",
     );
     const md = await readFile(path.join(repo, created.path), "utf8");
     assert.match(md, /edges-task-project: default/);
@@ -238,7 +238,7 @@ test("createTask --project cli writes field and named directory", async () => {
       { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 12, 0, 0) },
     );
     assert.equal(created.project, "cli");
-    assert.equal(created.path, "tasks/cli/todo/2026-09-16--Named/index.md");
+    assert.equal(created.path, "tasks/cli/todo/2026-09-16--Named/INDEX.md");
     const md = await readFile(path.join(repo, created.path), "utf8");
     assert.match(md, /edges-task-project: cli/);
     await access(path.join(repo, created.sidecarPath));
@@ -287,7 +287,7 @@ test("updateTask --project cli moves Task + sidecar and dual-writes", async () =
       { fs: nodeBoardWriter(), now: new Date(2026, 8, 16, 13, 0, 0) },
     );
     assert.equal(updated.project, "cli");
-    assert.equal(updated.path, "tasks/cli/todo/2026-09-16--Move-me/index.md");
+    assert.equal(updated.path, "tasks/cli/todo/2026-09-16--Move-me/INDEX.md");
     const md = await readFile(path.join(repo, updated.path), "utf8");
     assert.match(md, /edges-task-project: cli/);
     assert.match(md, /edges-tasks-status: todo/);
@@ -321,7 +321,7 @@ test("updateTask --project default writes the field and does not require other f
     assert.equal(updated.project, "default");
     assert.equal(
       updated.path,
-      "tasks/_default/in_progress/2026-09-16--Home/index.md",
+      "tasks/_default/in_progress/2026-09-16--Home/INDEX.md",
     );
     const md = await readFile(path.join(repo, updated.path), "utf8");
     assert.match(md, /edges-task-project: default/);

@@ -17,7 +17,7 @@ export function addNoteUpdateCommand(note: Command, ctx: CliContext): void {
   note
     .command("update")
     .description("Update a note title or body without git ingest")
-    .argument("<path>", "notes/<stem>/index.md")
+    .argument("<path>", "notes/<stem>/INDEX.md")
     .option("--title <title>", "New title")
     .option("--body <markdown>", "New body")
     .action((entryPath: string, opts: { title?: string; body?: string }) => {

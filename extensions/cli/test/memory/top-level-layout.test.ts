@@ -138,7 +138,7 @@ test("reruns preserve current extension-relative app links and memory index desc
   put(root, "extensions/apps/demo/README.md", "# app\n");
   put(
     root,
-    ".harness/memory/projects/AGENTS.md",
+    ".harness/memory/projects/README.md",
     "- [history](old/index.md) — Historical knowledge/notes/ scope.\n",
   );
   track(root);

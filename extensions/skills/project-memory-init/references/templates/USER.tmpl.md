@@ -6,6 +6,8 @@
 > **本入口与 `users/` 被 gitignore，绝不提交。** Agent 读的是本机这份类型入口；克隆里默认没有它。换机或删仓前用 `$user-memory-backup`，回注用 `$user-memory-restore`。
 > 本文件只是索引，条目区块由脚本重算，正文写在 `users/user_<slug>/index.md` 里。
 
-<!-- project-memory-entries:start -->
+<!-- project-entries-local:start -->
+## 本层内容
+
 - 暂无条目。
-<!-- project-memory-entries:end -->
+<!-- project-entries-local:end -->

@@ -14,6 +14,7 @@ import { addNoteCommand } from "./commands/note.js";
 import { addTasksCommand } from "./commands/tasks.js";
 import { addMemoryCommand } from "./commands/memory.js";
 import { addSkillCommand } from "./commands/skill.js";
+import { addForestCommand } from "./commands/forest.js";
 import { acquireWriteLock } from "./services/node/node-lock.js";
 import { VERSION } from "./utils/version.js";
 
@@ -22,6 +23,8 @@ export type { CliContext, CliInput, CliResult };
 const ROOT_AFTER_HELP = `
 EXAMPLES
   edges --scope ./projects/demo tasks --purpose maintenance list
+  edges --scope . forest list
+  edges --scope . forest list --form innermost --no-super
   edges note create --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
   edges note --help
   edges tasks --help
@@ -79,6 +82,10 @@ function addRootCommand(
       "--scope <directory>",
       "Target content scope (default: EDGES_SCOPE, EDGES_REPO, or cwd owner)",
     )
+    .option(
+      "--super",
+      "Root at a runtime SuperAgentsNode mounting harness-materials README paths (never written to disk)",
+    )
     .description("Edges CLI: notes, tasks, artifacts, and more")
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help")
@@ -88,7 +95,8 @@ function addRootCommand(
     .helpCommand(false);
 
   program.hook("preAction", async (_program, command) => {
-    const scope = program.opts<{ scope?: string }>().scope;
+    const { scope, super: useSuper } = program.opts<{ scope?: string; super?: boolean }>();
+    if (useSuper) ctx.super = true;
     if (scope !== undefined) ctx.env = { ...ctx.env, EDGES_SCOPE: scope };
     const target = commandWriteTarget(command, ctx.env);
     if (target !== undefined) await beforeWrite?.(target);
@@ -104,6 +112,7 @@ function addRootCommand(
   addSkillCommand(program, ctx);
   addArtifactsCommand(program, ctx);
   addSchemaCommand(program, ctx);
+  addForestCommand(program, ctx);
   program.addHelpText("after", ROOT_AFTER_HELP);
   applyOutput(program, output);
   return program;

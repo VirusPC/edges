@@ -59,7 +59,7 @@ flowchart TD
 
 Model 的 create/update/destroy 是内存领域方法；创建目录、保存文档等完整动作通过 Service 完成。operations 通过回调取得加载能力，不反向依赖 Service。不要让业务调用方重新拼装模型修改与文件读写。
 
-这张图表达职责边界，不代表所有历史代码都已整理完：Tasks 的结果适配仍引用 CliContext，审阅页命令还有流程编排，Artifacts 的部分部署逻辑仍在 commands 下。进一步解耦已登记为[后续任务](../../.harness/tasks/edges-cli-platform/backlog/2026-10-06--解耦-CLI-commands-与-Service/index.md)，不能把当前 commands 全部描述成“只调用 Service”。
+这张图表达职责边界，不代表所有历史代码都已整理完：Tasks 的结果适配仍引用 CliContext，审阅页命令还有流程编排，Artifacts 的部分部署逻辑仍在 commands 下。进一步解耦已登记为[后续任务](../../.harness/tasks/edges-cli-platform/backlog/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md)，不能把当前 commands 全部描述成“只调用 Service”。
 
 详细设计按职责分开阅读：
 
@@ -88,11 +88,11 @@ AGENTS 的本层硬约束、本层记忆、下层索引分别对应 constraints�
 
 每个节点可以有独立的 harness。内容叶节点的 harness 是同目录 AGENTS.md；InternalNode 的下一层 harness 位于 `.harness/AGENTS.md`。harness 不混入 children，普通查询不会自动进入维护系统的下一层。
 
-新增父级登记时，调用方明确选择 `--index-group local|descendant`，CLI 校验并执行，不按用途或目录深度推断。已有关系保留原分组，传入该参数不等于移动已有关系。缺少 owner 时不会自动初始化；生成的 Task 项目与 Memory 类型入口使用其固定本层组成关系。
+新增父级登记时，调用方明确选择 `--index-group local|descendant`，CLI 校验并执行，不按用途或目录深度推断。已有关系保留原分组，传入该参数不等于移动已有关系。缺少 owner 时不会自动初始化；生成的 Task 项目与 Memory 类型入口使用其固定本层系统维护信息关系。
 
 ### 查询遵循索引
 
-NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认只走 localChildren；includeDescendants 才进入下层组，includeHarness 才沿维护关系递归。
+NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认走全部组成 children（local∪descendants）；显式 `localOnly` 才只走 localChildren；includeHarness 才沿维护关系递归。**traverse 只跑单个系统**；森林在外由 `collectSystemRoots` + `SystemForestService` 拼装（CLI：`edges forest list`，默认 `independent`）。默认根是 scope 下真 `AGENTS.md`；显式 `--super` / `SuperAgentsNode` 按 `harness-materials.json` 挂材料 README（遍历当普通 AgentsNode），不是从真 AGENTS 并 README 边——详见 [models 设计原则](src/domain/models/README.md#设计原则树与入口)与 [operations 遍历原则](src/domain/operations/README.md#原则单系统-traverse--森林在外)。
 
 ```ts
 const pending = service.query(scope, { types: ["task"] })
@@ -249,4 +249,11 @@ pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts \
   --root /absolute/scope --write
 ```
 
-脚本先检查所有候选再写入，保留原文备份，跳过符号链接、依赖目录、受保护的 posts 和嵌套 Git 边界；重复执行无变更。目录迁移与本机私有内容恢复见[迁移指南](../../docs/recursive-layout-migration.md)。
+脚本先检查所有候选再写入，保留原文备份，跳过符号链接、依赖目录、受保护的 posts 和嵌套 Git 边界；重复执行无变更。
+
+Task Project 列表属于看板 `README.md`（`project-entries-local`）；看板 `AGENTS.md` 只登记 `<project>/AGENTS.md` 系统入口。把看板 AGENTS 里的 README 型 project 链接（含旧 task-projects 区块）一次性移过去：
+
+```bash
+pnpm migrate:task-project-lists -- --root /absolute/scope          # 预览
+pnpm migrate:task-project-lists -- --root /absolute/scope --apply
+```目录迁移与本机私有内容恢复见[迁移指南](../../docs/recursive-layout-migration.md)。

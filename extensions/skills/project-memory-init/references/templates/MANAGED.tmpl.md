@@ -5,6 +5,8 @@
 > 怎么写：`<name>/SKILL.md`，name 用 kebab-case；正文写步骤、输入输出和边界，出处与审计放 metadata。
 > 本文件只是索引，条目区块由脚本从当前类型来源重算。
 
-<!-- project-memory-entries:start -->
+<!-- project-entries-local:start -->
+## 本层内容
+
 - 暂无条目。
-<!-- project-memory-entries:end -->
+<!-- project-entries-local:end -->

@@ -4,21 +4,37 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 
 ## Language
 
+**系统入口（System Entry）**：
+引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层系统维护信息与下层系统维护信息，并可写硬约束；从作用域根起经系统维护信息登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$project-memory-init` / project harness init；命令 `edges memory init`），以标记该目录为重点维护作用域；不是路径白名单。CLI 默认遍历根是 `--scope` 下的真实 `AGENTS.md`，只覆盖该系统的系统二；从真 AGENTS 出发到不了同目录 README 上的 tasks/notes 等是预期。
+_避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md、从真 AGENTS 遍历时自动并进 README 组成边
+
+**虚拟超节点（SuperAgentsNode）**：
+相对当前 `--scope` 的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用。典型叙事：把整个仓库视为上一级主体（如个人）的系统二，向上为该系统构建虚拟根。traverse 时**当作普通 AgentsNode**（只走 `children`，无跨系统特判）。挂载表来自 `extensions/cli/src/domain/config/harness-materials.json`（材料 README；`scope`+path；不挂其它系统 `AGENTS.md`；可空）。缺 AGENTS 且未开 `--super` 不得自动合成。系统森林在 traverse 之外由 `SystemForestService` / `edges forest list` 拼装为 `BaseNode[][]`（`independent` 早停；`innermost` 只留内层）。
+_避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNode、缺 AGENTS 就静默加上超节点、把超节点落盘、用真 AGENTS 遍历并边代替 `--super`、让一次 traverse 跨系统拼森林、Super 挂其它系统 AGENTS
+
 **文档节点（Document Node）**：
-以目录中的 Markdown 入口为身份、包含内容与自身操作的单位。入口路径唯一标识节点，父归属遵循文件目录；入口索引可跨越多个目录层级发现节点。
-_避免使用_：仅指文件夹、仅指作用域入口
+模型中的 Markdown 单位：系统入口，组织清单，或内容叶子（Task / Note / Memory / Skill 等）。从作用域根（CLI scope 对应的真系统入口，或显式 `--super` 的虚拟超节点）起经登记可达才算节点。
+_避免使用_：仅指文件夹、磁盘上未登记的 md
 
-**组织节点（Internal Node）**：
-通过入口索引组织直属内容与下层组织节点的节点，在本系统中由 AGENTS.md 承载。直属节点可以是任务、记忆或其他组织节点，普通交叉引用不表示归属。
-_避免使用_：私有节点、仅能包含其他 AGENTS.md 的节点
+**组织清单（README.md）**：
+用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `project-entries-local` / `project-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。在「真系统」视角下这些是系统一材料；经 `SuperAgentsNode` 遍历时，同一批材料被当作**虚拟系统的系统二**展开。
+_避免使用_：把叶子正文写成 README、把 README 当成真系统入口、无 entries 的普通包说明自动当节点、把 README 组成写成 project-harness-*、下层内容挂成 INDEX/SKILL
 
-**叶子节点（Leaf Node）**：
-承载具体内容、没有组成子节点的节点。Task、Memory、Skill 与 Note 属于此类，叶子仍可拥有独立 harness。
-_避免使用_：无维护能力的节点、目录中没有其他文件的节点
+**内容叶子入口（INDEX.md）**：
+Task / Note / Memory 等的入口文件，名为 `INDEX.md`。Skill 仍为 `SKILL.md`。有无子项仍看是否出现组成登记，不靠文件名分 Internal / Leaf。
+_避免使用_：index.md（迁移前史料）、把叶子叫 README.md、把 INDEX.md 当成系统入口
+
+**组成登记（entries）**：
+系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口用 `project-harness-local` / `project-harness-descendants`（标题「本层系统维护信息 / 下层系统维护信息」）；组织清单用 `project-entries-local` / `project-entries-descendants`（标题「本层内容 / 下层内容」）。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——两套登记并列，持久化上互不为对方的 child。目标模型下真 AGENTS 的 traverse **不**自动并 README 边；要逛内容面须换根到 `SuperAgentsNode`。
+_避免使用_：目录扫描结果、把任意 Markdown 链接当子节点、宣称 AGENTS.md 永不登记子项、把系统一孩子双写进 AGENTS 与 README、两套标记混用、把 README 持久化挂进 AGENTS.children
+
+**组织节点 / 叶子节点（派生状态）**：
+同一文档节点的当前状态：有组成登记为组织节点，否则为叶子。不是固定类型，模型不持久化 isLeaf，任意节点都可增加子节点。具体节点直接继承 BaseNode；`type` 为 `agents` / `readme` / `task` / `memory` / `note` / `skill` / `text`（普通文本兜底），无 `internal`。
+_避免使用_：InternalNode/LeafNode 类层次、type internal、按文件名区分组织/叶子、另造 entryKind
 
 **维护关系（harness）**：
-节点指向自身维护系统的独立关系；不属于组成 children。读取某个系统二时展开其组成内容，不自动进入它及其组成节点的 harness。
-_避免使用_：组成子节点、固定深度截断
+节点指向自身维护系统（系统二）的独立关系；系统入口即该关系在文件上的落点。默认不跟随 harness。真系统入口上的组成是该系统的系统二材料；内容面另经组织清单或 `SuperAgentsNode` 进入，不自动从真 AGENTS 并进。
+_避免使用_：组成子节点、固定深度截断、把 harness 与「遍历时并 README 边」混为一谈
 
 **Edges**：
 采用通用递归模型、当前以个人递归自我改进为目标的支撑系统，其根节点在个人作用域中承载人的系统二。进入 Edges 自身的维护作用域时，Edges 又作为被维护的系统一；模型中的根主体不限于个人。
@@ -77,12 +93,12 @@ _避免使用_：长期知识库、会话流水账、代码事实副本
 _避免使用_：把 type 写成全局 JSON 注册表键、把看板状态夹直接叫 Memory Type、把每条 Task 升成 Memory Type（Q18=B，另卡）
 
 **层入口 AGENTS.md**：
-某一记忆层目录上的项目记忆入口，承载本层硬约束、本层类型入口清单与下层记忆索引。
-_避免使用_：类型入口 AGENTS.md、把类型目录里的 AGENTS.md 当成层入口、Task Project AGENTS.md（若指项目记忆层入口）
+某一作用域上的系统入口，与「系统入口」同指；历史称呼。
+_避免使用_：与系统入口并列的另一种文件
 
-**类型入口 AGENTS.md**：
-某一 Memory Type 在该层的记忆入口，承载该类型引言与条目索引，与条目目录同处；用途和受管标记可不同于层入口，但同属 InternalNode。
-_避免使用_：层入口 AGENTS.md、记忆层根上另立一套入口文件名、把类型入口写成全局注册表、Task Project AGENTS.md
+**类型入口**：
+某一 Memory Type（或 Skills 类型）的索引文档节点，与条目同处，由上层系统入口的组成登记挂入。统一为组织清单：`README.md` + `project-entries-*`（`type=readme`），不是系统入口；该目录另经用户 init 才另有 `AGENTS.md`。
+_避免使用_：把类型入口写成全局注册表、未加判断就等同层入口、类型索引继续用 AGENTS.md + project-memory-entries（迁移后）
 
 **用户记忆（User Memory）**：
 项目记忆的一种 Memory Type，保存绑定到某一仓库路径、且不宜公开的个人材料（个人偏好而非项目共享约定、凭据与密钥，以及其他不得公开的上下文）；权威副本在该仓库工作树内，但不进入版本历史。它不是独立于项目记忆的全局层，也不把私有仓当作真源。
@@ -201,8 +217,8 @@ _避免使用_：仅指第三方技能、全部 Agent 技能、Project Memory �
 _避免使用_：唯一入口、替代 CLI、直连仓根脚本（已否决）
 
 **Project Harness（Edges 语境）**：
-Git 项目里系统二落在 `AGENTS.md` 层入口上的写法，三章为硬约束、本层组成、下层节点。`.harness/` 是这份系统二的材料目录，不是另一套入口形状。
-_避免使用_：Agent Harness 的同义词、只等于 `.harness/` 目录、Project Memory 三章的旧称
+Git 项目里递归系统二落在系统入口 `AGENTS.md` 上的写法：本层硬约束、本层系统维护信息、下层系统维护信息；`.harness/` 是材料目录，不是另一套入口形状。内容节点由组织清单或系统入口的组成登记挂入，不必自身也是系统入口。
+_避免使用_：Agent Harness 的同义词、只等于 `.harness/` 目录、本层组成/下层节点（旧标题）、Project Memory 三章的旧称、要求每个内容目录都有 AGENTS.md
 
 **Agent Harness（Edges 语境）**：
 让 Agent 持续有效工作的支撑机制，组织上下文、记忆、工具、约束与反馈；它可承担系统二的角色，也可作为被维护的系统一，不与系统二严格同义。
@@ -269,11 +285,11 @@ _避免使用_：title、name、把展示名当 CLI 查找键
 _避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type、把未确认的候选当成已有 project
 
 **Task Project 索引**：
-所选板 `tasks/AGENTS.md` 或 `.harness/tasks/AGENTS.md` 本层记忆区块内的 Task Projects 索引；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。
+所选板 `tasks/README.md` 或 `.harness/tasks/README.md` 的 `project-entries-local` 列表；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。用户 init 为系统入口的 `<project>/AGENTS.md` 仍登记在看板 `AGENTS.md`。
 _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件当记忆条目
 
-**Task Project AGENTS.md**：
-每个 Task Project 目录（含 `_default`）内的轻量 `AGENTS.md`，写标题与描述（可选指针）；作为可读节点入口不意味着自动初始化完整 Project Memory。
+**Task Project README.md**：
+每个 Task Project 目录（含 `_default`）内的 `README.md` 组织清单：标题、描述（可选指针）与列出 Task 的 `project-entries-local`。CLI 新建 project 只写 README；用户明确 init 时才有 `AGENTS.md` 系统入口。
 _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
 
 **Task Project 候选（edges）**：

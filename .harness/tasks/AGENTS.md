@@ -14,20 +14,12 @@
 
 
 <!-- project-harness-local:start -->
-## 本层组成
-- [.harness/memory/feedbacks/AGENTS.md](<.harness/memory/feedbacks/AGENTS.md>) — 用户的纠正、确认过的做法与必须遵守的禁止模式。
-- [.harness/memory/projects/AGENTS.md](<.harness/memory/projects/AGENTS.md>) — 进行中的工作、关键时间点，无法从代码或 git 历史推导的决策，以及项目内的规范。兜底：对不上更具体类型时走这里。
-- [.harness/memory/references/AGENTS.md](<.harness/memory/references/AGENTS.md>) — 需求文档、设计稿、接口文档、监控面板等外部资料。
-- [.harness/skills/managed/AGENTS.md](<.harness/skills/managed/AGENTS.md>) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
-- [.harness/skills/referenced/AGENTS.md](<.harness/skills/referenced/AGENTS.md>) — 本层 .agents/skills/ 下人写或装入的标准技能，工具只索引不改写。
+## 本层系统维护信息
+- [.harness/memory/feedbacks/README.md](<.harness/memory/feedbacks/README.md>) — 用户的纠正、确认过的做法与必须遵守的禁止模式。
+- [.harness/memory/projects/README.md](<.harness/memory/projects/README.md>) — 进行中的工作、关键时间点，无法从代码或 git 历史推导的决策，以及项目内的规范。兜底：对不上更具体类型时走这里。
+- [.harness/memory/references/README.md](<.harness/memory/references/README.md>) — 需求文档、设计稿、接口文档、监控面板等外部资料。
+- [.harness/skills/managed/README.md](<.harness/skills/managed/README.md>) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
+- [.harness/skills/referenced/README.md](<.harness/skills/referenced/README.md>) — 本层 .agents/skills/ 下人写或装入的标准技能，工具只索引不改写。
 
-- [Default](<_default/AGENTS.md>) — Ungrouped tasks that have not been assigned a named Task Project.
-- [Agent Clients UX](<agent-clients-ux/AGENTS.md>) — 客户端/插件/外设与本地 UX 实验。
-- [Edges CLI Platform](<edges-cli-platform/AGENTS.md>) — edges CLI/脚手架/发布/鉴权等平台层。
-- [Edges Tasks](<edges-tasks/AGENTS.md>) — 看板与 Task 工作流（协作、绑定、Skill/MCP、分类与调度）。
-- [Evaluation](<evaluation/AGENTS.md>) — 知识库/Agent Evaluation 评测与可重复 cases（benchmark、评测流水线等）。
-- [Observation](<observation/AGENTS.md>) — 知识库/Agent Observation 观测/观察系统（与 Evaluation 分开）。
-- [Project Memory](<project-memory/AGENTS.md>) — Project Memory 类型/索引/reshape/与 docs 边界等。
-- [Site and Content](<site-and-content/AGENTS.md>) — 站点/posts/badge/内容整理检索。
 - [技术阅读](<tech-reading/AGENTS.md>) — 记录所有技术阅读相关进展（论文、长文、官方文档、源码精读等）。看板管阅读工作项与进度；可读笔记仍可落 notes。
 <!-- project-harness-local:end -->

@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { run } from '../../src/program.js';
-import { InternalNode, TaskNode } from '../../src/domain/models/index.js';
+import { AgentsNode, TaskNode } from '../../src/domain/models/index.js';
 import { generateTasksSite } from '../../src/services/tasks/generate-site.js';
 
 function fixture(t: { after(fn: () => void): void }, git = true) {
@@ -17,7 +17,7 @@ function fixture(t: { after(fn: () => void): void }, git = true) {
   };
   const index = (rel: string, children: string[]) => {
     const file = path.join(root, rel);
-    write(rel, '# Project\n\nDescription\n\n' + new InternalNode(file).create({ localChildren: children.map(id => ({ id: path.resolve(path.dirname(file), id) })) }, { operation: 'create' }).serialize());
+    write(rel, '# Project\n\nDescription\n\n' + new AgentsNode(file).create({ localChildren: children.map(id => ({ id: path.resolve(path.dirname(file), id) })) }, { operation: 'create' }).serialize());
   };
   const scopes = ['.', 'child', 'notes/example', 'tasks/alpha/todo/same', 'tasks/alpha/todo/same/.harness/tasks/alpha/todo/same'];
   const entries: string[] = [];

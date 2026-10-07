@@ -1,7 +1,7 @@
 import { isWithinPath, firstSymlink } from "../../utils/filesystem.js";
 import { query } from "../../domain/operations/query.js";
 import { realpathSync } from "node:fs";
-import { TaskNode, InternalNode } from "../../domain/models/index.js";
+import { TaskNode, AgentsNode, ReadmeNode } from "../../domain/models/index.js";
 import { taskBoardQuery, taskLocationOf, listRepositoryTaskNodes } from "./node-query.js";
 import { taskBoardLocation } from "./paths.js";
 import { scopeDir, type BoardTarget } from "./paths.js";
@@ -31,10 +31,12 @@ import {
   projectDirName,
   type TaskProjectId,
 } from "../../domain/models/tasks/project.js";
+import { isLeafEntryName } from "../../domain/models/layout.js";
 import {
   boardRoot,
   parseTarget,
   sidecarRelPath,
+  legacyTaskRelPath,
   taskRelPath,
 } from "./paths.js";
 import {
@@ -153,11 +155,18 @@ export async function listProjectIds(
   fs: BoardFs,
 ): Promise<TaskProjectId[]> {
   const target = typeof repoPath === 'string' ? taskBoardLocation(repoPath, 'domain') : repoPath;
-  const nodes = await (await taskBoardQuery(target, ['internal'])).value();
+  // Content face (board README) holds org-list projects; real AGENTS still holds
+  // system-entry projects and legacy README links awaiting migration.
+  const [fromContent, fromAgents] = await Promise.all([
+    (await taskBoardQuery(target, ["agents", "readme"], { super: true })).value(),
+    (await taskBoardQuery(target, ["agents", "readme"], { super: false })).value(),
+  ]);
+  const nodes = [...fromContent, ...fromAgents];
   const board = await fs.exists(boardRoot(repoPath)) ? realpathSync(boardRoot(repoPath)) : boardRoot(repoPath);
-  const ids: TaskProjectId[] = nodes
-    .filter(node => node instanceof InternalNode && path.dirname(node.directoryPath) === board)
-    .map(node => path.basename(node.directoryPath))
+  const names = new Set(nodes
+    .filter(node => (node instanceof AgentsNode || node instanceof ReadmeNode) && path.dirname(node.directoryPath) === board)
+    .map(node => path.basename(node.directoryPath)));
+  const ids: TaskProjectId[] = [...names]
     .filter(name => name === DEFAULT_TASK_PROJECT_DIR || isUserProjectSlug(name))
     .map(name => name === DEFAULT_TASK_PROJECT_DIR ? DEFAULT_TASK_PROJECT : name);
   return ids.sort((a, b) => {
@@ -184,8 +193,20 @@ async function readListItem(
   fs: BoardFs,
   providedNode?: TaskNode,
 ): Promise<ListedTask> {
-  const rel = taskRelPath(project, status, stem, repoPath);
+  let rel = taskRelPath(project, status, stem, repoPath);
+  if (
+    !providedNode &&
+    !(await fs.exists(path.join(scopeDir(repoPath), rel)))
+  )
+    rel = legacyTaskRelPath(project, status, stem, repoPath);
   const sidecarRel = sidecarRelPath(project, status, stem, repoPath);
+  if (providedNode) {
+    const actual = path.relative(
+      realpathSync(scopeDir(repoPath)),
+      providedNode.path,
+    );
+    if (actual && !actual.startsWith("..")) rel = actual;
+  }
   const abs = path.join(scopeDir(repoPath), rel);
   const sidecarAbs = path.join(scopeDir(repoPath), sidecarRel);
   const markdown = providedNode?.serialize() ?? await fs.readFile(abs);
@@ -316,7 +337,7 @@ export async function getTask(
     const abs = path.isAbsolute(target)
       ? target
       : path.join(scopeDir(repoPath), target);
-    if (path.basename(abs) !== "index.md" || !(await fs.exists(abs))) {
+    if (!isLeafEntryName(path.basename(abs)) || !(await fs.exists(abs))) {
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
     }
     const rel = path.relative(
@@ -367,9 +388,10 @@ export type RepositoryTaskItem = TaskListItem & {
 /** Shared projection for repository CLI lists and the persistent dashboard. */
 export async function listRepositoryTasksWithDocs(
   root: string, opts: TaskListOpts = {}, purpose?: import("./paths.js").TaskPurpose,
+  traversal: { super?: boolean } = {},
 ): Promise<RepositoryTaskItem[]> {
   root = realpathSync(root);
-  const nodes = await listRepositoryTaskNodes(root);
+  const nodes = await listRepositoryTaskNodes(root, traversal);
   const rows = await query(async function* () { yield* nodes; })
     .map(node => ({ node, location: taskLocationOf(node, root) }))
     .filter(({ location }) => !purpose || location.source.purpose === purpose)

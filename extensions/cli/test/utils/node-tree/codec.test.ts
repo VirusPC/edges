@@ -52,8 +52,8 @@ test('new model serialization escapes Markdown syntax without changing text or t
   assert.match(rendered, /<!-- project-harness:start -->/);
   assert.doesNotMatch(rendered, /<!-- project-memory:start -->/);
   assert.match(rendered, /## 本层硬约束/);
-  assert.match(rendered, /## 本层组成/);
-  assert.match(rendered, /## 下层节点/);
+  assert.match(rendered, /## 本层系统维护信息/);
+  assert.match(rendered, /## 下层系统维护信息/);
 });
 
 test('missing sections can be added without overwriting manual node text', () => {

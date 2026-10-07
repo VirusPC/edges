@@ -1,4 +1,4 @@
-import { LeafNode } from "../core/leaf-node.js";
+import { BaseNode } from "../core/base-node.js";
 import { domainFields, scalar, setDomainField } from "../core/fields.js";
 import type { Metadata, NodeCreateInput } from "../core/types.js";
 
@@ -8,7 +8,7 @@ export interface MemoryCreateInput extends NodeCreateInput {
 
 export interface MemoryUpdateInput extends MemoryCreateInput {}
 
-export class MemoryNode extends LeafNode<MemoryCreateInput, MemoryUpdateInput> {
+export class MemoryNode extends BaseNode<MemoryCreateInput, MemoryUpdateInput> {
   override readonly type = "memory" as const;
   protected override validateMetadata(metadata: Metadata | undefined): void {
     super.validateMetadata(metadata);

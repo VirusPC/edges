@@ -2,7 +2,7 @@
 
 项目记忆的类型入口原先平铺在 `.memory/` 根部（`USER.md` / `FEEDBACK.md` 等）。2026-09-17 grill 确认：类型入口改为对应复数目录下的 `AGENTS.md`，与条目同处；层入口与类型入口同名但契约不同。本轮只定 CONTEXT / PROTOCOL / LAYOUT / 本 ADR；doctor 迁移与脚本接线等用户另行 go-ahead。
 
-**Status:** accepted（grill 确认于 2026-09-17）
+**Status:** accepted（grill 确认于 2026-09-17）；类型入口文件名已被 ADR 0029 修订：现为复数目录下 `README.md`（`project-entries-*`），不再是 `AGENTS.md`
 
 **See also:** ADR 0003（用户记忆仍在仓内且 gitignore；索引路径改到 `users/AGENTS.md`）；ADR 0006（扩展面仍只在 LAYOUT，入口文件现为复数目录下的 `AGENTS.md`）
 

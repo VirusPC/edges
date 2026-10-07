@@ -1,6 +1,6 @@
 #!/usr/bin/env -S node --import tsx
 import { isWithinPath } from '../extensions/cli/src/utils/filesystem.js';
-import { LegacyIndex as InternalNode } from "./legacy-index.mjs";
+import { LegacyIndex as AgentsNode } from "./legacy-index.mjs";
 /** Reviewed Edges instance migration; generic Project Memory owns format conversion. */
 import * as fs from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
@@ -20,8 +20,7 @@ import {
   layerTypeSpecs,
   parseTypeMeta,
 } from "../extensions/cli/src/services/memory/types.js";
-import { expectedIndexDocument } from "../extensions/cli/src/services/memory/entries.js";
-import { readIndexTemplate } from "../extensions/cli/src/services/memory/templates.js";
+import { expectedIndexDocument, typeIndexTemplate } from "../extensions/cli/src/services/memory/entries.js";
 import type { LegacyType } from "../extensions/cli/src/services/memory/migration-legacy.js";
 const JOURNAL = ".recursive-layout-migration";
 export const OWNER_MAP: Record<string, string> = {
@@ -541,7 +540,7 @@ export function makeInstancePlan(
       const current = existing?.after ?? generic.state(agents);
       if (!current || current.kind !== "file")
         throw new Error("private-remnant-owner-AGENTS-missing");
-      const node = new InternalNode(agents).parse(generic.decodeState(current));
+      const node = new AgentsNode(agents).parse(generic.decodeState(current));
       const target = relative(dirname(agents), join(destination, "AGENTS.md"));
       if (!node.children.some((child) => child.target === target)) {
         node.addChild({
@@ -597,7 +596,7 @@ export function makeInstancePlan(
         "，那是唯一真理源。",
         "；AGENTS.md 组织入口发现，各规范正文按职责保持单一真源。",
       );
-      const node = new InternalNode(join(root, "AGENTS.md")).parse(text);
+      const node = new AgentsNode(join(root, "AGENTS.md")).parse(text);
       // ADRs are a Skill-owned collection; its directory is navigation, not an entry file.
       const adrNavigation = node.children.filter(
         (child) =>
@@ -734,7 +733,7 @@ export function planMissingPrivateIndexes(root: string, job: InstanceJob) {
         );
       const document = isDirectory(dirname(index))
         ? expectedIndexDocument(scope, "user")
-        : readIndexTemplate("USER.md", "user", "user");
+        : typeIndexTemplate(index, "user");
       const operation: generic.MigrationOperation = {
         source: index,
         target: index,

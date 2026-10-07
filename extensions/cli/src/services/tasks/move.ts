@@ -4,7 +4,7 @@ import { getTask, type BoardWriter } from "./board.js";
 import { TaskNode } from "../../domain/models/tasks/task-node.js";
 import { setDomainField } from "../../domain/models/core/fields.js";
 import { taskNodes, taskFile, moveTaskEntry, ensureTaskDestination } from "./write.js";
-import { sidecarRelPath, taskRelPath } from "./paths.js";
+import { sidecarRelPath, taskRelPath, withEntryName } from "./paths.js";
 import { TasksError, type TaskStatus } from "../../domain/models/tasks/types.js";
 
 export async function moveTaskStatus(
@@ -20,7 +20,10 @@ export async function moveTaskStatus(
   sidecarPath: string;
 }> {
   const record = await getTask(repoPath, target, io.fs);
-  const destRel = taskRelPath(record.project, next, record.stem, repoPath);
+  const destRel = withEntryName(
+    taskRelPath(record.project, next, record.stem, repoPath),
+    record.path,
+  );
   const destSidecarRel = sidecarRelPath(
     record.project,
     next,

@@ -24,7 +24,7 @@ test("Task directory create/get/update/status/project keep assets and runlog tog
   const made = await call(["create", "--title", "Unit"]);
   assert.equal(made.exitCode, 0, made.stdout);
   const item = JSON.parse(made.stdout);
-  assert.match(item.path, /\/index.md$/);
+  assert.match(item.path, /\/INDEX.md$/);
   assert.equal(path.dirname(item.sidecarPath), path.dirname(item.path));
   put(path.join(root, path.dirname(item.path), "image.png"), "asset");
   put(path.join(root, path.dirname(item.path), "resource.md"), "not a task");
@@ -47,7 +47,7 @@ test("Task directory create/get/update/status/project keep assets and runlog tog
   const changed = await call(["update", item.stem, "--project", "resources"]);
   assert.equal(changed.exitCode, 0, changed.stdout);
   const changedItem = JSON.parse(changed.stdout);
-  assert.match(changedItem.path, /resources\/done\/.*\/index.md$/);
+  assert.match(changedItem.path, /resources\/done\/.*\/INDEX.md$/);
   assert.equal(
     fs.existsSync(
       path.join(
@@ -66,7 +66,7 @@ test("Memory directory format indexes only entry, updates by same slug and docto
   put(path.join(source, "image.png"), "image");
   put(path.join(source, "details.md"), "resource");
   put(
-    path.join(source, "index.md"),
+    path.join(source, "INDEX.md"),
     "---\nname: project_unit\ndescription: Owned\nmetadata:\n  edges-title: Unit\n  edges-type: project\n---\n![image](image.png)",
   );
   const call = (args: string[]) =>
@@ -78,11 +78,11 @@ test("Memory directory format indexes only entry, updates by same slug and docto
     "--slug",
     "unit",
     "--import-entry",
-    path.join(source, "index.md"),
+    path.join(source, "INDEX.md"),
   ]);
   assert.equal(made.exitCode, 0, made.stdout);
   const result = JSON.parse(made.stdout);
-  assert.match(result.path, /project_unit\/index.md$/);
+  assert.match(result.path, /project_unit\/INDEX.md$/);
   assert.equal(
     fs.readFileSync(
       path.join(root, path.dirname(result.path), "image.png"),
@@ -92,7 +92,7 @@ test("Memory directory format indexes only entry, updates by same slug and docto
   );
   assert.match(
     fs.readFileSync(path.join(root, result.index), "utf8"),
-    /project_unit\/index.md/,
+    /project_unit\/INDEX.md/,
   );
   assert.doesNotMatch(
     fs.readFileSync(path.join(root, result.index), "utf8"),
@@ -131,7 +131,7 @@ test("Note CLI preserves authored Markdown and commits only its explicit owned r
   put(path.join(source, "photo.bin"), "asset");
   const document =
     '---\ncustom: "keep this exact formatting"\n---\n# Authored title\n\n![photo](photo.bin)\n\n';
-  const input = path.join(source, "index.md");
+  const input = path.join(source, "INDEX.md");
   put(input, document);
   const result = await run(
     [
@@ -150,7 +150,7 @@ test("Note CLI preserves authored Markdown and commits only its explicit owned r
   );
   assert.equal(result.exitCode, 0, result.stdout);
   const created = JSON.parse(result.stdout);
-  assert.match(created.filePath, /--filename-title\/index.md$/);
+  assert.match(created.filePath, /--filename-title\/INDEX.md$/);
   const saved = fs.readFileSync(path.join(root, created.filePath), "utf8");
   const { NoteNode } = await import("../../src/domain/models/notes/note-node.js");
   const note = new NoteNode(path.join(root, created.filePath)).parse(saved);
@@ -298,7 +298,7 @@ test("Memory and Note reject conflicting import content and wrong entry types be
     { env: {} },
   );
   assert.notEqual(wrong.exitCode, 0);
-  assert.match(wrong.stdout, /expected index.md/);
+  assert.match(wrong.stdout, /expected INDEX.md/);
   assert.equal(
     fs.existsSync(path.join(root, ".harness/memory/projects/project_example")),
     false,
@@ -316,7 +316,7 @@ test("Note import commits its parent registration and keeps source bytes unchang
   put(path.join(root, "notes/AGENTS.md"), "# Notes");
   git("add", ".");
   git("commit", "-m", "init");
-  const source = path.join(root, "source/index.md"),
+  const source = path.join(root, "source/INDEX.md"),
     original = "---\ncustom: keep\n---\n# Authored\n\nExtra prose\n";
   put(source, original);
   put(path.join(root, "source/asset"), "bytes");
@@ -346,7 +346,7 @@ test("Note import commits its parent registration and keeps source bytes unchang
 test("business imports reject known source directory types instead of silently retyping them", async (t) => {
   const root = fixture(t);
   await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
-  const source = path.join(root, "tasks/_default/backlog/task/index.md");
+  const source = path.join(root, "tasks/_default/backlog/task/INDEX.md");
   put(source, "# Task");
   const result = await run(
     [
@@ -373,7 +373,7 @@ test("business imports reject known source directory types instead of silently r
 test("doctor reports legacy memory migration without erasing the existing index", async (t) => {
   const root = fixture(t);
   await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
-  const index = path.join(root, ".harness/memory/projects/AGENTS.md");
+  const index = path.join(root, ".harness/memory/projects/README.md");
   const original = fs
     .readFileSync(index, "utf8")
     .replace("- 暂无条目。", "- [Old](project_old.md) — Legacy");
@@ -436,7 +436,7 @@ test("Note Markdown file input preserves extras without copying neighbors and in
   put(source, "---\ndescription: [invalid]\n---\n# Bad");
   const invalid = await call("Invalid");
   assert.notEqual(invalid.exitCode, 0);
-  assert.match(invalid.stdout, /index.md.*description/);
+  assert.match(invalid.stdout, /INDEX.md.*description/);
   assert.equal(git("rev-parse", "HEAD"), head);
   assert.equal(fs.readdirSync(path.join(root, "notes")).length, 1);
 });

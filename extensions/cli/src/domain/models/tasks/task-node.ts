@@ -1,11 +1,11 @@
 import { basename, extname } from "node:path";
-import { LeafNode } from "../core/leaf-node.js";
+import { BaseNode } from "../core/base-node.js";
 import { domainFields, scalar, setDomainField } from "../core/fields.js";
 import { TASK_PRIORITIES, TASK_STATUSES } from "./types.js";
 import type { Metadata, NodeContext } from "../core/types.js";
 import type { TaskPriority, TaskStatus, TaskCreateInput, TaskUpdateInput } from "./types.js";
 
-export class TaskNode extends LeafNode<TaskCreateInput, TaskUpdateInput> {
+export class TaskNode extends BaseNode<TaskCreateInput, TaskUpdateInput> {
   override readonly type = "task" as const;
   protected override validateMetadata(metadata: Metadata | undefined): void {
     super.validateMetadata(metadata);

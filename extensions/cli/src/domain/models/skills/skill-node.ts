@@ -1,6 +1,6 @@
 import * as nodePath from "node:path";
-import { LeafNode } from "../core/leaf-node.js";
-export class SkillNode extends LeafNode {
+import { BaseNode } from "../core/base-node.js";
+export class SkillNode extends BaseNode {
   override readonly type = "skill" as const;
   override validate(): void {
     super.validate();

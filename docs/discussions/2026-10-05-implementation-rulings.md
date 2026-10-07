@@ -835,8 +835,8 @@ flowchart LR
 
 - [节点模型 spec](../superpowers/specs/2026-10-04-node-domain-model-design.md)
 - [归属修正实施计划](../superpowers/plans/2026-10-05-recursive-node-ownership-correction.md)
-- [节点逻辑归属与资源单元分离](../../.harness/memory/projects/project_node_resource_unit_decision/index.md)
-- [递归节点与自身维护空间](../../.harness/memory/projects/project_scope_first_content_ownership/index.md)
+- [节点逻辑归属与资源单元分离](../../.harness/memory/projects/project_node_resource_unit_decision/INDEX.md)
+- [递归节点与自身维护空间](../../.harness/memory/projects/project_scope_first_content_ownership/INDEX.md)
 - [PR #161](https://github.com/VirusPC/edges/pull/161)
 
 

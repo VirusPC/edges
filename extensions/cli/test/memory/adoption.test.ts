@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { InternalNode } from "../../src/domain/models/internal/internal-node.js";
+import { AgentsNode } from "../../src/domain/models/internal/agents-node.js";
 import { initMemory, doctorMemory } from "../../src/services/memory/index.js";
 import { layerTypeSpecs } from "../../src/services/memory/types.js";
 import { rewriteLayerSurface } from "../../src/domain/models/internal/blocks.js";
@@ -17,9 +17,9 @@ function fixture(t: any) {
 const ownerText = (local: string, tail = "") =>
   `# Owner\n\n<!-- authored: keep -->\n<!-- project-memory-important:start -->\nImportant manual text.\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n## Authored pointers\n\n${local}\n<!-- project-memory-local:end -->\n${tail}`;
 for (const [kind, href] of [
-  ["plain", ".harness/memory/projects/AGENTS.md"],
-  ["angle", "<.harness/memory/projects/AGENTS.md>"],
-  ["encoded-angle", "<.harness/memory/%70rojects/AGENTS.md#entries>"],
+  ["plain", ".harness/memory/projects/README.md"],
+  ["angle", "<.harness/memory/projects/README.md>"],
+  ["encoded-angle", "<.harness/memory/%70rojects/README.md#entries>"],
 ] as const) {
   test(`Memory ${kind} local adoption recognizes missing type indexes and Doctor preserves authored links`, async (t) => {
     const root = fixture(t);
@@ -32,7 +32,7 @@ for (const [kind, href] of [
       fs.readFileSync(join(root, "AGENTS.md"), "utf8"),
       rewriteLayerSurface(text),
     );
-    fs.unlinkSync(join(root, ".harness/memory/projects/AGENTS.md"));
+    fs.unlinkSync(join(root, ".harness/memory/projects/README.md"));
     assert.deepEqual(
       layerTypeSpecs(root).map((spec) => spec.name),
       ["project"],
@@ -52,7 +52,7 @@ for (const [kind, href] of [
 for (const kind of ["descendant", "prose", "local-prose"] as const)
   test(`Memory ${kind} references do not adopt a local type`, async (t) => {
     const root = fixture(t),
-      line = "- [projects](<.harness/memory/%70rojects/AGENTS.md>) — not local";
+      line = "- [projects](<.harness/memory/%70rojects/README.md>) — not local";
     const tail =
       kind === "descendant"
         ? `<!-- project-memory-children:start -->\n${line}\n<!-- project-memory-children:end -->\n`
@@ -72,11 +72,11 @@ for (const kind of ["descendant", "prose", "local-prose"] as const)
       false,
     );
   });
-test("InternalNode generated local references are recognized as adopted types", async (t) => {
+test("AgentsNode generated local references are recognized as adopted types", async (t) => {
   const root = fixture(t),
-    node = new InternalNode(join(root, "AGENTS.md")).parse(ownerText(""));
+    node = new AgentsNode(join(root, "AGENTS.md")).parse(ownerText(""));
   node.addChild("local", {
-    id: join(root, ".harness/memory/projects/AGENTS.md"),
+    id: join(root, ".harness/memory/projects/README.md"),
     name: "projects",
     description: "project context",
   });
@@ -155,11 +155,11 @@ test("existing type files still require a local edge rather than a descendant or
   const root = fixture(t);
   await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
   const line =
-    "- [projects](<.harness/memory/%70rojects/AGENTS.md>) — descendant";
+    "- [projects](<.harness/memory/%70rojects/README.md>) — descendant";
   fs.writeFileSync(
     join(root, "AGENTS.md"),
     ownerText(
-      "[prose](<.harness/memory/projects/AGENTS.md>)",
+      "[prose](<.harness/memory/projects/README.md>)",
       `<!-- project-memory-children:start -->\n${line}\n<!-- project-memory-children:end -->\n`,
     ),
   );
@@ -188,7 +188,7 @@ test("reviewed public root graph loads document entries and keeps ADR navigation
   fs.mkdirSync(join(root, "docs/adr"), { recursive: true });
   const { NodeService } = await import("../../src/services/node/node-service.js");
   const service = new NodeService({ managedRoot: root });
-  const node = await service.get(join(root, "AGENTS.md"), InternalNode);
+  const node = await service.get(join(root, "AGENTS.md"), AgentsNode);
   assert.ok(node);
   assert.equal(
     node.children.some((ref) => ref.id === join(root, "docs/adr")),
@@ -202,7 +202,7 @@ test("reviewed public root graph loads document entries and keeps ADR navigation
     fs.writeFileSync(file, "# Fixture entry\n");
     assert.ok(await service.get(file));
   }
-  const listed = await service.list(root);
+  const listed = await service.list(root, { localOnly: true });
   assert.equal(listed.length, 1 + node.localChildren.length);
   assert.ok(listed.every((entry) => fs.statSync(entry.path).isFile()));
   assert.equal(fs.readFileSync(join(root, "AGENTS.md"), "utf8"), source);

@@ -1,7 +1,7 @@
 import { isWithinPath } from '../../utils/filesystem.js';
 import * as fs from "node:fs";
 import path from "node:path";
-import { BaseNode, InternalNode, TaskNode } from "../../domain/models/index.js";
+import { BaseNode, AgentsNode, TaskNode } from "../../domain/models/index.js";
 import { domainFields, scalar } from "../../domain/models/core/fields.js";
 import { decodeBody } from "../../domain/models/internal/parse.js";
 import {
@@ -20,10 +20,16 @@ import {
   type TaskPurpose,
 } from "./paths.js";
 
-/** No physical directory enumeration: absent boards are empty, old boards need migration. */
+/**
+ * Board discovery without physical directory enumeration.
+ * - `super: true` — content face only (board README as virtual system two)
+ * - `super: false` — real board AGENTS only (system-entry projects)
+ * - omit `super` — union both faces (org-list + system-entry); default for list/get
+ */
 export async function taskBoardQuery(
   target: TaskBoardLocation,
   types: readonly string[] = ["task"],
+  options: { super?: boolean } = {},
 ) {
   if (!fs.existsSync(target.boardDir))
     return query(async function* (): AsyncGenerator<BaseNode> {});
@@ -50,13 +56,33 @@ export async function taskBoardQuery(
       return undefined;
     },
   });
-  const board = await service.get(entry, InternalNode);
+  const board = await service.get(entry, AgentsNode);
   if (!board || !decodeBody(board.body).sections.memory.present)
     throw new TasksError(
       "VALIDATION_ERROR",
       `Task board index missing; migrate this board: ${entry}`,
     );
-  return service.query(root, { types });
+  const faces =
+    options.super === true
+      ? (["content"] as const)
+      : options.super === false
+        ? (["agents"] as const)
+        : (["content", "agents"] as const);
+  return query(async function* () {
+    const seen = new Set<string>();
+    for (const face of faces) {
+      if (face === "content" && !fs.existsSync(path.join(root, "README.md")))
+        continue;
+      const nodes = await service
+        .query(root, { types, localOnly: true, super: face === "content" })
+        .value();
+      for (const node of nodes) {
+        if (seen.has(node.path)) continue;
+        seen.add(node.path);
+        yield node;
+      }
+    }
+  });
 }
 export async function listTaskNodes(
   target: TaskBoardLocation,
@@ -67,14 +93,38 @@ export async function listTaskNodes(
 }
 export async function listRepositoryTaskNodes(
   root: string,
+  options: { super?: boolean } = {},
 ): Promise<TaskNode[]> {
   const canonicalRoot = fs.realpathSync(root);
   const service = new NodeService({ managedRoot: canonicalRoot });
-  return service.query(canonicalRoot, {
-    types: ["task"], includeDescendants: true, includeHarness: true,
-  })
-    .filter((node): node is TaskNode => node instanceof TaskNode)
+  if (options.super) {
+    return service
+      .query(canonicalRoot, { types: ["task"], includeHarness: true, super: true })
+      .filter((node): node is TaskNode => node instanceof TaskNode)
+      .value();
+  }
+  // Discover every task board via system-two + harness, then dual-face query each board.
+  const boards = await service
+    .query(canonicalRoot, { types: ["agents"], includeHarness: true })
+    .filter(
+      (node): node is AgentsNode =>
+        node instanceof AgentsNode &&
+        path.basename(node.path) === "AGENTS.md" &&
+        path.basename(node.directoryPath) === "tasks",
+    )
     .value();
+  const seen = new Set<string>();
+  const out: TaskNode[] = [];
+  for (const board of boards) {
+    for (const task of await listTaskNodes(
+      boardLocationOf(board.directoryPath, canonicalRoot),
+    )) {
+      if (seen.has(task.path)) continue;
+      seen.add(task.path);
+      out.push(task);
+    }
+  }
+  return out;
 }
 /** Classify a board from physical ownership, never from the reference used to reach it. */
 export function boardLocationOf(
@@ -144,7 +194,7 @@ export function taskLocationOf(node: TaskNode, root: string) {
     stem,
   };
 }
-export function projectLocationOf(node: InternalNode, root: string) {
+export function projectLocationOf(node: AgentsNode, root: string) {
   const board = path.dirname(node.directoryPath);
   if (path.basename(board) !== "tasks") return undefined;
   const location = boardLocationOf(board, root);

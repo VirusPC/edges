@@ -2,6 +2,8 @@
 
 状态：2026-10-06 用户批准并实施。实施计划见 [project-harness-layer-markers](../plans/2026-10-06-project-harness-layer-markers.md)。不替代 [目录节点模型](2026-10-05-directory-node-model.md) 的组成关系。
 
+> **标题翻案（2026-10-06 Q15c）：** 本层 / 下层章节标题改为「本层系统维护信息 / 下层系统维护信息」（不再用「本层组成 / 下层节点」）。标记名不变。见 [recursive-system-two-entries-design](2026-10-06-recursive-system-two-entries-design.md)。
+
 基线：`main` @ `ac7b5a8a`（#165）。
 
 ## 目的

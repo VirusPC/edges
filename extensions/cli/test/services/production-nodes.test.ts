@@ -29,7 +29,7 @@ test("task update adds title and priority metadata to an indexed task and status
   const stem = "2026-10-05--plain";
   mkdirSync(path.join(folder, stem), { recursive: true });
   writeFileSync(
-    path.join(folder, stem, "index.md"),
+    path.join(folder, stem, "INDEX.md"),
     "---\nmetadata:\n  edges-type: task\n  edges-tasks-status: todo\n---\n# Original\n\nBody stays.\n",
   );
   writeFileSync(path.join(folder, stem, "run.log.md"), "Run evidence\n");
@@ -52,7 +52,7 @@ test("task update adds title and priority metadata to an indexed task and status
   assert.equal(moved.exitCode, 0, moved.stdout);
   assert.match(
     readFileSync(
-      path.join(scope, "tasks/_default/done", stem, "index.md"),
+      path.join(scope, "tasks/_default/done", stem, "INDEX.md"),
       "utf8",
     ),
     /Body stays/,
@@ -108,7 +108,7 @@ test("note ingest refuses a linked destination before changing the outside note"
   mkdirSync(path.join(root, "notes/2026-10-05--hello"));
   symlinkSync(
     target,
-    path.join(root, "notes/2026-10-05--hello/index.md"),
+    path.join(root, "notes/2026-10-05--hello/INDEX.md"),
   );
   await assert.rejects(
     () =>
@@ -161,11 +161,11 @@ test("indexed task with malformed status is rejected without changing its body o
   const root = fixture(t), folder = path.join(root, "tasks/_default/todo/bad");
   mkdirSync(folder, { recursive: true });
   const original = "---\nmetadata:\n  edges-type: task\n  edges-tasks-status: invalid\n---\nOriginal\n";
-  writeFileSync(path.join(folder, "index.md"), original);
+  writeFileSync(path.join(folder, "INDEX.md"), original);
   writeFileSync(path.join(folder, "run.log.md"), "Evidence\n");
   await indexTaskFixtureBoard(path.join(root, "tasks"));
   const result = await run(["--scope", root, "tasks", "--index-group", "local", "--purpose", "domain", "update", "bad", "--title", "Changed"], { env: {} });
   assert.notEqual(result.exitCode, 0); assert.match(result.stdout, /Invalid edges-tasks-status/);
-  assert.equal(readFileSync(path.join(folder, "index.md"), "utf8"), original);
+  assert.equal(readFileSync(path.join(folder, "INDEX.md"), "utf8"), original);
   assert.equal(readFileSync(path.join(folder, "run.log.md"), "utf8"), "Evidence\n");
 });

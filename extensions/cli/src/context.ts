@@ -27,6 +27,8 @@ export type CliContext = {
   env: NodeJS.ProcessEnv;
   stdinText?: string;
   stdinIsTTY?: boolean;
+  /** Explicit `--super`: traverse from SuperAgentsNode mounting harness-materials READMEs. */
+  super?: boolean;
   indexGroup?: "local" | "descendant";
   purpose?: "domain" | "maintenance";
   result: CliResult | undefined;
@@ -48,7 +50,7 @@ export function usageError(reason: string, scope: "root" | "note" | "tasks" | "a
 }
 
 export function usageScope(argv: string[]): "root" | "note" | "tasks" | "artifacts" | "memory" | "schema" {
-  const command = argv.filter((arg, i) => arg !== "--scope" && argv[i - 1] !== "--scope" && !arg.startsWith("--scope="))[0];
+  const command = argv.filter((arg, i) => arg !== "--scope" && argv[i - 1] !== "--scope" && !arg.startsWith("--scope=") && arg !== "--super")[0];
   if (command === "note") return "note";
   if (command === "tasks") return "tasks";
   if (command === "artifacts") return "artifacts";

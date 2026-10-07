@@ -1,8 +1,12 @@
 import { isWithinPath, findAncestor } from '../../utils/filesystem.js';
 import fs from "node:fs";
 import path from "node:path";
-import { InternalNode, TaskNode } from "../../domain/models/index.js";
-import { identifyNodeType } from "../../domain/models/layout.js";
+import { AgentsNode, TaskNode } from "../../domain/models/index.js";
+import {
+  LEAF_ENTRY_NAMES,
+  identifyNodeType,
+  isLeafEntryName,
+} from "../../domain/models/layout.js";
 import { decodeBody } from "../../domain/models/internal/parse.js";
 import { projectIdFromDir } from "../../domain/models/tasks/project.js";
 import {
@@ -63,7 +67,7 @@ function discover(root: string): string[] {
         // Never follow links into other workspaces. Entry links are unsafe targets.
         if (
           item.name === "AGENTS.md" ||
-          item.name === "index.md" ||
+          isLeafEntryName(item.name) ||
           item.name === "tasks"
         )
           throw new Error(`Symbolic link in migration discovery: ${file}`);
@@ -88,7 +92,7 @@ export async function planTaskIndexes(
   const root = checkPath(path.resolve(inputRoot));
   const discovery = discover(root);
   const files = new Map(discovery.map((file) => [file, readEntry(file)!]));
-  const nodes = new Map<string, InternalNode>();
+  const nodes = new Map<string, AgentsNode>();
   const owners = new Map<string, EntryFile | undefined>();
   const tasks = discovery.filter((file) => identifyNodeType(file) === "task");
   const get = (
@@ -99,7 +103,7 @@ export async function planTaskIndexes(
       throw new Error(`Index outside migration root: ${file}`);
     let node = nodes.get(file);
     if (!node) {
-      node = new InternalNode(file).parse(files.get(file)?.source ?? seed);
+      node = new AgentsNode(file).parse(files.get(file)?.source ?? seed);
       if (decodeBody(node.body).unsafe)
         throw new Error(`Malformed index sections: ${file}`);
       for (const child of node.children)
@@ -199,8 +203,8 @@ export async function planTaskIndexes(
     const scope =
       path.basename(owner) === ".harness" ? path.dirname(owner) : owner;
     // Snapshot both present and absent candidates: adding an entry can change
-    // whether this selected public scope is an InternalNode or a content node.
-    const candidates = ["index.md", "SKILL.md"].map((name) =>
+    // whether this selected public scope is an AgentsNode or a content node.
+    const candidates = [...LEAF_ENTRY_NAMES, "SKILL.md"].map((name) =>
       path.join(scope, name),
     );
     for (const file of candidates)

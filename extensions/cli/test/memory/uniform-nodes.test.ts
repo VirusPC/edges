@@ -97,7 +97,7 @@ test("Doctor preserves sparse generic nodes and registered cross-directory local
     "nested/AGENTS.md",
     "nested/deep/AGENTS.md",
     "unowned/AGENTS.md",
-    ".harness/memory/projects/AGENTS.md",
+    ".harness/memory/projects/README.md",
   ];
   const before = files.map((file) => read(root, file));
   const report = await doctorMemory({ indexGroup: "descendant", targetDir: root, apply: true });
@@ -107,21 +107,19 @@ test("Doctor preserves sparse generic nodes and registered cross-directory local
     before,
   );
   const service = new NodeService({ managedRoot: root });
-  const local = await service.list(join(root, "business"));
+  const local = await service.list(join(root, "business"), { localOnly: true });
   assert.deepEqual(
     local.map((node) => node.path),
     [join(root, "business/AGENTS.md"), join(root, "shared/AGENTS.md")],
   );
-  const all = await service.list(join(root, "business"), {
-    includeDescendants: true,
-  });
+  const all = await service.list(join(root, "business"));
   assert.deepEqual(
     all.map((node) => node.path),
     [
       join(root, "business/AGENTS.md"),
       join(root, "shared/AGENTS.md"),
       join(root, "nested/deep/AGENTS.md"),
-      join(root, "nested/deep/.harness/memory/projects/AGENTS.md"),
+      join(root, "nested/deep/.harness/memory/projects/README.md"),
     ],
   );
 });
@@ -174,8 +172,8 @@ test("sparse Task Project markers are local content and a heading-only local sec
   );
   const source =
     "# Board\n\n## 本层记忆\n\nManual local prose.\n\n## Authored\nKeep me.\n";
-  const { InternalNode } = await import("../../src/domain/models/internal/internal-node.js");
-  const node = new InternalNode(join(root, 'AGENTS.md')).parse(source);
+  const { AgentsNode } = await import("../../src/domain/models/internal/agents-node.js");
+  const node = new AgentsNode(join(root, 'AGENTS.md')).parse(source);
   node.addChild('local', { id: join(root, 'demo/AGENTS.md'), name: 'Demo', description: 'Business' });
   const updated = node.serialize();
   assert.equal(updated.split("## 本层记忆").length - 1, 1);
@@ -218,7 +216,7 @@ test("Doctor diagnoses overlapping ownership groups without choosing an authored
       )
       .replace(
         "<!-- project-harness:end -->",
-        "<!-- project-harness-descendants:start -->\n## 下层节点\n\n- [Descendant](owned/AGENTS.md) — Old descendant description.\n- [Duplicate](owned/AGENTS.md) — Duplicate description.\n<!-- project-harness-descendants:end -->\n<!-- project-harness:end -->",
+        "<!-- project-harness-descendants:start -->\n## 下层系统维护信息\n\n- [Descendant](owned/AGENTS.md) — Old descendant description.\n- [Duplicate](owned/AGENTS.md) — Duplicate description.\n<!-- project-harness-descendants:end -->\n<!-- project-harness:end -->",
       ),
   );
   const beforeLocal = read(root, "AGENTS.md").match(
@@ -266,9 +264,7 @@ test("Doctor repairs an adopted child missing AGENTS and its missing registratio
   assert.deepEqual(result.remaining, []);
   assert.equal(isScope(child), true);
   const node = (
-    await new NodeService({ managedRoot: root }).list(root, {
-      includeDescendants: true,
-    })
+    await new NodeService({ managedRoot: root }).list(root)
   )[0]!;
   assert.ok(
     node.descendantChildren.some(
@@ -286,7 +282,7 @@ test("Doctor repairs an adopted child missing AGENTS and its missing registratio
 test("doctor repairs independent valid index while retaining invalid sibling and its reference", async (t) => {
   const root = fixture(t);
   await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
-  const index = ".harness/memory/projects/AGENTS.md";
+  const index = ".harness/memory/projects/README.md";
   put(
     root,
     ".harness/memory/projects/project_new/index.md",

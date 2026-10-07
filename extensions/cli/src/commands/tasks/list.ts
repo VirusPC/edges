@@ -90,12 +90,12 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
           projects: opts.project,
           sort: opts.sort,
         };
-        const repositoryRoot = opts.allScopes
+        const repositoryRoot = opts.allScopes || ctx.super
           ? gitRoot(runtime.location.scopeDir) ?? runtime.location.scopeDir
           : undefined;
         const purpose = tasks.getOptionValueSource("purpose") === "cli" ? ctx.purpose : undefined;
         const listed = repositoryRoot
-          ? await listRepositoryTasksWithDocs(repositoryRoot, listOpts, purpose)
+          ? await listRepositoryTasksWithDocs(repositoryRoot, listOpts, purpose, { super: ctx.super })
           : opts.groupBy
             ? await listTasksWithDocs(runtime.location, listOpts, runtime.fs)
             : await listTasksService(runtime.location, listOpts, runtime.fs);

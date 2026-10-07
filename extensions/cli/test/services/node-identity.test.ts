@@ -3,13 +3,13 @@ import { test } from 'node:test';
 import * as fs from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { BaseNode, InternalNode, LeafNode } from '../../src/domain/models/index.js';
+import { BaseNode, AgentsNode, LeafNode } from '../../src/domain/models/index.js';
 import { NodeService } from '../../src/services/node/node-service.js';
 function fixture(t: { after(fn: () => void): void }) {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), 'node-identity-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const entry = path.join(root, 'AGENTS.md');
-  fs.writeFileSync(entry, new InternalNode(entry).parse('# Root\n\nHuman introduction.\n').serialize());
+  fs.writeFileSync(entry, new AgentsNode(entry).parse('# Root\n\nHuman introduction.\n').serialize());
   return { root, entry, service: new NodeService({ managedRoot: root }) };
 }
 test('concurrent get, relative path, query and list share one instance per Service', async t => {
@@ -17,7 +17,7 @@ test('concurrent get, relative path, query and list share one instance per Servi
   const [a, b] = await Promise.all([service.get(entry), service.get(path.relative(process.cwd(), entry))]);
   assert.strictEqual(a, b);
   assert.strictEqual(await service.get(entry, BaseNode), a);
-  assert.ok(a instanceof InternalNode);
+  assert.ok(a instanceof AgentsNode);
   a.setConstraints(['shared constraint']);
   assert.strictEqual(await service.query(root).find(n => n.path === entry).value(), a);
   assert.strictEqual((await service.list(root)).find(n => n.path === entry), a);
@@ -27,7 +27,7 @@ test('concurrent get, relative path, query and list share one instance per Servi
 for (const operation of ['create', 'import'] as const) {
   test(`${operation} saves affected parent current constraints, body and metadata only`, async t => {
     const { root, entry, service } = fixture(t);
-    const parent = (await service.get(entry, InternalNode))!;
+    const parent = (await service.get(entry, AgentsNode))!;
     const unrelated = await service.create(new LeafNode(path.join(root, 'other/index.md')), { body: 'Original\n' }, { indexGroup: "local" });
     const bytes = fs.readFileSync(unrelated.path, 'utf8');
     unrelated.body = 'Unsaved unrelated\n';
@@ -43,7 +43,7 @@ for (const operation of ['create', 'import'] as const) {
       fs.writeFileSync(path.join(external, 'index.md'), 'Child\n');
       child = await service.import(path.join(external, 'index.md'), destination, { indexGroup: "local" });
     }
-    const disk = new InternalNode(entry).parse(fs.readFileSync(entry, 'utf8'));
+    const disk = new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8'));
     assert.deepEqual(disk.constraints, ['shared constraint']);
     assert.deepEqual(disk.metadata?.vendor, { version: 2 });
     assert.ok(disk.children.some(ref => ref.id === child.id));
@@ -68,7 +68,7 @@ for (const upgrade of ['get', 'list'] as const) {
     const { root, entry, service } = fixture(t);
     const file = path.join(root, 'child/index.md');
     fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, 'Original\n');
-    const parent = new InternalNode(entry).parse(fs.readFileSync(entry, 'utf8'));
+    const parent = new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8'));
     parent.addChild('local', { id: file }); fs.writeFileSync(entry, parent.serialize());
     const node = (await service.query(root).find(n => n.path === file).value())!;
     node.body = 'Pending\n';
@@ -103,7 +103,7 @@ for (const drift of ['content', 'identity', 'other service'] as const) {
 test('entry drift during query resource upgrade rejects without dropping user edits', async t => {
   const { root, service } = fixture(t);
   const file = path.join(root, 'child/AGENTS.md');
-  fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, new InternalNode(file).serialize());
+  fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, new AgentsNode(file).serialize());
   const node = (await service.query(path.dirname(file)).value())[0]!;
   node.body = 'Pending\n'; fs.writeFileSync(file, 'External\n');
   await assert.rejects(service.get(file), /changed/i);
@@ -113,9 +113,9 @@ test('entry drift during query resource upgrade rejects without dropping user ed
 test('co-located harness stays distinct and destroy invalidates both identities before recreation', async t => {
   const { root, entry, service } = fixture(t);
   const leaf = await service.create(new LeafNode(path.join(root, 'child/index.md')), { body: 'Leaf\n' }, { indexGroup: "local" });
-  const harness = await service.create(new InternalNode(path.join(root, 'child/AGENTS.md')), { body: 'Harness\n' }, { indexGroup: "local" });
+  const harness = await service.create(new AgentsNode(path.join(root, 'child/AGENTS.md')), { body: 'Harness\n' }, { indexGroup: "local" });
   assert.notStrictEqual(leaf, harness); assert.equal(leaf.harness?.id, harness.path);
-  const parent = (await service.get(entry, InternalNode))!; parent.description = 'Pending parent';
+  const parent = (await service.get(entry, AgentsNode))!; parent.description = 'Pending parent';
   await service.destroy(leaf);
   assert.equal(parent.children.length, 0);
   assert.match(fs.readFileSync(entry, 'utf8'), /Pending parent/);
@@ -126,16 +126,16 @@ test('co-located harness stays distinct and destroy invalidates both identities 
 });
 test('move saves affected parents, loaded descendants and referrers but leaves unrelated edits pending', async t => {
   const { root, entry, service } = fixture(t);
-  const from = await service.create(new InternalNode(path.join(root, 'from/AGENTS.md')), { body: 'From\n' }, { indexGroup: "local" });
-  const to = await service.create(new InternalNode(path.join(root, 'to/AGENTS.md')), { body: 'To\n' }, { indexGroup: "local" });
-  const branch = await service.create(new InternalNode(path.join(root, 'from/branch/AGENTS.md')), { body: 'Branch\n' }, { indexGroup: "local" });
+  const from = await service.create(new AgentsNode(path.join(root, 'from/AGENTS.md')), { body: 'From\n' }, { indexGroup: "local" });
+  const to = await service.create(new AgentsNode(path.join(root, 'to/AGENTS.md')), { body: 'To\n' }, { indexGroup: "local" });
+  const branch = await service.create(new AgentsNode(path.join(root, 'from/branch/AGENTS.md')), { body: 'Branch\n' }, { indexGroup: "local" });
   const child = await service.create(new LeafNode(path.join(root, 'from/branch/child/index.md')), { body: 'Child\n' }, { indexGroup: "local" });
   const ref = await service.create(new LeafNode(path.join(root, 'ref/index.md')), { body: '[link](../from/branch/child/index.md?q=1#part)\n' }, { indexGroup: "local" });
   const unrelated = await service.create(new LeafNode(path.join(root, 'other/index.md')), { body: 'Untouched\n' }, { indexGroup: "local" });
   // Capture attachments in a fresh service before moving a directory unit.
   fs.writeFileSync(path.join(child.directoryPath, 'run.log'), 'run');
   const moving = new NodeService({ managedRoot: root });
-  const nodes = await moving.list(root, { includeDescendants: true });
+  const nodes = await moving.list(root, {});
   const at = (p: string) => nodes.find(n => n.path === p)!;
   const movedBranch = at(branch.path), movedChild = at(child.path), a = at(from.path), b = at(to.path), r = at(ref.path), u = at(unrelated.path);
   for (const n of [movedBranch, movedChild, a, b, r, u]) n.description = 'pending';
@@ -155,7 +155,7 @@ test('later readonly discovery restricts the original writable instance', async 
   const { root, entry } = fixture(t);
   const file = path.join(root, 'child/index.md');
   fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, 'Child\n');
-  const parent = new InternalNode(entry).parse(fs.readFileSync(entry, 'utf8'));
+  const parent = new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8'));
   parent.addChild('local', { id: file }); fs.writeFileSync(entry, parent.serialize());
   const service = new NodeService({ managedRoot: root, readOnlyReference: () => true });
   const node = (await service.get(file))!;
@@ -168,7 +168,7 @@ for (const failure of ['validation', 'policy'] as const) {
   test(`${failure} failure preserves original parent edits without adding a child`, async t => {
     const { root, entry } = fixture(t);
     const service = new NodeService({ managedRoot: root, assertWrite: () => { if (failure === 'policy') throw new Error('Denied'); } });
-    const parent = (await service.get(entry, InternalNode))!;
+    const parent = (await service.get(entry, AgentsNode))!;
     parent.setConstraints(['Pending']);
     if (failure === 'validation') parent.addChild('local', { id: entry });
     const before = fs.readFileSync(entry, 'utf8'), current = parent.serialize();
@@ -182,9 +182,9 @@ for (const failure of ['validation', 'policy'] as const) {
 test('an already registered missing child does not flush its dirty parent during create', async t => {
   const { root, entry, service } = fixture(t);
   const file = path.join(root, 'child/index.md');
-  const document = new InternalNode(entry).parse(fs.readFileSync(entry, 'utf8'));
+  const document = new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8'));
   document.addChild('local', { id: file }); fs.writeFileSync(entry, document.serialize());
-  const parent = (await service.get(entry, InternalNode))!; parent.description = 'Pending';
+  const parent = (await service.get(entry, AgentsNode))!; parent.description = 'Pending';
   const before = fs.readFileSync(entry, 'utf8');
   await service.create(new LeafNode(file), { body: 'Child\n' }, { indexGroup: "local" });
   assert.equal(fs.readFileSync(entry, 'utf8'), before); assert.equal(parent.description, 'Pending');
@@ -194,7 +194,7 @@ test('custom model selection and reference selection retain a single compatible 
   class CustomLeaf extends LeafNode {}
   const file = path.join(root, 'child/index.md');
   fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, 'Child\n');
-  const parent = new InternalNode(entry).parse(fs.readFileSync(entry, 'utf8'));
+  const parent = new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8'));
   parent.addChild('local', { id: file }); fs.writeFileSync(entry, parent.serialize());
   for (const options of [{ models: { leaf: CustomLeaf } }, { modelForReference: () => CustomLeaf }]) {
     const service = new NodeService({ managedRoot: root, ...options });
@@ -203,7 +203,7 @@ test('custom model selection and reference selection retain a single compatible 
     assert.strictEqual(await service.get(file), node);
     assert.strictEqual(await service.get(file, BaseNode), node);
     assert.strictEqual(await service.get(file, LeafNode), node);
-    await assert.rejects(service.get(file, InternalNode), /model/i);
+    await assert.rejects(service.get(file, AgentsNode), /model/i);
   }
 });
 test('import rejects a cached destination identity before recreating its removed directory', async t => {
@@ -241,7 +241,7 @@ test('typed query skipping a cached leaf still propagates readonly discovery', a
   const { root, entry } = fixture(t);
   const file = path.join(root, 'child/index.md');
   fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, 'Child\n');
-  const parent = new InternalNode(entry).parse(fs.readFileSync(entry, 'utf8'));
+  const parent = new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8'));
   parent.addChild('local', { id: file }); fs.writeFileSync(entry, parent.serialize());
   const service = new NodeService({ managedRoot: root, readOnlyReference: () => true });
   const child = (await service.get(file))!;
@@ -257,14 +257,14 @@ test('AGENTS create rejects incompatible constructors before IO and keeps Intern
   const file = path.join(root, 'scope/AGENTS.md');
   const incompatible = new BaseNode(file);
   incompatible.description = 'Pending';
-  await assert.rejects(service.create(incompatible, { body: '# Scope\n' }, { indexGroup: "local" }), /InternalNode|model/i);
+  await assert.rejects(service.create(incompatible, { body: '# Scope\n' }, { indexGroup: "local" }), /AgentsNode|model/i);
   assert.equal(fs.existsSync(path.dirname(file)), false);
   assert.equal(incompatible.description, 'Pending');
   assert.equal(await service.get(file), undefined);
-  class CustomInternal extends InternalNode {}
+  class CustomInternal extends AgentsNode {}
   const node = new CustomInternal(file);
   assert.strictEqual(await service.create(node, { body: '# Scope\n' }, { indexGroup: "local" }), node);
-  assert.strictEqual(await service.get(file, InternalNode), node);
+  assert.strictEqual(await service.get(file, AgentsNode), node);
   assert.strictEqual(await service.get(file, BaseNode), node);
   assert.strictEqual((await service.query(path.dirname(file)).value())[0], node);
   const child = await service.create(new LeafNode(path.join(root, 'scope/child/index.md')), { body: 'Child\n' }, { indexGroup: "local" });
