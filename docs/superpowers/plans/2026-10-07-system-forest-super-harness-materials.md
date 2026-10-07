@@ -1,6 +1,6 @@
 # 系统森林、Super 挂载与 harness-materials 配置 Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 落地「traverse 只跑单系统；森林在外拼装；Super 按 domain JSON 挂 README 材料；Service 交出 `BaseNode[][]` 供 review」整条链路。
 
@@ -64,7 +64,7 @@ flowchart TB
   - `resolveHarnessMaterial(scopeDir: string, id: string): { absPath: string; material: HarnessMaterial } | undefined` — missing optional → `undefined`；required missing → throw
   - `listHarnessMaterialAbsPaths(scopeDir: string): { id: string; absPath: string }[]` — 仅存在的文件
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 ```ts
 import test from "node:test";
@@ -96,12 +96,12 @@ test("resolve uses .harness under scope when present", () => {
 });
 ```
 
-- [ ] **Step 2: Run tests — expect FAIL (module missing)**
+- [x] **Step 2: Run tests — expect FAIL (module missing)**
 
 Run: `cd extensions/cli && pnpm exec node --import tsx --test test/domain/harness-materials.test.ts`  
 Expected: FAIL cannot find module
 
-- [ ] **Step 3: Add JSON + loader**
+- [x] **Step 3: Add JSON + loader**
 
 `harness-materials.json`:
 
@@ -123,9 +123,9 @@ Expected: FAIL cannot find module
 
 Loader: `readFileSync` + `import.meta.url` 定位 JSON；校验每项有非空 `id`/`path`；实现上面三个函数。
 
-- [ ] **Step 4: Run tests — expect PASS**
+- [x] **Step 4: Run tests — expect PASS**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add extensions/cli/src/domain/config/harness-materials.json \
@@ -147,7 +147,7 @@ git commit -m "feat: domain harness-materials.json 与 path 解析"
 - Consumes: `listHarnessMaterialAbsPaths(scopeDir)`
 - Produces: `#superRoot(scopePath)` → `SuperAgentsNode`，`localChildren` = 存在的材料 abs path；**零个材料时不抛**（可空挂载），与旧「必须有 README」不同
 
-- [ ] **Step 1: Write failing test**
+- [x] **Step 1: Write failing test**
 
 ```ts
 test("super mounts configured README materials under .harness, not root AGENTS", async (t) => {
@@ -164,9 +164,9 @@ test("super mounts configured README materials under .harness, not root AGENTS",
 });
 ```
 
-- [ ] **Step 2: Run — expect FAIL（仍只挂仓根 README 或抛错）**
+- [x] **Step 2: Run — expect FAIL（仍只挂仓根 README 或抛错）**
 
-- [ ] **Step 3: Implement `#superRoot`**
+- [x] **Step 3: Implement `#superRoot`**
 
 ```ts
 #superRoot(scopePath: string): SuperAgentsNode {
@@ -179,9 +179,9 @@ test("super mounts configured README materials under .harness, not root AGENTS",
 
 更新 `SuperAgentsNode` 类注释：组成来自 harness-materials 配置的材料入口。
 
-- [ ] **Step 4: Fix / update 既有 `--super` 测试**（`traverse-dual-entry`、`super-flag` 等）使期望与「材料挂载」一致；仓根仅 README、无 `.harness/tasks` 时 Super 可只有 `readme` 材料或空。
+- [x] **Step 4: Fix / update 既有 `--super` 测试**（`traverse-dual-entry`、`super-flag` 等）使期望与「材料挂载」一致；仓根仅 README、无 `.harness/tasks` 时 Super 可只有 `readme` 材料或空。
 
-- [ ] **Step 5: Tests PASS + Commit**
+- [x] **Step 5: Tests PASS + Commit**
 
 ```bash
 git commit -m "feat: SuperAgentsNode 按 harness-materials 挂载"
@@ -201,11 +201,11 @@ git commit -m "feat: SuperAgentsNode 按 harness-materials 挂载"
   - `isProjectHarnessAgentsFile(absPath: string, source: string): boolean` — 含 `project-harness-local` / `project-harness-constraints` / `project-harness-descendants` 任一 start 标记（或 `decodeBody` 显示 memory/constraints 区块）
   - `collectSystemRoots(scopeDir: string): string[]` — 递归扫 `AGENTS.md`（跳过 `node_modules`、`.git`、常见大目录），返回绝对路径列表，排序稳定
 
-- [ ] **Step 1: Failing test** — fixture 含带标记的 `AGENTS.md`、无标记的 `AGENTS.md`、嵌套一层；断言只收集带标记的。
+- [x] **Step 1: Failing test** — fixture 含带标记的 `AGENTS.md`、无标记的 `AGENTS.md`、嵌套一层；断言只收集带标记的。
 
-- [ ] **Step 2: Implement scan** — `fs.readdirSync` 递归；读文件头/全文做标志检测（可用 `decodeBody` 若已依赖 models；注意 operations→models 现有依赖方向，保持与 `traverse` 一致）。
+- [x] **Step 2: Implement scan** — `fs.readdirSync` 递归；读文件头/全文做标志检测（可用 `decodeBody` 若已依赖 models；注意 operations→models 现有依赖方向，保持与 `traverse` 一致）。
 
-- [ ] **Step 3: PASS + Commit**
+- [x] **Step 3: PASS + Commit**
 
 ```bash
 git commit -m "feat: collectSystemRoots 扫盘认 project-harness"
@@ -233,14 +233,14 @@ git commit -m "feat: collectSystemRoots 扫盘认 project-harness"
     5. 得到 `BaseNode[][]`
     6. 若 `form === "innermost"`：若从 B 的树数组中出现 A 的根 path，则 A 属于 B，丢掉 B 那一行（只留内层）
 
-- [ ] **Step 1: Failing tests**
+- [x] **Step 1: Failing tests**
   - independent：两根均出现；从外根展开的数组**不含**内根 path
   - innermost：外根被丢弃，只留内根那一行
   - Super 根存在且不挂仓根 `AGENTS.md` 为 child
 
-- [ ] **Step 2: Implement service**（抽 `createSuperAgentsNode` 避免与 NodeService 循环依赖：放 `services/node/super-root.ts`）
+- [x] **Step 2: Implement service**（抽 `createSuperAgentsNode` 避免与 NodeService 循环依赖：放 `services/node/super-root.ts`）
 
-- [ ] **Step 3: PASS + Commit**
+- [x] **Step 3: PASS + Commit**
 
 ```bash
 git commit -m "feat: SystemForestService 组装 BaseNode[][]"
@@ -258,13 +258,13 @@ git commit -m "feat: SystemForestService 组装 BaseNode[][]"
 - 新增 `edges forest list`（或 `edges systems forest`）：stdout JSON `{ form, trees: [ { root, nodes: [{ path, type, name, description }] } ] }`（Service 用完整节点，命令层投影）
 - `review-page` 保持 `--from`；文档说明上游用 `forest list` 生成主体后再接分类 JSON
 
-- [ ] **Step 1: 查 `program.ts` 命令树，确定挂载点**
+- [x] **Step 1: 查 `program.ts` 命令树，确定挂载点**
 
-- [ ] **Step 2: Failing CLI 测试** — temp repo 两根 AGENTS → `forest list` 二维结构
+- [x] **Step 2: Failing CLI 测试** — temp repo 两根 AGENTS → `forest list` 二维结构
 
-- [ ] **Step 3: 实现命令 + 投影**
+- [x] **Step 3: 实现命令 + 投影**
 
-- [ ] **Step 4: PASS + Commit**
+- [x] **Step 4: PASS + Commit**
 
 ```bash
 git commit -m "feat: CLI forest list 输出二维系统林"
@@ -281,9 +281,9 @@ git commit -m "feat: CLI forest list 输出二维系统林"
 - Modify: `CONTEXT.md`（Super 挂载改为材料表）
 - Update: `.harness/memory/feedbacks/feedback_traverse_single_system_and_forest_roots/INDEX.md`（补全 Q22 首版条目表 + 「本轮全部落地」）
 
-- [ ] **Step 1: 写入原则**：配置路径、扫盘收根、`BaseNode[][]`、resolve 早停、嵌套形式、Super 不挂 AGENTS
+- [x] **Step 1: 写入原则**：配置路径、扫盘收根、`BaseNode[][]`、resolve 早停、嵌套形式、Super 不挂 AGENTS
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git commit -m "docs: 系统森林与 harness-materials 配置原则"
@@ -293,12 +293,12 @@ git commit -m "docs: 系统森林与 harness-materials 配置原则"
 
 ### Task 7: 全量回归
 
-- [ ] **Step 1:** `cd extensions/cli && pnpm test`  
+- [x] **Step 1:** `cd extensions/cli && pnpm test`  
   Expected: 全绿
 
-- [ ] **Step 2:** 修复失败用例（尤其旧 `--super` 只挂仓根 README 的假设）
+- [x] **Step 2:** 修复失败用例（尤其旧 `--super` 只挂仓根 README 的假设）
 
-- [ ] **Step 3:** Push + 更新 PR #167 描述
+- [x] **Step 3:** Push + 更新 PR #167 描述
 
 ---
 
