@@ -1,7 +1,9 @@
 import { isWithinPath } from '../../utils/filesystem.js';
 import * as fs from "node:fs";
 import path from "node:path";
-import { BaseNode, AgentsNode, TaskNode } from "../../domain/models/index.js";
+import { harnessMaterialById, tasksBoardDirName } from "../../domain/config/harness-materials.js";
+import { ENTRY_NAMES, identifyNodeType } from "../../domain/models/layout.js";
+import { BaseNode, AgentsNode, ReadmeNode, TaskNode } from "../../domain/models/index.js";
 import { domainFields, scalar } from "../../domain/models/core/fields.js";
 import { decodeBody } from "../../domain/models/internal/parse.js";
 import {
@@ -13,6 +15,8 @@ import { checkPath } from "../node/node-files.js";
 
 import { NodeService } from "../node/node-service.js";
 import { query } from "../../domain/operations/query.js";
+import { traverse } from "../../domain/operations/traverse.js";
+import { collectSystemRoots } from "../../domain/operations/system-forest.js";
 import {
   isTaskStatus,
   taskBoardLocation,
@@ -22,8 +26,8 @@ import {
 
 /**
  * Board discovery without physical directory enumeration.
- * - `super: true` — content face only (board README as virtual system two)
- * - `super: false` — real board AGENTS only (system-entry projects)
+ * - `super: true` — configured tasks material only
+ * - `super: false` — existing board system entry only (legacy system-entry projects)
  * - omit `super` — union both faces (org-list + system-entry); default for list/get
  */
 export async function taskBoardQuery(
@@ -39,12 +43,16 @@ export async function taskBoardQuery(
       path.relative(target.scopeDir, target.boardDir),
     ),
   );
-  const entry = path.join(root, "AGENTS.md");
-  if (!fs.existsSync(entry))
-    throw new TasksError(
-      "VALIDATION_ERROR",
-      `Task board index missing; migrate this board: ${entry}`,
-    );
+  const materialEntry = path.join(root, path.basename(harnessMaterialById("tasks").path));
+  const systemEntry = path.join(root, ENTRY_NAMES.internal);
+  const faces =
+    options.super === true
+      ? (["content"] as const)
+      : options.super === false
+        ? (["agents"] as const)
+        : (["content", "agents"] as const);
+  const hasMaterial = fs.existsSync(materialEntry);
+  const hasSystem = systemEntry !== materialEntry && fs.existsSync(systemEntry);
   const service = new NodeService({
     managedRoot: root,
     modelForReference: (_parent, _reference, entry) => {
@@ -56,30 +64,61 @@ export async function taskBoardQuery(
       return undefined;
     },
   });
-  const board = await service.get(entry, AgentsNode);
-  if (!board || !decodeBody(board.body).sections.memory.present)
+  if (!hasMaterial && !hasSystem)
     throw new TasksError(
       "VALIDATION_ERROR",
-      `Task board index missing; migrate this board: ${entry}`,
+      `Task board material missing: ${materialEntry}`,
     );
-  const faces =
-    options.super === true
-      ? (["content"] as const)
-      : options.super === false
-        ? (["agents"] as const)
-        : (["content", "agents"] as const);
+  if (!hasMaterial && hasSystem) {
+    const board = await service.get(systemEntry, AgentsNode);
+    if (!board || !decodeBody(board.body).sections.memory.present)
+      throw new TasksError(
+        "VALIDATION_ERROR",
+        `Task board index missing; migrate this board: ${systemEntry}`,
+      );
+  }
   return query(async function* () {
     const seen = new Set<string>();
+    const accept = (node: BaseNode) => {
+      if (seen.has(node.path)) return false;
+      seen.add(node.path);
+      return true;
+    };
     for (const face of faces) {
-      if (face === "content" && !fs.existsSync(path.join(root, "README.md")))
+      if (face === "content") {
+        if (!hasMaterial) continue;
+        const Model = identifyNodeType(materialEntry) === "agents" ? AgentsNode : ReadmeNode;
+        const material = await service.get(materialEntry, Model);
+        if (!material) continue;
+        for await (const node of traverse(
+          material,
+          { types, localOnly: true },
+          (_parent, reference) => {
+            if (!isWithinPath(reference.id, root))
+              throw new TasksError(
+                "VALIDATION_ERROR",
+                "path is outside selected task board",
+              );
+            return reference.id;
+          },
+          async (_parent, _reference, target) => {
+            const node = await service.get(target);
+            if (!node) throw new Error(`Missing referenced node: ${target}`);
+            return node;
+          },
+        )) {
+          if (accept(node)) yield node;
+        }
         continue;
+      }
+      if (!hasSystem) continue;
+      const board = await service.get(systemEntry, AgentsNode);
+      if (!board || !decodeBody(board.body).sections.memory.present) continue;
       const nodes = await service
-        .query(root, { types, localOnly: true, super: face === "content" })
+        .query(root, { types, localOnly: true })
         .value();
       for (const node of nodes) {
-        if (seen.has(node.path)) continue;
-        seen.add(node.path);
-        yield node;
+        if (accept(node)) yield node;
       }
     }
   });
@@ -103,21 +142,35 @@ export async function listRepositoryTaskNodes(
       .filter((node): node is TaskNode => node instanceof TaskNode)
       .value();
   }
-  // Discover every task board via system-two + harness, then dual-face query each board.
-  const boards = await service
+  // System entries whose directory is the tasks board, plus the configured material
+  // hung from any system root. The material path comes from harness-materials.
+  const materialName = path.basename(harnessMaterialById("tasks").path);
+  const boardDirs = new Set<string>();
+  const note = (file: string) => {
+    const dir = path.dirname(file);
+    if (path.basename(dir) !== tasksBoardDirName()) return;
+    const name = path.basename(file);
+    if (name === ENTRY_NAMES.internal || name === materialName) boardDirs.add(dir);
+  };
+  const linked = await service
     .query(canonicalRoot, { types: ["agents"], includeHarness: true })
-    .filter(
-      (node): node is AgentsNode =>
-        node instanceof AgentsNode &&
-        path.basename(node.path) === "AGENTS.md" &&
-        path.basename(node.directoryPath) === "tasks",
-    )
+    .filter((node): node is AgentsNode => node instanceof AgentsNode)
     .value();
+  for (const node of linked) {
+    note(node.path);
+    for (const child of node.children) note(child.id);
+  }
+  for (const agentsPath of collectSystemRoots(canonicalRoot)) {
+    const node = await service.get(agentsPath, AgentsNode);
+    if (!node) continue;
+    note(node.path);
+    for (const child of node.children) note(child.id);
+  }
   const seen = new Set<string>();
   const out: TaskNode[] = [];
-  for (const board of boards) {
+  for (const boardDir of boardDirs) {
     for (const task of await listTaskNodes(
-      boardLocationOf(board.directoryPath, canonicalRoot),
+      boardLocationOf(boardDir, canonicalRoot),
     )) {
       if (seen.has(task.path)) continue;
       seen.add(task.path);
@@ -131,7 +184,7 @@ export function boardLocationOf(
   board: string,
   root: string,
 ): TaskBoardLocation {
-  if (path.basename(board) !== "tasks")
+  if (path.basename(board) !== tasksBoardDirName())
     throw new TasksError(
       "VALIDATION_ERROR",
       `Invalid task board layout: ${board}`,
@@ -196,7 +249,7 @@ export function taskLocationOf(node: TaskNode, root: string) {
 }
 export function projectLocationOf(node: AgentsNode, root: string) {
   const board = path.dirname(node.directoryPath);
-  if (path.basename(board) !== "tasks") return undefined;
+  if (path.basename(board) !== tasksBoardDirName()) return undefined;
   const location = boardLocationOf(board, root);
   const project = projectIdFromDir(path.basename(node.directoryPath));
   return {

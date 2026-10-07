@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export type HarnessMaterial = {
@@ -70,6 +70,54 @@ export function resolveHarnessMaterial(
     return undefined;
   }
   throw new Error(`Required harness material missing: ${id} (expected ${absPath})`);
+}
+
+export function harnessMaterialById(id: string): HarnessMaterial {
+  const material = loadHarnessMaterialsConfig().materials.find((m) => m.id === id);
+  if (!material) throw new Error(`Unknown harness material id: ${id}`);
+  return material;
+}
+
+/** Real systems place materials under `<scope>/.harness` even before that directory exists. Super places them in the scope directory. */
+export function materialHarnessRoot(scopeDir: string, options: { super?: boolean } = {}): string {
+  return options.super === true ? scopeDir : join(scopeDir, ".harness");
+}
+
+/** Join a harness root with a material path from config. The relative path is the only entry name. */
+export function placedMaterialPath(
+  scopeDir: string,
+  materialPath: string,
+  options: { super?: boolean } = {},
+): string {
+  return join(materialHarnessRoot(scopeDir, options), materialPath);
+}
+
+export function placeHarnessMaterial(
+  scopeDir: string,
+  id: string,
+  options: { super?: boolean } = {},
+): { material: HarnessMaterial; absPath: string } {
+  const material = harnessMaterialById(id);
+  return { material, absPath: placedMaterialPath(scopeDir, material.path, options) };
+}
+
+/** Last directory segment of the tasks material, e.g. `tasks` from `tasks/README.md`. */
+export function tasksBoardDirName(): string {
+  const materialPath = harnessMaterialById("tasks").path;
+  const dir = dirname(materialPath);
+  const name = basename(dir);
+  if (dir === "." || name === "" || name === ".") {
+    throw new Error(`tasks material path must include a directory: ${materialPath}`);
+  }
+  return name;
+}
+
+/** True when absPath is the tasks material for this scope, on the real harness or on super. */
+export function isTasksBoardMaterial(absPath: string, scopeDir: string): boolean {
+  const rel = harnessMaterialById("tasks").path;
+  const norm = (file: string) => file.split(sep).join("/");
+  const file = norm(absPath);
+  return file === norm(join(scopeDir, ".harness", rel)) || file === norm(join(scopeDir, rel));
 }
 
 /** Materials at scope + configured path. For a super node, that scope directory is the harness. */

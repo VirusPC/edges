@@ -1,4 +1,5 @@
 import path from "node:path";
+import { placeHarnessMaterial, harnessMaterialById } from "../../domain/config/harness-materials.js";
 import { ENTRY_NAMES, LEGACY_LEAF_ENTRY, isLeafEntryName } from "../../domain/models/layout.js";
 import { projectDirName } from "../../domain/models/tasks/project.js";
 import {
@@ -24,31 +25,24 @@ export function taskBoardLocation(
   scopeDir: string,
   purpose: TaskPurpose = DEFAULT_TASK_PURPOSE,
 ): TaskBoardLocation {
+  const { absPath } = placeHarnessMaterial(scopeDir, "tasks", { super: purpose === "domain" });
   return {
     scopeDir,
     purpose,
-    boardDir: path.join(
-      scopeDir,
-      purpose === "maintenance" ? ".harness/tasks" : "tasks",
-    ),
+    boardDir: path.dirname(absPath),
   };
 }
 
-/** Board of the subject system. Real systems use `<scope>/.harness/tasks`. `--super` is virtual system one, whose harness is the scope directory, so the board is `<scope>/tasks`. */
+/** Board of the subject system. The directory is the tasks material from harness-materials. Real systems place it under `<scope>/.harness`; `--super` places it in the scope directory. */
 export function subjectTaskBoard(scopeDir: string, options: { super?: boolean } = {}): TaskBoardLocation {
-  const virtual = options.super === true;
-  return {
-    scopeDir,
-    purpose: virtual ? "domain" : "maintenance",
-    boardDir: path.join(scopeDir, virtual ? "tasks" : ".harness/tasks"),
-  };
+  return taskBoardLocation(scopeDir, options.super === true ? "domain" : "maintenance");
 }
 export function scopeDir(target: BoardTarget): string {
   return typeof target === "string" ? target : target.scopeDir;
 }
 export function boardRoot(target: BoardTarget): string {
   return typeof target === "string"
-    ? path.join(target, "tasks")
+    ? taskBoardLocation(target, "domain").boardDir
     : target.boardDir;
 }
 export function boardRel(target: BoardTarget = ""): string {
@@ -125,7 +119,8 @@ export function isTaskMarkdownName(name: string): boolean {
   if (name.startsWith(".") && name.endsWith(".log.md")) {
     return false;
   }
-  if (name === "AGENTS.md" || name === "README.md") {
+  const materialName = path.basename(harnessMaterialById("tasks").path);
+  if (name === ENTRY_NAMES.internal || name === ENTRY_NAMES.readme || name === materialName) {
     return false;
   }
   return true;

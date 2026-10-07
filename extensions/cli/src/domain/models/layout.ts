@@ -1,4 +1,5 @@
-import { basename, dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve, sep } from "node:path";
+import { harnessMaterialById, tasksBoardDirName } from "../config/harness-materials.js";
 import { TASK_STATUSES } from "./tasks/types.js";
 export const ENTRY_NAMES = {
   internal: "AGENTS.md",
@@ -68,12 +69,14 @@ export type DirectoryClassifier = (
 ) => NodeType | undefined;
 const classifiers: DirectoryClassifier[] = [
   (_entry, contract) => (contract?.module === "memory" ? "memory" : undefined),
-  (entry) =>
-    new RegExp(
-      `(?:^|/)tasks/(?:[^/]+/)*(?:${TASK_STATUSES.join("|")})/[^/]+/(?:INDEX|index)\\.md$`,
+  (entry) => {
+    const board = tasksBoardDirName().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(
+      `(?:^|/)${board}/(?:[^/]+/)*(?:${TASK_STATUSES.join("|")})/[^/]+/(?:INDEX|index)\\.md$`,
     ).test(entry)
       ? "task"
-      : undefined,
+      : undefined;
+  },
   (entry) =>
     /(?:^|\/)notes\/(?:[^/]+\/)+(?:INDEX|index)\.md$/.test(entry) ? "note" : undefined,
 ];
@@ -147,13 +150,15 @@ export function resolveHref(
   }
 }
 
-/** README under `.harness/` (type indexes) or `tasks/<project>/` (Task Project org lists)
- * is composition a layer AGENTS may own, unlike ordinary navigation READMEs. */
+/** Configured tasks material, a README under `.harness/`, or a project org list under the tasks board directory. */
 export function isHarnessMaterial(id: string): boolean {
+  const tasksPath = harnessMaterialById("tasks").path.split(sep).join("/");
+  const norm = id.split(sep).join("/");
+  if (norm.endsWith("/" + tasksPath)) return true;
   return (
     basename(id) === ENTRY_NAMES.readme &&
-    (dirname(id).split("/").includes(".harness") ||
-      basename(dirname(dirname(id))) === "tasks")
+    (dirname(id).split(sep).includes(".harness") ||
+      basename(dirname(dirname(id))) === tasksBoardDirName())
   );
 }
 

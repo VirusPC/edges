@@ -27,6 +27,7 @@ import {
   recoveryPath,
   type ResourceSnapshot,
 } from "./node-resources.js";
+import { isTasksBoardMaterial } from "../../domain/config/harness-materials.js";
 import { createSuperAgentsNode } from "./super-root.js";
 import {
   coLocated,
@@ -420,6 +421,9 @@ export class NodeService {
     node: BaseNode,
     group?: ChildGroup,
   ): Promise<Planned | undefined> {
+    // The tasks board file is placed from harness-materials. The tasks service
+    // links a maintenance board; super mounts it and does not hang it here.
+    if (isTasksBoardMaterial(node.path, this.managedRoot)) return undefined;
     // Same-dir README next to AGENTS is the content face, not registered as AGENTS' child.
     if (
       coLocated(node.path) ||

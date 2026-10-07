@@ -9,6 +9,8 @@ import {
   harnessRootForScope,
   resolveHarnessMaterial,
   listHarnessMaterialAbsPaths,
+  placedMaterialPath,
+  placeHarnessMaterial,
 } from "../../src/domain/config/harness-materials.js";
 
 test("config lists tasks README and not AGENTS", () => {
@@ -41,4 +43,19 @@ test("optional missing material returns undefined; unknown id throws", () => {
   const root = mkdtempSync(path.join(tmpdir(), "hm-opt-"));
   assert.equal(resolveHarnessMaterial(root, "tasks"), undefined);
   assert.throws(() => resolveHarnessMaterial(root, "no-such-id"), /Unknown harness material id/);
+});
+
+test("material placement uses the configured relative path, not a fixed entry name", () => {
+  assert.equal(placedMaterialPath("/repo", "queue/BOARD.md"), path.join("/repo", ".harness", "queue/BOARD.md"));
+  assert.equal(
+    placedMaterialPath("/repo", "queue/BOARD.md", { super: true }),
+    path.join("/repo", "queue/BOARD.md"),
+  );
+  const tasks = loadHarnessMaterialsConfig().materials.find((m) => m.id === "tasks");
+  assert.ok(tasks);
+  assert.equal(placeHarnessMaterial("/repo", "tasks").absPath, path.join("/repo", ".harness", tasks.path));
+  assert.equal(
+    placeHarnessMaterial("/repo", "tasks", { super: true }).absPath,
+    path.join("/repo", tasks.path),
+  );
 });

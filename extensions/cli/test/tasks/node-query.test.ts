@@ -91,7 +91,9 @@ test("missing board is empty, existing unindexed board requests migration", asyn
   const target = taskBoardLocation(root, "domain");
   assert.deepEqual(await listTaskNodes(target), []);
   write("tasks/_default/todo/old/index.md", "Old");
-  await assert.rejects(listTaskNodes(target), /migrat|index/i);
+  const material = (await import("../../src/domain/config/harness-materials.js")).placeHarnessMaterial(root, "tasks", { super: true }).absPath;
+  await assert.rejects(listTaskNodes(target), (error: Error) =>
+    error.message.includes("Task board material missing") && error.message.includes(material));
 });
 test("repository includes every harness depth and physical origins despite aliases", async (t) => {
   const { root, index, task, write } = fixture(t);

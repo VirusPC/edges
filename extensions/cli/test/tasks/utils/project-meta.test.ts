@@ -215,8 +215,8 @@ test("project reads reject unindexed directories without creating metadata", asy
   try {
     await mkdir(path.join(repo, "tasks/cli/todo"), { recursive: true });
     const fs = nodeBoardWriter();
-    await assert.rejects(listProjects(repo, fs), /index missing.*migrate/i);
-    await assert.rejects(getProject(repo, 'cli', fs), /index missing.*migrate/i);
+    await assert.rejects(listProjects(repo, fs), /Task board material missing|index missing.*migrate/i);
+    await assert.rejects(getProject(repo, 'cli', fs), /Task board material missing|index missing.*migrate/i);
     for (const rel of [
       "tasks/cli/AGENTS.md",
       "tasks/AGENTS.md",
