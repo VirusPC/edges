@@ -38,5 +38,5 @@ format: ordinary
 - [traverse 不兼容 includeDescendants](<feedback_no_include_descendants_compat/INDEX.md>) — 改 traverse / NodeService.query 选项时：不要再接受 includeDescendants；只要本层用 localOnly: true；默认仍是全部 children。
 - [CLI 默认只做系统二操作](<feedback_cli_is_system_two_ops/INDEX.md>) — 改 traverse 双文件并边、scope 根或 tasks 查询入口时：真 AGENTS 默认只做该系统的系统二；要内容面走 SuperAgentsNode（见 feedback\_content\_via\_super\_agents\_node），不要从真 AGENTS 并 README。
 - [系统一内容经 SuperAgentsNode 当虚拟系统二](<feedback_content_via_super_agents_node/INDEX.md>) — 改 traverse/\-\-super/tasks 查询时：真 AGENTS 只逛系统二；内容面用 SuperAgentsNode；无 includeContentFace/companion 兼容；Task 板 dual\-face；写路径 README 另起根。
-- [traverse 单系统；森林根、Super 与交林两种形式](<feedback_traverse_single_system_and_forest_roots/INDEX.md>) — 改 traverse/森林/Super 时：扫盘收根；Service 二维林；review 全部独立；resolve 跳过其它根落实无从属；嵌套形式只留内层（可达）；Super 挂 .harness 路径\+可选 README。
+- [traverse 单系统；森林根、Super 与交林两种形式](<feedback_traverse_single_system_and_forest_roots/INDEX.md>) — 改 traverse/森林/Super 时：扫盘收根；Service 交 TreeNode\[\]\[\]；review 全部独立；resolve 遇其它根早停并可拼接该树数组；嵌套形式只留内层；Super 挂 .harness 路径\+可选 README。
 <!-- project-entries-local:end -->
