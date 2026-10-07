@@ -20,6 +20,20 @@
 
 **仓：** VirusPC/edges；经 PR 合入 main；Co-authored-by: 全栈开发专家 \<grok-bot@users.noreply.github.com\>
 
+## 锁定：标准 CRUD 命令与旗标
+
+这是全仓 CLI 标准面。本卡只按此表实现 notes/skills。README / 组织列表、memory、tasks 以后照此表改，本卡不改那些命令。短 ADR 与 `CONTEXT.md` 的术语（house CLI surface）必须收录下表。
+
+| 命令 | 旗标 |
+| --- | --- |
+| `list` | 共享 `--filter` / `--group-by` 信封，外加全局 `--scope` / `--super` / `--all`。不另造域专用 list 旗标 |
+| `get` | 只收目标 |
+| `create` | metadata + `--body`，外加该类型真正需要的旗标 |
+| `update` | metadata + `--body`，外加该类型真正需要的旗标 |
+| `delete` | 只收目标 |
+
+类型旗标只在必要时出现：note 标题经正文 H1 或 helper；skill 用 name / description。正文旗标用 `--body`，不用 `--content`。
+
 ## Global Constraints
 
 - 禁止在 notes/skills 命令或替代模块里 `readFileSync`/`writeFileSync`/`rmSync`/`readdir` 直改叶子或父索引（测试可证）。
@@ -45,8 +59,8 @@
 | `extensions/cli/src/services/note/service.ts`、`auth.ts`（及只服务 ingest 的校验） | 删掉或收掉 ingest 包装与 token 校验 |
 | `extensions/cli/src/commands/notes.ts`、`program.ts` | 帮助文本去掉 git/PR ingest 与 `--import-entry` |
 | `docs/adr/0027-facade-crud-verbs.md` | 更新 skills create/update |
-| `docs/adr/00XX-content-leaf-crud-via-nodeservice.md` | **Create** 短 ADR：叶子经 NodeService，并写明全仓旗标原则 |
-| `CONTEXT.md` | 补 NodeService 门面（若缺）以及统一旗标原则，供其他域跟随 |
+| `docs/adr/00XX-content-leaf-crud-via-nodeservice.md` | **Create** 短 ADR：叶子经 NodeService，并收录标准 CRUD 旗标表（house CLI surface） |
+| `CONTEXT.md` | 术语表收录同一张标准 CRUD 旗标表；补 NodeService 门面（若缺）。README / memory / tasks 以后照此跟随 |
 | `extensions/cli/test/...` | 旁路消失 + CRUD 回归；删掉 ingest / git / PR 测试并改帮助断言 |
 | `docs/superpowers/plans/2026-10-08-notes-skills-crud-via-nodeservice.md` | 本 plan 入库 |
 
@@ -57,11 +71,11 @@
 **Files:**
 - Create: `docs/adr/00XX-content-leaf-crud-via-nodeservice.md`（编号取仓内下一个）
 - Modify: `docs/adr/0027-facade-crud-verbs.md`
-- Modify: `CONTEXT.md`（门面术语若缺则补；统一旗标原则必写）
+- Modify: `CONTEXT.md`（术语 / house CLI surface 必写上表；门面术语若缺则补）
 
-- [ ] **Step 1:** 写 ADR：内容叶子（Note/Skill）的 create/get/update/destroy 一律经 NodeService；标准面是 metadata + body；禁止 records/扫盘旁路；skills create/update 真写 `skills/managed`；notes create 只写本地叶子，不走 git/PR ingest，也不在 create 上做 token 鉴权。同时把旗标原则写成全仓标准：create/update 为 metadata + `--body` 加最少类型旗标；get/delete 只收目标；list 用同一 `--filter` / `--group-by` 信封加全局 scope 旗标。README / 组织列表、memory、tasks 适用处遵循。本 ADR 说明本卡只落地 notes/skills。
+- [ ] **Step 1:** 写 ADR：内容叶子（Note/Skill）的 create/get/update/destroy 一律经 NodeService；禁止 records/扫盘旁路；skills create/update 真写 `skills/managed`；notes create 只写本地叶子，不走 git/PR ingest，也不在 create 上做 token 鉴权。把上面「标准 CRUD 命令与旗标」表原样写入 ADR，标明这是全仓 house CLI surface。注明本卡只落地 notes/skills；README / 组织列表、memory、tasks 以后照表跟随。
 - [ ] **Step 2:** 改 0027：skills create/update 改为「会写 SKILL.md」，删掉「只提示 remember」；注明 remember 仍可写 skill 类 memory，与 CLI skills 动词并行。
-- [ ] **Step 3:** CONTEXT 补「NodeService：节点读写与组成登记的门面」若尚无等价条，并写上同一套旗标原则，让其他域有处可循。不在本卡改那些命令。
+- [ ] **Step 3:** CONTEXT 术语表收录同一张标准 CRUD 旗标表（glossary / house CLI surface）。若尚无等价条，补「NodeService：节点读写与组成登记的门面」。不在本卡改 README / memory / tasks 命令。
 - [ ] **Step 4:** Commit `docs: note/skill CRUD via NodeService ADR`
 
 ---
@@ -157,5 +171,5 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 - [ ] `services/note/git/*` ingest 路径已删除；无 `--import-entry`、`--co-author`、`--mode`、`--dry-run`，也无 notes create 的 token/auth 旗标；相关帮助与测试已去掉
 - [ ] 无额外特殊旗标（不含 referenced、content-file、markdown 保全）
 - [ ] delete 使用 destroy
-- [ ] ADR 0027 已更新；新 ADR 与 CONTEXT 写明统一旗标是全仓标准（本卡只实现 notes/skills）
+- [ ] ADR 0027 已更新；新 ADR 与 CONTEXT 术语表都收录标准 CRUD 旗标表（house CLI surface）；写明 README / memory / tasks 以后照此跟随，本卡只实现 notes/skills
 - [ ] 相关测试通过；PR 待合 main
