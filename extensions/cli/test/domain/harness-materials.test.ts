@@ -1,0 +1,42 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import * as fs from "node:fs";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import {
+  loadHarnessMaterialsConfig,
+  harnessRootForScope,
+  resolveHarnessMaterial,
+  listHarnessMaterialAbsPaths,
+} from "../../src/domain/config/harness-materials.js";
+
+test("config lists tasks README and not AGENTS", () => {
+  const cfg = loadHarnessMaterialsConfig();
+  assert.ok(cfg.materials.some((m) => m.id === "tasks" && m.path === "tasks/README.md"));
+  assert.ok(!cfg.materials.some((m) => m.path.endsWith("AGENTS.md")));
+});
+
+test("resolve uses .harness under scope when present", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "hm-"));
+  fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# t\n");
+  assert.equal(harnessRootForScope(root), path.join(root, ".harness"));
+  const hit = resolveHarnessMaterial(root, "tasks");
+  assert.equal(hit?.absPath, path.join(root, ".harness/tasks/README.md"));
+});
+
+test("listHarnessMaterialAbsPaths only returns existing files", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "hm-list-"));
+  fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# t\n");
+  const listed = listHarnessMaterialAbsPaths(root);
+  assert.ok(listed.some((m) => m.id === "tasks"));
+  assert.ok(!listed.some((m) => m.id === "evaluation"));
+});
+
+test("optional missing material returns undefined; unknown id throws", () => {
+  const root = mkdtempSync(path.join(tmpdir(), "hm-opt-"));
+  assert.equal(resolveHarnessMaterial(root, "tasks"), undefined);
+  assert.throws(() => resolveHarnessMaterial(root, "no-such-id"), /Unknown harness material id/);
+});
