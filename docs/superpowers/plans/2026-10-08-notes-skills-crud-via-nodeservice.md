@@ -4,7 +4,7 @@
 
 **Goal:** 消灭 notes/skills 对 NodeService 的旁路：CLI 的 create/get/update/delete 全部经 `NodeService`；删除 `services/note/records.ts` 与 `services/skills/records.ts`；**整段丢掉** notes 的 git/PR ingest，`notes create` 改为纯本地 `NodeService.create`；改 ADR 0027；补短 ADR + 测试。
 
-**Architecture:** CLI 命令层直接（或极薄 helper）调用 `NodeService.get/create/update/destroy` + `NoteNode`/`SkillNode`，对齐 memory `records` 已采用的模式。`notes create` **不再**走 git commit / push / PR，也没有 `--import-entry`：只写当前 scope 的本地叶子。删掉或收掉 `services/note/git/*` ingest 路径，以及 ingest 旗标（`--mode` / `--dry-run` / `--co-author` / token / `--import-entry`，含 content-file 与 markdown 保全）。create 只收标准 `--title` 与 `--body`，经 `NodeService.create`。skills create/update 改为真写 `SKILL.md`（默认落在当前 scope 的 `skills/managed/<name>/SKILL.md`，并登记父级 README）。
+**Architecture:** CLI 命令层直接（或极薄 helper）调用 `NodeService.get/create/update/destroy` + `NoteNode`/`SkillNode`，对齐 memory `records` 已采用的模式。标准节点面是 **metadata + body**；正文旗标用 `--body`，不用 ingest 的 `--content`。各命令只加本类型需要的旗标（note 标题走正文 H1 或一个 helper；skill 用 name / description）。不另加特殊旗标。`notes create` 整段丢掉 git/PR ingest，只做本地 `NodeService.create`。删掉 `services/note/git/*`，并去掉 `--import-entry`、`--co-author`、`--mode`、`--dry-run` 以及 notes create 上的 token/auth 旗标（鉴权归 CLI，不在 create 上再做一套）。skills create/update 改为真写 `SKILL.md`（默认落在当前 scope 的 `skills/managed/<name>/SKILL.md`，并登记父级 README）。
 
 **Tech Stack:** Node 22、`node:test`、tsx、现有 Commander / NodeService。不新增依赖。
 
@@ -15,7 +15,8 @@
 - Q4：新开短 ADR；CONTEXT 按需补 NodeService 门面术语
 - Q6=A：skills 写到 skills 类型目录下的 `SKILL.md`
 - Q7=B：skills create **与** update 都真写；改 ADR 0027
-- Q8：丢掉 notes 的 git/PR ingest，并去掉 `--import-entry`。`notes create` 改为纯 `NodeService.create`（只写本地叶子），参数只留标准 `--title` / `--body`。删掉或收掉 `services/note/git/*` ingest 路径，以及 `--mode` / `--dry-run` / `--co-author` / token / `--import-entry`（含 `--content-file`、`--markdown`）。
+- Q8：整段丢掉 notes git/PR ingest。`notes create` 只做本地 `NodeService.create`。去掉 `--import-entry`、`--co-author`、`--mode`、`--dry-run`，以及 notes create 的 token/auth 旗标（CLI 自有鉴权）。一并去掉 `--content` / `--content-file` / `--markdown`。
+- 标准节点面：**metadata + body**。各命令可加类型旗标（note 标题经正文 H1 或 helper；skill 的 name / description）。正文用 `--body`，不用 `--content`。保持简单，不加别的特殊旗标。
 
 **仓：** VirusPC/edges；经 PR 合入 main；Co-authored-by: 全栈开发专家 \<grok-bot@users.noreply.github.com\>
 
@@ -24,9 +25,9 @@
 - 禁止在 notes/skills 命令或替代模块里 `readFileSync`/`writeFileSync`/`rmSync`/`readdir` 直改叶子或父索引（测试可证）。
 - `NodeService.destroy` 删除；错误尽量映射为既有 `VALIDATION_ERROR`（not found / ambiguous / must be）。
 - 不重做 artifacts；不大改 tasks/memory 编排。
-- skills create 默认目录：`skills/managed/<kebab-name>/SKILL.md`（与 harness-materials `skills.managed` 对齐）；若需 `referenced`，用显式 flag（本卡最小：仅 managed，除非实现时发现 CLI 已有约定）。
-- ADR 0027 中「skills create/update 只提示 remember」改为真写说明；`memory create/update`、`tasks delete` 提示语义不动。
-- `notes create` 不做 git commit、push 或 PR。参数只有 `--title` 与 `--body`。不保留 `--import-entry`，也不保留 ingest 旗标（`--mode`、`--dry-run`、`--co-author`、`--token-file`、`--token-stdin`、`--content-file`、`--markdown`）。
+- skills create/update 真写 `skills/managed/<kebab-name>/SKILL.md`（与 harness-materials `skills.managed` 对齐）并登记父级 README。本卡不加 `referenced` 或其他特殊旗标。
+- ADR 0027 中「skills create/update 只提示 remember」改为真写说明；另写短 ADR。`memory create/update`、`tasks delete` 提示语义不动。
+- `notes create` 不做 git commit、push 或 PR，只 `NodeService.create` 写本地叶子。标准面是 metadata + `--body`；note 标题经正文 H1 或类型 helper。不保留 `--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--content`、`--content-file`、`--markdown`，也不在 create 上挂 `--token-file` / `--token-stdin`（鉴权归 CLI）。
 
 ## File map
 
@@ -34,9 +35,9 @@
 | --- | --- |
 | `extensions/cli/src/services/note/records.ts` | **Delete** |
 | `extensions/cli/src/services/skills/records.ts` | **Delete** |
-| `extensions/cli/src/commands/notes/create.ts` | 纯 `NodeService.create`；只留 `--title` / `--body`；去掉 `--import-entry` 与 git/PR ingest 旗标 |
+| `extensions/cli/src/commands/notes/create.ts` | 本地 `NodeService.create`；标准面 metadata + `--body`；标题经 H1 或 helper；去掉 ingest / `--import-entry` 旗标 |
 | `extensions/cli/src/commands/notes/{get,update,delete}.ts` | 改调 NodeService |
-| `extensions/cli/src/commands/skills/{get,create,update,delete}.ts` | 改调 NodeService；create/update 真写 |
+| `extensions/cli/src/commands/skills/{get,create,update,delete}.ts` | 改调 NodeService；create/update 真写 `skills/managed`；类型旗标 name/description + `--body` |
 | `extensions/cli/src/services/note/git/*` | **Delete** ingest 路径（`ingest.ts`、`pr.ts`、`exec.ts`、`markers.ts`、`slug.ts`） |
 | `extensions/cli/src/services/note/service.ts`、`auth.ts`（及只服务 ingest 的校验） | 删掉或收掉 ingest 包装与 token 校验 |
 | `extensions/cli/src/commands/notes.ts`、`program.ts` | 帮助文本去掉 git/PR ingest 与 `--import-entry` |
@@ -55,7 +56,7 @@
 - Modify: `docs/adr/0027-facade-crud-verbs.md`
 - Modify: `CONTEXT.md`（仅当术语缺失）
 
-- [ ] **Step 1:** 写 ADR：内容叶子（Note/Skill）的 create/get/update/destroy 一律经 NodeService；禁止 records/扫盘旁路；skills create 落 `skills/managed`；notes create 只写本地叶子，不走 git/PR ingest。
+- [ ] **Step 1:** 写 ADR：内容叶子（Note/Skill）的 create/get/update/destroy 一律经 NodeService；标准面是 metadata + body；禁止 records/扫盘旁路；skills create/update 真写 `skills/managed`；notes create 只写本地叶子，不走 git/PR ingest，也不在 create 上做 token 鉴权。
 - [ ] **Step 2:** 改 0027：skills create/update 改为「会写 SKILL.md」，删掉「只提示 remember」；注明 remember 仍可写 skill 类 memory，与 CLI skills 动词并行。
 - [ ] **Step 3:** CONTEXT 补「NodeService：节点读写与组成登记的门面」若尚无等价条。
 - [ ] **Step 4:** Commit `docs: note/skill CRUD via NodeService ADR`
@@ -97,8 +98,9 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 - Modify: `extensions/cli/src/commands/skills/{get,create,update,delete}.ts`
 - Test: `extensions/cli/test/commands/skills-crud-nodeservice.test.ts`
 
-**create/update CLI 最小参数（实现时可微调，保持 VALIDATION_ERROR）：**
-- create: `<name>` + `--description <text>`（必填，满足 SkillNode.validate）；可选 `--body`
+**create/update CLI（标准面 metadata + body，外加 skill 类型旗标；保持 VALIDATION_ERROR，不加别的特殊旗标）：**
+- 正文用 `--body`，不用 `--content`
+- create: `<name>` + `--description <text>`（满足 SkillNode.validate）；`--body` 可选
 - update: `<target>`（path 或 name）+ `--description` / `--body` 至少一个
 - get/delete: 先 `NodeService.query` 按 name 消歧，或 path → `get`；多命中仍 `ambiguous`
 
@@ -119,12 +121,12 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 - Delete: `extensions/cli/test/note/utils/git-ingest.test.ts`、`git-pr.test.ts`、`git-markers.test.ts`、`git-slug.test.ts`、`auth.test.ts`
 - Modify: 仍断言 `--co-author` / `--mode` / `--dry-run` / token / `--import-entry` 或 `runNoteIngest` 的测试（`cli.test.ts`、`run.test.ts`、`parse.test.ts`、`production-nodes.test.ts` 等）
 
-**`notes create` 参数（只此一套，保持 VALIDATION_ERROR）：**
-- 只接受 `--title` 与 `--body`（与 update 的正文字段同名）。二者为创建所需的标准参数。
-- 不接受 `--import-entry`，也不接受 `--mode`、`--dry-run`、`--co-author`、`--token-file`、`--token-stdin`、`--content-file`、`--markdown`。
-- 不 commit、不 push、不开 PR。只 `NodeService.create` 写当前 scope 的本地 Note 叶子，并登记父级 README。
+**`notes create` 参数（标准面 + note 类型旗标，保持 VALIDATION_ERROR）：**
+- 正文用 `--body`（不用 ingest 的 `--content`）。标题写在正文 H1，或用一个类型 helper（例如 `--title`）写入 H1。metadata 走标准 metadata 面。
+- 不接受 `--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--content`、`--content-file`、`--markdown`，也不接受 `--token-file` / `--token-stdin`。鉴权留在 CLI，不在 notes create 上再挂一套。
+- 不 commit、不 push、不开 PR。只 `NodeService.create` 写当前 scope 的本地 Note 叶子，并登记父级 README。不加别的特殊旗标。
 
-- [ ] **Step 1:** 失败测试：`notes create --title --body` 写出本地叶子且父级有登记；`--import-entry` 与 git/PR ingest 旗标被拒绝或从帮助中消失；进程不调用 git commit/push/PR；源码无 `services/note/git` ingest 入口。
+- [ ] **Step 1:** 失败测试：`notes create` 用 `--body`（标题经 H1 或 helper）写出本地叶子且父级有登记；`--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--content` 与 token 旗标被拒绝或从帮助中消失；进程不调用 git commit/push/PR；源码无 `services/note/git` ingest 入口。
 - [ ] **Step 2:** 重写 `notes create`；删除 git ingest 路径与只服务它的 auth/包装；改帮助文案（含 update 描述里的 “without git ingest”）。
 - [ ] **Step 3:** 删掉 ingest 测试并改相关帮助/解析断言；跑 notes/skills CRUD 相关测试至 PASS。
 - [ ] **Step 4:** Commit `refactor(notes): drop git/PR ingest; create via NodeService`
@@ -142,8 +144,9 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 
 - [ ] note/skills `records.ts` 已删除且无引用
 - [ ] notes get/update/delete 与 skills get/create/update/delete 经 NodeService
-- [ ] `notes create` 只经 `NodeService.create` 写本地叶子；参数只有 `--title` / `--body`
-- [ ] `services/note/git/*` ingest 路径已删除；无 `--import-entry`，无 git commit / push / PR，无 `--mode` / `--dry-run` / `--co-author` / token 旗标；相关帮助与测试已去掉
+- [ ] `notes create` 只经本地 `NodeService.create`；标准面是 metadata + `--body`（不用 `--content`）；标题经正文 H1 或类型 helper
+- [ ] `services/note/git/*` ingest 路径已删除；无 `--import-entry`、`--co-author`、`--mode`、`--dry-run`，也无 notes create 的 token/auth 旗标；相关帮助与测试已去掉
+- [ ] 无额外特殊旗标（不含 referenced、content-file、markdown 保全）
 - [ ] delete 使用 destroy
 - [ ] ADR 0027 已更新；新 ADR 已合入 PR
 - [ ] 相关测试通过；PR 待合 main
