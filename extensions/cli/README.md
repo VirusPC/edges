@@ -61,6 +61,8 @@ Model 的 create/update/destroy 是内存领域方法；创建目录、保存文
 
 每个领域模块有 `services/<module>/service.ts`。commands 只从这份主文件进入，不直接装配 `NodeService`，也不直接 import 模块里的其他文件。实现可以留在原文件，主文件 re-export 即可，不必为了统一入口把函数搬一遍。`memory` 的 `migrateMemory` 在主文件里动态 `import("./migrate.js")`：这份实现可以不随 CLI 启动加载，命令入口仍是 `service.ts`。notes 与 projects 的主文件固定各自的叶子规格，再委托共用底层。
 
+init 的主文件是 `services/init/service.ts`。`edges init` 只从这份文件进入。`edges notes init` 与 `edges projects init` 经各自主文件上的 `initNotes` / `initProjects`，这两处只把单一模块转给 init service。`edges memory init` 仍从 `services/memory/service.ts` 的 `initMemory` 进入，该函数再把实现交给 init service。
+
 这些是跨领域工具，不另造 `service.ts`：`services/node/`（`node-service.ts`、`scope-session.ts`，以及带日期 `INDEX.md` 叶子的 `dated-leaf.ts`）、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts`。命令要用其中的符号时，由该领域的 `service.ts` 再导出。进程入口 `program.ts` 在分发命令前直接取 `services/node/node-lock.ts` 的写锁，这不是某个领域命令。
 
 notes、projects、skills、memory、tasks、artifacts、forest 的 commands 都只调用各自的 `service.ts`。tasks 的 list 与审阅页、artifacts server 的安装和进程命令，仍在 command 动作里按原顺序调用这些已导出的函数；调用点收口了，流程本身没有改写。
@@ -180,6 +182,9 @@ review-page 只把 groups/items JSON 渲染成 HTML，不改任务、不打开�
 Project Memory 的执行能力由 TS CLI 提供，Skill 负责工作流和调用规范。
 
 ```bash
+edges --scope /absolute/project init
+edges --scope /absolute/project init notes
+edges --scope /absolute/project notes init
 edges --scope /absolute/project memory init --memory-types project feedback
 edges --scope /absolute/project memory remember --type project --slug decision \
   --description "记录本项目的设计取舍" --content-file /tmp/decision.md

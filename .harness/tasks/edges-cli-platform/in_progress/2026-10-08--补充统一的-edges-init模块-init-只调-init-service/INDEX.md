@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: edges-cli-platform
-  edges-updated-at: '2026-10-07T18:40:18.123Z'
+  edges-updated-at: '2026-10-07T19:34:52.909Z'
   edges-title: 统一 edges init：init 成为标准命令（含根命令），域 init 委托同一 init service
-  edges-tasks-status: backlog
+  edges-tasks-status: in_progress
   edges-task-priority: none
 name: edges-unified-init
 description: >-
@@ -12,6 +12,7 @@ description: >-
   <domain> init 只委托同一 init service；NodeService 底层、service 薄封装、commands 直调
   service。
 ---
+
 **背景：**
 2026-10-08 凌晨，用户在审 notes/skills CRUD 收口到 NodeService 的叠层 PR（#185 notes/skills → #186 projects CLI + 根 harness/init → #187 commands node 下沉 service）。先问的是「为什么 commands 层有 `node.ts`」，于是把 `commands/{notes,projects,skills}/node.ts` 下沉到 service，开了 #187。接着用户追问：「我只看到 CLI 改了，根目录的 `.harness` 以及 init 命令有改吗？」核对后，#186 确实改了：根 `.harness` 新增 `projects/README.md`、`notes/README.md` 并登记进根 `AGENTS.md`；`extensions/cli/src/services/memory/init.ts` 与 `extensions/cli/src/domain/config/harness-materials.json` 把 projects、notes 加进了 `edges memory init` 的推荐模块；`project-memory-init` skill 升到 3.4.0。
 
@@ -38,10 +39,30 @@ init 成为 Edges CLI 的标准命令：根命令 `edges init` 是统一初始�
 - `edges memory init` 改为薄入口，只把「初始化 memory 模块」交给 init service；后续 `edges <domain> init` 照此
 - 在 ADR / CONTEXT 记下：init 为标准命令、拥有根命令、域 init 委托同一 service；必要时同步 `project-memory-init` skill 与 README
 
+**决策记录：**
+用户睡前授权，只读 grill 清单共 12 题，由 Grok Bot 于 2026-10-08 03:07（UTC+8）逐题拍板。全文见 [plan](../../../../docs/superpowers/plans/2026-10-08-edges-unified-init.md)。
+
+- Q1 主文件放哪：新建 `services/init/service.ts`，memory 留薄包装。见 plan Q1。
+- Q2 材料清单模型：挂载表不动，init 模块表用 material id。见 plan Q2。
+- Q3 notes/projects 写哪：只建 `.harness` 桩。见 plan Q3。
+- Q4 无参写什么：AGENTS、notes/projects 桩、feedback/project/reference；memory 无参仍不写盘。见 plan Q4。
+- Q5 `--super`：init 不读。见 plan Q5。
+- Q6 再跑：缺了才建，类型索引仍刷新。见 plan Q6。
+- Q7 memory 兼容包：选定类型后仍建 notes/projects 桩。见 plan Q7。
+- Q8 域入口：memory、notes、projects。见 plan Q8。
+- Q9 tasks：不进 init，帮助里和「本次会创建」分开。见 plan Q9。
+- Q10 写盘：节点经 NodeService，`.gitignore` 仍走 `saveEntries`。见 plan Q10。
+- Q11 AGENTS：init service 的公共步骤。见 plan Q11。
+- Q12 文档：新 ADR 0031；CONTEXT 只改 init 那一句；skill 只改命令与模块段。见 plan Q12。
+
 **完成标准：**
-- [ ] `edges init --help` 可用；在空 scope 执行 `edges init` 能生成根 `AGENTS.md` 与 `.harness` 下已登记模块（至少 memory、notes、projects）的组织清单
-- [ ] `edges init` 可只初始化指定模块（参数形状在 grill 时定），结果与 `edges <domain> init` 一致
-- [ ] `edges memory init` 的输出与改造前一致（现有 memory init 测试不改断言即通过），且实现只调用 init service
+- [x] `edges init --help` 可用；在空 scope 执行 `edges init` 能生成根 `AGENTS.md` 与 `.harness` 下已登记模块（至少 memory、notes、projects）的组织清单
+- [x] `edges init` 可只初始化指定模块（参数形状在 grill 时定），结果与 `edges <domain> init` 一致
+- [x] `edges memory init` 的输出与改造前一致（现有 memory init 测试不改断言即通过），且实现只调用 init service
 - [ ] commands 下没有 init 业务逻辑：`extensions/cli/src/commands` 中不出现材料清单读取或直接文件写入；材料清单不再归 `services/memory` 独有
-- [ ] ADR 或 CONTEXT 写明 init 标准命令约定
+- [x] ADR 或 CONTEXT 写明 init 标准命令约定
 - [ ] 相关测试通过；经 PR 合入 main
+
+注：完成标准里「memory 的组织清单」指 feedback / project / reference 三个类型 README（`.harness/memory/feedbacks/README.md`、`.harness/memory/projects/README.md`、`.harness/memory/references/README.md`），不是单独的 memory 总入口。
+
+注：新建的 init 命令不读材料清单、不直接写文件。`commands/tasks/list.ts` 与 `commands/tasks/project/list.ts` 仍直接 import `harness-materials`，按 Q9 本卡不搬，所以上面第 4 项不勾。

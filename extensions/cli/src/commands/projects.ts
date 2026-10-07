@@ -5,6 +5,7 @@ import { addProjectCreateCommand } from "./projects/create.js";
 import { addProjectDeleteCommand } from "./projects/delete.js";
 import { addProjectGetCommand } from "./projects/get.js";
 import { addProjectListCommand } from "./projects/list.js";
+import { addProjectInitCommand } from "./projects/init.js";
 import { addProjectUpdateCommand } from "./projects/update.js";
 
 const PROJECT_AFTER_HELP = `
@@ -23,6 +24,7 @@ FLAGS
   create   --title <title>  --body <markdown>  --metadata <key=value>  --json
   update   <path>  --title  --body  --metadata <key=value>
   delete   <path>
+  init     [--target-dir] [--root-dir] [--index-group] [--description]
 
   create/update use metadata plus --body. The title is the body H1, or --title.
   get and delete take only the target. list uses the shared filter/group envelope.
@@ -55,6 +57,7 @@ export function addProjectsCommand(program: Command, ctx: CliContext): Command {
   addProjectGetCommand(projects, ctx);
   addProjectUpdateCommand(projects, ctx);
   addProjectDeleteCommand(projects, ctx);
+  addProjectInitCommand(projects, ctx);
   projects.addHelpText("after", PROJECT_AFTER_HELP);
   return projects;
 }

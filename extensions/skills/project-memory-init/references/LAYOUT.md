@@ -6,7 +6,7 @@
 
 `AGENTS.md` 是人和 Agent 的入口。本层硬约束直接写在所属层的硬约束区块，已有规则不覆盖；本层系统维护信息和下层系统维护信息只放链接与描述。区块外手写内容、其他工具区块和业务模块入口保持原文。
 
-通用推荐模块为 `memory`、`skills`、`tasks`；推荐不代表自动创建。Project Memory 只初始化用户选择的 Memory / Skills 类型，Tasks 和其他模块使用自己的契约。未采用的模块和类型不创建空目录。
+通用推荐模块为 `memory`、`skills`、`tasks`；推荐不代表自动创建。无参 `edges init` 创建 `AGENTS.md`、feedback / project / reference，以及 notes / projects 的 `.harness` 组织清单；不创建 user、skills、tasks。tasks 看板仍由 tasks 首次写入时确保。`edges memory init` 只初始化用户选择的 Memory / Skills 类型，未选择时不写盘。未采用的模块和类型不创建空目录。
 
 ```text
 <scope>/
@@ -30,12 +30,13 @@ CLI 目标选择依次为显式 `--scope`、`EDGES_SCOPE` / `EDGES_REPO`、cwd �
 ## 选择式初始化
 
 ```bash
+edges --scope S init
 edges --scope S memory init --root-dir R \
   --memory-types project feedback reference user \
   --skill-types managed referenced
 ```
 
-任一列表可省略；新层两个列表均省略时返回 `selectionRequired: true`、`recommendations`（模块与类型），不修改任何文件。已有层省略列表时只刷新已经采用的类型；显式列表只追加采用，不删旧类型。自定义类型不会被推荐清单重置。类型元数据与实际入口是注册事实源，无 JSON/YAML 注册表。
+`edges init` 不读 `--super`，材料在 `<scope>/.harness`。无参时创建本层系统入口、三个公开 memory 类型（feedback、project、reference）和 notes / projects harness 组织清单。`edges memory init` 任一列表可省略；新层两个列表均省略时返回 `selectionRequired: true`、`recommendations`（模块与类型），不修改任何文件。已有层省略列表时只刷新已经采用的类型；显式列表只追加采用，不删旧类型。选定类型后顺手创建 notes / projects 的 harness 桩。自定义类型不会被推荐清单重置。类型元数据与实际入口是注册事实源，无 JSON/YAML 注册表。
 
 | type | 模块与入口（相对作用域） | 正文与权限 |
 | --- | --- | --- |

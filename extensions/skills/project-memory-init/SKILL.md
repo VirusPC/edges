@@ -1,20 +1,25 @@
 ---
 name: project-memory-init
-description: 对用户选定的任意目录初始化或刷新系统入口 AGENTS.md（硬约束 + 组成登记），并按选择采用 Project Memory / Skills 类型。仅当用户明确要求 init 时使用；命令仍为 edges memory init。
-version: 3.4.0
+description: 对用户选定的任意目录初始化或刷新系统入口 AGENTS.md（硬约束 + 组成登记），并按选择采用 Project Memory / Skills 类型。仅当用户明确要求 init 时使用。标准命令是 edges init；edges memory init 仍是 memory 模块入口。
+version: 3.5.0
 ---
 
 # Project harness init（`$project-memory-init`）
 
-面向用户的名称是 **project harness init**；Skill 名与命令仍为 `$project-memory-init` / `edges memory init`（不强制改 bin 子命令）。只在用户明确要求 Init 时运行；Ask、Remember、Doctor 不得代为 Init。用户明确要求 reshape 已有入口时可按该流程初始化。先读 [PROTOCOL](references/PROTOCOL.md) 与 [LAYOUT](references/LAYOUT.md)：前者规定发现形状，后者规定当前路径、类型与写入边界。
+面向用户的名称是 **project harness init**；Skill 名仍为 `$project-memory-init`。标准命令是 `edges init`；`edges memory init` 仍是 memory 模块入口。只在用户明确要求 Init 时运行；Ask、Remember、Doctor 不得代为 Init。用户明确要求 reshape 已有入口时可按该流程初始化。先读 [PROTOCOL](references/PROTOCOL.md) 与 [LAYOUT](references/LAYOUT.md)：前者规定发现形状，后者规定当前路径、类型与写入边界。
 
 **谁该 init：** 用户认定需要重点维护、要挂 Memory / Skills 模块或登记下层系统入口的目录——空目录或已有内容目录均可。Init 写出合法**系统入口** `AGENTS.md`（`project-harness-*` 区块，标题「本层硬约束 / 本层系统维护信息 / 下层系统维护信息」），并按选择创建 `.harness` 下类型入口 `README.md`（`project-entries-*`，标题「本层内容 / 下层内容」）。层入口的本层系统维护信息链到这些 README。
 
 **谁不该 init：** 仅为列系统一孩子、尚未需要系统二材料的目录（用同目录 `README.md` + `project-entries-*`，或迁移脚本另建）；未经用户要求不要给全仓或批量目录铺 `AGENTS.md`。看板和类型目录上的 README 是组织清单，不是系统入口。不要在类型目录上 init `AGENTS.md` 来装组织清单，空的同目录桩删掉。不要让 list 另开一套 README 遍历。层系统入口仍是 `AGENTS.md`。Init **不会**在作用域根自动创建组织清单 `README.md`——那是系统一入口，由用户或迁移单独建立。
 
-模块默认推荐 memory、skills、tasks、projects、notes，按作用域目标采用。本 Skill 仍只负责 memory / skills 类型选择与系统入口同步；选定类型后，init 还会在 `.harness/projects/README.md` 与 `.harness/notes/README.md` 生成组织清单并登记到本层系统维护信息。新层先展示 memory 的 project / feedback / reference / user 与 skills 的 managed / referenced 用途，让用户选择，不预建全部。用户已明确选择时直接执行；未选择时命令返回 `selectionRequired` 和推荐清单且不改文件。已有层不传选择只刷新已采用类型。
+无参 `edges init` 写出 `AGENTS.md`、memory 的 feedback / project / reference，以及 `.harness/notes/README.md` 与 `.harness/projects/README.md`。不建 user、skills、tasks。tasks 看板仍在首次 tasks 写入时确保。`edges init` 不读 `--super`，材料落在 `<scope>/.harness`。单模块用 `edges init <module>`，域入口 `edges notes init` 与 `edges projects init` 委托同一 init service。
+
+本 Skill 的类型选择仍走 `edges memory init`。推荐模块仍含 memory、skills、tasks、projects、notes，推荐不代表无参 memory init 会全建。新层先展示 memory 的 project / feedback / reference / user 与 skills 的 managed / referenced 用途，让用户选择，不预建全部。用户已明确选择时直接执行；未选择时 `edges memory init` 返回 `selectionRequired` 和推荐清单且不改文件。已有层不传选择只刷新已采用类型。选定类型后，memory init 还会调用与 `edges init notes` / `edges init projects` 相同的函数，生成这两份 harness 组织清单并登记到本层系统维护信息。
 
 ```bash
+edges --scope <目录> init
+edges --scope <目录> init notes
+edges --scope <目录> notes init
 edges --scope <目录> memory init \
   [--target-dir <scope>] [--root-dir <root>] \
   [--memory-types project feedback reference user] \
