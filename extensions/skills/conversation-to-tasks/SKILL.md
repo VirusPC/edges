@@ -1,7 +1,7 @@
 ---
 name: conversation-to-tasks
 description: 把对话整理成任务（背景 → 目标 → 动作 → 完成标准；后两栏可选）。必填不足先提问；成文后交人审（对话确认或 PR），再用 CLI 落库。看板文件进受保护的 main 必须开 PR，不要直推。
-version: 1.3.0
+version: 1.3.1
 ---
 
 从对话整理任务：**成文 → 交人审 → 落库**（人审可以是对话确认或 PR）。正文顺序：**背景 → 目标**（必填）→ **动作** → **完成标准**（后两栏可选；完成标准可留到 `grill-with-docs` 后再补）。与 `conversation-to-notes` 主题行动指南同序（背景 → 问题/目标 → 方案/动作 → 验收/完成标准），便于从笔记开卡平移。四栏同构 STAR（Situation / Task / Action / Result）：用来**制定任务**，尤其是派给 agent 的 brief；**不要**拿 STAR 写复盘（复盘走 `conversation-to-notes`）。
@@ -60,4 +60,4 @@ version: 1.3.0
 - 写给人审阅，白话完整句；不添加对话里没有的新需求。
 - 不要把复盘四栏或记忆结论塞进任务顶替背景；不写执行流水。
 
-新建父级登记跟着主体系统走，`tasks` 上没有 `--index-group`，调用方不再选择 local 或 descendant。已有登记保留原分组。缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。
+新建父级登记跟着主体系统走，调用方不再选择 local 或 descendant。已有登记保留原分组。缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。
