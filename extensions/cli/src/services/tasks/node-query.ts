@@ -97,17 +97,34 @@ export async function listRepositoryTaskNodes(
 ): Promise<TaskNode[]> {
   const canonicalRoot = fs.realpathSync(root);
   const service = new NodeService({ managedRoot: canonicalRoot });
-  return service.query(canonicalRoot, {
-    types: ["task"],
-    includeHarness: true,
-    // Explicit --super: SuperAgentsNode over content-face README.
-    // Otherwise stay on real AGENTS but includeContentFace so board READMEs
-    // (where Task Projects list tasks) remain reachable for repository scans.
-    super: options.super,
-    includeContentFace: !options.super,
-  })
-    .filter((node): node is TaskNode => node instanceof TaskNode)
+  if (options.super) {
+    return service
+      .query(canonicalRoot, { types: ["task"], includeHarness: true, super: true })
+      .filter((node): node is TaskNode => node instanceof TaskNode)
+      .value();
+  }
+  // Discover every task board via system-two + harness, then dual-face query each board.
+  const boards = await service
+    .query(canonicalRoot, { types: ["agents"], includeHarness: true })
+    .filter(
+      (node): node is AgentsNode =>
+        node instanceof AgentsNode &&
+        path.basename(node.path) === "AGENTS.md" &&
+        path.basename(node.directoryPath) === "tasks",
+    )
     .value();
+  const seen = new Set<string>();
+  const out: TaskNode[] = [];
+  for (const board of boards) {
+    for (const task of await listTaskNodes(
+      boardLocationOf(board.directoryPath, canonicalRoot),
+    )) {
+      if (seen.has(task.path)) continue;
+      seen.add(task.path);
+      out.push(task);
+    }
+  }
+  return out;
 }
 /** Classify a board from physical ownership, never from the reference used to reach it. */
 export function boardLocationOf(

@@ -42,7 +42,7 @@ import {
   type Model,
 } from "./node-layout.js";
 import { query, type AsyncQuery } from "../../domain/operations/query.js";
-import { traverse, isContentFaceReadme } from "../../domain/operations/traverse.js";
+import { traverse, contentFaceReadme } from "../../domain/operations/traverse.js";
 import { NodeCache } from "./node-cache.js";
 
 type Operation = "create" | "update" | "move" | "destroy" | "import";
@@ -232,8 +232,6 @@ export class NodeService {
       // resolve and load are sequential; carry this edge's policy into its one load.
       let readonly = false;
       yield* traverse(root, options, (parent, reference) => {
-        // Write-path content-face edges are optional if the README is absent.
-        if (isContentFaceReadme(parent, reference) && !fs.existsSync(reference.id)) return undefined;
         if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.
@@ -249,8 +247,8 @@ export class NodeService {
       }, (parent, reference) => service.#reference(parent, reference, readonly, options.types, false));
     });
   }
-  /** Compatibility collection: materialize query and capture lifecycle resource
-   * snapshots before resolving, so later directory drift remains detectable. */
+  /** Materialize query and capture lifecycle resource snapshots before resolving,
+   * so later directory drift remains detectable. */
   async list(scopePath: string, options: ScopeTraversalOptions = {}): Promise<BaseNode[]> {
     const nodes = await this.query(scopePath, options).toArray().value();
     for (const node of nodes) this.#cache.captureResources(node);
@@ -276,7 +274,8 @@ export class NodeService {
     return state.file;
   }
   /** Reachable registered nodes plus explicitly loaded nodes, including maintenance trees.
-   * list deliberately has a narrower traversal policy and never uses this helper. */
+   * list deliberately has a narrower traversal policy and never uses this helper.
+   * Content faces are separate roots (not AGENTS child edges). */
   async #registered(deferred: (file: string) => boolean = () => false): Promise<Map<string, BaseNode>> {
     const result = new Map<string, BaseNode>();
     const root = await this.#read(
@@ -292,29 +291,37 @@ export class NodeService {
     const maintenanceOnly = (node: BaseNode, ref: NodeReference) =>
       node.harness?.id === ref.id && !node.children.some(child => child.id === ref.id);
     let readonly = false;
-    for await (const node of traverse(
-      roots(),
-      { includeHarness: true, includeContentFace: true },
-      (parent, ref) => {
-        if (isContentFaceReadme(parent, ref) && !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id))
-          return undefined;
-        if (!isWithinPath(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
-        // Maintenance discovery tolerates a missing optional entry; composition does not.
-        if (maintenanceOnly(parent, ref) &&
-            !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id)) return undefined;
-        // Optional harness reads retain their existing #read policy.
-        readonly = maintenanceOnly(parent, ref) ? false : this.#referenceReadOnly(parent, ref);
-        return ref.id;
-      },
-      async (parent, ref) => {
-        if (maintenanceOnly(parent, ref)) {
-          const harness = await this.#read(ref.id, AgentsNode);
-          if (!harness) throw new Error(`Missing referenced node: ${ref.id}`);
-          return harness;
-        }
-        return this.#reference(parent, ref, readonly);
-      },
-    )) result.set(node.path, node);
+    const resolve = (parent: BaseNode, ref: NodeReference) => {
+      if (!isWithinPath(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
+      // Maintenance discovery tolerates a missing optional entry; composition does not.
+      if (maintenanceOnly(parent, ref) &&
+          !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id)) return undefined;
+      // Optional harness reads retain their existing #read policy.
+      readonly = maintenanceOnly(parent, ref) ? false : this.#referenceReadOnly(parent, ref);
+      return ref.id;
+    };
+    const load = async (parent: BaseNode, ref: NodeReference) => {
+      if (maintenanceOnly(parent, ref)) {
+        const harness = await this.#read(ref.id, AgentsNode);
+        if (!harness) throw new Error(`Missing referenced node: ${ref.id}`);
+        return harness;
+      }
+      return this.#reference(parent, ref, readonly);
+    };
+    const agentsFaces: BaseNode[] = [];
+    for await (const node of traverse(roots(), { includeHarness: true }, resolve, load)) {
+      result.set(node.path, node);
+      if (contentFaceReadme(node)) agentsFaces.push(node);
+    }
+    // Walk each co-located README as its own root — virtual system two, not an AGENTS edge.
+    for (const agents of agentsFaces) {
+      const face = contentFaceReadme(agents);
+      if (!face || result.has(face.id) || deferred(face.id) || !fs.existsSync(face.id)) continue;
+      const readme = await this.#read(face.id);
+      if (!readme) continue;
+      for await (const node of traverse(readme, {}, resolve, load))
+        result.set(node.path, node);
+    }
     return result;
   }
   async #validateGraph(
@@ -327,14 +334,11 @@ export class NodeService {
     let readonly = false;
     for await (const _node of traverse(
       roots(),
-      { includeContentFace: true },
-      (parent, ref) => {
-        if (isContentFaceReadme(parent, ref) &&
-            (removed(ref.id) || (!plan.has(ref.id) && !fs.existsSync(ref.id))))
-          return undefined;
+      {},
+      (_parent, ref) => {
         if (removed(ref.id))
           throw new Error(`Reference to removed node: ${ref.id}`);
-        readonly = this.#referenceReadOnly(parent, ref);
+        readonly = this.#referenceReadOnly(_parent, ref);
         return ref.id;
       },
       (parent, ref, target) => {

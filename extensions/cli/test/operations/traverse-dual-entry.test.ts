@@ -4,7 +4,7 @@ import * as fs from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { NodeService } from "../../src/services/node/node-service.js";
-import { BaseNode, AgentsNode, LeafNode, ReadmeNode } from "../../src/domain/models/index.js";
+import { BaseNode, AgentsNode, ReadmeNode } from "../../src/domain/models/index.js";
 import { traverse } from "../../src/domain/operations/traverse.js";
 import type { NodeQueryOptions } from "../../src/domain/operations/traverse.js";
 
@@ -76,27 +76,6 @@ test("real AGENTS traverse does not reach same-dir README content face", async (
   assert.deepEqual(paths, [scopeAgents.path, mem.path]);
   assert.ok(!paths.includes(scopeReadme.path));
   assert.ok(!paths.includes(tasksReadme.path));
-
-  const withFace = await run(scopeAgents, { includeContentFace: true });
-  assert.deepEqual(withFace, [
-    scopeAgents.path,
-    mem.path,
-    scopeReadme.path,
-    tasksReadme.path,
-    lowerReadme.path,
-  ]);
-});
-
-test("includeContentFace localOnly still reaches README local only", async () => {
-  const mem = agents("scope/.harness/memory/projects");
-  const tasksReadme = readme("scope/tasks");
-  const lowerReadme = readme("scope/lower");
-  const scopeAgents = agents("scope", [mem]);
-  const scopeReadme = readme("scope", [tasksReadme], [lowerReadme]);
-  const { run } = graph([scopeAgents, scopeReadme, mem, tasksReadme, lowerReadme]);
-  const local = await run(scopeAgents, { includeContentFace: true, localOnly: true });
-  assert.ok(local.includes(tasksReadme.path));
-  assert.ok(!local.includes(lowerReadme.path));
 });
 
 const scopeAgentsMd = `# Scope
@@ -141,7 +120,7 @@ test("NodeService list from AGENTS is system-two only; --super reaches content f
   );
 });
 
-test("harness discovery from AGENTS does not walk content face without includeContentFace", async (t) => {
+test("harness discovery from AGENTS does not walk content face", async (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "dual-entry-harness-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const write = (name: string, text: string) => {

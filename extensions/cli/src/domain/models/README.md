@@ -28,7 +28,7 @@ flowchart TB
   A -. "不并边" .- R
 ```
 
-查询路径已对齐：默认不从真 AGENTS 并 README。写路径可用 `includeContentFace` 闭合引用图。详见 [operations README](../operations/README.md)。
+查询：真 AGENTS 不到 README；内容面用 `--super`。写路径把同目录 README 另起根闭合引用图。详见 [operations README](../operations/README.md)。
 
 设计真源：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md)。相关记忆：`feedback_cli_is_system_two_ops`、`feedback_content_via_super_agents_node`。
 

@@ -114,7 +114,7 @@ test("cross-project move updates both project READMEs", async (t) => {
   assert.deepEqual(listed.tasks.map((task: any) => task.project).sort(), ["alpha", "beta"]);
 });
 
-test("destroy removes references held by READMEs reached via write-path content face", async (t) => {
+test("destroy removes references held by READMEs reached as separate content-face roots", async (t) => {
   const repo = await readmeBoard();
   t.after(() => rm(repo, { recursive: true, force: true }));
   const created = await cli(repo, ["create", "--title", "Doomed", "--project", "alpha"]);

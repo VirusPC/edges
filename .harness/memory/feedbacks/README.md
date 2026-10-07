@@ -37,5 +37,5 @@ format: ordinary
 - [grill 与设计讨论必须当轮 remember](<feedback_grill_must_remember_settlements/INDEX.md>) — 做节点模型/系统二设计讨论或 grill 时：用户确认的取舍与纠正当轮用 edges memory remember 落库；不能只改 CONTEXT 或留在对话里。翻案则更新同一 slug。
 - [traverse 不兼容 includeDescendants](<feedback_no_include_descendants_compat/INDEX.md>) — 改 traverse / NodeService.query 选项时：不要再接受 includeDescendants；只要本层用 localOnly: true；默认仍是全部 children。
 - [CLI 默认只做系统二操作](<feedback_cli_is_system_two_ops/INDEX.md>) — 改 traverse 双文件并边、scope 根或 tasks 查询入口时：真 AGENTS 默认只做该系统的系统二；要内容面走 SuperAgentsNode（见 feedback\_content\_via\_super\_agents\_node），不要从真 AGENTS 并 README。
-- [系统一内容经 SuperAgentsNode 当虚拟系统二](<feedback_content_via_super_agents_node/INDEX.md>) — 改 traverse 并边、\-\-super 或 tasks/notes 查询根时：真 AGENTS 只逛真系统二；要内容面须 SuperAgentsNode；Task 板发现默认并查内容面与真 AGENTS（系统入口/遗留链）。
+- [系统一内容经 SuperAgentsNode 当虚拟系统二](<feedback_content_via_super_agents_node/INDEX.md>) — 改 traverse/\-\-super/tasks 查询时：真 AGENTS 只逛系统二；内容面用 SuperAgentsNode；无 includeContentFace/companion 兼容；Task 板 dual\-face；写路径 README 另起根。
 <!-- project-entries-local:end -->

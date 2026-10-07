@@ -8,13 +8,6 @@ export interface ScopeTraversalOptions {
   /** When true, expand only localChildren. Default false: local ∪ descendants. */
   localOnly?: boolean;
   includeHarness?: boolean;
-  /**
-   * Write-path graph closure only: also visit the same-directory README next to
-   * an AGENTS.md so reference rewrite can see content-face holders. Default
-   * false — query from a real AGENTS must not reach README composition.
-   * Content queries use `--super` / SuperAgentsNode instead.
-   */
-  includeContentFace?: boolean;
   /** Explicit `--super`: root traversal at a runtime SuperAgentsNode. */
   super?: boolean;
 }
@@ -26,32 +19,13 @@ export function contentFaceReadme(node: BaseNode): NodeReference | undefined {
   return { id: join(dirname(node.path), ENTRY_NAMES.readme) };
 }
 
-/** @deprecated Use contentFaceReadme */
-export const companionReadme = contentFaceReadme;
-
-export function isContentFaceReadme(
-  parent: BaseNode,
-  reference: NodeReference,
-): boolean {
-  return (
-    contentFaceReadme(parent)?.id === reference.id &&
-    !parent.children.some((child) => child.id === reference.id)
-  );
-}
-
-/** @deprecated Use isContentFaceReadme */
-export const isCompanionReadme = isContentFaceReadme;
-
 function expandedChildren(
   node: BaseNode,
   options: ScopeTraversalOptions,
 ): readonly NodeReference[] {
-  const own = options.localOnly
+  return options.localOnly
     ? (node.localChildren ?? node.children)
     : node.children;
-  if (!options.includeContentFace) return own;
-  const face = contentFaceReadme(node);
-  return face ? [...own, face] : own;
 }
 
 export interface NodeQueryOptions extends ScopeTraversalOptions {
@@ -88,8 +62,8 @@ export async function* traverse(
         const target = resolve(node, reference);
         if (target === undefined) continue;
         if (active.has(target)) {
-          // README harness → AGENTS and write-path content-face edges are dual links, not cycles.
-          if (reference === harness || isContentFaceReadme(node, reference)) continue;
+          // README harness → AGENTS is a dual link, not a composition cycle.
+          if (reference === harness) continue;
           throw new Error(`Composition cycle: ${target}`);
         }
         if (!seen.has(target))
