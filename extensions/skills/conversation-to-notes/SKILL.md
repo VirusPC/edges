@@ -4,7 +4,7 @@ description: >-
   将原始对话整理为可独立阅读的中文笔记（记录 + 复盘）：背景/主题/过程/结果/所学/行动指南/补充说明。
   主题=一段主题+难点列表；凡写做什么须带可选项与不做原因；取舍在过程保留并在所学与行动指南补充。
   行动指南分主题层与细节若则。结果有未闭环项时逐点问清再交 conversation-to-tasks；必须保留原始材料引用。用户说整理/总结对话时使用；入库 VirusPC/edges notes/。
-version: 2.5.0
+version: 2.6.0
 ---
 
 将原始对话整理为结构清晰的中文笔记（**同时包含记录与复盘总结**）。
@@ -52,12 +52,12 @@ version: 2.5.0
 14. 输出必须为中文。
 15. **入库**（正文写作与审阅完成后）：
     - 入口：`notes/YYYY-MM-DD--主题简述/INDEX.md`（选定 scope 下的 `notes/`）。
-    - 有 shell 时交给 `edges --scope <目录> note create --title "主题简述" --content-file /absolute/reviewed-note.md --markdown --co-author "助手名 <email>"`。子命令是 `note create`。完整 Markdown 已由本 skill 写好，CLI 不再改标题、套模板或整理正文；frontmatter 仍正常解析/序列化，不保证 YAML 样式或注释保真。Git / PR 按 `edges-note` 的 `--mode direct|pr`（或 `EDGES_MODE`）；`--dry-run` 仍会本地 commit。不要自己 `git commit`，也不要传已删除的 `--format` / `--resources` / `--index-group`。
+    - 有 shell 时交给 `edges --scope <目录> notes create --title "主题简述" --content-file /absolute/reviewed-note.md --markdown --co-author "助手名 <email>"`。子命令是 `notes create`。完整 Markdown 已由本 skill 写好，CLI 不再改标题、套模板或整理正文；frontmatter 仍正常解析/序列化，不保证 YAML 样式或注释保真。Git / PR 按 `edges-note` 的 `--mode direct|pr`（或 `EDGES_MODE`）；`--dry-run` 仍会本地 commit。不要自己 `git commit`，也不要传已删除的 `--format` / `--resources` / `--index-group`。
     - 有图片等资源时，先把入口和仅属于本篇的资源放进一个目录，再用 `--import-entry /absolute/note/INDEX.md`（与 `--content-file` / `--markdown` 互斥）。正文用相对路径引用这些资源。不要复制任意输入文件的全部邻居；不批量转换旧笔记。
     - 仓：`VirusPC/edges`（私密 → `edges-private`）。CLI 在 `extensions/cli`。
     - 大范围代码改动仍走 Cursor cloud agent
     - 公开库先脱敏（无 Tailscale `100.x`、凭证、授权链接等）
-    - 若随后把遗留项开成看板任务，看板文件进受保护的 `main` 必须开 PR，不要直推。笔记本身的 Git 模式仍由 `note create` 决定。
+    - 若随后把遗留项开成看板任务，看板文件进受保护的 `main` 必须开 PR，不要直推。笔记本身的 Git 模式仍由 `notes create` 决定。
 16. **遗留项 → 任务**：若「结果」中仍有未闭环事项，整理入库后不要默默结束。默认按优先级一次挑 1～2 条，向用户逐点问清（至少能写清背景与目标），再调用 `conversation-to-tasks` 成文开卡；问完落库后再问下一批，避免一次烤光。用户明确说「先不转任务」则可跳过。
 17. 旧笔记不强制回写。
 18. 落盘前可对照 edges 项目记忆（如 `project_conversation_notes_plain_rich_human_review`）；冲突以本 skill + CONTEXT/ADR 为准。
