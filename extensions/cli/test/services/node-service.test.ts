@@ -424,7 +424,9 @@ test('query defers reads and find closes before hit children or later siblings',
   write('branch/hit/AGENTS.md', '---\ncategory: hit\n---\n' + index('- [missing](missing/AGENTS.md)'));
   const hit = await pending.find(node => node.metadata?.category === 'hit').value();
   assert.equal(hit?.path, path.join(root, 'branch/hit/AGENTS.md'));
-  await assert.rejects(pending.toArray().value(), /Missing referenced node/);
+  const all = await pending.toArray().value();
+  assert.ok(all.some(node => node.path === path.join(root, 'branch/hit/AGENTS.md')));
+  assert.ok(!all.some(node => node.path.endsWith(`${path.sep}missing${path.sep}AGENTS.md`)));
 });
 test('typed queries keep internal navigation, skip unrelated bodies and preserve harness discovery', async t => {
   const { root, write, service } = fixture(t);
@@ -476,7 +478,8 @@ test('global query omits out-of-root references and linked installations while m
   fs.symlinkSync(outside,file('installed'));
   assert.equal((await service.query(root,{includeHarness:true}).value()).length,1);
   write('AGENTS.md',index('- [missing](missing/AGENTS.md)'));
-  await assert.rejects(new NodeService({managedRoot: root}).query(root,{includeHarness:true}).value(),/Missing referenced node/);
+  const skipped = await new NodeService({managedRoot: root}).query(root,{includeHarness:true}).value();
+  assert.deepEqual(skipped.map(node => node.path), [path.join(root, 'AGENTS.md')]);
 });
 
 test('typed navigation through a readonly leaf retains readonly origin for its harness children', async t => {
