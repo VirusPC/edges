@@ -38,5 +38,5 @@ format: ordinary
 - [traverse 不兼容 includeDescendants](<feedback_no_include_descendants_compat/INDEX.md>) — 改 traverse / NodeService.query 选项时：不要再接受 includeDescendants；只要本层用 localOnly: true；默认仍是全部 children。
 - [CLI 默认只做系统二操作](<feedback_cli_is_system_two_ops/INDEX.md>) — 改 traverse 双文件并边、scope 根或 tasks 查询入口时：真 AGENTS 默认只做该系统的系统二；要内容面走 SuperAgentsNode（见 feedback\_content\_via\_super\_agents\_node），不要从真 AGENTS 并 README。
 - [系统一内容经 SuperAgentsNode 当虚拟系统二](<feedback_content_via_super_agents_node/INDEX.md>) — 改 traverse/\-\-super/tasks 查询时：真 AGENTS 只逛系统二；内容面用 SuperAgentsNode；无 includeContentFace/companion 兼容；Task 板 dual\-face；写路径 README 另起根。
-- [traverse 单系统；scope 内 harness 根与仓库级 Super](<feedback_traverse_single_system_and_forest_roots/INDEX.md>) — 改 traverse、系统森林发现或 SuperAgentsNode 时：traverse 只走单系统 children；scope 内带 project\-harness 的 AGENTS 皆为根；仓库可视为 .harness 并向上建虚拟 Super。
+- [traverse 单系统；scope 内 harness 根与仓库级 Super](<feedback_traverse_single_system_and_forest_roots/INDEX.md>) — 改 traverse、系统森林发现或 SuperAgentsNode 时：traverse 只走单系统 children；scope 内带 project\-harness 的 AGENTS 皆为根；仓库可视为 .harness 并向上建虚拟 Super；森林有两种交出形式。
 <!-- project-entries-local:end -->
