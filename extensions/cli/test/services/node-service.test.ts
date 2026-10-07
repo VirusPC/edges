@@ -189,7 +189,7 @@ test("local traversal supports cross-layer discovery and skips descendants befor
     ].map(file),
   );
   await assert.rejects(
-    service.list(root, { includeDescendants: true }),
+    service.list(root, {}),
     /Missing/,
   );
   await assert.rejects(service.list(file("absent")), /Missing/);
@@ -628,7 +628,7 @@ test('generic query supports all types and explicit task-only deferred execution
   await service.create(new AgentsNode(path.join(root, 'AGENTS.md')), {});
   await service.create(new NoteNode(note), { body: '# Note\n' }, { indexGroup: 'local' });
   let seen = 0;
-  const all = service.query(root, { includeDescendants: true, includeHarness: true })
+  const all = service.query(root, { includeHarness: true })
     .map(node => { seen += 1; return node; }).groupBy(node => node.type)
     .mapValues(nodes => nodes.length);
   assert.equal(seen, 0);
@@ -638,9 +638,9 @@ test('generic query supports all types and explicit task-only deferred execution
   // A fresh Service observes disk changes without a cached body masking type filtering.
   const fresh = new NodeService({ managedRoot: root });
   assert.deepEqual(await fresh.query(root, {
-    types: ['task'], includeDescendants: true, includeHarness: true,
+    types: ['task'], includeHarness: true,
   }).value(), []);
   await assert.rejects(new NodeService({ managedRoot: root }).query(root, {
-    includeDescendants: true, includeHarness: true,
+    includeHarness: true,
   }).value());
 });

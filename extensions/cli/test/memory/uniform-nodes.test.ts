@@ -264,9 +264,7 @@ test("Doctor repairs an adopted child missing AGENTS and its missing registratio
   assert.deepEqual(result.remaining, []);
   assert.equal(isScope(child), true);
   const node = (
-    await new NodeService({ managedRoot: root }).list(root, {
-      includeDescendants: true,
-    })
+    await new NodeService({ managedRoot: root }).list(root)
   )[0]!;
   assert.ok(
     node.descendantChildren.some(

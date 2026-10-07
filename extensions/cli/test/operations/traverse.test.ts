@@ -31,7 +31,7 @@ test('single-root preorder defaults to all children; localOnly narrows; harness 
   const {run} = graph([root, child, a, b, maintenance]);
   assert.deepEqual(await collect(run(root)), [root, child, a, b]);
   assert.deepEqual(await collect(run(root, {localOnly: true})), [root, child, a]);
-  assert.deepEqual(await collect(run(root, {includeDescendants: false})), [root, child, a]);
+  assert.deepEqual(await collect(run(root, {localOnly: true})), [root, child, a]);
   assert.deepEqual(await collect(run(root, {includeHarness: true})), [root, child, a, b, maintenance]);
   assert.deepEqual(await collect(run(root, {localOnly: true, includeHarness: true})), [root, child, a, maintenance]);
 });

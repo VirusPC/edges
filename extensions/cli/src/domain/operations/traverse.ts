@@ -7,8 +7,6 @@ import { validateChild } from "../models/core/relations.js";
 export interface ScopeTraversalOptions {
   /** When true, expand only localChildren. Default false: local ∪ descendants. */
   localOnly?: boolean;
-  /** @deprecated Prefer localOnly. Default true; false is equivalent to localOnly. */
-  includeDescendants?: boolean;
   includeHarness?: boolean;
   /** Explicit `--super`: root traversal at a runtime SuperAgentsNode over the Edges root README.md. */
   super?: boolean;
@@ -40,8 +38,9 @@ function expandedChildren(
   node: BaseNode,
   options: ScopeTraversalOptions,
 ): readonly NodeReference[] {
-  const localOnly = options.localOnly ?? options.includeDescendants === false;
-  const own = localOnly ? (node.localChildren ?? node.children) : node.children;
+  const own = options.localOnly
+    ? (node.localChildren ?? node.children)
+    : node.children;
   const companion = companionReadme(node);
   return companion ? [...own, companion] : own;
 }

@@ -135,7 +135,7 @@ test('move saves affected parents, loaded descendants and referrers but leaves u
   // Capture attachments in a fresh service before moving a directory unit.
   fs.writeFileSync(path.join(child.directoryPath, 'run.log'), 'run');
   const moving = new NodeService({ managedRoot: root });
-  const nodes = await moving.list(root, { includeDescendants: true });
+  const nodes = await moving.list(root, {});
   const at = (p: string) => nodes.find(n => n.path === p)!;
   const movedBranch = at(branch.path), movedChild = at(child.path), a = at(from.path), b = at(to.path), r = at(ref.path), u = at(unrelated.path);
   for (const n of [movedBranch, movedChild, a, b, r, u]) n.description = 'pending';

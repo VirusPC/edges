@@ -201,7 +201,7 @@ for (const operation of ["move", "destroy"] as const) {
         assert.equal(saved.metadata?.pending, true);
         assert.match(saved.body, /Pending prose/);
       }
-      await fresh.list(file(""), { includeDescendants: true });
+      await fresh.list(file(""), {});
       assert.equal(fs.readFileSync(unrelated.path, "utf8"), unrelatedSource);
       assert.equal(unrelated.body, "Pending unrelated\n");
     });
@@ -222,7 +222,7 @@ test("move persists a destination parent's pending registration", async (t) => {
   assert.equal(saved.children[0]?.id, target);
   assert.equal(saved.children[0]?.name, "Pending label");
   assert.deepEqual(saved.constraints, ["Pending destination"]);
-  await fresh.list(file(""), { includeDescendants: true });
+  await fresh.list(file(""), {});
 });
 
 

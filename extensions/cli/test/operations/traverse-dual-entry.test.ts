@@ -56,14 +56,6 @@ test("localOnly skips descendant group", async () => {
   assert.ok(!paths.includes(nestedAgents.path));
 });
 
-test("includeDescendants:false maps to localOnly", async () => {
-  const nestedAgents = agents("scope/nested");
-  const root = agents("scope", [], [nestedAgents]);
-  const { run } = graph([root, nestedAgents]);
-  assert.ok(!(await run(root, { includeDescendants: false })).includes(nestedAgents.path));
-  assert.ok((await run(root, { includeDescendants: true })).includes(nestedAgents.path));
-});
-
 test("README local/descendants honour localOnly", async () => {
   const tasksReadme = readme("scope/tasks");
   const lowerReadme = readme("scope/lower");

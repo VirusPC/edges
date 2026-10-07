@@ -682,9 +682,7 @@ for (const [spelling, href] of [
       ].sort();
       const list = async () =>
         (
-          await new NodeService({ managedRoot: f.root }).list(f.root, {
-            includeDescendants: true,
-          })
+          await new NodeService({ managedRoot: f.root }).list(f.root)
         )
           .map((node) => node.path)
           .sort();

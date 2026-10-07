@@ -35,4 +35,5 @@ format: ordinary
 - [系统入口由用户对目录 init，不按路径禁配](<feedback_harness_markers_not_task_project_indexes/INDEX.md>) — 改任意目录上的 AGENTS.md 时：系统入口由用户自行 init 决定，不按路径白名单禁配；未 init 勿伪造。配套 project harness init skill 待办。
 
 - [grill 与设计讨论必须当轮 remember](<feedback_grill_must_remember_settlements/INDEX.md>) — 做节点模型/系统二设计讨论或 grill 时：用户确认的取舍与纠正当轮用 edges memory remember 落库；不能只改 CONTEXT 或留在对话里。翻案则更新同一 slug。
+- [traverse 不兼容 includeDescendants](<feedback_no_include_descendants_compat/INDEX.md>) — 改 traverse / NodeService.query 选项时：不要再接受 includeDescendants；只要本层用 localOnly: true；默认仍是全部 children。
 <!-- project-entries-local:end -->
