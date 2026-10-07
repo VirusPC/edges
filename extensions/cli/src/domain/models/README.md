@@ -19,13 +19,20 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 
 ```mermaid
 flowchart TB
-  subgraph personal["个人视角 — 显式 --super"]
-    S["SuperAgentsNode<br/>虚拟根 · 当普通 Agents"] --> M["harness-materials.json<br/>材料 README 挂载"]
+  CFG["domain/config/harness-materials.json<br/>materials id + path"]
+  CFG --> SUPER["SuperAgentsNode<br/>挂存在的材料 README"]
+  SCAN["collectSystemRoots<br/>扫盘认 project-harness AGENTS"] --> SFS
+  SUPER --> SFS["SystemForestService<br/>BaseNode[][]"]
+  TRAV["traverse<br/>只跑单系统 children"] --> SFS
+  SFS -->|"independent: resolve 遇其它根早停"| OUT["edges forest list / review"]
+  SFS -->|"innermost: 可达则丢外层"| OUT
+
+  subgraph single["单系统（一次 traverse）"]
+    A["AGENTS.md 系统二"] --> H[".harness 材料 / 下层 AGENTS"]
+    R["同目录 README 系统一"] --> T["tasks / notes …"]
   end
-  subgraph repo["仓库 = 个人的系统二"]
-    A["仓根 AGENTS.md"] --> H[".harness / 下层 AGENTS"]
-  end
-  S -. "收根/森林在 traverse 外" .- A
+  A -. "不并边" .- R
+  SUPER -. "不挂其它系统 AGENTS" .- A
 ```
 
 查询：真 AGENTS 不到 README；换根用 `--super`。写路径把同目录 README 另起根闭合引用图。traverse / 森林原则见 [operations README](../operations/README.md)。
