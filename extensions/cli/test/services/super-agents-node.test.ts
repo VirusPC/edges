@@ -68,15 +68,18 @@ test("--super with no materials mounts empty SuperAgentsNode", async () => {
   assert.deepEqual(nodes[0]!.children, []);
 });
 
-test("super mounts configured README materials under .harness, not root AGENTS", async (t) => {
+test("super treats the scope directory as its harness and does not mount the scope's own .harness", async (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "super-m-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
+  fs.mkdirSync(path.join(root, "tasks"), { recursive: true });
   fs.writeFileSync(path.join(root, "AGENTS.md"), "# Scope\n");
-  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# Tasks\n");
+  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# Maintenance\n");
+  fs.writeFileSync(path.join(root, "tasks/README.md"), "# Content\n");
   const service = new NodeService({ managedRoot: root });
   const nodes = await service.list(root, { super: true });
   const rel = nodes.map((n) => path.relative(root, n.path));
-  assert.ok(rel.some((p) => p === path.join(".harness", "tasks", "README.md")));
+  assert.ok(rel.includes(path.join("tasks", "README.md")));
+  assert.ok(!rel.includes(path.join(".harness", "tasks", "README.md")));
   assert.ok(!rel.includes("AGENTS.md"));
 });

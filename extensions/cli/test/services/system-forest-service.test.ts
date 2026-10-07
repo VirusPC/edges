@@ -35,7 +35,9 @@ function fixture(t: { after(fn: () => void): void }) {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "forest-svc-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
-  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# Tasks\n");
+  fs.mkdirSync(path.join(root, "tasks"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# Maintenance\n");
+  fs.writeFileSync(path.join(root, "tasks/README.md"), "# Content\n");
   const outer = writeAgents(root, "AGENTS.md", ["inner/AGENTS.md"]);
   const inner = writeAgents(root, "inner/AGENTS.md");
   return { root, outer, inner };
@@ -67,7 +69,10 @@ test("Super root mounts materials, not scope AGENTS", async (t) => {
   const superTree = forest.find((tree) => tree[0] instanceof SuperAgentsNode)!;
   assert.ok(superTree);
   assert.ok(
-    superTree.some((n) => n.path === path.join(root, ".harness/tasks/README.md")),
+    superTree.some((n) => n.path === path.join(root, "tasks/README.md")),
+  );
+  assert.ok(
+    !superTree.some((n) => n.path === path.join(root, ".harness/tasks/README.md")),
   );
   assert.ok(!superTree.slice(1).some((n) => n.path === outer));
 });

@@ -44,7 +44,10 @@ export function loadHarnessMaterialsConfig(): HarnessMaterialsConfig {
   return { materials };
 }
 
-/** Harness root for a scope: `<scope>/.harness` when that directory exists, else `scopeDir`. */
+/**
+ * This scope's own maintenance directory: `<scope>/.harness` when it exists.
+ * A super node does not use this. The scope directory is already that node's harness.
+ */
 export function harnessRootForScope(scopeDir: string): string {
   const harness = join(scopeDir, ".harness");
   return existsSync(harness) ? harness : scopeDir;
@@ -59,7 +62,7 @@ export function resolveHarnessMaterial(
   if (!material) {
     throw new Error(`Unknown harness material id: ${id}`);
   }
-  const absPath = join(harnessRootForScope(scopeDir), material.path);
+  const absPath = join(scopeDir, material.path);
   if (existsSync(absPath)) {
     return { absPath, material };
   }
@@ -69,7 +72,7 @@ export function resolveHarnessMaterial(
   throw new Error(`Required harness material missing: ${id} (expected ${absPath})`);
 }
 
-/** Absolute paths for materials that currently exist under the scope harness root. */
+/** Materials at scope + configured path. For a super node, that scope directory is the harness. */
 export function listHarnessMaterialAbsPaths(scopeDir: string): { id: string; absPath: string }[] {
   const cfg = loadHarnessMaterialsConfig();
   const out: { id: string; absPath: string }[] = [];
