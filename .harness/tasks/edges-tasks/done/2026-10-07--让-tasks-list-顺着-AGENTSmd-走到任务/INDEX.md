@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: edges-tasks
-  edges-updated-at: '2026-10-07T11:14:00.709Z'
+  edges-updated-at: '2026-10-07T14:02:54.007Z'
   edges-title: 让 tasks list 顺着 AGENTS.md 走到任务
-  edges-tasks-status: in_progress
+  edges-tasks-status: done
   edges-task-priority: high
 name: tasks_list_agents_md
 description: 仓库根 tasks list 应列出 AGENTS.md 指向的 .harness/tasks 任务；--all 的森林里也要有这些任务节点。
@@ -19,6 +19,6 @@ description: 仓库根 tasks list 应列出 AGENTS.md 指向的 .harness/tasks �
 仓库根 `tasks list` 列出 `AGENTS.md` 指向的 `.harness/tasks` 里的任务；`--all` 的森林里这些任务节点也在。
 
 **完成标准：**
-- [ ] `edges --scope <仓库根> tasks list` 列出 `.harness/tasks` 里、由 `AGENTS.md` children 走到的任务
-- [ ] `edges --scope <仓库根> --super tasks list` 仍只列出 `<仓库根>/tasks` 上的领域任务
-- [ ] `edges --scope <仓库根> --all tasks list` 走森林，结果里包含各系统 `AGENTS.md` 下的任务节点，而不是因为树上没有任务而得到 0
+- [x] `edges --scope <仓库根> tasks list` 列出 `.harness/tasks` 里、由 `AGENTS.md` children 走到的任务
+- [x] `edges --scope <仓库根> --super tasks list` 仍只列出 `<仓库根>/tasks` 上的领域任务
+- [x] `edges --scope <仓库根> --all tasks list` 走森林，结果里包含各系统 `AGENTS.md` 下的任务节点，而不是因为树上没有任务而得到 0
