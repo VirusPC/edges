@@ -7,7 +7,7 @@ import {
   type TaskStatus,
 } from "../../domain/models/tasks/types.js";
 import { runTasksCommand, succeed } from "./run.js";
-import { createTask } from "../../services/tasks/write.js";
+import { createTask } from "../../services/tasks/service.js";
 
 const CREATE_AFTER_HELP = `
 FLAGS

@@ -1,5 +1,5 @@
 import type { CliContext, CliResult } from "../../context.js";
-import { asTasksError, openTasksRuntime } from "../../services/tasks/result.js";
+import { asTasksError, openTasksRuntime } from "../../services/tasks/service.js";
 import { fail, succeed } from "../result.js";
 
 export { succeed };

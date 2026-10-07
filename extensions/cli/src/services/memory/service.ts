@@ -30,3 +30,12 @@ export function prepareMemoryWrite(target: string, file: string): string {
   if (spec) ensureLayerTypeGitignore(target, spec.name, [file]);
   return file;
 }
+
+export { initMemory } from "./init.js";
+export { rememberMemory } from "./remember.js";
+export { addMemoryType } from "./add-type.js";
+export { doctorMemory } from "./doctor.js";
+export { listMemoryEntries, getMemoryEntry, deleteMemoryEntry } from "./records.js";
+export { backupUserMemory, restoreUserMemory } from "./archive.js";
+export { migrateMemory } from "./migrate.js";
+export { resolveScope } from "../scope.js";

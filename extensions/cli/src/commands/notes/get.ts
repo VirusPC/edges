@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { getDatedLeaf, NOTE_LEAF } from "../../services/node/dated-leaf.js";
+import { getNote } from "../../services/notes/service.js";
 import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
 
@@ -13,7 +13,7 @@ export function addNoteGetCommand(note: Command, ctx: CliContext): void {
     .argument("<path>", "notes/<stem>/INDEX.md")
     .action(async (entryPath: string) => {
       try {
-        const loaded = await getDatedLeaf(ctx.env, NOTE_LEAF, entryPath);
+        const loaded = await getNote(ctx.env, entryPath);
         ctx.result = succeed({
           command: "notes.get",
           path: loaded.path,

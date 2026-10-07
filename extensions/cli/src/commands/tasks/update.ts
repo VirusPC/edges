@@ -2,7 +2,7 @@ import { Command, Option } from "commander";
 import type { CliContext } from "../../context.js";
 import { TASK_PRIORITIES, type TaskPriority } from "../../domain/models/tasks/types.js";
 import { runTasksCommand, succeed } from "./run.js";
-import { updateTask } from "../../services/tasks/write.js";
+import { updateTask } from "../../services/tasks/service.js";
 
 const UPDATE_AFTER_HELP = `
 ARGUMENTS

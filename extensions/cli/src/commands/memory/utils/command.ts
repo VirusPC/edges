@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import type { CliContext } from '../../../context.js';
-import { resolveScope } from '../../../services/scope.js';
+import { resolveScope } from '../../../services/memory/service.js';
 import { fail, succeed } from '../../result.js';
 
 export type TargetOptions = { targetDir?: string };

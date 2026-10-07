@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { deleteDatedLeaf, PROJECT_LEAF } from "../../services/node/dated-leaf.js";
+import { deleteProject } from "../../services/projects/service.js";
 import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
 
@@ -13,7 +13,7 @@ export function addProjectDeleteCommand(project: Command, ctx: CliContext): void
     .argument("<path>", "projects/<stem>/INDEX.md")
     .action(async (entryPath: string) => {
       try {
-        const removed = await deleteDatedLeaf(ctx.env, PROJECT_LEAF, entryPath);
+        const removed = await deleteProject(ctx.env, entryPath);
         ctx.result = succeed({ command: "projects.delete", path: removed.path });
       } catch (error) {
         failNodeCommand(ctx, error, HELP);

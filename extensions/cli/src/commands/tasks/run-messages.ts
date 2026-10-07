@@ -1,8 +1,7 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../../context.js";
-import { formatRunMessagesTable } from "../../services/tasks/format.js";
+import { findRun, formatRunMessagesTable } from "../../services/tasks/service.js";
 import { runTasksCommand, succeed } from "./run.js";
-import { findRun } from "../../services/tasks/service.js";
 
 const RUN_MESSAGES_AFTER_HELP = `
 ARGUMENTS

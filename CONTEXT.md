@@ -201,8 +201,8 @@ _避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成�
 _避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
 
 **NodeService**：
-节点读写与组成登记的门面。内容叶子的创建、读取、更新与删除都经它完成。
-_避免使用_：records 旁路、扫盘后直接改叶子或父索引
+节点读写与组成登记的门面。内容叶子的创建、读取、更新与删除都经它完成。commands 不直接装配它，只调用该领域的 `services/<module>/service.ts`；主文件可以 re-export 已有实现。
+_避免使用_：records 旁路、扫盘后直接改叶子或父索引、commands 直接 `new NodeService` 或调用 `dated-leaf`
 
 **House CLI surface（标准 CRUD 旗标）**：
 全仓 `list` / `get` / `create` / `update` / `delete` 共用的旗标形状。已用于 notes、skills 与 projects；README / 组织列表、memory、tasks 以后照此跟随。

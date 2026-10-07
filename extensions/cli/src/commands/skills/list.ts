@@ -1,7 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { presentListed } from "../../services/list-query.js";
-import { listSkills } from "../../services/skills/service.js";
+import { listSkills, presentListed } from "../../services/skills/service.js";
 import { collectRepeat } from "../metadata.js";
 import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";

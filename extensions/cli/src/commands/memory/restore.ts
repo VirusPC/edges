@@ -1,8 +1,7 @@
 import { Command } from 'commander';
 import type { CliContext } from '../../context.js';
-import { restoreUserMemory } from '../../services/memory/archive.js';
+import { resolveScope, restoreUserMemory } from '../../services/memory/service.js';
 import { operation } from './utils/command.js';
-import { resolveScope } from '../../services/scope.js';
 
 export function addMemoryRestoreCommand(memory: Command, ctx: CliContext): void {
   memory.command('restore').description('Restore a validated user-memory archive')

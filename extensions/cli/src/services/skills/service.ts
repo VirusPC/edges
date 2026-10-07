@@ -7,6 +7,8 @@ import { openNodeSession, scopeRelativePath } from "../node/scope-session.js";
 import { buildSystemForest } from "../node/system-forest-service.js";
 import type { NodeService } from "../node/node-service.js";
 
+export { presentListed } from "../list-query.js";
+
 export type SkillReach = {
   all?: boolean;
   super?: boolean;

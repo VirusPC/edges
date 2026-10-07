@@ -1,7 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { listDatedLeaves, NOTE_LEAF } from "../../services/node/dated-leaf.js";
-import { presentListed } from "../../services/list-query.js";
+import { listNotes, presentListed } from "../../services/notes/service.js";
 import { collectRepeat } from "../metadata.js";
 import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
@@ -16,7 +15,7 @@ export function addNoteListCommand(note: Command, ctx: CliContext): void {
     .option("--group-by <field>", "Group filtered notes by one field")
     .action(async (opts: { filter?: string[]; groupBy?: string }) => {
       try {
-        const items = await listDatedLeaves(ctx.env, NOTE_LEAF, { all: ctx.all, super: ctx.super });
+        const items = await listNotes(ctx.env, { all: ctx.all, super: ctx.super });
         ctx.result = succeed(presentListed("notes.list", items, opts));
       } catch (error) {
         failNodeCommand(ctx, error, HELP);

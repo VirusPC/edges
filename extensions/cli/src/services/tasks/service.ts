@@ -35,3 +35,17 @@ export async function findRun(
   }
   return { run, messages: messagesForRun(parsed, resolved.runId) };
 }
+
+export { createTask, updateTask } from "./write.js";
+export { createProject, getProject, updateProject } from "./project-meta.js";
+export { renderReviewPageFromText } from "./review-page.js";
+export { asTasksError, openTasksRuntime } from "./result.js";
+export { formatRunsTable, formatRunMessagesTable } from "./format.js";
+export { parseRunLog };
+export { isTaskStatus, subjectTaskBoard } from "./paths.js";
+export { moveTaskStatus } from "./move.js";
+export { listTaskNodes } from "./node-query.js";
+export { gitRoot } from "../scope.js";
+export { NodeService } from "../node/node-service.js";
+export { buildSystemForest } from "../node/system-forest-service.js";
+export { groupRecords, matchesFilters, parseFieldFilter, type FieldFilter } from "../list-query.js";

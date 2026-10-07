@@ -9,7 +9,7 @@ export function addMemoryMigrateCommand(memory: Command, ctx: CliContext): void 
     .option('--dry-run', 'Report the migration without changing files')
     .action((options: TargetOptions & { rootDir?: string; recursive?: boolean; dryRun?: boolean }) =>
       operation(ctx, async () => {
-        const { migrateMemory } = await import('../../services/memory/migrate.js');
+        const { migrateMemory } = await import('../../services/memory/service.js');
         return migrateMemory({ ...options, targetDir: target(options, ctx) });
       }));
 }

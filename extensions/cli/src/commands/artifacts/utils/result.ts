@@ -3,7 +3,7 @@ import { exitCodeForErrorCode } from "../../exit.js";
 import {
   ArtifactsError,
   type ArtifactsErrorCode,
-} from "../../../services/artifacts/error.js";
+} from "../../../services/artifacts/service.js";
 
 export { ArtifactsError, type ArtifactsErrorCode };
 

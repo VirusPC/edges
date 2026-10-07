@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { PROJECT_LEAF, updateDatedLeaf } from "../../services/node/dated-leaf.js";
+import { updateProject } from "../../services/projects/service.js";
 import { collectRepeat } from "../metadata.js";
 import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
@@ -17,7 +17,7 @@ export function addProjectUpdateCommand(project: Command, ctx: CliContext): void
     .option("--metadata <key=value>", "Repeatable frontmatter field", collectRepeat, [])
     .action(async (entryPath: string, opts: { title?: string; body?: string; metadata?: string[] }) => {
       try {
-        const updated = await updateDatedLeaf(ctx.env, PROJECT_LEAF, entryPath, {
+        const updated = await updateProject(ctx.env, entryPath, {
           title: opts.title,
           body: opts.body,
           metadata: opts.metadata,

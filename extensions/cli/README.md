@@ -51,15 +51,21 @@ flowchart TD
 
 | 层 | 负责什么 | 例子 |
 | --- | --- | --- |
-| commands | 命令注册、参数与 stdin 适配、stdout/stderr 和退出码 | 把 `tasks create` 转成创建请求 |
-| services | 加载、跨节点协调、文件操作与完整业务流程 | 创建 Task 后登记父 AGENTS、保存、移动整个任务目录 |
+| commands | 命令注册、参数与 stdin 适配、stdout/stderr 和退出码 | 把 `notes create` 转成 `services/notes/service` 的创建请求 |
+| services | 加载、跨节点协调、文件操作与完整业务流程 | 各领域 `service.ts`；创建 Task 后登记父 AGENTS、保存、移动整个任务目录 |
 | models | 节点自身的字段、校验、解析序列化和索引编辑 | Task 优先级校验、InternalNode.addChild |
 | operations | 对多个元素进行遍历、筛选、分组、查找 | traverse、filter、groupBy、Task 数组排序 |
 | utils | 可复用的底层格式与文件机制 | gray-matter 适配、路径与文件原语 |
 
 Model 的 create/update/destroy 是内存领域方法；创建目录、保存文档等完整动作通过 Service 完成。operations 通过回调取得加载能力，不反向依赖 Service。不要让业务调用方重新拼装模型修改与文件读写。
 
-这张图表达职责边界，不代表所有历史代码都已整理完：Tasks 的结果适配仍引用 CliContext，审阅页命令还有流程编排，Artifacts 的部分部署逻辑仍在 commands 下。进一步解耦已登记为[后续任务](../../.harness/tasks/edges-cli-platform/backlog/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md)，不能把当前 commands 全部描述成“只调用 Service”。
+每个领域模块有 `services/<module>/service.ts`。commands 只从这份主文件进入，不直接装配 `NodeService`，也不直接 import 模块里的其他文件。实现可以留在原文件，主文件 re-export 即可，不必为了统一入口把函数搬一遍。notes 与 projects 的主文件固定各自的叶子规格，再委托共用底层。
+
+这些是跨领域工具，不另造 `service.ts`：`services/node/`（`node-service.ts`、`scope-session.ts`，以及带日期 `INDEX.md` 叶子的 `dated-leaf.ts`）、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts`。命令要用其中的符号时，由该领域的 `service.ts` 再导出。进程入口 `program.ts` 在分发命令前直接取 `services/node/node-lock.ts` 的写锁，这不是某个领域命令。
+
+notes、projects、skills、memory、tasks、artifacts、forest 的 commands 都只调用各自的 `service.ts`。tasks 的 list 与审阅页、artifacts server 的安装和进程命令，仍在 command 动作里按原顺序调用这些已导出的函数；调用点收口了，流程本身没有改写。
+
+[解耦 CLI commands 与 Service](../../.harness/tasks/edges-cli-platform/done/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md) 记录了这层入口约定。`services/tasks/result.ts` 仍组装命令运行时（地点、读写和时钟），审阅页命令仍负责读输入、选输出路径和写 HTML。
 
 详细设计按职责分开阅读：
 

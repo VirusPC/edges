@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../../context.js";
-import { createProject } from "../../../services/tasks/project-meta.js";
+import { createProject } from "../../../services/tasks/service.js";
 import { runTasksCommand, succeed } from "../run.js";
 
 export function addProjectCreateCommand(project: Command, ctx: CliContext): void {

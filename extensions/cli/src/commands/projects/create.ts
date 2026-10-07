@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { createDatedLeaf, PROJECT_LEAF } from "../../services/node/dated-leaf.js";
+import { createProject } from "../../services/projects/service.js";
 import { collectRepeat } from "../metadata.js";
 import { failNodeCommand } from "../node-result.js";
 import { succeed } from "../result.js";
@@ -17,7 +17,7 @@ export function addProjectCreateCommand(project: Command, ctx: CliContext): void
     .option("--json", "Write JSON to stdout (always on)")
     .action(async (opts: { title?: string; body?: string; metadata?: string[] }) => {
       try {
-        const created = await createDatedLeaf(ctx.env, PROJECT_LEAF, {
+        const created = await createProject(ctx.env, {
           title: opts.title,
           body: opts.body,
           metadata: opts.metadata,
