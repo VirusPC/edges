@@ -111,6 +111,20 @@ groupBy 调用时不触发计算，但 value 执行后需要物化分组。先 f
 
 真源记忆：`feedback_traverse_single_system_and_forest_roots`。
 
+```mermaid
+flowchart LR
+  subgraph outside["森林在外"]
+    SCAN["collectSystemRoots"] --> ROOTS["根集合<br/>+ Super"]
+    ROOTS --> SFS["SystemForestService"]
+    SFS --> ARR["BaseNode[][]"]
+  end
+  subgraph inside["每次 traverse"]
+    T["单根 children"] --> STOP["excludeRoots 早停"]
+  end
+  SFS --> T
+  ARR --> CLI["edges forest list"]
+```
+
 ```ts
 traverse(
   roots,
