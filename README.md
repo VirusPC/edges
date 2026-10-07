@@ -223,7 +223,7 @@ pnpm test
 
 本仓库使用 [MIT License](LICENSE)。系统演进记录见 [`CHANGELOG.md`](CHANGELOG.md)。
 
-目录升级与本机私有材料迁移见[迁移指南](docs/recursive-layout-migration.md)。Task 命令默认操作选定作用域的 `.harness/tasks/`；领域任务显式传 `--purpose domain`，选择该作用域的 `tasks/`。根与子作用域遵循同一规则，读取和写入不会选择不同的默认板。`edges tasks list --all-scopes` 从所选作用域所在 Git 仓库根汇总两种用途及所有维护层级；无 Git 时以解析出的作用域为根。显式 `edges tasks --purpose maintenance list --all-scopes` 只筛用途，不缩小空间范围。全仓结果保留 `source.scope`、`source.purpose`、project、stem 与仓库相对入口 path，同名任务不会跨来源合并。
+目录升级与本机私有材料迁移见[迁移指南](docs/recursive-layout-migration.md)。Task 命令看主体系统：一般 `--scope` 写入该系统的 `.harness/tasks/`；`--scope <仓库根> --super` 建立虚拟系统一，写入 `<仓库根>/tasks/`。`--all` 从当前 scope 走森林。最全的一次查询是 `--scope <仓库根> --super --all`。
 
 <!-- project-entries-local:start -->
 ## 本层内容

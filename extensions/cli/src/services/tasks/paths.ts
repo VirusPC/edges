@@ -33,6 +33,16 @@ export function taskBoardLocation(
     ),
   };
 }
+
+/** Board of the subject system. Real systems use `<scope>/.harness/tasks`. `--super` is virtual system one, whose harness is the scope directory, so the board is `<scope>/tasks`. */
+export function subjectTaskBoard(scopeDir: string, options: { super?: boolean } = {}): TaskBoardLocation {
+  const virtual = options.super === true;
+  return {
+    scopeDir,
+    purpose: virtual ? "domain" : "maintenance",
+    boardDir: path.join(scopeDir, virtual ? "tasks" : ".harness/tasks"),
+  };
+}
 export function scopeDir(target: BoardTarget): string {
   return typeof target === "string" ? target : target.scopeDir;
 }

@@ -26,7 +26,7 @@ test("review-page renders classify JSON with a missing doc and a thin doc", asyn
   const dir = await mkdtemp(path.join(tmpdir(), "edges-classify-"));
   try {
     const out = path.join(dir, "out.html");
-    const result = await run(["tasks", "--index-group", "local", "project", "review-page", "--from", "-", "--out", out], {
+    const result = await run(["tasks", "project", "review-page", "--from", "-", "--out", out], {
       stdinText: JSON.stringify(classify),
     });
     assert.equal(result.exitCode, 0, result.stderr);

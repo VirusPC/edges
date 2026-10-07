@@ -1,4 +1,4 @@
-import { Command, Option } from "commander";
+import { Command } from "commander";
 import { type CliContext, usageError } from "../context.js";
 import { addCreateCommand } from "./tasks/create.js";
 import { addDeleteCommand } from "./tasks/delete.js";
@@ -9,15 +9,17 @@ import { addRunsCommand } from "./tasks/runs.js";
 import { addStatusCommand } from "./tasks/status.js";
 import { addProjectCommand } from "./tasks/project.js";
 import { addUpdateCommand } from "./tasks/update.js";
-import { DEFAULT_TASK_PURPOSE } from "../services/tasks/paths.js";
 
 const TASKS_AFTER_HELP = `
 TARGET
-  edges --scope <directory> tasks --purpose domain|maintenance ...
-  maintenance (default): <scope>/.harness/tasks; domain: <scope>/tasks
-  list --all-scopes: repository-wide, both purposes unless --purpose is explicit; includes all maintenance levels
+  edges --scope <directory> tasks ...
+  The subject system is that scope. Tasks are written to its .harness/tasks.
+  edges --scope <directory> --super tasks ...
+  --super makes the subject virtual system one. Its harness is the scope directory, so tasks are written to <directory>/tasks.
+  edges --scope <directory> --all tasks list
+  --all traverses the forest from that scope. The fullest query is --scope <repo> --super --all.
 COMMANDS
-  list [--all-scopes] [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
+  list [--status <edges-tasks-status>] [--priority <edges-task-priority>]... [--project <edges-task-project>]... [--sort priority] [--group-by project] [--format json]
   get <stem|path>
   create --title <title> [--description] [--body] [--status] [--name] [--assignee] [--priority] [--project]
   update <stem|path> [--title] [--description] [--body] [--assignee] [--priority] [--project]
@@ -46,8 +48,9 @@ Generic tasks Skill/MCP CRUD is a later backlog on this same contract.
 Capability Surface is CLI + Skill + MCP.
 
 EXAMPLES
-  edges tasks list --all-scopes
-  edges tasks --purpose domain list --all-scopes
+  edges --scope <directory> tasks list
+  edges --scope <directory> --super tasks list
+  edges --scope <directory> --all tasks list
   edges tasks list --status in_progress
   edges tasks get 2026-09-11--cli
   edges tasks runs 2026-09-11--cli --output json
@@ -58,13 +61,10 @@ export function addTasksCommand(program: Command, ctx: CliContext): void {
   const tasks = program
     .command("tasks")
     .description("Task board commands")
-    .addOption(new Option("--index-group <group>", "caller-selected group for a new owner index relation").choices(["local", "descendant"]))
-    .addOption(new Option("--purpose <purpose>", "domain tasks or scope maintenance tasks").choices(["domain", "maintenance"]).default(DEFAULT_TASK_PURPOSE))
     .allowExcessArguments(false)
     .showHelpAfterError(false)
     .helpOption("-h, --help", "Show this help");
 
-  tasks.hook("preAction", () => { ctx.purpose = tasks.opts().purpose; ctx.indexGroup = tasks.opts().indexGroup; });
   addListCommand(tasks, ctx);
   addGetCommand(tasks, ctx);
   addCreateCommand(tasks, ctx);

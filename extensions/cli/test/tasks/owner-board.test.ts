@@ -16,7 +16,7 @@ function fixture(t: { after(fn: () => void): void }) {
     const file = path.join(root, rel);
     fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, source);
   };
-  const call = (scope: string, purpose: string, args: string[]) => run(['--scope', path.join(root, scope), 'tasks', '--index-group', purpose === 'domain' ? 'descendant' : 'local', '--purpose', purpose, ...args], { env: {} });
+  const call = (scope: string, face: string, args: string[]) => run(['--scope', path.join(root, scope), ...(face === 'domain' ? ['--super'] : []), 'tasks', ...args], { env: {} });
   const read = (scope: string) => new AgentsNode(path.join(root, scope, 'AGENTS.md')).parse(fs.readFileSync(path.join(root, scope, 'AGENTS.md'), 'utf8'));
   return { root, write, call, read };
 }
@@ -36,7 +36,7 @@ test('CLI first projects and tasks connect existing root, child and content scop
     for (const purpose of ['maintenance', 'domain']) {
       const project = await call(scope, purpose, ['project', 'create', 'empty', '--title', 'Empty', '--description', 'No tasks yet']);
       assert.equal(project.exitCode, 0, project.stdout);
-      const globalEmpty = await run(['--scope', root, 'tasks', "--index-group", "local", 'list', '--all-scopes', '--group-by', 'project'], { env: {} });
+      const globalEmpty = await run(['--scope', root, '--all', 'tasks', 'list', '--group-by', 'project'], { env: {} });
       assert.equal(globalEmpty.exitCode, 0, globalEmpty.stdout);
       assert.equal(globalEmpty.exitCode, 0, globalEmpty.stdout);
       assert.equal(JSON.parse(globalEmpty.stdout).groupBy, "project");
@@ -47,7 +47,7 @@ test('CLI first projects and tasks connect existing root, child and content scop
       assert.equal(local.exitCode, 0, local.stdout); assert.equal(JSON.parse(local.stdout).tasks.length, 1);
     }
   }
-  const global = await run(['--scope', root, 'tasks', "--index-group", "local", 'list', '--all-scopes', '--group-by', 'project'], { env: {} });
+  const global = await run(['--scope', root, '--all', 'tasks', 'list', '--group-by', 'project'], { env: {} });
   assert.equal(global.exitCode, 0, global.stdout);
   const payload = JSON.parse(global.stdout);
   const items = payload.groups.flatMap((group: { items: Array<{ path: string }> }) => group.items);
@@ -95,7 +95,7 @@ test('fresh scope writes remain authorized without initializing Project Memory o
   }
   assert.ok(!fs.existsSync(path.join(root, 'AGENTS.md')));
   assert.ok(!fs.existsSync(path.join(root, '.harness/memory')));
-  const global = await run(['--scope', root, 'tasks', "--index-group", "local", 'list', '--all-scopes'], { env: {} });
+  const global = await run(['--scope', root, '--all', 'tasks', 'list'], { env: {} });
   assert.notEqual(global.exitCode, 0);
 });
 
@@ -110,7 +110,7 @@ test('first task creation registers both purposes without an earlier project com
     assert.equal(created.exitCode, 0, created.stdout);
     expected.push(path.join(scope, JSON.parse(created.stdout).path));
   }
-  const global = await run(['--scope', root, 'tasks', "--index-group", "local", 'list', '--all-scopes'], { env: {} });
+  const global = await run(['--scope', root, '--all', 'tasks', 'list'], { env: {} });
   assert.equal(global.exitCode, 0, global.stdout);
   assert.deepEqual(JSON.parse(global.stdout).tasks.map((x: any) => x.path).sort(), expected.sort());
   assert.equal(read('.').localChildren.length, 1);
@@ -141,11 +141,11 @@ test('unsafe owner indexes are refused without overwriting their source', async 
 test('new owner registration requires explicit group and preserves purpose-independent choice', async t => {
   const { root, write, read } = fixture(t);
   write('AGENTS.md', '# Owner\n');
-  const args = ['--scope', root, 'tasks', '--purpose', 'maintenance', 'project', 'create', 'example', '--title', 'Example', '--description', 'Description'];
+  const args = ['--scope', root, 'tasks', 'project', 'create', 'example', '--title', 'Example', '--description', 'Description'];
   const missing = await run(args, { env: {} });
   assert.notEqual(missing.exitCode, 0);
   assert.equal(fs.existsSync(path.join(root, '.harness')), false);
-  const created = await run([...args.slice(0, 5), '--index-group', 'descendant', ...args.slice(5)], { env: {} });
+  const created = await run([...args.slice(0, 5), ...args.slice(5)], { env: {} });
   assert.equal(created.exitCode, 0, created.stdout);
   assert.equal(read('.').descendantChildren[0]?.id, path.join(root, '.harness/tasks/AGENTS.md'));
   const board = new AgentsNode(path.join(root, '.harness/tasks/AGENTS.md')).parse(fs.readFileSync(path.join(root, '.harness/tasks/AGENTS.md'), 'utf8'));
@@ -155,17 +155,17 @@ test('new owner registration requires explicit group and preserves purpose-indep
   assert.equal(list.localChildren.filter(ref => ref.name === 'Example').length, 1);
 });
 
-for (const group of ['local', 'descendant'] as const) test('existing board registers missing owner relation as ' + group, async t => {
+test('existing board registers a nested system entry as a descendant', async t => {
   const { root, write, read } = fixture(t);
   const owner = new AgentsNode(path.join(root, 'AGENTS.md')).parse('# Owner\n\nKeep prose\n');
   owner.setConstraints(['Keep rule']);
   owner.addChild('local', { id: path.join(root, 'other/AGENTS.md'), name: 'Authored', description: 'Keep' });
   write('AGENTS.md', owner.serialize()); write('other/AGENTS.md', '# Other\n');
   write('tasks/AGENTS.md', '# Existing board\n<!-- project-memory-local:start -->\n<!-- project-memory-local:end -->\n');
-  const result = await run(['--scope', root, 'tasks', '--purpose', 'domain', '--index-group', group, 'project', 'create', 'example', '--title', 'Example', '--description', 'Description'], { env: {} });
+  const result = await run(['--scope', root, '--super', 'tasks', 'project', 'create', 'example', '--title', 'Example', '--description', 'Description'], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout);
   const updated = read('.');
-  assert.ok((group === 'local' ? updated.localChildren : updated.descendantChildren).some(ref => ref.id === path.join(root, 'tasks/AGENTS.md')));
+  assert.ok(updated.descendantChildren.some(ref => ref.id === path.join(root, 'tasks/AGENTS.md')));
   assert.deepEqual(updated.localChildren.find(ref => ref.id === path.join(root, 'other/AGENTS.md')), owner.localChildren[0]);
   assert.deepEqual(updated.constraints, ['Keep rule']);
   assert.match(updated.body, /Keep prose/);

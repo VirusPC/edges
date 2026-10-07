@@ -230,7 +230,7 @@ test("project get returns the read-only listed project after ordinary task creat
     const env = { EDGES_SCOPE: repo };
     const created = await run(
       [
-        "tasks", "--index-group", "local",
+        "tasks",
         "--purpose",
         "maintenance",
         "create",
@@ -246,13 +246,13 @@ test("project get returns the read-only listed project after ordinary task creat
     const before = await Promise.all(indexedPaths.map(rel => readFile(path.join(repo, rel), "utf8")));
     const listed = JSON.parse(
       (
-        await run(["tasks", "--index-group", "local", "--purpose", "maintenance", "project", "list"], {
+        await run(["tasks", "project", "list"], {
           env,
         })
       ).stdout,
     );
     const got = await run(
-      ["tasks", "--index-group", "local", "--purpose", "maintenance", "project", "get", "cli"],
+      ["tasks", "project", "get", "cli"],
       { env },
     );
     assert.equal(got.exitCode, 0, got.stdout);
@@ -324,7 +324,7 @@ test("maintenance board: CLI-created project is a README org list and never gets
   const repo = await mkdtemp(path.join(tmpdir(), "edges-project-readme-"));
   try {
     const env = { EDGES_SCOPE: repo };
-    const args = ["tasks", "--index-group", "local", "--purpose", "maintenance"];
+    const args = ["tasks"];
     assert.equal((await run([...args, "create", "--title", "Fresh", "--project", "cli"], { env })).exitCode, 0);
     const dir = path.join(repo, ".harness/tasks/cli");
     await assert.rejects(access(path.join(dir, "AGENTS.md")));
