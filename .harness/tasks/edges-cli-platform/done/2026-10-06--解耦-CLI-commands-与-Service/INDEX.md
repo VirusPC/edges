@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: edges-cli-platform
-  edges-updated-at: '2026-10-06T10:13:33.765Z'
+  edges-updated-at: '2026-10-07T14:33:06.076Z'
   edges-title: 解耦 CLI commands 与 Service
-  edges-tasks-status: backlog
+  edges-tasks-status: done
   edges-task-priority: none
 name: commands-service-decoupling
 description: 明确命令适配与完整业务用例的边界，移除 Service 对 CLI 上下文的依赖，整理审阅页与 Artifacts 编排。
@@ -37,8 +37,10 @@ description: 明确命令适配与完整业务用例的边界，移除 Service �
 
 **完成标准：**
 
-- [ ] Service 不依赖 Commander、CliContext/CliResult 或命令输出格式；命令协议适配与业务用例职责有明确入口和文档。
-- [ ] 已列出的错位点均已处理，或者有经审阅认可的保留理由；不以只搬文件或增加转发层充当解耦。
-- [ ] 关键用例可直接通过 Service 输入调用并验证，不需要构造 CLI 上下文；Service 依赖方向清晰，没有新增运行时循环或 domain 反向依赖。
-- [ ] 既有 CLI 参数、help、stdout/stderr、退出码、scope、锁、Schema 与目录操作行为保持兼容；有针对命令合同和 Service 行为的回归证据。
-- [ ] Node 22 下类型检查、相关测试、全量 CLI 测试和构建通过；文档明确最终边界及尚未解决的问题。
+- [x] Service 不依赖 Commander、CliContext/CliResult 或命令输出格式；命令协议适配与业务用例职责有明确入口和文档。
+- [x] 已列出的错位点均已处理，或者有经审阅认可的保留理由；不以只搬文件或增加转发层充当解耦。
+- [x] 关键用例可直接通过 Service 输入调用并验证，不需要构造 CLI 上下文；Service 依赖方向清晰，没有新增运行时循环或 domain 反向依赖。
+- [x] 既有 CLI 参数、help、stdout/stderr、退出码、scope、锁、Schema 与目录操作行为保持兼容；有针对命令合同和 Service 行为的回归证据。
+- [x] Node 22 下类型检查、相关测试、全量 CLI 测试和构建通过；文档明确最终边界及尚未解决的问题。
+
+补记：合入 PR #165 https://github.com/VirusPC/edges/pull/165 · `ac7b5a8a4c9230e2aaba7b97804dc8aaeede93b7`
