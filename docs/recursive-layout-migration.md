@@ -20,7 +20,7 @@
 
 存在 `.recursive-layout-migration/journal.json`、`.ownership-correction/public.json` 或 `.ownership-correction/private.json` 时，**目录转换一律拒绝**，无论旧流程是否看似完成；只检查存在性，不读取 payload，也不自动删除、归档或续跑。先人工核实旧状态，或在无这些本机日志的独立工作树审阅公开转换。下文旧流程的 resume/权限规则仅适用于对应旧迁移器，不是新目录转换器的行为。
 
-日常创建与读取已采用目录入口；`edges memory remember --import-entry` 和 `edges notes --import-entry` 导入完整目录，`edges notes --content-file --markdown` 仅输入一份文档。旧单文件由显式转换处理，Doctor 不代为迁移；重复或跨组重叠的 AGENTS 需修正作者意图，Doctor 不自动去重。这里不包含真实私有内容的目录转换，也不证明其他克隆已迁移。
+日常创建与读取已采用目录入口。`edges memory remember --import-entry` 导入完整目录。`edges notes create` 只在本地写下笔记叶子，不再导入目录或文档路径。旧单文件由显式转换处理，Doctor 不代为迁移；重复或跨组重叠的 AGENTS 需修正作者意图，Doctor 不自动去重。这里不包含真实私有内容的目录转换，也不证明其他克隆已迁移。
 
 ## 每个克隆的私有材料
 

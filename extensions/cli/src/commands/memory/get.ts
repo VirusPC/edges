@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { getMemoryEntry } from "../../services/memory/records.js";
+import { getMemoryEntry } from "../../services/memory/service.js";
 import { present, scoped, target, type TargetOptions } from "./utils/command.js";
 
 export function addMemoryGetCommand(memory: Command, ctx: CliContext): void {

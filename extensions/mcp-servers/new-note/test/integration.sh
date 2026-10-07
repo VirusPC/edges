@@ -10,32 +10,34 @@ cleanup() { rm -rf "$ISOLATED"; }
 trap cleanup EXIT
 
 git init -b main "$ISOLATED" >/dev/null
-git -C "$ISOLATED" config user.email "tester@example.com"
-git -C "$ISOLATED" config user.name "Tester"
-export EDGES_REPO="$ISOLATED"
+cat > "$ISOLATED/AGENTS.md" <<'EOF'
+# Isolated
+
+<!-- project-harness-local:start -->
+## 本层系统维护信息
+
+<!-- project-harness-local:end -->
+
+<!-- project-harness-descendants:start -->
+## 下层系统维护信息
+
+<!-- project-harness-descendants:end -->
+EOF
 
 echo "Starting integration tests via edges notes"
 
-TITLE="Test Direct Mode $(date +%s)"
+TITLE="Test Local Note $(date +%s)"
 OUTPUT="$(
-  EDGES_DRY_RUN=true EDGES_MODE=direct EDGES_AUTH_TOKEN= \
-    "${CLI[@]}" note \
-      --title "$TITLE" \
-      --content "Integration test content for direct mode." \
-      --co-author "Tester <tester@example.com>" \
-      --dry-run --json
+  "${CLI[@]}" --scope "$ISOLATED" notes create \
+    --title "$TITLE" \
+    --body "Integration test content." \
+    --json
 )"
-echo "$OUTPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['status']=='success'; assert d['prStatus']=='direct_commit'"
+echo "$OUTPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['status']=='success'; assert d['command']=='notes.create'; assert d['path'].endswith('/INDEX.md'); assert d['title']"
 
-TITLE="Test PR Mode $(date +%s)"
-OUTPUT_PR="$(
-  EDGES_DRY_RUN=true EDGES_MODE=pr EDGES_AUTH_TOKEN= \
-    "${CLI[@]}" note \
-      --title "$TITLE" \
-      --content "Integration test content for PR mode." \
-      --co-author "Tester <tester@example.com>" \
-      --mode pr --dry-run --json
-)"
-echo "$OUTPUT_PR" | python3 -c "import sys,json; d=json.load(sys.stdin); assert d['status']=='success'; assert d['prStatus'] in ('created','unavailable'); assert d['branch'].startswith('ingest/')"
+if git -C "$ISOLATED" rev-parse --verify HEAD >/dev/null 2>&1; then
+  echo "notes create must not commit" >&2
+  exit 1
+fi
 
 echo "Integration tests passed"

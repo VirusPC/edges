@@ -7,10 +7,8 @@ const execFileAsync = promisify(execFile);
 
 type CliPayload = {
   status: string;
-  filePath?: string;
-  branch?: string;
-  prStatus?: ScriptSuccess["prStatus"];
-  prUrl?: string;
+  path?: string;
+  title?: string;
   reason?: string;
   errorCode?: string;
 };
@@ -31,14 +29,12 @@ function failedNoteError(parsed: CliPayload, stdout: string): Error {
 
 function parseNoteJson(stdout: string): ScriptSuccess {
   const parsed = JSON.parse(stdout) as CliPayload;
-  if (parsed.status !== "success" || !parsed.filePath || !parsed.branch || !parsed.prStatus) {
+  if (parsed.status !== "success" || !parsed.path || !parsed.title) {
     throw failedNoteError(parsed, stdout);
   }
   return {
-    filePath: parsed.filePath,
-    branch: parsed.branch,
-    prUrl: parsed.prUrl,
-    prStatus: parsed.prStatus,
+    path: parsed.path,
+    title: parsed.title,
     stdout,
   };
 }
@@ -57,23 +53,15 @@ export async function runEdgesNote(
     "create",
     "--title",
     input.title,
-    "--content",
-    input.content,
-    "--co-author",
-    input.coAuthor,
+    "--body",
+    input.body,
     "--json",
-    "--mode",
-    config.mode,
   ];
-  if (config.dryRun || env.EDGES_DRY_RUN === "true") args.push("--dry-run");
 
   const childEnv: NodeJS.ProcessEnv = {
     ...env,
     EDGES_REPO: config.repoPath,
     EDGES_SCOPE: target === undefined ? undefined : path.resolve(cwd, target),
-    EDGES_BASE_BRANCH: config.baseBranch,
-    EDGES_MODE: config.mode,
-    EDGES_DRY_RUN: config.dryRun ? "true" : env.EDGES_DRY_RUN,
   };
   delete childEnv.EDGES_AUTH_TOKEN;
 

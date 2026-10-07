@@ -66,3 +66,21 @@ export function parseFieldFilter(raw: string): FieldFilter {
   }
   return { field: raw.slice(0, eq), value: raw.slice(eq + 1) };
 }
+
+/** Shared list envelope: filter first, then optional --group-by. */
+export function presentListed<T extends Record<string, unknown>>(
+  command: string,
+  items: T[],
+  opts: { filter?: string[]; groupBy?: string },
+): Record<string, unknown> {
+  const filters = (opts.filter ?? []).map(parseFieldFilter);
+  const filtered = items.filter((item) => matchesFilters(item, filters));
+  if (opts.groupBy) {
+    return {
+      command,
+      groupBy: opts.groupBy,
+      groups: groupRecords(filtered, opts.groupBy),
+    };
+  }
+  return { command, items: filtered };
+}

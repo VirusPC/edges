@@ -2,11 +2,7 @@ import type { Command } from "commander";
 import path from "node:path";
 import { type CliContext, usageError } from "../context.js";
 import { succeed } from "./result.js";
-import { resolveScope } from "../services/scope.js";
-import {
-  buildSystemForest,
-  type ForestForm,
-} from "../services/node/system-forest-service.js";
+import { buildSystemForest, resolveScope, type ForestForm } from "../services/forest/service.js";
 import type { BaseNode } from "../domain/models/index.js";
 
 function projectNode(node: BaseNode, scopeDir: string) {

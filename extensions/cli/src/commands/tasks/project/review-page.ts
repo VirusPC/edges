@@ -2,9 +2,8 @@ import { readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { Command } from "commander";
 import type { CliContext } from "../../../context.js";
-import { renderReviewPageFromText } from "../../../services/tasks/review-page.js";
+import { asTasksError, renderReviewPageFromText } from "../../../services/tasks/service.js";
 import { TasksError } from "../../../domain/models/tasks/types.js";
-import { asTasksError } from "../../../services/tasks/result.js";
 import { failTask, succeed } from "../run.js";
 
 export function addProjectReviewPageCommand(project: Command, ctx: CliContext): void {

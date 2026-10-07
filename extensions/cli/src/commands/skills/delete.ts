@@ -1,24 +1,22 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { fail, succeed } from "../result.js";
-import { resolveScope } from "../../services/scope.js";
-import { deleteSkill } from "../../services/skills/records.js";
+import { deleteSkill } from "../../services/skills/service.js";
+import { failNodeCommand } from "../node-result.js";
+import { succeed } from "../result.js";
+
+const HELP = "See edges skills --help for usage.\n";
 
 export function addSkillDeleteCommand(skill: Command, ctx: CliContext): void {
   skill
     .command("delete")
-    .description("Delete one skill directory")
+    .description("Delete one skill")
     .argument("<target>", "SKILL.md path or skill name")
-    .action((target: string) => {
+    .action(async (target: string) => {
       try {
-        ctx.result = succeed({ command: "skills.delete", ...deleteSkill(resolveScope(ctx.env), target) });
+        const removed = await deleteSkill(ctx.env, target, { all: ctx.all, super: ctx.super });
+        ctx.result = succeed({ command: "skills.delete", path: removed.path });
       } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        ctx.result = fail(
-          message.includes("not found") || message.includes("ambiguous") ? "VALIDATION_ERROR" : "UNKNOWN_ERROR",
-          message,
-          "See edges skills --help for usage.\n",
-        );
+        failNodeCommand(ctx, error, HELP);
       }
     });
 }

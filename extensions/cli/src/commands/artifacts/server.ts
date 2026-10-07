@@ -5,16 +5,14 @@ import {
   DEFAULT_HOST,
   DEFAULT_PORT,
   DEFAULT_PUBLIC_BASE_URL,
-  loadServerEnv,
-} from "../../services/artifacts/server/env.js";
-import {
   installArtifactsServer,
+  loadServerEnv,
   restartArtifactsServer,
   setupNginxArtifacts,
   startArtifactsServer,
   statusArtifactsServer,
   stopArtifactsServer,
-} from "../../services/artifacts/server/ops.js";
+} from "../../services/artifacts/service.js";
 
 const SERVER_AFTER_HELP = `
 COMMANDS

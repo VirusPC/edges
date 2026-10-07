@@ -197,8 +197,26 @@ Agent 与人发现并调用 Edges 扩展能力的入口集合；本仓定为 CLI
 _避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成单独一层、仅 CLI+Skill（漏掉 MCP）
 
 **CLI**：
-以 `edges` 为名的命令行界面（含 `notes`、`tasks`、`skills`、`artifacts` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
+以 `edges` 为名的命令行界面（含 `notes`、`projects`、`tasks`、`skills`、`artifacts` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
 _避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
+
+**NodeService**：
+节点读写与组成登记的门面。内容叶子的创建、读取、更新与删除都经它完成。commands 不直接装配它，只调用该领域的 `services/<module>/service.ts`；主文件可以 re-export 已有实现。
+_避免使用_：records 旁路、扫盘后直接改叶子或父索引、commands 直接 `new NodeService` 或调用 `dated-leaf`
+
+**House CLI surface（标准 CRUD 旗标）**：
+全仓 `list` / `get` / `create` / `update` / `delete` 共用的旗标形状。已用于 notes、skills 与 projects；README / 组织列表、memory、tasks 以后照此跟随。
+
+| 命令 | 旗标 |
+| --- | --- |
+| `list` | 共享 `--filter` / `--group-by` 信封，外加全局 `--scope` / `--super` / `--all`。不另造域专用 list 旗标 |
+| `get` | 只收目标 |
+| `create` | metadata + `--body`，外加该类型真正需要的旗标 |
+| `update` | metadata + `--body`，外加该类型真正需要的旗标 |
+| `delete` | 只收目标 |
+
+类型旗标只在必要时出现：note 标题经正文 H1 或 `--title`；skill 用 name / description。正文用 `--body`。metadata 用可重复的 `--metadata key=value`。
+_避免使用_：`--content`、域专用 list 旗标、在 get/delete 上挂 body 或 filter
 
 **Skill（Edges 接入语境）**：
 用于接入 Edges、教 Agent 何时及如何调用能力面的说明性能力包：有 shell 则调 CLI，无 shell 则调作为对等能力面入口的 MCP；不承载 git 或入库实现。

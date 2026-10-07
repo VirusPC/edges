@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.4.0] - 2026-10-08
+
+### Changed
+
+- 未选择类型时，推荐模块包含 projects 与 notes。选定类型并初始化后，会生成 `.harness/projects/README.md` 与 `.harness/notes/README.md` 并登记到本层系统维护信息。
+
 ## [3.3.0] - 2026-10-07
 
 ### Changed

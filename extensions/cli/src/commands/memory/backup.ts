@@ -1,8 +1,7 @@
 import { Command } from 'commander';
 import type { CliContext } from '../../context.js';
-import { backupUserMemory } from '../../services/memory/archive.js';
+import { backupUserMemory, resolveScope } from '../../services/memory/service.js';
 import { operation } from './utils/command.js';
-import { resolveScope } from '../../services/scope.js';
 
 export function addMemoryBackupCommand(memory: Command, ctx: CliContext): void {
   memory.command('backup').description('Archive private user memory with its index and assets')

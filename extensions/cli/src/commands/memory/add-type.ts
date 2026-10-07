@@ -1,6 +1,6 @@
 import { Command, Option } from 'commander';
 import type { CliContext } from '../../context.js';
-import { addMemoryType } from '../../services/memory/index.js';
+import { addMemoryType } from '../../services/memory/service.js';
 import { operation, scoped, target, type TargetOptions } from './utils/command.js';
 export function addMemoryAddTypeCommand(memory: Command, ctx: CliContext): void {
     scoped(memory.command('add-type').description('Register a custom type without changing existing permissions'))

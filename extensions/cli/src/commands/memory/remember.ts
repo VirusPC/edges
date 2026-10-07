@@ -1,6 +1,6 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../../context.js";
-import { rememberMemory } from "../../services/memory/index.js";
+import { rememberMemory } from "../../services/memory/service.js";
 import {
   operation,
   scoped,

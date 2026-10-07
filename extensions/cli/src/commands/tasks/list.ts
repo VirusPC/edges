@@ -8,15 +8,20 @@ import { TaskNode } from "../../domain/models/tasks/task-node.js";
 import { sortTasksByPriority } from "../../domain/operations/tasks.js";
 import { TASK_PRIORITIES, TASK_STATUSES, type TaskPriority, type TaskProjectId, type TaskStatus } from "../../domain/models/tasks/types.js";
 import { runTasksCommand, succeed } from "./run.js";
-import { gitRoot } from "../../services/scope.js";
-import { NodeService } from "../../services/node/node-service.js";
-import { buildSystemForest } from "../../services/node/system-forest-service.js";
 import { TasksError } from "../../domain/models/tasks/types.js";
 import { placeHarnessMaterial, tasksBoardDirName } from "../../domain/config/harness-materials.js";
 import { ENTRY_NAMES } from "../../domain/models/layout.js";
-import { listTaskNodes } from "../../services/tasks/node-query.js";
-import { subjectTaskBoard } from "../../services/tasks/paths.js";
-import { groupRecords, matchesFilters, parseFieldFilter, type FieldFilter } from "../../services/list-query.js";
+import {
+  buildSystemForest,
+  gitRoot,
+  groupRecords,
+  listTaskNodes,
+  matchesFilters,
+  NodeService,
+  parseFieldFilter,
+  subjectTaskBoard,
+  type FieldFilter,
+} from "../../services/tasks/service.js";
 
 const LIST_AFTER_HELP = `
 FLAGS

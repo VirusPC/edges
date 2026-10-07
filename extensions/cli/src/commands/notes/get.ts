@@ -1,28 +1,27 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { getNote } from "../../services/note/records.js";
-import { resolveScope } from "../../services/scope.js";
-import { fail, succeed } from "../result.js";
+import { getNote } from "../../services/notes/service.js";
+import { failNodeCommand } from "../node-result.js";
+import { succeed } from "../result.js";
 
-function failNote(ctx: CliContext, error: unknown): void {
-  const message = error instanceof Error ? error.message : String(error);
-  ctx.result = fail(
-    message.includes("not found") || message.includes("must be") ? "VALIDATION_ERROR" : "UNKNOWN_ERROR",
-    message,
-    "See edges notes --help for usage.\n",
-  );
-}
+const HELP = "See edges notes --help for usage.\n";
 
 export function addNoteGetCommand(note: Command, ctx: CliContext): void {
   note
     .command("get")
     .description("Read one note")
     .argument("<path>", "notes/<stem>/INDEX.md")
-    .action((entryPath: string) => {
+    .action(async (entryPath: string) => {
       try {
-        ctx.result = succeed({ command: "notes.get", ...getNote(resolveScope(ctx.env), entryPath) });
+        const loaded = await getNote(ctx.env, entryPath);
+        ctx.result = succeed({
+          command: "notes.get",
+          path: loaded.path,
+          title: loaded.title,
+          body: loaded.body,
+        });
       } catch (error) {
-        failNote(ctx, error);
+        failNodeCommand(ctx, error, HELP);
       }
     });
 }

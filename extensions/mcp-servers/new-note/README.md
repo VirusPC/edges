@@ -1,26 +1,21 @@
 # new-note
 
-TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 ingest（落盘、commit、push）。
+TypeScript + Node.js MCP server，用于在没有 shell 的宿主里本地创建一条 Note。不 commit、不 push、不开 PR。
 
 本地有 shell 的 agent 请用 [`cli` 的 `edges notes`](../../cli/README.md)，不要默认走 MCP。本 server 留给没有 shell 的宿主。决策：[`.harness/memory/projects/project_cli_from_mcp.md`](../../.harness/memory/projects/project_cli_from_mcp.md)。
 
 ## What It Does
 
 - 暴露 MCP 工具 `new_note`
-- 接收结构化输入：`title`、`content`、`coAuthor`
-- 子进程调用 `edges notes create`（与 CLI 同一套 flags / JSON 契约）：
-  - 生成 `notes/YYYY-MM-DD--slug.md`
-  - `git checkout -b ingest/...`
-  - `git commit` + `git push`
-  - 可选创建 PR
+- 接收结构化输入：`title`、`body`
+- 子进程调用 `edges notes create --title --body`（与 CLI 同一套 JSON 契约）
+- 在目标 scope 的 `notes/YYYY-MM-DD--slug/INDEX.md` 本地创建叶子
 - 返回结构化 JSON 结果，便于客户端自动处理
 
 ## Requirements
 
 - Node.js 22+
-- git
-- 可用的仓库凭据（SSH key 或 token）
-- 可选：`gh` / `curl` / `python3`（如果需要自动创建 PR 或复用现有脚本能力）
+- 可写的目标 scope（`EDGES_SCOPE`，或 MCP 启动目录所属的内容作用域）
 
 ## Install
 
@@ -71,13 +66,7 @@ HTTP 模式将在以下端点启动服务器：
 
 - `EDGES_SCOPE`: 显式目标作用域；优先于 `EDGES_REPO`。相对路径按 MCP 启动 cwd 解析。
 - `EDGES_REPO`: 未设置 `EDGES_SCOPE` 时的显式目标。两者均未设置时捕获 MCP 启动 cwd，由 CLI 找最近所属作用域或 Git 根；找不到则返回可操作的校验错误。CLI 和 Skill 资源独立从实现仓库读取。
-- `EDGES_BASE_BRANCH`: 基线分支，默认 `main`
-- `EDGES_MODE`: (可选) 提交模式。
-  - `direct` (默认): 直接在基线分支上提交并推送。
-  - `pr`: 创建新分支并尝试建立 PR。
-- `GITHUB_TOKEN`: (可选) GitHub 个人访问令牌。仅用于自动创建 PR；如果已配置 `gh` CLI，则不需要。
 - `EDGES_CLI`: (可选) `edges-cli` 入口绝对路径（`dist/index.js` 或 `src/index.ts`）。未设置时优先 `extensions/cli/dist/index.js`，否则回退 `extensions/cli/src/index.ts`。
-- `EDGES_DRY_RUN`: `true` 时给 `edges notes` 加上 `--dry-run`。
 
 ### HTTP 认证 (可选)
 
@@ -89,18 +78,15 @@ MCP tool 名称：`new_note`
 
 输入字段：
 - `title` (string)
-- `content` (string)
-- `coAuthor` (string)
+- `body` (string, optional)
 
 成功返回（JSON 文本）示例：
 
 ```json
 {
   "status": "success",
-  "filePath": "notes/2026-02-18--daily-summary.md",
-  "branch": "ingest/2026-02-18-daily-summary",
-  "prUrl": "https://github.com/org/repo/compare/main...ingest/2026-02-18-daily-summary?expand=1",
-  "prStatus": "unavailable",
+  "path": "notes/2026-02-18--daily-summary/INDEX.md",
+  "title": "daily-summary",
   "stdoutSummary": "..."
 }
 ```
@@ -193,14 +179,12 @@ npm test
 ## Troubleshooting
 
 - 报 `SCRIPT_NOT_FOUND`：`edges-cli` 入口缺失。执行 `pnpm --filter edges-cli build`，或设置 `EDGES_CLI` 指向 `dist/index.js` / `src/index.ts`。
-- 报 `PUSH_AUTH_FAILED`：检查服务器上的 Git 凭据（SSH key / token）。
-- 报 `GIT_FAILURE`：检查远程仓库可达性、分支权限和本地工作区状态。
-- 无法自动建 PR：确认 `gh auth status` 或 `GITHUB_TOKEN` 可用。注意 `direct` 提交模式不提供 PR 功能。
+- 报校验错误：确认 `title` 为 1–120 字，并且 `EDGES_SCOPE` 指向可写的内容作用域。
 
 ## Rollback
 
 如果线上出现异常，可通过停止该 MCP server 或从客户端配置中移除 `new_note` 工具，回退到手工执行：
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts note --title "…" --content "…" --co-author "…" --json
+pnpm --filter edges-cli exec tsx src/index.ts --scope <目录> notes create --title "…" --body "…" --json
 ```

@@ -1,8 +1,7 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { isTaskStatus } from "../../services/tasks/paths.js";
+import { isTaskStatus, moveTaskStatus } from "../../services/tasks/service.js";
 import { failTask, runTasksCommand, succeed } from "./run.js";
-import { moveTaskStatus } from "../../services/tasks/move.js";
 
 const STATUS_AFTER_HELP = `
 ARGUMENTS

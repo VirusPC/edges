@@ -11,6 +11,7 @@ import {
 import { addSchemaCommand } from "./commands/schema.js";
 import { addArtifactsCommand } from "./commands/artifacts.js";
 import { addNotesCommand } from "./commands/notes.js";
+import { addProjectsCommand } from "./commands/projects.js";
 import { addTasksCommand } from "./commands/tasks.js";
 import { addMemoryCommand } from "./commands/memory.js";
 import { addSkillsCommand } from "./commands/skills.js";
@@ -26,8 +27,11 @@ EXAMPLES
   edges --scope ./projects/demo --super tasks list
   edges --scope . forest list
   edges --scope . forest list --form innermost --no-super
-  edges notes create --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
+  edges notes create --title "Daily" --body "Notes from the session."
   edges notes --help
+  edges projects create --title "Demo" --body "What this project is."
+  edges projects --help
+  edges skills create demo --description "What it does" --body "Steps"
   edges skills --help
   edges tasks --help
   edges artifacts --help
@@ -36,7 +40,7 @@ EXAMPLES
 
 BREAKING RENAME
   The bin is edges only (not edges-note). There is no shim.
-  Callers must migrate to: edges notes create --title … --content … --co-author …
+  Callers must migrate to: edges notes create --title … --body …
   Top-level commands follow folder names: edges notes (not note), edges skills (not skill). There is no alias.
 `;
 
@@ -115,6 +119,7 @@ function addRootCommand(
   });
 
   addNotesCommand(program, ctx);
+  addProjectsCommand(program, ctx);
   addTasksCommand(program, ctx);
   addMemoryCommand(program, ctx);
   addSkillsCommand(program, ctx);
@@ -137,6 +142,8 @@ function commandWriteTarget(
   const options = command.opts();
   const writes =
     (parent === "notes" && ["create", "update", "delete"].includes(name)) ||
+    (parent === "projects" && ["create", "update", "delete"].includes(name)) ||
+    (parent === "skills" && ["create", "update", "delete"].includes(name)) ||
     (parent === "tasks" && ["create", "update", "status"].includes(name)) ||
     (parent === "project" &&
       command.parent?.parent?.name() === "tasks" &&

@@ -1,7 +1,7 @@
 ---
 name: project-memory-init
 description: 对用户选定的任意目录初始化或刷新系统入口 AGENTS.md（硬约束 + 组成登记），并按选择采用 Project Memory / Skills 类型。仅当用户明确要求 init 时使用；命令仍为 edges memory init。
-version: 3.3.0
+version: 3.4.0
 ---
 
 # Project harness init（`$project-memory-init`）
@@ -12,7 +12,7 @@ version: 3.3.0
 
 **谁不该 init：** 仅为列系统一孩子、尚未需要系统二材料的目录（用同目录 `README.md` + `project-entries-*`，或迁移脚本另建）；未经用户要求不要给全仓或批量目录铺 `AGENTS.md`。看板和类型目录上的 README 是组织清单，不是系统入口。不要在类型目录上 init `AGENTS.md` 来装组织清单，空的同目录桩删掉。不要让 list 另开一套 README 遍历。层系统入口仍是 `AGENTS.md`。Init **不会**在作用域根自动创建组织清单 `README.md`——那是系统一入口，由用户或迁移单独建立。
 
-模块默认推荐 memory、skills、tasks，按作用域目标采用；本 Skill 只负责 memory / skills 类型选择与系统入口同步。新层先展示 memory 的 project / feedback / reference / user 与 skills 的 managed / referenced 用途，让用户选择，不预建全部。用户已明确选择时直接执行；未选择时命令返回 `selectionRequired` 和推荐清单且不改文件。已有层不传选择只刷新已采用类型。
+模块默认推荐 memory、skills、tasks、projects、notes，按作用域目标采用。本 Skill 仍只负责 memory / skills 类型选择与系统入口同步；选定类型后，init 还会在 `.harness/projects/README.md` 与 `.harness/notes/README.md` 生成组织清单并登记到本层系统维护信息。新层先展示 memory 的 project / feedback / reference / user 与 skills 的 managed / referenced 用途，让用户选择，不预建全部。用户已明确选择时直接执行；未选择时命令返回 `selectionRequired` 和推荐清单且不改文件。已有层不传选择只刷新已采用类型。
 
 ```bash
 edges --scope <目录> memory init \

@@ -2,7 +2,7 @@
 
 2026-10-06 grill 确认：Task、Memory、Note、Skill 的命令面使用 list / get / create / update / delete 这些动词。已经有专门命令的写入不另做一套实现，该动词只返回失败并指出该调用的命令。
 
-**Status:** accepted（ADR 0027；grill 确认于 2026-10-06）
+**Status:** accepted（ADR 0027；grill 确认于 2026-10-06；2026-10-08 修订 skills create/update，见 ADR 0030）
 
 ## Decision
 
@@ -10,9 +10,8 @@
 
 - `tasks delete` 提示 `edges tasks status <target> cancelled`。任务文件和 sidecar 保留。
 - `memory create` 与 `memory update` 提示 `edges memory remember`。
-- `skills create` 与 `skills update` 提示用 `edges memory remember` 写 `SKILL.md`。
 
-这些命令照常执行：`memory list` / `get` / `delete`，`notes create`（即今天的 `edges notes` 入库）以及 `notes list` / `get` / `update` / `delete`，`skills list` / `get` / `delete`。
+这些命令照常执行：`memory list` / `get` / `delete`，`notes` 与 `skills` 的 list / get / create / update / delete。`skills create` 与 `skills update` 会写受管 `SKILL.md`（ADR 0030）。`edges memory remember` 仍可写 skill 类记忆，与 `edges skills` 并列，不互相代替。
 
 ## Considered Options
 

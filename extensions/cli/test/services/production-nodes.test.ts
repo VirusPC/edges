@@ -95,35 +95,23 @@ test("memory remember rejects malformed domain metadata without erasing the orig
   assert.equal(readFileSync(file, "utf8"), source);
 });
 
-test("note ingest refuses a linked destination before changing the outside note", async (t) => {
+test("note create refuses a linked destination before changing the outside note", async (t) => {
   const { symlinkSync } = await import("node:fs");
-  const { runNoteIngest } =
-    await import("../../src/services/note/git/ingest.js");
+  const { localDateYmd } = await import("../../src/utils/date.js");
+  const { run } = await import("../../src/program.js");
   const root = fixture(t),
-    outside = fixture(t),
-    date = new Date("2026-10-05T12:00:00Z");
-  mkdirSync(path.join(root, "notes"), { recursive: true });
+    outside = fixture(t);
+  writeFileSync(path.join(root, "AGENTS.md"), "# Scope\n");
   const target = path.join(outside, "source.md");
   writeFileSync(target, "Outside original\n");
-  mkdirSync(path.join(root, "notes/2026-10-05--hello"));
-  symlinkSync(
-    target,
-    path.join(root, "notes/2026-10-05--hello/INDEX.md"),
+  const dir = path.join(root, "notes", `${localDateYmd(new Date())}--hello`);
+  mkdirSync(dir, { recursive: true });
+  symlinkSync(target, path.join(dir, "INDEX.md"));
+  const result = await run(
+    ["--scope", root, "notes", "create", "--title", "Hello", "--body", "New body"],
+    { env: {} },
   );
-  await assert.rejects(
-    () =>
-      runNoteIngest(
-        {
-          title: "Hello",
-          content: "New body",
-          coAuthor: "Test <test@example.test>",
-        },
-        { repoPath: root, mode: "direct", dryRun: true, baseBranch: "main" },
-        {},
-        { now: date, exec: async () => ({ stdout: "", stderr: "" }) },
-      ),
-    /symbolic link/,
-  );
+  assert.notEqual(result.exitCode, 0);
   assert.equal(readFileSync(target, "utf8"), "Outside original\n");
 });
 

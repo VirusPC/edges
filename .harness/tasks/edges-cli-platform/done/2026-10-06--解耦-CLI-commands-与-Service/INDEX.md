@@ -2,13 +2,14 @@
 metadata:
   edges-type: task
   edges-task-project: edges-cli-platform
-  edges-updated-at: '2026-10-07T14:33:06.076Z'
+  edges-updated-at: '2026-10-07T19:07:32.411Z'
   edges-title: 解耦 CLI commands 与 Service
   edges-tasks-status: done
   edges-task-priority: none
 name: commands-service-decoupling
 description: 明确命令适配与完整业务用例的边界，移除 Service 对 CLI 上下文的依赖，整理审阅页与 Artifacts 编排。
 ---
+
 **背景：**
 
 在完成统一节点、共享 Service 和模型目录整理后，我们检查了“commands 是否已经只调用 Service”。实际情况是：部分 Task/Memory 命令已较薄，但命令适配、业务流程和基础工具仍有错位。用户提出应做好解耦，随后决定先整理 Model；Model 重构和三层架构 README 已完成，现在把 commands 与 Service 的后续重构单独记录，避免把它误报为已实现。
@@ -44,3 +45,9 @@ description: 明确命令适配与完整业务用例的边界，移除 Service �
 - [x] Node 22 下类型检查、相关测试、全量 CLI 测试和构建通过；文档明确最终边界及尚未解决的问题。
 
 补记：合入 PR #165 https://github.com/VirusPC/edges/pull/165 · `ac7b5a8a4c9230e2aaba7b97804dc8aaeede93b7`
+
+**2026-10-08 进展（#187）：**
+
+各领域 commands 只从 `services/<module>/service.ts` 进入。notes 与 projects 的主文件固定叶子规格并委托 `services/node/dated-leaf.ts`。skills、memory、tasks、artifacts、forest 的主文件 re-export 已有实现，以及该命令已经在用的跨领域符号。memory 的 `migrateMemory` 在主文件里动态 import，避免普通启动加载可选的迁移实现。`services/node/*`、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts` 仍是跨领域工具，不另造 `service.ts`。
+
+tasks list、审阅页和 artifacts server 的动作仍按原来的顺序调用这些函数，没有改写流程。`services/tasks/result.ts` 仍组装地点、读写和时钟。进程入口的写锁仍直接用 `node-lock`。规则写在 CLI README 分层和 ADR 0030。

@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0] - 2026-10-08
+
+### Changed
+
+- 日常笔记命令改为 `edges notes create`。目录导入只留给 `memory remember --import-entry`；笔记创建不再复制旁路目录。
+
 ## [1.0.2] - 2026-10-07
 
 ### Changed

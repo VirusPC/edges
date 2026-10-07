@@ -79,6 +79,10 @@ const classifiers: DirectoryClassifier[] = [
   },
   (entry) =>
     /(?:^|\/)notes\/(?:[^/]+\/)+(?:INDEX|index)\.md$/.test(entry) ? "note" : undefined,
+  (entry) =>
+    /(?:^|\/)(?<!memory\/)projects\/(?:[^/]+\/)+(?:INDEX|index)\.md$/.test(entry)
+      ? "project"
+      : undefined,
 ];
 /** Register a directory contract; return a disposer for scoped registrations. */
 export function registerDirectoryClassifier(

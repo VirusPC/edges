@@ -5,10 +5,8 @@ import { run } from "../src/program.js";
 const requiredNoteFlags = [
   "--title",
   "Daily summary",
-  "--content",
+  "--body",
   "Some useful content",
-  "--co-author",
-  "OpenAI Codex <codex@openai.com>",
 ] as const;
 
 function failedJson(stdout: string): { status: string; errorCode: string; reason: string } {
@@ -16,12 +14,11 @@ function failedJson(stdout: string): { status: string; errorCode: string; reason
 }
 
 test("run note rejects missing required flags", async () => {
-  const result = await run(["notes", "create", "--title", "Daily summary"]);
+  const result = await run(["notes", "create"]);
   assert.equal(result.exitCode, 2);
   const parsed = failedJson(result.stdout);
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
-  assert.match(parsed.reason, /--content/);
-  assert.match(parsed.reason, /--co-author/);
+  assert.match(parsed.reason, /--title|H1/);
 });
 
 test("run note rejects unknown flags", async () => {
@@ -60,27 +57,12 @@ test("run rejects unexpected positionals on note", async () => {
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
-test("run note rejects --token-file together with --token-stdin", async () => {
-  const result = await run([
-    "notes",
-    "create",
-    ...requiredNoteFlags,
-    "--token-file",
-    "/tmp/token",
-    "--token-stdin",
-  ]);
+test("run note rejects removed ingest flags", async () => {
+  const result = await run(["notes", "create", ...requiredNoteFlags, "--co-author", "Codex <codex@openai.com>"]);
   assert.equal(result.exitCode, 2);
   const parsed = failedJson(result.stdout);
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
-  assert.match(parsed.reason, /token-file|token-stdin/);
-});
-
-test("run note rejects invalid --mode", async () => {
-  const result = await run(["notes", "create", ...requiredNoteFlags, "--mode", "merge"]);
-  assert.equal(result.exitCode, 2);
-  const parsed = failedJson(result.stdout);
-  assert.equal(parsed.errorCode, "VALIDATION_ERROR");
-  assert.match(parsed.reason, /mode/);
+  assert.match(parsed.reason, /co-author/);
 });
 
 test("run returns version", async () => {

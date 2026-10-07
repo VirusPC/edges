@@ -1,6 +1,8 @@
 {
   "materials": [
     { "id": "tasks", "path": "tasks/README.md", "optional": true },
+    { "id": "projects", "path": "projects/README.md", "optional": true },
+    { "id": "notes", "path": "notes/README.md", "optional": true },
     { "id": "memory.feedbacks", "path": "memory/feedbacks/README.md", "optional": true },
     { "id": "memory.projects", "path": "memory/projects/README.md", "optional": true },
     { "id": "memory.references", "path": "memory/references/README.md", "optional": true },

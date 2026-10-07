@@ -4,6 +4,7 @@ export { LeafNode } from "./core/leaf-node.js";
 export { TaskNode } from "./tasks/task-node.js";
 export { MemoryNode } from "./memory/memory-node.js";
 export { NoteNode } from "./notes/note-node.js";
+export { ProjectNode } from "./projects/project-node.js";
 export { SkillNode } from "./skills/skill-node.js";
 export { AgentsNode } from "./internal/agents-node.js";
 export { SuperAgentsNode } from "./internal/super-agents-node.js";

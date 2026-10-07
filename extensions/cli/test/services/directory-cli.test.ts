@@ -116,52 +116,6 @@ test("Memory directory format indexes only entry, updates by same slug and docto
   const doctor = await call(["doctor"]);
   assert.equal(doctor.exitCode, 0, doctor.stdout);
 });
-test("Note CLI preserves authored Markdown and commits only its explicit owned resource directory", async (t) => {
-  const { execFileSync } = await import("node:child_process");
-  const root = fixture(t);
-  const git = (...args: string[]) =>
-    execFileSync("git", args, { cwd: root, encoding: "utf8" });
-  git("init", "-b", "main");
-  git("config", "user.name", "Test");
-  git("config", "user.email", "test@example.test");
-  put(path.join(root, "AGENTS.md"), "# Scope");
-  git("add", "AGENTS.md");
-  git("commit", "-m", "init");
-  const source = path.join(root, "selected");
-  put(path.join(source, "photo.bin"), "asset");
-  const document =
-    '---\ncustom: "keep this exact formatting"\n---\n# Authored title\n\n![photo](photo.bin)\n\n';
-  const input = path.join(source, "INDEX.md");
-  put(input, document);
-  const result = await run(
-    [
-      "--scope",
-      root,
-      "notes", "create",
-      "--title",
-      "Filename title",
-      "--import-entry",
-      input,
-      "--co-author",
-      "Codex <noreply@openai.com>",
-      "--dry-run",
-    ],
-    { env: { EDGES_MODE: "direct", EDGES_BASE_BRANCH: "main" } },
-  );
-  assert.equal(result.exitCode, 0, result.stdout);
-  const created = JSON.parse(result.stdout);
-  assert.match(created.filePath, /--filename-title\/INDEX.md$/);
-  const saved = fs.readFileSync(path.join(root, created.filePath), "utf8");
-  const { NoteNode } = await import("../../src/domain/models/notes/note-node.js");
-  const note = new NoteNode(path.join(root, created.filePath)).parse(saved);
-  assert.equal(note.metadata?.custom, "keep this exact formatting");
-  assert.equal(note.title, "Authored title");
-  assert.equal(note.body, "# Authored title\n\n![photo](photo.bin)\n\n");
-  assert.doesNotMatch(saved, /Ingested on|# Filename title/);
-  const tracked = git("show", "--pretty=format:", "--name-only", "HEAD");
-  assert.match(tracked, /photo.bin/);
-  assert.doesNotMatch(tracked, /selected|authored.md/);
-});
 test("Task directory status refuses same-stem standalone destination and preserves unrelated siblings", async (t) => {
   const root = fixture(t);
   put(path.join(root, "AGENTS.md"), "# Scope");
@@ -258,7 +212,7 @@ test("Skill import validates full fields before writing and preserves its source
   );
   assert.equal(fs.readFileSync(source, "utf8"), "# Invalid skill");
 });
-test("Memory and Note reject conflicting import content and wrong entry types before writing", async (t) => {
+test("Memory rejects conflicting import content and wrong entry types before writing", async (t) => {
   const root = fixture(t);
   await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
   const source = path.join(root, "source/SKILL.md");
@@ -304,45 +258,6 @@ test("Memory and Note reject conflicting import content and wrong entry types be
     false,
   );
 });
-test("Note import commits its parent registration and keeps source bytes unchanged", async (t) => {
-  const { execFileSync } = await import("node:child_process");
-  const root = fixture(t),
-    git = (...args: string[]) =>
-      execFileSync("git", args, { cwd: root, encoding: "utf8" });
-  git("init", "-b", "main");
-  git("config", "user.name", "Test");
-  git("config", "user.email", "test@example.test");
-  put(path.join(root, "AGENTS.md"), "# Root");
-  put(path.join(root, "notes/AGENTS.md"), "# Notes");
-  git("add", ".");
-  git("commit", "-m", "init");
-  const source = path.join(root, "source/INDEX.md"),
-    original = "---\ncustom: keep\n---\n# Authored\n\nExtra prose\n";
-  put(source, original);
-  put(path.join(root, "source/asset"), "bytes");
-  const result = await run(
-    [
-      "--scope",
-      root,
-      "notes", "create",
-      "--title",
-      "Imported",
-      "--import-entry",
-      source,
-      "--co-author",
-      "Codex <noreply@openai.com>",
-      "--dry-run",
-    ],
-    { env: { EDGES_MODE: "direct" } },
-  );
-  assert.equal(result.exitCode, 0, result.stdout);
-  assert.equal(fs.readFileSync(source, "utf8"), original);
-  assert.match(
-    git("show", "--pretty=format:", "--name-only", "HEAD"),
-    /notes\/AGENTS.md/,
-  );
-  assert.equal(git("diff", "--name-only").trim(), "");
-});
 test("business imports reject known source directory types instead of silently retyping them", async (t) => {
   const root = fixture(t);
   await initMemory({ indexGroup: "descendant", targetDir: root, memoryTypes: ["project"] });
@@ -387,56 +302,4 @@ test("doctor reports legacy memory migration without erasing the existing index"
   });
   assert.match(result.stdout, /migration-required/);
   assert.equal(fs.readFileSync(index, "utf8"), original);
-});
-test("Note Markdown file input preserves extras without copying neighbors and invalid metadata writes nothing", async (t) => {
-  const { execFileSync } = await import("node:child_process");
-  const root = fixture(t),
-    git = (...args: string[]) =>
-      execFileSync("git", args, { cwd: root, encoding: "utf8" });
-  git("init", "-b", "main");
-  git("config", "user.name", "Test");
-  git("config", "user.email", "test@example.test");
-  put(path.join(root, "AGENTS.md"), "# Root");
-  git("add", ".");
-  git("commit", "-m", "init");
-  const source = path.join(root, "source/document.md"),
-    original = "---\ncustom: keep\n---\n# Title\n\n## Extra\nKeep this\n";
-  put(source, original);
-  put(path.join(root, "source/unrelated.txt"), "neighbor");
-  const call = (title: string) =>
-    run(
-      [
-        "--scope",
-        root,
-        "notes", "create",
-        "--title",
-        title,
-        "--content-file",
-        source,
-        "--markdown",
-        "--co-author",
-        "Codex <noreply@openai.com>",
-        "--dry-run",
-      ],
-      { env: { EDGES_MODE: "direct" } },
-    );
-  const result = await call("Document");
-  assert.equal(result.exitCode, 0, result.stdout);
-  const file = JSON.parse(result.stdout).filePath;
-  assert.match(
-    fs.readFileSync(path.join(root, file), "utf8"),
-    /## Extra\nKeep this/,
-  );
-  assert.equal(
-    fs.existsSync(path.join(root, path.dirname(file), "unrelated.txt")),
-    false,
-  );
-  assert.equal(fs.readFileSync(source, "utf8"), original);
-  const head = git("rev-parse", "HEAD");
-  put(source, "---\ndescription: [invalid]\n---\n# Bad");
-  const invalid = await call("Invalid");
-  assert.notEqual(invalid.exitCode, 0);
-  assert.match(invalid.stdout, /INDEX.md.*description/);
-  assert.equal(git("rev-parse", "HEAD"), head);
-  assert.equal(fs.readdirSync(path.join(root, "notes")).length, 1);
 });

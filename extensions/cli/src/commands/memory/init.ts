@@ -1,6 +1,6 @@
 import { Command, Option } from 'commander';
 import type { CliContext } from '../../context.js';
-import { initMemory } from '../../services/memory/index.js';
+import { initMemory } from '../../services/memory/service.js';
 import { operation, scoped, target, type TargetOptions } from './utils/command.js';
 export function addMemoryInitCommand(memory: Command, ctx: CliContext): void {
     scoped(memory.command('init').description('Initialize system entry (AGENTS.md) and selected memory/skill types, or refresh adopted types'))

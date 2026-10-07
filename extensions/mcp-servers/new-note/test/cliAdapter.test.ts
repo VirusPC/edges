@@ -29,10 +29,9 @@ test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () =>
       "if (process.env.EDGES_REPO !== '/repo') { console.error('repo'); process.exit(1); }",
       "const json = {",
       "  status: 'success',",
-      "  filePath: 'notes/2026-09-11--demo.md',",
-      "  branch: 'ingest/2026-09-11-demo',",
-      "  prStatus: 'created',",
-      "  prUrl: 'https://github.com/org/repo/pull/9'",
+      "  command: 'notes.create',",
+      "  path: 'notes/2026-09-11--demo/INDEX.md',",
+      "  title: 'Demo'",
       "};",
       "process.stdout.write(JSON.stringify(json) + '\\n');",
     ].join("\n"),
@@ -54,8 +53,7 @@ test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () =>
     const result = await runEdgesNote(
       {
         title: "Demo",
-        content: "Body",
-        coAuthor: "OpenAI Codex <codex@openai.com>",
+        body: "Body",
       },
       config,
       {
@@ -67,10 +65,8 @@ test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () =>
       },
     );
 
-    assert.equal(result.filePath, "notes/2026-09-11--demo.md");
-    assert.equal(result.branch, "ingest/2026-09-11-demo");
-    assert.equal(result.prStatus, "created");
-    assert.equal(result.prUrl, "https://github.com/org/repo/pull/9");
+    assert.equal(result.path, "notes/2026-09-11--demo/INDEX.md");
+    assert.equal(result.title, "Demo");
 
     const capture = JSON.parse(await fs.readFile(capturePath, "utf8")) as {
       args: string[];
@@ -81,14 +77,9 @@ test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () =>
       "create",
       "--title",
       "Demo",
-      "--content",
+      "--body",
       "Body",
-      "--co-author",
-      "OpenAI Codex <codex@openai.com>",
       "--json",
-      "--mode",
-      "pr",
-      "--dry-run",
     ]);
     assert.equal(capture.cwd, await fs.realpath(tmp));
   } finally {
@@ -118,8 +109,7 @@ test("runEdgesNote maps CLI failure JSON to a thrown error with errorCode", asyn
       runEdgesNote(
         {
           title: "Demo",
-          content: "Body",
-          coAuthor: "OpenAI Codex <codex@openai.com>",
+          body: "Body",
         },
         config,
         { ...process.env },
@@ -154,8 +144,7 @@ test("runEdgesNote maps a missing CLI entry to SCRIPT_NOT_FOUND", async () => {
     await runEdgesNote(
       {
         title: "Demo",
-        content: "Body",
-        coAuthor: "OpenAI Codex <codex@openai.com>",
+        body: "Body",
       },
       config,
       { ...process.env },
@@ -195,7 +184,20 @@ test("default MCP target follows captured caller scope, with implementation reso
     await fs.mkdir(child, { recursive: true });
     await fs.writeFile(
       path.join(child, "AGENTS.md"),
-      "<!-- project-memory:start -->\n<!-- project-memory-local:start -->",
+      [
+        "# Child",
+        "",
+        "<!-- project-harness-local:start -->",
+        "## 本层系统维护信息",
+        "",
+        "<!-- project-harness-local:end -->",
+        "",
+        "<!-- project-harness-descendants:start -->",
+        "## 下层系统维护信息",
+        "",
+        "<!-- project-harness-descendants:end -->",
+        "",
+      ].join("\n"),
     );
     process.chdir(child);
     const config = loadConfig({
@@ -214,8 +216,7 @@ test("default MCP target follows captured caller scope, with implementation reso
     const result = await runEdgesNote(
       {
         title: "Caller Scope",
-        content: "Fixture",
-        coAuthor: "Codex <noreply@openai.com>",
+        body: "Fixture",
       },
       config,
       {
@@ -225,19 +226,20 @@ test("default MCP target follows captured caller scope, with implementation reso
       },
     );
     assert.match(
-      result.filePath,
-      /^projects\/child\/notes\/\d{4}-\d{2}-\d{2}--caller-scope\/INDEX\.md$/,
+      result.path,
+      /^notes\/\d{4}-\d{2}-\d{2}--caller-scope\/INDEX\.md$/,
     );
+    assert.equal(result.title, "Caller Scope");
     assert.match(
-      await fs.readFile(path.join(root, result.filePath), "utf8"),
+      await fs.readFile(path.join(child, result.path), "utf8"),
       /Fixture/,
     );
-    assert.equal(
-      execFileSync("git", ["show", "--format=", "--name-only", "HEAD"], {
+    assert.throws(() =>
+      execFileSync("git", ["rev-parse", "--verify", "HEAD"], {
         cwd: root,
         encoding: "utf8",
-      }).trim(),
-      result.filePath,
+        stdio: "pipe",
+      }),
     );
   } finally {
     process.chdir(previousCwd);
@@ -262,8 +264,7 @@ test("MCP with no target and no cwd owner returns actionable validation instead 
         runEdgesNote(
           {
             title: "No owner",
-            content: "Fixture",
-            coAuthor: "Codex <noreply@openai.com>",
+            body: "Fixture",
           },
           config,
           {},

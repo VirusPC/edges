@@ -51,15 +51,21 @@ flowchart TD
 
 | 层 | 负责什么 | 例子 |
 | --- | --- | --- |
-| commands | 命令注册、参数与 stdin 适配、stdout/stderr 和退出码 | 把 `tasks create` 转成创建请求 |
-| services | 加载、跨节点协调、文件操作与完整业务流程 | 创建 Task 后登记父 AGENTS、保存、移动整个任务目录 |
+| commands | 命令注册、参数与 stdin 适配、stdout/stderr 和退出码 | 把 `notes create` 转成 `services/notes/service` 的创建请求 |
+| services | 加载、跨节点协调、文件操作与完整业务流程 | 各领域 `service.ts`；创建 Task 后登记父 AGENTS、保存、移动整个任务目录 |
 | models | 节点自身的字段、校验、解析序列化和索引编辑 | Task 优先级校验、InternalNode.addChild |
 | operations | 对多个元素进行遍历、筛选、分组、查找 | traverse、filter、groupBy、Task 数组排序 |
 | utils | 可复用的底层格式与文件机制 | gray-matter 适配、路径与文件原语 |
 
 Model 的 create/update/destroy 是内存领域方法；创建目录、保存文档等完整动作通过 Service 完成。operations 通过回调取得加载能力，不反向依赖 Service。不要让业务调用方重新拼装模型修改与文件读写。
 
-这张图表达职责边界，不代表所有历史代码都已整理完：Tasks 的结果适配仍引用 CliContext，审阅页命令还有流程编排，Artifacts 的部分部署逻辑仍在 commands 下。进一步解耦已登记为[后续任务](../../.harness/tasks/edges-cli-platform/backlog/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md)，不能把当前 commands 全部描述成“只调用 Service”。
+每个领域模块有 `services/<module>/service.ts`。commands 只从这份主文件进入，不直接装配 `NodeService`，也不直接 import 模块里的其他文件。实现可以留在原文件，主文件 re-export 即可，不必为了统一入口把函数搬一遍。`memory` 的 `migrateMemory` 在主文件里动态 `import("./migrate.js")`：这份实现可以不随 CLI 启动加载，命令入口仍是 `service.ts`。notes 与 projects 的主文件固定各自的叶子规格，再委托共用底层。
+
+这些是跨领域工具，不另造 `service.ts`：`services/node/`（`node-service.ts`、`scope-session.ts`，以及带日期 `INDEX.md` 叶子的 `dated-leaf.ts`）、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts`。命令要用其中的符号时，由该领域的 `service.ts` 再导出。进程入口 `program.ts` 在分发命令前直接取 `services/node/node-lock.ts` 的写锁，这不是某个领域命令。
+
+notes、projects、skills、memory、tasks、artifacts、forest 的 commands 都只调用各自的 `service.ts`。tasks 的 list 与审阅页、artifacts server 的安装和进程命令，仍在 command 动作里按原顺序调用这些已导出的函数；调用点收口了，流程本身没有改写。
+
+[解耦 CLI commands 与 Service](../../.harness/tasks/edges-cli-platform/done/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md) 记录了这层入口约定。`services/tasks/result.ts` 仍组装命令运行时（地点、读写和时钟），审阅页命令仍负责读输入、选输出路径和写 HTML。
 
 详细设计按职责分开阅读：
 
@@ -108,7 +114,7 @@ edges --scope <仓库根> --super
             └── memory/feedbacks/README.md
 ```
 
-把 `--scope` 指到 `<仓库根>/.harness` 才是下一层：这个目录本身成为超节点的 `.harness`。它的 children 是该目录下存在的 `tasks/README.md`、`memory/feedbacks/README.md`、`memory/projects/README.md`、`memory/references/README.md`、`skills/managed/README.md`、`skills/referenced/README.md`、`evaluation/README.md`、`observation/README.md`。这不是仓库根那一份名单。
+把 `--scope` 指到 `<仓库根>/.harness` 才是下一层：这个目录本身成为超节点的 `.harness`。它的 children 是该目录下存在的 `tasks/README.md`、`memory/feedbacks/README.md`、`memory/projects/README.md`、`memory/references/README.md`、`skills/managed/README.md`、`skills/referenced/README.md`、`evaluation/README.md`、`observation/README.md`、`projects/README.md`、`notes/README.md`。这不是仓库根那一份名单。
 
 默认 list 从真 `AGENTS.md` 做一次 traverse。`--all` 从当前 `--scope` 走森林。`--super` 只换根。最全的一次查询是 `--scope <仓库根> --super --all`。这三个开关都在根命令上。
 
@@ -193,16 +199,23 @@ edges memory restore --repo-dir /absolute/project --archive /private/archive.tar
 ### 笔记：notes
 
 ```bash
-edges --scope /absolute/project notes create --title "设计结论" \
-  --content-file /tmp/reviewed-note.md --markdown \
-  --co-author "Codex <noreply@openai.com>" --dry-run
+edges --scope /absolute/project notes create --title "Design note" --body "正文。"
+edges --scope /absolute/project notes get notes/2026-10-08--design-note/INDEX.md
+edges --scope /absolute/project notes update notes/2026-10-08--design-note/INDEX.md --body "更新后的正文。"
+edges --scope /absolute/project notes delete notes/2026-10-08--design-note/INDEX.md
 ```
 
-必填 title、content/content-file 和 co-author。`--markdown` 保留已写好的标题与正文，不套入笔记模板；`--import-entry` 校验并复制完整入口目录，不能与正文或 markdown 输入混用。仅 content-file 不复制同目录附件。路径输入只供本地 CLI，HTTP/MCP 不接受本地路径参数。
+`notes create` 只在该 scope 的 `notes/` 下本地创建叶子，不 commit、不 push、不开 PR。标题来自 `--title` 或正文里的一级标题，正文用 `--body`。没有 `--content`、`--import-entry`、`--co-author`、`--mode`、`--dry-run` 或 token 旗标。get 与 delete 只收目标路径；list 用共享的 `--filter` / `--group-by`。stdout 为 JSON，诊断在 stderr；退出码为成功 0、运行错误 1、用法或校验 2。
 
-**notes 的 dry-run 仍会写文件并创建本地 commit，只是不 push。** `EDGES_DRY_RUN=true` 行为相同。stdout 为 JSON，诊断在 stderr；退出码为成功 0、用法或校验 2、鉴权 4、运行错误 1。
+### 项目：projects
 
-若配置 EDGES_AUTH_TOKEN，通过 notes create 的 --token-file 或非 TTY 的 --token-stdin 提供凭据，不把 token 放进命令参数。Git/PR 行为与 Note Service 保持一致。
+```bash
+edges --scope /absolute/project projects create --title "Demo" --body "What this project is."
+edges --scope /absolute/project projects list --filter title=Demo
+edges --scope /absolute/project projects get projects/2026-10-08--demo/INDEX.md
+```
+
+`projects create` 只在该 scope 的 `projects/` 下本地创建叶子，不 commit、不 push、不开 PR。旗标与 `notes` 相同：metadata、`--body`，标题来自 `--title` 或正文一级标题。get 与 delete 只收目标；list 用共享的 `--filter` / `--group-by`。
 
 ### 技能：skills
 
@@ -212,7 +225,7 @@ edges --scope <directory> skills get <name-or-path>
 edges skills delete <name-or-path>
 ```
 
-`skills create` 与 `skills update` 不写 `SKILL.md`，改走 `edges memory remember`。目录对齐 `.harness/skills`；没有 `edges skill` 别名。
+`skills create` 与 `skills update` 写入当前 scope 的 `skills/managed/<name>/SKILL.md`（真系统在 `<scope>/.harness/` 下）。`edges memory remember` 仍可另写 skill 类记忆，两者并列。没有 `edges skill` 别名。
 
 <a id="artifacts"></a>
 

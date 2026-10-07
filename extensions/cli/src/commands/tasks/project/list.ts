@@ -3,11 +3,9 @@ import { Command } from "commander";
 import type { CliContext } from "../../../context.js";
 import { ReadmeNode } from "../../../domain/models/readme/readme-node.js";
 import { runTasksCommand, succeed } from "../run.js";
-import { gitRoot } from "../../../services/scope.js";
-import { NodeService } from "../../../services/node/node-service.js";
 import { harnessMaterialById, tasksBoardDirName } from "../../../domain/config/harness-materials.js";
 import { ENTRY_NAMES } from "../../../domain/models/layout.js";
-import { buildSystemForest } from "../../../services/node/system-forest-service.js";
+import { buildSystemForest, gitRoot, NodeService } from "../../../services/tasks/service.js";
 
 export function addProjectListCommand(project: Command, ctx: CliContext): void {
   project

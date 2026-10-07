@@ -30,6 +30,8 @@
 - [.harness/skills/referenced/README.md](.harness/skills/referenced/README.md) — 本层 `.agents/skills/` 下人写或装入的标准技能，工具只索引不改写。
 - [.harness/evaluation/README.md](<.harness/evaluation/README.md>) — 根作用域的评测维护模块，评测整套 Edges。
 - [根维护任务](<.harness/tasks/README.md>) — 根维护任务入口。
+- [.harness/projects/README.md](<.harness/projects/README.md>) — 项目内容叶子的组织清单。
+- [.harness/notes/README.md](<.harness/notes/README.md>) — 笔记内容叶子的组织清单。
 - [观测职责与资料](<.harness/observation/README.md>) — 观测职责与资料入口。
 - [目录与内容说明](<README.md>) — 目录与内容说明入口。
 - [领域术语](<CONTEXT.md>) — 领域术语入口。
