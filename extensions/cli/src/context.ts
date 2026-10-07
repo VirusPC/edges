@@ -36,27 +36,30 @@ export type CliContext = {
   result: CliResult | undefined;
 };
 
-export function usageError(reason: string, scope: "root" | "note" | "tasks" | "artifacts" | "memory" | "schema"): CliResult {
+export function usageError(reason: string, scope: "root" | "notes" | "tasks" | "artifacts" | "memory" | "skills" | "schema"): CliResult {
   if (scope === "schema") return { exitCode: 2, stdout: "", stderr: `${reason}\nSee edges schema --help for usage.\n` };
   const usage =
-    scope === "note"
-      ? "See edges note --help for usage.\n"
+    scope === "notes"
+      ? "See edges notes --help for usage.\n"
       : scope === "tasks"
         ? "See edges tasks --help for usage.\n"
         : scope === "artifacts"
           ? "See edges artifacts --help for usage.\n"
           : scope === "memory"
             ? "See edges memory --help for usage.\n"
+            : scope === "skills"
+              ? "See edges skills --help for usage.\n"
         : "See edges --help for usage.\n";
   return fail("VALIDATION_ERROR", reason, usage);
 }
 
-export function usageScope(argv: string[]): "root" | "note" | "tasks" | "artifacts" | "memory" | "schema" {
+export function usageScope(argv: string[]): "root" | "notes" | "tasks" | "artifacts" | "memory" | "skills" | "schema" {
   const command = argv.filter((arg, i) => arg !== "--scope" && argv[i - 1] !== "--scope" && !arg.startsWith("--scope=") && arg !== "--super")[0];
-  if (command === "note") return "note";
+  if (command === "notes") return "notes";
   if (command === "tasks") return "tasks";
   if (command === "artifacts") return "artifacts";
   if (command === "schema") return "schema";
   if (command === "memory") return "memory";
+  if (command === "skills") return "skills";
   return "root";
 }

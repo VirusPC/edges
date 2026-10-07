@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { updateNote } from "../../services/note/records.js";
+import { getNote } from "../../services/note/records.js";
 import { resolveScope } from "../../services/scope.js";
 import { fail, succeed } from "../result.js";
 
@@ -9,23 +9,18 @@ function failNote(ctx: CliContext, error: unknown): void {
   ctx.result = fail(
     message.includes("not found") || message.includes("must be") ? "VALIDATION_ERROR" : "UNKNOWN_ERROR",
     message,
-    "See edges note --help for usage.\n",
+    "See edges notes --help for usage.\n",
   );
 }
 
-export function addNoteUpdateCommand(note: Command, ctx: CliContext): void {
+export function addNoteGetCommand(note: Command, ctx: CliContext): void {
   note
-    .command("update")
-    .description("Update a note title or body without git ingest")
+    .command("get")
+    .description("Read one note")
     .argument("<path>", "notes/<stem>/INDEX.md")
-    .option("--title <title>", "New title")
-    .option("--body <markdown>", "New body")
-    .action((entryPath: string, opts: { title?: string; body?: string }) => {
+    .action((entryPath: string) => {
       try {
-        ctx.result = succeed({
-          command: "note.update",
-          ...updateNote(resolveScope(ctx.env), entryPath, opts),
-        });
+        ctx.result = succeed({ command: "notes.get", ...getNote(resolveScope(ctx.env), entryPath) });
       } catch (error) {
         failNote(ctx, error);
       }

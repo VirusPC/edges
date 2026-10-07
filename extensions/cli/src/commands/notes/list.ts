@@ -12,7 +12,7 @@ function failNote(ctx: CliContext, error: unknown): void {
   ctx.result = fail(
     message.includes("not found") || message.includes("must be") ? "VALIDATION_ERROR" : "UNKNOWN_ERROR",
     message,
-    "See edges note --help for usage.\n",
+    "See edges notes --help for usage.\n",
   );
 }
 
@@ -31,7 +31,7 @@ export function addNoteListCommand(note: Command, ctx: CliContext): void {
         const rel = path.relative(scope, node.path).split(path.sep).join("/");
         return [{ stem: path.basename(path.dirname(node.path)), path: rel }];
       });
-      ctx.result = succeed({ command: "note.list", items });
+      ctx.result = succeed({ command: "notes.list", items });
     } catch (error) {
       failNote(ctx, error);
     }

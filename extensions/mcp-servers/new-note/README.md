@@ -2,13 +2,13 @@
 
 TypeScript + Node.js MCP server，用于接收外部 AI 总结并执行仓库 ingest（落盘、commit、push）。
 
-本地有 shell 的 agent 请用 [`cli` 的 `edges note`](../../cli/README.md)，不要默认走 MCP。本 server 留给没有 shell 的宿主。决策：[`.harness/memory/projects/project_cli_from_mcp.md`](../../.harness/memory/projects/project_cli_from_mcp.md)。
+本地有 shell 的 agent 请用 [`cli` 的 `edges notes`](../../cli/README.md)，不要默认走 MCP。本 server 留给没有 shell 的宿主。决策：[`.harness/memory/projects/project_cli_from_mcp.md`](../../.harness/memory/projects/project_cli_from_mcp.md)。
 
 ## What It Does
 
 - 暴露 MCP 工具 `new_note`
 - 接收结构化输入：`title`、`content`、`coAuthor`
-- 子进程调用 `edges note`（与 CLI 同一套 flags / JSON 契约）：
+- 子进程调用 `edges notes create`（与 CLI 同一套 flags / JSON 契约）：
   - 生成 `notes/YYYY-MM-DD--slug.md`
   - `git checkout -b ingest/...`
   - `git commit` + `git push`
@@ -77,7 +77,7 @@ HTTP 模式将在以下端点启动服务器：
   - `pr`: 创建新分支并尝试建立 PR。
 - `GITHUB_TOKEN`: (可选) GitHub 个人访问令牌。仅用于自动创建 PR；如果已配置 `gh` CLI，则不需要。
 - `EDGES_CLI`: (可选) `edges-cli` 入口绝对路径（`dist/index.js` 或 `src/index.ts`）。未设置时优先 `extensions/cli/dist/index.js`，否则回退 `extensions/cli/src/index.ts`。
-- `EDGES_DRY_RUN`: `true` 时给 `edges note` 加上 `--dry-run`。
+- `EDGES_DRY_RUN`: `true` 时给 `edges notes` 加上 `--dry-run`。
 
 ### HTTP 认证 (可选)
 

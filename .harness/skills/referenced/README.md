@@ -21,7 +21,7 @@ format: skills
 - [conversation-to-notes](../../../.agents/skills/conversation-to-notes/SKILL.md) — 将原始对话整理为可独立阅读的中文笔记（记录 + 复盘）：背景/主题/过程/结果/所学/行动指南/补充说明。 主题=一段主题+难点列表；凡写做什么须带可选项与不做原因；取舍在过程保留并在所学与行动指南补充。 行动指南分主题层与细节若则。结果有未闭环项时逐点问清再交 conversation-to-tasks；必须保留原始材料引用。用户说整理/总结对话时使用；入库 VirusPC/edges notes/。
 - [conversation-to-tasks](../../../.agents/skills/conversation-to-tasks/SKILL.md) — 把对话整理成任务（背景 → 目标 → 动作 → 完成标准；后两栏可选）。必填不足先提问；成文后交人审（对话确认或 PR），再用 CLI 落库。分支是否新建不限。
 - [domain-modeling](../../../.agents/skills/domain-modeling/SKILL.md) — Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording or editing an ADR.
-- [edges-note](../../../.agents/skills/edges-note/SKILL.md) — 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 \`edges note\`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
+- [edges-note](../../../.agents/skills/edges-note/SKILL.md) — 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 \`edges notes\`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
 - [executing-plans](../../../.agents/skills/executing-plans/SKILL.md) — Use when you have a written implementation plan to execute in a separate session with review checkpoints
 - [finishing-a-development-branch](../../../.agents/skills/finishing-a-development-branch/SKILL.md) — Use when implementation is complete, all tests pass, and you need to decide how to integrate the work
 - [grill-me](../../../.agents/skills/grill-me/SKILL.md) — A relentless interview to sharpen a plan or design.

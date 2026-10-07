@@ -8,18 +8,18 @@ function stdinFrom(text: string): NodeJS.ReadableStream {
 }
 
 test("readProcessInput drops node and script from argv", async () => {
-  const input = await readProcessInput(["node", "src/index.ts", "note", "--help"], {
+  const input = await readProcessInput(["node", "src/index.ts", "notes", "--help"], {
     stdin: stdinFrom("unused"),
     isTTY: true,
   });
-  assert.deepEqual(input.argv, ["note", "--help"]);
+  assert.deepEqual(input.argv, ["notes", "--help"]);
   assert.equal(input.stdinText, undefined);
   assert.equal(input.stdinIsTTY, true);
 });
 
 test("readProcessInput does not drain stdin without --token-stdin", async () => {
   const stdin = stdinFrom("secret\n");
-  const input = await readProcessInput(["node", "edges", "note", "--title", "x"], {
+  const input = await readProcessInput(["node", "edges", "notes", "--title", "x"], {
     stdin,
     isTTY: false,
   });
@@ -27,7 +27,7 @@ test("readProcessInput does not drain stdin without --token-stdin", async () => 
 });
 
 test("readProcessInput drains stdin when --token-stdin and not a TTY", async () => {
-  const input = await readProcessInput(["node", "edges", "note", "--token-stdin"], {
+  const input = await readProcessInput(["node", "edges", "notes", "--token-stdin"], {
     stdin: stdinFrom("secret\n"),
     isTTY: false,
   });
@@ -44,7 +44,7 @@ test("readProcessInput drains stdin when --from - and not a TTY", async () => {
 });
 
 test("readProcessInput skips stdin on a TTY even with --token-stdin", async () => {
-  const input = await readProcessInput(["node", "edges", "note", "--token-stdin"], {
+  const input = await readProcessInput(["node", "edges", "notes", "--token-stdin"], {
     stdin: stdinFrom("secret\n"),
     isTTY: true,
   });

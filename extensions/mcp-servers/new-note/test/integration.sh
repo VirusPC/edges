@@ -14,7 +14,7 @@ git -C "$ISOLATED" config user.email "tester@example.com"
 git -C "$ISOLATED" config user.name "Tester"
 export EDGES_REPO="$ISOLATED"
 
-echo "Starting integration tests via edges note"
+echo "Starting integration tests via edges notes"
 
 TITLE="Test Direct Mode $(date +%s)"
 OUTPUT="$(

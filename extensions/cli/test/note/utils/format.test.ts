@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { formatResult } from "../../../src/commands/note/format.js";
+import { formatResult } from "../../../src/commands/notes/format.js";
 
 test("formatted success includes file path, branch, and pr status", () => {
   const json = formatResult({

@@ -47,10 +47,10 @@ function validateNoteOptions(opts: IngestCliOptions):
     } {
   const mode = opts.mode;
   if (mode !== undefined && mode !== "pr" && mode !== "direct") {
-    return usageError('--mode must be "direct" or "pr"', "note");
+    return usageError('--mode must be "direct" or "pr"', "notes");
   }
   if (opts.tokenFile && opts.tokenStdin) {
-    return usageError("use only one of --token-file or --token-stdin", "note");
+    return usageError("use only one of --token-file or --token-stdin", "notes");
   }
   const title = opts.title;
   const content = opts.content;
@@ -60,7 +60,7 @@ function validateNoteOptions(opts: IngestCliOptions):
   if (!content) missing.push("--content");
   if (!coAuthor) missing.push("--co-author");
   if (!title || !content || !coAuthor) {
-    return usageError(`missing required flags: ${missing.join(", ")}`, "note");
+    return usageError(`missing required flags: ${missing.join(", ")}`, "notes");
   }
   return {
     title,
@@ -74,7 +74,7 @@ function validateNoteOptions(opts: IngestCliOptions):
 }
 
 /**
- * Auth flags (`--token-file`, `--token-stdin`) stay on `note create` — same
+ * Auth flags (`--token-file`, `--token-stdin`) stay on `notes create` — same
  * optional gate as the new-note MCP HTTP server.
  */
 export function addNoteCreateCommand(note: Command, ctx: CliContext): void {
@@ -142,7 +142,7 @@ export function addNoteCreateCommand(note: Command, ctx: CliContext): void {
         } catch (error) {
           ctx.result = usageError(
             `Cannot read --import-entry: ${String(error)}`,
-            "note",
+            "notes",
           );
           return;
         }
@@ -155,7 +155,7 @@ export function addNoteCreateCommand(note: Command, ctx: CliContext): void {
         } catch (error) {
           ctx.result = usageError(
             `Cannot read --content-file: ${String(error)}`,
-            "note",
+            "notes",
           );
           return;
         }
@@ -175,7 +175,7 @@ export function addNoteCreateCommand(note: Command, ctx: CliContext): void {
         });
       } catch (error) {
         if (error instanceof ZodError) {
-          ctx.result = usageError(formatZodReason(error), "note");
+          ctx.result = usageError(formatZodReason(error), "notes");
           return;
         }
         throw error;

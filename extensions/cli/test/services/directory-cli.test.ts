@@ -137,7 +137,7 @@ test("Note CLI preserves authored Markdown and commits only its explicit owned r
     [
       "--scope",
       root,
-      "note", "create",
+      "notes", "create",
       "--title",
       "Filename title",
       "--import-entry",
@@ -324,7 +324,7 @@ test("Note import commits its parent registration and keeps source bytes unchang
     [
       "--scope",
       root,
-      "note", "create",
+      "notes", "create",
       "--title",
       "Imported",
       "--import-entry",
@@ -408,7 +408,7 @@ test("Note Markdown file input preserves extras without copying neighbors and in
       [
         "--scope",
         root,
-        "note", "create",
+        "notes", "create",
         "--title",
         title,
         "--content-file",

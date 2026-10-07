@@ -19,7 +19,7 @@ test("memory create and update point at remember", async () => {
 
 test("skill create and update point at remember", async () => {
   for (const verb of ["create", "update"] as const) {
-    const result = await run(["skill", verb]);
+    const result = await run(["skills", verb]);
     assert.equal(result.exitCode, 2);
     const body = failed(result.stdout);
     assert.equal(body.errorCode, "VALIDATION_ERROR");
