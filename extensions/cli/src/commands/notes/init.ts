@@ -1,7 +1,6 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../../context.js";
 import { initNotes } from "../../services/notes/service.js";
-import { resolveScope } from "../../services/memory/service.js";
 import { fail, succeed } from "../result.js";
 
 const HELP = "See edges notes init --help for usage.\n";
@@ -23,10 +22,7 @@ export function addNoteInitCommand(notes: Command, ctx: CliContext): void {
         indexGroup?: "local" | "descendant";
       }) => {
         try {
-          const result = await initNotes({
-            ...options,
-            targetDir: options.targetDir ?? resolveScope(ctx.env),
-          });
+          const result = await initNotes({ ...options, env: ctx.env });
           ctx.result = succeed({ ...result, command: "notes.init" });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

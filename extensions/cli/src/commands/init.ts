@@ -1,7 +1,6 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../context.js";
 import { initScope } from "../services/init/service.js";
-import { resolveScope } from "../services/memory/service.js";
 import { fail, succeed } from "./result.js";
 
 const HELP = "See edges init --help for usage.\n";
@@ -47,11 +46,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
         },
       ) => {
         try {
-          const result = await initScope({
-            ...options,
-            modules,
-            targetDir: options.targetDir ?? resolveScope(ctx.env),
-          });
+          const result = await initScope({ ...options, modules, env: ctx.env });
           ctx.result = succeed({ ...result, command: "init" });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

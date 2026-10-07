@@ -1,6 +1,5 @@
 import { Command, Option } from "commander";
 import type { CliContext } from "../../context.js";
-import { resolveScope } from "../../services/memory/service.js";
 import { initProjects } from "../../services/projects/service.js";
 import { fail, succeed } from "../result.js";
 
@@ -23,10 +22,7 @@ export function addProjectInitCommand(projects: Command, ctx: CliContext): void 
         indexGroup?: "local" | "descendant";
       }) => {
         try {
-          const result = await initProjects({
-            ...options,
-            targetDir: options.targetDir ?? resolveScope(ctx.env),
-          });
+          const result = await initProjects({ ...options, env: ctx.env });
           ctx.result = succeed({ ...result, command: "projects.init" });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

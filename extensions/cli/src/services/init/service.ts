@@ -23,6 +23,7 @@ import {
   resolveTarget,
 } from "../memory/paths.js";
 import { memoryNodes, prepareMemoryWrite } from "../memory/service.js";
+import { resolveScope } from "../scope.js";
 import { readIndexTemplate } from "../memory/templates.js";
 import {
   MEMORY_TYPE_NAMES,
@@ -49,7 +50,8 @@ import {
 export type { InitMemoryOptions };
 
 export interface InitScopeOptions {
-  targetDir: string;
+  targetDir?: string;
+  env?: NodeJS.ProcessEnv;
   rootDir?: string;
   description?: string;
   indexGroup?: ChildGroup;
@@ -312,6 +314,7 @@ async function ensureScopeEntry(options: InitMemoryOptions) {
 }
 
 export async function initScope(options: InitScopeOptions) {
+  const targetDir = options.targetDir ?? resolveScope(options.env ?? process.env);
   const requested =
     options.modules === undefined || options.modules.length === 0
       ? [...DEFAULT_INIT_MODULES]
@@ -327,7 +330,7 @@ export async function initScope(options: InitScopeOptions) {
   if (requested.includes("memory")) {
     const memoryResult = await runMemoryInit(
       {
-        targetDir: options.targetDir,
+        targetDir,
         rootDir: options.rootDir,
         description: options.description,
         indexGroup: options.indexGroup,
@@ -350,7 +353,7 @@ export async function initScope(options: InitScopeOptions) {
     };
   }
 
-  const scope = await ensureScopeEntry(options);
+  const scope = await ensureScopeEntry({ ...options, targetDir });
   const boards = await ensureHarnessBoards(scope.targetDir, requested, scope.service);
   return {
     targetDir: scope.targetDir,

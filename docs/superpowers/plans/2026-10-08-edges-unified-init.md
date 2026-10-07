@@ -177,4 +177,4 @@
 ### Task 4: 任务卡与全量对比
 
 - [x] **Step 10:** `edges tasks status` 把 `edges-unified-init` 移到 in_progress。`edges tasks update --body` 追加决策摘要（链到本 plan），并注明无参 init 的 memory 组织清单指 feedback/project/reference 三个类型 README。不改背景和目标。勾上已达成的完成标准。log 记下 grill、决策、实现。合入前留在 in_progress。
-- [ ] **Step 11:** `extensions/cli` 下 `tsc --noEmit`。先跑本分支 `pnpm test`，结束后再在独立 worktree 跑 main 的 `pnpm test`。本分支有而 main 没有的失败必须为空。
+- [x] **Step 11:** `extensions/cli` 下 `tsc --noEmit`。先跑本分支 `pnpm test`，结束后再在独立 worktree 跑 main 的 `pnpm test`。本分支有而 main 没有的失败必须为空。
