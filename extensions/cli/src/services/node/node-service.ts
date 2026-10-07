@@ -220,6 +220,7 @@ export class NodeService {
       // resolve and load are sequential; carry this edge's policy into its one load.
       let readonly = false;
       yield* traverse(root, options, (parent, reference) => {
+        if (options.excludeRoots?.has(reference.id)) return undefined;
         if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.

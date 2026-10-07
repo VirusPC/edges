@@ -10,8 +10,12 @@ export interface ScopeTraversalOptions {
   includeHarness?: boolean;
   /** Explicit `--super`: root traversal at a runtime SuperAgentsNode. */
   super?: boolean;
+  /**
+   * Forest assembly: do not descend into these absolute entry paths
+   * (other system roots). Used outside traverse's single-system contract.
+   */
+  excludeRoots?: ReadonlySet<string>;
 }
-
 /** Same-directory README next to an AGENTS.md (content face). Not an AGENTS child. */
 export function contentFaceReadme(node: BaseNode): NodeReference | undefined {
   if (node.type !== "agents") return undefined;
