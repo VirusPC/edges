@@ -60,12 +60,11 @@ test("README local/descendants honour localOnly", async () => {
   const tasksReadme = readme("scope/tasks");
   const lowerReadme = readme("scope/lower");
   const scopeReadme = readme("scope", [tasksReadme], [lowerReadme]);
-  const root = agents("scope");
-  const { run } = graph([root, scopeReadme, tasksReadme, lowerReadme]);
+  const { run } = graph([scopeReadme, tasksReadme, lowerReadme]);
   assert.deepEqual(await run(scopeReadme, { localOnly: true }), [scopeReadme.path, tasksReadme.path]);
 });
 
-test("scope AGENTS merges same-dir README composition edges at traverse time", async () => {
+test("real AGENTS traverse does not reach same-dir README content face", async () => {
   const mem = agents("scope/.harness/memory/projects");
   const tasksReadme = readme("scope/tasks");
   const lowerReadme = readme("scope/lower");
@@ -74,27 +73,30 @@ test("scope AGENTS merges same-dir README composition edges at traverse time", a
   const { run } = graph([scopeAgents, scopeReadme, mem, tasksReadme, lowerReadme]);
 
   const paths = await run(scopeAgents);
-  assert.deepEqual(paths, [scopeAgents.path, mem.path, scopeReadme.path, tasksReadme.path, lowerReadme.path]);
+  assert.deepEqual(paths, [scopeAgents.path, mem.path]);
+  assert.ok(!paths.includes(scopeReadme.path));
+  assert.ok(!paths.includes(tasksReadme.path));
 
-  for (const ref of [...scopeAgents.localChildren, ...scopeAgents.descendantChildren])
-    assert.ok(!ref.id.includes("/tasks/"), "AGENTS fields must not carry README edges");
-  assert.ok(!scopeAgents.children.some((c) => c.id === scopeReadme.id));
-  for (const ref of scopeReadme.descendantChildren) assert.equal(ref.id.split("/").pop(), "README.md");
-
-  const local = await run(scopeAgents, { localOnly: true });
-  assert.ok(local.includes(tasksReadme.path));
-  assert.ok(!local.includes(lowerReadme.path));
+  const withFace = await run(scopeAgents, { includeContentFace: true });
+  assert.deepEqual(withFace, [
+    scopeAgents.path,
+    mem.path,
+    scopeReadme.path,
+    tasksReadme.path,
+    lowerReadme.path,
+  ]);
 });
 
-test("missing same-dir README is skipped; non-AGENTS roots get no companion", async () => {
-  const item = new LeafNode("/r/scope/item/index.md");
-  const scopeAgents = agents("scope", [item]);
-  const { run } = graph([scopeAgents, item]);
-  assert.deepEqual(await run(scopeAgents), [scopeAgents.path, item.path]);
-
-  const scopeReadme = readme("scope");
-  const other = agents("scope");
-  assert.deepEqual(await graph([scopeReadme, other]).run(scopeReadme), [scopeReadme.path]);
+test("includeContentFace localOnly still reaches README local only", async () => {
+  const mem = agents("scope/.harness/memory/projects");
+  const tasksReadme = readme("scope/tasks");
+  const lowerReadme = readme("scope/lower");
+  const scopeAgents = agents("scope", [mem]);
+  const scopeReadme = readme("scope", [tasksReadme], [lowerReadme]);
+  const { run } = graph([scopeAgents, scopeReadme, mem, tasksReadme, lowerReadme]);
+  const local = await run(scopeAgents, { includeContentFace: true, localOnly: true });
+  assert.ok(local.includes(tasksReadme.path));
+  assert.ok(!local.includes(lowerReadme.path));
 });
 
 const scopeAgentsMd = `# Scope
@@ -114,7 +116,7 @@ Keep constraints.
 <!-- project-harness-descendants:end -->
 `;
 
-test("NodeService reaches README composition from scope AGENTS; localOnly narrows", async (t) => {
+test("NodeService list from AGENTS is system-two only; --super reaches content face", async (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "dual-entry-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const write = (name: string, text: string) => {
@@ -130,16 +132,16 @@ test("NodeService reaches README composition from scope AGENTS; localOnly narrow
   write("lower/README.md", "# Lower\n");
   const service = new NodeService({ managedRoot: root });
   const rel = (nodes: BaseNode[]) => nodes.map((n) => path.relative(root, n.path));
-  assert.deepEqual(rel(await service.list(root)), ["AGENTS.md", "README.md", "tasks/README.md", "lower/README.md"]);
-  assert.deepEqual(rel(await service.list(root, { localOnly: true })), ["AGENTS.md", "README.md", "tasks/README.md"]);
-  const agentsNode = (await service.list(root))[0] as AgentsNode;
-  assert.equal(agentsNode.children.length, 0);
-
-  fs.rmSync(path.join(root, "README.md"));
-  assert.deepEqual(rel(await new NodeService({ managedRoot: root }).list(root)), ["AGENTS.md"]);
+  assert.deepEqual(rel(await service.list(root)), ["AGENTS.md"]);
+  const superList = await service.list(root, { super: true });
+  assert.equal(path.basename(path.dirname(superList[0]!.path)), ".super");
+  assert.deepEqual(
+    superList.slice(1).map((n) => path.relative(root, n.path)),
+    ["README.md", "tasks/README.md", "lower/README.md"],
+  );
 });
 
-test("harness discovery walks a dual-file pair reached from its README without a composition cycle", async (t) => {
+test("harness discovery from AGENTS does not walk content face without includeContentFace", async (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "dual-entry-harness-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const write = (name: string, text: string) => {
@@ -152,7 +154,7 @@ test("harness discovery walks a dual-file pair reached from its README without a
   write("notes/README.md", "# Notes\n");
   const rel = (nodes: BaseNode[]) => nodes.map((n) => path.relative(root, n.path));
   const nodes = await new NodeService({ managedRoot: root }).query(root, { includeHarness: true }).toArray().value();
-  assert.deepEqual(rel(nodes), ["AGENTS.md", "README.md", "notes/README.md", "notes/AGENTS.md"]);
+  assert.deepEqual(rel(nodes), ["AGENTS.md"]);
 });
 
 test("harness discovery skips symlinked mirrors of entries reachable by their real path", async (t) => {

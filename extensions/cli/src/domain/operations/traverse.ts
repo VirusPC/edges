@@ -8,31 +8,39 @@ export interface ScopeTraversalOptions {
   /** When true, expand only localChildren. Default false: local ∪ descendants. */
   localOnly?: boolean;
   includeHarness?: boolean;
-  /** Explicit `--super`: root traversal at a runtime SuperAgentsNode over the Edges root README.md. */
+  /**
+   * Write-path graph closure only: also visit the same-directory README next to
+   * an AGENTS.md so reference rewrite can see content-face holders. Default
+   * false — query from a real AGENTS must not reach README composition.
+   * Content queries use `--super` / SuperAgentsNode instead.
+   */
+  includeContentFace?: boolean;
+  /** Explicit `--super`: root traversal at a runtime SuperAgentsNode. */
   super?: boolean;
 }
 
-/**
- * Dual-file scope contract: a scope AGENTS.md is accompanied by the README.md
- * in the same directory. The edge exists only at traversal time; it is never
- * written into the AGENTS composition fields. Callers decide, in resolve,
- * whether the companion file exists.
- */
-export function companionReadme(node: BaseNode): NodeReference | undefined {
+/** Same-directory README next to an AGENTS.md (content face). Not an AGENTS child. */
+export function contentFaceReadme(node: BaseNode): NodeReference | undefined {
   if (node.type !== "agents") return undefined;
   if (basename(node.path) !== ENTRY_NAMES.internal) return undefined;
   return { id: join(dirname(node.path), ENTRY_NAMES.readme) };
 }
 
-export function isCompanionReadme(
+/** @deprecated Use contentFaceReadme */
+export const companionReadme = contentFaceReadme;
+
+export function isContentFaceReadme(
   parent: BaseNode,
   reference: NodeReference,
 ): boolean {
   return (
-    companionReadme(parent)?.id === reference.id &&
+    contentFaceReadme(parent)?.id === reference.id &&
     !parent.children.some((child) => child.id === reference.id)
   );
 }
+
+/** @deprecated Use isContentFaceReadme */
+export const isCompanionReadme = isContentFaceReadme;
 
 function expandedChildren(
   node: BaseNode,
@@ -41,8 +49,9 @@ function expandedChildren(
   const own = options.localOnly
     ? (node.localChildren ?? node.children)
     : node.children;
-  const companion = companionReadme(node);
-  return companion ? [...own, companion] : own;
+  if (!options.includeContentFace) return own;
+  const face = contentFaceReadme(node);
+  return face ? [...own, face] : own;
 }
 
 export interface NodeQueryOptions extends ScopeTraversalOptions {
@@ -79,8 +88,8 @@ export async function* traverse(
         const target = resolve(node, reference);
         if (target === undefined) continue;
         if (active.has(target)) {
-          // The dual-file pair links both ways at runtime: README harness → AGENTS → companion README.
-          if (reference === harness || isCompanionReadme(node, reference)) continue;
+          // README harness → AGENTS and write-path content-face edges are dual links, not cycles.
+          if (reference === harness || isContentFaceReadme(node, reference)) continue;
           throw new Error(`Composition cycle: ${target}`);
         }
         if (!seen.has(target))

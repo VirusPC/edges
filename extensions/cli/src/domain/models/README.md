@@ -28,9 +28,9 @@ flowchart TB
   A -. "不并边" .- R
 ```
 
-**与现行代码的差距：** `operations/traverse` 里若仍有「从 AGENTS 临时并同目录 README」的 companion 逻辑，视为待删的实现残留；目标模型以本节与 `CONTEXT.md` 为准。
+查询路径已对齐：默认不从真 AGENTS 并 README。写路径可用 `includeContentFace` 闭合引用图。详见 [operations README](../operations/README.md)。
 
-设计真源：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md)。相关记忆：`feedback_cli_is_system_two_ops`、`feedback_content_via_super_agents_node`、`project_grill_traverse_default_all_children`。
+设计真源：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md)。相关记忆：`feedback_cli_is_system_two_ops`、`feedback_content_via_super_agents_node`。
 
 ## 类与节点关系
 

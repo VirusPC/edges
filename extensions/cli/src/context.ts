@@ -27,7 +27,7 @@ export type CliContext = {
   env: NodeJS.ProcessEnv;
   stdinText?: string;
   stdinIsTTY?: boolean;
-  /** Explicit `--super`: traverse from a runtime SuperAgentsNode over the Edges root README. */
+  /** Explicit `--super`: traverse from SuperAgentsNode over the scope content-face README. */
   super?: boolean;
   indexGroup?: "local" | "descendant";
   purpose?: "domain" | "maintenance";

@@ -34,7 +34,7 @@ function write(root: string, rel: string, source: string): void {
   fs.writeFileSync(path.join(root, rel), source);
 }
 
-/** Maintenance board whose Task Projects are reached only through the board README companion. */
+/** Maintenance board whose Task Projects live on the board README content face. */
 async function readmeBoard(): Promise<string> {
   const repo = fs.realpathSync(await mkdtemp(path.join(tmpdir(), "edges-readme-projects-")));
   write(repo, "AGENTS.md", scopeAgents("- [Tasks](.harness/tasks/AGENTS.md) — board"));
@@ -114,7 +114,7 @@ test("cross-project move updates both project READMEs", async (t) => {
   assert.deepEqual(listed.tasks.map((task: any) => task.project).sort(), ["alpha", "beta"]);
 });
 
-test("destroy removes references held by READMEs reached only through the companion edge", async (t) => {
+test("destroy removes references held by READMEs reached via write-path content face", async (t) => {
   const repo = await readmeBoard();
   t.after(() => rm(repo, { recursive: true, force: true }));
   const created = await cli(repo, ["create", "--title", "Doomed", "--project", "alpha"]);

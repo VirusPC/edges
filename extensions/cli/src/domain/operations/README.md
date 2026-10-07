@@ -127,11 +127,15 @@ roots 是一个已加载节点或一组节点。resolve 返回 undefined 可跳�
 | 根 | 何时 | 走到什么 |
 | --- | --- | --- |
 | 真 `AGENTS.md` | CLI 默认（`--scope`） | 仅该系统的系统二（维护信息、下层 AGENTS） |
-| `SuperAgentsNode` | 显式 `--super` | 内容面（README 上的 tasks/notes 等），**当作虚拟系统的系统二** |
+| `SuperAgentsNode` | 显式 `--super` | 内容面（scope 或仓根 `README.md` 上的 tasks/notes 等），**当作虚拟系统的系统二** |
 
-同目录 `AGENTS.md` 与 `README.md` 在磁盘上是**并列登记**：系统一孩子只写在 README，不写进 AGENTS 组成字段。目标模型下，从真 AGENTS 出发**不要**再临时并一条 README 边；到不了内容面是预期。要逛内容面须换根到 `SuperAgentsNode`（见 [models README 设计原则](../models/README.md#设计原则树与入口)）。
+同目录 `AGENTS.md` 与 `README.md` 在磁盘上是**并列登记**：系统一孩子只写在 README，不写进 AGENTS 组成字段。从真 AGENTS 的 **query/list 默认不并 README 边**；到不了内容面是预期。要逛内容面须 `--super`。
 
-**现行代码残留：** 若 `companionReadme` / 遍历仍从 AGENTS 并同目录 README，属于待对齐目标模型的实现，新逻辑勿再依赖该并边。
+Task 板发现（`taskBoardQuery`）默认**并查两面**：内容面（org-list 项目与其 Task）+ 真 AGENTS（系统入口项目与遗留链）。单面排查时显式传 `super: true|false`。
+
+| 选项 | 行为 |
+| --- | --- |
+| `includeContentFace: true` | **仅写路径图闭合**（move/destroy 的 `#registered` / `#validateGraph`）：额外拜访同目录 README，以便改写内容面上的引用。不是把 README 变成 AGENTS 的 child，查询默认关闭。 |
 
 遍历按需进行深度优先、先序访问，已访问路径去重；遇到仍在当前递归路径中的节点时报组成环错误。同一节点被多处引用时只输出一次。解析或加载失败向上传递，不自动修复或回退到扫描。
 

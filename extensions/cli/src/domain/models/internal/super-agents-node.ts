@@ -6,9 +6,9 @@ import type { NodeReference } from "../core/types.js";
 export const SUPER_ENTRY_DIR = ".super";
 
 /**
- * Virtual AGENTS one level above `scopeDir`, created only by an explicit
- * `--super`. Its composition is supplied by the caller (for an Edges
- * repository: the root README.md) and is never parsed from or written to disk.
+ * Virtual AGENTS for `scopeDir`, created only by an explicit `--super`.
+ * Composition is the content-face README (supplied by the caller) treated as
+ * this virtual system's system two. Never parsed from or written to disk.
  */
 export class SuperAgentsNode extends AgentsNode {
   readonly scopeDir: string;

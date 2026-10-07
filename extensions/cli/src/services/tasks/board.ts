@@ -155,7 +155,13 @@ export async function listProjectIds(
   fs: BoardFs,
 ): Promise<TaskProjectId[]> {
   const target = typeof repoPath === 'string' ? taskBoardLocation(repoPath, 'domain') : repoPath;
-  const nodes = await (await taskBoardQuery(target, ['agents', 'readme'])).value();
+  // Content face (board README) holds org-list projects; real AGENTS still holds
+  // system-entry projects and legacy README links awaiting migration.
+  const [fromContent, fromAgents] = await Promise.all([
+    (await taskBoardQuery(target, ["agents", "readme"], { super: true })).value(),
+    (await taskBoardQuery(target, ["agents", "readme"], { super: false })).value(),
+  ]);
+  const nodes = [...fromContent, ...fromAgents];
   const board = await fs.exists(boardRoot(repoPath)) ? realpathSync(boardRoot(repoPath)) : boardRoot(repoPath);
   const names = new Set(nodes
     .filter(node => (node instanceof AgentsNode || node instanceof ReadmeNode) && path.dirname(node.directoryPath) === board)

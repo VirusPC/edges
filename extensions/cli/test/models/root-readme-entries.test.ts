@@ -11,6 +11,7 @@ const rootReadme = join(repoRoot, "README.md");
 test("repo root README project-entries-local includes domain tasks board", () => {
   const node = new ReadmeNode(rootReadme).parse(readFileSync(rootReadme, "utf8"));
   const ids = node.localChildren.map((c) => c.id);
-  assert.ok(ids.some((id) => id.endsWith("/tasks/AGENTS.md")));
+  // Domain board is registered on the content face (README), not as an AGENTS child.
+  assert.ok(ids.some((id) => id.endsWith("/tasks/README.md")));
   assert.ok(ids.some((id) => id.endsWith("/notes/README.md")));
 });

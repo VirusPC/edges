@@ -81,7 +81,7 @@ function addRootCommand(
     )
     .option(
       "--super",
-      "Root at a runtime SuperAgentsNode over the Edges root README.md (never written to disk)",
+      "Root at a runtime SuperAgentsNode over the scope content-face README (never written to disk)",
     )
     .description("Edges CLI: notes, tasks, artifacts, and more")
     .version(VERSION, "-v, --version", "Print version")

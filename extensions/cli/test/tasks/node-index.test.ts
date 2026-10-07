@@ -29,7 +29,8 @@ test("created projects and tasks are recursively discoverable, then moves replac
     assert.equal(created.exitCode, 0, created.stdout);
     const stem = JSON.parse(created.stdout).stem as string;
     const service = new NodeService({ managedRoot: board });
-    let nodes = await service.list(board);
+    // Content-face tasks/projects are discovered via SuperAgentsNode, not real AGENTS.
+    let nodes = await service.list(board, { super: true });
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
     assert.ok(nodes.some((node) => node.path === path.join(board, "cli/README.md")));
     const projectNode = await service.get(path.join(board, "cli/README.md"), ReadmeNode);
@@ -39,7 +40,7 @@ test("created projects and tasks are recursively discoverable, then moves replac
 
     const moved = await call(root, ["status", stem, "done"]);
     assert.equal(moved.exitCode, 0, moved.stdout);
-    nodes = await new NodeService({ managedRoot: board }).list(board);
+    nodes = await new NodeService({ managedRoot: board }).list(board, { super: true });
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
     assert.ok(nodes.some((node) => node.path === path.join(board, `cli/done/${stem}/INDEX.md`)));
     const old = await new NodeService({ managedRoot: board }).get(path.join(board, "cli/README.md"), ReadmeNode);
@@ -48,7 +49,7 @@ test("created projects and tasks are recursively discoverable, then moves replac
 
     const regrouped = await call(root, ["update", stem, "--project", "default"]);
     assert.equal(regrouped.exitCode, 0, regrouped.stdout);
-    nodes = await new NodeService({ managedRoot: board }).list(board);
+    nodes = await new NodeService({ managedRoot: board }).list(board, { super: true });
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
     assert.ok(nodes.some((node) => node.path === path.join(board, `_default/done/${stem}/INDEX.md`)));
     const destinationProject = await new NodeService({ managedRoot: board }).get(path.join(board, "_default/README.md"), ReadmeNode);
@@ -108,7 +109,7 @@ test("creating in a new named project registers its full discovery chain", async
   try {
     const created = await call(root, ["create", "--title", "Direct project task", "--project", "cli"]);
     assert.equal(created.exitCode, 0, created.stdout);
-    const nodes = await new NodeService({ managedRoot: board }).list(board);
+    const nodes = await new NodeService({ managedRoot: board }).list(board, { super: true });
     assert.equal(nodes.filter((node) => node instanceof TaskNode).length, 1);
     assert.ok(nodes.some((node) => node.path === path.join(board, "cli/README.md")));
     const projectNode = await new NodeService({ managedRoot: board }).get(path.join(board, "cli/README.md"), ReadmeNode);

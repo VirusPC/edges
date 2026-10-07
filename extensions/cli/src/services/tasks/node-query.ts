@@ -20,10 +20,16 @@ import {
   type TaskPurpose,
 } from "./paths.js";
 
-/** No physical directory enumeration: absent boards are empty, old boards need migration. */
+/**
+ * Board discovery without physical directory enumeration.
+ * - `super: true` — content face only (board README as virtual system two)
+ * - `super: false` — real board AGENTS only (system-entry projects)
+ * - omit `super` — union both faces (org-list + system-entry); default for list/get
+ */
 export async function taskBoardQuery(
   target: TaskBoardLocation,
   types: readonly string[] = ["task"],
+  options: { super?: boolean } = {},
 ) {
   if (!fs.existsSync(target.boardDir))
     return query(async function* (): AsyncGenerator<BaseNode> {});
@@ -56,7 +62,27 @@ export async function taskBoardQuery(
       "VALIDATION_ERROR",
       `Task board index missing; migrate this board: ${entry}`,
     );
-  return service.query(root, { types, localOnly: true });
+  const faces =
+    options.super === true
+      ? (["content"] as const)
+      : options.super === false
+        ? (["agents"] as const)
+        : (["content", "agents"] as const);
+  return query(async function* () {
+    const seen = new Set<string>();
+    for (const face of faces) {
+      if (face === "content" && !fs.existsSync(path.join(root, "README.md")))
+        continue;
+      const nodes = await service
+        .query(root, { types, localOnly: true, super: face === "content" })
+        .value();
+      for (const node of nodes) {
+        if (seen.has(node.path)) continue;
+        seen.add(node.path);
+        yield node;
+      }
+    }
+  });
 }
 export async function listTaskNodes(
   target: TaskBoardLocation,
@@ -72,7 +98,13 @@ export async function listRepositoryTaskNodes(
   const canonicalRoot = fs.realpathSync(root);
   const service = new NodeService({ managedRoot: canonicalRoot });
   return service.query(canonicalRoot, {
-    types: ["task"], includeHarness: true, super: options.super,
+    types: ["task"],
+    includeHarness: true,
+    // Explicit --super: SuperAgentsNode over content-face README.
+    // Otherwise stay on real AGENTS but includeContentFace so board READMEs
+    // (where Task Projects list tasks) remain reachable for repository scans.
+    super: options.super,
+    includeContentFace: !options.super,
   })
     .filter((node): node is TaskNode => node instanceof TaskNode)
     .value();

@@ -42,7 +42,7 @@ import {
   type Model,
 } from "./node-layout.js";
 import { query, type AsyncQuery } from "../../domain/operations/query.js";
-import { traverse, isCompanionReadme } from "../../domain/operations/traverse.js";
+import { traverse, isContentFaceReadme } from "../../domain/operations/traverse.js";
 import { NodeCache } from "./node-cache.js";
 
 type Operation = "create" | "update" | "move" | "destroy" | "import";
@@ -195,15 +195,25 @@ export class NodeService {
     if (!node) throw new Error(`Missing referenced node: ${reference.id}`);
     return node;
   }
-  /** Runtime-only super entry: one level above the scope, mounting the Edges root README.md. */
+  /**
+   * Runtime-only super entry for this scope: mounts the content-face README
+   * (scope README, else git-root README) as the virtual system's system two.
+   */
   #superRoot(scopePath: string): SuperAgentsNode {
     const scopeDir = path.basename(scopePath) === "AGENTS.md"
       ? path.dirname(path.resolve(scopePath)) : path.resolve(scopePath);
+    const scopeReadme = path.join(scopeDir, "README.md");
+    if (fs.existsSync(scopeReadme))
+      return new SuperAgentsNode(scopeDir, [{ id: scopeReadme }]);
     const edgesRoot = findAncestor(scopeDir, isGitBoundary) ?? scopeDir;
-    const readme = path.join(edgesRoot, "README.md");
-    if (!fs.existsSync(readme))
-      throw new Error(`--super requires the Edges root README.md: ${readme}`);
-    return new SuperAgentsNode(scopeDir, [{ id: readme }]);
+    const rootReadme = path.join(edgesRoot, "README.md");
+    if (fs.existsSync(rootReadme))
+      return new SuperAgentsNode(scopeDir, [{ id: rootReadme }]);
+    throw new Error(
+      `--super requires a content-face README.md at the scope or Edges root (tried ${scopeReadme}` +
+        (rootReadme !== scopeReadme ? ` and ${rootReadme}` : "") +
+        `).`,
+    );
   }
   /** Deferred, streaming reads with entry snapshots only. Before moving or
    * destroying a returned node, call get(node.path) to capture its resources. */
@@ -217,13 +227,13 @@ export class NodeService {
         : await service.#read(entry, AgentsNode, false, false);
       if (!root)
         throw new Error(
-          `Missing scope entry: ${entry}. Add AGENTS.md or pass --super to root at the Edges root README.md.`,
+          `Missing scope entry: ${entry}. Add AGENTS.md or pass --super to traverse the content face (README) as a virtual system.`,
         );
       // resolve and load are sequential; carry this edge's policy into its one load.
       let readonly = false;
       yield* traverse(root, options, (parent, reference) => {
-        // Dual-file scope: the same-directory README is optional composition.
-        if (isCompanionReadme(parent, reference) && !fs.existsSync(reference.id)) return undefined;
+        // Write-path content-face edges are optional if the README is absent.
+        if (isContentFaceReadme(parent, reference) && !fs.existsSync(reference.id)) return undefined;
         if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.
@@ -284,9 +294,9 @@ export class NodeService {
     let readonly = false;
     for await (const node of traverse(
       roots(),
-      { includeHarness: true },
+      { includeHarness: true, includeContentFace: true },
       (parent, ref) => {
-        if (isCompanionReadme(parent, ref) && !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id))
+        if (isContentFaceReadme(parent, ref) && !this.#cache.loaded.has(ref.id) && !fs.existsSync(ref.id))
           return undefined;
         if (!isWithinPath(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
         // Maintenance discovery tolerates a missing optional entry; composition does not.
@@ -317,9 +327,9 @@ export class NodeService {
     let readonly = false;
     for await (const _node of traverse(
       roots(),
-      {},
+      { includeContentFace: true },
       (parent, ref) => {
-        if (isCompanionReadme(parent, ref) &&
+        if (isContentFaceReadme(parent, ref) &&
             (removed(ref.id) || (!plan.has(ref.id) && !fs.existsSync(ref.id))))
           return undefined;
         if (removed(ref.id))
@@ -408,7 +418,7 @@ export class NodeService {
     node: BaseNode,
     group?: ChildGroup,
   ): Promise<Planned | undefined> {
-    // A same-directory README is reached through the dual-file companion edge, never registered.
+    // Same-dir README next to AGENTS is the content face, not registered as AGENTS' child.
     if (
       coLocated(node.path) ||
       path.basename(node.directoryPath) === ".harness" ||
