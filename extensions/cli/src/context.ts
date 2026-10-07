@@ -29,6 +29,8 @@ export type CliContext = {
   stdinIsTTY?: boolean;
   /** Explicit `--super`: traverse from SuperAgentsNode mounting harness-materials READMEs. */
   super?: boolean;
+  /** Explicit `--all`: traverse the system forest from the current scope. */
+  all?: boolean;
   indexGroup?: "local" | "descendant";
   purpose?: "domain" | "maintenance";
   result: CliResult | undefined;

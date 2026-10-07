@@ -17,19 +17,21 @@ test("config lists tasks README and not AGENTS", () => {
   assert.ok(!cfg.materials.some((m) => m.path.endsWith("AGENTS.md")));
 });
 
-test("resolve uses .harness under scope when present", () => {
+test("super materials use the scope directory; the scope's own harness is one level down", () => {
   const root = mkdtempSync(path.join(tmpdir(), "hm-"));
   fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
-  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# t\n");
+  fs.mkdirSync(path.join(root, "tasks"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# maintenance\n");
+  fs.writeFileSync(path.join(root, "tasks/README.md"), "# content\n");
   assert.equal(harnessRootForScope(root), path.join(root, ".harness"));
   const hit = resolveHarnessMaterial(root, "tasks");
-  assert.equal(hit?.absPath, path.join(root, ".harness/tasks/README.md"));
+  assert.equal(hit?.absPath, path.join(root, "tasks/README.md"));
 });
 
 test("listHarnessMaterialAbsPaths only returns existing files", () => {
   const root = mkdtempSync(path.join(tmpdir(), "hm-list-"));
-  fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
-  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# t\n");
+  fs.mkdirSync(path.join(root, "tasks"), { recursive: true });
+  fs.writeFileSync(path.join(root, "tasks/README.md"), "# t\n");
   const listed = listHarnessMaterialAbsPaths(root);
   assert.ok(listed.some((m) => m.id === "tasks"));
   assert.ok(!listed.some((m) => m.id === "evaluation"));

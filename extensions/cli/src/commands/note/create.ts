@@ -93,7 +93,6 @@ export function addNoteCreateCommand(note: Command, ctx: CliContext): void {
         "Read UTF-8 Markdown from a file",
       ).conflicts("content"),
     )
-    .addOption(new Option("--index-group <group>", "Caller-selected parent index group").choices(["local", "descendant"]))
     .option(
       "--markdown",
       "Preserve authored Markdown without adding a title or template",

@@ -2,12 +2,7 @@ import { existsSync } from "node:fs";
 import { relative } from "node:path";
 import { memoryNodes } from "./service.js";
 import { resolveTarget } from "./paths.js";
-import {
-  isSkillFormat,
-  memoryEntryTypes,
-  resolveMemoryPath,
-} from "./entries.js";
-import { listTypeFiles } from "./types.js";
+import { resolveMemoryPath } from "./entries.js";
 
 function slugOf(file: string, type: string, skill: boolean): string {
   if (skill) {
@@ -19,25 +14,31 @@ function slugOf(file: string, type: string, skill: boolean): string {
   return base.startsWith(prefix) ? base.slice(prefix.length, -".md".length) : base.replace(/\.md$/, "");
 }
 
-export async function listMemoryEntries(targetDir: string | undefined, type?: string) {
+export async function listMemoryEntries(
+  targetDir: string | undefined,
+  type?: string,
+  mode: { all?: boolean; super?: boolean } = {},
+) {
   const target = resolveTarget(targetDir ?? process.cwd());
-  const types = type ? [type] : memoryEntryTypes(target);
-  const items: Array<{ type: string; slug: string; path: string }> = [];
-  for (const name of types) {
-    let files: string[] = [];
-    try {
-      files = listTypeFiles(target, name, isSkillFormat(target, name) ? "*/SKILL.md" : `${name}_*.md`);
-    } catch {
-      continue;
-    }
-    for (const file of files) {
-      items.push({
-        type: name,
-        slug: slugOf(file, name, isSkillFormat(target, name)),
-        path: relative(target, file),
-      });
-    }
-  }
+  const { NodeService } = await import("../node/node-service.js");
+  const { MemoryNode } = await import("../../domain/models/memory/memory-node.js");
+  const { buildSystemForest } = await import("../node/system-forest-service.js");
+  const nodes = mode.all
+    ? (await buildSystemForest(target, { includeSuper: mode.super === true, form: "independent" })).flat()
+    : await new NodeService({ managedRoot: target })
+      .query(target, { types: ["memory"], ...(mode.super ? { super: true as const } : {}) })
+      .value();
+  const items = nodes.flatMap((node) => {
+    if (!(node instanceof MemoryNode)) return [];
+    const memoryType = node.memoryType ?? "";
+    if (type && memoryType !== type) return [];
+    const rel = relative(target, node.path);
+    return [{
+      type: memoryType,
+      slug: slugOf(rel, memoryType, node.path.endsWith(`${"/"}SKILL.md`)),
+      path: rel,
+    }];
+  });
   return { targetDir: target, items };
 }
 

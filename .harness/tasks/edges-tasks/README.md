@@ -25,4 +25,5 @@
 - [tasks\_board\_default\_path\_dot\_edges\_tasks](<backlog/2026-09-25--%E7%9C%8B%E6%9D%BF%E9%BB%98%E8%AE%A4%E8%B7%AF%E5%BE%84%E6%94%B9%E4%B8%BA.edges-tasks/INDEX.md>) — 按作用域分流任务：维护看板迁入 .harness/tasks/，领域任务归 tasks/；保留 Task/Run 契约并同步工具，新版仅新布局、旧内容一次性迁移。
 - [conversation\_to\_task\_skill\_via\_cli](<cancelled/2026-09-13--conversation-to-task-skill%E8%B0%83%E7%94%A8CLI/INDEX.md>) — conversation\-to\-task skill：按模板从对话总结 Task，并调用 edges tasks CLI 落盘
 - [organize\_default\_project\_tasks\_skill](<in_progress/2026-09-16--%E6%95%B4%E7%90%86default-project%E7%9A%84tasks-skill/INDEX.md>) — Skill：整理 \_default 下的 tasks——归入已有 project、新建 project、或继续留在 \_default
+- [tasks\_list\_agents\_md](<in_progress/2026-10-07--%E8%AE%A9-tasks-list-%E9%A1%BA%E7%9D%80-AGENTSmd-%E8%B5%B0%E5%88%B0%E4%BB%BB%E5%8A%A1/INDEX.md>) — 仓库根 tasks list 应列出 AGENTS.md 指向的 .harness/tasks 任务；\-\-all 的森林里也要有这些任务节点。
 <!-- project-entries-local:end -->

@@ -35,7 +35,7 @@ test("task update adds title and priority metadata to an indexed task and status
   writeFileSync(path.join(folder, stem, "run.log.md"), "Run evidence\n");
   await indexTaskFixtureBoard(path.join(scope, "tasks"));
   const call = (args: string[]) =>
-    run(["--scope", scope, "tasks", "--index-group", "local", "--purpose", "domain", ...args], { env: { EDGES_SCOPE: root } });
+    run(["--scope", scope, "--super", "tasks", ...args], { env: { EDGES_SCOPE: root } });
   const updated = await call([
     "update",
     stem,
@@ -164,7 +164,7 @@ test("indexed task with malformed status is rejected without changing its body o
   writeFileSync(path.join(folder, "INDEX.md"), original);
   writeFileSync(path.join(folder, "run.log.md"), "Evidence\n");
   await indexTaskFixtureBoard(path.join(root, "tasks"));
-  const result = await run(["--scope", root, "tasks", "--index-group", "local", "--purpose", "domain", "update", "bad", "--title", "Changed"], { env: {} });
+  const result = await run(["--scope", root, "--super", "tasks", "update", "bad", "--title", "Changed"], { env: {} });
   assert.notEqual(result.exitCode, 0); assert.match(result.stdout, /Invalid edges-tasks-status/);
   assert.equal(readFileSync(path.join(folder, "INDEX.md"), "utf8"), original);
   assert.equal(readFileSync(path.join(folder, "run.log.md"), "utf8"), "Evidence\n");

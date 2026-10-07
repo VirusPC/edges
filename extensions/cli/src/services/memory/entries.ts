@@ -194,16 +194,17 @@ export function buildEntryFields(
   fields.updatedAt = nowTimestamp();
   return fields;
 }
-/** README type indexes use ReadmeNode; a not-yet-migrated AGENTS.md index keeps its legacy model. */
+/** AGENTS.md type indexes use AgentsNode. A leftover README.md index stays a ReadmeNode. */
 export const typeIndexNode = (file: string): AgentsNode | ReadmeNode =>
   basename(file) === "README.md" ? new ReadmeNode(file) : new AgentsNode(file);
-/** A missing legacy AGENTS.md index is recreated in its own legacy dialect until migrated. */
+/** Current indexes are AGENTS.md. A leftover README.md keeps the entries dialect. */
 export function typeIndexTemplate(file: string, name: string): string {
   const template = readIndexTemplate(typeIndexTemplateName(name), name, name);
   if (basename(file) === "README.md") return template;
   return template
-    .replace(`${ENTRIES_LOCAL_START}\n## ${ENTRIES_SECTIONS.localChildren.heading}\n\n`, `${ENTRIES_START}\n`)
-    .replace(ENTRIES_LOCAL_END, ENTRIES_END);
+    .replaceAll("project-entries-", "project-harness-")
+    .replaceAll("## 本层内容", "## 本层系统维护信息")
+    .replaceAll("## 下层内容", "## 下层系统维护信息");
 }
 export function buildEntryIndex(
   target: string,
@@ -254,8 +255,13 @@ export function expectedIndexDocument(
     (isFile(file)
       ? readText(file)
       : typeIndexTemplate(file, name));
-  const legacy = basename(file) !== "README.md";
-  const generated = typeIndexNode(file).parse(buildEntryIndex(target, name, legacy));
+  const generatedSource = basename(file) === "README.md"
+    ? buildEntryIndex(target, name, false)
+    : buildEntryIndex(target, name, false)
+        .replaceAll("project-entries-", "project-harness-")
+        .replaceAll("## 本层内容", "## 本层系统维护信息")
+        .replaceAll("## 下层内容", "## 下层系统维护信息");
+  const generated = typeIndexNode(file).parse(generatedSource);
   const node = typeIndexNode(file).parse(generated.localChildren.length ? existing.replace(/^- 暂无条目。\r?\n/gm, "") : existing);
   const desired = new Map(generated.localChildren.map(ref => [ref.id, ref]));
   const base = canonicalPath(typeContentDir(target, name));

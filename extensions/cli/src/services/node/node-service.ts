@@ -79,6 +79,14 @@ const clone = <T extends BaseNode>(node: T, file = node.path): T =>
   new (node.constructor as Model<T>)(file).parse(node.serialize());
 
 /** Coordinates directory IO and indexes. References are discovery, not ownership. */
+/** Parent registration follows the subject system. Paths inside `.harness` stay local. A nested AGENTS entry is a descendant system. */
+function registrationGroup(parent: BaseNode, node: BaseNode): ChildGroup {
+  const harness = path.join(parent.directoryPath, ".harness");
+  if (node.path === harness || node.path.startsWith(harness + path.sep)) return "local";
+  if (path.basename(node.path) === "AGENTS.md" && path.dirname(node.path) !== parent.directoryPath) return "descendant";
+  return "local";
+}
+
 export class NodeService {
   readonly managedRoot: string;
   readonly #options: NodeServiceOptions;
@@ -221,6 +229,7 @@ export class NodeService {
       let readonly = false;
       yield* traverse(root, options, (parent, reference) => {
         if (options.excludeRoots?.has(reference.id)) return undefined;
+        if (!fs.existsSync(reference.id)) return undefined;
         if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.
@@ -428,9 +437,8 @@ export class NodeService {
     const before = this.#existing(parent),
       draft = clone(parent);
     if (draft.children.some((ref) => ref.id === node.id)) return undefined;
-    if (group !== "local" && group !== "descendant")
-      throw new Error(`New parent registration requires indexGroup (local or descendant): ${node.path}`);
-    draft.addChild(group, referenceOf(node));
+    const resolved = group === "local" || group === "descendant" ? group : registrationGroup(parent, node);
+    draft.addChild(resolved, referenceOf(node));
     return this.#plan(draft, draft.serialize(), before);
   }
   async create<T extends BaseNode>(

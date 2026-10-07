@@ -88,11 +88,31 @@ AGENTS 的本层硬约束、本层记忆、下层索引分别对应 constraints�
 
 每个节点可以有独立的 harness。内容叶节点的 harness 是同目录 AGENTS.md；InternalNode 的下一层 harness 位于 `.harness/AGENTS.md`。harness 不混入 children，普通查询不会自动进入维护系统的下一层。
 
-新增父级登记时，调用方明确选择 `--index-group local|descendant`，CLI 校验并执行，不按用途或目录深度推断。已有关系保留原分组，传入该参数不等于移动已有关系。缺少 owner 时不会自动初始化；生成的 Task 项目与 Memory 类型入口使用其固定本层系统维护信息关系。
+新增父级登记跟着主体系统走。路径在该系统的 `.harness` 里进本层；另一套系统入口进下层。已有关系保留原分组。缺少 owner 时不会自动初始化；生成的 Task 项目与 Memory 类型入口使用其固定本层系统维护信息关系。
 
 ### 查询遵循索引
 
-NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认走全部组成 children（local∪descendants）；显式 `localOnly` 才只走 localChildren；includeHarness 才沿维护关系递归。**traverse 只跑单个系统**；森林在外由 `collectSystemRoots` + `SystemForestService` 拼装（CLI：`edges forest list`，默认 `independent`）。默认根是 scope 下真 `AGENTS.md`；显式 `--super` / `SuperAgentsNode` 按 `harness-materials.json` 挂材料 README（遍历当普通 AgentsNode），不是从真 AGENTS 并 README 边——详见 [models 设计原则](src/domain/models/README.md#设计原则树与入口)与 [operations 遍历原则](src/domain/operations/README.md#原则单系统-traverse--森林在外)。
+NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认走全部组成 children（local∪descendants）；显式 `localOnly` 才只走 localChildren；includeHarness 才沿维护关系递归。**traverse 只跑单个系统**；森林在外由 `collectSystemRoots` + `SystemForestService` 拼装（CLI：`edges forest list`，默认 `independent`）。默认根是 scope 下真 `AGENTS.md`。显式 `--super` 在这个 scope 的上一级建 `SuperAgentsNode`：当前 scope 目录就是该超节点的 `.harness`，材料 README 按 `harness-materials.json` 的 path 直接挂在 scope 下（`tasks/README.md` 即 `<scope>/tasks/README.md`）。scope 自己的 `<scope>/.harness/` 是再下一层维护系统，由真 `AGENTS.md` 进入，超节点不把它再当成材料根。遍历仍当普通 `AgentsNode`，只走 `children`，不从真 AGENTS 并 README 边。详见 [models 设计原则](src/domain/models/README.md#设计原则树与入口)与 [operations 遍历原则](src/domain/operations/README.md#原则单系统-traverse--森林在外)。
+
+超节点的 `children` 只有这一层本层挂载，`descendantChildren` 为空。表里的 path 相对当前 scope；文件不存在就跳过，不扫盘补。以本仓库根为 `--scope` 时，九条材料里只有 `tasks/README.md` 和 `README.md` 在根上，所以 `children` 就是这两份。`memory/`、`skills/`、`evaluation/`、`observation/` 实际在 `.harness/` 下，根上没有同名路径，不会挂上。`.harness/tasks/README.md` 也不是这个超节点的孩子。
+
+```text
+edges --scope <仓库根> --super
+
+虚拟超节点
+└── <仓库根>/                         ← 超节点的 .harness
+      ├── tasks/README.md             ← children
+      ├── README.md                   ← children
+      └── .harness/                   ← 仓库自己的维护系统，不在 children 里
+            ├── tasks/README.md
+            └── memory/feedbacks/README.md
+```
+
+把 `--scope` 指到 `<仓库根>/.harness` 才是下一层：这个目录本身成为超节点的 `.harness`。它的 children 是该目录下存在的 `tasks/README.md`、`memory/feedbacks/README.md`、`memory/projects/README.md`、`memory/references/README.md`、`skills/managed/README.md`、`skills/referenced/README.md`、`evaluation/README.md`、`observation/README.md`。这不是仓库根那一份名单。
+
+默认 list 从真 `AGENTS.md` 做一次 traverse。`--all` 从当前 `--scope` 走森林。`--super` 只换根。最全的一次查询是 `--scope <仓库根> --super --all`。这三个开关都在根命令上。
+
+再往下走的是这两个 README 自己的 `project-entries-*`，不是超节点的另一组孩子。`--super tasks list` 只留下这条链上的 Task。
 
 ```ts
 const pending = service.query(scope, { types: ["task"] })
@@ -126,14 +146,14 @@ commands 的目录对应命令树：一个文件注册一个命令节点，同�
 
 ### 任务：tasks
 
-默认看板是 `<scope>/.harness/tasks/`，即 `--purpose maintenance`；显式使用 `--purpose domain` 选择 `<scope>/tasks/`。根作用域与子作用域、读与写使用相同默认值。
+主体系统由 `--scope` 决定。一般任务写在 `<scope>/.harness/tasks`。`--super` 把主体换成该 scope 上的虚拟系统一，它的 harness 就是这个 scope 目录，任务写在 `<scope>/tasks`。`--all` 从当前 scope 走森林。最全的一次查询是 `--scope <仓库根> --super --all`。
 
 ```bash
-edges tasks list
-edges tasks list --all-scopes --status todo --priority high --sort priority
-edges tasks list --all-scopes --group-by project
-edges tasks --purpose domain list
-edges tasks --index-group local create --title "修复构建" --project default
+edges --scope <directory> tasks list
+edges --scope <directory> --all tasks list --status todo --priority high --sort priority
+edges --scope <directory> --all tasks list --group-by project
+edges --scope <directory> --super tasks list
+edges --scope <directory> tasks create --title "修复构建" --project default
 edges tasks get <stem或路径>
 edges tasks update <stem或路径> --priority high
 edges tasks status <stem或路径> done
@@ -141,11 +161,11 @@ edges tasks project list
 edges tasks project review-page --from /tmp/tasks.json --out /tmp/review.html
 ```
 
-上例 create 的 local 是调用方选择，不是 CLI 对 maintenance 用途的自动推断。任务写操作只改文件，不执行 Git；取消使用 status cancelled，没有 delete 命令。任务以 `<stem>/index.md` 存储，并带 `.<stem>.log.md`；状态或项目变化移动整个目录。
+任务写操作只改文件，不执行 Git；取消使用 status cancelled，没有 delete 命令。任务以 `<stem>/index.md` 存储，并带 `.<stem>.log.md`；状态或项目变化移动整个目录。
 
-list --all-scopes 从选定作用域所属 Git 根出发，无 Git 时从该作用域出发，递归查询登记树及各维护层；默认包括两种 purpose，只有显式传入 purpose 才筛选。全局根必须有有效 AGENTS，未登记的看板不会因物理存在而自动出现。其他写命令仍只操作选定看板。
+`edges --scope <目录> --super tasks list` 在该 scope 上建超节点，列出从材料 README 能走到的任务，范围不改去 Git 根。`edges --scope <目录> --all tasks list` 从该 scope 走森林，不另跳 Git 根。未登记的看板不会因物理存在而自动出现。
 
-普通任务命令 stdout 为 JSON；runs、run-messages 只读，默认表格，可用 `--output json`。未分组 list 返回 tasks 数组；分组输出是 `{ groupBy, groups: [{ key, items }] }`，先筛选再分组。全局数据携带 scope、purpose、project、stem 和入口 path。
+普通任务命令 stdout 为 JSON；runs、run-messages 只读，默认表格，可用 `--output json`。未分组 list 返回 tasks 数组；分组输出是 `{ groupBy, groups: [{ key, items }] }`，先筛选再分组。条目携带 path、project、stem。
 
 review-page 只把 groups/items JSON 渲染成 HTML，不改任务、不打开浏览器、不自动发布。需要公开预览时再调用 artifacts publish。固定任务站点的生成、部署与路径配置见[部署说明](deploy/README.md)。
 

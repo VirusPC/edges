@@ -6,7 +6,7 @@ version: 1.2.2
 
 从对话整理任务：**成文 → 交人审 → 落库**（人审可以是对话确认或 PR；分支是否新建不限）。正文顺序：**背景 → 目标**（必填）→ **动作** → **完成标准**（后两栏可选；完成标准可留到 `grill-with-docs` 后再补）。与 `conversation-to-notes` 主题行动指南同序（背景 → 问题/目标 → 方案/动作 → 验收/完成标准），便于从笔记开卡平移。四栏同构 STAR（Situation / Task / Action / Result）：用来**制定任务**，尤其是派给 agent 的 brief；**不要**拿 STAR 写复盘（复盘走 `conversation-to-notes`）。
 
-先确定内容所属的作用域 `SCOPE` 和用途 `PURPOSE`：领域工作默认 `domain`，维护该作用域本身用 `maintenance`。Task Project 只是该看板的分组，不决定作用域。后续所有 list/get/project/create/update/status 命令使用同一组 `--scope "$SCOPE" --purpose "$PURPOSE"`；仓内维护 Edges 时显式选仓根和 `maintenance`，不要依赖执行命令时的源码目录。
+先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.harness/tasks`。主体是仓库之外的虚拟系统一时，再加 `--super`，任务写在 `<SCOPE>/tasks`。Task Project 只是该看板的分组，不决定作用域。后续命令使用 `--scope "$SCOPE"`，只有虚拟系统一才加 `--super`。仓内维护 Edges 时显式选仓根，不要依赖执行命令时的源码目录。
 
 ## 步骤
 
@@ -56,4 +56,4 @@ version: 1.2.2
 - 写给人审阅，白话完整句；不添加对话里没有的新需求。
 - 不要把复盘四栏或记忆结论塞进任务顶替背景；不写执行流水。
 
-新建父级索引关系时，由调用本技能的 Agent 根据语义明确选择 `local` 或 `descendant`，并传给 CLI 的 `--index-group`；Tasks 将选项放在 `tasks` 后，Memory 放在 `init` / `doctor` 后，Note 放在 `note` 后。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。
+新建父级登记跟着主体系统走，调用方不再选择 local 或 descendant。已有登记保留原分组。缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。

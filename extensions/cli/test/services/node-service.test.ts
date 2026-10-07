@@ -424,7 +424,9 @@ test('query defers reads and find closes before hit children or later siblings',
   write('branch/hit/AGENTS.md', '---\ncategory: hit\n---\n' + index('- [missing](missing/AGENTS.md)'));
   const hit = await pending.find(node => node.metadata?.category === 'hit').value();
   assert.equal(hit?.path, path.join(root, 'branch/hit/AGENTS.md'));
-  await assert.rejects(pending.toArray().value(), /Missing referenced node/);
+  const all = await pending.toArray().value();
+  assert.ok(all.some(node => node.path === path.join(root, 'branch/hit/AGENTS.md')));
+  assert.ok(!all.some(node => node.path.endsWith(`${path.sep}missing${path.sep}AGENTS.md`)));
 });
 test('typed queries keep internal navigation, skip unrelated bodies and preserve harness discovery', async t => {
   const { root, write, service } = fixture(t);
@@ -476,7 +478,8 @@ test('global query omits out-of-root references and linked installations while m
   fs.symlinkSync(outside,file('installed'));
   assert.equal((await service.query(root,{includeHarness:true}).value()).length,1);
   write('AGENTS.md',index('- [missing](missing/AGENTS.md)'));
-  await assert.rejects(new NodeService({managedRoot: root}).query(root,{includeHarness:true}).value(),/Missing referenced node/);
+  const skipped = await new NodeService({managedRoot: root}).query(root,{includeHarness:true}).value();
+  assert.deepEqual(skipped.map(node => node.path), [path.join(root, 'AGENTS.md')]);
 });
 
 test('typed navigation through a readonly leaf retains readonly origin for its harness children', async t => {
@@ -592,25 +595,24 @@ for (const operation of ['query', 'validate', 'destroy'] as const) {
   });
 }
 
-test('new registrations require a caller group before any directory creation', async t => {
+test('new system entries register as descendants without a caller group', async t => {
   const { file, write, service } = fixture(t);
   write('AGENTS.md', index());
-  await assert.rejects(service.create(new AgentsNode(file('new/AGENTS.md')), { body: '# New\n' }), /index.?group|registration group/i);
-  assert.equal(fs.existsSync(file('new')), false);
-  await service.create(new AgentsNode(file('new/AGENTS.md')), { body: '# New\n' }, { indexGroup: 'descendant' });
+  await service.create(new AgentsNode(file('new/AGENTS.md')), { body: '# New\n' });
   const owner = (await service.get(file('AGENTS.md'), AgentsNode))!;
   assert.deepEqual(owner.localChildren, []);
   assert.equal(owner.descendantChildren[0]?.id, file('new/AGENTS.md'));
 });
-test('import refuses missing registration choice before copying source resources', async t => {
+test('import registers a non-system file locally when no group is passed', async t => {
  const {root,file,write,service}=fixture(t);write('AGENTS.md',index());
  const source=fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()),'registration-import-'));t.after(()=>fs.rmSync(source,{recursive:true,force:true}));
  fs.writeFileSync(path.join(source,'index.md'),'Imported body');fs.writeFileSync(path.join(source,'asset.bin'),'resource');
- await assert.rejects(service.import(path.join(source,'index.md'),file('imported/index.md')),/indexGroup/);
- assert.equal(fs.existsSync(file('imported')),false);
- await service.import(path.join(source,'index.md'),file('imported/index.md'),{indexGroup:'descendant'});
+ await service.import(path.join(source,'index.md'),file('imported/index.md'));
+ const owner = (await service.get(file('AGENTS.md'), AgentsNode))!;
+ assert.equal(owner.localChildren.some(ref => ref.id === file('imported/index.md')), true);
+ assert.equal(fs.existsSync(file('imported/asset.bin')), true);
+ void root;
  assert.equal(fs.readFileSync(file('imported/asset.bin'),'utf8'),'resource');
- assert.equal((await service.get(file('AGENTS.md'),AgentsNode))?.descendantChildren.length,1);
 });
 test('moving an unregistered node does not invent a descendant registration',async t=>{
  const {file,write,service}=fixture(t);write('AGENTS.md',index());write('source/AGENTS.md',index());write('source/item/index.md','Body');write('destination/AGENTS.md',index());

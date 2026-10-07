@@ -19,8 +19,7 @@ export async function runTasksCommand(
   try {
     ctx.result = await fn(openTasksRuntime({
       env: ctx.env,
-      purpose: ctx.purpose,
-      indexGroup: ctx.indexGroup,
+      super: ctx.super,
     }));
   } catch (error) {
     const mapped = asTasksError(error);

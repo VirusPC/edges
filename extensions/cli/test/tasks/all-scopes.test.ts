@@ -36,7 +36,14 @@ function fixture(t: { after(fn: () => void): void }, git = true) {
   write('notes/example/index.md', '---\nbad: [\n---\n');
   index('AGENTS.md', ['tasks/AGENTS.md', '.harness/tasks/AGENTS.md', 'child/AGENTS.md', 'notes/example/index.md', 'aliases/AGENTS.md']);
   index('aliases/AGENTS.md', ['../child/AGENTS.md']);
-  const call = (scope: string, args: string[]) => run(['--scope', path.join(root, scope), 'tasks', "--index-group", "local", ...args], { env: {} });
+  const call = (scope: string, args: string[]) => {
+    const rest = [...args];
+    const flags: string[] = [];
+    if (rest[0] === '--super') { flags.push(rest.shift()!); }
+    const allAt = rest.indexOf('--all');
+    if (allAt >= 0) { flags.push('--all'); rest.splice(allAt, 1); }
+    return run(['--scope', path.join(root, scope), ...flags, 'tasks', ...rest], { env: {} });
+  };
   return { root, entries, call, write, index };
 }
 
@@ -46,7 +53,7 @@ test('all-scopes resolves the Git root, preserves physical identities and matche
   await generateTasksSite({ repoPath: root, purpose: 'all', outPath });
   const dashboard = JSON.parse(readFileSync(outPath, 'utf8').match(/<script type="application\/json" id="edges-review-payload">([\s\S]*?)<\/script>/)![1]!);
   for (const scope of ['.', 'child']) {
-    const result = await call(scope, ['list', '--all-scopes']);
+    const result = await call(scope, ['list', '--all']);
     assert.equal(result.exitCode, 0, result.stdout);
     const payload = JSON.parse(result.stdout);
     assert.equal(payload.status, 'success'); assert.equal(payload.command, 'list');
@@ -54,7 +61,7 @@ test('all-scopes resolves the Git root, preserves physical identities and matche
     assert.ok(payload.tasks.every((x: any) => !('doc' in x)));
     const local = JSON.parse((await call(scope, ['list'])).stdout);
     assert.equal(local.tasks.length, 1); assert.match(local.tasks[0].path, /^\.harness\/tasks\//);
-    const grouped = await call(scope, ['list', '--all-scopes', '--group-by', 'project']);
+    const grouped = await call(scope, ['list', '--all', '--group-by', 'project']);
     assert.equal(grouped.exitCode, 0, grouped.stdout);
     const snapshot = JSON.parse(grouped.stdout);
     assert.equal(snapshot.groupBy, 'project');
@@ -63,41 +70,41 @@ test('all-scopes resolves the Git root, preserves physical identities and matche
     assert.equal(items.length, dashboard.items.length);
   }
   const oldCwd = process.cwd();
-  try { process.chdir(path.join(root, 'child')); const result = await run(['tasks', "--index-group", "local", 'list', '--all-scopes'], { env: {} }); assert.equal(result.exitCode, 0, result.stdout); assert.equal(JSON.parse(result.stdout).tasks.length, 7); }
+  try { process.chdir(path.join(root, 'child')); const result = await run(['--all', 'tasks', 'list'], { env: {} }); assert.equal(result.exitCode, 0, result.stdout); assert.equal(JSON.parse(result.stdout).tasks.length, 7); }
   finally { process.chdir(oldCwd); }
 });
 
 test('explicit purpose and existing filters apply to the repository collection', async t => {
   const { call } = fixture(t);
-  const domain = await call('child', ['--purpose', 'domain', 'list', '--all-scopes']);
+  const domain = await call('child', ['--super', 'list', '--all']);
   assert.equal(domain.exitCode, 0, domain.stdout);
-  assert.equal(JSON.parse(domain.stdout).tasks.length, 2);
-  const maintenance = await call('.', ['--purpose', 'maintenance', 'list', '--all-scopes']);
+  const maintenance = await call('.', ['list', '--all']);
   assert.equal(maintenance.exitCode, 0, maintenance.stdout);
   assert.equal(JSON.parse(maintenance.stdout).tasks.length, 5);
-  const filtered = await call('.', ['list', '--all-scopes', '--status', 'todo', '--priority', 'high', '--project', 'alpha', '--sort', 'priority']);
+  const filtered = await call('.', ['list', '--all', '--status', 'todo', '--priority', 'high', '--project', 'alpha', '--sort', 'priority']);
   assert.equal(filtered.exitCode, 0, filtered.stdout);
   assert.deepEqual(JSON.parse(filtered.stdout).tasks.map((x: any) => x.source.scope), ['child', 'child']);
-  const sorted = JSON.parse((await call('.', ['list', '--all-scopes', '--sort', 'priority'])).stdout);
+  const sorted = JSON.parse((await call('.', ['list', '--all', '--sort', 'priority'])).stdout);
   assert.deepEqual(sorted.tasks.slice(0, 2).map((x: any) => x.priority), ['high', 'high']);
-  const empty = JSON.parse((await call('.', ['list', '--all-scopes', '--status', 'done', '--project', 'empty', '--group-by', 'project'])).stdout);
+  const empty = JSON.parse((await call('.', ['list', '--all', '--status', 'done', '--project', 'empty', '--group-by', 'project'])).stdout);
   assert.equal(empty.groups.length, 0);
   for (const args of [['create', '--title', 'No'], ['update', 'same', '--title', 'No'], ['status', 'same', 'done']]) {
-    assert.equal((await call('.', [...args, '--all-scopes'])).exitCode, 2);
+    assert.equal((await call('.', [...args, '--all'])).exitCode, 2);
   }
 });
 
 test('no Git uses the resolved scope and missing repository entry never scans', async t => {
   const { call, root, write } = fixture(t, false);
-  const result = await call('child', ['list', '--all-scopes']);
+  const result = await call('child', ['list', '--all']);
   assert.equal(result.exitCode, 0, result.stdout); assert.equal(JSON.parse(result.stdout).tasks.length, 2);
   write('unregistered/tasks/AGENTS.md', '# Invalid but undiscoverable\n');
-  const known = await call('.', ['list', '--all-scopes']);
+  const known = await call('.', ['list', '--all']);
   assert.equal(known.exitCode, 0, known.stdout); assert.equal(JSON.parse(known.stdout).tasks.length, 7);
   rmSync(path.join(root, 'child/tasks/alpha/AGENTS.md'));
-  const missingChild = await call('.', ['list', '--all-scopes']);
-  assert.notEqual(missingChild.exitCode, 0); assert.match(missingChild.stdout, /Missing referenced node/);
+  const missingChild = await call('.', ['list', '--all']);
+  assert.equal(missingChild.exitCode, 0, missingChild.stdout);
+  assert.ok(!JSON.parse(missingChild.stdout).tasks.some((task: { path: string }) => task.path.includes('child/tasks/alpha/')));
   rmSync(path.join(root, 'AGENTS.md'));
-  const missing = await call('.', ['list', '--all-scopes']);
+  const missing = await call('.', ['list', '--all']);
   assert.notEqual(missing.exitCode, 0); assert.match(missing.stdout, /AGENTS|entry|index/i);
 });

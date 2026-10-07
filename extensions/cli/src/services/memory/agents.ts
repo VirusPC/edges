@@ -5,7 +5,7 @@ import { discoverScopes } from '../scope.js';
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
-import { join, dirname, basename, relative } from "node:path";
+import { join, dirname, basename, relative, sep } from "node:path";
 import {
   AUTO_START,
   CHILDREN_START,
@@ -158,7 +158,10 @@ export async function syncIndexEntry(anchor: string, target: string, description
     const registered = node.children.find(ref => canonicalPath(ref.id) === id);
     const rel = relative(anchor, id), normalized = normalizeIndexDescription(target, description);
     if (registered && (description === undefined || registered.description === normalized)) return ['preserved', rel, null];
-    if (!registered && !indexGroup) throw new Error('New owner registration requires --index-group local|descendant');
+    if (!registered && !indexGroup) {
+        const harness = join(anchor, ".harness");
+        indexGroup = id === harness || id.startsWith(harness + sep) ? "local" : "descendant";
+    }
     const patch = (refs: typeof node.localChildren) => refs.map(ref => ref.id === registered?.id ? { ...ref, description: normalized } : ref);
     const localChildren = patch(node.localChildren), descendantChildren = patch(node.descendantChildren);
     if (!registered) (indexGroup === 'local' ? localChildren : descendantChildren).push({ id, name: rel, description: normalized });

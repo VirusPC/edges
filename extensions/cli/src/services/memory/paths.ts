@@ -128,12 +128,12 @@ export const typeFromDirName = (name: string) =>
       references: "reference",
     }) as Record<string, string>
   )[name] ?? name;
-export const TYPE_INDEX_FILE_NAME = "README.md";
+export const TYPE_INDEX_FILE_NAME = "AGENTS.md";
 export const typeIndexRelpath = (name: string, module = moduleForType(name)) =>
   `.harness/${module}/${typeDirName(name)}/${TYPE_INDEX_FILE_NAME}`;
-/** Pre-migration type indexes lived in AGENTS.md; reads accept them until Task 5 migrates files. */
+/** Reads still accept a type index that was written as README.md. */
 export const legacyTypeIndexRelpath = (name: string, module = moduleForType(name)) =>
-  `.harness/${module}/${typeDirName(name)}/${AGENTS_FILE_NAME}`;
+  `.harness/${module}/${typeDirName(name)}/README.md`;
 export const isExternalType = (name: string) => name === "referenced";
 export const relativeOrName = (file: string, root: string) =>
   isWithinPath(file, root) ? path.relative(root, file) || "." : path.basename(file);

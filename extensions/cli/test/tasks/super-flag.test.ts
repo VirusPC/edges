@@ -43,7 +43,43 @@ test("--super lists tasks through the root README without writing AGENTS.md", as
 
 test("without --super a scope lacking AGENTS fails clearly", async (t) => {
   const root = fixture(t);
-  const result = await run(["--scope", root, "tasks", "list", "--all-scopes"], { env: {} });
+  const result = await run(["--scope", root, "tasks", "list"], { env: {} });
   assert.notEqual(result.exitCode, 0);
   assert.match(result.stdout + result.stderr, /--super/);
+});
+
+function fixtureWithDescendantTask(t: { after(fn: () => void): void }) {
+  const root = fixture(t);
+  const agents = path.join(root, "AGENTS.md");
+  writeFileSync(agents, new AgentsNode(agents).create({
+    descendantChildren: [{ id: path.join(root, "tasks/AGENTS.md") }],
+  }, { operation: "create" }).serialize());
+  const harnessTask = path.join(root, ".harness/tasks/_default/todo/keep/index.md");
+  mkdirSync(path.dirname(harnessTask), { recursive: true });
+  writeFileSync(harnessTask, new TaskNode(harnessTask).create({
+    name: "Keep", status: "todo",
+    metadata: { metadata: { "edges-task-project": "default", "edges-task-priority": "low" } },
+  }, { operation: "create" }).serialize());
+  return root;
+}
+
+test("tasks list follows descendant systems through traverse", async (t) => {
+  const root = fixtureWithDescendantTask(t);
+  const listed = await run(["--scope", root, "tasks", "list"], { env: {} });
+  assert.equal(listed.exitCode, 0, listed.stdout + listed.stderr);
+  const tasks = JSON.parse(listed.stdout).tasks as { path: string }[];
+  assert.ok(tasks.some((task) => task.path.startsWith("tasks/")));
+  assert.equal("purpose" in (tasks[0] ?? {}), false);
+  const superListed = await run(["--scope", root, "--super", "tasks", "list"], { env: {} });
+  assert.equal(superListed.exitCode, 0, superListed.stdout + superListed.stderr);
+  const superTasks = JSON.parse(superListed.stdout).tasks as { path: string }[];
+  assert.ok(superTasks.every((task) => !task.path.includes(".harness/tasks/")));
+});
+
+test("--all traverses the forest from the given scope", async (t) => {
+  const root = fixtureWithDescendantTask(t);
+  const listed = await run(["--scope", root, "--all", "tasks", "list"], { env: {} });
+  assert.equal(listed.exitCode, 0, listed.stdout + listed.stderr);
+  const tasks = JSON.parse(listed.stdout).tasks as { path: string }[];
+  assert.ok(tasks.some((task) => task.path.startsWith("tasks/")));
 });

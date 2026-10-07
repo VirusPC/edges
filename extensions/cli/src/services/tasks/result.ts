@@ -1,15 +1,13 @@
-import { taskBoardLocation } from "./paths.js";
+import { subjectTaskBoard } from "./paths.js";
 import { loadConfig } from "../config.js";
 import { createNodeBoardFs, createNodeBoardWriter } from "./board.js";
 import { TasksError, type TasksErrorCode } from "../../domain/models/tasks/types.js";
 
 export function openTasksRuntime(input: {
   env: NodeJS.ProcessEnv;
-  purpose?: "domain" | "maintenance";
-  indexGroup?: "local" | "descendant";
+  super?: boolean;
 }) {
-  const location = taskBoardLocation(loadConfig(input.env).scopeDir, input.purpose);
-  location.indexGroup = input.indexGroup;
+  const location = subjectTaskBoard(loadConfig(input.env).scopeDir, { super: input.super });
   return {
     location,
     fs: createNodeBoardFs(location),

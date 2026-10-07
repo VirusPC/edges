@@ -20,7 +20,7 @@ test("Task directory create/get/update/status/project keep assets and runlog tog
   const root = fixture(t);
   put(path.join(root, "AGENTS.md"), "# Scope");
   const call = (args: string[]) =>
-    run(["--scope", root, "tasks", "--index-group", "local", ...args], { env: {} });
+    run(["--scope", root, "tasks", ...args], { env: {} });
   const made = await call(["create", "--title", "Unit"]);
   assert.equal(made.exitCode, 0, made.stdout);
   const item = JSON.parse(made.stdout);
@@ -137,7 +137,7 @@ test("Note CLI preserves authored Markdown and commits only its explicit owned r
     [
       "--scope",
       root,
-      "note", "create", "--index-group", "local",
+      "note", "create",
       "--title",
       "Filename title",
       "--import-entry",
@@ -166,7 +166,7 @@ test("Task directory status refuses same-stem standalone destination and preserv
   const root = fixture(t);
   put(path.join(root, "AGENTS.md"), "# Scope");
   const call = (args: string[]) =>
-    run(["--scope", root, "tasks", "--index-group", "local", "--purpose", "domain", ...args], { env: {} });
+    run(["--scope", root, "--super", "tasks", ...args], { env: {} });
   const result = await call(["create", "--title", "Collision"]);
   assert.equal(result.exitCode, 0, result.stdout);
   const item = JSON.parse(result.stdout);
@@ -324,7 +324,7 @@ test("Note import commits its parent registration and keeps source bytes unchang
     [
       "--scope",
       root,
-      "note", "create", "--index-group", "local",
+      "note", "create",
       "--title",
       "Imported",
       "--import-entry",
@@ -408,7 +408,7 @@ test("Note Markdown file input preserves extras without copying neighbors and in
       [
         "--scope",
         root,
-        "note", "create", "--index-group", "local",
+        "note", "create",
         "--title",
         title,
         "--content-file",

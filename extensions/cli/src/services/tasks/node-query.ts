@@ -99,7 +99,7 @@ export async function listRepositoryTaskNodes(
   const service = new NodeService({ managedRoot: canonicalRoot });
   if (options.super) {
     return service
-      .query(canonicalRoot, { types: ["task"], includeHarness: true, super: true })
+      .query(canonicalRoot, { types: ["task"], super: true })
       .filter((node): node is TaskNode => node instanceof TaskNode)
       .value();
   }

@@ -39,7 +39,7 @@ test("explicit nested scope separates both boards and co-moves Task/Run without 
   try {
     const env = { EDGES_REPO: root, EDGES_SCOPE: root };
     const call = (purpose: string, args: string[]) =>
-      run(["--scope", child, "tasks", "--index-group", "local", "--purpose", purpose, ...args], { env });
+      run(["--scope", child, "tasks", "--purpose", purpose, ...args], { env });
     let domainPath = "";
     for (const purpose of ["domain", "maintenance"]) {
       const result = await call(purpose, [
@@ -140,7 +140,7 @@ test("project reads do not initialize absent board and manual AGENTS content sur
       [
         "--scope",
         child,
-        "tasks", "--index-group", "local",
+        "tasks",
         "--purpose",
         "maintenance",
         "project",
@@ -200,7 +200,7 @@ test("selected board rejects symlink escape on writes", async () => {
     await mkdir(path.join(root, "outside"));
     await symlink(path.join(root, "outside"), path.join(child, "tasks"));
     const result = await run(
-      ["--scope", child, "tasks", "--index-group", "local", "--purpose", "domain", "create", "--title", "Escape"],
+      ["--scope", child, "--super", "tasks", "create", "--title", "Escape"],
       { env: {} },
     );
     assert.equal(result.exitCode, 2, result.stdout);
@@ -217,7 +217,7 @@ test("render-only review-page works outside a repository and explicit fresh scop
     process.chdir(dir);
     const rendered = await run(
       [
-        "tasks", "--index-group", "local",
+        "tasks",
         "project",
         "review-page",
         "--from",
@@ -234,13 +234,13 @@ test("render-only review-page works outside a repository and explicit fresh scop
       },
     );
     assert.equal(rendered.exitCode, 0, rendered.stdout);
-    const invalid = await run(["tasks", "--index-group", "local", "create", "--title", "No owner"], {
+    const invalid = await run(["tasks", "create", "--title", "No owner"], {
       env: {},
     });
     assert.equal(invalid.exitCode, 2);
     assert.match(invalid.stdout, /--scope/);
     const created = await run(
-      ["--scope", dir, "tasks", "--index-group", "local", "create", "--title", "Explicit"],
+      ["--scope", dir, "tasks", "create", "--title", "Explicit"],
       { env: {} },
     );
     assert.equal(created.exitCode, 0, created.stdout);
@@ -255,7 +255,7 @@ test("project list rejects unindexed project directories without creating metada
   const { root, child } = await fixture();
   try {
     await mkdir(path.join(child, "tasks/cli/todo"), { recursive: true });
-    const result = await run(["--scope", child, "tasks", "--index-group", "local", "--purpose", "domain", "project", "list"], {
+    const result = await run(["--scope", child, "--super", "tasks", "project", "list"], {
       env: {},
     });
     assert.equal(result.exitCode, 2, result.stdout);
