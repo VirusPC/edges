@@ -39,4 +39,5 @@ format: ordinary
 - [CLI 默认只做系统二操作](<feedback_cli_is_system_two_ops/INDEX.md>) — 改 traverse 双文件并边、scope 根或 tasks 查询入口时：真 AGENTS 默认只做该系统的系统二；要内容面走 SuperAgentsNode（见 feedback\_content\_via\_super\_agents\_node），不要从真 AGENTS 并 README。
 - [系统一内容经 SuperAgentsNode 当虚拟系统二](<feedback_content_via_super_agents_node/INDEX.md>) — 改 traverse/\-\-super/tasks 查询时：真 AGENTS 只逛系统二；内容面用 SuperAgentsNode 挂 harness\-materials；无 includeContentFace；Task 板 dual\-face。
 - [traverse 单系统；森林根、Super 挂载与 domain 配置](<feedback_traverse_single_system_and_forest_roots/INDEX.md>) — 改 traverse/森林/Super/harness 材料 IO 时：domain/config/harness\-materials.json；Super 只挂 README；森林 BaseNode\[\]\[\]；edges forest list。
+- [scope、super、all 的组合形成一切](<feedback_scope_super_all/INDEX.md>) — 改 edges 的 list、写任务、帮助或 skill 时：范围只由 \-\-scope、\-\-super、\-\-all 组合决定，不要再加用途、index\-group 或另一套全仓开关。
 <!-- project-entries-local:end -->

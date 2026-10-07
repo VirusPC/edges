@@ -65,7 +65,7 @@ format: ordinary
 - [Tasks 旧记忆逐条审阅后的共享范围与归属](project_task_shared_conventions_ownership/INDEX.md) — 跨层任务约定存根 Project Memory；写法引用 conversation-to-tasks；部署记录与预览 Skill 已归根，局部看板分组仍留 Tasks，对外分发留待办。
 - [Tasks 核心思想：与 /goal、loop engineering 同构](project_tasks_align_goal_and_loop_engineering/INDEX.md) — 设计或验收 tasks 时：目标+完成标准要与 /goal、loop engineering 一起想；开卡时完成标准可暂缺、grill 后补；沉淀结论时同时写清背景上下文。
 - [Task 看板变更优先走 edges tasks CLI](project_tasks_board_mutations_via_cli/INDEX.md) — 所有层级的领域 tasks 与维护 .harness/tasks 看板变更，优先走 edges tasks CLI 和已有任务 Skill；能力缺口明确反馈，不长期绕过工具直接改文件。
-- [2026-09-10 Task 速记直推 main（历史约定）](project_tasks_direct_main/INDEX.md) — 2026-09-10 旧 knowledge/tasks 只追加速记曾约定直推 main；当前领域 tasks/ 与维护 .harness/tasks/ 通过 CLI 和独立 worktree 操作，发布按当次流程。
+- [2026\-09\-10 Task 速记直推 main（历史约定）](<project_tasks_direct_main/INDEX.md>) — 2026\-09\-10 旧 knowledge/tasks 只追加速记曾约定直推 main；当前任务写入所选 scope 的节点 harness tasks，并遵守独立 worktree。
 - [持久 tasks 看板：分层存放、全仓汇总](project_tasks_persistent_board_site/INDEX.md) — 任务分层与全仓视图、局部维护板默认及通用延迟查询的边界和取舍；持久看板部署与 UI 既有决定。
 - [工作项叫 tasks，支持状态流转](project_tasks_with_status_not_todos/INDEX.md) — Task 工作项按 Task Project 与 edges-tasks-status 分夹；当前领域板在 tasks/，Edges 维护板在 .harness/tasks/，旧 knowledge/tasks/ 仅是迁移史料。
 - [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push/INDEX.md) — 改 teaching、/tasks/ 或 ECS 部署时：SSH 只在 deploy.yml 的 deploy job；production 不挂 url；site-teaching 与 site-tasks 都 needs deploy，分别登记 https://edges.viruspc.tech/teaching/ 与 /tasks/；summary 列两个 URL。不要拆成两次 SSH，不要用 teach.\* 或裸 IP。不要新开 workflow（ADR 0021）。
@@ -102,4 +102,5 @@ format: ordinary
 
 - [traverse 默认走全部 children](<project_grill_traverse_default_all_children/INDEX.md>) — 改 operations/traverse 或依赖其默认的调用方时：默认展开 local∪descendants；本层\-only 用显式 localOnly；不再接受 includeDescendants；includeHarness 仍默认 false。
 - [Task Project 组织清单用 README](<project_task_project_readme_org_lists/INDEX.md>) — 改 Task Project / 看板列表或 physicalParent 时：Task Project 与看板项目列表用 README\+project\-entries；新项目默认 README 种子，勿伪造 AGENTS；任务叶子的物理父是项目 README。
+- [scope、super、all 的组合形成一切](<project_list_all_forest/INDEX.md>) — 改 edges 的 list 或写任务时：范围只由 \-\-scope、\-\-super、\-\-all 组合决定；tasks 写入主体系统的 .harness/tasks。
 <!-- project-entries-local:end -->

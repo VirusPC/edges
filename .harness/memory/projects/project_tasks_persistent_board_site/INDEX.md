@@ -4,11 +4,11 @@ description: 任务分层与全仓视图、局部维护板默认及通用延迟�
 metadata:
   edges-title: 持久 tasks 看板：分层存放、全仓汇总
   edges-type: project
-  edges-origin-session-id: bc-4ba2da31-7293-5b2e-a60b-34cec5ba0813
+  edges-origin-session-id: ed32d8b9-d356-4eb9-8822-6ad2ddc36d1c
   edges-agent-client: cursor
-  edges-username: cheng
+  edges-username: viruspc
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-06T03:49:51+08:00'
+  edges-updated-at: '2026-10-07T17:40:52+08:00'
 ---
 
 `/tasks/` 是与 teaching 同机的持久看板入口，始终反映 main：`edges tasks list --group-by project` 产出松耦合 `edges.tasks.grouped/v1`，薄映射后喂现有 `review-page`；CI 扩展 `deploy.yml`，不新开 status station。已落地（2026-09-21 实现轮）。ADR 0022 起仍是这一份壳：不窄于 Tailwind `md` 时为三栏，grouped item 可带可选 Task Doc（`doc`），不写回 git。2026-09-23 实现轮已把 `doc` 带进审阅页，并在生成 `/tasks/` 前构建审阅壳。用户所述，grill 确认于 2026-09-23；接线已验证。2026-09-24 ADR 0023：同一壳在窄于 `md` 时改为纵向长滚动，双端「移到项目…」只改页内 JSON；`/tasks/` 不另做一壳。
@@ -42,7 +42,7 @@ metadata:
 
 **Why:** 局部维护需要稳定归属，全仓总览不能遗漏任务或模块自身的维护工作。自动物理扫描会掩盖未登记入口；另建 Task 遍历会使它与其他节点的发现规则分叉。
 
-**How to apply:** 普通命令选当前作用域 maintenance，领域工作显式 purpose=domain；list --all-scopes 从所在 Git 根汇总，未显式 purpose 时包含两种用途，无 Git 则用解析出的 scope。持久看板继续 purpose=all。两者共享已登记节点树查询并保留 scope/purpose/project/stem 来源身份，缺入口应诊断和显式迁移，不回退扫描。普通查询不跨节点自身 harness；全仓显式开启下层组成与独立维护关系，递归包含所有维护层级。网站部署/UI 的既有决定继续适用。
+**How to apply:** 2026-10-07：用户命令不再按用途分板。Skill 选 `--scope`；不传 `--super` 写 AgentsNode 指向的 `<scope>/.harness/tasks`，`--super` 写该超节点 harness 下的 `tasks/`。list 的 `--all` 从当前 `--scope` 走森林；最全是 `--scope <仓库根> --super --all`。持久看板生成脚本仍用其现有汇总调用，不从用户命令暴露用途分类。两者共享已登记节点树查询并保留 scope/purpose/project/stem 来源身份，缺入口应诊断和显式迁移，不回退扫描。普通查询不跨节点自身 harness；全仓显式开启下层组成与独立维护关系，递归包含所有维护层级。网站部署/UI 的既有决定继续适用。
 
 ## 通用延迟查询的取舍（2026-10-06 用户确认）
 
