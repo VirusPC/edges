@@ -1,3 +1,4 @@
+import * as fs from "node:fs";
 import path from "node:path";
 import { Command, Option } from "commander";
 import type { CliContext } from "../../context.js";
@@ -11,6 +12,10 @@ import { gitRoot } from "../../services/scope.js";
 import { NodeService } from "../../services/node/node-service.js";
 import { buildSystemForest } from "../../services/node/system-forest-service.js";
 import { TasksError } from "../../domain/models/tasks/types.js";
+import { placeHarnessMaterial, tasksBoardDirName } from "../../domain/config/harness-materials.js";
+import { ENTRY_NAMES } from "../../domain/models/layout.js";
+import { listTaskNodes } from "../../services/tasks/node-query.js";
+import { subjectTaskBoard } from "../../services/tasks/paths.js";
 import { groupRecords, matchesFilters, parseFieldFilter, type FieldFilter } from "../../services/list-query.js";
 
 const LIST_AFTER_HELP = `
@@ -122,6 +127,16 @@ async function collectTasks(scopeDir: string, mode: { all: boolean; super: boole
     const forest = await buildSystemForest(scopeDir, { includeSuper: mode.super, form: "independent" });
     return forest.flat().flatMap((node) => node instanceof TaskNode ? [taskItem(node, scopeDir)] : []);
   }
+  const scopeEntry = path.join(path.resolve(scopeDir), ENTRY_NAMES.internal);
+  if (!mode.super && !fs.existsSync(scopeEntry)) {
+    const material = placeHarnessMaterial(path.resolve(scopeDir), "tasks").absPath;
+    if (fs.existsSync(material)) {
+      return (await listTaskNodes(subjectTaskBoard(scopeDir))).map((node) => taskItem(node, scopeDir));
+    }
+    throw new Error(
+      `Missing scope entry: ${scopeEntry}. Add AGENTS.md or pass --super to traverse the content face (README) as a virtual system.`,
+    );
+  }
   const nodes = await new NodeService({ managedRoot: managed })
     .query(scopeDir, { types: ["task"], ...(mode.super ? { super: true as const } : {}) })
     .filter((node): node is TaskNode => node instanceof TaskNode)
@@ -132,7 +147,7 @@ async function collectTasks(scopeDir: string, mode: { all: boolean; super: boole
 function taskItem(node: TaskNode, root: string) {
   const rel = path.relative(root, node.path).split(path.sep).join("/");
   const parts = rel.split("/");
-  const at = parts.lastIndexOf("tasks");
+  const at = parts.lastIndexOf(tasksBoardDirName());
   const projectDir = at >= 0 ? parts[at + 1] : undefined;
   return {
     stem: path.basename(path.dirname(node.path)),

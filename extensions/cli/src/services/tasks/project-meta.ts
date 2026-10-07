@@ -2,7 +2,8 @@ import { AgentsNode } from "../../domain/models/internal/agents-node.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { decodeBody } from '../../domain/models/internal/parse.js';
 import { createAgentsDocument } from "../../domain/models/internal/document.js";
-import { ENTRIES_SECTIONS } from "../../domain/models/layout.js";
+import { placeHarnessMaterial } from "../../domain/config/harness-materials.js";
+import { ENTRIES_SECTIONS, ENTRY_NAMES } from "../../domain/models/layout.js";
 import { serializeNode } from '../../domain/models/internal/serialize.js';
 import { NodeService } from '../node/node-service.js';
 import { assertBoardPath } from './board.js';
@@ -162,15 +163,22 @@ async function resolveProjectEntry(
   return { rel: readme, abs: path.join(scope, readme), exists: false, kind: "readme" };
 }
 
-function rootAgentsAbsPath(repoPath: BoardTarget): string {
-  return path.join(realpathSync(scopeDir(repoPath)), boardRel(repoPath), "AGENTS.md");
+function boardIsVirtual(repoPath: BoardTarget): boolean {
+  return typeof repoPath === "string" || repoPath.purpose === "domain";
 }
-function boardReadmeAbsPath(repoPath: BoardTarget): string {
-  return path.join(path.dirname(rootAgentsAbsPath(repoPath)), "README.md");
+/** Absolute tasks material from harness-materials. Virtual boards sit on the scope; maintenance boards sit under `.harness`. */
+function tasksMaterialAbsPath(repoPath: BoardTarget): string {
+  return placeHarnessMaterial(realpathSync(scopeDir(repoPath)), "tasks", {
+    super: boardIsVirtual(repoPath),
+  }).absPath;
+}
+function boardSystemEntryAbsPath(repoPath: BoardTarget): string {
+  return path.join(path.dirname(tasksMaterialAbsPath(repoPath)), ENTRY_NAMES.internal);
 }
 
 async function collectProjectIds(repoPath: BoardTarget, fs: BoardFs, additional: readonly TaskProjectId[] = []): Promise<TaskProjectId[]> {
-  const listed = await fs.exists(rootAgentsAbsPath(repoPath)) ? await listProjectIds(repoPath, fs) : [];
+  const listed = (await fs.exists(tasksMaterialAbsPath(repoPath)) || await fs.exists(boardSystemEntryAbsPath(repoPath)))
+    ? await listProjectIds(repoPath, fs) : [];
   const ids: TaskProjectId[] = [DEFAULT_TASK_PROJECT];
   for (const id of new Set([...listed, ...additional])) {
     if (id !== DEFAULT_TASK_PROJECT) {
@@ -209,26 +217,25 @@ export async function readProjectRecord(
 }
 
 function projectNodes(target: BoardTarget): NodeService {
-  const scope = realpathSync(scopeDir(target)), owner = path.join(scope, 'AGENTS.md');
+  const scope = realpathSync(scopeDir(target)), owner = path.join(scope, ENTRY_NAMES.internal);
   return new NodeService({ managedRoot: scope, assertWrite: async ({ node }) => {
     if (node.path === owner && existsSync(owner)) return;
     await assertBoardPath({ scopeDir: scope, purpose: typeof target === "string" ? "domain" : target.purpose, boardDir: path.join(scope, boardRel(target)) }, node.path);
   } });
 }
 function selectedGroup(target: BoardTarget) { return typeof target === 'string' ? undefined : target.indexGroup; }
+
 async function prepareProjectWrite(target: BoardTarget, service: NodeService): Promise<void> {
-  await assertBoardPath(target, rootAgentsAbsPath(target));
-  const owner = await service.get(path.join(realpathSync(scopeDir(target)), 'AGENTS.md'), AgentsNode);
-  const board = path.join(realpathSync(scopeDir(target)), boardRel(target), 'AGENTS.md');
-  for (const file of [owner?.path, board]) {
+  await assertBoardPath(target, tasksMaterialAbsPath(target));
+  const owner = await service.get(path.join(realpathSync(scopeDir(target)), ENTRY_NAMES.internal), AgentsNode);
+  const legacy = boardSystemEntryAbsPath(target);
+  for (const file of [owner?.path, existsSync(legacy) ? legacy : undefined]) {
     if (!file) continue;
     const node = file === owner?.path ? owner : await service.get(file, AgentsNode);
     if (node && /<!-- task-projects:(?:start|end) -->/.test(node.body))
       throw new TasksError('VALIDATION_ERROR', 'migration-required: run pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root ' + scopeDir(target) + ' --write');
   }
   if (owner && decodeBody(owner.body).unsafe) throw new TasksError('VALIDATION_ERROR', 'Malformed owning scope index: ' + owner.path);
-  if (owner && !owner.children.some(ref => ref.id === board) && !selectedGroup(target))
-    throw new TasksError('VALIDATION_ERROR', 'New owner registration requires --index-group local|descendant');
 }
 
 export async function refreshProjectIndex(
@@ -246,14 +253,17 @@ export async function refreshProjectIndex(
     records.push(await readProjectRecord(repoPath, id, writer));
   }
 
-  const board = await ensureBoardAgents(repoPath, service);
-  const list = await ensureBoardReadme(repoPath, service);
+  const material = tasksMaterialAbsPath(repoPath);
+  const boardDir = path.dirname(material);
+  const systemEntry = path.join(boardDir, ENTRY_NAMES.internal);
+  const board = existsSync(systemEntry) ? await service.get(systemEntry, AgentsNode) : undefined;
+  const list = await ensureBoardMaterial(repoPath, service);
   const sorted = sortProjectRecords(records);
-  const updatesFor = (kind: "AGENTS.md" | "README.md") => new Map(sorted
+  const updatesFor = (kind: string) => new Map(sorted
     .filter(record => path.basename(record.path) === kind)
-    .map(record => [path.resolve(board.directoryPath, record.dir, kind), { name: record.title, description: oneLineDescription(record.description) }]));
+    .map(record => [path.resolve(boardDir, record.dir, kind), { name: record.title, description: oneLineDescription(record.description) }]));
   // System-entry projects stay under the board AGENTS; org-list projects belong to the board README (Q13).
-  const agentsUpdates = updatesFor("AGENTS.md"), readmeUpdates = updatesFor("README.md");
+  const agentsUpdates = updatesFor(ENTRY_NAMES.internal), readmeUpdates = updatesFor(ENTRY_NAMES.readme);
   const synced = (node: AgentsNode | ReadmeNode, updates: Map<string, { name: string; description: string }>, moved: ReadonlySet<string> = new Set()) => {
     const update = (refs: readonly NodeReference[]) => refs.filter(ref => !moved.has(ref.id)).map(ref => updates.has(ref.id) ? { ...ref, ...updates.get(ref.id) } : ref);
     const localChildren = update(node.localChildren), descendantChildren = update(node.descendantChildren);
@@ -261,30 +271,29 @@ export async function refreshProjectIndex(
     const unchanged = isDeepStrictEqual([localChildren, descendantChildren], [node.localChildren, node.descendantChildren]);
     return unchanged ? undefined : { localChildren, descendantChildren };
   };
-  const boardChildren = synced(board, agentsUpdates, new Set(readmeUpdates.keys()));
-  if (boardChildren) await service.update(board, boardChildren);
+  if (board) {
+    const boardChildren = synced(board, agentsUpdates, new Set(readmeUpdates.keys()));
+    if (boardChildren) await service.update(board, boardChildren);
+  }
   const listChildren = synced(list, readmeUpdates);
   if (listChildren) await service.update(list, listChildren);
-  const owner = await service.get(path.join(realpathSync(scopeDir(repoPath)), 'AGENTS.md'), AgentsNode);
-  if (owner && !owner.children.some(ref => ref.id === board.id)) {
-    const group = selectedGroup(repoPath)!; // prepareProjectWrite requires an explicit choice.
+  const owner = await service.get(path.join(realpathSync(scopeDir(repoPath)), ENTRY_NAMES.internal), AgentsNode);
+  const harnessPrefix = owner ? path.join(owner.directoryPath, ".harness") + path.sep : "";
+  // A child already sitting in the board directory counts as hung, whatever its filename.
+  const alreadyHung = owner?.children.some((ref) => path.dirname(ref.id) === boardDir) === true;
+  if (owner && material.startsWith(harnessPrefix) && !alreadyHung) {
+    const group = selectedGroup(repoPath) ?? "local";
     await service.update(owner, {
-      localChildren: group === 'local' ? [...owner.localChildren, { id: board.id }] : owner.localChildren,
-      descendantChildren: group === 'descendant' ? [...owner.descendantChildren, { id: board.id }] : owner.descendantChildren,
+      localChildren: group === "local" ? [...owner.localChildren, { id: material }] : owner.localChildren,
+      descendantChildren: group === "descendant" ? [...owner.descendantChildren, { id: material }] : owner.descendantChildren,
     });
   }
   return records;
 }
 
-async function ensureBoardAgents(repoPath: BoardTarget, service: NodeService): Promise<AgentsNode> {
-  const abs = rootAgentsAbsPath(repoPath);
-  return await service.get(abs, AgentsNode)
-    ?? await service.create(new AgentsNode(abs), { body: "# Tasks\n\n" + serializeNode(createAgentsDocument()) }, { indexGroup: selectedGroup(repoPath) });
-}
-
-/** The board's Task Project org list; an existing prose README gains an empty project-entries list. */
-async function ensureBoardReadme(repoPath: BoardTarget, service: NodeService): Promise<ReadmeNode> {
-  const abs = boardReadmeAbsPath(repoPath);
+/** The configured tasks material; an existing prose file gains an empty project-entries list. */
+async function ensureBoardMaterial(repoPath: BoardTarget, service: NodeService): Promise<ReadmeNode> {
+  const abs = tasksMaterialAbsPath(repoPath);
   const existing = await service.get(abs, ReadmeNode);
   if (!existing) return service.create(new ReadmeNode(abs), { body: "# Tasks\n\n" + EMPTY_ENTRIES });
   if (!ENTRIES_MARKER.test(existing.body))
@@ -300,8 +309,7 @@ export async function ensureProjectMetadata(
   service = projectNodes(repoPath),
 ): Promise<TaskProjectRecord[]> {
   await prepareProjectWrite(repoPath, service);
-  await ensureBoardAgents(repoPath, service);
-  await ensureBoardReadme(repoPath, service);
+  await ensureBoardMaterial(repoPath, service);
 
   for (const id of await collectProjectIds(repoPath, writer, additional)) {
     if (skipId === id) {
