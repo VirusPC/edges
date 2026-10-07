@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "type": "module",
-  "description": "Multi-command Edges CLI (note ingest, tasks, and more)",
+  "description": "Multi-command Edges CLI (notes, tasks, skills, and more)",
   "bin": {
     "edges": "./dist/index.js"
   },

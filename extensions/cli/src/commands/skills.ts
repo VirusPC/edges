@@ -9,7 +9,7 @@ import { addSkillUpdateCommand } from "./skills/update.js";
 export function addSkillsCommand(program: Command, ctx: CliContext): void {
   const skills = program
     .command("skills")
-    .description("Point skill writes at memory remember. Does not write SKILL.md");
+    .description("Skill commands. create and update write skills/managed/<name>/SKILL.md");
   skills.action(() => {
     ctx.result = usageError("missing skills command. Use edges skills --help.", "skills");
   });

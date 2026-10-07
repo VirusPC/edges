@@ -16,22 +16,20 @@ test("runIngest returns success payload", async () => {
   const result = await runIngest(
     {
       title: "Title",
-      content: "Body",
-      coAuthor: "OpenAI Codex <codex@openai.com>",
+      body: "Body",
     },
     config,
     async () => ({
-      filePath: "inbox/2026-02-18--title.md",
-      branch: "ingest/2026-02-18-title",
-      prStatus: "created",
-      prUrl: "https://github.com/org/repo/pull/1",
+      path: "notes/2026-02-18--title/INDEX.md",
+      title: "Title",
       stdout: "done",
     }),
   );
 
   assert.equal(result.status, "success");
   if (result.status === "success") {
-    assert.equal(result.branch, "ingest/2026-02-18-title");
+    assert.equal(result.path, "notes/2026-02-18--title/INDEX.md");
+    assert.equal(result.title, "Title");
   }
 });
 
@@ -39,8 +37,7 @@ test("runIngest returns failure payload", async () => {
   const result = await runIngest(
     {
       title: "Title",
-      content: "Body",
-      coAuthor: "OpenAI Codex <codex@openai.com>",
+      body: "Body",
     },
     config,
     async () => {

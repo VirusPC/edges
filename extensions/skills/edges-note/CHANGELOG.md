@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.3.0] - 2026-10-08
+
+### Changed
+
+- `notes create` 只经 NodeService 在本地写叶子。正文用 `--body`，标题用 `--title` 或正文一级标题。
+- 去掉 `--content`、`--content-file`、`--markdown`、`--import-entry`、`--co-author`、`--mode`、`--dry-run` 和 token 旗标。创建不再 commit、push 或开 PR。
+- new-note MCP 改为 `title` 与 `body`，同样只本地创建。
+
 ## [2.2.0] - 2026-10-07
 
 ### Changed

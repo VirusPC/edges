@@ -5,6 +5,12 @@ All notable changes to this skill will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-10-08
+
+### Changed
+
+- 入库改为 `edges notes create --title --body`。只在本地写叶子，不再使用 `--content-file`、`--import-entry`、`--co-author` 或 Git 模式。
+
 ## [2.6.0] - 2026-10-07
 
 ### Changed

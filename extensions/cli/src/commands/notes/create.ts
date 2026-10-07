@@ -1,228 +1,56 @@
-import { readFile } from "node:fs/promises";
-import { Command, Option } from "commander";
-import { ZodError } from "zod";
-import { type CliContext, type CliResult, usageError } from "../../context.js";
-import { loadConfig } from "../../services/config.js";
-import { exitCodeForErrorCode } from "../exit.js";
-import { checkAuth } from "../../services/note/auth.js";
-import { formatResult } from "./format.js";
-import { runNoteIngest } from "../../services/note/git/ingest.js";
-import { runIngest } from "../../services/note/service.js";
-import type { IngestFailure } from "../../services/note/types.js";
-import { formatZodReason, validateInput } from "../../services/note/validation.js";
+import path from "node:path";
+import { Command } from "commander";
+import type { CliContext } from "../../context.js";
+import { NoteNode } from "../../domain/models/notes/note-node.js";
+import { localDateYmd } from "../../utils/date.js";
+import { collectRepeat, parseMetadata } from "../metadata.js";
+import { succeed } from "../result.js";
+import { failNote, noteService, relPath } from "./node.js";
 
-type IngestCliOptions = {
-  title?: string;
-  content?: string;
-  contentFile?: string;
-  markdown?: boolean;
-  importEntry?: string;
-  indexGroup?: "local" | "descendant";
-  coAuthor?: string;
-  json?: boolean;
-  dryRun?: boolean;
-  mode?: string;
-  tokenFile?: string;
-  tokenStdin?: boolean;
-};
-
-function fail(failure: IngestFailure): CliResult {
-  return {
-    exitCode: exitCodeForErrorCode(failure.errorCode),
-    stdout: formatResult(failure),
-    stderr: "",
-  };
+function titleSlug(title: string, now: Date): string {
+  const slug = title.toLowerCase().replace(/ /g, "-").replace(/[^a-z0-9-]/g, "");
+  return slug.length === 0 ? `untitled-${Math.floor(now.getTime() / 1000)}` : slug;
 }
 
-function validateNoteOptions(opts: IngestCliOptions):
-  | CliResult
-  | {
-      title: string;
-      content: string;
-      coAuthor: string;
-      dryRun: boolean;
-      mode?: "pr" | "direct";
-      tokenFile?: string;
-      tokenStdin: boolean;
-    } {
-  const mode = opts.mode;
-  if (mode !== undefined && mode !== "pr" && mode !== "direct") {
-    return usageError('--mode must be "direct" or "pr"', "notes");
+function composeNote(anchor: string, title: string | undefined, body: string | undefined): { markdown: string; title: string } {
+  if (title !== undefined && (title.length < 1 || title.length > 120)) {
+    throw new Error("note title must be 1–120 characters");
   }
-  if (opts.tokenFile && opts.tokenStdin) {
-    return usageError("use only one of --token-file or --token-stdin", "notes");
-  }
-  const title = opts.title;
-  const content = opts.content;
-  const coAuthor = opts.coAuthor;
-  const missing: string[] = [];
-  if (!title) missing.push("--title");
-  if (!content) missing.push("--content");
-  if (!coAuthor) missing.push("--co-author");
-  if (!title || !content || !coAuthor) {
-    return usageError(`missing required flags: ${missing.join(", ")}`, "notes");
-  }
-  return {
-    title,
-    content,
-    coAuthor,
-    dryRun: opts.dryRun === true,
-    mode,
-    tokenFile: opts.tokenFile,
-    tokenStdin: opts.tokenStdin === true,
-  };
+  const draft = new NoteNode(anchor);
+  draft.body = body ?? "";
+  if (title !== undefined) draft.title = title;
+  if (!draft.title.trim()) throw new Error("note title must be an H1 or --title");
+  if (draft.title.length > 120) throw new Error("note title must be 1–120 characters");
+  return { markdown: draft.body, title: draft.title };
 }
 
-/**
- * Auth flags (`--token-file`, `--token-stdin`) stay on `notes create` — same
- * optional gate as the new-note MCP HTTP server.
- */
 export function addNoteCreateCommand(note: Command, ctx: CliContext): void {
   note
     .command("create")
-    .description("Ingest a note into the Edges knowledge repo")
-    .option("--title <title>", "Note title (1–120 chars)")
-    .addOption(
-      new Option("--content <content>", "Note body (1–50,000 chars)").conflicts(
-        "contentFile",
-      ),
-    )
-    .addOption(
-      new Option(
-        "--content-file <path>",
-        "Read UTF-8 Markdown from a file",
-      ).conflicts("content"),
-    )
-    .option(
-      "--markdown",
-      "Preserve authored Markdown without adding a title or template",
-    )
-    .addOption(
-      new Option(
-        "--import-entry <path>",
-        "Validate and import the complete entry directory",
-      ).conflicts(["content", "contentFile", "markdown"]),
-    )
-    .option(
-      "--co-author <name-email>",
-      'Git co-author, e.g. "Name <email@domain>" (3–200 chars)',
-    )
-    .option(
-      "--json",
-      "Write a machine-parseable JSON result to stdout (always on; flag kept for agents)",
-    )
-    .option(
-      "--dry-run",
-      "Set EDGES_DRY_RUN=true: write and commit locally, do not push",
-    )
-    .addOption(
-      new Option(
-        "--mode <mode>",
-        "direct | pr  (default: EDGES_MODE or direct)",
-      ).choices(["pr", "direct"]),
-    )
-    .addOption(
-      new Option(
-        "--token-file <path>",
-        "Present EDGES_AUTH_TOKEN from a file (never pass the token on argv)",
-      ),
-    )
-    .addOption(
-      new Option(
-        "--token-stdin",
-        "Present EDGES_AUTH_TOKEN from a non-TTY stdin",
-      ).conflicts("tokenFile"),
-    )
-    .action(async (opts: IngestCliOptions) => {
-      if (opts.importEntry) {
-        try {
-          opts.content = new TextDecoder("utf-8", { fatal: true }).decode(
-            await readFile(opts.importEntry),
-          );
-        } catch (error) {
-          ctx.result = usageError(
-            `Cannot read --import-entry: ${String(error)}`,
-            "notes",
-          );
-          return;
-        }
-      }
-      if (opts.contentFile) {
-        try {
-          opts.content = new TextDecoder("utf-8", { fatal: true }).decode(
-            await readFile(opts.contentFile),
-          );
-        } catch (error) {
-          ctx.result = usageError(
-            `Cannot read --content-file: ${String(error)}`,
-            "notes",
-          );
-          return;
-        }
-      }
-      const parsed = validateNoteOptions(opts);
-      if ("exitCode" in parsed) {
-        ctx.result = parsed;
-        return;
-      }
-
-      let request;
+    .description("Create a local note leaf")
+    .option("--title <title>", "Note title; written as the H1")
+    .option("--body <markdown>", "Note body")
+    .option("--metadata <key=value>", "Repeatable frontmatter field", collectRepeat, [])
+    .option("--json", "Write JSON to stdout (always on)")
+    .action(async (opts: { title?: string; body?: string; metadata?: string[] }) => {
       try {
-        request = validateInput({
-          title: parsed.title,
-          content: parsed.content,
-          coAuthor: parsed.coAuthor,
+        const { scope, service } = noteService(ctx);
+        const metadata = parseMetadata(opts.metadata);
+        const composed = composeNote(path.join(scope, "INDEX.md"), opts.title, opts.body);
+        const now = new Date();
+        const file = path.join(scope, "notes", `${localDateYmd(now)}--${titleSlug(composed.title, now)}`, "INDEX.md");
+        const node = new NoteNode(file);
+        await service.create(node, {
+          body: composed.markdown,
+          ...(metadata ? { metadata } : {}),
+        });
+        ctx.result = succeed({
+          command: "notes.create",
+          path: relPath(scope, file),
+          title: composed.title,
         });
       } catch (error) {
-        if (error instanceof ZodError) {
-          ctx.result = usageError(formatZodReason(error), "notes");
-          return;
-        }
-        throw error;
+        failNote(ctx, error);
       }
-
-      const env = ctx.env;
-      const config = loadConfig(env);
-      if (parsed.dryRun) {
-        config.dryRun = true;
-      }
-      if (parsed.mode) {
-        config.mode = parsed.mode;
-      }
-
-      const auth = await checkAuth({
-        expectedToken: config.authToken,
-        tokenFile: parsed.tokenFile,
-        tokenStdin: parsed.tokenStdin,
-        stdinText: ctx.stdinText,
-        stdinIsTTY: ctx.stdinIsTTY,
-      });
-      if (!auth.ok) {
-        ctx.result = fail({
-          status: "failed",
-          errorCode: auth.failure.errorCode,
-          reason: auth.failure.reason,
-        });
-        return;
-      }
-
-      const result = await runIngest(
-        { ...request, indexGroup: opts.indexGroup, markdown: opts.markdown, importEntry: opts.importEntry },
-        config,
-        runNoteIngest,
-        env,
-      );
-      const stderrLines =
-        result.status === "success" ? result.diagnostics : result.stderrSummary;
-      const stderr = stderrLines
-        ? stderrLines.endsWith("\n")
-          ? stderrLines
-          : `${stderrLines}\n`
-        : "";
-      ctx.result = {
-        exitCode: result.status === "success" ? 0 : exitCodeForErrorCode(result.errorCode),
-        stdout: formatResult(result),
-        stderr,
-      };
     });
 }

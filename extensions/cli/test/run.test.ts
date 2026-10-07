@@ -5,10 +5,8 @@ import { run } from "../src/program.js";
 const requiredNoteFlags = [
   "--title",
   "Title",
-  "--content",
+  "--body",
   "Body",
-  "--co-author",
-  "OpenAI Codex <codex@openai.com>",
 ] as const;
 
 test("run --help lists note and tasks", async () => {
@@ -21,14 +19,14 @@ test("run --help lists note and tasks", async () => {
   assert.doesNotMatch(result.stdout, /^\s+ingest\b/m);
 });
 
-test("run note --help documents ingest flags and structured output", async () => {
+test("run note --help documents local create flags and structured output", async () => {
   const result = await run(["notes", "--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /--title/);
-  assert.match(result.stdout, /--content/);
-  assert.match(result.stdout, /--co-author/);
+  assert.match(result.stdout, /--body/);
   assert.match(result.stdout, /--json/);
   assert.match(result.stdout, /STRUCTURED OUTPUT/);
+  assert.doesNotMatch(result.stdout, /--co-author|--content\b/);
 });
 
 test("run tasks --help lists subcommands and not the placeholder", async () => {
@@ -47,8 +45,8 @@ test("run tasks without subcommand is usage JSON", async () => {
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
 });
 
-test("missing note flags fail with JSON error before ingest", async () => {
-  const result = await run(["notes", "create", "--title", "Only title"]);
+test("missing note flags fail with JSON error before writing", async () => {
+  const result = await run(["notes", "create"]);
 
   assert.equal(result.exitCode, 2);
   const parsed = JSON.parse(result.stdout) as { status: string; errorCode: string };
@@ -63,22 +61,12 @@ test("root without a subcommand is a usage error", async () => {
   assert.notEqual(result.exitCode, 0);
 });
 
-test("too-long title is rejected before ingest", async () => {
-  const result = await run(["notes", "create", "--title", "x".repeat(121), "--content", "body", "--co-author", "OpenAI Codex <codex@openai.com>"]);
+test("too-long title is rejected before writing", async () => {
+  const result = await run(["notes", "create", "--title", "x".repeat(121), "--body", "body"]);
 
   assert.equal(result.exitCode, 2);
   const parsed = JSON.parse(result.stdout) as { errorCode: string };
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
-});
-
-test("AUTH_MISSING does not start ingest", async () => {
-  const result = await run(["notes", "create", ...requiredNoteFlags], {
-    env: { EDGES_AUTH_TOKEN: "secret" },
-  });
-
-  assert.equal(result.exitCode, 4);
-  const parsed = JSON.parse(result.stdout) as { errorCode: string };
-  assert.equal(parsed.errorCode, "AUTH_MISSING");
 });
 
 test("note --help no longer documents EDGES_SCRIPT", async () => {

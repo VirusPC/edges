@@ -1,30 +1,43 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { updateNote } from "../../services/note/records.js";
-import { resolveScope } from "../../services/scope.js";
-import { fail, succeed } from "../result.js";
-
-function failNote(ctx: CliContext, error: unknown): void {
-  const message = error instanceof Error ? error.message : String(error);
-  ctx.result = fail(
-    message.includes("not found") || message.includes("must be") ? "VALIDATION_ERROR" : "UNKNOWN_ERROR",
-    message,
-    "See edges notes --help for usage.\n",
-  );
-}
+import { NoteNode } from "../../domain/models/notes/note-node.js";
+import { collectRepeat, parseMetadata } from "../metadata.js";
+import { succeed } from "../result.js";
+import { failNote, loadNote, relPath } from "./node.js";
 
 export function addNoteUpdateCommand(note: Command, ctx: CliContext): void {
   note
     .command("update")
-    .description("Update a note title or body without git ingest")
+    .description("Update a note title, body, or metadata")
     .argument("<path>", "notes/<stem>/INDEX.md")
-    .option("--title <title>", "New title")
+    .option("--title <title>", "New title, written as the H1")
     .option("--body <markdown>", "New body")
-    .action((entryPath: string, opts: { title?: string; body?: string }) => {
+    .option("--metadata <key=value>", "Repeatable frontmatter field", collectRepeat, [])
+    .action(async (entryPath: string, opts: { title?: string; body?: string; metadata?: string[] }) => {
       try {
+        const metadata = parseMetadata(opts.metadata);
+        if (opts.title === undefined && opts.body === undefined && metadata === undefined) {
+          throw new Error("update must be --title, --body, or --metadata");
+        }
+        const { scope, service, node, file } = await loadNote(ctx, entryPath);
+        let body = opts.body;
+        if (opts.title !== undefined) {
+          if (opts.title.length < 1 || opts.title.length > 120) {
+            throw new Error("note title must be 1–120 characters");
+          }
+          const draft = new NoteNode(file).parse(node.serialize());
+          if (body !== undefined) draft.body = body;
+          draft.title = opts.title;
+          body = draft.body;
+        }
+        const updated = await service.update(node, {
+          ...(body !== undefined ? { body } : {}),
+          ...(metadata ? { metadata } : {}),
+        });
         ctx.result = succeed({
           command: "notes.update",
-          ...updateNote(resolveScope(ctx.env), entryPath, opts),
+          path: relPath(scope, file),
+          title: updated.title,
         });
       } catch (error) {
         failNote(ctx, error);

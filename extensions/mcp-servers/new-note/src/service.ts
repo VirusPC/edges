@@ -22,11 +22,9 @@ export async function runIngest(
     const result = await runner(input, config);
     return {
       status: "success",
-      filePath: result.filePath,
-      branch: result.branch,
-      prUrl: result.prUrl,
-      prStatus: result.prStatus,
-      stdoutSummary: summarize(result.stdout) ?? "ingest success",
+      path: result.path,
+      title: result.title,
+      stdoutSummary: summarize(result.stdout) ?? "note created",
     };
   } catch (error) {
     const err = error as NodeJS.ErrnoException & {

@@ -35,13 +35,13 @@ test("real entry --help lists note and tasks", async () => {
   assert.match(result.stdout, /\bartifacts\b/);
 });
 
-test("real entry note --help documents ingest flags", async () => {
+test("real entry note --help documents local create flags", async () => {
   const result = await launch(["notes", "create", "--help"]);
   assert.equal(result.status, 0);
   assert.match(result.stdout, /--title/);
-  assert.match(result.stdout, /--content/);
-  assert.match(result.stdout, /--co-author/);
+  assert.match(result.stdout, /--body/);
   assert.match(result.stdout, /--json/);
+  assert.doesNotMatch(result.stdout, /--co-author|--content\b/);
 });
 
 test("real entry note missing flags exits non-zero with JSON error", async () => {

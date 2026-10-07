@@ -19,19 +19,18 @@ function createMcpServer(config: ReturnType<typeof loadConfig>) {
 
   console.error(`[new-note] Registering MCP tool: new_note`);
   console.error(`  - Title: New Note Tool`);
-  console.error(`  - Description: Create a new note in the edges repository and perform commit/push`);
+  console.error(`  - Description: Create a local note leaf through edges notes`);
 
   server.registerTool("new_note", {
     title: "New Note Tool",
-    description: "Create a new note in the edges repository and perform commit/push",
+    description: "Create a local note leaf through edges notes. Does not commit, push, or open a pull request.",
     inputSchema: {
-      title: z.string().describe("Note title"),
-      content: z.string().describe("Note content"),
-      coAuthor: z.string().describe("Co-author for git commit"),
+      title: z.string().describe("Note title, 1–120 characters"),
+      body: z.string().optional().describe("Note markdown body"),
     },
-  }, async ({ title, content, coAuthor }) => {
+  }, async ({ title, body }) => {
       try {
-        const result = await runIngest({ title, content, coAuthor }, config);
+        const result = await runIngest({ title, body: body ?? "" }, config);
         return {
           content: [
             {
@@ -101,7 +100,7 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
   console.error(`[new-note] Configuration:`);
   console.error(`  - Scope target: ${config.scopeDir ?? config.repoPath ?? `owner of ${config.cwd ?? process.cwd()}`}`);
   console.error(`  - Base branch: ${config.baseBranch}`);
-  console.error(`  - Mode: ${config.mode.toUpperCase()}${config.mode === 'pr' ? ' (Create branch + PR)' : ' (Direct commit to base)'}`);
+  console.error(`  - Notes: local NodeService create (no commit, push, or PR)`);
   console.error(`  - CLI entry: ${config.cliEntry}`);
   
   // Log environment variables status
@@ -111,7 +110,7 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
   if (transportType === 'http') {
     console.error(`  • EDGES_AUTH_TOKEN: ${process.env.EDGES_AUTH_TOKEN ? '✓ Set' : '✗ Not set'}`);
   }
-  console.error(`  • GITHUB_TOKEN: ${process.env.GITHUB_TOKEN ? '✓ Set (PR enabled)' : '○ Not set (PR disabled)'}`);
+  console.error(`  • GITHUB_TOKEN: ${process.env.GITHUB_TOKEN ? '✓ Set' : '○ Not set'}`);
   
   // Validate auth configuration for HTTP mode
   if (transportType === 'http') {

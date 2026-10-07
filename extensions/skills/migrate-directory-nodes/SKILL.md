@@ -1,7 +1,7 @@
 ---
 name: migrate-directory-nodes
 description: 显式把 Edges 工作树中受管的 tracked/public 单文件 Memory、Task、Note 转为目录入口，预览引用调整与冲突后按已授权范围应用。用于统一目录迁移，不处理私有记录、ADR、博客或第三方体系。
-version: 1.0.2
+version: 1.1.0
 ---
 
 # 统一目录迁移
@@ -21,4 +21,4 @@ pnpm migrate:directory-nodes --root /absolute/edges-worktree --apply
 
 应用失败按错误中路径保留现场，不手工覆盖目标或删除恢复副本。应用成功后再次预览应无 moves，检查 Git diff 和相关测试。脚本不自动 stage、commit、push；沿用任务已有授权。历史迁移 manifest/journal 保持历史语义，普通 CLI 不提供长期双格式兼容。
 
-日常创建使用 `edges --scope <目录> tasks create`、`edges --scope <目录> memory remember`、`edges --scope <目录> note create`，默认目录入口。虚拟系统一再加 `--super`（领域任务写在 `<目录>/tasks`，否则写在 `<目录>/.harness/tasks`）。已有完整目录导入用 Memory/Note 的 `--import-entry`；Note 的 `--content-file --markdown` 只导入文档，不带入相邻文件。这些日常入口不承担单文件历史迁移。`tasks list` 顺着主体 `AGENTS.md` 的 children 一次 traverse（`--all` 走森林）；不要再扫 README `project-entries`，也不要把 README 链接抄进 `AGENTS.md`。看板变更送进受保护的 `main` 必须开 PR。
+日常创建使用 `edges --scope <目录> tasks create`、`edges --scope <目录> memory remember`、`edges --scope <目录> notes create`，默认目录入口。虚拟系统一再加 `--super`（领域任务写在 `<目录>/tasks`，否则写在 `<目录>/.harness/tasks`）。已有完整目录导入只留给 Memory 的 `--import-entry`。`notes create` 在本地写下正文，不复制旁路目录，也不再提供 `--import-entry`。这些日常入口不承担单文件历史迁移。`tasks list` 顺着主体 `AGENTS.md` 的 children 一次 traverse（`--all` 走森林）；不要再扫 README `project-entries`，也不要把 README 链接抄进 `AGENTS.md`。看板变更送进受保护的 `main` 必须开 PR。

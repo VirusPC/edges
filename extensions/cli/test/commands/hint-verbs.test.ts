@@ -17,13 +17,18 @@ test("memory create and update point at remember", async () => {
   }
 });
 
-test("skill create and update point at remember", async () => {
-  for (const verb of ["create", "update"] as const) {
-    const result = await run(["skills", verb]);
-    assert.equal(result.exitCode, 2);
-    const body = failed(result.stdout);
-    assert.equal(body.errorCode, "VALIDATION_ERROR");
-    assert.match(body.reason, /edges memory remember/);
-    assert.match(body.reason, /SKILL\.md/);
-  }
+test("skill create and update write SKILL.md and do not hint remember", async () => {
+  const create = await run(["skills", "create"]);
+  assert.equal(create.exitCode, 2);
+  const createBody = failed(create.stdout);
+  assert.equal(createBody.errorCode, "VALIDATION_ERROR");
+  assert.match(createBody.reason, /description|argument/i);
+  assert.doesNotMatch(createBody.reason, /edges memory remember/);
+
+  const update = await run(["skills", "update", "demo"]);
+  assert.equal(update.exitCode, 2);
+  const updateBody = failed(update.stdout);
+  assert.equal(updateBody.errorCode, "VALIDATION_ERROR");
+  assert.match(updateBody.reason, /--description|--body|--metadata/);
+  assert.doesNotMatch(updateBody.reason, /edges memory remember/);
 });
