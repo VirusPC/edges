@@ -38,5 +38,5 @@ format: ordinary
 - [traverse 不兼容 includeDescendants](<feedback_no_include_descendants_compat/INDEX.md>) — 改 traverse / NodeService.query 选项时：不要再接受 includeDescendants；只要本层用 localOnly: true；默认仍是全部 children。
 - [CLI 默认只做系统二操作](<feedback_cli_is_system_two_ops/INDEX.md>) — 改 traverse 双文件并边、scope 根或 tasks 查询入口时：真 AGENTS 默认只做该系统的系统二；要内容面走 SuperAgentsNode（见 feedback\_content\_via\_super\_agents\_node），不要从真 AGENTS 并 README。
 - [系统一内容经 SuperAgentsNode 当虚拟系统二](<feedback_content_via_super_agents_node/INDEX.md>) — 改 traverse/\-\-super/tasks 查询时：真 AGENTS 只逛系统二；内容面用 SuperAgentsNode；无 includeContentFace/companion 兼容；Task 板 dual\-face；写路径 README 另起根。
-- [traverse 单系统；森林根、Super 挂载与 domain 配置](<feedback_traverse_single_system_and_forest_roots/INDEX.md>) — 改 traverse/森林/Super/harness 材料 IO 时：固定相对 path 在 domain 配置；创建与读取都走 scope\+指定 path；Super 只挂 README 材料不挂其它系统 AGENTS；森林 TreeNode\[\]\[\]。
+- [traverse 单系统；森林根、Super 挂载与 domain 配置](<feedback_traverse_single_system_and_forest_roots/INDEX.md>) — 改 traverse/森林/Super/harness 材料 IO 时：固定 path 用 domain 层 JSON/YAML 配置；创建读取走 scope\+path；Super 只挂 README 材料；森林 TreeNode\[\]\[\]。
 <!-- project-entries-local:end -->
