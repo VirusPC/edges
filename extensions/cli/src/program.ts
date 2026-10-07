@@ -86,6 +86,10 @@ function addRootCommand(
       "--super",
       "Root at a runtime SuperAgentsNode mounting harness-materials README paths (never written to disk)",
     )
+    .option(
+      "--all",
+      "Traverse the system forest from the current scope",
+    )
     .description("Edges CLI: notes, tasks, artifacts, and more")
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help")
@@ -95,8 +99,9 @@ function addRootCommand(
     .helpCommand(false);
 
   program.hook("preAction", async (_program, command) => {
-    const { scope, super: useSuper } = program.opts<{ scope?: string; super?: boolean }>();
+    const { scope, super: useSuper, all } = program.opts<{ scope?: string; super?: boolean; all?: boolean }>();
     if (useSuper) ctx.super = true;
+    if (all) ctx.all = true;
     if (scope !== undefined) ctx.env = { ...ctx.env, EDGES_SCOPE: scope };
     const target = commandWriteTarget(command, ctx.env);
     if (target !== undefined) await beforeWrite?.(target);
