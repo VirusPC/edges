@@ -102,6 +102,15 @@ groupBy 调用时不触发计算，但 value 执行后需要物化分组。先 f
 
 ## 遍历与加载边界
 
+### 原则（单系统 traverse / 森林在外）
+
+1. **traverse 只跑单个系统**：只走该入口的 `children`（系统二组成），**不跨系统**，不做森林拼装。
+2. **`SuperAgentsNode` 无特判**：traverse 时当作普通 `AgentsNode`（同一套 `children` 规则）。
+3. **森林在 traverse 之外**：scope 内凡带 `project-harness` 标识的 `AGENTS.md` 皆可收为根；对每根各自调用 traverse。收根可「全部独立」；展开时 **任意一棵树不得包含另一棵树的根节点**（互不吞根）。
+4. **仓库可视为 `.harness`**：整仓可当作上一级主体（如个人）的系统二；向上建虚拟 `SuperAgentsNode` 作该系统的虚拟根。Super 挂载按虚拟 scope 下、对齐 `.harness` 的固定相对路径；`<scope>/README.md` 可缺（仅读兼容）。
+
+真源记忆：`feedback_traverse_single_system_and_forest_roots`。
+
 ```ts
 traverse(
   roots,
@@ -111,7 +120,7 @@ traverse(
 );
 ```
 
-roots 是一个已加载节点或一组节点。resolve 返回 undefined 可跳过引用；load 提供实际加载能力。traverse 不自己打开文件，也不扫描目录发现未登记节点。
+roots 是一个已加载节点或一组节点（多根时仍是「多棵单系统树」的入口集合，不是跨系统一次走完）。resolve 返回 undefined 可跳过引用；load 提供实际加载能力。traverse 不自己打开文件，也不扫描目录发现未登记节点。
 
 | 选项 | 行为 |
 | --- | --- |
@@ -127,9 +136,9 @@ roots 是一个已加载节点或一组节点。resolve 返回 undefined 可跳�
 | 根 | 何时 | 走到什么 |
 | --- | --- | --- |
 | 真 `AGENTS.md` | CLI 默认（`--scope`） | 仅该系统的系统二（维护信息、下层 AGENTS） |
-| `SuperAgentsNode` | 显式 `--super` | 内容面（scope 或仓根 `README.md` 上的 tasks/notes 等），**当作虚拟系统的系统二** |
+| `SuperAgentsNode` | 显式 `--super` | 按虚拟 scope 固定相对路径挂载的组成（常为内容面）；**遍历语义同普通 AgentsNode** |
 
-同目录 `AGENTS.md` 与 `README.md` 在磁盘上是**并列登记**：系统一孩子只写在 README，不写进 AGENTS 组成字段。从真 AGENTS 的 **query/list 不到内容面**是预期。要逛内容面须 `--super`（SuperAgentsNode）。没有查询并边，也没有 `includeContentFace` 兼容开关。
+同目录 `AGENTS.md` 与 `README.md` 在磁盘上是**并列登记**：系统一孩子只写在 README，不写进 AGENTS 组成字段。从真 AGENTS 的 **query/list 不到内容面**是预期。要逛内容面须换根到 `SuperAgentsNode`。没有查询并边，也没有 `includeContentFace` 兼容开关。
 
 Task 板发现（`taskBoardQuery`）默认**并查两面**：内容面（org-list 项目与其 Task）+ 真 AGENTS（系统入口项目与遗留链）。单面排查时显式传 `super: true|false`。仓级扫描先找到各板 AGENTS，再对每板做 dual-face 查询。写路径 `#registered` 在系统二图之外，把每个 AGENTS 同目录 README **另起根**遍历（不是 AGENTS 的 child 边）。
 

@@ -11,26 +11,26 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 1. **递归系统二：** 系统入口是 `AGENTS.md`，带组成登记。CLI **默认**从 scope 下真 `AGENTS.md` 出发，只做该系统的**系统二**操作。经登记可达才算节点。
 2. **组成边 ≠ 维护边：** `harness` 不进 `children`。默认遍历不跟随 harness。
 3. **同目录双文件：登记分工，不是 traverse 并边：** 若同时存在 `AGENTS.md` 与 `README.md`，系统一孩子只挂在 README 的 `project-entries-*`；AGENTS 的 `project-harness-*` 只挂系统二材料与下级 AGENTS。持久化上互不为对方的 child。从真 AGENTS 出发**到不了** README 上的 tasks/notes 是预期。
-4. **内容面换根：`SuperAgentsNode`：** 若需要 tasks/notes 等（真系统视角下的系统一），在该 scope 创建运行时 `SuperAgentsNode`（`--super`），把内容面**当作虚拟系统的系统二**再遍历。不要从真 AGENTS 临时并一条 README 边来「顺便」逛内容。
-5. **入口合同：** 组织清单 → `README.md` + `project-entries-*`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md`。有无子节点看是否出现组成登记，不持久化 `isLeaf`。
-6. **谁拥有系统入口：** 任意目录可由用户自行 init；不是路径白名单。有列表 ≠ 系统入口。
-7. **存量迁 `INDEX.md`：** 可预览脚本；含 `posts/`（仅改名）。不要手改、不要另写扫盘冒充组成。
+4. **`traverse` 单系统：** 只走一个入口的 `children`，不跨系统、不拼森林。森林在外：scope 内带 `project-harness` 的 `AGENTS.md` 收根，对每根各自 traverse；任意一棵树不得包含另一棵树的根。
+5. **仓库可视为个人系统二 + `SuperAgentsNode`：** 整仓可当作上一级主体（如个人）的系统二；向上建虚拟 `SuperAgentsNode` 作该系统的虚拟根。traverse Super 时**当作普通 `AgentsNode`**。挂载按虚拟 scope 下、对齐 `.harness` 的固定相对路径；`README.md` 可缺（读兼容）。不要从真 AGENTS 临时并 README 边。
+6. **入口合同：** 组织清单 → `README.md` + `project-entries-*`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md`。有无子节点看是否出现组成登记，不持久化 `isLeaf`。
+7. **谁拥有系统入口：** 任意目录可由用户自行 init；不是路径白名单。有列表 ≠ 系统入口。
+8. **存量迁 `INDEX.md`：** 可预览脚本；含 `posts/`（仅改名）。不要手改、不要另写扫盘冒充组成。
 
 ```mermaid
 flowchart TB
-  subgraph real["真系统 — 默认 CLI"]
-    A["scope/AGENTS.md"] --> H[".harness / 下层 AGENTS<br/>真系统二"]
+  subgraph personal["个人视角 — 显式 --super"]
+    S["SuperAgentsNode<br/>虚拟根 · 当普通 Agents"] --> M["虚拟 scope 下固定相对挂载<br/>对齐 .harness 规则"]
   end
-  subgraph virt["虚拟系统 — 显式 --super"]
-    S["SuperAgentsNode<br/>不落盘"] --> R["README 内容面<br/>当作虚拟系统二"]
-    R --> T["tasks / notes / …"]
+  subgraph repo["仓库 = 个人的系统二"]
+    A["仓根 AGENTS.md"] --> H[".harness / 下层 AGENTS"]
   end
-  A -. "不并边" .- R
+  S -. "收根/森林在 traverse 外" .- A
 ```
 
-查询：真 AGENTS 不到 README；内容面用 `--super`。写路径把同目录 README 另起根闭合引用图。详见 [operations README](../operations/README.md)。
+查询：真 AGENTS 不到 README；换根用 `--super`。写路径把同目录 README 另起根闭合引用图。traverse / 森林原则见 [operations README](../operations/README.md)。
 
-设计真源：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md)。相关记忆：`feedback_cli_is_system_two_ops`、`feedback_content_via_super_agents_node`。
+设计真源：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md)。相关记忆：`feedback_traverse_single_system_and_forest_roots`、`feedback_cli_is_system_two_ops`、`feedback_content_via_super_agents_node`。
 
 ## 类与节点关系
 
