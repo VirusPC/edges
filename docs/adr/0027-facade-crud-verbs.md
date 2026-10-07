@@ -10,9 +10,9 @@
 
 - `tasks delete` 提示 `edges tasks status <target> cancelled`。任务文件和 sidecar 保留。
 - `memory create` 与 `memory update` 提示 `edges memory remember`。
-- `skill create` 与 `skill update` 提示用 `edges memory remember` 写 `SKILL.md`。
+- `skills create` 与 `skills update` 提示用 `edges memory remember` 写 `SKILL.md`。
 
-这些命令照常执行：`memory list` / `get` / `delete`，`note create`（即今天的 `edges note` 入库）以及 `note list` / `get` / `update` / `delete`，`skill list` / `get` / `delete`。
+这些命令照常执行：`memory list` / `get` / `delete`，`notes create`（即今天的 `edges notes` 入库）以及 `notes list` / `get` / `update` / `delete`，`skills list` / `get` / `delete`。
 
 ## Considered Options
 

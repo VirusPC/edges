@@ -14,9 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 节点与内容管理
 
 - **节点按入口归属：** `edges tasks` 与 `edges memory` 可从显式作用域或最近的可读 `AGENTS.md` 选择节点；本层索引登记直属内容，下层索引登记子节点，普通交叉链接不改变归属。入口沿用硬约束、本层组成、下层节点三部分，发现节点不会自动初始化 Memory。
-- **统一文档与归属操作：** Task、项目记忆、Note 和 Skill 由类型化节点模型与 `NodeService` 读取、保存和维护 AGENTS 索引；`edges tasks`、`edges memory remember` 和 `edges note` 沿用原命令入口。唯一父归属遵循物理目录，索引用于发现；默认只展开本层组成引用，显式选择下层后继续展开，两者都不自动读取节点自身的 harness。
-- **显式选择索引归属：** `edges tasks --index-group local|descendant`、`edges memory init --index-group local|descendant` 和 `edges note --index-group local|descendant` 接收调用方选择的本层或下层归属；需要新增父索引却未指定时，在写入前报错。已有关系保留分组，移动未登记节点不会凭空增加下层引用。Tasks 与 Memory 共用普通 AGENTS 索引和节点保存流程；旧 `task-projects` 区块通过 `pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root <作用域> --check` 显式审阅，改用 `--write` 才迁移。
-- **目录内容带着资源走：** Task、普通项目记忆和 Note 统一使用目录中的 `index.md`，Skill 使用 `SKILL.md`；不再提供单文件创建或资源清单参数。`edges memory remember --import-entry` 与 `edges note --import-entry` 校验并复制完整目录，保留来源；Task 状态流转以及节点移动、删除按目录处理。`edges note --content-file <path> --markdown` 只保存已审阅文档，不复制旁边的附件。
+- **命令名对齐目录：** 顶层命令 `edges skill` 改为 `edges skills`，与 `.harness/skills` 对齐；`edges note` 改为 `edges notes`，与 `notes/` 对齐。没有兼容别名。`edges tasks` 与 `edges memory` 已经和目录同名，保持不变。`edges artifacts`、`edges schema`、`edges forest` 没有同名内容目录，不改名。不为 `.harness/evaluation` 或 `.harness/observation` 新增命令。
+- **统一文档与归属操作：** Task、项目记忆、Note 和 Skill 由类型化节点模型与 `NodeService` 读取、保存和维护 AGENTS 索引；`edges tasks`、`edges memory remember` 和 `edges notes` 是这些内容的命令入口。唯一父归属遵循物理目录，索引用于发现；默认只展开本层组成引用，显式选择下层后继续展开，两者都不自动读取节点自身的 harness。
+- **显式选择索引归属：** `edges tasks --index-group local|descendant` 和 `edges memory init --index-group local|descendant` 接收调用方选择的本层或下层归属；需要新增父索引却未指定时，在写入前报错。`edges notes` 不接收 `--index-group`。已有关系保留分组，移动未登记节点不会凭空增加下层引用。Tasks 与 Memory 共用普通 AGENTS 索引和节点保存流程；旧 `task-projects` 区块通过 `pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root <作用域> --check` 显式审阅，改用 `--write` 才迁移。
+- **目录内容带着资源走：** Task、普通项目记忆和 Note 统一使用目录中的 `index.md`，Skill 使用 `SKILL.md`；不再提供单文件创建或资源清单参数。`edges memory remember --import-entry` 与 `edges notes --import-entry` 校验并复制完整目录，保留来源；Task 状态流转以及节点移动、删除按目录处理。`edges notes --content-file <path> --markdown` 只保存已审阅文档，不复制旁边的附件。
 - **显式采用目录入口：** `pnpm migrate:directory-nodes --root <工作树>` 先预览，再通过 `--apply` 转换 tracked/public 内容。本仓已转换 117 条 Memory、103 条 Task、88 条 Note 和 100 份 runlog，保留附件、权限及引用目标，重复预览为空；私有内容、文章、第三方目录与旧审计材料不在范围内。
 
 ### 任务看板与项目

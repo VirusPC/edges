@@ -190,19 +190,29 @@ edges memory restore --repo-dir /absolute/project --archive /private/archive.tar
 
 内容类型、私有忽略规则与规范以 [Project Memory LAYOUT](../skills/project-memory-init/references/LAYOUT.md) 为准。
 
-### 笔记：note
+### 笔记：notes
 
 ```bash
-edges --scope /absolute/project note --title "设计结论" \
+edges --scope /absolute/project notes create --title "设计结论" \
   --content-file /tmp/reviewed-note.md --markdown \
   --co-author "Codex <noreply@openai.com>" --dry-run
 ```
 
 必填 title、content/content-file 和 co-author。`--markdown` 保留已写好的标题与正文，不套入笔记模板；`--import-entry` 校验并复制完整入口目录，不能与正文或 markdown 输入混用。仅 content-file 不复制同目录附件。路径输入只供本地 CLI，HTTP/MCP 不接受本地路径参数。
 
-**note 的 dry-run 仍会写文件并创建本地 commit，只是不 push。** `EDGES_DRY_RUN=true` 行为相同。stdout 为 JSON，诊断在 stderr；退出码为成功 0、用法或校验 2、鉴权 4、运行错误 1。
+**notes 的 dry-run 仍会写文件并创建本地 commit，只是不 push。** `EDGES_DRY_RUN=true` 行为相同。stdout 为 JSON，诊断在 stderr；退出码为成功 0、用法或校验 2、鉴权 4、运行错误 1。
 
-若配置 EDGES_AUTH_TOKEN，通过 note 的 --token-file 或非 TTY 的 --token-stdin 提供凭据，不把 token 放进命令参数。Git/PR 行为与 Note Service 保持一致。
+若配置 EDGES_AUTH_TOKEN，通过 notes create 的 --token-file 或非 TTY 的 --token-stdin 提供凭据，不把 token 放进命令参数。Git/PR 行为与 Note Service 保持一致。
+
+### 技能：skills
+
+```bash
+edges --scope <directory> skills list
+edges --scope <directory> skills get <name-or-path>
+edges skills delete <name-or-path>
+```
+
+`skills create` 与 `skills update` 不写 `SKILL.md`，改走 `edges memory remember`。目录对齐 `.harness/skills`；没有 `edges skill` 别名。
 
 <a id="artifacts"></a>
 

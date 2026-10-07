@@ -30,8 +30,8 @@
 | `extensions/cli/src/commands/tasks/list.ts` | 读 `--all`：单树或森林，滤 `TaskNode` |
 | `extensions/cli/src/commands/tasks/project/list.ts` | 读 `--all`：单树或森林，滤项目 `ReadmeNode` |
 | `extensions/cli/src/services/memory/records.ts` | `listMemoryEntries` 改为 query / 森林，滤 `memory` |
-| `extensions/cli/src/commands/skill/list.ts` | 读 `--all`：query / 森林，滤 `skill` |
-| `extensions/cli/src/commands/note/list.ts` | 读 `--all`：query / 森林，滤 `note` |
+| `extensions/cli/src/commands/skills/list.ts` | 读 `--all`：query / 森林，滤 `skill` |
+| `extensions/cli/src/commands/notes/list.ts` | 读 `--all`：query / 森林，滤 `note` |
 | `extensions/cli/README.md` | 超节点 children 的仓库根例子 |
 | `extensions/cli/src/domain/models/README.md` | 原则 5 与上句一致 |
 
@@ -227,8 +227,8 @@ EOF
 **Files:**
 - Modify: `extensions/cli/src/commands/tasks/project/list.ts`
 - Modify: `extensions/cli/src/services/memory/records.ts`（只改 `listMemoryEntries`）
-- Modify: `extensions/cli/src/commands/skill/list.ts`
-- Modify: `extensions/cli/src/commands/note/list.ts`
+- Modify: `extensions/cli/src/commands/skills/list.ts`
+- Modify: `extensions/cli/src/commands/notes/list.ts`
 
 **Interfaces:**
 - Consumes: Task 3 的 `ctx.all`、query / forest 用法
@@ -267,8 +267,8 @@ Expected: 两条都退出 0。缺文件不导致失败。
 ```bash
 git add extensions/cli/src/commands/tasks/project/list.ts \
   extensions/cli/src/services/memory/records.ts \
-  extensions/cli/src/commands/skill/list.ts \
-  extensions/cli/src/commands/note/list.ts
+  extensions/cli/src/commands/skills/list.ts \
+  extensions/cli/src/commands/notes/list.ts
 git commit -m "$(cat <<'EOF'
 fix: list projects, memory, skills, and notes via traverse
 

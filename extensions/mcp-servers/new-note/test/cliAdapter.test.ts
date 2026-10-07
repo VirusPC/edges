@@ -23,7 +23,7 @@ test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () =>
       "import { writeFileSync } from 'node:fs';",
       "const args = process.argv.slice(2);",
       "writeFileSync(process.env.EDGES_CAPTURE_PATH, JSON.stringify({ args, cwd: process.cwd() }));",
-      "if (args[0] !== 'note') { console.error('missing note'); process.exit(1); }",
+      "if (args[0] !== 'notes') { console.error('missing notes'); process.exit(1); }",
       "if (process.env.EDGES_AUTH_TOKEN) { console.error('auth leaked'); process.exit(1); }",
       "if (process.env.EDGES_SCOPE !== '/repo') { console.error('scope leaked'); process.exit(1); }",
       "if (process.env.EDGES_REPO !== '/repo') { console.error('repo'); process.exit(1); }",
@@ -77,7 +77,8 @@ test("runEdgesNote spawns the CLI entry with flags and parses JSON", async () =>
       cwd: string;
     };
     assert.deepEqual(capture.args, [
-      "note",
+      "notes",
+      "create",
       "--title",
       "Demo",
       "--content",
@@ -225,7 +226,7 @@ test("default MCP target follows captured caller scope, with implementation reso
     );
     assert.match(
       result.filePath,
-      /^projects\/child\/notes\/\d{4}-\d{2}-\d{2}--caller-scope\/index\.md$/,
+      /^projects\/child\/notes\/\d{4}-\d{2}-\d{2}--caller-scope\/INDEX\.md$/,
     );
     assert.match(
       await fs.readFile(path.join(root, result.filePath), "utf8"),

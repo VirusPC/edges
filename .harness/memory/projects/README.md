@@ -22,7 +22,7 @@ format: ordinary
 - [个人 Artifacts 预览服务：上传→URL→TTL](project_artifacts_preview_service/INDEX.md) — 改 Artifacts 预览服务、edges artifacts、或审阅页如何给人打开时打开：稳定短生命周期托管 + 真浏览器可开 URL；聊天内嵌预览是绕开的不可靠路径；review-page 仍只渲染；结果回传另卡。ECS 手机 URL 走与 teach 同机的 :80 反代，不要假定 localhost。与 /tasks/ 持久站硬边界见 ADR 0021。决策见 docs/adr/0013-artifacts-preview-service.md。
 - [tasks 工作流阶段：grill → research → plan → implement → validate → close，回环按证伪](project_assign_grill_with_docs_first/INDEX.md) — 所有层级 .harness/tasks 的通用执行约定：grill→research→plan→implement→validate→close；按证伪回退，用户可明确跳过；不自动扩展到领域 tasks。
 - [Edges 云端部署：Obsidian vault 使用仓库 clone](project_box_obsidian_vault_for_preview/INDEX.md) — Edges 仓库部署约定：云端 Obsidian 使用独立 Edges clone，不连接本机 Sync；归根节点部署记忆，具体环境为 2026-09-11 的验证记录。
-- [能力面：CLI / Skill / MCP](project_capability_surface_cli_skill_mcp/INDEX.md) — 能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 extensions/cli 的 TS；MCP 子进程调 edges note。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。
+- [能力面：CLI / Skill / MCP](project_capability_surface_cli_skill_mcp/INDEX.md) — 能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 extensions/cli 的 TS；MCP 子进程调 edges notes。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。
 - [Changelog 自动化：调研过，暂不生成正文](project_changelog_automation/INDEX.md) — 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。
 - [classifyTasks 与 Task Project 元数据](project_classify_tasks_and_project_metadata/INDEX.md) — 实现或改 edges tasks project / project-tasks-classify Skill 时打开：能力面 CLI + Skill + MCP；按用户已设质心做 LLM / agent 判断；无 embedding、无 classify 动词。第 4 步人闸是 project review-page（Markdown 表仅无 GUI 回退）。四个 project 动词都会 ensure。Skill 目录/id 是 project-tasks-classify（展示名 classifyTasks）。
 - [classifyTasks 按已有质心分类；Task Project 元数据只做索引层](project_classify_tasks_and_task_project_metadata/INDEX.md) — 改 Task Project 元数据、classifyTasks / project-tasks-classify 工作流或看板 AGENTS.md 时：只做索引/描述层（Q18=A），不把 Task 升成 Memory Type。按用户已设 Task Project 质心做归属建议（LLM / agent 判断），不要求 embedding。人闸主路径是 review-page（ADR 0012）。Skill 路径 extensions/skills/project-tasks-classify/；新类型走 proposeTypes（ADR 0011）。决策见 docs/adr/0010-classify-tasks-and-task-project-metadata.md。
@@ -44,7 +44,7 @@ format: ordinary
 - [v1 Langfuse 先证明 UI 再试 1–2 个客户端](project_langfuse_ui_then_few_clients/INDEX.md) — 写自部署 Langfuse 的 v1 验收、或想一次接上 Grok/edges Agent 时打开：先证明 UI 健康，再试 1–2 个客户端；更广接线留在 Observation 产品卡。决策见 docs/adr/0020-langfuse-ui-then-few-clients.md。
 - [记忆研究笔记落 knowledge/projects/memory](project_memory_research_notes_in_knowledge_projects/INDEX.md) — 写 project-memory 的调研、优点、related work 等研究笔记时：落到 knowledge/projects/memory/；skill 层 .memory 只记协议与设计决策，不当成对外研究笔记落点。
 - [整仓 MIT，不拆 knowledge 许可证](project_mit_license/INDEX.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
-- [new-note MCP 的 ingest 约束](project_new_note_ingest/INDEX.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges note，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
+- [new-note MCP 的 ingest 约束](project_new_note_ingest/INDEX.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges notes，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
 - [节点目录单元与组织关系设计](project_node_resource_unit_decision/INDEX.md) — 递归目录与 harness 的现行决定及理由；模型与公开目录已采用，历史讨论保留但不替代现行 spec，私有材料逐克隆审阅。
 - [定期从目录职责提炼通用维护规范](project_periodic_architecture_review/INDEX.md) — 复盘 Edges 目录架构时：按实际职责与维护对象识别可跨作用域复用的系统二模块，输出规范候选；维护任务管理是例子，当前仅记规范、不启用自动运行。
 - [posts 对外展示，Astro 博客 + Actions CI](project_posts_public_astro_blog/INDEX.md) — posts 面向对外展示；后续以 posts 为数据用 Astro 搭博客，并用 GitHub Actions 在服务器做 CI

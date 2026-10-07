@@ -10,10 +10,10 @@ import {
 } from "./context.js";
 import { addSchemaCommand } from "./commands/schema.js";
 import { addArtifactsCommand } from "./commands/artifacts.js";
-import { addNoteCommand } from "./commands/note.js";
+import { addNotesCommand } from "./commands/notes.js";
 import { addTasksCommand } from "./commands/tasks.js";
 import { addMemoryCommand } from "./commands/memory.js";
-import { addSkillCommand } from "./commands/skill.js";
+import { addSkillsCommand } from "./commands/skills.js";
 import { addForestCommand } from "./commands/forest.js";
 import { acquireWriteLock } from "./services/node/node-lock.js";
 import { VERSION } from "./utils/version.js";
@@ -25,8 +25,9 @@ EXAMPLES
   edges --scope ./projects/demo tasks --purpose maintenance list
   edges --scope . forest list
   edges --scope . forest list --form innermost --no-super
-  edges note create --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
-  edges note --help
+  edges notes create --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
+  edges notes --help
+  edges skills --help
   edges tasks --help
   edges artifacts --help
   edges --scope ./projects/demo memory init --memory-types project feedback
@@ -34,7 +35,8 @@ EXAMPLES
 
 BREAKING RENAME
   The bin is edges only (not edges-note). There is no shim.
-  Callers must migrate to: edges note create --title … --content … --co-author …
+  Callers must migrate to: edges notes create --title … --content … --co-author …
+  Top-level commands follow folder names: edges notes (not note), edges skills (not skill). There is no alias.
 `;
 
 /**
@@ -111,10 +113,10 @@ function addRootCommand(
     ctx.result = usageError("missing command. Use edges --help.", "root");
   });
 
-  addNoteCommand(program, ctx);
+  addNotesCommand(program, ctx);
   addTasksCommand(program, ctx);
   addMemoryCommand(program, ctx);
-  addSkillCommand(program, ctx);
+  addSkillsCommand(program, ctx);
   addArtifactsCommand(program, ctx);
   addSchemaCommand(program, ctx);
   addForestCommand(program, ctx);
@@ -133,7 +135,7 @@ function commandWriteTarget(
     parent = command.parent?.name();
   const options = command.opts();
   const writes =
-    (parent === "note" && ["create", "update", "delete"].includes(name)) ||
+    (parent === "notes" && ["create", "update", "delete"].includes(name)) ||
     (parent === "tasks" && ["create", "update", "status"].includes(name)) ||
     (parent === "project" &&
       command.parent?.parent?.name() === "tasks" &&
@@ -184,7 +186,7 @@ export async function run(
   input: CliInput = {},
 ): Promise<CliResult> {
   if (argv[0] === "ingest") {
-    return usageError("ingest was renamed to note. Use: edges note …", "root");
+    return usageError("ingest was renamed to notes. Use: edges notes …", "root");
   }
 
   const ctx: CliContext = {

@@ -30,13 +30,13 @@ test("real entry --help lists note and tasks", async () => {
   const result = await launch(["--help"]);
   assert.equal(result.status, 0);
   assert.match(result.stdout, /Commands:/);
-  assert.match(result.stdout, /\bnote\b/);
+  assert.match(result.stdout, /\bnotes\b/);
   assert.match(result.stdout, /\btasks\b/);
   assert.match(result.stdout, /\bartifacts\b/);
 });
 
 test("real entry note --help documents ingest flags", async () => {
-  const result = await launch(["note", "create", "--help"]);
+  const result = await launch(["notes", "create", "--help"]);
   assert.equal(result.status, 0);
   assert.match(result.stdout, /--title/);
   assert.match(result.stdout, /--content/);
@@ -45,7 +45,7 @@ test("real entry note --help documents ingest flags", async () => {
 });
 
 test("real entry note missing flags exits non-zero with JSON error", async () => {
-  const result = await launch(["note"]);
+  const result = await launch(["notes"]);
   assert.notEqual(result.status, 0);
   const parsed = JSON.parse(result.stdout) as { status: string; errorCode: string };
   assert.equal(parsed.status, "failed");

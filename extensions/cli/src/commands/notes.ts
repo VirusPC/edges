@@ -1,11 +1,11 @@
 import { Command } from "commander";
 import { type CliContext, usageError } from "../context.js";
 import { VERSION } from "../utils/version.js";
-import { addNoteCreateCommand } from "./note/create.js";
-import { addNoteDeleteCommand } from "./note/delete.js";
-import { addNoteGetCommand } from "./note/get.js";
-import { addNoteListCommand } from "./note/list.js";
-import { addNoteUpdateCommand } from "./note/update.js";
+import { addNoteCreateCommand } from "./notes/create.js";
+import { addNoteDeleteCommand } from "./notes/delete.js";
+import { addNoteGetCommand } from "./notes/get.js";
+import { addNoteListCommand } from "./notes/list.js";
+import { addNoteUpdateCommand } from "./notes/update.js";
 
 const NOTE_AFTER_HELP = `
 STRUCTURED OUTPUT
@@ -20,7 +20,7 @@ STRUCTURED OUTPUT
 
 AUTH
   Optional, same gate as the new-note MCP HTTP server.
-  Auth flags stay on note create (no separate auth subcommand yet).
+  Auth flags stay on notes create (no separate auth subcommand yet).
   If EDGES_AUTH_TOKEN is unset, auth is skipped.
   If it is set, present the same value via --token-file or --token-stdin before git starts.
   Do not use a --token flag (it would leak into ps and shell history).
@@ -45,28 +45,28 @@ ENV
   GITHUB_TOKEN        Passed through to git ingest for PR creation
 
 EXAMPLES
-  edges note create --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
-  edges note create --dry-run --title "Daily" --content "..." --co-author "Codex <codex@openai.com>"
-  edges note --help
+  edges notes create --title "Daily" --content "Notes from the session." --co-author "Codex <codex@openai.com>" --json
+  edges notes create --dry-run --title "Daily" --content "..." --co-author "Codex <codex@openai.com>"
+  edges notes --help
 `;
 
-export function addNoteCommand(program: Command, ctx: CliContext): Command {
-  const note = program
-    .command("note")
+export function addNotesCommand(program: Command, ctx: CliContext): Command {
+  const notes = program
+    .command("notes")
     .description("Note commands")
     .allowExcessArguments(false)
     .showHelpAfterError(false)
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help");
 
-  note.action(() => {
-    ctx.result = usageError("missing note command. Use: edges note create …", "note");
+  notes.action(() => {
+    ctx.result = usageError("missing notes command. Use: edges notes create …", "notes");
   });
-  addNoteCreateCommand(note, ctx);
-  addNoteListCommand(note, ctx);
-  addNoteGetCommand(note, ctx);
-  addNoteUpdateCommand(note, ctx);
-  addNoteDeleteCommand(note, ctx);
-  note.addHelpText("after", NOTE_AFTER_HELP);
-  return note;
+  addNoteCreateCommand(notes, ctx);
+  addNoteListCommand(notes, ctx);
+  addNoteGetCommand(notes, ctx);
+  addNoteUpdateCommand(notes, ctx);
+  addNoteDeleteCommand(notes, ctx);
+  notes.addHelpText("after", NOTE_AFTER_HELP);
+  return notes;
 }

@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { getNote } from "../../services/note/records.js";
+import { deleteNote } from "../../services/note/records.js";
 import { resolveScope } from "../../services/scope.js";
 import { fail, succeed } from "../result.js";
 
@@ -9,18 +9,18 @@ function failNote(ctx: CliContext, error: unknown): void {
   ctx.result = fail(
     message.includes("not found") || message.includes("must be") ? "VALIDATION_ERROR" : "UNKNOWN_ERROR",
     message,
-    "See edges note --help for usage.\n",
+    "See edges notes --help for usage.\n",
   );
 }
 
-export function addNoteGetCommand(note: Command, ctx: CliContext): void {
+export function addNoteDeleteCommand(note: Command, ctx: CliContext): void {
   note
-    .command("get")
-    .description("Read one note")
+    .command("delete")
+    .description("Delete one note directory")
     .argument("<path>", "notes/<stem>/INDEX.md")
     .action((entryPath: string) => {
       try {
-        ctx.result = succeed({ command: "note.get", ...getNote(resolveScope(ctx.env), entryPath) });
+        ctx.result = succeed({ command: "notes.delete", ...deleteNote(resolveScope(ctx.env), entryPath) });
       } catch (error) {
         failNote(ctx, error);
       }

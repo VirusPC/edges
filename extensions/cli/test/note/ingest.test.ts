@@ -21,7 +21,7 @@ test("dry-run ingest against an isolated repo returns parseable success", async 
   const repo = await initTempRepo();
   const result = await run(
     [
-      "note",
+      "notes",
       "create",
       "--title",
       "Cli Isolated Ingest",

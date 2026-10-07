@@ -16,7 +16,7 @@
     "dev:note-server": "pnpm --filter new-note dev",
     "start:artifacts": "pnpm --filter edges-artifacts-preview start",
     "dev:artifacts": "pnpm --filter edges-artifacts-preview dev",
-    "cli:note": "pnpm --filter edges-cli exec tsx src/index.ts note",
+    "cli:notes": "pnpm --filter edges-cli exec tsx src/index.ts notes",
     "mcp:run": "pnpm --filter",
     "migrate:recursive-layout": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-recursive-layout.mts",
     "restore:local-ownership": "pnpm --filter edges-cli exec tsx ../../scripts/restore-local-ownership.mts",

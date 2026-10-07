@@ -18,7 +18,7 @@ export function addSkillListCommand(skill: Command, ctx: CliContext): void {
           .query(scope, { types: ["skill"], ...(ctx.super ? { super: true as const } : {}) })
           .value();
       ctx.result = succeed({
-        command: "skill.list",
+        command: "skills.list",
         items: nodes.flatMap((node) => node instanceof SkillNode ? [{
           name: node.name,
           path: path.relative(scope, node.path),
@@ -26,7 +26,7 @@ export function addSkillListCommand(skill: Command, ctx: CliContext): void {
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      ctx.result = fail("UNKNOWN_ERROR", message, "See edges skill --help for usage.\n");
+      ctx.result = fail("UNKNOWN_ERROR", message, "See edges skills --help for usage.\n");
     }
   });
 }

@@ -1,6 +1,6 @@
 ---
 name: project_cli_from_mcp
-description: 改 note ingest、new-note MCP 或 cli 时：本地 agent 走 extensions/cli 的 edges note；git 在 CLI 的 TS 模块；MCP 子进程调 edges note；鉴权 flag 留在 note 上；JSON stdout。不要把 CLI 放仓库根。
+description: 改 note ingest、new-note MCP 或 cli 时：本地 agent 走 extensions/cli 的 edges notes；git 在 CLI 的 TS 模块；MCP 子进程调 edges notes；鉴权 flag 留在 notes create 上；JSON stdout。不要把 CLI 放仓库根。
 metadata:
   edges-title: new_note 收成 extensions/cli/edges，MCP 保留
   edges-type: project
@@ -11,7 +11,7 @@ metadata:
   edges-updated-at: "2026-09-13T04:08:49+00:00"
 ---
 
-本地、有 shell 的 agent 用 `extensions/cli/` 的 `edges` CLI；入库子命令是 `edges note …`。鉴权 flag（`--token-file` / `--token-stdin`）挂在 `note` 上，和 new-note MCP HTTP 同一道可选门闩。`edges tasks` 已落地 Issue 层 list/get/create/update/status 与只读 `runs` / `run-messages`（ADR 0005）。二进制只有 `edges`。git 在 `extensions/cli/src/git`（仅 `note` ingest）；tasks 写盘不调 git。`extensions/mcp-servers/new-note` 留给没有 shell 的宿主，子进程调用 `edges note`。不要把 CLI 项目放在仓库根 `clis/`。
+本地、有 shell 的 agent 用 `extensions/cli/` 的 `edges` CLI；入库子命令是 `edges notes …`。鉴权 flag（`--token-file` / `--token-stdin`）挂在 `notes create` 上，和 new-note MCP HTTP 同一道可选门闩。`edges tasks` 已落地 Issue 层 list/get/create/update/status 与只读 `runs` / `run-messages`（ADR 0005）。二进制只有 `edges`。git 在 `extensions/cli/src/git`（仅 `note` ingest）；tasks 写盘不调 git。`extensions/mcp-servers/new-note` 留给没有 shell 的宿主，子进程调用 `edges notes`。不要把 CLI 项目放在仓库根 `clis/`。
 
 **Why:** ADR-0004 把能力面定为 CLI + Skill + MCP，并删除仓根 `bin/`。ADR-0005 把本轮 tasks 钉在 CLI 契约。先前「两边都 execFile bin/new-note、MCP 不套 CLI」已被取代。
 
@@ -25,9 +25,9 @@ metadata:
 
 ```
 agent / human
- ├─ extensions/cli  edges            多命令 CLI（note / tasks / …；Commander + JSON；git 在 src/git）
+ ├─ extensions/cli  edges            多命令 CLI（notes / skills / tasks / …；Commander + JSON；git 在 src/git）
  ├─ extensions/skills/edges-note      何时如何调 CLI 或 MCP（对等能力面入口）
- └─ extensions/mcp-servers/new-note   无 shell 的 MCP 宿主（spawn edges note）
+ └─ extensions/mcp-servers/new-note   无 shell 的 MCP 宿主（spawn edges notes）
 ```
 
 不要把 npm `bin` 当成一层。不要恢复仓根 `bin/`。`conversation-to-notes` 不进 CLI。隔离仓测用 `EDGES_REPO`，不要再设 `EDGES_SCRIPT`。
@@ -37,7 +37,7 @@ agent / human
 包 `edges-cli`，目录 `extensions/cli/`，二进制只有 `edges`。
 
 ```
-edges note --title T --content C --co-author "Name <email>" [--json] [--dry-run] [--mode direct|pr] [--token-file PATH]
+edges notes create --title T --content C --co-author "Name <email>" [--json] [--dry-run] [--mode direct|pr] [--token-file PATH]
 edges tasks list|get|create|update|status|runs|run-messages
 edges --help / -v
 ```

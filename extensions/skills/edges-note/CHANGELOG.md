@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.0] - 2026-10-07
+
+### Changed
+
+- 入库命令改为 `edges notes`（`notes create`）。`edges note` 不再是命令，没有别名。
+
 ## [2.1.0] - 2026-10-07
 
 ### Changed

@@ -15,14 +15,14 @@ test("run --help lists note and tasks", async () => {
   const result = await run(["--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /Commands:/);
-  assert.match(result.stdout, /^\s+note\b/m);
+  assert.match(result.stdout, /^\s+notes\b/m);
   assert.match(result.stdout, /^\s+tasks\b/m);
   assert.match(result.stdout, /^\s+artifacts\b/m);
   assert.doesNotMatch(result.stdout, /^\s+ingest\b/m);
 });
 
 test("run note --help documents ingest flags and structured output", async () => {
-  const result = await run(["note", "--help"]);
+  const result = await run(["notes", "--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /--title/);
   assert.match(result.stdout, /--content/);
@@ -48,13 +48,13 @@ test("run tasks without subcommand is usage JSON", async () => {
 });
 
 test("missing note flags fail with JSON error before ingest", async () => {
-  const result = await run(["note", "create", "--title", "Only title"]);
+  const result = await run(["notes", "create", "--title", "Only title"]);
 
   assert.equal(result.exitCode, 2);
   const parsed = JSON.parse(result.stdout) as { status: string; errorCode: string };
   assert.equal(parsed.status, "failed");
   assert.equal(parsed.errorCode, "VALIDATION_ERROR");
-  assert.match(result.stderr, /edges note --help/);
+  assert.match(result.stderr, /edges notes --help/);
 });
 
 test("root without a subcommand is a usage error", async () => {
@@ -64,7 +64,7 @@ test("root without a subcommand is a usage error", async () => {
 });
 
 test("too-long title is rejected before ingest", async () => {
-  const result = await run(["note", "create", "--title", "x".repeat(121), "--content", "body", "--co-author", "OpenAI Codex <codex@openai.com>"]);
+  const result = await run(["notes", "create", "--title", "x".repeat(121), "--content", "body", "--co-author", "OpenAI Codex <codex@openai.com>"]);
 
   assert.equal(result.exitCode, 2);
   const parsed = JSON.parse(result.stdout) as { errorCode: string };
@@ -72,7 +72,7 @@ test("too-long title is rejected before ingest", async () => {
 });
 
 test("AUTH_MISSING does not start ingest", async () => {
-  const result = await run(["note", "create", ...requiredNoteFlags], {
+  const result = await run(["notes", "create", ...requiredNoteFlags], {
     env: { EDGES_AUTH_TOKEN: "secret" },
   });
 
@@ -82,7 +82,7 @@ test("AUTH_MISSING does not start ingest", async () => {
 });
 
 test("note --help no longer documents EDGES_SCRIPT", async () => {
-  const result = await run(["note", "--help"]);
+  const result = await run(["notes", "--help"]);
   assert.equal(result.exitCode, 0);
   assert.doesNotMatch(result.stdout, /EDGES_SCRIPT/);
   assert.doesNotMatch(result.stdout, /bin\/new-note/);

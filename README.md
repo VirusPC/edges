@@ -144,7 +144,7 @@ CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使�
 
 `.harness/evaluation/` 与 `.harness/observation/` 是系统实现旁的支撑目录：前者对照假设，后者记录野外现象。它们不进入 notes → edges → archive 主链；观测或评测若产生新洞察，仍须回到捕获入口。
 
-捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](extensions/cli/README.md) 的 `edges note …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](extensions/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
+捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](extensions/cli/README.md) 的 `edges notes …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](extensions/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
 
 Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；各节点的 `AGENTS.md` 和 `.harness/memory/` 保存该节点维护所需的规则、决策与经验；根层的 `notes/`、`edges/` 等目录保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
 

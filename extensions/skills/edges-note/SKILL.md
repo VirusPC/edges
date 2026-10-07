@@ -1,12 +1,12 @@
 ---
 name: edges-note
-description: 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 `edges note`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
-version: 2.1.0
+description: 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 `edges notes`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
+version: 2.2.0
 ---
 
-# edges note
+# edges notes
 
-人和有 shell 的 Agent 共用 [`extensions/cli`](../../cli/README.md) 的 `edges note`。本 skill 只说明何时调用、怎么写对命令。Git / 落盘 / PR 在 CLI 里，不在本目录。
+人和有 shell 的 Agent 共用 [`extensions/cli`](../../cli/README.md) 的 `edges notes`。本 skill 只说明何时调用、怎么写对命令。Git / 落盘 / PR 在 CLI 里，不在本目录。
 
 ## 什么时候用
 
@@ -18,14 +18,14 @@ version: 2.1.0
 在仓库根：
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts --scope <目录> note create \
+pnpm --filter edges-cli exec tsx src/index.ts --scope <目录> notes create \
   --title "<1–120 chars>" \
   --content "<1–50000 chars>" \
   --co-author "Name <email@domain>" \
   --json
 ```
 
-子命令是 `note create`。已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。`package.json` 的 `"bin": { "edges": "./dist/index.js" }` 只是安装挂钩：装过之后也可以 `npx edges --scope <目录> note create …`，不要再包一层仓根脚本。笔记写入该 scope 的 `notes/`。`note` 没有 `--index-group`。
+子命令是 `notes create`。已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。`package.json` 的 `"bin": { "edges": "./dist/index.js" }` 只是安装挂钩：装过之后也可以 `npx edges --scope <目录> notes create …`，不要再包一层仓根脚本。笔记写入该 scope 的 `notes/`。`notes` 没有 `--index-group`。
 
 已经由 `conversation-to-notes` 等写好并审阅的完整文稿，用 `--content-file /absolute/reviewed.md --markdown` 代替 `--content`，原文不再添加 ingest 标题或日期模板。整理工作仍由写作 skill 完成。
 
@@ -65,4 +65,4 @@ pnpm --filter edges-cli exec tsx src/index.ts --scope <目录> note create \
 - 不要在本 skill 下写 `scripts/` 去跑 git。
 - 不要教 Agent 把仓根 `bin/` 加入 PATH。
 - 不要把 npm `bin` 说成能力面的一层。能力面是 CLI + Skill + MCP（见仓库 `CONTEXT.md` 与 `docs/adr/0004-capability-surface-cli-skill-mcp.md`）。
-- 不要给 `note create` 传 `--index-group`。父级登记跟着主体系统走；这个 flag 只留在 `memory init` / `memory doctor`。
+- 不要给 `notes create` 传 `--index-group`。父级登记跟着主体系统走；这个 flag 只留在 `memory init` / `memory doctor`。

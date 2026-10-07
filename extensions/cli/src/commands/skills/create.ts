@@ -2,15 +2,15 @@ import { Command } from "commander";
 import type { CliContext } from "../../context.js";
 import { fail } from "../result.js";
 
-export function addSkillUpdateCommand(skill: Command, ctx: CliContext): void {
+export function addSkillCreateCommand(skill: Command, ctx: CliContext): void {
   skill
-    .command("update")
+    .command("create")
     .description("Point at memory remember. Does not write a SKILL.md")
     .action(() => {
       ctx.result = fail(
         "VALIDATION_ERROR",
-        "edges skill update does not write a SKILL.md. Run: edges memory remember",
-        "See edges skill --help for usage.\n",
+        "edges skills create does not write a SKILL.md. Run: edges memory remember",
+        "See edges skills --help for usage.\n",
       );
     });
 }

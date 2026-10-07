@@ -23,7 +23,7 @@ function spawnArgs(cliEntry: string): { file: string; prefix: string[] } {
 }
 
 function failedNoteError(parsed: CliPayload, stdout: string): Error {
-  return Object.assign(new Error(parsed.reason || "edges note failed"), {
+  return Object.assign(new Error(parsed.reason || "edges notes failed"), {
     errorCode: parsed.errorCode,
     stdout,
   });
@@ -53,7 +53,8 @@ export async function runEdgesNote(
   const { file, prefix } = spawnArgs(path.resolve(cwd, config.cliEntry));
   const args = [
     ...prefix,
-    "note",
+    "notes",
+    "create",
     "--title",
     input.title,
     "--content",
