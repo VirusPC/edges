@@ -120,6 +120,8 @@ test("Doctor preserves sparse generic nodes and registered cross-directory local
       join(root, "shared/AGENTS.md"),
       join(root, "nested/deep/AGENTS.md"),
       join(root, "nested/deep/.harness/memory/projects/README.md"),
+      join(root, "nested/deep/.harness/projects/README.md"),
+      join(root, "nested/deep/.harness/notes/README.md"),
     ],
   );
 });

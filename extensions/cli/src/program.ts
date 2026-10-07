@@ -11,6 +11,7 @@ import {
 import { addSchemaCommand } from "./commands/schema.js";
 import { addArtifactsCommand } from "./commands/artifacts.js";
 import { addNotesCommand } from "./commands/notes.js";
+import { addProjectsCommand } from "./commands/projects.js";
 import { addTasksCommand } from "./commands/tasks.js";
 import { addMemoryCommand } from "./commands/memory.js";
 import { addSkillsCommand } from "./commands/skills.js";
@@ -28,6 +29,8 @@ EXAMPLES
   edges --scope . forest list --form innermost --no-super
   edges notes create --title "Daily" --body "Notes from the session."
   edges notes --help
+  edges projects create --title "Demo" --body "What this project is."
+  edges projects --help
   edges skills create demo --description "What it does" --body "Steps"
   edges skills --help
   edges tasks --help
@@ -116,6 +119,7 @@ function addRootCommand(
   });
 
   addNotesCommand(program, ctx);
+  addProjectsCommand(program, ctx);
   addTasksCommand(program, ctx);
   addMemoryCommand(program, ctx);
   addSkillsCommand(program, ctx);
@@ -138,6 +142,7 @@ function commandWriteTarget(
   const options = command.opts();
   const writes =
     (parent === "notes" && ["create", "update", "delete"].includes(name)) ||
+    (parent === "projects" && ["create", "update", "delete"].includes(name)) ||
     (parent === "skills" && ["create", "update", "delete"].includes(name)) ||
     (parent === "tasks" && ["create", "update", "status"].includes(name)) ||
     (parent === "project" &&

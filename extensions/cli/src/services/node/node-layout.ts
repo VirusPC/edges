@@ -14,6 +14,7 @@ import {
   TaskNode,
   MemoryNode,
   NoteNode,
+  ProjectNode,
   SkillNode,
   ReadmeNode,
 } from "../../domain/models/index.js";
@@ -146,6 +147,7 @@ export function modelAt(
         task: TaskNode,
         memory: MemoryNode,
         note: NoteNode,
+        project: ProjectNode,
       } as Record<string, Model>
     )[type];
   if (!model)

@@ -197,7 +197,7 @@ Agent 与人发现并调用 Edges 扩展能力的入口集合；本仓定为 CLI
 _避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成单独一层、仅 CLI+Skill（漏掉 MCP）
 
 **CLI**：
-以 `edges` 为名的命令行界面（含 `notes`、`tasks`、`skills`、`artifacts` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
+以 `edges` 为名的命令行界面（含 `notes`、`projects`、`tasks`、`skills`、`artifacts` 等子命令）；人和有 shell 的 Agent 共用同一套命令与契约。
 _避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
 
 **NodeService**：
@@ -205,7 +205,7 @@ _避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
 _避免使用_：records 旁路、扫盘后直接改叶子或父索引
 
 **House CLI surface（标准 CRUD 旗标）**：
-全仓 `list` / `get` / `create` / `update` / `delete` 共用的旗标形状。本轮先用于 notes 与 skills；README / 组织列表、memory、tasks 以后照此跟随。
+全仓 `list` / `get` / `create` / `update` / `delete` 共用的旗标形状。已用于 notes、skills 与 projects；README / 组织列表、memory、tasks 以后照此跟随。
 
 | 命令 | 旗标 |
 | --- | --- |

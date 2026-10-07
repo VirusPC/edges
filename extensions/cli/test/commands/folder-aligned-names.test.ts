@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { run } from "../../src/program.js";
 
-const ALIGNED = ["notes", "tasks", "memory", "skills", "artifacts", "schema", "forest"] as const;
+const ALIGNED = ["notes", "projects", "tasks", "memory", "skills", "artifacts", "schema", "forest"] as const;
 
 test("root help lists folder-aligned command names", async () => {
   const result = await run(["--help"]);

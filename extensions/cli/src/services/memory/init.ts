@@ -1,4 +1,6 @@
+import { placeHarnessMaterial } from "../../domain/config/harness-materials.js";
 import { AgentsNode } from "../../domain/models/internal/agents-node.js";
+import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
@@ -19,6 +21,23 @@ export interface InitMemoryOptions {
     memoryTypes?: readonly string[];
     skillTypes?: readonly string[];
 }
+const CONTENT_BOARDS = [
+    { id: "projects", title: "projects", description: "项目内容叶子的组织清单。" },
+    { id: "notes", title: "notes", description: "笔记内容叶子的组织清单。" },
+] as const;
+
+async function ensureContentBoards(target: string, service: ReturnType<typeof memoryNodes>) {
+    for (const board of CONTENT_BOARDS) {
+        const file = placeHarnessMaterial(target, board.id).absPath;
+        if (existsSync(file)) continue;
+        await service.create(new ReadmeNode(file), {
+            name: board.title,
+            description: board.description,
+            body: `# ${board.title}\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n<!-- project-entries-local:end -->\n`,
+        });
+    }
+}
+
 export async function initMemory(options: InitMemoryOptions) {
     const target = resolveTarget(options.targetDir), root = resolveRoot(target, options.rootDir);
     rejectLegacy(target);
@@ -36,7 +55,7 @@ export async function initMemory(options: InitMemoryOptions) {
             targetDir: target,
             selectionRequired: true,
             recommendations: {
-                modules: ["memory", "skills", "tasks"],
+                modules: ["memory", "skills", "tasks", "projects", "notes"],
                 memoryTypes: [...MEMORY_TYPE_NAMES],
                 skillTypes: [...SKILL_TYPE_NAMES],
             },
@@ -101,6 +120,7 @@ export async function initMemory(options: InitMemoryOptions) {
             });
         }
     const agentsAction = await syncTargetAgents(target, root, service);
+    await ensureContentBoards(target, service);
     if (target !== root && existsSync(join(root, AGENTS_FILE_NAME)) && layerTypeSpecs(root).length)
         await syncTargetAgents(root, root);
     const [indexAction, indexEntry, indexDescription] = await syncIndexEntry(anchor, target, options.description, options.indexGroup);

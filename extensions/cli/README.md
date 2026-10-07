@@ -108,7 +108,7 @@ edges --scope <仓库根> --super
             └── memory/feedbacks/README.md
 ```
 
-把 `--scope` 指到 `<仓库根>/.harness` 才是下一层：这个目录本身成为超节点的 `.harness`。它的 children 是该目录下存在的 `tasks/README.md`、`memory/feedbacks/README.md`、`memory/projects/README.md`、`memory/references/README.md`、`skills/managed/README.md`、`skills/referenced/README.md`、`evaluation/README.md`、`observation/README.md`。这不是仓库根那一份名单。
+把 `--scope` 指到 `<仓库根>/.harness` 才是下一层：这个目录本身成为超节点的 `.harness`。它的 children 是该目录下存在的 `tasks/README.md`、`memory/feedbacks/README.md`、`memory/projects/README.md`、`memory/references/README.md`、`skills/managed/README.md`、`skills/referenced/README.md`、`evaluation/README.md`、`observation/README.md`、`projects/README.md`、`notes/README.md`。这不是仓库根那一份名单。
 
 默认 list 从真 `AGENTS.md` 做一次 traverse。`--all` 从当前 `--scope` 走森林。`--super` 只换根。最全的一次查询是 `--scope <仓库根> --super --all`。这三个开关都在根命令上。
 
@@ -200,6 +200,16 @@ edges --scope /absolute/project notes delete notes/2026-10-08--design-note/INDEX
 ```
 
 `notes create` 只在该 scope 的 `notes/` 下本地创建叶子，不 commit、不 push、不开 PR。标题来自 `--title` 或正文里的一级标题，正文用 `--body`。没有 `--content`、`--import-entry`、`--co-author`、`--mode`、`--dry-run` 或 token 旗标。get 与 delete 只收目标路径；list 用共享的 `--filter` / `--group-by`。stdout 为 JSON，诊断在 stderr；退出码为成功 0、运行错误 1、用法或校验 2。
+
+### 项目：projects
+
+```bash
+edges --scope /absolute/project projects create --title "Demo" --body "What this project is."
+edges --scope /absolute/project projects list --filter title=Demo
+edges --scope /absolute/project projects get projects/2026-10-08--demo/INDEX.md
+```
+
+`projects create` 只在该 scope 的 `projects/` 下本地创建叶子，不 commit、不 push、不开 PR。旗标与 `notes` 相同：metadata、`--body`，标题来自 `--title` 或正文一级标题。get 与 delete 只收目标；list 用共享的 `--filter` / `--group-by`。
 
 ### 技能：skills
 

@@ -8,7 +8,7 @@
 
 ## Decision
 
-内容叶子（Note、Skill）的创建、读取、更新与删除一律调用 `NodeService.create` / `get` / `update` / `destroy`。命令层不 `readFileSync` / `writeFileSync` / `rmSync` / `readdir` 直改叶子或父索引。删除用 `destroy`，并清掉父级组成登记。
+内容叶子（Note、Skill，以及随后的 Project）的创建、读取、更新与删除一律调用 `NodeService.create` / `get` / `update` / `destroy`。命令层不 `readFileSync` / `writeFileSync` / `rmSync` / `readdir` 直改叶子或父索引。删除用 `destroy`，并清掉父级组成登记。
 
 `notes create` 只做本地 `NodeService.create`。不在 create 上做 token 鉴权，也不保留 `--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--content`、`--content-file`、`--markdown`、`--token-file`、`--token-stdin`。
 

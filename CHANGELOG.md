@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **显式选择索引归属：** `edges memory init --index-group local|descendant` 与 `edges memory doctor` 接收调用方选择的本层或下层归属。`edges tasks` 与 `edges notes` 不接收 `--index-group`。已有关系保留分组，移动未登记节点不会凭空增加下层引用。旧 `task-projects` 区块通过 `pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root <作用域> --check` 显式审阅，改用 `--write` 才迁移。
 - **目录内容带着资源走：** Task、普通项目记忆和 Note 统一使用目录中的 `index.md`，Skill 使用 `SKILL.md`；不再提供单文件创建或资源清单参数。`edges memory remember --import-entry` 校验并复制完整目录，保留来源；Task 状态流转以及节点移动、删除按目录处理。
 - **笔记和技能在本地经 NodeService 写入：** `edges notes` 与 `edges skills` 的创建、读取、更新和删除都调用 NodeService。`edges notes create` 只在本地写下 `notes/` 里的叶子，不再 commit、push 或开 PR。`edges skills create` 与 `edges skills update` 会写下受管的 `SKILL.md`。
+- **项目叶子与 harness 索引：** `edges projects` 用和 `edges notes` 相同的本地创建、读取、更新和删除，写在作用域的 `projects/`。根 `.harness` 与 `edges memory init` 会带上 projects、notes 两份组织清单。
 - **显式采用目录入口：** `pnpm migrate:directory-nodes --root <工作树>` 先预览，再通过 `--apply` 转换 tracked/public 内容。本仓已转换 117 条 Memory、103 条 Task、88 条 Note 和 100 份 runlog，保留附件、权限及引用目标，重复预览为空；私有内容、文章、第三方目录与旧审计材料不在范围内。
 
 ### 任务看板与项目
