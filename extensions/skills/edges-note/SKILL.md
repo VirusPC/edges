@@ -1,7 +1,7 @@
 ---
 name: edges-note
 description: 把一条 Note 入库到 Edges 仓库时使用。有 shell 就调用 `edges note`；没有 shell 的宿主调用对等能力面入口 new-note MCP。不要自己跑 git，也不要找仓根 bin/new-note。
-version: 2.0.1
+version: 2.1.0
 ---
 
 # edges note
@@ -18,14 +18,14 @@ version: 2.0.1
 在仓库根：
 
 ```bash
-pnpm --filter edges-cli exec tsx src/index.ts note \
+pnpm --filter edges-cli exec tsx src/index.ts --scope <目录> note create \
   --title "<1–120 chars>" \
   --content "<1–50000 chars>" \
   --co-author "Name <email@domain>" \
   --json
 ```
 
-已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。`package.json` 的 `"bin": { "edges": "./dist/index.js" }` 只是安装挂钩：装过之后也可以 `npx edges note …`，不要再包一层仓根脚本。
+子命令是 `note create`。已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。`package.json` 的 `"bin": { "edges": "./dist/index.js" }` 只是安装挂钩：装过之后也可以 `npx edges --scope <目录> note create …`，不要再包一层仓根脚本。笔记写入该 scope 的 `notes/`。`note` 没有 `--index-group`。
 
 已经由 `conversation-to-notes` 等写好并审阅的完整文稿，用 `--content-file /absolute/reviewed.md --markdown` 代替 `--content`，原文不再添加 ingest 标题或日期模板。整理工作仍由写作 skill 完成。
 
@@ -33,14 +33,14 @@ pnpm --filter edges-cli exec tsx src/index.ts note \
 
 可选 flags：`--dry-run`（本地 commit，不 push）、`--mode direct|pr`、`--token-file PATH`、`--token-stdin`（仅当环境变量 `EDGES_AUTH_TOKEN` 已设置）。
 
-环境变量：`EDGES_REPO`、`EDGES_BASE_BRANCH`（默认 `main`）、`EDGES_MODE`、`EDGES_DRY_RUN`、`EDGES_AUTH_TOKEN`、`GITHUB_TOKEN`（PR）。
+环境变量：`EDGES_SCOPE`（显式 `--scope` 之后）、`EDGES_REPO`（再往前的回退）、`EDGES_BASE_BRANCH`（默认 `main`）、`EDGES_MODE`、`EDGES_DRY_RUN`、`EDGES_AUTH_TOKEN`、`GITHUB_TOKEN`（PR）。
 
 ### stdout JSON
 
 成功 exit 0：
 
 ```json
-{"status":"success","filePath":"notes/2026-09-11--slug.md","branch":"main","prStatus":"direct_commit"}
+{"status":"success","filePath":"notes/2026-09-11--slug/INDEX.md","branch":"main","prStatus":"direct_commit"}
 ```
 
 `prStatus` 为 `created` | `unavailable` | `direct_commit`。失败时 `status` 为 `failed`，带 `errorCode` 与 `reason`。
@@ -65,5 +65,4 @@ pnpm --filter edges-cli exec tsx src/index.ts note \
 - 不要在本 skill 下写 `scripts/` 去跑 git。
 - 不要教 Agent 把仓根 `bin/` 加入 PATH。
 - 不要把 npm `bin` 说成能力面的一层。能力面是 CLI + Skill + MCP（见仓库 `CONTEXT.md` 与 `docs/adr/0004-capability-surface-cli-skill-mcp.md`）。
-
-新建父级索引关系时，由调用本技能的 Agent 根据语义明确选择 `local` 或 `descendant`，并传给 CLI 的 `--index-group`；Tasks 将选项放在 `tasks` 后，Memory 放在 `init` / `doctor` 后，Note 放在 `note` 后。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。
+- 不要给 `note create` 传 `--index-group`。父级登记跟着主体系统走；这个 flag 只留在 `memory init` / `memory doctor`。

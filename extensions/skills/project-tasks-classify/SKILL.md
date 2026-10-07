@@ -1,7 +1,7 @@
 ---
 name: project-tasks-classify
 description: 对整板 Task 按用户已设的 Task Project（标题 + 描述）做归属建议（LLM / agent 判断，不要求 embedding），经 edges tasks project review-page 审阅页等人贴回导出 JSON 后再用 CLI 落地。无 GUI 时才退回 Markdown 表。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
-version: 1.2.2
+version: 1.3.0
 ---
 
 # classifyTasks
@@ -14,7 +14,11 @@ version: 1.2.2
 - 已有 Task Project 带标题与描述，要把它们当用户已设的分类质心。
 - 不要用它做单条 CRUD（那是后续 generic tasks Skill/MCP）；不要要求 embedding；不要调用不存在的 `edges tasks classify`。
 
-先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.harness/tasks`。主体是仓库之外的虚拟系统一时，再加 `--super`，任务写在 `<SCOPE>/tasks`。Task Project 只是该看板的分组，不决定作用域。后续命令使用 `--scope "$SCOPE"`，只有虚拟系统一才加 `--super`。仓内维护 Edges 时显式选仓根，不要依赖执行命令时的源码目录。
+先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.harness/tasks`。主体是仓库之外的虚拟系统一时，再加 `--super`，任务写在 `<SCOPE>/tasks`。Task Project 只是该看板的分组，不决定作用域。后续命令使用 `--scope "$SCOPE"`，只有虚拟系统一才加 `--super`。仓内维护 Edges 时显式选仓根，不要依赖执行命令时的源码目录。CLI 在 `extensions/cli`。
+
+`tasks list` 与 `tasks project list` 顺着该主体 `AGENTS.md` 的 children 做一次 traverse。要把当前 scope 下各系统都算进来再加 `--all`（森林）。最全的一次查询是 `--scope <仓库根> --super --all`。不要另写一套 README `project-entries` 扫描，也不要把 README 链接抄进 `AGENTS.md` 来凑列表。
+
+`edges tasks` 只改文件。这些看板变更要进受保护的 `main` 时必须开 PR，不要直接 push `main`。审阅页仍只渲染；给人可达 URL 时另跑 `edges artifacts publish`，不要把发布并进 `review-page`。
 
 ## 步骤（必须按序，第 4 步要停）
 

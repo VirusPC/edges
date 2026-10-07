@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.0] - 2026-10-07
+
+### Changed
+
+- 类型入口改为 `.harness/<module>/<plural>/AGENTS.md`，列表用 `project-harness-*`。残留 `README.md` 只读兼容。层入口链到这些 AGENTS，不把 README 链接抄进去。
+- `tasks` / `note` 不再使用 `--index-group`。任务范围只讲 `--scope` / `--super` / `--all`；list 顺着 `AGENTS.md` children 一次 traverse。
+
 ## [3.1.1] - 2026-10-05
 
 - 对齐目录入口的 name 来源与物理父归属；明确 Doctor 对重复或重叠组成引用仅诊断、保留原文，独立有效节点仍可修复。

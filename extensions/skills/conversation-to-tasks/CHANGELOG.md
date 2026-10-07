@@ -5,10 +5,12 @@ All notable changes to this skill will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - 2026-10-07
 
 ### Changed
 
+- 任务范围只由 `--scope` / `--super` / `--all` 决定。list 顺着主体 `AGENTS.md` 的 children 一次 traverse，不再讲用途或 README 二次遍历，也不把 README 链接抄进 `AGENTS.md`。
+- 看板文件进受保护的 `main` 必须开 PR。`tasks` 没有 `--index-group`。
 - 区分任务背景中的可核对事实、未验证判断与候选做法，简介说明问题与预期结果；沿用原有 STAR 正文与必填规则。
 
 ## [1.2.1] - 2026-10-03

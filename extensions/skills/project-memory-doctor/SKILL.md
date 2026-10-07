@@ -1,7 +1,7 @@
 ---
 name: project-memory-doctor
 description: 诊断并修复已采用的 .harness 项目记忆索引与作用域登记。默认只诊断；明确授权修复时 apply。旧布局只报告迁移需求。
-version: 3.1.0
+version: 3.2.0
 ---
 
 # Project Memory Doctor
@@ -9,15 +9,15 @@ version: 3.1.0
 用户要求检查、修复项目记忆，或 init 返回 needs-doctor 时使用。目标态见 [LAYOUT](../project-memory-init/references/LAYOUT.md)。默认只诊断；用户已明确要求修复可直接 apply，否则先说明具体 findings 再获得授权。
 
 ```bash
-edges memory doctor \
-  --target-dir <scope> [--root-dir <boundary>] [--apply]
+edges --scope <目录> memory doctor \
+  [--target-dir <scope>] [--root-dir <boundary>] [--apply]
 ```
 
 只修已采用类型的派生索引、层入口和下层登记，不代为 Init 未采用模块或类型，不改正文、文件头或安装链接。旧 `.memory` 返回 `migration-required`，由独立 `$project-memory-migrate` 转换。
 
 | code / issue | 处理 |
 | --- | --- |
-| missing-index / stale-index | 补已采用类型入口，或重算 entries 区块 |
+| missing-index / stale-index | 补已采用类型入口 `AGENTS.md`，或重算其本层列表区块 |
 | unregistered-type / outdated-local | 补本层类型链接，保留其他类型和人工说明 |
 | missing-agents / foreign-agents | 建层入口或追加受管区块，人工正文保留 |
 | missing-important | 补硬约束种子，已有规则不覆盖 |
@@ -35,4 +35,4 @@ edges memory doctor \
 
 旧单文件不作为生产节点。目录转换用 `$migrate-directory-nodes`，Doctor 不自动迁移。若 AGENTS 本身无效，本次 apply 保留文件并返回诊断，不猜测应保留的索引组或条目。
 
-新建父级索引关系时，由调用本技能的 Agent 根据语义明确选择 `local` 或 `descendant`，并传给 CLI 的 `--index-group`；Tasks 将选项放在 `tasks` 后，Memory 放在 `init` / `doctor` 后，Note 放在 `note` 后。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。
+`memory init` / `memory doctor` 的新建 owner 登记仍要 `--index-group local|descendant`（flag 在这两条命令上）。不要把它加到 `tasks` 或 `note` 上：那两个命令没有这个 flag。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。Tasks 的范围是根上的 `--scope` / `--super` / `--all`。list 顺着主体 `AGENTS.md` 的 children 一次 traverse，不要再扫 README `project-entries`，也不要把 README 链接抄进 `AGENTS.md`。看板变更只通过 `edges tasks` 改文件；送进受保护的 `main` 必须开 PR，不要直接 push。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。
