@@ -26,4 +26,5 @@
 - [conversation\_to\_task\_skill\_via\_cli](<cancelled/2026-09-13--conversation-to-task-skill%E8%B0%83%E7%94%A8CLI/INDEX.md>) — conversation\-to\-task skill：按模板从对话总结 Task，并调用 edges tasks CLI 落盘
 - [organize\_default\_project\_tasks\_skill](<in_progress/2026-09-16--%E6%95%B4%E7%90%86default-project%E7%9A%84tasks-skill/INDEX.md>) — Skill：整理 \_default 下的 tasks——归入已有 project、新建 project、或继续留在 \_default
 - [tasks\_list\_agents\_md](<done/2026-10-07--%E8%AE%A9-tasks-list-%E9%A1%BA%E7%9D%80-AGENTSmd-%E8%B5%B0%E5%88%B0%E4%BB%BB%E5%8A%A1/INDEX.md>) — 仓库根 tasks list 应列出 AGENTS.md 指向的 .harness/tasks 任务；\-\-all 的森林里也要有这些任务节点。
+- [list\_subject\_system\_agents\_md](<done/2026-10-07--list-%E6%94%B9%E8%B5%B0%E4%B8%BB%E4%BD%93%E7%B3%BB%E7%BB%9F%E7%B1%BB%E5%9E%8B%E5%85%A5%E5%8F%A3%E6%94%B9%E7%94%A8-AGENTSmd/INDEX.md>) — 用户命令范围只由 \`\-\-scope\` / \`\-\-super\` / \`\-\-all\` 决定；记忆与技能类型入口从 README 改为 AGENTS.md。根上维护任务当时仍挂在项目 README，未在本 PR 收完（见 \#170）。
 <!-- project-entries-local:end -->
