@@ -26,7 +26,7 @@ skills create 与 update 写入当前 scope 的受管技能目录 `skills/manage
 
 类型旗标只在必要时出现：note 标题经正文 H1 或 `--title`；skill 用 name / description。正文旗标用 `--body`，不用 `--content`。metadata 用可重复的 `--metadata key=value`。
 
-2026-10-08 补充：CRUD 用例放在各领域的 `services/<module>/service.ts`。commands 不直接装配 `NodeService`，也不直接调用 `dated-leaf` 这类共用底层。notes 与 projects 的主文件固定叶子规格后委托 `services/node/dated-leaf.ts`。其余领域的主文件 re-export 模块内已有实现，以及该命令已经在用的跨领域符号；不把实现再搬一遍。`services/node/*`、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts` 保持跨领域工具，不单独套 `service.ts`。
+2026-10-08 补充：CRUD 用例放在各领域的 `services/<module>/service.ts`。commands 不直接装配 `NodeService`，也不直接调用 `dated-leaf` 这类共用底层。notes 与 projects 的主文件固定叶子规格后委托 `services/node/dated-leaf.ts`。其余领域的主文件 re-export 模块内已有实现，以及该命令已经在用的跨领域符号；不把实现再搬一遍。`memory` 的迁移实现是可选项，主文件用动态 `import("./migrate.js")` 转发 `migrateMemory`，避免普通启动去加载它。`services/node/*`、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts` 保持跨领域工具，不单独套 `service.ts`。
 
 ## Considered Options
 

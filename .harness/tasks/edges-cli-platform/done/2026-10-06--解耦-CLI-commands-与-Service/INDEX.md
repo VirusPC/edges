@@ -2,7 +2,7 @@
 metadata:
   edges-type: task
   edges-task-project: edges-cli-platform
-  edges-updated-at: '2026-10-07T18:56:23.795Z'
+  edges-updated-at: '2026-10-07T19:07:32.411Z'
   edges-title: 解耦 CLI commands 与 Service
   edges-tasks-status: done
   edges-task-priority: none
@@ -48,6 +48,6 @@ description: 明确命令适配与完整业务用例的边界，移除 Service �
 
 **2026-10-08 进展（#187）：**
 
-各领域 commands 只从 `services/<module>/service.ts` 进入。notes 与 projects 的主文件固定叶子规格并委托 `services/node/dated-leaf.ts`。skills、memory、tasks、artifacts、forest 的主文件 re-export 已有实现，以及该命令已经在用的跨领域符号。`services/node/*`、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts` 仍是跨领域工具，不另造 `service.ts`。
+各领域 commands 只从 `services/<module>/service.ts` 进入。notes 与 projects 的主文件固定叶子规格并委托 `services/node/dated-leaf.ts`。skills、memory、tasks、artifacts、forest 的主文件 re-export 已有实现，以及该命令已经在用的跨领域符号。memory 的 `migrateMemory` 在主文件里动态 import，避免普通启动加载可选的迁移实现。`services/node/*`、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts` 仍是跨领域工具，不另造 `service.ts`。
 
 tasks list、审阅页和 artifacts server 的动作仍按原来的顺序调用这些函数，没有改写流程。`services/tasks/result.ts` 仍组装地点、读写和时钟。进程入口的写锁仍直接用 `node-lock`。规则写在 CLI README 分层和 ADR 0030。
