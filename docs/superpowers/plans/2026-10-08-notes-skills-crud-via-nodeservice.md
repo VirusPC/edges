@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 消灭 notes/skills 对 NodeService 的旁路：CLI 的 create/get/update/delete 全部经 `NodeService`；删除 `services/note/records.ts` 与 `services/skills/records.ts`；**整段丢掉** notes 的 git/PR ingest，`notes create` 改为纯本地 `NodeService.create`；改 ADR 0027；补短 ADR + 测试。
+**Goal:** 消灭 notes/skills 对 NodeService 的旁路：CLI 的 create/get/update/delete 全部经 `NodeService`；删除 `services/note/records.ts` 与 `services/skills/records.ts`；**整段丢掉** notes 的 git/PR ingest，`notes create` 改为纯本地 `NodeService.create`；改 ADR 0027；补短 ADR + 测试。CLI 旗标尽量统一：标准面是 metadata + body（正文旗标用 `--body`），只有类型真正需要时才加扩展；不要并列发明另一套名字（例如 `--content` 对 `--body`）。
 
-**Architecture:** CLI 命令层直接（或极薄 helper）调用 `NodeService.get/create/update/destroy` + `NoteNode`/`SkillNode`，对齐 memory `records` 已采用的模式。标准节点面是 **metadata + body**；正文旗标用 `--body`，不用 ingest 的 `--content`。各命令只加本类型需要的旗标（note 标题走正文 H1 或一个 helper；skill 用 name / description）。不另加特殊旗标。`notes create` 整段丢掉 git/PR ingest，只做本地 `NodeService.create`。删掉 `services/note/git/*`，并去掉 `--import-entry`、`--co-author`、`--mode`、`--dry-run` 以及 notes create 上的 token/auth 旗标（鉴权归 CLI，不在 create 上再做一套）。skills create/update 改为真写 `SKILL.md`（默认落在当前 scope 的 `skills/managed/<name>/SKILL.md`，并登记父级 README）。
+**Architecture:** CLI 命令层直接（或极薄 helper）调用 `NodeService.get/create/update/destroy` + `NoteNode`/`SkillNode`，对齐 memory `records` 已采用的模式。标准节点面是 **metadata + body**；正文旗标统一用 `--body`。类型扩展只在该类型真正需要时出现（note 标题走正文 H1 或一个 helper；skill 用 name / description），不并列发明 `--content` 这类别名。不另加特殊旗标。`notes create` 整段丢掉 git/PR ingest，只做本地 `NodeService.create`。删掉 `services/note/git/*`，并去掉 `--import-entry`、`--co-author`、`--mode`、`--dry-run` 以及 notes create 上的 token/auth 旗标（鉴权归 CLI，不在 create 上再做一套）。skills create/update 改为真写 `SKILL.md`（默认落在当前 scope 的 `skills/managed/<name>/SKILL.md`，并登记父级 README）。
 
 **Tech Stack:** Node 22、`node:test`、tsx、现有 Commander / NodeService。不新增依赖。
 
