@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.2.0] - 2026-10-07
+
+### Changed
+
+- 诊断命令带上根 `--scope`。类型入口按 `AGENTS.md` 补，不再把 `--index-group` 写到 `tasks` 或 `note`。
+- 看板 list 只顺着 `AGENTS.md` children；看板变更进 `main` 必须开 PR。
+
 ## [3.1.0] - 2026-10-05
 
 - 统一目录入口、验证后的整目录导入与显式公开迁移；保留非受控正文，非法入口诊断后由调用方修正。

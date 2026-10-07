@@ -5,7 +5,12 @@ All notable changes to this skill will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.5.0] - 2026-10-07
+
+### Changed
+
+- 入库改为 `edges --scope <目录> note create`，入口是 `notes/YYYY-MM-DD--主题简述/INDEX.md`。
+- 有附件用 `--import-entry`。去掉 `--format directory --resources`。看板任务进 `main` 必须开 PR。
 
 ## [2.4.1] - 2026-10-05
 

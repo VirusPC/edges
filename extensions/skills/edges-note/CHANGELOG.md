@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0] - 2026-10-07
+
+### Changed
+
+- 入库命令是 `edges --scope <目录> note create`。入口路径示例改为 `notes/YYYY-MM-DD--slug/INDEX.md`。
+- 去掉 `note` 上的 `--index-group`。Git 模式仍是 `--mode direct|pr`。
+
 ## [2.0.1] - 2026-10-05
 
 - 同步根层 notes 与 extensions/apps 的目录调整，保持原工作流和内容规范。

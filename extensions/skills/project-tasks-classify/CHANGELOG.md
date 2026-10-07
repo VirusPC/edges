@@ -5,7 +5,12 @@ All notable changes to this skill will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.0] - 2026-10-07
+
+### Changed
+
+- 整板读取只沿 `--scope` / `--super` / `--all`。list 顺着 `AGENTS.md` children，不另扫 README `project-entries`，也不抄 README 链接进 `AGENTS.md`。
+- 看板变更进受保护的 `main` 必须开 PR。`review-page` 仍只渲染，公开 URL 继续单独 `edges artifacts publish`。
 
 ## [1.2.2] - 2026-10-05
 
