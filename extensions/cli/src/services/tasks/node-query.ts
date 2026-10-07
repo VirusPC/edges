@@ -87,8 +87,9 @@ export async function taskBoardQuery(
     for (const face of faces) {
       if (face === "content") {
         if (!hasMaterial) continue;
-        const Model = identifyNodeType(materialEntry) === "agents" ? AgentsNode : ReadmeNode;
-        const material = await service.get(materialEntry, Model);
+        const material = identifyNodeType(materialEntry) === "agents"
+          ? await service.get(materialEntry, AgentsNode)
+          : await service.get(materialEntry, ReadmeNode);
         if (!material) continue;
         for await (const node of traverse(
           material,
