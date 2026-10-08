@@ -11,7 +11,7 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 1. **递归系统二：** 系统入口是 `AGENTS.md`，带组成登记。CLI **默认**从 scope 下真 `AGENTS.md` 出发，只做该系统的**系统二**操作。经登记可达才算节点。
 2. **组成边 ≠ 维护边：** `harness` 不进 `children`。默认遍历不跟随 harness。
 3. **同目录双文件：登记分工，不是 traverse 并边：** 若同时存在 `AGENTS.md` 与 `README.md`，系统一孩子只挂在 README 的 `project-entries-*`；AGENTS 的 `project-harness-*` 只挂系统二材料与下级 AGENTS。持久化上互不为对方的 child。从真 AGENTS 出发**到不了** README 上的 tasks/notes 是预期。
-4. **`traverse` 单系统：** 只走一个入口的 `children`，不跨系统、不拼森林。森林在外：[`services/node/system-roots.ts`](../../services/node/system-roots.ts) 扫盘收 `project-harness` 的 `AGENTS.md`（判定在 [`internal/harness-agents.ts`](internal/harness-agents.ts)，只看传入文本），`SystemForestService` 交出 `BaseNode[][]`；`independent` 下 resolve 遇其它根早停；`innermost` 只留内层。
+4. **`traverse` 单系统：** 只走一个入口的 `children`。多个系统由 Service 层的 [`system-roots.ts`](../../services/node/system-roots.ts) 收集带 `project-harness` 的 `AGENTS.md`，并由 [`system-forest-service.ts`](../../services/node/system-forest-service.ts) 拼成森林。收集、判定和 `independent` / `innermost` 见 [CLI README](../../../README.md#多个系统拼成森林)。
 5. **仓库可视为个人系统二 + `SuperAgentsNode`：** 整仓可当作上一级主体（如个人）的系统二；向上建虚拟 `SuperAgentsNode`。当前 scope 目录就是这个超节点的 `.harness`，材料路径是 scope 加上 `harness-materials.json` 里的 path（`tasks/README.md` → `<scope>/tasks/README.md`）。scope 自己的维护目录仍是 `<scope>/.harness`，由真 `AGENTS.md` 走，超节点不再往下找一层。traverse Super 时当作普通 `AgentsNode`，只走 `children`，不挂其它系统 AGENTS，材料可缺。不要从真 AGENTS 临时并 README 边。用户命令的范围只有 `--scope`、`--super`、`--all`：默认 list 从真 `AGENTS.md` 做一次 traverse；`--all` 从当前 scope 走森林；`--super` 只换根。最全是 `--scope <仓库根> --super --all`。`--scope <仓库根>` 与 `--scope <仓库根>/.harness` 的 children 不是同一份。
 6. **入口合同：** 组织清单 → `README.md` + `project-entries-*`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md`。有无子节点看是否出现组成登记，不持久化 `isLeaf`。
 7. **谁拥有系统入口：** 任意目录可由用户自行 init；不是路径白名单。有列表 ≠ 系统入口。
@@ -36,7 +36,7 @@ flowchart TB
   SUPER -. "不挂其它系统 AGENTS" .- A
 ```
 
-查询：真 AGENTS 不到 README；换根用 `--super`。写路径把同目录 README 另起根闭合引用图。traverse / 森林原则见 [operations README](../operations/README.md)。
+查询：真 AGENTS 不到 README；换根用 `--super`。写路径把同目录 README 另起根闭合引用图。traverse 只走单个系统，见 [operations README](../operations/README.md#traverse-只走单个系统)。多个系统由 Service 层收集并拼成森林，见 [CLI README](../../../README.md#多个系统拼成森林)。
 
 设计真源：[recursive-system-two-entries-design](../../../../../docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md)。相关记忆：`feedback_traverse_single_system_and_forest_roots`、`feedback_cli_is_system_two_ops`、`feedback_content_via_super_agents_node`。
 

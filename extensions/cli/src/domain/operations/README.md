@@ -102,27 +102,20 @@ groupBy 调用时不触发计算，但 value 执行后需要物化分组。先 f
 
 ## 遍历与加载边界
 
-### 原则（单系统 traverse / 森林在外）
+### traverse 只走单个系统
 
-1. **traverse 只跑单个系统**：只走该入口的 `children`（系统二组成），**不跨系统**，不做森林拼装。
+1. **一次 traverse 走一个系统**：只走该入口的 `children`（系统二组成）。
 2. **`SuperAgentsNode` 无特判**：traverse 时当作普通 `AgentsNode`（同一套 `children` 规则）。
-3. **森林在 traverse 之外**：扫盘不在 operations。[`services/node/system-roots.ts`](../../services/node/system-roots.ts) 的 `collectSystemRoots` 扫盘，用 [`models/internal/harness-agents.ts`](../models/internal/harness-agents.ts) 的 `isProjectHarnessAgentsFile`（只看传入路径与正文）认带 `project-harness` 标记的 `AGENTS.md`；`SystemForestService` / `edges forest list` 对每根各自 traverse，`resolve` 遇其它根早停。形式：`independent`（默认，全部独立）或 `innermost`（从 B 可达 A 则丢掉外层 B，只留内层）。
+3. **`excludeRoots` 早停**：调用方传入的绝对入口路径在 resolve 时停住，不再沿该入口向下。
 4. **仓库可视为个人系统二 + Super**：整仓可当作上一级主体的系统二；`SuperAgentsNode` 按 `domain/config/harness-materials.json` 挂**存在的**材料 README（`scope` + path；材料 path 不带 `.harness/` 前缀；harness 根 = `<scope>/.harness` 若存在否则 `scope`）。零个材料时允许空挂载；**不**挂其它系统的 `AGENTS.md`。
+
+多个系统由 Service 层收集系统根并拼成森林，见 [CLI README](../../../README.md#多个系统拼成森林)。
 
 真源记忆：`feedback_traverse_single_system_and_forest_roots`。
 
 ```mermaid
 flowchart LR
-  subgraph outside["森林在外"]
-    SCAN["services/node/system-roots.ts<br/>collectSystemRoots"] --> ROOTS["根集合<br/>+ Super"]
-    ROOTS --> SFS["SystemForestService"]
-    SFS --> ARR["BaseNode[][]"]
-  end
-  subgraph inside["每次 traverse"]
-    T["单根 children"] --> STOP["excludeRoots 早停"]
-  end
-  SFS --> T
-  ARR --> CLI["edges forest list"]
+  T["单根 children"] --> STOP["excludeRoots 早停"]
 ```
 
 ```ts
@@ -134,7 +127,7 @@ traverse(
 );
 ```
 
-roots 是一个已加载节点或一组节点（多根时仍是「多棵单系统树」的入口集合，不是跨系统一次走完）。resolve 返回 undefined 可跳过引用；load 提供实际加载能力。traverse 不自己打开文件，也不扫描目录发现未登记节点。
+roots 是一个已加载节点或一组节点。多根时每一棵只走自己的 `children`。resolve 返回 undefined 可跳过引用；load 提供实际加载能力。调用方可以把路径放进 `excludeRoots`，resolve 遇到这些路径即停。traverse 不自己打开文件，也不扫描目录发现未登记节点。
 
 | 选项 | 行为 |
 | --- | --- |
