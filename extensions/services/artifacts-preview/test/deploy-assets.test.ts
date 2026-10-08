@@ -306,6 +306,21 @@ for (const [fixture, rootHeader] of [
   });
 }
 
+test("site-layout mode check reads group and other bits from the last three digits", () => {
+  const script = path.join(deployDir, "edges-migrate-site-layout");
+  const probe = (mode: string) => spawnSync("bash", ["-c", 'source "$1"; if mode_grants_group_or_other_write "$2"; then echo writable; else echo ok; fi', "probe", script, mode], { encoding: "utf8" });
+  for (const mode of ["755", "644", "0755", "0644", "1755", "2755"]) {
+    const result = probe(mode);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout.trim(), "ok", `${mode} must be accepted`);
+  }
+  for (const mode of ["775", "757", "0775"]) {
+    const result = probe(mode);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout.trim(), "writable", `${mode} must be rejected`);
+  }
+});
+
 test("root site-layout entry hardcodes paths and refuses arguments", async () => {
   const entry = await readDeploy("edges-migrate-site-layout");
   assert.match(entry, /\/usr\/local\/lib\/edges\/site-layout\/migrate-site-layout\.sh/);

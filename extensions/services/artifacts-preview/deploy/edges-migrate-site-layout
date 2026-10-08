@@ -11,6 +11,16 @@ die() {
   exit 1
 }
 
+# stat -c %a may include a leading special-bit digit (1755, 2755, 0775).
+# The last three digits are owner, group, other.
+mode_grants_group_or_other_write() {
+  local mode=$1
+  local tail=${mode: -3}
+  local group=$((8#${tail:1:1}))
+  local other=$((8#${tail:2:1}))
+  [ $((group & 2)) -ne 0 ] || [ $((other & 2)) -ne 0 ]
+}
+
 require_root_owned() {
   local path=$1
   local kind=$2
@@ -22,17 +32,18 @@ require_root_owned() {
   else
     [ -f "$path" ] || die "missing $path"
   fi
-  local uid mode tail group other
+  local uid mode
   uid=$(/usr/bin/stat -c %u "$path")
   mode=$(/usr/bin/stat -c %a "$path")
   [ "$uid" = 0 ] || die "$path is not owned by root"
-  tail=${mode: -3}
-  group=$((8#${tail:0:1}))
-  other=$((8#${tail:2:1}))
-  if [ $((group & 2)) -ne 0 ] || [ $((other & 2)) -ne 0 ]; then
+  if mode_grants_group_or_other_write "$mode"; then
     die "$path is writable by group or others"
   fi
 }
+
+if [ "${BASH_SOURCE[0]}" != "$0" ]; then
+  return 0
+fi
 
 if [ "$#" -ne 0 ]; then
   echo "edges-migrate-site-layout takes no arguments" >&2
