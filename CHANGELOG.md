@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 从 1.3.0 升级时先看这几处：`edges note` 改为 `edges notes`，`edges skill` 改为 `edges skills`，没有兼容别名。Project Memory 的 Python 执行层已移除，相关 Skill 改为调用 `edges memory`，使用前需要先构建或安装 Edges CLI。根上的维护记忆、技能、任务、评测和观测已迁入 `.harness/`，领域任务在 `tasks/`。
 
-### 节点与内容管理
+### 领域模型细化
 
 - **节点按入口归属：** `edges tasks` 与 `edges memory` 可从显式作用域或最近的可读 `AGENTS.md` 选择节点；本层索引登记直属内容，下层索引登记子节点，普通交叉链接不改变归属。入口沿用硬约束、本层系统维护信息、下层系统维护信息三部分，发现节点不会自动初始化 Memory。
 - **看清系统森林：** `edges forest list` 列出当前作用域里各系统入口组成的森林，默认形态是 `independent`，也可以用 `--form innermost`。任务、笔记、项目、技能和记忆的 list 默认只走当前这一棵系统；要一次走完这片森林，在根命令加上 `--all`，例如 `edges --scope <目录> --all tasks list`。`--super` 只换列出的根，不代替 `--all`。
