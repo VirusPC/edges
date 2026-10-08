@@ -61,9 +61,11 @@ Model 的 create/update/destroy 是内存领域方法；创建目录、保存文
 
 每个领域模块有 `services/<module>/service.ts`。commands 只从这份主文件进入，不直接装配 `NodeService`，也不直接 import 模块里的其他文件。实现可以留在原文件，主文件 re-export 即可，不必为了统一入口把函数搬一遍。`memory` 的 `migrateMemory` 在主文件里动态 `import("./migrate.js")`：这份实现可以不随 CLI 启动加载，命令入口仍是 `service.ts`。notes 与 projects 的主文件固定各自的叶子规格，再委托共用底层。
 
+init 的主文件是 `services/init/service.ts`。`edges init` 只从这份文件进入，做公共的系统入口步骤，再依次调用各模块自己的那一段。`edges notes init`、`edges projects init`、`edges skills init`、`edges tasks init` 经各自 `service.ts` 上的薄转发，只把本模块交给 init service。`edges memory init` 从 `services/memory/service.ts` 的 `initMemory` 进入，只初始化 memory。模块之间不创建对方的材料。`edges artifacts init` 仍只写 artifacts 自己的 token 配置。
+
 这些是跨领域工具，不另造 `service.ts`：`services/node/`（`node-service.ts`、`scope-session.ts`，以及带日期 `INDEX.md` 叶子的 `dated-leaf.ts`）、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts`。命令要用其中的符号时，由该领域的 `service.ts` 再导出。进程入口 `program.ts` 在分发命令前直接取 `services/node/node-lock.ts` 的写锁，这不是某个领域命令。
 
-notes、projects、skills、memory、tasks、artifacts、forest 的 commands 都只调用各自的 `service.ts`。tasks 的 list 与审阅页、artifacts server 的安装和进程命令，仍在 command 动作里按原顺序调用这些已导出的函数；调用点收口了，流程本身没有改写。
+notes、projects、skills、memory、tasks、artifacts、forest 的 commands 都只调用各自的 `service.ts`。tasks list 的看板目录名、README 位置与是否存在由 `services/tasks/service.ts` 回答，命令不读挂载表。审阅页仍负责读输入、选输出路径和写 HTML。artifacts 的 token 配置写入仍在 command 侧。调用点收口了，list 的遍历顺序没有改写。
 
 [解耦 CLI commands 与 Service](../../.harness/tasks/edges-cli-platform/done/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md) 记录了这层入口约定。`services/tasks/result.ts` 仍组装命令运行时（地点、读写和时钟），审阅页命令仍负责读输入、选输出路径和写 HTML。
 
@@ -180,7 +182,12 @@ review-page 只把 groups/items JSON 渲染成 HTML，不改任务、不打开�
 Project Memory 的执行能力由 TS CLI 提供，Skill 负责工作流和调用规范。
 
 ```bash
+edges --scope /absolute/project init
+edges --scope /absolute/project init notes
+edges --scope /absolute/project notes init
 edges --scope /absolute/project memory init --memory-types project feedback
+edges --scope /absolute/project skills init --skill-types managed referenced
+edges --scope /absolute/project tasks init
 edges --scope /absolute/project memory remember --type project --slug decision \
   --description "记录本项目的设计取舍" --content-file /tmp/decision.md
 edges --scope /absolute/project memory doctor
@@ -190,7 +197,7 @@ edges memory backup --repo-dir /absolute/project
 edges memory restore --repo-dir /absolute/project --archive /private/archive.tar.gz
 ```
 
-新作用域的 init 未选择类型时只返回推荐项；remember 不初始化缺失作用域；doctor 默认只诊断。旧 `.memory` 通过显式 migrate 转换，普通命令不兼容迁移。新建 owner 登记需要的 index-group 放在 init 或 doctor 后。
+新作用域的 `edges memory init` 未选择类型时只返回推荐项，不创建 notes、projects、skills 或 tasks 的材料。`edges skills init` 只写 skill 类型索引。`edges tasks init` 只写任务看板。remember 不初始化缺失作用域；doctor 默认只诊断。旧 `.memory` 通过显式 migrate 转换，普通命令不兼容迁移。新建 owner 登记需要的 index-group 放在 init 或 doctor 后。
 
 用户记忆 restore 默认拒绝覆盖，明确使用 --force 才整份替换，失败时回滚。备份和恢复接受未压缩或 gzip tar，解包上限 256 MiB、10,000 文件，拒绝硬链接；中断后若报告 `.private-user-memory-*/previous`，应保留恢复副本。模板随包复制到 dist，运行不依赖相邻 Skill 源码或 Python。
 

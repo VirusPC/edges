@@ -1,5 +1,6 @@
 import path from "node:path";
 import { materialHarnessRoot } from "../../domain/config/harness-materials.js";
+import { initScope, type InitScopeOptions } from "../init/service.js";
 import { SkillNode } from "../../domain/models/skills/skill-node.js";
 import { isWithinPath } from "../../utils/filesystem.js";
 import { parseMetadata } from "../metadata.js";
@@ -132,6 +133,10 @@ export async function deleteSkill(
   const file = node.path;
   await service.destroy(node);
   return { path: scopeRelativePath(scope, file) };
+}
+
+export function initSkills(options: Omit<InitScopeOptions, "modules">) {
+  return initScope({ ...options, modules: ["skills"] });
 }
 
 export async function listSkills(env: NodeJS.ProcessEnv, reach: SkillReach): Promise<SkillItem[]> {

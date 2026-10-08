@@ -5,6 +5,7 @@ import path from "node:path";
 import { tmpdir } from "node:os";
 import { run } from "../../src/program.js";
 import { initMemory } from "../../src/services/memory/init.js";
+import { initSkills } from "../../src/services/init/service.js";
 function fixture(t: any) {
   const root = fs.realpathSync(
     fs.mkdtempSync(path.join(tmpdir(), "directory-cli-")),
@@ -169,7 +170,7 @@ test("private Memory directory entries stay ignored", async (t) => {
 });
 test("Skill type enumeration ignores resource recovery directories", async (t) => {
   const root = fixture(t);
-  await initMemory({ indexGroup: "descendant", targetDir: root, skillTypes: ["managed"] });
+  await initSkills({ indexGroup: "descendant", targetDir: root, skillTypes: ["managed"] });
   put(
     path.join(root, ".harness/skills/managed/kept/SKILL.md"),
     "---\nname: kept\ndescription: Kept\n---\nBody",
@@ -186,7 +187,7 @@ test("Skill type enumeration ignores resource recovery directories", async (t) =
 });
 test("Skill import validates full fields before writing and preserves its source", async (t) => {
   const root = fixture(t);
-  await initMemory({ indexGroup: "descendant", targetDir: root, skillTypes: ["managed"] });
+  await initSkills({ indexGroup: "descendant", targetDir: root, skillTypes: ["managed"] });
   const source = path.join(root, "source/SKILL.md");
   put(source, "# Invalid skill");
   const result = await run(

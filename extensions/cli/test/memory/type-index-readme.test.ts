@@ -14,6 +14,7 @@ import {
   initMemory,
   rememberMemory,
 } from "../../src/services/memory/index.js";
+import { initSkills } from "../../src/services/init/service.js";
 import {
   typeIndexRelpath,
   AGENTS_FILE_NAME,
@@ -58,6 +59,10 @@ test("init writes README type indexes with project-entries markers", async (t) =
     indexGroup: "descendant",
     targetDir: dir,
     memoryTypes: ["project"],
+  });
+  await initSkills({
+    indexGroup: "descendant",
+    targetDir: dir,
     skillTypes: ["managed"],
   });
   for (const rel of [
@@ -142,6 +147,10 @@ test("a missing type index is created as README.md for memory and skills", async
     indexGroup: "descendant",
     targetDir: dir,
     memoryTypes: ["project"],
+  });
+  await initSkills({
+    indexGroup: "descendant",
+    targetDir: dir,
     skillTypes: ["managed"],
   });
   const projects = join(dir, ".harness/memory/projects");

@@ -10,6 +10,7 @@ import {
   type DatedLeafView,
   type LeafReach,
 } from "../node/dated-leaf.js";
+import { initScope, type InitScopeOptions } from "../init/service.js";
 
 export type { DatedLeafFields as NoteFields, LeafReach as NoteReach };
 export { presentListed } from "../list-query.js";
@@ -39,4 +40,8 @@ export function deleteNote(env: NodeJS.ProcessEnv, entryPath: string): Promise<{
 
 export function listNotes(env: NodeJS.ProcessEnv, reach: LeafReach): Promise<DatedLeafItem[]> {
   return listDatedLeaves(env, NOTE_LEAF, reach);
+}
+
+export function initNotes(options: Omit<InitScopeOptions, "modules">) {
+  return initScope({ ...options, modules: ["notes"] });
 }

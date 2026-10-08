@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
@@ -16,7 +17,7 @@ test("harness materials include projects and notes", () => {
   assert.equal(notes?.path, "notes/README.md");
 });
 
-test("memory init recommends projects and notes and writes their harness indexes", async (t) => {
+test("memory init recommends projects and notes and does not write their harness indexes", async (t) => {
   const root = await mkdtemp(path.join(tmpdir(), "edges-content-boards-"));
   t.after(() => rm(root, { recursive: true, force: true }));
   const recommended = await run(["--scope", root, "memory", "init"], { env: {} });
@@ -29,10 +30,10 @@ test("memory init recommends projects and notes and writes their harness indexes
   const init = await run(["--scope", root, "memory", "init", "--memory-types", "project"], { env: {} });
   assert.equal(init.exitCode, 0, init.stdout);
   for (const rel of [".harness/projects/README.md", ".harness/notes/README.md"]) {
-    const text = await readFile(path.join(root, rel), "utf8");
-    assert.match(text, /project-entries-local:start/);
+    assert.equal(existsSync(path.join(root, rel)), false, rel);
   }
   const agents = await readFile(path.join(root, "AGENTS.md"), "utf8");
-  assert.match(agents, /\.harness\/projects\/README\.md/);
-  assert.match(agents, /\.harness\/notes\/README\.md/);
+  assert.match(agents, /\.harness\/memory\/projects\/README\.md/);
+  assert.doesNotMatch(agents, /\.harness\/projects\/README\.md/);
+  assert.doesNotMatch(agents, /\.harness\/notes\/README\.md/);
 });

@@ -9,7 +9,6 @@ import { sortTasksByPriority } from "../../domain/operations/tasks.js";
 import { TASK_PRIORITIES, TASK_STATUSES, type TaskPriority, type TaskProjectId, type TaskStatus } from "../../domain/models/tasks/types.js";
 import { runTasksCommand, succeed } from "./run.js";
 import { TasksError } from "../../domain/models/tasks/types.js";
-import { placeHarnessMaterial, tasksBoardDirName } from "../../domain/config/harness-materials.js";
 import { ENTRY_NAMES } from "../../domain/models/layout.js";
 import {
   buildSystemForest,
@@ -20,6 +19,8 @@ import {
   NodeService,
   parseFieldFilter,
   subjectTaskBoard,
+  tasksBoardDirName,
+  tasksBoardReadmeExists,
   type FieldFilter,
 } from "../../services/tasks/service.js";
 
@@ -134,8 +135,7 @@ async function collectTasks(scopeDir: string, mode: { all: boolean; super: boole
   }
   const scopeEntry = path.join(path.resolve(scopeDir), ENTRY_NAMES.internal);
   if (!mode.super && !fs.existsSync(scopeEntry)) {
-    const material = placeHarnessMaterial(path.resolve(scopeDir), "tasks").absPath;
-    if (fs.existsSync(material)) {
+    if (tasksBoardReadmeExists(scopeDir)) {
       return (await listTaskNodes(subjectTaskBoard(scopeDir))).map((node) => taskItem(node, scopeDir));
     }
     throw new Error(

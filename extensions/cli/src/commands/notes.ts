@@ -5,6 +5,7 @@ import { addNoteCreateCommand } from "./notes/create.js";
 import { addNoteDeleteCommand } from "./notes/delete.js";
 import { addNoteGetCommand } from "./notes/get.js";
 import { addNoteListCommand } from "./notes/list.js";
+import { addNoteInitCommand } from "./notes/init.js";
 import { addNoteUpdateCommand } from "./notes/update.js";
 
 const NOTE_AFTER_HELP = `
@@ -23,6 +24,7 @@ FLAGS
   create   --title <title>  --body <markdown>  --metadata <key=value>  --json
   update   <path>  --title  --body  --metadata <key=value>
   delete   <path>
+  init     [--target-dir] [--root-dir] [--index-group] [--description]
 
   create/update use metadata plus --body. The title is the body H1, or --title.
   get and delete take only the target. list uses the shared filter/group envelope.
@@ -55,6 +57,7 @@ export function addNotesCommand(program: Command, ctx: CliContext): Command {
   addNoteGetCommand(notes, ctx);
   addNoteUpdateCommand(notes, ctx);
   addNoteDeleteCommand(notes, ctx);
+  addNoteInitCommand(notes, ctx);
   notes.addHelpText("after", NOTE_AFTER_HELP);
   return notes;
 }

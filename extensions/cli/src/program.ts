@@ -16,6 +16,7 @@ import { addTasksCommand } from "./commands/tasks.js";
 import { addMemoryCommand } from "./commands/memory.js";
 import { addSkillsCommand } from "./commands/skills.js";
 import { addForestCommand } from "./commands/forest.js";
+import { addInitCommand } from "./commands/init.js";
 import { acquireWriteLock } from "./services/node/node-lock.js";
 import { VERSION } from "./utils/version.js";
 
@@ -35,7 +36,11 @@ EXAMPLES
   edges skills --help
   edges tasks --help
   edges artifacts --help
+  edges --scope ./projects/demo init
+  edges --scope ./projects/demo init notes
   edges --scope ./projects/demo memory init --memory-types project feedback
+  edges --scope ./projects/demo skills init
+  edges --scope ./projects/demo tasks init
   edges memory --help
 
 BREAKING RENAME
@@ -118,6 +123,7 @@ function addRootCommand(
     ctx.result = usageError("missing command. Use edges --help.", "root");
   });
 
+  addInitCommand(program, ctx);
   addNotesCommand(program, ctx);
   addProjectsCommand(program, ctx);
   addTasksCommand(program, ctx);
@@ -141,10 +147,11 @@ function commandWriteTarget(
     parent = command.parent?.name();
   const options = command.opts();
   const writes =
-    (parent === "notes" && ["create", "update", "delete"].includes(name)) ||
-    (parent === "projects" && ["create", "update", "delete"].includes(name)) ||
-    (parent === "skills" && ["create", "update", "delete"].includes(name)) ||
-    (parent === "tasks" && ["create", "update", "status"].includes(name)) ||
+    (parent === "edges" && name === "init") ||
+    (parent === "notes" && ["create", "update", "delete", "init"].includes(name)) ||
+    (parent === "projects" && ["create", "update", "delete", "init"].includes(name)) ||
+    (parent === "skills" && ["create", "update", "delete", "init"].includes(name)) ||
+    (parent === "tasks" && ["create", "update", "status", "init"].includes(name)) ||
     (parent === "project" &&
       command.parent?.parent?.name() === "tasks" &&
       ["create", "update"].includes(name)) ||
@@ -153,7 +160,15 @@ function commandWriteTarget(
         (name === "doctor" && options.apply) ||
         (name === "migrate" && !options.dryRun)));
   if (!writes) return undefined;
-  if (parent === "memory" && options.targetDir)
+  if (
+    options.targetDir &&
+    (parent === "memory" ||
+      parent === "notes" ||
+      parent === "projects" ||
+      parent === "skills" ||
+      parent === "tasks" ||
+      (parent === "edges" && name === "init"))
+  )
     return path.resolve(expandHomePath(options.targetDir));
   if (
     parent === "memory" &&

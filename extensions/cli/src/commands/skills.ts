@@ -3,6 +3,7 @@ import { type CliContext, usageError } from "../context.js";
 import { addSkillCreateCommand } from "./skills/create.js";
 import { addSkillDeleteCommand } from "./skills/delete.js";
 import { addSkillGetCommand } from "./skills/get.js";
+import { addSkillInitCommand } from "./skills/init.js";
 import { addSkillListCommand } from "./skills/list.js";
 import { addSkillUpdateCommand } from "./skills/update.js";
 
@@ -18,4 +19,5 @@ export function addSkillsCommand(program: Command, ctx: CliContext): void {
   addSkillCreateCommand(skills, ctx);
   addSkillUpdateCommand(skills, ctx);
   addSkillDeleteCommand(skills, ctx);
+  addSkillInitCommand(skills, ctx);
 }

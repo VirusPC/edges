@@ -19,6 +19,7 @@ import {
   addMemoryType,
   doctorMemory,
 } from "../../src/services/memory/index.js";
+import { initSkills } from "../../src/services/init/service.js";
 import { layerTypeSpecs } from "../../src/services/memory/types.js";
 import { parseFrontmatter } from "../../src/services/memory/entries.js";
 function fixture(t: any) {
@@ -86,7 +87,7 @@ test("remember refreshes index and preserves YAML metadata and origin on update"
 });
 test("managed uses skill format and referenced remains read only with missing source diagnostics", async (t) => {
   const targetDir = fixture(t);
-  const result = await initMemory({ indexGroup: "descendant",
+  const result = await initSkills({ indexGroup: "descendant",
     targetDir,
     skillTypes: ["managed", "referenced"],
   });
@@ -212,6 +213,9 @@ test("managed symlink escapes are rejected and referenced links deduplicate by r
   await initMemory({ indexGroup: "descendant",
     targetDir,
     memoryTypes: ["project"],
+  });
+  await initSkills({ indexGroup: "descendant",
+    targetDir,
     skillTypes: ["referenced"],
   });
   symlinkSync(external, join(targetDir, ".harness/memory/projects/escape"));
@@ -234,7 +238,7 @@ test("managed symlink escapes are rejected and referenced links deduplicate by r
   mkdirSync(join(targetDir, ".agents/skills"), { recursive: true });
   symlinkSync(external, join(targetDir, ".agents/skills/a"));
   symlinkSync(external, join(targetDir, ".agents/skills/b"));
-  const initialized = await initMemory({ indexGroup: "descendant", targetDir });
+  const initialized = await initSkills({ indexGroup: "descendant", targetDir });
   assert.equal(initialized.complete, true, JSON.stringify(initialized));
   assert.equal(
     read(targetDir, ".harness/skills/referenced/README.md").split(" — external")

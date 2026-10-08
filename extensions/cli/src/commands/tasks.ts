@@ -3,6 +3,7 @@ import { type CliContext, usageError } from "../context.js";
 import { addCreateCommand } from "./tasks/create.js";
 import { addDeleteCommand } from "./tasks/delete.js";
 import { addGetCommand } from "./tasks/get.js";
+import { addTaskInitCommand } from "./tasks/init.js";
 import { addListCommand } from "./tasks/list.js";
 import { addRunMessagesCommand } from "./tasks/run-messages.js";
 import { addRunsCommand } from "./tasks/runs.js";
@@ -26,6 +27,8 @@ COMMANDS
   delete <stem|path>
     Does not delete files. Run: edges tasks status <stem|path> cancelled
   status <stem|path> <edges-tasks-status>
+  init     [--target-dir] [--root-dir] [--index-group] [--description]
+    Creates only the tasks board. Does not read --super.
   runs <stem|path> [--output table|json]
   run-messages <run-id> [--task <stem>] [--output table|json]
   project list
@@ -74,6 +77,7 @@ export function addTasksCommand(program: Command, ctx: CliContext): void {
   addStatusCommand(tasks, ctx);
   addRunsCommand(tasks, ctx);
   addRunMessagesCommand(tasks, ctx);
+  addTaskInitCommand(tasks, ctx);
   tasks.action(() => {
     ctx.result = usageError("missing tasks subcommand. Use edges tasks --help.", "tasks");
   });

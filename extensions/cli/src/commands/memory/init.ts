@@ -3,17 +3,15 @@ import type { CliContext } from '../../context.js';
 import { initMemory } from '../../services/memory/service.js';
 import { operation, scoped, target, type TargetOptions } from './utils/command.js';
 export function addMemoryInitCommand(memory: Command, ctx: CliContext): void {
-    scoped(memory.command('init').description('Initialize system entry (AGENTS.md) and selected memory/skill types, or refresh adopted types'))
+    scoped(memory.command('init').description('Initialize the memory module only: system entry and selected memory types. Does not read --super.'))
         .option('--root-dir <directory>', 'Boundary for the memory tree')
         .addOption(new Option('--index-group <group>', 'Caller-selected parent index group').choices(['local', 'descendant']))
         .option('--description <text>', 'Description in the parent scope index')
         .option('--memory-types <types...>', 'Select memory types: project feedback reference user')
-        .option('--skill-types <types...>', 'Select skill types: managed referenced')
         .action((options: TargetOptions & {
         rootDir?: string;
         description?: string;
         indexGroup?: "local" | "descendant";
         memoryTypes?: string[];
-        skillTypes?: string[];
     }) => operation(ctx, async () => await initMemory({ ...options, targetDir: target(options, ctx) })));
 }

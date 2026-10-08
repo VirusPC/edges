@@ -13,6 +13,7 @@ import {
   addMemoryType,
   doctorMemory,
 } from "../../src/services/memory/index.js";
+import { initSkills } from "../../src/services/init/service.js";
 import {
   layerTypeSpecs,
   parseTypeMeta,
@@ -211,11 +212,11 @@ for (const [name, field, from, to] of [
 ] as const)
   test(`official ${name} rejects ${field}=${to}`, async (t) => {
     const d = fixture(t);
-    await initMemory({ indexGroup: "descendant",
-      targetDir: d,
-      memoryTypes: name === "user" ? ["user"] : [],
-      skillTypes: name === "user" ? [] : [name],
-    });
+    if (name === "user") {
+      await initMemory({ indexGroup: "descendant", targetDir: d, memoryTypes: ["user"] });
+    } else {
+      await initSkills({ indexGroup: "descendant", targetDir: d, skillTypes: [name] });
+    }
     const spec = layerTypeSpecs(d)[0]!;
     const before =
       read(d, spec.indexFile) +
@@ -238,7 +239,7 @@ test("linked harness and linked managed write ancestor never escape", async (t) 
   );
   assert.deepEqual(fs.readdirSync(external), []);
   fs.unlinkSync(join(d, ".harness"));
-  await initMemory({ indexGroup: "descendant", targetDir: d, skillTypes: ["managed"] });
+  await initSkills({ indexGroup: "descendant", targetDir: d, skillTypes: ["managed"] });
   fs.symlinkSync(external, join(d, ".harness/skills/managed/escape"));
   await assert.rejects(async () => await remember(d, "managed", "escape"));
   assert.deepEqual(fs.readdirSync(external), []);
@@ -278,7 +279,7 @@ test("private ignore is reestablished before remember and applies to nested user
 });
 test("source aliases deduplicate per type but same names and cross-type ownership survive", async (t) => {
   const d = fixture(t);
-  await initMemory({ indexGroup: "descendant", targetDir: d, skillTypes: ["managed", "referenced"] });
+  await initSkills({ indexGroup: "descendant", targetDir: d, skillTypes: ["managed", "referenced"] });
   put(d, ".harness/skills/managed/original/SKILL.md", skill);
   fs.symlinkSync("original", join(d, ".harness/skills/managed/alias"));
   fs.mkdirSync(join(d, ".agents/skills"), { recursive: true });
@@ -288,7 +289,7 @@ test("source aliases deduplicate per type but same names and cross-type ownershi
   );
   put(d, ".agents/skills/other/SKILL.md", skill);
   put(d, "child/.agents/skills/hidden/SKILL.md", skill);
-  assert.equal((await initMemory({ indexGroup: "descendant", targetDir: d })).complete, true);
+  assert.equal((await initSkills({ indexGroup: "descendant", targetDir: d })).complete, true);
   assert.equal(
     read(d, ".harness/skills/managed/README.md").split(" — example").length - 1,
     1,
@@ -302,11 +303,11 @@ test("source aliases deduplicate per type but same names and cross-type ownershi
 test("broken and unreadable referenced sources preserve exact index bytes", async (t) => {
   const d = fixture(t);
   put(d, ".agents/skills/one/SKILL.md", skill);
-  await initMemory({ indexGroup: "descendant", targetDir: d, skillTypes: ["referenced"] });
+  await initSkills({ indexGroup: "descendant", targetDir: d, skillTypes: ["referenced"] });
   const index = ".harness/skills/referenced/README.md",
     before = read(d, index);
   fs.symlinkSync("missing", join(d, ".agents/skills/broken"));
-  assert.equal((await initMemory({ indexGroup: "descendant", targetDir: d })).complete, false);
+  assert.equal((await initSkills({ indexGroup: "descendant", targetDir: d })).complete, false);
   await doctorMemory({ indexGroup: "descendant", targetDir: d, apply: true });
   assert.equal(read(d, index), before);
   fs.unlinkSync(join(d, ".agents/skills/broken"));
@@ -314,7 +315,7 @@ test("broken and unreadable referenced sources preserve exact index bytes", asyn
     fs.chmodSync(join(d, ".agents/skills/one/SKILL.md"), 0);
     t.after(() => {});
     try {
-      assert.equal((await initMemory({ indexGroup: "descendant", targetDir: d })).complete, false);
+      assert.equal((await initSkills({ indexGroup: "descendant", targetDir: d })).complete, false);
       assert.equal(read(d, index), before);
     } finally {
       fs.chmodSync(
@@ -457,7 +458,7 @@ test("doctor inventories all AGENTS scopes but does not initialize business or R
   const d = await base(t),
     child = join(d, ".harness/evaluation/suite");
   fs.mkdirSync(child, { recursive: true });
-  await initMemory({ indexGroup: "descendant",
+  await initSkills({ indexGroup: "descendant",
     targetDir: child,
     rootDir: child,
     skillTypes: ["managed"],
@@ -555,7 +556,7 @@ test("slug and content validation fail before writing", async (t) => {
   const d = await base(t);
   for (const slug of ["../escape", "two-words", "project_prefixed", ""])
     await assert.rejects(async () => await remember(d, "project", slug));
-  await initMemory({ indexGroup: "descendant", targetDir: d, skillTypes: ["managed"] });
+  await initSkills({ indexGroup: "descendant", targetDir: d, skillTypes: ["managed"] });
   for (const slug of ["two_words", "x".repeat(65), "../escape"])
     await assert.rejects(async () => await remember(d, "managed", slug));
   await assert.rejects(
@@ -661,11 +662,9 @@ for (const type of ["project", "managed", "referenced"] as const)
     const source =
       "---\nname: source\nmetadata:\n  edges-title: |-\n    Safe ](../../wrong.md)\n    - [Forged title](../../elsewhere.md)\ndescription: |-\n  Good summary\n  - [Forged](../../elsewhere.md) — injected\n---\nOriginal body\n";
     put(d, file, source);
-    const result = await initMemory({ indexGroup: "descendant",
-      targetDir: d,
-      memoryTypes: type === "project" ? [type] : [],
-      skillTypes: type === "project" ? [] : [type],
-    });
+    const result = type === "project"
+      ? await initMemory({ indexGroup: "descendant", targetDir: d, memoryTypes: [type] })
+      : await initSkills({ indexGroup: "descendant", targetDir: d, skillTypes: [type] });
     assert.equal(result.complete, true, JSON.stringify(result));
     const index = type === "project" ? pi : `.harness/skills/${type}/README.md`;
     const text = read(d, index)
