@@ -11,7 +11,7 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 1. **递归系统二：** 系统入口是 `AGENTS.md`，带组成登记。CLI **默认**从 scope 下真 `AGENTS.md` 出发，只做该系统的**系统二**操作。经登记可达才算节点。
 2. **组成边 ≠ 维护边：** `harness` 不进 `children`。默认遍历不跟随 harness。
 3. **同目录双文件：登记分工，不是 traverse 并边：** 若同时存在 `AGENTS.md` 与 `README.md`，系统一孩子只挂在 README 的 `project-entries-*`；AGENTS 的 `project-harness-*` 只挂系统二材料与下级 AGENTS。持久化上互不为对方的 child。从真 AGENTS 出发**到不了** README 上的 tasks/notes 是预期。
-4. **`traverse` 单系统：** 只走一个入口的 `children`，不跨系统、不拼森林。森林在外：扫盘收 `project-harness` 的 `AGENTS.md`，`SystemForestService` 交出 `BaseNode[][]`；`independent` 下 resolve 遇其它根早停；`innermost` 只留内层。
+4. **`traverse` 单系统：** 只走一个入口的 `children`，不跨系统、不拼森林。森林在外：[`services/node/system-roots.ts`](../../services/node/system-roots.ts) 扫盘收 `project-harness` 的 `AGENTS.md`（判定在 [`internal/harness-agents.ts`](internal/harness-agents.ts)，只看传入文本），`SystemForestService` 交出 `BaseNode[][]`；`independent` 下 resolve 遇其它根早停；`innermost` 只留内层。
 5. **仓库可视为个人系统二 + `SuperAgentsNode`：** 整仓可当作上一级主体（如个人）的系统二；向上建虚拟 `SuperAgentsNode`。当前 scope 目录就是这个超节点的 `.harness`，材料路径是 scope 加上 `harness-materials.json` 里的 path（`tasks/README.md` → `<scope>/tasks/README.md`）。scope 自己的维护目录仍是 `<scope>/.harness`，由真 `AGENTS.md` 走，超节点不再往下找一层。traverse Super 时当作普通 `AgentsNode`，只走 `children`，不挂其它系统 AGENTS，材料可缺。不要从真 AGENTS 临时并 README 边。用户命令的范围只有 `--scope`、`--super`、`--all`：默认 list 从真 `AGENTS.md` 做一次 traverse；`--all` 从当前 scope 走森林；`--super` 只换根。最全是 `--scope <仓库根> --super --all`。`--scope <仓库根>` 与 `--scope <仓库根>/.harness` 的 children 不是同一份。
 6. **入口合同：** 组织清单 → `README.md` + `project-entries-*`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md`。有无子节点看是否出现组成登记，不持久化 `isLeaf`。
 7. **谁拥有系统入口：** 任意目录可由用户自行 init；不是路径白名单。有列表 ≠ 系统入口。
@@ -21,7 +21,8 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 flowchart TB
   CFG["domain/config/harness-materials.json<br/>materials id + path"]
   CFG --> SUPER["SuperAgentsNode<br/>挂存在的材料 README"]
-  SCAN["collectSystemRoots<br/>扫盘认 project-harness AGENTS"] --> SFS
+  MARK["isProjectHarnessAgentsFile<br/>internal/harness-agents.ts<br/>只看传入文本"] --> SCAN["services/node/system-roots.ts<br/>collectSystemRoots 扫盘"]
+  SCAN --> SFS
   SUPER --> SFS["SystemForestService<br/>BaseNode[][]"]
   TRAV["traverse<br/>只跑单系统 children"] --> SFS
   SFS -->|"independent: resolve 遇其它根早停"| OUT["edges forest list / review"]
@@ -160,7 +161,7 @@ models/
 | 模块 | 值得保留的拆分 |
 | --- | --- |
 | [core](core/base-node.ts) | `base-node.ts` 管通用内容与生命周期 hooks；`types.ts` 管基础契约；`fields.ts` 管共享 metadata 字段；`relations.ts` 保存 Service 协调的路径、parent、harness，不从公共入口开放身份改写 |
-| [internal](internal/internal-node.ts) | `internal-node.ts` 管领域引用；`syntax.ts` 转换领域内容与 Markdown 索引；`document.ts` 定义 AgentsDocument；`parse.ts`/`serialize.ts` 保留原文并处理格式；`blocks.ts` 处理受控区块 |
+| [internal](internal/agents-node.ts) | `agents-node.ts` 管领域引用；`syntax.ts` 转换领域内容与 Markdown 索引；`document.ts` 定义 AgentsDocument；`parse.ts`/`serialize.ts` 保留原文并处理格式；`blocks.ts` 处理受控区块；`harness-agents.ts` 只根据传入路径与正文判断是不是带 project-harness 的 `AGENTS.md`，不读盘 |
 | [tasks](tasks/task-node.ts) | `types.ts` 放任务枚举、输入及数据类型；`priority.ts`/`project.ts` 放单值规则；`frontmatter.ts`/`task-doc.ts` 适配文档；`task-doc-contract.ts` 单独服务前端与 Schema 生成 |
 | [memory](memory/memory-node.ts) | `memory-node.ts` 管 memoryType；`documents.ts` 管已有记忆字段的读取、兼容和保留 |
 | [layout.ts](layout.ts) | 集中管理 AGENTS.md、SKILL.md、INDEX.md（兼容旧 index.md）的识别、章节标记及 harness 路径。它涉及 Tasks 状态目录，因此保留在 models 根层，不伪装成业务无关的 core |

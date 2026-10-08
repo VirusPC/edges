@@ -3,10 +3,7 @@ import assert from "node:assert/strict";
 import * as fs from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import {
-  collectSystemRoots,
-  isProjectHarnessAgentsFile,
-} from "../../src/domain/operations/system-forest.js";
+import { collectSystemRoots } from "../../src/services/node/system-roots.js";
 
 const harnessAgents = `# Scope
 
@@ -20,21 +17,6 @@ const plainAgents = `# Plain
 
 Just prose, no harness markers.
 `;
-
-test("isProjectHarnessAgentsFile detects harness start markers", () => {
-  assert.equal(
-    isProjectHarnessAgentsFile("/x/AGENTS.md", harnessAgents),
-    true,
-  );
-  assert.equal(
-    isProjectHarnessAgentsFile("/x/AGENTS.md", plainAgents),
-    false,
-  );
-  assert.equal(
-    isProjectHarnessAgentsFile("/x/README.md", harnessAgents),
-    false,
-  );
-});
 
 test("collectSystemRoots returns only marked AGENTS.md paths, sorted", (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "sys-forest-"));
