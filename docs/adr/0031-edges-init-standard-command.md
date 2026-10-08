@@ -17,3 +17,5 @@
 init 不读 `--super`，材料永远落在 `<scope>/.harness`。帮助把「本次会创建」和默认集之外的 tasks、skills 分开。无 TTY。无参 `edges memory init` 仍返回 `selectionRequired` 且不写盘。根 init 与 notes / projects / skills / tasks init 的成功信封是 `status: success`；memory init 仍是 `ok: true`。
 
 创建或补齐 scope `AGENTS.md` 是 init service 的公共步骤。桩缺了才建；类型索引继续刷新；AGENTS 只补受管区块。节点文件经 NodeService。tasks 看板不走 NodeService 的自动登记，由 tasks init 自己把这一份文件挂到 scope `AGENTS.md`。唯一例外是非节点 `.gitignore`，仍由 `saveEntries` 写入。
+
+`extensions/cli/src/commands` 不 import `harness-materials`。tasks list 要看板 README 的位置、是否存在，以及某个节点是不是看板 README 时，走 `services/tasks/service.ts`。

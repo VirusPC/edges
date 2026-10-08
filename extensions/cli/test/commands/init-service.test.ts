@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, readdir, rm, stat } from "node:fs/promises";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -140,6 +140,26 @@ test("edges init does not read --super when choosing the write root", async (t) 
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   assert.equal(existsSync(path.join(root, ".harness/notes/README.md")), true);
   assert.equal(existsSync(path.join(root, "notes/README.md")), false);
+});
+
+test("commands do not import the harness material catalog", () => {
+  function walk(dir: string): string[] {
+    return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const abs = path.join(dir, entry.name);
+      if (entry.isDirectory()) return walk(abs);
+      return entry.name.endsWith(".ts") ? [abs] : [];
+    });
+  }
+  const files = walk(commandsRoot);
+  assert.ok(files.length > 0);
+  for (const file of files) {
+    const text = readFileSync(file, "utf8");
+    assert.doesNotMatch(
+      text,
+      /domain\/config\/harness-materials/,
+      path.relative(commandsRoot, file),
+    );
+  }
 });
 
 test("init commands do not import the material catalog or write files themselves", () => {

@@ -3,9 +3,14 @@ import { Command } from "commander";
 import type { CliContext } from "../../../context.js";
 import { ReadmeNode } from "../../../domain/models/readme/readme-node.js";
 import { runTasksCommand, succeed } from "../run.js";
-import { harnessMaterialById, tasksBoardDirName } from "../../../domain/config/harness-materials.js";
 import { ENTRY_NAMES } from "../../../domain/models/layout.js";
-import { buildSystemForest, gitRoot, NodeService } from "../../../services/tasks/service.js";
+import {
+  buildSystemForest,
+  gitRoot,
+  isTasksBoardReadmeNode,
+  NodeService,
+  tasksBoardDirName,
+} from "../../../services/tasks/service.js";
 
 export function addProjectListCommand(project: Command, ctx: CliContext): void {
   project
@@ -27,9 +32,8 @@ export function addProjectListCommand(project: Command, ctx: CliContext): void {
           const parts = rel.split("/");
           const board = tasksBoardDirName();
           const at = parts.lastIndexOf(board);
-          const materialName = path.basename(harnessMaterialById("tasks").path);
           if (at < 0 || parts[at + 1] === undefined || path.basename(node.path) !== ENTRY_NAMES.readme) return [];
-          if (path.basename(path.dirname(node.path)) === board && path.basename(node.path) === materialName) return [];
+          if (isTasksBoardReadmeNode(node.path)) return [];
           const dir = path.basename(path.dirname(node.path));
           return [{
             project: dir === "_default" ? "default" : dir,

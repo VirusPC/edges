@@ -49,6 +49,7 @@ export function initTasks(options: Omit<InitScopeOptions, "modules">) {
   return initScope({ ...options, modules: ["tasks"] });
 }
 
+export { isTasksBoardReadmeNode, tasksBoardDirName, tasksBoardReadmeExists, tasksBoardReadmePath } from "./board-material.js";
 export { listTaskNodes } from "./node-query.js";
 export { gitRoot } from "../scope.js";
 export { NodeService } from "../node/node-service.js";

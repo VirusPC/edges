@@ -40,4 +40,5 @@ format: ordinary
 - [系统一内容经 SuperAgentsNode 当虚拟系统二](<feedback_content_via_super_agents_node/INDEX.md>) — 改 traverse/\-\-super/tasks 查询时：同目录 README 不并边；层入口可登记材料 README 供默认 list；\-\-super 把材料接到 scope 目录。无 includeContentFace。
 - [traverse 单系统；森林根、Super 挂载与 domain 配置](<feedback_traverse_single_system_and_forest_roots/INDEX.md>) — 改 traverse/森林/Super/harness 材料 IO 时：domain/config/harness\-materials.json；Super 只挂 README；森林 BaseNode\[\]\[\]；edges forest list。
 - [scope、super、all 的组合形成一切](<feedback_scope_super_all/INDEX.md>) — 改 edges 的 list、写任务、帮助或 skill 时：范围只由 \-\-scope、\-\-super、\-\-all 组合决定，不要再加用途、index\-group 或另一套全仓开关。
+- [commands 不直接读 harness 材料表](<feedback_commands_do_not_import_harness_materials/INDEX.md>) — 改 CLI 命令时：不要在 commands 里 import harness\-materials；看板路径与是否存在走该领域 service。
 <!-- project-entries-local:end -->

@@ -147,11 +147,12 @@
 4. `edges notes init` / `edges projects init` / `edges skills init` / `edges tasks init` 接受 `--target-dir`、`--root-dir`、`--index-group`、`--description`，以便嵌套 scope 登记 AGENTS。只有 skills init 接受 `--skill-types`。这些域入口不接受另一个模块的类型旗标。
 5. 执行顺序固定为 memory、skills、tasks、projects、notes，不跟参数顺序走。返回的 `modules` 仍保持调用方或默认集的顺序。
 6. **已按「各管各的」改定。** 祖先类型行刷新只发生在该模块自己的 `runTypeInit` 里，而且仅当目标不是根、根上已有 AGENTS、根的类型里已经有这个模块时，才 `syncTargetAgents(root)`。这次调用仍会重写根上已经发现的类型行，不会创建另一个模块尚不存在的材料。notes、projects、tasks 不刷新根上的类型行。每个模块都会在需要时用 `syncIndexEntry` 把子层系统入口登记到父层。`layerTypeSpecs` 仍校验磁盘上全部类型文件，所以损坏的 skill 索引仍可能让随后的 `initMemory()` 抛错；这是既有校验，不在本修订里改。
-7. `extensions/cli/src/commands/tasks/list.ts` 与 `commands/tasks/project/list.ts` 今天仍直接 import `harness-materials`。本卡不搬这两处。完成标准里「commands 不读材料清单」对本卡新建的 init 命令成立，对既有 tasks list 不成立，该项不勾。
+7. **已定（用户 2026-10-08 确认「改一下」）。** `commands/tasks/list.ts` 与 `commands/tasks/project/list.ts` 不再 import `harness-materials`，也不在命令里用 fs 判断看板 README。看板目录名、README 绝对路径、文件是否存在、节点是否为看板 README，由 `services/tasks/board-material.ts` 提供，经 `services/tasks/service.ts` 导出。`commands` 下不得再出现 `domain/config/harness-materials` 的 import，由守护测试守住。完成标准第 4 条按此勾上。
 8. 任务 sidecar `.log.md` 没有 CLI 动词。状态和正文走 `edges tasks`；log 条目按既有 Markdown 格式直接追加。
 9. 材料表里有 id 的官方类型（feedback、project、reference、managed、referenced）写盘路径经 `placeHarnessMaterial`。`user` 和自定义类型没有 material id，仍用 `TypeSpec.indexFile`。两条路径在现有官方类型上与原来的 `.harness/.../README.md` 相同。
 10. evaluation 与 observation 在 `harness-materials.json` 里有可选材料，但没有领域 CLI。`extensions/AGENTS.md` 写明不为这两处发明命令，所以没有 `edges evaluation init` / `edges observation init`。`readme` 是内容面 README 的挂载项，不是 init 模块。
 11. `edges artifacts init` 已有语义：只写本机 artifacts token 配置（`~/.config/edges/artifacts.env`，ADR 0013）。它没有 harness 材料，不改成 harness init，也不进 `edges init` 的编排。按「只管 artifacts 自己」看，这条命令已经收敛，本次不改它的行为。
+12. **留下不搬。** 扫过 `extensions/cli/src/commands/**` 之后，与 harness 材料无关、又要大改的直接文件写入有两处：`commands/tasks/project/review-page.ts` 读审阅 JSON 并写出 HTML；`commands/artifacts/utils/config.ts` 创建目录并写入 artifacts token 配置。本次只把材料清单读取从命令下沉，不改这两处的流程。`commands/artifacts/utils/collect.ts` 与 `commands/memory/remember.ts` 会读取调用方给出的文件，不是写入，也不是挂载表，同样不动。`commands/tasks/list.ts` 仍用 `existsSync` 判断 scope 的 `AGENTS.md` 在不在，这不是看板材料。
 
 ---
 
