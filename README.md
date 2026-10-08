@@ -2,6 +2,14 @@
 
 [![教学站点部署](https://github.com/VirusPC/edges/actions/workflows/deploy.yml/badge.svg)](https://github.com/VirusPC/edges/actions/workflows/deploy.yml)
 
+
+> comment: **为任意工作空间，补充自进化系统**
+> 1. 一种基于文件系统与 Git 的记忆管理方式；
+> 2. 一种无限递归（团队=>个体=>业务项目=>Infra项目...）的自进化 Meta Harness 系统；
+> 3. 一种不绑定具体Agent工具的多人多agent协作平台；
+> 4. 一种知识ETL系统：任意输入、统一转化、多种输出；
+> 5. 个人第二大脑，认知复利系统
+
 > 持续提升自己，也持续提升自我改进的能力。
 
 Edges 当前以个人递归自我改进（Recursive Self-Improvement，RSI）为实践目标，帮助个人持续改善认知、判断、行动与自我改进的方法。它用知识资产、Memory、Agent 协作与可迁移 harness，将学习、判断、行动和反馈连成闭环，让经验既改善下一次行动，也改善学习、判断与自我改进的方法。
