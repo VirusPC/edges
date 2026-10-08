@@ -7,6 +7,15 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 const deploy = readFileSync(path.join(repoRoot, ".github/workflows/deploy.yml"), "utf8");
 
+test("deploy builds schema artifacts before generating /tasks/ and before the tsx CLI fallback", () => {
+  const schemasAt = deploy.indexOf("pnpm --filter edges-cli run build:schemas");
+  const generateAt = deploy.indexOf("scripts/generate-tasks-site.ts");
+  const tsxCliAt = deploy.indexOf("tsx src/index.ts artifacts server install");
+  assert.ok(schemasAt >= 0, "deploy.yml must run edges-cli build:schemas");
+  assert.ok(generateAt > schemasAt, "build:schemas must run before generate-tasks-site.ts");
+  assert.ok(tsxCliAt > schemasAt, "build:schemas must run before the tsx CLI fallback");
+});
+
 test("deploy builds tasks-review-app before generating /tasks/ and not only when node_modules is missing", () => {
   const buildAt = deploy.indexOf("pnpm --filter tasks-review-app run build");
   const generateAt = deploy.indexOf("scripts/generate-tasks-site.ts");

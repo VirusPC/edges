@@ -5,8 +5,9 @@
 # deploy does the only SSH pull and does not claim both URLs.
 # The job summary lists both paths. Do not use a teach.* hostname.
 # ECS can reach GitHub over HTTPS; do not rsync-push a path subset.
-# After pull: generate tasks/_site for /tasks/ (always; failure
-# fails the job). Then edges artifacts server install, then restart, if the
+# After pull: build the gitignored review shell and schema artifacts, then
+# generate tasks/_site for /tasks/ (always; failure fails the job). Then
+# edges artifacts server install, then restart, if the
 # server env file exists. Never a combined install-and-start. nginx is
 # migrated to the new physical paths after generation (do not call setup-nginx
 # from this Action). The deploy user needs sudo for migrate-site-layout.sh.
@@ -83,6 +84,8 @@ jobs:
              test -s extensions/cli/src/commands/tasks/project/assets/review-page/index.html
              test -s extensions/cli/src/commands/tasks/project/assets/review-page/review.js
              test -s extensions/cli/src/commands/tasks/project/assets/review-page/review.css
+             # dist/schemas is gitignored. Review-page doc checks read it at runtime.
+             pnpm --filter edges-cli run build:schemas
              pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
                --scope "$PWD" --purpose all --out "$PWD/tasks/_site/index.html"
              test -s tasks/_site/index.html

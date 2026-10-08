@@ -6,9 +6,9 @@ metadata:
   edges-type: project
   edges-origin-session-id: ed32d8b9-d356-4eb9-8822-6ad2ddc36d1c
   edges-agent-client: cursor
-  edges-username: viruspc
-  edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-07T17:40:52+08:00'
+  edges-username: Cursor Agent
+  edges-email: cursoragent@cursor.com
+  edges-updated-at: '2026-10-08T04:40:23+00:00'
 ---
 
 `/tasks/` 是与 teaching 同机的持久看板入口，始终反映 main：`edges tasks list --group-by project` 产出松耦合 `edges.tasks.grouped/v1`，薄映射后喂现有 `review-page`；CI 扩展 `deploy.yml`，不新开 status station。已落地（2026-09-21 实现轮）。ADR 0022 起仍是这一份壳：不窄于 Tailwind `md` 时为三栏，grouped item 可带可选 Task Doc（`doc`），不写回 git。2026-09-23 实现轮已把 `doc` 带进审阅页，并在生成 `/tasks/` 前构建审阅壳。用户所述，grill 确认于 2026-09-23；接线已验证。2026-09-24 ADR 0023：同一壳在窄于 `md` 时改为纵向长滚动，双端「移到项目…」只改页内 JSON；`/tasks/` 不另做一壳。
@@ -18,7 +18,7 @@ metadata:
 
 **How to apply:**
 - 改 glossary、部署链或看板入口时按 ADR 0021 / 0022 / 0023 与 CONTEXT 术语 `/tasks/` 持久看板站 / 分组列表 schema（edges.tasks.grouped） / 审阅壳 / Task Doc / Artifacts 预览服务。
-- 生成前先 `pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...` 与 `pnpm --filter tasks-review-app run build`（产物 gitignore，必须在盒上现编），再 `pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts --scope "$PWD" --purpose all --out "$PWD/tasks/_site/index.html"`（默认相对路径 `tasks/_site/index.html`，gitignored）。`deploy.yml` 在 `reset --hard origin/main` 之后始终这么做；失败则整次 SSH 失败。不要把 generate 绑在 artifacts env 上。
+- 生成前先 `pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...`、`pnpm --filter tasks-review-app run build`（审阅壳 gitignore，必须在盒上现编）与 `pnpm --filter edges-cli run build:schemas`（`extensions/cli/dist/schemas/` gitignore；审阅页校验任务 doc 时读取，运行时不现生成），再 `pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts --scope "$PWD" --purpose all --out "$PWD/tasks/_site/index.html"`（默认相对路径 `tasks/_site/index.html`，gitignored）。`deploy.yml` 在 `reset --hard origin/main` 之后始终这么做；失败则整次 SSH 失败。不要把 generate 绑在 artifacts env 上。
 - nginx：一次性 `sudo bash extensions/cli/deploy/setup-nginx-tasks.sh`，snippet 是 `extensions/cli/deploy/nginx-tasks.conf`（装到 `/etc/nginx/snippets/edges-tasks.conf`）。Action 不跑 setup-nginx。只认 `teaching.conf` + `/teaching/`。
 - review-page 仍只渲染（ADR 0012）。不要为 `/tasks/` 另做一壳。grouped item 的可选 `doc` 经薄映射进入审阅页；页只读页内 JSON。
 - 顶栏字面筛选与不窄于 `md` 的三栏交互按 ADR 0022。窄于 `md` 的纵向长滚动与「移到项目…」按 ADR 0023。语义检索、写回、鉴权仍是各自 backlog。
