@@ -29,7 +29,15 @@ If dependencies are missing, `pnpm install --frozen-lockfile --filter edges-cli.
 
 `--scope "$PWD" --purpose all` gathers the root and actual descendant scopes, including domain and maintenance tasks. Public `/tasks/` remains one aggregated board.
 
-The Action does **not** re-run nginx setup. After generation it runs `sudo -n bash extensions/services/artifacts-preview/deploy/migrate-site-layout.sh` to update existing physical paths: teaching locations serve `<repo>/teaching/`, and the installed tasks snippet serves `<repo>/tasks/_site/`. The wrapper preserves inherited server roots and unrelated locations, backs up both configs, validates with `nginx -t`, and reloads only on change. Failure restores both configs and fails the deployment. Provision the deploy user's sudo permission for this wrapper before deploying the layout change. This runs regardless of the artifacts token/env file; fresh hosts still need the one-time nginx setup below.
+The Action does **not** re-run nginx setup. After generation it runs `sudo -n /usr/local/sbin/edges-migrate-site-layout`. That command is a root-owned copy, not a script in this repo: teaching locations serve `<repo>/teaching/`, and the installed tasks snippet serves `<repo>/tasks/_site/`. It keeps unrelated roots, backs up both configs, validates with `nginx -t`, restores on failure, and reloads only when changed. This runs regardless of the artifacts token/env file.
+
+Do not grant the deploy account sudo on a repository path. Anyone who can push `main` could change that file before the next deploy. Install the fixed command once, as root, from the checkout:
+
+```bash
+sudo bash extensions/services/artifacts-preview/deploy/install-site-layout.sh
+```
+
+The account is `SUDO_USER`, or pass that account as the only argument. The installer copies the migrator to `/usr/local/sbin/edges-migrate-site-layout` and its helpers to `/usr/local/lib/edges/site-layout/` (`root:root`, directories and executables `0755`, the Python helper `0644`), writes `/etc/sudoers.d/edges-site-layout` (`0440`) so that account may run only that absolute path with no arguments, checks the fragment with `visudo -cf` before replacing the file, then runs the migration once. Run the installer again to upgrade the copies. If the installed bytes differ from the checkout, Deploy prints a `::warning::` and still runs the installed command. If the command is missing or `sudo -n` cannot run it, Deploy fails and prints the installer command. Fresh hosts still need the one-time nginx setup below.
 
 ## One-time nginx (sudo)
 
