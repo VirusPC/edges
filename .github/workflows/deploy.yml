@@ -10,7 +10,11 @@
 # edges artifacts server install, then restart, if the
 # server env file exists. Never a combined install-and-start. nginx is
 # migrated to the new physical paths after generation (do not call setup-nginx
-# from this Action). The deploy user needs sudo for migrate-site-layout.sh.
+# from this Action). sudo -n runs only the root-owned
+# /usr/local/sbin/edges-migrate-site-layout, never a script in this repo.
+# Install that command once as root:
+#   sudo bash extensions/services/artifacts-preview/deploy/install-site-layout.sh
+# A checksum mismatch with this checkout warns; it does not switch to the repo copy.
 # Fallback if git fetch from ECS is flaky: from a machine that can reach both
 # GitHub and the box, tar the full repo over SSH, then the same two CLI
 # commands (or deploy/bootstrap.sh, which is that wrapper).
@@ -95,7 +99,31 @@ jobs:
                echo "review.js must be inlined, not linked"
                exit 1
              fi
-             sudo -n bash extensions/services/artifacts-preview/deploy/migrate-site-layout.sh
+             entry=/usr/local/sbin/edges-migrate-site-layout
+             install_cmd="sudo bash extensions/services/artifacts-preview/deploy/install-site-layout.sh"
+             lib_dir=/usr/local/lib/edges/site-layout
+             if [ ! -x "$entry" ] || [ -L "$entry" ] ||
+                [ ! -f "$lib_dir/migrate-site-layout.sh" ] || [ -L "$lib_dir/migrate-site-layout.sh" ] ||
+                [ ! -f "$lib_dir/migrate-teaching-nginx-prefix.py" ] || [ -L "$lib_dir/migrate-teaching-nginx-prefix.py" ]; then
+               echo "site-layout migrator is not installed at $entry" >&2
+               echo "On the server as root, from the repo checkout: $install_cmd" >&2
+               exit 1
+             fi
+             if ! sudo -n -l "$entry" >/dev/null 2>&1; then
+               echo "sudo -n cannot run $entry without a password" >&2
+               echo "On the server as root, from the repo checkout: $install_cmd" >&2
+               exit 1
+             fi
+             digest() { sha256sum "$1" | awk "{print \$1}"; }
+             repo_entry=extensions/services/artifacts-preview/deploy/edges-migrate-site-layout
+             repo_lib=extensions/services/artifacts-preview/deploy/migrate-site-layout.sh
+             repo_py=extensions/services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py
+             if [ "$(digest "$repo_entry")" != "$(digest "$entry")" ] ||
+                [ "$(digest "$repo_lib")" != "$(digest "$lib_dir/migrate-site-layout.sh")" ] ||
+                [ "$(digest "$repo_py")" != "$(digest "$lib_dir/migrate-teaching-nginx-prefix.py")" ]; then
+               echo "::warning::installed site-layout migrator differs from this checkout; re-run: $install_cmd"
+             fi
+             sudo -n /usr/local/sbin/edges-migrate-site-layout
              env_file="$HOME/.config/edges/artifacts-preview.env"
              token=""
              if [ -f "$env_file" ]; then

@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 任务看板与项目
 
 - **部署先生成数据契约：** 持久 `/tasks/` 在生成页面前运行 `pnpm --filter edges-cli run build:schemas`。审阅页校验任务正文时读取这份构建产物；仓库不提交它。
+- **站点迁移走固定免密入口：** Deploy 不再对仓库里的脚本使用 sudo。在服务器上用 root 执行一次 `sudo bash extensions/services/artifacts-preview/deploy/install-site-layout.sh`，之后只免密运行 `/usr/local/sbin/edges-migrate-site-layout`，把 teaching 与 tasks 的磁盘路径改到当前布局。
 - **仓库根列出维护任务：** 在仓库根运行 `edges tasks list` 会顺着根入口登记的 `.harness/tasks/README.md` 列出维护任务。`--super` 仍只列出领域目录 `tasks/` 下的任务。材料与类型的名单留在各自 README 的组织清单里。memory 与 skills 类型目录上的空 `AGENTS.md` 桩已删除；层系统入口仍是 `AGENTS.md`。列出命令本身没有改。
 - **任务看板跟材料配置走：** `edges tasks` 的看板目录和入口文件来自 `domain/config/harness-materials.json` 的 `tasks` 材料（当前相对路径 `tasks/README.md`）。维护系统写在 `<scope>/.harness/` 加上该路径；`--super` 写在 `<scope>/` 加上该路径。新建维护登记挂这份材料，不创建、也不要求 `tasks/AGENTS.md`。已有登记若已经挂着看板目录里的入口，则保持原样。
 - **获取当前版本的数据契约：** `edges schema list` 列出可用契约，`edges schema get task-doc/v1` 直接输出 TaskDoc JSON Schema，无需进入仓库或选择 scope。契约从 TS 数据定义生成，随构建包分发，不再手工维护仓库内的 JSON 文件。分组 JSON 与审阅页输入使用同一契约校验：保留对象、数组等扩展 metadata；非法状态、日期和未知顶层字段会明确报错，不自动修正输入。

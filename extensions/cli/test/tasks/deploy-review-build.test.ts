@@ -7,6 +7,17 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 const deploy = readFileSync(path.join(repoRoot, ".github/workflows/deploy.yml"), "utf8");
 
+test("deploy sudo only runs the root-owned site-layout entry after /tasks/ generation", () => {
+  const generateAt = deploy.indexOf("scripts/generate-tasks-site.ts");
+  const entry = "/usr/local/sbin/edges-migrate-site-layout";
+  const sudoAt = deploy.indexOf(`sudo -n ${entry}`);
+  assert.ok(sudoAt > generateAt, "sudo of the installed entry must follow generate-tasks-site.ts");
+  assert.equal(deploy.includes("sudo -n bash extensions/services/artifacts-preview/deploy/migrate-site-layout.sh"), false);
+  assert.match(deploy, /install-site-layout\.sh/);
+  assert.match(deploy, /::warning::/);
+  assert.match(deploy, /sha256sum/);
+});
+
 test("deploy builds schema artifacts before generating /tasks/ and before the tsx CLI fallback", () => {
   const schemasAt = deploy.indexOf("pnpm --filter edges-cli run build:schemas");
   const generateAt = deploy.indexOf("scripts/generate-tasks-site.ts");
