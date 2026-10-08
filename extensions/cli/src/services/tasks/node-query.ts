@@ -14,9 +14,9 @@ import { TasksError } from "../../domain/models/tasks/types.js";
 import { checkPath } from "../node/node-files.js";
 
 import { NodeService } from "../node/node-service.js";
+import { collectSystemRoots } from "../node/system-roots.js";
 import { query } from "../../domain/operations/query.js";
 import { traverse } from "../../domain/operations/traverse.js";
-import { collectSystemRoots } from "../../domain/operations/system-forest.js";
 import {
   isTaskStatus,
   taskBoardLocation,

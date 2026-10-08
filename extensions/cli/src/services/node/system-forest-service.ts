@@ -1,6 +1,6 @@
 import path from "node:path";
 import { BaseNode } from "../../domain/models/index.js";
-import { collectSystemRoots } from "../../domain/operations/system-forest.js";
+import { collectSystemRoots } from "./system-roots.js";
 import { NodeService } from "./node-service.js";
 import { createSuperAgentsNode } from "./super-root.js";
 
