@@ -1,3 +1,4 @@
+import { initScope, type InitScopeOptions } from "../init/service.js";
 import { type BoardTarget } from "./paths.js";
 import { getTask, listTasks, type BoardFs, type TaskListOpts } from "./board.js";
 
@@ -44,6 +45,10 @@ export { formatRunsTable, formatRunMessagesTable } from "./format.js";
 export { parseRunLog };
 export { isTaskStatus, subjectTaskBoard } from "./paths.js";
 export { moveTaskStatus } from "./move.js";
+export function initTasks(options: Omit<InitScopeOptions, "modules">) {
+  return initScope({ ...options, modules: ["tasks"] });
+}
+
 export { listTaskNodes } from "./node-query.js";
 export { gitRoot } from "../scope.js";
 export { NodeService } from "../node/node-service.js";

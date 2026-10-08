@@ -3,9 +3,18 @@
  * and placeHarnessMaterial is the only reader of harness-materials.json paths.
  * notes is not a child of memory.
  */
-export const INIT_MODULE_NAMES = ["memory", "notes", "projects"] as const;
+export const INIT_MODULE_NAMES = ["memory", "skills", "tasks", "notes", "projects"] as const;
 
 export type InitModuleName = (typeof INIT_MODULE_NAMES)[number];
+
+/** Orchestration order. Reported module lists keep the caller's order. */
+export const MODULE_RUN_ORDER: readonly InitModuleName[] = [
+  "memory",
+  "skills",
+  "tasks",
+  "projects",
+  "notes",
+];
 
 export const DEFAULT_INIT_MODULES: readonly InitModuleName[] = [
   "memory",
@@ -33,16 +42,28 @@ export const TYPE_MATERIAL_IDS: Readonly<Record<string, string>> = {
 };
 
 export type HarnessBoardModule = {
-  module: "notes" | "projects";
+  module: "notes" | "projects" | "tasks";
   materialId: string;
   title: string;
   description: string;
-  /** NodeService hangs the new README on the scope AGENTS local block. */
-  registration: "scope-agents";
+  /**
+   * scope-agents: NodeService hangs the README on the scope AGENTS.
+   * manual-agents: NodeService skips the tasks board, so init links it itself.
+   */
+  registration: "scope-agents" | "manual-agents";
+  body?: string;
 };
 
-/** Fixed order matches the historical memory-init board list: projects, then notes. */
+/** projects, then notes, matching the old board list. tasks is its own module. */
 export const HARNESS_BOARD_MODULES: readonly HarnessBoardModule[] = [
+  {
+    module: "tasks",
+    materialId: "tasks",
+    title: "Tasks",
+    description: "任务看板。",
+    registration: "manual-agents",
+    body: "# Tasks\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n",
+  },
   {
     module: "projects",
     materialId: "projects",

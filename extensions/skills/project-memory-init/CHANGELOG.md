@@ -1,5 +1,11 @@
 # Changelog
 
+## [3.6.0] - 2026-10-08
+
+### Changed
+
+- 各模块 init 只创建并登记本模块的材料。`edges memory init` 不再生成 notes / projects harness 桩。skill 类型改走 `edges skills init`，任务看板改走 `edges tasks init`。无参 `edges init` 仍只编排 memory、notes、projects。
+
 ## [3.4.0] - 2026-10-08
 
 ### Changed

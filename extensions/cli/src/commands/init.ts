@@ -14,8 +14,8 @@ CREATED WHEN NO MODULE IS GIVEN
   harness organization lists: notes, projects
 
 NOT CREATED HERE
-  tasks (the board is ensured on the first tasks write)
-  user memory, skills, evaluation, and observation
+  tasks (not in the default set; edges tasks init creates only that board)
+  user memory, skills (edges skills init adopts skill types), evaluation, and observation
 `;
 
 export function addInitCommand(program: Command, ctx: CliContext): void {
@@ -24,7 +24,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
     .description(
       "Initialize AGENTS.md and selected modules. This command does not read --super.",
     )
-    .argument("[module...]", "Repeatable module: memory, notes, or projects")
+    .argument("[module...]", "Repeatable module: memory, skills, tasks, notes, or projects")
     .option("--target-dir <directory>", "Explicit target scope (otherwise use --scope or scope discovery)")
     .option("--root-dir <directory>", "Boundary for the scope tree")
     .addOption(new Option("--index-group <group>", "Caller-selected parent index group").choices(["local", "descendant"]))

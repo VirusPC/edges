@@ -2,7 +2,7 @@
 
 可执行入口为 `edges memory`，实现位于 Edges CLI 的 TypeScript service。Skill 保留工作流与内容规范；不再通过同级 Skill 路径查找 Python 脚本。
 
-- `init`：标准命令是 `edges init`。无参时写出 `AGENTS.md`、feedback / project / reference，以及 `.harness/notes/README.md` 与 `.harness/projects/README.md`；不建 user、skills、tasks，也不读 `--super`。`edges memory init` 仍只采用显式选择的 memory/skill 类型，未选择时 `selectionRequired` 且不写盘；选定类型后刷新类型入口，并顺手生成 notes / projects 的 harness 桩。类型入口写 `.harness/<module>/<plural>/README.md`（`project-entries-*`），memory 与 skills 都一样；不在类型目录上创建 `AGENTS.md`。空的同目录类型桩删掉。不在作用域根自动创建内容面组织清单 `README.md`；重复调用刷新已采用类型。层系统入口仍是 `AGENTS.md`。
+- `init`：标准命令是 `edges init`，只编排公共系统入口和各模块自己的 init。无参时写出 `AGENTS.md`、feedback / project / reference，以及 `.harness/notes/README.md` 与 `.harness/projects/README.md`；不建 user、skills、tasks，也不读 `--super`。`edges memory init` 只采用 memory 类型，未选择时 `selectionRequired` 且不写盘，不创建 notes、projects、skills、tasks 的文件。`edges skills init` 只采用 skill 类型。`edges tasks init` 只建任务看板。类型入口写 `.harness/<module>/<plural>/README.md`（`project-entries-*`），memory 与 skills 都一样；不在类型目录上创建 `AGENTS.md`。空的同目录类型桩删掉。不在作用域根自动创建内容面组织清单 `README.md`；重复调用只刷新本模块已采用的类型。层系统入口仍是 `AGENTS.md`。
 - `remember`：写入条目并刷新其类型索引和层入口。
 - `add-type`：登记自定义格式与权限；不会隐式初始化作用域。
 - `doctor`：诊断作用域和索引，只有 `--apply` 写修复。

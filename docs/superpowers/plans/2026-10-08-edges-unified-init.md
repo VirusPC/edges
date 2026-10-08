@@ -2,7 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 根命令 `edges init` 成为标准初始化入口；`edges memory init`、`edges notes init`、`edges projects init` 只委托同一个 init service。无参 `edges init` 写 AGENTS、notes/projects 的 `.harness` 桩，以及 memory 的 feedback/project/reference。
+**Goal:** 根命令 `edges init` 成为标准初始化入口；各域 init 只委托同一个 init service 里本模块那一段。无参 `edges init` 写 AGENTS、notes/projects 的 `.harness` 桩，以及 memory 的 feedback/project/reference。
+
+> **2026-10-08 修订（用户审 #190）：** Q7、Q8 的原结论已推翻，见下方「修订」。`edges memory init` 不再建 notes/projects。有 harness 材料的模块各自 init，只建本模块。
 
 **Architecture:** `services/init/service.ts` 持有 init 模块表和写盘编排。挂载表 `harness-materials.json` 仍只提供 path，经 `placeHarnessMaterial` 取用。notes/projects 的 `service.ts` 只增加薄转调 `initNotes` / `initProjects`。`initMemory` 留在 memory 侧作同名薄包装，内部兼容包仍顺手建 notes/projects 桩。节点文件经 NodeService；`.gitignore` 继续走 `saveEntries`。
 
@@ -58,17 +60,31 @@
 - 备选项：A 兼容包留在 memory 入口内部；B memory 不再建桩并改测试；C 命令层展开多次调用。
 - 选择和理由：Q7: A —— memory 入口内兼容包仍顺手建 notes/projects 桩（调与 `edges init notes|projects` 同一函数）；模块表不要把 notes 写成 memory 子材料。后续卡可删兼容包。
 
+#### 修订
+
+- 原结论（Grok Bot）：Q7: A，memory 入口内兼容包仍顺手建 notes/projects 桩。
+- 用户推翻原话：「不顺手创建，明确划分模块，简化模型」
+- 新结论：`edges memory init`（含兼容包装）只初始化 memory。不创建、不登记 `.harness/notes/README.md` 与 `.harness/projects/README.md`。兼容包代码删除。无参 `edges init` 仍创建这两份桩，因为它们在默认模块列表里，由 notes 与 projects 自己的 init 创建。
+- 理由：明确模块边界，简化心智模型。顺手创建会让 memory 看起来拥有 notes 和 projects。
+
 ### Q8
 
 - 问题：本卡给哪些域加 init 子命令。
 - 备选项：A 只有根命令和改薄的 memory；B 再加上 notes、projects；C 连 tasks、skills、artifacts 一起收。
 - 选择和理由：Q8: B —— 本卡域入口：memory（改薄）、notes、projects。不加 tasks/skills init。`edges artifacts init` 仍是 token 命令，不进标准 init。默认集不含 evaluation/observation。
 
+#### 修订
+
+- 原结论（Grok Bot）：Q8: B，域入口只有 memory、notes、projects，不加 tasks/skills init。
+- 用户推翻原话：「各管各的，简化心智」
+- 新结论：每个有 harness 材料的领域模块自己 init，只建、只登记本模块。已落地的入口是 memory、skills、tasks、notes、projects。`edges init <module>` 与 `edges <module> init` 写同一批文件。根 `edges init` 只编排公共 AGENTS 步骤，再按 memory → skills → tasks → projects → notes 调用各模块 init，没有跨模块副作用。默认集仍是 memory、notes、projects（Q4 未改）。Q9「tasks 不进域 init」里「不进域 init」被本修订收窄：tasks 仍不进默认集，帮助仍把它和「本次会创建」分开，但因为它有 `.harness/tasks/README.md`，所以有 `edges tasks init`。
+- 理由：明确模块边界，简化心智模型。各管各的之后，调用方不用记住哪条命令会顺手带上别的模块。
+
 ### Q9
 
 - 问题：tasks 看板的登记特例要不要进 init。
 - 备选项：A 默认集不含 tasks，不调用看板懒创建；B init 调用现有 `ensureBoardMaterial`；C 去掉 NodeService 对 tasks 材料不登记的特例。
-- 选择和理由：Q9: A —— tasks 不进默认集、不进域 init；看板仍由 tasks 懒创建。推荐展示要把「本次会创建」和 tasks（首次写入才确保）分开说明。
+- 选择和理由：Q9: A —— tasks 不进默认集、不进域 init；看板仍由 tasks 懒创建。推荐展示要把「本次会创建」和 tasks（首次写入才确保）分开说明。Q8 修订之后：仍不进默认集，帮助分栏保留；域 init 改为 `edges tasks init` 只建看板。首次 tasks 写入的懒创建保留。
 
 ### Q10
 
@@ -90,13 +106,15 @@
 
 ## Global Constraints
 
-- 不改 notes / skills / projects 的 CRUD 行为，不重写 NodeService 合同。
-- 现有 memory init 测试不改断言。`initMemory` 的返回形状保持：无类型且未采用时 `selectionRequired: true` 且不写盘；选定类型后仍创建 notes/projects 桩。
+2026-10-08 审 #190 之后，下面与 Q7、Q8 冲突的旧句子已被修订取代：memory init 不再建 notes/projects 桩；skills 与 tasks 有自己的 init；相关测试断言按新边界改。其余约束仍有效。
+
+- 不改 notes / skills / projects 的 CRUD 行为，不重写 NodeService 合同。NodeService 仍不自动登记 tasks 看板；tasks init 只把这一份文件挂到 scope AGENTS。
+- `initMemory` 的返回形状保持：无类型且未采用时 `selectionRequired: true` 且不写盘。选定类型后只写 memory。传入 `skillTypes` 直接失败。
 - init 不读取 `ctx.super`。帮助写明 does not read `--super`。
 - 命令只从对应 `services/<module>/service.ts` 进入。commands 的 init 文件不 import `harness-materials`，不 `writeFileSync`。
-- 不新增 tasks/skills 的 init 子命令。`edges artifacts init` 保持 token 命令。
+- `edges artifacts init` 保持 token 命令，不进 harness 编排。不为 evaluation / observation 发明命令。
 - 不改 PROTOCOL、模板、doctor、根 README。
-- skill 真源只有 `extensions/skills/project-memory-init`（`.claude/skills` 与 `.agents/skills` 是指向它的符号链接）。版本 `3.4.0` → `3.5.0`。
+- skill 真源只有 `extensions/skills/project-memory-init`（`.claude/skills` 与 `.agents/skills` 是指向它的符号链接）。版本 `3.5.0` → `3.6.0`。
 
 ## File map
 
@@ -123,15 +141,17 @@
 
 决策没有写死、本卡按「对现有行为改动最小」处理的点：
 
-1. `edges init notes` 的 JSON `command` 是 `init`，`edges notes init` 是 `notes.init`。两边文件树、模块列表、AGENTS 动作一致。「结果一致」按文件和共享字段比较，不要求 `command` 字符串相同。
-2. 显式模块列表里没有 `memory` 却带了 `--memory-types` / `--skill-types` 时，命令失败并说明需要 memory 模块。无参 `edges init` 的类型旗标作用在默认包含的 memory 上。
-3. 兼容包只挂在 `initMemory`（`edges memory init`）。`edges init memory` 不建 notes/projects 桩。无参 `edges init` 建这两份桩，是因为它们在默认模块列表里。
-4. `edges notes init` / `edges projects init` 接受与 memory init 相同的 `--target-dir`、`--root-dir`、`--index-group`、`--description`，以便嵌套 scope 登记 AGENTS。不提供类型旗标。
-5. 多模块时桩的创建顺序固定为 projects 然后 notes，与今天 `CONTENT_BOARDS` 一致，不跟参数顺序走。
-6. 只有 memory 路径会在 `target !== root` 且根上已有类型时再 `syncTargetAgents(root)`。notes/projects init 只保证目标 scope 的 AGENTS，并在需要时用 `syncIndexEntry` 登记到父层。
-7. `extensions/cli/src/commands/tasks/list.ts` 与 `commands/tasks/project/list.ts` 今天仍直接 import `harness-materials`。本卡不搬这两处（Q9 不改 tasks）。完成标准里「commands 不读材料清单」对本卡新建的 init 命令成立，对既有 tasks list 不成立，该项不勾。
+1. `edges init notes` 的 JSON `command` 是 `init`，`edges notes init` 是 `notes.init`。skills、tasks 同样：根入口是 `init`，域入口是 `skills.init` / `tasks.init`。memory init 仍是 `ok: true`。「结果一致」按文件和共享字段比较，不要求 `command` 字符串相同。
+2. **已按「各管各的」改定。** `--memory-types` 要求本次包含 memory 模块，否则失败且不写盘，文案仍是 `Type flags require the memory module`。`--skill-types` 要求本次包含 skills 模块，文案是 `Type flags require the skills module`。无参 `edges init` 只把默认 memory 类型交给 memory，不传 skill 类型。`edges memory init --skill-types` 不再是合法旗标。
+3. **已撤销。** Q7 修订删掉了 memory 路径上的 notes/projects 兼容包。`edges memory init` 与 `edges init memory` 都不建这两份桩。无参 `edges init` 仍建它们，因为 notes 与 projects 在默认模块列表里。
+4. `edges notes init` / `edges projects init` / `edges skills init` / `edges tasks init` 接受 `--target-dir`、`--root-dir`、`--index-group`、`--description`，以便嵌套 scope 登记 AGENTS。只有 skills init 接受 `--skill-types`。这些域入口不接受另一个模块的类型旗标。
+5. 执行顺序固定为 memory、skills、tasks、projects、notes，不跟参数顺序走。返回的 `modules` 仍保持调用方或默认集的顺序。
+6. **已按「各管各的」改定。** 祖先类型行刷新只发生在该模块自己的 `runTypeInit` 里，而且仅当目标不是根、根上已有 AGENTS、根的类型里已经有这个模块时，才 `syncTargetAgents(root)`。这次调用仍会重写根上已经发现的类型行，不会创建另一个模块尚不存在的材料。notes、projects、tasks 不刷新根上的类型行。每个模块都会在需要时用 `syncIndexEntry` 把子层系统入口登记到父层。`layerTypeSpecs` 仍校验磁盘上全部类型文件，所以损坏的 skill 索引仍可能让随后的 `initMemory()` 抛错；这是既有校验，不在本修订里改。
+7. `extensions/cli/src/commands/tasks/list.ts` 与 `commands/tasks/project/list.ts` 今天仍直接 import `harness-materials`。本卡不搬这两处。完成标准里「commands 不读材料清单」对本卡新建的 init 命令成立，对既有 tasks list 不成立，该项不勾。
 8. 任务 sidecar `.log.md` 没有 CLI 动词。状态和正文走 `edges tasks`；log 条目按既有 Markdown 格式直接追加。
 9. 材料表里有 id 的官方类型（feedback、project、reference、managed、referenced）写盘路径经 `placeHarnessMaterial`。`user` 和自定义类型没有 material id，仍用 `TypeSpec.indexFile`。两条路径在现有官方类型上与原来的 `.harness/.../README.md` 相同。
+10. evaluation 与 observation 在 `harness-materials.json` 里有可选材料，但没有领域 CLI。`extensions/AGENTS.md` 写明不为这两处发明命令，所以没有 `edges evaluation init` / `edges observation init`。`readme` 是内容面 README 的挂载项，不是 init 模块。
+11. `edges artifacts init` 已有语义：只写本机 artifacts token 配置（`~/.config/edges/artifacts.env`，ADR 0013）。它没有 harness 材料，不改成 harness init，也不进 `edges init` 的编排。按「只管 artifacts 自己」看，这条命令已经收敛，本次不改它的行为。
 
 ---
 

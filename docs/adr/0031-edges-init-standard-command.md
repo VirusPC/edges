@@ -8,8 +8,12 @@
 
 ## Decision
 
-`edges init [module...]` 写系统入口和本次列出的模块。不给模块时写 `AGENTS.md`、notes 与 projects 的 `.harness` 组织清单，以及 memory 的 feedback / project / reference。不建 user、skills、tasks、evaluation、observation。`edges init <module>` 可重复，只初始化列出的模块。`edges init memory` 不顺手建 notes / projects 桩；`edges memory init` 在选定类型后仍调用与域 init 相同的桩函数，作为兼容包。
+`edges init [module...]` 只做编排：先做公共的系统入口步骤，再按模块表依次调用各模块自己的 init。不给模块时写 `AGENTS.md`、notes 与 projects 的 `.harness` 组织清单，以及 memory 的 feedback / project / reference。不建 user、skills、tasks、evaluation、observation。`edges init <module>` 可重复，与 `edges <module> init` 写同一批文件。每个模块只创建、只登记自己的材料，不顺手创建别的模块。
 
-init 不读 `--super`，材料永远落在 `<scope>/.harness`。帮助把「本次会创建」和 tasks（首次 tasks 写入才确保看板）分开。无 TTY。无参 `edges memory init` 仍返回 `selectionRequired` 且不写盘。根 init 的成功信封是 `status: success`；memory init 仍是 `ok: true`。
+`edges memory init` 只采用 memory 类型。`edges skills init` 只采用 skill 类型；未指定且尚未采用时采用 managed 与 referenced。`edges tasks init` 只建 `.harness/tasks/README.md` 并登记到本层系统入口。`edges notes init` 与 `edges projects init` 只建各自的 harness 组织清单。evaluation 与 observation 在挂载表里有材料，但没有领域命令，本决定不为它们发明 init。`edges artifacts init` 仍只写本机 artifacts token 配置，不进 harness 编排。
 
-创建或补齐 scope `AGENTS.md` 是 init service 的公共步骤。桩缺了才建；类型索引继续刷新；AGENTS 只补受管区块。节点文件经 NodeService。唯一例外是非节点 `.gitignore`，仍由 `saveEntries` 写入。本决定不加 tasks / skills 的 init 子命令，也不改 `edges artifacts init`。
+`--memory-types` 只在本次包含 memory 时有效；`--skill-types` 只在本次包含 skills 时有效。祖先类型行的刷新只发生在该模块自己的类型 init 里，而且只刷新根上已经有的该模块类型行。
+
+init 不读 `--super`，材料永远落在 `<scope>/.harness`。帮助把「本次会创建」和默认集之外的 tasks、skills 分开。无 TTY。无参 `edges memory init` 仍返回 `selectionRequired` 且不写盘。根 init 与 notes / projects / skills / tasks init 的成功信封是 `status: success`；memory init 仍是 `ok: true`。
+
+创建或补齐 scope `AGENTS.md` 是 init service 的公共步骤。桩缺了才建；类型索引继续刷新；AGENTS 只补受管区块。节点文件经 NodeService。tasks 看板不走 NodeService 的自动登记，由 tasks init 自己把这一份文件挂到 scope `AGENTS.md`。唯一例外是非节点 `.gitignore`，仍由 `saveEntries` 写入。

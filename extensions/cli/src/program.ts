@@ -39,6 +39,8 @@ EXAMPLES
   edges --scope ./projects/demo init
   edges --scope ./projects/demo init notes
   edges --scope ./projects/demo memory init --memory-types project feedback
+  edges --scope ./projects/demo skills init
+  edges --scope ./projects/demo tasks init
   edges memory --help
 
 BREAKING RENAME
@@ -148,8 +150,8 @@ function commandWriteTarget(
     (parent === "edges" && name === "init") ||
     (parent === "notes" && ["create", "update", "delete", "init"].includes(name)) ||
     (parent === "projects" && ["create", "update", "delete", "init"].includes(name)) ||
-    (parent === "skills" && ["create", "update", "delete"].includes(name)) ||
-    (parent === "tasks" && ["create", "update", "status"].includes(name)) ||
+    (parent === "skills" && ["create", "update", "delete", "init"].includes(name)) ||
+    (parent === "tasks" && ["create", "update", "status", "init"].includes(name)) ||
     (parent === "project" &&
       command.parent?.parent?.name() === "tasks" &&
       ["create", "update"].includes(name)) ||
@@ -163,6 +165,8 @@ function commandWriteTarget(
     (parent === "memory" ||
       parent === "notes" ||
       parent === "projects" ||
+      parent === "skills" ||
+      parent === "tasks" ||
       (parent === "edges" && name === "init"))
   )
     return path.resolve(expandHomePath(options.targetDir));

@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { run } from "../../src/program.js";
+import { initMemory } from "../../src/services/memory/init.js";
 import { acquireWriteLock } from "../../src/services/node/node-lock.js";
 
 const commandsRoot = path.resolve(
@@ -147,12 +148,14 @@ test("init commands do not import the material catalog or write files themselves
     "notes/init.ts",
     "projects/init.ts",
     "memory/init.ts",
+    "skills/init.ts",
+    "tasks/init.ts",
   ].map((rel) => path.join(commandsRoot, rel));
   for (const file of files) {
     const text = readFileSync(file, "utf8");
     assert.doesNotMatch(text, /harness-materials/);
     assert.doesNotMatch(text, /writeFileSync|readFileSync|mkdirSync/);
-    assert.match(text, /services\/(init|notes|projects|memory)\/service\.js/);
+    assert.match(text, /services\/(init|notes|projects|memory|skills|tasks)\/service\.js/);
   }
 });
 
@@ -164,6 +167,8 @@ test("new init commands take the scope write lock", async (t) => {
     ["--scope", root, "init"],
     ["--scope", root, "notes", "init"],
     ["--scope", root, "projects", "init"],
+    ["--scope", root, "skills", "init"],
+    ["--scope", root, "tasks", "init"],
   ]) {
     const blocked = await run(args, { env: {} });
     assert.notEqual(blocked.exitCode, 0, args.join(" "));
@@ -177,4 +182,116 @@ test("type flags without the memory module are rejected", async (t) => {
   assert.notEqual(result.exitCode, 0);
   assert.match(result.stdout, /require the memory module/);
   assert.equal(existsSync(path.join(root, "AGENTS.md")), false);
+});
+
+test("memory init does not create or register notes or projects", async (t) => {
+  const root = await scope(t);
+  const result = await run(["--scope", root, "memory", "init", "--memory-types", "project"], { env: {} });
+  assert.equal(result.exitCode, 0, result.stdout + result.stderr);
+  assert.equal(existsSync(path.join(root, ".harness/memory/projects/README.md")), true);
+  for (const rel of [
+    ".harness/notes/README.md",
+    ".harness/projects/README.md",
+    ".harness/tasks/README.md",
+    ".harness/skills/managed/README.md",
+  ]) {
+    assert.equal(existsSync(path.join(root, rel)), false, rel);
+  }
+  const agents = await readFile(path.join(root, "AGENTS.md"), "utf8");
+  assert.match(agents, /\.harness\/memory\/projects\/README\.md/);
+  assert.doesNotMatch(agents, /\.harness\/notes\/README\.md/);
+  assert.doesNotMatch(agents, /\.harness\/projects\/README\.md/);
+});
+
+test("memory init rejects skill type flags and writes nothing", async (t) => {
+  const root = await scope(t);
+  await assert.rejects(
+    () => initMemory({ targetDir: root, skillTypes: ["managed"] }),
+    /require the skills module/,
+  );
+  const cli = await run(["--scope", root, "memory", "init", "--skill-types", "managed"], { env: {} });
+  assert.notEqual(cli.exitCode, 0);
+  assert.match(cli.stdout, /skill-types|unknown option/i);
+  assert.equal(existsSync(path.join(root, "AGENTS.md")), false);
+  assert.equal(existsSync(path.join(root, ".harness")), false);
+});
+
+test("skill type flags without the skills module are rejected", async (t) => {
+  const root = await scope(t);
+  const result = await run(["--scope", root, "init", "notes", "--skill-types", "managed"], { env: {} });
+  assert.notEqual(result.exitCode, 0);
+  assert.match(result.stdout, /require the skills module/);
+  assert.equal(existsSync(path.join(root, "AGENTS.md")), false);
+});
+
+test("edges init skills and edges skills init write the same files", async (t) => {
+  const left = await scope(t);
+  const right = await scope(t);
+  const fromRoot = await run(["--scope", left, "init", "skills"], { env: {} });
+  const fromDomain = await run(["--scope", right, "skills", "init"], { env: {} });
+  assert.equal(fromRoot.exitCode, 0, fromRoot.stdout + fromRoot.stderr);
+  assert.equal(fromDomain.exitCode, 0, fromDomain.stdout + fromDomain.stderr);
+  const normalize = async (dir: string) => {
+    const name = path.basename(dir);
+    const files = await tree(dir);
+    return new Map([...files].map(([rel, text]) => [rel, text.replaceAll(name, "<scope>")]));
+  };
+  assert.deepEqual(await normalize(left), await normalize(right));
+  const rootBody = JSON.parse(fromRoot.stdout) as { modules: string[]; command: string };
+  const domainBody = JSON.parse(fromDomain.stdout) as { modules: string[]; command: string };
+  assert.deepEqual(rootBody.modules, ["skills"]);
+  assert.deepEqual(domainBody.modules, ["skills"]);
+  assert.equal(rootBody.command, "init");
+  assert.equal(domainBody.command, "skills.init");
+  for (const rel of [
+    ".harness/skills/managed/README.md",
+    ".harness/skills/referenced/README.md",
+  ]) {
+    assert.equal(existsSync(path.join(left, rel)), true, rel);
+  }
+  for (const rel of [
+    ".harness/notes/README.md",
+    ".harness/projects/README.md",
+    ".harness/tasks/README.md",
+    ".harness/memory/projects/README.md",
+  ]) {
+    assert.equal(existsSync(path.join(left, rel)), false, rel);
+  }
+});
+
+test("edges init tasks and edges tasks init write only the tasks board", async (t) => {
+  const left = await scope(t);
+  const right = await scope(t);
+  const fromRoot = await run(["--scope", left, "init", "tasks"], { env: {} });
+  const fromDomain = await run(["--scope", right, "tasks", "init"], { env: {} });
+  assert.equal(fromRoot.exitCode, 0, fromRoot.stdout + fromRoot.stderr);
+  assert.equal(fromDomain.exitCode, 0, fromDomain.stdout + fromDomain.stderr);
+  const normalize = async (dir: string) => {
+    const name = path.basename(dir);
+    const files = await tree(dir);
+    return new Map([...files].map(([rel, text]) => [rel, text.replaceAll(name, "<scope>")]));
+  };
+  assert.deepEqual(await normalize(left), await normalize(right));
+  const domainBody = JSON.parse(fromDomain.stdout) as { modules: string[]; command: string };
+  assert.deepEqual(domainBody.modules, ["tasks"]);
+  assert.equal(domainBody.command, "tasks.init");
+  const board = await readFile(path.join(left, ".harness/tasks/README.md"), "utf8");
+  assert.match(board, /project-entries-local:start/);
+  const agents = await readFile(path.join(left, "AGENTS.md"), "utf8");
+  assert.match(agents, /\.harness\/tasks\/README\.md/);
+  for (const rel of [
+    ".harness/notes/README.md",
+    ".harness/projects/README.md",
+    ".harness/skills/managed/README.md",
+    ".harness/memory/feedbacks/README.md",
+    "tasks/README.md",
+  ]) {
+    assert.equal(existsSync(path.join(left, rel)), false, rel);
+  }
+  const custom = `${board}\n手写看板保留。\n`;
+  const { writeFile } = await import("node:fs/promises");
+  await writeFile(path.join(left, ".harness/tasks/README.md"), custom);
+  const again = await run(["--scope", left, "tasks", "init"], { env: {} });
+  assert.equal(again.exitCode, 0, again.stdout + again.stderr);
+  assert.equal(await readFile(path.join(left, ".harness/tasks/README.md"), "utf8"), custom);
 });

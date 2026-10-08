@@ -1,20 +1,20 @@
 ---
 name: project-memory-init
-description: 对用户选定的任意目录初始化或刷新系统入口 AGENTS.md（硬约束 + 组成登记），并按选择采用 Project Memory / Skills 类型。仅当用户明确要求 init 时使用。标准命令是 edges init；edges memory init 仍是 memory 模块入口。
-version: 3.5.0
+description: 对用户选定的任意目录初始化或刷新系统入口 AGENTS.md（硬约束 + 组成登记），并按选择采用 Project Memory / Skills 类型。仅当用户明确要求 init 时使用。标准命令是 edges init；各域 init 只初始化本模块。
+version: 3.6.0
 ---
 
 # Project harness init（`$project-memory-init`）
 
-面向用户的名称是 **project harness init**；Skill 名仍为 `$project-memory-init`。标准命令是 `edges init`；`edges memory init` 仍是 memory 模块入口。只在用户明确要求 Init 时运行；Ask、Remember、Doctor 不得代为 Init。用户明确要求 reshape 已有入口时可按该流程初始化。先读 [PROTOCOL](references/PROTOCOL.md) 与 [LAYOUT](references/LAYOUT.md)：前者规定发现形状，后者规定当前路径、类型与写入边界。
+面向用户的名称是 **project harness init**；Skill 名仍为 `$project-memory-init`。标准命令是 `edges init`：它只做公共的系统入口步骤，再依次调用各模块自己的 init。`edges memory init`、`edges skills init`、`edges tasks init`、`edges notes init`、`edges projects init` 各自只初始化本模块。只在用户明确要求 Init 时运行；Ask、Remember、Doctor 不得代为 Init。用户明确要求 reshape 已有入口时可按该流程初始化。先读 [PROTOCOL](references/PROTOCOL.md) 与 [LAYOUT](references/LAYOUT.md)：前者规定发现形状，后者规定当前路径、类型与写入边界。
 
 **谁该 init：** 用户认定需要重点维护、要挂 Memory / Skills 模块或登记下层系统入口的目录——空目录或已有内容目录均可。Init 写出合法**系统入口** `AGENTS.md`（`project-harness-*` 区块，标题「本层硬约束 / 本层系统维护信息 / 下层系统维护信息」），并按选择创建 `.harness` 下类型入口 `README.md`（`project-entries-*`，标题「本层内容 / 下层内容」）。层入口的本层系统维护信息链到这些 README。
 
 **谁不该 init：** 仅为列系统一孩子、尚未需要系统二材料的目录（用同目录 `README.md` + `project-entries-*`，或迁移脚本另建）；未经用户要求不要给全仓或批量目录铺 `AGENTS.md`。看板和类型目录上的 README 是组织清单，不是系统入口。不要在类型目录上 init `AGENTS.md` 来装组织清单，空的同目录桩删掉。不要让 list 另开一套 README 遍历。层系统入口仍是 `AGENTS.md`。Init **不会**在作用域根自动创建组织清单 `README.md`——那是系统一入口，由用户或迁移单独建立。
 
-无参 `edges init` 写出 `AGENTS.md`、memory 的 feedback / project / reference，以及 `.harness/notes/README.md` 与 `.harness/projects/README.md`。不建 user、skills、tasks。tasks 看板仍在首次 tasks 写入时确保。`edges init` 不读 `--super`，材料落在 `<scope>/.harness`。单模块用 `edges init <module>`，域入口 `edges notes init` 与 `edges projects init` 委托同一 init service。
+无参 `edges init` 写出 `AGENTS.md`、memory 的 feedback / project / reference，以及 `.harness/notes/README.md` 与 `.harness/projects/README.md`。不建 user、skills、tasks。`edges init` 不读 `--super`，材料落在 `<scope>/.harness`。`edges init <module>` 与 `edges <module> init` 写同一批文件，而且只写该模块。模块之间不创建对方的材料。
 
-本 Skill 的类型选择仍走 `edges memory init`。推荐模块仍含 memory、skills、tasks、projects、notes，推荐不代表无参 memory init 会全建。新层先展示 memory 的 project / feedback / reference / user 与 skills 的 managed / referenced 用途，让用户选择，不预建全部。用户已明确选择时直接执行；未选择时 `edges memory init` 返回 `selectionRequired` 和推荐清单且不改文件。已有层不传选择只刷新已采用类型。选定类型后，memory init 还会调用与 `edges init notes` / `edges init projects` 相同的函数，生成这两份 harness 组织清单并登记到本层系统维护信息。
+类型选择按模块拆开。memory 类型走 `edges memory init`；skill 类型走 `edges skills init`。推荐模块仍含 memory、skills、tasks、projects、notes，推荐不代表无参命令会全建。新层先展示 memory 的 project / feedback / reference / user 与 skills 的 managed / referenced 用途，让用户选择，不预建全部。未选择时 `edges memory init` 返回 `selectionRequired` 和推荐清单且不改文件。已有 memory 层不传选择只刷新已采用的 memory 类型。`edges memory init` 不创建 notes、projects、tasks、skills 的文件。`edges skills init` 在未选择且尚未采用 skill 类型时采用 managed 与 referenced；已经采用时只刷新那些 skill 类型。`edges tasks init` 只建任务看板；首次 tasks 写入仍会在看板缺失时补上同一份文件。
 
 ```bash
 edges --scope <目录> init
@@ -23,12 +23,14 @@ edges --scope <目录> notes init
 edges --scope <目录> memory init \
   [--target-dir <scope>] [--root-dir <root>] \
   [--memory-types project feedback reference user] \
-  [--skill-types managed referenced] \
   [--index-group local|descendant] \
   [--description <本层职责>]
+edges --scope <目录> skills init \
+  [--skill-types managed referenced]
+edges --scope <目录> tasks init
 ```
 
-新层至少选择一类 memory 或 skill；两份列表分别可省略。显式选择追加采用，不删除既有或自定义类型。自定义类型使用 `$project-memory-add-type`，不要改官方推荐模板。
+memory 与 skill 的选择分别执行。显式选择追加采用，不删除既有或自定义类型。自定义类型使用 `$project-memory-add-type`，不要改官方推荐模板。`--memory-types` 需要 memory 模块，`--skill-types` 需要 skills 模块。
 
 层入口直接链到 `.harness/memory/<plural>/README.md` 与 `.harness/skills/<type>/README.md`，固定两跳到正文，无容器总入口。新索引只写 README。尚未迁走、仍带条目列表的旧 `AGENTS.md` 类型入口只读兼容；空桩不是索引。可读 AGENTS 都是节点；本层和下层按显式登记区分，容器可跨层直达。已有登记不因中间目录新增入口而重归属，节点身份不自动采用 Memory。`--root-dir` 是边界；默认先取 Git 根，否则最近受管层入口，否则目标自身，不能从工具安装目录推断目标。
 
@@ -40,4 +42,4 @@ edges --scope <目录> memory init \
 
 普通记忆正文统一为 `<type>_<slug>/INDEX.md`；Skill 保持 `<name>/SKILL.md`。Init 不转换旧单文件；公开 tracked 内容转换使用 `$migrate-directory-nodes`。
 
-新建 owner 登记只发生在 `memory init` / `memory doctor`：调用方按语义选择 `local` 或 `descendant`，flag 是这两条命令上的 `--index-group`。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。`tasks` 与 `note` 没有 `--index-group`。任务范围只用根上的 `--scope`、`--super`、`--all`：不传 `--super` 时看板在 `<scope>/.harness/tasks`，`--super` 时看板在 `<scope>/tasks`。`tasks list` 顺着主体 `AGENTS.md` 的 children 做一次 traverse；`--all` 从当前 scope 走森林。不要从真 AGENTS 再读同目录 README 的 `project-entries`，也不要把 README 链接抄进 `AGENTS.md`。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。
+新建 owner 登记发生在各模块 init 与 `memory doctor`：调用方按语义选择 `local` 或 `descendant`，flag 是这些命令上的 `--index-group`。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。`tasks` 与 `notes` 的内容命令没有 `--index-group`。任务范围只用根上的 `--scope`、`--super`、`--all`：不传 `--super` 时看板在 `<scope>/.harness/tasks`，`--super` 时看板在 `<scope>/tasks`。`tasks list` 顺着主体 `AGENTS.md` 的 children 做一次 traverse；`--all` 从当前 scope 走森林。不要从真 AGENTS 再读同目录 README 的 `project-entries`，也不要把 README 链接抄进 `AGENTS.md`。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。

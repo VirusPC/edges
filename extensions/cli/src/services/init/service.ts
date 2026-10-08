@@ -41,6 +41,7 @@ import {
   DEFAULT_PUBLIC_MEMORY_TYPES,
   HARNESS_BOARD_MODULES,
   INIT_MODULE_NAMES,
+  MODULE_RUN_ORDER,
   TYPE_MATERIAL_IDS,
   harnessBoardSeed,
   type HarnessBoardModule,
@@ -90,9 +91,19 @@ async function ensureHarnessBoard(
   await service.create(new ReadmeNode(file), {
     name: board.title,
     description: board.description,
-    body: harnessBoardSeed(board.title),
+    body: board.body ?? harnessBoardSeed(board.title),
   });
   return "created";
+}
+
+/** NodeService does not hang the tasks board. Init registers only that file. */
+async function hangBoard(target: string, absPath: string, service: NodeService): Promise<void> {
+  const owner = await service.get(join(target, AGENTS_FILE_NAME), AgentsNode);
+  if (!owner || owner.children.some((ref) => ref.id === absPath)) return;
+  await service.update(owner, {
+    localChildren: [...owner.localChildren, { id: absPath }],
+    descendantChildren: [...owner.descendantChildren],
+  });
 }
 
 async function ensureHarnessBoards(
@@ -104,9 +115,11 @@ async function ensureHarnessBoards(
   const preserved: string[] = [];
   for (const board of HARNESS_BOARD_MODULES) {
     if (!modules.includes(board.module)) continue;
-    const rel = relative(target, placeHarnessMaterial(target, board.materialId).absPath);
+    const absPath = placeHarnessMaterial(target, board.materialId).absPath;
+    const rel = relative(target, absPath);
     if ((await ensureHarnessBoard(target, board, service)) === "created") created.push(rel);
     else preserved.push(rel);
+    if (board.registration === "manual-agents") await hangBoard(target, absPath, service);
   }
   return { created, preserved };
 }
@@ -157,19 +170,38 @@ type MemoryInitWritten = {
 
 type MemoryInitResult = MemoryInitSelection | MemoryInitWritten;
 
-/** Memory compatibility package: same notes/projects stubs as `edges init notes|projects`. */
+/** Memory init adopts memory types only. Skill indexes belong to skills init. */
 export async function initMemory(options: InitMemoryOptions): Promise<MemoryInitResult> {
-  return runMemoryInit(options, true);
+  if (options.skillTypes !== undefined) {
+    throw new Error("Type flags require the skills module");
+  }
+  return runTypeInit(options, "memory");
 }
 
-async function runMemoryInit(options: InitMemoryOptions, compatBoards: boolean): Promise<MemoryInitResult> {
+/** Skills init adopts skill types only. */
+export async function initSkills(options: InitMemoryOptions): Promise<MemoryInitResult> {
+  if (options.memoryTypes !== undefined) {
+    throw new Error("Type flags require the memory module");
+  }
+  return runTypeInit(options, "skills");
+}
+
+async function runTypeInit(
+  options: InitMemoryOptions,
+  module: "memory" | "skills",
+): Promise<MemoryInitResult> {
   const { target, root } = await openScope(options);
-  const specs = new Map(layerTypeSpecs(target).map((spec) => [spec.name, spec]));
-  if (
-    !specs.size &&
-    options.memoryTypes === undefined &&
-    options.skillTypes === undefined
-  ) {
+  let memoryTypes = options.memoryTypes;
+  let skillTypes = options.skillTypes;
+  const specs = new Map(
+    layerTypeSpecs(target)
+      .filter((spec) => spec.module === module)
+      .map((spec) => [spec.name, spec]),
+  );
+  if (module === "skills" && skillTypes === undefined && specs.size === 0) {
+    skillTypes = [...SKILL_TYPE_NAMES];
+  }
+  if (module === "memory" && !specs.size && memoryTypes === undefined) {
     return {
       operation: "init",
       targetDir: target,
@@ -181,16 +213,13 @@ async function runMemoryInit(options: InitMemoryOptions, compatBoards: boolean):
       },
     };
   }
-  for (const [module, selected, allowed] of [
-    ["memory", options.memoryTypes, MEMORY_TYPE_NAMES],
-    ["skills", options.skillTypes, SKILL_TYPE_NAMES],
-  ] as const) {
-    for (const name of selected ?? []) {
-      if (!(allowed as readonly string[]).includes(name)) {
-        throw new Error(`Unknown ${module} type: ${name}; register custom types with add-type`);
-      }
-      if (!specs.has(name)) specs.set(name, seedSpec(name));
+  const selected = module === "memory" ? memoryTypes : skillTypes;
+  const allowed = module === "memory" ? MEMORY_TYPE_NAMES : SKILL_TYPE_NAMES;
+  for (const name of selected ?? []) {
+    if (!(allowed as readonly string[]).includes(name)) {
+      throw new Error(`Unknown ${module} type: ${name}; register custom types with add-type`);
     }
+    if (!specs.has(name)) specs.set(name, seedSpec(name));
   }
   if (!specs.size) throw new Error("Select at least one memory or skill type");
   assertScopePath(join(target, AGENTS_FILE_NAME), target);
@@ -248,8 +277,11 @@ async function runMemoryInit(options: InitMemoryOptions, compatBoards: boolean):
     }
   }
   const agentsAction = await syncTargetAgents(target, root, service);
-  if (compatBoards) await ensureHarnessBoards(target, ["projects", "notes"], service);
-  if (target !== root && existsSync(join(root, AGENTS_FILE_NAME)) && layerTypeSpecs(root).length) {
+  if (
+    target !== root &&
+    existsSync(join(root, AGENTS_FILE_NAME)) &&
+    layerTypeSpecs(root).some((spec) => spec.module === module)
+  ) {
     await syncTargetAgents(root, root);
   }
   const [indexAction, indexEntry, indexDescription] = await syncIndexEntry(
@@ -320,49 +352,58 @@ export async function initScope(options: InitScopeOptions) {
       ? [...DEFAULT_INIT_MODULES]
       : assertKnownModules(options.modules);
   if (requested.length === 0) throw new Error("Select at least one init module");
-  if (
-    (options.memoryTypes !== undefined || options.skillTypes !== undefined) &&
-    !requested.includes("memory")
-  ) {
+  if (options.memoryTypes !== undefined && !requested.includes("memory")) {
     throw new Error("Type flags require the memory module");
   }
-
-  if (requested.includes("memory")) {
-    const memoryResult = await runMemoryInit(
-      {
-        targetDir,
-        rootDir: options.rootDir,
-        description: options.description,
-        indexGroup: options.indexGroup,
-        memoryTypes: options.memoryTypes ?? [...DEFAULT_PUBLIC_MEMORY_TYPES],
-        skillTypes: options.skillTypes,
-      },
-      false,
-    );
-    if (memoryResult.selectionRequired) return { ...memoryResult, modules: requested };
-    const boards = await ensureHarnessBoards(
-      memoryResult.targetDir,
-      requested,
-      memoryNodes(memoryResult.targetDir),
-    );
-    return {
-      ...memoryResult,
-      modules: requested,
-      created: [...memoryResult.created, ...boards.created],
-      preserved: [...memoryResult.preserved, ...boards.preserved],
-    };
+  if (options.skillTypes !== undefined && !requested.includes("skills")) {
+    throw new Error("Type flags require the skills module");
   }
 
-  const scope = await ensureScopeEntry({ ...options, targetDir });
-  const boards = await ensureHarnessBoards(scope.targetDir, requested, scope.service);
+  const base = {
+    targetDir,
+    rootDir: options.rootDir,
+    description: options.description,
+    indexGroup: options.indexGroup,
+  };
+  // Shared system entry, then each module writes only its own materials.
+  const scope = await ensureScopeEntry(base);
+  let created: string[] = [];
+  let preserved: string[] = [];
+  let typeResult: MemoryInitResult | undefined;
+  let diagnostics: MemoryInitWritten["diagnostics"] | undefined;
+  let complete: boolean | undefined;
+  for (const module of MODULE_RUN_ORDER) {
+    if (!requested.includes(module)) continue;
+    if (module === "memory" || module === "skills") {
+      const memoryTypes =
+        module === "memory"
+          ? (options.memoryTypes ?? [...DEFAULT_PUBLIC_MEMORY_TYPES])
+          : undefined;
+      typeResult = await runTypeInit(
+        { ...base, memoryTypes, skillTypes: module === "skills" ? options.skillTypes : undefined },
+        module,
+      );
+      if (typeResult.selectionRequired) return { ...typeResult, modules: requested };
+      created = [...created, ...typeResult.created];
+      preserved = [...preserved, ...typeResult.preserved];
+      diagnostics = [...(diagnostics ?? []), ...typeResult.diagnostics];
+      complete = (complete ?? true) && typeResult.complete;
+      continue;
+    }
+    const boards = await ensureHarnessBoards(scope.targetDir, [module], memoryNodes(scope.targetDir));
+    created = [...created, ...boards.created];
+    preserved = [...preserved, ...boards.preserved];
+  }
   return {
+    ...(typeResult ?? {}),
     targetDir: scope.targetDir,
     agentsAction: scope.agentsAction,
     indexAction: scope.indexAction,
     indexEntry: scope.indexEntry,
     indexDescription: scope.indexDescription,
     modules: requested,
-    created: boards.created,
-    preserved: boards.preserved,
+    created,
+    preserved,
+    ...(complete === undefined ? {} : { complete, diagnostics }),
   };
 }
