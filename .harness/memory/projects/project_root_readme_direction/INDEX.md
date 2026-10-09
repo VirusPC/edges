@@ -1,15 +1,82 @@
 ---
 name: project_root_readme_direction
-description: 修改根 README 时：个人 RSI 与知识闭环为主线，保留四视角六思想；递归树结构区分仓内共享与扩展对外分发，跨仓安装复用为目标，局部记忆不默认分发。
+description: >-
+  修改根 README 时打开：2026-10-09 grill 已结束并按此重写。定稿：标语「harness
+  任何目录。你的大脑，也是一个目录。」；首屏六条（持续自进化、不止停留在仓库、任何目录、任何人、任何
+  Agent、超级个体）；正文用现在时、不写「在路上」，但快速开始只放实测命令；中文为主；README 只做门面加地图，内容标准在各目录
+  README；「怎么做到的」以后再补。模型见 ADR 0032。
 metadata:
-  edges-title: 根 README 以知识闭环为唯一主线
+  edges-title: 根 README：harness 任何目录的对外门面
   edges-type: project
   edges-origin-session-id: bc-0cc3a85a-15e3-508e-88c6-9349ff47fbf1
-  edges-agent-client: codex
-  edges-username: cheng
+  edges-agent-client: cursor
+  edges-username: viruspc
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-05T18:14:25+08:00'
+  edges-updated-at: '2026-10-09T17:09:15+08:00'
 ---
+
+根 README 重写为面向外部访客的门面与地图：任何目录都能配一套 harness，大脑也被看作一个虚拟目录；经验按「谁 × 在哪」沉淀；本仓是作者大脑的 harness 仓库。具体规范下放到所属目录 README。
+
+> 状态：README 重写 grill 已于 2026-10-09 结束，README 已按「已定」重写（分支 docs/readme-rewrite）。「此前决定」只作史料，与「已定」冲突时以「已定」为准。
+
+## 已定（2026-10-08，用户确认）
+
+- **定位通用优先（Q1=B，后经 Q5、Q6 细化）**：Edges 是「任何目录都能配一套 harness」的模型，加 `extensions/`、`shared-extensions/` 里的可安装能力。本仓是作者大脑这个虚拟目录的 harness 仓库，也就是个人实例。任意仓库一键安装复用是目标，不写成现状。
+- **读者是外部访客（Q2=A）**：README 首先回答第一次打开 GitHub 页面的人「这是什么、和我有什么关系、能不能拿去用」。Agent 的入口是 `AGENTS.md`，README 不为 Agent 写操作规范。
+- **README 是门面加地图（Q3=B）**：README 只讲是什么、为什么、怎么用、去哪看。Edge 准入与演化、归档规则、附件共置等内容标准下放到所属内容目录的 README（模块 README 不加正文，见 feedback_no_prose_in_harness_module_readmes）；术语留在 `CONTEXT.md`，取舍留在 ADR。随之要改 `AGENTS.md` 中「目录约定、业务逻辑与内容标准看 README.md」那句；`posts/README.md` 受 posts 硬约束，只能由用户手改。
+- **不新造「工作空间」（Q4=A）**：comment 里的「任意工作空间」指作用域；「工作区」仍只指 Edges 内部的专项工作区。
+- **「自进化」只按 S1 写现在时（Q5b）**：现状是被纠正后 Agent 自己写记忆、走分支和 PR、由人合并，下次不再犯，README 写成「受控自进化」并带这条限定。S2（无人纠正时 Agent 从多次会话或观测中自己发现问题并提议）与 S3（Agent 按评测自动改 harness 并合并、无人参与）可能是未来方向，只写进路线图，不写成现状或承诺。依据：业界把「Agent 自己写、改自己的 skill」称 self-improving（Hermes），带人审收件箱的标为 partial（Gemini CLI），见 https://arxiv.org/html/2609.00006v1；综述把 self-evolving 定义为自主优化，见 https://arxiv.org/abs/2508.07407。
+- **不用「Meta Harness」（Q5a）**：业界 meta-harness 指自动搜索 harness 代码（https://arxiv.org/abs/2603.28052）或在多个厂商 harness 之上统一编排（Omnigent，见 https://arxiv.org/html/2609.00006v1），Edges 都不是。
+- **各类 Agent 同等重要，区别只在 harness 对象（Q5c–Q5e，用户纠正）**：code agent、work agent 的对象是仓库或子目录；personal agent（ChatGPT dots、Meta Muse、Manus Cue、Grok Bot 等）的对象是大脑这个虚拟目录。机制相同，README 不把 personal agent 写成唯一主角。CONTEXT 用「harness 对象」，不用「harness 主体」。业界背景：personal agent 是 2026 年最热品类（https://www.cnbc.com/2026/09/30/openai-follows-meta-into-the-red-hot-market-for-personal-agents.html），各家记忆互不相通（https://vinny.dev/blog/2026-10-01-the-return-of-the-personal-agent/），而 Muse 等内部同样用 Markdown 记忆、AGENTS.md 与 SKILL.md（https://mouse.dev/blog/muse-runtime-export/）。
+- **harness 落成仓库，大脑是虚拟目录（Q5f，用户：「很简单的逻辑，人脑看做成一个虚拟目录就好了」）**：harness 是实物，一个 Git 仓库；它维护的大脑不落盘，也不是本机某个物理父目录。code agent 经各客户端的用户级配置（如 `~/.codex/AGENTS.md`、`~/.claude/CLAUDE.md`、全局 skills）接到这个仓库；personal agent 在自己的电脑上 clone 它。不选物理父目录：Codex 等客户端不扫仓库根之上（https://learn.chatgpt.com/docs/build-skills），personal agent 的云电脑上也没有本机目录树；不选纯虚拟：personal agent 要装的必须是实物。README 现状只写：模型本身、本仓内 code agent 读写、Grok Bot 在本仓 clone 上工作；其他仓库的 code agent 经用户级配置接入（作者本机尚未配置）、dots / Muse / Cue 接入、`--super` 跨多个仓库，都写成目标。
+- **大脑里只设一个 harness 仓库（Q5i）**：与「一个目录一份入口」一致，不为公开 / 私密拆成两个仓库。外部访客的大脑 harness 仓库建议设为私有；作者本仓公开，私密内容只能放 gitignore 的用户记忆、不随 clone 到 personal agent 的云电脑，这件事作为单独路线项另议。
+- **标语（Q5g）**：中文「harness 任何目录。你的大脑，也是一个目录。」（用户给出；harness 作动词）；英文默认「Harness any directory. Your brain is one too.」，备选原句「A harness for any directory — including the virtual one in your head.」。用词约定：用「大脑」，不用「脑子」「人脑」；保留「目录」，因为「一切都是文件和目录」本身就是论点（用户：「毕竟我们整体是基于文件系统的思考」），当初的生硬来自技术文档句式；量词用 any /「任何」，不用「每个」，因为系统入口由用户对选定目录 init，不自动给所有目录铺 AGENTS.md。「不落盘的虚拟目录」放在标语下的说明里讲。
+- **经验按「谁 × 在哪」沉淀（Q6c=A，用户：「当一个仓库是团队协作开发时，本质根目录沉淀下来的，就是团队在这个目录下的经验……要区分什么人在什么地方沉淀」）**：在哪 = 目录树（含大脑这个虚拟目录）；谁 = 在该处协作的所有人或某一个人，按人算，Agent 只负责写。团队仓库的上一层是团队，不是某个人的大脑；大脑在此人自己的仓库之上，并在他进入团队仓库时叠加生效。团队仓库不一定是 monorepo（用户纠正），统一说「团队仓库」。团队这一层写成目标。
+- **anywhere 靠任意目录，anyone 靠共享范围（Q6d，用户提出）**：共享范围由「提交进哪个仓库、谁能访问」表达——目录所在仓库（该仓库的协作者）、大脑 harness 仓库（此人及其装入的 Agent）、团队 harness 仓库（团队，目标）。用户记忆（gitignore）偏隐私，放密码这类材料，用户明确「先不用这么刻意去管」：不把它当成「某人 × 某目录」的经验层，README 也不突出它。CONTEXT 新增「大脑（虚拟目录）」「Personal Agent」「共享范围」词条。
+
+- **README 按「已经做完」来写，不写「在路上」（用户 2026-10-08）**：用户原话「README 直接假装做完了，不要写在路上」。README 正文一律用现在时描述能力与愿景，不加「目标」「路线图」「在路上」标注。本条推翻：Q5b「S2/S3 只写进路线图」、Q5f 的现状/目标状态表、「此前决定」中「目标和实现现状分别表达」、以及 project_system_one_click_deploy_ingest_output 中「不要暗示三件事今天都已一键完成」。Q8（现状与目标怎么标）因此作废。待确认：「快速开始」里的命令是否仍须实测可跑通（建议是）。
+- **保留「平台」（用户 2026-10-08）**：「harness 目录就是一个平台」；「任何 Agent」条用用户原文「跟随仓库的多 Agent 多人协作平台」。
+- **首屏六条定稿（用户 2026-10-08）**：
+  1. 持续自进化：每一次反馈都会自动沉淀，下次不再重犯。Edges 自己也用 Edges 维护：改进 Edges 的方法，也在被 Edges 改进，RSI 的成果随每一次升级交到你手里。
+  2. 不止停留在仓库：海量经验知识从不同端捕获到仓库，但不止停留在仓库。将它们提炼成简单可复用的判断优势，并进一步转化为博客、播客、视频、PPT 等丰富的对外分发资料，用更低的边际成本取得更大收益。
+  3. 任何目录：以文件系统模型为核心，允许为任何仓库、仓库里的任何目录配置 harness。你的大脑，也是一个目录。
+  4. 任何人：既是个人的 harness，也是团队的 harness，取决于目录的共享范围。
+  5. 任何 Agent：不与 Codex、Claude Code、Grok Bot 等任何 Agent 绑定。记忆、技能、任务看板、笔记——跟随仓库的多 Agent 多人协作平台。一切尽在掌控之中。
+  6. 超级个体：个人第二大脑，认知复利系统。持续快速地提升自己，实现个人大脑的快速进化。
+  「大脑仓库自带机制、可在自己身上做 RSI」的特例用户未写入，大脑仓库模板任务卡暂不开。以下为定稿前的草稿记录。
+- **首屏六条用户草稿（2026-10-08）**：顺序为 递归自我改进（RSI）、不止停留在仓库、任何目录、任何人、任何 Agent、超级个体；正文以用户原文为准，仅修错字（「近一步」→「进一步」）、「for 个人/团队」→「既是个人的 harness，也是团队的 harness」、「Grok bot」→「Grok Bot」。RSI 条用户嫌初稿写得不好，候选「harness 不只帮 Agent 记住教训，也在改进自己。经验沉淀成规则和技能，规则和技能又反过来优化沉淀经验的方式：持续变强，也持续提升变强的能力。」待确认。
+
+- **本仓在做 RSI，交付出去的是自进化（用户 2026-10-08 指出，已核实）**：用户原话「这个仓库本身是 RSI，但是最后交出去的产物只是普通的自我进化吧。RSI 能力并没有提供给用户」。核实：改进机制（project-memory 系列 skill、edges CLI、AGENTS.md 结构）的源码只在本仓，并用同一套记忆维护，所以本仓在改进「改进者」；外部用户经 `npx skills@latest add` 拿到的是实体拷贝，本地改动会被重装覆盖，CLI 未发布，用户只得到目录自进化，外加在自己 harness 里写关于沉淀方式的反馈、managed skill、`$project-memory-add-type` 这类弱递归；Edges 自身 RSI 的成果只能经重装升级间接获得（本机另两个仓库仍停在旧 `.memory/` 布局）。README 处理（用户 2026-10-08 先选 B 后改为 A，并补充「B 是个人大脑的特例，在最后一条提一下」）：首条改名「持续自进化」，讲目录越用越聪明，并说明 Edges 用 Edges 维护自己、改进 Edges 的方法也在被改进（RSI），成果随升级交给用户；「大脑仓库自带整套机制，所以能在自己身上做 RSI」只作为特例写进最后一条「超级个体」。后续需开任务卡：只带机制、不带作者个人内容的大脑仓库模板。
+
+- **知识闭环与投资隐喻（Q7=A，用户 2026-10-08：「属于内部系统架构思想了」）**：README 首屏六条之后只留一张简化闭环图（捕获 → 提炼成 Edge → 调用与输出 → 反馈回到捕获），作为「不止停留在仓库」「超级个体」的展开，反馈必须回到捕获；认知资本、Edge 组合、认知风险等投资隐喻移出 README，归内部系统架构文档；知识模型表（notes / projects / teaching → edges → posts → archive）移到「本仓：作者的个人实例」一节作目录地图。
+
+- **核心架构设计思想必须写进 README（用户 2026-10-08/09）**：用户原话「核心的一些架构设计思想要写到 README，这是亮点。只说目标不够，要说如何实现目标。我记得之前 README 里写过部分」。README 在首屏六条（目标）之后要有一节讲「怎么做到的」，从旧 README「系统实现」一节提炼（递归树、系统一与系统二、统一入口、检索边界、文件系统、Git 原生管理、CLI / Skill / MCP 能力面等）；只有细节（投资隐喻、遍历规则等）下放到内部架构文档、CONTEXT 与 ADR。Q12 原「系统实现整体移到 docs/architecture.md」据此改为只下放细节。随后用户改口（2026-10-09）：「算了，这部分先不写了」——本次重写不写「怎么做到的」一节，留待以后补；旧「系统实现」原文拟原样移到 `docs/architecture.md` 保存以备取材（待用户确认）。
+
+- **快速开始实测修订（2026-10-09）**：`npx skills@latest add VirusPC/edges/extensions/skills` 会浅克隆整个仓库，实测 300 秒超时，不能写进快速开始；改为在第 1 步的克隆目录里 `npx skills@latest add ./extensions/skills -g`（隔离 HOME 实测 7 秒装好 20 个 skill 到 `~/.agents/skills`，交互模式可选 Agent），与安装 CLI 合并为一步，快速开始只剩两步。另发现根脚本 `pnpm skills:install` 带 `-a claude-code`，实际只装进 `~/.claude/skills`，与 `extensions/skills/README.md`「写入中枢 ~/.agents/skills」的描述不符，未在本次修。
+- **快速开始（Q9=A，用户 2026-10-09 确认）**：只放实测能跑通的命令。原定三步：克隆本仓并 `pnpm install`，`pnpm --filter edges-cli pack --pack-destination /tmp` 后 `npm install -g /tmp/edges-cli-0.1.0.tgz`；`cd` 到任意仓库执行 `edges init`；`npx skills@latest add VirusPC/edges/extensions/skills`（动笔前须在隔离环境实测）。紧跟一句：想给大脑配一套，就新建私有仓库同样 `edges init`，再让 personal agent 在它自己的电脑上 clone，不附命令。2026-10-09 实测：init 与 memory remember 在空仓库可用，打包的 CLI 装到临时前缀后 `edges --help` 正常。旧「维护完整的 Edges」压成很短的「参与开发」小节。用户要求记 todo「CLI 发 npm 包」：更新已有卡 `.harness/tasks/edges-cli-platform/backlog/2026-09-14--edges-CLI发布成package`，待用户确认草稿后落库。
+
+- **语言（Q10，用户 2026-10-09：「README 中文为主」）**：正文中文；英文只保留中文标语下的一行英文标语；暂不另写英文版 README。
+
+- **名字（Q11，用户 2026-10-09 按推荐）**：在首屏「不止停留在仓库」的「判断优势」后加括注「（Edge，Edges 由此得名）」；README 里「Edges」只指系统，指实例时说「本仓」或「作者的大脑仓库」；CONTEXT 的 Edges 词条已同步。
+- **其余内容去向（Q12，用户 2026-10-09 按推荐）**：旧「系统实现」原文原样移到 `docs/architecture.md` 保存；「架构复盘」从 README 删除（由 project_periodic_architecture_review 承载）；「文档与版本」压成文档地图（CONTEXT、ADR、CHANGELOG、各目录 README）；「公开仓库边界」保留短版，完整规则在 AGENTS.md 硬约束；License 后的 Task 命令段删除（extensions/cli/README.md 已覆盖 --scope / --super / --all）；README 末尾受管的「本层内容」区块必须保留，兼作本仓内容地图；部署徽章标签「教学站点部署」改为「站点部署」。
+
+- **收尾确认（用户 2026-10-09 按推荐）**：任务卡「edges CLI 发布到 npm」按草稿更新入看板；为「harness 落成仓库、大脑是虚拟目录、经验按谁 × 在哪沉淀」写一份 ADR；旧口号「持续提升自己，也持续提升自我改进的能力」放进「本仓：作者的大脑仓库」一节作为该实例的目标；CONTEXT 的 Meta-harness 词条补业界两种用法。grill 结束，进入实现。
+
+## 后续事项
+
+- README「怎么做到的」一节（核心架构设计思想）以后再补，取材自 `docs/architecture.md`。
+- `posts/README.md` 仍写旧路径 `knowledge/posts/`，受 posts 硬约束只能由用户手改。
+- 根脚本 `pnpm skills:install` 带 `-a claude-code`，实际只装进 `~/.claude/skills`，与 `extensions/skills/README.md` 的描述不符。
+- CLI 发布到 npm 见任务卡 `.harness/tasks/edges-cli-platform/backlog/2026-09-14--edges-CLI发布成package`；发布后把快速开始换成一行 npm 命令。
+- 团队这一层、其他仓库的 code agent 接入大脑 harness、`--super` 跨多个仓库、personal agent 云端同步私密内容，见 ADR 0032 的 Consequences。
+
+**Why:** 用户 2026-10-08 在 README 顶部加了 comment「为任意工作空间，补充自进化系统」，随后在 grill 中逐步确认：通用优先、外部访客为读者、README 只做门面，并把模型收敛为「任何目录都能配 harness，大脑也是一个目录，经验按谁 × 在哪沉淀」。原 README 约 22KB 并承担规范真源，外部访客读到第三屏仍不知道这是什么、怎么上手。
+
+**How to apply:** 改根 README 时先按「已定」检查首屏：标语与说明是否按定稿；是否把大脑讲成虚拟目录、把各类 Agent 讲成同等；现状与目标是否分开。正文只留地图并链接到目录 README、CONTEXT 与 ADR。「待定」项未答前不要按「此前决定」直接落笔。下放规范时同步改写所属目录 README，其中多份已过时或缺失。
+
+## 此前决定（2026-09 至 2026-10-05，待本轮 grill 逐条复核）
+
+以下是翻案前的原文。其中「README 定位为个人自我进化系统」「根 README 说明目录约定、业务逻辑与内容标准」「理念只保留一张核心图」等已被上方结论取代或待 Q7 复核，其余各条仍待复核。
 
 根 README 以个人 RSI 为当前实践目标，以知识闭环为唯一叙事主线，按「理念：知识只有进入闭环，才能产生复利 → 知识模型 → 系统实现 → 使用与维护 → 公开仓库边界」组织；新增概念必须替换或收编旧结构，不能继续叠加平行章节。
 
