@@ -2,7 +2,7 @@
 
 你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 extensions 与 shared-extensions、辅助知识库结构。
 
-目录约定、业务逻辑与内容标准看 [README.md](README.md)；AGENTS.md 组织入口发现，各规范正文按职责保持单一真源。
+Edges 是什么、怎么用看 [README.md](README.md)；内容标准看所属目录的 README（如 [edges/](edges/README.md)、[archive/](archive/README.md)、[tasks/](tasks/README.md)），术语看 [CONTEXT.md](CONTEXT.md)；AGENTS.md 组织入口发现，各规范正文按职责保持单一真源。
 
 <!-- project-harness:start -->
 

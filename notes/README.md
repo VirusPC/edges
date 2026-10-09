@@ -1,17 +1,11 @@
-# 待处理想法
+# 笔记 (Notes)
 
-此目录用于存放从 memory 会话中提取的、
-尚未形成完整认知优势的原始想法和材料。
+此目录存放低成本捕获的想法和材料：对话、文章、实践里冒出来的线索，不要求预先有目标或结论。反复用得上的判断，再提炼成 [Edge](../edges/README.md)。
 
-## 当前内容
+## 怎么写进来
 
-*暂无*
+- 有 shell 的人和 Agent 用 `edges notes create`，笔记落在 `notes/YYYY-MM-DD--<标题>/INDEX.md`。
+- 没有 shell 的 Agent 宿主用 [new-note MCP](../extensions/mcp-servers/new-note/README.md)。
+- Agent 什么时候该记一条，看 [edges-note skill](../extensions/skills/edges-note/SKILL.md)。
 
----
-
-新想法请按以下格式命名：
-`YYYY-MM-DD--主题简述.md`
-
-示例：
-- `2026-02-07--流量监控需求分析.md`
-- `2026-02-07--技术选型思考.md`
+图片等附件与 `INDEX.md` 放在同一个目录。早期导入的部分笔记没有日期前缀，保留原名。
