@@ -20,7 +20,7 @@
 - **`services/`**: 接入 Edges 的常驻 HTTP 进程（不是 MCP，也不是 Commander 命令节点）。目前是 Artifacts 预览服务 [`services/artifacts-preview/`](services/artifacts-preview/)；命令面仍是 `edges artifacts`。
 - **`apps/`**: 全局共享的对外应用实现，可被不同作用域复用。目前包括 [`tasks-review-app/`](apps/tasks-review-app/)，构建结果供 CLI 的任务审阅页使用。
 - **`mcp-servers/`**: [Model Context Protocol](https://modelcontextprotocol.io/) 服务器实现。给没有 shell 的 AI 客户端。
-- **`skills/`**: 供外部 Agent 加载的技能定义（Prompt 模板、思维链规范）。项目级用 `pnpm skills:link` 把每个 skill 软链到 `.agents/skills`；本机全局跑 `pnpm skills:install` 写入 `~/.agents/skills`（并为 Claude Code 建软链）；外部用户用 `npx skills@latest add VirusPC/edges/extensions/skills`。
+- **`skills/`**: 供外部 Agent 加载的技能定义（Prompt 模板、思维链规范）。项目级用 `pnpm skills:link` 把每个 skill 软链到 `.agents/skills`；本机全局只装给 Claude Code 跑 `pnpm skills:install-claude-global`（实体拷贝到 `~/.claude/skills`，不写中枢 `~/.agents/skills`）；外部用户用 `npx skills@latest add VirusPC/edges/extensions/skills`。
 - **`subagents/`**: 针对特定复杂任务预配置的子代理。
 - **`tools/`**: 暴露给外部系统的独立工具或脚本适配器。
 

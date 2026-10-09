@@ -49,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 文档与系统
 
+- **全局 skill 安装脚本按实际行为改名：** `pnpm skills:install` 改为 `pnpm skills:install-claude-global`，命令不变，不留旧名。它只装给 Claude Code，把每个 skill 实体拷贝进 `~/.claude/skills`，不写中枢 `~/.agents/skills`，也不建软链；文档原先写的「写入中枢、Claude Code 走软链」与实测不符。装进中枢改用 `npx skills@latest add ./extensions/skills -g`。
 - **统一 Node 22 环境：** CLI、MCP 和扩展应用的运行与构建最低要求为 Node 22；从源码使用 `pnpm test`、`pnpm build` 时也采用同一版本基线。
 - **按归属迁移目录：** 根维护记忆、技能、任务、评测和观测进入 `.harness/`，领域任务位于 `tasks/`，研究与教学分别位于 `projects/`、`teaching/`。`pnpm migrate:recursive-layout --worktree <独立工作树绝对路径> --dry-run` 审阅实例清单，改用 `--apply` 执行并保留本机恢复记录；各克隆的私有旧材料须分别迁移。
 
