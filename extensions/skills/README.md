@@ -52,10 +52,10 @@ npx skills@latest --version  # 1.5.23  ← 真包
 
 本目录的命名已经避开了这两类（用 `entry_line.tmpl.md` 和 `OVERVIEW.md`），所以旧版也能正常装。但**新版 1.4.1 / 1.4.5 起已分别修掉 README 和下划线的排除**，不必为此约束新 skill——只有 `metadata.json` 是至今仍会被丢的（这条有文档）。
 
-> 改完 skill 目录结构后，用这条复核，别只看退出码：
+> 改完 skill 目录结构后，用这条复核，别只看退出码（`<安装目录>` 是 `~/.agents/skills` 或 `~/.claude/skills`，看用的哪种装法）：
 > ```bash
 > diff <(cd <src> && find . -type f | sort) \
->      <(cd ~/.agents/skills/<name> && find . -type f | sort)
+>      <(cd <安装目录>/<name> && find . -type f | sort)
 > ```
 
 ## 项目级（本仓库工作区）
@@ -76,13 +76,15 @@ npx skills@latest --version  # 1.5.23  ← 真包
 ### 本机（作者）
 
 ```bash
-pnpm skills:link      # 项目级：extensions/skills → .agents/skills 相对软链
-pnpm skills:install   # 全局：拷进 ~/.agents/skills，Claude Code 另建软链
+pnpm skills:link                   # 项目级：extensions/skills → .agents/skills 相对软链
+pnpm skills:install-claude-global  # 全局，只装给 Claude Code：实体拷贝到 ~/.claude/skills
 ```
 
-`skills:link` 只写仓库内的发现位。`skills:install` 把内容装到中枢 `~/.agents/skills/<name>/`（实体拷贝），再给 `~/.claude/skills/` 建一条软链。Codex、Cursor、Gemini CLI、Factory、opencode 原生读中枢（Codex 源码里 `~/.codex/skills` 已标 deprecated），不必再占一份目录。只有 Claude Code 不读中枢，那条软链是它能看到全局 skill 的唯一原因。
+`skills:link` 只写仓库内的发现位。`skills:install-claude-global` 跑的是 `npx skills@latest add ./extensions/skills -g -a claude-code -y`。只选 Claude Code 一家时，`npx skills` 不经过中枢，直接把每个 skill 实体拷贝进 `~/.claude/skills/<name>/`，不建软链；`~/.agents/skills` 里不会出现这些 skill，只在 `~/.agents/.skill-lock.json` 记一笔（`skills` 1.7.1 实测）。只读中枢的 Agent 因此看不到这次安装。
 
-> ⚠️ **改完必须重跑。** 中枢里是实体拷贝而非软链——`npx skills` 会把源目录里的软链一并 `dereference` 掉——所以改了本目录下的文件不会自动生效。`npx skills@latest update` 对本地路径源直接跳过（跳过理由就是 `Local path`），只能重跑上面那条命令。
+要装进中枢 `~/.agents/skills`，用[根 README 快速开始](../../README.md#快速开始)里的 `npx skills@latest add ./extensions/skills -g`，交互选择 Agent。Codex、Cursor、Gemini CLI、Factory、opencode 原生读中枢（Codex 源码里 `~/.codex/skills` 已标 deprecated）。同时选中一家读中枢的 Agent 和 Claude Code 时，中枢放实体，`~/.claude/skills/<name>` 是指回中枢的软链（例如 `-a codex claude-code`）。
+
+> ⚠️ **改完必须重跑。** 两种装法里的 skill 内容都是从本目录拷出去的实体——`npx skills` 会把源目录里的软链一并 `dereference` 掉——所以改了本目录下的文件不会自动生效。`npx skills@latest update` 对本地路径源直接跳过（跳过理由就是 `Local path`），只能重跑安装命令。
 
 ### 外部用户
 

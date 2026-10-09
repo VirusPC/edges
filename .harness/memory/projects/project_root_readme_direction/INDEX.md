@@ -12,7 +12,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: viruspc
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-09T17:09:15+08:00'
+  edges-updated-at: '2026-10-09T17:31:30+08:00'
 ---
 
 根 README 重写为面向外部访客的门面与地图：任何目录都能配一套 harness，大脑也被看作一个虚拟目录；经验按「谁 × 在哪」沉淀；本仓是作者大脑的 harness 仓库。具体规范下放到所属目录 README。
@@ -52,7 +52,7 @@ metadata:
 
 - **核心架构设计思想必须写进 README（用户 2026-10-08/09）**：用户原话「核心的一些架构设计思想要写到 README，这是亮点。只说目标不够，要说如何实现目标。我记得之前 README 里写过部分」。README 在首屏六条（目标）之后要有一节讲「怎么做到的」，从旧 README「系统实现」一节提炼（递归树、系统一与系统二、统一入口、检索边界、文件系统、Git 原生管理、CLI / Skill / MCP 能力面等）；只有细节（投资隐喻、遍历规则等）下放到内部架构文档、CONTEXT 与 ADR。Q12 原「系统实现整体移到 docs/architecture.md」据此改为只下放细节。随后用户改口（2026-10-09）：「算了，这部分先不写了」——本次重写不写「怎么做到的」一节，留待以后补；旧「系统实现」原文拟原样移到 `docs/architecture.md` 保存以备取材（待用户确认）。
 
-- **快速开始实测修订（2026-10-09）**：`npx skills@latest add VirusPC/edges/extensions/skills` 会浅克隆整个仓库，实测 300 秒超时，不能写进快速开始；改为在第 1 步的克隆目录里 `npx skills@latest add ./extensions/skills -g`（隔离 HOME 实测 7 秒装好 20 个 skill 到 `~/.agents/skills`，交互模式可选 Agent），与安装 CLI 合并为一步，快速开始只剩两步。另发现根脚本 `pnpm skills:install` 带 `-a claude-code`，实际只装进 `~/.claude/skills`，与 `extensions/skills/README.md`「写入中枢 ~/.agents/skills」的描述不符，未在本次修。
+- **快速开始实测修订（2026-10-09）**：`npx skills@latest add VirusPC/edges/extensions/skills` 会浅克隆整个仓库，实测 300 秒超时，不能写进快速开始；改为在第 1 步的克隆目录里 `npx skills@latest add ./extensions/skills -g`（隔离 HOME 实测 7 秒装好 20 个 skill 到 `~/.agents/skills`，交互模式可选 Agent），与安装 CLI 合并为一步，快速开始只剩两步。另发现根脚本 `pnpm skills:install` 带 `-a claude-code`，实际只装进 `~/.claude/skills`，与 `extensions/skills/README.md`「写入中枢 ~/.agents/skills」的描述不符；2026-10-09 已按实际行为改名为 `pnpm skills:install-claude-global` 并改写文档，命令本身未改。
 - **快速开始（Q9=A，用户 2026-10-09 确认）**：只放实测能跑通的命令。原定三步：克隆本仓并 `pnpm install`，`pnpm --filter edges-cli pack --pack-destination /tmp` 后 `npm install -g /tmp/edges-cli-0.1.0.tgz`；`cd` 到任意仓库执行 `edges init`；`npx skills@latest add VirusPC/edges/extensions/skills`（动笔前须在隔离环境实测）。紧跟一句：想给大脑配一套，就新建私有仓库同样 `edges init`，再让 personal agent 在它自己的电脑上 clone，不附命令。2026-10-09 实测：init 与 memory remember 在空仓库可用，打包的 CLI 装到临时前缀后 `edges --help` 正常。旧「维护完整的 Edges」压成很短的「参与开发」小节。用户要求记 todo「CLI 发 npm 包」：更新已有卡 `.harness/tasks/edges-cli-platform/backlog/2026-09-14--edges-CLI发布成package`，待用户确认草稿后落库。
 
 - **语言（Q10，用户 2026-10-09：「README 中文为主」）**：正文中文；英文只保留中文标语下的一行英文标语；暂不另写英文版 README。
@@ -66,7 +66,6 @@ metadata:
 
 - README「怎么做到的」一节（核心架构设计思想）以后再补，取材自 `docs/architecture.md`。
 - `posts/README.md` 仍写旧路径 `knowledge/posts/`，受 posts 硬约束只能由用户手改。
-- 根脚本 `pnpm skills:install` 带 `-a claude-code`，实际只装进 `~/.claude/skills`，与 `extensions/skills/README.md` 的描述不符。
 - CLI 发布到 npm 见任务卡 `.harness/tasks/edges-cli-platform/backlog/2026-09-14--edges-CLI发布成package`；发布后把快速开始换成一行 npm 命令。
 - 团队这一层、其他仓库的 code agent 接入大脑 harness、`--super` 跨多个仓库、personal agent 云端同步私密内容，见 ADR 0032 的 Consequences。
 
