@@ -1,25 +1,30 @@
 ---
 name: publish_edges_cli_as_package
-description: 把 edges CLI 发布成 package，可安装而不是只在仓里跑
+description: 把 edges CLI 发布到 npm，外部用户一行命令就能装上，README 快速开始不再需要克隆和本地打包。
 metadata:
   edges-type: task
-  edges-title: edges CLI 发布成 package
+  edges-title: edges CLI 发布到 npm
   edges-tasks-status: backlog
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-17T14:09:12.236Z"
+  edges-updated-at: '2026-10-09T08:04:23.573Z'
   edges-task-project: edges-cli-platform
 ---
 
-把 edges CLI 发布成 package，让人能安装使用，而不是只能在仓库里跑。
+**背景：**
+2026-10-08 至 10-09 重写根 README、讨论「快速开始」时，实测了外部访客今天能走通的安装路径：克隆本仓 → `pnpm install` → `pnpm --filter edges-cli pack` → `npm install -g` 本地安装包，再对自己的仓库执行 `edges init`。这条路能跑通，但要四步，还要求本机装有 pnpm。用户确认 README 先写这条实测路径，同时要求记一个 todo：把 CLI 发成 npm 包。本卡由 2026-09-14 的同名 backlog 卡更新而来，原卡只记了方向（包名、registry、版本与 CI 待细聊）。
+- 现状：`extensions/cli/package.json` 的包名是 `edges-cli`，`private: true`，版本 0.1.0；`prepack` 已执行完整构建。本地打出的安装包装到临时目录后，`edges --help`、`edges init`、`edges memory remember` 均正常（2026-10-09 实测）。
+- 公网 npm 上 `edges-cli` 与 `@viruspc/edges` 目前没有被占用，`edges` 已被他人占用（2026-10-09 查询）。包名、registry、版本号与 CI 发布流程仍待定。
+- `extensions/skills` 里大约 10 个 skill 运行时要调用 `edges` CLI，只装 skill、没有 CLI 时大多跑不起来。
+- 非目标：CLI 与 MCP 的鉴权、project-memory 脚本迁移（原卡已排除）；不再加仓根 `bin/`。
+- 关联：根 README 重写（分支 `docs/readme-rewrite`）；兄弟卡「edges 封装为脚手架框架并定义升级路径」。
 
-**Why:**
-CLI 已经是能力面入口（Commander、tasks 子命令已落地），但还绑在仓内。发成 package 之后，其它机器和 Agent 才能 `npx`/`npm i` 用同一套契约。这和「CLI/MCP 鉴权」「project-memory 脚本迁到 edges CLI」都相关，但本条只做发布/分发。
+**目标：**
+外部用户在没有克隆本仓的机器上，用一行 npm 命令装上 `edges` CLI，README 快速开始随之改成这一行。
 
-**How to apply:**
-- 细聊包名、scope、registry（npm 公有还是 GitHub Packages）、版本与 CI 发布。
-- 对齐能力面：package 暴露的是 `edges` CLI，不是再加仓根 `bin/`。
-- 鉴权、脚本迁移不夹进本条。
-- 未指派。派发时默认先 grill-with-docs。
+**完成标准：**
+- [ ] 在一台没有克隆本仓的机器上，`npm install -g <包名>` 之后 `edges --help` 正常输出
+- [ ] 同一环境里，对一个空 Git 仓库执行 `edges init`、`edges memory remember` 都成功
+- [ ] 根 README 快速开始的安装步骤换成这一行 npm 命令
