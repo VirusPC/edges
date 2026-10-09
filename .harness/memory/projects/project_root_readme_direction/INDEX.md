@@ -12,7 +12,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: viruspc
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-09T16:13:21+08:00'
+  edges-updated-at: '2026-10-09T17:09:15+08:00'
 ---
 
 根 README 重写为面向外部访客的门面与地图：任何目录都能配一套 harness，大脑也被看作一个虚拟目录；经验按「谁 × 在哪」沉淀；本仓是作者大脑的 harness 仓库。具体规范下放到所属目录 README。
@@ -23,7 +23,7 @@ metadata:
 
 - **定位通用优先（Q1=B，后经 Q5、Q6 细化）**：Edges 是「任何目录都能配一套 harness」的模型，加 `extensions/`、`shared-extensions/` 里的可安装能力。本仓是作者大脑这个虚拟目录的 harness 仓库，也就是个人实例。任意仓库一键安装复用是目标，不写成现状。
 - **读者是外部访客（Q2=A）**：README 首先回答第一次打开 GitHub 页面的人「这是什么、和我有什么关系、能不能拿去用」。Agent 的入口是 `AGENTS.md`，README 不为 Agent 写操作规范。
-- **README 是门面加地图（Q3=B）**：README 只讲是什么、为什么、怎么用、去哪看。Edge 准入与演化、归档规则、附件共置、任务存放与全仓看板等内容标准下放到所属目录 README；术语留在 `CONTEXT.md`，取舍留在 ADR。随之要改 `AGENTS.md` 中「目录约定、业务逻辑与内容标准看 README.md」那句；`posts/README.md` 受 posts 硬约束，只能由用户手改。
+- **README 是门面加地图（Q3=B）**：README 只讲是什么、为什么、怎么用、去哪看。Edge 准入与演化、归档规则、附件共置等内容标准下放到所属内容目录的 README（模块 README 不加正文，见 feedback_no_prose_in_harness_module_readmes）；术语留在 `CONTEXT.md`，取舍留在 ADR。随之要改 `AGENTS.md` 中「目录约定、业务逻辑与内容标准看 README.md」那句；`posts/README.md` 受 posts 硬约束，只能由用户手改。
 - **不新造「工作空间」（Q4=A）**：comment 里的「任意工作空间」指作用域；「工作区」仍只指 Edges 内部的专项工作区。
 - **「自进化」只按 S1 写现在时（Q5b）**：现状是被纠正后 Agent 自己写记忆、走分支和 PR、由人合并，下次不再犯，README 写成「受控自进化」并带这条限定。S2（无人纠正时 Agent 从多次会话或观测中自己发现问题并提议）与 S3（Agent 按评测自动改 harness 并合并、无人参与）可能是未来方向，只写进路线图，不写成现状或承诺。依据：业界把「Agent 自己写、改自己的 skill」称 self-improving（Hermes），带人审收件箱的标为 partial（Gemini CLI），见 https://arxiv.org/html/2609.00006v1；综述把 self-evolving 定义为自主优化，见 https://arxiv.org/abs/2508.07407。
 - **不用「Meta Harness」（Q5a）**：业界 meta-harness 指自动搜索 harness 代码（https://arxiv.org/abs/2603.28052）或在多个厂商 harness 之上统一编排（Omnigent，见 https://arxiv.org/html/2609.00006v1），Edges 都不是。
