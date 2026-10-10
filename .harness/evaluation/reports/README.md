@@ -2,6 +2,8 @@
 
 某次评测运行的报告。有真实结果再往这里写；不要预埋假分数。
 
+- [2026-10-11 MemoryBench NFCats / MiniMax-M2.5](2026-10-11-memorybench-nfcats-smoke-minimax-m2.5.md)：无记忆与 BM25-M 各 10 题，两组均为 4.5/5；链路冒烟，未接入 Edges Project Memory。
+
 LoCoMo 报告都是 Evaluation Smoke，不是 Benchmark Proof，也不是 Project Memory proof。
 
 - **Preferred official path** (`evaluation/run_locomo_official.py`): `{date}-locomo-official-smoke-{model}.md` / `.json`。F1 来自 submodule 的 `task_eval/evaluation.py`。

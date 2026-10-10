@@ -4,5 +4,6 @@
 
 - **Preferred official path:** [`../run_locomo_official.py`](../run_locomo_official.py) via the [`../third_party/locomo`](../third_party/locomo) submodule. Official `task_eval/evaluate_qa.py` + `evaluation.py` F1. Evaluation Smoke, not Benchmark Proof / not Project Memory proof.
 - [`locomo-smoke/`](locomo-smoke/README.md)： **legacy hand-port** of F1 + truncated context (PR #70). Kept for history and existing reports. New runs should use the official submodule path.
+- [`memorybench-smoke/`](memorybench-smoke/README.md)：固定官方 MemoryBench 代码和 NFCats 数据的小规模无记忆 / BM25-M 对照，记录真实请求、检索、回答与原生评分；未接入 Edges Project Memory。
 
 约定见上一级 [README](../README.md)。
