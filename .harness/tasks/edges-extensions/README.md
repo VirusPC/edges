@@ -27,4 +27,5 @@ edges CLI/脚手架/发布/鉴权等平台层。
 - [edges\_cli\_scope](<backlog/2026-10-08--%E9%83%A8%E7%BD%B2%E8%83%BD%E5%8A%9B%E5%B0%81%E8%A3%85%E8%BF%9B-edges-CLI%E6%94%AF%E6%8C%81%E4%BB%BB%E6%84%8F-scope-%E9%83%A8%E7%BD%B2/INDEX.md>) — 现在部署逻辑写死在 GitHub Actions 的 deploy.yml 和服务器脚本里，只能部署本仓固定的几个站点；想把它收进 edges CLI，任意 scope 下都能部署自己的内容。
 - [shelve\_cli\_pr\_bugbot\_auto\_trigger](<todo/2026-10-11--%E6%90%81%E7%BD%AE%E5%8F%AA%E8%AE%A9-CLI-%E7%9A%84-PR-%E8%87%AA%E5%8A%A8%E8%A7%A6%E5%8F%91-Bugbot/INDEX.md>) — Bugbot 不能按目录自动跑；Action、PAT、云端 Agent 身份都不通，先记结论，另议方案。
 - [厘清\_harness\_模块在知识流转中的位置](<backlog/2026-10-11--%E5%8E%98%E6%B8%85-Harness-%E6%A8%A1%E5%9D%97%E5%9C%A8%E7%9F%A5%E8%AF%86%E6%B5%81%E8%BD%AC%E4%B8%AD%E7%9A%84%E4%BD%8D%E7%BD%AE/INDEX.md>) — Harness 模块在增多，但各模块在知识流转里该站哪一格还不够清楚。要把这条流转关系设计清楚，让新模块也能对号入座，而不是各自堆目录。
+- [探索新的\_cr\_方式](<backlog/2026-10-11--%E6%8E%A2%E7%B4%A2%E6%96%B0%E7%9A%84-CR-%E6%96%B9%E5%BC%8F/INDEX.md>) — 在 Cursor Bugbot 之外，为 edges 找到可控、可试点的自动/半自动 PR Code Review 方式。
 <!-- project-entries-local:end -->
