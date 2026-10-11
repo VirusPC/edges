@@ -180,6 +180,44 @@ export async function listProjectIds(
   });
 }
 
+/** JS realpath keeps caller casing on macOS; native realpath is the directory-entry spelling used by node paths. */
+export type TaskBoardRealpath = {
+  javascript(target: string): string;
+  native(target: string): string;
+};
+
+const systemTaskBoardRealpath: TaskBoardRealpath = {
+  javascript: (target) => realpathSync(target),
+  native: (target) => realpathSync.native(target),
+};
+
+let taskBoardRealpath: TaskBoardRealpath = systemTaskBoardRealpath;
+
+/** Tests simulate a case-insensitive scope alias. Production calls keep the system implementation. */
+export function useTaskBoardRealpathForTests(realpath?: TaskBoardRealpath): void {
+  taskBoardRealpath = realpath ?? systemTaskBoardRealpath;
+}
+
+/** Directory-entry spelling shared with node.path. JS realpath keeps caller casing on macOS. */
+export function nativeTaskPath(target: string): string {
+  return taskBoardRealpath.native(target);
+}
+
+function scopeNodeRoot(repoPath: BoardTarget): string {
+  return nativeTaskPath(scopeDir(repoPath));
+}
+
+export function relativePathInsideScope(scopeRoot: string, file: string): string {
+  const rel = path.relative(scopeRoot, file);
+  if (!rel || !isWithinPath(file, scopeRoot)) {
+    throw new TasksError(
+      "VALIDATION_ERROR",
+      "path is outside selected task board",
+    );
+  }
+  return rel;
+}
+
 export type ListedTask = {
   item: TaskListItem;
   doc: TaskDoc;
@@ -200,19 +238,13 @@ async function readListItem(
   )
     rel = legacyTaskRelPath(project, status, stem, repoPath);
   const sidecarRel = sidecarRelPath(project, status, stem, repoPath);
-  if (providedNode) {
-    const actual = path.relative(
-      realpathSync(scopeDir(repoPath)),
-      providedNode.path,
-    );
-    if (actual && !actual.startsWith("..")) rel = actual;
-  }
   const abs = path.join(scopeDir(repoPath), rel);
   const sidecarAbs = path.join(scopeDir(repoPath), sidecarRel);
   const markdown = providedNode?.serialize() ?? await fs.readFile(abs);
-  const node = providedNode ?? new TaskNode(realpathSync.native(abs)).parse(markdown);
-  rel = path.relative(realpathSync(scopeDir(repoPath)), node.path);
-  taskLocationOf(node, realpathSync(scopeDir(repoPath)));
+  const node = providedNode ?? new TaskNode(taskBoardRealpath.native(abs)).parse(markdown);
+  const scopeRoot = scopeNodeRoot(repoPath);
+  rel = relativePathInsideScope(scopeRoot, node.path);
+  taskLocationOf(node, scopeRoot);
   const parsed = parseTaskDoc(markdown);
   const doc = taskDocFromParsed(parsed);
   const resolvedProject = assertProjectDualWrite(
@@ -252,7 +284,7 @@ export async function listTasksWithDocs(
   fs: BoardFs,
 ): Promise<Array<TaskListItem & { doc: TaskDoc }>> {
   const target = typeof repoPath === 'string' ? taskBoardLocation(repoPath, 'domain') : repoPath;
-  const root = realpathSync(scopeDir(repoPath));
+  const root = scopeNodeRoot(repoPath);
   const filtered = await (await taskBoardQuery(target))
     .filter((node): node is TaskNode => node instanceof TaskNode)
     .map(node => ({ node, location: taskLocationOf(node, root) }))
