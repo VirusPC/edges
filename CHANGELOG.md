@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 文档与系统
 
-- **CLI 改动自动请 Bugbot 审查：** 改到 `extensions/cli/` 的正式 pull request 会收到一条 `bugbot run` 评论，Cursor Bugbot 按该目录的审查清单看这次增量。本仓库的 Bugbot 只在评论点名时才跑，其他目录的 pull request 需要审查时手动评论 `bugbot run`。草稿和 fork 不会自动点名。
+- **CLI 改动自动请 Bugbot 审查：** 改到 `extensions/cli/` 的正式 pull request 会收到一条 `bugbot run` 评论，Cursor Bugbot 按该目录的审查清单看这次增量。本仓库的 Bugbot 只在评论点名时才跑，而且不认 `github-actions[bot]` 的评论（2026-10-11 在 PR #209 上确认）。自动点名使用仓库 Secret `BUGBOT_TRIGGER_TOKEN`：一张只覆盖 `VirusPC/edges`、具备 Pull requests 与 Issues 读写的 fine-grained PAT，评论显示为 VirusPC 本人。Secret 未配置或 fork 读不到时跳过，不报错。token 过期后换一张同样范围的 PAT，并更新这个 Secret。其他目录的 pull request 需要审查时手动评论 `bugbot run`。
 
 - **README 改为对外门面：** 根 README 现在先回答外部访客「这是什么、能不能拿去用」：标语「harness 任何目录。你的大脑，也是一个目录。」、六条要点、一张知识闭环图、照着就能跑通的快速开始（本地打包安装 `edges` CLI 后对任意仓库执行 `edges init`），以及本仓的目录地图。原来写在 README 里的内容标准下放到所属目录：Edge 准入与演化在 `edges/README.md`，归档与附件规则在新的 `archive/README.md`；原「理念」「系统实现」原文保存在 `docs/architecture.md`。
 

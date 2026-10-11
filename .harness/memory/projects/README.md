@@ -104,5 +104,5 @@ format: ordinary
 - [Task Project 组织清单用 README](<project_task_project_readme_org_lists/INDEX.md>) — 改 Task Project / 看板列表或 physicalParent 时：Task Project 与看板项目列表用 README\+project\-entries；新项目默认 README 种子，勿伪造 AGENTS；任务叶子的物理父是项目 README。
 - [层 AGENTS 挂材料 README，list 顺着 children](<project_list_all_forest/INDEX.md>) — 改 tasks 登记、根 AGENTS 或 list 时：层入口挂材料 README（尤其 .harness/tasks/README.md），条目留在 project\-entries。类型目录空 AGENTS 桩删除。不另写 walker。\-\-super 仍只接 scope 目录。
 - [各模块 init 只创建本模块的材料](<project_init_module_boundary/INDEX.md>) — 改 edges init 或域 init 时：memory 不顺手建其他模块；每个有材料的模块只初始化自己。
-- [CLI 改动才自动点名 Bugbot](<project_bugbot_comment_trigger_for_cli/INDEX.md>) — 讨论 Bugbot 何时会跑、或改 CLI 自动审查时打开：后台只在评论 bugbot run 或 cursor review 时才跑，不能按目录触发；CLI 正式同源 PR 由工作流自动点名。2026\-10\-11 PR \#209 上 github\-actions\[bot\] 的评论在约 6 分钟内没有引出 Bugbot 检查。
+- [CLI 改动才自动点名 Bugbot](<project_bugbot_comment_trigger_for_cli/INDEX.md>) — 讨论 Bugbot 何时会跑、或改 CLI 自动审查时打开：后台只在评论点名时才跑，且不认机器人评论（PR \#209 已证实）。CLI 正式 PR 用仓库 Secret BUGBOT\_TRIGGER\_TOKEN（仅 VirusPC/edges 的 Pull requests 与 Issues 读写 PAT）以 VirusPC 身份评论 bugbot run。Secret 为空则成功跳过。token 过期要轮换。
 <!-- project-entries-local:end -->
