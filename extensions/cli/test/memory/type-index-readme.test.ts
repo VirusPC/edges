@@ -6,6 +6,7 @@ import {
   readFileSync,
   rmSync,
   writeFileSync,
+  realpathSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -23,7 +24,7 @@ import { layerTypeSpecs } from "../../src/services/memory/types.js";
 import { memoryNodes } from "../../src/services/memory/service.js";
 
 function fixture(t: any) {
-  const dir = mkdtempSync(join(tmpdir(), "type-index-readme-"));
+  const dir = mkdtempSync(join(realpathSync(tmpdir()), "type-index-readme-"));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   return dir;
 }

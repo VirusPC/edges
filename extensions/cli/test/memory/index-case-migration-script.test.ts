@@ -116,9 +116,14 @@ test("apply is idempotent", async (t) => {
 });
 
 test("a sibling INDEX.md is a conflict and nothing is changed", async (t) => {
-  const files = base();
-  files["guide/notes/beta/INDEX.md"] = "# other\n";
-  const root = fixture(t, files);
+  const root = fixture(t, base());
+  try {
+    fs.writeFileSync(path.join(root, "guide/notes/beta/INDEX.md"), "# other\n", { flag: "wx" });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
+    t.skip("Requires a filesystem that can store INDEX.md and index.md as separate files");
+    return;
+  }
   const plan = planIndexCaseMigration(root);
   assert.equal(plan.conflicts.length, 1);
   assert.match(plan.conflicts[0]!, /guide\/notes\/beta/);

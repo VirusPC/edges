@@ -306,7 +306,7 @@ test("doctor repairs independent valid index while retaining invalid sibling and
     result.findings.some((f) => f.code === "stale-index" && f.path === index),
   );
   assert.ok(result.repaired.some((f) => f.includes(index)));
-  assert.match(read(root, index), /project_new\/index.md/);
+  assert.match(read(root, index), /project_new\/INDEX.md/);
   assert.equal(read(root, "broken/AGENTS.md"), broken);
   assert.match(read(root, "AGENTS.md"), /broken\/AGENTS.md/);
   assert.ok(

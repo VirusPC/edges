@@ -1,4 +1,3 @@
-import { writeIndexedTaskFixture as writeFile } from "./helpers.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
@@ -6,6 +5,7 @@ import {
   mkdir,
   readFile,
   rm,
+  writeFile,
 } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -147,9 +147,9 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
   const repo = await mkdtemp(path.join(tmpdir(), "edges-proj-"));
   try {
     const taskRel = "tasks/_default/backlog/2026-09-13--keep/index.md";
-    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.dirname(path.join(repo, taskRel)), { recursive: true });
     await writeFile(path.join(repo, taskRel), "# keep\n", "utf8");
-    await mkdir(path.join(repo, "tasks/cli/todo"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/cli/todo/2026-09-13--other"), { recursive: true });
     await writeFile(
       path.join(repo, "tasks/cli/todo/2026-09-13--other/index.md"),
       "---\nmetadata:\n  edges-task-project: cli\n  edges-tasks-status: todo\n---\n\nx\n",
@@ -162,7 +162,10 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
       "utf8",
     );
 
-    const records = await ensureProjectMetadata(repo, nodeBoardWriter());
+    // Metadata must be created by the operation under test, not the fixture helper.
+    await assert.rejects(readFile(path.join(repo, "tasks/_default/README.md")));
+    await assert.rejects(readFile(path.join(repo, "tasks/cli/README.md")));
+    const records = await ensureProjectMetadata(repo, nodeBoardWriter(), undefined, ["cli"]);
     assert.equal(records[0]?.project, "default");
     assert.equal(
       records.some((item) => item.project === "cli"),
@@ -170,22 +173,26 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
     );
 
     const seeded = await readFile(
-      path.join(repo, "tasks/_default/AGENTS.md"),
+      path.join(repo, "tasks/_default/README.md"),
       "utf8",
     );
     assert.match(seeded, /^# Default\n/);
-    const cliAgents = await readFile(
-      path.join(repo, "tasks/cli/AGENTS.md"),
+    const cliReadme = await readFile(
+      path.join(repo, "tasks/cli/README.md"),
       "utf8",
     );
-    assert.match(cliAgents, /^# cli\n/);
-    assert.match(cliAgents, /Task Project cli\./);
+    assert.match(cliReadme, /^# cli\n/);
+    assert.match(cliReadme, /Task Project cli\./);
 
     const root = await readFile(rootAgents, "utf8");
     assert.match(root, /- keep-index/);
     assert.doesNotMatch(root, /task-projects:/);
-    const { AgentsNode } = await import("../../../src/domain/models/internal/agents-node.js");
-    assert.equal(new AgentsNode(rootAgents).parse(root).localChildren.length, 2);
+    const { ReadmeNode } = await import("../../../src/domain/models/readme/readme-node.js");
+    const rootReadme = path.join(repo, "tasks/README.md");
+    const entries = new ReadmeNode(rootReadme).parse(await readFile(rootReadme, "utf8"));
+    assert.deepEqual(entries.localChildren.map(ref => path.basename(path.dirname(ref.id))).sort(), ["_default", "cli"]);
+    await assert.rejects(readFile(path.join(repo, "tasks/_default/AGENTS.md")));
+    await assert.rejects(readFile(path.join(repo, "tasks/cli/AGENTS.md")));
 
     const task = await readFile(path.join(repo, taskRel), "utf8");
     assert.equal(task, "# keep\n");
@@ -194,13 +201,13 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
   }
 });
 
-test("ensureProjectMetadata skipId leaves that AGENTS.md missing", async () => {
+test("ensureProjectMetadata skipId leaves that README.md missing", async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-proj-"));
   try {
     await mkdir(path.join(repo, "tasks"), { recursive: true });
     await ensureProjectMetadata(repo, nodeBoardWriter(), "default");
     await assert.rejects(
-      readFile(path.join(repo, "tasks/_default/AGENTS.md"), "utf8"),
+      readFile(path.join(repo, "tasks/_default/README.md"), "utf8"),
     );
   } finally {
     await rm(repo, { recursive: true, force: true });

@@ -178,7 +178,7 @@ body
     assert.equal(items[0]?.project, "cli");
     assert.equal(
       items[0]?.path,
-      "tasks/cli/backlog/2026-09-16--named/index.md",
+      "tasks/cli/backlog/2026-09-16--named/INDEX.md",
     );
   } finally {
     await rm(repo, { recursive: true, force: true });

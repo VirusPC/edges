@@ -17,13 +17,14 @@ import {
   writeFile as fixtureRawWriteFile,
   rm,
 } from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { indexTaskFixtureBoard } from "./utils/helpers.js";
 import { run } from "../../src/program.js";
 
 test("run tasks list returns JSON tasks from EDGES_REPO", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const dir = path.join(repo, "tasks/_default/backlog");
     await mkdir(dir, { recursive: true });
@@ -62,7 +63,7 @@ x
 });
 
 test("run tasks list --project default --project cli ANDs with --status", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     await run(["--super", "tasks", "create", "--title", "A", "--status", "backlog"], {
@@ -70,8 +71,7 @@ test("run tasks list --project default --project cli ANDs with --status", async 
     });
     await run(
       [
-        "tasks",
-        "--purpose", "domain",
+        "--super", "tasks",
         "create",
         "--title",
         "B",
@@ -84,8 +84,7 @@ test("run tasks list --project default --project cli ANDs with --status", async 
     );
     await run(
       [
-        "tasks",
-        "--purpose", "domain",
+        "--super", "tasks",
         "create",
         "--title",
         "C",
@@ -98,8 +97,7 @@ test("run tasks list --project default --project cli ANDs with --status", async 
     );
     const result = await run(
       [
-        "tasks",
-        "--purpose", "domain",
+        "--super", "tasks",
         "list",
         "--status",
         "todo",
@@ -125,7 +123,7 @@ test("run tasks list --project default --project cli ANDs with --status", async 
 });
 
 test("run tasks get returns the task body", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
@@ -162,7 +160,7 @@ hello body
 });
 
 test("run tasks get missing exits 1 with TASK_NOT_FOUND", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     await indexTaskFixtureBoard(path.join(repo, "tasks"));
@@ -178,7 +176,7 @@ test("run tasks get missing exits 1 with TASK_NOT_FOUND", async () => {
 });
 
 test("run tasks create is JSON and skips git", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const result = await run(["--super", "tasks", "create", "--title", "From CLI"], {
@@ -198,7 +196,7 @@ test("run tasks create is JSON and skips git", async () => {
 });
 
 test("run tasks create --priority high returns JSON priority and writes the field", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const env = { ...process.env, EDGES_REPO: repo };
@@ -225,7 +223,7 @@ test("run tasks create --priority high returns JSON priority and writes the fiel
 });
 
 test("run tasks create --project cli returns JSON project and writes the field", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(
@@ -248,7 +246,7 @@ test("run tasks create --project cli returns JSON project and writes the field",
 });
 
 test("run tasks create --project _default is VALIDATION_ERROR and writes nothing", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const result = await run(
       ["--super", "tasks", "create", "--title", "Pri", "--project", "_default"],
@@ -264,7 +262,7 @@ test("run tasks create --project _default is VALIDATION_ERROR and writes nothing
 });
 
 test("run tasks create without --project JSON project is default", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const result = await run(["--super", "tasks", "create", "--title", "None"], {
       env: { ...process.env, EDGES_REPO: repo },
@@ -278,7 +276,7 @@ test("run tasks create without --project JSON project is default", async () => {
 });
 
 test("run tasks create --priority P0 is VALIDATION_ERROR and writes nothing", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const result = await run(
@@ -297,7 +295,7 @@ test("run tasks create --priority P0 is VALIDATION_ERROR and writes nothing", as
 });
 
 test("run tasks create without --priority JSON priority is none", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const result = await run(["--super", "tasks", "create", "--title", "From CLI"], {
@@ -317,7 +315,7 @@ test("run tasks update without flags is VALIDATION_ERROR", async () => {
 });
 
 test("run tasks update --priority high JSON and in-place path", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
@@ -349,7 +347,7 @@ test("run tasks update --priority Urgent is VALIDATION_ERROR", async () => {
 });
 
 test("run tasks update --project cli JSON and new path", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(
@@ -381,7 +379,7 @@ test("run tasks update --project Default is VALIDATION_ERROR", async () => {
 });
 
 test("run tasks status returns command status", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
@@ -412,7 +410,7 @@ body
 });
 
 test("run tasks runs --output json lists derived run-id", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   const stem = "2026-09-13--with-run";
   try {
     const dir = path.join(repo, "tasks/_default/done");
@@ -466,7 +464,7 @@ body
 });
 
 test("run tasks runs missing task is TASK_NOT_FOUND", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     await indexTaskFixtureBoard(path.join(repo, "tasks"));
@@ -481,7 +479,7 @@ test("run tasks runs missing task is TASK_NOT_FOUND", async () => {
 });
 
 test("run tasks run-messages returns notes for a stable run-id", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   const stem = "2026-09-13--msg";
   try {
     const dir = path.join(repo, "tasks/_default/in_progress");
@@ -551,7 +549,7 @@ test("run tasks run-messages 1 without --task is VALIDATION_ERROR", async () => 
 });
 
 test("run tasks run-messages unknown id is RUN_NOT_FOUND", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   const stem = "2026-09-13--msg";
   try {
     const dir = path.join(repo, "tasks/_default/todo");
@@ -590,7 +588,7 @@ body
 });
 
 async function seedPriorities() {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   const docs: Array<{
     status: "backlog" | "todo";
     stem: string;
@@ -645,8 +643,7 @@ test("run tasks list --priority urgent --priority high --sort priority", async (
   try {
     const result = await run(
       [
-        "tasks",
-        "--purpose", "domain",
+        "--super", "tasks",
         "list",
         "--priority",
         "urgent",
@@ -684,7 +681,7 @@ test("run tasks list --priority P0 is VALIDATION_ERROR", async () => {
 });
 
 test("run tasks status rejects --project and does not move", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
@@ -725,7 +722,7 @@ body
 });
 
 test("run tasks status JSON has no project key and stays under _default", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(
@@ -744,13 +741,12 @@ test("run tasks status JSON has no project key and stays under _default", async 
 });
 
 test("run tasks project create/list/get/update and update --project keeps status and priority", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     const createdProj = await run(
       [
-        "tasks",
-        "--purpose", "domain",
+        "--super", "tasks",
         "project",
         "create",
         "cli",
@@ -793,8 +789,7 @@ test("run tasks project create/list/get/update and update --project keeps status
 
     const createdTask = await run(
       [
-        "tasks",
-        "--purpose", "domain",
+        "--super", "tasks",
         "create",
         "--title",
         "Keep fields",
@@ -830,8 +825,7 @@ test("run tasks project create/list/get/update and update --project keeps status
 
     const badSlug = await run(
       [
-        "tasks",
-        "--purpose", "domain",
+        "--super", "tasks",
         "project",
         "create",
         "_default",
@@ -850,7 +844,7 @@ test("run tasks project create/list/get/update and update --project keeps status
 });
 
 test("run tasks status rejects --priority and does not move", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     const dir = path.join(repo, "tasks/_default/todo");
     await mkdir(dir, { recursive: true });
