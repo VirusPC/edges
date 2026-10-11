@@ -69,7 +69,7 @@ init 的主文件是 `services/init/service.ts`。`edges init` 只从这份文�
 
 notes、projects、skills、memory、tasks、artifacts、forest 的 commands 都只调用各自的 `service.ts`。tasks list 的看板目录名、README 位置与是否存在由 `services/tasks/service.ts` 回答，命令不读挂载表。审阅页仍负责读输入、选输出路径和写 HTML。artifacts 的 token 配置写入仍在 command 侧。调用点收口了，list 的遍历顺序没有改写。
 
-[解耦 CLI commands 与 Service](../../.harness/tasks/edges-cli-platform/done/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md) 记录了这层入口约定。`services/tasks/result.ts` 仍组装命令运行时（地点、读写和时钟），审阅页命令仍负责读输入、选输出路径和写 HTML。
+[解耦 CLI commands 与 Service](../../.harness/tasks/edges-extensions/done/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md) 记录了这层入口约定。`services/tasks/result.ts` 仍组装命令运行时（地点、读写和时钟），审阅页命令仍负责读输入、选输出路径和写 HTML。
 
 详细设计按职责分开阅读：
 
