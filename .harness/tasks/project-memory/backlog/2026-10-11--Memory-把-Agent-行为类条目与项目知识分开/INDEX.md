@@ -2,11 +2,11 @@
 metadata:
   edges-type: task
   edges-task-project: project-memory
-  edges-updated-at: '2026-10-11T10:02:16.727Z'
+  edges-updated-at: '2026-10-11T11:10:47.150Z'
   edges-title: Memory 把 Agent 行为类条目与项目知识分开
   edges-tasks-status: backlog
   edges-task-priority: none
-name: memory_agent
+name: memory_把_agent_行为类条目与项目知识分开
 description: >-
   项目记忆里，纠正 Agent
   行为的规则和项目本身的事实、约定混在一起；模型升级或换模型后，前者可能过时，却很难单独找出来清理。要做到行为类条目能单独识别、复查和整块删除，项目知识不受影响。
