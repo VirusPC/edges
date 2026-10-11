@@ -37,7 +37,7 @@ function write(root: string, rel: string, source: string): void {
 /** Maintenance board whose Task Projects live on the board README content face. */
 async function readmeBoard(): Promise<string> {
   const repo = fs.realpathSync(await mkdtemp(path.join(tmpdir(), "edges-readme-projects-")));
-  write(repo, "AGENTS.md", scopeAgents("- [Tasks](.harness/tasks/AGENTS.md) — board"));
+  write(repo, "AGENTS.md", scopeAgents("- [Tasks](.harness/tasks/README.md) — board"));
   write(repo, ".harness/tasks/AGENTS.md", scopeAgents());
   write(
     repo,
@@ -49,9 +49,9 @@ async function readmeBoard(): Promise<string> {
   return repo;
 }
 
-async function cli(repo: string, args: string[]) {
+async function cli(repo: string, args: string[], superScope = false) {
   const { run } = await import("../../src/program.js");
-  const result = await run(["tasks", ...args], { env: { EDGES_SCOPE: repo } });
+  const result = await run(["--scope", repo, ...(superScope ? ["--super"] : []), "tasks", ...args], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   return JSON.parse(result.stdout);
 }
@@ -152,21 +152,20 @@ test("domain board: new project and its tasks live in README org lists; legacy A
   write(repo, "AGENTS.md", scopeAgents("- [Tasks](tasks/AGENTS.md) — board"));
   write(repo, "tasks/AGENTS.md", scopeAgents("- [Old](old/README.md) — old work"));
   write(repo, "tasks/old/README.md", projectReadme("Old", "old work"));
-  const args = ["--purpose", "domain"];
-  const created = await cli(repo, [...args, "project", "create", "cli", "--title", "CLI", "--description", "cli work"]);
+  const created = await cli(repo, ["project", "create", "cli", "--title", "CLI", "--description", "cli work"], true);
   assert.equal(created.path, "tasks/cli/README.md");
   const board = await read(repo, "tasks/AGENTS.md");
   assert.doesNotMatch(board, /README\.md/);
   const list = await read(repo, "tasks/README.md");
   assert.match(list, /\[CLI\]\(<?cli\/README\.md>?\) — cli work/);
   assert.match(list, /\[Old\]\(<?old\/README\.md>?\) — old work/);
-  const projects = await cli(repo, [...args, "project", "list"]);
+  const projects = await cli(repo, ["project", "list"], true);
   assert.deepEqual(projects.projects.map((p: any) => [p.project, p.path]).sort(), [
     ["cli", "tasks/cli/README.md"],
     ["default", "tasks/_default/README.md"],
     ["old", "tasks/old/README.md"],
   ]);
-  const task = await cli(repo, [...args, "create", "--title", "Domain task", "--project", "cli"]);
+  const task = await cli(repo, ["create", "--title", "Domain task", "--project", "cli"], true);
   assert.ok((await read(repo, "tasks/cli/README.md")).includes(task.stem));
   assert.doesNotMatch(await read(repo, "tasks/AGENTS.md"), new RegExp(task.stem));
 });

@@ -2,13 +2,14 @@ import { indexTaskFixtureBoard, writeFixtureIndex } from "./helpers.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../../src/program.js";
 import { generateTasksSite } from "../../../src/services/tasks/generate-site.js";
 
 test("generateTasksSite writes HTML with review payload and created title", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-site-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-site-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(
@@ -30,7 +31,7 @@ test("generateTasksSite writes HTML with review payload and created title", asyn
 });
 
 test("aggregate site preserves duplicate stems with portable scope/purpose/project identities", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-site-all-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-site-all-"));
   try {
     const { execFileSync } = await import("node:child_process");
     execFileSync("git", ["init", "-q", repo]);
@@ -40,9 +41,8 @@ test("aggregate site preserves duplicate stems with portable scope/purpose/proje
         [
           "--scope",
           repo,
+          ...(purpose === "domain" ? ["--super"] : []),
           "tasks",
-          "--purpose",
-          purpose,
           "create",
           "--title",
           "Same",
@@ -99,7 +99,7 @@ test("aggregate site preserves duplicate stems with portable scope/purpose/proje
 
 test("standalone scope aggregate resolves nested sources relative to selected root", async () => {
   const { mkdir, writeFile } = await import("node:fs/promises");
-  const root = await mkdtemp(path.join(tmpdir(), "edges-standalone-"));
+  const root = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-standalone-"));
   try {
     const child = path.join(root, ".harness/evaluation");
     await mkdir(child, { recursive: true });

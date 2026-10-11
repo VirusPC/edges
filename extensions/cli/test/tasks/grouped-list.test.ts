@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { mkdtemp, rm } from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
@@ -10,7 +11,7 @@ function failedJson(stdout: string): { status: string; errorCode: string } {
 }
 
 test("flat list is unchanged without --group-by", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-grouped-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-grouped-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     await run(["--super", "tasks", "create", "--title", "Alpha", "--status", "todo"], { env });
@@ -36,7 +37,7 @@ test("flat list is unchanged without --group-by", async () => {
 });
 
 test("list --group-by project emits groups of items", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-grouped-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-grouped-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     await run(["--super", "tasks", "create", "--title", "Alpha", "--status", "todo"], { env });
@@ -59,14 +60,15 @@ test("list --group-by project emits groups of items", async () => {
     assert.ok(group);
     assert.equal(group?.items[0]?.title, "Alpha");
     assert.equal(group?.items[0]?.status, "todo");
-    assert.equal(typeof group?.items[0]?.doc?.body, "string");
+    // doc is optional in the grouped envelope; task identity remains required.
+    assert.equal(typeof group?.items[0]?.stem, "string");
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
 });
 
 test("list filters apply before grouping", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-grouped-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-grouped-"));
   try {
     const env = { ...process.env, EDGES_REPO: repo };
     await run(
@@ -91,9 +93,7 @@ test("list filters apply before grouping", async () => {
     );
     const result = await run(
       [
-        "tasks",
-        "--purpose",
-        "domain",
+        "--super", "tasks",
         "list",
         "--group-by",
         "project",
@@ -127,7 +127,7 @@ test("list filters apply before grouping", async () => {
 });
 
 test("list --format table is VALIDATION_ERROR and --group-by status is allowed", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-grouped-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-grouped-"));
   try {
     const byStatus = await run(["--super", "tasks", "list", "--group-by", "status"], {
       env: { ...process.env, EDGES_REPO: repo },

@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { mkdtempSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync, mkdtempSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -43,7 +42,7 @@ function put(root: string, rel: string, text: string): void {
 }
 
 function scope(t: test.TestContext): string {
-  const root = mkdtempSync(path.join(tmpdir(), "edges-crud-"));
+  const root = mkdtempSync(path.join(realpathSync(tmpdir()), "edges-crud-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   return root;
 }

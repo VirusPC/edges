@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, readdirSync, rmSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -19,7 +19,7 @@ import { buildSystemForest } from "../../src/services/forest/service.js";
 import { buildSystemForest as buildSystemForestFromModule } from "../../src/services/node/system-forest-service.js";
 
 test("note and project services reject paths outside their leaf folder", async () => {
-  const root = mkdtempSync(path.join(tmpdir(), "edges-domain-service-"));
+  const root = mkdtempSync(path.join(realpathSync(tmpdir()), "edges-domain-service-"));
   try {
     const env = { EDGES_SCOPE: root };
     await assert.rejects(() => getNote(env, "projects/x/INDEX.md"), /note path must be notes\/<stem>\/INDEX\.md/);

@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { access, mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
@@ -10,9 +11,9 @@ function failedJson(stdout: string): { status: string; errorCode: string } {
 }
 
 test("run tasks list [--status]", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
+    await writeFile(path.join(repo, "AGENTS.md"), "# Scope\n");
     const listed = await run(["tasks", "list"], { env: { ...process.env, EDGES_REPO: repo } });
     assert.equal(listed.exitCode, 0);
     assert.equal(JSON.parse(listed.stdout).command, "list");
@@ -33,7 +34,7 @@ test("run tasks list rejects Run status values", async () => {
 });
 
 test("run tasks get/create/update/status/runs/run-messages", async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
     await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
     const env = { ...process.env, EDGES_REPO: repo };
@@ -149,7 +150,7 @@ test("run tasks classify is VALIDATION_ERROR", async () => {
 });
 
 test("run tasks project review-page --from fixture writes html and returns path", async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), "edges-rp-cli-"));
+  const dir = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-rp-cli-"));
   try {
     const fixture = path.join(dir, "in.json");
     const out = path.join(dir, "out.html");
@@ -186,7 +187,7 @@ test("run tasks project review-page --from fixture writes html and returns path"
 });
 
 test("run tasks project review-page --from bad json is VALIDATION_ERROR", async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), "edges-rp-bad-"));
+  const dir = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-rp-bad-"));
   try {
     const fixture = path.join(dir, "bad.json");
     await writeFile(fixture, "{", "utf8");
@@ -206,7 +207,7 @@ test("run tasks project review-page --from bad json is VALIDATION_ERROR", async 
 });
 
 test("run tasks project review-page --from missing file is VALIDATION_ERROR", async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), "edges-rp-miss-"));
+  const dir = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-rp-miss-"));
   try {
     const missing = path.join(dir, "nope.json");
     const result = await run(["tasks", "project", "review-page", "--from", missing], {
@@ -223,7 +224,7 @@ test("run tasks project review-page --from missing file is VALIDATION_ERROR", as
 });
 
 test("run tasks project review-page --from - writes html from stdinText", async () => {
-  const dir = await mkdtemp(path.join(tmpdir(), "edges-rp-stdin-"));
+  const dir = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-rp-stdin-"));
   try {
     const out = path.join(dir, "out.html");
     const result = await run(

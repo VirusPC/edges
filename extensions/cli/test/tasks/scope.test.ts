@@ -39,7 +39,7 @@ test("explicit nested scope separates both boards and co-moves Task/Run without 
   try {
     const env = { EDGES_REPO: root, EDGES_SCOPE: root };
     const call = (purpose: string, args: string[]) =>
-      run(["--scope", child, "tasks", "--purpose", purpose, ...args], { env });
+      run(["--scope", child, ...(purpose === "domain" ? ["--super"] : []), "tasks", ...args], { env });
     let domainPath = "";
     for (const purpose of ["domain", "maintenance"]) {
       const result = await call(purpose, [
@@ -141,8 +141,6 @@ test("project reads do not initialize absent board and manual AGENTS content sur
         "--scope",
         child,
         "tasks",
-        "--purpose",
-        "maintenance",
         "project",
         "list",
       ],
@@ -251,16 +249,18 @@ test("render-only review-page works outside a repository and explicit fresh scop
   }
 });
 
-test("project list rejects unindexed project directories without creating metadata", async () => {
+test("project list ignores unindexed project directories without creating metadata", async () => {
   const { root, child } = await fixture();
   try {
     await mkdir(path.join(child, "tasks/cli/todo"), { recursive: true });
     const result = await run(["--scope", child, "--super", "tasks", "project", "list"], {
       env: {},
     });
-    assert.equal(result.exitCode, 2, result.stdout);
-    assert.match(JSON.parse(result.stdout).reason, /index missing.*migrate/i);
+    assert.equal(result.exitCode, 0, result.stdout);
+    assert.deepEqual(JSON.parse(result.stdout).projects, []);
     await assert.rejects(access(path.join(child, "tasks/cli/AGENTS.md")));
+    await assert.rejects(access(path.join(child, "tasks/cli/README.md")));
+    await assert.rejects(access(path.join(child, "tasks/README.md")));
     await assert.rejects(access(path.join(child, "tasks/_default")));
   } finally {
     await rm(root, { recursive: true, force: true });

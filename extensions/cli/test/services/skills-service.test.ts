@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { managedSkillFile, resolveSkill } from "../../src/services/skills/service.js";
@@ -26,7 +26,7 @@ test("managed skill files use kebab-case names under skills/managed", () => {
 });
 
 test("resolveSkill rejects paths outside the managed root and unknown names", async (t) => {
-  const root = mkdtempSync(path.join(tmpdir(), "edges-skill-resolve-"));
+  const root = mkdtempSync(path.join(realpathSync(tmpdir()), "edges-skill-resolve-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const agents = path.join(root, "AGENTS.md");
   mkdirSync(root, { recursive: true });

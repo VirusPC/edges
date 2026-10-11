@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { mkdtempSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, mkdtempSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
@@ -30,7 +29,7 @@ function put(root: string, rel: string, text: string): void {
 }
 
 function scope(t: test.TestContext): string {
-  const root = mkdtempSync(path.join(tmpdir(), "edges-projects-"));
+  const root = mkdtempSync(path.join(realpathSync(tmpdir()), "edges-projects-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   return root;
 }

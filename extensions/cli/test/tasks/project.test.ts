@@ -14,6 +14,7 @@ import {
   rm,
   access,
 } from "node:fs/promises";
+import { realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { nodeBoardWriter } from "./utils/helpers.js";
@@ -26,7 +27,7 @@ import {
 } from "../../src/services/tasks/project-meta.js";
 
 async function virginRepo(): Promise<string> {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-proj-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-proj-"));
   await mkdir(path.join(repo, "tasks"), { recursive: true });
   return repo;
 }
@@ -75,10 +76,7 @@ test("create/list/get/update project metadata; create default on virgin board", 
     assert.equal(updated.description, "updated CLI");
     assert.equal(updated.title, "CLI");
 
-    const root = await readFile(path.join(repo, "tasks/AGENTS.md"), "utf8");
-    assert.doesNotMatch(root, /updated CLI/);
-    assert.doesNotMatch(root, /task-projects:/);
-    assert.match(root, /<!-- project-harness-local:start -->/);
+    await assert.rejects(access(path.join(repo, "tasks/AGENTS.md")));
     const list = await readFile(path.join(repo, "tasks/README.md"), "utf8");
     assert.match(list, /\[CLI\]\(<cli\/README\.md>\) — updated CLI/);
     assert.match(list, /<!-- project-entries-local:start -->/);
@@ -225,14 +223,12 @@ test("createProject rejects _default as the CLI id", async () => {
 
 test("project get returns the read-only listed project after ordinary task creation", async () => {
   const { run } = await import("../../src/program.js");
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-project-get-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-project-get-"));
   try {
     const env = { EDGES_SCOPE: repo };
     const created = await run(
       [
         "tasks",
-        "--purpose",
-        "maintenance",
         "create",
         "--title",
         "Fresh",
@@ -242,15 +238,11 @@ test("project get returns the read-only listed project after ordinary task creat
       { env },
     );
     assert.equal(created.exitCode, 0, created.stdout);
-    const indexedPaths = [".harness/tasks/cli/README.md", ".harness/tasks/AGENTS.md", ".harness/tasks/README.md", ".harness/tasks/_default/README.md"];
+    const indexedPaths = [".harness/tasks/cli/README.md", ".harness/tasks/README.md", ".harness/tasks/_default/README.md"];
     const before = await Promise.all(indexedPaths.map(rel => readFile(path.join(repo, rel), "utf8")));
-    const listed = JSON.parse(
-      (
-        await run(["tasks", "project", "list"], {
-          env,
-        })
-      ).stdout,
-    );
+    const listResult = await run(["tasks", "project", "list"], { env });
+    assert.equal(listResult.exitCode, 0, listResult.stdout + listResult.stderr);
+    const listed = JSON.parse(listResult.stdout);
     const got = await run(
       ["tasks", "project", "get", "cli"],
       { env },
@@ -277,6 +269,8 @@ test("README Task Projects are discovered, read and updated; a user-initialised 
     const writer = nodeBoardWriter();
     await createProject(repo, { project: "cli", title: "CLI", description: "edges CLI work" }, writer);
     const board = path.join(repo, "tasks/AGENTS.md");
+    // This case intentionally covers a user-initialised legacy system entry.
+    await writeFile(board, "# Tasks\n\n<!-- project-harness-local:start -->\n## 本层系统维护信息\n\n<!-- project-harness-local:end -->\n");
     await writeFile(path.join(repo, "tasks/legacy/AGENTS.md"), renderProjectAgents({ title: "Legacy", description: "legacy work" }));
     await fixtureRawWriteFile(
       board,
@@ -321,7 +315,7 @@ test("README Task Projects are discovered, read and updated; a user-initialised 
 
 test("maintenance board: CLI-created project is a README org list and never gets a seed AGENTS", async () => {
   const { run } = await import("../../src/program.js");
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-project-readme-"));
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-project-readme-"));
   try {
     const env = { EDGES_SCOPE: repo };
     const args = ["tasks"];
@@ -329,7 +323,9 @@ test("maintenance board: CLI-created project is a README org list and never gets
     const dir = path.join(repo, ".harness/tasks/cli");
     await assert.rejects(access(path.join(dir, "AGENTS.md")));
 
-    const listed = JSON.parse((await run([...args, "project", "list"], { env })).stdout);
+    const listResult = await run([...args, "project", "list"], { env });
+    assert.equal(listResult.exitCode, 0, listResult.stdout + listResult.stderr);
+    const listed = JSON.parse(listResult.stdout);
     const cli = listed.projects.find((p: any) => p.project === "cli");
     assert.equal(cli.path, ".harness/tasks/cli/README.md");
     const updated = await run([...args, "project", "update", "cli", "--description", "d2"], { env });

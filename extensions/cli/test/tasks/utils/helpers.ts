@@ -59,27 +59,27 @@ export function nodeBoardWriter(): BoardWriter {
   };
 }
 
-/** Legacy fixtures opt into the real index model; production never performs this scan. */
+/** Seed current README org lists for task fixtures; production never performs this scan. */
 export async function indexTaskFixtureBoard(board: string): Promise<void> {
-  const { AgentsNode } = await import("../../../src/domain/models/internal/agents-node.js");
+  const { ReadmeNode } = await import("../../../src/domain/models/readme/readme-node.js");
   const { TASK_STATUSES } = await import('../../../src/domain/models/tasks/types.js');
   const { isUserProjectSlug } = await import('../../../src/domain/models/tasks/project.js');
-  const { renderProjectAgents, seedTitleFor, seedDescriptionFor } = await import('../../../src/services/tasks/project-meta.js');
+  const { renderProjectReadme, seedTitleFor, seedDescriptionFor } = await import('../../../src/services/tasks/project-meta.js');
   const path = await import('node:path');
   const { realpath } = await import('node:fs/promises');
   board = await realpath(board);
   const loadIndex = async (file: string, fallback: string) => {
     let source = fallback;
     try { source = await readFile(file,'utf8'); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-    return new AgentsNode(file).parse(source);
+    return new ReadmeNode(file).parse(source);
   };
-  const root = await loadIndex(path.join(board,'AGENTS.md'),'# Tasks\n');
+  const root = await loadIndex(path.join(board,'README.md'),'# Tasks\n');
   for (const name of await readdir(board)) {
     if (name !== '_default' && !isUserProjectSlug(name)) continue;
     const project = name === '_default' ? 'default' : name;
     const dir = path.join(board,name);
     try { await readdir(dir); } catch { continue; }
-    const node = await loadIndex(path.join(dir,'AGENTS.md'),renderProjectAgents({title:seedTitleFor(project),description:seedDescriptionFor(project)}));
+    const node = await loadIndex(path.join(dir,'README.md'),renderProjectReadme({title:seedTitleFor(project),description:seedDescriptionFor(project)}));
     for (const status of TASK_STATUSES) {
       let names: string[];
       try { names = await readdir(path.join(dir,status)); } catch { continue; }

@@ -17,6 +17,8 @@ test('compiled memory CLI includes templates and runs with no source skills chec
   execFileSync(path.join(cli, 'node_modules/.bin/tsc'), ['-p', path.join(cli, 'tsconfig.json'), '--outDir', path.join(runtime, 'dist')], { cwd: cli });
   execFileSync(process.execPath, ['--import', 'tsx', 'scripts/copy-memory-templates.ts'], { cwd: cli });
   await cp(path.join(cli, 'dist/assets/memory/templates'), path.join(runtime, 'dist/assets/memory/templates'), { recursive: true });
+  // tsc does not copy JSON resources; mirror the config copy in the normal build.
+  await cp(path.join(cli, 'src/domain/config'), path.join(runtime, 'dist/domain/config'), { recursive: true });
   await symlink(path.join(cli, 'node_modules'), path.join(runtime, 'node_modules'), 'dir');
   await writeFile(path.join(runtime, 'package.json'), '{"type":"module"}');
   const scope = path.join(temporary, 'scope');
