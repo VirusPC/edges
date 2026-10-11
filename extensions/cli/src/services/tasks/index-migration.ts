@@ -1,4 +1,4 @@
-import { isWithinPath, findAncestor } from '../../utils/filesystem.js';
+import { isWithinPath, findAncestor, canonicalPath, firstSymlink } from '../../utils/filesystem.js';
 import fs from "node:fs";
 import path from "node:path";
 import { AgentsNode, TaskNode } from "../../domain/models/index.js";
@@ -123,7 +123,10 @@ export async function planTaskIndexes(
     description?: string,
   ) => {
     const node = get(parent);
-    if (!node.children.some((ref) => ref.id === child))
+    const identity = canonicalPath(checkPath(child));
+    const existing = node.children.find(ref => ref.id === child ||
+      (!firstSymlink(ref.id) && canonicalPath(ref.id) === identity));
+    if (!existing)
       node.addChild(group, {
         id: child,
         ...(name ? { name } : {}),
@@ -131,9 +134,9 @@ export async function planTaskIndexes(
       });
     else if (
       group === "local" &&
-      node.descendantChildren.some((ref) => ref.id === child)
+      node.descendantChildren.some((ref) => ref.id === existing.id)
     )
-      node.moveChild(child, "local");
+      node.moveChild(existing.id, "local");
   };
   // Connect only existing scope entries, crossing physical folders without inventing nodes.
   const connected = new Set<string>();

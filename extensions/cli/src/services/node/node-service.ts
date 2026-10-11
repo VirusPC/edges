@@ -12,7 +12,7 @@ import {
   identifyNodeType,
   normalizeNodeType,
 } from "../../domain/models/layout.js";
-import { referenceOf } from "../../domain/models/core/relations.js";
+import { referenceOf, setNodePath } from "../../domain/models/core/relations.js";
 import {
   checkPath,
   readEntry,
@@ -96,12 +96,12 @@ export class NodeService {
   constructor(options: NodeServiceOptions) {
     if (!options?.managedRoot)
       throw new Error("NodeService requires an explicit managedRoot");
-    this.managedRoot = checkPath(options.managedRoot);
+    this.managedRoot = canonicalPath(checkPath(options.managedRoot));
     this.#options = options;
     this.#cache = new NodeCache(this.managedRoot);
   }
   #boundary(file: string): string {
-    file = checkPath(file);
+    file = canonicalPath(checkPath(file));
     if (!isWithinPath(file, this.managedRoot))
       throw new Error(`Node path escapes managedRoot: ${file}`);
     if (!identifyNodeType(file))
@@ -455,21 +455,22 @@ export class NodeService {
     input: Parameters<T["create"]>[0],
     registrationOptions: NodeRegistrationOptions = {},
   ): Promise<T> {
-    this.#boundary(node.path);
+    const file = this.#boundary(node.path);
     if (path.basename(node.path) === "AGENTS.md" && !(node instanceof AgentsNode))
       throw new Error(`AGENTS creation requires an AgentsNode model: ${node.path}`);
-    if (this.#cache.loaded.has(node.path) || fs.existsSync(node.path))
+    if (this.#cache.loaded.has(file) || fs.existsSync(file))
       throw new Error(`Node target already exists: ${node.path}`);
-    const draft = clone(node);
+    const draft = clone(node, file);
     draft.create(input, {
       operation: "create",
-      parent: this.#parentNode(node.path),
+      parent: this.#parentNode(file),
     });
     draft.validate();
     const plan = new Map<string, Planned>([[draft.path, this.#plan(draft)]]);
     const registration = await this.#registration(draft, registrationOptions.indexGroup);
     if (registration) plan.set(registration.node.path, registration);
     await this.#save("create", plan);
+    setNodePath(node, file);
     node.parse(draft.serialize());
     this.#cache.remember(node, readEntry(node.path)!);
     return node;

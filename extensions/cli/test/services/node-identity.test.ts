@@ -338,3 +338,30 @@ for (const entryName of ['index.md', 'INDEX.md']) {
     assert.equal(fs.readFileSync(file, 'utf8'), 'Child\n');
   });
 }
+
+test('managedRoot aliases use consistent physical boundaries for reads and writes', async t => {
+  const { root } = fixture(t);
+  const actualRoot = path.join(root, 'CaseRoot'), aliasRoot = path.join(root, 'caseroot');
+  const entry = path.join(actualRoot, 'AGENTS.md'), file = path.join(actualRoot, 'child/index.md');
+  fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, 'Original\n');
+  const parent = new AgentsNode(entry).parse('# Scope\n');
+  parent.addChild('local', { id: file }); fs.writeFileSync(entry, parent.serialize());
+  const selectedRoot = fs.existsSync(aliasRoot) ? aliasRoot : actualRoot;
+  const service = new NodeService({ managedRoot: selectedRoot });
+  const child = (await service.get(path.join(selectedRoot, 'child/index.md')))!;
+  assert.equal(child.path, file);
+  await service.update(child, { body: 'Updated\n' });
+  assert.equal(fs.readFileSync(file, 'utf8'), 'Updated\n');
+  const created = await service.create(new LeafNode(path.join(selectedRoot, 'created/INDEX.md')), { body: 'Created\n' }, { indexGroup: 'local' });
+  assert.equal(created.path, path.join(actualRoot, 'created/INDEX.md'));
+  assert.strictEqual(await service.get(created.path), created);
+  await service.move(child, path.join(selectedRoot, 'moved/index.md'));
+  assert.equal(child.path, path.join(actualRoot, 'moved/index.md'));
+  assert.strictEqual(await service.get(child.path), child);
+  assert.deepEqual(new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8')).localChildren.map(ref => ref.id).sort(), [created.path, child.path].sort());
+  const outside = path.join(root, 'outside/index.md');
+  await assert.rejects(service.create(new LeafNode(outside), { body: 'Outside\n' }), /escapes managedRoot/);
+  assert.equal(fs.existsSync(outside), false);
+  const linkedRoot = path.join(root, 'linked'); fs.symlinkSync(actualRoot, linkedRoot);
+  assert.throws(() => new NodeService({ managedRoot: linkedRoot }), /symbolic link/i);
+});

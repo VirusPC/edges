@@ -322,3 +322,44 @@ for (const entryName of ['index.md', 'INDEX.md']) {
     assert.equal((await planTaskIndexes(root)).edits.length, 0);
   });
 }
+
+for (const entryName of ['index.md', 'INDEX.md'])
+  for (const group of ['local', 'descendant'] as const) {
+    test(`migration preserves ${group} inverse-spelling registration for actual ${entryName}`, async t => {
+      const { root, write, task } = fixture(t);
+      await applyTaskIndexes(await planTaskIndexes(root));
+      const content = write(`tools/foo/${entryName}`, '# Owner content\n');
+      const alias = path.join(path.dirname(content), entryName === 'index.md' ? 'INDEX.md' : 'index.md');
+      const registered = fs.existsSync(alias) ? alias : content;
+      const owner = path.join(root, 'AGENTS.md');
+      const node = new AgentsNode(owner).parse(fs.readFileSync(owner, 'utf8'));
+      node.addChild(group, { id: registered, name: 'Keep authored label', description: 'Keep authored description' });
+      fs.writeFileSync(owner, node.serialize());
+      const before = fs.readFileSync(owner, 'utf8');
+      task('tools/foo/.harness/tasks/_default/todo/owned/index.md');
+      const plan = await planTaskIndexes(root);
+      await applyTaskIndexes(plan);
+      assert.equal(fs.readFileSync(owner, 'utf8'), before);
+      assert.equal(new AgentsNode(owner).parse(before).children.filter(ref => fs.realpathSync.native(ref.id) === content).length, 1);
+      assert.deepEqual(fs.readdirSync(path.dirname(content)).filter(name => /^(INDEX|index)\.md$/.test(name)), [entryName]);
+      assert.equal((await planTaskIndexes(root)).edits.length, 0);
+    });
+  }
+
+test('migration identity comparison preserves unrelated linked registrations without following them', async t => {
+  const { root, write, task } = fixture(t);
+  await applyTaskIndexes(await planTaskIndexes(root));
+  const material = write('material/index.md', '# Linked material\n');
+  const link = path.join(root, 'linked'); fs.symlinkSync(path.dirname(material), link);
+  const owner = path.join(root, 'AGENTS.md');
+  const node = new AgentsNode(owner).parse(fs.readFileSync(owner, 'utf8'));
+  node.addChild('local', { id: path.join(link, 'index.md'), name: 'Linked material', description: 'Keep link' });
+  fs.writeFileSync(owner, node.serialize());
+  write('tools/foo/AGENTS.md', '# Owner\n');
+  task('tools/foo/.harness/tasks/_default/todo/owned/index.md');
+  const plan = await planTaskIndexes(root);
+  await applyTaskIndexes(plan);
+  assert.ok(fs.readFileSync(owner, 'utf8').includes('- [Linked material](<linked/index.md>) — Keep link'));
+  assert.equal(fs.readFileSync(material, 'utf8'), '# Linked material\n');
+  assert.ok(fs.lstatSync(link).isSymbolicLink());
+});
