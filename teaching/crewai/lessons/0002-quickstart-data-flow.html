@@ -9,7 +9,7 @@
 <body>
 <article>
 
-<p class="meta">CrewAI 学习空间 · 第 2 课 · 约 10 分钟 · 概念为主；附官方短片段体感（非作业） · 依据官方 <a href="https://docs.crewai.com/en/quickstart">Quickstart</a>（2026-10-11 再抓取） · <a href="0001-agent-task-crew-flow.html">← 第 1 课</a></p>
+<p class="meta">CrewAI 学习空间 · 第 2 课 · 约 10 分钟 · 概念为主；附官方短片段体感（非作业） · 依据官方 <a href="https://docs.crewai.com/en/quickstart">Quickstart</a>（2026-10-11 再抓取） · <a href="0001-agent-task-crew-flow.html">← 第 1 课</a> · <a href="0003-process-and-delegation.html">第 3 课 →</a></p>
 <h1>朗读 Quickstart：topic 怎么进 Crew，report 怎么回 Flow</h1>
 <p class="subtitle">Narrate the official Quickstart Flow: main.py steps + crew.jsonc kickoff, without installing.</p>
 
@@ -259,7 +259,7 @@ def kickoff_content_crew(inputs: dict):
       <li><code>agent</code> 与 <code>output</code></li>
       <li><code>inputs</code> 与 <code>context</code></li>
     </ol>
-    <div data-explanation">Pydantic 模型只有 <code>topic: str = ""</code> 和 <code>report: str = ""</code>。见 <a href="https://docs.crewai.com/en/quickstart#define-the-flow-in-mainpy">Define the Flow in main.py</a>。</div>
+    <div data-explanation>Pydantic 模型只有 <code>topic: str = ""</code> 和 <code>report: str = ""</code>。见 <a href="https://docs.crewai.com/en/quickstart#define-the-flow-in-mainpy">Define the Flow in main.py</a>。</div>
   </div>
 
   <div data-question data-answer="3">
@@ -270,7 +270,7 @@ def kickoff_content_crew(inputs: dict):
       <li>prepare_topic → run_research → summarize</li>
       <li>prepare_topic → summarize → run_research</li>
     </ol>
-    <div data-explanation"><code>@start</code> 的 prepare_topic 先跑；run_research 监听它；summarize 再监听 run_research。见 <a href="https://docs.crewai.com/en/quickstart#how-this-run-fits-together">How this run fits together</a>。</div>
+    <div data-explanation><code>@start</code> 的 prepare_topic 先跑；run_research 监听它；summarize 再监听 run_research。见 <a href="https://docs.crewai.com/en/quickstart#how-this-run-fits-together">How this run fits together</a>。</div>
   </div>
 
   <div data-question data-answer="4">
@@ -281,7 +281,7 @@ def kickoff_content_crew(inputs: dict):
       <li>让 hierarchical 经理在分派时把主题自动代注入</li>
       <li>在监听步骤调用 kickoff 并把 topic 当作 inputs</li>
     </ol>
-    <div data-explanation"><code>kickoff_content_crew(inputs={"topic": self.state.topic})</code>，再与 load_crew 的 default_inputs 合并后交给 <code>crew.kickoff</code>。见 <a href="https://docs.crewai.com/en/quickstart#define-the-flow-in-mainpy">main.py</a> 与 <a href="https://docs.crewai.com/en/quickstart#load-the-json-crew-content_crewpy">content_crew.py</a>。</div>
+    <div data-explanation><code>kickoff_content_crew(inputs={"topic": self.state.topic})</code>，再与 load_crew 的 default_inputs 合并后交给 <code>crew.kickoff</code>。见 <a href="https://docs.crewai.com/en/quickstart#define-the-flow-in-mainpy">main.py</a> 与 <a href="https://docs.crewai.com/en/quickstart#load-the-json-crew-content_crewpy">content_crew.py</a>。</div>
   </div>
 
   <div data-question data-answer="2">
@@ -296,7 +296,7 @@ def kickoff_content_crew(inputs: dict):
   </div>
 
   <div data-question data-answer="1">
-    <p data-stem"><code>agents: ["researcher"]</code> 在命名约定下会加载哪个文件？</p>
+    <p data-stem><code>agents: ["researcher"]</code> 在命名约定下会加载哪个文件？</p>
     <ol data-options>
       <li><code>agents/researcher.jsonc</code></li>
       <li><code>config/researcher.yaml</code></li>
@@ -313,6 +313,7 @@ def kickoff_content_crew(inputs: dict):
 <h2>延伸阅读与下一步</h2>
 <ul>
   <li><strong>一手资料（本课）：</strong><a href="https://docs.crewai.com/en/quickstart">CrewAI Docs · Quickstart</a>——尤其是 main.py、crew.jsonc 与 “How this run fits together” 三节。</li>
+  <li><strong>下一课：</strong><a href="0003-process-and-delegation.html">第 3 课 · Process 与 allow_delegation</a>——sequential vs hierarchical、谁该开委派、委派循环与 <code>max_iter</code>。</li>
   <li><strong>上一课：</strong><a href="0001-agent-task-crew-flow.html">第 1 课 · Agent / Task / Crew / Flow 心智模型</a>。</li>
   <li><strong>速查表：</strong><a href="../reference/glossary.html">术语表 / Glossary</a>。</li>
   <li><strong>可选加深：</strong><a href="https://docs.crewai.com/en/guides/flows/first-flow">Build Your First Flow</a>（routing、persistence；本课未展开）。</li>

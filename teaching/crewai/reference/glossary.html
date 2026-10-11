@@ -9,7 +9,7 @@
 <body>
 <div class="page">
 <h1>CrewAI 术语速查表</h1>
-<p class="subtitle">Glossary · 可打印 · 依据 <a href="https://docs.crewai.com/">docs.crewai.com</a>（2026-10-11 核对，v1.15.27） · <a href="../lessons/0001-agent-task-crew-flow.html">← 第 1 课</a> · <a href="../lessons/0002-quickstart-data-flow.html">第 2 课 →</a></p>
+<p class="subtitle">Glossary · 可打印 · 依据 <a href="https://docs.crewai.com/">docs.crewai.com</a>（2026-10-11 核对，v1.15.27） · <a href="../lessons/0001-agent-task-crew-flow.html">← 第 1 课</a> · <a href="../lessons/0002-quickstart-data-flow.html">第 2 课</a> · <a href="../lessons/0003-process-and-delegation.html">第 3 课 →</a></p>
 
 <p class="meta">嵌套关系：<strong>Flow</strong> ⊃ 步骤（<code>@start</code> / <code>@listen</code>）⊃ <strong>Crew</strong> ⊃ <strong>Task</strong> → 由 <strong>Agent</strong> 执行；Crew 按 <strong>Process</strong> 排班。</p>
 
@@ -91,6 +91,30 @@
 <h3>hierarchical（层级）</h3>
 <p>由 manager Agent 负责规划、分派、审核；Task 不预先分配。必须提供 <code>manager_llm</code> 或 <code>manager_agent</code>。</p>
 <p class="src"><a href="https://docs.crewai.com/en/concepts/processes#hierarchical-process">Hierarchical Process</a></p>
+</div>
+
+<div class="term">
+<h3>manager_llm · manager_agent</h3>
+<p>hierarchical 的经理，二选一<strong>必填</strong>：<code>manager_llm</code> 让 CrewAI 自动创建经理；<code>manager_agent</code> 指定自定义经理（JSON 中可引用不在 <code>agents</code> 列表里的 <code>agents/&lt;name&gt;.jsonc</code>）。（第 3 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/crews#crew-attributes">Crew Attributes</a> · <a href="https://docs.crewai.com/en/learn/hierarchical-process#using-a-custom-manager-agent">Custom Manager Agent</a></p>
+</div>
+
+<div class="term">
+<h3>allow_delegation（允许委派）</h3>
+<p>Agent 属性，默认 <code>False</code>。设为 <code>True</code> 时自动获得两个协作工具：<code>Delegate work to coworker</code>（委派工作）与 <code>Ask question to coworker</code>（向同事提问）。与 Process 无关，sequential 下也可用。（第 3 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/collaboration#how-agent-collaboration-works">How Agent Collaboration Works</a> · <a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a></p>
+</div>
+
+<div class="term">
+<h3>Delegation Loops（委派循环）</h3>
+<p>症状：Agent 之间“delegate back and forth indefinitely”。官方解法：清晰层级——经理 <code>allow_delegation=True</code>，专家 <code>False</code>（No re-delegation）。（第 3 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/collaboration#issue-delegation-loops">Issue: Delegation Loops</a></p>
+</div>
+
+<div class="term">
+<h3>max_iter · max_execution_time</h3>
+<p><code>max_iter</code>：Agent 达到最大迭代次数前必须给出最佳答案，默认 <code>20</code>。<code>max_execution_time</code>：任务执行最长秒数（可选）。兜底用的硬上限。（第 3 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a> · <a href="https://docs.crewai.com/en/concepts/agents#execution-control">Execution Control</a></p>
 </div>
 
 <div class="term">
