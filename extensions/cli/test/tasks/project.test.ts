@@ -32,6 +32,14 @@ async function virginRepo(): Promise<string> {
   return repo;
 }
 
+async function seedMaintenanceScope(repo: string): Promise<void> {
+  await writeFile(
+    path.join(repo, "AGENTS.md"),
+    "# Scope\n\n<!-- project-harness-local:start -->\n## 本层系统维护信息\n\n- [Tasks](.harness/tasks/README.md) — maintenance tasks\n<!-- project-harness-local:end -->\n",
+    "utf8",
+  );
+}
+
 test("create/list/get/update project metadata; create default on virgin board", async () => {
   const repo = await virginRepo();
   try {
@@ -225,6 +233,7 @@ test("project get returns the read-only listed project after ordinary task creat
   const { run } = await import("../../src/program.js");
   const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-project-get-"));
   try {
+    await seedMaintenanceScope(repo);
     const env = { EDGES_SCOPE: repo };
     const created = await run(
       [
@@ -238,7 +247,7 @@ test("project get returns the read-only listed project after ordinary task creat
       { env },
     );
     assert.equal(created.exitCode, 0, created.stdout);
-    const indexedPaths = [".harness/tasks/cli/README.md", ".harness/tasks/README.md", ".harness/tasks/_default/README.md"];
+    const indexedPaths = ["AGENTS.md", ".harness/tasks/cli/README.md", ".harness/tasks/README.md", ".harness/tasks/_default/README.md"];
     const before = await Promise.all(indexedPaths.map(rel => readFile(path.join(repo, rel), "utf8")));
     const listResult = await run(["tasks", "project", "list"], { env });
     assert.equal(listResult.exitCode, 0, listResult.stdout + listResult.stderr);
@@ -255,13 +264,61 @@ test("project get returns the read-only listed project after ordinary task creat
       listed.projects.find((project: any) => project.project === "cli"),
     );
     assert.deepEqual(await Promise.all(indexedPaths.map(rel => readFile(path.join(repo, rel), "utf8"))), before);
-    for (const rel of ["tasks"]) {
+    for (const rel of ["tasks", ".harness/tasks/AGENTS.md", ".harness/tasks/cli/AGENTS.md", ".harness/tasks/_default/AGENTS.md"]) {
       await assert.rejects(access(path.join(repo, rel)));
     }
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+for (const all of [false, true]) {
+  test(`project list${all ? " --all" : ""} preserves custom metadata from reached README projects without writes`, async () => {
+    const { run } = await import("../../src/program.js");
+    const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-project-custom-"));
+    try {
+      await seedMaintenanceScope(repo);
+      const env = { EDGES_SCOPE: repo };
+      const title = "CLI tools & workflows";
+      const description = "First paragraph.\n\nSecond paragraph with **Markdown**.";
+      const created = await run(
+        ["tasks", "project", "create", "cli", "--title", title, "--description", description],
+        { env },
+      );
+      assert.equal(created.exitCode, 0, created.stdout);
+      const updated = await run(
+        ["tasks", "project", "update", "default", "--title", "Unsorted work", "--description", "Pending assignment."],
+        { env },
+      );
+      assert.equal(updated.exitCode, 0, updated.stdout);
+      // An unindexed sibling must not be parsed or given metadata by either query.
+      await writeFile(path.join(repo, ".harness/tasks/unindexed/README.md"), "Unindexed, malformed project metadata.\n", "utf8");
+      const indexedPaths = ["AGENTS.md", ".harness/tasks/README.md", ".harness/tasks/cli/README.md", ".harness/tasks/_default/README.md", ".harness/tasks/unindexed/README.md"];
+      const before = await Promise.all(indexedPaths.map(rel => readFile(path.join(repo, rel), "utf8")));
+      const result = await run([...(all ? ["--all"] : []), "tasks", "project", "list"], { env });
+      assert.equal(result.exitCode, 0, result.stdout + result.stderr);
+      const expected = [
+        { project: "cli", dir: "cli", title, description, path: ".harness/tasks/cli/README.md" },
+        { project: "default", dir: "_default", title: "Unsorted work", description: "Pending assignment.", path: ".harness/tasks/_default/README.md" },
+      ];
+      assert.deepEqual(JSON.parse(result.stdout).projects.sort((a: any, b: any) => a.project.localeCompare(b.project)), expected);
+      for (const wanted of expected) {
+        const got = await run(["tasks", "project", "get", wanted.project], { env });
+        assert.equal(got.exitCode, 0, got.stdout);
+        const { status, command, ...record } = JSON.parse(got.stdout);
+        assert.equal(status, "success");
+        assert.equal(command, "project.get");
+        assert.deepEqual(record, wanted);
+      }
+      assert.deepEqual(await Promise.all(indexedPaths.map(rel => readFile(path.join(repo, rel), "utf8"))), before);
+      for (const rel of [".harness/tasks/AGENTS.md", ".harness/tasks/cli/AGENTS.md", ".harness/tasks/_default/AGENTS.md", ".harness/tasks/unindexed/AGENTS.md"]) {
+        await assert.rejects(access(path.join(repo, rel)));
+      }
+    } finally {
+      await rm(repo, { recursive: true, force: true });
+    }
+  });
+}
 
 test("README Task Projects are discovered, read and updated; a user-initialised AGENTS project stays a system entry", async () => {
   const repo = await virginRepo();
@@ -317,6 +374,7 @@ test("maintenance board: CLI-created project is a README org list and never gets
   const { run } = await import("../../src/program.js");
   const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-project-readme-"));
   try {
+    await seedMaintenanceScope(repo);
     const env = { EDGES_SCOPE: repo };
     const args = ["tasks"];
     assert.equal((await run([...args, "create", "--title", "Fresh", "--project", "cli"], { env })).exitCode, 0);
