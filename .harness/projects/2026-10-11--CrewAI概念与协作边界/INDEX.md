@@ -1,3 +1,9 @@
+---
+name: CrewAI概念与协作边界
+description: >-
+  用 teach 流程学 CrewAI：先建概念模型，再对照 LangChain / Claude Code Agent
+  Teams，理清声明式小队与开放讨论的边界。
+---
 # 2026-10-11--CrewAI概念与协作边界
 
 > 用 teach 流程学 CrewAI：先建概念模型，再对照 LangChain / Claude Code Agent Teams，理清声明式小队与开放讨论的边界。
