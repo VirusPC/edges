@@ -9,7 +9,7 @@
 <body>
 <div class="page">
 <h1>CrewAI 术语速查表</h1>
-<p class="subtitle">Glossary · 可打印 · 依据 <a href="https://docs.crewai.com/">docs.crewai.com</a>（2026-10-11 核对，v1.15.27） · <a href="../lessons/0001-agent-task-crew-flow.html">← 第 1 课</a> · <a href="../lessons/0002-quickstart-data-flow.html">第 2 课</a> · <a href="../lessons/0003-process-and-delegation.html">第 3 课 →</a></p>
+<p class="subtitle">Glossary · 可打印 · 依据 <a href="https://docs.crewai.com/">docs.crewai.com</a>（2026-10-11 核对，v1.15.27） · <a href="../lessons/0001-agent-task-crew-flow.html">← 第 1 课</a> · <a href="../lessons/0002-quickstart-data-flow.html">第 2 课</a> · <a href="../lessons/0003-process-and-delegation.html">第 3 课</a> · <a href="../lessons/0004-unified-memory.html">第 4 课 →</a></p>
 
 <p class="meta">嵌套关系：<strong>Flow</strong> ⊃ 步骤（<code>@start</code> / <code>@listen</code>）⊃ <strong>Crew</strong> ⊃ <strong>Task</strong> → 由 <strong>Agent</strong> 执行；Crew 按 <strong>Process</strong> 排班。</p>
 
@@ -151,6 +151,37 @@
 <h3>JSON-first（agents/*.jsonc + crew.jsonc）</h3>
 <p><code>crewai create crew</code> 新项目的默认布局；<code>crewai run</code> 直接加载。旧布局 <code>crew.py</code> + <code>config/*.yaml</code> 需 <code>--classic</code>。</p>
 <p class="src"><a href="https://docs.crewai.com/en/guides/crews/first-crew#step-1-create-a-new-crew">First Crew · Step 1</a></p>
+</div>
+
+
+<div class="term">
+<h3>Unified Memory（统一记忆）</h3>
+<p>一个 <code>Memory</code> 类取代旧的 short-term / long-term / entity / external 四种记忆。四种用法：standalone、Crew（<code>memory=True</code>：Task 后自动抽取事实、Task 前召回注入）、Agent（<code>memory.scope(...)</code>）、Flow（<code>self.remember/recall/extract_memories</code>）。默认存储 LanceDB 中央库。（第 4 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/memory#overview">Memory · Overview</a> · <a href="https://docs.crewai.com/en/concepts/flows#memory-in-flows">Memory in Flows</a></p>
+</div>
+
+<div class="term">
+<h3>scope（记忆作用域）</h3>
+<p>类似文件系统的层级路径，如 <code>/project/alpha</code>；是抽象命名空间，不绑定代码目录。按 scope 召回只搜该<strong>前缀子树</strong>（向下）。<code>memory.scope(path)</code> 得到子树视图；<code>memory.slice(scopes=[...])</code> 跨多个分支读。（第 4 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/memory#hierarchical-scopes">Hierarchical Scopes</a> · <a href="https://docs.crewai.com/en/concepts/memory#memory-slices">Memory Slices</a></p>
+</div>
+
+<div class="term">
+<h3>suggested_scope</h3>
+<p><code>remember()</code> 省略 scope 时，LLM 读现有 scope 列表后给出的放置位置（“best matching existing scope or new path”），可新建路径；LLM 失败时退回 <code>/</code>。（第 4 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/memory#how-scope-inference-works">How Scope Inference Works</a> · <a href="https://github.com/crewAIInc/crewAI/blob/main/lib/crewai/src/crewai/memory/analyze.py">analyze.py</a></p>
+</div>
+
+<div class="term">
+<h3>recall depth（召回深度）</h3>
+<p><code>recall(..., depth=)</code>：<code>"shallow"</code> 纯向量检索 + 复合打分，无 LLM；<code>"deep"</code>（默认）走 RecallFlow（查询分析、选 scope、并行检索、置信度路由）。复合分 = 语义 + 时近 + 重要度加权（默认 0.5 / 0.3 / 0.2）。（第 4 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/memory#recallflow-deep-recall">RecallFlow</a> · <a href="https://docs.crewai.com/en/concepts/memory#composite-scoring">Composite Scoring</a></p>
+</div>
+
+<div class="term">
+<h3>consolidation（记忆合并整理）</h3>
+<p>保存时与相似旧记录比较，相似度超过 <code>consolidation_threshold</code>（默认 0.85）时由 LLM 对旧记录决定 <code>keep</code> / <code>update</code> / <code>delete</code>，并决定是否 <code>insert_new</code>，防止重复堆积。（第 4 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/memory#memory-consolidation">Memory Consolidation</a></p>
 </div>
 
 </div>
