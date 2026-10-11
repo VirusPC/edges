@@ -1,25 +1,30 @@
 ---
 name: knowledge_base_evaluation_system
-description: 为整个知识库建立 Evaluation 系统：能评测条目质量、覆盖与回答是否可信
+description: 用 edges 自有内容出可复跑的问答评测集，对照 Edges 项目记忆与无记忆、全文检索的差异。
 metadata:
   edges-type: task
-  edges-title: 知识库 Evaluation 系统
+  edges-title: 知识库 Evaluation 系统：先做 edges 自有记忆问答评测
   edges-tasks-status: backlog
   edges-origin-session-id: d807a059-9774-4fd0-8fa7-d5fb69f9d031
   edges-agent-client: cursor
   edges-username: 任务记录员
   edges-email: grok-bot@users.noreply.github.com
-  edges-updated-at: "2026-09-17T14:09:12.057Z"
+  edges-updated-at: '2026-10-11T10:05:59.576Z'
   edges-task-project: evaluation
 ---
 
-为整个知识库（notes / tasks / memory 及相关产物）建 Evaluation 系统：能对条目质量、缺口、回答可信度打分或跑集。
+**背景：**
+2026-10-11 盘点评测进度时，peng cheng 指出现有评测只是拿官方数据跑了 LoCoMo、MemoryBench 的小冒烟，没有真正评测这个仓库。讨论后确认，这两个 benchmark 用的是公开对话数据，测的是「模型加检索」的通用能力，测不到 edges 的笔记、ADR 和记忆好不好用，ADR 0008 也规定冒烟结果不能当作证明。因此把「用仓库自己的内容出题」定为本卡的第一刀，不另开近义新卡。
+- 现状：`.harness/evaluation/` 只有官方冒烟，没有一道 edges 自有的题，也没有标准答案。
+- 非目标：不做写代码类任务的评测，那部分归「SWE-ContextBench 主评测」；不替代公开 benchmark，它们只作对外参照。
+- 关联：「SWE-ContextBench 主评测」「evaluation-cases 登记可重复用例」、ADR 0008。
 
-**Why:**
-知识库在长，没有 Evaluation 就只能靠体感。这条是「怎么判这库好不好」，不是 Observation（看实际怎么被用）。与 backlog「找公开 benchmark 证明 memory 有效性」相关但更宽：benchmark 是可用的外部标尺，本条是仓内评测系统本身。
+**目标：**
+有一套从 edges 自有内容出的、可以重复跑的问答评测集，能对照出 Edges 项目记忆比不给记忆、只做全文检索强在哪、弱在哪。
 
-**How to apply:**
-- 先细聊评测对象（笔记 / task / memory / 检索回答）、指标与金标出处。
-- 与 Observation 条目分开设计：Observation 产跑踪与使用记录，Evaluation 用这些数据和金标打分。
-- 公开 memory benchmark 可以当评测源之一，不要把本条混成只找公开集。
-- 派发时默认先 grill-with-docs。
+**动作：**
+- 从 notes、ADR、`.harness/memory` 里出 peng cheng 实际会问的问题，每题配好标准答案和出处路径。
+- 分三组对照：不给记忆、只做全文检索、走 Edges 项目记忆。
+- 能用规则判的部分（出处有没有引对）用脚本判，判断不了的用模型当裁判打分；运行 trace 打进自建的 Langfuse。
+
+（完成标准待 grill-with-docs 补，本栏省略。）
