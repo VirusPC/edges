@@ -4,7 +4,7 @@
 
 核心分工是：**先确定作用域，由 Service 完成用例，Model 维护单节点规则，operations 处理集合与树。** 文件系统是内容载体，AGENTS.md 是递归索引入口；CLI 执行明确的操作，不替调用方判断内容应该属于本层还是下层。
 
-本目录的 pull request 由 Cursor Bugbot 按 [`.cursor/BUGBOT.md`](.cursor/BUGBOT.md) 自动审，并需 @VirusPC 人审（[`.github/CODEOWNERS`](../../.github/CODEOWNERS)）。
+本目录的 pull request 由 Cursor Bugbot 按 [`.cursor/BUGBOT.md`](.cursor/BUGBOT.md) 审查，并需 @VirusPC 人审（[`.github/CODEOWNERS`](../../.github/CODEOWNERS)）。Cursor 后台已把本仓库的 Bugbot 设成只在评论点名时才跑。改到 `extensions/cli/**` 的 pull request，由开 PR 的 Agent 或人用 VirusPC 已授权的身份评论 `bugbot run` 来触发；不改本目录的 PR 不要为了审查去点名。
 
 ## 快速开始
 

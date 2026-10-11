@@ -16,6 +16,7 @@ Edges 是什么、怎么用看 [README.md](README.md)；内容标准看所属目
 - Git：`type: subject`；AI 参与加 `Co-authored-by`；不提交 `.obsidian/workspace.json`；`pull` / `rebase` 加 `--autostash`。
 - 本机修改本仓（commit/push 或改工作树文件）必须通过独立 `git worktree`：每个 Agent/任务一个 worktree + 独立分支；禁止多 Agent 共用同一工作树并行改文件或切分支；同一分支不得挂两个 worktree。Cursor 云端 Agent 等已在独立 clone/环境中的任务视为已隔离，不要求再套本机 worktree；只读查询可不建 worktree。
 - `posts/` 存放对外博客（将公开发表的成稿），由人仔细维护。AI 不得自动创建、编辑、移动、删除、重构或重写该路径下的任何文件。
+- 开启或推送更新改到 `extensions/cli/**` 的 pull request 后，用 VirusPC 已授权的身份在该 PR 评论 `bugbot run`；没改到该目录的不要评论。不要用 PAT、token、GitHub Action 或定时任务去点名。原因见项目记忆 `project_bugbot_comment_trigger_for_cli`。
 <!-- project-harness-constraints:end -->
 
 <!-- project-harness-local:start -->
