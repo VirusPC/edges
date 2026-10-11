@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 笔记入库与能力面
+
+- **中文标题的笔记和项目目录保留汉字：** 用 `edges notes create` 或 `edges projects create` 新建叶子时，日期目录会留下标题里的汉字和数字。标题「中文标题」得到形如 `YYYY-MM-DD--中文标题` 的目录，不再收成 `untitled-` 加时间。英文单词仍转成小写，词与词之间用 `-`。标题里没有任何字母或数字时，目录名仍是 `untitled-` 加时间。
+
 ### 任务看板与项目
 
 - **中文标题的任务名保留汉字：** 用 `edges tasks create` 新建任务、又没有写 `--name` 时，生成的名字会留下标题里的汉字和数字，不再只剩夹在中间的英文词。已有任务可以用 `edges tasks update <目标> --name <名字>` 改这个字段。标题里没有任何字母或数字时，名字仍是 `task`。

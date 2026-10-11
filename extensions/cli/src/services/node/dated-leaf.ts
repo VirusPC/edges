@@ -1,6 +1,7 @@
 import path from "node:path";
 import { BaseNode } from "../../domain/models/index.js";
 import { isLeafEntryName } from "../../domain/models/layout.js";
+import { directoryStem } from "../../domain/models/node/stem.js";
 import { NoteNode } from "../../domain/models/notes/note-node.js";
 import { ProjectNode } from "../../domain/models/projects/project-node.js";
 import { localDateYmd } from "../../utils/date.js";
@@ -77,8 +78,10 @@ export function datedLeafFile<T extends TitledLeaf>(
 }
 
 function titleSlug(title: string, now: Date): string {
-  const slug = title.toLowerCase().replace(/ /g, "-").replace(/[^a-z0-9-]/g, "");
-  return slug.length === 0 ? `untitled-${Math.floor(now.getTime() / 1000)}` : slug;
+  return directoryStem(title, {
+    lowercase: true,
+    fallback: `untitled-${Math.floor(now.getTime() / 1000)}`,
+  });
 }
 
 function composeLeaf<T extends TitledLeaf>(

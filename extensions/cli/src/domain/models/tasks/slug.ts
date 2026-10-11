@@ -1,27 +1,12 @@
 import { localDateYmd } from "../../../utils/date.js";
-
-const HOSTILE = /[/\\:*?"<>|]/g;
+import { directoryStem } from "../node/stem.js";
 
 export function taskFileSlug(title: string): string {
-  const slug = title
-    .replace(HOSTILE, "")
-    .replace(/\s+/g, "-")
-    .replace(/[^\p{L}\p{N}-]+/gu, "")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "")
-    .slice(0, 80);
-  return slug.length > 0 ? slug : "task";
+  return directoryStem(title, { fallback: "task", maxLength: 80 });
 }
 
 export function taskNameSlug(title: string): string {
-  const slug = title
-    .toLowerCase()
-    .replace(HOSTILE, "")
-    .replace(/[\s-]+/g, "_")
-    .replace(/[^\p{L}\p{N}_]+/gu, "")
-    .replace(/_+/g, "_")
-    .replace(/^_|_$/g, "");
-  return slug.length > 0 ? slug : "task";
+  return directoryStem(title, { separator: "_", lowercase: true, fallback: "task" });
 }
 
 export function newTaskStem(title: string, now: Date): string {
