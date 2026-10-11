@@ -1,23 +1,24 @@
 ---
 name: project_langfuse_tailscale_only_access
-description: 改自托管 Langfuse 的 v1 访问面、或有人要立刻做公网 HTTPS/反代时打开：v1 仅 Tailscale；没有 Tailscale 就接受只剩 minigtr localhost/LAN。公网 HTTPS（反代+证书）是后续未做。决策见 docs/adr/0017-langfuse-tailscale-only-access.md。
+description: >-
+  改自托管 Langfuse 的访问面时打开：公网 HTTPS 经 Cloudflare Tunnel 转到 minigtr；ADR 0017 的仅
+  Tailscale 已由 ADR 0033 取代。不要把实例域名、Tailscale 地址或 Cloudflare 账号写进仓库。
 metadata:
-  edges-title: v1 自托管 Langfuse 只走 Tailscale
+  edges-title: 自托管 Langfuse 经 Cloudflare Tunnel 提供公网 HTTPS
   edges-type: project
   edges-origin-session-id: bc-8f1d5fb6-9160-5c0a-a840-06865f80e964
   edges-agent-client: cursor
   edges-username: Cursor Agent
   edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-20T11:26:35+00:00"
+  edges-updated-at: '2026-10-11T09:27:09+00:00'
 ---
 
-v1 自托管 Langfuse 只从 Tailscale 访问。公网 HTTPS（反代 + 证书）是后续，本轮未做。第三轮确认：在那之前，没有 Tailscale 就接受只剩 minigtr 的 localhost / 局域网，不当成必须立刻补的缺陷。
+自托管 Langfuse 的当前访问面是公网 HTTPS，经 Cloudflare Tunnel 转到 minigtr 上的实例。ADR 0017 的「仅 Tailscale」已于 2026-10-11 由 ADR 0033 取代。仓库里用「公网 HTTPS 域名（经 Cloudflare Tunnel）」描述入口，不写实例域名。
 
 **Why:**
-2026-09-20 第二、三轮 grill 确认（peng cheng）：v1 不需要公网入口；用户设备不会永远开 Tailscale，所以 HTTPS 要另开，但这段窗口的可达性缺口被接受。
+2026-09-20 grill 曾把 v1 收成仅 Tailscale，并把公网 HTTPS 留作后续，因为设备不会一直开着 Tailscale。2026-10-11 核实这条后续已经落地：Langfuse v4.38.0 在 minigtr 的 Docker 上，`/api/public/health` 返回 OK。继续把仅 Tailscale 写成现行决策会让仓库和实例不一致。
 
 **How to apply:**
-- 不要把 Funnel、反代、证书或公网端口当成 v1 范围。
-- 不要把「没开 Tailscale 也能从外面打开」写成 v1 能力，也不要为此提前实现 HTTPS。
-- 不要把 Tailscale MagicDNS / 机器名当成给人用的公网网址。
-- 对照 ADR `docs/adr/0017-langfuse-tailscale-only-access.md`；宿主见 ADR 0014。
+- 写访问方式、冒烟或任务时对照 ADR 0033，不要再把 ADR 0017 当作现行访问面。
+- 不要把 Tailscale Funnel、自管反代证书材料、实例域名、Cloudflare 账号、Tailscale 地址或 100.x 写进本仓。
+- 密钥仍只留 minigtr 磁盘（ADR 0018）。宿主仍是 minigtr，不是云 VPS（ADR 0014）。

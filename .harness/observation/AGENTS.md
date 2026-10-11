@@ -28,7 +28,7 @@
 | [`extensions/`](../../extensions/README.md) | 接口层。观测可以记录某个 extension 在野外的表现；实现仍在 extensions。 |
 | [`evaluation/`](../evaluation/README.md) | 评测把假设做成可复现对照；本目录只记看到了什么。观测不是评测。 |
 
-自托管 Langfuse 是独立的观测后端候选，不是本目录，也不是看板「知识库 Observation 系统」。v1 决策见 [ADR 0014](../../docs/adr/0014-self-hosted-langfuse-on-minigtr.md)–[ADR 0020](../../docs/adr/0020-langfuse-ui-then-few-clients.md)。产品卡可以日后消费该后端。公网 HTTPS、定时机外备份、以及更广的 Grok / edges 接线是后续或产品卡范围，不是本卡已交付。
+自托管 Langfuse 是独立的观测后端候选，不是本目录，也不是看板「知识库 Observation 系统」。宿主与编排见 [ADR 0014](../../docs/adr/0014-self-hosted-langfuse-on-minigtr.md)–[ADR 0016](../../docs/adr/0016-langfuse-docker-compose.md)，验收顺序见 [ADR 0020](../../docs/adr/0020-langfuse-ui-then-few-clients.md)。现行访问面是 [ADR 0033](../../docs/adr/0033-langfuse-public-https-via-cloudflare-tunnel.md)：公网 HTTPS 经 Cloudflare Tunnel；[ADR 0017](../../docs/adr/0017-langfuse-tailscale-only-access.md) 已取代。产品卡可以日后消费该后端。定时机外备份，以及更广的 Grok / edges 接线，仍是后续或产品卡范围。实例域名不写进本仓。
 
 ## 起步布局
 
@@ -36,4 +36,5 @@
 
 - [`logs/`](logs/README.md)：脱敏后的 run / 使用记录
 - [`metrics/`](metrics/README.md)：指标定义与仪表盘笔记
+- [`smoke/`](smoke/README.md)：不含密钥的可复现冒烟；Langfuse v4 events_only 的 OTLP 用法写在该处
 - 本 README

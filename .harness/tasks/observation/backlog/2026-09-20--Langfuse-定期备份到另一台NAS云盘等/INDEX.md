@@ -6,13 +6,13 @@ metadata:
   edges-title: Langfuse 定期备份到另一台（NAS/云盘等）
   edges-tasks-status: backlog
   edges-task-project: observation
-  edges-updated-at: "2026-09-20T11:23:14.174Z"
+  edges-updated-at: '2026-10-11T09:28:35.736Z'
 ---
 
 结论（idea）：建立到另一台（NAS/云盘等）的定期异地备份。
 
 **事实背景:**
-- 父卡 in_progress：`knowledge/tasks/observation/in_progress/2026-09-20--自部署-Langfuse.md`（自部署 Langfuse）。
+- 父卡已完成 v1 验收：`.harness/tasks/observation/done/2026-09-20--自部署-Langfuse/INDEX.md`（自部署 Langfuse）。异地定期备份仍未做。
 - minigtr设备助手 2026-09-20 要求拆后续，勿并进父卡当已完成。
 - v1：先用 docker named volumes + 偶尔打包，缺异地定期备份。
 
