@@ -4,7 +4,7 @@
 
 **Status:** accepted（ADR 0020；grill 确认于 2026-09-20）
 
-**See also:** ADR 0015（[基础设施卡 vs Observation 产品卡](0015-langfuse-infra-vs-observation-product.md)）；ADR 0014（[宿主 minigtr](0014-self-hosted-langfuse-on-minigtr.md)）；ADR 0017（[v1 仅 Tailscale](0017-langfuse-tailscale-only-access.md)）
+**See also:** ADR 0015（[基础设施卡 vs Observation 产品卡](0015-langfuse-infra-vs-observation-product.md)）；ADR 0014（[宿主 minigtr](0014-self-hosted-langfuse-on-minigtr.md)）；ADR 0033（[公网 HTTPS，经 Cloudflare Tunnel](0033-langfuse-public-https-via-cloudflare-tunnel.md)，取代 [ADR 0017](0017-langfuse-tailscale-only-access.md)）
 
 ## Decision
 

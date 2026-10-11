@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 评测与观测
 
+- **自建 Langfuse 的仓库记录与实例对齐：** 在仓库根执行 `bash .harness/observation/smoke/langfuse-otlp-smoke.sh`，可以向自建 Langfuse 发一条名为 `edges-langfuse-smoke` 的 OTLP trace，并用 v2 observations 回查。先在环境里设置 `LANGFUSE_HOST`、`LANGFUSE_PUBLIC_KEY`、`LANGFUSE_SECRET_KEY`，脚本和仓库都不存放这些值。这台 v4.38.0 实例的 events_only 写模式不接受旧 ingestion 接口上的 trace-create；健康检查仍看 `/api/public/health`。自部署任务按「界面健康，再由一到两个客户端发出 trace」记成完成。公网入口记为经 Cloudflare Tunnel 的 HTTPS，仓库不写实例域名。旧的「只走 Tailscale」不再作为现行访问面。
+
 - **MemoryBench 小规模对照可复跑：** 新增 `.harness/evaluation/cases/memorybench-smoke/run.py`，固定官方代码和 NFCats 数据，比较无记忆与 BM25-M；`--prepare-only` 准备数据且不调用模型，`--output` 指定新的运行目录。默认最多 40 次模型请求，保存真实检索、作答、评分和用量，接口失败时终止并标记失败。附 MiniMax-M2.5 的实际试跑报告；该用例验证基准链路，尚未接入 Edges 项目记忆。
 
 ### 文档与系统
