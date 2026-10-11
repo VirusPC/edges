@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **旧任务入口继续可用：** `edges tasks status` 对旧 `index.md` 任务仍能正常流转，保留入口文件的拼写，并一起移动日志和附件；索引迁移不会因同一文件的 `INDEX.md` 别名重复登记。
 - **项目列表保留完整描述：** `edges tasks project list` 与 `edges tasks project get` 返回一致的项目信息，包括自定义标题和多段描述；`--all` 列表也沿用同一解析方式。查询只读取当前范围内已登记的项目，不补建元数据或系统入口。
+- **写命令拒绝森林开关：** `edges --all tasks create`、`edges --all tasks update` 和 `edges --all tasks status` 现在会明确报错且不修改文件；其他内容写命令也采用同一检查，避免把森林查询开关误用于写入。
 
 ## [1.4.0] - 2026-10-08
 

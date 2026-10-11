@@ -116,6 +116,9 @@ function addRootCommand(
     if (all) ctx.all = true;
     if (scope !== undefined) ctx.env = { ...ctx.env, EDGES_SCOPE: scope };
     const target = commandWriteTarget(command, ctx.env);
+    if (all && target !== undefined) {
+      throw new Error("--all is only supported by read commands.");
+    }
     if (target !== undefined) await beforeWrite?.(target);
   });
 
