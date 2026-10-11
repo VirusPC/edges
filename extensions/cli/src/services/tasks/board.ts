@@ -1,6 +1,9 @@
 import { isWithinPath, firstSymlink } from "../../utils/filesystem.js";
 import { query } from "../../domain/operations/query.js";
-import { realpathSync } from "node:fs";
+import {
+  nativeTaskPath,
+  relativePathInsideScope,
+} from "./realpath.js";
 import { TaskNode, AgentsNode, ReadmeNode } from "../../domain/models/index.js";
 import { taskBoardQuery, taskLocationOf, listRepositoryTaskNodes } from "./node-query.js";
 import { taskBoardLocation } from "./paths.js";
@@ -48,6 +51,13 @@ import {
   type TaskStatus,
 } from "../../domain/models/tasks/types.js";
 
+export {
+  nativeTaskPath,
+  relativePathInsideScope,
+  useTaskBoardRealpathForTests,
+  type TaskBoardRealpath,
+} from "./realpath.js";
+
 export type BoardFs = {
   readFile(abs: string): Promise<string>;
   readdir(abs: string): Promise<string[]>;
@@ -68,7 +78,7 @@ export async function assertBoardPath(
 ): Promise<void> {
   if (target === undefined) return;
   const originalScope = path.resolve(scopeDir(target));
-  const scope = realpathSync(originalScope);
+  const scope = nativeTaskPath(originalScope);
   const board = path.join(scope, path.relative(originalScope, boardRoot(target)));
   if (isWithinPath(abs, originalScope)) abs = path.join(scope, path.relative(originalScope, abs));
   if (!isWithinPath(abs, board)) {
@@ -162,7 +172,8 @@ export async function listProjectIds(
     (await taskBoardQuery(target, ["agents", "readme"], { super: false })).value(),
   ]);
   const nodes = [...fromContent, ...fromAgents];
-  const board = await fs.exists(boardRoot(repoPath)) ? realpathSync(boardRoot(repoPath)) : boardRoot(repoPath);
+  const boardPath = boardRoot(repoPath);
+  const board = await fs.exists(boardPath) ? nativeTaskPath(boardPath) : boardPath;
   const names = new Set(nodes
     .filter(node => (node instanceof AgentsNode || node instanceof ReadmeNode) && path.dirname(node.directoryPath) === board)
     .map(node => path.basename(node.directoryPath)));
@@ -180,42 +191,8 @@ export async function listProjectIds(
   });
 }
 
-/** JS realpath keeps caller casing on macOS; native realpath is the directory-entry spelling used by node paths. */
-export type TaskBoardRealpath = {
-  javascript(target: string): string;
-  native(target: string): string;
-};
-
-const systemTaskBoardRealpath: TaskBoardRealpath = {
-  javascript: (target) => realpathSync(target),
-  native: (target) => realpathSync.native(target),
-};
-
-let taskBoardRealpath: TaskBoardRealpath = systemTaskBoardRealpath;
-
-/** Tests simulate a case-insensitive scope alias. Production calls keep the system implementation. */
-export function useTaskBoardRealpathForTests(realpath?: TaskBoardRealpath): void {
-  taskBoardRealpath = realpath ?? systemTaskBoardRealpath;
-}
-
-/** Directory-entry spelling shared with node.path. JS realpath keeps caller casing on macOS. */
-export function nativeTaskPath(target: string): string {
-  return taskBoardRealpath.native(target);
-}
-
 function scopeNodeRoot(repoPath: BoardTarget): string {
   return nativeTaskPath(scopeDir(repoPath));
-}
-
-export function relativePathInsideScope(scopeRoot: string, file: string): string {
-  const rel = path.relative(scopeRoot, file);
-  if (!rel || !isWithinPath(file, scopeRoot)) {
-    throw new TasksError(
-      "VALIDATION_ERROR",
-      "path is outside selected task board",
-    );
-  }
-  return rel;
 }
 
 export type ListedTask = {
@@ -241,7 +218,7 @@ async function readListItem(
   const abs = path.join(scopeDir(repoPath), rel);
   const sidecarAbs = path.join(scopeDir(repoPath), sidecarRel);
   const markdown = providedNode?.serialize() ?? await fs.readFile(abs);
-  const node = providedNode ?? new TaskNode(taskBoardRealpath.native(abs)).parse(markdown);
+  const node = providedNode ?? new TaskNode(nativeTaskPath(abs)).parse(markdown);
   const scopeRoot = scopeNodeRoot(repoPath);
   rel = relativePathInsideScope(scopeRoot, node.path);
   taskLocationOf(node, scopeRoot);
@@ -326,7 +303,7 @@ async function findByStem(
   fs: BoardFs,
 ): Promise<Array<{ project: TaskProjectId; status: TaskStatus }>> {
   const target = typeof repoPath === 'string' ? taskBoardLocation(repoPath, 'domain') : repoPath;
-  const root = realpathSync(scopeDir(repoPath));
+  const root = scopeNodeRoot(repoPath);
   return (await taskBoardQuery(target))
     .filter((node): node is TaskNode => node instanceof TaskNode)
     .map(node => taskLocationOf(node, root))
@@ -423,7 +400,7 @@ export async function listRepositoryTasksWithDocs(
   root: string, opts: TaskListOpts = {}, purpose?: import("./paths.js").TaskPurpose,
   traversal: { super?: boolean } = {},
 ): Promise<RepositoryTaskItem[]> {
-  root = realpathSync(root);
+  root = nativeTaskPath(root);
   const nodes = await listRepositoryTaskNodes(root, traversal);
   const rows = await query(async function* () { yield* nodes; })
     .map(node => ({ node, location: taskLocationOf(node, root) }))
@@ -436,8 +413,8 @@ export async function listRepositoryTasksWithDocs(
       const target = taskBoardLocation(path.resolve(root, source.scope), source.purpose);
       const listed = await readListItem(target, project, status, stem, createNodeBoardFs(target), node);
       return { ...listed.item, doc: listed.doc, source,
-        path: path.relative(root, node.path),
-        sidecarPath: path.relative(root, path.join(target.scopeDir, listed.item.sidecarPath)) };
+        path: relativePathInsideScope(root, node.path),
+        sidecarPath: relativePathInsideScope(root, path.join(target.scopeDir, listed.item.sidecarPath)) };
     }).value();
   rows.sort((a,b) => a.source.scope.localeCompare(b.source.scope) || a.source.purpose.localeCompare(b.source.purpose)
     || (a.project === b.project ? 0 : a.project === DEFAULT_TASK_PROJECT ? -1 : b.project === DEFAULT_TASK_PROJECT ? 1 : a.project.localeCompare(b.project))
