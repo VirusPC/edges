@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 1 课 · Agent、Task、Crew、Flow 的心智模型 — CrewAI</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<article>
+
+<p class="meta">CrewAI 学习空间 · 第 1 课 · 约 8 分钟 · 概念为主；附官方短片段体感（非作业） · 依据官方文档（2026-10-11 再抓取，docs 版本 v1.15.27 / edge）</p>
+<h1>Agent、Task、Crew、Flow：四层是怎么套在一起的</h1>
+<p class="subtitle">One mental model: who works, on what, as a team, inside which workflow.</p>
+
+<div class="callout goal">
+  <p><strong>本课唯一目标：</strong>读完后，你能用自己的话讲清楚两件事——</p>
+  <ol>
+    <li>一个 <span class="en">Task</span> 的输出是<strong>怎样</strong>流到下一个 <span class="en">Task</span> 的；</li>
+    <li><span class="en">Flow</span> 在 <span class="en">Crew</span> 之上<strong>多加了什么</strong>。</li>
+  </ol>
+</div>
+<p class="meta">应你的反馈：下面在每个概念旁附了<strong>很短</strong>的官方片段，方便建立体感。它们<strong>不是作业</strong>——不用安装、不用敲、不用跑；读懂字段名即可。</p>
+
+<section id="big-picture">
+<h2>1. 先看总图</h2>
+<p>
+官方 <a href="https://docs.crewai.com/en/introduction#the-crewai-architecture">Introduction · The CrewAI Architecture</a>
+把 CrewAI 分成两层：<strong><span class="en">Flow</span> 是骨架（backbone）</strong>，负责步骤、逻辑和数据怎么在系统里移动；
+<strong><span class="en">Crew</span> 是干活的团队（intelligence）</strong>，在 <span class="en">Flow</span> 的某一步里被触发，去解决需要协作与自主性的复杂问题。
+再往下一层，<span class="en">Crew</span> 由若干 <span class="en">Agent</span>（谁来做）和若干 <span class="en">Task</span>（做什么）组成，
+并按一种 <span class="en">Process</span>（怎么排班）执行
+（<a href="https://docs.crewai.com/en/concepts/crews#crew-attributes">Crews · Crew Attributes</a>）。
+</p>
+
+<figure>
+<svg viewBox="0 0 640 410" role="img" aria-labelledby="dg-title dg-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="dg-title">Flow、Crew、Task、Agent 嵌套关系图</title>
+  <desc id="dg-desc">最外层是 Flow，它持有 state，并按 @start、@listen 顺序执行步骤。中间步骤 run_research 内部启动一个 Crew，Crew 按 sequential Process 依次执行 research_task 和 analysis_task，前者的输出通过 context 传给后者，每个 Task 由一个 Agent 执行。</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8b2d1f"/>
+    </marker>
+    <marker id="arrg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#777"/>
+    </marker>
+  </defs>
+  <g font-family="-apple-system, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#1f1f1f">
+    <!-- Flow -->
+    <rect x="8" y="8" width="624" height="394" rx="10" fill="#fbf7ef" stroke="#8b2d1f" stroke-width="1.6"/>
+    <text x="22" y="32" font-size="15" font-weight="700" fill="#8b2d1f">Flow（事件驱动的编排 + state）</text>
+
+    <!-- State panel -->
+    <rect x="482" y="52" width="136" height="334" rx="6" fill="#fff" stroke="#8b2d1f" stroke-dasharray="4 3"/>
+    <text x="550" y="74" text-anchor="middle" font-weight="700">self.state</text>
+    <text x="550" y="94" text-anchor="middle" fill="#555">跨步骤共享的数据</text>
+    <text x="550" y="124" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="11">topic = "AI Agents"</text>
+    <text x="550" y="250" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="11">report = result.raw</text>
+    <text x="550" y="360" text-anchor="middle" fill="#555" font-size="11">可持久化（@persist）</text>
+
+    <!-- Step 1 -->
+    <rect x="26" y="52" width="440" height="40" rx="6" fill="#fff" stroke="#999"/>
+    <text x="40" y="77"><tspan font-family="Menlo, Consolas, monospace" fill="#8b2d1f">@start()</tspan>  prepare_topic：决定主题，写入 state</text>
+    <line x1="466" y1="72" x2="480" y2="110" stroke="#777" stroke-dasharray="3 3" marker-end="url(#arrg)"/>
+
+    <line x1="246" y1="92" x2="246" y2="110" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Step 2 with Crew -->
+    <rect x="26" y="112" width="440" height="222" rx="6" fill="#fff" stroke="#999"/>
+    <text x="40" y="134"><tspan font-family="Menlo, Consolas, monospace" fill="#8b2d1f">@listen(prepare_topic)</tspan>  run_research：在这一步里启动 Crew</text>
+    <line x1="466" y1="250" x2="480" y2="250" stroke="#777" stroke-dasharray="3 3" marker-end="url(#arrg)"/>
+
+    <!-- Crew -->
+    <rect x="42" y="146" width="408" height="176" rx="6" fill="#f4ece4" stroke="#8b2d1f"/>
+    <text x="56" y="166" font-weight="700">Crew</text>
+    <text x="96" y="166" fill="#555">= agents + tasks + Process（这里是 sequential）</text>
+
+    <!-- Task 1 -->
+    <rect x="56" y="178" width="164" height="132" rx="5" fill="#fff" stroke="#666"/>
+    <text x="66" y="197" font-weight="700">Task 1: research_task</text>
+    <text x="66" y="216" fill="#555" font-size="11">description（做什么）</text>
+    <text x="66" y="232" fill="#555" font-size="11">expected_output（交付什么）</text>
+    <rect x="66" y="244" width="144" height="56" rx="4" fill="#eef3f8" stroke="#6b8caf"/>
+    <text x="74" y="262" font-weight="700" font-size="11">Agent: researcher</text>
+    <text x="74" y="278" font-size="10.5" fill="#444">role / goal / backstory</text>
+    <text x="74" y="292" font-size="10.5" fill="#444">tools · llm</text>
+
+    <!-- context arrow -->
+    <line x1="220" y1="230" x2="270" y2="230" stroke="#8b2d1f" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="245" y="221" text-anchor="middle" font-size="11" fill="#8b2d1f" font-weight="700">输出</text>
+    <text x="245" y="248" text-anchor="middle" font-size="10.5" fill="#8b2d1f" font-family="Menlo, Consolas, monospace">context</text>
+
+    <!-- Task 2 -->
+    <rect x="272" y="178" width="164" height="132" rx="5" fill="#fff" stroke="#666"/>
+    <text x="282" y="197" font-weight="700">Task 2: analysis_task</text>
+    <text x="282" y="216" fill="#555" font-size="11">context: [research_task]</text>
+    <text x="282" y="232" fill="#555" font-size="11">output_file: report.md</text>
+    <rect x="282" y="244" width="144" height="56" rx="4" fill="#eef3f8" stroke="#6b8caf"/>
+    <text x="290" y="262" font-weight="700" font-size="11">Agent: analyst</text>
+    <text x="290" y="278" font-size="10.5" fill="#444">role / goal / backstory</text>
+    <text x="290" y="292" font-size="10.5" fill="#444">tools · llm</text>
+
+    <line x1="246" y1="334" x2="246" y2="352" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <!-- Step 3 -->
+    <rect x="26" y="354" width="440" height="36" rx="6" fill="#fff" stroke="#999"/>
+    <text x="40" y="377"><tspan font-family="Menlo, Consolas, monospace" fill="#8b2d1f">@listen(run_research)</tspan>  summarize：读 state，收尾</text>
+  </g>
+</svg>
+<figcaption>图 1　由外到内：Flow（持有 state，按 <code>@start</code> / <code>@listen</code> 推进步骤）→ 某一步里启动 Crew → Crew 按 Process 执行 Task → 每个 Task 交给一个 Agent。
+步骤名取自官方 <a href="https://docs.crewai.com/en/quickstart">Quickstart</a>；两个 Task 取自 <a href="https://docs.crewai.com/en/guides/crews/first-crew">Build Your First Crew</a>（Quickstart 里的 Crew 只有一个 Task，这里合并成一张图便于说明）。</figcaption>
+</figure>
+</section>
+
+<section id="agent">
+<h2>2. Agent：谁来做</h2>
+<p>
+<a href="https://docs.crewai.com/en/concepts/agents#overview-of-an-agent">Agents</a> 页把 <span class="en">Agent</span> 定义为一个“自主单元”：能执行任务、依据自己的 role 和 goal 做决策、使用工具、与其他 Agent 协作。
+最核心的三个字段是“人设”：
+</p>
+<ul>
+  <li><code>role</code>：在团队里的职能与专长；</li>
+  <li><code>goal</code>：指导它做决策的个人目标；</li>
+  <li><code>backstory</code>：给它背景和性格，丰富交互。</li>
+</ul>
+<p>
+另外两个常见字段：<code>tools</code>（它能调用的能力，默认为空列表）和 <code>llm</code>（驱动它的语言模型）
+（<a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a>）。
+</p>
+<aside class="sidenote">文档里 <code>llm</code> 标为 optional，默认取 <code>OPENAI_MODEL_NAME</code> 或 "gpt-4"；但 JSON-first 教程里每个 Agent 都显式写了 <code>"llm": "provider/model-id"</code>（<a href="https://docs.crewai.com/en/guides/crews/first-crew#step-2-define-your-agents">First Crew · Step 2</a>）。</aside>
+<p>
+新项目里，每个 Agent 是一个文件 <code>agents/&lt;name&gt;.jsonc</code>，文件名就是在 <code>crew.jsonc</code> 里引用它的名字
+（<a href="https://docs.crewai.com/en/concepts/agents#jsonc-configuration-recommended">Agents · JSONC Configuration (Recommended)</a>）。
+</p>
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> <code>agents/researcher.jsonc</code> — 摘自 <a href="https://docs.crewai.com/en/guides/crews/first-crew#step-2-define-your-agents">Build Your First Crew · Step 2</a>（字段照原文，含官方注释与 <code>llm</code> 占位符）。</figcaption>
+<pre><code class="language-jsonc">{
+  "role": "Senior Research Specialist for {topic}",
+  "goal": "Find comprehensive and accurate information about {topic}, with a focus on recent developments and key insights.",
+  "backstory": "You are an experienced research specialist who organizes complex information into clear, useful notes.",
+  // Replace with your model, for example "openai/gpt-4o".
+  "llm": "provider/model-id",
+  "tools": ["SerperDevTool"],
+  "settings": {
+    "verbose": true,
+    "allow_delegation": false
+  }
+}</code></pre>
+</figure>
+</section>
+
+<section id="task">
+<h2>3. Task：做什么，以及数据怎么往下传</h2>
+<p>
+<a href="https://docs.crewai.com/en/concepts/tasks#overview">Tasks</a> 页说：<span class="en">Task</span> 是由一个 <span class="en">Agent</span> 完成的具体任务。
+在 <code>crew.jsonc</code> 里，<strong>每个 Task 必须有 <code>description</code> 和 <code>expected_output</code></strong>，
+<code>agent</code> 要对应 <code>agents</code> 列表里的某个名字
+（<a href="https://docs.crewai.com/en/concepts/tasks#jsonc-configuration-recommended">Tasks · JSONC Configuration</a>）。
+</p>
+<ul>
+  <li><code>description</code>：这件事是什么；</li>
+  <li><code>expected_output</code>：做完长什么样（交付物的规格）；</li>
+  <li><code>agent</code>：派给谁；</li>
+  <li><code>context</code>：<strong>要读取哪些前序 Task 的输出</strong>。</li>
+</ul>
+
+<h3>本课重点：Task → Task 的数据流</h3>
+<p>两条规则，都来自官方文档：</p>
+<ol>
+  <li><strong>默认接力。</strong>在 sequential 流程中，Task 按列表顺序执行，“一个 Task 的输出作为下一个 Task 的上下文”
+  （<a href="https://docs.crewai.com/en/concepts/processes#sequential-process">Processes · Sequential Process</a>；
+  另见 <a href="https://docs.crewai.com/en/concepts/tasks#referring-to-other-tasks">Tasks · Referring to Other Tasks</a>：“the output of one task is automatically relayed into the next one”）。</li>
+  <li><strong>显式指定。</strong>用 <code>context</code> 列出前序 Task 的名字，就能精确指定读哪些（可以多个、可以不是紧挨着的上一个）。
+  JSON 里 <code>context</code> 只能引用<strong>之前</strong>的 Task，向前引用会被拒绝，“so sequential context stays explicit”
+  （<a href="https://docs.crewai.com/en/concepts/tasks#jsonc-configuration-recommended">Tasks · JSONC</a>）。</li>
+</ol>
+<p>
+官方教程里的例子：<code>analysis_task</code> 写了 <code>"context": ["research_task"]</code>，于是 analyst 拿到 researcher 的研究结果，再写出 <code>output/report.md</code>
+（<a href="https://docs.crewai.com/en/guides/crews/first-crew#step-3-define-tasks-and-crew-settings">First Crew · Step 3</a>、<a href="https://docs.crewai.com/en/guides/crews/first-crew#how-it-works">How It Works</a>）。
+</p>
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> 带 <code>context</code> 的下游 Task — 摘自 <a href="https://docs.crewai.com/en/guides/crews/first-crew#step-3-define-tasks-and-crew-settings">First Crew · Step 3</a>（只摘 <code>analysis_task</code> 对象）。</figcaption>
+<pre><code class="language-jsonc">{
+  "name": "analysis_task",
+  "description": "Analyze the research findings and create a polished report on {topic}. Include an executive summary, key insights, trend analysis, and recommendations.",
+  "expected_output": "A professional markdown report with clear headings, a concise summary, main findings, and recommendations.",
+  "agent": "analyst",
+  "context": ["research_task"],
+  "output_file": "output/report.md",
+  "markdown": true
+}</code></pre>
+</figure>
+<aside class="sidenote">我的类比（非官方说法）：<code>context</code> 像是“Task 级别的显式消息传递”——下游 Task 声明自己依赖哪些上游输出，而不是去一个共享记忆里自己找。这和你熟悉的 agent memory 是两回事；CrewAI 另有 <code>memory</code> 机制，以后单独讲。</aside>
+<p>
+还有一个“入口”数据：<code>{topic}</code> 这类占位符，由 <code>crew.jsonc</code> 顶层的 <code>inputs</code> 提供默认值，缺了 <code>crewai run</code> 会提示你填
+（<a href="https://docs.crewai.com/en/guides/crews/first-crew#step-3-define-tasks-and-crew-settings">First Crew · Step 3</a>）。
+所以数据流可以概括为：<strong>inputs 填进占位符 → Task 1 产出 → 经 context 交给 Task 2 → 最后一个 Task 的输出（或 output_file）就是 Crew 的结果。</strong>
+</p>
+</section>
+
+<section id="crew">
+<h2>4. Crew 与 Process：怎么排班</h2>
+<p>
+<span class="en">Crew</span> 是“一组协作的 Agent，一起完成一组 Task”，并定义执行策略
+（<a href="https://docs.crewai.com/en/concepts/crews#overview">Crews · Overview</a>）。
+关键字段是 <code>agents</code>、<code>tasks</code> 和 <code>process</code>，<code>process</code> 默认为 <code>sequential</code>
+（<a href="https://docs.crewai.com/en/concepts/crews#crew-attributes">Crew Attributes</a>）。
+<a href="https://docs.crewai.com/en/concepts/processes#process-implementations">Processes</a> 只有两种：
+</p>
+<table>
+  <thead><tr><th>Process</th><th>谁决定谁做什么</th><th>要点</th></tr></thead>
+  <tbody>
+    <tr><td><code>sequential</code></td><td>你在 <code>tasks</code> 列表里预先排好，每个 Task 已指定 agent</td><td>按顺序执行，前一个的输出做后一个的上下文</td></tr>
+    <tr><td><code>hierarchical</code></td><td>一个 manager（经理）Agent</td><td>Task <strong>不预先分配</strong>；经理按能力分派、审核产出、判断是否完成。必须提供 <code>manager_llm</code> 或 <code>manager_agent</code>（<a href="https://docs.crewai.com/en/concepts/processes#hierarchical-process">Hierarchical Process</a>）</td></tr>
+  </tbody>
+</table>
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> <code>crew.jsonc</code> — 摘自 <a href="https://docs.crewai.com/en/guides/crews/first-crew#step-3-define-tasks-and-crew-settings">First Crew · Step 3</a>；长 <code>description</code> / <code>expected_output</code> 用 JSONC <code>//</code> 注释省略（教学省略），其余键值照原文。</figcaption>
+<pre><code class="language-jsonc">{
+  "name": "Research Crew",
+  "agents": ["researcher", "analyst"],
+  "tasks": [
+    {
+      "name": "research_task",
+      // description / expected_output：见第 3 节官方片段或 First Crew Step 3
+      "agent": "researcher"
+    },
+    {
+      "name": "analysis_task",
+      // description / expected_output：见第 3 节
+      "agent": "analyst",
+      "context": ["research_task"],
+      "output_file": "output/report.md",
+      "markdown": true
+    }
+  ],
+  "process": "sequential",
+  "verbose": true,
+  "memory": true,
+  "inputs": {
+    "topic": "Artificial Intelligence in Healthcare"
+  }
+}</code></pre>
+</figure>
+</section>
+
+<section id="flow">
+<h2>5. Flow：在 Crew 之上多了什么</h2>
+<p>
+<a href="https://docs.crewai.com/en/concepts/flows#overview">Flows</a> 页：Flow 用来构建<strong>结构化、事件驱动</strong>的工作流，连接多个步骤、<strong>管理 state</strong>、控制执行流向。
+Introduction 列出 Flow 提供的三样东西：<strong>State Management</strong>（跨步骤、跨执行持久化数据）、<strong>Event-Driven Execution</strong>（由事件或外部输入触发）、<strong>Control Flow</strong>（条件、循环、分支）
+（<a href="https://docs.crewai.com/en/introduction#1-flows-the-backbone">Introduction · Flows: The Backbone</a>）。
+</p>
+<ul>
+  <li><code>@start()</code> 标记入口步骤；<code>@listen(x)</code> 标记“当 x 产出输出时执行我”，并且能把 x 的输出当参数拿到
+  （<a href="https://docs.crewai.com/en/concepts/flows#getting-started">Flows · Getting Started</a>）。</li>
+  <li><code>self.state</code> 是步骤之间共享的数据；可以是 dict，也可以是 Pydantic 模型（结构化 state）
+  （<a href="https://docs.crewai.com/en/concepts/flows#flow-state-management">Flow State Management</a>）。<code>@persist</code> 能让 state 在重启之后保留（<a href="https://docs.crewai.com/en/concepts/flows#flow-persistence">Flow Persistence</a>）。</li>
+  <li><strong>Crew 跑在 Flow 的某一步里</strong>：Quickstart 中 <code>run_research</code> 这一步调用 <code>crew.kickoff(inputs={"topic": self.state.topic})</code>，再把 <code>result.raw</code> 写回 <code>self.state.report</code>
+  （<a href="https://docs.crewai.com/en/quickstart#how-this-run-fits-together">Quickstart · How this run fits together</a>；<a href="https://docs.crewai.com/en/concepts/flows#adding-crews-to-flows">Flows · Adding Crews to Flows</a>）。</li>
+</ul>
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> Flow <code>@start</code> / <code>@listen</code> 调 Crew — 摘自 <a href="https://docs.crewai.com/en/quickstart#define-the-flow-in-mainpy">Quickstart · Define the Flow in main.py</a>（去掉 trigger 分支与 print；<code>summarize</code> 体用注释标省略）。</figcaption>
+<pre><code class="language-python">class ResearchFlowState(BaseModel):
+    topic: str = ""
+    report: str = ""
+
+class LatestAiFlow(Flow[ResearchFlowState]):
+    @start()
+    def prepare_topic(self, crewai_trigger_payload: dict | None = None):
+        self.state.topic = "AI Agents"
+
+    @listen(prepare_topic)
+    def run_research(self):
+        result = kickoff_content_crew(inputs={"topic": self.state.topic})
+        self.state.report = result.raw
+
+    @listen(run_research)
+    def summarize(self):
+        ...  # 官方：打印 output/report.md 路径</code></pre>
+</figure>
+<aside class="sidenote">对比一下两种“传数据”：Crew 内部 Task 之间靠 <code>context</code>；Flow 的步骤之间靠 <code>@listen</code> 的返回值和 <code>self.state</code>。Crew 的结果要进入 Flow，需要那一步把它写进 state 或 return 出去。</aside>
+<p>
+一句话：<strong>Crew 解决“一群 Agent 怎样协作完成一组 Task”；Flow 解决“整个应用分哪几步、按什么事件和条件推进、数据存在哪里”。</strong>
+Introduction 的建议很直接：“For any production-ready application, start with a Flow”——用 Flow 定义整体结构、state 和逻辑，在需要自主协作的那一步里放一个 Crew
+（<a href="https://docs.crewai.com/en/introduction#when-to-use-crews-vs-flows">When to Use Crews vs. Flows</a>）。
+</p>
+</section>
+
+<section id="current-docs">
+<h2>6. 两个“当前文档”事实（已核实）</h2>
+<ul>
+  <li><strong>JSON-first：</strong>新建 crew 项目（<code>crewai create crew &lt;name&gt;</code>）默认是 <code>agents/*.jsonc</code> + <code>crew.jsonc</code>，<code>crewai run</code> 直接加载；旧的 <code>crew.py</code> + <code>config/*.yaml</code> 布局需要加 <code>--classic</code>
+  （<a href="https://docs.crewai.com/en/guides/crews/first-crew#step-1-create-a-new-crew">First Crew · Step 1</a>；<a href="https://docs.crewai.com/en/concepts/crews#jsonc-configuration-recommended">Crews · JSONC (Recommended)</a>）。网上很多旧教程是 YAML 写法，读的时候要知道它是 classic。</li>
+  <li><strong>生产推荐 Flow：</strong>Quickstart 原话 “Flows are the recommended way to structure production apps”（<a href="https://docs.crewai.com/en/quickstart">Quickstart</a>），与 Introduction 的 “start with a Flow” 一致。</li>
+</ul>
+<aside class="sidenote">一个小不一致：<a href="https://docs.crewai.com/en/concepts/flows#adding-crews-to-flows">Flows</a> 页说 <code>crewai create flow</code> 生成的示例 crew（<code>poem_crew</code>）仍是 classic YAML 布局；Quickstart 则描述生成 <code>crews/content_crew/</code> 并让你替换成 JSONC。概念上不影响，写代码时以实际生成结果为准。</aside>
+</section>
+
+<section id="explain-back">
+<h2>7. 讲给自己听（1 分钟）</h2>
+<p>不看上文，试着回答：在图 1 里，<code>topic</code> 从哪里来？它怎样进入 researcher 的 prompt？analyst 怎么拿到研究结果？最终报告又怎么回到 Flow 的 state？
+说得出来，就达成了本课目标。然后做下面的小测。</p>
+</section>
+
+<section id="quiz">
+<h2>8. 小测（检索练习）</h2>
+<p class="meta">点击选项即判定，每题只能作答一次；选项顺序随机。“重做”可清空重来。</p>
+
+<div class="quiz" data-quiz>
+
+  <div data-question data-answer="1">
+    <p data-stem>Agent 的三个“人设”核心字段是哪一组？</p>
+    <ol data-options>
+      <li><code>role</code>、<code>goal</code>、<code>backstory</code></li>
+      <li><code>name</code>、<code>prompt</code>、<code>persona</code></li>
+      <li><code>role</code>、<code>model</code>、<code>memory</code></li>
+      <li><code>task</code>、<code>tools</code>、<code>process</code></li>
+    </ol>
+    <div data-explanation>Agent Attributes 表里前三项就是 role（职能）、goal（目标）、backstory（背景）；tools 和 llm 是另外的可选字段。见 <a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agents · Agent Attributes</a>。</div>
+  </div>
+
+  <div data-question data-answer="3">
+    <p data-stem>在 <code>crew.jsonc</code> 里，每个 Task <strong>必须</strong>包含哪两个字段？</p>
+    <ol data-options>
+      <li><code>description</code> 与 <code>output_pydantic</code></li>
+      <li><code>expected_output</code> 与 <code>output_file</code></li>
+      <li><code>description</code> 与 <code>expected_output</code></li>
+      <li><code>human_input</code> 与 <code>output_pydantic</code></li>
+    </ol>
+    <div data-explanation>原文：“Each task must include description and expected_output.” 其余字段都是可选的。见 <a href="https://docs.crewai.com/en/concepts/tasks#jsonc-configuration-recommended">Tasks · JSONC Configuration</a>。</div>
+  </div>
+
+  <div data-question data-answer="2">
+    <p data-stem>Build Your First Crew 里，<code>analysis_task</code> 是如何明确拿到 <code>research_task</code> 输出的？</p>
+    <ol data-options>
+      <li>在 backstory 中预写入上步结果</li>
+      <li>在 context 中列出前序任务名</li>
+      <li>由 memory 自动检索之前输出</li>
+      <li>靠 inputs 占位符传上步结果</li>
+    </ol>
+    <div data-explanation><code>"context": ["research_task"]</code>——context 指向前序 Task 的名字，analyst 因此收到研究结果。inputs 只负责填 <code>{topic}</code> 这类占位符的初始值。见 <a href="https://docs.crewai.com/en/guides/crews/first-crew#step-3-define-tasks-and-crew-settings">First Crew · Step 3</a>。</div>
+  </div>
+
+  <div data-question data-answer="4">
+    <p data-stem>hierarchical Process 和 sequential 最关键的区别是？</p>
+    <ol data-options>
+      <li>所有任务同时并行执行而不分先后</li>
+      <li>每个任务都必须先经人类逐条确认</li>
+      <li>只允许一个智能体去完成全部任务</li>
+      <li>由经理智能体分派任务并审核产出</li>
+    </ol>
+    <div data-explanation>hierarchical 中 Task 不预先分配，由 manager Agent（需 <code>manager_llm</code> 或 <code>manager_agent</code>）按能力分派、审核输出、判断完成。见 <a href="https://docs.crewai.com/en/concepts/processes#hierarchical-process">Processes · Hierarchical Process</a>。</div>
+  </div>
+
+  <div data-question data-answer="2">
+    <p data-stem>相比单独运行一个 Crew，Flow 主要额外提供了什么？</p>
+    <ol data-options>
+      <li>更多智能体角色与更长的背景故事</li>
+      <li>跨步骤的状态与事件驱动执行控制</li>
+      <li>把每个任务的输出自动保存为文件</li>
+      <li>让智能体自动选择最合适的大模型</li>
+    </ol>
+    <div data-explanation>Flow 提供 State Management、Event-Driven Execution 和 Control Flow（条件/循环/分支）。保存文件是 Task 的 <code>output_file</code>，与 Flow 无关。见 <a href="https://docs.crewai.com/en/introduction#1-flows-the-backbone">Introduction · Flows: The Backbone</a>。</div>
+  </div>
+
+  <div data-question data-answer="3">
+    <p data-stem>在官方 Quickstart 里，Crew 是在哪里被启动（<code>kickoff</code>）的？</p>
+    <ol data-options>
+      <li>在研究员智能体的背景故事字段里</li>
+      <li>在第二个任务的上下文依赖列表里</li>
+      <li>在一个被上一步触发的流程步骤里</li>
+      <li>在团队配置文件的默认输入对象里</li>
+    </ol>
+    <div data-explanation><code>run_research</code> 用 <code>@listen(prepare_topic)</code> 标记，在 <code>prepare_topic</code> 完成后执行，在其中调用 crew 的 <code>kickoff</code>，并把 <code>result.raw</code> 写回 <code>self.state.report</code>。见 <a href="https://docs.crewai.com/en/quickstart#how-this-run-fits-together">Quickstart · How this run fits together</a>。</div>
+  </div>
+
+</div>
+</section>
+
+<section id="next">
+<h2>延伸阅读与下一步</h2>
+<ul>
+  <li><strong>推荐一手资料（先读这一页）：</strong><a href="https://docs.crewai.com/en/introduction">CrewAI Docs · Introduction</a>——篇幅短，正好讲清 Flow 与 Crew 的分工以及“什么时候用哪个”。读完再看
+  <a href="https://docs.crewai.com/en/guides/crews/first-crew">Build Your First Crew</a>，用一个真实的 <code>crew.jsonc</code> 印证 Task 之间的 <code>context</code>。</li>
+  <li><strong>速查表：</strong><a href="../reference/glossary.html">术语表 / Glossary</a>（可打印）。</li>
+  <li><strong>下一课：</strong><a href="0002-quickstart-data-flow.html">第 2 课 · 朗读 Quickstart 的数据流</a>——对着官方 <code>main.py</code> 与 <code>crew.jsonc</code> 讲清 topic / report 怎么走。</li>
+</ul>
+<div class="callout"><p>有不清楚的地方随时问我（你的老师）。</p></div>
+</section>
+
+<footer>
+所有事实均来自 <a href="https://docs.crewai.com/">docs.crewai.com</a>（2026-10-11 再抓取；稳定链接 <code>/en/…</code> 与 <code>/edge/en/…</code> 对齐 v1.15.27）。课内代码块标「官方」的摘自文档（可有 JSONC <code>//</code> 教学省略）；标注“我的类比”的旁注是教学类比，不是官方说法。本课仍不要求安装或运行。
+</footer>
+
+</article>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

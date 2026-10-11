@@ -1,0 +1,232 @@
+/* teach-crewai shared stylesheet — Tufte-like, CJK-friendly, print-friendly */
+:root {
+  --ink: #1f1f1f;
+  --ink-soft: #555;
+  --paper: #fffff8;
+  --rule: #d8d6c8;
+  --accent: #8b2d1f;
+  --accent-soft: #f4ece4;
+  --code-bg: #f3f2ea;
+  --ok: #2f6b3a;
+  --ok-bg: #e9f3e9;
+  --bad: #9a2c22;
+  --bad-bg: #f8e8e5;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia,
+           "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial,
+          "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Source Han Sans SC",
+          "Microsoft YaHei", sans-serif;
+  --mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Noto Sans Mono CJK SC", monospace;
+  --measure: 40rem;      /* main text column */
+  --margin-col: 15rem;   /* side-note column */
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 17px; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  line-height: 1.8;            /* generous for CJK */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Layout: main column + right margin for side notes */
+article, .page {
+  max-width: calc(var(--measure) + var(--margin-col) + 6rem);
+  padding: 2.5rem 1.5rem 4rem;
+  margin: 0 auto;
+}
+article > *, .page > * { max-width: var(--measure); }
+section { margin: 2.2rem 0; }
+
+h1, h2, h3 { font-family: var(--sans); font-weight: 600; line-height: 1.35; color: var(--ink); }
+h1 { font-size: 1.9rem; margin: 0 0 .3rem; letter-spacing: -.01em; }
+h2 { font-size: 1.35rem; margin: 2.4rem 0 .6rem; padding-top: .6rem; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.1rem; margin: 1.6rem 0 .4rem; }
+p.subtitle { font-family: var(--sans); color: var(--ink-soft); margin: 0 0 1.5rem; }
+.meta { font-family: var(--sans); font-size: .85rem; color: var(--ink-soft); }
+
+p, li { hyphens: auto; }
+ul, ol { padding-left: 1.4rem; }
+li { margin: .2rem 0; }
+
+a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(139,45,31,.3); }
+a:hover { border-bottom-color: var(--accent); }
+
+code, kbd, pre { font-family: var(--mono); font-size: .86em; }
+code { background: var(--code-bg); padding: .05em .3em; border-radius: 3px; }
+pre { background: var(--code-bg); padding: .8rem 1rem; overflow-x: auto; line-height: 1.5; border-radius: 4px; }
+pre code { background: none; padding: 0; }
+
+strong { font-weight: 600; }
+.en { font-family: var(--sans); font-size: .92em; }   /* official English terms */
+
+/* Callouts */
+.callout {
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  padding: .7rem 1rem;
+  margin: 1.2rem 0;
+  font-family: var(--sans);
+  font-size: .95rem;
+}
+.callout p { margin: .3rem 0; }
+.goal { font-family: var(--sans); }
+
+/* Side notes (Tufte): float into right margin on wide screens */
+.sidenote, .marginnote {
+  float: right;
+  clear: right;
+  width: var(--margin-col);
+  margin-right: calc(-1 * var(--margin-col) - 2.5rem);
+  margin-top: .2rem;
+  margin-bottom: 1rem;
+  font-family: var(--sans);
+  font-size: .8rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+@media (max-width: 64rem) {
+  .sidenote, .marginnote {
+    float: none;
+    display: block;
+    width: auto;
+    margin: .5rem 0 1rem 1rem;
+    padding-left: .7rem;
+    border-left: 2px solid var(--rule);
+  }
+}
+
+/* Tables */
+table { border-collapse: collapse; width: 100%; font-family: var(--sans); font-size: .9rem; margin: 1rem 0; }
+th, td { text-align: left; vertical-align: top; padding: .4rem .6rem; border-bottom: 1px solid var(--rule); }
+th { font-weight: 600; border-bottom: 2px solid var(--ink); }
+
+/* Figures / diagrams */
+figure { margin: 1.6rem 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { font-family: var(--sans); font-size: .82rem; color: var(--ink-soft); margin-top: .4rem; }
+
+/* Quiz component (assets/quiz.js) */
+.quiz { font-family: var(--sans); margin: 1.5rem 0; }
+.quiz-q { border: 1px solid var(--rule); border-radius: 6px; padding: 1rem 1.1rem; margin: 1rem 0; background: #fff; }
+.quiz-stem { font-weight: 600; margin: 0 0 .6rem; }
+.quiz-stem .qnum { color: var(--accent); margin-right: .3rem; }
+.quiz-options { list-style: none; padding: 0; margin: 0; display: grid; gap: .45rem; }
+.quiz-option {
+  /* every option is styled identically until answered */
+  display: block; width: 100%;
+  text-align: left;
+  font: inherit; font-size: .95rem; font-weight: 400;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid #bdbbb0;
+  border-radius: 5px;
+  padding: .5rem .8rem;
+  cursor: pointer;
+}
+.quiz-option:hover:not([disabled]) { background: #f7f6ef; }
+.quiz-option:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.quiz-option[disabled] { cursor: default; }
+.quiz-option.is-correct { background: var(--ok-bg); border-color: var(--ok); }
+.quiz-option.is-wrong { background: var(--bad-bg); border-color: var(--bad); }
+.quiz-option .tag { font-size: .8rem; margin-left: .4rem; }
+.quiz-feedback { margin-top: .7rem; font-size: .9rem; line-height: 1.6; }
+.quiz-feedback[hidden] { display: none; }
+.quiz-feedback .verdict { font-weight: 600; margin-right: .3rem; }
+.quiz-feedback.ok .verdict { color: var(--ok); }
+.quiz-feedback.bad .verdict { color: var(--bad); }
+.quiz-score {
+  position: sticky; bottom: 0;
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+  padding: .5rem 0; font-size: .9rem;
+  display: flex; gap: 1rem; align-items: center;
+}
+.quiz-score button { font: inherit; font-size: .85rem; padding: .2rem .7rem; border: 1px solid #bdbbb0; background: #fff; border-radius: 4px; cursor: pointer; }
+
+/* Glossary / cheat sheet */
+.cheat { columns: 2 22rem; column-gap: 2rem; }
+.cheat .term { break-inside: avoid; margin: 0 0 .9rem; }
+.cheat .term h3 { margin: 0; font-size: 1rem; }
+.cheat .term p { margin: .15rem 0; font-size: .9rem; line-height: 1.6; }
+.cheat .src { font-family: var(--sans); font-size: .78rem; }
+
+footer { font-family: var(--sans); font-size: .82rem; color: var(--ink-soft); margin-top: 3rem; border-top: 1px solid var(--rule); padding-top: 1rem; }
+
+/* Print */
+@media print {
+  html { font-size: 11pt; }
+  body { background: #fff; color: #000; }
+  article, .page { max-width: none; padding: 0; }
+  article > *, .page > * { max-width: none; }
+  .sidenote, .marginnote { float: none; width: auto; margin: .3rem 0 .6rem 1rem; border-left: 1px solid #999; padding-left: .5rem; }
+  a { color: #000; border-bottom: none; }
+  article a[href^="http"]::after, .page a[href^="http"]::after { content: " ⟨" attr(href) "⟩"; font-size: .75em; color: #444; word-break: break-all; }
+  .cheat a[href^="http"]::after { content: none; }
+  .quiz-score, .no-print { display: none !important; }
+  .quiz-q { break-inside: avoid; }
+  h2 { break-after: avoid; }
+  figure { break-inside: avoid; }
+}
+
+/* Code blocks — readable snippets colocated with concepts */
+figure.codeblock {
+  margin: 1.1rem 0 1.4rem;
+  max-width: 100%;
+}
+figure.codeblock > figcaption {
+  font-family: var(--sans);
+  font-size: .78rem;
+  color: var(--ink-soft);
+  margin: 0 0 .35rem;
+  line-height: 1.45;
+}
+figure.codeblock > figcaption .badge {
+  display: inline-block;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+  padding: .08em .45em;
+  border-radius: 3px;
+  margin-right: .35rem;
+  vertical-align: baseline;
+}
+figure.codeblock > figcaption .badge.official {
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+figure.codeblock > figcaption .badge.illustrative {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+figure.codeblock pre {
+  margin: 0;
+  white-space: pre-wrap;       /* wrap long lines; print-friendly */
+  word-break: break-word;
+  overflow-x: auto;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  font-size: .8rem;
+  line-height: 1.55;
+  max-width: 100%;
+}
+/* Let wide code blocks use a bit of the margin column on large screens */
+@media (min-width: 64rem) {
+  figure.codeblock { max-width: calc(var(--measure) + 4rem); }
+}
+@media print {
+  figure.codeblock { break-inside: avoid; }
+  figure.codeblock pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow: visible;
+    border: 1px solid #999;
+    background: #f7f7f7;
+    font-size: 8.5pt;
+  }
+}

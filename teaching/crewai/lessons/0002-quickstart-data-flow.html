@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 2 课 · 朗读 Quickstart 的数据流 — CrewAI</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<article>
+
+<p class="meta">CrewAI 学习空间 · 第 2 课 · 约 10 分钟 · 概念为主；附官方短片段体感（非作业） · 依据官方 <a href="https://docs.crewai.com/en/quickstart">Quickstart</a>（2026-10-11 再抓取） · <a href="0001-agent-task-crew-flow.html">← 第 1 课</a></p>
+<h1>朗读 Quickstart：topic 怎么进 Crew，report 怎么回 Flow</h1>
+<p class="subtitle">Narrate the official Quickstart Flow: main.py steps + crew.jsonc kickoff, without installing.</p>
+
+<div class="callout goal">
+  <p><strong>本课唯一目标：</strong>不装、不跑，也能对着官方 Quickstart 讲清楚——</p>
+  <ol>
+    <li><code>prepare_topic</code> → <code>run_research</code> → <code>summarize</code> 各自干什么、靠什么触发；</li>
+    <li><code>topic</code> 从 <code>self.state</code> 怎样进 <code>crew.kickoff(inputs=…)</code>，报告又怎样回到 <code>self.state.report</code> 与 <code>output/report.md</code>。</li>
+  </ol>
+</div>
+<p class="meta">第 1 课已建立 Agent / Task / Crew / Flow 四层心智模型；本课把它<strong>落到官方 Quickstart 的真实文件</strong>上。片段仍不是作业——读懂数据往哪走即可。</p>
+
+<section id="what-it-builds">
+<h2>1. Quickstart 在搭什么</h2>
+<p>
+官方 <a href="https://docs.crewai.com/en/quickstart">Quickstart</a> 原话：你会创建一个 <span class="en">Flow</span>——先设定研究主题，再跑一个<strong>只有一个 Agent</strong>（带网页搜索的 researcher）的 <span class="en">Crew</span>，最后在磁盘上得到一份 markdown 报告。
+并重申：<strong>Flows are the recommended way to structure production apps</strong>——Flow 管 state 与执行顺序，Agent 在 crew 那一步里干活。
+</p>
+<p>脚手架命令是 <code>crewai create flow latest-ai-flow</code>（本课不要求你执行）；生成物大致是：</p>
+<ul>
+  <li><code>src/latest_ai_flow/main.py</code> — Flow 类与三个步骤；</li>
+  <li><code>src/latest_ai_flow/crews/content_crew/</code> — 内嵌 Crew：<code>crew.jsonc</code>、<code>agents/researcher.jsonc</code>、加载器 <code>content_crew.py</code>。</li>
+</ul>
+<aside class="sidenote">和第 1 课图 1 的对照：Quickstart 的 Crew <strong>只有一个 Task</strong>，没有 <code>context</code> 接力；本课重点在 <strong>Flow ↔ Crew</strong> 的边界，不是 Task ↔ Task。</aside>
+</section>
+
+<section id="main-py">
+<h2>2. main.py：三步 + 两个 state 字段</h2>
+<p>
+官方用 Pydantic 定义结构化 state，再写一个 <code>Flow[ResearchFlowState]</code>
+（<a href="https://docs.crewai.com/en/quickstart#define-the-flow-in-mainpy">Quickstart · Define the Flow in main.py</a>；state 概念见 <a href="https://docs.crewai.com/en/concepts/flows#flow-state-management">Flows · State Management</a>）。
+</p>
+
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> state + 三步骨架 — 摘自 <a href="https://docs.crewai.com/en/quickstart#define-the-flow-in-mainpy">Quickstart · main.py</a>（保留 trigger 分支与 print；与原文一致）。</figcaption>
+<pre><code class="language-python">class ResearchFlowState(BaseModel):
+    topic: str = ""
+    report: str = ""
+
+class LatestAiFlow(Flow[ResearchFlowState]):
+    @start()
+    def prepare_topic(self, crewai_trigger_payload: dict | None = None):
+        if crewai_trigger_payload:
+            self.state.topic = crewai_trigger_payload.get("topic", "AI Agents")
+        else:
+            self.state.topic = "AI Agents"
+        print(f"Topic: {self.state.topic}")
+
+    @listen(prepare_topic)
+    def run_research(self):
+        result = kickoff_content_crew(inputs={"topic": self.state.topic})
+        self.state.report = result.raw
+        print("Research crew finished.")
+
+    @listen(run_research)
+    def summarize(self):
+        print("Report path: output/report.md")</code></pre>
+</figure>
+
+<table>
+  <thead><tr><th>步骤</th><th>装饰器</th><th>做什么</th><th>动到的 state</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>prepare_topic</code></td>
+      <td><code>@start()</code></td>
+      <td>入口：默认把主题写成 <code>"AI Agents"</code>（若有 trigger payload 则读其中的 <code>topic</code>）</td>
+      <td>写入 <code>self.state.topic</code></td>
+    </tr>
+    <tr>
+      <td><code>run_research</code></td>
+      <td><code>@listen(prepare_topic)</code></td>
+      <td>上一步结束后触发：把 topic 交给 Crew，等结果</td>
+      <td>写入 <code>self.state.report = result.raw</code></td>
+    </tr>
+    <tr>
+      <td><code>summarize</code></td>
+      <td><code>@listen(run_research)</code></td>
+      <td>Crew 跑完后触发：打印报告路径（收尾）</td>
+      <td>只读（打印路径，不改 state）</td>
+    </tr>
+  </tbody>
+</table>
+<p>
+顺序完全由装饰器串起来：<code>@start</code> 先跑；每个 <code>@listen(前一步)</code> 等前一步“产出输出”后再跑
+（<a href="https://docs.crewai.com/en/concepts/flows#getting-started">Flows · Getting Started</a>）。
+官方小结也写成同一条链：prepare_topic → run_research → summarize；state（topic、report）住在 Flow 上
+（<a href="https://docs.crewai.com/en/quickstart#how-this-run-fits-together">How this run fits together</a>）。
+</p>
+</section>
+
+<section id="kickoff-bridge">
+<h2>3. 那一脚 kickoff：inputs 进、report 出</h2>
+<p>
+数据跨过 Flow / Crew 边界的地方，就在 <code>run_research</code> 这一行：
+</p>
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> Flow 步骤里启动 Crew — 同上页；加载器见 <a href="https://docs.crewai.com/en/quickstart#load-the-json-crew-content_crewpy">Load the JSON crew</a>。</figcaption>
+<pre><code class="language-python"># run_research 内：
+result = kickoff_content_crew(inputs={"topic": self.state.topic})
+self.state.report = result.raw
+
+# content_crew.py 加载器：
+def kickoff_content_crew(inputs: dict):
+    crew, default_inputs = load_crew(Path(__file__).with_name("crew.jsonc"))
+    return crew.kickoff(inputs={**default_inputs, **inputs})</code></pre>
+</figure>
+
+<figure>
+<svg viewBox="0 0 640 280" role="img" aria-labelledby="df-title df-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="df-title">Quickstart 数据流：topic 进 Crew，report 回 Flow</title>
+  <desc id="df-desc">prepare_topic 写入 state.topic；run_research 把 topic 作为 inputs 传给 crew.kickoff；Task 写出 output/report.md；result.raw 写回 state.report；summarize 打印路径。</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8b2d1f"/>
+    </marker>
+  </defs>
+  <g font-family="-apple-system, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#1f1f1f">
+    <rect x="8" y="8" width="280" height="264" rx="8" fill="#fbf7ef" stroke="#8b2d1f" stroke-width="1.5"/>
+    <text x="22" y="30" font-size="14" font-weight="700" fill="#8b2d1f">Flow · LatestAiFlow</text>
+    <text x="22" y="50" fill="#555" font-size="11">self.state：topic · report</text>
+
+    <rect x="22" y="64" width="252" height="36" rx="5" fill="#fff" stroke="#999"/>
+    <text x="34" y="87"><tspan font-family="Menlo, Consolas, monospace" fill="#8b2d1f" font-size="11">@start</tspan>  prepare_topic → topic</text>
+
+    <line x1="148" y1="100" x2="148" y2="118" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <rect x="22" y="120" width="252" height="78" rx="5" fill="#fff" stroke="#999"/>
+    <text x="34" y="142"><tspan font-family="Menlo, Consolas, monospace" fill="#8b2d1f" font-size="11">@listen</tspan>  run_research</text>
+    <text x="34" y="162" font-family="Menlo, Consolas, monospace" font-size="10.5">kickoff(inputs={topic})</text>
+    <text x="34" y="182" font-family="Menlo, Consolas, monospace" font-size="10.5">state.report = result.raw</text>
+
+    <line x1="148" y1="198" x2="148" y2="216" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#arr)"/>
+
+    <rect x="22" y="218" width="252" height="36" rx="5" fill="#fff" stroke="#999"/>
+    <text x="34" y="241"><tspan font-family="Menlo, Consolas, monospace" fill="#8b2d1f" font-size="11">@listen</tspan>  summarize → 打印路径</text>
+
+    <!-- arrow to crew -->
+    <line x1="288" y1="155" x2="330" y2="155" stroke="#8b2d1f" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="309" y="146" text-anchor="middle" font-size="10" fill="#8b2d1f" font-weight="700">topic</text>
+
+    <rect x="334" y="64" width="290" height="152" rx="8" fill="#f4ece4" stroke="#8b2d1f" stroke-width="1.5"/>
+    <text x="348" y="86" font-size="14" font-weight="700" fill="#8b2d1f">Crew · content_crew</text>
+    <text x="348" y="108" fill="#555" font-size="11">load_crew(crew.jsonc)</text>
+    <rect x="348" y="120" width="262" height="78" rx="5" fill="#fff" stroke="#666"/>
+    <text x="360" y="142" font-weight="700" font-size="11">Task: research_task</text>
+    <text x="360" y="160" font-size="11" fill="#444">agent: researcher · Serper</text>
+    <text x="360" y="178" font-family="Menlo, Consolas, monospace" font-size="10.5">output_file → output/report.md</text>
+
+    <line x1="330" y1="175" x2="288" y2="175" stroke="#8b2d1f" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="309" y="196" text-anchor="middle" font-size="10" fill="#8b2d1f" font-weight="700">result.raw</text>
+
+    <text x="479" y="250" text-anchor="middle" font-size="11" fill="#555">磁盘产物与 state.report 各存一份路径/正文</text>
+  </g>
+</svg>
+<figcaption>图 1　Quickstart 跨边界数据流（据 <a href="https://docs.crewai.com/en/quickstart#how-this-run-fits-together">How this run fits together</a>）：<code>topic</code> 经 <code>inputs</code> 进 Crew；Task 的 <code>output_file</code> 写磁盘；<code>result.raw</code> 写回 <code>self.state.report</code>。</figcaption>
+</figure>
+
+<p>三句话串起来（官方三点摘要的展开）：</p>
+<ol>
+  <li><strong>进：</strong><code>self.state.topic</code> → <code>kickoff_content_crew(inputs={"topic": …})</code> → 与 <code>load_crew</code> 读到的 <code>default_inputs</code> 合并后交给 <code>crew.kickoff</code>，填进 Agent / Task 里的 <code>{topic}</code> 占位符。</li>
+  <li><strong>做：</strong>Crew 只有一个 Task：researcher 用 <code>SerperDevTool</code> 搜网，写出结构化报告。</li>
+  <li><strong>出：</strong>Task 的 <code>output_file</code> 把报告落到 <code>output/report.md</code>；同时 <code>result.raw</code> 被写进 <code>self.state.report</code>，供后续 Flow 步骤使用。</li>
+</ol>
+<aside class="sidenote">和第 1 课对照：Crew <em>内部</em> Task 之间靠 <code>context</code>；Flow <em>步骤</em>之间靠 <code>@listen</code> + <code>self.state</code>。跨过边界时，必须在那一步显式 <code>kickoff(inputs=…)</code> 并自己把 <code>result</code> 写回 state——框架不会自动把 state 整包塞进 Crew。</aside>
+</section>
+
+<section id="jsonc-pieces">
+<h2>4. kickoff 时真正用到的 JSONC 零件</h2>
+<p>
+官方强调命名必须对齐：<code>agents: ["researcher"]</code> 会加载 <code>agents/researcher.jsonc</code>；Task 的 <code>agent: "researcher"</code> 把任务派给同名 Agent
+（<a href="https://docs.crewai.com/en/quickstart#naming-consistency">Naming consistency</a>）。
+</p>
+
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> <code>agents/researcher.jsonc</code> — 摘自 <a href="https://docs.crewai.com/en/quickstart#configure-one-agent-in-jsonc">Configure one agent in JSONC</a>。</figcaption>
+<pre><code class="language-jsonc">{
+  "role": "{topic} Senior Data Researcher",
+  "goal": "Uncover cutting-edge developments in {topic}",
+  "backstory": "You're a seasoned researcher who finds relevant information and presents it clearly.",
+  "tools": ["SerperDevTool"],
+  "settings": {
+    "verbose": true
+  }
+}</code></pre>
+</figure>
+
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> <code>crew.jsonc</code> — 摘自 <a href="https://docs.crewai.com/en/quickstart#configure-the-crew-in-crewjsonc">Configure the crew in crew.jsonc</a>。</figcaption>
+<pre><code class="language-jsonc">{
+  "name": "Research Crew",
+  "agents": ["researcher"],
+  "tasks": [
+    {
+      "name": "research_task",
+      "description": "Conduct thorough research about {topic}. Use web search to find recent, credible information.",
+      "expected_output": "A markdown report with clear sections: key trends, notable tools or companies, and implications. Aim for 800-1200 words. No fenced code blocks around the whole document.",
+      "agent": "researcher",
+      "output_file": "output/report.md",
+      "markdown": true
+    }
+  ],
+  "process": "sequential",
+  "verbose": true
+}</code></pre>
+</figure>
+
+<p>和本课目标相关的字段，只需要盯这几处：</p>
+<ul>
+  <li><code>{topic}</code> 出现在 Agent 的 role/goal 与 Task 的 description——靠 kickoff 的 <code>inputs</code> 填；</li>
+  <li><code>agents: ["researcher"]</code> + <code>agent: "researcher"</code> —— 名字对齐文件；</li>
+  <li><code>output_file: "output/report.md"</code> + <code>markdown: true</code> —— 磁盘产物；</li>
+  <li><code>process: "sequential"</code> —— 只有一个 Task，顺序执行也只跑这一条；</li>
+  <li><strong>没有</strong> <code>context</code>（没有第二个 Task 可接力）；本页示例的 <code>crew.jsonc</code> 也<strong>没有</strong>顶层 <code>inputs</code> 默认值——主题完全由 Flow 的 <code>kickoff(inputs=…)</code> 灌入。</li>
+</ul>
+</section>
+
+<section id="explain-back">
+<h2>5. 讲给自己听（1 分钟）</h2>
+<p>
+不看上文，试着说：<code>topic</code> 先写在哪？哪一步调用 <code>kickoff</code>？<code>{topic}</code> 出现在哪些 JSONC 字段里？
+报告有几条“出路”（state 与磁盘）？说得出来，就达成了本课目标。然后做小测。
+</p>
+</section>
+
+<section id="quiz">
+<h2>6. 小测（检索练习）</h2>
+<p class="meta">点击选项即判定，每题只能作答一次；选项顺序随机。“重做”可清空重来。一手资料：<a href="https://docs.crewai.com/en/quickstart">Quickstart</a>。</p>
+
+<div class="quiz" data-quiz>
+
+  <div data-question data-answer="2">
+    <p data-stem>官方 Quickstart 最终搭出的是什么？</p>
+    <ol data-options>
+      <li>两个 Agent 协作且不放进任何 Flow 的独立 Crew</li>
+      <li>带 state 的 Flow 里嵌一个单 Agent Crew 出报告</li>
+      <li>只用 Agent.kickoff 且不定义任何 Task 的脚本</li>
+      <li>先写 classic YAML Crew 再手工改写成 Flow 教程</li>
+    </ol>
+    <div data-explanation>Quickstart 开篇：创建一个 Flow，设定主题，跑一个单 Agent 的 crew，得到磁盘上的 markdown 报告。见 <a href="https://docs.crewai.com/en/quickstart">Quickstart</a>。</div>
+  </div>
+
+  <div data-question data-answer="1">
+    <p data-stem><code>ResearchFlowState</code> 里官方声明了哪两个字段？</p>
+    <ol data-options>
+      <li><code>topic</code> 与 <code>report</code></li>
+      <li><code>query</code> 与 <code>answer</code></li>
+      <li><code>agent</code> 与 <code>output</code></li>
+      <li><code>inputs</code> 与 <code>context</code></li>
+    </ol>
+    <div data-explanation">Pydantic 模型只有 <code>topic: str = ""</code> 和 <code>report: str = ""</code>。见 <a href="https://docs.crewai.com/en/quickstart#define-the-flow-in-mainpy">Define the Flow in main.py</a>。</div>
+  </div>
+
+  <div data-question data-answer="3">
+    <p data-stem>三个 Flow 步骤的触发顺序是？</p>
+    <ol data-options>
+      <li>summarize → prepare_topic → run_research</li>
+      <li>run_research → summarize → prepare_topic</li>
+      <li>prepare_topic → run_research → summarize</li>
+      <li>prepare_topic → summarize → run_research</li>
+    </ol>
+    <div data-explanation"><code>@start</code> 的 prepare_topic 先跑；run_research 监听它；summarize 再监听 run_research。见 <a href="https://docs.crewai.com/en/quickstart#how-this-run-fits-together">How this run fits together</a>。</div>
+  </div>
+
+  <div data-question data-answer="4">
+    <p data-stem><code>topic</code> 是怎样从 Flow 进入 Crew 的？</p>
+    <ol data-options>
+      <li>把主题写进 researcher 的 backstory 固定字符串</li>
+      <li>让下游 Task 用 context 列表自动去上游拉取主题</li>
+      <li>让 hierarchical 经理在分派时把主题自动代注入</li>
+      <li>在监听步骤调用 kickoff 并把 topic 当作 inputs</li>
+    </ol>
+    <div data-explanation"><code>kickoff_content_crew(inputs={"topic": self.state.topic})</code>，再与 load_crew 的 default_inputs 合并后交给 <code>crew.kickoff</code>。见 <a href="https://docs.crewai.com/en/quickstart#define-the-flow-in-mainpy">main.py</a> 与 <a href="https://docs.crewai.com/en/quickstart#load-the-json-crew-content_crewpy">content_crew.py</a>。</div>
+  </div>
+
+  <div data-question data-answer="2">
+    <p data-stem>报告回到 Flow / 磁盘的路径，官方描述是？</p>
+    <ol data-options>
+      <li>报告只进 state，磁盘上的文件还得自己手动另存</li>
+      <li>任务写入报告文件，同时把原始结果回写到 state</li>
+      <li>收尾步骤自己 open 文件，把正文直接写入磁盘</li>
+      <li>持久化装饰器在流程重启之后自动去生成报告文件</li>
+    </ol>
+    <div data-explanation>官方两点并行：Task 的 <code>output_file</code> 把报告落到 <code>output/report.md</code>；<code>run_research</code> 把 <code>result.raw</code> 赋给 <code>self.state.report</code>。<code>summarize</code> 只打印路径。见 <a href="https://docs.crewai.com/en/quickstart#how-this-run-fits-together">How this run fits together</a>。</div>
+  </div>
+
+  <div data-question data-answer="1">
+    <p data-stem"><code>agents: ["researcher"]</code> 在命名约定下会加载哪个文件？</p>
+    <ol data-options>
+      <li><code>agents/researcher.jsonc</code></li>
+      <li><code>config/researcher.yaml</code></li>
+      <li><code>tools/researcher.jsonc</code></li>
+      <li><code>crews/researcher.json</code></li>
+    </ol>
+    <div data-explanation>Naming consistency：<code>agents: ["researcher"]</code> loads <code>agents/researcher.jsonc</code>。见 <a href="https://docs.crewai.com/en/quickstart#naming-consistency">Naming consistency</a>。</div>
+  </div>
+
+</div>
+</section>
+
+<section id="next">
+<h2>延伸阅读与下一步</h2>
+<ul>
+  <li><strong>一手资料（本课）：</strong><a href="https://docs.crewai.com/en/quickstart">CrewAI Docs · Quickstart</a>——尤其是 main.py、crew.jsonc 与 “How this run fits together” 三节。</li>
+  <li><strong>上一课：</strong><a href="0001-agent-task-crew-flow.html">第 1 课 · Agent / Task / Crew / Flow 心智模型</a>。</li>
+  <li><strong>速查表：</strong><a href="../reference/glossary.html">术语表 / Glossary</a>。</li>
+  <li><strong>可选加深：</strong><a href="https://docs.crewai.com/en/guides/flows/first-flow">Build Your First Flow</a>（routing、persistence；本课未展开）。</li>
+</ul>
+<div class="callout"><p>有不清楚的地方随时问我（你的老师）。</p></div>
+</section>
+
+<footer>
+所有事实均来自 <a href="https://docs.crewai.com/en/quickstart">docs.crewai.com/en/quickstart</a>（2026-10-11 再抓取）。课内标「官方」的代码块摘自该页（可有教学省略说明）；旁注中的对照是教学说明，不是官方说法。本课不要求安装或运行。
+</footer>
+
+</article>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
