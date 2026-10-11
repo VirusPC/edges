@@ -4,7 +4,7 @@
 
 核心分工是：**先确定作用域，由 Service 完成用例，Model 维护单节点规则，operations 处理集合与树。** 文件系统是内容载体，AGENTS.md 是递归索引入口；CLI 执行明确的操作，不替调用方判断内容应该属于本层还是下层。
 
-本目录的 pull request 由 Cursor Bugbot 按 [`.cursor/BUGBOT.md`](.cursor/BUGBOT.md) 自动审，并需 @VirusPC 人审（[`.github/CODEOWNERS`](../../.github/CODEOWNERS)）。
+本目录的 pull request 由 Cursor Bugbot 按 [`.cursor/BUGBOT.md`](.cursor/BUGBOT.md) 审查，并需 @VirusPC 人审（[`.github/CODEOWNERS`](../../.github/CODEOWNERS)）。Cursor 后台已把本仓库的 Bugbot 改成只在评论点名时才跑（`bugbot run` 或 `cursor review`），不能按目录单独打开。改到 `extensions/cli/**` 的正式 pull request，由 [`.github/workflows/bugbot-cli.yml`](../../.github/workflows/bugbot-cli.yml) 自动评论 `bugbot run`；其他目录的 PR 需要审查时，在评论里手动写 `bugbot run`。草稿，以及来自 fork 的 PR，不会自动点名（fork 上的 `GITHUB_TOKEN` 没有写权限，工作流直接跳过）。每次推送点名一次，供 Bugbot 做增量审查；同一个提交已经点名过就不再重复评论。
 
 ## 快速开始
 

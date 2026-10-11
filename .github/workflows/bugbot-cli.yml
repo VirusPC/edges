@@ -1,0 +1,73 @@
+# 只有改到 extensions/cli/** 的 pull request 才自动请 Cursor Bugbot 审查。
+#
+# Bugbot 按仓库整体开关，不能按目录触发。后台已改为只在评论点名时才跑
+# （评论 `bugbot run` 或 `cursor review`）。本工作流用默认 GITHUB_TOKEN
+# 在 PR 下评论 `bugbot run`，相当于只给 CLI 改动自动点名。
+#
+# 取舍：opened / synchronize / reopened / ready_for_review 都会进来。
+# 点名模式下 Bugbot 不会自己跟随后续提交，而它默认做增量审查，所以每次
+# 新推送都要点名一次。代价是活跃的 CLI PR 上，每个新提交多一条短评论。
+# 同一 head SHA 已经有本工作流的点名时不再发，避免重复投递刷屏。
+# concurrency 按 PR 号分组并取消进行中的旧运行，连续推送只保留最新一次。
+#
+# 安全：用 pull_request，不用 pull_request_target；不 checkout PR 代码。
+# 草稿直接跳过。fork 上的 GITHUB_TOKEN 没有写权限，job 条件静默跳过
+# （Actions 里显示 skipped，不算失败），不在脚本里吞掉同源 PR 的真实错误。
+name: 请 Bugbot 审查 CLI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "extensions/cli/**"
+
+permissions:
+  contents: none
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: bugbot-cli-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  request-review:
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: 评论 bugbot run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if ! [[ "$HEAD_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "head SHA 格式异常，拒绝评论。" >&2
+            exit 1
+          fi
+          if ! [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]; then
+            echo "PR 号格式异常，拒绝评论。" >&2
+            exit 1
+          fi
+          marker="bugbot-cli-sha:${HEAD_SHA}"
+          # 评论按时间正序分页。超过 100 条时，新的点名在后面的页上，必须加总。
+          count="$(
+            gh api --paginate "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" \
+              --jq "[.[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${marker}\")))] | length" \
+              | awk '{s+=$1} END {print s+0}'
+          )"
+          if [ "$count" != "0" ]; then
+            echo "该提交已经点名过 Bugbot，跳过。"
+            exit 0
+          fi
+          body_file="$(mktemp)"
+          trap 'rm -f "$body_file"' EXIT
+          # 第一行必须是触发词。HTML 注释只给本工作流认同一提交，页面上不显示。
+          printf '%s\n\n%s\n' 'bugbot run' "<!-- ${marker} -->" > "$body_file"
+          gh pr comment "$PR_NUMBER" --repo "$REPO" --body-file "$body_file"
+          echo "已为 ${HEAD_SHA} 评论 bugbot run。"
