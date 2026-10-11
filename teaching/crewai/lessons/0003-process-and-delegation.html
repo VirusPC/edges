@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 3 课 · Process 与 allow_delegation：谁来分活、何时收手 — CrewAI</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<article>
+
+<p class="meta">CrewAI 学习空间 · 第 3 课 · 约 12 分钟 · 概念为主；附官方短片段体感（非作业） · 一手资料：官方 <a href="https://docs.crewai.com/en/concepts/collaboration">Collaboration</a>（辅以 <a href="https://docs.crewai.com/en/concepts/processes">Processes</a>、<a href="https://docs.crewai.com/en/learn/hierarchical-process">Hierarchical Process</a>、<a href="https://docs.crewai.com/en/concepts/agents">Agents</a>；2026-10-12 抓取，docs v1.15.27） · <a href="0002-quickstart-data-flow.html">← 第 2 课</a> · <a href="0004-unified-memory.html">第 4 课 →</a></p>
+<h1>sequential 还是 hierarchical？allow_delegation 开给谁？</h1>
+<p class="subtitle">Process decides who assigns the work; allow_delegation decides who may hand it off — and limits decide when it stops.</p>
+
+<div class="callout goal">
+  <p><strong>本课唯一目标：</strong>读完后，你能讲清楚三件事——</p>
+  <ol>
+    <li><code>sequential</code> 与 <code>hierarchical</code> 的区别：<strong>谁</strong>决定哪个 Agent 做哪个 Task；</li>
+    <li><code>allow_delegation=True</code> 到底给了 Agent 什么，<strong>什么时候</strong>该开；</li>
+    <li>为什么会出现“委派循环”（delegation loop），以及靠什么让它<strong>收尾</strong>：经理 True / 专家 False、清晰的完成标准、<code>max_iter</code>。</li>
+  </ol>
+</div>
+<p class="meta">第 1 课在表格里提过两种 Process；第 2 课的 Quickstart 只有一个 Task、<code>process: "sequential"</code>。本课把“排班”和“转派”这两根旋钮拆开讲。</p>
+
+<section id="two-knobs">
+<h2>1. 两根不同的旋钮</h2>
+<p>先把两个经常被混在一起的设置分开：</p>
+<table>
+  <thead><tr><th>旋钮</th><th>挂在哪</th><th>回答的问题</th><th>默认值</th></tr></thead>
+  <tbody>
+    <tr><td><span class="en">Process</span>（<code>process</code>）</td><td><span class="en">Crew</span></td><td>Task 按什么策略分配、推进？</td><td><code>sequential</code>（<a href="https://docs.crewai.com/en/concepts/crews#crew-attributes">Crew Attributes</a>）</td></tr>
+    <tr><td><span class="en">Allow Delegation</span>（<code>allow_delegation</code>）</td><td><span class="en">Agent</span></td><td>这个 Agent 能不能把活转给 / 去问同事？</td><td><code>False</code>（<a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a>）</td></tr>
+  </tbody>
+</table>
+<aside class="sidenote">两者独立：官方 <a href="https://docs.crewai.com/en/concepts/collaboration#collaboration-in-action">Collaboration in Action</a> 的示例就是 <code>Process.sequential</code> + 三个 <code>allow_delegation=True</code> 的 Agent。委派不是 hierarchical 专属。</aside>
+<p>
+<a href="https://docs.crewai.com/en/concepts/processes#overview">Processes</a> 把 Process 比作人类团队里的项目管理（project management）：它决定任务如何被分发、执行。
+而 <a href="https://docs.crewai.com/en/concepts/collaboration#overview">Collaboration</a> 说的是另一件事：Agent 之间通过<strong>委派任务</strong>和<strong>提问</strong>互相借用专长。
+</p>
+</section>
+
+<section id="process">
+<h2>2. Process：sequential vs hierarchical</h2>
+
+<figure>
+<svg viewBox="0 0 640 270" role="img" aria-labelledby="pr-title pr-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="pr-title">sequential 与 hierarchical 对照图</title>
+  <desc id="pr-desc">左：sequential，三个 Task 按列表顺序执行，每个 Task 预先绑定一个 Agent，上一个输出作为下一个的上下文。右：hierarchical，一个 manager Agent 在顶部，向 researcher 和 writer 分派任务，并审核它们的输出。</desc>
+  <defs>
+    <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8b2d1f"/>
+    </marker>
+  </defs>
+  <g font-family="-apple-system, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#1f1f1f">
+    <!-- sequential -->
+    <rect x="8" y="8" width="300" height="254" rx="8" fill="#fbf7ef" stroke="#8b2d1f" stroke-width="1.5"/>
+    <text x="22" y="30" font-size="14" font-weight="700" fill="#8b2d1f">sequential（默认）</text>
+    <text x="22" y="48" font-size="11" fill="#555">谁做什么：写在 Task 的 agent 字段里</text>
+    <rect x="34" y="62" width="248" height="40" rx="5" fill="#fff" stroke="#999"/>
+    <text x="46" y="80" font-weight="700">Task 1 · research</text>
+    <text x="46" y="95" font-size="11" fill="#444">agent: researcher</text>
+    <line x1="158" y1="102" x2="158" y2="126" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#a3)"/>
+    <text x="166" y="118" font-size="10" fill="#8b2d1f">输出 → 上下文</text>
+    <rect x="34" y="128" width="248" height="40" rx="5" fill="#fff" stroke="#999"/>
+    <text x="46" y="146" font-weight="700">Task 2 · write</text>
+    <text x="46" y="161" font-size="11" fill="#444">agent: writer</text>
+    <line x1="158" y1="168" x2="158" y2="192" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#a3)"/>
+    <text x="166" y="184" font-size="10" fill="#8b2d1f">输出 → 上下文</text>
+    <rect x="34" y="194" width="248" height="40" rx="5" fill="#fff" stroke="#999"/>
+    <text x="46" y="212" font-weight="700">Task 3 · edit</text>
+    <text x="46" y="227" font-size="11" fill="#444">agent: editor</text>
+    <text x="158" y="254" text-anchor="middle" font-size="10.5" fill="#555">顺序 = tasks 列表顺序</text>
+
+    <!-- hierarchical -->
+    <rect x="332" y="8" width="300" height="254" rx="8" fill="#f4ece4" stroke="#8b2d1f" stroke-width="1.5"/>
+    <text x="346" y="30" font-size="14" font-weight="700" fill="#8b2d1f">hierarchical</text>
+    <text x="346" y="48" font-size="11" fill="#555">谁做什么：manager 运行时决定</text>
+    <rect x="392" y="62" width="180" height="48" rx="5" fill="#fff" stroke="#8b2d1f" stroke-width="1.5"/>
+    <text x="482" y="82" text-anchor="middle" font-weight="700">manager</text>
+    <text x="482" y="99" text-anchor="middle" font-size="10" font-family="Menlo, Consolas, monospace" fill="#444">manager_llm | manager_agent</text>
+    <line x1="440" y1="110" x2="410" y2="168" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#a3)"/>
+    <line x1="524" y1="110" x2="554" y2="168" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#a3)"/>
+    <text x="482" y="140" text-anchor="middle" font-size="10.5" fill="#8b2d1f">规划 · 分派 · 审核</text>
+    <rect x="346" y="170" width="124" height="40" rx="5" fill="#fff" stroke="#999"/>
+    <text x="408" y="188" text-anchor="middle" font-weight="700">researcher</text>
+    <text x="408" y="203" text-anchor="middle" font-size="10" fill="#444">专家</text>
+    <rect x="494" y="170" width="124" height="40" rx="5" fill="#fff" stroke="#999"/>
+    <text x="556" y="188" text-anchor="middle" font-weight="700">writer</text>
+    <text x="556" y="203" text-anchor="middle" font-size="10" fill="#444">专家</text>
+    <text x="482" y="236" text-anchor="middle" font-size="10.5" fill="#555">Task 不预先分配；经理判断是否完成</text>
+    <text x="482" y="254" text-anchor="middle" font-size="10.5" fill="#555">必须提供 manager_llm 或 manager_agent</text>
+  </g>
+</svg>
+<figcaption>图 1　左：<a href="https://docs.crewai.com/en/concepts/processes#sequential-process">Sequential Process</a>——按列表顺序，上一个输出作为下一个的上下文。右：<a href="https://docs.crewai.com/en/concepts/processes#hierarchical-process">Hierarchical Process</a>——经理负责 planning、delegation、validation。</figcaption>
+</figure>
+
+<table>
+  <thead><tr><th></th><th><code>sequential</code></th><th><code>hierarchical</code></th></tr></thead>
+  <tbody>
+    <tr><td>谁分配 Task</td><td>你：在每个 Task 上写 <code>agent</code></td><td>manager：按 Agent 能力分派，Task <strong>不预先分配</strong></td></tr>
+    <tr><td>推进顺序</td><td><code>tasks</code> 列表顺序；输出自动接力，可用 <code>context</code> 精确指定</td><td>仍按逻辑顺序推进，但由经理监督（<a href="https://docs.crewai.com/en/learn/hierarchical-process#workflow-in-action">Workflow in Action</a>）</td></tr>
+    <tr><td>谁判定“做完了”</td><td>Agent 产出符合 <code>expected_output</code> 的结果即进入下一个</td><td>经理审核输出（reviews outputs）、评估是否完成（assesses task completion）</td></tr>
+    <tr><td>必填额外配置</td><td>无</td><td><code>manager_llm</code> 或 <code>manager_agent</code> 二选一</td></tr>
+    <tr><td>适合</td><td>步骤与分工都确定的流水线</td><td>需要“先拆解、再分派、再验收”的开放型复杂任务</td></tr>
+  </tbody>
+</table>
+<p class="meta">“适合”一行是教学归纳；官方对 hierarchical 的说法是“emulates a corporate hierarchy”，并在 <a href="https://docs.crewai.com/en/concepts/collaboration#hierarchical-collaboration">Hierarchical Collaboration</a> 中写 “For complex projects, use a hierarchical process with a manager agent”。</p>
+
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> 给 Crew 指定 Process — 摘自 <a href="https://docs.crewai.com/en/concepts/processes#assigning-processes-to-a-crew">Processes · Assigning Processes to a Crew</a>。</figcaption>
+<pre><code class="language-python">from crewai import Crew, Process
+
+crew = Crew(
+    agents=my_agents,
+    tasks=my_tasks,
+    process=Process.sequential
+)
+
+# hierarchical：必须提供 manager_llm 或 manager_agent
+crew = Crew(
+    agents=my_agents,
+    tasks=my_tasks,
+    process=Process.hierarchical,
+    manager_llm="gpt-4o"
+    # or
+    # manager_agent=my_manager_agent
+)</code></pre>
+</figure>
+<p>
+JSON-first 写法同理：在 <code>crew.jsonc</code> 里写 <code>"process": "hierarchical"</code>，并给出 <code>manager_llm</code> 或 <code>manager_agent</code>；<code>manager_agent</code> 可以引用一个<strong>不在</strong>顶层 <code>agents</code> 列表里的 <code>agents/&lt;name&gt;.jsonc</code>
+（<a href="https://docs.crewai.com/en/concepts/crews#jsonc-configuration-recommended">Crews · JSONC Configuration</a>）。
+<code>Process</code> 本身是枚举（<code>Enum</code>），只有这两个值（<a href="https://docs.crewai.com/en/concepts/processes#process-class-detailed-overview">Process Class</a>）。
+</p>
+</section>
+
+<section id="delegation">
+<h2>3. allow_delegation：多出来的两个工具</h2>
+<p>
+<a href="https://docs.crewai.com/en/concepts/collaboration#how-agent-collaboration-works">Collaboration · How Agent Collaboration Works</a>：当 <code>allow_delegation=True</code>，CrewAI 会<strong>自动</strong>给这个 Agent 装上两个工具：
+</p>
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> 自动获得的两个协作工具 — 摘自 <a href="https://docs.crewai.com/en/concepts/collaboration#1-delegate-work-tool">Delegate Work Tool</a> / <a href="https://docs.crewai.com/en/concepts/collaboration#2-ask-question-tool">Ask Question Tool</a>。</figcaption>
+<pre><code class="language-python"># Agent automatically gets this tool:
+# Delegate work to coworker(task: str, context: str, coworker: str)
+
+# Agent automatically gets this tool:
+# Ask question to coworker(question: str, context: str, coworker: str)</code></pre>
+</figure>
+<ul>
+  <li><span class="en">Delegate work to coworker</span>（委派工作）：把一块活交给有对应专长的同事；</li>
+  <li><span class="en">Ask question to coworker</span>（向同事提问）：只问一个具体问题，拿回信息后自己继续做。</li>
+</ul>
+<p>所以“协作”在 CrewAI 里不是魔法：它就是<strong>工具调用</strong>。Agent 决定调用工具时，参数里写明交给哪个 <code>coworker</code>、带什么 <code>context</code>。没开 <code>allow_delegation</code>，这两个工具就不存在——官方排错第一条正是“Agents Not Collaborating → 确认已开启 delegation”（<a href="https://docs.crewai.com/en/concepts/collaboration#issue-agents-not-collaborating">Issue: Agents Not Collaborating</a>）。</p>
+
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> JSON-first 写法：放在 Agent 文件的 <code>settings</code> 里 — 摘自 <a href="https://docs.crewai.com/en/concepts/agents#jsonc-configuration-recommended">Agents · JSONC Configuration</a>（节选）。</figcaption>
+<pre><code class="language-jsonc">// agents/researcher.jsonc
+{
+  "role": "{topic} Senior Data Researcher",
+  ...
+  "settings": {
+    "verbose": true,
+    "allow_delegation": false,
+    "max_iter": 20
+  }
+}</code></pre>
+</figure>
+<aside class="sidenote"><a href="https://docs.crewai.com/en/learn/hierarchical-process#key-features">Hierarchical Process · Key Features</a> 也强调：“Delegation is now disabled by default to give users explicit control.” ——默认关，开不开由你明确决定。</aside>
+</section>
+
+<section id="when">
+<h2>4. 什么时候开？经理 True，专家 False</h2>
+<p>
+官方最佳实践 <a href="https://docs.crewai.com/en/concepts/collaboration#2-strategic-delegation-enabling">Strategic Delegation Enabling</a> 只有两行原则：
+<strong>给协调者和通才（coordinators and generalists）开</strong>；<strong>给专注的专家（focused specialists）关（可选）</strong>。
+</p>
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> 层级协作里的典型分工 — 摘自 <a href="https://docs.crewai.com/en/concepts/collaboration#hierarchical-collaboration">Hierarchical Collaboration</a>（省略 backstory / verbose）。</figcaption>
+<pre><code class="language-python">manager = Agent(
+    role="Project Manager",
+    goal="Coordinate team efforts and ensure project success",
+    allow_delegation=True,
+)
+researcher = Agent(
+    role="Researcher",
+    goal="Provide accurate research and analysis",
+    allow_delegation=False,  # Specialists focus on their expertise
+)
+writer = Agent(
+    role="Writer",
+    goal="Create compelling content",
+    allow_delegation=False,
+)</code></pre>
+</figure>
+<table>
+  <thead><tr><th>情形</th><th>建议</th><th>依据</th></tr></thead>
+  <tbody>
+    <tr><td>固定流水线：研究 → 写作 → 编辑，每步谁做已确定</td><td><code>sequential</code> + <code>context</code>；delegation 可全关</td><td><a href="https://docs.crewai.com/en/concepts/collaboration#pattern-1-research-%E2%86%92-write-%E2%86%92-edit">Pattern 1</a> 只靠 <code>context</code> 传递</td></tr>
+    <tr><td>一个 Task 需要多人专长（如写作要查资料）</td><td>给<strong>牵头</strong> Agent 开 True，被问的专家关</td><td><a href="https://docs.crewai.com/en/concepts/collaboration#pattern-2-collaborative-single-task">Pattern 2</a>：“Lead agent, but can delegate”</td></tr>
+    <tr><td>开放复杂任务，需要拆解、分派、验收</td><td><code>hierarchical</code>；经理 True，专家 False</td><td><a href="https://docs.crewai.com/en/concepts/collaboration#hierarchical-collaboration">Hierarchical Collaboration</a></td></tr>
+  </tbody>
+</table>
+<aside class="sidenote">教学提醒：官方 Collaboration 页的层级示例把 manager 也放进了 <code>agents</code> 并同时写了 <code>manager_llm</code>；而 <a href="https://docs.crewai.com/en/learn/hierarchical-process#using-a-custom-manager-agent">Using a Custom Manager Agent</a> 是用 <code>manager_agent=manager</code> 且不放进 <code>agents</code>。读代码时认清：<strong>真正被当作经理的</strong>，是 <code>manager_agent</code> 指定的那个（或由 <code>manager_llm</code> 自动创建的那个）。</aside>
+</section>
+
+<section id="loops">
+<h2>5. 委派循环与收尾条件</h2>
+
+<h3>5.1 循环是怎么来的</h3>
+<p>
+官方排错 <a href="https://docs.crewai.com/en/concepts/collaboration#issue-delegation-loops">Issue: Delegation Loops</a> 的症状描述：<em>“Agents delegate back and forth indefinitely”</em>——互相踢皮球，没完没了。
+原因很直白：如果 A 和 B <strong>都</strong>有“委派工作”工具，A 可以把活交给 B，B 又可以交回 A……没有谁被迫自己动手。
+</p>
+
+<figure>
+<svg viewBox="0 0 640 150" role="img" aria-labelledby="lp-title lp-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="lp-title">委派循环与官方解法</title>
+  <desc id="lp-desc">左：A 与 B 都允许委派，箭头来回无限往返。右：经理允许委派，专家 A、B 不允许委派，只有从经理指向专家的单向箭头。</desc>
+  <defs>
+    <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8b2d1f"/>
+    </marker>
+  </defs>
+  <g font-family="-apple-system, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#1f1f1f">
+    <rect x="8" y="8" width="300" height="134" rx="8" fill="#f8e8e5" stroke="#9a2c22" stroke-width="1.5"/>
+    <text x="22" y="30" font-size="13" font-weight="700" fill="#9a2c22">✗ 都是 True：可能来回踢</text>
+    <rect x="34" y="60" width="90" height="40" rx="5" fill="#fff" stroke="#999"/>
+    <text x="79" y="78" text-anchor="middle" font-weight="700">A</text>
+    <text x="79" y="93" text-anchor="middle" font-size="10" font-family="Menlo, Consolas, monospace">True</text>
+    <rect x="192" y="60" width="90" height="40" rx="5" fill="#fff" stroke="#999"/>
+    <text x="237" y="78" text-anchor="middle" font-weight="700">B</text>
+    <text x="237" y="93" text-anchor="middle" font-size="10" font-family="Menlo, Consolas, monospace">True</text>
+    <line x1="126" y1="70" x2="188" y2="70" stroke="#9a2c22" stroke-width="1.5" marker-end="url(#a4)"/>
+    <line x1="190" y1="90" x2="128" y2="90" stroke="#9a2c22" stroke-width="1.5" marker-end="url(#a4)"/>
+    <text x="158" y="125" text-anchor="middle" font-size="10.5" fill="#555">delegate back and forth indefinitely</text>
+
+    <rect x="332" y="8" width="300" height="134" rx="8" fill="#e9f3e9" stroke="#2f6b3a" stroke-width="1.5"/>
+    <text x="346" y="30" font-size="13" font-weight="700" fill="#2f6b3a">✓ 经理 True，专家 False</text>
+    <rect x="437" y="40" width="90" height="34" rx="5" fill="#fff" stroke="#2f6b3a"/>
+    <text x="482" y="56" text-anchor="middle" font-weight="700">Manager</text>
+    <text x="482" y="69" text-anchor="middle" font-size="10" font-family="Menlo, Consolas, monospace">True</text>
+    <rect x="356" y="96" width="110" height="34" rx="5" fill="#fff" stroke="#999"/>
+    <text x="411" y="112" text-anchor="middle" font-weight="700">Specialist A</text>
+    <text x="411" y="125" text-anchor="middle" font-size="10" font-family="Menlo, Consolas, monospace">False</text>
+    <rect x="498" y="96" width="110" height="34" rx="5" fill="#fff" stroke="#999"/>
+    <text x="553" y="112" text-anchor="middle" font-weight="700">Specialist B</text>
+    <text x="553" y="125" text-anchor="middle" font-size="10" font-family="Menlo, Consolas, monospace">False</text>
+    <line x1="462" y1="74" x2="428" y2="94" stroke="#2f6b3a" stroke-width="1.5" marker-end="url(#a4)"/>
+    <line x1="502" y1="74" x2="536" y2="94" stroke="#2f6b3a" stroke-width="1.5" marker-end="url(#a4)"/>
+  </g>
+</svg>
+<figcaption>图 2　左：双方都能委派，就可能无限往返。右：官方解法——清晰层级，专家不再转派（No re-delegation）。</figcaption>
+</figure>
+
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> 解法：清晰的层级与职责 — 摘自 <a href="https://docs.crewai.com/en/concepts/collaboration#issue-delegation-loops">Issue: Delegation Loops</a>。</figcaption>
+<pre><code class="language-python"># ✅ Solution: Clear hierarchy and responsibilities
+manager = Agent(role="Manager", allow_delegation=True)
+specialist1 = Agent(role="Specialist A", allow_delegation=False)  # No re-delegation
+specialist2 = Agent(role="Specialist B", allow_delegation=False)</code></pre>
+</figure>
+
+<h3>5.2 收尾条件：三道闸</h3>
+<p>“让它停下来”可以从三个层面看，从软到硬：</p>
+<table>
+  <thead><tr><th>闸</th><th>怎么起作用</th><th>出处</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>① 结构闸</strong>：经理 True、专家 False</td>
+      <td>专家手里根本没有“委派工作”工具，只能自己产出 → 环路在结构上被切断</td>
+      <td><a href="https://docs.crewai.com/en/concepts/collaboration#issue-delegation-loops">Delegation Loops</a></td>
+    </tr>
+    <tr>
+      <td><strong>② 语言闸</strong>：goal / 完成标准写清楚</td>
+      <td><code>expected_output</code> 是“任务完成长什么样”的描述；description 里写明受众、长度、交付物、<em>什么情况下</em>才去委派，Agent 就知道何时该交卷</td>
+      <td><a href="https://docs.crewai.com/en/concepts/tasks#task-attributes">Task Attributes</a> · <a href="https://docs.crewai.com/en/concepts/collaboration#issue-too-much-back-and-forth">Too Much Back-and-Forth</a> · <a href="https://docs.crewai.com/en/concepts/collaboration#4-clear-task-descriptions">Clear Task Descriptions</a></td>
+    </tr>
+    <tr>
+      <td><strong>③ 硬上限</strong>：<code>max_iter</code>（及 <code>max_execution_time</code>）</td>
+      <td><code>max_iter</code>：达到最大迭代次数前<strong>必须给出它的最佳答案</strong>，默认 <code>20</code>；<code>max_execution_time</code>：任务执行最长秒数（默认不设）</td>
+      <td><a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a> · <a href="https://docs.crewai.com/en/concepts/agents#execution-control">Execution Control</a></td>
+    </tr>
+  </tbody>
+</table>
+<aside class="sidenote">hierarchical 下还有一层：经理本身负责 “reviews outputs, and assesses task completion”（<a href="https://docs.crewai.com/en/concepts/processes#hierarchical-process">Hierarchical Process</a>）。所以经理的 goal 与 Task 的 <code>expected_output</code> 写得越具体，经理越容易判定“够了”。<br>“三道闸”这个说法是教学归纳，不是官方术语。</aside>
+
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> “语言闸”的写法示例：给足上下文，并写明<em>何时</em>委派 — 摘自 <a href="https://docs.crewai.com/en/concepts/collaboration#issue-too-much-back-and-forth">Issue: Too Much Back-and-Forth</a>。</figcaption>
+<pre><code class="language-python">Task(
+    description="""Write a technical blog post about machine learning.
+
+    Context: Target audience is software developers with basic ML knowledge.
+    Length: 1200 words
+    Include: code examples, practical applications, best practices
+
+    If you need specific technical details, delegate research to the researcher.""",
+    ...
+)</code></pre>
+</figure>
+<p>
+注意这段 description 的结构：<strong>受众 + 长度 + 必含内容</strong>给出了“做完”的边界；最后一句把委派限定在“需要具体技术细节时”且只交给 researcher——这就是在用自然语言收窄委派的范围。
+官方还建议把协作规矩写进 backstory（如 “Only escalate blocking issues to the Project Manager”，见 <a href="https://docs.crewai.com/en/concepts/collaboration#custom-collaboration-rules">Custom Collaboration Rules</a>）。
+</p>
+<p class="meta">提醒：<code>max_iter</code> 是兜底，不是设计手段——到了上限会强制交出“目前最好的答案”，质量未必达标。先用 ①②，再用 ③ 防跑飞。（教学说明）</p>
+</section>
+
+<section id="explain-back">
+<h2>6. 讲给自己听（1 分钟）</h2>
+<p>
+不看上文，试着回答：sequential 下谁决定 Task 归属？hierarchical 必须多给什么？<code>allow_delegation=True</code> 自动加了哪两个工具？
+为什么“所有人都 True”容易踢皮球？三道闸分别是什么？说得出来，就达成了本课目标。然后做小测。
+</p>
+</section>
+
+<section id="quiz">
+<h2>7. 小测（检索练习）</h2>
+<p class="meta">点击选项即判定，每题只能作答一次；选项顺序随机。“重做”可清空重来。一手资料：<a href="https://docs.crewai.com/en/concepts/collaboration">Collaboration</a> · <a href="https://docs.crewai.com/en/concepts/processes">Processes</a>。</p>
+
+<div class="quiz" data-quiz>
+
+  <div data-question data-answer="1">
+    <p data-stem>把 Crew 设为 <code>hierarchical</code> 时，官方要求必须额外提供什么？</p>
+    <ol data-options>
+      <li>一个 manager_llm 或者一个 manager_agent</li>
+      <li>一个 planning_llm 并且把 planning 打开</li>
+      <li>给每个 Task 都事先写好执行的 agent 名</li>
+      <li>给 crew 里的每个 Agent 都开启委派能力</li>
+    </ol>
+    <div data-explanation>“A manager language model (<code>manager_llm</code>) or a custom manager agent (<code>manager_agent</code>) must be specified”。hierarchical 下 Task 恰恰<strong>不</strong>预先分配。见 <a href="https://docs.crewai.com/en/concepts/processes#process-implementations">Processes · Process Implementations</a>。</div>
+  </div>
+
+  <div data-question data-answer="3">
+    <p data-stem><code>allow_delegation=True</code> 时，CrewAI 自动给 Agent 增加了什么？</p>
+    <ol data-options>
+      <li>一个自动创建、负责分派与审核的经理角色</li>
+      <li>读取所有前序 Task 输出的 context 权限</li>
+      <li>委派工作与向同事提问这两个协作类工具</li>
+      <li>在 Flow 里监听其他 Crew 结束事件的能力</li>
+    </ol>
+    <div data-explanation>两个工具：<code>Delegate work to coworker(task, context, coworker)</code> 与 <code>Ask question to coworker(question, context, coworker)</code>。见 <a href="https://docs.crewai.com/en/concepts/collaboration#how-agent-collaboration-works">How Agent Collaboration Works</a>。</div>
+  </div>
+
+  <div data-question data-answer="2">
+    <p data-stem>关于 <code>allow_delegation</code> 与 Process 的关系，哪句符合官方文档？</p>
+    <ol data-options>
+      <li>只有 hierarchical 才能用，sequential 下会被忽略</li>
+      <li>与 Process 无关，sequential 示例里也照样开启</li>
+      <li>选了 hierarchical 后所有 Agent 会被自动开启</li>
+      <li>它默认就是 True，只有经理角色才需要手动关闭</li>
+    </ol>
+    <div data-explanation><code>allow_delegation</code> 是 Agent 属性，默认 <code>False</code>；官方 <a href="https://docs.crewai.com/en/concepts/collaboration#collaboration-in-action">Collaboration in Action</a> 示例就是 <code>Process.sequential</code> + 三个开启委派的 Agent。默认值见 <a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a>。</div>
+  </div>
+
+  <div data-question data-answer="4">
+    <p data-stem>症状：“Agents delegate back and forth indefinitely”。官方给的解法是？</p>
+    <ol data-options>
+      <li>所有 Agent 都开委派，让大家彼此多商量几轮</li>
+      <li>改成 hierarchical 并删掉 manager_llm 配置</li>
+      <li>把 max_rpm 调高，让来回往返跑得更快一些</li>
+      <li>经理开委派、专家关委派，专家不能再转派</li>
+    </ol>
+    <div data-explanation>“Clear hierarchy and responsibilities”：<code>manager</code> 为 <code>allow_delegation=True</code>，<code>specialist</code> 为 <code>False  # No re-delegation</code>。见 <a href="https://docs.crewai.com/en/concepts/collaboration#issue-delegation-loops">Issue: Delegation Loops</a>。</div>
+  </div>
+
+  <div data-question data-answer="1">
+    <p data-stem>Agent 的 <code>max_iter</code> 是什么意思？</p>
+    <ol data-options>
+      <li>迭代上限，到点必须交出当前的最佳答案（默认 20）</li>
+      <li>每分钟最多请求次数，用来避免触发限流（默认 20）</li>
+      <li>出错后最多重试的次数，超过就中止任务（默认 20）</li>
+      <li>单个任务最长执行的秒数，超时就直接停（默认 20）</li>
+    </ol>
+    <div data-explanation>“Maximum iterations before the agent must provide its best answer. Default is 20.” 其余分别是 <code>max_rpm</code>、<code>max_retry_limit</code>（默认 2）、<code>max_execution_time</code>。见 <a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a>。</div>
+  </div>
+
+  <div data-question data-answer="3">
+    <p data-stem>固定流水线：研究 → 写作 → 编辑，每一步由谁做都已确定。最贴合官方模式的配置是？</p>
+    <ol data-options>
+      <li>hierarchical，让经理在每一步都重新挑人分派</li>
+      <li>sequential，但给每位专家都开启委派与提问</li>
+      <li>sequential，按列表接力并用 context 来传递</li>
+      <li>hierarchical，并且让所有专家也都允许委派</li>
+    </ol>
+    <div data-explanation>官方 <a href="https://docs.crewai.com/en/concepts/collaboration#pattern-1-research-%E2%86%92-write-%E2%86%92-edit">Pattern 1: Research → Write → Edit</a> 只靠每个 Task 预先指定 <code>agent</code> + <code>context=[上一个 Task]</code>；sequential 下“the output of one task serving as context for the next”（<a href="https://docs.crewai.com/en/concepts/processes#sequential-process">Sequential Process</a>）。</div>
+  </div>
+
+</div>
+</section>
+
+<section id="next">
+<h2>延伸阅读与下一步</h2>
+<ul>
+  <li><strong>一手资料（本课）：</strong><a href="https://docs.crewai.com/en/concepts/collaboration">CrewAI Docs · Collaboration</a>——尤其 How Agent Collaboration Works、Hierarchical Collaboration、Troubleshooting 三节。</li>
+  <li><strong>辅助：</strong><a href="https://docs.crewai.com/en/concepts/processes">Processes</a> · <a href="https://docs.crewai.com/en/learn/hierarchical-process">Hierarchical Process</a> · <a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agents · Attributes</a>。</li>
+  <li><strong>上一课：</strong><a href="0002-quickstart-data-flow.html">第 2 课 · 朗读 Quickstart 的数据流</a>。</li>
+  <li><strong>下一课：</strong><a href="0004-unified-memory.html">第 4 课 · Unified Memory：scope 树、写时选层、前缀召回</a>。</li>
+  <li><strong>速查表：</strong><a href="../reference/glossary.html">术语表 / Glossary</a>（本课新增 allow_delegation、manager_llm / manager_agent、max_iter 等条目）。</li>
+  <li><strong>可选加深：</strong><a href="https://docs.crewai.com/en/learn/custom-manager-agent">Custom Manager Agent</a>（自定义经理；本课未展开）。</li>
+</ul>
+<div class="callout"><p>有不清楚的地方随时问我（你的老师）。</p></div>
+</section>
+
+<footer>
+事实来自 <a href="https://docs.crewai.com/en/concepts/collaboration">concepts/collaboration</a>、<a href="https://docs.crewai.com/en/concepts/processes">concepts/processes</a>、<a href="https://docs.crewai.com/en/learn/hierarchical-process">learn/hierarchical-process</a>、<a href="https://docs.crewai.com/en/concepts/agents">concepts/agents</a>、<a href="https://docs.crewai.com/en/concepts/crews">concepts/crews</a>、<a href="https://docs.crewai.com/en/concepts/tasks">concepts/tasks</a>（2026-10-12 抓取，v1.15.27）。课内标「官方」的代码块摘自对应页面（可有省略说明）；“三道闸”、“适合”一行及旁注对照为教学归纳，不是官方说法。本课不要求安装或运行。
+</footer>
+
+</article>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>

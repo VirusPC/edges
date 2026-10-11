@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 4 课 · Unified Memory：scope 树、写时选层、前缀召回（对照 edges 目录记忆） — CrewAI</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<article>
+
+<p class="meta">CrewAI 学习空间 · 第 4 课 · 约 10 分钟 · 概念为主；附官方短片段体感（非作业） · 一手资料：官方 <a href="https://docs.crewai.com/en/concepts/memory">Memory</a>（辅以 <a href="https://docs.crewai.com/en/concepts/flows#memory-in-flows">Flows · Memory in Flows</a>、<a href="https://docs.crewai.com/en/concepts/crews">Crews</a>，并对照 <a href="https://github.com/crewAIInc/crewAI/tree/main/lib/crewai/src/crewai/memory">源码 crewai/memory</a>；2026-10-12 抓取） · <a href="0003-process-and-delegation.html">← 第 3 课</a></p>
+<h1>一个 Memory，一棵 scope 树：写的时候选层，读的时候往下找</h1>
+<p class="subtitle">One <code>Memory</code> class, a filesystem-like scope tree, LLM-chosen placement on write, prefix-subtree recall on read — and how that differs from edges' code-directory memory.</p>
+
+<div class="callout goal">
+  <p><strong>本课唯一目标：</strong>读完后，你能讲清楚三件事——</p>
+  <ol>
+    <li>CrewAI 的 <span class="en">Unified Memory</span> 是什么、有哪四种用法；</li>
+    <li><strong>写路径</strong>（<code>remember</code> → 省略 scope 时由 LLM 给出 <code>suggested_scope</code> → consolidation）与<strong>读路径</strong>（<code>recall</code> → scope <strong>前缀子树</strong> + 复合打分）；</li>
+    <li>它和你自己的 edges 目录记忆（代码目录树里的 <code>.memory/</code>、<strong>祖先并集</strong>读、<strong>就近层</strong>写）到底哪里像、哪里不像。</li>
+  </ol>
+</div>
+<p class="meta">前 3 课讲的是“谁来干活”。本课讲“干完以后记住什么、下次怎么找回来”。</p>
+
+<section id="what">
+<h2>1. 一个类取代四种记忆</h2>
+<p>
+官方 <a href="https://docs.crewai.com/en/concepts/memory#overview">Memory · Overview</a> 第一句：CrewAI 提供 <strong>unified memory system</strong>——用<strong>一个</strong> <code>Memory</code> 类，取代过去分开的 short-term、long-term、entity、external 四种记忆类型。
+保存时由 LLM 分析内容（推断 scope、categories、importance）；召回时做自适应深度（adaptive-depth）检索，按语义 + 时近 + 重要度的<strong>复合分</strong>排序。
+</p>
+<aside class="sidenote">读旧资料时注意：<a href="https://docs.crewai.com/en/concepts/crews#crew-attributes">Crews · Crew Attributes</a> 表格里 <code>memory</code> 一行仍写着 “short-term, long-term, entity memory”，是旧说法未同步；以 Memory 页为准。</aside>
+
+<h3>四种用法</h3>
+<table>
+  <thead><tr><th>用法</th><th>怎么开</th><th>官方说它会做什么</th></tr></thead>
+  <tbody>
+    <tr><td><span class="en">Standalone</span></td><td><code>memory = Memory()</code></td><td>脚本 / notebook 里当知识库用，不需要 Agent 或 Crew</td></tr>
+    <tr><td><span class="en">With Crews</span></td><td><code>Crew(..., memory=True)</code> 或传入 <code>Memory(...)</code> 实例</td><td><strong>每个 Task 之后</strong>自动从输出里抽取事实并存储；<strong>每个 Task 之前</strong>Agent 召回相关上下文注入 prompt；所有 Agent 共享 crew 的记忆（除非某 Agent 自带）</td></tr>
+    <tr><td><span class="en">With Agents</span></td><td><code>Agent(..., memory=memory.scope("/agent/researcher"))</code></td><td>给某个 Agent 一个<strong>私有子树视图</strong>；不设则用 crew 共享记忆</td></tr>
+    <tr><td><span class="en">With Flows</span></td><td>每个 Flow 自带（自动创建默认 <code>Memory()</code>）</td><td>在任意 flow 方法里用 <code>self.remember()</code> / <code>self.recall()</code> / <code>self.extract_memories()</code></td></tr>
+  </tbody>
+</table>
+<p class="meta">出处：<a href="https://docs.crewai.com/en/concepts/memory#four-ways-to-use-memory">Four Ways to Use Memory</a> · <a href="https://docs.crewai.com/en/concepts/memory#with-crews">With Crews</a> · <a href="https://docs.crewai.com/en/concepts/flows#memory-in-flows">Memory in Flows</a>。JSONC 写法里 <code>crew.jsonc</code> 也支持 <code>"memory": true</code>（<a href="https://docs.crewai.com/en/concepts/crews#jsonc-configuration-recommended">Crews · JSONC</a>）。</p>
+
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> Quick Start — 摘自 <a href="https://docs.crewai.com/en/concepts/memory#quick-start">Memory · Quick Start</a>（节选）。</figcaption>
+<pre><code class="language-python">from crewai import Memory
+
+memory = Memory()
+
+# Store -- the LLM infers scope, categories, and importance
+memory.remember("We decided to use PostgreSQL for the user database.")
+
+# Retrieve -- results ranked by composite score (semantic + recency + importance)
+matches = memory.recall("What database did we choose?")
+
+# Forget
+memory.forget(scope="/project/old")
+
+# Explore the self-organized scope tree
+print(memory.tree())</code></pre>
+</figure>
+</section>
+
+<section id="scope">
+<h2>2. scope：像文件系统的一棵路径树</h2>
+<p>
+<a href="https://docs.crewai.com/en/concepts/memory#what-scopes-are">What Scopes Are</a>：记忆被组织成一棵层级 <span class="en">scope</span> 树，“similar to a filesystem”，每个 scope 是 <code>/</code>、<code>/project/alpha</code>、<code>/agent/researcher/findings</code> 这样的路径。
+关键是：这些路径是<strong>抽象命名空间</strong>（按实体 / 关注点命名，官方推荐 <code>/{entity_type}/{identifier}</code>、深度 2–3 层），<strong>和磁盘上的代码目录没有任何绑定</strong>（<a href="https://docs.crewai.com/en/concepts/memory#best-practices-for-scope-design">Best Practices for Scope Design</a>）。
+</p>
+<ul>
+  <li><span class="en">MemoryScope</span>：<code>memory.scope("/agent/researcher")</code> 把所有读写限制在一个子树里，可再 <code>.subscope("project-alpha")</code> 收窄；</li>
+  <li><span class="en">MemorySlice</span>：<code>memory.slice(scopes=[...], read_only=True)</code> 一次跨几个<strong>不相邻</strong>的分支召回；只读 slice 调 <code>remember</code> 会抛 <code>PermissionError</code>（<a href="https://docs.crewai.com/en/concepts/memory#memory-slices">Memory Slices</a>）。</li>
+</ul>
+<aside class="sidenote">记住 slice：它是 CrewAI 里“把几个分支并起来读”的<strong>显式</strong>手段——你要自己列出分支。edges 的“祖先并集”是<strong>隐式</strong>按目录位置算出来的。第 5 节会用到这个区别。</aside>
+</section>
+
+<section id="write">
+<h2>3. 写路径：remember → suggested_scope → consolidation</h2>
+
+<figure>
+<svg viewBox="0 0 640 170" role="img" aria-labelledby="w-title w-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="w-title">CrewAI 写路径</title>
+  <desc id="w-desc">remember(content) 进入；若未给 scope，LLM 读取现有 scope 列表并给出 suggested_scope，可能是新路径；随后与相似记录比较，相似度超过 0.85 时由 LLM 决定 keep、update、delete 和是否 insert_new；最后写入中央 LanceDB。</desc>
+  <defs><marker id="w4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b2d1f"/></marker></defs>
+  <g font-family="-apple-system, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#1f1f1f">
+    <rect x="8" y="40" width="130" height="70" rx="6" fill="#fff" stroke="#999"/>
+    <text x="73" y="66" text-anchor="middle" font-weight="700">remember()</text>
+    <text x="73" y="84" text-anchor="middle" font-size="10.5" fill="#444">content, scope?,</text>
+    <text x="73" y="98" text-anchor="middle" font-size="10.5" fill="#444">categories?, importance?</text>
+    <line x1="140" y1="75" x2="166" y2="75" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#w4)"/>
+    <rect x="168" y="20" width="160" height="110" rx="6" fill="#fbf7ef" stroke="#8b2d1f" stroke-width="1.5"/>
+    <text x="248" y="42" text-anchor="middle" font-weight="700" fill="#8b2d1f">省略 scope 时</text>
+    <text x="248" y="62" text-anchor="middle" font-size="10.5">LLM 读现有 scope 列表</text>
+    <text x="248" y="78" text-anchor="middle" font-size="10.5">→ suggested_scope</text>
+    <text x="248" y="96" text-anchor="middle" font-size="10.5">没合适的就新建路径</text>
+    <text x="248" y="118" text-anchor="middle" font-size="10" fill="#555">（写时选层）</text>
+    <line x1="330" y1="75" x2="356" y2="75" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#w4)"/>
+    <rect x="358" y="20" width="150" height="110" rx="6" fill="#f4ece4" stroke="#8b2d1f" stroke-width="1.5"/>
+    <text x="433" y="42" text-anchor="middle" font-weight="700" fill="#8b2d1f">consolidation</text>
+    <text x="433" y="62" text-anchor="middle" font-size="10.5">相似度 &gt; 0.85 时</text>
+    <text x="433" y="78" text-anchor="middle" font-size="10.5">LLM 对旧记录：</text>
+    <text x="433" y="94" text-anchor="middle" font-size="10.5" font-family="Menlo, Consolas, monospace">keep|update|delete</text>
+    <text x="433" y="110" text-anchor="middle" font-size="10.5" font-family="Menlo, Consolas, monospace">+ insert_new?</text>
+    <line x1="510" y1="75" x2="536" y2="75" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#w4)"/>
+    <rect x="538" y="40" width="94" height="70" rx="6" fill="#fff" stroke="#999"/>
+    <text x="585" y="66" text-anchor="middle" font-weight="700">LanceDB</text>
+    <text x="585" y="84" text-anchor="middle" font-size="10.5" fill="#444">中央存储</text>
+    <text x="585" y="98" text-anchor="middle" font-size="10.5" fill="#444">一张表</text>
+    <text x="320" y="160" text-anchor="middle" font-size="10.5" fill="#555">长文本可先 extract_memories() 拆成原子事实，再逐条 remember()</text>
+  </g>
+</svg>
+<figcaption>图 1　写路径。出处：<a href="https://docs.crewai.com/en/concepts/memory#how-scope-inference-works">How Scope Inference Works</a> · <a href="https://docs.crewai.com/en/concepts/memory#memory-consolidation">Memory Consolidation</a> · <a href="https://docs.crewai.com/en/concepts/memory#storage-backend">Storage Backend</a>。</figcaption>
+</figure>
+
+<ol>
+  <li><strong><code>remember(content, scope=None, categories=None, importance=None, ...)</code></strong>：三个字段都可省；省了就交给 LLM（源码签名还有 <code>metadata</code>、<code>source</code>、<code>private</code> 等，见 <a href="https://github.com/crewAIInc/crewAI/blob/main/lib/crewai/src/crewai/memory/unified_memory.py">unified_memory.py</a>）。</li>
+  <li><strong><span class="en">scope inference</span></strong>：官方原话 “the LLM analyzes the content and the existing scope tree, then suggests the best placement. If no existing scope fits, it creates a new one.” 源码里这个字段叫 <code>suggested_scope</code>，描述为 “Best matching existing scope or new path”（<a href="https://github.com/crewAIInc/crewAI/blob/main/lib/crewai/src/crewai/memory/analyze.py">analyze.py · MemoryAnalysis</a>）。LLM 失败时退回默认 scope <code>/</code>、importance <code>0.5</code>（<a href="https://docs.crewai.com/en/concepts/memory#failure-behavior">Failure Behavior</a>）。</li>
+  <li><strong><code>extract_memories(content)</code></strong>：把一段原始文本（如 task 输出）拆成若干条独立陈述，避免存成“一大坨”；Crew 的自动抽取就是这么做的（<a href="https://docs.crewai.com/en/concepts/memory#llm-analysis-layer">LLM Analysis Layer</a>）。</li>
+  <li><strong><span class="en">consolidation</span></strong>（合并整理）：保存前查找相似旧记录，相似度超过 <code>consolidation_threshold</code>（默认 <code>0.85</code>）时，LLM 对旧记录决定 <code>keep</code> / <code>update</code> / <code>delete</code>，并决定新内容是否 <code>insert_new</code>。</li>
+</ol>
+
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> 省略 scope 由 LLM 推断，或显式给出 — 摘自 <a href="https://docs.crewai.com/en/concepts/memory#how-scope-inference-works">How Scope Inference Works</a>。</figcaption>
+<pre><code class="language-python">memory = Memory()
+
+# LLM infers scope from content
+memory.remember("We chose PostgreSQL for the user database.")
+# -> might be placed under /project/decisions or /engineering/database
+
+# You can also specify scope explicitly
+memory.remember("Sprint velocity is 42 points", scope="/team/metrics")</code></pre>
+</figure>
+</section>
+
+<section id="read">
+<h2>4. 读路径：recall → 前缀子树 + 复合打分</h2>
+<p><code>recall(query, scope=None, categories=None, limit=10, depth="deep", ...)</code>（<a href="https://github.com/crewAIInc/crewAI/blob/main/lib/crewai/src/crewai/memory/unified_memory.py">unified_memory.py · recall</a>）。三个要点：</p>
+<table>
+  <thead><tr><th>要点</th><th>含义</th><th>出处</th></tr></thead>
+  <tbody>
+    <tr><td><strong>scope = 前缀子树（向下）</strong></td><td>“when you recall within a scope, you only search that branch of the tree”。源码 LanceDB 查询就是 <code>scope LIKE '&lt;prefix&gt;%'</code>：给 <code>/project</code>，会搜到 <code>/project/alpha/...</code>，但<strong>不会</strong>往上搜 <code>/</code> 或兄弟分支</td><td><a href="https://docs.crewai.com/en/concepts/memory#what-scopes-are">What Scopes Are</a> · <a href="https://github.com/crewAIInc/crewAI/blob/main/lib/crewai/src/crewai/memory/storage/lancedb_storage.py">lancedb_storage.py · search</a></td></tr>
+    <tr><td><strong><span class="en">recall depth</span></strong></td><td><code>"shallow"</code>：直接向量检索 + 复合打分，无 LLM 调用，约 200ms；<code>"deep"</code>（<strong>默认</strong>）：RecallFlow——查询分析、选 scope、并行检索、按置信度路由、必要时递归探索。短于 200 字符的查询即使 deep 也跳过 LLM 分析</td><td><a href="https://docs.crewai.com/en/concepts/memory#recallflow-deep-recall">RecallFlow (Deep Recall)</a></td></tr>
+    <tr><td><strong><span class="en">Composite Scoring</span></strong></td><td><code>semantic_weight·similarity + recency_weight·decay + importance_weight·importance</code>；默认权重 0.5 / 0.3 / 0.2，半衰期 30 天</td><td><a href="https://docs.crewai.com/en/concepts/memory#composite-scoring">Composite Scoring</a> · <a href="https://docs.crewai.com/en/concepts/memory#configuration-reference">Configuration Reference</a></td></tr>
+  </tbody>
+</table>
+<figure class="codeblock">
+<figcaption><span class="badge official">官方</span> 跨项目召回 vs 限定在一个分支 — 摘自 <a href="https://docs.crewai.com/en/concepts/memory#use-case-examples">Use Case Examples</a>。</figcaption>
+<pre><code class="language-python"># Recall across all projects
+memory.recall("API design decisions")
+
+# Or within a specific project
+memory.recall("API design", scope="/project/beta")</code></pre>
+</figure>
+<aside class="sidenote">deep 模式里 LLM 会挑候选 scope，但源码中候选来自给定 scope <strong>之下</strong>的子 scope（<code>list_scopes(prefix)</code>），方向依旧是向下（<a href="https://github.com/crewAIInc/crewAI/blob/main/lib/crewai/src/crewai/memory/recall_flow.py">recall_flow.py</a>）。</aside>
+
+<h3>管理操作与存储</h3>
+<table>
+  <thead><tr><th>操作</th><th>作用</th></tr></thead>
+  <tbody>
+    <tr><td><code>tree(path, max_depth)</code> · <code>info(path)</code></td><td>打印 scope 树与记录数；某 scope 的 <code>ScopeInfo</code>（记录数、categories、最早/最新、子 scope）</td></tr>
+    <tr><td><code>list_scopes(path)</code> · <code>list_records(scope=, limit=)</code> · <code>list_categories()</code></td><td>直接子 scope；某 scope 下记录（新的在前）；类别计数</td></tr>
+    <tr><td><code>forget(scope=, categories=, older_than=, record_ids=...)</code></td><td>按条件删除，scope 同样按前缀子树匹配</td></tr>
+    <tr><td><code>reset(scope=None)</code></td><td>清空全部或某子树</td></tr>
+    <tr><td><code>update(record_id, content=, scope=, ...)</code></td><td>按 ID 改<strong>单条</strong>记录；传新 <code>scope</code> 即把这条记录<strong>移到</strong>另一层</td></tr>
+  </tbody>
+</table>
+<p class="meta">出处：<a href="https://docs.crewai.com/en/concepts/memory#discovery">Discovery</a> · <a href="https://docs.crewai.com/en/concepts/memory#troubleshooting">Troubleshooting</a>（reset）· 源码 <a href="https://github.com/crewAIInc/crewAI/blob/main/lib/crewai/src/crewai/memory/unified_memory.py">unified_memory.py</a>（<code>forget</code>/<code>update</code> 签名；<code>update</code> 官方 Memory 页未单独介绍）。注意 <code>update</code> 是逐条移动，没有“整棵子树搬家”的批量 API。</p>
+<p>
+<strong>存储</strong>：默认 <span class="en">LanceDB</span>。官方 <a href="https://docs.crewai.com/en/concepts/memory#storage-backend">Storage Backend</a> 写的是 <code>./.crewai/memory</code>（或 <code>$CREWAI_STORAGE_DIR/memory</code>，或 <code>storage="path"</code>）；可实现 <code>StorageBackend</code> 协议换后端。
+不管哪条路径，它都是<strong>一个中央库</strong>，所有 scope 都是库里一列字符串——不会在你的代码子目录里散落文件。
+</p>
+<aside class="sidenote">文档与源码有出入：main 分支 <a href="https://github.com/crewAIInc/crewAI/blob/main/lib/crewai/src/crewai/memory/storage/lancedb_storage.py">lancedb_storage.py</a>（2026-10-09 提交 6b93fa0）在没设 <code>CREWAI_STORAGE_DIR</code> 时用的是 <code>db_storage_path()/memory</code>——平台用户数据目录（<code>appdirs.user_data_dir(&lt;当前目录名&gt;, "CrewAI")</code>），而不是项目下的 <code>./.crewai/memory</code>。“中央、不在仓库子目录里”这一结论两者一致。</aside>
+</section>
+
+<section id="compare">
+<h2>5. 对照：CrewAI Unified Memory vs edges 目录记忆</h2>
+<div class="callout">
+<p><strong>来源说明：</strong>本节的横向比较<strong>来自 2026-10-11 调研结论</strong>（你的 Agent Eval 助手的一手调研），不是 CrewAI 官方说法；CrewAI 一侧的事实以前 4 节的官方文档 / 源码为准。</p>
+</div>
+
+<h3>5.1 edges 是怎么做的（回顾）</h3>
+<p>可写记忆放在<strong>代码目录树</strong>里，每层一个 <code>.memory/</code>（或 <code>.harness/memory/</code>）；<strong>读</strong>时从当前目录<strong>向上</strong>取所有祖先层的并集（ancestor union）；<strong>写</strong>时由 skill 挑<strong>最近</strong>的一层（nearest layer）。</p>
+
+<figure>
+<svg viewBox="0 0 640 210" role="img" aria-labelledby="c-title c-desc" xmlns="http://www.w3.org/2000/svg">
+  <title id="c-title">读方向对比</title>
+  <desc id="c-desc">左：CrewAI recall(scope="/project")，从 /project 向下覆盖 /project/alpha 和 /project/beta，不包含根和兄弟 /agent。右：edges 在 repo/pkg/api 工作时，读取 api、pkg、repo 三层 .memory 的并集，方向向上；写入时选最近层 api/.memory。</desc>
+  <defs><marker id="c4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8b2d1f"/></marker></defs>
+  <g font-family="-apple-system, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#1f1f1f">
+    <rect x="8" y="8" width="300" height="194" rx="8" fill="#fbf7ef" stroke="#8b2d1f" stroke-width="1.5"/>
+    <text x="22" y="30" font-size="13" font-weight="700" fill="#8b2d1f">CrewAI：前缀子树，向下</text>
+    <text x="40" y="58" fill="#999">/</text>
+    <rect x="52" y="70" width="90" height="24" rx="4" fill="#fff" stroke="#8b2d1f" stroke-width="2"/>
+    <text x="97" y="87" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="11">/project</text>
+    <text x="200" y="87" font-family="Menlo, Consolas, monospace" font-size="11" fill="#999">/agent</text>
+    <rect x="80" y="110" width="130" height="24" rx="4" fill="#fff" stroke="#8b2d1f"/>
+    <text x="145" y="127" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="11">/project/alpha</text>
+    <rect x="80" y="144" width="130" height="24" rx="4" fill="#fff" stroke="#8b2d1f"/>
+    <text x="145" y="161" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="11">/project/beta</text>
+    <line x1="66" y1="96" x2="66" y2="156" stroke="#8b2d1f" stroke-width="1.5"/>
+    <line x1="66" y1="122" x2="78" y2="122" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#c4)"/>
+    <line x1="66" y1="156" x2="78" y2="156" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#c4)"/>
+    <text x="158" y="192" text-anchor="middle" font-size="10.5" fill="#555">recall(q, scope="/project")；抽象命名空间</text>
+
+    <rect x="332" y="8" width="300" height="194" rx="8" fill="#f4ece4" stroke="#8b2d1f" stroke-width="1.5"/>
+    <text x="346" y="30" font-size="13" font-weight="700" fill="#8b2d1f">edges：祖先并集，向上</text>
+    <rect x="356" y="46" width="150" height="24" rx="4" fill="#fff" stroke="#8b2d1f"/>
+    <text x="431" y="63" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="11">repo/.memory</text>
+    <rect x="376" y="86" width="150" height="24" rx="4" fill="#fff" stroke="#8b2d1f"/>
+    <text x="451" y="103" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="11">pkg/.memory</text>
+    <rect x="396" y="126" width="150" height="24" rx="4" fill="#fff" stroke="#8b2d1f" stroke-width="2"/>
+    <text x="471" y="143" text-anchor="middle" font-family="Menlo, Consolas, monospace" font-size="11">api/.memory ← 写</text>
+    <line x1="560" y1="138" x2="560" y2="62" stroke="#8b2d1f" stroke-width="1.5" marker-end="url(#c4)"/>
+    <text x="568" y="104" font-size="10.5" fill="#8b2d1f">读</text>
+    <text x="482" y="180" text-anchor="middle" font-size="10.5" fill="#555">在 repo/pkg/api 工作；绑定真实代码目录</text>
+    <text x="482" y="194" text-anchor="middle" font-size="10.5" fill="#555">写：skill 选最近层</text>
+  </g>
+</svg>
+<figcaption>图 2　读方向相反：CrewAI 给一个 scope，往<strong>下</strong>覆盖它的子树；edges 从当前目录往<strong>上</strong>把祖先层并起来。（edges 侧为教学示意，目录名虚构。）</figcaption>
+</figure>
+
+<table>
+  <thead><tr><th>维度</th><th>CrewAI Unified Memory</th><th>edges 目录记忆</th></tr></thead>
+  <tbody>
+    <tr><td>scope 形状</td><td>层级路径树（<code>/project/alpha/decisions</code>）</td><td>代码目录树，每层一个 <code>.memory/</code></td></tr>
+    <tr><td>绑定</td><td>抽象命名空间，不绑代码目录</td><td>绑定真实代码目录</td></tr>
+    <tr><td>读方向</td><td>前缀子树，<strong>向下</strong>；多分支需显式 <code>slice</code></td><td>祖先并集，<strong>向上</strong>，按位置隐式计算</td></tr>
+    <tr><td>写时定层</td><td>显式 <code>scope</code>，或 LLM 给 <code>suggested_scope</code>（可新建路径）</td><td>skill 选最近层</td></tr>
+    <tr><td>存储</td><td>中央 LanceDB（一张表），不在仓库目录里</td><td>文件，散落在仓库各层目录里</td></tr>
+    <tr><td>管理操作</td><td>较全：<code>tree/info/list_scopes/list_records/forget/reset</code>，<code>update(scope=)</code> 逐条移层；另有 consolidation</td><td>较弱：缺跨层 promote / demote / move</td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 调研结论要点（来自 2026-10-11 调研结论）</h3>
+<ul>
+  <li><strong>主流 coding agent</strong>（Claude Code / Cursor / Codex / Gemini / Copilot / Windsurf 等）：<strong>读</strong>侧普遍有嵌套指令文件或路径 glob；但<strong>自动写入</strong>的记忆是固定的全局 / 仓库级“桶”，没有一个会把新记忆自动归档到某个代码子目录。</li>
+  <li>在“<strong>可写 + 路径 scope + 写时选层</strong>”这一点上，最接近的公开系统是 CrewAI Unified Memory；但它的路径是抽象命名空间、读是前缀子树向下、存储是中央 LanceDB。</li>
+  <li>edges 仍较少见的组合：<strong>可写记忆在代码目录树里 + 祖先并集读 + 就近层写</strong>。CrewAI 证明了“分层 scope + 写时选层”可行，且管理 API 更完整；edges 的差异在于<strong>绑定代码目录 + 祖先并集</strong>，而<strong>不是</strong>“分层”本身。</li>
+  <li><strong>次近但不同构</strong>：Anthropic Memory tool / Letta MemFS（agent 自管文件树）；GitHub Copilot Memory（仓库桶 + 代码引用校验）；Devin Knowledge（组织级文件夹 + promote）。</li>
+</ul>
+<aside class="sidenote">附注（同出自该调研）：LoCoMo 之类记忆基准的冒烟测试<strong>证明不了</strong>某个设计好坏；评估 edges 需要自己的用例，或构念匹配（construct-matched）的基准。Langfuse tracing 是另一条线，与目录记忆无关。</aside>
+</section>
+
+<section id="explain-back">
+<h2>6. 讲给自己听（1 分钟）</h2>
+<p>
+不看上文，试着回答：Unified Memory 取代了哪几种旧记忆？Crew 开 <code>memory=True</code> 后，Task 前后各自动做什么？
+<code>remember()</code> 不给 scope 时谁来决定放哪、能不能新建路径？<code>recall(scope="/project")</code> 会不会搜到 <code>/</code> 下的记录？
+最后，用一句话说出 edges 和 CrewAI 的<strong>真正</strong>差别（提示：不是“分层”）。说得出来，就达成了本课目标。然后做小测。
+</p>
+</section>
+
+<section id="quiz">
+<h2>7. 小测（检索练习）</h2>
+<p class="meta">点击选项即判定，每题只能作答一次；选项顺序随机。“重做”可清空重来。一手资料：<a href="https://docs.crewai.com/en/concepts/memory">Memory</a>。</p>
+
+<div class="quiz" data-quiz>
+
+  <div data-question data-answer="2">
+    <p data-stem>CrewAI 的 Unified Memory 和旧版记忆的关系是？</p>
+    <ol data-options>
+      <li>在四种旧记忆之上再加一层统一的检索缓存</li>
+      <li>一个 Memory 类取代短期长期实体外部四种</li>
+      <li>只合并了短期和长期两种，实体记忆仍独立</li>
+      <li>仅供 Flow 使用，Crew 仍沿用旧的四种记忆</li>
+    </ol>
+    <div data-explanation>“a single <code>Memory</code> class that replaces separate short-term, long-term, entity, and external memory types”。见 <a href="https://docs.crewai.com/en/concepts/memory#overview">Memory · Overview</a>。</div>
+  </div>
+
+  <div data-question data-answer="3">
+    <p data-stem>Crew 设置 <code>memory=True</code> 后，官方说会自动发生什么？</p>
+    <ol data-options>
+      <li>只在 kickoff 结束时把最终结果整体存成一条</li>
+      <li>每个 Agent 各自建一个互相隔离的私有记忆库</li>
+      <li>Task 后抽取事实存入，Task 前召回并注入</li>
+      <li>只在 hierarchical 下由经理决定何时读写记忆</li>
+    </ol>
+    <div data-explanation>“After each task, the crew automatically extracts discrete facts… Before each task, the agent recalls relevant context… and injects it into the task prompt.” 所有 Agent 默认共享 crew 记忆。见 <a href="https://docs.crewai.com/en/concepts/memory#with-crews">With Crews</a>。</div>
+  </div>
+
+  <div data-question data-answer="1">
+    <p data-stem>调用 <code>remember(content)</code> 且不传 scope，会怎样？</p>
+    <ol data-options>
+      <li>LLM 看现有 scope 树给出位置，必要时新建路径</li>
+      <li>一律写进根 scope 斜杠，之后需要手动再移动</li>
+      <li>直接抛出异常，要求调用方必须显式指定 scope</li>
+      <li>写到调用代码所在的磁盘目录下的 .memory 里</li>
+    </ol>
+    <div data-explanation>“the LLM analyzes the content and the existing scope tree, then suggests the best placement. If no existing scope fits, it creates a new one.” 源码字段 <code>suggested_scope</code>。只有 LLM 分析<strong>失败</strong>时才退回 <code>/</code>。见 <a href="https://docs.crewai.com/en/concepts/memory#how-scope-inference-works">How Scope Inference Works</a> · <a href="https://docs.crewai.com/en/concepts/memory#failure-behavior">Failure Behavior</a>。</div>
+  </div>
+
+  <div data-question data-answer="4">
+    <p data-stem><code>recall("...", scope="/project/beta")</code> 的检索范围是？</p>
+    <ol data-options>
+      <li>/project/beta 加上它所有祖先，一直到根斜杠</li>
+      <li>只匹配 scope 恰好等于 /project/beta 本身的记录</li>
+      <li>整棵树全部检索，scope 只用来给结果额外加一些权重</li>
+      <li>/project/beta 及其下所有子 scope 的前缀子树</li>
+    </ol>
+    <div data-explanation>“when you recall within a scope, you only search that branch of the tree”；源码过滤条件为 <code>scope LIKE '/project/beta%'</code>。祖先并集是 edges 的读法，不是 CrewAI 的。见 <a href="https://docs.crewai.com/en/concepts/memory#what-scopes-are">What Scopes Are</a> · <a href="https://github.com/crewAIInc/crewAI/blob/main/lib/crewai/src/crewai/memory/storage/lancedb_storage.py">lancedb_storage.py</a>。</div>
+  </div>
+
+  <div data-question data-answer="2">
+    <p data-stem>关于 <code>recall</code> 的 <code>depth</code>，哪句正确？</p>
+    <ol data-options>
+      <li>默认 shallow；deep 需显式开启且总会调用 LLM</li>
+      <li>默认 deep；shallow 是纯向量检索、不调用 LLM</li>
+      <li>两种都会调用 LLM，区别只在于返回结果数量的多少</li>
+      <li>depth 决定向上回溯几层祖先 scope 来做合并</li>
+    </ol>
+    <div data-explanation><code>depth="shallow"</code>：“Direct vector search with composite scoring… no LLM calls”；<code>depth="deep"</code>（default）运行 RecallFlow，且短于 200 字符的查询会跳过 LLM 分析。见 <a href="https://docs.crewai.com/en/concepts/memory#recallflow-deep-recall">RecallFlow (Deep Recall)</a>。</div>
+  </div>
+
+  <div data-question data-answer="3">
+    <p data-stem>按 2026-10-11 调研结论，edges 与 CrewAI 的<strong>关键差异</strong>是？</p>
+    <ol data-options>
+      <li>edges 有分层 scope，CrewAI 只有一个扁平桶</li>
+      <li>edges 的管理 API 更全，支持跨层批量移动记忆</li>
+      <li>edges 绑定代码目录、按祖先并集读，而非分层本身</li>
+      <li>edges 用中央向量库，CrewAI 把文件写进仓库里</li>
+    </ol>
+    <div data-explanation>CrewAI 已证明“分层 scope + 写时选层”可行，且管理 API 更完整；edges 的差别在<strong>绑定代码目录 + 祖先并集读</strong>（+ 就近层写），edges 反而缺 promote / demote / move。存储方向也正好相反。见本课第 5 节（来自 2026-10-11 调研结论）。</div>
+  </div>
+
+</div>
+</section>
+
+<section id="next">
+<h2>延伸阅读与下一步</h2>
+<ul>
+  <li><strong>一手资料（本课）：</strong><a href="https://docs.crewai.com/en/concepts/memory">CrewAI Docs · Memory</a>——尤其 Hierarchical Scopes、Memory Consolidation、RecallFlow、Discovery 四节。</li>
+  <li><strong>辅助：</strong><a href="https://docs.crewai.com/en/concepts/flows#memory-in-flows">Flows · Memory in Flows</a> · 源码 <a href="https://github.com/crewAIInc/crewAI/tree/main/lib/crewai/src/crewai/memory">crewai/memory</a>（<code>unified_memory.py</code>、<code>analyze.py</code>、<code>storage/lancedb_storage.py</code>）。</li>
+  <li><strong>上一课：</strong><a href="0003-process-and-delegation.html">第 3 课 · Process 与 allow_delegation</a>。</li>
+  <li><strong>速查表：</strong><a href="../reference/glossary.html">术语表 / Glossary</a>（本课新增 Unified Memory、scope、suggested_scope、recall depth、consolidation）。</li>
+  <li><strong>可选加深：</strong>Memory Slices、Source and Privacy（<code>source</code> / <code>private</code>）——本课未展开。</li>
+</ul>
+<div class="callout"><p>有不清楚的地方随时问我（你的老师）。</p></div>
+</section>
+
+<footer>
+CrewAI 事实来自 <a href="https://docs.crewai.com/en/concepts/memory">concepts/memory</a>、<a href="https://docs.crewai.com/en/concepts/flows#memory-in-flows">concepts/flows#memory-in-flows</a>、<a href="https://docs.crewai.com/en/concepts/crews">concepts/crews</a>（2026-10-12 抓取），并对照 <a href="https://github.com/crewAIInc/crewAI/tree/main/lib/crewai/src/crewai/memory">crewAIInc/crewAI main · lib/crewai/src/crewai/memory</a>（提交 6b93fa0，2026-10-09）。课内标「官方」的代码块摘自对应页面（可有省略）。第 5 节横向比较来自 2026-10-11 调研结论，不是 CrewAI 官方说法；edges 示意图目录名为虚构。本课不要求安装或运行。
+</footer>
+
+</article>
+<script src="../assets/quiz.js"></script>
+</body>
+</html>
