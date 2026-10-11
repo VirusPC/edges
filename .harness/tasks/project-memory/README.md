@@ -25,4 +25,5 @@ Project Memory 类型/索引/reshape/与 docs 边界等。
 - [index\_md\_index\_md\_posts](<backlog/2026-10-06--%E8%84%9A%E6%9C%ACindexmd-%E8%BF%81-INDEXmd%E5%90%AB-posts/INDEX.md>) — 可预览迁移脚本，套 CLI 树遍历，将内容叶子 index.md 改为 INDEX.md 并改引用；含 posts 仅改名。
 - [personal\_rsi\_recursive\_scope](<done/2026-10-02--%E6%96%87%E6%A1%A3%E6%98%8E%E7%A1%AE%E4%B8%AA%E4%BA%BA-RSI-%E4%B8%8E%E9%80%9A%E7%94%A8%E9%80%92%E5%BD%92%E4%BD%9C%E7%94%A8%E5%9F%9F/INDEX.md>) — README / CONTEXT / 项目记忆把「个人递归自我改进」与系统一／系统二、harness、递归作用域说清楚；目录迁移与 CLI scope 实现留给后续卡。
 - [project\_harness\_layer\_markers](<done/2026-10-06--%E5%B1%82%E5%85%A5%E5%8F%A3%E8%A1%A8%E9%9D%A2%E6%94%B9%E7%94%A8-project-harness-%E6%A0%87%E8%AE%B0/INDEX.md>) — AGENTS.md 层入口 HTML 注释与标题从 project\-memory 表面改成 project\-harness；读写兼容旧标记，命令名与 skill 目录名不动。
+- [memory\_agent](<backlog/2026-10-11--Memory-%E6%8A%8A-Agent-%E8%A1%8C%E4%B8%BA%E7%B1%BB%E6%9D%A1%E7%9B%AE%E4%B8%8E%E9%A1%B9%E7%9B%AE%E7%9F%A5%E8%AF%86%E5%88%86%E5%BC%80/INDEX.md>) — 项目记忆里，纠正 Agent 行为的规则和项目本身的事实、约定混在一起；模型升级或换模型后，前者可能过时，却很难单独找出来清理。要做到行为类条目能单独识别、复查和整块删除，项目知识不受影响。
 <!-- project-entries-local:end -->
