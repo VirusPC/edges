@@ -1,4 +1,4 @@
-import { isWithinPath, findAncestor, firstSymlink } from '../../utils/filesystem.js';
+import { isWithinPath, findAncestor, firstSymlink, canonicalPath } from '../../utils/filesystem.js';
 import { isGitBoundary } from '../scope.js';
 import { WRITE_LOCK_NAME, assertNoWriteLock } from "./node-lock.js";
 import * as fs from "node:fs";
@@ -125,6 +125,9 @@ export class NodeService {
     resources = true,
   ): Promise<BaseNode | undefined> {
     file = path.resolve(file);
+    // A case-insensitive filesystem can resolve different spellings to one
+    // entry. Keep one cache identity, without resolving permitted read-only links.
+    if (!firstSymlink(file)) file = canonicalPath(file);
     const cached = this.#cache.loaded.get(file);
     const Requested = Model;
     // Base requests constrain the authoritative model rather than downgrade it.
@@ -173,7 +176,8 @@ export class NodeService {
       this.#navigationReadOnly.has(parent) ||
       indexContract(parent)?.writable === false ||
       this.#options.readOnlyReference?.(parent, reference, reference.id) === true;
-    const cached = this.#cache.loaded.get(reference.id);
+    const file = firstSymlink(reference.id) ? reference.id : canonicalPath(reference.id);
+    const cached = this.#cache.loaded.get(file);
     if (readonly && cached) this.#cache.markReadOnly(cached);
     return readonly;
   }
@@ -184,6 +188,7 @@ export class NodeService {
     types?: readonly string[],
     resources = true,
   ): Promise<BaseNode> {
+    const file = firstSymlink(reference.id) ? reference.id : canonicalPath(reference.id);
     const explicit = this.#options.modelForReference?.(parent, reference, reference.id);
     const Model = explicit ?? modelAt(reference.id, indexContract(parent), this.#options.models);
     if (types && Model) {
@@ -194,14 +199,14 @@ export class NodeService {
         this.#cache.relations(navigation);
         if (readonly) {
           this.#navigationReadOnly.add(navigation);
-          const cached = this.#cache.loaded.get(reference.id);
+          const cached = this.#cache.loaded.get(file);
           if (cached) this.#cache.markReadOnly(cached);
         }
         return navigation;
       }
     }
     // A layout-derived model is only a navigation hint; #read resolves the authoritative one.
-    const node = await this.#read(reference.id, explicit, readonly, resources);
+    const node = await this.#read(file, explicit, readonly, resources);
     if (!node) throw new Error(`Missing referenced node: ${reference.id}`);
     return node;
   }
@@ -522,7 +527,7 @@ export class NodeService {
       throw new Error(`Node destination already exists: ${destRoot}`);
     const relocate = (file: string) =>
       isWithinPath(file, sourceRoot)
-        ? path.join(destRoot, path.relative(sourceRoot, file))
+        ? path.join(destRoot, path.relative(sourceRoot, canonicalPath(file)))
         : file;
     for (const file of this.#cache.loaded.keys())
       if (isWithinPath(file, destRoot))
@@ -551,10 +556,10 @@ export class NodeService {
       ? (registered.get(oldParent) as CompositeNode | undefined)
       : undefined;
     if (old) {
-      const match = old.children.find((ref) => ref.id === node.path);
+      const match = old.children.find((ref) => canonicalPath(ref.id) === node.path);
       if (match) {
         reference = match;
-        group = old.localChildren.some((ref) => ref.id === node.path)
+        group = old.localChildren.some((ref) => ref.id === match.id)
           ? "local"
           : "descendant";
       }
@@ -571,7 +576,7 @@ export class NodeService {
         oldParent !== newParent &&
         isComposite(draft)
       ) {
-        draft.removeChild(node.path);
+        draft.removeChild(reference.id);
         authored = draft.serialize();
       }
       let source = rewriteLinks(authored, entry.path, target, relocate);
@@ -584,7 +589,7 @@ export class NodeService {
         !draft.children.some((ref) => ref.id === destination)
       ) {
         draft.addChild(group, { ...reference, id: destination });
-        if (old) carryReferenceSuffix(old, draft, node.path, destination);
+        if (old) carryReferenceSuffix(old, draft, reference.id, destination);
         source = draft.serialize();
       }
       const text = source;
@@ -601,7 +606,7 @@ export class NodeService {
       const parent = (await this.get(newParent)) as CompositeNode,
         draft = clone(parent);
       draft.addChild(group, { ...reference, id: destination });
-      if (old) carryReferenceSuffix(old, draft, node.path, destination);
+      if (old) carryReferenceSuffix(old, draft, reference.id, destination);
       plan.set(
         newParent,
         this.#plan(draft, draft.serialize(), this.#existing(parent)),

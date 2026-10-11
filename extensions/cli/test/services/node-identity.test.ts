@@ -271,3 +271,70 @@ test('AGENTS create rejects incompatible constructors before IO and keeps Intern
   assert.equal(node.children[0]?.id, child.id);
   assert.match(fs.readFileSync(file, 'utf8'), /child\/index.md/);
 });
+
+for (const entryName of ['index.md', 'INDEX.md']) {
+  test(`${entryName} filesystem aliases share a loaded instance and move once`, async t => {
+    const { root, entry, service } = fixture(t);
+    const toPath = path.join(root, 'to/AGENTS.md');
+    fs.mkdirSync(path.dirname(toPath)); fs.writeFileSync(toPath, '# Destination\n');
+    const to = (await service.get(toPath, AgentsNode))!;
+    const file = path.join(root, 'child', entryName);
+    fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, 'Original\n');
+    fs.writeFileSync(path.join(path.dirname(file), 'resource.txt'), 'resource bytes');
+    const alias = path.join(path.dirname(file), entryName === 'index.md' ? 'INDEX.md' : 'index.md');
+    const registered = fs.existsSync(alias) ? alias : file;
+    const parent = new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8'));
+    parent.addChild('descendant', { id: registered, name: 'Keep label', description: 'Keep description' });
+    fs.writeFileSync(entry, parent.serialize().replace(`child/${path.basename(registered)}>`, `child/${path.basename(registered)}?q=1#part>`));
+    const [node, byReference] = await Promise.all([service.get(file), service.get(registered)]);
+    assert.ok(node);
+    assert.strictEqual(byReference, node);
+    assert.equal(node.path, file);
+    assert.equal((await service.list(root)).filter(n => n.directoryPath === path.dirname(file)).length, 1);
+    node.body = 'Pending\n';
+    const destination = path.join(root, 'to/moved', entryName);
+    await service.move(node, destination);
+    assert.strictEqual(await service.get(destination), node);
+    assert.deepEqual(to.descendantChildren, [{ id: destination, name: 'Keep label', description: 'Keep description' }]);
+    assert.ok(fs.readFileSync(to.path, 'utf8').includes(`moved/${entryName}?q=1#part`));
+    assert.ok(!new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8')).children.some(ref => ref.id === registered));
+    assert.equal(fs.readFileSync(destination, 'utf8'), 'Pending\n');
+    assert.equal(fs.readFileSync(path.join(root, 'to/moved/resource.txt'), 'utf8'), 'resource bytes');
+    assert.deepEqual(fs.readdirSync(path.dirname(destination)).filter(name => /^(INDEX|index)\.md$/.test(name)), [entryName]);
+  });
+}
+test('filesystem case semantics preserve alias identity or distinct INDEX.md and index.md instances', async t => {
+  const { root, service } = fixture(t);
+  const upper = path.join(root, 'child/INDEX.md'), lower = path.join(root, 'child/index.md');
+  fs.mkdirSync(path.dirname(upper)); fs.writeFileSync(upper, 'Upper\n');
+  if (fs.existsSync(lower)) {
+    assert.strictEqual(await service.get(upper), await service.get(lower));
+    assert.deepEqual(fs.readdirSync(path.dirname(upper)), ['INDEX.md']);
+    return;
+  }
+  fs.writeFileSync(lower, 'Lower\n');
+  const a = (await service.get(upper))!, b = (await service.get(lower))!;
+  assert.notStrictEqual(a, b);
+  await service.update(a, { body: 'Updated upper\n' });
+  assert.equal(fs.readFileSync(upper, 'utf8'), 'Updated upper\n');
+  assert.equal(fs.readFileSync(lower, 'utf8'), 'Lower\n');
+});
+
+for (const entryName of ['index.md', 'INDEX.md']) {
+  test(`${entryName} alias cannot bypass readonly discovery when a typed query skips its body`, async t => {
+    const { root, entry } = fixture(t);
+    const file = path.join(root, 'child', entryName);
+    fs.mkdirSync(path.dirname(file)); fs.writeFileSync(file, 'Child\n');
+    const alias = path.join(path.dirname(file), entryName === 'index.md' ? 'INDEX.md' : 'index.md');
+    const registered = fs.existsSync(alias) ? alias : file;
+    const parent = new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8'));
+    parent.addChild('local', { id: registered }); fs.writeFileSync(entry, parent.serialize());
+    const service = new NodeService({ managedRoot: root, readOnlyReference: () => true });
+    const child = (await service.get(file))!;
+    child.description = 'Pending';
+    assert.deepEqual(await service.query(root, { types: ['task'] }).value(), []);
+    await assert.rejects(service.update(child, {}), /read.only/i);
+    assert.equal(child.description, 'Pending');
+    assert.equal(fs.readFileSync(file, 'utf8'), 'Child\n');
+  });
+}

@@ -213,7 +213,7 @@ test("adopts legacy task-projects-only board index into a readable local section
   assert.equal((await planTaskIndexes(root)).edits.length, 0);
 });
 
-for (const entryName of ["index.md", "SKILL.md"] as const)
+for (const entryName of ["index.md", "INDEX.md", "SKILL.md"] as const)
   for (const drift of ["addition", "deletion", "content", "identity"] as const)
     test(`rejects ${entryName} owner ${drift} after preview without index writes`, async (t) => {
       const { root, write, task } = fixture(t);
@@ -300,5 +300,25 @@ for (const kind of ['directory', 'file'] as const) {
       if (edit.before === null) assert.ok(!fs.existsSync(file));
       else assert.equal(fs.readFileSync(file, 'utf8'), edit.before);
     }
+  });
+}
+
+for (const entryName of ['index.md', 'INDEX.md']) {
+  test(`migration preserves an already registered ${entryName} content owner byte for byte`, async t => {
+    const { root, write, task } = fixture(t);
+    await applyTaskIndexes(await planTaskIndexes(root));
+    const content = write(`tools/foo/${entryName}`, '# Owner content\n');
+    const owner = path.join(root, 'AGENTS.md');
+    const node = new AgentsNode(owner).parse(fs.readFileSync(owner, 'utf8'));
+    node.addChild('local', { id: content, name: 'Content', description: 'Keep registration' });
+    fs.writeFileSync(owner, node.serialize());
+    const before = fs.readFileSync(owner, 'utf8');
+    task('tools/foo/.harness/tasks/_default/todo/owned/index.md');
+    const plan = await planTaskIndexes(root);
+    await applyTaskIndexes(plan);
+    assert.equal(fs.readFileSync(owner, 'utf8'), before);
+    assert.equal(fs.readFileSync(content, 'utf8'), '# Owner content\n');
+    assert.deepEqual(fs.readdirSync(path.dirname(content)).filter(name => /^(INDEX|index)\.md$/.test(name)), [entryName]);
+    assert.equal((await planTaskIndexes(root)).edits.length, 0);
   });
 }
