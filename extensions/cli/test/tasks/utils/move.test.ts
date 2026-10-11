@@ -5,6 +5,8 @@ import {
   access,
   mkdir,
   readFile,
+  readdir,
+  realpath,
   rm,
 } from "node:fs/promises";
 import { mkdtemp } from "node:fs/promises";
@@ -13,7 +15,8 @@ import path from "node:path";
 import { moveTaskStatus } from "../../../src/services/tasks/move.js";
 import { nodeBoardWriter } from "./helpers.js";
 
-test("moveTaskStatus updates frontmatter and moves Task + sidecar", async () => {
+for (const entryName of ["index.md", "INDEX.md"]) {
+test(`moveTaskStatus updates frontmatter and moves Task + sidecar (${entryName})`, async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const fromDir = path.join(repo, "tasks/_default/todo");
@@ -22,7 +25,7 @@ test("moveTaskStatus updates frontmatter and moves Task + sidecar", async () => 
       recursive: true,
     });
     await writeFile(
-      path.join(fromDir, "2026-09-13--mv/index.md"),
+      path.join(fromDir, `2026-09-13--mv/${entryName}`),
       `---
 name: mv
 description: mv
@@ -41,27 +44,31 @@ body
       "# Run log: 2026-09-13--mv\n",
       "utf8",
     );
+    await writeFile(path.join(fromDir, "2026-09-13--mv/resource.txt"), "resource bytes", "utf8");
     const result = await moveTaskStatus(repo, "2026-09-13--mv", "in_progress", {
       fs: nodeBoardWriter(),
       now: new Date("2026-09-13T12:00:00Z"),
     });
     assert.equal(result.from, "todo");
     assert.equal(result.to, "in_progress");
+    assert.equal(path.basename(await realpath(path.join(repo, result.path))), entryName);
     const md = await readFile(path.join(repo, result.path), "utf8");
     assert.match(md, /edges-tasks-status: in_progress/);
+    assert.deepEqual((await readdir(path.dirname(path.join(repo, result.path)))).filter(name => /^(INDEX|index)\.md$/.test(name)), [entryName]);
+    assert.equal(await readFile(path.join(path.dirname(path.join(repo, result.path)), "resource.txt"), "utf8"), "resource bytes");
     await access(
       path.join(
         repo,
         "tasks/_default/in_progress/2026-09-13--mv/.2026-09-13--mv.log.md",
       ),
     );
-    await assert.rejects(access(path.join(fromDir, "2026-09-13--mv/index.md")));
+    await assert.rejects(access(path.join(fromDir, `2026-09-13--mv/${entryName}`)));
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
 });
 
-test("status cancelled keeps both files under cancelled/", async () => {
+test(`status cancelled keeps both files under cancelled/ (${entryName})`, async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const fromDir = path.join(repo, "tasks/_default/backlog");
@@ -70,7 +77,7 @@ test("status cancelled keeps both files under cancelled/", async () => {
       recursive: true,
     });
     await writeFile(
-      path.join(fromDir, "2026-09-13--stop/index.md"),
+      path.join(fromDir, `2026-09-13--stop/${entryName}`),
       `---
 name: stop
 description: stop
@@ -94,7 +101,7 @@ body
       now: new Date("2026-09-13T12:00:00Z"),
     });
     await access(
-      path.join(repo, "tasks/_default/cancelled/2026-09-13--stop/index.md"),
+      path.join(repo, `tasks/_default/cancelled/2026-09-13--stop/${entryName}`),
     );
     await access(
       path.join(
@@ -107,13 +114,13 @@ body
   }
 });
 
-test("moveTaskStatus stays inside a named project and preserves edges-task-project", async () => {
+test(`moveTaskStatus stays inside a named project and preserves edges-task-project (${entryName})`, async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const fromDir = path.join(repo, "tasks/cli/todo");
     await mkdir(fromDir, { recursive: true });
     await writeFile(
-      path.join(fromDir, "2026-09-16--keep/index.md"),
+      path.join(fromDir, `2026-09-16--keep/${entryName}`),
       `---
 name: keep
 description: keep
@@ -146,7 +153,7 @@ body
     assert.equal(result.to, "in_progress");
     assert.equal(
       result.path,
-      "tasks/cli/in_progress/2026-09-16--keep/index.md",
+      `tasks/cli/in_progress/2026-09-16--keep/${entryName}`,
     );
     const md = await readFile(path.join(repo, result.path), "utf8");
     assert.match(md, /edges-tasks-status: in_progress/);
@@ -159,14 +166,14 @@ body
       ),
     );
     await assert.rejects(
-      access(path.join(fromDir, "2026-09-16--keep/index.md")),
+      access(path.join(fromDir, `2026-09-16--keep/${entryName}`)),
     );
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
 });
 
-test("moveTaskStatus preserves edges-task-priority and still moves folders", async () => {
+test(`moveTaskStatus preserves edges-task-priority and still moves folders (${entryName})`, async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
     const fromDir = path.join(repo, "tasks/_default/todo");
@@ -175,7 +182,7 @@ test("moveTaskStatus preserves edges-task-priority and still moves folders", asy
       recursive: true,
     });
     await writeFile(
-      path.join(fromDir, "2026-09-16--keep/index.md"),
+      path.join(fromDir, `2026-09-16--keep/${entryName}`),
       `---
 name: keep
 description: keep
@@ -218,3 +225,5 @@ body
     await rm(repo, { recursive: true, force: true });
   }
 });
+
+}

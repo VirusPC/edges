@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **README 改为对外门面：** 根 README 现在先回答外部访客「这是什么、能不能拿去用」：标语「harness 任何目录。你的大脑，也是一个目录。」、六条要点、一张知识闭环图、照着就能跑通的快速开始（本地打包安装 `edges` CLI 后对任意仓库执行 `edges init`），以及本仓的目录地图。原来写在 README 里的内容标准下放到所属目录：Edge 准入与演化在 `edges/README.md`，归档与附件规则在新的 `archive/README.md`；原「理念」「系统实现」原文保存在 `docs/architecture.md`。
 
+### 任务看板与项目
+
+- **旧任务入口继续可用：** `edges tasks status` 对旧 `index.md` 任务仍能正常流转，保留入口文件的拼写，并一起移动日志和附件；索引迁移不会因同一文件的 `INDEX.md` 别名重复登记。
+- **项目列表保留完整描述：** `edges tasks project list` 与 `edges tasks project get` 返回一致的项目信息，包括自定义标题和多段描述；`--all` 列表也沿用同一解析方式。查询只读取当前范围内已登记的项目，不补建元数据或系统入口。
+- **写命令拒绝森林开关：** `edges --all tasks create`、`edges --all tasks update` 和 `edges --all tasks status` 现在会明确报错且不修改文件；其他内容写命令也采用同一检查，避免把森林查询开关误用于写入。
+
 ## [1.4.0] - 2026-10-08
 
 从 1.3.0 升级时先看这几处：`edges note` 改为 `edges notes`，`edges skill` 改为 `edges skills`，没有兼容别名。Project Memory 的 Python 执行层已移除，相关 Skill 改为调用 `edges memory`，使用前需要先构建或安装 Edges CLI。根上的维护记忆、技能、任务、评测和观测已迁入 `.harness/`，领域任务在 `tasks/`。

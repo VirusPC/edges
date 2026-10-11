@@ -9,6 +9,7 @@ import {
   gitRoot,
   isTasksBoardReadmeNode,
   NodeService,
+  projectRecordFromEntry,
   tasksBoardDirName,
 } from "../../../services/tasks/service.js";
 
@@ -34,13 +35,7 @@ export function addProjectListCommand(project: Command, ctx: CliContext): void {
           const at = parts.lastIndexOf(board);
           if (at < 0 || parts[at + 1] === undefined || path.basename(node.path) !== ENTRY_NAMES.readme) return [];
           if (isTasksBoardReadmeNode(node.path)) return [];
-          const dir = path.basename(path.dirname(node.path));
-          return [{
-            project: dir === "_default" ? "default" : dir,
-            title: node.name,
-            description: node.description,
-            path: rel,
-          }];
+          return [projectRecordFromEntry(scopeDir, node)];
         });
         return succeed({ status: "success", command: "project.list", projects });
       });
