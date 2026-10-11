@@ -1,12 +1,12 @@
 ---
-name: electron_edges
+name: electron_桌面端作为_edges_操作台
 description: 缺少统一的桌面操作台来操作 edges（看板/记忆/审阅等仍散落在聊天与临时 HTML）；用 Electron 做桌面客户端，作为 edges 的操作台。
 metadata:
   edges-type: task
   edges-title: Electron 桌面端作为 edges 操作台
   edges-tasks-status: backlog
   edges-task-project: agent-clients-ux
-  edges-updated-at: "2026-09-20T11:45:50.709Z"
+  edges-updated-at: '2026-10-11T10:22:42.090Z'
 ---
 
 结论（idea）：做一个 Electron 桌面应用，作为操作 edges 的统一工作台（任务看板、记忆、审阅/artifacts、后续可接 CLI/本地服务）。

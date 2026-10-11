@@ -1,6 +1,8 @@
 ---
-name: minigtr_codex_cli_remote_control
-description: 结论：minigtr Ubuntu 上 Codex CLI remote-control 可用手机 ChatGPT 配对（codex-cli 0.157.0；需先 device-auth 登录）。
+name: minigtr_验证_codex_cli_remote_control手机配对
+description: >-
+  结论：minigtr Ubuntu 上 Codex CLI remote-control 可用手机 ChatGPT 配对（codex-cli
+  0.157.0；需先 device-auth 登录）。
 metadata:
   edges-type: task
   edges-title: minigtr 验证 Codex CLI remote-control（手机配对）
@@ -9,7 +11,7 @@ metadata:
   edges-task-priority: medium
   edges-task-assignee: minigtr设备助手
   edges-task-assignee-id: 93cef072-a666-4ecc-bb6b-e48130b0817d
-  edges-updated-at: "2026-09-25T08:04:40.070Z"
+  edges-updated-at: '2026-10-11T10:22:34.258Z'
 ---
 
 手机 ChatGPT 经 Codex CLI remote-control 把 minigtr（Ubuntu）当远程主机配对 — **可以**。

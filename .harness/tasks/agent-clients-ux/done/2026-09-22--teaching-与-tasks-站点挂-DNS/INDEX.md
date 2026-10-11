@@ -1,12 +1,14 @@
 ---
-name: teaching_tasks_dns
-description: DNS 已挂 edges.viruspc.tech，域名 HTTPS/Flexible 因未备案不可用；2026-09-22 稍后改口采用 ECS+Tunnel，此前「放弃隧道」作废为对外策略。本卡保持 done。
+name: teaching_与_tasks_站点挂_dns
+description: >-
+  DNS 已挂 edges.viruspc.tech，域名 HTTPS/Flexible 因未备案不可用；2026-09-22 稍后改口采用
+  ECS+Tunnel，此前「放弃隧道」作废为对外策略。本卡保持 done。
 metadata:
   edges-type: task
   edges-title: teaching 与 tasks 站点挂 DNS
   edges-tasks-status: done
   edges-task-project: agent-clients-ux
-  edges-updated-at: "2026-09-21T16:54:18.122Z"
+  edges-updated-at: '2026-10-11T10:22:38.031Z'
   edges-task-assignee: IT资产管理
   edges-task-assignee-id: 5fcd37e7-eacb-4cc8-b9ed-b96a8ef4e344
 ---

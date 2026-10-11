@@ -60,7 +60,9 @@ export function canonicalPath(file: string): string {
     if (active.has(candidate)) throw new Error(`Symbolic link cycle: ${candidate}`);
     active.add(candidate);
     try {
-      try { return realpathSync(candidate); }
+      // The JavaScript realpath implementation retains a caller's final casing
+      // on macOS; native realpath returns the actual directory-entry spelling.
+      try { return realpathSync.native(candidate); }
       catch (error) {
         if (!['ENOENT', 'ENOTDIR'].includes((error as NodeJS.ErrnoException).code ?? '')) throw error;
       }

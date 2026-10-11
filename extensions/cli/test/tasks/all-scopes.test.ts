@@ -1,110 +1,179 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, realpathSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, readdirSync, rmSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { run } from '../../src/program.js';
-import { AgentsNode, TaskNode } from '../../src/domain/models/index.js';
-import { generateTasksSite } from '../../src/services/tasks/generate-site.js';
+import { AgentsNode, ReadmeNode, TaskNode } from '../../src/domain/models/index.js';
+
+const maintenancePaths = [
+  '.harness/tasks/alpha/todo/same/INDEX.md',
+  'child/.harness/tasks/alpha/todo/same/INDEX.md',
+  'notes/example/.harness/tasks/beta/done/same/INDEX.md',
+  'tasks/alpha/todo/same/.harness/tasks/alpha/todo/same/INDEX.md',
+  'tasks/alpha/todo/same/.harness/tasks/alpha/todo/same/.harness/tasks/alpha/todo/same/INDEX.md',
+];
+const rootDomainPath = 'tasks/alpha/todo/same/INDEX.md';
+const childMaintenancePath = '.harness/tasks/alpha/todo/same/INDEX.md';
 
 function fixture(t: { after(fn: () => void): void }, git = true) {
   const root = mkdtempSync(path.join(realpathSync(tmpdir()), 'all-scopes-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   if (git) execFileSync('git', ['init', '-q', root]);
   const write = (rel: string, body: string) => {
-    const file = path.join(root, rel); mkdirSync(path.dirname(file), { recursive: true }); writeFileSync(file, body);
-  };
-  const index = (rel: string, children: string[]) => {
     const file = path.join(root, rel);
-    write(rel, '# Project\n\nDescription\n\n' + new AgentsNode(file).create({ localChildren: children.map(id => ({ id: path.resolve(path.dirname(file), id) })) }, { operation: 'create' }).serialize());
+    mkdirSync(path.dirname(file), { recursive: true });
+    writeFileSync(file, body);
   };
-  const scopes = ['.', 'child', 'notes/example', 'tasks/alpha/todo/same', 'tasks/alpha/todo/same/.harness/tasks/alpha/todo/same'];
-  const entries: string[] = [];
-  for (const scope of scopes) {
-    const purposes = scope === '.' || scope === 'child' ? ['tasks', '.harness/tasks'] : ['.harness/tasks'];
-    index(path.join(scope, 'AGENTS.md'), purposes.map(board => `${board}/AGENTS.md`));
-    for (const board of purposes) {
-      const rel = path.join(scope, board, 'alpha/todo/same/index.md'); entries.push(rel);
-      index(path.join(scope, board, 'AGENTS.md'), ['alpha/AGENTS.md', 'empty/AGENTS.md']);
-      index(path.join(scope, board, 'alpha/AGENTS.md'), ['todo/same/index.md']);
-      index(path.join(scope, board, 'empty/AGENTS.md'), []);
-      write(rel, new TaskNode(path.join(root, rel)).create({ name: 'Same', status: 'todo', metadata: { metadata: { 'edges-task-project': 'alpha', 'edges-task-priority': scope === 'child' ? 'high' : 'low' } } }, { operation: 'create' }).serialize());
-    }
+  const index = (rel: string, local: string[], descendants: string[] = []) => {
+    const file = path.join(root, rel);
+    const refs = (ids: string[]) => ids.map(id => ({ id: path.resolve(path.dirname(file), id) }));
+    const node = rel.endsWith('AGENTS.md') ? new AgentsNode(file) : new ReadmeNode(file);
+    write(rel, '# Project\n\nDescription\n\n' + node.create({
+      localChildren: refs(local), descendantChildren: refs(descendants),
+    }, { operation: 'create' }).serialize());
+  };
+  const board = (scope: string, rel: string, project = 'alpha', status: 'todo' | 'done' = 'todo') => {
+    const entry = path.join(scope, rel, project, status, 'same/INDEX.md');
+    index(path.join(scope, rel, 'README.md'), [`${project}/README.md`, 'empty/README.md']);
+    index(path.join(scope, rel, project, 'README.md'), [`${status}/same/INDEX.md`]);
+    index(path.join(scope, rel, 'empty/README.md'), []);
+    write(entry, new TaskNode(path.join(root, entry)).create({
+      name: 'Same', status,
+      metadata: { metadata: { 'edges-task-project': project, 'edges-task-priority': scope === 'child' ? 'high' : 'low' } },
+    }, { operation: 'create' }).serialize());
+  };
+  for (const scope of ['.', 'child', 'notes/example', 'tasks/alpha/todo/same', 'tasks/alpha/todo/same/.harness/tasks/alpha/todo/same']) {
+    index(path.join(scope, 'AGENTS.md'), ['.harness/tasks/README.md']);
+    board(scope, '.harness/tasks', scope === 'notes/example' ? 'beta' : 'alpha', scope === 'notes/example' ? 'done' : 'todo');
+    if (scope === '.' || scope === 'child') board(scope, 'tasks');
   }
-  // A non-Task entry must remain traversable without loading its malformed content.
-  write('notes/example/index.md', '---\nbad: [\n---\n');
-  index('AGENTS.md', ['tasks/AGENTS.md', '.harness/tasks/AGENTS.md', 'child/AGENTS.md', 'notes/example/index.md', 'aliases/AGENTS.md']);
+  // A valid unrelated leaf lets forest queries exercise traversal rather than YAML failure.
+  write('notes/example/INDEX.md', '---\nname: Example\ndescription: Unrelated note\n---\n\n# Example\n');
+  index('AGENTS.md', ['.harness/tasks/README.md', 'notes/example/INDEX.md', 'aliases/AGENTS.md', '.harness/observation/README.md'], ['child/AGENTS.md', 'missing/AGENTS.md']);
   index('aliases/AGENTS.md', ['../child/AGENTS.md']);
   const call = (scope: string, args: string[]) => {
-    const rest = [...args];
-    const flags: string[] = [];
-    if (rest[0] === '--super') { flags.push(rest.shift()!); }
-    const allAt = rest.indexOf('--all');
-    if (allAt >= 0) { flags.push('--all'); rest.splice(allAt, 1); }
+    const flags = args.filter(arg => arg === '--super' || arg === '--all');
+    const rest = args.filter(arg => arg !== '--super' && arg !== '--all');
     return run(['--scope', path.join(root, scope), ...flags, 'tasks', ...rest], { env: {} });
   };
-  return { root, entries, call, write, index };
+  return { root, call, write };
 }
 
-test('all-scopes resolves the Git root, preserves physical identities and matches dashboard payload', async t => {
-  const { root, entries, call } = fixture(t);
-  const outPath = path.join(root, 'site/index.html');
-  await generateTasksSite({ repoPath: root, purpose: 'all', outPath });
-  const dashboard = JSON.parse(readFileSync(outPath, 'utf8').match(/<script type="application\/json" id="edges-review-payload">([\s\S]*?)<\/script>/)![1]!);
-  for (const scope of ['.', 'child']) {
-    const result = await call(scope, ['list', '--all']);
-    assert.equal(result.exitCode, 0, result.stdout);
-    const payload = JSON.parse(result.stdout);
-    assert.equal(payload.status, 'success'); assert.equal(payload.command, 'list');
-    assert.deepEqual(payload.tasks.map((x: any) => x.path).sort(), entries.sort());
-    assert.ok(payload.tasks.every((x: any) => !('doc' in x)));
-    const local = JSON.parse((await call(scope, ['list'])).stdout);
-    assert.equal(local.tasks.length, 1); assert.match(local.tasks[0].path, /^\.harness\/tasks\//);
-    const grouped = await call(scope, ['list', '--all', '--group-by', 'project']);
-    assert.equal(grouped.exitCode, 0, grouped.stdout);
-    const snapshot = JSON.parse(grouped.stdout);
-    assert.equal(snapshot.groupBy, 'project');
-    const items = snapshot.groups.flatMap((group: { items: Array<{ path: string }> }) => group.items);
-    assert.deepEqual(items.map((item) => item.path).sort(), entries.sort());
-    assert.equal(items.length, dashboard.items.length);
-  }
-  const oldCwd = process.cwd();
-  try { process.chdir(path.join(root, 'child')); const result = await run(['--all', 'tasks', 'list'], { env: {} }); assert.equal(result.exitCode, 0, result.stdout); assert.equal(JSON.parse(result.stdout).tasks.length, 7); }
-  finally { process.chdir(oldCwd); }
-});
+async function listed(call: ReturnType<typeof fixture>['call'], scope: string, args: string[] = []) {
+  const result = await call(scope, ['list', ...args]);
+  assert.equal(result.exitCode, 0, result.stdout + result.stderr);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.status, 'success');
+  assert.equal(payload.command, 'list');
+  return payload;
+}
 
-test('explicit purpose and existing filters apply to the repository collection', async t => {
+function assertPaths(tasks: Array<{ path: string }>, expected: string[]) {
+  assert.deepEqual(tasks.map(task => task.path).sort(), [...expected].sort());
+  assert.equal(new Set(tasks.map(task => task.path)).size, tasks.length);
+}
+
+function fileSnapshot(root: string): Array<[string, string]> {
+  return readdirSync(root, { recursive: true, withFileTypes: true })
+    .filter(entry => entry.isFile())
+    .map(entry => path.join(entry.parentPath, entry.name))
+    .sort()
+    .map(file => [path.relative(root, file), readFileSync(file).toString('base64')]);
+}
+
+test('default list follows registered local and descendant children and preserves duplicate-title identities', async t => {
   const { call } = fixture(t);
-  const domain = await call('child', ['--super', 'list', '--all']);
-  assert.equal(domain.exitCode, 0, domain.stdout);
-  const maintenance = await call('.', ['list', '--all']);
-  assert.equal(maintenance.exitCode, 0, maintenance.stdout);
-  assert.equal(JSON.parse(maintenance.stdout).tasks.length, 5);
-  const filtered = await call('.', ['list', '--all', '--status', 'todo', '--priority', 'high', '--project', 'alpha', '--sort', 'priority']);
-  assert.equal(filtered.exitCode, 0, filtered.stdout);
-  assert.deepEqual(JSON.parse(filtered.stdout).tasks.map((x: any) => x.source.scope), ['child', 'child']);
-  const sorted = JSON.parse((await call('.', ['list', '--all', '--sort', 'priority'])).stdout);
-  assert.deepEqual(sorted.tasks.slice(0, 2).map((x: any) => x.priority), ['high', 'high']);
-  const empty = JSON.parse((await call('.', ['list', '--all', '--status', 'done', '--project', 'empty', '--group-by', 'project'])).stdout);
-  assert.equal(empty.groups.length, 0);
+  const root = await listed(call, '.');
+  assertPaths(root.tasks, maintenancePaths.slice(0, 2));
+  assert.deepEqual(root.tasks.map((task: any) => ({
+    stem: task.stem, title: task.title, status: task.status, priority: task.priority, project: task.project,
+  })), [
+    { stem: 'same', title: 'Same', status: 'todo', priority: 'low', project: 'alpha' },
+    { stem: 'same', title: 'Same', status: 'todo', priority: 'high', project: 'alpha' },
+  ]);
+  assert.ok(root.tasks.every((task: any) => !('doc' in task)));
+  assertPaths((await listed(call, 'child')).tasks, [childMaintenancePath]);
+});
+
+test('--all scans systems beneath the selected scope without widening to the Git root', async t => {
+  const { root, call } = fixture(t);
+  assertPaths((await listed(call, '.', ['--all'])).tasks, maintenancePaths);
+  assertPaths((await listed(call, 'child', ['--all'])).tasks, [childMaintenancePath]);
+  const oldCwd = process.cwd();
+  try {
+    process.chdir(path.join(root, 'child'));
+    const result = await run(['--all', 'tasks', 'list'], { env: {} });
+    assert.equal(result.exitCode, 0, result.stdout);
+    assertPaths(JSON.parse(result.stdout).tasks, [childMaintenancePath]);
+  } finally { process.chdir(oldCwd); }
+});
+
+test('--super mounts the configured material face and --super --all also collects scoped systems', async t => {
+  const { call } = fixture(t);
+  assertPaths((await listed(call, '.', ['--super'])).tasks, [rootDomainPath]);
+  assertPaths((await listed(call, '.', ['--super', '--all'])).tasks, [rootDomainPath, ...maintenancePaths]);
+  assertPaths((await listed(call, 'child', ['--super', '--all'])).tasks, [rootDomainPath, childMaintenancePath]);
+});
+
+test('forest grouping, status, priority and project filters retain task paths and current fields', async t => {
+  const { call } = fixture(t);
+  const grouped = await listed(call, '.', ['--all', '--group-by', 'project']);
+  assert.equal(grouped.groupBy, 'project');
+  assert.deepEqual(grouped.groups.map((group: any) => group.key).sort(), ['alpha', 'beta']);
+  assertPaths(grouped.groups.flatMap((group: any) => group.items), maintenancePaths);
+  assertPaths(grouped.groups.find((group: any) => group.key === 'alpha').items, maintenancePaths.filter(task => !task.includes('/beta/')));
+  assertPaths(grouped.groups.find((group: any) => group.key === 'beta').items, [maintenancePaths[2]!]);
+  const filtered = await listed(call, '.', ['--all', '--status', 'todo', '--priority', 'high', '--project', 'alpha', '--sort', 'priority']);
+  assertPaths(filtered.tasks, ['child/.harness/tasks/alpha/todo/same/INDEX.md']);
+  assertPaths((await listed(call, '.', ['--all', '--status', 'done'])).tasks, [maintenancePaths[2]!]);
+  assertPaths((await listed(call, '.', ['--all', '--project', 'beta'])).tasks, [maintenancePaths[2]!]);
+  assert.equal((await listed(call, '.', ['--all', '--priority', 'high', '--project', 'beta'])).tasks.length, 0);
+  assert.deepEqual((await listed(call, '.', ['--all', '--sort', 'priority'])).tasks.map((task: any) => task.priority), ['high', 'low', 'low', 'low', 'low']);
+  const empty = await listed(call, '.', ['--all', '--status', 'done', '--project', 'empty', '--group-by', 'project']);
+  assert.deepEqual(empty.groups, []);
+});
+
+test('write commands reject --all', async t => {
   for (const args of [['create', '--title', 'No'], ['update', 'same', '--title', 'No'], ['status', 'same', 'done']]) {
-    assert.equal((await call('.', [...args, '--all'])).exitCode, 2);
+    await t.test(args[0]!, async t => {
+      const { root, call } = fixture(t);
+      const before = fileSnapshot(root);
+      const result = await call('.', [...args, '--all']);
+      assert.equal(result.exitCode, 2, result.stdout);
+      assert.match(result.stdout + result.stderr, /--all/);
+      assert.deepEqual(fileSnapshot(root), before);
+      assert.ok(!readdirSync(root).includes('.edges-write.lock'));
+    });
   }
 });
 
-test('no Git uses the resolved scope and missing repository entry never scans', async t => {
+test('without Git, missing registered children skip and --all discovers systems without a top-level AGENTS', async t => {
   const { call, root, write } = fixture(t, false);
-  const result = await call('child', ['list', '--all']);
-  assert.equal(result.exitCode, 0, result.stdout); assert.equal(JSON.parse(result.stdout).tasks.length, 2);
-  write('unregistered/tasks/AGENTS.md', '# Invalid but undiscoverable\n');
-  const known = await call('.', ['list', '--all']);
-  assert.equal(known.exitCode, 0, known.stdout); assert.equal(JSON.parse(known.stdout).tasks.length, 7);
-  rmSync(path.join(root, 'child/tasks/alpha/AGENTS.md'));
-  const missingChild = await call('.', ['list', '--all']);
-  assert.equal(missingChild.exitCode, 0, missingChild.stdout);
-  assert.ok(!JSON.parse(missingChild.stdout).tasks.some((task: { path: string }) => task.path.includes('child/tasks/alpha/')));
+  assertPaths((await listed(call, 'child', ['--all'])).tasks, [childMaintenancePath]);
+  write('unregistered/tasks/AGENTS.md', '# Not a system entry\n');
+  assertPaths((await listed(call, '.', ['--all'])).tasks, maintenancePaths);
+  rmSync(path.join(root, 'child/.harness/tasks/alpha/README.md'));
+  assertPaths((await listed(call, '.')).tasks, [maintenancePaths[0]!]);
+  const remaining = maintenancePaths.filter(task => !task.startsWith('child/'));
+  assertPaths((await listed(call, '.', ['--all'])).tasks, remaining);
   rmSync(path.join(root, 'AGENTS.md'));
-  const missing = await call('.', ['list', '--all']);
-  assert.notEqual(missing.exitCode, 0); assert.match(missing.stdout, /AGENTS|entry|index/i);
+  assertPaths((await listed(call, '.', ['--all'])).tasks, remaining.slice(1));
+  assertPaths((await listed(call, '.')).tasks, [maintenancePaths[0]!]);
+  // Remove the existing task-board fallback as well before asserting an absent root.
+  rmSync(path.join(root, '.harness/tasks/README.md'));
+  const missing = await call('.', ['list']);
+  assert.notEqual(missing.exitCode, 0);
+  assert.match(missing.stdout, /Missing scope entry/);
+});
+
+test('forest traversal reports malformed unrelated content instead of returning partial success', async t => {
+  const { call, write } = fixture(t);
+  write('notes/example/INDEX.md', '---\nbad: [\n---\n');
+  const result = await call('.', ['list', '--all']);
+  assert.notEqual(result.exitCode, 0);
+  const payload = JSON.parse(result.stdout);
+  assert.equal(payload.status, 'failed');
+  assert.match(payload.reason, /notes\/example\/INDEX\.md/);
 });

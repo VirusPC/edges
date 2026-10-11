@@ -1,12 +1,12 @@
 ---
-name: review_page_filter
+name: review_page_增加更丰富的辅助_filter
 description: review-page 现有筛选偏基础，复杂看板不好收窄；需要更丰富的辅助 filter（如状态/优先级/指派/关键词等组合），方便审阅时定位。
 metadata:
   edges-type: task
   edges-title: review-page 增加更丰富的辅助 filter
   edges-tasks-status: cancelled
   edges-task-project: agent-clients-ux
-  edges-updated-at: "2026-09-21T09:06:12.380Z"
+  edges-updated-at: '2026-10-11T10:22:32.359Z'
 ---
 
 结论（idea）：为 review-page（含持久 /tasks/）增加更丰富的辅助 filter 能力。

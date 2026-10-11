@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 任务看板与项目
+
+- **中文标题的任务名保留汉字：** 用 `edges tasks create` 新建任务、又没有写 `--name` 时，生成的名字会留下标题里的汉字和数字，不再只剩夹在中间的英文词。已有任务可以用 `edges tasks update <目标> --name <名字>` 改这个字段。标题里没有任何字母或数字时，名字仍是 `task`。
+
 ### 评测与观测
 
 - **自建 Langfuse 的仓库记录与实例对齐：** 在仓库根执行 `bash .harness/observation/smoke/langfuse-otlp-smoke.sh`，可以向自建 Langfuse 发一条名为 `edges-langfuse-smoke` 的 OTLP trace，并用 v2 observations 回查。先在环境里设置 `LANGFUSE_HOST`、`LANGFUSE_PUBLIC_KEY`、`LANGFUSE_SECRET_KEY`，脚本和仓库都不存放这些值。这台 v4.38.0 实例的 events_only 写模式不接受旧 ingestion 接口上的 trace-create；健康检查仍看 `/api/public/health`。自部署任务按「界面健康，再由一到两个客户端发出 trace」记成完成。公网入口记为经 Cloudflare Tunnel 的 HTTPS，仓库不写实例域名。旧的「只走 Tailscale」不再作为现行访问面。
@@ -20,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 文档与系统
 
 - **README 改为对外门面：** 根 README 现在先回答外部访客「这是什么、能不能拿去用」：标语「harness 任何目录。你的大脑，也是一个目录。」、六条要点、一张知识闭环图、照着就能跑通的快速开始（本地打包安装 `edges` CLI 后对任意仓库执行 `edges init`），以及本仓的目录地图。原来写在 README 里的内容标准下放到所属目录：Edge 准入与演化在 `edges/README.md`，归档与附件规则在新的 `archive/README.md`；原「理念」「系统实现」原文保存在 `docs/architecture.md`。
+
+### 任务看板与项目
+
+- **旧任务入口继续可用：** `edges tasks status` 对旧 `index.md` 任务仍能正常流转，保留入口文件的拼写，并一起移动日志和附件；索引迁移不会因同一文件的 `INDEX.md` 别名重复登记。
+- **项目列表保留完整描述：** `edges tasks project list` 与 `edges tasks project get` 返回一致的项目信息，包括自定义标题和多段描述；`--all` 列表也沿用同一解析方式。查询只读取当前范围内已登记的项目，不补建元数据或系统入口。
+- **写命令拒绝森林开关：** `edges --all tasks create`、`edges --all tasks update` 和 `edges --all tasks status` 现在会明确报错且不修改文件；其他内容写命令也采用同一检查，避免把森林查询开关误用于写入。
 
 ## [1.4.0] - 2026-10-08
 

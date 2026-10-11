@@ -210,7 +210,8 @@ async function readListItem(
   const abs = path.join(scopeDir(repoPath), rel);
   const sidecarAbs = path.join(scopeDir(repoPath), sidecarRel);
   const markdown = providedNode?.serialize() ?? await fs.readFile(abs);
-  const node = providedNode ?? new TaskNode(realpathSync(abs)).parse(markdown);
+  const node = providedNode ?? new TaskNode(realpathSync.native(abs)).parse(markdown);
+  rel = path.relative(realpathSync(scopeDir(repoPath)), node.path);
   taskLocationOf(node, realpathSync(scopeDir(repoPath)));
   const parsed = parseTaskDoc(markdown);
   const doc = taskDocFromParsed(parsed);

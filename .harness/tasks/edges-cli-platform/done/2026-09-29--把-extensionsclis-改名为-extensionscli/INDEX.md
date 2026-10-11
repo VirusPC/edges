@@ -1,12 +1,12 @@
 ---
-name: extensions_clis_extensions_cli
+name: 把_extensionsclis_改名为_extensionscli
 description: 目录实际是一套统一 edges 命令，复数名容易让人以为有多套 CLI。
 metadata:
   edges-type: task
   edges-title: 把 extensions/clis 改名为 extensions/cli
   edges-tasks-status: done
   edges-task-project: edges-cli-platform
-  edges-updated-at: "2026-09-29T15:24:30.609Z"
+  edges-updated-at: '2026-10-11T10:22:22.839Z'
   edges-task-assignee: Coding Agent 专家
   edges-task-assignee-id: ac913463-5bf6-4c16-adc0-900c61a8692d
 ---

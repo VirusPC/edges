@@ -2,11 +2,11 @@
 metadata:
   edges-type: task
   edges-task-project: evaluation
-  edges-updated-at: '2026-10-11T10:06:01.472Z'
+  edges-updated-at: '2026-10-11T10:22:00.729Z'
   edges-title: edges skills 与 Agent 回归评测
   edges-tasks-status: backlog
   edges-task-priority: none
-name: edges_skills_agent
+name: edges_skills_与_agent_回归评测
 description: 用固定真实任务做回归集，自动检查 Agent 是否按 skill 执行、是否守住 AGENTS.md 硬约束。
 ---
 **背景：**

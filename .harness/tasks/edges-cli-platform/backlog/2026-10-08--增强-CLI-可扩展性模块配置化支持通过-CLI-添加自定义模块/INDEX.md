@@ -2,11 +2,11 @@
 metadata:
   edges-type: task
   edges-task-project: edges-cli-platform
-  edges-updated-at: '2026-10-08T04:37:50.358Z'
+  edges-updated-at: '2026-10-11T10:22:28.582Z'
   edges-title: 增强 CLI 可扩展性：模块配置化，支持通过 CLI 添加自定义模块
   edges-tasks-status: backlog
   edges-task-priority: none
-name: cli_cli
+name: 增强_cli_可扩展性模块配置化支持通过_cli_添加自定义模块
 description: 现在加一个模块要改好几处代码。目标是让模块主要靠配置声明，用户也能用 CLI 自己加模块。
 ---
 

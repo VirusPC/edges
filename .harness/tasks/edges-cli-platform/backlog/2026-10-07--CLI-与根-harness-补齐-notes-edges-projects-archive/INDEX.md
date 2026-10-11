@@ -2,11 +2,11 @@
 metadata:
   edges-type: task
   edges-task-project: edges-cli-platform
-  edges-updated-at: '2026-10-07T14:32:15.877Z'
+  edges-updated-at: '2026-10-11T10:22:26.719Z'
   edges-title: CLI 与根 .harness 补齐 notes / edges / projects / archive
   edges-tasks-status: backlog
   edges-task-priority: none
-name: cli_harness_notes_edges_projects_archive
+name: cli_与根_harness_补齐_notes_edges_projects_archive
 description: 按文件夹名，在 edges 顶层命令和根 .harness 材料登记里补上这四块。
 ---
 **背景：**

@@ -86,7 +86,7 @@ export async function indexTaskFixtureBoard(board: string): Promise<void> {
       for (const stem of names) {
         let entry = '';
         for (const leaf of ['INDEX.md','index.md']) {
-          try { await access(path.join(dir,status,stem,leaf)); entry = path.join(dir,status,stem,leaf); break; } catch { /* try legacy spelling */ }
+          try { entry = await realpath(path.join(dir,status,stem,leaf)); break; } catch { /* try legacy spelling */ }
         }
         if (!entry) continue;
         if (!node.children.some(ref=>ref.id===entry)) node.addChild('local',{id:entry});
