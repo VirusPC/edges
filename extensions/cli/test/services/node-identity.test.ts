@@ -303,6 +303,41 @@ for (const entryName of ['index.md', 'INDEX.md']) {
     assert.deepEqual(fs.readdirSync(path.dirname(destination)).filter(name => /^(INDEX|index)\.md$/.test(name)), [entryName]);
   });
 }
+for (const entryName of ['index.md', 'INDEX.md']) {
+  test(`${entryName} move rewrites peer registrations through directory casing aliases`, async t => {
+    const { root, entry, service } = fixture(t);
+    const file = path.join(root, 'Child', entryName);
+    const alias = path.join(root, 'child', entryName);
+    const peerPath = path.join(root, 'peer/AGENTS.md');
+    const toPath = path.join(root, 'to/AGENTS.md');
+    for (const target of [file, peerPath, toPath]) fs.mkdirSync(path.dirname(target));
+    fs.writeFileSync(file, 'Child body\n');
+    fs.writeFileSync(toPath, '# Destination\n');
+    // On case-sensitive hosts the actual spelling still exercises peer relocation.
+    const registered = fs.existsSync(alias) ? alias : file;
+    const parent = new AgentsNode(entry).parse(fs.readFileSync(entry, 'utf8'));
+    for (const id of [file, peerPath, toPath]) parent.addChild('local', { id });
+    fs.writeFileSync(entry, parent.serialize());
+    const peer = new AgentsNode(peerPath).parse('# Peer\n');
+    peer.addChild('descendant', { id: registered, name: 'Keep label', description: 'Keep description' });
+    fs.writeFileSync(peerPath, peer.serialize().replace(`${entryName}>`, `${entryName}?q=1#part>`));
+    const node = (await service.get(file))!;
+    assert.strictEqual(await service.get(registered), node);
+    const cachedPeer = (await service.get(peerPath, AgentsNode))!;
+    const destination = path.join(root, 'to/moved', entryName);
+    await service.move(node, destination);
+    const expected = [{ id: destination, name: 'Keep label', description: 'Keep description' }];
+    const savedPeer = new AgentsNode(peerPath).parse(fs.readFileSync(peerPath, 'utf8'));
+    assert.deepEqual(savedPeer.descendantChildren, expected);
+    assert.deepEqual(savedPeer.localChildren, []);
+    assert.deepEqual(cachedPeer.descendantChildren, expected);
+    assert.ok(fs.readFileSync(peerPath, 'utf8').includes(`../to/moved/${entryName}?q=1#part`));
+    assert.equal(fs.readFileSync(destination, 'utf8'), 'Child body\n');
+    assert.equal(fs.existsSync(file), false);
+    assert.strictEqual(await service.get(savedPeer.descendantChildren[0]!.id), node);
+    assert.strictEqual(await service.get(destination), node);
+  });
+}
 test('filesystem case semantics preserve alias identity or distinct INDEX.md and index.md instances', async t => {
   const { root, service } = fixture(t);
   const upper = path.join(root, 'child/INDEX.md'), lower = path.join(root, 'child/index.md');

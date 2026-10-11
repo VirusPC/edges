@@ -526,10 +526,14 @@ export class NodeService {
       throw new Error("Move cannot nest owned directories");
     if (fs.existsSync(destRoot))
       throw new Error(`Node destination already exists: ${destRoot}`);
-    const relocate = (file: string) =>
-      isWithinPath(file, sourceRoot)
-        ? path.join(destRoot, path.relative(sourceRoot, canonicalPath(file)))
+    const relocate = (file: string) => {
+      if (firstSymlink(file)) return file;
+      // Resolve directory casing aliases before deciding whether the target moves.
+      const source = canonicalPath(file);
+      return isWithinPath(source, sourceRoot)
+        ? path.join(destRoot, path.relative(sourceRoot, source))
         : file;
+    };
     for (const file of this.#cache.loaded.keys())
       if (isWithinPath(file, destRoot))
         throw new Error(`Node destination already managed: ${file}`);
