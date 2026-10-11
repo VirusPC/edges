@@ -206,13 +206,25 @@ export async function readProjectRecord(
       path: entry.rel,
     };
   }
-  const parsed = parseProjectAgents(await fs.readFile(entry.abs));
+  return projectRecordFromEntry(realpathSync(scopeDir(repoPath)), {
+    path: entry.abs,
+    body: await fs.readFile(entry.abs),
+  });
+}
+
+/** Decode an already reached project entry without discovering or loading siblings. */
+export function projectRecordFromEntry(
+  scope: string,
+  entry: { path: string; body: string },
+): TaskProjectRecord {
+  const dir = path.basename(path.dirname(entry.path));
+  const parsed = parseProjectAgents(entry.body);
   return {
-    project: id,
-    dir: projectDirName(id),
+    project: dir === "_default" ? DEFAULT_TASK_PROJECT : dir,
+    dir,
     title: parsed.title,
     description: parsed.description,
-    path: entry.rel,
+    path: path.relative(scope, entry.path).split(path.sep).join("/"),
   };
 }
 

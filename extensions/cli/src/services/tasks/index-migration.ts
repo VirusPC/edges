@@ -1,4 +1,4 @@
-import { isWithinPath, findAncestor } from '../../utils/filesystem.js';
+import { isWithinPath, findAncestor, canonicalPath, firstSymlink } from '../../utils/filesystem.js';
 import fs from "node:fs";
 import path from "node:path";
 import { AgentsNode, TaskNode } from "../../domain/models/index.js";
@@ -123,7 +123,10 @@ export async function planTaskIndexes(
     description?: string,
   ) => {
     const node = get(parent);
-    if (!node.children.some((ref) => ref.id === child))
+    const identity = canonicalPath(checkPath(child));
+    const existing = node.children.find(ref => ref.id === child ||
+      (!firstSymlink(ref.id) && canonicalPath(ref.id) === identity));
+    if (!existing)
       node.addChild(group, {
         id: child,
         ...(name ? { name } : {}),
@@ -131,9 +134,9 @@ export async function planTaskIndexes(
       });
     else if (
       group === "local" &&
-      node.descendantChildren.some((ref) => ref.id === child)
+      node.descendantChildren.some((ref) => ref.id === existing.id)
     )
-      node.moveChild(child, "local");
+      node.moveChild(existing.id, "local");
   };
   // Connect only existing scope entries, crossing physical folders without inventing nodes.
   const connected = new Set<string>();
@@ -206,7 +209,7 @@ export async function planTaskIndexes(
     // whether this selected public scope is an AgentsNode or a content node.
     const candidates = [...LEAF_ENTRY_NAMES, "SKILL.md"].map((name) =>
       path.join(scope, name),
-    );
+    ).map(file => fs.existsSync(checkPath(file)) ? fs.realpathSync.native(file) : file);
     for (const file of candidates)
       if (!owners.has(file))
         owners.set(file, files.get(file) ?? readEntry(file));
@@ -265,7 +268,7 @@ export async function applyTaskIndexes(
   for (const [file, entry] of snapshot.owners) {
     if (entry) validateEntry(entry);
     else if (fs.existsSync(checkPath(file)))
-      throw new Error(`Owner entry added; plan again: ${file}`);
+      throw new Error(`Owner entry added; plan again: ${fs.realpathSync.native(file)}`);
   }
   if (JSON.stringify(plan.edits) !== JSON.stringify(snapshot.edits))
     throw new Error(`Migration plan edits changed: ${plan.root}`);

@@ -167,7 +167,7 @@ test("default get uses layout and physical ancestors, ignoring YAML type claims 
   write("invalid/index.md", "---\nname: [\n---\n");
   await assert.rejects(service.get(file("invalid/index.md")));
 });
-test("local traversal supports cross-layer discovery and skips descendants before loading", async (t) => {
+test("local traversal skips missing and malformed descendants before loading while missing roots fail", async (t) => {
   const { root, file, write, service } = fixture(t);
   write(
     "AGENTS.md",
@@ -179,18 +179,27 @@ test("local traversal supports cross-layer discovery and skips descendants befor
     index("- [Leaf](../../data/a%20b/index.md#part)"),
   );
   write("data/a b/index.md", "leaf");
+  const expectedPaths = [
+    "AGENTS.md",
+    "a/AGENTS.md",
+    "elsewhere/b/AGENTS.md",
+    "data/a b/index.md",
+  ].map(file);
   assert.deepEqual(
     (await service.list(root, { localOnly: true })).map((n) => n.path),
-    [
-      "AGENTS.md",
-      "a/AGENTS.md",
-      "elsewhere/b/AGENTS.md",
-      "data/a b/index.md",
-    ].map(file),
+    expectedPaths,
+  );
+  // Default traversal skips the absent referenced descendant, retaining every local node.
+  assert.deepEqual((await service.list(root)).map((n) => n.path), expectedPaths);
+  write("missing/AGENTS.md", "---\nmalformed: [\n---\n");
+  const fresh = new NodeService({ managedRoot: root });
+  assert.deepEqual(
+    (await fresh.list(root, { localOnly: true })).map((n) => n.path),
+    expectedPaths,
   );
   await assert.rejects(
-    service.list(root, {}),
-    /Missing/,
+    fresh.list(root),
+    /missing\/AGENTS\.md/,
   );
   await assert.rejects(service.list(file("absent")), /Missing/);
   assert.equal(

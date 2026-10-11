@@ -92,7 +92,7 @@ test("AgentsNode generated local references are recognized as adopted types", as
     1,
   );
 });
-test("reviewed restored owner AGENTS and type indexes have no false Doctor adoption findings", async (t) => {
+test("reviewed restored owners adopt and register their types with only expected source-scan diagnostics", async (t) => {
   const root = fixture(t),
     repo = join(import.meta.dirname, "../../../..");
   const manifest = JSON.parse(
@@ -136,17 +136,18 @@ test("reviewed restored owner AGENTS and type indexes have no false Doctor adopt
   const { planAgentsIndexes, applyAgentsIndexes } = await import("../../../../scripts/migrate-agents-indexes.mts");
   await applyAgentsIndexes(planAgentsIndexes(root));
   for (const owner of owners) {
+    assert.deepEqual(
+      layerTypeSpecs(join(root, owner)).map((spec) => spec.name).sort(),
+      ["feedback", "managed", "project", "reference", "referenced"],
+      owner,
+    );
     const report = await doctorMemory({ indexGroup: "descendant",
       targetDir: join(root, owner),
       rootDir: join(root, owner),
     });
     assert.deepEqual(
-      report.findings.filter((f) => !["source-scan-error"].includes(f.code)),
-      [],
-      owner,
-    );
-    assert.ok(
-      report.findings.some((f) => f.code === "source-scan-error"),
+      [...new Set(report.findings.map((f) => f.code))],
+      ["source-scan-error"],
       owner,
     );
   }
