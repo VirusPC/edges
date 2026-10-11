@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: edges-cli-platform
-  edges-updated-at: '2026-10-11T11:04:27.817Z'
+  edges-updated-at: '2026-10-11T11:06:11.467Z'
   edges-title: 搁置：只让 CLI 的 PR 自动触发 Bugbot
-  edges-tasks-status: backlog
+  edges-tasks-status: todo
   edges-task-priority: none
 name: shelve_cli_pr_bugbot_auto_trigger
 description: Bugbot 不能按目录自动跑；Action、PAT、云端 Agent 身份都不通，先记结论，另议方案。
