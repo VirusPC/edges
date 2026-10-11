@@ -55,7 +55,7 @@
 
 - [Default](<_default/README.md>) — Ungrouped tasks that have not been assigned a named Task Project.
 - [Agent Clients UX](<agent-clients-ux/README.md>) — 客户端/插件/外设与本地 UX 实验。
-- [Edges CLI Platform](<edges-extensions/README.md>) — edges CLI/脚手架/发布/鉴权等平台层。
+- [Edges Extensions](<edges-extensions/README.md>) — edges CLI/脚手架/发布/鉴权等平台层。
 - [Edges Tasks](<edges-tasks/README.md>) — 看板与 Task 工作流（协作、绑定、Skill/MCP、分类与调度）。
 - [Evaluation](<evaluation/README.md>) — 知识库/Agent Evaluation 评测与可重复 cases（benchmark、评测流水线等）。
 - [Observation](<observation/README.md>) — 知识库/Agent Observation 观测/观察系统（与 Evaluation 分开）。
