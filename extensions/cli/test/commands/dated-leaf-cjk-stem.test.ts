@@ -54,3 +54,24 @@ test("notes and projects create keep Chinese characters in the dated directory s
   assert.match(projectMade.path, /^projects\/\d{4}-\d{2}-\d{2}--中文标题\/INDEX\.md$/);
   assert.equal(existsSync(path.join(root, projectMade.path)), true);
 });
+
+test("notes create shortens a long CJK title so the directory name fits", async (t) => {
+  const root = mkdtempSync(path.join(realpathSync(tmpdir()), "edges-cjk-long-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  put(root, "AGENTS.md", agents("- [notes](notes/AGENTS.md) — notes"));
+  put(root, "notes/AGENTS.md", agents());
+  const title = "测".repeat(120);
+
+  const note = await run(
+    ["--scope", root, "notes", "create", "--title", title, "--body", "正文"],
+    { env: {} },
+  );
+  assert.equal(note.exitCode, 0, note.stdout + note.stderr);
+  const made = JSON.parse(note.stdout) as { path: string; title: string };
+  assert.equal(made.title, title);
+  const stem = made.path.split("/")[1] ?? "";
+  assert.match(stem, /^\d{4}-\d{2}-\d{2}--测/);
+  assert.ok(Buffer.byteLength(stem) <= 255);
+  assert.equal(stem.endsWith("-"), false);
+  assert.equal(existsSync(path.join(root, made.path)), true);
+});

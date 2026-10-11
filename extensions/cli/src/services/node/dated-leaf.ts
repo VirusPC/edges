@@ -77,10 +77,15 @@ export function datedLeafFile<T extends TitledLeaf>(
   return abs;
 }
 
+const DATED_DIRECTORY_MAX_BYTES = 255;
+
 function titleSlug(title: string, now: Date): string {
+  const prefixBytes = Buffer.byteLength(`${localDateYmd(now)}--`);
   return directoryStem(title, {
     lowercase: true,
     fallback: `untitled-${Math.floor(now.getTime() / 1000)}`,
+    maxLength: DATED_DIRECTORY_MAX_BYTES - prefixBytes,
+    maxLengthUnit: "bytes",
   });
 }
 
