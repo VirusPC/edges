@@ -1,257 +1,211 @@
 /**
- * Schema shared.v1 — portable Routine definition for review.
- *
- * This file is a design snapshot. It is not wired into the Edges build,
- * and this repository does not grow a top-level Routines/ product directory.
- *
- * Proposed filesystem (the layout lives in the note and in this comment):
- *
- *   Routines/<id>/INDEX.md
- *     YAML frontmatter = RoutineFrontmatter
- *     Markdown body     = the prompt executed on each run
- *   Routines/<id>/adapters/<platform>.yaml
- *     PlatformAdapter
- *
- * Shared nouns sit on RoutineFrontmatter:
- *   intent, triggers, execution, io, policy, capabilities
- *
- * Adapters stay beside that document. An adapter records where a platform
- * keeps its native copy and which shared fields that platform cannot store.
- * It does not restate the prompt or the nouns.
- *
- * Secrets, bearer tokens, and webhook keys stay out of both files.
- * An adapter may name a secret slot. It must not contain the secret.
+ * Shared Routine filesystem model (vendor-neutral).
+ * One routine = one directory under Routines/<id>/ with INDEX.md (frontmatter + body).
+ * Platform bindings live in adapters/*.yaml (optional), not in the shared contract.
  */
 
-export const ROUTINE_SCHEMA = "shared.v1" as const;
+/** Semver string, e.g. "1.0.0" */
+export type SemVer = string;
 
-export type RoutineSchema = typeof ROUTINE_SCHEMA;
+/** IANA timezone, e.g. "Asia/Shanghai" */
+export type IanaTimeZone = string;
 
-/** Stable id. Also the directory name under the proposed Routines/ tree. */
-export type RoutineId = string;
+/** Capability noun, not a vendor tool id — e.g. "read-transcripts", "open-pr" */
+export type Capability = string;
 
-export type PlatformId =
-  | "grok-bot"
-  | "claude-code-cloud"
-  | "claude-desktop"
-  | "codex"
-  | "chatgpt-scheduled"
-  | "kimi"
-  | "pi"
-  | "dsh";
+/** Secret reference name only — never the secret value */
+export type SecretRef = string;
 
-/** What the routine is for. The prompt itself is the INDEX.md body. */
-export interface Intent {
-  /** Display name. Adapters may kebab-case it when a platform needs a folder name. */
-  name: string;
-  /** One-line summary for lists. Distinct from the prompt body. */
-  description: string;
-  /** What a single successful run produces, in terms a person can check. */
-  outcome: string;
-}
+export type RoutineStatus = "draft" | "active" | "paused" | "retired";
 
-export interface CronSchedule {
-  form: "cron";
-  /** Five fields: minute hour day-of-month month day-of-week. */
+export type Owner =
+  | { kind: "person"; id: string; email?: string }
+  | { kind: "team"; id: string; name?: string }
+  | { kind: "agent"; id: string; name?: string };
+
+/** Time-based triggers. Prefer cron + timezone for portability. */
+export type CronTrigger = {
+  type: "cron";
+  /** 5-field POSIX cron: minute hour day-of-month month day-of-week */
   expression: string;
-}
+  timezone: IanaTimeZone;
+};
 
-export interface RRuleSchedule {
-  form: "rrule";
-  /** RFC 5545 RRULE value, without the RRULE: prefix. */
-  expression: string;
-}
-
-export interface PresetSchedule {
-  form: "preset";
-  preset: "hourly" | "daily" | "weekdays" | "weekly" | "monthly";
-  /** Local wall time HH:mm when the preset needs a clock time. */
-  at?: string;
-  /** 1 = Monday … 7 = Sunday, when preset is weekly. */
-  weekday?: number;
-}
-
-export interface IntervalSchedule {
-  form: "interval";
-  /** Compact duration such as "5m", "2h", or "1d". */
+export type IntervalTrigger = {
+  type: "interval";
+  /** e.g. "4h", "30m", "1d" — parser is adapter-specific */
   every: string;
-}
+  timezone: IanaTimeZone;
+};
 
-export type ScheduleExpr =
-  | CronSchedule
-  | RRuleSchedule
-  | PresetSchedule
-  | IntervalSchedule;
+export type RRuleTrigger = {
+  type: "rrule";
+  /** RFC 5545 RRULE body, optionally with DTSTART handled by adapter */
+  rrule: string;
+  timezone: IanaTimeZone;
+};
 
-export interface ScheduleTrigger {
-  kind: "schedule";
-  expr: ScheduleExpr;
-  /** IANA zone. Required so adapters cannot silently use the host zone. */
-  timezone: string;
-  /** False means fire once, then disable. */
-  recurring: boolean;
-}
+export type OneShotTrigger = {
+  type: "one_shot";
+  /** ISO-8601 instant or local wall time + timezone */
+  at: string;
+  timezone?: IanaTimeZone;
+};
 
-export type EventSource =
-  | "github"
-  | "slack"
-  | "linear"
-  | "sentry"
-  | "pagerduty"
-  | "email";
+/**
+ * Event triggers stay abstract in the shared file.
+ * Adapters map `source` + `filter` to Slack/GitHub/webhook/etc.
+ */
+export type EventTrigger = {
+  type: "event";
+  /** Noun: "github.pr", "slack.message", "webhook", ... */
+  source: string;
+  /** Opaque filter object; meaning defined by adapter for that source */
+  filter?: Record<string, unknown>;
+};
 
-export interface EventTrigger {
-  kind: "event";
-  source: EventSource;
-  /**
-   * Structured filter. Values stay short labels (event name, channel, phrase).
-   * Adapters map this onto the platform's own trigger form.
-   */
-  filter: Record<string, string>;
-}
+export type WebhookTrigger = {
+  type: "webhook";
+  /** Logical name; URL/secret live in adapter / vault refs */
+  name?: string;
+};
 
-export interface WebhookTrigger {
-  kind: "webhook";
-  /** Name of a secret slot. The secret value is not in git. */
-  authSlot: string;
-  /** How the inbound body is handed to the run. */
-  payload: "text" | "json";
-}
-
-export interface ManualTrigger {
-  kind: "manual";
-}
-
-export interface SessionTrigger {
-  kind: "session";
-  on: "session_start" | "agent_end" | "session_shutdown" | "pulse";
-  /** Required when on is "pulse". Compact duration such as "10m". */
-  every?: string;
-}
-
-/** Triggers union. A routine may carry more than one. */
-export type Trigger =
-  | ScheduleTrigger
+export type RoutineTrigger =
+  | CronTrigger
+  | IntervalTrigger
+  | RRuleTrigger
+  | OneShotTrigger
   | EventTrigger
-  | WebhookTrigger
-  | ManualTrigger
-  | SessionTrigger;
+  | WebhookTrigger;
 
-export type ExecutionResidency =
-  | "cloud"
-  | "local-machine"
-  | "in-session"
-  | "headless-oneshot";
+export type OverlapPolicy = "skip" | "queue" | "cancel_previous";
 
-export type OverlapPolicy = "skip" | "queue" | "cancel-previous";
+export type MisfirePolicy =
+  | "skip"
+  | "run_once_on_wake"
+  | "catch_up_bounded";
 
-export type WorkspaceBinding =
-  | { kind: "repo"; remote: string }
-  | { kind: "cwd"; path: string }
+export type RetryPolicy = {
+  /** Blind retry of side-effecting runs should stay false by default */
+  enabled: boolean;
+  maxAttempts?: number;
+  backoff?: "none" | "linear" | "exponential";
+};
+
+export type ExecutionPolicy = {
+  /** Prefer a fresh session/run each fire (agent platforms) */
+  freshRun: boolean;
+  concurrency: OverlapPolicy;
+  /** Soft or hard wall-clock budget in minutes */
+  timeoutMin?: number;
+  misfire: MisfirePolicy;
+  retry: RetryPolicy;
+  /** Stable key template for idempotency, e.g. "{id}:{fireDate}" */
+  idempotencyKey?: string;
+};
+
+export type Destination =
+  | { kind: "chat"; channel: "owner" | "thread" | "group"; ref?: string }
+  | { kind: "file"; pathTemplate: string }
   | { kind: "none" };
 
-export interface ExecutionPolicy {
-  residency: ExecutionResidency;
-  /** Fresh session per fire, or continue an existing thread. */
-  session: "fresh" | "thread";
-  workspace: WorkspaceBinding;
-  model?: string;
-  timeoutMin?: number;
-  overlap: OverlapPolicy;
-  /**
-   * Minimum gap this definition asks for.
-   * Platforms enforce their own floors (Grok Bot 5m, Claude Code cloud 1h,
-   * Claude Desktop 1m, Pi in-session extensions 30s). Adapters record the floor
-   * they actually honor in PlatformAdapter.gaps or PlatformAdapter.narrows.
-   */
-  minInterval?: string;
-}
+export type IoPolicy = {
+  /** Declared inputs the run may need (paths, queries) — no secrets */
+  inputs?: Array<{ name: string; description: string; required?: boolean }>;
+  /** Declared outputs the run should produce */
+  outputs?: Array<{ name: string; description: string }>;
+  destination: Destination;
+  /** When nothing actionable: stay silent (no message) */
+  quietWhenEmpty: boolean;
+};
 
-export type InputSource = "prompt" | "fire-payload" | "file" | "connector";
+export type ApprovalPolicy = {
+  /** Human must approve before these capability nouns execute */
+  requiredFor: Capability[];
+};
 
-export interface RoutineInput {
+export type Policy = {
+  approvals: ApprovalPolicy;
+  /** Secret refs only — values never in-repo */
+  secrets: SecretRef[];
+  /** Treat event/webhook payloads as untrusted unless Intent opts in */
+  trustEventPayload: boolean;
+  /** What "green run" means in prose, mirrored in INDEX.md body */
+  successCriteria: string[];
+};
+
+/**
+ * YAML frontmatter of Routines/<id>/INDEX.md
+ * Body sections (Markdown): Intent, Procedure, Inputs, Outputs, Idle, Success, Ownership
+ */
+export type RoutineFrontmatter = {
+  /** routine.schema version for this file shape */
+  schema: "shared.v1";
+  id: string;
   name: string;
-  required: boolean;
-  source: InputSource;
-}
-
-export type Delivery =
-  | { type: "chat" }
-  | { type: "file"; path: string }
-  | { type: "connector"; name: string };
-
-export type MissingInputBehavior = "fail" | "report" | "skip";
-
-export type StaleInputBehavior = "fail" | "report" | "use";
-
-export interface IoPolicy {
-  inputs: RoutineInput[];
-  deliver: Delivery[];
-  onMissing: MissingInputBehavior;
-  onStale: StaleInputBehavior;
-}
-
-export type ApprovalGate =
-  | "send"
-  | "purchase"
-  | "delete"
-  | "publish"
-  | "production-write";
-
-export type Autonomy = "ask" | "allowlisted" | "unattended";
-
-export type NetworkPolicy = "default-allowlist" | "open" | "none";
-
-export interface Policy {
-  enabled: boolean;
-  /** Empty means the run does not stop for a person. */
-  approval: ApprovalGate[];
-  autonomy: Autonomy;
-  network: NetworkPolicy;
-  /** How many run records to keep, when the platform accepts a preference. */
-  retainRuns?: number;
-}
-
-export interface Capabilities {
-  /** Skill ids the run may load. Empty means the prompt alone. */
-  skills: string[];
-  /** Connector or plugin ids. Listing one permits the run to call it. */
-  connectors: string[];
-  /** Tools beyond the platform's default agent profile. */
-  tools: string[];
-}
-
-export interface RoutineFrontmatter {
-  schema: RoutineSchema;
-  id: RoutineId;
-  intent: Intent;
-  triggers: Trigger[];
+  version: SemVer;
+  status: RoutineStatus;
+  owners: Owner[];
+  created: string; // YYYY-MM-DD
+  updated: string; // YYYY-MM-DD
+  tags?: string[];
+  triggers: RoutineTrigger[];
   execution: ExecutionPolicy;
   io: IoPolicy;
   policy: Policy;
-  capabilities: Capabilities;
-}
-
-export type AdapterBindingKind = "account" | "file" | "tool-call" | "session-store";
-
-export interface PlatformAdapter {
-  schema: RoutineSchema;
-  /** Matches RoutineFrontmatter.id. */
-  routineId: RoutineId;
-  platform: PlatformId;
   /**
-   * Pointer to the native record. Not a second copy of the prompt.
-   * ref is a path, an account routine id, or a tool name — never a secret.
+   * Capability nouns the intent may need.
+   * Adapters bind these to real tools/MCP — never put vendor tool ids here.
    */
-  binding: {
-    kind: AdapterBindingKind;
-    ref: string;
-  };
-  /** Shared fields this platform cannot store or cannot honor. */
-  gaps: string[];
-  /** Forced narrower values. Omitted fields keep the shared definition. */
-  narrows?: {
-    execution?: Partial<ExecutionPolicy>;
-    policy?: Partial<Policy>;
-  };
-}
+  capabilities?: Capability[];
+};
+
+/** Parsed on-disk routine (frontmatter + markdown body) */
+export type RoutineDocument = {
+  frontmatter: RoutineFrontmatter;
+  /** Markdown below the second --- */
+  body: string;
+};
+
+/** Optional platform binding: Routines/<id>/adapters/<platform>.yaml */
+export type PlatformAdapter = {
+  platform:
+    | "grok-bot"
+    | "claude-desktop"
+    | "claude-cloud"
+    | "codex-chatgpt"
+    | "kimi-code"
+    | "pi"
+    | "dsh-routines"
+    | "os-cron"
+    | string;
+  /** Opaque binding — e.g. grokBotFolder, skillPath, envId */
+  binding: Record<string, unknown>;
+  /** Map shared capability nouns → platform-specific tool/skill names */
+  capabilityMap?: Record<Capability, string>;
+  notes?: string;
+};
+
+/**
+ * Filesystem layout for this project (local first; migrate to edges later):
+ *
+ * Routines/
+ *   README.md
+ *   types.ts                 ← this file
+ *   <routine-id>/
+ *     INDEX.md               ← frontmatter: RoutineFrontmatter; body: intent sections
+ *     adapters/              ← optional
+ *       grok-bot.yaml        ← PlatformAdapter
+ *       claude-desktop.yaml
+ *     examples/              ← optional sample outputs / fixtures
+ *   _schema/
+ *     shared.v1.md           ← human doc of the schema (optional)
+ */
+export type RoutinesTree = {
+  root: "Routines";
+  entries: Array<{
+    id: string;
+    index: "INDEX.md";
+    adapters?: string[]; // filenames under adapters/
+  }>;
+};
