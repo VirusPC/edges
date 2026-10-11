@@ -1,12 +1,12 @@
 ---
-name: edges_cli_command
+name: 跑通_edges_cli_完整编译修好_command_字段撞车
 description: 拆开装 nginx 结果里两个都叫 command 的字段，让 pnpm --filter edges-cli build 通过。
 metadata:
   edges-type: task
   edges-title: 跑通 edges-cli 完整编译（修好 command 字段撞车）
   edges-tasks-status: done
   edges-task-project: edges-cli-platform
-  edges-updated-at: "2026-09-30T09:32:38.023Z"
+  edges-updated-at: '2026-10-11T10:22:24.693Z'
   edges-task-assignee: Coding Agent 专家
   edges-task-assignee-id: ac913463-5bf6-4c16-adc0-900c61a8692d
 ---

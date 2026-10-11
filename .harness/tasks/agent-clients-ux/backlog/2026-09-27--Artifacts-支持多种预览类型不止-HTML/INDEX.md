@@ -1,12 +1,12 @@
 ---
-name: artifacts_html
+name: artifacts_支持多种预览类型不止_html
 description: 除直接 publish HTML 外，还要支持 markdown、diff、文件夹浏览、图片、视频等预览方式
 metadata:
   edges-type: task
   edges-title: Artifacts 支持多种预览类型（不止 HTML）
   edges-tasks-status: backlog
   edges-task-project: agent-clients-ux
-  edges-updated-at: "2026-09-26T23:53:07.445Z"
+  edges-updated-at: '2026-10-11T10:22:39.956Z'
 ---
 
 ## 背景

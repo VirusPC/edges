@@ -13,6 +13,7 @@ FLAGS
   --description <text>
   --body <markdown>
   --assignee <text>
+  --name <name>            frontmatter name
   --priority <priority>    edges-task-priority: urgent | high | medium | low | none
   --project <project>      reassign Task Project (moves files, same status)
   --json  Write JSON to stdout (always on)
@@ -33,6 +34,7 @@ export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
     .option("--description <text>")
     .option("--body <markdown>")
     .option("--assignee <text>")
+    .option("--name <name>", "frontmatter name")
     .addOption(new Option("--priority <priority>", "edges-task-priority").choices([...TASK_PRIORITIES]))
     .option("--project <project>", "reassign Task Project (moves files, same status)")
     .option("--json", "Write JSON to stdout (always on)")
@@ -44,6 +46,7 @@ export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
         description?: string;
         body?: string;
         assignee?: string;
+        name?: string;
         priority?: TaskPriority;
         project?: string;
       },
@@ -57,6 +60,7 @@ export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
             description: opts.description,
             body: opts.body,
             assignee: opts.assignee,
+            name: opts.name,
             priority: opts.priority,
             project: opts.project,
           },

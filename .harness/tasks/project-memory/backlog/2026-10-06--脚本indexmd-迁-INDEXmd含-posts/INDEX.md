@@ -2,11 +2,11 @@
 metadata:
   edges-type: task
   edges-task-project: project-memory
-  edges-updated-at: '2026-10-06T16:28:41.083Z'
+  edges-updated-at: '2026-10-11T10:22:44.239Z'
   edges-title: 脚本：index.md 迁 INDEX.md（含 posts）
   edges-tasks-status: backlog
   edges-task-priority: medium
-name: index_md_index_md_posts
+name: 脚本indexmd_迁_indexmd含_posts
 description: 可预览迁移脚本，套 CLI 树遍历，将内容叶子 index.md 改为 INDEX.md 并改引用；含 posts 仅改名。
 ---
 ## 背景

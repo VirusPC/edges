@@ -9,9 +9,14 @@ test("taskFileSlug keeps CJK and hyphenates spaces", () => {
   assert.equal(taskFileSlug("???"), "task");
 });
 
-test("taskNameSlug is ascii snake and falls back", () => {
+test("taskNameSlug keeps unicode letters and digits", () => {
+  assert.equal(taskNameSlug("中文标题"), "中文标题");
+  assert.equal(taskNameSlug("为 Edges CLI 建立 scope"), "为_edges_cli_建立_scope");
+  assert.equal(taskNameSlug("edges-cli 完整编译"), "edges_cli_完整编译");
   assert.equal(taskNameSlug("CLI + Skill + MCP"), "cli_skill_mcp");
-  assert.equal(taskNameSlug("中文标题"), "task");
+  assert.equal(taskNameSlug("index.md"), "indexmd");
+  assert.equal(taskNameSlug("???"), "task");
+  assert.equal(taskNameSlug("---"), "task");
 });
 
 test("newTaskStem uses local calendar date", () => {

@@ -1,12 +1,12 @@
 ---
-name: edges_cli_scope
+name: 为_edges_cli_建立统一的工作_scope_解析
 description: 基于递归记忆模型，先解析本次工作 scope，再确定操作归属、适用上下文和读写位置，使共享 CLI 能力可服务不同作用域。
 metadata:
   edges-type: task
   edges-title: 为 Edges CLI 建立统一的工作 scope 解析
   edges-tasks-status: done
   edges-task-project: edges-cli-platform
-  edges-updated-at: "2026-10-03T09:02:30.239Z"
+  edges-updated-at: '2026-10-11T10:22:18.943Z'
 ---
 
 ## 2026-10-03 完成记录

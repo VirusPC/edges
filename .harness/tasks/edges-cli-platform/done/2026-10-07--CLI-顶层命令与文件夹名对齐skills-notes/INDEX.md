@@ -2,11 +2,11 @@
 metadata:
   edges-type: task
   edges-task-project: edges-cli-platform
-  edges-updated-at: '2026-10-07T14:22:51.467Z'
+  edges-updated-at: '2026-10-11T10:22:20.803Z'
   edges-title: CLI 顶层命令与文件夹名对齐（skills / notes）
   edges-tasks-status: done
   edges-task-priority: none
-name: cli_skills_notes
+name: cli_顶层命令与文件夹名对齐skills_notes
 description: 能对齐的 edges 顶层命令跟文件夹走；硬改 skill→skills、note→notes，不留别名。
 ---
 **背景：**
