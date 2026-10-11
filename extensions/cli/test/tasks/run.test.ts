@@ -340,6 +340,29 @@ test("run tasks update --priority high JSON and in-place path", async () => {
   }
 });
 
+test("run tasks update --name writes frontmatter name", async () => {
+  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
+  try {
+    const env = { ...process.env, EDGES_REPO: repo };
+    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
+    const created = await run(["--super", "tasks", "create", "--title", "PatchName"], {
+      env,
+    });
+    const stem = JSON.parse(created.stdout).stem as string;
+    const updated = await run(
+      ["--super", "tasks", "update", stem, "--name", "中文任务名"],
+      { env },
+    );
+    assert.equal(updated.exitCode, 0, updated.stderr + updated.stdout);
+    const body = JSON.parse(updated.stdout) as { command: string; path: string };
+    assert.equal(body.command, "update");
+    const md = await readFile(path.join(repo, body.path), "utf8");
+    assert.match(md, /^name: 中文任务名$/m);
+  } finally {
+    await rm(repo, { recursive: true, force: true });
+  }
+});
+
 test("run tasks update --priority Urgent is VALIDATION_ERROR", async () => {
   const result = await run(["--super", "tasks", "update", "stem", "--priority", "Urgent"]);
   assert.equal(result.exitCode, 2);

@@ -170,6 +170,7 @@ export async function updateTask(
     assignee?: string;
     priority?: string;
     project?: string;
+    name?: string;
   },
   io: { fs: BoardWriter; now: Date },
 ): Promise<{
@@ -184,12 +185,16 @@ export async function updateTask(
     !patch.body &&
     !patch.assignee &&
     patch.priority === undefined &&
-    patch.project === undefined
+    patch.project === undefined &&
+    patch.name === undefined
   ) {
     throw new TasksError(
       "VALIDATION_ERROR",
-      "update requires at least one of --title, --description, --body, --assignee, --priority, --project",
+      "update requires at least one of --title, --description, --body, --assignee, --priority, --project, --name",
     );
+  }
+  if (patch.name !== undefined && !patch.name.trim()) {
+    throw new TasksError("VALIDATION_ERROR", "name must be nonempty");
   }
   const parsedPriority =
     patch.priority === undefined
@@ -208,6 +213,7 @@ export async function updateTask(
   if (patch.body !== undefined)
     node.body = node.metadata === undefined ? patch.body : taskBody(patch.body);
   if (patch.assignee !== undefined) node.assignee = patch.assignee;
+  if (patch.name !== undefined) node.name = patch.name;
   if (parsedPriority !== undefined) node.priority = parsedPriority;
   if (parsedProject !== undefined)
     setDomainField(node, "edges-task-project", parsedProject);

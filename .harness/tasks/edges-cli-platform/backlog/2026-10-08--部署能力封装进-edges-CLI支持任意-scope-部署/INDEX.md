@@ -2,11 +2,11 @@
 metadata:
   edges-type: task
   edges-task-project: edges-cli-platform
-  edges-updated-at: '2026-10-08T05:43:14.721Z'
+  edges-updated-at: '2026-10-11T10:22:30.444Z'
   edges-title: 部署能力封装进 edges CLI，支持任意 scope 部署
   edges-tasks-status: backlog
   edges-task-priority: none
-name: edges_cli_scope
+name: 部署能力封装进_edges_cli支持任意_scope_部署
 description: >-
   现在部署逻辑写死在 GitHub Actions 的 deploy.yml 和服务器脚本里，只能部署本仓固定的几个站点；想把它收进 edges CLI，任意
   scope 下都能部署自己的内容。

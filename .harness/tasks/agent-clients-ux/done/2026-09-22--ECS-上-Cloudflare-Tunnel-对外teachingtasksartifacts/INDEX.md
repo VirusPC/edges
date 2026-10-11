@@ -1,6 +1,8 @@
 ---
-name: ecs_cloudflare_tunnel_teaching_tasks_artifacts
-description: 域名直连阿里云因未备案 Beaver + TLS1.2+SNI 不可用；采用 ECS + Cloudflare Tunnel 作为当前最简单对外方案，用域名 HTTPS 进站并保留动态服务。
+name: ecs_上_cloudflare_tunnel_对外teachingtasksartifacts
+description: >-
+  域名直连阿里云因未备案 Beaver + TLS1.2+SNI 不可用；采用 ECS + Cloudflare Tunnel 作为当前最简单对外方案，用域名
+  HTTPS 进站并保留动态服务。
 metadata:
   edges-type: task
   edges-title: ECS 上 Cloudflare Tunnel 对外（teaching/tasks/artifacts）
@@ -8,7 +10,7 @@ metadata:
   edges-task-project: agent-clients-ux
   edges-task-assignee: IT资产管理
   edges-task-assignee-id: 5fcd37e7-eacb-4cc8-b9ed-b96a8ef4e344
-  edges-updated-at: "2026-09-21T17:13:17.780Z"
+  edges-updated-at: '2026-10-11T10:22:36.144Z'
 ---
 
 结论（idea）：域名直连阿里云因未备案不可用；在现有 ECS 上部署 Cloudflare Tunnel（或同等），用域名 HTTPS 进站并保留动态服务，避开公网回源 Beaver。

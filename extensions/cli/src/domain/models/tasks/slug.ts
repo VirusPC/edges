@@ -16,7 +16,9 @@ export function taskFileSlug(title: string): string {
 export function taskNameSlug(title: string): string {
   const slug = title
     .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
+    .replace(HOSTILE, "")
+    .replace(/[\s-]+/g, "_")
+    .replace(/[^\p{L}\p{N}_]+/gu, "")
     .replace(/_+/g, "_")
     .replace(/^_|_$/g, "");
   return slug.length > 0 ? slug : "task";

@@ -14,6 +14,7 @@ const base = { name: '', description: '', metadata: {}, body: '' };
 const metadataCase = (metadata: unknown) => ({ ...base, metadata });
 const cases: [string, unknown, boolean][] = [
   ['empty strings', base, true],
+  ['cjk name', { ...base, name: '为_edges_cli_建立_scope' }, true],
   ['nested metadata', metadataCase({custom: {nested: true}, tags: ['a'], count: 1, enabled: false, extra: null}), true],
   ['task type', metadataCase({'edges-type': 'task'}), true],
   ['default project', metadataCase({'edges-task-project': 'default'}), true],

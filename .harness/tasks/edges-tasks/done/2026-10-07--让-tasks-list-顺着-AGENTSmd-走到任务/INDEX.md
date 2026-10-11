@@ -2,11 +2,11 @@
 metadata:
   edges-type: task
   edges-task-project: edges-tasks
-  edges-updated-at: '2026-10-07T14:02:54.007Z'
+  edges-updated-at: '2026-10-11T10:22:17.059Z'
   edges-title: 让 tasks list 顺着 AGENTS.md 走到任务
   edges-tasks-status: done
   edges-task-priority: high
-name: tasks_list_agents_md
+name: 让_tasks_list_顺着_agentsmd_走到任务
 description: 仓库根 tasks list 应列出 AGENTS.md 指向的 .harness/tasks 任务；--all 的森林里也要有这些任务节点。
 ---
 **背景：**
