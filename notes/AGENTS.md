@@ -19,4 +19,5 @@
 - [.harness/skills/referenced/README.md](<.harness/skills/referenced/README.md>) — 本层 .agents/skills/ 下人写或装入的标准技能，工具只索引不改写。
 - [2026\-10\-07\-\-osmo\-maldives\-ingest\-and\-highlight\-preview/INDEX.md](<2026-10-07--osmo-maldives-ingest-and-highlight-preview/INDEX.md>)
 - [2026\-09\-27\-\-%E5%A5%BD%E5%A4%8D%E7%9B%98%E8%B0%83%E7%A0%94/INDEX.md](<2026-09-27--%E5%A5%BD%E5%A4%8D%E7%9B%98%E8%B0%83%E7%A0%94/INDEX.md>)
+- [2026\-10\-12\-\-4070ts\-%E5%BC%80%E6%9C%BA%E8%87%AA%E5%8A%A8%E7%99%BB%E5%BD%95%E4%B8%8E%E8%BF%9C%E7%A8%8B%E6%8E%A7%E5%88%B6/INDEX.md](<2026-10-12--4070ts-%E5%BC%80%E6%9C%BA%E8%87%AA%E5%8A%A8%E7%99%BB%E5%BD%95%E4%B8%8E%E8%BF%9C%E7%A8%8B%E6%8E%A7%E5%88%B6/INDEX.md>)
 <!-- project-harness-local:end -->
