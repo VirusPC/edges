@@ -224,7 +224,7 @@
 
 - Tiago Forte，《The Weekly Review is an Operating System》，Forte Labs，2017-05-26（更新 2021-05-06）：  
   `https://fortelabs.com/blog/the-weekly-review-is-an-operating-system/`
-- 作者后续公开的简化清单（LinkedIn / BASB 社区视频描述，2017 文已含其个人 checklist 逻辑）：邮件 → 日历（约 −2/+4 周）→ 物理/数字桌面 → 笔记归档（PARA）→ 澄清并选择本周/今日任务。
+- 作者后续公开的简化清单（LinkedIn / BASB 社区视频描述：**未核到来源**；2017 文已含其个人 checklist 逻辑，见上一条 URL）：邮件 → 日历（约 −2/+4 周）→ 物理/数字桌面 → 笔记归档（PARA）→ 澄清并选择本周/今日任务。
 
 **要点**
 
