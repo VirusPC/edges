@@ -76,21 +76,7 @@
 
 仓库依据：[`extensions/cli/src/domain/models/tasks/slug.ts`](../../../extensions/cli/src/domain/models/tasks/slug.ts) 的 `taskNameSlug` 转调 `directoryStem`。[`extensions/cli/src/domain/models/node/stem.ts`](../../../extensions/cli/src/domain/models/node/stem.ts) 写着保留 Unicode 字母、记号和数字。根 `AGENTS.md` 与 `extensions/AGENTS.md` 的硬约束正文都没有「任务名保留中文」。
 
-### 三份内容 PR 周一凌晨才合并
-
-[#216](https://github.com/VirusPC/edges/pull/216)、[#219](https://github.com/VirusPC/edges/pull/219)、[#220](https://github.com/VirusPC/edges/pull/220) 已经合并，时间是周一凌晨 00:28、00:37、00:51（北京时间）。周日夜里它们还开着：合并时间落在窗口之外，是仓库记录，不是对话里的句子。
-
-- Agent Memory 专家，2026-10-11 22:35。用户学完 CrewAI 后说记笔记。22:38 助手说 PR 已开、等用户合入。开出时助手写的路径是 `knowledge/notes/` 下的一篇笔记；最终落点以 [#216](https://github.com/VirusPC/edges/pull/216) 为准。
-
-> 记录一下笔记吧。
-
-- 全栈开发专家，2026-10-11 23:14。用户要把当次 Routine 讨论开成 PR，方便在 GitHub 上看 Markdown。助手 23:23 给出 #219。摘录在这一段没有「现在就合并」的原话。
-
-> 刚刚我们聊的Routine这部分也起个PR吧。主要是我需要你更新PR来看Artifacts。GitHub APP的Markdown预览效果更好一些。
-
-- Agent Memory 专家，2026-10-11 23:19。用户要求课放进本仓的 teaching，不要留在助手那侧的教学目录。23:23 助手说 #220 是草稿，转成正式 PR 再合。摘录在这里停在等合并。
-
-> 说放到edges下面的teaching里。
+[#216](https://github.com/VirusPC/edges/pull/216)、[#219](https://github.com/VirusPC/edges/pull/219)、[#220](https://github.com/VirusPC/edges/pull/220) 已合并，时间分别是 2026-10-12 00:51、00:28、00:37（北京时间）。
 
 ### 看板：有的卡对齐了，有的没有
 
@@ -117,10 +103,6 @@
 摘录里的旧说法已经对不上这次结果，不再当作待确认项。任务记录员 2026-10-08 15:57 说当时 main 上 971 项里有 24 项本来就失败。同一助手 2026-10-11 18:29 在 #210 的结果里说还剩 8 个失败、不是这次改出来的。两句都没有附失败名单。
 
 ## 为什么
-
-### 三份内容 PR 跨过周日
-
-可能因为这周没有事先写周目标，PR 按当次对话收尾，所以三份教学内容的 PR 跨过周日 24:00 才合并。「本周事先没有目标」这句在摘录里没有原文，是本篇「本该怎样」里写明的前提。能对上的对话是：#216 在 22:38 等用户合入，#219 在 23:14 才被要求开出来看预览，#220 在 23:23 还是草稿。三份都停在等人合并，没有人在周日夜里把「今晚必须合入」说成目标。
 
 ### NodeService 的卡没有跟着合并改状态
 
