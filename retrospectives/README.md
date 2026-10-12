@@ -18,11 +18,11 @@
 
 ## 约定
 
-- 周复盘的命名、章节和登记见 [`weekly/README.md`](weekly/README.md)。
-- 日复盘的命名、章节和登记见 [`daily/README.md`](daily/README.md)。
+- 周复盘的命名和章节见 [`weekly/README.md`](weekly/README.md)。
+- 日复盘的命名和章节见 [`daily/README.md`](daily/README.md)。
 - 一篇内容是一个目录，正文入口是 `INDEX.md`。附件与入口放在同一目录。
 - 本仓公开。复盘遵守根 [`README.md`](../README.md) 的「隐私与脱敏」。
-- 发现路径：根 README 的本层内容登记本目录，本目录再登记周复盘与日复盘。写入就是编辑 `INDEX.md`，并在对应清单的「本层内容」补一行。
+- 写入就是编辑 `INDEX.md`。
 
 <!-- project-entries-local:start -->
 ## 本层内容
