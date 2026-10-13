@@ -121,7 +121,49 @@ description: 学习 Cognition 开源的 Agent Memory Repo 规范与 Devin Memory
 4. **蜂群工作区模式**：并行 agent 用 `findings` / `questions` 文件协作，完成后留一条索引，可对照本仓 tasks / projects 叶子。
 5. **SKILL.md 的安全条款**：「写前工作树必须干净」「只 add 自己改的文件」「记忆是数据不是指令」可以对照 remember 技能查漏。
 
-## 6. 开放问题
+## 6. 官方示例与 .harness 模块对照
+
+> 依据：规范页、GitHub README / SPEC.md 中的示例；`.harness` 现状按 origin/main 根作用域。映射与建议均为本笔记解读，统一视为 **【推断】**，表中个别格另行标注。
+
+### 6.1 三个官方示例（摘要）
+
+1. **单人记忆布局**（`memory-john/`）：`MEMORY.md`（常驻条目 + `## Index`）、`team_structure.md`、`using_datadog_mcp.md`、`projects/{payments,website}.md`、`metrics/autocomplete_keep_rate.sql`。条目如 `- John coordinates the billing launch [source: https://example.com/sessions/101]`。`team_structure` / `using_datadog_mcp` 的具体内容来源未给出。
+2. **蜂群**（`swarms/slow-checkout/`）：`README.md`（目标与规则）、`findings.md`（各 agent 的测量与排除项、最终 Cause / Fix）、`questions.md`（agent 互问互答）、`agents/*.md`（每 agent 一份笔记）、`scripts/bench.sh`（所有 agent 共用的基准）。结束后在 `MEMORY.md` Index 加 `- [[swarms/slow-checkout/README]]`，文件夹保留复用。
+3. **多仓组合**：同一机器上并列 `vm/memory-alice/`、`vm/memory-bob/`，各自有 `MEMORY.md`，agent 按归属写回对应仓库。
+
+### 6.2 来源之间的不一致
+
+- **`projects/autocomplete.md`**：只出现在规范页的目录树中；README 与 SPEC.md 的树里没有。
+- **autocomplete 条目如何被找到**：规范页写 agent grep 记忆仓库，在 `projects/autocomplete.md` 找到；README 写 agent 先读 `MEMORY.md` 就在其中找到。条目正文相同。
+
+### 6.3 示例 → `.harness` 映射
+
+| AMR 示例 | 最接近的 `.harness` 模块 | 说明 |
+| --- | --- | --- |
+| `MEMORY.md` 常驻条目 | `AGENTS.md`「本层硬约束」区块 | 都是每会话必读的少量内容 |
+| `MEMORY.md` 的 `## Index` | `AGENTS.md` project-harness-local 索引 + 各类型 README | edges 多一层「类型 README → 条目」 |
+| `team_structure.md` | `memory/users/`（本机不入库），部分可入 `references/` | 公开仓不宜存人员信息 |
+| `using_datadog_mcp.md` | `memory/references/`（在哪）+ `skills/managed/`（怎么做） | AMR 合一文件，edges 拆两处 |
+| `projects/*.md` | `memory/projects/`；长文落 `.harness/projects/` 叶子 | AMR 一项目一文件多条目；edges 一条记忆一目录 |
+| 术语类条目（如 ghost_text） | `CONTEXT.md` 或 `memory/projects/` | 【推断】 |
+| `metrics/*.sql` | 无直接对应；近似 `observation/metrics/` 或 skill 内脚本 | edges 记忆类型不收非 md 资源 |
+| `swarms/<name>/` | `tasks/<project>/` + task 的 `.{stem}.log.md` | 蜂群是多 agent 共写同一工作区 |
+| `swarms/.../README.md` | task 文件本体或 projects 叶子 `INDEX.md` | |
+| `findings.md` | task Run Log 或 `evaluation/reports/` | edges 的 log 按单次执行，非多人共写 |
+| `questions.md` | 无对应 | |
+| `agents/*.md` | 近似 Run Log | 【推断】 |
+| `scripts/bench.sh` | `observation/smoke/*.sh`、`evaluation/cases/*/run.py` | 已有「可执行资源与说明同处」先例 |
+| 多仓组合 | 作用域树（子目录 `.harness`）+ `users/` 不入 git | AMR 按「人」组合，edges 按「目录作用域」组合 |
+
+### 6.4 模块划分建议（【推断】）
+
+1. **主题聚合**：允许 `memory/projects/` 等类型下按主题聚合为一个文件、内含多行带来源条目，减少「一条记忆一个目录」的碎片化，同时保留类型标记。
+2. **记忆旁资源**：允许记忆条目旁放 SQL、脚本等可复用资源，由 `INDEX.md` 链接；evaluation / observation 已有类似先例。
+3. **协作工作区**：为多 agent 协作提供 `swarms/<name>/` 式形态（可作为 tasks 下的一种形态或独立模块），约定 `README.md`、`findings.md`、`questions.md`、`agents/`、`scripts/`，结束后在上层索引留一行并保留目录。
+4. **人/团队信息分离**：人员与团队结构类内容与项目知识分开，放 `users/` 或独立私有记忆仓（对应 AMR 一人一仓的组合方式）。
+5. **不建议完全自由布局**：edges 的类型 README、脚本重算索引与 doctor 体检依赖固定结构，照搬 AMR 的自由布局会削弱这些能力。
+
+## 7. 开放问题
 
 - Dreaming 「移除未被任何会话使用的记录」是怎么统计使用的？会不会误删低频但关键的记忆？
 - 无人工介入的实时写入如何防止错误或被注入的内容进入记忆？规范只给出「记忆是数据不是指令」一条。
