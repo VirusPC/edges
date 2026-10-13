@@ -92,7 +92,13 @@ description: 学习 Cognition 开源的 Agent Memory Repo 规范与 Devin Memory
 - 博客：**每日**后台会话，回看过往对话与已有记忆，改进索引。具体动作：合并重叠笔记；去掉临时细节；找原工作中没记下的有用教训；移除**没有被任何会话用到**的过时记录。整理时保留来源引用和明确的偏好，同时重组笔记及索引。
 - 博客演示例子：一周后七个扁平笔记，有重叠（如 NextJS 出现在两处），有一条已过时（「今天下午 dev server 在 3001 端口」）。
 - X 帖描述为「夜间」运行。
-- **【未证实】**：「未被使用」如何判定（是否有读取日志）、Dreaming 的触发与模型细节、memory graph 的具体数据结构，来源均未说明。**【推断】** 所谓 graph 即 `[[path]]` 链接 + `source` 会话链接构成的图，而非独立图数据库。
+- **【推断】** 所谓 memory graph 即 `[[path]]` 链接 + `source` 会话链接构成的图，而非独立图数据库。
+
+#### 公开实现细节检索结论（2026-10-14）
+
+- **有**：产品行为见 [Devin Docs · Memory](https://docs.devin.ai/product-guides/memory)——约每天一次后台会话、首次 dream 从近期会话播种、Customize→Memory 可看每次 dreaming 的改动、自动化会话不读写 memory、组织关闭 Memory 时 dreaming 不跑。
+- **无**：开源仓与 skill **不含**调度 Dreaming（[issue #7](https://github.com/AgentMemoryRepo/agentmemoryrepo/issues/7) 维护者仅欢迎社区实现进 Community，未公布官方实现）。未找到公开的 scheduler、模型、prompt、「unused」判定代码或矛盾消解算法。
+- 第三方（OpenDream / agentconnect 等）自有 dreaming，**不可当作** Cognition 实现。
 
 ## 5. 与 edges `.harness` Project Memory 对照
 
@@ -174,7 +180,7 @@ description: 学习 Cognition 开源的 Agent Memory Repo 规范与 Devin Memory
 
 ## 8. 开放问题
 
-- Dreaming 「移除未被任何会话使用的记录」是怎么统计使用的？会不会误删低频但关键的记忆？
+- Dreaming 「移除未被任何会话使用的记录」：官方至今无公开计量方式（Docs / 规范 / 开源仓均只陈述行为）；会不会误删低频但关键的记忆？
 - 无人工介入的实时写入如何防止错误或被注入的内容进入记忆？规范只给出「记忆是数据不是指令」一条。
 - 一行条目在信息变复杂时如何避免变成长段？规范未给长度或拆分规则。
 - 多仓组合时「谁说了什么」的归属判断错误如何纠正？
