@@ -58,7 +58,7 @@ CLI、MCP 和 skill 各自的用法见 [`extensions/cli`](extensions/cli/README.
 
 | 目录 | 作用 |
 | --- | --- |
-| [`notes/`](notes/README.md)、[`projects/`](projects/)、[`teaching/`](teaching/README.md) | 知识生产：低成本捕获、专项工作区、教学工作区 |
+| [`notes/`](notes/README.md)、[`projects/`](projects/)、[`memory/`](memory/README.md)、[`teaching/`](teaching/README.md) | 知识生产：低成本捕获、专项工作区、Agent 能力调研备忘、教学工作区 |
 | [`retrospectives/`](retrospectives/README.md) | 阶段性回看：周复盘与日复盘 |
 | [`edges/`](edges/README.md) | 提炼出来、可以反复使用的判断 |
 | [`posts/`](posts/README.md) | 对外博客成稿，由作者亲手维护 |
@@ -108,6 +108,7 @@ pnpm build && pnpm test
 
 - [领域任务](tasks/README.md) — 根作用域领域工作项看板（系统入口见同目录 AGENTS.md）。
 - [笔记](notes/README.md) — 低成本捕获与在研想法。
+- [调研备忘](memory/README.md) — Agent 能力调研时的优先关注清单等短备忘。
 - [复盘](retrospectives/README.md) — 周复盘与日复盘的阶段性回看记录。
 - [教学](teaching/README.md) — 有状态的教学工作区与主题课页。
 - [认知优势](edges/README.md) — 已提炼、可复用的判断资产。
