@@ -46,6 +46,21 @@
 - **成本权衡**（[L378-L400](https://github.com/earendil-works/pi/blob/67996ab75c2818847423549807eda888db218c1c/packages/coding-agent/src/core/cache-warmer.ts#L378-L400)）：`warmCost` = 按缓存读价算整段 prompt + 1 个输出 token；`missCost` = 写入价（模型没有写入价就用输入价）− 读取价；`expectedSavings = p × missCost − warmCost`。运行期间 p = 1，空闲时 p = 0.15（作者自称来自自家统计，[L21-L26](https://github.com/earendil-works/pi/blob/67996ab75c2818847423549807eda888db218c1c/packages/coding-agent/src/core/cache-warmer.ts#L21-L26)）。预期节省 ≥ $0.05 才发（[L19-L20](https://github.com/earendil-works/pi/blob/67996ab75c2818847423549807eda888db218c1c/packages/coding-agent/src/core/cache-warmer.ts#L19-L20)）；扩展可以通过 `cache_warming_decision` 事件推翻这个决定。
 - **启示**：prompt 越长、写入相对读取越贵（Anthropic 是 1.25× 对 0.1×），预热越划算。小 prompt 或空闲会话的预期节省为负，就不应该预热。
 
+## 社区观察：各家 TTL 一览（@jakevin7）
+
+来源：@jakevin7，2026-10-12[^x1]。API 返回的原文有截断，截断的部分不做补写。下表逐条和官方文档对照，核对日期 2026-10-13。
+
+| 帖子说法 | 官方文档 | 结论 |
+|---|---|---|
+| DeepSeek：几小时到几天 | 缓存不再使用后会自动清除，"通常几小时到几天"；属于尽力而为，不保证命中[^d1] | 一致（这是清理时间，不是承诺的 TTL） |
+| Codex：5–10 分钟，过了 5 分钟没接上就算不命中 | OpenAI API 的 `in_memory` 档是"闲置约 5–10 分钟，最长 1 小时"；`24h` 档一般约 30 分钟、最长 24 小时（没开 ZDR 的组织默认 24h）；GPT-5.6 及以后的模型改用 `ttl: 30m`[^o1] | 部分一致。5–10 分钟和 API 的 `in_memory` 档吻合，但和本笔记写的"GPT-5.6+ 30 分钟"、"24h 档"属于不同模型、不同档位。Codex 产品实际用哪个档位、哪个模型版本，官方没有找到说明，**未核实**。"5 分钟一过就不命中"比文档的说法绝对，文档写的是"约 5–10 分钟" |
+| Claude：默认 5 分钟、命中刷新，可付费提到 1 小时 | 默认 5 分钟，命中刷新且不另收费；1 小时档写入价为 2×[^a1] | 一致 |
+| Gemini：默认 1 小时 | 显式缓存的 TTL 默认 1 小时[^g2]；隐式缓存（2.5 及以上默认开启）文档没给 TTL[^g1] | 显式缓存一致；隐式缓存未核实 |
+| 阿里：默认 5（原文截断） | 百炼显式缓存有效期 5 分钟，命中后重置；创建按输入单价的 125% 计费，命中通常按 10%；最少 1,024 token。隐式缓存没有固定有效期，系统定期清理，命中通常按 20% 计费（因模型而异）[^ali] | 截断的部分按"5 分钟"理解时，和显式缓存一致；隐式缓存没有固定 TTL |
+| Kimi：默认 5（原文截断） | Kimi API 不传 `prompt_cache_options` 时默认 5m，可选 1h；命中按原 TTL 免费续期。以 kimi-k3 为例：输入 ¥20/M、5m 写入 ¥20/M、1h 写入 ¥40/M、命中 ¥2/M[^kimi] | 截断的部分按"5 分钟"理解时一致 |
+
+要点：社区常说的"TTL"其实混了三种东西：**承诺的最短存活时间**（Anthropic、Kimi、阿里显式缓存、OpenAI 30m）、**典型闲置时长**（OpenAI `in_memory`）和**尽力而为的清理时间**（DeepSeek、隐式缓存）。设计 cache warm 时，应该以承诺值为准。
+
 ## 参考链接
 
 [^a1]: Anthropic Prompt caching: https://platform.claude.com/docs/en/build-with-claude/prompt-caching
@@ -53,5 +68,8 @@
 [^g1]: Gemini Caching（隐式）: https://ai.google.dev/gemini-api/docs/caching
 [^g2]: Gemini Context caching（显式，generateContent）: https://ai.google.dev/gemini-api/docs/generate-content/caching
 [^d1]: DeepSeek Context Caching: https://api-docs.deepseek.com/guides/kv_cache
+[^ali]: 阿里云百炼 上下文缓存: https://help.aliyun.com/zh/model-studio/context-cache
+[^kimi]: Kimi API 上下文缓存最佳实践: https://platform.moonshot.cn/docs/guide/use-context-caching-feature-of-kimi-api
+[^x1]: @jakevin7 X 帖子（2026-10-12）: https://x.com/jakevin7/status/2109605283236553163
 
 - pi 源码（commit 67996ab）：https://github.com/earendil-works/pi/blob/67996ab75c2818847423549807eda888db218c1c/packages/coding-agent/src/core/cache-warmer.ts
