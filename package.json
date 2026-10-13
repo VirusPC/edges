@@ -1,13 +1,13 @@
 {
   "name": "edges",
   "private": true,
-  "version": "1.2.0",
+  "version": "1.4.0",
   "license": "MIT",
   "description": "Edges - 认知系统服务工作区",
   "scripts": {
     "setup": "./scripts/setup",
     "skills:link": "./scripts/link-agent-skills",
-    "skills:install": "npx -y skills@latest add ./extensions/skills -g -a claude-code -y",
+    "skills:install-claude-global": "npx -y skills@latest add ./extensions/skills -g -a claude-code -y",
     "build": "pnpm recursive run build",
     "test": "pnpm recursive run test",
     "lint": "pnpm recursive lint",
@@ -16,11 +16,22 @@
     "dev:note-server": "pnpm --filter new-note dev",
     "start:artifacts": "pnpm --filter edges-artifacts-preview start",
     "dev:artifacts": "pnpm --filter edges-artifacts-preview dev",
-    "cli:note": "pnpm --filter edges-cli exec tsx src/index.ts note",
-    "mcp:run": "pnpm --filter"
+    "cli:notes": "pnpm --filter edges-cli exec tsx src/index.ts notes",
+    "mcp:run": "pnpm --filter",
+    "migrate:recursive-layout": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-recursive-layout.mts",
+    "restore:local-ownership": "pnpm --filter edges-cli exec tsx ../../scripts/restore-local-ownership.mts",
+    "migrate:directory-nodes": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-directory-nodes.mts",
+    "migrate:top-level-layout": "pnpm --filter edges-cli exec tsx ../../scripts/flatten-content-layout.mts",
+    "migrate:content-units": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-content-units.mts",
+    "migrate:task-indexes": "pnpm --filter edges-cli exec tsx ../../scripts/index-task-nodes.mts",
+    "migrate:project-harness-markers": "pnpm --filter edges-cli exec tsx ../../scripts/rewrite-project-harness-markers.mts",
+    "migrate:type-index-readme": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-type-index-to-readme.mts",
+    "migrate:split-type-index-readme": "pnpm --filter edges-cli exec tsx ../../scripts/split-type-index-readme.mts",
+    "migrate:index-case": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-index-to-INDEX.mts",
+    "migrate:task-project-lists": "pnpm --filter edges-cli exec tsx ../../scripts/migrate-task-project-lists.mts"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22"
   },
   "devDependencies": {
     "@types/node": "^22.19.11",

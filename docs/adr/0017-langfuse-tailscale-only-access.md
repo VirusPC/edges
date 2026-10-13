@@ -2,7 +2,7 @@
 
 ADR 0014 把 v1 宿主定在 minigtr，并写过「访问走已有 Tailscale」。2026-09-20 第二轮 grill 确认（peng cheng）：v1 **只**从 Tailscale 访问。公网 HTTPS（反代 + 证书）另开后续，因为用户的设备不会永远开着 Tailscale；本轮不实现。
 
-**Status:** accepted（ADR 0017；grill 确认于 2026-09-20）
+**Status:** superseded by [ADR 0033](0033-langfuse-public-https-via-cloudflare-tunnel.md)（2026-10-11）。下文是 2026-09-20 的原决策，不再作为现行访问面。
 
 **See also:** ADR 0014（[v1 宿主 minigtr](0014-self-hosted-langfuse-on-minigtr.md)）；ADR 0018（[密钥不进仓](0018-langfuse-secrets-stay-on-minigtr.md)）
 
@@ -20,12 +20,13 @@ ADR 0014 把 v1 宿主定在 minigtr，并写过「访问走已有 Tailscale」�
 
 ## Consequences
 
-- 直到公网 HTTPS 后续落地：场外设备要么在 tailnet 上，要么打不开。localhost / 局域网只覆盖人在 minigtr 旁边或同一 LAN 的情况。
-- 不为此提前做 Funnel 或反代；后续仍是 ADR 0017 的 Follow-up，不是本轮实现。
+- 下面两条是 2026-09-20 当时的后果。现行访问面与后果见 ADR 0033，不要把这两条当成现在仍要遵守的缺口。
+- 在公网 HTTPS 落地之前：场外设备要么在 tailnet 上，要么打不开。localhost / 局域网只覆盖人在 minigtr 旁边或同一 LAN 的情况。
+- 当时不为此提前做 Funnel 或自管反代。该后续已由 ADR 0033 以 Cloudflare Tunnel 落地。
 
-## Follow-up（未做）
+## Follow-up（已由 ADR 0033 落地）
 
-- 公网 HTTPS：反代 + 证书，供未跑 Tailscale 的设备访问。未实现，不要写成已完成。
+- 公网 HTTPS 已接通。方式是 Cloudflare Tunnel，不是本 ADR 起草时设想的、写进仓库的自管反代与证书。现行访问面见 ADR 0033。不要再把本段当成「未实现」。
 
 ## Out of scope
 

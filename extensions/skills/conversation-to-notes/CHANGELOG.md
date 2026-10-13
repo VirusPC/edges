@@ -5,7 +5,34 @@ All notable changes to this skill will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.7.0] - 2026-10-08
+
+### Changed
+
+- 入库改为 `edges notes create --title --body`。只在本地写叶子，不再使用 `--content-file`、`--import-entry`、`--co-author` 或 Git 模式。
+
+## [2.6.0] - 2026-10-07
+
+### Changed
+
+- 入库命令改为 `edges --scope <目录> notes create`。`edges note` / `note create` 不再是命令，没有别名。
+
+## [2.5.0] - 2026-10-07
+
+### Changed
+
+- 入库改为 `edges --scope <目录> note create`，入口是 `notes/YYYY-MM-DD--主题简述/INDEX.md`。
+- 有附件用 `--import-entry`。去掉 `--format directory --resources`。看板任务进 `main` 必须开 PR。
+
+## [2.4.1] - 2026-10-05
+
+- 同步根层 notes 与 extensions/apps 的目录调整，保持原工作流和内容规范。
+
+## [2.4.0] - 2026-10-05
+
+### Changed
+
+- 正文写作与审阅后使用 `edges note --content-file --markdown` 确定性入库；显式目录格式支持本篇资源，保留已有隐私、Git/PR 与发布授权约定。
 
 ## [2.3.3] - 2026-09-27
 
@@ -91,7 +118,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.3.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.4.0...HEAD
+[2.4.0]: https://github.com/VirusPC/edges/releases/tag/skill/conversation-to-notes@2.4.0
 [2.3.0]: https://github.com/VirusPC/edges/releases/tag/skill/conversation-to-notes@2.3.0
 [2.2.1]: https://github.com/VirusPC/edges/releases/tag/skill/conversation-to-notes@2.2.1
 [2.2.0]: https://github.com/VirusPC/edges/compare/skill/conversation-to-notes@2.1.1...skill/conversation-to-notes@2.2.0

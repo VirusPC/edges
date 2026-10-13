@@ -1,5 +1,5 @@
 packages:
   - 'extensions/mcp-servers/*'
-  - 'extensions/clis'
-  - 'apps/*'
+  - 'extensions/cli'
+  - 'extensions/apps/*'
   - 'extensions/services/*'

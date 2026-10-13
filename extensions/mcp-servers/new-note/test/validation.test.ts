@@ -2,21 +2,20 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { validateInput } from "../src/validation.js";
 
-test("validateInput accepts valid payload", () => {
+test("validateInput accepts title and body", () => {
   const parsed = validateInput({
     title: "Daily summary",
-    content: "Some useful content",
-    coAuthor: "OpenAI Codex <codex@openai.com>",
+    body: "Some useful content",
   });
 
   assert.equal(parsed.title, "Daily summary");
+  assert.equal(parsed.body, "Some useful content");
 });
 
-test("validateInput rejects missing field", () => {
+test("validateInput rejects a missing title", () => {
   assert.throws(() => {
     validateInput({
-      title: "Daily summary",
-      content: "Some useful content",
+      body: "Some useful content",
     });
   });
 });

@@ -52,6 +52,39 @@ test("POST upload then unauthenticated GET returns the file", async () => {
   }
 });
 
+test("draft POST is not publicly readable until publish", async () => {
+  const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
+  const { url, close } = await startServer(nowMs);
+  try {
+    const created = await fetch(`${url}/artifacts`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+      body: JSON.stringify({
+        publish: false,
+        files: [{ path: "index.html", content: "<html>draft</html>" }],
+      }),
+    });
+    assert.equal(created.status, 201);
+    const body = (await created.json()) as { id: string; url?: string };
+    assert.equal(body.id, FIXED_ID);
+    assert.equal(body.url, undefined);
+    assert.equal((await fetch(`${url}/artifacts/${FIXED_ID}/`)).status, 404);
+
+    const published = await fetch(`${url}/artifacts/${FIXED_ID}/publish`, {
+      method: "POST",
+      headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" },
+      body: JSON.stringify({ ttlSeconds: 60 }),
+    });
+    assert.equal(published.status, 200);
+    const pub = (await published.json()) as { url: string; expiresAt: string };
+    assert.equal(pub.url, `http://artifacts.test/artifacts/${FIXED_ID}/`);
+    assert.equal(pub.expiresAt, "2026-09-19T12:01:00.000Z");
+    assert.equal(await (await fetch(`${url}/artifacts/${FIXED_ID}/`)).text(), "<html>draft</html>");
+  } finally {
+    await close();
+  }
+});
+
 test("POST without Bearer is 401", async () => {
   const nowMs = { current: Date.parse("2026-09-19T12:00:00.000Z") };
   const { url, close } = await startServer(nowMs);

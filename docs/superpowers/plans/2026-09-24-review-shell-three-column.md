@@ -6,11 +6,11 @@
 
 **Goal:** Ship one Vite + React review shell for classifyTasks, proposeTypes, `edges tasks project review-page`, and `/tasks/`, with a project column, read-only status columns, a Markdown pane, and a grouped item `doc` that the page reads only from injected JSON.
 
-**Architecture:** The monorepo keeps the UI source and the CLI apart. The Vite app is the workspace package `tasks-review-app` at `apps/tasks-review-app/` (room under `apps/` for later prebuilt shells). Its `outDir` writes gitignored `index.html`, `review.js`, and `review.css` into the CLI tree at `extensions/clis/src/tasks/project/assets/review-page/`. `extensions/clis/src/tasks/utils/review-page.ts` only reads those three files, inlines the JS and CSS into one HTML file, and injects `#edges-review-payload`. It does not import the Vite source. Generators attach a Schema-aligned `doc` from `parseTaskDoc`. The browser never reads a Task markdown file. Navigation is hash or hash+query.
+**Architecture:** The monorepo keeps the UI source and the CLI apart. The Vite app is the workspace package `tasks-review-app` at `apps/tasks-review-app/` (room under `apps/` for later prebuilt shells). Its `outDir` writes gitignored `index.html`, `review.js`, and `review.css` into the CLI tree at `extensions/cli/src/tasks/project/assets/review-page/`. `extensions/cli/src/tasks/utils/review-page.ts` only reads those three files, inlines the JS and CSS into one HTML file, and injects `#edges-review-payload`. It does not import the Vite source. Generators attach a Schema-aligned `doc` from `parseTaskDoc`. The browser never reads a Task markdown file. Navigation is hash or hash+query.
 
 **Tech Stack:** Vite 8 + React 19 + Tailwind 4 + shadcn/ui (radix-nova, as scaffolded by `shadcn@4`), `@dnd-kit/core`, `react-markdown` + `remark-gfm`, Vitest 5 + Testing Library. CLI stays Node ≥20, TypeScript nodenext, `node:test` + `tsx`. Relative CLI imports end in `.js`.
 
-**Spec:** `docs/adr/0022-review-shell-three-column-task-doc.md` (Amended pointers on `docs/adr/0012-task-project-review-page-is-render-only-cli.md` and `docs/adr/0021-persistent-tasks-board-site.md`). Schema: `extensions/clis/schemas/task-doc.v1.json` (`$id`: `edges.task-doc/v1`). Glossary in `CONTEXT.md`: **Task Doc（edges）**, **Task Project 审阅页（edges）**, **审阅壳（Review Shell）**, **`/tasks/` 持久看板站**, **分组列表 schema（edges.tasks.grouped）**, **doc（看板条目）**, **edges-task-assignee**, **edges tasks（CLI）**. Process note: `knowledge/notes/2026-09-24--Tasks审阅壳三列布局-grill与Playwright嵌入调研.md`. Task card (do not move): `knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--review-page-改造三列布局-顶栏-filter.md`. Playwright evidence used below: `packages/html-reporter/vite.config.ts` (`inlineDynamicImports`, `entryFileNames: 'report.js'`, `assetFileNames` → `report.css`, `cssCodeSplit: false`, `assetsInlineLimit: 100000000`) and `packages/playwright/src/reporters/html.ts` `_writeStaticAssets` (inline `report.js` / `report.css`; data is a separate zip template that this plan does not copy). Hash shape: `packages/html-reporter/src/links.tsx` (`new URLSearchParams(window.location.hash.slice(1))`, links `#?` + params).
+**Spec:** `docs/adr/0022-review-shell-three-column-task-doc.md` (Amended pointers on `docs/adr/0012-task-project-review-page-is-render-only-cli.md` and `docs/adr/0021-persistent-tasks-board-site.md`). Schema: `extensions/cli/schemas/task-doc.v1.json` (`$id`: `edges.task-doc/v1`). Glossary in `CONTEXT.md`: **Task Doc（edges）**, **Task Project 审阅页（edges）**, **审阅壳（Review Shell）**, **`/tasks/` 持久看板站**, **分组列表 schema（edges.tasks.grouped）**, **doc（看板条目）**, **edges-task-assignee**, **edges tasks（CLI）**. Process note: `knowledge/notes/2026-09-24--Tasks审阅壳三列布局-grill与Playwright嵌入调研.md`. Task card (do not move): `knowledge/tasks/agent-clients-ux/in_progress/2026-09-21--review-page-改造三列布局-顶栏-filter.md`. Playwright evidence used below: `packages/html-reporter/vite.config.ts` (`inlineDynamicImports`, `entryFileNames: 'report.js'`, `assetFileNames` → `report.css`, `cssCodeSplit: false`, `assetsInlineLimit: 100000000`) and `packages/playwright/src/reporters/html.ts` `_writeStaticAssets` (inline `report.js` / `report.css`; data is a separate zip template that this plan does not copy). Hash shape: `packages/html-reporter/src/links.tsx` (`new URLSearchParams(window.location.hash.slice(1))`, links `#?` + params).
 
 ## Scope check
 
@@ -27,7 +27,7 @@ The in-progress card still says the center board may reuse an open-source kanban
 - Playwright zip+base64 payload, `doNotInlineAssets`, a second static tree, CLI-embedded Vite HMR
 - Path history or react-router
 - Moving the in-progress card, editing `knowledge/posts/`, or rewriting ADR 0022
-- Committing `extensions/clis/src/tasks/project/assets/review-page/`
+- Committing `extensions/cli/src/tasks/project/assets/review-page/`
 
 ## Global Constraints
 
@@ -41,11 +41,11 @@ The in-progress card still says the center board may reuse an open-source kanban
 - Grouped list stays `edges.tasks.grouped/v1` (`groups[]` + `items[]`). `doc` is optional on items. Do not add a second board schema. Flat `edges tasks list` (no `--group-by`) stays `{ status, command: "list", tasks: [...] }` and must not grow a `doc` field.
 - Existing `--status` / `--priority` / `--project` / `--sort` still apply before grouping.
 - Build output directory is gitignored. Generate it with `build:tasks-review-app`, `prepack`, CI, or the ECS deploy chain before writing `/tasks/`. Do not commit the built files.
-- Monorepo: UI source is `apps/tasks-review-app/` (package name `tasks-review-app`). CLI stays `extensions/clis/`. Vite `outDir` is `extensions/clis/src/tasks/project/assets/review-page/`. Do not put this app under `extensions/clis/`. Root `pnpm-workspace.yaml` lists `apps/*` so another shell can sit beside this one.
+- Monorepo: UI source is `apps/tasks-review-app/` (package name `tasks-review-app`). CLI stays `extensions/cli/`. Vite `outDir` is `extensions/cli/src/tasks/project/assets/review-page/`. Do not put this app under `extensions/cli/`. Root `pnpm-workspace.yaml` lists `apps/*` so another shell can sit beside this one.
 - Runtime inlines `review.js` and `review.css`. Payload is `<script type="application/json" id="edges-review-payload">`. Not a zip. Not Playwright's `<template id="playwrightReportBase64">`.
 - Navigation is hash or hash+query (`#?q=&priority=&assignee=&status=&project=&stem=`). No path history. No server rewrite.
 - `edges tasks project review-page` stays render-only: no board writes, no browser open, no publish.
-- CLI relative imports use `.js`. Tests: `node --test --import tsx './test/**/*.test.ts'` from `extensions/clis` (never `node --test --import tsx test`).
+- CLI relative imports use `.js`. Tests: `node --test --import tsx './test/**/*.test.ts'` from `extensions/cli` (never `node --test --import tsx test`).
 - Co-authored-by on every commit: `Coding 专家 <grok-bot@users.noreply.github.com>`
 - Git subject: `type: subject`
 - Capability surface wording stays CLI + Skill + MCP.
@@ -77,27 +77,27 @@ The in-progress card still says the center board may reuse an open-source kanban
 
 **Create — CLI doc mapping**
 
-- `extensions/clis/src/tasks/utils/task-doc.ts` — `TaskDoc`, `taskDocFromParsed`, `taskDocFromMarkdown`.
-- `extensions/clis/test/tasks/tasks-review-app-build.test.ts` — fixed filenames, gitignore, dev-mock excluded from `review.js`.
+- `extensions/cli/src/tasks/utils/task-doc.ts` — `TaskDoc`, `taskDocFromParsed`, `taskDocFromMarkdown`.
+- `extensions/cli/test/tasks/tasks-review-app-build.test.ts` — fixed filenames, gitignore, dev-mock excluded from `review.js`.
 
 **Modify — CLI**
 
-- `extensions/clis/src/tasks/utils/board.ts` — `readListItem` also returns `doc`; `listTasks` still strips it; grouped listing keeps it.
-- `extensions/clis/src/tasks/utils/grouped.ts` — optional `doc` on items; map passes `doc`, `status`, `priority`.
-- `extensions/clis/src/tasks/utils/review-page.ts` — optional `doc` / `status` / `priority`; load three assets; inline JS/CSS; inject payload.
-- `extensions/clis/src/tasks/project/review-page.ts` — call the asset loader instead of the handwritten HTML file.
-- `extensions/clis/src/tasks/list.ts` — one help sentence: grouped items may include optional `doc`.
-- `extensions/clis/package.json` — `build:tasks-review-app`, `prepack`, test depends on the app build, `tasks-review-app` workspace devDependency.
-- `extensions/clis/scripts/copy-review-page-asset.mjs` — still copies `src/tasks/project/assets` onto `dist` (the built directory is inside that tree).
-- `extensions/clis/test/tasks/utils/grouped.test.ts`, `review-page.test.ts`, `grouped-list.test.ts` — `doc` present on grouped list, absent on flat list, optional on review-page input.
-- Delete `extensions/clis/src/tasks/project/assets/review-page.html` once the inlined shell replaces it.
+- `extensions/cli/src/tasks/utils/board.ts` — `readListItem` also returns `doc`; `listTasks` still strips it; grouped listing keeps it.
+- `extensions/cli/src/tasks/utils/grouped.ts` — optional `doc` on items; map passes `doc`, `status`, `priority`.
+- `extensions/cli/src/tasks/utils/review-page.ts` — optional `doc` / `status` / `priority`; load three assets; inline JS/CSS; inject payload.
+- `extensions/cli/src/tasks/project/review-page.ts` — call the asset loader instead of the handwritten HTML file.
+- `extensions/cli/src/tasks/list.ts` — one help sentence: grouped items may include optional `doc`.
+- `extensions/cli/package.json` — `build:tasks-review-app`, `prepack`, test depends on the app build, `tasks-review-app` workspace devDependency.
+- `extensions/cli/scripts/copy-review-page-asset.mjs` — still copies `src/tasks/project/assets` onto `dist` (the built directory is inside that tree).
+- `extensions/cli/test/tasks/utils/grouped.test.ts`, `review-page.test.ts`, `grouped-list.test.ts` — `doc` present on grouped list, absent on flat list, optional on review-page input.
+- Delete `extensions/cli/src/tasks/project/assets/review-page.html` once the inlined shell replaces it.
 
 **Modify — repo wiring**
 
 - `pnpm-workspace.yaml` — add `apps/*` so `tasks-review-app` and later shells are workspace packages.
-- `.gitignore` — `extensions/clis/src/tasks/project/assets/review-page/`.
+- `.gitignore` — `extensions/cli/src/tasks/project/assets/review-page/`.
 - `.github/workflows/deploy.yml` — install the new package and `pnpm --filter tasks-review-app run build` before `generate-tasks-site.ts`.
-- `extensions/clis/README.md`, `extensions/clis/deploy/README.md` — build-before-generate.
+- `extensions/cli/README.md`, `extensions/cli/deploy/README.md` — build-before-generate.
 - `extensions/skills/project-tasks-classify/SKILL.md` + `CHANGELOG.md` — optional thin `doc`; export row unchanged. Version `1.2.0` (tag `1.1.0` already exists; `SKILL.md` on this branch is still `1.0.0`).
 - `CHANGELOG.md` — one Chinese Unreleased bullet under `### 任务看板与项目` when the feature lands.
 - Root `pnpm-lock.yaml` — the only lockfile to update. Delete any `pnpm-lock.yaml` or `pnpm-workspace.yaml` the shadcn scaffold writes inside `apps/tasks-review-app/`.
@@ -108,20 +108,20 @@ The in-progress card still says the center board may reuse an open-source kanban
 
 **Files:**
 - Create: `apps/tasks-review-app/**` (shadcn Vite scaffold, then the edits in this task)
-- Create: `extensions/clis/test/tasks/tasks-review-app-build.test.ts`
+- Create: `extensions/cli/test/tasks/tasks-review-app-build.test.ts`
 - Modify: `pnpm-workspace.yaml`
 - Modify: `.gitignore`
-- Modify: `extensions/clis/package.json`
+- Modify: `extensions/cli/package.json`
 - Modify: `pnpm-lock.yaml`
-- Test: `extensions/clis/test/tasks/tasks-review-app-build.test.ts`
+- Test: `extensions/cli/test/tasks/tasks-review-app-build.test.ts`
 
 **Interfaces:**
 - Consumes: none
-- Produces: `pnpm --filter tasks-review-app run build` writes exactly these three files into `extensions/clis/src/tasks/project/assets/review-page/`: `index.html`, `review.js`, `review.css`. `index.html` references `review.js` and `review.css` (the CLI inlines them in Task 4). `review.js` does not contain the string `DEV-MOCK-STEM-NOT-IN-PROD`. Package script `build:tasks-review-app` on `edges-cli` runs that build. `prepack` runs `pnpm run build`.
+- Produces: `pnpm --filter tasks-review-app run build` writes exactly these three files into `extensions/cli/src/tasks/project/assets/review-page/`: `index.html`, `review.js`, `review.css`. `index.html` references `review.js` and `review.css` (the CLI inlines them in Task 4). `review.js` does not contain the string `DEV-MOCK-STEM-NOT-IN-PROD`. Package script `build:tasks-review-app` on `edges-cli` runs that build. `prepack` runs `pnpm run build`.
 
 - [ ] **Step 1: Write the failing test**
 
-Create `extensions/clis/test/tasks/tasks-review-app-build.test.ts`:
+Create `extensions/cli/test/tasks/tasks-review-app-build.test.ts`:
 
 ```ts
 import test from "node:test";
@@ -134,7 +134,7 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
 const assetDir = path.join(
   repoRoot,
-  "extensions/clis/src/tasks/project/assets/review-page",
+  "extensions/cli/src/tasks/project/assets/review-page",
 );
 
 test("build:tasks-review-app emits index.html, review.js, and review.css only", () => {
@@ -185,7 +185,7 @@ Add the package to the root workspace. In `pnpm-workspace.yaml`:
 ```yaml
 packages:
   - 'extensions/mcp-servers/*'
-  - 'extensions/clis'
+  - 'extensions/cli'
   - 'apps/*'
   - 'extensions/services/*'
 ```
@@ -194,7 +194,7 @@ Append to the root `.gitignore`:
 
 ```
 # Review shell Vite outDir (ADR 0022). Source is apps/tasks-review-app/.
-extensions/clis/src/tasks/project/assets/review-page/
+extensions/cli/src/tasks/project/assets/review-page/
 ```
 
 Replace `apps/tasks-review-app/vite.config.ts` with:
@@ -207,7 +207,7 @@ import { defineConfig } from "vitest/config";
 
 const outDir = path.resolve(
   __dirname,
-  "../../extensions/clis/src/tasks/project/assets/review-page",
+  "../../extensions/cli/src/tasks/project/assets/review-page",
 );
 
 export default defineConfig({
@@ -328,7 +328,7 @@ Install Vitest 5 (peers with Vite 8) from the repo root:
 pnpm --filter tasks-review-app add -D vitest@^5.0.1 jsdom @testing-library/react @testing-library/user-event
 ```
 
-Point `edges-cli` at the app. In `extensions/clis/package.json`:
+Point `edges-cli` at the app. In `extensions/cli/package.json`:
 
 ```json
 "scripts": {
@@ -364,12 +364,12 @@ Commit the root `pnpm-lock.yaml` only.
 pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/tasks-review-app-build.test.ts
 ```
 
-Expected: PASS. `git status --short` does not list `extensions/clis/src/tasks/project/assets/review-page/` as a file to add.
+Expected: PASS. `git status --short` does not list `extensions/cli/src/tasks/project/assets/review-page/` as a file to add.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add pnpm-workspace.yaml pnpm-lock.yaml .gitignore extensions/clis/package.json apps/tasks-review-app extensions/clis/test/tasks/tasks-review-app-build.test.ts
+git add pnpm-workspace.yaml pnpm-lock.yaml .gitignore extensions/cli/package.json apps/tasks-review-app extensions/cli/test/tasks/tasks-review-app-build.test.ts
 git commit -m "$(cat <<'EOF'
 build: scaffold review shell with fixed Vite filenames
 
@@ -383,15 +383,15 @@ EOF
 ### Task 2: Put optional Task Doc on grouped items
 
 **Files:**
-- Create: `extensions/clis/src/tasks/utils/task-doc.ts`
-- Modify: `extensions/clis/src/tasks/utils/board.ts` (`readListItem` around the `parseTaskDoc` call)
-- Modify: `extensions/clis/src/tasks/utils/grouped.ts`
-- Modify: `extensions/clis/src/tasks/list.ts` (help text only)
-- Test: `extensions/clis/test/tasks/utils/grouped.test.ts`
-- Test: `extensions/clis/test/tasks/grouped-list.test.ts`
+- Create: `extensions/cli/src/tasks/utils/task-doc.ts`
+- Modify: `extensions/cli/src/tasks/utils/board.ts` (`readListItem` around the `parseTaskDoc` call)
+- Modify: `extensions/cli/src/tasks/utils/grouped.ts`
+- Modify: `extensions/cli/src/tasks/list.ts` (help text only)
+- Test: `extensions/cli/test/tasks/utils/grouped.test.ts`
+- Test: `extensions/cli/test/tasks/grouped-list.test.ts`
 
 **Interfaces:**
-- Consumes: `parseTaskDoc` from `extensions/clis/src/tasks/utils/frontmatter.ts` returns `{ name, description, metadata, body, rawFrontmatter }`. `TaskListItem` stays stem/title/status/description/path/sidecarPath/runCount/priority/project.
+- Consumes: `parseTaskDoc` from `extensions/cli/src/tasks/utils/frontmatter.ts` returns `{ name, description, metadata, body, rawFrontmatter }`. `TaskListItem` stays stem/title/status/description/path/sidecarPath/runCount/priority/project.
 - Produces:
   - `export type TaskDoc = { name: string; description: string; metadata: Record<string, string>; body: string }`
   - `export function taskDocFromMarkdown(markdown: string): TaskDoc`
@@ -403,7 +403,7 @@ EOF
 
 - [ ] **Step 1: Write the failing test**
 
-Add to `extensions/clis/test/tasks/utils/grouped.test.ts`:
+Add to `extensions/cli/test/tasks/utils/grouped.test.ts`:
 
 ```ts
 test("buildGroupedList copies doc and omits rawFrontmatter", () => {
@@ -458,7 +458,7 @@ test("buildGroupedList omits doc when the caller has none", () => {
 });
 ```
 
-Add to `extensions/clis/test/tasks/grouped-list.test.ts` inside the existing `--group-by project` test, after `assert.equal(item?.status, "todo")`:
+Add to `extensions/cli/test/tasks/grouped-list.test.ts` inside the existing `--group-by project` test, after `assert.equal(item?.status, "todo")`:
 
 ```ts
 assert.equal(item?.doc?.name !== undefined, true);
@@ -485,7 +485,7 @@ Expected: FAIL. `buildGroupedList` drops `doc`. `list --group-by` items have no 
 
 - [ ] **Step 3: Write the minimal implementation**
 
-Create `extensions/clis/src/tasks/utils/task-doc.ts`:
+Create `extensions/cli/src/tasks/utils/task-doc.ts`:
 
 ```ts
 import { parseTaskDoc, type ParsedTaskDoc } from "./frontmatter.js";
@@ -675,7 +675,7 @@ Expected: PASS. Flat list still has no `doc`.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/task-doc.ts extensions/clis/src/tasks/utils/board.ts extensions/clis/src/tasks/utils/grouped.ts extensions/clis/src/tasks/list.ts extensions/clis/test/tasks/utils/grouped.test.ts extensions/clis/test/tasks/grouped-list.test.ts
+git add extensions/cli/src/tasks/utils/task-doc.ts extensions/cli/src/tasks/utils/board.ts extensions/cli/src/tasks/utils/grouped.ts extensions/cli/src/tasks/list.ts extensions/cli/test/tasks/utils/grouped.test.ts extensions/cli/test/tasks/grouped-list.test.ts
 git commit -m "$(cat <<'EOF'
 feat: embed optional Task Doc on grouped task items
 
@@ -689,10 +689,10 @@ EOF
 ### Task 3: Pass doc through the review-page payload
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/review-page.ts` (`ReviewPageItem`, `parseItem`)
-- Modify: `extensions/clis/src/tasks/utils/grouped.ts` (`groupedListToReviewPageInput`)
-- Test: `extensions/clis/test/tasks/utils/review-page.test.ts`
-- Test: `extensions/clis/test/tasks/utils/grouped.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/review-page.ts` (`ReviewPageItem`, `parseItem`)
+- Modify: `extensions/cli/src/tasks/utils/grouped.ts` (`groupedListToReviewPageInput`)
+- Test: `extensions/cli/test/tasks/utils/review-page.test.ts`
+- Test: `extensions/cli/test/tasks/utils/grouped.test.ts`
 
 **Interfaces:**
 - Consumes: `TaskDoc` from `task-doc.ts`. `GroupedListItem.doc`, `.status`, `.priority`.
@@ -700,7 +700,7 @@ EOF
 
 - [ ] **Step 1: Write the failing test**
 
-Add to `extensions/clis/test/tasks/utils/grouped.test.ts`:
+Add to `extensions/cli/test/tasks/utils/grouped.test.ts`:
 
 ```ts
 test("groupedListToReviewPageInput copies status, priority, and doc", () => {
@@ -730,7 +730,7 @@ test("groupedListToReviewPageInput copies status, priority, and doc", () => {
 });
 ```
 
-Add to `extensions/clis/test/tasks/utils/review-page.test.ts`:
+Add to `extensions/cli/test/tasks/utils/review-page.test.ts`:
 
 ```ts
 test("parseReviewPageInput keeps a thin doc and allows a missing doc", () => {
@@ -867,7 +867,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/review-page.ts extensions/clis/src/tasks/utils/grouped.ts extensions/clis/test/tasks/utils/grouped.test.ts extensions/clis/test/tasks/utils/review-page.test.ts
+git add extensions/cli/src/tasks/utils/review-page.ts extensions/cli/src/tasks/utils/grouped.ts extensions/cli/test/tasks/utils/grouped.test.ts extensions/cli/test/tasks/utils/review-page.test.ts
 git commit -m "$(cat <<'EOF'
 feat: carry optional doc through the review-page payload
 
@@ -881,10 +881,10 @@ EOF
 ### Task 4: Inline the built shell instead of the handwritten HTML
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/review-page.ts`
-- Modify: `extensions/clis/src/tasks/project/review-page.ts`
-- Delete: `extensions/clis/src/tasks/project/assets/review-page.html`
-- Test: `extensions/clis/test/tasks/utils/review-page.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/review-page.ts`
+- Modify: `extensions/cli/src/tasks/project/review-page.ts`
+- Delete: `extensions/cli/src/tasks/project/assets/review-page.html`
+- Test: `extensions/cli/test/tasks/utils/review-page.test.ts`
 
 **Interfaces:**
 - Consumes: Task 1's three files at `defaultReviewPageAssetDir()`. `renderReviewPageHtml(input, shellHtml)` still replaces `#edges-review-payload`.
@@ -1010,7 +1010,7 @@ const shell = await loadBuiltReviewShell((abs) => readFile(abs, "utf8"));
 const html = renderReviewPageHtml(input, shell);
 ```
 
-Delete `extensions/clis/src/tasks/project/assets/review-page.html`.
+Delete `extensions/cli/src/tasks/project/assets/review-page.html`.
 
 - [ ] **Step 4: Run the tests to verify they pass**
 
@@ -1019,12 +1019,12 @@ pnpm --filter edges-cli run build:tasks-review-app
 pnpm --filter edges-cli exec -- node --test --import tsx ./test/tasks/utils/review-page.test.ts
 ```
 
-Expected: PASS. Grep the repo for `review-page.html` and update any remaining test import. `extensions/clis/README.md` still describes a single-file HTML page; Task 7 updates that sentence.
+Expected: PASS. Grep the repo for `review-page.html` and update any remaining test import. `extensions/cli/README.md` still describes a single-file HTML page; Task 7 updates that sentence.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/review-page.ts extensions/clis/src/tasks/project/review-page.ts extensions/clis/src/tasks/project/assets/review-page.html extensions/clis/test/tasks/utils/review-page.test.ts
+git add extensions/cli/src/tasks/utils/review-page.ts extensions/cli/src/tasks/project/review-page.ts extensions/cli/src/tasks/project/assets/review-page.html extensions/cli/test/tasks/utils/review-page.test.ts
 git commit -m "$(cat <<'EOF'
 feat: inline the prebuilt review shell into one HTML file
 
@@ -1054,7 +1054,7 @@ EOF
 - Test: `apps/tasks-review-app/test/shell.test.tsx`
 
 **Interfaces:**
-- Consumes: payload shape from Task 3. Schema enums from `extensions/clis/schemas/task-doc.v1.json`.
+- Consumes: payload shape from Task 3. Schema enums from `extensions/cli/schemas/task-doc.v1.json`.
 - Produces:
   - `matchesReviewFilter(item: ReviewItem, filter: ReviewFilter): boolean`
   - `itemStatus`, `itemPriority`, `itemAssignee`, `itemSearchText`
@@ -1260,7 +1260,7 @@ Expected: FAIL importing `../src/filter.ts` (module not found).
 `src/statuses.ts`:
 
 ```ts
-import taskDocSchema from "../../../extensions/clis/schemas/task-doc.v1.json" with { type: "json" };
+import taskDocSchema from "../../../extensions/cli/schemas/task-doc.v1.json" with { type: "json" };
 
 const metadata = taskDocSchema.properties.metadata.properties;
 
@@ -1568,14 +1568,14 @@ EOF
 
 **Files:**
 - Modify: `.github/workflows/deploy.yml` (the generate block inside the SSH script)
-- Modify: `extensions/clis/deploy/README.md`
-- Modify: `extensions/clis/README.md`
-- Modify: `extensions/clis/src/tasks/list.ts` only if Task 2's help sentence is missing
+- Modify: `extensions/cli/deploy/README.md`
+- Modify: `extensions/cli/README.md`
+- Modify: `extensions/cli/src/tasks/list.ts` only if Task 2's help sentence is missing
 - Modify: `extensions/skills/project-tasks-classify/SKILL.md`
 - Modify: `extensions/skills/project-tasks-classify/CHANGELOG.md`
 - Modify: `CHANGELOG.md`
-- Test: `extensions/clis/test/tasks/review-page-classify.test.ts`
-- Test: `extensions/clis/test/tasks/deploy-review-build.test.ts`
+- Test: `extensions/cli/test/tasks/review-page-classify.test.ts`
+- Test: `extensions/cli/test/tasks/deploy-review-build.test.ts`
 
 **Interfaces:**
 - Consumes: `loadBuiltReviewShell`, `parseReviewPageInput`, `renderReviewPageHtml`, `exportReviewRows`.
@@ -1583,7 +1583,7 @@ EOF
 
 - [ ] **Step 1: Write the failing tests**
 
-`extensions/clis/test/tasks/review-page-classify.test.ts`:
+`extensions/cli/test/tasks/review-page-classify.test.ts`:
 
 ```ts
 import test from "node:test";
@@ -1635,7 +1635,7 @@ test("review-page renders classify JSON with a missing doc and a thin doc", asyn
 });
 ```
 
-`extensions/clis/test/tasks/deploy-review-build.test.ts` reads `.github/workflows/deploy.yml` as text and asserts it contains `pnpm --filter tasks-review-app run build` before `scripts/generate-tasks-site.ts`, and that this build is not inside `if [ ! -d node_modules ]`.
+`extensions/cli/test/tasks/deploy-review-build.test.ts` reads `.github/workflows/deploy.yml` as text and asserts it contains `pnpm --filter tasks-review-app run build` before `scripts/generate-tasks-site.ts`, and that this build is not inside `if [ ! -d node_modules ]`.
 
 - [ ] **Step 2: Run the tests to verify they fail**
 
@@ -1652,9 +1652,9 @@ In `.github/workflows/deploy.yml`, replace the block that conditionally installs
 ```bash
 pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...
 pnpm --filter tasks-review-app run build
-test -s extensions/clis/src/tasks/project/assets/review-page/index.html
-test -s extensions/clis/src/tasks/project/assets/review-page/review.js
-test -s extensions/clis/src/tasks/project/assets/review-page/review.css
+test -s extensions/cli/src/tasks/project/assets/review-page/index.html
+test -s extensions/cli/src/tasks/project/assets/review-page/review.js
+test -s extensions/cli/src/tasks/project/assets/review-page/review.css
 pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
   --out "$PWD/knowledge/tasks/_site/index.html"
 test -s knowledge/tasks/_site/index.html
@@ -1668,7 +1668,7 @@ fi
 
 Leave the later artifacts `if [ ! -d` install alone. Do not add a second workflow file.
 
-In `extensions/clis/deploy/README.md`, put the build command in front of the generate command in the "Generate (every deploy)" section:
+In `extensions/cli/deploy/README.md`, put the build command in front of the generate command in the "Generate (every deploy)" section:
 
 ```bash
 pnpm install --frozen-lockfile --filter edges-cli... --filter tasks-review-app...
@@ -1679,7 +1679,7 @@ pnpm --filter edges-cli exec -- tsx scripts/generate-tasks-site.ts \
 
 State that the Vite output is gitignored and must be built on the box. Do not write whether a machine has already been migrated.
 
-In `extensions/clis/README.md`, replace the `project review-page` paragraph with: the command still only renders; it reads groups+items JSON; it inlines the prebuilt shell (`pnpm --filter edges-cli run build:tasks-review-app` or `prepack`) into one HTML file; data is `#edges-review-payload`; items may omit `doc`. Mention `dev:tasks-review-app` for local UI work. Keep the Artifacts sentence: render, then `publish` separately.
+In `extensions/cli/README.md`, replace the `project review-page` paragraph with: the command still only renders; it reads groups+items JSON; it inlines the prebuilt shell (`pnpm --filter edges-cli run build:tasks-review-app` or `prepack`) into one HTML file; data is `#edges-review-payload`; items may omit `doc`. Mention `dev:tasks-review-app` for local UI work. Keep the Artifacts sentence: render, then `publish` separately.
 
 In `extensions/skills/project-tasks-classify/SKILL.md`, set `version: 1.2.0`. Under step 4's `items` bullet, add: `doc` is optional. When present it is `name`, `description`, `metadata`, and `body` (Markdown, `body` may be `""`). Omitting `doc` is valid. The pasted export is still `stem`, `current`, `suggested`, `action`, `note`. Do not require the skill to read Task files into `doc` in this round; the board generator does that for `/tasks/`.
 
@@ -1722,7 +1722,7 @@ Open `dev:tasks-review-app` only if a browser is available. Otherwise the Vitest
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .github/workflows/deploy.yml extensions/clis/deploy/README.md extensions/clis/README.md extensions/skills/project-tasks-classify/SKILL.md extensions/skills/project-tasks-classify/CHANGELOG.md CHANGELOG.md extensions/clis/test/tasks/review-page-classify.test.ts extensions/clis/test/tasks/deploy-review-build.test.ts
+git add .github/workflows/deploy.yml extensions/cli/deploy/README.md extensions/cli/README.md extensions/skills/project-tasks-classify/SKILL.md extensions/skills/project-tasks-classify/CHANGELOG.md CHANGELOG.md extensions/cli/test/tasks/review-page-classify.test.ts extensions/cli/test/tasks/deploy-review-build.test.ts
 git commit -m "$(cat <<'EOF'
 ci: build the review shell before generating /tasks/
 

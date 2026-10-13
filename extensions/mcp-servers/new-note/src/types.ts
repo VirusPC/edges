@@ -8,16 +8,13 @@ export type IngestErrorCode =
 
 export interface IngestRequest {
   title: string;
-  content: string;
-  coAuthor: string;
+  body: string;
 }
 
 export interface IngestSuccess {
   status: "success";
-  filePath: string;
-  branch: string;
-  prUrl?: string;
-  prStatus: "created" | "unavailable" | "direct_commit";
+  path: string;
+  title: string;
   stdoutSummary: string;
 }
 
@@ -32,7 +29,9 @@ export interface IngestFailure {
 export type IngestResult = IngestSuccess | IngestFailure;
 
 export interface RuntimeConfig {
-  repoPath: string;
+  repoPath?: string;
+  cwd?: string;
+  scopeDir?: string;
   baseBranch: string;
   cliEntry: string;
   skillsPath: string;
@@ -42,9 +41,7 @@ export interface RuntimeConfig {
 }
 
 export interface ScriptSuccess {
-  filePath: string;
-  branch: string;
-  prUrl?: string;
-  prStatus: "created" | "unavailable" | "direct_commit";
+  path: string;
+  title: string;
   stdout: string;
 }

@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Delete repo-root `bin/`, move note-ingest git into `extensions/clis` TypeScript with full `bin/new-note` parity, make MCP spawn `edges note`, and add an `edges-note` Skill that only teaches when/how to call the CLI (or MCP when there is no shell).
+**Goal:** Delete repo-root `bin/`, move note-ingest git into `extensions/cli` TypeScript with full `bin/new-note` parity, make MCP spawn `edges note`, and add an `edges-note` Skill that only teaches when/how to call the CLI (or MCP when there is no shell).
 
 **Architecture:** Capability Surface is three entries — CLI, Skill, MCP — as defined in CONTEXT and accepted in ADR-0004. The `edges` CLI owns git via small `execFile('git', …)` wrappers (no `simple-git`, no leftover bash). MCP is a subprocess client of that CLI (`execFile` of the `edges-cli` entry + `note` flags), not an in-process import and not `execFile` of a repo-root script. Skill is a SKILL.md only: invoke recipes, JSON/exit codes, and the no-shell MCP peer. npm `package.json` `"bin": { "edges": … }` stays an install hook, not a glossary layer.
 
@@ -34,29 +34,29 @@
 
 **Create**
 
-- `extensions/clis/src/git/slug.ts` — title → slug (bash `tr` rules)
-- `extensions/clis/src/git/markers.ts` — format/parse `__EDGES_*__` lines
-- `extensions/clis/src/git/exec.ts` — `execFile` wrapper + `commandExists`
-- `extensions/clis/src/git/pr.ts` — remote → repo path, compare URL, gh / token / fallback
-- `extensions/clis/src/git/ingest.ts` — `runNoteIngest` orchestration (write note, git, markers)
-- `extensions/clis/test/git-slug.test.ts`
-- `extensions/clis/test/git-markers.test.ts`
-- `extensions/clis/test/git-pr.test.ts`
-- `extensions/clis/test/git-ingest.test.ts`
+- `extensions/cli/src/git/slug.ts` — title → slug (bash `tr` rules)
+- `extensions/cli/src/git/markers.ts` — format/parse `__EDGES_*__` lines
+- `extensions/cli/src/git/exec.ts` — `execFile` wrapper + `commandExists`
+- `extensions/cli/src/git/pr.ts` — remote → repo path, compare URL, gh / token / fallback
+- `extensions/cli/src/git/ingest.ts` — `runNoteIngest` orchestration (write note, git, markers)
+- `extensions/cli/test/git-slug.test.ts`
+- `extensions/cli/test/git-markers.test.ts`
+- `extensions/cli/test/git-pr.test.ts`
+- `extensions/cli/test/git-ingest.test.ts`
 - `extensions/mcp-servers/new-note/src/cliAdapter.ts` — spawn `edges note`, parse JSON
 - `extensions/skills/edges-note/SKILL.md`
 - `extensions/skills/edges-note/CHANGELOG.md`
 
 **Modify**
 
-- `extensions/clis/src/types.ts` — drop `scriptPath` from `RuntimeConfig`
-- `extensions/clis/src/config.ts` — drop `EDGES_SCRIPT`
-- `extensions/clis/src/service.ts` — default runner = `runNoteIngest`
-- `extensions/clis/src/run.ts` — default ingest = `runNoteIngest`
-- `extensions/clis/src/help.ts` — ENV without `EDGES_SCRIPT`; `GITHUB_TOKEN` goes to TS git
-- `extensions/clis/src/errors.ts` — `ENOENT` on git → `GIT_FAILURE`, not `SCRIPT_NOT_FOUND`
-- `extensions/clis/README.md` — git lives in this package
-- `extensions/clis/test/config.test.ts`, `service.test.ts`, `errors.test.ts`, `ingest.test.ts`, `run.test.ts`
+- `extensions/cli/src/types.ts` — drop `scriptPath` from `RuntimeConfig`
+- `extensions/cli/src/config.ts` — drop `EDGES_SCRIPT`
+- `extensions/cli/src/service.ts` — default runner = `runNoteIngest`
+- `extensions/cli/src/run.ts` — default ingest = `runNoteIngest`
+- `extensions/cli/src/help.ts` — ENV without `EDGES_SCRIPT`; `GITHUB_TOKEN` goes to TS git
+- `extensions/cli/src/errors.ts` — `ENOENT` on git → `GIT_FAILURE`, not `SCRIPT_NOT_FOUND`
+- `extensions/cli/README.md` — git lives in this package
+- `extensions/cli/test/config.test.ts`, `service.test.ts`, `errors.test.ts`, `ingest.test.ts`, `run.test.ts`
 - `extensions/mcp-servers/new-note/src/types.ts` — `scriptPath` → `cliEntry`
 - `extensions/mcp-servers/new-note/src/config.ts` — resolve `edges-cli` entry; honor `EDGES_CLI`
 - `extensions/mcp-servers/new-note/src/service.ts` — default runner = `runEdgesNote`
@@ -68,12 +68,12 @@
 - `scripts/setup` — stop adding a `bin/` PATH; keep `.env` sourcing
 - `scripts/README.md`, root `README.md`, `extensions/README.md`, `extensions/tools/README.md`
 - `CHANGELOG.md` Unreleased — Removed `bin/`; Changed MCP spawn; Added `edges-note` skill
-- Memory via `memory.py remember` (not hand-edited indexes): `project_capability_surface_cli_skill_mcp`, `project_new_note_ingest`, `project_clis_from_mcp`, `reference_bin_cli_skill_classic_projects`. If `project_bin_cli_skill_layering` is still present, delete that file after remember so the two-layer slug leaves the index.
+- Memory via `memory.py remember` (not hand-edited indexes): `project_capability_surface_cli_skill_mcp`, `project_new_note_ingest`, `project_cli_from_mcp`, `reference_bin_cli_skill_classic_projects`. If `project_bin_cli_skill_layering` is still present, delete that file after remember so the two-layer slug leaves the index.
 
 **Delete**
 
 - entire `bin/` (`bin/new-note`, `bin/README.md`)
-- `extensions/clis/src/scriptAdapter.ts`
+- `extensions/cli/src/scriptAdapter.ts`
 - `extensions/mcp-servers/new-note/src/scriptAdapter.ts`
 
 **Do not create/commit**
@@ -136,18 +136,18 @@ Remove from CLI config, help, and tests. Isolation tests use `EDGES_REPO` only; 
 ### Task 1: TypeScript git ingest module (unit-tested, mocked exec)
 
 **Files:**
-- Create: `extensions/clis/src/git/slug.ts`
-- Create: `extensions/clis/src/git/markers.ts`
-- Create: `extensions/clis/src/git/exec.ts`
-- Create: `extensions/clis/src/git/pr.ts`
-- Create: `extensions/clis/src/git/ingest.ts`
-- Test: `extensions/clis/test/git-slug.test.ts`
-- Test: `extensions/clis/test/git-markers.test.ts`
-- Test: `extensions/clis/test/git-pr.test.ts`
-- Test: `extensions/clis/test/git-ingest.test.ts`
+- Create: `extensions/cli/src/git/slug.ts`
+- Create: `extensions/cli/src/git/markers.ts`
+- Create: `extensions/cli/src/git/exec.ts`
+- Create: `extensions/cli/src/git/pr.ts`
+- Create: `extensions/cli/src/git/ingest.ts`
+- Test: `extensions/cli/test/git-slug.test.ts`
+- Test: `extensions/cli/test/git-markers.test.ts`
+- Test: `extensions/cli/test/git-pr.test.ts`
+- Test: `extensions/cli/test/git-ingest.test.ts`
 
 **Interfaces:**
-- Consumes: `IngestRequest` from `extensions/clis/src/types.ts` (`title`, `content`, `coAuthor`)
+- Consumes: `IngestRequest` from `extensions/cli/src/types.ts` (`title`, `content`, `coAuthor`)
 - Produces:
   - `titleToSlug(title: string, now?: Date): string`
   - `localDateYmd(now: Date): string`
@@ -165,7 +165,7 @@ Remove from CLI config, help, and tests. Isolation tests use `EDGES_REPO` only; 
 
 - [ ] **Step 1: Write the failing tests**
 
-Create `extensions/clis/test/git-slug.test.ts`:
+Create `extensions/cli/test/git-slug.test.ts`:
 
 ```ts
 import test from "node:test";
@@ -188,7 +188,7 @@ test("localDateYmd uses local calendar date", () => {
 });
 ```
 
-Create `extensions/clis/test/git-markers.test.ts`:
+Create `extensions/cli/test/git-markers.test.ts`:
 
 ```ts
 import test from "node:test";
@@ -219,7 +219,7 @@ test("parseMarkers reads markers and leaves diagnostics", () => {
 });
 ```
 
-Create `extensions/clis/test/git-pr.test.ts`:
+Create `extensions/cli/test/git-pr.test.ts`:
 
 ```ts
 import test from "node:test";
@@ -292,7 +292,7 @@ test("createPullRequest falls back to token fetch then compare URL", async () =>
 });
 ```
 
-Create `extensions/clis/test/git-ingest.test.ts`:
+Create `extensions/cli/test/git-ingest.test.ts`:
 
 ```ts
 import test from "node:test";
@@ -408,7 +408,7 @@ Expected: FAIL with `ERR_MODULE_NOT_FOUND` for `../src/git/slug.js` (and the oth
 
 - [ ] **Step 3: Write the minimal implementation**
 
-`extensions/clis/src/git/slug.ts`:
+`extensions/cli/src/git/slug.ts`:
 
 ```ts
 export function localDateYmd(now: Date): string {
@@ -427,7 +427,7 @@ export function titleToSlug(title: string, now: Date = new Date()): string {
 }
 ```
 
-`extensions/clis/src/git/markers.ts`:
+`extensions/cli/src/git/markers.ts`:
 
 ```ts
 export type PrStatus = "created" | "unavailable" | "direct_commit";
@@ -490,7 +490,7 @@ export function parseMarkers(stdout: string): {
 }
 ```
 
-`extensions/clis/src/git/exec.ts`:
+`extensions/cli/src/git/exec.ts`:
 
 ```ts
 import { execFile } from "node:child_process";
@@ -518,7 +518,7 @@ export function createExecFile(): ExecFn {
 }
 ```
 
-`extensions/clis/src/git/pr.ts`:
+`extensions/cli/src/git/pr.ts`:
 
 ```ts
 import type { ExecFn } from "./exec.js";
@@ -619,7 +619,7 @@ export async function createPullRequest(input: CreatePrInput): Promise<{
 }
 ```
 
-`extensions/clis/src/git/ingest.ts`:
+`extensions/cli/src/git/ingest.ts`:
 
 ```ts
 import path from "node:path";
@@ -781,7 +781,7 @@ Expected: PASS (4 files, all tests).
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/git extensions/clis/test/git-slug.test.ts extensions/clis/test/git-markers.test.ts extensions/clis/test/git-pr.test.ts extensions/clis/test/git-ingest.test.ts
+git add extensions/cli/src/git extensions/cli/test/git-slug.test.ts extensions/cli/test/git-markers.test.ts extensions/cli/test/git-pr.test.ts extensions/cli/test/git-ingest.test.ts
 git commit -m "feat(cli): port new-note git ingest to TypeScript
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -792,18 +792,18 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 2: Wire CLI service/run; drop scriptAdapter and EDGES_SCRIPT
 
 **Files:**
-- Modify: `extensions/clis/src/types.ts`
-- Modify: `extensions/clis/src/config.ts`
-- Modify: `extensions/clis/src/service.ts`
-- Modify: `extensions/clis/src/run.ts`
-- Modify: `extensions/clis/src/help.ts`
-- Modify: `extensions/clis/src/errors.ts`
-- Modify: `extensions/clis/README.md`
-- Modify: `extensions/clis/test/config.test.ts`
-- Modify: `extensions/clis/test/service.test.ts`
-- Modify: `extensions/clis/test/errors.test.ts`
-- Modify: `extensions/clis/test/ingest.test.ts`
-- Delete: `extensions/clis/src/scriptAdapter.ts`
+- Modify: `extensions/cli/src/types.ts`
+- Modify: `extensions/cli/src/config.ts`
+- Modify: `extensions/cli/src/service.ts`
+- Modify: `extensions/cli/src/run.ts`
+- Modify: `extensions/cli/src/help.ts`
+- Modify: `extensions/cli/src/errors.ts`
+- Modify: `extensions/cli/README.md`
+- Modify: `extensions/cli/test/config.test.ts`
+- Modify: `extensions/cli/test/service.test.ts`
+- Modify: `extensions/cli/test/errors.test.ts`
+- Modify: `extensions/cli/test/ingest.test.ts`
+- Delete: `extensions/cli/src/scriptAdapter.ts`
 
 **Interfaces:**
 - Consumes: `runNoteIngest(input, config, env, deps?)` from Task 1. `IngestGitConfig` fields are the git subset of `RuntimeConfig`.
@@ -811,7 +811,7 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 
 - [ ] **Step 1: Write the failing tests (update existing files first)**
 
-Replace `extensions/clis/test/config.test.ts` entirely:
+Replace `extensions/cli/test/config.test.ts` entirely:
 
 ```ts
 import test from "node:test";
@@ -834,7 +834,7 @@ test("loadConfig defaults repo, branch, mode, dryRun and has no scriptPath", () 
 });
 ```
 
-In `extensions/clis/test/service.test.ts` remove `scriptPath` from the fixture:
+In `extensions/cli/test/service.test.ts` remove `scriptPath` from the fixture:
 
 ```ts
 const config: RuntimeConfig = {
@@ -845,7 +845,7 @@ const config: RuntimeConfig = {
 };
 ```
 
-Replace the ENOENT test in `extensions/clis/test/errors.test.ts`:
+Replace the ENOENT test in `extensions/cli/test/errors.test.ts`:
 
 ```ts
 test("classifyError maps git ENOENT to GIT_FAILURE", () => {
@@ -854,7 +854,7 @@ test("classifyError maps git ENOENT to GIT_FAILURE", () => {
 });
 ```
 
-Replace `extensions/clis/test/ingest.test.ts` so it no longer sets `EDGES_SCRIPT` and no longer points at `bin/new-note`. Keep a real isolated git repo (this is the CLI-level dry-run integration):
+Replace `extensions/cli/test/ingest.test.ts` so it no longer sets `EDGES_SCRIPT` and no longer points at `bin/new-note`. Keep a real isolated git repo (this is the CLI-level dry-run integration):
 
 ```ts
 import test from "node:test";
@@ -915,7 +915,7 @@ test("dry-run ingest against an isolated repo returns parseable success", async 
 });
 ```
 
-Add to `extensions/clis/test/run.test.ts` (keep existing injected-runner tests):
+Add to `extensions/cli/test/run.test.ts` (keep existing injected-runner tests):
 
 ```ts
 test("note --help no longer documents EDGES_SCRIPT", async () => {
@@ -934,7 +934,7 @@ Expected: FAIL — `config.scriptPath` still exists; `classifyError` still retur
 
 - [ ] **Step 3: Wire the CLI**
 
-`extensions/clis/src/types.ts` — change `RuntimeConfig` to:
+`extensions/cli/src/types.ts` — change `RuntimeConfig` to:
 
 ```ts
 export interface RuntimeConfig {
@@ -946,7 +946,7 @@ export interface RuntimeConfig {
 }
 ```
 
-`extensions/clis/src/config.ts` — replace `loadConfig` return (keep `resolveEdgesRoot`):
+`extensions/cli/src/config.ts` — replace `loadConfig` return (keep `resolveEdgesRoot`):
 
 ```ts
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig {
@@ -966,7 +966,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): RuntimeConfig 
 }
 ```
 
-`extensions/clis/src/service.ts` — replace the whole file:
+`extensions/cli/src/service.ts` — replace the whole file:
 
 ```ts
 import type { IngestRequest, IngestResult, RuntimeConfig, ScriptSuccess } from "./types.js";
@@ -1017,7 +1017,7 @@ export async function runIngest(
 }
 ```
 
-`extensions/clis/src/run.ts` — drop `runIngestScript`. Change the two lines:
+`extensions/cli/src/run.ts` — drop `runIngestScript`. Change the two lines:
 
 ```ts
 import { runNoteIngest } from "./git/ingest.js";
@@ -1030,7 +1030,7 @@ and later:
   const result = await runIngest(request, config, runner, env);
 ```
 
-`extensions/clis/src/help.ts` — ENV section becomes:
+`extensions/cli/src/help.ts` — ENV section becomes:
 
 ```
 ENV
@@ -1044,7 +1044,7 @@ ENV
 
 Remove `EDGES_SCRIPT` and every `bin/new-note` mention from `NOTE_AFTER_HELP`.
 
-`extensions/clis/src/errors.ts` — replace the ENOENT / `new-note` branches:
+`extensions/cli/src/errors.ts` — replace the ENOENT / `new-note` branches:
 
 ```ts
   if (output.code === "ENOENT") {
@@ -1066,13 +1066,13 @@ Remove `EDGES_SCRIPT` and every `bin/new-note` mention from `NOTE_AFTER_HELP`.
 
 Leave `SCRIPT_NOT_FOUND` in the `IngestErrorCode` union (MCP still uses it). Remove it from the CLI help failure-code list.
 
-`extensions/clis/README.md` first paragraph:
+`extensions/cli/README.md` first paragraph:
 
 ```
 Multi-command Edges CLI. Humans and local agents share `edges`. Note ingest git lives in this package (`src/git`). npm `package.json` `"bin"` is the install hook for the `edges` binary, not a separate layer.
 ```
 
-Delete `extensions/clis/src/scriptAdapter.ts`. Grep the package for `scriptAdapter` / `EDGES_SCRIPT` / `scriptPath` and fix leftovers.
+Delete `extensions/cli/src/scriptAdapter.ts`. Grep the package for `scriptAdapter` / `EDGES_SCRIPT` / `scriptPath` and fix leftovers.
 
 - [ ] **Step 4: Run CLI tests**
 
@@ -1083,7 +1083,7 @@ Expected: PASS, including isolated-repo dry-run ingest.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis
+git add extensions/cli
 git commit -m "feat(cli): run note ingest in-process and drop EDGES_SCRIPT
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1116,7 +1116,7 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
   - `runEdgesNote(input: IngestRequest, config: RuntimeConfig, env?: NodeJS.ProcessEnv): Promise<ScriptSuccess>`
   - Child argv: `note --title <t> --content <c> --co-author <a> --json` plus `--dry-run` when `config.dryRun` or `env.EDGES_DRY_RUN === "true"`, plus `--mode <config.mode>` when set
   - Child env copies parent but **deletes `EDGES_AUTH_TOKEN`**. Sets `EDGES_REPO`, `EDGES_BASE_BRANCH`, `EDGES_MODE`, `EDGES_DRY_RUN` from config. Keeps `GITHUB_TOKEN`.
-  - Spawn: if `cliEntry` ends with `.ts`, `execFile(process.execPath, ["--import", "tsx", cliEntry, ...noteArgs])`; else `execFile(process.execPath, [cliEntry, ...noteArgs])`. Never `execFile("edges")` via PATH. Never `import` from `extensions/clis/src`.
+  - Spawn: if `cliEntry` ends with `.ts`, `execFile(process.execPath, ["--import", "tsx", cliEntry, ...noteArgs])`; else `execFile(process.execPath, [cliEntry, ...noteArgs])`. Never `execFile("edges")` via PATH. Never `import` from `extensions/cli/src`.
 
 - [ ] **Step 1: Write the failing MCP adapter test**
 
@@ -1206,7 +1206,7 @@ test("runEdgesNote maps CLI failure JSON to a thrown error with errorCode", asyn
 });
 ```
 
-In `extensions/mcp-servers/new-note/test/service.test.ts` and `authMiddleware.test.ts`, change fixtures from `scriptPath: "/repo/bin/new-note"` to `cliEntry: "/repo/extensions/clis/dist/index.js"` and add `dryRun: false` if the type requires it.
+In `extensions/mcp-servers/new-note/test/service.test.ts` and `authMiddleware.test.ts`, change fixtures from `scriptPath: "/repo/bin/new-note"` to `cliEntry: "/repo/extensions/cli/dist/index.js"` and add `dryRun: false` if the type requires it.
 
 Replace `extensions/mcp-servers/new-note/test/integration.sh` so it calls the CLI, not `bin/new-note`:
 
@@ -1216,7 +1216,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$(dirname "$(dirname "$(dirname "$SCRIPT_DIR")")")")"
-CLI=(node --import tsx "$REPO_ROOT/extensions/clis/src/index.ts")
+CLI=(node --import tsx "$REPO_ROOT/extensions/cli/src/index.ts")
 
 echo "Starting integration tests via edges note"
 
@@ -1283,8 +1283,8 @@ function resolveDefaultRepoPath(): string {
 
 function resolveCliEntry(env: NodeJS.ProcessEnv): string {
   if (env.EDGES_CLI) return env.EDGES_CLI;
-  const dist = path.resolve(__dirname, "../../../clis/dist/index.js");
-  const src = path.resolve(__dirname, "../../../clis/src/index.ts");
+  const dist = path.resolve(__dirname, "../../../cli/dist/index.js");
+  const src = path.resolve(__dirname, "../../../cli/src/index.ts");
   return fs.existsSync(dist) ? dist : src;
 }
 
@@ -1454,7 +1454,7 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 There is no existing docs test file. Add `scripts/test/no-bin-entry.test.sh` only if you want a machine check; otherwise the failing step is the explicit grep (run it, expect hits, then fix):
 
 ```bash
-rg -n 'bin/new-note|\[`bin/`\]|加入 `\$PATH`|把 `bin/` 加入' README.md scripts/README.md scripts/setup extensions/README.md extensions/clis/README.md extensions/mcp-servers/README.md extensions/mcp-servers/new-note/README.md extensions/tools/README.md CHANGELOG.md
+rg -n 'bin/new-note|\[`bin/`\]|加入 `\$PATH`|把 `bin/` 加入' README.md scripts/README.md scripts/setup extensions/README.md extensions/cli/README.md extensions/mcp-servers/README.md extensions/mcp-servers/new-note/README.md extensions/tools/README.md CHANGELOG.md
 test -d bin && echo 'bin/ still exists'
 ```
 
@@ -1515,7 +1515,7 @@ On Linux this environment `sed -i.bak` is the portable form (the current `sed -i
 Root `README.md` system table: **delete the `bin/` row**. Capture paragraph becomes:
 
 ```
-捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](extensions/clis/README.md) 的 `edges note …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](extensions/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
+捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](extensions/cli/README.md) 的 `edges note …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](extensions/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
 ```
 
 `pnpm setup` bullet: `初始化本地环境（加载 .env；不再把仓根 bin/ 写入 PATH）。`
@@ -1525,10 +1525,10 @@ Footer links: drop `[用户命令](bin/README.md)`.
 `scripts/README.md`:
 
 ```
-项目自身的维护脚本目录。人和 Agent 天天用的入库命令是 `extensions/clis` 的 `edges`，不是仓根脚本。
+项目自身的维护脚本目录。人和 Agent 天天用的入库命令是 `extensions/cli` 的 `edges`，不是仓根脚本。
 ```
 
-Replace 「→ `bin/`」 with 「→ `extensions/clis` 的 `edges`（`package.json` `"bin"` 安装挂钩）」。
+Replace 「→ `bin/`」 with 「→ `extensions/cli` 的 `edges`（`package.json` `"bin"` 安装挂钩）」。
 
 Naming bullet: drop 「与 `bin/new-note` 保持风格一致」.
 
@@ -1543,7 +1543,7 @@ Setup row: `首次接入初始化：加载 .env；清掉旧的仓根 bin PATH`.
 `extensions/tools/README.md`:
 
 ```
-与 `extensions/clis` 的 `edges` CLI 不同，这里的工具通常包含适配器代码，用于对接外部 API 或特定平台的调用协议。
+与 `extensions/cli` 的 `edges` CLI 不同，这里的工具通常包含适配器代码，用于对接外部 API 或特定平台的调用协议。
 ```
 
 `CHANGELOG.md` `[Unreleased]`:
@@ -1558,7 +1558,7 @@ Setup row: `首次接入初始化：加载 .env；清掉旧的仓根 bin PATH`.
 - 根 README 捕获入口改为 CLI + Skill + MCP（ADR-0004）。
 
 ### Removed
-- 仓根 `bin/`（含 `new-note`）。Note 入库 git 在 `extensions/clis` TypeScript。
+- 仓根 `bin/`（含 `new-note`）。Note 入库 git 在 `extensions/cli` TypeScript。
 ```
 
 Also edit the existing Unreleased ADR line from 「实现另 PR」 to 「实现见本 Unreleased 的 Removed/Changed」 once Tasks 1–5 are on the branch.
@@ -1566,7 +1566,7 @@ Also edit the existing Unreleased ADR line from 「实现另 PR」 to 「实现�
 - [ ] **Step 4: Re-run the living-doc grep**
 
 ```bash
-rg -n 'bin/new-note' README.md scripts/README.md scripts/setup extensions/README.md extensions/clis/README.md extensions/mcp-servers/README.md extensions/mcp-servers/new-note/README.md extensions/tools/README.md extensions/clis/src extensions/mcp-servers/new-note/src
+rg -n 'bin/new-note' README.md scripts/README.md scripts/setup extensions/README.md extensions/cli/README.md extensions/mcp-servers/README.md extensions/mcp-servers/new-note/README.md extensions/tools/README.md extensions/cli/src extensions/mcp-servers/new-note/src
 test ! -e bin
 pnpm --filter edges-cli test
 pnpm --filter new-note test
@@ -1620,7 +1620,7 @@ version: 1.0.0
 
 # edges note
 
-人和有 shell 的 Agent 共用 [`extensions/clis`](../../clis/README.md) 的 `edges note`。本 skill 只说明何时调用、怎么写对命令。Git / 落盘 / PR 在 CLI 里，不在本目录。
+人和有 shell 的 Agent 共用 [`extensions/cli`](../../cli/README.md) 的 `edges note`。本 skill 只说明何时调用、怎么写对命令。Git / 落盘 / PR 在 CLI 里，不在本目录。
 
 ## 什么时候用
 
@@ -1747,7 +1747,7 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
   - `.memory/projects/project_capability_surface_cli_skill_mcp.md`
   - `.memory/projects/project_new_note_ingest.md`
   - `.memory/references/reference_bin_cli_skill_classic_projects.md`
-  - `extensions/.memory/projects/project_clis_from_mcp.md`
+  - `extensions/.memory/projects/project_cli_from_mcp.md`
 - Verify: `docs/adr/0004-capability-surface-cli-skill-mcp.md`, `CONTEXT.md` terms
 - Modify: `CHANGELOG.md` only if Task 4 left the ADR Unreleased line saying 「实现另 PR」
 
@@ -1762,7 +1762,7 @@ rg -n 'bin/new-note 可继续|git 仍只在 `bin/new-note`|两边都 `execFile` 
   .memory/projects/project_capability_surface_cli_skill_mcp.md \
   .memory/projects/project_new_note_ingest.md \
   .memory/references/reference_bin_cli_skill_classic_projects.md \
-  extensions/.memory/projects/project_clis_from_mcp.md
+  extensions/.memory/projects/project_cli_from_mcp.md
 test -f docs/adr/0004-capability-surface-cli-skill-mcp.md
 test ! -f .memory/projects/project_bin_cli_skill_layering.md
 ```
@@ -1785,8 +1785,8 @@ python3 "$INIT" remember \
   --type project \
   --slug capability_surface_cli_skill_mcp \
   --title "能力面：CLI / Skill / MCP" \
-  --description "能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 extensions/clis 的 TS；MCP 子进程调 edges note。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。" \
-  --content "能力面定为 CLI、Skill 与 MCP 三者并列。仓根 \`bin/\`（含 \`new-note\`）已删除；Note 入库的 git 在 \`extensions/clis\` 的 TypeScript，与旧脚本全量对等。MCP 用子进程调用 \`edges note\`，不直连仓根脚本、也不 in-process import。Skill 在 \`extensions/skills/edges-note/\`，说明何时如何调 CLI 或 MCP。npm \`package.json\` 的 \`bin\` 只是安装挂钩，不是一层。
+  --description "能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 extensions/cli 的 TS；MCP 子进程调 edges note。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。" \
+  --content "能力面定为 CLI、Skill 与 MCP 三者并列。仓根 \`bin/\`（含 \`new-note\`）已删除；Note 入库的 git 在 \`extensions/cli\` 的 TypeScript，与旧脚本全量对等。MCP 用子进程调用 \`edges note\`，不直连仓根脚本、也不 in-process import。Skill 在 \`extensions/skills/edges-note/\`，说明何时如何调 CLI 或 MCP。npm \`package.json\` 的 \`bin\` 只是安装挂钩，不是一层。
 
 **Why:**
 能力面始终是三条对等入口：CLI、Skill、MCP。经典项目（gh / AXI / Agent Skills）只示范 CLI 与 Skill 的形状，用来去掉「给人的 PATH 脚本」这层假分层；Edges 另外把 MCP 作为无 shell 宿主的一等入口，不是事后加装。删除仓根 \`bin/\` 后，MCP 仍通过子进程调用 CLI。2026-09-11 grill 确认（ADR 0004）。实现已按 \`docs/superpowers/plans/2026-09-11-capability-surface-bin-cli-skill-mcp.md\` 落地。
@@ -1805,7 +1805,7 @@ python3 "$INIT" remember \
   --slug new_note_ingest \
   --title "new-note MCP 的 ingest 约束" \
   --description "改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges note，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。" \
-  --content "\`new-note\` MCP 的约束是：TypeScript + Node.js 编排，git 由 \`edges note\` 在 CLI 进程里跑，MCP 只 \`execFile\` 该 CLI。失败即停，返回机器可解析结果。不要改成 Python server，不要 in-process import \`extensions/clis\`，不要再 \`execFile\` 仓根脚本。
+  --content "\`new-note\` MCP 的约束是：TypeScript + Node.js 编排，git 由 \`edges note\` 在 CLI 进程里跑，MCP 只 \`execFile\` 该 CLI。失败即停，返回机器可解析结果。不要改成 Python server，不要 in-process import \`extensions/cli\`，不要再 \`execFile\` 仓根脚本。
 
 **Why:** 2026-02-19 的 ingest 把外部写入做成 MCP 工具 \`new_note\`。ADR-0004 把 git 收进 CLI，并规定 MCP 子进程调 CLI。参数数组调用避免注入。
 
@@ -1833,15 +1833,15 @@ python3 "$INIT" remember \
 - AXI / \`gh-axi\`：CLI 是主界面；Skill 例子写成 \`npx -y gh-axi …\`。他们的 \`bin/*.ts\` 是 npm 入口，不是第三层。
 - Agent Skills 规范：已有包就 \`npx\`/\`uvx\`；命令难一次写对才把脚本放进 **skill 自己的 \`scripts/\`**，不是仓根 \`bin/\`。https://agentskills.io/skill-creation/using-scripts
 - obra/superpowers：Skill 是流程，落地调已有命令。
-- 本仓现状：\`extensions/clis\` 的 \`edges note\` 在进程内跑 git（\`src/git\`，\`execFile('git', …)\`）；MCP \`new-note\` 子进程调用该 CLI；\`extensions/skills/edges-note\` 只教何时如何调用。仓根 \`bin/\` 已删除。"
+- 本仓现状：\`extensions/cli\` 的 \`edges note\` 在进程内跑 git（\`src/git\`，\`execFile('git', …)\`）；MCP \`new-note\` 子进程调用该 CLI；\`extensions/skills/edges-note\` 只教何时如何调用。仓根 \`bin/\` 已删除。"
 
 python3 "$INIT" remember \
   --target-dir extensions \
   --type project \
-  --slug clis_from_mcp \
-  --title "new_note 收成 extensions/clis/edges，MCP 保留" \
-  --description "改 note ingest、new-note MCP 或 clis 时：本地 agent 走 extensions/clis 的 edges note；git 在 CLI 的 TS 模块；MCP 子进程调 edges note；鉴权 flag 留在 note 上；JSON stdout。不要把 CLI 放仓库根。" \
-  --content "本地、有 shell 的 agent 用 \`extensions/clis/\` 的 \`edges\` CLI；入库子命令是 \`edges note …\`。鉴权 flag（\`--token-file\` / \`--token-stdin\`）挂在 \`note\` 上，和 new-note MCP HTTP 同一道可选门闩。\`edges tasks\` 仍是占位。二进制只有 \`edges\`。git 在 \`extensions/clis/src/git\`；\`extensions/mcp-servers/new-note\` 留给没有 shell 的宿主，子进程调用 \`edges note\`。不要把 CLI 项目放在仓库根 \`clis/\`。
+  --slug cli_from_mcp \
+  --title "new_note 收成 extensions/cli/edges，MCP 保留" \
+  --description "改 note ingest、new-note MCP 或 cli 时：本地 agent 走 extensions/cli 的 edges note；git 在 CLI 的 TS 模块；MCP 子进程调 edges note；鉴权 flag 留在 note 上；JSON stdout。不要把 CLI 放仓库根。" \
+  --content "本地、有 shell 的 agent 用 \`extensions/cli/\` 的 \`edges\` CLI；入库子命令是 \`edges note …\`。鉴权 flag（\`--token-file\` / \`--token-stdin\`）挂在 \`note\` 上，和 new-note MCP HTTP 同一道可选门闩。\`edges tasks\` 仍是占位。二进制只有 \`edges\`。git 在 \`extensions/cli/src/git\`；\`extensions/mcp-servers/new-note\` 留给没有 shell 的宿主，子进程调用 \`edges note\`。不要把 CLI 项目放在仓库根 \`clis/\`。
 
 **Why:** ADR-0004 把能力面定为 CLI + Skill + MCP，并删除仓根 \`bin/\`。先前「两边都 execFile bin/new-note、MCP 不套 CLI」已被取代。
 
@@ -1855,7 +1855,7 @@ python3 "$INIT" remember \
 
 \`\`\`
 agent / human
- ├─ extensions/clis  edges            多命令 CLI（note / tasks / …；Commander + JSON；git 在 src/git）
+ ├─ extensions/cli  edges            多命令 CLI（note / tasks / …；Commander + JSON；git 在 src/git）
  ├─ extensions/skills/edges-note      何时如何调 CLI 或 MCP（对等能力面入口）
  └─ extensions/mcp-servers/new-note   无 shell 的 MCP 宿主（spawn edges note）
 \`\`\`
@@ -1864,7 +1864,7 @@ agent / human
 
 ### CLI 契约
 
-包 \`edges-cli\`，目录 \`extensions/clis/\`，二进制只有 \`edges\`。
+包 \`edges-cli\`，目录 \`extensions/cli/\`，二进制只有 \`edges\`。
 
 \`\`\`
 edges note --title T --content C --co-author \"Name <email>\" [--json] [--dry-run] [--mode direct|pr] [--token-file PATH]
@@ -1893,14 +1893,14 @@ python3 extensions/skills/project-memory-init/scripts/memory.py doctor --target-
 
 rg -n 'bin/new-note|仓根 `bin/`' \
   README.md scripts/README.md scripts/setup \
-  extensions/README.md extensions/clis/README.md extensions/clis/src \
+  extensions/README.md extensions/cli/README.md extensions/cli/src \
   extensions/mcp-servers/README.md extensions/mcp-servers/new-note/src \
   extensions/mcp-servers/new-note/README.md \
   extensions/skills/edges-note \
   .memory/projects/project_capability_surface_cli_skill_mcp.md \
   .memory/projects/project_new_note_ingest.md \
   .memory/references/reference_bin_cli_skill_classic_projects.md \
-  extensions/.memory/projects/project_clis_from_mcp.md \
+  extensions/.memory/projects/project_cli_from_mcp.md \
   CONTEXT.md docs/adr/0004-capability-surface-cli-skill-mcp.md
 
 test -f docs/adr/0004-capability-surface-cli-skill-mcp.md
@@ -1921,7 +1921,7 @@ git add .memory/projects/project_capability_surface_cli_skill_mcp.md \
   .memory/projects/project_new_note_ingest.md \
   .memory/references/reference_bin_cli_skill_classic_projects.md \
   .memory/PROJECT.md .memory/REFERENCE.md \
-  extensions/.memory/projects/project_clis_from_mcp.md \
+  extensions/.memory/projects/project_cli_from_mcp.md \
   extensions/.memory/PROJECT.md \
   CHANGELOG.md
 git add -u .memory/projects/project_bin_cli_skill_layering.md
@@ -1938,7 +1938,7 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 | --- | --- |
 | Capability Surface = CLI + Skill + MCP (CONTEXT / ADR-0004) | header, 4–6 |
 | Delete entire repo-root `bin/` | 4 |
-| Rewrite `bin/new-note` git in `extensions/clis` TS with full parity | 1–2 |
+| Rewrite `bin/new-note` git in `extensions/cli` TS with full parity | 1–2 |
 | Args title/content/coAuthor | 1 (`runNoteIngest` input), 2 (existing CLI flags) |
 | Env EDGES_REPO / BASE_BRANCH / MODE / DRY_RUN / GITHUB_TOKEN | 1–2 |
 | Slug, `knowledge/notes/YYYY-MM-DD--slug.md`, branch names | 1 |

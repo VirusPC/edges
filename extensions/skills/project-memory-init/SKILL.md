@@ -1,56 +1,45 @@
 ---
 name: project-memory-init
-description: 在指定目录创建或修复项目记忆（AGENTS.md + .memory）。仅当用户明确要求初始化时使用，禁止自动调用；不覆盖已有正文。
-version: 1.7.0
+description: 对用户选定的任意目录初始化或刷新系统入口 AGENTS.md（硬约束 + 组成登记），并按选择采用 Project Memory / Skills 类型。仅当用户明确要求 init 时使用。标准命令是 edges init；各域 init 只初始化本模块。
+version: 3.6.0
 ---
 
-# Project Memory Init
+# Project harness init（`$project-memory-init`）
 
-在一个已存在的目录里建好 `.memory/` 里模板声明的各类型入口及内容目录，并维护该目录的 `AGENTS.md` 索引。类型入口是 `.memory/<plural>/AGENTS.md`（与条目同处），不用层入口那份 `AGENTS.tmpl.md`。`user` 的入口 `users/AGENTS.md` 与目录 `users/` 会被 gitignore，只留在本机。Init **只建官方六类种子**；用户后加的 Memory Type 不要写进模板，走 `$project-memory-add-type`。
+面向用户的名称是 **project harness init**；Skill 名仍为 `$project-memory-init`。标准命令是 `edges init`：它只做公共的系统入口步骤，再依次调用各模块自己的 init。`edges memory init`、`edges skills init`、`edges tasks init`、`edges notes init`、`edges projects init` 各自只初始化本模块。只在用户明确要求 Init 时运行；Ask、Remember、Doctor 不得代为 Init。用户明确要求 reshape 已有入口时可按该流程初始化。先读 [PROTOCOL](references/PROTOCOL.md) 与 [LAYOUT](references/LAYOUT.md)：前者规定发现形状，后者规定当前路径、类型与写入边界。
 
-只在用户明确要求 Init 时运行。Remember、Ask、Doctor 都不得代为调用。用户要求 `$project-memory-reshape` 某一份已有 `AGENTS.md` 时，视为同时同意对该目录 Init。
+**谁该 init：** 用户认定需要重点维护、要挂 Memory / Skills 模块或登记下层系统入口的目录——空目录或已有内容目录均可。Init 写出合法**系统入口** `AGENTS.md`（`project-harness-*` 区块，标题「本层硬约束 / 本层系统维护信息 / 下层系统维护信息」），并按选择创建 `.harness` 下类型入口 `README.md`（`project-entries-*`，标题「本层内容 / 下层内容」）。层入口的本层系统维护信息链到这些 README。
 
-要把已有 `AGENTS.md` 的区块外正文拆成常驻指令和记忆条目，用 `$project-memory-reshape`。本 skill 不覆盖已有正文。
+**谁不该 init：** 仅为列系统一孩子、尚未需要系统二材料的目录（用同目录 `README.md` + `project-entries-*`，或迁移脚本另建）；未经用户要求不要给全仓或批量目录铺 `AGENTS.md`。看板和类型目录上的 README 是组织清单，不是系统入口。不要在类型目录上 init `AGENTS.md` 来装组织清单，空的同目录桩删掉。不要让 list 另开一套 README 遍历。层系统入口仍是 `AGENTS.md`。Init **不会**在作用域根自动创建组织清单 `README.md`——那是系统一入口，由用户或迁移单独建立。
 
-维护相关的文档，别混：
+无参 `edges init` 写出 `AGENTS.md`、memory 的 feedback / project / reference，以及 `.harness/notes/README.md` 与 `.harness/projects/README.md`。不建 user、skills、tasks。`edges init` 不读 `--super`，材料落在 `<scope>/.harness`。`edges init <module>` 与 `edges <module> init` 写同一批文件，而且只写该模块。模块之间不创建对方的材料。
 
-- [`references/PROTOCOL.md`](references/PROTOCOL.md) 是**协议**，冻结的。本系列 skill 共同遵守，两个消费方（`project-memory-ask` 检索、`project-memory-remember` 沉淀）只以它为准。
-- [`references/LAYOUT.md`](references/LAYOUT.md) 是协议的**实现**，按协议三层描述具体产物。本 skill 和 `project-memory-doctor` 共同拥有它，可以自由升级，只要不破协议。改了 `scripts/lib/blocks.py` 的标记常量就同步改那份文档，体检拿它当目标态，漂移了就没有判据。
-- 开发流程、设计决策与调研史料在本层项目记忆里，从 [`AGENTS.md`](AGENTS.md) 进入。
+类型选择按模块拆开。memory 类型走 `edges memory init`；skill 类型走 `edges skills init`。推荐模块仍含 memory、skills、tasks、projects、notes，推荐不代表无参命令会全建。新层先展示 memory 的 project / feedback / reference / user 与 skills 的 managed / referenced 用途，让用户选择，不预建全部。未选择时 `edges memory init` 返回 `selectionRequired` 和推荐清单且不改文件。已有 memory 层不传选择只刷新已采用的 memory 类型。`edges memory init` 不创建 notes、projects、tasks、skills 的文件。`edges skills init` 在未选择且尚未采用 skill 类型时采用 managed 与 referenced；已经采用时只刷新那些 skill 类型。`edges tasks init` 只建任务看板；首次 tasks 写入仍会在看板缺失时补上同一份文件。
 
-所以升级实现时守住协议；单纯修改名字或路径通常不用改两个消费方，因为**它们各有一个自描述的东西可依赖**：`remember` 经 `scripts/memory.py` 落盘，`--help` 就是它看到的全部接口；`ask` 只认产物本身——每个链接后面那句说明就是挑选判据，而那些说明由脚本全量重算，永远和磁盘一致。只有消费方自己的交互边界变化时才同步修改，不要让它们知道区块标记名、索引文件名或记忆目录名。
+```bash
+edges --scope <目录> init
+edges --scope <目录> init notes
+edges --scope <目录> notes init
+edges --scope <目录> memory init \
+  [--target-dir <scope>] [--root-dir <root>] \
+  [--memory-types project feedback reference user] \
+  [--index-group local|descendant] \
+  [--description <本层职责>]
+edges --scope <目录> skills init \
+  [--skill-types managed referenced]
+edges --scope <目录> tasks init
+```
 
-## init 与体检的分界
+memory 与 skill 的选择分别执行。显式选择追加采用，不删除既有或自定义类型。自定义类型使用 `$project-memory-add-type`，不要改官方推荐模板。`--memory-types` 需要 memory 模块，`--skill-types` 需要 skills 模块。
 
-**init 是单目标、只往前写的**：它只管一个目录，假设仓库是干净的，所以能整份渲染理想态；它也只处理自己这次动作引起的层级漂移。
+层入口直接链到 `.harness/memory/<plural>/README.md` 与 `.harness/skills/<type>/README.md`，固定两跳到正文，无容器总入口。新索引只写 README。尚未迁走、仍带条目列表的旧 `AGENTS.md` 类型入口只读兼容；空桩不是索引。可读 AGENTS 都是节点；本层和下层按显式登记区分，容器可跨层直达。已有登记不因中间目录新增入口而重归属，节点身份不自动采用 Memory。`--root-dir` 是边界；默认先取 Git 根，否则最近受管层入口，否则目标自身，不能从工具安装目录推断目标。
 
-需要**扫全树才能发现**的问题不属于 init——死条目、没被登记的记忆目录、重复条目、别人的 `AGENTS.md`。这些交给 `$project-memory-doctor`。
+`managed` 可写本地 Skill；`referenced` 仅索引当前层 `.agents/skills`，不创建来源目录、不动原位正文或安装链接。同源别名在类型内去重，不同真源同名保留。私有类型先补 ignore 再创建索引。
 
-所以 init 遇到已有 `AGENTS.md` 时分两种情况：里面已有本套受管标记就做区块级刷新；只有别人的内容（手写正文、别的工具的受管块）就返回 `needs-doctor` 并且不动文件。碰到 `needs-doctor` 不要自己动手改，告诉用户跑 `$project-memory-doctor`。
+按 JSON 汇报 created / preserved、agentsAction / indexAction 和下层条目移动。`needs-doctor` 表示只有人工 AGENTS，文件未被覆盖；交给 doctor 追加区块。`complete: false` 的 diagnostics 必须说明，尤其来源缺失或不可读时保留原索引，不能称为空来源刷新成功。旧层返回 `migration-required`，转 `$project-memory-migrate`，不让 doctor 迁移。
 
-## 步骤
+工具只维护自己的区块，现有硬约束与手写正文不覆盖。需先安装提供 `edges memory` 的 Edges CLI；运行 `edges memory init --help` 检查命令可用性。模板随 CLI 构建分发，类型和字段结构见 references/templates。实现分层见 [运行时说明](references/runtime.md)。
 
-1. 确认目标目录已经存在。`--root-dir` 可以省略，省略时按「Git 根目录 → 最近的祖先 `AGENTS.md` → 目标目录自身」的顺序推断。
-2. 如果目标不是记忆根，补一句它的职责说明。说不清楚就写「`<目录名>` 目录的项目记忆与规范入口」，不要凭空猜业务。
-3. 执行下面的命令，其中 `<skill-dir>` 是本 SKILL.md 所在的目录：
+普通记忆正文统一为 `<type>_<slug>/INDEX.md`；Skill 保持 `<name>/SKILL.md`。Init 不转换旧单文件；公开 tracked 内容转换使用 `$migrate-directory-nodes`。
 
-   ```bash
-   python3 <skill-dir>/scripts/memory.py init \
-     --target-dir <目录> \
-     [--root-dir <工作区根>] \
-     [--description <目录职责说明>]
-   ```
-
-4. 按脚本返回的 JSON 汇报结果。`agentsAction` / `indexAction` 里出现 `needs-doctor` 要单独点出来；`inheritedEntries` 或 `detachedEntries` 非空说明有下层条目被移动过，也要说明。
-
-## 规则
-
-- 改动范围：目标目录的 `AGENTS.md` 与 `.memory/`、记忆根的 `AGENTS.md`，以及登记本层时那一层祖先的 `AGENTS.md`。
-- 已存在的索引文件一律不覆盖，受管区块之外的正文原样保留；重复执行只刷新模板拥有的受管区块。本层硬约束区块缺失时补上种子，**已有规则不覆盖**。种子只有两句：ask / remember 的聚光灯，以及「硬约束写在本区块」。不要把 skill 用法抄进入口，也不要在种子里点名 init / doctor / reshape。各层仓规手写追加，再跑 init 也不会覆盖。
-- 本层硬约束直接写在 `AGENTS.md` 对应区块里，不要链到 `.memory` 文件；那是人/agent 维护的正文，不是 remember 的落点。
-- 所有生成的文案都来自 `references/templates/`，脚本运行时读取。层入口仍是 `AGENTS.tmpl.md` → 目录上的 `AGENTS.md`。类型入口例外：产物是 `<plural>/AGENTS.md`，但仍由 `FEEDBACK.tmpl.md` / `USER.tmpl.md` / `TYPE.tmpl.md` 等类型模板渲染，不改用层入口模板。`type_slug.tmpl.md` 生成 `<plural>/<type>_<slug>.md`，`SKILL.tmpl.md` 生成 `skills/<name>/SKILL.md`。要改文案，改模板，别改脚本。
-- `agent_skills` 的内容根是 `.agents/skills/`，**本套工具绝不往那里写**：不建目录、不生成内容、不改写既有文件，只把它索引进 `.memory/agent_skills/AGENTS.md`。技能正文没有模板，因为没有产物。
-- **扩展这套东西时守住一条：模板尽可能体现内容结构，脚本只做占位符替换。** 判据是「盯着模板能不能说出产物长什么样」。所以字段清单、行格式、类型清单都在模板里，不要为了省事挪回脚本。
-- `scripts/` 按层分目录，依赖只朝下。入口仍是 `scripts/memory.py`（已发布契约，路径不改）。目录地图、改哪里、怎么跑见 [`scripts/OVERVIEW.md`](scripts/OVERVIEW.md)。
-- 目标就是记忆根时，`indexAction` 返回 `not-applicable`。索引条目只在传了 `--description` 时才刷新已有描述，没刷新时 `indexDescription` 返回 `null`。
-- 索引逐层披露：本层只登记直接下层的记忆目录，条目路径相对本层。「直接下层」按记忆层级算，不带记忆的中间目录被跳过。层级随记忆增减变化时，init 会自动把错位条目归位。
+新建 owner 登记发生在各模块 init 与 `memory doctor`：调用方按语义选择 `local` 或 `descendant`，flag 是这些命令上的 `--index-group`。不要按 purpose、文件名或目录深度推导，也不要移动已有关系。已有登记保留原分组；缺失 owner 不代为初始化。`tasks` 与 `notes` 的内容命令没有 `--index-group`。任务范围只用根上的 `--scope`、`--super`、`--all`：不传 `--super` 时看板在 `<scope>/.harness/tasks`，`--super` 时看板在 `<scope>/tasks`。`tasks list` 顺着主体 `AGENTS.md` 的 children 做一次 traverse；`--all` 从当前 scope 走森林。不要从真 AGENTS 再读同目录 README 的 `project-entries`，也不要把 README 链接抄进 `AGENTS.md`。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。

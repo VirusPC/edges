@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CrewAI 术语速查表 / Glossary</title>
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+<div class="page">
+<h1>CrewAI 术语速查表</h1>
+<p class="subtitle">Glossary · 可打印 · 依据 <a href="https://docs.crewai.com/">docs.crewai.com</a>（2026-10-11 核对，v1.15.27） · <a href="../lessons/0001-agent-task-crew-flow.html">← 第 1 课</a> · <a href="../lessons/0002-quickstart-data-flow.html">第 2 课</a> · <a href="../lessons/0003-process-and-delegation.html">第 3 课</a> · <a href="../lessons/0004-unified-memory.html">第 4 课 →</a></p>
+
+<p class="meta">嵌套关系：<strong>Flow</strong> ⊃ 步骤（<code>@start</code> / <code>@listen</code>）⊃ <strong>Crew</strong> ⊃ <strong>Task</strong> → 由 <strong>Agent</strong> 执行；Crew 按 <strong>Process</strong> 排班。</p>
+
+<div class="cheat">
+
+<div class="term">
+<h3>Agent（智能体）</h3>
+<p>自主单元：执行任务，依据 role 与 goal 做决策，可用工具、可协作。新项目每个 Agent 一个文件 <code>agents/&lt;name&gt;.jsonc</code>。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/agents">concepts/agents</a></p>
+</div>
+
+<div class="term">
+<h3>role / goal / backstory</h3>
+<p>Agent 的“人设”：<code>role</code> 职能与专长；<code>goal</code> 指导决策的个人目标；<code>backstory</code> 背景与性格。三者均可含 <code>{placeholder}</code>。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a></p>
+</div>
+
+<div class="term">
+<h3>tools · llm</h3>
+<p><code>tools</code>：Agent 可调用的能力（默认空列表）。<code>llm</code>：驱动 Agent 的语言模型（可选；JSON 写法如 <code>"openai/gpt-4o"</code>）。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a></p>
+</div>
+
+<div class="term">
+<h3>Task（任务）</h3>
+<p>由一个 Agent 完成的具体工作。在 <code>crew.jsonc</code> 的 <code>tasks</code> 数组中定义，数组顺序即执行顺序（sequential）。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/tasks">concepts/tasks</a></p>
+</div>
+
+<div class="term">
+<h3>description · expected_output</h3>
+<p>Task 的两个<strong>必填</strong>字段：做什么；做完的交付物长什么样。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/tasks#jsonc-configuration-recommended">Tasks · JSONC</a></p>
+</div>
+
+<div class="term">
+<h3>agent（Task 字段）</h3>
+<p>把 Task 派给哪个 Agent；值须与 <code>crew.jsonc</code> 中 <code>agents</code> 列出的名字一致。hierarchical 下可不预先分配。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/tasks#task-attributes">Task Attributes</a></p>
+</div>
+
+<div class="term">
+<h3>context（Task 字段）</h3>
+<p>列出要读取其输出的<strong>前序</strong> Task 名（可多个）；JSON 中禁止向前引用。sequential 下上一个 Task 的输出本就会自动传给下一个，<code>context</code> 用于显式指定。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/tasks#referring-to-other-tasks">Referring to Other Tasks</a> · <a href="https://docs.crewai.com/en/concepts/processes#sequential-process">Sequential</a></p>
+</div>
+
+<div class="term">
+<h3>output_file · markdown</h3>
+<p><code>output_file</code>：把 Task 输出存成文件；<code>markdown</code>：要求以 Markdown 格式返回。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/tasks#task-attributes">Task Attributes</a></p>
+</div>
+
+<div class="term">
+<h3>Crew（团队）</h3>
+<p>一组协作的 Agent 共同完成一组 Task，并定义执行策略。核心字段 <code>agents</code>、<code>tasks</code>、<code>process</code>。新项目用 <code>crew.jsonc</code> 定义。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/crews">concepts/crews</a></p>
+</div>
+
+<div class="term">
+<h3>inputs · {placeholder}</h3>
+<p><code>crew.jsonc</code> 顶层 <code>inputs</code> 给 <code>{topic}</code> 等占位符提供默认值；缺省时 <code>crewai run</code> 会提示输入。在 Flow 中通过 <code>crew.kickoff(inputs=...)</code> 传入。</p>
+<p class="src"><a href="https://docs.crewai.com/en/guides/crews/first-crew#step-3-define-tasks-and-crew-settings">First Crew · Step 3</a></p>
+</div>
+
+<div class="term">
+<h3>Process（流程）</h3>
+<p>Crew 执行 Task 的策略，枚举值只有两种：<code>sequential</code>、<code>hierarchical</code>。默认 <code>sequential</code>。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/processes">concepts/processes</a></p>
+</div>
+
+<div class="term">
+<h3>sequential（顺序）</h3>
+<p>按 <code>tasks</code> 列表顺序执行，前一个 Task 的输出作为下一个的上下文。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/processes#sequential-process">Sequential Process</a></p>
+</div>
+
+<div class="term">
+<h3>hierarchical（层级）</h3>
+<p>由 manager Agent 负责规划、分派、审核；Task 不预先分配。必须提供 <code>manager_llm</code> 或 <code>manager_agent</code>。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/processes#hierarchical-process">Hierarchical Process</a></p>
+</div>
+
+<div class="term">
+<h3>manager_llm · manager_agent</h3>
+<p>hierarchical 的经理，二选一<strong>必填</strong>：<code>manager_llm</code> 让 CrewAI 自动创建经理；<code>manager_agent</code> 指定自定义经理（JSON 中可引用不在 <code>agents</code> 列表里的 <code>agents/&lt;name&gt;.jsonc</code>）。（第 3 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/crews#crew-attributes">Crew Attributes</a> · <a href="https://docs.crewai.com/en/learn/hierarchical-process#using-a-custom-manager-agent">Custom Manager Agent</a></p>
+</div>
+
+<div class="term">
+<h3>allow_delegation（允许委派）</h3>
+<p>Agent 属性，默认 <code>False</code>。设为 <code>True</code> 时自动获得两个协作工具：<code>Delegate work to coworker</code>（委派工作）与 <code>Ask question to coworker</code>（向同事提问）。与 Process 无关，sequential 下也可用。（第 3 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/collaboration#how-agent-collaboration-works">How Agent Collaboration Works</a> · <a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a></p>
+</div>
+
+<div class="term">
+<h3>Delegation Loops（委派循环）</h3>
+<p>症状：Agent 之间“delegate back and forth indefinitely”。官方解法：清晰层级——经理 <code>allow_delegation=True</code>，专家 <code>False</code>（No re-delegation）。（第 3 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/collaboration#issue-delegation-loops">Issue: Delegation Loops</a></p>
+</div>
+
+<div class="term">
+<h3>max_iter · max_execution_time</h3>
+<p><code>max_iter</code>：Agent 达到最大迭代次数前必须给出最佳答案，默认 <code>20</code>。<code>max_execution_time</code>：任务执行最长秒数（可选）。兜底用的硬上限。（第 3 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/agents#agent-attributes">Agent Attributes</a> · <a href="https://docs.crewai.com/en/concepts/agents#execution-control">Execution Control</a></p>
+</div>
+
+<div class="term">
+<h3>Flow（流程编排）</h3>
+<p>结构化、事件驱动的工作流：管理 state、控制执行（条件/循环/分支），在某些步骤里启动 Crew。官方建议生产应用从 Flow 开始。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/flows">concepts/flows</a> · <a href="https://docs.crewai.com/en/introduction#when-to-use-crews-vs-flows">Crews vs Flows</a></p>
+</div>
+
+<div class="term">
+<h3>@start() · @listen()</h3>
+<p><code>@start()</code>：Flow 入口步骤。<code>@listen(x)</code>：x 产出输出后执行，可把 x 的输出作为参数接收。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/flows#getting-started">Flows · Getting Started</a></p>
+</div>
+
+<div class="term">
+<h3>state（Flow 状态）</h3>
+<p><code>self.state</code>：Flow 各步骤共享的数据，可为 dict（非结构化）或 Pydantic 模型（结构化）；每个实例自带唯一 <code>id</code>。<code>@persist</code> 可跨重启保留。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/flows#flow-state-management">State Management</a> · <a href="https://docs.crewai.com/en/concepts/flows#flow-persistence">Persistence</a></p>
+</div>
+
+<div class="term">
+<h3>@router() · or_ · and_</h3>
+<p>Flow 的控制流工具：<code>@router()</code> 按方法输出路由到不同分支；<code>or_</code> / <code>and_</code> 监听多个步骤的任一/全部完成。（第 1 课未展开）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/flows#flow-control">Flow Control</a></p>
+</div>
+
+<div class="term">
+<h3>kickoff()</h3>
+<p>启动执行：<code>crew.kickoff(inputs=...)</code> 运行一个 Crew；<code>flow.kickoff()</code> 运行 Flow，返回最后完成的方法的输出。</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/crews#kicking-off-a-crew">Kicking Off a Crew</a> · <a href="https://docs.crewai.com/en/concepts/flows#retrieving-the-final-output">Flow Output</a></p>
+</div>
+
+<div class="term">
+<h3>JSON-first（agents/*.jsonc + crew.jsonc）</h3>
+<p><code>crewai create crew</code> 新项目的默认布局；<code>crewai run</code> 直接加载。旧布局 <code>crew.py</code> + <code>config/*.yaml</code> 需 <code>--classic</code>。</p>
+<p class="src"><a href="https://docs.crewai.com/en/guides/crews/first-crew#step-1-create-a-new-crew">First Crew · Step 1</a></p>
+</div>
+
+
+<div class="term">
+<h3>Unified Memory（统一记忆）</h3>
+<p>一个 <code>Memory</code> 类取代旧的 short-term / long-term / entity / external 四种记忆。四种用法：standalone、Crew（<code>memory=True</code>：Task 后自动抽取事实、Task 前召回注入）、Agent（<code>memory.scope(...)</code>）、Flow（<code>self.remember/recall/extract_memories</code>）。默认存储 LanceDB 中央库。（第 4 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/memory#overview">Memory · Overview</a> · <a href="https://docs.crewai.com/en/concepts/flows#memory-in-flows">Memory in Flows</a></p>
+</div>
+
+<div class="term">
+<h3>scope（记忆作用域）</h3>
+<p>类似文件系统的层级路径，如 <code>/project/alpha</code>；是抽象命名空间，不绑定代码目录。按 scope 召回只搜该<strong>前缀子树</strong>（向下）。<code>memory.scope(path)</code> 得到子树视图；<code>memory.slice(scopes=[...])</code> 跨多个分支读。（第 4 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/memory#hierarchical-scopes">Hierarchical Scopes</a> · <a href="https://docs.crewai.com/en/concepts/memory#memory-slices">Memory Slices</a></p>
+</div>
+
+<div class="term">
+<h3>suggested_scope</h3>
+<p><code>remember()</code> 省略 scope 时，LLM 读现有 scope 列表后给出的放置位置（“best matching existing scope or new path”），可新建路径；LLM 失败时退回 <code>/</code>。（第 4 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/memory#how-scope-inference-works">How Scope Inference Works</a> · <a href="https://github.com/crewAIInc/crewAI/blob/main/lib/crewai/src/crewai/memory/analyze.py">analyze.py</a></p>
+</div>
+
+<div class="term">
+<h3>recall depth（召回深度）</h3>
+<p><code>recall(..., depth=)</code>：<code>"shallow"</code> 纯向量检索 + 复合打分，无 LLM；<code>"deep"</code>（默认）走 RecallFlow（查询分析、选 scope、并行检索、置信度路由）。复合分 = 语义 + 时近 + 重要度加权（默认 0.5 / 0.3 / 0.2）。（第 4 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/memory#recallflow-deep-recall">RecallFlow</a> · <a href="https://docs.crewai.com/en/concepts/memory#composite-scoring">Composite Scoring</a></p>
+</div>
+
+<div class="term">
+<h3>consolidation（记忆合并整理）</h3>
+<p>保存时与相似旧记录比较，相似度超过 <code>consolidation_threshold</code>（默认 0.85）时由 LLM 对旧记录决定 <code>keep</code> / <code>update</code> / <code>delete</code>，并决定是否 <code>insert_new</code>，防止重复堆积。（第 4 课）</p>
+<p class="src"><a href="https://docs.crewai.com/en/concepts/memory#memory-consolidation">Memory Consolidation</a></p>
+</div>
+
+</div>
+
+<footer>有不清楚的地方随时问我（你的老师）。 · 本页链接均为稳定地址 <code>docs.crewai.com/en/…</code>。</footer>
+</div>
+</body>
+</html>

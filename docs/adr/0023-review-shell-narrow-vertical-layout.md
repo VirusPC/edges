@@ -4,7 +4,7 @@
 
 **Status:** accepted（ADR 0023；grill 确认于 2026-09-24）
 
-**See also:** ADR 0022（[审阅壳三栏与 Task Doc](0022-review-shell-three-column-task-doc.md)）；ADR 0012（[审阅页仍是 render-only CLI](0012-task-project-review-page-is-render-only-cli.md)）；ADR 0021（[持久 `/tasks/` 看板站](0021-persistent-tasks-board-site.md)）；进行中的窄屏卡 [`knowledge/tasks/agent-clients-ux/in_progress/2026-09-24--Tasks-审阅壳手机-窄屏适配.md`](../../knowledge/tasks/agent-clients-ux/in_progress/2026-09-24--Tasks-审阅壳手机-窄屏适配.md)（本 ADR 不挪这张卡）；不改的兄弟 backlog [`knowledge/tasks/agent-clients-ux/backlog/2026-09-24--Tasks-审阅壳-deploy-分支-GitHub-Actions-预览部署.md`](../../knowledge/tasks/agent-clients-ux/backlog/2026-09-24--Tasks-审阅壳-deploy-分支-GitHub-Actions-预览部署.md)；桌面壳 [PR #126](https://github.com/VirusPC/edges/pull/126)
+**See also:** ADR 0022（[审阅壳三栏与 Task Doc](0022-review-shell-three-column-task-doc.md)）；ADR 0012（[审阅页仍是 render-only CLI](0012-task-project-review-page-is-render-only-cli.md)）；ADR 0021（[持久 `/tasks/` 看板站](0021-persistent-tasks-board-site.md)）；进行中的窄屏卡 [`knowledge/tasks/agent-clients-ux/in_progress/2026-09-24--Tasks-审阅壳手机-窄屏适配.md`](../../.harness/tasks/agent-clients-ux/in_progress/2026-09-24--Tasks-%E5%AE%A1%E9%98%85%E5%A3%B3%E6%89%8B%E6%9C%BA-%E7%AA%84%E5%B1%8F%E9%80%82%E9%85%8D.md)（本 ADR 不挪这张卡）；不改的兄弟 backlog [`knowledge/tasks/agent-clients-ux/backlog/2026-09-24--Tasks-审阅壳-deploy-分支-GitHub-Actions-预览部署.md`](../../.harness/tasks/agent-clients-ux/backlog/2026-09-24--Tasks-%E5%AE%A1%E9%98%85%E5%A3%B3-deploy-%E5%88%86%E6%94%AF-GitHub-Actions-%E9%A2%84%E8%A7%88%E9%83%A8%E7%BD%B2.md)；桌面壳 [PR #126](https://github.com/VirusPC/edges/pull/126)
 
 ## Decision
 
@@ -38,5 +38,5 @@
 - 改桌面三栏的观感、可拖分隔线，或拿掉左栏拖放
 - 窄屏必须做触摸拖放（可以跳过）
 - 状态写回与 git 写回、鉴权
-- 移动或改写 [`backlog/2026-09-24--Tasks-审阅壳-deploy-分支-GitHub-Actions-预览部署.md`](../../knowledge/tasks/agent-clients-ux/backlog/2026-09-24--Tasks-审阅壳-deploy-分支-GitHub-Actions-预览部署.md)
+- 移动或改写 [`backlog/2026-09-24--Tasks-审阅壳-deploy-分支-GitHub-Actions-预览部署.md`](../../.harness/tasks/agent-clients-ux/backlog/2026-09-24--Tasks-%E5%AE%A1%E9%98%85%E5%A3%B3-deploy-%E5%88%86%E6%94%AF-GitHub-Actions-%E9%A2%84%E8%A7%88%E9%83%A8%E7%BD%B2.md)
 - `--mode`、review-page MCP、公开 `classify` / `apply-review`

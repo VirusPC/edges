@@ -149,7 +149,10 @@ export function createArtifactStore(options: {
     try {
       const raw = await readFile(metaPath(id), "utf8");
       const parsed = JSON.parse(raw) as ArtifactMeta;
-      if (!parsed || parsed.id !== id || typeof parsed.entry !== "string" || typeof parsed.expiresAt !== "string") {
+      if (!parsed || parsed.id !== id || typeof parsed.entry !== "string") {
+        return null;
+      }
+      if (parsed.published !== false && typeof parsed.expiresAt !== "string") {
         return null;
       }
       try {
@@ -183,8 +186,15 @@ export function createArtifactStore(options: {
 
   async function expireIfNeeded(id: string, now: Date): Promise<boolean> {
     const meta = await readMeta(id);
-    const expiresAt = meta ? Date.parse(meta.expiresAt) : Number.NaN;
-    if (!meta || Number.isNaN(expiresAt) || expiresAt <= now.getTime()) {
+    if (!meta) {
+      await remove(id);
+      return true;
+    }
+    if (meta.published === false) {
+      return false;
+    }
+    const expiresAt = meta.expiresAt ? Date.parse(meta.expiresAt) : Number.NaN;
+    if (Number.isNaN(expiresAt) || expiresAt <= now.getTime()) {
       await remove(id);
       return true;
     }
@@ -193,7 +203,8 @@ export function createArtifactStore(options: {
 
   return {
     async put(input) {
-      if (!Number.isInteger(input.ttlSeconds) || input.ttlSeconds < DEFAULT_MIN_TTL || input.ttlSeconds > DEFAULT_MAX_TTL) {
+      const published = input.published !== false;
+      if (published && (!Number.isInteger(input.ttlSeconds) || input.ttlSeconds! < DEFAULT_MIN_TTL || input.ttlSeconds! > DEFAULT_MAX_TTL)) {
         throw new Error("ttlSeconds must be an integer between 1 and 2592000");
       }
       if (!Array.isArray(input.files) || input.files.length === 0) {
@@ -211,7 +222,9 @@ export function createArtifactStore(options: {
         throw new Error("invalid artifact id");
       }
 
-      const expiresAt = new Date(nowFn().getTime() + input.ttlSeconds * 1000).toISOString();
+      const expiresAt = published
+        ? new Date(nowFn().getTime() + input.ttlSeconds! * 1000).toISOString()
+        : undefined;
       await ensurePrivateDir(dataDir);
       await ensurePrivateDir(artifactDir(id));
       const root = filesRoot(id);
@@ -226,12 +239,29 @@ export function createArtifactStore(options: {
         await writePrivateFile(dest, bytes);
       }
 
-      const meta: ArtifactMeta = { id, entry, expiresAt };
+      const meta: ArtifactMeta = { id, entry, published };
+      if (expiresAt) {
+        meta.expiresAt = expiresAt;
+      }
       if (from) {
         meta.from = from;
       }
       await writePrivateFile(metaPath(id), `${JSON.stringify(meta)}\n`);
-      return from ? { id, expiresAt, entry, from } : { id, expiresAt, entry };
+      return { id, expiresAt, entry, published, ...(from ? { from } : {}) };
+    },
+
+    async publish(id, ttlSeconds) {
+      if (!Number.isInteger(ttlSeconds) || ttlSeconds < DEFAULT_MIN_TTL || ttlSeconds > DEFAULT_MAX_TTL) {
+        throw new Error("ttlSeconds must be an integer between 1 and 2592000");
+      }
+      const meta = await readMeta(id);
+      if (!meta) {
+        throw new Error("artifact not found");
+      }
+      meta.published = true;
+      meta.expiresAt = new Date(nowFn().getTime() + ttlSeconds * 1000).toISOString();
+      await writePrivateFile(metaPath(id), `${JSON.stringify(meta)}\n`);
+      return { id: meta.id, expiresAt: meta.expiresAt, entry: meta.entry, ...(meta.from ? { from: meta.from } : {}) };
     },
 
     async getMeta(id) {

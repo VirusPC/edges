@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript, Node.js ≥20, existing `commander` + `zod`, `node:test` + `tsx` (not vitest), `node:fs/promises`. No new YAML library. No `simple-git`. No Multica daemon. No parent / sub-issue / stage.
 
-**Spec:** `docs/adr/0009-edges-task-project-grouping.md` (accepted; amends ADR 0002). Glossary: `CONTEXT.md` terms **Task Project（edges）**, **edges-task-project**, **Task**, **edges-tasks-status**, **edges-task-priority**, **edges tasks（CLI）**. Command surface: `docs/adr/0005-edges-tasks-cli.md` and `extensions/clis/src/tasks/`. Priority orthogonality: `docs/adr/0007-edges-task-priority.md`. Status folders: `docs/adr/0002-knowledge-tasks-status-folders.md`. Capability Surface: `docs/adr/0004-capability-surface-cli-skill-mcp.md`. Verb alignment only: https://multica.ai/docs/cli ; `.memory/references/reference_multica_cli_tasks_reference.md`.
+**Spec:** `docs/adr/0009-edges-task-project-grouping.md` (accepted; amends ADR 0002). Glossary: `CONTEXT.md` terms **Task Project（edges）**, **edges-task-project**, **Task**, **edges-tasks-status**, **edges-task-priority**, **edges tasks（CLI）**. Command surface: `docs/adr/0005-edges-tasks-cli.md` and `extensions/cli/src/tasks/`. Priority orthogonality: `docs/adr/0007-edges-task-priority.md`. Status folders: `docs/adr/0002-knowledge-tasks-status-folders.md`. Capability Surface: `docs/adr/0004-capability-surface-cli-skill-mcp.md`. Verb alignment only: https://multica.ai/docs/cli ; `.memory/references/reference_multica_cli_tasks_reference.md`.
 
 ## Global Constraints
 
@@ -29,7 +29,7 @@
 - Do not implement Multica parent / sub-issue / stage
 - Do not auto-create/edit/move/delete `knowledge/posts/`
 - Do not add `js-yaml` / `gray-matter` / `simple-git` / vitest. Stay on `commander` + `zod` + `node:test` + `tsx`
-- Test runner is `extensions/clis/package.json` `"test": "node --test --import tsx test"` (recursive). New tests go under `extensions/clis/test/tasks/`
+- Test runner is `extensions/cli/package.json` `"test": "node --test --import tsx test"` (recursive). New tests go under `extensions/cli/test/tasks/`
 - Reuse `EDGES_REPO` from `loadConfig()` as the repo root. Board lives at `<repoPath>/knowledge/tasks/`
 - Relative TypeScript imports use `.js` (nodenext)
 - Public repo: no credentials, tokens, or personal data in commits
@@ -43,37 +43,37 @@
 
 **Create**
 
-- `extensions/clis/src/tasks/utils/project.ts` — `TASK_PROJECT_FIELD`, parse, dir ↔ id, dual-write assert, filter (re-exports `DEFAULT_TASK_PROJECT` / `DEFAULT_TASK_PROJECT_DIR` / `TaskProjectId` from `types.ts`)
-- `extensions/clis/src/tasks/utils/migrate.ts` — `migrateLegacyBoard(repoPath, writer)` one-shot helper
-- `extensions/clis/test/tasks/utils/project.test.ts` — pure helper tests
-- `extensions/clis/test/tasks/utils/migrate.test.ts` — tmpdir migrate tests
+- `extensions/cli/src/tasks/utils/project.ts` — `TASK_PROJECT_FIELD`, parse, dir ↔ id, dual-write assert, filter (re-exports `DEFAULT_TASK_PROJECT` / `DEFAULT_TASK_PROJECT_DIR` / `TaskProjectId` from `types.ts`)
+- `extensions/cli/src/tasks/utils/migrate.ts` — `migrateLegacyBoard(repoPath, writer)` one-shot helper
+- `extensions/cli/test/tasks/utils/project.test.ts` — pure helper tests
+- `extensions/cli/test/tasks/utils/migrate.test.ts` — tmpdir migrate tests
 
 **Modify**
 
-- `extensions/clis/src/tasks/utils/types.ts` — `DEFAULT_TASK_PROJECT`, `DEFAULT_TASK_PROJECT_DIR`, `TaskProjectId`; add `project: TaskProjectId` on `TaskListItem` (and therefore `TaskRecord`)
-- `extensions/clis/src/tasks/utils/paths.ts` — `taskRelPath` / `sidecarRelPath` / `statusDir` take a `TaskProjectId` (directory name comes from `projectDirName` in `project.ts`)
-- `extensions/clis/src/tasks/utils/frontmatter.ts` — `renderNewTaskDoc` writes `edges-task-project` only when the project is not `default`
-- `extensions/clis/src/tasks/utils/board.ts` — walk `tasks/<projectDir>/<status>/`; `readListItem` sets `project` via dual-write assert; `listTasks` gains `projects?`; `getTask` parses `<projectDir>/<status>`
-- `extensions/clis/src/tasks/utils/write.ts` — `createTask` / `updateTask` accept `project`; create writes under the project dir; update `--project` moves Task + sidecar and dual-writes
-- `extensions/clis/src/tasks/utils/move.ts` — dest paths stay inside `record.project`
-- `extensions/clis/src/tasks/utils/service.ts` — pass the new `listTasks` opts through
-- `extensions/clis/src/tasks/create.ts` — `--project <project>`
-- `extensions/clis/src/tasks/update.ts` — `--project <project>` (reassignment); include it in the “at least one flag” rule
-- `extensions/clis/src/tasks/list.ts` — repeatable `--project` (OR)
-- `extensions/clis/src/tasks/status.ts` — help says same-project only; no `--project` flag
-- `extensions/clis/src/tasks.ts` — `TASKS_AFTER_HELP` command surface
-- `extensions/clis/src/tasks/utils/board.ts` `BoardWriter` — add `rmdir` for migrate
-- `extensions/clis/test/tasks/utils/helpers.ts` — add `rmdir` on the writer double
-- `extensions/clis/README.md` — document `--project`; keep Capability Surface as CLI + Skill + MCP
+- `extensions/cli/src/tasks/utils/types.ts` — `DEFAULT_TASK_PROJECT`, `DEFAULT_TASK_PROJECT_DIR`, `TaskProjectId`; add `project: TaskProjectId` on `TaskListItem` (and therefore `TaskRecord`)
+- `extensions/cli/src/tasks/utils/paths.ts` — `taskRelPath` / `sidecarRelPath` / `statusDir` take a `TaskProjectId` (directory name comes from `projectDirName` in `project.ts`)
+- `extensions/cli/src/tasks/utils/frontmatter.ts` — `renderNewTaskDoc` writes `edges-task-project` only when the project is not `default`
+- `extensions/cli/src/tasks/utils/board.ts` — walk `tasks/<projectDir>/<status>/`; `readListItem` sets `project` via dual-write assert; `listTasks` gains `projects?`; `getTask` parses `<projectDir>/<status>`
+- `extensions/cli/src/tasks/utils/write.ts` — `createTask` / `updateTask` accept `project`; create writes under the project dir; update `--project` moves Task + sidecar and dual-writes
+- `extensions/cli/src/tasks/utils/move.ts` — dest paths stay inside `record.project`
+- `extensions/cli/src/tasks/utils/service.ts` — pass the new `listTasks` opts through
+- `extensions/cli/src/tasks/create.ts` — `--project <project>`
+- `extensions/cli/src/tasks/update.ts` — `--project <project>` (reassignment); include it in the “at least one flag” rule
+- `extensions/cli/src/tasks/list.ts` — repeatable `--project` (OR)
+- `extensions/cli/src/tasks/status.ts` — help says same-project only; no `--project` flag
+- `extensions/cli/src/tasks.ts` — `TASKS_AFTER_HELP` command surface
+- `extensions/cli/src/tasks/utils/board.ts` `BoardWriter` — add `rmdir` for migrate
+- `extensions/cli/test/tasks/utils/helpers.ts` — add `rmdir` on the writer double
+- `extensions/cli/README.md` — document `--project`; keep Capability Surface as CLI + Skill + MCP
 - `knowledge/tasks/README.md` — path is now `<project-slug>/<status>/`; `_default` for ungrouped
-- `extensions/clis/test/tasks/utils/frontmatter.test.ts`
-- `extensions/clis/test/tasks/utils/write.test.ts`
-- `extensions/clis/test/tasks/utils/board.test.ts`
-- `extensions/clis/test/tasks/utils/move.test.ts`
-- `extensions/clis/test/tasks/utils/paths.test.ts`
-- `extensions/clis/test/tasks/parse.test.ts`
-- `extensions/clis/test/tasks/run.test.ts`
-- `extensions/clis/test/tasks/cli.test.ts`
+- `extensions/cli/test/tasks/utils/frontmatter.test.ts`
+- `extensions/cli/test/tasks/utils/write.test.ts`
+- `extensions/cli/test/tasks/utils/board.test.ts`
+- `extensions/cli/test/tasks/utils/move.test.ts`
+- `extensions/cli/test/tasks/utils/paths.test.ts`
+- `extensions/cli/test/tasks/parse.test.ts`
+- `extensions/cli/test/tasks/run.test.ts`
+- `extensions/cli/test/tasks/cli.test.ts`
 - `CHANGELOG.md` `[Unreleased]` — Added line for the CLI + migrate (when implementation lands)
 - `.memory/projects/project_edges_task_project.md` — How-to: CLI has landed; point at this plan (via `$project-memory-remember`, do not hand-edit the index)
 - `.memory/projects/project_tasks_with_status_not_todos.md` — How-to path becomes `knowledge/tasks/<project-slug>/<status>/`
@@ -185,10 +185,10 @@ The live board (as of ADR 0009 merge) still has root status dirs: `backlog/`, `d
 
 ### Test commands
 
-Single file (cwd = `extensions/clis`):
+Single file (cwd = `extensions/cli`):
 
 ```bash
-cd extensions/clis && node --test --import tsx test/tasks/utils/project.test.ts
+cd extensions/cli && node --test --import tsx test/tasks/utils/project.test.ts
 ```
 
 Package suite after each implementation step:
@@ -202,9 +202,9 @@ pnpm --filter edges-cli test
 ### Task 1: Project id helpers
 
 **Files:**
-- Create: `extensions/clis/src/tasks/utils/project.ts`
-- Create: `extensions/clis/test/tasks/utils/project.test.ts`
-- Modify: `extensions/clis/src/tasks/utils/types.ts` — define `DEFAULT_TASK_PROJECT`, `DEFAULT_TASK_PROJECT_DIR`, and `TaskProjectId` next to `TASK_STATUSES` (avoids a `types.ts` ↔ `project.ts` cycle) and add `project: TaskProjectId` on `TaskListItem`
+- Create: `extensions/cli/src/tasks/utils/project.ts`
+- Create: `extensions/cli/test/tasks/utils/project.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/types.ts` — define `DEFAULT_TASK_PROJECT`, `DEFAULT_TASK_PROJECT_DIR`, and `TaskProjectId` next to `TASK_STATUSES` (avoids a `types.ts` ↔ `project.ts` cycle) and add `project: TaskProjectId` on `TaskListItem`
 
 **Interfaces:**
 - Consumes: `TasksError`, `TASK_STATUSES` from `./types.js`
@@ -318,7 +318,7 @@ test("filterTasksByProject empty allowed is no-op; otherwise OR", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/project.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/project.test.ts`
 
 Expected: FAIL with `ERR_MODULE_NOT_FOUND` for `project.js`
 
@@ -355,16 +355,16 @@ Adding `project` to `TaskListItem` will fail compile in `readListItem` until Tas
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/project.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/project.test.ts`
 
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/types.ts \
-  extensions/clis/src/tasks/utils/project.ts \
-  extensions/clis/test/tasks/utils/project.test.ts
+git add extensions/cli/src/tasks/utils/types.ts \
+  extensions/cli/src/tasks/utils/project.ts \
+  extensions/cli/test/tasks/utils/project.test.ts
 git commit -m "feat(tasks): add edges-task-project helpers" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -374,18 +374,18 @@ git commit -m "feat(tasks): add edges-task-project helpers" \
 ### Task 2: Project-aware paths and board discovery
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/paths.ts`
-- Modify: `extensions/clis/src/tasks/utils/board.ts` — walker, `getTask` path parse, `TaskListOpts.projects`, `readListItem.project`
-- Modify: `extensions/clis/src/tasks/utils/write.ts` — call 3-arg path helpers with `input.project ?? "default"` so create still compiles (CLI flag comes in Task 4; default path must already be `_default/<status>/`)
-- Modify: `extensions/clis/src/tasks/utils/move.ts` — dest = `taskRelPath(record.project, next, record.stem)`
-- Modify: `extensions/clis/src/tasks/utils/service.ts` — pass `projects` through
-- Modify: `extensions/clis/test/tasks/utils/paths.test.ts`
-- Modify: `extensions/clis/test/tasks/utils/board.test.ts`
-- Modify: every fixture under `extensions/clis/test/tasks/` that still writes `knowledge/tasks/<status>/` — rewrite to `knowledge/tasks/_default/<status>/` (see grep below)
-- Modify: `extensions/clis/test/tasks/utils/write.test.ts` — path assertions
-- Modify: `extensions/clis/test/tasks/utils/move.test.ts` — path assertions
-- Modify: `extensions/clis/test/tasks/run.test.ts`
-- Modify: `extensions/clis/test/tasks/parse.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/paths.ts`
+- Modify: `extensions/cli/src/tasks/utils/board.ts` — walker, `getTask` path parse, `TaskListOpts.projects`, `readListItem.project`
+- Modify: `extensions/cli/src/tasks/utils/write.ts` — call 3-arg path helpers with `input.project ?? "default"` so create still compiles (CLI flag comes in Task 4; default path must already be `_default/<status>/`)
+- Modify: `extensions/cli/src/tasks/utils/move.ts` — dest = `taskRelPath(record.project, next, record.stem)`
+- Modify: `extensions/cli/src/tasks/utils/service.ts` — pass `projects` through
+- Modify: `extensions/cli/test/tasks/utils/paths.test.ts`
+- Modify: `extensions/cli/test/tasks/utils/board.test.ts`
+- Modify: every fixture under `extensions/cli/test/tasks/` that still writes `knowledge/tasks/<status>/` — rewrite to `knowledge/tasks/_default/<status>/` (see grep below)
+- Modify: `extensions/cli/test/tasks/utils/write.test.ts` — path assertions
+- Modify: `extensions/cli/test/tasks/utils/move.test.ts` — path assertions
+- Modify: `extensions/cli/test/tasks/run.test.ts`
+- Modify: `extensions/cli/test/tasks/parse.test.ts`
 
 **Interfaces:**
 - Consumes: `projectDirName`, `assertProjectDualWrite`, `filterTasksByProject`, `isUserProjectSlug`, `DEFAULT_TASK_PROJECT` from `./project.js`
@@ -573,7 +573,7 @@ body
 Rewrite the existing priority fixtures in `board.test.ts` (`seedPriorities` and the P0/urgent files) from `knowledge/tasks/<status>/` to `knowledge/tasks/_default/<status>/`. Same for `run.test.ts`, `write.test.ts`, `move.test.ts`, `parse.test.ts`. Find them with:
 
 ```bash
-rg -n "knowledge/tasks/(backlog|todo|in_progress|in_review|done|blocked|cancelled)" extensions/clis/test/tasks
+rg -n "knowledge/tasks/(backlog|todo|in_progress|in_review|done|blocked|cancelled)" extensions/cli/test/tasks
 ```
 
 Every leftover old path in tests is a bug after this task.
@@ -582,7 +582,7 @@ Every leftover old path in tests is a bug after this task.
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/paths.test.ts test/tasks/utils/board.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/paths.test.ts test/tasks/utils/board.test.ts`
 
 Expected: FAIL — `taskRelPath` still has the 2-arg signature / old path strings; `project` is missing on list items; root `backlog/` is still listed
 
@@ -644,12 +644,12 @@ Expected: PASS. If a leftover fixture still points at `knowledge/tasks/todo/`, l
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/paths.ts \
-  extensions/clis/src/tasks/utils/board.ts \
-  extensions/clis/src/tasks/utils/write.ts \
-  extensions/clis/src/tasks/utils/move.ts \
-  extensions/clis/src/tasks/utils/service.ts \
-  extensions/clis/test/tasks
+git add extensions/cli/src/tasks/utils/paths.ts \
+  extensions/cli/src/tasks/utils/board.ts \
+  extensions/cli/src/tasks/utils/write.ts \
+  extensions/cli/src/tasks/utils/move.ts \
+  extensions/cli/src/tasks/utils/service.ts \
+  extensions/cli/test/tasks
 git commit -m "feat(tasks): discover tasks under project status folders" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -659,8 +659,8 @@ git commit -m "feat(tasks): discover tasks under project status folders" \
 ### Task 3: Frontmatter writes project only when not default
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/frontmatter.ts` — `renderNewTaskDoc` input gains `project?: TaskProjectId`
-- Modify: `extensions/clis/test/tasks/utils/frontmatter.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/frontmatter.ts` — `renderNewTaskDoc` input gains `project?: TaskProjectId`
+- Modify: `extensions/cli/test/tasks/utils/frontmatter.test.ts`
 
 **Interfaces:**
 - Consumes: `TaskProjectId` from `./types.js`; `TASK_PROJECT_FIELD` from `./project.js`
@@ -710,7 +710,7 @@ test("renderNewTaskDoc writes edges-task-project after status when not default",
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/frontmatter.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/frontmatter.test.ts`
 
 Expected: FAIL — `renderNewTaskDoc` does not accept / write `project`
 
@@ -754,15 +754,15 @@ Do not add a `removeMetadataField` helper this round.
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/frontmatter.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/frontmatter.test.ts`
 
 Expected: PASS. Then `pnpm --filter edges-cli test`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/frontmatter.ts \
-  extensions/clis/test/tasks/utils/frontmatter.test.ts
+git add extensions/cli/src/tasks/utils/frontmatter.ts \
+  extensions/cli/test/tasks/utils/frontmatter.test.ts
 git commit -m "feat(tasks): dual-write edges-task-project on create docs" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -772,11 +772,11 @@ git commit -m "feat(tasks): dual-write edges-task-project on create docs" \
 ### Task 4: create --project (JSON + disk, no git)
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/write.ts` — `TasksCreateInput.project?: string`; return `{ ..., priority, project }`
-- Modify: `extensions/clis/src/tasks/create.ts` — `--project <project>`
-- Modify: `extensions/clis/test/tasks/utils/write.test.ts`
-- Modify: `extensions/clis/test/tasks/run.test.ts`
-- Modify: `extensions/clis/test/tasks/parse.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/write.ts` — `TasksCreateInput.project?: string`; return `{ ..., priority, project }`
+- Modify: `extensions/cli/src/tasks/create.ts` — `--project <project>`
+- Modify: `extensions/cli/test/tasks/utils/write.test.ts`
+- Modify: `extensions/cli/test/tasks/run.test.ts`
+- Modify: `extensions/cli/test/tasks/parse.test.ts`
 
 **Interfaces:**
 - Consumes: `parseTaskProject` from `./project.js`; `renderNewTaskDoc` `project` from Task 3; 3-arg paths from Task 2
@@ -898,7 +898,7 @@ Keep existing create `--priority` tests; they must still write under `_default` 
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/write.test.ts test/tasks/run.test.ts test/tasks/parse.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/write.test.ts test/tasks/run.test.ts test/tasks/parse.test.ts`
 
 Expected: FAIL — `created.project` is undefined; `--project` is an unknown option
 
@@ -934,11 +934,11 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/write.ts \
-  extensions/clis/src/tasks/create.ts \
-  extensions/clis/test/tasks/utils/write.test.ts \
-  extensions/clis/test/tasks/run.test.ts \
-  extensions/clis/test/tasks/parse.test.ts
+git add extensions/cli/src/tasks/utils/write.ts \
+  extensions/cli/src/tasks/create.ts \
+  extensions/cli/test/tasks/utils/write.test.ts \
+  extensions/cli/test/tasks/run.test.ts \
+  extensions/cli/test/tasks/parse.test.ts
 git commit -m "feat(tasks): add create --project" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -948,11 +948,11 @@ git commit -m "feat(tasks): add create --project" \
 ### Task 5: update --project reassigns (same status, move + dual-write)
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/write.ts` — `updateTask` patch gains `project?: string`; return includes `project`
-- Modify: `extensions/clis/src/tasks/update.ts` — `--project <project>`; “at least one flag” includes `--project`; help no longer says the file never moves
-- Modify: `extensions/clis/test/tasks/utils/write.test.ts`
-- Modify: `extensions/clis/test/tasks/run.test.ts`
-- Modify: `extensions/clis/test/tasks/parse.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/write.ts` — `updateTask` patch gains `project?: string`; return includes `project`
+- Modify: `extensions/cli/src/tasks/update.ts` — `--project <project>`; “at least one flag” includes `--project`; help no longer says the file never moves
+- Modify: `extensions/cli/test/tasks/utils/write.test.ts`
+- Modify: `extensions/cli/test/tasks/run.test.ts`
+- Modify: `extensions/cli/test/tasks/parse.test.ts`
 
 **Interfaces:**
 - Consumes: `parseTaskProject`, `projectDirName`, `setMetadataField`, 3-arg paths, `getTask`
@@ -1068,7 +1068,7 @@ test("run tasks update --project Default is VALIDATION_ERROR", async () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/write.test.ts test/tasks/run.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/write.test.ts test/tasks/run.test.ts`
 
 Expected: FAIL — update still requires the old flag set; `--project` unknown; path stays under `_default`
 
@@ -1129,11 +1129,11 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/write.ts \
-  extensions/clis/src/tasks/update.ts \
-  extensions/clis/test/tasks/utils/write.test.ts \
-  extensions/clis/test/tasks/run.test.ts \
-  extensions/clis/test/tasks/parse.test.ts
+git add extensions/cli/src/tasks/utils/write.ts \
+  extensions/cli/src/tasks/update.ts \
+  extensions/cli/test/tasks/utils/write.test.ts \
+  extensions/cli/test/tasks/run.test.ts \
+  extensions/cli/test/tasks/parse.test.ts
 git commit -m "feat(tasks): add update --project reassignment" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1143,10 +1143,10 @@ git commit -m "feat(tasks): add update --project reassignment" \
 ### Task 6: status stays same-project; reject --project
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/move.ts` — dest stays in `record.project`; preserve `edges-task-project` and `edges-task-priority` by copying the patched markdown
-- Modify: `extensions/clis/src/tasks/status.ts` — AFTER_HELP: same-project only; no `--project` option
-- Modify: `extensions/clis/test/tasks/utils/move.test.ts`
-- Modify: `extensions/clis/test/tasks/run.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/move.ts` — dest stays in `record.project`; preserve `edges-task-project` and `edges-task-priority` by copying the patched markdown
+- Modify: `extensions/cli/src/tasks/status.ts` — AFTER_HELP: same-project only; no `--project` option
+- Modify: `extensions/cli/test/tasks/utils/move.test.ts`
+- Modify: `extensions/cli/test/tasks/run.test.ts`
 
 **Interfaces:**
 - Consumes: `taskRelPath(record.project, next, record.stem)` from Task 2
@@ -1253,7 +1253,7 @@ test("run tasks status JSON has no project key and stays under _default", async 
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/move.test.ts test/tasks/run.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/move.test.ts test/tasks/run.test.ts`
 
 Expected: FAIL — named-project move still aims at `_default` or the help/status case is not asserted. If `status --project` already fails as an unknown Commander option (exit 2), keep that case as a regression; the named-project move test is the one that must fail until Step 3.
 
@@ -1280,10 +1280,10 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/move.ts \
-  extensions/clis/src/tasks/status.ts \
-  extensions/clis/test/tasks/utils/move.test.ts \
-  extensions/clis/test/tasks/run.test.ts
+git add extensions/cli/src/tasks/utils/move.ts \
+  extensions/cli/src/tasks/status.ts \
+  extensions/cli/test/tasks/utils/move.test.ts \
+  extensions/cli/test/tasks/run.test.ts
 git commit -m "feat(tasks): keep status moves inside one project" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1293,15 +1293,15 @@ git commit -m "feat(tasks): keep status moves inside one project" \
 ### Task 7: list --project CLI, help, README, CHANGELOG
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/list.ts` — repeatable `--project`
-- Modify: `extensions/clis/src/tasks.ts` — `TASKS_AFTER_HELP`
-- Modify: `extensions/clis/src/tasks/create.ts` / `update.ts` AFTER_HELP (if not already complete)
-- Modify: `extensions/clis/README.md`
+- Modify: `extensions/cli/src/tasks/list.ts` — repeatable `--project`
+- Modify: `extensions/cli/src/tasks.ts` — `TASKS_AFTER_HELP`
+- Modify: `extensions/cli/src/tasks/create.ts` / `update.ts` AFTER_HELP (if not already complete)
+- Modify: `extensions/cli/README.md`
 - Modify: `knowledge/tasks/README.md`
 - Modify: `CHANGELOG.md` `[Unreleased]` Added
-- Modify: `extensions/clis/test/tasks/cli.test.ts`
-- Modify: `extensions/clis/test/tasks/run.test.ts`
-- Modify: `extensions/clis/test/tasks/parse.test.ts`
+- Modify: `extensions/cli/test/tasks/cli.test.ts`
+- Modify: `extensions/cli/test/tasks/run.test.ts`
+- Modify: `extensions/cli/test/tasks/parse.test.ts`
 
 **Interfaces:**
 - Consumes: `parseTaskProject`, `listTasks({ projects })` from Tasks 1–2
@@ -1371,7 +1371,7 @@ Also extend the existing `run tasks list returns JSON` test to `assert.equal(bod
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/cli.test.ts test/tasks/run.test.ts test/tasks/parse.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/cli.test.ts test/tasks/run.test.ts test/tasks/parse.test.ts`
 
 Expected: FAIL — help text does not mention `--project`; list filter flag missing
 
@@ -1405,7 +1405,7 @@ Pass `projects: opts.project` into `listTasksService`. AFTER_HELP FLAGS add: `--
 
 Keep the Capability Surface sentence: `Capability Surface is CLI + Skill + MCP.`
 
-`extensions/clis/README.md` `tasks` block — same command surface. Keep: `Skill and MCP come later on this same contract. Capability Surface is CLI + Skill + MCP.`
+`extensions/cli/README.md` `tasks` block — same command surface. Keep: `Skill and MCP come later on this same contract. Capability Surface is CLI + Skill + MCP.`
 
 `knowledge/tasks/README.md` — replace the Issue-layer path `knowledge/tasks/<edges-tasks-status>/` with `knowledge/tasks/<project-slug>/<edges-tasks-status>/`. After the 状态夹 section, add:
 
@@ -1434,16 +1434,16 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/list.ts \
-  extensions/clis/src/tasks.ts \
-  extensions/clis/src/tasks/create.ts \
-  extensions/clis/src/tasks/update.ts \
-  extensions/clis/README.md \
+git add extensions/cli/src/tasks/list.ts \
+  extensions/cli/src/tasks.ts \
+  extensions/cli/src/tasks/create.ts \
+  extensions/cli/src/tasks/update.ts \
+  extensions/cli/README.md \
   knowledge/tasks/README.md \
   CHANGELOG.md \
-  extensions/clis/test/tasks/cli.test.ts \
-  extensions/clis/test/tasks/run.test.ts \
-  extensions/clis/test/tasks/parse.test.ts
+  extensions/cli/test/tasks/cli.test.ts \
+  extensions/cli/test/tasks/run.test.ts \
+  extensions/cli/test/tasks/parse.test.ts
 git commit -m "feat(tasks): add list --project and document the contract" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1453,10 +1453,10 @@ git commit -m "feat(tasks): add list --project and document the contract" \
 ### Task 8: One-shot migrate helper (tmpdir only)
 
 **Files:**
-- Create: `extensions/clis/src/tasks/utils/migrate.ts`
-- Create: `extensions/clis/test/tasks/utils/migrate.test.ts`
-- Modify: `extensions/clis/src/tasks/utils/board.ts` — `BoardWriter` gains `rmdir(abs: string): Promise<void>`
-- Modify: `extensions/clis/src/tasks/utils/helpers` path: `extensions/clis/test/tasks/utils/helpers.ts` — implement `rmdir`
+- Create: `extensions/cli/src/tasks/utils/migrate.ts`
+- Create: `extensions/cli/test/tasks/utils/migrate.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/board.ts` — `BoardWriter` gains `rmdir(abs: string): Promise<void>`
+- Modify: `extensions/cli/src/tasks/utils/helpers` path: `extensions/cli/test/tasks/utils/helpers.ts` — implement `rmdir`
 
 **Interfaces:**
 - Consumes: `TASK_STATUSES`, `boardRoot`, `statusDir`, `DEFAULT_TASK_PROJECT`, `BoardWriter`
@@ -1596,7 +1596,7 @@ test("migrateLegacyBoard rmdirs empty root status folders", async () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/migrate.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/migrate.test.ts`
 
 Expected: FAIL with `ERR_MODULE_NOT_FOUND` for `migrate.js`
 
@@ -1687,7 +1687,7 @@ Do not register this on `tasks.ts`. Do not run it against the live board in this
 Run:
 
 ```bash
-cd extensions/clis && node --test --import tsx test/tasks/utils/migrate.test.ts
+cd extensions/cli && node --test --import tsx test/tasks/utils/migrate.test.ts
 pnpm --filter edges-cli test
 ```
 
@@ -1696,10 +1696,10 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/migrate.ts \
-  extensions/clis/src/tasks/utils/board.ts \
-  extensions/clis/test/tasks/utils/migrate.test.ts \
-  extensions/clis/test/tasks/utils/helpers.ts
+git add extensions/cli/src/tasks/utils/migrate.ts \
+  extensions/cli/src/tasks/utils/board.ts \
+  extensions/cli/test/tasks/utils/migrate.test.ts \
+  extensions/cli/test/tasks/utils/helpers.ts
 git commit -m "feat(tasks): add one-shot board migrate helper" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1786,7 +1786,7 @@ console.log(JSON.stringify(result));
 '
 ```
 
-`tsx -e` with `.ts` imports may not resolve; if it fails, add a throwaway runner `extensions/clis/scripts/migrate-legacy-board.ts` that prints the JSON result, run it with `pnpm --filter edges-cli exec tsx scripts/migrate-legacy-board.ts` from `extensions/clis` while passing the **repository root** (parent of `extensions/`) as `EDGES_REPO` or `process.argv[2]`. Delete that runner in the same commit after it succeeds — it is not a public CLI.
+`tsx -e` with `.ts` imports may not resolve; if it fails, add a throwaway runner `extensions/cli/scripts/migrate-legacy-board.ts` that prints the JSON result, run it with `pnpm --filter edges-cli exec tsx scripts/migrate-legacy-board.ts` from `extensions/cli` while passing the **repository root** (parent of `extensions/`) as `EDGES_REPO` or `process.argv[2]`. Delete that runner in the same commit after it succeeds — it is not a public CLI.
 
 Alternatively, if you prefer not to add a temp script: `git mv` every file the helper would move, matching Task 8’s rules exactly (all files in each root status dir, including `.{stem}.log.md`; `git mv` the directories into `_default/<status>/`; `rmdir` leftovers). Do not edit Task bodies. Do not add `edges-task-project` lines. Do not touch `.memory/`, `AGENTS.md`, or `README.md`.
 
@@ -1878,7 +1878,7 @@ git commit -m "refactor(tasks): move board into _default project folders" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
 
-If git treats the directory moves as renames, that is correct. Do not commit a leftover `extensions/clis/scripts/migrate-legacy-board.ts`. Do not commit `.obsidian/workspace.json`.
+If git treats the directory moves as renames, that is correct. Do not commit a leftover `extensions/cli/scripts/migrate-legacy-board.ts`. Do not commit `.obsidian/workspace.json`.
 
 ---
 

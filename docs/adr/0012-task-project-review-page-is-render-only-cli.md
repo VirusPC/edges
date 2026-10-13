@@ -4,7 +4,7 @@ ADR 0010 / 0011 的人确认闸门原先靠聊天里的 Markdown 建议表，以
 
 **Status:** accepted（ADR 0012；grill 确认于 2026-09-17；2026-09-19 由 ADR 0013 修订打开方式；2026-09-21 由 ADR 0021 修订持久入口；2026-09-23 由 ADR 0022 修订壳的三栏、文档载荷、不入库的预构建产物、默认内联壳与 hash 导航）
 
-**See also:** ADR 0010（classifyTasks 整板归属 + 人确认闸门）；ADR 0011（proposeTypes 类型发现 + 人确认闸门）；ADR 0013（[Artifacts 预览服务](0013-artifacts-preview-service.md)）；ADR 0021（[持久 `/tasks/` 看板站](0021-persistent-tasks-board-site.md)）；ADR 0022（[审阅壳三栏与 Task Doc](0022-review-shell-three-column-task-doc.md)）；[`knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`](../../knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md)（聊天 HTML 预览不能当拖拽闸门）
+**See also:** ADR 0010（classifyTasks 整板归属 + 人确认闸门）；ADR 0011（proposeTypes 类型发现 + 人确认闸门）；ADR 0013（[Artifacts 预览服务](0013-artifacts-preview-service.md)）；ADR 0021（[持久 `/tasks/` 看板站](0021-persistent-tasks-board-site.md)）；ADR 0022（[审阅壳三栏与 Task Doc](0022-review-shell-three-column-task-doc.md)）；[`knowledge/notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`](../../notes/2026-09-17--Grok-Bot-HTML%E9%A2%84%E8%A7%88%E6%8B%96%E6%8B%BD%E5%BC%82%E5%B8%B8.md)（聊天 HTML 预览不能当拖拽闸门）
 
 ## Decision
 

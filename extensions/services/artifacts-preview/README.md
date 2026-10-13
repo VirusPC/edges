@@ -6,7 +6,7 @@ Short-lived static **Artifacts 预览服务** (ADR 0013): upload → public URL 
 
 ## 用例 × 能力
 
-这个包是 HTTP 进程；日常操作走 [`edges artifacts`](../../clis/README.md#artifacts)。能做的事：把短生命周期静态页变成真浏览器（含手机）可开的 URL，到期删；以及在本机或 ECS 式宿主上把服务装起来、重启、轮换 token。能力面仍是 CLI + Skill + MCP；本轮没有 artifacts MCP。Skill 路径：渲染 → `publish` → 给人 URL。`review-page` 仍只渲染，不 publish。固定入口看 main 整板**不是**本服务：那是无 TTL 的 `/tasks/` 持久看板站（[ADR 0021](../../../docs/adr/0021-persistent-tasks-board-site.md)），不要用 UUID `publish` 当长期入口。
+这个包是 HTTP 进程；日常操作走 [`edges artifacts`](../../cli/README.md#artifacts)。能做的事：把短生命周期静态页变成真浏览器（含手机）可开的 URL，到期删；以及在本机或 ECS 式宿主上把服务装起来、重启、轮换 token。能力面仍是 CLI + Skill + MCP；本轮没有 artifacts MCP。Skill 路径：渲染 → `publish` → 给人 URL。`review-page` 仍只渲染，不 publish。固定入口看 main 整板**不是**本服务：那是无 TTL 的 `/tasks/` 持久看板站（[ADR 0021](../../../docs/adr/0021-persistent-tasks-board-site.md)），不要用 UUID `publish` 当长期入口。
 
 | 用例 | 达成什么 | CLI | HTTP | review-page / Skill / Action |
 | --- | --- | --- | --- | --- |
@@ -17,7 +17,7 @@ Short-lived static **Artifacts 预览服务** (ADR 0013): upload → public URL 
 | 仓库部署 pull 之后 | 盒上已有 server env 时跟上新代码并重启 | `server install` 再 `restart`（env 不存在则跳过） | 重启后 `GET /health` | Action：[`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml)；不要从 Action 再跑 `setup-nginx` |
 | 轮换 token | 换共享 token，服务与客户端都跟上 | `server install --force` → `restart` → 客户端 `init --force` | 写接口换新 Bearer | 无 |
 
-This package is the HTTP process. The thin command surface is `edges artifacts` in [`../../clis`](../../clis/). `edges tasks project review-page` stays render-only; Skill orchestration is render → `edges artifacts publish` → give the human the URL. Capability Surface is CLI + Skill + MCP; this round has no artifacts MCP.
+This package is the HTTP process. The thin command surface is `edges artifacts` in [`../../cli`](../../cli/). `edges tasks project review-page` stays render-only; Skill orchestration is render → `edges artifacts publish` → give the human the URL. Capability Surface is CLI + Skill + MCP; this round has no artifacts MCP.
 
 Phone review needs a **reachable** `EDGES_ARTIFACTS_BASE_URL` (ECS / public host). Localhost only works on the same machine.
 
@@ -58,7 +58,7 @@ There is no `server init` (client `edges artifacts init` is the laptop command).
 
 ### First time on the ECS
 
-1. **Node ≥ 20 + pnpm** on `cheng-dev` PATH (user systemd cannot sudo-install them). `corepack enable` then `corepack prepare pnpm@latest --activate` is enough if Node is already there.
+1. **Node ≥ 22 + pnpm** on `cheng-dev` PATH (user systemd cannot sudo-install them). `corepack enable` then `corepack prepare pnpm@latest --activate` is enough if Node is already there.
 2. **Install (config + unit, no process):**
 
    ```bash
@@ -147,7 +147,7 @@ Phone opens the printed `https://edges.viruspc.tech/artifacts/<uuid>/` in a syst
 
 ### After each main pull
 
-GitHub Actions [`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). **Only when** `~/.config/edges/artifacts-preview.env` exists, it runs `edges artifacts server install` then `edges artifacts server restart` (skipped until the one-time token file is in place, so teach deploys stay green). After the env exists, a failure fails the job so the restart is visible; the tree is already at `origin/main`. nginx is usually unchanged — do not re-run `setup-nginx` from the Action.
+GitHub Actions [`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). **Only when** `~/.config/edges/artifacts-preview.env` exists, it runs `edges artifacts server install` then `edges artifacts server restart` (skipped until the one-time token file is in place, so teach deploys stay green). After the env exists, a failure fails the job so the restart is visible; the tree is already at `origin/main`. After task-site generation, the Action runs `sudo -n /usr/local/sbin/edges-migrate-site-layout` even without the artifacts env. That entry is installed once by root with `sudo bash extensions/services/artifacts-preview/deploy/install-site-layout.sh`. It is not a repository script: sudo is limited to that absolute path with no arguments, so a push to `main` cannot change what root executes. The command migrates teaching roots to `<repo>/teaching/` and the installed tasks alias to `<repo>/tasks/_site/`, keeping public URLs and unrelated roots. It backs up both configs, validates with `nginx -t`, restores on failure, and reloads only when changed. Paths are fixed (`/etc/nginx/conf.d/teaching.conf` and `/etc/nginx/snippets/edges-tasks.conf`). A checksum mismatch prints `::warning::` and still runs the installed command; a missing command or a password prompt fails the job and prints the installer command. Do not re-run `setup-nginx` from the Action.
 
 If the unit files did not change, `restart` alone is enough; `install` then `restart` is the conservative path the Action uses.
 

@@ -11,47 +11,109 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- **完成标准可后补：** `conversation-to-tasks`：完成标准开卡时可选，可留到 `grill-with-docs` 再补；必填仅背景与目标。
-
-
 ### 笔记入库与能力面
 
-- **笔记写给人审：** `conversation-to-notes` 技能（`extensions/skills/conversation-to-notes`）现在要求整理出来的笔记写给人审阅：白话完整句，例子与上下文要够独立读懂；密表放进补充说明；所学只写判断与边界；行动指南须带触发与步骤。该技能的 2.1.0 / 2.1.1 已写在技能 changelog 里，这里不再复述明细。
-- **任务只成草稿：** 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`）：从对话整理任务草稿，正文为背景 → 目标 → 完成标准（动作可选）；栏名用中文。与笔记 / 记忆技能分工；只成文，不落库。
-
-### 文档与系统
-
-- **写明一键三件事：** 根 README 写明了系统设计目标：一键部署 Edges、一键接入 Agent 客户端、一键产出对外资产。仓库按这个方向收敛。
+- **中文标题的笔记和项目目录保留汉字：** 用 `edges notes create` 或 `edges projects create` 新建叶子时，日期目录会留下标题里的汉字和数字。标题「中文标题」得到形如 `YYYY-MM-DD--中文标题` 的目录，不再收成 `untitled-` 加时间。英文单词仍转成小写，词与词之间用 `-`；连续空白会折成一个 `-`。标题里没有任何字母或数字时，目录名仍是 `untitled-` 加时间。很长的标题会被截短，使整个日期目录名不超过 255 字节。
 
 ### 任务看板与项目
 
-- **窄屏能滚到详情：** 窄屏审阅页从页顶可以一直滚到 Details，点「回到看板」之后也能再滚回 Projects。任务锚定仍停在当前卡片上，并让开吸顶标题。
-- **标题配色与锚定：** `edges tasks project review-page` 和 `/tasks/` 上，三栏章节标题是 Projects、Tasks、Details。状态段标题是英文 Title Case，例如 Backlog、In Progress，点开的任务名留在 Details 下面。强色在顶栏：Edges 旁边是 Lucide `Layers2` 浅色图标块，顶栏本身是一条色带。章节标题是顶栏和页面背景之间的过渡色面，没有左侧色条。状态行贴着页面背景，仍是扁列表。窄屏项目下拉用弹出层锚在触发器上，打开后能切换项目。状态段标题比章节标题小一档。窄屏筛选入口是 Lucide `ListFilter` 图标。双击 Projects、Tasks、Details 或 Edges 会滚到那一节；「回到看板」滚到当前卡片，并让开吸顶的 Tasks 和状态标题。
-- **窄屏分段桌面一行：** 审阅页窄于 768px 时，项目收成一个下拉（例如「全部 · 95」），状态按 Backlog、In Progress、Done 这类英文标题分段纵向排开，只显示有卡片的状态且全部展开。筛选收进图标按钮，抽屉标题仍是「筛选」，右上角用 × 关掉。窄屏仍是项目、任务、详情接在同一页里往下滚；Projects、Tasks、Details 的标题吸在 Edges 下面，同一时间只钉住当前这一节，右侧用箭头图标收起，不是文字按钮。Backlog、In Progress 这些状态标题也用同一套标题：吸在 Tasks 下面，并且可以用箭头收起。窄屏把每一个状态段都收起时，这些标题紧挨成一列，中间不留深色空隙；还有一段展开时，卡片仍跟在自己的标题下面，段与段的间距保持原样。桌面状态列间距不变，Projects 的下拉和列表也不为这件事改间距。只有 Details 有「回到看板」，点了滚回任务区，不取消选中。宽屏把 Edges 和筛选合成一行，详情栏默认 220px，中栏更宽，分隔线仍可拖且中栏不会被拖没。卡片上的日期文件名默认收起。拖到左栏或「移到项目…」仍只改页内归属，复制导出 JSON 会带上这次改动。
-- **共用三栏审阅页：** `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个三栏审阅页：顶栏可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选；左侧点项目筛选，拖到项目上只改 project，再用「复制导出 JSON」贴回。中间的状态列只展示，右侧渲染当前条目的 Markdown 正文。页上的脚本在生成前由 `pnpm --filter tasks-review-app run build` 打好并内联进单份 HTML，构建产物不进 git。
-- **按项目分组列出：** 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板；需要时再加 `--format json`。输出是稳定的分组 JSON（`edges.tasks.grouped/v1`），不是审阅页的输入格式。原来的筛选和排序仍然先生效，再分组。
-- **部署生成静态页：** 部署时会把这份列表交给 `edges tasks project review-page` 写成静态页。现有 `deploy.yml` 会在整仓 pull 之后自动生成。
-- **修复部署引号：** 修复教学站部署流水线里读 token 时的引号错误，避免 Action 一启动就语法失败.
-- **/tasks/ 固定入口：** nginx 一次性配好后，打开 `http(s)://<host>/tasks/` 就是固定入口，始终反映 main 上的看板，和 `/teaching/` 在同一台机器上（见 ADR 0021）。第一次对外跑 `extensions/clis/deploy/setup-nginx-tasks.sh`。
-- **拖拽不写回仓库：** `edges tasks project review-page` 仍然只负责渲染，本轮拖拽不会写回仓库。
+- **中文标题的任务名保留汉字：** 用 `edges tasks create` 新建任务、又没有写 `--name` 时，生成的名字会留下标题里的汉字和数字，不再只剩夹在中间的英文词。已有任务可以用 `edges tasks update <目标> --name <名字>` 改这个字段。标题里没有任何字母或数字时，名字仍是 `task`。
+
+### 评测与观测
+
+- **自建 Langfuse 的仓库记录与实例对齐：** 在仓库根执行 `bash .harness/observation/smoke/langfuse-otlp-smoke.sh`，可以向自建 Langfuse 发一条名为 `edges-langfuse-smoke` 的 OTLP trace，并用 v2 observations 回查。先在环境里设置 `LANGFUSE_HOST`、`LANGFUSE_PUBLIC_KEY`、`LANGFUSE_SECRET_KEY`，脚本和仓库都不存放这些值。这台 v4.38.0 实例的 events_only 写模式不接受旧 ingestion 接口上的 trace-create；健康检查仍看 `/api/public/health`。自部署任务按「界面健康，再由一到两个客户端发出 trace」记成完成。公网入口记为经 Cloudflare Tunnel 的 HTTPS，仓库不写实例域名。旧的「只走 Tailscale」不再作为现行访问面。
+
+- **MemoryBench 小规模对照可复跑：** 新增 `.harness/evaluation/cases/memorybench-smoke/run.py`，固定官方代码和 NFCats 数据，比较无记忆与 BM25-M；`--prepare-only` 准备数据且不调用模型，`--output` 指定新的运行目录。默认最多 40 次模型请求，保存真实检索、作答、评分和用量，接口失败时终止并标记失败。附 MiniMax-M2.5 的实际试跑报告；该用例验证基准链路，尚未接入 Edges 项目记忆。
+
+### 文档与系统
+
+- **周复盘和日复盘有单独目录：** 阶段性回看写在 `retrospectives/`。周复盘是 `retrospectives/weekly/<周一日期>--周复盘/INDEX.md`，一级标题下用二级标题写六节：范围、本该怎样、实际怎样、为什么、下次做什么、建议补充内容清单。日复盘是 `retrospectives/daily/<日期>--日复盘/INDEX.md`，必写范围与建议补充内容清单，同样用二级标题。命名，以及 Memory / Skill / Note / Task / `AGENTS.md` 硬约束候选的去向，在 `retrospectives/README.md`。根 README 的目录表和本层内容列入了这个目录。
+
+- **README 改为对外门面：** 根 README 现在先回答外部访客「这是什么、能不能拿去用」：标语「harness 任何目录。你的大脑，也是一个目录。」、六条要点、一张知识闭环图、照着就能跑通的快速开始（本地打包安装 `edges` CLI 后对任意仓库执行 `edges init`），以及本仓的目录地图。原来写在 README 里的内容标准下放到所属目录：Edge 准入与演化在 `edges/README.md`，归档与附件规则在新的 `archive/README.md`；原「理念」「系统实现」原文保存在 `docs/architecture.md`。
+
+### 任务看板与项目
+
+- **旧任务入口继续可用：** `edges tasks status` 对旧 `index.md` 任务仍能正常流转，保留入口文件的拼写，并一起移动日志和附件；索引迁移不会因同一文件的 `INDEX.md` 别名重复登记。
+- **项目列表保留完整描述：** `edges tasks project list` 与 `edges tasks project get` 返回一致的项目信息，包括自定义标题和多段描述；`--all` 列表也沿用同一解析方式。查询只读取当前范围内已登记的项目，不补建元数据或系统入口。
+- **写命令拒绝森林开关：** `edges --all tasks create`、`edges --all tasks update` 和 `edges --all tasks status` 现在会明确报错且不修改文件；其他内容写命令也采用同一检查，避免把森林查询开关误用于写入。
+
+## [1.4.0] - 2026-10-08
+
+从 1.3.0 升级时先看这几处：`edges note` 改为 `edges notes`，`edges skill` 改为 `edges skills`，没有兼容别名。Project Memory 的 Python 执行层已移除，相关 Skill 改为调用 `edges memory`，使用前需要先构建或安装 Edges CLI。根上的维护记忆、技能、任务、评测和观测已迁入 `.harness/`，领域任务在 `tasks/`。
+
+### 领域模型细化
+
+- **节点按入口归属：** `edges tasks` 与 `edges memory` 可从显式作用域或最近的可读 `AGENTS.md` 选择节点；本层索引登记直属内容，下层索引登记子节点，普通交叉链接不改变归属。入口沿用硬约束、本层系统维护信息、下层系统维护信息三部分，发现节点不会自动初始化 Memory。
+- **看清系统森林：** `edges forest list` 列出当前作用域里各系统入口组成的森林，默认形态是 `independent`，也可以用 `--form innermost`。任务、笔记、项目、技能和记忆的 list 默认只走当前这一棵系统；要一次走完这片森林，在根命令加上 `--all`，例如 `edges --scope <目录> --all tasks list`。`--super` 只换列出的根，不代替 `--all`。
+- **命令名对齐目录：** 顶层命令 `edges skill` 改为 `edges skills`，与 `.harness/skills` 对齐；`edges note` 改为 `edges notes`，与 `notes/` 对齐。没有兼容别名。`edges tasks` 与 `edges memory` 已经和目录同名，保持不变。`edges artifacts`、`edges schema`、`edges forest` 没有同名内容目录，不改名。不为 `.harness/evaluation` 或 `.harness/observation` 新增命令。
+- **统一文档与归属操作：** Task、项目记忆、Note 和 Skill 由类型化节点模型与 `NodeService` 读取、保存和维护 AGENTS 索引；`edges tasks`、`edges memory remember` 和 `edges notes` 是这些内容的命令入口。唯一父归属遵循物理目录，索引用于发现；列出时默认顺着当前系统已登记的本层和下层引用一起展开，不自动进入节点自己的 harness。
+- **显式选择索引归属：** `edges memory init --index-group local|descendant` 与 `edges memory doctor` 接收调用方选择的本层或下层归属。`edges tasks` 与 `edges notes` 的列出和写入不接收 `--index-group`。已有关系保留分组，移动未登记节点不会凭空增加下层引用。旧 `task-projects` 区块通过 `pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root <作用域> --check` 显式审阅，改用 `--write` 才迁移。
+- **初始化作用域：** `edges init` 在选定目录写下系统入口 `AGENTS.md`，并编排 memory 的 feedback、project、reference，以及 notes、projects 两份 `.harness` 组织清单。材料落在该作用域的 `.harness`，这条命令不读 `--super`。`edges init <模块>` 与 `edges <模块> init` 写同一批文件。各模块只初始化自己：`edges memory init` 不带 `--memory-types` 时仍只返回待选择、不写盘，也不再创建 notes 或 projects；`edges skills init` 在尚未采用时写入 managed 与 referenced；`edges tasks init` 只建立任务看板并登记到本层入口。不指定模块时，不会创建 tasks、skills、user memory、evaluation、observation。`edges artifacts init` 仍只保存预览服务的地址和 token，不参与这套编排。
+- **目录内容带着资源走：** Task、普通项目记忆和 Note 统一使用目录中的 `INDEX.md`，Skill 使用 `SKILL.md`；旧的 `index.md` 仍可读，新建不再使用这个文件名。不再提供单文件创建或资源清单参数。`edges memory remember --import-entry` 校验并复制完整目录，保留来源；Task 状态流转以及节点移动、删除按目录处理。
+- **笔记和技能在本地经 NodeService 写入：** `edges notes` 与 `edges skills` 的创建、读取、更新和删除都调用 NodeService。`edges notes create` 只在本地写下 `notes/` 里的叶子，不再 commit、push 或开 PR。`edges skills create` 与 `edges skills update` 会写下受管的 `SKILL.md`。
+- **项目叶子与 harness 索引：** `edges projects` 用和 `edges notes` 相同的本地创建、读取、更新和删除，写在作用域的 `projects/`。projects 与 notes 的组织清单由 `edges projects init`、`edges notes init` 或无参 `edges init` 写入根 `.harness`，不再由 `edges memory init` 顺手带上。
+- **显式采用目录入口：** `pnpm migrate:directory-nodes --root <工作树>` 先预览，再通过 `--apply` 转换 tracked/public 内容。本仓已转换 117 条 Memory、103 条 Task、88 条 Note 和 100 份 runlog，保留附件、权限及引用目标，重复预览为空；私有内容、文章、第三方目录与旧审计材料不在范围内。
+
+### 任务看板与项目
+
+- **部署先生成数据契约：** 持久 `/tasks/` 在生成页面前运行 `pnpm --filter edges-cli run build:schemas`。审阅页校验任务正文时读取这份构建产物；仓库不提交它。
+- **站点迁移走固定免密入口：** Deploy 不再对仓库里的脚本使用 sudo。在服务器上用 root 执行一次 `sudo bash extensions/services/artifacts-preview/deploy/install-site-layout.sh`，之后只免密运行 `/usr/local/sbin/edges-migrate-site-layout`，把 teaching 与 tasks 的磁盘路径改到当前布局。
+- **仓库根列出维护任务：** 在仓库根运行 `edges tasks list` 会顺着根入口登记的 `.harness/tasks/README.md` 列出维护任务。`--super` 仍只列出领域目录 `tasks/` 下的任务。材料与类型的名单留在各自 README 的组织清单里。memory 与 skills 类型目录上的空 `AGENTS.md` 桩已删除；层系统入口仍是 `AGENTS.md`。
+- **任务看板跟材料配置走：** `edges tasks` 的看板目录和入口文件来自 `domain/config/harness-materials.json` 的 `tasks` 材料（当前相对路径 `tasks/README.md`）。维护系统写在 `<scope>/.harness/` 加上该路径；`--super` 写在 `<scope>/` 加上该路径。新建维护登记挂这份材料，不创建、也不要求 `tasks/AGENTS.md`。已有登记若已经挂着看板目录里的入口，则保持原样。
+- **获取当前版本的数据契约：** `edges schema list` 列出可用契约，`edges schema get task-doc/v1` 直接输出 TaskDoc JSON Schema，无需进入仓库或选择 scope。契约从 TS 数据定义生成，随构建包分发，不再手工维护仓库内的 JSON 文件。分组 JSON 与审阅页输入使用同一契约校验：保留对象、数组等扩展 metadata；非法状态、日期和未知顶层字段会明确报错，不自动修正输入。
+
+### 项目记忆（project-memory）
+
+- **层入口改用 project-harness 标记：** `AGENTS.md` 受管外层与三章改为 `project-harness` / `constraints` / `local` / `descendants`，写入标题为本层硬约束、本层系统维护信息、下层系统维护信息；旧标题本层组成、下层节点仍可读，刷新时写回现行标题。`edges memory` 读兼容旧 `project-memory-*` 层标记，刷新时写回新标记。类型目录的组织清单是 `README.md`，列表用 `project-entries`（本层内容 / 下层内容）；类型元数据仍用 `project-memory-type`。存量用 `pnpm migrate:project-harness-markers -- --root <作用域>` 预览，加 `--apply` 才写入。
+- **局部记忆回到所有者：** 将先前上收根层的 43 条公开记忆按当前内容恢复到 `extensions`、`project-memory-init`、`shared-extensions`、`knowledge/notes` 和 `.harness/tasks` 的本地索引，保留人工说明；`pnpm restore:local-ownership --root <独立克隆路径> --manifest <已审阅清单> --dry-run` 可审阅符合旧状态的公开纠正。其他克隆的 ignored 私有记录须各自按 journal 显式审阅。
+- **统一 CLI 执行入口：** Project Memory 的初始化、写入、类型登记、检查、旧布局迁移和私有归档统一由 TypeScript 的 `edges memory` 执行；模板随 CLI 分发。相关 Skill 改为调用 CLI，移除原 Python 执行层。需先构建或安装 Edges CLI，再升级这些 Skill。
+- **私有内容写入前检查：** `edges memory remember` 及迁移、归档恢复命令会核对实际文件的 Git 忽略结果，遇到例外规则放行私有文件时先拒绝写入。强制恢复失败会回滚原目录，无法回滚时保留受保护的恢复副本。
+
+### 文档与系统
+
+- **全局 skill 安装脚本按实际行为改名：** `pnpm skills:install` 改为 `pnpm skills:install-claude-global`，命令不变，不留旧名。它只装给 Claude Code，把每个 skill 实体拷贝进 `~/.claude/skills`，不写中枢 `~/.agents/skills`，也不建软链；文档原先写的「写入中枢、Claude Code 走软链」与实测不符。装进中枢改用 `npx skills@latest add ./extensions/skills -g`。
+- **统一 Node 22 环境：** CLI、MCP 和扩展应用的运行与构建最低要求为 Node 22；从源码使用 `pnpm test`、`pnpm build` 时也采用同一版本基线。
+- **按归属迁移目录：** 根维护记忆、技能、任务、评测和观测进入 `.harness/`，领域任务位于 `tasks/`，研究与教学分别位于 `projects/`、`teaching/`。`pnpm migrate:recursive-layout --worktree <独立工作树绝对路径> --dry-run` 审阅实例清单，改用 `--apply` 执行并保留本机恢复记录；各克隆的私有旧材料须分别迁移。
+
+## [1.3.0] - 2026-09-30
+
+### 任务看板与项目
+
+- **共用三栏审阅页：** `edges tasks project review-page` 和固定入口 `/tasks/` 共用同一个审阅页，按 Projects、Tasks、Details 展示项目、任务和正文。左侧点项目筛选，中间按状态展示任务，右侧渲染所选任务的 Markdown 正文；任务名显示在 Details 标题下面。卡片突出任务标题，带日期的文件标识默认收起。
+- **筛选与归属调整：** 可以按全文、`urgent` / `high` / `medium` / `low` / `none`、指派和 `edges-tasks-status` 筛选任务。把卡片拖到左侧项目，或使用「移到项目…」，只调整页内的项目归属；「复制导出 JSON」会带上调整结果，供审阅后回传。状态列只负责展示，页面操作不会直接写回仓库。
+- **桌面布局可调：** 宽屏把 Edges 顶栏和筛选控件放在同一行，详情栏默认宽 220px，为中间看板留出更多空间。两条分隔线可以拖动调整栏宽，中栏不会被拖没；桌面状态列间距保持不变。
+- **窄屏纵向浏览：** 页面窄于 768px 时，Projects、Tasks、Details 接在同一页中纵向滚动。项目列表收成显示数量的下拉框，弹出层锚在触发器上；筛选收进 Lucide `ListFilter` 图标按钮，抽屉标题为「筛选」，右上角用 × 关闭。任务按 Backlog、In Progress、Done 等英文状态标题分段，空状态不显示，有卡片的状态默认展开。
+- **分段吸顶与折叠：** 窄屏当前章节标题吸在 Edges 下方，状态标题吸在 Tasks 下方，两者均可通过箭头图标折叠。同一时间只吸顶当前章节；所有状态段收起时，标题紧挨成一列，不留深色空隙；仍有状态段展开时，保留卡片与段间距。项目下拉和项目列表的间距不受这次状态折叠调整影响。
+- **标题层级更清楚：** 顶栏使用色带，Edges 旁是 Lucide `Layers2` 浅色图标块。章节标题使用介于顶栏与页面背景之间的过渡色面，不加左侧色条；状态标题贴近页面背景，字号比章节标题小一档，保持扁平列表的层级。
+- **跳转与返回定位：** 双击 Projects、Tasks、Details 标题可滚到对应章节，双击 Edges 回到页顶。窄屏 Details 中的「回到看板」会滚到当前卡片、保留选中状态，并让开吸顶的 Tasks 和状态标题。修复窄屏滚动范围问题后，从页顶可以滚到详情，返回看板后也能再滚回 Projects。
+- **按项目分组列出：** 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板，需要时加 `--format json`。输出为稳定的 `edges.tasks.grouped/v1` 分组 JSON；原有筛选和排序先执行，再分组。这个输出与审阅页输入格式不同，部署生成器会完成转换。
+- **构建为单份页面：** 生成审阅页前，先用 `pnpm --filter tasks-review-app run build` 构建前端资源，随后由 `edges tasks project review-page` 将脚本和样式内联到一份 HTML 中；构建产物不进 git。`deploy.yml` 会在同步 main 后完成构建、格式转换和静态页生成，并修复了读取 Artifacts token 的引号错误，避免部署因语法错误中断。
+- **固定看板随部署更新：** nginx 首次配置完成后，`/tasks/` 与 `/teaching/` 在同一台机器上提供固定入口；看板随 main 的成功部署更新。首次配置使用 `extensions/cli/deploy/setup-nginx-tasks.sh`，后续部署自动生成页面。它是长期入口，不使用 Artifacts 临时链接的到期机制。
 
 ### Artifacts 预览
 
-- **公网域名与标识：** 公网示例和 `edges artifacts init --base-url` 用 `https://edges.viruspc.tech`（`/health`、`/artifacts` 路径不变）。对这个地址做 `publish`（`POST /artifacts`）时，请求带固定的浏览器式 User-Agent：缺了它 Cloudflare 回 1010，带上则是 201。打开链接的 GET 通常不受影响。
-- **发布临时预览链接：** 可以把短生命周期的静态页（例如审阅页 HTML）上传成真浏览器能打开的 URL，到期自动删。本机先用 `edges artifacts init` 记下服务地址和共享 token，再用 `edges artifacts publish` 拿到公开链接；提前删用 `edges artifacts rm`。
-- **鉴权与可达地址：** 写接口要带这份共享 token；浏览器打开链接不用登录。手机审阅必须用能到达的 `BASE_URL`，不能假定 localhost。
-- **审阅页不负责发布：** `edges tasks project review-page` 仍然只负责渲染，不发布。要给人打开时，先渲染再 `publish`。
-- **同机安装与启停：** 在和 teaching 同一台机器上，用 `edges artifacts server install` 装好环境（不启动进程），再用 `start` 拉起服务。日常用 `stop` / `restart` 管进程，用 `status` 查看。一次性对外跑 `setup-nginx`。没有 `server init`。
-- **反代不另开端口：** 反代写进已有的 `teaching.conf`，必须带 `/teaching/`，不要另开公网端口。
-- **合并后重启服务：** 合并到 main 后，如果盒上已经有这份服务配置，`deploy.yml` 会在整仓 pull 之后重启服务。nginx 通常不用再跑。
+- **发布临时预览链接：** 可以把静态文件或目录上传成浏览器和手机可打开的 URL，到期自动删除。本机先用 `edges artifacts init --base-url <url> --token <server-token>` 保存服务地址并复用服务器的 token，再用 `edges artifacts publish` 发布，提前删除用 `edges artifacts rm`。审阅页先由 `edges tasks project review-page` 渲染，再单独发布。
+- **公网地址与鉴权：** 公网示例和 `edges artifacts init --base-url` 使用 `https://edges.viruspc.tech`，`/health`、`/artifacts` 路径不变。上传和删除需要共享 token，浏览器打开预览链接无需登录；给手机的地址必须从手机可达。客户端写请求带固定的浏览器式 User-Agent，以处理该公网入口对缺少此标识的 `POST /artifacts` 返回 Cloudflare 1010 的问题。
+- **安装与启停分开：** 在与教学站点相同的宿主上，用 `edges artifacts server install` 准备环境和服务，再用 `edges artifacts server start` 启动。日常通过 `stop` / `restart` 管进程、`status` 查看状态；`install` 不启动进程，也没有 `server init` 命令。
+- **复用现有反代：** 一次性运行 `edges artifacts server setup-nginx`，把反代写入已有的 `teaching.conf`；配置必须包含 `/teaching/`，不另开公网端口。后续常规部署不需要重复配置 nginx。
+- **部署后更新服务：** 合并到 main 后，若服务器已有 Artifacts 服务配置且 token 已设置，`deploy.yml` 会在同步 main 后执行 `edges artifacts server install` 和 `edges artifacts server restart`；缺少配置或仍使用占位 token 时跳过。
+- **修复 CLI 完整编译：** `edges artifacts server setup-nginx` 成功结果中的 `command` 保留子命令名 `artifacts.server.setup-nginx`，sudo shell 命令字符串放到 `sudoCommand`。修复两个含义共用字段的问题后，`pnpm --filter edges-cli build` 可以完整通过。
+
+### 笔记入库与能力面
+
+- **任务人审后落库：** 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`），从对话整理任务草稿，正文按背景 → 目标 → 动作 → 完成标准组织，使用中文栏名。背景和目标必填，动作和完成标准可选；完成标准可在 `grill-with-docs` 后补齐。通过 `edges tasks create` 或 `edges tasks update` 落库，可以在对话确认后写入，也可以写在独立分支上提 PR 审阅。
+- **CLI 目录改名：** 多命令 CLI 的代码目录从 `extensions/clis` 改为 `extensions/cli`，引用旧路径的本地脚本需要同步调整。npm 包名仍为 `edges-cli`，二进制仍为 `edges`，`pnpm --filter edges-cli` 和命令行为不变。
+- **明确本地 CLI 使用方式：** 文档明确 `edges-cli` 保持 `private`，不发布到 npm registry。日常可用 `pnpm --filter edges-cli exec tsx src/index.ts` 运行；本地 `edges` 二进制来自 `dist/index.js`，需先让 `pnpm --filter edges-cli build` 成功，`prepack` 会运行同一构建流程。
+
+### 文档与系统
+
+- **本地窗口状态不再入库：** `.obsidian/workspace.json` 已移出版本管理并加入忽略规则，Obsidian 的本地窗口布局不再随仓库提交共享。
 
 ## [1.2.0] - 2026-09-18
 
 ### 任务看板与项目
 
-- 跨 Agent 接力的工作项看板改到 [`knowledge/tasks/`](knowledge/tasks/)。原来 `knowledge/todos/` 里的条目已经改成现在的任务记录格式并迁了过来；旧目录已删除，没有再留跳转说明。
+- 跨 Agent 接力的工作项看板改到 [`knowledge/tasks/`](.harness/tasks)。原来 `knowledge/todos/` 里的条目已经改成现在的任务记录格式并迁了过来；旧目录已删除，没有再留跳转说明。
 - 可以用 `edges tasks` 管理这块看板：`edges tasks list`（列出）、`edges tasks get`（查看）、`edges tasks create`（创建）、`edges tasks update`（更新）、`edges tasks status`（改状态）。运行记录可以只读查看：`edges tasks runs`、`edges tasks run-messages`。目前还不能从命令行删除任务，也还没有和 GitHub 同步。创建或更新时可以用 `--priority` 标优先级，取值为 `urgent` / `high` / `medium` / `low` / `none`（写在 `metadata.edges-task-priority`，缺省为 `none`）；列出时可以用 `edges tasks list --sort priority` 按优先级排序。改优先级不会把任务挪到别的状态文件夹。
 - 任务可以归到一个任务项目里，文件放在 `knowledge/tasks/<项目>/` 下；还没分组的放在 `_default`。创建或筛选时用 `--project`，换项目用 `edges tasks update --project`；`edges tasks status` 只在同一个项目内移动。项目的标题和说明用 `edges tasks project list`、`edges tasks project get`、`edges tasks project create`、`edges tasks project update` 管理；任务正文仍以看板上的 markdown 为准。
 - 新增命令 `edges tasks project review-page`：根据分组建议生成一个本地网页，方便用浏览器拖拽调整任务归属。点左侧分组可以筛选列表，拖到分组上可以改归属。新增 classifyTasks 技能（`extensions/skills/project-tasks-classify`）按你已经建好的任务项目给整板提出归属建议；确认时默认打开上面的审阅页，再用 `edges tasks update --project` 落地。没有图形界面时可以退回用表格。
@@ -80,7 +142,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `shared-extensions/`：跨机器、跨 Agent 共享的个人 harness（skills、MCP 配置、plugins、hooks）。接入 Edges 的能力仍在 `extensions/`。整层发版：`VERSION` + `CHANGELOG.md` + tag `shared-extensions@`。
 - MIT 许可证。
 - README 增加「隐私与脱敏」节。
-- `extensions/clis/`：面向 agent 的 `edges-note` CLI（JSON stdout，复用 `bin/new-note`）。本地 agent 优先走它；MCP `new-note` 保留。
+- `extensions/cli/`：面向 agent 的 `edges-note` CLI（JSON stdout，复用 `bin/new-note`）。本地 agent 优先走它；MCP `new-note` 保留。
 - `pnpm skills:link`：把 `extensions/skills` 里每个 skill 以相对软链挂到 `.agents/skills`。
 - 项目级 `teach` skill / `knowledge/teaching/` 教学工作区。
 - 项目级 `.agents/skills` 增加 `grill-with-docs`：grilling 同时产出 ADR 与 glossary。
@@ -126,7 +188,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 办公文档（`.docx` / `.xlsx` / `.pptx`）入库。
 - 未公开的专利交底材料。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/VirusPC/edges/compare/v1.3.0...v1.4.0
+[1.3.0]: https://github.com/VirusPC/edges/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/VirusPC/edges/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/VirusPC/edges/releases/tag/v1.1.0
 [1.0.0]: https://github.com/VirusPC/edges/releases/tag/v1.0.0

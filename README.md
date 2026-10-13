@@ -1,189 +1,115 @@
-# Edges — 个人认知系统
+# Edges
 
-[![教学站点部署](https://github.com/VirusPC/edges/actions/workflows/deploy.yml/badge.svg)](https://github.com/VirusPC/edges/actions/workflows/deploy.yml)
+[![站点部署](https://github.com/VirusPC/edges/actions/workflows/deploy.yml/badge.svg)](https://github.com/VirusPC/edges/actions/workflows/deploy.yml) ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/VirusPC/edges?utm_source=oss&utm_medium=github&utm_campaign=VirusPC%2Fedges&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
-> 把认知资本转化为可复利的判断优势。
+**harness 任何目录。你的大脑，也是一个目录。**
 
-Edges 是一个以知识资产为核心、由 Agent 接口和可迁移 harness 支撑的个人认知系统。它把有限的时间、注意力和推理能力投入知识的研究、提炼与使用，让重要经验形成可复用的 Edge，并在真实判断、行动和外部互动中持续获得反馈。
+*Harness any directory. Your brain is one too.*
 
-这是一个公开的个人系统，不承诺整仓可以即插即用；其中的 skills、CLI、MCP 等组件可以独立复用。
+harness 就是一组 Markdown 文件加 Git。仓库里的那套，给 Cursor、Codex 这类写代码的 Agent 用；你的大脑是一个不落盘的虚拟目录，它的那套单独放在一个仓库里，给 Grok Bot 这类 personal agent 用。你纠正过的、拍板过的、想明白的，都会留在对应的那一套里，经你审核合并后，下一个 Agent 直接接着用。
 
-## 理念：知识只有进入闭环，才能产生复利
+- **持续自进化**：每一次反馈都会自动沉淀，下次不再重犯。Edges 自己也用 Edges 维护：改进 Edges 的方法，也在被 Edges 改进，RSI 的成果随每一次升级交到你手里。
+- **不止停留在仓库**：海量经验知识从不同端捕获到仓库，但不止停留在仓库。将它们提炼成简单可复用的判断优势（Edge，Edges 由此得名），并进一步转化为博客、播客、视频、PPT 等丰富的对外分发资料，用更低的边际成本取得更大收益。
+- **任何目录**：以文件系统模型为核心，允许为任何仓库、仓库里的任何目录配置 harness。你的大脑，也是一个目录。
+- **任何人**：既是个人的 harness，也是团队的 harness，取决于目录的共享范围。
+- **任何 Agent**：不与 Codex、Claude Code、Grok Bot 等任何 Agent 绑定。记忆、技能、任务看板、笔记——跟随仓库的多 Agent 多人协作平台。一切尽在掌控之中。
+- **超级个体**：个人第二大脑，认知复利系统。持续快速地提升自己，实现个人大脑的快速进化。
 
-从投资的角度看，知识管理是在配置认知资本。信息只是研究机会；保存下来并不会自动成为资产。缺少提炼、无法重新找到、不能影响行动的内容，不但无法产生收益，还会积累持有成本。Edges 关心的是选择值得持续投入的经验，把它们转化为能够改善未来决策的知识资产。
-
-核心原则是：**多端捕获，选择投入；沉淀 Edge，按需部署；反馈回流，持续复利。**
-
-```text
-(1) 发现机会：对话 / 文章 / 实践 / 学习
-        |
-        | 低成本捕获
-        v
-(2) 投入研究：Notes / Projects / Teach
-        |
-        | 配置认知资本，选择性提炼
-        v
-(3) 形成资产：Edges
-        |
-        | 按需部署
-        +--> 内部调用 --> 判断与行动
-        |
-        +--> 外部扩环 --> Posts / 系统接口 --> 外部参与者
-        |
-        v
-(4) 获得收益：行动结果 / 新经验 / 问题 / 反驳 / 新证据
-        |
-        | 回流并再投资，改善资产与管理能力
-        +------------------------------------------> 回到 (1)
-```
-
-这就是 Edges 的知识闭环（Knowledge Loop）。“机会”是值得研究的线索，不是交易机会；“收益”是相对原有判断或替代方案，在判断质量、行动效果、决策速度、认知成本或外部反馈上的改善，不等于财务利润。只有收益与反馈重新进入捕获入口并被再次投入，知识积累才会变成认知复利。
-
-人在闭环中拥有认知资本，决定配置方向并承担最终风险；Agent 是受人治理的主动管理者，协助研究、提炼、检索、部署和处理反馈；Memory 让规则、上下文和资产跨任务延续；Loop 则把一次使用变成持续的收益再投资。
-
-知识闭环还可以向外扩张。Edge 被内部调用，形成“判断—行动—新经验”的个人循环；Post 和系统接口把知识部署给更多人和系统，引入新的问题、反驳与证据。输出不是终点：只有反馈催生的新洞察重新进入知识生产入口，个人循环才扩展成连接真实世界的更大循环。
-
-复利发生在两个相互促进的层面：反馈修正 Edge，改善知识资产组合；反馈进一步改变 Agent 的记忆、检索、工具和工作流，改善资产管理能力。Edges 当前追求 Human/Agent-in-the-loop 的受控自进化：Agent 协助发现问题、提出改进和执行验证，人判断并采纳重要变更。Recursive Self-Improvement（递归自我改进）是更长期的方向，不是当前能力。
-
-## 知识模型
-
-目录不是一条强制流水线，而是在知识闭环中承担不同角色：
-
-| 角色 | 目录或机制 | 作用 |
-| --- | --- | --- |
-| 知识生产 | [`notes/`](knowledge/notes/)、[`projects/`](knowledge/projects/)、[`teaching/`](knowledge/teaching/) | 承载研究线索与在研资产，选择性投入认知资本 |
-| 知识沉淀 | [`edges/`](knowledge/edges/) | 形成脱离原始场景仍可反复部署的核心资产 |
-| 知识使用 | 内部调用、[`posts/`](knowledge/posts/)、系统接口 | 部署资产，获得决策收益和外部反馈 |
-| 工作项 | [`tasks/`](knowledge/tasks/) | 跨 Agent 接力的 Task 看板，按 `edges-tasks-status` 分夹；不是知识原材料，也不是抢单队列 |
-| 支撑与退出 | [`resources/`](knowledge/resources/)、[`archive/`](knowledge/archive/) | 支撑资产使用、控制持有成本并保留恢复可能 |
-
-Notes 是低成本、零散且尚未形成稳定结论的捕获。Projects 是以解决问题或交付产出为目标的专项工作区；Teach 是以学习进展和能力获得为目标的专项工作区。三者都是知识生产入口，不是依次晋级的成熟度阶段，也不要求投入相同成本。专项中的原始上下文留在工作区，只有预期能够复用、影响决策或降低不确定性的经验，才值得进一步提炼为 Edge。
-
-[`knowledge/tasks/`](knowledge/tasks/) 存放跨 Agent 接力的工作项，按 `edges-tasks-status` 分夹。新人侧捕获默认落入 `backlog/`；执行记录写在同 stem 的 sidecar，不进入 Task 正文。它不是 Note，也不是 Multica 式可抢单队列。
-
-### Edge 与演化
-
-Edge 是已经提炼出理由与适用边界、可检验且能相对原有判断或替代方案改善未来决策的可复用判断。单条 Edge 是判断优势；多个相互补充、交叉检验并服务于不同决策的 Edge，共同构成认知资产组合。
-
-Edge 至少应说明结论、理由、适用边界和检验方式，并满足四项准入标准：未来可以复用，能够影响行动，允许复盘或证伪，并能随新经验继续演化。现实验证可以记录，但不是成为 Edge 的前提。Edge 也具有认知风险：证据可能不足，判断可能被越界使用，价值可能随环境衰减，也可能被新证据反驳。
-
-对新增 Edge，可以逐步观察置信度、验证证据、复用记录、最近复查时间、失效条件和衰减风险。这些是帮助判断与演化的观察维度，不是统一的 ROI、Alpha 或综合评分；现有历史内容也尚未按这些维度完成记录。
-
-从 Note 或专项形成 Edge 是提炼，不是移动原文或复制全文。外部反馈首先作为新材料回到 Note 或对应专项，经过判断后再用于演化 Edge：
-
-- 不改变判断含义的勘误、证据和链接补充，可以原地修改。
-- 适用边界、因果解释或结论发生实质变化时，创建继任 Edge，并标明替代关系。
-- 被替代的旧 Edge 归档到对应的 `archive/edges/` 路径。
-
-### 知识如何发挥作用
-
-- **内部调用**：在新问题中检索并部署 Edge，使其影响判断与行动；产生的决策收益再回到知识生产入口。
-- **外部扩环**：Post 或系统接口把活跃知识部署给外部参与者；读者反馈、使用结果和新证据回流后，形成更大的知识闭环。
-
-[`knowledge/posts/`](knowledge/posts/) 存放准备公开发表的成稿。Post 可以取材于 Note、Edge 或专项成果，但不会替代内部知识真源。该目录由人仔细维护；AI 不得自动创建、编辑、移动、删除、重构或重写其中的任何文件，可以在其他位置协助起草，再由人审阅后放入。
-
-知识资产只有能够被及时找到、理解并带着必要上下文投入决策，才具有流动性。当前主要通过文件、Obsidian 和人工检索调用知识；后续计划接入 RAG、PageIndex 等索引方式，并经 [`extensions/`](extensions/) 向外部系统提供机器可读的知识访问能力。它们旨在提高知识流动性，但仍属于规划方向，尚不是现有能力。
-
-### 支撑与退出
-
-[`knowledge/resources/`](knowledge/resources/) 存放跨知识区域共享的图片、音频等附件，不作为独立知识阅读；只属于某个专项的附件与专项共置。
-
-[`knowledge/archive/`](knowledge/archive/) 类似整个知识空间的回收站：过时、重复、错误或低活跃度内容退出活跃区域，以降低持有成本，但仍保留来源和恢复可能性。它不是知识出口，也不限于失效 Edge。归档必须保留内容在 `knowledge/` 下的原始相对路径：
+经验在这几层之间循环，越滚越大：
 
 ```text
-knowledge/notes/a.md → knowledge/archive/notes/a.md
-knowledge/projects/foo/report.md → knowledge/archive/projects/foo/report.md
+(1) 多端捕获：对话 / 文章 / 实践 / 学习
+        │
+        ▼
+(2) 提炼：可复用的判断优势（Edge）
+        │
+        ├──> 调用：用在新的判断和行动里
+        └──> 输出：博客 / 播客 / 视频 / PPT / 站点
+        │
+        ▼
+(3) 反馈：结果 / 问题 / 反驳 / 新证据 ──> 回到 (1)
 ```
 
-曾经有意义或被引用过的内容应归档，并写明原因；误建、空白或纯临时文件可以直接删除。
+## 快速开始
 
-> 以上是新增内容和后续维护的目标约定。历史内容尚未全部按该模型整理，目录现状不代表已经完成迁移。
-
-## 系统实现
-
-系统设计上，Edges 希望部署、接入和输出这三件事尽量一键完成。它们分别托住知识闭环的底座、把捕获接到输入侧、以及把沉淀资产部署出去。仓库按这个方向收敛。
-
-- **部署**：一键把 Edges 拉起来，立刻有可运行的知识管理底座。
-- **接入**：一键把各类 Agent 客户端接到输入侧，持续收集知识。
-- **输出**：一键把沉淀知识转成合适的对外输出资产（站点、预览页、公开稿等）。
-
-| 目录 | 职责 | 边界 |
-| --- | --- | --- |
-| [`knowledge/`](knowledge/) | 知识生产、提炼、使用与退出 | Edges 的核心资产 |
-| [`AGENTS.md`](AGENTS.md) 与 [`.memory/`](.memory/) | 为 Agent 提供分层的规则、决策、纠错与流程记忆 | 服务项目维护，不替代长期知识库 |
-| [`extensions/`](extensions/README.md) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关 |
-| [`shared-extensions/`](shared-extensions/README.md) | 跨机器、跨 Agent 共用的个人 harness | 离开 Edges 仍然有价值 |
-| [`scripts/`](scripts/README.md) | 初始化、构建、迁移等维护脚本 | 通过 `pnpm` 调用，不加入 `$PATH` |
-| [`evaluation/`](evaluation/README.md) | 评测整套 Edges | 系统元工作，不是知识生命周期阶段 |
-| [`observation/`](observation/README.md) | 观测运行与使用 | 运营观测，不替代 `.memory` 决策 |
-
-`evaluation/` 与 `observation/` 是系统实现旁的支撑目录：前者对照假设，后者记录野外现象。它们不进入 notes → edges → archive 主链；观测或评测若产生新洞察，仍须回到捕获入口。
-
-捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](extensions/clis/README.md) 的 `edges note …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](extensions/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](extensions/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
-
-Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；`AGENTS.md` 和 `.memory/` 保存维护系统所需的运营规则、决策与经验；`knowledge/` 保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
-
-`extensions/` 收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill 和其他接口。`shared-extensions/` 则保存不依赖 Edges、可跨机器和 Agent 客户端复用的个人 harness；两者互斥。短生命周期预览页（上传 → 可达 URL → TTL）的用例 × 能力见 [`extensions/services/artifacts-preview`](extensions/services/artifacts-preview/README.md#use-case-matrix)；命令面是 `edges artifacts`。
-
-现有调用侧以文件、Obsidian 和人工检索为主。未来的索引、检索与机器接口仍放在 `extensions/`，提高知识流动性并让闭环连接外部系统，但必须在实现前明确标注为规划能力。
-
-## 使用与维护
-
-### 维护完整的 Edges
+需要 Node.js 22 及以上和 pnpm。
 
 ```bash
-git clone --recurse-submodules https://github.com/VirusPC/edges.git
+# 1. 安装 edges CLI，并让你的 Agent 学会什么时候调用它
+git clone https://github.com/VirusPC/edges.git && cd edges
 pnpm install
-pnpm setup
-pnpm skills:link
+pnpm --filter edges-cli pack --pack-destination /tmp
+npm install -g /tmp/edges-cli-0.1.0.tgz
+npx skills@latest add ./extensions/skills -g
+
+# 2. 给任何目录配一套 harness
+cd ~/your-repo && edges init
 ```
 
-已有克隆若没有评测 submodule：`git submodule update --init evaluation/third_party/locomo`。LoCoMo 官方冒烟入口见 [`evaluation/README.md`](evaluation/README.md)。
+最后一条命令会让你选择把 skill 装给哪些 Agent。
 
-- `pnpm install`：安装 workspace 依赖。
-- `pnpm setup`：初始化本地环境（加载 .env；不再把仓根 bin/ 写入 PATH）。
-- `pnpm skills:link`：把 Edges 自有 skills 链到项目级 `.agents/skills/`。
+想给你的大脑也配一套：新建一个私有仓库，同样执行 `edges init`，再让你的 personal agent 在它自己的电脑上 clone 这个仓库。
 
-### 只使用可复用组件
+CLI、MCP 和 skill 各自的用法见 [`extensions/cli`](extensions/cli/README.md)、[`extensions/mcp-servers`](extensions/mcp-servers/README.md) 和 [`extensions/skills`](extensions/skills/README.md)。
 
-不克隆整套系统也可以安装公开 skills：
+## 本仓：作者的大脑仓库
+
+本仓既是 Edges 的源码仓库，也是作者大脑的 harness 仓库。这个实例的目标是：持续提升自己，也持续提升自我改进的能力。
+
+| 目录 | 作用 |
+| --- | --- |
+| [`notes/`](notes/README.md)、[`projects/`](projects/)、[`teaching/`](teaching/README.md) | 知识生产：低成本捕获、专项工作区、教学工作区 |
+| [`retrospectives/`](retrospectives/README.md) | 阶段性回看：周复盘与日复盘 |
+| [`edges/`](edges/README.md) | 提炼出来、可以反复使用的判断 |
+| [`posts/`](posts/README.md) | 对外博客成稿，由作者亲手维护 |
+| [`tasks/`](tasks/README.md)、[`.harness/tasks/`](.harness/tasks/README.md) | 领域任务与 Edges 维护任务看板 |
+| [`archive/`](archive/README.md) | 退出活跃区域的内容 |
+| [`extensions/`](extensions/README.md) | 接入和操作 Edges 的 CLI、MCP、skill 与应用 |
+| [`shared-extensions/`](shared-extensions/README.md) | 不依赖 Edges、跨机器跨 Agent 共用的能力 |
+| [`.harness/`](.harness/) | 本仓自身的维护记忆、技能、评测与观测 |
+
+对外输出可以直接看：[教学站](https://edges.viruspc.tech/teaching/)、[任务看板](https://edges.viruspc.tech/tasks/)。
+
+## 参与开发
 
 ```bash
-npx skills@latest add VirusPC/edges/extensions/skills
+git clone --recurse-submodules https://github.com/VirusPC/edges.git && cd edges
+pnpm install && pnpm setup && pnpm skills:link
+pnpm build && pnpm test
 ```
 
-子路径不能省。单独使用 Agent CLI、MCP server 或 skills 的方式分别见 [`extensions/clis/README.md`](extensions/clis/README.md)、[`extensions/mcp-servers/README.md`](extensions/mcp-servers/README.md) 和 [`extensions/skills/README.md`](extensions/skills/README.md)。
+已有克隆若没有评测 submodule：`git submodule update --init .harness/evaluation/third_party/locomo`。可用命令以根 [`package.json`](package.json) 为准，专项命令见各子目录 README。
 
-### 开发与验证
+## 文档地图
 
-```bash
-pnpm build
-pnpm test
-```
+- [`AGENTS.md`](AGENTS.md)：Agent 的入口，含硬约束与分层项目记忆。
+- [`CONTEXT.md`](CONTEXT.md)：领域术语表。
+- [`docs/adr/`](docs/adr/)：架构决策记录。
+- [`docs/architecture.md`](docs/architecture.md)：内部架构思想。
+- [`docs/recursive-layout-migration.md`](docs/recursive-layout-migration.md)：目录升级与本机私有材料迁移。
+- [`CHANGELOG.md`](CHANGELOG.md)：仓库级变更记录，tag 使用 `vX.Y.Z`；对外 skill 各自独立 semver，`shared-extensions/` 整层使用自己的 [`VERSION`](shared-extensions/VERSION) 与 [`CHANGELOG.md`](shared-extensions/CHANGELOG.md)。
+- [`scripts/`](scripts/README.md)、[`.harness/evaluation/`](.harness/evaluation/README.md)、[`.harness/observation/`](.harness/observation/README.md)：维护脚本、评测与观测。
 
-根 [`package.json`](package.json) 是可用 workspace 命令的当前清单，专项命令见各子目录 README。
-
-### 文档与版本
-
-- [`README.md`](README.md)：目录约定、业务逻辑和内容标准的唯一真理源。
-- [`AGENTS.md`](AGENTS.md)：Agent 必须优先看到的硬约束和分层项目记忆入口。
-- [`CONTEXT.md`](CONTEXT.md)：领域术语表，不存放实现细节。
-- [`.memory/`](.memory/)：保存无法从代码或 Git 历史直接推导的决策、反馈与参考资料。
-- 仓库级变更记录在 [`CHANGELOG.md`](CHANGELOG.md)，tag 使用 `vX.Y.Z`。
-- 对外 skill 各自独立 semver；`shared-extensions/` 整层使用自己的 [`VERSION`](shared-extensions/VERSION) 与 [`CHANGELOG.md`](shared-extensions/CHANGELOG.md)。
-
-进一步文档：[Edges 扩展](extensions/README.md) · [共享 Agent harness](shared-extensions/README.md) · [维护脚本](scripts/README.md) · [评测](evaluation/README.md) · [观测](observation/README.md)
-
-## 公开仓库边界
+## 隐私与脱敏
 
 本仓库公开在 `github.com/VirusPC/edges`，写入即等同公开发表：
 
 - token、API key、密码、私钥、cookie 等凭据，个人信息、未公开 IP，以及 `.docx`、`.xlsx`、`.pptx` 等办公二进制文件绝不入库。
 - 内部域名、系统名、服务名、代码路径、同事身份和排期等标识符必须删除或改写为通用表述后才能入库。
-- 截图按“能否直接放到公开博客”判断；需要打码、包含内部 UI 或可能泄漏上下文的截图不要入库。
-- 发现疑似泄漏时立即停止并告知仓库所有者；删除工作区文件不等于清除 Git 历史。
-- `git filter-repo`、force push 等历史重写必须由仓库所有者确认并执行。
+- 截图按「能否直接放到公开博客」判断；需要打码、包含内部 UI 或可能泄漏上下文的截图不要入库。
+- 发现疑似泄漏时立即停止并告知仓库所有者；删除工作区文件不等于清除 Git 历史，`git filter-repo`、force push 等历史重写必须由仓库所有者确认并执行。
 
 ## License
 
-本仓库使用 [MIT License](LICENSE)。系统演进记录见 [`CHANGELOG.md`](CHANGELOG.md)。
+[MIT License](LICENSE)。
+
+<!-- project-entries-local:start -->
+## 本层内容
+
+- [领域任务](tasks/README.md) — 根作用域领域工作项看板（系统入口见同目录 AGENTS.md）。
+- [笔记](notes/README.md) — 低成本捕获与在研想法。
+- [复盘](retrospectives/README.md) — 周复盘与日复盘的阶段性回看记录。
+- [教学](teaching/README.md) — 有状态的教学工作区与主题课页。
+- [认知优势](edges/README.md) — 已提炼、可复用的判断资产。
+- [对外成稿](posts/README.md) — 准备公开发表的博客成稿（人维护）。
+<!-- project-entries-local:end -->

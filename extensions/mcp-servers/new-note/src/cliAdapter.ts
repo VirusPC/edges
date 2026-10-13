@@ -1,31 +1,27 @@
 import { execFile } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import type { IngestRequest, RuntimeConfig, ScriptSuccess } from "./types.js";
 
 const execFileAsync = promisify(execFile);
-const MCP_PACKAGE_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 type CliPayload = {
   status: string;
-  filePath?: string;
-  branch?: string;
-  prStatus?: ScriptSuccess["prStatus"];
-  prUrl?: string;
+  path?: string;
+  title?: string;
   reason?: string;
   errorCode?: string;
 };
 
 function spawnArgs(cliEntry: string): { file: string; prefix: string[] } {
   if (cliEntry.endsWith(".ts")) {
-    return { file: process.execPath, prefix: ["--import", "tsx", cliEntry] };
+    return { file: process.execPath, prefix: ["--import", import.meta.resolve("tsx"), cliEntry] };
   }
   return { file: process.execPath, prefix: [cliEntry] };
 }
 
 function failedNoteError(parsed: CliPayload, stdout: string): Error {
-  return Object.assign(new Error(parsed.reason || "edges note failed"), {
+  return Object.assign(new Error(parsed.reason || "edges notes failed"), {
     errorCode: parsed.errorCode,
     stdout,
   });
@@ -33,14 +29,12 @@ function failedNoteError(parsed: CliPayload, stdout: string): Error {
 
 function parseNoteJson(stdout: string): ScriptSuccess {
   const parsed = JSON.parse(stdout) as CliPayload;
-  if (parsed.status !== "success" || !parsed.filePath || !parsed.branch || !parsed.prStatus) {
+  if (parsed.status !== "success" || !parsed.path || !parsed.title) {
     throw failedNoteError(parsed, stdout);
   }
   return {
-    filePath: parsed.filePath,
-    branch: parsed.branch,
-    prUrl: parsed.prUrl,
-    prStatus: parsed.prStatus,
+    path: parsed.path,
+    title: parsed.title,
     stdout,
   };
 }
@@ -50,35 +44,31 @@ export async function runEdgesNote(
   config: RuntimeConfig,
   env: NodeJS.ProcessEnv = process.env,
 ): Promise<ScriptSuccess> {
-  const { file, prefix } = spawnArgs(config.cliEntry);
+  const cwd = config.cwd ?? process.cwd();
+  const target = config.scopeDir ?? config.repoPath;
+  const { file, prefix } = spawnArgs(path.resolve(cwd, config.cliEntry));
   const args = [
     ...prefix,
-    "note",
+    "notes",
+    "create",
     "--title",
     input.title,
-    "--content",
-    input.content,
-    "--co-author",
-    input.coAuthor,
+    "--body",
+    input.body,
     "--json",
-    "--mode",
-    config.mode,
   ];
-  if (config.dryRun || env.EDGES_DRY_RUN === "true") args.push("--dry-run");
 
   const childEnv: NodeJS.ProcessEnv = {
     ...env,
     EDGES_REPO: config.repoPath,
-    EDGES_BASE_BRANCH: config.baseBranch,
-    EDGES_MODE: config.mode,
-    EDGES_DRY_RUN: config.dryRun ? "true" : env.EDGES_DRY_RUN,
+    EDGES_SCOPE: target === undefined ? undefined : path.resolve(cwd, target),
   };
   delete childEnv.EDGES_AUTH_TOKEN;
 
   let stdout = "";
   try {
     const result = await execFileAsync(file, args, {
-      cwd: MCP_PACKAGE_ROOT,
+      cwd,
       env: childEnv,
       maxBuffer: 1024 * 1024 * 10,
     });

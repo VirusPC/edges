@@ -1,5 +1,36 @@
 # Changelog
 
+## [3.6.0] - 2026-10-08
+
+### Changed
+
+- 各模块 init 只创建并登记本模块的材料。`edges memory init` 不再生成 notes / projects harness 桩。skill 类型改走 `edges skills init`，任务看板改走 `edges tasks init`。无参 `edges init` 仍只编排 memory、notes、projects。
+
+## [3.4.0] - 2026-10-08
+
+### Changed
+
+- 未选择类型时，推荐模块包含 projects 与 notes。选定类型并初始化后，会生成 `.harness/projects/README.md` 与 `.harness/notes/README.md` 并登记到本层系统维护信息。
+
+## [3.3.0] - 2026-10-07
+
+### Changed
+
+- 类型入口改为 `.harness/<module>/<plural>/AGENTS.md`，列表用 `project-harness-*`。残留 `README.md` 只读兼容。层入口链到这些 AGENTS，不把 README 链接抄进去。
+- `tasks` / `note` 不再使用 `--index-group`。任务范围只讲 `--scope` / `--super` / `--all`；list 顺着 `AGENTS.md` children 一次 traverse。
+
+## [3.1.1] - 2026-10-05
+
+- 对齐目录入口的 name 来源与物理父归属；明确 Doctor 对重复或重叠组成引用仅诊断、保留原文，独立有效节点仍可修复。
+
+## [3.1.0] - 2026-10-05
+
+- 统一目录入口、验证后的整目录导入与显式公开迁移；保留非受控正文，非法入口诊断后由调用方修正。
+
+## [3.0.1] - 2026-10-05
+
+- 统一 AGENTS 节点身份与三类内容组织；保留显式类型采用、写权限和局部归属，不用 Memory 标记或独立职责筛选节点。
+
 All notable changes to this skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
@@ -9,8 +40,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- 类型入口改为 `.memory/<plural>/AGENTS.md`，与条目同处（ADR-0012）。仍用 `FEEDBACK.tmpl.md` 等类型模板渲染，不用层入口 `AGENTS.tmpl.md`。`user` → `users/AGENTS.md`；`agent_skills` → `agent_skills/AGENTS.md`，绝不写入 `.agents/`。存量平铺 `TYPE.md` 入口拒绝 init，交给 `$project-memory-doctor`。
-- Init 仍只建官方六类种子。用户 Memory Type 由 `$project-memory-add-type` 按 LAYOUT 登记，不写进 `AGENTS.tmpl.md`（ADR-0006）。
+- 类型入口只写 `.harness/<module>/<plural>/README.md`，列表用 `project-entries-*`（本层内容 / 下层内容），与 ADR 0029 一致。memory 与 skills 相同。层入口链到这些 README。空的同目录类型 `AGENTS.md` 桩删除；不要为了装组织清单在类型目录上 init `AGENTS.md`。层系统入口仍是 `AGENTS.md`。尚未迁走、仍带条目列表的旧类型索引入口只读兼容。
+
+## [3.0.0] - 2026-10-04
+
+### Changed
+
+- 执行入口迁至 TypeScript `edges memory` CLI；使用前需安装或构建 CLI，模板随构建产物分发，保留原有工作流与权限边界。
+
+## [2.0.0] - 2026-10-03
+
+### Fixed
+
+- 自定义类型元数据区块或单个 writable/gitignore 权限字段缺失时拒绝推断公开可写权限；managed 保持可写 Skill 格式，doctor 能诊断未闭合 frontmatter，拒绝时保留来源与索引。
+
+### Changed
+
+- 初始化改为按选择采用 `.harness/memory` 与 `.harness/skills` 类型，保留稀疏作用域、原位技能权限和私有忽略规则；旧布局交独立迁移器。
 
 ## [1.7.0] - 2026-09-11
 

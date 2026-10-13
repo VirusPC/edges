@@ -135,15 +135,17 @@ export function createArtifactsServer(options: ServerOptions): http.Server {
         const files = parseFiles(publish.files);
         const from = parseArtifactFrom(publish.from);
         const created = await store.put({
-          ttlSeconds: defaultTtl(publish.ttlSeconds),
+          ttlSeconds: publish.publish === false ? undefined : defaultTtl(publish.ttlSeconds),
           entry: publish.entry,
           from,
           files,
+          published: publish.publish !== false,
         });
         sendJson(res, 201, {
           id: created.id,
-          url: `${baseUrl}/artifacts/${created.id}/`,
-          expiresAt: created.expiresAt,
+          ...(created.published
+            ? { url: `${baseUrl}/artifacts/${created.id}/`, expiresAt: created.expiresAt }
+            : {}),
           ...(created.from ? { from: created.from } : {}),
         });
       } catch (error) {
@@ -156,6 +158,35 @@ export function createArtifactsServer(options: ServerOptions): http.Server {
     const artifact = artifactPath(pathname);
     if (!artifact) {
       sendError(res, 404, "NOT_FOUND", "not found");
+      return;
+    }
+
+    if (method === "POST" && artifact.rel === "publish") {
+      if (!(await requireWrite(req, res))) {
+        return;
+      }
+      let body: unknown;
+      try {
+        body = await readJsonBody(req, maxBodyBytes);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        sendError(res, 400, "VALIDATION_ERROR", message);
+        return;
+      }
+      const ttlSeconds = defaultTtl(body && typeof body === "object" ? (body as { ttlSeconds?: unknown }).ttlSeconds : undefined);
+      try {
+        const published = await store.publish(artifact.id, ttlSeconds);
+        sendJson(res, 200, {
+          id: published.id,
+          url: `${baseUrl}/artifacts/${published.id}/`,
+          expiresAt: published.expiresAt,
+          ...(published.from ? { from: published.from } : {}),
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const status = message === "artifact not found" ? 404 : 400;
+        sendError(res, status, status === 404 ? "NOT_FOUND" : "VALIDATION_ERROR", message);
+      }
       return;
     }
 
@@ -175,7 +206,7 @@ export function createArtifactsServer(options: ServerOptions): http.Server {
 
     if (method === "GET") {
       const meta = await store.getMeta(artifact.id);
-      if (!meta) {
+      if (!meta || meta.published === false) {
         sendError(res, 404, "NOT_FOUND", "artifact not found");
         return;
       }

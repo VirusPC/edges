@@ -22,12 +22,12 @@
 - Export row: `stem`, `current`, `suggested`, `action`, optional `note`. `stem` is filename without `.md` (CLI lookup key), not title, not frontmatter `name`
 - `action` on export is derived in the page: `keep` if `suggested === current`, else `move` (do not invent `create-then-move` in the page; Skill still may `project create` before `update --project` when suggested is unknown)
 - Default output: OS temp file; `--out <path>` overrides; print absolute path in JSON success payload; do **not** open a browser
-- HTML shell lives in the CLI package (`extensions/clis/.../assets/`), not under `tools/`
+- HTML shell lives in the CLI package (`extensions/cli/.../assets/`), not under `tools/`
 - classifyTasks Skill path: `extensions/skills/project-tasks-classify/` — update step 4 to review-page primary path; Markdown table = no-GUI fallback only
 - proposeTypes Skill is **not** on main yet (`extensions/skills/project-tasks-propose-types/` missing). Do **not** invent that Skill in this plan; only ensure CLI is reusable. Optional one-line note in `extensions/skills/README.md` or classify CHANGELOG cross-link is enough
 - Do not put `ingest` / `fs` / `writer` / `now` / `repoPath` on `CliContext`
 - Relative TypeScript imports use `.js` (nodenext)
-- Test runner: `extensions/clis/package.json` `"test": "node --test --import tsx './test/**/*.test.ts'"`
+- Test runner: `extensions/cli/package.json` `"test": "node --test --import tsx './test/**/*.test.ts'"`
 - Invalid JSON / schema → `VALIDATION_ERROR`, exit 2, no file write (except do not leave partial `--out` on failure — write via temp rename or write only after successful render)
 - Public repo: no credentials or personal data
 - This plan-only PR that first lands this document must **not** implement the CLI or rewrite the Skill
@@ -36,25 +36,25 @@
 
 ## File map
 
-Verified against `origin/main` after ADR 0012 merge (`92ea00a`). Command tree: `extensions/clis/src/tasks.ts` + `extensions/clis/src/tasks/project.ts` + `extensions/clis/src/tasks/project/<verb>.ts`. README rule: **file = one command node**.
+Verified against `origin/main` after ADR 0012 merge (`92ea00a`). Command tree: `extensions/cli/src/tasks.ts` + `extensions/cli/src/tasks/project.ts` + `extensions/cli/src/tasks/project/<verb>.ts`. README rule: **file = one command node**.
 
 **Create**
 
-- `extensions/clis/src/tasks/utils/review-page.ts` — types; `parseReviewPageInput`; `renderReviewPageHtml`; `resolveReviewPageOutPath`; `writeReviewPage`
-- `extensions/clis/src/tasks/project/assets/review-page.html` — static shell with `<script type="application/json" id="edges-review-payload">` for JSON injection
-- `extensions/clis/src/tasks/project/review-page.ts` — Commander leaf `review-page`
-- `extensions/clis/test/tasks/utils/review-page.test.ts` — parse/render/write unit tests
-- `extensions/clis/scripts/copy-review-page-asset.mjs` — tiny post-`tsc` copy (or inline `cp` in package.json `build` if the team prefers zero script file; prefer one small script for Windows-hostile `cp -R` clarity on Linux CI)
+- `extensions/cli/src/tasks/utils/review-page.ts` — types; `parseReviewPageInput`; `renderReviewPageHtml`; `resolveReviewPageOutPath`; `writeReviewPage`
+- `extensions/cli/src/tasks/project/assets/review-page.html` — static shell with `<script type="application/json" id="edges-review-payload">` for JSON injection
+- `extensions/cli/src/tasks/project/review-page.ts` — Commander leaf `review-page`
+- `extensions/cli/test/tasks/utils/review-page.test.ts` — parse/render/write unit tests
+- `extensions/cli/scripts/copy-review-page-asset.mjs` — tiny post-`tsc` copy (or inline `cp` in package.json `build` if the team prefers zero script file; prefer one small script for Windows-hostile `cp -R` clarity on Linux CI)
 
 **Modify**
 
-- `extensions/clis/package.json` — `build` runs `tsc` then copies `src/tasks/project/assets/` → `dist/tasks/project/assets/`
-- `extensions/clis/src/tasks/project.ts` — register `addProjectReviewPageCommand`; help text lists `review-page`
-- `extensions/clis/src/tasks/utils/format.ts` — extend `TasksSuccess` with optional `path?: string`, `groupCount?: number`, `itemCount?: number` (or nest under a single optional object — prefer flat fields matching existing style)
-- `extensions/clis/src/tasks.ts` — `TASKS_AFTER_HELP` mentions `project review-page` if the root help enumerates project children
-- `extensions/clis/README.md` — document `project review-page`; Capability Surface stays CLI + Skill + MCP
-- `extensions/clis/test/tasks/cli.test.ts` — project help lists `review-page`
-- `extensions/clis/test/tasks/parse.test.ts` — happy path `--from` fixture; bad JSON → exit 2; unknown `classify` still fails
+- `extensions/cli/package.json` — `build` runs `tsc` then copies `src/tasks/project/assets/` → `dist/tasks/project/assets/`
+- `extensions/cli/src/tasks/project.ts` — register `addProjectReviewPageCommand`; help text lists `review-page`
+- `extensions/cli/src/tasks/utils/format.ts` — extend `TasksSuccess` with optional `path?: string`, `groupCount?: number`, `itemCount?: number` (or nest under a single optional object — prefer flat fields matching existing style)
+- `extensions/cli/src/tasks.ts` — `TASKS_AFTER_HELP` mentions `project review-page` if the root help enumerates project children
+- `extensions/cli/README.md` — document `project review-page`; Capability Surface stays CLI + Skill + MCP
+- `extensions/cli/test/tasks/cli.test.ts` — project help lists `review-page`
+- `extensions/cli/test/tasks/parse.test.ts` — happy path `--from` fixture; bad JSON → exit 2; unknown `classify` still fails
 - `extensions/skills/project-tasks-classify/SKILL.md` — step 4 primary = write suggestions JSON → `review-page` → give path → **STOP** → wait for pasted export → step 5 apply; Markdown table = fallback
 - `extensions/skills/project-tasks-classify/CHANGELOG.md` — note review-page gate
 - `CHANGELOG.md` `[Unreleased]` — Added `edges tasks project review-page`
@@ -171,10 +171,10 @@ Markdown table remains documented as fallback when the host has no way to open H
 ### Task 1: Pure parse + render + write helpers
 
 **Files:**
-- Create: `extensions/clis/src/tasks/utils/review-page.ts`
-- Create: `extensions/clis/src/tasks/project/assets/review-page.html`
-- Create: `extensions/clis/test/tasks/utils/review-page.test.ts`
-- Modify: `extensions/clis/package.json` (build copy — can land in Task 2 if you split; include build copy here so render can load the asset via `import.meta.url` in tests under tsx from `src/`)
+- Create: `extensions/cli/src/tasks/utils/review-page.ts`
+- Create: `extensions/cli/src/tasks/project/assets/review-page.html`
+- Create: `extensions/cli/test/tasks/utils/review-page.test.ts`
+- Modify: `extensions/cli/package.json` (build copy — can land in Task 2 if you split; include build copy here so render can load the asset via `import.meta.url` in tests under tsx from `src/`)
 
 **Interfaces:**
 - Produces:
@@ -187,7 +187,7 @@ Markdown table remains documented as fallback when the host has no way to open H
 
 - [ ] **Step 1: Write the failing tests**
 
-Create `extensions/clis/test/tasks/utils/review-page.test.ts`:
+Create `extensions/cli/test/tasks/utils/review-page.test.ts`:
 
 ```ts
 import test from "node:test";
@@ -289,16 +289,16 @@ test("writeReviewPage writes utf8 html", async () => {
 - [ ] **Step 2: Run tests to verify they fail**
 
 Run: `pnpm --filter edges-cli test -- test/tasks/utils/review-page.test.ts`  
-(or from `extensions/clis`: `node --test --import tsx test/tasks/utils/review-page.test.ts`)  
+(or from `extensions/cli`: `node --test --import tsx test/tasks/utils/review-page.test.ts`)  
 Expected: FAIL module not found / cannot find review-page.js
 
 - [ ] **Step 3: Implement `review-page.ts` helpers + minimal HTML asset**
 
-`extensions/clis/src/tasks/utils/review-page.ts` — implement the functions above. `parseReviewPageInput` throws `TasksError("VALIDATION_ERROR", exactMessage)`.
+`extensions/cli/src/tasks/utils/review-page.ts` — implement the functions above. `parseReviewPageInput` throws `TasksError("VALIDATION_ERROR", exactMessage)`.
 
 `renderReviewPageHtml`: find `<script type="application/json" id="edges-review-payload">` … `</script>` and replace inner JSON with `JSON.stringify({ groups: input.groups, items: input.items })`. If the script tag is missing → `VALIDATION_ERROR`, `review-page template missing edges-review-payload script`.
 
-`extensions/clis/src/tasks/project/assets/review-page.html` — full single-file page:
+`extensions/cli/src/tasks/project/assets/review-page.html` — full single-file page:
 
 ```html
 <!DOCTYPE html>
@@ -429,15 +429,15 @@ Expected: FAIL module not found / cannot find review-page.js
 
 - [ ] **Step 4: Run tests to verify they pass**
 
-Run: `node --test --import tsx test/tasks/utils/review-page.test.ts` from `extensions/clis`  
+Run: `node --test --import tsx test/tasks/utils/review-page.test.ts` from `extensions/cli`  
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/review-page.ts \
-  extensions/clis/src/tasks/project/assets/review-page.html \
-  extensions/clis/test/tasks/utils/review-page.test.ts
+git add extensions/cli/src/tasks/utils/review-page.ts \
+  extensions/cli/src/tasks/project/assets/review-page.html \
+  extensions/cli/test/tasks/utils/review-page.test.ts
 git commit -m "$(cat <<'EOF'
 feat: add review-page parse/render helpers
 
@@ -451,15 +451,15 @@ EOF
 ### Task 2: Build asset copy + CLI verb
 
 **Files:**
-- Create: `extensions/clis/src/tasks/project/review-page.ts`
-- Create: `extensions/clis/scripts/copy-review-page-asset.mjs` (optional if `build` uses a one-liner)
-- Modify: `extensions/clis/package.json`
-- Modify: `extensions/clis/src/tasks/project.ts`
-- Modify: `extensions/clis/src/tasks/utils/format.ts`
-- Modify: `extensions/clis/test/tasks/cli.test.ts`
-- Modify: `extensions/clis/test/tasks/parse.test.ts`
-- Modify: `extensions/clis/README.md`
-- Modify: `extensions/clis/src/tasks.ts` (help text if needed)
+- Create: `extensions/cli/src/tasks/project/review-page.ts`
+- Create: `extensions/cli/scripts/copy-review-page-asset.mjs` (optional if `build` uses a one-liner)
+- Modify: `extensions/cli/package.json`
+- Modify: `extensions/cli/src/tasks/project.ts`
+- Modify: `extensions/cli/src/tasks/utils/format.ts`
+- Modify: `extensions/cli/test/tasks/cli.test.ts`
+- Modify: `extensions/cli/test/tasks/parse.test.ts`
+- Modify: `extensions/cli/README.md`
+- Modify: `extensions/cli/src/tasks.ts` (help text if needed)
 
 **Interfaces:**
 - Consumes: helpers from Task 1
@@ -638,11 +638,11 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/package.json extensions/clis/scripts/copy-review-page-asset.mjs \
-  extensions/clis/src/tasks/project/review-page.ts extensions/clis/src/tasks/project.ts \
-  extensions/clis/src/tasks/utils/format.ts extensions/clis/src/tasks.ts \
-  extensions/clis/README.md extensions/clis/test/tasks/cli.test.ts \
-  extensions/clis/test/tasks/parse.test.ts
+git add extensions/cli/package.json extensions/cli/scripts/copy-review-page-asset.mjs \
+  extensions/cli/src/tasks/project/review-page.ts extensions/cli/src/tasks/project.ts \
+  extensions/cli/src/tasks/utils/format.ts extensions/cli/src/tasks.ts \
+  extensions/cli/README.md extensions/cli/test/tasks/cli.test.ts \
+  extensions/cli/test/tasks/parse.test.ts
 git commit -m "$(cat <<'EOF'
 feat: add edges tasks project review-page CLI
 

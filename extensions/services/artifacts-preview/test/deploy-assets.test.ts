@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtemp, readFile, rm, writeFile, access, constants } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile, access, constants, mkdir, chmod, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,7 +31,7 @@ test("deploy nginx include proxies /health, POST /artifacts, and /artifacts/ wit
 test("deploy env example has placeholders only and binds loopback", async () => {
   const env = await readDeploy("artifacts.env.example");
   assert.match(env, /^EDGES_ARTIFACTS_TOKEN=replace-with-shared-token$/m);
-  assert.match(env, /^EDGES_ARTIFACTS_BASE_URL=http:\/\/182\.92\.131\.89$/m);
+  assert.match(env, /^EDGES_ARTIFACTS_BASE_URL=https:\/\/edges\.viruspc\.tech$/m);
   assert.match(env, /^EDGES_ARTIFACTS_HOST=127\.0\.0\.1$/m);
   assert.match(env, /^EDGES_ARTIFACTS_PORT=8787$/m);
   assert.doesNotMatch(env, /EDGES_ARTIFACTS_TOKEN=[0-9a-f]{32,}/i);
@@ -51,7 +51,7 @@ test("README is CLI-first and documents the locked server surface", async () => 
   assert.match(readme, /edges artifacts server start/);
   assert.match(readme, /edges artifacts server setup-nginx/);
   assert.match(readme, /edges artifacts server status/);
-  assert.match(readme, /edges artifacts init --base-url http:\/\/182\.92\.131\.89 --token/);
+  assert.match(readme, /edges artifacts init --base-url https:\/\/edges\.viruspc\.tech --token/);
   assert.match(readme, /install --force/);
   assert.match(readme, /server restart/);
   assert.doesNotMatch(readme, /edges artifacts server init/);
@@ -158,7 +158,7 @@ test("teaching nginx prefix migrator rewrites both 80 and 443 servers toward /te
   assert.match(migrated, /listen 443[\s\S]*rewrite \^\/teach\/\(\.\*\)\$ \/teaching\/\$1 permanent;/);
   assert.match(migrated, /ssl_certificate /);
   assert.match(migrated, /root \/home\/cheng-dev\/projects\/edges\/knowledge;/);
-  assert.match(migrated, /location \/teaching\/\s*\{\s*try_files \$uri \$uri\/ =404;/);
+  assert.match(migrated, /location \/teaching\/\s*\{\s*root \/home\/cheng-dev\/projects\/edges;\s*try_files \$uri \$uri\/ =404;/);
 
   const second = spawnSync("python3", [migrateScript, confPath], { encoding: "utf8" });
   assert.equal(second.status, 0, second.stderr);
@@ -207,4 +207,198 @@ test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts 
   assert.match(workflow, /concurrency:\s*\n\s*group:\s*ecs-edges-pull/s);
   assert.doesNotMatch(workflow, /^\s*rsync\b/m);
   assert.match(workflow, /do not rsync-push a path subset/);
+});
+
+
+test("teaching migration updates inherited and explicit physical roots while preserving other locations", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-teaching-roots-"));
+  try {
+    const conf = path.join(dir, "teaching.conf");
+    const original = await readFile(path.join(here, "fixtures/teaching.conf.legacy-roots"), "utf8");
+    await writeFile(conf, original);
+    const result = spawnSync("python3", [migrateScript, conf], { encoding: "utf8" });
+    assert.equal(result.status, 0, result.stderr);
+    const changed = await readFile(conf, "utf8");
+    assert.equal((changed.match(/location \/teaching\/ \{\s*root \/srv\/edges;/g) || []).length, 2);
+    assert.match(changed, /location \/teaching\/assets\/ \{ alias \/srv\/edges\/teaching\/assets\/;/);
+    assert.match(changed, /location \/other\/ \{ root \/srv\/edges\/knowledge; \}/);
+    assert.match(changed, /location \/assets\/ \{ alias \/srv\/edges\/knowledge\/teaching\/assets\/; \}/);
+    assert.ok(changed.endsWith(original.slice(original.lastIndexOf("server {"))));
+    assert.equal((changed.split("server {")[1]!.match(/location = \/ \{/g) || []).length, 1);
+    assert.match(changed, /location = \/ \{ return 200 "other homepage"; \}/);
+    assert.match(changed, /listen 80;\s*# shared root for unrelated locations\s*root \/srv\/edges\/knowledge;/);
+    const again = spawnSync("python3", [migrateScript, conf], { encoding: "utf8" });
+    assert.equal(again.status, 0, again.stderr);
+    assert.equal(await readFile(conf, "utf8"), changed);
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+test("deployment layout migration updates existing sites and restores both configs when nginx validation fails", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-deploy-layout-"));
+  try {
+    const conf = path.join(dir, "teaching.conf");
+    const tasks = path.join(dir, "tasks.conf");
+    const bin = path.join(dir, "bin");
+    await mkdir(bin);
+    const log = path.join(dir, "nginx.log");
+    await writeFile(path.join(bin, "nginx"), '#!/bin/sh\nprintf "%s\n" "$*" >> "$NGINX_LOG"\nif [ "$*" = "-t" ]; then exit "${NGINX_STATUS:-0}"; fi\n');
+    await chmod(path.join(bin, "nginx"), 0o755);
+    const before = await readFile(path.join(here, "fixtures/teaching.conf.legacy-roots"), "utf8");
+    const beforeTasks = "location /tasks/ { alias /srv/edges/knowledge/tasks/_site/; }\n# leave /srv/edges/knowledge alone\n";
+    const decoyTeaching = path.join(dir, "decoy-teaching.conf");
+    const decoyTasks = path.join(dir, "decoy-tasks.conf");
+    await writeFile(decoyTeaching, "decoy-teaching\n");
+    await writeFile(decoyTasks, "decoy-tasks\n");
+    const env = {
+      ...process.env,
+      PATH: `${bin}:${process.env.PATH}`,
+      TEACHING_CONF: decoyTeaching,
+      TASKS_CONF: decoyTasks,
+      NGINX_LOG: log,
+    };
+    const script = path.join(deployDir, "migrate-site-layout.sh");
+    for (const status of ["1", "0"]) {
+      await writeFile(conf, before);
+      await writeFile(tasks, beforeTasks);
+      await writeFile(log, "");
+      const result = spawnSync("bash", [script, conf, tasks], { env: { ...env, NGINX_STATUS: status }, encoding: "utf8" });
+      if (status === "1") {
+        assert.notEqual(result.status, 0);
+        assert.equal(await readFile(conf, "utf8"), before);
+        assert.equal(await readFile(tasks, "utf8"), beforeTasks);
+        assert.equal(await readFile(log, "utf8"), "-t\n");
+      } else {
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(await readFile(conf, "utf8"), /root \/srv\/edges;/);
+        assert.equal(await readFile(tasks, "utf8"), "location /tasks/ { alias /srv/edges/tasks/_site/; }\n# leave /srv/edges/knowledge alone\n");
+        assert.equal(await readFile(log, "utf8"), "-t\n-s reload\n");
+        const again = spawnSync("bash", [script, conf, tasks], { env, encoding: "utf8" });
+        assert.equal(again.status, 0, again.stderr);
+        assert.equal(await readFile(log, "utf8"), "-t\n-s reload\n");
+      }
+      assert.equal(await readFile(decoyTeaching, "utf8"), "decoy-teaching\n");
+      assert.equal(await readFile(decoyTasks, "utf8"), "decoy-tasks\n");
+    }
+  } finally { await rm(dir, { recursive: true, force: true }); }
+});
+
+for (const [fixture, rootHeader] of [
+  ["teaching.conf.legacy-root-prefix", "location /"],
+  ["teaching.conf.legacy-root-priority-prefix", "location ^~ /"],
+]) {
+  test(`teaching migration preserves the unrelated ${rootHeader} homepage handler`, async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), "edges-teaching-homepage-"));
+    try {
+      const conf = path.join(dir, "teaching.conf");
+      await writeFile(conf, await readFile(path.join(here, "fixtures", fixture!), "utf8"));
+      const first = spawnSync("python3", [migrateScript, conf], { encoding: "utf8" });
+      assert.equal(first.status, 0, first.stderr);
+      const migrated = await readFile(conf, "utf8");
+      assert.match(migrated, /location \/teaching\/ \{\s*root \/srv\/edges;\s*try_files \$uri \$uri\/ =404;/);
+      assert.ok(migrated.includes(`${rootHeader} {\n        proxy_pass http://127.0.0.1:8080;\n    }`));
+      assert.doesNotMatch(migrated, /location\s+=\s+\/\s*\{/);
+      const second = spawnSync("python3", [migrateScript, conf], { encoding: "utf8" });
+      assert.equal(second.status, 0, second.stderr);
+      assert.equal(await readFile(conf, "utf8"), migrated);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+}
+
+test("site-layout mode check reads group and other bits from the last three digits", () => {
+  const script = path.join(deployDir, "edges-migrate-site-layout");
+  const probe = (mode: string) => spawnSync("bash", ["-c", 'source "$1"; if mode_grants_group_or_other_write "$2"; then echo writable; else echo ok; fi', "probe", script, mode], { encoding: "utf8" });
+  for (const mode of ["755", "644", "0755", "0644", "1755", "2755"]) {
+    const result = probe(mode);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout.trim(), "ok", `${mode} must be accepted`);
+  }
+  for (const mode of ["775", "757", "0775"]) {
+    const result = probe(mode);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout.trim(), "writable", `${mode} must be rejected`);
+  }
+});
+
+test("root site-layout entry hardcodes paths and refuses arguments", async () => {
+  const entry = await readDeploy("edges-migrate-site-layout");
+  assert.match(entry, /\/usr\/local\/lib\/edges\/site-layout\/migrate-site-layout\.sh/);
+  assert.match(entry, /\/etc\/nginx\/conf\.d\/teaching\.conf/);
+  assert.match(entry, /\/etc\/nginx\/snippets\/edges-tasks\.conf/);
+  assert.match(entry, /PATH=\/usr\/sbin:\/usr\/bin:\/bin/);
+  assert.match(entry, /stat -c %u/);
+  assert.match(entry, /writable by group or others/);
+  assert.match(entry, /symlink/);
+  assert.doesNotMatch(entry, /TEACHING_CONF|TASKS_CONF/);
+  const script = path.join(deployDir, "edges-migrate-site-layout");
+  const withArg = spawnSync("bash", [script, "/tmp/extra.conf"], { encoding: "utf8" });
+  assert.notEqual(withArg.status, 0);
+  assert.match(withArg.stderr, /no arguments/);
+  const missing = spawnSync("bash", [script], { encoding: "utf8", env: { ...process.env, TEACHING_CONF: "/tmp/not-used.conf", TASKS_CONF: "/tmp/not-used-tasks.conf" } });
+  assert.notEqual(missing.status, 0);
+  assert.match(missing.stderr, /\/usr\/local\/lib\/edges\/site-layout/);
+  assert.doesNotMatch(`${missing.stderr}\n${missing.stdout}`, /\/tmp\/not-used/);
+});
+
+test("install-site-layout installs root copies, sudoers, and refuses a bad visudo", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-site-layout-install-"));
+  try {
+    const bin = path.join(dir, "usr/bin");
+    const sbin = path.join(dir, "usr/sbin");
+    await mkdir(bin, { recursive: true });
+    await mkdir(sbin, { recursive: true });
+    await writeFile(path.join(bin, "getent"), "#!/bin/sh\n[ \"$1\" = passwd ] && [ \"$2\" = deployacct ]\n");
+    await chmod(path.join(bin, "getent"), 0o755);
+    await writeFile(path.join(sbin, "visudo"), "#!/bin/sh\nexit 0\n");
+    await chmod(path.join(sbin, "visudo"), 0o755);
+    const installer = path.join(deployDir, "install-site-layout.sh");
+    const ok = spawnSync("bash", [installer, "--root", dir, "deployacct"], { encoding: "utf8" });
+    assert.equal(ok.status, 0, ok.stderr);
+    const entry = path.join(dir, "usr/local/sbin/edges-migrate-site-layout");
+    const lib = path.join(dir, "usr/local/lib/edges/site-layout/migrate-site-layout.sh");
+    const py = path.join(dir, "usr/local/lib/edges/site-layout/migrate-teaching-nginx-prefix.py");
+    const sudoers = path.join(dir, "etc/sudoers.d/edges-site-layout");
+    assert.equal(await readFile(entry, "utf8"), await readDeploy("edges-migrate-site-layout"));
+    assert.equal(await readFile(lib, "utf8"), await readDeploy("migrate-site-layout.sh"));
+    assert.equal(await readFile(py, "utf8"), await readDeploy("migrate-teaching-nginx-prefix.py"));
+    for (const file of [entry, lib]) {
+      assert.equal((await stat(file)).mode & 0o777, 0o755);
+    }
+    assert.equal((await stat(py)).mode & 0o777, 0o644);
+    assert.equal((await stat(path.join(dir, "usr/local/lib/edges/site-layout"))).mode & 0o777, 0o755);
+    const rule = await readFile(sudoers, "utf8");
+    assert.match(rule, /^deployacct ALL=\(root\) NOPASSWD: \/usr\/local\/sbin\/edges-migrate-site-layout ""$/m);
+    assert.match(rule, /Defaults!\/usr\/local\/sbin\/edges-migrate-site-layout !setenv/);
+    assert.equal((await stat(sudoers)).mode & 0o777, 0o440);
+    const visudo = spawnSync("visudo", ["-cf", sudoers], { encoding: "utf8" });
+    assert.equal(visudo.status, 0, visudo.stderr);
+    const again = spawnSync("bash", [installer, "--root", dir, "deployacct"], { encoding: "utf8" });
+    assert.equal(again.status, 0, again.stderr);
+
+    await writeFile(path.join(sbin, "visudo"), "#!/bin/sh\nexit 1\n");
+    await chmod(path.join(sbin, "visudo"), 0o755);
+    const beforeFail = await readFile(sudoers, "utf8");
+    const failed = spawnSync("bash", [installer, "--root", dir, "deployacct"], { encoding: "utf8" });
+    assert.notEqual(failed.status, 0);
+    assert.match(failed.stderr, /visudo/);
+    assert.equal(await readFile(sudoers, "utf8"), beforeFail);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("install-site-layout rejects unsafe account names before writing sudoers", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-site-layout-name-"));
+  try {
+    const installer = path.join(deployDir, "install-site-layout.sh");
+    const bad = spawnSync("bash", [installer, "--root", dir, "bad name"], { encoding: "utf8" });
+    assert.notEqual(bad.status, 0);
+    await assert.rejects(access(path.join(dir, "etc/sudoers.d/edges-site-layout")));
+    const missingUser = spawnSync("bash", [installer], { encoding: "utf8", env: { ...process.env, SUDO_USER: "" } });
+    assert.notEqual(missingUser.status, 0);
+    assert.match(missingUser.stderr, /account|SUDO_USER/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 });

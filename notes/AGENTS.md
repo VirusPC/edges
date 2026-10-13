@@ -1,0 +1,24 @@
+# notes
+
+
+
+<!-- project-harness-constraints:start -->
+## 本层硬约束
+
+- 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
+- 本层硬约束直接写在这个区块里，不要通过记忆正文链接代替本区块的硬约束。
+<!-- project-harness-constraints:end -->
+
+
+<!-- project-harness-local:start -->
+## 本层系统维护信息
+- [.harness/memory/feedbacks/README.md](<.harness/memory/feedbacks/README.md>) — 用户的纠正、确认过的做法与必须遵守的禁止模式。
+- [.harness/memory/projects/README.md](<.harness/memory/projects/README.md>) — 进行中的工作、关键时间点，无法从代码或 git 历史推导的决策，以及项目内的规范。兜底：对不上更具体类型时走这里。
+- [.harness/memory/references/README.md](<.harness/memory/references/README.md>) — 需求文档、设计稿、接口文档、监控面板等外部资料。
+- [.harness/skills/managed/README.md](<.harness/skills/managed/README.md>) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
+- [.harness/skills/referenced/README.md](<.harness/skills/referenced/README.md>) — 本层 .agents/skills/ 下人写或装入的标准技能，工具只索引不改写。
+- [2026\-10\-07\-\-osmo\-maldives\-ingest\-and\-highlight\-preview/INDEX.md](<2026-10-07--osmo-maldives-ingest-and-highlight-preview/INDEX.md>)
+- [2026\-09\-27\-\-%E5%A5%BD%E5%A4%8D%E7%9B%98%E8%B0%83%E7%A0%94/INDEX.md](<2026-09-27--%E5%A5%BD%E5%A4%8D%E7%9B%98%E8%B0%83%E7%A0%94/INDEX.md>)
+- [2026\-10\-12\-\-4070ts\-%E5%BC%80%E6%9C%BA%E8%87%AA%E5%8A%A8%E7%99%BB%E5%BD%95%E4%B8%8E%E8%BF%9C%E7%A8%8B%E6%8E%A7%E5%88%B6/INDEX.md](<2026-10-12--4070ts-%E5%BC%80%E6%9C%BA%E8%87%AA%E5%8A%A8%E7%99%BB%E5%BD%95%E4%B8%8E%E8%BF%9C%E7%A8%8B%E6%8E%A7%E5%88%B6/INDEX.md>)
+- [2026\-09\-27\-\-Win11%E7%AE%A1%E7%90%86%E5%91%98%E9%80%9A%E9%81%93OpenSSH%E4%B8%8E%E6%89%8B%E6%9C%BA%E8%BF%9C%E6%8E%A7/INDEX.md](<2026-09-27--Win11%E7%AE%A1%E7%90%86%E5%91%98%E9%80%9A%E9%81%93OpenSSH%E4%B8%8E%E6%89%8B%E6%9C%BA%E8%BF%9C%E6%8E%A7/INDEX.md>)
+<!-- project-harness-local:end -->

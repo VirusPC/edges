@@ -27,7 +27,7 @@
 - Bootstrap metadata only. Do **not** relocate Task files or sidecars (ADR 0009 already moved the live board into `_default/<status>/`)
 - Do not put `ingest` / `fs` / `writer` / `now` / `repoPath` on `CliContext` or `run()`’s second argument
 - Do not add `js-yaml` / `gray-matter` / `simple-git` / vitest. Stay on `commander` + `zod` + `node:test` + `tsx`
-- Test runner is `extensions/clis/package.json` `"test": "node --test --import tsx './test/**/*.test.ts'"`. New tests go under `extensions/clis/test/tasks/`
+- Test runner is `extensions/cli/package.json` `"test": "node --test --import tsx './test/**/*.test.ts'"`. New tests go under `extensions/cli/test/tasks/`
 - Reuse `EDGES_REPO` from `loadConfig()` as the repo root. Board lives at `<repoPath>/knowledge/tasks/`
 - Relative TypeScript imports use `.js` (nodenext)
 - Invalid project slug / title / description = `VALIDATION_ERROR`, exit 2, no writes (except `ensure` which may write missing metadata files before a verb fails)
@@ -40,32 +40,32 @@
 
 ## File map
 
-Verified on `origin/main` after ADR 0010 (`1a5875a`). Command tree is `extensions/clis/src/tasks.ts` (group) + `extensions/clis/src/tasks/<verb>.ts` (leaf). `extensions/clis/README.md` says **file = one command node**, **folder = children**. Slug helpers already live at `extensions/clis/src/tasks/utils/project.ts` (`parseTaskProject`, `listProjectIds` is on `board.ts`). Do not rename those.
+Verified on `origin/main` after ADR 0010 (`1a5875a`). Command tree is `extensions/cli/src/tasks.ts` (group) + `extensions/cli/src/tasks/<verb>.ts` (leaf). `extensions/cli/README.md` says **file = one command node**, **folder = children**. Slug helpers already live at `extensions/cli/src/tasks/utils/project.ts` (`parseTaskProject`, `listProjectIds` is on `board.ts`). Do not rename those.
 
 **Create**
 
-- `extensions/clis/src/tasks/utils/project-meta.ts` — title/description validators; parse/render lightweight project `AGENTS.md`; rewrite root Task Projects section; `ensureProjectMetadata`; `listProjects` / `getProject` / `createProject` / `updateProject`
-- `extensions/clis/src/tasks/project.ts` — `project` command group (register children; missing-subcommand action)
-- `extensions/clis/src/tasks/project/list.ts` — `edges tasks project list`
-- `extensions/clis/src/tasks/project/get.ts` — `edges tasks project get <project>`
-- `extensions/clis/src/tasks/project/create.ts` — `edges tasks project create <project> --title --description`
-- `extensions/clis/src/tasks/project/update.ts` — `edges tasks project update <project> [--title] [--description]`
-- `extensions/clis/test/tasks/utils/project-meta.test.ts` — pure string + tmpdir helper tests
-- `extensions/clis/test/tasks/project.test.ts` — domain CRUD via `createProject` / `listProjects` / `getProject` / `updateProject`
+- `extensions/cli/src/tasks/utils/project-meta.ts` — title/description validators; parse/render lightweight project `AGENTS.md`; rewrite root Task Projects section; `ensureProjectMetadata`; `listProjects` / `getProject` / `createProject` / `updateProject`
+- `extensions/cli/src/tasks/project.ts` — `project` command group (register children; missing-subcommand action)
+- `extensions/cli/src/tasks/project/list.ts` — `edges tasks project list`
+- `extensions/cli/src/tasks/project/get.ts` — `edges tasks project get <project>`
+- `extensions/cli/src/tasks/project/create.ts` — `edges tasks project create <project> --title --description`
+- `extensions/cli/src/tasks/project/update.ts` — `edges tasks project update <project> [--title] [--description]`
+- `extensions/cli/test/tasks/utils/project-meta.test.ts` — pure string + tmpdir helper tests
+- `extensions/cli/test/tasks/project.test.ts` — domain CRUD via `createProject` / `listProjects` / `getProject` / `updateProject`
 - `extensions/skills/project-tasks-classify/SKILL.md` — classifyTasks workflow (Task 6)
 - `extensions/skills/project-tasks-classify/CHANGELOG.md` — skill-local 1.0.0 (Task 6)
 
 **Modify**
 
-- `extensions/clis/src/tasks/utils/types.ts` — `PROJECT_NOT_FOUND` on `TasksErrorCode`; `TaskProjectRecord` type
-- `extensions/clis/src/tasks/utils/format.ts` — `TasksSuccess` gains `projects?` plus the flattened project-record fields
-- `extensions/clis/src/tasks.ts` — `addProjectCommand`; `TASKS_AFTER_HELP` lists `project list|get|create|update`; still no `classify`
-- `extensions/clis/src/tasks/utils/write.ts` — no behavior change required; Task 5 adds a CLI regression that `update --project` keeps status and priority (unit test already matches `edges-tasks-status` / `edges-task-priority` in `test/tasks/utils/write.test.ts`)
-- `extensions/clis/README.md` — document `project` verbs; Capability Surface stays CLI + Skill + MCP
+- `extensions/cli/src/tasks/utils/types.ts` — `PROJECT_NOT_FOUND` on `TasksErrorCode`; `TaskProjectRecord` type
+- `extensions/cli/src/tasks/utils/format.ts` — `TasksSuccess` gains `projects?` plus the flattened project-record fields
+- `extensions/cli/src/tasks.ts` — `addProjectCommand`; `TASKS_AFTER_HELP` lists `project list|get|create|update`; still no `classify`
+- `extensions/cli/src/tasks/utils/write.ts` — no behavior change required; Task 5 adds a CLI regression that `update --project` keeps status and priority (unit test already matches `edges-tasks-status` / `edges-task-priority` in `test/tasks/utils/write.test.ts`)
+- `extensions/cli/README.md` — document `project` verbs; Capability Surface stays CLI + Skill + MCP
 - `knowledge/tasks/README.md` — one short paragraph: each project including `_default` has lightweight `AGENTS.md`; root Task Projects section is CLI-maintained
-- `extensions/clis/test/tasks/cli.test.ts` — help lists `project`; omits `classify`
-- `extensions/clis/test/tasks/parse.test.ts` — `run(["tasks", "project", …])` happy/error paths
-- `extensions/clis/test/tasks/run.test.ts` — tmpdir `EDGES_REPO` integration
+- `extensions/cli/test/tasks/cli.test.ts` — help lists `project`; omits `classify`
+- `extensions/cli/test/tasks/parse.test.ts` — `run(["tasks", "project", …])` happy/error paths
+- `extensions/cli/test/tasks/run.test.ts` — tmpdir `EDGES_REPO` integration
 - `CHANGELOG.md` `[Unreleased]` — Added lines when implementation lands (plan-only PR adds only the plan line)
 - `.memory/projects/project_classify_tasks_and_project_metadata.md` — via `$project-memory-remember` (implementation updates How-to to “project CLI + project-tasks-classify Skill landed”; Capability Surface remains CLI + Skill + MCP)
 - Live board metadata only, in Task 7: `knowledge/tasks/_default/AGENTS.md` (create) and the Task Projects section of `knowledge/tasks/AGENTS.md`
@@ -178,7 +178,7 @@ edges CLI work
 
 ## Pointers
 
-- [edges-cli README](../../../extensions/clis/README.md)
+- [edges-cli README](../../../extensions/cli/README.md)
 ```
 
 Parse / render rules:
@@ -360,10 +360,10 @@ Capability Surface paragraph in the Skill (required wording): hosts with a shell
 
 ### Test commands
 
-Single file (cwd = `extensions/clis`):
+Single file (cwd = `extensions/cli`):
 
 ```bash
-cd extensions/clis && node --test --import tsx test/tasks/utils/project-meta.test.ts
+cd extensions/cli && node --test --import tsx test/tasks/utils/project-meta.test.ts
 ```
 
 Package suite after each implementation step:
@@ -377,9 +377,9 @@ pnpm --filter edges-cli test
 ### Task 1: Parse and render Task Project AGENTS.md
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/types.ts` — add `PROJECT_NOT_FOUND` to `TasksErrorCode`; add `TaskProjectRecord`
-- Create: `extensions/clis/src/tasks/utils/project-meta.ts` — validators + parse/render only (no fs yet)
-- Create: `extensions/clis/test/tasks/utils/project-meta.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/types.ts` — add `PROJECT_NOT_FOUND` to `TasksErrorCode`; add `TaskProjectRecord`
+- Create: `extensions/cli/src/tasks/utils/project-meta.ts` — validators + parse/render only (no fs yet)
+- Create: `extensions/cli/test/tasks/utils/project-meta.test.ts`
 
 **Interfaces:**
 - Consumes: `DEFAULT_TASK_PROJECT`, `DEFAULT_TASK_PROJECT_DIR`, `TaskProjectId`, `TasksError` from `./types.js`; `projectDirName` from `./project.js`
@@ -460,7 +460,7 @@ test("render and parse round-trip title, description, and optional pointers", ()
   const withPointers = renderProjectAgents({
     title: "CLI",
     description: "edges CLI work",
-    pointers: "## Pointers\n\n- [readme](../../../extensions/clis/README.md)",
+    pointers: "## Pointers\n\n- [readme](../../../extensions/cli/README.md)",
   });
   const parsed = parseProjectAgents(withPointers);
   assert.equal(parsed.title, "CLI");
@@ -488,7 +488,7 @@ test("parseProjectAgents rejects frontmatter and project-memory markers", () => 
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/project-meta.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/project-meta.test.ts`
 
 Expected: FAIL with `ERR_MODULE_NOT_FOUND` for `project-meta.js`
 
@@ -510,16 +510,16 @@ export type TaskProjectRecord = {
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/project-meta.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/project-meta.test.ts`
 
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/types.ts \
-  extensions/clis/src/tasks/utils/project-meta.ts \
-  extensions/clis/test/tasks/utils/project-meta.test.ts
+git add extensions/cli/src/tasks/utils/types.ts \
+  extensions/cli/src/tasks/utils/project-meta.ts \
+  extensions/cli/test/tasks/utils/project-meta.test.ts
 git commit -m "feat(tasks): parse Task Project AGENTS.md metadata" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -529,8 +529,8 @@ git commit -m "feat(tasks): parse Task Project AGENTS.md metadata" \
 ### Task 2: Rewrite root Task Projects index outside project-memory markers
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/project-meta.ts` — add marker constants + `rewriteRootAgents` + `oneLineDescription`
-- Modify: `extensions/clis/test/tasks/utils/project-meta.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/project-meta.ts` — add marker constants + `rewriteRootAgents` + `oneLineDescription`
+- Modify: `extensions/cli/test/tasks/utils/project-meta.test.ts`
 
 **Interfaces:**
 - Consumes: `TaskProjectRecord`, `parseProjectDescription` from Task 1; `projectDirName` from `./project.js`
@@ -627,7 +627,7 @@ test("rewriteRootAgents rejects a start marker without an end marker", () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/project-meta.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/project-meta.test.ts`
 
 Expected: FAIL — `oneLineDescription` / `rewriteRootAgents` not exported
 
@@ -637,15 +637,15 @@ Implement the functions from Interfaces. Sort a copy of `projects` with `default
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/project-meta.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/project-meta.test.ts`
 
 Expected: PASS
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/project-meta.ts \
-  extensions/clis/test/tasks/utils/project-meta.test.ts
+git add extensions/cli/src/tasks/utils/project-meta.ts \
+  extensions/cli/test/tasks/utils/project-meta.test.ts
 git commit -m "feat(tasks): rewrite Task Projects index outside memory markers" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -655,8 +655,8 @@ git commit -m "feat(tasks): rewrite Task Projects index outside memory markers" 
 ### Task 3: ensureProjectMetadata bootstrap (tmpdir only)
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/project-meta.ts` — `ensureProjectMetadata`, `refreshProjectIndex`, `readProjectRecord`
-- Modify: `extensions/clis/test/tasks/utils/project-meta.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/project-meta.ts` — `ensureProjectMetadata`, `refreshProjectIndex`, `readProjectRecord`
+- Modify: `extensions/cli/test/tasks/utils/project-meta.test.ts`
 - Consumes `BoardWriter` from `./board.js` (same type `write.ts` uses)
 
 **Interfaces:**
@@ -739,7 +739,7 @@ Import `assert` / `test` the same way as Task 1. The `nodeBoardWriter` import pa
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/utils/project-meta.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/utils/project-meta.test.ts`
 
 Expected: FAIL — `ensureProjectMetadata` not exported
 
@@ -752,7 +752,7 @@ Use `path.join(repoPath, projectAgentsRelPath(id))`. `mkdirp` the project dir. S
 Run:
 
 ```bash
-cd extensions/clis && node --test --import tsx test/tasks/utils/project-meta.test.ts
+cd extensions/cli && node --test --import tsx test/tasks/utils/project-meta.test.ts
 pnpm --filter edges-cli test
 ```
 
@@ -761,8 +761,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/project-meta.ts \
-  extensions/clis/test/tasks/utils/project-meta.test.ts
+git add extensions/cli/src/tasks/utils/project-meta.ts \
+  extensions/cli/test/tasks/utils/project-meta.test.ts
 git commit -m "feat(tasks): bootstrap Task Project metadata without moving tasks" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -772,9 +772,9 @@ git commit -m "feat(tasks): bootstrap Task Project metadata without moving tasks
 ### Task 4: Domain list/get/create/update
 
 **Files:**
-- Modify: `extensions/clis/src/tasks/utils/project-meta.ts` — `listProjects`, `getProject`, `createProject`, `updateProject`
-- Modify: `extensions/clis/src/tasks/utils/format.ts` — extend `TasksSuccess` (used in Task 5; add the fields now so domain tests can `JSON.stringify` the record shape)
-- Create: `extensions/clis/test/tasks/project.test.ts`
+- Modify: `extensions/cli/src/tasks/utils/project-meta.ts` — `listProjects`, `getProject`, `createProject`, `updateProject`
+- Modify: `extensions/cli/src/tasks/utils/format.ts` — extend `TasksSuccess` (used in Task 5; add the fields now so domain tests can `JSON.stringify` the record shape)
+- Create: `extensions/cli/test/tasks/project.test.ts`
 
 **Interfaces:**
 - Consumes: `parseTaskProject` from `./project.js`; helpers from Tasks 1–3; `BoardWriter` from `./board.js`
@@ -961,7 +961,7 @@ test("createProject rejects _default as the CLI id", async () => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/project.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/project.test.ts`
 
 Expected: FAIL — `createProject` not exported
 
@@ -1003,7 +1003,7 @@ export async function createProject(
 Run:
 
 ```bash
-cd extensions/clis && node --test --import tsx test/tasks/project.test.ts
+cd extensions/cli && node --test --import tsx test/tasks/project.test.ts
 pnpm --filter edges-cli test
 ```
 
@@ -1012,9 +1012,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks/utils/project-meta.ts \
-  extensions/clis/src/tasks/utils/format.ts \
-  extensions/clis/test/tasks/project.test.ts
+git add extensions/cli/src/tasks/utils/project-meta.ts \
+  extensions/cli/src/tasks/utils/format.ts \
+  extensions/cli/test/tasks/project.test.ts
 git commit -m "feat(tasks): add Task Project metadata domain CRUD" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1024,17 +1024,17 @@ git commit -m "feat(tasks): add Task Project metadata domain CRUD" \
 ### Task 5: Wire `edges tasks project` + help/README + orthogonality
 
 **Files:**
-- Create: `extensions/clis/src/tasks/project.ts`
-- Create: `extensions/clis/src/tasks/project/list.ts`
-- Create: `extensions/clis/src/tasks/project/get.ts`
-- Create: `extensions/clis/src/tasks/project/create.ts`
-- Create: `extensions/clis/src/tasks/project/update.ts`
-- Modify: `extensions/clis/src/tasks.ts` — `addProjectCommand(tasks, ctx)` after `addUpdateCommand`; extend `TASKS_AFTER_HELP`
-- Modify: `extensions/clis/README.md` — add the four verbs under `## tasks`; Capability Surface stays CLI + Skill + MCP
+- Create: `extensions/cli/src/tasks/project.ts`
+- Create: `extensions/cli/src/tasks/project/list.ts`
+- Create: `extensions/cli/src/tasks/project/get.ts`
+- Create: `extensions/cli/src/tasks/project/create.ts`
+- Create: `extensions/cli/src/tasks/project/update.ts`
+- Modify: `extensions/cli/src/tasks.ts` — `addProjectCommand(tasks, ctx)` after `addUpdateCommand`; extend `TASKS_AFTER_HELP`
+- Modify: `extensions/cli/README.md` — add the four verbs under `## tasks`; Capability Surface stays CLI + Skill + MCP
 - Modify: `knowledge/tasks/README.md` — after “Issue 层 Task Project”, add that each project including `_default` has lightweight `AGENTS.md` and that `knowledge/tasks/AGENTS.md` has a CLI-maintained Task Projects section outside project-memory markers
-- Modify: `extensions/clis/test/tasks/cli.test.ts`
-- Modify: `extensions/clis/test/tasks/parse.test.ts`
-- Modify: `extensions/clis/test/tasks/run.test.ts`
+- Modify: `extensions/cli/test/tasks/cli.test.ts`
+- Modify: `extensions/cli/test/tasks/parse.test.ts`
+- Modify: `extensions/cli/test/tasks/run.test.ts`
 
 **Interfaces:**
 - Consumes: `listProjects` / `getProject` / `createProject` / `updateProject`; `runTasksCommand` / `succeed` from `./utils/result.js` (project leaves import `../utils/result.js`); `CliContext` / `usageError`
@@ -1256,7 +1256,7 @@ test("run tasks project create/list/get/update and update --project keeps status
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/clis && node --test --import tsx test/tasks/cli.test.ts test/tasks/parse.test.ts test/tasks/run.test.ts`
+Run: `cd extensions/cli && node --test --import tsx test/tasks/cli.test.ts test/tasks/parse.test.ts test/tasks/run.test.ts`
 
 Expected: FAIL — unknown command `project` / help does not list `project`
 
@@ -1279,14 +1279,14 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/clis/src/tasks.ts \
-  extensions/clis/src/tasks/project.ts \
-  extensions/clis/src/tasks/project \
-  extensions/clis/README.md \
+git add extensions/cli/src/tasks.ts \
+  extensions/cli/src/tasks/project.ts \
+  extensions/cli/src/tasks/project \
+  extensions/cli/README.md \
   knowledge/tasks/README.md \
-  extensions/clis/test/tasks/cli.test.ts \
-  extensions/clis/test/tasks/parse.test.ts \
-  extensions/clis/test/tasks/run.test.ts
+  extensions/cli/test/tasks/cli.test.ts \
+  extensions/cli/test/tasks/parse.test.ts \
+  extensions/cli/test/tasks/run.test.ts
 git commit -m "feat(tasks): add edges tasks project list|get|create|update" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
