@@ -9,6 +9,17 @@ description: 学习 Cognition 开源的 Agent Memory Repo 规范与 Devin Memory
 > 用途：理解 Cognition 的「记忆即 git 仓库」规范与 Devin 的 Dreaming 机制，对照本仓 Project Memory，找可借鉴点。
 > 原则：正文只写来源里出现的事实；标 **【推断】** 的是本笔记的理解，标 **【未证实】** 的是来源未说明的部分。
 
+## 我的观察（peng cheng）
+
+1. **Memory loop**：定义了 clone → search → update → push 的 memory loop。
+2. **Dreaming**：支持 add new memory 和 clean up memory。
+   1. Add new memory：Spot patterns across sessions and save them as new entries.
+   2. Clean up memory：Merge duplicates, remove outdated entries, and check sources to resolve contradictions.
+3. **文件组织**：有一个 `MEMORY.md` 作为记忆的主入口，类似 Claude Code auto memory。除入口外，不限制记忆文件的目录组织形式，允许 md 之外的额外资源文件。
+4. **链接引用**：链接用 `[[path]]` 而非 `[name](path)`。个人看法：没看到很强的必要性。
+5. **Entry 级 metadata**：每个 entry 后可以用 `[key1: value1; key2: value2]` 这种形式定义 entry 级 metadata（键值用冒号分隔、键值对之间用分号分隔，如 `[source: https://example.com/sessions/102; added: 2026-09-03]`）。
+6. **可组合性**：一个 session 可以同时加载多个 memory repo。
+
 ## 1. 背景与来源
 
 - **X 发布帖**（Cognition 官方账号，2026-10-05 17:44 UTC，即北京时间 2026-10-06 01:44）：[x.com/cognition/status/2107165034463867001](https://x.com/cognition/status/2107165034463867001)。原文要点：推出 Dreaming；跨会话里 Devin 会建立一张关于「你喜欢怎么工作」的 memory graph；夜间自我整理记忆、移除过时记录、发现潜在信息；同时在做一个名为 Agent Memory Repo 的开源标准。
