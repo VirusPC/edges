@@ -11,3 +11,4 @@ Routine 专项工作区：跨平台 routine 的形态调研，以及 skill 与�
 ## 示例
 
 - [daily-conversation-deposit/SKILL.md](daily-conversation-deposit/SKILL.md) — 日复盘。意图在 `SKILL.md`，日程在同目录 [schedule.md](daily-conversation-deposit/schedule.md)，只引用 Skill。结果写入 [`retrospectives/daily/`](../../retrospectives/daily/README.md)。
+- [weekly-retrospective/SKILL.md](weekly-retrospective/SKILL.md) — 周复盘。意图在 `SKILL.md`，日程在同目录 [schedule.md](weekly-retrospective/schedule.md)，只引用 Skill。结果写入 [`retrospectives/weekly/`](../../retrospectives/weekly/README.md)。
