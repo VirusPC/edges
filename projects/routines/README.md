@@ -7,3 +7,7 @@ Routine 专项工作区：跨平台 routine 的形态调研，以及 skill 与�
 ## 文档
 
 - [2026-10-11--跨平台定义调研.md](2026-10-11--跨平台定义调研.md) — 四种形态、拆分布局，以及各家字段的分开示意
+
+## 示例
+
+- [daily-conversation-deposit/SKILL.md](daily-conversation-deposit/SKILL.md) — 日复盘。意图在 `SKILL.md`，日程在同目录 [schedule.md](daily-conversation-deposit/schedule.md)，只引用 Skill。结果写入 [`retrospectives/daily/`](../../retrospectives/daily/README.md)。
