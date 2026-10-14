@@ -102,6 +102,15 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - 其「PageIndex File System」把树状索引扩展到文件层级，以便在整个语料库上推理。
 - 与文件式记忆的关系：它把「路径即索引、索引文件指路、按需下钻」这套思路做成了检索方法本身，说明不用向量也能做大规模检索；对 edges 而言，CLI 生成的层级 `AGENTS.md` / `README.md` 索引正是一棵可供 Agent 推理下钻的树。
 
+#### OpenViking：火山引擎的 Agent 上下文数据库
+
+- 火山引擎开源的「AI Agent 上下文数据库」（GitHub 仓库 `volcengine/OpenViking`，AGPL-3.0），官网自述为「The Context Database for AI Agents」；火山引擎另提供托管服务。
+- 虚拟文件系统：用 `viking://` 协议把知识、记忆和技能组织成一棵目录树，分三块：`resources/`（项目文档、代码仓库、网页等）、`user/<user_id>/`（该用户的记忆、私有资源、技能、会话等）、`agent/`（全局的 Agent 能力与配置，如技能）。Agent 像操作文件一样 `ls`、`tree`、`read`、`grep`，人也可以打开任意目录查看和编辑。
+- 上下文分层：每个经过语义处理的目录都有三层内容：L0 简介 `.abstract.md`（默认约 256 字符，用于向量检索和快速过滤）、L1 概览 `.overview.md`（默认约 4000 字符，用于重排和导航）、L2 原文（原始文件和子目录，按需加载）。Agent 先看摘要再决定读不读原文。
+- 会话：`session.commit()` 先归档对话，再在后台用 LLM 生成会话摘要（写成 `.abstract.md` / `.overview.md`），按记忆类型的 schema 抽取长期记忆，由 LLM 合并去重后以补丁形式写回记忆文件，并在归档目录写一份 `memory_diff.json` 作为记忆变更审计日志。
+- 存储与检索：VikingFS 虚拟文件系统把内容存在 RAGFS 里，另建向量索引；检索可以限定在某个目录子树里做语义搜索，而不是扫描整个扁平向量池。
+- 接入：人用 `ov` 命令行（如 `ov add-resource`、`ov ls`、`ov find`、`ov grep`）；Agent 通过 MCP（服务端提供 `/mcp`）或各编码 Agent 的插件、hook 接入，另有 Python、Go、TypeScript SDK 与 HTTP API。
+
 #### 论文：Filesystem-Based Memory for LLM Agents（2026-07）
 
 - 《Filesystem-Based Memory for LLM Agents: Organization, Evolution, and Sustainability》，Sizhe Zhou、Sheldon Yu、Hui Wei 等，arXiv 2607.26637，2026-07-29 提交。目前只是 arXiv 预印本，没有查到会议或期刊录用信息，**未经同行评审**，结论只能当参考。
@@ -160,9 +169,10 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 | 索引 | `MEMORY.md`、frontmatter、文件树 | 各层 `AGENTS.md` 与类型 `README.md`，由 CLI 生成 |
 | 分层 | 组织 / 用户 / 项目 / 本地 | 递归作用域（任意目录可 init），`--super` 指向仓库根 |
 | 记忆类型 | Claude Code 四类 | 内置六类且可扩展，前四类与 Claude Code 对齐 |
-| 写入审阅 | Letta 自动提交；Cognition 每次编辑即 push、无人参与；Claude Code 本机直接写 | 人审 PR 合入受保护 main |
+| 写入审阅 | Letta 自动提交；OpenViking 由服务在会话提交时自动抽取写入，只留 `memory_diff.json` 审计日志；Cognition 每次编辑即 push、无人参与；Claude Code 本机直接写 | 人审 PR 合入受保护 main |
 | 并发 | Letta 子 Agent 各用 worktree 再合并 | 每个 Agent 一个 worktree 加分支，经 PR 合并 |
-| 检索 | grep 为主，可选向量索引（GBrain）或无向量树索引（PageIndex） | CLI list/get 加 grep，暂无向量层 |
+| 检索 | grep 为主，可选向量索引（GBrain）、目录范围内的向量检索（OpenViking）或无向量树索引（PageIndex） | CLI list/get 加 grep，暂无向量层 |
+| 分层摘要 | OpenViking 每个目录自动生成 L0 `.abstract.md` 与 L1 `.overview.md`，原文按需读 | 只有 CLI 生成的索引（各层 `AGENTS.md` / `README.md` 的条目与描述），没有目录级摘要 |
 | 私有内容 | `CLAUDE.local.md`、仓库外目录 | gitignore 的 `users/`，或私有仓 |
 
 ## 所学
@@ -171,6 +181,7 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - Cognition 的规范与 edges 最接近（git 仓库、`MEMORY.md` 入口、一行一条带来源、定期整理），区别是它默认无人审核直接 push，edges 走 PR；它的条目级 `source` / `added` 元数据值得借鉴。
 - 与业界最大的差异是「人审 PR」：Letta 选择自动提交以换取低延迟，edges 选择审阅以换取质量与公开安全。两者都成立，取决于记忆写入频率与公开程度。
 - 「检索靠 grep 还是向量」不必二选一：业界常见做法是文件为真源、索引为可重建的派生物；现阶段 edges 规模下 grep 足够，没有必要引入向量库。
+- OpenViking 与 edges 的异同：相同的是路径即索引、摘要分层、按需加载；不同的是它没有 git 历史、diff 和 PR 审阅，记忆由服务自动抽取、合并后写入（只有变更审计日志），而 edges 的每次变更都经人审 PR。可借鉴的是「在每个目录生成分层摘要」：让 Agent 先读一两句简介和一段概览，再决定是否下钻。
 - 2607.26637 给 edges 的启示：
   - 结构退化是常态，不能指望 Agent 自觉保持整洁；edges 用 CLI 自动生成索引、用人审 PR 把关，正是对抗退化的两道闸。
   - 工具设计是一等杠杆：CLI 暴露哪些命令、校验什么，会直接塑造记忆的形态，作用不亚于换模型。
@@ -215,6 +226,7 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - 先完成 backlog 中「`memory init` / `remember` 支持 `--super`」，再用 CLI 重整仓库根 `memory/`，删除手写 README。
 - 参考 Claude Code 的索引上限，给 CLI 生成的索引加长度检查（例如 `memory doctor` 报告超长索引）。
 - 把 CLI 当作塑造记忆结构的主要杠杆：在 `memory doctor` 一类命令中检查结构健康（索引长度、重复、孤立条目），而不是只靠提示词要求 Agent 保持整洁。
+- 参考 OpenViking 的 L0 / L1 分层，评估让 CLI 为每个目录生成简介与概览（可放在索引文件的描述里或单独文件），并在结构变化时重建。
 - 参考 Cognition 的条目元数据，考虑让 CLI 为记忆条目记录来源与添加日期。
 - 参考 Letta 的 defragmentation 与 Cognition 的 Dreaming，考虑一个整理类 skill：先备份，再合并重复、拆大文件，结果仍走 PR。
 - 参考 Letta 的 `system/` 钉住机制与 Claude Code 的 `paths` 规则，评估是否需要「始终加载」与「按路径加载」的元数据。
@@ -247,6 +259,12 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - GBrain 开源仓库（README，作者自述与「brain repo 是记录系统」）：https://github.com/garrytan/gbrain
 - Anthropic Managed Agents memory stores 文档：https://platform.claude.com/docs/en/managed-agents/memory
 - Anthropic Dreams 文档（研究预览）：https://platform.claude.com/docs/en/managed-agents/dreams
+- OpenViking 开源仓库（README）：https://github.com/volcengine/OpenViking
+- OpenViking 官网：https://openviking.ai/
+- OpenViking 架构文档：https://docs.openviking.ai/en/concepts/01-architecture
+- OpenViking 上下文分层（L0/L1/L2）：https://docs.openviking.ai/en/concepts/03-context-layers
+- OpenViking Viking URI：https://docs.openviking.ai/en/concepts/04-viking-uri
+- OpenViking 会话管理：https://docs.openviking.ai/en/concepts/08-session
 - 论文《Filesystem-Based Memory for LLM Agents》（arXiv 预印本，未经同行评审）：https://arxiv.org/abs/2607.26637
 - Mem0 在 X 上介绍 GBrain 的帖子（长文《A Brain in a Git Repo: How GBrain Works》）：https://x.com/mem0ai/status/2070541048527609885
 - PageIndex 开源仓库：https://github.com/VectifyAI/PageIndex
@@ -270,6 +288,7 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - Cognition Agent Memory Repo 的发布日期（委托中给 2026-10-13）：页面上未找到日期，未核实。
 - 已解决：Anthropic Managed Agents / Dreams 已找到官方文档并写入正文（memory store 挂载为沙箱目录；Dreams 为研究预览）。memory store 在服务端的底层存储形式文档未说明，未核实。
 - 2607.26637 尚无同行评审或录用信息，其结论未独立复现。
+- OpenViking 相关论文（arXiv 2605.29640，《Directory-Aware Query and Maintenance in Vector Databases》）是否被 VLDB 2026 录用：只有项目 README 自述「Presented at VLDB 2026」，未找到会议官方录用信息，未核实；GitHub star 数（二手来源称约 3 万）也未核实，不写入正文。
 - Letta 的 LoCoMo 分数为厂商自测，未独立复现。
 
 ### 原始材料引用
