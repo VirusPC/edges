@@ -204,6 +204,9 @@
 - **Practical AI**：偏落地，Agent 进企业、AGENTS.md、computer use 都聊过
   - 主持人：Daniel Whitenack、Chris Benson
   - 链接：https://practicalai.show/
+- **Lenny's Podcast**：产品视角，近期常请 AI 大厂产品负责人（OpenAI、Google Labs、SpaceXAI 等）讲 Agent 产品怎么做
+  - 主持人：Lenny Rachitsky
+  - 链接：https://www.lennysnewsletter.com/podcast
 - **张小珺商业访谈录**：中文长访谈，覆盖国内大模型和 Agent 公司创始人
   - 主持人：张小珺
   - 链接：https://www.xiaoyuzhoufm.com/podcast/626b46ea9cbbf0451cf5a962
