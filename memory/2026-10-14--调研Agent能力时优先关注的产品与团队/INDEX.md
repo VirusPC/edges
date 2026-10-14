@@ -48,6 +48,15 @@
   - 博客：https://aws.amazon.com/cn/blogs/machine-learning/
   - X：[@awscloud](https://x.com/awscloud)
 
+- **Meta / Muse**：Meta 的个人 Agent 产品（2026-09-08 发布），模型系列是 Muse Spark / Muse Wonder；本仓 `projects/muse-gadgets` 配的也是 Meta Muse Gadgets 硬件
+  - 代码仓库：https://github.com/facebookincubator/muse-gadget-sdk（Gadget SDK，不是 Agent 本体）
+  - 博客：https://research.meta.ai/blog/muse-wonder；https://research.meta.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse
+  - X：[@AIatMeta](https://x.com/AIatMeta)；[@Muse](https://x.com/Muse)（企业认证，简介是「Your personal AI agent」，是否 Meta 官方账号 【未证实】）
+- **SpaceXAI（xAI）/ Grok Bot**：个人 Agent，每个 Bot 有自己的持久云电脑，跨会话记忆
+  - 代码仓库：—
+  - 博客：https://x.ai/news/introducing-grok-bot；产品页 https://x.ai/bot；文档 https://docs.x.ai/grok-bot/overview
+  - X：[@bot](https://x.com/bot)（Grok Bot 官方，企业认证）；[@xai](https://x.com/xai)
+
 ## Coding Agent 产品
 
 - **Cognition / Devin**：Memory Drive 和产品侧 Dreaming；开源的只是 Agent Memory Repo 格式
