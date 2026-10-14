@@ -8,4 +8,4 @@ Agent 基础设施专项工作区：记录支撑 Agent 运行的底层设施，�
 
 ## 文档
 
-（暂无）
+- [prompt-caching.md](prompt-caching.md)：Prompt caching 知识笔记：各厂商（Anthropic / OpenAI / Gemini / DeepSeek）机制和计价对比、Agent 场景实践，以及 pi cache warmer 案例
