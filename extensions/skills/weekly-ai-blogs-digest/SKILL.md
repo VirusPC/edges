@@ -1,7 +1,7 @@
 ---
 name: weekly-ai-blogs-digest
 description: 当用户想要汇总一段时间内（默认过去一周）AI / AI Coding 领域各大博客的新文章时使用此技能。会逐站收集新发布链接、逐篇做 200 字内摘要、总结整体技术风向，并按固定模版输出为 markdown 文件。在以下短语触发："本周 AI 资讯"、"汇总一下 AI 博客"、"weekly AI digest"、"看看这周 AI Coding 有什么新东西"。不要为单篇文章总结（用 summarize-ai-article）或非博客类信源触发。
-version: 1.0.1
+version: 1.1.0
 ---
 
 ## 任务执行流程
@@ -51,7 +51,7 @@ version: 1.0.1
 https://claude.com/blog
 https://www.anthropic.com/engineering
 https://openai.com/zh-Hans-CN/news/
-https://research.google/blog/
+https://blog.google/technology/ai/
 https://manus.im/blog
 https://cursor.com/cn/blog
 https://cognition.ai/blog/1
@@ -65,11 +65,11 @@ https://aws.amazon.com/cn/blogs/machine-learning/
 https://sankalp.bearblog.dev/
 https://www.datacamp.com/blog/category/ai
 https://ampcode.com/chronicle
-https://latitude-blog.ghost.io/blog/
+https://latitude.so/blog
 https://lovable.dev/blog
 https://kiro.dev/blog/
 https://www.philschmid.de/
-https://block.github.io/goose/blog
+https://goose-docs.ai/blog/
 https://zed.dev/blog
 https://roocode.com/blog
 https://www.coderabbit.ai/blog
@@ -83,4 +83,26 @@ https://jxnl.co/writing/#business-and-product
 https://baoyu.io/
 https://lucumr.pocoo.org/
 https://minimaxi.com/blog
+```
+
+## 参考播客列表（可选信源）
+
+播客不是博客，默认不逐期总结；用户要求时，或本周有和 AI / Agent 强相关的一期时，在「本周风向」里点名一句并附链接。
+
+```md
+https://www.latent.space/podcast
+https://www.dwarkesh.com/podcast
+https://podcasts.apple.com/us/podcast/no-priors-artificial-intelligence-technology-startups/id1668002688
+https://www.cognitiverevolution.ai/
+https://lexfridman.com/podcast/
+https://practicalai.show/
+https://www.lennysnewsletter.com/podcast
+https://cheekypint.substack.com/
+https://www.xiaoyuzhoufm.com/podcast/626b46ea9cbbf0451cf5a962
+https://www.xiaoyuzhoufm.com/podcast/60502e253c92d4f62c2a9577
+https://www.xiaoyuzhoufm.com/podcast/640ee2438be5d40013fe4a87
+https://openai.com/podcast/
+https://aws.amazon.com/podcasts/aws-podcast/
+https://ampcode.com/podcast
+https://www.datacamp.com/podcast
 ```
