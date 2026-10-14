@@ -8,7 +8,7 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 
 这次调研的是：以文件和目录为载体、以 git 为版本层的 Agent 记忆方案，在业界有哪些一手做法，共性模式是什么，代价在哪里，以及 edges 现有设计与之相比的异同和下一步。
 
-- 难点一：一手材料分散在产品文档、工程博客与开源 README 中，有些候选方向（例如 Anthropic 是否有托管的文件化记忆、Cursor 的 memories）在本次检索中没有找到可核实的官方页面，只能标为未核实，不能凭印象写。
+- 难点一：一手材料分散在产品文档、工程博客与开源 README 中，有些候选方向（例如 Cursor 的 memories）在本次检索中没有找到可核实的官方页面，只能标为未核实，不能凭印象写。
 - 难点二：「文件式记忆」和「向量式记忆」并不是二选一，很多系统是文件为真源、索引为加速层，需要区分「存储形态」与「检索方式」两个维度。
 - 难点三：git 带来历史、diff、分支和回滚，但多 Agent 并发写同一份记忆时，冲突解决、索引文件的合并冲突，是文件式方案特有的问题。
 
@@ -47,6 +47,12 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - 官方把它定位成「just-in-time」上下文检索：不预先塞满上下文，按需读回。启用后 API 会自动注入「先看记忆目录、假设随时会被打断」的系统提示。
 - 安全上要求应用自己做路径穿越防护、大小上限与过期清理。文档还推荐「多会话软件开发」模式：首个会话建进度日志与功能清单，之后每个会话先读再干，结束前更新。
 - Anthropic 工程博客《Effective context engineering for AI agents》把这类做法称为 structured note-taking（agentic memory），并把 Claude Code「CLAUDE.md 预先放进上下文 + glob/grep 按需检索」作为混合策略的例子。
+
+#### Anthropic Managed Agents：memory stores 与 Dreams
+
+- Managed Agents 的 memory store 是工作区范围内的一组文本文档；挂到会话上时，会作为一个目录挂载进会话沙箱，Agent 用文件工具读写。
+- Dreams（研究预览，需申请）：一个异步任务，输入一个已有的 memory store 和 1 到 100 个历史会话记录，输出一个新的、重新整理过的 memory store，负责合并重复、用最新值替换过时或矛盾的条目，并提炼新的洞见。输入 store 不会被修改，可以先审阅输出再决定是否采用。文档给出的动机是：Agent 工作时的写入是「局部、增量」的，多次会话后会积累重复、矛盾和过时条目。
+- 这和 edges「新结果走 PR、人审后合入」的思路相近：整理结果是一个可以审阅、可以丢弃的新版本。
 
 #### Letta：Context Repositories（git 版本化记忆）
 
@@ -96,6 +102,23 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - 其「PageIndex File System」把树状索引扩展到文件层级，以便在整个语料库上推理。
 - 与文件式记忆的关系：它把「路径即索引、索引文件指路、按需下钻」这套思路做成了检索方法本身，说明不用向量也能做大规模检索；对 edges 而言，CLI 生成的层级 `AGENTS.md` / `README.md` 索引正是一棵可供 Agent 推理下钻的树。
 
+#### 论文：Filesystem-Based Memory for LLM Agents（2026-07）
+
+- 《Filesystem-Based Memory for LLM Agents: Organization, Evolution, and Sustainability》，Sizhe Zhou、Sheldon Yu、Hui Wei 等，arXiv 2607.26637，2026-07-29 提交。目前只是 arXiv 预印本，没有查到会议或期刊录用信息，**未经同行评审**，结论只能当参考。
+- 研究设定：把「Markdown 目录树加通用文件工具」的记忆形式化为围绕同一个记忆文件系统的三个角色：
+  - 管理 Agent：整合并整理新来的内容，写入工具是 Anthropic memory tool 的六个通用文件操作（view、create、字符串替换、insert、delete、rename）加行级正则搜索；
+  - 检索 Agent：只读地浏览存储并给出带出处的回答，工具是 view、正则搜索、目录、按章节读，故意不给排序检索引擎，好让目录组织的差异显现出来；
+  - 执行 Agent：提供任务轨迹，被提炼为技能，与陈述性记忆放在同一个存储里。
+- 变量：记忆形态（不建存储、按块 BM25 检索、逐字转储、只按主题分文件夹、LLM 重组、Agent 自行整理的层级）、信息流规模、工具集（默认工具、加 BM25、沙箱 shell）、管理与检索 Agent 的模型强弱。基准包括 LoCoMo、PersonaMem、REALTALK 等长对话和一个具身任务的技能设定，度量回答正确率、出处支持率、成本以及存储健康度。
+- 主要发现：
+  - 整理带来的稳定收益是检索更省：资料量大时，整理过的存储检索成本大约减半。
+  - 随着记忆增长，除最强的管理 Agent 外，目录结构都会退化。
+  - 没有任何一个被测 Agent 能把「整理本身」转化为更好的答案；没有一种形态在所有场景下答案质量最好。
+  - 只换工具集对存储形态的影响，与换模型一样大；论文据此认为工具集是引导目标结构的一个自然旋钮。
+  - 记忆形态要匹配使用者：强执行 Agent 用逐字日志效果最好，弱执行 Agent 下排名反转，只有整理过的「技能加记忆」存储能撑住。
+- 它在引言中把 Anthropic memory tool（六个通用文件操作的目录）、Claude Code auto memory（带索引的记忆文件夹，`MEMORY.md` 加主题文件按需读取）作为「文件系统已是部署默认」的例证，并在相关工作中引用 Anthropic Dreams，说明整理被放到 Agent 之外进行，正是因为 Agent 自己的写入是局部增量的、存储会在两次整理之间退化。
+- 全文没有讨论 git。
+
 #### Karpathy：LLM Wiki
 
 - Karpathy 在一份公开 gist《LLM Wiki》里提出：与其每次 RAG 从原始文档重新拼答案，不如让 LLM 持续维护一套互相链接的 Markdown wiki，把知识「编译一次、保持最新」，成为不断复利的产物。人负责找材料和提问，LLM 负责总结、交叉引用、归档；他用 Obsidian 浏览，「Obsidian 是 IDE，LLM 是程序员，wiki 是代码库」。
@@ -118,6 +141,7 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - 索引文件是并发写的热点，多分支同时改同一个索引容易冲突；由工具自动生成索引能缓解。
 - 规模大时纯 grep 召回有限，语义近似问题需要额外索引。
 - 公开仓库里的记忆必须脱敏；私有内容只能放 gitignore 层或私有仓。
+- 2607.26637 的实验显示：Agent 自行整理的目录结构会随记忆增长而退化，整理本身也不一定提升答案质量；目录整理的主要收益在于降低大资料的检索成本。
 - 人审 PR 提高质量，但也增加了写入延迟，不适合高频的细粒度记忆。
 
 ### edges 现状（已在仓库核实）
@@ -147,6 +171,12 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - Cognition 的规范与 edges 最接近（git 仓库、`MEMORY.md` 入口、一行一条带来源、定期整理），区别是它默认无人审核直接 push，edges 走 PR；它的条目级 `source` / `added` 元数据值得借鉴。
 - 与业界最大的差异是「人审 PR」：Letta 选择自动提交以换取低延迟，edges 选择审阅以换取质量与公开安全。两者都成立，取决于记忆写入频率与公开程度。
 - 「检索靠 grep 还是向量」不必二选一：业界常见做法是文件为真源、索引为可重建的派生物；现阶段 edges 规模下 grep 足够，没有必要引入向量库。
+- 2607.26637 给 edges 的启示：
+  - 结构退化是常态，不能指望 Agent 自觉保持整洁；edges 用 CLI 自动生成索引、用人审 PR 把关，正是对抗退化的两道闸。
+  - 工具设计是一等杠杆：CLI 暴露哪些命令、校验什么，会直接塑造记忆的形态，作用不亚于换模型。
+  - 需要定期整理（类似 Dreams、Letta defragmentation、Cognition Dreaming），且整理结果应作为可审阅、可丢弃的新版本提交。
+  - 记忆形态要匹配使用者：给能力弱的 Agent 准备更提炼的条目，给强 Agent 保留原始材料的链接。
+  - 整理的价值主要在省检索成本，不必为了「好看」过度分层。
 - Mem0 这类抽取式记忆不可直接审阅、不可 diff，与 edges「经你审核合并」的核心诉求不符，所以只作对照，不作替代。
 
 ## 行动指南
@@ -184,6 +214,7 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 
 - 先完成 backlog 中「`memory init` / `remember` 支持 `--super`」，再用 CLI 重整仓库根 `memory/`，删除手写 README。
 - 参考 Claude Code 的索引上限，给 CLI 生成的索引加长度检查（例如 `memory doctor` 报告超长索引）。
+- 把 CLI 当作塑造记忆结构的主要杠杆：在 `memory doctor` 一类命令中检查结构健康（索引长度、重复、孤立条目），而不是只靠提示词要求 Agent 保持整洁。
 - 参考 Cognition 的条目元数据，考虑让 CLI 为记忆条目记录来源与添加日期。
 - 参考 Letta 的 defragmentation 与 Cognition 的 Dreaming，考虑一个整理类 skill：先备份，再合并重复、拆大文件，结果仍走 PR。
 - 参考 Letta 的 `system/` 钉住机制与 Claude Code 的 `paths` 规则，评估是否需要「始终加载」与「按路径加载」的元数据。
@@ -214,16 +245,31 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - Cognition Agent Memory Repo 规范页：https://cognition.com/agent-memory-repo
 - Agent Memory Repo 开源仓库：https://github.com/AgentMemoryRepo/agentmemoryrepo
 - GBrain 开源仓库（README，作者自述与「brain repo 是记录系统」）：https://github.com/garrytan/gbrain
+- Anthropic Managed Agents memory stores 文档：https://platform.claude.com/docs/en/managed-agents/memory
+- Anthropic Dreams 文档（研究预览）：https://platform.claude.com/docs/en/managed-agents/dreams
+- 论文《Filesystem-Based Memory for LLM Agents》（arXiv 预印本，未经同行评审）：https://arxiv.org/abs/2607.26637
 - Mem0 在 X 上介绍 GBrain 的帖子（长文《A Brain in a Git Repo: How GBrain Works》）：https://x.com/mem0ai/status/2070541048527609885
 - PageIndex 开源仓库：https://github.com/VectifyAI/PageIndex
+### 综述清单（都不讨论文件式记忆）
+
+以下宽泛的 Agent 记忆综述都已打开核实；在全文中检索不到对文件系统、Markdown 或 git 式记忆的讨论，只把 MemGPT 当作分层或早期系统提及。目前没有专门讲文件 / git 式 Agent 记忆的综述。
+
+- 《Memory in the Age of AI Agents: A Survey — Forms, Functions and Dynamics》，Yuyang Hu 等，2025-12：https://arxiv.org/abs/2512.13564
+- 《Memory for Autonomous LLM Agents: Mechanisms, Evaluation, and Emerging Frontiers》，Pengfei Du，2026-03：https://arxiv.org/abs/2603.07670
+- 《Anatomy of Agentic Memory: Taxonomy and Empirical Analysis of Evaluation and System Limitations》，Dongming Jiang 等，2026-02：https://arxiv.org/abs/2602.19320
+- 《A Survey on the Memory Mechanism of Large Language Model based Agents》，Zeyu Zhang 等，2024-04（后发表于 ACM TOIS）：https://arxiv.org/abs/2404.13501
+
+### 其他链接
+
 - git worktree 官方文档：https://git-scm.com/docs/git-worktree
 
 ### 未能核实的点
 
-- Anthropic「Managed Agents / Dreams」是否提供文件化记忆：本次未找到一手官方页面，未写入结论。
 - Cursor「Memories」功能：官方 rules 文档中未见说明，未写入结论。
 - Mem0 关于 GBrain 的帖子：X 接口显示发布时间为 2026-06-27 00:13（UTC+8），不是委托中给的 2026-07-27；帖子只是长文链接，长文正文未能读取，GBrain 的事实以其 GitHub README 为准。
 - Cognition Agent Memory Repo 的发布日期（委托中给 2026-10-13）：页面上未找到日期，未核实。
+- 已解决：Anthropic Managed Agents / Dreams 已找到官方文档并写入正文（memory store 挂载为沙箱目录；Dreams 为研究预览）。memory store 在服务端的底层存储形式文档未说明，未核实。
+- 2607.26637 尚无同行评审或录用信息，其结论未独立复现。
 - Letta 的 LoCoMo 分数为厂商自测，未独立复现。
 
 ### 原始材料引用
