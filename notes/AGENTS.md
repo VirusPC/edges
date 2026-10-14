@@ -24,4 +24,5 @@
 - [2026\-10\-14\-\-skill%E8%B7%A8%E8%81%8A%E5%A4%A9%E7%AA%97%E5%8F%A3%E4%BD%BF%E7%94%A8%E4%B8%8Eedges\-connector/INDEX.md](<2026-10-14--skill%E8%B7%A8%E8%81%8A%E5%A4%A9%E7%AA%97%E5%8F%A3%E4%BD%BF%E7%94%A8%E4%B8%8Eedges-connector/INDEX.md>)
 - [2026\-10\-14\-\-%E5%9F%BA%E4%BA%8E\-git\-repo\-%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84\-agent\-memory/INDEX.md](<2026-10-14--%E5%9F%BA%E4%BA%8E-git-repo-%E4%B8%8E%E6%96%87%E4%BB%B6%E7%B3%BB%E7%BB%9F%E7%9A%84-agent-memory/INDEX.md>)
 - [2026\-10\-14\-\-connector%E6%9C%8D%E5%8A%A1%E7%AB%AFagent%E7%94%A8codex%E6%8E%A5%E5%85%A5%E4%B8%8E%E6%B2%99%E7%AE%B1/INDEX.md](<2026-10-14--connector%E6%9C%8D%E5%8A%A1%E7%AB%AFagent%E7%94%A8codex%E6%8E%A5%E5%85%A5%E4%B8%8E%E6%B2%99%E7%AE%B1/INDEX.md>)
+- [2026\-10\-15\-\-folo%E4%B8%8Ebestblogs%E8%AE%A2%E9%98%85%E6%BA%90%E5%8F%8Aopml%E7%99%BD%E5%AB%96%E8%B7%AF%E5%BE%84/INDEX.md](<2026-10-15--folo%E4%B8%8Ebestblogs%E8%AE%A2%E9%98%85%E6%BA%90%E5%8F%8Aopml%E7%99%BD%E5%AB%96%E8%B7%AF%E5%BE%84/INDEX.md>)
 <!-- project-harness-local:end -->
