@@ -68,6 +68,8 @@ Stencil 做开源 agent harness **omp**（文档站 [omp.sh](https://omp.sh)；�
 - Provider 不只是 `stream`：计数、embedding、语音、web-search、发现模型等都要进同一层，避免每个扩展自造 OAuth/重试。
 - **强制工具调用策略（作者理想路径）：** 永远软提示 → 无副作用时再开原生 flag → 不遵从则有限重试并必要时付代价开 flag。
 - 永久工具表有税：实验显示工具数量显著影响墙钟（文中给 omp vs Codex/Pi 数字）——**数字来自作者实验，未复跑，标「未核实」。** 长尾工具走稳定发现面（文中 `dyn` CLI / 代码面），而不是塞满 schema。
+- Compaction 应提前投机做，再 splice 回主分支，而不是卡在上限时让用户空等最大的那次请求（作者主张）。
+- 小本地模型适合标题、分类、情绪判断等 harness 杂务（作者主张）。
 - 内置要深：`Read` 统一物化资源（目录、笔记本、办公文档、归档、URL、内部 URI…）；`Bash` 自带解析/策略感知，而不是裸 shell。
 
 ## 界面与栈
@@ -75,6 +77,17 @@ Stencil 做开源 agent harness **omp**（文档站 [omp.sh](https://omp.sh)；�
 - 旧 `render(): string[]` 导致反复解析 ANSI、量宽、分配；作者称某会话渲染占大量 CPU，改为一遍流式 RichText 后从数百秒量级到 ~90ms——**性能数字未复现，标「未核实」。**
 - 组件模型 + 语义色/图标策略归渲染器；transcript 用 block 生命周期（active → finalized → committed），并用 TLA+ 建模（附录 B）——**形式化规格存在性以文中附录为准，未独立跑 TLC。**
 - 语言：作者对 TS 作 harness 内核持负面态度，omp² 内核偏 Rust、扩展 Python——**品味判断，非普适结论。**
+
+## 认知要点
+
+以下为作者观点的浓缩（非新事实），用于评估或演进 harness：
+
+1. **Harness 更像游戏引擎的职责清单**：权威世界状态、日记、不可信动作、多视图复制、调度、协议适配、实时 UI——而不是「提示词 + 工具循环」的产品叙事。
+2. **「简单好、复杂坏」常被误读**：Dijkstra 要的是可推理，Ousterhout 要的是模块作者拥抱复杂度、把它压进内核；扩展「好写」若建立在闭包状态与三段工具 API 上，可靠性会系统性漏掉。
+3. **正确性来自「不可重放的状态不可表示」**，而不是更多文档或多加两个 hook；状态、取消、截断、兼容、渲染都应有单一可强制的所有者。
+4. **Director 与推理层分工**：Director 只声明语义意图（如「下一轮必须 write」），推理层选最便宜且诚实的实现并按需升级；「支持某个 flag」不等于产品完成。
+5. **永久工具表的代价是语法税与缓存失效**：动态发现需要稳定外壳，否则省了 schema、伤了 KV 缓存（参见 [prompt caching](../agent-infra/prompt-caching.md)）。
+6. **用四形态信封做验收**：评估或自建 coding agent 客户端时，用 Multiplexed / Remote / Spectator / Factorio 四种形态做架构验收，而不只看本地对话是否好用。
 
 ## 和本目录的关系
 
@@ -93,3 +106,4 @@ Stencil 做开源 agent harness **omp**（文档站 [omp.sh](https://omp.sh)；�
 - 长文：https://stencil.so/blog/harness-playbook
 - omp 文档（扩展）：https://omp.sh/docs/extension-authoring
 - Pi 示例仓库路径：https://github.com/earendil-works/pi/tree/main/packages/coding-agent/examples/extensions
+- 部分要点整合自 2026-09-28 旧笔记（PR #148，未合入）。
