@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - goose 博客改为 https://goose-docs.ai/blog/ ；latitude 博客改为 https://latitude.so/blog （旧地址失效）。
 
+### Changed
+
+- Google 信源从 research.google/blog（纯研究、含大量非 AI 内容）换为 https://blog.google/technology/ai/ 。
+
 ## [1.0.1] - 2026-09-06
 
 ### Changed

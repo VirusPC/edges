@@ -51,7 +51,7 @@ version: 1.1.0
 https://claude.com/blog
 https://www.anthropic.com/engineering
 https://openai.com/zh-Hans-CN/news/
-https://research.google/blog/
+https://blog.google/technology/ai/
 https://manus.im/blog
 https://cursor.com/cn/blog
 https://cognition.ai/blog/1
