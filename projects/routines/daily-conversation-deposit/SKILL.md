@@ -1,11 +1,11 @@
 ---
 name: daily-conversation-deposit
-description: 每日沉淀扫描（日复盘）。回顾过去 24 小时各 Grok Bot 助手的对话，只出沉淀候选，并把当日复盘经 PR 写入 retrospectives/daily。
+description: 每日沉淀扫描（日复盘）。回顾过去 24 小时各 Grok Bot 助手的对话，把沉淀候选直接落成文件并开 PR 到 main；当日复盘写入 retrospectives/daily。审阅在 PR 上，不自动合并。
 ---
 
 # 每日沉淀扫描（日复盘）
 
-回顾 peng cheng 过去 24 小时（Asia/Shanghai）在所有 Grok Bot 助手里的对话，按 VirusPC/edges 根 AGENTS.md 判断哪些该沉淀（笔记、任务、记忆/feedback 等它定义的类型；个人内容去 edges-private）。
+回顾 peng cheng 过去 24 小时（Asia/Shanghai）在所有 Grok Bot 助手里的对话，按 VirusPC/edges 根 AGENTS.md 判断哪些该沉淀、落到哪里（笔记、任务、记忆、feedback，以及它定义的其它类型）。个人内容去 edges-private。
 
 何时跑见同目录 [schedule.md](schedule.md)。本文件不写日程。
 
@@ -17,28 +17,44 @@ description: 每日沉淀扫描（日复盘）。回顾过去 24 小时各 Grok 
 
 ### 2. 再离线分析
 
-只基于落盘文件，按时间从前往后读，判断沉淀候选。共享记忆和 GitHub 合入记录只用来交叉核对、去重（已合入的跳过）。
+只基于落盘文件，按时间从前往后读，判断沉淀候选。共享记忆和 GitHub 合入记录只用来交叉核对、去重（已经合入或已经落过文件的跳过）。
 
-只出候选，不直接写其它沉淀内容、不改记忆：每条写来源助手、内容、依据 AGENTS.md 的理由、建议落点和下一步。有候选则转给用户确认；没有新候选则不要向用户索要沉淀确认（日复盘仍按步骤 3 入库）。报告里注明落盘目录、读到了哪些助手、哪些读不到。
+每条候选在内部记下来源助手、内容、依据根 AGENTS.md 的去向，以及准备写入的路径。能从落盘对话里有依据写成文件的，进入步骤 3 直接落盘。必填不足、写了就会编造的，不写文件，稍后在清单里写不做原因。这一步不在对话里提问，也不征求确认。没有新候选也继续步骤 3，日复盘仍要入库。
 
-### 3. 写入当日复盘
+### 3. 直接落文件并开 PR
 
-每天把当日复盘结果（候选清单 + 扫描局限）写成一份 Markdown，经 PR 入库：
+分析出的候选直接写成文件，和当日复盘一起开到 main 的 PR。审阅放在 PR 上。保持 PR 开放，等人合并，不自动合并。对话里不先征求确认。
+
+当日复盘：
 
 `retrospectives/daily/YYYY-MM-DD--日复盘/INDEX.md`
 
-日期取回看结束时刻所在的日历日（Asia/Shanghai）。同一日只保留一篇，补记改原来的 `INDEX.md`。章节按 [日复盘 README](../../../retrospectives/daily/README.md)：一级标题 `# <YYYY-MM-DD> 日复盘`，必写二级标题「范围」和「建议补充内容清单」。候选写进清单，扫描局限和读到的助手写进「范围」。
+日期取回看结束时刻所在的日历日（Asia/Shanghai）。同一日只保留一篇，补记改原来的 `INDEX.md`。章节按 [日复盘 README](../../../retrospectives/daily/README.md)：一级标题 `# <YYYY-MM-DD> 日复盘`，必写二级标题「范围」和「建议补充内容清单」。扫描局限、落盘目录、读到的助手和读不到的助手写进「范围」。
 
-这一步只写这份日复盘。笔记、任务、记忆和其它沉淀仍只出候选，等用户确认后再写。没有新候选时不向用户索要确认；日复盘仍要入库，清单里写明没有。
+「建议补充内容清单」列出本次 PR 里落了哪些候选。每条一句话，写上建议去处，以及本次 PR 中的写入路径。没有新候选就写明没有。没有落成文件的写不做原因（例如 `posts/` 由人维护，不自动写入；背景或目标在对话里不足，写了就会编造）。
 
-开 PR：用 Cursor 云端 Agent 开到 main 的 PR；**不要自动合并**，留给人审。Commit 带一行 `Co-authored-by: 日复盘 <grok-bot@users.noreply.github.com>`。
+去向以根 AGENTS.md 为准。落盘用仓库已有技能和 CLI，保证格式和索引登记正确：笔记用 `edges notes`，看板任务用 `edges tasks`，记忆和 feedback 用 `edges memory remember`。这些命令只改工作区文件。git 发生在 PR 分支上：提交、推送、开到 main 的 PR。看板任务也走这条 PR，任务文件和当日 `INDEX.md` 放在一起，不直接 push `main`。
 
-公开仓脱敏后再写：不写个人身份细节、未公开 IP、鉴权链接、凭据、私人生活细节。私人条目只概括成「有 N 条私人内容建议进 edges-private」。原始 transcript 不进 edges，只留在 `/workspace/daily-scan/`。
+按仓库归属分 PR：
+
+- VirusPC/edges 的公开内容，与当日 `INDEX.md` 同一个 PR，开到 main。
+- edges-private 的个人内容，在 edges-private 另开一个到 main 的 PR，不并进公开仓。公开仓的清单只写「有 N 条私人内容已在 edges-private 开 PR」，并附该 PR 链接，不写私人正文。拿不到 edges-private 时，公开清单写明未落成及原因，私人正文仍不写入公开仓。
+
+同一日补记：已落过的候选不重复写。新的公开候选并进尚未合并的当日 PR；该 PR 已经合并则另开一个到 main 的 PR。edges-private 同样处理。两个仓都不自动合并。
+
+开 PR：用 Cursor 云端 Agent 开到 main 的 PR。Commit 带一行 `Co-authored-by: 日复盘 <grok-bot@users.noreply.github.com>`。
+
+公开仓按根 README 的「隐私与脱敏」再写：不写个人身份细节、未公开 IP、鉴权链接、凭据、私人生活细节。凭据、鉴权链接、未公开 IP 在 edges-private 同样不写。原始 transcript 不进任何仓库，只留在 `/workspace/daily-scan/`。
+
+### 4. 只回链接
+
+对话里只告诉用户 PR 链接。公开仓一条；有 edges-private 的 PR 再加一条。不把候选清单贴出来征求确认。
 
 ## 成功标准
 
 - 窗口内每个读到的助手都有一份按时间正序的 jsonl，落在 `/workspace/daily-scan/YYYY-MM-DD/`。往期目录仍在。同一天重跑没有覆盖已有文件。
 - 候选只来自这些落盘文件。共享记忆和已合入记录只用于核对和去重。
-- 除当日日复盘这篇以外，没有改记忆，也没有把笔记、任务或其它沉淀写进仓库。有候选则转给用户确认；没有新候选则不要向用户索要沉淀确认（日复盘仍按步骤 3 入库）。
-- 报告写明落盘目录、读到的助手、读不到的助手。
-- 当日结果已按上面的路径经 PR 入库：用 Cursor 云端 Agent 开到 main，不自动合并，留给人审；commit 带 `Co-authored-by: 日复盘 <grok-bot@users.noreply.github.com>`。不含原始对话和需要脱敏的内容。
+- 能落盘的候选已按根 AGENTS.md 写成文件，并放进对应仓库开到 main 的 PR。看板任务在该 PR 里，没有直接 push `main`。对话里没有先征求确认。
+- 当日 `INDEX.md` 的「建议补充内容清单」列出本次 PR 里落了哪些候选及其路径。没有就写明没有。私人内容在公开清单里只留条数和 edges-private 的 PR 链接。
+- PR 开到 main，没有自动合并。commit 带 `Co-authored-by: 日复盘 <grok-bot@users.noreply.github.com>`。仓库里没有原始对话，也没有需要脱敏的内容。
+- 给用户的回复只有 PR 链接。

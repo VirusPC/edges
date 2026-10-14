@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 文档与系统
 
+- **日复盘把扫描候选直接写进 PR：** `projects/routines/daily-conversation-deposit` 扫完过去 24 小时的对话后，按根 `AGENTS.md` 判断去向，把笔记、任务、记忆和 feedback 等候选直接落成文件，并和当天的 `retrospectives/daily/<日期>--日复盘/INDEX.md` 放进同一个开到 `main` 的 PR。个人内容在 edges-private 另开 PR。审阅在 PR 上，不自动合并。看板任务同样进这个 PR，不直接推进 `main`。当天这篇的「建议补充内容清单」列出本次 PR 里落了哪些候选。公开仓仍按「隐私与脱敏」来写，原始对话不入库。
+
 - **周复盘和日复盘有单独目录：** 阶段性回看写在 `retrospectives/`。周复盘是 `retrospectives/weekly/<周一日期>--周复盘/INDEX.md`，一级标题下用二级标题写六节：范围、本该怎样、实际怎样、为什么、下次做什么、建议补充内容清单。日复盘是 `retrospectives/daily/<日期>--日复盘/INDEX.md`，必写范围与建议补充内容清单，同样用二级标题。命名，以及 Memory / Skill / Note / Task / `AGENTS.md` 硬约束候选的去向，在 `retrospectives/README.md`。根 README 的目录表和本层内容列入了这个目录。
 
 - **README 改为对外门面：** 根 README 现在先回答外部访客「这是什么、能不能拿去用」：标语「harness 任何目录。你的大脑，也是一个目录。」、六条要点、一张知识闭环图、照着就能跑通的快速开始（本地打包安装 `edges` CLI 后对任意仓库执行 `edges init`），以及本仓的目录地图。原来写在 README 里的内容标准下放到所属目录：Edge 准入与演化在 `edges/README.md`，归档与附件规则在新的 `archive/README.md`；原「理念」「系统实现」原文保存在 `docs/architecture.md`。
