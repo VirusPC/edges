@@ -172,9 +172,3 @@
   - 代码仓库：https://github.com/datacamp
   - 博客：https://www.datacamp.com/blog/category/ai
   - X：[@DataCamp](https://x.com/DataCamp)
-
-## Dreaming：开源和闭源怎么分
-
-- **有公开实现，能读代码**：Codex memories Phase 1/2、Letta sleeptime、OpenDream、agentconnect 的 dream-runner。
-- **产品行为写清楚了，但实现闭源，或只开源了格式**：Devin Dreaming、Anthropic Dreams、Mem0 Platform Dream、ChatGPT Dreaming。
-- **评价前先拆开三件事**：边干边记不等于 Dreaming；开源库有的能力不等于托管平台的 Dream；ChatGPT Dreaming 不等于 Codex memories。
