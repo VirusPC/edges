@@ -207,6 +207,9 @@
 - **Lenny's Podcast**：产品视角，近期常请 AI 大厂产品负责人（OpenAI、Google Labs、SpaceXAI 等）讲 Agent 产品怎么做
   - 主持人：Lenny Rachitsky
   - 链接：https://www.lennysnewsletter.com/podcast
+- **Cheeky Pint**：Stripe 联合创始人访谈一线 CEO，常有大厂 AI 负责人讲战略与产品（如 Zuckerberg & Alexandr Wang 谈 Muse Wonder）
+  - 主持人：John Collison
+  - 链接：https://cheekypint.substack.com/
 - **张小珺商业访谈录**：中文长访谈，覆盖国内大模型和 Agent 公司创始人
   - 主持人：张小珺
   - 链接：https://www.xiaoyuzhoufm.com/podcast/626b46ea9cbbf0451cf5a962
