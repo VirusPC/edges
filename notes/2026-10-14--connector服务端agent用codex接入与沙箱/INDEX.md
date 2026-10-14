@@ -86,7 +86,7 @@ edges 有几个 G，完整 clone 要几分钟，缓存命中后只拉增量，�
 
 ## 结果
 
-方向定为在 minigtr 上本地运行 Codex（exec 或 SDK）作为 connector 的服务端 agent，沙箱用 workspace-write 外加每任务一个容器，环境用常驻仓库加 worktree。还没有写进 edges connector 任务卡，也没有实现。OAuth 方面倾向于用 Auth0 免费套餐加 GitHub 登录，目前还没有实施。
+方向定为在 minigtr 上本地运行 Codex（exec 或 SDK）作为 connector 的服务端 agent，沙箱用 workspace-write 外加每任务一个容器，环境用常驻仓库加 worktree。已写进 edges connector 任务卡（PR #248），尚未实现。OAuth 方面倾向于用 Auth0 免费套餐加 GitHub 登录，目前还没有实施。
 
 ## 所学
 
