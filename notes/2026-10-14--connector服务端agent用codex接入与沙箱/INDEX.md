@@ -6,6 +6,8 @@
 
 用户想让 ChatGPT、Claude 等聊天窗口通过一个远程 MCP connector，把对话沉淀成 edges 笔记，并且尽量降低每个窗口的接入成本。前面已经定下 capture 这类意图级工具：由服务端 agent 加载 skill 整理内容，再开 PR 交人审。剩下的问题是这个服务端 agent 用什么来跑，于是讨论了 OpenAI Codex 云端怎么接入。
 
+之所以要把写入放到服务端，是因为 ChatGPT 网页聊天、YouMind 这类窗口没有持久化的工作区，也没有文件系统、git 和 shell，所以 skill 跑不了 `edges notes create` 这类 CLI 步骤，也没法入库或开 PR。即使某些窗口或沙箱能临时拉取仓库来操作，edges 仓库也有几个 G，每次临时 clone 都会极大拖慢任务完成效率，所以服务端需要常驻一份仓库，每个任务用 worktree 增量地开工作目录。
+
 ## 主题
 
 这次对话在比较服务端 agent 的几种运行方式：借用 Codex 云端、借用 GitHub Actions，或者在自建服务器 minigtr 上本地跑 Codex。同时讨论了沙箱隔离，以及大仓库的环境准备耗时。
