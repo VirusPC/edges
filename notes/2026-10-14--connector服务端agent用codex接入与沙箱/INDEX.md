@@ -15,7 +15,7 @@
 - 难点一：Codex 云端没有公开 API，不能由程序直接创建云端任务并拿回 PR。
 - 难点二：在自己机器上跑 agent 时，沙箱只能限制文件和网络，更强的隔离要自己再搭一层。
 - 难点三：edges 仓库有几个 G，每个任务都完整 clone 会非常慢。
-- 难点四：ChatGPT 和 Claude 网页的自定义 connector 要求标准的 OAuth 2.1（包括动态注册和 PKCE），这是整个工作量里最磨人的部分。
+- 难点四：ChatGPT 和 Claude 网页的自定义 connector 要求标准的 OAuth 2.1（包括动态注册和 PKCE），网页端要接入就绕不开这一步。
 
 ## 过程
 
@@ -48,16 +48,6 @@
 
 edges 有几个 G，完整 clone 要几分钟，缓存命中后只拉增量，几秒钟。minigtr 上可以常驻一份本地仓库，平时只 fetch，每个任务用 `git worktree add` 新开工作目录，对象共享、几乎不占额外空间；还可以用 sparse checkout 只检出内容目录。
 
-### 21:15 重写 MCP 服务要多久
-
-合理的估算是一到两周。拆开来看：四个工具要一两天；worktree 加 Codex 再到开 PR 的链路要一两天；容器隔离要一两天；OAuth 要三到五天；部署要一天，可以照搬 Langfuse 的部署方式。
-
-用户问 6 小时行不行。我的答复是：6 小时能做出一个可演示的版本。
-- 能做到的：四个工具、从 capture 到 PR 的链路、用 Bearer token 接入 Claude Code 或 Cursor、在 Docker 里运行并接上 Cloudflare Tunnel。
-- 做不完的：OAuth（没有它，网页端连不上），以及每任务一个容器、网络白名单和防注入这些加固。这些还要再花一两天。
-
-工作量里还有一个不确定点：ChatGPT 的写操作需要 Business 套餐加开发者模式，Pro 只能读，所以建议先以 Claude 作为验收目标。
-
 ### 21:16 OAuth 一般用什么方案
 
 一般的做法是让 MCP 服务器只做资源服务器，登录和发 token 交给现成的认证服务。方案大致有三类：
@@ -66,6 +56,8 @@ edges 有几个 G，完整 clone 要几分钟，缓存命中后只拉增量，�
 3. 自建 Keycloak、Authentik 或 Ory Hydra：完全自己掌控，但配置和维护最重，对动态注册的支持也要逐个核实。
 
 我倾向于用托管服务，绑定 GitHub 登录，只放行用户本人。
+
+另外，ChatGPT 的写操作需要 Business 套餐加开发者模式，Pro 只能读，所以建议先以 Claude 作为验收目标。
 
 ### 21:22 核实 Auth0 免费套餐
 
