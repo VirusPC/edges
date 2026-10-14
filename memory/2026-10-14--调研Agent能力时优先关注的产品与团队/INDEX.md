@@ -14,10 +14,11 @@
   - 代码仓库：https://github.com/openai/codex
   - 博客：https://openai.com/zh-Hans-CN/news/
   - X：[@OpenAI](https://x.com/OpenAI)、[@OpenAIDevs](https://x.com/OpenAIDevs)
-- **Google Research**
-  - 代码仓库：https://github.com/google-research
-  - 博客：https://research.google/blog/
-  - X：[@GoogleResearch](https://x.com/GoogleResearch)
+- **Google AI**：Gemini 模型与 Google 的 AI 产品线
+  - 产品页：https://ai.google/products/
+  - 代码仓库：https://github.com/google-gemini
+  - 博客：https://blog.google/technology/ai/
+  - X：[@GoogleAI](https://x.com/GoogleAI)
 - **Qwen（阿里）**
   - 代码仓库：https://github.com/QwenLM
   - 博客：https://qwen.ai/research
