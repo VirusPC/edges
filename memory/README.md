@@ -1,6 +1,6 @@
 # memory
 
-调研 Agent 能力时积累的短备忘：优先跟哪些产品与团队、开闭源 Dreaming 怎么分。详细长文仍放 [`projects/memory/`](../projects/memory/)。
+跨主题的通用备忘，例如调研 Agent 能力时优先关注哪些产品与团队。专题长文仍放 `projects/` 下。
 
 一篇内容一个目录，正文入口是 `INDEX.md`。命名：`YYYY-MM-DD--主题简述/`。
 

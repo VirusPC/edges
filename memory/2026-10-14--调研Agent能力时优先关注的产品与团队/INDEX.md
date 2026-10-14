@@ -1,17 +1,16 @@
 # 调研 Agent 能力时优先关注的产品与团队
 
 > 落库日期：2026-10-14（Asia/Shanghai）  
-> 来源：以 weekly-ai-blogs-digest skill 的「参考博客网址列表」为底，合并此前已在跟的 Devin、Codex、Anthropic、Letta、Mem0、Kimi Code、pi、DeepSeek、ZCode、MiniMax Code。  
+> 来源：以 weekly-ai-blogs-digest skill 的「参考博客网址列表」为底，补充 Devin、Codex、Kimi Code、pi、DeepSeek、ZCode、MiniMax Code、Letta、Mem0 等。  
 > 核验：链接都在 2026-10-14 打开确认过，X 账号逐个查过；无法确认的标 【未证实】，没有的写 —。  
-> 相关长文：[`projects/memory/2026-10-14-Agent-Memory-Dreaming调研.md`](../../projects/memory/2026-10-14-Agent-Memory-Dreaming调研.md)
 
 ## 模型厂商
 
-- **Anthropic**：Claude；Managed Agents / Dreams 有 API 级 dreaming job
+- **Anthropic**：Claude 模型、Claude Code、Agent SDK
   - 代码仓库：https://github.com/anthropics/claude-code
   - 博客：https://claude.com/blog（现跳到 claude.com/resources/articles）；https://www.anthropic.com/engineering
   - X：[@AnthropicAI](https://x.com/AnthropicAI)、[@claudeai](https://x.com/claudeai)
-- **OpenAI**：Codex 公开了 memories 管线；ChatGPT Dreaming 是另一套闭源产品能力，不要混为一谈
+- **OpenAI**：GPT 模型、ChatGPT、Codex
   - 代码仓库：https://github.com/openai/codex
   - 博客：https://openai.com/zh-Hans-CN/news/
   - X：[@OpenAI](https://x.com/OpenAI)、[@OpenAIDevs](https://x.com/OpenAIDevs)
@@ -23,11 +22,11 @@
   - 代码仓库：https://github.com/QwenLM
   - 博客：https://qwen.ai/research
   - X：[@Alibaba_Qwen](https://x.com/Alibaba_Qwen)
-- **Moonshot / Kimi**：Kimi Code 内置长期记忆还弱，主要靠 issue 和插件
+- **Moonshot / Kimi**：Kimi 模型、Kimi Code
   - 代码仓库：https://github.com/MoonshotAI/kimi-code
   - 博客：https://www.kimi.com/blog/（现跳到 kimi.ai/blog）
   - X：[@Kimi_Moonshot](https://x.com/Kimi_Moonshot)
-- **MiniMax**：MiniMax Code（mcode）有 Proactive Memory 和 `/memory`，没看到 Dreaming
+- **MiniMax**：MiniMax 模型、MiniMax Code（mcode）
   - 代码仓库：https://github.com/MiniMax-AI/minimax-code
   - 博客：https://minimaxi.com/blog（现跳到 minimax.cn/blog）
   - X：[@MiniMax_AI](https://x.com/MiniMax_AI)
@@ -52,22 +51,22 @@
   - 代码仓库：https://github.com/facebookincubator/muse-gadget-sdk（Gadget SDK，不是 Agent 本体）
   - 博客：https://research.meta.ai/blog/muse-wonder；https://research.meta.ai/blog/security-and-safety-for-ai-agents-our-approach-with-muse
   - X：[@AIatMeta](https://x.com/AIatMeta)；[@Muse](https://x.com/Muse)（企业认证，简介是「Your personal AI agent」，是否 Meta 官方账号 【未证实】）
-- **SpaceXAI（xAI）/ Grok Bot**：个人 Agent，每个 Bot 有自己的持久云电脑，跨会话记忆
+- **SpaceXAI（xAI）/ Grok Bot**：个人 Agent，每个 Bot 有自己的持久云电脑
   - 代码仓库：—
   - 博客：https://x.ai/news/introducing-grok-bot；产品页 https://x.ai/bot；文档 https://docs.x.ai/grok-bot/overview
   - X：[@bot](https://x.com/bot)（Grok Bot 官方，企业认证）；[@xai](https://x.com/xai)
 
 ## Coding Agent 产品
 
-- **Cognition / Devin**：Memory Drive 和产品侧 Dreaming；开源的只是 Agent Memory Repo 格式
-  - 代码仓库：https://github.com/AgentMemoryRepo/agentmemoryrepo
+- **Cognition / Devin**：云端自主 coding agent
+  - 代码仓库：https://github.com/CognitionAI
   - 博客：https://cognition.ai/blog/1（现跳到 cognition.com/blog）
   - X：[@cognition](https://x.com/cognition)
 - **Cursor**
   - 代码仓库：https://github.com/cursor
   - 博客：https://cursor.com/cn/blog
   - X：[@cursor_ai](https://x.com/cursor_ai)
-- **pi（Mario Zechner）**：长期记忆和 dreaming 靠扩展生态
+- **pi（Mario Zechner）**：极简可扩展的终端 coding agent
   - 代码仓库：https://github.com/badlogic/pi-mono（现跳到 github.com/earendil-works/pi）
   - 博客：https://mariozechner.at/
   - X：[@badlogicgames](https://x.com/badlogicgames)
@@ -112,13 +111,13 @@
   - 博客：https://manus.im/blog
   - X：[@ManusAI](https://x.com/ManusAI)
 
-## Agent 框架与记忆
+## Agent 框架
 
-- **Letta**：Sleep-time / Dreaming 有文档和 SDK
+- **Letta**：有状态 Agent 框架
   - 代码仓库：https://github.com/letta-ai/letta
   - 博客：https://www.letta.com/blog
   - X：[@Letta_AI](https://x.com/Letta_AI)
-- **Mem0**：库开源；Dream 只在托管平台提供
+- **Mem0**：Agent 记忆层
   - 代码仓库：https://github.com/mem0ai/mem0
   - 博客：https://mem0.ai/blog
   - X：[@mem0ai](https://x.com/mem0ai)
