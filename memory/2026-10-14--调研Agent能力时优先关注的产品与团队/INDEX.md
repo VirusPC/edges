@@ -157,6 +157,10 @@
   - 代码仓库：https://github.com/bcherny
   - 博客：https://borischerny.com/
   - X：[@bcherny](https://x.com/bcherny)
+- **Tibo（Thibault Sottiaux）**：OpenAI 负责 ChatGPT 和 Codex，Codex 的发布、额度重置常在他的 X 上先公布
+  - 代码仓库：https://github.com/tibo-openai
+  - 博客：无（主要在 X 发）
+  - X：[@thsottiaux](https://x.com/thsottiaux)
 - **Philipp Schmid**
   - 代码仓库：https://github.com/philschmid
   - 博客：https://www.philschmid.de/
