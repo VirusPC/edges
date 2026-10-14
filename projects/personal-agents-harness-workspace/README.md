@@ -17,3 +17,4 @@ routine 的跨平台形态在 [`projects/routines/`](../routines/)，不在本�
 ## 文档
 
 - [2026-10-12--命名与定位.md](2026-10-12--命名与定位.md) — 三个词怎么分开，以及和 2025–2026 personal agent 潮流的关系
+- [2026-10-14--Stencil-Harness-Playbook-omp2.md](2026-10-14--Stencil-Harness-Playbook-omp2.md) — Stencil《Harness Playbook》：omp 复盘与 omp²（状态权威、沙箱、Director）
