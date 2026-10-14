@@ -149,6 +149,14 @@
 
 ## 个人博客与媒体
 
+- **Andrej Karpathy**：LLM 和 Agent 的一线判断，常给出新概念（vibe coding、context engineering 等）
+  - 代码仓库：https://github.com/karpathy
+  - 博客：https://karpathy.bearblog.dev/
+  - X：[@karpathy](https://x.com/karpathy)
+- **Boris Cherny**：Claude Code 的创建者（Anthropic），常分享 coding agent 用法
+  - 代码仓库：https://github.com/bcherny
+  - 博客：https://borischerny.com/
+  - X：[@bcherny](https://x.com/bcherny)
 - **Philipp Schmid**
   - 代码仓库：https://github.com/philschmid
   - 博客：https://www.philschmid.de/
