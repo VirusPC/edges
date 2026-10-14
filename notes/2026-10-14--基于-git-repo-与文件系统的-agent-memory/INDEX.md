@@ -27,12 +27,18 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 
 ### 业界做法逐条
 
+#### 背景：MemGPT（Letta 的前身）
+
+- 论文《MemGPT: Towards LLMs as Operating Systems》（arXiv 2310.08560）提出「虚拟上下文管理」：借鉴操作系统在快慢存储之间搬运数据的分层内存，把有限的上下文窗口当作内存、外部存储当作磁盘，由模型自己决定何时换入换出，从而在有限窗口内提供「更大的上下文」。
+- 这是后来 Letta 记忆块、文件系统与 Context Repositories 的思想源头；文件式记忆可以看作把「磁盘」换成了人也能读的 Markdown 与 git。
+
 #### Claude Code：CLAUDE.md 与 auto memory
 
 - 两套机制：人写的 `CLAUDE.md`（指令与规则）与 Claude 自己写的 auto memory（学到的偏好与纠正）。两者每次会话开始都会加载，但官方明确说它们是「上下文，不是强制配置」，要硬拦截用 hook。
 - 分层：组织托管策略、用户 `~/.claude/CLAUDE.md`、项目 `./CLAUDE.md`（随版本库共享）、本地 `CLAUDE.local.md`（加入 gitignore）。目录树上方的文件启动即加载，子目录里的按需加载；`.claude/rules/` 可以用 `paths` 限定只在操作匹配文件时加载。
 - auto memory 存在 `~/.claude/projects/<project>/memory/`，同一 git 仓库的所有 worktree 共享一个目录，只在本机，不跨机器。结构是一个 `MEMORY.md` 索引（每条一行）加每条一个主题文件；启动只加载 `MEMORY.md` 前 200 行或 25KB，主题文件按需读取。
 - 记忆类型分为 `user` / `feedback` / `project` / `reference` 四类，并明确跳过能从代码推导的内容。
+- 补充（auto memory 细节，已在官方文档核实）：本机默认开启，可在 `/memory` 中开关或用 `autoMemoryEnabled`、`CLAUDE_CODE_DISABLE_AUTO_MEMORY=1` 关闭；`autoMemoryDirectory` 可改存放位置；写入 `MEMORY.md` 接近 200 行或 25KB 时会提醒 Claude 精简索引，超限则返回错误要求重写；写带 frontmatter 的记忆文件时自动记录 `modified` 时间；记忆文件不受会话记录清理周期影响；主会话的 auto memory 不传给子 Agent（fork 除外），子 Agent 可开自己的独立记忆目录。
 - 现在 Claude Code 也可以直接读 `AGENTS.md`（没有 `CLAUDE.md` 时）。
 
 #### Anthropic memory tool（API）
@@ -70,6 +76,26 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - 定位为「AI 的记忆层」：由 LLM 从对话中抽取记忆、做实体链接与嵌入，存入向量库等后端，靠检索取回。README 当前版本写明采用单次 ADD-only 抽取（只新增，不覆盖）。
 - 和文件式相比：人不能直接用编辑器打开、diff、审阅；优点是不依赖 Agent 自己整理、规模化检索更省事。
 
+#### Cognition：Agent Memory Repo
+
+- Cognition（Devin 的开发公司）发布的开放规范，配套 GitHub 仓库 `AgentMemoryRepo/agentmemoryrepo`。记忆就是一个 git 仓库：每次会话先 clone 最新记忆，按需搜索或顺着链接读，Agent 在学到东西时直接更新条目（无人参与），每次编辑后 push。
+- 格式：`MEMORY.md` 是入口，每次会话都加载，要求简短并链接其他文件；条目是一行一个要点，末尾可带 `[source: …; added: YYYY-MM-DD]` 元数据；文件间用 `[[path]]` 交叉链接；仓库里也可以放 SQL、脚本等非 Markdown 文件。
+- Dreaming：一个定期运行的专门 Agent，负责从多次会话中发现模式写成新条目，以及合并重复、删除过时内容、核对来源解决矛盾。
+- 组合与并发：多人会话可以把各自的记忆仓库 clone 到同一台机器，所有权和历史各自独立，Agent 把每条记忆写回对应的人；Agent 群并行时各自 push 到同一记忆仓库，由 git 标出冲突。
+
+#### GBrain（Garry Tan）
+
+- 开源项目 `garrytan/gbrain`，作者在 README 中自述为 Y Combinator 总裁兼 CEO Garry Tan，用它驱动自己的个人 Agent。
+- 「Brain repo 是记录系统」：知识以 Markdown 文件存在普通 git 仓库中，GBrain 把仓库同步进 Postgres / PGLite 做关键词、向量与图检索，git 里的删除在数据库中变成软删除；通过 MCP 接入 Claude Code、Codex 等。
+- 注意边界：README 也写明数据库独有的页面、修订历史等运营状态需要另做数据库备份，即并非全部状态都在 git 里。
+- Mem0 在 X 上发了一篇长文《A Brain in a Git Repo: How GBrain Works》介绍它；文章正文本次未能读取。
+
+#### PageIndex：无向量的树状索引检索
+
+- VectifyAI 开源的「无向量、基于推理的 RAG」：不切块、不建向量库，先为每个文档生成层级树状索引（类似目录），检索时由 LLM 沿树推理找到相关章节，主张「相似不等于相关」。
+- 其「PageIndex File System」把树状索引扩展到文件层级，以便在整个语料库上推理。
+- 与文件式记忆的关系：它把「路径即索引、索引文件指路、按需下钻」这套思路做成了检索方法本身，说明不用向量也能做大规模检索；对 edges 而言，CLI 生成的层级 `AGENTS.md` / `README.md` 索引正是一棵可供 Agent 推理下钻的树。
+
 #### Karpathy：LLM Wiki
 
 - Karpathy 在一份公开 gist《LLM Wiki》里提出：与其每次 RAG 从原始文档重新拼答案，不如让 LLM 持续维护一套互相链接的 Markdown wiki，把知识「编译一次、保持最新」，成为不断复利的产物。人负责找材料和提问，LLM 负责总结、交叉引用、归档；他用 Obsidian 浏览，「Obsidian 是 IDE，LLM 是程序员，wiki 是代码库」。
@@ -82,12 +108,12 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - **分层**：组织/全局、用户、项目、目录（本地私有）几层，越靠近工作目录越后读、越具体。私有层用 gitignore 或放在仓库外。
 - **渐进式加载**：只把索引或钉住的文件放进上下文，其余 just-in-time 读取（Claude Code 子目录按需加载、memory tool、Letta `system/`）。
 - **git 提供历史与审阅**：版本化、diff、回滚、PR 审阅；Letta 把它做成自动提交，edges 则走人审 PR。
-- **并发靠 worktree**：Letta 与 Claude Code 都把 worktree 作为隔离单位（Claude Code 的 auto memory 在同仓 worktree 间共享）。
+- **并发靠 worktree 或 git 合并**：Letta、Cognition Agent Memory Repo 与 Claude Code 都把 worktree 作为隔离单位（Claude Code 的 auto memory 在同仓 worktree 间共享）。
 - **检索方式**：grep / glob 加 Agent 自主浏览是主流默认；向量或全文索引作为可选的派生加速层（basic-memory），而不是真源。
 
 ### 权衡与局限
 
-- 文件式记忆依赖 Agent 自己整理，时间长了会碎片化，需要定期整理（Letta 的 defragmentation、Claude Code 的索引长度提醒与 `/doctor` 修剪建议）。
+- 文件式记忆依赖 Agent 自己整理，时间长了会碎片化，需要定期整理（Letta 的 defragmentation、Cognition 的 Dreaming、Claude Code 的索引长度提醒与 `/doctor` 修剪建议）。
 - 指令文件只是上下文，不是强制；必须执行的约束应交给 hook、CI 或权限设置。
 - 索引文件是并发写的热点，多分支同时改同一个索引容易冲突；由工具自动生成索引能缓解。
 - 规模大时纯 grep 召回有限，语义近似问题需要额外索引。
@@ -110,14 +136,15 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 | 索引 | `MEMORY.md`、frontmatter、文件树 | 各层 `AGENTS.md` 与类型 `README.md`，由 CLI 生成 |
 | 分层 | 组织 / 用户 / 项目 / 本地 | 递归作用域（任意目录可 init），`--super` 指向仓库根 |
 | 记忆类型 | Claude Code 四类 | 内置六类且可扩展，前四类与 Claude Code 对齐 |
-| 写入审阅 | Letta 自动提交；Claude Code 本机直接写 | 人审 PR 合入受保护 main |
+| 写入审阅 | Letta 自动提交；Cognition 每次编辑即 push、无人参与；Claude Code 本机直接写 | 人审 PR 合入受保护 main |
 | 并发 | Letta 子 Agent 各用 worktree 再合并 | 每个 Agent 一个 worktree 加分支，经 PR 合并 |
-| 检索 | grep 为主，可选向量索引 | CLI list/get 加 grep，暂无向量层 |
+| 检索 | grep 为主，可选向量索引（GBrain）或无向量树索引（PageIndex） | CLI list/get 加 grep，暂无向量层 |
 | 私有内容 | `CLAUDE.local.md`、仓库外目录 | gitignore 的 `users/`，或私有仓 |
 
 ## 所学
 
-- edges 的路线（文件为真源、git 为版本层、索引由工具生成、按作用域分层）与 Claude Code、Letta、Codex、Karpathy 的做法方向一致，不是孤例。
+- edges 的路线（文件为真源、git 为版本层、索引由工具生成、按作用域分层）与 Claude Code、Letta、Codex、Cognition Agent Memory Repo、GBrain、Karpathy 的做法方向一致，不是孤例；其思想可追溯到 MemGPT 的「上下文是内存、外部存储是磁盘」。
+- Cognition 的规范与 edges 最接近（git 仓库、`MEMORY.md` 入口、一行一条带来源、定期整理），区别是它默认无人审核直接 push，edges 走 PR；它的条目级 `source` / `added` 元数据值得借鉴。
 - 与业界最大的差异是「人审 PR」：Letta 选择自动提交以换取低延迟，edges 选择审阅以换取质量与公开安全。两者都成立，取决于记忆写入频率与公开程度。
 - 「检索靠 grep 还是向量」不必二选一：业界常见做法是文件为真源、索引为可重建的派生物；现阶段 edges 规模下 grep 足够，没有必要引入向量库。
 - Mem0 这类抽取式记忆不可直接审阅、不可 diff，与 edges「经你审核合并」的核心诉求不符，所以只作对照，不作替代。
@@ -157,7 +184,8 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 
 - 先完成 backlog 中「`memory init` / `remember` 支持 `--super`」，再用 CLI 重整仓库根 `memory/`，删除手写 README。
 - 参考 Claude Code 的索引上限，给 CLI 生成的索引加长度检查（例如 `memory doctor` 报告超长索引）。
-- 参考 Letta 的 defragmentation，考虑一个整理类 skill：先备份，再合并重复、拆大文件，结果仍走 PR。
+- 参考 Cognition 的条目元数据，考虑让 CLI 为记忆条目记录来源与添加日期。
+- 参考 Letta 的 defragmentation 与 Cognition 的 Dreaming，考虑一个整理类 skill：先备份，再合并重复、拆大文件，结果仍走 PR。
 - 参考 Letta 的 `system/` 钉住机制与 Claude Code 的 `paths` 规则，评估是否需要「始终加载」与「按路径加载」的元数据。
 - 索引冲突：让 CLI 在 rebase 后可一键重建索引，减少多 worktree 合并时的人工处理。
 - 向量检索暂不引入；如果将来条目规模让 grep 召回明显不足，再以「可重建的派生索引」方式加入，不改变文件为真源。
@@ -182,12 +210,20 @@ peng cheng 一直把 edges 仓库当作「外部大脑」：Agent 的记忆、�
 - Mem0 开源仓库（记忆层、ADD-only 抽取、实体链接）：https://github.com/mem0ai/mem0
 - Mem0 平台文档概览：https://docs.mem0.ai/platform/overview
 - Karpathy《LLM Wiki》gist：https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f
+- MemGPT 论文（arXiv 2310.08560）：https://arxiv.org/abs/2310.08560
+- Cognition Agent Memory Repo 规范页：https://cognition.com/agent-memory-repo
+- Agent Memory Repo 开源仓库：https://github.com/AgentMemoryRepo/agentmemoryrepo
+- GBrain 开源仓库（README，作者自述与「brain repo 是记录系统」）：https://github.com/garrytan/gbrain
+- Mem0 在 X 上介绍 GBrain 的帖子（长文《A Brain in a Git Repo: How GBrain Works》）：https://x.com/mem0ai/status/2070541048527609885
+- PageIndex 开源仓库：https://github.com/VectifyAI/PageIndex
 - git worktree 官方文档：https://git-scm.com/docs/git-worktree
 
 ### 未能核实的点
 
 - Anthropic「Managed Agents / Dreams」是否提供文件化记忆：本次未找到一手官方页面，未写入结论。
 - Cursor「Memories」功能：官方 rules 文档中未见说明，未写入结论。
+- Mem0 关于 GBrain 的帖子：X 接口显示发布时间为 2026-06-27 00:13（UTC+8），不是委托中给的 2026-07-27；帖子只是长文链接，长文正文未能读取，GBrain 的事实以其 GitHub README 为准。
+- Cognition Agent Memory Repo 的发布日期（委托中给 2026-10-13）：页面上未找到日期，未核实。
 - Letta 的 LoCoMo 分数为厂商自测，未独立复现。
 
 ### 原始材料引用
