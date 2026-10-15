@@ -9,7 +9,7 @@
 harness 就是一组 Markdown 文件加 Git。仓库里的那套，给 Cursor、Codex 这类写代码的 Agent 用；你的大脑是一个不落盘的虚拟目录，它的那套单独放在一个仓库里，给 Grok Bot 这类 personal agent 用。你纠正过的、拍板过的、想明白的，都会留在对应的那一套里，经你审核合并后，下一个 Agent 直接接着用。
 
 - **持续自进化**：每一次反馈都会自动沉淀，下次不再重犯。Edges 自己也用 Edges 维护：改进 Edges 的方法，也在被 Edges 改进，RSI 的成果随每一次升级交到你手里。
-- **将 harness 放在与被 harness 对象最近的地方**：claude code auto memory、mem0 等记忆系统，claude code 、codex 等 skill 系统 。。。 往往只支持根工作空间，无法对 monorepo、全栈开发等场景分目录来搭建 harness 系统。Edges 允许为任何目录创建局部 harness，并通过树结构将整个仓内的 harness 文件串联起来。
+- **将 harness 放在与被 harness 对象最近的地方**：Edges 允许为任何目录创建局部 harness，并通过树结构将整个仓内的 harness 文件串联起来。每次任务只加载与其最相关的 harness。
 - **不止停留在仓库**：海量经验知识从不同端捕获到仓库，但不止停留在仓库。将它们提炼成简单可复用的判断优势（Edge，Edges 由此得名），并进一步转化为博客、播客、视频、PPT 等丰富的对外分发资料，用更低的边际成本取得更大收益。
 - **任何目录**：以文件系统模型为核心，允许为任何仓库、仓库里的任何目录配置 harness。你的大脑，也是一个目录。
 - **任何人**：既是个人的 harness，也是团队的 harness，取决于目录的共享范围。
