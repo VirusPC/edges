@@ -517,7 +517,7 @@ Compose block 与 edges 里「本层硬约束」「本层系统维护信息」�
 2. **已确认的最小 CLI 面**：clone（把 Compose block 里登记的仓库拉到本机路径）与 pull（更新已有 clone）。
 3. **完整操作列表仍在 grill**：本轮不定（不要把尚未确认的 op 写成已定）。
 4. **仍另议**：入口条目的字段形态；clone 放在哪。
-5. **跟进**：任务卡 [Compose 节点 CLI：clone 与 pull](<../../.harness/tasks/project-memory/backlog/2026-10-17--Compose-节点-CLI-clone-与-pull/INDEX.md>)。
+5. **跟进**：写入 ADR 0034 Decision #10（不另开任务卡）。
 
 见 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md) Decision #10 与 Consequences。
 
@@ -532,7 +532,10 @@ Compose block 与 edges 里「本层硬约束」「本层系统维护信息」�
 3. **最小 CLI 面仍是 clone 与 pull**：第十轮已确认的 clone / pull 不变。
 4. **本轮确认的操作**：clone / pull / push / traverse；完整操作列表仍在 grill，其余不定。
 5. **仍另议**：入口条目的字段形态；clone 放在哪。
-6. **跟进**：任务卡 [Compose 节点 CLI：clone 与 pull](<../../.harness/tasks/project-memory/backlog/2026-10-17--Compose-节点-CLI-clone-与-pull/INDEX.md>)（未实现）。
+6. **跟进**：写入 ADR 0034 Decision #10 / Consequences（不另开任务卡；用户：不要开 task，直接写 ADR）。已删 backlog 任务卡。
 
 见 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md) Decision #3、#10 与 Consequences。
 
+**任务卡撤回（2026-10-17）**
+
+用户明确：不要开 task，直接写 ADR。已删除 backlog 任务卡 `2026-10-17--Compose-节点-CLI-clone-与-pull`；Decision #10（Domain/Service/CLI + clone/pull/push/traverse）保留在 ADR 0034，不新开任务。
