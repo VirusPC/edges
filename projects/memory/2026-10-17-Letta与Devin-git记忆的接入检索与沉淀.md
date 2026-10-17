@@ -180,3 +180,121 @@ description: 基于源码和官方文档，对比 Letta（MemFS / Context Reposi
 | 冲突处理 | 先 rebase 再重试一次；冲突时通过 reminder 交给 agent；reflection 冲突则 abort 后重试 | stale write 被拒后重试，由 agent 解决冲突 | PR review / merge |
 
 **结论要点**：两个系统都把"写入"完全交给 LLM 自主完成，并用后台整理（reflection / Dreaming）兜底质量，都不做人工审阅。edges 把质量门放在 CLI 校验和人工 PR 上，代价是写入延迟和更高的人力成本。Letta 的 pre-commit 约束（frontmatter、子目录必须有 `MEMORY.md`、字符预算），可以直接借鉴到 edges 的 CLI 校验中。Devin 的 `[source:; added:]` 单行条目格式，便于 Dreaming 去重和溯源，也值得借鉴。
+
+---
+
+## 补充：2026-10-17 讨论中的追问与结论
+
+### 1. 仓库放在哪里，靠什么检索
+
+- **Letta**：仓库固定在 `~/.letta/agents/<id>/memory`，通过 `$MEMORY_DIR` 告诉 Agent。不靠 skill：运行时每轮自动把 `MEMORY.md`、核心文件和文件树注入系统提示，Agent 再用普通文件工具按需读和 grep。
+- **Devin 开源 skill**：默认目录 `~/agent-memory`，用户给了路径就用用户的。skill 本身不保存路径，下次会话要用户再指定或落到默认目录；只在 skill 被调用时工作，不会自动启动。
+- **Devin 产品内**：平台每次会话自动 checkout 记忆仓库并把 `MEMORY.md` 放进上下文。
+- **关键区别**：索引由运行时注入（每轮必有、零感知），还是靠 skill（要 Agent 想起来或用户点名，容易漏）。edges 目前相当于 skill 这一档；想做到运行时注入，可以加会话启动钩子（如 Claude Code 的 SessionStart hook），或在项目 AGENTS.md 里写硬指令。
+
+skill 原文（`skills/agent-memory-repo/SKILL.md`）：
+
+```markdown
+Use the path or repo the user gives you. If they don't give one, use `~/agent-memory`. Resolve it to a full path.
+
+Refuse a path that is the current project, inside the current project, or inside the `AgentMemoryRepo/agentmemoryrepo` spec repo.
+
+- **Path is already a memory repo:** reuse it. It counts as a memory repo only if `git -C <path> rev-parse --show-toplevel` prints the path itself (not a parent directory) and `MEMORY.md` exists at the top.
+
+## 2. Read what the task needs
+1. Read `MEMORY.md`.
+2. Grep for what the task needs, for example `grep -rni "<term>" <path>`, or follow `[[path]]` links.
+```
+
+`grep -rni`：`-r` 递归搜子目录，`-n` 显示行号，`-i` 不区分大小写。
+
+### 2. 沉淀是不是自动的
+
+- **Devin 开源 skill**：半自动。只在 skill 被调用的会话里，由 Agent 判断哪些值得记并 commit；没有 Dreaming。
+- **Devin 产品**：自动。会话中 Agent 自己写，不经人工审核；Dreaming 约每天一次事后整理。
+- **Letta**：全自动。主 Agent 随时写，反思子 Agent 在上下文压缩时或每隔若干步自动整理，每轮结束自动 push；可用 `/reflect` 手动触发。
+- **记什么**（skill 原则）：偏好、决策、用户不想重复说的事实；只对当前任务有用或容易重新查到的不记。
+
+### 3. 能不能按项目子目录配置记忆
+
+两家的记忆仓库都不在项目里，所以没有「按项目子目录配置」的说法：
+
+- 记忆仓库内部可以分子目录。Devin 随意组织，用 `[[链接]]` 串起来；Letta 的子目录可以有自己的 `MEMORY.md`，按需读，深度限 2 层。但这是按主题分，不跟代码目录对应。
+- 跟着代码子目录走的上下文，靠代码仓库里嵌套的 AGENTS.md。Letta 明确说 AGENTS.md 和 `.agents` 属于环境，记忆属于 Agent。
+- edges 在这点上更细：`.harness/` 可以按任意目录（`--scope`）初始化，子目录有自己的记忆，召回时逐层合并。
+
+### 4. Devin 的 composable 体现在哪
+
+- 组合的单位是**人**，不是项目目录：Alice 开会话 clone 她的仓库，Bob 加入时把他的仓库 clone 到同一台机器，两个仓库并排放。
+- 仓库保持独立，各有归属、权限和历史，下次会话可以任意搭配。
+- 写入按「谁说的」路由回各自的仓库，拿不准就问人。
+- 共享由本人决定：Bob 同意才会被 clone 进来。
+- 原文：「Memories compose because they are folders」。
+- **限制**：这只停留在规范里，开源 skill 一次只处理一个路径，没有实现多仓库挂载和按人路由。
+
+### 5. 多个记忆仓库怎么存、怎么读（以「前端规范」和「组件库」为例）
+
+**Devin 规范**
+- 存：两个独立 git 仓库，会话开始时并排 clone（`memory-fe-conventions/`、`memory-ui-kit/`），不嵌套也不合并。
+- 读：两份 `MEMORY.md` 都读；正文分别 grep 或顺着各自的 `[[链接]]` 找，链接只在本仓库内有效。冲突时规范没定优先级，靠 `source`、`added` 判断，再交给 Dreaming。
+- 写：Agent 判断属于哪个仓库就写哪个，分别 commit、push，拿不准就问。
+
+**Letta**
+- 存：`letta shared-memory attach <name>` 挂载，clone 到 `$MEMORY_DIR/../<name>`，与 Agent 自己的记忆并列；每个仓库有自己的远程和读写权限，`letta shared-memory sync` 同步。
+- 读：系统提示列出每个挂载仓库的路径和顶层文件；正文按需读或 grep；共享仓库里的 `skills/*/SKILL.md` 自动成为可用 skill。
+- 写：直接改对应目录、自己 commit 和 push；只读仓库写不进；冲突靠 rebase 后重推。
+- 限制：共享仓库只支持云端 Agent。
+
+**edges 的建议做法（尚未实现）**
+
+在项目里放一份挂载清单：
+
+```yaml
+# .harness/memory-sources.yaml
+sources:
+  - name: project            # 本项目 .harness，可写，优先级最高
+    path: .harness
+    write: direct
+  - name: fe-conventions
+    repo: org/memory-fe-conventions
+    write: pr
+  - name: ui-kit
+    repo: org/memory-ui-kit
+    write: pr
+```
+
+- 存：每个记忆仓库遵守同一格式（edges memory 格式，带 INDEX），由 CLI 负责 clone 和同步。
+- 读：会话开始时 CLI 合并各源 INDEX 摘要并标出来源；`edges ask` / `search` 跨源检索；冲突时项目级覆盖通用级，同层冲突交给人判断。
+- 写：`edges remember` 按作用域路由；项目内直接写、随项目提交，共享仓库生成 PR 由人审。写入口始终只有 CLI。
+
+### 6. `source` 和 `added`
+
+Devin 规范推荐的条目元数据，写在每条记忆行末：
+
+```markdown
+- 付款和官网共用 2026-10-15 上线截止 [source: https://example.com/sessions/102; added: 2026-09-03]
+```
+
+- `source`：从哪次会话学来的链接，用于溯源和冲突核对。
+- `added`：记下的日期（`YYYY-MM-DD`），用于判断新旧和复查过时条目。
+- 格式 `[key: value; key: value]`，键可扩展（如 `owner`、`expires`）。Dreaming 靠它们溯源、判新旧、清理。
+
+### 7. edges 作为外部记忆接入其他工作空间（我们的设计讨论，未实现）
+
+**工作空间是另一个代码仓库**
+- 读：在对方仓库 AGENTS.md 放指针（「通用经验去 edges 查，用 `edges ask` / `memory search`」），按需检索，不复制内容。
+- 写：可复用经验通过 skill 或会话结束钩子调用 CLI 回流 edges；只属于该仓库的知识留在它自己的 `.harness/`。
+- 挂载：本机装 CLI 用 `--scope` 指向 edges；或把 CLI 包成 MCP server（`search`、`remember`）供 Cursor、Claude Code、Codex 调用。
+
+**工作空间是 ChatGPT 这类对话框**
+- 首选：把 MCP server 部署成远程服务，ChatGPT（开发者模式 / connectors）、Claude 网页版接入；写入仍落成 PR。
+- 次选：自定义 GPT + Actions，用轻量 HTTP API 包住 search 和 remember。
+- 退路：读这头把关键规则生成精简上下文贴进自定义指令或 Projects；写这头定期导出对话，用 conversation-to-notes 整理入库。
+
+**写入口原则**
+- 每个仓库只有 CLI 一个写入口，负责校验格式、判断作用域、更新索引。
+- 审核力度跟着作用域走：项目自己的 `.harness/` 直接写、随正常提交被审；团队库和 edges 走 PR；只读领域库不在当前工作区写。
+- 高频小沉淀可先攒在 inbox 分支，定期批量合成一个 PR。
+- 对照：Devin 和 Letta 都是 LLM 直接写、后台整理兜底，没有人工 PR。
+
+**落地顺序建议**：先给 CLI 包本地 MCP，解决代码仓库场景；再部署到自托管机器加鉴权暴露出去，解决对话框场景；之后补挂载清单和多源检索、按作用域路由写入。
