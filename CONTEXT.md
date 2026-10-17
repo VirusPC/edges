@@ -41,12 +41,12 @@ _避免使用_：组成子节点、固定深度截断、把 harness 与「遍历
 _避免使用_：Agent 工具箱、skill 合集、用「Edges」指本仓这个个人实例（说「本仓」或「作者的大脑仓库」）、与 `edges/` 目录或单条 Edge 混用
 
 **组合（Compose）**：
-把别的 harness 仓库（大脑、团队库、规范库、组件库等）叠加进当前工作空间的统一说法，对应 Devin Agent Memory 文章里的 composable。工作空间 = 自身就地 init 的 harness + 若干被组合的 harness 仓库；被组合的仓库各自保持独立的归属、权限和历史。组合不是另造 `compose.json`，而是在当前作用域的 `AGENTS.md` 里用专用的 **Compose 相关 block** 登记指向记忆仓库入口的节点，traverse 顺着走。入口可以是本地目录，也可以是远程目录（MCP 暴露的目录根），模型里是同一种子节点，解析方式不同。Compose block **属本层**（与本层硬约束、本层系统维护信息同一层语义，不是旁路）。组合是 harness 的依赖声明，不是记忆库：`.harness/` 好比项目自己的源码，Compose block 里的记忆入口好比依赖声明，`edges context` 好比解析并加载。它和 docker compose 一样用登记声明由哪些东西组合而成，但组合的是可复用的经验与约束，不是运行中的服务。见 ADR 0034。
-_避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作空间的独立记忆库、用组合代替项目知识的就地 init、git submodule、另造 `compose.json` / `compose.yaml`、强制大脑必须走远程 MCP、把现有组成登记列表原样复用当记忆入口登记、把 Compose block 当成层模型外的旁路
+把别的 harness 仓库（大脑、团队库、规范库、组件库等）叠加进当前工作空间的统一说法，对应 Devin Agent Memory 文章里的 composable。工作空间 = 自身就地 init 的 harness + 若干被组合的 harness 仓库；被组合的仓库各自保持独立的归属、权限和历史。被组合的仓库一律 clone 到本机，在当前作用域的 `AGENTS.md` 里用专用的 **Compose block** 登记本地入口，挂到目录树上，traverse 顺着走，和读本仓子目录一样；本地组合进来的仓库和 `.harness/` 一样可以直接写。Compose block **属本层**（与本层硬约束、本层系统维护信息同一层语义，不是旁路）。edges 只管 git 仓库和本地目录树，不管远程入口和大规模检索。组合是 harness 的依赖声明，不是记忆库：`.harness/` 好比项目自己的源码，Compose block 里的本地入口好比依赖声明，`edges context` 好比解析并加载。它和 docker compose 一样用登记声明由哪些东西组合而成，但组合的是可复用的经验与约束，不是运行中的服务。见 ADR 0034。
+_避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作空间的独立记忆库、用组合代替项目知识的就地 init、git submodule、另造 `compose.json` / `compose.yaml`、远程入口、远程 MCP 组合、服务端 clone、「一个模型两种部署」、把现有组成登记列表原样复用当记忆入口登记、把 Compose block 当成层模型外的旁路
 
 **记忆入口登记**：
-在当前作用域的 `AGENTS.md` 的专用 **Compose block** 里，登记指向记忆仓库入口的节点：本地入口是本机目录路径（可直接写，与就地 `.harness/` 一致），远程入口是 MCP 暴露的目录根（写仍走 dream + PR）。Compose block **属本层**，对当前作用域做 traverse / `edges context` / 本层硬约束收集时归入该层。traverse 走到远程入口时用固定工具（读一层索引、读原文、`search`）去读。取代已废弃的「组合清单」；不是把现有组成登记列表原样多挂一个节点。入口条目字段形态另议；以后可加读写权限控制且要和 Git 仓库权限关联，本轮不定。见 ADR 0034。
-_避免使用_：组合清单、Compose List、`compose.json`、`compose.yaml`、`~/.harness/compose.json`、`.harness/compose.json`、挂载表、记忆源清单（`memory-sources`）、复用 `--super` 的 `harness-materials.json` 表示跨仓库入口、用动态加载 MCP tools 表示目录树、另造与 Git 无关的独立 ACL、把 Compose block 当成不算本层的旁路
+在当前作用域的 `AGENTS.md` 的专用 **Compose block** 里，登记被组合仓库在本机 clone 的入口目录（可直接写，与就地 `.harness/` 一致）。只有本地入口，没有远程入口。Compose block **属本层**，对当前作用域做 traverse / `edges context` / 本层硬约束收集时归入该层。取代已废弃的「组合清单」；不是把现有组成登记列表原样多挂一个节点。入口条目字段形态、clone 放在哪另议；以后可加读写权限控制且要和 Git 仓库权限关联，本轮不定。见 ADR 0034。
+_避免使用_：组合清单、Compose List、`compose.json`、`compose.yaml`、`~/.harness/compose.json`、`.harness/compose.json`、挂载表、记忆源清单（`memory-sources`）、复用 `--super` 的 `harness-materials.json` 表示跨仓库入口、远程入口、MCP 目录根、MCP `remember` / 收件箱（`.harness/inbox/`）、由 edges 维护的远程大库索引（PageIndex 式）、另造与 Git 无关的独立 ACL、把 Compose block 当成不算本层的旁路
 
 **根作用域（Root Scope）**：
 组织记忆与改进机制时选定的最外层范围，可面向个人、Agent、团队、公司或更大的系统；根代表所选主体或系统的作用域，其中的维护空间承载系统二。它相对于当前建模范围成立，可以独立存在，也可以纳入更大的作用域。以个人为主体时，根是大脑这个虚拟目录，位于此人自己的仓库之上；团队仓库的根沉淀的是团队在该目录下的经验。

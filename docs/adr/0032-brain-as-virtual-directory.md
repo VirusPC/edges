@@ -20,4 +20,4 @@ status: accepted
 - 其他仓库里的 code agent 接入大脑 harness、`--super` 跨多个仓库、团队这一层的 harness 仓库，目前都还没有实现。
 - 术语见 `CONTEXT.md` 的「大脑（虚拟目录）」「Personal Agent」「共享范围」。
 
-> 修订：其他仓库与对话框接入大脑、团队库等 harness 仓库的方式，见 [ADR 0034](0034-compose-harness-repos-into-workspace.md)（2026-10-17）。
+> 修订：其他仓库里的 code agent 接入大脑、团队库等 harness 仓库的方式（clone 到本机，在 `AGENTS.md` 的 Compose block 里登记本地入口），见 [ADR 0034](0034-compose-harness-repos-into-workspace.md)（2026-10-17）。没有本地 harness 的对话框类宿主不在其范围内。
