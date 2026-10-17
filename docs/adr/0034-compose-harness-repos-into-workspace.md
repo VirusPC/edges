@@ -10,7 +10,7 @@ status: accepted
 
 本 ADR 补全 ADR 0032 的「接入方式」（code agent 经用户级配置接入大脑仓库、personal agent clone），并部分取代其 Consequences 里「其他仓库里的 code agent 接入大脑 harness」「团队这一层的 harness 仓库」两项未实现说明：接入方式改由本 ADR 规定（本地 clone + Compose block），实现仍待做。`--super` 跨多个仓库不在本 ADR 范围内。
 
-**Status:** accepted（ADR 0034；grill 确认于 2026-10-17，同日经六轮修订，被推翻的做法见 Considered Options）
+**Status:** accepted（ADR 0034；grill 确认于 2026-10-17，同日经七轮修订，被推翻的做法见 Considered Options）
 
 **See also:** ADR 0032（大脑是虚拟目录）
 
@@ -23,8 +23,8 @@ status: accepted
 5. **检索就是顺树走，不承诺大规模检索**：Agent 从入口开始，看各层 `README.md` / `AGENTS.md` 组成登记里的 name / description，选分支、逐层往下，最后读原文。维护要求仍然有用：每层子节点控制在几十个以内，过多就拆目录；name / description 要能帮模型判断该走哪个分支。edges 不承诺几千篇文档规模的检索，不建索引、不做向量库；需要这种能力的，用别的系统。
 6. **`edges context` 命令**：从当前作用域的 `AGENTS.md` 出发，用现有 traverse 在本地顺树走（含 Compose block 里登记的本地入口；Compose block 算本层，见第 2 条），取本层硬约束和一级索引（name / description）。按 traverse 顺序拼成 Markdown，每段标明来源与路径；有字数上限，超出时先截索引、保留硬约束，并提示精简；输出到 stdout。深处的内容靠顺树读。`--super` 用的 `harness-materials.json` 只列同仓相对路径、不挂其他系统的 `AGENTS.md`，不能拿来当入口登记。
 7. **开场注入先从简**：不做 hook。只在代码 Agent 客户端的用户级配置里写一句「开场先运行 `edges context`」。
-8. **dream 只做提升**：dream 是定时运行的 Agent，把项目 harness 主分支里可跨项目复用的内容提升到大脑或团队库，产出一律走 PR，由维护者审核。每 24 小时检查一次，只有项目 harness 主分支自上次运行以来有新提交才运行，没有变化就跳过，省成本、把一天的变化攒成一批。顺带可以做一件轻量的事：在它提 PR 的目标仓库里，按第 5 条的维护要求整理目录树（子节点过多时拆目录、更新 name / description）；这不是独立职责，也不维护任何索引。dream 不消化收件箱、不维护远程索引。在哪运行（GitHub Actions 定时任务、自建机器 cron 等）和需要哪些权限另议。
-9. **分支记忆不做特殊标记**：分支上的记忆留在该分支自己的 `.harness/`，分支丢弃就随之消失；合入项目主分支时和代码在同一个 PR 里被审到。dream 只看项目 harness 的主分支，分支上的零碎经验到不了被组合的仓库。中心化方案（Mem0、OpenViking、Hy Memory 等）所有写入进同一个库，只能靠事后打标签（如 `workspace_id`、`branch`）隔离，这是 git 分布式方案的一个优势。
+8. **dream 是整理整棵组合树**：dream 是定时运行的 Agent，对工作空间由就地 `.harness/` 与 Compose block 挂上的本地仓库组成的整棵树做整理——从树底层向上层推进，包括记忆的合并与删除、目录结构清理、刷新各层 name / description，以及把可跨项目复用的内容经 PR 提升到上层仓库（大脑 / 团队库）。产出一律走 PR，由维护者审核。不把「提升」与「整理目录」拆成两套独立职责。每 24 小时检查一次，只有项目 harness 主分支自上次运行以来有新提交才运行，没有变化就跳过，省成本、把一天的变化攒成一批；整理结果仍一致时开 PR。dream 不消化收件箱、不维护远程索引。在哪运行（GitHub Actions 定时任务、自建机器 cron 等）和需要哪些权限另议。
+9. **分支记忆不做特殊标记**：分支上的记忆留在该分支自己的 `.harness/`，分支丢弃就随之消失；合入项目主分支时和代码在同一个 PR 里被审到。dream 的触发与提升素材仍看项目 harness 的主分支，分支上的零碎经验到不了被组合的仓库。中心化方案（Mem0、OpenViking、Hy Memory 等）所有写入进同一个库，只能靠事后打标签（如 `workspace_id`、`branch`）隔离，这是 git 分布式方案的一个优势。
 10. **暂不提供 `remember` 和收件箱**：它们原本只为没有本地 harness 的宿主（如 ChatGPT）准备，这类宿主已不在本 ADR 范围内。这里说的是此前设想的 MCP `remember` 工具和 `.harness/inbox/`，与现有的 `$project-memory-remember` skill（往本地 `.harness/` 写记忆）无关。
 
 ## Considered Options
@@ -33,7 +33,8 @@ status: accepted
 - **远程 MCP 入口 / 「一个模型，两种部署」（本地入口 + 远程 MCP 目录根，服务端持有 clone、同一 CLI 顺树读）：** 否决（2026-10-17 同日第六轮修订）。用户觉得远程 MCP、收件箱、dream 叠在一起太重。把关注点分开，edges 只管 git 仓库和本地目录树，更简单；远程大规模知识管理是别的系统的事。
 - **由 edges 管理的 PageIndex 式远程大库索引（全库一棵带摘要的树，dream 离线维护，`search` 逐层推理）：** 否决（2026-10-17 同日第六轮修订）。大规模检索不是 edges 的事，交给别的系统；edges 只保留顺树走和目录维护要求。
 - **MCP `remember` + 记忆仓库内的收件箱（`.harness/inbox/`）：** 否决（2026-10-17 同日第六轮修订）。它们只为没有本地 harness 的宿主存在，这类宿主不在范围内。
-- **dream 消化收件箱、维护远程索引：** 否决（2026-10-17 同日第六轮修订）。收件箱和远程索引都已去掉，dream 只做提升。
+- **dream 消化收件箱、维护远程索引：** 否决（2026-10-17 同日第六轮修订）。收件箱和远程索引都已去掉。
+- **dream 只做提升、整理目录树只是顺带的轻量附带职责：** 否决（2026-10-17 同日第七轮修订）。用户确认 dream 概念更简单：就是整棵组合树的整理过程（自下而上），合并/删除记忆、清理目录、刷新 name / description、经 PR 提升到大脑/团队库，同属这一过程，不拆成独立职责。
 - **另造组合清单文件（`compose.yaml` / `compose.json`，含用户级与项目级、`repo`+`mcp` 字段）：** 否决（2026-10-17 同日第三轮修订；第四轮明确落点）。入口登记在 `AGENTS.md` 的专用 Compose block 里。另造清单与「harness 任何目录」重复，且要单独维护覆盖规则。
 - **把 Compose block 当成层模型外的旁路（不算本层）：** 否决（2026-10-17 同日第五轮修订）。用户确认「compose block算本层」。
 - **强制大脑必须走远程 MCP：** 否决（第三轮）；第六轮起远程入口整体不在范围内。
@@ -55,10 +56,10 @@ status: accepted
 
 ## Consequences
 
-- 以下都未实现：AGENTS.md Compose block 的解析；traverse 中跨仓库的本地入口节点；`edges context`；dream（提升、顺带整理目录树）及其调度（每 24 小时检查、主分支有变化才运行）。
+- 以下都未实现：AGENTS.md Compose block 的解析；traverse 中跨仓库的本地入口节点；`edges context`；dream（整棵组合树自下而上整理：合并/删除记忆、目录清理、刷新 name / description、经 PR 提升到大脑/团队库）及其调度（每 24 小时检查、主分支有变化才运行）。
 - 还没定的：Compose block 里每个入口条目的字段形态；clone 放在哪（如 `~/.harness/` 下或用户自选目录）、由谁 clone 和更新；dream 在哪运行、要看哪些项目仓库的主分支、读和开 PR 需要哪些权限。
 - 没有本地 harness 的对话框类宿主（如手机上的 ChatGPT）不由 edges 直接支持。
-- 经 dream 提升的经验要等下一轮和 PR 合并后才对他人可见，可能隔天；在本机直接写组合仓库的，按该仓库自己的提交、推送节奏对他人可见。
+- 经 dream 整理并提升的经验要等下一轮和 PR 合并后才对他人可见，可能隔天；在本机直接写组合仓库的，按该仓库自己的提交、推送节奏对他人可见。
 - 检索质量依赖目录结构和 name / description 写得好不好；edges 不承诺几千篇文档规模的检索。
 - 以后可做：为组合进来的仓库加读写权限控制，且要和底层 Git 仓库权限关联，不另造独立 ACL；本轮不定方案。
-- 术语见 `CONTEXT.md` 的「组合（Compose）」「记忆入口登记」（均指向 AGENTS.md 的 Compose block）。
+- 术语见 `CONTEXT.md` 的「组合（Compose）」「记忆入口登记」（均指向 AGENTS.md 的 Compose block）与「dream」。

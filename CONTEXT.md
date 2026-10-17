@@ -48,6 +48,10 @@ _避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作
 在当前作用域的 `AGENTS.md` 的专用 **Compose block** 里，登记被组合仓库在本机 clone 的入口目录（可直接写，与就地 `.harness/` 一致）。只有本地入口，没有远程入口。Compose block **属本层**，对当前作用域做 traverse / `edges context` / 本层硬约束收集时归入该层。取代已废弃的「组合清单」；不是把现有组成登记列表原样多挂一个节点。入口条目字段形态、clone 放在哪另议；以后可加读写权限控制且要和 Git 仓库权限关联，本轮不定。见 ADR 0034。
 _避免使用_：组合清单、Compose List、`compose.json`、`compose.yaml`、`~/.harness/compose.json`、`.harness/compose.json`、挂载表、记忆源清单（`memory-sources`）、复用 `--super` 的 `harness-materials.json` 表示跨仓库入口、远程入口、MCP 目录根、MCP `remember` / 收件箱（`.harness/inbox/`）、由 edges 维护的远程大库索引（PageIndex 式）、另造与 Git 无关的独立 ACL、把 Compose block 当成不算本层的旁路
 
+**dream**：
+对整棵组合树（就地 `.harness/` + Compose block 挂上的本地仓库）做整理的过程：自下而上，合并与删除记忆、清理目录结构、刷新 name / description，并把可跨项目复用的内容经 PR 提升到上层仓库（大脑 / 团队库）。定时 Agent 执行；每 24 小时检查一次，项目 harness 主分支有新提交才运行；产出走 PR。在哪运行另议。见 ADR 0034。
+_避免使用_：只把 dream 当成「提升」单一职责、把整理目录树当成与 dream 无关的另套流程、消化收件箱、维护远程索引、无条件按固定周期跑、每次有变化就立即跑
+
 **根作用域（Root Scope）**：
 组织记忆与改进机制时选定的最外层范围，可面向个人、Agent、团队、公司或更大的系统；根代表所选主体或系统的作用域，其中的维护空间承载系统二。它相对于当前建模范围成立，可以独立存在，也可以纳入更大的作用域。以个人为主体时，根是大脑这个虚拟目录，位于此人自己的仓库之上；团队仓库的根沉淀的是团队在该目录下的经验。
 _避免使用_：固定等于个人或 Git 仓库、唯一绝对根、把所选主体直接等同于系统二、工作空间（若指作用域；「工作区」只指专项工作区）
