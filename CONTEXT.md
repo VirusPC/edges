@@ -45,8 +45,8 @@ _避免使用_：Agent 工具箱、skill 合集、用「Edges」指本仓这个�
 _避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作空间的独立记忆库、用组合代替项目知识的就地 init、git submodule
 
 **组合清单（Compose List）**：
-声明当前工作空间组合了哪些 harness 仓库的清单，分用户级 `~/.edges/compose.yaml`（跟人走，如大脑）和项目级 `.harness/compose.yaml`（随代码提交，团队一致）两层；同名仓库项目级覆盖用户级。每项写名字、git 地址、可选分支。见 ADR 0034。
-_避免使用_：挂载表、挂载清单、记忆源清单（`memory-sources`）、复用 `--super` 的 `harness-materials.json` 表示组合
+声明组合了哪些 harness 仓库的 JSON 清单。任意目录都可以有自己的 `.harness/compose.json`（随代码提交，协作者一致），另有用户级 `~/.harness/compose.json`（跟人走，如大脑）。生效时从工作目录向上逐层收集各级清单，再加用户级清单；同名仓库离工作目录越近越优先，用户级最低。每项写名字、git 地址、可选分支。见 ADR 0034。
+_避免使用_：挂载表、挂载清单、记忆源清单（`memory-sources`）、`compose.yaml`、只允许项目根放组合清单、复用 `--super` 的 `harness-materials.json` 表示组合
 
 **根作用域（Root Scope）**：
 组织记忆与改进机制时选定的最外层范围，可面向个人、Agent、团队、公司或更大的系统；根代表所选主体或系统的作用域，其中的维护空间承载系统二。它相对于当前建模范围成立，可以独立存在，也可以纳入更大的作用域。以个人为主体时，根是大脑这个虚拟目录，位于此人自己的仓库之上；团队仓库的根沉淀的是团队在该目录下的经验。

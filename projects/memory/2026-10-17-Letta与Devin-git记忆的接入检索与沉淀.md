@@ -381,9 +381,9 @@ flowchart LR
 grill（2026-10-17）结论已写成 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md)，要点如下（均未实现）：
 
 1. **范围与术语**：大脑、团队库、规范库、组件库用同一套机制，统一叫「组合（compose）」，对应 Devin 文章的 composable。不再说「外部记忆」「挂载」。工作空间 = 自身就地 harness + 若干被组合的 harness 仓库。
-2. **组合清单两层**：用户级 `~/.edges/compose.yaml`（如大脑，跟人走，不强加给同事），项目级 `.harness/compose.yaml`（随代码提交，团队一致）；同名仓库项目级覆盖用户级。每项写名字、git 地址、可选分支。取代第 5 节设想的 `memory-sources.yaml`。
-3. **拉到本地**：CLI 统一 clone 到 `~/.edges/repos/<name>`，代码 Agent 按普通文件读写。ChatGPT 这类无 shell 宿主走远程 MCP，服务端同样持有 clone，MCP 子进程调 CLI，用服务端默认清单。否决 git submodule、手动 clone 写路径、主路径直接调中心化远程服务。
-4. **`edges context`**：合并两层清单 → 没有就 clone、有就带超时 pull（失败沿用旧版本并告警）→ 对项目自身和每个组合仓库，用 traverse 的 `localOnly` 取根 `AGENTS.md` 的「本层硬约束」和本层索引 → 按「项目自身、项目级组合、用户级组合」拼 Markdown，标来源，有字数上限，超限先截索引 → 输出到 stdout。MCP `context` 工具调用同一条命令。`--super` 的 `harness-materials.json` 不能当组合清单用。
+2. **组合清单可放任意目录（JSON）**：用户级 `~/.harness/compose.json`（如大脑，跟人走，不强加给同事）；任意目录都可以有 `.harness/compose.json`（随代码提交，协作者一致），和「harness 任何目录」一致。生效时从工作目录向上逐层收集，再加用户级；同名仓库离工作目录越近越优先，用户级最低。每项写名字、git 地址、可选分支。（grill 初稿是项目根 + 用户级两层 YAML，同日改成现在这样。）取代第 5 节设想的 `memory-sources.yaml`。
+3. **拉到本地**：CLI 统一 clone 到 `~/.edges/repos/<name>`（是否改到 `~/.harness/` 下另议），代码 Agent 按普通文件读写。ChatGPT 这类无 shell 宿主走远程 MCP，服务端同样持有 clone，MCP 子进程调 CLI，用服务端默认清单。否决 git submodule、手动 clone 写路径、主路径直接调中心化远程服务。
+4. **`edges context`**：从工作目录向上收集各级清单再加用户级，合并 → 没有就 clone、有就带超时 pull（失败沿用旧版本并告警）→ 对项目自身和每个组合仓库，用 traverse 的 `localOnly` 取根 `AGENTS.md` 的「本层硬约束」和本层索引 → 按「项目自身 harness、由近到远的各级目录组合、用户级组合」拼 Markdown，标来源，有字数上限，超限先截索引 → 输出到 stdout。MCP `context` 工具调用同一条命令。`--super` 的 `harness-materials.json` 不能当组合清单用。
 5. **注入从简**：不做 hook，只在用户级配置或 ChatGPT 自定义指令里写一句「开场先运行 / 调用 `edges context`」。对话框宿主只能尽力而为。
 6. **写回**：默认写进项目自身 harness；用户明确要求写进某个组合仓库时按普通文件改，但走分支加 PR，不直推 main。
 7. **团队库写入**：Agent 只写自己的 harness；提升到团队库或大脑交给后续的 dream，批量出 PR，由维护者审。
