@@ -378,7 +378,7 @@ flowchart LR
 
 **修正**：重读 README 后发现，第 10 节的「统一方案」把 edges 当成一个要挂进其他工作空间的外部记忆库，偏离了 README 的两条前提：「harness 任何目录」和「把 harness 放在离被 harness 对象最近的地方」。修正为：项目自己的知识在项目里就地 init；大脑、团队库这类跨项目的 harness 仓库，通过「组合」叠加进来。
 
-grill（2026-10-17）结论已写成 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md)，要点如下（均未实现）。第 3、4、6、9、10 条已被下文「第二轮 grill 修订」改写，ADR 0034 已按修订后的结论重写：
+grill（2026-10-17）结论已写成 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md)，要点如下（均未实现）。第 2–4、6、9、10 条等已被下文第二、三轮 grill 修订改写，以 ADR 0034 与「第三轮修订」为准：
 
 1. **范围与术语**：大脑、团队库、规范库、组件库用同一套机制，统一叫「组合（compose）」，对应 Devin 文章的 composable。不再说「外部记忆」「挂载」。工作空间 = 自身就地 harness + 若干被组合的 harness 仓库。
 2. **组合清单可放任意目录（JSON）**：用户级 `~/.harness/compose.json`（如大脑，跟人走，不强加给同事）；任意目录都可以有 `.harness/compose.json`（随代码提交，协作者一致），和「harness 任何目录」一致。生效时从工作目录向上逐层收集，再加用户级；同名仓库离工作目录越近越优先，用户级最低。每项写名字、git 地址、可选分支。（grill 初稿是项目根 + 用户级两层 YAML，同日改成现在这样。）取代第 5 节设想的 `memory-sources.yaml`。
@@ -416,8 +416,22 @@ grill（2026-10-17）结论已写成 [ADR 0034](../../docs/adr/0034-compose-harn
 修订后的结论：
 
 1. **两类记忆**：本地记忆是项目内就地的 `.harness/`，跟代码走、规模小，AI 顺着目录读，不建索引。远程记忆仓库是团队库、规范库和大脑，服务端持有并用 PageIndex 思路离线维护树状索引（索引仍是仓库里的入口文件和摘要，随 PR 审核），通过 MCP 暴露读一层索引、读原文、`search` 等工具；客户端不再拉到本地，代码 Agent 和 ChatGPT 走同一套远程工具。`search` 改为远程 MCP 工具，服务端仍用 CLI 实现。推翻第 3 条「一律 clone 到本地读写」和第 9 条「`edges search` 是本地命令」。
-2. **`edges context` 保留**：读本地 harness 的硬约束和一级索引，对组合清单里的远程仓库调用其 MCP 取根层硬约束和一级索引，拼在一起输出，不再负责 clone 远程仓库。改写第 4 条。
+2. **`edges context` 保留**（第三轮改为顺组成登记 traverse，不再读 compose.json）：读本地 harness 的硬约束和一级索引，对组合清单里的远程仓库调用其 MCP 取根层硬约束和一级索引，拼在一起输出，不再负责 clone 远程仓库。改写第 4 条。
 3. **远程仓库只有 dream 一个写入口**：产出一律走 PR；个人和 Agent 只写自己项目的 `.harness/`，由 dream 挑选提升。推翻第 6 条。
 4. **`remember` 只进收件箱**：dream 的输入因此是项目 harness 主分支的变化加收件箱。触发仍是每 24 小时检查一次，有变化才运行；收件箱非空也算有变化（这一点是整理时补充的）。改写第 10 条。
-5. **组合清单每项写 `repo` 和 `mcp`**：如 `{ "name": "team-kb", "repo": "<git url>", "mcp": "<https url>" }`。只填 `repo` 的按本地仓库处理，clone 到 `~/.edges/repos/<name>` 后顺目录读（是否改到 `~/.harness/` 下另议）。逐层收集、越近越优先的规则不变。
+5. **组合清单每项写 `repo` 和 `mcp`**（已被第三轮取代）：如 `{ "name": "team-kb", "repo": "<git url>", "mcp": "<https url>" }`。只填 `repo` 的按本地仓库处理，clone 到 `~/.edges/repos/<name>` 后顺目录读（是否改到 `~/.harness/` 下另议）。逐层收集、越近越优先的规则不变。
 6. **分支记忆更站得住**：远程仓库只经 dream 写入，dream 只看主分支，分支上的零碎经验更到不了远程仓库。
+
+**第三轮 grill 修订（2026-10-17）**
+
+进一步简化：不要组合清单文件，组合就是组成登记里的跨仓库引用。
+
+追问与结论：
+
+- **还需要 `compose.json` 吗？** 不需要。在当前作用域的 `AGENTS.md`（或组织清单）里登记一个指向记忆仓库入口的节点即可，traverse 顺着这条边走，和读本仓子目录一样。第二轮的「组合清单 / `repo`+`mcp` 字段 / 逐层收集」被本轮取代。
+- **本地和远程怎么统一？** 入口可以是本地目录（clone 下来的路径），也可以是远程目录（MCP 暴露的目录根）。模型里是同一种子节点，只是解析方式不同：本地读文件，远程用固定工具（读一层索引、读原文、`search`），不靠动态加载 tools。
+- **一个模型还是两套？** 一个模型，两种部署。每份记忆都是带 harness 的 git 仓库；读 = 顺树，写 = PR。MCP 服务 = 服务端 clone + 同一 CLI；dream = 定时 Agent，用同一 CLI，产出 PR。收件箱 = 仓库内 `.harness/inbox/`，`remember` 往里写文件并开 PR。
+- **大脑必须走服务端吗？** 不必。默认可本地（clone 后登记本地路径），也可选远程（登记 MCP 入口）。
+- **还保留什么？** PageIndex 思路维护远程大库的树状索引；远程写入以 dream 为主 + 收件箱；dream 每 24 小时检查、主分支或收件箱有变化才跑；dream 在哪运行另议；分支记忆优势。
+
+术语：保留「组合（Compose）」的概念含义；「组合清单」废弃，改为「记忆入口登记」（在组成登记里指向本地路径或远程 MCP 入口）。见 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md)。

@@ -41,12 +41,12 @@ _避免使用_：组成子节点、固定深度截断、把 harness 与「遍历
 _避免使用_：Agent 工具箱、skill 合集、用「Edges」指本仓这个个人实例（说「本仓」或「作者的大脑仓库」）、与 `edges/` 目录或单条 Edge 混用
 
 **组合（Compose）**：
-把别的 harness 仓库（大脑、团队库、规范库、组件库等）叠加进当前工作空间的统一说法，对应 Devin Agent Memory 文章里的 composable。工作空间 = 自身就地 init 的 harness + 若干被组合的 harness 仓库；被组合的仓库各自保持独立的归属、权限和历史。按「是不是工作空间里的本地文件」分两类：本地记忆是项目内就地的 `.harness/`，顺着目录读、由人和 Agent 直接写；远程记忆仓库（团队库、规范库、大脑）由服务端持有，经 MCP 读取，只由 dream 写入并走 PR。组合是 harness 的依赖声明，不是记忆库：`.harness/` 好比项目自己的源码，`compose.json` 好比 `package.json` 里的依赖声明，`edges context` 好比解析并加载依赖。它和 docker compose 一样用一份清单声明由哪些东西组合而成，但组合的是可复用的经验与约束，不是运行中的服务，并且按目录逐层收集。见 ADR 0034。
-_避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作空间的独立记忆库、用组合代替项目知识的就地 init、git submodule、把远程记忆仓库一律拉到本地、直接写远程记忆仓库、按团队 / 项目区分本地与远程
+把别的 harness 仓库（大脑、团队库、规范库、组件库等）叠加进当前工作空间的统一说法，对应 Devin Agent Memory 文章里的 composable。工作空间 = 自身就地 init 的 harness + 若干被组合的 harness 仓库；被组合的仓库各自保持独立的归属、权限和历史。组合不是另造一套机制，只是组成登记里多一种跨仓库引用：在 `AGENTS.md`（或组织清单）里登记指向记忆仓库入口的节点，traverse 顺着走。入口可以是本地目录，也可以是远程目录（MCP 暴露的目录根），模型里是同一种子节点，解析方式不同。组合是 harness 的依赖声明，不是记忆库：`.harness/` 好比项目自己的源码，组成登记里的记忆入口好比依赖声明，`edges context` 好比解析并加载。它和 docker compose 一样用登记声明由哪些东西组合而成，但组合的是可复用的经验与约束，不是运行中的服务。见 ADR 0034。
+_避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作空间的独立记忆库、用组合代替项目知识的就地 init、git submodule、另造 `compose.json` / `compose.yaml`、强制大脑必须走远程 MCP
 
-**组合清单（Compose List）**：
-声明组合了哪些 harness 仓库的 JSON 清单。任意目录都可以有自己的 `.harness/compose.json`（随代码提交，协作者一致），另有用户级 `~/.harness/compose.json`（跟人走，如大脑）。生效时从工作目录向上逐层收集各级清单，再加用户级清单；同名仓库离工作目录越近越优先，用户级最低。每项写名字、仓库地址 `repo` 和 MCP 地址 `mcp`：`mcp` 用来读，`repo` 用来定位来源、确定 dream 开 PR 的仓库和兜底；只填 `repo` 的项按本地仓库处理。见 ADR 0034。
-_避免使用_：挂载表、挂载清单、记忆源清单（`memory-sources`）、`compose.yaml`、只允许项目根放组合清单、复用 `--super` 的 `harness-materials.json` 表示组合
+**记忆入口登记**：
+在当前作用域的 `AGENTS.md`（或组织清单）的组成登记里，登记一个指向记忆仓库入口的节点：本地入口是本机目录路径，远程入口是 MCP 暴露的目录根。traverse 走到远程入口时用固定工具（读一层索引、读原文、`search`）去读。取代已废弃的「组合清单」。见 ADR 0034。
+_避免使用_：组合清单、Compose List、`compose.json`、`compose.yaml`、`~/.harness/compose.json`、`.harness/compose.json`、挂载表、记忆源清单（`memory-sources`）、复用 `--super` 的 `harness-materials.json` 表示跨仓库入口、用动态加载 MCP tools 表示目录树
 
 **根作用域（Root Scope）**：
 组织记忆与改进机制时选定的最外层范围，可面向个人、Agent、团队、公司或更大的系统；根代表所选主体或系统的作用域，其中的维护空间承载系统二。它相对于当前建模范围成立，可以独立存在，也可以纳入更大的作用域。以个人为主体时，根是大脑这个虚拟目录，位于此人自己的仓库之上；团队仓库的根沉淀的是团队在该目录下的经验。
