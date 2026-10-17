@@ -6,22 +6,22 @@ status: accepted
 
 2026-10-17 的 grill 确认：edges 接入其他工作空间时，不把 edges 当成一个要挂进去的独立记忆库。项目自己的知识在项目里就地 init；大脑、团队库、规范库、组件库这类跨项目的 harness 仓库，用同一套机制叠加进来，统称「组合（compose）」，对应 Devin Agent Memory 文章里的 composable。一个工作空间 = 自身就地的 harness + 若干被组合的 harness 仓库。
 
-**一个模型，两种入口**：组合不是另造一套清单文件，而是在当前作用域的 `AGENTS.md` 里加一个专用的 **Compose 相关 block**，在其中登记指向记忆仓库入口的节点；traverse 顺着这条边走，和读本仓子目录一样。入口可以是本地目录，也可以是远程目录（MCP 暴露的目录根）；在模型里它们是同一种子节点，只是解析方式不同。每份记忆都是带 harness 的 git 仓库：读 = 顺着目录树；本地入口可直接写，远程入口写 = dream + PR。MCP 服务 = 服务端持有 clone + 同一 CLI 顺树读；dream = 定时 Agent，用同一 CLI，产出 PR。
+**一个模型，两种入口**：组合不是另造一套清单文件，而是在当前作用域的 `AGENTS.md` 里加一个专用的 **Compose 相关 block**，在其中登记指向记忆仓库入口的节点；Compose block **算本层**（与本层硬约束、本层系统维护信息同一层语义，不是层模型外的旁路）；traverse 顺着这条边走，和读本仓子目录一样。入口可以是本地目录，也可以是远程目录（MCP 暴露的目录根）；在模型里它们是同一种子节点，只是解析方式不同。每份记忆都是带 harness 的 git 仓库：读 = 顺着目录树；本地入口可直接写，远程入口写 = dream + PR。MCP 服务 = 服务端持有 clone + 同一 CLI 顺树读；dream = 定时 Agent，用同一 CLI，产出 PR。
 
 本 ADR 补全 ADR 0032 的「接入方式」（code agent 经用户级配置接入大脑仓库、personal agent clone），并部分取代其 Consequences 里「其他仓库里的 code agent 接入大脑 harness」「团队这一层的 harness 仓库」两项未实现说明：接入方式改由本 ADR 规定，实现仍待做。大脑默认可本地（clone 后在 AGENTS.md 的 Compose block 里写本地路径），也可选远程（登记 MCP 入口），不强制依赖服务端。`--super` 跨多个仓库不在本 ADR 范围内。
 
-**Status:** accepted（ADR 0034；grill 确认于 2026-10-17，同日经四轮修订，被推翻的做法见 Considered Options）
+**Status:** accepted（ADR 0034；grill 确认于 2026-10-17，同日经五轮修订，被推翻的做法见 Considered Options）
 
 **See also:** ADR 0032（大脑是虚拟目录）、ADR 0004（MCP 子进程调 CLI）
 
 ## Decision
 
 1. **术语**：大脑、团队库、规范库、组件库都叫被组合的 harness 仓库，动作叫「组合」。不用「外部记忆」「挂载」，这两个词会让人以为 edges 是一个独立记忆库，和「harness 任何目录」冲突。组合是 harness 的依赖声明，不是记忆库：`.harness/` 好比项目自己的源码，AGENTS.md Compose block 里指向记忆入口的节点好比依赖声明，`edges context` 好比解析并加载。它和 docker compose 一样用登记声明由哪些东西组合而成，但组合的是可复用的经验与约束，不是运行中的服务。
-2. **记忆入口登记在 AGENTS.md 的 Compose block，不用组合清单文件**：在当前作用域的 `AGENTS.md` 里增加一个专用的 **Compose 相关 block**（Compose / 记忆入口登记区块），在其中登记指向记忆仓库入口的节点；不另造 `compose.json`、`compose.yaml` 或任何组合清单文件。这不是把现有组成登记列表原样复用、只多挂一个节点，而是单独一块给 compose / 记忆入口用。traverse 顺着这条边走，和读本仓子目录一样。入口可以登记在任意作用域的 `AGENTS.md` Compose block 里，和「harness 任何目录」一致。每个入口条目的字段形态另议。
+2. **记忆入口登记在 AGENTS.md 的 Compose block，不用组合清单文件；Compose block 算本层**：在当前作用域的 `AGENTS.md` 里增加一个专用的 **Compose 相关 block**（Compose / 记忆入口登记区块），在其中登记指向记忆仓库入口的节点；不另造 `compose.json`、`compose.yaml` 或任何组合清单文件。这不是把现有组成登记列表原样复用、只多挂一个节点，而是单独一块给 compose / 记忆入口用。**Compose block 算本层**：与 edges 里「本层硬约束」「本层系统维护信息」同一层语义，属于当前作用域本层材料，不是层模型外的旁路；对当前作用域做 traverse、`edges context`、本层硬约束收集时，Compose block 归入该层。traverse 顺着这条边走，和读本仓子目录一样。入口可以登记在任意作用域的 `AGENTS.md` Compose block 里，和「harness 任何目录」一致。每个入口条目的字段形态另议。
 3. **入口可以是本地目录，也可以是远程目录**：本地入口指向记忆仓库在本机的目录（例如 clone 下来的路径）；远程入口指向 MCP 暴露的目录根。traverse 走到远程入口时，通过 MCP 的固定工具（读一层索引、读原文、`search`）去读，不靠动态加载 tools。本地与远程在模型里是同一种子节点，只是解析方式不同。
 4. **一个模型，两种部署**：每份记忆都是带 harness 的 git 仓库。读 = 顺着目录树；本地入口可直接写，远程入口写 = dream + PR（细则见第 8 条）。MCP 服务 = 服务端持有 clone，用同一 CLI 顺树读，MCP 子进程调 CLI（遵循 ADR 0004）。dream = 定时运行的 Agent，用同一 CLI，产出 PR。收件箱 = 记忆仓库内的目录，例如 `.harness/inbox/`：`remember` 往里写文件并开 PR，dream 下一轮消化。大脑默认可本地（clone 后登记本地路径），也可选远程（登记 MCP 入口），不强制依赖服务端。没有本地 harness 的宿主（如 ChatGPT）走远程 MCP，服务端按默认登记的记忆入口返回上下文。
 5. **远程大库的检索借 PageIndex 的思路，不用它的代码**：远程库可能有几千篇、每篇 300–1000 字，难点不在速度，而在同义词漏检和单层索引太长读不完。PageIndex（VectifyAI/PageIndex）不用向量，给文档生成带摘要的目录树，检索时让模型顺着树推理。短文档单篇建树没有意义，需要全库一棵树；Edges 的目录层级加各层 `README.md` / `AGENTS.md` 组成登记里的 name / description，本身就是这棵带摘要的树。索引就是这些入口文件（可选再加各目录的汇总摘要），留在同一个记忆仓库里、随 PR 审核，不另设构建产物或向量库。索引离线建、由 dream 维护，检索时只读。维护要求：每层子节点控制在几十个以内，过多就拆目录；摘要要能帮模型判断该走哪个分支。`search` 按这个方式从根层读索引，选分支、逐层往下，最后读原文。本地小库顺着目录读即可，不建索引。
-6. **`edges context` 命令**：从当前作用域的 `AGENTS.md` 出发，用现有 traverse（含跨仓库的记忆入口边）取本层硬约束和一级索引（name / description）；走到本地入口就读本地文件，走到远程入口就调 MCP 取根层硬约束和一级索引。按 traverse 顺序拼成 Markdown，每段标明来源与路径；有字数上限，超出时先截索引、保留硬约束，并提示精简；输出到 stdout。深处的内容靠检索。MCP 的 `context` 工具子进程调用同一条命令（或服务端按默认登记返回同样格式的内容）。`--super` 用的 `harness-materials.json` 只列同仓相对路径、不挂其他系统的 `AGENTS.md`，不能拿来当记忆入口登记。
+6. **`edges context` 命令**：从当前作用域的 `AGENTS.md` 出发，用现有 traverse（含跨仓库的记忆入口边；Compose block 算本层，见第 2 条）取本层硬约束和一级索引（name / description）；走到本地入口就读本地文件，走到远程入口就调 MCP 取根层硬约束和一级索引。按 traverse 顺序拼成 Markdown，每段标明来源与路径；有字数上限，超出时先截索引、保留硬约束，并提示精简；输出到 stdout。深处的内容靠检索。MCP 的 `context` 工具子进程调用同一条命令（或服务端按默认登记返回同样格式的内容）。`--super` 用的 `harness-materials.json` 只列同仓相对路径、不挂其他系统的 `AGENTS.md`，不能拿来当记忆入口登记。
 7. **开场注入先从简**：不做 hook。只在代码 Agent 客户端的用户级配置或 ChatGPT 自定义指令里写一句「开场先运行 / 调用 `edges context`」。对话框类宿主无法保证开场注入，MCP 工具只在模型决定时才被调用，只能尽力而为。
 8. **写入规则**：项目内就地的 `.harness/` 由人和 Agent 直接写，随代码提交。本地登记的记忆仓库（clone 在本机、入口是本地路径）允许直接写，与就地 `.harness/` 一致——本地入口读本地文件，写也直接落盘，逻辑一致。跨项目的远程记忆仓库仍以 dream 为主写入口：产出一律走 PR，由维护者审核。个人和 Agent 不直接改远程仓库正文，可复用经验留在项目 harness 里，由 dream 挑选提升；没有本地 harness 的宿主用 `remember` 往收件箱写（见第 9 条）。代价是提升到远程仓库的经验要等 dream 下一轮和 PR 合并后才对他人可见，可能隔天。以后可加读写权限控制，且要和底层 Git 仓库权限关联（谁能读/写该仓），不另造一套独立 ACL；具体方案本 ADR 不定。
 9. **`remember` 只进收件箱**：收件箱是记忆仓库内的目录，例如 `.harness/inbox/`。`remember` 往里写文件并开 PR，不直接改仓库正文；dream 下一轮统一消化。写入口仍然以 dream 为主。
@@ -33,6 +33,7 @@ status: accepted
 
 - **把 edges 当外部记忆库挂进各个工作空间：** 否决。与「harness 任何目录、记忆离被 harness 对象最近」冲突；项目知识应就地 init。
 - **另造组合清单文件（`compose.yaml` / `compose.json`，含用户级与项目级、`repo`+`mcp` 字段）：** 否决（2026-10-17 同日第三轮修订；第四轮明确落点）。组合不另造清单文件；记忆入口登记在 `AGENTS.md` 的专用 Compose block 里，不靠「组成登记列表原样多挂一个节点」含糊带过。另造清单与「harness 任何目录」重复，且要单独维护覆盖规则。
+- **把 Compose block 当成层模型外的旁路（不算本层）：** 否决（2026-10-17 同日第五轮修订）。用户确认「compose block算本层」：Compose block 与本层硬约束、本层系统维护信息同一层语义；traverse / `edges context` / 本层硬约束收集时归入当前作用域本层，不是侧信道。
 - **强制大脑必须走远程 MCP：** 否决（2026-10-17 同日第三轮修订）。大脑默认可本地 clone 后登记本地路径，也可选远程；不强制依赖服务端。
 - **按团队 / 项目 / 个人划分记忆的接入方式：** 否决（2026-10-17 同日修订）。接入方式由入口是本地目录还是远程目录决定，不由归属标签决定。
 - **被组合仓库一律 clone 到固定目录本地读写，或一律只走远程、客户端禁止 clone：** 否决（2026-10-17 同日修订）。一律本地会让大库在每台机器上读不完；一律远程又强迫小库和大脑依赖服务端。改为同一模型下两种入口，由登记决定。

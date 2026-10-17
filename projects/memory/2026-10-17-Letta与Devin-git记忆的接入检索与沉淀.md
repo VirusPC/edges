@@ -445,3 +445,9 @@ grill（2026-10-17）结论已写成 [ADR 0034](../../docs/adr/0034-compose-harn
 3. **权限以后再加，且要和 Git 关联**：读写权限控制可以以后再加，且要和底层 Git 仓库权限关联（谁能读/写该仓），不另造独立 ACL；本轮不定方案。现行规则仍是本地直接写、远程 dream-only。
 
 见 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md) Decision #2、#8 与 Consequences。
+
+**第五轮 grill 修订（2026-10-17）**
+
+用户确认：「compose block算本层」。
+
+Compose block 与 edges 里「本层硬约束」「本层系统维护信息」同一层语义，属于当前作用域本层材料，不是层模型外的旁路。对当前作用域做 traverse、`edges context`、本层硬约束收集时，Compose block 归入该层。见 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md) Decision #2、#6。
