@@ -45,7 +45,7 @@ _避免使用_：Agent 工具箱、skill 合集、用「Edges」指本仓这个�
 _避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作空间的独立记忆库、用组合代替项目知识的就地 init、git submodule、另造 `compose.json` / `compose.yaml`、远程入口、远程 MCP 组合、服务端 clone、「一个模型两种部署」、把现有组成登记列表原样复用当记忆入口登记、把 Compose block 当成层模型外的旁路
 
 **记忆入口登记**：
-在当前作用域的 `AGENTS.md` 的专用 **Compose block** 里，登记被组合仓库在本机 clone 的入口目录（可直接写，与就地 `.harness/` 一致）。只有本地入口，没有远程入口。Compose block **属本层**，对当前作用域做 traverse / 本层硬约束收集时归入该层；Agent 开场读 `AGENTS.md` 时就能看到其中的入口路径和 name / description。取代已废弃的「组合清单」；不是把现有组成登记列表原样多挂一个节点。入口条目字段形态、clone 放在哪另议；以后可加读写权限控制且要和 Git 仓库权限关联，本轮不定。见 ADR 0034。
+在当前作用域的 `AGENTS.md` 的专用 **Compose block** 里，登记被组合仓库在本机 clone 的入口目录（可直接写，与就地 `.harness/` 一致）。只有本地入口，没有远程入口。Compose block **属本层**，对当前作用域做 traverse / 本层硬约束收集时归入该层；Agent 开场读 `AGENTS.md` 时就能看到其中的入口路径和 name / description。取代已废弃的「组合清单」；不是把现有组成登记列表原样多挂一个节点。实现上 Domain（Compose 节点模型）、Service（clone / pull / 登记 / traverse）、CLI 三层一起改；CLI 至少支持 clone 与 pull（未实现）；完整操作列表仍在 grill。入口条目字段形态、clone 放在哪另议；以后可加读写权限控制且要和 Git 仓库权限关联，本轮不定。见 ADR 0034。
 _避免使用_：组合清单、Compose List、`compose.json`、`compose.yaml`、`~/.harness/compose.json`、`.harness/compose.json`、挂载表、记忆源清单（`memory-sources`）、复用 `--super` 的 `harness-materials.json` 表示跨仓库入口、远程入口、MCP 目录根、MCP `remember` / 收件箱（`.harness/inbox/`）、由 edges 维护的远程大库索引（PageIndex 式）、另造与 Git 无关的独立 ACL、把 Compose block 当成不算本层的旁路
 
 **dream**：

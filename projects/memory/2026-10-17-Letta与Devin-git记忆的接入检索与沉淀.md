@@ -378,7 +378,7 @@ flowchart LR
 
 **修正**：重读 README 后发现，第 10 节的「统一方案」把 edges 当成一个要挂进其他工作空间的外部记忆库，偏离了 README 的两条前提：「harness 任何目录」和「把 harness 放在离被 harness 对象最近的地方」。修正为：项目自己的知识在项目里就地 init；大脑、团队库这类跨项目的 harness 仓库，通过「组合」叠加进来。
 
-grill（2026-10-17）结论已写成 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md)，要点如下（均未实现）。第 2–6、9、10 条等已被下文第二至九轮 grill 修订改写，以 ADR 0034 与最新一轮修订为准（dream 以「第八轮修订」为准，`edges context` 与开场注入以「第九轮修订」为准，其余以「第六轮修订」为准）：
+grill（2026-10-17）结论已写成 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md)，要点如下（均未实现）。第 2–6、9、10 条等已被下文第二至十轮 grill 修订改写，以 ADR 0034 与最新一轮修订为准（dream 以「第八轮修订」为准，`edges context` 与开场注入以「第九轮修订」为准，Compose 的 Domain/Service/CLI 与 clone/pull 以「第十轮修订」为准，其余以「第六轮修订」为准）：
 
 1. **范围与术语**：大脑、团队库、规范库、组件库用同一套机制，统一叫「组合（compose）」，对应 Devin 文章的 composable。不再说「外部记忆」「挂载」。工作空间 = 自身就地 harness + 若干被组合的 harness 仓库。
 2. **组合清单可放任意目录（JSON）**（已被第三轮取代）：用户级 `~/.harness/compose.json`（如大脑，跟人走，不强加给同事）；任意目录都可以有 `.harness/compose.json`（随代码提交，协作者一致），和「harness 任何目录」一致。生效时从工作目录向上逐层收集，再加用户级；同名仓库离工作目录越近越优先，用户级最低。每项写名字、git 地址、可选分支。（grill 初稿是项目根 + 用户级两层 YAML，同日改成现在这样。）取代第 5 节设想的 `memory-sources.yaml`。
@@ -506,3 +506,17 @@ Compose block 与 edges 里「本层硬约束」「本层系统维护信息」�
 4. **ADR 编号变化**：ADR 0034 的 Decision 重新编号——原 #6（`edges context`）和 #7（开场注入）合并为新 #6（`AGENTS.md` 本身就是入口）；dream 由 #8 改为 #7，分支记忆 #9 改为 #8，`remember` 与收件箱 #10 改为 #9。上文各轮里的「Decision #N」是当轮编号。
 
 见 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md) Decision #6 与 Considered Options。
+
+**第十轮 grill 修订（2026-10-17）**
+
+用户决定：CLI 围绕 Compose 节点需要支持，至少是 clone 与 pull；而且不只是 CLI——Domain、Service、CLI 三层都要改。
+
+修订后的结论：
+
+1. **三层一起改**：Domain 要有 Compose 节点模型；Service 要能 clone / pull / 登记 / traverse；CLI 把这些能力暴露出来。不是只加几个命令。
+2. **已确认的最小 CLI 面**：clone（把 Compose block 里登记的仓库拉到本机路径）与 pull（更新已有 clone）。
+3. **完整操作列表仍在 grill**：本轮不定（不要把尚未确认的 op 写成已定）。
+4. **仍另议**：入口条目的字段形态；clone 放在哪。
+5. **跟进**：任务卡 [Compose 节点 CLI：clone 与 pull](<../../.harness/tasks/project-memory/backlog/2026-10-17--Compose-节点-CLI-clone-与-pull/INDEX.md>)。
+
+见 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md) Decision #10 与 Consequences。

@@ -10,7 +10,7 @@ status: accepted
 
 本 ADR 补全 ADR 0032 的「接入方式」（code agent 经用户级配置接入大脑仓库、personal agent clone），并部分取代其 Consequences 里「其他仓库里的 code agent 接入大脑 harness」「团队这一层的 harness 仓库」两项未实现说明：接入方式改由本 ADR 规定（本地 clone + Compose block），实现仍待做。`--super` 跨多个仓库不在本 ADR 范围内。
 
-**Status:** accepted（ADR 0034；grill 确认于 2026-10-17，同日经九轮修订，被推翻的做法见 Considered Options）
+**Status:** accepted（ADR 0034；grill 确认于 2026-10-17，同日经十轮修订，被推翻的做法见 Considered Options）
 
 **See also:** ADR 0032（大脑是虚拟目录）
 
@@ -25,6 +25,7 @@ status: accepted
 7. **dream 是整理整棵组合树**：dream 是定时运行的 Agent，**入口是工作空间的 `AGENTS.md`（其 Compose block）**，从该入口出发自下而上走完整棵组合树（就地 `.harness/` + Compose block 挂上的本地仓库），而不是直接以大脑或团队库为入口——大脑 / 团队库是树上的上层节点，不是入口。整理包括记忆的合并与删除、目录结构清理、刷新各层 name / description，以及把可跨项目复用的内容经 PR 提升到上层仓库（大脑 / 团队库）。产出一律走 PR，由维护者审核。不把「提升」与「整理目录」拆成两套独立职责。每 24 小时检查一次，只有项目 harness 主分支自上次运行以来有新提交才运行，没有变化就跳过，省成本、把一天的变化攒成一批；整理结果仍一致时开 PR。dream 不消化收件箱、不维护远程索引。在哪运行（GitHub Actions 定时任务、自建机器 cron 等）和需要哪些权限另议。
 8. **分支记忆不做特殊标记**：分支上的记忆留在该分支自己的 `.harness/`，分支丢弃就随之消失；合入项目主分支时和代码在同一个 PR 里被审到。dream 的触发与提升素材仍看项目 harness 的主分支，分支上的零碎经验到不了被组合的仓库。中心化方案（Mem0、OpenViking、Hy Memory 等）所有写入进同一个库，只能靠事后打标签（如 `workspace_id`、`branch`）隔离，这是 git 分布式方案的一个优势。
 9. **暂不提供 `remember` 和收件箱**：它们原本只为没有本地 harness 的宿主（如 ChatGPT）准备，这类宿主已不在本 ADR 范围内。这里说的是此前设想的 MCP `remember` 工具和 `.harness/inbox/`，与现有的 `$project-memory-remember` skill（往本地 `.harness/` 写记忆）无关。
+10. **Compose 需要 Domain、Service、CLI 三层一起改；CLI 至少支持 clone 与 pull**：Compose 不是只加几个命令——Domain 要有 Compose 节点模型，Service 要能 clone / pull / 登记 / traverse，CLI 把这些能力暴露出来。已确认的最小 CLI 面：clone（把 Compose block 里登记的仓库拉到本机路径）与 pull（更新已有 clone）。完整操作列表仍在 grill，本轮不定。入口条目的字段形态仍另议；clone 放在哪仍另议。（第十轮修订）
 
 ## Considered Options
 
@@ -57,8 +58,8 @@ status: accepted
 
 ## Consequences
 
-- 以下都未实现：AGENTS.md Compose block 的解析；traverse 中跨仓库的本地入口节点；dream（入口为工作空间 `AGENTS.md` / Compose block，自下而上整理整棵组合树：合并/删除记忆、目录清理、刷新 name / description、经 PR 提升到大脑/团队库）及其调度（每 24 小时检查、主分支有变化才运行）。
-- 还没定的：Compose block 里每个入口条目的字段形态；clone 放在哪（如 `~/.harness/` 下或用户自选目录）、由谁 clone 和更新；dream 在哪运行、要看哪些项目仓库的主分支、读和开 PR 需要哪些权限。
+- 以下都未实现：AGENTS.md Compose block 的解析；Domain 的 Compose 节点模型；Service 层的 clone / pull / 登记 / traverse；CLI 对 Compose 的最小面（至少 clone：把登记仓库拉到本机路径；pull：更新已有 clone）；traverse 中跨仓库的本地入口节点；dream（入口为工作空间 `AGENTS.md` / Compose block，自下而上整理整棵组合树：合并/删除记忆、目录清理、刷新 name / description、经 PR 提升到大脑/团队库）及其调度（每 24 小时检查、主分支有变化才运行）。跟进见任务卡 [Compose 节点 CLI：clone 与 pull](<../../.harness/tasks/project-memory/backlog/2026-10-17--Compose-节点-CLI-clone-与-pull/INDEX.md>)。
+- 还没定的：Compose 完整操作列表（仍在 grill，本轮只确认 clone 与 pull）；Compose block 里每个入口条目的字段形态；clone 放在哪（如 `~/.harness/` 下或用户自选目录）；dream 在哪运行、要看哪些项目仓库的主分支、读和开 PR 需要哪些权限。
 - 未核实：主流代码 Agent 开场读到 `AGENTS.md` 的 Compose block 后，是否真的会顺着入口路径往下读。第九轮决定依赖这一点，验证与是否需要 `edges context` 的判断见任务卡 [评估是否需要 `edges context`](<../../.harness/tasks/project-memory/backlog/2026-10-17--评估是否需要-edges-context/INDEX.md>)。
 - 没有本地 harness 的对话框类宿主（如手机上的 ChatGPT）不由 edges 直接支持。
 - 经 dream 整理并提升的经验要等下一轮和 PR 合并后才对他人可见，可能隔天；在本机直接写组合仓库的，按该仓库自己的提交、推送节奏对他人可见。

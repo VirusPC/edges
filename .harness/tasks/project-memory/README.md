@@ -28,4 +28,5 @@ Project Memory 类型/索引/reshape/与 docs 边界等。
 - [memory\_agent](<backlog/2026-10-11--Memory-%E6%8A%8A-Agent-%E8%A1%8C%E4%B8%BA%E7%B1%BB%E6%9D%A1%E7%9B%AE%E4%B8%8E%E9%A1%B9%E7%9B%AE%E7%9F%A5%E8%AF%86%E5%88%86%E5%BC%80/INDEX.md>) — 项目记忆里，纠正 Agent 行为的规则和项目本身的事实、约定混在一起；模型升级或换模型后，前者可能过时，却很难单独找出来清理。要做到行为类条目能单独识别、复查和整块删除，项目知识不受影响。
 - [edges\_memory\_init\_remember\_支持\_super写入仓库根\_memory](<backlog/2026-10-14--edges-memory-init-remember-%E6%94%AF%E6%8C%81-super%E5%86%99%E5%85%A5%E4%BB%93%E5%BA%93%E6%A0%B9-memory/INDEX.md>) — 现在 \-\-super 只对读取和 tasks 生效，memory 写入命令会忽略；补上后仓库根的通用备忘可由 CLI 初始化和写入。
 - [评估是否需要\_edges\_context](<backlog/2026-10-17--%E8%AF%84%E4%BC%B0%E6%98%AF%E5%90%A6%E9%9C%80%E8%A6%81-edges-context/INDEX.md>) — ADR 0034 第九轮暂缓了 edges context，前提是 Agent 会顺着 AGENTS.md 里 Compose block 的路径往下读；要实测核实这一点，再决定要不要做这个命令。
+- [Compose\_节点\_CLI\_clone\_与\_pull](<backlog/2026-10-17--Compose-%E8%8A%82%E7%82%B9-CLI-clone-%E4%B8%8E-pull/INDEX.md>) — ADR 0034 第十轮：Compose 要改 Domain（节点模型）、Service（clone/pull/登记/traverse）和 CLI；CLI 至少先做 clone 与 pull。完整操作列表仍在 grill，字段形态与 clone 位置另议。
 <!-- project-entries-local:end -->
