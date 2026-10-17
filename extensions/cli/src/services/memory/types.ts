@@ -360,7 +360,7 @@ export function listTypeFiles(
     let candidate: string;
     if (pattern === "*/SKILL.md") {
       if (!isDirectory(child)) continue;
-      candidate = join(child, "SKILL.md");
+      candidate = join(child, ENTRY_NAMES.skill);
       if (!fs.existsSync(candidate)) {
         if (isSymlink(candidate))
           throw new Error(`source-scan-error: broken link ${candidate}`);

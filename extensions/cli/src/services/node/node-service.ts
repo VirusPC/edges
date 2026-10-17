@@ -7,6 +7,7 @@ import { BaseNode, AgentsNode, SuperAgentsNode } from "../../domain/models/index
 import type { ChildGroup, NodeReference } from "../../domain/models/index.js";
 import type { ScopeTraversalOptions, NodeQueryOptions } from "../../domain/operations/traverse.js";
 import {
+  ENTRY_NAMES,
   lifecycleUnits,
   assertMovableLayout,
   identifyNodeType,
@@ -84,7 +85,7 @@ const clone = <T extends BaseNode>(node: T, file = node.path): T =>
 function registrationGroup(parent: BaseNode, node: BaseNode): ChildGroup {
   const harness = path.join(parent.directoryPath, ".harness");
   if (node.path === harness || node.path.startsWith(harness + path.sep)) return "local";
-  if (path.basename(node.path) === "AGENTS.md" && path.dirname(node.path) !== parent.directoryPath) return "descendant";
+  if (path.basename(node.path) === ENTRY_NAMES.internal && path.dirname(node.path) !== parent.directoryPath) return "descendant";
   return "local";
 }
 
@@ -133,7 +134,7 @@ export class NodeService {
     // Base requests constrain the authoritative model rather than downgrade it.
     Model = cached
       ? cached.constructor as Model
-      : !Model || Model === BaseNode || path.basename(file) === "AGENTS.md"
+      : !Model || Model === BaseNode || path.basename(file) === ENTRY_NAMES.internal
         ? this.#model(file)
         : Model;
     if (!Model) return undefined;
@@ -222,8 +223,8 @@ export class NodeService {
   query(scopePath: string, options: NodeQueryOptions = {}): AsyncQuery<BaseNode> {
     const service = this;
     return query(async function* () {
-      const entry = path.basename(scopePath) === "AGENTS.md"
-        ? path.resolve(scopePath) : path.join(path.resolve(scopePath), "AGENTS.md");
+      const entry = path.basename(scopePath) === ENTRY_NAMES.internal
+        ? path.resolve(scopePath) : path.join(path.resolve(scopePath), ENTRY_NAMES.internal);
       const root = options.super
         ? service.#superRoot(scopePath)
         : await service.#read(entry, AgentsNode, false, false);
@@ -283,7 +284,7 @@ export class NodeService {
   async #registered(deferred: (file: string) => boolean = () => false): Promise<Map<string, BaseNode>> {
     const result = new Map<string, BaseNode>();
     const root = await this.#read(
-      path.join(this.managedRoot, "AGENTS.md"),
+      path.join(this.managedRoot, ENTRY_NAMES.internal),
       AgentsNode,
     );
     const service = this;
@@ -402,7 +403,7 @@ export class NodeService {
     draft.validate();
     // An explicit typed get cannot bypass authoritative AGENTS validation.
     const authoritative =
-      path.basename(node.path) === "AGENTS.md"
+      path.basename(node.path) === ENTRY_NAMES.internal
         ? new AgentsNode(node.path).parse(source)
         : draft;
     return { node: authoritative, before, source };
@@ -433,8 +434,8 @@ export class NodeService {
     if (
       coLocated(node.path) ||
       path.basename(node.directoryPath) === ".harness" ||
-      (path.basename(node.path) === "README.md" &&
-        fs.existsSync(path.join(node.directoryPath, "AGENTS.md")))
+      (path.basename(node.path) === ENTRY_NAMES.readme &&
+        fs.existsSync(path.join(node.directoryPath, ENTRY_NAMES.internal)))
     )
       return undefined;
     const parentPath = physicalParent(node.path, this.managedRoot);
@@ -456,7 +457,7 @@ export class NodeService {
     registrationOptions: NodeRegistrationOptions = {},
   ): Promise<T> {
     const file = this.#boundary(node.path);
-    if (path.basename(node.path) === "AGENTS.md" && !(node instanceof AgentsNode))
+    if (path.basename(node.path) === ENTRY_NAMES.internal && !(node instanceof AgentsNode))
       throw new Error(`AGENTS creation requires an AgentsNode model: ${node.path}`);
     if (this.#cache.loaded.has(file) || fs.existsSync(file))
       throw new Error(`Node target already exists: ${node.path}`);

@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { AgentsNode, TaskNode } from "../../domain/models/index.js";
 import {
+  ENTRY_NAMES,
   LEAF_ENTRY_NAMES,
   identifyNodeType,
   isLeafEntryName,
@@ -66,7 +67,7 @@ function discover(root: string): string[] {
       if (item.isSymbolicLink()) {
         // Never follow links into other workspaces. Entry links are unsafe targets.
         if (
-          item.name === "AGENTS.md" ||
+          item.name === ENTRY_NAMES.internal ||
           isLeafEntryName(item.name) ||
           item.name === "tasks"
         )
@@ -76,7 +77,7 @@ function discover(root: string): string[] {
       if (item.isDirectory()) visit(file);
       else if (
         item.isFile() &&
-        (item.name === "AGENTS.md" || identifyNodeType(file) === "task")
+        (item.name === ENTRY_NAMES.internal || identifyNodeType(file) === "task")
       )
         entries.push(file);
     }
@@ -141,14 +142,14 @@ export async function planTaskIndexes(
   // Connect only existing scope entries, crossing physical folders without inventing nodes.
   const connected = new Set<string>();
   const connect = (entry: string) => {
-    if (entry === path.join(root, "AGENTS.md") || connected.has(entry)) return;
+    if (entry === path.join(root, ENTRY_NAMES.internal) || connected.has(entry)) return;
     connected.add(entry);
     const dir = path.dirname(path.dirname(entry));
     const owner = isWithinPath(dir, root) ? findAncestor(dir,
-      directory => files.has(path.join(directory, "AGENTS.md")) || nodes.has(path.join(directory, "AGENTS.md")),
+      directory => files.has(path.join(directory, ENTRY_NAMES.internal)) || nodes.has(path.join(directory, ENTRY_NAMES.internal)),
       directory => directory === root) : undefined;
     if (owner) {
-      const parent = path.join(owner, "AGENTS.md");
+      const parent = path.join(owner, ENTRY_NAMES.internal);
       add(parent, entry, "descendant");
       connect(parent);
       return;
@@ -164,7 +165,7 @@ export async function planTaskIndexes(
     const board = path.dirname(project);
     boards.add(board);
     const id = projectIdFromDir(path.basename(project));
-    const projectEntry = path.join(project, "AGENTS.md");
+    const projectEntry = path.join(project, ENTRY_NAMES.internal);
     const projectNode = get(
       projectEntry,
       renderProjectAgents({
@@ -175,7 +176,7 @@ export async function planTaskIndexes(
     const meta = parseProjectAgents(projectNode.body);
     add(projectEntry, file, "local", task.name, task.description);
     add(
-      path.join(board, "AGENTS.md"),
+      path.join(board, ENTRY_NAMES.internal),
       projectEntry,
       "local",
       meta.title,
@@ -185,14 +186,14 @@ export async function planTaskIndexes(
   // Include already existing empty projects; retain all other index links and prose.
   for (const file of discovery)
     if (
-      path.basename(file) === "AGENTS.md" &&
+      path.basename(file) === ENTRY_NAMES.internal &&
       path.basename(path.dirname(path.dirname(file))) === "tasks"
     ) {
       const board = path.dirname(path.dirname(file));
       boards.add(board);
       const meta = parseProjectAgents(get(file).body);
       add(
-        path.join(board, "AGENTS.md"),
+        path.join(board, ENTRY_NAMES.internal),
         file,
         "local",
         meta.title,
@@ -200,26 +201,26 @@ export async function planTaskIndexes(
       );
     }
   for (const board of [...boards].sort()) {
-    const boardEntry = path.join(board, "AGENTS.md");
+    const boardEntry = path.join(board, ENTRY_NAMES.internal);
     const boardNode = get(boardEntry);
     const owner = path.dirname(board);
     const scope =
       path.basename(owner) === ".harness" ? path.dirname(owner) : owner;
     // Snapshot both present and absent candidates: adding an entry can change
     // whether this selected public scope is an AgentsNode or a content node.
-    const candidates = [...LEAF_ENTRY_NAMES, "SKILL.md"].map((name) =>
+    const candidates = [...LEAF_ENTRY_NAMES, ENTRY_NAMES.skill].map((name) =>
       path.join(scope, name),
     ).map(file => fs.existsSync(checkPath(file)) ? fs.realpathSync.native(file) : file);
     for (const file of candidates)
       if (!owners.has(file))
         owners.set(file, files.get(file) ?? readEntry(file));
     const content = candidates.find((file) => owners.get(file) !== undefined);
-    const scopeEntry = path.join(scope, "AGENTS.md");
+    const scopeEntry = path.join(scope, ENTRY_NAMES.internal);
     if (!content && !files.has(scopeEntry) && !nodes.has(scopeEntry))
       throw new Error(`Missing owning scope index: ${scopeEntry}`);
     add(
       scopeEntry,
-      path.join(board, "AGENTS.md"),
+      path.join(board, ENTRY_NAMES.internal),
       path.basename(owner) === ".harness" ? "local" : "descendant",
     );
     connect(content ?? scopeEntry);

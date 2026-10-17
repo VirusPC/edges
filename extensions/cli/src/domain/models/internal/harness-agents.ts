@@ -1,4 +1,5 @@
 import { basename } from "node:path";
+import { ENTRY_NAMES } from "../layout.js";
 import { decodeBody } from "./parse.js";
 
 const HARNESS_START =
@@ -6,7 +7,7 @@ const HARNESS_START =
 
 /** True when path is AGENTS.md and body carries a project-harness (or legacy memory) layer. */
 export function isProjectHarnessAgentsFile(absPath: string, source: string): boolean {
-  if (basename(absPath) !== "AGENTS.md") return false;
+  if (basename(absPath) !== ENTRY_NAMES.internal) return false;
   if (HARNESS_START.test(source)) return true;
   const decoded = decodeBody(source);
   return (

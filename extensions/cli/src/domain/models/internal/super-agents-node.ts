@@ -1,4 +1,5 @@
 import { dirname, join } from "node:path";
+import { ENTRY_NAMES } from "../layout.js";
 import { AgentsNode } from "./agents-node.js";
 import type { NodeReference } from "../core/types.js";
 
@@ -15,7 +16,7 @@ export class SuperAgentsNode extends AgentsNode {
   readonly #mounts: readonly NodeReference[];
 
   constructor(scopeDir: string, mounts: readonly NodeReference[] = []) {
-    super(join(dirname(scopeDir), SUPER_ENTRY_DIR, "AGENTS.md"));
+    super(join(dirname(scopeDir), SUPER_ENTRY_DIR, ENTRY_NAMES.internal));
     this.scopeDir = scopeDir;
     this.#mounts = mounts.map((mount) => ({ ...mount }));
   }

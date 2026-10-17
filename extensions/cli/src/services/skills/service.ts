@@ -1,6 +1,7 @@
 import path from "node:path";
 import { materialHarnessRoot } from "../../domain/config/harness-materials.js";
 import { initScope, type InitScopeOptions } from "../init/service.js";
+import { ENTRY_NAMES } from "../../domain/models/layout.js";
 import { SkillNode } from "../../domain/models/skills/skill-node.js";
 import { isWithinPath } from "../../utils/filesystem.js";
 import { parseMetadata } from "../metadata.js";
@@ -32,7 +33,7 @@ export function managedSkillFile(scope: string, name: string, superRoot: boolean
     throw new Error(`${name}: name must be lowercase kebab-case, 1–64 characters.`);
   }
   const harness = materialHarnessRoot(scope, { super: superRoot });
-  return path.join(harness, "skills", "managed", name, "SKILL.md");
+  return path.join(harness, "skills", "managed", name, ENTRY_NAMES.skill);
 }
 
 async function listedSkills(
@@ -54,10 +55,10 @@ export async function resolveSkill(
   reach: SkillReach,
 ): Promise<{ scope: string; service: NodeService; node: SkillNode }> {
   const { scope, managedRoot, service } = openNodeSession(env);
-  const looksPath = target.includes("/") || target.endsWith("SKILL.md");
+  const looksPath = target.includes("/") || target.endsWith(ENTRY_NAMES.skill);
   if (looksPath) {
     const abs = path.resolve(scope, target);
-    if (!isWithinPath(abs, managedRoot) || path.basename(abs) !== "SKILL.md") {
+    if (!isWithinPath(abs, managedRoot) || path.basename(abs) !== ENTRY_NAMES.skill) {
       throw new Error(`skill not found: ${target}`);
     }
     const node = await service.get(abs, SkillNode);

@@ -1,7 +1,7 @@
 import { isWithinPath, findAncestor } from "../../utils/filesystem.js";
 import { WRITE_LOCK_NAME } from "./node-lock.js";
 import { InternalSyntax, type SyntaxReference } from "../../domain/models/internal/syntax.js";
-import { LEAF_ENTRY_NAMES, resolveEntryHref } from "../../domain/models/layout.js";
+import { ENTRY_NAMES, LEAF_ENTRY_NAMES, resolveEntryHref } from "../../domain/models/layout.js";
 /** Filesystem facts and source-preserving relocation; no domain resources. */
 import * as fs from "node:fs";
 import path from "node:path";
@@ -29,8 +29,8 @@ import { checkPath, readEntry } from "./node-files.js";
 export type Model<T extends BaseNode = BaseNode> = new (file: string) => T;
 export function coLocated(entry: string): boolean {
   return (
-    path.basename(entry) === "AGENTS.md" &&
-    ["SKILL.md", ...LEAF_ENTRY_NAMES].some((name) =>
+    path.basename(entry) === ENTRY_NAMES.internal &&
+    [ENTRY_NAMES.skill, ...LEAF_ENTRY_NAMES].some((name) =>
       fs.existsSync(path.join(path.dirname(entry), name)),
     )
   );
@@ -61,10 +61,10 @@ function parentEntryIn(
   exists: (entry: string) => boolean,
   read: EntrySource,
 ): string | undefined {
-  const agents = path.join(directory, "AGENTS.md");
-  const readme = path.join(directory, "README.md");
+  const agents = path.join(directory, ENTRY_NAMES.internal);
+  const readme = path.join(directory, ENTRY_NAMES.readme);
   const systemOne =
-    path.basename(child) !== "AGENTS.md" &&
+    path.basename(child) !== ENTRY_NAMES.internal &&
     !path.relative(directory, child).split(path.sep).includes(".harness");
   if (systemOne && exists(readme) && ENTRIES_MARKER.test(read(readme) ?? ""))
     return readme;
@@ -98,7 +98,7 @@ export type CompositeNode = AgentsNode | ReadmeNode;
 export const isComposite = (node: unknown): node is CompositeNode =>
   node instanceof AgentsNode || node instanceof ReadmeNode;
 export function parseComposite(file: string, source: string): CompositeNode {
-  return path.basename(file) === "README.md"
+  return path.basename(file) === ENTRY_NAMES.readme
     ? new ReadmeNode(file).parse(source)
     : new AgentsNode(file).parse(source);
 }

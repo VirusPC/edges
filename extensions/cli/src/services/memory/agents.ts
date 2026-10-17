@@ -119,7 +119,7 @@ export function readOwnershipEntries(file: string) {
 }
 export function readIndexEntries(file: string): [string, string][] {
     return (isFile(file) ? new AgentsNode(file).parse(readText(file)).descendantChildren : [])
-        .filter(entry => entry.id.endsWith('AGENTS.md'))
+        .filter(entry => entry.id.endsWith(AGENTS_FILE_NAME))
         .map(entry => [relative(dirname(file), entry.id), entry.description ?? '']);
 }
 export function registeredIndexAnchors(target: string, root: string): string[] {
