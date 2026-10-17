@@ -41,7 +41,7 @@ _避免使用_：组成子节点、固定深度截断、把 harness 与「遍历
 _避免使用_：Agent 工具箱、skill 合集、用「Edges」指本仓这个个人实例（说「本仓」或「作者的大脑仓库」）、与 `edges/` 目录或单条 Edge 混用
 
 **组合（Compose）**：
-把别的 harness 仓库（大脑、团队库、规范库、组件库等）叠加进当前工作空间的统一说法，对应 Devin Agent Memory 文章里的 composable。工作空间 = 自身就地 init 的 harness + 若干被组合的 harness 仓库；被组合的仓库各自保持独立的归属、权限和历史；写入默认落在项目自身的 harness，写进被组合仓库要走该仓库的 PR。见 ADR 0034。
+把别的 harness 仓库（大脑、团队库、规范库、组件库等）叠加进当前工作空间的统一说法，对应 Devin Agent Memory 文章里的 composable。工作空间 = 自身就地 init 的 harness + 若干被组合的 harness 仓库；被组合的仓库各自保持独立的归属、权限和历史；写入默认落在项目自身的 harness，写进被组合仓库要走该仓库的 PR。组合是 harness 的依赖声明，不是记忆库：`.harness/` 好比项目自己的源码，`compose.json` 好比 `package.json` 里的依赖声明，`edges context` 好比安装并加载。它和 docker compose 一样用一份清单声明由哪些东西组合而成，但组合的是可复用的经验与约束，不是运行中的服务，并且按目录逐层收集。见 ADR 0034。
 _避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作空间的独立记忆库、用组合代替项目知识的就地 init、git submodule
 
 **组合清单（Compose List）**：
