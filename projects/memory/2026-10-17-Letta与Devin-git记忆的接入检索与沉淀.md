@@ -301,13 +301,26 @@ Devin 规范推荐的条目元数据，写在每条记忆行末：
 
 ### 8. 分布式（git 仓库）还是中心化（记忆服务）
 
-讨论对象：分布式指 Letta、Devin 这种 pull 到本地再 push 的 git 仓库方案；中心化指 Mem0、OpenViking 这类服务加 API 的方案（用户还提到 Hy Memory 2.0，**未核实**，未纳入对比）。以下是讨论中的观点，不是来源事实。
+讨论对象：分布式指 Letta、Devin 这种 pull 到本地再 push 的 git 仓库方案；中心化指 Mem0、OpenViking 这类服务加 API 的方案（以及腾讯混元的 Hy Memory 2.0，见下文）。以下是讨论中的观点，不是来源事实。
 
 **分布式的优势**：人可读、可改、可走 PR 审核；完整历史可回滚审计；文件可迁移、不锁定厂商；本地离线用 grep 即可；多仓库天然可组合。
 **分布式的弱点**：同步和冲突要自己处理；语义检索弱；规模大时上下文预算和组织吃力；没有文件系统的对话框接不进来。
 
 **中心化的优势**：任何环境调 API 即可接入；向量 / 语义检索与分层摘要，规模大也能召回；多 Agent 实时一致；服务端 LLM 自动抽取合并。
 **中心化的弱点**：黑盒难审，错了不易发现；服务依赖与锁定风险；隐私与权限问题；需要 Infra 运维（与「公司 Infra 偏弱」的现状冲突）。
+
+
+**Hy Memory 2.0（腾讯混元）**
+
+来源：[Tencent-Hunyuan/Hy-Memory](https://github.com/Tencent-Hunyuan/Hy-Memory) README.zh.md 与 `memhub/README.md`（@2026-10-17 clone）。Apache-2.0；仓库 2026-10-15 创建，约 480 星。
+
+- **形态**：Python SDK `hy-memory==2.0.2`（API：`add` / `search` / `get` / `update` / `delete` / `evolve`），存储是向量库（默认 ChromaDB，可选 Qdrant、FAISS）、图库（Kuzu / Neo4j，ultra 模式）和本地 SQLite。不是文件或 git，人不能直接读改。
+- **三种场景**：`chat` 是 L0–L7 分层认知记忆（原始对话、原子事实、会话摘要、心智图式、前瞻意图等）；`working` 是「会话事实 + 可复用经验」双层，每次会话恰好产出 1 条事实、0–N 条经验；`coding` 在 working 基础上加「代码版本演进链」，零 LLM 地存下每一版真实 diff（来自本地 Git 或工具轨迹）。
+- **接入项目**：不是挂仓库，而是写入时带 `workspace_id`（如仓库地址）和 `branch` 做隔离，`source` 参数区分宿主应用（cursor、codex 等）。
+- **沉淀**：调用 `add()` 时由 LLM 抽取并做冲突消解（pro 模式）；ultra 模式用 `evolve()` 触发 System 2 的图式归纳。全自动，无人工审核。
+- **MemHub**：基于 Hy Memory 的本地优先桌面端与 CLI（`memhub`），把 Claude Code、Cursor、Codex 等多个 AI 应用的历史对话汇入同一个本地 Runtime（数据默认在 `~/.one-memory`），再通过 Skill、Hook、插件和 MCP 向授权宿主提供跨应用记忆召回。
+- **定位上的特点**：它是「中心化」，但中心在本机而不是云端：一个本地服务汇总所有 AI 应用的记忆。可以看作分布式与云端中心化之间的第三种形态。
+- **未核实**：README 自述的「论文被 EMNLP 2026 接收」「CMB 已投稿 ICLR 2027」未在会议官方核实。
 
 **判断三问**
 1. 记忆需要人审吗？需要（团队规范、业务口径）用分布式；Agent 自己的偏好和会话细节用中心化即可。
