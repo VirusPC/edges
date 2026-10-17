@@ -1,8 +1,8 @@
 import { existsSync } from "node:fs";
 import { dirname, join, parse } from "node:path";
 import { fileURLToPath } from "node:url";
+import { ENTRY_NAMES } from "../../domain/models/layout.js";
 import { readText, typeDirName } from "./paths.js";
-export const ENTRY_OUTPUT_PATTERN = "INDEX.md";
 export const ENTRY_LINE_TEMPLATE = "entry_line.md";
 export function templateRoot(): string {
   const here = dirname(fileURLToPath(import.meta.url));
@@ -10,7 +10,9 @@ export function templateRoot(): string {
     join(here, "../../assets/memory/templates"),
     join(here, "../../../../skills/project-memory-init/references/templates"),
   ];
-  const root = candidates.find((p) => existsSync(join(p, "AGENTS.tmpl.md")));
+  const root = candidates.find((p) =>
+    existsSync(join(p, `${parse(ENTRY_NAMES.internal).name}.tmpl.md`)),
+  );
   if (!root)
     throw new Error(`Memory templates not found: ${candidates.join(", ")}`);
   return root;

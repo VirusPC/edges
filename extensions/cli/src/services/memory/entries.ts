@@ -43,7 +43,6 @@ import {
 } from "./types.js";
 import {
   ENTRY_LINE_TEMPLATE,
-  ENTRY_OUTPUT_PATTERN,
   fillPlaceholders,
   readIndexTemplate,
   readTemplate,
@@ -56,7 +55,6 @@ import {
   preserveEntryMetadata,
 } from "../../domain/models/memory/documents.js";
 import { ORIGIN_FIELDS, AUDIT_FIELDS, nowTimestamp } from "./provenance.js";
-export const SKILL_OUTPUT_NAME = "SKILL.md";
 export const AGENT_SKILL_FORMAT_TYPES = new Set(["managed", "referenced"]);
 export const memoryEntryTypes = (target?: string) =>
   target
@@ -67,10 +65,10 @@ export const isSkillFormat = (target: string, name: string) =>
   layerTypeSpecs(target).some((s) => s.name === name && s.format === "skills");
 export const entryOutputName = (name: string, target?: string) =>
   (target ? isSkillFormat(target, name) : AGENT_SKILL_FORMAT_TYPES.has(name))
-    ? SKILL_OUTPUT_NAME
-    : ENTRY_OUTPUT_PATTERN;
+    ? ENTRY_NAMES.skill
+    : ENTRY_NAMES.leaf;
 export const entryName = (file: string, name: string, target?: string) =>
-  entryOutputName(name, target) === SKILL_OUTPUT_NAME ||
+  entryOutputName(name, target) === ENTRY_NAMES.skill ||
   isLeafEntryName(basename(file))
     ? basename(dirname(file))
     : parse(file).name;
@@ -85,7 +83,7 @@ export const yamlScalar = (value: string) =>
 export function renderEntry(
   fields: Record<string, string>,
   content: string,
-  outputName = ENTRY_OUTPUT_PATTERN,
+  outputName: string = ENTRY_NAMES.leaf,
   previousSource?: string,
 ): string {
   if (!content.trim()) throw new Error("content 不能为空");
@@ -127,7 +125,7 @@ export function resolveMemoryPath(
         `--slug 在 ${name} 里是技能目录名，必须是 kebab-case 且不超过 64 字符`,
       );
     return assertScopePath(
-      join(directory, normalized, SKILL_OUTPUT_NAME),
+      join(directory, normalized, ENTRY_NAMES.skill),
       target,
     );
   }
@@ -195,11 +193,11 @@ export function buildEntryFields(
 }
 /** README type indexes use ReadmeNode; a not-yet-migrated AGENTS.md index keeps its legacy model. */
 export const typeIndexNode = (file: string): AgentsNode | ReadmeNode =>
-  basename(file) === "README.md" ? new ReadmeNode(file) : new AgentsNode(file);
+  basename(file) === ENTRY_NAMES.readme ? new ReadmeNode(file) : new AgentsNode(file);
 /** An existing legacy AGENTS.md index keeps its dialect. A missing index is created as README. */
 export function typeIndexTemplate(file: string, name: string): string {
   const template = readIndexTemplate(typeIndexTemplateName(name), name, name);
-  if (basename(file) === "README.md") return template;
+  if (basename(file) === ENTRY_NAMES.readme) return template;
   return template
     .replace(`${ENTRIES_LOCAL_START}\n## ${ENTRIES_SECTIONS.localChildren.heading}\n\n`, `${ENTRIES_START}\n`)
     .replace(ENTRIES_LOCAL_END, ENTRIES_END);
@@ -250,7 +248,7 @@ export function expectedIndexDocument(
     (isFile(file)
       ? readText(file)
       : typeIndexTemplate(file, name));
-  const legacy = basename(file) !== "README.md";
+  const legacy = basename(file) !== ENTRY_NAMES.readme;
   const generated = typeIndexNode(file).parse(buildEntryIndex(target, name, legacy));
   const node = typeIndexNode(file).parse(generated.localChildren.length ? existing.replace(/^- 暂无条目。\r?\n/gm, "") : existing);
   const desired = new Map(generated.localChildren.map(ref => [ref.id, ref]));

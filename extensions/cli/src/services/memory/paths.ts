@@ -1,3 +1,4 @@
+import { ENTRY_NAMES } from "../../domain/models/layout.js";
 import { isScope } from "../scope.js";
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -8,7 +9,6 @@ import {
   firstSymlink,
   findAncestor,
 } from "../../utils/filesystem.js";
-export const AGENTS_FILE_NAME = "AGENTS.md";
 export const MEMORY_DIR_NAME = ".harness/memory";
 export function readText(file: string): string {
   return new TextDecoder("utf-8", { fatal: true }).decode(
@@ -71,8 +71,8 @@ export function assertScopePath(file: string, target: string): string {
 export function rejectLegacy(target: string): void {
   if (
     fs.existsSync(path.join(target, ".memory")) ||
-    (isFile(path.join(target, AGENTS_FILE_NAME)) &&
-      readText(path.join(target, AGENTS_FILE_NAME)).includes("](.memory/"))
+    (isFile(path.join(target, ENTRY_NAMES.internal)) &&
+      readText(path.join(target, ENTRY_NAMES.internal)).includes("](.memory/"))
   )
     throw new Error(
       "migration-required: run project-memory-migrate before using this legacy layer",
@@ -128,7 +128,8 @@ export const typeFromDirName = (name: string) =>
       references: "reference",
     }) as Record<string, string>
   )[name] ?? name;
-export const TYPE_INDEX_FILE_NAME = "README.md";
+export const AGENTS_FILE_NAME = ENTRY_NAMES.internal;
+export const TYPE_INDEX_FILE_NAME = ENTRY_NAMES.readme;
 export const typeIndexRelpath = (name: string, module = moduleForType(name)) =>
   `.harness/${module}/${typeDirName(name)}/${TYPE_INDEX_FILE_NAME}`;
 /** Pre-migration type indexes lived in AGENTS.md; reads accept them until the directory is split. */

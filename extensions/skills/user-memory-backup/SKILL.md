@@ -1,6 +1,6 @@
 ---
 name: user-memory-backup
-description: 将指定作用域 .harness/memory/users 的本机私有记忆（含 AGENTS.md 索引及资产）打成归档。换机、删仓或留逃生副本时用；旧 .memory 先用 project-memory-migrate 转换。
+description: 将指定作用域 .harness/memory/users 的本机私有记忆（含 README.md 索引及资产）打成归档。换机、删仓或留逃生副本时用；旧 .memory 先用 project-memory-migrate 转换。
 version: 3.0.0
 ---
 

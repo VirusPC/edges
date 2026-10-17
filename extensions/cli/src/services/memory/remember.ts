@@ -53,18 +53,18 @@ export async function rememberMemory(options: RememberMemoryOptions) {
       throw new Error("importEntry conflicts with content");
     const source = resolve(options.importEntry);
     const expected =
-      entryOutputName(options.type, target) === "SKILL.md"
-        ? "SKILL.md"
+      entryOutputName(options.type, target) === ENTRY_NAMES.skill
+        ? ENTRY_NAMES.skill
         : ENTRY_NAMES.leaf;
     if (
-      expected === "SKILL.md"
+      expected === ENTRY_NAMES.skill
         ? basename(source) !== expected
         : !isLeafEntryName(basename(source))
     )
       throw new Error(`${source}: expected ${expected} entry`);
-    assertImportType(source, expected === "SKILL.md" ? "skill" : "memory");
+    assertImportType(source, expected === ENTRY_NAMES.skill ? "skill" : "memory");
     const imported =
-      expected === "SKILL.md" ? new SkillNode(source) : new MemoryNode(source);
+      expected === ENTRY_NAMES.skill ? new SkillNode(source) : new MemoryNode(source);
     imported.parse(readFileSync(source, "utf8")).validate();
     if (
       imported instanceof MemoryNode &&
@@ -91,7 +91,7 @@ export async function rememberMemory(options: RememberMemoryOptions) {
     };
   }
   const Model =
-    entryOutputName(options.type, target) === "SKILL.md"
+    entryOutputName(options.type, target) === ENTRY_NAMES.skill
       ? SkillNode
       : MemoryNode;
   const node = exists

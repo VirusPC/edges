@@ -1,6 +1,6 @@
 import path from "node:path";
 import { BaseNode } from "../../domain/models/index.js";
-import { isLeafEntryName } from "../../domain/models/layout.js";
+import { ENTRY_NAMES, isLeafEntryName } from "../../domain/models/layout.js";
 import { directoryStem } from "../../domain/models/node/stem.js";
 import { NoteNode } from "../../domain/models/notes/note-node.js";
 import { ProjectNode } from "../../domain/models/projects/project-node.js";
@@ -125,9 +125,9 @@ export async function createDatedLeaf<T extends TitledLeaf>(
 ): Promise<{ path: string; title: string }> {
   const { scope, service } = openNodeSession(env);
   const metadata = parseMetadata(input.metadata);
-  const composed = composeLeaf(spec, path.join(scope, "INDEX.md"), input.title, input.body);
+  const composed = composeLeaf(spec, path.join(scope, ENTRY_NAMES.leaf), input.title, input.body);
   const now = new Date();
-  const file = path.join(scope, spec.folder, `${localDateYmd(now)}--${titleSlug(composed.title, now)}`, "INDEX.md");
+  const file = path.join(scope, spec.folder, `${localDateYmd(now)}--${titleSlug(composed.title, now)}`, ENTRY_NAMES.leaf);
   const node = new spec.Model(file);
   await service.create(node, {
     body: composed.markdown,

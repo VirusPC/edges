@@ -22,7 +22,8 @@ import {
   parseTypeMeta,
   SEED_TYPE_NAMES,
 } from "./types.js";
-import { legacyTypeIndexRelpath as indexFileName } from "./paths.js";
+import { AGENTS_FILE_NAME, legacyTypeIndexRelpath as indexFileName } from "./paths.js";
+import { ENTRY_NAMES } from "../../domain/models/layout.js";
 import { frontmatterData, logicalFields } from "../../domain/models/memory/documents.js";
 import {
   parseLegacy,
@@ -195,7 +196,7 @@ function validNewScope(scope: string) {
   if (!isDirectory(harness) || !isScope(scope))
     throw new Error(`unrelated-harness-conflict: ${harness}`);
   const specs = layerTypeSpecs(scope),
-    text = readText(join(scope, "AGENTS.md"));
+    text = readText(join(scope, AGENTS_FILE_NAME));
   if (!specs.length || specs.some((s) => !text.includes(`](${s.indexFile})`)))
     throw new Error(`unrelated-harness-conflict: ${harness}`);
   for (const s of specs)
@@ -228,7 +229,7 @@ export function inventory(
     const child = join(source, name);
     if (isSymlink(child) && !fs.existsSync(child))
       throw new Error("broken source link");
-    const path = spec.format === "skills" ? join(child, "SKILL.md") : child;
+    const path = spec.format === "skills" ? join(child, ENTRY_NAMES.skill) : child;
     if (
       spec.format === "skills"
         ? !(isDirectory(child) && isFile(path))
@@ -333,7 +334,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
       throw new Error(`new-layout-only-allows-private-remnants: ${owner}`);
     for (const spec of current) {
       const converted = parseTypeMeta(convertIndex("", spec))!,
-        planned = join(spec.relativeTarget, "AGENTS.md"),
+        planned = join(spec.relativeTarget, AGENTS_FILE_NAME),
         official = SEED_TYPE_NAMES.find((n) => indexFileName(n) === planned);
       if (
         (official && official !== converted.name) ||
@@ -355,7 +356,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
         next: join(owner, spec.relativeTarget),
       });
       for (const index of spec.indexes)
-        exact.set(index, join(owner, spec.relativeTarget, "AGENTS.md"));
+        exact.set(index, join(owner, spec.relativeTarget, AGENTS_FILE_NAME));
       types.push({ owner, spec });
       if (spec.name === "agent_skills")
         diagnostics.push(...referencedDiagnostics(owner));
@@ -386,7 +387,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
       for (const name of files)
         bySource.set(join(base, name), mapped(join(base, name)));
     }
-    bySource.set(join(owner, "AGENTS.md"), mapped(join(owner, "AGENTS.md")));
+    bySource.set(join(owner, AGENTS_FILE_NAME), mapped(join(owner, AGENTS_FILE_NAME)));
   }
   for (const { base, files } of walk(target, true))
     for (const name of files) {
@@ -456,7 +457,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
             "<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->",
           );
         if (
-          basename(source) === "SKILL.md" &&
+          basename(source) === ENTRY_NAMES.skill &&
           types.some(
             (t) =>
               t.spec.name === "skills" &&
@@ -478,14 +479,14 @@ export function planMigration(target: string, recursive = false): MigrationJob {
         if (rebuild)
           text = rebuildEntries(text, entry.owner, entry.spec, dest, mapped);
         if (
-          basename(source) === "AGENTS.md" &&
+          basename(source) === AGENTS_FILE_NAME &&
           owners.includes(dirname(source))
         )
           for (const { owner, spec } of types) {
             if (owner !== dirname(source)) continue;
             const rel = relative(
               dirname(dest),
-              mapped(join(owner, spec.relativeTarget, "AGENTS.md")),
+              mapped(join(owner, spec.relativeTarget, AGENTS_FILE_NAME)),
             );
             if (!text.includes(`](${rel})`)) {
               const marker = "<!-- project-memory-local:end -->";
@@ -516,7 +517,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
     });
   }
   for (const owner of owners)
-    for (const match of readText(join(owner, "AGENTS.md")).matchAll(LINK)) {
+    for (const match of readText(join(owner, AGENTS_FILE_NAME)).matchAll(LINK)) {
       const raw = match[2]!;
       if (raw.startsWith(".memory/")) {
         const old = resolve(owner, raw);
@@ -712,7 +713,7 @@ export function preflightMigration(target: string, job: MigrationJob) {
     if (op.before && src === null && !equal(dst, op.after))
       throw new Error(`resume-source-and-target-missing: ${op.source}`);
   }
-  for (const p of job.private) safeAncestors(join(p, "AGENTS.md"), target);
+  for (const p of job.private) safeAncestors(join(p, AGENTS_FILE_NAME), target);
   const ignore = join(target, ".gitignore");
   if (present(ignore) && (isSymlink(ignore) || !isFile(ignore)))
     throw new Error("unsafe-gitignore");
@@ -734,7 +735,7 @@ export function validateMigration(target: string, job: MigrationJob) {
     if (!equal(state(op.target), op.after))
       throw new Error(`copy-validation-failed: ${op.target}`);
   for (const owner of job.owners) {
-    const text = readText(join(owner, "AGENTS.md"));
+    const text = readText(join(owner, AGENTS_FILE_NAME));
     for (const spec of layerTypeSpecs(owner)) {
       if (!text.includes(`](${spec.indexFile})`))
         throw new Error(`unregistered-migrated-type: ${spec.indexFile}`);

@@ -1,5 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { ENTRY_NAMES } from "../../domain/models/layout.js";
 import { isProjectHarnessAgentsFile } from "../../domain/models/internal/harness-agents.js";
 
 const SKIP_DIR_NAMES = new Set([
@@ -32,7 +33,7 @@ export function collectSystemRoots(scopeDir: string): string[] {
         stack.push(abs);
         continue;
       }
-      if (!entry.isFile() || entry.name !== "AGENTS.md") continue;
+      if (!entry.isFile() || entry.name !== ENTRY_NAMES.internal) continue;
       let source: string;
       try {
         source = readFileSync(abs, "utf8");

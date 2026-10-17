@@ -1,7 +1,15 @@
 /** Legacy syntax is intentionally confined to the explicit migration. */
 import * as fs from "node:fs";
 import { join, basename, extname } from "node:path";
-import { isFile, isDirectory, isSymlink, readText } from "./paths.js";
+import {
+  isFile,
+  isDirectory,
+  isSymlink,
+  readText,
+  AGENTS_FILE_NAME,
+  typeIndexRelpath,
+  legacyTypeIndexRelpath,
+} from "./paths.js";
 import { parseDocument } from "../../utils/markdown/document.js";
 export const BUILTINS: Record<string, string> = {
   user: "users",
@@ -62,8 +70,8 @@ export function parseLegacy(scope: string): LegacyType[] {
     if (isSymlink(path)) throw new Error(`legacy-type-is-symlink: ${path}`);
     let candidates: string[], guessed: string;
     if (isDirectory(path)) {
-      candidates = isFile(join(path, "AGENTS.md"))
-        ? [join(path, "AGENTS.md")]
+      candidates = isFile(join(path, AGENTS_FILE_NAME))
+        ? [join(path, AGENTS_FILE_NAME)]
         : [];
       guessed = Object.keys(BUILTINS).find((n) => BUILTINS[n] === file) ?? file;
     } else if (/^[A-Z][A-Z0-9_]*\.md$/.test(file)) {
@@ -146,7 +154,7 @@ export function parseLegacy(scope: string): LegacyType[] {
       } else groups.set(name, current);
     }
   }
-  const local = readText(join(scope, "AGENTS.md")).match(
+  const local = readText(join(scope, AGENTS_FILE_NAME)).match(
     /<!-- project-memory-local:start -->([\s\S]*?)<!-- project-memory-local:end -->/,
   )?.[1];
   if (local)
@@ -180,7 +188,8 @@ export function parseLegacy(scope: string): LegacyType[] {
     ) {
       if (
         name === "users" &&
-        isFile(join(scope, ".harness/memory/users/AGENTS.md"))
+        (isFile(join(scope, typeIndexRelpath("user"))) ||
+          isFile(join(scope, legacyTypeIndexRelpath("user"))))
       )
         groups.set(
           "user",

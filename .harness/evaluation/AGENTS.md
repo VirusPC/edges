@@ -14,7 +14,7 @@
 ## 本层系统维护信息
 下面这些是索引，不是正文。按条目说明挑要读的，再打开对应内容。
 
-- [.harness/memory/users/AGENTS.md](.harness/memory/users/AGENTS.md) — 绑定本仓库、不宜公开的个人材料（个人偏好、凭据与密钥）。本机文件，不进 git。
+- [.harness/memory/users/README.md](.harness/memory/users/README.md) — 绑定本仓库、不宜公开的个人材料（个人偏好、凭据与密钥）。本机文件，不进 git。
 - [.harness/memory/feedbacks/README.md](.harness/memory/feedbacks/README.md) — 用户的纠正、确认过的做法与必须遵守的禁止模式。
 - [.harness/memory/projects/README.md](.harness/memory/projects/README.md) — 进行中的工作、关键时间点，无法从代码或 git 历史推导的决策，以及项目内的规范。兜底：对不上更具体类型时走这里。
 - [.harness/memory/references/README.md](.harness/memory/references/README.md) — 需求文档、设计稿、接口文档、监控面板等外部资料。
