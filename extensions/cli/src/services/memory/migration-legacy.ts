@@ -180,7 +180,8 @@ export function parseLegacy(scope: string): LegacyType[] {
     ) {
       if (
         name === "users" &&
-        isFile(join(scope, ".harness/memory/users/AGENTS.md"))
+        (isFile(join(scope, ".harness/memory/users/README.md")) ||
+          isFile(join(scope, ".harness/memory/users/AGENTS.md")))
       )
         groups.set(
           "user",

@@ -41,7 +41,7 @@ edges --scope S tasks init
 
 | type | 模块与入口（相对作用域） | 正文与权限 |
 | --- | --- | --- |
-| `user` | `.harness/memory/users/AGENTS.md` | `user_<slug>/INDEX.md`；正文和索引整类 gitignore |
+| `user` | `.harness/memory/users/README.md` | `user_<slug>/INDEX.md`；正文和索引整类 gitignore |
 | `feedback` | `.harness/memory/feedbacks/README.md` | 用户纠正、有效做法和禁止模式 |
 | `project` | `.harness/memory/projects/README.md` | 接手背景、决策、约定；不记可从代码推出的事实 |
 | `reference` | `.harness/memory/references/README.md` | 资料指针 |

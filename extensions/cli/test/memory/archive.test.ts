@@ -81,7 +81,7 @@ test('only a byte-identical empty generated index is unoccupied', async t => {
   const { archive } = await backupUserMemory({ repoDir: source });
   const template = await readFile(new URL('../../../skills/project-memory-init/references/templates/USER.tmpl.md', import.meta.url), 'utf8');
   await mkdir(path.join(destination, users), { recursive: true });
-  const index = path.join(destination, users, 'AGENTS.md');
+  const index = path.join(destination, users, 'README.md');
   await writeFile(index, template.trimEnd() + '\n');
   await restoreUserMemory({ archive, repoDir: destination });
   await rm(path.join(destination, users), { recursive: true });
