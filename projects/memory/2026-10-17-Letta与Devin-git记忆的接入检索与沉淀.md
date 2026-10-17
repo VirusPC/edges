@@ -328,3 +328,23 @@ Devin 规范推荐的条目元数据，写在每条记忆行末：
 3. 规模多大？几百到几千条 grep 加索引够用；量大且以模糊查询为主才需要向量检索。
 
 **建议路线**：git 仓库作为唯一真相源（写入、审核、历史），上面叠一层由仓库派生的检索服务（MCP 加可选向量索引），负责跨环境读取和语义检索。服务坏了可从仓库重建。即「edges CLI 包成 MCP」再往前一步。
+
+### 9. 回到原始痛点：edges 怎么接入别的工作空间
+
+原始问题：edges 作为工作空间时边做边沉淀没问题，但工作空间换成另一个代码仓库或 ChatGPT 这类对话框时，怎么把 edges 当外部记忆接过去。对照上面几家，结论（设计建议，未实现）：
+
+**接另一个代码仓库：学 Letta，记忆与项目分离，由宿主自动注入**
+- 固定位置：edges 放在本机固定目录（如 `~/edges`），用环境变量（如 `EDGES_HOME`）告知 Agent，不复制进项目。对应 Letta 的 `$MEMORY_DIR`、Devin 的 `~/agent-memory`。
+- 自动注入而非靠 skill：用宿主会话启动钩子（Claude Code SessionStart、Cursor rules 等）开局注入 edges INDEX 摘要；退路是在项目 AGENTS.md 写硬指令先读 edges 索引。
+- 按需检索：`edges ask` / `search` / grep。
+- 写回：跨项目经验经 CLI 写回 edges 走 PR；项目知识留在项目 `.harness/`。
+- 多库组合：项目里的挂载清单声明 edges、规范库、组件库等，CLI 跨库读、按作用域写。
+
+**接 ChatGPT 这类对话框：学 MemHub，走服务接口**
+- 没有文件系统，只能走 MCP / API。MemHub 即用 MCP、Skill、Hook 向多个应用提供同一份记忆。
+- edges：CLI 包成 MCP server，部署在自托管机器，加鉴权后经 Cloudflare Tunnel 暴露，ChatGPT 与 Claude 网页版通过 connector 接入。读是实时检索；写只提交候选，落成 PR 由人审。
+- 该服务只是 git 仓库的派生检索层，仓库仍是唯一真相源，服务可从仓库重建。
+
+**一句话**：代码仓库学 Letta（固定目录 + 自动注入），对话框学 MemHub（MCP 服务），共用 edges 这一个 git 真相源和 CLI 这一个写入口。
+
+**落地顺序**：① CLI 加 MCP 模式 + 常用宿主的启动注入接线；② 远程部署与鉴权；③ 挂载清单与多库支持。
