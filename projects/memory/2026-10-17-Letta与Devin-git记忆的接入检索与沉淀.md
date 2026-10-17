@@ -378,13 +378,13 @@ flowchart LR
 
 **修正**：重读 README 后发现，第 10 节的「统一方案」把 edges 当成一个要挂进其他工作空间的外部记忆库，偏离了 README 的两条前提：「harness 任何目录」和「把 harness 放在离被 harness 对象最近的地方」。修正为：项目自己的知识在项目里就地 init；大脑、团队库这类跨项目的 harness 仓库，通过「组合」叠加进来。
 
-grill（2026-10-17）结论已写成 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md)，要点如下（均未实现）。第 2–4、6、9、10 条等已被下文第二至八轮 grill 修订改写，以 ADR 0034 与最新一轮修订为准（dream 以「第八轮修订」为准，其余以「第六轮修订」为准）：
+grill（2026-10-17）结论已写成 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md)，要点如下（均未实现）。第 2–6、9、10 条等已被下文第二至九轮 grill 修订改写，以 ADR 0034 与最新一轮修订为准（dream 以「第八轮修订」为准，`edges context` 与开场注入以「第九轮修订」为准，其余以「第六轮修订」为准）：
 
 1. **范围与术语**：大脑、团队库、规范库、组件库用同一套机制，统一叫「组合（compose）」，对应 Devin 文章的 composable。不再说「外部记忆」「挂载」。工作空间 = 自身就地 harness + 若干被组合的 harness 仓库。
 2. **组合清单可放任意目录（JSON）**（已被第三轮取代）：用户级 `~/.harness/compose.json`（如大脑，跟人走，不强加给同事）；任意目录都可以有 `.harness/compose.json`（随代码提交，协作者一致），和「harness 任何目录」一致。生效时从工作目录向上逐层收集，再加用户级；同名仓库离工作目录越近越优先，用户级最低。每项写名字、git 地址、可选分支。（grill 初稿是项目根 + 用户级两层 YAML，同日改成现在这样。）取代第 5 节设想的 `memory-sources.yaml`。
 3. **拉到本地**（已被第二轮修订改写；第六轮又回到「一律 clone 到本地」，但不再有 MCP、服务端 clone）：CLI 统一 clone 到 `~/.edges/repos/<name>`（是否改到 `~/.harness/` 下另议），代码 Agent 按普通文件读写。ChatGPT 这类无 shell 宿主走远程 MCP，服务端同样持有 clone，MCP 子进程调 CLI，用服务端默认清单。否决 git submodule、手动 clone 写路径、主路径直接调中心化远程服务。
-4. **`edges context`**（已被第二轮修订改写）：从工作目录向上收集各级清单再加用户级，合并 → 没有就 clone、有就带超时 pull（失败沿用旧版本并告警）→ 对项目自身和每个组合仓库，用 traverse 的 `localOnly` 取根 `AGENTS.md` 的「本层硬约束」和本层索引 → 按「项目自身 harness、由近到远的各级目录组合、用户级组合」拼 Markdown，标来源，有字数上限，超限先截索引 → 输出到 stdout。MCP `context` 工具调用同一条命令。`--super` 的 `harness-materials.json` 不能当组合清单用。
-5. **注入从简**：不做 hook，只在用户级配置或 ChatGPT 自定义指令里写一句「开场先运行 / 调用 `edges context`」。对话框宿主只能尽力而为。
+4. **`edges context`**（已被第二轮修订改写；第九轮起整体暂缓）：从工作目录向上收集各级清单再加用户级，合并 → 没有就 clone、有就带超时 pull（失败沿用旧版本并告警）→ 对项目自身和每个组合仓库，用 traverse 的 `localOnly` 取根 `AGENTS.md` 的「本层硬约束」和本层索引 → 按「项目自身 harness、由近到远的各级目录组合、用户级组合」拼 Markdown，标来源，有字数上限，超限先截索引 → 输出到 stdout。MCP `context` 工具调用同一条命令。`--super` 的 `harness-materials.json` 不能当组合清单用。
+5. **注入从简**（第九轮起不再要求开场配置指令，靠 Agent 原生读 `AGENTS.md`）：不做 hook，只在用户级配置或 ChatGPT 自定义指令里写一句「开场先运行 / 调用 `edges context`」。对话框宿主只能尽力而为。
 6. **写回**（已被第二轮修订改写）：默认写进项目自身 harness；用户明确要求写进某个组合仓库时按普通文件改，但走分支加 PR，不直推主分支。
 7. **团队库写入**：Agent 只写自己的 harness；提升到团队库或大脑交给后续的 dream，批量出 PR，由维护者审。
 8. **分支记忆**：不做标记。分支记忆留在分支自己的 `.harness/`，丢弃分支就没了；合入主分支时和代码一起被审；分支零碎经验到不了团队库。中心化方案只能靠事后打标签隔离。
@@ -491,3 +491,18 @@ Compose block 与 edges 里「本层硬约束」「本层系统维护信息」�
 3. **其余不变**：整理内容（合并/删除、目录清理、刷新 name / description、经 PR 提升）、24h 检查 + 主分支有变化才跑、在哪运行另议。
 
 见 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md) Decision #8。
+
+**第九轮 grill 修订（2026-10-17）**
+
+用户决定：先砍掉 `edges context`，放进一张待办任务卡。
+
+理由（双方认同）：主流代码 Agent 开场本来就会读 `AGENTS.md`。Compose block 写在 `AGENTS.md` 里、算本层，所以 Agent 开场就能看到各入口的路径和 name / description，可以自己顺着走。`edges context` 和这一步重复，还多了一个必须做的开场步骤。
+
+修订后的结论（改写第六轮「保留 `edges context`、开场写一句配置」）：
+
+1. **`AGENTS.md` 本身就是入口**：不提供 `edges context` 命令，也不要求在客户端配置里写「开场先运行 `edges context`」。Agent 开场读 `AGENTS.md`，看到 Compose block 后顺着路径往下走。
+2. **暂缓，不是否决**：出现以下情况再回头看：组合树很深，硬约束要手动展开才看得到；或者 Agent 实际不顺着 Compose block 的路径走。
+3. **未核实**：Agent 是否会可靠地顺着 Compose block 的路径走，还没验证。跟进见任务卡 [评估是否需要 `edges context`](<../../.harness/tasks/project-memory/backlog/2026-10-17--评估是否需要-edges-context/INDEX.md>)。
+4. **ADR 编号变化**：ADR 0034 的 Decision 重新编号——原 #6（`edges context`）和 #7（开场注入）合并为新 #6（`AGENTS.md` 本身就是入口）；dream 由 #8 改为 #7，分支记忆 #9 改为 #8，`remember` 与收件箱 #10 改为 #9。上文各轮里的「Decision #N」是当轮编号。
+
+见 [ADR 0034](../../docs/adr/0034-compose-harness-repos-into-workspace.md) Decision #6 与 Considered Options。
