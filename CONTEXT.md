@@ -40,6 +40,18 @@ _避免使用_：组成子节点、固定深度截断、把 harness 与「遍历
 「harness 任何目录」的模型及其可安装能力：任何目录（包括大脑这个虚拟目录）都能配一套 harness，经验按谁 × 在哪沉淀；名字来自 Edge。本仓是作者大脑的 harness 仓库，即个人实例。进入 Edges 自身的维护作用域时，Edges 又作为被维护的系统一；模型中的根主体不限于个人。
 _避免使用_：Agent 工具箱、skill 合集、用「Edges」指本仓这个个人实例（说「本仓」或「作者的大脑仓库」）、与 `edges/` 目录或单条 Edge 混用
 
+**组合（Compose）**：
+把别的 harness 仓库（大脑、团队库、规范库、组件库等）叠加进当前工作空间的统一说法，对应 Devin Agent Memory 文章里的 composable。工作空间 = 自身就地 init 的 harness + 若干被组合的 harness 仓库；被组合的仓库各自保持独立的归属、权限和历史。被组合的仓库一律 clone 到本机，在当前作用域的 `AGENTS.md` 里用专用的 **Compose block** 登记本地入口，挂到目录树上，traverse 沿 Compose 边跨仓往下走（不是只遍历同仓子节点），和读本仓子目录一样；本地组合进来的仓库和 `.harness/` 一样可以直接写。Compose block **属本层**（与本层硬约束、本层系统维护信息同一层语义，不是旁路）。edges 只管 git 仓库和本地目录树，不管远程入口和大规模检索。组合是 harness 的依赖声明，不是记忆库：`.harness/` 好比项目自己的源码，Compose block 里的本地入口好比依赖声明，Agent 开场读 `AGENTS.md`、顺着 Compose block 的路径走，就是解析并加载（不另做 `edges context` 命令，暂缓，见 ADR 0034）。它和 docker compose 一样用登记声明由哪些东西组合而成，但组合的是可复用的经验与约束，不是运行中的服务。见 ADR 0034。
+_避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作空间的独立记忆库、用组合代替项目知识的就地 init、git submodule、另造 `compose.json` / `compose.yaml`、远程入口、远程 MCP 组合、服务端 clone、「一个模型两种部署」、把现有组成登记列表原样复用当记忆入口登记、把 Compose block 当成层模型外的旁路
+
+**记忆入口登记**：
+在当前作用域的 `AGENTS.md` 的专用 **Compose block** 里，登记被组合仓库在本机 clone 的入口目录（可直接写，与就地 `.harness/` 一致）。只有本地入口，没有远程入口。Compose block **属本层**，对当前作用域做 traverse / 本层硬约束收集时归入该层；Agent 开场读 `AGENTS.md` 时就能看到其中的入口路径和 name / description。取代已废弃的「组合清单」；不是把现有组成登记列表原样多挂一个节点。实现上 Domain（Compose 节点模型）、Service（clone / pull / push / 登记 / traverse）、CLI 三层一起改；traverse 须沿 Compose 边跨仓（不是只走同仓子节点）；CLI 至少支持 clone 与 pull，并对组合仓支持 push（兼容各仓既有 git 流程）（均未实现）；完整操作列表仍在 grill，本轮只确认 clone / pull / push / traverse。入口条目字段形态、clone 放在哪另议；以后可加读写权限控制且要和 Git 仓库权限关联，本轮不定。见 ADR 0034。
+_避免使用_：组合清单、Compose List、`compose.json`、`compose.yaml`、`~/.harness/compose.json`、`.harness/compose.json`、挂载表、记忆源清单（`memory-sources`）、复用 `--super` 的 `harness-materials.json` 表示跨仓库入口、远程入口、MCP 目录根、MCP `remember` / 收件箱（`.harness/inbox/`）、由 edges 维护的远程大库索引（PageIndex 式）、另造与 Git 无关的独立 ACL、把 Compose block 当成不算本层的旁路
+
+**dream**：
+对整棵组合树做整理的过程：入口是工作空间的 `AGENTS.md`（其 Compose block），从该入口自下而上走树（就地 `.harness/` + Compose block 挂上的本地仓库）；大脑 / 团队库是树上的上层节点，不是入口。整理包括合并与删除记忆、清理目录结构、刷新 name / description，并把可跨项目复用的内容经 PR 提升到上层仓库（大脑 / 团队库）。定时 Agent 执行；每 24 小时检查一次，项目 harness 主分支有新提交才运行；产出走 PR。在哪运行另议。见 ADR 0034。
+_避免使用_：以大脑或团队库为 dream 入口、直接指向大脑、只把 dream 当成「提升」单一职责、把整理目录树当成与 dream 无关的另套流程、消化收件箱、维护远程索引、无条件按固定周期跑、每次有变化就立即跑
+
 **根作用域（Root Scope）**：
 组织记忆与改进机制时选定的最外层范围，可面向个人、Agent、团队、公司或更大的系统；根代表所选主体或系统的作用域，其中的维护空间承载系统二。它相对于当前建模范围成立，可以独立存在，也可以纳入更大的作用域。以个人为主体时，根是大脑这个虚拟目录，位于此人自己的仓库之上；团队仓库的根沉淀的是团队在该目录下的经验。
 _避免使用_：固定等于个人或 Git 仓库、唯一绝对根、把所选主体直接等同于系统二、工作空间（若指作用域；「工作区」只指专项工作区）

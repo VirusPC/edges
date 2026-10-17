@@ -19,3 +19,5 @@ status: accepted
 - 对外分发的能力给用户的是目录自进化：`extensions/` 的 skill 以实体拷贝安装，CLI 尚未发布。改进机制本身的递归自我改进只在本仓发生，成果随升级交给用户。
 - 其他仓库里的 code agent 接入大脑 harness、`--super` 跨多个仓库、团队这一层的 harness 仓库，目前都还没有实现。
 - 术语见 `CONTEXT.md` 的「大脑（虚拟目录）」「Personal Agent」「共享范围」。
+
+> 修订：其他仓库里的 code agent 接入大脑、团队库等 harness 仓库的方式（clone 到本机，在 `AGENTS.md` 的 Compose block 里登记本地入口），见 [ADR 0034](0034-compose-harness-repos-into-workspace.md)（2026-10-17）。没有本地 harness 的对话框类宿主不在其范围内。
