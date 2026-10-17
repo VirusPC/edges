@@ -66,7 +66,7 @@ const isTypeIndexSource = (text: string) =>
   [ENTRIES_START, ENTRIES_LOCAL_START, TYPE_META_START].some((m) =>
     text.includes(m),
   );
-const TYPE_INDEX_FILES = [TYPE_INDEX_FILE_NAME, AGENTS_FILE_NAME];
+const TYPE_INDEX_FILES: readonly string[] = [TYPE_INDEX_FILE_NAME, AGENTS_FILE_NAME];
 export function validateTypeName(value: string): string {
   const name = value.trim();
   if (SEED_TYPE_NAMES.includes(name.toLowerCase()))

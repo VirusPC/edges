@@ -1,7 +1,14 @@
 /** Legacy syntax is intentionally confined to the explicit migration. */
 import * as fs from "node:fs";
 import { join, basename, extname } from "node:path";
-import { isFile, isDirectory, isSymlink, readText } from "./paths.js";
+import {
+  isFile,
+  isDirectory,
+  isSymlink,
+  readText,
+  typeIndexRelpath,
+  legacyTypeIndexRelpath,
+} from "./paths.js";
 import { parseDocument } from "../../utils/markdown/document.js";
 export const BUILTINS: Record<string, string> = {
   user: "users",
@@ -180,8 +187,8 @@ export function parseLegacy(scope: string): LegacyType[] {
     ) {
       if (
         name === "users" &&
-        (isFile(join(scope, ".harness/memory/users/README.md")) ||
-          isFile(join(scope, ".harness/memory/users/AGENTS.md")))
+        (isFile(join(scope, typeIndexRelpath("user"))) ||
+          isFile(join(scope, legacyTypeIndexRelpath("user"))))
       )
         groups.set(
           "user",

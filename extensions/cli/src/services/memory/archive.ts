@@ -6,7 +6,7 @@ import { expandHomePath } from '../../utils/filesystem.js';
 import path from 'node:path';
 import { create, Header, Parser, type ReadEntry } from 'tar';
 import { assertPrivateIgnored } from './ignore.js';
-import { rejectLegacy } from './paths.js';
+import { rejectLegacy, TYPE_INDEX_FILE_NAME } from './paths.js';
 import { readTemplate } from './templates.js';
 
 const USERS = '.harness/memory/users';
@@ -159,7 +159,7 @@ async function occupied(root: string): Promise<boolean> {
   if (!entry.isDirectory() || entry.isSymbolicLink()) return true;
   const files = await fs.readdir(users);
   if (!files.length) return false;
-  if (files.length !== 1 || files[0] !== 'README.md') return true;
+  if (files.length !== 1 || files[0] !== TYPE_INDEX_FILE_NAME) return true;
   const index = path.join(users, files[0]), indexInfo = await fs.lstat(index);
   if (!indexInfo.isFile() || indexInfo.isSymbolicLink()) return true;
   try { return !(await fs.readFile(index)).equals(Buffer.from(readTemplate('USER.md').trimEnd() + '\n')); }
