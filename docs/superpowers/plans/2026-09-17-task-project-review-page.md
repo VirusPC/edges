@@ -22,12 +22,12 @@
 - Export row: `stem`, `current`, `suggested`, `action`, optional `note`. `stem` is filename without `.md` (CLI lookup key), not title, not frontmatter `name`
 - `action` on export is derived in the page: `keep` if `suggested === current`, else `move` (do not invent `create-then-move` in the page; Skill still may `project create` before `update --project` when suggested is unknown)
 - Default output: OS temp file; `--out <path>` overrides; print absolute path in JSON success payload; do **not** open a browser
-- HTML shell lives in the CLI package (`cli/.../assets/`), not under `tools/`
-- classifyTasks Skill path: `skills/project-tasks-classify/` — update step 4 to review-page primary path; Markdown table = no-GUI fallback only
-- proposeTypes Skill is **not** on main yet (`skills/project-tasks-propose-types/` missing). Do **not** invent that Skill in this plan; only ensure CLI is reusable. Optional one-line note in `skills/README.md` or classify CHANGELOG cross-link is enough
+- HTML shell lives in the CLI package (`packages/cli/.../assets/`), not under `tools/`
+- classifyTasks Skill path: `packages/skills/project-tasks-classify/` — update step 4 to review-page primary path; Markdown table = no-GUI fallback only
+- proposeTypes Skill is **not** on main yet (`packages/skills/project-tasks-propose-types/` missing). Do **not** invent that Skill in this plan; only ensure CLI is reusable. Optional one-line note in `packages/skills/README.md` or classify CHANGELOG cross-link is enough
 - Do not put `ingest` / `fs` / `writer` / `now` / `repoPath` on `CliContext`
 - Relative TypeScript imports use `.js` (nodenext)
-- Test runner: `cli/package.json` `"test": "node --test --import tsx './test/**/*.test.ts'"`
+- Test runner: `packages/cli/package.json` `"test": "node --test --import tsx './test/**/*.test.ts'"`
 - Invalid JSON / schema → `VALIDATION_ERROR`, exit 2, no file write (except do not leave partial `--out` on failure — write via temp rename or write only after successful render)
 - Public repo: no credentials or personal data
 - This plan-only PR that first lands this document must **not** implement the CLI or rewrite the Skill
@@ -36,27 +36,27 @@
 
 ## File map
 
-Verified against `origin/main` after ADR 0012 merge (`92ea00a`). Command tree: `cli/src/tasks.ts` + `cli/src/tasks/project.ts` + `cli/src/tasks/project/<verb>.ts`. README rule: **file = one command node**.
+Verified against `origin/main` after ADR 0012 merge (`92ea00a`). Command tree: `packages/cli/src/tasks.ts` + `packages/cli/src/tasks/project.ts` + `packages/cli/src/tasks/project/<verb>.ts`. README rule: **file = one command node**.
 
 **Create**
 
-- `cli/src/tasks/utils/review-page.ts` — types; `parseReviewPageInput`; `renderReviewPageHtml`; `resolveReviewPageOutPath`; `writeReviewPage`
-- `cli/src/tasks/project/assets/review-page.html` — static shell with `<script type="application/json" id="edges-review-payload">` for JSON injection
-- `cli/src/tasks/project/review-page.ts` — Commander leaf `review-page`
-- `cli/test/tasks/utils/review-page.test.ts` — parse/render/write unit tests
-- `cli/scripts/copy-review-page-asset.mjs` — tiny post-`tsc` copy (or inline `cp` in package.json `build` if the team prefers zero script file; prefer one small script for Windows-hostile `cp -R` clarity on Linux CI)
+- `packages/cli/src/tasks/utils/review-page.ts` — types; `parseReviewPageInput`; `renderReviewPageHtml`; `resolveReviewPageOutPath`; `writeReviewPage`
+- `packages/cli/src/tasks/project/assets/review-page.html` — static shell with `<script type="application/json" id="edges-review-payload">` for JSON injection
+- `packages/cli/src/tasks/project/review-page.ts` — Commander leaf `review-page`
+- `packages/cli/test/tasks/utils/review-page.test.ts` — parse/render/write unit tests
+- `packages/cli/scripts/copy-review-page-asset.mjs` — tiny post-`tsc` copy (or inline `cp` in package.json `build` if the team prefers zero script file; prefer one small script for Windows-hostile `cp -R` clarity on Linux CI)
 
 **Modify**
 
-- `cli/package.json` — `build` runs `tsc` then copies `src/tasks/project/assets/` → `dist/tasks/project/assets/`
-- `cli/src/tasks/project.ts` — register `addProjectReviewPageCommand`; help text lists `review-page`
-- `cli/src/tasks/utils/format.ts` — extend `TasksSuccess` with optional `path?: string`, `groupCount?: number`, `itemCount?: number` (or nest under a single optional object — prefer flat fields matching existing style)
-- `cli/src/tasks.ts` — `TASKS_AFTER_HELP` mentions `project review-page` if the root help enumerates project children
-- `cli/README.md` — document `project review-page`; Capability Surface stays CLI + Skill + MCP
-- `cli/test/tasks/cli.test.ts` — project help lists `review-page`
-- `cli/test/tasks/parse.test.ts` — happy path `--from` fixture; bad JSON → exit 2; unknown `classify` still fails
-- `skills/project-tasks-classify/SKILL.md` — step 4 primary = write suggestions JSON → `review-page` → give path → **STOP** → wait for pasted export → step 5 apply; Markdown table = fallback
-- `skills/project-tasks-classify/CHANGELOG.md` — note review-page gate
+- `packages/cli/package.json` — `build` runs `tsc` then copies `src/tasks/project/assets/` → `dist/tasks/project/assets/`
+- `packages/cli/src/tasks/project.ts` — register `addProjectReviewPageCommand`; help text lists `review-page`
+- `packages/cli/src/tasks/utils/format.ts` — extend `TasksSuccess` with optional `path?: string`, `groupCount?: number`, `itemCount?: number` (or nest under a single optional object — prefer flat fields matching existing style)
+- `packages/cli/src/tasks.ts` — `TASKS_AFTER_HELP` mentions `project review-page` if the root help enumerates project children
+- `packages/cli/README.md` — document `project review-page`; Capability Surface stays CLI + Skill + MCP
+- `packages/cli/test/tasks/cli.test.ts` — project help lists `review-page`
+- `packages/cli/test/tasks/parse.test.ts` — happy path `--from` fixture; bad JSON → exit 2; unknown `classify` still fails
+- `packages/skills/project-tasks-classify/SKILL.md` — step 4 primary = write suggestions JSON → `review-page` → give path → **STOP** → wait for pasted export → step 5 apply; Markdown table = fallback
+- `packages/skills/project-tasks-classify/CHANGELOG.md` — note review-page gate
 - `CHANGELOG.md` `[Unreleased]` — Added `edges tasks project review-page`
 - `.memory/projects/project_task_project_review_page_render_only_cli.md` — How-to: landed (via `$project-memory-remember` if that skill is used; otherwise edit the pointer file consistently with prior plans)
 
@@ -171,10 +171,10 @@ Markdown table remains documented as fallback when the host has no way to open H
 ### Task 1: Pure parse + render + write helpers
 
 **Files:**
-- Create: `cli/src/tasks/utils/review-page.ts`
-- Create: `cli/src/tasks/project/assets/review-page.html`
-- Create: `cli/test/tasks/utils/review-page.test.ts`
-- Modify: `cli/package.json` (build copy — can land in Task 2 if you split; include build copy here so render can load the asset via `import.meta.url` in tests under tsx from `src/`)
+- Create: `packages/cli/src/tasks/utils/review-page.ts`
+- Create: `packages/cli/src/tasks/project/assets/review-page.html`
+- Create: `packages/cli/test/tasks/utils/review-page.test.ts`
+- Modify: `packages/cli/package.json` (build copy — can land in Task 2 if you split; include build copy here so render can load the asset via `import.meta.url` in tests under tsx from `src/`)
 
 **Interfaces:**
 - Produces:
@@ -187,7 +187,7 @@ Markdown table remains documented as fallback when the host has no way to open H
 
 - [ ] **Step 1: Write the failing tests**
 
-Create `cli/test/tasks/utils/review-page.test.ts`:
+Create `packages/cli/test/tasks/utils/review-page.test.ts`:
 
 ```ts
 import test from "node:test";
@@ -294,11 +294,11 @@ Expected: FAIL module not found / cannot find review-page.js
 
 - [ ] **Step 3: Implement `review-page.ts` helpers + minimal HTML asset**
 
-`cli/src/tasks/utils/review-page.ts` — implement the functions above. `parseReviewPageInput` throws `TasksError("VALIDATION_ERROR", exactMessage)`.
+`packages/cli/src/tasks/utils/review-page.ts` — implement the functions above. `parseReviewPageInput` throws `TasksError("VALIDATION_ERROR", exactMessage)`.
 
 `renderReviewPageHtml`: find `<script type="application/json" id="edges-review-payload">` … `</script>` and replace inner JSON with `JSON.stringify({ groups: input.groups, items: input.items })`. If the script tag is missing → `VALIDATION_ERROR`, `review-page template missing edges-review-payload script`.
 
-`cli/src/tasks/project/assets/review-page.html` — full single-file page:
+`packages/cli/src/tasks/project/assets/review-page.html` — full single-file page:
 
 ```html
 <!DOCTYPE html>
@@ -435,9 +435,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/review-page.ts \
-  cli/src/tasks/project/assets/review-page.html \
-  cli/test/tasks/utils/review-page.test.ts
+git add packages/cli/src/tasks/utils/review-page.ts \
+  packages/cli/src/tasks/project/assets/review-page.html \
+  packages/cli/test/tasks/utils/review-page.test.ts
 git commit -m "$(cat <<'EOF'
 feat: add review-page parse/render helpers
 
@@ -451,15 +451,15 @@ EOF
 ### Task 2: Build asset copy + CLI verb
 
 **Files:**
-- Create: `cli/src/tasks/project/review-page.ts`
-- Create: `cli/scripts/copy-review-page-asset.mjs` (optional if `build` uses a one-liner)
-- Modify: `cli/package.json`
-- Modify: `cli/src/tasks/project.ts`
-- Modify: `cli/src/tasks/utils/format.ts`
-- Modify: `cli/test/tasks/cli.test.ts`
-- Modify: `cli/test/tasks/parse.test.ts`
-- Modify: `cli/README.md`
-- Modify: `cli/src/tasks.ts` (help text if needed)
+- Create: `packages/cli/src/tasks/project/review-page.ts`
+- Create: `packages/cli/scripts/copy-review-page-asset.mjs` (optional if `build` uses a one-liner)
+- Modify: `packages/cli/package.json`
+- Modify: `packages/cli/src/tasks/project.ts`
+- Modify: `packages/cli/src/tasks/utils/format.ts`
+- Modify: `packages/cli/test/tasks/cli.test.ts`
+- Modify: `packages/cli/test/tasks/parse.test.ts`
+- Modify: `packages/cli/README.md`
+- Modify: `packages/cli/src/tasks.ts` (help text if needed)
 
 **Interfaces:**
 - Consumes: helpers from Task 1
@@ -638,11 +638,11 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/package.json cli/scripts/copy-review-page-asset.mjs \
-  cli/src/tasks/project/review-page.ts cli/src/tasks/project.ts \
-  cli/src/tasks/utils/format.ts cli/src/tasks.ts \
-  cli/README.md cli/test/tasks/cli.test.ts \
-  cli/test/tasks/parse.test.ts
+git add packages/cli/package.json packages/cli/scripts/copy-review-page-asset.mjs \
+  packages/cli/src/tasks/project/review-page.ts packages/cli/src/tasks/project.ts \
+  packages/cli/src/tasks/utils/format.ts packages/cli/src/tasks.ts \
+  packages/cli/README.md packages/cli/test/tasks/cli.test.ts \
+  packages/cli/test/tasks/parse.test.ts
 git commit -m "$(cat <<'EOF'
 feat: add edges tasks project review-page CLI
 
@@ -656,11 +656,11 @@ EOF
 ### Task 3: classifyTasks Skill + changelog pointers
 
 **Files:**
-- Modify: `skills/project-tasks-classify/SKILL.md`
-- Modify: `skills/project-tasks-classify/CHANGELOG.md`
+- Modify: `packages/skills/project-tasks-classify/SKILL.md`
+- Modify: `packages/skills/project-tasks-classify/CHANGELOG.md`
 - Modify: `CHANGELOG.md`
 - Modify: `.memory/projects/project_task_project_review_page_render_only_cli.md` (How-to landed)
-- Optional: `skills/README.md` one line that proposeTypes (when added) reuses `project review-page`
+- Optional: `packages/skills/README.md` one line that proposeTypes (when added) reuses `project review-page`
 
 - [ ] **Step 1: Rewrite Skill step 4 (primary path)**
 
@@ -685,8 +685,8 @@ Skill-local CHANGELOG + root `CHANGELOG.md` `[Unreleased]` Added line for the co
 - [ ] **Step 3: Commit**
 
 ```bash
-git add skills/project-tasks-classify/SKILL.md \
-  skills/project-tasks-classify/CHANGELOG.md \
+git add packages/skills/project-tasks-classify/SKILL.md \
+  packages/skills/project-tasks-classify/CHANGELOG.md \
   CHANGELOG.md \
   .memory/projects/project_task_project_review_page_render_only_cli.md
 git commit -m "$(cat <<'EOF'

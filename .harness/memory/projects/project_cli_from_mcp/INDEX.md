@@ -1,11 +1,11 @@
 ---
 name: project_cli_from_mcp
 description: >-
-  改 note ingest、new-note MCP 或 cli 时：本地 agent 走仓库根 cli/ 的 edges notes；git 在 CLI
+  改 note ingest、new-note MCP 或 cli 时：本地 agent 走仓库根 packages/cli/ 的 edges notes；git 在 CLI
   的 TS 模块；MCP 子进程调 edges notes；鉴权 flag 留在 notes create 上；JSON stdout。不要在仓库根另建
   clis/，也不要放回已删除的 extensions/。
 metadata:
-  edges-title: new_note 收成 cli/edges，MCP 保留
+  edges-title: new_note 收成 packages/cli/edges，MCP 保留
   edges-type: project
   edges-origin-session-id: bc-3219fe95-afee-53c8-9317-6d04fc05bc4f
   edges-agent-client: cursor
@@ -14,7 +14,7 @@ metadata:
   edges-updated-at: '2026-10-20T07:40:32+00:00'
 ---
 
-本地、有 shell 的 agent 用 `cli/` 的 `edges` CLI；入库子命令是 `edges notes …`。鉴权 flag（`--token-file` / `--token-stdin`）挂在 `notes create` 上，和 new-note MCP HTTP 同一道可选门闩。`edges tasks` 已落地 Issue 层 list/get/create/update/status 与只读 `runs` / `run-messages`（ADR 0005）。二进制只有 `edges`。git 在 `cli/src/git`（仅 `note` ingest）；tasks 写盘不调 git。`mcp-servers/new-note` 留给没有 shell 的宿主，子进程调用 `edges notes`。不要把 CLI 项目放在仓库根 `clis/`。2026-10-20 起这个 `cli/` 就在仓库根；不要再放回已删除的 `extensions/`。
+本地、有 shell 的 agent 用 `packages/cli/` 的 `edges` CLI；入库子命令是 `edges notes …`。鉴权 flag（`--token-file` / `--token-stdin`）挂在 `notes create` 上，和 new-note MCP HTTP 同一道可选门闩。`edges tasks` 已落地 Issue 层 list/get/create/update/status 与只读 `runs` / `run-messages`（ADR 0005）。二进制只有 `edges`。git 在 `packages/cli/src/git`（仅 `note` ingest）；tasks 写盘不调 git。`packages/mcp-servers/new-note` 留给没有 shell 的宿主，子进程调用 `edges notes`。不要把 CLI 项目放在仓库根 `clis/`。2026-10-20 起这个 `packages/cli/` 就在仓库根；不要再放回已删除的 `extensions/`。
 
 **Why:** ADR-0004 把能力面定为 CLI + Skill + MCP，并删除仓根 `bin/`。ADR-0005 把本轮 tasks 钉在 CLI 契约。先前「两边都 execFile bin/new-note、MCP 不套 CLI」已被取代。
 
@@ -29,15 +29,15 @@ metadata:
 ```
 agent / human
  ├─ cli  edges            多命令 CLI（notes / skills / tasks / …；Commander + JSON；git 在 src/git）
- ├─ skills/edges-note      何时如何调 CLI 或 MCP（对等能力面入口）
- └─ mcp-servers/new-note   无 shell 的 MCP 宿主（spawn edges notes）
+ ├─ packages/skills/edges-note      何时如何调 CLI 或 MCP（对等能力面入口）
+ └─ packages/mcp-servers/new-note   无 shell 的 MCP 宿主（spawn edges notes）
 ```
 
 不要把 npm `bin` 当成一层。不要恢复仓根 `bin/`。`conversation-to-notes` 不进 CLI。隔离仓测用 `EDGES_REPO`，不要再设 `EDGES_SCRIPT`。
 
 ### CLI 契约
 
-包 `edges-cli`，目录 `cli/`，二进制只有 `edges`。
+包 `edges-cli`，目录 `packages/cli/`，二进制只有 `edges`。
 
 ```
 edges notes create --title T --content C --co-author "Name <email>" [--json] [--dry-run] [--mode direct|pr] [--token-file PATH]

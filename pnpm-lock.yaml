@@ -17,7 +17,7 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
-  apps/tasks-review-app:
+  packages/apps/tasks-review-app:
     dependencies:
       '@dnd-kit/core':
         specifier: ^6.3.1
@@ -117,7 +117,7 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(@types/node@20.19.43)(jsdom@30.1.1)(vite@8.3.0(@types/node@20.19.43)(esbuild@0.27.3)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.1))
 
-  cli:
+  packages/cli:
     dependencies:
       ajv:
         specifier: ^8.18.0
@@ -162,6 +162,9 @@ importers:
       '@types/write-file-atomic':
         specifier: ^4.0.3
         version: 4.0.3
+      '@viruspc/edges-skills':
+        specifier: workspace:*
+        version: link:../skills
       parse5:
         specifier: 8.0.1
         version: 8.0.1
@@ -178,7 +181,9 @@ importers:
         specifier: ^5.8.2
         version: 5.9.3
 
-  mcp-servers/new-note:
+  packages/evaluation: {}
+
+  packages/mcp-servers/new-note:
     dependencies:
       '@modelcontextprotocol/sdk':
         specifier: ^1.17.4
@@ -209,7 +214,9 @@ importers:
         specifier: ^5.8.2
         version: 5.9.3
 
-  services/artifacts-preview:
+  packages/observation: {}
+
+  packages/services/artifacts-preview:
     devDependencies:
       '@types/node':
         specifier: ^22.19.11
@@ -220,6 +227,10 @@ importers:
       typescript:
         specifier: ^5.8.2
         version: 5.9.3
+
+  packages/skills: {}
+
+  packages/system-prompt: {}
 
 packages:
 

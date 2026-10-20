@@ -20,8 +20,8 @@ metadata:
 - 加载分三段：`name` + `description` 启动时全量加载（约 100 token），正文激活时才读，`scripts/` `references/` `assets/` 按需。
 - 格式本身被广泛采纳：客户端名录 47 家，含 OpenAI（ChatGPT & Codex）、Google（Gemini CLI）、GitHub Copilot、VS Code、Cursor、JetBrains Junie、Amazon Kiro、Databricks、Snowflake、Mistral、字节 TRAE、Block Goose、Spring AI、Nous Research Hermes。由 Anthropic 开发后开放。
 
-**但字段闭集在实践中不被遵守。** 本机 46 个来自不同作者的 skill 实测：18 个用顶层 `version`（不在六字段内），17 个用 `disable-model-invocation`、4 个用 `argument-hint`（Claude Code 的官方字段，同样不在六字段内），只有 7 个用 `metadata`。Claude Code 自己文档化了约 19 个顶层字段。本仓 `skills/` 的 11 个 skill 也全部带顶层 `version`。
+**但字段闭集在实践中不被遵守。** 本机 46 个来自不同作者的 skill 实测：18 个用顶层 `version`（不在六字段内），17 个用 `disable-model-invocation`、4 个用 `argument-hint`（Claude Code 的官方字段，同样不在六字段内），只有 7 个用 `metadata`。Claude Code 自己文档化了约 19 个顶层字段。本仓 `packages/skills/` 的 11 个 skill 也全部带顶层 `version`。
 
 **所以自定义数据放 `metadata` 的理由不是「顶层会被拒」，是撞名。** 运行时几乎没人拒；硬报错只出现在 Anthropic 的打包 / claude.ai 上传路径。真正的风险是 `version` / `title` / `author` 这类通用词哪天被某个 vendor 赋予语义——那时文件不报错，**行为静默改变**，比报错难查得多。`metadata` 是规范唯一承诺「clients 不解释其内容」的命名空间，代价为零。
 
-`.agents/skills/`（项目级与家目录级）是这批 agent 共读的位置，但 **Claude Code 不在其中**——它读 `.claude/skills/`，桥接靠 per-skill 软链。官方只承诺 `<skill-name>` 条目可以是软链，整个 `skills/` 目录做软链未文档化。
+`.agents/skills/`（项目级与家目录级）是这批 agent 共读的位置，但 **Claude Code 不在其中**——它读 `.claude/skills/`，桥接靠 per-skill 软链。官方只承诺 `<skill-name>` 条目可以是软链，整个 `packages/skills/` 目录做软链未文档化。

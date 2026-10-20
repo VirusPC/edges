@@ -11,8 +11,8 @@ description: 现在加一个模块要改好几处代码。目标是让模块主�
 ---
 
 **背景：**
-2026-10-08 合入 #190 后，`edges init` 成了标准命令，每个模块各管各的 init，根命令只负责编排。但模块清单目前写死在代码里，挂载表 `harness-materials.json` 和 init 模块表 `services/init/modules.ts` 是分开维护的。命令注册、service 主文件、init 那一段也都要逐个手写。所以新增一个模块要同时改好几处，用户也没法自己往系统里加模块。用户提出要先记一张卡，增强 CLI 的可扩展性。随后用户又补充：从用户角度，后续可能需要补充自己的 harness 模块，所以扩展不只是给维护者省改动，也要让使用者能在自己的 scope 里加模块。
-- 现状：模块的材料、init 行为和命令入口分散在挂载表、init 模块表、`program.ts` 和各模块的 `commands/*`、`services/*/service.ts` 里。
+2026-10-08 合入 #190 后，`edges init` 成了标准命令，每个模块各管各的 init，根命令只负责编排。但模块清单目前写死在代码里，挂载表 `harness-materials.json` 和 init 模块表 `packages/services/init/modules.ts` 是分开维护的。命令注册、service 主文件、init 那一段也都要逐个手写。所以新增一个模块要同时改好几处，用户也没法自己往系统里加模块。用户提出要先记一张卡，增强 CLI 的可扩展性。随后用户又补充：从用户角度，后续可能需要补充自己的 harness 模块，所以扩展不只是给维护者省改动，也要让使用者能在自己的 scope 里加模块。
+- 现状：模块的材料、init 行为和命令入口分散在挂载表、init 模块表、`program.ts` 和各模块的 `commands/*`、`packages/services/*/service.ts` 里。
 - 约束：沿用 #187 和 #190 定下的分层，也就是 NodeService 提供底层能力，service 是薄封装，commands 只调 service、不读材料清单。模块之间各管各的，不互相创建对方的材料。
 - 预期收益：加模块的成本降低；使用者可以按自己的需要补充自己的 harness 模块，不必等内置模块支持。
 - 关联：#187、#190、ADR 0031；`project-memory` 下的「Memory 模块解耦与可插拔接口」、`edges-extensions` 下的「edges 封装为脚手架框架并定义升级路径」。

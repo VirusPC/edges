@@ -1,8 +1,8 @@
 # Agent Developer Guide
 
-你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 CLI / skill / MCP / 应用与服务、维护 `.harness/` 里讲 Edges 本身的记忆、任务、评测与观测。
+你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 CLI / skill / MCP / 应用与服务、维护 `.harness/` 里讲 Edges 本身的记忆与任务，以及 `packages/evaluation/`、`packages/observation/` 里的评测与观测。
 
-本仓 `VirusPC/edges` 只放 Edges 框架本身（`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/`、协议、ADR、架构文档）。peng cheng 的个人大脑（笔记、Edge、教学、复盘、领域任务、shared-extensions、对外博客成稿等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)，经下面的 Compose 区块挂进来；个人知识不要写进本仓。2026-10-20 拆仓前的历史、PR 与 Actions 记录都留在个人仓，最后一个拆仓前提交是 `025904fa29bcc6970f45c654d95e30c5390d43d7`。2026-10-20 起不再有 `extensions/` 这一层，映射见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
+本仓 `VirusPC/edges` 只放 Edges 框架本身（`packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/`、协议、ADR、架构文档）。peng cheng 的个人大脑（笔记、Edge、教学、复盘、领域任务、shared-extensions、对外博客成稿等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)，经下面的 Compose 区块挂进来；个人知识不要写进本仓。2026-10-20 拆仓前的历史、PR 与 Actions 记录都留在个人仓，最后一个拆仓前提交是 `025904fa29bcc6970f45c654d95e30c5390d43d7`。2026-10-20 起不再有 `extensions/` 这一层，映射见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。同日代码目录收进 `packages/`，映射见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
 
 Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](CONTEXT.md)；AGENTS.md 组织入口发现，各规范正文按职责保持单一真源。
 
@@ -30,13 +30,14 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 - [目录与内容说明](<README.md>) — 目录与内容说明入口。
 - [领域术语](<CONTEXT.md>) — 领域术语入口。
 - [架构决策](<docs/adr/>) — 架构决策入口。
-- [.harness/evaluation/AGENTS.md](<.harness/evaluation/AGENTS.md>) — evaluation 目录的项目记忆与规范入口。
 - [.harness/tasks/AGENTS.md](<.harness/tasks/AGENTS.md>) — tasks 目录的项目记忆与规范入口。
 <!-- project-harness-local:end -->
 
 <!-- project-harness-descendants:start -->
 ## 下层系统维护信息
-- [project-memory-init](<skills/project-memory-init/AGENTS.md>) — project-memory 系列 skill 的项目记忆与规范入口。
+- [project-memory-init](<packages/skills/project-memory-init/AGENTS.md>) — project-memory 系列 skill 的项目记忆与规范入口。
+- [evaluation](<packages/evaluation/AGENTS.md>) — evaluation 目录的项目记忆与规范入口。
+- [observation](<packages/observation/AGENTS.md>) — observation 目录的项目记忆与规范入口。
 
 <!-- project-harness-descendants:end -->
 

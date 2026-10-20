@@ -22,6 +22,6 @@ metadata:
 **How to apply:**
 - 部署写在自部署 Langfuse 卡与 ADR 0014–0016；访问面 ADR 0033（ADR 0017 已取代），密钥 ADR 0018，备份 ADR 0019，验收顺序 ADR 0020。
 - 检索/读写/代理使用过程的看板语义写在 Observation 产品卡；不要改那张卡的正文来记部署。
-- 仓内 `.harness/observation/` 是脱敏运营笔记落点，不是后端，也不是产品卡。冒烟脚本可以放在那里，不因此把两张卡并成一条。
+- 仓内 `packages/observation/` 是脱敏运营笔记落点，不是后端，也不是产品卡。冒烟脚本可以放在那里，不因此把两张卡并成一条。
 - 不要为了这条边界去改产品卡正文。各卡状态以卡自身的验收为准。
 - 对照 ADR `docs/adr/0015-langfuse-infra-vs-observation-product.md`。

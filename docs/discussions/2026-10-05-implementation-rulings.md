@@ -54,7 +54,7 @@ flowchart LR
 
 2026-10-05：用户确认第 1 项执行顺序没有问题，并询问归属是否处理完成。
 
-公开归属修正已在 PR #161 分支完成：43 条记忆按当前内容恢复到原所有者，25 个类型索引说明及相关入口、引用已同步并验证。分布为 extensions 16 条、skills/project-memory-init 17 条、shared-extensions 1 条、knowledge/notes 1 条，以及原 Tasks 8 条归 .harness/tasks。第 3 项具体归属选择仍待讨论，此处确认执行顺序不等于预先确认第 3 项。
+公开归属修正已在 PR #161 分支完成：43 条记忆按当前内容恢复到原所有者，25 个类型索引说明及相关入口、引用已同步并验证。分布为 extensions 16 条、packages/skills/project-memory-init 17 条、shared-extensions 1 条、knowledge/notes 1 条，以及原 Tasks 8 条归 .harness/tasks。第 3 项具体归属选择仍待讨论，此处确认执行顺序不等于预先确认第 3 项。
 
 完成范围不包括真实私有内容：私有迁移工具已实现并通过合成样例测试，但没有在其他克隆自动执行。修正已推至 PR 分支，尚未合并到 main。
 
@@ -77,7 +77,7 @@ notes/
     └── comparison.csv
 
 标准 Skill：
-skills/example/
+packages/skills/example/
 ├── SKILL.md
 └── scripts/
 ```
@@ -867,7 +867,7 @@ flowchart LR
 | 缓存副本按基线合并完整持久化状态；元数据按键递归，正文按行保守合并，冲突在写盘前拒绝。 | 未保存改动不能覆盖其他副本已提交的业务字段或非受控正文；使用已锁定的 diff 库计算文本差异。 | 增加一个直接运行时依赖与差异计算；同一行的不同字词及部分插入边界仍可能冲突，细化需调整合并策略与测试。 |
 | 导入来源的归属解析与正常加载共用规则；显式 sourceRoot 优先，否则最近 Git 目录为界，无 Git 时以文件系统根为界。 | 跨中间目录仍应识别已知 Memory，又不能越过独立仓库继承外部约定。 | 需要按目录深度查找祖先；无 Git 的来源可能继承祖先 AGENTS，需更窄边界时由调用方指定。 |
 
-可重复批量操作均使用脚本；正式目录转换工具为 `scripts/migrate-directory-nodes.mts`，先 dry-run，再显式 apply。代码验证和审查结果记录在实施计划中，历史验证结果不冒充本轮验收。
+可重复批量操作均使用脚本；正式目录转换工具为 `scripts/migrations/migrate-directory-nodes.mts`，先 dry-run，再显式 apply。代码验证和审查结果记录在实施计划中，历史验证结果不冒充本轮验收。
 
 ## 公开迁移验收
 

@@ -20,7 +20,7 @@ metadata:
 - 2026-10-11（北京时间）实例在线：Langfuse v4.38.0，Docker 跑在 minigtr 上，公网 HTTPS 经 Cloudflare Tunnel。`/api/public/health` 返回 OK。
 - 该实例的写模式是 v4 events_only。`POST /api/public/ingestion` 只收 score，trace-create 与 span-create 会被 400 拒绝。发 trace 走 `POST /api/public/otel/v1/traces`，Basic auth 为公钥:私钥。此模式下 `GET /api/public/traces/{id}` 返回 404；回查用 `GET /api/public/v2/observations?traceId=...`。
 - 2026-10-11 17:18（北京时间）从 Grok Bot 云电脑用 curl 加 OTLP 发出首条 trace，name 为 `edges-langfuse-smoke`。v2 observations 回查成功。grok-bot 项目不再停在 Waiting for first trace。
-- 可复现脚本在 `.harness/observation/smoke/langfuse-otlp-smoke.sh`。它只读 `LANGFUSE_HOST`、`LANGFUSE_PUBLIC_KEY`、`LANGFUSE_SECRET_KEY`。仓库不放密钥、项目或组织 ID、实例域名。
+- 可复现脚本在 `packages/observation/smoke/langfuse-otlp-smoke.sh`。它只读 `LANGFUSE_HOST`、`LANGFUSE_PUBLIC_KEY`、`LANGFUSE_SECRET_KEY`。仓库不放密钥、项目或组织 ID、实例域名。
 - 非目标：定时机外备份仍是 backlog。更广的 Grok / edges 接线仍归 Observation 产品卡。
 - 关联：ADR 0014、ADR 0020、ADR 0033。公网 HTTPS 卡已按 Cloudflare Tunnel 完成。
 

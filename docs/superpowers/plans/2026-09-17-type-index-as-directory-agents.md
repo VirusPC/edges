@@ -8,7 +8,7 @@
 
 **Tech Stack:** Python 3 stdlib (`unittest`, `argparse`, `pathlib`, `re`), existing `scripts/memory.py` CLI, Agent Skills frontmatter + Keep a Changelog. No new libraries. No `edges` CLI work.
 
-**Spec:** `docs/adr/0012-type-memory-index-as-directory-agents.md` (accepted; docs landed via PR #83). Protocol/layout: `skills/project-memory-init/references/PROTOCOL.md`, `LAYOUT.md`. Glossary: `CONTEXT.md` terms **层入口 AGENTS.md** vs **类型入口 AGENTS.md**. Prior extension surface: ADR 0006. User gitignore: ADR 0003.
+**Spec:** `docs/adr/0012-type-memory-index-as-directory-agents.md` (accepted; docs landed via PR #83). Protocol/layout: `packages/skills/project-memory-init/references/PROTOCOL.md`, `LAYOUT.md`. Glossary: `CONTEXT.md` terms **层入口 AGENTS.md** vs **类型入口 AGENTS.md**. Prior extension surface: ADR 0006. User gitignore: ADR 0003.
 
 ## Global Constraints
 
@@ -32,29 +32,29 @@
 
 **Create**
 
-- `skills/project-memory-init/scripts/tests/test_type_index_as_directory_agents.py` — new-path init / discovery / remember / doctor migration / no `.agents/` writes
+- `packages/skills/project-memory-init/scripts/tests/test_type_index_as_directory_agents.py` — new-path init / discovery / remember / doctor migration / no `.agents/` writes
 
 **Modify (scripts)**
 
-- `skills/project-memory-init/scripts/lib/paths.py` — `type_index_path()`, `type_index_relpath()`, `type_from_dir_name()`
-- `skills/project-memory-init/scripts/lib/blocks.py` — `MEMORY_INDEX_LINK_PATTERN` matches `.memory/<plural>/AGENTS.md`; keep a legacy flat-link regex; `index_files()` returns `{user: users/AGENTS.md, ...}`
-- `skills/project-memory-init/scripts/lib/types.py` — `index_file_name()` → `<plural>/AGENTS.md`; `type_index_template_name()` stays `TYPE.md`; discovery follows new links + `*/AGENTS.md`; `upsert_local_type_line` writes `.memory/<plural>/AGENTS.md`
-- `skills/project-memory-init/scripts/lib/templates.py` — `read_index_template` still keys off `FEEDBACK.md` / `TYPE.md`, never `AGENTS.md`
-- `skills/project-memory-init/scripts/nodes/entries.py` — index path + relative links are based at the type directory (same-dir entries; `agent_skills` becomes `../../.agents/skills/...`)
-- `skills/project-memory-init/scripts/operations/init.py` — write seed indexes to `<plural>/AGENTS.md` using type templates
-- `skills/project-memory-init/scripts/operations/add_type.py` — write `<plural>/AGENTS.md`
-- `skills/project-memory-init/scripts/operations/remember.py` — report new index path
-- `skills/project-memory-init/scripts/operations/doctor.py` — `legacy-flat-index` (+ conflict); rewrite stale local links; apply moves then deletes
+- `packages/skills/project-memory-init/scripts/lib/paths.py` — `type_index_path()`, `type_index_relpath()`, `type_from_dir_name()`
+- `packages/skills/project-memory-init/scripts/lib/blocks.py` — `MEMORY_INDEX_LINK_PATTERN` matches `.memory/<plural>/AGENTS.md`; keep a legacy flat-link regex; `index_files()` returns `{user: users/AGENTS.md, ...}`
+- `packages/skills/project-memory-init/scripts/lib/types.py` — `index_file_name()` → `<plural>/AGENTS.md`; `type_index_template_name()` stays `TYPE.md`; discovery follows new links + `*/AGENTS.md`; `upsert_local_type_line` writes `.memory/<plural>/AGENTS.md`
+- `packages/skills/project-memory-init/scripts/lib/templates.py` — `read_index_template` still keys off `FEEDBACK.md` / `TYPE.md`, never `AGENTS.md`
+- `packages/skills/project-memory-init/scripts/nodes/entries.py` — index path + relative links are based at the type directory (same-dir entries; `agent_skills` becomes `../../.agents/skills/...`)
+- `packages/skills/project-memory-init/scripts/operations/init.py` — write seed indexes to `<plural>/AGENTS.md` using type templates
+- `packages/skills/project-memory-init/scripts/operations/add_type.py` — write `<plural>/AGENTS.md`
+- `packages/skills/project-memory-init/scripts/operations/remember.py` — report new index path
+- `packages/skills/project-memory-init/scripts/operations/doctor.py` — `legacy-flat-index` (+ conflict); rewrite stale local links; apply moves then deletes
 - Existing tests: `test_user_type.py`, `test_layer_types.py`, `test_add_type.py`, `test_example_types_smoke.py`, `test_user_memory_archive.py`
 
 **Modify (docs / templates / in-repo layers)**
 
-- `skills/project-memory-init/references/templates/AGENTS.tmpl.md` — local links → `.memory/<plural>/AGENTS.md`
-- `skills/project-memory-init/references/templates/USER.tmpl.md` / `AGENT_SKILLS.tmpl.md` — path sentences only (shape unchanged)
-- `skills/project-memory-init/references/LAYOUT.md` — drop “本轮只定意图，不实现”
+- `packages/skills/project-memory-init/references/templates/AGENTS.tmpl.md` — local links → `.memory/<plural>/AGENTS.md`
+- `packages/skills/project-memory-init/references/templates/USER.tmpl.md` / `AGENT_SKILLS.tmpl.md` — path sentences only (shape unchanged)
+- `packages/skills/project-memory-init/references/LAYOUT.md` — drop “本轮只定意图，不实现”
 - Skill docs + changelogs: init, remember, ask, reshape, add-type, doctor, user-memory-backup, user-memory-restore
-- `skills/user-memory-backup/scripts/backup.py` and `user-memory-restore/scripts/restore.py` — pack/restore `users/AGENTS.md`; still accept leftover `USER.md`
-- Layer `AGENTS.md` local blocks (root, `extensions/`, `shared-extensions/`, `evaluation/`, `knowledge/tasks/`, `knowledge/teaching/`, `skills/project-memory-init/`)
+- `packages/skills/user-memory-backup/scripts/backup.py` and `user-memory-restore/scripts/restore.py` — pack/restore `users/AGENTS.md`; still accept leftover `USER.md`
+- Layer `AGENTS.md` local blocks (root, `extensions/`, `shared-extensions/`, `evaluation/`, `knowledge/tasks/`, `knowledge/teaching/`, `packages/skills/project-memory-init/`)
 - In-repo type indexes: move committed `.memory/FEEDBACK.md` (etc.) → `<plural>/AGENTS.md` via doctor `--apply`
 - Root `CHANGELOG.md` `[Unreleased]` project-memory bullet
 
@@ -89,13 +89,13 @@ if str(SCRIPTS) not in sys.path:
 Run one file:
 
 ```bash
-python3 skills/project-memory-init/scripts/tests/test_type_index_as_directory_agents.py -v
+python3 packages/skills/project-memory-init/scripts/tests/test_type_index_as_directory_agents.py -v
 ```
 
 Full suite after each green step:
 
 ```bash
-python3 -m unittest discover -s skills/project-memory-init/scripts/tests -v
+python3 -m unittest discover -s packages/skills/project-memory-init/scripts/tests -v
 ```
 
 ---
@@ -163,7 +163,7 @@ Expected: `index_files()["feedback"]` is still `FEEDBACK.md`.
 
 ```bash
 git add docs/superpowers/plans/2026-09-17-type-index-as-directory-agents.md \
-  skills/project-memory-init
+  packages/skills/project-memory-init
 git commit -m "feat: type indexes live at plural/AGENTS.md"
 ```
 

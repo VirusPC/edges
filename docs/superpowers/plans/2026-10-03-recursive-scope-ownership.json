@@ -1968,10 +1968,10 @@
     {
       "description": "改 AGENTS.md 本层记忆清单或挑类型时：先 user，再 feedback，再 project（兜底），再 reference；skills / agent_skills 仍靠后。",
       "sha256": "824f6904e7f5ef8af9fc8fd5415d37fc8b39ecd32331099f22f592c252a55ac1",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/feedbacks/feedback_agents_local_type_order.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/feedbacks/feedback_agents_local_type_order.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/feedbacks/feedback_agents_local_type_order.md",
+      "source": "packages/skills/project-memory-init/.memory/feedbacks/feedback_agents_local_type_order.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/feedbacks/feedback_agents_local_type_order.md",
@@ -1982,10 +1982,10 @@
     {
       "description": "目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。",
       "sha256": "3dd628ee0d7954c30de4cff417f8dcc49e0951323ff369af45084dc6c0770653",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/feedbacks/feedback_isolated_root_dir.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/feedbacks/feedback_isolated_root_dir.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/feedbacks/feedback_isolated_root_dir.md",
+      "source": "packages/skills/project-memory-init/.memory/feedbacks/feedback_isolated_root_dir.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/feedbacks/feedback_isolated_root_dir.md",
@@ -1996,10 +1996,10 @@
     {
       "description": "改 AGENTS.md 记忆形状、增减受管区块、或决定区块外留什么时：只保留 important / local / children；不要独立 auto 区块；硬约束种子是 ask/remember 聚光灯加「写在本区块」；区块外只留身份与指针。",
       "sha256": "713dc7a531afd114a2e8199b4555f200c836867e2e4c7523c7e1ee561b3e7193",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/projects/project_agents_three_blocks.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/projects/project_agents_three_blocks.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/projects/project_agents_three_blocks.md",
+      "source": "packages/skills/project-memory-init/.memory/projects/project_agents_three_blocks.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/projects/project_agents_three_blocks.md",
@@ -2010,10 +2010,10 @@
     {
       "description": "这套记忆的承重点、最脆的地方，以及技术选择的判断。",
       "sha256": "a1d978ba1dda8f1924f5f1a678355c62793e5cd3417e1b09c5b6392c07662722",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/projects/project_architecture.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/projects/project_architecture.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/projects/project_architecture.md",
+      "source": "packages/skills/project-memory-init/.memory/projects/project_architecture.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/projects/project_architecture.md",
@@ -2024,10 +2024,10 @@
     {
       "description": "成型过程中的关键取舍、翻案与待议；论证不进 PROTOCOL/LAYOUT。",
       "sha256": "a6985706ff18e4b6746d518ae95beb76912a9707a437f0db9fca624be3cc3aab",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/projects/project_design_decisions.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/projects/project_design_decisions.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/projects/project_design_decisions.md",
+      "source": "packages/skills/project-memory-init/.memory/projects/project_design_decisions.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/projects/project_design_decisions.md",
@@ -2038,10 +2038,10 @@
     {
       "description": "修改顺序：协议 → 布局 → init → 其他非 doctor skill → doctor。",
       "sha256": "d0bb862a388752e13c8ad244ab2d7636424788416019caf67fc9e42eac3b938d",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/projects/project_development.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/projects/project_development.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/projects/project_development.md",
+      "source": "packages/skills/project-memory-init/.memory/projects/project_development.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/projects/project_development.md",
@@ -2052,10 +2052,10 @@
     {
       "description": "改普通记忆条目的 YAML 头、或读旧扁平文件时：写入只留 name/description/metadata，实现字段进 metadata.edges-*；闭集以 https://agentskills.io/specification 为准。读取兼容顶层旧键。",
       "sha256": "53f245041d27abc72e998584c189c524d76804a2abbcb1cef251090e913aaca2",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/projects/project_frontmatter_metadata.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/projects/project_frontmatter_metadata.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/projects/project_frontmatter_metadata.md",
+      "source": "packages/skills/project-memory-init/.memory/projects/project_frontmatter_metadata.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/projects/project_frontmatter_metadata.md",
@@ -2066,10 +2066,10 @@
     {
       "description": "改 AGENTS.md 记忆形状、或决定一条规则该常驻还是进 .memory 时：点名 ask/remember，加上不检索就会做错的仓规，直接写进 project-memory-important；目录细则不进这里也不进 .memory。",
       "sha256": "c054d0c392c34bbf9fecd8564a945e5ce1513b66ae1f81a1b719b42464b35400",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/projects/project_important_block.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/projects/project_important_block.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/projects/project_important_block.md",
+      "source": "packages/skills/project-memory-init/.memory/projects/project_important_block.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/projects/project_important_block.md",
@@ -2080,10 +2080,10 @@
     {
       "description": "为什么否掉 .memory→.agents 改名，改成 skills（自动沉淀）与 agent_skills（只索引）两个类型；两份入口为什么都放 .memory/；为什么没平铺进 local 区块。",
       "sha256": "a76e7ffa91254ae801ad75fd27aee84a962876838b0f54d11f2ce6b88a6cc2b8",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/projects/project_skill_ownership_split.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/projects/project_skill_ownership_split.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/projects/project_skill_ownership_split.md",
+      "source": "packages/skills/project-memory-init/.memory/projects/project_skill_ownership_split.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/projects/project_skill_ownership_split.md",
@@ -2094,10 +2094,10 @@
     {
       "description": "决定 AGENTS.md 要不要点名 skill、或觉得 skill 自己的说明就够时：要点名 ask 和 remember，因为 skill 一多，模型不一定会自己加载它们；不要点名 init/doctor/reshape，也不要在入口里写整套工具怎么用。",
       "sha256": "89e5e29013eae6e72971a53ae99225e529020f3da45cd7ed532e29c26548cadd",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/projects/project_spotlight_ask_remember.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/projects/project_spotlight_ask_remember.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/projects/project_spotlight_ask_remember.md",
+      "source": "packages/skills/project-memory-init/.memory/projects/project_spotlight_ask_remember.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/projects/project_spotlight_ask_remember.md",
@@ -2108,10 +2108,10 @@
     {
       "description": "官方 init 种子仍是六类；类型集合由 LAYOUT+本层登记决定，不是 PROTOCOL 闭集。可扩展见仓库根 ADR 0006。类型入口现为复数目录下 AGENTS.md（ADR 0012）。否掉把 docs 等示例写进默认种子。user 进仓且 gitignore；v1 不做晋升。",
       "sha256": "e731e7477720dc29e00ff775d068395b27dc5d9fd1b4f20d633592268d13e11f",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/projects/project_type_set.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/projects/project_type_set.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/projects/project_type_set.md",
+      "source": "packages/skills/project-memory-init/.memory/projects/project_type_set.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/projects/project_type_set.md",
@@ -2122,10 +2122,10 @@
     {
       "description": "记忆索引粒度、膨胀与检索的论文证据。",
       "sha256": "7375e2caee40353ffd1120cf1437373252607c10a3c336a0e7e83ec64b1f8b07",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/references/reference_academic_papers.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/references/reference_academic_papers.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/references/reference_academic_papers.md",
+      "source": "packages/skills/project-memory-init/.memory/references/reference_academic_papers.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/references/reference_academic_papers.md",
@@ -2136,10 +2136,10 @@
     {
       "description": "各家编码 agent / AI IDE 的记忆与 AGENTS.md 实践。",
       "sha256": "effdba89a61559b2d4020627cbfe13efe989572c4b7f7ee46d4bb575013c5656",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/references/reference_coding_agents.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/references/reference_coding_agents.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/references/reference_coding_agents.md",
+      "source": "packages/skills/project-memory-init/.memory/references/reference_coding_agents.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/references/reference_coding_agents.md",
@@ -2150,10 +2150,10 @@
     {
       "description": "索引粒度、路标 vs 摘要，以及可落地的阈值。",
       "sha256": "cb095231b6c48df27a26f6d7ff57a42a41e8a0957fc566f46e3463298cfb34bd",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/references/reference_index_granularity.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/references/reference_index_granularity.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/references/reference_index_granularity.md",
+      "source": "packages/skills/project-memory-init/.memory/references/reference_index_granularity.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/references/reference_index_granularity.md",
@@ -2164,10 +2164,10 @@
     {
       "description": "写或核对 SKILL.md / 普通记忆 YAML 头时查：顶层闭集、name 规则、metadata 用途。规范 https://agentskills.io/specification；本仓与生态落差见 extensions 的 reference_skill_format_spec。",
       "sha256": "fb201b6b3765e2456ca81e1c6134293848585df9231c3bb1f63c5dad4b3f3056",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/references/reference_official_skills_spec.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/references/reference_official_skills_spec.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/references/reference_official_skills_spec.md",
+      "source": "packages/skills/project-memory-init/.memory/references/reference_official_skills_spec.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/references/reference_official_skills_spec.md",
@@ -2178,10 +2178,10 @@
     {
       "description": "开源记忆框架的机制细节与源码取证。",
       "sha256": "46b99b1a3e4da4c2fba82f7cfa001f3b8da7a7722583337910f7e939bebc4c04",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/references/reference_oss_frameworks.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/references/reference_oss_frameworks.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/references/reference_oss_frameworks.md",
+      "source": "packages/skills/project-memory-init/.memory/references/reference_oss_frameworks.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/references/reference_oss_frameworks.md",
@@ -2192,10 +2192,10 @@
     {
       "description": "四路并行调研的综合结论，改变本方案决策的外部证据总入口。",
       "sha256": "c0f7c52f204dcea88dc8d2be9e34a56254543a845cf1726c65a2a3a233e6d07f",
-      "scope": "skills/project-memory-init",
-      "target": "skills/project-memory-init/.harness/memory/references/reference_prior_art.md",
+      "scope": "packages/skills/project-memory-init",
+      "target": "packages/skills/project-memory-init/.harness/memory/references/reference_prior_art.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "skills/project-memory-init/.memory/references/reference_prior_art.md",
+      "source": "packages/skills/project-memory-init/.memory/references/reference_prior_art.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".harness/memory/references/reference_prior_art.md",
@@ -2220,8 +2220,8 @@
     {
       "description": "设计或审阅 agent-memory / long-context 类 benchmark、或判断仓内冒烟分数能不能当证明时：先看构念效度 → 数据可信 → 区分度 → 可复现公平协议；分数表是证据不是贡献。全文见 knowledge/projects/memory/2026-09-16-benchmark-review-checklist.md。LoCoMo 个案仍看十问笔记；ADR 0008：Evaluation Smoke ≠ Benchmark Proof。",
       "sha256": "e3f242daeb29a29f343109fc0aa9822f522a46c9ce014ac90bda70d0bf3e90b4",
-      "scope": ".harness/evaluation",
-      "target": ".harness/evaluation/.harness/memory/projects/project_benchmark_review_checklist.md",
+      "scope": "packages/evaluation",
+      "target": "packages/evaluation/.harness/memory/projects/project_benchmark_review_checklist.md",
       "reason": "评测有独立的用例、协议和验证责任；该条维护评测判断/执行上下文，保留在评测作用域。 对象：设计或审阅 agent-memory / long-context 类 benchmark、或判断仓内冒烟分数能不能当证明时：先看构念效度 → 数据可信 → 区分度 → 可复现公平协议；分数表是证据不是贡献。全文见 knowledge/projects/memory/2026-09-16-benchmark-review-checklist.md。LoCoMo 个案仍看十问笔记；ADR 0008：Evaluation Smoke ≠ Benchmark Proof。",
       "source": "evaluation/.memory/projects/project_benchmark_review_checklist.md",
       "targetSha256": "a5ed69726e9d670e352c7b923561a86dc3e6b391e8078183135a4f630b2992df"
@@ -2229,8 +2229,8 @@
     {
       "description": "决定从 LoCoMo 借什么、或评 PM / 事件图世界模型时：可借的是 persona→G→按日切 session→接地对话，不是官方 QA 分。只跑 QA 测不到 online write→use 或事件图世界模型。全文见 knowledge/projects/memory/2026-09-16-LoCoMo-paper-10-questions.md「补充：合成造数逻辑、宣传落差与审稿站台」。四臂仍 paused；分数按 ADR 0008 不是 PM proof。",
       "sha256": "f1d73313c5fd9407783a54af365b5a226baafaa792b5f9e3a823744686bd93cb",
-      "scope": ".harness/evaluation",
-      "target": ".harness/evaluation/.harness/memory/projects/project_locomo_generator_structure_before_interaction.md",
+      "scope": "packages/evaluation",
+      "target": "packages/evaluation/.harness/memory/projects/project_locomo_generator_structure_before_interaction.md",
       "reason": "评测有独立的用例、协议和验证责任；该条维护评测判断/执行上下文，保留在评测作用域。 对象：决定从 LoCoMo 借什么、或评 PM / 事件图世界模型时：可借的是 persona→G→按日切 session→接地对话，不是官方 QA 分。只跑 QA 测不到 online write→use 或事件图世界模型。全文见 knowledge/projects/memory/2026-09-16-LoCoMo-paper-10-questions.md「补充：合成造数逻辑、宣传落差与审稿站台」。四臂仍 paused；分数按 ADR 0008 不是 PM proof。",
       "source": "evaluation/.memory/projects/project_locomo_generator_structure_before_interaction.md",
       "targetSha256": "26b74b3f6c2f4eda529216272bf2c1831416b9430a77a522f64e3ed30d9c3548"
@@ -2238,8 +2238,8 @@
     {
       "description": "跑或改 LoCoMo Evaluation Smoke 时：首选 evaluation/run_locomo_official.py（submodule 官方 evaluate_qa.py / evaluation.py F1）。print-command 无 key；真实 smoke 用 KIMI_API_KEY + kimi-for-coding。evaluation/cases/locomo-smoke 是 legacy hand-port。不是 Benchmark Proof / Project Memory proof。",
       "sha256": "6ae270313e207cf4068ab77bcb59103fa81da7115e08047c80b07bbe13f753e6",
-      "scope": ".harness/evaluation",
-      "target": ".harness/evaluation/.harness/memory/projects/project_locomo_official_submodule_path.md",
+      "scope": "packages/evaluation",
+      "target": "packages/evaluation/.harness/memory/projects/project_locomo_official_submodule_path.md",
       "reason": "评测有独立的用例、协议和验证责任；该条维护评测判断/执行上下文，保留在评测作用域。 对象：跑或改 LoCoMo Evaluation Smoke 时：首选 evaluation/run_locomo_official.py（submodule 官方 evaluate_qa.py / evaluation.py F1）。print-command 无 key；真实 smoke 用 KIMI_API_KEY + kimi-for-coding。evaluation/cases/locomo-smoke 是 legacy hand-port。不是 Benchmark Proof / Project Memory proof。",
       "source": "evaluation/.memory/projects/project_locomo_official_submodule_path.md",
       "targetSha256": "6ae270313e207cf4068ab77bcb59103fa81da7115e08047c80b07bbe13f753e6"
@@ -2247,8 +2247,8 @@
     {
       "description": "评 Project Memory / PM-online 或对照官方 RAG/截断基线时：官方 QA 是事后静态库，不等于对话中 write→use。全文见 knowledge/projects/memory/2026-09-16-LoCoMo-paper-10-questions.md「补充：过程中产生/消费 vs 事后静态库」。四臂仍 paused；分数按 ADR 0008 不是 PM proof。",
       "sha256": "2e5ebb6223bc4daf291235fd8d10a41338e6522a44dd199a4abb1000c982db41",
-      "scope": ".harness/evaluation",
-      "target": ".harness/evaluation/.harness/memory/projects/project_locomo_online_produce_consume_vs_posthoc_qa.md",
+      "scope": "packages/evaluation",
+      "target": "packages/evaluation/.harness/memory/projects/project_locomo_online_produce_consume_vs_posthoc_qa.md",
       "reason": "评测有独立的用例、协议和验证责任；该条维护评测判断/执行上下文，保留在评测作用域。 对象：评 Project Memory / PM-online 或对照官方 RAG/截断基线时：官方 QA 是事后静态库，不等于对话中 write→use。全文见 knowledge/projects/memory/2026-09-16-LoCoMo-paper-10-questions.md「补充：过程中产生/消费 vs 事后静态库」。四臂仍 paused；分数按 ADR 0008 不是 PM proof。",
       "source": "evaluation/.memory/projects/project_locomo_online_produce_consume_vs_posthoc_qa.md",
       "targetSha256": "2ea450c0986a250aaad5f50b0da3886cfccc3c99b469036b73b2f41451e8cb82"
@@ -2256,8 +2256,8 @@
     {
       "description": "改 evaluation/cases/locomo-smoke 时：这是 legacy hand-port。新跑用 evaluation/run_locomo_official.py。dummy 仍可用 python3 run.py dry-run（不要 key）。真实 run 若走旧入口：KIMI_API_KEY + OPENAI_BASE_URL=https://api.kimi.com/coding/v1，模型 kimi-for-coding。SUT 是上游 locomo 打分；不要接 Project Memory。",
       "sha256": "b1792f9b345f7df4fbfdeaf4138538b41444cfd347de177edd58167b83cee7b3",
-      "scope": ".harness/evaluation",
-      "target": ".harness/evaluation/.harness/memory/projects/project_locomo_smoke_truncated_baseline.md",
+      "scope": "packages/evaluation",
+      "target": "packages/evaluation/.harness/memory/projects/project_locomo_smoke_truncated_baseline.md",
       "reason": "评测有独立的用例、协议和验证责任；该条维护评测判断/执行上下文，保留在评测作用域。 对象：改 evaluation/cases/locomo-smoke 时：这是 legacy hand-port。新跑用 evaluation/run_locomo_official.py。dummy 仍可用 python3 run.py dry-run（不要 key）。真实 run 若走旧入口：KIMI_API_KEY + OPENAI_BASE_URL=https://api.kimi.com/coding/v1，模型 kimi-for-coding。SUT 是上游 locomo 打分；不要接 Project Memory。",
       "source": "evaluation/.memory/projects/project_locomo_smoke_truncated_baseline.md",
       "targetSha256": "b1792f9b345f7df4fbfdeaf4138538b41444cfd347de177edd58167b83cee7b3"
@@ -2265,8 +2265,8 @@
     {
       "description": "取 LoCoMo 数据或对照官方打分时：首选 submodule evaluation/third_party/locomo（https://github.com/VirusPC/locomo @ cb5151e32c82c3b6fc6ffdc18e72572691b9d8ea）；上游基线 https://github.com/snap-research/locomo @ 3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376 ；QA 入口 task_eval/evaluate_qa.py，打分 task_eval/evaluation.py。fork 唯一有意差异是 OpenAI-compatible 模型后端。",
       "sha256": "381b3a2abadd367103a673a0a7bb3c3b466824d39f2506221454c1cbef43e85a",
-      "scope": ".harness/evaluation",
-      "target": ".harness/evaluation/.harness/memory/references/reference_snap_research_locomo.md",
+      "scope": "packages/evaluation",
+      "target": "packages/evaluation/.harness/memory/references/reference_snap_research_locomo.md",
       "reason": "评测有独立的用例、协议和验证责任；该条维护评测判断/执行上下文，保留在评测作用域。 对象：取 LoCoMo 数据或对照官方打分时：首选 submodule evaluation/third_party/locomo（https://github.com/VirusPC/locomo @ cb5151e32c82c3b6fc6ffdc18e72572691b9d8ea）；上游基线 https://github.com/snap-research/locomo @ 3eb6f2c585f5e1699204e3c3bdf7adc5c28cb376 ；QA 入口 task_eval/evaluate_qa.py，打分 task_eval/evaluation.py。fork 唯一有意差异是 OpenAI-compatible 模型后端。",
       "source": "evaluation/.memory/references/reference_snap_research_locomo.md",
       "targetSha256": "381b3a2abadd367103a673a0a7bb3c3b466824d39f2506221454c1cbef43e85a"
@@ -2430,7 +2430,7 @@
   },
   "gitlink": {
     "source": "evaluation/third_party/locomo",
-    "target": ".harness/evaluation/third_party/locomo",
+    "target": "packages/evaluation/third_party/locomo",
     "sha": "cb5151e32c82c3b6fc6ffdc18e72572691b9d8ea"
   },
   "taskSidecarCount": 100,
@@ -2467,11 +2467,11 @@
   "privateOwnerMap": {
     ".": ".",
     "extensions": "extensions",
-    "skills/project-memory-init": "skills/project-memory-init",
+    "packages/skills/project-memory-init": "packages/skills/project-memory-init",
     "shared-extensions": "shared-extensions",
     "knowledge/tasks": ".harness/tasks",
     "knowledge/notes": "knowledge/notes",
-    "evaluation": ".harness/evaluation",
+    "evaluation": "packages/evaluation",
     "knowledge/teaching": "teaching"
   },
   "privatePolicy": "Per-clone explicit migration keeps private types at the original owner. Completed old promotions require separate opt-in provenance correction; absent or ambiguous evidence requires review without moving content.",
@@ -2494,7 +2494,7 @@
     "protectedPostsUnchanged": true,
     "gitlinkUnchanged": true,
     "remainingReferencedSourceDiagnostics": [
-      ".harness/evaluation/.agents/skills",
+      "packages/evaluation/.agents/skills",
       "teaching/.agents/skills"
     ]
   },
@@ -2503,11 +2503,11 @@
     "privateOwnerMap": {
       ".": ".",
       "extensions": ".",
-      "skills/project-memory-init": ".",
+      "packages/skills/project-memory-init": ".",
       "shared-extensions": ".",
       "knowledge/tasks": ".",
       "knowledge/notes": ".",
-      "evaluation": ".harness/evaluation",
+      "evaluation": "packages/evaluation",
       "knowledge/teaching": "teaching"
     },
     "privatePolicy": "Preserve private type identity, metadata, filenames and assets. Unknown owner/type or differing collision is a preflight conflict; never infer ownership from private body. Each local checkout must run the instance migration.",

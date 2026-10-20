@@ -9,7 +9,7 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 _避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md、从真 AGENTS 遍历时自动并进 README 组成边、在 edges 作用域的 AGENTS 本层逐条列出各 `.harness/` 材料、把无 edges 标记的普通 AGENTS.md 当成 edges 作用域
 
 **虚拟超节点（SuperAgentsNode）**：
-相对当前 `--scope` 的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用。典型叙事：把整个仓库视为上一级主体（如个人）的系统二，向上为该系统构建虚拟根。traverse 时**当作普通 AgentsNode**（只走 `children`，无跨系统特判）。挂载优先 `<scope>/.harness/README.md` 并从它展开；这份组织清单不存在时，再回退按 `cli/src/domain/config/harness-materials.json` 扁平挂已有材料（材料 README；`scope`+path；不挂其它系统 `AGENTS.md`；可空）。不把作用域根 `README.md` 当作中间优先层。见 ADR 0035。缺 AGENTS 且未开 `--super` 不得自动合成。系统森林在 traverse 之外由 `SystemForestService` / `edges forest list` 拼装为 `BaseNode[][]`（`independent` 早停；`innermost` 只留内层）。
+相对当前 `--scope` 的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用。典型叙事：把整个仓库视为上一级主体（如个人）的系统二，向上为该系统构建虚拟根。traverse 时**当作普通 AgentsNode**（只走 `children`，无跨系统特判）。挂载优先 `<scope>/.harness/README.md` 并从它展开；这份组织清单不存在时，再回退按 `packages/cli/src/domain/config/harness-materials.json` 扁平挂已有材料（材料 README；`scope`+path；不挂其它系统 `AGENTS.md`；可空）。不把作用域根 `README.md` 当作中间优先层。见 ADR 0035。缺 AGENTS 且未开 `--super` 不得自动合成。系统森林在 traverse 之外由 `SystemForestService` / `edges forest list` 拼装为 `BaseNode[][]`（`independent` 早停；`innermost` 只留内层）。
 _避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNode、缺 AGENTS 就静默加上超节点、把超节点落盘、用真 AGENTS 遍历并边代替 `--super`、让一次 traverse 跨系统拼森林、Super 挂其它系统 AGENTS、在入口 README 已存在时仍只按 harness-materials.json 扁平挂载（目标行为）
 
 **文档节点（Document Node）**：
@@ -225,7 +225,7 @@ _避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成�
 _避免使用_：仓根脚本、`edges-note`、把 CLI 定义为「bin entry」
 
 **NodeService**：
-节点读写与组成登记的门面。内容叶子的创建、读取、更新与删除都经它完成。commands 不直接装配它，只调用该领域的 `services/<module>/service.ts`；主文件可以 re-export 已有实现。
+节点读写与组成登记的门面。内容叶子的创建、读取、更新与删除都经它完成。commands 不直接装配它，只调用该领域的 `packages/services/<module>/service.ts`；主文件可以 re-export 已有实现。
 _避免使用_：records 旁路、扫盘后直接改叶子或父索引、commands 直接 `new NodeService` 或调用 `dated-leaf`
 
 **House CLI surface（标准 CRUD 旗标）**：
@@ -367,7 +367,7 @@ classifyTasks、proposeTypes、本地 `edges tasks project review-page` 与 `/ta
 _避免使用_：把它当 Task Project、当分类算法、`--mode`、把它当 Artifacts 预览服务、让 review-page 负责发布、把它当成 `/tasks/` 站点本身、status station、按用途再拆一壳
 
 **审阅壳（Review Shell）**：
-Task Project 审阅页这一份交互界面。仓库只留下源码和构建管线：源码在仓根 `apps/tasks-review-app/`（包名 `tasks-review-app`，与 CLI 分开，`apps/` 可再放别的预构建壳），产物在 `cli/src/commands/tasks/project/assets/review-page/`（`index.html`、`review.js`、`review.css`）且不入库，由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成。Vite 把产物写进 CLI 那份目录；`review-page.ts` 只读产物，不读 `apps/` 源码。写出的页把预构建 JS/CSS 内联成一份 HTML，数据是页内 JSON script `#edges-review-payload`。导航是 hash 或 hash 上的 query，同一份产物用于 `file://`、Artifacts 与 `/tasks/`。左栏是 Task Project：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。视口不窄于 Tailwind `md`（`≥768px`）时仍是这一套三栏。窄于 `md` 时同一壳改成纵向长滚动：项目筛选区、状态板，点卡片后详情接在状态板下方，仍在同一页里滚动。每张任务卡都有「移到项目…」，桌面与窄屏都能把卡片改到另一个 Task Project；这只改页内 JSON，写回仍是 Copy JSON。桌面左栏拖放还在。
+Task Project 审阅页这一份交互界面。仓库只留下源码和构建管线：源码在仓根 `packages/apps/tasks-review-app/`（包名 `tasks-review-app`，与 CLI 分开，`packages/apps/` 可再放别的预构建壳），产物在 `packages/cli/src/commands/tasks/project/assets/review-page/`（`index.html`、`review.js`、`review.css`）且不入库，由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成。Vite 把产物写进 CLI 那份目录；`review-page.ts` 只读产物，不读 `packages/apps/` 源码。写出的页把预构建 JS/CSS 内联成一份 HTML，数据是页内 JSON script `#edges-review-payload`。导航是 hash 或 hash 上的 query，同一份产物用于 `file://`、Artifacts 与 `/tasks/`。左栏是 Task Project：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。视口不窄于 Tailwind `md`（`≥768px`）时仍是这一套三栏。窄于 `md` 时同一壳改成纵向长滚动：项目筛选区、状态板，点卡片后详情接在状态板下方，仍在同一页里滚动。每张任务卡都有「移到项目…」，桌面与窄屏都能把卡片改到另一个 Task Project；这只改页内 JSON，写回仍是 Copy JSON。桌面左栏拖放还在。
 _避免使用_：三套页面、status station、本轮在中栏改状态、把语义检索算进这份壳、用另一套看板产品充当 Task 的领域模型、在用户机器上现编这份壳、把预构建产物提交进 git、默认用 zip+base64 装载荷、path history、靠服务器 rewrite 的 react-router、窄屏只做抽屉、底栏分页、左右滑页、窄屏另做一壳、窄屏在状态列上改状态
 
 **`/tasks/` 持久看板站**：
@@ -387,11 +387,11 @@ Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`�
 _避免使用_：用 title 或 name 当查找键、把展示字段当 apply 键
 
 **classifyTasks（edges）**：
-独立工作流 Skill（约定路径 `skills/project-tasks-classify/`，展示名 classifyTasks）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task Project 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
+独立工作流 Skill（约定路径 `packages/skills/project-tasks-classify/`，展示名 classifyTasks）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task Project 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
 _避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、要求 embedding / 向量分类、只整理 `_default`、公开 `edges tasks classify`、把审阅页当成分类器
 
 **proposeTypes（edges）**：
-独立工作流 Skill（约定路径 `skills/project-tasks-propose-types/`，展示名 proposeTypes）：从 `_default` Task 与已有 Task Project 质心提议新的 Task Project 候选，复用同一 Task Project 审阅页给人确认（无 GUI 时候选表回退），本身不落地为 Task Project。
+独立工作流 Skill（约定路径 `packages/skills/project-tasks-propose-types/`，展示名 proposeTypes）：从 `_default` Task 与已有 Task Project 质心提议新的 Task Project 候选，复用同一 Task Project 审阅页给人确认（无 GUI 时候选表回退），本身不落地为 Task Project。
 _避免使用_：并进 classifyTasks、自动建 project、Embedding NCC、K-means 命名、公开 `edges tasks propose`、为 proposeTypes 另开 `--mode`
 
 **edges-task-project**：

@@ -17,4 +17,4 @@ metadata:
 统一任务表达，使执行者先理解语境与目标，再理解行动和完成条件，也便于将笔记中的行动指南转为可接续的任务。
 
 **How to apply:**
-具体写作方法、字段顺序、必填与可选规则，以 [conversation-to-tasks Skill](../../../../../../skills/conversation-to-tasks/SKILL.md) 为准。本记忆只保留采用原因与适用范围，不重复维护方法正文，也不固定引用版本。
+具体写作方法、字段顺序、必填与可选规则，以 [conversation-to-tasks Skill](../../../../../../packages/skills/conversation-to-tasks/SKILL.md) 为准。本记忆只保留采用原因与适用范围，不重复维护方法正文，也不固定引用版本。

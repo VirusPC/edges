@@ -17,6 +17,6 @@ metadata:
 `node --test --import tsx test` 在该组合下把 `test/` 当成 ESM 模块解析，报 `ERR_MODULE_NOT_FOUND` for `test/index.json`，`pnpm --filter @viruspc/edges test` 无法跑递归套件。ADR 0009 实现计划仍写着旧命令；实现 PR 已把 `package.json` `"test"` 改成 glob。
 
 **How to apply:**
-- 改 `cli/package.json` `"test"` 或写计划里的测试命令时，保持 glob，不要为了「跟旧计划字面一致」改回 `node --test --import tsx test`。
+- 改 `packages/cli/package.json` `"test"` 或写计划里的测试命令时，保持 glob，不要为了「跟旧计划字面一致」改回 `node --test --import tsx test`。
 - 单文件仍可用 `node --test --import tsx test/tasks/utils/foo.test.ts`。
 - 不要因此换 vitest。

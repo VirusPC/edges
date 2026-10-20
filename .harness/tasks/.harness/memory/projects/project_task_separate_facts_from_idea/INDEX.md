@@ -11,7 +11,7 @@ metadata:
   edges-updated-at: '2026-10-05T19:54:17+08:00'
 ---
 
-所有层级的领域任务与维护任务都应区分事实、判断和候选做法；具体写法统一由 [conversation-to-tasks](../../../../../../skills/conversation-to-tasks/SKILL.md) 维护。
+所有层级的领域任务与维护任务都应区分事实、判断和候选做法；具体写法统一由 [conversation-to-tasks](../../../../../../packages/skills/conversation-to-tasks/SKILL.md) 维护。
 
 **Why:** 旧卡把事实背景与设想混在一起，接手者难以判断哪些已经发生、哪些仍需验证；在各看板重复存写作模板又会与 STAR 正文规则分叉。
 

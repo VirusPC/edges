@@ -1,6 +1,6 @@
 # Node Tree / CLI Decoupling Implementation Plan
 
-> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；frontmatter 直接采用 `gray-matter` 默认解析/序列化，删除自定义格式行为及 `js-yaml` 直接依赖；不合约定的文档直接修正。下文旧包路径、旧实现与验证属于历史记录，现行约定以链接的 API 文档为准。
+> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../packages/cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；frontmatter 直接采用 `gray-matter` 默认解析/序列化，删除自定义格式行为及 `js-yaml` 直接依赖；不合约定的文档直接修正。下文旧包路径、旧实现与验证属于历史记录，现行约定以链接的 API 文档为准。
 
 > **For agentic workers:** Use executing-plans to implement this plan task-by-task. User has authorized implementation in the current isolated worktree.
 
@@ -35,7 +35,7 @@
 
 ## Task 2: CLI integration
 
-**Files:** `cli/package.json`, `cli/src/utils/scope.ts`, `cli/test/utils/scope.test.ts`; existing Tasks/config consumers retain their adapter imports.
+**Files:** `packages/cli/package.json`, `packages/cli/src/utils/scope.ts`, `packages/cli/test/utils/scope.test.ts`; existing Tasks/config consumers retain their adapter imports.
 
 - [x] Add tests for explicit/env/cwd precedence, missing-owner validation independent of TasksError, Git stop policies and unchanged portable IDs. Run the error-independence test against old code and observe failure.
 - [x] Replace ancestor/discovery loops with core calls; keep env, Git fallback, scope eligibility and output/error translation in CLI. Add the workspace dependency and ensure CLI build/test generate core declarations; native JS runtime exports must support existing source/deployment entry paths without any prior build.

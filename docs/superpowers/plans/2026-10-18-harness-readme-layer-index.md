@@ -13,12 +13,12 @@
 ## 评审简化（已落地）
 
 - `--super` 不再有「作用域根 `README.md`」中间层：只有 `.harness/README.md`，否则扁平挂载。
-- 删除 `harness-index.ts`。`.harness/README.md` 就是普通 `ReadmeNode`。保证文件与 AGENTS 指针在 `init/service.ts`；`--super` 优先挂载在 `super-root.ts`；迁移在 `scripts/migrate-harness-readme-index.mts`（写入函数在 `init/migrate-scope-readme.ts`，供 init 与脚本共用）。`migrateScopeMaterialIndex` 只在 `initScope` 末尾调用一次。
+- 删除 `harness-index.ts`。`.harness/README.md` 就是普通 `ReadmeNode`。保证文件与 AGENTS 指针在 `init/service.ts`；`--super` 优先挂载在 `super-root.ts`；迁移在 `scripts/migrations/migrate-harness-readme-index.mts`（写入函数在 `init/migrate-scope-readme.ts`，供 init 与脚本共用）。`migrateScopeMaterialIndex` 只在 `initScope` 末尾调用一次。
 - 删除未使用的 `upsertLocalTypeLine` 与 `HarnessBoardModule.registration`。
 
 ## Global Constraints
 
-- 只对 `isScope` 为真的目录生效（`cli/src/services/scope.ts`：`AGENTS.md` 能解析成带 edges XML 标记的 `AgentsNode`）。
+- 只对 `isScope` 为真的目录生效（`packages/cli/src/services/scope.ts`：`AGENTS.md` 能解析成带 edges XML 标记的 `AgentsNode`）。
 - 只迁「本层系统维护信息」的材料清单。下层系统维护信息、Compose block、本层硬约束仍在 `AGENTS.md`。
 - AGENTS 本层恰好一条组成，指向 `.harness/README.md`，name 为「本层 harness 材料索引」。不双写。
 - `.harness/README.md` 是标准组织清单：`project-entries-local` / `project-entries-descendants`，无 YAML frontmatter。
@@ -32,10 +32,10 @@
 
 **Files:**
 
-- Create: `cli/src/domain/harness-index.ts`
-- Modify: `cli/src/services/node/super-root.ts`
-- Test: `cli/test/services/super-agents-node.test.ts`
-- Test: `cli/test/operations/traverse-dual-entry.test.ts`
+- Create: `packages/cli/src/domain/harness-index.ts`
+- Modify: `packages/cli/src/services/node/super-root.ts`
+- Test: `packages/cli/test/services/super-agents-node.test.ts`
+- Test: `packages/cli/test/operations/traverse-dual-entry.test.ts`
 
 **Interfaces:**
 
@@ -55,7 +55,7 @@
 3. 否则回退 `listHarnessMaterialAbsPaths` 扁平挂载。
 
 - [x] **Step 1:** 写失败测试：仅有 `.harness/README.md` 时不扁平挂 `tasks/README.md`；仅有根 `README.md` 时不扁平挂未链接的材料；两者都没有时仍扁平挂载。
-- [x] **Step 2:** 跑 `node --import tsx --test cli/test/services/super-agents-node.test.ts`，确认新断言失败。
+- [x] **Step 2:** 跑 `node --import tsx --test packages/cli/test/services/super-agents-node.test.ts`，确认新断言失败。
 - [x] **Step 3:** 实现 `preferredSuperHarnessIndex`，`createSuperAgentsNode` 改为优先单挂载。
 - [x] **Step 4:** 更新 `traverse-dual-entry` 里「tasks 在 readme 之前」的旧扁平顺序。
 - [x] **Step 5:** 测试通过。
@@ -64,15 +64,15 @@
 
 **Files:**
 
-- Create: `cli/src/services/harness-index.ts`
-- Modify: `cli/src/services/init/service.ts`
-- Modify: `cli/src/services/memory/agents.ts`
-- Modify: `cli/src/services/memory/types.ts`
-- Modify: `cli/src/services/memory/add-type.ts`
-- Modify: `cli/src/services/memory/doctor.ts`
-- Modify: `cli/src/services/init/modules.ts`（注释）
-- Test: `cli/test/services/harness-index.test.ts`
-- Test: `cli/test/commands/init-service.test.ts`
+- Create: `packages/cli/src/services/harness-index.ts`
+- Modify: `packages/cli/src/services/init/service.ts`
+- Modify: `packages/cli/src/services/memory/agents.ts`
+- Modify: `packages/cli/src/services/memory/types.ts`
+- Modify: `packages/cli/src/services/memory/add-type.ts`
+- Modify: `packages/cli/src/services/memory/doctor.ts`
+- Modify: `packages/cli/src/services/init/modules.ts`（注释）
+- Test: `packages/cli/test/services/harness-index.test.ts`
+- Test: `packages/cli/test/commands/init-service.test.ts`
 
 **Interfaces:**
 
@@ -102,7 +102,7 @@
 
 **Files:**
 
-- Create: `scripts/migrate-harness-readme-index.mts`
+- Create: `scripts/migrations/migrate-harness-readme-index.mts`
 - Modify: `package.json`（`migrate:harness-readme-index`）
 - Modify: 各 `isScope` 目录的 `AGENTS.md` 与新建的 `.harness/README.md`
 
@@ -114,7 +114,7 @@
 - 排除 `posts/`（本仓 AI 不改对外博客）。
 
 - [x] **Step 1:** 实现脚本，对仓库根预览。
-- [x] **Step 2:** `--apply`。抽查根、`extensions/`、`skills/project-memory-init/`：材料在 `.harness/README.md`；下层还在。非材料链接（内容 INDEX、`tech-reading/AGENTS.md`、根上的 README/CONTEXT/adr 导航）留在 AGENTS。
+- [x] **Step 2:** `--apply`。抽查根、`extensions/`、`packages/skills/project-memory-init/`：材料在 `.harness/README.md`；下层还在。非材料链接（内容 INDEX、`tech-reading/AGENTS.md`、根上的 README/CONTEXT/adr 导航）留在 AGENTS。
 - [x] **Step 3:** 再跑一次预览，计划为空。
 
 ### Task 4: 文档状态

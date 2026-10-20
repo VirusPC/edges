@@ -4,7 +4,7 @@
 
 **Goal:** 退出码与失败 JSON 由命令层的一个函数产生，Service 不再引用 `CliContext` 或 `utils/exit.ts`。
 
-**Architecture:** `commands/exit.ts` 把错误码映射成 0/2/4/1。`commands/result.ts` 组装 `{ status, errorCode, reason }` 与 stderr 提示。`services/config.ts` 拥有 `loadConfig`。`services/tasks/result.ts` 只保留用 `env` 打开看板的运行时，不再写进程输出。
+**Architecture:** `commands/exit.ts` 把错误码映射成 0/2/4/1。`commands/result.ts` 组装 `{ status, errorCode, reason }` 与 stderr 提示。`packages/services/config.ts` 拥有 `loadConfig`。`packages/services/tasks/result.ts` 只保留用 `env` 打开看板的运行时，不再写进程输出。
 
 **Tech Stack:** Node 22、`node:test`、tsx、现有 Commander。不新增依赖。
 
@@ -16,7 +16,7 @@
 - 失败 JSON：`{ status: "failed", errorCode, reason }` 加换行，写 stdout。给人看的短句写 stderr。
 - 成功 JSON：`{ status: "success", ... }` 加换行。
 - Service 不 import `CliContext`、`CliResult`、Commander。
-- `utils/` 不 import `services/`。
+- `utils/` 不 import `packages/services/`。
 - 不引入 sysexits 或 JSON 规范化库。
 
 ---
@@ -24,8 +24,8 @@
 ### Task 1: 错误码到退出码
 
 **Files:**
-- Create: `cli/src/commands/exit.ts`
-- Test: `cli/test/commands/exit.test.ts`
+- Create: `packages/cli/src/commands/exit.ts`
+- Test: `packages/cli/test/commands/exit.test.ts`
 
 **Interfaces:**
 - Consumes: 无
@@ -70,7 +70,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/commands/exit.ts cli/test/commands/exit.test.ts
+git add packages/cli/src/commands/exit.ts packages/cli/test/commands/exit.test.ts
 git commit -m "$(cat <<'EOF'
 feat: map domain error codes to process exit codes
 
@@ -81,9 +81,9 @@ EOF
 ### Task 2: 命令结果与用法错误
 
 **Files:**
-- Create: `cli/src/commands/result.ts`
-- Test: `cli/test/commands/result.test.ts`
-- Modify: `cli/src/context.ts`
+- Create: `packages/cli/src/commands/result.ts`
+- Test: `packages/cli/test/commands/result.test.ts`
+- Modify: `packages/cli/src/context.ts`
 
 **Interfaces:**
 - Consumes: `exitCodeForErrorCode`；`CliResult` from `context.ts`
@@ -179,7 +179,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/commands/result.ts cli/src/commands/exit.ts cli/src/context.ts cli/test/commands/result.test.ts
+git add packages/cli/src/commands/result.ts packages/cli/src/commands/exit.ts packages/cli/src/context.ts packages/cli/test/commands/result.test.ts
 git commit -m "$(cat <<'EOF'
 feat: build CLI results in the command layer
 
@@ -190,14 +190,14 @@ EOF
 ### Task 3: `loadConfig` 进入 Service
 
 **Files:**
-- Create: `cli/src/services/config.ts`
-- Modify: `cli/src/utils/config.ts`
-- Modify: `cli/test/utils/config.test.ts`
-- Modify: callers of `loadConfig` (`services/tasks/result.ts`, `commands/note.ts`, `services/note/types.ts`)
+- Create: `packages/cli/src/services/config.ts`
+- Modify: `packages/cli/src/utils/config.ts`
+- Modify: `packages/cli/test/utils/config.test.ts`
+- Modify: callers of `loadConfig` (`packages/services/tasks/result.ts`, `commands/note.ts`, `packages/services/note/types.ts`)
 
 **Interfaces:**
-- Consumes: `resolveScope`、`gitRoot` from `services/scope.ts`；`resolveEdgesRoot` 仍留在 `utils/config.ts`
-- Produces: `loadConfig(env?: NodeJS.ProcessEnv): RuntimeConfig` from `services/config.ts`。`RuntimeConfig` 字段与今天的 `utils/config.ts` 相同。
+- Consumes: `resolveScope`、`gitRoot` from `packages/services/scope.ts`；`resolveEdgesRoot` 仍留在 `utils/config.ts`
+- Produces: `loadConfig(env?: NodeJS.ProcessEnv): RuntimeConfig` from `packages/services/config.ts`。`RuntimeConfig` 字段与今天的 `utils/config.ts` 相同。
 
 - [ ] **Step 1: Write the failing test**
 
@@ -206,11 +206,11 @@ EOF
 - [ ] **Step 2: Run test to verify it fails**
 
 Run: `pnpm --filter edges-cli exec node --test --import tsx './test/utils/config.test.ts'`
-Expected: FAIL，找不到 `services/config.js`
+Expected: FAIL，找不到 `packages/services/config.js`
 
 - [ ] **Step 3: Write minimal implementation**
 
-把 `loadConfig` 与 `RuntimeConfig` 从 `utils/config.ts` 剪到 `services/config.ts`。`utils/config.ts` 只保留 `resolveEdgesRoot`。全仓库把 `loadConfig` / `RuntimeConfig` 的 import 改到 `services/config.js`。确认 `utils/` 下不再出现 `from "../services/` 或 `from "../../services/`。
+把 `loadConfig` 与 `RuntimeConfig` 从 `utils/config.ts` 剪到 `packages/services/config.ts`。`utils/config.ts` 只保留 `resolveEdgesRoot`。全仓库把 `loadConfig` / `RuntimeConfig` 的 import 改到 `packages/services/config.js`。确认 `utils/` 下不再出现 `from "../services/` 或 `from "../../services/`。
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -220,7 +220,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/services/config.ts cli/src/utils/config.ts cli/test/utils/config.test.ts cli/src/services/tasks/result.ts cli/src/commands/note.ts cli/src/services/note/types.ts
+git add packages/cli/src/services/config.ts packages/cli/src/utils/config.ts packages/cli/test/utils/config.test.ts packages/cli/src/services/tasks/result.ts packages/cli/src/commands/note.ts packages/cli/src/services/note/types.ts
 git commit -m "$(cat <<'EOF'
 refactor: load runtime config from the service layer
 
@@ -231,10 +231,10 @@ EOF
 ### Task 4: Tasks 运行时不再接收 CliContext
 
 **Files:**
-- Modify: `cli/src/services/tasks/result.ts`
-- Create: `cli/src/commands/tasks/run.ts`
+- Modify: `packages/cli/src/services/tasks/result.ts`
+- Create: `packages/cli/src/commands/tasks/run.ts`
 - Modify: 每个调用 `runTasksCommand` / `succeed` / `fail` 的 `commands/tasks/**` 文件
-- Test: 现有 `cli/test/tasks/*.test.ts` 保持通过
+- Test: 现有 `packages/cli/test/tasks/*.test.ts` 保持通过
 
 **Interfaces:**
 - Consumes: `loadConfig`；`fail` / `succeed` from `commands/result.ts`
@@ -244,7 +244,7 @@ EOF
 
 - [ ] **Step 1: Write the failing test**
 
-在 `cli/test/services/tasks-runtime.test.ts`：
+在 `packages/cli/test/services/tasks-runtime.test.ts`：
 
 ```ts
 import test from "node:test";
@@ -277,7 +277,7 @@ Expected: FAIL，`openTasksRuntime` 不存在或源码仍包含 `CliContext`
 
 - [ ] **Step 3: Write minimal implementation**
 
-`services/tasks/result.ts` 删除 `runTasksCommand`、`fail`、`succeed`、`CliResult`。`tasksRuntime(ctx)` 改名为 `openTasksRuntime`，参数是上面的 input，内部仍 `loadConfig(input.env)`。`asTasksError` 留在 service，供命令层使用，它只认识 `TasksError`，不认识 `CliResult`。
+`packages/services/tasks/result.ts` 删除 `runTasksCommand`、`fail`、`succeed`、`CliResult`。`tasksRuntime(ctx)` 改名为 `openTasksRuntime`，参数是上面的 input，内部仍 `loadConfig(input.env)`。`asTasksError` 留在 service，供命令层使用，它只认识 `TasksError`，不认识 `CliResult`。
 
 `commands/tasks/run.ts` 实现 `runTasksCommand`。各 task 命令改为从这里 import `runTasksCommand`、`succeed`、`fail`。`succeed` / `fail` 来自 `commands/result.ts`。tasks 的 `fail` 包装成：
 
@@ -297,7 +297,7 @@ Expected: PASS。tasks 集成测试的 stdout 仍是 `{ status: "success" | "fai
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/services/tasks/result.ts cli/src/commands/tasks cli/test/services/tasks-runtime.test.ts
+git add packages/cli/src/services/tasks/result.ts packages/cli/src/commands/tasks packages/cli/test/services/tasks-runtime.test.ts
 git commit -m "$(cat <<'EOF'
 refactor: open the task board without a CLI context
 
@@ -310,6 +310,6 @@ EOF
 - 不改 `list --group-by` 的输出形状。
 - 不新增 `tasks delete`、`note create` 或 Memory / Skill 动词。
 - 不改 artifacts-preview 的 HTTP。
-- 不把 `commands/artifacts/server/ops.ts` 搬进 `services/`。
+- 不把 `commands/artifacts/server/ops.ts` 搬进 `packages/services/`。
 
 这些各自一份计划，每份都能单独测试。

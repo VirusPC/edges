@@ -16,7 +16,7 @@
 - Git subject: `type: subject`
 - Capability Surface wording, if mentioned: always **CLI + Skill + MCP** (three peers). Never “必要时 MCP”, never “CLI + Skill” as the Edges shorthand, never npm `package.json` `"bin"` as a layer
 - This round implements **CLI project subcommands + project-tasks-classify Skill**. Do not implement generic edges-tasks Skill/MCP CRUD (that backlog stays separate). Do not add a classify MCP
-- Skill path is exactly `skills/project-tasks-classify/` (frontmatter `name: project-tasks-classify`). Display name in headings is classifyTasks
+- Skill path is exactly `packages/skills/project-tasks-classify/` (frontmatter `name: project-tasks-classify`). Display name in headings is classifyTasks
 - Classification is **LLM / agent judgment** onto **already-set** Task Project centroids (title + description). Whole-board classify, not only `_default`. Batch human-editable suggestion table, then CLI apply. Do not require embeddings
 - No embeddings. No vector store. No `scripts/` under project-tasks-classify. No public `edges tasks classify` (or `classify-tasks`) verb
 - CLI: `edges tasks project list|get|create|update`. `create` writes the project directory + lightweight `AGENTS.md` + refreshes the root `knowledge/tasks/AGENTS.md` Task Projects section **outside** `<!-- project-memory:start -->` … `<!-- project-memory:end -->`
@@ -27,52 +27,52 @@
 - Bootstrap metadata only. Do **not** relocate Task files or sidecars (ADR 0009 already moved the live board into `_default/<status>/`)
 - Do not put `ingest` / `fs` / `writer` / `now` / `repoPath` on `CliContext` or `run()`’s second argument
 - Do not add `js-yaml` / `gray-matter` / `simple-git` / vitest. Stay on `commander` + `zod` + `node:test` + `tsx`
-- Test runner is `cli/package.json` `"test": "node --test --import tsx './test/**/*.test.ts'"`. New tests go under `cli/test/tasks/`
+- Test runner is `packages/cli/package.json` `"test": "node --test --import tsx './test/**/*.test.ts'"`. New tests go under `packages/cli/test/tasks/`
 - Reuse `EDGES_REPO` from `loadConfig()` as the repo root. Board lives at `<repoPath>/knowledge/tasks/`
 - Relative TypeScript imports use `.js` (nodenext)
 - Invalid project slug / title / description = `VALIDATION_ERROR`, exit 2, no writes (except `ensure` which may write missing metadata files before a verb fails)
 - Public repo: no credentials, tokens, or personal data in commits
 - `pull` / `rebase` use `--autostash`. Do not commit `.obsidian/workspace.json`
 - Do not auto-create/edit/move/delete `knowledge/posts/`
-- This plan-only PR that first lands this document must **not** implement CLI or Skill behavior, must **not** write `skills/project-tasks-classify/**`, and must **not** seed live `knowledge/tasks/**/AGENTS.md`
+- This plan-only PR that first lands this document must **not** implement CLI or Skill behavior, must **not** write `packages/skills/project-tasks-classify/**`, and must **not** seed live `knowledge/tasks/**/AGENTS.md`
 
 ---
 
 ## File map
 
-Verified on `origin/main` after ADR 0010 (`1a5875a`). Command tree is `cli/src/tasks.ts` (group) + `cli/src/tasks/<verb>.ts` (leaf). `cli/README.md` says **file = one command node**, **folder = children**. Slug helpers already live at `cli/src/tasks/utils/project.ts` (`parseTaskProject`, `listProjectIds` is on `board.ts`). Do not rename those.
+Verified on `origin/main` after ADR 0010 (`1a5875a`). Command tree is `packages/cli/src/tasks.ts` (group) + `packages/cli/src/tasks/<verb>.ts` (leaf). `packages/cli/README.md` says **file = one command node**, **folder = children**. Slug helpers already live at `packages/cli/src/tasks/utils/project.ts` (`parseTaskProject`, `listProjectIds` is on `board.ts`). Do not rename those.
 
 **Create**
 
-- `cli/src/tasks/utils/project-meta.ts` — title/description validators; parse/render lightweight project `AGENTS.md`; rewrite root Task Projects section; `ensureProjectMetadata`; `listProjects` / `getProject` / `createProject` / `updateProject`
-- `cli/src/tasks/project.ts` — `project` command group (register children; missing-subcommand action)
-- `cli/src/tasks/project/list.ts` — `edges tasks project list`
-- `cli/src/tasks/project/get.ts` — `edges tasks project get <project>`
-- `cli/src/tasks/project/create.ts` — `edges tasks project create <project> --title --description`
-- `cli/src/tasks/project/update.ts` — `edges tasks project update <project> [--title] [--description]`
-- `cli/test/tasks/utils/project-meta.test.ts` — pure string + tmpdir helper tests
-- `cli/test/tasks/project.test.ts` — domain CRUD via `createProject` / `listProjects` / `getProject` / `updateProject`
-- `skills/project-tasks-classify/SKILL.md` — classifyTasks workflow (Task 6)
-- `skills/project-tasks-classify/CHANGELOG.md` — skill-local 1.0.0 (Task 6)
+- `packages/cli/src/tasks/utils/project-meta.ts` — title/description validators; parse/render lightweight project `AGENTS.md`; rewrite root Task Projects section; `ensureProjectMetadata`; `listProjects` / `getProject` / `createProject` / `updateProject`
+- `packages/cli/src/tasks/project.ts` — `project` command group (register children; missing-subcommand action)
+- `packages/cli/src/tasks/project/list.ts` — `edges tasks project list`
+- `packages/cli/src/tasks/project/get.ts` — `edges tasks project get <project>`
+- `packages/cli/src/tasks/project/create.ts` — `edges tasks project create <project> --title --description`
+- `packages/cli/src/tasks/project/update.ts` — `edges tasks project update <project> [--title] [--description]`
+- `packages/cli/test/tasks/utils/project-meta.test.ts` — pure string + tmpdir helper tests
+- `packages/cli/test/tasks/project.test.ts` — domain CRUD via `createProject` / `listProjects` / `getProject` / `updateProject`
+- `packages/skills/project-tasks-classify/SKILL.md` — classifyTasks workflow (Task 6)
+- `packages/skills/project-tasks-classify/CHANGELOG.md` — skill-local 1.0.0 (Task 6)
 
 **Modify**
 
-- `cli/src/tasks/utils/types.ts` — `PROJECT_NOT_FOUND` on `TasksErrorCode`; `TaskProjectRecord` type
-- `cli/src/tasks/utils/format.ts` — `TasksSuccess` gains `projects?` plus the flattened project-record fields
-- `cli/src/tasks.ts` — `addProjectCommand`; `TASKS_AFTER_HELP` lists `project list|get|create|update`; still no `classify`
-- `cli/src/tasks/utils/write.ts` — no behavior change required; Task 5 adds a CLI regression that `update --project` keeps status and priority (unit test already matches `edges-tasks-status` / `edges-task-priority` in `test/tasks/utils/write.test.ts`)
-- `cli/README.md` — document `project` verbs; Capability Surface stays CLI + Skill + MCP
+- `packages/cli/src/tasks/utils/types.ts` — `PROJECT_NOT_FOUND` on `TasksErrorCode`; `TaskProjectRecord` type
+- `packages/cli/src/tasks/utils/format.ts` — `TasksSuccess` gains `projects?` plus the flattened project-record fields
+- `packages/cli/src/tasks.ts` — `addProjectCommand`; `TASKS_AFTER_HELP` lists `project list|get|create|update`; still no `classify`
+- `packages/cli/src/tasks/utils/write.ts` — no behavior change required; Task 5 adds a CLI regression that `update --project` keeps status and priority (unit test already matches `edges-tasks-status` / `edges-task-priority` in `test/tasks/utils/write.test.ts`)
+- `packages/cli/README.md` — document `project` verbs; Capability Surface stays CLI + Skill + MCP
 - `knowledge/tasks/README.md` — one short paragraph: each project including `_default` has lightweight `AGENTS.md`; root Task Projects section is CLI-maintained
-- `cli/test/tasks/cli.test.ts` — help lists `project`; omits `classify`
-- `cli/test/tasks/parse.test.ts` — `run(["tasks", "project", …])` happy/error paths
-- `cli/test/tasks/run.test.ts` — tmpdir `EDGES_REPO` integration
+- `packages/cli/test/tasks/cli.test.ts` — help lists `project`; omits `classify`
+- `packages/cli/test/tasks/parse.test.ts` — `run(["tasks", "project", …])` happy/error paths
+- `packages/cli/test/tasks/run.test.ts` — tmpdir `EDGES_REPO` integration
 - `CHANGELOG.md` `[Unreleased]` — Added lines when implementation lands (plan-only PR adds only the plan line)
 - `.memory/projects/project_classify_tasks_and_project_metadata.md` — via `$project-memory-remember` (implementation updates How-to to “project CLI + project-tasks-classify Skill landed”; Capability Surface remains CLI + Skill + MCP)
 - Live board metadata only, in Task 7: `knowledge/tasks/_default/AGENTS.md` (create) and the Task Projects section of `knowledge/tasks/AGENTS.md`
 
 **Do not create/commit**
 
-- `skills/edges-tasks/**` or any generic tasks Skill/MCP CRUD wrapper
+- `packages/skills/edges-tasks/**` or any generic tasks Skill/MCP CRUD wrapper
 - MCP server / tool for classify or for `tasks project`
 - `edges tasks classify` / `edges tasks project classify`
 - Embeddings, vector-classification code, or project-tasks-classify `scripts/`
@@ -247,7 +247,7 @@ Canonical block (note the blank line after the intro sentence):
 CLI-maintained index of Task Project titles and descriptions. Do not hand-edit this section.
 
 - [`_default`](_default/AGENTS.md) — Ungrouped tasks that have not been assigned a named Task Project.
-- [`cli`](cli/AGENTS.md) — edges CLI work
+- [`cli`](packages/cli/AGENTS.md) — edges CLI work
 <!-- task-projects:end -->
 ```
 
@@ -377,9 +377,9 @@ pnpm --filter edges-cli test
 ### Task 1: Parse and render Task Project AGENTS.md
 
 **Files:**
-- Modify: `cli/src/tasks/utils/types.ts` — add `PROJECT_NOT_FOUND` to `TasksErrorCode`; add `TaskProjectRecord`
-- Create: `cli/src/tasks/utils/project-meta.ts` — validators + parse/render only (no fs yet)
-- Create: `cli/test/tasks/utils/project-meta.test.ts`
+- Modify: `packages/cli/src/tasks/utils/types.ts` — add `PROJECT_NOT_FOUND` to `TasksErrorCode`; add `TaskProjectRecord`
+- Create: `packages/cli/src/tasks/utils/project-meta.ts` — validators + parse/render only (no fs yet)
+- Create: `packages/cli/test/tasks/utils/project-meta.test.ts`
 
 **Interfaces:**
 - Consumes: `DEFAULT_TASK_PROJECT`, `DEFAULT_TASK_PROJECT_DIR`, `TaskProjectId`, `TasksError` from `./types.js`; `projectDirName` from `./project.js`
@@ -517,9 +517,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/types.ts \
-  cli/src/tasks/utils/project-meta.ts \
-  cli/test/tasks/utils/project-meta.test.ts
+git add packages/cli/src/tasks/utils/types.ts \
+  packages/cli/src/tasks/utils/project-meta.ts \
+  packages/cli/test/tasks/utils/project-meta.test.ts
 git commit -m "feat(tasks): parse Task Project AGENTS.md metadata" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -529,8 +529,8 @@ git commit -m "feat(tasks): parse Task Project AGENTS.md metadata" \
 ### Task 2: Rewrite root Task Projects index outside project-memory markers
 
 **Files:**
-- Modify: `cli/src/tasks/utils/project-meta.ts` — add marker constants + `rewriteRootAgents` + `oneLineDescription`
-- Modify: `cli/test/tasks/utils/project-meta.test.ts`
+- Modify: `packages/cli/src/tasks/utils/project-meta.ts` — add marker constants + `rewriteRootAgents` + `oneLineDescription`
+- Modify: `packages/cli/test/tasks/utils/project-meta.test.ts`
 
 **Interfaces:**
 - Consumes: `TaskProjectRecord`, `parseProjectDescription` from Task 1; `projectDirName` from `./project.js`
@@ -644,8 +644,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/project-meta.ts \
-  cli/test/tasks/utils/project-meta.test.ts
+git add packages/cli/src/tasks/utils/project-meta.ts \
+  packages/cli/test/tasks/utils/project-meta.test.ts
 git commit -m "feat(tasks): rewrite Task Projects index outside memory markers" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -655,8 +655,8 @@ git commit -m "feat(tasks): rewrite Task Projects index outside memory markers" 
 ### Task 3: ensureProjectMetadata bootstrap (tmpdir only)
 
 **Files:**
-- Modify: `cli/src/tasks/utils/project-meta.ts` — `ensureProjectMetadata`, `refreshProjectIndex`, `readProjectRecord`
-- Modify: `cli/test/tasks/utils/project-meta.test.ts`
+- Modify: `packages/cli/src/tasks/utils/project-meta.ts` — `ensureProjectMetadata`, `refreshProjectIndex`, `readProjectRecord`
+- Modify: `packages/cli/test/tasks/utils/project-meta.test.ts`
 - Consumes `BoardWriter` from `./board.js` (same type `write.ts` uses)
 
 **Interfaces:**
@@ -761,8 +761,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/project-meta.ts \
-  cli/test/tasks/utils/project-meta.test.ts
+git add packages/cli/src/tasks/utils/project-meta.ts \
+  packages/cli/test/tasks/utils/project-meta.test.ts
 git commit -m "feat(tasks): bootstrap Task Project metadata without moving tasks" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -772,9 +772,9 @@ git commit -m "feat(tasks): bootstrap Task Project metadata without moving tasks
 ### Task 4: Domain list/get/create/update
 
 **Files:**
-- Modify: `cli/src/tasks/utils/project-meta.ts` — `listProjects`, `getProject`, `createProject`, `updateProject`
-- Modify: `cli/src/tasks/utils/format.ts` — extend `TasksSuccess` (used in Task 5; add the fields now so domain tests can `JSON.stringify` the record shape)
-- Create: `cli/test/tasks/project.test.ts`
+- Modify: `packages/cli/src/tasks/utils/project-meta.ts` — `listProjects`, `getProject`, `createProject`, `updateProject`
+- Modify: `packages/cli/src/tasks/utils/format.ts` — extend `TasksSuccess` (used in Task 5; add the fields now so domain tests can `JSON.stringify` the record shape)
+- Create: `packages/cli/test/tasks/project.test.ts`
 
 **Interfaces:**
 - Consumes: `parseTaskProject` from `./project.js`; helpers from Tasks 1–3; `BoardWriter` from `./board.js`
@@ -1012,9 +1012,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/project-meta.ts \
-  cli/src/tasks/utils/format.ts \
-  cli/test/tasks/project.test.ts
+git add packages/cli/src/tasks/utils/project-meta.ts \
+  packages/cli/src/tasks/utils/format.ts \
+  packages/cli/test/tasks/project.test.ts
 git commit -m "feat(tasks): add Task Project metadata domain CRUD" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1024,17 +1024,17 @@ git commit -m "feat(tasks): add Task Project metadata domain CRUD" \
 ### Task 5: Wire `edges tasks project` + help/README + orthogonality
 
 **Files:**
-- Create: `cli/src/tasks/project.ts`
-- Create: `cli/src/tasks/project/list.ts`
-- Create: `cli/src/tasks/project/get.ts`
-- Create: `cli/src/tasks/project/create.ts`
-- Create: `cli/src/tasks/project/update.ts`
-- Modify: `cli/src/tasks.ts` — `addProjectCommand(tasks, ctx)` after `addUpdateCommand`; extend `TASKS_AFTER_HELP`
-- Modify: `cli/README.md` — add the four verbs under `## tasks`; Capability Surface stays CLI + Skill + MCP
+- Create: `packages/cli/src/tasks/project.ts`
+- Create: `packages/cli/src/tasks/project/list.ts`
+- Create: `packages/cli/src/tasks/project/get.ts`
+- Create: `packages/cli/src/tasks/project/create.ts`
+- Create: `packages/cli/src/tasks/project/update.ts`
+- Modify: `packages/cli/src/tasks.ts` — `addProjectCommand(tasks, ctx)` after `addUpdateCommand`; extend `TASKS_AFTER_HELP`
+- Modify: `packages/cli/README.md` — add the four verbs under `## tasks`; Capability Surface stays CLI + Skill + MCP
 - Modify: `knowledge/tasks/README.md` — after “Issue 层 Task Project”, add that each project including `_default` has lightweight `AGENTS.md` and that `knowledge/tasks/AGENTS.md` has a CLI-maintained Task Projects section outside project-memory markers
-- Modify: `cli/test/tasks/cli.test.ts`
-- Modify: `cli/test/tasks/parse.test.ts`
-- Modify: `cli/test/tasks/run.test.ts`
+- Modify: `packages/cli/test/tasks/cli.test.ts`
+- Modify: `packages/cli/test/tasks/parse.test.ts`
+- Modify: `packages/cli/test/tasks/run.test.ts`
 
 **Interfaces:**
 - Consumes: `listProjects` / `getProject` / `createProject` / `updateProject`; `runTasksCommand` / `succeed` from `./utils/result.js` (project leaves import `../utils/result.js`); `CliContext` / `usageError`
@@ -1062,7 +1062,7 @@ There is no classify command. Task moves stay on update --project (same status a
 Keep the existing “Skill and MCP come later on this same contract. Capability Surface is CLI + Skill + MCP.” sentence. After this round the project metadata Skill (classifyTasks) exists; generic tasks Skill/MCP CRUD is still later. Rewrite that pair to:
 
 ```
-classifyTasks Skill (skills/project-tasks-classify) uses these project verbs plus update --project.
+classifyTasks Skill (packages/skills/project-tasks-classify) uses these project verbs plus update --project.
 Generic tasks Skill/MCP CRUD is a later backlog on this same contract.
 Capability Surface is CLI + Skill + MCP.
 ```
@@ -1279,14 +1279,14 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks.ts \
-  cli/src/tasks/project.ts \
-  cli/src/tasks/project \
-  cli/README.md \
+git add packages/cli/src/tasks.ts \
+  packages/cli/src/tasks/project.ts \
+  packages/cli/src/tasks/project \
+  packages/cli/README.md \
   knowledge/tasks/README.md \
-  cli/test/tasks/cli.test.ts \
-  cli/test/tasks/parse.test.ts \
-  cli/test/tasks/run.test.ts
+  packages/cli/test/tasks/cli.test.ts \
+  packages/cli/test/tasks/parse.test.ts \
+  packages/cli/test/tasks/run.test.ts
 git commit -m "feat(tasks): add edges tasks project list|get|create|update" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1296,10 +1296,10 @@ git commit -m "feat(tasks): add edges tasks project list|get|create|update" \
 ### Task 6: project-tasks-classify Skill (workflow only)
 
 **Files:**
-- Create: `skills/project-tasks-classify/SKILL.md`
-- Create: `skills/project-tasks-classify/CHANGELOG.md`
+- Create: `packages/skills/project-tasks-classify/SKILL.md`
+- Create: `packages/skills/project-tasks-classify/CHANGELOG.md`
 - Modify: run `pnpm skills:link` so `.agents/skills/project-tasks-classify` is a relative symlink to `../../skills/project-tasks-classify` (script is `scripts/link-agent-skills`; commit the symlink if git tracks `.agents/skills` links — if `.agents/skills` ignores Edges-owned links, still run the script and commit only the skill directory)
-- Do not create: `skills/project-tasks-classify/scripts/`
+- Do not create: `packages/skills/project-tasks-classify/scripts/`
 
 **Interfaces:**
 - Consumes: CLI from Task 5 (`project list|get|create|update`, `tasks list`, `tasks update --project`)
@@ -1320,18 +1320,18 @@ version: 1.0.0
 There is no skill test runner. Use a file probe that must fail before the directory exists:
 
 ```bash
-test ! -f skills/project-tasks-classify/SKILL.md
+test ! -f packages/skills/project-tasks-classify/SKILL.md
 ```
 
 Expected before Step 3: exit 1 (file missing). After Step 3 the inverse plus content gates:
 
 ```bash
-test -f skills/project-tasks-classify/SKILL.md
-test -f skills/project-tasks-classify/CHANGELOG.md
-test ! -d skills/project-tasks-classify/scripts
+test -f packages/skills/project-tasks-classify/SKILL.md
+test -f packages/skills/project-tasks-classify/CHANGELOG.md
+test ! -d packages/skills/project-tasks-classify/scripts
 python3 - <<'PY'
 from pathlib import Path
-text = Path("skills/project-tasks-classify/SKILL.md").read_text()
+text = Path("packages/skills/project-tasks-classify/SKILL.md").read_text()
 assert text.startswith("---\nname: project-tasks-classify\n")
 assert "version: 1.0.0" in text.split("---", 2)[1]
 for needle in [
@@ -1354,13 +1354,13 @@ PY
 
 - [ ] **Step 2: Run probe to verify it fails**
 
-Run: `test ! -f skills/project-tasks-classify/SKILL.md`
+Run: `test ! -f packages/skills/project-tasks-classify/SKILL.md`
 
 Expected: the `test ! -f` succeeds (file absent) **before** implementation. The python gate is the post-condition.
 
 - [ ] **Step 3: Write the Skill**
 
-Write `skills/project-tasks-classify/SKILL.md` with **exactly** this body after the frontmatter above (executor may wrap lines but must keep every required needle):
+Write `packages/skills/project-tasks-classify/SKILL.md` with **exactly** this body after the frontmatter above (executor may wrap lines but must keep every required needle):
 
 ```markdown
 # classifyTasks
@@ -1433,7 +1433,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks update <stem> --project <sug
 - **MCP：** 对等入口；本轮没有 classify MCP，也没有 generic tasks MCP。缺 shell 时说明 generic tasks Skill/MCP CRUD 仍在 backlog，不要假装 MCP 已能搬 Task
 ```
 
-`skills/project-tasks-classify/CHANGELOG.md`:
+`packages/skills/project-tasks-classify/CHANGELOG.md`:
 
 ```markdown
 # Changelog
@@ -1465,12 +1465,12 @@ Do **not** `git tag skill/project-tasks-classify@1.0.0` in the implementation PR
 
 - [ ] **Step 4: Run probe to verify it passes**
 
-Run the python gate from Step 1. Expected: exit 0. Also `test ! -d skills/project-tasks-classify/scripts`.
+Run the python gate from Step 1. Expected: exit 0. Also `test ! -d packages/skills/project-tasks-classify/scripts`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add skills/project-tasks-classify
+git add packages/skills/project-tasks-classify
 git add -u .agents/skills/project-tasks-classify 2>/dev/null || true
 git commit -m "feat(skills): add classifyTasks workflow skill" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1551,7 +1551,7 @@ If any Task `*.md` or `.{stem}.log.md` appears, **stop and revert those files**.
 
 ```
 - `edges tasks project list|get|create|update`：Task Project 元数据（每 project 含 `_default` 的轻量 AGENTS.md + 根 `knowledge/tasks/AGENTS.md` Task Projects 节，写在 project-memory 受管标记外）。Q18=A；看板 markdown 仍是 Task 真源。无 embedding，无 `edges tasks classify`。
-- `skills/project-tasks-classify`：classifyTasks 整板按已有 Task Project 质心做归属建议（LLM / agent 判断）；人改建议表后经 CLI 落地。能力面 CLI + Skill + MCP。Generic tasks Skill/MCP CRUD 仍是另卡 backlog。
+- `packages/skills/project-tasks-classify`：classifyTasks 整板按已有 Task Project 质心做归属建议（LLM / agent 判断）；人改建议表后经 CLI 落地。能力面 CLI + Skill + MCP。Generic tasks Skill/MCP CRUD 仍是另卡 backlog。
 ```
 
 Update the existing project memory via `$project-memory-remember` (do not hand-edit `.memory/PROJECT.md`). Reuse slug `classify_tasks_and_project_metadata` if the plan-only PR already created it; otherwise create it. Body shape:
@@ -1625,7 +1625,7 @@ Only stage `.memory/PROJECT.md` if the remember script refreshed the index. Do n
 
 | Decision | Task |
 | --- | --- |
-| Skill `skills/project-tasks-classify/`, display classifyTasks | Task 6 |
+| Skill `packages/skills/project-tasks-classify/`, display classifyTasks | Task 6 |
 | Classify onto user-set project centroids (LLM / agent judgment); whole-board classify; batch editable table; CLI apply | Task 6 Locked design |
 | No embeddings; no `edges tasks classify` | Global Constraints; Tasks 5–6 tests |
 | `edges tasks project list\|get\|create\|update`; create writes dir + AGENTS.md + root index outside project-memory markers | Tasks 2–5 |

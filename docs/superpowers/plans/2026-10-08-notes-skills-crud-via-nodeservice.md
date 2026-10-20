@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 消灭 notes/skills 对 NodeService 的旁路：CLI 的 create/get/update/delete 全部经 `NodeService`；删除 `services/note/records.ts` 与 `services/skills/records.ts`；**整段丢掉** notes 的 git/PR ingest，`notes create` 改为纯本地 `NodeService.create`；改 ADR 0027；补短 ADR + 测试。CLI 旗标按动词对齐：create/update 用 metadata + `--body`（只加该类型真正需要的旗标）；get/delete 只收目标；list 用与其他 list 相同的 `--filter` / `--group-by` 信封，再加全局 `--scope` / `--super` / `--all`。不另造 notes/skills 专用 list 旗标，也不并列发明 `--content` 这类名字。这套旗标是全仓标准（README / 组织列表、memory、tasks 等适用处也照此），本卡只先实现 notes/skills；短 ADR 与 CONTEXT 写明原则，供其他域跟随，本卡不顺手改那些命令。
+**Goal:** 消灭 notes/skills 对 NodeService 的旁路：CLI 的 create/get/update/delete 全部经 `NodeService`；删除 `packages/cli/src/services/note/records.ts` 与 `packages/cli/src/services/skills/records.ts`；**整段丢掉** notes 的 git/PR ingest，`notes create` 改为纯本地 `NodeService.create`；改 ADR 0027；补短 ADR + 测试。CLI 旗标按动词对齐：create/update 用 metadata + `--body`（只加该类型真正需要的旗标）；get/delete 只收目标；list 用与其他 list 相同的 `--filter` / `--group-by` 信封，再加全局 `--scope` / `--super` / `--all`。不另造 notes/skills 专用 list 旗标，也不并列发明 `--content` 这类名字。这套旗标是全仓标准（README / 组织列表、memory、tasks 等适用处也照此），本卡只先实现 notes/skills；短 ADR 与 CONTEXT 写明原则，供其他域跟随，本卡不顺手改那些命令。
 
-**Architecture:** CLI 命令层直接（或极薄 helper）调用 `NodeService.get/create/update/destroy` + `NoteNode`/`SkillNode`，对齐 memory `records` 已采用的模式。标准节点面是 **metadata + body**；正文旗标统一用 `--body`。create/update 用这套面，类型扩展只在该类型真正需要时出现（note 标题走正文 H1 或一个 helper；skill 用 name / description）。get/delete 只收目标。list 复用既有 `--filter` / `--group-by` 信封（ADR 0028）和全局 scope 旗标，不并列发明 `--content` 或另一套 list 旗标。该原则是全仓标准：README / 组织列表、memory、tasks 在适用处同样用 metadata + `--body`、list 的 filter/group 信封，以及最少的类型旗标。本卡只改 notes/skills；ADR 与 CONTEXT 把原则写下来，其他域以后照做。`notes create` 整段丢掉 git/PR ingest，只做本地 `NodeService.create`。删掉 `services/note/git/*`，并去掉 `--import-entry`、`--co-author`、`--mode`、`--dry-run` 以及 notes create 上的 token/auth 旗标（鉴权归 CLI，不在 create 上再做一套）。skills create/update 改为真写 `SKILL.md`（默认落在当前 scope 的 `skills/managed/<name>/SKILL.md`，并登记父级 README）。
+**Architecture:** CLI 命令层直接（或极薄 helper）调用 `NodeService.get/create/update/destroy` + `NoteNode`/`SkillNode`，对齐 memory `records` 已采用的模式。标准节点面是 **metadata + body**；正文旗标统一用 `--body`。create/update 用这套面，类型扩展只在该类型真正需要时出现（note 标题走正文 H1 或一个 helper；skill 用 name / description）。get/delete 只收目标。list 复用既有 `--filter` / `--group-by` 信封（ADR 0028）和全局 scope 旗标，不并列发明 `--content` 或另一套 list 旗标。该原则是全仓标准：README / 组织列表、memory、tasks 在适用处同样用 metadata + `--body`、list 的 filter/group 信封，以及最少的类型旗标。本卡只改 notes/skills；ADR 与 CONTEXT 把原则写下来，其他域以后照做。`notes create` 整段丢掉 git/PR ingest，只做本地 `NodeService.create`。删掉 `packages/cli/src/services/note/git/*`，并去掉 `--import-entry`、`--co-author`、`--mode`、`--dry-run` 以及 notes create 上的 token/auth 旗标（鉴权归 CLI，不在 create 上再做一套）。skills create/update 改为真写 `SKILL.md`（默认落在当前 scope 的 `skills/managed/<name>/SKILL.md`，并登记父级 README）。
 
 **Tech Stack:** Node 22、`node:test`、tsx、现有 Commander / NodeService。不新增依赖。
 
@@ -48,20 +48,20 @@
 
 | Path | Change |
 | --- | --- |
-| `cli/src/services/note/records.ts` | **Delete** |
-| `cli/src/services/skills/records.ts` | **Delete** |
-| `cli/src/commands/notes/create.ts` | 本地 `NodeService.create`；标准面 metadata + `--body`；标题经 H1 或 helper；去掉 ingest / `--import-entry` 旗标 |
-| `cli/src/commands/notes/{get,update,delete}.ts` | 改调 NodeService；update 用 metadata + `--body`；get/delete 只收目标 |
-| `cli/src/commands/notes/list.ts` | 对齐共享 `--filter` / `--group-by`；不加专用 list 旗标 |
-| `cli/src/commands/skills/{get,create,update,delete}.ts` | 改调 NodeService；create/update 真写 `skills/managed`（metadata + `--body` + name/description）；get/delete 只收目标 |
-| `cli/src/commands/skills/list.ts` | 对齐共享 `--filter` / `--group-by`；不加专用 list 旗标 |
-| `cli/src/services/note/git/*` | **Delete** ingest 路径（`ingest.ts`、`pr.ts`、`exec.ts`、`markers.ts`、`slug.ts`） |
-| `cli/src/services/note/service.ts`、`auth.ts`（及只服务 ingest 的校验） | 删掉或收掉 ingest 包装与 token 校验 |
-| `cli/src/commands/notes.ts`、`program.ts` | 帮助文本去掉 git/PR ingest 与 `--import-entry` |
+| `packages/cli/src/services/note/records.ts` | **Delete** |
+| `packages/cli/src/services/skills/records.ts` | **Delete** |
+| `packages/cli/src/commands/notes/create.ts` | 本地 `NodeService.create`；标准面 metadata + `--body`；标题经 H1 或 helper；去掉 ingest / `--import-entry` 旗标 |
+| `packages/cli/src/commands/notes/{get,update,delete}.ts` | 改调 NodeService；update 用 metadata + `--body`；get/delete 只收目标 |
+| `packages/cli/src/commands/notes/list.ts` | 对齐共享 `--filter` / `--group-by`；不加专用 list 旗标 |
+| `packages/cli/src/commands/skills/{get,create,update,delete}.ts` | 改调 NodeService；create/update 真写 `skills/managed`（metadata + `--body` + name/description）；get/delete 只收目标 |
+| `packages/cli/src/commands/skills/list.ts` | 对齐共享 `--filter` / `--group-by`；不加专用 list 旗标 |
+| `packages/cli/src/services/note/git/*` | **Delete** ingest 路径（`ingest.ts`、`pr.ts`、`exec.ts`、`markers.ts`、`slug.ts`） |
+| `packages/cli/src/services/note/service.ts`、`auth.ts`（及只服务 ingest 的校验） | 删掉或收掉 ingest 包装与 token 校验 |
+| `packages/cli/src/commands/notes.ts`、`program.ts` | 帮助文本去掉 git/PR ingest 与 `--import-entry` |
 | `docs/adr/0027-facade-crud-verbs.md` | 更新 skills create/update |
 | `docs/adr/00XX-content-leaf-crud-via-nodeservice.md` | **Create** 短 ADR：叶子经 NodeService，并收录标准 CRUD 旗标表（house CLI surface） |
 | `CONTEXT.md` | 术语表收录同一张标准 CRUD 旗标表；补 NodeService 门面（若缺）。README / memory / tasks 以后照此跟随 |
-| `cli/test/...` | 旁路消失 + CRUD 回归；删掉 ingest / git / PR 测试并改帮助断言 |
+| `packages/cli/test/...` | 旁路消失 + CRUD 回归；删掉 ingest / git / PR 测试并改帮助断言 |
 | `docs/superpowers/plans/2026-10-08-notes-skills-crud-via-nodeservice.md` | 本 plan 入库 |
 
 ---
@@ -83,12 +83,12 @@
 ### Task 2: notes get/update/delete → NodeService，删 records
 
 **Files:**
-- Delete: `cli/src/services/note/records.ts`
-- Modify: `cli/src/commands/notes/get.ts`
-- Modify: `cli/src/commands/notes/update.ts`
-- Modify: `cli/src/commands/notes/delete.ts`
-- Modify: `cli/src/commands/notes/list.ts`（只对齐共享 list 信封）
-- Test: `cli/test/commands/notes-crud-nodeservice.test.ts`（或既有 note 测试目录）
+- Delete: `packages/cli/src/services/note/records.ts`
+- Modify: `packages/cli/src/commands/notes/get.ts`
+- Modify: `packages/cli/src/commands/notes/update.ts`
+- Modify: `packages/cli/src/commands/notes/delete.ts`
+- Modify: `packages/cli/src/commands/notes/list.ts`（只对齐共享 list 信封）
+- Test: `packages/cli/test/commands/notes-crud-nodeservice.test.ts`（或既有 note 测试目录）
 
 **旗标：** update 用 metadata + `--body`（标题经 H1 或 helper）。get/delete 只有目标路径。list 复用 `--filter` / `--group-by`，范围靠全局 `--scope` / `--super` / `--all`。
 
@@ -104,7 +104,7 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 // delete: await service.destroy(node)
 ```
 
-- [ ] **Step 1:** 写失败测试：临时 fixture 仓内建 note；`get`/`update`/`delete` 成功；delete 后父级登记无死链；源码/模块中不存在 `services/note/records`。
+- [ ] **Step 1:** 写失败测试：临时 fixture 仓内建 note；`get`/`update`/`delete` 成功；delete 后父级登记无死链；源码/模块中不存在 `packages/cli/src/services/note/records`。
 - [ ] **Step 2:** 改三个命令，删除 `records.ts`，修所有 import。
 - [ ] **Step 3:** 跑相关 test 至 PASS。
 - [ ] **Step 4:** Commit `refactor(notes): route get/update/delete through NodeService`
@@ -114,10 +114,10 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 ### Task 3: skills get/create/update/delete → NodeService，删 records
 
 **Files:**
-- Delete: `cli/src/services/skills/records.ts`
-- Modify: `cli/src/commands/skills/{get,create,update,delete}.ts`
-- Modify: `cli/src/commands/skills/list.ts`（只对齐共享 list 信封）
-- Test: `cli/test/commands/skills-crud-nodeservice.test.ts`
+- Delete: `packages/cli/src/services/skills/records.ts`
+- Modify: `packages/cli/src/commands/skills/{get,create,update,delete}.ts`
+- Modify: `packages/cli/src/commands/skills/list.ts`（只对齐共享 list 信封）
+- Test: `packages/cli/test/commands/skills-crud-nodeservice.test.ts`
 
 **旗标（保持 VALIDATION_ERROR，不加别的特殊旗标）：**
 - create/update：metadata + `--body`，外加 skill 类型旗标。正文不用 `--content`。
@@ -127,7 +127,7 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 - list：`--filter` / `--group-by` 与其他 list 相同；范围只用全局 `--scope` / `--super` / `--all`。
 
 - [ ] **Step 1:** 失败测试：create 写出 `skills/managed/<name>/SKILL.md` 且父 README 有登记；get/update/delete；无扫盘 records。
-- [ ] **Step 2:** 实现四命令；删 `skills/records.ts`。
+- [ ] **Step 2:** 实现四命令；删 `packages/skills/records.ts`。
 - [ ] **Step 3:** 跑 test PASS。
 - [ ] **Step 4:** Commit `feat(skills): real create/update via NodeService; drop records bypass`
 
@@ -136,11 +136,11 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 ### Task 4: 去掉 notes git/PR ingest，`notes create` 改为本地 NodeService.create
 
 **Files:**
-- Modify: `cli/src/commands/notes/create.ts`
-- Delete: `cli/src/services/note/git/*`（`ingest.ts`、`pr.ts`、`exec.ts`、`markers.ts`、`slug.ts`）
-- Delete or slim: `cli/src/services/note/service.ts`、`auth.ts`，以及只为 ingest 存在的 input 校验
-- Modify: `cli/src/commands/notes.ts`、`cli/src/program.ts`（帮助里的 ingest / co-author / mode / `--import-entry` 说明）
-- Delete: `cli/test/note/utils/git-ingest.test.ts`、`git-pr.test.ts`、`git-markers.test.ts`、`git-slug.test.ts`、`auth.test.ts`
+- Modify: `packages/cli/src/commands/notes/create.ts`
+- Delete: `packages/cli/src/services/note/git/*`（`ingest.ts`、`pr.ts`、`exec.ts`、`markers.ts`、`slug.ts`）
+- Delete or slim: `packages/cli/src/services/note/service.ts`、`auth.ts`，以及只为 ingest 存在的 input 校验
+- Modify: `packages/cli/src/commands/notes.ts`、`packages/cli/src/program.ts`（帮助里的 ingest / co-author / mode / `--import-entry` 说明）
+- Delete: `packages/cli/test/note/utils/git-ingest.test.ts`、`git-pr.test.ts`、`git-markers.test.ts`、`git-slug.test.ts`、`auth.test.ts`
 - Modify: 仍断言 `--co-author` / `--mode` / `--dry-run` / token / `--import-entry` 或 `runNoteIngest` 的测试（`cli.test.ts`、`run.test.ts`、`parse.test.ts`、`production-nodes.test.ts` 等）
 
 **`notes create` 参数（标准面 + note 类型旗标，保持 VALIDATION_ERROR）：**
@@ -148,7 +148,7 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 - 不接受 `--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--content`、`--content-file`、`--markdown`，也不接受 `--token-file` / `--token-stdin`。鉴权留在 CLI，不在 notes create 上再挂一套。
 - 不 commit、不 push、不开 PR。只 `NodeService.create` 写当前 scope 的本地 Note 叶子，并登记父级 README。不加别的特殊旗标。
 
-- [ ] **Step 1:** 失败测试：`notes create` 用 `--body`（标题经 H1 或 helper）写出本地叶子且父级有登记；`--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--content` 与 token 旗标被拒绝或从帮助中消失；进程不调用 git commit/push/PR；源码无 `services/note/git` ingest 入口。
+- [ ] **Step 1:** 失败测试：`notes create` 用 `--body`（标题经 H1 或 helper）写出本地叶子且父级有登记；`--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--content` 与 token 旗标被拒绝或从帮助中消失；进程不调用 git commit/push/PR；源码无 `packages/cli/src/services/note/git` ingest 入口。
 - [ ] **Step 2:** 重写 `notes create`；删除 git ingest 路径与只服务它的 auth/包装；改帮助文案（含 update 描述里的 “without git ingest”）。
 - [ ] **Step 3:** 删掉 ingest 测试并改相关帮助/解析断言；跑 notes/skills CRUD 相关测试至 PASS。
 - [ ] **Step 4:** Commit `refactor(notes): drop git/PR ingest; create via NodeService`
@@ -168,7 +168,7 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 - [ ] notes get/update/delete 与 skills get/create/update/delete 经 NodeService
 - [ ] create/update 为 metadata + `--body`（加类型旗标）；get/delete 只收目标；notes/skills list 使用共享 `--filter` / `--group-by`，外加全局 scope 旗标，无专用 list 旗标
 - [ ] `notes create` 只经本地 `NodeService.create`；标准面是 metadata + `--body`（不用 `--content`）；标题经正文 H1 或类型 helper
-- [ ] `services/note/git/*` ingest 路径已删除；无 `--import-entry`、`--co-author`、`--mode`、`--dry-run`，也无 notes create 的 token/auth 旗标；相关帮助与测试已去掉
+- [ ] `packages/cli/src/services/note/git/*` ingest 路径已删除；无 `--import-entry`、`--co-author`、`--mode`、`--dry-run`，也无 notes create 的 token/auth 旗标；相关帮助与测试已去掉
 - [ ] 无额外特殊旗标（不含 referenced、content-file、markdown 保全）
 - [ ] delete 使用 destroy
 - [ ] ADR 0027 已更新；新 ADR 与 CONTEXT 术语表都收录标准 CRUD 旗标表（house CLI surface）；写明 README / memory / tasks 以后照此跟随，本卡只实现 notes/skills

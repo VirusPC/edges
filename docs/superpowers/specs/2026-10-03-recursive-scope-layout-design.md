@@ -8,7 +8,7 @@
 
 以下保留原设计作为复核材料，不能继续将其中“已确认”视为整套方案重新获批。原设计已产生代码和目录迁移；正文中的“尚未实施”等为撰写时状态。完整替代方案与修复迁移尚未确认或完成。
 
-> 2026-10-04 新增修订要求：作用域解析、节点关系与树结构递归需从 CLI 命令及业务模块中解耦，形成可复用的公共能力；CLI 负责调用适配，Tasks、Memory 等消费节点上下文。具体边界与待设计事项见 ADR 0024 的“递归树结构”。公共工具已放入 `cli/src/utils/node-tree/` 并接回现有命令，按用户要求使用 TypeScript、直接复用 `gray-matter` 默认解析/序列化且不单独建包，不自定义格式行为；不合约定的文档直接修正；Python 接入、统一节点识别及局部记忆恢复仍待完成，见 [本次实施计划](../plans/2026-10-04-node-tree-cli-decoupling.md)。
+> 2026-10-04 新增修订要求：作用域解析、节点关系与树结构递归需从 CLI 命令及业务模块中解耦，形成可复用的公共能力；CLI 负责调用适配，Tasks、Memory 等消费节点上下文。具体边界与待设计事项见 ADR 0024 的“递归树结构”。公共工具已放入 `packages/cli/src/utils/node-tree/` 并接回现有命令，按用户要求使用 TypeScript、直接复用 `gray-matter` 默认解析/序列化且不单独建包，不自定义格式行为；不合约定的文档直接修正；Python 接入、统一节点识别及局部记忆恢复仍待完成，见 [本次实施计划](../plans/2026-10-04-node-tree-cli-decoupling.md)。
 
 > 同日进一步分离三部分领域模型、纯 Markdown codec 与文件适配，增加保留原文的序列化和显式保存接口；CLI 通过组合层接入。见 [模型与 codec 解耦计划](../plans/2026-10-04-node-model-codec-separation.md)。
 
@@ -20,7 +20,7 @@
 
 本设计区分三件事：目录由谁拥有、在该作用域承担什么职责、其组织约定能否复用。一个可复用模块不因此成为每层必建目录，一个源码目录也不因此成为独立责任作用域。
 
-已确认的取舍见 [ADR 0024](../../adr/0024-scope-first-content-ownership.md)。已确认的目标布局采用以下具体落点：维护知识使用 `memory/`，技能使用 `skills/<type>/` 继续分类，不另建容器总入口，由作用域入口跨目录层级直接引用各 type；迁移 Skill 暂名为 `project-memory-migrate`。
+已确认的取舍见 [ADR 0024](../../adr/0024-scope-first-content-ownership.md)。已确认的目标布局采用以下具体落点：维护知识使用 `memory/`，技能使用 `packages/skills/<type>/` 继续分类，不另建容器总入口，由作用域入口跨目录层级直接引用各 type；迁移 Skill 暂名为 `project-memory-migrate`。
 
 自身维护空间的默认目录采用 `.harness/`，以支撑、维护和改进的职责命名，适用于个人、Agent、团队等主体。Edges 保留为系统与工具名称；系统二表示相对职责，Agent Harness 表示 Agent 的支撑机制，目录名称不将两者等同。共享实现和工具约定文档按原有边界接入。
 
@@ -51,7 +51,7 @@
 ├── AGENTS.md
 ├── .harness/                   # 本作用域默认维护目录，按需要建立
 │   ├── memory/<type>/          # 维护知识；类型开放
-│   ├── skills/<type>/          # 技能容器下按类型组织，按需扩展
+│   ├── packages/skills/<type>/          # 技能容器下按类型组织，按需扩展
 │   ├── tasks/                  # 可选的维护任务，保留 Task/Run 契约
 │   └── <扩展模块>/             # 所选模块按自己的内容契约组织
 └── <领域目录>/                 # 由本作用域的目标决定
@@ -94,7 +94,7 @@ edges/
 │   │   ├── references/AGENTS.md        # 资料指针
 │   │   ├── users/AGENTS.md             # 索引与正文均 gitignore
 │   │   └── <其他 type>/AGENTS.md
-│   ├── skills/                         # 技能容器，无必经总入口
+│   ├── packages/skills/                         # 技能容器，无必经总入口
 │   │   ├── managed/
 │   │   │   ├── AGENTS.md
 │   │   │   └── <name>/SKILL.md
@@ -114,7 +114,7 @@ edges/
 ├── teaching/
 ├── extensions/
 ├── shared-extensions/
-├── apps/
+├── packages/apps/
 ├── scripts/
 ├── docs/
 ├── .agents/
@@ -124,13 +124,13 @@ edges/
 └── .obsidian/
 ```
 
-现有 `edges` CLI 由根作用域拥有和维护。`extensions/`、`shared-extensions/`、`apps/`、`scripts/` 保留实现位置，维护任务和知识先按实际职责归根；不能仅按源码目录、包边界或已有 `.memory` 推导出独立责任作用域。已有局部记录逐项处理，保持必要的模块上下文，不能机械整包合并。
+现有 `edges` CLI 由根作用域拥有和维护。`extensions/`、`shared-extensions/`、`packages/apps/`、`scripts/` 保留实现位置，维护任务和知识先按实际职责归根；不能仅按源码目录、包边界或已有 `.memory` 推导出独立责任作用域。已有局部记录逐项处理，保持必要的模块上下文，不能机械整包合并。
 
 ### 完整目录映射
 
 | 当前目录 | 目标及迁移规则 |
 |---|---|
-| `.memory/` | 按类型映射到 `.harness/memory/` 与 `.harness/skills/`；旧 skills/agent_skills 分别映射为 managed/referenced，各有类型入口，统一放入技能容器；保留自定义类型和来源权限语义 |
+| `.memory/` | 按类型映射到 `.harness/memory/` 与 `.harness/skills/`；旧 packages/skills/agent_skills 分别映射为 managed/referenced，各有类型入口，统一放入技能容器；保留自定义类型和来源权限语义 |
 | `knowledge/tasks/` | 按目标与实际归属分流到根 `tasks/`、根 `.harness/tasks/` 或已确认子作用域；保留 Task/Run 关联，不按 Task Project 名称机械建作用域 |
 | `knowledge/projects/` | 上移为 `projects/`；内部仅按实际需要建立独立作用域 |
 | `knowledge/teaching/` | 上移为 `teaching/`，保留主题内容、学习状态、附件与课页；同步更新首页、Topics、构建和发布路径 |
@@ -139,11 +139,11 @@ edges/
 | `knowledge/posts/` | 原路径保留；AI 不创建、修改、移动或删除其中任何文件 |
 | `knowledge/resources/` | 根共享附件位置保留；专属附件随明确的所属工作区组织 |
 | `knowledge/archive/` | 根知识归档位置保留；迁移记录保留旧路径与所属作用域，不能按新路径重写历史含义 |
-| `evaluation/` | 整模块迁至 `.harness/evaluation/`，覆盖执行器、用例、测试、报告、submodule 和局部维护材料；逐项更新相关路径 |
-| `observation/` | 迁至 `.harness/observation/`，以 `AGENTS.md` 为模块入口，将现有说明中的职责与导航纳入入口并更新上层引用；当前仅有说明和占位，不包含后端部署 |
+| `evaluation/` | 整模块迁至 `packages/evaluation/`，覆盖执行器、用例、测试、报告、submodule 和局部维护材料；逐项更新相关路径 |
+| `observation/` | 迁至 `packages/observation/`，以 `AGENTS.md` 为模块入口，将现有说明中的职责与导航纳入入口并更新上层引用；当前仅有说明和占位，不包含后端部署 |
 | `extensions/` | 保留实现位置；维护归根，原有局部记忆逐项处理 |
 | `shared-extensions/` | 保留实现位置与发版边界；维护归根，原有局部记忆逐项处理 |
-| `apps/` | 保留应用源码和构建关系；目录或包不自动成为独立作用域 |
+| `packages/apps/` | 保留应用源码和构建关系；目录或包不自动成为独立作用域 |
 | `scripts/` | 保留工具脚本位置，更新受目录迁移影响的调用 |
 | `docs/` | 保留工具约定真源；更新可修改文档中的当前路径和入口引用 |
 | `.agents/` | 保留现有实体技能和安装入口，不复制共享正文；仅按迁移清单修复指向已迁本地真源的链接目标 |
@@ -172,7 +172,7 @@ edges/
 
 物理分组调整不要求废掉现有 Skills 类型适配。自定义普通类型或 Skill 格式类型保持类型身份及独立命名空间，默认在 `.harness/memory/<原复数目录>/` 保留；不能仅因格式相同就自动归入技能容器。
 
-在 Project Memory 受管区块外使用 `AGENTS.md` 的共享文件扩展点，列出本层工作与模块入口：领域任务、维护任务、评测、观测及原位文档。Tasks、Evaluation、Observation 的业务模块入口统一使用各自的 `AGENTS.md`；作用域入口直接引用 `.harness/observation/AGENTS.md`，不经 README 中转。模块入口不自动成为独立作用域，也不自动登记为记忆子层。Memory、Skills 仍直接引用各 type 的 `AGENTS.md`，不因此补建容器总入口。Task 可以沿自己的 Task Project 索引继续查找，不受普通记忆两跳规则约束。
+在 Project Memory 受管区块外使用 `AGENTS.md` 的共享文件扩展点，列出本层工作与模块入口：领域任务、维护任务、评测、观测及原位文档。Tasks、Evaluation、Observation 的业务模块入口统一使用各自的 `AGENTS.md`；作用域入口直接引用 `packages/observation/AGENTS.md`，不经 README 中转。模块入口不自动成为独立作用域，也不自动登记为记忆子层。Memory、Skills 仍直接引用各 type 的 `AGENTS.md`，不因此补建容器总入口。Task 可以沿自己的 Task Project 索引继续查找，不受普通记忆两跳规则约束。
 
 这批变更应主要落在 LAYOUT、路径解析、索引生成和模块接入中。不得用全局替换 `.memory` 的方式改造解析器：作用域定位、children 索引、外部技能真源、doctor 扫描和 Git ignore 都需按新布局适配。
 
@@ -180,7 +180,7 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 
 ### Skills：一个容器，保留两种 type
 
-用户明确了结构：当前以 `managed` 与 `referenced` 两种 type 承接原 skills 与 agent_skills 的职责，归入统一的 `skills/` 容器；每个 type 保留自己的 `AGENTS.md`，最外层作用域入口直接引用这两份类型入口，与 Memory 一样组织。类型集合仍可扩展，不合并成单一 type，也不另建 `skills/AGENTS.md` 总入口。
+用户明确了结构：当前以 `managed` 与 `referenced` 两种 type 承接原 skills 与 agent_skills 的职责，归入统一的 `packages/skills/` 容器；每个 type 保留自己的 `AGENTS.md`，最外层作用域入口直接引用这两份类型入口，与 Memory 一样组织。类型集合仍可扩展，不合并成单一 type，也不另建 `packages/skills/AGENTS.md` 总入口。
 
 用户已确认按正文维护关系命名为 `managed` / `referenced`，两类的内容与维护契约保留。以下是目标命名与迁移映射，尚未实施：
 
@@ -198,7 +198,7 @@ CLI 的目标契约是先明确所操作的作用域，再明确模块及领域/
 ├── AGENTS.md
 ├── .harness/
 │   ├── memory/<type>/AGENTS.md
-│   └── skills/
+│   └── packages/skills/
 │       ├── managed/
 │       │   ├── AGENTS.md
 │       │   └── <name>/SKILL.md

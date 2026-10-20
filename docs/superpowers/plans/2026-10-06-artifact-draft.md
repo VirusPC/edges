@@ -6,7 +6,7 @@
 
 **Architecture:** 预览服务的 store 增加未公开状态。`POST /artifacts` 可以带 `publish: false`。公开是对已有 id 的第二次写。CLI 的 `create` 调用不公开的保存，`publish <path>` 在命令里连续调用创建和公开。`delete` 继续删除两种状态。
 
-**Tech Stack:** 现有 `services/artifacts-preview` 与 `services/artifacts`。不新增列表或 get 命令。
+**Tech Stack:** 现有 `packages/services/artifacts-preview` 与 `packages/services/artifacts`。不新增列表或 get 命令。
 
 **Spec:** ADR 0026。
 

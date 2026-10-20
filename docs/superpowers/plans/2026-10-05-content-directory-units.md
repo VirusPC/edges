@@ -20,7 +20,7 @@
 
 ### Task 1: 引用与迁移计划
 
-Files: `cli/scripts/content-directory-migration.ts`、`scripts/migrate-content-units.mts`、`cli/test/memory/content-directory-migration.test.ts`、`package.json`。
+Files: `packages/cli/scripts/content-directory-migration.ts`、`scripts/migrations/migrate-content-units.mts`、`packages/cli/test/memory/content-directory-migration.test.ts`、`package.json`。
 
 - [x] 写 fixture：中文路径、空格、锚点、Wiki 别名、代码中的假引用、HTML 图片、外部入链、既有入口、冲突与源变更。
 - [x] 运行 `pnpm --filter edges-cli exec node --test --import tsx test/memory/content-directory-migration.test.ts`，先验证缺少实现导致失败。

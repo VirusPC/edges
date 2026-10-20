@@ -9,7 +9,7 @@ metadata:
   edges-updated-at: "2026-09-06T17:52:01+08:00"
 ---
 
-更新 `skills/` 下任何一个 skill 后，必须同步：升该 skill `SKILL.md` 的 `version`、把变更写入同目录 `CHANGELOG.md`、对同一个 commit 打 annotated tag `skill/<name>@<version>`。
+更新 `packages/skills/` 下任何一个 skill 后，必须同步：升该 skill `SKILL.md` 的 `version`、把变更写入同目录 `CHANGELOG.md`、对同一个 commit 打 annotated tag `skill/<name>@<version>`。
 
 **Why:** 分发后的副本靠 version 判断有没有新内容；changelog 是给人读的发版说明；tag 是「某个版本对应哪次提交」的索引。只改正文不升版本、不打 tag，安装方会沿用旧副本，以后也找不到那一版的代码。
 

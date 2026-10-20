@@ -17,6 +17,6 @@ metadata:
 2. 变更碎片再拼接（changesets、towncrier、Release Drafter）：正文质量好，changesets 的多包独立 semver 也接近 skill 的形状，但会和现有各 `CHANGELOG.md` 重复。skill 独立发版那条已经否决用它生成。
 3. 手写 `[Unreleased]`，脚本只切版本：即现状。认真维护的项目经常停在这里。
 
-根 `CHANGELOG.md` 和各 `skills/<name>/CHANGELOG.md` 都适用同一条。GitHub 自动生成的 Release notes 对 clone 仓库的人不可见，不能代替仓库内文件。
+根 `CHANGELOG.md` 和各 `packages/skills/<name>/CHANGELOG.md` 都适用同一条。GitHub 自动生成的 Release notes 对 clone 仓库的人不可见，不能代替仓库内文件。
 
 **How to apply:** 不要擅自引入 semantic-release、git-cliff、changesets 来生成 changelog。用户再提自动化时，优先做切 Unreleased 和忘写校验，不必重做方案调研。只改某一个 skill 的补丁仍走该 skill 的 changelog 和 `skill/<name>@<version>`，不要因此升仓库版本。

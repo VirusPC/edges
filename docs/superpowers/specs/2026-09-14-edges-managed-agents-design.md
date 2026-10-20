@@ -106,7 +106,7 @@ Gates are enforced by **API + path/tool policy + writer permissions**, not by pr
 | Assignment and start | `POST /runs` requires authenticated human approval; agents cannot enqueue themselves |
 | Edge admission/evolution | Worker denylist: `knowledge/edges/`, archive/succession operations |
 | External publish | Denylist: `knowledge/posts/`, public deploy configs/actions |
-| System rules/harness | Denylist: root `AGENTS.md`, hard-constraint memory, default skills/extensions config (privileged run types deferred) |
+| System rules/harness | Denylist: root `AGENTS.md`, hard-constraint memory, default packages/skills/extensions config (privileged run types deferred) |
 | Code/environment | `can_merge=false`; no production credentials for infra mutation in v1 worker role |
 
 Short-lived worker tokens are scoped to the single Run’s allowed paths and APIs.

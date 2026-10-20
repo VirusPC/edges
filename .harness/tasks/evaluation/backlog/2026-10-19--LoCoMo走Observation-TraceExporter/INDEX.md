@@ -19,7 +19,7 @@ description: LoCoMo 评测改走 Observation 的 TraceExporter 上报轨迹，�
 LoCoMo 评测通过 Observation 的 TraceExporter 上报轨迹，调用方不知道 Langfuse。
 
 **动作：**
-- 复用 `.harness/observation/langfuse_sink` 的 `exporter_from_env()` 与 `export(trace)`。import 方式与检索评测相同：把 `.harness/observation` 放进 `sys.path`。
+- 复用 `packages/observation/langfuse_sink` 的 `exporter_from_env()` 与 `export(trace)`。import 方式与检索评测相同：把 `packages/observation` 放进 `sys.path`。
 - 何时上报、分数 metadata、`service.name` 留在 LoCoMo 评测侧。
 - 三个 Langfuse 环境变量不齐时走 no-op；失败只打一行 stderr，不影响分数。
 

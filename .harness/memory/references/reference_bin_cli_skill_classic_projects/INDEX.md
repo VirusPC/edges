@@ -17,8 +17,8 @@ metadata:
 2026-09-11 为对齐「要不要单独养仓根 `bin/`」做的短调研。结论写入 `project_capability_surface_cli_skill_mcp` 与 ADR 0004。对照来源只用来定 CLI 与 Skill 的形状，不要据此把 MCP 写成可选项。
 
 **How to apply:**
-- `gh`（cli/cli）：人和 agent 共用一个 `gh`。Skill 只教 agent 痛点。https://github.com/cli/cli/blob/trunk/skills/gh/SKILL.md
+- `gh`（packages/cli/cli）：人和 agent 共用一个 `gh`。Skill 只教 agent 痛点。https://github.com/cli/cli/blob/trunk/packages/skills/gh/SKILL.md
 - AXI / `gh-axi`：CLI 是主界面；Skill 例子写成 `npx -y gh-axi …`。他们的 `bin/*.ts` 是 npm 入口，不是第三层。
 - Agent Skills 规范：已有包就 `npx`/`uvx`；命令难一次写对才把脚本放进 **skill 自己的 `scripts/`**，不是仓根 `bin/`。https://agentskills.io/skill-creation/using-scripts
 - obra/superpowers：Skill 是流程，落地调已有命令。
-- 本仓现状：`cli` 的 `edges notes` 在进程内跑 git（`src/git`，`execFile('git', …)`）；MCP `new-note` 子进程调用该 CLI；`skills/edges-note` 只教何时如何调用。仓根 `bin/` 已删除。
+- 本仓现状：`cli` 的 `edges notes` 在进程内跑 git（`src/git`，`execFile('git', …)`）；MCP `new-note` 子进程调用该 CLI；`packages/skills/edges-note` 只教何时如何调用。仓根 `bin/` 已删除。

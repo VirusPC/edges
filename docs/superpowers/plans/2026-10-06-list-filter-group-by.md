@@ -4,7 +4,7 @@
 
 **Goal:** `list --filter` 与 `list --group-by` 使用同一种比较和分组，任务列表的分组输出不再使用 `edges.tasks.grouped/v1`。
 
-**Architecture:** `services/list-query.ts` 做纯函数：缺字段是 `__undefined__`，同字段过滤是 OR，不同字段是 AND，对象和数组按键名排序后的 JSON 文本比较。命令先沿用现有的 status / priority / project 筛选，再套 `--filter`，最后分组。`/tasks/` 生成器按 `project` 分组后，把 `key` 写成审阅页的 group id、title、`current` 和 `suggested`。
+**Architecture:** `packages/services/list-query.ts` 做纯函数：缺字段是 `__undefined__`，同字段过滤是 OR，不同字段是 AND，对象和数组按键名排序后的 JSON 文本比较。命令先沿用现有的 status / priority / project 筛选，再套 `--filter`，最后分组。`/tasks/` 生成器按 `project` 分组后，把 `key` 写成审阅页的 group id、title、`current` 和 `suggested`。
 
 **Tech Stack:** Node 22、`node:test`、现有 Task 列表函数。不新增依赖。
 
@@ -22,7 +22,7 @@
 
 ### Task 1: 纯函数
 
-Create `cli/src/services/list-query.ts` and `cli/test/services/list-query.test.ts`.
+Create `packages/cli/src/services/list-query.ts` and `packages/cli/test/services/list-query.test.ts`.
 
 `fieldText(record, field)`、`matchesFilters(record, filters)`、`groupRecords(records, field)`。
 

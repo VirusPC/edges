@@ -15,7 +15,7 @@ BaseNode           共同文档能力，可选 parent / children
 └── SkillNode       SKILL.md 及其领域操作
 ```
 
-BaseNode 提供共同的文件路径 path、文档内容、可选 metadata、身份、可选 parent / children 及文本转换能力。树结构是共同模型的一部分，所有子类继承树关系属性，但允许没有关系值。InternalNode 扩展 AGENTS 正文与索引处理，TaskNode、MemoryNode、NoteNode、SkillNode 扩展自身字段与领域操作，彼此并列继承 BaseNode。模型统一位于 `cli/src/models/`，不创建独立 package。
+BaseNode 提供共同的文件路径 path、文档内容、可选 metadata、身份、可选 parent / children 及文本转换能力。树结构是共同模型的一部分，所有子类继承树关系属性，但允许没有关系值。InternalNode 扩展 AGENTS 正文与索引处理，TaskNode、MemoryNode、NoteNode、SkillNode 扩展自身字段与领域操作，彼此并列继承 BaseNode。模型统一位于 `packages/cli/src/models/`，不创建独立 package。
 
 NoteNode 表达知识捕获与整理的笔记，MemoryNode 表达供作用域长期复用的项目记忆，两者不因都是 Markdown 就互相继承。NoteNode.title 沿用现有 Note 的一级标题，读写作用于 body，不另造 title YAML 字段；不把某个笔记 skill 的章节模板强加给所有 Note。
 
@@ -45,8 +45,8 @@ Memory、Task、Note 支持独立 Markdown 文件和“目录入口 + 附属资�
 notes/example.md            # 单文件节点
 notes/example/index.md      # 目录节点的入口
 notes/example/diagram.png   # 同一节点的资源
-skills/example/SKILL.md      # Skill 的入口
-skills/example/scripts/... # Skill 的资源
+packages/skills/example/SKILL.md      # Skill 的入口
+packages/skills/example/scripts/... # Skill 的资源
 ```
 
 `path` 始终指入口文件，新增只读 `directoryPath?: string` 表达完整资源单元：TaskNode、MemoryNode、NoteNode 仅在入口文件名为 `index.md` 时具有该值；SkillNode 必须使用 `SKILL.md` 并拥有其所在目录；BaseNode 和 InternalNode 不因文件恰好位于某目录而拥有整个目录。加载按具体模型与固定入口命名判断，不扫描邻居或猜测任意 Markdown 的附件归属。入口更新只修改正文；资源保持原样。单文件节点不拥有旁边的图片或其他文件。
@@ -342,7 +342,7 @@ Task 的状态、负责人、优先级，Memory 的内容分类，以及 Skill �
 ## 源码组织
 
 ```text
-cli/src/
+packages/cli/src/
 ├── commands/                 CLI 参数、调用与输出
 ├── models/
 │   ├── base-node.ts
@@ -352,7 +352,7 @@ cli/src/
 │   ├── note-node.ts
 │   ├── skill-node.ts
 │   └── types.ts
-├── services/                 增删改查、文档与索引同步、跨对象流程协调
+├── packages/services/                 增删改查、文档与索引同步、跨对象流程协调
 │   ├── node-service.ts        公共节点服务入口
 │   └── traverse.ts            内部遍历辅助，节点加载由 service 提供
 └── utils/                    无领域含义的基础工具
@@ -364,7 +364,7 @@ cli/src/
 
 2026-10-05：模型与 NodeService 已接入正常 Task create/update/status、Memory remember/索引维护及 Note ingest。命令处理器位于 `src/commands/`，保留目录即命令树；业务编排位于 `src/services/`，领域语法辅助位于 `src/models/`，通用 Markdown 与文件系统工具位于 `src/utils/`。旧纯数据仓储/树编排已删除，语法数据结构只作为模型内部实现。Task 读取保留旧优先级的容错投影；修改使用类型化字段并保留未知 vendor metadata。
 
-对应实现位于 `cli/src/models/{base-node,internal-node,task-node,memory-node,note-node,skill-node}.ts`、`cli/src/services/{node-service,traverse,node-resources}.ts`；生产适配位于 `src/services/{tasks,memory,note}/`，CLI 命令位于 `src/commands/`。`NodeService` 的所有权遍历依据已登记索引，CLI 当前作用域选择仍在 `src/services/scope.ts`：可识别有可读 AGENTS.md 的真实目录，显式作用域或最近入口优先，未找到时按 Git 回退；节点发现不自动初始化 Memory。
+对应实现位于 `packages/cli/src/models/{base-node,internal-node,task-node,memory-node,note-node,skill-node}.ts`、`packages/cli/src/services/{node-service,traverse,node-resources}.ts`；生产适配位于 `src/services/{tasks,memory,note}/`，CLI 命令位于 `src/commands/`。`NodeService` 的所有权遍历依据已登记索引，CLI 当前作用域选择仍在 `src/services/scope.ts`：可识别有可读 AGENTS.md 的真实目录，显式作用域或最近入口优先，未找到时按 Git 回退；节点发现不自动初始化 Memory。
 
 Memory 的 init、remember、add-type、doctor、refreshIndex 及写索引辅助函数现为异步接口；命令输出、来源信息、权限检查及 Task runlog 约定保持。私有类型先检查整个目的目录的 Git 忽略覆盖，新文件首次暂存即采用 0600。managed 内部别名索引指向经当前作用域边界验证的物理来源，referenced 安装 href 保留且只读。NodeReference 保留原始 href，编码的 CR/LF 文件名可加载，字面换行和 NUL 不可作为 href。
 

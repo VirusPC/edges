@@ -63,7 +63,7 @@ edges --scope . tasks create --title "修复构建" --project default
 edges --scope . tasks list
 ```
 
-把外部 harness 仓库挂进当前目录用 `edges compose`，步骤见 [`edges-compose`](skills/edges-compose/SKILL.md)。完整命令见 [`cli/README.md`](cli/README.md)，或运行 `edges --help`。
+把外部 harness 仓库挂进当前目录用 `edges compose`，步骤见 [`edges-compose`](packages/skills/edges-compose/SKILL.md)。完整命令见 [`packages/cli/README.md`](packages/cli/README.md)，或运行 `edges --help`。
 
 ## 本仓与个人大脑仓
 
@@ -71,19 +71,19 @@ edges --scope . tasks list
 
 | 目录 | 作用 |
 | --- | --- |
-| [`cli/`](cli/) | 面向 agent 的 CLI（命令名 `edges`，npm 包 `@viruspc/edges`） |
-| [`skills/`](skills/) | 对外分发、随 npm 包装进安装包的 skill 真源。本仓用 `pnpm skills:link` 链到 [`.agents/skills`](.agents/skills)。本仓维护用的技能在 [`.harness/skills`](.harness/skills)，构建时拷进包内的副本是 `cli/skills/`（不入库） |
-| [`apps/`](apps/) | 可跨作用域复用的对外应用，目前是任务审阅页 |
-| [`services/`](services/) | 接入 Edges 的常驻 HTTP 进程，目前是 Artifacts 预览 |
-| [`mcp-servers/`](mcp-servers/) | 给没有 shell 的宿主用的 MCP server |
-| [`system-prompt/`](system-prompt/) | 接入新 Agent 时取用的 system prompt 片段 |
+| [`packages/cli/`](packages/cli/) | 面向 agent 的 CLI（命令名 `edges`，npm 包 `@viruspc/edges`） |
+| [`packages/skills/`](packages/skills/) | 对外分发、随 npm 包装进安装包的 skill 真源。本仓用 `pnpm skills:link` 链到 [`.agents/skills`](.agents/skills)。本仓维护用的技能在 [`.harness/skills`](.harness/skills)，构建时拷进包内的副本是 `packages/cli/skills/`（不入库） |
+| [`packages/apps/`](packages/apps/) | 可跨作用域复用的对外应用，目前是任务审阅页 |
+| [`packages/services/`](packages/services/) | 接入 Edges 的常驻 HTTP 进程，目前是 Artifacts 预览 |
+| [`packages/mcp-servers/`](packages/mcp-servers/) | 给没有 shell 的宿主用的 MCP server |
+| [`packages/system-prompt/`](packages/system-prompt/) | 接入新 Agent 时取用的 system prompt 片段 |
 | [`docs/`](docs/) | ADR、架构与迁移说明 |
 | [`scripts/`](scripts/README.md) | 初始化、构建、迁移等维护脚本 |
-| [`.harness/`](.harness/) | 本仓自身的维护记忆、技能、任务看板、评测与观测 |
+| [`.harness/`](.harness/) | 本仓自身的维护记忆、技能与任务看板。评测与观测在 `packages/evaluation/`、`packages/observation/` |
 
 2026-10-20 起这些接入目录直接放在仓库根，不再套 `extensions/`。旧路径对照见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。空占位 `docs/`、`tools/`、`subagents/`（当时在 `extensions/` 下）已删除；`new-server/` 与 `others/` 从本仓删除，由个人仓另行放进 `shared-extensions/`。
 
-作者的个人大脑（`notes/`、`edges/`、`teaching/`、`retrospectives/`、`tasks/`、`projects/`、`memory/`、`archive/`、`shared-extensions/`、[`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts) 等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)。对外博客与站点内容看板 [`.harness/tasks/site-and-content`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/.harness/tasks/site-and-content) 也在个人仓。本仓根 `AGENTS.md` 用 `edges compose` 把它登记为挂载的个人工作区；个人仓反过来把本仓登记为参考项目。挂载步骤见 [`edges-compose`](skills/edges-compose/SKILL.md)。
+作者的个人大脑（`notes/`、`edges/`、`teaching/`、`retrospectives/`、`tasks/`、`projects/`、`memory/`、`archive/`、`shared-extensions/`、[`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts) 等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)。对外博客与站点内容看板 [`.harness/tasks/site-and-content`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/.harness/tasks/site-and-content) 也在个人仓。本仓根 `AGENTS.md` 用 `edges compose` 把它登记为挂载的个人工作区；个人仓反过来把本仓登记为参考项目。挂载步骤见 [`edges-compose`](packages/skills/edges-compose/SKILL.md)。
 
 对外输出可以直接看：[教学站](https://edges.viruspc.tech/teaching/)、[任务看板](https://edges.viruspc.tech/tasks/)（目前都从个人仓部署）。
 
@@ -99,7 +99,7 @@ pnpm install && pnpm setup && pnpm skills:link
 pnpm build && pnpm test
 ```
 
-已有克隆若没有评测 submodule：`git submodule update --init .harness/evaluation/third_party/locomo`。可用命令以根 [`package.json`](package.json) 为准，专项命令见各子目录 README。
+已有克隆若没有评测 submodule：`git submodule update --init packages/evaluation/third_party/locomo`。可用命令以根 [`package.json`](package.json) 为准，专项命令见各子目录 README。
 
 ## 文档地图
 
@@ -109,7 +109,7 @@ pnpm build && pnpm test
 - [`docs/architecture.md`](docs/architecture.md)：内部架构思想。
 - [`docs/recursive-layout-migration.md`](docs/recursive-layout-migration.md)：目录升级与本机私有材料迁移。
 - [`CHANGELOG.md`](CHANGELOG.md)：仓库级变更记录，tag 使用 `vX.Y.Z`；对外 skill 各自独立 semver；`shared-extensions/` 已随个人大脑搬到 `VirusPC/edges-brain-viruspc`。
-- [`scripts/`](scripts/README.md)、[`.harness/evaluation/`](.harness/evaluation/README.md)、[`.harness/observation/`](.harness/observation/README.md)：维护脚本、评测与观测。
+- [`scripts/`](scripts/README.md)、[`packages/evaluation/`](packages/evaluation/README.md)、[`packages/observation/`](packages/observation/README.md)：维护脚本、评测与观测。
 
 ## 隐私与脱敏
 

@@ -17,7 +17,7 @@ metadata:
 
 **How to apply:**
 - 单独 deploy 分支（名待定）
-- GitHub Actions：构建 `apps/tasks-review-app` + 生成 `/tasks/`（或等价预览产物）并发布
+- GitHub Actions：构建 `packages/apps/tasks-review-app` + 生成 `/tasks/`（或等价预览产物）并发布
 - 宿主待定：GitHub Pages / 现有 ECS / 其它（grill 时定）
 - **配 beta 域名**（名待定；指向预览部署，与生产域名分开）
 - 与现有 `deploy.yml` / ECS `/tasks/` 的关系要写清，避免双源冲突

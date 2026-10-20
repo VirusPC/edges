@@ -26,9 +26,9 @@
 - models/layout.ts: entry/module/harness/section/lifecycle conventions.
 - models/types.ts, base-node.ts, leaf-node.ts, internal-node.ts, internal-syntax.ts, relations.ts: common model and source preserving references.
 - models/{task,memory,skill,note}-node.ts: leaf business implementations.
-- services/node-service.ts, traverse.ts, node-files.ts and focused helper modules: filesystem coordination and snapshots, no resource domain.
-- services/{memory,tasks,note}/ and commands/: business CLI adaptation.
-- scripts/migrate-directory-nodes.mts + matching test + migration Skill: one-time old file conversion.
+- packages/services/node-service.ts, traverse.ts, node-files.ts and focused helper modules: filesystem coordination and snapshots, no resource domain.
+- packages/services/{memory,tasks,note}/ and commands/: business CLI adaptation.
+- scripts/migrations/migrate-directory-nodes.mts + matching test + migration Skill: one-time old file conversion.
 - README, CONTEXT, ADR, current specs, protocols, indexed memories: current contract and ownership.
 
 ### Task 1: Node models and layout
@@ -46,7 +46,7 @@ const root = new InternalNode('/repo/AGENTS.md').parse(sourceWithExtraProse);
 root.addChild('local', { id: skill.id, name: 'A' });
 assert.deepEqual(root.localChildren.map(x => x.id), [skill.id]);
 assert.equal(root.serialize().includes('my untouched comment'), true);
-assert.equal(root.serialize().includes('skills/a/SKILL.md'), true);
+assert.equal(root.serialize().includes('packages/skills/a/SKILL.md'), true);
 assert.throws(() => root.addChild('descendant', { id: skill.id }));
 ```
 - [x] Run `pnpm --filter edges-cli exec node --test --import tsx './test/models/*.test.ts'`; record meaningful failing baseline.
@@ -64,7 +64,7 @@ const reference = { id: node.id, ...(node.name ? {name:node.name} : {}), ...(nod
 
 ### Task 2: Service lifecycle and traversal
 
-**Files:** services/node-service.ts, node-files.ts, node-resources.ts (simplify/remove), traverse.ts; add focused services/node-layout.ts or node-operation helpers as necessary; services adapters callsite changes; test/services/*.test.ts.
+**Files:** packages/services/node-service.ts, node-files.ts, node-resources.ts (simplify/remove), traverse.ts; add focused packages/services/node-layout.ts or node-operation helpers as necessary; services adapters callsite changes; test/services/*.test.ts.
 
 **Interfaces:** consumes models/layout and spec model methods. Produces spec NodeService CRUD/move/import/list, with explicit managedRoot and typed get overload; returns same node for mutations. No public reparent. Business assertWrite/read-only hooks retained; no createMode/resourceMode. Task 3 replaces legacy production file paths; this task migrates relevant test fixtures to directories.
 
@@ -94,7 +94,7 @@ assert.notEqual(destinationEntry, original); // no-op separately supported
 
 ### Task 3: CLI adapters and explicit uniform-directory migration
 
-**Files:** services/memory/{node-documents,entries,remember,types,doctor,init}.ts plus related modules; services/tasks/{write,paths,...}.ts; services/note/git/ingest.ts; command input wiring; scripts/migrate-directory-nodes.mts; package.json; new skills/migrate-directory-nodes/SKILL.md; relevant test/{memory,tasks,note,services}; migration tests.
+**Files:** packages/services/memory/{node-documents,entries,remember,types,doctor,init}.ts plus related modules; packages/services/tasks/{write,paths,...}.ts; packages/services/note/git/ingest.ts; command input wiring; scripts/migrations/migrate-directory-nodes.mts; package.json; new packages/skills/migrate-directory-nodes/SKILL.md; relevant test/{memory,tasks,note,services}; migration tests.
 
 **Interfaces:** consumes new NodeService/model interfaces. Produces directory-only new writes/recognition; explicit migration with dry-run default, --apply, --root and public tracked scope. Existing Markdown note ingest becomes validated import/create, no blind permissive parser. Keep observable useful CLI parameter names unless they advertise legacy formats.
 

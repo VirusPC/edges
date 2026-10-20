@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript、Node ≥22、`node:test`、tsx、现有 `edges-cli`。配置用 JSON（不加 YAML 依赖）。
 
-**Spec / 约束真源:** `.harness/memory/feedbacks/feedback_traverse_single_system_and_forest_roots/INDEX.md`；`CONTEXT.md`（SuperAgentsNode）；`cli/src/domain/operations/README.md`（单系统 traverse）。
+**Spec / 约束真源:** `.harness/memory/feedbacks/feedback_traverse_single_system_and_forest_roots/INDEX.md`；`CONTEXT.md`（SuperAgentsNode）；`packages/cli/src/domain/operations/README.md`（单系统 traverse）。
 
 ## Global Constraints
 
@@ -23,17 +23,17 @@
 
 | 文件 | 职责 |
 | --- | --- |
-| `cli/src/domain/config/harness-materials.json` | 材料 `{ id, path, optional }[]` |
-| `cli/src/domain/config/harness-materials.ts` | 加载、校验、`resolveHarnessMaterial(scopeDir, id)` |
-| `cli/src/domain/operations/system-forest.ts` | `collectSystemRoots`、`isSystemEntry`（扫盘 + 标志） |
-| `cli/src/services/node/system-forest-service.ts` | 组装 `BaseNode[][]`；全部独立 / 嵌套只留内层；resolve 禁入其它根 |
-| `cli/src/services/node/node-service.ts` | `#superRoot` 改为按配置挂载材料 |
-| `cli/src/domain/models/agents/super-agents-node.ts` | 注释对齐：材料挂载，非「只挂一个 README」 |
-| `cli/src/commands/tasks/…` 或新 `forest` 子命令 / review 接线 | 暴露森林给 CLI / review |
-| `cli/test/domain/harness-materials.test.ts` | 配置与解析 |
-| `cli/test/operations/system-forest.test.ts` | 收根 |
-| `cli/test/services/system-forest-service.test.ts` | 二维林、早停、嵌套形式 |
-| `cli/test/services/super-agents-node.test.ts`（扩展） | Super 挂载表 |
+| `packages/cli/src/domain/config/harness-materials.json` | 材料 `{ id, path, optional }[]` |
+| `packages/cli/src/domain/config/harness-materials.ts` | 加载、校验、`resolveHarnessMaterial(scopeDir, id)` |
+| `packages/cli/src/domain/operations/system-forest.ts` | `collectSystemRoots`、`isSystemEntry`（扫盘 + 标志） |
+| `packages/cli/src/services/node/system-forest-service.ts` | 组装 `BaseNode[][]`；全部独立 / 嵌套只留内层；resolve 禁入其它根 |
+| `packages/cli/src/services/node/node-service.ts` | `#superRoot` 改为按配置挂载材料 |
+| `packages/cli/src/domain/models/agents/super-agents-node.ts` | 注释对齐：材料挂载，非「只挂一个 README」 |
+| `packages/cli/src/commands/tasks/…` 或新 `forest` 子命令 / review 接线 | 暴露森林给 CLI / review |
+| `packages/cli/test/domain/harness-materials.test.ts` | 配置与解析 |
+| `packages/cli/test/operations/system-forest.test.ts` | 收根 |
+| `packages/cli/test/services/system-forest-service.test.ts` | 二维林、早停、嵌套形式 |
+| `packages/cli/test/services/super-agents-node.test.ts`（扩展） | Super 挂载表 |
 | docs：`operations/README.md`、`models/README.md`、`CONTEXT.md`、CLI README | 与记忆对齐 |
 
 ```mermaid
@@ -51,9 +51,9 @@ flowchart TB
 ### Task 1: harness-materials.json + loader
 
 **Files:**
-- Create: `cli/src/domain/config/harness-materials.json`
-- Create: `cli/src/domain/config/harness-materials.ts`
-- Test: `cli/test/domain/harness-materials.test.ts`
+- Create: `packages/cli/src/domain/config/harness-materials.json`
+- Create: `packages/cli/src/domain/config/harness-materials.ts`
+- Test: `packages/cli/test/domain/harness-materials.test.ts`
 
 **Interfaces:**
 - Produces:
@@ -128,9 +128,9 @@ Loader: `readFileSync` + `import.meta.url` 定位 JSON；校验每项有非空 `
 - [x] **Step 5: Commit**
 
 ```bash
-git add cli/src/domain/config/harness-materials.json \
-  cli/src/domain/config/harness-materials.ts \
-  cli/test/domain/harness-materials.test.ts
+git add packages/cli/src/domain/config/harness-materials.json \
+  packages/cli/src/domain/config/harness-materials.ts \
+  packages/cli/test/domain/harness-materials.test.ts
 git commit -m "feat: domain harness-materials.json 与 path 解析"
 ```
 
@@ -139,9 +139,9 @@ git commit -m "feat: domain harness-materials.json 与 path 解析"
 ### Task 2: SuperAgentsNode 按配置挂载
 
 **Files:**
-- Modify: `cli/src/services/node/node-service.ts` (`#superRoot`)
-- Modify: `cli/src/domain/models/agents/super-agents-node.ts`（注释）
-- Test: `cli/test/services/super-agents-node.test.ts`（扩展或新建用例）
+- Modify: `packages/cli/src/services/node/node-service.ts` (`#superRoot`)
+- Modify: `packages/cli/src/domain/models/agents/super-agents-node.ts`（注释）
+- Test: `packages/cli/test/services/super-agents-node.test.ts`（扩展或新建用例）
 
 **Interfaces:**
 - Consumes: `listHarnessMaterialAbsPaths(scopeDir)`
@@ -192,9 +192,9 @@ git commit -m "feat: SuperAgentsNode 按 harness-materials 挂载"
 ### Task 3: collectSystemRoots（扫盘）
 
 **Files:**
-- Create: `cli/src/domain/operations/system-forest.ts`
-- Modify: `cli/src/domain/operations/index.ts`（导出）
-- Test: `cli/test/operations/system-forest.test.ts`
+- Create: `packages/cli/src/domain/operations/system-forest.ts`
+- Modify: `packages/cli/src/domain/operations/index.ts`（导出）
+- Test: `packages/cli/test/operations/system-forest.test.ts`
 
 **Interfaces:**
 - Produces:
@@ -216,8 +216,8 @@ git commit -m "feat: collectSystemRoots 扫盘认 project-harness"
 ### Task 4: SystemForestService → `BaseNode[][]`
 
 **Files:**
-- Create: `cli/src/services/node/system-forest-service.ts`
-- Test: `cli/test/services/system-forest-service.test.ts`
+- Create: `packages/cli/src/services/node/system-forest-service.ts`
+- Test: `packages/cli/test/services/system-forest-service.test.ts`
 
 **Interfaces:**
 - Produces:
@@ -238,7 +238,7 @@ git commit -m "feat: collectSystemRoots 扫盘认 project-harness"
   - innermost：外根被丢弃，只留内根那一行
   - Super 根存在且不挂仓根 `AGENTS.md` 为 child
 
-- [x] **Step 2: Implement service**（抽 `createSuperAgentsNode` 避免与 NodeService 循环依赖：放 `services/node/super-root.ts`）
+- [x] **Step 2: Implement service**（抽 `createSuperAgentsNode` 避免与 NodeService 循环依赖：放 `packages/services/node/super-root.ts`）
 
 - [x] **Step 3: PASS + Commit**
 
@@ -251,7 +251,7 @@ git commit -m "feat: SystemForestService 组装 BaseNode[][]"
 ### Task 5: CLI / review 接线
 
 **Files:**
-- Modify: `cli/src/commands/tasks/project/review-page.ts` 与/或新增 `edges systems forest` / `edges tasks forest`（择一，推荐 **`edges systems forest`** 若已有 systems 命名空间；否则挂 `tasks project forest` 易混淆——优先查 `program.ts` 现有命令树，无则加顶层 `forest` 或 `systems forest`）
+- Modify: `packages/cli/src/commands/tasks/project/review-page.ts` 与/或新增 `edges systems forest` / `edges tasks forest`（择一，推荐 **`edges systems forest`** 若已有 systems 命名空间；否则挂 `tasks project forest` 易混淆——优先查 `program.ts` 现有命令树，无则加顶层 `forest` 或 `systems forest`）
 - Modify: review 相关：增加可选模式——无 `--from` 时从当前 scope 建林并生成「主体列表」JSON 再渲染；**或**新命令只输出森林 JSON，review-page 仍只渲染（更贴「review-page 只渲染」现状）
 
 **推荐产品切法（本任务采用）：**
@@ -275,9 +275,9 @@ git commit -m "feat: CLI forest list 输出二维系统林"
 ### Task 6: 文档与记忆对齐
 
 **Files:**
-- Modify: `cli/src/domain/operations/README.md`
-- Modify: `cli/src/domain/models/README.md`
-- Modify: `cli/README.md`
+- Modify: `packages/cli/src/domain/operations/README.md`
+- Modify: `packages/cli/src/domain/models/README.md`
+- Modify: `packages/cli/README.md`
 - Modify: `CONTEXT.md`（Super 挂载改为材料表）
 - Update: `.harness/memory/feedbacks/feedback_traverse_single_system_and_forest_roots/INDEX.md`（补全 Q22 首版条目表 + 「本轮全部落地」）
 

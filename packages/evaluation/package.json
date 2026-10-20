@@ -1,0 +1,7 @@
+{
+  "name": "@viruspc/edges-evaluation",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Edges evaluation cases, reports, and runners. Python scripts and metadata only; no build."
+}

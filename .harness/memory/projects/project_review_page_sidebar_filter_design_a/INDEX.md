@@ -17,4 +17,4 @@ metadata:
 2026-09-17 用户选定 design A。2026-09-23 壳改成 React 后外观仍是这套，不要重开 A/B，也不要再改已删除的 `review-page.html`。
 
 **How to apply:**
-改 `apps/tasks-review-app/src/components/ProjectColumn.tsx` 的 class。选中含 `border-solid border-[#5b9fd4] bg-[#1a2332] opacity-100`；未选中含 `opacity-60 hover:opacity-100`。悬停拖放目标加 `outline outline-2 outline-offset-[3px] outline-[#5b9fd4]`。不要改点击筛选或只改 project 的拖放。空状态列可以不渲染，那不是侧栏筛选。
+改 `packages/apps/tasks-review-app/src/components/ProjectColumn.tsx` 的 class。选中含 `border-solid border-[#5b9fd4] bg-[#1a2332] opacity-100`；未选中含 `opacity-60 hover:opacity-100`。悬停拖放目标加 `outline outline-2 outline-offset-[3px] outline-[#5b9fd4]`。不要改点击筛选或只改 project 的拖放。空状态列可以不渲染，那不是侧栏筛选。

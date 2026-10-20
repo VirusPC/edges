@@ -72,25 +72,25 @@ src/
 ├─ domain/
 │  ├─ models/
 │  └─ operations/
-├─ services/
+├─ packages/services/
 ├─ commands/
 └─ utils/
 ```
 
 依赖为 `services → domain/operations → domain/models`，services 也可以直接使用 domain/models。models 不反向依赖 operations，domain 不依赖任何业务 Service（包括类型依赖），不直接执行文件 IO；可以使用纯 Markdown/日期/路径工具。traverse 的 resolve/load 回调继续由 Service 注入，filter/groupBy 等仍保持泛型，不因为归入 domain 而绑定节点类型。
 
-迁移时一并纠正现有 `models/note/validation.ts → services/note/types.ts` 的类型反向依赖：该文件校验的是入库请求，应移至 `services/note/validation.ts`，与 IngestRequest 同属 Note 业务 Service。保持原校验行为、错误信息与 CLI 返回结果，不把请求类型下沉到领域模型。
+迁移时一并纠正现有 `models/note/validation.ts → packages/services/note/types.ts` 的类型反向依赖：该文件校验的是入库请求，应移至 `packages/services/note/validation.ts`，与 IngestRequest 同属 Note 业务 Service。保持原校验行为、错误信息与 CLI 返回结果，不把请求类型下沉到领域模型。
 
 批量移动和引用重算使用 TypeScript 脚本，覆盖源码、测试、仓库迁移脚本及当前开发文档；相对导入仍使用 .js。原 src/models、src/operations 不留转发目录。测试目录暂不搬迁。已完成的历史 spec/plan 保留其当时路径，本次 spec/plan 对新布局有优先解释权。
 
 | 能力 | 落点 | 本次收敛 |
 | --- | --- | --- |
-| 节点 CRUD、查询与关联保存 | `services/node-service.ts` | 业务直接复用已有接口；不新增 `services/node-documents.ts` 或 `services/node-query.ts` |
-| 文件冲突检查、原子保存、恢复 | `services/node-files.ts` | 保持现有实现；Memory 的 `.gitignore` 写也复用它 |
+| 节点 CRUD、查询与关联保存 | `packages/services/node-service.ts` | 业务直接复用已有接口；不新增 `packages/services/node-documents.ts` 或 `packages/services/node-query.ts` |
+| 文件冲突检查、原子保存、恢复 | `packages/services/node-files.ts` | 保持现有实现；Memory 的 `.gitignore` 写也复用它 |
 | AGENTS 结构与文本格式 | `domain/models/agents/agents-node.ts`、同目录 `domain/models/agents/` | 骨架使用现有 serializeNode；区块算法集中到 blocks.ts；不新增 agents/documents.ts |
 | 索引转义与路径编码 | 现有 `domain/models/agents/serialize.ts` | 迁入 Memory 的两个纯函数，所有索引生成者复用；不新建 utils/markdown/index-rendering.ts |
 | 基础路径机制 | 现有 `utils/filesystem.ts` | 包含关系、真实路径、链接检查与祖先查找共用 |
-| Memory 的节点访问政策 | `services/memory/node-documents.ts` 改名为 `service.ts` | 保留 Service 构造和写入准备政策，删除 MemoryDocument/load/save 包装 |
+| Memory 的节点访问政策 | `packages/services/memory/node-documents.ts` 改名为 `service.ts` | 保留 Service 构造和写入准备政策，删除 MemoryDocument/load/save 包装 |
 | Tasks / Note 业务流程 | 各自现有 Service | 删除重复基础机制，不迁走业务规则 |
 
 内部的 parse.ts、serialize.ts、blocks.ts 可继续拆分，它们有明确的格式职责。纯格式函数可以被业务 Service 的文档适配代码使用；函数返回文本或值，不制造另一份受管节点，也不执行保存。
@@ -117,7 +117,7 @@ Memory 保留写前的 scope / 类型 / ignore 准备和只读来源限制。Not
 
 所有 Tasks 项目索引统一使用 InternalNode 通用关系与序列化能力，不再生成或维护 task-projects 专属区块。正常服务保留业务标题/描述、所属范围和排序政策，通过 NodeService 更新相关引用；其他模块引用及非受控正文保留。
 
-旧 task-projects 的转换由独立 scripts/migrate-agents-indexes.mts 承担，支持显式范围、预览、冲突检查、可恢复原文和幂等执行；正常写入遇到冲突旧格式只提示迁移，不夹带兼容性搬迁分支。通用区块工具保留必要的 Memory 模板用途，不能因统一索引删掉类型约定或用户正文。
+旧 task-projects 的转换由独立 scripts/migrations/migrate-agents-indexes.mts 承担，支持显式范围、预览、冲突检查、可恢复原文和幂等执行；正常写入遇到冲突旧格式只提示迁移，不夹带兼容性搬迁分支。通用区块工具保留必要的 Memory 模板用途，不能因统一索引删掉类型约定或用户正文。
 
 用户确认：位置由 LLM 根据语义和上下文判断，CLI 只负责执行明确输入。本层/下层分组不根据任务用途、节点类型或物理目录深度自动推导；CLI 接收目标路径及 local/descendant，验证路径、格式与关系一致性，并通过 Service 完成登记。更新未要求改组时保留既有位置；新增关系缺少必要位置输入则在写前报错，不采用隐式默认或先登记后纠正。harness 独立关系继续遵循原协议，不混成 children。
 

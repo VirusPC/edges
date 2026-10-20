@@ -46,7 +46,7 @@
 
 对外博客成稿在个人仓 [`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts)。Post 可以取材于 Note、Edge 或专项成果，但不会替代内部知识真源。该目录由人在个人仓维护。
 
-知识资产只有能够被及时找到、理解并带着必要上下文投入决策，才具有流动性。当前主要通过文件、Obsidian 和人工检索调用知识；后续计划接入 RAG、PageIndex 等索引方式，并经仓库根的 [`cli/`](../cli/)、[`skills/`](../skills/)、[`mcp-servers/`](../mcp-servers/) 向外部系统提供机器可读的知识访问能力。它们旨在提高知识流动性，但仍属于规划方向，尚不是现有能力。
+知识资产只有能够被及时找到、理解并带着必要上下文投入决策，才具有流动性。当前主要通过文件、Obsidian 和人工检索调用知识；后续计划接入 RAG、PageIndex 等索引方式，并经仓库根的 [`packages/cli/`](../packages/cli/)、[`packages/skills/`](../packages/skills/)、[`packages/mcp-servers/`](../packages/mcp-servers/) 向外部系统提供机器可读的知识访问能力。它们旨在提高知识流动性，但仍属于规划方向，尚不是现有能力。
 
 ## 系统实现
 
@@ -58,7 +58,7 @@
 - **递归树结构**：
 
   - **逻辑归属**：树的父归属遵循文件目录；索引可跨越目录层级发现节点，普通交叉引用不产生新的所有权。各节点可按需拥有维护空间，根可面向个人、团队、公司等主体。
-  - **全局共享**：仓内全局约定与维护记忆由根节点的 `AGENTS.md` 和 `.harness/` 承载，各层按归属引用复用。对外分发的 Edges 能力放在仓库根的 `cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/`；不依赖 Edges 的通用能力放个人仓 `VirusPC/edges-brain-viruspc` 的 `shared-extensions/`；目标是让任意仓库安装后复用这套能力，并在自己的作用域内维护节点与 `.harness/`。局部记忆不因共享而上收根层，也不随扩展默认分发。
+  - **全局共享**：仓内全局约定与维护记忆由根节点的 `AGENTS.md` 和 `.harness/` 承载，各层按归属引用复用。对外分发的 Edges 能力放在仓库根的 `packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/`；不依赖 Edges 的通用能力放个人仓 `VirusPC/edges-brain-viruspc` 的 `shared-extensions/`；目标是让任意仓库安装后复用这套能力，并在自己的作用域内维护节点与 `.harness/`。局部记忆不因共享而上收根层，也不随扩展默认分发。
   - **统一入口**：每个入口文件对应一个节点：`AGENTS.md` 组织内容，`INDEX.md` 或 `SKILL.md` 承载内容。`AGENTS.md` 沿用 Project Memory 的三部分：本层硬约束规定本层规则，本层记忆登记直属材料，下层记忆索引登记子节点。Task Project 等业务索引也放进这三部分。
   - **系统一与系统二**：当前对象是系统一，负责维护和改进它的是系统二；当维护对象换成这套系统二时，它又成为新的系统一。
   - **检索边界**：完整读取当前对象的系统二，但不自动进入系统二自身的系统二。同层分类索引可以继续展开，停止边界由维护关系决定，不由物理目录深度或经过多少个 `AGENTS.md` 决定。
@@ -70,7 +70,7 @@
 
 - **Git 原生管理**：用 Git 的跟踪、忽略与版本机制管理记忆；例如 user memory 通过 `.gitignore` 不随 Git 提交与共享，同时仍属于本层记忆。
 
-CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使用目录中的 `INDEX.md`，Skill 使用 `SKILL.md`；各层公开旧内容已转换并保留原归属与附件目标。通用遍历只展开已登记的 `localChildren`，显式开启时也展开 `descendantChildren`，不自动跟随 harness。历史 Task 组成索引已通过显式迁移补齐；Task 列表和全仓看板共用 NodeService 的已登记节点查询，不扫描目录补漏。Note 的目录转换仍不自动补齐组成索引。Project Memory 按需登记本地类型，不因发现节点而自动初始化。迁移与私有副本边界见[迁移指南](../docs/recursive-layout-migration.md)，术语见 [CONTEXT.md](../CONTEXT.md)。
+CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使用目录中的 `INDEX.md`，Skill 使用 `SKILL.md`；各层公开旧内容已转换并保留原归属与附件目标。通用遍历只展开已登记的 `localChildren`，显式开启时也展开 `descendantChildren`，不自动跟随 harness。历史 Task 组成索引已通过显式迁移补齐；Task 列表和全仓看板共用 NodeService 的已登记节点查询，不扫描目录补漏。Note 的目录转换仍不自动补齐组成索引。Project Memory 按需登记本地类型，不因发现节点而自动初始化。迁移与私有副本边界见[迁移指南](./recursive-layout-migration.md)，术语见 [CONTEXT.md](../CONTEXT.md)。
 
 围绕这些原则，Edges 希望部署、接入和输出这三件事尽量一键完成。它们分别托住知识闭环的底座、把捕获接到输入侧、以及把沉淀资产部署出去。仓库按这个方向收敛。
 
@@ -82,25 +82,25 @@ CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使�
 | --- | --- | --- |
 | `notes/`、`edges/`、`archive/`、[`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts)（个人仓 [`edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)） | 知识生产、提炼、使用与退出 | 在个人仓；每篇内容使用目录入口，附件共置。个人知识经 Compose 挂进本仓 |
 | [`AGENTS.md`](../AGENTS.md) 与各节点的 `.harness/memory/` | 为人和 Agent 提供分层的规则、决策、纠错与流程记忆 | 归属各节点，服务项目维护，不替代长期知识库 |
-| [`cli/`](../cli/)、[`skills/`](../skills/)、[`apps/`](../apps/)、[`services/`](../services/)、[`mcp-servers/`](../mcp-servers/)、[`system-prompt/`](../system-prompt/) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关。2026-10-20 起平铺在仓库根，见 [平铺说明](migrations/2026-10-20-flatten-extensions.md) |
+| [`packages/cli/`](../packages/cli/)、[`packages/skills/`](../packages/skills/)、[`packages/apps/`](../packages/apps/)、[`packages/services/`](../packages/services/)、[`packages/mcp-servers/`](../packages/mcp-servers/)、[`packages/system-prompt/`](../packages/system-prompt/) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关。2026-10-20 起收进 `packages/`，见 [workspace 说明](migrations/2026-10-20-packages-workspace.md) |
 | `shared-extensions/`（个人仓 [`edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/shared-extensions)） | 跨机器、跨 Agent 共用的个人 harness | 离开 Edges 仍然有价值；不在本仓 |
 | [`scripts/`](../scripts/README.md) | 初始化、构建、迁移等维护脚本 | 通过 `pnpm` 调用，不加入 `$PATH` |
-| [`.harness/evaluation/`](../.harness/evaluation/README.md) | 评测整套 Edges | 系统元工作，不是知识生命周期阶段 |
-| [`.harness/observation/`](../.harness/observation/README.md) | 观测运行与使用 | 运营观测，不替代 维护记忆中的决策 |
+| [`packages/evaluation/`](../packages/evaluation/README.md) | 评测整套 Edges | 系统元工作，不是知识生命周期阶段 |
+| [`packages/observation/`](../packages/observation/README.md) | 观测运行与使用 | 运营观测，不替代 维护记忆中的决策 |
 
-`.harness/evaluation/` 与 `.harness/observation/` 是系统实现旁的支撑目录：前者对照假设，后者记录野外现象。它们不进入 notes → edges → archive 主链；观测或评测若产生新洞察，仍须回到捕获入口。
+`packages/evaluation/` 与 `packages/observation/` 是系统实现旁的支撑目录：前者对照假设，后者记录野外现象。它们不进入 notes → edges → archive 主链；观测或评测若产生新洞察，仍须回到捕获入口。
 
-捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](../cli/README.md) 的 `edges notes …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](../mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](../skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
+捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](../packages/cli/README.md) 的 `edges notes …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](../packages/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](../packages/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
 
 Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；各节点的 `AGENTS.md` 和 `.harness/memory/` 保存该节点维护所需的规则、决策与经验；根层的 `notes/`、`edges/` 等目录保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
 
 接入 Edges 的目录收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill、常驻服务、应用和可复用 prompt。判据是「这是为了让 Agent / 外部系统接入或操作 Edges」，而不是「它是代码还是文档」。纯 markdown 一样可以进这些目录：一段能复用的 system prompt 与一个 MCP server 地位相同。只在当下有用、不可复用的总结属于个人仓的 `notes/`；跨机器共用、却不绑定 Edges 的 harness（通用 skill、MCP 配置、plugins、hooks）属于个人仓 [`shared-extensions/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/shared-extensions)。换 Agent、换机器带得走是进这些目录的必要条件，不是充分条件。个人仓的 `shared-extensions/` 与这些目录互斥。
 
-短生命周期预览页（上传 → 可达 URL → TTL）的用例 × 能力见 [`services/artifacts-preview`](../services/artifacts-preview/README.md#use-case-matrix)；命令面是 `edges artifacts`。
+短生命周期预览页（上传 → 可达 URL → TTL）的用例 × 能力见 [`packages/services/artifacts-preview`](../packages/services/artifacts-preview/README.md#use-case-matrix)；命令面是 `edges artifacts`。
 
 接入时：
 
-1. **并列入口**：能力面是 CLI、Skill、MCP 三者并列（[`cli/`](../cli/)、[`skills/`](../skills/)、[`mcp-servers/`](../mcp-servers/)），不是「有 shell 就只用 CLI、没有再补 MCP」。
+1. **并列入口**：能力面是 CLI、Skill、MCP 三者并列（[`packages/cli/`](../packages/cli/)、[`packages/skills/`](../packages/skills/)、[`packages/mcp-servers/`](../packages/mcp-servers/)），不是「有 shell 就只用 CLI、没有再补 MCP」。
 2. **文档化**：每个子目录都应包含独立的 README，说明其调用协议和配置方法。
 3. **解耦**：这些实现只依赖 `edges` CLI 契约或作用域内约定的内容路径，避免复杂的内部依赖。不要依赖仓根 `bin/`。
 4. **自包含**：一份实现应当能被单独复制走。避免用 Obsidian wikilink 引用别处的附件。
