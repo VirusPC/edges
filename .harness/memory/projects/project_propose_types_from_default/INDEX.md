@@ -1,6 +1,6 @@
 ---
 name: project_propose_types_from_default
-description: 改 propose-types 工作流或从 _default 发明新 Task Project 时打开：独立 Skill extensions/skills/project-tasks-propose-types/；经同一 review-page 确认，不自动 project create；方法是 LLM/agent 判断；配对 project-tasks-classify、ADR 0011 与 ADR 0012。本轮不写 skill 正文。
+description: 改 propose-types 工作流或从 _default 发明新 Task Project 时打开：独立 Skill skills/project-tasks-propose-types/；经同一 review-page 确认，不自动 project create；方法是 LLM/agent 判断；配对 project-tasks-classify、ADR 0011 与 ADR 0012。本轮不写 skill 正文。
 metadata:
   edges-title: proposeTypes 从 _default 提议新 Task Project 类型
   edges-type: project
@@ -11,7 +11,7 @@ metadata:
   edges-updated-at: "2026-09-17T07:58:06+00:00"
 ---
 
-proposeTypes 是独立工作流 Skill（`extensions/skills/project-tasks-propose-types/`），从 `_default` Task 加已有 Task Project 质心提议新类型候选（slug、description、supporting stems），不自动 `project create`；人确认走同一 Task Project 审阅页（`edges tasks project review-page`，无 GUI 时候选表回退），再另步 `project create` + `project-tasks-classify`。真 embedding 前用 LLM / agent 判断，不称 Embedding NCC、不用 K-means 命名。默认一批 3–7 个候选。用户所述、grill 确认于 2026-09-17；类型发现文档见 ADR 0011；人闸形态见 ADR 0012。本轮不写 skill 正文。
+proposeTypes 是独立工作流 Skill（`skills/project-tasks-propose-types/`），从 `_default` Task 加已有 Task Project 质心提议新类型候选（slug、description、supporting stems），不自动 `project create`；人确认走同一 Task Project 审阅页（`edges tasks project review-page`，无 GUI 时候选表回退），再另步 `project create` + `project-tasks-classify`。真 embedding 前用 LLM / agent 判断，不称 Embedding NCC、不用 K-means 命名。默认一批 3–7 个候选。用户所述、grill 确认于 2026-09-17；类型发现文档见 ADR 0011；人闸形态见 ADR 0012。本轮不写 skill 正文。
 
 **Why:**
 2026-09-17 grill 确认：类型发现与归属是两段编排。ADR 0010 的 classifyTasks 按已有质心做整板归属，不会从堆积的 `_default` 里发现该建哪些新类型。人闸与 classify 共用通用 groups+items 审阅页，不另开 `--mode`。并进 classify、自动建 project、Embedding NCC、K-means 命名都会名实不符或跳过人确认。能力面仍是 CLI + Skill + MCP。

@@ -36,7 +36,7 @@ metadata:
 
 **关联：**
 
-- `extensions/skills/project-memory-remember/SKILL.md`
-- `extensions/skills/project-memory-init` 的 `TYPE.tmpl` / `PROTOCOL`
+- `skills/project-memory-remember/SKILL.md`
+- `skills/project-memory-init` 的 `TYPE.tmpl` / `PROTOCOL`
 - `project-memory-add-type`（`add-type`）及其自定义 Memory type 发现机制
 - `skills` 类型已经存在的特殊正文形状

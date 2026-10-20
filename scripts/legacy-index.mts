@@ -1,10 +1,10 @@
 /** Migration-only reader/editor for pre-directory Markdown indexes. Never used by production CLI. */
-import { resolveHref } from "../extensions/cli/src/domain/models/node/layout.js";
-import { InternalSyntax, type SyntaxContent, type SyntaxReference } from "../extensions/cli/src/domain/models/node/document.js";
+import { resolveHref } from "../cli/src/domain/models/node/layout.js";
+import { InternalSyntax, type SyntaxContent, type SyntaxReference } from "../cli/src/domain/models/node/document.js";
 import {
   parseDocument,
   serializeDocument,
-} from "../extensions/cli/src/utils/markdown/document.js";
+} from "../cli/src/utils/markdown/document.js";
 type LegacyReference = SyntaxReference & {
   id: string;
   kind: "local" | "descendant";

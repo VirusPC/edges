@@ -19,7 +19,7 @@ grill Q14：内容叶子入口从 index.md 迁到 INDEX.md，含 posts/（用户
 
 ## 动作
 
-- 复用 extensions/cli 的 operations 树遍历，不要另写扫盘发现
+- 复用 cli 的 operations 树遍历，不要另写扫盘发现
 - dry-run 列计划与冲突；--apply 写入；幂等
 - 校验 posts 仅改名/改链，不改正文内容
 

@@ -10,8 +10,8 @@ name: 搁置只让_cli_的_pr_自动触发_bugbot
 description: Bugbot 不能按目录自动跑；Action、PAT、云端 Agent 身份都不通，先记结论，另议方案。
 ---
 **背景：**
-2026-10-11 为减少非 CLI PR 被 Cursor Bugbot 审查，peng cheng 把后台改成「只在评论点名时才跑」，并尝试用仓库机制只对 `extensions/cli/**` 的 PR 自动点名。先后试了 GitHub Action（github-actions 发 `bugbot run`）、个人 PAT Secret、云端 Agent 代发评论、仓库记忆 + AGENTS.md 硬约束。实测结论：Bugbot 不认 github-actions 评论；认 VirusPC 本人的评论；云端 Agent 的 gh 是 Cursor App 身份，发评论也不认；用户明确不要引入 token/PAT。兼容链条多，用户要求先搁置。
-- 相关现状：#209（Action 方案）已关；#212（记忆方案）本次一并关闭；`extensions/cli/.cursor/BUGBOT.md` 与 CODEOWNERS 仍在。
+2026-10-11 为减少非 CLI PR 被 Cursor Bugbot 审查，peng cheng 把后台改成「只在评论点名时才跑」，并尝试用仓库机制只对 `cli/**` 的 PR 自动点名。先后试了 GitHub Action（github-actions 发 `bugbot run`）、个人 PAT Secret、云端 Agent 代发评论、仓库记忆 + AGENTS.md 硬约束。实测结论：Bugbot 不认 github-actions 评论；认 VirusPC 本人的评论；云端 Agent 的 gh 是 Cursor App 身份，发评论也不认；用户明确不要引入 token/PAT。兼容链条多，用户要求先搁置。
+- 相关现状：#209（Action 方案）已关；#212（记忆方案）本次一并关闭；`cli/.cursor/BUGBOT.md` 与 CODEOWNERS 仍在。
 - 非目标：本卡不实现自动点名，不引入 PAT、Action 或定时任务。
 - 关联：PR #200、#209、#212；项目记忆草案曾用 slug `project_bugbot_comment_trigger_for_cli`（勿当已定方案）。
 

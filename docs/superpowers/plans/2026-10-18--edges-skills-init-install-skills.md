@@ -13,7 +13,7 @@
 ## Global Constraints
 
 - 总原则：安装技能是 vercel skills 的薄封装。edges 不加 TTY 判断、`--agent` 必填、版本比较、本地改动检测、skill 筛选、`-f` / `--force`，也不对用户开放 `--skill`。
-- 固定版本常量只有一处：`VERCEL_SKILLS_VERSION = "1.7.2"`。`extensions/cli/package.json` 的 `dependencies.skills` 必须是同一个确切版本。
+- 固定版本常量只有一处：`VERCEL_SKILLS_VERSION = "1.7.2"`。`cli/package.json` 的 `dependencies.skills` 必须是同一个确切版本。
 - 实际参数：`add <包内 skills 目录绝对路径> --skill '*' ` 再接 `--` 之后的 token，顺序不变。进程是 `node` 加上该依赖包自己的 bin（不走 `npx`，避免测试和离线安装打到网络）。起不来（解析不到 bin、spawn 报错）视同安装失败。
 - stdio 为 `inherit`。edges 不改写 vercel skills 的 stdout / stderr。
 - vercel skills 非零退出时，进程退出码就是它的退出码；信封 `{ status: "failed", errorCode: "SKILLS_INSTALL_FAILED", reason }` 带上原因。没有 `--no-skills`。
@@ -42,21 +42,21 @@
 | 测试不写真实 `~/.agents`、`~/.claude` | Task 3 preload |
 | 干净环境全局安装后 agent 能调用 | 不在本计划自动执行。无 TTY 的 `edges init` 按 vercel 默认会退出 1；本环境不写真实 agent 目录、测试不打网络。PR 里这一条保持未勾 |
 | `engines.node` `>=22.20.0`，README 同步 | Task 2、Task 5 |
-| `extensions/skills/README.md` 与 `shared-extensions/skills/README.md` | Task 5 |
+| `skills/README.md` 与 `shared-extensions/skills/README.md` | Task 5 |
 | CLI README 与 `project-memory-init` 文案 | Task 5 |
 | ADR 0036 Status / Consequences 改为已实现 | Task 5。合入 main 由 PR 完成，本计划不合并 |
 
 ## 文件结构
 
 - Create: `scripts/move-edges-unrelated-skills.mts` — 可预览、可重复的搬家脚本。
-- Create: `extensions/cli/src/services/skills/install-bundled.ts` — 版本常量、目录解析、参数拼装、spawn。
-- Create: `extensions/cli/src/services/skills/split-skills-install-args.ts` — 在 `--` 处切开 argv。
-- Create: `extensions/cli/scripts/copy-bundled-skills.ts` — 把 `extensions/skills` 里带 `SKILL.md` 的目录拷进包。
-- Create: `extensions/cli/test/skills/install-bundled.test.ts`
-- Create: `extensions/cli/test/skills/split-skills-install-args.test.ts`
-- Create: `extensions/cli/test/register-skills-install-mock.ts` — 测试 preload。
-- Modify: `extensions/cli/src/services/init/service.ts`、`modules.ts`、`commands/init.ts`、`commands/skills/init.ts`、`context.ts`、`program.ts`
-- Modify: `extensions/cli/package.json`、根 `package.json` 的脚本（若搬家脚本要登记）、`.gitignore`
+- Create: `cli/src/services/skills/install-bundled.ts` — 版本常量、目录解析、参数拼装、spawn。
+- Create: `cli/src/services/skills/split-skills-install-args.ts` — 在 `--` 处切开 argv。
+- Create: `cli/scripts/copy-bundled-skills.ts` — 把 `skills` 里带 `SKILL.md` 的目录拷进包。
+- Create: `cli/test/skills/install-bundled.test.ts`
+- Create: `cli/test/skills/split-skills-install-args.test.ts`
+- Create: `cli/test/register-skills-install-mock.ts` — 测试 preload。
+- Modify: `cli/src/services/init/service.ts`、`modules.ts`、`commands/init.ts`、`commands/skills/init.ts`、`context.ts`、`program.ts`
+- Modify: `cli/package.json`、根 `package.json` 的脚本（若搬家脚本要登记）、`.gitignore`
 - Modify: 文档与 `project-memory-init` 正文；任务卡只追加进展记录。
 
 调用链：
@@ -110,10 +110,10 @@ edges init / edges skills init
 
 **Files:**
 
-- Create: `extensions/cli/scripts/copy-bundled-skills.ts`
-- Modify: `extensions/cli/package.json`（`files`、`engines`、`build`、`dependencies.skills`）
-- Modify: `.gitignore`（`extensions/cli/skills/`）
-- Test: `extensions/cli/test/skills/bundled-skills-package.test.ts`
+- Create: `cli/scripts/copy-bundled-skills.ts`
+- Modify: `cli/package.json`（`files`、`engines`、`build`、`dependencies.skills`）
+- Modify: `.gitignore`（`cli/skills/`）
+- Test: `cli/test/skills/bundled-skills-package.test.ts`
 
 **Interfaces:**
 
@@ -123,7 +123,7 @@ edges init / edges skills init
   - `engines.node` 为 `">=22.20.0"`。
   - `dependencies.skills` 为 `"1.7.2"`。
 
-- [ ] **Step 1:** 写失败测试：拷贝结果含 `extensions/skills` 现有的每一个 skill 目录且各有 `SKILL.md`；不含 Task 1 的 6 个名字；`package.json` 的 `files` / `engines` / `dependencies.skills` 符合上面的接口。
+- [ ] **Step 1:** 写失败测试：拷贝结果含 `skills` 现有的每一个 skill 目录且各有 `SKILL.md`；不含 Task 1 的 6 个名字；`package.json` 的 `files` / `engines` / `dependencies.skills` 符合上面的接口。
 - [ ] **Step 2:** 跑该测试，确认因拷贝函数或字段缺失而失败。
 - [ ] **Step 3:** 实现拷贝，把它加进 `build`（`prepack` 已调用 `build`）。`pnpm --filter @viruspc/edges add skills@1.7.2`（确切版本）。
 - [ ] **Step 4:** 跑测试。再执行一次 `pnpm --filter @viruspc/edges pack --pack-destination <tmpdir>`，列出 tgz，确认包内 `package/skills/<name>/SKILL.md` 覆盖剩下的 skill，且没有那 6 个名字，也没有 `shared-extensions`。
@@ -132,20 +132,20 @@ edges init / edges skills init
 
 **Files:**
 
-- Create: `extensions/cli/src/services/skills/install-bundled.ts`
-- Create: `extensions/cli/src/services/skills/split-skills-install-args.ts`
-- Create: `extensions/cli/test/skills/install-bundled.test.ts`
-- Create: `extensions/cli/test/skills/split-skills-install-args.test.ts`
-- Create: `extensions/cli/test/register-skills-install-mock.ts`
-- Modify: `extensions/cli/package.json` 的 `test` 脚本，加上该 preload
-- Modify: `extensions/cli/src/program.ts`、`context.ts`
+- Create: `cli/src/services/skills/install-bundled.ts`
+- Create: `cli/src/services/skills/split-skills-install-args.ts`
+- Create: `cli/test/skills/install-bundled.test.ts`
+- Create: `cli/test/skills/split-skills-install-args.test.ts`
+- Create: `cli/test/register-skills-install-mock.ts`
+- Modify: `cli/package.json` 的 `test` 脚本，加上该 preload
+- Modify: `cli/src/program.ts`、`context.ts`
 
 **Interfaces:**
 
 - Produces:
   - `export const VERCEL_SKILLS_VERSION = "1.7.2"`
   - `splitSkillsInstallArgs(argv: readonly string[]) → { argv: string[]; skillsInstallArgs: string[] }`
-  - `resolveBundledSkillsDir() → string`（绝对路径。包根下 `skills/` 里已有 `SKILL.md` 时用它，否则用包根的 `../skills`，即仓库里的 `extensions/skills`）
+  - `resolveBundledSkillsDir() → string`（绝对路径。包根下 `skills/` 里已有 `SKILL.md` 时用它，否则用包根的 `../skills`，即仓库里的 `skills`）
   - `skillsAddArgs(skillsDir: string, forwarded: readonly string[]) → string[]` 等于 `["add", skillsDir, "--skill", "*", ...forwarded]`
   - `installBundledSkills(forwarded: readonly string[]) → Promise<void>`
   - `setBundledSkillsSpawnForTests(spawn | undefined)`：测试替换 spawn。`undefined` 恢复真实 spawn。
@@ -186,12 +186,12 @@ spawn(process.execPath, [skillsBin, ...skillsAddArgs(dir, forwarded)], { stdio: 
 
 **Files:**
 
-- Modify: `extensions/cli/src/services/init/modules.ts`（`DEFAULT_INIT_MODULES` 变为 `["memory", "skills", "notes", "projects"]`）
-- Modify: `extensions/cli/src/services/init/service.ts`
-- Modify: `extensions/cli/src/commands/init.ts`
-- Modify: `extensions/cli/src/commands/skills/init.ts`
-- Modify: `extensions/cli/src/services/skills/service.ts`（`initSkills` 把 `skillsInstallArgs` 传给 `initScope`）
-- Test: `extensions/cli/test/commands/init-service.test.ts` 与 `extensions/cli/test/skills/install-bundled.test.ts` 里的 `run()` 用例
+- Modify: `cli/src/services/init/modules.ts`（`DEFAULT_INIT_MODULES` 变为 `["memory", "skills", "notes", "projects"]`）
+- Modify: `cli/src/services/init/service.ts`
+- Modify: `cli/src/commands/init.ts`
+- Modify: `cli/src/commands/skills/init.ts`
+- Modify: `cli/src/services/skills/service.ts`（`initSkills` 把 `skillsInstallArgs` 传给 `initScope`）
+- Test: `cli/test/commands/init-service.test.ts` 与 `cli/test/skills/install-bundled.test.ts` 里的 `run()` 用例
 
 **Interfaces:**
 
@@ -225,14 +225,14 @@ spawn(process.execPath, [skillsBin, ...skillsAddArgs(dir, forwarded)], { stdio: 
 
 **Files:**
 
-- Modify: `extensions/cli/README.md`、`README.md`、`extensions/README.md`、`extensions/skills/README.md`、`shared-extensions/skills/README.md`、`CONTEXT.md`、`docs/adr/0036-edges-init-installs-bundled-skills.md`、`CHANGELOG.md`（边界变化的一条）
-- Modify: `extensions/skills/project-memory-init/SKILL.md`、`references/LAYOUT.md`、`references/runtime.md`、`CHANGELOG.md`（版本记为 `4.0.0`，行为变化）
+- Modify: `cli/README.md`、`README.md`、`README.md`、`skills/README.md`、`shared-extensions/skills/README.md`、`CONTEXT.md`、`docs/adr/0036-edges-init-installs-bundled-skills.md`、`CHANGELOG.md`（边界变化的一条）
+- Modify: `skills/project-memory-init/SKILL.md`、`references/LAYOUT.md`、`references/runtime.md`、`CHANGELOG.md`（版本记为 `4.0.0`，行为变化）
 - Modify: 任务卡进展记录。不移动卡片目录。
-- Modify: `teaching/link-external-repo/NOTES.md` 里 `extensions/skills/learn-repo` 的路径。
+- Modify: `teaching/link-external-repo/NOTES.md` 里 `skills/learn-repo` 的路径。
 
 **文案要点：**
 
-- 外部用户主路径是 `edges skills init`。旗标写在 `--` 后面，例如 `edges skills init -- -g -y --agent claude-code`。不再写「外部用户走 `npx skills add VirusPC/edges/extensions/skills`」和「一律 `@latest`」作为安装主路径。作者本机 `pnpm skills:link` 保留。
+- 外部用户主路径是 `edges skills init`。旗标写在 `--` 后面，例如 `edges skills init -- -g -y --agent claude-code`。不再写「外部用户走 `npx skills add VirusPC/edges/skills`」和「一律 `@latest`」作为安装主路径。作者本机 `pnpm skills:link` 保留。
 - Node 要求写成 22.20.0 及以上（根 README 快速开始、CLI README）。
 - `安装技能` 术语补上薄封装、`--skill '*'`、`--` 转交。
 - ADR 0036 的 Status 改为已实现；Consequences 改为实现后的事实（包内 `skills/`、依赖 `skills@1.7.2`、stdio 继承、无 TTY 时由 vercel skills 自己退出）。

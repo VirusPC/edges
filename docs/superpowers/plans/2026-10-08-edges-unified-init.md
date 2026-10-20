@@ -114,26 +114,26 @@
 - 命令只从对应 `services/<module>/service.ts` 进入。commands 的 init 文件不 import `harness-materials`，不 `writeFileSync`。
 - `edges artifacts init` 保持 token 命令，不进 harness 编排。不为 evaluation / observation 发明命令。
 - 不改 PROTOCOL、模板、doctor、根 README。
-- skill 真源只有 `extensions/skills/project-memory-init`（`.claude/skills` 与 `.agents/skills` 是指向它的符号链接）。版本 `3.5.0` → `3.6.0`。
+- skill 真源只有 `skills/project-memory-init`（`.claude/skills` 与 `.agents/skills` 是指向它的符号链接）。版本 `3.5.0` → `3.6.0`。
 
 ## File map
 
 | Path | Change |
 | --- | --- |
-| `extensions/cli/src/services/init/modules.ts` | **Create** 模块表：notes/projects → material id、标题、描述、种子正文 |
-| `extensions/cli/src/services/init/service.ts` | **Create** `initMemory` / `initScope` / `ensureHarnessBoard` |
-| `extensions/cli/src/services/memory/init.ts` | 改为动态 import 的薄包装 |
-| `extensions/cli/src/services/notes/service.ts` | 增加 `initNotes` 转调 |
-| `extensions/cli/src/services/projects/service.ts` | 增加 `initProjects` 转调 |
-| `extensions/cli/src/commands/init.ts` | **Create** 根命令 |
-| `extensions/cli/src/commands/notes/init.ts` | **Create** |
-| `extensions/cli/src/commands/projects/init.ts` | **Create** |
-| `extensions/cli/src/commands/notes.ts`、`projects.ts`、`program.ts` | 注册命令、写锁、帮助示例 |
-| `extensions/cli/test/commands/init-service.test.ts` | **Create** |
+| `cli/src/services/init/modules.ts` | **Create** 模块表：notes/projects → material id、标题、描述、种子正文 |
+| `cli/src/services/init/service.ts` | **Create** `initMemory` / `initScope` / `ensureHarnessBoard` |
+| `cli/src/services/memory/init.ts` | 改为动态 import 的薄包装 |
+| `cli/src/services/notes/service.ts` | 增加 `initNotes` 转调 |
+| `cli/src/services/projects/service.ts` | 增加 `initProjects` 转调 |
+| `cli/src/commands/init.ts` | **Create** 根命令 |
+| `cli/src/commands/notes/init.ts` | **Create** |
+| `cli/src/commands/projects/init.ts` | **Create** |
+| `cli/src/commands/notes.ts`、`projects.ts`、`program.ts` | 注册命令、写锁、帮助示例 |
+| `cli/test/commands/init-service.test.ts` | **Create** |
 | `docs/adr/0031-edges-init-standard-command.md` | **Create** |
 | `CONTEXT.md` | 只改系统入口那一句里的命令 |
-| `extensions/cli/README.md` | 分层登记 init，加示例 |
-| `extensions/skills/project-memory-init/SKILL.md`、`references/runtime.md`、`references/LAYOUT.md` | 命令与模块段，版本 3.5.0 |
+| `cli/README.md` | 分层登记 init，加示例 |
+| `skills/project-memory-init/SKILL.md`、`references/runtime.md`、`references/LAYOUT.md` | 命令与模块段，版本 3.5.0 |
 | `docs/superpowers/plans/2026-10-08-edges-init-grill.md` | grill 全文 |
 | 任务卡 INDEX 与 `.log.md` | `edges tasks` 移到 in_progress，追加决策摘要 |
 
@@ -150,16 +150,16 @@
 7. **已定（用户 2026-10-08 确认「改一下」）。** `commands/tasks/list.ts` 与 `commands/tasks/project/list.ts` 不再 import `harness-materials`，也不在命令里用 fs 判断看板 README。看板目录名、README 绝对路径、文件是否存在、节点是否为看板 README，由 `services/tasks/board-material.ts` 提供，经 `services/tasks/service.ts` 导出。`commands` 下不得再出现 `domain/config/harness-materials` 的 import，由守护测试守住。完成标准第 4 条按此勾上。
 8. 任务 sidecar `.log.md` 没有 CLI 动词。状态和正文走 `edges tasks`；log 条目按既有 Markdown 格式直接追加。
 9. 材料表里有 id 的官方类型（feedback、project、reference、managed、referenced）写盘路径经 `placeHarnessMaterial`。`user` 和自定义类型没有 material id，仍用 `TypeSpec.indexFile`。两条路径在现有官方类型上与原来的 `.harness/.../README.md` 相同。
-10. evaluation 与 observation 在 `harness-materials.json` 里有可选材料，但没有领域 CLI。`extensions/AGENTS.md` 写明不为这两处发明命令，所以没有 `edges evaluation init` / `edges observation init`。`readme` 是内容面 README 的挂载项，不是 init 模块。
+10. evaluation 与 observation 在 `harness-materials.json` 里有可选材料，但没有领域 CLI。`AGENTS.md` 写明不为这两处发明命令，所以没有 `edges evaluation init` / `edges observation init`。`readme` 是内容面 README 的挂载项，不是 init 模块。
 11. `edges artifacts init` 已有语义：只写本机 artifacts token 配置（`~/.config/edges/artifacts.env`，ADR 0013）。它没有 harness 材料，不改成 harness init，也不进 `edges init` 的编排。按「只管 artifacts 自己」看，这条命令已经收敛，本次不改它的行为。
-12. **留下不搬。** 扫过 `extensions/cli/src/commands/**` 之后，与 harness 材料无关、又要大改的直接文件写入有两处：`commands/tasks/project/review-page.ts` 读审阅 JSON 并写出 HTML；`commands/artifacts/utils/config.ts` 创建目录并写入 artifacts token 配置。本次只把材料清单读取从命令下沉，不改这两处的流程。`commands/artifacts/utils/collect.ts` 与 `commands/memory/remember.ts` 会读取调用方给出的文件，不是写入，也不是挂载表，同样不动。`commands/tasks/list.ts` 仍用 `existsSync` 判断 scope 的 `AGENTS.md` 在不在，这不是看板材料。
+12. **留下不搬。** 扫过 `cli/src/commands/**` 之后，与 harness 材料无关、又要大改的直接文件写入有两处：`commands/tasks/project/review-page.ts` 读审阅 JSON 并写出 HTML；`commands/artifacts/utils/config.ts` 创建目录并写入 artifacts token 配置。本次只把材料清单读取从命令下沉，不改这两处的流程。`commands/artifacts/utils/collect.ts` 与 `commands/memory/remember.ts` 会读取调用方给出的文件，不是写入，也不是挂载表，同样不动。`commands/tasks/list.ts` 仍用 `existsSync` 判断 scope 的 `AGENTS.md` 在不在，这不是看板材料。
 
 ---
 
 ### Task 1: 失败测试
 
 **Files:**
-- Create: `extensions/cli/test/commands/init-service.test.ts`
+- Create: `cli/test/commands/init-service.test.ts`
 
 - [x] **Step 1:** 覆盖 `edges init --help`（含 does not read `--super`，以及 tasks 与「本次会创建」分栏）、空 scope 无参产物、`edges init notes` 与 `edges notes init` 文件一致、`edges init memory` 不建 notes 桩、幂等重跑、`--super` 仍写 `.harness`、init 命令源码不读材料清单、写锁把新 init 当写命令。
 - [x] **Step 2:** 跑该测试，确认因命令不存在而失败。
@@ -167,17 +167,17 @@
 ### Task 2: init service 与命令
 
 **Files:**
-- Create: `extensions/cli/src/services/init/modules.ts`
-- Create: `extensions/cli/src/services/init/service.ts`
-- Modify: `extensions/cli/src/services/memory/init.ts`
-- Modify: `extensions/cli/src/services/notes/service.ts`
-- Modify: `extensions/cli/src/services/projects/service.ts`
-- Create: `extensions/cli/src/commands/init.ts`
-- Create: `extensions/cli/src/commands/notes/init.ts`
-- Create: `extensions/cli/src/commands/projects/init.ts`
-- Modify: `extensions/cli/src/commands/notes.ts`
-- Modify: `extensions/cli/src/commands/projects.ts`
-- Modify: `extensions/cli/src/program.ts`
+- Create: `cli/src/services/init/modules.ts`
+- Create: `cli/src/services/init/service.ts`
+- Modify: `cli/src/services/memory/init.ts`
+- Modify: `cli/src/services/notes/service.ts`
+- Modify: `cli/src/services/projects/service.ts`
+- Create: `cli/src/commands/init.ts`
+- Create: `cli/src/commands/notes/init.ts`
+- Create: `cli/src/commands/projects/init.ts`
+- Modify: `cli/src/commands/notes.ts`
+- Modify: `cli/src/commands/projects.ts`
+- Modify: `cli/src/program.ts`
 
 **Interfaces:**
 - `initMemory(options)`：与今天相同的返回值；`compatBoards: true`。
@@ -187,7 +187,7 @@
 - [x] **Step 3:** 模块表只用 material id。`ensureHarnessBoard` 用 `placeHarnessMaterial` 取 path，文件已存在则返回 preserved，否则 `NodeService.create`。
 - [x] **Step 4:** `runMemoryInit` 保持今天的选择、类型索引、`refreshIndex`、AGENTS、`syncIndexEntry` 顺序。仅把桩创建换成 `ensureHarnessBoard`，并由 `compatBoards` 开关控制。
 - [x] **Step 5:** 根命令与域命令只 import 各自主文件。`commandWriteTarget` 把根 `init`、`notes init`、`projects init` 算作写命令；`--target-dir` 作为锁路径。
-- [x] **Step 6:** 跑新测试与 `extensions/cli/test/memory/content-boards.test.ts`、`cli.test.ts`、`core.test.ts` 至 PASS。
+- [x] **Step 6:** 跑新测试与 `cli/test/memory/content-boards.test.ts`、`cli.test.ts`、`core.test.ts` 至 PASS。
 
 ### Task 3: ADR、CONTEXT、skill、CLI README
 
@@ -198,4 +198,4 @@
 ### Task 4: 任务卡与全量对比
 
 - [x] **Step 10:** `edges tasks status` 把 `edges-unified-init` 移到 in_progress。`edges tasks update --body` 追加决策摘要（链到本 plan），并注明无参 init 的 memory 组织清单指 feedback/project/reference 三个类型 README。不改背景和目标。勾上已达成的完成标准。log 记下 grill、决策、实现。合入前留在 in_progress。
-- [x] **Step 11:** `extensions/cli` 下 `tsc --noEmit`。先跑本分支 `pnpm test`，结束后再在独立 worktree 跑 main 的 `pnpm test`。本分支有而 main 没有的失败必须为空。
+- [x] **Step 11:** `cli` 下 `tsc --noEmit`。先跑本分支 `pnpm test`，结束后再在独立 worktree 跑 main 的 `pnpm test`。本分支有而 main 没有的失败必须为空。

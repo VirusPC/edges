@@ -146,14 +146,14 @@ flowchart LR
 
 | 区域 | 主文件 |
 | --- | --- |
-| 入口名 / 章节常量 | `extensions/cli/src/domain/models/layout.ts` |
+| 入口名 / 章节常量 | `cli/src/domain/models/layout.ts` |
 | AGENTS/README blocks | `…/agents/blocks.ts`, `parse.ts`, `serialize.ts`, `syntax.ts` |
 | 组成节点 | `…/agents/agents-node.ts` → 演进为 Agents/Readme |
 | 遍历 | `…/operations/traverse.ts` + NodeService 加载 |
 | 类型索引路径 | `…/services/memory/paths.ts`, `types.ts`, `entries.ts`, `init.ts`, `add-type.ts` |
-| 模板 | `extensions/skills/project-memory-init/references/templates/*` |
+| 模板 | `skills/project-memory-init/references/templates/*` |
 | 协议 | `…/PROTOCOL.md`, `LAYOUT.md` |
-| 迁移脚本 | `scripts/migrate-*.mts` 或 `extensions/cli/scripts/`（与现有 migrate 同风格） |
+| 迁移脚本 | `scripts/migrate-*.mts` 或 `cli/scripts/`（与现有 migrate 同风格） |
 | 根 README | `/README.md` |
 
 ---
@@ -163,11 +163,11 @@ flowchart LR
 ### Task 1: layout 常量与 AGENTS 新标题
 
 **Files:**
-- Modify: `extensions/cli/src/domain/models/layout.ts`
-- Modify: `extensions/cli/test/models/agents-node.test.ts`
-- Modify: `extensions/skills/project-memory-init/references/LAYOUT.md`
-- Modify: `extensions/skills/project-memory-init/references/PROTOCOL.md`（只改称呼，不写 HTML 标记名）
-- Modify: `extensions/skills/project-memory-init/references/templates/AGENTS.tmpl.md`
+- Modify: `cli/src/domain/models/layout.ts`
+- Modify: `cli/test/models/agents-node.test.ts`
+- Modify: `skills/project-memory-init/references/LAYOUT.md`
+- Modify: `skills/project-memory-init/references/PROTOCOL.md`（只改称呼，不写 HTML 标记名）
+- Modify: `skills/project-memory-init/references/templates/AGENTS.tmpl.md`
 
 **Interfaces:**
 - Produces: `INTERNAL_SECTIONS.localChildren.heading === "本层系统维护信息"`；`descendantChildren.heading === "下层系统维护信息"`；parse 仍认旧标题
@@ -215,9 +215,9 @@ export const INTERNAL_SECTIONS = {
 ```bash
 pnpm --filter edges-cli exec node --test --import tsx test/models/agents-node.test.ts
 # apply 后一并 stage 被 rewrite 的各层 AGENTS.md（勿手改标题）
-git add extensions/cli/src/domain/models/layout.ts \
-  extensions/cli/test/models/agents-node.test.ts \
-  extensions/skills/project-memory-init/references/ \
+git add cli/src/domain/models/layout.ts \
+  cli/test/models/agents-node.test.ts \
+  skills/project-memory-init/references/ \
   $(git diff --name-only -- '**/AGENTS.md')
 git commit -m "$(cat <<'EOF'
 feat: AGENTS 章节标题改为系统维护信息
@@ -232,10 +232,10 @@ EOF
 ### Task 2: README `project-entries-*` 组成 codec
 
 **Files:**
-- Modify: `extensions/cli/src/domain/models/layout.ts` — 增加 `ENTRY_NAMES.readme`、`ENTRIES_SECTIONS`、`identifyNodeType` 认 `README.md` → 暂映射可解析组成的节点
-- Modify: `extensions/cli/src/domain/models/agents/syntax.ts` / `blocks.ts` / `parse.ts` — 支持第二套 marker（或参数化 section table）
-- Create: `extensions/cli/src/domain/models/readme/readme-node.ts`（或先用参数化 InternalNode；Prefer 独立 `ReadmeNode`，`type` 先写 `"readme"` 字符串，Wave B 收口）
-- Test: `extensions/cli/test/models/readme-entries.test.ts`
+- Modify: `cli/src/domain/models/layout.ts` — 增加 `ENTRY_NAMES.readme`、`ENTRIES_SECTIONS`、`identifyNodeType` 认 `README.md` → 暂映射可解析组成的节点
+- Modify: `cli/src/domain/models/agents/syntax.ts` / `blocks.ts` / `parse.ts` — 支持第二套 marker（或参数化 section table）
+- Create: `cli/src/domain/models/readme/readme-node.ts`（或先用参数化 InternalNode；Prefer 独立 `ReadmeNode`，`type` 先写 `"readme"` 字符串，Wave B 收口）
+- Test: `cli/test/models/readme-entries.test.ts`
 
 **Interfaces:**
 - Consumes: Task 1 的 section 模式
@@ -332,10 +332,10 @@ EOF
 ### Task 3: traverse 默认全部 children + 双文件规则
 
 **Files:**
-- Modify: `extensions/cli/src/domain/operations/traverse.ts`
-- Modify: `extensions/cli/src/domain/operations/README.md`
+- Modify: `cli/src/domain/operations/traverse.ts`
+- Modify: `cli/src/domain/operations/README.md`
 - Modify: NodeService 加载回调（同目录 README 并边）；审计所有依赖「默认只 local」的调用方，改为显式 `localOnly: true` 如需要
-- Test: `extensions/cli/test/operations/traverse-dual-entry.test.ts`（及既有 traverse 默认行为测试）
+- Test: `cli/test/operations/traverse-dual-entry.test.ts`（及既有 traverse 默认行为测试）
 
 **Interfaces:**
 - Consumes: AgentsNode + ReadmeNode
@@ -407,9 +407,9 @@ EOF
 ### Task 4: 类型入口改为 README + 模板 / memory 写路径
 
 **Files:**
-- Modify: `extensions/cli/src/services/memory/paths.ts` — `typeIndexRelpath` → `…/README.md`
+- Modify: `cli/src/services/memory/paths.ts` — `typeIndexRelpath` → `…/README.md`
 - Modify: `types.ts`, `entries.ts`, `init.ts`, `add-type.ts`, `agents.ts`（链到类型索引的 href）
-- Modify: 全部 `extensions/skills/project-memory-init/references/templates/{USER,FEEDBACK,PROJECT,REFERENCE,MANAGED,REFERENCED,TYPE}.tmpl.md` — entries 区块改 `project-entries-*` + 标题本层内容；保留 `project-memory-type` 头
+- Modify: 全部 `skills/project-memory-init/references/templates/{USER,FEEDBACK,PROJECT,REFERENCE,MANAGED,REFERENCED,TYPE}.tmpl.md` — entries 区块改 `project-entries-*` + 标题本层内容；保留 `project-memory-type` 头
 - Modify: `AGENTS.tmpl.md` local 链接 `…/README.md`
 - Modify: LAYOUT.md 类型入口段
 - Test: 现有 `test/memory/*.test.ts` 中断言 `AGENTS.md` 类型索引的用例
@@ -609,7 +609,7 @@ EOF
 ### Task 10: 显式 `--super`（`SuperAgentsNode`）
 
 **Files:**
-- Create: `extensions/cli/src/domain/models/agents/super-agents-node.ts`（或与 AgentsNode 同目录）
+- Create: `cli/src/domain/models/agents/super-agents-node.ts`（或与 AgentsNode 同目录）
 - Modify: CLI 全局/`--scope` 旁增加 `--super`；query/list 入口传入
 - Modify: NodeService：无 AGENTS 且无 `--super` → 明确错误；有 `--super` → 构造不落盘 `SuperAgentsNode`（语义：相对当前 scope **再上一级**），其组成挂 **Edges 根 `README.md`**（Q9b），再按默认 traverse 下钻
 - Test: `test/…/super-agents-node.test.ts`

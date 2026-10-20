@@ -16,7 +16,7 @@
 
 ## 目录与 layout
 
-`extensions/cli/src/models/layout.ts` 集中定义入口名、类型识别、章节/标记、harness 路径和目录生命周期规则；业务目录注册可扩展。沿用现有 project-memory 标记、type-index 合同与 task-projects 标记，不凭正文猜类型。
+`cli/src/models/layout.ts` 集中定义入口名、类型识别、章节/标记、harness 路径和目录生命周期规则；业务目录注册可扩展。沿用现有 project-memory 标记、type-index 合同与 task-projects 标记，不凭正文猜类型。
 
 - AGENTS.md → InternalNode；SKILL.md → SkillNode；index.md → 按注册目录合同选择 TaskNode、MemoryNode、NoteNode 或通用 LeafNode。
 - 通用未知 index.md 是 LeafNode；任意普通 .md 不是新模型节点，导入/迁移明确转换后才登记。外部普通文档链接保持正文，不进入组成关系。
@@ -160,7 +160,7 @@ Task / Memory / Note / Skill 生产路径接入新节点方法。Tasks CLI 接�
 
 新增显式一次性迁移工具和迁移 Skill：dry-run 给出旧单文件到 `<stem>/index.md` 的计划、引用更新与冲突；apply 只操作明示作用域的 tracked/public 内容，幂等。对于无可靠资源归属的历史附件不猜测迁移；保留原链接目标并重新计算相对路径。若同名目录已有附件但没有入口，迁移计划明确列出复用该目录，只新增 index.md、不移动或覆盖附件；已有目标入口或符号链接则冲突报错。排除 posts（含旧 knowledge/posts）、私有记忆、第三方体系和历史 spec 中示例路径。迁移真实本工作树内的受管 public Memory/Tasks/Notes 时使用该工具；旧快照/journal 审计材料保持历史语义。
 
-2026-10-05 后续目录决定：移除 knowledge 容器，notes、edges、posts、resources、archive 直接放在根层；Note CLI 使用所选作用域内的 notes。apps 移入 extensions/apps，作为全局共享的对外扩展实现。此项独立路径迁移不改变节点模型及局部记忆归属；posts 仅按本次明确授权搬迁，保持文件字节。
+2026-10-05 后续目录决定：移除 knowledge 容器，notes、edges、posts、resources、archive 直接放在根层；Note CLI 使用所选作用域内的 notes。apps 移入 apps，作为全局共享的对外扩展实现。此项独立路径迁移不改变节点模型及局部记忆归属；posts 仅按本次明确授权搬迁，保持文件字节。
 
 旧 Tasks 记忆剩余归属：云端 Obsidian 部署记忆移根 Project Memory；preview-tasks-with-box-obsidian 移根 managed Skill；事实/想法写法归 conversation-to-tasks（保留现有 STAR，不强加新的必填字段）；七个 Task Project 分类留 Tasks 本层。不建设 extensions/memory。
 

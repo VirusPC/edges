@@ -10,7 +10,7 @@ name: 安装_edges_后自动装好_skills
 description: 只装 npm 包拿不到 edges skills；目标是一次安装加一次初始化，同时装好 CLI 和 skills。
 ---
 **背景：**
-2026-10-18 `@viruspc/edges@0.1.0` 首次发布到 npm（PR #264，用 stage 暂存加人工批准的方式上线）。验证安装时讨论到：用户从零开始用 edges，只装一个 CLI 够不够？结论是不够。CLI 只负责搭目录、读写笔记、记忆和任务；真正让 agent 用起来的是 `extensions/skills/` 下的 skill（conversation-to-notes、project-memory-* 等），而 npm 包只打了 `dist`，不包含这些 skill。用户确认：安装过程要把 skills 也装好。
+2026-10-18 `@viruspc/edges@0.1.0` 首次发布到 npm（PR #264，用 stage 暂存加人工批准的方式上线）。验证安装时讨论到：用户从零开始用 edges，只装一个 CLI 够不够？结论是不够。CLI 只负责搭目录、读写笔记、记忆和任务；真正让 agent 用起来的是 `skills/` 下的 skill（conversation-to-notes、project-memory-* 等），而 npm 包只打了 `dist`，不包含这些 skill。用户确认：安装过程要把 skills 也装好。
 - 现状：CLI 已有 `edges skills` 命令组（list / get / create / update / delete / init），create / update 写到 `skills/managed/<name>/SKILL.md`
 - 非目标：ChatGPT、Claude 网页端接入（另有 edges connector 卡）
 - 关联：PR #264；卡「edges CLI 发布到 npm」；卡「入库类 skill 增加无工作区降级模式」
@@ -26,8 +26,8 @@ description: 只装 npm 包拿不到 edges skills；目标是一次安装加一�
   - 理由（用户原话）：没有终端时用什么参数调用，也按默认行为。/ 反正安装skill这块儿，有问题都参考 vercel skills。/ 这里只要薄封装，不要加任何额外逻辑。/ 你做的无非是补充了一个skills地址 + 选中安装所有skill。
   - vercel skills 1.7.2 的默认行为（核对 `dist/cli.mjs`）：需要交互而 stdin 不是 TTY 时，打印「Interactive prompt required but stdin is not a TTY. Nothing was installed. Use --agent <name> (or --agent '*') and -y to run non-interactively.」，不装、退出码 1（约 L4680–4685）；探测到自己在 agent 里运行时非交互安装（约 L5309、L6652）；无 TTY 时打印安装提示（约 L5310）；同名 skill 先列 `overwrites:` 清单并确认后覆盖，`-y` 跳过确认（约 L4926–4950）
 - **Q1 skill 从哪来**
-  - 选项：A 打进 npm 包 `@viruspc/edges`；B 安装时从 GitHub 拉（`VirusPC/edges/extensions/skills`）
-  - 结论：A。`extensions/cli/package.json` 的 `files` 加 skills 目录，与 CLI 版本锁定
+  - 选项：A 打进 npm 包 `@viruspc/edges`；B 安装时从 GitHub 拉（`VirusPC/edges/skills`）
+  - 结论：A。`cli/package.json` 的 `files` 加 skills 目录，与 CLI 版本锁定
   - 理由：CLI 与 skill 同一次发布，不会错版；不依赖 GitHub 可达。现状：PR #264 发布的 0.1.0 只含 `dist`
 - **Q2 用什么安装器**
   - 选项：vercel-labs/skills（`npx skills add <本地路径>`）；GitHub `gh skill`（官方，2026-04 起 public preview，需 gh ≥ 2.90，见 [changelog](https://github.blog/changelog/2026-04-16-manage-agent-skills-with-github-cli/)）；APM / PSPM / paks（各有注册表，用户少）
@@ -39,7 +39,7 @@ description: 只装 npm 包拿不到 edges skills；目标是一次安装加一�
   - 理由：agent 没有 skill 就用不上 CLI。后果：根 `edges init` 默认集（ADR 0031 里是 memory、notes、projects）要加 skills
 - **Q4 装哪些**
   - 选项：A 全装、不筛选；B 可筛选
-  - 结论：A。同时把与 edges 无关的 6 个 skill 从 `extensions/skills/` 移到 `shared-extensions/skills/`：`paper-10-questions`、`summarize-ai-article`、`summarize-ai-article-ultra`、`weekly-ai-blogs-digest`、`horizontal-vertical-research`、`learn-repo`。npm 包只打剩下的
+  - 结论：A。同时把与 edges 无关的 6 个 skill 从 `skills/` 移到 `shared-extensions/skills/`：`paper-10-questions`、`summarize-ai-article`、`summarize-ai-article-ultra`、`weekly-ai-blogs-digest`、`horizontal-vertical-research`、`learn-repo`。npm 包只打剩下的
   - 理由：这 6 个都不调用 edges CLI；先移走，剩下的全装，保持简单
   - **按总原则对齐（2026-10-18）**：「全装」由 edges 传 `--skill '*'` 实现，这是 edges 补的两样之一；包里有什么就选中什么，edges 不另做筛选
 - **Q5 / Q6 装到哪、怎么问**
@@ -85,7 +85,7 @@ description: 只装 npm 包拿不到 edges skills；目标是一次安装加一�
 - **Q13 Node engines**
   - 问题：`skills@1.7.2` 要求 node ≥ 22.20.0，`@viruspc/edges` 声明 `>=22`，怎么对齐？
   - 选项：A 把 `engines.node` 提到 `>=22.20.0`；B 保持 `>=22`，init 前检查并报错
-  - 结论：A。`extensions/cli/package.json` 的 `engines.node` 改为 `>=22.20.0`
+  - 结论：A。`cli/package.json` 的 `engines.node` 改为 `>=22.20.0`
   - 理由（用户原话）：提到 `>=22.20.0`（vercel skills@1.7.2 要求）。
 - **Q14 用户能否自带 `--skill`**（2026-10-18 21:00）
   - 问题：edges 固定补 `--skill '*'`，用户再传 `--skill` 怎么办？
@@ -102,8 +102,8 @@ description: 只装 npm 包拿不到 edges skills；目标是一次安装加一�
 - **CONTEXT.md**：新增术语「安装技能」（把包内 skill 装给 agent），写明 `edges skills init` 现在既建索引也安装；与 Skill / Managed Skill / Referenced Skill 保持一致
 
 **完成标准：**
-- [ ] 6 个与 edges 无关的 skill（`paper-10-questions`、`summarize-ai-article`、`summarize-ai-article-ultra`、`weekly-ai-blogs-digest`、`horizontal-vertical-research`、`learn-repo`）已从 `extensions/skills/` 移到 `shared-extensions/skills/`，遵循该目录约定（去掉单个 skill 的 `version` / `CHANGELOG.md`，走整层 VERSION）；两处 `name` 不重复。整层 `shared-extensions/VERSION` 记为 `4.0.0`
-- [ ] `extensions/cli/package.json` 的 `files` 含 skills 目录；`pnpm --filter @viruspc/edges pack` 出的 tgz 里有 `extensions/skills/` 剩下的全部 skill（每个带 `SKILL.md`），不含上面 6 个，也不含 `shared-extensions` 里的 skill
+- [ ] 6 个与 edges 无关的 skill（`paper-10-questions`、`summarize-ai-article`、`summarize-ai-article-ultra`、`weekly-ai-blogs-digest`、`horizontal-vertical-research`、`learn-repo`）已从 `skills/` 移到 `shared-extensions/skills/`，遵循该目录约定（去掉单个 skill 的 `version` / `CHANGELOG.md`，走整层 VERSION）；两处 `name` 不重复。整层 `shared-extensions/VERSION` 记为 `4.0.0`
+- [ ] `cli/package.json` 的 `files` 含 skills 目录；`pnpm --filter @viruspc/edges pack` 出的 tgz 里有 `skills/` 剩下的全部 skill（每个带 `SKILL.md`），不含上面 6 个，也不含 `shared-extensions` 里的 skill
 - [ ] CLI 里调用的 vercel skills 是固定的确切版本（不是 `@latest`，也不是范围），版本号在一处常量里，有测试或脚本覆盖它
 - [ ] `edges skills init` 传给 vercel skills 的是包内 skills 目录的绝对路径
 - [ ] 安装步骤是薄封装：实际执行的命令等于 `skills@1.7.2 add <包内 skills 目录> --skill '*'` 加上 `--` 之后的 token（原样、同顺序），edges 不再自加 `-g`、`-y`、`--agent` 等任何旗标；有测试断言实际参数
@@ -116,18 +116,18 @@ description: 只装 npm 包拿不到 edges skills；目标是一次安装加一�
 - [ ] vercel skills 非零退出或起不来（如 npx 不可用）时，`edges skills init` 和 `edges init` 非零退出，信封里有失败原因；edges 不另加失败条件；没有 `--no-skills` 之类的跳过开关；有测试（含「无 TTY 需要交互 → vercel 退出 1 → init 失败」）
 - [ ] 测试隔离 HOME / agent 目录，跑测试不写开发机真实的 `~/.agents`、`~/.claude`
 - [ ] 在干净环境里 `npm install -g @viruspc/edges` 后执行一次 `edges init`，本地 agent（至少 Claude Code 与一家读 `~/.agents/skills` 的 agent）能看到并按 skill 调用 CLI
-- [ ] `extensions/cli/package.json` 的 `engines.node` 为 `>=22.20.0`（Q13，与 `skills@1.7.2` 一致）；README 等处写到的 Node 版本要求同步
-- [ ] `extensions/skills/README.md` 按新分发方式更新：主路径改为 `edges skills init`，删掉或改写「外部用户走 `npx skills add VirusPC/edges/extensions/skills`」与「一律 `@latest`」两段；`shared-extensions/skills/README.md` 的分工表同步。（本次 grill 的 PR 不改 README，实现时再改）
+- [ ] `cli/package.json` 的 `engines.node` 为 `>=22.20.0`（Q13，与 `skills@1.7.2` 一致）；README 等处写到的 Node 版本要求同步
+- [ ] `skills/README.md` 按新分发方式更新：主路径改为 `edges skills init`，删掉或改写「外部用户走 `npx skills add VirusPC/edges/skills`」与「一律 `@latest`」两段；`shared-extensions/skills/README.md` 的分工表同步。（本次 grill 的 PR 不改 README，实现时再改）
 - [ ] CLI README 的 init 段（「`edges skills init` 只写 skill 类型索引」）与 `project-memory-init` 等相关 skill 文案同步为新行为
 - [ ] ADR 0036 的 Status 与 Consequences 更新为已实现；经 PR 合入 main
 
 **进展记录：**
-- 2026-10-18 grill 完成。Q1–Q11 由 peng cheng 拍板，见上方决策记录；新写 ADR 0036，ADR 0031 加修订链接，`CONTEXT.md` 增加「安装技能」。实现未开始。核对 `extensions/skills/` 现有 20 个 skill，移走 6 个后剩 14 个（grill 时说的是 15 个，以实际目录为准）。
+- 2026-10-18 grill 完成。Q1–Q11 由 peng cheng 拍板，见上方决策记录；新写 ADR 0036，ADR 0031 加修订链接，`CONTEXT.md` 增加「安装技能」。实现未开始。核对 `skills/` 现有 20 个 skill，移走 6 个后剩 14 个（grill 时说的是 15 个，以实际目录为准）。
 - 2026-10-18 追加决策（peng cheng）：Q12 无 TTY 时必须用 `--agent` 显式指定（`*` / `all` / 部分 agent），未指定则报错，修订 Q5 / Q6 原先的无 TTY 默认；Q13 `engines.node` 提到 `>=22.20.0`；Q7 补充：本地版本更高、或本地改过 → 跳过并提示，`-f` / `--force` 强制覆盖。ADR 0036 同步，完成标准改为可逐条核对。用户同意合入 PR #274。卡仍在 backlog，实现未开始。
 - 2026-10-18 再次修订 Q7（peng cheng）：核对 vercel skills 1.7.2 源码后决定「抄他的行为」，edges 不做版本比较、不加 `-f` / `--force`，同名 skill 由 vercel skills 列出覆盖清单并确认（无 TTY 时 `-y` 直接覆盖）；上一条里的 Q7 补充已被取代，保留为决策历史。Q12、Q13 不变。ADR 0036 Decision 6 同步，完成标准相应调整。用户同意合入 PR #274。卡仍在 backlog。
 - 2026-10-18 20:53（Asia/Shanghai）定下总原则（peng cheng）：安装技能是 vercel skills 的薄封装，edges 只补 skill 源地址与 `--skill '*'`，其余按 vercel skills 默认、旗标透传，不加额外逻辑。据此修订 Q12（无 TTY 不再强制 `--agent`，改为按默认行为），并对齐 Q4–Q9 的表述；Q13 不变。ADR 0036 精简重写，完成标准相应调整。待定：stdout 上 vercel 输出与 edges JSON 信封并存（ADR 记为继承 stdio 的后果）、`edges init` 如何转交旗标、用户自带 `--skill` 的处理。卡仍在 backlog，实现未开始。
 - 2026-10-18 21:00（Asia/Shanghai）追加决策（peng cheng）：Q14 `--skill` 不开放，CLI 写死 `--skill '*'`；Q15 用 `--` 分隔，之后的 token 原样转交 vercel skills，`edges init` 只转交给 skills 安装步骤，commander 解析前在 `--` 处切开 argv。上一条的两个待定（旗标转交、自带 `--skill`）已定；stdout 与 JSON 信封并存仍记为继承 stdio 的后果。完成标准相应调整。卡仍在 backlog。
 - 2026-10-18 实现：6 个无关 skill 移到 `shared-extensions/skills/`。整层版本记为 `4.0.0`。`edges skills init` 与无参 `edges init` 在建类型索引后调用依赖 `skills@1.7.2`：`add <包内目录绝对路径> --skill '*'`，`--` 之后原样转交，stdio 继承。`engines.node` 为 `>=22.20.0`。分支 `cursor/edges-init-install-skills-4daa`（`1adb174a`）。版本文件记为 `4.0.0`。未在这次记录里改 tag。`gh pr create` 返回 `Resource not accessible by integration`，PR 未开，对比页：https://github.com/VirusPC/edges/compare/main...cursor/edges-init-install-skills-4daa 。CLI 测试 1051 通过；`pack` 含 14 个 skill、不含迁走的 6 个。干净环境的全局安装与真实 agent 目录未跑。卡仍在 backlog。
-- 2026-10-18 评审修复（PR #276，卡仍在 backlog）：`--` 只在第一个字面量 `--` 处切开，不再自带选项表。包内 skill 目录按模块位置定一条路径：`dist/` 用包内 `skills/`，源码用 `extensions/skills`，不读陈旧的 `extensions/cli/skills/`。安装在 init 写锁释放之后。失败信封带 `created`，`errorCode` 为 `SKILLS_INSTALL_FAILED`，进程退出码仍是安装器的退出码。没选 skills 时 stderr 列出被忽略的 token。测试预加载拒绝真实 spawn。删掉 `.agents/skills/migrate-directory-nodes` 软链和 `scripts/move-edges-unrelated-skills.mts`。`project-memory-init` 文案改为 `edges init -- -g -y`，版本文件记为 `4.0.0`，未改 tag。`shared-extensions/VERSION` 记为 `4.0.0`。干净环境：`pnpm pack` 后 `npm install -g --prefix <临时前缀>`，stdin 不是 TTY。在临时项目目录里执行 `edges --scope <该目录> init -- -y --agent claude-code`，退出 0，14 个 skill 落在该项目 `.claude/skills`，6 个迁走的名字不在。同一条 `edges init -- -g -y`：本机探测到 cursor-cli 时退出 0，14 个 skill 在临时 `HOME/.agents/skills`；去掉 `CURSOR_AGENT` 后再跑，退出 0，临时 `HOME/.claude/skills` 与 `HOME/.agents/skills` 各 14 个，6 个迁走的仍不在。CLI 测试 1060 通过。
+- 2026-10-18 评审修复（PR #276，卡仍在 backlog）：`--` 只在第一个字面量 `--` 处切开，不再自带选项表。包内 skill 目录按模块位置定一条路径：`dist/` 用包内 `skills/`，源码用 `skills`，不读陈旧的 `cli/skills/`。安装在 init 写锁释放之后。失败信封带 `created`，`errorCode` 为 `SKILLS_INSTALL_FAILED`，进程退出码仍是安装器的退出码。没选 skills 时 stderr 列出被忽略的 token。测试预加载拒绝真实 spawn。删掉 `.agents/skills/migrate-directory-nodes` 软链和 `scripts/move-edges-unrelated-skills.mts`。`project-memory-init` 文案改为 `edges init -- -g -y`，版本文件记为 `4.0.0`，未改 tag。`shared-extensions/VERSION` 记为 `4.0.0`。干净环境：`pnpm pack` 后 `npm install -g --prefix <临时前缀>`，stdin 不是 TTY。在临时项目目录里执行 `edges --scope <该目录> init -- -y --agent claude-code`，退出 0，14 个 skill 落在该项目 `.claude/skills`，6 个迁走的名字不在。同一条 `edges init -- -g -y`：本机探测到 cursor-cli 时退出 0，14 个 skill 在临时 `HOME/.agents/skills`；去掉 `CURSOR_AGENT` 后再跑，退出 0，临时 `HOME/.claude/skills` 与 `HOME/.agents/skills` 各 14 个，6 个迁走的仍不在。CLI 测试 1060 通过。
 - 2026-10-18 复审修复（PR #276，卡仍在 backlog）：`--` 只在 `init` 和 `skills init` 上、于第一个字面量 `--` 处切开；其他命令保留原 argv。`skills get -- edges-note`、`notes get -- -weird/INDEX.md`、`skills list -- nope`，以及选项值本身是 `--`，都不再被切开。安装器里删掉 `runningUnderNodeTest()` / `process.execArgv.includes("--test")`，测试隔离只留预加载注入。没选 skills 的 stderr 警告改看解析后的模块集合，memory 类型选择提前返回且集合里仍有 skills 时不报警。未改 tag。Node 22.23.3 上 CLI 测试 1069 通过，tsc 通过。
 - 2026-10-18 版本记为 `4.0.0`（PR #276，卡仍在 backlog）：`shared-extensions/VERSION` 与 changelog 的移入记录是 `[4.0.0] - 2026-10-18`，原先的 `[1.0.0] - 2026-09-08` 仍在。`project-memory-init` 的 frontmatter 与 changelog 顶栏是 `[4.0.0] - 2026-10-18`，概括 `edges init -- -g -y`；`[3.7.0]` 与 2026-09-01 的 `[1.0.0]` 仍在。未推、未移动、未删除 git tag。

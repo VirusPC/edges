@@ -22,7 +22,7 @@ description: 明确命令适配与完整业务用例的边界，移除 Service �
 
 本任务是职责解耦，不是要求所有 command 变成一行调用，也不为每个 helper 新增一层 Service。Model 单节点行为、operations 集合操作与现有节点持久化机制保持原边界。
 
-关联：[Domain 架构](../../../../../extensions/cli/src/domain/README.md)、[模型整理验收](../../../../../docs/superpowers/plans/2026-10-06-model-module-organization.md)。
+关联：[Domain 架构](../../../../../cli/src/domain/README.md)、[模型整理验收](../../../../../docs/superpowers/plans/2026-10-06-model-module-organization.md)。
 
 **目标：**
 

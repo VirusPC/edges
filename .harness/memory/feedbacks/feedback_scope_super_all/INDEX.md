@@ -21,6 +21,6 @@ metadata:
 
 `edges init`、`edges memory init`、`edges notes init`、`edges projects init`、`edges skills init`、`edges tasks init` 不接受 `--index-group`。未登记的子作用域按路径登记：目标 `AGENTS.md` 在锚点 `.harness` 下是 local，否则是 descendant。已经登记的保持原组。`edges memory doctor --apply` 用同一规则补上缺失的父级链接，不挪已有登记。
 
-`extensions/cli/scripts/generate-tasks-site.ts` 不接受 `--purpose`，始终汇总该根下发现的全部任务板。list、分组和生成页仍输出从目录推出的 `source.purpose`（父目录名为 `.harness` 则是 maintenance，否则是 domain）。身份键仍是 `scope:purpose:project:stem`。
+`cli/scripts/generate-tasks-site.ts` 不接受 `--purpose`，始终汇总该根下发现的全部任务板。list、分组和生成页仍输出从目录推出的 `source.purpose`（父目录名为 `.harness` 则是 maintenance，否则是 domain）。身份键仍是 `scope:purpose:project:stem`。
 
 不要再加用途、分组或另一套全仓开关。NodeService 写节点时的 `indexGroup` 覆盖不是这条要删的旗标。

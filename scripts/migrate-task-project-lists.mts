@@ -15,16 +15,16 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { AgentsNode, ReadmeNode } from "../extensions/cli/src/domain/models/index.js";
-import { acquireWriteLock } from "../extensions/cli/src/services/node/node-lock.js";
-import { isGitBoundary } from "../extensions/cli/src/services/scope.js";
+import { AgentsNode, ReadmeNode } from "../cli/src/domain/models/index.js";
+import { acquireWriteLock } from "../cli/src/services/node/node-lock.js";
+import { isGitBoundary } from "../cli/src/services/scope.js";
 import {
   checkPath,
   readEntry,
   saveEntries,
   validateEntry,
   type EntryFile,
-} from "../extensions/cli/src/services/node/node-files.js";
+} from "../cli/src/services/node/node-files.js";
 import { convert as convertLegacyTaskProjects } from "./migrate-agents-indexes.mts";
 
 const excluded = new Set([".git", "node_modules", "dist", "build", "posts", ".agents", ".superpowers", ".obsidian"]);

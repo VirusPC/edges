@@ -26,10 +26,10 @@
 # Node artifacts
 node_modules/
 dist/
-extensions/mcp-servers/*/node_modules/
-extensions/mcp-servers/*/dist/
-extensions/services/*/node_modules/
-extensions/services/*/dist/
+mcp-servers/*/node_modules/
+mcp-servers/*/dist/
+services/*/node_modules/
+services/*/dist/
 
 # Python
 __pycache__/
@@ -58,11 +58,11 @@ knowledge/tasks/_site/
 evaluation/.cache/
 **/.harness/evaluation/.cache/
 
-# Review shell Vite outDir (ADR 0022). Source is extensions/apps/tasks-review-app/.
-extensions/cli/src/commands/tasks/project/assets/review-page/
+# Review shell Vite outDir (ADR 0022). Source is apps/tasks-review-app/.
+cli/src/commands/tasks/project/assets/review-page/
 
-# Copied into @viruspc/edges at build time from extensions/skills.
-extensions/cli/skills/
+# Copied into @viruspc/edges at build time from skills.
+cli/skills/
 
 # 公开仓库：不接收 Office 文档
 # 这类文件正文与元数据都不可 diff 审查，专利交底书/评审材料等极易夹带

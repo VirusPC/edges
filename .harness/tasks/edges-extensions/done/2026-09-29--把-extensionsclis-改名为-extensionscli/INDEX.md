@@ -3,7 +3,7 @@ name: 把_extensionsclis_改名为_extensionscli
 description: 目录实际是一套统一 edges 命令，复数名容易让人以为有多套 CLI。
 metadata:
   edges-type: task
-  edges-title: 把 extensions/clis 改名为 extensions/cli
+  edges-title: 把 extensions/clis 改名为 cli
   edges-tasks-status: done
   edges-task-project: edges-extensions
   edges-updated-at: '2026-10-11T10:22:22.839Z'
@@ -19,7 +19,7 @@ metadata:
 - 关联：任务记录员对话里关于 CLI 目录结构的问答（2026-09-29）
 
 **目标：**
-仓库路径与文档统一写成 extensions/cli，引用旧路径的地方一并改完且能正常构建调用。
+仓库路径与文档统一写成 cli，引用旧路径的地方一并改完且能正常构建调用。
 
 **动作：**
 - 目录改名 + 更新 README / AGENTS / .memory / pnpm workspace 等引用

@@ -19,7 +19,7 @@ peng cheng 觉得 VirusPC/edges 不该把 Edges 系统和个人大脑混在一�
 
 **已拍板的边界（2026-10-20）：**
 - 系统仓留下：`extensions/`（CLI）、`scripts/`、`docs/`（ADR、架构）、根目录 AGENTS/README/CHANGELOG/CONTEXT 与构建配置、`.github`；`.harness/tasks` 中的 `evaluation` 等讲 Edges 系统的项目留系统仓。
-- **2026-10-20 翻案：** 早上这条边界里的 `posts/` 与 `.harness/tasks/site-and-content` 改归个人仓。框架仓删除这两处（个人仓已有同内容副本）；根 `AGENTS.md` 不再写 posts 硬约束。`/tasks/` 看板生成器仍留框架仓。见 [ADR 0040](../../../../../docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)。
+- **2026-10-20 翻案：** 早上这条边界里的 `posts/` 与 `.harness/tasks/site-and-content` 改归个人仓。框架仓删除这两处（个人仓已有同内容副本）；根 `AGENTS.md` 不再写 posts 硬约束。`/tasks/` 看板生成器仍留框架仓。同日 `extensions/` 取消，原名平铺到仓库根。见 [ADR 0040](../../../../../docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)。
 - 个人仓搬走：`edges/`（知识主体）、`notes/`、`archive/`、`teaching/`（连同其部署）、`retrospectives/`、`memory/`、`tasks/`、`projects/`、`shared-extensions/`、`.obsidian`。
 - 个人仓保持公开，沿用脱敏约束（commit 历史不刻意脱敏）。
 - 待定：无（grill R1–R3 已收口）。

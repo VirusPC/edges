@@ -24,8 +24,8 @@
 ### Task 1: 错误码到退出码
 
 **Files:**
-- Create: `extensions/cli/src/commands/exit.ts`
-- Test: `extensions/cli/test/commands/exit.test.ts`
+- Create: `cli/src/commands/exit.ts`
+- Test: `cli/test/commands/exit.test.ts`
 
 **Interfaces:**
 - Consumes: 无
@@ -70,7 +70,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/cli/src/commands/exit.ts extensions/cli/test/commands/exit.test.ts
+git add cli/src/commands/exit.ts cli/test/commands/exit.test.ts
 git commit -m "$(cat <<'EOF'
 feat: map domain error codes to process exit codes
 
@@ -81,9 +81,9 @@ EOF
 ### Task 2: 命令结果与用法错误
 
 **Files:**
-- Create: `extensions/cli/src/commands/result.ts`
-- Test: `extensions/cli/test/commands/result.test.ts`
-- Modify: `extensions/cli/src/context.ts`
+- Create: `cli/src/commands/result.ts`
+- Test: `cli/test/commands/result.test.ts`
+- Modify: `cli/src/context.ts`
 
 **Interfaces:**
 - Consumes: `exitCodeForErrorCode`；`CliResult` from `context.ts`
@@ -179,7 +179,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/cli/src/commands/result.ts extensions/cli/src/commands/exit.ts extensions/cli/src/context.ts extensions/cli/test/commands/result.test.ts
+git add cli/src/commands/result.ts cli/src/commands/exit.ts cli/src/context.ts cli/test/commands/result.test.ts
 git commit -m "$(cat <<'EOF'
 feat: build CLI results in the command layer
 
@@ -190,9 +190,9 @@ EOF
 ### Task 3: `loadConfig` 进入 Service
 
 **Files:**
-- Create: `extensions/cli/src/services/config.ts`
-- Modify: `extensions/cli/src/utils/config.ts`
-- Modify: `extensions/cli/test/utils/config.test.ts`
+- Create: `cli/src/services/config.ts`
+- Modify: `cli/src/utils/config.ts`
+- Modify: `cli/test/utils/config.test.ts`
 - Modify: callers of `loadConfig` (`services/tasks/result.ts`, `commands/note.ts`, `services/note/types.ts`)
 
 **Interfaces:**
@@ -220,7 +220,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/cli/src/services/config.ts extensions/cli/src/utils/config.ts extensions/cli/test/utils/config.test.ts extensions/cli/src/services/tasks/result.ts extensions/cli/src/commands/note.ts extensions/cli/src/services/note/types.ts
+git add cli/src/services/config.ts cli/src/utils/config.ts cli/test/utils/config.test.ts cli/src/services/tasks/result.ts cli/src/commands/note.ts cli/src/services/note/types.ts
 git commit -m "$(cat <<'EOF'
 refactor: load runtime config from the service layer
 
@@ -231,10 +231,10 @@ EOF
 ### Task 4: Tasks 运行时不再接收 CliContext
 
 **Files:**
-- Modify: `extensions/cli/src/services/tasks/result.ts`
-- Create: `extensions/cli/src/commands/tasks/run.ts`
+- Modify: `cli/src/services/tasks/result.ts`
+- Create: `cli/src/commands/tasks/run.ts`
 - Modify: 每个调用 `runTasksCommand` / `succeed` / `fail` 的 `commands/tasks/**` 文件
-- Test: 现有 `extensions/cli/test/tasks/*.test.ts` 保持通过
+- Test: 现有 `cli/test/tasks/*.test.ts` 保持通过
 
 **Interfaces:**
 - Consumes: `loadConfig`；`fail` / `succeed` from `commands/result.ts`
@@ -244,7 +244,7 @@ EOF
 
 - [ ] **Step 1: Write the failing test**
 
-在 `extensions/cli/test/services/tasks-runtime.test.ts`：
+在 `cli/test/services/tasks-runtime.test.ts`：
 
 ```ts
 import test from "node:test";
@@ -297,7 +297,7 @@ Expected: PASS。tasks 集成测试的 stdout 仍是 `{ status: "success" | "fai
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/cli/src/services/tasks/result.ts extensions/cli/src/commands/tasks extensions/cli/test/services/tasks-runtime.test.ts
+git add cli/src/services/tasks/result.ts cli/src/commands/tasks cli/test/services/tasks-runtime.test.ts
 git commit -m "$(cat <<'EOF'
 refactor: open the task board without a CLI context
 

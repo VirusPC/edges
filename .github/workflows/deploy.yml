@@ -66,6 +66,9 @@ jobs:
              git fetch origin main
              git checkout main
              git reset --hard origin/main
+             if [ -d extensions ] && [ -z "$(git ls-files -- extensions)" ]; then
+               rm -rf extensions
+             fi
              git --no-pager status -sb
              git rev-parse HEAD
              export PATH="${HOME}/.local/share/pnpm:${HOME}/.local/bin:/usr/local/bin:${PATH}"
@@ -75,9 +78,9 @@ jobs:
              fi
              pnpm install --frozen-lockfile --filter @viruspc/edges... --filter tasks-review-app...
              pnpm --filter tasks-review-app run build
-             test -s extensions/cli/src/commands/tasks/project/assets/review-page/index.html
-             test -s extensions/cli/src/commands/tasks/project/assets/review-page/review.js
-             test -s extensions/cli/src/commands/tasks/project/assets/review-page/review.css
+             test -s cli/src/commands/tasks/project/assets/review-page/index.html
+             test -s cli/src/commands/tasks/project/assets/review-page/review.js
+             test -s cli/src/commands/tasks/project/assets/review-page/review.css
              # dist/schemas is gitignored. Review-page doc checks read it at runtime.
              pnpm --filter @viruspc/edges run build:schemas
              pnpm --filter @viruspc/edges exec -- tsx scripts/generate-tasks-site.ts \
@@ -90,7 +93,7 @@ jobs:
                exit 1
              fi
              entry=/usr/local/sbin/edges-migrate-site-layout
-             install_cmd="sudo bash extensions/services/artifacts-preview/deploy/install-site-layout.sh"
+             install_cmd="sudo bash services/artifacts-preview/deploy/install-site-layout.sh"
              lib_dir=/usr/local/lib/edges/site-layout
              if [ ! -x "$entry" ] || [ -L "$entry" ] ||
                 [ ! -f "$lib_dir/migrate-site-layout.sh" ] || [ -L "$lib_dir/migrate-site-layout.sh" ] ||
@@ -105,9 +108,9 @@ jobs:
                exit 1
              fi
              digest() { sha256sum "$1" | awk "{print \$1}"; }
-             repo_entry=extensions/services/artifacts-preview/deploy/edges-migrate-site-layout
-             repo_lib=extensions/services/artifacts-preview/deploy/migrate-site-layout.sh
-             repo_py=extensions/services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py
+             repo_entry=services/artifacts-preview/deploy/edges-migrate-site-layout
+             repo_lib=services/artifacts-preview/deploy/migrate-site-layout.sh
+             repo_py=services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py
              if [ "$(digest "$repo_entry")" != "$(digest "$entry")" ] ||
                 [ "$(digest "$repo_lib")" != "$(digest "$lib_dir/migrate-site-layout.sh")" ] ||
                 [ "$(digest "$repo_py")" != "$(digest "$lib_dir/migrate-teaching-nginx-prefix.py")" ]; then
@@ -126,16 +129,9 @@ jobs:
                fi
                # Pull already succeeded. Failure here fails the job so a
                # dead artifacts unit is visible; teach files are already new.
-               if ! command -v edges >/dev/null 2>&1; then
-                 pnpm install --frozen-lockfile --filter @viruspc/edges...
-               fi
-               if command -v edges >/dev/null 2>&1; then
-                 edges artifacts server install
-                 edges artifacts server restart
-               else
-                 pnpm --filter @viruspc/edges exec -- tsx src/index.ts artifacts server install
-                 pnpm --filter @viruspc/edges exec -- tsx src/index.ts artifacts server restart
-               fi
+               # ECS has no global edges. Always use the checkout CLI.
+               pnpm --filter @viruspc/edges exec -- tsx src/index.ts artifacts server install
+               pnpm --filter @viruspc/edges exec -- tsx src/index.ts artifacts server restart
              else
                echo "skip artifacts server: $env_file missing or token unused (one-time: artifacts-preview README)"
              fi'

@@ -22,7 +22,7 @@ status: accepted
 
 ## Considered Options
 
-- 把上报放进 `extensions/` 并加 CLI 命令：否决。`extensions/AGENTS.md` 不为 evaluation / observation 发明命令；这包是 harness 自用代码。
+- 把上报放进 `extensions/` 并加 CLI 命令：否决。`AGENTS.md` 不为 evaluation / observation 发明命令；这包是 harness 自用代码。
 - 改 `.harness/observation/AGENTS.md` 的收录边界来容纳代码：否决。本轮只更新 README。
 - 调用方直接填 `langfuse.*` 属性：否决。换后端时 Langfuse 名字会漏进评测。
 - 目录改名为与 `TraceExporter` 一致的包名：未改。路径已定为 `langfuse_sink/`。公开类型仍叫 `TraceExporter`，不叫 Sink。

@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --import tsx
-import { isWithinPath } from '../extensions/cli/src/utils/filesystem.js';
+import { isWithinPath } from '../cli/src/utils/filesystem.js';
 import { LegacyIndex as AgentsNode } from "./legacy-index.mjs";
 /** Reviewed Edges instance migration; generic Project Memory owns format conversion. */
 import * as fs from "node:fs";
@@ -7,7 +7,7 @@ import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import { parseArgs } from "node:util";
-import * as generic from "../extensions/cli/src/services/memory/migrate.js";
+import * as generic from "../cli/src/services/memory/migrate.js";
 import {
   isFile,
   isDirectory,
@@ -15,13 +15,13 @@ import {
   readText,
   resolveTarget,
   ownershipTarget,
-} from "../extensions/cli/src/services/memory/paths.js";
+} from "../cli/src/services/memory/paths.js";
 import {
   layerTypeSpecs,
   parseTypeMeta,
-} from "../extensions/cli/src/services/memory/types.js";
-import { expectedIndexDocument, typeIndexTemplate } from "../extensions/cli/src/services/memory/entries.js";
-import type { LegacyType } from "../extensions/cli/src/services/memory/migration-legacy.js";
+} from "../cli/src/services/memory/types.js";
+import { expectedIndexDocument, typeIndexTemplate } from "../cli/src/services/memory/entries.js";
+import type { LegacyType } from "../cli/src/services/memory/migration-legacy.js";
 const JOURNAL = ".recursive-layout-migration";
 export const OWNER_MAP: Record<string, string> = {
   ".": ".",

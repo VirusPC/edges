@@ -32,9 +32,9 @@ Tasks 1–2 own Python memory tools; Task 3 owns CLI/MCP/task-site consumers; Ta
 ### Task 1: New-layout Project Memory runtime and selected types
 
 **Files:**
-- Modify: `extensions/skills/project-memory-init/scripts/{memory.py,lib/paths.py,lib/types.py,lib/blocks.py,lib/templates.py,nodes/agents.py,nodes/entries.py,operations/init.py,operations/add_type.py,operations/remember.py,operations/doctor.py}`.
-- Modify: `extensions/skills/project-memory-init/{SKILL.md,references/LAYOUT.md,references/PROTOCOL.md,references/templates/,scripts/OVERVIEW.md}` and `extensions/skills/project-memory-{ask,remember,add-type,reshape,doctor}/SKILL.md`.
-- Test: `extensions/skills/project-memory-init/scripts/tests/test_harness_layout.py` and existing runtime tests.
+- Modify: `skills/project-memory-init/scripts/{memory.py,lib/paths.py,lib/types.py,lib/blocks.py,lib/templates.py,nodes/agents.py,nodes/entries.py,operations/init.py,operations/add_type.py,operations/remember.py,operations/doctor.py}`.
+- Modify: `skills/project-memory-init/{SKILL.md,references/LAYOUT.md,references/PROTOCOL.md,references/templates/,scripts/OVERVIEW.md}` and `skills/project-memory-{ask,remember,add-type,reshape,doctor}/SKILL.md`.
+- Test: `skills/project-memory-init/scripts/tests/test_harness_layout.py` and existing runtime tests.
 
 **Interfaces:**
 - Consumes: existing frontmatter and managed AGENTS block contracts, explicit `target_dir/root_dir`.
@@ -62,16 +62,16 @@ with tempfile.TemporaryDirectory() as d:
 - [x] Make referenced scans current-scope only, retain different sources with the same name, deduplicate aliases within a type by realpath, preserve same source across both types, and distinguish missing/unreadable sources from successful empty scans. Reject managed paths that resolve outside the selected owner, including linked ancestors. Preserve manual AGENTS text.
 - [x] Remove old-layout repairs from normal commands. Report migration required for legacy layers; never silently re-create `.memory`. Preserve migration-era fixtures for Task 2 rather than asserting legacy repair is current runtime behavior.
 - [x] Update affected skills/templates and LAYOUT with exact new commands, recommendation/selection semantics and two-container type discovery. Do not modify the live instance's `.memory` yet.
-- [x] Run `TMPDIR=/private/tmp PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s extensions/skills/project-memory-init/scripts/tests`. Archive tests are explicitly deferred to Task 2 if still bound to old archive paths; report them individually, not as runtime regressions silently ignored. Commit and report RED/GREEN evidence.
+- [x] Run `TMPDIR=/private/tmp PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s skills/project-memory-init/scripts/tests`. Archive tests are explicitly deferred to Task 2 if still bound to old archive paths; report them individually, not as runtime regressions silently ignored. Commit and report RED/GREEN evidence.
 
 **Verified:** Runtime suite 90/90 passed; 35 harness acceptance cases. Task review and scoped fix review approved; custom permission metadata and managed format are enforced. Archive adaptation is explicitly outstanding in Task 2. Integrated commits: `c77afa1`, `c9d3b08`, `13df3f9`.
 
 ### Task 2: Deterministic migration and private-memory archives
 
 **Files:**
-- Create: `extensions/skills/project-memory-migrate/{SKILL.md,CHANGELOG.md,scripts/migrate.py,scripts/legacy.py,scripts/tests/test_migrate.py}`. Additional focused Python modules under its scripts directory are allowed for journal/link/preflight responsibilities.
-- Modify: `extensions/skills/user-memory-{backup,restore}/{SKILL.md,scripts/*.py}` and their tests in `project-memory-init/scripts/tests/test_user_memory_archive.py`.
-- Modify: `extensions/skills/README.md` migration/distribution inventory and memory Skill CHANGELOG files relevant to the new release.
+- Create: `skills/project-memory-migrate/{SKILL.md,CHANGELOG.md,scripts/migrate.py,scripts/legacy.py,scripts/tests/test_migrate.py}`. Additional focused Python modules under its scripts directory are allowed for journal/link/preflight responsibilities.
+- Modify: `skills/user-memory-{backup,restore}/{SKILL.md,scripts/*.py}` and their tests in `project-memory-init/scripts/tests/test_user_memory_archive.py`.
+- Modify: `skills/README.md` migration/distribution inventory and memory Skill CHANGELOG files relevant to the new release.
 
 **Interfaces:**
 - Consumes: Task 1 new-layout path/type/CLI contract; all old parsing resides in this migrator.
@@ -104,11 +104,11 @@ assert subprocess.run(['git', '-C', str(scope), 'check-ignore',
 ### Task 3: Scope-first CLI and two task purposes
 
 **Files:**
-- Modify: `extensions/cli/src/{program.ts,context.ts,utils/config.ts}`; create `extensions/cli/src/utils/scope.ts`.
-- Modify: `extensions/cli/src/tasks.ts`, `src/tasks/utils/{paths,board,write,move,project-meta,result,service,grouped,generate-site}.ts` and their callers; `scripts/generate-tasks-site.ts`.
-- Modify: `extensions/cli/src/note/utils/` target-path consumers and `extensions/mcp-servers/new-note/src/cliAdapter.ts`; `extensions/cli/src/artifacts/server/ops.ts` and its focused tests to separate implementation-resource lookup from target-scope resolution.
+- Modify: `cli/src/{program.ts,context.ts,utils/config.ts}`; create `cli/src/utils/scope.ts`.
+- Modify: `cli/src/tasks.ts`, `src/tasks/utils/{paths,board,write,move,project-meta,result,service,grouped,generate-site}.ts` and their callers; `scripts/generate-tasks-site.ts`.
+- Modify: `cli/src/note/utils/` target-path consumers and `mcp-servers/new-note/src/cliAdapter.ts`; `cli/src/artifacts/server/ops.ts` and its focused tests to separate implementation-resource lookup from target-scope resolution.
 - Modify: `apps/tasks-review-app/src/` only where source identity is required for aggregate rendering/export; retain existing visual behavior.
-- Test: `extensions/cli/test/{parse,run,utils/config,tasks/parse,tasks/project,tasks/run,tasks/grouped-list,tasks/utils/paths,tasks/utils/board,tasks/utils/write,tasks/utils/move,tasks/utils/project-meta,tasks/utils/grouped,tasks/utils/generate-site,note/ingest,note/utils/git-ingest}.test.ts`, affected app and MCP tests.
+- Test: `cli/test/{parse,run,utils/config,tasks/parse,tasks/project,tasks/run,tasks/grouped-list,tasks/utils/paths,tasks/utils/board,tasks/utils/write,tasks/utils/move,tasks/utils/project-meta,tasks/utils/grouped,tasks/utils/generate-site,note/ingest,note/utils/git-ingest}.test.ts`, affected app and MCP tests.
 
 **Interfaces:**
 - Consumes: explicit scope versus implementation/Git root distinction; task schema and Run identifiers stay unchanged.
@@ -137,8 +137,8 @@ assert.equal(existsSync(join(root, '.harness/tasks/_default')), false);
 ### Task 4: Evaluation, teaching and deployment adapters
 
 **Files:**
-- Modify before relocation: `evaluation/run_locomo_official.py`, affected evaluation test/report builders; `extensions/services/artifacts-preview/deploy/{teaching-locations.conf,migrate-teaching-nginx-prefix.py,bootstrap.sh}` as required; `test/deploy-assets.test.ts`.
-- Modify: `.github/workflows/deploy.yml`, `extensions/cli/deploy/setup-nginx-tasks.sh`, deployment docs, `extensions/skills/learn-repo/SKILL.md`.
+- Modify before relocation: `evaluation/run_locomo_official.py`, affected evaluation test/report builders; `services/artifacts-preview/deploy/{teaching-locations.conf,migrate-teaching-nginx-prefix.py,bootstrap.sh}` as required; `test/deploy-assets.test.ts`.
+- Modify: `.github/workflows/deploy.yml`, `cli/deploy/setup-nginx-tasks.sh`, deployment docs, `skills/learn-repo/SKILL.md`.
 - Modify: `.gitignore`, `.obsidian/app.json`; never workspace.json.
 
 **Interfaces:**

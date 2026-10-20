@@ -43,8 +43,8 @@ TBD
 关联
 
 - 薄 skill PR：https://github.com/VirusPC/edges/pull/127（只整理，不落库）
-- `extensions/skills/conversation-to-notes/SKILL.md`
-- `extensions/skills/edges-note/SKILL.md`
+- `skills/conversation-to-notes/SKILL.md`
+- `skills/edges-note/SKILL.md`
 - 兄弟：`2026-09-16--edges-tasks的Skill与MCP封装`
 - 旧卡（cancelled）：`2026-09-13--conversation-to-task-skill调用CLI`
 

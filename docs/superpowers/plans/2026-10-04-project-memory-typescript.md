@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript, Node.js >=20, Commander, gray-matter, node:test/tsx.
 
-**Spec:** `extensions/skills/project-memory-init/references/PROTOCOL.md`, `LAYOUT.md`, `frontmatter-fields.md`; current Python operations/tests are behavioral references, not a parser implementation to copy.
+**Spec:** `skills/project-memory-init/references/PROTOCOL.md`, `LAYOUT.md`, `frontmatter-fields.md`; current Python operations/tests are behavioral references, not a parser implementation to copy.
 
 ## Global Constraints
 
@@ -24,18 +24,18 @@
 
 ### Task 1: Port core memory services and behavioral tests
 
-**Files:** Create `extensions/cli/src/services/memory/{index,paths,types,templates,blocks,agents,entries,provenance,init,remember,add-type,doctor}.ts` as needed; tests in `extensions/cli/test/memory/`. Read existing Python files under `extensions/skills/project-memory-init/scripts/` and template resources.
+**Files:** Create `cli/src/services/memory/{index,paths,types,templates,blocks,agents,entries,provenance,init,remember,add-type,doctor}.ts` as needed; tests in `cli/test/memory/`. Read existing Python files under `skills/project-memory-init/scripts/` and template resources.
 
 **Interfaces:** Export `initMemory(options)`, `rememberMemory(options)`, `addMemoryType(options)`, `doctorMemory(options)` from services/memory/index.ts. Options use camelCase equivalents of Python CLI arguments, with required targetDir; remember accepts content text rather than contentFile. Return current JSON payloads without process IO. Export shared path/type/index helpers for the explicit migrator.
 
 - [x] Write tests exercising selected init, no-selection nonmutation, remember/index refresh, managed Skill output, referenced rejection, custom private types, doctor readonly/apply/idempotence, source failures, symlink boundaries and nested Git boundaries. Before code exists, run tests and record the expected missing implementation failure.
 - [x] Implement pure document handling with gray-matter and filesystem orchestration in service modules. Preserve unknown metadata when updating an entry. Use UTF-8 decoding that reports invalid source bytes.
-- [x] Run `node --test --import tsx './test/memory/*.test.ts'` in extensions/cli and `tsc --noEmit -p extensions/cli/tsconfig.json` from root; record parity differences caused by standard YAML parsing rather than hiding them.
+- [x] Run `node --test --import tsx './test/memory/*.test.ts'` in cli and `tsc --noEmit -p cli/tsconfig.json` from root; record parity differences caused by standard YAML parsing rather than hiding them.
 - [x] Commit only owned files with a Co-authored-by trailer; provide public exports and test evidence for review.
 
 ### Task 2: Port explicit migration and private archives
 
-**Files:** Create `extensions/cli/src/services/memory/migrate.ts` and migration helpers; `archive.ts` for user backup/restore; tests under `extensions/cli/test/memory/` with distinct names. Also port the direct runtime consumer `scripts/migrate-recursive-layout.py` to `scripts/migrate-recursive-layout.mts`, with tests ported from `scripts/test_migrate_recursive_layout.py`. Existing Python references: project-memory-migrate/scripts and user-memory-backup/restore/scripts. Dependency updates only if needed for a maintained archive library.
+**Files:** Create `cli/src/services/memory/migrate.ts` and migration helpers; `archive.ts` for user backup/restore; tests under `cli/test/memory/` with distinct names. Also port the direct runtime consumer `scripts/migrate-recursive-layout.py` to `scripts/migrate-recursive-layout.mts`, with tests ported from `scripts/test_migrate_recursive_layout.py`. Existing Python references: project-memory-migrate/scripts and user-memory-backup/restore/scripts. Dependency updates only if needed for a maintained archive library.
 
 **Interfaces:** `migrateMemory({targetDir,rootDir?,recursive?,dryRun?})`, `backupUserMemory({repoDir,outputDir?,timestamp?})`, `restoreUserMemory({archive,repoDir,force?})`; preserve JSON result fields and migration journal semantics. Consume Task 1's path/type/index helpers without duplicated ordinary runtime.
 
@@ -47,7 +47,7 @@
 
 ### Task 3: Integrate CLI, distribution and skill workflows
 
-**Files:** `extensions/cli/src/memory.ts`, `src/program.ts`, `src/context.ts`, build resource copying, CLI tests/docs; Project Memory and archive SKILL.md/CHANGELOG.md, LAYOUT.md and runtime overview. Remove superseded Python sources/tests after their behavior has TS coverage; update active callers and tooling.
+**Files:** `cli/src/memory.ts`, `src/program.ts`, `src/context.ts`, build resource copying, CLI tests/docs; Project Memory and archive SKILL.md/CHANGELOG.md, LAYOUT.md and runtime overview. Remove superseded Python sources/tests after their behavior has TS coverage; update active callers and tooling.
 
 **Interfaces:** `edges memory init|remember|add-type|doctor|migrate|backup|restore`. Common --scope/--target-dir input is resolved before service calls. Preserve doctor --apply, migration --dry-run, archive restore --force, provenance arguments, JSON payloads and nonzero failures.
 

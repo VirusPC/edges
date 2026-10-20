@@ -1,6 +1,6 @@
 # classifyTasks 按已有 Task Project 质心整板分类；Task Project 元数据只做索引/描述层
 
-看板已有 directory-first 的 Task Project（ADR 0009），但缺少「按主题整理」工作流，也缺少 project 级标题与描述。2026-09-17 grill 确认：独立 Skill `classifyTasks`（`extensions/skills/project-tasks-classify/`）对整板做归属建议（带描述的 Task Project 为用户已设质心），人改建议表后再用 CLI 落地；Task Project 管理只在索引/描述层对齐 Project Memory（Q18=A），看板 markdown 仍是 Task 真源。同日曾把方法名写成 Embedding-based 最近质心分类，随即撤回：本轮不要求 embedding，也不把向量分类或无标签聚类写成合同。Skill 路径定为 `extensions/skills/project-tasks-classify/`（初稿曾写 `classify-tasks/`）。**Extends ADR 0009**（分组形状不变，补元数据与 classify 工作流）；**Amended by ADR 0011**（类型发现从本 skill 拆出；整板归属 + Q18=A 不变）；**Amended by ADR 0012**（人闸主路径改为 render-only 审阅页；Markdown 建议表作无 GUI 回退）。叠 ADR 0004 / 0005。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
+看板已有 directory-first 的 Task Project（ADR 0009），但缺少「按主题整理」工作流，也缺少 project 级标题与描述。2026-09-17 grill 确认：独立 Skill `classifyTasks`（`skills/project-tasks-classify/`）对整板做归属建议（带描述的 Task Project 为用户已设质心），人改建议表后再用 CLI 落地；Task Project 管理只在索引/描述层对齐 Project Memory（Q18=A），看板 markdown 仍是 Task 真源。同日曾把方法名写成 Embedding-based 最近质心分类，随即撤回：本轮不要求 embedding，也不把向量分类或无标签聚类写成合同。Skill 路径定为 `skills/project-tasks-classify/`（初稿曾写 `classify-tasks/`）。**Extends ADR 0009**（分组形状不变，补元数据与 classify 工作流）；**Amended by ADR 0011**（类型发现从本 skill 拆出；整板归属 + Q18=A 不变）；**Amended by ADR 0012**（人闸主路径改为 render-only 审阅页；Markdown 建议表作无 GUI 回退）。叠 ADR 0004 / 0005。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
 
 **Status:** accepted（ADR 0010；grill 确认于 2026-09-17；同日由 ADR 0011 修订路径与类型发现边界；同日撤回 embedding 作为本轮方法；同日由 ADR 0012 修订人闸主路径）
 
@@ -8,7 +8,7 @@
 
 ## Decision
 
-- **Skill：** `extensions/skills/project-tasks-classify/`，展示名 classifyTasks。独立工作流 Skill，不是通用 edges-tasks Skill+MCP CRUD。
+- **Skill：** `skills/project-tasks-classify/`，展示名 classifyTasks。独立工作流 Skill，不是通用 edges-tasks Skill+MCP CRUD。
 - **分类：** 按用户已设的 Task Project（标题 + 描述）做归属建议；agent / LLM 判断，不要求 embedding。带描述的 Task Project 是质心；对整板分类（不只 `_default`）。先出建议表，人可改目标或留 `_default`，再经 CLI 应用。不自动批量建 project。新类型不在本 skill 发明——走 proposeTypes（ADR 0011）。Embedding / 真向量分类另卡。
 - **正交：** classify 与 `update --project` 不得改 `edges-tasks-status` 或 `edges-task-priority`。
 - **元数据（Q18=A）：** Task Project 管理只在索引/描述层像 Project Memory。看板 markdown 仍是真源。不把每条 Task 升成 Memory Type（那是 Q18=B，与 [`tasks-memory与看板语义合并`](../../.harness/tasks/_default/backlog/2026-09-13--tasks-memory%E4%B8%8E%E7%9C%8B%E6%9D%BF%E8%AF%AD%E4%B9%89%E5%90%88%E5%B9%B6.md) 重叠，以后再谈）。

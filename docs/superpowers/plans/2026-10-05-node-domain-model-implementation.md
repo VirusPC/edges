@@ -4,7 +4,7 @@
 
 **Goal:** Implement the approved node classes and NodeService, connect real CLI consumers, and support document/resource ownership without losing existing content or command behavior.
 
-**Architecture:** Six domain classes live together in `extensions/cli/src/models/`. Instance parsing and serialization share standard gray-matter primitives; InternalNode delegates syntax preservation to private model helpers. A common asynchronous NodeService coordinates filesystem persistence, local/descendant traversal and ownership indexes. Existing business workflows consume these models/services rather than introducing another independent tree implementation.
+**Architecture:** Six domain classes live together in `cli/src/models/`. Instance parsing and serialization share standard gray-matter primitives; InternalNode delegates syntax preservation to private model helpers. A common asynchronous NodeService coordinates filesystem persistence, local/descendant traversal and ownership indexes. Existing business workflows consume these models/services rather than introducing another independent tree implementation.
 
 **Tech Stack:** TypeScript, NodeNext, existing gray-matter and CommonMark libraries, node:test/tsx, pnpm.
 
@@ -24,7 +24,7 @@
 
 ### Task 1: Domain classes and instance document behavior
 
-**Files:** Create `extensions/cli/src/models/{base-node,internal-node,task-node,memory-node,note-node,skill-node,types,index}.ts` and focused private helpers if needed; tests `extensions/cli/test/models/*.test.ts`. Existing syntax source: `src/utils/node-tree/{model,codec/*}.ts`; business field sources: `src/tasks/utils/frontmatter.ts`, `types.ts`, `src/services/memory/documents.ts`.
+**Files:** Create `cli/src/models/{base-node,internal-node,task-node,memory-node,note-node,skill-node,types,index}.ts` and focused private helpers if needed; tests `cli/test/models/*.test.ts`. Existing syntax source: `src/utils/node-tree/{model,codec/*}.ts`; business field sources: `src/tasks/utils/frontmatter.ts`, `types.ts`, `src/services/memory/documents.ts`.
 
 **Interfaces:** Implement the public types/classes exactly as in the spec's Public Types section. Constructors accept path only and never invoke overridable parsers. Base type is `base`; Internal type is `internal`. `parse(markdown):this`, `serialize():string`, protected parseBody/serializeBody. Concrete type must remain readonly. Implement model relation coordination through a package-internal helper used later by NodeService; do not expose public writable parent/children setters. Export only types/classes needed by consumers.
 
@@ -39,11 +39,11 @@ assert.equal(node.metadata?.metadata && (node.metadata.metadata as Record<string
 Also verify optional headers, subclass hooks, repeated parse reset, no path/tree context leaked into YAML, nested metadata snapshots cannot mutate state, invalid status/priority rejects before mutation, Note H1 title updates body, Skill name/description follow frontmatter, no-header base document, and invalid non-YAML language rejection.
 - [x] Implement BaseNode with cloned metadata/read-only snapshots and protected body extension points; keep fields' canonical storage in metadata/body. Reuse existing business field names and validity, not new schemas. setMetadata/removeMetadata address outer metadata keys; reject invalid domain metadata through domain hooks.
 - [x] Implement InternalNode using current Markdown parser/serializer as a private syntax helper, preserving authored non-index prose and section headings. Map each actual indexed link to NodeReference with label/description and derived kind. Implement setConstraints/addChild/updateChild/removeChild; updateChild requires existing target, replaces optional values, can change kind, cannot rename target. Escape generated display text and encode paths consistently. Plain references never become children. Existing type indexes with project-memory-entries map to local references and retain their existing header/body syntax; they do not acquire a new physical intermediate directory or forced extra chapters. InternalNode body getter/serialize use current content; parse/body setter replace state rather than append. Parent/children optional on other classes.
-- [x] Run `node --test --import tsx './test/models/*.test.ts'` from CLI and root `pnpm exec tsc --noEmit -p extensions/cli/tsconfig.json`. Commit only owned classes/tests; report exact RED/GREEN evidence, exports and constraints.
+- [x] Run `node --test --import tsx './test/models/*.test.ts'` from CLI and root `pnpm exec tsc --noEmit -p cli/tsconfig.json`. Commit only owned classes/tests; report exact RED/GREEN evidence, exports and constraints.
 
 ### Task 2: Common NodeService persistence and ownership traversal
 
-**Files:** Create `extensions/cli/src/services/{node-service,traverse}.ts`, narrow persistence helpers as needed, tests `extensions/cli/test/services/node-service*.test.ts`; may extend Task1's internal relation helper. Reuse proven `utils/node-tree/filesystem.ts` identity/symlink handling; no duplicate Markdown model.
+**Files:** Create `cli/src/services/{node-service,traverse}.ts`, narrow persistence helpers as needed, tests `cli/test/services/node-service*.test.ts`; may extend Task1's internal relation helper. Reuse proven `utils/node-tree/filesystem.ts` identity/symlink handling; no duplicate Markdown model.
 
 **Interfaces:** `new NodeService()` and asynchronous methods from spec; overload get(path, Model?), returns undefined only for absent target. list(scopePath,{includeDescendants?}) returns BaseNode[]; accepts a directory scope, reads its AGENTS.md. Public path args absolute. InternalNode for AGENTS; Task/Memory/Note/Skill constructors selected from explicit index/module contracts, not arbitrary YAML guessing. Type-index entries are local children without pretending they have new handwritten AGENTS sections. Keep literal references unmodified in documents; resolve relative to owning entry.
 
