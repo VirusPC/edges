@@ -38,4 +38,5 @@ edges CLI/脚手架/发布/鉴权等平台层。
 - [把个人大脑从\_viruspc\_edges\_系统仓拆出去](<in_progress/2026-10-20--%E6%8A%8A%E4%B8%AA%E4%BA%BA%E5%A4%A7%E8%84%91%E4%BB%8E-VirusPCedges-%E7%B3%BB%E7%BB%9F%E4%BB%93%E6%8B%86%E5%87%BA%E5%8E%BB/INDEX.md>) — 现在系统实现和个人知识混在同一个公开仓里。拆开以后，edges 只放系统本身，个人大脑走独立仓，再用 Compose 挂回来。
 - [框架仓平铺 extensions 并把 posts 搬回个人仓](<done/2026-10-20--%E6%A1%86%E6%9E%B6%E4%BB%93%E5%B9%B3%E9%93%BA-extensions-%E5%B9%B6%E6%8A%8A-posts-%E6%90%AC%E5%9B%9E%E4%B8%AA%E4%BA%BA%E4%BB%93/INDEX.md>) — 拆仓后 extensions/ 一层多余，平铺到框架仓顶层；posts/ 改算个人内容，搬到 edges\-brain\-viruspc。
 - [框架仓重整目录 workspace 化](<done/2026-10-20--%E6%A1%86%E6%9E%B6%E4%BB%93%E9%87%8D%E6%95%B4%E7%9B%AE%E5%BD%95-workspace-%E5%8C%96/INDEX.md>) — 独立开源后仓根目录仍不合理；把代码类目录都做成 pnpm workspace 包并重整位置。
+- [Compose 改挂到 .harness/README.md](<todo/2026-10-21--Compose-%E6%94%B9%E6%8C%82%E5%88%B0-harnessREADMEmd/INDEX.md>) — Compose 区块与展开改挂到 .harness/README.md，与其他本层材料一致
 <!-- project-entries-local:end -->
