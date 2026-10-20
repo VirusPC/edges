@@ -10,14 +10,14 @@ const HELP = "See edges compose --help for usage.\n";
 export function addComposeListCommand(compose: Command, ctx: CliContext): void {
   compose
     .command("list")
-    .description("List Compose block entries on the scope AGENTS.md")
+    .description("List Compose block entries and whether each is checked out locally")
     .allowExcessArguments(false)
     .action(async () => {
       try {
         const { entries, warnings } = await listCompose(ctx.env);
         ctx.result = succeed({
           command: "compose.list",
-          entries: entries.map(presentComposeEntry),
+          entries: entries.map((entry) => ({ ...presentComposeEntry(entry), href: entry.href, initialized: entry.initialized })),
         }, warnings.join(""));
       } catch (error) {
         failNodeCommand(ctx, error, HELP);

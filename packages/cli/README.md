@@ -288,34 +288,38 @@ init 管理客户端配置，publish/delete 调用预览服务并返回 JSON。s
 
 ### 组合仓库：compose
 
-作用域 `AGENTS.md` 的 `project-harness-compose` 区块登记被组合的 harness 仓库。每条是一个本地目录链接：链接文字是名字，破折号后面是说明，`remote: <git-url>` 是 clone 用的地址。`register` 的 `--description` 必填，要写清这个仓存什么、什么时候该往里写；不传或传空字符串时校验失败，不写区块。完整操作见 [`edges-compose`](../skills/edges-compose/SKILL.md)。
+作用域 `AGENTS.md` 的 `project-harness-compose` 区块登记被组合的 harness 仓库。每条是一个本地目录链接：链接文字是名字，破折号后面是说明，`remote: <git-url>` 是 git 地址。完整操作见 [`edges-compose`](../skills/edges-compose/SKILL.md)。
 
-底层是 git submodule。`register` 不传 `--path` 时，目录是仓内的 `.harness/compose/<name>`。区块里的链接永远是相对路径，相对于这份 `AGENTS.md` 所在的目录（在仓库根的 `AGENTS.md` 就是相对于 git 仓库根）。`--path` 只收相对路径，原样（规范化后）写进区块；绝对路径和 `~` 开头的路径以校验错误拒绝（退出码 2），不写区块。拒绝而不是只给 warning，是为了保证新写的区块换机器也能用。
+底层是 git submodule，CLI 只有三个子命令，名字对应 git submodule：`add`、`list`、`update`。没有 `register`、`unregister`、`clone`、`pull`、`push`、`sync`，也没有别名；推送和去掉条目交给原生 git 和手改 `AGENTS.md`（见下文）。
+
+`add` 不传 `--path` 时，目录是仓内的 `.harness/compose/<name>`。区块里的链接永远是相对路径，相对于这份 `AGENTS.md` 所在的目录（在仓库根的 `AGENTS.md` 就是相对于 git 仓库根）。`--path` 只收相对路径，原样（规范化后）写进区块；绝对路径和 `~` 开头的路径以校验错误拒绝（退出码 2），不写区块。拒绝而不是只给 warning，是为了保证新写的区块换机器也能用。`--description` 必填，要写清这个仓存什么、什么时候该往里写；不传或传空字符串时校验失败，不写区块。
 
 ```bash
-edges --scope <directory> compose register --name brain --remote https://github.com/example/brain.git --description "个人大脑：只在记跨项目判断时写入"
-edges --scope <directory> compose register --name brain --path vendor/brain --remote https://github.com/example/brain.git --description "个人大脑：只在记跨项目判断时写入"
+edges --scope <directory> compose add --name brain --remote https://github.com/example/brain.git --description "个人大脑：只在记跨项目判断时写入"
+edges --scope <directory> compose add --name brain --path vendor/brain --remote https://github.com/example/brain.git --description "个人大脑：只在记跨项目判断时写入"
 edges --scope <directory> compose list
-edges --scope <directory> compose unregister --name brain
-edges --scope <directory> compose clone
-edges --scope <directory> compose pull
-edges --scope <directory> compose push --name brain
+edges --scope <directory> compose update
+edges --scope <directory> compose update --remote --name brain
 ```
 
 | 命令 | 仓内条目（git submodule） | 旧条目 / 仓外条目 |
 | --- | --- | --- |
-| `register --remote` | `git -C <仓库根> submodule add -- <remote> <path>`，再写 `AGENTS.md`。同一路径已是同一 URL 的子模块时只登记（JSON `submodule: "existing"`），URL 不同时报错。 | 跳过 submodule add，stderr 打 warning |
-| `clone` | `git submodule update --init -- <path>`，从不带 `--recursive`。已初始化记为 `present`。条目还不在 `.gitmodules` 里时先 `submodule add`。 | `git clone`；目录已是同一 origin 的检出时 `present` |
-| `pull` | `git submodule update --init --remote -- <path>`。子模块在分支上时加 `--merge`，合进该分支，不切成 detached HEAD。 | `git pull` |
-| `push` | 在子模块目录里 `git push`。子模块是 detached HEAD 时这一条失败，原因提示先 `git switch <branch>`。 | `git push` |
+| `add --remote` | `git -C <仓库根> submodule add -- <remote> <path>`，再写 `AGENTS.md`。同一路径已是同一 URL 的子模块时只登记（JSON `submodule: "existing"`），URL 不同时报错。同名再 `add` 替换原来那一行。 | 跳过 submodule add，stderr 打 warning |
+| `list` | 列出条目；每条带 `href` 和 `initialized`（目录存在且非空） | 同左 |
+| `update` | `git submodule update --init -- <path>`，从不带 `--recursive`。条目还不在 `.gitmodules` 里时先 `submodule add`。 | 目录不存在时 `git clone`；已是同一 origin 的检出时不动 |
+| `update --remote` | `git submodule update --init --remote -- <path>`。子模块在分支上时加 `--merge`，合进该分支，不切成 detached HEAD。 | 目录不存在时 `git clone`，否则 `git pull` |
 
-「仓内条目」指目录在 scope 所在 git 仓库的工作树里。scope 不在 git 仓库里、目录在仓库外（例如 `--path ../brain`），或区块里是旧的 `~/...` / 绝对路径时，按旧方式处理。`register` 不带 `--remote` 时只登记本地目录，不碰 git。`register` 之后 `.gitmodules` 与子模块进了主仓库的暂存区，要和 `AGENTS.md` 一起提交。
+`update` 的每条 `action` 是 `initialized`（原来没检出，现在有了）、`present`（已检出，没动）、`updated`（`--remote` 跟到了远端）或 `failed`。「仓内条目」指目录在 scope 所在 git 仓库的工作树里。scope 不在 git 仓库里、目录在仓库外（例如 `--path ../brain`），或区块里是旧的 `~/...` / 绝对路径时，按旧条目处理。`add` 不带 `--remote` 时只登记本地目录，不碰 git。`add` 之后 `.gitmodules` 与子模块进了主仓库的暂存区，要和 `AGENTS.md` 一起提交。
 
-`register`、`list` 和 `unregister` 读写当前作用域的 Compose block，经 NodeService 保存 `AGENTS.md`。`unregister` 按 `--name` 去掉一条登记，不删除目录，也不移除子模块。`clone` / `pull` / `push` 的 `--name` 只处理一条。这三个命令逐条处理：某一条失败（目录缺失、git 报错、URL 与登记不符、detached HEAD 等）时，这条在 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 打一行 `warning: compose <动作> failed for <名字>: <原因>`，其余条目照常执行。至少一条成功时退出码 0；全部请求的条目都失败（含 `--name` 指定的那一条失败）时非零退出，失败结果里仍带 `entries`。缺少作用域 `AGENTS.md`、`--name` 找不到条目这类错误照旧整条命令失败。
+`update` 逐条处理：某一条失败（git 报错、URL 与登记不符、没有 remote 等）时，这条在 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 打一行 `warning: compose update failed for <名字>: <原因>`，其余条目照常执行。至少一条成功时退出码 0；全部请求的条目都失败（含 `--name` 指定的那一条失败）时非零退出，失败结果里仍带 `entries`。缺少作用域 `AGENTS.md`、`--name` 找不到条目这类错误照旧整条命令失败。
 
-不递归：只看当前仓库自己的条目。`clone` 不初始化被组合仓库里的子模块；默认查询停在当前 scope；`--with-composed` 只把这些目录的入口 `AGENTS.md` 纳入结果，不展开被组合仓库自己的 Compose 条目。系统森林扫描（`forest list`、`--all`）跳过 `.harness/compose/` 和任何已登记的组合目录，不把被组合仓库当成本仓的系统根。被组合的入口一律只读，即使它在主仓库目录里。两个仓库互相登记也只到一层。
+推送：在子模块目录里用原生 git。子模块默认是 detached HEAD，先 `git -C .harness/compose/<name> switch <branch>`，提交后 `git -C .harness/compose/<name> push`。
 
-提示：条目目录不存在或是空的（子模块还没初始化）时，`compose list` 和带 `--with-composed` 的命令在 stderr 打 `warning: compose entry <name> is not checked out at <path>; run edges compose clone --name <name>`。旧的 `~/...` / 绝对路径条目照样能读，`compose list`、`clone`、`pull`、`push` 和 `--with-composed` 会打迁移提示，建议 `unregister` 后不带 `--path` 重新 `register --remote`。
+去掉一条：在 `AGENTS.md` 的 Compose 区块删掉那一行；要连子模块一起删时，跑 `git submodule deinit -f <path>` 和 `git rm <path>` 再提交。Domain 的 `ComposeNode.removeChild` 仍在，只是不再有 CLI 入口。
+
+不递归：只看当前仓库自己的条目。`update` 不初始化被组合仓库里的子模块；默认查询停在当前 scope；`--with-composed` 只把这些目录的入口 `AGENTS.md` 纳入结果，不展开被组合仓库自己的 Compose 条目。系统森林扫描（`forest list`、`--all`）跳过 `.harness/compose/` 和任何已登记的组合目录，不把被组合仓库当成本仓的系统根。被组合的入口一律只读，即使它在主仓库目录里。两个仓库互相登记也只到一层。
+
+提示：条目目录不存在或是空的（子模块还没初始化）时，`compose list` 和带 `--with-composed` 的命令在 stderr 打 `warning: compose entry <name> is not checked out at <path>; run edges compose update --name <name>`。旧的 `~/...` / 绝对路径条目照样能读，`compose list`、`update` 和 `--with-composed` 会打迁移提示，建议不带 `--path` 用同一个名字重新 `compose add --remote ...`，把旧行换成 `.harness/compose/<name>`。
 
 <a id="json-schema-contracts"></a>
 

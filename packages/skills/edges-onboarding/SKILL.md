@@ -45,7 +45,7 @@ git --version
 | --- | --- | --- |
 | `node -v` | `v22.20.0` 或更高（包的 `engines.node` 是 `>=22.20.0`，依赖 `skills@1.7.2` 同样要求） | 让用户用自己习惯的版本管理器（nvm、fnm、Volta、官方安装包）升级。低版本可能装得上，但不受支持，`edges init` 装 skill 那一步可能失败。 |
 | `npm -v` | 有输出即可（随 Node 自带） | 重新安装 Node。 |
-| `git --version` | 有输出即可 | CLI 用 Git 根判断作用域，`compose clone/pull/push` 也会调用 git。没有 git 时先装 git。 |
+| `git --version` | 有输出即可 | CLI 用 Git 根判断作用域，`compose add/update` 也会调用 git。没有 git 时先装 git。 |
 | 网络 | 能访问 npm registry | `npm install` 超时或 `ETIMEDOUT` 时，检查代理或 registry 设置（`npm config get registry`）。不要替用户改全局 npm 配置，先问。 |
 
 ## 安装
@@ -115,7 +115,7 @@ edges --scope . init -- -g -y
 | --- | --- | --- |
 | 发布预览页（`edges artifacts create/publish/delete`） | 共享 token，变量 `EDGES_ARTIFACTS_TOKEN`、`EDGES_ARTIFACTS_BASE_URL`；默认存在 `~/.config/edges/artifacts.env`（权限 0600，可用 `EDGES_ARTIFACTS_CONFIG` 改路径）。用 `edges artifacts init` 写入。 | 告诉用户在他自己的终端运行 `edges artifacts init --base-url <预览服务地址>`（会新生成 token 并打印在 stderr）或加 `--token <服务端 token>` 复用服务端 token。**不要由你来运行带 `--token` 的命令，也不要读取或复述输出里的 token。** 完成后你只需确认 stdout 里 `"tokenCreated"` 和 `"configPath"`。 |
 | new-note MCP 的 HTTP 模式 | 静态 Bearer token，变量 `EDGES_AUTH_TOKEN`；不设置就不鉴权 | 让用户自己在 MCP 服务端环境和客户端配置里设置，不要经手。 |
-| `compose clone/pull/push`、git 推送 | 走用户本机已有的 git 凭证 | 推荐用户执行 `gh auth login` 在浏览器里授权；不要让用户贴 PAT。 |
+| `compose add/update`、git 推送 | 走用户本机已有的 git 凭证 | 推荐用户执行 `gh auth login` 在浏览器里授权；不要让用户贴 PAT。 |
 
 ## 验证
 
@@ -177,9 +177,9 @@ edges --scope <目录> skills get <name或路径>
 edges --scope <目录> forest list
 edges schema list
 
-# 组合多个 harness 仓库（clone/pull/push 会调用 git）
+# 组合多个 harness 仓库（add/update 会调用 git submodule）
 edges --scope <目录> compose list
-edges --scope <目录> compose clone
+edges --scope <目录> compose update
 ```
 
 细节交给对应 skill：写笔记 `edges-note`，整理对话 `conversation-to-notes`，记忆 `project-memory-ask` / `project-memory-remember` / `project-memory-doctor`，任务分类 `project-tasks-classify`。

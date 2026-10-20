@@ -37,9 +37,9 @@ EXAMPLES
   edges --scope ./projects/demo --super tasks list
   edges --scope . forest list
   edges --scope . forest list --form innermost --no-super
-  edges --scope . compose clone
-  edges --scope . compose pull
-  edges --scope . compose push
+  edges --scope . compose list
+  edges --scope . compose update
+  edges --scope . compose update --remote
   edges notes create --title "Daily" --body "Notes from the session."
   edges notes --help
   edges projects create --title "Demo" --body "What this project is."
@@ -186,7 +186,7 @@ function commandWriteTarget(
         (name === "doctor" && options.apply) ||
         (name === "migrate" && !options.dryRun))) ||
     (parent === "compose" &&
-      ["register", "unregister", "clone", "pull", "push"].includes(name));
+      ["add", "update"].includes(name));
   if (!writes) return undefined;
   if (
     options.targetDir &&

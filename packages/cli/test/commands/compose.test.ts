@@ -47,14 +47,14 @@ function failed(stdout: string): { status: string; errorCode: string; reason: st
   return JSON.parse(stdout) as { status: string; errorCode: string; reason: string };
 }
 
-test("compose register --help marks --description as required", async () => {
-  const result = await run(["compose", "register", "--help"]);
+test("compose add --help marks --description as required", async () => {
+  const result = await run(["compose", "add", "--help"]);
   assert.equal(result.exitCode, 0);
   assert.match(result.stdout, /--description\s+<text>/);
   assert.match(result.stdout, /required/i);
 });
 
-test("compose register without --description is a validation error and leaves AGENTS.md unchanged", async (t) => {
+test("compose add without --description is a validation error and leaves AGENTS.md unchanged", async (t) => {
   const root = mkdtempSync(path.join(tmpdir(), "compose-register-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const scope = path.join(root, "scope");
@@ -65,7 +65,7 @@ test("compose register without --description is a validation error and leaves AG
   const env = { ...process.env, EDGES_SCOPE: scope };
 
   const missing = await run(
-    ["compose", "register", "--name", "brain", "--remote", "https://github.com/example/brain.git"],
+    ["compose", "add", "--name", "brain", "--remote", "https://github.com/example/brain.git"],
     { env },
   );
   assert.equal(missing.exitCode, 2);
@@ -77,7 +77,7 @@ test("compose register without --description is a validation error and leaves AG
   assert.equal(readFileSync(file, "utf8"), before);
 
   const empty = await run(
-    ["compose", "register", "--name", "brain", "--remote", "https://github.com/example/brain.git", "--description", ""],
+    ["compose", "add", "--name", "brain", "--remote", "https://github.com/example/brain.git", "--description", ""],
     { env },
   );
   assert.equal(empty.exitCode, 2);
@@ -88,7 +88,7 @@ test("compose register without --description is a validation error and leaves AG
   assert.equal(readFileSync(file, "utf8"), before);
 
   const blank = await run(
-    ["compose", "register", "--name", "brain", "--description", "   "],
+    ["compose", "add", "--name", "brain", "--description", "   "],
     { env },
   );
   assert.equal(blank.exitCode, 2);
@@ -96,7 +96,7 @@ test("compose register without --description is a validation error and leaves AG
   assert.equal(readFileSync(file, "utf8"), before);
 });
 
-test("compose register writes the description into the Compose block", async (t) => {
+test("compose add writes the description into the Compose block", async (t) => {
   const root = mkdtempSync(path.join(tmpdir(), "compose-desc-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const scope = path.join(root, "scope");
@@ -107,7 +107,7 @@ test("compose register writes the description into the Compose block", async (t)
   const registered = await run(
     [
       "compose",
-      "register",
+      "add",
       "--name",
       "brain",
       "--remote",
@@ -131,15 +131,17 @@ test("compose register writes the description into the Compose block", async (t)
   assert.match(registered.stderr, /^warning: compose entry brain is outside the owner's git repo; skipped git submodule add/m);
 });
 
-test("edges compose --help lists clone, pull, and push", async () => {
+test("edges compose has exactly add, list, and update; old subcommands are gone", async () => {
   const result = await run(["compose", "--help"]);
   assert.equal(result.exitCode, 0);
-  assert.match(result.stdout, /^\s+clone\b/m);
-  assert.match(result.stdout, /^\s+pull\b/m);
-  assert.match(result.stdout, /^\s+push\b/m);
-  assert.match(result.stdout, /^\s+register\b/m);
-  assert.match(result.stdout, /^\s+unregister\b/m);
-  assert.match(result.stdout, /^\s+list\b/m);
+  const commands = [...result.stdout.matchAll(/^  (\w+)\b/gm)].map((match) => match[1]);
+  assert.deepEqual(commands.filter((name) => name !== "help").sort(), ["add", "list", "update"]);
+  assert.match(result.stdout, /no unregister \/ push \/ sync/);
+  for (const old of ["register", "unregister", "clone", "pull", "push"]) {
+    const gone = await run(["compose", old, "--name", "x"]);
+    assert.equal(gone.exitCode, 2, old);
+    assert.equal(failed(gone.stdout).errorCode, "VALIDATION_ERROR");
+  }
 });
 
 /** Lets git (and `edges compose`) use file:// / local-path submodule remotes in tests. */
@@ -202,7 +204,7 @@ interface GitEntries {
   entries: Array<{ name: string; action: string; error?: string; directory?: string }>;
 }
 
-test("compose register --remote adds a git submodule at .harness/compose/<name> with a relative href", async (t) => {
+test("compose add --remote adds a git submodule at .harness/compose/<name> with a relative href", async (t) => {
   const root = mkdtempSync(path.join(tmpdir(), "compose-sub-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const { bare, source } = setupRemote(root, "brain");
@@ -211,7 +213,7 @@ test("compose register --remote adds a git submodule at .harness/compose/<name> 
   const checkout = path.join(owner, ".harness", "compose", "brain");
 
   const registered = await run(
-    ["compose", "register", "--name", "brain", "--remote", bare, "--description", "个人大脑"],
+    ["compose", "add", "--name", "brain", "--remote", bare, "--description", "个人大脑"],
     { env },
   );
   assert.equal(registered.exitCode, 0, registered.stdout + registered.stderr);
@@ -225,9 +227,9 @@ test("compose register --remote adds a git submodule at .harness/compose/<name> 
   assert.match(git(["config", "-f", ".gitmodules", "--get-regexp", "path"], owner), /\.harness\/compose\/brain/);
   assert.equal(readFileSync(path.join(checkout, "README.md"), "utf8"), "brain\n");
 
-  // Same URL again: the submodule exists, so register only rewrites the line.
+  // Same URL again: the submodule exists, so add only rewrites the line.
   const again = await run(
-    ["compose", "register", "--name", "brain", "--remote", `${bare}/`, "--description", "个人大脑 v2"],
+    ["compose", "add", "--name", "brain", "--remote", `${bare}/`, "--description", "个人大脑 v2"],
     { env },
   );
   assert.equal(again.exitCode, 0, again.stdout + again.stderr);
@@ -238,7 +240,7 @@ test("compose register --remote adds a git submodule at .harness/compose/<name> 
   const before = readFileSync(path.join(owner, "AGENTS.md"), "utf8");
   const other = setupRemote(root, "other").bare;
   const clash = await run(
-    ["compose", "register", "--name", "brain", "--remote", other, "--description", "x"],
+    ["compose", "add", "--name", "brain", "--remote", other, "--description", "x"],
     { env },
   );
   assert.notEqual(clash.exitCode, 0);
@@ -246,60 +248,58 @@ test("compose register --remote adds a git submodule at .harness/compose/<name> 
   assert.equal(readFileSync(path.join(owner, "AGENTS.md"), "utf8"), before);
   commitAll(owner, "compose brain");
 
-  // Fresh-clone state: the submodule directory is empty until compose clone.
+  // Fresh-clone state: the submodule directory is empty until compose update.
   git(["submodule", "deinit", "-q", "-f", ".harness/compose/brain"], owner);
   assert.deepEqual(readdirSync(checkout), []);
   const listed = await run(["compose", "list"], { env });
   assert.equal(listed.exitCode, 0, listed.stdout);
-  assert.match(listed.stderr, /^warning: compose entry brain is not checked out at \.harness\/compose\/brain; run edges compose clone --name brain$/m);
+  assert.match(listed.stderr, /^warning: compose entry brain is not checked out at \.harness\/compose\/brain; run edges compose update --name brain$/m);
 
-  const cloned = await run(["compose", "clone"], { env });
-  assert.equal(cloned.exitCode, 0, cloned.stdout + cloned.stderr);
-  assert.equal((JSON.parse(cloned.stdout) as GitEntries).entries[0]?.action, "cloned");
+  const listedBody = JSON.parse(listed.stdout) as { entries: Array<{ name: string; initialized: boolean; href: string }> };
+  assert.deepEqual(listedBody.entries.map((e) => [e.name, e.href, e.initialized]), [["brain", ".harness/compose/brain", false]]);
+
+  const updated = await run(["compose", "update"], { env });
+  assert.equal(updated.exitCode, 0, updated.stdout + updated.stderr);
+  assert.equal((JSON.parse(updated.stdout) as GitEntries).entries[0]?.action, "initialized");
   assert.equal(readFileSync(path.join(checkout, "README.md"), "utf8"), "brain\n");
-  const present = await run(["compose", "clone", "--name", "brain"], { env });
+  const present = await run(["compose", "update", "--name", "brain"], { env });
   assert.equal((JSON.parse(present.stdout) as GitEntries).entries[0]?.action, "present");
-  assert.doesNotMatch((await run(["compose", "list"], { env })).stderr, /not checked out/);
+  const relisted = await run(["compose", "list"], { env });
+  assert.doesNotMatch(relisted.stderr, /not checked out/);
+  assert.equal((JSON.parse(relisted.stdout) as { entries: Array<{ initialized: boolean }> }).entries[0]?.initialized, true);
 
+  // Without --remote, update keeps the recorded commit; --remote follows the remote tip.
   commit(source, "upstream", "NOTE.md", "from-upstream\n");
   git(["push", "-q"], source);
-  const pulled = await run(["compose", "pull"], { env });
-  assert.equal(pulled.exitCode, 0, pulled.stdout + pulled.stderr);
-  assert.equal((JSON.parse(pulled.stdout) as GitEntries).entries[0]?.action, "pulled");
+  await run(["compose", "update"], { env });
+  assert.equal(existsSync(path.join(checkout, "NOTE.md")), false);
+  const followed = await run(["compose", "update", "--remote"], { env });
+  assert.equal(followed.exitCode, 0, followed.stdout + followed.stderr);
+  assert.equal((JSON.parse(followed.stdout) as GitEntries).entries[0]?.action, "updated");
   assert.equal(readFileSync(path.join(checkout, "NOTE.md"), "utf8"), "from-upstream\n");
 
-  // Submodules check out a detached HEAD; push refuses with a clear message.
-  const detached = await run(["compose", "push", "--name", "brain"], { env });
-  assert.notEqual(detached.exitCode, 0);
-  const detachedBody = JSON.parse(detached.stdout) as GitEntries;
-  assert.match(detachedBody.reason ?? "", /detached HEAD/);
-  assert.match(detached.stderr, /^warning: compose push failed for brain: Compose checkout is on a detached HEAD/m);
-
+  // Push is plain git inside the submodule; on a branch, update --remote merges and stays on it.
   git(["checkout", "-q", "-B", "main", "origin/main"], checkout);
   commit(checkout, "local", "LOCAL.md", "from-checkout\n");
-  const pushed = await run(["compose", "push"], { env });
-  assert.equal(pushed.exitCode, 0, pushed.stdout + pushed.stderr);
-  assert.equal((JSON.parse(pushed.stdout) as GitEntries).entries[0]?.action, "pushed");
+  git(["push", "-q", "origin", "main"], checkout);
   assert.match(git(["--git-dir", bare, "log", "-1", "--format=%s", "main"]), /local/);
-
-  // On a branch, pull merges the remote tip and stays on that branch.
   git(["pull", "-q", "--ff-only"], source);
   commit(source, "upstream-2", "MORE.md", "more\n");
   git(["push", "-q"], source);
-  const pulledOnBranch = await run(["compose", "pull", "--name", "brain"], { env });
-  assert.equal(pulledOnBranch.exitCode, 0, pulledOnBranch.stdout + pulledOnBranch.stderr);
+  const onBranch = await run(["compose", "update", "--remote", "--name", "brain"], { env });
+  assert.equal(onBranch.exitCode, 0, onBranch.stdout + onBranch.stderr);
   assert.equal(git(["symbolic-ref", "--short", "HEAD"], checkout).trim(), "main");
   assert.equal(readFileSync(path.join(checkout, "MORE.md"), "utf8"), "more\n");
 });
 
-test("compose register rejects absolute and ~ paths and keeps a relative --path relative", async (t) => {
+test("compose add rejects absolute and ~ paths and keeps a relative --path relative", async (t) => {
   const root = mkdtempSync(path.join(tmpdir(), "compose-path-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const owner = setupOwner(root);
   const env = { ...process.env, ...FILE_PROTOCOL, EDGES_SCOPE: owner };
   const before = readFileSync(path.join(owner, "AGENTS.md"), "utf8");
   for (const bad of [path.join(root, "abs"), "~/brain"]) {
-    const result = await run(["compose", "register", "--name", "brain", "--path", bad, "--description", "x"], { env });
+    const result = await run(["compose", "add", "--name", "brain", "--path", bad, "--description", "x"], { env });
     assert.equal(result.exitCode, 2, bad);
     assert.equal(failed(result.stdout).errorCode, "VALIDATION_ERROR");
     assert.match(result.stdout, /must be relative/);
@@ -307,7 +307,7 @@ test("compose register rejects absolute and ~ paths and keeps a relative --path 
   }
   const { bare } = setupRemote(root, "team");
   const relative = await run(
-    ["compose", "register", "--name", "team", "--path", "vendor/team", "--remote", bare, "--description", "团队库"],
+    ["compose", "add", "--name", "team", "--path", "vendor/team", "--remote", bare, "--description", "团队库"],
     { env },
   );
   assert.equal(relative.exitCode, 0, relative.stdout + relative.stderr);
@@ -317,7 +317,7 @@ test("compose register rejects absolute and ~ paths and keeps a relative --path 
 
   // No --remote: a plain local directory, nothing runs in git.
   const local = await run(
-    ["compose", "register", "--name", "notes", "--path", "../notes", "--description", "本地目录"],
+    ["compose", "add", "--name", "notes", "--path", "../notes", "--description", "本地目录"],
     { env },
   );
   assert.equal(local.exitCode, 0, local.stdout + local.stderr);
@@ -325,7 +325,7 @@ test("compose register rejects absolute and ~ paths and keeps a relative --path 
   assert.doesNotMatch(readFileSync(path.join(owner, ".gitmodules"), "utf8"), /notes/);
 });
 
-test("compose submodule clone/pull/push skip a failing entry, warn, and still exit 0", async (t) => {
+test("compose update skips a failing submodule entry, warns, and still exits 0", async (t) => {
   const root = mkdtempSync(path.join(tmpdir(), "compose-sub-partial-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const good = setupRemote(root, "good");
@@ -335,37 +335,35 @@ test("compose submodule clone/pull/push skip a failing entry, warn, and still ex
   writeFileSync(path.join(owner, "AGENTS.md"), agents(composeBlock([
     `- [bad](<.harness/compose/bad>) — 坏 remote: ${path.join(root, "missing.git")}`,
   ])));
-  const registered = await run(["compose", "register", "--name", "good", "--remote", good.bare, "--description", "好"], { env });
+  const registered = await run(["compose", "add", "--name", "good", "--remote", good.bare, "--description", "好"], { env });
   assert.equal(registered.exitCode, 0, registered.stdout + registered.stderr);
   git(["submodule", "deinit", "-q", "-f", ".harness/compose/good"], owner);
 
-  const cloned = await run(["compose", "clone"], { env });
-  assert.equal(cloned.exitCode, 0, cloned.stdout + cloned.stderr);
-  const cloneBody = JSON.parse(cloned.stdout) as GitEntries;
-  assert.deepEqual(cloneBody.entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "cloned"]]);
-  assert.match(cloned.stderr, /^warning: compose clone failed for bad: /m);
-  assert.doesNotMatch(cloned.stderr, /for good/);
+  const updated = await run(["compose", "update"], { env });
+  assert.equal(updated.exitCode, 0, updated.stdout + updated.stderr);
+  const body = JSON.parse(updated.stdout) as GitEntries;
+  assert.equal(body.status, "success");
+  assert.deepEqual(body.entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "initialized"]]);
+  assert.ok(body.entries[0]?.error);
+  assert.match(updated.stderr, /^warning: compose update failed for bad: /m);
+  assert.doesNotMatch(updated.stderr, /for good/);
 
-  const pulled = await run(["compose", "pull"], { env });
-  assert.equal(pulled.exitCode, 0, pulled.stdout + pulled.stderr);
-  const pullBody = JSON.parse(pulled.stdout) as GitEntries;
-  assert.deepEqual(pullBody.entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "pulled"]]);
-  assert.match(pullBody.entries[0]?.error ?? "", /not a git submodule yet: bad/);
+  const followed = await run(["compose", "update", "--remote"], { env });
+  assert.equal(followed.exitCode, 0, followed.stdout + followed.stderr);
+  assert.deepEqual((JSON.parse(followed.stdout) as GitEntries).entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "updated"]]);
 
-  const pushed = await run(["compose", "push"], { env });
-  const pushBody = JSON.parse(pushed.stdout) as GitEntries;
-  // Both fail: bad is missing, good is on the detached HEAD a submodule checks out.
-  assert.notEqual(pushed.exitCode, 0);
-  assert.equal(pushBody.reason, "compose push failed for all 2 entries");
-  assert.match(pushBody.entries[0]?.error ?? "", /Compose checkout is missing: bad/);
-  assert.match(pushBody.entries[1]?.error ?? "", /detached HEAD/);
+  const single = await run(["compose", "update", "--name", "bad"], { env });
+  assert.notEqual(single.exitCode, 0);
+  const singleBody = JSON.parse(single.stdout) as GitEntries;
+  assert.equal(singleBody.status, "failed");
+  assert.deepEqual(singleBody.entries.map((e) => [e.name, e.action]), [["bad", "failed"]]);
 });
 
 function legacyEntries(root: string, entries: Array<{ name: string; dir: string; remote: string }>): string {
   return agents(composeBlock(entries.map((entry) => `- [${entry.name}](<${entry.dir}>) — ${entry.name} 仓 remote: ${entry.remote}`)));
 }
 
-test("legacy absolute entries still clone/pull/push with plain git and warn to migrate", async (t) => {
+test("legacy absolute entries: update clones when missing, pulls with --remote, and warns to migrate", async (t) => {
   const root = mkdtempSync(path.join(tmpdir(), "compose-legacy-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const scope = path.join(root, "scope");
@@ -382,47 +380,43 @@ test("legacy absolute entries still clone/pull/push with plain git and warn to m
 
   const listed = await run(["compose", "list"], { env });
   assert.equal(listed.exitCode, 0, listed.stdout);
-  assert.match(listed.stderr, /^warning: compose entry good uses a legacy path .*migrate it to a git submodule at \.harness\/compose\/good/m);
+  assert.match(listed.stderr, /^warning: compose entry good uses a legacy path .*migrate it to a git submodule at \.harness\/compose\/good \(edges compose add --name good/m);
+  assert.match(listed.stderr, /^warning: compose entry good is not checked out at .*; run edges compose update --name good$/m);
 
-  const cloned = await run(["compose", "clone"], { env });
-  assert.equal(cloned.exitCode, 0, cloned.stdout + cloned.stderr);
-  const cloneBody = JSON.parse(cloned.stdout) as GitEntries;
-  assert.equal(cloneBody.status, "success");
-  assert.deepEqual(cloneBody.entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "cloned"]]);
-  assert.ok(cloneBody.entries[0]?.error);
-  assert.match(cloned.stderr, /^warning: compose clone failed for bad: /m);
-  assert.match(cloned.stderr, /^warning: compose entry good uses a legacy path/m);
-  assert.doesNotMatch(cloned.stderr, /failed for good/);
+  const updated = await run(["compose", "update"], { env });
+  assert.equal(updated.exitCode, 0, updated.stdout + updated.stderr);
+  const body = JSON.parse(updated.stdout) as GitEntries;
+  assert.equal(body.status, "success");
+  assert.deepEqual(body.entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "initialized"]]);
+  assert.ok(body.entries[0]?.error);
+  assert.match(updated.stderr, /^warning: compose update failed for bad: /m);
+  assert.match(updated.stderr, /^warning: compose entry good uses a legacy path/m);
+  assert.doesNotMatch(updated.stderr, /failed for good/);
   assert.equal(existsSync(path.join(goodCheckout, "README.md")), true);
-  const again = await run(["compose", "clone", "--name", "good"], { env });
+  const again = await run(["compose", "update", "--name", "good"], { env });
   assert.equal((JSON.parse(again.stdout) as GitEntries).entries[0]?.action, "present");
 
   commit(good.source, "upstream", "NOTE.md", "from-upstream\n");
   git(["push", "-q"], good.source);
-  const pulled = await run(["compose", "pull"], { env });
+  const pulled = await run(["compose", "update", "--remote"], { env });
   assert.equal(pulled.exitCode, 0, pulled.stdout + pulled.stderr);
-  const pullBody = JSON.parse(pulled.stdout) as GitEntries;
-  assert.deepEqual(pullBody.entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "pulled"]]);
-  assert.equal(pullBody.entries[0]?.error, "Compose checkout is missing: bad");
-  assert.match(pulled.stderr, /^warning: compose pull failed for bad: Compose checkout is missing: bad$/m);
+  assert.deepEqual((JSON.parse(pulled.stdout) as GitEntries).entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "updated"]]);
   assert.equal(readFileSync(path.join(goodCheckout, "NOTE.md"), "utf8"), "from-upstream\n");
 
-  commit(goodCheckout, "local", "LOCAL.md", "from-checkout\n");
-  const pushed = await run(["compose", "push"], { env });
-  assert.equal(pushed.exitCode, 0, pushed.stdout + pushed.stderr);
-  assert.deepEqual((JSON.parse(pushed.stdout) as GitEntries).entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "pushed"]]);
-  assert.match(git(["--git-dir", good.bare, "log", "-1", "--format=%s", "main"]), /local/);
-
-  const removed = await run(["compose", "unregister", "--name", "good"], { env });
-  assert.equal(removed.exitCode, 0, removed.stdout + removed.stderr);
-  assert.equal(existsSync(path.join(goodCheckout, "README.md")), true);
-  assert.doesNotMatch(readFileSync(path.join(scope, "AGENTS.md"), "utf8"), /\[good\]/);
-  const missing = await run(["compose", "unregister", "--name", "good"], { env });
-  assert.notEqual(missing.exitCode, 0);
-  assert.match(missing.stdout, /Compose entry not found: good/);
+  // Migrating: add with the same name and no --path replaces the legacy line.
+  const owner = setupOwner(root, "owner");
+  writeFileSync(path.join(owner, "AGENTS.md"), legacyEntries(root, [{ name: "good", dir: goodCheckout, remote: good.bare }]));
+  const migrated = await run(
+    ["compose", "add", "--name", "good", "--remote", good.bare, "--description", "好"],
+    { env: { ...process.env, ...FILE_PROTOCOL, EDGES_SCOPE: owner } },
+  );
+  assert.equal(migrated.exitCode, 0, migrated.stdout + migrated.stderr);
+  const source = readFileSync(path.join(owner, "AGENTS.md"), "utf8");
+  assert.match(source, /\[good\]\(<\.harness\/compose\/good>\)/);
+  assert.equal(source.includes(goodCheckout), false);
 });
 
-test("compose pull/push fail when every requested entry fails, including --name", async (t) => {
+test("compose update fails when every requested entry fails, including --name", async (t) => {
   const root = mkdtempSync(path.join(tmpdir(), "compose-allfail-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const scope = path.join(root, "scope");
@@ -433,28 +427,24 @@ test("compose pull/push fail when every requested entry fails, including --name"
   ]));
   const env = { ...process.env, EDGES_SCOPE: scope };
 
-  const pulled = await run(["compose", "pull"], { env });
-  assert.notEqual(pulled.exitCode, 0);
-  const body = JSON.parse(pulled.stdout) as GitEntries;
+  const updated = await run(["compose", "update"], { env });
+  assert.notEqual(updated.exitCode, 0);
+  const body = JSON.parse(updated.stdout) as GitEntries;
   assert.equal(body.status, "failed");
   assert.equal(body.errorCode, "UNKNOWN_ERROR");
   assert.match(body.reason ?? "", /all 2 entries/);
   assert.deepEqual(body.entries.map((e) => [e.name, e.action]), [["one", "failed"], ["two", "failed"]]);
-  assert.match(pulled.stderr, /^warning: compose pull failed for one: /m);
-  assert.match(pulled.stderr, /^warning: compose pull failed for two: /m);
+  assert.match(updated.stderr, /^warning: compose update failed for one: /m);
+  assert.match(updated.stderr, /^warning: compose update failed for two: /m);
 
-  const single = await run(["compose", "push", "--name", "two"], { env });
+  const single = await run(["compose", "update", "--remote", "--name", "two"], { env });
   assert.notEqual(single.exitCode, 0);
   const singleBody = JSON.parse(single.stdout) as GitEntries;
   assert.equal(singleBody.status, "failed");
-  assert.equal(singleBody.reason, "Compose checkout is missing: two");
   assert.deepEqual(singleBody.entries.map((e) => [e.name, e.action]), [["two", "failed"]]);
+  assert.equal(singleBody.reason, singleBody.entries[0]?.error);
 
-  const cloned = await run(["compose", "clone"], { env });
-  assert.notEqual(cloned.exitCode, 0);
-  assert.equal((JSON.parse(cloned.stdout) as GitEntries).status, "failed");
-
-  const unknown = await run(["compose", "pull", "--name", "nope"], { env });
+  const unknown = await run(["compose", "update", "--name", "nope"], { env });
   assert.equal(unknown.exitCode, 2);
   assert.match(unknown.stdout, /compose entry not found: nope/);
   assert.doesNotMatch(unknown.stdout, /"entries"/);
@@ -469,7 +459,7 @@ test("Compose never recurses: two repos registering each other stay one layer de
 
   // B registers A, A registers B: each is a git submodule of the other.
   const inB = await run(
-    ["compose", "register", "--name", "a", "--remote", a.bare, "--description", "A 仓"],
+    ["compose", "add", "--name", "a", "--remote", a.bare, "--description", "A 仓"],
     { env: { ...process.env, ...FILE_PROTOCOL, EDGES_SCOPE: b.source } },
   );
   assert.equal(inB.exitCode, 0, inB.stdout + inB.stderr);
@@ -477,7 +467,7 @@ test("Compose never recurses: two repos registering each other stay one layer de
   git(["push", "-q"], b.source);
   const env = { ...process.env, ...FILE_PROTOCOL, EDGES_SCOPE: a.source };
   const inA = await run(
-    ["compose", "register", "--name", "b", "--remote", b.bare, "--description", "B 仓"],
+    ["compose", "add", "--name", "b", "--remote", b.bare, "--description", "B 仓"],
     { env },
   );
   assert.equal(inA.exitCode, 0, inA.stdout + inA.stderr);
@@ -485,12 +475,12 @@ test("Compose never recurses: two repos registering each other stay one layer de
 
   const bCheckout = path.join(a.source, ".harness", "compose", "b");
   const nested = path.join(bCheckout, ".harness", "compose", "a");
-  // Fresh-clone state, then compose clone: never --recursive, so B's own entry stays empty.
+  // Fresh-clone state, then compose update: never --recursive, so B's own entry stays empty.
   git(["submodule", "deinit", "-q", "-f", ".harness/compose/b"], a.source);
   const hint = await run(["--with-composed", "forest", "list", "--no-super"], { env });
   assert.equal(hint.exitCode, 0, hint.stdout + hint.stderr);
-  assert.match(hint.stderr, /^warning: compose entry b is not checked out at \.harness\/compose\/b; run edges compose clone --name b$/m);
-  const cloned = await run(["compose", "clone"], { env });
+  assert.match(hint.stderr, /^warning: compose entry b is not checked out at \.harness\/compose\/b; run edges compose update --name b$/m);
+  const cloned = await run(["compose", "update"], { env });
   assert.equal(cloned.exitCode, 0, cloned.stdout + cloned.stderr);
   assert.equal(existsSync(path.join(bCheckout, "AGENTS.md")), true);
   assert.deepEqual(readdirSync(nested), []);
@@ -524,18 +514,20 @@ test("Compose never recurses: two repos registering each other stay one layer de
   assert.deepEqual(listed.entries.map((entry) => entry.name), ["b"]);
 });
 
-test("compose pull without a scope AGENTS.md still fails the whole command", async (t) => {
+test("compose update without a scope AGENTS.md still fails the whole command", async (t) => {
   const root = mkdtempSync(path.join(tmpdir(), "compose-noscope-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
-  const result = await run(["compose", "pull"], { env: { ...process.env, EDGES_SCOPE: root } });
+  const result = await run(["compose", "update"], { env: { ...process.env, EDGES_SCOPE: root } });
   assert.notEqual(result.exitCode, 0);
   assert.equal(failed(result.stdout).status, "failed");
   assert.doesNotMatch(result.stdout, /"entries"/);
 });
 
-test("compose pull --help documents per-entry failure handling", async () => {
-  const result = await run(["compose", "pull", "--help"]);
+test("compose update --help documents --remote and per-entry failure handling", async () => {
+  const result = await run(["compose", "update", "--help"]);
   assert.equal(result.exitCode, 0);
+  assert.match(result.stdout, /--remote/);
+  assert.match(result.stdout, /never\s+--recursive/);
   assert.match(result.stdout, /action "failed"/);
   assert.match(result.stdout, /every requested entry/);
 });

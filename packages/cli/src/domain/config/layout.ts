@@ -11,7 +11,7 @@ export const ENTRY_NAMES = {
 export const COMPOSE_ENTRY_DIR = ".compose";
 
 /**
- * Default Compose checkout root when `edges compose register` omits `--path`.
+ * Default Compose checkout root when `edges compose add` omits `--path`.
  * Relative to the owner AGENTS.md directory; each entry is a git submodule at
  * `.harness/compose/<name>`.
  */

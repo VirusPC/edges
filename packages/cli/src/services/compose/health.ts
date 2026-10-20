@@ -17,7 +17,7 @@ export function legacyPathWarning(entry: EntryLike): string | undefined {
   return (
     `warning: compose entry ${entry.name} uses a legacy path ${entry.href}; ` +
     `migrate it to a git submodule at ${COMPOSED_CHECKOUT_ROOT}/${entry.name} ` +
-    `(edges compose unregister --name ${entry.name}, then edges compose register --name ${entry.name} --remote <url> --description <text>)\n`
+    `(edges compose add --name ${entry.name} --remote <url> --description <text>, without --path, replaces the old line)\n`
   );
 }
 
@@ -42,7 +42,7 @@ export function composeEntryWarnings(entries: readonly EntryLike[]): string[] {
     if (legacy) warnings.push(legacy);
     if (notCheckedOut(entry.directory))
       warnings.push(
-        `warning: compose entry ${entry.name} is not checked out at ${entry.href}; run edges compose clone --name ${entry.name}\n`,
+        `warning: compose entry ${entry.name} is not checked out at ${entry.href}; run edges compose update --name ${entry.name}\n`,
       );
   }
   return warnings;

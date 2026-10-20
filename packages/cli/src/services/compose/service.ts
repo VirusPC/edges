@@ -11,8 +11,12 @@ import type { NodeService } from "../node/node-service.js";
 
 const execFileAsync = promisify(execFile);
 
-/** `failed` marks an entry whose own git step failed; the batch keeps going. */
-export type ComposeGitAction = "cloned" | "present" | "pulled" | "pushed" | "failed";
+/**
+ * Per-entry result of `compose update`. `initialized`: the checkout was missing and is
+ * now there. `present`: already checked out, nothing to do. `updated`: `--remote` moved it
+ * to the remote tip. `failed`: this entry's own git step failed; the batch keeps going.
+ */
+export type ComposeGitAction = "initialized" | "present" | "updated" | "failed";
 
 export interface ComposeGitReport {
   name: string;
@@ -23,7 +27,7 @@ export interface ComposeGitReport {
   error?: string;
 }
 
-export interface ComposeRegisterInput {
+export interface ComposeAddInput {
   name: string;
   /**
    * Checkout directory relative to the owner AGENTS.md directory.
@@ -34,7 +38,7 @@ export interface ComposeRegisterInput {
   remote?: string;
 }
 
-export interface ComposeRegisterResult {
+export interface ComposeAddResult {
   entry: ComposeEntry;
   /** `added`: ran `git submodule add`. `existing`: the submodule was already there. */
   submodule?: "added" | "existing";
@@ -120,7 +124,7 @@ function realish(target: string): string {
  * Where an entry lives relative to the owner repo. `submodule`: inside the owner's
  * git work tree, managed with `git submodule`. `standalone`: outside any owner repo
  * (legacy `~/...` / absolute entries, or an owner that is not in git), managed with
- * plain `git clone` / `git pull` / `git push` as before.
+ * plain `git clone` / `git pull` as before.
  */
 type Placement =
   | { kind: "submodule"; top: string; rel: string }
@@ -198,11 +202,6 @@ async function isGitCheckout(directory: string, env: NodeJS.ProcessEnv): Promise
   }
 }
 
-async function requireCheckout(entry: ComposeCheckout, env: NodeJS.ProcessEnv): Promise<void> {
-  if (!(await isGitCheckout(entry.directory, env)))
-    throw new Error(`Compose checkout is missing: ${entry.name}`);
-}
-
 async function addSubmodule(
   at: { top: string; rel: string },
   remote: string,
@@ -239,18 +238,29 @@ async function eachCheckout(
   return { reports, warnings };
 }
 
-export async function listCompose(
-  env: NodeJS.ProcessEnv,
-): Promise<{ entries: ComposeEntry[]; warnings: string[] }> {
-  const { node } = await loadScope(env);
-  const entries = node.composeNode().entries();
-  return { entries, warnings: composeEntryWarnings(entries) };
+export interface ComposeListEntry extends ComposeEntry {
+  /** The entry directory exists and is not empty (e.g. an initialized git submodule). */
+  initialized: boolean;
 }
 
-export async function registerCompose(
+export async function listCompose(
   env: NodeJS.ProcessEnv,
-  input: ComposeRegisterInput,
-): Promise<ComposeRegisterResult> {
+): Promise<{ entries: ComposeListEntry[]; warnings: string[] }> {
+  const { node } = await loadScope(env);
+  const entries = node.composeNode().entries();
+  return {
+    entries: entries.map((entry) => ({
+      ...entry,
+      initialized: existsSync(entry.directory) && !isEmptyDirectory(entry.directory),
+    })),
+    warnings: composeEntryWarnings(entries),
+  };
+}
+
+export async function addCompose(
+  env: NodeJS.ProcessEnv,
+  input: ComposeAddInput,
+): Promise<ComposeAddResult> {
   const { service, node } = await loadScope(env);
   const name = input.name.trim();
   const compose = node.composeNode();
@@ -263,7 +273,7 @@ export async function registerCompose(
   });
   const checkout = compose.checkout(name);
   const warnings: string[] = [];
-  let submodule: ComposeRegisterResult["submodule"];
+  let submodule: ComposeAddResult["submodule"];
   const remote = checkout.remote;
   if (remote) {
     const at = await placement(path.dirname(node.path), checkout.directory, env);
@@ -282,7 +292,7 @@ export async function registerCompose(
     } else {
       warnings.push(
         `warning: compose entry ${name} is outside the owner's git repo; skipped git submodule add. ` +
-          `edges compose clone will use a plain git clone.\n`,
+          `edges compose update will use a plain git clone.\n`,
       );
     }
   }
@@ -293,57 +303,52 @@ export async function registerCompose(
   return { entry, ...(submodule ? { submodule } : {}), warnings };
 }
 
-export async function unregisterCompose(
+/** Legacy / out-of-repo entry: plain `git clone` when missing, `git pull` for `--remote`. */
+async function updateStandalone(
+  entry: ComposeCheckout,
+  remote: boolean,
   env: NodeJS.ProcessEnv,
-  name: string,
-): Promise<ComposeEntry> {
-  const { service, node } = await loadScope(env);
-  const trimmed = name.trim();
-  const entry = node.composeNode().entries().find((item) => item.name === trimmed);
-  if (!entry) throw new Error(`Compose entry not found: ${trimmed || name}`);
-  node.composeNode().removeChild(entry.id);
-  await service.update(node, {});
-  return entry;
-}
-
-async function cloneStandalone(entry: ComposeCheckout, env: NodeJS.ProcessEnv): Promise<"cloned" | "present"> {
+): Promise<Exclude<ComposeGitAction, "failed">> {
+  if (await isGitCheckout(entry.directory, env)) {
+    if (entry.remote) {
+      const origin = await gitTry(["-C", entry.directory, "remote", "get-url", "origin"], env);
+      if (!origin) throw new Error(`Compose checkout has no origin: ${entry.directory}`);
+      if (!sameRemote(origin, entry.remote))
+        throw new Error(
+          `Compose checkout origin does not match the registered remote: ${entry.name}`,
+        );
+    }
+    if (!remote) return "present";
+    await git(["-C", entry.directory, "pull"], env);
+    return "updated";
+  }
   if (!entry.remote)
     throw new Error(`Compose entry has no git remote: ${entry.name}`);
-  if (await isGitCheckout(entry.directory, env)) {
-    let origin = "";
-    try {
-      origin = (await git(["-C", entry.directory, "remote", "get-url", "origin"], env)).trim();
-    } catch {
-      throw new Error(`Compose checkout has no origin: ${entry.directory}`);
-    }
-    if (!sameRemote(origin, entry.remote))
-      throw new Error(
-        `Compose checkout origin does not match the registered remote: ${entry.name}`,
-      );
-    return "present";
-  }
-  if (existsSync(entry.directory))
+  if (existsSync(entry.directory) && !isEmptyDirectory(entry.directory))
     throw new Error(
       `Compose path exists and is not a git checkout: ${entry.directory}`,
     );
   mkdirSync(path.dirname(entry.directory), { recursive: true });
   await git(["clone", entry.remote, entry.directory], env);
-  return "cloned";
+  return "initialized";
 }
 
 /**
- * Clone every entry (or `--name`). In-repo entries: `git submodule update --init -- <path>`,
- * never `--recursive`, so a composed repo's own Compose entries stay uninitialized.
+ * `edges compose update [--remote] [--name]`. In-repo entries:
+ * `git submodule update --init [--remote [--merge]] -- <path>`, never `--recursive`, so a
+ * composed repo's own Compose entries stay uninitialized. `--merge` is added with
+ * `--remote` when the submodule is on a branch, so that branch is not detached.
  */
-export async function cloneCompose(
+export async function updateCompose(
   env: NodeJS.ProcessEnv,
-  name?: string,
+  options: { name?: string; remote?: boolean } = {},
 ): Promise<ComposeGitRun> {
   const { node } = await loadScope(env);
   const ownerDir = path.dirname(node.path);
-  return eachCheckout(checkouts(node, name), async (entry) => {
+  const remote = options.remote === true;
+  return eachCheckout(checkouts(node, options.name), async (entry) => {
     const at = await placement(ownerDir, entry.directory, env);
-    if (at.kind === "standalone") return cloneStandalone(entry, env);
+    if (at.kind === "standalone") return updateStandalone(entry, remote, env);
     const info = await submoduleAt(at.top, at.rel, env);
     if (!info) {
       if (!entry.remote)
@@ -351,75 +356,27 @@ export async function cloneCompose(
       if (existsSync(entry.directory) && !isEmptyDirectory(entry.directory) && !(await isOwnCheckout(entry.directory, env)))
         throw new Error(`Compose path exists and is not a git checkout: ${entry.directory}`);
       await addSubmodule(at, entry.remote, env);
-      return "cloned";
+      return "initialized";
     }
     if (entry.remote && info.url && !sameRemote(info.url, entry.remote))
       throw new Error(
         `Compose submodule URL does not match the registered remote: ${entry.name} (${info.url})`,
       );
     const initialized = await isOwnCheckout(entry.directory, env);
-    await git(["-C", at.top, "submodule", "update", "--init", "--", at.rel], env);
-    return initialized ? "present" : "cloned";
-  });
-}
-
-/**
- * In-repo entries: `git submodule update --init --remote -- <path>`. When the submodule
- * is on a branch, `--merge` is added so local commits are merged instead of detached.
- */
-export async function pullCompose(
-  env: NodeJS.ProcessEnv,
-  name?: string,
-): Promise<ComposeGitRun> {
-  const { node } = await loadScope(env);
-  const ownerDir = path.dirname(node.path);
-  return eachCheckout(checkouts(node, name), async (entry) => {
-    const at = await placement(ownerDir, entry.directory, env);
-    if (at.kind === "standalone") {
-      await requireCheckout(entry, env);
-      await git(["-C", entry.directory, "pull"], env);
-      return "pulled";
-    }
-    if (!(await submoduleAt(at.top, at.rel, env)))
-      throw new Error(
-        `Compose entry is not a git submodule yet: ${entry.name}. Run edges compose clone --name ${entry.name}`,
-      );
     const onBranch =
-      (await isOwnCheckout(entry.directory, env)) &&
+      remote &&
+      initialized &&
       (await gitTry(["-C", entry.directory, "symbolic-ref", "-q", "HEAD"], env)) !== undefined;
     await git(
-      ["-C", at.top, "submodule", "update", "--init", "--remote", ...(onBranch ? ["--merge"] : []), "--", at.rel],
+      [
+        "-C", at.top, "submodule", "update", "--init",
+        ...(remote ? ["--remote"] : []),
+        ...(onBranch ? ["--merge"] : []),
+        "--", at.rel,
+      ],
       env,
     );
-    return "pulled";
-  });
-}
-
-/** `git push` inside each checkout. A submodule on a detached HEAD fails with a clear message. */
-export async function pushCompose(
-  env: NodeJS.ProcessEnv,
-  name?: string,
-): Promise<ComposeGitRun> {
-  const { node } = await loadScope(env);
-  const ownerDir = path.dirname(node.path);
-  return eachCheckout(checkouts(node, name), async (entry) => {
-    const at = await placement(ownerDir, entry.directory, env);
-    if (at.kind === "standalone") {
-      await requireCheckout(entry, env);
-      await git(["-C", entry.directory, "push"], env);
-      return "pushed";
-    }
-    if (!(await isOwnCheckout(entry.directory, env)))
-      throw new Error(
-        `Compose checkout is missing: ${entry.name}. Run edges compose clone --name ${entry.name}`,
-      );
-    const branch = await gitTry(["-C", entry.directory, "symbolic-ref", "-q", "--short", "HEAD"], env);
-    if (!branch)
-      throw new Error(
-        `Compose checkout is on a detached HEAD (git submodule default): ${entry.name}. ` +
-          `Run git -C ${entry.directory} switch <branch>, commit there, then edges compose push.`,
-      );
-    await git(["-C", entry.directory, "push"], env);
-    return "pushed";
+    if (!initialized) return "initialized";
+    return remote ? "updated" : "present";
   });
 }

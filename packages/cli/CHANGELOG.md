@@ -6,12 +6,13 @@
 
 ### Changed
 
-- `edges compose` 底层改用 git submodule。`register` 不传 `--path` 时目录从 `~/.edges/composed/<name>` 改为仓内 `.harness/compose/<name>`；区块里只写相对路径（相对于所属 `AGENTS.md` 的目录），相对的 `--path` 不再被改写成绝对路径，绝对路径和 `~` 路径以校验错误拒绝。带 `--remote` 且条目在主仓库工作树里时，`register` 先跑 `git submodule add <remote> <path>`；同一 URL 的子模块已存在时只登记，URL 不同时报错。`register` 的 JSON 多了 `href` 和 `submodule`（`added` / `existing`）。
-- 仓内条目的 `clone` 是 `git submodule update --init -- <path>`（不带 `--recursive`），`pull` 是 `git submodule update --init --remote -- <path>`（子模块在分支上时加 `--merge`），`push` 在子模块里 `git push`，detached HEAD 时这一条失败并提示先切到分支。PR #13 的逐条失败处理不变。旧的 `~/...` / 绝对路径条目、仓外条目仍走 `git clone` / `pull` / `push`。
+- **破坏性：** `edges compose` 只剩三个子命令，名字对应 git submodule：`add`（取代 `register`，选项不变）、`list`、`update`（取代 `clone` 与 `pull`）。`register`、`unregister`、`clone`、`pull`、`push` 直接删除，不留别名，旧命令以用法错误退出（退出码 2）。去掉条目改为手删 `AGENTS.md` 的那一行（要删子模块时用 `git submodule deinit` / `git rm`）；推送改在子模块里用原生 `git push`。
+- `edges compose` 底层改用 git submodule。`add` 不传 `--path` 时目录从 `~/.edges/composed/<name>` 改为仓内 `.harness/compose/<name>`；区块里只写相对路径（相对于所属 `AGENTS.md` 的目录），相对的 `--path` 不再被改写成绝对路径，绝对路径和 `~` 路径以校验错误拒绝。带 `--remote` 且条目在主仓库工作树里时，`add` 先跑 `git submodule add <remote> <path>`；同一 URL 的子模块已存在时只登记，URL 不同时报错。`add` 的 JSON 带 `href` 和 `submodule`（`added` / `existing`）。
+- `compose update` 对仓内条目跑 `git submodule update --init -- <path>`（不带 `--recursive`）；`--remote` 时加 `--remote`，子模块在分支上时再加 `--merge`；`--name` 只处理一条。每条的 `action` 是 `initialized`、`present`、`updated` 或 `failed`。旧的 `~/...` / 绝对路径条目、仓外条目：目录不存在时 `git clone`，`--remote` 时 `git pull`。
+- `compose list` 的每条多了 `href` 和 `initialized`（目录存在且非空）。
 - 不递归：`--with-composed` 和读取只看当前仓库自己的 Compose 条目。系统森林扫描（`forest list`、`--all` 等）跳过 `.harness/compose/` 和已登记的组合目录。被组合的入口即使在主仓库目录里也只读。
-- 新提示：条目目录不存在或为空（子模块未初始化）时，`compose list` 和带 `--with-composed` 的命令在 stderr 提示运行 `edges compose clone`；旧路径条目会提示迁移到 `.harness/compose/<name>`。
-
-- `edges compose clone`、`pull`、`push` 不再在第一条失败的登记处中止。失败的条目在 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 每条打一行 `warning: compose <clone|pull|push> failed for <name>: <reason>`，其余条目继续执行。至少一条成功时退出码 0；全部请求的条目都失败（含 `--name` 指定的单条失败）时以失败结果退出（`status: "failed"`，仍带 `entries`；单条失败时 `reason` 是该条的错误）。缺少作用域 `AGENTS.md`、`--name` 找不到条目照旧整条命令失败。
+- 新提示：条目目录不存在或为空（子模块未初始化）时，`compose list` 和带 `--with-composed` 的命令在 stderr 提示运行 `edges compose update --name <name>`；旧路径条目会提示迁移到 `.harness/compose/<name>`。
+- 逐条失败处理（原 `clone` / `pull` / `push`，现在是 `compose update`）：失败的条目在 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 每条打一行 `warning: compose update failed for <name>: <reason>`，其余条目继续执行。至少一条成功时退出码 0；全部请求的条目都失败（含 `--name` 指定的单条失败）时以失败结果退出（`status: "failed"`，仍带 `entries`；单条失败时 `reason` 是该条的错误）。缺少作用域 `AGENTS.md`、`--name` 找不到条目照旧整条命令失败。
 
 ## [0.2.3] - 2026-10-19
 
