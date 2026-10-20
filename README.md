@@ -83,7 +83,7 @@ edges --scope . tasks list
 
 2026-10-20 起这些接入目录直接放在仓库根，不再套 `extensions/`。旧路径对照见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。空占位 `docs/`、`tools/`、`subagents/`（当时在 `extensions/` 下）已删除；`new-server/` 与 `others/` 从本仓删除，由个人仓另行放进 `shared-extensions/`。
 
-作者的个人大脑（`notes/`、`edges/`、`teaching/`、`retrospectives/`、`tasks/`、`projects/`、`memory/`、`archive/`、`shared-extensions/`、[`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts) 等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)。对外博客与站点内容看板 [`.harness/tasks/site-and-content`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/.harness/tasks/site-and-content) 也在个人仓。本框架仓不登记具体的个人仓库。使用方用 `edges compose` 把个人仓挂到自己的 `.harness/compose/README.md`。挂载步骤见 [`edges-compose`](packages/skills/edges-compose/SKILL.md)。
+个人知识（笔记、教学、复盘、任务、项目、记忆、归档、shared-extensions、对外博客）放在使用方自己的个人主干仓，不放进本框架仓。本仓不登记具体的个人仓库。使用方用 `edges compose` 把个人仓挂到自己的 `.harness/compose/README.md`。挂载步骤见 [`edges-compose`](packages/skills/edges-compose/SKILL.md)。
 
 对外输出可以直接看：[教学站](https://edges.viruspc.tech/teaching/)、[任务看板](https://edges.viruspc.tech/tasks/)（目前都从个人仓部署）。
 

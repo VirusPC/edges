@@ -15,7 +15,9 @@ export function addComposeDoctorCommand(compose: Command, ctx: CliContext): void
     .addHelpText("after", `
 Daily edits stay on compose add, list, and update. doctor only moves an existing
 AGENTS.md Compose block into .harness/compose/README.md, rewrites those hrefs,
-links the entry from .harness/README.md, and strips --with-composed from docs.
+and links the entry from .harness/README.md. Other mentions of --with-composed
+are reported and left unchanged. .agents/skills/, CHANGELOG files, and docs/adr/
+are not listed.
 `)
     .action(async (opts: { apply?: boolean }) => {
       try {

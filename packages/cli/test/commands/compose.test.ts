@@ -616,14 +616,43 @@ test("compose doctor dry-run reports the move and --apply writes it once", async
   assert.doesNotMatch(agentsAfter, /project-harness-compose/);
   assert.match(agentsAfter, /\.harness\/README\.md/);
   assert.match(readFileSync(path.join(scope, ".harness", "README.md"), "utf8"), /compose\/README\.md/);
-  assert.doesNotMatch(readFileSync(path.join(scope, "NOTES.md"), "utf8"), /--with-composed/);
-  assert.doesNotMatch(readFileSync(path.join(scope, "sample.test.ts"), "utf8"), /--with-composed/);
-  assert.match(readFileSync(path.join(scope, "NOTES.md"), "utf8"), /forest list/);
+  assert.equal(readFileSync(path.join(scope, "NOTES.md"), "utf8"), "Run edges --with-composed forest list\n");
+  assert.match(readFileSync(path.join(scope, "sample.test.ts"), "utf8"), /--with-composed/);
 
   const again = await run(["compose", "doctor"], { env });
   assert.equal(again.exitCode, 0, again.stdout + again.stderr);
-  assert.deepEqual((JSON.parse(again.stdout) as { changes: unknown[] }).changes, []);
+  const againChanges = (JSON.parse(again.stdout) as { changes: Array<{ kind: string; detail?: string }> }).changes;
+  assert.deepEqual(againChanges.map((change) => change.kind), ["docs", "docs"]);
+  assert.ok(againChanges.every((change) => change.detail === "mentions --with-composed; left unchanged"));
   assert.equal(readFileSync(path.join(scope, ".harness", "compose", "README.md"), "utf8"), composeFile);
+});
+
+test("compose doctor leaves --with-composed prose in place and skips skills and history", async (t) => {
+  const root = mkdtempSync(path.join(tmpdir(), "compose-doctor-prose-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  mkdirSync(path.join(root, ".agents", "skills", "edges-compose"), { recursive: true });
+  mkdirSync(path.join(root, "docs", "adr"), { recursive: true });
+  writeFileSync(path.join(root, "AGENTS.md"), agents());
+  const skill = "经 `--with-composed` 展开\n";
+  const changelog = "旧命令使用 --with-composed。\n";
+  const adr = "当时的开关是 --with-composed。\n";
+  const notes = "经 `--with-composed` 展开\n";
+  writeFileSync(path.join(root, ".agents", "skills", "edges-compose", "SKILL.md"), skill);
+  writeFileSync(path.join(root, "CHANGELOG.md"), changelog);
+  writeFileSync(path.join(root, "docs", "adr", "0042-example.md"), adr);
+  writeFileSync(path.join(root, "NOTES.md"), notes);
+  const env = { ...process.env, EDGES_SCOPE: root };
+
+  const applied = await run(["compose", "doctor", "--apply"], { env });
+  assert.equal(applied.exitCode, 0, applied.stdout + applied.stderr);
+  const changes = (JSON.parse(applied.stdout) as { changes: Array<{ kind: string; path: string; detail?: string }> }).changes;
+  assert.deepEqual(changes.map((change) => path.basename(change.path)), ["NOTES.md"]);
+  assert.equal(changes[0]?.detail, "mentions --with-composed; left unchanged");
+  assert.equal(readFileSync(path.join(root, ".agents", "skills", "edges-compose", "SKILL.md"), "utf8"), skill);
+  assert.equal(readFileSync(path.join(root, "CHANGELOG.md"), "utf8"), changelog);
+  assert.equal(readFileSync(path.join(root, "docs", "adr", "0042-example.md"), "utf8"), adr);
+  assert.equal(readFileSync(path.join(root, "NOTES.md"), "utf8"), notes);
+  assert.doesNotMatch(readFileSync(path.join(root, "NOTES.md"), "utf8"), /经 `` 展开/);
 });
 
 test("compose doctor does nothing when AGENTS.md has no Compose block", async (t) => {

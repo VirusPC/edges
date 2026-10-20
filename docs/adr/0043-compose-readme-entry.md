@@ -19,7 +19,7 @@ status: accepted
 5. **默认展开。** Compose 与其他模块一样参与 traverse。系统根扫描默认进入 scope 自己的 `.harness/compose/`。被组合仓库自己的 `.harness/compose/` 一律不进入（不递归）。
 6. **根级 `--exclude <modules>`。** 与 `--scope` 一样挂在程序上，逗号分隔，可重复。允许的名字：`compose`、`memory`、`skills`、`notes`、`projects`、`tasks`。未知名字直接报错。与 `--types` 正交。`--exclude compose` 同时跳过森林扫描和遍历。不提供 `--only`。删除 `--with-composed`。
 7. **`compose add` / `list` / `update`** 读写 `compose/README.md`。文件或材料索引上的链接缺失时，由这三条命令建出来。日常只使用这三条。
-8. **`edges compose doctor [--apply]`** 只做一次性迁移：把 `AGENTS.md` 的 Compose 区块搬进 `.harness/compose/README.md`，补上索引链接，改写 href，清掉 AGENTS 上的标记，并去掉文档和测试里的 `--with-composed`。默认只预览，`--apply` 才写。
+8. **`edges compose doctor [--apply]`** 只做一次性迁移：把 `AGENTS.md` 的 Compose 区块搬进 `.harness/compose/README.md`，补上索引链接，改写 href，清掉 AGENTS 上的标记。默认只预览，`--apply` 才写。其它文档和测试里的 `--with-composed` 只报告、不改写；`.agents/skills/`、CHANGELOG 和 ADR 不列入。
 9. **被组合的内容只读。** 不递归展开被组合仓库自己的 Compose。磁盘上的子模块路径仍是 `.harness/compose/<name>`。
 
 ## Considered Options

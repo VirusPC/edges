@@ -1,4 +1,4 @@
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { isInsideComposedCheckout } from "../../domain/config/exclude.js";
@@ -22,7 +22,7 @@ const SKIP_DIRS = new Set([
   ".cache",
 ]);
 
-const WITH_COMPOSED = /[ \t]*--with-composed\b/g;
+const DOCS_DETAIL = "mentions --with-composed; left unchanged";
 
 export type ComposeDoctorKind =
   | "move-block"
@@ -97,7 +97,7 @@ export async function doctorCompose(
     });
   }
   if (markers) changes.push({ kind: "clear-agents", path: agentsFile });
-  for (const file of docs) changes.push({ kind: "docs", path: file, detail: "remove --with-composed" });
+  for (const file of docs) changes.push({ kind: "docs", path: file, detail: DOCS_DETAIL });
 
   const warnings: string[] = [];
   if (!apply || changes.length === 0) return { changes, warnings };
@@ -132,11 +132,6 @@ export async function doctorCompose(
     agents.clearComposeSection();
     await session.service.update(agents, {});
   }
-  for (const file of docs) {
-    const text = readFileSync(file, "utf8");
-    const next = text.replace(WITH_COMPOSED, "");
-    if (next !== text) writeFileSync(file, next);
-  }
   return { changes, warnings };
 }
 
@@ -145,6 +140,25 @@ function indexLinksCompose(scopeDir: string): boolean {
   const compose = composeReadmePath(scopeDir);
   if (!existsSync(readme) || !existsSync(compose)) return false;
   return readFileSync(readme, "utf8").includes("compose/README.md");
+}
+
+/** Installed skills and historical docs keep the old flag as prose. */
+function skipDocTree(parent: string, name: string): boolean {
+  if (name === "skills" && path.basename(parent) === ".agents") return true;
+  if (name === "adr" && path.basename(parent) === "docs") return true;
+  return false;
+}
+
+function isHistoricalDoc(scopeDir: string, file: string): boolean {
+  if (/^changelog\.md$/i.test(path.basename(file))) return true;
+  const parts = path.relative(scopeDir, file).split(path.sep);
+  for (let i = 0; i < parts.length - 1; i++) {
+    const here = parts[i];
+    const next = parts[i + 1];
+    if (here === ".agents" && next === "skills") return true;
+    if (here === "docs" && next === "adr") return true;
+  }
+  return false;
 }
 
 function collectDocHits(scopeDir: string): string[] {
@@ -160,12 +174,13 @@ function collectDocHits(scopeDir: string): string[] {
       if (entry.isSymbolicLink()) continue;
       const abs = path.join(dir, entry.name);
       if (entry.isDirectory()) {
-        if (SKIP_DIRS.has(entry.name) || isInsideComposedCheckout(abs)) continue;
+        if (SKIP_DIRS.has(entry.name) || skipDocTree(dir, entry.name) || isInsideComposedCheckout(abs)) continue;
         walk(abs);
         continue;
       }
       if (!entry.isFile() || isInsideComposedCheckout(abs)) continue;
       if (!entry.name.endsWith(".md") && !entry.name.endsWith(".test.ts")) continue;
+      if (isHistoricalDoc(scopeDir, abs)) continue;
       if (readFileSync(abs, "utf8").includes("--with-composed")) hits.push(abs);
     }
   };

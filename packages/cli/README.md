@@ -321,7 +321,7 @@ edges --scope <directory> compose update --remote --name brain
 
 提示：条目目录不存在或是空的（子模块还没初始化）时，`compose list` 和默认会读到该条目的命令在 stderr 打 `warning: compose entry <name> is not checked out at <href>; run edges compose update --name <name>`。`--exclude compose` 时不打这行。旧的 `~/...` / 绝对路径条目照样能读，并提示不带 `--path` 用同一个名字重新 `compose add --remote ...`，把旧行换成 `<name>/README.md`。
 
-`edges compose doctor` 只做迁移：把还写在 `AGENTS.md` 上的区块搬进 `.harness/compose/README.md`，补上材料索引链接，改写 href，并去掉文档里的 `--with-composed`。默认只打印会改什么，`--apply` 才写。日常修改用 `add` / `list` / `update`。
+`edges compose doctor` 只做迁移：把还写在 `AGENTS.md` 上的区块搬进 `.harness/compose/README.md`，补上材料索引链接，改写 href。默认只打印会改什么，`--apply` 才写。其它文件里的 `--with-composed` 只报告、不改写；`.agents/skills/`、CHANGELOG 和 `docs/adr/` 不列入。日常修改用 `add` / `list` / `update`。
 
 根级 `--exclude <modules>` 与 `--scope` 同级，逗号分隔，可重复。允许 `compose, memory, skills, notes, projects, tasks`。未知名字直接报错。与 `--types` 正交。没有 `--only`，也没有 `--with-composed`。
 
