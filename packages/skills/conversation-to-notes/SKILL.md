@@ -3,8 +3,8 @@ name: conversation-to-notes
 description: >-
   将原始对话整理为可独立阅读的中文笔记（记录 + 复盘）：背景/主题/过程/结果/所学/行动指南/补充说明。
   主题=一段主题+难点列表；凡写做什么须带可选项与不做原因；取舍在过程保留并在所学与行动指南补充。
-  行动指南分主题层与细节若则。结果有未闭环项时逐点问清再交 conversation-to-tasks；必须保留原始材料引用。用户说整理/总结对话时使用；入库 VirusPC/edges notes/。
-version: 2.7.1
+  行动指南分主题层与细节若则。结果有未闭环项时逐点问清再交 conversation-to-tasks；必须保留原始材料引用。用户说整理/总结对话时使用；入库所选目录的 notes/。
+version: 2.7.2
 ---
 
 将原始对话整理为结构清晰的中文笔记（**同时包含记录与复盘总结**）。
@@ -13,7 +13,7 @@ version: 2.7.1
 
 ## When to Use
 
-用户说「整理对话 / 总结这次对话 / 整理成笔记」等时：先完成本 skill 正文，再入库 `notes/`（私密 → `edges-private`）。
+用户说「整理对话 / 总结这次对话 / 整理成笔记」等时：先完成本 skill 正文，再入库 `notes/`（私密内容写入你自己的私密仓）。
 
 ## Inputs
 
@@ -54,7 +54,7 @@ version: 2.7.1
     - 入口：`notes/YYYY-MM-DD--主题简述/INDEX.md`（选定 scope 下的 `notes/`）。
     - 有 shell 时交给 `edges --scope <目录> notes create --title "主题简述" --body "<审阅后的 Markdown>"`。子命令是 `notes create`。完整 Markdown 放进 `--body`；标题用 `--title`（若正文已有一级标题，CLI 会按该标题对齐）。这次调用只在本地写下叶子，不 commit、不 push、不开 PR。不要自己 `git commit`，也不要传已删除的 `--content`、`--content-file`、`--markdown`、`--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--format`、`--resources`、`--index-group`。
     - `notes create` 不复制旁路目录。图片等资源不要指望随笔记一起导入；正文里需要的材料写进 `--body`。不批量转换旧笔记。
-    - 仓：`VirusPC/edges`（私密 → `edges-private`）。CLI 在 `cli`。
+    - 仓：普通内容写进用户自己的笔记仓（`--scope` 指向的目录）。私密内容写入你自己的私密仓：调用时把 `--scope` 指向私密仓的目录，`notes create` 不会自动换仓。CLI 源码在本仓 `packages/cli/`。
     - 大范围代码改动仍走 Cursor cloud agent
     - 公开库先脱敏（无 Tailscale `100.x`、凭证、授权链接等）
     - 若随后把遗留项开成看板任务，看板文件进受保护的 `main` 必须开 PR，不要直推。笔记创建本身不提交 Git。
