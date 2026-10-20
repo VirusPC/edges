@@ -83,7 +83,7 @@ There is no `server init` (client `edges artifacts init` is the laptop command).
 
       ```bash
       sudo mv /etc/nginx/conf.d/teach.conf /etc/nginx/conf.d/teaching.conf
-      sudo python3 /home/cheng-dev/projects/edges/extensions/services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py /etc/nginx/conf.d/teaching.conf
+      sudo python3 /home/cheng-dev/projects/edges-framework/extensions/services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py /etc/nginx/conf.d/teaching.conf
       sudo nginx -t && sudo systemctl reload nginx
       ```
 

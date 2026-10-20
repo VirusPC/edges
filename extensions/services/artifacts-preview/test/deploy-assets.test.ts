@@ -43,6 +43,12 @@ test("deploy unit is a systemd user unit that loads the server env file", async 
   assert.doesNotMatch(unit, /WantedBy=multi-user\.target/);
   assert.match(unit, /EnvironmentFile=%h\/\.config\/edges\/artifacts-preview\.env/);
   assert.match(unit, /artifacts-preview\/dist\/index\.js/);
+  assert.match(unit, /^WorkingDirectory=%h\/projects\/edges-framework$/m);
+  assert.match(
+    unit,
+    /^ExecStart=\/usr\/bin\/env node %h\/projects\/edges-framework\/extensions\/services\/artifacts-preview\/dist\/index\.js$/m,
+  );
+  assert.doesNotMatch(unit, /%h\/projects\/edges(?!-framework)/);
 });
 
 test("README is CLI-first and documents the locked server surface", async () => {
