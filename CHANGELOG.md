@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `extensions/docs/`、`extensions/tools/`、`extensions/subagents/` | 删除 |
 | `extensions/new-server/`、`extensions/others/` | 从本仓删除 |
 
+
 ### 内容归属
 
 - **对外博客离开框架仓：** `posts/`、维护看板项目 `site-and-content`（4 张卡）和项目记忆 `project_posts_public_astro_blog` 从本仓删除。文章与建站卡以个人仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc) 的 [`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts)、[`.harness/tasks/site-and-content/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/.harness/tasks/site-and-content) 为准；博客记忆由个人仓补登记。根 `AGENTS.md` 不再禁止改 `posts/`。`/tasks/` 看板生成器仍在本仓。决定见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)。
