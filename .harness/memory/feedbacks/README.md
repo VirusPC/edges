@@ -47,4 +47,18 @@ format: ordinary
 - [叠层 PR：底层 squash 前确认上层已合入](<feedback_stacked_pr_merge_order/INDEX.md>) — 合叠层 PR 或核实修复是否已在 main 时打开：底层 squash 进 main 前确认上层都已合进底层分支，合完把剩余上层改指向 main；PR 显示已合并不等于改动在 main。缘起 \#208/\#211 丢失，见 https://github.com/VirusPC/edges/pull/289。
 - [复盘正文定稿后不改，评论写进同目录 COMMENTS.md](<feedback_retro_comments_in_separate_file/INDEX.md>) — 审阅或补记周复盘时打开：正文定稿后不再改，用户后续评论与进度写同目录 COMMENTS.md；更正往期也在往期目录加 COMMENTS.md，不动往期正文。
 - [调研行业方案先并列多种，不擅自收敛](<feedback_survey_options_before_converging/INDEX.md>) — 用户要行业方案、主流做法或技术选型调研时打开：先并列多种方案并按用户约束逐条评估，不擅自收敛；说「常见」「主流」前要有依据。
+- [CLI 遇到缺失的必需文件就报错，不自动补](<feedback_cli_fail_on_missing_required_files/INDEX.md>) — 改 cli 里读写节点或项目的命令时打开：约定必需的文件缺失时报错并写明路径，不自动生成文件掩盖数据问题；只有显式 create 才新建。
+- [CLI 多子命令一文件一个动词](<feedback_cli_subcommand_files/INDEX.md>) — 新增或修改 cli 的多子命令时：父文件只注册，每个子命令一个文件，commands 层只解析参数并调 Service。
+- [CLI 放仓库根 cli/](<feedback_cli_under_extensions/INDEX.md>) — 新增或移动面向 agent 的 CLI 时：放仓库根 cli/。2026\-10\-20 翻案，不再禁止放仓库根。
+- [Codex 唤起 skill 用 $ 不是 /](<feedback_codex_invoke_skill_with_dollar/INDEX.md>) — 在 Codex 里触发某个 skill 时用 $skill\-name；/ 是斜杠命令。/skills 只列清单。不要把认不到 skill 当成没装上。
+- [禁止动词的 help 测例锚定命令行](<feedback_help_forbid_verb_line_anchor/INDEX.md>) — 写 edges tasks \-\-help 测例、禁止某个动词出现时：用 ^\\s\+verb\\b 锚定命令列表行，不要用 /\\bverb\\b/，以免 after\-help 的 “There is no X command” 被当成命令。
+- [接口层方案进根 .harness/memory，不进 docs](<feedback_interface_plans_in_memory/INDEX.md>) — 写接入层调研或技术方案时：进根 .harness/memory（reference/project），不要放 docs/ 或 knowledge/projects，否则 ask 检索不到。
+- [move 不改写软链接登记](<feedback_move_leaves_symlink_registrations/INDEX.md>) — 改 NodeService.move 或父级登记匹配时：软链接登记是指向别处的链接，不是节点本身；只迁移非软链接的那条登记，不改写、不删除、不重定向；断链是预期，交给诊断，不要在 move 里修。
+- [新增文件不造新概念，名字一眼看懂](<feedback_new_files_no_new_concepts/INDEX.md>) — 在 cli 新增文件、目录或改名时打开：不引入抽象新词（如 classify.ts），文件名要一眼看出职责、符合语义；能并进已有文件就不另起。简单命名不等于降低分层质量。
+- [不要加 edges\-note shim 或根目录默认 ingest](<feedback_no_edges_note_shim/INDEX.md>) — 改 edges\-cli 的 bin、默认命令或兼容入口时：只保留 edges；禁止 edges\-note 第二 bin / shim；根目录无子命令不得跑 note ingest。
+- [目录 stem 保留 Unicode，名字校验仍要 ASCII](<feedback_node_stem_unicode_not_ascii_names/INDEX.md>) — 改笔记、项目目录名或任务名 slug 时打开：目录 stem 保留汉字；skill、memory、task project 的名字校验仍要求小写 ASCII，不要一起放宽。
+- [Restore \-\-force 整份替换，不合并](<feedback_restore_force_replaces/INDEX.md>) — 改 user\-memory\-restore 时：\-\-force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。
+- [审阅壳竖线只拖宽度](<feedback_review_shell_dividers_resize_width/INDEX.md>) — 改审阅壳三栏分隔线或拖放时打开：两条竖线只调整左右栏宽度，不搬任务、不改状态。项目拖放仍只在左栏。2026\-09\-24 peng cheng 澄清。
+- [审阅壳筛选靠右、紧挨导出](<feedback_review_shell_filters_before_export/INDEX.md>) — 改审阅壳顶栏筛选或复制导出 JSON 的位置时打开：全文和优先级、负责人、状态整组靠右，紧挨在导出按钮前面。系统名不在这一栏。
+- [改 skill 后必须升级 version、写 changelog、打 tag](<feedback_skill_bump_version/INDEX.md>) — 更新 skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/\<name\>@\<version\> tag。
 <!-- project-entries-local:end -->

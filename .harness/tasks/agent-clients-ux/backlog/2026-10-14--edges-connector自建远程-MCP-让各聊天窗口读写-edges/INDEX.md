@@ -16,7 +16,7 @@ description: 自建远程 MCP 服务，让各聊天窗口和编程 Agent 以最�
 - 预期收益：任何窗口都能查询 edges，不必凭空回答；支持写入的窗口一句话就能保存笔记或任务；规则集中在服务端，改一处处处生效；以后新增客户端零成本接入。
 - 非目标：不保证所有客户端都能写入（受各平台套餐限制）；不在本卡内修改 skill 的降级模式（另行处理）。
 - 关联：笔记 `notes/2026-10-14--skill跨聊天窗口使用与edges-connector/INDEX.md`（PR https://github.com/VirusPC/edges/pull/243 ）；笔记 `notes/2026-10-14--connector服务端agent用codex接入与沙箱/INDEX.md`（PR https://github.com/VirusPC/edges/pull/247 ）；Codex 文档 https://developers.openai.com/codex/noninteractive 和 https://developers.openai.com/codex/sdk ；原始对话为 2026-10-14 约 16:05–16:17（Asia/Shanghai）用户与 Grok Bot 的会话。
-- 补充（2026-10-14 晚）：服务端需要一个能加载 skill 的 agent 来整理内容并开 PR。讨论后决定不从零开始，而是在现有的 `extensions/mcp-servers/new-note` 上扩展，服务端 agent 用 minigtr 上本地运行的 Codex。详见笔记 PR https://github.com/VirusPC/edges/pull/247 。
+- 补充（2026-10-14 晚）：服务端需要一个能加载 skill 的 agent 来整理内容并开 PR。讨论后决定不从零开始，而是在现有的 `mcp-servers/new-note` 上扩展，服务端 agent 用 minigtr 上本地运行的 Codex。详见笔记 PR https://github.com/VirusPC/edges/pull/247 。
 - 现有基础：`new-note` 已经提供 `new_note(title, body)` 工具，它用子进程调用 `edges notes create`；还注册了 conversation-to-notes prompt；支持 stdio 和 Streamable HTTP（端点 `/new-note`）两种传输，HTTP 下可选用 `EDGES_AUTH_TOKEN` 做 Bearer 认证。它缺少 git/PR、OAuth 和部署这几块。另外 `.env.example` 里残留了 `EDGES_MODE` 和 `GITHUB_TOKEN`，需要清理。
 - 负责人建议：先 grill-with-docs 细化，再交全栈开发专家实现。
 
@@ -25,12 +25,12 @@ description: 自建远程 MCP 服务，让各聊天窗口和编程 Agent 以最�
 
 **动作：**
 - 不新建 ADR，相关决策记录在本卡和上述笔记里。
-- 在 `extensions/mcp-servers/new-note` 的基础上扩展，复用它现有的 `new_note` 工具、conversation-to-notes prompt 和两种传输；先清理 `.env.example` 里残留的 `EDGES_MODE` 和 `GITHUB_TOKEN`。
+- 在 `mcp-servers/new-note` 的基础上扩展，复用它现有的 `new_note` 工具、conversation-to-notes prompt 和两种传输；先清理 `.env.example` 里残留的 `EDGES_MODE` 和 `GITHUB_TOKEN`。
 - 对外提供意图级工具：capture、search、read、status。capture 的输入默认是原文摘录，也可以传分享链接或要点。服务端 agent 加载 skill 整理内容，然后开 PR，由人审阅后合入。这个分工可以对照 Notion：它既有薄的 CRUD 工具，也有服务端 agent。
 - 服务端 agent 在 minigtr 上本地运行 Codex，通过 Codex SDK 或 `codex exec` 调用。
   - 不选 GitHub Actions 加 `openai/codex-action`：每次冷启动要几十秒到一两分钟，从聊天窗口触发也不自然。它留作以后量大或需要更强隔离时的备选。
   - 不选 `codex cloud exec`：它是实验功能，不支持 API key，能否开 PR 也没有核实。Codex 云端本身没有公开 API。
-  - Codex 默认只发现 `.agents/skills`，而 edges 的 skill 在 `extensions/skills`，所以要在 prompt 里写明 skill 路径，或者在仓库里加链接。
+  - Codex 默认只发现 `.agents/skills`，而 edges 的 skill 在 `skills`，所以要在 prompt 里写明 skill 路径，或者在仓库里加链接。
 - 隔离与环境：服务端常驻一份本地仓库，平时只做 fetch。每个任务从最新的 main 用 `git worktree` 新开工作目录，任务结束后删除。仓库有几个 G，必要时用 sparse checkout 只检出内容目录。Codex 使用 `--sandbox workspace-write`，外面再套一个每任务一次性的 Docker 容器，容器只挂载该 worktree，网络只放行模型 API。
 - 安全：agent 只允许写内容目录（如 `notes/`）。推送使用只限 edges 仓库、只能开 PR 的窄权限 token，不碰 main。capture 收到的原文一律当作不可信内容处理，防止提示注入。
 - 接入与部署：接入层使用 OAuth 2.1 + PKCE，以便 ChatGPT 和 Claude 的自定义 connector 接入。服务部署在 minigtr，通过 Cloudflare Tunnel 对外暴露。公开仓库里不写 IP、token 或内网地址。

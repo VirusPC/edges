@@ -2,7 +2,7 @@
 
 This is the reviewed Edges instance correction for the 2026-10-03 owner promotion. It is separate from generic Memory layout migration. Public correction never reads the old instance journal or discovers private records.
 
-Run from the repository root with explicit absolute paths (the package command executes inside `extensions/cli`):
+Run from the repository root with explicit absolute paths (the package command executes inside `cli`):
 
 ```sh
 pnpm restore:local-ownership --root "$PWD" --manifest "$PWD/docs/superpowers/plans/2026-10-05-local-ownership-correction.json" --dry-run
@@ -30,7 +30,7 @@ All source and destination private directories, both journals, and copy paths mu
 
 ## Future instance migration and old pending journals
 
-`migrate:recursive-layout` now maps `extensions`, `extensions/skills/project-memory-init`, `shared-extensions`, and `knowledge/notes` to themselves; original `knowledge/tasks` memory belongs to `.harness/tasks`. The canonical ownership manifest records these current mappings and retains the superseded promotion metadata solely as historical evidence.
+`migrate:recursive-layout` now maps `extensions`, `skills/project-memory-init`, `shared-extensions`, and `knowledge/notes` to themselves; original `knowledge/tasks` memory belongs to `.harness/tasks`. The canonical ownership manifest records these current mappings and retains the superseded promotion metadata solely as historical evidence.
 
 Pending old journals that would promote a local owner's material into root refuse with `historical-owner-promotion-journal-needs-review`. Keep their journal, original source snapshots, copied destinations, and directory modes for review; do not replay old targets, delete the journal, or treat an incomplete promotion as a completed private correction. Corrected pending journals continue to resume normally.
 

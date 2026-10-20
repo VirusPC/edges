@@ -41,26 +41,26 @@
 
 | 文件 | 本次职责 |
 | --- | --- |
-| `extensions/cli/src/services/node-cache.ts` | 唯一路径实例、EntryFile/资源快照、提交后登记/改键/失效；删除 alias 三方合并 |
-| `extensions/cli/src/services/node-service.ts` | 共用实例及完整状态计划；成功回填；通过加载/范围适配复用 operations 遍历 |
-| `extensions/cli/src/services/traverse.ts` → `extensions/cli/src/operations/traverse.ts` | 移动纯树算法；单根/多根共用 DFS、去重和环检测；删除旧实现，不保留第二份 |
-| `extensions/cli/src/operations/index.ts` | 导出 traverse 和泛型查询 API；内部直接模块导入，避免 barrel 循环依赖 |
-| `extensions/cli/src/utils/async-query.ts` → `extensions/cli/src/operations/query.ts` | 查询链与独立算法文件分开，更新全部生产及测试消费者；删除旧文件，不留转发副本 |
-| `extensions/cli/test/utils/async-query.{test,types}.ts` → `extensions/cli/test/operations/async-query.{test,types}.ts` | 保留运行时及类型断言，同步 strict 验证路径 |
-| `extensions/cli/test/operations/traverse.test.ts` | 纯内存模型及加载回调验证次序、关系范围、惰性、环、多根和提前结束 |
-| `extensions/cli/src/services/node-layout.ts` | 仅在模型选择需要共用既有逻辑时调整；不改变 layout/路径/引用协议 |
-| `extensions/cli/src/services/node-merge.ts` | Task 1 停止调用，Task 3 删除 |
-| `extensions/cli/src/services/node-text-merge.ts` | Task 3 删除 |
-| `extensions/cli/test/services/node-identity.test.ts` | 新增身份、读缓存、资源升级、模型与只读边界用例 |
-| `extensions/cli/test/services/alias-reconciliation.test.ts` | 改名为 `shared-node-state.test.ts`，替换自动合并预期，保留完整状态与源文本业务验证 |
-| `extensions/cli/test/services/{node-service,owned-units,resource-review}.test.ts` | 生命周期、失败不改变路径、索引/附件、外部冲突回归 |
-| `extensions/cli/test/tasks/{node-index,owner-board,node-query,all-scopes}.test.ts` | 生产 Tasks 索引、共享查询、全仓覆盖回归 |
-| `extensions/cli/test/services/{production-nodes,directory-cli}.test.ts` | Memory/Task/Note/Skill 与 CLI 兼容验证 |
-| `extensions/cli/package.json`、`pnpm-lock.yaml` | 删除直接 diff 依赖；由 pnpm 添加兼容版本的锁/原子保存依赖 |
-| `extensions/cli/src/services/node-lock.ts`（新增）、现有 CLI 写命令编排入口 | 薄封装 proper-lockfile；在业务读取之前取得工作树锁，finally 释放，覆盖整个命令 |
-| `extensions/cli/src/services/node-files.ts`（已有） | 接入 write-file-atomic；保留文件读取、快照检查及失败恢复；不把锁缩小到单次文件保存 |
-| `extensions/cli/test/services/command-write-lock.test.ts`、现有文件写入/CLI 集成测试 | 两进程父子 scope 争锁、不同工作树独立、失败释放、原子替换后的快照及恢复 |
-| `docs/superpowers/specs/2026-10-05-directory-node-model.md`、`extensions/cli/README.md` | 移除多副本合并表述，说明共享实例、完整保存、资源升级与外部冲突 |
+| `cli/src/services/node-cache.ts` | 唯一路径实例、EntryFile/资源快照、提交后登记/改键/失效；删除 alias 三方合并 |
+| `cli/src/services/node-service.ts` | 共用实例及完整状态计划；成功回填；通过加载/范围适配复用 operations 遍历 |
+| `cli/src/services/traverse.ts` → `cli/src/operations/traverse.ts` | 移动纯树算法；单根/多根共用 DFS、去重和环检测；删除旧实现，不保留第二份 |
+| `cli/src/operations/index.ts` | 导出 traverse 和泛型查询 API；内部直接模块导入，避免 barrel 循环依赖 |
+| `cli/src/utils/async-query.ts` → `cli/src/operations/query.ts` | 查询链与独立算法文件分开，更新全部生产及测试消费者；删除旧文件，不留转发副本 |
+| `cli/test/utils/async-query.{test,types}.ts` → `cli/test/operations/async-query.{test,types}.ts` | 保留运行时及类型断言，同步 strict 验证路径 |
+| `cli/test/operations/traverse.test.ts` | 纯内存模型及加载回调验证次序、关系范围、惰性、环、多根和提前结束 |
+| `cli/src/services/node-layout.ts` | 仅在模型选择需要共用既有逻辑时调整；不改变 layout/路径/引用协议 |
+| `cli/src/services/node-merge.ts` | Task 1 停止调用，Task 3 删除 |
+| `cli/src/services/node-text-merge.ts` | Task 3 删除 |
+| `cli/test/services/node-identity.test.ts` | 新增身份、读缓存、资源升级、模型与只读边界用例 |
+| `cli/test/services/alias-reconciliation.test.ts` | 改名为 `shared-node-state.test.ts`，替换自动合并预期，保留完整状态与源文本业务验证 |
+| `cli/test/services/{node-service,owned-units,resource-review}.test.ts` | 生命周期、失败不改变路径、索引/附件、外部冲突回归 |
+| `cli/test/tasks/{node-index,owner-board,node-query,all-scopes}.test.ts` | 生产 Tasks 索引、共享查询、全仓覆盖回归 |
+| `cli/test/services/{production-nodes,directory-cli}.test.ts` | Memory/Task/Note/Skill 与 CLI 兼容验证 |
+| `cli/package.json`、`pnpm-lock.yaml` | 删除直接 diff 依赖；由 pnpm 添加兼容版本的锁/原子保存依赖 |
+| `cli/src/services/node-lock.ts`（新增）、现有 CLI 写命令编排入口 | 薄封装 proper-lockfile；在业务读取之前取得工作树锁，finally 释放，覆盖整个命令 |
+| `cli/src/services/node-files.ts`（已有） | 接入 write-file-atomic；保留文件读取、快照检查及失败恢复；不把锁缩小到单次文件保存 |
+| `cli/test/services/command-write-lock.test.ts`、现有文件写入/CLI 集成测试 | 两进程父子 scope 争锁、不同工作树独立、失败释放、原子替换后的快照及恢复 |
+| `docs/superpowers/specs/2026-10-05-directory-node-model.md`、`cli/README.md` | 移除多副本合并表述，说明共享实例、完整保存、资源升级与外部冲突 |
 
 无需另建缓存包、身份服务、文档合并模块或通用变更追踪器。
 
@@ -110,7 +110,7 @@ test("get/query/list share identity and child creation saves parent current stat
 });
 ```
 
-- [x] **Step 2：确认 RED。** 在 `extensions/cli` 运行 `node --test --import tsx test/services/node-identity.test.ts`。应因同路径 `strictEqual` 失败；另将“父未保存约束在 create 后立即出现在磁盘”的断言独立成用例，避免前一个断言阻断这条行为验证。
+- [x] **Step 2：确认 RED。** 在 `cli` 运行 `node --test --import tsx test/services/node-identity.test.ts`。应因同路径 `strictEqual` 失败；另将“父未保存约束在 create 后立即出现在磁盘”的断言独立成用例，避免前一个断言阻断这条行为验证。
 - [x] **Step 3：改身份表与所有读入口。** 唯一入口路径采用 `path.resolve` 等既有规范化。首次读取、parse/validate 后登记；命中返回同一实例。`remember` 不允许不同对象覆盖已受管路径；同一对象成功提交可以更新快照。内部关系读取若需要物理权威信息可保留短命只读解析，但不得作为第二个受管实例传播。模型解析保留 layout/models/modelForReference；typed get 请求 BaseNode 不把 InternalNode 降级。冲突模型明确报错。
 
 ```ts
@@ -156,7 +156,7 @@ const source = rewriteLinks(currentSource, entry.path, target, relocate);
 | 外部改内容/同字节替换文件/另一个 Service 保存 | 写入拒绝且不推进旧快照；原内存编辑保留；新建 Service 能读外部新版本 |
 | 校验失败、assertWrite 拒绝、已有 IO 故障 fixture | 不提交新增索引/路径，不丢调用方原修改；文件恢复/残留报告仍正确 |
 
-- [x] **Step 8：验证并提交。** 在 `extensions/cli` 执行下列命令；针对变动代码迭代这些 tests，不每一步重复全仓套件：
+- [x] **Step 8：验证并提交。** 在 `cli` 执行下列命令；针对变动代码迭代这些 tests，不每一步重复全仓套件：
 
 ```bash
 node --test --import tsx test/services/node-identity.test.ts test/services/shared-node-state.test.ts test/services/node-service.test.ts test/services/owned-units.test.ts test/services/resource-review.test.ts
@@ -168,7 +168,7 @@ git diff --check
 
 ## Task 2：将树遍历和查询链集中到 operations 并复用递归内核
 
-**Files:** 移动 `extensions/cli/src/services/traverse.ts` 到 `extensions/cli/src/operations/traverse.ts`；新增 operations/index.ts；将 utils/async-query.ts 拆为 operations/query.ts、filter.ts、map.ts、find.ts、group-by.ts、map-values.ts、to-array.ts，并移动其 test/types 到 operations 测试目录，并用 TS 脚本更新全部消费者；修改 services/node-service.ts；新增 test/operations/traverse.test.ts；补强 test/services/node-service.test.ts、owned-units.test.ts 和 test/tasks/node-query.test.ts。
+**Files:** 移动 `cli/src/services/traverse.ts` 到 `cli/src/operations/traverse.ts`；新增 operations/index.ts；将 utils/async-query.ts 拆为 operations/query.ts、filter.ts、map.ts、find.ts、group-by.ts、map-values.ts、to-array.ts，并移动其 test/types 到 operations 测试目录，并用 TS 脚本更新全部消费者；修改 services/node-service.ts；新增 test/operations/traverse.test.ts；补强 test/services/node-service.test.ts、owned-units.test.ts 和 test/tasks/node-query.test.ts。
 
 **Interfaces:**
 
@@ -214,7 +214,7 @@ test("multiple roots share traversal identity and load on demand", async () => {
 });
 ```
 
-在 extensions/cli 运行 `node --test --import tsx test/operations/traverse.test.ts`；预期先因 operations/traverse 尚不存在失败。补充单根前序、默认 local、显式 descendant/harness、菱形去重、跨根环、types 仅筛结果不误剪父节点、resolve 返回 undefined、load 报错、break 后无额外 load 用例。
+在 cli 运行 `node --test --import tsx test/operations/traverse.test.ts`；预期先因 operations/traverse 尚不存在失败。补充单根前序、默认 local、显式 descendant/harness、菱形去重、跨根环、types 仅筛结果不误剪父节点、resolve 返回 undefined、load 报错、break 后无额外 load 用例。
 - [x] **Step 2：移动现有算法，最小扩展根集合。** 将 seen/active 放在一次 traverse 调用内，内部 visit 沿用既有流程；外层按根顺序调用 visit。单根等价于一元素集合，不为每个根重建 seen/active。traverse 直接导入 ../models 下的 base-node/internal-node/types/relations，operations/index.ts 导出遍历及泛型查询 API；内部不反向导入自身 barrel。用可重复执行的 TS 脚本迁移查询链、拆出算法、移动测试并更新所有引用。query.ts 保留 fluent interfaces 和薄的 deferred/collection/object 链式适配；filter/map/find/group-by/map-values/to-array 各文件承载对应算法，不反向导入 query.ts；保留延迟求值及可重复执行，不保留 async-query 转发文件，不把查询链改为 Node 专用类型。
 
 ```ts
@@ -240,7 +240,7 @@ for (const root of roots instanceof BaseNode ? [roots] : roots)
 ```bash
 pnpm --filter edges-cli exec node --test --import tsx test/operations/traverse.test.ts test/services/node-service.test.ts test/services/owned-units.test.ts test/tasks/node-query.test.ts test/tasks/all-scopes.test.ts test/operations/async-query.test.ts
 pnpm --filter edges-cli exec tsc --noEmit -p tsconfig.json
-rg -n 'services/traverse|\./traverse\.js' extensions/cli/src
+rg -n 'services/traverse|\./traverse\.js' cli/src
 git diff --check
 git diff --stat
 ```
@@ -260,9 +260,9 @@ git diff --stat
 - [x] **Step 2：由包管理器删除直接依赖。** 在仓根确认 diff 的实际消费者后运行：
 
 ```bash
-rg -n 'from ["\x27]diff["\x27]|mergeNode|mergeText|node-text-merge|node-merge' extensions/cli/src
+rg -n 'from ["\x27]diff["\x27]|mergeNode|mergeText|node-text-merge|node-merge' cli/src
 pnpm --filter edges-cli remove diff
-git diff -- extensions/cli/package.json pnpm-lock.yaml
+git diff -- cli/package.json pnpm-lock.yaml
 ```
 
 预期源码查询没有命中；只移除 edges-cli 的直接 diff 依赖，锁文件中其他合法依赖的 diff 记录不手工删。不要删除历史讨论/旧计划中的术语作为“通过检查”的手段。
@@ -293,7 +293,7 @@ pnpm --filter edges-cli exec node --test --import tsx test/services/production-n
 ```bash
 pnpm test
 pnpm build
-pnpm exec tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck scripts/index-task-nodes.mts extensions/cli/test/operations/async-query.types.ts
+pnpm exec tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck scripts/index-task-nodes.mts cli/test/operations/async-query.types.ts
 git diff --check
 git diff --stat
 ```

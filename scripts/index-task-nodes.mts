@@ -5,7 +5,7 @@ import { parseArgs } from "node:util";
 import {
   planTaskIndexes,
   applyTaskIndexes,
-} from "../extensions/cli/src/services/tasks/index-migration.js";
+} from "../cli/src/services/tasks/index-migration.js";
 const { values } = parseArgs({
   options: {
     root: { type: "string" },

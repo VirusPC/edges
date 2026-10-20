@@ -1,13 +1,13 @@
-import { acquireWriteLock } from "../extensions/cli/src/services/node/node-lock.js";
-import { isGitBoundary } from "../extensions/cli/src/services/scope.js";
-import { rewriteLayerSurface } from "../extensions/cli/src/domain/models/node/document.js";
+import { acquireWriteLock } from "../cli/src/services/node/node-lock.js";
+import { isGitBoundary } from "../cli/src/services/scope.js";
+import { rewriteLayerSurface } from "../cli/src/domain/models/node/document.js";
 import {
   readEntry,
   saveEntries,
   validateEntry,
   checkPath,
   type EntryFile,
-} from "../extensions/cli/src/services/node/node-files.js";
+} from "../cli/src/services/node/node-files.js";
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";

@@ -4,11 +4,11 @@
 
 **Goal:** Wire writable project-memory type `user` end-to-end (template → init → remember → index), gitignore `.memory/users/` plus `.memory/USER.md` plus default backup archives, and ship backup/restore skills so a deleted clone can be reinjected.
 
-**Architecture:** Types are derived from `AGENTS.tmpl.md` local-memory links via `lib/blocks.py` `index_files()`. Adding one link plus `USER.tmpl.md` makes `memory_entry_types()` include `user`, init create `.memory/USER.md` + `.memory/users/`, and remember write `users/user_<slug>.md` then refresh `USER.md`. `type_dir_name("user")` already yields `users`. SoT stays in-repo and gitignored. Escape hatch is two Edges skills under `extensions/skills/` that pack/unpack `USER.md` and `users/` into `user-memory-backup-<timestamp>.tar.gz`. No `private` frontmatter field (deferred; see backlog task「记忆条目加 private 元数据」).
+**Architecture:** Types are derived from `AGENTS.tmpl.md` local-memory links via `lib/blocks.py` `index_files()`. Adding one link plus `USER.tmpl.md` makes `memory_entry_types()` include `user`, init create `.memory/USER.md` + `.memory/users/`, and remember write `users/user_<slug>.md` then refresh `USER.md`. `type_dir_name("user")` already yields `users`. SoT stays in-repo and gitignored. Escape hatch is two Edges skills under `skills/` that pack/unpack `USER.md` and `users/` into `user-memory-backup-<timestamp>.tar.gz`. No `private` frontmatter field (deferred; see backlog task「记忆条目加 private 元数据」).
 
 **Tech Stack:** Python 3 stdlib (`unittest`, `tarfile`, `argparse`, `pathlib`), existing `scripts/memory.py` CLI, Agent Skills frontmatter + Keep a Changelog.
 
-**Spec:** `docs/adr/0003-user-memory-in-repo-gitignored.md` (ADR-0003). Glossary: `CONTEXT.md` term 用户记忆（User Memory）. Prior type-set note: `extensions/skills/project-memory-init/.memory/projects/project_type_set.md`. Confirmed after ADR Open: also ignore `.memory/USER.md`.
+**Spec:** `docs/adr/0003-user-memory-in-repo-gitignored.md` (ADR-0003). Glossary: `CONTEXT.md` term 用户记忆（User Memory）. Prior type-set note: `skills/project-memory-init/.memory/projects/project_type_set.md`. Confirmed after ADR Open: also ignore `.memory/USER.md`.
 
 ## Global Constraints
 
@@ -19,7 +19,7 @@
 - Do **not** commit actual user content; `USER.md` / `users/` stay gitignored
 - Do **not** auto-create/edit `knowledge/posts/`
 - v1: no desensitized promotion into committable types
-- Backup/restore live in `extensions/skills/` (Edges-related), not `shared-extensions/`
+- Backup/restore live in `skills/` (Edges-related), not `shared-extensions/`
 - Default archive at repo root: `user-memory-backup-<timestamp>.tar.gz` (zip glob already ignored; v1 writes tar.gz)
 - Init only when user-requested; this PR may run init on existing memory dirs to refresh indexes after the template change
 - `PROTOCOL.md` stays frozen (types are implementation); update `LAYOUT.md`
@@ -30,27 +30,27 @@
 
 **Create**
 
-- `extensions/skills/project-memory-init/references/templates/USER.tmpl.md`
-- `extensions/skills/project-memory-init/scripts/tests/test_user_type.py`
-- `extensions/skills/user-memory-backup/SKILL.md`
-- `extensions/skills/user-memory-backup/CHANGELOG.md`
-- `extensions/skills/user-memory-backup/scripts/backup.py`
-- `extensions/skills/user-memory-restore/SKILL.md`
-- `extensions/skills/user-memory-restore/CHANGELOG.md`
-- `extensions/skills/user-memory-restore/scripts/restore.py`
-- `extensions/skills/project-memory-init/scripts/tests/test_user_memory_archive.py`
+- `skills/project-memory-init/references/templates/USER.tmpl.md`
+- `skills/project-memory-init/scripts/tests/test_user_type.py`
+- `skills/user-memory-backup/SKILL.md`
+- `skills/user-memory-backup/CHANGELOG.md`
+- `skills/user-memory-backup/scripts/backup.py`
+- `skills/user-memory-restore/SKILL.md`
+- `skills/user-memory-restore/CHANGELOG.md`
+- `skills/user-memory-restore/scripts/restore.py`
+- `skills/project-memory-init/scripts/tests/test_user_memory_archive.py`
 
 **Modify**
 
-- `extensions/skills/project-memory-init/references/templates/AGENTS.tmpl.md` — add `.memory/USER.md` link; change 「下面五个」→「下面六个」
+- `skills/project-memory-init/references/templates/AGENTS.tmpl.md` — add `.memory/USER.md` link; change 「下面五个」→「下面六个」
 - `.gitignore` — add `.memory/USER.md`
 - `docs/adr/0003-user-memory-in-repo-gitignored.md` — close Open (USER.md is ignored)
-- `extensions/skills/project-memory-init/references/LAYOUT.md` — add `user` row; drop 「官方第四类 user 不落盘」
-- `extensions/skills/project-memory-init/SKILL.md` + `CHANGELOG.md` + `scripts/OVERVIEW.md` + `scripts/memory.py` help
-- `extensions/skills/project-memory-remember/SKILL.md` + `CHANGELOG.md` — carve out `--type user`
-- `extensions/skills/project-memory-reshape/SKILL.md` — add `user` to the extract table
+- `skills/project-memory-init/references/LAYOUT.md` — add `user` row; drop 「官方第四类 user 不落盘」
+- `skills/project-memory-init/SKILL.md` + `CHANGELOG.md` + `scripts/OVERVIEW.md` + `scripts/memory.py` help
+- `skills/project-memory-remember/SKILL.md` + `CHANGELOG.md` — carve out `--type user`
+- `skills/project-memory-reshape/SKILL.md` — add `user` to the extract table
 - Existing `AGENTS.md` local blocks (root, `extensions/`, `project-memory-init/`, and other memory dirs) — refresh via init so they list `USER.md`
-- `extensions/skills/project-memory-init/.memory/projects/project_type_set.md` — via remember: skill wiring is done
+- `skills/project-memory-init/.memory/projects/project_type_set.md` — via remember: skill wiring is done
 - `.agents/skills/user-memory-backup` and `user-memory-restore` — relative symlinks via `pnpm skills:link`
 
 **Do not create/commit**
@@ -64,9 +64,9 @@
 ### Task 1: Register `user` in templates (index_files / memory_entry_types)
 
 **Files:**
-- Create: `extensions/skills/project-memory-init/scripts/tests/test_user_type.py`
-- Create: `extensions/skills/project-memory-init/references/templates/USER.tmpl.md`
-- Modify: `extensions/skills/project-memory-init/references/templates/AGENTS.tmpl.md`
+- Create: `skills/project-memory-init/scripts/tests/test_user_type.py`
+- Create: `skills/project-memory-init/references/templates/USER.tmpl.md`
+- Modify: `skills/project-memory-init/references/templates/AGENTS.tmpl.md`
 
 **Interfaces:**
 - Consumes: `lib.blocks.index_files() -> dict[str, str]`, `nodes.entries.memory_entry_types() -> tuple[str, ...]`
@@ -123,7 +123,7 @@ class UserTypeRegistrationTests(unittest.TestCase):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 extensions/skills/project-memory-init/scripts/tests/test_user_type.py -v
+python3 skills/project-memory-init/scripts/tests/test_user_type.py -v
 ```
 
 Expected: `test_index_files_includes_user` FAIL (`KeyError: 'user'` or assertion). `test_memory_entry_types_includes_user` FAIL.
@@ -155,21 +155,21 @@ Create `USER.tmpl.md` mirroring `FEEDBACK.tmpl.md` / `PROJECT.tmpl.md`:
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 extensions/skills/project-memory-init/scripts/tests/test_user_type.py UserTypeRegistrationTests -v
+python3 skills/project-memory-init/scripts/tests/test_user_type.py UserTypeRegistrationTests -v
 ```
 
 Expected: PASS (4 tests). Existing `test_frontmatter.py` must still pass:
 
 ```bash
-python3 extensions/skills/project-memory-init/scripts/tests/test_frontmatter.py -v
+python3 skills/project-memory-init/scripts/tests/test_frontmatter.py -v
 ```
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/skills/project-memory-init/scripts/tests/test_user_type.py \
-        extensions/skills/project-memory-init/references/templates/AGENTS.tmpl.md \
-        extensions/skills/project-memory-init/references/templates/USER.tmpl.md
+git add skills/project-memory-init/scripts/tests/test_user_type.py \
+        skills/project-memory-init/references/templates/AGENTS.tmpl.md \
+        skills/project-memory-init/references/templates/USER.tmpl.md
 git commit -m "feat(memory): register writable user type in templates
 
 Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
@@ -180,7 +180,7 @@ Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
 ### Task 2: Init creates USER.md + users/
 
 **Files:**
-- Modify: `extensions/skills/project-memory-init/scripts/tests/test_user_type.py`
+- Modify: `skills/project-memory-init/scripts/tests/test_user_type.py`
 - Implementation already in `operations/init.py` once templates drive `index_files()`
 
 **Interfaces:**
@@ -209,7 +209,7 @@ If Task 1 templates are already in, this should pass immediately. If it fails, f
 - [ ] **Step 2: Run the test**
 
 ```bash
-python3 extensions/skills/project-memory-init/scripts/tests/test_user_type.py UserInitTests -v
+python3 skills/project-memory-init/scripts/tests/test_user_type.py UserInitTests -v
 ```
 
 Expected: PASS. If FAIL because template missing, that is a Task 1 gap — do not special-case `user` in `init.py`.
@@ -217,7 +217,7 @@ Expected: PASS. If FAIL because template missing, that is a Task 1 gap — do no
 - [ ] **Step 3: Commit only if the test file gained this class after Task 1 commit**
 
 ```bash
-git add extensions/skills/project-memory-init/scripts/tests/test_user_type.py
+git add skills/project-memory-init/scripts/tests/test_user_type.py
 git commit -m "test(memory): init creates USER.md and users/
 
 Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
@@ -228,8 +228,8 @@ Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
 ### Task 3: remember --type user writes users/user_*.md and refreshes USER.md
 
 **Files:**
-- Modify: `extensions/skills/project-memory-init/scripts/tests/test_user_type.py`
-- Modify: `extensions/skills/project-memory-init/scripts/memory.py` (help text only)
+- Modify: `skills/project-memory-init/scripts/tests/test_user_type.py`
+- Modify: `skills/project-memory-init/scripts/memory.py` (help text only)
 - Implementation already in `remember()` / `resolve_memory_path()` once `user` is a writable type
 
 **Interfaces:**
@@ -267,7 +267,7 @@ class UserRememberTests(unittest.TestCase):
 - [ ] **Step 2: Run test**
 
 ```bash
-python3 extensions/skills/project-memory-init/scripts/tests/test_user_type.py UserRememberTests -v
+python3 skills/project-memory-init/scripts/tests/test_user_type.py UserRememberTests -v
 ```
 
 Expected: PASS after Task 1. If `--type` CLI rejects `user`, `memory_entry_types()` is wrong.
@@ -277,8 +277,8 @@ Expected: PASS after Task 1. If `--type` CLI rejects `user`, `memory_entry_types
 - [ ] **Step 4: Commit**
 
 ```bash
-git add extensions/skills/project-memory-init/scripts/tests/test_user_type.py \
-        extensions/skills/project-memory-init/scripts/memory.py
+git add skills/project-memory-init/scripts/tests/test_user_type.py \
+        skills/project-memory-init/scripts/memory.py
 git commit -m "feat(memory): remember --type user writes users/ and USER.md
 
 Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
@@ -291,7 +291,7 @@ Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
 **Files:**
 - Modify: `.gitignore`
 - Modify: `docs/adr/0003-user-memory-in-repo-gitignored.md`
-- Modify: `extensions/skills/project-memory-init/scripts/tests/test_user_type.py`
+- Modify: `skills/project-memory-init/scripts/tests/test_user_type.py`
 
 **Interfaces:**
 - Produces: root `.gitignore` contains exactly these user-memory patterns (already has users/ + backup globs):
@@ -335,7 +335,7 @@ Expected: FAIL on `.memory/USER.md` (present on main for the other three).
 
 ```bash
 git add .gitignore docs/adr/0003-user-memory-in-repo-gitignored.md \
-        extensions/skills/project-memory-init/scripts/tests/test_user_type.py
+        skills/project-memory-init/scripts/tests/test_user_type.py
 git commit -m "fix: gitignore .memory/USER.md (ADR-0003 Open)
 
 Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
@@ -346,10 +346,10 @@ Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
 ### Task 5: Remember / LAYOUT / init / reshape docs (no hardcoded frozen type list elsewhere)
 
 **Files:**
-- Modify: `extensions/skills/project-memory-remember/SKILL.md` + `CHANGELOG.md` (bump to 1.6.0)
-- Modify: `extensions/skills/project-memory-init/SKILL.md` + `CHANGELOG.md` (bump to 1.7.0) + `scripts/OVERVIEW.md`
-- Modify: `extensions/skills/project-memory-init/references/LAYOUT.md`
-- Modify: `extensions/skills/project-memory-reshape/SKILL.md` + `CHANGELOG.md` (bump to 1.3.1)
+- Modify: `skills/project-memory-remember/SKILL.md` + `CHANGELOG.md` (bump to 1.6.0)
+- Modify: `skills/project-memory-init/SKILL.md` + `CHANGELOG.md` (bump to 1.7.0) + `scripts/OVERVIEW.md`
+- Modify: `skills/project-memory-init/references/LAYOUT.md`
+- Modify: `skills/project-memory-reshape/SKILL.md` + `CHANGELOG.md` (bump to 1.3.1)
 
 **Interfaces:**
 - Produces: `--type user` is the only remember path that accepts personal prefs and secrets; other types still forbid secrets. LAYOUT lists `user` as a writable in-repo gitignored type.
@@ -385,12 +385,12 @@ Add: 个人偏好 / 凭据 / 不得公开 → `user`（gitignore，不进 git）
 - [ ] **Step 6: Commit**
 
 ```bash
-git add extensions/skills/project-memory-remember \
-        extensions/skills/project-memory-init/SKILL.md \
-        extensions/skills/project-memory-init/CHANGELOG.md \
-        extensions/skills/project-memory-init/scripts/OVERVIEW.md \
-        extensions/skills/project-memory-init/references/LAYOUT.md \
-        extensions/skills/project-memory-reshape
+git add skills/project-memory-remember \
+        skills/project-memory-init/SKILL.md \
+        skills/project-memory-init/CHANGELOG.md \
+        skills/project-memory-init/scripts/OVERVIEW.md \
+        skills/project-memory-init/references/LAYOUT.md \
+        skills/project-memory-reshape
 git commit -m "docs(memory): document user type gate and gitignore layout
 
 Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
@@ -403,10 +403,10 @@ Ask and doctor SKILL.md do not hardcode the current type list — leave them. PR
 ### Task 6: Backup skill
 
 **Files:**
-- Create: `extensions/skills/user-memory-backup/scripts/backup.py`
-- Create: `extensions/skills/user-memory-backup/SKILL.md`
-- Create: `extensions/skills/user-memory-backup/CHANGELOG.md`
-- Create: `extensions/skills/project-memory-init/scripts/tests/test_user_memory_archive.py` (backup half first)
+- Create: `skills/user-memory-backup/scripts/backup.py`
+- Create: `skills/user-memory-backup/SKILL.md`
+- Create: `skills/user-memory-backup/CHANGELOG.md`
+- Create: `skills/project-memory-init/scripts/tests/test_user_memory_archive.py` (backup half first)
 
 **Interfaces:**
 - Produces: `backup_user_memory(repo_dir: Path, output_dir: Path | None = None, timestamp: str | None = None) -> Path`
@@ -468,7 +468,7 @@ class BackupTests(unittest.TestCase):
 - [ ] **Step 2: Run to verify it fails** (`ModuleNotFoundError: backup`)
 
 ```bash
-python3 extensions/skills/project-memory-init/scripts/tests/test_user_memory_archive.py BackupTests -v
+python3 skills/project-memory-init/scripts/tests/test_user_memory_archive.py BackupTests -v
 ```
 
 - [ ] **Step 3: Implement `backup.py`**
@@ -494,8 +494,8 @@ CHANGELOG 1.0.0 Added.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/skills/user-memory-backup \
-        extensions/skills/project-memory-init/scripts/tests/test_user_memory_archive.py
+git add skills/user-memory-backup \
+        skills/project-memory-init/scripts/tests/test_user_memory_archive.py
 git commit -m "feat(skills): add user-memory-backup archive skill
 
 Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
@@ -506,10 +506,10 @@ Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
 ### Task 7: Restore / reinject skill
 
 **Files:**
-- Create: `extensions/skills/user-memory-restore/scripts/restore.py`
-- Create: `extensions/skills/user-memory-restore/SKILL.md`
-- Create: `extensions/skills/user-memory-restore/CHANGELOG.md`
-- Modify: `extensions/skills/project-memory-init/scripts/tests/test_user_memory_archive.py`
+- Create: `skills/user-memory-restore/scripts/restore.py`
+- Create: `skills/user-memory-restore/SKILL.md`
+- Create: `skills/user-memory-restore/CHANGELOG.md`
+- Modify: `skills/project-memory-init/scripts/tests/test_user_memory_archive.py`
 
 **Interfaces:**
 - Produces: `restore_user_memory(archive: Path, repo_dir: Path, force: bool = False) -> dict`
@@ -574,7 +574,7 @@ class RestoreTests(unittest.TestCase):
 - [ ] **Step 2: Run to verify FAIL** (`ModuleNotFoundError: restore`)
 
 ```bash
-python3 extensions/skills/project-memory-init/scripts/tests/test_user_memory_archive.py RestoreTests -v
+python3 skills/project-memory-init/scripts/tests/test_user_memory_archive.py RestoreTests -v
 ```
 
 - [ ] **Step 3: Implement `restore.py` + SKILL.md**
@@ -588,8 +588,8 @@ CLI: `--archive`, `--repo-dir`, `--force`.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/skills/user-memory-restore \
-        extensions/skills/project-memory-init/scripts/tests/test_user_memory_archive.py
+git add skills/user-memory-restore \
+        skills/project-memory-init/scripts/tests/test_user_memory_archive.py
 git commit -m "feat(skills): add user-memory-restore reinject skill
 
 Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
@@ -601,17 +601,17 @@ Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
 
 **Files:**
 - Modify: root / `extensions/` / `project-memory-init/` (and other existing memory-dir) `AGENTS.md` local blocks via `memory.py init`
-- Modify: `extensions/skills/project-memory-init/.memory/projects/project_type_set.md` via `memory.py remember --type project --slug type_set`
+- Modify: `skills/project-memory-init/.memory/projects/project_type_set.md` via `memory.py remember --type project --slug type_set`
 - Create: `.agents/skills/user-memory-backup` and `user-memory-restore` via `pnpm skills:link`
 - Do not `git add` any `.memory/USER.md` or `.memory/users/`
 
 **Interfaces:**
 - Produces: committed `AGENTS.md` lists `.memory/USER.md` so agents know to read the local (gitignored) index. `project_type_set` says skill wiring is done; still no v1 promotion; still no `private` field.
 
-- [ ] **Step 1: Run init on each existing memory directory** (root, `extensions`, `extensions/skills/project-memory-init`, `knowledge/tasks`, `knowledge/teaching`, `shared-extensions` if they have `.memory/`). Command:
+- [ ] **Step 1: Run init on each existing memory directory** (root, `extensions`, `skills/project-memory-init`, `knowledge/tasks`, `knowledge/teaching`, `shared-extensions` if they have `.memory/`). Command:
 
 ```bash
-python3 extensions/skills/project-memory-init/scripts/memory.py init \
+python3 skills/project-memory-init/scripts/memory.py init \
   --target-dir <dir> --root-dir "$(pwd)"
 ```
 
@@ -638,7 +638,7 @@ Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>"
 - [ ] **Step 1: Run the existing test suite**
 
 ```bash
-python3 -m unittest discover -s extensions/skills/project-memory-init/scripts/tests -v
+python3 -m unittest discover -s skills/project-memory-init/scripts/tests -v
 ```
 
 Expected: all PASS, including frontmatter, user type, backup, restore.
@@ -646,7 +646,7 @@ Expected: all PASS, including frontmatter, user type, backup, restore.
 - [ ] **Step 2: Extra checks**
 
 ```bash
-python3 extensions/skills/project-memory-init/scripts/memory.py remember --help
+python3 skills/project-memory-init/scripts/memory.py remember --help
 # choices include user
 git check-ignore -v .memory/USER.md .memory/users/ user-memory-backup-demo.tar.gz
 pnpm skills:link -- --check

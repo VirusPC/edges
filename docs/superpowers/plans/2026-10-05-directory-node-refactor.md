@@ -94,7 +94,7 @@ assert.notEqual(destinationEntry, original); // no-op separately supported
 
 ### Task 3: CLI adapters and explicit uniform-directory migration
 
-**Files:** services/memory/{node-documents,entries,remember,types,doctor,init}.ts plus related modules; services/tasks/{write,paths,...}.ts; services/note/git/ingest.ts; command input wiring; scripts/migrate-directory-nodes.mts; package.json; new extensions/skills/migrate-directory-nodes/SKILL.md; relevant test/{memory,tasks,note,services}; migration tests.
+**Files:** services/memory/{node-documents,entries,remember,types,doctor,init}.ts plus related modules; services/tasks/{write,paths,...}.ts; services/note/git/ingest.ts; command input wiring; scripts/migrate-directory-nodes.mts; package.json; new skills/migrate-directory-nodes/SKILL.md; relevant test/{memory,tasks,note,services}; migration tests.
 
 **Interfaces:** consumes new NodeService/model interfaces. Produces directory-only new writes/recognition; explicit migration with dry-run default, --apply, --root and public tracked scope. Existing Markdown note ingest becomes validated import/create, no blind permissive parser. Keep observable useful CLI parameter names unless they advertise legacy formats.
 

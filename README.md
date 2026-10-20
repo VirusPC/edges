@@ -39,7 +39,7 @@ harness 就是一组 Markdown 文件加 Git。仓库里的那套，给 Cursor、
 把下面这句话复制给你的 AI：
 
 ```text
-读 https://raw.githubusercontent.com/VirusPC/edges/main/extensions/skills/edges-onboarding/SKILL.md ，帮我接入 edges
+读 https://raw.githubusercontent.com/VirusPC/edges/main/skills/edges-onboarding/SKILL.md ，帮我接入 edges
 ```
 
 AI 会检查 Node 和 git，安装 edges CLI，在你选定的目录里初始化，并在临时目录里验证笔记和任务能写、能读。
@@ -63,7 +63,7 @@ edges --scope . tasks create --title "修复构建" --project default
 edges --scope . tasks list
 ```
 
-把外部 harness 仓库挂进当前目录用 `edges compose`，步骤见 [`edges-compose`](extensions/skills/edges-compose/SKILL.md)。完整命令见 [`extensions/cli/README.md`](extensions/cli/README.md)，或运行 `edges --help`。
+把外部 harness 仓库挂进当前目录用 `edges compose`，步骤见 [`edges-compose`](skills/edges-compose/SKILL.md)。完整命令见 [`cli/README.md`](cli/README.md)，或运行 `edges --help`。
 
 ## 本仓与个人大脑仓
 
@@ -71,12 +71,19 @@ edges --scope . tasks list
 
 | 目录 | 作用 |
 | --- | --- |
-| [`extensions/`](extensions/README.md) | 接入和操作 Edges 的 CLI、MCP、skill 与应用。打进 npm 包的是 `extensions/skills/` |
-| [`docs/`](docs/) | ADR 与架构文档 |
+| [`cli/`](cli/) | 面向 agent 的 CLI（命令名 `edges`，npm 包 `@viruspc/edges`） |
+| [`skills/`](skills/) | 对外分发、随 npm 包装进安装包的 skill 真源。本仓用 `pnpm skills:link` 链到 [`.agents/skills`](.agents/skills)。本仓维护用的技能在 [`.harness/skills`](.harness/skills)，构建时拷进包内的副本是 `cli/skills/`（不入库） |
+| [`apps/`](apps/) | 可跨作用域复用的对外应用，目前是任务审阅页 |
+| [`services/`](services/) | 接入 Edges 的常驻 HTTP 进程，目前是 Artifacts 预览 |
+| [`mcp-servers/`](mcp-servers/) | 给没有 shell 的宿主用的 MCP server |
+| [`system-prompt/`](system-prompt/) | 接入新 Agent 时取用的 system prompt 片段 |
+| [`docs/`](docs/) | ADR、架构与迁移说明 |
 | [`scripts/`](scripts/README.md) | 初始化、构建、迁移等维护脚本 |
 | [`.harness/`](.harness/) | 本仓自身的维护记忆、技能、任务看板、评测与观测 |
 
-作者的个人大脑（`notes/`、`edges/`、`teaching/`、`retrospectives/`、`tasks/`、`projects/`、`memory/`、`archive/`、`shared-extensions/`、[`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts) 等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)。对外博客与站点内容看板 [`.harness/tasks/site-and-content`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/.harness/tasks/site-and-content) 也在个人仓。本仓根 `AGENTS.md` 用 `edges compose` 把它登记为挂载的个人工作区；个人仓反过来把本仓登记为参考项目。挂载步骤见 [`edges-compose`](extensions/skills/edges-compose/SKILL.md)。
+2026-10-20 起这些接入目录直接放在仓库根，不再套 `extensions/`。旧路径对照见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。空占位 `docs/`、`tools/`、`subagents/`（当时在 `extensions/` 下）已删除；`new-server/` 与 `others/` 从本仓删除，由个人仓另行放进 `shared-extensions/`。
+
+作者的个人大脑（`notes/`、`edges/`、`teaching/`、`retrospectives/`、`tasks/`、`projects/`、`memory/`、`archive/`、`shared-extensions/`、[`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts) 等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)。对外博客与站点内容看板 [`.harness/tasks/site-and-content`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/.harness/tasks/site-and-content) 也在个人仓。本仓根 `AGENTS.md` 用 `edges compose` 把它登记为挂载的个人工作区；个人仓反过来把本仓登记为参考项目。挂载步骤见 [`edges-compose`](skills/edges-compose/SKILL.md)。
 
 对外输出可以直接看：[教学站](https://edges.viruspc.tech/teaching/)、[任务看板](https://edges.viruspc.tech/tasks/)（目前都从个人仓部署）。
 

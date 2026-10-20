@@ -30,7 +30,7 @@
 edges/.harness/memory/projects/扩展开发约定.md
 
 应该恢复到：
-edges/extensions/.harness/memory/projects/扩展开发约定.md
+edges/.harness/memory/projects/扩展开发约定.md
 ```
 
 恢复不只是移动文件，还要更新根索引、子节点索引与相对链接。
@@ -54,7 +54,7 @@ flowchart LR
 
 2026-10-05：用户确认第 1 项执行顺序没有问题，并询问归属是否处理完成。
 
-公开归属修正已在 PR #161 分支完成：43 条记忆按当前内容恢复到原所有者，25 个类型索引说明及相关入口、引用已同步并验证。分布为 extensions 16 条、extensions/skills/project-memory-init 17 条、shared-extensions 1 条、knowledge/notes 1 条，以及原 Tasks 8 条归 .harness/tasks。第 3 项具体归属选择仍待讨论，此处确认执行顺序不等于预先确认第 3 项。
+公开归属修正已在 PR #161 分支完成：43 条记忆按当前内容恢复到原所有者，25 个类型索引说明及相关入口、引用已同步并验证。分布为 extensions 16 条、skills/project-memory-init 17 条、shared-extensions 1 条、knowledge/notes 1 条，以及原 Tasks 8 条归 .harness/tasks。第 3 项具体归属选择仍待讨论，此处确认执行顺序不等于预先确认第 3 项。
 
 完成范围不包括真实私有内容：私有迁移工具已实现并通过合成样例测试，但没有在其他克隆自动执行。修正已推至 PR 分支，尚未合并到 main。
 

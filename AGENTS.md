@@ -1,8 +1,8 @@
 # Agent Developer Guide
 
-你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 extensions、维护 `.harness/` 里讲 Edges 本身的记忆、任务、评测与观测。
+你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 CLI / skill / MCP / 应用与服务、维护 `.harness/` 里讲 Edges 本身的记忆、任务、评测与观测。
 
-本仓 `VirusPC/edges` 只放 Edges 框架本身（CLI、extensions、skills、协议、ADR、架构文档）。peng cheng 的个人大脑（笔记、Edge、教学、复盘、领域任务、shared-extensions、对外博客成稿等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)，经下面的 Compose 区块挂进来；个人知识不要写进本仓。2026-10-20 拆仓前的历史、PR 与 Actions 记录都留在个人仓，最后一个拆仓前提交是 `025904fa29bcc6970f45c654d95e30c5390d43d7`。
+本仓 `VirusPC/edges` 只放 Edges 框架本身（`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/`、协议、ADR、架构文档）。peng cheng 的个人大脑（笔记、Edge、教学、复盘、领域任务、shared-extensions、对外博客成稿等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)，经下面的 Compose 区块挂进来；个人知识不要写进本仓。2026-10-20 拆仓前的历史、PR 与 Actions 记录都留在个人仓，最后一个拆仓前提交是 `025904fa29bcc6970f45c654d95e30c5390d43d7`。2026-10-20 起不再有 `extensions/` 这一层，映射见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
 
 Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](CONTEXT.md)；AGENTS.md 组织入口发现，各规范正文按职责保持单一真源。
 
@@ -17,6 +17,9 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 - 本仓公开（`github.com/VirusPC/edges`）。凭据、个人信息、未公开 IP、办公文档不入库；内部信息脱敏后再写；截图按「能不能上公开博客」判断。细则见 README 的「隐私与脱敏」。
 - Git：`type: subject`；AI 参与加 `Co-authored-by`；不提交 `.obsidian/workspace.json`；`pull` / `rebase` 加 `--autostash`。
 - 本机修改本仓（commit/push 或改工作树文件）必须通过独立 `git worktree`：每个 Agent/任务一个 worktree + 独立分支；禁止多 Agent 共用同一工作树并行改文件或切分支；同一分支不得挂两个 worktree。Cursor 云端 Agent 等已在独立 clone/环境中的任务视为已隔离，不要求再套本机 worktree；只读查询可不建 worktree。
+- 不绑定 Edges 的通用 skill / MCP 配置 / plugin / hook 不放本仓，去个人仓 `VirusPC/edges-brain-viruspc` 的 `shared-extensions/`。
+- 顶层 `edges` 命令能对上 harness 或领域目录时，命令名跟目录（`notes/` → `notes`，`.harness/skills` → `skills`）。硬切断，不留旧名别名。`tasks`、`memory` 已对齐则不动。不为 `evaluation` / `observation` 发明命令。
+- 内容节点的 create/get/update/destroy 必须走 NodeService，不得旁路写文件（[ADR 0030](docs/adr/0030-content-leaf-crud-via-nodeservice.md)）。
 <!-- project-harness-constraints:end -->
 
 <!-- project-harness-local:start -->
@@ -27,11 +30,13 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 - [目录与内容说明](<README.md>) — 目录与内容说明入口。
 - [领域术语](<CONTEXT.md>) — 领域术语入口。
 - [架构决策](<docs/adr/>) — 架构决策入口。
+- [.harness/evaluation/AGENTS.md](<.harness/evaluation/AGENTS.md>) — evaluation 目录的项目记忆与规范入口。
+- [.harness/tasks/AGENTS.md](<.harness/tasks/AGENTS.md>) — tasks 目录的项目记忆与规范入口。
 <!-- project-harness-local:end -->
 
 <!-- project-harness-descendants:start -->
 ## 下层系统维护信息
-- [对外能力实现约束](<extensions/AGENTS.md>) — 对外能力实现约束入口。
+- [project-memory-init](<skills/project-memory-init/AGENTS.md>) — project-memory 系列 skill 的项目记忆与规范入口。
 
 <!-- project-harness-descendants:end -->
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 把 extensions/skills 里每个 skill 以相对软链挂到 .agents/skills。
+# 把 skills 里每个 skill 以相对软链挂到 .agents/skills。
 # vendor 拷贝（npx skills 装进来的实体目录）不动；只管理指向 source 的那批链。
 set -euo pipefail
 
@@ -8,19 +8,19 @@ usage() {
 usage: link-agent-skills [--check] [--dry-run] [--source DIR] [--dest DIR]
                          [--self-test] [-h|--help]
 
-Link each skill in extensions/skills into .agents/skills as a relative
+Link each skill in skills into .agents/skills as a relative
 symlink. Idempotent. Vendor copies already in dest are left alone.
 
   --check      verify links; write nothing; exit 1 if out of sync
   --dry-run    print actions; write nothing
-  --source     skill source dir (default: <repo>/extensions/skills)
+  --source     skill source dir (default: <repo>/skills)
   --dest       hub dir (default: <repo>/.agents/skills)
   --self-test  run against a temp tree and exit
 EOF
 }
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SOURCE="$REPO_ROOT/extensions/skills"
+SOURCE="$REPO_ROOT/skills"
 DEST="$REPO_ROOT/.agents/skills"
 CHECK=0
 DRY_RUN=0
@@ -96,6 +96,8 @@ is_ours() {
     return 1
   fi
   target="$(readlink "$entry")"
+  # 2026-10-20 之前链到 extensions/skills。平铺后仍视为本脚本的链，允许改指 skills/。
+  target="${target//extensions\/skills/skills}"
   resolved="$(normjoin "$(dirname "$entry")" "$target")"
   if [[ "$(is_under "$resolved" "$SOURCE")" == "yes" ]]; then
     return 0
@@ -219,15 +221,18 @@ run() {
 run_self_test() {
   local tmp src dest out
   tmp="$(mktemp -d "${TMPDIR:-/tmp}/link-agent-skills.XXXXXX")"
-  src="$tmp/extensions/skills"
+  src="$tmp/skills"
   dest="$tmp/.agents/skills"
   mkdir -p "$src/alpha" "$src/beta" "$dest"
   printf '%s\n' '---' 'name: alpha' 'description: a' '---' >"$src/alpha/SKILL.md"
   printf '%s\n' '---' 'name: beta' 'description: b' '---' >"$src/beta/SKILL.md"
 
   "$0" --source "$src" --dest "$dest" >/dev/null
-  [[ "$(readlink "$dest/alpha")" == "../../extensions/skills/alpha" ]]
-  [[ "$(readlink "$dest/beta")" == "../../extensions/skills/beta" ]]
+  [[ "$(readlink "$dest/alpha")" == "../../skills/alpha" ]]
+  [[ "$(readlink "$dest/beta")" == "../../skills/beta" ]]
+  ln -sfn "../../extensions/skills/alpha" "$dest/alpha"
+  "$0" --source "$src" --dest "$dest" >/dev/null
+  [[ "$(readlink "$dest/alpha")" == "../../skills/alpha" ]]
   [[ -f "$dest/alpha/SKILL.md" ]]
   "$0" --source "$src" --dest "$dest" --check >/dev/null
 
@@ -250,7 +255,7 @@ run_self_test() {
   rm -rf "$src/vendor"
 
   # stale ours-link is removed
-  ln -s "../../extensions/skills/gone" "$dest/gone"
+  ln -s "../../skills/gone" "$dest/gone"
   "$0" --source "$src" --dest "$dest" >/dev/null
   [[ ! -e "$dest/gone" && ! -L "$dest/gone" ]]
 

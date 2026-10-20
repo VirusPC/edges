@@ -23,17 +23,17 @@
 
 | 文件 | 职责 |
 | --- | --- |
-| `extensions/cli/src/services/node/node-service.ts` | `query` 的 resolve：目标不存在则跳过 |
-| `extensions/cli/src/domain/config/harness-materials.ts` | 超节点材料 = `join(scopeDir, path)`；`harnessRootForScope` 仍只找 `<scope>/.harness` |
-| `extensions/cli/src/context.ts` | `ctx.all` |
-| `extensions/cli/src/program.ts` | 根选项 `--all` |
-| `extensions/cli/src/commands/tasks/list.ts` | 读 `--all`：单树或森林，滤 `TaskNode` |
-| `extensions/cli/src/commands/tasks/project/list.ts` | 读 `--all`：单树或森林，滤项目 `ReadmeNode` |
-| `extensions/cli/src/services/memory/records.ts` | `listMemoryEntries` 改为 query / 森林，滤 `memory` |
-| `extensions/cli/src/commands/skills/list.ts` | 读 `--all`：query / 森林，滤 `skill` |
-| `extensions/cli/src/commands/notes/list.ts` | 读 `--all`：query / 森林，滤 `note` |
-| `extensions/cli/README.md` | 超节点 children 的仓库根例子 |
-| `extensions/cli/src/domain/models/README.md` | 原则 5 与上句一致 |
+| `cli/src/services/node/node-service.ts` | `query` 的 resolve：目标不存在则跳过 |
+| `cli/src/domain/config/harness-materials.ts` | 超节点材料 = `join(scopeDir, path)`；`harnessRootForScope` 仍只找 `<scope>/.harness` |
+| `cli/src/context.ts` | `ctx.all` |
+| `cli/src/program.ts` | 根选项 `--all` |
+| `cli/src/commands/tasks/list.ts` | 读 `--all`：单树或森林，滤 `TaskNode` |
+| `cli/src/commands/tasks/project/list.ts` | 读 `--all`：单树或森林，滤项目 `ReadmeNode` |
+| `cli/src/services/memory/records.ts` | `listMemoryEntries` 改为 query / 森林，滤 `memory` |
+| `cli/src/commands/skills/list.ts` | 读 `--all`：query / 森林，滤 `skill` |
+| `cli/src/commands/notes/list.ts` | 读 `--all`：query / 森林，滤 `note` |
+| `cli/README.md` | 超节点 children 的仓库根例子 |
+| `cli/src/domain/models/README.md` | 原则 5 与上句一致 |
 
 `listRepositoryTaskNodes` 不再被 list 命令调用。`taskBoardQuery` 若只剩写路径/单板 get 在用，留在那里，不要为 list 再包一层。
 
@@ -42,8 +42,8 @@
 ### Task 1: 遍历跳过不存在的登记
 
 **Files:**
-- Modify: `extensions/cli/src/services/node/node-service.ts`（`query` 的 resolve）
-- Test: `extensions/cli/test/services/node-service.test.ts`
+- Modify: `cli/src/services/node/node-service.ts`（`query` 的 resolve）
+- Test: `cli/test/services/node-service.test.ts`
 
 **Interfaces:**
 - Consumes: `traverse` 的 resolve 返回 `undefined` 即不进入该边
@@ -61,7 +61,7 @@ assert.deepEqual(skipped.map(node => node.path), [path.join(root, 'AGENTS.md')])
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/cli && node --test --import tsx --test-name-pattern 'missing local entries' ./test/services/node-service.test.ts`
+Run: `cd cli && node --test --import tsx --test-name-pattern 'missing local entries' ./test/services/node-service.test.ts`
 
 Expected: FAIL，`Missing referenced node`
 
@@ -82,7 +82,7 @@ if (!fs.existsSync(reference.id)) return undefined;
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/cli/src/services/node/node-service.ts extensions/cli/test/services/node-service.test.ts
+git add cli/src/services/node/node-service.ts cli/test/services/node-service.test.ts
 git commit -m "$(cat <<'EOF'
 fix: skip missing entries during traverse
 
@@ -95,10 +95,10 @@ EOF
 ### Task 2: 超节点材料挂在 scope 目录上
 
 **Files:**
-- Modify: `extensions/cli/src/domain/config/harness-materials.ts`
-- Test: `extensions/cli/test/domain/harness-materials.test.ts`
-- Test: `extensions/cli/test/services/super-agents-node.test.ts`
-- Test: `extensions/cli/test/services/system-forest-service.test.ts`
+- Modify: `cli/src/domain/config/harness-materials.ts`
+- Test: `cli/test/domain/harness-materials.test.ts`
+- Test: `cli/test/services/super-agents-node.test.ts`
+- Test: `cli/test/services/system-forest-service.test.ts`
 
 **Interfaces:**
 - Consumes: `harness-materials.json` 的 `path`
@@ -120,7 +120,7 @@ test("super materials use the scope directory; the scope's own harness is one le
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd extensions/cli && node --test --import tsx --test-name-pattern 'super materials use the scope' ./test/domain/harness-materials.test.ts`
+Run: `cd cli && node --test --import tsx --test-name-pattern 'super materials use the scope' ./test/domain/harness-materials.test.ts`
 
 Expected: FAIL，实际路径是 `root/.harness/tasks/README.md`
 
@@ -142,17 +142,17 @@ const absPath = join(scopeDir, material.path);
 
 - [ ] **Step 5: Run tests**
 
-Run: `cd extensions/cli && node --test --import tsx ./test/domain/harness-materials.test.ts ./test/services/super-agents-node.test.ts ./test/services/system-forest-service.test.ts ./test/operations/traverse-dual-entry.test.ts`
+Run: `cd cli && node --test --import tsx ./test/domain/harness-materials.test.ts ./test/services/super-agents-node.test.ts ./test/services/system-forest-service.test.ts ./test/operations/traverse-dual-entry.test.ts`
 
 Expected: PASS
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add extensions/cli/src/domain/config/harness-materials.ts \
-  extensions/cli/test/domain/harness-materials.test.ts \
-  extensions/cli/test/services/super-agents-node.test.ts \
-  extensions/cli/test/services/system-forest-service.test.ts
+git add cli/src/domain/config/harness-materials.ts \
+  cli/test/domain/harness-materials.test.ts \
+  cli/test/services/super-agents-node.test.ts \
+  cli/test/services/system-forest-service.test.ts
 git commit -m "$(cat <<'EOF'
 fix: mount super materials on the scope directory
 
@@ -165,10 +165,10 @@ EOF
 ### Task 3: tasks list 改为一次遍历或一片森林
 
 **Files:**
-- Modify: `extensions/cli/src/context.ts`
-- Modify: `extensions/cli/src/program.ts`
-- Modify: `extensions/cli/src/commands/tasks/list.ts`
-- Test: `extensions/cli/test/tasks/super-flag.test.ts`
+- Modify: `cli/src/context.ts`
+- Modify: `cli/src/program.ts`
+- Modify: `cli/src/commands/tasks/list.ts`
+- Test: `cli/test/tasks/super-flag.test.ts`
 
 **Interfaces:**
 - Consumes: 根选项 `--all` 写入 `ctx.all`。`NodeService.query(scope, { types: ["task"], super? })`；`buildSystemForest(scope, { includeSuper, form: "independent" })`
@@ -211,8 +211,8 @@ Expected: FAIL。当前 list 只打开 `<root>/.harness/tasks/`。
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/cli/src/context.ts extensions/cli/src/program.ts \
-  extensions/cli/src/commands/tasks/list.ts extensions/cli/test/tasks/super-flag.test.ts
+git add cli/src/context.ts cli/src/program.ts \
+  cli/src/commands/tasks/list.ts cli/test/tasks/super-flag.test.ts
 git commit -m "$(cat <<'EOF'
 fix: list tasks with traverse or forest
 
@@ -225,10 +225,10 @@ EOF
 ### Task 4: 其余 list 同一条路
 
 **Files:**
-- Modify: `extensions/cli/src/commands/tasks/project/list.ts`
-- Modify: `extensions/cli/src/services/memory/records.ts`（只改 `listMemoryEntries`）
-- Modify: `extensions/cli/src/commands/skills/list.ts`
-- Modify: `extensions/cli/src/commands/notes/list.ts`
+- Modify: `cli/src/commands/tasks/project/list.ts`
+- Modify: `cli/src/services/memory/records.ts`（只改 `listMemoryEntries`）
+- Modify: `cli/src/commands/skills/list.ts`
+- Modify: `cli/src/commands/notes/list.ts`
 
 **Interfaces:**
 - Consumes: Task 3 的 `ctx.all`、query / forest 用法
@@ -255,7 +255,7 @@ EOF
 只确认单树能退出 0。仓库根与 `.harness` 的完整矩阵留给 Task 6，这里不要跑。
 
 ```bash
-cd extensions/cli
+cd cli
 node --import tsx src/index.ts --scope "$PWD/../.." tasks list
 node --import tsx src/index.ts --scope "$PWD/../.." --super tasks list
 ```
@@ -265,10 +265,10 @@ Expected: 两条都退出 0。缺文件不导致失败。
 - [ ] **Step 5: Commit**
 
 ```bash
-git add extensions/cli/src/commands/tasks/project/list.ts \
-  extensions/cli/src/services/memory/records.ts \
-  extensions/cli/src/commands/skills/list.ts \
-  extensions/cli/src/commands/notes/list.ts
+git add cli/src/commands/tasks/project/list.ts \
+  cli/src/services/memory/records.ts \
+  cli/src/commands/skills/list.ts \
+  cli/src/commands/notes/list.ts
 git commit -m "$(cat <<'EOF'
 fix: list projects, memory, skills, and notes via traverse
 
@@ -281,8 +281,8 @@ EOF
 ### Task 5: README 与原则 5
 
 **Files:**
-- Modify: `extensions/cli/README.md`（「查询遵循索引」）
-- Modify: `extensions/cli/src/domain/models/README.md` 原则 5
+- Modify: `cli/README.md`（「查询遵循索引」）
+- Modify: `cli/src/domain/models/README.md` 原则 5
 
 - [ ] **Step 1: Write the scope example**
 
@@ -296,7 +296,7 @@ EOF
 - [ ] **Step 2: Commit**
 
 ```bash
-git add extensions/cli/README.md extensions/cli/src/domain/models/README.md
+git add cli/README.md cli/src/domain/models/README.md
 git commit -m "$(cat <<'EOF'
 docs: describe super children and list via traverse
 
@@ -309,14 +309,14 @@ EOF
 ### Task 6: 写到节点指向的 harness tasks
 
 **Files:**
-- Modify: `extensions/cli/src/commands/tasks.ts`（去掉用途选项和 `--index-group`）
-- Modify: `extensions/cli/src/commands/memory/doctor.ts`（去掉 `--index-group`）
-- Modify: `extensions/cli/src/services/node/node-service.ts`（`#registration` 自己选分组）
-- Modify: `extensions/cli/src/services/tasks/paths.ts`（看板目录由根节点决定）
-- Modify: `extensions/skills/conversation-to-tasks/SKILL.md`
-- Modify: `extensions/skills/project-tasks-classify/SKILL.md`
-- Modify: `extensions/cli/README.md`、仓库根 `README.md` 里仍把任务写成用途二选一、或要求调用方选择 index-group 的句子
-- Test: `extensions/cli/test/tasks/`、`extensions/cli/test/services/` 里仍传这两个选项的用例
+- Modify: `cli/src/commands/tasks.ts`（去掉用途选项和 `--index-group`）
+- Modify: `cli/src/commands/memory/doctor.ts`（去掉 `--index-group`）
+- Modify: `cli/src/services/node/node-service.ts`（`#registration` 自己选分组）
+- Modify: `cli/src/services/tasks/paths.ts`（看板目录由根节点决定）
+- Modify: `skills/conversation-to-tasks/SKILL.md`
+- Modify: `skills/project-tasks-classify/SKILL.md`
+- Modify: `cli/README.md`、仓库根 `README.md` 里仍把任务写成用途二选一、或要求调用方选择 index-group 的句子
+- Test: `cli/test/tasks/`、`cli/test/services/` 里仍传这两个选项的用例
 
 **Interfaces:**
 - Consumes: 主体系统。一般是 `--scope` 上的真 AgentsNode，其 harness 为 `harnessRootForScope(scope)`。`--scope <仓库根> --super` 的主体是虚拟系统一，其 harness 就是该 scope 目录。
@@ -344,11 +344,11 @@ EOF
 - [ ] **Step 4: Commit**
 
 ```bash
-git add extensions/cli/src/commands/tasks.ts extensions/cli/src/commands/memory/doctor.ts \
-  extensions/cli/src/services/node/node-service.ts extensions/cli/src/services/tasks/paths.ts \
-  extensions/skills/conversation-to-tasks/SKILL.md \
-  extensions/skills/project-tasks-classify/SKILL.md \
-  extensions/cli/README.md README.md extensions/cli/test/tasks extensions/cli/test/services
+git add cli/src/commands/tasks.ts cli/src/commands/memory/doctor.ts \
+  cli/src/services/node/node-service.ts cli/src/services/tasks/paths.ts \
+  skills/conversation-to-tasks/SKILL.md \
+  skills/project-tasks-classify/SKILL.md \
+  cli/README.md README.md cli/test/tasks cli/test/services
 git commit -m "$(cat <<'EOF'
 fix: write tasks into the node harness board
 

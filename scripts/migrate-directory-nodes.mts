@@ -9,18 +9,18 @@ import {
   MemoryNode,
   NoteNode,
   TaskNode,
-} from "../extensions/cli/src/domain/models/index.js";
+} from "../cli/src/domain/models/index.js";
 import {
   indexContract,
   rewriteLinks,
-} from "../extensions/cli/src/services/node/node-layout.js";
+} from "../cli/src/services/node/node-layout.js";
 import {
   checkPath,
   readEntry,
   saveEntries,
   validateEntry,
   type EntryFile,
-} from "../extensions/cli/src/services/node/node-files.js";
+} from "../cli/src/services/node/node-files.js";
 
 export interface DirectoryMove {
   from: string;

@@ -6,8 +6,8 @@
  * Preview by default. `--apply` writes. Safe to re-run: a migrated scope plans nothing.
  */
 import path from "node:path";
-import { discoverScopes, isScope } from "../extensions/cli/src/services/scope.js";
-import { migrateScopeMaterialIndex } from "../extensions/cli/src/services/init/migrate-scope-readme.js";
+import { discoverScopes, isScope } from "../cli/src/services/scope.js";
+import { migrateScopeMaterialIndex } from "../cli/src/services/init/migrate-scope-readme.js";
 
 const args = process.argv.slice(2);
 const apply = args.includes("--apply");

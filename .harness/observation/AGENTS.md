@@ -13,7 +13,7 @@
 - 凭据、未公开 IP、可识别个人、未脱敏的内部信息
 - 已确认的决策、纠错、必须遵守的做法 → [`memory/`](../memory)
 - 认知资产、研究笔记 → [`knowledge/`](../../knowledge)
-- 接入 Edges 的接口实现 → [`extensions/`](../../extensions/README.md)
+- 接入 Edges 的接口实现 → 仓库根 [`cli/`](../../cli)、[`skills/`](../../skills)、[`apps/`](../../apps)、[`services/`](../../services)、[`mcp-servers/`](../../mcp-servers)、[`system-prompt/`](../../system-prompt)
 - 可复现的评测用例、harness 与分数 → [`evaluation/`](../evaluation/README.md)
 - 原始 `*.log` 文件（根 [`.gitignore`](../../.gitignore) 会忽略它们）；写成脱敏 markdown
 
@@ -25,7 +25,7 @@
 | --- | --- |
 | [`knowledge/`](../../knowledge) | 认知资产。观测记录的是系统如何被使用，不是研究笔记。野外现象若值得沉淀为可复用判断，先回到捕获入口。 |
 | [`memory/`](../memory) | 运营账本。观测提供证据；被采纳的决策、纠错与约束写进 维护记忆，不把本目录当成第二份决策库。 |
-| [`extensions/`](../../extensions/README.md) | 接口层。观测可以记录某个 extension 在野外的表现；实现仍在 extensions。 |
+| 仓库根 `cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` | 接口层。观测可以记录这些能力在野外的表现；实现仍在这些目录。 |
 | [`evaluation/`](../evaluation/README.md) | 评测把假设做成可复现对照；本目录只记看到了什么。观测不是评测。 |
 
 自托管 Langfuse 是独立的观测后端候选，不是本目录，也不是看板「知识库 Observation 系统」。宿主与编排见 [ADR 0014](../../docs/adr/0014-self-hosted-langfuse-on-minigtr.md)–[ADR 0016](../../docs/adr/0016-langfuse-docker-compose.md)，验收顺序见 [ADR 0020](../../docs/adr/0020-langfuse-ui-then-few-clients.md)。现行访问面是 [ADR 0033](../../docs/adr/0033-langfuse-public-https-via-cloudflare-tunnel.md)：公网 HTTPS 经 Cloudflare Tunnel；[ADR 0017](../../docs/adr/0017-langfuse-tailscale-only-access.md) 已取代。产品卡可以日后消费该后端。定时机外备份，以及更广的 Grok / edges 接线，仍是后续或产品卡范围。实例域名不写进本仓。

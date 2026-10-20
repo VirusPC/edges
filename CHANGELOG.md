@@ -5,11 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-本文件只记 Edges 这个仓库本身的重要变化，方便扫一眼「系统最近能做什么」。某个对外技能自己的版本记录，看 [`extensions/skills/`](extensions/skills/) 下面各自的 changelog；跨机器共用、但不绑定 Edges 的扩展，看 [`shared-extensions/CHANGELOG.md`](shared-extensions/CHANGELOG.md)。尚未发版的变化按功能模块分组。Unreleased 的 `###` 用功能模块原名，不要改成「模块：摘要」或只留摘要；每条 `-` 前面加短小标题，写成 `- **小标题：** 正文…`。完整约定在项目记忆 `project_repo_changelog`，示例是 commit `a80d1b0`。
+本文件只记 Edges 这个仓库本身的重要变化，方便扫一眼「系统最近能做什么」。某个对外技能自己的版本记录，看 [`skills/`](skills/) 下面各自的 changelog；跨机器共用、但不绑定 Edges 的扩展，看 [`shared-extensions/CHANGELOG.md`](shared-extensions/CHANGELOG.md)。尚未发版的变化按功能模块分组。Unreleased 的 `###` 用功能模块原名，不要改成「模块：摘要」或只留摘要；每条 `-` 前面加短小标题，写成 `- **小标题：** 正文…`。完整约定在项目记忆 `project_repo_changelog`，示例是 commit `a80d1b0`。
 
 领域决策、术语表和实现计划不写进这份根 changelog，分别看 [`docs/adr/`](docs/adr/)、[`CONTEXT.md`](CONTEXT.md) 和 [`docs/superpowers/plans/`](docs/superpowers/plans/)。
 
 ## [Unreleased]
+
+### 目录布局
+
+- **extensions 平铺到仓库根：** `extensions/` 这一层取消，不留软链。`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 用原名放到仓库根。`extensions/.harness/` 的记忆并入根 `.harness/`；`extensions/AGENTS.md` 的硬约束并入根 `AGENTS.md`；`skills/project-memory-init` 改由根登记。空目录 `extensions/docs`、`extensions/tools`、`extensions/subagents` 删除。`extensions/new-server` 与 `extensions/others` 从本仓删除（个人仓 `shared-extensions/` 由 peng cheng 另行搬入）。`feedback_cli_under_extensions` 翻案：CLI 放仓库根 `cli/`。决定见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)，对照表见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
+
+| 旧路径 | 新路径 |
+| --- | --- |
+| `extensions/cli/` | `cli/` |
+| `extensions/skills/` | `skills/` |
+| `extensions/apps/` | `apps/` |
+| `extensions/services/` | `services/` |
+| `extensions/mcp-servers/` | `mcp-servers/` |
+| `extensions/system-prompt/` | `system-prompt/` |
+| `extensions/.harness/` | 并入 `.harness/` |
+| `extensions/AGENTS.md` | 硬约束并入根 `AGENTS.md` |
+| `extensions/README.md` | 目录表进根 `README.md`，收录标准进 `docs/architecture.md` |
+| `extensions/docs/`、`extensions/tools/`、`extensions/subagents/` | 删除 |
+| `extensions/new-server/`、`extensions/others/` | 从本仓删除 |
 
 ### 内容归属
 
@@ -21,7 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 组合仓库
 
-- **登记组合仓库必须写说明：** `edges compose register` 现在要求 `--description`。不传，或只传空白，命令以校验错误退出（退出码 2，`errorCode` 为 `VALIDATION_ERROR`），不会把缺说明的条目写进作用域 `AGENTS.md`。说明要写清这个仓存什么、什么时候该往里写。操作见 [`edges-compose`](extensions/skills/edges-compose/SKILL.md)（beta，版本 `0.1.0`）。
+- **登记组合仓库必须写说明：** `edges compose register` 现在要求 `--description`。不传，或只传空白，命令以校验错误退出（退出码 2，`errorCode` 为 `VALIDATION_ERROR`），不会把缺说明的条目写进作用域 `AGENTS.md`。说明要写清这个仓存什么、什么时候该往里写。操作见 [`edges-compose`](skills/edges-compose/SKILL.md)（beta，版本 `0.1.0`）。
 
 ### CLI
 
@@ -36,8 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### CLI
 
-- **正式发布到公共 npm：** `@viruspc/edges` 已可在装了 Node.js 22.20 及以上的机器上执行 `npm install -g @viruspc/edges`，然后 `edges --help`；`edges init` 与 `edges memory remember` 不必再克隆本仓。命令名仍是 `edges`。审阅页随安装包 `dist` 里编好的 HTML/JS/CSS 走，不另发 `tasks-review-app`。仓库里开发用 `pnpm --filter @viruspc/edges`（旧名 `edges-cli` 已改掉）。命令行包已可发布，不再保持 private。版本记录见 [`extensions/cli/CHANGELOG.md`](extensions/cli/CHANGELOG.md)。
-- **推 annotated tag 经 GitHub Actions 发版：** 在 main 上把 `extensions/cli/package.json` 的 `version` 对齐后，打 annotated tag `@viruspc/edges@x.y.z` 并推送，会跑 `.github/workflows/publish-edges-cli.yml`：先测，再进入 Environment `npm-publish` 等人批，批准后用 OIDC Trusted Publishing 执行 `pnpm --filter @viruspc/edges publish --no-git-checks --access public`，不放长效 `NPM_TOKEN`。版本号必须和 `package.json` 一致。
+- **正式发布到公共 npm：** `@viruspc/edges` 已可在装了 Node.js 22.20 及以上的机器上执行 `npm install -g @viruspc/edges`，然后 `edges --help`；`edges init` 与 `edges memory remember` 不必再克隆本仓。命令名仍是 `edges`。审阅页随安装包 `dist` 里编好的 HTML/JS/CSS 走，不另发 `tasks-review-app`。仓库里开发用 `pnpm --filter @viruspc/edges`（旧名 `edges-cli` 已改掉）。命令行包已可发布，不再保持 private。版本记录见 [`cli/CHANGELOG.md`](cli/CHANGELOG.md)。
+- **推 annotated tag 经 GitHub Actions 发版：** 在 main 上把 `cli/package.json` 的 `version` 对齐后，打 annotated tag `@viruspc/edges@x.y.z` 并推送，会跑 `.github/workflows/publish-edges-cli.yml`：先测，再进入 Environment `npm-publish` 等人批，批准后用 OIDC Trusted Publishing 执行 `pnpm --filter @viruspc/edges publish --no-git-checks --access public`，不放长效 `NPM_TOKEN`。版本号必须和 `package.json` 一致。
 - **init 安装包内 skills：** `edges skills init` 和无参 `edges init` 在建 skill 类型索引之后，用依赖里的 `skills@1.7.2` 把包内 Edges skill 装给本机 agent。edges 只补包内目录和 `--skill '*'`；`--` 之后的旗标原样转交。没有 TTY、安装器又没探测到 agent 时，在 `--` 后加 `-g -y`（例如 `edges init -- -g -y`），否则安装器退出 1，init 用同一退出码失败，信封里的 `errorCode` 是 `SKILLS_INSTALL_FAILED`。
 
 ### 复盘与 routines
@@ -69,7 +87,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **旧任务入口继续可用：** `edges tasks status` 对旧 `index.md` 任务仍能正常流转，保留入口文件的拼写，并一起移动日志和附件；索引迁移不会因同一文件的 `INDEX.md` 别名重复登记。
 - **改状态时不动软链登记：** `edges tasks status` 把任务移到另一个状态目录时，只迁移任务自己的登记。父级里指向它的软链登记原样保留，移动后可能断开，和 `mv` 一样；不再报 `Node path contains a symbolic link`。
 - **`--scope` 大小写不同也不越界：** 在大小写不敏感的文件系统上，传给 `--scope` 的路径和实际目录大小写不一致时，`edges tasks list`、`edges tasks get`、`edges tasks update`、`edges tasks project list` 和 `--all` 列表返回的 `path` 不再带 `..`，仍留在作用域内。真正在作用域外的路径会被拒绝，错误码是 `VALIDATION_ERROR`。
-- **持久看板汇总该根下的全部任务板：** 生成页的 `extensions/cli/scripts/generate-tasks-site.ts` 不再接受 `--purpose`。传入 `--scope` 后，它汇总这个根下面发现到的 domain 与 maintenance 板，列表和页面里的 `source.purpose` 仍从目录推出来。
+- **持久看板汇总该根下的全部任务板：** 生成页的 `cli/scripts/generate-tasks-site.ts` 不再接受 `--purpose`。传入 `--scope` 后，它汇总这个根下面发现到的 domain 与 maintenance 板，列表和页面里的 `source.purpose` 仍从目录推出来。
 
 ### 笔记入库与能力面
 
@@ -82,7 +100,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 文档与系统
 
 - **README 改为对外门面：** 根 README 现在先回答外部访客「这是什么、能不能拿去用」：标语「harness 任何目录。你的大脑，也是一个目录。」、七条要点、一张知识闭环图、照着就能跑通的快速开始（`npm install -g @viruspc/edges` 后对任意仓库执行 `edges init`），以及本仓的目录地图。根目录有 `memory/`，放跨主题的短备忘，专题长文仍放在 `projects/`。原来写在 README 里的内容标准下放到所属目录：Edge 准入与演化在 `edges/README.md`，归档与附件规则在新的 `archive/README.md`；原「理念」「系统实现」原文保存在 `docs/architecture.md`。
-- **全局 skill 安装脚本按实际行为改名：** `pnpm skills:install` 改名为 `pnpm skills:install-claude-global`，旧名不保留。它执行 `npx -y skills@1.7.2 add ./extensions/skills -g -a claude-code -y`，只把每个 skill 实体拷进 `~/.claude/skills`，不写中枢 `~/.agents/skills`，也不建软链。外部用户改用 `edges skills init`。
+- **全局 skill 安装脚本按实际行为改名：** `pnpm skills:install` 改名为 `pnpm skills:install-claude-global`，旧名不保留。它执行 `npx -y skills@1.7.2 add ./skills -g -a claude-code -y`，只把每个 skill 实体拷进 `~/.claude/skills`，不写中枢 `~/.agents/skills`，也不建软链。外部用户改用 `edges skills init`。
 - **仓库固定使用 pnpm 10：** 根 `package.json` 的 `packageManager` 固定为 `pnpm@10.34.7`。开了 Corepack 的机器会自动换到这个版本，`pnpm install --frozen-lockfile` 不再因为 pnpm 9 的 `pnpmfileChecksum` 对不上而失败。不要把锁文件降到 pnpm 9。
 
 ## [1.4.0] - 2026-10-08
@@ -105,7 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 任务看板与项目
 
 - **部署先生成数据契约：** 持久 `/tasks/` 在生成页面前运行 `pnpm --filter edges-cli run build:schemas`。审阅页校验任务正文时读取这份构建产物；仓库不提交它。
-- **站点迁移走固定免密入口：** Deploy 不再对仓库里的脚本使用 sudo。在服务器上用 root 执行一次 `sudo bash extensions/services/artifacts-preview/deploy/install-site-layout.sh`，之后只免密运行 `/usr/local/sbin/edges-migrate-site-layout`，把 teaching 与 tasks 的磁盘路径改到当前布局。
+- **站点迁移走固定免密入口：** Deploy 不再对仓库里的脚本使用 sudo。在服务器上用 root 执行一次 `sudo bash services/artifacts-preview/deploy/install-site-layout.sh`，之后只免密运行 `/usr/local/sbin/edges-migrate-site-layout`，把 teaching 与 tasks 的磁盘路径改到当前布局。
 - **仓库根列出维护任务：** 在仓库根运行 `edges tasks list` 会顺着根入口登记的 `.harness/tasks/README.md` 列出维护任务。`--super` 仍只列出领域目录 `tasks/` 下的任务。材料与类型的名单留在各自 README 的组织清单里。memory 与 skills 类型目录上的空 `AGENTS.md` 桩已删除；层系统入口仍是 `AGENTS.md`。
 - **任务看板跟材料配置走：** `edges tasks` 的看板目录和入口文件来自 `domain/config/harness-materials.json` 的 `tasks` 材料（当前相对路径 `tasks/README.md`）。维护系统写在 `<scope>/.harness/` 加上该路径；`--super` 写在 `<scope>/` 加上该路径。新建维护登记挂这份材料，不创建、也不要求 `tasks/AGENTS.md`。已有登记若已经挂着看板目录里的入口，则保持原样。
 - **获取当前版本的数据契约：** `edges schema list` 列出可用契约，`edges schema get task-doc/v1` 直接输出 TaskDoc JSON Schema，无需进入仓库或选择 scope。契约从 TS 数据定义生成，随构建包分发，不再手工维护仓库内的 JSON 文件。分组 JSON 与审阅页输入使用同一契约校验：保留对象、数组等扩展 metadata；非法状态、日期和未知顶层字段会明确报错，不自动修正输入。
@@ -135,7 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **跳转与返回定位：** 双击 Projects、Tasks、Details 标题可滚到对应章节，双击 Edges 回到页顶。窄屏 Details 中的「回到看板」会滚到当前卡片、保留选中状态，并让开吸顶的 Tasks 和状态标题。修复窄屏滚动范围问题后，从页顶可以滚到详情，返回看板后也能再滚回 Projects。
 - **按项目分组列出：** 可以用 `edges tasks list --group-by project` 按任务项目分组列出看板，需要时加 `--format json`。输出为稳定的 `edges.tasks.grouped/v1` 分组 JSON；原有筛选和排序先执行，再分组。这个输出与审阅页输入格式不同，部署生成器会完成转换。
 - **构建为单份页面：** 生成审阅页前，先用 `pnpm --filter tasks-review-app run build` 构建前端资源，随后由 `edges tasks project review-page` 将脚本和样式内联到一份 HTML 中；构建产物不进 git。`deploy.yml` 会在同步 main 后完成构建、格式转换和静态页生成，并修复了读取 Artifacts token 的引号错误，避免部署因语法错误中断。
-- **固定看板随部署更新：** nginx 首次配置完成后，`/tasks/` 与 `/teaching/` 在同一台机器上提供固定入口；看板随 main 的成功部署更新。首次配置使用 `extensions/cli/deploy/setup-nginx-tasks.sh`，后续部署自动生成页面。它是长期入口，不使用 Artifacts 临时链接的到期机制。
+- **固定看板随部署更新：** nginx 首次配置完成后，`/tasks/` 与 `/teaching/` 在同一台机器上提供固定入口；看板随 main 的成功部署更新。首次配置使用 `cli/deploy/setup-nginx-tasks.sh`，后续部署自动生成页面。它是长期入口，不使用 Artifacts 临时链接的到期机制。
 
 ### Artifacts 预览
 
@@ -148,8 +166,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 笔记入库与能力面
 
-- **任务人审后落库：** 新增 `conversation-to-tasks`（`extensions/skills/conversation-to-tasks`），从对话整理任务草稿，正文按背景 → 目标 → 动作 → 完成标准组织，使用中文栏名。背景和目标必填，动作和完成标准可选；完成标准可在 `grill-with-docs` 后补齐。通过 `edges tasks create` 或 `edges tasks update` 落库，可以在对话确认后写入，也可以写在独立分支上提 PR 审阅。
-- **CLI 目录改名：** 多命令 CLI 的代码目录从 `extensions/clis` 改为 `extensions/cli`，引用旧路径的本地脚本需要同步调整。当时 npm 包名仍为 `edges-cli`，二进制仍为 `edges`，`pnpm --filter edges-cli` 和命令行为不变。（现行包名是 `@viruspc/edges`，见 Unreleased「一行安装 edges 命令」。）
+- **任务人审后落库：** 新增 `conversation-to-tasks`（`skills/conversation-to-tasks`），从对话整理任务草稿，正文按背景 → 目标 → 动作 → 完成标准组织，使用中文栏名。背景和目标必填，动作和完成标准可选；完成标准可在 `grill-with-docs` 后补齐。通过 `edges tasks create` 或 `edges tasks update` 落库，可以在对话确认后写入，也可以写在独立分支上提 PR 审阅。
+- **CLI 目录改名：** 多命令 CLI 的代码目录从 `extensions/clis` 改为 `cli`，引用旧路径的本地脚本需要同步调整。当时 npm 包名仍为 `edges-cli`，二进制仍为 `edges`，`pnpm --filter edges-cli` 和命令行为不变。（现行包名是 `@viruspc/edges`，见 Unreleased「一行安装 edges 命令」。）
 - **明确本地 CLI 使用方式：** 当时文档写明包名 `edges-cli` 保持 `private`，不发布到 npm registry。日常可用 `pnpm --filter edges-cli exec tsx src/index.ts` 运行；本地 `edges` 二进制来自 `dist/index.js`，需先让 `pnpm --filter edges-cli build` 成功，`prepack` 会运行同一构建流程。（此条已过时：见上方 Unreleased「一行安装 edges 命令」。现行包名是 `@viruspc/edges`，可以发布到 npm。）
 
 ### 文档与系统
@@ -163,7 +181,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 跨 Agent 接力的工作项看板改到 [`knowledge/tasks/`](.harness/tasks)。原来 `knowledge/todos/` 里的条目已经改成现在的任务记录格式并迁了过来；旧目录已删除，没有再留跳转说明。
 - 可以用 `edges tasks` 管理这块看板：`edges tasks list`（列出）、`edges tasks get`（查看）、`edges tasks create`（创建）、`edges tasks update`（更新）、`edges tasks status`（改状态）。运行记录可以只读查看：`edges tasks runs`、`edges tasks run-messages`。目前还不能从命令行删除任务，也还没有和 GitHub 同步。创建或更新时可以用 `--priority` 标优先级，取值为 `urgent` / `high` / `medium` / `low` / `none`（写在 `metadata.edges-task-priority`，缺省为 `none`）；列出时可以用 `edges tasks list --sort priority` 按优先级排序。改优先级不会把任务挪到别的状态文件夹。
 - 任务可以归到一个任务项目里，文件放在 `knowledge/tasks/<项目>/` 下；还没分组的放在 `_default`。创建或筛选时用 `--project`，换项目用 `edges tasks update --project`；`edges tasks status` 只在同一个项目内移动。项目的标题和说明用 `edges tasks project list`、`edges tasks project get`、`edges tasks project create`、`edges tasks project update` 管理；任务正文仍以看板上的 markdown 为准。
-- 新增命令 `edges tasks project review-page`：根据分组建议生成一个本地网页，方便用浏览器拖拽调整任务归属。点左侧分组可以筛选列表，拖到分组上可以改归属。新增 classifyTasks 技能（`extensions/skills/project-tasks-classify`）按你已经建好的任务项目给整板提出归属建议；确认时默认打开上面的审阅页，再用 `edges tasks update --project` 落地。没有图形界面时可以退回用表格。
+- 新增命令 `edges tasks project review-page`：根据分组建议生成一个本地网页，方便用浏览器拖拽调整任务归属。点左侧分组可以筛选列表，拖到分组上可以改归属。新增 classifyTasks 技能（`skills/project-tasks-classify`）按你已经建好的任务项目给整板提出归属建议；确认时默认打开上面的审阅页，再用 `edges tasks update --project` 落地。没有图形界面时可以退回用表格。
 
 ### 项目记忆（project-memory）
 
@@ -176,11 +194,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 笔记入库与能力面
 
-- 把笔记写入仓库的入口现在是命令 `edges note`、对应的 `edges-note` 技能（`extensions/skills/edges-note`），以及 MCP。旧命令名 `edges-note` 和仓库根目录脚本已经去掉，没有留下兼容别名。仓库根目录不再提供 `bin/` 脚本，也不再用 `EDGES_SCRIPT` 环境变量去找这些脚本；安装时也不会再把仓库根的 `bin/` 加进 PATH。笔记入库时的 git 操作改在命令 `edges note` 里完成。根目录 `inbox/` 里旧的自动入库测试草稿已删除。
+- 把笔记写入仓库的入口现在是命令 `edges note`、对应的 `edges-note` 技能（`skills/edges-note`），以及 MCP。旧命令名 `edges-note` 和仓库根目录脚本已经去掉，没有留下兼容别名。仓库根目录不再提供 `bin/` 脚本，也不再用 `EDGES_SCRIPT` 环境变量去找这些脚本；安装时也不会再把仓库根的 `bin/` 加进 PATH。笔记入库时的 git 操作改在命令 `edges note` 里完成。根目录 `inbox/` 里旧的自动入库测试草稿已删除。
 
 ### 教学站点
 
-- 教学工作区从 `knowledge/teach/` 改名为 `knowledge/teaching/`，网站上的路径也一起改了。部署改成：GitHub Actions 登录服务器后，在仓库里直接拉取最新的 main，不再单独推送教学目录。README 上加了部署状态徽章。新增 `learn-repo` 技能（`extensions/skills/learn-repo`）：把要长期学习的外部仓库挂到对应教学主题下，主仓库只记一个提交指针。Obsidian 会忽略这些学习仓库，避免搜索和图谱被外部文件占满。
+- 教学工作区从 `knowledge/teach/` 改名为 `knowledge/teaching/`，网站上的路径也一起改了。部署改成：GitHub Actions 登录服务器后，在仓库里直接拉取最新的 main，不再单独推送教学目录。README 上加了部署状态徽章。新增 `learn-repo` 技能（`skills/learn-repo`）：把要长期学习的外部仓库挂到对应教学主题下，主仓库只记一个提交指针。Obsidian 会忽略这些学习仓库，避免搜索和图谱被外部文件占满。
 
 ## [1.1.0] - 2026-09-09
 
@@ -189,8 +207,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `shared-extensions/`：跨机器、跨 Agent 共享的个人 harness（skills、MCP 配置、plugins、hooks）。接入 Edges 的能力仍在 `extensions/`。整层发版：`VERSION` + `CHANGELOG.md` + tag `shared-extensions@`。
 - MIT 许可证。
 - README 增加「隐私与脱敏」节。
-- `extensions/cli/`：面向 agent 的 `edges-note` CLI（JSON stdout，复用 `bin/new-note`）。本地 agent 优先走它；MCP `new-note` 保留。
-- `pnpm skills:link`：把 `extensions/skills` 里每个 skill 以相对软链挂到 `.agents/skills`。
+- `cli/`：面向 agent 的 `edges-note` CLI（JSON stdout，复用 `bin/new-note`）。本地 agent 优先走它；MCP `new-note` 保留。
+- `pnpm skills:link`：把 `skills` 里每个 skill 以相对软链挂到 `.agents/skills`。
 - 项目级 `teach` skill / `knowledge/teaching/` 教学工作区。
 - 项目级 `.agents/skills` 增加 `grill-with-docs`：grilling 同时产出 ADR 与 glossary。
 

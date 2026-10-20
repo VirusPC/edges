@@ -4,7 +4,7 @@ status: accepted
 
 # edges init / skills init 顺带把 skills 装给 agent
 
-只装 `@viruspc/edges` CLI，本地 agent 用不上它；要让 agent 用起来，还得装 `extensions/skills/` 下的 skill。本 ADR 决定 skill 如何随 CLI 分发和安装。
+只装 `@viruspc/edges` CLI，本地 agent 用不上它；要让 agent 用起来，还得装 `skills/` 下的 skill。本 ADR 决定 skill 如何随 CLI 分发和安装。
 
 **Amends ADR 0031**：无参 `edges init` 的默认集加入 skills；`edges skills init` 除建 skill 类型索引外，还安装包内 skill。0031 其余决定不变。
 
@@ -14,7 +14,7 @@ status: accepted
 
 ## Decision
 
-1. **skill 打进 npm 包**：`extensions/cli/package.json` 的 `files` 加入 skills 目录，与 CLI 同版本发布，安装时不从 GitHub 拉。与 edges CLI 无关的 6 个 skill 移到 `shared-extensions/skills/`，不进包。
+1. **skill 打进 npm 包**：`cli/package.json` 的 `files` 加入 skills 目录，与 CLI 同版本发布，安装时不从 GitHub 拉。与 edges CLI 无关的 6 个 skill 移到 `shared-extensions/skills/`，不进包。
 2. **安装是 vercel skills 的薄封装**：`edges skills init` 的安装步骤运行固定版本的 `skills@1.7.2`：`skills add <包内 skills 目录的绝对路径> --skill '*'`。edges 只补这两样：skill 源地址、选中全部 skill。agent、`-g`、`-y`、有无 TTY、同名覆盖等其余行为一律按 vercel skills 的默认，用户给的旗标原样透传。edges 不加任何额外逻辑；这一块有问题都以 vercel skills 的行为为准。
 3. **装在 init 里**：不新开 `edges skills install`。`edges skills init` 既建 skill 类型索引（同 ADR 0031），也安装；重跑即刷新。根 `edges init` 默认集加 skills。
 4. **失败即失败**：vercel skills 非零退出时，`edges skills init` / `edges init` 也非零退出。不提供 `--no-skills`。

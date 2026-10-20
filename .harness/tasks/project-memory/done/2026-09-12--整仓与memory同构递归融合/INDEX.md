@@ -81,8 +81,8 @@ metadata:
 
 关联资料：
 
-- [Project Memory 协议](../../../../../extensions/skills/project-memory-init/references/PROTOCOL.md)：层入口、类型入口、两跳及递归规则。
-- [Project Memory 布局](../../../../../extensions/skills/project-memory-init/references/LAYOUT.md)：当前目录形态和外部内容根限制。
-- [Ask](../../../../../extensions/skills/project-memory-ask/SKILL.md)、[Remember](../../../../../extensions/skills/project-memory-remember/SKILL.md)：按作用域检索与沉淀。
-- [Edges 扩展](../../../../../extensions/README.md)、[共享扩展](../../../../../shared-extensions/README.md)：能力归属与分发边界。
+- [Project Memory 协议](../../../../../skills/project-memory-init/references/PROTOCOL.md)：层入口、类型入口、两跳及递归规则。
+- [Project Memory 布局](../../../../../skills/project-memory-init/references/LAYOUT.md)：当前目录形态和外部内容根限制。
+- [Ask](../../../../../skills/project-memory-ask/SKILL.md)、[Remember](../../../../../skills/project-memory-remember/SKILL.md)：按作用域检索与沉淀。
+- [Edges 扩展](../../../../../README.md)、[共享扩展](../../../../../shared-extensions/README.md)：能力归属与分发边界。
 - 本任务前文为历史讨论；其中旧版平铺类型索引路径仅作历史背景，当前形态以 PROTOCOL/LAYOUT 为准。

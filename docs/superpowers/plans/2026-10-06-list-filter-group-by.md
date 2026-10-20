@@ -22,7 +22,7 @@
 
 ### Task 1: 纯函数
 
-Create `extensions/cli/src/services/list-query.ts` and `extensions/cli/test/services/list-query.test.ts`.
+Create `cli/src/services/list-query.ts` and `cli/test/services/list-query.test.ts`.
 
 `fieldText(record, field)`、`matchesFilters(record, filters)`、`groupRecords(records, field)`。
 

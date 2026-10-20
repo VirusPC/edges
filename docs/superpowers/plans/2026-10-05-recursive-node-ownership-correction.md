@@ -16,14 +16,14 @@
 - Isolated worktrees only. Never edit knowledge/posts or .obsidian/workspace.json. No private content fetched from other clones/worktrees, no merge/deployment/release/automatic directory-review schedule.
 - AGENTS remains three parts: 本层硬约束 (alias 本层重要约束), 本层记忆, 下层记忆索引. Tasks and other module references fit the existing parts; no separate 工作与模块入口.
 - No independent-goals/decisions/validation eligibility gate. Real directories with a readable AGENTS are nodes; CLI selects the explicit scope or nearest AGENTS with Git fallback when none exists. This is initial CLI discovery policy, not inference of logical parent from dirname. Explicit scope still does not initialize Memory automatically.
-- The43 promoted public records return to original owners: extensions16, extensions/skills/project-memory-init17, shared-extensions1, knowledge/notes1, old knowledge/tasks8 now .harness/tasks. Domain tasks reference the board-maintenance conventions rather than duplicating them.
+- The43 promoted public records return to original owners: extensions16, skills/project-memory-init17, shared-extensions1, knowledge/notes1, old knowledge/tasks8 now .harness/tasks. Domain tasks reference the board-maintenance conventions rather than duplicating them.
 - Restore using current source bytes. Historical Git supplies original owner and manual index sections only. Preserve all current root records, unknown metadata, subsequent edits, private flags and current paths of actual source code/docs.
 - Private copies/archives/journals must remain ignored before writing. Other clones retain their private data and receive a deterministic documented upgrade path; don't claim live migration there.
 - Keep fixed CONTEXT/docs/ADR/Skill locations; use references. Keep memory/skills containers optional with type-level AGENTS and managed/referenced distinction.
 
 ### Task 1: Uniform node selection and three-part discovery
 
-**Files:** `extensions/cli/src/services/scope.ts`, normal Memory scope/index helpers, AGENTS syntax/model helpers as necessary, Task project index generators, `scripts/migrate-recursive-layout.mts`, PROTOCOL/LAYOUT and corresponding Skill docs/tests.
+**Files:** `cli/src/services/scope.ts`, normal Memory scope/index helpers, AGENTS syntax/model helpers as necessary, Task project index generators, `scripts/migrate-recursive-layout.mts`, PROTOCOL/LAYOUT and corresponding Skill docs/tests.
 
 **Interfaces:** Current --scope/env/cwd precedence unchanged. Remove only the marker/independent-responsibility eligibility predicate. Domain command semantics remain explicit; adopt/init and writable types still require registered content contracts. Project/task/type indexes may have a sparse representation of the same content model, without requiring empty headings or auto-creating all modules.
 

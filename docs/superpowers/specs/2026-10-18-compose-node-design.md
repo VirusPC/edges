@@ -38,7 +38,7 @@
 一种节点一个文件夹，与 `agents/`、`readme/` 平级。允许跨目录继承。`node/` 继续放路径判定和区块文书，它不是节点类。
 
 ```text
-extensions/cli/src/domain/models/
+cli/src/domain/models/
 ├── agents/
 │   ├── agents-node.ts       # AgentsNode。一条 compose 边，序列化时读写 ComposeNode
 │   └── harness-agents.ts    # 判断路径和正文是不是带 project-harness 的 AGENTS.md

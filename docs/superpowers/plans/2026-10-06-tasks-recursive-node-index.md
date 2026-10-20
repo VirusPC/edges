@@ -68,29 +68,29 @@ AGENTS.md                                  根作用域入口
 2. `board.ts:listTasksWithDocs` 和 `findByStem` 按项目／状态目录查询；`listProjectIds` 也扫描目录。
 3. Task create/update/move 已使用 NodeService，但项目入口生成仍是旧格式，需要保证索引生命周期完整。
 4. 全仓看板通过 `discoverScopes` 扫描物理作用域后逐板读取；它也需要改为从根入口沿登记组成关系与约定的 harness 关系聚合。
-5. 当前有尚未提交的默认值试改：`README.md`、`extensions/cli/README.md`、`src/commands/tasks.ts`、`src/services/tasks/paths.ts` 和新测试 `test/tasks/default-purpose.test.ts`。这不是已验收实现。用户确认计划后先检查这些差异，再纳入任务 4；不要覆盖其他人的修改。
+5. 当前有尚未提交的默认值试改：`README.md`、`cli/README.md`、`src/commands/tasks.ts`、`src/services/tasks/paths.ts` 和新测试 `test/tasks/default-purpose.test.ts`。这不是已验收实现。用户确认计划后先检查这些差异，再纳入任务 4；不要覆盖其他人的修改。
 
 ## 文件与职责
 
 | 文件 | 调整职责 |
 |---|---|
-| `extensions/cli/src/services/tasks/project-meta.ts` | 项目入口采用既有 AGENTS 结构；更新标题／说明时保留索引与非受控内容 |
-| `extensions/cli/src/services/tasks/node-query.ts`（新增） | 用 NodeService 查询；将 TaskNode 投影为现有任务列表格式；解释任务的板归属 |
-| `extensions/cli/src/services/tasks/board.ts` | list/get/project discovery 接入节点查询；删除正常查询路径上的旧目录枚举 |
-| `extensions/cli/src/services/tasks/write.ts`、`move.ts` | CRUD 前确保相应入口可用，复用 NodeService 的登记与移动一致性 |
-| `extensions/cli/src/services/tasks/grouped.ts`、`generate-site.ts` | 由统一节点查询结果构造分组与全仓看板 |
-| `extensions/cli/src/commands/tasks/list.ts`、`commands/tasks.ts`、Tasks 列表服务及投影类型 | 增加 --all-scopes；复用全仓查询、保留来源，兼容既有筛选、排序与分组 |
-| `extensions/cli/test/tasks/all-scopes.test.ts`（新增） | 全仓 CLI 覆盖、子目录调用、用途筛选、来源分组及与看板一致性 |
-| `extensions/cli/src/services/node-service.ts`、`traverse.ts` | 惰性遍历内核、延迟 query 入口、类型条件与分支剪枝；维护去重／环检测／harness 边界，不加入 Task 特判 |
-| `extensions/cli/src/utils/async-query.ts`（新增） | 薄延迟查询包装与通用操作，value() 才执行；内部使用原生 AsyncIterable，不依赖节点模型或 IO |
-| `extensions/cli/src/models/types.ts` | 保留遍历范围，补查询类型条件；不增加公开剪枝回调；任务业务范围策略仍由 Tasks 层提供 |
-| `extensions/cli/src/services/tasks/index-migration.ts`（新增） | 显式历史索引补齐计划，独立于正常读路径 |
+| `cli/src/services/tasks/project-meta.ts` | 项目入口采用既有 AGENTS 结构；更新标题／说明时保留索引与非受控内容 |
+| `cli/src/services/tasks/node-query.ts`（新增） | 用 NodeService 查询；将 TaskNode 投影为现有任务列表格式；解释任务的板归属 |
+| `cli/src/services/tasks/board.ts` | list/get/project discovery 接入节点查询；删除正常查询路径上的旧目录枚举 |
+| `cli/src/services/tasks/write.ts`、`move.ts` | CRUD 前确保相应入口可用，复用 NodeService 的登记与移动一致性 |
+| `cli/src/services/tasks/grouped.ts`、`generate-site.ts` | 由统一节点查询结果构造分组与全仓看板 |
+| `cli/src/commands/tasks/list.ts`、`commands/tasks.ts`、Tasks 列表服务及投影类型 | 增加 --all-scopes；复用全仓查询、保留来源，兼容既有筛选、排序与分组 |
+| `cli/test/tasks/all-scopes.test.ts`（新增） | 全仓 CLI 覆盖、子目录调用、用途筛选、来源分组及与看板一致性 |
+| `cli/src/services/node-service.ts`、`traverse.ts` | 惰性遍历内核、延迟 query 入口、类型条件与分支剪枝；维护去重／环检测／harness 边界，不加入 Task 特判 |
+| `cli/src/utils/async-query.ts`（新增） | 薄延迟查询包装与通用操作，value() 才执行；内部使用原生 AsyncIterable，不依赖节点模型或 IO |
+| `cli/src/models/types.ts` | 保留遍历范围，补查询类型条件；不增加公开剪枝回调；任务业务范围策略仍由 Tasks 层提供 |
+| `cli/src/services/tasks/index-migration.ts`（新增） | 显式历史索引补齐计划，独立于正常读路径 |
 | `scripts/index-task-nodes.mts`（新增） | 批量预览／apply／报告入口，注册为 `pnpm migrate:task-indexes` |
-| `extensions/cli/test/tasks/node-index.test.ts`（新增） | 索引协议、查询和 CRUD 生命周期回归 |
-| `extensions/cli/test/utils/async-query.test.ts`（新增）、`extensions/cli/test/services/node-service.test.ts`（已有） | 构建无 IO、value 显式执行、类型排除、提前终止、上游关闭与范围语义 |
-| `extensions/cli/test/tasks/task-index-migration.test.ts`（新增） | 历史迁移、保真、冲突、漂移、重复执行回归 |
-| `extensions/cli/test/tasks/default-purpose.test.ts` | 默认维护板、显式领域板、根与子作用域一致性 |
-| `extensions/cli/test/tasks/utils/generate-site.test.ts` | 全仓覆盖、来源身份、未登记目录不被静默收录、harness 边界 |
+| `cli/test/tasks/node-index.test.ts`（新增） | 索引协议、查询和 CRUD 生命周期回归 |
+| `cli/test/utils/async-query.test.ts`（新增）、`cli/test/services/node-service.test.ts`（已有） | 构建无 IO、value 显式执行、类型排除、提前终止、上游关闭与范围语义 |
+| `cli/test/tasks/task-index-migration.test.ts`（新增） | 历史迁移、保真、冲突、漂移、重复执行回归 |
+| `cli/test/tasks/default-purpose.test.ts` | 默认维护板、显式领域板、根与子作用域一致性 |
+| `cli/test/tasks/utils/generate-site.test.ts` | 全仓覆盖、来源身份、未登记目录不被静默收录、harness 边界 |
 
 ## Task 1：让项目入口和 Task 生命周期维护同一棵索引树
 
@@ -217,7 +217,7 @@ const list = await tasks.toArray().map(task => task.id).value();
 ```text
 .harness/tasks/                                  根维护任务
 notes/example/.harness/tasks/                    笔记维护任务
-extensions/cli/.harness/tasks/                   CLI 维护任务
+cli/.harness/tasks/                   CLI 维护任务
 .harness/tasks/project/task/.harness/tasks/      单条任务自身的维护任务
 ```
 
@@ -426,7 +426,7 @@ Task 1–3 已由 controller 独立审阅并整合至 Task 4 基线 b06dbfb；�
 ```bash
 pnpm test
 pnpm build
-pnpm exec tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck scripts/index-task-nodes.mts extensions/cli/test/utils/async-query.types.ts
+pnpm exec tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck scripts/index-task-nodes.mts cli/test/utils/async-query.types.ts
 pnpm --filter edges-cli exec node --test --import tsx test/tasks/all-scopes.test.ts test/tasks/project.test.ts
 ```
 
@@ -455,7 +455,7 @@ pnpm --filter edges-cli exec node --test --import tsx test/tasks/all-scopes.test
 ```bash
 pnpm --filter edges-cli exec node --test --import tsx test/tasks/owner-board.test.ts test/tasks/index-migration.test.ts test/tasks/node-index.test.ts test/tasks/node-query.test.ts test/tasks/all-scopes.test.ts test/tasks/default-purpose.test.ts test/tasks/project.test.ts test/tasks/scope.test.ts test/utils/scope.test.ts
 pnpm --filter edges-cli exec tsc --noEmit -p tsconfig.json
-pnpm exec tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck scripts/index-task-nodes.mts extensions/cli/test/utils/async-query.types.ts
+pnpm exec tsc --noEmit --strict --target ES2022 --module NodeNext --moduleResolution NodeNext --esModuleInterop --skipLibCheck scripts/index-task-nodes.mts cli/test/utils/async-query.types.ts
 pnpm test
 pnpm build
 pnpm migrate:task-indexes --root /absolute/worktree

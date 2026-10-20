@@ -1,6 +1,6 @@
 # Optional Markdown frontmatter
 
-> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../extensions/cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；frontmatter 直接采用 `gray-matter` 默认解析/序列化，删除自定义格式行为及 `js-yaml` 直接依赖；不合约定的文档直接修正。下文旧包路径、旧实现与验证属于历史记录，现行约定以链接的 API 文档为准。
+> 后续用户修正：这些能力现已迁入 [CLI 的 TypeScript utils](../../../cli/src/utils/node-tree/README.md)，不再使用独立 `@edges/node-tree` 包；frontmatter 直接采用 `gray-matter` 默认解析/序列化，删除自定义格式行为及 `js-yaml` 直接依赖；不合约定的文档直接修正。下文旧包路径、旧实现与验证属于历史记录，现行约定以链接的 API 文档为准。
 
 Approved design: Task, Memory and AGENTS.md share a Markdown document envelope with optional YAML metadata. AGENTS.md adds its own comment markers, chapters and index rules. Format handling must remain independent from domain validation and filesystem operations.
 
@@ -24,7 +24,7 @@ Metadata is a string-keyed map of JSON-compatible values. No schema is required 
 
 ## 后续目录与语言调整验证
 
-用户要求无需独立 package，改为 CLI utils 内的 TypeScript；YAML 使用现成库。实现现位于 `extensions/cli/src/utils/node-tree/`，模型、codec、存储及遍历边界保留，直接依赖 `yaml` 与 `mdast-util-from-markdown`；原包、workspace 入口和预构建步骤已删除。
+用户要求无需独立 package，改为 CLI utils 内的 TypeScript；YAML 使用现成库。实现现位于 `cli/src/utils/node-tree/`，模型、codec、存储及遍历边界保留，直接依赖 `yaml` 与 `mdast-util-from-markdown`；原包、workspace 入口和预构建步骤已删除。
 
 - CLI TypeScript 检查及 build 通过。
 - 迁入 CLI 的 48 项节点/文档测试均保留；工作区总计 418 项通过（CLI 335、MCP 14、服务 42、页面 27）。

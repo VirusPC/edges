@@ -14,7 +14,7 @@ description: >-
 ---
 
 **背景：**
-2026-10-08 凌晨，用户在审 notes/skills CRUD 收口到 NodeService 的叠层 PR（#185 notes/skills → #186 projects CLI + 根 harness/init → #187 commands node 下沉 service）。先问的是「为什么 commands 层有 `node.ts`」，于是把 `commands/{notes,projects,skills}/node.ts` 下沉到 service，开了 #187。接着用户追问：「我只看到 CLI 改了，根目录的 `.harness` 以及 init 命令有改吗？」核对后，#186 确实改了：根 `.harness` 新增 `projects/README.md`、`notes/README.md` 并登记进根 `AGENTS.md`；`extensions/cli/src/services/memory/init.ts` 与 `extensions/cli/src/domain/config/harness-materials.json` 把 projects、notes 加进了 `edges memory init` 的推荐模块；`project-memory-init` skill 升到 3.4.0。
+2026-10-08 凌晨，用户在审 notes/skills CRUD 收口到 NodeService 的叠层 PR（#185 notes/skills → #186 projects CLI + 根 harness/init → #187 commands node 下沉 service）。先问的是「为什么 commands 层有 `node.ts`」，于是把 `commands/{notes,projects,skills}/node.ts` 下沉到 service，开了 #187。接着用户追问：「我只看到 CLI 改了，根目录的 `.harness` 以及 init 命令有改吗？」核对后，#186 确实改了：根 `.harness` 新增 `projects/README.md`、`notes/README.md` 并登记进根 `AGENTS.md`；`cli/src/services/memory/init.ts` 与 `cli/src/domain/config/harness-materials.json` 把 projects、notes 加进了 `edges memory init` 的推荐模块；`project-memory-init` skill 升到 3.4.0。
 
 问题也就在这里：notes、projects 的初始化是挂在 `memory init` 下面「顺手」生成的。它们不是 memory 的子概念，只是和 memory 共用 `.harness` 材料清单。结果是语义拧着：要改 harness 布局，得先去摸 memory 的 init。用户据此判断 init 本身也要改：补一个 `edges init`，`edges memory init` 或其他 `edges xxx init` 只是调用 `edges init` 背后的 service 来初始化某个具体模块。讨论中曾考虑叫 `edges harness init`，用户定的是 `edges init`。
 
@@ -59,7 +59,7 @@ init 成为 Edges CLI 的标准命令：根命令 `edges init` 是统一初始�
 - [x] `edges init --help` 可用；在空 scope 执行 `edges init` 能生成根 `AGENTS.md` 与 `.harness` 下已登记模块（至少 memory、notes、projects）的组织清单
 - [x] `edges init` 可只初始化指定模块（参数形状在 grill 时定），结果与 `edges <domain> init` 一致
 - [x] `edges memory init` 只调用 init service，并且只初始化 memory（Q7 修订后不再与「顺手建桩」的旧输出比较）
-- [x] commands 下没有 init 业务逻辑：`extensions/cli/src/commands` 中不出现材料清单读取或直接文件写入；材料清单不再归 `services/memory` 独有
+- [x] commands 下没有 init 业务逻辑：`cli/src/commands` 中不出现材料清单读取或直接文件写入；材料清单不再归 `services/memory` 独有
 - [x] ADR 或 CONTEXT 写明 init 标准命令约定
 - [x] 相关测试通过；经 PR 合入 main
 

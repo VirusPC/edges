@@ -5,7 +5,7 @@ import { parseArgs } from "node:util";
 import {
   planContentUnits,
   applyContentUnits,
-} from "../extensions/cli/scripts/content-directory-migration.js";
+} from "../cli/scripts/content-directory-migration.js";
 const { values } = parseArgs({
   options: {
     root: { type: "string" },

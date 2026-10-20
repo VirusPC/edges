@@ -48,20 +48,20 @@
 
 | Path | Change |
 | --- | --- |
-| `extensions/cli/src/services/note/records.ts` | **Delete** |
-| `extensions/cli/src/services/skills/records.ts` | **Delete** |
-| `extensions/cli/src/commands/notes/create.ts` | 本地 `NodeService.create`；标准面 metadata + `--body`；标题经 H1 或 helper；去掉 ingest / `--import-entry` 旗标 |
-| `extensions/cli/src/commands/notes/{get,update,delete}.ts` | 改调 NodeService；update 用 metadata + `--body`；get/delete 只收目标 |
-| `extensions/cli/src/commands/notes/list.ts` | 对齐共享 `--filter` / `--group-by`；不加专用 list 旗标 |
-| `extensions/cli/src/commands/skills/{get,create,update,delete}.ts` | 改调 NodeService；create/update 真写 `skills/managed`（metadata + `--body` + name/description）；get/delete 只收目标 |
-| `extensions/cli/src/commands/skills/list.ts` | 对齐共享 `--filter` / `--group-by`；不加专用 list 旗标 |
-| `extensions/cli/src/services/note/git/*` | **Delete** ingest 路径（`ingest.ts`、`pr.ts`、`exec.ts`、`markers.ts`、`slug.ts`） |
-| `extensions/cli/src/services/note/service.ts`、`auth.ts`（及只服务 ingest 的校验） | 删掉或收掉 ingest 包装与 token 校验 |
-| `extensions/cli/src/commands/notes.ts`、`program.ts` | 帮助文本去掉 git/PR ingest 与 `--import-entry` |
+| `cli/src/services/note/records.ts` | **Delete** |
+| `cli/src/services/skills/records.ts` | **Delete** |
+| `cli/src/commands/notes/create.ts` | 本地 `NodeService.create`；标准面 metadata + `--body`；标题经 H1 或 helper；去掉 ingest / `--import-entry` 旗标 |
+| `cli/src/commands/notes/{get,update,delete}.ts` | 改调 NodeService；update 用 metadata + `--body`；get/delete 只收目标 |
+| `cli/src/commands/notes/list.ts` | 对齐共享 `--filter` / `--group-by`；不加专用 list 旗标 |
+| `cli/src/commands/skills/{get,create,update,delete}.ts` | 改调 NodeService；create/update 真写 `skills/managed`（metadata + `--body` + name/description）；get/delete 只收目标 |
+| `cli/src/commands/skills/list.ts` | 对齐共享 `--filter` / `--group-by`；不加专用 list 旗标 |
+| `cli/src/services/note/git/*` | **Delete** ingest 路径（`ingest.ts`、`pr.ts`、`exec.ts`、`markers.ts`、`slug.ts`） |
+| `cli/src/services/note/service.ts`、`auth.ts`（及只服务 ingest 的校验） | 删掉或收掉 ingest 包装与 token 校验 |
+| `cli/src/commands/notes.ts`、`program.ts` | 帮助文本去掉 git/PR ingest 与 `--import-entry` |
 | `docs/adr/0027-facade-crud-verbs.md` | 更新 skills create/update |
 | `docs/adr/00XX-content-leaf-crud-via-nodeservice.md` | **Create** 短 ADR：叶子经 NodeService，并收录标准 CRUD 旗标表（house CLI surface） |
 | `CONTEXT.md` | 术语表收录同一张标准 CRUD 旗标表；补 NodeService 门面（若缺）。README / memory / tasks 以后照此跟随 |
-| `extensions/cli/test/...` | 旁路消失 + CRUD 回归；删掉 ingest / git / PR 测试并改帮助断言 |
+| `cli/test/...` | 旁路消失 + CRUD 回归；删掉 ingest / git / PR 测试并改帮助断言 |
 | `docs/superpowers/plans/2026-10-08-notes-skills-crud-via-nodeservice.md` | 本 plan 入库 |
 
 ---
@@ -83,12 +83,12 @@
 ### Task 2: notes get/update/delete → NodeService，删 records
 
 **Files:**
-- Delete: `extensions/cli/src/services/note/records.ts`
-- Modify: `extensions/cli/src/commands/notes/get.ts`
-- Modify: `extensions/cli/src/commands/notes/update.ts`
-- Modify: `extensions/cli/src/commands/notes/delete.ts`
-- Modify: `extensions/cli/src/commands/notes/list.ts`（只对齐共享 list 信封）
-- Test: `extensions/cli/test/commands/notes-crud-nodeservice.test.ts`（或既有 note 测试目录）
+- Delete: `cli/src/services/note/records.ts`
+- Modify: `cli/src/commands/notes/get.ts`
+- Modify: `cli/src/commands/notes/update.ts`
+- Modify: `cli/src/commands/notes/delete.ts`
+- Modify: `cli/src/commands/notes/list.ts`（只对齐共享 list 信封）
+- Test: `cli/test/commands/notes-crud-nodeservice.test.ts`（或既有 note 测试目录）
 
 **旗标：** update 用 metadata + `--body`（标题经 H1 或 helper）。get/delete 只有目标路径。list 复用 `--filter` / `--group-by`，范围靠全局 `--scope` / `--super` / `--all`。
 
@@ -114,10 +114,10 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 ### Task 3: skills get/create/update/delete → NodeService，删 records
 
 **Files:**
-- Delete: `extensions/cli/src/services/skills/records.ts`
-- Modify: `extensions/cli/src/commands/skills/{get,create,update,delete}.ts`
-- Modify: `extensions/cli/src/commands/skills/list.ts`（只对齐共享 list 信封）
-- Test: `extensions/cli/test/commands/skills-crud-nodeservice.test.ts`
+- Delete: `cli/src/services/skills/records.ts`
+- Modify: `cli/src/commands/skills/{get,create,update,delete}.ts`
+- Modify: `cli/src/commands/skills/list.ts`（只对齐共享 list 信封）
+- Test: `cli/test/commands/skills-crud-nodeservice.test.ts`
 
 **旗标（保持 VALIDATION_ERROR，不加别的特殊旗标）：**
 - create/update：metadata + `--body`，外加 skill 类型旗标。正文不用 `--content`。
@@ -136,11 +136,11 @@ if (!node) throw new Error(`note not found: ${entryPath}`);
 ### Task 4: 去掉 notes git/PR ingest，`notes create` 改为本地 NodeService.create
 
 **Files:**
-- Modify: `extensions/cli/src/commands/notes/create.ts`
-- Delete: `extensions/cli/src/services/note/git/*`（`ingest.ts`、`pr.ts`、`exec.ts`、`markers.ts`、`slug.ts`）
-- Delete or slim: `extensions/cli/src/services/note/service.ts`、`auth.ts`，以及只为 ingest 存在的 input 校验
-- Modify: `extensions/cli/src/commands/notes.ts`、`extensions/cli/src/program.ts`（帮助里的 ingest / co-author / mode / `--import-entry` 说明）
-- Delete: `extensions/cli/test/note/utils/git-ingest.test.ts`、`git-pr.test.ts`、`git-markers.test.ts`、`git-slug.test.ts`、`auth.test.ts`
+- Modify: `cli/src/commands/notes/create.ts`
+- Delete: `cli/src/services/note/git/*`（`ingest.ts`、`pr.ts`、`exec.ts`、`markers.ts`、`slug.ts`）
+- Delete or slim: `cli/src/services/note/service.ts`、`auth.ts`，以及只为 ingest 存在的 input 校验
+- Modify: `cli/src/commands/notes.ts`、`cli/src/program.ts`（帮助里的 ingest / co-author / mode / `--import-entry` 说明）
+- Delete: `cli/test/note/utils/git-ingest.test.ts`、`git-pr.test.ts`、`git-markers.test.ts`、`git-slug.test.ts`、`auth.test.ts`
 - Modify: 仍断言 `--co-author` / `--mode` / `--dry-run` / token / `--import-entry` 或 `runNoteIngest` 的测试（`cli.test.ts`、`run.test.ts`、`parse.test.ts`、`production-nodes.test.ts` 等）
 
 **`notes create` 参数（标准面 + note 类型旗标，保持 VALIDATION_ERROR）：**

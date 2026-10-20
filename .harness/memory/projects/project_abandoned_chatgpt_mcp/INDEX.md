@@ -13,4 +13,4 @@ ChatGPT Apps / ChatGPT Notes MCP 这两条变更在 2026-02-19 建档后从未�
 
 **Why:** `add-chatgpt-apps-mcp-server` 与 `chatgpt-notes-mcp-app` 只留下空配置，没有可恢复的设计决策。
 
-**How to apply:** 若再做 ChatGPT 侧接入，按当前 `extensions/mcp-servers/` 与 pnpm workspace 从零提案，不要去找已删除的 OpenSpec change。
+**How to apply:** 若再做 ChatGPT 侧接入，按当前 `mcp-servers/` 与 pnpm workspace 从零提案，不要去找已删除的 OpenSpec change。

@@ -19,8 +19,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { acquireWriteLock } from "../extensions/cli/src/services/node/node-lock.js";
-import { isGitBoundary } from "../extensions/cli/src/services/scope.js";
+import { acquireWriteLock } from "../cli/src/services/node/node-lock.js";
+import { isGitBoundary } from "../cli/src/services/scope.js";
 import {
   checkPath,
   readEntry,
@@ -28,7 +28,7 @@ import {
   validateEntry,
   type EntryFile,
   type FileChange,
-} from "../extensions/cli/src/services/node/node-files.js";
+} from "../cli/src/services/node/node-files.js";
 
 const excluded = new Set([
   ".git",

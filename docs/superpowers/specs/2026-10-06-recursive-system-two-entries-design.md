@@ -296,7 +296,7 @@ flowchart TB
 
 - 术语：根 `CONTEXT.md`
 - 修订 ADR 0024：`docs/adr/0029-recursive-system-two-entries.md`
-- 原则摘要：`extensions/cli/src/domain/models/README.md`「设计原则」
+- 原则摘要：`cli/src/domain/models/README.md`「设计原则」
 - 记忆：`project_recursive_system_two_entry`、`project_document_entry_readme_index`、`project_grill_system_entry_q13_q14`、`project_grill_entries_markers_and_titles`、`project_harness_layer_markers`、`project_grill_q16_spec_and_adr_first`
 
 ## 验收（实施后）

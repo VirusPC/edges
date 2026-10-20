@@ -1,5 +1,5 @@
 #!/usr/bin/env -S node --import tsx
-import { isWithinPath } from '../extensions/cli/src/utils/filesystem.js';
+import { isWithinPath } from '../cli/src/utils/filesystem.js';
 /** Reviewed instance correction. Public and private entry points never share discovery. */
 import * as fs from "node:fs";
 import {
@@ -14,14 +14,14 @@ import { execFileSync } from "node:child_process";
 import { pathToFileURL } from "node:url";
 import { parseArgs } from "node:util";
 import { LegacyIndex as AgentsNode } from "./legacy-index.mjs";
-import { parseTypeMeta } from "../extensions/cli/src/services/memory/types.js";
+import { parseTypeMeta } from "../cli/src/services/memory/types.js";
 import { OWNER_MAP, type InstanceJob } from "./migrate-recursive-layout.mjs";
-import * as migration from "../extensions/cli/src/services/memory/migrate.js";
+import * as migration from "../cli/src/services/memory/migrate.js";
 import {
   isDirectory,
   isSymlink,
   ownershipTarget,
-} from "../extensions/cli/src/services/memory/paths.js";
+} from "../cli/src/services/memory/paths.js";
 export interface CorrectionManifest {
   version: 1;
   moves: {

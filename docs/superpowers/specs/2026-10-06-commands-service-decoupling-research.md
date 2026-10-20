@@ -26,8 +26,8 @@
 
 来源是当前树，不是外部库。
 
-- 预览服务 `extensions/services/artifacts-preview/src/server.ts` 的 `POST /artifacts` 写入后即可 GET。响应是 `{ id, url, expiresAt }`，可选 `from`。没有草稿态。TTL 在这次 POST 上起算。
-- `/tasks/` 不执行 `edges tasks list --group-by`。`.github/workflows/deploy.yml` 运行 `extensions/cli/scripts/generate-tasks-site.ts`，由 `generateTasksSite` 调用 `listGroupedByProject` 或 `listRepositoryGroupedByProject`，再调用 `groupedListToReviewPageInput`。该函数要求 `schema === "edges.tasks.grouped/v1"`，条目带 `group`，映射后 `current` 与 `suggested` 都等于这个 `group`。
+- 预览服务 `services/artifacts-preview/src/server.ts` 的 `POST /artifacts` 写入后即可 GET。响应是 `{ id, url, expiresAt }`，可选 `from`。没有草稿态。TTL 在这次 POST 上起算。
+- `/tasks/` 不执行 `edges tasks list --group-by`。`.github/workflows/deploy.yml` 运行 `cli/scripts/generate-tasks-site.ts`，由 `generateTasksSite` 调用 `listGroupedByProject` 或 `listRepositoryGroupedByProject`，再调用 `groupedListToReviewPageInput`。该函数要求 `schema === "edges.tasks.grouped/v1"`，条目带 `group`，映射后 `current` 与 `suggested` 都等于这个 `group`。
 - `services/` 里只有 `services/tasks/result.ts` 引用 `CliContext`。`utils/config.ts` 的 `loadConfig` 引用 `services/scope.ts`。`utils/exit.ts` 引用 note 与 tasks 的错误类型。
 - Memory 没有 list / get / delete 用例。Note 只有 `runIngest`。没有 `services/skill/`。`commands/artifacts/server/ops.ts` 已导出 install、start、stop、restart、status、setup-nginx，入参是 `env` 而不是 `CliContext`。
 

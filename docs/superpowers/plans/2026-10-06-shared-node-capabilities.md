@@ -121,7 +121,7 @@ flowchart LR
 这是目标布局；Schema 命令文件及构建脚本由 Task 5 创建。
 
 ```text
-extensions/cli/
+cli/
 ├── src/
 │   ├── commands/                 # 用户命令入口
 │   │   └── schema.ts             # Task 5：schema list/get，只读编译产物
@@ -164,7 +164,7 @@ Schema 仅描述明确的 TS 对外数据契约，不要求节点类变成纯数
 | `src/domain/operations/` | 保留现有惰性查询与遍历，不新增全仓查询包装 |
 | `src/commands/schema.ts`、`scripts/generate-schemas.ts` | Task 5：获取安装包契约、构建生成；不增加 SchemaService |
 
-表内 src 相对 `extensions/cli/`。执行顺序：domain 归组与依赖清理 → 路径 → AGENTS 格式 → 保存调用链 → 全仓查询 → Schema 生成与获取。Task 0 执行后，后续 Task 1–4 的源码路径均按新布局书写；test/models 和 test/operations 保持原位，只更新其源码引用。后两项复用的核心接口已存在，先跑基线再迁移；不要为了制造 RED 添加没有用户行为意义的实现断言。新增格式/路径行为则先补失败用例。
+表内 src 相对 `cli/`。执行顺序：domain 归组与依赖清理 → 路径 → AGENTS 格式 → 保存调用链 → 全仓查询 → Schema 生成与获取。Task 0 执行后，后续 Task 1–4 的源码路径均按新布局书写；test/models 和 test/operations 保持原位，只更新其源码引用。后两项复用的核心接口已存在，先跑基线再迁移；不要为了制造 RED 添加没有用户行为意义的实现断言。新增格式/路径行为则先补失败用例。
 
 不把“删除所有小文件”作为目标；Task 0–4 不新增通用生产入口文件；Task 5 只新增 Schema 命令、生成脚本与必要的契约清单。Memory 的 service.ts 是原文件改名并删职责，不是增加一层服务。
 
@@ -173,12 +173,12 @@ Schema 仅描述明确的 TS 对外数据契约，不要求节点类变成纯数
 ## Task 0：将模型与操作归入 domain，清理请求类型反向依赖
 
 **Files:**
-- Move: `extensions/cli/src/models/` → `extensions/cli/src/domain/models/`
-- Move: `extensions/cli/src/operations/` → `extensions/cli/src/domain/operations/`
-- Exception move: 原 `extensions/cli/src/models/note/validation.ts` → `extensions/cli/src/services/note/validation.ts`，不进入 domain
-- Update imports: `extensions/cli/src/**/*.ts`、`extensions/cli/test/**/*.ts`、`scripts/legacy-index.mts`、`scripts/migrate-directory-nodes.mts`，以及仓内静态搜索发现的其他源码消费者
-- Update live docs: `extensions/cli/README.md`；本次 spec/plan 已使用目标布局；不批量改写已完成的历史设计记录
-- Verify: `extensions/cli/tsconfig.json` 仍覆盖 `src/**/*.ts`，无须新增 package、path alias 或 domain 总入口
+- Move: `cli/src/models/` → `cli/src/domain/models/`
+- Move: `cli/src/operations/` → `cli/src/domain/operations/`
+- Exception move: 原 `cli/src/models/note/validation.ts` → `cli/src/services/note/validation.ts`，不进入 domain
+- Update imports: `cli/src/**/*.ts`、`cli/test/**/*.ts`、`scripts/legacy-index.mts`、`scripts/migrate-directory-nodes.mts`，以及仓内静态搜索发现的其他源码消费者
+- Update live docs: `cli/README.md`；本次 spec/plan 已使用目标布局；不批量改写已完成的历史设计记录
+- Verify: `cli/tsconfig.json` 仍覆盖 `src/**/*.ts`，无须新增 package、path alias 或 domain 总入口
 - Align runtime baseline: 根及 workspace `package.json` 的 Node engines、现有 Node 版本选择/CI 配置与当前开发文档；历史完成记录不批量改写
 
 **Interfaces:**
@@ -193,11 +193,11 @@ Schema 仅描述明确的 TS 对外数据契约，不要求节点类变成纯数
 
 ```ts
 function destination(relative: string): string {
-  if (relative === 'extensions/cli/src/models/note/validation.ts')
-    return 'extensions/cli/src/services/note/validation.ts';
+  if (relative === 'cli/src/models/note/validation.ts')
+    return 'cli/src/services/note/validation.ts';
   return relative
-    .replace(/^extensions\/cli\/src\/models\//, 'extensions/cli/src/domain/models/')
-    .replace(/^extensions\/cli\/src\/operations\//, 'extensions/cli/src/domain/operations/');
+    .replace(/^extensions\/cli\/src\/models\//, 'cli/src/domain/models/')
+    .replace(/^extensions\/cli\/src\/operations\//, 'cli/src/domain/operations/');
 }
 ```
 
@@ -212,12 +212,12 @@ function destination(relative: string): string {
 ## Task 1：统一物理路径原语，保留业务边界
 
 **Files:**
-- Modify: `extensions/cli/src/utils/filesystem.ts`
-- Modify: `extensions/cli/src/services/node-layout.ts`, `extensions/cli/src/services/node-files.ts`
-- Modify: `extensions/cli/src/services/tasks/board.ts`, `extensions/cli/src/services/tasks/node-query.ts`
-- Modify: `extensions/cli/src/services/memory/paths.ts`, `extensions/cli/src/services/note/git/ingest.ts`
-- Modify: `extensions/cli/src/services/memory/types.ts` 及 typeIndexPath/typeContentDir/listTypeFiles 的直接消费者，仅切换这些函数的定义与导入位置
-- Test: `extensions/cli/test/utils/filesystem.test.ts`, `extensions/cli/test/memory/core-boundaries.test.ts`, `extensions/cli/test/note/utils/git-ingest.test.ts`
+- Modify: `cli/src/utils/filesystem.ts`
+- Modify: `cli/src/services/node-layout.ts`, `cli/src/services/node-files.ts`
+- Modify: `cli/src/services/tasks/board.ts`, `cli/src/services/tasks/node-query.ts`
+- Modify: `cli/src/services/memory/paths.ts`, `cli/src/services/note/git/ingest.ts`
+- Modify: `cli/src/services/memory/types.ts` 及 typeIndexPath/typeContentDir/listTypeFiles 的直接消费者，仅切换这些函数的定义与导入位置
+- Test: `cli/test/utils/filesystem.test.ts`, `cli/test/memory/core-boundaries.test.ts`, `cli/test/note/utils/git-ingest.test.ts`
 
 **Interfaces:**
 - Consumes existing `findAncestor(start: string, matches: (directory: string) => boolean, stopAt?: (directory: string) => boolean): string | undefined`.
@@ -292,12 +292,12 @@ export const typeContentDir = (target: string, name: string): string =>
 ## Task 2：统一 AGENTS 索引，旧 task-projects 由独立脚本迁移
 
 **Files:**
-- Modify: extensions/cli/src/domain/models/agents/{blocks,serialize,agents-node}.ts 的既有索引接口（只在已有接口确实缺能力时修改）
-- Remove after migration: extensions/cli/src/domain/models/memory/index-rendering.ts
-- Modify: extensions/cli/src/services/tasks/project-meta.ts、services/memory/{blocks,entries,agents}.ts
+- Modify: cli/src/domain/models/agents/{blocks,serialize,agents-node}.ts 的既有索引接口（只在已有接口确实缺能力时修改）
+- Remove after migration: cli/src/domain/models/memory/index-rendering.ts
+- Modify: cli/src/services/tasks/project-meta.ts、services/memory/{blocks,entries,agents}.ts
 - Create: scripts/migrate-agents-indexes.mts（只处理显式选定范围的旧 task-projects 索引）
-- Extend tests: extensions/cli/test/models/agents-node.test.ts、test/tasks/utils/project-meta.test.ts、test/tasks/owner-board.test.ts、test/memory/core.test.ts
-- Create: extensions/cli/test/tasks/agents-index-migration.test.ts
+- Extend tests: cli/test/models/agents-node.test.ts、test/tasks/utils/project-meta.test.ts、test/tasks/owner-board.test.ts、test/memory/core.test.ts
+- Create: cli/test/tasks/agents-index-migration.test.ts
 
 **Interfaces and policy:**
 - 所有 Tasks 项目引用使用 InternalNode 的 localChildren/descendantChildren 和既有 serializer；正常命令不生成、更新或搬迁 task-projects 专属区块，不保留第二套业务索引渲染器。
@@ -327,12 +327,12 @@ pnpm --filter edges-cli exec tsx ../../scripts/migrate-agents-indexes.mts --root
 ## Task 3：业务写操作统一经过 NodeService
 
 **Files:**
-- Rename/reduce: `extensions/cli/src/services/memory/node-documents.ts` → `extensions/cli/src/services/memory/service.ts`
-- Modify: `extensions/cli/src/services/memory/{init,add-type,agents,entries,doctor,remember,types,paths}.ts`
-- Modify: `extensions/cli/src/services/tasks/project-meta.ts`, `extensions/cli/src/services/tasks/board.ts`
-- Modify only duplicated persistence/path calls: `extensions/cli/src/services/note/git/ingest.ts`
-- Extend tests: `extensions/cli/test/tasks/{project,owner-board}.test.ts`, `extensions/cli/test/memory/core-boundaries.test.ts`, `extensions/cli/test/note/utils/git-ingest.test.ts`
-- Reuse tests: `extensions/cli/test/services/{node-service,shared-node-state,node-files-atomic}.test.ts`
+- Rename/reduce: `cli/src/services/memory/node-documents.ts` → `cli/src/services/memory/service.ts`
+- Modify: `cli/src/services/memory/{init,add-type,agents,entries,doctor,remember,types,paths}.ts`
+- Modify: `cli/src/services/tasks/project-meta.ts`, `cli/src/services/tasks/board.ts`
+- Modify only duplicated persistence/path calls: `cli/src/services/note/git/ingest.ts`
+- Extend tests: `cli/test/tasks/{project,owner-board}.test.ts`, `cli/test/memory/core-boundaries.test.ts`, `cli/test/note/utils/git-ingest.test.ts`
+- Reuse tests: `cli/test/services/{node-service,shared-node-state,node-files-atomic}.test.ts`
 
 **Interfaces:**
 - Consumes existing NodeService methods (不新增 save/upsert 接口)：
@@ -406,9 +406,9 @@ if (missing.length) {
 ## Task 4：直接复用 NodeService.query
 
 **Files:**
-- Modify: `extensions/cli/src/services/tasks/node-query.ts`, `extensions/cli/src/services/tasks/grouped.ts`
-- Extend test: `extensions/cli/test/services/node-service.test.ts`
-- Reuse tests: `extensions/cli/test/tasks/{all-scopes,node-query}.test.ts`, `extensions/cli/test/operations/{async-query,traverse}.test.ts`
+- Modify: `cli/src/services/tasks/node-query.ts`, `cli/src/services/tasks/grouped.ts`
+- Extend test: `cli/test/services/node-service.test.ts`
+- Reuse tests: `cli/test/tasks/{all-scopes,node-query}.test.ts`, `cli/test/operations/{async-query,traverse}.test.ts`
 
 **Interfaces:**
 - Consumes existing `NodeService.query(scopePath: string, options?: NodeQueryOptions): AsyncQuery<BaseNode>`。
@@ -461,17 +461,17 @@ return service.query(canonicalRoot, {
 ## Task 5：从 TS 契约生成 TaskDoc Schema，提供 CLI 获取命令
 
 **Files:**
-- Modify: `extensions/cli/src/domain/models/tasks/task-doc.ts`、`tasks/types.ts`；Task 0 后的路径，数据契约及公共枚举留在对应模型模块
-- Create: `extensions/cli/src/domain/models/tasks/task-doc-contract.ts`；纯数据契约与生成约束。前端及生成器直接引用，`task-doc.ts` 保留解析适配函数并重导出类型，避免前端类型检查沿解析依赖进入 Node 文件模块。
-- Create: `extensions/cli/scripts/generate-schemas.ts`、`extensions/cli/scripts/schema-contracts.ts`；生成脚本及唯一源清单，不建立运行时服务层
-- Create: `extensions/cli/src/commands/schema.ts`、`extensions/cli/src/services/tasks/task-doc.ts`（两个 JSON 入口共用的契约校验边界）
-- Modify: `extensions/cli/src/program.ts`、`context.ts`、`utils/process-input.ts`；注册命令、限定 Schema 错误输出及 stdin 行为
-- Modify: `extensions/cli/package.json`、`pnpm-lock.yaml`、`extensions/apps/tasks-review-app/package.json`、`src/statuses.ts`、`src/types.ts`；依赖、构建顺序及消费者去重
-- Modify: `extensions/cli/src/services/tasks/grouped.ts`、`review-page.ts`；TaskDoc JSON 输入适配器接受契约允许的扩展 metadata
-- Extend tests: `extensions/cli/test/tasks/utils/grouped.test.ts`、`review-page.test.ts`；合法 TaskDoc 经两个公开 JSON 入口保留数据
-- Create: `extensions/cli/test/schema/contract.test.ts`、`command.test.ts`、`package.test.ts`
-- Remove after compatibility checks: `extensions/cli/schemas/task-doc.v1.json`
-- Update: `extensions/cli/README.md`、ADR 0025 与本 spec/plan 的实施状态
+- Modify: `cli/src/domain/models/tasks/task-doc.ts`、`tasks/types.ts`；Task 0 后的路径，数据契约及公共枚举留在对应模型模块
+- Create: `cli/src/domain/models/tasks/task-doc-contract.ts`；纯数据契约与生成约束。前端及生成器直接引用，`task-doc.ts` 保留解析适配函数并重导出类型，避免前端类型检查沿解析依赖进入 Node 文件模块。
+- Create: `cli/scripts/generate-schemas.ts`、`cli/scripts/schema-contracts.ts`；生成脚本及唯一源清单，不建立运行时服务层
+- Create: `cli/src/commands/schema.ts`、`cli/src/services/tasks/task-doc.ts`（两个 JSON 入口共用的契约校验边界）
+- Modify: `cli/src/program.ts`、`context.ts`、`utils/process-input.ts`；注册命令、限定 Schema 错误输出及 stdin 行为
+- Modify: `cli/package.json`、`pnpm-lock.yaml`、`apps/tasks-review-app/package.json`、`src/statuses.ts`、`src/types.ts`；依赖、构建顺序及消费者去重
+- Modify: `cli/src/services/tasks/grouped.ts`、`review-page.ts`；TaskDoc JSON 输入适配器接受契约允许的扩展 metadata
+- Extend tests: `cli/test/tasks/utils/grouped.test.ts`、`review-page.test.ts`；合法 TaskDoc 经两个公开 JSON 入口保留数据
+- Create: `cli/test/schema/contract.test.ts`、`command.test.ts`、`package.test.ts`
+- Remove after compatibility checks: `cli/schemas/task-doc.v1.json`
+- Update: `cli/README.md`、ADR 0025 与本 spec/plan 的实施状态
 
 **Interfaces:**
 - 保留 `TaskDoc` 及 `taskDocFromParsed` / `taskDocFromMarkdown` 的用途；只给对外数据形状生成 Schema，不导出完整 TaskNode 类。
@@ -535,14 +535,14 @@ assert.ok(missing.stderr.length > 0);
 - [x] GREEN：`pnpm --filter edges-cli run build:schemas` 后运行 `pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx 'test/schema/*.test.ts'`；测试包含生成确定性、正反例、纯 JSON 输出、异常参数与无 stdin 等待。
 - [x] 消费者回归：`pnpm --filter edges-cli exec node --test --test-concurrency=1 --import tsx test/tasks/utils/grouped.test.ts test/tasks/utils/review-page.test.ts test/tasks/grouped-list.test.ts`；合法扩展 metadata 不在 CLI JSON 适配阶段被拒绝，前端类型检查与显示同样通过。
 - [x] 从干净构建打包，将安装包放到仓库外临时目录，仅安装 production 依赖，确保没有 TS 源码或生成器开发依赖，只有生产依赖；执行编译后的 list/get。暂移一份临时包内 Schema 验证明确报错及不生成兜底。此测试不能拿工作树源码执行代替分发包。
-- [x] 运行 CLI 与审阅页独立构建/测试/typecheck，记录实际 Node 22 结果；确认 `git ls-files extensions/cli/dist` 无输出。更新 README 的命令及构建说明、ADR 实施状态，提交 `feat: generate and expose TaskDoc JSON Schema`，带 Co-authored-by。
+- [x] 运行 CLI 与审阅页独立构建/测试/typecheck，记录实际 Node 22 结果；确认 `git ls-files cli/dist` 无输出。更新 README 的命令及构建说明、ADR 实施状态，提交 `feat: generate and expose TaskDoc JSON Schema`，带 Co-authored-by。
 
 ## 最终验收
 
 - [x] 审查职责边界：parse/serialize/validate、字段更新与自身索引维护仍归 Model；operations 保留集合/遍历/查询职责；完整文件与跨节点变更通过 Service。没有为 Schema 生成搬迁节点方法或替换继承体系。
 - [x] 对照“架构审查结论与简化验收”报告被删除的重复机制、公共概念和新增构建成本；验证 Tasks 使用通用索引、旧区块仅由独立脚本迁移及创建关系分组符合最终决策，同一用例内同政策 Service 复用。不能仅用移动目录、行数或文件数证明简化完成。
 - [x] Task 5 全部通过：TS 为字段唯一源，v1 兼容性与方言已验证；干净构建和仓库外分发包可获取 Schema，生成物不入 Git；Ajv 不修改输入，也未误用到可省略字段的原始 Markdown。ADR 中保留选型依据、候选取舍、探针限制与实际验收结果。
-- [x] `rg -n 'MemoryDocument|loadMemoryDocument|saveMemoryDocument|repositoryNodeQuery|writeAtomic|domain/models/memory/index-rendering' extensions/cli/src`：本轮移除的包装与旧路径无残留。不新增 NodeDocument/DocumentService/save 包装。
+- [x] `rg -n 'MemoryDocument|loadMemoryDocument|saveMemoryDocument|repositoryNodeQuery|writeAtomic|domain/models/memory/index-rendering' cli/src`：本轮移除的包装与旧路径无残留。不新增 NodeDocument/DocumentService/save 包装。
 - [x] 检查 project-meta.ts 的 AGENTS 保存已通过 NodeService；检查业务更新采用 Service input，未因删除包装变成直接修改对象后 raw writeFile。Model 内存方法与内部校验草稿仍可存在。
 - [x] 检查 domain 与纯 utils 无业务 Service 反向依赖（含 type-only import/export），domain/models 不依赖 domain/operations。Memory 的未登记文件盘点保持物理扫描，不能以 query 替代。
 - [x] 用 TypeScript compiler API 扫描 src 的 import/export，排除 type-only 边，将相对 .js 路径解析到 .ts 后检查强连通分量。涉及 services 的运行时循环必须为零；Tasks/Memory/Note 之间及 node-* → 业务 Service 的导入边保持为零。重点确认 paths.ts 不再导入或转发 types.ts；不能只用声明图掩盖实现循环。

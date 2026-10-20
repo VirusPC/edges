@@ -25,7 +25,7 @@ description: >-
 - 两 job：`test`（无 Env，跑 `pnpm --filter @viruspc/edges test`）→ `publish`（`needs: test`，`environment: npm-publish`，审批后再 `pnpm --filter @viruspc/edges publish --no-git-checks --access public`）
 - 认证：OIDC Trusted Publishing（`id-token: write`）；setup-node 按 npm 官方示例带 registry-url；provenance 保持默认开启、不加 `--provenance`
 - 门禁：tag 版本硬等于 package.json version；tag commit 必须是 origin/main 祖先；版本已在 npm 上则失败
-- 文档：短 ADR 0037 + 更新 extensions/cli/README（tag 名改为 `@viruspc/edges@x.y.z`，去掉 cli@）；操作备忘含 npm Trusted Publisher 登记与 GitHub Env 创建
+- 文档：短 ADR 0037 + 更新 cli/README（tag 名改为 `@viruspc/edges@x.y.z`，去掉 cli@）；操作备忘含 npm Trusted Publisher 登记与 GitHub Env 创建
 - 同 PR：删除硬编码 `src/utils/version.ts`，CLI 从 package.json 读版本（对齐 Vite/npm/ESLint）；相关 import/测试一起改
 
 **完成标准：**
@@ -34,6 +34,6 @@ description: >-
 - [ ] OIDC Trusted Publishing（`id-token: write`）；setup-node 带 registry-url；provenance 默认开启、不加 `--provenance`
 - [ ] tag 版本硬等于 package.json version；tag commit 是 origin/main 祖先；版本已在 npm 则失败
 - [ ] 不创建 GitHub Release；不改 deploy.yml；不自动打 tag；不引入 changesets
-- [ ] 短 ADR 0037 + 更新 extensions/cli/README（tag 为 `@viruspc/edges@x.y.z`）；操作备忘含 Trusted Publisher 与 GitHub Env
+- [ ] 短 ADR 0037 + 更新 cli/README（tag 为 `@viruspc/edges@x.y.z`）；操作备忘含 Trusted Publisher 与 GitHub Env
 - [ ] 删除硬编码 `src/utils/version.ts`，从 package.json 读版本；相关 import/测试同步
 - [ ] 0.2.0 仍人工 stage；本 workflow 从下一版起用
