@@ -14,7 +14,7 @@
 
 ## 树操作与分层
 
-纯节点关系算法归 operations：遍历次序、本层/下层/harness 关系选择、去重、环检测。将现有 `services/traverse.ts` 移至 `operations/traverse.ts`，保留独立函数，不新增 NodeTree 类，也不把文件加载放入 BaseNode。
+纯节点关系算法归 operations：遍历次序、本层/下层/harness 关系选择、去重、环检测。将现有 `packages/services/traverse.ts` 移至 `operations/traverse.ts`，保留独立函数，不新增 NodeTree 类，也不把文件加载放入 BaseNode。
 
 用户随后确认采用通用布局：`src/operations/` 与 models、services、utils 同级，包含 traverse.ts、query.ts 及各个操作算法文件。traverse 依赖领域模型，查询链保持泛型，不限定 Node；两者均不承担文件 IO 或 CLI 编排。此决定替代早先仅把树操作放入 models/operations 的布局。
 
@@ -71,7 +71,7 @@ NodeService 生命周期限定在一次 CLI 命令内，相关修改属于同一
 - **锁的生命周期：** 先解析稳定的工作树锁身份，再取得锁，然后创建本次命令的 Service、读取业务节点并执行写操作；完成或失败均释放。锁占用直接报错，用户重试，不引入任务队列。只读命令不加锁，不承诺多文件读取是一致性快照。
 - **实现边界：** 命令编排在读操作前取得锁，服务层封装锁及文件 IO，models 不感知锁。直接调用 NodeService 不等于自动获得整个 CLI 命令的锁；不能只锁 save，因为那时可能已基于过期状态生成计划。实际锁根为规范化后的最近 Git worktree 根（不使用 common-dir）；非 Git 写命令统一使用一个固定临时锁；init 可创建或更新祖先 AGENTS，不能用会在命令中变化的 marker 选择锁身份。代价是共享该临时目录的互不相关非 Git 写入也串行，Git worktree 仍保持独立锁域。发现阶段仅查文件元数据，不解析业务文档；不存在的目标按已存在祖先 realpath 加剩余后缀确定身份。Git 锁路径为 `<canonical-worktree-root>/.edges-write.lock/`；非 Git 为 `<os.tmpdir()>/.edges-write.lock/`，不使用 hash 或父级注册表。保留精确 basename `.edges-write.lock` 作为运行时产物：资源快照、入口发现及 import 复制排除它；move/destroy 遇到单元内的该锁时拒绝，避免搬走活跃锁。相似附件名不排除。本仓 .gitignore 加 `/.edges-write.lock/`；CLI 不自动改外部仓 .gitignore，文档提示调用方自行采用。正常锁是空目录，Git 不跟踪目录本身。
 - **锁的机制：** `proper-lockfile` 使用原子 mkdir 创建空 `.lock` 目录，定期更新目录 mtime 作为心跳；释放时删除目录，过期后可尝试回收。它是协作式锁，不是 OS 强制文件权限。检测到持锁失效时采用 proper-lockfile 默认 compromised 处理器抛出错误并终止进程，不能吞掉错误继续写入。正常结束或业务异常在命令 finally 释放，释放失败也返回失败；若业务同时失败，保留原结构化错误及恢复路径，并在 stderr 追加释放失败，不以释放错误覆盖原诊断。
-- **文件划分：** 新增 `services/node-lock.ts` 薄封装工作树锁；在已有 `services/node-files.ts` 接入原子写入并保留读取、快照检查和失败恢复。锁覆盖整个命令，原子写入处理每个文件，两种生命周期分别表达；不新增子目录、package、LockManager 或 AtomicWriter 类。
+- **文件划分：** 新增 `packages/services/node-lock.ts` 薄封装工作树锁；在已有 `packages/services/node-files.ts` 接入原子写入并保留读取、快照检查和失败恢复。锁覆盖整个命令，原子写入处理每个文件，两种生命周期分别表达；不新增子目录、package、LockManager 或 AtomicWriter 类。
 - **文件的保存：** `write-file-atomic` 负责临时文件写入、默认 fsync、rename 替换和清理。已有文件覆盖接入该能力；新建目标的存在性检查、目录移动/删除、附件处理和失败恢复仍遵守原有合同。替换成功后重新取得实际文件身份/快照再回填缓存，不能沿用被替换文件的 inode；不得放宽“外部同字节替换文件仍报错”的检查。
 - **外部冲突：** 保留读取时原文及已有文件/资源身份快照，写入前检测变化，有冲突直接报错。不新增仅凭 mtime 的版本协议。编辑器不遵守 CLI 锁，检查与替换之间仍有竞态窗口；此方案不声称完全排除任意外部写入。
 - **事务边界：** 单文件原子替换不等于多文件一起成功或失败。保留已有失败恢复与残留位置报告，不新增事务框架，不承诺进程崩溃时整次操作原子回滚。选用与项目 Node 引擎兼容的包版本，不能无条件安装最新版。

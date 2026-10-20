@@ -21,4 +21,4 @@ metadata:
 
 **Why:** 用户确认；Q13 影响遍历；Q14 用户称「写个脚本的事」。
 
-**How to apply:** 改 traverse / layout / 根 README·AGENTS 双文件时遵守 Q13 分工。迁移脚本必须 dry-run、冲突检查、幂等；posts 仅在本轮 INDEX 改名迁移中按用户授权处理，不扩大为可随意改博客正文。原则摘要写入 `cli/src/domain/models/README.md`。
+**How to apply:** 改 traverse / layout / 根 README·AGENTS 双文件时遵守 Q13 分工。迁移脚本必须 dry-run、冲突检查、幂等；posts 仅在本轮 INDEX 改名迁移中按用户授权处理，不扩大为可随意改博客正文。原则摘要写入 `packages/cli/src/domain/models/README.md`。

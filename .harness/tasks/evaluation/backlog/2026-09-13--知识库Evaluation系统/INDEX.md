@@ -15,7 +15,7 @@ metadata:
 
 **背景：**
 2026-10-11 盘点评测进度时，peng cheng 指出现有评测只是拿官方数据跑了 LoCoMo、MemoryBench 的小冒烟，没有真正评测这个仓库。讨论后确认，这两个 benchmark 用的是公开对话数据，测的是「模型加检索」的通用能力，测不到 edges 的笔记、ADR 和记忆好不好用，ADR 0008 也规定冒烟结果不能当作证明。因此把「用仓库自己的内容出题」定为本卡的第一刀，不另开近义新卡。
-- 现状：`.harness/evaluation/` 只有官方冒烟，没有一道 edges 自有的题，也没有标准答案。
+- 现状：`packages/evaluation/` 只有官方冒烟，没有一道 edges 自有的题，也没有标准答案。
 - 非目标：不做写代码类任务的评测，那部分归「SWE-ContextBench 主评测」；不替代公开 benchmark，它们只作对外参照。
 - 关联：「SWE-ContextBench 主评测」「evaluation-cases 登记可重复用例」、ADR 0008。
 

@@ -13,8 +13,8 @@
 ## 何时**不**放这里
 
 - 用户/Agent 装好之后**天天会用**的命令 → `cli` 的 `edges`（`package.json` `"bin"` 安装挂钩）
-- 跟外部系统/MCP 协议相关的代码 → 仓库根的 `cli/`、`skills/`、`mcp-servers/`、`apps/`、`services/`；跨机器 harness 的安装脚本仍放本目录，源在个人仓 `VirusPC/edges-brain-viruspc` 的 `shared-extensions/`
-- 纯 Node 包、可被 pnpm 链接的 → `mcp-servers/<name>/`
+- 跟外部系统/MCP 协议相关的代码 → 仓库根的 `packages/cli/`、`packages/skills/`、`packages/mcp-servers/`、`packages/apps/`、`packages/services/`；跨机器 harness 的安装脚本仍放本目录，源在个人仓 `VirusPC/edges-brain-viruspc` 的 `shared-extensions/`
+- 纯 Node 包、可被 pnpm 链接的 → `packages/mcp-servers/<name>/`
 
 ## 命名与权限
 
@@ -35,15 +35,15 @@
 | 脚本 | 入口 | 作用 |
 |---|---|---|
 | `setup` | `pnpm setup` | 首次接入初始化：加载 .env；只清带 `# edges bin` 或 `$REPO/bin` 的 PATH。`pnpm setup --uninstall` 再去掉 `source "<repo>/.env"` |
-| `migrate-recursive-layout.mts` | `pnpm migrate:recursive-layout --worktree <path> --dry-run` | 按审阅归属迁移当前 Edges 实例；改用 `--apply` 写入，见[迁移指南](../docs/recursive-layout-migration.md) |
-| `restore-local-ownership.mts` | `pnpm restore:local-ownership --root <path> --manifest <path> --dry-run` | 审阅符合旧清单的局部所有权纠正；已采用现行公开布局的工作树不重放旧快照 |
-| `migrate-directory-nodes.mts` | `pnpm migrate:directory-nodes --root <path>` | 默认预览 tracked/public 旧单文件到目录入口，显式 `--apply` 写入；旧 journal 存在即拒绝 |
-| `migrate-index-to-INDEX.mts` | `pnpm migrate:index-case -- --root <abs> [--apply]` | 内容叶子入口 `index.md` → `INDEX.md`（含 `posts/`，仅改名）；预览默认，`--apply` 写入；重写登记与正文链接，可重复执行 |
-| `migrate-task-project-lists.mts` | `pnpm migrate:task-project-lists -- --root <abs> [--apply]` | 看板 `AGENTS.md` 里的 README 型 Task Project 链接（含旧 `task-projects` 区块）移入看板 `README.md` 的 `project-entries-local`；`<project>/AGENTS.md` 系统入口留在 AGENTS；预览默认，冲突即停，可重复执行 |
-| `flatten-content-layout.mts` | `pnpm migrate:top-level-layout --root <path>` | 预览去掉 knowledge 层及 apps 移入 extensions，显式 `--apply`；只改 tracked/public 引用，posts 仅搬迁且不改字节 |
-| `migrate-content-units.mts` | `pnpm migrate:content-units --root <path>` | 预览普通 Markdown 目录化与附件归位；`--copy-shared` 复制共用附件，`--archive-unreferenced` 归档根 resources 的无引用附件，`--archive-unused-img` 将未引用旧 img 附件归入 archive/img，`--apply` 写入 |
-| `link-agent-skills` | `pnpm skills:link` | 把 `skills` 里每个 skill 软链到 `.agents/skills` |
+| `migrations/migrate-recursive-layout.mts` | `pnpm migrate:recursive-layout --worktree <path> --dry-run` | 按审阅归属迁移当前 Edges 实例；改用 `--apply` 写入，见[迁移指南](../docs/recursive-layout-migration.md) |
+| `migrations/restore-local-ownership.mts` | `pnpm restore:local-ownership --root <path> --manifest <path> --dry-run` | 审阅符合旧清单的局部所有权纠正；已采用现行公开布局的工作树不重放旧快照 |
+| `migrations/migrate-directory-nodes.mts` | `pnpm migrate:directory-nodes --root <path>` | 默认预览 tracked/public 旧单文件到目录入口，显式 `--apply` 写入；旧 journal 存在即拒绝 |
+| `migrations/migrate-index-to-INDEX.mts` | `pnpm migrate:index-case -- --root <abs> [--apply]` | 内容叶子入口 `index.md` → `INDEX.md`（含 `posts/`，仅改名）；预览默认，`--apply` 写入；重写登记与正文链接，可重复执行 |
+| `migrations/migrate-task-project-lists.mts` | `pnpm migrate:task-project-lists -- --root <abs> [--apply]` | 看板 `AGENTS.md` 里的 README 型 Task Project 链接（含旧 `task-projects` 区块）移入看板 `README.md` 的 `project-entries-local`；`<project>/AGENTS.md` 系统入口留在 AGENTS；预览默认，冲突即停，可重复执行 |
+| `migrations/flatten-content-layout.mts` | `pnpm migrate:top-level-layout --root <path>` | 预览去掉 knowledge 层及 apps 移入 extensions，显式 `--apply`；只改 tracked/public 引用，posts 仅搬迁且不改字节 |
+| `migrations/migrate-content-units.mts` | `pnpm migrate:content-units --root <path>` | 预览普通 Markdown 目录化与附件归位；`--copy-shared` 复制共用附件，`--archive-unreferenced` 归档根 resources 的无引用附件，`--archive-unused-img` 将未引用旧 img 附件归入 archive/img，`--apply` 写入 |
+| `link-agent-skills` | `pnpm skills:link` | 把 `packages/skills` 里每个 skill 软链到 `.agents/skills` |
 
 `pnpm skills:link -- --check` 只校验不写；`--dry-run` 打印动作；`--self-test` 在临时目录跑一遍。vendor 拷贝（`.agents/skills` 里的实体目录）不碰；source 里删掉的 skill，对应软链会清掉。
 
-统一目录转换：`pnpm migrate:directory-nodes --root <worktree>` 默认预览，`--apply` 写入。实现使用 TypeScript `.mts`（NodeNext ESM），仅迁移 tracked/public 受管内容。完整边界与故障处理见 [迁移 Skill](../skills/migrate-directory-nodes/SKILL.md)。
+统一目录转换：`pnpm migrate:directory-nodes --root <worktree>` 默认预览，`--apply` 写入。实现使用 TypeScript `.mts`（NodeNext ESM），仅迁移 tracked/public 受管内容。完整边界与故障处理见 [迁移 Skill](../packages/skills/migrate-directory-nodes/SKILL.md)。

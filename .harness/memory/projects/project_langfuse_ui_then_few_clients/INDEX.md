@@ -21,7 +21,7 @@ metadata:
 
 **How to apply:**
 - 本卡冒烟的标准仍是：UI 能打开且健康，再由 1–2 个客户端发 trace。2026-10-11 17:18（北京时间）这一条已经满足，不要当成还没发过 trace。
-- 可复现步骤在 `.harness/observation/smoke/`。v4 events_only 不走旧 ingestion 的 trace-create。
+- 可复现步骤在 `packages/observation/smoke/`。v4 events_only 不走旧 ingestion 的 trace-create。
 - 不要把全量 Grok / edges 接线写进本卡。
 - 产品语义与多 Agent 接入看 ADR 0015 与 Observation 产品卡；不要改产品卡正文。
 - 对照 ADR `docs/adr/0020-langfuse-ui-then-few-clients.md`。

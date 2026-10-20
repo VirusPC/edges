@@ -18,6 +18,16 @@ VirusPC/edges 拆仓后是独立的开源框架仓。PR #7 已把 `extensions/` 
 
 **已定前提（peng cheng 已拍板，不再讨论）：**
 - A. `skills/` 和 `system-prompt/` 也成为 pnpm workspace 包。
-- B. `evaluation` 和 `observation` 从 `.harness/` 移到仓根这一级，并成为 workspace 包。
+- B. `evaluation` 和 `observation` 从 `.harness/` 移出，并成为 workspace 包。
 
-其余细节（包装目录、包名、`.harness` 其余部分、`scripts/`、PR 拆法、完成标准）待 grill 后补。
+**Grill R1（2026-10-20 peng cheng 保留全部默认）：**
+
+1. 包装在哪 → 全部放在 `packages/`，目录名沿用现有结构；glob 为 `packages/*`、`packages/apps/*`、`packages/services/*`、`packages/mcp-servers/*` → 一个 workspace 根，只在树本来就嵌套的地方再嵌一层。
+2. skills 包 → 私有 `@viruspc/edges-skills`，CLI 用 `workspace:*`，构建解析该包再拷贝（沿用 copy-bundled-skills）→ skill 是 workspace 包，发布的 CLI 仍自带拷好的 `skills/`。
+3. system-prompt → 私有 `@viruspc/edges-system-prompt`，只导出 `*.md`，不构建 → markdown 资产，没有编译步骤。
+4. evaluation 与 observation → 整棵移到 `packages/evaluation`、`packages/observation`，私有 Python `package.json`（只登记脚本与元数据）；locomo 的 gitmodule path 跟着改 → 它们是代码与资产，不是其余 harness。
+5. `.harness/` 其余留下（tasks、memory、notes、projects、skills dogfood）→ 只有评测和观测离开。
+6. 一次性迁移脚本（约 14 个）→ `scripts/migrations/`；根 `package.json` 入口保留并改指新路径；`link-agent-skills` 与 `setup` 留在 `scripts/` → 一次性脚本和日常工具分开。
+7. 一个原子 PR，`git mv`，硬切，不留兼容软链，CHANGELOG 加 `docs/migrations` 对照表，历史计划里的旧路径也改写；workflow 文件名不变 → main 上不出现搬了一半的目录。
+
+决定见 [ADR 0041](../../../../../docs/adr/0041-packages-workspace-layout.md)。状态保持 todo。

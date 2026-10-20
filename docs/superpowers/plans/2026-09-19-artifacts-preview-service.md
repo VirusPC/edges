@@ -4,7 +4,7 @@
 
 **Goal:** Ship a short-lived static Artifacts 预览服务 (upload → public URL → TTL delete) plus thin `edges artifacts` CLI, so humans can open Agent HTML (e.g. a Task Project 审阅页) in a real browser on a reachable URL.
 
-**Architecture:** New pnpm workspace package `services/artifacts-preview/` is the HTTP service (Node `http`, disk store, server-side expiry). `edges artifacts` in `cli` is a thin client: `init` writes `~/.config/edges/artifacts.env`; `publish` / `rm` read that config and call the HTTP API. `edges tasks project review-page` stays render-only (ADR 0012). classifyTasks Skill adds one orchestration beat: render → publish → give the human the public URL. No result-back-to-agent-client. No new MCP this round (Capability Surface remains CLI + Skill + MCP; artifacts MCP is backlog).
+**Architecture:** New pnpm workspace package `packages/services/artifacts-preview/` is the HTTP service (Node `http`, disk store, server-side expiry). `edges artifacts` in `cli` is a thin client: `init` writes `~/.config/edges/artifacts.env`; `publish` / `rm` read that config and call the HTTP API. `edges tasks project review-page` stays render-only (ADR 0012). classifyTasks Skill adds one orchestration beat: render → publish → give the human the public URL. No result-back-to-agent-client. No new MCP this round (Capability Surface remains CLI + Skill + MCP; artifacts MCP is backlog).
 
 **Tech Stack:** TypeScript, Node.js ≥20, NodeNext ESM (relative imports end in `.js`), `node:test` + `tsx`, `node:http`, `node:fs/promises`, `node:crypto`. CLI keeps existing `commander`. No Express/busboy. No embeddings. No browser automation in CI.
 
@@ -24,13 +24,13 @@
 - Test runners: `node --test --import tsx './test/**/*.test.ts'` (never `node --test --import tsx test`)
 - Public repo: no credentials, tokens, or personal data in committed files; config lives in `~/.config/edges/artifacts.env` (gitignored by being outside the repo)
 - Phone review needs a reachable URL (ECS / public host). Localhost is fine for laptop-only; document that phones cannot use localhost
-- Layout: service package under `services/` (new sibling of `cli/` / `mcp-servers/`), **not** inside the CLI command tree. CLI stays the thin command surface
+- Layout: service package under `packages/services/` (new sibling of `packages/cli/` / `packages/mcp-servers/`), **not** inside the CLI command tree. CLI stays the thin command surface
 
 ---
 
 ## File map
 
-**Create — HTTP service (`services/artifacts-preview/`)**
+**Create — HTTP service (`packages/services/artifacts-preview/`)**
 
 - `package.json` — name `edges-artifacts-preview`, private, `"type": "module"`, scripts `build` / `start` / `dev` / `test`
 - `tsconfig.json` — extends `../../../tsconfig.base.json`, `rootDir: src`, `outDir: dist`
@@ -47,7 +47,7 @@
 - `test/store.test.ts`
 - `test/server.test.ts` — upload, auth reject, TTL, path safety
 
-**Create — CLI (`cli/`)**
+**Create — CLI (`packages/cli/`)**
 
 - `src/artifacts.ts` — group command `artifacts`
 - `src/artifacts/init.ts` — `init`
@@ -65,19 +65,19 @@
 
 **Modify**
 
-- `pnpm-workspace.yaml` — add `services/*`
+- `pnpm-workspace.yaml` — add `packages/services/*`
 - `package.json` — optional `start:artifacts` / `dev:artifacts` scripts
-- `README.md` — document `services/`
-- `cli/src/program.ts` — register `addArtifactsCommand`; help lists `artifacts`
-- `cli/src/context.ts` — `usageError` / `usageScope` add `"artifacts"`
-- `cli/README.md` — document `edges artifacts`
-- `cli/test/run.test.ts` — root help lists `artifacts`
-- `cli/test/cli.test.ts` — real entry help lists `artifacts`
-- `skills/project-tasks-classify/SKILL.md` — step 4: after render, `edges artifacts publish` then give URL; still STOP for pasted JSON; no result-back
-- `skills/project-tasks-classify/CHANGELOG.md`
+- `README.md` — document `packages/services/`
+- `packages/cli/src/program.ts` — register `addArtifactsCommand`; help lists `artifacts`
+- `packages/cli/src/context.ts` — `usageError` / `usageScope` add `"artifacts"`
+- `packages/cli/README.md` — document `edges artifacts`
+- `packages/cli/test/run.test.ts` — root help lists `artifacts`
+- `packages/cli/test/cli.test.ts` — real entry help lists `artifacts`
+- `packages/skills/project-tasks-classify/SKILL.md` — step 4: after render, `edges artifacts publish` then give URL; still STOP for pasted JSON; no result-back
+- `packages/skills/project-tasks-classify/CHANGELOG.md`
 - `CHANGELOG.md` `[Unreleased]` — new module **Artifacts 预览**
 - `CONTEXT.md` — `edges artifacts（CLI）` drop “约定中的”
-- `.gitignore` — `services/*/node_modules/` and `services/*/dist/` (root `dist/` already covers)
+- `.gitignore` — `packages/services/*/node_modules/` and `packages/services/*/dist/` (root `dist/` already covers)
 
 **Do not create/commit**
 
@@ -96,11 +96,11 @@
 
 ### Layout (Edges convention)
 
-`extensions/` already has `cli/` (command tree), `mcp-servers/` (MCP hosts), `skills/` (when/how). A long-running static host is neither a Commander node nor an MCP server, so it gets a new sibling:
+`extensions/` already has `packages/cli/` (command tree), `packages/mcp-servers/` (MCP hosts), `packages/skills/` (when/how). A long-running static host is neither a Commander node nor an MCP server, so it gets a new sibling:
 
 ```
-services/artifacts-preview/   # HTTP process
-cli/src/artifacts/           # thin CLI client
+packages/services/artifacts-preview/   # HTTP process
+packages/cli/src/artifacts/           # thin CLI client
 ```
 
 Do **not** put `createServer` inside `cli`. The CLI README rule is **file = one command node**.
@@ -270,7 +270,7 @@ JSON failure envelope: `{"status":"failed","errorCode":"VALIDATION_ERROR"|"AUTH_
 
 ### Skill orchestration (minimal)
 
-In `skills/project-tasks-classify/SKILL.md` step 4, after `review-page` prints `path`:
+In `packages/skills/project-tasks-classify/SKILL.md` step 4, after `review-page` prints `path`:
 
 1. If the human needs a reachable URL (phone / other machine):
 
@@ -299,13 +299,13 @@ ECS: same binary; set `EDGES_ARTIFACTS_HOST=0.0.0.0` and a public `EDGES_ARTIFAC
 ### Task 1: Path safety + disk store
 
 **Files:**
-- Create: `services/artifacts-preview/package.json`
-- Create: `services/artifacts-preview/tsconfig.json`
-- Create: `services/artifacts-preview/src/types.ts`
-- Create: `services/artifacts-preview/src/paths.ts`
-- Create: `services/artifacts-preview/src/store.ts`
-- Create: `services/artifacts-preview/test/paths.test.ts`
-- Create: `services/artifacts-preview/test/store.test.ts`
+- Create: `packages/services/artifacts-preview/package.json`
+- Create: `packages/services/artifacts-preview/tsconfig.json`
+- Create: `packages/services/artifacts-preview/src/types.ts`
+- Create: `packages/services/artifacts-preview/src/paths.ts`
+- Create: `packages/services/artifacts-preview/src/store.ts`
+- Create: `packages/services/artifacts-preview/test/paths.test.ts`
+- Create: `packages/services/artifacts-preview/test/store.test.ts`
 - Modify: `pnpm-workspace.yaml`
 
 **Interfaces:**
@@ -359,11 +359,11 @@ test("safeResolve stays under root", () => {
 
 - [ ] **Step 2: Run tests to verify they fail**
 
-Run: `cd services/artifacts-preview && pnpm test` (after adding package.json / workspace). Expected: FAIL module not found.
+Run: `cd packages/services/artifacts-preview && pnpm test` (after adding package.json / workspace). Expected: FAIL module not found.
 
 - [ ] **Step 3: Implement paths + store + package scaffold**
 
-`package.json` name `edges-artifacts-preview`, scripts matching cli (`"test": "node --test --import tsx './test/**/*.test.ts'"`). Workspace glob `services/*`. Then implement `paths.ts` and `store.ts` so tests pass. `put` writes `meta.json` + files under `files/`. `getFile` returns null for missing, expired (and deletes), or symlink. `sweepExpired` removes expired dirs.
+`package.json` name `edges-artifacts-preview`, scripts matching cli (`"test": "node --test --import tsx './test/**/*.test.ts'"`). Workspace glob `packages/services/*`. Then implement `paths.ts` and `store.ts` so tests pass. `put` writes `meta.json` + files under `files/`. `getFile` returns null for missing, expired (and deletes), or symlink. `sweepExpired` removes expired dirs.
 
 - [ ] **Step 4: Write store tests (TTL + symlink refuse) and implement until green**
 
@@ -384,7 +384,7 @@ test("getFile refuses a symlink inside the artifact dir", async () => {
 - [ ] **Step 5: Commit**
 
 ```bash
-git add pnpm-workspace.yaml services/artifacts-preview
+git add pnpm-workspace.yaml packages/services/artifacts-preview
 git commit -m "feat(artifacts): add preview store with path safety"
 ```
 
@@ -395,11 +395,11 @@ Trailer: `Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>`
 ### Task 2: HTTP service (upload, auth, GET, delete, sweep)
 
 **Files:**
-- Create: `services/artifacts-preview/src/auth.ts`
-- Create: `services/artifacts-preview/src/http.ts`
-- Create: `services/artifacts-preview/src/server.ts`
-- Create: `services/artifacts-preview/src/index.ts`
-- Create: `services/artifacts-preview/test/server.test.ts`
+- Create: `packages/services/artifacts-preview/src/auth.ts`
+- Create: `packages/services/artifacts-preview/src/http.ts`
+- Create: `packages/services/artifacts-preview/src/server.ts`
+- Create: `packages/services/artifacts-preview/src/index.ts`
+- Create: `packages/services/artifacts-preview/test/server.test.ts`
 
 **Interfaces:**
 - Consumes: store + `assertSafeRelPath` from Task 1

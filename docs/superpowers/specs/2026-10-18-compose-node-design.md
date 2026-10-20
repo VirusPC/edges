@@ -14,7 +14,7 @@
 
 `BaseNode.composeChildren` 默认 `undefined`。`children` 不含这些边。`operations/traverse.ts` 在结构 children 之后再拼上 `composeChildren`。`localOnly` 仍然拼上，因为 Compose block 属本层。`NodeService` 用 `isComposeOnlyReference` 把「只出现在 compose 列表里的 id」排除出登记图和写前校验；查询则用 `#insideEnteredCompose` 记住跨仓根，以便走出 `managedRoot`。
 
-`models/agents/compose.ts` 是一组散函数：从说明里抠 `remote:`、比较说明是否原样、拼回说明、把 href 解成绝对目录、再收成 `ComposeEntry`。`AgentsNode` 解析时走 `resolveComposeDirectory`；`services/compose/service.ts` 登记时又对同一路径做 `expandHomePath` + `path.resolve` + `path.relative`，节点里再 `path.resolve` 一次。git 的 clone / pull / push 在 Service，目标目录和 remote 从 `ComposeEntry` 上读。
+`models/agents/compose.ts` 是一组散函数：从说明里抠 `remote:`、比较说明是否原样、拼回说明、把 href 解成绝对目录、再收成 `ComposeEntry`。`AgentsNode` 解析时走 `resolveComposeDirectory`；`packages/services/compose/service.ts` 登记时又对同一路径做 `expandHomePath` + `path.resolve` + `path.relative`，节点里再 `path.resolve` 一次。git 的 clone / pull / push 在 Service，目标目录和 remote 从 `ComposeEntry` 上读。
 
 `SuperAgentsNode` 与 `AgentsNode` 同放在 `models/agents/`。它继承 `AgentsNode`，路径用运行时的 `.super/AGENTS.md`，不 parse、不 serialize、不落盘。
 
@@ -38,7 +38,7 @@
 一种节点一个文件夹，与 `agents/`、`readme/` 平级。允许跨目录继承。`node/` 继续放路径判定和区块文书，它不是节点类。
 
 ```text
-cli/src/domain/models/
+packages/cli/src/domain/models/
 ├── agents/
 │   ├── agents-node.ts       # AgentsNode。一条 compose 边，序列化时读写 ComposeNode
 │   └── harness-agents.ts    # 判断路径和正文是不是带 project-harness 的 AGENTS.md
@@ -52,7 +52,7 @@ cli/src/domain/models/
 ├── memory/ …
 ├── notes/ …
 ├── projects/ …
-├── skills/ …
+├── packages/skills/ …
 ├── node/                    # layout.ts、document.ts、stem.ts
 └── index.ts                 # 按新路径再导出 AgentsNode、SuperAgentsNode、ComposeNode
 ```
@@ -203,9 +203,9 @@ Compose 实现 PR：
 - `core/base-node.ts`：删除 `composeChildren`，增加默认空的 `compose`
 - 根级 `--with-composed`，与 `--scope`、`--super`、`--all` 一起传入 `NodeQueryOptions.withComposed`
 - `operations/traverse.ts`：仅 `withComposed: true` 时穿过 `node.compose`，yield 外部仓库入口后停止；删除 `isComposeOnlyReference`
-- `services/node/node-service.ts`：`--with-composed` 时装载虚拟节点与外部入口；登记图与写前校验不跟随这条边
+- `packages/services/node/node-service.ts`：`--with-composed` 时装载虚拟节点与外部入口；登记图与写前校验不跟随这条边
 - `commands/compose/register.ts`：`--path` 可选；不传时不给 `addChild` directory
-- `services/compose/service.ts`：登记/注销改走 `addChild` / `removeChild`；省略 `--path` 时由节点写入 `~/.edges/composed/<name>`；git 使用 `checkout(name)` 的已展开目录
+- `packages/services/compose/service.ts`：登记/注销改走 `addChild` / `removeChild`；省略 `--path` 时由节点写入 `~/.edges/composed/<name>`；git 使用 `checkout(name)` 的已展开目录
 - 测试：`test/models/compose-node.test.ts`、compose 命令测试；默认 list 不含外部仓库和挂载点，`--with-composed` 的 list 含外部入口、不含挂载点、不含该入口的下层；不传 `--path` 时链接为 `~/.edges/composed/<name>` 且 `checkout` 展开 `~`；显式 `--path` 优先
 - 现状文档：`models/README.md`、`domain/README.md`、CLI README 里描述 Compose 边的句子；`CONTEXT.md` 里「Domain 把 Compose block 收成 Compose 节点」改成现在的虚拟节点和目录。历史 plan / spec / ADR 0034 的决定记录不动
 

@@ -19,6 +19,6 @@ ADR 0010 的 CLI project 子命令与 classifyTasks Skill（id / 目录 `project
 **How to apply:**
 - 改 project 标题/描述用 `edges tasks project update`；新建用 `project create`。
 - `project list|get|create|update` 都会 ensure（update 无 skipId）；orphan 目录会被补种，不要先手写 AGENTS.md。
-- 整理看板用 `project-tasks-classify` Skill（路径 `skills/project-tasks-classify/`），按已有质心做归属建议，禁止手改路径。第 4 步：写建议 JSON → `project review-page --from` → 把 stdout `path` 交给人用系统浏览器打开 → 停止 → 等贴回审阅导出行 → 再 `project create`（如需）/ `update --project`。Markdown 表只作无 GUI 回退。
+- 整理看板用 `project-tasks-classify` Skill（路径 `packages/skills/project-tasks-classify/`），按已有质心做归属建议，禁止手改路径。第 4 步：写建议 JSON → `project review-page --from` → 把 stdout `path` 交给人用系统浏览器打开 → 停止 → 等贴回审阅导出行 → 再 `project create`（如需）/ `update --project`。Markdown 表只作无 GUI 回退。
 - 不要把 Task 升成 Memory Type；不要实现 `edges tasks classify` 或 `apply-review`；不要把 generic tasks Skill/MCP CRUD 塞进本 Skill；不要加仓内 embedding 库。
 - Skill 正文禁止句里的 `edges tasks classify` 必须保留，探针不要因此失败。

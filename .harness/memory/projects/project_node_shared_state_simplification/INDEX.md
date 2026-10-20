@@ -39,7 +39,7 @@ metadata:
 
 **Why:** 用户指出除了 traverse，还应统一组织 filter、map、groupBy、find 等可组合操作。统一目录便于发现整条操作链，同时通用集合查询不应归为 Node 专用模型能力。
 
-**How to apply:** traverse 依赖节点模型、由 Service 注入加载；query 保持泛型和显式 value 求值；filter、map、groupBy、find 等算法分别放独立文件，由 query 组合且不反向依赖查询链，更新全部导入及运行时/类型测试，不保留旧路径转发文件。锁放 services/node-lock.ts，原子保存放已有 services/node-files.ts，保持薄封装。具体完成状态以实施计划为准。
+**How to apply:** traverse 依赖节点模型、由 Service 注入加载；query 保持泛型和显式 value 求值；filter、map、groupBy、find 等算法分别放独立文件，由 query 组合且不反向依赖查询链，更新全部导入及运行时/类型测试，不保留旧路径转发文件。锁放 packages/services/node-lock.ts，原子保存放已有 packages/services/node-files.ts，保持薄封装。具体完成状态以实施计划为准。
 
 
 ## 实施时保留的扩展边界
@@ -84,7 +84,7 @@ metadata:
 
 ## models 与 operations 共同归入 domain
 
-用户提出用 domain 目录包裹 models 和 operations，并要求将该布局一起写入计划。两者在 domain 内保持同级，services/commands/utils 留在 src 顶层。
+用户提出用 domain 目录包裹 models 和 operations，并要求将该布局一起写入计划。两者在 domain 内保持同级，packages/services/commands/utils 留在 src 顶层。
 
 **Why:** 模型和节点操作共同构成领域核心，归组能明确其与 Service 执行编排的边界；这是一处目录归组，不应引入新的调用层、DomainService 或 package。
 

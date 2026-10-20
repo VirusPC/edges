@@ -5,13 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-本文件只记 Edges 这个仓库本身的重要变化，方便扫一眼「系统最近能做什么」。某个对外技能自己的版本记录，看 [`skills/`](skills/) 下面各自的 changelog；跨机器共用、但不绑定 Edges 的扩展，看 [`shared-extensions/CHANGELOG.md`](shared-extensions/CHANGELOG.md)。尚未发版的变化按功能模块分组。Unreleased 的 `###` 用功能模块原名，不要改成「模块：摘要」或只留摘要；每条 `-` 前面加短小标题，写成 `- **小标题：** 正文…`。完整约定在项目记忆 `project_repo_changelog`，示例是 commit `a80d1b0`。
+本文件只记 Edges 这个仓库本身的重要变化，方便扫一眼「系统最近能做什么」。某个对外技能自己的版本记录，看 [`packages/skills/`](packages/skills/) 下面各自的 changelog；跨机器共用、但不绑定 Edges 的扩展，看 [`shared-extensions/CHANGELOG.md`](shared-extensions/CHANGELOG.md)。尚未发版的变化按功能模块分组。Unreleased 的 `###` 用功能模块原名，不要改成「模块：摘要」或只留摘要；每条 `-` 前面加短小标题，写成 `- **小标题：** 正文…`。完整约定在项目记忆 `project_repo_changelog`，示例是 commit `a80d1b0`。
 
 领域决策、术语表和实现计划不写进这份根 changelog，分别看 [`docs/adr/`](docs/adr/)、[`CONTEXT.md`](CONTEXT.md) 和 [`docs/superpowers/plans/`](docs/superpowers/plans/)。
 
 ## [Unreleased]
 
 ### 目录布局
+
+- **代码目录收进 `packages/`：** pnpm workspace 的包都在 `packages/` 下。`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 从仓库根移入，目录名不变。`.harness/evaluation/` 与 `.harness/observation/` 整棵移到 `packages/evaluation/`、`packages/observation/`。一次性迁移脚本移到 `scripts/migrations/`。不留兼容软链。新增私有包 `@viruspc/edges-skills`、`@viruspc/edges-system-prompt`、`@viruspc/edges-evaluation`、`@viruspc/edges-observation`。CLI 用 `workspace:*` 依赖 skills，构建时解析该包再拷进发布目录。npm 包名 `@viruspc/edges` 不变，`repository.directory` 改为 `packages/cli`。决定见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md)，对照表见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
+
+| 旧路径 | 新路径 |
+| --- | --- |
+| `cli/` | `packages/cli/` |
+| `skills/` | `packages/skills/`（`@viruspc/edges-skills`） |
+| `apps/` | `packages/apps/` |
+| `services/` | `packages/services/` |
+| `mcp-servers/` | `packages/mcp-servers/` |
+| `system-prompt/` | `packages/system-prompt/`（`@viruspc/edges-system-prompt`） |
+| `.harness/evaluation/` | `packages/evaluation/`（`@viruspc/edges-evaluation`） |
+| `.harness/observation/` | `packages/observation/`（`@viruspc/edges-observation`） |
+| 一次性 `scripts/*.mts` 等 | `scripts/migrations/` |
 
 - **extensions 平铺到仓库根：** `extensions/` 这一层取消，不留软链。`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 用原名放到仓库根。`extensions/.harness/` 的记忆并入根 `.harness/`；`extensions/AGENTS.md` 的硬约束并入根 `AGENTS.md`；`skills/project-memory-init` 改由根登记。空目录 `extensions/docs`、`extensions/tools`、`extensions/subagents` 删除。`extensions/new-server` 与 `extensions/others` 从本仓删除（个人仓 `shared-extensions/` 由 peng cheng 另行搬入）。`feedback_cli_under_extensions` 翻案：CLI 放仓库根 `cli/`。决定见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)，对照表见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
 

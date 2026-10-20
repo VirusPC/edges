@@ -26,7 +26,7 @@ peng cheng 觉得 VirusPC/edges 不该把 Edges 系统和个人大脑混在一�
 
 **grill R1 拍板（2026-10-20）：**
 - `.harness/memory`（feedbacks / projects / references）整体留系统仓：条目几乎都在讲 Edges 开发；个人仓以后自己 `edges init`。
-- `.harness/observation`（Langfuse 接收器代码与冒烟）留系统仓。
+- `packages/observation`（Langfuse 接收器代码与冒烟）留系统仓。
 - `.harness/skills`：`managed/linux-nas-direct-link` 去个人仓；`managed/preview-tasks-with-box-obsidian` 与 `referenced/` 留系统仓。
 - `.harness/notes`、`.harness/projects`：系统仓保留模块入口；`projects/2026-10-11--CrewAI概念与协作边界` 去个人仓，`projects/2026-10-11--code-review` 留。
 - 其余 `.harness/tasks` 项目：`_default`、`agent-clients-ux`、`edges-routines`、`edges-tasks`、`observation`、`project-memory` 留系统仓；只有 `tech-reading` 去个人仓。

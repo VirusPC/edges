@@ -16,7 +16,7 @@
 
 ## 目录与 layout
 
-`cli/src/models/layout.ts` 集中定义入口名、类型识别、章节/标记、harness 路径和目录生命周期规则；业务目录注册可扩展。沿用现有 project-memory 标记、type-index 合同与 task-projects 标记，不凭正文猜类型。
+`packages/cli/src/models/layout.ts` 集中定义入口名、类型识别、章节/标记、harness 路径和目录生命周期规则；业务目录注册可扩展。沿用现有 project-memory 标记、type-index 合同与 task-projects 标记，不凭正文猜类型。
 
 - AGENTS.md → InternalNode；SKILL.md → SkillNode；index.md → 按注册目录合同选择 TaskNode、MemoryNode、NoteNode 或通用 LeafNode。
 - 通用未知 index.md 是 LeafNode；任意普通 .md 不是新模型节点，导入/迁移明确转换后才登记。外部普通文档链接保持正文，不进入组成关系。

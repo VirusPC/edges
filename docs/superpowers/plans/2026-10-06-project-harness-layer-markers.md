@@ -25,10 +25,10 @@
 ### Task 1: PROTOCOL、LAYOUT、层入口模板
 
 **Files:**
-- Modify: `skills/project-memory-init/references/PROTOCOL.md`
-- Modify: `skills/project-memory-init/references/LAYOUT.md`
-- Modify: `skills/project-memory-init/references/templates/AGENTS.tmpl.md`
-- `.claude/skills/project-memory-init` 与 `.agents/skills/project-memory-init` 是指向 `skills/project-memory-init` 的软链，不要另改一份。
+- Modify: `packages/skills/project-memory-init/references/PROTOCOL.md`
+- Modify: `packages/skills/project-memory-init/references/LAYOUT.md`
+- Modify: `packages/skills/project-memory-init/references/templates/AGENTS.tmpl.md`
+- `.claude/skills/project-memory-init` 与 `.agents/skills/project-memory-init` 是指向 `packages/skills/project-memory-init` 的软链，不要另改一份。
 
 **Interfaces:**
 - Consumes: spec 的标记表与标题
@@ -92,7 +92,7 @@
 Run:
 
 ```bash
-rg -n "project-harness|project-memory-important|本层记忆索引" skills/project-memory-init/references/PROTOCOL.md
+rg -n "project-harness|project-memory-important|本层记忆索引" packages/skills/project-memory-init/references/PROTOCOL.md
 ```
 
 Expected: PROTOCOL 无这些实现名。LAYOUT 与 `AGENTS.tmpl.md` 含新标记。
@@ -100,9 +100,9 @@ Expected: PROTOCOL 无这些实现名。LAYOUT 与 `AGENTS.tmpl.md` 含新标记
 - [ ] **Step 5: Commit**
 
 ```bash
-git add skills/project-memory-init/references/PROTOCOL.md \
-  skills/project-memory-init/references/LAYOUT.md \
-  skills/project-memory-init/references/templates/AGENTS.tmpl.md
+git add packages/skills/project-memory-init/references/PROTOCOL.md \
+  packages/skills/project-memory-init/references/LAYOUT.md \
+  packages/skills/project-memory-init/references/templates/AGENTS.tmpl.md
 git commit -m "docs: 层入口协议与模板改用 project-harness"
 ```
 
@@ -111,9 +111,9 @@ git commit -m "docs: 层入口协议与模板改用 project-harness"
 ### Task 2: 布局常量、拆开标记工厂、`rewriteLayerSurface`
 
 **Files:**
-- Modify: `cli/src/domain/models/layout.ts`
-- Modify: `cli/src/domain/models/agents/blocks.ts`
-- Test: `cli/test/models/layer-markers.test.ts`
+- Modify: `packages/cli/src/domain/models/layout.ts`
+- Modify: `packages/cli/src/domain/models/agents/blocks.ts`
+- Test: `packages/cli/test/models/layer-markers.test.ts`
 
 **Interfaces:**
 - Consumes: Task 1 的 canonical 名称
@@ -126,7 +126,7 @@ git commit -m "docs: 层入口协议与模板改用 project-harness"
 
 - [ ] **Step 1: Write the failing test**
 
-创建 `cli/test/models/layer-markers.test.ts`：
+创建 `packages/cli/test/models/layer-markers.test.ts`：
 
 ```ts
 import test from "node:test";
@@ -300,9 +300,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/domain/models/layout.ts \
-  cli/src/domain/models/agents/blocks.ts \
-  cli/test/models/layer-markers.test.ts
+git add packages/cli/src/domain/models/layout.ts \
+  packages/cli/src/domain/models/agents/blocks.ts \
+  packages/cli/test/models/layer-markers.test.ts
 git commit -m "feat: 拆开 project-harness 层标记与 type 标记"
 ```
 
@@ -311,11 +311,11 @@ git commit -m "feat: 拆开 project-harness 层标记与 type 标记"
 ### Task 3: parse 双读、serialize 新稿、entries 适配
 
 **Files:**
-- Modify: `cli/src/domain/models/agents/parse.ts`
-- Modify: `cli/src/domain/models/agents/serialize.ts`
-- Modify: `cli/src/domain/models/agents/syntax.ts`
-- Test: `cli/test/models/agents-node.test.ts`
-- Test: `cli/test/utils/node-tree/codec.test.ts`
+- Modify: `packages/cli/src/domain/models/agents/parse.ts`
+- Modify: `packages/cli/src/domain/models/agents/serialize.ts`
+- Modify: `packages/cli/src/domain/models/agents/syntax.ts`
+- Test: `packages/cli/test/models/agents-node.test.ts`
+- Test: `packages/cli/test/utils/node-tree/codec.test.ts`
 
 **Interfaces:**
 - Consumes: `INTERNAL_SECTIONS` canonical markers；`rewriteLayerSurface` 不在 patch 路径调用
@@ -421,11 +421,11 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/domain/models/agents/parse.ts \
-  cli/src/domain/models/agents/serialize.ts \
-  cli/src/domain/models/agents/syntax.ts \
-  cli/test/models/agents-node.test.ts \
-  cli/test/utils/node-tree/codec.test.ts
+git add packages/cli/src/domain/models/agents/parse.ts \
+  packages/cli/src/domain/models/agents/serialize.ts \
+  packages/cli/src/domain/models/agents/syntax.ts \
+  packages/cli/test/models/agents-node.test.ts \
+  packages/cli/test/utils/node-tree/codec.test.ts
 git commit -m "feat: 层入口标记双读，新稿只写 project-harness"
 ```
 
@@ -434,11 +434,11 @@ git commit -m "feat: 层入口标记双读，新稿只写 project-harness"
 ### Task 4: memory 刷新与 doctor 认旧写新
 
 **Files:**
-- Modify: `cli/src/services/memory/agents.ts`
-- Modify: `cli/src/services/memory/blocks.ts`
-- Modify: `cli/src/services/memory/doctor.ts`
-- Modify: `cli/src/services/memory/entries.ts`（若直接使用 LOCAL_START）
-- Test: `cli/test/memory/core.test.ts` 或新增 `cli/test/memory/layer-markers.test.ts`
+- Modify: `packages/cli/src/services/memory/agents.ts`
+- Modify: `packages/cli/src/services/memory/blocks.ts`
+- Modify: `packages/cli/src/services/memory/doctor.ts`
+- Modify: `packages/cli/src/services/memory/entries.ts`（若直接使用 LOCAL_START）
+- Test: `packages/cli/test/memory/core.test.ts` 或新增 `packages/cli/test/memory/layer-markers.test.ts`
 
 **Interfaces:**
 - Consumes: `rewriteLayerSurface`、`CONSTRAINTS_START`、legacy 常量
@@ -526,10 +526,10 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/services/memory/agents.ts \
-  cli/src/services/memory/blocks.ts \
-  cli/src/services/memory/doctor.ts \
-  cli/test/memory/layer-markers.test.ts
+git add packages/cli/src/services/memory/agents.ts \
+  packages/cli/src/services/memory/blocks.ts \
+  packages/cli/src/services/memory/doctor.ts \
+  packages/cli/test/memory/layer-markers.test.ts
 git commit -m "feat: memory 刷新认旧层标记并写回 project-harness"
 ```
 
@@ -538,12 +538,12 @@ git commit -m "feat: memory 刷新认旧层标记并写回 project-harness"
 ### Task 5: 可预览的仓内迁移脚本
 
 **Files:**
-- Create: `scripts/rewrite-project-harness-markers.mts`
-- Create: `cli/test/memory/rewrite-layer-surface-script.test.ts`（测 `planLayerMarkerRewrite`，不要在测试里扫整个仓库）
+- Create: `scripts/migrations/rewrite-project-harness-markers.mts`
+- Create: `packages/cli/test/memory/rewrite-layer-surface-script.test.ts`（测 `planLayerMarkerRewrite`，不要在测试里扫整个仓库）
 - Modify: `package.json`（加 `migrate:project-harness-markers`）
 
 **Interfaces:**
-- Consumes: `rewriteLayerSurface`、`checkPath`、与 `scripts/migrate-agents-indexes.mts` 相同的 preview/apply/锁
+- Consumes: `rewriteLayerSurface`、`checkPath`、与 `scripts/migrations/migrate-agents-indexes.mts` 相同的 preview/apply/锁
 - Produces: `planLayerMarkerRewrite(root: string): { root; edits: Array<{ path; before; after }> }`；默认预览；`--apply` 才写；跳过 `posts/`、类型入口、无层标记文件
 
 - [ ] **Step 1: Write the failing test**
@@ -558,7 +558,7 @@ Expected: FAIL，模块不存在。
 
 - [ ] **Step 3: Write the script**
 
-照 `scripts/migrate-agents-indexes.mts`：`plan*` + `applyPlan` + CLI `--root` `--apply`。`convert` 只做：
+照 `scripts/migrations/migrate-agents-indexes.mts`：`plan*` + `applyPlan` + CLI `--root` `--apply`。`convert` 只做：
 
 ```ts
 function convert(file: string, source: string): string {
@@ -580,7 +580,7 @@ function convert(file: string, source: string): string {
 `package.json`：
 
 ```json
-"migrate:project-harness-markers": "pnpm --filter edges-cli exec tsx ../../scripts/rewrite-project-harness-markers.mts"
+"migrate:project-harness-markers": "pnpm --filter edges-cli exec tsx ../../scripts/migrations/rewrite-project-harness-markers.mts"
 ```
 
 - [ ] **Step 4: Run tests**
@@ -592,8 +592,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/rewrite-project-harness-markers.mts \
-  cli/test/memory/rewrite-layer-surface-script.test.ts \
+git add scripts/migrations/rewrite-project-harness-markers.mts \
+  packages/cli/test/memory/rewrite-layer-surface-script.test.ts \
   package.json
 git commit -m "feat: 预览并重写层入口 project-harness 标记"
 ```
@@ -607,9 +607,9 @@ git commit -m "feat: 预览并重写层入口 project-harness 标记"
 - Modify: `CONTEXT.md`（新增 **Project Harness**；收紧 **Agent Harness** 的避免使用）
 - Modify: `docs/adr/0024-scope-first-content-ownership.md` 现行三部分名称
 - Modify: `docs/superpowers/specs/2026-10-05-directory-node-model.md` 若把旧标题写成现行合同
-- Modify: `cli/src/domain/models/README.md` 表格标题
+- Modify: `packages/cli/src/domain/models/README.md` 表格标题
 - Modify: `.harness/memory/projects/project_agents_three_blocks/index.md`
-- Modify: `skills/project-memory-init/.harness/memory/projects/project_important_block/index.md` 及其根层对应条目（若根层没有则只改 skill 层那份，或 remember 更新 `project_harness_layer_markers`）
+- Modify: `packages/skills/project-memory-init/.harness/memory/projects/project_important_block/index.md` 及其根层对应条目（若根层没有则只改 skill 层那份，或 remember 更新 `project_harness_layer_markers`）
 - Modify: `docs/superpowers/specs/2026-10-06-project-harness-layer-markers-design.md` 状态改为已批准并实施
 - Test: 全量 `pnpm --filter edges-cli test`
 
@@ -664,9 +664,9 @@ Expected: PASS。输入夹具可以继续用旧标记。失败的若是「init/�
 ```bash
 git add AGENTS.md teaching/AGENTS.md notes/AGENTS.md AGENTS.md \
   shared-extensions/AGENTS.md CONTEXT.md docs/adr/0024-scope-first-content-ownership.md \
-  cli/src/domain/models/README.md \
+  packages/cli/src/domain/models/README.md \
   .harness/memory/projects \
-  skills/project-memory-init/.harness/memory/projects \
+  packages/skills/project-memory-init/.harness/memory/projects \
   docs/superpowers/specs/2026-10-06-project-harness-layer-markers-design.md
 git commit -m "refactor: 存量层入口与术语改用 project-harness"
 ```

@@ -8,19 +8,19 @@ usage() {
 usage: link-agent-skills [--check] [--dry-run] [--source DIR] [--dest DIR]
                          [--self-test] [-h|--help]
 
-Link each skill in skills into .agents/skills as a relative
+Link each skill in packages/skills into .agents/skills as a relative
 symlink. Idempotent. Vendor copies already in dest are left alone.
 
   --check      verify links; write nothing; exit 1 if out of sync
   --dry-run    print actions; write nothing
-  --source     skill source dir (default: <repo>/skills)
+  --source     skill source dir (default: <repo>/packages/skills)
   --dest       hub dir (default: <repo>/.agents/skills)
   --self-test  run against a temp tree and exit
 EOF
 }
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SOURCE="$REPO_ROOT/skills"
+SOURCE="$REPO_ROOT/packages/skills"
 DEST="$REPO_ROOT/.agents/skills"
 CHECK=0
 DRY_RUN=0
@@ -91,15 +91,26 @@ list_skills() {
 
 # dest 里由本脚本管理的条目：软链解析后落在 source 下（含断链）。
 is_ours() {
-  local entry="$1" target resolved
+  local entry="$1" target resolved name normalized
   if [[ ! -L "$entry" ]]; then
     return 1
   fi
   target="$(readlink "$entry")"
-  # 2026-10-20 之前链到 extensions/skills。平铺后仍视为本脚本的链，允许改指 skills/。
-  target="${target//extensions\/skills/skills}"
-  resolved="$(normjoin "$(dirname "$entry")" "$target")"
+  name="$(basename "$entry")"
+  # Historical links this script still owns:
+  #   ../../extensions/skills/<name>  (before the flatten)
+  #   ../../skills/<name>             (repo-root skills/)
+  #   ../../packages/skills/<name>    (workspace package)
+  normalized="$target"
+  normalized="${normalized//extensions\/skills/skills}"
+  resolved="$(normjoin "$(dirname "$entry")" "$normalized")"
   if [[ "$(is_under "$resolved" "$SOURCE")" == "yes" ]]; then
+    return 0
+  fi
+  if [[ "$normalized" == */skills/"$name" || "$normalized" == skills/"$name" ]]; then
+    return 0
+  fi
+  if [[ "$target" == */packages/skills/"$name" || "$target" == packages/skills/"$name" ]]; then
     return 0
   fi
   return 1

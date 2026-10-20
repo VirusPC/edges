@@ -18,7 +18,7 @@ metadata:
 1. **traverse**：单系统 `children`；森林在外。
 2. **收根**：`collectSystemRoots` 扫盘认 `project-harness` 的 `AGENTS.md`。
 3. **整仓 = 个人系统二** + Super；不挂其它系统 `AGENTS.md`。
-4. **配置**：`cli/src/domain/config/harness-materials.json`，形状：
+4. **配置**：`packages/cli/src/domain/config/harness-materials.json`，形状：
    `{ "materials": [ { "id": "tasks", "path": "tasks/README.md", "optional": true }, ... ] }`
    创建 / 读取 / Super 挂载：`scope` + `path`；按 `id` 查找；harness 根 = `<scope>/.harness` 若存在否则 `scope`。
 5. **Service → review / CLI**：`SystemForestService` → `BaseNode[][]`；默认 `independent`（resolve 遇其它根早停）；`innermost` 从 B 可达 A 则丢掉外层；CLI：`edges forest list`。

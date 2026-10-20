@@ -13,4 +13,4 @@ metadata:
 
 teach 技能的教学工作区放 knowledge/teaching/<topic>/，作为知识资产随仓库提交；不要再放 .teaching/。
 **Why:** 2026-09-10 用户在教学第一课把工作区建到 .teaching/ 后明确纠正：教学工作区归 knowledge/ 树。2026-09-11 已将 `.teaching/obsidian-cli` 迁到 `knowledge/teach/obsidian-cli/`；随后目录重命名为 `knowledge/teaching/`。根下 `.teaching/` 不再代表现行约定。
-**How to apply:** 新主题建 knowledge/teaching/<slug>/（MISSION.md、NOTES.md、RESOURCES.md、lessons/、learning-records/、assets/、reference/），并在 knowledge/teaching/README.md 的 Topics 列表登记一行；要往主题里挂学习仓库时走 skills/learn-repo（submodule 挂 repos/）。
+**How to apply:** 新主题建 knowledge/teaching/<slug>/（MISSION.md、NOTES.md、RESOURCES.md、lessons/、learning-records/、assets/、reference/），并在 knowledge/teaching/README.md 的 Topics 列表登记一行；要往主题里挂学习仓库时走 packages/skills/learn-repo（submodule 挂 repos/）。

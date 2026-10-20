@@ -15,14 +15,14 @@ description: 明确命令适配与完整业务用例的边界，移除 Service �
 在完成统一节点、共享 Service 和模型目录整理后，我们检查了“commands 是否已经只调用 Service”。实际情况是：部分 Task/Memory 命令已较薄，但命令适配、业务流程和基础工具仍有错位。用户提出应做好解耦，随后决定先整理 Model；Model 重构和三层架构 README 已完成，现在把 commands 与 Service 的后续重构单独记录，避免把它误报为已实现。
 
 已核对的现状：
-- `services/tasks/result.ts` 依赖 CliContext/CliResult，既构造命令运行环境，也写命令结果和退出码。
+- `packages/services/tasks/result.ts` 依赖 CliContext/CliResult，既构造命令运行环境，也写命令结果和退出码。
 - `commands/tasks/project/review-page.ts` 仍串联读取输入、校验、加载模板、渲染、选输出路径和写 HTML 的完整流程。
 - `commands/artifacts/server/ops.ts` 等文件承载服务安装、构建和部署逻辑；Artifacts 的 HTTP、文件收集及配置职责也需按实际边界复核。
 - `utils/exit.ts` 依赖业务错误类型，说明通用工具与命令适配尚未完全区分。
 
 本任务是职责解耦，不是要求所有 command 变成一行调用，也不为每个 helper 新增一层 Service。Model 单节点行为、operations 集合操作与现有节点持久化机制保持原边界。
 
-关联：[Domain 架构](../../../../../cli/src/domain/README.md)、[模型整理验收](../../../../../docs/superpowers/plans/2026-10-06-model-module-organization.md)。
+关联：[Domain 架构](../../../../../packages/cli/src/domain/README.md)、[模型整理验收](../../../../../docs/superpowers/plans/2026-10-06-model-module-organization.md)。
 
 **目标：**
 
@@ -48,6 +48,6 @@ description: 明确命令适配与完整业务用例的边界，移除 Service �
 
 **2026-10-08 进展（#187）：**
 
-各领域 commands 只从 `services/<module>/service.ts` 进入。notes 与 projects 的主文件固定叶子规格并委托 `services/node/dated-leaf.ts`。skills、memory、tasks、artifacts、forest 的主文件 re-export 已有实现，以及该命令已经在用的跨领域符号。memory 的 `migrateMemory` 在主文件里动态 import，避免普通启动加载可选的迁移实现。`services/node/*`、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts` 仍是跨领域工具，不另造 `service.ts`。
+各领域 commands 只从 `packages/services/<module>/service.ts` 进入。notes 与 projects 的主文件固定叶子规格并委托 `packages/services/node/dated-leaf.ts`。skills、memory、tasks、artifacts、forest 的主文件 re-export 已有实现，以及该命令已经在用的跨领域符号。memory 的 `migrateMemory` 在主文件里动态 import，避免普通启动加载可选的迁移实现。`packages/services/node/*`、`scope.ts`、`list-query.ts`、`metadata.ts`、`config.ts`、`import-entry.ts` 仍是跨领域工具，不另造 `service.ts`。
 
-tasks list、审阅页和 artifacts server 的动作仍按原来的顺序调用这些函数，没有改写流程。`services/tasks/result.ts` 仍组装地点、读写和时钟。进程入口的写锁仍直接用 `node-lock`。规则写在 CLI README 分层和 ADR 0030。
+tasks list、审阅页和 artifacts server 的动作仍按原来的顺序调用这些函数，没有改写流程。`packages/services/tasks/result.ts` 仍组装地点、读写和时钟。进程入口的写锁仍直接用 `node-lock`。规则写在 CLI README 分层和 ADR 0030。

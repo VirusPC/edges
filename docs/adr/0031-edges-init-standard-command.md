@@ -1,6 +1,6 @@
 # edges init 是标准初始化命令，域 init 委托同一个 init service
 
-模块初始化原先只有 `edges memory init`，notes 与 projects 的 harness 桩顺手挂在这条命令上。根命令 `edges init` 成为标准入口；`edges memory init`、`edges notes init`、`edges projects init` 只委托 `services/init/service.ts`。挂载表 `harness-materials.json` 仍只提供 path，init 模块表用 material id 引用，path 只经 `placeHarnessMaterial`。
+模块初始化原先只有 `edges memory init`，notes 与 projects 的 harness 桩顺手挂在这条命令上。根命令 `edges init` 成为标准入口；`edges memory init`、`edges notes init`、`edges projects init` 只委托 `packages/services/init/service.ts`。挂载表 `harness-materials.json` 仍只提供 path，init 模块表用 material id 引用，path 只经 `placeHarnessMaterial`。
 
 **Status:** accepted（ADR 0031；grill 确认于 2026-10-08；2026-10-18 由 ADR 0036 修订默认集与 skills init）
 
@@ -20,4 +20,4 @@ init 不读 `--super`，材料永远落在 `<scope>/.harness`。帮助把「本�
 
 创建或补齐 scope `AGENTS.md` 是 init service 的公共步骤。桩缺了才建；类型索引继续刷新；AGENTS 只补受管区块。节点文件经 NodeService。tasks 看板不走 NodeService 的自动登记，由 tasks init 自己把这一份文件挂到 scope `AGENTS.md`。唯一例外是非节点 `.gitignore`，仍由 `saveEntries` 写入。
 
-`cli/src/commands` 不 import `harness-materials`。tasks list 要看板 README 的位置、是否存在，以及某个节点是不是看板 README 时，走 `services/tasks/service.ts`。
+`packages/cli/src/commands` 不 import `harness-materials`。tasks list 要看板 README 的位置、是否存在，以及某个节点是不是看板 README 时，走 `packages/services/tasks/service.ts`。

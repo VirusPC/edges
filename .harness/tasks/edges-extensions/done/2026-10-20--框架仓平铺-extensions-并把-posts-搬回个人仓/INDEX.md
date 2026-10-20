@@ -23,9 +23,9 @@ description: 拆仓后 extensions/ 一层多余，平铺到框架仓顶层；pos
 
 **进展（2026-10-20）：** 已全部完成，本卡关闭。
 - VirusPC/edges#6 已合：`posts/`、site-and-content 项目和博客记忆迁出框架仓；新增 ADR 0040；grill 拍板写进本卡。
-- VirusPC/edges#7 已合（merge commit）：`extensions/` 平铺到仓根（`cli/` `skills/` `apps/` `services/` `mcp-servers/` `system-prompt/`），硬约束与记忆并入根；CHANGELOG 与 `docs/migrations` 写了旧→新路径对照表。用 merge commit 是为了让 6 个 skill tag 指向的提交留在 main 上。
+- VirusPC/edges#7 已合（merge commit）：`extensions/` 平铺到仓根（`packages/cli/` `packages/skills/` `packages/apps/` `packages/services/` `packages/mcp-servers/` `packages/system-prompt/`），硬约束与记忆并入根；CHANGELOG 与 `docs/migrations` 写了旧→新路径对照表。用 merge commit 是为了让 6 个 skill tag 指向的提交留在 main 上。
 - 个人仓接收内容：VirusPC/edges-brain-viruspc#334。
-- 部署：框架仓 Deploy 成功；ECS 上框架仓检出已到最新，没有 `extensions/`，artifacts 服务改从 `services/` 运行；`/tasks/`、`/teaching/`、`/health`、`/artifacts` 都返回 200。
+- 部署：框架仓 Deploy 成功；ECS 上框架仓检出已到最新，没有 `extensions/`，artifacts 服务改从 `packages/services/` 运行；`/tasks/`、`/teaching/`、`/health`、`/artifacts` 都返回 200。
 - 拆仓卡里 posts 边界的表述已在 VirusPC/edges-brain-viruspc#333 改掉。
 
 **完成标准：**
@@ -41,9 +41,9 @@ description: 拆仓后 extensions/ 一层多余，平铺到框架仓顶层；pos
 ### 1. 平铺后的目录名
 
 - **问题：** `extensions/` 下的目录放到仓根时用哪一套名字？
-- **选项：** 原名平铺（`cli/` `skills/` `apps/` `services/` `mcp-servers/` `system-prompt/`）；或收进 `packages/`、skills 等资产放根；或其他命名。
+- **选项：** 原名平铺（`packages/cli/` `packages/skills/` `packages/apps/` `packages/services/` `packages/mcp-servers/` `packages/system-prompt/`）；或收进 `packages/`、skills 等资产放根；或其他命名。
 - **结论：** 原名平铺，不套 `packages/`。推荐项，未改。
-- **理由：** `cli/`、`skills/`、`apps/` 仍是兄弟，现有互相引用的相对路径不用改。套 `packages/` 会让「平铺」名不副实，打包脚本也要改。
+- **理由：** `packages/cli/`、`packages/skills/`、`packages/apps/` 仍是兄弟，现有互相引用的相对路径不用改。套 `packages/` 会让「平铺」名不副实，打包脚本也要改。
 
 ### 2. 空占位和个人运维目录
 
@@ -55,8 +55,8 @@ description: 拆仓后 extensions/ 一层多余，平铺到框架仓顶层；pos
 ### 3. extensions 这层 harness 并到哪里
 
 - **问题：** `extensions/AGENTS.md` 与 `extensions/.harness/`（22 条记忆）并到哪里？
-- **选项：** 并入根；或挪到 `cli/` 让 CLI 成为下层系统；或按条目分流。
-- **结论：** 并入根。硬约束进根 `AGENTS.md`，22 条记忆并入根 `.harness` 并合并索引。`skills/project-memory-init` 改由根登记。`feedback_cli_under_extensions` 按同一 slug 翻案，写明 2026-10-20 推翻「CLI 不放仓库根」。推荐项，未改。
+- **选项：** 并入根；或挪到 `packages/cli/` 让 CLI 成为下层系统；或按条目分流。
+- **结论：** 并入根。硬约束进根 `AGENTS.md`，22 条记忆并入根 `.harness` 并合并索引。`packages/skills/project-memory-init` 改由根登记。`feedback_cli_under_extensions` 按同一 slug 翻案，写明 2026-10-20 推翻「CLI 不放仓库根」。推荐项，未改。
 - **理由：** 平铺之后不再有 extensions 这一层系统。记忆条目与根上无同名目录，只合并索引。
 
 ### 4. 旧路径留不留兼容
@@ -85,7 +85,7 @@ description: 拆仓后 extensions/ 一层多余，平铺到框架仓顶层；pos
 - **问题：** artifacts unit 与站点布局迁移器怎么切到新路径？
 - **选项：** 迁移器只移动不改内容，unit 由 deploy 里的 `artifacts server install` 重写并重启；或顺手改迁移器文案再约 root 重装；或在 ECS 上手动留软链。
 - **结论：** 迁移器三份文件只 `git mv`，字节不变。`deploy.yml` 的 `repo_entry`、`repo_lib`、`repo_py`、`install_cmd` 改为新路径。unit 的 `WorkingDirectory` / `ExecStart` 改为 `%h/projects/edges-framework/services/artifacts-preview/...`，由 deploy 用仓内 CLI 执行 `artifacts server install` 后重启。`reset --hard` 之后若还有未被跟踪的 `extensions/`，整目录删掉。全程不用全局 `edges`。推荐项，未改；deploy 只用仓内 CLI 与清残留是拍板时写明的做法。
-- **理由：** 迁移器装在 `/usr/local`，deploy 只比对摘要；内容不变就不必 root 重装。unit 是 user 级，install 会重写。ECS 上没有可靠的全局 edges，旧版还会写死 `extensions/services/...`。
+- **理由：** 迁移器装在 `/usr/local`，deploy 只比对摘要；内容不变就不必 root 重装。unit 是 user 级，install 会重写。ECS 上没有可靠的全局 edges，旧版还会写死 `packages/services/...`。
 
 ### 8. site-and-content 的 4 张卡怎么分
 

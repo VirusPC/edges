@@ -49,7 +49,7 @@ format: ordinary
 - [调研行业方案先并列多种，不擅自收敛](<feedback_survey_options_before_converging/INDEX.md>) — 用户要行业方案、主流做法或技术选型调研时打开：先并列多种方案并按用户约束逐条评估，不擅自收敛；说「常见」「主流」前要有依据。
 - [CLI 遇到缺失的必需文件就报错，不自动补](<feedback_cli_fail_on_missing_required_files/INDEX.md>) — 改 cli 里读写节点或项目的命令时打开：约定必需的文件缺失时报错并写明路径，不自动生成文件掩盖数据问题；只有显式 create 才新建。
 - [CLI 多子命令一文件一个动词](<feedback_cli_subcommand_files/INDEX.md>) — 新增或修改 cli 的多子命令时：父文件只注册，每个子命令一个文件，commands 层只解析参数并调 Service。
-- [CLI 放仓库根 cli/](<feedback_cli_under_extensions/INDEX.md>) — 新增或移动面向 agent 的 CLI 时：放仓库根 cli/。2026\-10\-20 翻案，不再禁止放仓库根。
+- [CLI 放 packages/cli/](<feedback_cli_under_extensions/INDEX.md>) — 新增或移动面向 agent 的 CLI 时放 packages/cli/。2026\-10\-20 先翻案到仓库根 cli/，同日 workspace 化后再收进 packages/cli/。
 - [Codex 唤起 skill 用 $ 不是 /](<feedback_codex_invoke_skill_with_dollar/INDEX.md>) — 在 Codex 里触发某个 skill 时用 $skill\-name；/ 是斜杠命令。/skills 只列清单。不要把认不到 skill 当成没装上。
 - [禁止动词的 help 测例锚定命令行](<feedback_help_forbid_verb_line_anchor/INDEX.md>) — 写 edges tasks \-\-help 测例、禁止某个动词出现时：用 ^\\s\+verb\\b 锚定命令列表行，不要用 /\\bverb\\b/，以免 after\-help 的 “There is no X command” 被当成命令。
 - [接口层方案进根 .harness/memory，不进 docs](<feedback_interface_plans_in_memory/INDEX.md>) — 写接入层调研或技术方案时：进根 .harness/memory（reference/project），不要放 docs/ 或 knowledge/projects，否则 ask 检索不到。

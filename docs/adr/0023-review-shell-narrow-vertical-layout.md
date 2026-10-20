@@ -16,7 +16,7 @@
 - **桌面：** `≥768px` 保持 #126 的三栏、可拖宽度的分隔线、左栏拖放改 project。观感与布局保持 #126，允许多出来的只有这张卡上的菜单。
 - **硬边界：** 中栏状态列只读。菜单与拖放都不写回 git。不做鉴权。不与写回仓 backlog 并卡。
 - **完成标准（实现轮）：** 390×844 以及任何 `<768px` 整页无横向溢出；能筛项目、用状态板、打开并读完详情；双端「移到项目…」可用；桌面三栏与左栏拖放不回退；桌面观感除新菜单外保持 #126。
-- **本轮范围：** glossary、本 ADR、窄屏卡上的指针。不实现 React。不改 `apps/tasks-review-app/`。不改 deploy 预览那张 backlog 的状态或正文。
+- **本轮范围：** glossary、本 ADR、窄屏卡上的指针。不实现 React。不改 `packages/apps/tasks-review-app/`。不改 deploy 预览那张 backlog 的状态或正文。
 
 ## Considered Options
 
@@ -34,7 +34,7 @@
 
 ## Out of scope
 
-- 实现 `apps/tasks-review-app/` 的窄屏布局与「移到项目…」
+- 实现 `packages/apps/tasks-review-app/` 的窄屏布局与「移到项目…」
 - 改桌面三栏的观感、可拖分隔线，或拿掉左栏拖放
 - 窄屏必须做触摸拖放（可以跳过）
 - 状态写回与 git 写回、鉴权

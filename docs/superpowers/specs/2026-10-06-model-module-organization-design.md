@@ -61,7 +61,7 @@ src/
 │   │   │   └── documents.ts          # Memory 文档兼容与字段保留规则
 │   │   ├── notes/
 │   │   │   └── note-node.ts
-│   │   └── skills/
+│   │   └── packages/skills/
 │   │       └── skill-node.ts
 │   └── operations/
 │       ├── traverse.ts              # 同时拥有遍历/节点查询选项类型
@@ -69,7 +69,7 @@ src/
 │       ├── filter.ts
 │       ├── group-by.ts
 │       └── tasks.ts                 # 从模型移出的 Tasks 集合筛选、排序
-├── services/                        # 完整用例与 IO，现有布局保留
+├── packages/services/                        # 完整用例与 IO，现有布局保留
 └── utils/markdown/
     ├── document.ts                  # 通用 parse/serialize 及类型绑定工厂
     └── types.ts

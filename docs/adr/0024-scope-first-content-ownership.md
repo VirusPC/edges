@@ -28,7 +28,7 @@ Task、Memory、Note 等统一采用目录与 `index.md` 入口，标准 Skill �
 
 任意节点可拥有独立 harness，承载它的系统二。组成遍历不自动跟随 harness：读取当前系统二的组成内容，不继续检索它或其组成节点的系统二。同目录 SKILL.md 与 AGENTS.md 分别是 Skill 叶子与它的 harness；AGENTS 的 harness 则可继续位于 `.harness/AGENTS.md`。叶子没有组成子节点，也可以拥有 harness；空组织节点仍是 InternalNode。
 
-各节点的局部上下文留在所属层，不能因通用递归而上收根层。根 `AGENTS.md` 和 `.harness/` 保存仓内共享约定；只有提炼到仓库根 `cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 与个人仓 `shared-extensions/` 的能力才用于对外分发。预定义可分发记忆仍是独立待办，不把原始历史记忆直接分发。
+各节点的局部上下文留在所属层，不能因通用递归而上收根层。根 `AGENTS.md` 和 `.harness/` 保存仓内共享约定；只有提炼到仓库根 `packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/` 与个人仓 `shared-extensions/` 的能力才用于对外分发。预定义可分发记忆仍是独立待办，不把原始历史记忆直接分发。
 
 ## 文件系统
 

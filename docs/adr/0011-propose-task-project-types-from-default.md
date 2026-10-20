@@ -1,6 +1,6 @@
 # 从 `_default` 提议新 Task Project 类型；人确认后再 create + classify
 
-classifyTasks（ADR 0010）按用户已设的 Task Project 质心做归属建议，但不会从堆积的 `_default` 里发现该建哪些新类型。2026-09-17 grill 确认：另开独立 Skill `proposeTypes`（`skills/project-tasks-propose-types/`），只读 `_default` tasks 与已有质心、输出候选表，不自动 `project create`。人确认类型后，再在后续步骤用 `project create` + `project-tasks-classify`。真 embedding 就绪前用 LLM / agent 判断；不称 Embedding NCC，也不用 K-means 命名。本轮只定 CONTEXT / ADR（及记忆指针），不写 skill 正文、不迁看板。**Amends ADR 0010**（路径与类型发现边界；整板归属 + Q18=A 不变）；**Amended by ADR 0012**（人确认闸门复用同一审阅页，不改类型发现边界）。叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
+classifyTasks（ADR 0010）按用户已设的 Task Project 质心做归属建议，但不会从堆积的 `_default` 里发现该建哪些新类型。2026-09-17 grill 确认：另开独立 Skill `proposeTypes`（`packages/skills/project-tasks-propose-types/`），只读 `_default` tasks 与已有质心、输出候选表，不自动 `project create`。人确认类型后，再在后续步骤用 `project create` + `project-tasks-classify`。真 embedding 就绪前用 LLM / agent 判断；不称 Embedding NCC，也不用 K-means 命名。本轮只定 CONTEXT / ADR（及记忆指针），不写 skill 正文、不迁看板。**Amends ADR 0010**（路径与类型发现边界；整板归属 + Q18=A 不变）；**Amended by ADR 0012**（人确认闸门复用同一审阅页，不改类型发现边界）。叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
 
 **Status:** accepted（ADR 0011；grill 确认于 2026-09-17；同日由 ADR 0012 修订人闸形态）
 
@@ -8,7 +8,7 @@ classifyTasks（ADR 0010）按用户已设的 Task Project 质心做归属建议
 
 ## Decision
 
-- **Skill：** `skills/project-tasks-propose-types/`，展示名 proposeTypes。独立工作流 Skill，不是 classifyTasks 的子步骤，也不是通用 edges-tasks Skill+MCP CRUD。
+- **Skill：** `packages/skills/project-tasks-propose-types/`，展示名 proposeTypes。独立工作流 Skill，不是 classifyTasks 的子步骤，也不是通用 edges-tasks Skill+MCP CRUD。
 - **输入：** `_default` 下的 Task（各 status），加上已有 Task Project 的标题/描述质心，用来避撞（slug 与主题都不要撞上已有 project，含保留名 `_default`）。
 - **输出：** 候选表。每行：slug、description、supporting stems（支撑该类型的 `_default` Task 文件 stem）。人确认并 `project create` 之前还不是 Task Project。
 - **禁止自动落地：** 本 skill 不调用 `project create`，不改 Task 路径 / `edges-task-project`，不改 `edges-tasks-status` / `edges-task-priority`。
@@ -17,7 +17,7 @@ classifyTasks（ADR 0010）按用户已设的 Task Project 质心做归属建议
 - **批量：** 默认一次 3–7 个候选；宁缺勿滥，剩在 `_default` 比硬凑类型好。
 - **正交：** 不改 status 或 priority。不把 Task 升成 Memory Type（Q18=A 仍只做索引/描述层）。
 - **能力面：** 始终 CLI + Skill + MCP。落地仍走 ADR 0010 约定的 `edges tasks project` 与 `update --project`，不新增 `propose` / `classify` CLI 动词。本轮文档不实现 Skill/MCP 封装。
-- **本轮范围：** 只落地 glossary + 本 ADR。不写 `skills/project-tasks-propose-types/` 正文（路径仅在文档出现），不迁看板。
+- **本轮范围：** 只落地 glossary + 本 ADR。不写 `packages/skills/project-tasks-propose-types/` 正文（路径仅在文档出现），不迁看板。
 
 ## Considered Options
 
@@ -32,7 +32,7 @@ classifyTasks（ADR 0010）按用户已设的 Task Project 质心做归属建议
 
 ## Out of scope
 
-- 本轮实现 `skills/project-tasks-propose-types/` 正文（路径仅登记）
+- 本轮实现 `packages/skills/project-tasks-propose-types/` 正文（路径仅登记）
 - 看板迁移、自动建 project、批量 `update --project`
 - embedding / 真向量 NCC / 真 K-means
 - CLI 公开 `propose` 或 `classify` 动词

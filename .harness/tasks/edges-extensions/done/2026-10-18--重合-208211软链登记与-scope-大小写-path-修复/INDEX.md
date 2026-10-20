@@ -13,7 +13,7 @@ description: >-
 ---
 
 **背景：**
-PR #208（挪任务状态时保留父级软链登记）和 #211（`--scope` 大小写与实际目录不一致时，任务 path 不越界）在 2026-10-11 合进了叠层分支 `codex/cli-remaining-tests-20261011`，但 #204 squash 合进 main 时这两条还没进该分支（晚了约 8s / 21s），所以 main 上从未落地，也不是后来被回滚。证据：`82a69642` / `be871728` 仍只在该叠层分支；main 无 firstSymlink 守卫、无 `services/tasks/realpath.ts`。peng cheng 要求先修这些问题再打 Edges 1.5.0。全栈开发专家会直接开修复 PR；本卡只跟踪把这两处修复重新合进 main。
+PR #208（挪任务状态时保留父级软链登记）和 #211（`--scope` 大小写与实际目录不一致时，任务 path 不越界）在 2026-10-11 合进了叠层分支 `codex/cli-remaining-tests-20261011`，但 #204 squash 合进 main 时这两条还没进该分支（晚了约 8s / 21s），所以 main 上从未落地，也不是后来被回滚。证据：`82a69642` / `be871728` 仍只在该叠层分支；main 无 firstSymlink 守卫、无 `packages/services/tasks/realpath.ts`。peng cheng 要求先修这些问题再打 Edges 1.5.0。全栈开发专家会直接开修复 PR；本卡只跟踪把这两处修复重新合进 main。
 - 关联：#208、#211、叠层分支 `codex/cli-remaining-tests-20261011`、提交 `82a69642` / `be871728`；约束：不改 1.5.0 发布卡状态
 
 **目标：**

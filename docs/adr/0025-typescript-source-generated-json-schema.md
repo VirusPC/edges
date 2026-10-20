@@ -10,7 +10,7 @@
 - **前端依赖边界：** TaskDoc 数据定义单独放在模型目录的 `task-doc-contract.ts`；`task-doc.ts` 保留解析适配并重导出类型。实施时真实前端类型检查发现，只使用 type import 仍会检查原文件引入的 Node 解析模块。这个最小拆分避免为浏览器补 Node typings，也不引入独立 Schema 层；代价是同目录多一个纯契约文件。
 - **生成器：** ts-json-schema-generator，选型验证版本为 2.9.0，作为构建期开发依赖；接入时锁定版本。使用标准类型与受支持的 JSDoc 约束，不自写 AST 生成器、自定义 formatter 或字符串修补生成结果。
 - **运行环境：** 项目运行、构建、测试统一以 Node 22 为基线，最低 Node >=22；不保留运行 Node 20、构建 Node 22 的双基线。2.9.0 的包元数据要求 Node >=22。
-- **产物：** 仓库只提交 TS 契约、TypeScript 生成脚本和必要的测试。JSON Schema 生成到 cli/dist/schemas/，不提交 Git，随构建/发布包分发；不增加 domain/schemas 手写定义层。2026-10-06 用户进一步纠正：撤销本 ADR 初稿中“生成产物可提交、源码侧 schema 路径保持稳定”的建议。对外稳定的是契约标识及 CLI 获取方式，不是源码中的文件路径。这与 ADR 0022 的预构建资源分发原则一致。
+- **产物：** 仓库只提交 TS 契约、TypeScript 生成脚本和必要的测试。JSON Schema 生成到 packages/cli/dist/schemas/，不提交 Git，随构建/发布包分发；不增加 domain/schemas 手写定义层。2026-10-06 用户进一步纠正：撤销本 ADR 初稿中“生成产物可提交、源码侧 schema 路径保持稳定”的建议。对外稳定的是契约标识及 CLI 获取方式，不是源码中的文件路径。这与 ADR 0022 的预构建资源分发原则一致。
 - **校验：** 需要运行时结构校验的边界使用 Ajv 8；date-time 等格式使用 ajv-formats。配置 coerceTypes=false、useDefaults=false、removeAdditional=false，只返回错误，不静默修正输入。Model 的跨字段/关系规则和 Service 的文件系统一致性仍保留，不能把 Schema 当成完整业务校验。不得把原本容许省略的 Markdown frontmatter 直接套入要求完整字段的输出契约。
 - **架构：** Model 继续负责单个节点的内容、parse/serialize/validate、字段更新与自身索引；operations 负责集合、遍历和查询；Service 负责完整用例及保存。Schema 描述对外数据，不扫描完整节点类来推断接口，不因此迁移方法、移除继承或引入 immutable/reducer。
 
@@ -35,7 +35,7 @@ edges schema get task-doc/v1 > task-doc.v1.json
 - 这是 CLI 自身的全局只读能力，不解析内容 scope、不读取业务文档、不取写锁、不等待 stdin。输出从安装位置相对定位的编译产物读取，与 cwd 无关；不联网、不运行生成器，也不回退读取仓库源码。
 - 构建顺序保证先生成 Schema，再执行依赖它的审阅页构建/测试，最终 CLI 包含生成物；生成器仍为开发依赖。独立运行审阅页 dev/build/test/typecheck 时也须准备其需要的产物，不能依赖上一次全仓构建的残留。后续清理 dist 的步骤不能删掉刚生成的 Schema。
 - Schema 缺失时报告构建/安装不完整，提示开发者重新构建；不能静默现场生成。生成和消费共享一个最小契约清单，避免分别维护 key、文件名和版本映射，不建立 SchemaService 框架。
-- 迁移验收后移除旧 cli/schemas/task-doc.v1.json 及其源码路径依赖。开发者仍可显式重定向保存一份导出文件；“不入仓库”不表示禁止用户导出，也不表示发布包不携带 JSON 文件。
+- 迁移验收后移除旧 packages/cli/schemas/task-doc.v1.json 及其源码路径依赖。开发者仍可显式重定向保存一份导出文件；“不入仓库”不表示禁止用户导出，也不表示发布包不携带 JSON 文件。
 
 | 候选 | 未采用的原因 |
 | --- | --- |

@@ -13,7 +13,7 @@ description: >-
 ---
 **背景：**
 2026-10-19 peng cheng 问 `edges artifacts publish` 是不是绑死了自己的服务器。查下来，客户端没有写死：地址和 token 都从 `EDGES_ARTIFACTS_BASE_URL`、`EDGES_ARTIFACTS_TOKEN` 读，可以来自环境变量或 `~/.config/edges/artifacts.env`，`init --base-url` 不填时默认是 `http://127.0.0.1:8787`。问题出在服务端，它只适合作者自己的环境。讨论后的结论是服务本体应该打进 npm 包，部署方式不跟着打包。
-- 服务端源码在 `services/artifacts-preview/`，但 npm 包的 `files` 只有 `dist` 和 `skills`，从 npm 安装的用户拿不到。
+- 服务端源码在 `packages/services/artifacts-preview/`，但 npm 包的 `files` 只有 `dist` 和 `skills`，从 npm 安装的用户拿不到。
 - `edges artifacts server install` 要在仓库源码里用 pnpm 构建，用 systemd user unit 托管进程；`setup-nginx` 会把配置写进作者 ECS 上的 `/etc/nginx/conf.d/teaching.conf`，别的机器上没有这个文件。
 - help 文案、`artifacts.env.example` 和部署脚本的示例里写的都是作者的域名 `edges.viruspc.tech`。
 - 非目标：不改 publish、delete 的协议；不替用户配域名或 HTTPS。

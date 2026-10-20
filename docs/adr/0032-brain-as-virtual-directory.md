@@ -16,7 +16,7 @@ status: accepted
 
 ## Consequences
 
-- 对外分发的能力给用户的是目录自进化：`skills/` 的 skill 以实体拷贝安装，写这条时 CLI 尚未发布。改进机制本身的递归自我改进只在本仓发生，成果随升级交给用户。
+- 对外分发的能力给用户的是目录自进化：`packages/skills/` 的 skill 以实体拷贝安装，写这条时 CLI 尚未发布。改进机制本身的递归自我改进只在本仓发生，成果随升级交给用户。
 - 其他仓库里的 code agent 接入大脑 harness、`--super` 跨多个仓库、团队这一层的 harness 仓库，目前都还没有实现。
 - 术语见 `CONTEXT.md` 的「大脑（虚拟目录）」「Personal Agent」「共享范围」。
 

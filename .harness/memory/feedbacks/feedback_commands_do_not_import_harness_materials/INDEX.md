@@ -11,7 +11,7 @@ metadata:
   edges-updated-at: '2026-10-08T03:52:30+00:00'
 ---
 
-`cli/src/commands` 不 import `domain/config/harness-materials`。要看板 README 的位置、是否存在，或某个节点是不是看板 README，走该领域 `services/<module>/service.ts` 导出的薄函数。
+`packages/cli/src/commands` 不 import `domain/config/harness-materials`。要看板 README 的位置、是否存在，或某个节点是不是看板 README，走该领域 `packages/services/<module>/service.ts` 导出的薄函数。
 
 **Why:** 用户在 2026-10-08 确认完成标准第 4 条「改一下」。命令自己读挂载表，材料路径判断就留在参数解析层。
 

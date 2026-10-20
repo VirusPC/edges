@@ -22,7 +22,7 @@
 
 ## Task 1: 模型归组与消费者同步
 
-**Files:** spec 文件映射表中的 models 文件；`src/domain/operations/{traverse,tasks}.ts`；`src/utils/markdown/document.ts`；引用这些模块的 CLI、测试和仓根 TS 脚本。新增 `cli/scripts/organize-models.ts`。
+**Files:** spec 文件映射表中的 models 文件；`src/domain/operations/{traverse,tasks}.ts`；`src/utils/markdown/document.ts`；引用这些模块的 CLI、测试和仓根 TS 脚本。新增 `packages/cli/scripts/organize-models.ts`。
 
 **Interfaces:** 节点类方法、输入字段与返回值不变。NodeModel 改名 AgentsDocument；对应 createNodeModel/NodeItem/NodeLink/NodeText 明确为 AGENTS 文档名字。所有导入按符号归属更新；公共模型出口保留节点类型，查询选项由 traverse 导出。
 

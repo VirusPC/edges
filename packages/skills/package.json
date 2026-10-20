@@ -1,0 +1,7 @@
+{
+  "name": "@viruspc/edges-skills",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Bundled Edges skills. The CLI resolves this package and copies the skill directories into the published package at build time."
+}

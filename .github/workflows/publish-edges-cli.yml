@@ -33,7 +33,7 @@ jobs:
             "$PREFIX"*) VER="${TAG#"$PREFIX"}" ;;
             *) echo "unexpected tag: $TAG"; exit 1 ;;
           esac
-          PKG="$(node -p "require('./cli/package.json').version")"
+          PKG="$(node -p "require('./packages/cli/package.json').version")"
           if [ "$VER" != "$PKG" ]; then
             echo "tag version $VER != package.json $PKG"
             exit 1
@@ -80,7 +80,7 @@ jobs:
       - name: Fail if version already on npm
         run: |
           set -euo pipefail
-          VER="$(node -p "require('./cli/package.json').version")"
+          VER="$(node -p "require('./packages/cli/package.json').version")"
           set +e
           OUT="$(npm view "@viruspc/edges@${VER}" version 2>&1)"
           CODE=$?

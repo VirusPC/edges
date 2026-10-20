@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript, Node.js ≥20, existing `commander` + `zod`, `node:test` + `tsx` (not vitest), `node:fs/promises`. No new YAML library. No `simple-git`. No Multica daemon. No P0–P3 aliases.
 
-**Spec:** `docs/adr/0007-edges-task-priority.md` (accepted). Glossary: `CONTEXT.md` terms **edges-task-priority**, **edges-tasks-status**, **Task**, **edges tasks（CLI）**. Existing command surface: `docs/adr/0005-edges-tasks-cli.md` and `cli/src/tasks/`. Status folders: `docs/adr/0002-knowledge-tasks-status-folders.md`. Capability Surface: `docs/adr/0004-capability-surface-cli-skill-mcp.md`. Why words not P0: `knowledge/projects/tasks/2026-09-15--issue-priority-words-vs-p0.md`. Verb alignment only: https://multica.ai/docs/cli ; `.memory/references/reference_multica_cli_tasks_reference.md`.
+**Spec:** `docs/adr/0007-edges-task-priority.md` (accepted). Glossary: `CONTEXT.md` terms **edges-task-priority**, **edges-tasks-status**, **Task**, **edges tasks（CLI）**. Existing command surface: `docs/adr/0005-edges-tasks-cli.md` and `packages/cli/src/tasks/`. Status folders: `docs/adr/0002-knowledge-tasks-status-folders.md`. Capability Surface: `docs/adr/0004-capability-surface-cli-skill-mcp.md`. Why words not P0: `knowledge/projects/tasks/2026-09-15--issue-priority-words-vs-p0.md`. Verb alignment only: https://multica.ai/docs/cli ; `.memory/references/reference_multica_cli_tasks_reference.md`.
 
 ## Global Constraints
 
@@ -27,7 +27,7 @@
 - Do not change `knowledge/tasks/` board status or task bodies (tests use `os.tmpdir()`)
 - Do not auto-create/edit/move/delete `knowledge/posts/`
 - Do not add `js-yaml` / `gray-matter` / `simple-git` / vitest. Stay on `commander` + `zod` + `node:test` + `tsx`
-- Test runner is `cli/package.json` `"test": "node --test --import tsx test"` (recursive). New tests go under `cli/test/tasks/`
+- Test runner is `packages/cli/package.json` `"test": "node --test --import tsx test"` (recursive). New tests go under `packages/cli/test/tasks/`
 - Reuse `EDGES_REPO` from `loadConfig()` as the repo root. Board lives at `<repoPath>/knowledge/tasks/`
 - Public repo: no credentials, tokens, or personal data in commits
 - `pull` / `rebase` use `--autostash`. Do not commit `.obsidian/workspace.json`
@@ -38,34 +38,34 @@
 
 **Create**
 
-- `cli/src/tasks/utils/priority.ts` — `TASK_PRIORITY_FIELD`, parse, read-normalize, compare, filter, stable sort (re-exports `TASK_PRIORITIES` / `TaskPriority` from `types.ts`)
-- `cli/test/tasks/utils/priority.test.ts` — pure helper tests
+- `packages/cli/src/tasks/utils/priority.ts` — `TASK_PRIORITY_FIELD`, parse, read-normalize, compare, filter, stable sort (re-exports `TASK_PRIORITIES` / `TaskPriority` from `types.ts`)
+- `packages/cli/test/tasks/utils/priority.test.ts` — pure helper tests
 
 **Modify**
 
-- `cli/src/tasks/utils/types.ts` — `TASK_PRIORITIES` / `TaskPriority`; add `priority: TaskPriority` on `TaskListItem` (and therefore `TaskRecord`)
-- `cli/src/tasks/utils/frontmatter.ts` — `renderNewTaskDoc` writes `edges-task-priority` only when the value is not `none`
-- `cli/src/tasks/utils/write.ts` — `createTask` / `updateTask` accept `priority`; return `priority`; `update` may be `--priority` alone
-- `cli/src/tasks/utils/board.ts` — `readListItem` sets `priority` via `priorityFromMetadata`; `listTasks` gains `priorities?` + `sort?`
-- `cli/src/tasks/utils/service.ts` — pass the new `listTasks` opts through
-- `cli/src/tasks/create.ts` — `--priority <priority>` with Commander `.choices`
-- `cli/src/tasks/update.ts` — `--priority <priority>`; include it in the “at least one flag” rule
-- `cli/src/tasks/list.ts` — repeatable `--priority` (OR) and `--sort priority`
-- `cli/src/tasks.ts` — `TASKS_AFTER_HELP` command surface
-- `cli/README.md` — document the new flags; keep Capability Surface as CLI + Skill + MCP
+- `packages/cli/src/tasks/utils/types.ts` — `TASK_PRIORITIES` / `TaskPriority`; add `priority: TaskPriority` on `TaskListItem` (and therefore `TaskRecord`)
+- `packages/cli/src/tasks/utils/frontmatter.ts` — `renderNewTaskDoc` writes `edges-task-priority` only when the value is not `none`
+- `packages/cli/src/tasks/utils/write.ts` — `createTask` / `updateTask` accept `priority`; return `priority`; `update` may be `--priority` alone
+- `packages/cli/src/tasks/utils/board.ts` — `readListItem` sets `priority` via `priorityFromMetadata`; `listTasks` gains `priorities?` + `sort?`
+- `packages/cli/src/tasks/utils/service.ts` — pass the new `listTasks` opts through
+- `packages/cli/src/tasks/create.ts` — `--priority <priority>` with Commander `.choices`
+- `packages/cli/src/tasks/update.ts` — `--priority <priority>`; include it in the “at least one flag” rule
+- `packages/cli/src/tasks/list.ts` — repeatable `--priority` (OR) and `--sort priority`
+- `packages/cli/src/tasks.ts` — `TASKS_AFTER_HELP` command surface
+- `packages/cli/README.md` — document the new flags; keep Capability Surface as CLI + Skill + MCP
 - `knowledge/tasks/README.md` — one short paragraph: priority is metadata, not a folder
-- `cli/test/tasks/utils/frontmatter.test.ts`
-- `cli/test/tasks/utils/write.test.ts`
-- `cli/test/tasks/utils/board.test.ts`
-- `cli/test/tasks/utils/move.test.ts` — status move preserves an existing priority field and still moves folders
-- `cli/test/tasks/parse.test.ts`
-- `cli/test/tasks/run.test.ts`
-- `cli/test/tasks/cli.test.ts`
+- `packages/cli/test/tasks/utils/frontmatter.test.ts`
+- `packages/cli/test/tasks/utils/write.test.ts`
+- `packages/cli/test/tasks/utils/board.test.ts`
+- `packages/cli/test/tasks/utils/move.test.ts` — status move preserves an existing priority field and still moves folders
+- `packages/cli/test/tasks/parse.test.ts`
+- `packages/cli/test/tasks/run.test.ts`
+- `packages/cli/test/tasks/cli.test.ts`
 - `CHANGELOG.md` `[Unreleased]` — Added line for the CLI feature (when implementation lands)
 
 **Do not create/commit**
 
-- `skills/edges-tasks/**` or any Skill wrapper
+- `packages/skills/edges-tasks/**` or any Skill wrapper
 - MCP server / tool for tasks priority
 - `--priority` on `status`
 - P0–P3 aliases, case folding, or folder/filename encoding of priority
@@ -171,9 +171,9 @@ pnpm --filter edges-cli test
 ### Task 1: Priority enum and pure helpers
 
 **Files:**
-- Create: `cli/src/tasks/utils/priority.ts`
-- Create: `cli/test/tasks/utils/priority.test.ts`
-- Modify: `cli/src/tasks/utils/types.ts` — define `TASK_PRIORITIES` / `TaskPriority` next to `TASK_STATUSES` (avoids a `types.ts` ↔ `priority.ts` cycle) and add `priority: TaskPriority` on `TaskListItem`
+- Create: `packages/cli/src/tasks/utils/priority.ts`
+- Create: `packages/cli/test/tasks/utils/priority.test.ts`
+- Modify: `packages/cli/src/tasks/utils/types.ts` — define `TASK_PRIORITIES` / `TaskPriority` next to `TASK_STATUSES` (avoids a `types.ts` ↔ `priority.ts` cycle) and add `priority: TaskPriority` on `TaskListItem`
 
 **Interfaces:**
 - Consumes: `TasksError`, `TASK_PRIORITIES`, `TaskPriority` from `./types.js`
@@ -383,10 +383,10 @@ Expected: PASS (existing board tests keep working once `readListItem` sets `prio
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/priority.ts \
-  cli/src/tasks/utils/types.ts \
-  cli/src/tasks/utils/board.ts \
-  cli/test/tasks/utils/priority.test.ts
+git add packages/cli/src/tasks/utils/priority.ts \
+  packages/cli/src/tasks/utils/types.ts \
+  packages/cli/src/tasks/utils/board.ts \
+  packages/cli/test/tasks/utils/priority.test.ts
 git commit -m "feat(tasks): add edges-task-priority helpers" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -396,8 +396,8 @@ git commit -m "feat(tasks): add edges-task-priority helpers" \
 ### Task 2: Frontmatter writes priority only when not none
 
 **Files:**
-- Modify: `cli/src/tasks/utils/frontmatter.ts`
-- Modify: `cli/test/tasks/utils/frontmatter.test.ts`
+- Modify: `packages/cli/src/tasks/utils/frontmatter.ts`
+- Modify: `packages/cli/test/tasks/utils/frontmatter.test.ts`
 
 **Interfaces:**
 - Consumes: `TaskPriority` from `./types.js`
@@ -409,7 +409,7 @@ git commit -m "feat(tasks): add edges-task-priority helpers" \
 
 - [ ] **Step 1: Write the failing test**
 
-Append to `cli/test/tasks/utils/frontmatter.test.ts` (keep the three existing tests):
+Append to `packages/cli/test/tasks/utils/frontmatter.test.ts` (keep the three existing tests):
 
 ```ts
 test("renderNewTaskDoc omits edges-task-priority when none or omitted", () => {
@@ -516,8 +516,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/frontmatter.ts \
-  cli/test/tasks/utils/frontmatter.test.ts
+git add packages/cli/src/tasks/utils/frontmatter.ts \
+  packages/cli/test/tasks/utils/frontmatter.test.ts
 git commit -m "feat(tasks): write edges-task-priority in new Task docs" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -527,9 +527,9 @@ git commit -m "feat(tasks): write edges-task-priority in new Task docs" \
 ### Task 3: list/get expose normalized priority
 
 **Files:**
-- Modify: `cli/src/tasks/utils/board.ts`
-- Modify: `cli/test/tasks/utils/board.test.ts`
-- Modify: `cli/test/tasks/run.test.ts` — existing `list` / `get` fixtures without the field must still succeed and report `"priority":"none"`
+- Modify: `packages/cli/src/tasks/utils/board.ts`
+- Modify: `packages/cli/test/tasks/utils/board.test.ts`
+- Modify: `packages/cli/test/tasks/run.test.ts` — existing `list` / `get` fixtures without the field must still succeed and report `"priority":"none"`
 
 **Interfaces:**
 - Consumes: `priorityFromMetadata` from `./priority.js`; `TaskListItem.priority` from Task 1
@@ -666,9 +666,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/board.ts \
-  cli/test/tasks/utils/board.test.ts \
-  cli/test/tasks/run.test.ts
+git add packages/cli/src/tasks/utils/board.ts \
+  packages/cli/test/tasks/utils/board.test.ts \
+  packages/cli/test/tasks/run.test.ts
 git commit -m "feat(tasks): expose normalized priority on list and get" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -678,11 +678,11 @@ git commit -m "feat(tasks): expose normalized priority on list and get" \
 ### Task 4: create --priority (JSON + disk, no git)
 
 **Files:**
-- Modify: `cli/src/tasks/utils/write.ts`
-- Modify: `cli/src/tasks/create.ts`
-- Modify: `cli/test/tasks/utils/write.test.ts`
-- Modify: `cli/test/tasks/parse.test.ts`
-- Modify: `cli/test/tasks/run.test.ts`
+- Modify: `packages/cli/src/tasks/utils/write.ts`
+- Modify: `packages/cli/src/tasks/create.ts`
+- Modify: `packages/cli/test/tasks/utils/write.test.ts`
+- Modify: `packages/cli/test/tasks/parse.test.ts`
+- Modify: `packages/cli/test/tasks/run.test.ts`
 
 **Interfaces:**
 - Consumes: `parseTaskPriority`, `renderNewTaskDoc` with `priority?`
@@ -881,11 +881,11 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/write.ts \
-  cli/src/tasks/create.ts \
-  cli/test/tasks/utils/write.test.ts \
-  cli/test/tasks/parse.test.ts \
-  cli/test/tasks/run.test.ts
+git add packages/cli/src/tasks/utils/write.ts \
+  packages/cli/src/tasks/create.ts \
+  packages/cli/test/tasks/utils/write.test.ts \
+  packages/cli/test/tasks/parse.test.ts \
+  packages/cli/test/tasks/run.test.ts
 git commit -m "feat(tasks): add create --priority" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -895,11 +895,11 @@ git commit -m "feat(tasks): add create --priority" \
 ### Task 5: update --priority in place (never move status)
 
 **Files:**
-- Modify: `cli/src/tasks/utils/write.ts`
-- Modify: `cli/src/tasks/update.ts`
-- Modify: `cli/test/tasks/utils/write.test.ts`
-- Modify: `cli/test/tasks/parse.test.ts`
-- Modify: `cli/test/tasks/run.test.ts`
+- Modify: `packages/cli/src/tasks/utils/write.ts`
+- Modify: `packages/cli/src/tasks/update.ts`
+- Modify: `packages/cli/test/tasks/utils/write.test.ts`
+- Modify: `packages/cli/test/tasks/parse.test.ts`
+- Modify: `packages/cli/test/tasks/run.test.ts`
 
 **Interfaces:**
 - Consumes: `parseTaskPriority`, `setMetadataField`, `getTask`
@@ -1095,11 +1095,11 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/write.ts \
-  cli/src/tasks/update.ts \
-  cli/test/tasks/utils/write.test.ts \
-  cli/test/tasks/parse.test.ts \
-  cli/test/tasks/run.test.ts
+git add packages/cli/src/tasks/utils/write.ts \
+  packages/cli/src/tasks/update.ts \
+  packages/cli/test/tasks/utils/write.test.ts \
+  packages/cli/test/tasks/parse.test.ts \
+  packages/cli/test/tasks/run.test.ts
 git commit -m "feat(tasks): add update --priority without moving status" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1109,12 +1109,12 @@ git commit -m "feat(tasks): add update --priority without moving status" \
 ### Task 6: list --priority OR filter, --sort priority, AND --status
 
 **Files:**
-- Modify: `cli/src/tasks/utils/board.ts`
-- Modify: `cli/src/tasks/utils/service.ts`
-- Modify: `cli/src/tasks/list.ts`
-- Modify: `cli/test/tasks/utils/board.test.ts`
-- Modify: `cli/test/tasks/parse.test.ts`
-- Modify: `cli/test/tasks/run.test.ts`
+- Modify: `packages/cli/src/tasks/utils/board.ts`
+- Modify: `packages/cli/src/tasks/utils/service.ts`
+- Modify: `packages/cli/src/tasks/list.ts`
+- Modify: `packages/cli/test/tasks/utils/board.test.ts`
+- Modify: `packages/cli/test/tasks/parse.test.ts`
+- Modify: `packages/cli/test/tasks/run.test.ts`
 
 **Interfaces:**
 - Consumes: `filterTasksByPriority`, `sortTasksByPriority`, `TASK_PRIORITIES`, `parseTaskPriority`
@@ -1374,13 +1374,13 @@ Expected: PASS. If the default-order test flakes on `readdir` sorting, relax onl
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/utils/board.ts \
-  cli/src/tasks/utils/service.ts \
-  cli/src/tasks/list.ts \
-  cli/test/tasks/utils/board.test.ts \
-  cli/test/tasks/parse.test.ts \
-  cli/test/tasks/run.test.ts \
-  cli/test/tasks/utils/helpers.ts
+git add packages/cli/src/tasks/utils/board.ts \
+  packages/cli/src/tasks/utils/service.ts \
+  packages/cli/src/tasks/list.ts \
+  packages/cli/test/tasks/utils/board.test.ts \
+  packages/cli/test/tasks/parse.test.ts \
+  packages/cli/test/tasks/run.test.ts \
+  packages/cli/test/tasks/utils/helpers.ts
 git commit -m "feat(tasks): filter and sort list by priority" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1390,12 +1390,12 @@ git commit -m "feat(tasks): filter and sort list by priority" \
 ### Task 7: status untouched, help, README, CHANGELOG
 
 **Files:**
-- Modify: `cli/src/tasks.ts` — `TASKS_AFTER_HELP`
-- Modify: `cli/src/tasks/status.ts` — help text only if needed to say priority is not a status flag; **do not** add `--priority`
-- Modify: `cli/test/tasks/cli.test.ts`
-- Modify: `cli/test/tasks/run.test.ts` — status + unknown `--priority`
-- Modify: `cli/test/tasks/utils/move.test.ts` — preserve an existing priority field across a status move
-- Modify: `cli/README.md`
+- Modify: `packages/cli/src/tasks.ts` — `TASKS_AFTER_HELP`
+- Modify: `packages/cli/src/tasks/status.ts` — help text only if needed to say priority is not a status flag; **do not** add `--priority`
+- Modify: `packages/cli/test/tasks/cli.test.ts`
+- Modify: `packages/cli/test/tasks/run.test.ts` — status + unknown `--priority`
+- Modify: `packages/cli/test/tasks/utils/move.test.ts` — preserve an existing priority field across a status move
+- Modify: `packages/cli/README.md`
 - Modify: `knowledge/tasks/README.md`
 - Modify: `CHANGELOG.md` `[Unreleased]` Added
 
@@ -1529,7 +1529,7 @@ Expected: FAIL — help text does not mention `--priority` / `--sort priority`; 
 
 Keep the Capability Surface sentence: `Capability Surface is CLI + Skill + MCP.`
 
-`cli/README.md` `tasks` block — same command surface. Keep: `Skill and MCP come later on this same contract. Capability Surface is CLI + Skill + MCP.`
+`packages/cli/README.md` `tasks` block — same command surface. Keep: `Skill and MCP come later on this same contract. Capability Surface is CLI + Skill + MCP.`
 
 `knowledge/tasks/README.md` — after the Issue 层状态夹 section, add:
 
@@ -1560,14 +1560,14 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks.ts \
-  cli/src/tasks/status.ts \
-  cli/README.md \
+git add packages/cli/src/tasks.ts \
+  packages/cli/src/tasks/status.ts \
+  packages/cli/README.md \
   knowledge/tasks/README.md \
   CHANGELOG.md \
-  cli/test/tasks/cli.test.ts \
-  cli/test/tasks/run.test.ts \
-  cli/test/tasks/utils/move.test.ts
+  packages/cli/test/tasks/cli.test.ts \
+  packages/cli/test/tasks/run.test.ts \
+  packages/cli/test/tasks/utils/move.test.ts
 git commit -m "docs(tasks): document edges-task-priority CLI contract" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```

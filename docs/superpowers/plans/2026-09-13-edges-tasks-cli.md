@@ -23,7 +23,7 @@
 - Do not change `knowledge/tasks/` board status or task bodies as part of implementing this CLI (tests use a temp board)
 - Do not auto-create/edit/move/delete `knowledge/posts/`
 - Do not add `js-yaml` / `gray-matter` / `simple-git` / vitest. Stay on `commander` + `zod` + `node:test` + `tsx`
-- Test glob is `cli/test/*.test.ts` (`package.json` `"test": "node --test --import tsx test/*.test.ts"`). New tests must match that glob (`test/tasks-*.test.ts`). Helpers may live at `test/tasks-helpers.ts` (not a `*.test.ts`)
+- Test glob is `packages/cli/test/*.test.ts` (`package.json` `"test": "node --test --import tsx test/*.test.ts"`). New tests must match that glob (`test/tasks-*.test.ts`). Helpers may live at `test/tasks-helpers.ts` (not a `*.test.ts`)
 - Reuse `EDGES_REPO` from `loadConfig()` as the repo root. Board lives at `<repoPath>/knowledge/tasks/`
 - `edges note` auth flags stay on `note` only. Tasks commands do not read `--token-file` / `--token-stdin`
 - Public repo: no credentials, tokens, or personal data in commits
@@ -35,46 +35,46 @@
 
 **Create**
 
-- `cli/src/tasks/types.ts` — `TaskStatus`, `RunStatus`, `TasksErrorCode`, records, parsed-command types
-- `cli/src/tasks/paths.ts` — status dirs, stem/path resolve, sidecar path, skip `AGENTS.md` / `README.md` / `.memory/`
-- `cli/src/tasks/slug.ts` — CJK-preserving file slug + ASCII `name` slug (do **not** reuse `git/slug.ts` `titleToSlug`, which strips CJK)
-- `cli/src/tasks/frontmatter.ts` — parse/serialize project-memory shape; surgical metadata patch
-- `cli/src/tasks/board.ts` — list/get over a temp or real board root
-- `cli/src/tasks/write.ts` — create + update (files only)
-- `cli/src/tasks/move.ts` — status move of Task + sidecar
-- `cli/src/tasks/runlog.ts` — parse sidecar table, stable `run-id`, note→run attribution
-- `cli/src/tasks/format.ts` — JSON envelope + `runs`/`run-messages` table
-- `cli/src/tasks/service.ts` — command handlers (`listTasks`, `getTask`, …)
-- `cli/src/tasks/program.ts` — attach Commander subtree to the `tasks` command
-- `cli/src/tasks/run.ts` — `runTasks(parsed, io)` used by root `run()`
-- `cli/test/tasks-helpers.ts` — temp board factory (not executed by the test glob)
-- `cli/test/tasks-paths.test.ts`
-- `cli/test/tasks-slug.test.ts`
-- `cli/test/tasks-frontmatter.test.ts`
-- `cli/test/tasks-board.test.ts`
-- `cli/test/tasks-write.test.ts`
-- `cli/test/tasks-move.test.ts`
-- `cli/test/tasks-runlog.test.ts`
-- `cli/test/tasks-parse.test.ts`
-- `cli/test/tasks-run.test.ts`
-- `cli/test/tasks-cli.test.ts`
+- `packages/cli/src/tasks/types.ts` — `TaskStatus`, `RunStatus`, `TasksErrorCode`, records, parsed-command types
+- `packages/cli/src/tasks/paths.ts` — status dirs, stem/path resolve, sidecar path, skip `AGENTS.md` / `README.md` / `.memory/`
+- `packages/cli/src/tasks/slug.ts` — CJK-preserving file slug + ASCII `name` slug (do **not** reuse `git/slug.ts` `titleToSlug`, which strips CJK)
+- `packages/cli/src/tasks/frontmatter.ts` — parse/serialize project-memory shape; surgical metadata patch
+- `packages/cli/src/tasks/board.ts` — list/get over a temp or real board root
+- `packages/cli/src/tasks/write.ts` — create + update (files only)
+- `packages/cli/src/tasks/move.ts` — status move of Task + sidecar
+- `packages/cli/src/tasks/runlog.ts` — parse sidecar table, stable `run-id`, note→run attribution
+- `packages/cli/src/tasks/format.ts` — JSON envelope + `runs`/`run-messages` table
+- `packages/cli/src/tasks/service.ts` — command handlers (`listTasks`, `getTask`, …)
+- `packages/cli/src/tasks/program.ts` — attach Commander subtree to the `tasks` command
+- `packages/cli/src/tasks/run.ts` — `runTasks(parsed, io)` used by root `run()`
+- `packages/cli/test/tasks-helpers.ts` — temp board factory (not executed by the test glob)
+- `packages/cli/test/tasks-paths.test.ts`
+- `packages/cli/test/tasks-slug.test.ts`
+- `packages/cli/test/tasks-frontmatter.test.ts`
+- `packages/cli/test/tasks-board.test.ts`
+- `packages/cli/test/tasks-write.test.ts`
+- `packages/cli/test/tasks-move.test.ts`
+- `packages/cli/test/tasks-runlog.test.ts`
+- `packages/cli/test/tasks-parse.test.ts`
+- `packages/cli/test/tasks-run.test.ts`
+- `packages/cli/test/tasks-cli.test.ts`
 
 **Modify**
 
-- `cli/src/program.ts` — drop placeholder `onTasks`; call `addTasksCommands`; keep `note` unchanged
-- `cli/src/parse.ts` — `ParseOk` grows seven `tasks-*` kinds; unknown `tasks` verb / missing subcommand = `VALIDATION_ERROR`
-- `cli/src/run.ts` — dispatch `tasks-*` to `runTasks`; remove “not implemented yet”
-- `cli/src/help.ts` — replace `TASKS_AFTER_HELP` placeholder with the contract below
-- `cli/src/exit.ts` — `exitCodeForTasksError(code)` (2 = validation, 1 = not found / IO)
-- `cli/README.md` — document the seven commands; say Skill/MCP follow later on this contract
-- `cli/test/parse.test.ts` — rewrite placeholder assertions
-- `cli/test/run.test.ts` — rewrite placeholder assertions
-- `cli/test/cli.test.ts` — rewrite placeholder `--help` assertion
+- `packages/cli/src/program.ts` — drop placeholder `onTasks`; call `addTasksCommands`; keep `note` unchanged
+- `packages/cli/src/parse.ts` — `ParseOk` grows seven `tasks-*` kinds; unknown `tasks` verb / missing subcommand = `VALIDATION_ERROR`
+- `packages/cli/src/run.ts` — dispatch `tasks-*` to `runTasks`; remove “not implemented yet”
+- `packages/cli/src/help.ts` — replace `TASKS_AFTER_HELP` placeholder with the contract below
+- `packages/cli/src/exit.ts` — `exitCodeForTasksError(code)` (2 = validation, 1 = not found / IO)
+- `packages/cli/README.md` — document the seven commands; say Skill/MCP follow later on this contract
+- `packages/cli/test/parse.test.ts` — rewrite placeholder assertions
+- `packages/cli/test/run.test.ts` — rewrite placeholder assertions
+- `packages/cli/test/cli.test.ts` — rewrite placeholder `--help` assertion
 - `CHANGELOG.md` `[Unreleased]` — Added `edges tasks` CLI (when the implementation lands)
 
 **Do not create/commit**
 
-- `skills/edges-tasks/**` or any Skill wrapper
+- `packages/skills/edges-tasks/**` or any Skill wrapper
 - MCP server / tool for tasks
 - `edges tasks delete`, `edges tasks log`, Run append, GitHub sync
 - Edits under `knowledge/posts/`
@@ -249,9 +249,9 @@ Run statuses on disk (ADR 0002 / README): `pending` | `running` | `completed` | 
 ### Task 1: Status enum, paths, identity resolve
 
 **Files:**
-- Create: `cli/src/tasks/types.ts`
-- Create: `cli/src/tasks/paths.ts`
-- Create: `cli/test/tasks-paths.test.ts`
+- Create: `packages/cli/src/tasks/types.ts`
+- Create: `packages/cli/src/tasks/paths.ts`
+- Create: `packages/cli/test/tasks-paths.test.ts`
 
 **Interfaces:**
 - Consumes: `RuntimeConfig.repoPath` (later tasks pass it in)
@@ -349,8 +349,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/types.ts cli/src/tasks/paths.ts \
-  cli/test/tasks-paths.test.ts
+git add packages/cli/src/tasks/types.ts packages/cli/src/tasks/paths.ts \
+  packages/cli/test/tasks-paths.test.ts
 git commit -m "feat(tasks): add status enum and board paths" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -360,8 +360,8 @@ git commit -m "feat(tasks): add status enum and board paths" \
 ### Task 2: CJK-preserving task slugs
 
 **Files:**
-- Create: `cli/src/tasks/slug.ts`
-- Create: `cli/test/tasks-slug.test.ts`
+- Create: `packages/cli/src/tasks/slug.ts`
+- Create: `packages/cli/test/tasks-slug.test.ts`
 - Modify: none of `src/git/slug.ts` (reuse `localDateYmd` only)
 
 **Interfaces:**
@@ -443,7 +443,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/slug.ts cli/test/tasks-slug.test.ts
+git add packages/cli/src/tasks/slug.ts packages/cli/test/tasks-slug.test.ts
 git commit -m "feat(tasks): add CJK-preserving task slugs" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -453,8 +453,8 @@ git commit -m "feat(tasks): add CJK-preserving task slugs" \
 ### Task 3: Project-memory frontmatter parse and surgical patch
 
 **Files:**
-- Create: `cli/src/tasks/frontmatter.ts`
-- Create: `cli/test/tasks-frontmatter.test.ts`
+- Create: `packages/cli/src/tasks/frontmatter.ts`
+- Create: `packages/cli/test/tasks-frontmatter.test.ts`
 
 **Interfaces:**
 - Consumes: `TaskStatus` from `./types.js`
@@ -554,7 +554,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/frontmatter.ts cli/test/tasks-frontmatter.test.ts
+git add packages/cli/src/tasks/frontmatter.ts packages/cli/test/tasks-frontmatter.test.ts
 git commit -m "feat(tasks): parse and patch task frontmatter" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -564,9 +564,9 @@ git commit -m "feat(tasks): parse and patch task frontmatter" \
 ### Task 4: Board read — list and get (no Commander yet)
 
 **Files:**
-- Create: `cli/src/tasks/board.ts`
-- Create: `cli/test/tasks-board.test.ts`
-- Modify: `cli/test/tasks-helpers.ts`
+- Create: `packages/cli/src/tasks/board.ts`
+- Create: `packages/cli/test/tasks-board.test.ts`
+- Modify: `packages/cli/test/tasks-helpers.ts`
 
 **Interfaces:**
 - Consumes: `boardRoot`, `TASK_STATUSES`, `isTaskMarkdownName`, `parseTaskDoc`, `sidecarRelPath`
@@ -692,8 +692,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/board.ts cli/test/tasks-board.test.ts \
-  cli/test/tasks-helpers.ts
+git add packages/cli/src/tasks/board.ts packages/cli/test/tasks-board.test.ts \
+  packages/cli/test/tasks-helpers.ts
 git commit -m "feat(tasks): list and get task board files" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -703,11 +703,11 @@ git commit -m "feat(tasks): list and get task board files" \
 ### Task 5: Commander subtree + parseArgv kinds
 
 **Files:**
-- Create: `cli/src/tasks/program.ts`
-- Create: `cli/test/tasks-parse.test.ts`
-- Modify: `cli/src/program.ts` (replace placeholder `tasks.action`)
-- Modify: `cli/src/parse.ts` (`ParseOk` union)
-- Modify: `cli/test/parse.test.ts` (placeholder tests)
+- Create: `packages/cli/src/tasks/program.ts`
+- Create: `packages/cli/test/tasks-parse.test.ts`
+- Modify: `packages/cli/src/program.ts` (replace placeholder `tasks.action`)
+- Modify: `packages/cli/src/parse.ts` (`ParseOk` union)
+- Modify: `packages/cli/test/parse.test.ts` (placeholder tests)
 
 **Interfaces:**
 - Consumes: `TASK_STATUSES`, Commander `Command`
@@ -910,9 +910,9 @@ Expected: PASS. Then `pnpm --filter edges-cli test` — `run.test.ts` / `cli.tes
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/program.ts cli/src/program.ts \
-  cli/src/parse.ts cli/test/tasks-parse.test.ts \
-  cli/test/parse.test.ts
+git add packages/cli/src/tasks/program.ts packages/cli/src/program.ts \
+  packages/cli/src/parse.ts packages/cli/test/tasks-parse.test.ts \
+  packages/cli/test/parse.test.ts
 git commit -m "feat(tasks): parse list get create update status runs" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -922,15 +922,15 @@ git commit -m "feat(tasks): parse list get create update status runs" \
 ### Task 6: `run()` dispatch + `edges tasks list`
 
 **Files:**
-- Create: `cli/src/tasks/format.ts`
-- Create: `cli/src/tasks/service.ts`
-- Create: `cli/src/tasks/run.ts`
-- Create: `cli/test/tasks-run.test.ts`
-- Modify: `cli/src/run.ts`
-- Modify: `cli/src/exit.ts`
-- Modify: `cli/src/help.ts`
-- Modify: `cli/test/run.test.ts`
-- Modify: `cli/test/cli.test.ts`
+- Create: `packages/cli/src/tasks/format.ts`
+- Create: `packages/cli/src/tasks/service.ts`
+- Create: `packages/cli/src/tasks/run.ts`
+- Create: `packages/cli/test/tasks-run.test.ts`
+- Modify: `packages/cli/src/run.ts`
+- Modify: `packages/cli/src/exit.ts`
+- Modify: `packages/cli/src/help.ts`
+- Modify: `packages/cli/test/run.test.ts`
+- Modify: `packages/cli/test/cli.test.ts`
 
 **Interfaces:**
 - Consumes: `listTasks`, `ParseOk` `tasks-list`, `loadConfig(env).repoPath`
@@ -1056,10 +1056,10 @@ Expected: PASS for list/help/parse. `tasks get` without wiring still exits 2 unt
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/format.ts cli/src/tasks/service.ts \
-  cli/src/tasks/run.ts cli/src/run.ts cli/src/exit.ts \
-  cli/src/help.ts cli/test/tasks-run.test.ts \
-  cli/test/run.test.ts cli/test/cli.test.ts
+git add packages/cli/src/tasks/format.ts packages/cli/src/tasks/service.ts \
+  packages/cli/src/tasks/run.ts packages/cli/src/run.ts packages/cli/src/exit.ts \
+  packages/cli/src/help.ts packages/cli/test/tasks-run.test.ts \
+  packages/cli/test/run.test.ts packages/cli/test/cli.test.ts
 git commit -m "feat(tasks): wire run() to tasks list" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1069,9 +1069,9 @@ git commit -m "feat(tasks): wire run() to tasks list" \
 ### Task 7: `edges tasks get`
 
 **Files:**
-- Modify: `cli/src/tasks/run.ts`
-- Modify: `cli/src/tasks/service.ts`
-- Modify: `cli/test/tasks-run.test.ts`
+- Modify: `packages/cli/src/tasks/run.ts`
+- Modify: `packages/cli/src/tasks/service.ts`
+- Modify: `packages/cli/test/tasks-run.test.ts`
 
 **Interfaces:**
 - Consumes: `getTask(repoPath, target, fs)`
@@ -1144,8 +1144,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/run.ts cli/src/tasks/service.ts \
-  cli/test/tasks-run.test.ts
+git add packages/cli/src/tasks/run.ts packages/cli/src/tasks/service.ts \
+  packages/cli/test/tasks-run.test.ts
 git commit -m "feat(tasks): add edges tasks get" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1155,11 +1155,11 @@ git commit -m "feat(tasks): add edges tasks get" \
 ### Task 8: `edges tasks create` (file + empty sidecar, no git)
 
 **Files:**
-- Create: `cli/src/tasks/write.ts`
-- Create: `cli/test/tasks-write.test.ts`
-- Modify: `cli/src/tasks/service.ts`
-- Modify: `cli/src/tasks/run.ts`
-- Modify: `cli/test/tasks-run.test.ts`
+- Create: `packages/cli/src/tasks/write.ts`
+- Create: `packages/cli/test/tasks-write.test.ts`
+- Modify: `packages/cli/src/tasks/service.ts`
+- Modify: `packages/cli/src/tasks/run.ts`
+- Modify: `packages/cli/test/tasks-run.test.ts`
 
 **Interfaces:**
 - Consumes: `newTaskStem`, `taskNameSlug`, `renderNewTaskDoc`, `taskRelPath`, `sidecarRelPath`
@@ -1262,9 +1262,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/write.ts cli/src/tasks/service.ts \
-  cli/src/tasks/run.ts cli/test/tasks-write.test.ts \
-  cli/test/tasks-run.test.ts cli/test/tasks-helpers.ts
+git add packages/cli/src/tasks/write.ts packages/cli/src/tasks/service.ts \
+  packages/cli/src/tasks/run.ts packages/cli/test/tasks-write.test.ts \
+  packages/cli/test/tasks-run.test.ts packages/cli/test/tasks-helpers.ts
 git commit -m "feat(tasks): create task file and empty sidecar" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1274,11 +1274,11 @@ git commit -m "feat(tasks): create task file and empty sidecar" \
 ### Task 9: `edges tasks update` (no move, no stem rename)
 
 **Files:**
-- Modify: `cli/src/tasks/write.ts`
-- Modify: `cli/src/tasks/service.ts`
-- Modify: `cli/src/tasks/run.ts`
-- Modify: `cli/test/tasks-write.test.ts`
-- Modify: `cli/test/tasks-run.test.ts`
+- Modify: `packages/cli/src/tasks/write.ts`
+- Modify: `packages/cli/src/tasks/service.ts`
+- Modify: `packages/cli/src/tasks/run.ts`
+- Modify: `packages/cli/test/tasks-write.test.ts`
+- Modify: `packages/cli/test/tasks-run.test.ts`
 
 **Interfaces:**
 - Consumes: `getTask`, `setMetadataField`, `setTopLevelField`, `replaceBody`
@@ -1341,9 +1341,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/write.ts cli/src/tasks/service.ts \
-  cli/src/tasks/run.ts cli/test/tasks-write.test.ts \
-  cli/test/tasks-run.test.ts
+git add packages/cli/src/tasks/write.ts packages/cli/src/tasks/service.ts \
+  packages/cli/src/tasks/run.ts packages/cli/test/tasks-write.test.ts \
+  packages/cli/test/tasks-run.test.ts
 git commit -m "feat(tasks): update task fields without moving" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1353,11 +1353,11 @@ git commit -m "feat(tasks): update task fields without moving" \
 ### Task 10: `edges tasks status` moves Task + sidecar
 
 **Files:**
-- Create: `cli/src/tasks/move.ts`
-- Create: `cli/test/tasks-move.test.ts`
-- Modify: `cli/src/tasks/service.ts`
-- Modify: `cli/src/tasks/run.ts`
-- Modify: `cli/test/tasks-run.test.ts`
+- Create: `packages/cli/src/tasks/move.ts`
+- Create: `packages/cli/test/tasks-move.test.ts`
+- Modify: `packages/cli/src/tasks/service.ts`
+- Modify: `packages/cli/src/tasks/run.ts`
+- Modify: `packages/cli/test/tasks-run.test.ts`
 
 **Interfaces:**
 - Consumes: `getTask`, `setMetadataField`, `taskRelPath`, `sidecarRelPath`
@@ -1438,9 +1438,9 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/move.ts cli/src/tasks/service.ts \
-  cli/src/tasks/run.ts cli/test/tasks-move.test.ts \
-  cli/test/tasks-run.test.ts cli/test/tasks-helpers.ts
+git add packages/cli/src/tasks/move.ts packages/cli/src/tasks/service.ts \
+  packages/cli/src/tasks/run.ts packages/cli/test/tasks-move.test.ts \
+  packages/cli/test/tasks-run.test.ts packages/cli/test/tasks-helpers.ts
 git commit -m "feat(tasks): status moves task and sidecar" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1450,10 +1450,10 @@ git commit -m "feat(tasks): status moves task and sidecar" \
 ### Task 11: No hard delete — `status cancelled` only
 
 **Files:**
-- Modify: `cli/test/tasks-move.test.ts`
-- Modify: `cli/test/tasks-parse.test.ts`
-- Modify: `cli/test/tasks-cli.test.ts` (create this file if Task 6 did not)
-- Modify: `cli/src/tasks/move.ts` only if unlink-of-task exists (it must not)
+- Modify: `packages/cli/test/tasks-move.test.ts`
+- Modify: `packages/cli/test/tasks-parse.test.ts`
+- Modify: `packages/cli/test/tasks-cli.test.ts` (create this file if Task 6 did not)
+- Modify: `packages/cli/src/tasks/move.ts` only if unlink-of-task exists (it must not)
 
 **Interfaces:**
 - Consumes: `moveTaskStatus(..., "cancelled")`, `parseArgv`
@@ -1520,8 +1520,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/test/tasks-move.test.ts cli/test/tasks-parse.test.ts \
-  cli/src/tasks/move.ts
+git add packages/cli/test/tasks-move.test.ts packages/cli/test/tasks-parse.test.ts \
+  packages/cli/src/tasks/move.ts
 git commit -m "test(tasks): cancel via status, never delete" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1531,8 +1531,8 @@ git commit -m "test(tasks): cancel via status, never delete" \
 ### Task 12: Run-log parser and stable `run-id`
 
 **Files:**
-- Create: `cli/src/tasks/runlog.ts`
-- Create: `cli/test/tasks-runlog.test.ts`
+- Create: `packages/cli/src/tasks/runlog.ts`
+- Create: `packages/cli/test/tasks-runlog.test.ts`
 
 **Interfaces:**
 - Consumes: sidecar markdown + `stem`
@@ -1639,7 +1639,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/runlog.ts cli/test/tasks-runlog.test.ts
+git add packages/cli/src/tasks/runlog.ts packages/cli/test/tasks-runlog.test.ts
 git commit -m "feat(tasks): parse run log with stable run-id" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1649,10 +1649,10 @@ git commit -m "feat(tasks): parse run log with stable run-id" \
 ### Task 13: `edges tasks runs` summary + `--output json`
 
 **Files:**
-- Modify: `cli/src/tasks/format.ts`
-- Modify: `cli/src/tasks/service.ts`
-- Modify: `cli/src/tasks/run.ts`
-- Modify: `cli/test/tasks-run.test.ts`
+- Modify: `packages/cli/src/tasks/format.ts`
+- Modify: `packages/cli/src/tasks/service.ts`
+- Modify: `packages/cli/src/tasks/run.ts`
+- Modify: `packages/cli/test/tasks-run.test.ts`
 
 **Interfaces:**
 - Consumes: `getTask`, `parseRunLog`
@@ -1746,8 +1746,8 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/format.ts cli/src/tasks/service.ts \
-  cli/src/tasks/run.ts cli/test/tasks-run.test.ts
+git add packages/cli/src/tasks/format.ts packages/cli/src/tasks/service.ts \
+  packages/cli/src/tasks/run.ts packages/cli/test/tasks-run.test.ts
 git commit -m "feat(tasks): add read-only tasks runs" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1757,12 +1757,12 @@ git commit -m "feat(tasks): add read-only tasks runs" \
 ### Task 14: `edges tasks run-messages`
 
 **Files:**
-- Modify: `cli/src/tasks/format.ts`
-- Modify: `cli/src/tasks/service.ts`
-- Modify: `cli/src/tasks/run.ts`
-- Modify: `cli/src/tasks/runlog.ts` (lookup helper if needed)
-- Modify: `cli/test/tasks-run.test.ts`
-- Create: `cli/test/tasks-cli.test.ts` if not already created
+- Modify: `packages/cli/src/tasks/format.ts`
+- Modify: `packages/cli/src/tasks/service.ts`
+- Modify: `packages/cli/src/tasks/run.ts`
+- Modify: `packages/cli/src/tasks/runlog.ts` (lookup helper if needed)
+- Modify: `packages/cli/test/tasks-run.test.ts`
+- Create: `packages/cli/test/tasks-cli.test.ts` if not already created
 
 **Interfaces:**
 - Consumes: `resolveRunId`, `parseRunLog`, `messagesForRun`, `listTasks` (to find the stem's sidecar when a full `run-id` is given)
@@ -1894,9 +1894,9 @@ Expected: PASS (all prior tasks + this one)
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/src/tasks/format.ts cli/src/tasks/service.ts \
-  cli/src/tasks/run.ts cli/src/tasks/runlog.ts \
-  cli/test/tasks-run.test.ts cli/test/tasks-cli.test.ts
+git add packages/cli/src/tasks/format.ts packages/cli/src/tasks/service.ts \
+  packages/cli/src/tasks/run.ts packages/cli/src/tasks/runlog.ts \
+  packages/cli/test/tasks-run.test.ts packages/cli/test/tasks-cli.test.ts
 git commit -m "feat(tasks): add read-only run-messages" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -1906,8 +1906,8 @@ git commit -m "feat(tasks): add read-only run-messages" \
 ### Task 15: CLI docs + implementation CHANGELOG
 
 **Files:**
-- Modify: `cli/README.md`
-- Modify: `cli/src/help.ts` (only if examples drifted)
+- Modify: `packages/cli/README.md`
+- Modify: `packages/cli/src/help.ts` (only if examples drifted)
 - Modify: `CHANGELOG.md` `[Unreleased]` Added
 
 **Interfaces:**
@@ -1939,7 +1939,7 @@ Expected: FAIL if help/README still omit the Capability Surface sentence.
 
 - [ ] **Step 3: Write minimal implementation**
 
-Replace the `tasks` section in `cli/README.md` (currently “Placeholder only”) with the seven commands, JSON/table rules, cancel-via-status, read-only Run layer, filesystem-only writes, and: Skill and MCP come later on this contract; Capability Surface is CLI + Skill + MCP.
+Replace the `tasks` section in `packages/cli/README.md` (currently “Placeholder only”) with the seven commands, JSON/table rules, cancel-via-status, read-only Run layer, filesystem-only writes, and: Skill and MCP come later on this contract; Capability Surface is CLI + Skill + MCP.
 
 `CHANGELOG.md` under `[Unreleased]` → `### Added`:
 
@@ -1958,7 +1958,7 @@ Expected: PASS
 - [ ] **Step 5: Commit**
 
 ```bash
-git add cli/README.md cli/src/help.ts cli/test/cli.test.ts \
+git add packages/cli/README.md packages/cli/src/help.ts packages/cli/test/cli.test.ts \
   CHANGELOG.md
 git commit -m "docs(tasks): document edges tasks CLI contract" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1968,7 +1968,7 @@ git commit -m "docs(tasks): document edges tasks CLI contract" \
 
 ## Out of scope (do not add tasks)
 
-- Skill wrapper (`skills/edges-tasks/` or similar)
+- Skill wrapper (`packages/skills/edges-tasks/` or similar)
 - MCP tool/server that spawns `edges tasks`
 - Run append / write path / `--since`
 - GitHub Issue/PR sync (`edges-task-issue`, `issue pull-requests`)
@@ -2025,4 +2025,4 @@ No `TBD`, `TODO`, “implement later”, “add validation”, or “similar to 
 
 ### 4. Test runner check
 
-`edges-cli` uses `node --test --import tsx test/*.test.ts`, not vitest. All new tests are `cli/test/tasks-*.test.ts`. Helpers stay in `test/tasks-helpers.ts`.
+`edges-cli` uses `node --test --import tsx test/*.test.ts`, not vitest. All new tests are `packages/cli/test/tasks-*.test.ts`. Helpers stay in `test/tasks-helpers.ts`.

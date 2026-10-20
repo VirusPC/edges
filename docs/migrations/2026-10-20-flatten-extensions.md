@@ -1,6 +1,6 @@
 # 2026-10-20：取消 `extensions/`，平铺到仓库根
 
-决定见 [ADR 0040](../adr/0040-flatten-extensions-posts-to-personal-repo.md)。旧路径硬切，不留软链。仓外写死旧路径的配置按本表改。
+决定见 [ADR 0040](../adr/0040-flatten-extensions-posts-to-personal-repo.md)。旧路径硬切，不留软链。仓外写死旧路径的配置按本表改。同日稍后这些目录又收进 `packages/`，现行路径见 [workspace 说明](2026-10-20-packages-workspace.md)。下表是平铺当时的落点。
 
 | 旧路径 | 新路径 |
 | --- | --- |

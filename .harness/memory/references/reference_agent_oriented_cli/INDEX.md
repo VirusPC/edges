@@ -30,10 +30,10 @@ flags only, no TTY prompts
 ### 五条机制与来源
 
 1. **自描述 `--help`，带例子。** [clig.dev](https://clig.dev/) 例子放最前；AXI 原则 10 每子命令精简完整参考；[agentnative P3](https://github.com/brettdavies/agentnative-cli)；[awesome-cli-for-ai-agents](https://github.com/deadbeef101010/awesome-cli-for-ai-agents)；[brigleb checklist](https://gist.githubusercontent.com/brigleb/08c20ebf8d83b398e10c35d4f2b98824/raw/c8fb69924dbe1f426d587e68efb70f3e87453689/cli-agent-checklist.md)。
-2. **非交互。** clig.dev：永远不要把 prompt 当唯一输入，`--no-input` 时缺参就失败。AXI 原则 6：未知 flag 大声失败（exit 2），禁止默默丢掉。agentnative P1：stdin 接 `/dev/null` 也能跑完。[gh skill](https://github.com/cli/cli/blob/trunk/skills/gh/SKILL.md) 在非 TTY 下直接报错要 `--title`/`--body`，不打开编辑器。
+2. **非交互。** clig.dev：永远不要把 prompt 当唯一输入，`--no-input` 时缺参就失败。AXI 原则 6：未知 flag 大声失败（exit 2），禁止默默丢掉。agentnative P1：stdin 接 `/dev/null` 也能跑完。[gh skill](https://github.com/cli/cli/blob/trunk/packages/skills/gh/SKILL.md) 在非 TTY 下直接报错要 `--title`/`--body`，不打开编辑器。
 3. **stdout = 机器结果，stderr = 诊断。** clig.dev 基础规则；AXI 通道划分；brigleb：JSON 走 stdout，进度走 stderr，`--json` 时退出码配 stdout 上的错误对象。[`gh --json`](https://cli.github.com/manual/gh_help_formatting) 是业界样板；[oclif](https://oclif.github.io/docs/json)；[agcli](https://github.com/matthiasdebernardini/agcli) 永远 JSON 但仍保留 `--json` 布尔位，以免吞掉后面的 positional。失败时**结构化错误仍在 stdout**（与成功同一信封）。
 4. **稳定非零退出。** clig.dev：成功 0，失败非零并映射到失败模式。AXI：0 成功（含幂等 no-op），1 错误，2 用法。brigleb：2 bad args，4 auth，避开 126–255。[cli-agent-spec ExitCode](https://github.com/romamo/cli-agent-spec/blob/master/schemas/exit-code.json)。
-5. **结构化错误码。** AXI：错误与正常输出同一结构，含可执行建议，先校验再调依赖。brigleb 配 `errorCode`。 [cli-builder](https://github.com/assetcorp/agent-skills/blob/main/skills/cli-builder/SKILL.md) 用 `status` + `error` 信封。
+5. **结构化错误码。** AXI：错误与正常输出同一结构，含可执行建议，先校验再调依赖。brigleb 配 `errorCode`。 [cli-builder](https://github.com/assetcorp/agent-skills/blob/main/packages/skills/cli-builder/SKILL.md) 用 `status` + `error` 信封。
 
 ### 数字（引用，不代替读原文）
 

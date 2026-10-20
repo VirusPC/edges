@@ -26,10 +26,10 @@
 # Node artifacts
 node_modules/
 dist/
-mcp-servers/*/node_modules/
-mcp-servers/*/dist/
-services/*/node_modules/
-services/*/dist/
+packages/mcp-servers/*/node_modules/
+packages/mcp-servers/*/dist/
+packages/services/*/node_modules/
+packages/services/*/dist/
 
 # Python
 __pycache__/
@@ -55,14 +55,14 @@ knowledge/tasks/_site/
 **/tasks/_site/
 
 # LoCoMo / evaluation caches (full upstream dump or clone)
-evaluation/.cache/
+packages/evaluation/.cache/
 **/.harness/evaluation/.cache/
 
-# Review shell Vite outDir (ADR 0022). Source is apps/tasks-review-app/.
-cli/src/commands/tasks/project/assets/review-page/
+# Review shell Vite outDir (ADR 0022). Source is packages/apps/tasks-review-app/.
+packages/cli/src/commands/tasks/project/assets/review-page/
 
-# Copied into @viruspc/edges at build time from skills.
-cli/skills/
+# Copied into @viruspc/edges at build time from @viruspc/edges-skills.
+packages/cli/skills/
 
 # 公开仓库：不接收 Office 文档
 # 这类文件正文与元数据都不可 diff 审查，专利交底书/评审材料等极易夹带
@@ -83,7 +83,7 @@ cli/skills/
 
 /teaching/.harness/memory/users/
 
-/.harness/evaluation/.harness/memory/users/
+/packages/evaluation/.harness/memory/users/
 
 # Owner-local correction recovery snapshots (private opt-in may contain secrets).
 **/.ownership-correction/
@@ -95,4 +95,4 @@ cli/skills/
 .worktrees/
 
 # Retrieval eval clones and client logs.
-.harness/evaluation/.cache/
+packages/evaluation/.cache/
