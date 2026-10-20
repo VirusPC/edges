@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `edges compose clone`、`pull`、`push` 不再在第一条失败的登记处中止。失败的条目在 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 每条打一行 `warning: compose <clone|pull|push> failed for <name>: <reason>`，其余条目继续执行。至少一条成功时退出码 0；全部请求的条目都失败（含 `--name` 指定的单条失败）时以失败结果退出（`status: "failed"`，仍带 `entries`；单条失败时 `reason` 是该条的错误）。缺少作用域 `AGENTS.md`、`--name` 找不到条目照旧整条命令失败。
+
 ## [0.2.3] - 2026-10-19
 
 ### Added

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- 说明 `clone` / `pull` / `push` 的逐条失败处理：失败条目记为 `action: "failed"` 并在 stderr 打 warning，其余条目继续；部分成功时退出码仍是 0，要检查 `entries`。
+
 ## [0.1.0] - 2026-10-19
 
 ### Added

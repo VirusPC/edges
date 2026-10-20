@@ -54,4 +54,6 @@ edges --scope <目录> compose unregister --name brain
 
 `unregister` 只从 Compose 区块去掉这一条，不删除已经 clone 的目录。`clone` / `pull` / `push` 的 `--name` 只处理一条；不传则处理全部已登记条目。`clone` 发现目录已经是同一 origin 的检出时保持不动。
 
+`clone` / `pull` / `push` 逐条处理。某一条失败时，它在 `entries` 里是 `action: "failed"`，原因在 `error`，stderr 有一行 `warning: compose <动作> failed for <名字>: ...`；其余条目照常执行。至少一条成功时退出码是 0，所以要看 `entries` 里有没有 `failed`，再把失败的条目和原因告诉用户。全部请求的条目都失败（含 `--name` 那一条失败）时非零退出。
+
 stdout 只有 JSON。失败时读 `reason`。退出码 `2` 是用法或校验错误。
