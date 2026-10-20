@@ -9,14 +9,14 @@ const HELP = "See edges compose --help for usage.\n";
 export function addComposeCloneCommand(compose: Command, ctx: CliContext): void {
   compose
     .command("clone")
-    .description("Clone Compose block repositories into their registered paths")
+    .description("Initialize Compose entries (git submodule update --init, never --recursive)")
     .option("--name <name>", "Only this entry")
     .allowExcessArguments(false)
     .addHelpText("after", COMPOSE_GIT_AFTER_HELP)
     .action(async (opts: { name?: string }) => {
       try {
-        const entries = await cloneCompose(ctx.env, opts.name);
-        ctx.result = composeGitResult("clone", entries, HELP);
+        const { reports, warnings } = await cloneCompose(ctx.env, opts.name);
+        ctx.result = composeGitResult("clone", reports, HELP, warnings);
       } catch (error) {
         failNodeCommand(ctx, error, HELP);
       }

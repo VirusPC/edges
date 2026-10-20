@@ -54,6 +54,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 组合仓库
 
+- **Compose 底层改用 git submodule：** 被组合的仓库默认装到仓内 `.harness/compose/<name>`，不再放 `~/.edges/composed/<name>`。`AGENTS.md` 只写相对路径，换一台机器 clone 主仓库后跑一次 `edges compose clone` 就能用。`register --remote` 跑 `git submodule add`，`clone` 是 `git submodule update --init`（不带 `--recursive`），`pull` 是 `git submodule update --init --remote`，`push` 在子模块里推送，detached HEAD 时给出明确的失败原因。`--path` 只收相对路径。逐条失败处理不变。
+- **不递归，并提示未初始化：** 读取和 `--with-composed` 只看当前仓库自己的条目，两个仓库互相登记也只展开一层；系统森林扫描跳过 `.harness/compose/`。子模块目录为空时提示运行 `edges compose clone`。旧的 `~/...` / 绝对路径条目照样能读，并提示迁移。本仓根 `AGENTS.md` 的 `edges-brain-viruspc` 条目改指 `.harness/compose/edges-brain-viruspc`（子模块本身另行添加）。决定见 [ADR 0042](docs/adr/0042-compose-on-git-submodule.md)。
 - **登记组合仓库必须写说明：** `edges compose register` 现在要求 `--description`。不传，或只传空白，命令以校验错误退出（退出码 2，`errorCode` 为 `VALIDATION_ERROR`），不会把缺说明的条目写进作用域 `AGENTS.md`。说明要写清这个仓存什么、什么时候该往里写。操作见 [`edges-compose`](skills/edges-compose/SKILL.md)（beta，版本 `0.1.0`）。
 - **clone / pull / push 跳过失败条目：** `edges compose clone`、`pull`、`push` 逐条处理登记。某一条失败（检出缺失、git 报错、origin 与登记不符等）时，这条在 JSON 的 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 打一行 `warning: compose <动作> failed for <名字>: <原因>`，后面的条目照常执行。至少一条成功时整体成功（退出码 0）；全部请求的条目都失败（包括 `--name` 指定的那一条失败）时整体失败，非零退出，失败结果里仍带全部 `entries`。缺少作用域 `AGENTS.md`、`--name` 找不到条目这类非单条错误照旧直接失败。
 

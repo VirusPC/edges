@@ -249,7 +249,9 @@ export class NodeService {
             if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
           }
         }
+        // Composed entries are another repo, even when checked out in-repo as a git submodule.
         readonly =
+          composeEntry ||
           !isWithinPath(reference.id, service.managedRoot) ||
           service.#referenceReadOnly(parent, reference);
         return reference.id;

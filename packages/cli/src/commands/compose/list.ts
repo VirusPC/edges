@@ -14,11 +14,11 @@ export function addComposeListCommand(compose: Command, ctx: CliContext): void {
     .allowExcessArguments(false)
     .action(async () => {
       try {
-        const entries = await listCompose(ctx.env);
+        const { entries, warnings } = await listCompose(ctx.env);
         ctx.result = succeed({
           command: "compose.list",
           entries: entries.map(presentComposeEntry),
-        });
+        }, warnings.join(""));
       } catch (error) {
         failNodeCommand(ctx, error, HELP);
       }

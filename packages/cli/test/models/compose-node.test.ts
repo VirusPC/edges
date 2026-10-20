@@ -69,13 +69,13 @@ test("addChild writes the block and removeChild drops the last link", () => {
 `));
   node.composeNode().addChild({
     name: "team",
-    directory: "/repos/team",
+    directory: "../repos/team",
     description: "团队库",
     remote: "git@github.com:example/team.git",
   });
   const source = node.serialize();
   assert.match(source, /project-harness-compose:start/);
-  assert.match(source, /\[team\]\(<\/repos\/team>\) — 团队库 remote: git@github\.com:example\/team\.git/);
+  assert.match(source, /\[team\]\(<\.\.\/repos\/team>\) — 团队库 remote: git@github\.com:example\/team\.git/);
   assert.match(source, /\[tasks\]\(<\.harness\/tasks\/README\.md>\)/);
   const again = new AgentsNode(file).parse(source);
   assert.equal(again.composeNode().entries()[0]?.name, "team");
@@ -101,34 +101,51 @@ test("a description survives serialize and parse next to the remote", () => {
     remote: "https://github.com/example/brain.git",
   });
   const source = node.serialize();
-  assert.match(source, /\[brain\]\(<~\/\.edges\/composed\/brain>\) — 个人大脑 remote: https:\/\/github\.com\/example\/brain\.git/);
+  assert.match(source, /\[brain\]\(<\.harness\/compose\/brain>\) — 个人大脑 remote: https:\/\/github\.com\/example\/brain\.git/);
   const loaded = new AgentsNode(file).parse(source);
   assert.equal(loaded.composeNode().entries()[0]?.description, "个人大脑");
   assert.equal(loaded.composeNode().entries()[0]?.remote, "https://github.com/example/brain.git");
   assert.equal(loaded.serialize(), source);
 });
 
-test("omitted directory uses ~/.edges/composed/<name> and checkout expands ~", () => {
+test("omitted directory uses .harness/compose/<name>; hrefs stay relative", () => {
   const file = "/repo/AGENTS.md";
   const node = new AgentsNode(file).parse(agents(""));
   node.composeNode().addChild({ name: "brain", remote: "https://github.com/example/brain.git" });
   const source = node.serialize();
-  assert.match(source, /\[brain\]\(<~\/\.edges\/composed\/brain>\)/);
+  assert.match(source, /\[brain\]\(<\.harness\/compose\/brain>\)/);
   const loaded = new AgentsNode(file).parse(source);
-  assert.equal(loaded.composeNode().entries()[0]?.href, "~/.edges/composed/brain");
-  assert.equal(
-    loaded.composeNode().checkout("brain").directory,
-    path.join(homedir(), ".edges", "composed", "brain"),
-  );
-  node.composeNode().addChild({ name: "custom", directory: "~/custom" });
-  assert.match(node.serialize(), /\[custom\]\(<~\/custom>\)/);
-  assert.equal(node.composeNode().checkout("custom").directory, path.join(homedir(), "custom"));
-  node.composeNode().addChild({ name: "abs", directory: "/var/composed/abs" });
-  assert.equal(node.composeNode().checkout("abs").directory, "/var/composed/abs");
-  assert.match(node.serialize(), /\[abs\]\(<\/var\/composed\/abs>\)/);
-  node.composeNode().addChild({ name: "rel", directory: "rel-dir" });
+  assert.equal(loaded.composeNode().entries()[0]?.href, ".harness/compose/brain");
+  assert.equal(loaded.composeNode().checkout("brain").directory, "/repo/.harness/compose/brain");
+  assert.equal(loaded.composeNode().entries()[0]?.id, "/repo/.harness/compose/brain/AGENTS.md");
+  node.composeNode().addChild({ name: "rel", directory: "rel-dir/" });
   assert.equal(node.composeNode().checkout("rel").directory, "/repo/rel-dir");
-  assert.match(node.serialize(), /\[rel\]\(<\/repo\/rel-dir>\)/);
+  assert.match(node.serialize(), /\[rel\]\(<rel-dir>\)/);
+  node.composeNode().addChild({ name: "up", directory: "./../sibling" });
+  assert.equal(node.composeNode().checkout("up").directory, "/sibling");
+  assert.match(node.serialize(), /\[up\]\(<\.\.\/sibling>\)/);
+  assert.doesNotMatch(node.serialize(), /\]\(<\//);
+});
+
+test("addChild rejects absolute and ~ paths; legacy links still read", () => {
+  const file = "/repo/AGENTS.md";
+  const node = new AgentsNode(file).parse(agents(""));
+  assert.throws(() => node.composeNode().addChild({ name: "abs", directory: "/var/composed/abs" }), /must be relative/);
+  assert.throws(() => node.composeNode().addChild({ name: "home", directory: "~/custom" }), /must be relative/);
+  assert.throws(() => node.composeNode().addChild({ name: "self", directory: "." }), /own directory/);
+  assert.equal(node.composeNode().entries().length, 0);
+  const legacy = new AgentsNode(file).parse(agents(`
+<!-- project-harness-compose:start -->
+## 组合
+
+- [old](<~/.edges/composed/old>) — 旧 remote: https://github.com/example/old.git
+- [abs](</var/composed/abs>) — 绝对
+<!-- project-harness-compose:end -->
+`));
+  assert.equal(legacy.composeNode().checkout("old").directory, path.join(homedir(), ".edges", "composed", "old"));
+  assert.equal(legacy.composeNode().checkout("abs").directory, "/var/composed/abs");
+  assert.match(legacy.serialize(), /\[old\]\(<~\/\.edges\/composed\/old>\)/);
+  assert.match(legacy.serialize(), /\[abs\]\(<\/var\/composed\/abs>\)/);
 });
 
 test("setNodePath moves the compose edge id", () => {
@@ -216,7 +233,7 @@ test("NodeService list includes an external entry only with withComposed", async
   const node = (await service.get(path.join(scope, "AGENTS.md"), AgentsNode))!;
   node.composeNode().addChild({
     name: "later",
-    directory: missing,
+    directory: "../missing-repo",
     remote: "https://github.com/example/later.git",
   });
   await service.update(node, {});

@@ -45,6 +45,6 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 <!-- project-harness-compose:start -->
 ## 组合
 
-- [edges\-brain\-viruspc](<~/.edges/composed/edges-brain-viruspc>) — peng cheng 的个人大脑主干（个人工作区，挂载到本系统仓）：笔记、Edge、教学、复盘、领域任务、个人项目与 shared\-extensions。记个人知识、学习、复盘、非 Edges 系统的任务时写这里；Edges 系统本身的代码、ADR 与维护记忆写本仓。 remote: https://github.com/VirusPC/edges\-brain\-viruspc.git
+- [edges\-brain\-viruspc](<.harness/compose/edges-brain-viruspc>) — peng cheng 的个人大脑主干（个人工作区，挂载到本系统仓）：笔记、Edge、教学、复盘、领域任务、个人项目与 shared\-extensions。记个人知识、学习、复盘、非 Edges 系统的任务时写这里；Edges 系统本身的代码、ADR 与维护记忆写本仓。 remote: https://github.com/VirusPC/edges\-brain\-viruspc.git
 <!-- project-harness-compose:end -->
 <!-- project-harness:end -->

@@ -9,14 +9,14 @@ const HELP = "See edges compose --help for usage.\n";
 export function addComposePullCommand(compose: Command, ctx: CliContext): void {
   compose
     .command("pull")
-    .description("git pull in each composed checkout, using that repo's own config")
+    .description("Update Compose entries to their remote tip (git submodule update --init --remote)")
     .option("--name <name>", "Only this entry")
     .allowExcessArguments(false)
     .addHelpText("after", COMPOSE_GIT_AFTER_HELP)
     .action(async (opts: { name?: string }) => {
       try {
-        const entries = await pullCompose(ctx.env, opts.name);
-        ctx.result = composeGitResult("pull", entries, HELP);
+        const { reports, warnings } = await pullCompose(ctx.env, opts.name);
+        ctx.result = composeGitResult("pull", reports, HELP, warnings);
       } catch (error) {
         failNodeCommand(ctx, error, HELP);
       }

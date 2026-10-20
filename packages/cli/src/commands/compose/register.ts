@@ -13,8 +13,8 @@ export function addComposeRegisterCommand(compose: Command, ctx: CliContext): vo
     .command("register")
     .description("Record a composed repository in the scope Compose block")
     .requiredOption("--name <name>", "Entry name")
-    .option("--path <directory>", "Local checkout directory (default: ~/.edges/composed/<name>)")
-    .option("--remote <url>", "Git remote used by clone")
+    .option("--path <directory>", "Checkout directory relative to the scope AGENTS.md (default: .harness/compose/<name>; absolute and ~ paths are rejected)")
+    .option("--remote <url>", "Git remote; inside a git repo this runs git submodule add <url> <path>")
     .requiredOption("--description <text>", "Required. What this repository stores and when to write into it")
     .allowExcessArguments(false)
     .action(async (opts: {
@@ -29,7 +29,7 @@ export function addComposeRegisterCommand(compose: Command, ctx: CliContext): vo
         return;
       }
       try {
-        const entry = await registerCompose(ctx.env, {
+        const { entry, submodule, warnings } = await registerCompose(ctx.env, {
           name: opts.name,
           directory: opts.path,
           remote: opts.remote,
@@ -38,7 +38,9 @@ export function addComposeRegisterCommand(compose: Command, ctx: CliContext): vo
         ctx.result = succeed({
           command: "compose.register",
           ...presentComposeEntry(entry),
-        });
+          href: entry.href,
+          ...(submodule === undefined ? {} : { submodule }),
+        }, warnings.join(""));
       } catch (error) {
         failNodeCommand(ctx, error, HELP);
       }

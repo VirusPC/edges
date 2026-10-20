@@ -23,6 +23,8 @@ export interface ComposeEntry {
 export interface ComposeCheckout {
   name: string;
   directory: string;
+  /** Authored link target, relative to the owner AGENTS.md directory for new entries. */
+  href: string;
   remote?: string;
 }
 
@@ -75,6 +77,29 @@ function writeComposeSuffix(description?: string, remote?: string): string | und
   if (text && url) return `${text} remote: ${url}`;
   if (url) return `remote: ${url}`;
   return text || undefined;
+}
+
+/**
+ * True for an authored href written before Compose moved to in-repo git submodules:
+ * an absolute path or a `~/...` path. Such entries still read, with a migration warning.
+ */
+export function isLegacyComposeHref(href: string): boolean {
+  const value = href.trim();
+  return value === "~" || value.startsWith("~/") || path.isAbsolute(value);
+}
+
+/** Normalize a user-given relative path to a POSIX href; reject absolute and `~` paths. */
+function relativeHref(owner: string, raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) throw new Error(`${owner}: compose entry path is empty`);
+  if (isLegacyComposeHref(trimmed) || path.win32.isAbsolute(trimmed))
+    throw new Error(
+      `${owner}: compose path must be relative to the owner AGENTS.md directory (got ${trimmed}). ` +
+        `Absolute and ~ paths are no longer written; omit --path to use ${COMPOSED_CHECKOUT_ROOT}/<name>.`,
+    );
+  const href = path.posix.normalize(trimmed.replace(/\\/g, "/")).replace(/\/+$/, "");
+  if (!href || href === ".") throw new Error(`${owner}: compose entry cannot target its own directory`);
+  return href;
 }
 
 function expandHome(href: string): string {
@@ -205,6 +230,7 @@ export class ComposeNode extends BaseNode {
     return {
       name: item.name,
       directory: item.directory,
+      href: item.href,
       ...(item.remote === undefined ? {} : { remote: item.remote }),
     };
   }
@@ -247,10 +273,8 @@ export class ComposeNode extends BaseNode {
       const href = `${COMPOSED_CHECKOUT_ROOT}/${name}`;
       return { href, directory: resolveDirectory(owner, href) };
     }
-    const trimmed = raw.trim();
-    const directory = resolveDirectory(owner, trimmed);
-    const href = trimmed === "~" || trimmed.startsWith("~/") ? trimmed : directory;
-    return { directory, href };
+    const href = relativeHref(owner, raw);
+    return { href, directory: resolveDirectory(owner, href) };
   }
 
   #fromLink(entry: ComposeLink): ComposeItem {

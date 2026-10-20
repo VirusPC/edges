@@ -9,14 +9,14 @@ const HELP = "See edges compose --help for usage.\n";
 export function addComposePushCommand(compose: Command, ctx: CliContext): void {
   compose
     .command("push")
-    .description("git push in each composed checkout, using that repo's own upstream")
+    .description("git push inside each composed checkout (submodule must be on a branch)")
     .option("--name <name>", "Only this entry")
     .allowExcessArguments(false)
     .addHelpText("after", COMPOSE_GIT_AFTER_HELP)
     .action(async (opts: { name?: string }) => {
       try {
-        const entries = await pushCompose(ctx.env, opts.name);
-        ctx.result = composeGitResult("push", entries, HELP);
+        const { reports, warnings } = await pushCompose(ctx.env, opts.name);
+        ctx.result = composeGitResult("push", reports, HELP, warnings);
       } catch (error) {
         failNodeCommand(ctx, error, HELP);
       }
