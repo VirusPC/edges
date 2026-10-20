@@ -204,7 +204,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `shared-extensions/`：跨机器、跨 Agent 共享的个人 harness（skills、MCP 配置、plugins、hooks）。接入 Edges 的能力仍在 `extensions/`。整层发版：`VERSION` + `CHANGELOG.md` + tag `shared-extensions@`。
+- `shared-extensions/`：跨机器、跨 Agent 共享的个人 harness（skills、MCP 配置、plugins、hooks）。接入 Edges 的能力当时在 `extensions/`（2026-10-20 起改为仓库根 `cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/`，见 Unreleased）。整层发版：`VERSION` + `CHANGELOG.md` + tag `shared-extensions@`。
 - MIT 许可证。
 - README 增加「隐私与脱敏」节。
 - `cli/`：面向 agent 的 `edges-note` CLI（JSON stdout，复用 `bin/new-note`）。本地 agent 优先走它；MCP `new-note` 保留。
@@ -215,7 +215,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - 根 README 按“理念 → 知识模型 → 系统实现 → 使用与维护”重构；从投资视角串联认知资本、Agent Memory、Edge、知识流动性、决策收益和反馈复利，并明确各知识角色的边界及演化规则。
-- `extensions/` 收录标准收窄为「接入或操作 Edges」；跨机器共用但不绑定 Edges 的扩展改走 `shared-extensions/`。
+- 当时的 `extensions/` 收录标准收窄为「接入或操作 Edges」；跨机器共用但不绑定 Edges 的扩展改走 `shared-extensions/`。该层已于 2026-10-20 平铺到仓库根，见 Unreleased。
 - project-memory 的 `AGENTS.md` 增加本层硬约束区块：最重要的规则直接写在入口里。
 - project-memory 的 `AGENTS.md` 受管区块之间空一行。
 - `AGENTS.md` 作为记忆入口只保留硬约束、本层索引、下层索引；检索与沉淀时机写进硬约束。根入口正文收到身份、指针和硬约束，目录细则仍看 README。
@@ -236,7 +236,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - 知识库流转：`knowledge/notes` → `edges` → `archive`，`new-note` MCP 作为写入入口。
-- 对外接口层 `extensions/`：skills、MCP、tools、system-prompt。
+- 对外接口层当时是 `extensions/`（skills、MCP、tools、system-prompt）。2026-10-20 起这些目录在仓库根，见 Unreleased。
 - 用 `npx skills@latest` 分发 skill；本机中枢 `~/.agents/skills`，Claude Code 走软链。
 - project-memory 系列 skill（init / ask / remember / doctor / reshape）及仓库内 `.memory/`。
 - 公开仓库的隐私与脱敏规则。
