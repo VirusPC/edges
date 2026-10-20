@@ -1,0 +1,98 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Obsidian local workspace state
+.obsidian/workspace.json
+
+# Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+.env
+.env.current
+
+# Node artifacts
+node_modules/
+dist/
+extensions/mcp-servers/*/node_modules/
+extensions/mcp-servers/*/dist/
+extensions/services/*/node_modules/
+extensions/services/*/dist/
+
+# Python
+__pycache__/
+*.py[cod]
+
+# 用户记忆：仓内权威副本与仓库根默认备份，不进 git（ADR-0003）
+# 含斜杠的模式只匹配仓库根，所以再加 **/ 盖住下层记忆目录。
+.memory/users/
+.memory/USER.md
+**/.memory/users/
+**/.memory/USER.md
+user-memory-backup-*.tar.gz
+user-memory-backup-*.zip
+
+# New scope-local private memory: include indexes; retain legacy rules above.
+**/.harness/memory/users/
+# Custom private types receive explicit per-scope rules from init/migrate.
+# Migration journals include private material and must never enter Git.
+**/.project-memory-migration/
+
+# Persistent /tasks/ board HTML generated on the box (ADR 0021)
+knowledge/tasks/_site/
+**/tasks/_site/
+
+# LoCoMo / evaluation caches (full upstream dump or clone)
+evaluation/.cache/
+**/.harness/evaluation/.cache/
+
+# Review shell Vite outDir (ADR 0022). Source is extensions/apps/tasks-review-app/.
+extensions/cli/src/commands/tasks/project/assets/review-page/
+
+# Copied into @viruspc/edges at build time from extensions/skills.
+extensions/cli/skills/
+
+# 公开仓库：不接收 Office 文档
+# 这类文件正文与元数据都不可 diff 审查，专利交底书/评审材料等极易夹带
+# 内部信息与个人信息。要归档就转成脱敏后的 markdown。
+*.docx
+*.doc
+*.xlsx
+*.xls
+*.pptx
+*.ppt
+
+**/.recursive-layout-migration/
+
+# Private harness type user
+.harness/memory/users/
+
+/.harness/memory/users/
+
+/teaching/.harness/memory/users/
+
+/.harness/evaluation/.harness/memory/users/
+
+# Owner-local correction recovery snapshots (private opt-in may contain secrets).
+**/.ownership-correction/
+
+# Worktree-local runtime write lock (proper-lockfile directory).
+/.edges-write.lock/
+
+# Local git worktrees for isolated implementation.
+.worktrees/
+
+# Retrieval eval clones and client logs.
+.harness/evaluation/.cache/
