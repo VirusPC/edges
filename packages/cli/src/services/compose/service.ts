@@ -10,13 +10,16 @@ import type { NodeService } from "../node/node-service.js";
 
 const execFileAsync = promisify(execFile);
 
-export type ComposeGitAction = "cloned" | "present" | "pulled" | "pushed";
+/** `failed` marks an entry whose own git step failed; the batch keeps going. */
+export type ComposeGitAction = "cloned" | "present" | "pulled" | "pushed" | "failed";
 
 export interface ComposeGitReport {
   name: string;
   directory: string;
   remote?: string;
   action: ComposeGitAction;
+  /** Only set when `action` is `failed`. */
+  error?: string;
 }
 
 export interface ComposeRegisterInput {
@@ -80,6 +83,31 @@ async function requireCheckout(entry: ComposeCheckout): Promise<void> {
     throw new Error(`Compose checkout is missing: ${entry.name}`);
 }
 
+/**
+ * Run one git step per entry. A failing entry becomes a `failed` report and the
+ * loop moves on. Scope and `--name` lookup errors happen before this and still throw.
+ */
+async function eachCheckout(
+  entries: ComposeCheckout[],
+  step: (entry: ComposeCheckout) => Promise<Exclude<ComposeGitAction, "failed">>,
+): Promise<ComposeGitReport[]> {
+  const reports: ComposeGitReport[] = [];
+  for (const entry of entries) {
+    const base = {
+      name: entry.name,
+      directory: entry.directory,
+      ...(entry.remote === undefined ? {} : { remote: entry.remote }),
+    };
+    try {
+      reports.push({ ...base, action: await step(entry) });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      reports.push({ ...base, action: "failed", error: message });
+    }
+  }
+  return reports;
+}
+
 export async function listCompose(
   env: NodeJS.ProcessEnv,
 ): Promise<ComposeEntry[]> {
@@ -124,8 +152,7 @@ export async function cloneCompose(
   name?: string,
 ): Promise<ComposeGitReport[]> {
   const { node } = await loadScope(env);
-  const reports: ComposeGitReport[] = [];
-  for (const entry of checkouts(node, name)) {
+  return eachCheckout(checkouts(node, name), async (entry) => {
     if (!entry.remote)
       throw new Error(`Compose entry has no git remote: ${entry.name}`);
     if (await isGitCheckout(entry.directory)) {
@@ -139,13 +166,7 @@ export async function cloneCompose(
         throw new Error(
           `Compose checkout origin does not match the registered remote: ${entry.name}`,
         );
-      reports.push({
-        name: entry.name,
-        directory: entry.directory,
-        remote: entry.remote,
-        action: "present",
-      });
-      continue;
+      return "present";
     }
     if (existsSync(entry.directory))
       throw new Error(
@@ -153,14 +174,8 @@ export async function cloneCompose(
       );
     mkdirSync(path.dirname(entry.directory), { recursive: true });
     await git(["clone", entry.remote, entry.directory]);
-    reports.push({
-      name: entry.name,
-      directory: entry.directory,
-      remote: entry.remote,
-      action: "cloned",
-    });
-  }
-  return reports;
+    return "cloned";
+  });
 }
 
 export async function pullCompose(
@@ -168,18 +183,11 @@ export async function pullCompose(
   name?: string,
 ): Promise<ComposeGitReport[]> {
   const { node } = await loadScope(env);
-  const reports: ComposeGitReport[] = [];
-  for (const entry of checkouts(node, name)) {
+  return eachCheckout(checkouts(node, name), async (entry) => {
     await requireCheckout(entry);
     await git(["-C", entry.directory, "pull"]);
-    reports.push({
-      name: entry.name,
-      directory: entry.directory,
-      remote: entry.remote,
-      action: "pulled",
-    });
-  }
-  return reports;
+    return "pulled";
+  });
 }
 
 export async function pushCompose(
@@ -187,16 +195,9 @@ export async function pushCompose(
   name?: string,
 ): Promise<ComposeGitReport[]> {
   const { node } = await loadScope(env);
-  const reports: ComposeGitReport[] = [];
-  for (const entry of checkouts(node, name)) {
+  return eachCheckout(checkouts(node, name), async (entry) => {
     await requireCheckout(entry);
     await git(["-C", entry.directory, "push"]);
-    reports.push({
-      name: entry.name,
-      directory: entry.directory,
-      remote: entry.remote,
-      action: "pushed",
-    });
-  }
-  return reports;
+    return "pushed";
+  });
 }

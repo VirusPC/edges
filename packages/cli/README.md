@@ -300,7 +300,7 @@ edges --scope <directory> compose pull
 edges --scope <directory> compose push --name brain
 ```
 
-`register`、`list` 和 `unregister` 读写当前作用域的 Compose block，经 NodeService 保存 `AGENTS.md`。`unregister` 按 `--name` 去掉一条登记，不删除已 clone 的目录。`clone` 把尚未检出的条目 `git clone` 到登记目录；该目录已经是同一 origin 的检出时保持不动。`pull` 与 `push` 在检出目录里执行这个仓库自己的 `git pull` / `git push`，不另建提交。`clone` / `pull` / `push` 的 `--name` 只处理一条。默认查询停在当前 scope。`--with-composed` 把这些目录的入口 `AGENTS.md` 纳入结果，并且只到这一层。
+`register`、`list` 和 `unregister` 读写当前作用域的 Compose block，经 NodeService 保存 `AGENTS.md`。`unregister` 按 `--name` 去掉一条登记，不删除已 clone 的目录。`clone` 把尚未检出的条目 `git clone` 到登记目录；该目录已经是同一 origin 的检出时保持不动。`pull` 与 `push` 在检出目录里执行这个仓库自己的 `git pull` / `git push`，不另建提交。`clone` / `pull` / `push` 的 `--name` 只处理一条。这三个命令逐条处理：某一条失败（检出缺失、git 报错、origin 与登记不符等）时，这条在 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 打一行 `warning: compose <动作> failed for <名字>: <原因>`，其余条目照常执行。至少一条成功时退出码 0；全部请求的条目都失败（含 `--name` 指定的那一条失败）时非零退出，失败结果里仍带 `entries`。缺少作用域 `AGENTS.md`、`--name` 找不到条目这类错误照旧整条命令失败。默认查询停在当前 scope。`--with-composed` 把这些目录的入口 `AGENTS.md` 纳入结果，并且只到这一层。
 
 <a id="json-schema-contracts"></a>
 

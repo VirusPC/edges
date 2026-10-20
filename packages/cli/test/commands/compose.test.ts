@@ -199,3 +199,128 @@ test("compose register, clone, pull, and push use the repo's own git flow", asyn
   assert.notEqual(missing.exitCode, 0);
   assert.match(missing.stdout, /Compose entry not found: brain/);
 });
+
+interface GitEntries {
+  status: string;
+  errorCode?: string;
+  reason?: string;
+  entries: Array<{ name: string; action: string; error?: string }>;
+}
+
+function setupRemote(root: string, name: string): string {
+  const bare = path.join(root, `${name}.git`);
+  const source = path.join(root, `${name}-source`);
+  git(["init", "--bare", "-b", "main", bare]);
+  git(["init", "-b", "main", source]);
+  commit(source, "init", "README.md", `${name}\n`);
+  git(["remote", "add", "origin", bare], source);
+  git(["push", "-u", "origin", "main"], source);
+  return bare;
+}
+
+async function registerEntry(
+  env: NodeJS.ProcessEnv,
+  name: string,
+  checkout: string,
+  remote: string,
+): Promise<void> {
+  const result = await run(
+    ["compose", "register", "--name", name, "--path", checkout, "--remote", remote, "--description", `${name} 仓`],
+    { env },
+  );
+  assert.equal(result.exitCode, 0, result.stdout + result.stderr);
+}
+
+test("compose pull/push/clone skip a failing entry, warn, and still exit 0", async (t) => {
+  const root = mkdtempSync(path.join(tmpdir(), "compose-partial-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const scope = path.join(root, "scope");
+  mkdirSync(scope, { recursive: true });
+  writeFileSync(path.join(scope, "AGENTS.md"), agents());
+  const env = { ...process.env, EDGES_SCOPE: scope };
+  const goodRemote = setupRemote(root, "good");
+  const goodCheckout = path.join(root, "good");
+  const badCheckout = path.join(root, "bad");
+  // "bad" is registered first so a failure there must not stop "good".
+  await registerEntry(env, "bad", badCheckout, path.join(root, "missing.git"));
+  await registerEntry(env, "good", goodCheckout, goodRemote);
+
+  const cloned = await run(["compose", "clone"], { env });
+  assert.equal(cloned.exitCode, 0, cloned.stdout + cloned.stderr);
+  const cloneBody = JSON.parse(cloned.stdout) as GitEntries;
+  assert.equal(cloneBody.status, "success");
+  assert.deepEqual(cloneBody.entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "cloned"]]);
+  assert.ok(cloneBody.entries[0]?.error);
+  assert.match(cloned.stderr, /^warning: compose clone failed for bad: /m);
+  assert.doesNotMatch(cloned.stderr, /for good/);
+  assert.equal(existsSync(path.join(goodCheckout, "README.md")), true);
+
+  const pulled = await run(["compose", "pull"], { env });
+  assert.equal(pulled.exitCode, 0, pulled.stdout + pulled.stderr);
+  const pullBody = JSON.parse(pulled.stdout) as GitEntries;
+  assert.equal(pullBody.status, "success");
+  assert.deepEqual(pullBody.entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "pulled"]]);
+  assert.equal(pullBody.entries[0]?.error, "Compose checkout is missing: bad");
+  assert.match(pulled.stderr, /^warning: compose pull failed for bad: Compose checkout is missing: bad$/m);
+
+  commit(goodCheckout, "local", "LOCAL.md", "from-checkout\n");
+  const pushed = await run(["compose", "push"], { env });
+  assert.equal(pushed.exitCode, 0, pushed.stdout + pushed.stderr);
+  const pushBody = JSON.parse(pushed.stdout) as GitEntries;
+  assert.deepEqual(pushBody.entries.map((e) => [e.name, e.action]), [["bad", "failed"], ["good", "pushed"]]);
+  assert.match(pushed.stderr, /^warning: compose push failed for bad: /m);
+  assert.match(git(["--git-dir", goodRemote, "log", "-1", "--format=%s", "main"]), /local/);
+});
+
+test("compose pull/push fail when every requested entry fails, including --name", async (t) => {
+  const root = mkdtempSync(path.join(tmpdir(), "compose-allfail-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const scope = path.join(root, "scope");
+  mkdirSync(scope, { recursive: true });
+  writeFileSync(path.join(scope, "AGENTS.md"), agents());
+  const env = { ...process.env, EDGES_SCOPE: scope };
+  await registerEntry(env, "one", path.join(root, "one"), path.join(root, "one.git"));
+  await registerEntry(env, "two", path.join(root, "two"), path.join(root, "two.git"));
+
+  const pulled = await run(["compose", "pull"], { env });
+  assert.notEqual(pulled.exitCode, 0);
+  const body = JSON.parse(pulled.stdout) as GitEntries;
+  assert.equal(body.status, "failed");
+  assert.equal(body.errorCode, "UNKNOWN_ERROR");
+  assert.match(body.reason ?? "", /all 2 entries/);
+  assert.deepEqual(body.entries.map((e) => [e.name, e.action]), [["one", "failed"], ["two", "failed"]]);
+  assert.match(pulled.stderr, /^warning: compose pull failed for one: /m);
+  assert.match(pulled.stderr, /^warning: compose pull failed for two: /m);
+
+  const single = await run(["compose", "push", "--name", "two"], { env });
+  assert.notEqual(single.exitCode, 0);
+  const singleBody = JSON.parse(single.stdout) as GitEntries;
+  assert.equal(singleBody.status, "failed");
+  assert.equal(singleBody.reason, "Compose checkout is missing: two");
+  assert.deepEqual(singleBody.entries.map((e) => [e.name, e.action]), [["two", "failed"]]);
+
+  const cloned = await run(["compose", "clone"], { env });
+  assert.notEqual(cloned.exitCode, 0);
+  assert.equal((JSON.parse(cloned.stdout) as GitEntries).status, "failed");
+
+  const unknown = await run(["compose", "pull", "--name", "nope"], { env });
+  assert.equal(unknown.exitCode, 2);
+  assert.match(unknown.stdout, /compose entry not found: nope/);
+  assert.doesNotMatch(unknown.stdout, /"entries"/);
+});
+
+test("compose pull without a scope AGENTS.md still fails the whole command", async (t) => {
+  const root = mkdtempSync(path.join(tmpdir(), "compose-noscope-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  const result = await run(["compose", "pull"], { env: { ...process.env, EDGES_SCOPE: root } });
+  assert.notEqual(result.exitCode, 0);
+  assert.equal(failed(result.stdout).status, "failed");
+  assert.doesNotMatch(result.stdout, /"entries"/);
+});
+
+test("compose pull --help documents per-entry failure handling", async () => {
+  const result = await run(["compose", "pull", "--help"]);
+  assert.equal(result.exitCode, 0);
+  assert.match(result.stdout, /action "failed"/);
+  assert.match(result.stdout, /every requested entry/);
+});
