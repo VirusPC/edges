@@ -5,6 +5,12 @@ All notable changes to this skill will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.2] - 2026-10-20
+
+### Changed
+
+- 不再点名任何个人仓：入库仓改为用户自己的笔记仓（`--scope` 指向的目录），私密内容写入用户自己的私密仓；去掉过时的「仓：`VirusPC/edges`」说法，CLI 位置写成 `packages/cli/`。
+
 ## [2.7.1] - 2026-10-20
 
 ### Changed
