@@ -31,8 +31,8 @@ export type CliContext = {
   super?: boolean;
   /** Explicit `--all`: traverse the system forest from the current scope. */
   all?: boolean;
-  /** Explicit `--with-composed`: include composed repository entry nodes in list and query. */
-  withComposed?: boolean;
+  /** Global `--exclude`: module names skipped by traversal and the system-root scan. */
+  exclude?: ReadonlySet<string>;
   /** Tokens after the first `--`, forwarded only when this invocation installs skills. */
   skillsInstallArgs?: readonly string[];
   /**
@@ -69,7 +69,7 @@ export function usageError(reason: string, scope: "root" | "notes" | "projects" 
 }
 
 export function usageScope(argv: string[]): "root" | "notes" | "projects" | "tasks" | "artifacts" | "memory" | "skills" | "schema" | "compose" {
-  const command = argv.filter((arg, i) => arg !== "--scope" && argv[i - 1] !== "--scope" && !arg.startsWith("--scope=") && arg !== "--super" && arg !== "--all" && arg !== "--with-composed" && !arg.startsWith("--with-composed="))[0];
+  const command = argv.filter((arg, i) => arg !== "--scope" && argv[i - 1] !== "--scope" && !arg.startsWith("--scope=") && arg !== "--exclude" && argv[i - 1] !== "--exclude" && !arg.startsWith("--exclude=") && arg !== "--super" && arg !== "--all")[0];
   if (command === "notes") return "notes";
   if (command === "projects") return "projects";
   if (command === "tasks") return "tasks";

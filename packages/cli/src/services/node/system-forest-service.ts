@@ -1,5 +1,6 @@
 import path from "node:path";
 import { BaseNode } from "../../domain/models/index.js";
+import { composedCheckoutRoot } from "../../domain/config/exclude.js";
 import { collectSystemRoots } from "./system-roots.js";
 import { NodeService } from "./node-service.js";
 import { createSuperAgentsNode } from "./super-root.js";
@@ -10,8 +11,8 @@ export type SystemForestOptions = {
   form?: ForestForm;
   /** When false, omit the runtime SuperAgentsNode root. Default true. */
   includeSuper?: boolean;
-  /** Pass through ComposeNode and yield external entry nodes. */
-  withComposed?: boolean;
+  /** Global `--exclude`. `compose` skips both the scan of `.harness/compose/` and traversal into it. */
+  exclude?: ReadonlySet<string>;
 };
 
 type RootSpec =
@@ -29,7 +30,7 @@ export async function buildSystemForest(
   const form = options.form ?? "independent";
   const includeSuper = options.includeSuper !== false;
   const scope = path.resolve(scopeDir);
-  const agentsRoots = collectSystemRoots(scope);
+  const agentsRoots = collectSystemRoots(scope, options.exclude);
   const specs: RootSpec[] = agentsRoots.map((p) => ({ kind: "agents", path: p }));
   if (includeSuper) {
     const superNode = createSuperAgentsNode(scope);
@@ -47,7 +48,7 @@ export async function buildSystemForest(
         const peers = new Set(rootSet);
         peers.delete(spec.path);
         const hits = new Set<string>();
-        await listTree(service, spec, recordingExclude(peers, hits), options.withComposed === true);
+        await listTree(service, spec, recordingExclude(peers, hits), scope, options.exclude);
         reachability.set(spec.path, hits);
       }),
     );
@@ -68,7 +69,7 @@ export async function buildSystemForest(
     active.map((spec) => {
       const exclude = new Set(activeSet);
       exclude.delete(spec.path);
-      return listTree(service, spec, exclude, options.withComposed === true);
+      return listTree(service, spec, exclude, scope, options.exclude);
     }),
   );
 }
@@ -77,12 +78,19 @@ function listTree(
   service: NodeService,
   spec: RootSpec,
   excludeRoots: ReadonlySet<string>,
-  withComposed: boolean,
+  hostScope: string,
+  exclude: ReadonlySet<string> | undefined,
 ): Promise<BaseNode[]> {
+  const rootPath = spec.kind === "super" ? spec.scopeDir : spec.path;
+  // A system that already lives in a checkout does not expand its own Compose entries.
+  const checkout = composedCheckoutRoot(rootPath);
+  const nested = checkout !== undefined && path.relative(checkout, rootPath) !== "";
+  const nextExclude = nested ? new Set([...(exclude ?? []), "compose"]) : exclude;
   return service.list(spec.kind === "super" ? spec.scopeDir : spec.path, {
     super: spec.kind === "super",
-    ...(withComposed ? { withComposed: true } : {}),
     excludeRoots,
+    scopeDir: nested && checkout ? checkout : hostScope,
+    ...(nextExclude && nextExclude.size > 0 ? { exclude: nextExclude } : {}),
   });
 }
 

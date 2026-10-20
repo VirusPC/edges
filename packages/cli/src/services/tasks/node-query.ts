@@ -136,7 +136,7 @@ export async function listTaskNodes(
 /** Task boards reached from system entries and linked tasks material. Not a directory scan. */
 export async function listTaskBoardLocations(
   root: string,
-  options: { super?: boolean; withComposed?: boolean } = {},
+  options: { super?: boolean; exclude?: ReadonlySet<string> } = {},
 ): Promise<TaskBoardLocation[]> {
   const canonicalRoot = nativeTaskPath(root);
   const dirs = await collectTaskBoardDirs(canonicalRoot, options);
@@ -147,7 +147,7 @@ export async function listTaskBoardLocations(
 
 async function collectTaskBoardDirs(
   canonicalRoot: string,
-  options: { super?: boolean; withComposed?: boolean } = {},
+  options: { super?: boolean; exclude?: ReadonlySet<string> } = {},
 ): Promise<Set<string>> {
   const service = new NodeService({ managedRoot: canonicalRoot });
   const materialName = path.basename(harnessMaterialById("tasks").path);
@@ -159,31 +159,29 @@ async function collectTaskBoardDirs(
     if (name === ENTRY_NAMES.internal || name === materialName) boardDirs.add(dir);
   };
   const queryOptions = {
-    types: ["agents"] as const,
+    // agents: system entries. readme: module entries, including a Compose child README.
+    // Leaf notes stay unread so a broken note body cannot fail board discovery.
+    types: ["agents", "readme"] as const,
     includeHarness: true,
-    ...(options.withComposed ? { withComposed: true as const } : {}),
+    ...(options.exclude && options.exclude.size > 0 ? { exclude: options.exclude } : {}),
   };
-  const linked: AgentsNode[] = [];
+  const linked: BaseNode[] = [];
   const scopeEntry = path.join(canonicalRoot, ENTRY_NAMES.internal);
   // A missing scope AGENTS.md makes the real-root query throw. `--super` uses the
-  // virtual root instead, and still keeps `--with-composed` on a real entry.
+  // virtual root instead. `--exclude` still applies on a real entry.
+  // Every reached node is noted, not only AGENTS: a Compose entry's child id is
+  // the composed repository's README.md, and that file is enough to mark a tasks board.
   if (fs.existsSync(scopeEntry) || options.super !== true) {
-    linked.push(...await service
-      .query(canonicalRoot, queryOptions)
-      .filter((node): node is AgentsNode => node instanceof AgentsNode)
-      .value());
+    linked.push(...await service.query(canonicalRoot, queryOptions).value());
   }
   if (options.super === true) {
-    linked.push(...await service
-      .query(canonicalRoot, { ...queryOptions, super: true })
-      .filter((node): node is AgentsNode => node instanceof AgentsNode)
-      .value());
+    linked.push(...await service.query(canonicalRoot, { ...queryOptions, super: true }).value());
   }
   for (const node of linked) {
     note(node.path);
     for (const child of node.children) note(child.id);
   }
-  for (const agentsPath of collectSystemRoots(canonicalRoot)) {
+  for (const agentsPath of collectSystemRoots(canonicalRoot, options.exclude)) {
     const node = await service.get(agentsPath, AgentsNode);
     if (!node) continue;
     note(node.path);

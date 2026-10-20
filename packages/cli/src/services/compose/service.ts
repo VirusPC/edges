@@ -2,12 +2,26 @@ import { execFile } from "node:child_process";
 import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
+import { existsSync as fileExists } from "node:fs";
 import { AgentsNode } from "../../domain/models/index.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
-import type { ComposeCheckout, ComposeEntry } from "../../domain/models/compose/compose-node.js";
+import {
+  ComposeReadmeNode,
+  COMPOSE_INDEX_DESCRIPTION,
+  COMPOSE_INDEX_NAME,
+  composeReadmePath,
+  composeReadmeSeed,
+  hrefForScopeCheckout,
+  type ComposeCheckout,
+  type ComposeEntry,
+} from "../../domain/models/compose/compose-readme-node.js";
 import { openNodeSession } from "../node/scope-session.js";
+import { ensureScopeReadme, ensureScopeReadmePointer, linkScopeReadme } from "../init/service.js";
 import { composeEntryWarnings, legacyPathWarning } from "./health.js";
 import type { NodeService } from "../node/node-service.js";
+
+export { doctorCompose } from "./doctor.js";
+export type { ComposeDoctorChange, ComposeDoctorResult } from "./doctor.js";
 
 const execFileAsync = promisify(execFile);
 
@@ -30,8 +44,9 @@ export interface ComposeGitReport {
 export interface ComposeAddInput {
   name: string;
   /**
-   * Checkout directory relative to the owner AGENTS.md directory.
+   * Checkout directory relative to the scope directory.
    * Omitted directories use `.harness/compose/<name>`. Absolute and `~` paths are rejected.
+   * The href written in `compose/README.md` is relative to `.harness/compose/`.
    */
   directory?: string;
   description?: string;
@@ -79,21 +94,50 @@ async function gitTry(args: string[], env: NodeJS.ProcessEnv): Promise<string | 
   }
 }
 
-async function loadScope(env: NodeJS.ProcessEnv): Promise<{
-  service: NodeService;
-  node: AgentsNode;
-}> {
-  const { scope, service } = openNodeSession(env);
-  const file = path.join(scope, ENTRY_NAMES.internal);
-  const node = await service.get(file, AgentsNode);
+async function requireScope(env: NodeJS.ProcessEnv): Promise<{ scope: string; service: NodeService }> {
+  const session = openNodeSession(env);
+  const file = path.join(session.scope, ENTRY_NAMES.internal);
+  if (!fileExists(file)) throw new Error(`Missing scope entry: ${file}. Add AGENTS.md.`);
+  const node = await session.service.get(file, AgentsNode);
   if (!node) throw new Error(`Missing scope entry: ${file}. Add AGENTS.md.`);
-  return { service, node };
+  return { scope: session.scope, service: session.service };
 }
 
-function checkouts(node: AgentsNode, name?: string): ComposeCheckout[] {
-  const compose = node.composeNode();
-  if (name === undefined) return compose.entries().map((entry) => compose.checkout(entry.name));
-  return [compose.checkout(name)];
+/** Create `compose/README.md` and its link from `.harness/README.md` when either is missing. */
+export async function ensureComposeEntry(scope: string, service: NodeService): Promise<ComposeReadmeNode> {
+  const file = composeReadmePath(scope);
+  await ensureScopeReadme(scope, service);
+  await ensureScopeReadmePointer(scope, service);
+  if (!fileExists(file)) {
+    await service.create(new ComposeReadmeNode(file), {
+      name: COMPOSE_INDEX_NAME,
+      description: COMPOSE_INDEX_DESCRIPTION,
+      body: composeReadmeSeed(),
+    });
+  }
+  await linkScopeReadme(scope, {
+    id: file,
+    name: COMPOSE_INDEX_NAME,
+    description: COMPOSE_INDEX_DESCRIPTION,
+  }, service);
+  const node = await service.get(file, ComposeReadmeNode);
+  if (!node) throw new Error(`Missing compose entry: ${file}`);
+  return node;
+}
+
+async function loadCompose(env: NodeJS.ProcessEnv): Promise<{
+  service: NodeService;
+  node: ComposeReadmeNode;
+  scope: string;
+}> {
+  const { scope, service } = await requireScope(env);
+  const node = await ensureComposeEntry(scope, service);
+  return { service, node, scope };
+}
+
+function checkouts(node: ComposeReadmeNode, name?: string): ComposeCheckout[] {
+  if (name === undefined) return node.entries().map((entry) => node.checkout(entry.name));
+  return [node.checkout(name)];
 }
 
 function sameRemote(left: string, right: string): boolean {
@@ -246,8 +290,8 @@ export interface ComposeListEntry extends ComposeEntry {
 export async function listCompose(
   env: NodeJS.ProcessEnv,
 ): Promise<{ entries: ComposeListEntry[]; warnings: string[] }> {
-  const { node } = await loadScope(env);
-  const entries = node.composeNode().entries();
+  const { node } = await loadCompose(env);
+  const entries = node.entries();
   return {
     entries: entries.map((entry) => ({
       ...entry,
@@ -261,22 +305,26 @@ export async function addCompose(
   env: NodeJS.ProcessEnv,
   input: ComposeAddInput,
 ): Promise<ComposeAddResult> {
-  const { service, node } = await loadScope(env);
+  const loaded = await requireScope(env);
   const name = input.name.trim();
-  const compose = node.composeNode();
+  if (input.directory !== undefined) hrefForScopeCheckout(composeReadmePath(loaded.scope), loaded.scope, input.directory);
+  const { service } = loaded;
+  const node = await ensureComposeEntry(loaded.scope, service);
   // Validate (name, relative path, duplicates) before touching git.
-  compose.addChild({
+  node.addChild({
     name,
-    ...(input.directory === undefined ? {} : { directory: input.directory }),
+    ...(input.directory === undefined
+      ? {}
+      : { href: hrefForScopeCheckout(node.path, loaded.scope, input.directory) }),
     description: input.description,
     remote: input.remote,
   });
-  const checkout = compose.checkout(name);
+  const checkout = node.checkout(name);
   const warnings: string[] = [];
   let submodule: ComposeAddResult["submodule"];
   const remote = checkout.remote;
   if (remote) {
-    const at = await placement(path.dirname(node.path), checkout.directory, env);
+    const at = await placement(loaded.scope, checkout.directory, env);
     if (at.kind === "submodule") {
       const existing = await submoduleAt(at.top, at.rel, env);
       if (existing) {
@@ -297,8 +345,8 @@ export async function addCompose(
     }
   }
   await service.update(node, {});
-  const saved = await service.get(node.path, AgentsNode);
-  const entry = saved?.composeNode().entries().find((item) => item.name === name);
+  const saved = await service.get(node.path, ComposeReadmeNode);
+  const entry = saved?.entries().find((item) => item.name === name);
   if (!entry) throw new Error(`Compose entry was not saved: ${name}`);
   return { entry, ...(submodule ? { submodule } : {}), warnings };
 }
@@ -343,8 +391,8 @@ export async function updateCompose(
   env: NodeJS.ProcessEnv,
   options: { name?: string; remote?: boolean } = {},
 ): Promise<ComposeGitRun> {
-  const { node } = await loadScope(env);
-  const ownerDir = path.dirname(node.path);
+  const { node, scope } = await loadCompose(env);
+  const ownerDir = scope;
   const remote = options.remote === true;
   return eachCheckout(checkouts(node, options.name), async (entry) => {
     const at = await placement(ownerDir, entry.directory, env);

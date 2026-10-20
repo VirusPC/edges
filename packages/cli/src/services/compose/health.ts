@@ -1,8 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { COMPOSED_CHECKOUT_ROOT, ENTRY_NAMES } from "../../domain/config/layout.js";
-import { AgentsNode } from "../../domain/models/index.js";
-import { isLegacyComposeHref } from "../../domain/models/compose/compose-node.js";
+import { ComposeReadmeNode, composeReadmePath, isLegacyComposeHref } from "../../domain/models/compose/compose-readme-node.js";
+import { COMPOSED_CHECKOUT_ROOT } from "../../domain/config/layout.js";
 import { resolveScope } from "../scope.js";
 
 interface EntryLike {
@@ -48,13 +47,13 @@ export function composeEntryWarnings(entries: readonly EntryLike[]): string[] {
   return warnings;
 }
 
-/** Same hints for the scope AGENTS.md. Never throws; an unreadable scope yields none. */
+/** Same hints for `.harness/compose/README.md`. Never throws; a missing entry yields none. */
 export function scopeComposeWarnings(env: NodeJS.ProcessEnv): string[] {
   try {
-    const file = path.join(resolveScope(env), ENTRY_NAMES.internal);
+    const file = composeReadmePath(resolveScope(env));
     if (!existsSync(file)) return [];
-    const node = new AgentsNode(file).parse(readFileSync(file, "utf8"));
-    return composeEntryWarnings(node.composeNode().entries());
+    const node = new ComposeReadmeNode(file).parse(readFileSync(file, "utf8"));
+    return composeEntryWarnings(node.entries());
   } catch {
     return [];
   }

@@ -6,7 +6,8 @@
 
 ### Changed
 
-- **破坏性：** `edges compose` 只剩三个子命令，名字对应 git submodule：`add`（取代 `register`，选项不变）、`list`、`update`（取代 `clone` 与 `pull`）。`register`、`unregister`、`clone`、`pull`、`push` 直接删除，不留别名，旧命令以用法错误退出（退出码 2）。去掉条目改为手删 `AGENTS.md` 的那一行（要删子模块时用 `git submodule deinit` / `git rm`）；推送改在子模块里用原生 `git push`。
+- **破坏性：** Compose 入口改为磁盘上的 `.harness/compose/README.md`（`ComposeReadmeNode extends ReadmeNode`），由 `.harness/README.md` 链接。不再有虚拟节点 `<owner>/.compose/README.md`，`AGENTS.md` 不再写 Compose 区块。子节点 id 是被组合仓库的 `README.md`。默认 traverse 和系统根扫描都会进入 scope 自己的 `.harness/compose/`。根级 `--exclude <modules>` 取代 `--with-composed`；`--exclude compose` 同时跳过扫描和遍历。未知模块名直接报错。`compose add` / `list` / `update` 读写这份 README，缺失时连同索引链接一起创建。`edges compose doctor`（默认预览，`--apply` 才写）把旧区块从 `AGENTS.md` 迁过来，不删除文档里的 `--with-composed`（`.agents/skills/`、CHANGELOG 和 ADR 跳过，其余只报告）。见 [ADR 0043](../../docs/adr/0043-compose-readme-entry.md)。
+- **破坏性：** `edges compose` 只剩三个日常子命令，名字对应 git submodule：`add`（取代 `register`，选项不变）、`list`、`update`（取代 `clone` 与 `pull`）。`register`、`unregister`、`clone`、`pull`、`push` 直接删除，不留别名，旧命令以用法错误退出（退出码 2）。去掉条目改为手删 `AGENTS.md` 的那一行（要删子模块时用 `git submodule deinit` / `git rm`）；推送改在子模块里用原生 `git push`。
 - `edges compose` 底层改用 git submodule。`add` 不传 `--path` 时目录从 `~/.edges/composed/<name>` 改为仓内 `.harness/compose/<name>`；区块里只写相对路径（相对于所属 `AGENTS.md` 的目录），相对的 `--path` 不再被改写成绝对路径，绝对路径和 `~` 路径以校验错误拒绝。带 `--remote` 且条目在主仓库工作树里时，`add` 先跑 `git submodule add <remote> <path>`；同一 URL 的子模块已存在时只登记，URL 不同时报错。`add` 的 JSON 带 `href` 和 `submodule`（`added` / `existing`）。
 - `compose update` 对仓内条目跑 `git submodule update --init -- <path>`（不带 `--recursive`）；`--remote` 时加 `--remote`，子模块在分支上时再加 `--merge`；`--name` 只处理一条。每条的 `action` 是 `initialized`、`present`、`updated` 或 `failed`。旧的 `~/...` / 绝对路径条目、仓外条目：目录不存在时 `git clone`，`--remote` 时 `git pull`。
 - `compose list` 的每条多了 `href` 和 `initialized`（目录存在且非空）。

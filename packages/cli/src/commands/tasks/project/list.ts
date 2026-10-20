@@ -13,7 +13,7 @@ export function addProjectListCommand(project: Command, ctx: CliContext): void {
         const projects = await listProjectsInScope(runtime.location.scopeDir, {
           all: ctx.all === true,
           super: ctx.super === true,
-          withComposed: ctx.withComposed === true,
+          exclude: ctx.exclude,
         });
         return succeed({ status: "success", command: "project.list", projects });
       });

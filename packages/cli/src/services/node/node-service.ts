@@ -7,6 +7,7 @@ import { BaseNode, AgentsNode, SuperAgentsNode } from "../../domain/models/index
 import type { ChildGroup, NodeReference } from "../../domain/models/index.js";
 import type { ScopeTraversalOptions, NodeQueryOptions } from "../../domain/operations/traverse.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
+import { isInsideComposedCheckout, pathHitsExcludedModule } from "../../domain/config/exclude.js";
 import {
   identifyNodeType,
   lifecycleUnits,
@@ -147,6 +148,7 @@ export class NodeService {
     const parent = this.#parentNode(file);
     readOnly ||=
       this.#cache.isReadOnly(file) ||
+      isInsideComposedCheckout(file) ||
       (!!parent && indexContract(parent)?.writable === false);
     if (cached) {
       if (readOnly) this.#cache.markReadOnly(cached);
@@ -175,6 +177,7 @@ export class NodeService {
     const readonly =
       this.#cache.state.get(parent)?.readOnly === true ||
       this.#navigationReadOnly.has(parent) ||
+      parent.mountsReadOnly() ||
       indexContract(parent)?.writable === false ||
       this.#options.readOnlyReference?.(parent, reference, reference.id) === true;
     const file = firstSymlink(reference.id) ? reference.id : canonicalPath(reference.id);
@@ -233,13 +236,14 @@ export class NodeService {
           `Missing scope entry: ${entry}. Add AGENTS.md or pass --super to traverse the content face (README) as a virtual system.`,
         );
       // resolve and load are sequential; carry this edge's policy into its one load.
+      const scopeDir = options.scopeDir ?? service.managedRoot;
       let readonly = false;
-      yield* traverse(root, options, (parent, reference) => {
+      yield* traverse(root, { ...options, scopeDir }, (parent, reference) => {
         if (options.excludeRoots?.has(reference.id)) return undefined;
-        if (reference.id === parent.compose?.id) return reference.id;
+        if (pathHitsExcludedModule(reference.id, scopeDir, options.exclude)) return undefined;
         if (!fs.existsSync(reference.id)) return undefined;
-        const composeEntry = parent.type === "compose";
-        if (options.includeHarness && !composeEntry) {
+        const mounted = parent.mountsReadOnly();
+        if (options.includeHarness && !mounted) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.
           if (firstSymlink(reference.id, service.managedRoot)) return undefined;
@@ -251,13 +255,11 @@ export class NodeService {
         }
         // Composed entries are another repo, even when checked out in-repo as a git submodule.
         readonly =
-          composeEntry ||
+          mounted ||
           !isWithinPath(reference.id, service.managedRoot) ||
           service.#referenceReadOnly(parent, reference);
         return reference.id;
       }, (parent, reference) => {
-        if (reference.id === parent.compose?.id && parent instanceof AgentsNode)
-          return Promise.resolve(parent.composeNode());
         return service.#reference(parent, reference, readonly, options.types, false);
       });
     });
@@ -307,7 +309,6 @@ export class NodeService {
       node.harness?.id === ref.id && !node.children.some(child => child.id === ref.id);
     let readonly = false;
     const resolve = (parent: BaseNode, ref: NodeReference) => {
-      if (ref.id === parent.compose?.id) return undefined;
       if (!isWithinPath(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;
       // A symlink registration points elsewhere; it is not this node's index entry.
       if (firstSymlink(ref.id)) return undefined;
@@ -353,7 +354,6 @@ export class NodeService {
       roots(),
       {},
       (_parent, ref) => {
-        if (ref.id === _parent.compose?.id) return undefined;
         if (removed(ref.id))
           throw new Error(`Reference to removed node: ${ref.id}`);
         // Leave symlink registrations in place; do not follow them as the node.
@@ -361,6 +361,8 @@ export class NodeService {
         // Pre-existing links to absent files (gitignored users/README, deleted entries)
         // are skipped. A reference this operation would newly persist still fails.
         if (!fs.existsSync(ref.id) && !plan.has(ref.id)) {
+          // A mount lists its entry before the checkout exists. That is an absent edge.
+          if (_parent.childTraversal() === "leaf") return undefined;
           if (this.#persistedReference(plan, _parent, ref.id)) return undefined;
           throw new Error(`Missing referenced node: ${ref.id}`);
         }

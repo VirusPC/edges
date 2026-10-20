@@ -3,7 +3,7 @@ import { InternalNode, type InternalCreateInput } from "../../core/internal-node
 import { InternalSyntax, type SyntaxContent, type SyntaxReference } from "../node/document.js";
 import { identifyNodeType, resolveEntryHref, isHarnessMaterial } from "../node/layout.js";
 import type { NodeReference } from "../../core/types.js";
-import { ComposeNode } from "../compose/compose-node.js";
+import { stripComposeBlock } from "../compose/compose-readme-node.js";
 
 export interface AgentsCreateInput extends InternalCreateInput {
   constraints?: readonly string[];
@@ -18,14 +18,12 @@ export interface AgentsContent {
 export class AgentsNode extends InternalNode<AgentsCreateInput, AgentsUpdateInput> {
   override readonly type = "agents";
   #constraints: string[] = [];
-  #composeNode: ComposeNode;
+  #dropCompose = false;
   #syntax = new InternalSyntax("");
   #hrefs = new Map<string, string>();
 
   constructor(file: string) {
     super(file);
-    this.#composeNode = new ComposeNode(file);
-    this.#composeNode.track(() => this.path);
   }
 
   get content(): AgentsContent {
@@ -38,12 +36,12 @@ export class AgentsNode extends InternalNode<AgentsCreateInput, AgentsUpdateInpu
   get constraints(): readonly string[] {
     return [...this.#constraints];
   }
-  composeNode(): ComposeNode {
-    return this.#composeNode;
-  }
-  override get compose(): Readonly<NodeReference> | undefined {
-    if (this.#composeNode.children.length === 0) return undefined;
-    return { id: this.#composeNode.path, name: "组合" };
+
+  /** Drop a legacy Compose block. The entry now lives on `.harness/compose/README.md`. */
+  clearComposeSection(): this {
+    this.#dropCompose = true;
+    this.parse(stripComposeBlock(this.serialize()));
+    return this;
   }
 
   protected override parseBody(markdown: string): void {
@@ -64,7 +62,6 @@ export class AgentsNode extends InternalNode<AgentsCreateInput, AgentsUpdateInpu
           ...(entry.description === undefined ? {} : { description: entry.description }),
         }];
       });
-    const previousLinks = this.#composeNode.links();
     const previous = {
       constraints: this.#constraints,
       syntax: this.#syntax,
@@ -74,11 +71,9 @@ export class AgentsNode extends InternalNode<AgentsCreateInput, AgentsUpdateInpu
     this.#syntax = syntax;
     this.#hrefs = hrefs;
     try {
-      this.#composeNode.loadLinks(parsed.compose ?? []);
       this.replace(references(parsed.localChildren), references(parsed.descendantChildren));
     } catch (error) {
       this.#constraints = previous.constraints;
-      this.#composeNode.loadLinks(previousLinks);
       this.#syntax = previous.syntax;
       this.#hrefs = previous.hrefs;
       throw error;
@@ -98,7 +93,7 @@ export class AgentsNode extends InternalNode<AgentsCreateInput, AgentsUpdateInpu
       constraints: this.#constraints,
       localChildren: this.#links(this.locals),
       descendantChildren: this.#links(this.descendants),
-      compose: this.#composeNode.links(),
+      ...(this.#dropCompose ? { compose: [] } : {}),
     };
   }
   protected override serializeBody(): string {
@@ -126,7 +121,6 @@ export class AgentsNode extends InternalNode<AgentsCreateInput, AgentsUpdateInpu
   }
   override validate(): void {
     super.validate();
-    this.#composeNode.check();
   }
   protected override applyInput(input: AgentsCreateInput): void {
     if (

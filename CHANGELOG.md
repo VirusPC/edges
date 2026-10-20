@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Compose
+
+- **入口 README：** `.harness` 下每个模块一份入口 README。Compose 不再是 `AGENTS.md` 上的特例，入口是 `.harness/compose/README.md`，由 `.harness/README.md` 链接。`ComposeReadmeNode` 继承 README 节点，负责组合区块、只读挂载和子节点展开。子节点是被组合仓库的 `README.md`。默认就会展开；系统根扫描默认进入本 scope 的 `.harness/compose/`。根级 `--exclude` 可跳过 `compose`、`memory`、`skills`、`notes`、`projects`、`tasks`。一次性迁移用 `edges compose doctor --apply`。doctor 不改写文档里的 `--with-composed`：`.agents/skills/`、CHANGELOG 和 ADR 跳过，其余只在预览里报告。决定见 [ADR 0043](docs/adr/0043-compose-readme-entry.md)。
+
 ### 目录布局
 
 - **代码目录收进 `packages/`：** pnpm workspace 的包都在 `packages/` 下。`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 从仓库根移入，目录名不变。`.harness/evaluation/` 与 `.harness/observation/` 整棵移到 `packages/evaluation/`、`packages/observation/`。一次性迁移脚本移到 `scripts/migrations/`。不留兼容软链。新增私有包 `@viruspc/edges-skills`、`@viruspc/edges-system-prompt`、`@viruspc/edges-evaluation`、`@viruspc/edges-observation`。CLI 用 `workspace:*` 依赖 skills，构建时解析该包再拷进发布目录。npm 包名 `@viruspc/edges` 不变，`repository.directory` 改为 `packages/cli`。决定见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md)，对照表见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。

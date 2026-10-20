@@ -125,7 +125,7 @@ AGENTS 的本层硬约束、本层记忆、下层索引分别对应 constraints�
 
 ### 查询遵循索引
 
-NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认走全部组成 children（local∪descendants），不走进 Compose 边；显式 `localOnly` 走 localChildren；`withComposed` 穿过挂载点，只纳入外部仓库入口；includeHarness 才沿维护关系递归。**traverse 一次走一个系统的 `children`。根级 `--with-composed` 才把被组合仓库的入口 `AGENTS.md` 纳入结果，并且只到这一层。** 多个系统由 Service 层收集并拼成森林，见[多个系统拼成森林](#多个系统拼成森林)。默认根是 scope 下真 `AGENTS.md`。显式 `--super` 在这个 scope 的上一级建 `SuperAgentsNode`：当前 scope 目录就是该超节点的 `.harness`，材料 README 按 `harness-materials.json` 的 path 直接挂在 scope 下（`tasks/README.md` 即 `<scope>/tasks/README.md`）。scope 自己的 `<scope>/.harness/` 是再下一层维护系统，由真 `AGENTS.md` 进入，超节点不把它再当成材料根。遍历仍当普通 `AgentsNode`，只走 `children`，不从真 AGENTS 并 README 边。详见 [models 设计原则](src/domain/models/README.md#设计原则树与入口)与 [operations 遍历原则](src/domain/operations/README.md#traverse-只走单个系统)。
+NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认走全部组成 children（local∪descendants），含 `.harness/compose/README.md`；显式 `localOnly` 走 localChildren；根级 `--exclude` 按模块名跳过；includeHarness 才沿维护关系递归。**traverse 一次走一个系统的 `children`。Compose 子节点是被组合仓库的 `README.md`，并且只到这一层。** 多个系统由 Service 层收集并拼成森林，见[多个系统拼成森林](#多个系统拼成森林)。默认根是 scope 下真 `AGENTS.md`。显式 `--super` 在这个 scope 的上一级建 `SuperAgentsNode`：当前 scope 目录就是该超节点的 `.harness`，材料 README 按 `harness-materials.json` 的 path 直接挂在 scope 下（`tasks/README.md` 即 `<scope>/tasks/README.md`）。scope 自己的 `<scope>/.harness/` 是再下一层维护系统，由真 `AGENTS.md` 进入，超节点不把它再当成材料根。遍历仍当普通 `AgentsNode`，只走 `children`，不从真 AGENTS 并 README 边。详见 [models 设计原则](src/domain/models/README.md#设计原则树与入口)与 [operations 遍历原则](src/domain/operations/README.md#traverse-只走单个系统)。
 
 ### 多个系统拼成森林
 
@@ -304,22 +304,26 @@ edges --scope <directory> compose update --remote --name brain
 
 | 命令 | 仓内条目（git submodule） | 旧条目 / 仓外条目 |
 | --- | --- | --- |
-| `add --remote` | `git -C <仓库根> submodule add -- <remote> <path>`，再写 `AGENTS.md`。同一路径已是同一 URL 的子模块时只登记（JSON `submodule: "existing"`），URL 不同时报错。同名再 `add` 替换原来那一行。 | 跳过 submodule add，stderr 打 warning |
+| `add --remote` | `git -C <仓库根> submodule add -- <remote> <path>`，再写 `.harness/compose/README.md`。同一路径已是同一 URL 的子模块时只登记（JSON `submodule: "existing"`），URL 不同时报错。同名再 `add` 替换原来那一行。 | 跳过 submodule add，stderr 打 warning |
 | `list` | 列出条目；每条带 `href` 和 `initialized`（目录存在且非空） | 同左 |
 | `update` | `git submodule update --init -- <path>`，从不带 `--recursive`。条目还不在 `.gitmodules` 里时先 `submodule add`。 | 目录不存在时 `git clone`；已是同一 origin 的检出时不动 |
 | `update --remote` | `git submodule update --init --remote -- <path>`。子模块在分支上时加 `--merge`，合进该分支，不切成 detached HEAD。 | 目录不存在时 `git clone`，否则 `git pull` |
 
-`update` 的每条 `action` 是 `initialized`（原来没检出，现在有了）、`present`（已检出，没动）、`updated`（`--remote` 跟到了远端）或 `failed`。「仓内条目」指目录在 scope 所在 git 仓库的工作树里。scope 不在 git 仓库里、目录在仓库外（例如 `--path ../brain`），或区块里是旧的 `~/...` / 绝对路径时，按旧条目处理。`add` 不带 `--remote` 时只登记本地目录，不碰 git。`add` 之后 `.gitmodules` 与子模块进了主仓库的暂存区，要和 `AGENTS.md` 一起提交。
+`update` 的每条 `action` 是 `initialized`（原来没检出，现在有了）、`present`（已检出，没动）、`updated`（`--remote` 跟到了远端）或 `failed`。「仓内条目」指目录在 scope 所在 git 仓库的工作树里。scope 不在 git 仓库里、目录在仓库外（例如 `--path ../notes`），或区块里是旧的 `~/...` / 绝对路径时，按旧条目处理。`add` 不带 `--remote` 时只登记本地目录，不碰 git。`add` 之后 `.gitmodules` 与子模块进了主仓库的暂存区，要和 `.harness/compose/README.md` 一起提交。
 
 `update` 逐条处理：某一条失败（git 报错、URL 与登记不符、没有 remote 等）时，这条在 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 打一行 `warning: compose update failed for <名字>: <原因>`，其余条目照常执行。至少一条成功时退出码 0；全部请求的条目都失败（含 `--name` 指定的那一条失败）时非零退出，失败结果里仍带 `entries`。缺少作用域 `AGENTS.md`、`--name` 找不到条目这类错误照旧整条命令失败。
 
 推送：在子模块目录里用原生 git。子模块默认是 detached HEAD，先 `git -C .harness/compose/<name> switch <branch>`，提交后 `git -C .harness/compose/<name> push`。
 
-去掉一条：在 `AGENTS.md` 的 Compose 区块删掉那一行；要连子模块一起删时，跑 `git submodule deinit -f <path>` 和 `git rm <path>` 再提交。Domain 的 `ComposeNode.removeChild` 仍在，只是不再有 CLI 入口。
+去掉一条：在 `.harness/compose/README.md` 的 Compose 区块删掉那一行；要连子模块一起删时，跑 `git submodule deinit -f <path>` 和 `git rm <path>` 再提交。`ComposeReadmeNode.removeChild` 仍在，只是不再有 CLI 入口。
 
-不递归：只看当前仓库自己的条目。`update` 不初始化被组合仓库里的子模块；默认查询停在当前 scope；`--with-composed` 只把这些目录的入口 `AGENTS.md` 纳入结果，不展开被组合仓库自己的 Compose 条目。系统森林扫描（`forest list`、`--all`）跳过 `.harness/compose/` 和任何已登记的组合目录，不把被组合仓库当成本仓的系统根。被组合的入口一律只读，即使它在主仓库目录里。两个仓库互相登记也只到一层。
+不递归：只看当前仓库自己的条目。`update` 不初始化被组合仓库里的子模块。默认查询会展开 `compose/README.md`，子节点是被组合仓库的 `README.md`，不展开该仓库自己的 Compose。系统森林扫描默认进入 scope 自己的 `.harness/compose/`，把其中带 project-harness 标记的 `AGENTS.md` 当作系统根；被组合仓库内部的 `.harness/compose/` 不扫描。`--exclude compose` 同时跳过扫描和遍历。被组合的内容一律只读。两个仓库互相登记也只到一层。
 
-提示：条目目录不存在或是空的（子模块还没初始化）时，`compose list` 和带 `--with-composed` 的命令在 stderr 打 `warning: compose entry <name> is not checked out at <path>; run edges compose update --name <name>`。旧的 `~/...` / 绝对路径条目照样能读，`compose list`、`update` 和 `--with-composed` 会打迁移提示，建议不带 `--path` 用同一个名字重新 `compose add --remote ...`，把旧行换成 `.harness/compose/<name>`。
+提示：条目目录不存在或是空的（子模块还没初始化）时，`compose list` 和默认会读到该条目的命令在 stderr 打 `warning: compose entry <name> is not checked out at <href>; run edges compose update --name <name>`。`--exclude compose` 时不打这行。旧的 `~/...` / 绝对路径条目照样能读，并提示不带 `--path` 用同一个名字重新 `compose add --remote ...`，把旧行换成 `<name>/README.md`。
+
+`edges compose doctor` 只做迁移：把还写在 `AGENTS.md` 上的区块搬进 `.harness/compose/README.md`，补上材料索引链接，改写 href。默认只打印会改什么，`--apply` 才写。其它文件里的 `--with-composed` 只报告、不改写；`.agents/skills/`、CHANGELOG 和 `docs/adr/` 不列入。日常修改用 `add` / `list` / `update`。
+
+根级 `--exclude <modules>` 与 `--scope` 同级，逗号分隔，可重复。允许 `compose, memory, skills, notes, projects, tasks`。未知名字直接报错。与 `--types` 正交。没有 `--only`，也没有 `--with-composed`。
 
 <a id="json-schema-contracts"></a>
 

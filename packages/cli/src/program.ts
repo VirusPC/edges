@@ -18,6 +18,7 @@ import { addSkillsCommand } from "./commands/skills.js";
 import { addForestCommand } from "./commands/forest.js";
 import { addComposeCommand } from "./commands/compose.js";
 import { scopeComposeWarnings } from "./services/compose/health.js";
+import { parseExcludedModules } from "./domain/config/exclude.js";
 import { addInitCommand } from "./commands/init.js";
 import { failWithExit } from "./commands/result.js";
 import { acquireWriteLock } from "./services/node/node-lock.js";
@@ -115,8 +116,12 @@ function addRootCommand(
       "Traverse the system forest from the current scope",
     )
     .option(
-      "--with-composed",
-      "Include composed repository entries in the current scope result (one layer)",
+      "--exclude <modules>",
+      "Skip modules (comma-separated): compose, memory, skills, notes, projects, tasks",
+      (value: string, previous: string[] = []) => {
+        previous.push(value);
+        return previous;
+      },
     )
     .description("Edges CLI: notes, tasks, artifacts, and more")
     .version(VERSION, "-v, --version", "Print version")
@@ -127,15 +132,15 @@ function addRootCommand(
     .helpCommand(false);
 
   program.hook("preAction", async (_program, command) => {
-    const { scope, super: useSuper, all, withComposed } = program.opts<{
+    const { scope, super: useSuper, all, exclude } = program.opts<{
       scope?: string;
       super?: boolean;
       all?: boolean;
-      withComposed?: boolean;
+      exclude?: string[];
     }>();
     if (useSuper) ctx.super = true;
     if (all) ctx.all = true;
-    if (withComposed) ctx.withComposed = true;
+    if (exclude !== undefined) ctx.exclude = parseExcludedModules(exclude);
     if (scope !== undefined) ctx.env = { ...ctx.env, EDGES_SCOPE: scope };
     const target = commandWriteTarget(command, ctx.env);
     if (all && target !== undefined) {
@@ -186,7 +191,8 @@ function commandWriteTarget(
         (name === "doctor" && options.apply) ||
         (name === "migrate" && !options.dryRun))) ||
     (parent === "compose" &&
-      ["add", "update"].includes(name));
+      (["add", "update", "list"].includes(name) ||
+        (name === "doctor" && options.apply)));
   if (!writes) return undefined;
   if (
     options.targetDir &&
@@ -316,12 +322,12 @@ export async function run(
 }
 
 /**
- * `--with-composed` reads only the scope repo's own Compose entries (one layer).
- * Hint on stderr when one is a legacy path or not checked out yet (empty submodule).
- * `compose list` prints the same hints itself.
+ * Compose is included unless `--exclude compose`. Hint on stderr when one entry
+ * is a legacy path or not checked out yet (empty submodule).
+ * `compose` commands print the same hints themselves.
  */
 function appendComposeWarnings(ctx: CliContext, argv: string[]): void {
-  if (!ctx.withComposed || !ctx.result || usageScope(argv) === "compose") return;
+  if (ctx.exclude?.has("compose") || !ctx.result || usageScope(argv) === "compose") return;
   const warnings = scopeComposeWarnings(ctx.env).join("");
   if (!warnings) return;
   const previous = ctx.result.stderr;

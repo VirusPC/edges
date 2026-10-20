@@ -28,6 +28,7 @@ import {
   SkillNode,
   ReadmeNode,
 } from "../../domain/models/index.js";
+import { createReadmeNode, readmeModelFor } from "../../domain/models/readme/specialize.js";
 import { parseDocument } from "../../utils/markdown/document.js";
 import { checkPath, readEntry } from "./node-files.js";
 export type Model<T extends BaseNode = BaseNode> = new (file: string) => T;
@@ -103,7 +104,7 @@ export const isComposite = (node: unknown): node is CompositeNode =>
   node instanceof AgentsNode || node instanceof ReadmeNode;
 export function parseComposite(file: string, source: string): CompositeNode {
   return path.basename(file) === ENTRY_NAMES.readme
-    ? new ReadmeNode(file).parse(source)
+    ? createReadmeNode(file).parse(source)
     : new AgentsNode(file).parse(source);
 }
 /** Runtime and import classification use exactly the same physical owner. */
@@ -139,9 +140,10 @@ export function modelAt(
 ): Model | undefined {
   const type = identifyNodeType(file, contract);
   if (!type) return undefined;
+  const override = models?.[type] ?? models?.[legacyNodeType(type)];
+  if (override) return override;
+  if (type === "readme") return readmeModelFor(file);
   const model =
-    models?.[type] ??
-    models?.[legacyNodeType(type)] ??
     (
       {
         agents: AgentsNode,

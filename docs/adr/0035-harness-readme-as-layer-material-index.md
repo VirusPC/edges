@@ -6,7 +6,7 @@ status: accepted
 
 2026-10-18 的 grill 确认：edges 作用域里，「本层系统维护信息」所登记的材料清单，从 `AGENTS.md` 迁到该作用域的 `.harness/README.md`。动机与 Letta / Devin 把索引放进 harness 文件夹、以及 Compose 进来的外部知识库自带索引文件一致——材料索引只有一份、形状统一，比在 `AGENTS.md` 与 `.harness/` 之间双写或拆两套清单更好懂。
 
-本 ADR **不**改正 ADR 0034：Compose block、本层硬约束仍写在 `AGENTS.md`；本层材料列表的落点改到 `.harness/README.md`，`AGENTS.md` 本层只留一条指向该 README 的组成登记。
+本 ADR **不**改正 ADR 0034：本层硬约束仍写在 `AGENTS.md`；本层材料列表的落点改到 `.harness/README.md`，`AGENTS.md` 本层只留一条指向该 README 的组成登记。当时 Compose block 也留在 `AGENTS.md`；这一条由 [ADR 0043](0043-compose-readme-entry.md) 取代，Compose 入口改为 `.harness/compose/README.md`。
 
 **Status:** accepted（ADR 0035；grill 确认于 2026-10-18 Asia/Shanghai）
 
