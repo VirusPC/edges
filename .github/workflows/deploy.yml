@@ -1,0 +1,151 @@
+# Framework repo (VirusPC/edges) deploy for the /tasks/ site only. Teaching
+# stays in VirusPC/edges-brain-viruspc. Manual trigger only until the ECS
+# cutover (separate framework checkout + nginx /tasks/ switch) is planned:
+# today nginx /tasks/ is still served from the personal checkout, and the
+# personal repo's Deploy keeps that site live.
+# Secrets TEACH_DEPLOY_* live in the `production` environment of this repo.
+# Keep: full-repo pull on ECS; do not rsync-push a path subset. sudo -n only
+# runs the root-owned /usr/local/sbin/edges-migrate-site-layout.
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: write
+
+concurrency:
+  group: ecs-edges-pull
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # No site URL here. production stays so existing environment secrets
+    # and protection rules still apply to the SSH deploy.
+    environment: production
+    steps:
+      - name: Public site URLs
+        run: |
+          {
+            echo '## Public site URLs'
+            echo
+            echo '- [Tasks](https://edges.viruspc.tech/tasks/)'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Pull edges on ECS
+        env:
+          TEACH_DEPLOY_HOST: ${{ secrets.TEACH_DEPLOY_HOST }}
+          TEACH_DEPLOY_USER: ${{ secrets.TEACH_DEPLOY_USER }}
+          TEACH_DEPLOY_SSH_KEY: ${{ secrets.TEACH_DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          : "${TEACH_DEPLOY_HOST:?missing secret TEACH_DEPLOY_HOST}"
+          : "${TEACH_DEPLOY_USER:?missing secret TEACH_DEPLOY_USER}"
+          : "${TEACH_DEPLOY_SSH_KEY:?missing secret TEACH_DEPLOY_SSH_KEY}"
+          key="$(mktemp)"
+          trap 'rm -f "$key"' EXIT
+          printf '%s\n' "$TEACH_DEPLOY_SSH_KEY" > "$key"
+          chmod 600 "$key"
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H -T 10 "$TEACH_DEPLOY_HOST" >> ~/.ssh/known_hosts
+          ssh -i "$key" \
+            -o IdentitiesOnly=yes \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            "${TEACH_DEPLOY_USER}@${TEACH_DEPLOY_HOST}" \
+            'set -euo pipefail
+             dir=/home/cheng-dev/projects/edges-framework
+             remote=https://ghproxy.net/https://github.com/VirusPC/edges.git
+             if [ ! -d "$dir/.git" ]; then
+               git clone "$remote" "$dir"
+             fi
+             cd "$dir"
+             git remote set-url origin "$remote"
+             git fetch origin main
+             git checkout main
+             git reset --hard origin/main
+             git --no-pager status -sb
+             git rev-parse HEAD
+             export PATH="${HOME}/.local/share/pnpm:${HOME}/.local/bin:/usr/local/bin:${PATH}"
+             if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
+               export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+               . "$NVM_DIR/nvm.sh"
+             fi
+             pnpm install --frozen-lockfile --filter @viruspc/edges... --filter tasks-review-app...
+             pnpm --filter tasks-review-app run build
+             test -s extensions/cli/src/commands/tasks/project/assets/review-page/index.html
+             test -s extensions/cli/src/commands/tasks/project/assets/review-page/review.js
+             test -s extensions/cli/src/commands/tasks/project/assets/review-page/review.css
+             # dist/schemas is gitignored. Review-page doc checks read it at runtime.
+             pnpm --filter @viruspc/edges run build:schemas
+             pnpm --filter @viruspc/edges exec -- tsx scripts/generate-tasks-site.ts \
+               --scope "$PWD" --out "$PWD/tasks/_site/index.html"
+             test -s tasks/_site/index.html
+             grep -q "id=\"edges-review-payload\"" tasks/_site/index.html
+             grep -q "<script type=\"module\">" tasks/_site/index.html
+             if grep -q "src=\"./review.js\"" tasks/_site/index.html; then
+               echo "review.js must be inlined, not linked"
+               exit 1
+             fi
+             entry=/usr/local/sbin/edges-migrate-site-layout
+             install_cmd="sudo bash extensions/services/artifacts-preview/deploy/install-site-layout.sh"
+             lib_dir=/usr/local/lib/edges/site-layout
+             if [ ! -x "$entry" ] || [ -L "$entry" ] ||
+                [ ! -f "$lib_dir/migrate-site-layout.sh" ] || [ -L "$lib_dir/migrate-site-layout.sh" ] ||
+                [ ! -f "$lib_dir/migrate-teaching-nginx-prefix.py" ] || [ -L "$lib_dir/migrate-teaching-nginx-prefix.py" ]; then
+               echo "site-layout migrator is not installed at $entry" >&2
+               echo "On the server as root, from the repo checkout: $install_cmd" >&2
+               exit 1
+             fi
+             if ! sudo -n -l "$entry" >/dev/null 2>&1; then
+               echo "sudo -n cannot run $entry without a password" >&2
+               echo "On the server as root, from the repo checkout: $install_cmd" >&2
+               exit 1
+             fi
+             digest() { sha256sum "$1" | awk "{print \$1}"; }
+             repo_entry=extensions/services/artifacts-preview/deploy/edges-migrate-site-layout
+             repo_lib=extensions/services/artifacts-preview/deploy/migrate-site-layout.sh
+             repo_py=extensions/services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py
+             if [ "$(digest "$repo_entry")" != "$(digest "$entry")" ] ||
+                [ "$(digest "$repo_lib")" != "$(digest "$lib_dir/migrate-site-layout.sh")" ] ||
+                [ "$(digest "$repo_py")" != "$(digest "$lib_dir/migrate-teaching-nginx-prefix.py")" ]; then
+               echo "::warning::installed site-layout migrator differs from this checkout; re-run: $install_cmd"
+             fi
+             sudo -n /usr/local/sbin/edges-migrate-site-layout
+             env_file="$HOME/.config/edges/artifacts-preview.env"
+             token=""
+             if [ -f "$env_file" ]; then
+               token="$(grep -m1 "^EDGES_ARTIFACTS_TOKEN=" "$env_file" | cut -d= -f2- || true)"
+             fi
+             if [ -n "$token" ] && [ "$token" != "replace-with-shared-token" ]; then
+               export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+               if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -S "${XDG_RUNTIME_DIR}/bus" ]; then
+                 export DBUS_SESSION_BUS_ADDRESS="unix:path=${XDG_RUNTIME_DIR}/bus"
+               fi
+               # Pull already succeeded. Failure here fails the job so a
+               # dead artifacts unit is visible; teach files are already new.
+               if ! command -v edges >/dev/null 2>&1; then
+                 pnpm install --frozen-lockfile --filter @viruspc/edges...
+               fi
+               if command -v edges >/dev/null 2>&1; then
+                 edges artifacts server install
+                 edges artifacts server restart
+               else
+                 pnpm --filter @viruspc/edges exec -- tsx src/index.ts artifacts server install
+                 pnpm --filter @viruspc/edges exec -- tsx src/index.ts artifacts server restart
+               fi
+             else
+               echo "skip artifacts server: $env_file missing or token unused (one-time: artifacts-preview README)"
+             fi'
+
+  site-tasks:
+    needs: [deploy]
+    runs-on: ubuntu-latest
+    environment:
+      name: tasks
+      url: https://edges.viruspc.tech/tasks/
+    steps:
+      - name: Record tasks URL
+        run: echo "tasks"
