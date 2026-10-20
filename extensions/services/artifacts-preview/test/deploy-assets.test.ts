@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -181,13 +180,8 @@ test("teaching nginx prefix migrator rewrites both 80 and 443 servers toward /te
   await rm(dir, { recursive: true, force: true });
 });
 
-test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts when env exists", async (t) => {
-  const workflowPath = path.join(repoRoot, ".github/workflows/deploy.yml");
-  if (!existsSync(workflowPath)) {
-    t.skip("deploy.yml not in this checkout");
-    return;
-  }
-  const workflow = await readFile(workflowPath, "utf8");
+test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts when env exists", async () => {
+  const workflow = await readFile(path.join(repoRoot, ".github/workflows/deploy.yml"), "utf8");
   assert.match(workflow, /git reset --hard origin\/main/);
   assert.match(workflow, /artifacts-preview\.env/);
   assert.match(workflow, /replace-with-shared-token/);
