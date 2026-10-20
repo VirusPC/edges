@@ -60,6 +60,5 @@
 - [Evaluation](<evaluation/README.md>) — 知识库/Agent Evaluation 评测与可重复 cases（benchmark、评测流水线等）。
 - [Observation](<observation/README.md>) — 知识库/Agent Observation 观测/观察系统（与 Evaluation 分开）。
 - [Project Memory](<project-memory/README.md>) — Project Memory 类型/索引/reshape/与 docs 边界等。
-- [Site and Content](<site-and-content/README.md>) — 站点/posts/badge/内容整理检索。
 - [Edges Routines](<edges-routines/README.md>) — routines 模块迭代（调度文件、Skill 约定与最小示例）。
 <!-- project-entries-local:end -->

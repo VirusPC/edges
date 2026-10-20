@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 内容归属
+
+- **对外博客离开框架仓：** `posts/`、维护看板项目 `site-and-content`（4 张卡）和项目记忆 `project_posts_public_astro_blog` 从本仓删除。文章与建站卡以个人仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc) 的 [`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts)、[`.harness/tasks/site-and-content/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/.harness/tasks/site-and-content) 为准；博客记忆由个人仓补登记。根 `AGENTS.md` 不再禁止改 `posts/`。`/tasks/` 看板生成器仍在本仓。决定见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)。
+
 ### 仓库拆分
 
 - **框架单独成仓：** 2026-10-20 起，原 `VirusPC/edges` 改名为 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)，作 peng cheng 的个人主干长期保留；新的 `VirusPC/edges` 只含 Edges 系统路径，从单个初始提交开始，拆自 `edges-brain-viruspc@025904fa29bcc6970f45c654d95e30c5390d43d7`。拆仓前的 commit、PR 与 Actions 记录都在个人仓。根 `AGENTS.md` 用 Compose 登记个人仓；retrieval eval 的 `edges` 语料锁到个人仓的这个提交。npm 包名 `@viruspc/edges` 不变。

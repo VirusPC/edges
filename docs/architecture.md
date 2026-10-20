@@ -44,7 +44,7 @@
 - **内部调用**：在新问题中检索并部署 Edge，使其影响判断与行动；产生的决策收益再回到知识生产入口。
 - **外部扩环**：Post 或系统接口把活跃知识部署给外部参与者；读者反馈、使用结果和新证据回流后，形成更大的知识闭环。
 
-[`posts/`](../posts) 存放准备公开发表的成稿。Post 可以取材于 Note、Edge 或专项成果，但不会替代内部知识真源。该目录由人仔细维护；AI 不得自动创建、编辑、移动、删除、重构或重写其中的任何文件，可以在其他位置协助起草，再由人审阅后放入。
+对外博客成稿在个人仓 [`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts)。Post 可以取材于 Note、Edge 或专项成果，但不会替代内部知识真源。该目录由人在个人仓维护。
 
 知识资产只有能够被及时找到、理解并带着必要上下文投入决策，才具有流动性。当前主要通过文件、Obsidian 和人工检索调用知识；后续计划接入 RAG、PageIndex 等索引方式，并经 [`extensions/`](../extensions/) 向外部系统提供机器可读的知识访问能力。它们旨在提高知识流动性，但仍属于规划方向，尚不是现有能力。
 
@@ -80,7 +80,7 @@ CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使�
 
 | 目录 | 职责 | 边界 |
 | --- | --- | --- |
-| `notes/`、`edges/`、`archive/`（个人仓 [`edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)）、[`posts/`](../posts/) | 知识生产、提炼、使用与退出 | 平铺在作用域根；每篇内容使用目录入口，附件共置。个人知识经 Compose 挂进本仓 |
+| `notes/`、`edges/`、`archive/`、[`posts/`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/posts)（个人仓 [`edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)） | 知识生产、提炼、使用与退出 | 在个人仓；每篇内容使用目录入口，附件共置。个人知识经 Compose 挂进本仓 |
 | [`AGENTS.md`](../AGENTS.md) 与各节点的 `.harness/memory/` | 为人和 Agent 提供分层的规则、决策、纠错与流程记忆 | 归属各节点，服务项目维护，不替代长期知识库 |
 | [`extensions/`](../extensions/README.md) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关 |
 | [`extensions/apps/`](../extensions/apps/) | 可跨作用域复用的对外应用，如任务审阅页 | 属于共享扩展实现，不属于根层知识内容 |

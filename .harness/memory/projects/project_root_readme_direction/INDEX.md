@@ -4,7 +4,7 @@ description: >-
   修改根 README 时打开：2026-10-09 grill 已结束并按此重写。定稿：标语「harness
   任何目录。你的大脑，也是一个目录。」；首屏六条（持续自进化、不止停留在仓库、任何目录、任何人、任何
   Agent、超级个体）；正文用现在时、不写「在路上」，但快速开始只放实测命令；中文为主；README 只做门面加地图，内容标准在各目录
-  README；「怎么做到的」以后再补。模型见 ADR 0032。
+  README；「怎么做到的」以后再补。模型见 ADR 0032。2026-10-20 起框架仓不再放 posts/，该约束只在个人仓。
 metadata:
   edges-title: 根 README：harness 任何目录的对外门面
   edges-type: project
@@ -12,7 +12,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: viruspc
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-09T17:31:30+08:00'
+  edges-updated-at: '2026-10-20T06:50:03+00:00'
 ---
 
 根 README 重写为面向外部访客的门面与地图：任何目录都能配一套 harness，大脑也被看作一个虚拟目录；经验按「谁 × 在哪」沉淀；本仓是作者大脑的 harness 仓库。具体规范下放到所属目录 README。
@@ -128,3 +128,8 @@ README 描述新增内容与后续维护的目标约定，集中用一处说明�
 
 
 2026-10-05 用户进一步明确“全局共享”与“对外分发”的区别：根 AGENTS.md 与 .harness 服务本仓，只有提炼到 extensions 或 shared-extensions 的能力才进入对外安装分发范围。目标是任意仓库安装后复用整套能力，在自己的作用域中管理节点与维护内容；不把源仓局部记忆默认随扩展分发。README 应在“递归树结构／全局共享”中简要写清楚，同时将整套能力安装复用表述为设计目标，不能因内容进入某目录就宣称已完成打包、发布或统一安装。
+
+
+## 2026-10-20 翻案
+
+框架仓不再存放 `posts/`。对外博客与看板项目 `site-and-content` 在个人仓 [VirusPC/edges-brain-viruspc](https://github.com/VirusPC/edges-brain-viruspc)。根 `AGENTS.md` 已去掉「AI 不得改 posts/」。上文「`posts/README.md` 只能由用户手改」只对个人仓仍成立。
