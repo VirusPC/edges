@@ -2,16 +2,17 @@
 metadata:
   edges-type: task
   edges-task-project: edges-extensions
-  edges-updated-at: '2026-10-20T09:15:39.804Z'
+  edges-updated-at: '2026-10-20T11:25:33.667Z'
   edges-title: 框架仓重整目录 workspace 化
-  edges-tasks-status: todo
+  edges-tasks-status: done
   edges-task-priority: none
 name: 框架仓重整目录 workspace 化
 description: 独立开源后仓根目录仍不合理；把代码类目录都做成 pnpm workspace 包并重整位置。
 ---
+
 **背景：**
 VirusPC/edges 拆仓后是独立的开源框架仓。PR #7 已把 `extensions/` 平铺到仓根。peng cheng 看过平铺后的仓根，认为作为独立开源项目，目录结构仍不合理：可发布的包、资产、评测观测代码和看板记忆混在根上和 `.harness/` 里，pnpm workspace 也只收了 `mcp-servers/*`、`cli`、`apps/*`、`services/*`。
-- 关联：[平铺卡](../../done/2026-10-20--框架仓平铺-extensions-并把-posts-搬回个人仓/INDEX.md)、[ADR 0040](../../../../../docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)、[平铺迁移说明](../../../../../docs/migrations/2026-10-20-flatten-extensions.md)
+- 关联：[平铺卡](../2026-10-20--%E6%A1%86%E6%9E%B6%E4%BB%93%E5%B9%B3%E9%93%BA-extensions-%E5%B9%B6%E6%8A%8A-posts-%E6%90%AC%E5%9B%9E%E4%B8%AA%E4%BA%BA%E4%BB%93/INDEX.md)、[ADR 0040](../../../../../docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)、[平铺迁移说明](../../../../../docs/migrations/2026-10-20-flatten-extensions.md)
 
 **目标：**
 仓根按独立开源项目的习惯重整，代码类目录都成为 pnpm workspace 包，构建、测试、发布、部署照常跑通。
@@ -31,3 +32,8 @@ VirusPC/edges 拆仓后是独立的开源框架仓。PR #7 已把 `extensions/` 
 7. 一个原子 PR，`git mv`，硬切，不留兼容软链，CHANGELOG 加 `docs/migrations` 对照表，历史计划里的旧路径也改写；workflow 文件名不变 → main 上不出现搬了一半的目录。
 
 决定见 [ADR 0041](../../../../../docs/adr/0041-packages-workspace-layout.md)。状态保持 todo。
+
+**进展（2026-10-20）：** 已全部完成，本卡关闭。
+- VirusPC/edges#9 已合：建卡。
+- VirusPC/edges#10 已合：所有包移进 `packages/`，`skills` 和 `system-prompt` 也成为 workspace 包，`evaluation` / `observation` 从 `.harness/` 移到 `packages/`，一次性迁移脚本移到 `scripts/migrations/`；新增 ADR 0041 和迁移对照表；grill 的 7 条决定写进本卡。
+- 部署：Deploy 成功；ECS 上 artifacts 服务改从 `packages/services` 运行；`/tasks/`、`/teaching/`、`/health`、`/artifacts` 都返回 200。
