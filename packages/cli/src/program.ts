@@ -17,6 +17,7 @@ import { addMemoryCommand } from "./commands/memory.js";
 import { addSkillsCommand } from "./commands/skills.js";
 import { addForestCommand } from "./commands/forest.js";
 import { addComposeCommand } from "./commands/compose.js";
+import { scopeComposeWarnings } from "./services/compose/health.js";
 import { addInitCommand } from "./commands/init.js";
 import { failWithExit } from "./commands/result.js";
 import { acquireWriteLock } from "./services/node/node-lock.js";
@@ -36,9 +37,9 @@ EXAMPLES
   edges --scope ./projects/demo --super tasks list
   edges --scope . forest list
   edges --scope . forest list --form innermost --no-super
-  edges --scope . compose clone
-  edges --scope . compose pull
-  edges --scope . compose push
+  edges --scope . compose list
+  edges --scope . compose update
+  edges --scope . compose update --remote
   edges notes create --title "Daily" --body "Notes from the session."
   edges notes --help
   edges projects create --title "Demo" --body "What this project is."
@@ -185,7 +186,7 @@ function commandWriteTarget(
         (name === "doctor" && options.apply) ||
         (name === "migrate" && !options.dryRun))) ||
     (parent === "compose" &&
-      ["register", "unregister", "clone", "pull", "push"].includes(name));
+      ["add", "update"].includes(name));
   if (!writes) return undefined;
   if (
     options.targetDir &&
@@ -307,10 +308,27 @@ export async function run(
     }
   }
   await installSkillsAfterLock(ctx);
+  appendComposeWarnings(ctx, split.argv);
   return (
     ctx.result ??
     usageError("missing command. Use edges --help.", usageScope(split.argv))
   );
+}
+
+/**
+ * `--with-composed` reads only the scope repo's own Compose entries (one layer).
+ * Hint on stderr when one is a legacy path or not checked out yet (empty submodule).
+ * `compose list` prints the same hints itself.
+ */
+function appendComposeWarnings(ctx: CliContext, argv: string[]): void {
+  if (!ctx.withComposed || !ctx.result || usageScope(argv) === "compose") return;
+  const warnings = scopeComposeWarnings(ctx.env).join("");
+  if (!warnings) return;
+  const previous = ctx.result.stderr;
+  ctx.result = {
+    ...ctx.result,
+    stderr: previous + (previous && !previous.endsWith("\n") ? "\n" : "") + warnings,
+  };
 }
 
 /** Vercel install runs only after the init write lock is released. */

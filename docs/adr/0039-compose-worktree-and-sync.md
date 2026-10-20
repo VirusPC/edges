@@ -10,7 +10,9 @@ status: proposed
 
 **Status:** proposed（ADR 0039；grill 2026-10-19～20）
 
-**See also:** ADR 0034（组合 harness 仓库）
+**See also:** ADR 0034（组合 harness 仓库）、ADR 0042（Compose 底层改用 git submodule，取代本文的「submodule 否决」与 `compose sync`）
+
+> 2026-10-20 更新：ADR 0042 把 Compose 收成 `add` / `list` / `update` 三个命令，推送与同步交给原生 git，不再做 `compose sync`；底层改为 git submodule。下文的 `compose register` / `clone` / `pull` / `push` / `sync` 是当时的命令名。
 
 ## Decision
 

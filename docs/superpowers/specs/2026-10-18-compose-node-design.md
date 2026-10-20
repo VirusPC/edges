@@ -1,5 +1,7 @@
 # Compose 虚拟节点
 
+> 2026-10-20 更新：默认检出目录与路径规则已由 [ADR 0042](../../adr/0042-compose-on-git-submodule.md) 取代。现在底层是 git submodule，默认装到仓内 `.harness/compose/<name>`，区块只写相对路径。下文的 `~/.edges/composed/<name>` 与绝对路径写法是当时的设计，仅作历史记录。
+
 状态：方案，2026-10-18。本文件只定模型，不含实现。基线是 `main` 的 `56850a06`。
 
 磁盘格式沿用 ADR 0034：组合条目仍写在所属 `AGENTS.md` 的 `project-harness-compose` 区块，链接指向本地目录，`remote: <git-url>` 写在说明里。本方案改的是这块文本在 Domain 里的节点形状。
