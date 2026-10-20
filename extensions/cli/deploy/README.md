@@ -44,7 +44,7 @@ The account is `SUDO_USER`, or pass that account as the only argument. The insta
 Requires `/etc/nginx/conf.d/teaching.conf` with `/teaching/` already in a `server { }` block. Leftover `teach.conf` / `/teach/` must be migrated first (`extensions/services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py`), then:
 
 ```bash
-sudo bash /home/cheng-dev/projects/edges/extensions/cli/deploy/setup-nginx-tasks.sh
+sudo bash /home/cheng-dev/projects/edges-framework/extensions/cli/deploy/setup-nginx-tasks.sh
 ```
 
 That installs `/etc/nginx/snippets/edges-tasks.conf` (`/tasks/` → `<repo>/tasks/_site/`) and includes it only in `teaching.conf` servers that contain `/teaching/`. Do not add `/tasks/` to the artifacts snippet. Do not dual-recognize `/teach/`.

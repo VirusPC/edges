@@ -6,10 +6,10 @@ ConditionPathExists=%h/.config/edges/artifacts-preview.env
 
 [Service]
 Type=simple
-WorkingDirectory=%h/projects/edges
+WorkingDirectory=%h/projects/edges-framework
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
 EnvironmentFile=%h/.config/edges/artifacts-preview.env
-ExecStart=/usr/bin/env node %h/projects/edges/extensions/services/artifacts-preview/dist/index.js
+ExecStart=/usr/bin/env node %h/projects/edges-framework/extensions/services/artifacts-preview/dist/index.js
 Restart=on-failure
 RestartSec=2
 NoNewPrivileges=true
