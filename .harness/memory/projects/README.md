@@ -57,7 +57,7 @@ format: ordinary
 - [递归目录采用统一节点模型与自身维护空间](project_scope_first_content_ownership/INDEX.md) — 递归目录与 harness 的现行决定及理由；模型与公开目录已采用，历史讨论保留但不替代现行 spec，私有材料逐克隆审阅。
 - [系统一／系统二按作用域建模，区分 harness 层级与自进化](project_scoped_systems_and_harness/INDEX.md) — 设计作用域与遍历时：系统一／二是相对角色；检索当前系统二不自动进入其系统二，同层分类索引仍可递归。
 - [v1 自托管 Langfuse 落在物理机 minigtr](<project_self_hosted_langfuse_on_minigtr/INDEX.md>) — 改自托管 Langfuse 的宿主、或默认往阿里云/云 VPS 上放时打开：宿主是物理机 minigtr，按多数时候在线的小型服务器运维；双系统仍在但 Windows 不是日常路径。不是阿里云或其它云 VPS。访问面见 ADR 0033。决策见 docs/adr/0014\-self\-hosted\-langfuse\-on\-minigtr.md。
-- [跨机器跨 Agent 的 harness 放 shared\-extensions](<project_shared_extensions/INDEX.md>) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放个人仓 shared\-extensions。接入 Edges 的能力放仓库根 packages/cli/、packages/skills/、packages/apps/、packages/services/、mcp\-servers/、system\-prompt/。
+- [跨机器跨 Agent 的 harness 放 shared\-extensions](<project_shared_extensions/INDEX.md>) — 新增不绑定 Edges 的 skill / MCP 配置 / plugin / hook 时：放个人仓 shared\-extensions。接入 Edges 的能力放仓库根 packages/cli/、packages/skills/、packages/apps/、packages/services/、packages/mcp\-servers/、packages/system\-prompt/。
 - [系统设计目标：三件事尽量一键](<project_system_one_click_deploy_ingest_output/INDEX.md>) — 改根 README 的系统实现、或讨论 Edges 产品方向时打开：设计目标是一键部署底座、一键接入 Agent 客户端、一键产出对外资产。2026\-10\-08 起 README 按已完成用现在时写，不标「在路上」；实际进度仍按真实状态记在任务与 CHANGELOG。不要另开顶级章节。
 - [TS 数据契约生成 JSON Schema](<project_task_doc_json_schema/INDEX.md>) — Schema 字段真源、生成与分发、运行时输入校验及取舍；Node 22、CLI 获取和真实消费者验收见 ADR 0025。
 - [Task Project 审阅页是 render-only CLI](project_task_project_review_page_render_only_cli/INDEX.md) — 改审阅壳或 edges tasks project review-page 时打开：仍只渲染、无 --mode。桌面三栏见 ADR 0022。窄屏同一页纵向分段，滚动必须能到顶也能到 Details。章节头是过渡色面，状态行贴背景且比章节小一档。筛选入口是 ListFilter 图标。双击章节标题滚到该节，回到看板滚到当前卡片。不要视口面板。源码在 packages/apps/tasks-review-app/。
@@ -110,4 +110,5 @@ format: ordinary
 - [节点共享状态与职责简化](<project_node_shared_state_simplification/INDEX.md>) — Model/operations/Service 分工、模型按节点归组、共享实例与统一索引；LLM 指定归属，CLI 执行。
 - [审阅壳外观 2026\-09\-24 收口](<project_review_shell_chrome_2026_09_24/INDEX.md>) — 改审阅壳外观或信息密度时打开：顶栏左侧是 Edges；项目悬停出 description；卡片以标题为主；空状态列不占宽；桌面右栏是 Markdown 抽屉。不窄于 md 的交互按 ADR 0022。窄于 md 按 ADR 0023 纵向长滚动，不是盖住看板的抽屉。
 - [Skill 独立发版，changelog 按 skill 分](<project_skill_independent_versioning/INDEX.md>) — 决定 changelog、tag、semver 粒度时：每个 skill 一份，不要 skills 总 changelog。
+- [.harness 模块保持同一入口，便于插件化](<project_harness_module_consistency_for_plugins/INDEX.md>) — 新增或改 .harness 模块、或给单个模块加特殊节点时打开：各模块同一套入口 README（可继承定制），不为单个模块发明虚拟节点；Compose 写进 compose/README.md。目标是架构一致、便于后续插件化。
 <!-- project-entries-local:end -->
