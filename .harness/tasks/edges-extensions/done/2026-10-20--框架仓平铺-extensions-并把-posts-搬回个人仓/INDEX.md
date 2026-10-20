@@ -2,13 +2,14 @@
 metadata:
   edges-type: task
   edges-task-project: edges-extensions
-  edges-updated-at: '2026-10-20T05:17:08.480Z'
+  edges-updated-at: '2026-10-20T07:54:42.541Z'
   edges-title: 框架仓平铺 extensions 并把 posts 搬回个人仓
-  edges-tasks-status: todo
+  edges-tasks-status: done
   edges-task-priority: none
 name: 框架仓平铺 extensions 并把 posts 搬回个人仓
 description: 拆仓后 extensions/ 一层多余，平铺到框架仓顶层；posts/ 改算个人内容，搬到 edges-brain-viruspc。
 ---
+
 **背景：**
 拆仓后 VirusPC/edges 已是框架工程仓而非记忆仓库，`extensions/` 这一层多余；之前认定 `posts/` 算系统，现改为算个人内容。
 
@@ -20,11 +21,18 @@ description: 拆仓后 extensions/ 一层多余，平铺到框架仓顶层；pos
 - 等拆仓卡剩余两件（ECS `/tasks/` 切换、删个人仓系统副本）完成后再动手。
 - 对老路径留兼容，或写清迁移说明。
 
+**进展（2026-10-20）：** 已全部完成，本卡关闭。
+- VirusPC/edges#6 已合：`posts/`、site-and-content 项目和博客记忆迁出框架仓；新增 ADR 0040；grill 拍板写进本卡。
+- VirusPC/edges#7 已合（merge commit）：`extensions/` 平铺到仓根（`cli/` `skills/` `apps/` `services/` `mcp-servers/` `system-prompt/`），硬约束与记忆并入根；CHANGELOG 与 `docs/migrations` 写了旧→新路径对照表。用 merge commit 是为了让 6 个 skill tag 指向的提交留在 main 上。
+- 个人仓接收内容：VirusPC/edges-brain-viruspc#334。
+- 部署：框架仓 Deploy 成功；ECS 上框架仓检出已到最新，没有 `extensions/`，artifacts 服务改从 `services/` 运行；`/tasks/`、`/teaching/`、`/health`、`/artifacts` 都返回 200。
+- 拆仓卡里 posts 边界的表述已在 VirusPC/edges-brain-viruspc#333 改掉。
+
 **完成标准：**
-- [ ] 框架仓顶层不再有 `extensions/`，构建、测试、npm 发布、部署工作流路径改对并跑通
-- [ ] README / AGENTS 目录说明按平铺后的现状写
-- [ ] `posts/` 与相关卡在个人仓，框架仓不再有
-- [ ] 拆仓卡里 posts 边界的表述同步改掉
+- [x] 框架仓顶层不再有 `extensions/`，构建、测试、npm 发布、部署工作流路径改对并跑通
+- [x] README / AGENTS 目录说明按平铺后的现状写
+- [x] `posts/` 与相关卡在个人仓，框架仓不再有
+- [x] 拆仓卡里 posts 边界的表述同步改掉
 
 ## grill 第 1 轮（2026-10-20 peng cheng 拍板）
 
