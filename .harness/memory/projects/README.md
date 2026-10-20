@@ -47,14 +47,13 @@ format: ordinary
 - [new-note MCP 的 ingest 约束](project_new_note_ingest/INDEX.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges notes，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
 - [节点目录单元与组织关系设计](project_node_resource_unit_decision/INDEX.md) — 递归目录与 harness 的现行决定及理由；模型与公开目录已采用，历史讨论保留但不替代现行 spec，私有材料逐克隆审阅。
 - [定期从目录职责提炼通用维护规范](project_periodic_architecture_review/INDEX.md) — 复盘 Edges 目录架构时：按实际职责与维护对象识别可跨作用域复用的系统二模块，输出规范候选；维护任务管理是例子，当前仅记规范、不启用自动运行。
-- [posts 对外展示，Astro 博客 + Actions CI](project_posts_public_astro_blog/INDEX.md) — posts 面向对外展示；后续以 posts 为数据用 Astro 搭博客，并用 GitHub Actions 在服务器做 CI
 - [仓内任务优先用仓库 Skill 与 CLI](project_prefer_repo_skills_and_cli/INDEX.md) — 执行 VirusPC/edges 仓内工作时，优先调用本仓 Skill 与 edges CLI；不可用须向用户说明缺口，勿默认手搓绕过。
 - [订阅管理盘点进展](project_progress/INDEX.md) — 订阅/用量盘点进展：双 Gmail + QQ IMAP、国内 Kimi 无邮箱、CodexBar Linux CLI 已装待鉴权；后续 Apple/微信侧核对。
 - [proposeTypes 从 \_default 提议新 Task Project 类型](project_propose_types_from_default/INDEX.md) — 改 propose-types 工作流或从 \_default 发明新 Task Project 时打开：独立 Skill extensions/skills/project-tasks-propose-types/；经同一 review-page 确认，不自动 project create；方法是 LLM/agent 判断；配对 project-tasks-classify、ADR 0011 与 ADR 0012。本轮不写 skill 正文。
 - [仓库用根 CHANGELOG 和 v 标签发版](project_repo_changelog/INDEX.md) — 仓库发版先提 PR，合并后给 main 的合并提交打 tag 并发布。写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 v 标签。Unreleased 的 ### 用功能模块原名（如笔记入库与能力面、文档与系统、任务看板与项目、Artifacts 预览），不要改成「模块：摘要」或只留摘要；每条前面写成 \`- \*\*小标题：\*\* 正文\`，小标题白话摘要，正文不因精简文风大段删实现说明（示例 commit a80d1b0）。用人话写清「现在能做什么」，同一条里立刻给出真实命令名；对照 \[1.2.0\] 的完整句，不要堆 schema 字段表。枚举写仓库英文原值（优先级是 urgent/high/medium/low/none）。不要摊成扁平长列表，也不要把决策/术语/计划逐条写进去。 新版本不留 Changed 等未按模块归类的兜底小节；切版时检查重复、条目顺序与已落地范围。
 - [审阅页侧栏筛选用 design A（选中染色 + 未选变淡）](project_review_page_sidebar_filter_design_a/INDEX.md) — 改审阅页左栏项目筛选外观时打开：选中用 accent 实线边加面板底；未选中 opacity 0.6（hover 拉回）；拖过时外扩 outline，须和选中边叠得开。类写在 ProjectColumn，不改点击或拖放。用户 2026-09-17 选定 design A。
 - [根硬约束只留聚光灯、脱敏与 git](project_root_important_scope/INDEX.md) — 改根 AGENTS.md 硬约束时：只留 ask/remember 聚光灯、硬约束写在本区块、公开仓脱敏、git 纪律；bin/scripts 路径约定和交互口吻不进硬约束，也不进 .memory。
-- [根 README：harness 任何目录的对外门面](<project_root_readme_direction/INDEX.md>) — 修改根 README 时打开：2026\-10\-09 grill 已结束并按此重写。定稿：标语「harness 任何目录。你的大脑，也是一个目录。」；首屏六条（持续自进化、不止停留在仓库、任何目录、任何人、任何 Agent、超级个体）；正文用现在时、不写「在路上」，但快速开始只放实测命令；中文为主；README 只做门面加地图，内容标准在各目录 README；「怎么做到的」以后再补。模型见 ADR 0032。
+- [根 README：harness 任何目录的对外门面](<project_root_readme_direction/INDEX.md>) — 修改根 README 时打开：2026\-10\-09 grill 已结束并按此重写。定稿：标语「harness 任何目录。你的大脑，也是一个目录。」；首屏六条（持续自进化、不止停留在仓库、任何目录、任何人、任何 Agent、超级个体）；正文用现在时、不写「在路上」，但快速开始只放实测命令；中文为主；README 只做门面加地图，内容标准在各目录 README；「怎么做到的」以后再补。模型见 ADR 0032。2026\-10\-20 起框架仓不再放 posts/，该约束只在个人仓。
 - [递归目录采用统一节点模型与自身维护空间](project_scope_first_content_ownership/INDEX.md) — 递归目录与 harness 的现行决定及理由；模型与公开目录已采用，历史讨论保留但不替代现行 spec，私有材料逐克隆审阅。
 - [系统一／系统二按作用域建模，区分 harness 层级与自进化](project_scoped_systems_and_harness/INDEX.md) — 设计作用域与遍历时：系统一／二是相对角色；检索当前系统二不自动进入其系统二，同层分类索引仍可递归。
 - [v1 自托管 Langfuse 落在物理机 minigtr](<project_self_hosted_langfuse_on_minigtr/INDEX.md>) — 改自托管 Langfuse 的宿主、或默认往阿里云/云 VPS 上放时打开：宿主是物理机 minigtr，按多数时候在线的小型服务器运维；双系统仍在但 Windows 不是日常路径。不是阿里云或其它云 VPS。访问面见 ADR 0033。决策见 docs/adr/0014\-self\-hosted\-langfuse\-on\-minigtr.md。
@@ -71,7 +70,6 @@ format: ordinary
 - [ECS 上 edges 用 Actions SSH 整仓 pull](project_teach_site_rsync_push/INDEX.md) — 改 teaching、/tasks/ 或 ECS 部署时：SSH 只在 deploy.yml 的 deploy job；production 不挂 url；site-teaching 与 site-tasks 都 needs deploy，分别登记 https://edges.viruspc.tech/teaching/ 与 /tasks/；summary 列两个 URL。不要拆成两次 SSH，不要用 teach.\* 或裸 IP。不要新开 workflow（ADR 0021）。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main/INDEX.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks\_direct\_main
 - [知识目录单元与扩展应用归属](project_top_level_content_and_extension_apps/INDEX.md) — 目录单元适用于全部知识内容；共用附件复制，未引用旧 img 归 archive/img，根共享池无引用附件归档；apps 属于 extensions，局部记忆保留归属。
-
 - [层入口表面命名改为 project\-harness](<project_harness_layer_markers/INDEX.md>) — 改 AGENTS.md 层入口注释或章节标题时：标记为 project\-harness / constraints / local / descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；type 与 entries 仍用 project\-memory\-\*。README 的 project\-entries\-\* 见 grill\_entries 条。
 
 - [递归系统二：系统入口 AGENTS.md 带组成登记](<project_recursive_system_two_entry/INDEX.md>) — 改节点模型、AGENTS.md、Project Harness 或 layout 时打开：核心是递归系统二；系统入口为 AGENTS.md 且必须带组成登记；从 scope 系统入口经登记可达才算节点；无 isLeaf；Task/Note/Skill 由登记挂入。曾议 AGENTS 不带 entries 已否。谁必须有真实 AGENTS 见 grill Q10。
@@ -101,6 +99,7 @@ format: ordinary
 - [SuperAgentsNode 继承 AgentsNode](<project_grill_super_agents_node_extends_agents/INDEX.md>) — 改虚拟超节点实现时：类名 SuperAgentsNode，继承 AgentsNode；flag 仍 \-\-super；勿用 VirtualSuperNode。
 
 - [traverse 默认走全部 children](<project_grill_traverse_default_all_children/INDEX.md>) — 改 operations/traverse 或依赖其默认的调用方时：默认展开 local∪descendants；本层\-only 用显式 localOnly；不再接受 includeDescendants；includeHarness 仍默认 false。
+
 - [Task Project 组织清单用 README](<project_task_project_readme_org_lists/INDEX.md>) — 改 Task Project / 看板列表或 physicalParent 时：Task Project 与看板项目列表用 README\+project\-entries；新项目默认 README 种子，勿伪造 AGENTS；任务叶子的物理父是项目 README。
 - [层 AGENTS 挂材料 README，list 顺着 children](<project_list_all_forest/INDEX.md>) — 改 tasks 登记、根 AGENTS 或 list 时：层入口挂材料 README（尤其 .harness/tasks/README.md），条目留在 project\-entries。类型目录空 AGENTS 桩删除。不另写 walker。\-\-super 仍只接 scope 目录。
 - [各模块 init 只创建本模块的材料](<project_init_module_boundary/INDEX.md>) — 改 edges init 或域 init 时：memory 不顺手建其他模块；每个有材料的模块只初始化自己。

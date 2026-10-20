@@ -2,7 +2,7 @@
 
 你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 extensions、维护 `.harness/` 里讲 Edges 本身的记忆、任务、评测与观测。
 
-本仓 `VirusPC/edges` 只放 Edges 框架本身（CLI、extensions、skills、协议、ADR、架构文档、对外博客成稿）。peng cheng 的个人大脑（笔记、Edge、教学、复盘、领域任务、shared-extensions 等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)，经下面的 Compose 区块挂进来；个人知识不要写进本仓。2026-10-20 拆仓前的历史、PR 与 Actions 记录都留在个人仓，最后一个拆仓前提交是 `025904fa29bcc6970f45c654d95e30c5390d43d7`。
+本仓 `VirusPC/edges` 只放 Edges 框架本身（CLI、extensions、skills、协议、ADR、架构文档）。peng cheng 的个人大脑（笔记、Edge、教学、复盘、领域任务、shared-extensions、对外博客成稿等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)，经下面的 Compose 区块挂进来；个人知识不要写进本仓。2026-10-20 拆仓前的历史、PR 与 Actions 记录都留在个人仓，最后一个拆仓前提交是 `025904fa29bcc6970f45c654d95e30c5390d43d7`。
 
 Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](CONTEXT.md)；AGENTS.md 组织入口发现，各规范正文按职责保持单一真源。
 
@@ -17,7 +17,6 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 - 本仓公开（`github.com/VirusPC/edges`）。凭据、个人信息、未公开 IP、办公文档不入库；内部信息脱敏后再写；截图按「能不能上公开博客」判断。细则见 README 的「隐私与脱敏」。
 - Git：`type: subject`；AI 参与加 `Co-authored-by`；不提交 `.obsidian/workspace.json`；`pull` / `rebase` 加 `--autostash`。
 - 本机修改本仓（commit/push 或改工作树文件）必须通过独立 `git worktree`：每个 Agent/任务一个 worktree + 独立分支；禁止多 Agent 共用同一工作树并行改文件或切分支；同一分支不得挂两个 worktree。Cursor 云端 Agent 等已在独立 clone/环境中的任务视为已隔离，不要求再套本机 worktree；只读查询可不建 worktree。
-- `posts/` 存放对外博客（将公开发表的成稿），由人仔细维护。AI 不得自动创建、编辑、移动、删除、重构或重写该路径下的任何文件。
 <!-- project-harness-constraints:end -->
 
 <!-- project-harness-local:start -->
