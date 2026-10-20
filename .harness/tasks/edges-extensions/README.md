@@ -40,4 +40,5 @@ edges CLI/脚手架/发布/鉴权等平台层。
 - [框架仓重整目录 workspace 化](<done/2026-10-20--%E6%A1%86%E6%9E%B6%E4%BB%93%E9%87%8D%E6%95%B4%E7%9B%AE%E5%BD%95-workspace-%E5%8C%96/INDEX.md>) — 独立开源后仓根目录仍不合理；把代码类目录都做成 pnpm workspace 包并重整位置。
 - [Compose 改挂到 .harness/README.md](<todo/2026-10-21--Compose-%E6%94%B9%E6%8C%82%E5%88%B0-harnessREADMEmd/INDEX.md>) — Compose 区块与展开改挂到 .harness/README.md，与其他本层材料一致
 - [任务状态流转时 CLI 自动追加进展段落](<todo/2026-10-21--%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E6%B5%81%E8%BD%AC%E6%97%B6-CLI-%E8%87%AA%E5%8A%A8%E8%BF%BD%E5%8A%A0%E8%BF%9B%E5%B1%95%E6%AE%B5%E8%90%BD/INDEX.md>) — 任务状态流转时 CLI 自动追加进展段落
+- [.harness 模块插件化](<backlog/2026-10-21--harness-%E6%A8%A1%E5%9D%97%E6%8F%92%E4%BB%B6%E5%8C%96/INDEX.md>) — .harness 下各模块以统一入口与契约可插件化注册与加载，模块间形态一致
 <!-- project-entries-local:end -->
