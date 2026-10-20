@@ -104,7 +104,7 @@ format: ordinary
 - [层 AGENTS 挂材料 README，list 顺着 children](<project_list_all_forest/INDEX.md>) — 改 tasks 登记、根 AGENTS 或 list 时：层入口挂材料 README（尤其 .harness/tasks/README.md），条目留在 project\-entries。类型目录空 AGENTS 桩删除。不另写 walker。\-\-super 仍只接 scope 目录。
 - [各模块 init 只创建本模块的材料](<project_init_module_boundary/INDEX.md>) — 改 edges init 或域 init 时：memory 不顺手建其他模块；每个有材料的模块只初始化自己。
 - [个人仓是长期主干，系统往外拆](<project_personal_repo_is_trunk/INDEX.md>) — 原 edges 改名 edges\-brain\-viruspc 作个人主干长期保留；系统拆成新仓，不再 archive
-- [new\_note 收成 cli/edges，MCP 保留](<project_cli_from_mcp/INDEX.md>) — 改 note ingest、new\-note MCP 或 cli 时：本地 agent 走 cli 的 edges notes；git 在 CLI 的 TS 模块；MCP 子进程调 edges notes；鉴权 flag 留在 notes create 上；JSON stdout。不要把 CLI 放仓库根。
+- [new\_note 收成 cli/edges，MCP 保留](<project_cli_from_mcp/INDEX.md>) — 改 note ingest、new\-note MCP 或 cli 时：本地 agent 走仓库根 cli/ 的 edges notes；git 在 CLI 的 TS 模块；MCP 子进程调 edges notes；鉴权 flag 留在 notes create 上；JSON stdout。不要在仓库根另建 clis/，也不要放回已删除的 extensions/。
 - [edges\-cli 测试用 glob 而不是目录 test](<project_cli_node_test_glob/INDEX.md>) — 跑 cli 测试时：Node 22 \+ tsx 下 \`node \-\-test \-\-import tsx test\` 会把 test/ 当成模块并找 test/index.json；用 './test/\*\*/\*.test.ts'。
 - [Node ESM \+ TS 相对导入写 .js](<project_node_esm_ts_import_js/INDEX.md>) — 写 Node ESM TypeScript（nodenext、tsc 出 JS）时：相对 import 用 .js，不要写 .ts，也不要省略扩展名。
 - [节点共享状态与职责简化](<project_node_shared_state_simplification/INDEX.md>) — Model/operations/Service 分工、模型按节点归组、共享实例与统一索引；LLM 指定归属，CLI 执行。

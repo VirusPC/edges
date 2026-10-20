@@ -1,17 +1,20 @@
 ---
 name: project_cli_from_mcp
-description: 改 note ingest、new-note MCP 或 cli 时：本地 agent 走 cli 的 edges notes；git 在 CLI 的 TS 模块；MCP 子进程调 edges notes；鉴权 flag 留在 notes create 上；JSON stdout。不要把 CLI 放仓库根。
+description: >-
+  改 note ingest、new-note MCP 或 cli 时：本地 agent 走仓库根 cli/ 的 edges notes；git 在 CLI
+  的 TS 模块；MCP 子进程调 edges notes；鉴权 flag 留在 notes create 上；JSON stdout。不要在仓库根另建
+  clis/，也不要放回已删除的 extensions/。
 metadata:
   edges-title: new_note 收成 cli/edges，MCP 保留
   edges-type: project
-  edges-origin-session-id: bc-93a6c09d-f19d-443a-8076-98a33936e684
+  edges-origin-session-id: bc-3219fe95-afee-53c8-9317-6d04fc05bc4f
   edges-agent-client: cursor
-  edges-username: Cursor Agent
-  edges-email: cursoragent@cursor.com
-  edges-updated-at: "2026-09-13T04:08:49+00:00"
+  edges-username: viruspc
+  edges-email: cheng.peng.helloworld@gmail.com
+  edges-updated-at: '2026-10-20T07:40:32+00:00'
 ---
 
-本地、有 shell 的 agent 用 `cli/` 的 `edges` CLI；入库子命令是 `edges notes …`。鉴权 flag（`--token-file` / `--token-stdin`）挂在 `notes create` 上，和 new-note MCP HTTP 同一道可选门闩。`edges tasks` 已落地 Issue 层 list/get/create/update/status 与只读 `runs` / `run-messages`（ADR 0005）。二进制只有 `edges`。git 在 `cli/src/git`（仅 `note` ingest）；tasks 写盘不调 git。`mcp-servers/new-note` 留给没有 shell 的宿主，子进程调用 `edges notes`。不要把 CLI 项目放在仓库根 `clis/`。
+本地、有 shell 的 agent 用 `cli/` 的 `edges` CLI；入库子命令是 `edges notes …`。鉴权 flag（`--token-file` / `--token-stdin`）挂在 `notes create` 上，和 new-note MCP HTTP 同一道可选门闩。`edges tasks` 已落地 Issue 层 list/get/create/update/status 与只读 `runs` / `run-messages`（ADR 0005）。二进制只有 `edges`。git 在 `cli/src/git`（仅 `note` ingest）；tasks 写盘不调 git。`mcp-servers/new-note` 留给没有 shell 的宿主，子进程调用 `edges notes`。不要把 CLI 项目放在仓库根 `clis/`。2026-10-20 起这个 `cli/` 就在仓库根；不要再放回已删除的 `extensions/`。
 
 **Why:** ADR-0004 把能力面定为 CLI + Skill + MCP，并删除仓根 `bin/`。ADR-0005 把本轮 tasks 钉在 CLI 契约。先前「两边都 execFile bin/new-note、MCP 不套 CLI」已被取代。
 
