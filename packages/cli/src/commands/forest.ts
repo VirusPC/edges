@@ -44,6 +44,7 @@ export function addForestCommand(program: Command, ctx: CliContext): void {
       const forest = await buildSystemForest(scopeDir, {
         form,
         includeSuper: opts.super !== false,
+        exclude: ctx.exclude,
       });
       ctx.result = succeed({
         command: "forest.list",

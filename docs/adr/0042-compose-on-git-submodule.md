@@ -8,7 +8,9 @@ status: accepted
 
 **Status:** accepted（ADR 0042）
 
-**See also:** ADR 0034（组合 harness 仓库）、ADR 0039（Compose 写入走 worktree，proposed）
+入口位置、虚拟节点和 `--with-composed` 由 [ADR 0043](0043-compose-readme-entry.md) 取代。子模块路径、`add` / `list` / `update` 和逐条失败仍以本 ADR 为准。
+
+**See also:** ADR 0034（组合 harness 仓库）、ADR 0039（Compose 写入走 worktree，proposed）、ADR 0043（真实的 `compose/README.md` 入口）
 
 ## Decision
 

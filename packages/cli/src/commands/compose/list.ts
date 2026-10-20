@@ -10,7 +10,7 @@ const HELP = "See edges compose --help for usage.\n";
 export function addComposeListCommand(compose: Command, ctx: CliContext): void {
   compose
     .command("list")
-    .description("List Compose block entries and whether each is checked out locally")
+    .description("List .harness/compose/README.md entries and whether each is checked out locally")
     .allowExcessArguments(false)
     .action(async () => {
       try {

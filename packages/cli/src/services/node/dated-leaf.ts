@@ -57,7 +57,7 @@ export type DatedLeafItem = {
 export type LeafReach = {
   all?: boolean;
   super?: boolean;
-  withComposed?: boolean;
+  exclude?: ReadonlySet<string>;
 };
 
 export function datedLeafFile<T extends TitledLeaf>(
@@ -193,7 +193,7 @@ export async function listDatedLeaves<T extends TitledLeaf>(
 ): Promise<DatedLeafItem[]> {
   const { scope, service } = openNodeSession(env);
   const nodes = reach.all
-    ? (await buildSystemForest(scope, { includeSuper: reach.super === true, withComposed: reach.withComposed === true, form: "independent" })).flat()
+    ? (await buildSystemForest(scope, { includeSuper: reach.super === true, exclude: reach.exclude, form: "independent" })).flat()
     : await service
       .query(scope, { types: [spec.queryType], ...scopeTraversal(reach) })
       .value();

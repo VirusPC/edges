@@ -13,7 +13,7 @@ export function addSkillGetCommand(skill: Command, ctx: CliContext): void {
     .argument("<target>", "SKILL.md path or skill name")
     .action(async (target: string) => {
       try {
-        const loaded = await getSkill(ctx.env, target, { all: ctx.all, super: ctx.super, withComposed: ctx.withComposed });
+        const loaded = await getSkill(ctx.env, target, { all: ctx.all, super: ctx.super, exclude: ctx.exclude });
         ctx.result = succeed({
           command: "skills.get",
           name: loaded.name,

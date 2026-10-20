@@ -3,241 +3,172 @@ import { test } from "node:test";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import path from "node:path";
-import { AgentsNode } from "../../src/domain/models/index.js";
-import { setNodePath } from "../../src/domain/core/relations.js";
+import { ReadmeNode } from "../../src/domain/models/index.js";
+import {
+  ComposeReadmeNode,
+  composeReadmeSeed,
+  hrefForScopeCheckout,
+} from "../../src/domain/models/compose/compose-readme-node.js";
+import { readmeModelFor } from "../../src/domain/models/readme/specialize.js";
 import { traverse } from "../../src/domain/operations/traverse.js";
 import { NodeService } from "../../src/services/node/node-service.js";
+import { collectSystemRoots } from "../../src/services/node/system-roots.js";
 
-const agents = (body: string) => `# Scope
+const FILE = "/repo/.harness/compose/README.md";
 
-<!-- project-harness:start -->
-<!-- project-harness-constraints:start -->
-## 本层硬约束
+function compose(body = ""): ComposeReadmeNode {
+  return new ComposeReadmeNode(FILE).parse(body || composeReadmeSeed()) as ComposeReadmeNode;
+}
 
-- keep
-<!-- project-harness-constraints:end -->
-${body}
-<!-- project-harness:end -->
-`;
-
-test("compose block registers a local directory, name, description, and remote", () => {
-  const file = "/repo/AGENTS.md";
-  const node = new AgentsNode(file).parse(agents(`
-<!-- project-harness-compose:start -->
-## 组合
-
-- [brain](<../brain>) — 个人大脑 remote: https://github.com/example/brain.git
-<!-- project-harness-compose:end -->
-<!-- project-harness-local:start -->
-## 本层系统维护信息
-
-- [tasks](<.harness/tasks/README.md>) — 维护任务
-<!-- project-harness-local:end -->
-`));
-  assert.deepEqual(node.composeNode().entries().map((entry) => ({
-    name: entry.name,
-    directory: entry.directory,
-    href: entry.href,
-    description: entry.description,
-    remote: entry.remote,
-  })), [{
-    name: "brain",
-    directory: "/brain",
-    href: "../brain",
-    description: "个人大脑",
-    remote: "https://github.com/example/brain.git",
-  }]);
-  assert.equal(node.compose?.id, "/repo/.compose/README.md");
-  assert.equal(node.compose?.name, "组合");
-  assert.deepEqual(node.composeNode().children, [{
-    id: "/brain/AGENTS.md",
-    name: "brain",
-    description: "个人大脑",
-  }]);
-  assert.equal(node.children.some((child) => child.id === "/brain/AGENTS.md"), false);
-  assert.equal(node.serialize(), node.parse(node.serialize()).serialize());
+test("compose entry is the real compose/README.md and a ReadmeNode subclass", () => {
+  const node = compose();
+  assert.equal(node.type, "readme");
+  assert.ok(node instanceof ReadmeNode);
+  assert.ok(node instanceof ComposeReadmeNode);
+  assert.equal(readmeModelFor(FILE), ComposeReadmeNode);
+  assert.equal(readmeModelFor("/repo/.harness/README.md"), ReadmeNode);
+  assert.equal(node.childTraversal(), "leaf");
+  assert.equal(node.mountsReadOnly(), true);
+  assert.equal(node.path, FILE);
 });
 
-test("addChild writes the block and removeChild drops the last link", () => {
-  const file = "/repo/AGENTS.md";
-  const node = new AgentsNode(file).parse(agents(`
-<!-- project-harness-local:start -->
-## 本层系统维护信息
-
-- [tasks](<.harness/tasks/README.md>) — 维护任务
-<!-- project-harness-local:end -->
-`));
-  node.composeNode().addChild({
-    name: "team",
-    directory: "../repos/team",
-    description: "团队库",
-    remote: "git@github.com:example/team.git",
-  });
-  const source = node.serialize();
-  assert.match(source, /project-harness-compose:start/);
-  assert.match(source, /\[team\]\(<\.\.\/repos\/team>\) — 团队库 remote: git@github\.com:example\/team\.git/);
-  assert.match(source, /\[tasks\]\(<\.harness\/tasks\/README\.md>\)/);
-  const again = new AgentsNode(file).parse(source);
-  assert.equal(again.composeNode().entries()[0]?.name, "team");
-  assert.equal(again.localChildren[0]?.name, "tasks");
-  again.composeNode().removeChild("/repos/team/AGENTS.md");
-  const cleared = again.serialize();
-  assert.doesNotMatch(cleared, /\[team\]/);
-  assert.match(cleared, /\[tasks\]\(<\.harness\/tasks\/README\.md>\)/);
-  assert.equal(new AgentsNode(file).parse(cleared).composeNode().entries().length, 0);
-  assert.equal(new AgentsNode(file).parse(cleared).compose, undefined);
-  assert.throws(
-    () => again.composeNode().removeChild("/repos/team/AGENTS.md"),
-    /compose entry not found/,
-  );
-});
-
-test("a description survives serialize and parse next to the remote", () => {
-  const file = "/repo/AGENTS.md";
-  const node = new AgentsNode(file).parse(agents(""));
-  node.composeNode().addChild({
+test("child id is the composed README and the default href does not double the checkout path", () => {
+  const node = compose();
+  node.addChild({
     name: "brain",
     description: "个人大脑",
     remote: "https://github.com/example/brain.git",
   });
+  const entry = node.entries()[0];
+  assert.equal(entry?.href, "brain/README.md");
+  assert.equal(entry?.id, "/repo/.harness/compose/brain/README.md");
+  assert.equal(entry?.directory, "/repo/.harness/compose/brain");
+  assert.deepEqual(node.children, [{
+    id: "/repo/.harness/compose/brain/README.md",
+    name: "brain",
+    description: "个人大脑",
+  }]);
   const source = node.serialize();
-  assert.match(source, /\[brain\]\(<\.harness\/compose\/brain>\) — 个人大脑 remote: https:\/\/github\.com\/example\/brain\.git/);
-  const loaded = new AgentsNode(file).parse(source);
-  assert.equal(loaded.composeNode().entries()[0]?.description, "个人大脑");
-  assert.equal(loaded.composeNode().entries()[0]?.remote, "https://github.com/example/brain.git");
+  assert.match(source, /\[brain\]\(<brain\/README\.md>\) — 个人大脑 remote: https:\/\/github\.com\/example\/brain\.git/);
+  assert.doesNotMatch(source, /\.harness\/compose\/brain/);
+  const loaded = new ComposeReadmeNode(FILE).parse(source) as ComposeReadmeNode;
+  assert.equal(loaded.entries()[0]?.remote, "https://github.com/example/brain.git");
   assert.equal(loaded.serialize(), source);
 });
 
-test("omitted directory uses .harness/compose/<name>; hrefs stay relative", () => {
-  const file = "/repo/AGENTS.md";
-  const node = new AgentsNode(file).parse(agents(""));
-  node.composeNode().addChild({ name: "brain", remote: "https://github.com/example/brain.git" });
-  const source = node.serialize();
-  assert.match(source, /\[brain\]\(<\.harness\/compose\/brain>\)/);
-  const loaded = new AgentsNode(file).parse(source);
-  assert.equal(loaded.composeNode().entries()[0]?.href, ".harness/compose/brain");
-  assert.equal(loaded.composeNode().checkout("brain").directory, "/repo/.harness/compose/brain");
-  assert.equal(loaded.composeNode().entries()[0]?.id, "/repo/.harness/compose/brain/AGENTS.md");
-  node.composeNode().addChild({ name: "rel", directory: "rel-dir/" });
-  assert.equal(node.composeNode().checkout("rel").directory, "/repo/rel-dir");
-  assert.match(node.serialize(), /\[rel\]\(<rel-dir>\)/);
-  node.composeNode().addChild({ name: "up", directory: "./../sibling" });
-  assert.equal(node.composeNode().checkout("up").directory, "/sibling");
-  assert.match(node.serialize(), /\[up\]\(<\.\.\/sibling>\)/);
-  assert.doesNotMatch(node.serialize(), /\]\(<\//);
+test("a scope-relative --path is stored as a README href relative to .harness/compose", () => {
+  const href = hrefForScopeCheckout(FILE, "/repo", "vendor/team");
+  assert.equal(href, "../../vendor/team/README.md");
+  const up = hrefForScopeCheckout(FILE, "/repo", "../notes");
+  assert.equal(up, "../../../notes/README.md");
+  const node = compose();
+  node.addChild({ name: "team", href, description: "团队库" });
+  assert.equal(node.checkout("team").directory, "/repo/vendor/team");
+  assert.equal(node.entries()[0]?.id, "/repo/vendor/team/README.md");
+  assert.throws(() => hrefForScopeCheckout(FILE, "/repo", "/var/composed/abs"), /must be relative/);
+  assert.throws(() => hrefForScopeCheckout(FILE, "/repo", "~/custom"), /must be relative/);
+  assert.throws(() => node.addChild({ name: "self", directory: "." }), /own directory/);
 });
 
-test("addChild rejects absolute and ~ paths; legacy links still read", () => {
-  const file = "/repo/AGENTS.md";
-  const node = new AgentsNode(file).parse(agents(""));
-  assert.throws(() => node.composeNode().addChild({ name: "abs", directory: "/var/composed/abs" }), /must be relative/);
-  assert.throws(() => node.composeNode().addChild({ name: "home", directory: "~/custom" }), /must be relative/);
-  assert.throws(() => node.composeNode().addChild({ name: "self", directory: "." }), /own directory/);
-  assert.equal(node.composeNode().entries().length, 0);
-  const legacy = new AgentsNode(file).parse(agents(`
+test("legacy absolute and ~ hrefs still read from compose/README.md", () => {
+  const node = new ComposeReadmeNode(FILE).parse(`# 组合
+
 <!-- project-harness-compose:start -->
 ## 组合
 
 - [old](<~/.edges/composed/old>) — 旧 remote: https://github.com/example/old.git
 - [abs](</var/composed/abs>) — 绝对
 <!-- project-harness-compose:end -->
-`));
-  assert.equal(legacy.composeNode().checkout("old").directory, path.join(homedir(), ".edges", "composed", "old"));
-  assert.equal(legacy.composeNode().checkout("abs").directory, "/var/composed/abs");
-  assert.match(legacy.serialize(), /\[old\]\(<~\/\.edges\/composed\/old>\)/);
-  assert.match(legacy.serialize(), /\[abs\]\(<\/var\/composed\/abs>\)/);
+`) as ComposeReadmeNode;
+  assert.equal(node.checkout("old").directory, path.join(homedir(), ".edges", "composed", "old"));
+  assert.equal(node.entries()[0]?.id, path.join(homedir(), ".edges", "composed", "old", "README.md"));
+  assert.equal(node.checkout("abs").directory, "/var/composed/abs");
+  assert.equal(node.entries()[1]?.id, "/var/composed/abs/README.md");
+  assert.match(node.serialize(), /\[old\]\(<~\/\.edges\/composed\/old>\)/);
 });
 
-test("setNodePath moves the compose edge id", () => {
-  const node = new AgentsNode("/repo/AGENTS.md").parse(agents(`
-<!-- project-harness-compose:start -->
-## 组合
+test("default traverse expands the composed README; --exclude compose skips it", async () => {
+  const node = compose();
+  node.addChild({ name: "brain", description: "个人大脑" });
+  const child = new ReadmeNode("/repo/.harness/compose/brain/README.md").parse(`# Brain
 
-- [brain](<../brain>) — 个人大脑
-<!-- project-harness-compose:end -->
-`));
-  setNodePath(node, "/moved/AGENTS.md");
-  assert.equal(node.compose?.id, "/moved/.compose/README.md");
-  assert.equal(node.composeNode().path, "/moved/.compose/README.md");
-});
+<!-- project-entries-local:start -->
+## 本层内容
 
-test("default traverse stays in scope; --with-composed yields only the external entry", async () => {
-  const foreignChild = new AgentsNode("/brain/nested/AGENTS.md");
-  const foreign = new AgentsNode("/brain/AGENTS.md").parse(agents(`
-<!-- project-harness-descendants:start -->
-## 下层系统维护信息
-
-- [nested](<nested/AGENTS.md>) — nested
-<!-- project-harness-descendants:end -->
-`));
-  const root = new AgentsNode("/repo/AGENTS.md").parse(agents(`
-<!-- project-harness-compose:start -->
-## 组合
-
-- [brain](</brain>) — 个人大脑 remote: https://github.com/example/brain.git
-<!-- project-harness-compose:end -->
-`));
-  const entries = new Map([root, foreign, foreignChild].map((node) => [node.id, node]));
-  const resolve = (parent: { compose?: { id: string }; path: string }, ref: { id: string }) => {
-    if (ref.id === parent.compose?.id) return ref.id;
-    return entries.has(ref.id) ? ref.id : undefined;
-  };
-  const load = async (parent: AgentsNode, _ref: { id: string }, id: string) => {
-    if (parent.compose?.id === id) return parent.composeNode();
-    return entries.get(id)!;
-  };
-  const collect = async (options: { withComposed?: boolean; localOnly?: boolean; includeHarness?: boolean }) => {
+- [nested](<nested/README.md>) — nested
+<!-- project-entries-local:end -->
+`);
+  const nested = new ReadmeNode("/repo/.harness/compose/brain/nested/README.md").parse("# Nested\n");
+  const entries = new Map([node, child, nested].map((item) => [item.id, item]));
+  const collect = async (exclude?: ReadonlySet<string>) => {
     const paths: string[] = [];
-    for await (const node of traverse(root, options, resolve, load)) paths.push(node.path);
+    for await (const found of traverse(
+      node,
+      { scopeDir: "/repo", ...(exclude ? { exclude } : {}) },
+      (_parent, ref) => entries.has(ref.id) ? ref.id : undefined,
+      async (_parent, _ref, id) => entries.get(id)!,
+    )) paths.push(found.path);
     return paths;
   };
-  assert.deepEqual(await collect({}), ["/repo/AGENTS.md"]);
-  assert.deepEqual(await collect({ localOnly: true }), ["/repo/AGENTS.md"]);
-  assert.deepEqual(await collect({ includeHarness: true }), ["/repo/AGENTS.md"]);
-  assert.deepEqual(await collect({ withComposed: true }), ["/repo/AGENTS.md", "/brain/AGENTS.md"]);
-  assert.deepEqual(await collect({ withComposed: true, localOnly: true }), ["/repo/AGENTS.md", "/brain/AGENTS.md"]);
+  assert.deepEqual(await collect(), [FILE, "/repo/.harness/compose/brain/README.md"]);
+  assert.deepEqual(await collect(new Set(["compose"])), [FILE]);
 });
 
-test("NodeService list includes an external entry only with withComposed", async (t) => {
-  const root = mkdtempSync(path.join(tmpdir(), "compose-node-"));
+test("NodeService list yields the composed README by default and --exclude compose skips the module", async (t) => {
+  const root = mkdtempSync(path.join(tmpdir(), "compose-readme-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const scope = path.join(root, "scope");
-  const brain = path.join(root, "brain");
+  const brain = path.join(scope, ".harness", "compose", "brain");
   mkdirSync(path.join(brain, "nested"), { recursive: true });
-  mkdirSync(scope, { recursive: true });
-  writeFileSync(path.join(scope, "AGENTS.md"), agents(`
+  writeFileSync(path.join(scope, "AGENTS.md"), `# Scope
+
+<!-- project-harness:start -->
+<!-- project-harness-local:start -->
+## 本层系统维护信息
+
+- [材料](<.harness/README.md>) — index
+<!-- project-harness-local:end -->
+<!-- project-harness:end -->
+`);
+  writeFileSync(path.join(scope, ".harness", "README.md"), `# 材料
+
+<!-- project-entries-local:start -->
+## 本层内容
+
+- [组合](compose/README.md) — 被组合的 harness 仓库。
+<!-- project-entries-local:end -->
+`);
+  writeFileSync(path.join(scope, ".harness", "compose", "README.md"), `# 组合
+
 <!-- project-harness-compose:start -->
 ## 组合
 
-- [brain](<${brain}>) — 个人大脑 remote: https://github.com/example/brain.git
+- [brain](<brain/README.md>) — 个人大脑 remote: https://github.com/example/brain.git
 <!-- project-harness-compose:end -->
-`));
-  writeFileSync(path.join(brain, "AGENTS.md"), agents(`
+`);
+  writeFileSync(path.join(brain, "README.md"), "# Brain\n");
+  writeFileSync(path.join(brain, "AGENTS.md"), `# Brain
+
+<!-- project-harness:start -->
 <!-- project-harness-descendants:start -->
 ## 下层系统维护信息
 
 - [nested](<nested/AGENTS.md>) — nested
 <!-- project-harness-descendants:end -->
-`));
-  writeFileSync(path.join(brain, "nested", "AGENTS.md"), agents(""));
+<!-- project-harness:end -->
+`);
+  writeFileSync(path.join(brain, "nested", "AGENTS.md"), "# Nested\n");
   const service = new NodeService({ managedRoot: scope });
-  const plain = (await service.list(scope)).map((node) => node.path);
-  assert.equal(plain.includes(path.join(brain, "AGENTS.md")), false);
-  assert.equal(plain.includes(path.join(scope, ".compose", "README.md")), false);
-  const composed = (await service.list(scope, { withComposed: true })).map((node) => node.path);
-  assert.ok(composed.includes(path.join(brain, "AGENTS.md")));
-  assert.equal(composed.includes(path.join(brain, "nested", "AGENTS.md")), false);
-  assert.equal(composed.includes(path.join(scope, ".compose", "README.md")), false);
-
-  const missing = path.join(root, "missing-repo");
-  const node = (await service.get(path.join(scope, "AGENTS.md"), AgentsNode))!;
-  node.composeNode().addChild({
-    name: "later",
-    directory: "../missing-repo",
-    remote: "https://github.com/example/later.git",
-  });
-  await service.update(node, {});
-  const saved = (await service.get(path.join(scope, "AGENTS.md"), AgentsNode))!;
-  assert.equal(saved.composeNode().entries().some((entry) => entry.name === "later"), true);
-  assert.equal(saved.composeNode().checkout("later").directory, missing);
+  const listed = (await service.list(scope)).map((node) => node.path);
+  assert.ok(listed.includes(path.join(scope, ".harness", "compose", "README.md")));
+  assert.ok(listed.includes(path.join(brain, "README.md")));
+  assert.equal(listed.includes(path.join(brain, "AGENTS.md")), false);
+  assert.equal(listed.includes(path.join(brain, "nested", "AGENTS.md")), false);
+  assert.equal(listed.includes(path.join(scope, ".compose", "README.md")), false);
+  const skipped = (await service.list(scope, { exclude: new Set(["compose"]) })).map((node) => node.path);
+  assert.equal(skipped.includes(path.join(scope, ".harness", "compose", "README.md")), false);
+  assert.equal(skipped.includes(path.join(brain, "README.md")), false);
+  assert.ok(collectSystemRoots(scope).includes(path.join(brain, "AGENTS.md")));
+  assert.equal(collectSystemRoots(scope, new Set(["compose"])).includes(path.join(brain, "AGENTS.md")), false);
+  assert.equal(collectSystemRoots(scope, new Set(["compose"])).includes(path.join(scope, "AGENTS.md")), true);
 });

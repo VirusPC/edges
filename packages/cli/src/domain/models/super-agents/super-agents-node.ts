@@ -21,9 +21,6 @@ export class SuperAgentsNode extends AgentsNode {
     this.#mounts = mounts.map((mount) => ({ ...mount }));
   }
 
-  override get compose(): undefined {
-    return undefined;
-  }
   override get localChildren(): readonly Readonly<NodeReference>[] {
     return structuredClone([...this.#mounts]);
   }

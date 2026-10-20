@@ -15,7 +15,7 @@ export { presentListed } from "../list-query.js";
 export type SkillReach = {
   all?: boolean;
   super?: boolean;
-  withComposed?: boolean;
+  exclude?: ReadonlySet<string>;
 };
 
 export type SkillFields = {
@@ -44,7 +44,7 @@ async function listedSkills(
 ): Promise<SkillNode[]> {
   const { scope, service } = openNodeSession(env);
   const nodes = reach.all
-    ? (await buildSystemForest(scope, { includeSuper: reach.super === true, withComposed: reach.withComposed === true, form: "independent" })).flat()
+    ? (await buildSystemForest(scope, { includeSuper: reach.super === true, exclude: reach.exclude, form: "independent" })).flat()
     : await service
       .query(scope, { types: ["skill"], ...scopeTraversal(reach) })
       .value();
@@ -145,7 +145,7 @@ export function initSkills(options: Omit<InitScopeOptions, "modules">) {
 export async function listSkills(env: NodeJS.ProcessEnv, reach: SkillReach): Promise<SkillItem[]> {
   const { scope, service } = openNodeSession(env);
   const nodes = reach.all
-    ? (await buildSystemForest(scope, { includeSuper: reach.super === true, withComposed: reach.withComposed === true, form: "independent" })).flat()
+    ? (await buildSystemForest(scope, { includeSuper: reach.super === true, exclude: reach.exclude, form: "independent" })).flat()
     : await service
       .query(scope, { types: ["skill"], ...scopeTraversal(reach) })
       .value();

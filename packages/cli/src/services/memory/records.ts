@@ -17,7 +17,7 @@ function slugOf(file: string, type: string, skill: boolean): string {
 export async function listMemoryEntries(
   targetDir: string | undefined,
   type?: string,
-  mode: { all?: boolean; super?: boolean; withComposed?: boolean } = {},
+  mode: { all?: boolean; super?: boolean; exclude?: ReadonlySet<string> } = {},
 ) {
   const target = resolveTarget(targetDir ?? process.cwd());
   const { NodeService } = await import("../node/node-service.js");
@@ -25,7 +25,7 @@ export async function listMemoryEntries(
   const { buildSystemForest } = await import("../node/system-forest-service.js");
   const { scopeTraversal } = await import("../../domain/operations/traverse.js");
   const nodes = mode.all
-    ? (await buildSystemForest(target, { includeSuper: mode.super === true, withComposed: mode.withComposed === true, form: "independent" })).flat()
+    ? (await buildSystemForest(target, { includeSuper: mode.super === true, exclude: mode.exclude, form: "independent" })).flat()
     : await new NodeService({ managedRoot: target })
       .query(target, { types: ["memory"], ...scopeTraversal(mode) })
       .value();

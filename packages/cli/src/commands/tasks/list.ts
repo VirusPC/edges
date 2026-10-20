@@ -108,7 +108,7 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
         const listed = (await collectTasks(scopeDir, {
           all: ctx.all === true,
           super: ctx.super === true,
-          withComposed: ctx.withComposed === true,
+          exclude: ctx.exclude,
         })).filter((item) => itemMatches(item, listOpts));
         const ordered = listOpts.sort === "priority" ? sortTasksByPriority(listed) : listed;
         const filtered = ordered.filter((item) =>
@@ -131,10 +131,10 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
     });
 }
 
-async function collectTasks(scopeDir: string, mode: { all: boolean; super: boolean; withComposed: boolean }) {
+async function collectTasks(scopeDir: string, mode: { all: boolean; super: boolean; exclude?: ReadonlySet<string> }) {
   const managed = gitRoot(scopeDir) ?? scopeDir;
   if (mode.all) {
-    const forest = await buildSystemForest(scopeDir, { includeSuper: mode.super, withComposed: mode.withComposed, form: "independent" });
+    const forest = await buildSystemForest(scopeDir, { includeSuper: mode.super, exclude: mode.exclude, form: "independent" });
     return forest.flat().flatMap((node) => node instanceof TaskNode ? [taskItem(node, scopeDir)] : []);
   }
   const scopeEntry = path.join(path.resolve(scopeDir), ENTRY_NAMES.internal);

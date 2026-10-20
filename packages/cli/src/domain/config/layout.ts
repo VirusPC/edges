@@ -7,13 +7,10 @@ export const ENTRY_NAMES = {
   leaf: "INDEX.md",
 } as const;
 
-/** Directory segment of a ComposeNode id: `<owner dir>/.compose/README.md`. */
-export const COMPOSE_ENTRY_DIR = ".compose";
-
 /**
  * Default Compose checkout root when `edges compose add` omits `--path`.
- * Relative to the owner AGENTS.md directory; each entry is a git submodule at
- * `.harness/compose/<name>`.
+ * Relative to the scope directory; each entry is a git submodule at
+ * `.harness/compose/<name>`. The module entry is `.harness/compose/README.md`.
  */
 export const COMPOSED_CHECKOUT_ROOT = ".harness/compose";
 

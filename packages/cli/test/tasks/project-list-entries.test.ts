@@ -203,15 +203,19 @@ test("project list --all --super does not require a scope AGENTS.md", async (t) 
   assert.equal(fs.existsSync(path.join(repo, "AGENTS.md")), false);
 });
 
-test("project list --all keeps withComposed when super is also forwarded", async (t) => {
+test("project list --all includes a composed tasks board and --exclude compose skips it", async (t) => {
   const repo = fs.realpathSync(await mkdtemp(path.join(tmpdir(), "edges-project-list-composed-")));
   t.after(() => rm(repo, { recursive: true, force: true }));
-  const hidden = path.join(repo, "hidden", "tasks");
+  write(repo, "AGENTS.md", scopeAgents("- [材料](.harness/README.md) — harness"));
   write(
     repo,
-    "AGENTS.md",
-    scopeAgents() +
-      `\n<!-- project-harness-compose:start -->\n## 组合\n\n- [hidden](<${hidden}>) — hidden board remote: https://example.com/hidden.git\n<!-- project-harness-compose:end -->\n`,
+    ".harness/README.md",
+    "# 材料\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [组合](compose/README.md) — composed\n<!-- project-entries-local:end -->\n",
+  );
+  write(
+    repo,
+    ".harness/compose/README.md",
+    "# 组合\n\n<!-- project-harness-compose:start -->\n## 组合\n\n- [hidden](<../../hidden/tasks/README.md>) — hidden board remote: https://example.com/hidden.git\n<!-- project-harness-compose:end -->\n",
   );
   write(repo, "hidden/tasks/AGENTS.md", "# Hidden\n\nNot a harness system entry.\n");
   write(
@@ -222,16 +226,19 @@ test("project list --all keeps withComposed when super is also forwarded", async
   write(repo, "hidden/tasks/foreign/README.md", projectReadme("Foreign", "foreign work"));
   const plain = await runList(repo, ["--all"]);
   assert.equal(plain.exitCode, 0, plain.stdout + plain.stderr);
-  assert.equal(projectsOf(plain.stdout).some((project) => project.project === "foreign"), false);
-  const composed = await runList(repo, ["--all", "--with-composed"]);
-  assert.equal(composed.exitCode, 0, composed.stdout + composed.stderr);
   assert.deepEqual(
-    projectsOf(composed.stdout).filter((project) => project.project === "foreign").map((project) => project.path),
+    projectsOf(plain.stdout).filter((project) => project.project === "foreign").map((project) => project.path),
     ["hidden/tasks/foreign/README.md"],
   );
-  const both = await runList(repo, ["--all", "--super", "--with-composed"]);
+  const excluded = await runList(repo, ["--all", "--exclude", "compose"]);
+  assert.equal(excluded.exitCode, 0, excluded.stdout + excluded.stderr);
+  assert.equal(projectsOf(excluded.stdout).some((project) => project.project === "foreign"), false);
+  const both = await runList(repo, ["--all", "--super"]);
   assert.equal(both.exitCode, 0, both.stdout + both.stderr);
   assert.equal(projectsOf(both.stdout).some((project) => project.project === "foreign"), true);
+  const bothExcluded = await runList(repo, ["--all", "--super", "--exclude", "compose"]);
+  assert.equal(bothExcluded.exitCode, 0, bothExcluded.stdout + bothExcluded.stderr);
+  assert.equal(projectsOf(bothExcluded.stdout).some((project) => project.project === "foreign"), false);
 });
 
 test("project list fails fast and names the file when one project entry is invalid", async (t) => {

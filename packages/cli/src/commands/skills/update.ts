@@ -25,7 +25,7 @@ export function addSkillUpdateCommand(skill: Command, ctx: CliContext): void {
             body: opts.body,
             metadata: opts.metadata,
           },
-          { all: ctx.all, super: ctx.super, withComposed: ctx.withComposed },
+          { all: ctx.all, super: ctx.super, exclude: ctx.exclude },
         );
         ctx.result = succeed({
           command: "skills.update",

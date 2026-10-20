@@ -78,9 +78,16 @@ export class BaseNode<
   get children(): readonly Readonly<NodeReference>[] {
     return [];
   }
-  /** One edge to a ComposeNode. Undefined when this node has no composed repositories. */
-  get compose(): Readonly<NodeReference> | undefined {
-    return undefined;
+  /**
+   * How traverse continues through `children`. `leaf` yields each child and stops,
+   * so a module entry can mount another repository without walking into it.
+   */
+  childTraversal(): "descend" | "leaf" {
+    return "descend";
+  }
+  /** When true, children loaded through this node are read-only mounts. */
+  mountsReadOnly(): boolean {
+    return false;
   }
   get isLeaf(): boolean {
     return this.localChildren === undefined && this.children.length === 0;

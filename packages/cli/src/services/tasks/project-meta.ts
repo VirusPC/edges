@@ -242,14 +242,14 @@ function boardHasEntry(board: TaskBoardLocation): boolean {
  */
 export async function listProjectsInScope(
   scopeDirPath: string,
-  options: { all?: boolean; super?: boolean; withComposed?: boolean } = {},
+  options: { all?: boolean; super?: boolean; exclude?: ReadonlySet<string> } = {},
 ): Promise<TaskProjectRecord[]> {
   const invocation = nativeTaskPath(scopeDirPath);
   const subject = subjectTaskBoard(invocation, { super: options.super === true });
   const boards = options.all
     ? [subject, ...await listTaskBoardLocations(invocation, {
         super: options.super === true,
-        withComposed: options.withComposed === true,
+        exclude: options.exclude,
       })]
     : [subject];
   const seenBoards = new Set<string>();
