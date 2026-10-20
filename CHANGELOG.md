@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 仓库拆分
+
+- **框架单独成仓：** 2026-10-20 起，原 `VirusPC/edges` 改名为 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)，作 peng cheng 的个人主干长期保留；新的 `VirusPC/edges` 只含 Edges 系统路径，从单个初始提交开始，拆自 `edges-brain-viruspc@025904fa29bcc6970f45c654d95e30c5390d43d7`。拆仓前的 commit、PR 与 Actions 记录都在个人仓。根 `AGENTS.md` 用 Compose 登记个人仓；retrieval eval 的 `edges` 语料锁到个人仓的这个提交。npm 包名 `@viruspc/edges` 不变。
+
 ### 组合仓库
 
 - **登记组合仓库必须写说明：** `edges compose register` 现在要求 `--description`。不传，或只传空白，命令以校验错误退出（退出码 2，`errorCode` 为 `VALIDATION_ERROR`），不会把缺说明的条目写进作用域 `AGENTS.md`。说明要写清这个仓存什么、什么时候该往里写。操作见 [`edges-compose`](extensions/skills/edges-compose/SKILL.md)（beta，版本 `0.1.0`）。

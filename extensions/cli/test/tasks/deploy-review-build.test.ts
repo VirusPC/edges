@@ -1,13 +1,16 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
-const deploy = readFileSync(path.join(repoRoot, ".github/workflows/deploy.yml"), "utf8");
+const deployPath = path.join(repoRoot, ".github/workflows/deploy.yml");
+// After the repo split the framework repo may not carry deploy.yml yet.
+const skip = existsSync(deployPath) ? false : "deploy.yml not in this checkout";
+const deploy = skip ? "" : readFileSync(deployPath, "utf8");
 
-test("deploy sudo only runs the root-owned site-layout entry after /tasks/ generation", () => {
+test("deploy sudo only runs the root-owned site-layout entry after /tasks/ generation", { skip }, () => {
   const generateAt = deploy.indexOf("scripts/generate-tasks-site.ts");
   const entry = "/usr/local/sbin/edges-migrate-site-layout";
   const sudoAt = deploy.indexOf(`sudo -n ${entry}`);
@@ -18,7 +21,7 @@ test("deploy sudo only runs the root-owned site-layout entry after /tasks/ gener
   assert.match(deploy, /sha256sum/);
 });
 
-test("deploy builds schema artifacts before generating /tasks/ and before the tsx CLI fallback", () => {
+test("deploy builds schema artifacts before generating /tasks/ and before the tsx CLI fallback", { skip }, () => {
   const schemasAt = deploy.indexOf("pnpm --filter @viruspc/edges run build:schemas");
   const generateAt = deploy.indexOf("scripts/generate-tasks-site.ts");
   const tsxCliAt = deploy.indexOf("tsx src/index.ts artifacts server install");
@@ -27,7 +30,7 @@ test("deploy builds schema artifacts before generating /tasks/ and before the ts
   assert.ok(tsxCliAt > schemasAt, "build:schemas must run before the tsx CLI fallback");
 });
 
-test("deploy builds tasks-review-app before generating /tasks/ and not only when node_modules is missing", () => {
+test("deploy builds tasks-review-app before generating /tasks/ and not only when node_modules is missing", { skip }, () => {
   const buildAt = deploy.indexOf("pnpm --filter tasks-review-app run build");
   const generateAt = deploy.indexOf("scripts/generate-tasks-site.ts");
   assert.ok(buildAt >= 0, "deploy.yml must build tasks-review-app");

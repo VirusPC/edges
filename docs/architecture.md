@@ -58,7 +58,7 @@
 - **递归树结构**：
 
   - **逻辑归属**：树的父归属遵循文件目录；索引可跨越目录层级发现节点，普通交叉引用不产生新的所有权。各节点可按需拥有维护空间，根可面向个人、团队、公司等主体。
-  - **全局共享**：仓内全局约定与维护记忆由根节点的 `AGENTS.md` 和 `.harness/` 承载，各层按归属引用复用。对外分发的能力须沉淀到 `extensions/`（Edges 能力）或 `shared-extensions/`（不依赖 Edges 的通用能力）；目标是让任意仓库安装后复用这套能力，并在自己的作用域内维护节点与 `.harness/`。局部记忆不因共享而上收根层，也不随扩展默认分发。
+  - **全局共享**：仓内全局约定与维护记忆由根节点的 `AGENTS.md` 和 `.harness/` 承载，各层按归属引用复用。对外分发的能力须沉淀到 `extensions/`（Edges 能力）；不依赖 Edges 的通用能力放个人仓 `VirusPC/edges-brain-viruspc` 的 `shared-extensions/`；目标是让任意仓库安装后复用这套能力，并在自己的作用域内维护节点与 `.harness/`。局部记忆不因共享而上收根层，也不随扩展默认分发。
   - **统一入口**：每个入口文件对应一个节点：`AGENTS.md` 组织内容，`INDEX.md` 或 `SKILL.md` 承载内容。`AGENTS.md` 沿用 Project Memory 的三部分：本层硬约束规定本层规则，本层记忆登记直属材料，下层记忆索引登记子节点。Task Project 等业务索引也放进这三部分。
   - **系统一与系统二**：当前对象是系统一，负责维护和改进它的是系统二；当维护对象换成这套系统二时，它又成为新的系统一。
   - **检索边界**：完整读取当前对象的系统二，但不自动进入系统二自身的系统二。同层分类索引可以继续展开，停止边界由维护关系决定，不由物理目录深度或经过多少个 `AGENTS.md` 决定。
@@ -80,11 +80,11 @@ CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使�
 
 | 目录 | 职责 | 边界 |
 | --- | --- | --- |
-| [`notes/`](../notes/)、[`edges/`](../edges/)、[`posts/`](../posts/)、[`archive/`](../archive/) | 知识生产、提炼、使用与退出 | 平铺在根目录；每篇内容使用目录入口，附件共置 |
+| `notes/`、`edges/`、`archive/`（个人仓 [`edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)）、[`posts/`](../posts/) | 知识生产、提炼、使用与退出 | 平铺在作用域根；每篇内容使用目录入口，附件共置。个人知识经 Compose 挂进本仓 |
 | [`AGENTS.md`](../AGENTS.md) 与各节点的 `.harness/memory/` | 为人和 Agent 提供分层的规则、决策、纠错与流程记忆 | 归属各节点，服务项目维护，不替代长期知识库 |
 | [`extensions/`](../extensions/README.md) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关 |
 | [`extensions/apps/`](../extensions/apps/) | 可跨作用域复用的对外应用，如任务审阅页 | 属于共享扩展实现，不属于根层知识内容 |
-| [`shared-extensions/`](../shared-extensions/README.md) | 跨机器、跨 Agent 共用的个人 harness | 离开 Edges 仍然有价值 |
+| `shared-extensions/`（个人仓 [`edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc/tree/main/shared-extensions)） | 跨机器、跨 Agent 共用的个人 harness | 离开 Edges 仍然有价值；不在本仓 |
 | [`scripts/`](../scripts/README.md) | 初始化、构建、迁移等维护脚本 | 通过 `pnpm` 调用，不加入 `$PATH` |
 | [`.harness/evaluation/`](../.harness/evaluation/README.md) | 评测整套 Edges | 系统元工作，不是知识生命周期阶段 |
 | [`.harness/observation/`](../.harness/observation/README.md) | 观测运行与使用 | 运营观测，不替代 维护记忆中的决策 |
@@ -95,6 +95,6 @@ CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使�
 
 Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；各节点的 `AGENTS.md` 和 `.harness/memory/` 保存该节点维护所需的规则、决策与经验；根层的 `notes/`、`edges/` 等目录保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
 
-`extensions/` 收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill 和其他接口。`shared-extensions/` 则保存不依赖 Edges、可跨机器和 Agent 客户端复用的个人 harness；两者互斥。短生命周期预览页（上传 → 可达 URL → TTL）的用例 × 能力见 [`extensions/services/artifacts-preview`](../extensions/services/artifacts-preview/README.md#use-case-matrix)；命令面是 `edges artifacts`。
+`extensions/` 收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill 和其他接口。个人仓的 `shared-extensions/` 则保存不依赖 Edges、可跨机器和 Agent 客户端复用的个人 harness；两者互斥。短生命周期预览页（上传 → 可达 URL → TTL）的用例 × 能力见 [`extensions/services/artifacts-preview`](../extensions/services/artifacts-preview/README.md#use-case-matrix)；命令面是 `edges artifacts`。
 
 现有调用侧以文件、Obsidian 和人工检索为主。未来的索引、检索与机器接口仍放在 `extensions/`，提高知识流动性并让闭环连接外部系统，但必须在实现前明确标注为规划能力。

@@ -57,8 +57,10 @@ class ConfigTests(unittest.TestCase):
         cells = load_cells()
         self.assertEqual(len(cells), 1)
         cell = cells[0]
-        self.assertEqual(cell.repository.url, "https://github.com/VirusPC/edges.git")
-        self.assertEqual(cell.repository.ref, "main")
+        # Gold paths include personal dirs, so the corpus is pinned to the last
+        # pre-split commit of the personal trunk (repo split, 2026-10-20).
+        self.assertEqual(cell.repository.url, "https://github.com/VirusPC/edges-brain-viruspc.git")
+        self.assertEqual(cell.repository.ref, "025904fa29bcc6970f45c654d95e30c5390d43d7")
         self.assertEqual(cell.client.command, "codex")
         self.assertEqual(cell.client.sandbox, "read-only")
         self.assertEqual(cell.client.reasoning_summary, "detailed")
@@ -75,7 +77,7 @@ class ConfigTests(unittest.TestCase):
             text=True,
             capture_output=True,
         )
-        self.assertIn("git clone --no-recurse-submodules https://github.com/VirusPC/edges.git", completed.stdout)
+        self.assertIn("git clone --no-recurse-submodules https://github.com/VirusPC/edges-brain-viruspc.git", completed.stdout)
         self.assertIn("codex exec", completed.stdout)
         self.assertIn("--json", completed.stdout)
         self.assertIn("--sandbox read-only", completed.stdout)

@@ -1,6 +1,6 @@
 # Edges
 
-[![npm](https://img.shields.io/npm/v/@viruspc/edges?label=npm&color=CB3837)](https://www.npmjs.com/package/@viruspc/edges) [![站点部署](https://github.com/VirusPC/edges/actions/workflows/deploy.yml/badge.svg)](https://github.com/VirusPC/edges/actions/workflows/deploy.yml) ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/VirusPC/edges?utm_source=oss&utm_medium=github&utm_campaign=VirusPC%2Fedges&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+[![npm](https://img.shields.io/npm/v/@viruspc/edges?label=npm&color=CB3837)](https://www.npmjs.com/package/@viruspc/edges) [![站点部署](https://github.com/VirusPC/edges-brain-viruspc/actions/workflows/deploy.yml/badge.svg)](https://github.com/VirusPC/edges-brain-viruspc/actions/workflows/deploy.yml) ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/VirusPC/edges?utm_source=oss&utm_medium=github&utm_campaign=VirusPC%2Fedges&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 **harness 任何目录。你的大脑，也是一个目录。**
 
@@ -64,23 +64,25 @@ edges --scope . tasks list
 
 把外部 harness 仓库挂进当前目录用 `edges compose`，步骤见 [`edges-compose`](extensions/skills/edges-compose/SKILL.md)。完整命令见 [`extensions/cli/README.md`](extensions/cli/README.md)，或运行 `edges --help`。
 
-## 本仓：作者的大脑仓库
+## 本仓与个人大脑仓
 
-本仓既是 Edges 的源码仓库，也是作者大脑的 harness 仓库。这个实例的目标是：持续提升自己，也持续提升自我改进的能力。
+本仓 `VirusPC/edges` 只放 Edges 框架本身：
 
 | 目录 | 作用 |
 | --- | --- |
-| [`notes/`](notes/README.md)、[`projects/`](projects/)、[`memory/`](memory/README.md)、[`teaching/`](teaching/README.md) | 知识生产：低成本捕获、专项工作区、Agent 能力调研备忘、教学工作区 |
-| [`retrospectives/`](retrospectives/README.md) | 阶段性回看：周复盘与日复盘 |
-| [`edges/`](edges/README.md) | 提炼出来、可以反复使用的判断 |
-| [`posts/`](posts/README.md) | 对外博客成稿，由作者亲手维护 |
-| [`tasks/`](tasks/README.md)、[`.harness/tasks/`](.harness/tasks/README.md) | 领域任务与 Edges 维护任务看板 |
-| [`archive/`](archive/README.md) | 退出活跃区域的内容 |
 | [`extensions/`](extensions/README.md) | 接入和操作 Edges 的 CLI、MCP、skill 与应用。打进 npm 包的是 `extensions/skills/` |
-| [`shared-extensions/`](shared-extensions/README.md) | 不依赖 Edges、跨机器跨 Agent 共用的能力。通用 skill 在 [`shared-extensions/skills/`](shared-extensions/skills/README.md)，不打进 `@viruspc/edges` |
-| [`.harness/`](.harness/) | 本仓自身的维护记忆、技能、评测与观测 |
+| [`docs/`](docs/) | ADR 与架构文档 |
+| [`posts/`](posts/README.md) | 对外博客成稿，由作者亲手维护 |
+| [`scripts/`](scripts/README.md) | 初始化、构建、迁移等维护脚本 |
+| [`.harness/`](.harness/) | 本仓自身的维护记忆、技能、任务看板、评测与观测 |
 
-对外输出可以直接看：[教学站](https://edges.viruspc.tech/teaching/)、[任务看板](https://edges.viruspc.tech/tasks/)。
+作者的个人大脑（`notes/`、`edges/`、`teaching/`、`retrospectives/`、`tasks/`、`projects/`、`memory/`、`archive/`、`shared-extensions/` 等）在个人主干仓 [`VirusPC/edges-brain-viruspc`](https://github.com/VirusPC/edges-brain-viruspc)。本仓根 `AGENTS.md` 用 `edges compose` 把它登记为挂载的个人工作区；个人仓反过来把本仓登记为参考项目。挂载步骤见 [`edges-compose`](extensions/skills/edges-compose/SKILL.md)。
+
+对外输出可以直接看：[教学站](https://edges.viruspc.tech/teaching/)、[任务看板](https://edges.viruspc.tech/tasks/)（目前都从个人仓部署）。
+
+### 拆仓前的历史
+
+2026-10-20 起，原 `VirusPC/edges` 改名为 `VirusPC/edges-brain-viruspc` 作个人主干长期保留；本仓是从它的 [`025904f`](https://github.com/VirusPC/edges-brain-viruspc/tree/025904fa29bcc6970f45c654d95e30c5390d43d7) 拆出的单个初始提交，只含系统路径。此前的 commit、PR、issue 与 Actions 记录都在个人仓里看。npm 包名 `@viruspc/edges` 不变。
 
 ## 参与开发
 
@@ -99,7 +101,7 @@ pnpm build && pnpm test
 - [`docs/adr/`](docs/adr/)：架构决策记录。
 - [`docs/architecture.md`](docs/architecture.md)：内部架构思想。
 - [`docs/recursive-layout-migration.md`](docs/recursive-layout-migration.md)：目录升级与本机私有材料迁移。
-- [`CHANGELOG.md`](CHANGELOG.md)：仓库级变更记录，tag 使用 `vX.Y.Z`；对外 skill 各自独立 semver，`shared-extensions/` 整层使用自己的 [`VERSION`](shared-extensions/VERSION) 与 [`CHANGELOG.md`](shared-extensions/CHANGELOG.md)。
+- [`CHANGELOG.md`](CHANGELOG.md)：仓库级变更记录，tag 使用 `vX.Y.Z`；对外 skill 各自独立 semver；`shared-extensions/` 已随个人大脑搬到 `VirusPC/edges-brain-viruspc`。
 - [`scripts/`](scripts/README.md)、[`.harness/evaluation/`](.harness/evaluation/README.md)、[`.harness/observation/`](.harness/observation/README.md)：维护脚本、评测与观测。
 
 ## 隐私与脱敏
@@ -118,11 +120,5 @@ pnpm build && pnpm test
 <!-- project-entries-local:start -->
 ## 本层内容
 
-- [领域任务](tasks/README.md) — 根作用域领域工作项看板（系统入口见同目录 AGENTS.md）。
-- [笔记](notes/README.md) — 低成本捕获与在研想法。
-- [调研备忘](memory/README.md) — Agent 能力调研时的优先关注清单等短备忘。
-- [复盘](retrospectives/README.md) — 周复盘与日复盘的阶段性回看记录。
-- [教学](teaching/README.md) — 有状态的教学工作区与主题课页。
-- [认知优势](edges/README.md) — 已提炼、可复用的判断资产。
 - [对外成稿](posts/README.md) — 准备公开发表的博客成稿（人维护）。
 <!-- project-entries-local:end -->

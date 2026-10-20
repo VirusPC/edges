@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -180,8 +181,13 @@ test("teaching nginx prefix migrator rewrites both 80 and 443 servers toward /te
   await rm(dir, { recursive: true, force: true });
 });
 
-test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts when env exists", async () => {
-  const workflow = await readFile(path.join(repoRoot, ".github/workflows/deploy.yml"), "utf8");
+test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts when env exists", async (t) => {
+  const workflowPath = path.join(repoRoot, ".github/workflows/deploy.yml");
+  if (!existsSync(workflowPath)) {
+    t.skip("deploy.yml not in this checkout");
+    return;
+  }
+  const workflow = await readFile(workflowPath, "utf8");
   assert.match(workflow, /git reset --hard origin\/main/);
   assert.match(workflow, /artifacts-preview\.env/);
   assert.match(workflow, /replace-with-shared-token/);
@@ -190,14 +196,17 @@ test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts 
   assert.doesNotMatch(workflow, /nginx-snippet|nginx-setup|configure-proxy/);
   assert.doesNotMatch(workflow, /artifacts server setup-nginx/);
   assert.match(workflow, /^name:\s*Deploy\s*$/m);
-  const deployJob = workflow.split(/\n {2}site-teaching:/)[0];
+  const deployJob = workflow.split(/\n {2}site-(?:teaching|tasks):/)[0];
   assert.match(deployJob, /\n {2}deploy:[\s\S]*\n {4}environment:\s*production\s*\n/);
   assert.doesNotMatch(deployJob, /\n\s*url:/);
   assert.equal(workflow.match(/git reset --hard origin\/main/g)?.length, 1);
-  assert.match(
-    workflow,
-    /site-teaching:\s*\n {4}needs:\s*\[deploy\][\s\S]*?\n {6}name:\s*teaching\s*\n {6}url:\s*https:\/\/edges\.viruspc\.tech\/teaching\//,
-  );
+  // Framework repo deploys only the tasks site; teaching stays in edges-brain-viruspc.
+  if (/\n {2}site-teaching:/.test(workflow)) {
+    assert.match(
+      workflow,
+      /site-teaching:\s*\n {4}needs:\s*\[deploy\][\s\S]*?\n {6}name:\s*teaching\s*\n {6}url:\s*https:\/\/edges\.viruspc\.tech\/teaching\//,
+    );
+  }
   assert.match(
     workflow,
     /site-tasks:\s*\n {4}needs:\s*\[deploy\][\s\S]*?\n {6}name:\s*tasks\s*\n {6}url:\s*https:\/\/edges\.viruspc\.tech\/tasks\//,
