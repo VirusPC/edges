@@ -8,10 +8,12 @@ import { ReadmeNode } from "../../src/domain/models/index.js";
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const rootReadme = join(repoRoot, "README.md");
 
-test("repo root README project-entries-local includes domain tasks board", () => {
+test("repo root README project-entries-local lists posts and no personal content dirs", () => {
   const node = new ReadmeNode(rootReadme).parse(readFileSync(rootReadme, "utf8"));
   const ids = node.localChildren.map((c) => c.id);
-  // Domain board is registered on the content face (README), not as an AGENTS child.
-  assert.ok(ids.some((id) => id.endsWith("/tasks/README.md")));
-  assert.ok(ids.some((id) => id.endsWith("/notes/README.md")));
+  assert.ok(ids.some((id) => id.endsWith("/posts/README.md")));
+  // Personal content (tasks/, notes/, ...) moved to VirusPC/edges-brain-viruspc on 2026-10-20.
+  for (const dir of ["tasks", "notes", "memory", "retrospectives", "teaching", "edges"]) {
+    assert.equal(ids.some((id) => id.endsWith(`/${dir}/README.md`)), false, dir);
+  }
 });

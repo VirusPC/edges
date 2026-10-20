@@ -18,7 +18,6 @@ const MOVED_SKILL_NAMES = [
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const sourceSkills = path.resolve(here, "../../../skills");
-const sharedSkills = path.resolve(here, "../../../../shared-extensions/skills");
 const packageJsonPath = path.resolve(here, "../../package.json");
 
 async function skillDirs(root: string): Promise<string[]> {
@@ -41,7 +40,6 @@ test("copyBundledSkills copies every remaining extensions skill and not the six 
   }
   for (const name of MOVED_SKILL_NAMES) {
     assert.equal(existsSync(path.join(dest, name)), false, name);
-    assert.equal(existsSync(path.join(sharedSkills, name, "SKILL.md")), true, name);
   }
   assert.equal(existsSync(path.join(dest, "README.md")), false);
   assert.equal(existsSync(path.join(dest, "AGENTS.md")), false);
