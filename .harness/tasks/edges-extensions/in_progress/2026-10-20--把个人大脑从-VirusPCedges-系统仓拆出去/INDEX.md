@@ -2,7 +2,7 @@
 metadata:
   edges-type: task
   edges-task-project: edges-extensions
-  edges-updated-at: '2026-10-21T01:33:20.994Z'
+  edges-updated-at: '2026-10-21T01:41:15.012Z'
   edges-title: 把个人大脑从 VirusPC/edges 系统仓拆出去
   edges-tasks-status: in_progress
   edges-task-priority: none
@@ -32,7 +32,7 @@ peng cheng 觉得 VirusPC/edges 不该把 Edges 系统和个人大脑混在一�
 - 其余 `.harness/tasks` 项目：`_default`、`agent-clients-ux`、`edges-routines`、`edges-tasks`、`observation`、`project-memory` 留系统仓；只有 `tech-reading` 去个人仓。
 - 根 `tasks/`：搬走前先把讲系统的卡挪进 `.harness/tasks` 同名项目（如「整理posts文件夹并建站」「edges-connector自建远程MCP」「笔记洗成project-memory格式」），其余随 `tasks/` 走。
 - `.agents/`、`.claude/`、`.factory/`、`skills-lock.json`、`.gitmodules` 留系统仓。
-- ~~个人仓名：`example/personal-brain`。~~（R6：现有 edges 改名为用户的个人大脑仓）
+- ~~个人仓名：曾选的另一个候选名。~~（R6：现有 edges 改名为用户的个人大脑仓）
 - ~~迁移用 `git filter-repo` 抽出搬走的路径，保留历史。~~（R6 作废：现有 edges 改名作个人主干）
 
 
@@ -55,7 +55,7 @@ peng cheng 觉得 VirusPC/edges 不该把 Edges 系统和个人大脑混在一�
 
 **grill R4（被 R6 恢复为基础）：** 现有 edges 改名为个人仓、框架新建仓 `VirusPC/edges`（单个初始提交）。
 
-**grill R5（已作废，被 R6 取代）：** ~~现有 edges 改名为归档仓并归档；框架与个人各开新仓~~。作废原因：个人知识库会不断长新项目、系统也会不断往外拆，不能每次都 archive；R6 更简单。
+**grill R5（已作废，被 R6 取代）：** ~~现有 edges 改成另一个候选名后归档；框架与个人各开新仓~~。作废原因：个人知识库会不断长新项目、系统也会不断往外拆，不能每次都 archive；R6 更简单。
 
 **grill R6 拍板（2026-10-20）：个人仓作长期主干，系统往外拆**
 - 现有 `VirusPC/edges` **改名为用户的个人大脑仓**，作 peng cheng 的**个人主干，长期保留，不归档**；历史、PR、issue、Actions 配置、teaching 部署、ECS 检出与密钥原样跟着走。
