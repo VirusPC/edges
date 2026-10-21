@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: edges-extensions
-  edges-updated-at: '2026-10-20T18:10:06.088Z'
+  edges-updated-at: '2026-10-20T18:33:21.613Z'
   edges-title: Compose 改挂到 .harness/README.md
-  edges-tasks-status: in_review
+  edges-tasks-status: done
   edges-task-priority: none
   edges-task-assignee: 全栈开发专家
 name: Compose 改挂到 .harness/README.md
@@ -26,3 +26,11 @@ description: 每个模块一份入口 README。Compose 入口是 .harness/compos
 8. **迁移：** 一次性 `edges compose doctor [--apply]`。把 Compose 区块从 `AGENTS.md` 搬进 `.harness/compose/README.md`，补上索引链接，改写 href，清掉 AGENTS 上的组合标记，并更新提到 `--with-composed` 的文档和测试。默认只预览。日常表面仍是 add / list / update；doctor 只做迁移。
 9. 被组合的内容保持只读；不递归 Compose；磁盘上的子模块路径仍是 `.harness/compose/<name>`。
 10. 公开的框架仓库不点名个人或私有仓库（示例用通用名字）。
+
+## 进展
+
+- 2026-10-21 实现完成：PR https://github.com/VirusPC/edges/pull/19 squash 合入 main（72980dd）。
+- 去掉虚拟 ComposeNode；Compose 入口改为真实文件 `.harness/compose/README.md`（ComposeReadmeNode 继承 ReadmeNode），子节点是被组合仓的 README.md；`.harness/README.md` 链到这个入口；AGENTS.md 只留约束和指针。
+- 默认展开 Compose，forest 遍历不跳过；全局 `--exclude <模块>` 取代 `--with-composed`；新增一次性迁移命令 `compose doctor [--apply]`；edges-compose skill 升到 0.2.0。
+- 验证：packages/cli typecheck 通过，测试 1108/1108 通过；在工作空间副本上单独试迁移通过；私有工作空间已迁移，默认遍历能到两个组合进来的 README，`--exclude compose` 能排除。
+- 遗留（待定）：工作空间里旧的 edges-compose skill 0.1.0 需要重装；框架仓里约 20 处历史文字还提到个人仓名。
