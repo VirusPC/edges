@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -204,7 +205,7 @@ def _load_repositories(path: Path) -> dict[str, Repository]:
     for repo_id, body in raw.items():
         if not isinstance(body, dict):
             raise ConfigError(f"{path} entry {repo_id} must be an object")
-        url = _required_str(body, "url", repo_id)
+        url = _repository_url(body, repo_id)
         if "://" not in url and not url.startswith("git@"):
             raise ConfigError(f"{repo_id}.url must be a remote git URL")
         ref = body.get("ref")
@@ -216,6 +217,18 @@ def _load_repositories(path: Path) -> dict[str, Repository]:
             ref=ref.strip() if isinstance(ref, str) else None,
         )
     return repos
+
+
+def _repository_url(body: dict[str, Any], repo_id: str) -> str:
+    """Use url_env when that variable is set; otherwise the committed fixture URL."""
+    url = _required_str(body, "url", repo_id)
+    url_env = body.get("url_env")
+    if url_env is None:
+        return url
+    if not isinstance(url_env, str) or not url_env.isidentifier():
+        raise ConfigError(f"{repo_id}.url_env must be an environment variable name")
+    override = os.environ.get(url_env, "").strip()
+    return override or url
 
 
 def _load_clients(path: Path) -> dict[str, Client]:

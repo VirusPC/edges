@@ -204,7 +204,7 @@ test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts 
   assert.match(deployJob, /\n {2}deploy:[\s\S]*\n {4}environment:\s*production\s*\n/);
   assert.doesNotMatch(deployJob, /\n\s*url:/);
   assert.equal(workflow.match(/git reset --hard origin\/main/g)?.length, 1);
-  // Framework repo deploys only the tasks site; teaching stays in edges-brain-viruspc.
+  // Framework repo deploys only the tasks site; teaching stays in the personal brain repo.
   if (/\n {2}site-teaching:/.test(workflow)) {
     assert.match(
       workflow,

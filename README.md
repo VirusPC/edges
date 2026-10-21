@@ -1,6 +1,6 @@
 # Edges
 
-[![npm](https://img.shields.io/npm/v/@viruspc/edges?label=npm&color=CB3837)](https://www.npmjs.com/package/@viruspc/edges) [![站点部署](https://github.com/VirusPC/edges-brain-viruspc/actions/workflows/deploy.yml/badge.svg)](https://github.com/VirusPC/edges-brain-viruspc/actions/workflows/deploy.yml) ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/VirusPC/edges?utm_source=oss&utm_medium=github&utm_campaign=VirusPC%2Fedges&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+[![npm](https://img.shields.io/npm/v/@viruspc/edges?label=npm&color=CB3837)](https://www.npmjs.com/package/@viruspc/edges) [![站点部署](https://github.com/VirusPC/edges/actions/workflows/deploy.yml/badge.svg)](https://github.com/VirusPC/edges/actions/workflows/deploy.yml) ![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/VirusPC/edges?utm_source=oss&utm_medium=github&utm_campaign=VirusPC%2Fedges&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
 **harness 任何目录。你的大脑，也是一个目录。**
 
@@ -89,7 +89,7 @@ edges --scope . tasks list
 
 ### 拆仓前的历史
 
-2026-10-20 起，原 `VirusPC/edges` 改名为 `VirusPC/edges-brain-viruspc` 作个人主干长期保留；本仓是从它的 [`025904f`](https://github.com/VirusPC/edges-brain-viruspc/tree/025904fa29bcc6970f45c654d95e30c5390d43d7) 拆出的单个初始提交，只含系统路径。此前的 commit、PR、issue 与 Actions 记录都在个人仓里看。npm 包名 `@viruspc/edges` 不变。
+2026-10-20 起，原 `VirusPC/edges` 改名为用户的个人大脑仓并长期保留；本仓是从该仓拆仓前提交 `025904fa29bcc6970f45c654d95e30c5390d43d7` 拆出的单个初始提交，只含系统路径。此前的 commit、PR、issue 与 Actions 记录都在个人大脑仓里看。npm 包名 `@viruspc/edges` 不变。
 
 ## 参与开发
 
@@ -108,7 +108,7 @@ pnpm build && pnpm test
 - [`docs/adr/`](docs/adr/)：架构决策记录。
 - [`docs/architecture.md`](docs/architecture.md)：内部架构思想。
 - [`docs/recursive-layout-migration.md`](docs/recursive-layout-migration.md)：目录升级与本机私有材料迁移。
-- [`CHANGELOG.md`](CHANGELOG.md)：仓库级变更记录，tag 使用 `vX.Y.Z`；对外 skill 各自独立 semver；`shared-extensions/` 已随个人大脑搬到 `VirusPC/edges-brain-viruspc`。
+- [`CHANGELOG.md`](CHANGELOG.md)：仓库级变更记录，tag 使用 `vX.Y.Z`；对外 skill 各自独立 semver；`shared-extensions/` 已随个人大脑搬到用户的个人大脑仓。
 - [`scripts/`](scripts/README.md)、[`packages/evaluation/`](packages/evaluation/README.md)、[`packages/observation/`](packages/observation/README.md)：维护脚本、评测与观测。
 
 ## 隐私与脱敏
@@ -117,6 +117,7 @@ pnpm build && pnpm test
 
 - token、API key、密码、私钥、cookie 等凭据，个人信息、未公开 IP，以及 `.docx`、`.xlsx`、`.pptx` 等办公二进制文件绝不入库。
 - 内部域名、系统名、服务名、代码路径、同事身份和排期等标识符必须删除或改写为通用表述后才能入库。
+- 不点名、不链接维护者的个人仓或私有仓，包括历史旧名、Actions、子模块路径和评测语料地址。写成「个人大脑仓」「私有仓」或 `example/personal-brain`。
 - 截图按「能否直接放到公开博客」判断；需要打码、包含内部 UI 或可能泄漏上下文的截图不要入库。
 - 发现疑似泄漏时立即停止并告知仓库所有者；删除工作区文件不等于清除 Git 历史，`git filter-repo`、force push 等历史重写必须由仓库所有者确认并执行。
 

@@ -1,5 +1,5 @@
 # Framework repo (VirusPC/edges) deploy for the /tasks/ site only. Teaching
-# stays in VirusPC/edges-brain-viruspc. Manual trigger only until the ECS
+# stays in the personal brain repo. Manual trigger only until the ECS
 # cutover (separate framework checkout + nginx /tasks/ switch) is planned:
 # today nginx /tasks/ is still served from the personal checkout, and the
 # personal repo's Deploy keeps that site live.

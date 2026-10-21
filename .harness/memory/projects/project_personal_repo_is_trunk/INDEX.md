@@ -1,6 +1,6 @@
 ---
 name: project_personal_repo_is_trunk
-description: 原 edges 改名 edges-brain-viruspc 作个人主干长期保留；系统拆成新仓，不再 archive
+description: 原公开仓改名为用户的个人大脑仓，作个人主干长期保留；系统拆成新仓，不再 archive
 metadata:
   edges-title: 个人仓是长期主干，系统往外拆
   edges-type: project
@@ -8,10 +8,10 @@ metadata:
   edges-agent-client: cursor
   edges-username: VirusPC
   edges-email: 30697592+VirusPC@users.noreply.github.com
-  edges-updated-at: '2026-10-20T12:12:43+08:00'
+  edges-updated-at: '2026-10-21T01:21:34+00:00'
 ---
 
-本仓（原 `VirusPC/edges`，2026-10-20 起改名 `VirusPC/edges-brain-viruspc`）是 peng cheng 的**个人主干**，长期保留，不归档。
+用户的个人大脑仓（2026-10-20 起由原 `VirusPC/edges` 改名而来）是 peng cheng 的**个人主干**，长期保留，不归档。
 
 **Why:** 个人知识库会不断长出新项目，系统也会不断往外拆；每次都 archive 不现实。个人仓的 commit 历史无所谓，不刻意脱敏。
 

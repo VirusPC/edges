@@ -1,6 +1,7 @@
 {
   "edges": {
-    "url": "https://github.com/VirusPC/edges-brain-viruspc.git",
+    "url": "https://github.com/example/personal-brain.git",
+    "url_env": "EDGES_RETRIEVAL_CORPUS_URL",
     "ref": "025904fa29bcc6970f45c654d95e30c5390d43d7"
   }
 }

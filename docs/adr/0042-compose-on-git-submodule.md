@@ -4,7 +4,7 @@ status: accepted
 
 # Compose 底层改用 git submodule，装到 `.harness/compose/<name>`
 
-2026-10-20 peng cheng 开卡（`edges-brain-viruspc` PR #338，任务卡「Compose 底层改用 git submodule，装到 `.harness/compose/<name>`」）。问题：Compose 把本机绝对路径写进 `AGENTS.md`（相对的 `--path` 会被改成绝对路径，默认的 `~/.edges/composed/<name>` 又固定在本机家目录），换一台机器登记就不能用；`clone` / `pull` / `push` 也都由 CLI 自己实现。两个仓库互相登记时还担心无限展开。同日 peng cheng 又拍板把子命令收成三个，名字跟 git submodule 对应，一次硬切。
+2026-10-20 peng cheng 开卡（个人大脑仓 PR #338，任务卡「Compose 底层改用 git submodule，装到 `.harness/compose/<name>`」）。问题：Compose 把本机绝对路径写进 `AGENTS.md`（相对的 `--path` 会被改成绝对路径，默认的 `~/.edges/composed/<name>` 又固定在本机家目录），换一台机器登记就不能用；`clone` / `pull` / `push` 也都由 CLI 自己实现。两个仓库互相登记时还担心无限展开。同日 peng cheng 又拍板把子命令收成三个，名字跟 git submodule 对应，一次硬切。
 
 **Status:** accepted（ADR 0042）
 
@@ -41,4 +41,4 @@ status: accepted
 
 - ADR 0039 里「submodule 换底座：否决」与「新增 `edges compose sync`」两条由本 ADR 取代；0039 里 worktree 的部分要按子模块重新评估。
 - `add` 会改主仓库的暂存区（`.gitmodules` 与子模块），要和 `AGENTS.md` 一起提交。
-- 后续：两个仓库（`VirusPC/edges` 与 `VirusPC/edges-brain-viruspc`）真正添加子模块并迁移 `AGENTS.md` 条目；可选的浅克隆、`edges compose worktree`、带已访问集合的 `--recursive`。
+- 后续：两个仓库（`VirusPC/edges` 与用户的个人大脑仓）真正添加子模块并迁移 `AGENTS.md` 条目；可选的浅克隆、`edges compose worktree`、带已访问集合的 `--recursive`。

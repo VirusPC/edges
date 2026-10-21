@@ -13,7 +13,7 @@
 ## 何时**不**放这里
 
 - 用户/Agent 装好之后**天天会用**的命令 → `cli` 的 `edges`（`package.json` `"bin"` 安装挂钩）
-- 跟外部系统/MCP 协议相关的代码 → 仓库根的 `packages/cli/`、`packages/skills/`、`packages/mcp-servers/`、`packages/apps/`、`packages/services/`；跨机器 harness 的安装脚本仍放本目录，源在个人仓 `VirusPC/edges-brain-viruspc` 的 `shared-extensions/`
+- 跟外部系统/MCP 协议相关的代码 → 仓库根的 `packages/cli/`、`packages/skills/`、`packages/mcp-servers/`、`packages/apps/`、`packages/services/`；跨机器 harness 的安装脚本仍放本目录，源在用户个人大脑仓的 `shared-extensions/`
 - 纯 Node 包、可被 pnpm 链接的 → `packages/mcp-servers/<name>/`
 
 ## 命名与权限

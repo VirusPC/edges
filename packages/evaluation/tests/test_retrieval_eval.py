@@ -54,12 +54,13 @@ GIT_ENV = {
 
 class ConfigTests(unittest.TestCase):
     def test_default_cell_is_edges_codex_smoke(self) -> None:
-        cells = load_cells()
+        with patch.dict(os.environ, {"EDGES_RETRIEVAL_CORPUS_URL": ""}):
+            cells = load_cells()
         self.assertEqual(len(cells), 1)
         cell = cells[0]
-        # Gold paths include personal dirs, so the corpus is pinned to the last
-        # pre-split commit of the personal trunk (repo split, 2026-10-20).
-        self.assertEqual(cell.repository.url, "https://github.com/VirusPC/edges-brain-viruspc.git")
+        # Gold paths include personal dirs from the pre-split tree. The committed
+        # URL is a generic fixture; EDGES_RETRIEVAL_CORPUS_URL selects a real remote.
+        self.assertEqual(cell.repository.url, "https://github.com/example/personal-brain.git")
         self.assertEqual(cell.repository.ref, "025904fa29bcc6970f45c654d95e30c5390d43d7")
         self.assertEqual(cell.client.command, "codex")
         self.assertEqual(cell.client.sandbox, "read-only")
@@ -70,14 +71,29 @@ class ConfigTests(unittest.TestCase):
         samples = load_samples(cell.sample_path)
         self.assertEqual(len(samples), 6)
 
+    def test_corpus_url_env_overrides_fixture(self) -> None:
+        with patch.dict(
+            os.environ,
+            {"EDGES_RETRIEVAL_CORPUS_URL": "https://github.com/example/other-corpus.git"},
+        ):
+            cells = load_cells()
+        self.assertEqual(cells[0].repository.url, "https://github.com/example/other-corpus.git")
+        self.assertEqual(cells[0].repository.ref, "025904fa29bcc6970f45c654d95e30c5390d43d7")
+
     def test_print_command_does_not_clone(self) -> None:
+        env = os.environ.copy()
+        env.pop("EDGES_RETRIEVAL_CORPUS_URL", None)
         completed = subprocess.run(
             [sys.executable, str(EVAL_DIR / "retrieval_eval" / "run.py"), "print-command"],
             check=True,
             text=True,
             capture_output=True,
+            env=env,
         )
-        self.assertIn("git clone --no-recurse-submodules https://github.com/VirusPC/edges-brain-viruspc.git", completed.stdout)
+        self.assertIn(
+            "git clone --no-recurse-submodules https://github.com/example/personal-brain.git",
+            completed.stdout,
+        )
         self.assertIn("codex exec", completed.stdout)
         self.assertIn("--json", completed.stdout)
         self.assertIn("--sandbox read-only", completed.stdout)
