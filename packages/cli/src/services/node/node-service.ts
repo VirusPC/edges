@@ -7,7 +7,8 @@ import { BaseNode, AgentsNode, SuperAgentsNode } from "../../domain/models/index
 import type { ChildGroup, NodeReference } from "../../domain/models/index.js";
 import type { ScopeTraversalOptions, NodeQueryOptions } from "../../domain/operations/traverse.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
-import { isInsideComposedCheckout, pathHitsExcludedModule } from "../../domain/config/exclude.js";
+import { innermostComposedCheckout, pathHitsExcludedModule } from "../../domain/config/exclude.js";
+import { uninitializedComposeWriteError } from "../compose/health.js";
 import {
   identifyNodeType,
   lifecycleUnits,
@@ -102,8 +103,16 @@ export class NodeService {
     this.#options = options;
     this.#cache = new NodeCache(this.managedRoot);
   }
+  /** Parent lookup stops at a composed checkout so the host index is not its parent. */
+  #contentRoot(file: string): string {
+    const checkout = innermostComposedCheckout(path.resolve(file));
+    if (checkout && isWithinPath(checkout, this.managedRoot)) return checkout;
+    return this.managedRoot;
+  }
   #boundary(file: string): string {
     file = canonicalPath(checkPath(file));
+    const uninitialized = uninitializedComposeWriteError(file);
+    if (uninitialized) throw new Error(uninitialized);
     if (!isWithinPath(file, this.managedRoot))
       throw new Error(`Node path escapes managedRoot: ${file}`);
     if (!identifyNodeType(file))
@@ -111,7 +120,7 @@ export class NodeService {
     return file;
   }
   #parentNode(file: string): CompositeNode | undefined {
-    return physicalParentNode(file, this.managedRoot);
+    return physicalParentNode(file, this.#contentRoot(file));
   }
   #model(file: string): Model | undefined {
     return modelAt(
@@ -148,7 +157,6 @@ export class NodeService {
     const parent = this.#parentNode(file);
     readOnly ||=
       this.#cache.isReadOnly(file) ||
-      isInsideComposedCheckout(file) ||
       (!!parent && indexContract(parent)?.writable === false);
     if (cached) {
       if (readOnly) this.#cache.markReadOnly(cached);
@@ -177,7 +185,6 @@ export class NodeService {
     const readonly =
       this.#cache.state.get(parent)?.readOnly === true ||
       this.#navigationReadOnly.has(parent) ||
-      parent.mountsReadOnly() ||
       indexContract(parent)?.writable === false ||
       this.#options.readOnlyReference?.(parent, reference, reference.id) === true;
     const file = firstSymlink(reference.id) ? reference.id : canonicalPath(reference.id);
@@ -242,8 +249,7 @@ export class NodeService {
         if (options.excludeRoots?.has(reference.id)) return undefined;
         if (pathHitsExcludedModule(reference.id, scopeDir, options.exclude)) return undefined;
         if (!fs.existsSync(reference.id)) return undefined;
-        const mounted = parent.mountsReadOnly();
-        if (options.includeHarness && !mounted) {
+        if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.
           if (firstSymlink(reference.id, service.managedRoot)) return undefined;
@@ -253,9 +259,7 @@ export class NodeService {
             if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
           }
         }
-        // Composed entries are another repo, even when checked out in-repo as a git submodule.
         readonly =
-          mounted ||
           !isWithinPath(reference.id, service.managedRoot) ||
           service.#referenceReadOnly(parent, reference);
         return reference.id;
@@ -393,7 +397,7 @@ export class NodeService {
   ): CompositeNode | undefined {
     const parent = physicalParent(
       file,
-      this.managedRoot,
+      this.#contentRoot(file),
       (candidate) => plan.has(candidate) || fs.existsSync(candidate),
       (candidate) => plan.get(candidate)?.source ?? readEntry(candidate)?.source,
     );
@@ -473,7 +477,7 @@ export class NodeService {
         fs.existsSync(path.join(node.directoryPath, ENTRY_NAMES.internal)))
     )
       return undefined;
-    const parentPath = physicalParent(node.path, this.managedRoot);
+    const parentPath = physicalParent(node.path, this.#contentRoot(node.path));
     if (!parentPath) return undefined;
     const parent = await this.get(parentPath);
     if (!isComposite(parent)) return undefined;
@@ -577,8 +581,8 @@ export class NodeService {
     const registered = await this.#registered((file) => isWithinPath(file, destRoot));
     registered.set(node.path, node);
     for (const parentPath of [
-      physicalParent(node.path, this.managedRoot),
-      physicalParent(destination, this.managedRoot),
+      physicalParent(node.path, this.#contentRoot(node.path)),
+      physicalParent(destination, this.#contentRoot(destination)),
     ])
       if (parentPath && !registered.has(parentPath)) {
         const parent = await this.get(parentPath);
@@ -589,8 +593,8 @@ export class NodeService {
         const child = await this.#read(file);
         if (child) registered.set(file, child);
       }
-    const oldParent = physicalParent(node.path, this.managedRoot),
-      newParent = physicalParent(destination, this.managedRoot);
+    const oldParent = physicalParent(node.path, this.#contentRoot(node.path)),
+      newParent = physicalParent(destination, this.#contentRoot(destination));
     let group: ChildGroup | undefined,
       reference: NodeReference = referenceOf(node);
     const old = oldParent

@@ -111,4 +111,5 @@ format: ordinary
 - [审阅壳外观 2026\-09\-24 收口](<project_review_shell_chrome_2026_09_24/INDEX.md>) — 改审阅壳外观或信息密度时打开：顶栏左侧是 Edges；项目悬停出 description；卡片以标题为主；空状态列不占宽；桌面右栏是 Markdown 抽屉。不窄于 md 的交互按 ADR 0022。窄于 md 按 ADR 0023 纵向长滚动，不是盖住看板的抽屉。
 - [Skill 独立发版，changelog 按 skill 分](<project_skill_independent_versioning/INDEX.md>) — 决定 changelog、tag、semver 粒度时：每个 skill 一份，不要 skills 总 changelog。
 - [.harness 模块保持同一入口，便于插件化](<project_harness_module_consistency_for_plugins/INDEX.md>) — 新增或改 .harness 模块、或给单个模块加特殊节点时打开：各模块同一套入口 README（可继承定制），不为单个模块发明虚拟节点；Compose 写进 compose/README.md。目标是架构一致、便于后续插件化。
+- [被组合仓库可写，不加挂载机制](<project_compose_checkout_writable/INDEX.md>) — 改 Compose 写入、只读挂载或想加 write/readonly 字段时打开：被组合仓库直接写子模块工作区，不另加机制。决定见 ADR 0045。
 <!-- project-entries-local:end -->

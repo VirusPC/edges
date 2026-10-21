@@ -49,13 +49,31 @@ export function pathHitsExcludedModule(
  * A composed checkout is `<scope>/.harness/compose/<name>/…`.
  * The module entry `<scope>/.harness/compose/README.md` is not a checkout.
  */
+function composedCheckoutAt(parts: string[], index: number): string | undefined {
+  if (parts[index] === ".harness" && parts[index + 1] === "compose" && parts[index + 2] && parts[index + 2] !== ENTRY_NAMES.readme)
+    return parts.slice(0, index + 3).join(sep);
+  return undefined;
+}
+
+/** Outermost `<scope>/.harness/compose/<name>` that contains `file`. */
 export function composedCheckoutRoot(file: string): string | undefined {
   const parts = normalize(file).split(sep);
   for (let i = 0; i < parts.length - 2; i++) {
-    if (parts[i] === ".harness" && parts[i + 1] === "compose" && parts[i + 2] && parts[i + 2] !== ENTRY_NAMES.readme)
-      return parts.slice(0, i + 3).join(sep);
+    const checkout = composedCheckoutAt(parts, i);
+    if (checkout) return checkout;
   }
   return undefined;
+}
+
+/** Innermost checkout containing `file`, so a nested repo keeps its own parent walk. */
+export function innermostComposedCheckout(file: string): string | undefined {
+  const parts = normalize(file).split(sep);
+  let found: string | undefined;
+  for (let i = 0; i < parts.length - 2; i++) {
+    const checkout = composedCheckoutAt(parts, i);
+    if (checkout) found = checkout;
+  }
+  return found;
 }
 
 export function isInsideComposedCheckout(file: string): boolean {

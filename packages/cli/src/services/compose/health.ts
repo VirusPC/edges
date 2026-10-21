@@ -1,7 +1,8 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { ComposeReadmeNode, composeReadmePath, isLegacyComposeHref } from "../../domain/models/compose/compose-readme-node.js";
+import { ComposeReadmeNode, composeReadmePath, isLegacyComposeHref, type ComposeEntry } from "../../domain/models/compose/compose-readme-node.js";
 import { COMPOSED_CHECKOUT_ROOT } from "../../domain/config/layout.js";
+import { isWithinPath } from "../../utils/filesystem.js";
 import { resolveScope } from "../scope.js";
 
 interface EntryLike {
@@ -26,6 +27,39 @@ function notCheckedOut(directory: string): boolean {
     return readdirSync(directory).length === 0;
   } catch {
     return false;
+  }
+}
+
+function checkoutWriteError(composeFile: string, target: string): string | undefined {
+  if (!existsSync(composeFile)) return undefined;
+  let entries: ComposeEntry[];
+  try {
+    entries = new ComposeReadmeNode(composeFile).parse(readFileSync(composeFile, "utf8")).entries();
+  } catch {
+    return undefined;
+  }
+  for (const entry of entries) {
+    const directory = path.resolve(entry.directory);
+    if (!isWithinPath(target, directory) || !notCheckedOut(directory)) continue;
+    return `compose entry ${entry.name} is not checked out at ${entry.href}; run edges compose update --name ${entry.name}`;
+  }
+  return undefined;
+}
+
+/**
+ * Write into a registered checkout whose directory is missing or empty.
+ * A missing compose README, or a reference to a missing node, does not throw:
+ * callers skip that edge. Returns undefined when the write is not inside such a checkout.
+ */
+export function uninitializedComposeWriteError(file: string): string | undefined {
+  const abs = path.resolve(file);
+  let dir = path.dirname(abs);
+  while (true) {
+    const message = checkoutWriteError(path.join(dir, ".harness", "compose", "README.md"), abs);
+    if (message) return message;
+    const parent = path.dirname(dir);
+    if (parent === dir) return undefined;
+    dir = parent;
   }
 }
 

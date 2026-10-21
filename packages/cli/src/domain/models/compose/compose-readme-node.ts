@@ -185,8 +185,8 @@ function singleDirectoryName(name: string): boolean {
 /**
  * Real module entry for Compose: `<scope>/.harness/compose/README.md`.
  * Subclasses ReadmeNode. The compose block is the child list; each child id is
- * the composed repository's `README.md`. Children are a read-only mount and are
- * not descended into (no recursive Compose).
+ * the composed repository's `README.md`. Children are not descended into
+ * (no recursive Compose).
  */
 export class ComposeReadmeNode extends ReadmeNode {
   #items: ComposeItem[] = [];
@@ -194,10 +194,6 @@ export class ComposeReadmeNode extends ReadmeNode {
 
   override childTraversal(): "leaf" {
     return "leaf";
-  }
-
-  override mountsReadOnly(): boolean {
-    return true;
   }
 
   entries(): ComposeEntry[] {
