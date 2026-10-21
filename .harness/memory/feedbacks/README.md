@@ -47,7 +47,7 @@ format: ordinary
 - [叠层 PR：底层 squash 前确认上层已合入](<feedback_stacked_pr_merge_order/INDEX.md>) — 合叠层 PR 或核实修复是否已在 main 时打开：底层 squash 进 main 前确认上层都已合进底层分支，合完把剩余上层改指向 main；PR 显示已合并不等于改动在 main。缘起 \#208/\#211 丢失，见 https://github.com/VirusPC/edges/pull/289。
 - [复盘正文定稿后不改，评论写进同目录 COMMENTS.md](<feedback_retro_comments_in_separate_file/INDEX.md>) — 审阅或补记周复盘时打开：正文定稿后不再改，用户后续评论与进度写同目录 COMMENTS.md；更正往期也在往期目录加 COMMENTS.md，不动往期正文。
 - [调研行业方案先并列多种，不擅自收敛](<feedback_survey_options_before_converging/INDEX.md>) — 用户要行业方案、主流做法或技术选型调研时打开：先并列多种方案并按用户约束逐条评估，不擅自收敛；说「常见」「主流」前要有依据。
-- [CLI 遇到缺失的必需文件就报错，不自动补](<feedback_cli_fail_on_missing_required_files/INDEX.md>) — 改 cli 里读写节点或项目的命令时打开：约定必需的文件缺失时报错并写明路径，不自动生成文件掩盖数据问题；只有显式 create 才新建。
+- [CLI 遇到缺失的必需文件就报错，不自动补](<feedback_cli_fail_on_missing_required_files/INDEX.md>) — 改 cli 里读写节点或项目的命令时打开：读、列表、更新遇到约定必需文件缺失就报错，不补文件。系统一叶子的 create 例外：缺组织清单 README 时先创建再登记，不挂到 AGENTS。
 - [CLI 多子命令一文件一个动词](<feedback_cli_subcommand_files/INDEX.md>) — 新增或修改 cli 的多子命令时：父文件只注册，每个子命令一个文件，commands 层只解析参数并调 Service。
 - [CLI 放 packages/cli/](<feedback_cli_under_extensions/INDEX.md>) — 新增或移动面向 agent 的 CLI 时放 packages/cli/。2026\-10\-20 先翻案到仓库根 cli/，同日 workspace 化后再收进 packages/cli/。
 - [Codex 唤起 skill 用 $ 不是 /](<feedback_codex_invoke_skill_with_dollar/INDEX.md>) — 在 Codex 里触发某个 skill 时用 $skill\-name；/ 是斜杠命令。/skills 只列清单。不要把认不到 skill 当成没装上。

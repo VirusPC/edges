@@ -8,6 +8,8 @@
 
 **Amended by:** [ADR 0036](0036-edges-init-installs-bundled-skills.md) — 无参 `edges init` 的默认集加入 skills；`edges skills init` 在建类型索引之外，还把 npm 包内的 skill 装给本机 agent。下文「不建 user、skills……」「`edges skills init` 只采用 skill 类型」两处以 0036 为准；其余不变。
 
+**Amended by:** [ADR 0046](0046-content-face-org-list.md) — notes/projects 叶子的组织清单是 scope 内容面的 `notes/README.md`、`projects/README.md`。`edges notes init` / `edges projects init` 在 harness 条目之外确保这份内容面清单。下文「只建各自的 harness 组织清单」以 0046 为准。
+
 ## Decision
 
 `edges init [module...]` 只做编排：先做公共的系统入口步骤，再按模块表依次调用各模块自己的 init。不给模块时写 `AGENTS.md`、notes 与 projects 的 `.harness` 组织清单，以及 memory 的 feedback / project / reference。不建 user、skills、tasks、evaluation、observation。`edges init <module>` 可重复，与 `edges <module> init` 写同一批文件。每个模块只创建、只登记自己的材料，不顺手创建别的模块。

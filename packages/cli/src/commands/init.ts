@@ -23,7 +23,8 @@ CREATED WHEN NO MODULE IS GIVEN
   AGENTS.md
   memory types: feedback, project, reference
   skills: managed and referenced type indexes, then install bundled skills
-  harness organization lists: notes, projects
+  harness index entries: notes, projects
+  content-face org lists: <scope>/notes/README.md, <scope>/projects/README.md
 
 NOT CREATED HERE
   tasks (not in the default set; edges tasks init creates only that board)

@@ -68,13 +68,15 @@ export const HARNESS_BOARD_MODULES: readonly HarnessBoardModule[] = [
     module: "projects",
     materialId: "projects",
     title: "projects",
-    description: "项目内容叶子的组织清单。",
+    description: "项目模块的 harness 条目。叶子登记在 scope 的 projects/README.md。",
+    body: "# projects\n\n项目叶子的组织清单是当前 scope 的 `projects/README.md`。本文件只占 harness 材料索引，不登记叶子。\n",
   },
   {
     module: "notes",
     materialId: "notes",
     title: "notes",
-    description: "笔记内容叶子的组织清单。",
+    description: "笔记模块的 harness 条目。叶子登记在 scope 的 notes/README.md。",
+    body: "# notes\n\n笔记叶子的组织清单是当前 scope 的 `notes/README.md`。本文件只占 harness 材料索引，不登记叶子。\n",
   },
 ];
 

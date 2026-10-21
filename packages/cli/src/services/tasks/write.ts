@@ -15,7 +15,9 @@ import {
 import { newTaskStem, taskNameSlug } from "../../domain/models/tasks/slug.js";
 import { parseTaskPriority } from "../../domain/models/tasks/priority.js";
 import { parseTaskProject, projectDirName } from "../../domain/models/tasks/project.js";
-import { ensureProjectMetadata } from "./project-meta.js";
+import { ensureProjectMetadata, ensureTaskProjectReadme } from "./project-meta.js";
+import { physicalParent } from "../node/node-layout.js";
+import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import {
   DEFAULT_TASK_PROJECT,
   TASK_STATUSES,
@@ -135,7 +137,19 @@ export async function createTask(
   const rel = taskRelPath(project, input.status, stem, repoPath);
   const sidecarRel = sidecarRelPath(project, input.status, stem, repoPath);
   const service = taskNodes(repoPath);
-  const node = new TaskNode(taskFile(repoPath, rel));
+  const file = taskFile(repoPath, rel);
+  const expected = path.join(
+    nativeTaskPath(boardRoot(repoPath)),
+    projectDirName(project),
+    ENTRY_NAMES.readme,
+  );
+  if (physicalParent(file, service.managedRoot) !== expected) {
+    throw new TasksError(
+      "VALIDATION_ERROR",
+      `task leaf must register on the project README: ${expected}`,
+    );
+  }
+  const node = new TaskNode(file);
   await service.create(node, {
     name: input.name ?? taskNameSlug(input.title),
     description: input.description ?? input.title,
@@ -288,6 +302,7 @@ export async function ensureTaskDestination(
   writer: BoardWriter,
 ): Promise<void> {
   await ensureProjectMetadata(target, writer, undefined, [project]);
+  await ensureTaskProjectReadme(target, project, writer);
   await writer.mkdirp(statusDir(target, project, status));
 }
 

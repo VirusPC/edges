@@ -59,7 +59,18 @@ const readSource: EntrySource = (file) => {
 function isTypeIndexReadme(file: string, read: EntrySource): boolean {
   return TYPE_DIRECTORY.test(path.dirname(file)) || !!read(file)?.includes(TYPE_HEADER);
 }
-/** Q13: system-one children belong to the README org list; system entries and harness material to AGENTS. */
+/** Note, project, and task leaves, plus the content-face notes/projects org lists. */
+function readmeOnlyChild(child: string): boolean {
+  const type = identifyNodeType(child);
+  if (type === "note" || type === "project" || type === "task") return true;
+  const posix = child.split(path.sep).join("/");
+  if (posix.split("/").includes(".harness")) return false;
+  return (
+    /(?:^|\/)notes\/README\.md$/.test(posix) ||
+    /(?:^|\/)(?<!memory\/)projects\/README\.md$/.test(posix)
+  );
+}
+/** Q13: those children belong to a README org list. Other nodes may still use AGENTS. */
 function parentEntryIn(
   directory: string,
   child: string,
@@ -71,10 +82,14 @@ function parentEntryIn(
   const systemOne =
     path.basename(child) !== ENTRY_NAMES.internal &&
     !path.relative(directory, child).split(path.sep).includes(".harness");
-  if (systemOne && exists(readme) && ENTRIES_MARKER.test(read(readme) ?? ""))
-    return readme;
+  const readmeOrg =
+    exists(readme) &&
+    (ENTRIES_MARKER.test(read(readme) ?? "") || isTypeIndexReadme(readme, read));
+  const readmeOnly = readmeOnlyChild(child);
+  if ((systemOne || readmeOnly) && readmeOrg) return readme;
+  if (readmeOnly) return undefined;
   if (exists(agents)) return agents;
-  return exists(readme) && isTypeIndexReadme(readme, read) ? readme : undefined;
+  return readmeOrg ? readme : undefined;
 }
 export function physicalParent(
   entry: string,

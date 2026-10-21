@@ -98,7 +98,9 @@ test("notes create get update delete and list go through a local leaf", async (t
   const saved = readFileSync(path.join(root, made.path), "utf8");
   assert.match(saved, /^# Hello Note/m);
   assert.match(saved, /custom: kept/);
-  assert.match(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /hello-note\/INDEX\.md/);
+  assert.match(readFileSync(path.join(root, "notes/README.md"), "utf8"), /hello-note\/INDEX\.md/);
+  assert.doesNotMatch(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /hello-note\/INDEX\.md/);
+  assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /INDEX\.md/);
 
   const got = await run(["--scope", root, "notes", "get", made.path], { env: {} });
   assert.equal(got.exitCode, 0, got.stdout);
@@ -123,6 +125,7 @@ test("notes create get update delete and list go through a local leaf", async (t
   const removed = await run(["--scope", root, "notes", "delete", made.path], { env: {} });
   assert.equal(removed.exitCode, 0, removed.stdout);
   assert.equal(existsSync(path.join(root, made.path)), false);
+  assert.doesNotMatch(readFileSync(path.join(root, "notes/README.md"), "utf8"), /hello-note\/INDEX\.md/);
   assert.doesNotMatch(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /hello-note\/INDEX\.md/);
 });
 
