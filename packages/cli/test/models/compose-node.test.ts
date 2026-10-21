@@ -28,7 +28,6 @@ test("compose entry is the real compose/README.md and a ReadmeNode subclass", ()
   assert.equal(readmeModelFor(FILE), ComposeReadmeNode);
   assert.equal(readmeModelFor("/repo/.harness/README.md"), ReadmeNode);
   assert.equal(node.childTraversal(), "leaf");
-  assert.equal(node.mountsReadOnly(), true);
   assert.equal(node.path, FILE);
 });
 

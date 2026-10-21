@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- 被组合仓库可写。删掉 Compose 的只读特例之后，已检出的子模块工作区可以直接写。见 [ADR 0045](../../docs/adr/0045-compose-checkout-writable.md)。
+
 ## [0.2.4] - 2026-10-21
 
 ### Changed

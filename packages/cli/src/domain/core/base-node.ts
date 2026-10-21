@@ -85,10 +85,6 @@ export class BaseNode<
   childTraversal(): "descend" | "leaf" {
     return "descend";
   }
-  /** When true, children loaded through this node are read-only mounts. */
-  mountsReadOnly(): boolean {
-    return false;
-  }
   get isLeaf(): boolean {
     return this.localChildren === undefined && this.children.length === 0;
   }

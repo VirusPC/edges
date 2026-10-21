@@ -7,7 +7,7 @@ import { BaseNode, AgentsNode, SuperAgentsNode } from "../../domain/models/index
 import type { ChildGroup, NodeReference } from "../../domain/models/index.js";
 import type { ScopeTraversalOptions, NodeQueryOptions } from "../../domain/operations/traverse.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
-import { isInsideComposedCheckout, pathHitsExcludedModule } from "../../domain/config/exclude.js";
+import { pathHitsExcludedModule } from "../../domain/config/exclude.js";
 import {
   identifyNodeType,
   lifecycleUnits,
@@ -148,7 +148,6 @@ export class NodeService {
     const parent = this.#parentNode(file);
     readOnly ||=
       this.#cache.isReadOnly(file) ||
-      isInsideComposedCheckout(file) ||
       (!!parent && indexContract(parent)?.writable === false);
     if (cached) {
       if (readOnly) this.#cache.markReadOnly(cached);
@@ -177,7 +176,6 @@ export class NodeService {
     const readonly =
       this.#cache.state.get(parent)?.readOnly === true ||
       this.#navigationReadOnly.has(parent) ||
-      parent.mountsReadOnly() ||
       indexContract(parent)?.writable === false ||
       this.#options.readOnlyReference?.(parent, reference, reference.id) === true;
     const file = firstSymlink(reference.id) ? reference.id : canonicalPath(reference.id);
@@ -242,8 +240,7 @@ export class NodeService {
         if (options.excludeRoots?.has(reference.id)) return undefined;
         if (pathHitsExcludedModule(reference.id, scopeDir, options.exclude)) return undefined;
         if (!fs.existsSync(reference.id)) return undefined;
-        const mounted = parent.mountsReadOnly();
-        if (options.includeHarness && !mounted) {
+        if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.
           if (firstSymlink(reference.id, service.managedRoot)) return undefined;
@@ -253,9 +250,7 @@ export class NodeService {
             if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
           }
         }
-        // Composed entries are another repo, even when checked out in-repo as a git submodule.
         readonly =
-          mounted ||
           !isWithinPath(reference.id, service.managedRoot) ||
           service.#referenceReadOnly(parent, reference);
         return reference.id;

@@ -8,12 +8,12 @@ status: accepted
 
 **Status:** accepted（ADR 0043）
 
-**See also:** ADR 0042（子模块底座；入口、虚拟节点、`--with-composed` 由本 ADR 取代）、ADR 0035（材料索引；「Compose 仍写在 AGENTS」由本 ADR 取代）
+**See also:** ADR 0042（子模块底座；入口、虚拟节点、`--with-composed` 由本 ADR 取代）、ADR 0035（材料索引；「Compose 仍写在 AGENTS」由本 ADR 取代）、ADR 0045（第 9 条「被组合的内容只读」由该 ADR 取代）
 
 ## Decision
 
 1. **没有虚拟 ComposeNode。** 删掉运行时 id `<owner>/.compose/README.md`。Compose 的入口是磁盘上的 `<scope>/.harness/compose/README.md`。
-2. **入口 README 用子类加能力。** `ComposeReadmeNode extends ReadmeNode`（`type` 仍是 `readme`）。它持有 `project-harness-compose` 区块、检出目录与只读挂载，并展开子节点。`models/readme/specialize.ts` 按路径选择子类。这是给别的模块入口留的扩展点，不是插件加载器；本 ADR 不引入插件系统。
+2. **入口 README 用子类加能力。** `ComposeReadmeNode extends ReadmeNode`（`type` 仍是 `readme`）。它持有 `project-harness-compose` 区块与检出目录，并展开子节点。`models/readme/specialize.ts` 按路径选择子类。这是给别的模块入口留的扩展点，不是插件加载器；本 ADR 不引入插件系统。只读挂载由 [ADR 0045](0045-compose-checkout-writable.md) 取代。
 3. **索引。** `.harness/README.md` 像链接 memory / skills / notes / projects 一样链接 `compose/README.md`。`AGENTS.md` 只留硬约束和指向 `.harness/README.md` 的指针，不再写 Compose 区块。
 4. **子节点 id** 是被组合仓库的 `<checkout>/README.md`，不是 `AGENTS.md`。`compose/README.md` 里的 href 相对于 `.harness/compose/`（例如 `<name>/README.md`）。`--path` 仍是相对于 scope 目录的检出目录；写进区块的是该检出的 README，相对 `.harness/compose/`，避免路径叠成 `.harness/compose/.harness/compose/<name>`。
 5. **默认展开。** Compose 与其他模块一样参与 traverse。系统根扫描默认进入 scope 自己的 `.harness/compose/`。被组合仓库自己的 `.harness/compose/` 一律不进入（不递归）。
@@ -21,6 +21,8 @@ status: accepted
 7. **`compose add` / `list` / `update`** 读写 `compose/README.md`。文件或材料索引上的链接缺失时，由这三条命令建出来。日常只使用这三条。
 8. **`edges compose doctor [--apply]`** 只做一次性迁移：把 `AGENTS.md` 的 Compose 区块搬进 `.harness/compose/README.md`，补上索引链接，改写 href，清掉 AGENTS 上的标记。默认只预览，`--apply` 才写。其它文档和测试里的 `--with-composed` 只报告、不改写；`.agents/skills/`、CHANGELOG 和 ADR 不列入。
 9. **被组合的内容只读。** 不递归展开被组合仓库自己的 Compose。磁盘上的子模块路径仍是 `.harness/compose/<name>`。
+
+> 2026-10-21：本条「被组合的内容只读」由 [ADR 0045](0045-compose-checkout-writable.md) 取代。不递归展开被组合仓库自己的 Compose，以及磁盘路径 `.harness/compose/<name>`，仍然有效。
 
 ## Considered Options
 

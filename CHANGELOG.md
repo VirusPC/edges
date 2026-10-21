@@ -17,7 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Compose
 
-- **入口 README：** `.harness` 下每个模块一份入口 README。Compose 不再是 `AGENTS.md` 上的特例，入口是 `.harness/compose/README.md`，由 `.harness/README.md` 链接。`ComposeReadmeNode` 继承 README 节点，负责组合区块、只读挂载和子节点展开。子节点是被组合仓库的 `README.md`。默认就会展开；系统根扫描默认进入本 scope 的 `.harness/compose/`。根级 `--exclude` 可跳过 `compose`、`memory`、`skills`、`notes`、`projects`、`tasks`。一次性迁移用 `edges compose doctor --apply`。doctor 不改写文档里的 `--with-composed`：`.agents/skills/`、CHANGELOG 和 ADR 跳过，其余只在预览里报告。决定见 [ADR 0043](docs/adr/0043-compose-readme-entry.md)。
+- **入口 README：** `.harness` 下每个模块一份入口 README。Compose 不再是 `AGENTS.md` 上的特例，入口是 `.harness/compose/README.md`，由 `.harness/README.md` 链接。`ComposeReadmeNode` 继承 README 节点，负责组合区块和子节点展开。子节点是被组合仓库的 `README.md`。默认就会展开；系统根扫描默认进入本 scope 的 `.harness/compose/`。根级 `--exclude` 可跳过 `compose`、`memory`、`skills`、`notes`、`projects`、`tasks`。一次性迁移用 `edges compose doctor --apply`。doctor 不改写文档里的 `--with-composed`：`.agents/skills/`、CHANGELOG 和 ADR 跳过，其余只在预览里报告。决定见 [ADR 0043](docs/adr/0043-compose-readme-entry.md)。
+- **被组合仓库可写：** 删掉只读特例之后，已检出的子模块工作区可以直接写。提交和推送用原生 git。决定见 [ADR 0045](docs/adr/0045-compose-checkout-writable.md)。
 
 ### 目录布局
 
