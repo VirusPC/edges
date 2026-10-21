@@ -90,7 +90,8 @@ test("notes create and update write inside an initialized composed checkout", as
   assert.equal(made.title, "Inside");
   assert.match(made.path, /^notes\/\d{4}-\d{2}-\d{2}--inside\/INDEX\.md$/);
   assert.equal(existsSync(path.join(brain, made.path)), true);
-  assert.match(readFileSync(path.join(brain, "notes/AGENTS.md"), "utf8"), /inside\/INDEX\.md/);
+  assert.match(readFileSync(path.join(brain, "notes/README.md"), "utf8"), /inside\/INDEX\.md/);
+  assert.doesNotMatch(readFileSync(path.join(brain, "notes/AGENTS.md"), "utf8"), /INDEX\.md/);
   assert.equal(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), hostNotes);
   assert.equal(git(["rev-parse", "HEAD"], brain), head);
   assert.match(git(["status", "--porcelain"], brain), /inside/);
@@ -117,5 +118,6 @@ test("a missing composed README does not block a host note", async (t) => {
   assert.match(created.stderr, /edges compose update --name brain/);
   const made = JSON.parse(created.stdout) as { path: string };
   assert.equal(existsSync(path.join(root, made.path)), true);
-  assert.match(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /INDEX\.md/);
+  assert.match(readFileSync(path.join(root, "notes/README.md"), "utf8"), /INDEX\.md/);
+  assert.doesNotMatch(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /INDEX\.md/);
 });

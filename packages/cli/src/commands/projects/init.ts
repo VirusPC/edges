@@ -8,7 +8,7 @@ const HELP = "See edges projects init --help for usage.\n";
 export function addProjectInitCommand(projects: Command, ctx: CliContext): void {
   projects
     .command("init")
-    .description("Initialize the projects harness list and scope AGENTS.md. Does not read --super.")
+    .description("Initialize the projects harness entry, content-face projects/README.md, and scope AGENTS.md. Does not read --super.")
     .option("--target-dir <directory>", "Explicit target scope (otherwise use --scope or scope discovery)")
     .option("--root-dir <directory>", "Boundary for the scope tree")
     .option("--description <text>", "Description in the parent scope index")

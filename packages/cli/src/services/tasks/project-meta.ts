@@ -375,7 +375,8 @@ export async function ensureProjectMetadata(
     const entry = await resolveProjectEntry(repoPath, id, writer);
     if (!entry.exists) {
       const agents = path.join(boardRoot(repoPath), projectDirName(id), ENTRY_NAMES.internal);
-      // An existing AGENTS.md without README.md is a data error, not a project to repair.
+      // A discovered AGENTS-only directory stays a system entry. The task write path
+      // creates that project's README before registering a leaf.
       if (await writer.exists(agents)) continue;
       await service.create(new ReadmeNode(entry.abs), { body: renderProjectReadme({
           title: seedTitleFor(id),
@@ -387,6 +388,40 @@ export async function ensureProjectMetadata(
   }
 
   return refreshProjectIndex(repoPath, writer, additional, service);
+}
+
+/** The project README that owns task leaves. Created when a write would otherwise have no org list. */
+export async function ensureTaskProjectReadme(
+  repoPath: BoardTarget,
+  id: TaskProjectId,
+  writer: BoardWriter,
+  service = projectNodes(repoPath),
+): Promise<void> {
+  await prepareProjectWrite(repoPath, service);
+  const entry = await resolveProjectEntry(repoPath, id, writer);
+  if (!entry.exists) {
+    let title = seedTitleFor(id);
+    let description = seedDescriptionFor(id);
+    const agents = path.join(boardRoot(repoPath), projectDirName(id), ENTRY_NAMES.internal);
+    if (await writer.exists(agents)) {
+      try {
+        const parsed = parseProjectAgents(await writer.readFile(agents));
+        title = parsed.title;
+        description = parsed.description;
+      } catch {
+        // The system entry stays as it is. The new README still gets a seed title.
+      }
+    }
+    await service.create(new ReadmeNode(entry.abs), {
+      body: renderProjectReadme({ title, description }),
+    }, { indexGroup: "local" });
+    await refreshProjectIndex(repoPath, writer, [id], service);
+    return;
+  }
+  const node = await service.get(entry.abs, ReadmeNode);
+  if (node && !ENTRIES_MARKER.test(node.body)) {
+    await service.update(node, { body: `${node.body.trimEnd()}\n\n${EMPTY_ENTRIES}` });
+  }
 }
 
 export async function listProjects(

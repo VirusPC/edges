@@ -50,6 +50,7 @@ import {
   type InitModuleName,
 } from "./modules.js";
 import { migrateScopeMaterialIndex } from "./migrate-scope-readme.js";
+import { contentOrgListPath, ensureContentOrgList } from "../node/content-org-list.js";
 
 export type { InitMemoryOptions };
 
@@ -186,6 +187,14 @@ async function ensureHarnessBoards(
     const rel = relative(target, absPath);
     if ((await ensureHarnessBoard(target, board, service)) === "created") created.push(rel);
     else preserved.push(rel);
+    if (board.module === "notes" || board.module === "projects") {
+      const face = contentOrgListPath(target, board.module);
+      const faceRel = relative(target, face);
+      const existed = existsSync(face);
+      await ensureContentOrgList(service, face, board.module);
+      if (existed) preserved.push(faceRel);
+      else created.push(faceRel);
+    }
     // NodeService skips the tasks board. Link that README here.
     if (board.materialId === "tasks") {
       await linkScopeReadme(target, {

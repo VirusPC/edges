@@ -724,7 +724,13 @@ export class NodeService {
     const units = this.#unit(node).filter((unit) => fs.existsSync(unit));
     const removed = (file: string) => units.some((unit) => isWithinPath(file, unit));
     const plan = new Map<string, Planned>();
-    for (const entry of (await this.#registered()).values())
+    const registered = await this.#registered();
+    const parentPath = physicalParent(node.path, this.managedRoot);
+    if (parentPath && !registered.has(parentPath)) {
+      const parent = await this.get(parentPath);
+      if (parent) registered.set(parentPath, parent);
+    }
+    for (const entry of registered.values())
       if (!removed(entry.path) && isComposite(entry)) {
         const draft = clone(entry);
         const deleted = draft.children.filter((ref) => removed(ref.id));

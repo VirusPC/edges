@@ -80,6 +80,21 @@ test("physicalParent: a project-entries README is the parent of its task leaves"
   );
 });
 
+test("task create into an AGENTS-only project creates the project README and does not register the leaf on AGENTS", async (t) => {
+  const repo = await readmeBoard();
+  t.after(() => rm(repo, { recursive: true, force: true }));
+  write(repo, ".harness/tasks/legacy/AGENTS.md", scopeAgents());
+  const boardBefore = await read(repo, ".harness/tasks/AGENTS.md");
+  const legacyAgents = await read(repo, ".harness/tasks/legacy/AGENTS.md");
+  const created = await cli(repo, ["create", "--title", "Orphan", "--project", "legacy"]);
+  const readme = await read(repo, ".harness/tasks/legacy/README.md");
+  assert.match(readme, /project-entries-local:start/);
+  assert.ok(readme.includes(created.stem), readme);
+  assert.equal(await read(repo, ".harness/tasks/legacy/AGENTS.md"), legacyAgents);
+  assert.equal(await read(repo, ".harness/tasks/AGENTS.md"), boardBefore);
+  assert.ok(!(await read(repo, "AGENTS.md")).includes(created.stem));
+});
+
 test("task create into a README-backed project updates the project README, not the board AGENTS", async (t) => {
   const repo = await readmeBoard();
   t.after(() => rm(repo, { recursive: true, force: true }));

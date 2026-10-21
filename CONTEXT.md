@@ -17,8 +17,8 @@ _避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNod
 _避免使用_：仅指文件夹、磁盘上未登记的 md
 
 **组织清单（README.md）**：
-用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `project-entries-local` / `project-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。在「真系统」视角下这些是系统一材料；经 `SuperAgentsNode` 遍历时，同一批材料被当作**虚拟系统的系统二**展开。edges 作用域的 **`.harness/README.md`** 是该层的**材料索引**（标准组织清单，无 YAML frontmatter）：本层各 harness 材料挂在它的 entries 下，由上层 `AGENTS.md` 本层以单条组成指向它。见 ADR 0035。
-_避免使用_：把叶子正文写成 README、把 README 当成真系统入口、无 entries 的普通包说明自动当节点、把 README 组成写成 project-harness-*、下层内容挂成 INDEX/SKILL、在 AGENTS 与 `.harness/README.md` 双写同一份材料索引
+用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `project-entries-local` / `project-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。在「真系统」视角下这些是系统一材料；经 `SuperAgentsNode` 遍历时，同一批材料被当作**虚拟系统的系统二**展开。edges 作用域的 **`.harness/README.md`** 是该层的**材料索引**（标准组织清单，无 YAML frontmatter）：本层各 harness 材料挂在它的 entries 下，由上层 `AGENTS.md` 本层以单条组成指向它。Note 与 Project 叶子的组织清单是 scope 内容面的 `notes/README.md`、`projects/README.md`：文件不在就创建；已有散文且没有 entries 标记时只补标记，不改写原文。这两类叶子，以及 Task 叶子，不登记到任何 `AGENTS.md`。Task 叶子登记在所属 Task Project 的 `README.md`。`.harness/notes/README.md` 与 `.harness/projects/README.md` 是材料索引里的条目，不是那份叶子清单。见 ADR 0035、ADR 0046。
+_避免使用_：把叶子正文写成 README、把 README 当成真系统入口、无 entries 的普通包说明自动当节点、把 README 组成写成 project-harness-*、下层内容挂成 INDEX/SKILL、在 AGENTS 与 `.harness/README.md` 双写同一份材料索引、把 Note/Project/Task 叶子登记进 AGENTS.md、缺组织清单时回落到 AGENTS.md
 
 **内容叶子入口（INDEX.md）**：
 Task / Note / Memory 等的入口文件，名为 `INDEX.md`。Skill 仍为 `SKILL.md`。有无子项仍看是否出现组成登记，不靠文件名分 Internal / Leaf。

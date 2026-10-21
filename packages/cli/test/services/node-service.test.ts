@@ -140,6 +140,10 @@ test("post-commit temporary cleanup failure recovers created file rather than le
 test("structured create dispatches task defaults and refuses conflicts before changing the input", async (t) => {
   const { file, write, service } = fixture(t);
   write("AGENTS.md", index());
+  write(
+    "tasks/README.md",
+    "# Tasks\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n",
+  );
   const task = new TaskNode(file("tasks/backlog/one/index.md"));
   assert.equal(
     await service.create(task, { title: "One", body: "body" }, { indexGroup: "local" }),
@@ -147,7 +151,8 @@ test("structured create dispatches task defaults and refuses conflicts before ch
   );
   assert.equal(task.title, "One");
   assert.equal(task.status, "backlog");
-  assert.equal(task.parent?.id, file("AGENTS.md"));
+  assert.equal(task.parent?.id, file("tasks/README.md"));
+  assert.doesNotMatch(fs.readFileSync(file("AGENTS.md"), "utf8"), /index\.md/);
   const fresh = new LeafNode(task.path);
   await assert.rejects(service.create(fresh, { body: "wrong" }, { indexGroup: "local" }), /exists/);
   assert.equal(fresh.body, "");
@@ -648,18 +653,20 @@ test('moving an unregistered node does not invent a descendant registration',asy
 test('generic query supports all types and explicit task-only deferred execution', async t => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(tmpdir(), 'generic-query-')));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const note = path.join(root, 'notes/example/index.md');
+  // Text leaves still hang on AGENTS. Note, project, and task leaves do not, so this
+  // fixture uses a text leaf to exercise type grouping and deferred body reads.
+  const page = path.join(root, 'pages/example/index.md');
   const service = new NodeService({ managedRoot: root });
   await service.create(new AgentsNode(path.join(root, 'AGENTS.md')), {});
-  await service.create(new NoteNode(note), { body: '# Note\n' }, { indexGroup: 'local' });
+  await service.create(new LeafNode(page), { body: '# Page\n' }, { indexGroup: 'local' });
   let seen = 0;
   const all = service.query(root, { includeHarness: true })
     .map(node => { seen += 1; return node; }).groupBy(node => node.type)
     .mapValues(nodes => nodes.length);
   assert.equal(seen, 0);
-  assert.equal((await all.value()).note, 1);
+  assert.equal((await all.value()).text, 1);
   assert.ok(seen > 0);
-  fs.writeFileSync(note, '---\nbroken: [\n---\n');
+  fs.writeFileSync(page, '---\nbroken: [\n---\n');
   // A fresh Service observes disk changes without a cached body masking type filtering.
   const fresh = new NodeService({ managedRoot: root });
   assert.deepEqual(await fresh.query(root, {

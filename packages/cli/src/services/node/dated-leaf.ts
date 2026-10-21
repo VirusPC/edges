@@ -8,7 +8,11 @@ import { ProjectNode } from "../../domain/models/projects/project-node.js";
 import { localDateYmd } from "../../utils/date.js";
 import { isWithinPath } from "../../utils/filesystem.js";
 import { parseMetadata } from "../metadata.js";
+import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
+import { contentOrgListPath, ensureContentOrgList } from "./content-org-list.js";
 import type { Model } from "./node-layout.js";
+import { physicalParent } from "./node-layout.js";
+import { collectSystemRoots } from "./system-roots.js";
 import { openNodeSession, scopeRelativePath } from "./scope-session.js";
 import { buildSystemForest } from "./system-forest-service.js";
 import { scopeTraversal } from "../../domain/operations/traverse.js";
@@ -126,11 +130,17 @@ export async function createDatedLeaf<T extends TitledLeaf>(
   spec: DatedLeafSpec<T>,
   input: DatedLeafFields,
 ): Promise<{ path: string; title: string }> {
-  const { scope, service } = openNodeSession(env);
+  const { scope, managedRoot, service } = openNodeSession(env);
   const metadata = parseMetadata(input.metadata);
   const composed = composeLeaf(spec, path.join(scope, ENTRY_NAMES.leaf), input.title, input.body);
   const now = new Date();
   const file = path.join(scope, spec.folder, `${localDateYmd(now)}--${titleSlug(composed.title, now)}`, ENTRY_NAMES.leaf);
+  const org = contentOrgListPath(scope, spec.folder);
+  await ensureContentOrgList(service, org, spec.folder);
+  const parent = physicalParent(file, managedRoot);
+  if (parent !== org) {
+    throw new Error(`${spec.label} must register on ${spec.folder}/README.md`);
+  }
   const node = new spec.Model(file);
   await service.create(node, {
     body: composed.markdown,
@@ -186,17 +196,44 @@ export async function deleteDatedLeaf<T extends TitledLeaf>(
   return { path: scopeRelativePath(scope, file) };
 }
 
+async function orgListLeaves<T extends TitledLeaf>(
+  service: ReturnType<typeof openNodeSession>["service"],
+  directories: readonly string[],
+  spec: DatedLeafSpec<T>,
+): Promise<T[]> {
+  const out: T[] = [];
+  for (const dir of directories) {
+    const readme = await service.get(contentOrgListPath(dir, spec.folder), ReadmeNode);
+    if (!readme) continue;
+    for (const child of readme.children) {
+      const node = await service.get(child.id, spec.Model);
+      if (node) out.push(node);
+    }
+  }
+  return out;
+}
+
 export async function listDatedLeaves<T extends TitledLeaf>(
   env: NodeJS.ProcessEnv,
   spec: DatedLeafSpec<T>,
   reach: LeafReach,
 ): Promise<DatedLeafItem[]> {
   const { scope, service } = openNodeSession(env);
-  const nodes = reach.all
+  const fromTree = reach.all
     ? (await buildSystemForest(scope, { includeSuper: reach.super === true, exclude: reach.exclude, form: "independent" })).flat()
     : await service
       .query(scope, { types: [spec.queryType], ...scopeTraversal(reach) })
       .value();
+  const directories = reach.all
+    ? [scope, ...collectSystemRoots(scope, reach.exclude).map((entry) => path.dirname(entry))]
+    : [scope];
+  const nodes = [...fromTree];
+  const seen = new Set(nodes.map((node) => node.path));
+  for (const node of await orgListLeaves(service, directories, spec)) {
+    if (seen.has(node.path)) continue;
+    seen.add(node.path);
+    nodes.push(node);
+  }
   return nodes.flatMap((node) => {
     if (!(node instanceof spec.Model)) return [];
     return [{
