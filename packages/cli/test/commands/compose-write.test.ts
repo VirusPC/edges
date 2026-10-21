@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { uninitializedComposeWriteError } from "../../src/services/compose/health.js";
 import { run } from "../../src/program.js";
 
 function agents(local = "", descendants = ""): string {
@@ -105,25 +104,6 @@ test("notes create and update write inside an initialized composed checkout", as
   assert.equal(git(["rev-parse", "HEAD"], brain), head);
 });
 
-test("writing into an empty composed checkout names the update command", async (t) => {
-  const root = repo(t, "compose-empty-");
-  const { brain } = hostWithBrain(root);
-  mkdirSync(brain);
-  const before = readFileSync(path.join(root, ".harness/compose/README.md"), "utf8");
-  const hostNotes = readFileSync(path.join(root, "notes/AGENTS.md"), "utf8");
-  const created = await run(
-    ["--scope", brain, "notes", "create", "--title", "Nope", "--body", "should not land"],
-    { env: {} },
-  );
-  assert.notEqual(created.exitCode, 0);
-  const body = JSON.parse(created.stdout) as { status: string; reason: string };
-  assert.equal(body.status, "failed");
-  assert.match(body.reason, /compose entry brain is not checked out at brain\/README\.md; run edges compose update --name brain/);
-  assert.equal(readdirSync(brain).length, 0);
-  assert.equal(readFileSync(path.join(root, ".harness/compose/README.md"), "utf8"), before);
-  assert.equal(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), hostNotes);
-});
-
 test("a missing composed README does not block a host note", async (t) => {
   const root = repo(t, "compose-missing-");
   hostWithBrain(root);
@@ -138,17 +118,4 @@ test("a missing composed README does not block a host note", async (t) => {
   const made = JSON.parse(created.stdout) as { path: string };
   assert.equal(existsSync(path.join(root, made.path)), true);
   assert.match(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /INDEX\.md/);
-});
-
-test("uninitialized checkout errors follow the registered name, including a custom path", () => {
-  const root = realpathSync(mkdtempSync(path.join(tmpdir(), "compose-custom-")));
-  try {
-    hostWithBrain(root, "vendor/brain");
-    mkdirSync(path.join(root, "vendor/brain"), { recursive: true });
-    const message = uninitializedComposeWriteError(path.join(root, "vendor/brain/notes/x/INDEX.md"));
-    assert.match(message ?? "", /compose entry brain is not checked out at \.\.\/\.\.\/vendor\/brain\/README\.md; run edges compose update --name brain/);
-    assert.equal(uninitializedComposeWriteError(path.join(root, "notes/x/INDEX.md")), undefined);
-  } finally {
-    rmSync(root, { recursive: true, force: true });
-  }
 });

@@ -8,7 +8,6 @@ import type { ChildGroup, NodeReference } from "../../domain/models/index.js";
 import type { ScopeTraversalOptions, NodeQueryOptions } from "../../domain/operations/traverse.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { pathHitsExcludedModule } from "../../domain/config/exclude.js";
-import { uninitializedComposeWriteError } from "../compose/health.js";
 import {
   identifyNodeType,
   lifecycleUnits,
@@ -105,8 +104,6 @@ export class NodeService {
   }
   #boundary(file: string): string {
     file = canonicalPath(checkPath(file));
-    const uninitialized = uninitializedComposeWriteError(file);
-    if (uninitialized) throw new Error(uninitialized);
     if (!isWithinPath(file, this.managedRoot))
       throw new Error(`Node path escapes managedRoot: ${file}`);
     if (!identifyNodeType(file))
