@@ -6,7 +6,7 @@
 
 ### Changed
 
-- 被组合仓库可写。删掉 Compose 的只读特例之后，`notes` / `memory` / `tasks` 等走 NodeService 的写命令会把文件直接写进已检出的子模块工作区 `.harness/compose/<name>`（条目用了相对 `--path` 时，写进那个检出目录）。父索引停在该仓库自己的作用域，不改宿主仓库的索引。CLI 仍只落盘，不 commit、不 push。目录不存在或为空时写入失败，并提示 `edges compose update --name <name>`；缺失的节点或引用照旧跳过。不新增挂载字段、worktree 或同步命令。Compose 仍不展开被组合仓库自己的 `.harness/compose/`。见 [ADR 0045](../../docs/adr/0045-compose-checkout-writable.md)。
+- 被组合仓库可写。删掉 Compose 的只读特例之后，已检出的子模块工作区可以直接写。目录不存在或为空时写入失败，并提示 `edges compose update --name <name>`。见 [ADR 0045](../../docs/adr/0045-compose-checkout-writable.md)。
 
 ## [0.2.4] - 2026-10-21
 

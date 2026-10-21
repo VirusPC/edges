@@ -317,7 +317,7 @@ edges --scope <directory> compose update --remote --name brain
 
 去掉一条：在 `.harness/compose/README.md` 的 Compose 区块删掉那一行；要连子模块一起删时，跑 `git submodule deinit -f <path>` 和 `git rm <path>` 再提交。`ComposeReadmeNode.removeChild` 仍在，只是不再有 CLI 入口。
 
-不递归：只看当前仓库自己的条目。`update` 不初始化被组合仓库里的子模块。默认查询会展开 `compose/README.md`，子节点是被组合仓库的 `README.md`，不展开该仓库自己的 Compose。系统森林扫描默认进入 scope 自己的 `.harness/compose/`，把其中带 project-harness 标记的 `AGENTS.md` 当作系统根；被组合仓库内部的 `.harness/compose/` 不扫描。`--exclude compose` 同时跳过扫描和遍历。两个仓库互相登记也只到一层。已检出的仓库可写：`notes` / `memory` / `tasks` 等写命令把文件直接写进该工作区，父索引用那个仓库自己的，不改宿主仓库的索引。CLI 不在子模块里 commit 或 push。条目目录不存在或为空时，写入失败并提示 `edges compose update --name <name>`；缺了的节点或引用跳过，不挡住其余命令。
+不递归：只看当前仓库自己的条目。`update` 不初始化被组合仓库里的子模块。默认查询会展开 `compose/README.md`，子节点是被组合仓库的 `README.md`，不展开该仓库自己的 Compose。系统森林扫描默认进入 scope 自己的 `.harness/compose/`，把其中带 project-harness 标记的 `AGENTS.md` 当作系统根；被组合仓库内部的 `.harness/compose/` 不扫描。`--exclude compose` 同时跳过扫描和遍历。两个仓库互相登记也只到一层。被组合的仓库可以直接写，提交和推送用原生 git。条目目录不存在或为空时，写入失败并提示 `edges compose update --name <name>`；缺了的节点或引用跳过，不挡住其余命令。
 
 提示：条目目录不存在或是空的（子模块还没初始化）时，`compose list` 和默认会读到该条目的命令在 stderr 打 `warning: compose entry <name> is not checked out at <href>; run edges compose update --name <name>`。`--exclude compose` 时不打这行。旧的 `~/...` / 绝对路径条目照样能读，并提示不带 `--path` 用同一个名字重新 `compose add --remote ...`，把旧行换成 `<name>/README.md`。
 

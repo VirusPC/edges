@@ -1,12 +1,12 @@
 ---
 name: edges-compose
 description: 把外部 harness 仓库挂到当前 scope 时使用。教 AI 用 edges compose add、list、update 三个日常命令（名字对应 git submodule）。底层是 git submodule，默认装到仓内 .harness/compose/<name>，登记写在 .harness/compose/README.md。add 必须带 --description。推送、去掉条目用原生 git 和手改 compose/README.md。doctor 只做从 AGENTS.md 迁出的一次性迁移。不经手 git token。
-version: 0.3.0
+version: 0.2.1
 ---
 
 # edges compose
 
-本 skill 是 beta（`0.3.0`）。人和有 shell 的 Agent 用 [`edges` CLI](../../cli/README.md) 的 `edges compose` 把外部 harness 仓库登记进当前 scope 的 `.harness/compose/README.md`。这里只说明何时调用、命令怎么写。登记走 CLI，不要自己跑 `git submodule add` 再手写区块。
+本 skill 是 beta（`0.2.1`）。人和有 shell 的 Agent 用 [`edges` CLI](../../cli/README.md) 的 `edges compose` 把外部 harness 仓库登记进当前 scope 的 `.harness/compose/README.md`。这里只说明何时调用、命令怎么写。登记走 CLI，不要自己跑 `git submodule add` 再手写区块。
 
 底层是 git submodule：被组合的仓库默认装在当前仓库里的 `.harness/compose/<name>`。区块里的链接相对于 `.harness/compose/`，缺省是 `<name>/README.md`。换一台机器 clone 主仓库后跑一次 `edges compose update` 就能用。
 
@@ -35,13 +35,7 @@ version: 0.3.0
 5. **推送用原生 git，且只在用户要求时做。** CLI 不提供 push。用户要发布被组合仓库里的改动时，在子模块目录里用普通 git：子模块默认是 detached HEAD，先 `git -C .harness/compose/<name> switch <分支>`，在分支上提交，再 `git -C .harness/compose/<name> push`。用户没要求发布时不要 push。
 6. **不递归。** 只看当前仓库自己登记的条目。被组合仓库自己的 Compose 条目不会被初始化，也不会被展开。两个仓库互相登记也只展开一层。不要手动跑 `git submodule update --recursive`。默认就会展开当前仓库的 Compose；不想看时用 `--exclude compose`。
 
-## 写入被组合仓库
-
-笔记、任务、项目记忆不走 `compose`。那些命令照常使用，把作用域指到已经检出的子模块：`--scope .harness/compose/<name>`，或者当前目录已经在那个工作区里。文件直接写进子模块工作区。CLI 不 commit、不 push。要发布时仍按上面的硬规则，在子模块里用原生 git。
-
-子模块目录不存在或是空的时，写命令失败，原因里有 `run edges compose update --name <name>`。先 `update`，再写。某一条的文件还不在时，列出或写入其它内容会跳过这条，不因此整单失败。
-
-没有单独的可写开关。登记了并且已经检出，就按那个仓库自己的 `.harness` 来写。
+被组合的仓库可以直接写，提交和推送用原生 git。
 
 ## 常见流程
 

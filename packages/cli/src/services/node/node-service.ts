@@ -7,7 +7,7 @@ import { BaseNode, AgentsNode, SuperAgentsNode } from "../../domain/models/index
 import type { ChildGroup, NodeReference } from "../../domain/models/index.js";
 import type { ScopeTraversalOptions, NodeQueryOptions } from "../../domain/operations/traverse.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
-import { innermostComposedCheckout, pathHitsExcludedModule } from "../../domain/config/exclude.js";
+import { pathHitsExcludedModule } from "../../domain/config/exclude.js";
 import { uninitializedComposeWriteError } from "../compose/health.js";
 import {
   identifyNodeType,
@@ -103,12 +103,6 @@ export class NodeService {
     this.#options = options;
     this.#cache = new NodeCache(this.managedRoot);
   }
-  /** Parent lookup stops at a composed checkout so the host index is not its parent. */
-  #contentRoot(file: string): string {
-    const checkout = innermostComposedCheckout(path.resolve(file));
-    if (checkout && isWithinPath(checkout, this.managedRoot)) return checkout;
-    return this.managedRoot;
-  }
   #boundary(file: string): string {
     file = canonicalPath(checkPath(file));
     const uninitialized = uninitializedComposeWriteError(file);
@@ -120,7 +114,7 @@ export class NodeService {
     return file;
   }
   #parentNode(file: string): CompositeNode | undefined {
-    return physicalParentNode(file, this.#contentRoot(file));
+    return physicalParentNode(file, this.managedRoot);
   }
   #model(file: string): Model | undefined {
     return modelAt(
@@ -397,7 +391,7 @@ export class NodeService {
   ): CompositeNode | undefined {
     const parent = physicalParent(
       file,
-      this.#contentRoot(file),
+      this.managedRoot,
       (candidate) => plan.has(candidate) || fs.existsSync(candidate),
       (candidate) => plan.get(candidate)?.source ?? readEntry(candidate)?.source,
     );
@@ -477,7 +471,7 @@ export class NodeService {
         fs.existsSync(path.join(node.directoryPath, ENTRY_NAMES.internal)))
     )
       return undefined;
-    const parentPath = physicalParent(node.path, this.#contentRoot(node.path));
+    const parentPath = physicalParent(node.path, this.managedRoot);
     if (!parentPath) return undefined;
     const parent = await this.get(parentPath);
     if (!isComposite(parent)) return undefined;
@@ -581,8 +575,8 @@ export class NodeService {
     const registered = await this.#registered((file) => isWithinPath(file, destRoot));
     registered.set(node.path, node);
     for (const parentPath of [
-      physicalParent(node.path, this.#contentRoot(node.path)),
-      physicalParent(destination, this.#contentRoot(destination)),
+      physicalParent(node.path, this.managedRoot),
+      physicalParent(destination, this.managedRoot),
     ])
       if (parentPath && !registered.has(parentPath)) {
         const parent = await this.get(parentPath);
@@ -593,8 +587,8 @@ export class NodeService {
         const child = await this.#read(file);
         if (child) registered.set(file, child);
       }
-    const oldParent = physicalParent(node.path, this.#contentRoot(node.path)),
-      newParent = physicalParent(destination, this.#contentRoot(destination));
+    const oldParent = physicalParent(node.path, this.managedRoot),
+      newParent = physicalParent(destination, this.managedRoot);
     let group: ChildGroup | undefined,
       reference: NodeReference = referenceOf(node);
     const old = oldParent

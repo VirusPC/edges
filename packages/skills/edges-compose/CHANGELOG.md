@@ -7,11 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.3.0] - 2026-10-21
+## [0.2.1] - 2026-10-21
 
 ### Changed
 
-- 被组合仓库可写。笔记、任务、记忆仍用各自的命令；作用域指到已检出的子模块时，文件直接落在子模块工作区。CLI 不 commit、不 push。目录不存在或为空时写入失败，并提示 `edges compose update --name <name>`。不新增挂载种类或同步命令。Compose 仍不递归。
+- 被组合的仓库可以直接写，提交和推送用原生 git。
 
 ## [0.2.0] - 2026-10-20
 

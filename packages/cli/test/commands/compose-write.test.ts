@@ -4,9 +4,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpath
 import { tmpdir } from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { NoteNode } from "../../src/domain/models/index.js";
 import { uninitializedComposeWriteError } from "../../src/services/compose/health.js";
-import { NodeService } from "../../src/services/node/node-service.js";
 import { run } from "../../src/program.js";
 
 function agents(local = "", descendants = ""): string {
@@ -140,24 +138,6 @@ test("a missing composed README does not block a host note", async (t) => {
   const made = JSON.parse(created.stdout) as { path: string };
   assert.equal(existsSync(path.join(root, made.path)), true);
   assert.match(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /INDEX\.md/);
-});
-
-test("a host NodeService write inside a checkout stays on that repo", async (t) => {
-  const root = repo(t, "compose-scope-");
-  const { brain } = hostWithBrain(root);
-  put(brain, "AGENTS.md", agents("", "- [notes](notes/AGENTS.md) — notes"));
-  put(brain, "notes/AGENTS.md", agents(""));
-  put(brain, "README.md", "# Brain\n");
-  const note = path.join(brain, "notes/example/INDEX.md");
-  const service = new NodeService({ managedRoot: root });
-  await service.create(new NoteNode(note), { body: "# Example\n" });
-  assert.match(readFileSync(path.join(brain, "notes/AGENTS.md"), "utf8"), /example\/INDEX\.md/);
-  assert.doesNotMatch(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /example/);
-  assert.doesNotMatch(readFileSync(path.join(root, ".harness/README.md"), "utf8"), /example/);
-  const loaded = await service.get(note, NoteNode);
-  assert.ok(loaded);
-  await service.update(loaded, { body: "# Example\n\nEdited\n" });
-  assert.match(readFileSync(note, "utf8"), /Edited/);
 });
 
 test("uninitialized checkout errors follow the registered name, including a custom path", () => {
