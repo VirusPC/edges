@@ -12,7 +12,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: viruspc
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-20T06:50:03+00:00'
+  edges-updated-at: '2026-10-21T01:21:40+00:00'
 ---
 
 根 README 重写为面向外部访客的门面与地图：任何目录都能配一套 harness，大脑也被看作一个虚拟目录；经验按「谁 × 在哪」沉淀；本仓是作者大脑的 harness 仓库。具体规范下放到所属目录 README。
@@ -132,4 +132,4 @@ README 描述新增内容与后续维护的目标约定，集中用一处说明�
 
 ## 2026-10-20 翻案
 
-框架仓不再存放 `posts/`。对外博客与看板项目 `site-and-content` 在个人仓 [VirusPC/edges-brain-viruspc](https://github.com/VirusPC/edges-brain-viruspc)。根 `AGENTS.md` 已去掉「AI 不得改 posts/」。上文「`posts/README.md` 只能由用户手改」只对个人仓仍成立。
+框架仓不再存放 `posts/`。对外博客与看板项目 `site-and-content` 在用户的个人大脑仓。根 `AGENTS.md` 已去掉「AI 不得改 posts/」。上文「`posts/README.md` 只能由用户手改」只对个人仓仍成立。

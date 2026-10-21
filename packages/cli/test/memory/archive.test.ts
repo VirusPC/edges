@@ -13,7 +13,7 @@ import { backupUserMemory, restoreUserMemory } from '../../src/services/memory/a
 
 const users = '.harness/memory/users';
 async function fixture(t: TestContext) {
-  const root = await realpath(await mkdtemp(path.join(tmpdir(), 'edges-private-archive-')));
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), 'user-memory-archive-')));
   t.after(() => rm(root, { recursive: true, force: true }));
   const source = path.join(root, 'source'), destination = path.join(root, 'destination');
   await mkdir(path.join(source, users, 'assets'), { recursive: true });

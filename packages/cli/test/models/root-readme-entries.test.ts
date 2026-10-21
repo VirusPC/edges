@@ -11,7 +11,7 @@ const rootReadme = join(repoRoot, "README.md");
 test("repo root README project-entries-local lists no posts or personal content dirs", () => {
   const node = new ReadmeNode(rootReadme).parse(readFileSync(rootReadme, "utf8"));
   const ids = node.localChildren.map((c) => c.id);
-  // posts/ and site-and-content left for VirusPC/edges-brain-viruspc on 2026-10-20.
+  // posts/ and site-and-content left for the personal brain repo on 2026-10-20.
   assert.equal(ids.some((id) => id.endsWith("/posts/README.md")), false);
   for (const dir of ["tasks", "notes", "memory", "retrospectives", "teaching", "edges", "posts"]) {
     assert.equal(ids.some((id) => id.endsWith(`/${dir}/README.md`)), false, dir);
