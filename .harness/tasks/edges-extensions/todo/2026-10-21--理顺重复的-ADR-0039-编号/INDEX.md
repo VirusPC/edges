@@ -24,3 +24,8 @@ description: 理顺重复的 ADR 0039 编号
 - 改编号后同步更新 CHANGELOG、README、其它 ADR/文档/代码注释里的引用
 
 细节 grill 后补
+
+## 进展
+
+- 2026-10-21：0039 留给 `docs/adr/0039-compose-worktree-and-sync.md`。pi client 沙箱读取 ADR 用 git mv 改为 `docs/adr/0044-pi-client-sandbox-read-scope.md`，accepted 与决策正文未改。评测 README 与 retrieval-eval 任务日志里指向该决策的编号改为 ADR 0044。CHANGELOG 未列这两份 ADR，未补条目。状态仍为 todo。
+- PR：https://github.com/VirusPC/edges/pull/23
