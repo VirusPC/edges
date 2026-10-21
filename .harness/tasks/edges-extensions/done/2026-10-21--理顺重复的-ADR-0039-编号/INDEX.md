@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: edges-extensions
-  edges-updated-at: '2026-10-21T01:27:34.122Z'
+  edges-updated-at: '2026-10-21T01:44:25.998Z'
   edges-title: 理顺重复的 ADR 0039 编号
-  edges-tasks-status: todo
+  edges-tasks-status: done
   edges-task-priority: none
   edges-task-assignee: 全栈开发专家
 name: 理顺重复的 ADR 0039 编号
@@ -27,5 +27,5 @@ description: 理顺重复的 ADR 0039 编号
 
 ## 进展
 
-- 2026-10-21：0039 留给 `docs/adr/0039-compose-worktree-and-sync.md`。pi client 沙箱读取 ADR 用 git mv 改为 `docs/adr/0044-pi-client-sandbox-read-scope.md`，accepted 与决策正文未改。评测 README 与 retrieval-eval 任务日志里指向该决策的编号改为 ADR 0044。CHANGELOG 未列这两份 ADR，未补条目。状态仍为 todo。
-- PR：https://github.com/VirusPC/edges/pull/23
+- 2026-10-21：0039 留给 `docs/adr/0039-compose-worktree-and-sync.md`。pi client 沙箱读取 ADR 用 git mv 改为 `docs/adr/0044-pi-client-sandbox-read-scope.md`，accepted 与决策正文未改。评测 README 与 retrieval-eval 任务日志里指向该决策的编号改为 ADR 0044。CHANGELOG 未列这两份 ADR，未补条目。
+- PR https://github.com/VirusPC/edges/pull/23 已 squash 合入 main（cffe757）；`docs/adr` 里现在只有一份 0039，pi client 沙箱读取 ADR 为 0044。卡已挪到 done。
