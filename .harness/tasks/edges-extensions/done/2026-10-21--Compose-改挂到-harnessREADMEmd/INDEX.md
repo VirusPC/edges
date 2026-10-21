@@ -33,4 +33,6 @@ description: 每个模块一份入口 README。Compose 入口是 .harness/compos
 - 去掉虚拟 ComposeNode；Compose 入口改为真实文件 `.harness/compose/README.md`（ComposeReadmeNode 继承 ReadmeNode），子节点是被组合仓的 README.md；`.harness/README.md` 链到这个入口；AGENTS.md 只留约束和指针。
 - 默认展开 Compose，forest 遍历不跳过；全局 `--exclude <模块>` 取代 `--with-composed`；新增一次性迁移命令 `compose doctor [--apply]`；edges-compose skill 升到 0.2.0。
 - 验证：packages/cli typecheck 通过，测试 1108/1108 通过；在工作空间副本上单独试迁移通过；私有工作空间已迁移，默认遍历能到两个组合进来的 README，`--exclude compose` 能排除。
-- 遗留（待定）：工作空间里旧的 edges-compose skill 0.1.0 需要重装；框架仓里约 20 处历史文字还提到个人仓名。
+- 遗留已全部完成：
+  - 工作空间里的 edges-compose skill 已升到 0.2.0。
+  - 框架仓里历史文字提到的个人仓名已清掉，见 https://github.com/VirusPC/edges/pull/22 （e16b736）；tsc 干净，CLI 测试 1108/1108，retrieval eval 42/42。retrieval eval 现在默认指向 example/personal-brain，跑全量时要设 `EDGES_RETRIEVAL_CORPUS_URL`。
