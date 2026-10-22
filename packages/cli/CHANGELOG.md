@@ -4,6 +4,12 @@
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-10-22
+
+### Fixed
+
+- `edges notes create`、`edges projects create` 与 `edges tasks create` 在内容面组织清单缺失时创建 README 再登记叶子，这些叶子不再回落到 `AGENTS.md`。见 [ADR 0046](../../docs/adr/0046-content-face-org-list.md)。
+
 ### Changed
 
 - 被组合仓库可写。删掉 Compose 的只读特例之后，已检出的子模块工作区可以直接写。见 [ADR 0045](../../docs/adr/0045-compose-checkout-writable.md)。
