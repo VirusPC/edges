@@ -17,4 +17,5 @@
 - [框架附带可接入评测能力含\_experiment\_webhook\_适配层](<backlog/2026-10-25--%E6%A1%86%E6%9E%B6%E9%99%84%E5%B8%A6%E5%8F%AF%E6%8E%A5%E5%85%A5%E8%AF%84%E6%B5%8B%E8%83%BD%E5%8A%9B%E5%90%AB-Experiment-Webhook-%E9%80%82%E9%85%8D%E5%B1%82/INDEX.md>) — AGIS/Edges 应附带一套评测能力，让接入方能方便看见系统在自有场景下变好还是变坏；统一 Experiment Webhook 适配层是落地入口之一。
 - [评测实验程序\_experiment\_webhook用\_dataset\_跑实验](<backlog/2026-10-25--%E8%AF%84%E6%B5%8B%E5%AE%9E%E9%AA%8C%E7%A8%8B%E5%BA%8F-Experiment-Webhook%E7%94%A8-Dataset-%E8%B7%91%E5%AE%9E%E9%AA%8C/INDEX.md>) — 把可复用实验 runner 与统一 Experiment Webhook 收进框架：Webhook 用用户 Dataset 触发并跑实验。
 - [评测\_skill收集用户数据并产生\_dataset](<backlog/2026-10-25--%E8%AF%84%E6%B5%8B-Skill%E6%94%B6%E9%9B%86%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E5%B9%B6%E4%BA%A7%E7%94%9F-Dataset/INDEX.md>) — 框架附带评测 skill：在用户场景下收集数据并落到 Dataset，供后续实验消费。
+- [cli评测\_experiment\_webhook\_服务启动入口](<backlog/2026-10-25--CLI%E8%AF%84%E6%B5%8B-Experiment-Webhook-%E6%9C%8D%E5%8A%A1%E5%90%AF%E5%8A%A8%E5%85%A5%E5%8F%A3/INDEX.md>) — edges CLI 提供启动评测相关长驻服务（含 Experiment Webhook）的入口，接入方不必手写 systemd 命令。
 <!-- project-entries-local:end -->
