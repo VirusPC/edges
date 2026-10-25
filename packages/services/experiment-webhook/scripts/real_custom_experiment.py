@@ -1,7 +1,8 @@
-"""Check self-hosted Langfuse reachability and print the UI trigger checklist.
+"""Check self-hosted Langfuse reachability and point at the live-trigger note.
 
 Does not register a Custom Experiment URL and does not start a tunnel.
 Secrets and the instance hostname are not printed.
+The signed POST that counts for this PR is recorded in REAL-CUSTOM-EXPERIMENT.md.
 
     PYTHONPATH=. python3 scripts/real_custom_experiment.py
 """
@@ -59,11 +60,18 @@ def main() -> int:
     total = meta.get("totalItems") if isinstance(meta, dict) else None
     print(f"dataset {dataset_name} readable totalItems={total}")
     tunnel = shutil.which("cloudflared")
-    print(f"cloudflared={'found' if tunnel else 'not-installed'}")
-    print("inbound Custom Experiment: not run")
+    local_bin = Path.home() / ".local" / "bin" / "cloudflared"
+    if tunnel:
+        cloudflared = "found"
+    elif local_bin.is_file() and os.access(local_bin, os.X_OK):
+        cloudflared = "found-off-path"
+    else:
+        cloudflared = "not-installed"
+    print(f"cloudflared={cloudflared}")
+    print("this script does not send a Custom Experiment POST")
     print(
-        "blocker: this process is not registered as the dataset remote URL; "
-        "the public dataset API does not set that URL (PATCH returned 405 on 2026-10-25)"
+        "acceptance: signed POST through a quick tunnel, then Langfuse dataset and experiment APIs; "
+        "UI click deferred (public dataset PATCH 405, tRPC remote-experiment routes 401 without a UI session)"
     )
     print(f"checklist: {CHECKLIST}")
     return 0
