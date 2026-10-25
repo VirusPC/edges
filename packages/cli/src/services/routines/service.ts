@@ -131,11 +131,23 @@ export async function updateRoutine(env: NodeJS.ProcessEnv, target: string, inpu
   if (input.description === undefined && input.body === undefined && metadata === undefined) throw new Error("update must be --description, --body, or --metadata");
   const { scope, service, node } = await resolveRoutine(env, target, reach);
   if (metadata?.name !== undefined && metadata.name !== node.name) throw new Error("routine name is stable and cannot be updated");
+  const parent = await service.get(routineOrg(node.path), ReadmeNode);
+  if (!parent) throw new Error(`Missing routine organization entry: ${routineOrg(node.path)}`);
   const updated = await service.update(node, {
     ...(input.description !== undefined ? { description: input.description } : {}),
     ...(input.body !== undefined ? { body: input.body } : {}),
     ...(metadata ? { metadata } : {}),
   });
+  const registered = parent.children.find((child) => child.id === updated.path);
+  if (registered && registered.description !== updated.description) {
+    const refresh = (children: typeof parent.localChildren) => children.map((child) =>
+      child.id === updated.path ? { ...child, description: updated.description } : child,
+    );
+    await service.update(parent, {
+      localChildren: refresh(parent.localChildren),
+      descendantChildren: refresh(parent.descendantChildren),
+    });
+  }
   return { name: updated.name, path: scopeRelativePath(scope, updated.path) };
 }
 

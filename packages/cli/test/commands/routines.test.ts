@@ -77,6 +77,22 @@ test("routine CRUD preserves generic frontmatter and Markdown and indexes the de
   assert.doesNotMatch(readFileSync(path.join(root, ".harness/routines/README.md"), "utf8"), /daily-review\/INDEX\.md/);
 });
 
+test("routine updates refresh only its indexed description, including metadata updates", async (t) => {
+  const root = scope(t);
+  await initRoutines({ targetDir: root });
+  await createRoutine(env(root), { name: "daily", description: "Old summary" });
+  await createRoutine(env(root), { name: "other", description: "Unrelated summary" });
+  const file = path.join(root, ".harness/routines/README.md");
+  const original = `${readFileSync(file, "utf8")}\nPreserved explanatory text and [external link](https://example.com/).\n`;
+  writeFileSync(file, original);
+  await cli(root, ["routines", "update", "daily", "--description", "New summary"]);
+  assert.equal(readFileSync(file, "utf8"), original.replace("Old summary", "New summary"));
+  await cli(root, ["routines", "update", "daily", "--metadata", "description=Metadata summary"]);
+  assert.equal(readFileSync(file, "utf8"), original.replace("Old summary", "Metadata summary"));
+  assert.equal((await getRoutine(env(root), "daily", {})).description, "Metadata summary");
+  assert.equal((await getRoutine(env(root), "other", {})).description, "Unrelated summary");
+});
+
 test("super selects the flat routine index; all combines forest roots without duplicates", async (t) => {
   const root = scope(t);
   await initRoutines({ targetDir: root });
