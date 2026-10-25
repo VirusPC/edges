@@ -1,8 +1,8 @@
 ---
 name: project_root_readme_direction
 description: >-
-  修改根 README 或推进按模块拆 skill 时打开：2026-10-26
-  用户要求系统重组，先讲设计思考、十个模块的用例与协作，再安排上手和导航；保留标语，开发/部署/历史分流到对应文档，不往受管模块索引塞正文。旧首屏与章节安排不再限制本次重组。
+  修改根 README 或推进按模块拆 skill 时打开：先讲设计思考、十个模块的用例与协作，再引导通过 Agent 接入和对话使用，不放手动 CLI
+  实践教程；保留标语与配图，开发/部署/历史分流到对应文档，不往受管模块索引塞正文。旧首屏与章节安排不再限制本次重组。
 metadata:
   edges-title: 根 README：harness 任何目录的对外门面
   edges-type: project
@@ -10,7 +10,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: VirusPC
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-26T02:24:31+08:00'
+  edges-updated-at: '2026-10-26T02:27:24+08:00'
 ---
 
 根 README 是 Edges 框架面向外部访客的门面与地图：任何目录都能配一套 harness，大脑也被看作一个虚拟目录；经验按「谁 × 在哪」沉淀。文档要让读者理解各模块的设计思考和用例，再找到具体用法。具体规范保留在所属能力文档。
@@ -26,11 +26,12 @@ metadata:
 **How to apply:**
 
 - README 先回答使用者遇到的问题与获得的价值，再解释设计理由、模块与用例，提供贯穿场景、可操作的上手入口及导航。具体组织由本次文档实现承接，不把助手拟定的逐句文案标成用户已确认。
+- 用户明确要求删除根 README 的手动实践部分：系统通过 Agent 使用，上手应集中于让 Agent 接入和通过对话表达需求，不在首页教授安装命令、手动创建笔记或任务等 CLI 操作。命令参考仍由能力文档承接。
 - 覆盖 Notes、Projects、Tasks、Memory、Skills、Compose、Routines、Observation、Evaluation、Artifacts，并说明目录与作用域、递归索引、Markdown/Git、CLI/Skill/MCP 这些共同基础。
 - 用户进一步希望 README 有漂亮的配图，帮助外部访客理解并愿意使用。配图应服务于系统价值与模块关系的表达；具体画风和布局属于实现选择，尚非用户指定规范。
 - 优先澄清模块职责与用例，再据此收敛操作模块的 skill；本次文档整理没有完成 skill 重构任务。
 - 根 README 保留设计概览，细节链接能力文档、CONTEXT 和 ADR。部署、开发、历史与完整贡献约束移到对应能力文档或 CONTRIBUTING，并保留导航；迁出内容先确认去处，不能因精简而丢失必要信息。
-- `.harness` 下受管模块 README 仍承担索引职责，不向这些清单塞说明文字。快速开始命令应实测或与现行实现核对，说明已覆盖的入口与实际接入条件。
+- `.harness` 下受管模块 README 仍承担索引职责，不向这些清单塞说明文字。Agent 接入说明应与现行实现核对，说明已覆盖的入口与实际接入条件。
 
 ## 已定（2026-10-08，用户确认）
 

@@ -131,9 +131,7 @@ flowchart TB
 
 ## 开始使用
 
-### 让 Agent 帮你接入
-
-把下面这句话发给你的 Agent：
+把下面这句话发给你正在使用的 Agent，让它帮你接入：
 
 ```text
 读 https://raw.githubusercontent.com/VirusPC/edges/main/packages/skills/edges-onboarding/SKILL.md ，帮我接入 edges。
@@ -141,30 +139,7 @@ flowchart TB
 
 接入流程会检查 Node.js 与 Git，在你选择的目录初始化，并验证内容能写入和读回。让 Agent 在这个目录工作，并加载该目录的 `AGENTS.md`，即可沿入口发现相关材料。客户端配置方式见[接入技能](packages/skills/edges-onboarding/SKILL.md)。
 
-### 手动开始：保存第一条笔记
-
-需要 **Node.js 22.20 及以上**和 **Git**。在你想使用 Edges 的项目或知识目录中执行：
-
-```bash
-npm install -g @viruspc/edges
-cd <你的目录>
-edges --scope . init -- -g -y
-
-edges --scope . notes create --title "第一条笔记" --body "记下一次尝试和所得。"
-edges --scope . notes list
-```
-
-默认初始化 Memory、Skills、Notes、Projects。`--` 后的 `-g -y` 将随包技能安装到用户 Agent 目录，并跳过安装确认。内容写在选定目录，本地内容变更可按你的 Git 流程审阅与保存。
-
-### 再加一个任务看板
-
-```bash
-edges --scope . tasks init
-edges --scope . tasks create --title "验证一个想法" --project default
-edges --scope . tasks list
-```
-
-后续按需要采用其他模块：组合已有仓库用 [`edges compose`](packages/skills/edges-compose/SKILL.md)，记录例行工作用 [`edges routines init`](packages/skills/edges-routines/SKILL.md)。观测、评测与预览各有接入步骤，见上面的模块入口。完整命令见 [CLI 文档](packages/cli/README.md)或 `edges --help`。
+接入后，直接通过对话使用 Edges：让 Agent 记下这次讨论、把一个想法整理成任务、查找过去的决策，或将有效做法沉淀为技能。Agent 沿着目录入口与 Skills 使用相应能力，你通过对话和产物审阅推进工作。
 
 ## 公开实践
 
