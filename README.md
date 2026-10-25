@@ -15,6 +15,8 @@ harness 就是一组 Markdown 文件加 Git。仓库里的那套，给 Cursor、
 - **任何人**：既是个人的 harness，也是团队的 harness，取决于目录的共享范围。
 - **任何 Agent**：不与 Codex、Claude Code、Grok Bot 等任何 Agent 绑定。记忆、技能、任务看板、笔记——跟随仓库的多 Agent 多人协作平台。一切尽在掌控之中。
 - **知识透明、零依赖、零运维**：知识就是 Git 仓库里的纯 Markdown，人和 Agent 都能直接读、直接审，每次改动都有 diff 可查。核心功能只需要 git 和 edges CLI，不用数据库、服务器或 SaaS 账号，也没有要部署、要运维的服务。
+- **可观测**：一次任务里 Agent 实际读了什么、做了什么，可以留下来回头看。
+- **可评估**：同一批题可以再跑一遍，用来看这次改动有没有让结果变好。
 - **超级个体**：个人第二大脑，认知复利系统。持续快速地提升自己，实现个人大脑的快速进化。
 
 经验在这几层之间循环，越滚越大：
@@ -65,6 +67,40 @@ edges --scope . tasks list
 
 把外部 harness 仓库挂进当前目录用 `edges compose`，步骤见 [`edges-compose`](packages/skills/edges-compose/SKILL.md)。完整命令见 [`packages/cli/README.md`](packages/cli/README.md)，或运行 `edges --help`。
 
+### 可观测与评估
+
+记笔记、记任务按上面做即可。想看见 Agent 怎么被用，或者想用同一批题看改动有没有变好，再用下面两条。
+
+**可观测**看的是一次次真实使用。脱敏后的运行记录和指标笔记在 [`packages/observation/`](packages/observation/README.md)。没有单独的 `edges observation` 命令。要把会话接到 Langfuse，用随 npm 包装上的技能；还没确定是哪一种表面时，先打开 [`langfuse-agent-tracing`](packages/skills/langfuse-agent-tracing/SKILL.md)，它只帮你选：
+
+- 本机 Codex、Cursor、Claude Code、OpenCode、Pi：[`langfuse-local-agent-tracing`](packages/skills/langfuse-local-agent-tracing/SKILL.md)
+- Codex Cloud：[`langfuse-codex-cloud-tracing`](packages/skills/langfuse-codex-cloud-tracing/SKILL.md)
+- Cursor Cloud Agents：[`langfuse-cursor-cloud-tracing`](packages/skills/langfuse-cursor-cloud-tracing/SKILL.md)
+- Grok Bot 的会话导出：[`langfuse-grokbot-tracing`](packages/skills/langfuse-grokbot-tracing/SKILL.md)
+
+密钥和实例地址只放在你自己的环境里。`edges init` 会把这些技能和其它随包技能一起装上。
+
+**评估**看的是同一批题再跑一遍，结果有没有变好。用例和报告在 [`packages/evaluation/`](packages/evaluation/README.md)。要从 Langfuse 的 Custom Experiment 打到本机，进程在本仓 [`packages/services/evaluation`](packages/services/evaluation/README.md)，不在 `npm install -g` 的安装包里。先按下面的「参与开发」克隆并构建，然后在这个目录里用构建出来的 `edges`。
+
+第一次要它留在这台机器上、一直接着实验：
+
+```bash
+pnpm --filter @viruspc/edges exec -- edges config init
+pnpm --filter @viruspc/edges exec -- edges evaluation server install
+pnpm --filter @viruspc/edges exec -- edges evaluation server start
+pnpm --filter @viruspc/edges exec -- edges evaluation server status
+```
+
+`edges config init` 写成一份 `~/.config/edges/edges.env`。预览服务和评测服务都读这一份。以前单独的预览配置，只在这份还不存在时被抄进来一次。`install` 只登记，登记完还不会自己跑；要后台一直跑，再用不带 `--dev` 的 `start`。
+
+只想看着这次输出、结束进程就停：
+
+```bash
+pnpm --filter @viruspc/edges exec -- edges evaluation server start --dev
+```
+
+它在前台跑。服务起来之后，在 Langfuse 里按数据集名字发起实验，就会跑本仓已经登记的实验。
+
 ## 本仓与个人大脑仓
 
 本仓 `VirusPC/edges` 只放 Edges 框架本身：
@@ -74,12 +110,14 @@ edges --scope . tasks list
 | [`packages/cli/`](packages/cli/) | 面向 agent 的 CLI（命令名 `edges`，npm 包 `@viruspc/edges`） |
 | [`packages/skills/`](packages/skills/) | 对外分发、随 npm 包装进安装包的 skill 真源。本仓用 `pnpm skills:link` 链到 [`.agents/skills`](.agents/skills)。本仓维护用的技能在 [`.harness/skills`](.harness/skills)，构建时拷进包内的副本是 `packages/cli/skills/`（不入库） |
 | [`packages/apps/`](packages/apps/) | 可跨作用域复用的对外应用，目前是任务审阅页 |
-| [`packages/services/`](packages/services/) | 接入 Edges 的常驻 HTTP 进程，目前是 Artifacts 预览 |
+| [`packages/services/`](packages/services/) | 接入 Edges 的常驻 HTTP 进程：Artifacts 预览，以及评测服务 `edges evaluation server` |
+| [`packages/evaluation/`](packages/evaluation/README.md) | 可复现的评测：同一批题再跑，看有没有变好 |
+| [`packages/observation/`](packages/observation/README.md) | 看系统怎么被用：脱敏运行记录、指标笔记，以及把轨迹送到 Langfuse |
 | [`packages/mcp-servers/`](packages/mcp-servers/) | 给没有 shell 的宿主用的 MCP server |
 | [`packages/system-prompt/`](packages/system-prompt/) | 接入新 Agent 时取用的 system prompt 片段 |
 | [`docs/`](docs/) | ADR、架构与迁移说明 |
 | [`scripts/`](scripts/README.md) | 初始化、构建、迁移等维护脚本 |
-| [`.harness/`](.harness/) | 本仓自身的维护记忆、技能与任务看板。评测与观测在 `packages/evaluation/`、`packages/observation/` |
+| [`.harness/`](.harness/) | 本仓自身的维护记忆、技能与任务看板 |
 
 2026-10-20 起这些接入目录直接放在仓库根，不再套 `extensions/`。旧路径对照见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。空占位 `docs/`、`tools/`、`subagents/`（当时在 `extensions/` 下）已删除；`new-server/` 与 `others/` 从本仓删除，由个人仓另行放进 `shared-extensions/`。
 
@@ -109,7 +147,8 @@ pnpm build && pnpm test
 - [`docs/architecture.md`](docs/architecture.md)：内部架构思想。
 - [`docs/recursive-layout-migration.md`](docs/recursive-layout-migration.md)：目录升级与本机私有材料迁移。
 - [`CHANGELOG.md`](CHANGELOG.md)：仓库级变更记录，tag 使用 `vX.Y.Z`；对外 skill 各自独立 semver；`shared-extensions/` 已随个人大脑搬到用户的个人大脑仓。
-- [`scripts/`](scripts/README.md)、[`packages/evaluation/`](packages/evaluation/README.md)、[`packages/observation/`](packages/observation/README.md)：维护脚本、评测与观测。
+- [`scripts/`](scripts/README.md)：维护脚本。
+- [`packages/evaluation/`](packages/evaluation/README.md)、[`packages/observation/`](packages/observation/README.md)：评测与观测。第一次怎么跑见[可观测与评估](#可观测与评估)。
 
 ## 隐私与脱敏
 

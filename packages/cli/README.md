@@ -288,15 +288,17 @@ init 管理客户端配置，publish/delete 调用预览服务并返回 JSON。s
 
 ### 评测服务：evaluation
 
+服务代码在本仓 [`packages/services/evaluation`](../services/evaluation/README.md)，不在 npm 安装包里。在克隆下来的本仓里，用这里构建出的 `edges`（`pnpm --filter @viruspc/edges exec -- edges`）。全局 `npm install -g` 的那份用来记笔记和装技能。
+
+第一次要它留在这台机器上、一直接着实验：先 `edges config init`，再 `install`（只登记，不启动），再用不带 `--dev` 的 `start`。只想看着这次输出、结束进程就停，用 `start --dev`，它在前台跑。配置是 `~/.config/edges/edges.env`。
+
 ```bash
 edges config init
 edges evaluation server install
 edges evaluation server start
-edges evaluation server start --dev
 edges evaluation server status
+edges evaluation server start --dev
 ```
-
-`install` 安装并 enable user systemd unit，不启动。默认 `start` 走这个 unit。`start --dev` 在前台阻塞。配置是 `~/.config/edges/edges.env`。
 
 ### 统一配置：config
 
