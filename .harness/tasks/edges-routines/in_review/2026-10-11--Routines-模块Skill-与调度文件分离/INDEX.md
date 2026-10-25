@@ -2,7 +2,7 @@
 metadata:
   edges-type: task
   edges-task-project: edges-routines
-  edges-updated-at: '2026-10-25T17:02:55.173Z'
+  edges-updated-at: '2026-10-25T17:05:54.893Z'
   edges-title: Routines 模块：记录定义供外部平台接入
   edges-tasks-status: in_review
   edges-task-priority: none
@@ -74,7 +74,7 @@ Spec：本任务前三轮已确认决定与 project_routines_from_brain_practice
 - [x] Task 1：框架能力。创建 domain/models/routines/routine-node.ts、services/routines/service.ts、commands/routines.ts 与六个动词文件；更新 layout、models 导出与 modelAt、init modules/catalog、program 写锁、exclude/查询归类和 schema 入口。接口：createRoutine(env, {name, description, body?, metadata?, super?})；getRoutine(env,target,reach)；listRoutines(env,reach)；updateRoutine(env,target,fields,reach)；deleteRoutine(env,target,reach)；initRoutines(options)。名称稳定 kebab-case，目录无日期和 Project 分组。内容类型为 routine；body 不解析平台日程。显式路径只能操作对应 routine INDEX，不误操作别类节点。创建/更新/删除索引随 NodeService 同步。删除同目录 Skill 遵循既有目录生命周期，外置 Skill 不动。
 - [x] Task 2：说明与模板。新增 edges-routines Skill（初版0.1.0及changelog）；更新框架/CLI README、领域模型文档和根 CHANGELOG。示例只包含通用 name/description、Markdown 日程及Skill链接；写清默认来源分支最新、可指定ref、每轮读取、失败停止报告、平台另行配置。叶子带示例不是自动装入的个人例程。
 - [x] Task 3：公开 brain 适配。独立 worktree，迁移前输出冲突预览；用 NodeService/CLI迁日复盘和周复盘，入口统一INDEX.md；会话导出仅迁定义，引用现有外置Skill，保持代码/submodule。更新有效入口与当前任务/记忆引用，保留历史正文。脚本可重复执行且冲突时退出。
-- [ ] Task 4：Validate。有意义的集成测试覆盖init幂等、CRUD与索引、稳定名称、scope/super/all/compose/exclude、同名歧义、非法路径及只读不补缺文件、同目录与外置Skill生命周期。运行类型检查、相关CLI回归、三例程读取/链接检查；独立代码审阅并修复。完成后提交可审阅PR与Artifacts页面，不自动merge或改平台配置。
+- [x] Task 4：Validate。有意义的集成测试覆盖init幂等、CRUD与索引、稳定名称、scope/super/all/compose/exclude、同名歧义、非法路径及只读不补缺文件、同目录与外置Skill生命周期。运行类型检查、相关CLI回归、三例程读取/链接检查；独立代码审阅并修复。完成后提交可审阅PR与Artifacts页面，不自动merge或改平台配置。
 
 命令验证形状：
 ```sh
@@ -95,4 +95,12 @@ edges --scope <scope> --all routines list
 - 独立审阅已闭环：描述变更同步索引；损坏同级记录时写入前失败；已登记外部引用（含软链接）可读，未登记外部路径与越界写入拒绝。
 - 实现取舍：routines 的 --super 显式遍历根 routines/README.md，保持其他模块共享 Super 行为不变；只增加 NodeService.query 对明确 README 根的支持。
 - 验证环境使用系统临时目录的真实路径；macOS /var 软链接与工作区内 Git 继承分别会触发既有测试前提限制。
-- 边界：叶子与索引仍使用既有 NodeService 分次写入，未验证磁盘故障注入；未发布 npm、未修改平台触发器。框架 PR 与 Artifacts 链接待交付后补齐。
+- 边界：叶子与索引仍使用既有 NodeService 分次写入，未验证磁盘故障注入；未发布 npm、未修改平台触发器。框架 PR 与 Artifacts 链接见下方，当前等待用户审阅。
+
+
+**交付：**
+
+- 框架 PR：[VirusPC/edges #49](https://github.com/VirusPC/edges/pull/49)。
+- 公开脑适配 PR：[VirusPC/edges-brain-viruspc #384](https://github.com/VirusPC/edges-brain-viruspc/pull/384)。
+- [实现审阅页](https://edges.viruspc.tech/artifacts/70e368dd-ce1c-4556-b497-a5a5141bcc89/)：已浏览器验证，包含命令、迁移布局、真实代码片段、测试结果与两仓 PR。有效期至 2026-10-27 01:05（Asia/Shanghai）。
+- HTML 源文件和打包件保存在工作区 .work/routines-module/review/implementation.html 与 implementation.packed.html；Markdown 任务记录为正本。
