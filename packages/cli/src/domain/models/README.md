@@ -246,6 +246,8 @@ AgentsNode 将索引链接变成具有绝对入口 ID 的 NodeReference；Agents
 
 ## Schema 与模型的关系
 
+`RoutineNode` 是 `BaseNode` 的业务子类，入口为 `routines/<name>/INDEX.md`，可位于 scope 的 `.harness` 下。它校验稳定名称与非空说明，正文保留平台日程及 Skill 引用；不解析执行计划，也没有运行状态。同目录 Skill 是独立节点身份，但与该目录共享移动和删除生命周期；外置 Skill 只是引用。
+
 Schema 描述对外的数据合同，不直接扫描包含方法、路径与关系的完整节点类。当前接入的是 TaskDoc，而不是“所有节点都已有 Schema”。
 
 ```mermaid

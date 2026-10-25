@@ -3,7 +3,7 @@
  * and placeHarnessMaterial is the only reader of harness-materials.json paths.
  * notes is not a child of memory.
  */
-export const INIT_MODULE_NAMES = ["memory", "skills", "tasks", "notes", "projects"] as const;
+export const INIT_MODULE_NAMES = ["memory", "skills", "tasks", "notes", "projects", "routines"] as const;
 
 export type InitModuleName = (typeof INIT_MODULE_NAMES)[number];
 
@@ -12,6 +12,7 @@ export const MODULE_RUN_ORDER: readonly InitModuleName[] = [
   "memory",
   "skills",
   "tasks",
+  "routines",
   "projects",
   "notes",
 ];
@@ -48,7 +49,7 @@ export const SCOPE_README_ENTRY_DESCRIPTION =
   "本层 harness 材料的组织清单。各材料只在这里登记。";
 
 export type HarnessBoardModule = {
-  module: "notes" | "projects" | "tasks";
+  module: "notes" | "projects" | "tasks" | "routines";
   materialId: string;
   title: string;
   description: string;
@@ -57,6 +58,12 @@ export type HarnessBoardModule = {
 
 /** projects, then notes, matching the old board list. tasks is its own module. */
 export const HARNESS_BOARD_MODULES: readonly HarnessBoardModule[] = [
+  {
+    module: "routines",
+    materialId: "routines",
+    title: "Routines",
+    description: "例行任务定义；执行与调度由外部平台负责。",
+  },
   {
     module: "tasks",
     materialId: "tasks",

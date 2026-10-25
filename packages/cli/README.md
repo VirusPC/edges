@@ -269,6 +269,27 @@ edges skills delete <name-or-path>
 
 `skills create` 与 `skills update` 写入当前 scope 的 `skills/managed/<name>/SKILL.md`（真系统在 `<scope>/.harness/` 下）。`edges memory remember` 仍可另写 skill 类记忆，两者并列。没有 `edges skill` 别名。
 
+### 例程：routines
+
+```bash
+edges --scope /absolute/project routines init
+edges --scope /absolute/project routines create daily-review --description "每日复盘" --body "# 日复盘"
+edges --scope /absolute/project routines list
+edges --scope /absolute/project routines get daily-review
+edges --scope /absolute/project routines update daily-review --body "更新后的日程与 Skill 引用"
+edges --scope /absolute/project routines delete daily-review
+edges --scope /absolute/project --super routines list
+edges --scope /absolute/project --all routines list
+```
+
+`routines init`（或 `init routines`）显式采用模块，无参 `init` 的默认集不变。记录位于 `<scope>/.harness/routines/<name>/INDEX.md`，`--super` 创建与查询 `<scope>/routines/`；init 与其他模块一样只初始化真实 scope，不读 `--super`。名称为稳定的小写 kebab-case（1–64 字符），不加日期或 Project 分组。
+
+`create` 需要名称和非空 `--description`，可带 `--body` 与重复的 `--metadata key=value`；`update` 修改说明、正文或 metadata。`get/update/delete` 接受名称或准确的入口路径，同名不唯一就报错。`list` 使用通用 `--filter` / `--group-by`；`--all` 只读，`--exclude routines` 排除模块。索引随 NodeService 的写入更新；查询沿已登记关系读取，不扫描目录补录孤立文件。
+
+`INDEX.md` 用通用 name/description 元数据与 Markdown 正文，记录平台日程并链接同目录或外置 Skill。CLI 不解释 cron，不统一不同平台的日程格式。删除 routine 会处理整个目录，包括同目录 Skill；引用的外置 Skill 保留原处。
+
+平台接入约定是：仓库作为配置依据；每次运行前读取记录和 Skill；默认读取来源仓库默认分支最新内容，明确指定的 branch/tag/commit 优先；读取失败停止本次并报告。修改日程后须另行更新平台配置。Edges 提供记录管理，不提供调度器、启停、缓存或平台连接器。完整示例见 [`edges-routines`](../skills/edges-routines/SKILL.md)。
+
 <a id="artifacts"></a>
 
 ### 预览发布：artifacts
@@ -347,7 +368,7 @@ edges --scope <directory> compose update --remote --name brain
 
 `edges compose doctor` 只做迁移：把还写在 `AGENTS.md` 上的区块搬进 `.harness/compose/README.md`，补上材料索引链接，改写 href。默认只打印会改什么，`--apply` 才写。其它文件里的 `--with-composed` 只报告、不改写；`.agents/skills/`、CHANGELOG 和 `docs/adr/` 不列入。日常修改用 `add` / `list` / `update`。
 
-根级 `--exclude <modules>` 与 `--scope` 同级，逗号分隔，可重复。允许 `compose, memory, skills, notes, projects, tasks`。未知名字直接报错。与 `--types` 正交。没有 `--only`，也没有 `--with-composed`。
+根级 `--exclude <modules>` 与 `--scope` 同级，逗号分隔，可重复。允许 `compose, memory, skills, notes, projects, tasks, routines`。未知名字直接报错。与 `--types` 正交。没有 `--only`，也没有 `--with-composed`。
 
 <a id="json-schema-contracts"></a>
 

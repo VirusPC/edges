@@ -112,4 +112,5 @@ format: ordinary
 - [Skill 独立发版，changelog 按 skill 分](<project_skill_independent_versioning/INDEX.md>) — 决定 changelog、tag、semver 粒度时：每个 skill 一份，不要 skills 总 changelog。
 - [.harness 模块保持同一入口，便于插件化](<project_harness_module_consistency_for_plugins/INDEX.md>) — 新增或改 .harness 模块、或给单个模块加特殊节点时打开：各模块同一套入口 README（可继承定制），不为单个模块发明虚拟节点；Compose 写进 compose/README.md。目标是架构一致、便于后续插件化。
 - [被组合仓库可写，不加挂载机制](<project_compose_checkout_writable/INDEX.md>) — 改 Compose 写入或想加只读特例、空检出报错、父索引边界时打开：只删只读限制。决定见 ADR 0045。
+- [Routines 记录定义，由外部平台接入执行](<project_routines_from_brain_practice/INDEX.md>) — 设计 routines 时打开：INDEX.md 记录，仓库为接入依据；平台每次读Skill，默认最新可指定，失败停止报告；首版适配全部现有例程，无调度器和分组。
 <!-- project-entries-local:end -->

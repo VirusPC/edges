@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Routines
+
+- **把例行工作记录交给平台接入：** `edges routines init` 初始化例程模块，`create/list/get/update/delete` 维护日程与 Skill 引用。Agent 可以从索引找到记录，再按平台自己的方式配置触发器；Edges 不运行调度器。
+- **执行内容跟随仓库更新：** 新增 `edges-routines` 技能，说明平台每次读取 Skill，默认采用仓库默认分支最新内容，也可指定版本；读取失败就停止本次并报告。
+
 ### 可观测
 
 - **把编码 Agent 和 Grok Bot 接到 Langfuse：** `edges init` 或 `edges skills init` 会装上主入口 `langfuse-agent-tracing`，以及本机 `langfuse-local-agent-tracing`、Codex Cloud `langfuse-codex-cloud-tracing`、Cursor Cloud `langfuse-cursor-cloud-tracing`、Grok Bot `langfuse-grokbot-tracing`。还没确定是哪一种时先打开主入口，它只帮你选。安装步骤在对应技能里。Grok Bot 的导出脚本和 Codex Cloud 的轮询脚本不在这个 npm 包里。运行记录和指标笔记在 `packages/observation/`。

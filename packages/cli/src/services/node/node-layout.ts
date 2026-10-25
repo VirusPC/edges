@@ -26,6 +26,7 @@ import {
   NoteNode,
   ProjectNode,
   SkillNode,
+  RoutineNode,
   ReadmeNode,
 } from "../../domain/models/index.js";
 import { createReadmeNode, readmeModelFor } from "../../domain/models/readme/specialize.js";
@@ -59,14 +60,14 @@ const readSource: EntrySource = (file) => {
 function isTypeIndexReadme(file: string, read: EntrySource): boolean {
   return TYPE_DIRECTORY.test(path.dirname(file)) || !!read(file)?.includes(TYPE_HEADER);
 }
-/** Note, project, and task leaves, plus the content-face notes/projects org lists. */
+/** Content leaves and their content-face organization lists. */
 function readmeOnlyChild(child: string): boolean {
   const type = identifyNodeType(child);
-  if (type === "note" || type === "project" || type === "task") return true;
+  if (type === "note" || type === "project" || type === "task" || type === "routine") return true;
   const posix = child.split(path.sep).join("/");
   if (posix.split("/").includes(".harness")) return false;
   return (
-    /(?:^|\/)notes\/README\.md$/.test(posix) ||
+    /(?:^|\/)(?:notes|routines)\/README\.md$/.test(posix) ||
     /(?:^|\/)(?<!memory\/)projects\/README\.md$/.test(posix)
   );
 }
@@ -165,6 +166,7 @@ export function modelAt(
         text: LeafNode,
         readme: ReadmeNode,
         skill: SkillNode,
+        routine: RoutineNode,
         task: TaskNode,
         memory: MemoryNode,
         note: NoteNode,

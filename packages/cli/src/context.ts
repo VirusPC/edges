@@ -47,7 +47,7 @@ export type CliContext = {
   result: CliResult | undefined;
 };
 
-export function usageError(reason: string, scope: "root" | "notes" | "projects" | "tasks" | "artifacts" | "memory" | "skills" | "schema" | "compose" | "evaluation" | "config"): CliResult {
+export function usageError(reason: string, scope: "root" | "notes" | "projects" | "tasks" | "artifacts" | "memory" | "skills" | "routines" | "schema" | "compose" | "evaluation" | "config"): CliResult {
   if (scope === "schema") return { exitCode: 2, stdout: "", stderr: `${reason}\nSee edges schema --help for usage.\n` };
   const usage =
     scope === "notes"
@@ -62,17 +62,19 @@ export function usageError(reason: string, scope: "root" | "notes" | "projects" 
               ? "See edges memory --help for usage.\n"
               : scope === "skills"
                 ? "See edges skills --help for usage.\n"
-                : scope === "compose"
-                  ? "See edges compose --help for usage.\n"
-                  : scope === "evaluation"
-                    ? "See edges evaluation --help for usage.\n"
-                    : scope === "config"
-                      ? "See edges config --help for usage.\n"
-                      : "See edges --help for usage.\n";
+                : scope === "routines"
+                  ? "See edges routines --help for usage.\n"
+                  : scope === "compose"
+                    ? "See edges compose --help for usage.\n"
+                    : scope === "evaluation"
+                      ? "See edges evaluation --help for usage.\n"
+                      : scope === "config"
+                        ? "See edges config --help for usage.\n"
+                        : "See edges --help for usage.\n";
   return fail("VALIDATION_ERROR", reason, usage);
 }
 
-export function usageScope(argv: string[]): "root" | "notes" | "projects" | "tasks" | "artifacts" | "memory" | "skills" | "schema" | "compose" | "evaluation" | "config" {
+export function usageScope(argv: string[]): "root" | "notes" | "projects" | "tasks" | "artifacts" | "memory" | "skills" | "routines" | "schema" | "compose" | "evaluation" | "config" {
   const command = argv.filter((arg, i) => arg !== "--scope" && argv[i - 1] !== "--scope" && !arg.startsWith("--scope=") && arg !== "--exclude" && argv[i - 1] !== "--exclude" && !arg.startsWith("--exclude=") && arg !== "--super" && arg !== "--all")[0];
   if (command === "notes") return "notes";
   if (command === "projects") return "projects";
@@ -81,6 +83,7 @@ export function usageScope(argv: string[]): "root" | "notes" | "projects" | "tas
   if (command === "schema") return "schema";
   if (command === "memory") return "memory";
   if (command === "skills") return "skills";
+  if (command === "routines") return "routines";
   if (command === "compose") return "compose";
   if (command === "evaluation") return "evaluation";
   if (command === "config") return "config";

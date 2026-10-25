@@ -28,6 +28,7 @@ CREATED WHEN NO MODULE IS GIVEN
 
 NOT CREATED HERE
   tasks (not in the default set; edges tasks init creates only that board)
+  routines (not in the default set; edges routines init creates only that module)
   user memory, evaluation, and observation
 `;
 
@@ -37,7 +38,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
     .description(
       "Initialize AGENTS.md and selected modules. This command does not read --super.",
     )
-    .argument("[module...]", "Repeatable module: memory, skills, tasks, notes, or projects")
+    .argument("[module...]", "Repeatable module: memory, skills, tasks, notes, projects, or routines")
     .option("--target-dir <directory>", "Explicit target scope (otherwise use --scope or scope discovery)")
     .option("--root-dir <directory>", "Boundary for the scope tree")
     .option("--description <text>", "Description in the parent scope index")
