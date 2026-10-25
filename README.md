@@ -69,6 +69,10 @@ edges --scope . tasks list
 
 把外部 harness 仓库挂进当前目录用 `edges compose`，步骤见 [`edges-compose`](packages/skills/edges-compose/SKILL.md)。完整命令见 [`packages/cli/README.md`](packages/cli/README.md)，或运行 `edges --help`。
 
+### 例行工作：routines
+
+用 `edges routines init` 在选定作用域采用例程模块，再通过 `create/list/get/update/delete` 维护记录。每条记录用 `INDEX.md` 写日程并引用 Skill，供外部平台的 Agent 读取后接入。平台每次运行前读取仓库，默认使用默认分支最新内容，也可指定版本；实际触发由平台负责。命令与接入示例见 [`edges-routines`](packages/skills/edges-routines/SKILL.md)。
+
 ### 可观测与评估
 
 记笔记、记任务按上面做即可。想看见 Agent 怎么被用，或者想用同一批题看改动有没有变好，再用下面两条。
