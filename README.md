@@ -6,6 +6,8 @@
 
 *Harness any directory. Your brain is one too.*
 
+![从零散材料到有序目录，再展开下一次工作：经验成为新的起点](docs/assets/readme/hero.png)
+
 和 Agent 一起工作时，许多有价值的东西留在了聊天里：一个方案为什么被放弃，一次纠正适用于什么情况，一件事做到哪里，以及下次可以复用的方法。换个会话，这些背景又要重新解释。
 
 Edges 把这些经验组织成**跟随目录、由 Git 管理的工作记忆与协作方法**。讨论留下理由，任务留下目标，实践留下方法。下一个 Agent 可以沿着索引找到相关材料，接着推进；你可以阅读、修改、审阅它们，也可以带着它们换工具。
@@ -54,6 +56,8 @@ flowchart TB
 ## 模块的设计与用例
 
 十个模块各自解决不同的问题。Notes、Projects、Tasks 承接材料与工作；Memory、Skills 保留经验与方法；Compose、Routines 支持复用与持续运行；Observation、Evaluation、Artifacts 帮助检查过程、验证效果和审阅产物。
+
+![Edges 模块地图：十个模块按材料与工作、经验与方法、组合与例行、检查与交付分组，围绕当前工作按需组合](docs/assets/readme/modules.svg)
 
 ### Notes · 先把值得保留的东西留下
 
