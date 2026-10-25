@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: evaluation
-  edges-updated-at: '2026-10-25T06:58:26.615Z'
+  edges-updated-at: '2026-10-25T11:49:36.606Z'
   edges-title: 评测实验程序 + Experiment Webhook（用 Dataset 跑实验）
-  edges-tasks-status: backlog
+  edges-tasks-status: done
   edges-task-priority: none
 name: 评测实验程序_experiment_webhook用_dataset_跑实验
 description: >-
@@ -29,9 +29,9 @@ description: >-
 6. 跟进：脑仓 #378 改为薄包装/配置，逐步去掉重复实现（可同批或紧随 PR）。
 
 **完成标准：**
-- [ ] `packages/services/experiment-webhook/` 可启动，验签与开发关签行为符合约定
-- [ ] JSON 注册表能按名路由；至少挂上 `harness_memory_ablation`
-- [ ] 伪造 payload 端到端跑通（202 → runner → 回写路径有记录）
-- [ ] 结果同时可见于 Langfuse 与本地 reports（真联调路径）
-- [ ] 自建 Langfuse 经本机 CLI 隧道真触发一次成功或失败有可诊断日志
+- [x] `packages/services/experiment-webhook/` 可启动，验签与开发关签行为符合约定
+- [x] JSON 注册表能按名路由；至少挂上 `harness_memory_ablation`
+- [x] 伪造 payload 端到端跑通（202 → runner → 回写路径有记录）
+- [x] 结果同时可见于 Langfuse 与本地 reports（真联调路径）
+- [x] 自建 Langfuse 经本机 CLI 隧道真触发一次成功或失败有可诊断日志
 - [ ] 脑仓薄包装跟进 PR 已开（或本卡注明阻塞原因）
