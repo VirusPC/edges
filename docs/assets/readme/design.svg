@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1080" viewBox="0 0 1280 1080" role="img" aria-labelledby="title description">
+  <title id="title">Edges 设计：一套结构，从任意目录开始</title>
+  <desc id="description">三种可按需要采用的扩展方式。任意位置建立：项目根、模块或专项目录都可以作为起点；示例只在选中的模块目录中建立 AGENTS.md 入口和 .harness 维护材料。按需递归初始化：在选定子目录或维护方法目录中，继续建立同样结构，并登记到已有父层；父层保存共识，子目录保存局部经验，Skill 自身也可以有维护材料。这不表示自动扫描或初始化所有层。跨仓组合使用：当前工作区通过 Compose 接入独立的个人方法仓与团队规范仓，保留各自归属、历史及选定的引用版本；组合不表示自动同步。目录树中的实线表示目录关系，递归示意中标注登记的实线表示父层登记，跨仓虚线表示 Compose 组合。</desc>
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+      .ink { fill: #19343c; }
+      .muted { fill: #607477; }
+      .heading { font-size: 29px; font-weight: 650; fill: #19343c; }
+      .node-title { font-size: 26px; font-weight: 600; fill: #19343c; }
+      .body { font-size: 23px; fill: #526c70; }
+      .plain-node { fill: #ffffff; stroke: #d7e2dc; stroke-width: 1.5; }
+      .folder { fill: none; stroke: #68817c; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+      .selected-folder { fill: none; stroke: #397e70; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="1080" rx="24" fill="#f7f8f4"/>
+  <path d="M60 48h28" stroke="#1b817b" stroke-width="4" stroke-linecap="round"/>
+  <text x="102" y="55" class="muted" font-size="18" font-weight="600" letter-spacing="2">EDGES / 结构设计</text>
+  <text x="60" y="112" class="ink" font-size="40" font-weight="650">一套结构，从任意目录开始</text>
+  <text x="60" y="155" class="muted" font-size="24">在需要的地方建立，沿目录继续扩展，将独立积累组合使用。</text>
+
+  <!-- These are three independent capabilities, not required workflow stages. -->
+  <text x="60" y="220" class="heading">任意位置建立</text>
+  <text x="60" y="260" class="body">项目根、模块、专项目录都可作为起点。</text>
+  <text x="680" y="220" class="heading">按需递归初始化</text>
+  <text x="680" y="260" class="body">在选定子目录或维护方法目录中，</text>
+  <text x="680" y="293" class="body">继续建立同样结构。</text>
+  <path d="M640 208v460" stroke="#dce5dd" stroke-width="1.5"/>
+
+  <!-- A directory tree with one selected location, not a tree-wide initialization. -->
+  <path d="M111 386v249h39M111 495h39" fill="none" stroke="#c4d2cb" stroke-width="2"/>
+  <rect x="88" y="322" width="230" height="64" rx="13" class="plain-node"/>
+  <path d="M108 342h10l5 5h14v18h-29z" class="folder"/>
+  <text x="151" y="363" class="node-title">项目根</text>
+
+  <rect x="150" y="423" width="440" height="144" rx="16" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
+  <path d="M175 443h10l5 5h14v18h-29z" class="selected-folder"/>
+  <text x="219" y="464" class="node-title">选中的模块目录</text>
+  <path d="M176 481h388" stroke="#d1e1d5" stroke-width="1"/>
+  <path d="M181 493h12l5 5v15h-17zM193 493v6h5" class="selected-folder"/>
+  <text x="215" y="512" class="body">AGENTS.md 入口</text>
+  <path d="M179 530h8l4 4h10v14h-22z" class="selected-folder"/>
+  <text x="215" y="548" class="body">.harness/ 维护材料</text>
+
+  <rect x="150" y="603" width="260" height="64" rx="13" class="plain-node"/>
+  <path d="M170 623h10l5 5h14v18h-29z" class="folder"/>
+  <text x="213" y="644" class="node-title">专项目录</text>
+
+  <!-- The same structure can be established at selected descendants and maintenance objects. -->
+  <rect x="710" y="322" width="482" height="90" rx="15" class="plain-node"/>
+  <text x="735" y="357" class="node-title">项目根：父层共识</text>
+  <text x="735" y="391" class="body">已有入口与维护材料</text>
+  <path d="M734 412v212h44M734 500h44" fill="none" stroke="#94b9a7" stroke-width="2"/>
+  <text x="718" y="455" fill="#527668" font-size="23" text-anchor="end">登记</text>
+  <text x="718" y="580" fill="#527668" font-size="23" text-anchor="end">登记</text>
+  <rect x="778" y="460" width="414" height="80" rx="14" fill="#eaf3eb" stroke="#bad2c2" stroke-width="1.5"/>
+  <text x="802" y="493" class="node-title">选定子目录</text>
+  <text x="802" y="524" class="body">局部经验 · 同样结构</text>
+  <rect x="778" y="584" width="414" height="80" rx="14" fill="#f9f1e2" stroke="#dfcba9" stroke-width="1.5"/>
+  <text x="802" y="617" class="node-title">选定的维护方法目录</text>
+  <text x="802" y="648" class="body">Skill 也有自己的维护材料</text>
+
+  <path d="M60 704h1160" stroke="#dce5dd" stroke-width="1.5"/>
+  <text x="60" y="751" class="heading">跨仓组合使用</text>
+  <path d="M758 743h34" stroke="#94b9a7" stroke-width="2"/>
+  <text x="806" y="751" class="body">目录 / 登记</text>
+  <path d="M990 743h34" stroke="#83aa98" stroke-width="2" stroke-dasharray="7 6"/>
+  <text x="1038" y="751" class="body">跨仓组合</text>
+  <text x="60" y="791" class="body">各仓独立维护，以选定版本接入当前工作区。</text>
+
+  <!-- Independent repository boundaries are linked by Compose, not by parenthood. -->
+  <rect x="60" y="846" width="285" height="126" rx="16" class="plain-node"/>
+  <text x="202.5" y="891" class="node-title" text-anchor="middle">个人方法仓</text>
+  <text x="202.5" y="935" class="body" text-anchor="middle">自身归属与历史</text>
+
+  <path d="M345 922h125M810 922h125" fill="none" stroke="#83aa98" stroke-width="2" stroke-dasharray="7 6"/>
+  <text x="407.5" y="904" fill="#527668" font-size="23" text-anchor="middle">Compose</text>
+  <text x="872.5" y="904" fill="#527668" font-size="23" text-anchor="middle">Compose</text>
+
+  <rect x="470" y="832" width="340" height="154" rx="18" fill="#e9f2e9" stroke="#a7c4b1" stroke-width="1.8"/>
+  <text x="640" y="877" class="ink" font-size="28" font-weight="650" text-anchor="middle">当前工作区</text>
+  <text x="640" y="919" class="body" text-anchor="middle">登记所用仓库</text>
+  <text x="640" y="955" class="body" text-anchor="middle">保留引用版本</text>
+
+  <rect x="935" y="846" width="285" height="126" rx="16" class="plain-node"/>
+  <text x="1077.5" y="891" class="node-title" text-anchor="middle">团队规范仓</text>
+  <text x="1077.5" y="935" class="body" text-anchor="middle">自身归属与历史</text>
+
+  <text x="640" y="1040" fill="#397e70" font-size="26" font-weight="600" text-anchor="middle">就地维护 · 层层扩展 · 按需组合</text>
+</svg>

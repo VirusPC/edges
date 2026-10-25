@@ -20,23 +20,31 @@ Edges 把这些经验组织成**跟随目录、由 Git 管理的工作记忆与�
 
 ## 为什么这样设计
 
+Edges 从你选定的目录开始：项目根、子模块或专项目录都可以建立一套 harness。需要更细的维护范围时，可以继续为选定子目录、技能或 harness 本身初始化同样的结构；需要复用其他仓库的积累时，再通过 Compose 组合进来。
+
+![Edges 的三种组织方式：在任意选定目录建立 harness，在子目录或维护方法目录中按需递归初始化，再通过 Compose 组合独立维护的仓库](docs/assets/readme/design.svg)
+
 ### 经验放在离问题最近的地方
 
 一个项目的共同约定适合放在根，某个子模块的特殊限制适合留在那个目录。Edges 允许你为选定目录建立局部 harness，各层通过索引连接；Agent 从当前问题所在的作用域出发，读取相关层的约束，再按索引选择需要的材料，减少每次塞进上下文的无关背景。
 
 这样，经验的归属和适用范围都能被看见。团队约定随团队仓库共享，个人方法留在自己的仓库；跨目录复用通过引用与组合完成。详细理由见[按作用域确定内容归属](docs/adr/0024-scope-first-content-ownership.md)。
 
-### 用普通文件积累，用 Git 管理版本与共享范围
+目录中既有正在做的工作，也有帮助你维护和改进它的经验。`README.md` 组织内容，`AGENTS.md` 引出维护信息，`.harness/README.md` 汇总该层材料。当维护对象变成一套复盘技能或 harness 本身时，它也可以拥有自己的维护材料，记录这套方法的纠正、任务与改进。各层沿用同一结构，Edges 自身也用它来维护框架。入口分工见[递归系统设计](docs/adr/0029-recursive-system-two-entries.md)与[材料索引](docs/adr/0035-harness-readme-as-layer-material-index.md)。
 
-笔记、任务、记忆和技能以 Markdown 保存，正文与附件放在同一内容目录中。组织关系写在索引里，变化可以用 diff 检查、用 Git 追溯。跟踪与忽略规则也决定哪些材料进入共享版本、哪些仅留在本机。核心内容管理只需要 Node.js、Git 和 Edges CLI；观测后端、评测服务与在线预览按需要接入。
+### 让积累可掌控、可延续
 
-目录中既有正在做的工作，也有帮助你维护和改进它的经验。`README.md` 组织内容，`AGENTS.md` 引出维护信息，`.harness/README.md` 汇总该层材料。这套结构可以继续用于维护 Edges 自身。入口分工见[递归系统设计](docs/adr/0029-recursive-system-two-entries.md)与[材料索引](docs/adr/0035-harness-readme-as-layer-material-index.md)。
+长期积累还需要能检查、能迁移，换工具后仍能继续使用。Edges 将内容保存在普通文件中，以 Git 管理变化，让不同 Agent 接入，并把额外服务留给需要它们的场景。
 
-### 让方法和内容跨 Agent 延续
+![Edges 的长期使用优势：文件系统让内容可读可迁移，Git 让变更可追溯可审阅，跨 Agent 接入让积累可接续，核心本地可用让服务按需接入](docs/assets/readme/foundations.svg)
 
-Edges 提供 CLI、Skill、MCP 三种接入方式：CLI 执行操作，Skill 告诉 Agent 何时及如何使用，MCP 为相应宿主提供工具入口。它们围绕同一套内容与操作契约工作，各入口已覆盖的能力见[CLI](packages/cli/README.md)、[Skills](packages/skills/README.md)和[MCP](packages/mcp-servers/README.md)。
+**文件系统让内容可读、可迁移。** 笔记、任务、记忆和技能以 Markdown 保存，正文与附件放在同一内容目录中，组织关系写在索引里。你可以用常见编辑器阅读，用文件工具检索和备份；换工具时，已有材料仍可继续使用。
 
-你可以在不同会话和客户端之间接续工作。接入时需要让 Agent 能找到工作目录及其入口；经验的长期归属由仓库决定。这个选择的背景见[能力面设计](docs/adr/0004-capability-surface-cli-skill-mcp.md)。
+**Git 让变化可追溯、可审阅。** 一条经验为何修改，可以通过 diff 和历史回看；协作中的变化可以经过分支与 PR 审阅。跟踪与忽略规则决定哪些材料进入共享版本、哪些保留在本机，积累的版本与共享范围由你管理。
+
+**跨 Agent 接入让工作可接续。** CLI 执行操作，Skill 告诉 Agent 何时及如何使用，MCP 为相应宿主提供工具入口。让新的 Agent 能找到工作目录及其入口，就能继续读取其中的背景与方法。各入口的能力覆盖与接入方式见[CLI](packages/cli/README.md)、[Skills](packages/skills/README.md)和[MCP](packages/mcp-servers/README.md)，设计理由见[能力面设计](docs/adr/0004-capability-surface-cli-skill-mcp.md)。
+
+**轻运维让核心工作先用起来。** 核心内容管理在本地通过 Node.js、Git 和 Edges CLI 完成，无需常驻数据库或服务器。需要集中观测、远程触发评测或跨设备在线审阅时，再接入相应的[观测](packages/observation/README.md)、[评测](packages/services/evaluation/README.md)与[预览服务](packages/services/artifacts-preview/README.md)。
 
 ### 让反馈改善下一次工作
 
