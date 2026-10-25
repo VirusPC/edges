@@ -7,7 +7,7 @@ import { RoutineNode } from "../../domain/models/routines/routine-node.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { identifyNodeType } from "../../domain/models/node/layout.js";
 import { scopeTraversal, type ReachOptions } from "../../domain/operations/traverse.js";
-import { isWithinPath } from "../../utils/filesystem.js";
+import { firstSymlink, isWithinPath } from "../../utils/filesystem.js";
 import { parseMetadata } from "../metadata.js";
 import {
   initScope,
@@ -86,15 +86,19 @@ export async function resolveRoutine(
     if (!isRoutineEntry(file) || reach.exclude?.has("routines") || pathHitsExcludedModule(file, scope, reach.exclude)) {
       throw new Error(`routine not found: ${target}`);
     }
-    if (!isWithinPath(file, managedRoot)) {
-      const reachable = operation === "read" && (await listedRoutines(env, reach)).some((node) => node.path === file);
-      if (!reachable) throw new Error(`routine path escapes managed root: ${target}`);
+    if (!isWithinPath(file, managedRoot) || firstSymlink(file)) {
+      const reachable = operation === "read"
+        ? (await listedRoutines(env, reach)).find((node) => node.path === file)
+        : undefined;
+      if (!reachable) throw new Error(`routine path escapes managed root or is read-only: ${target}`);
+      return { scope, service, node: reachable };
     }
   } else {
     const matches = (await listedRoutines(env, reach)).filter((node) => node.name === target);
     if (matches.length !== 1) throw new Error(matches.length === 0 ? `routine not found: ${target}` : `routine name is ambiguous: ${target}`);
+    if (operation === "read") return { scope, service, node: matches[0]! };
     file = matches[0]!.path;
-    if (operation === "write" && !isWithinPath(file, managedRoot)) throw new Error(`routine path escapes managed root: ${target}`);
+    if (!isWithinPath(file, managedRoot) || firstSymlink(file)) throw new Error(`routine path escapes managed root or is read-only: ${target}`);
   }
   const org = routineOrg(file);
   if (!await service.get(org, ReadmeNode)) throw new Error(`Missing routine organization entry: ${org}`);
@@ -144,20 +148,28 @@ export async function updateRoutine(env: NodeJS.ProcessEnv, target: string, inpu
   if (!parent) throw new Error(`Missing routine organization entry: ${routineOrg(node.path)}`);
   const registered = parent.children.find((child) => child.id === node.path);
   if (!registered) throw new Error(`Routine is not indexed in ${parent.path}: ${target}`);
-  const updated = await service.update(node, {
+  const fields = {
     ...(input.description !== undefined ? { description: input.description } : {}),
     ...(input.body !== undefined ? { body: input.body } : {}),
     ...(metadata ? { metadata } : {}),
-  });
-  if (registered.description !== updated.description) {
-    const refresh = (children: typeof parent.localChildren) => children.map((child) =>
-      child.id === updated.path ? { ...child, description: updated.description } : child,
-    );
-    await service.update(parent, {
-      localChildren: refresh(parent.localChildren),
-      descendantChildren: refresh(parent.descendantChildren),
-    });
+  };
+  const draft = new RoutineNode(node.path).parse(node.serialize()).update(fields, { operation: "update" });
+  const refresh = (children: typeof parent.localChildren) => children.map((child) =>
+    child.id === draft.path ? { ...child, description: draft.description } : child,
+  );
+  const indexFields = registered.description !== draft.description ? {
+    localChildren: refresh(parent.localChildren),
+    descendantChildren: refresh(parent.descendantChildren),
+  } : undefined;
+  if (indexFields) {
+    const indexDraft = new ReadmeNode(parent.path).parse(parent.serialize()).update(indexFields, { operation: "update" });
+    new ReadmeNode(parent.path).parse(indexDraft.serialize()).validate();
   }
+  // Validate the existing dependency graph before either write: a damaged sibling
+  // must not leave the updated definition ahead of its organization index.
+  await service.query(parent.path).value();
+  const updated = await service.update(node, fields);
+  if (indexFields) await service.update(parent, indexFields);
   return { name: updated.name, path: scopeRelativePath(scope, updated.path) };
 }
 

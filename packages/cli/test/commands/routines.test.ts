@@ -1,7 +1,7 @@
 import test from "node:test";
 import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
@@ -158,6 +158,35 @@ test("registered external routines remain readable while writes and unregistered
   assert.equal(existsSync(path.join(external, hidden.path)), true);
 });
 
+test("registered external routine symlinks support list and get but never writes", async (t) => {
+  const host = scope(t);
+  const external = scope(t);
+  const links = scope(t);
+  for (const root of [host, external]) {
+    execFileSync("git", ["init", "--quiet", root]);
+    await initRoutines({ targetDir: root });
+  }
+  const created = await createRoutine(env(external), { name: "shared", description: "Linked routine" });
+  const hidden = await createRoutine(env(external), { name: "hidden", description: "Unregistered" });
+  const linkedRoot = path.join(links, "external-link");
+  symlinkSync(external, linkedRoot, "dir");
+  const linkedFile = path.join(linkedRoot, created.path);
+  const org = path.join(host, ".harness/routines/README.md");
+  const service = new NodeService({ managedRoot: host });
+  const index = await service.get(org);
+  assert.ok(index);
+  await service.update(index, { body: index.body.replace("<!-- project-entries-local:end -->", `- [Shared](<${linkedFile}>) — Linked routine\n<!-- project-entries-local:end -->`) });
+  const listed = await listRoutines(env(host), {});
+  assert.deepEqual(names(listed), ["shared"]);
+  for (const target of ["shared", listed[0]!.path]) {
+    assert.equal((await getRoutine(env(host), target, {})).description, "Linked routine");
+    await assert.rejects(() => updateRoutine(env(host), target, { description: "Changed" }, {}), /escapes managed root|read-only/);
+    await assert.rejects(() => deleteRoutine(env(host), target, {}), /escapes managed root|read-only/);
+  }
+  await assert.rejects(() => getRoutine(env(host), path.join(linkedRoot, hidden.path), {}), /escapes managed root/);
+  assert.equal((await getRoutine(env(external), "shared", {})).description, "Linked routine");
+});
+
 test("routines reject invalid names, empty descriptions, renaming, and unrelated exact paths", async (t) => {
   const root = scope(t);
   await initRoutines({ targetDir: root });
@@ -205,6 +234,22 @@ test("routine update validates its existing index registration before changing t
   await assert.rejects(() => updateRoutine(env(root), created.path, { description: "Changed" }, {}), /not indexed/);
   assert.equal(readFileSync(definition, "utf8"), before);
   assert.equal(readFileSync(org, "utf8"), index);
+});
+
+test("routine update rejects a damaged indexed sibling before writing the definition or index", async (t) => {
+  const root = scope(t);
+  await initRoutines({ targetDir: root });
+  const first = await createRoutine(env(root), { name: "first", description: "Old" });
+  const second = await createRoutine(env(root), { name: "second", description: "Valid" });
+  const damaged = path.join(root, second.path);
+  writeFileSync(damaged, readFileSync(damaged, "utf8").replace("description: Valid\n", ""));
+  const definition = path.join(root, first.path);
+  const org = path.join(root, ".harness/routines/README.md");
+  const beforeDefinition = readFileSync(definition, "utf8");
+  const beforeIndex = readFileSync(org, "utf8");
+  await assert.rejects(() => updateRoutine(env(root), first.path, { description: "New" }, {}), /description must be nonempty/);
+  assert.equal(readFileSync(definition, "utf8"), beforeDefinition);
+  assert.equal(readFileSync(org, "utf8"), beforeIndex);
 });
 
 test("routine directory lifecycle includes a co-located Skill and preserves an external Skill", async (t) => {
