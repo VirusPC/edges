@@ -11,39 +11,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-10-25
+
 ### 评测
 
 - **用 `edges evaluation server` 拉起评测服务：** `install` 把 user systemd unit 装上并 enable，不启动进程。`start`、`stop`、`restart`、`status` 只管这个 unit。`edges evaluation server start --dev` 在前台阻塞，直到进程退出。第一次先 `edges config init`，再 `install`，再 `start`。
 - **本机配置收成一份 `edges.env`：** `edges config init` 建立 `~/.config/edges/edges.env`。旧的 `~/.config/edges/artifacts-preview.env` 只在这一步被复制一次，之后不再读取。`edges config path` 打印路径。`edges config show` 打印时把含 SECRET、TOKEN、PASSWORD 或 `_KEY` 的值写成 `***`。`edges artifacts server` 同样只读这份文件；文件不在就报错，并提示运行 `edges config init`。
 - **Experiment Webhook 并进 evaluation 服务：** 目录是 `packages/services/evaluation`，包名 `edges-evaluation`。对外入口是 `edges evaluation server`，不再使用 `packages/services/experiment-webhook` 这个包名。
-- **Langfuse 的 Custom Experiment 可以打到本仓 webhook，按 Dataset 名字跑已登记的实验：** 在 `packages/services/evaluation` 起进程后，`POST /langfuse/experiment` 用官方 `x-langfuse-signature` 校验原始 body，立刻回 202，再在本进程里调用 `registry.json` 里的 runner。第一条接 harness memory 消融，把 Dataset 题适配进现有的 `run_experiment`。默认 10 分钟超时；超时或失败会写 `packages/evaluation/reports/`，并在配了 Langfuse 密钥时写回 experiment trace 和 `run_ok` 分数。开发环境用 `EXPERIMENT_WEBHOOK_SIGNATURE=off` 关掉签名校验。
+- **Langfuse 的 Custom Experiment 可以打到本仓 webhook，按 Dataset 名字跑已登记的实验：** 评测服务收到 `POST /langfuse/experiment` 后，用官方 `x-langfuse-signature` 校验原始 body，立刻回 202，再按 Dataset 名字调用已登记的 runner。第一条接 harness memory 消融，把 Dataset 题适配进现有的 `run_experiment`。默认 10 分钟超时；超时或失败会写 `packages/evaluation/reports/`，并在配了 Langfuse 密钥时写回 experiment trace 和 `run_ok` 分数。
 
 ### 文档与系统
 
 - **公开文档不点名个人仓：** 根 README、CHANGELOG、ADR、架构说明、任务与记忆，以及评测配置，不再写出维护者个人仓或私有仓的名字和链接。检索评测的语料地址改成通用示例 `https://github.com/example/personal-brain.git`；需要真实的拆仓前语料时，设置 `EDGES_RETRIEVAL_CORPUS_URL`。`VirusPC/edges` 与 npm 包 `@viruspc/edges` 保持不变。
 
-### Compose
-
-- **入口 README：** `.harness` 下每个模块一份入口 README。Compose 不再是 `AGENTS.md` 上的特例，入口是 `.harness/compose/README.md`，由 `.harness/README.md` 链接。`ComposeReadmeNode` 继承 README 节点，负责组合区块和子节点展开。子节点是被组合仓库的 `README.md`。默认就会展开；系统根扫描默认进入本 scope 的 `.harness/compose/`。根级 `--exclude` 可跳过 `compose`、`memory`、`skills`、`notes`、`projects`、`tasks`。一次性迁移用 `edges compose doctor --apply`。doctor 不改写文档里的 `--with-composed`：`.agents/skills/`、CHANGELOG 和 ADR 跳过，其余只在预览里报告。决定见 [ADR 0043](docs/adr/0043-compose-readme-entry.md)。
-- **被组合仓库可写：** 删掉只读特例之后，已检出的子模块工作区可以直接写。提交和推送用原生 git。决定见 [ADR 0045](docs/adr/0045-compose-checkout-writable.md)。
-
 ### 目录布局
 
-- **代码目录收进 `packages/`：** pnpm workspace 的包都在 `packages/` 下。`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 从仓库根移入，目录名不变。`.harness/evaluation/` 与 `.harness/observation/` 整棵移到 `packages/evaluation/`、`packages/observation/`。一次性迁移脚本移到 `scripts/migrations/`。不留兼容软链。新增私有包 `@viruspc/edges-skills`、`@viruspc/edges-system-prompt`、`@viruspc/edges-evaluation`、`@viruspc/edges-observation`。CLI 用 `workspace:*` 依赖 skills，构建时解析该包再拷进发布目录。npm 包名 `@viruspc/edges` 不变，`repository.directory` 改为 `packages/cli`。决定见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md)，对照表见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
-
-| 旧路径 | 新路径 |
-| --- | --- |
-| `cli/` | `packages/cli/` |
-| `skills/` | `packages/skills/`（`@viruspc/edges-skills`） |
-| `apps/` | `packages/apps/` |
-| `services/` | `packages/services/` |
-| `mcp-servers/` | `packages/mcp-servers/` |
-| `system-prompt/` | `packages/system-prompt/`（`@viruspc/edges-system-prompt`） |
-| `.harness/evaluation/` | `packages/evaluation/`（`@viruspc/edges-evaluation`） |
-| `.harness/observation/` | `packages/observation/`（`@viruspc/edges-observation`） |
-| 一次性 `scripts/*.mts` 等 | `scripts/migrations/` |
-
-- **extensions 平铺到仓库根：** `extensions/` 这一层取消，不留软链。`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 用原名放到仓库根。`extensions/.harness/` 的记忆并入根 `.harness/`；`extensions/AGENTS.md` 的硬约束并入根 `AGENTS.md`；`skills/project-memory-init` 改由根登记。空目录 `extensions/docs`、`extensions/tools`、`extensions/subagents` 删除。`extensions/new-server` 与 `extensions/others` 从本仓删除（个人仓 `shared-extensions/` 由 peng cheng 另行搬入）。`feedback_cli_under_extensions` 翻案：CLI 放仓库根 `cli/`。决定见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)，对照表见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
+- **extensions 平铺到仓库根：** `extensions/` 这一层取消，不留软链。`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 用原名放到仓库根。`extensions/.harness/` 的记忆并入根 `.harness/`；`extensions/AGENTS.md` 的硬约束并入根 `AGENTS.md`；`skills/project-memory-init` 改由根登记。空目录 `extensions/docs`、`extensions/tools`、`extensions/subagents` 删除。`extensions/new-server` 与 `extensions/others` 从本仓删除（个人仓 `shared-extensions/` 另行搬入）。`feedback_cli_under_extensions` 翻案：CLI 放仓库根 `cli/`。同日这些落在仓库根的代码目录再收进 `packages/`，见下一条。决定见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)，对照表见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
 
 | 旧路径 | 新路径 |
 | --- | --- |
@@ -59,6 +42,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 | `extensions/docs/`、`extensions/tools/`、`extensions/subagents/` | 删除 |
 | `extensions/new-server/`、`extensions/others/` | 从本仓删除 |
 
+- **代码目录收进 `packages/`：** pnpm workspace 的包都在 `packages/` 下。`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 从仓库根移入，目录名不变。`.harness/evaluation/` 与 `.harness/observation/` 整棵移到 `packages/evaluation/`、`packages/observation/`。一次性迁移脚本移到 `scripts/migrations/`。不留兼容软链。新增私有包 `@viruspc/edges-skills`、`@viruspc/edges-system-prompt`、`@viruspc/edges-evaluation`、`@viruspc/edges-observation`。CLI 用 `workspace:*` 依赖 skills，构建时解析该包再拷进发布目录。npm 包名 `@viruspc/edges` 不变，`repository.directory` 改为 `packages/cli`。决定见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md)，对照表见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
+
+| 旧路径 | 新路径 |
+| --- | --- |
+| `cli/` | `packages/cli/` |
+| `skills/` | `packages/skills/`（`@viruspc/edges-skills`） |
+| `apps/` | `packages/apps/` |
+| `services/` | `packages/services/` |
+| `mcp-servers/` | `packages/mcp-servers/` |
+| `system-prompt/` | `packages/system-prompt/`（`@viruspc/edges-system-prompt`） |
+| `.harness/evaluation/` | `packages/evaluation/`（`@viruspc/edges-evaluation`） |
+| `.harness/observation/` | `packages/observation/`（`@viruspc/edges-observation`） |
+| 一次性 `scripts/*.mts` 等 | `scripts/migrations/` |
 
 ### 内容归属
 
@@ -66,15 +62,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 仓库拆分
 
-- **框架单独成仓：** 2026-10-20 起，原 `VirusPC/edges` 改名为用户的个人大脑仓，作 peng cheng 的个人主干长期保留；新的 `VirusPC/edges` 只含 Edges 系统路径，从单个初始提交开始，拆自个人大脑仓提交 `025904fa29bcc6970f45c654d95e30c5390d43d7`。拆仓前的 commit、PR 与 Actions 记录都在个人大脑仓。根 `AGENTS.md` 用 Compose 登记个人大脑仓；retrieval eval 的 `edges` 语料锁到个人大脑仓的这个提交。npm 包名 `@viruspc/edges` 不变。
+- **框架单独成仓：** 2026-10-20 起，原 `VirusPC/edges` 改名为用户的个人大脑仓，作个人主干长期保留；新的 `VirusPC/edges` 只含 Edges 系统路径，从单个初始提交开始，拆自个人大脑仓提交 `025904fa29bcc6970f45c654d95e30c5390d43d7`。拆仓前的 commit、PR 与 Actions 记录都在个人大脑仓。根 `AGENTS.md` 用 Compose 登记个人大脑仓；retrieval eval 的 `edges` 语料锁到个人大脑仓的这个提交。npm 包名 `@viruspc/edges` 不变。
 
 ### 组合仓库
 
-- **Compose 底层改用 git submodule：** 被组合的仓库默认装到仓内 `.harness/compose/<name>`，不再放 `~/.edges/composed/<name>`。`AGENTS.md` 只写相对路径，换一台机器 clone 主仓库后跑一次 `edges compose update` 就能用。`--path` 只收相对路径。
-- **compose 只剩 add / list / update：** 名字对应 git submodule。`add` 取代 `register`，跑 `git submodule add` 再写区块；`list` 列出条目和是否已检出；`update` 取代 `clone` / `pull`，跑 `git submodule update --init`（从不带 `--recursive`），加 `--remote` 跟到远端最新。`register`、`unregister`、`clone`、`pull`、`push` 删除，不留别名。推送在子模块里用原生 git；去掉条目手删 `AGENTS.md` 那一行，需要时再 `git submodule deinit` / `git rm`。
-- **不递归，并提示未初始化：** 读取和 `--with-composed` 只看当前仓库自己的条目，两个仓库互相登记也只展开一层；系统森林扫描跳过 `.harness/compose/`。子模块目录为空时提示运行 `edges compose update --name <name>`。旧的 `~/...` / 绝对路径条目照样能读，并提示迁移。本仓根 `AGENTS.md` 的个人大脑仓条目改指 `.harness/compose/<name>`（子模块本身另行添加）。决定见 [ADR 0042](docs/adr/0042-compose-on-git-submodule.md)。
-- **登记组合仓库必须写说明：** `edges compose add`（原 `register`）要求 `--description`。不传，或只传空白，命令以校验错误退出（退出码 2，`errorCode` 为 `VALIDATION_ERROR`），不会把缺说明的条目写进作用域 `AGENTS.md`。说明要写清这个仓存什么、什么时候该往里写。操作见 [`edges-compose`](skills/edges-compose/SKILL.md)（beta，版本 `0.1.0`）。
+- **Compose 底层改用 git submodule：** 被组合的仓库默认装到仓内 `.harness/compose/<name>`，不再放 `~/.edges/composed/<name>`。登记只写相对路径，换一台机器 clone 主仓库后跑一次 `edges compose update` 就能用。`--path` 只收相对路径。
+- **compose 只剩 add / list / update：** 名字对应 git submodule。`add` 取代 `register`，跑 `git submodule add` 再写 `.harness/compose/README.md`；`list` 列出条目和是否已检出；`update` 取代 `clone` / `pull`，跑 `git submodule update --init`（从不带 `--recursive`），加 `--remote` 跟到远端最新。`register`、`unregister`、`clone`、`pull`、`push` 删除，不留别名。推送在子模块里用原生 git；去掉条目手删 `.harness/compose/README.md` 那一行，需要时再 `git submodule deinit` / `git rm`。
+- **不递归，并提示未初始化：** 读取只看当前仓库自己的条目，不展开被组合仓库自己的 Compose；两个仓库互相登记也只展开一层。子模块目录为空时提示运行 `edges compose update --name <name>`。旧的 `~/...` / 绝对路径条目照样能读，并提示迁移。本仓根 `AGENTS.md` 的个人大脑仓条目改指 `.harness/compose/<name>`（子模块本身另行添加）。决定见 [ADR 0042](docs/adr/0042-compose-on-git-submodule.md)。本 scope 是否进入扫描见下面「入口 README」。
+- **登记组合仓库必须写说明：** `edges compose add`（原 `register`）要求 `--description`。不传，或只传空白，命令以校验错误退出（退出码 2，`errorCode` 为 `VALIDATION_ERROR`），不会把缺说明的条目写进 `.harness/compose/README.md`。说明要写清这个仓存什么、什么时候该往里写。操作见 [`edges-compose`](packages/skills/edges-compose/SKILL.md)（beta）。
 - **逐条处理失败：** `edges compose update` 逐条处理登记。某一条失败（git 报错、URL 与登记不符等）时，这条在 JSON 的 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 打一行 `warning: compose update failed for <名字>: <原因>`，后面的条目照常执行。至少一条成功时整体成功（退出码 0）；全部请求的条目都失败（包括 `--name` 指定的那一条失败）时整体失败，非零退出，失败结果里仍带全部 `entries`。缺少作用域 `AGENTS.md`、`--name` 找不到条目这类非单条错误照旧直接失败。
+- **入口 README：** `.harness` 下每个模块一份入口 README。Compose 不再是 `AGENTS.md` 上的特例，入口是 `.harness/compose/README.md`，由 `.harness/README.md` 链接。`ComposeReadmeNode` 继承 README 节点，负责组合区块和子节点展开。子节点是被组合仓库的 `README.md`。默认就会展开；系统根扫描默认进入本 scope 的 `.harness/compose/`。根级 `--exclude` 可跳过 `compose`、`memory`、`skills`、`notes`、`projects`、`tasks`。一次性迁移用 `edges compose doctor --apply`。doctor 不改写文档里的 `--with-composed`：`.agents/skills/`、CHANGELOG 和 ADR 跳过，其余只在预览里报告。决定见 [ADR 0043](docs/adr/0043-compose-readme-entry.md)。
+- **被组合仓库可写：** 删掉只读特例之后，已检出的子模块工作区可以直接写。提交和推送用原生 git。决定见 [ADR 0045](docs/adr/0045-compose-checkout-writable.md)。
 
 ### CLI
 
@@ -240,7 +238,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `shared-extensions/`：跨机器、跨 Agent 共享的个人 harness（skills、MCP 配置、plugins、hooks）。接入 Edges 的能力当时在 `extensions/`（2026-10-20 起改为仓库根 `cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/`，见 Unreleased）。整层发版：`VERSION` + `CHANGELOG.md` + tag `shared-extensions@`。
+- `shared-extensions/`：跨机器、跨 Agent 共享的个人 harness（skills、MCP 配置、plugins、hooks）。接入 Edges 的能力当时在 `extensions/`（2026-10-20 起改为仓库根 `cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/`，见 [1.6.0]）。整层发版：`VERSION` + `CHANGELOG.md` + tag `shared-extensions@`。
 - MIT 许可证。
 - README 增加「隐私与脱敏」节。
 - `cli/`：面向 agent 的 `edges-note` CLI（JSON stdout，复用 `bin/new-note`）。本地 agent 优先走它；MCP `new-note` 保留。
@@ -251,7 +249,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - 根 README 按“理念 → 知识模型 → 系统实现 → 使用与维护”重构；从投资视角串联认知资本、Agent Memory、Edge、知识流动性、决策收益和反馈复利，并明确各知识角色的边界及演化规则。
-- 当时的 `extensions/` 收录标准收窄为「接入或操作 Edges」；跨机器共用但不绑定 Edges 的扩展改走 `shared-extensions/`。该层已于 2026-10-20 平铺到仓库根，见 Unreleased。
+- 当时的 `extensions/` 收录标准收窄为「接入或操作 Edges」；跨机器共用但不绑定 Edges 的扩展改走 `shared-extensions/`。该层已于 2026-10-20 平铺到仓库根，见 [1.6.0]。
 - project-memory 的 `AGENTS.md` 增加本层硬约束区块：最重要的规则直接写在入口里。
 - project-memory 的 `AGENTS.md` 受管区块之间空一行。
 - `AGENTS.md` 作为记忆入口只保留硬约束、本层索引、下层索引；检索与沉淀时机写进硬约束。根入口正文收到身份、指针和硬约束，目录细则仍看 README。
@@ -272,7 +270,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - 知识库流转：`knowledge/notes` → `edges` → `archive`，`new-note` MCP 作为写入入口。
-- 对外接口层当时是 `extensions/`（skills、MCP、tools、system-prompt）。2026-10-20 起这些目录在仓库根，见 Unreleased。
+- 对外接口层当时是 `extensions/`（skills、MCP、tools、system-prompt）。2026-10-20 起这些目录在仓库根，见 [1.6.0]。
 - 用 `npx skills@latest` 分发 skill；本机中枢 `~/.agents/skills`，Claude Code 走软链。
 - project-memory 系列 skill（init / ask / remember / doctor / reshape）及仓库内 `.memory/`。
 - 公开仓库的隐私与脱敏规则。
@@ -289,7 +287,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 办公文档（`.docx` / `.xlsx` / `.pptx`）入库。
 - 未公开的专利交底材料。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/VirusPC/edges/releases/tag/v1.6.0
 [1.5.0]: https://github.com/VirusPC/edges/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/VirusPC/edges/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/VirusPC/edges/compare/v1.2.0...v1.3.0
