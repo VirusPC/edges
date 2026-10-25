@@ -43,6 +43,17 @@ Body 是 Langfuse Custom Experiment 的官方形状：`projectId`、`datasetId`�
 
 ## 本地
 
+服务进程在框架源码中，不包含在 `npm install -g @viruspc/edges` 的安装包里。先按[贡献指南](../../../CONTRIBUTING.md#本地开发)克隆并构建框架，再在仓库根调用构建出来的 CLI：
+
+```bash
+pnpm --filter @viruspc/edges exec -- edges config init
+pnpm --filter @viruspc/edges exec -- edges evaluation server install
+pnpm --filter @viruspc/edges exec -- edges evaluation server start
+pnpm --filter @viruspc/edges exec -- edges evaluation server status
+```
+
+下面的 `edges` 均指这份仓内 CLI；使用上述 `pnpm --filter @viruspc/edges exec --` 前缀可以明确选择它。只需前台调试时，执行 `pnpm --filter @viruspc/edges exec -- edges evaluation server start --dev`，结束进程即停止。
+
 配置只读 `~/.config/edges/edges.env`。没有这份文件时命令报错，并提示 `edges config init`。`edges config init` 会在旧的 `~/.config/edges/artifacts-preview.env` 还在、新文件不在时复制一次。复制之后不再读旧文件。`edges config show` 把密钥打成 `***`。
 
 ```bash

@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1040" viewBox="0 0 1280 1040" role="img" aria-labelledby="title description">
+  <title id="title">Edges 模块地图：从当前工作出发，按需选用</title>
+  <desc id="description">按用途寻找十个模块，没有固定执行顺序。材料组织：Notes 留下原始材料、Projects 组织持续工作。工作安排：Tasks 接续目标与进度、Routines 记录日程与方法。经验积累：Memory 保留判断理由、Skills 复用有效做法。改进依据：Observation 回看工作过程、Evaluation 验证改进效果。产物审阅：Artifacts 交付产物供审阅。跨仓复用：Compose 组合不同仓库，为当前工作接入外部积累，可配合其他用途使用。共同基础是目录与作用域、递归索引、Markdown 与 Git，以及 CLI、Skill、MCP 三种接入方式。</desc>
+
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+      .ink { fill: #19343c; }
+      .muted { fill: #607477; }
+      .heading { font-size: 28px; font-weight: 650; fill: #19343c; }
+      .module { font-size: 27px; font-weight: 600; fill: #19343c; }
+      .value { font-size: 25px; fill: #526c70; }
+      .rule { stroke: #e3e8e4; stroke-width: 1; }
+      .card { fill: #ffffff; stroke: #dae3dd; stroke-width: 1.5; }
+      .teal-icon { fill: none; stroke: #367c6b; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+      .amber-icon { fill: none; stroke: #a57a30; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+
+  <!-- An opaque paper ground keeps the artwork consistent in either GitHub theme. -->
+  <rect width="1280" height="1040" rx="24" fill="#f7f8f4"/>
+  <path d="M60 48h28" stroke="#1b817b" stroke-width="4" stroke-linecap="round"/>
+  <text x="102" y="55" class="muted" font-size="18" font-weight="600" letter-spacing="2">EDGES / 模块地图</text>
+  <text x="60" y="112" class="ink" font-size="40" font-weight="650">从当前工作出发，按需选用</text>
+  <text x="60" y="155" class="muted" font-size="24">按用途找到模块，让积累继续参与工作。</text>
+
+  <!-- Use-oriented cards are entry points, not mutually exclusive dimensions or stages. -->
+  <!-- Materials. -->
+  <rect x="60" y="198" width="564" height="220" rx="20" class="card"/>
+  <rect x="84" y="221" width="38" height="38" rx="11" fill="#e5f1eb"/>
+  <g class="teal-icon">
+    <path d="M95 232h10l6 6v10H95z"/>
+    <path d="M105 232v6h6M99 242h8M99 246h6"/>
+  </g>
+  <text x="137" y="250" class="heading">材料组织</text>
+  <path d="M84 277h516" class="rule"/>
+  <text x="88" y="326" class="module">Notes</text>
+  <text x="596" y="326" class="value" text-anchor="end">留下原始材料</text>
+  <text x="88" y="382" class="module">Projects</text>
+  <text x="596" y="382" class="value" text-anchor="end">组织持续工作</text>
+
+  <!-- Work planning includes persistent goals and routine schedules/methods. -->
+  <rect x="656" y="198" width="564" height="220" rx="20" class="card"/>
+  <rect x="680" y="221" width="38" height="38" rx="11" fill="#e5f1eb"/>
+  <g class="teal-icon">
+    <rect x="688" y="231" width="22" height="19" rx="2"/>
+    <path d="M693 228v6M705 228v6M688 237h22M693 242h3M702 242h3M693 246h3"/>
+  </g>
+  <text x="733" y="250" class="heading">工作安排</text>
+  <path d="M680 277h516" class="rule"/>
+  <text x="684" y="326" class="module">Tasks</text>
+  <text x="1192" y="326" class="value" text-anchor="end">接续目标与进度</text>
+  <text x="684" y="382" class="module">Routines</text>
+  <text x="1192" y="382" class="value" text-anchor="end">记录日程与方法</text>
+
+  <!-- Experience. -->
+  <rect x="60" y="446" width="564" height="220" rx="20" class="card"/>
+  <rect x="84" y="469" width="38" height="38" rx="11" fill="#e5f1eb"/>
+  <g class="teal-icon">
+    <path d="M92 480h10v18H92zM105 480h9v18h-9z"/>
+    <path d="M96 484h3M108 484h3M96 493h3M108 493h3"/>
+  </g>
+  <text x="137" y="498" class="heading">经验积累</text>
+  <path d="M84 525h516" class="rule"/>
+  <text x="88" y="574" class="module">Memory</text>
+  <text x="596" y="574" class="value" text-anchor="end">保留判断理由</text>
+  <text x="88" y="630" class="module">Skills</text>
+  <text x="596" y="630" class="value" text-anchor="end">复用有效做法</text>
+
+  <!-- Process and outcomes. -->
+  <rect x="656" y="446" width="564" height="220" rx="20" class="card"/>
+  <rect x="680" y="469" width="38" height="38" rx="11" fill="#f7ecd8"/>
+  <g class="amber-icon">
+    <path d="M689 497v-7M697 497v-15M705 497v-10M687 501h22"/>
+    <path d="m689 483 8-7 8 4"/>
+  </g>
+  <text x="733" y="498" class="heading">改进依据</text>
+  <path d="M680 525h516" class="rule"/>
+  <text x="684" y="574" class="module">Observation</text>
+  <text x="1192" y="574" class="value" text-anchor="end">回看工作过程</text>
+  <text x="684" y="630" class="module">Evaluation</text>
+  <text x="1192" y="630" class="value" text-anchor="end">验证改进效果</text>
+
+  <!-- Human review of deliverables. -->
+  <rect x="60" y="694" width="564" height="220" rx="20" class="card"/>
+  <rect x="84" y="717" width="38" height="38" rx="11" fill="#f7ecd8"/>
+  <g class="amber-icon">
+    <rect x="92" y="727" width="22" height="17" rx="2"/>
+    <path d="M92 732h22M97 748h12M103 744v4"/>
+    <path d="m98 738 3 3 6-5"/>
+  </g>
+  <text x="137" y="746" class="heading">产物审阅</text>
+  <path d="M84 773h516" class="rule"/>
+  <text x="88" y="822" class="module">Artifacts</text>
+  <text x="596" y="822" class="value" text-anchor="end">交付产物供审阅</text>
+
+  <!-- Composition is cross-cutting: bring external material into any of the uses above. -->
+  <rect x="656" y="694" width="564" height="220" rx="20" fill="#f0f5ef" stroke="#cadbcd" stroke-width="1.5"/>
+  <rect x="680" y="717" width="38" height="38" rx="11" fill="#dfebe1"/>
+  <g class="teal-icon">
+    <rect x="689" y="727" width="9" height="9" rx="2"/>
+    <rect x="700" y="738" width="9" height="9" rx="2"/>
+    <path d="M703 727h6v6M689 741v6h6"/>
+  </g>
+  <text x="733" y="746" class="heading">跨仓复用</text>
+  <path d="M680 773h516" stroke="#d4e1d6" stroke-width="1"/>
+  <text x="684" y="822" class="module">Compose</text>
+  <text x="1192" y="822" class="value" text-anchor="end">组合不同仓库</text>
+  <text x="684" y="876" fill="#527668" font-size="23">为当前工作接入外部积累</text>
+
+  <rect x="60" y="946" width="1160" height="54" rx="13" fill="#eaf0e9"/>
+  <text x="84" y="981" fill="#367c6b" font-size="21" font-weight="650">共同基础</text>
+  <path d="M197 963v20" stroke="#c4d4c9" stroke-width="1.5"/>
+  <text x="223" y="981" class="muted" font-size="21">目录与作用域</text>
+  <circle cx="394" cy="973" r="2" fill="#9ab0a3"/>
+  <text x="416" y="981" class="muted" font-size="21">递归索引</text>
+  <circle cx="545" cy="973" r="2" fill="#9ab0a3"/>
+  <text x="568" y="981" class="muted" font-size="21">Markdown + Git</text>
+  <circle cx="775" cy="973" r="2" fill="#9ab0a3"/>
+  <text x="798" y="981" class="muted" font-size="21">CLI / Skill / MCP</text>
+</svg>

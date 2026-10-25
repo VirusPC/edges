@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-labelledby="title description">
+  <title id="title">Edges 工作总览：换会话、换 Agent，工作和经验仍能接着用</title>
+  <desc id="description">你提出目标并审阅成果与经验，Agent 结合背景与方法推进工作，交付可审阅的方案、修改或报告，再由你审阅与反馈。Edges 是随目录保留的工作与经验基础：Agent 从中读取背景与方法，并留下材料与经验；它不是自动编排或执行器。基础中包括材料 Notes 与 Projects、工作 Tasks 与 Routines、经验 Memory 与 Skills。Routines 在此记录日程与方法，执行仍由外部平台触发。按需接入跨仓复用、过程观测与效果评测、产物预览。目录索引、Markdown 与 Git 让这些积累可以读取、维护和延续。</desc>
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+      .ink { fill: #19343c; }
+      .muted { fill: #607477; }
+      .heading { font-size: 28px; font-weight: 650; fill: #19343c; }
+      .body { font-size: 24px; fill: #526c70; }
+      .label { font-size: 22px; fill: #526c70; }
+      .card { fill: #ffffff; stroke: #d7e2dc; stroke-width: 1.5; }
+      .icon { fill: none; stroke: #367c6b; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    <marker id="arrow-neutral" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="m1 1 6 3-6 3" fill="none" stroke="#90a8a0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrow-teal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="m1 1 7 4-7 4" fill="none" stroke="#397e70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="m1 1 7 4-7 4" fill="none" stroke="#b28a47" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="900" rx="24" fill="#f7f8f4"/>
+  <path d="M60 48h28" stroke="#1b817b" stroke-width="4" stroke-linecap="round"/>
+  <text x="102" y="55" class="muted" font-size="18" font-weight="600" letter-spacing="2">EDGES / 工作总览</text>
+  <text x="60" y="112" class="ink" font-size="39" font-weight="650">换会话、换 Agent，工作和经验仍能接着用。</text>
+  <text x="60" y="155" class="muted" font-size="24">你与 Agent 推进工作，Edges 让背景、方法和进度留在目录中。</text>
+
+  <!-- Review returns to the person; Edges does not autonomously approve its own changes. -->
+  <path d="M1080 242v-14q0-16-16-16H216q-16 0-16 16v14" fill="none" stroke="#90a8a0" stroke-width="1.8" marker-end="url(#arrow-neutral)"/>
+  <rect x="559" y="196" width="162" height="30" rx="10" fill="#f7f8f4"/>
+  <text x="640" y="217" class="label" text-anchor="middle">审阅与反馈</text>
+
+  <!-- The working relationship. -->
+  <rect x="60" y="246" width="280" height="152" rx="20" class="card"/>
+  <rect x="84" y="269" width="38" height="38" rx="11" fill="#e5f1eb"/>
+  <g class="icon">
+    <circle cx="103" cy="283" r="5"/>
+    <path d="M93 299c0-11 20-11 20 0"/>
+  </g>
+  <text x="137" y="298" class="heading">你</text>
+  <text x="87" y="342" class="body">提出目标</text>
+  <text x="87" y="377" class="body">审阅成果与经验</text>
+
+  <path d="M353 322h134" fill="none" stroke="#90a8a0" stroke-width="2" marker-end="url(#arrow-neutral)"/>
+  <text x="420" y="305" class="label" text-anchor="middle">对话与目标</text>
+
+  <rect x="500" y="246" width="280" height="152" rx="20" fill="#edf4ee" stroke="#b8d1c3" stroke-width="1.5"/>
+  <rect x="524" y="269" width="38" height="38" rx="11" fill="#dcebdd"/>
+  <g class="icon">
+    <path d="M536 279h-4v18h4M550 279h4v18h-4"/>
+    <path d="m539 284 4 4-4 4M545 293h4"/>
+  </g>
+  <text x="577" y="298" class="heading">Agent</text>
+  <text x="527" y="342" class="body">结合背景与方法</text>
+  <text x="527" y="377" class="body">推进当前工作</text>
+
+  <path d="M793 322h134" fill="none" stroke="#90a8a0" stroke-width="2" marker-end="url(#arrow-neutral)"/>
+  <text x="860" y="305" class="label" text-anchor="middle">交付</text>
+
+  <rect x="940" y="246" width="280" height="152" rx="20" class="card"/>
+  <rect x="964" y="269" width="38" height="38" rx="11" fill="#f7ecd8"/>
+  <g fill="none" stroke="#a57a30" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M976 278h11l5 5v16h-16zM987 278v6h5"/>
+    <path d="m980 291 3 3 5-6"/>
+  </g>
+  <text x="1017" y="298" class="ink" font-size="25" font-weight="650">可审阅的成果</text>
+  <text x="967" y="348" class="body">方案 · 修改 · 报告</text>
+
+  <!-- Separate directions make the persistence relationship explicit. -->
+  <path d="M574 514V409" fill="none" stroke="#397e70" stroke-width="2.5" marker-end="url(#arrow-teal)"/>
+  <text x="548" y="463" fill="#397e70" font-size="23" text-anchor="end">读取背景与方法</text>
+  <path d="M706 409v105" fill="none" stroke="#b28a47" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+  <text x="732" y="463" fill="#9a7438" font-size="23">留下材料与经验</text>
+
+  <!-- The persistent foundation is inspectable material, not an execution engine. -->
+  <rect x="60" y="520" width="1160" height="300" rx="20" fill="#ffffff" stroke="#cfddd3" stroke-width="1.5"/>
+  <path d="M80 520h1120q20 0 20 20v41H60v-41q0-20 20-20" fill="#e9f1e8"/>
+  <text x="88" y="560" class="ink" font-size="28" font-weight="650">Edges · 随目录保留的工作与经验</text>
+  <text x="1192" y="558" fill="#527668" font-size="22" text-anchor="end">人和 Agent 都能维护</text>
+
+  <path d="M440 607v124M832 607v124" stroke="#e1e7e1" stroke-width="1.5"/>
+  <text x="88" y="632" class="heading">材料</text>
+  <text x="88" y="671" class="body">Notes / Projects</text>
+  <text x="88" y="710" class="label">保留背景与原始资料</text>
+  <text x="480" y="632" class="heading">工作</text>
+  <text x="480" y="671" class="body">Tasks / Routines</text>
+  <text x="480" y="710" class="label">记录目标、进度与日程</text>
+  <text x="872" y="632" class="heading">经验</text>
+  <text x="872" y="671" class="body">Memory / Skills</text>
+  <text x="872" y="710" class="label">保留理由与有效做法</text>
+
+  <path d="M84 752h1112" stroke="#e1e7e1" stroke-width="1"/>
+  <text x="88" y="793" fill="#527668" font-size="21" font-weight="600">按需接入</text>
+  <text x="236" y="793" class="label">跨仓复用</text>
+  <circle cx="382" cy="785" r="2" fill="#9ab0a3"/>
+  <text x="409" y="793" class="label">回看过程、验证改进</text>
+  <circle cx="671" cy="785" r="2" fill="#9ab0a3"/>
+  <text x="698" y="793" class="label">分享产物预览</text>
+
+  <text x="640" y="864" class="muted" font-size="22" text-anchor="middle">目录索引 · Markdown · Git</text>
+</svg>
