@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: evaluation
-  edges-updated-at: '2026-10-25T08:32:51.213Z'
+  edges-updated-at: '2026-10-25T11:49:51.037Z'
   edges-title: CLI：edges evaluation server 启动入口
-  edges-tasks-status: backlog
+  edges-tasks-status: done
   edges-task-priority: none
 name: cli_evaluation_server_启动入口
 description: edges evaluation server 拉起评测服务；统一 edges.env；包迁入 evaluation 模块；脑仓 ops 同批改指 CLI。
@@ -26,8 +26,8 @@ description: edges evaluation server 拉起评测服务；统一 edges.env；包
 5. 验收路径：`--dev` 起服务 → `GET /health` → 伪造签名 POST；install/start 能装上 unit。
 
 **完成标准：**
-- [ ] `packages/services/experiment-webhook/` 已迁入 evaluation 模块目录，旧路径不再作为对外入口
-- [ ] `edges evaluation server start --dev` 可前台拉起；默认 `start` 走 systemd unit
-- [ ] 默认读 `~/.config/edges/edges.env`；`edges config init|path|show` 可用；旧 `artifacts-preview.env` 被忽略并给出迁移动作提示
-- [ ] `--dev` 下 `/health` 与伪造签名 POST 有可复现测试或脚本记录
+- [x] `packages/services/experiment-webhook/` 已迁入 evaluation 模块目录，旧路径不再作为对外入口
+- [x] `edges evaluation server start --dev` 可前台拉起；默认 `start` 走 systemd unit
+- [x] 默认读 `~/.config/edges/edges.env`；`edges config init|path|show` 可用；旧 `artifacts-preview.env` 被忽略并给出迁移动作提示
+- [x] `--dev` 下 `/health` 与伪造签名 POST 有可复现测试或脚本记录
 - [ ] 脑仓 ops 已改为 CLI 入口的 PR 已开；workspace 指针 bump PR 已开（或同批说明阻塞）
