@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 文档与系统
+
+- **追问直接写在 `grill-me` 和 `grill-with-docs` 里：** 打开这两个技能就会按轮追问，直到问题和推荐答案都对上。`grill-with-docs` 同时加载 `domain-modeling`，边问边写术语和 ADR。仓库里不再单独提供 grilling 技能，`skills-lock.json` 和技能索引也不再登记它。
+
 ## [1.6.0] - 2026-10-25
 
 ### 评测
