@@ -1,0 +1,3 @@
+{
+  "harness-memory-ablation/v1": "experiment_webhook.runners.harness_memory_ablation"
+}
