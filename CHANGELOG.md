@@ -15,47 +15,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 评测
 
-- **用 `edges evaluation server` 拉起评测服务：** `install` 把 user systemd unit 装上并 enable，不启动进程。`start`、`stop`、`restart`、`status` 只管这个 unit。`edges evaluation server start --dev` 在前台阻塞，直到进程退出。第一次先 `edges config init`，再 `install`，再 `start`。
-- **本机配置收成一份 `edges.env`：** `edges config init` 建立 `~/.config/edges/edges.env`。旧的 `~/.config/edges/artifacts-preview.env` 只在这一步被复制一次，之后不再读取。`edges config path` 打印路径。`edges config show` 打印时把含 SECRET、TOKEN、PASSWORD 或 `_KEY` 的值写成 `***`。`edges artifacts server` 同样只读这份文件；文件不在就报错，并提示运行 `edges config init`。
-- **Experiment Webhook 并进 evaluation 服务：** 目录是 `packages/services/evaluation`，包名 `edges-evaluation`。对外入口是 `edges evaluation server`，不再使用 `packages/services/experiment-webhook` 这个包名。
-- **Langfuse 的 Custom Experiment 可以打到本仓 webhook，按 Dataset 名字跑已登记的实验：** 评测服务收到 `POST /langfuse/experiment` 后，用官方 `x-langfuse-signature` 校验原始 body，立刻回 202，再按 Dataset 名字调用已登记的 runner。第一条接 harness memory 消融，把 Dataset 题适配进现有的 `run_experiment`。默认 10 分钟超时；超时或失败会写 `packages/evaluation/reports/`，并在配了 Langfuse 密钥时写回 experiment trace 和 `run_ok` 分数。
+- **评测服务可以用 `edges evaluation server` 拉起：** `install` 装上 unit 并不启动；`start`、`stop`、`restart`、`status` 管这个 unit。以前没有这条仓库入口。
+- **本机配置收成一份 `edges.env`：** `edges config init` 建立 `~/.config/edges/edges.env`，评测和 `edges artifacts server` 都只读这一份。旧的 `artifacts-preview.env` 只在 init 时复制一次。
+- **Langfuse 实验可以打进本仓 webhook：** `POST /langfuse/experiment` 按 Dataset 名字跑已登记的实验。校验通过后立刻接受，再在评测服务里执行。
 
 ### 文档与系统
 
-- **公开文档不点名个人仓：** 根 README、CHANGELOG、ADR、架构说明、任务与记忆，以及评测配置，不再写出维护者个人仓或私有仓的名字和链接。检索评测的语料地址改成通用示例 `https://github.com/example/personal-brain.git`；需要真实的拆仓前语料时，设置 `EDGES_RETRIEVAL_CORPUS_URL`。`VirusPC/edges` 与 npm 包 `@viruspc/edges` 保持不变。
+- **公开文档不再点名个人仓：** 根 README、CHANGELOG 和 ADR 不再写维护者个人仓的名字和链接。拆仓前语料用 `EDGES_RETRIEVAL_CORPUS_URL` 指定。
 
 ### 目录布局
 
-- **extensions 平铺到仓库根：** 取消 `extensions/` 这一层，不留软链，代码目录用原名先放到仓库根。同日再收进 `packages/`，见下一条。决定见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)，对照见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
-- **代码目录收进 `packages/`：** 这些目录从仓库根移入 `packages/`，目录名不变；npm 包名 `@viruspc/edges` 不变，`repository.directory` 改为 `packages/cli`。不留兼容软链。决定见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md)，对照见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
+- **取消 `extensions/` 这一层：** 不留软链，代码目录用原名先放到仓库根，同日再收进 `packages/`。见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md) 和 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
+- **代码目录收进 `packages/`：** 目录名不变，不留兼容软链；npm 包 `@viruspc/edges` 的 `repository.directory` 改为 `packages/cli`。见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md) 和 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
 
 ### 内容归属
 
-- **对外博客离开框架仓：** `posts/`、维护看板项目 `site-and-content`（4 张卡）和项目记忆 `project_posts_public_astro_blog` 从本仓删除。文章与建站卡以用户的个人大脑仓里的 `posts/` 与 `.harness/tasks/site-and-content/` 为准；博客记忆由个人大脑仓补登记。根 `AGENTS.md` 不再禁止改 `posts/`。`/tasks/` 看板生成器仍在本仓。决定见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)。
+- **对外博客离开框架仓：** `posts/` 从本仓删除，文章改在个人主干仓。`/tasks/` 看板生成器仍留在本仓。见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)。
 
 ### 仓库拆分
 
-- **框架单独成仓：** 2026-10-20 起，原 `VirusPC/edges` 改名为用户的个人大脑仓，作个人主干长期保留；新的 `VirusPC/edges` 只含 Edges 系统路径，从单个初始提交开始，拆自个人大脑仓提交 `025904fa29bcc6970f45c654d95e30c5390d43d7`。拆仓前的 commit、PR 与 Actions 记录都在个人大脑仓。根 `AGENTS.md` 用 Compose 登记个人大脑仓；retrieval eval 的 `edges` 语料锁到个人大脑仓的这个提交。npm 包名 `@viruspc/edges` 不变。
+- **框架单独成仓：** 本仓只保留 Edges 系统，历史 commit 与 PR 留在个人主干仓。npm 包名 `@viruspc/edges` 不变。
 
 ### 组合仓库
 
-- **Compose 底层改用 git submodule：** 被组合的仓库默认装到仓内 `.harness/compose/<name>`，不再放 `~/.edges/composed/<name>`。登记只写相对路径，换一台机器 clone 主仓库后跑一次 `edges compose update` 就能用。`--path` 只收相对路径。
-- **compose 只剩 add / list / update：** 名字对应 git submodule。`add` 取代 `register`，跑 `git submodule add` 再写 `.harness/compose/README.md`；`list` 列出条目和是否已检出；`update` 取代 `clone` / `pull`，跑 `git submodule update --init`（从不带 `--recursive`），加 `--remote` 跟到远端最新。`register`、`unregister`、`clone`、`pull`、`push` 删除，不留别名。推送在子模块里用原生 git；去掉条目手删 `.harness/compose/README.md` 那一行，需要时再 `git submodule deinit` / `git rm`。
-- **不递归，并提示未初始化：** 读取只看当前仓库自己的条目，不展开被组合仓库自己的 Compose；两个仓库互相登记也只展开一层。子模块目录为空时提示运行 `edges compose update --name <name>`。旧的 `~/...` / 绝对路径条目照样能读，并提示迁移。本仓根 `AGENTS.md` 的个人大脑仓条目改指 `.harness/compose/<name>`（子模块本身另行添加）。决定见 [ADR 0042](docs/adr/0042-compose-on-git-submodule.md)。本 scope 是否进入扫描见下面「入口 README」。
-- **登记组合仓库必须写说明：** `edges compose add`（原 `register`）要求 `--description`。不传，或只传空白，命令以校验错误退出（退出码 2，`errorCode` 为 `VALIDATION_ERROR`），不会把缺说明的条目写进 `.harness/compose/README.md`。说明要写清这个仓存什么、什么时候该往里写。操作见 [`edges-compose`](packages/skills/edges-compose/SKILL.md)（beta）。
-- **逐条处理失败：** `edges compose update` 逐条处理登记。某一条失败（git 报错、URL 与登记不符等）时，这条在 JSON 的 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 打一行 `warning: compose update failed for <名字>: <原因>`，后面的条目照常执行。至少一条成功时整体成功（退出码 0）；全部请求的条目都失败（包括 `--name` 指定的那一条失败）时整体失败，非零退出，失败结果里仍带全部 `entries`。缺少作用域 `AGENTS.md`、`--name` 找不到条目这类非单条错误照旧直接失败。
-- **入口 README：** `.harness` 下每个模块一份入口 README。Compose 不再是 `AGENTS.md` 上的特例，入口是 `.harness/compose/README.md`，由 `.harness/README.md` 链接。`ComposeReadmeNode` 继承 README 节点，负责组合区块和子节点展开。子节点是被组合仓库的 `README.md`。默认就会展开；系统根扫描默认进入本 scope 的 `.harness/compose/`。根级 `--exclude` 可跳过 `compose`、`memory`、`skills`、`notes`、`projects`、`tasks`。一次性迁移用 `edges compose doctor --apply`。doctor 不改写文档里的 `--with-composed`：`.agents/skills/`、CHANGELOG 和 ADR 跳过，其余只在预览里报告。决定见 [ADR 0043](docs/adr/0043-compose-readme-entry.md)。
-- **被组合仓库可写：** 删掉只读特例之后，已检出的子模块工作区可以直接写。提交和推送用原生 git。决定见 [ADR 0045](docs/adr/0045-compose-checkout-writable.md)。
+- **Compose 改用 git submodule：** 被组合仓库装到 `.harness/compose/<name>`，不再放 `~/.edges/composed/<name>`。换一台机器后跑一次 `edges compose update` 就能用。见 [ADR 0042](docs/adr/0042-compose-on-git-submodule.md)。
+- **日常命令只剩 `add` / `list` / `update`：** `edges compose add`、`list`、`update` 取代 `register`、`clone`、`pull`、`push`，不留别名。`add` 必须带 `--description`；推送在子模块里用原生 git。
+- **组合入口改为 README，检出可写：** 入口从 `AGENTS.md` 上的区块改为 `.harness/compose/README.md`，默认就会展开；已检出的子模块可以直接写。一次性迁移用 `edges compose doctor --apply`。见 [ADR 0043](docs/adr/0043-compose-readme-entry.md) 和 [ADR 0045](docs/adr/0045-compose-checkout-writable.md)。
 
 ### CLI
 
-- **prerelease 发到 npm 的 `beta` tag：** `.github/workflows/publish-edges-cli.yml` 看到 `packages/cli/package.json` 的 `version` 含 `-` 时，发布命令加上 `--tag beta`，不把该版本标成 `latest`。稳定版不传 `--tag`，仍走默认 `latest`。决定见 [ADR 0037](docs/adr/0037-npm-publish-via-github-actions.md)。
-- **发往 main 的 PR 先做冻结安装：** `.github/workflows/frozen-install.yml` 在 pull request 的目标分支是 main 时，用根 `package.json` 的 `packageManager` 跑与 Deploy 相同的 `pnpm install --frozen-lockfile --filter @viruspc/edges... --filter tasks-review-app...`。锁文件和 `.pnpmfile.cjs` 对不上时，在合入前失败。
-- **npm 发版工作流使用仓库锁定的 pnpm：** `.github/workflows/publish-edges-cli.yml` 不再在 `pnpm/action-setup` 里写 `version: 10`。根 `package.json` 的 `packageManager` 已是 `pnpm@10.34.7`，两边同时指定会让 `@viruspc/edges@*` 的发布在安装前失败。
+- **预发布发到 npm 的 `beta` tag：** 版本号里带 `-` 的 `@viruspc/edges` 发到 npm `beta` tag，不覆盖 `latest`。稳定版仍走 `latest`。见 [ADR 0037](docs/adr/0037-npm-publish-via-github-actions.md)。
 
 ### 项目记忆（project-memory）
 
-- **旧平铺记忆可以迁到当前布局：** 在仍使用早期 `.memory/` 平铺文件的仓库里，先跑 `edges memory migrate --dry-run`，确认映射后再跑 `edges memory migrate`。它按 `project` / `feedback` / `reference` / `user` 前缀把 `<type>_<slug>.md` 收进 `.harness/memory/<plural>/<type>_<slug>/INDEX.md`，大写的 `FEEDBACK.md`、`PROJECT.md`、`REFERENCE.md`、`USER.md` 重写成类型 `README.md`。条目用相对路径引用的附件目录一起搬走。对不上的路径列在结果的 `diagnostics` 里，正式迁移时进 `.project-memory-migration/unclassified/`，不再因为一个文件让整次迁移失败。`edges init` 碰到旧层时，会直接提示这两条命令。
+- **旧平铺 `.memory/` 可以迁到 `.harness/memory/`：** 先 `edges memory migrate --dry-run`，再 `edges memory migrate`。对不上的文件不再让整次迁移失败。
 
 ## [1.5.0] - 2026-10-19
 
