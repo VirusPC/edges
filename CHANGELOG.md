@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 项目记忆（project-memory）
 
-- **只有还在用旧的一篇篇文件时才要迁：** `.memory/` 里若已是现在的目录结构，不用跑迁移。
+- **只有还在用旧的一篇篇文件时才要迁：** 记忆已经在 `.harness/memory/` 里的，不用跑。还停在 `.memory/` 下一篇篇文件的，才走下面这一步。
 - **先看会搬到哪，再真正搬：** `edges memory migrate --dry-run` 只预览；确认后去掉 `--dry-run` 再跑，文件进入 `.harness/memory/`。对不上的文件会单独列出，不会让其余的停掉。
 
 ## [1.5.0] - 2026-10-19
