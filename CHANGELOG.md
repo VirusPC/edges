@@ -26,35 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 目录布局
 
-- **extensions 平铺到仓库根：** `extensions/` 这一层取消，不留软链。`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 用原名放到仓库根。`extensions/.harness/` 的记忆并入根 `.harness/`；`extensions/AGENTS.md` 的硬约束并入根 `AGENTS.md`；`skills/project-memory-init` 改由根登记。空目录 `extensions/docs`、`extensions/tools`、`extensions/subagents` 删除。`extensions/new-server` 与 `extensions/others` 从本仓删除（个人仓 `shared-extensions/` 另行搬入）。`feedback_cli_under_extensions` 翻案：CLI 放仓库根 `cli/`。同日这些落在仓库根的代码目录再收进 `packages/`，见下一条。决定见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)，对照表见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
-
-| 旧路径 | 新路径 |
-| --- | --- |
-| `extensions/cli/` | `cli/` |
-| `extensions/skills/` | `skills/` |
-| `extensions/apps/` | `apps/` |
-| `extensions/services/` | `services/` |
-| `extensions/mcp-servers/` | `mcp-servers/` |
-| `extensions/system-prompt/` | `system-prompt/` |
-| `extensions/.harness/` | 并入 `.harness/` |
-| `extensions/AGENTS.md` | 硬约束并入根 `AGENTS.md` |
-| `extensions/README.md` | 目录表进根 `README.md`，收录标准进 `docs/architecture.md` |
-| `extensions/docs/`、`extensions/tools/`、`extensions/subagents/` | 删除 |
-| `extensions/new-server/`、`extensions/others/` | 从本仓删除 |
-
-- **代码目录收进 `packages/`：** pnpm workspace 的包都在 `packages/` 下。`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/` 从仓库根移入，目录名不变。`.harness/evaluation/` 与 `.harness/observation/` 整棵移到 `packages/evaluation/`、`packages/observation/`。一次性迁移脚本移到 `scripts/migrations/`。不留兼容软链。新增私有包 `@viruspc/edges-skills`、`@viruspc/edges-system-prompt`、`@viruspc/edges-evaluation`、`@viruspc/edges-observation`。CLI 用 `workspace:*` 依赖 skills，构建时解析该包再拷进发布目录。npm 包名 `@viruspc/edges` 不变，`repository.directory` 改为 `packages/cli`。决定见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md)，对照表见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
-
-| 旧路径 | 新路径 |
-| --- | --- |
-| `cli/` | `packages/cli/` |
-| `skills/` | `packages/skills/`（`@viruspc/edges-skills`） |
-| `apps/` | `packages/apps/` |
-| `services/` | `packages/services/` |
-| `mcp-servers/` | `packages/mcp-servers/` |
-| `system-prompt/` | `packages/system-prompt/`（`@viruspc/edges-system-prompt`） |
-| `.harness/evaluation/` | `packages/evaluation/`（`@viruspc/edges-evaluation`） |
-| `.harness/observation/` | `packages/observation/`（`@viruspc/edges-observation`） |
-| 一次性 `scripts/*.mts` 等 | `scripts/migrations/` |
+- **extensions 平铺到仓库根：** 取消 `extensions/` 这一层，不留软链，代码目录用原名先放到仓库根。同日再收进 `packages/`，见下一条。决定见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)，对照见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
+- **代码目录收进 `packages/`：** 这些目录从仓库根移入 `packages/`，目录名不变；npm 包名 `@viruspc/edges` 不变，`repository.directory` 改为 `packages/cli`。不留兼容软链。决定见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md)，对照见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
 
 ### 内容归属
 
