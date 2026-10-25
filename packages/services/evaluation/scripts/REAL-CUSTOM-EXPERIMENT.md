@@ -72,10 +72,10 @@ EOF
 mkdir -p /tmp/edges-experiment-webhook-reports
 ```
 
-Server, from `packages/services/experiment-webhook`. The log line was `listening host=127.0.0.1 port=8791 signature=True`.
+Server, from `packages/services/evaluation` (`edges evaluation server start --dev`). The log line was `listening host=127.0.0.1 port=8791 signature=True`.
 
 ```bash
-cd packages/services/experiment-webhook
+cd packages/services/evaluation
 set -a
 source /tmp/edges-experiment-webhook.env
 set +a
@@ -195,7 +195,7 @@ curl -A edges-observation/1 -u "$LANGFUSE_PUBLIC_KEY:$LANGFUSE_SECRET_KEY" \
 Re-check credentials and item counts without sending a trigger:
 
 ```bash
-cd packages/services/experiment-webhook
+cd packages/services/evaluation
 PYTHONPATH=. python3 scripts/real_custom_experiment.py
 ```
 

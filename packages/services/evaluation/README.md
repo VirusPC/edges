@@ -1,6 +1,8 @@
-# edges-experiment-webhook
+# edges evaluation server
 
-Langfuse Custom Experiment 打到这个 HTTP 进程。进程立刻回 **202**，再在本进程里按 Dataset 名字调用登记过的 runner。没有任务队列。
+包名 `edges-evaluation`。对外只有这一条服务：`edges evaluation server`。Langfuse Custom Experiment 打到这个 HTTP 进程。进程立刻回 **202**，再在本进程里按 Dataset 名字调用登记过的 runner。没有任务队列。
+
+Python 模块仍叫 `experiment_webhook`。那是 unit 和 `start --dev` 拉起的进程，不是第二个包名。
 
 第一条 runner 是 harness memory 消融：`registry.json` 把 `harness-memory-ablation/v1` 指到 `experiment_webhook.runners.harness_memory_ablation`。适配层把 Langfuse Dataset item 收成 `run_experiment` 已经接受的题，不改 runner 本身。本地 case 文件和 Dataset item 不是同一种形状。
 
@@ -41,16 +43,27 @@ Body 是 Langfuse Custom Experiment 的官方形状：`projectId`、`datasetId`�
 
 ## 本地
 
+配置只读 `~/.config/edges/edges.env`。没有这份文件时命令报错，并提示 `edges config init`。`edges config init` 会在旧的 `~/.config/edges/artifacts-preview.env` 还在、新文件不在时复制一次。复制之后不再读旧文件。`edges config show` 把密钥打成 `***`。
+
 ```bash
-cd packages/services/experiment-webhook
-PYTHONPATH=. python3 -m unittest discover -s test -p 'test_*.py' -v
-LANGFUSE_WEBHOOK_SECRET=… \
-LANGFUSE_HOST=… \
-LANGFUSE_PUBLIC_KEY=… \
-LANGFUSE_SECRET_KEY=… \
-PYTHONPATH=. python3 -m experiment_webhook
+edges config init
+edges config path
+edges config show
+edges evaluation server install
+edges evaluation server start
+edges evaluation server status
+edges evaluation server start --dev
 ```
 
-默认 `127.0.0.1:8791`。报告目录默认是仓库里的 `packages/evaluation/reports/`。密钥只放环境变量，不进仓库，也不要把实例域名写进仓库。
+`install` 装 user systemd unit 并 enable，不启动。默认 `start` 走这个 unit。`start --dev` 在前台阻塞。不要把 install 和 start 合成一步。
+
+密钥放在 `edges.env` 的 `LANGFUSE_*` / `EXPERIMENT_WEBHOOK_*` 里，不进仓库，也不要把实例域名写进仓库。默认监听 `127.0.0.1:8791`。报告目录默认是仓库里的 `packages/evaluation/reports/`。
+
+测试：
+
+```bash
+cd packages/services/evaluation
+PYTHONPATH=. python3 -m unittest discover -s test -p 'test_*.py' -v
+```
 
 登记表是本目录的 `registry.json`：Dataset 名字 → Python 模块。模块提供 `run(context)`。换一个实验就加一行，不必改 HTTP 入口。

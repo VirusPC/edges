@@ -282,9 +282,31 @@ edges artifacts server start
 edges artifacts server status
 ```
 
-init 管理客户端配置，publish/delete 调用预览服务并返回 JSON。server install 负责构建、服务配置和启用，不自动 start；start/stop/restart 只管理进程。服务部署路径与内容作用域独立。发布任务来源时使用 from-type、from-id、task-project，不把渲染审阅页与发布合成一个隐含动作。
+init 管理客户端配置，publish/delete 调用预览服务并返回 JSON。server install 负责构建、服务配置和启用，不自动 start；start/stop/restart 只管理进程。服务部署路径与内容作用域独立。服务端读 `~/.config/edges/edges.env`，不读 `artifacts-preview.env`。发布任务来源时使用 from-type、from-id、task-project，不把渲染审阅页与发布合成一个隐含动作。
 
 客户端 token、服务端配置、nginx、升级与恢复流程见 [Artifacts 服务说明](../services/artifacts-preview/README.md)和[部署说明](deploy/README.md)。
+
+### 评测服务：evaluation
+
+```bash
+edges config init
+edges evaluation server install
+edges evaluation server start
+edges evaluation server start --dev
+edges evaluation server status
+```
+
+`install` 安装并 enable user systemd unit，不启动。默认 `start` 走这个 unit。`start --dev` 在前台阻塞。配置是 `~/.config/edges/edges.env`。
+
+### 统一配置：config
+
+```bash
+edges config init
+edges config path
+edges config show
+```
+
+`init` 建立 `~/.config/edges/edges.env`。旧的 `artifacts-preview.env` 只在新文件还不存在时被复制一次。`path` 打印路径。`show` 把密钥打成 `***`。
 
 ### 组合仓库：compose
 

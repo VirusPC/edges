@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 # Thin wrapper: edges artifacts server install, then restart.
 # Never a combined install-and-start. No sudo. Requires
-# ~/.config/edges/artifacts-preview.env (token on the box).
+# ~/.config/edges/edges.env (token on the box).
+# edges no longer reads ~/.config/edges/artifacts-preview.env.
+# Migrate with: edges config init
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
-ENV_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/edges/artifacts-preview.env"
+ENV_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/edges/edges.env"
+LEGACY_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/edges/artifacts-preview.env"
 UID_NOW="$(id -u)"
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/${UID_NOW}}"
 if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ] && [ -S "${XDG_RUNTIME_DIR}/bus" ]; then
@@ -26,7 +29,12 @@ if [ -s "${NVM_DIR:-$HOME/.nvm}/nvm.sh" ]; then
   . "$NVM_DIR/nvm.sh"
 fi
 
-[ -f "$ENV_FILE" ] || die "missing $ENV_FILE — run: edges artifacts server install"
+if [ ! -f "$ENV_FILE" ]; then
+  if [ -f "$LEGACY_FILE" ]; then
+    die "missing $ENV_FILE — edges no longer reads $LEGACY_FILE. Migrate: edges config init"
+  fi
+  die "missing $ENV_FILE — run: edges config init"
+fi
 token="$(awk -F= '/^EDGES_ARTIFACTS_TOKEN=/{print substr($0, index($0,"=")+1); exit}' "$ENV_FILE")"
 [ -n "$token" ] && [ "$token" != "replace-with-shared-token" ] || die "unusable token in $ENV_FILE — run: edges artifacts server install"
 command -v node >/dev/null 2>&1 || die "node not on PATH (need Node >= 22 on this box)"

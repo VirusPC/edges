@@ -1,0 +1,19 @@
+[Unit]
+Description=Edges evaluation server
+Documentation=https://github.com/VirusPC/edges/blob/main/packages/services/evaluation/README.md
+After=network.target
+ConditionPathExists=%h/.config/edges/edges.env
+
+[Service]
+Type=simple
+WorkingDirectory=@SERVICE_DIR@
+Environment=PYTHONPATH=@SERVICE_DIR@
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=%h/.config/edges/edges.env
+ExecStart=/usr/bin/python3 -m experiment_webhook
+Restart=on-failure
+RestartSec=2
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

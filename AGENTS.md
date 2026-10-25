@@ -18,7 +18,7 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 - Git：`type: subject`；AI 参与加 `Co-authored-by`；不提交 `.obsidian/workspace.json`；`pull` / `rebase` 加 `--autostash`。
 - 本机修改本仓（commit/push 或改工作树文件）必须通过独立 `git worktree`：每个 Agent/任务一个 worktree + 独立分支；禁止多 Agent 共用同一工作树并行改文件或切分支；同一分支不得挂两个 worktree。Cursor 云端 Agent 等已在独立 clone/环境中的任务视为已隔离，不要求再套本机 worktree；只读查询可不建 worktree。
 - 不绑定 Edges 的通用 skill / MCP 配置 / plugin / hook 不放本仓，去个人仓的 `shared-extensions/`。
-- 顶层 `edges` 命令能对上 harness 或领域目录时，命令名跟目录（`notes/` → `notes`，`.harness/skills` → `skills`）。硬切断，不留旧名别名。`tasks`、`memory` 已对齐则不动。不为 `evaluation` / `observation` 发明命令。
+- 顶层 `edges` 命令能对上 harness 或领域目录时，命令名跟目录（`notes/` → `notes`，`.harness/skills` → `skills`）。硬切断，不留旧名别名。`tasks`、`memory` 已对齐则不动。不为 `observation` 发明命令。`evaluation` 只提供已定的长驻服务入口 `edges evaluation server`，不另开评测内容命令。
 - 内容节点的 create/get/update/destroy 必须走 NodeService，不得旁路写文件（[ADR 0030](docs/adr/0030-content-leaf-crud-via-nodeservice.md)）。
 <!-- project-harness-constraints:end -->
 

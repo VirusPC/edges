@@ -46,9 +46,25 @@ test("artifacts server has no nginx-snippet or nginx-setup command", async () =>
   assert.notEqual(setup.exitCode, 0);
 });
 
-test("ensureServerEnv creates a token when the file is missing", async () => {
+test("ensureServerEnv rejects a missing edges.env and tells you to migrate", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-env-"));
-  const configPath = path.join(dir, "artifacts-preview.env");
+  const configPath = path.join(dir, "edges.env");
+  await assert.rejects(
+    () => ensureServerEnv({ env: { HOME: dir }, configPath }),
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.match(error.message, /edges config init/);
+      assert.match(error.message, /artifacts-preview\.env/);
+      assert.doesNotMatch(error.message, /super-secret-legacy/);
+      return true;
+    },
+  );
+});
+
+test("ensureServerEnv creates a token when the file exists without one", async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-env-"));
+  const configPath = path.join(dir, "edges.env");
+  await writeFile(configPath, "# unified\nLANGFUSE_HOST=https://langfuse.example\n", { mode: 0o600 });
   const ensured = await ensureServerEnv({
     env: { HOME: dir },
     configPath,
@@ -61,12 +77,18 @@ test("ensureServerEnv creates a token when the file is missing", async () => {
   const raw = await readFile(configPath, "utf8");
   assert.match(raw, /EDGES_ARTIFACTS_TOKEN=[0-9a-f]{64}/);
   assert.match(raw, /EDGES_ARTIFACTS_BASE_URL=https:\/\/edges\.viruspc\.tech/);
+  assert.match(raw, /LANGFUSE_HOST=https:\/\/langfuse\.example/);
   assert.equal((await stat(configPath)).mode & 0o777, 0o600);
 });
 
 test("ensureServerEnv keeps an existing token unless --force", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-env-"));
-  const configPath = path.join(dir, "artifacts-preview.env");
+  const configPath = path.join(dir, "edges.env");
+  await writeFile(
+    configPath,
+    "LANGFUSE_SECRET_KEY=super-secret\nEDGES_ARTIFACTS_TOKEN=\n",
+    { mode: 0o600 },
+  );
   const first = await ensureServerEnv({ env: { HOME: dir }, configPath });
   const second = await ensureServerEnv({ env: { HOME: dir }, configPath });
   assert.equal(second.tokenCreated, false);
@@ -76,36 +98,37 @@ test("ensureServerEnv keeps an existing token unless --force", async () => {
   assert.equal(rotated.tokenCreated, false);
   assert.equal(rotated.tokenRotated, true);
   assert.notEqual(rotated.token, first.token);
+  const raw = await readFile(configPath, "utf8");
+  assert.match(raw, /LANGFUSE_SECRET_KEY=super-secret/);
 });
 
-test("installArtifactsServer creates env when missing and does not start", async () => {
+test("installArtifactsServer errors when edges.env is missing and does not start", async () => {
   const dir = await mkdtemp(path.join(tmpdir(), "edges-artifacts-ops-"));
   const repo = path.join(dir, "repo");
-  const deploy = path.join(repo, "packages/services/artifacts-preview/deploy");
-  await mkdir(deploy, { recursive: true });
-  await writeFile(
-    path.join(deploy, "edges-artifacts-preview.service"),
-    "[Unit]\nDescription=test\n[Service]\nExecStart=/bin/true\n[Install]\nWantedBy=default.target\n",
-  );
-  const envFile = path.join(dir, "artifacts-preview.env");
+  const envFile = path.join(dir, "edges.env");
+  const legacy = path.join(dir, "artifacts-preview.env");
+  await writeFile(legacy, "EDGES_ARTIFACTS_TOKEN=super-secret-legacy\n", { mode: 0o600 });
   const calls: string[] = [];
-  const result = await installArtifactsServer({
-    env: { HOME: dir },
-    envFile,
-    repoRoot: repo,
-    runCommand: async (command, args) => {
-      calls.push([command, ...args].join(" "));
-      return { exitCode: 0, stdout: "ok\n", stderr: "" };
+  await assert.rejects(
+    () =>
+      installArtifactsServer({
+        env: { HOME: dir },
+        envFile,
+        repoRoot: repo,
+        runCommand: async (command, args) => {
+          calls.push([command, ...args].join(" "));
+          return { exitCode: 0, stdout: "ok\n", stderr: "" };
+        },
+      }),
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.match(error.message, /edges config init/);
+      assert.match(error.message, /artifacts-preview\.env/);
+      assert.doesNotMatch(error.message, /super-secret-legacy/);
+      return true;
     },
-  });
-  assert.equal(result.started, false);
-  assert.equal(result.tokenCreated, true);
-  const raw = await readFile(envFile, "utf8");
-  assert.match(raw, /EDGES_ARTIFACTS_TOKEN=[0-9a-f]{64}/);
-  assert.ok(calls.some((line) => line.includes("pnpm") && line.includes("edges-artifacts-preview")));
-  assert.ok(calls.some((line) => line.includes("systemctl --user enable")));
-  assert.ok(calls.some((line) => line.includes("systemctl --user daemon-reload")));
-  assert.ok(!calls.some((line) => /\b(start|restart|stop)\b/.test(line)));
+  );
+  assert.deepEqual(calls, []);
 });
 
 test("installArtifactsServer --force rotates the token without starting", async () => {
@@ -117,7 +140,7 @@ test("installArtifactsServer --force rotates the token without starting", async 
     path.join(deploy, "edges-artifacts-preview.service"),
     "[Unit]\nDescription=test\n[Service]\nExecStart=/bin/true\n[Install]\nWantedBy=default.target\n",
   );
-  const envFile = path.join(dir, "artifacts-preview.env");
+  const envFile = path.join(dir, "edges.env");
   const original = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   await writeFile(
     envFile,
@@ -157,7 +180,7 @@ test("installArtifactsServer builds and enables the unit without starting it", a
     path.join(deploy, "edges-artifacts-preview.service"),
     "[Unit]\nDescription=test\n[Service]\nExecStart=/bin/true\n[Install]\nWantedBy=default.target\n",
   );
-  const envFile = path.join(dir, "artifacts-preview.env");
+  const envFile = path.join(dir, "edges.env");
   await writeFile(
     envFile,
     [

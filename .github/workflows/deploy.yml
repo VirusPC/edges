@@ -127,7 +127,8 @@ jobs:
                echo "::warning::installed site-layout migrator differs from this checkout; re-run: $install_cmd"
              fi
              sudo -n /usr/local/sbin/edges-migrate-site-layout
-             env_file="$HOME/.config/edges/artifacts-preview.env"
+             env_file="$HOME/.config/edges/edges.env"
+             legacy="$HOME/.config/edges/artifacts-preview.env"
              token=""
              if [ -f "$env_file" ]; then
                token="$(grep -m1 "^EDGES_ARTIFACTS_TOKEN=" "$env_file" | cut -d= -f2- || true)"
@@ -143,7 +144,11 @@ jobs:
                pnpm --filter @viruspc/edges exec -- tsx src/index.ts artifacts server install
                pnpm --filter @viruspc/edges exec -- tsx src/index.ts artifacts server restart
              else
-               echo "skip artifacts server: $env_file missing or token unused (one-time: artifacts-preview README)"
+               if [ ! -f "$env_file" ] && [ -f "$legacy" ]; then
+                 echo "skip artifacts server: missing $env_file. edges no longer reads $legacy. Migrate: edges config init"
+               else
+                 echo "skip artifacts server: $env_file missing or token unused (one-time: edges config init)"
+               fi
              fi'
 
   site-tasks:

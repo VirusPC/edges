@@ -10,6 +10,8 @@ import {
 } from "./context.js";
 import { addSchemaCommand } from "./commands/schema.js";
 import { addArtifactsCommand } from "./commands/artifacts.js";
+import { addConfigCommand } from "./commands/config.js";
+import { addEvaluationCommand } from "./commands/evaluation.js";
 import { addNotesCommand } from "./commands/notes.js";
 import { addProjectsCommand } from "./commands/projects.js";
 import { addTasksCommand } from "./commands/tasks.js";
@@ -49,6 +51,10 @@ EXAMPLES
   edges skills --help
   edges tasks --help
   edges artifacts --help
+  edges evaluation server --help
+  edges config init
+  edges config path
+  edges config show
   edges --scope ./projects/demo init
   edges --scope ./projects/demo init notes
   edges --scope ./projects/demo memory init --memory-types project feedback
@@ -123,7 +129,7 @@ function addRootCommand(
         return previous;
       },
     )
-    .description("Edges CLI: notes, tasks, artifacts, and more")
+    .description("Edges CLI: notes, tasks, artifacts, evaluation, and more")
     .version(VERSION, "-v, --version", "Print version")
     .helpOption("-h, --help", "Show this help")
     .allowExcessArguments(false)
@@ -160,6 +166,8 @@ function addRootCommand(
   addMemoryCommand(program, ctx);
   addSkillsCommand(program, ctx);
   addArtifactsCommand(program, ctx);
+  addEvaluationCommand(program, ctx);
+  addConfigCommand(program, ctx);
   addSchemaCommand(program, ctx);
   addForestCommand(program, ctx);
   addComposeCommand(program, ctx);

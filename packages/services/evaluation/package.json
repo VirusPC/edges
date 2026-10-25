@@ -1,9 +1,9 @@
 {
-  "name": "edges-experiment-webhook",
+  "name": "edges-evaluation",
   "version": "0.1.0",
   "license": "MIT",
   "private": true,
-  "description": "Langfuse Custom Experiment webhook that runs registered evaluation runners in-process",
+  "description": "Edges evaluation server. Langfuse Custom Experiment webhook that runs registered runners in-process",
   "scripts": {
     "start": "PYTHONPATH=. python3 -m experiment_webhook",
     "test": "PYTHONPATH=. python3 -m unittest discover -s test -p 'test_*.py' -v",

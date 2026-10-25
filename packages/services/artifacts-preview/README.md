@@ -54,14 +54,15 @@ edges artifacts server status
 edges artifacts server setup-nginx
 ```
 
-There is no `server init` (client `edges artifacts init` is the laptop command). `install` ensures `~/.config/edges/artifacts-preview.env` (creates a token if missing; `--force` may rotate), runs pnpm install/build, and installs + enables the user unit. It does **not** start. Never combine install and start. Token stays on the server (and in your local CLI config). Never commit `EDGES_ARTIFACTS_TOKEN`. Thin scripts under [`deploy/`](deploy/) are called by the CLI; do not treat them as the public surface.
+There is no `server init` (client `edges artifacts init` is the laptop command). The server reads `~/.config/edges/edges.env` only. It does not read `~/.config/edges/artifacts-preview.env`. If `edges.env` is missing, `install` / `start` / `restart` / `status` error and tell you to run `edges config init` (that command copies the old file once when it is present). `install` then creates a token in `edges.env` if one is missing; `--force` may rotate. It runs pnpm install/build, and installs + enables the user unit. It does **not** start. Never combine install and start. Token stays on the server (and in your local CLI config). Never commit `EDGES_ARTIFACTS_TOKEN`. Thin scripts under [`deploy/`](deploy/) are called by the CLI; do not treat them as the public surface.
 
 ### First time on the ECS
 
 1. **Node ≥ 22 + pnpm** on `cheng-dev` PATH (user systemd cannot sudo-install them). `corepack enable` then `corepack prepare pnpm@latest --activate` is enough if Node is already there.
-2. **Install (config + unit, no process):**
+2. **Config, then install (unit, no process):**
 
    ```bash
+   edges config init
    edges artifacts server install
    ```
 
@@ -147,7 +148,7 @@ Phone opens the printed `https://edges.viruspc.tech/artifacts/<uuid>/` in a syst
 
 ### After each main pull
 
-GitHub Actions [`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). **Only when** `~/.config/edges/artifacts-preview.env` exists, it runs `edges artifacts server install` then `edges artifacts server restart` (skipped until the one-time token file is in place, so teach deploys stay green). After the env exists, a failure fails the job so the restart is visible; the tree is already at `origin/main`. After task-site generation, the Action runs `sudo -n /usr/local/sbin/edges-migrate-site-layout` even without the artifacts env. That entry is installed once by root with `sudo bash packages/services/artifacts-preview/deploy/install-site-layout.sh`. It is not a repository script: sudo is limited to that absolute path with no arguments, so a push to `main` cannot change what root executes. The command migrates teaching roots to `<repo>/teaching/` and the installed tasks alias to `<repo>/tasks/_site/`, keeping public URLs and unrelated roots. It backs up both configs, validates with `nginx -t`, restores on failure, and reloads only when changed. Paths are fixed (`/etc/nginx/conf.d/teaching.conf` and `/etc/nginx/snippets/edges-tasks.conf`). A checksum mismatch prints `::warning::` and still runs the installed command; a missing command or a password prompt fails the job and prints the installer command. Do not re-run `setup-nginx` from the Action.
+GitHub Actions [`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml) already SSH-pulls the full repo (`git fetch` / `reset --hard origin/main`, concurrency `ecs-edges-pull`). **Only when** `~/.config/edges/edges.env` exists and its token is set, it runs `edges artifacts server install` then `edges artifacts server restart` (skipped until that file is in place, so teach deploys stay green). A leftover `artifacts-preview.env` is not read; the skip line tells you to run `edges config init`. After the env exists, a failure fails the job so the restart is visible; the tree is already at `origin/main`. After task-site generation, the Action runs `sudo -n /usr/local/sbin/edges-migrate-site-layout` even without the artifacts env. That entry is installed once by root with `sudo bash packages/services/artifacts-preview/deploy/install-site-layout.sh`. It is not a repository script: sudo is limited to that absolute path with no arguments, so a push to `main` cannot change what root executes. The command migrates teaching roots to `<repo>/teaching/` and the installed tasks alias to `<repo>/tasks/_site/`, keeping public URLs and unrelated roots. It backs up both configs, validates with `nginx -t`, restores on failure, and reloads only when changed. Paths are fixed (`/etc/nginx/conf.d/teaching.conf` and `/etc/nginx/snippets/edges-tasks.conf`). A checksum mismatch prints `::warning::` and still runs the installed command; a missing command or a password prompt fails the job and prints the installer command. Do not re-run `setup-nginx` from the Action.
 
 If the unit files did not change, `restart` alone is enough; `install` then `restart` is the conservative path the Action uses.
 
@@ -155,7 +156,7 @@ If `git fetch` from the ECS is flaky: keep the Action as primary (it already wor
 
 Rotate the token: `edges artifacts server install --force`, then `edges artifacts server restart`, then client `edges artifacts init --base-url https://edges.viruspc.tech --token <printed token> --force`.
 
-Server env (see [`deploy/artifacts.env.example`](deploy/artifacts.env.example)):
+Server env lives in `~/.config/edges/edges.env` (see [`deploy/artifacts.env.example`](deploy/artifacts.env.example) for the artifacts keys):
 
 ```
 EDGES_ARTIFACTS_TOKEN=<shared token from install>
