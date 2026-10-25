@@ -6,7 +6,7 @@ import json
 from typing import Any
 
 from langfuse_sink import spans_from_codex_jsonl, spans_from_pi_jsonl
-from retrieval_eval.client import ClientCall
+from shared.agent_client import ClientCall
 
 
 _IGNORED_PARSE_ERRORS = frozenset(

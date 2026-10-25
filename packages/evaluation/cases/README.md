@@ -1,11 +1,11 @@
 # cases/
 
-评测用例与 benchmark 定义。有真实用例再往这里加文件；不要预埋空数据或虚构数据集。
+用例已经按实验目标挪到 [`../experiments/`](../experiments/) 下面。这一层只留指针，不再放新的平铺用例。
 
-- **Preferred official path:** [`../run_locomo_official.py`](../run_locomo_official.py) via the [`../third_party/locomo`](../third_party/locomo) submodule. Official `task_eval/evaluate_qa.py` + `evaluation.py` F1. Evaluation Smoke, not Benchmark Proof / not Project Memory proof.
-- [`locomo-smoke/`](locomo-smoke/README.md)： **legacy hand-port** of F1 + truncated context (PR #70). Kept for history and existing reports. New runs should use the official submodule path.
-- [`memorybench-smoke/`](memorybench-smoke/README.md)：固定官方 MemoryBench 代码和 NFCats 数据的小规模无记忆 / BM25-M 对照，记录真实请求、检索、回答与原生评分；未接入 Edges Project Memory。
-- [`retrieval-smoke/`](retrieval-smoke/README.md)：edges 仓库自有路径的检索评测冒烟样本（6 题）。只为跑通链路，不是质量基准。
-- [`harness-memory-ablation/`](harness-memory-ablation/README.md)：harness memory 消融的自由问答冒烟题。30 题真源在个人主干仓 `evaluations/harness-memory-ablation`。
+- 路径检索：[`../experiments/retrieval_eval/cases/retrieval-smoke/`](../experiments/retrieval_eval/cases/retrieval-smoke/README.md)
+- LoCoMo 官方入口：[`../experiments/locomo/run_locomo_official.py`](../experiments/locomo/run_locomo_official.py)（submodule [`../third_party/locomo`](../third_party/locomo)）。Evaluation Smoke，不是 Benchmark Proof / Project Memory proof。
+- LoCoMo 历史 hand-port：[`../experiments/locomo/cases/locomo-smoke/`](../experiments/locomo/cases/locomo-smoke/README.md)
+- MemoryBench：[`../experiments/memorybench/cases/memorybench-smoke/`](../experiments/memorybench/cases/memorybench-smoke/README.md)
+- harness memory 消融：[`../experiments/harness_memory_ablation/cases/`](../experiments/harness_memory_ablation/cases/README.md)
 
-约定见上一级 [README](../README.md)。
+地图见上一级 [README](../README.md)。

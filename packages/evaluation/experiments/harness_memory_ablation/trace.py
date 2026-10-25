@@ -1,4 +1,9 @@
-"""One ablation trial as a trace. Scoring and service.name stay here."""
+"""One ablation trial as a trace. Scoring and service.name stay here.
+
+The shared sink has no tag field. Filter labels go in metadata `tags`
+as one comma-separated string. Export maps that to
+`langfuse.trace.metadata.tags`, not a Langfuse tag list.
+"""
 
 from __future__ import annotations
 
@@ -20,6 +25,11 @@ EVAL_TAG = "eval:harness-memory-ablation"
 _STEP_NS = 1_000_000
 
 
+def trial_tags(condition: str, run_date: str) -> str:
+    """`eval:harness-memory-ablation,memory:on|off,run:YYYY-MM-DD`."""
+    return ",".join((EVAL_TAG, condition, f"run:{run_date}"))
+
+
 def build_trial_trace(
     *,
     events_jsonl: str,
@@ -35,7 +45,7 @@ def build_trial_trace(
     dataset: str,
     attributes: dict[str, str] | None = None,
 ) -> Trace:
-    """Root span plus client child spans. Tags are memory condition, not retrieval."""
+    """Root span plus client child spans. Labels stay in metadata, not sink tags."""
     trace_id = new_trace_id()
     root_id = new_span_id()
     start = time.time_ns()
@@ -64,6 +74,7 @@ def build_trial_trace(
         "condition": condition,
         "dataset": dataset,
         "client_id": client_id,
+        "tags": trial_tags(condition, run_date),
     }
     return Trace(
         name=f"harness-memory-ablation {case_id}",
@@ -72,7 +83,6 @@ def build_trial_trace(
         session_id=session_id,
         user_id=client_id,
         metadata=metadata,
-        tags=(EVAL_TAG, condition, f"run:{run_date}"),
     )
 
 

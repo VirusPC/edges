@@ -11,7 +11,8 @@ from evaluate import f1_key
 from scoring import gold_answer
 
 
-EVAL_DIR = Path(__file__).resolve().parents[2]
+# cases/locomo-smoke/report.py -> packages/evaluation
+EVAL_DIR = Path(__file__).resolve().parents[4]
 REPO_ROOT = next(parent for parent in EVAL_DIR.parents if (parent / ".git").exists())
 
 

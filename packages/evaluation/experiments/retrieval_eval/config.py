@@ -9,8 +9,8 @@ from pathlib import Path
 from typing import Any
 
 
-EVAL_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = Path(__file__).resolve().parent / "config" / "config.json"
+_CASES_DIR = Path(__file__).resolve().parent / "cases"
 
 
 class ConfigError(ValueError):
@@ -269,7 +269,7 @@ def _load_clients(path: Path) -> dict[str, Client]:
 def _sample_path(sample_id: str) -> Path:
     if not sample_id or sample_id.startswith("/") or ".." in Path(sample_id).parts:
         raise ConfigError(f"invalid sample id {sample_id!r}")
-    path = EVAL_DIR / "cases" / f"{sample_id}.json"
+    path = _CASES_DIR / f"{sample_id}.json"
     if not path.is_file():
         raise ConfigError(f"sample file not found: {path}")
     return path

@@ -10,7 +10,7 @@ import json
 import os
 import urllib.error
 import urllib.request
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any, Protocol
 
@@ -187,7 +187,6 @@ def _attributes(trace: Trace, span: Any) -> list[dict[str, Any]]:
         items.append(_string("langfuse.user.id", user))
     if trace.name:
         items.append(_string("langfuse.trace.name", trace.name))
-    items.append(_string_array("langfuse.trace.tags", getattr(trace, "tags", ())))
     for key, value in trace.metadata.items():
         items.append(_string(f"langfuse.trace.metadata.{key}", value))
     if span.kind:
@@ -246,27 +245,6 @@ def _copy_int(details: dict[str, int], key: str, value: Any) -> None:
     if isinstance(value, bool) or not isinstance(value, int):
         return
     details[key] = value
-
-
-def _string_array(key: str, values: Sequence[str]) -> dict[str, Any] | None:
-    """OTLP string array. Empty after trimming is omitted."""
-    cleaned: list[str] = []
-    for value in values:
-        if not isinstance(value, str):
-            continue
-        stripped = value.strip()
-        if stripped:
-            cleaned.append(stripped)
-    if not cleaned:
-        return None
-    return {
-        "key": key,
-        "value": {
-            "arrayValue": {
-                "values": [{"stringValue": clip(item, _MAX_ATTR)} for item in cleaned],
-            }
-        },
-    }
 
 
 def _string(key: str, value: str | None) -> dict[str, Any] | None:

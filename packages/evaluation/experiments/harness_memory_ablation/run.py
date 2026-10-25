@@ -8,10 +8,10 @@ Answers come from the agent client (codex by default, pi when `--client pi`).
 The prompt is the question. Memory files are not pasted in. Quality, when
 requested, is a separate judge call.
 
-    python3 packages/evaluation/harness_memory_ablation/run.py print-command \
+    python3 packages/evaluation/experiments/harness_memory_ablation/run.py print-command \
         --memory-off /path/to/worktree-A --memory-on /path/to/worktree-B --samples 1
 
-    python3 packages/evaluation/harness_memory_ablation/run.py run \
+    python3 packages/evaluation/experiments/harness_memory_ablation/run.py run \
         --memory-off /path/to/worktree-A --memory-on /path/to/worktree-B \
         --case S01 --case S02
 
@@ -33,11 +33,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-_EVAL_DIR = Path(__file__).resolve().parents[1]
-if str(_EVAL_DIR) not in sys.path:
-    sys.path.insert(0, str(_EVAL_DIR))
+_PACKAGE = Path(__file__).resolve().parent
+_EXPERIMENTS = _PACKAGE.parent
+_EVAL_DIR = _EXPERIMENTS.parent
+for _path in (_EVAL_DIR, _EXPERIMENTS):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 
-import retrieval_eval  # noqa: F401  # puts packages/observation on sys.path
+import shared  # noqa: F401  # retrieval_eval + packages/observation on sys.path
 
 from harness_memory_ablation.answer import answer_text, trial_failure, usage_from_events
 from harness_memory_ablation.cases import (
@@ -52,8 +55,12 @@ from harness_memory_ablation.report import write_report
 from harness_memory_ablation.score import compare_trials
 from harness_memory_ablation.trace import SERVICE_NAME, build_trial_trace
 from langfuse_sink import ExportResult, exporter_from_env, make_session_id
-from retrieval_eval.client import (
+from shared.agent_client import (
+    DEFAULT_CONFIG,
+    Client,
     ClientCall,
+    ConfigError,
+    _load_clients,
     codex_command,
     pi_command,
     pi_install_command,
@@ -61,10 +68,9 @@ from retrieval_eval.client import (
     pi_sandbox_config_json,
     run_client,
 )
-from retrieval_eval.config import DEFAULT_CONFIG, Client, ConfigError, _load_clients
 
 
-DEFAULT_CASES = _EVAL_DIR / "cases" / "harness-memory-ablation" / "smoke.json"
+DEFAULT_CASES = _PACKAGE / "cases" / "smoke.json"
 CACHE_ROOT = _EVAL_DIR / ".cache" / "harness-memory-ablation"
 REPORTS_DIR = _EVAL_DIR / "reports"
 _FULL_RUN_NOTE = (

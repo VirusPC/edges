@@ -18,9 +18,9 @@ env skips export. A failed export prints one stderr line and does not change
 the score. The instance origin and keys stay out of the repo and out of
 `reports/`.
 
-    python3 packages/evaluation/retrieval_eval/run.py print-command
-    python3 packages/evaluation/retrieval_eval/run.py run
-    python3 packages/evaluation/retrieval_eval/run.py run --client pi --samples retrieval-smoke/edges-one
+    python3 packages/evaluation/experiments/retrieval_eval/run.py print-command
+    python3 packages/evaluation/experiments/retrieval_eval/run.py run
+    python3 packages/evaluation/experiments/retrieval_eval/run.py run --client pi --samples retrieval-smoke/edges-one
 """
 
 from __future__ import annotations
@@ -34,9 +34,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Sequence
 
-_EVAL_DIR = Path(__file__).resolve().parents[1]
-if str(_EVAL_DIR) not in sys.path:
-    sys.path.insert(0, str(_EVAL_DIR))
+_PACKAGE = Path(__file__).resolve().parent
+_EXPERIMENTS = _PACKAGE.parent
+_EVAL_DIR = _EXPERIMENTS.parent
+# Keep the import name `retrieval_eval` after the package moved under experiments/.
+if str(_EXPERIMENTS) not in sys.path:
+    sys.path.insert(0, str(_EXPERIMENTS))
 
 from retrieval_eval.client import (
     ClientCall,

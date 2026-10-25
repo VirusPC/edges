@@ -14,8 +14,10 @@ from pathlib import Path
 from unittest.mock import patch
 
 EVAL_DIR = Path(__file__).resolve().parents[1]
-if str(EVAL_DIR) not in sys.path:
-    sys.path.insert(0, str(EVAL_DIR))
+EXPERIMENTS = EVAL_DIR / "experiments"
+for _path in (EVAL_DIR, EXPERIMENTS):
+    if str(_path) not in sys.path:
+        sys.path.insert(0, str(_path))
 
 from harness_memory_ablation.answer import answer_text, trial_failure, usage_from_events
 from harness_memory_ablation.cases import CasesError, load_cases, select_cases
@@ -24,14 +26,13 @@ from harness_memory_ablation.prompt import build_prompt
 from harness_memory_ablation.report import write_report
 from harness_memory_ablation.run import main, print_command, run_experiment
 from harness_memory_ablation.score import compare_trials
-from harness_memory_ablation.trace import EVAL_TAG, SERVICE_NAME, build_trial_trace
-from retrieval_eval.client import ClientCall
-from retrieval_eval.config import Client
+from harness_memory_ablation.trace import EVAL_TAG, SERVICE_NAME, build_trial_trace, trial_tags
+from shared.agent_client import Client, ClientCall
 import retrieval_eval.git_repo as git_repo
 
 
-SMOKE_CASES = EVAL_DIR / "cases" / "harness-memory-ablation" / "smoke.json"
-PACKAGE_DIR = EVAL_DIR / "harness_memory_ablation"
+SMOKE_CASES = EXPERIMENTS / "harness_memory_ablation" / "cases" / "smoke.json"
+PACKAGE_DIR = EXPERIMENTS / "harness_memory_ablation"
 _REPO_SLUG = re.compile(r"VirusPC/[A-Za-z0-9_-]+")
 
 
@@ -317,9 +318,11 @@ class TraceTests(unittest.TestCase):
             dataset="harness-memory-ablation/v1",
         )
         self.assertEqual(trace.service_name, SERVICE_NAME)
-        self.assertIn(EVAL_TAG, trace.tags)
-        self.assertIn("memory:on", trace.tags)
-        self.assertIn("run:2026-10-25", trace.tags)
+        self.assertFalse(hasattr(trace, "tags"))
+        self.assertEqual(trace.metadata["tags"], trial_tags("memory:on", "2026-10-25"))
+        self.assertIn(EVAL_TAG, trace.metadata["tags"])
+        self.assertIn("memory:on", trace.metadata["tags"])
+        self.assertIn("run:2026-10-25", trace.metadata["tags"])
         self.assertNotIn("edges-retrieval-eval", json.dumps(trace.metadata))
         self.assertFalse(any(key.startswith("langfuse.") for key in trace.metadata))
 
@@ -463,9 +466,10 @@ class RunTests(unittest.TestCase):
             self.assertTrue(all(trace.service_name == SERVICE_NAME for trace in exported))
             conditions = {trace.metadata["condition"] for trace in exported}
             self.assertEqual(conditions, {"memory:off", "memory:on"})
-            self.assertTrue(all(EVAL_TAG in trace.tags for trace in exported))
-            self.assertTrue(any("memory:off" in trace.tags for trace in exported))
-            self.assertTrue(any("memory:on" in trace.tags for trace in exported))
+            self.assertTrue(all(EVAL_TAG in trace.metadata["tags"] for trace in exported))
+            self.assertTrue(any("memory:off" in trace.metadata["tags"] for trace in exported))
+            self.assertTrue(any("memory:on" in trace.metadata["tags"] for trace in exported))
+            self.assertTrue(all(not hasattr(trace, "tags") for trace in exported))
             events = list(cache.rglob("*.events.jsonl"))
             self.assertEqual(len(events), 4)
             markdown = next(reports.glob("*.md")).read_text(encoding="utf-8")

@@ -19,8 +19,9 @@ import time
 
 UPSTREAM_SHA = "247ba8c1e327fa297c0d57aaad0e3cbd66bac656"
 DATA_SHA = "3acd60a4bd35b43b408f0e6db4c5f1e88df5e96d"
-CACHE = Path(__file__).resolve().parents[2] / ".cache" / "memorybench"
-ENV_FILE = Path(__file__).resolve().parents[4] / ".env"
+# cases/memorybench-smoke/run.py -> packages/evaluation/.cache and the repo-root .env
+CACHE = Path(__file__).resolve().parents[4] / ".cache" / "memorybench"
+ENV_FILE = Path(__file__).resolve().parents[6] / ".env"
 ENV_KEYS = {
     "OPENAI_API_KEY", "OPENAI_BASE_URL", "MEMORYBENCH_MODEL",
     "EVALUATE_API_KEY", "EVALUATE_BASE_URL", "EVALUATE_MODEL",

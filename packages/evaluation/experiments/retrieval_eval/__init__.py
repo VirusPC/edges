@@ -10,6 +10,7 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-_OBSERVATION_DIR = Path(__file__).resolve().parents[2] / "observation"
+# packages/evaluation/experiments/retrieval_eval -> packages/observation
+_OBSERVATION_DIR = Path(__file__).resolve().parents[3] / "observation"
 if str(_OBSERVATION_DIR) not in sys.path:
     sys.path.insert(0, str(_OBSERVATION_DIR))

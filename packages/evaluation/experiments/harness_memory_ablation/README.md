@@ -13,7 +13,7 @@
 | A | `--memory-off PATH` | 无 memory 的本地 worktree。cwd 就是这个目录 |
 | B | `--memory-on PATH` | 完整 memory 的本地 worktree |
 
-两个目录都在命令外准备好。runner 不 `git clone`、不 checkout、不 reset，因此不会清掉 memory-off 上未提交的实验改动。不要调用 `packages/evaluation/retrieval_eval/run.py`：那条链路会 `sync_clone`，而且指标是路径检索。
+两个目录都在命令外准备好。runner 不 `git clone`、不 checkout、不 reset，因此不会清掉 memory-off 上未提交的实验改动。不要调用 `packages/evaluation/experiments/retrieval_eval/run.py`：那条链路会 `sync_clone`，而且指标是路径检索。Agent client 从 [`shared/`](../../shared/README.md) 再导出，不复制实现。
 
 Codex 仍用 `clients.json` 里的 read-only sandbox，避免答题时改到 A/B 目录。
 
@@ -22,18 +22,18 @@ Codex 仍用 `clients.json` 里的 read-only sandbox，避免答题时改到 A/B
 只打印第一条题的命令，不跑模型，也不需要 Langfuse：
 
 ```bash
-python3 packages/evaluation/harness_memory_ablation/run.py print-command \
+python3 packages/evaluation/experiments/harness_memory_ablation/run.py print-command \
   --memory-off /path/to/worktree-A \
   --memory-on /path/to/worktree-B \
   --samples 1
 ```
 
-`--samples 1` 只留 1 题。`--case S01 --case S02` 按 id 选题，可再被 `--samples` 截断。默认题库是 [`../cases/harness-memory-ablation/smoke.json`](../cases/harness-memory-ablation/smoke.json)（2 题）。
+`--samples 1` 只留 1 题。`--case S01 --case S02` 按 id 选题，可再被 `--samples` 截断。默认题库是 [`cases/smoke.json`](cases/smoke.json)（2 题）。
 
 真跑 1 到 2 题（要本机 Agent 凭据；默认 `--judge skip`，没有 Langfuse 密钥就不上报）：
 
 ```bash
-python3 packages/evaluation/harness_memory_ablation/run.py run \
+python3 packages/evaluation/experiments/harness_memory_ablation/run.py run \
   --memory-off /path/to/worktree-A \
   --memory-on /path/to/worktree-B \
   --case S01 --case S02
@@ -44,7 +44,7 @@ python3 packages/evaluation/harness_memory_ablation/run.py run \
 30 题不在本仓。从个人主干仓 `evaluations/harness-memory-ablation` 做成 Dataset `harness-memory-ablation/v1` 的 JSON（`items[].input.question`、`expectedOutput.criteria`、`expectedOutput.violations`、`metadata.category`），再：
 
 ```bash
-python3 packages/evaluation/harness_memory_ablation/run.py run \
+python3 packages/evaluation/experiments/harness_memory_ablation/run.py run \
   --memory-off /path/to/worktree-A \
   --memory-on /path/to/worktree-B \
   --cases /path/to/harness-memory-ablation-v1.json \
@@ -73,9 +73,9 @@ python3 packages/evaluation/harness_memory_ablation/run.py run \
 
 conflict-stale 只报告 B 更差的题，不挡住上面四条。
 
-可选导出的 `service.name` 是 `edges-harness-memory-ablation`，不是 `edges-retrieval-eval`。tags 含 `eval:harness-memory-ablation`、`memory:on` 或 `memory:off`，以及 `run:YYYY-MM-DD`。
+可选导出的 `service.name` 是 `edges-harness-memory-ablation`，不是 `edges-retrieval-eval`。共享 `langfuse_sink` 没有 tags 字段，这次不改它。筛选标签写在 trace metadata `tags`，逗号分隔：`eval:harness-memory-ablation`、`memory:on` 或 `memory:off`、`run:YYYY-MM-DD`。导出后是 `langfuse.trace.metadata.tags`，不是 Langfuse 的 tag 列表。
 
-事件流在 `packages/evaluation/.cache/harness-memory-ablation/sessions/`（gitignore）。报告在 [`../reports/`](../reports/README.md)，标题写明评测冒烟。报告里会有本地 cwd，提交前自行看一遍。
+事件流在 `packages/evaluation/.cache/harness-memory-ablation/sessions/`（gitignore）。报告在 [`../../reports/`](../../reports/README.md)，标题写明评测冒烟。报告里会有本地 cwd，提交前自行看一遍。
 
 ```bash
 python3 -m unittest discover -s packages/evaluation/tests -p test_harness_memory_ablation.py -v

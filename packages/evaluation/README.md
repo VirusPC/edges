@@ -27,17 +27,22 @@
 | 仓库根 `packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/` | 接口层。评测对象常常是这些目录的行为；评测用例本身不因此变成接口实现。 |
 | [`observation/`](../observation/README.md) | 观测提供「野外看到了什么」；本目录把假设做成可复现对照。观测不是评测。 |
 
-## 起步布局
+## 目录地图
 
-先有真实用例再往下加目录，不要预埋空数据文件。
+实验按目标分目录。共享代码只再导出，不复制 Agent client。缓存（`.cache/`）和 [`reports/`](reports/README.md) 仍在本目录。先有真实用例再加文件，不要预埋空数据。
 
-- [`run_locomo_official.py`](run_locomo_official.py)：首选官方路径（VirusPC/locomo submodule → `task_eval/evaluate_qa.py` → official `evaluation.py` F1）
-- [`third_party/`](third_party/README.md)：评测用 git submodule（现有 [`third_party/locomo/`](third_party/locomo)）
-- [`retrieval_eval/`](retrieval_eval/run.py)：仓库 URL × agent client × samples 的检索评测。第一组克隆 `edges` 的 `main`，用 `codex exec` 交出路径，按簇打 P@5 / R@5 / nDCG@5。这是评测冒烟。
-- [`harness_memory_ablation/`](harness_memory_ablation/README.md)：本地 A/B 工作目录上的 harness memory 消融（真实 Agent client）。方法与 30 题在个人主干仓 `evaluations/harness-memory-ablation`（Dataset `harness-memory-ablation/v1`）。
-- [`cases/`](cases/README.md)：用例与 benchmark 定义（[`cases/locomo-smoke/`](cases/locomo-smoke/README.md) 是历史 hand-port，legacy）
-- [`reports/`](reports/README.md)：某次运行的报告
-- 本 README
+| 路径 | 目标 |
+| --- | --- |
+| [`shared/`](shared/README.md) | 复用检索评测的 Agent client 与 client 注册表。实现仍在 `experiments/retrieval_eval/`。 |
+| [`experiments/retrieval_eval/`](experiments/retrieval_eval/run.py) | 仓库 URL × agent client × samples 的路径检索。用例在 [`cases/retrieval-smoke/`](experiments/retrieval_eval/cases/retrieval-smoke/README.md)。评测冒烟。 |
+| [`experiments/locomo/run_locomo_official.py`](experiments/locomo/run_locomo_official.py) | LoCoMo 官方冒烟（VirusPC/locomo submodule → `task_eval/evaluate_qa.py` → official `evaluation.py` F1）。 |
+| [`experiments/locomo/cases/locomo-smoke/`](experiments/locomo/cases/locomo-smoke/README.md) | LoCoMo 历史 hand-port，legacy。 |
+| [`experiments/memorybench/`](experiments/memorybench/README.md) | MemoryBench NFCats 小规模无记忆 / BM25-M 对照。用例在 [`cases/memorybench-smoke/`](experiments/memorybench/cases/memorybench-smoke/README.md)。 |
+| [`experiments/harness_memory_ablation/`](experiments/harness_memory_ablation/README.md) | 本地 A/B 工作目录上的 harness memory 消融（真实 Agent client）。方法与 30 题在个人主干仓 `evaluations/harness-memory-ablation`（Dataset `harness-memory-ablation/v1`）。 |
+| [`third_party/`](third_party/README.md) | 评测用 git submodule（现有 [`third_party/locomo/`](third_party/locomo)）。 |
+| [`cases/README.md`](cases/README.md) | 旧的平铺用例目录，只留指针。 |
+
+Python 包名仍是 `retrieval_eval` 和 `harness_memory_ablation`。入口把 `experiments/` 放进 `sys.path`，内部 `from retrieval_eval...` 不用改名。`import retrieval_eval` 仍把 `packages/observation` 放进 `sys.path`。
 
 LoCoMo 冒烟是 Evaluation Smoke，不是 Benchmark Proof，也不是 Project Memory proof。见 [`docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md`](../../docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md)。
 
@@ -58,7 +63,7 @@ git submodule update --init packages/evaluation/third_party/locomo
 Print the official `evaluate_qa.py` command (no API key; safe in CI):
 
 ```bash
-python3 packages/evaluation/run_locomo_official.py print-command
+python3 packages/evaluation/experiments/locomo/run_locomo_official.py print-command
 ```
 
 Live conv-44 / 2 QA per category / `kimi-for-coding` run (key via env, never commit the key):
@@ -66,34 +71,34 @@ Live conv-44 / 2 QA per category / `kimi-for-coding` run (key via env, never com
 ```bash
 pip install -r packages/evaluation/third_party/locomo/requirements-openai-compat.txt
 KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 \
-  python3 packages/evaluation/run_locomo_official.py smoke
+  python3 packages/evaluation/experiments/locomo/run_locomo_official.py smoke
 ```
 
 Optional official crop (keeps `observation` / `session_summary` / `event_summary` for later RAG; default out-file is gitignored under `packages/evaluation/.cache/`):
 
 ```bash
-python3 packages/evaluation/run_locomo_official.py crop
+python3 packages/evaluation/experiments/locomo/run_locomo_official.py crop
 ```
 
-Reports go to [`reports/`](reports/README.md) with titles that say **Evaluation Smoke / not Project Memory proof**. F1 is official `task_eval/evaluation.py`, not the hand-port in `cases/locomo-smoke/scoring.py`.
+Reports go to [`reports/`](reports/README.md) with titles that say **Evaluation Smoke / not Project Memory proof**. F1 is official `task_eval/evaluation.py`, not the hand-port in `experiments/locomo/cases/locomo-smoke/scoring.py`.
 
 Retrieval smoke prints the clone and `codex exec` commands without running them:
 
 ```bash
-python3 packages/evaluation/retrieval_eval/run.py print-command
+python3 packages/evaluation/experiments/retrieval_eval/run.py print-command
 ```
 
-A live run clones the corpus URL from [`retrieval_eval/config/repositories.json`](retrieval_eval/config/repositories.json) at ref `025904fa29bcc6970f45c654d95e30c5390d43d7` into `packages/evaluation/.cache/` (gitignored), then runs `codex exec --json` once per sample. The committed URL is the generic fixture `https://github.com/example/personal-brain.git`. Gold paths include personal directories that left this repo on 2026-10-20, so set `EDGES_RETRIEVAL_CORPUS_URL` to a checkout of that pre-split tree when you need a real corpus; an empty variable keeps the fixture. The default `codex` client also passes `-c model_reasoning_summary=detailed`, `-c show_raw_agent_reasoning=true`, and `-c model_reasoning_effort=high`, so the event stream includes `reasoning` items. Those three settings are written on the report and on the exported root span (`reasoning_summary`, `reasoning_effort`, `show_raw_reasoning`) so runs with different effort are not compared silently. Change them in [`retrieval_eval/config/clients.json`](retrieval_eval/config/clients.json). The report lands in [`reports/`](reports/README.md) and is an Evaluation Smoke, not a Benchmark Proof.
+A live run clones the corpus URL from [`experiments/retrieval_eval/config/repositories.json`](experiments/retrieval_eval/config/repositories.json) at ref `025904fa29bcc6970f45c654d95e30c5390d43d7` into `packages/evaluation/.cache/` (gitignored), then runs `codex exec --json` once per sample. The committed URL is the generic fixture `https://github.com/example/personal-brain.git`. Gold paths include personal directories that left this repo on 2026-10-20, so set `EDGES_RETRIEVAL_CORPUS_URL` to a checkout of that pre-split tree when you need a real corpus; an empty variable keeps the fixture. The default `codex` client also passes `-c model_reasoning_summary=detailed`, `-c show_raw_agent_reasoning=true`, and `-c model_reasoning_effort=high`, so the event stream includes `reasoning` items. Those three settings are written on the report and on the exported root span (`reasoning_summary`, `reasoning_effort`, `show_raw_reasoning`) so runs with different effort are not compared silently. Change them in [`experiments/retrieval_eval/config/clients.json`](experiments/retrieval_eval/config/clients.json). The report lands in [`reports/`](reports/README.md) and is an Evaluation Smoke, not a Benchmark Proof.
 
 ```bash
-python3 packages/evaluation/retrieval_eval/run.py run
+python3 packages/evaluation/experiments/retrieval_eval/run.py run
 ```
 
 第二个 client 是 [pi-coding-agent](https://www.npmjs.com/package/@earendil-works/pi-coding-agent)（CLI `pi`，已在 1.3.0 上核对，需要 Node.js >= 22.19）。默认配置块仍是 `codex`。单样本冒烟用 `--client` 和 `--samples` 换 client 与样本集，不改 `config.json`：
 
 ```bash
-python3 packages/evaluation/retrieval_eval/run.py print-command --client pi --samples retrieval-smoke/edges-one
-MINIMAX_API_KEY=... python3 packages/evaluation/retrieval_eval/run.py run --client pi --samples retrieval-smoke/edges-one
+python3 packages/evaluation/experiments/retrieval_eval/run.py print-command --client pi --samples retrieval-smoke/edges-one
+MINIMAX_API_KEY=... python3 packages/evaluation/experiments/retrieval_eval/run.py run --client pi --samples retrieval-smoke/edges-one
 ```
 
 `retrieval-smoke/edges-one` 只有 `edges_smoke_0008`。`pi` 的 provider / model 是 `minimax-cn` / `MiniMax-M3`，thinking 是 `high`。不传 `--tools`，用 pi 的默认工具 `read`、`bash`、`edit`、`write`。命令是 `--mode json --no-session -ns -np -nc --no-themes --no-mcp -na --offline`，工作目录是克隆下来的仓库，stdin 关闭。没有 `-o` 和 max-turns，只靠 `timeout_seconds`（默认 600）。Codex 的命令和沙箱不变。
