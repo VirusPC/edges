@@ -42,4 +42,5 @@ edges CLI/脚手架/发布/鉴权等平台层。
 - [任务状态流转时 CLI 自动追加进展段落](<todo/2026-10-21--%E4%BB%BB%E5%8A%A1%E7%8A%B6%E6%80%81%E6%B5%81%E8%BD%AC%E6%97%B6-CLI-%E8%87%AA%E5%8A%A8%E8%BF%BD%E5%8A%A0%E8%BF%9B%E5%B1%95%E6%AE%B5%E8%90%BD/INDEX.md>) — 任务状态流转时 CLI 自动追加进展段落
 - [.harness 模块插件化](<backlog/2026-10-21--harness-%E6%A8%A1%E5%9D%97%E6%8F%92%E4%BB%B6%E5%8C%96/INDEX.md>) — .harness 下各模块以统一入口与契约可插件化注册与加载，模块间形态一致
 - [理顺重复的 ADR 0039 编号](<done/2026-10-21--%E7%90%86%E9%A1%BA%E9%87%8D%E5%A4%8D%E7%9A%84-ADR-0039-%E7%BC%96%E5%8F%B7/INDEX.md>) — 理顺重复的 ADR 0039 编号
+- [edges 按模块拆 skill（一模块一个）](<backlog/2026-10-25--edges-%E6%8C%89%E6%A8%A1%E5%9D%97%E6%8B%86-skill%E4%B8%80%E6%A8%A1%E5%9D%97%E4%B8%80%E4%B8%AA/INDEX.md>) — Edges 随包装发的 skill 按细碎能力堆了太多份，要改成每个模块一个 skill，方便发现与维护。
 <!-- project-entries-local:end -->
