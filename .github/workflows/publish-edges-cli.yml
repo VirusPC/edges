@@ -98,4 +98,18 @@ jobs:
           exit 1
 
       - name: Publish
-        run: pnpm --filter @viruspc/edges publish --no-git-checks --access public
+        run: |
+          set -euo pipefail
+          VER="$(node -p "require('./packages/cli/package.json').version")"
+          # Semver prerelease (version contains '-'): dist-tag beta.
+          # pnpm's default tag is latest, which would promote a beta.
+          case "$VER" in
+            *-*)
+              echo "prerelease ${VER}: dist-tag beta (not latest)"
+              pnpm --filter @viruspc/edges publish --no-git-checks --access public --tag beta
+              ;;
+            *)
+              echo "release ${VER}: default dist-tag latest"
+              pnpm --filter @viruspc/edges publish --no-git-checks --access public
+              ;;
+          esac
