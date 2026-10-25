@@ -8,6 +8,8 @@
 
 harness 就是一组 Markdown 文件加 Git。仓库里的那套，给 Cursor、Codex 这类写代码的 Agent 用；你的大脑是一个不落盘的虚拟目录，它的那套单独放在一个仓库里，给 Grok Bot 这类 personal agent 用。你纠正过的、拍板过的、想明白的，都会留在对应的那一套里，经你审核合并后，下一个 Agent 直接接着用。
 
+Edges 从作者的个人知识管理实践中逐步发展而来。日常笔记、任务、教学和复盘持续积累在[个人 brain](https://github.com/VirusPC/edges-brain-viruspc) 中。框架于 2026 年 10 月拆出，早期提交和使用记录仍保留在那里。
+
 - **持续自进化**：每一次反馈都会自动沉淀，下次不再重犯。Edges 自己也用 Edges 维护：改进 Edges 的方法，也在被 Edges 改进，RSI 的成果随每一次升级交到你手里。
 - **将 harness 放在与被 harness 对象最近的地方**：Edges 允许为任何目录创建局部 harness，并通过树结构将整个仓内的 harness 文件串联起来。每次任务只加载与其最相关的 harness。
 - **不止停留在仓库**：海量经验知识从不同端捕获到仓库，但不止停留在仓库。将它们提炼成简单可复用的判断优势（Edge，Edges 由此得名），并进一步转化为博客、播客、视频、PPT 等丰富的对外分发资料，用更低的边际成本取得更大收益。
@@ -121,7 +123,7 @@ pnpm --filter @viruspc/edges exec -- edges evaluation server start --dev
 
 2026-10-20 起这些接入目录直接放在仓库根，不再套 `extensions/`。旧路径对照见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。空占位 `docs/`、`tools/`、`subagents/`（当时在 `extensions/` 下）已删除；`new-server/` 与 `others/` 从本仓删除，由个人仓另行放进 `shared-extensions/`。
 
-个人知识（笔记、教学、复盘、任务、项目、记忆、归档、shared-extensions、对外博客）放在使用方自己的个人主干仓，不放进本框架仓。本仓不登记具体的个人仓库。使用方用 `edges compose` 把个人仓挂到自己的 `.harness/compose/README.md`。挂载步骤见 [`edges-compose`](packages/skills/edges-compose/SKILL.md)。
+个人知识（笔记、教学、复盘、任务、项目、记忆、归档、shared-extensions、对外博客）放在使用方自己的个人主干仓，不放进本框架仓。本仓不挂载个人仓库。使用方用 `edges compose` 把个人仓挂到自己的 `.harness/compose/README.md`。挂载步骤见 [`edges-compose`](packages/skills/edges-compose/SKILL.md)。
 
 对外输出可以直接看：[教学站](https://edges.viruspc.tech/teaching/)、[任务看板](https://edges.viruspc.tech/tasks/)（目前都从个人仓部署）。
 
@@ -156,7 +158,7 @@ pnpm build && pnpm test
 
 - token、API key、密码、私钥、cookie 等凭据，个人信息、未公开 IP，以及 `.docx`、`.xlsx`、`.pptx` 等办公二进制文件绝不入库。
 - 内部域名、系统名、服务名、代码路径、同事身份和排期等标识符必须删除或改写为通用表述后才能入库。
-- 不点名、不链接维护者的个人仓或私有仓，包括历史旧名、Actions、子模块路径和评测语料地址。写成「个人大脑仓」「私有仓」或 `example/personal-brain`。
+- 允许点名、链接公开使用案例 `VirusPC/edges-brain-viruspc`。其他个人仓和所有私有仓仍不点名、不链接，包括历史旧名、Actions、子模块路径和评测语料地址；写成「个人大脑仓」「私有仓」或 `example/personal-brain`。
 - 截图按「能否直接放到公开博客」判断；需要打码、包含内部 UI 或可能泄漏上下文的截图不要入库。
 - 发现疑似泄漏时立即停止并告知仓库所有者；删除工作区文件不等于清除 Git 历史，`git filter-repo`、force push 等历史重写必须由仓库所有者确认并执行。
 
