@@ -193,6 +193,20 @@ test("missing registered routine files fail reads and updates without repair", a
   assert.equal(existsSync(path.join(root, ".harness/routines/README.md")), false);
 });
 
+test("routine update validates its existing index registration before changing the definition", async (t) => {
+  const root = scope(t);
+  await initRoutines({ targetDir: root });
+  const created = await createRoutine(env(root), { name: "unindexed", description: "Original summary" });
+  const definition = path.join(root, created.path);
+  const org = path.join(root, ".harness/routines/README.md");
+  const index = readFileSync(org, "utf8").split("\n").filter((line) => !line.includes("unindexed/INDEX.md")).join("\n");
+  writeFileSync(org, index);
+  const before = readFileSync(definition, "utf8");
+  await assert.rejects(() => updateRoutine(env(root), created.path, { description: "Changed" }, {}), /not indexed/);
+  assert.equal(readFileSync(definition, "utf8"), before);
+  assert.equal(readFileSync(org, "utf8"), index);
+});
+
 test("routine directory lifecycle includes a co-located Skill and preserves an external Skill", async (t) => {
   const root = scope(t);
   await initRoutines({ targetDir: root });
