@@ -228,6 +228,8 @@ importers:
         specifier: ^5.8.2
         version: 5.9.3
 
+  packages/services/evaluation: {}
+
   packages/skills: {}
 
   packages/system-prompt: {}

@@ -16,7 +16,7 @@
     "dev:note-server": "pnpm --filter new-note dev",
     "start:artifacts": "pnpm --filter edges-artifacts-preview start",
     "dev:artifacts": "pnpm --filter edges-artifacts-preview dev",
-    "start:experiment-webhook": "pnpm --filter edges-experiment-webhook start",
+    "start:evaluation": "pnpm --filter edges-evaluation start",
     "cli:notes": "pnpm --filter @viruspc/edges exec tsx src/index.ts notes",
     "mcp:run": "pnpm --filter",
     "migrate:recursive-layout": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/migrate-recursive-layout.mts",

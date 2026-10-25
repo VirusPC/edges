@@ -17,9 +17,10 @@ import {
 const SERVER_AFTER_HELP = `
 COMMANDS
   install [--force] [--base-url <url>] [--config <path>]
-    Ensure ~/.config/edges/artifacts-preview.env (create token if missing;
-    --force may rotate), pnpm install/build, install and enable the user unit.
-    Does not start.
+    Require ~/.config/edges/edges.env (create it with: edges config init).
+    Create the token in that file if missing; --force may rotate.
+    pnpm install/build, install and enable the user unit. Does not start.
+    Does not read ~/.config/edges/artifacts-preview.env.
   start | stop | restart
     Process lifecycle only (systemctl --user).
   status
@@ -126,7 +127,7 @@ export function addArtifactsServerCommand(artifacts: Command, ctx: CliContext): 
     .option("--port <n>", "Listen port when creating env", String(DEFAULT_PORT))
     .option("--data-dir <path>", "Artifact data directory when creating env")
     .option("--token <hex>", "Reuse an existing shared token when creating env")
-    .option("--config <path>", "Server env path (default: ~/.config/edges/artifacts-preview.env)")
+    .option("--config <path>", "Unified env path (default: ~/.config/edges/edges.env)")
     .option("--force", "Rotate an existing token")
     .action(async (opts: {
       baseUrl: string;

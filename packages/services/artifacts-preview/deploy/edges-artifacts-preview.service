@@ -2,13 +2,13 @@
 Description=Edges artifacts preview (ADR 0013)
 Documentation=https://github.com/VirusPC/edges/blob/main/packages/services/artifacts-preview/README.md
 After=network.target
-ConditionPathExists=%h/.config/edges/artifacts-preview.env
+ConditionPathExists=%h/.config/edges/edges.env
 
 [Service]
 Type=simple
 WorkingDirectory=%h/projects/edges-framework/packages/services/artifacts-preview
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
-EnvironmentFile=%h/.config/edges/artifacts-preview.env
+EnvironmentFile=%h/.config/edges/edges.env
 ExecStart=/usr/bin/env node %h/projects/edges-framework/packages/services/artifacts-preview/dist/index.js
 Restart=on-failure
 RestartSec=2

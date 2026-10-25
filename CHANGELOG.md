@@ -13,7 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 评测
 
-- **Langfuse 的 Custom Experiment 可以打到本仓 webhook，按 Dataset 名字跑已登记的实验：** 在 `packages/services/experiment-webhook` 起进程后，`POST /langfuse/experiment` 用官方 `x-langfuse-signature` 校验原始 body，立刻回 202，再在本进程里调用 `registry.json` 里的 runner。第一条接 harness memory 消融，把 Dataset 题适配进现有的 `run_experiment`。默认 10 分钟超时；超时或失败会写 `packages/evaluation/reports/`，并在配了 Langfuse 密钥时写回 experiment trace 和 `run_ok` 分数。开发环境用 `EXPERIMENT_WEBHOOK_SIGNATURE=off` 关掉签名校验。
+- **用 `edges evaluation server` 拉起评测服务：** `install` 把 user systemd unit 装上并 enable，不启动进程。`start`、`stop`、`restart`、`status` 只管这个 unit。`edges evaluation server start --dev` 在前台阻塞，直到进程退出。第一次先 `edges config init`，再 `install`，再 `start`。
+- **本机配置收成一份 `edges.env`：** `edges config init` 建立 `~/.config/edges/edges.env`。旧的 `~/.config/edges/artifacts-preview.env` 只在这一步被复制一次，之后不再读取。`edges config path` 打印路径。`edges config show` 打印时把含 SECRET、TOKEN、PASSWORD 或 `_KEY` 的值写成 `***`。`edges artifacts server` 同样只读这份文件；文件不在就报错，并提示运行 `edges config init`。
+- **Experiment Webhook 并进 evaluation 服务：** 目录是 `packages/services/evaluation`，包名 `edges-evaluation`。对外入口是 `edges evaluation server`，不再使用 `packages/services/experiment-webhook` 这个包名。
+- **Langfuse 的 Custom Experiment 可以打到本仓 webhook，按 Dataset 名字跑已登记的实验：** 在 `packages/services/evaluation` 起进程后，`POST /langfuse/experiment` 用官方 `x-langfuse-signature` 校验原始 body，立刻回 202，再在本进程里调用 `registry.json` 里的 runner。第一条接 harness memory 消融，把 Dataset 题适配进现有的 `run_experiment`。默认 10 分钟超时；超时或失败会写 `packages/evaluation/reports/`，并在配了 Langfuse 密钥时写回 experiment trace 和 `run_ok` 分数。开发环境用 `EXPERIMENT_WEBHOOK_SIGNATURE=off` 关掉签名校验。
 
 ### 文档与系统
 

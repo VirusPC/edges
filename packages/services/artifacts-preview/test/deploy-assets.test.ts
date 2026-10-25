@@ -41,7 +41,8 @@ test("deploy unit is a systemd user unit that loads the server env file", async 
   const unit = await readDeploy("edges-artifacts-preview.service");
   assert.match(unit, /WantedBy=default\.target/);
   assert.doesNotMatch(unit, /WantedBy=multi-user\.target/);
-  assert.match(unit, /EnvironmentFile=%h\/\.config\/edges\/artifacts-preview\.env/);
+  assert.match(unit, /EnvironmentFile=%h\/\.config\/edges\/edges\.env/);
+  assert.doesNotMatch(unit, /artifacts-preview\.env/);
   assert.match(unit, /artifacts-preview\/dist\/index\.js/);
   assert.match(unit, /^WorkingDirectory=%h\/projects\/edges-framework\/packages\/services\/artifacts-preview$/m);
   assert.match(
@@ -193,6 +194,8 @@ test("deploy.yml still full-repo pulls then CLI-installs and restarts artifacts 
   assert.match(workflow, /pnpm --filter @viruspc\/edges exec -- tsx src\/index\.ts artifacts server install/);
   assert.match(workflow, /pnpm --filter @viruspc\/edges exec -- tsx src\/index\.ts artifacts server restart/);
   assert.doesNotMatch(workflow, /command -v edges/);
+  assert.match(workflow, /\/\.config\/edges\/edges\.env/);
+  assert.match(workflow, /edges config init/);
   assert.match(workflow, /artifacts-preview\.env/);
   assert.match(workflow, /replace-with-shared-token/);
   assert.match(workflow, /artifacts server install/);
