@@ -519,7 +519,7 @@ class ReportTests(unittest.TestCase):
 
 class PrivacyTests(unittest.TestCase):
     def test_package_docs_do_not_name_personal_repos(self) -> None:
-        paths = [PACKAGE_DIR / "README.md", EVAL_DIR / "README.md", EVAL_DIR / "cases" / "README.md"]
+        paths = [PACKAGE_DIR / "README.md", EVAL_DIR / "README.md", PACKAGE_DIR / "cases" / "README.md"]
         paths.extend(PACKAGE_DIR.glob("*.py"))
         blob = "\n".join(path.read_text(encoding="utf-8") for path in paths if path.is_file())
         _assert_no_personal_repo_slug(self, blob)

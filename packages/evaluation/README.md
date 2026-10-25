@@ -40,7 +40,6 @@
 | [`experiments/memorybench/`](experiments/memorybench/README.md) | MemoryBench NFCats 小规模无记忆 / BM25-M 对照。用例在 [`cases/memorybench-smoke/`](experiments/memorybench/cases/memorybench-smoke/README.md)。 |
 | [`experiments/harness_memory_ablation/`](experiments/harness_memory_ablation/README.md) | 本地 A/B 工作目录上的 harness memory 消融（真实 Agent client）。方法与 30 题在个人主干仓 `evaluations/harness-memory-ablation`（Dataset `harness-memory-ablation/v1`）。 |
 | [`third_party/`](third_party/README.md) | 评测用 git submodule（现有 [`third_party/locomo/`](third_party/locomo)）。 |
-| [`cases/README.md`](cases/README.md) | 旧的平铺用例目录，只留指针。 |
 
 Python 包名仍是 `retrieval_eval` 和 `harness_memory_ablation`。入口把 `experiments/` 放进 `sys.path`，内部 `from retrieval_eval...` 不用改名。`import retrieval_eval` 仍把 `packages/observation` 放进 `sys.path`。
 
