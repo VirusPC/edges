@@ -15,40 +15,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 评测
 
-- **评测服务可以用 `edges evaluation server` 拉起：** 用 `edges evaluation server install` 在本机登记评测服务。登记后还不会自动跑；`edges evaluation server start` 才启动，`edges evaluation server start --dev` 在前台跑，`stop`、`restart`、`status` 用来停、重启和查看。
-- **本机配置收成一份 `edges.env`：** 跑 `edges config init`，评测和 `edges artifacts server` 的配置都写进 `~/.config/edges/edges.env`。以前单独的预览配置会在这一步抄过来，之后只用这一份。
-- **Langfuse 里的实验可以跑本仓已登记的题目：** 在 Langfuse 发起实验时，按数据集名字跑这里已经登记的实验。
+- **第一次：先配配置，再登记，再让它一直跑：** 跑 `edges config init` 写好本机配置，然后 `edges evaluation server install` 在这台机器上登记评测服务。登记完它还不会自己跑；要它留在后台持续服务，再跑 `edges evaluation server start`。
+- **看输出、改完就停，用 `--dev`；要长期留在这台机器上，不要加 `--dev`：** 本机调试时用 `edges evaluation server start --dev`，它在前台跑，看着输出，结束进程就停。要当后台服务长期跑，走上面的 `install`，再用不带 `--dev` 的 `start`。
+- **配好之后能干什么：** 评测和 `edges artifacts server` 都读 `~/.config/edges/edges.env`，不用再各维护一份；`edges config init` 会把以前单独的预览配置抄进这一份。服务跑起来以后，在 Langfuse 里按数据集名字发起实验，就会跑本仓已经登记的实验。
 
 ### 文档与系统
 
-- **公开文档不再点名个人仓：** 根 README、CHANGELOG 和 ADR 不再写出个人仓的名字和链接。要拿拆仓前的材料做检索评测，设置 `EDGES_RETRIEVAL_CORPUS_URL`。
+- **读公开文档只看 Edges 本身：** 根 README、CHANGELOG 和 ADR 讲这个系统怎么用，不再把你带到某个人的私有仓。
+- **要评测拆仓前的材料，自己给地址：** 检索评测默认用一个示例仓库。要用拆仓前的真实材料，设置 `EDGES_RETRIEVAL_CORPUS_URL` 再跑。
 
 ### 目录布局
 
-- **取消 `extensions/` 这一层：** 仓库里不再有这一层，代码目录用原来的名字先出现在仓库根，同一天再放进 `packages/`。旧路径不会再跳转。见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md) 和 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
-- **代码目录收进 `packages/`：** 目录名不变。npm 上的 `@viruspc/edges` 源码改到 `packages/cli`。见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md) 和 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
+- **改代码去 `packages/`，不要再找 `extensions/`：** 要改命令行、技能或服务，进 `packages/` 下原来的目录名，例如命令行在 `packages/cli`。`extensions/` 和仓库根上的旧位置都不要再打开。对照见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)、[ADR 0041](docs/adr/0041-packages-workspace-layout.md)、[平铺说明](docs/migrations/2026-10-20-flatten-extensions.md) 和 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
+- **安装方式不变：** 还是 `npm install -g @viruspc/edges`。包名没变，只是源码改到了 `packages/cli`。
 
 ### 内容归属
 
-- **对外博客离开框架仓：** 本仓不再放 `posts/`，文章到个人主干仓看。任务看板还在，网站上的 `/tasks/` 不变。见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)。
+- **写文章去个人主干仓，改任务看板留在这里：** 这个仓不再收 `posts/`。要改任务看板，还在本仓做，网站上的 `/tasks/` 也不变。见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)。
 
 ### 仓库拆分
 
-- **框架单独成仓：** 这个仓库只放 Edges 系统。更早的提交和讨论留在个人主干仓。用 npm 安装时包名仍是 `@viruspc/edges`。
+- **看系统用这个仓，看更早的历史去个人主干仓：** 这里只放 Edges 怎么工作。2026-10-20 之前的提交和讨论在个人主干仓。安装命令仍是 `npm install -g @viruspc/edges`。
 
 ### 组合仓库
 
-- **组合仓库跟主仓库走：** 被组合的仓库放在 `.harness/compose/<name>`，不再放在家目录。换一台电脑后，跑一次 `edges compose update` 就能用。见 [ADR 0042](docs/adr/0042-compose-on-git-submodule.md)。
-- **日常只剩 `edges compose add`、`list`、`update`：** 以前的 `register`、`clone`、`pull`、`push` 没有了，也不留旧名字。`add` 必须写 `--description`，说明这个仓存什么。要推送，进那个目录用平时的 git。
-- **组合仓库写在 README 里，可以直接改：** 登记写在 `.harness/compose/README.md`，查看时默认就能看到。已经拉下来的仓库可以直接改文件。以前写在 `AGENTS.md` 上的，跑一次 `edges compose doctor --apply` 搬过来。见 [ADR 0043](docs/adr/0043-compose-readme-entry.md) 和 [ADR 0045](docs/adr/0045-compose-checkout-writable.md)。
+- **要把另一个仓库挂进当前项目：** 跑 `edges compose add`，并写上 `--description`，说明那个仓存什么、什么时候该往里写。登记写在 `.harness/compose/README.md`，之后打开项目就能看到。见 [ADR 0042](docs/adr/0042-compose-on-git-submodule.md)。
+- **换一台电脑：** clone 主仓库之后跑 `edges compose update`。被组合的仓库出现在 `.harness/compose/<name>`，不在家目录。
+- **要改里面的文件：** 直接改那个目录，用平时的 git 提交和推送，没有单独的推送命令。登记若还写在 `AGENTS.md` 上，先跑一次 `edges compose doctor --apply`，之后继续用 `add`、`list`、`update`。见 [ADR 0043](docs/adr/0043-compose-readme-entry.md) 和 [ADR 0045](docs/adr/0045-compose-checkout-writable.md)。
 
 ### CLI
 
-- **预发布版不会变成默认安装：** 版本号里带 `-` 的 `@viruspc/edges` 要装 `beta` 才会拿到，不会顶掉 `npm install -g @viruspc/edges` 的稳定版。见 [ADR 0037](docs/adr/0037-npm-publish-via-github-actions.md)。
+- **平时装稳定版：** `npm install -g @viruspc/edges` 拿到的是不含 `-` 的稳定版。
+- **要试还没转正的版本，才去装 `beta`：** 版本号里带 `-` 的不会替换上面这条命令装上的版本。需要时再显式安装 `beta`。见 [ADR 0037](docs/adr/0037-npm-publish-via-github-actions.md)。
 
 ### 项目记忆（project-memory）
 
-- **旧的单文件记忆可以迁到 `.harness/memory/`：** 还在用 `.memory/` 里一篇篇文件的仓库，先跑 `edges memory migrate --dry-run` 看会怎么搬，再跑 `edges memory migrate`。有对不上的文件，也不会整次停掉。
+- **只有还在用旧的一篇篇文件时才要迁：** `.memory/` 里若已是现在的目录结构，不用跑迁移。
+- **先看会搬到哪，再真正搬：** `edges memory migrate --dry-run` 只预览；确认后去掉 `--dry-run` 再跑，文件进入 `.harness/memory/`。对不上的文件会单独列出，不会让其余的停掉。
 
 ## [1.5.0] - 2026-10-19
 
