@@ -1,13 +1,13 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { EvaluationError } from "../../services/evaluation/error.js";
 import {
+  EvaluationError,
   installEvaluationServer,
   restartEvaluationServer,
   startEvaluationServer,
   statusEvaluationServer,
   stopEvaluationServer,
-} from "../../services/evaluation/server/ops.js";
+} from "../../services/evaluation/service.js";
 import { fail, succeed } from "../result.js";
 
 const SERVER_AFTER_HELP = `

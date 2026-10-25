@@ -1,6 +1,6 @@
 import { Command } from "commander";
 import type { CliContext } from "../../context.js";
-import { EdgesConfigError, showEdgesConfig } from "../../services/config/edges-env.js";
+import { EdgesConfigError, showEdgesConfig } from "../../services/config/service.js";
 import { fail, succeed } from "../result.js";
 
 const HELP = "See edges config --help for usage.\n";
