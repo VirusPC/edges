@@ -11,9 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 可观测
+
+- **把编码 Agent 和 Grok Bot 接到 Langfuse：** `edges init` 或 `edges skills init` 会装上主入口 `langfuse-agent-tracing`，以及本机 `langfuse-local-agent-tracing`、Codex Cloud `langfuse-codex-cloud-tracing`、Cursor Cloud `langfuse-cursor-cloud-tracing`、Grok Bot `langfuse-grokbot-tracing`。还没确定是哪一种时先打开主入口，它只帮你选。安装步骤在对应技能里。Grok Bot 的导出脚本和 Codex Cloud 的轮询脚本不在这个 npm 包里。运行记录和指标笔记在 `packages/observation/`。
+
 ### 评测
 
-- **把编码 Agent 和 Grok Bot 接到 Langfuse：** `edges skills init` 会装上主入口 `langfuse-agent-tracing`，以及本机 `langfuse-local-agent-tracing`、Codex Cloud `langfuse-codex-cloud-tracing`、Cursor Cloud `langfuse-cursor-cloud-tracing`、Grok Bot `langfuse-grokbot-tracing`。安装步骤在子技能里。Grok Bot 的导出脚本和 Codex Cloud 的轮询脚本不在这个包里。
+- **稳定版 `0.2.6`，直接装：** `npm install -g @viruspc/edges` 就是 `@viruspc/edges@0.2.6`。评测服务从这一版进入 latest，不用再写 `@beta`。服务跑起来以后，在 Langfuse 里按数据集名字发起 Custom Experiment，就会跑本仓已经登记的实验。
+- **第一次：在本仓克隆里先写配置，再登记，再让它一直跑：** 评测进程在 `packages/services/evaluation`，用这里构建出的 `edges`（`pnpm --filter @viruspc/edges exec -- edges`）。先 `edges config init` 写成 `~/.config/edges/edges.env`，再 `edges evaluation server install`，再 `edges evaluation server start`。登记完还不会自己跑。全局安装的 `edges` 用来记笔记和装技能。
+- **看输出用 `--dev`，要一直跑就不要加：** `edges evaluation server start --dev` 在前台跑，结束进程就停。要长期留在这台机器上，走上面的 `install`，再用不带 `--dev` 的 `start`。
 
 ### 文档与系统
 
