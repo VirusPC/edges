@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="850" viewBox="0 0 1280 850" role="img" aria-labelledby="title description">
+  <title id="title">Edges 模块地图：从当前工作出发，按需组合</title>
+  <desc id="description">十个模块分为四组，围绕当前工作按需组合，没有固定执行顺序。材料与工作：Notes 留下原始材料、Projects 组织持续工作、Tasks 接续目标与进度。经验与方法：Memory 保留判断理由、Skills 复用有效做法。组合与例行：Compose 组合已有积累、Routines 记录例行方法。检查与交付：Observation 回看工作过程、Evaluation 验证改进效果、Artifacts 交付产物供审阅。共同基础是目录与作用域、递归索引、Markdown 与 Git，以及 CLI、Skill、MCP 三种接入方式。</desc>
+
+  <defs>
+    <style>
+      text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
+      .ink { fill: #19343c; }
+      .muted { fill: #607477; }
+      .heading { font-size: 27px; font-weight: 650; fill: #19343c; }
+      .module { font-size: 24px; font-weight: 600; fill: #19343c; }
+      .value { font-size: 23px; fill: #526c70; }
+      .rule { stroke: #e3e8e4; stroke-width: 1; }
+    </style>
+  </defs>
+
+  <!-- An opaque paper ground keeps the artwork consistent in either GitHub theme. -->
+  <rect width="1280" height="850" rx="24" fill="#f7f8f4"/>
+  <path d="M60 48h28" stroke="#1b817b" stroke-width="4" stroke-linecap="round"/>
+  <text x="102" y="55" class="muted" font-size="18" font-weight="600" letter-spacing="2">EDGES / 模块地图</text>
+  <text x="60" y="112" class="ink" font-size="40" font-weight="650">从当前工作出发，按需组合</text>
+  <text x="60" y="155" class="muted" font-size="24">让材料、经验与方法，成为下一次工作的起点。</text>
+
+  <!-- Undirected connections express optional composition, not a required pipeline. -->
+  <g fill="none" stroke="#c3d9d3" stroke-width="2.5">
+    <path d="M500 317C558 317 528 405 555 405"/>
+    <path d="M780 317C722 317 752 405 725 405"/>
+    <path d="M500 587C558 587 528 499 555 499"/>
+    <path d="M780 587C722 587 752 499 725 499"/>
+  </g>
+
+  <!-- Materials and work. -->
+  <rect x="60" y="198" width="440" height="238" rx="20" fill="#ffffff" stroke="#dae3dd" stroke-width="1.5"/>
+  <rect x="84" y="221" width="38" height="38" rx="11" fill="#e5f1eb"/>
+  <g fill="none" stroke="#367c6b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M95 232h10l6 6v10H95z"/>
+    <path d="M105 232v6h6M99 242h8M99 246h6"/>
+  </g>
+  <text x="137" y="250" class="heading">材料与工作</text>
+  <path d="M84 277h392" class="rule"/>
+  <text x="87" y="315" class="module">Notes</text>
+  <text x="473" y="315" class="value" text-anchor="end">留下原始材料</text>
+  <text x="87" y="362" class="module">Projects</text>
+  <text x="473" y="362" class="value" text-anchor="end">组织持续工作</text>
+  <text x="87" y="409" class="module">Tasks</text>
+  <text x="473" y="409" class="value" text-anchor="end">接续目标与进度</text>
+
+  <!-- Experience and methods. -->
+  <rect x="780" y="198" width="440" height="238" rx="20" fill="#ffffff" stroke="#dae3dd" stroke-width="1.5"/>
+  <rect x="804" y="221" width="38" height="38" rx="11" fill="#e5f1eb"/>
+  <g fill="none" stroke="#367c6b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M812 232h10v18h-10zM825 232h9v18h-9z"/>
+    <path d="M816 236h3M828 236h3M816 245h3M828 245h3"/>
+  </g>
+  <text x="857" y="250" class="heading">经验与方法</text>
+  <path d="M804 277h392" class="rule"/>
+  <text x="807" y="327" class="module">Memory</text>
+  <text x="1193" y="327" class="value" text-anchor="end">保留判断理由</text>
+  <text x="807" y="386" class="module">Skills</text>
+  <text x="1193" y="386" class="value" text-anchor="end">复用有效做法</text>
+
+  <!-- The current work is the selection point, not a new module. -->
+  <circle cx="640" cy="452" r="103" fill="#edf3ed" stroke="#dbe5db" stroke-width="1.5"/>
+  <circle cx="640" cy="452" r="88" fill="#e4efe8" stroke="#b4cec2" stroke-width="1.5"/>
+  <path d="M625 404h13l6 6h15v18h-34z" fill="none" stroke="#367c6b" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="640" y="466" class="ink" font-size="30" font-weight="650" text-anchor="middle">当前工作</text>
+  <text x="640" y="499" fill="#527668" font-size="20" text-anchor="middle">按需要选用</text>
+
+  <!-- Composition and routines. -->
+  <rect x="60" y="468" width="440" height="238" rx="20" fill="#ffffff" stroke="#dae3dd" stroke-width="1.5"/>
+  <rect x="84" y="491" width="38" height="38" rx="11" fill="#f7ecd8"/>
+  <g fill="none" stroke="#a57a30" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="93" y="501" width="9" height="9" rx="2"/>
+    <rect x="104" y="512" width="9" height="9" rx="2"/>
+    <path d="M107 501h6v6M93 515v6h6"/>
+  </g>
+  <text x="137" y="520" class="heading">组合与例行</text>
+  <path d="M84 547h392" class="rule"/>
+  <text x="87" y="597" class="module">Compose</text>
+  <text x="473" y="597" class="value" text-anchor="end">组合已有积累</text>
+  <text x="87" y="656" class="module">Routines</text>
+  <text x="473" y="656" class="value" text-anchor="end">记录例行方法</text>
+
+  <!-- Inspection and delivery. -->
+  <rect x="780" y="468" width="440" height="238" rx="20" fill="#ffffff" stroke="#dae3dd" stroke-width="1.5"/>
+  <rect x="804" y="491" width="38" height="38" rx="11" fill="#f7ecd8"/>
+  <g fill="none" stroke="#a57a30" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M813 519v-7M821 519v-15M829 519v-10M811 523h22"/>
+    <path d="m813 505 8-7 8 4"/>
+  </g>
+  <text x="857" y="520" class="heading">检查与交付</text>
+  <path d="M804 547h392" class="rule"/>
+  <text x="807" y="585" class="module">Observation</text>
+  <text x="1193" y="585" class="value" text-anchor="end">回看工作过程</text>
+  <text x="807" y="632" class="module">Evaluation</text>
+  <text x="1193" y="632" class="value" text-anchor="end">验证改进效果</text>
+  <text x="807" y="679" class="module">Artifacts</text>
+  <text x="1193" y="679" class="value" text-anchor="end">交付产物供审阅</text>
+
+  <rect x="60" y="753" width="1160" height="54" rx="13" fill="#eaf0e9"/>
+  <text x="84" y="788" fill="#367c6b" font-size="21" font-weight="650">共同基础</text>
+  <path d="M197 770v20" stroke="#c4d4c9" stroke-width="1.5"/>
+  <text x="223" y="788" class="muted" font-size="21">目录与作用域</text>
+  <circle cx="394" cy="780" r="2" fill="#9ab0a3"/>
+  <text x="416" y="788" class="muted" font-size="21">递归索引</text>
+  <circle cx="545" cy="780" r="2" fill="#9ab0a3"/>
+  <text x="568" y="788" class="muted" font-size="21">Markdown + Git</text>
+  <circle cx="775" cy="780" r="2" fill="#9ab0a3"/>
+  <text x="798" y="788" class="muted" font-size="21">CLI / Skill / MCP</text>
+</svg>
