@@ -4,18 +4,19 @@
 
 ## [Unreleased]
 
-## [0.2.6-beta.0] - 2026-10-25
+## [0.2.6] - 2026-10-25
 
-本版是 prerelease。`version` 含 `-` 时，发布工作流执行 `pnpm --filter @viruspc/edges publish --no-git-checks --access public --tag beta`，不把这个版本标成 npm 的 `latest`。安装：`npm install -g @viruspc/edges@beta`。见 [ADR 0037](../../docs/adr/0037-npm-publish-via-github-actions.md)。
+稳定版。`0.2.6-beta.0` 里的评测服务从这一版进入 npm 的 `latest`。安装：`npm install -g @viruspc/edges`。
 
-### Added
+### 评测服务
 
-- `edges evaluation server` 在本机跑评测 HTTP 进程，接收 Langfuse Custom Experiment。子命令是 `install`、`start`、`stop`、`restart`、`status`。`install` 安装并 enable user systemd unit，不启动。默认 `start` 走这个 unit，然后请求 `/health`。`start --dev` 在前台运行，直到进程退出。第一次先 `edges config init`，再 `install`，再 `start`。
-- Experiment Webhook 迁到 `packages/services/evaluation`（包名 `edges-evaluation`）。对外入口是 `edges evaluation server`。Python 模块仍叫 `experiment_webhook`，由 unit 和 `start --dev` 拉起。不再使用 `packages/services/experiment-webhook`。
+- **第一次：先写配置，再登记，再让它一直跑：** 在本仓克隆里用这里构建出的 `edges`（`pnpm --filter @viruspc/edges exec -- edges`）。先 `edges config init` 写好本机配置，然后 `edges evaluation server install` 在这台机器上登记评测服务。登记完它还不会自己跑；要它留在后台、一直接着实验，再跑 `edges evaluation server start`。服务代码在 `packages/services/evaluation`，不在 `npm install -g` 的安装包里。
+- **看输出、改完就停，用 `--dev`；要长期留在这台机器上，不要加 `--dev`：** 本机调试用 `edges evaluation server start --dev`，它在前台跑，看着输出，结束进程就停。要当后台服务长期跑，走上面的 `install`，再用不带 `--dev` 的 `start`。
+- **配好之后能干什么：** 评测和 `edges artifacts server` 都读 `~/.config/edges/edges.env`，不用再各维护一份。`edges config init` 会在新文件还不存在时，把以前单独的预览配置抄进来一次。服务跑起来以后，在 Langfuse 里按数据集名字发起 Custom Experiment，就会跑本仓已经登记的实验。对外入口是 `edges evaluation server`，实现在 `packages/services/evaluation`（以前的 `packages/services/experiment-webhook` 已收进这里）。
 
-### Changed
+### 随包技能
 
-- **破坏性：** 本机配置收成一份 `~/.config/edges/edges.env`。`edges config init` 建立这份文件；旧的 `~/.config/edges/artifacts-preview.env` 只在 `edges.env` 还不存在时被复制一次，之后不再读取。`edges config path` 打印路径，文件可以不存在。`edges config show` 打印赋值，键名含 SECRET、TOKEN、PASSWORD 或 `_KEY` 的值写成 `***`。`edges artifacts server` 与 `edges evaluation server` 只读 `edges.env`。文件不在，或把旧的 `artifacts-preview.env` 路径传给 `--config`，命令报错并提示 `edges config init`。
+- **把 Agent 会话接到 Langfuse：** 安装包里多了五份技能。还没确定是本机、Codex Cloud、Cursor Cloud 还是 Grok Bot 时，先打开 `langfuse-agent-tracing`，它只帮你选该用哪一份。`edges init` 或 `edges skills init` 会把包内技能装上。Codex Cloud 的轮询脚本和 Grok Bot 的导出脚本不在这个 npm 包里，步骤写在对应技能里。
 
 ## [0.2.5] - 2026-10-22
 
