@@ -17,6 +17,14 @@ import { loadServerEnv } from "../../src/services/artifacts/service.js";
 import { loadServerEnv as loadServerEnvFromModule } from "../../src/services/artifacts/server/env.js";
 import { buildSystemForest } from "../../src/services/forest/service.js";
 import { buildSystemForest as buildSystemForestFromModule } from "../../src/services/node/system-forest-service.js";
+import { EdgesConfigError, initEdgesConfig } from "../../src/services/config/service.js";
+import {
+  EdgesConfigError as EdgesConfigErrorFromModule,
+  initEdgesConfig as initEdgesConfigFromModule,
+} from "../../src/services/config/edges-env.js";
+import { EvaluationError, installEvaluationServer } from "../../src/services/evaluation/service.js";
+import { EvaluationError as EvaluationErrorFromModule } from "../../src/services/evaluation/error.js";
+import { installEvaluationServer as installEvaluationServerFromModule } from "../../src/services/evaluation/server/ops.js";
 
 test("note and project services reject paths outside their leaf folder", async () => {
   const root = mkdtempSync(path.join(realpathSync(tmpdir()), "edges-domain-service-"));
@@ -39,6 +47,10 @@ test("domain service entry re-exports the module implementation", () => {
   assert.equal(updateTask, updateTaskFromModule);
   assert.equal(loadServerEnv, loadServerEnvFromModule);
   assert.equal(buildSystemForest, buildSystemForestFromModule);
+  assert.equal(initEdgesConfig, initEdgesConfigFromModule);
+  assert.equal(EdgesConfigError, EdgesConfigErrorFromModule);
+  assert.equal(EvaluationError, EvaluationErrorFromModule);
+  assert.equal(installEvaluationServer, installEvaluationServerFromModule);
 });
 
 test("commands import services only through each module service.ts", () => {
