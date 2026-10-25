@@ -219,16 +219,18 @@ export class NodeService {
   #superRoot(scopePath: string): SuperAgentsNode {
     return createSuperAgentsNode(scopePath);
   }
-  /** Deferred, streaming reads with entry snapshots only. Before moving or
-   * destroying a returned node, call get(node.path) to capture its resources. */
+  /** Deferred, streaming reads from a scope, AGENTS.md, or explicit README.md.
+   * Before moving or destroying a returned node, call get(node.path) to capture
+   * its resources. */
   query(scopePath: string, options: NodeQueryOptions = {}): AsyncQuery<BaseNode> {
     const service = this;
     return query(async function* () {
-      const entry = path.basename(scopePath) === ENTRY_NAMES.internal
+      const readmeRoot = path.basename(scopePath) === ENTRY_NAMES.readme;
+      const entry = readmeRoot || path.basename(scopePath) === ENTRY_NAMES.internal
         ? path.resolve(scopePath) : path.join(path.resolve(scopePath), ENTRY_NAMES.internal);
       const root = options.super
         ? service.#superRoot(scopePath)
-        : await service.#read(entry, AgentsNode, false, false);
+        : await service.#read(entry, readmeRoot ? undefined : AgentsNode, false, false);
       if (!root)
         throw new Error(
           `Missing scope entry: ${entry}. Add AGENTS.md or pass --super to traverse the content face (README) as a virtual system.`,

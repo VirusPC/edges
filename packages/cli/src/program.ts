@@ -16,6 +16,7 @@ import { addNotesCommand } from "./commands/notes.js";
 import { addProjectsCommand } from "./commands/projects.js";
 import { addTasksCommand } from "./commands/tasks.js";
 import { addMemoryCommand } from "./commands/memory.js";
+import { addRoutinesCommand } from "./commands/routines.js";
 import { addSkillsCommand } from "./commands/skills.js";
 import { addForestCommand } from "./commands/forest.js";
 import { addComposeCommand } from "./commands/compose.js";
@@ -123,7 +124,7 @@ function addRootCommand(
     )
     .option(
       "--exclude <modules>",
-      "Skip modules (comma-separated): compose, memory, skills, notes, projects, tasks",
+      "Skip modules (comma-separated): compose, memory, skills, notes, projects, tasks, routines",
       (value: string, previous: string[] = []) => {
         previous.push(value);
         return previous;
@@ -165,6 +166,7 @@ function addRootCommand(
   addTasksCommand(program, ctx);
   addMemoryCommand(program, ctx);
   addSkillsCommand(program, ctx);
+  addRoutinesCommand(program, ctx);
   addArtifactsCommand(program, ctx);
   addEvaluationCommand(program, ctx);
   addConfigCommand(program, ctx);
@@ -189,6 +191,7 @@ function commandWriteTarget(
     (parent === "edges" && name === "init") ||
     (parent === "notes" && ["create", "update", "delete", "init"].includes(name)) ||
     (parent === "projects" && ["create", "update", "delete", "init"].includes(name)) ||
+    (parent === "routines" && ["create", "update", "delete", "init"].includes(name)) ||
     (parent === "skills" && ["create", "update", "delete", "init"].includes(name)) ||
     (parent === "tasks" && ["create", "update", "status", "init"].includes(name)) ||
     (parent === "project" &&
@@ -208,6 +211,7 @@ function commandWriteTarget(
       parent === "notes" ||
       parent === "projects" ||
       parent === "skills" ||
+      parent === "routines" ||
       parent === "tasks" ||
       (parent === "edges" && name === "init"))
   )

@@ -29,11 +29,12 @@ export const LEGACY_NODE_TYPES = {
 } as const;
 
 /**
- * Leaf INDEX.md rules, checked in this order: memory, task, note, project.
+ * Leaf INDEX.md rules, checked in this order: memory, routine, task, note, project.
  * Task paths are filled in by the caller because the board directory name comes from harness materials.
  */
 export const LEAF_DIRECTORIES = [
   { type: "memory", module: "memory" },
+  { type: "routine", path: /(?:^|\/)routines\/[^/]+\/INDEX\.md$/ },
   { type: "task" },
   { type: "note", path: /(?:^|\/)notes\/(?:[^/]+\/)+(?:INDEX|index)\.md$/ },
   {

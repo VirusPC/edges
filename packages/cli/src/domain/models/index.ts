@@ -7,6 +7,7 @@ export { TaskNode } from "./tasks/task-node.js";
 export { MemoryNode } from "./memory/memory-node.js";
 export { NoteNode } from "./notes/note-node.js";
 export { ProjectNode } from "./projects/project-node.js";
+export { RoutineNode } from "./routines/routine-node.js";
 export { SkillNode } from "./skills/skill-node.js";
 export { AgentsNode } from "./agents/agents-node.js";
 export { SuperAgentsNode } from "./super-agents/super-agents-node.js";

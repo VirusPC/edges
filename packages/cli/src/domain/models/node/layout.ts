@@ -12,7 +12,7 @@ import { TASK_STATUSES } from "../tasks/types.js";
 export { ENTRY_NAMES, LEGACY_LEAF_ENTRY, LEAF_ENTRY_NAMES };
 
 export type NodeType =
-  "agents" | "readme" | "skill" | "task" | "memory" | "note" | "text" | (string & {});
+  "agents" | "readme" | "routine" | "skill" | "task" | "memory" | "note" | "text" | (string & {});
 
 export const isLeafEntryName = (name: string): boolean =>
   LEAF_ENTRY_NAMES.includes(name);

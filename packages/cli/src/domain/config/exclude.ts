@@ -9,6 +9,7 @@ export const EXCLUDABLE_MODULES = [
   "notes",
   "projects",
   "tasks",
+  "routines",
 ] as const;
 
 export type ExcludableModule = (typeof EXCLUDABLE_MODULES)[number];
