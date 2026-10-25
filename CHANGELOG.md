@@ -11,20 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-10-26
+
 ### Routines
 
-- **把例行工作记录交给平台接入：** `edges routines init` 初始化例程模块，`create/list/get/update/delete` 维护日程与 Skill 引用。Agent 可以从索引找到记录，再按平台自己的方式配置触发器；Edges 不运行调度器。
-- **执行内容跟随仓库更新：** 新增 `edges-routines` 技能，说明平台每次读取 Skill，默认采用仓库默认分支最新内容，也可指定版本；读取失败就停止本次并报告。
-
-### 可观测
-
-- **把编码 Agent 和 Grok Bot 接到 Langfuse：** `edges init` 或 `edges skills init` 会装上主入口 `langfuse-agent-tracing`，以及本机 `langfuse-local-agent-tracing`、Codex Cloud `langfuse-codex-cloud-tracing`、Cursor Cloud `langfuse-cursor-cloud-tracing`、Grok Bot `langfuse-grokbot-tracing`。还没确定是哪一种时先打开主入口，它只帮你选。安装步骤在对应技能里。Grok Bot 的导出脚本和 Codex Cloud 的轮询脚本不在这个 npm 包里。运行记录和指标笔记在 `packages/observation/`。
-
-### 评测
-
-- **稳定版 `0.2.6`，直接装：** `npm install -g @viruspc/edges` 就是 `@viruspc/edges@0.2.6`。评测服务从这一版进入 latest，不用再写 `@beta`。服务跑起来以后，在 Langfuse 里按数据集名字发起 Custom Experiment，就会跑本仓已经登记的实验。
-- **第一次：在本仓克隆里先写配置，再登记，再让它一直跑：** 评测进程在 `packages/services/evaluation`，用这里构建出的 `edges`（`pnpm --filter @viruspc/edges exec -- edges`）。先 `edges config init` 写成 `~/.config/edges/edges.env`，再 `edges evaluation server install`，再 `edges evaluation server start`。登记完还不会自己跑。全局安装的 `edges` 用来记笔记和装技能。
-- **看输出用 `--dev`，要一直跑就不要加：** `edges evaluation server start --dev` 在前台跑，结束进程就停。要长期留在这台机器上，走上面的 `install`，再用不带 `--dev` 的 `start`。
+- **把例行工作记录交给平台接入：** `edges routines init` 初始化例程模块。`edges routines create`、`edges routines list`、`edges routines get`、`edges routines update`、`edges routines delete` 维护日程和要引用的 Skill。Agent 可以从索引找到记录，再按平台自己的方式配置触发；Edges 只保存记录，不到点替你跑。
+- **执行内容跟随仓库更新：** 技能 `edges-routines` 说明平台每次读取记录和它引用的 Skill。默认采用仓库默认分支最新内容，也可以指定 branch、tag 或 commit；读取失败就停止本次并报告，不沿用旧副本。
 
 ### 文档与系统
 
@@ -275,7 +267,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 办公文档（`.docx` / `.xlsx` / `.pptx`）入库。
 - 未公开的专利交底材料。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/VirusPC/edges/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/VirusPC/edges/releases/tag/v1.6.0
 [1.5.0]: https://github.com/VirusPC/edges/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/VirusPC/edges/compare/v1.3.0...v1.4.0

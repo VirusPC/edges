@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+## [0.2.7] - 2026-10-26
+
+### Routines
+
+- **把例行工作记在仓库里：** `edges routines init` 在当前作用域启用例程。无参 `edges init` 不会顺手启用。然后用 `edges routines create`、`edges routines list`、`edges routines get`、`edges routines update`、`edges routines delete` 维护每条记录的说明和正文。记录在 `<scope>/.harness/routines/<name>/INDEX.md`，名称是稳定的小写 kebab-case。`edges routines create` 要带 `--description`，可以用 `--body` 写日程，用重复的 `--metadata key=value` 写前置信息。Edges 只保存这些记录，不到点替你执行。
+- **平台每次执行前重新读：** 随包技能 `edges-routines` 说明外部平台怎么接。触发时读取这条记录和它引用的 Skill。没写版本就用来源仓库默认分支的最新内容；写了 branch、tag 或 commit 就用那一版。读不到记录或 Skill 就停止这一次并报告原因，不沿用旧副本。日程改了之后，平台上的触发时间要另外更新。
+
 ## [0.2.6] - 2026-10-25
 
 稳定版。`0.2.6-beta.0` 里的评测服务从这一版进入 npm 的 `latest`。安装：`npm install -g @viruspc/edges`。
