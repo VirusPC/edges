@@ -7,6 +7,7 @@ Local agents still prefer [`../cli`](../cli/) (`edges …`). Skills say when to 
 ## Services
 
 - `artifacts-preview/`: Artifacts 预览服务 (ADR 0013). Upload → public URL → TTL delete. Client: `edges artifacts`.
+- `experiment-webhook/`: Langfuse Custom Experiment webhook. HTTP 202, then an in-process runner from `registry.json`. First runner: harness memory ablation.
 
 ## Conventions
 

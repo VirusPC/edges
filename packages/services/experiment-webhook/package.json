@@ -1,0 +1,12 @@
+{
+  "name": "edges-experiment-webhook",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "description": "Langfuse Custom Experiment webhook that runs registered evaluation runners in-process",
+  "scripts": {
+    "start": "PYTHONPATH=. python3 -m experiment_webhook",
+    "test": "PYTHONPATH=. python3 -m unittest discover -s test -p 'test_*.py' -v",
+    "check:langfuse": "PYTHONPATH=. python3 scripts/real_custom_experiment.py"
+  }
+}

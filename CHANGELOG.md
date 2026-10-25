@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 评测
+
+- **Langfuse 的 Custom Experiment 可以打到本仓 webhook，按 Dataset 名字跑已登记的实验：** 在 `packages/services/experiment-webhook` 起进程后，`POST /langfuse/experiment` 用官方 `x-langfuse-signature` 校验原始 body，立刻回 202，再在本进程里调用 `registry.json` 里的 runner。第一条接 harness memory 消融，把 Dataset 题适配进现有的 `run_experiment`。默认 10 分钟超时；超时或失败会写 `packages/evaluation/reports/`，并在配了 Langfuse 密钥时写回 experiment trace 和 `run_ok` 分数。开发环境用 `EXPERIMENT_WEBHOOK_SIGNATURE=off` 关掉签名校验。
+
 ### 文档与系统
 
 - **公开文档不点名个人仓：** 根 README、CHANGELOG、ADR、架构说明、任务与记忆，以及评测配置，不再写出维护者个人仓或私有仓的名字和链接。检索评测的语料地址改成通用示例 `https://github.com/example/personal-brain.git`；需要真实的拆仓前语料时，设置 `EDGES_RETRIEVAL_CORPUS_URL`。`VirusPC/edges` 与 npm 包 `@viruspc/edges` 保持不变。
