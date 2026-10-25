@@ -20,6 +20,10 @@ Edges 把这些经验组织成**跟随目录、由 Git 管理的工作记忆与�
 
 ## 为什么这样设计
 
+Edges 从你选定的目录开始：项目根、子模块或专项目录都可以建立一套 harness。需要更细的维护范围时，可以继续为选定子目录、技能或 harness 本身初始化同样的结构；需要复用其他仓库的积累时，再通过 Compose 组合进来。
+
+![Edges 的三种组织方式：在任意选定目录建立 harness，在子目录或维护方法目录中按需递归初始化，再通过 Compose 组合独立维护的仓库](docs/assets/readme/design.svg)
+
 ### 经验放在离问题最近的地方
 
 一个项目的共同约定适合放在根，某个子模块的特殊限制适合留在那个目录。Edges 允许你为选定目录建立局部 harness，各层通过索引连接；Agent 从当前问题所在的作用域出发，读取相关层的约束，再按索引选择需要的材料，减少每次塞进上下文的无关背景。
@@ -30,7 +34,7 @@ Edges 把这些经验组织成**跟随目录、由 Git 管理的工作记忆与�
 
 笔记、任务、记忆和技能以 Markdown 保存，正文与附件放在同一内容目录中。组织关系写在索引里，变化可以用 diff 检查、用 Git 追溯。跟踪与忽略规则也决定哪些材料进入共享版本、哪些仅留在本机。核心内容管理只需要 Node.js、Git 和 Edges CLI；观测后端、评测服务与在线预览按需要接入。
 
-目录中既有正在做的工作，也有帮助你维护和改进它的经验。`README.md` 组织内容，`AGENTS.md` 引出维护信息，`.harness/README.md` 汇总该层材料。这套结构可以继续用于维护 Edges 自身。入口分工见[递归系统设计](docs/adr/0029-recursive-system-two-entries.md)与[材料索引](docs/adr/0035-harness-readme-as-layer-material-index.md)。
+目录中既有正在做的工作，也有帮助你维护和改进它的经验。`README.md` 组织内容，`AGENTS.md` 引出维护信息，`.harness/README.md` 汇总该层材料。当维护对象变成一套复盘技能或 harness 本身时，它也可以拥有自己的维护材料，记录这套方法的纠正、任务与改进。各层沿用同一结构，Edges 自身也用它来维护框架。入口分工见[递归系统设计](docs/adr/0029-recursive-system-two-entries.md)与[材料索引](docs/adr/0035-harness-readme-as-layer-material-index.md)。
 
 ### 让方法和内容跨 Agent 延续
 
