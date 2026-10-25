@@ -55,9 +55,9 @@ flowchart TB
 
 ## 模块的设计与用例
 
-十个模块各自解决不同的问题。Notes、Projects、Tasks 承接材料与工作；Memory、Skills 保留经验与方法；Compose、Routines 支持复用与持续运行；Observation、Evaluation、Artifacts 帮助检查过程、验证效果和审阅产物。
+从当前工作需要解决的问题出发，可以按用途选择模块：用 Notes、Projects 组织材料，用 Tasks、Routines 安排和跟进工作，用 Memory、Skills 积累经验，用 Observation、Evaluation 为改进提供依据，用 Artifacts 审阅产物，用 Compose 跨仓复用已有积累。这些用途可以交叉；Compose 也能为其他模块接入外部仓库的材料与方法。
 
-![Edges 模块地图：十个模块按材料与工作、经验与方法、组合与例行、检查与交付分组，围绕当前工作按需组合](docs/assets/readme/modules.svg)
+![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块](docs/assets/readme/modules.svg)
 
 ### Notes · 先把值得保留的东西留下
 
@@ -77,6 +77,12 @@ flowchart TB
 
 **用例：** 手机上记下一个想法，桌面上与 Agent 澄清范围，再交给下一次会话实施；接手者能知道为什么做、进展如何、怎样算完成。[任务用法与 Run 查询](packages/cli/README.md#任务tasks)
 
+### Routines · 让例行工作的做法持续改进
+
+例程分别记录日程与执行方法。仓库保存定义和 Skill，外部平台负责触发；每次运行前读取仓库中的记录与方法，默认采用默认分支最新内容，也可以固定版本。这样，改进后的做法有一个持续维护的来源。
+
+**用例：** 每天由平台触发复盘。改进复盘 Skill 并合入默认分支后，下次按约定读取它；若改了日程，还需要同步调整平台配置。创建例程记录后，要完成平台接入才会定时执行。[例程用法与接入约定](packages/skills/edges-routines/SKILL.md)
+
 ### Memory · 留住未来判断仍然需要的理由
 
 项目记忆保存当前代码或文件无法直接说明的东西：为什么选了这个方案、哪些做法被纠正过、哪些限制必须继续遵守。记忆归到最相关的作用域，检索时先看索引与说明，再读取需要的正文。
@@ -88,18 +94,6 @@ flowchart TB
 重复工作值得保留的不只是结果，还有执行步骤、判断条件和检查方式。Skills 把这些整理成 Agent 可以调用的方法。受管技能由本作用域维护正文；引用技能在原处维护，这里保留发现入口。这样，持续改进方法时能找到负责维护的原文，跨目录复用也无需另养一份副本。安装到 Agent 与登记到作用域索引分别完成。
 
 **用例：** 把多次复盘后稳定下来的流程沉淀为技能，换 Agent 时仍能沿用，并在使用反馈中继续改进。这里管理的是可复用方法；教 Agent 操作 Edges 各模块的接入 skill 也属于技能的一种用途。[技能用法](packages/cli/README.md#技能skills)
-
-### Compose · 分别维护，按需组合
-
-个人经验、团队规范和项目知识有不同的共享范围、维护者与版本。Compose 通过 Git submodule 将外部仓库接入当前工作区，并登记各自用途，让它们能被发现和复用，同时保留原有归属与历史。
-
-**用例：** 新项目组合一份团队工程规范和一份个人常用方法，项目自己的决策仍留在本地；更新共享规范时，可以明确选择引用的版本。[组合用法](packages/cli/README.md#组合仓库compose) · [为什么采用 Git submodule](docs/adr/0042-compose-on-git-submodule.md)
-
-### Routines · 让例行工作的做法持续改进
-
-例程分别记录日程与执行方法。仓库保存定义和 Skill，外部平台负责触发；每次运行前读取仓库中的记录与方法，默认采用默认分支最新内容，也可以固定版本。这样，改进后的做法有一个持续维护的来源。
-
-**用例：** 每天由平台触发复盘。改进复盘 Skill 并合入默认分支后，下次按约定读取它；若改了日程，还需要同步调整平台配置。创建例程记录后，要完成平台接入才会定时执行。[例程用法与接入约定](packages/skills/edges-routines/SKILL.md)
 
 ### Observation · 看见真实工作是怎样发生的
 
@@ -118,6 +112,12 @@ flowchart TB
 交互页面、方案预览和分类建议需要一个方便打开的落点。Artifacts 为静态产物提供临时托管与可分享的 URL，适合跨设备审阅；页面渲染、发布以及结果写回各有自己的步骤。
 
 **用例：** Agent 生成任务分类建议页，发布后在手机上审阅，再将确认结果交给 Agent 落库。临时链接按生命周期清理，长期站点另行维护。[预览发布用法](packages/cli/README.md#预览发布artifacts) · [服务说明](packages/services/artifacts-preview/README.md)
+
+### Compose · 分别维护，按需组合
+
+个人经验、团队规范和项目知识有不同的共享范围、维护者与版本。Compose 通过 Git submodule 将外部仓库接入当前工作区，并登记各自用途，让它们能被发现和复用，同时保留原有归属与历史。
+
+**用例：** 新项目组合一份团队工程规范和一份个人常用方法，项目自己的决策仍留在本地；更新共享规范时，可以明确选择引用的版本。[组合用法](packages/cli/README.md#组合仓库compose) · [为什么采用 Git submodule](docs/adr/0042-compose-on-git-submodule.md)
 
 ## 一次工作怎样留下下一次的起点
 

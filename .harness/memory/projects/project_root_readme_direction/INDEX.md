@@ -10,7 +10,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: VirusPC
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-10-26T02:27:24+08:00'
+  edges-updated-at: '2026-10-26T02:31:01+08:00'
 ---
 
 根 README 是 Edges 框架面向外部访客的门面与地图：任何目录都能配一套 harness，大脑也被看作一个虚拟目录；经验按「谁 × 在哪」沉淀。文档要让读者理解各模块的设计思考和用例，再找到具体用法。具体规范保留在所属能力文档。
@@ -29,6 +29,7 @@ metadata:
 - 用户明确要求删除根 README 的手动实践部分：系统通过 Agent 使用，上手应集中于让 Agent 接入和通过对话表达需求，不在首页教授安装命令、手动创建笔记或任务等 CLI 操作。命令参考仍由能力文档承接。
 - 覆盖 Notes、Projects、Tasks、Memory、Skills、Compose、Routines、Observation、Evaluation、Artifacts，并说明目录与作用域、递归索引、Markdown/Git、CLI/Skill/MCP 这些共同基础。
 - 用户进一步希望 README 有漂亮的配图，帮助外部访客理解并愿意使用。配图应服务于系统价值与模块关系的表达；具体画风和布局属于实现选择，尚非用户指定规范。
+- 用户指出模块图中的「组合与例行」不像完整维度：Compose 的跨仓组合与 Routines 的重复工作安排不应硬合为一组。分组应帮助读者理解明确用途，不为凑布局拼接不同职责；用途可能交叉，不能宣称是一套互斥、完备的分类。
 - 优先澄清模块职责与用例，再据此收敛操作模块的 skill；本次文档整理没有完成 skill 重构任务。
 - 根 README 保留设计概览，细节链接能力文档、CONTEXT 和 ADR。部署、开发、历史与完整贡献约束移到对应能力文档或 CONTRIBUTING，并保留导航；迁出内容先确认去处，不能因精简而丢失必要信息。
 - `.harness` 下受管模块 README 仍承担索引职责，不向这些清单塞说明文字。Agent 接入说明应与现行实现核对，说明已覆盖的入口与实际接入条件。

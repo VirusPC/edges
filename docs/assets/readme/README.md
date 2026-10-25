@@ -1,13 +1,13 @@
 # README 配图
 
-配图服务于同一条阅读路径：先看到经验如何成为下一次工作的起点，再理解十个模块怎样围绕当前工作按需组合。
+配图服务于同一条阅读路径：先看到经验如何成为下一次工作的起点，再按当前工作的用途找到需要的模块。
 
 | 文件 | 用途 | 制作方式 |
 | --- | --- | --- |
 | [hero.png](hero.png) | 首屏概念插画；纸张与目录表达经验的积累和延续 | Codex 内置 image generation，2026-10-26 生成；未使用 CLI / API fallback |
 | [modules.svg](modules.svg) | 十个模块的用途与共同基础 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
 
-模块图中的连线表示可选组合，没有规定执行顺序。模块说明以[根 README](../../../README.md#模块的设计与用例)及其引用的能力文档为准。更新模块职责时同步检查图中文字；图片的替代文字保留在根 README 中。
+模块图按用途组织，不规定执行顺序，也不要求各组互斥。Tasks 与 Routines 分别记录具体任务和重复工作的安排；Compose 单独表达跨仓复用，也能为其他模块接入外部积累。模块说明以[根 README](../../../README.md#模块的设计与用例)及其引用的能力文档为准。更新模块职责时同步检查图中文字；图片的替代文字保留在根 README 中。
 
 ## 首屏插画的最终提示词
 
@@ -27,4 +27,3 @@ Materials/textures: matte paper, very subtle fine grain, no glossy plastic.
 Text: none.
 Constraints: no words, letters, numbers, labels, logos or watermark; no brain illustration, robots, neon glow, network-node wallpaper, fake UI screenshots, or decorative arrows. This is a conceptual illustration, not a literal diagram. Crisp silhouettes, professional visual polish, balanced asymmetry.
 ```
-
