@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 文档与系统
+
+- **从设计和用例了解 Edges：** 首页按问题、设计思考、十个模块的用例、贯穿场景与上手步骤重新组织，方便理解各模块为什么存在、如何一起工作。开发与历史信息集中到贡献指南，评测部署回到服务文档；接入链接改为现行路径，任务示例先运行 `edges tasks init`。
+
 ## [1.7.0] - 2026-10-26
 
 ### Routines
