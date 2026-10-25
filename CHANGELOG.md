@@ -15,40 +15,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 评测
 
-- **评测服务可以用 `edges evaluation server` 拉起：** `install` 装上 unit 并不启动；`start`、`stop`、`restart`、`status` 管这个 unit。以前没有这条仓库入口。
-- **本机配置收成一份 `edges.env`：** `edges config init` 建立 `~/.config/edges/edges.env`，评测和 `edges artifacts server` 都只读这一份。旧的 `artifacts-preview.env` 只在 init 时复制一次。
-- **Langfuse 实验可以打进本仓 webhook：** `POST /langfuse/experiment` 按 Dataset 名字跑已登记的实验。校验通过后立刻接受，再在评测服务里执行。
+- **评测服务可以用 `edges evaluation server` 拉起：** 用 `edges evaluation server install` 在本机登记评测服务。登记后还不会自动跑；`edges evaluation server start` 才启动，`edges evaluation server start --dev` 在前台跑，`stop`、`restart`、`status` 用来停、重启和查看。
+- **本机配置收成一份 `edges.env`：** 跑 `edges config init`，评测和 `edges artifacts server` 的配置都写进 `~/.config/edges/edges.env`。以前单独的预览配置会在这一步抄过来，之后只用这一份。
+- **Langfuse 里的实验可以跑本仓已登记的题目：** 在 Langfuse 发起实验时，按数据集名字跑这里已经登记的实验。
 
 ### 文档与系统
 
-- **公开文档不再点名个人仓：** 根 README、CHANGELOG 和 ADR 不再写维护者个人仓的名字和链接。拆仓前语料用 `EDGES_RETRIEVAL_CORPUS_URL` 指定。
+- **公开文档不再点名个人仓：** 根 README、CHANGELOG 和 ADR 不再写出个人仓的名字和链接。要拿拆仓前的材料做检索评测，设置 `EDGES_RETRIEVAL_CORPUS_URL`。
 
 ### 目录布局
 
-- **取消 `extensions/` 这一层：** 不留软链，代码目录用原名先放到仓库根，同日再收进 `packages/`。见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md) 和 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
-- **代码目录收进 `packages/`：** 目录名不变，不留兼容软链；npm 包 `@viruspc/edges` 的 `repository.directory` 改为 `packages/cli`。见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md) 和 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
+- **取消 `extensions/` 这一层：** 仓库里不再有这一层，代码目录用原来的名字先出现在仓库根，同一天再放进 `packages/`。旧路径不会再跳转。见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md) 和 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。
+- **代码目录收进 `packages/`：** 目录名不变。npm 上的 `@viruspc/edges` 源码改到 `packages/cli`。见 [ADR 0041](docs/adr/0041-packages-workspace-layout.md) 和 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
 
 ### 内容归属
 
-- **对外博客离开框架仓：** `posts/` 从本仓删除，文章改在个人主干仓。`/tasks/` 看板生成器仍留在本仓。见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)。
+- **对外博客离开框架仓：** 本仓不再放 `posts/`，文章到个人主干仓看。任务看板还在，网站上的 `/tasks/` 不变。见 [ADR 0040](docs/adr/0040-flatten-extensions-posts-to-personal-repo.md)。
 
 ### 仓库拆分
 
-- **框架单独成仓：** 本仓只保留 Edges 系统，历史 commit 与 PR 留在个人主干仓。npm 包名 `@viruspc/edges` 不变。
+- **框架单独成仓：** 这个仓库只放 Edges 系统。更早的提交和讨论留在个人主干仓。用 npm 安装时包名仍是 `@viruspc/edges`。
 
 ### 组合仓库
 
-- **Compose 改用 git submodule：** 被组合仓库装到 `.harness/compose/<name>`，不再放 `~/.edges/composed/<name>`。换一台机器后跑一次 `edges compose update` 就能用。见 [ADR 0042](docs/adr/0042-compose-on-git-submodule.md)。
-- **日常命令只剩 `add` / `list` / `update`：** `edges compose add`、`list`、`update` 取代 `register`、`clone`、`pull`、`push`，不留别名。`add` 必须带 `--description`；推送在子模块里用原生 git。
-- **组合入口改为 README，检出可写：** 入口从 `AGENTS.md` 上的区块改为 `.harness/compose/README.md`，默认就会展开；已检出的子模块可以直接写。一次性迁移用 `edges compose doctor --apply`。见 [ADR 0043](docs/adr/0043-compose-readme-entry.md) 和 [ADR 0045](docs/adr/0045-compose-checkout-writable.md)。
+- **组合仓库跟主仓库走：** 被组合的仓库放在 `.harness/compose/<name>`，不再放在家目录。换一台电脑后，跑一次 `edges compose update` 就能用。见 [ADR 0042](docs/adr/0042-compose-on-git-submodule.md)。
+- **日常只剩 `edges compose add`、`list`、`update`：** 以前的 `register`、`clone`、`pull`、`push` 没有了，也不留旧名字。`add` 必须写 `--description`，说明这个仓存什么。要推送，进那个目录用平时的 git。
+- **组合仓库写在 README 里，可以直接改：** 登记写在 `.harness/compose/README.md`，查看时默认就能看到。已经拉下来的仓库可以直接改文件。以前写在 `AGENTS.md` 上的，跑一次 `edges compose doctor --apply` 搬过来。见 [ADR 0043](docs/adr/0043-compose-readme-entry.md) 和 [ADR 0045](docs/adr/0045-compose-checkout-writable.md)。
 
 ### CLI
 
-- **预发布发到 npm 的 `beta` tag：** 版本号里带 `-` 的 `@viruspc/edges` 发到 npm `beta` tag，不覆盖 `latest`。稳定版仍走 `latest`。见 [ADR 0037](docs/adr/0037-npm-publish-via-github-actions.md)。
+- **预发布版不会变成默认安装：** 版本号里带 `-` 的 `@viruspc/edges` 要装 `beta` 才会拿到，不会顶掉 `npm install -g @viruspc/edges` 的稳定版。见 [ADR 0037](docs/adr/0037-npm-publish-via-github-actions.md)。
 
 ### 项目记忆（project-memory）
 
-- **旧平铺 `.memory/` 可以迁到 `.harness/memory/`：** 先 `edges memory migrate --dry-run`，再 `edges memory migrate`。对不上的文件不再让整次迁移失败。
+- **旧的单文件记忆可以迁到 `.harness/memory/`：** 还在用 `.memory/` 里一篇篇文件的仓库，先跑 `edges memory migrate --dry-run` 看会怎么搬，再跑 `edges memory migrate`。有对不上的文件，也不会整次停掉。
 
 ## [1.5.0] - 2026-10-19
 
