@@ -6,5 +6,6 @@
 - [`locomo-smoke/`](locomo-smoke/README.md)： **legacy hand-port** of F1 + truncated context (PR #70). Kept for history and existing reports. New runs should use the official submodule path.
 - [`memorybench-smoke/`](memorybench-smoke/README.md)：固定官方 MemoryBench 代码和 NFCats 数据的小规模无记忆 / BM25-M 对照，记录真实请求、检索、回答与原生评分；未接入 Edges Project Memory。
 - [`retrieval-smoke/`](retrieval-smoke/README.md)：edges 仓库自有路径的检索评测冒烟样本（6 题）。只为跑通链路，不是质量基准。
+- [`harness-memory-ablation/`](harness-memory-ablation/README.md)：harness memory 消融的自由问答冒烟题。30 题真源在个人主干仓 `evaluations/harness-memory-ablation`。
 
 约定见上一级 [README](../README.md)。

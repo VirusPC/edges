@@ -62,6 +62,7 @@ class Trace:
 
     `metadata` is copied onto every span by an exporter. `attributes` on a
     span stay on that span. `service_name` is the OTel resource `service.name`.
+    `tags` are filter labels for the whole trace. They are not metadata.
     """
 
     name: str
@@ -70,6 +71,7 @@ class Trace:
     session_id: str | None = None
     user_id: str | None = None
     metadata: dict[str, str] = field(default_factory=dict)
+    tags: tuple[str, ...] = ()
 
     @property
     def trace_id(self) -> str:

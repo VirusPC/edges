@@ -789,6 +789,46 @@ class ExporterTests(unittest.TestCase):
         self.assertEqual(attrs["gen_ai.request.model"]["stringValue"], "gpt-5.4")
         self.assertLessEqual(len(attrs["langfuse.trace.metadata.note"]["stringValue"]), 8000 + len("…[truncated]"))
 
+    def test_trace_tags_export_as_string_array(self) -> None:
+        trace = Trace(
+            name="named",
+            service_name="edges-harness-memory-ablation",
+            tags=("eval:harness-memory-ablation", "memory:on", "run:2026-10-25"),
+            spans=[
+                Span(
+                    trace_id="e" * 32,
+                    span_id="f" * 16,
+                    name="root",
+                    start_time_unix_nano=1,
+                    end_time_unix_nano=2,
+                    kind="span",
+                )
+            ],
+        )
+        self.assertFalse(any(key.startswith("langfuse.") for key in trace.metadata))
+        capture = _Capture()
+        result = exporter_from_env(
+            {
+                "LANGFUSE_HOST": "https://langfuse.example",
+                "LANGFUSE_PUBLIC_KEY": "pk",
+                "LANGFUSE_SECRET_KEY": "sk",
+            },
+            opener=capture,
+        ).export(trace)
+        self.assertEqual(result.status, "sent")
+        payload = json.loads(capture.requests[0].data.decode("utf-8"))
+        span = payload["resourceSpans"][0]["scopeSpans"][0]["spans"][0]
+        attrs = {item["key"]: item["value"] for item in span["attributes"]}
+        self.assertEqual(
+            attrs["langfuse.trace.tags"]["arrayValue"]["values"],
+            [
+                {"stringValue": "eval:harness-memory-ablation"},
+                {"stringValue": "memory:on"},
+                {"stringValue": "run:2026-10-25"},
+            ],
+        )
+        self.assertNotIn("langfuse.trace.metadata.tags", attrs)
+
     def test_smoke_trace_is_one_root_span(self) -> None:
         capture = _Capture()
         trace = smoke_trace()

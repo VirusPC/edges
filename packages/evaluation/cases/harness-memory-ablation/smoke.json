@@ -1,0 +1,43 @@
+{
+  "dataset": "harness-memory-ablation/smoke",
+  "items": [
+    {
+      "id": "harness-memory-ablation-S01",
+      "case_id": "S01",
+      "input": {
+        "question": "本仓把 LoCoMo 冒烟分数写成项目记忆有效，可以吗？"
+      },
+      "expectedOutput": {
+        "criteria": [
+          "不可以。这是评测冒烟，不是公开基准证明",
+          "不能把 LoCoMo 分数写成项目记忆或 Agent Memory 有效"
+        ],
+        "violations": [
+          "把 LoCoMo 冒烟分数写成项目记忆有效"
+        ]
+      },
+      "metadata": {
+        "category": "memory-dependent",
+        "source": "public ADR 0008"
+      }
+    },
+    {
+      "id": "harness-memory-ablation-S02",
+      "case_id": "S02",
+      "input": {
+        "question": "Langfuse 里 score 和 evaluator 有什么差别？请用产品概念回答。"
+      },
+      "expectedOutput": {
+        "criteria": [
+          "score 是落在对象上的分值记录",
+          "evaluator 是产生 score 的机制"
+        ],
+        "violations": []
+      },
+      "metadata": {
+        "category": "memory-irrelevant",
+        "source": "public product concepts"
+      }
+    }
+  ]
+}

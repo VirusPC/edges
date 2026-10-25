@@ -34,6 +34,7 @@
 - [`run_locomo_official.py`](run_locomo_official.py)：首选官方路径（VirusPC/locomo submodule → `task_eval/evaluate_qa.py` → official `evaluation.py` F1）
 - [`third_party/`](third_party/README.md)：评测用 git submodule（现有 [`third_party/locomo/`](third_party/locomo)）
 - [`retrieval_eval/`](retrieval_eval/run.py)：仓库 URL × agent client × samples 的检索评测。第一组克隆 `edges` 的 `main`，用 `codex exec` 交出路径，按簇打 P@5 / R@5 / nDCG@5。这是评测冒烟。
+- [`harness_memory_ablation/`](harness_memory_ablation/README.md)：本地 A/B 工作目录上的 harness memory 消融（真实 Agent client）。方法与 30 题在个人主干仓 `evaluations/harness-memory-ablation`（Dataset `harness-memory-ablation/v1`）。
 - [`cases/`](cases/README.md)：用例与 benchmark 定义（[`cases/locomo-smoke/`](cases/locomo-smoke/README.md) 是历史 hand-port，legacy）
 - [`reports/`](reports/README.md)：某次运行的报告
 - 本 README
