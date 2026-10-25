@@ -1,6 +1,6 @@
 # Skills (packages/skills/)
 
-本目录是 Edges **对外分发、接入本系统**的 skill 真源，供外部 AI Agent（Claude Code、Codex、Cursor、Gemini CLI、Factory、opencode）加载。不绑定 Edges 的通用 skill 在 [`shared-extensions/skills/`](../shared-extensions/skills/README.md)，不要放进来。classifyTasks（`project-tasks-classify`）人闸走 `edges tasks project review-page`；尚未入库的 proposeTypes Skill 应复用同一命令与同一 HTML 壳，不要另开 `--mode`。
+本目录是 Edges **对外分发、接入本系统**的 skill 真源，供外部 AI Agent（Claude Code、Codex、Cursor、Gemini CLI、Factory、opencode）加载。评测接入类 skill（`langfuse-*-tracing`：把 Agent / Grok Bot 会话接进 Langfuse）也放这里；主入口是 `langfuse-agent-tracing`。其余不绑定 Edges 的通用 skill 放在使用方自己的 shared-extensions，不要放进本仓。classifyTasks（`project-tasks-classify`）人闸走 `edges tasks project review-page`；尚未入库的 proposeTypes Skill 应复用同一命令与同一 HTML 壳，不要另开 `--mode`。
 
 ## 目录规范
 
@@ -103,4 +103,4 @@ npx skills@1.7.2 remove <name> -g
 
 ## 命名注意
 
-skill 名会跟各 agent 的内置 skill 处在同一命名空间，同名会遮蔽内置的。取名前先确认不撞车——例如 `deep-research` 是 Claude Code 的内置名，横纵分析法因此叫 `horizontal-vertical-research`（在 `shared-extensions/skills/`，不进 npm 包）。
+skill 名会跟各 agent 的内置 skill 处在同一命名空间，同名会遮蔽内置的。取名前先确认不撞车——例如 `deep-research` 是 Claude Code 的内置名，横纵分析法因此叫 `horizontal-vertical-research`（不进 npm 包，放在使用方自己的 shared-extensions，不进本仓）。
