@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Legacy LoCoMo Evaluation Smoke runner (hand-port, truncated-context baseline).
 
-Preferred official path: ``packages/evaluation/run_locomo_official.py`` (VirusPC/locomo
+Preferred official path: ``packages/evaluation/experiments/locomo/run_locomo_official.py`` (VirusPC/locomo
 submodule → ``task_eval/evaluate_qa.py`` → official ``evaluation.py`` F1).
 """
 
@@ -20,17 +20,18 @@ from openai_compat import resolve_api_config
 from report import REPO_ROOT, render_report
 
 CASE_DIR = Path(__file__).resolve().parent
-EVAL_DIR = CASE_DIR.parents[1]
+# cases/locomo-smoke -> packages/evaluation (reports and .cache stay there)
+EVAL_DIR = CASE_DIR.parents[3]
 EVAL_PATH = EVAL_DIR.relative_to(REPO_ROOT).as_posix()
 DEFAULT_REPORTS = EVAL_DIR / "reports"
 DEFAULT_CACHE = EVAL_DIR / ".cache" / "locomo" / "locomo10.json"
 DEFAULT_CROPPED = CASE_DIR / "data" / "locomo10-conv44-smoke.json"
 
 SUBSET = f"{SAMPLE_ID}; first 2 QA per category 1-5 in file order (take all if a category has <2)"
-DRY_RUN_COMMAND = f"python3 {EVAL_PATH}/cases/locomo-smoke/run.py dry-run"
+DRY_RUN_COMMAND = f"python3 {EVAL_PATH}/experiments/locomo/cases/locomo-smoke/run.py dry-run"
 REAL_COMMAND = (
     "KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 "
-    f"python3 {EVAL_PATH}/cases/locomo-smoke/run.py baseline"
+    f"python3 {EVAL_PATH}/experiments/locomo/cases/locomo-smoke/run.py baseline"
 )
 
 

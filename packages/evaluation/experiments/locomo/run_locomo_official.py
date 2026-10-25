@@ -17,7 +17,8 @@ from pathlib import Path
 from statistics import mean
 from typing import Any
 
-EVAL_DIR = Path(__file__).resolve().parent
+# experiments/locomo/<this file> -> packages/evaluation
+EVAL_DIR = Path(__file__).resolve().parents[2]
 REPO_ROOT = next(parent for parent in EVAL_DIR.parents if (parent / ".git").exists())
 EVAL_PATH = EVAL_DIR.relative_to(REPO_ROOT).as_posix()
 LOCOMO_ROOT = EVAL_DIR / "third_party" / "locomo"
@@ -38,10 +39,10 @@ SUBSET = (
     f"{SAMPLE_ID}; first {QA_PER_CATEGORY} QA per category 1-5 in file order "
     "(take all if a category has <2)"
 )
-PRINT_COMMAND = f"python3 {EVAL_PATH}/run_locomo_official.py print-command"
+PRINT_COMMAND = f"python3 {EVAL_PATH}/experiments/locomo/run_locomo_official.py print-command"
 SMOKE_COMMAND = (
     "KIMI_API_KEY=... OPENAI_BASE_URL=https://api.kimi.com/coding/v1 "
-    f"python3 {EVAL_PATH}/run_locomo_official.py smoke"
+    f"python3 {EVAL_PATH}/experiments/locomo/run_locomo_official.py smoke"
 )
 CLONE_COMMAND = "git clone --recurse-submodules https://github.com/VirusPC/edges.git"
 INIT_COMMAND = f"git submodule update --init {EVAL_PATH}/third_party/locomo"
@@ -193,7 +194,7 @@ Real kimi-for-coding run (key via env, never commit the key):
 - Not a ranking of memory systems.
 - Not a construct-valid proof for filesystem project-memory.
 - Not an official LoCoMo leaderboard submission.
-- Not the legacy hand-port at `{EVAL_PATH}/cases/locomo-smoke/` (kept for history).
+- Not the legacy hand-port at `{EVAL_PATH}/experiments/locomo/cases/locomo-smoke/` (kept for history).
 """
 
 

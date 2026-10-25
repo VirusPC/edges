@@ -12,12 +12,13 @@ from pathlib import Path
 
 EVAL_DIR = Path(__file__).resolve().parents[1]
 REPO_ROOT = next(parent for parent in EVAL_DIR.parents if (parent / ".git").exists())
-WRAPPER = EVAL_DIR / "run_locomo_official.py"
+LOCOMO_PKG = EVAL_DIR / "experiments" / "locomo"
+WRAPPER = LOCOMO_PKG / "run_locomo_official.py"
 LOCOMO_ROOT = EVAL_DIR / "third_party" / "locomo"
 FIXTURE_PATH = Path(__file__).resolve().parent / "fixtures" / "tiny_locomo_with_rag.json"
 
-if str(EVAL_DIR) not in sys.path:
-    sys.path.insert(0, str(EVAL_DIR))
+if str(LOCOMO_PKG) not in sys.path:
+    sys.path.insert(0, str(LOCOMO_PKG))
 
 
 class OfficialCommandTests(unittest.TestCase):
@@ -182,15 +183,18 @@ class RelocatedEvaluationTests(unittest.TestCase):
                 "import pathlib, sys\npathlib.Path(sys.argv[sys.argv.index('--out-file')+1]).write_text('[]')\n"
             )
             env = dict(os.environ, KIMI_API_KEY="fixture-no-network", PYTHONDONTWRITEBYTECODE="1")
-            printed = subprocess.run([sys.executable, str(target / "run_locomo_official.py"), "print-command"],
-                                     cwd=repo, env=env, capture_output=True, text=True)
+            printed = subprocess.run(
+                [sys.executable, str(target / "experiments/locomo/run_locomo_official.py"), "print-command"],
+                cwd=repo, env=env, capture_output=True, text=True,
+            )
             self.assertEqual(printed.returncode, 0, printed.stderr)
-            self.assertIn("packages/evaluation/third_party/locomo/task_eval/evaluate_qa.py", printed.stdout)
-            self.assertIn("git submodule update --init packages/evaluation/third_party/locomo", printed.stdout)
+            relocated = ".harness/evaluation"
+            self.assertIn(f"{relocated}/third_party/locomo/task_eval/evaluate_qa.py", printed.stdout)
+            self.assertIn(f"git submodule update --init {relocated}/third_party/locomo", printed.stdout)
             for reports in [target / "reports", repo / "exports/deep/reports", Path(tmp) / "outside"]:
                 for runner, mode, name in [
-                    (target / "run_locomo_official.py", "smoke", "2026-09-16-locomo-official-smoke-kimi-for-coding.md"),
-                    (target / "cases/locomo-smoke/run.py", "dry-run", "2026-09-16-locomo-smoke-dry-run.md"),
+                    (target / "experiments/locomo/run_locomo_official.py", "smoke", "2026-09-16-locomo-official-smoke-kimi-for-coding.md"),
+                    (target / "experiments/locomo/cases/locomo-smoke/run.py", "dry-run", "2026-09-16-locomo-smoke-dry-run.md"),
                 ]:
                     with self.subTest(reports=reports, runner=runner):
                         done = subprocess.run([sys.executable, str(runner), mode, "--reports-dir", str(reports)],
@@ -199,7 +203,7 @@ class RelocatedEvaluationTests(unittest.TestCase):
                         body = (reports / name).read_text()
                         link = re.search(r"See \[.*?\]\((.*?)\)", body).group(1)
                         self.assertEqual((reports / link).resolve(), adr.resolve())
-                        self.assertIn("python3 packages/evaluation/", body)
+                        self.assertIn("python3 .harness/evaluation/", body)
 
 
 if __name__ == "__main__":

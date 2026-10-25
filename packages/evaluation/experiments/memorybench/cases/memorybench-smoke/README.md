@@ -18,8 +18,8 @@ mkdir -p packages/evaluation/.cache/memorybench
 git clone https://github.com/THUIR/MemoryBench.git packages/evaluation/.cache/memorybench/upstream
 git -C packages/evaluation/.cache/memorybench/upstream checkout 247ba8c1e327fa297c0d57aaad0e3cbd66bac656
 uv venv --python 3.11 packages/evaluation/.cache/memorybench/venv
-uv pip install --python packages/evaluation/.cache/memorybench/venv/bin/python -r packages/evaluation/cases/memorybench-smoke/requirements-lock.txt
-packages/evaluation/.cache/memorybench/venv/bin/python packages/evaluation/cases/memorybench-smoke/run.py --prepare-only
+uv pip install --python packages/evaluation/.cache/memorybench/venv/bin/python -r packages/evaluation/experiments/memorybench/cases/memorybench-smoke/requirements-lock.txt
+packages/evaluation/.cache/memorybench/venv/bin/python packages/evaluation/experiments/memorybench/cases/memorybench-smoke/run.py --prepare-only
 ```
 
 `--prepare-only` 下载固定数据并记录选题 ID，不调用模型。准备记录在 `.cache/memorybench/preparation.json`。
@@ -35,10 +35,10 @@ OPENAI_BASE_URL=https://api.minimax.cn/v1
 MEMORYBENCH_MODEL=MiniMax-M2.5
 ```
 
-`.env` 已被 Git 忽略，不提交密钥。脚本只读取自身 worktree 根目录的 `.env`，仅加载模型及裁判配置；进程环境中的同名变量优先。不执行 shell 语句或变量展开。模型须使用该 key 实际支持的名称；以上配置已用于 [2026-10-11 的真实试跑](../../reports/2026-10-11-memorybench-nfcats-smoke-minimax-m2.5.md)。MiniMax 请求使用 `reasoning_split=true`，避免把思考内容送入回答评分。不要将密钥写进本目录、命令参数或报告。
+`.env` 已被 Git 忽略，不提交密钥。脚本只读取自身 worktree 根目录的 `.env`，仅加载模型及裁判配置；进程环境中的同名变量优先。不执行 shell 语句或变量展开。模型须使用该 key 实际支持的名称；以上配置已用于 [2026-10-11 的真实试跑](../../../../reports/2026-10-11-memorybench-nfcats-smoke-minimax-m2.5.md)。MiniMax 请求使用 `reasoning_split=true`，避免把思考内容送入回答评分。不要将密钥写进本目录、命令参数或报告。
 
 ```bash
-packages/evaluation/.cache/memorybench/venv/bin/python packages/evaluation/cases/memorybench-smoke/run.py \
+packages/evaluation/.cache/memorybench/venv/bin/python packages/evaluation/experiments/memorybench/cases/memorybench-smoke/run.py \
   --output packages/evaluation/.cache/memorybench/run-001
 ```
 

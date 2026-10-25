@@ -15,8 +15,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 EVAL_DIR = Path(__file__).resolve().parents[1]
-if str(EVAL_DIR) not in sys.path:
-    sys.path.insert(0, str(EVAL_DIR))
+EXPERIMENTS = EVAL_DIR / "experiments"
+if str(EXPERIMENTS) not in sys.path:
+    sys.path.insert(0, str(EXPERIMENTS))
 
 from retrieval_eval.client import (
     ClientCall,
@@ -84,7 +85,7 @@ class ConfigTests(unittest.TestCase):
         env = os.environ.copy()
         env.pop("EDGES_RETRIEVAL_CORPUS_URL", None)
         completed = subprocess.run(
-            [sys.executable, str(EVAL_DIR / "retrieval_eval" / "run.py"), "print-command"],
+            [sys.executable, str(EXPERIMENTS / "retrieval_eval" / "run.py"), "print-command"],
             check=True,
             text=True,
             capture_output=True,
@@ -134,7 +135,7 @@ class ScoreTests(unittest.TestCase):
         self.assertEqual(summary["macro"]["R@5"], 0.5)
 
     def test_smoke_file_perfect_hit(self) -> None:
-        samples = load_samples(EVAL_DIR / "cases" / "retrieval-smoke" / "edges.json")
+        samples = load_samples(EXPERIMENTS / "retrieval_eval" / "cases" / "retrieval-smoke" / "edges.json")
         cluster = next(sample for sample in samples if sample["id"] == "edges_smoke_system_entry")
         row = score_prediction(cluster["ground_truth"], ["CONTEXT.md"])
         self.assertEqual(row["R@5"], 1.0)
@@ -693,7 +694,7 @@ class PiClientTests(unittest.TestCase):
         self.assertEqual(client.model, "MiniMax-M3")
         self.assertEqual(client.thinking, "high")
         self.assertFalse(hasattr(client, "tools"))
-        raw_clients = json.loads((EVAL_DIR / "retrieval_eval" / "config" / "clients.json").read_text())
+        raw_clients = json.loads((EXPERIMENTS / "retrieval_eval" / "config" / "clients.json").read_text())
         self.assertNotIn("tools", raw_clients["pi"])
         self.assertEqual(client.timeout_seconds, 600)
         self.assertEqual(client.env, {"MINIMAX_CN_API_KEY": "$MINIMAX_API_KEY", "PI_TELEMETRY": "0"})

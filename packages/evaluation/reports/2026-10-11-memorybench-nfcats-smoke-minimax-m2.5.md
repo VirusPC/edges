@@ -54,7 +54,7 @@ BM25 增加了输入 token，但这一次的回答更短，作答总 token 略�
 
 ## 复现与记录
 
-- [运行说明](../cases/memorybench-smoke/README.md)；[运行脚本](../cases/memorybench-smoke/run.py)；[锁定依赖](../cases/memorybench-smoke/requirements-lock.txt)。本地密钥只在 worktree 根 `.env`，已被 Git 忽略。
+- [运行说明](../experiments/memorybench/cases/memorybench-smoke/README.md)；[运行脚本](../experiments/memorybench/cases/memorybench-smoke/run.py)；[锁定依赖](../experiments/memorybench/cases/memorybench-smoke/requirements-lock.txt)。本地密钥只在 worktree 根 `.env`，已被 Git 忽略。
 - [机器可读报告](2026-10-11-memorybench-nfcats-smoke-minimax-m2.5.json) 保存选题 ID、数据与代码版本、逐题分数、分阶段用量和原始文件 SHA-256。
 - 原始记录在本次 worktree 的 [`.cache/memorybench/run-001/`](../.cache/memorybench/run-001/)：`manifest.json`、`results.json`、`api_events.json` 和 Whoosh 索引。原始记录仅在本地，受 Git 忽略；新克隆需要按说明重新运行。
 - 已核对每题恰有一次作答和一次裁判调用、裁判原文重新解析的分数与报告一致、两组测试 ID 相同、记录的检索结果与保存索引重查一致；运行产物不含配置中的 API key。脚本经只读复核，无阻断问题。
