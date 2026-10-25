@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: edges-routines
-  edges-updated-at: '2026-10-25T17:05:54.893Z'
+  edges-updated-at: '2026-10-25T17:30:33.951Z'
   edges-title: Routines 模块：记录定义供外部平台接入
-  edges-tasks-status: in_review
+  edges-tasks-status: done
   edges-task-priority: none
 name: routines_模块skill_与调度文件分离
 description: Routines 定义记录模块与全部现有例程适配；默认最新可指定版本，平台读取执行，无调度器或分组。
@@ -95,7 +95,7 @@ edges --scope <scope> --all routines list
 - 独立审阅已闭环：描述变更同步索引；损坏同级记录时写入前失败；已登记外部引用（含软链接）可读，未登记外部路径与越界写入拒绝。
 - 实现取舍：routines 的 --super 显式遍历根 routines/README.md，保持其他模块共享 Super 行为不变；只增加 NodeService.query 对明确 README 根的支持。
 - 验证环境使用系统临时目录的真实路径；macOS /var 软链接与工作区内 Git 继承分别会触发既有测试前提限制。
-- 边界：叶子与索引仍使用既有 NodeService 分次写入，未验证磁盘故障注入；未发布 npm、未修改平台触发器。框架 PR 与 Artifacts 链接见下方，当前等待用户审阅。
+- 边界：叶子与索引仍使用既有 NodeService 分次写入，未验证磁盘故障注入；未发布 npm、未修改平台触发器。框架 PR 与 Artifacts 链接见下方，用户已于 2026-10-26 明确确认合并，任务完成状态随本 PR 合入 main 生效。
 
 
 **交付：**
