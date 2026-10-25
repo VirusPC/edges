@@ -1,4 +1,5 @@
 import test from "node:test";
+import { execFileSync } from "node:child_process";
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -126,7 +127,35 @@ test("sibling scopes have independent names; forest lookup rejects ambiguity and
   await assert.rejects(() => getRoutine(env(root), "repeat", { all: true }), /ambiguous/);
   const chosen = await getRoutine(env(root), "left/.harness/routines/repeat/INDEX.md", {});
   assert.equal(chosen.description, "left");
-  await assert.rejects(() => getRoutine(env(path.join(root, "left")), "../right/.harness/routines/repeat/INDEX.md", {}), /routine not found/);
+  await assert.rejects(() => getRoutine(env(path.join(root, "left")), "../right/.harness/routines/repeat/INDEX.md", {}), /escapes managed root/);
+});
+
+test("registered external routines remain readable while writes and unregistered external reads fail", async (t) => {
+  const host = scope(t);
+  const external = scope(t);
+  for (const root of [host, external]) {
+    execFileSync("git", ["init", "--quiet", root]);
+    await initRoutines({ targetDir: root });
+  }
+  const created = await createRoutine(env(external), { name: "external-review", description: "Shared routine" });
+  const hidden = await createRoutine(env(external), { name: "hidden-review", description: "Not registered on host" });
+  const file = path.join(external, created.path);
+  const service = new NodeService({ managedRoot: host });
+  const org = await service.get(path.join(host, ".harness/routines/README.md"));
+  assert.ok(org);
+  await service.update(org, { body: org.body.replace("<!-- project-entries-local:end -->", `- [Shared routine](<${file}>) — Shared routine\n<!-- project-entries-local:end -->`) });
+  const listed = await listRoutines(env(host), {});
+  assert.deepEqual(names(listed), ["external-review"]);
+  assert.equal((await getRoutine(env(host), "external-review", {})).description, "Shared routine");
+  assert.equal((await getRoutine(env(host), listed[0]!.path, {})).description, "Shared routine");
+  const before = readFileSync(file, "utf8");
+  for (const target of ["external-review", listed[0]!.path]) {
+    await assert.rejects(() => updateRoutine(env(host), target, { body: "Changed" }, {}), /escapes managed root/);
+    await assert.rejects(() => deleteRoutine(env(host), target, {}), /escapes managed root/);
+  }
+  await assert.rejects(() => getRoutine(env(host), path.join(external, hidden.path), {}), /escapes managed root/);
+  assert.equal(readFileSync(file, "utf8"), before);
+  assert.equal(existsSync(path.join(external, hidden.path)), true);
 });
 
 test("routines reject invalid names, empty descriptions, renaming, and unrelated exact paths", async (t) => {
@@ -141,7 +170,7 @@ test("routines reject invalid names, empty descriptions, renaming, and unrelated
   await assert.rejects(() => updateRoutine(env(root), "valid", { description: " " }, {}), /nonempty/);
   put(root, "notes/other/INDEX.md", "---\nname: other\ndescription: Not a routine\n---\n# Note\n");
   for (const target of ["notes/other/INDEX.md", ".harness/routines/README.md", ".harness/routines/valid/SKILL.md", ".harness/routines/valid", "../routines/outside/INDEX.md"]) {
-    await assert.rejects(() => deleteRoutine(env(root), target, {}), /routine not found/);
+    await assert.rejects(() => deleteRoutine(env(root), target, {}), /routine not found|escapes managed root/);
   }
   assert.equal(existsSync(path.join(root, "notes/other/INDEX.md")), true);
   assert.equal(identifyNodeType(path.join(root, "projects/example/.harness/routines/test/INDEX.md")), "routine");

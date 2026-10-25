@@ -73,19 +73,28 @@ async function listedRoutines(env: NodeJS.ProcessEnv, reach: RoutineReach): Prom
   return [...new Map(nodes.filter((node): node is RoutineNode => node instanceof RoutineNode).map((node) => [node.path, node])).values()];
 }
 
-export async function resolveRoutine(env: NodeJS.ProcessEnv, target: string, reach: RoutineReach) {
+export async function resolveRoutine(
+  env: NodeJS.ProcessEnv,
+  target: string,
+  reach: RoutineReach,
+  operation: "read" | "write" = "read",
+) {
   const { scope, managedRoot, service } = openNodeSession(env);
   let file: string;
   if (target.includes("/") || target.endsWith(".md")) {
     file = path.resolve(scope, target);
-    if (!isWithinPath(file, managedRoot) || !isRoutineEntry(file) || reach.exclude?.has("routines") || pathHitsExcludedModule(file, scope, reach.exclude)) {
+    if (!isRoutineEntry(file) || reach.exclude?.has("routines") || pathHitsExcludedModule(file, scope, reach.exclude)) {
       throw new Error(`routine not found: ${target}`);
+    }
+    if (!isWithinPath(file, managedRoot)) {
+      const reachable = operation === "read" && (await listedRoutines(env, reach)).some((node) => node.path === file);
+      if (!reachable) throw new Error(`routine path escapes managed root: ${target}`);
     }
   } else {
     const matches = (await listedRoutines(env, reach)).filter((node) => node.name === target);
     if (matches.length !== 1) throw new Error(matches.length === 0 ? `routine not found: ${target}` : `routine name is ambiguous: ${target}`);
     file = matches[0]!.path;
-    if (!isWithinPath(file, managedRoot)) throw new Error(`routine path escapes managed root: ${target}`);
+    if (operation === "write" && !isWithinPath(file, managedRoot)) throw new Error(`routine path escapes managed root: ${target}`);
   }
   const org = routineOrg(file);
   if (!await service.get(org, ReadmeNode)) throw new Error(`Missing routine organization entry: ${org}`);
@@ -129,7 +138,7 @@ export async function updateRoutine(env: NodeJS.ProcessEnv, target: string, inpu
   if (reach.all) throw new Error("--all is only supported by read commands.");
   const metadata = parseMetadata(input.metadata);
   if (input.description === undefined && input.body === undefined && metadata === undefined) throw new Error("update must be --description, --body, or --metadata");
-  const { scope, service, node } = await resolveRoutine(env, target, reach);
+  const { scope, service, node } = await resolveRoutine(env, target, reach, "write");
   if (metadata?.name !== undefined && metadata.name !== node.name) throw new Error("routine name is stable and cannot be updated");
   const parent = await service.get(routineOrg(node.path), ReadmeNode);
   if (!parent) throw new Error(`Missing routine organization entry: ${routineOrg(node.path)}`);
@@ -153,7 +162,7 @@ export async function updateRoutine(env: NodeJS.ProcessEnv, target: string, inpu
 
 export async function deleteRoutine(env: NodeJS.ProcessEnv, target: string, reach: RoutineReach) {
   if (reach.all) throw new Error("--all is only supported by read commands.");
-  const { scope, service, node } = await resolveRoutine(env, target, reach);
+  const { scope, service, node } = await resolveRoutine(env, target, reach, "write");
   const file = node.path;
   await service.destroy(node);
   return { path: scopeRelativePath(scope, file) };
