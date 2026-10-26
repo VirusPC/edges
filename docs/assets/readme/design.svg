@@ -89,7 +89,6 @@
   <path d="M630 974V928q0-18-18-18H78q-18 0-18 18v284q0 18 18 18h534q18 0 18-18v-36M630 1006v58M630 1096v48" fill="none" stroke="#d7e2dc" stroke-width="1.5"/>
   <text x="88" y="952" class="ink" font-size="28" font-weight="650">当前项目仓库</text>
 
-  <rect x="88" y="1040" width="514" height="162" rx="16" class="plain-node"/>
   <text x="345" y="1107" class="ink" font-size="28" font-weight="650" text-anchor="middle">Agent</text>
   <text x="345" y="1145" class="body" text-anchor="middle">推进当前项目</text>
 
