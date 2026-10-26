@@ -20,9 +20,9 @@ Edges 把这些经验组织成**跟随目录、由 Git 管理的工作记忆与�
 
 ## 为什么这样设计
 
-Edges 可以在任意选定目录建立 harness，例如 monorepo 下的 `apps/web/`。harness 本身也可以继续 harness：项目拥有自己的 harness，其中的代码审阅 Skill 又可以拥有自己的 harness。维护对象从项目变成方法，同一套结构继续适用。需要复用其他仓库的积累时，通过 Compose 接入当前工作区。
+Edges 可以在任意选定目录建立 harness，例如 monorepo 下的 `apps/web/`。harness 本身也可以继续 harness：项目拥有自己的 harness，其中的代码审阅 Skill 又可以拥有自己的 harness。维护对象从项目变成方法，同一套结构继续适用。个人大脑这样的共享 harness 还可以独立成仓，通过 Compose 挂入当前工作空间：在项目中利用已有知识，也把新的经验沉淀进去。
 
-![Edges 的三种组织方式：白色对象各自拥有独立的绿色 harness；monorepo 子 app 可就地建立 harness，项目与 Skill 的四层嵌套体现递归，两侧独立仓库通过 Compose 接入当前工作区的 harness](docs/assets/readme/design.svg)
+![Edges 的三种组织方式：monorepo 子 app 内建立绿色 harness；项目、项目的 harness、Skill、Skill 的 harness 四层嵌套；个人大脑仓与当前项目仓平级独立，通过 Compose 引用，Agent 在项目中利用大脑的知识与方法，并向大脑沉淀新的经验](docs/assets/readme/design.svg)
 
 ### 经验放在离问题最近的地方
 
@@ -114,9 +114,9 @@ Agent 可以把纠正写成记忆，把重复成功的做法整理成技能；�
 
 ### Compose · 分别维护，按需组合
 
-个人经验、团队规范和项目知识有不同的共享范围、维护者与版本。Compose 通过 Git submodule 将外部仓库接入当前工作区，并登记各自用途，让它们能被发现和复用，同时保留原有归属与历史。
+有些仓库本身就是共享 harness，例如保存个人知识与方法的大脑仓库。Compose 通过 Git submodule 将外部仓库挂入当前工作空间，并登记各自用途。Agent 在推进项目时，可以利用其中的知识与方法，也可以把新的经验沉淀到对应仓库；各仓继续保留自己的归属与 Git 历史。
 
-**用例：** 新项目组合一份团队工程规范和一份个人常用方法，项目自己的决策仍留在本地；更新共享规范时，可以明确选择引用的版本。[组合用法](packages/cli/README.md#组合仓库compose) · [为什么采用 Git submodule](docs/adr/0042-compose-on-git-submodule.md)
+**用例：** 在新项目中挂入个人大脑，复用过去的调试方法；完成排查后，将可跨项目使用的经验沉淀到大脑，项目自身的决策留在项目 harness。团队共享的知识与方法也可以同样组合，并选择引用的版本。[组合用法](packages/cli/README.md#组合仓库compose) · [为什么采用 Git submodule](docs/adr/0042-compose-on-git-submodule.md) · [挂载仓库的写入](docs/adr/0045-compose-checkout-writable.md)
 
 ## 一次工作怎样留下下一次的起点
 
