@@ -34,4 +34,5 @@
 - [tasks\_review\_shell\_mobile\_narrow](<done/2026-09-24--Tasks-%E5%AE%A1%E9%98%85%E5%A3%B3%E6%89%8B%E6%9C%BA-%E7%AA%84%E5%B1%8F%E9%80%82%E9%85%8D/INDEX.md>) — \#126 三列桌面可用；390×844 横向溢出。2026\-09\-24 grill 已锁窄屏纵向长滚动与双端「移到项目…」，见 ADR 0023
 - [minigtr\_codex\_cli\_remote\_control](<done/2026-09-25--minigtr-%E9%AA%8C%E8%AF%81-Codex-CLI-remote-control/INDEX.md>) — 结论：minigtr Ubuntu 上 Codex CLI remote\-control 可用手机 ChatGPT 配对（codex\-cli 0.157.0；需先 device\-auth 登录）。
 - [github\_artifacts\_preview](<backlog/2026-10-19--Github-Artifacts-Preview/INDEX.md>) — 用 GitHub Pages 提供常开预览 URL，替代依赖自建服务端的 Artifacts Publish；浏览器看页，Grok 里继续决策。候选含 CF Pages 直传与 Tunnel+Nginx。
+- [edges\_new\_user\_onboarding\_validation](<backlog/2026-10-27--%E9%AA%8C%E8%AF%81-Edges-%E6%96%B0%E7%94%A8%E6%88%B7%E6%8E%A5%E5%85%A5%E4%B8%8E%E9%A6%96%E6%AC%A1%E4%BD%BF%E7%94%A8/INDEX.md>) — 从外部用户起点验证安装、Skill 发现和首次真实任务，检查梳理后的接入流程是否可用。
 <!-- project-entries-local:end -->

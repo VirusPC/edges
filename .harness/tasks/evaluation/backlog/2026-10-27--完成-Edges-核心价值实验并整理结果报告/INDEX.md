@@ -1,0 +1,32 @@
+---
+metadata:
+  edges-type: task
+  edges-task-project: evaluation
+  edges-updated-at: '2026-10-26T22:20:23.703Z'
+  edges-title: 完成 Edges 核心价值实验并整理结果报告
+  edges-tasks-status: backlog
+  edges-task-priority: none
+name: edges_value_experiment_runs
+description: 按确认的方案跑完核心价值实验，保留真实结果、成本与失败案例，形成可追溯的推广证据。
+---
+
+**背景：**
+用户要求 Edges 推广先有实验数据。已有 2026-10-25 记忆报告采用全文注入和单轮问答，不能直接代表真实 Agent 沿索引按需读取记忆的收益；框架已有 harness_memory_ablation runner，可作为执行基础。本任务负责本次确定范围的实际运行与结果汇总，不重复建设已有评测基础设施。
+
+实验具体清单、模型、预算和通过门槛由前置方案确定。结果可以支持、限制或否定原先的效果预期，不以取得正向分数作为完成条件。
+
+- 主任务：[Edges 对外推广准备：实验、Skills 与场景案例](<https://github.com/VirusPC/edges-brain-viruspc/blob/main/.harness/tasks/site-and-content/backlog/2026-10-27--Edges-%E5%AF%B9%E5%A4%96%E6%8E%A8%E5%B9%BF%E5%87%86%E5%A4%87%E5%AE%9E%E9%AA%8CSkills-%E4%B8%8E%E5%9C%BA%E6%99%AF%E6%A1%88%E4%BE%8B/INDEX.md>)
+- 依赖或需要引用的成果：[梳理 Edges 核心价值与推广实验方案](<../2026-10-27--梳理-Edges-核心价值与推广实验方案/INDEX.md>)
+
+**目标：**
+完成确认范围内的核心价值实验，形成方法与原始结果可追溯、能支持恰当对外表述的结果报告。
+
+**动作：**
+- 按已审阅方案准备独立实验环境并执行，复用适用的 runner、题库和观测能力。
+- 记录实际回答或任务产物、质量与成本指标、失败案例和运行条件。
+- 整理支持与不支持的主张及其边界，向案例文章提供可引用的数据与材料。
+
+**完成标准：**
+- [ ] 确认范围内的实验已实际完成，运行失败与未达预期的结果也保留在记录中。
+- [ ] 报告中的结论和数字可以追溯到实验条件与原始结果，没有把冒烟或近似实验外推为生产收益。
+- [ ] 对外可用的主张、限制和待后续研究的问题已明确区分。
