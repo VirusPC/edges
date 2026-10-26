@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1040" viewBox="0 0 1280 1040" role="img" aria-labelledby="title description">
   <title id="title">Edges 模块地图：从当前工作出发，按需选用</title>
-  <desc id="description">按用途寻找十个模块，没有固定执行顺序。材料组织：Notes 留下原始材料、Projects 组织持续工作。工作安排：Tasks 接续目标与进度、Routines 记录日程与方法。经验积累：Memory 保留判断理由、Skills 复用有效做法。改进依据：Observation 回看工作过程、Evaluation 验证改进效果。产物审阅：Artifacts 交付产物供审阅。跨仓复用：Compose 组合不同仓库，为当前工作接入外部积累，可配合其他用途使用。共同基础是目录与作用域、递归索引、Markdown 与 Git，以及 CLI、Skill、MCP 三种接入方式。</desc>
+  <desc id="description">按用途寻找十个模块，没有固定执行顺序。材料组织：Notes 留下原始材料、Projects 组织持续工作。工作安排：Tasks 接续目标与进度、Routines 记录日程与方法。经验积累：Memory 保留判断理由、Skills 复用有效做法。改进依据：Observation 留存个人会话、Evaluation 验证改进效果。产物审阅：Artifacts 交付产物供审阅。跨仓复用：Compose 组合不同仓库，为当前工作接入外部积累，可配合其他用途使用。共同基础是目录与作用域、递归索引、Markdown 与 Git，以及 CLI、Skill、MCP 三种接入方式。</desc>
 
   <defs>
     <style>
@@ -77,7 +77,7 @@
   <text x="733" y="498" class="heading">改进依据</text>
   <path d="M680 525h516" class="rule"/>
   <text x="684" y="574" class="module">Observation</text>
-  <text x="1192" y="574" class="value" text-anchor="end">回看工作过程</text>
+  <text x="1192" y="574" class="value" text-anchor="end">留存个人会话</text>
   <text x="684" y="630" class="module">Evaluation</text>
   <text x="1192" y="630" class="value" text-anchor="end">验证改进效果</text>
 

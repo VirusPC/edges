@@ -12,7 +12,7 @@
 
 ## 这是什么，能帮我做什么？
 
-和 Agent 一起工作时，方案的取舍、做到一半的任务、下次可以复用的方法，常常留在聊天里。换个会话，这些背景又要重新解释。
+和 Agent 一起工作时，想做的改进、方案的取舍、做到一半的任务、下次可以复用的方法，常常留在聊天里。时间一久容易忘记，换个会话又要重新解释。
 
 Edges 把它们组织成**跟随目录、由 Git 管理的工作记忆与协作方法**，让不同会话、不同 Agent 能找到已有积累，接着推进工作。围绕一个目录维护的这套材料，就是它的 **harness**；代码库、长期项目和个人大脑都可以拥有自己的一套。
 
@@ -28,9 +28,11 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 
 ![Edges 的三种组织方式：monorepo 子 app 内建立 web 的 harness；项目、项目的 harness、Skill、Skill 的 harness 四层嵌套；从左侧当前项目仓出发，通过 Compose 引用右侧的「共享的 harness 仓库」，以个人大脑为例，在项目中利用已有知识与方法，并向大脑沉淀新的经验](docs/assets/readme/design.svg)
 
-长期积累需要能阅读、修改、审阅和迁移。普通文件与 Git 保留这些能力，Agent 与服务按需接入。
+**想做的事有处安放，做到一半的工作能够接续。** 想到一个改进，可以先留下想做什么和缘由；有时间再沿着已有背景继续推进。普通文件与 Git 让积累可读、可迁移、可审阅，任务背景、目标与执行记录也能供后续会话和其他 Agent 接续。
 
-![Edges 的长期使用优势：文件系统让内容可读可迁移，Git 让变更可追溯可审阅，跨 Agent 接入让积累可接续，零运维让核心本地可用并提供现成服务接入](docs/assets/readme/foundations.svg)
+![Edges 的长期使用优势：文件系统让内容可读可迁移，Git 让变更可追溯可审阅，跨 Agent 接入让任务可接力，零运维让核心本地可用并提供现成服务接入](docs/assets/readme/foundations.svg)
+
+**自己的 harness 有没有用，看得见，也测得出。** 记录不同 Agent 下的个人会话，分析日常工作与 harness 的使用情况，找出需要改进或清理的内容；再用自己的材料和问题开展对照评测，衡量质量与成本，让取舍有依据。
 
 ## 怎么开始？
 
@@ -67,11 +69,11 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 </details>
 
 <details>
-<summary>Tasks · 让目标跨会话接力</summary>
+<summary>Tasks · 留住想做的事，随时随地继续推进</summary>
 
-任务保存背景、目标、状态和完成标准，一次执行尝试则由 Run 区分。目标因此可以持续存在，在失败、暂停或换人之后继续推进。开卡时先留下背景与目标，澄清后再补齐可核验的完成标准。
+想法出现时，先留下想做什么、为什么值得做，避免被日常事务淹没。有时间后，再逐步澄清范围、补齐完成标准并付诸行动。任务保存背景、目标和状态，Run 区分一次次执行尝试；已有背景与记录也支持跨会话、跨 Agent 继续推进。
 
-**用例：** 手机上记下一个想法，桌面上与 Agent 澄清范围，再交给下一次会话实施；接手者能知道为什么做、进展如何、怎样算完成。[任务用法与 Run 查询](packages/cli/README.md#任务tasks)
+**用例：** 手机上想到一个改进，先让 Agent 记下来；几周后在电脑前腾出时间，重新打开任务，沿着当时的背景讨论和实施。中途换一个 Agent，也能根据任务与执行记录继续做。[任务用法与 Run 查询](packages/cli/README.md#任务tasks)
 
 </details>
 
@@ -103,20 +105,20 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 </details>
 
 <details>
-<summary>Observation · 看见真实工作是怎样发生的</summary>
+<summary>Observation · 记录不同 Agent 下的个人会话</summary>
 
-改进需要知道 Agent 实际读了什么、调用了什么、在哪里遇到问题。Observation 保留运行轨迹与指标，用来回看真实使用过程。当前提供 Agent 轨迹接入与相关运行记录，可按客户端选择 Langfuse 接入方式。
+通过对应客户端的接入方案，Observation 留存已接入 Agent 下的个人会话与可用执行记录，作为分析自己日常工作的材料。回看这些数据，可以了解自己在做什么、哪些问题反复出现，并结合当前任务与实际文件判断 harness 是否仍然适用、哪些过时内容需要更新或移除。
 
-**用例：** Agent 给出了错误结论，沿着轨迹查看它是否读到必要材料、工具是否失败，再决定应该改记忆、方法还是工具。[观测说明](packages/observation/README.md) · [选择轨迹接入方式](packages/skills/langfuse-agent-tracing/SKILL.md)
+**用例：** 回看一段时间的个人会话，发现 Agent 反复引用已经失效的约定，定位对应的 harness 文件，确认适用范围后更新或移除，再用评测检查调整的影响。[观测说明](packages/observation/README.md) · [选择会话接入方式](packages/skills/langfuse-agent-tracing/SKILL.md)
 
 </details>
 
 <details>
-<summary>Evaluation · 检查改进有没有带来效果</summary>
+<summary>Evaluation · 检验自己的 harness 是否真正有用</summary>
 
-同一批题、可复查的配置与对照实验，让不同方案能够比较。Evaluation 提供检索和记忆等实验及报告，用来检验一次修改的效果；跑通评测链路之后，还需要合适的对照与证据来判断收益。
+用自己的材料和关心的问题构建评测，通过可复现的对照比较回答质量、规则遵守及 token、时间成本，判断一次修改是否改善了自己的工作。Evaluation 提供检索评测、记忆消融等实验与报告；跑通程序之后，需要匹配问题的题集与判分，才能判断实际收益。
 
-**用例：** 修改记忆检索方法后，用固定题集比较结果与成本，检查是否改善了目标问题，并保留报告供后续复跑。[评测用例](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
+**用例：** 同一个 Agent 回答同一批问题，比较有记忆与无记忆两个工作目录中的表现，检查回答是否更好、违反约束是否减少、成本增加了多少，再决定怎样调整记忆。[记忆消融实验](packages/evaluation/experiments/harness_memory_ablation/README.md) · [评测说明](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
 
 </details>
 
@@ -151,13 +153,13 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 
 **Git 让变化可追溯、可审阅。** 一条经验为何修改，可以通过 diff 和历史回看；协作中的变化可以经过分支与 PR 审阅。跟踪与忽略规则决定哪些材料进入共享版本、哪些保留在本机，积累的版本与共享范围由你管理。
 
-**跨 Agent 接入让工作可接续。** CLI 执行操作，Skill 告诉 Agent 何时及如何使用，MCP 为相应宿主提供工具入口。让新的 Agent 能找到工作目录及其入口，就能继续读取其中的背景与方法。各入口的能力覆盖与接入方式见[CLI](packages/cli/README.md)、[Skills](packages/skills/README.md)和[MCP](packages/mcp-servers/README.md)，设计理由见[能力面设计](docs/adr/0004-capability-surface-cli-skill-mcp.md)。
+**跨 Agent 接入让工作可接续。** CLI 执行操作，Skill 告诉 Agent 何时及如何使用，MCP 为相应宿主提供工具入口。接手的 Agent 能沿项目入口读取任务背景、目标与已有执行记录，继续推进工作；接续依赖于能访问同一份最新材料。各入口的能力覆盖与接入方式见[CLI](packages/cli/README.md)、[Skills](packages/skills/README.md)和[MCP](packages/mcp-servers/README.md)，设计理由见[能力面设计](docs/adr/0004-capability-surface-cli-skill-mcp.md)。
 
 **零运维，让 Agent 完成接入。** 核心内容通过本地 Node.js、Git 和 Edges CLI 管理，无需常驻数据库或服务器。[观测](packages/observation/README.md)、[评测](packages/services/evaluation/README.md)与[在线预览](packages/services/artifacts-preview/README.md)提供开箱即用的接入服务；CLI 已提供服务端启动能力，Agent 可以完成服务启动与客户端接入流程。
 
 **经验怎样继续改进工作。** 值得复用的判断可以从一次实践中提炼出来，成为 **Edge**——带着理由和适用边界、能帮助未来行动的判断优势，Edges 由此得名。它可以再次用于工作，也可以发展成报告、文章、教学或工具。
 
-Agent 可以把纠正写成记忆，把重复成功的做法整理成技能；人通过对话或 Git diff 审阅这些变化，观测与评测再提供改进的依据。积累的价值体现在下一次工作少走弯路、判断更有根据。这也是 Edges 实践持续自我改进的方式。
+Agent 可以把纠正写成记忆，把重复成功的做法整理成技能；人通过对话或 Git diff 审阅这些变化。个人会话记录为分析日常工作、识别过时的 harness 内容提供依据，评测用自己的材料与问题验证更新或清理的影响，再将有依据的改进用于后续工作。这也是 Edges 实践持续自我改进的方式。
 
 </details>
 
