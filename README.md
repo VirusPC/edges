@@ -20,9 +20,9 @@ Edges 把这些经验组织成**跟随目录、由 Git 管理的工作记忆与�
 
 ## 为什么这样设计
 
-Edges 从你选定的目录开始：项目根、子模块或专项目录都可以建立一套 harness。需要更细的维护范围时，可以继续为选定子目录、技能或 harness 本身初始化同样的结构；需要复用其他仓库的积累时，再通过 Compose 组合进来。
+Edges 可以在任意选定目录建立 harness，例如 monorepo 下的 `apps/web/`。harness 本身也可以继续 harness：其中用于代码审阅的 Skill，可以拥有自己的维护入口与材料，记录开发它的任务、设计判断和验证经验。需要复用其他仓库的积累时，通过 Compose 接入当前工作区。
 
-![Edges 的三种组织方式：在任意选定目录建立 harness，在子目录或维护方法目录中按需递归初始化，再通过 Compose 组合独立维护的仓库](docs/assets/readme/design.svg)
+![Edges 的三种组织方式：为 monorepo 的子 app 建立 harness，为 harness 内的 Skill 开发建立它自己的 harness，两侧独立仓库通过 Compose 箭头指向当前工作区](docs/assets/readme/design.svg)
 
 ### 经验放在离问题最近的地方
 
