@@ -12,7 +12,7 @@
 
 总览图解释系统作用：Agent 读取目录中的背景与方法，推进工作，再留下材料与经验，供后续会话使用；人提出目标并审阅。箭头表达协作与读写关系，具体操作由 Agent 及接入平台执行。
 
-设计图用具体例子解释同一套结构怎样扩展。左侧在 monorepo 的 `apps/web/` 建立 harness，沿途目录和同级 app 不要求一起初始化。右侧以相同样式重复两层 harness：项目的 harness 包含代码审阅 Skill，Skill 又拥有自己的 harness；任务、记忆、技能等维护材料可以再次用于维护这份方法。这里强调维护对象改变后，同一结构仍然成立，省去中间存储路径与文件清单。每次初始化仍针对选定目录，不表示递归扫描或自动自我改进。下方 Compose 箭头从两侧独立仓库指向使用它们的当前工作区，各仓保留归属、历史与引用版本。三种方式可以按需采用，没有必经顺序。依据见[初始化说明](../../../packages/skills/project-memory-init/SKILL.md)、[递归系统设计](../../adr/0029-recursive-system-two-entries.md)与[Compose 设计](../../adr/0042-compose-on-git-submodule.md)。
+设计图用具体例子解释同一套结构怎样扩展。左侧在 monorepo 的 `apps/web/` 建立 harness，沿途目录和同级 app 不要求一起初始化。右侧从项目本身开始，依次嵌套项目的 harness、代码审阅 Skill、Skill 的 harness；项目与 Skill 是两层维护对象，各自的 harness 重复同一视觉样式。任务、记忆、技能等维护材料可以再次用于维护这份方法。这里强调维护对象改变后，同一结构仍然成立，省去中间存储路径与文件清单。每次初始化仍针对选定目录，不表示递归扫描或自动自我改进。下方 Compose 箭头从两侧独立仓库指向使用它们的当前工作区，各仓保留归属、历史与引用版本。三种方式可以按需采用，没有必经顺序。依据见[初始化说明](../../../packages/skills/project-memory-init/SKILL.md)、[递归系统设计](../../adr/0029-recursive-system-two-entries.md)与[Compose 设计](../../adr/0042-compose-on-git-submodule.md)。
 
 长期使用优势图将设计选择与使用收益对应起来，不是模块分类或操作流程。Git 的跟踪与忽略规则控制是否纳入共享版本，不代表文件访问权限；跨 Agent 接续需要相应宿主接入目录与入口，各入口的能力覆盖以文档为准；轻运维只指核心内容管理，集中观测、远程触发评测和在线预览需要相应服务。依据见[CLI](../../../packages/cli/README.md)、[能力面设计](../../adr/0004-capability-surface-cli-skill-mcp.md)及根 README 链接的服务文档。
 
