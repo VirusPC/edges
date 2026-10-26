@@ -95,18 +95,18 @@
   <text x="596" y="822" class="value" text-anchor="end">交付产物供审阅</text>
 
   <!-- Composition is cross-cutting: bring external material into any of the uses above. -->
-  <rect x="656" y="694" width="564" height="220" rx="20" fill="#f0f5ef" stroke="#cadbcd" stroke-width="1.5"/>
-  <rect x="680" y="717" width="38" height="38" rx="11" fill="#dfebe1"/>
+  <rect x="656" y="694" width="564" height="220" rx="20" class="card"/>
+  <rect x="680" y="717" width="38" height="38" rx="11" fill="#e5f1eb"/>
   <g class="teal-icon">
     <rect x="689" y="727" width="9" height="9" rx="2"/>
     <rect x="700" y="738" width="9" height="9" rx="2"/>
     <path d="M703 727h6v6M689 741v6h6"/>
   </g>
   <text x="733" y="746" class="heading">跨仓复用</text>
-  <path d="M680 773h516" stroke="#d4e1d6" stroke-width="1"/>
+  <path d="M680 773h516" class="rule"/>
   <text x="684" y="822" class="module">Compose</text>
   <text x="1192" y="822" class="value" text-anchor="end">组合不同仓库</text>
-  <text x="684" y="876" fill="#527668" font-size="23">为当前工作接入外部积累</text>
+  <text x="684" y="876" class="muted" font-size="23">为当前工作接入外部积累</text>
 
   <rect x="60" y="946" width="1160" height="54" rx="13" fill="#eaf0e9"/>
   <text x="84" y="981" fill="#367c6b" font-size="21" font-weight="650">共同基础</text>
