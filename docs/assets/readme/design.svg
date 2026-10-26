@@ -34,7 +34,7 @@
   <text x="60" y="220" class="heading">任意目录建立</text>
   <text x="60" y="260" class="body">例如：为 monorepo 中的一个子 app</text>
   <text x="60" y="293" class="body">建立自己的 harness。</text>
-  <text x="680" y="220" class="heading">递归 harness</text>
+  <text x="680" y="220" class="heading">递归使用</text>
   <text x="680" y="260" class="body">harness 本身，也可以继续 harness。</text>
   <path d="M640 208v528" stroke="#dce5dd" stroke-width="1.5"/>
 

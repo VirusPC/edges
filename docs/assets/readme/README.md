@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | [hero.png](hero.png) | 首屏概念插画；纸张与目录表达经验的积累和延续 | Codex 内置 image generation，2026-10-26 生成；未使用 CLI / API fallback |
 | [overview.svg](overview.svg) | 开头系统总览；人的目标与审阅、Agent 的工作，以及目录中可继续使用的积累 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
-| [design.svg](design.svg) | 三种组织方式；monorepo 子 app 的任意目录建立、以 Skill 开发说明递归 harness、挂入共享 harness 并利用和沉淀知识 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
+| [design.svg](design.svg) | 三种组织方式；monorepo 子 app 的任意目录建立、以 Skill 开发说明递归使用、挂入共享 harness 并利用和沉淀知识 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
 | [foundations.svg](foundations.svg) | 长期使用的四项优势；可读可迁移、可追溯可审阅、跨 Agent 接续、核心轻运维 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
 | [modules.svg](modules.svg) | 十个模块的用途与共同基础 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
 
