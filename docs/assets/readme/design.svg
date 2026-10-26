@@ -29,6 +29,16 @@
   <text x="102" y="55" class="muted" font-size="18" font-weight="600" letter-spacing="2">EDGES / 结构设计</text>
   <text x="60" y="112" class="ink" font-size="40" font-weight="650">一套结构，从任意目录开始</text>
 
+  <!-- The legend applies to all three structural examples. -->
+  <g class="muted" font-size="20">
+    <rect x="804" y="88" width="24" height="20" rx="4" class="plain-node"/>
+    <text x="840" y="105">维护对象</text>
+    <rect x="948" y="88" width="24" height="20" rx="4" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
+    <text x="984" y="105">harness</text>
+    <path d="M1088 98h36" fill="none" stroke="#5a927c" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#compose-arrow)"/>
+    <text x="1220" y="105" text-anchor="end">引用关系</text>
+  </g>
+
   <g transform="translate(0 -40)">
   <!-- Independent structural choices, not automatic initialization stages. -->
   <text x="60" y="220" class="heading">任意目录建立</text>
@@ -76,12 +86,6 @@
 
   <path d="M60 768h1160" stroke="#dce5dd" stroke-width="1.5"/>
   <text x="60" y="815" class="heading">跨仓组合使用</text>
-  <rect x="650" y="796" width="28" height="24" rx="5" class="plain-node"/>
-  <text x="692" y="815" class="body">维护对象</text>
-  <rect x="852" y="796" width="28" height="24" rx="5" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
-  <text x="894" y="815" class="body">harness</text>
-  <path d="M1030 807h38" stroke="#5a927c" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#compose-arrow)"/>
-  <text x="1086" y="815" class="body">引用关系</text>
   <text x="60" y="855" class="body">从当前项目出发，接入个人大脑，利用知识、沉淀经验。</text>
 
   <!-- Begin with the existing project, which references an independent shared brain. -->
