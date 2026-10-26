@@ -30,7 +30,7 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 
 长期积累需要能阅读、修改、审阅和迁移。普通文件与 Git 保留这些能力，Agent 与服务按需接入。
 
-![Edges 的长期使用优势：文件系统让内容可读可迁移，Git 让变更可追溯可审阅，跨 Agent 接入让积累可接续，核心本地可用让服务按需接入](docs/assets/readme/foundations.svg)
+![Edges 的长期使用优势：文件系统让内容可读可迁移，Git 让变更可追溯可审阅，跨 Agent 接入让积累可接续，零运维让核心本地可用并提供现成服务接入](docs/assets/readme/foundations.svg)
 
 ## 怎么开始？
 
@@ -153,7 +153,7 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 
 **跨 Agent 接入让工作可接续。** CLI 执行操作，Skill 告诉 Agent 何时及如何使用，MCP 为相应宿主提供工具入口。让新的 Agent 能找到工作目录及其入口，就能继续读取其中的背景与方法。各入口的能力覆盖与接入方式见[CLI](packages/cli/README.md)、[Skills](packages/skills/README.md)和[MCP](packages/mcp-servers/README.md)，设计理由见[能力面设计](docs/adr/0004-capability-surface-cli-skill-mcp.md)。
 
-**轻运维让核心工作先用起来。** 核心内容管理在本地通过 Node.js、Git 和 Edges CLI 完成，无需常驻数据库或服务器。需要集中观测、远程触发评测或跨设备在线审阅时，再接入相应的[观测](packages/observation/README.md)、[评测](packages/services/evaluation/README.md)与[预览服务](packages/services/artifacts-preview/README.md)。
+**零运维，让 Agent 完成接入。** 核心内容通过本地 Node.js、Git 和 Edges CLI 管理，无需常驻数据库或服务器。[观测](packages/observation/README.md)、[评测](packages/services/evaluation/README.md)与[在线预览](packages/services/artifacts-preview/README.md)提供开箱即用的接入服务；CLI 已提供服务端启动能力，Agent 可以完成服务启动与客户端接入流程。
 
 **经验怎样继续改进工作。** 值得复用的判断可以从一次实践中提炼出来，成为 **Edge**——带着理由和适用边界、能帮助未来行动的判断优势，Edges 由此得名。它可以再次用于工作，也可以发展成报告、文章、教学或工具。
 
