@@ -20,6 +20,10 @@ Edges 把它们组织成**跟随目录、由 Git 管理的工作记忆与协作�
 
 ## 为什么值得用？
 
+Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的组织方式与使用流程：Tasks 区分任务目标与执行尝试，Memory 按适用范围检索，Skills 保留可复用的步骤与判断。你可以按需组合这些模块，沿用已有的设计，再结合自己的工作持续改进。
+
+![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块](docs/assets/readme/modules.svg)
+
 经验留在适用的地方，方法本身也能被维护；各处独立积累，需要时再跨仓复用。
 
 ![Edges 的三种组织方式：monorepo 子 app 内建立 web 的 harness；项目、项目的 harness、Skill、Skill 的 harness 四层嵌套；从左侧当前项目仓出发，通过 Compose 引用右侧的「共享的 harness 仓库」，以个人大脑为例，在项目中利用已有知识与方法，并向大脑沉淀新的经验](docs/assets/readme/design.svg)
@@ -43,8 +47,6 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 ## 深入了解
 
 按当前需要选择模块，展开查看它解决的问题、设计理由与典型用例。一次简单笔记可以只用 Notes，一项小改动也可以从 Tasks 与 Memory 开始。
-
-![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块](docs/assets/readme/modules.svg)
 
 <details>
 <summary>Notes · 先把值得保留的东西留下</summary>
