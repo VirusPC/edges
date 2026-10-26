@@ -53,7 +53,7 @@ format: ordinary
 - [仓库用根 CHANGELOG 和 v 标签发版](project_repo_changelog/INDEX.md) — 仓库发版先提 PR，合并后给 main 的合并提交打 tag 并发布。写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 v 标签。Unreleased 的 ### 用功能模块原名（如笔记入库与能力面、文档与系统、任务看板与项目、Artifacts 预览），不要改成「模块：摘要」或只留摘要；每条前面写成 \`- \*\*小标题：\*\* 正文\`，小标题白话摘要，正文不因精简文风大段删实现说明（示例 commit a80d1b0）。用人话写清「现在能做什么」，同一条里立刻给出真实命令名；对照 \[1.2.0\] 的完整句，不要堆 schema 字段表。枚举写仓库英文原值（优先级是 urgent/high/medium/low/none）。不要摊成扁平长列表，也不要把决策/术语/计划逐条写进去。 新版本不留 Changed 等未按模块归类的兜底小节；切版时检查重复、条目顺序与已落地范围。
 - [审阅页侧栏筛选用 design A（选中染色 + 未选变淡）](project_review_page_sidebar_filter_design_a/INDEX.md) — 改审阅页左栏项目筛选外观时打开：选中用 accent 实线边加面板底；未选中 opacity 0.6（hover 拉回）；拖过时外扩 outline，须和选中边叠得开。类写在 ProjectColumn，不改点击或拖放。用户 2026-09-17 选定 design A。
 - [根硬约束含平铺后并入的三条](<project_root_important_scope/INDEX.md>) — 改根 AGENTS.md 硬约束时：保留聚光灯、脱敏、git，以及 2026\-10\-20 从 extensions 并入的三条；目录细则和说话风格仍不进硬约束。
-- [根 README：harness 任何目录的对外门面](<project_root_readme_direction/INDEX.md>) — 修改根 README 或推进按模块拆 skill 时打开：先讲设计思考、十个模块的用例与协作，再引导通过 Agent 接入和对话使用，不放手动 CLI 实践教程；保留标语与配图，开发/部署/历史分流到对应文档，不往受管模块索引塞正文。旧首屏与章节安排不再限制本次重组。
+- [根 README：harness 任何目录的对外门面](<project_root_readme_direction/INDEX.md>) — 修改根 README 时打开：正文只讲系统作用、选择理由与 Agent 接入；五张图保留，模块设计与用例在深入了解中按需展开，不放手动 CLI 教程，开发部署细节留在对应文档。
 - [递归目录采用统一节点模型与自身维护空间](project_scope_first_content_ownership/INDEX.md) — 递归目录与 harness 的现行决定及理由；模型与公开目录已采用，历史讨论保留但不替代现行 spec，私有材料逐克隆审阅。
 - [系统一／系统二按作用域建模，区分 harness 层级与自进化](project_scoped_systems_and_harness/INDEX.md) — 设计作用域与遍历时：系统一／二是相对角色；检索当前系统二不自动进入其系统二，同层分类索引仍可递归。
 - [v1 自托管 Langfuse 落在物理机 minigtr](<project_self_hosted_langfuse_on_minigtr/INDEX.md>) — 改自托管 Langfuse 的宿主、或默认往阿里云/云 VPS 上放时打开：宿主是物理机 minigtr，按多数时候在线的小型服务器运维；双系统仍在但 Windows 不是日常路径。不是阿里云或其它云 VPS。访问面见 ADR 0033。决策见 docs/adr/0014\-self\-hosted\-langfuse\-on\-minigtr.md。
