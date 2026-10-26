@@ -22,7 +22,7 @@ Edges 把这些经验组织成**跟随目录、由 Git 管理的工作记忆与�
 
 Edges 可以在任意选定目录建立 harness，例如 monorepo 下的 `apps/web/`。harness 本身也可以继续 harness：项目拥有自己的 harness，其中的代码审阅 Skill 又可以拥有自己的 harness。维护对象从项目变成方法，同一套结构继续适用。在已有项目中工作时，还可以通过 Compose 接入个人大脑这类独立的共享 harness 仓库：利用已有知识，也把跨项目的经验沉淀到大脑。
 
-![Edges 的三种组织方式：monorepo 子 app 内建立绿色 harness；项目、项目的 harness、Skill、Skill 的 harness 四层嵌套；从左侧当前项目仓出发，通过 Compose 引用右侧独立的个人大脑仓，在项目中利用已有知识与方法，并向大脑沉淀新的经验](docs/assets/readme/design.svg)
+![Edges 的三种组织方式：monorepo 子 app 内建立 web 的 harness；项目、项目的 harness、Skill、Skill 的 harness 四层嵌套；从左侧当前项目仓出发，通过 Compose 引用右侧的「共享的 harness 仓库」，以个人大脑为例，在项目中利用已有知识与方法，并向大脑沉淀新的经验](docs/assets/readme/design.svg)
 
 ### 经验放在离问题最近的地方
 
