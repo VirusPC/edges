@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1240" viewBox="0 0 1280 1240" role="img" aria-labelledby="title description">
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1140" viewBox="0 0 1280 1140" role="img" aria-labelledby="title description">
   <title id="title">Edges 结构：就地建立、递归维护与从项目出发的跨仓引用</title>
   <desc id="description">任意目录建立与递归维护：白色框表示被维护对象，绿色框按对象命名为 web 的 harness、项目的 harness、Skill 的 harness。monorepo 中选定的 web 子 app 单独拥有 harness。递归示意依次包含项目、项目的 harness、代码审阅 Skill、Skill 的 harness；项目与 Skill 都能拥有自己的维护空间，按需采用任务、记忆与技能，不表示自动加载内层材料或自动自我改进。跨仓组合从已有的当前项目仓库出发：左侧白色项目仓库内标注当前项目内容，右侧的共享 harness 仓库以个人大脑为例，提供跨项目知识与方法。两仓平级独立。Compose 虚线从项目仓库上方折起后指向共享的 harness 仓库，表示引用额外的个人知识库；青绿色实线箭头从大脑指向项目，表示利用知识与方法；琥珀色实线箭头从项目指向同一个大脑，表示沉淀新经验。图只展示一个已有项目使用个人大脑的故事。</desc>
   <defs>
@@ -24,12 +24,12 @@
     </marker>
   </defs>
 
-  <rect width="1280" height="1240" rx="24" fill="#f7f8f4"/>
+  <rect width="1280" height="1140" rx="24" fill="#f7f8f4"/>
   <path d="M60 48h28" stroke="#1b817b" stroke-width="4" stroke-linecap="round"/>
   <text x="102" y="55" class="muted" font-size="18" font-weight="600" letter-spacing="2">EDGES / 结构设计</text>
   <text x="60" y="112" class="ink" font-size="40" font-weight="650">一套结构，从任意目录开始</text>
-  <text x="60" y="155" class="muted" font-size="24">就地建立维护空间，维护方法本身，组合独立积累。</text>
 
+  <g transform="translate(0 -40)">
   <!-- Independent structural choices, not automatic initialization stages. -->
   <text x="60" y="220" class="heading">任意目录建立</text>
   <text x="60" y="260" class="body">例如：为 monorepo 中的一个子 app</text>
@@ -105,5 +105,5 @@
   <path d="M522 1110H758" fill="none" stroke="#b28a47" stroke-width="2.5" marker-end="url(#experience-arrow)"/>
   <text x="640" y="1088" fill="#9a7438" font-size="23" text-anchor="middle">沉淀新经验</text>
 
-  <text x="640" y="1200" fill="#397e70" font-size="26" font-weight="600" text-anchor="middle">就地建立 · 维护方法本身 · 跨仓组合</text>
+  </g>
 </svg>
