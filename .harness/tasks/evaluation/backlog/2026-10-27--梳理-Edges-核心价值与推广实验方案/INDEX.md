@@ -2,7 +2,7 @@
 metadata:
   edges-type: task
   edges-task-project: evaluation
-  edges-updated-at: '2026-10-26T22:20:23.563Z'
+  edges-updated-at: '2026-10-26T22:28:42.716Z'
   edges-title: 梳理 Edges 核心价值与推广实验方案
   edges-tasks-status: backlog
   edges-task-priority: none
@@ -15,7 +15,7 @@ description: 把拟推广的核心价值对应到使用场景、对照实验或�
 
 已有评测程序与题库可以复用；公开基准冒烟、全文注入测试与真实 Agent 使用 Edges 的收益需要分别说明。已有“知识库 Evaluation 系统”和“SWE-ContextBench 主评测”任务保持各自范围，本任务负责本次推广主张与验证范围的对应关系。
 
-- 主任务：[Edges 对外推广准备：实验、Skills 与场景案例](<https://github.com/VirusPC/edges-brain-viruspc/blob/main/.harness/tasks/site-and-content/backlog/2026-10-27--Edges-%E5%AF%B9%E5%A4%96%E6%8E%A8%E5%B9%BF%E5%87%86%E5%A4%87%E5%AE%9E%E9%AA%8CSkills-%E4%B8%8E%E5%9C%BA%E6%99%AF%E6%A1%88%E4%BE%8B/INDEX.md>)
+- 主任务：[Edges 对外推广准备：实验、Skills 与场景案例](<../../../_default/backlog/2026-10-27--Edges-对外推广准备实验Skills-与场景案例/INDEX.md>)
 
 **目标：**
 得到可执行、可审阅的核心价值验证清单，每项有对应场景、实验或验收方式、指标、对照条件和适用边界。

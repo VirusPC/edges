@@ -2,7 +2,7 @@
 metadata:
   edges-type: task
   edges-task-project: evaluation
-  edges-updated-at: '2026-10-26T22:20:23.703Z'
+  edges-updated-at: '2026-10-26T22:28:42.857Z'
   edges-title: 完成 Edges 核心价值实验并整理结果报告
   edges-tasks-status: backlog
   edges-task-priority: none
@@ -15,7 +15,7 @@ description: 按确认的方案跑完核心价值实验，保留真实结果、�
 
 实验具体清单、模型、预算和通过门槛由前置方案确定。结果可以支持、限制或否定原先的效果预期，不以取得正向分数作为完成条件。
 
-- 主任务：[Edges 对外推广准备：实验、Skills 与场景案例](<https://github.com/VirusPC/edges-brain-viruspc/blob/main/.harness/tasks/site-and-content/backlog/2026-10-27--Edges-%E5%AF%B9%E5%A4%96%E6%8E%A8%E5%B9%BF%E5%87%86%E5%A4%87%E5%AE%9E%E9%AA%8CSkills-%E4%B8%8E%E5%9C%BA%E6%99%AF%E6%A1%88%E4%BE%8B/INDEX.md>)
+- 主任务：[Edges 对外推广准备：实验、Skills 与场景案例](<../../../_default/backlog/2026-10-27--Edges-对外推广准备实验Skills-与场景案例/INDEX.md>)
 - 依赖或需要引用的成果：[梳理 Edges 核心价值与推广实验方案](<../2026-10-27--梳理-Edges-核心价值与推广实验方案/INDEX.md>)
 
 **目标：**

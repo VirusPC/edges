@@ -2,7 +2,7 @@
 metadata:
   edges-type: task
   edges-task-project: edges-extensions
-  edges-updated-at: '2026-10-26T22:21:29.247Z'
+  edges-updated-at: '2026-10-26T22:28:42.994Z'
   edges-title: edges 按模块拆 skill（一模块一个）
   edges-tasks-status: backlog
   edges-task-priority: none
@@ -15,7 +15,7 @@ description: Edges 随包装发的 skill 按细碎能力堆了太多份，要改
 
 本卡负责 Skill 组织与接入说明的调整；新用户完整接入体验由关联验收子任务验证。具体模块映射、命名和迁移处理在实施前细化。
 
-- 主任务：[Edges 对外推广准备：实验、Skills 与场景案例](<https://github.com/VirusPC/edges-brain-viruspc/blob/main/.harness/tasks/site-and-content/backlog/2026-10-27--Edges-%E5%AF%B9%E5%A4%96%E6%8E%A8%E5%B9%BF%E5%87%86%E5%A4%87%E5%AE%9E%E9%AA%8CSkills-%E4%B8%8E%E5%9C%BA%E6%99%AF%E6%A1%88%E4%BE%8B/INDEX.md>)
+- 主任务：[Edges 对外推广准备：实验、Skills 与场景案例](<../../../_default/backlog/2026-10-27--Edges-对外推广准备实验Skills-与场景案例/INDEX.md>)
 
 **目标：**
 Edges 对外、随包装发的 Skill 按模块划分，一模块一个 Skill，外部 Agent 能发现并执行相关能力。
