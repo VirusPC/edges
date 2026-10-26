@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: evaluation
-  edges-updated-at: '2026-10-25T12:33:25.635Z'
+  edges-updated-at: '2026-10-26T16:09:18.226Z'
   edges-title: 评测 Skill：迁移 Langfuse 接入 Agent 的 skills
-  edges-tasks-status: backlog
+  edges-tasks-status: done
   edges-task-priority: none
 name: 评测_skill收集用户数据并产生_dataset
 description: >-
@@ -30,8 +30,8 @@ description: >-
 - brain 另开 PR 删除旧三份副本，shared-extensions 升 5.0.0 并记 Removed。
 
 **完成标准：**
-- [ ] `pnpm skills:link --check` 通过；五条软链存在。
-- [ ] 临时目录跑 `edges skills init`，五份 skill 与源目录 `diff` 一致。
-- [ ] `rg 'viruspc\.tech|/workspace/|/home/box/|projects/routines' packages/skills/langfuse-*-tracing` 无结果（GitHub 链接除外）。
-- [ ] brain `shared-extensions/skills/` 中没有旧三份目录。
-- [ ] 打 tag `skill/<name>@0.1.0` 五条。
+- [x] `pnpm skills:link --check` 通过；五条软链存在。
+- [x] 临时目录跑 `edges skills init`，五份 skill 与源目录 `diff` 一致。
+- [x] `rg 'viruspc\.tech|/workspace/|/home/box/|projects/routines' packages/skills/langfuse-*-tracing` 无结果（GitHub 链接除外）。
+- [x] brain `shared-extensions/skills/` 中没有旧三份目录。
+- [x] 打 tag `skill/<name>@0.1.0` 五条。
