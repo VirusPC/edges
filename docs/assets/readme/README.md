@@ -6,13 +6,15 @@
 | --- | --- | --- |
 | [hero.png](hero.png) | 首屏概念插画；纸张与目录表达经验的积累和延续 | Codex 内置 image generation，2026-10-26 生成；未使用 CLI / API fallback |
 | [overview.svg](overview.svg) | 开头系统总览；人的目标与审阅、Agent 的工作，以及目录中可继续使用的积累 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
-| [design.svg](design.svg) | 三种组织方式；monorepo 子 app 的任意目录建立、以 Skill 开发说明递归 harness、跨仓组合指向当前工作区 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
+| [design.svg](design.svg) | 三种组织方式；monorepo 子 app 的任意目录建立、以 Skill 开发说明递归 harness、挂入共享 harness 并利用和沉淀知识 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
 | [foundations.svg](foundations.svg) | 长期使用的四项优势；可读可迁移、可追溯可审阅、跨 Agent 接续、核心轻运维 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
 | [modules.svg](modules.svg) | 十个模块的用途与共同基础 | 手工编写的原生 SVG，文字可编辑，无外部资源 |
 
 总览图解释系统作用：Agent 读取目录中的背景与方法，推进工作，再留下材料与经验，供后续会话使用；人提出目标并审阅。箭头表达协作与读写关系，具体操作由 Agent 及接入平台执行。
 
-设计图用具体例子解释同一套结构怎样扩展。左侧在 monorepo 的 `apps/web/` 建立 harness，沿途目录和同级 app 不要求一起初始化。右侧用 harness 中的代码审阅 Skill 展示递归：`SKILL.md` 保存方法，Skill 自己的 `AGENTS.md` 与 `.harness/` 组织开发任务、设计判断和验证经验，维护方法本身也有一套维护系统。每次初始化仍针对选定目录，不表示递归扫描或自动自我改进。下方 Compose 箭头从两侧独立仓库指向使用它们的当前工作区，各仓保留归属、历史与引用版本。三种方式可以按需采用，没有必经顺序。依据见[初始化说明](../../../packages/skills/project-memory-init/SKILL.md)、[递归系统设计](../../adr/0029-recursive-system-two-entries.md)与[Compose 设计](../../adr/0042-compose-on-git-submodule.md)。
+设计图用具体例子解释同一套结构怎样扩展，用绿色表示 harness。左侧在白色的 monorepo 子 app `apps/web/` 中建立自己的 harness，沿途目录和同级 app 不要求一起初始化。右侧从项目本身开始，依次嵌套项目的 harness、代码审阅 Skill、Skill 的 harness；白色项目与 Skill 是两层维护对象，各自的绿色 harness 重复同一视觉样式。任务、记忆、技能等维护材料可以再次用于维护这份方法。这里强调维护对象改变后，同一结构仍然成立，省去中间存储路径与文件清单。每次初始化仍针对选定目录，不表示递归扫描或自动自我改进。
+
+下方从已有项目仓出发，再接入额外的个人知识库。左侧白色的当前项目仓是叙事主体，内部标注「当前项目内容」；右侧个人大脑仓本身扮演共享 harness，整体用绿色表达。两者是平级的独立仓库，分别保留归属与 Git 历史。Compose 虚线表示项目对大脑仓的引用关系；知识与方法从右侧大脑用于左侧项目，工作中产生的新经验沉淀到同一份大脑。实际写入发生在对应仓库的检出目录中，提交和推送仍由 Git 完成；图中不表示自动同步，也不约定各模块的实际存储路径。三种方式可以按需采用，没有必经顺序。依据见[初始化说明](../../../packages/skills/project-memory-init/SKILL.md)、[递归系统设计](../../adr/0029-recursive-system-two-entries.md)、[Compose 设计](../../adr/0042-compose-on-git-submodule.md)与[挂载仓库可写](../../adr/0045-compose-checkout-writable.md)。
 
 长期使用优势图将设计选择与使用收益对应起来，不是模块分类或操作流程。Git 的跟踪与忽略规则控制是否纳入共享版本，不代表文件访问权限；跨 Agent 接续需要相应宿主接入目录与入口，各入口的能力覆盖以文档为准；轻运维只指核心内容管理，集中观测、远程触发评测和在线预览需要相应服务。依据见[CLI](../../../packages/cli/README.md)、[能力面设计](../../adr/0004-capability-surface-cli-skill-mcp.md)及根 README 链接的服务文档。
 
