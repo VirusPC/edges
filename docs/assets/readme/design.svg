@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1230" viewBox="0 0 1280 1230" role="img" aria-labelledby="title description">
-  <title id="title">Edges 结构：维护对象与独立 harness</title>
-  <desc id="description">三种结构用统一颜色表达：白色框是被维护对象或仓库，绿色框是独立的 harness。任意目录建立：以 monorepo 中的子 app 为例，monorepo/apps/web/ 是本例选定的对象，其中单独的绿色 harness 保存入口与维护材料；同级 admin/ 是普通目录，不表示沿途或所有目录都自动初始化。递归 harness 展示四层：白色项目、绿色项目的 harness、白色代码审阅 Skill、绿色 Skill 的 harness。项目和 Skill 都可以拥有自己的维护空间，两层 harness 均按需采用任务、记忆与技能。递归不表示常规调用时自动加载内层材料或自动自我改进。跨仓组合使用：个人方法仓、当前工作区与团队规范仓都是白色外框，各自包含绿色 harness。两侧 harness 通过 Compose 虚线箭头接入当前工作区的 harness；白色外框预留连接线口。各仓保留自身归属与历史，当前工作区保留选定的引用版本，组合不表示自动同步。</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1400" viewBox="0 0 1280 1400" role="img" aria-labelledby="title description">
+  <title id="title">Edges 结构：就地建立、递归维护与共享 harness 的使用</title>
+  <desc id="description">任意目录建立与递归维护：白色框表示被维护对象，绿色框表示 harness。monorepo 中选定的 web 子 app 单独拥有 harness。递归示意依次包含项目、项目的 harness、代码审阅 Skill、Skill 的 harness；项目与 Skill 都能拥有自己的维护空间，按需采用任务、记忆与技能，不表示自动加载内层材料或自动自我改进。跨仓组合使用展示一个完整工作场景：左侧个人大脑仓本身就是共享 harness，整个仓库为绿色。Compose 虚线箭头将其挂载到右侧白色的当前项目工作空间，箭头目标为其中绿色的个人大脑已挂载实例。空间内另有项目自身的 harness。白色 Agent 利用已挂载大脑中的知识与方法推进项目，同时把新经验沉淀到这个已挂载大脑；这两条知识流以方向相反的实线与 Compose 挂载关系区分。个人大脑保持自身归属与历史，挂载记录保留来源与引用版本；图中的知识流不表示源仓自动同步或复制合并。</desc>
   <defs>
     <style>
       text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
@@ -16,9 +16,15 @@
     <marker id="compose-arrow" markerWidth="11" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
       <path d="m1 1 7 4-7 4" fill="none" stroke="#5a927c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </marker>
+    <marker id="knowledge-arrow" markerWidth="11" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="m1 1 7 4-7 4" fill="none" stroke="#397e70" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <marker id="experience-arrow" markerWidth="11" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="userSpaceOnUse">
+      <path d="m1 1 7 4-7 4" fill="none" stroke="#b28a47" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
   </defs>
 
-  <rect width="1280" height="1230" rx="24" fill="#f7f8f4"/>
+  <rect width="1280" height="1400" rx="24" fill="#f7f8f4"/>
   <path d="M60 48h28" stroke="#1b817b" stroke-width="4" stroke-linecap="round"/>
   <text x="102" y="55" class="muted" font-size="18" font-weight="600" letter-spacing="2">EDGES / 结构设计</text>
   <text x="60" y="112" class="ink" font-size="40" font-weight="650">一套结构，从任意目录开始</text>
@@ -71,42 +77,46 @@
   <path d="M60 768h1160" stroke="#dce5dd" stroke-width="1.5"/>
   <text x="60" y="815" class="heading">跨仓组合使用</text>
   <rect x="650" y="796" width="28" height="24" rx="5" class="plain-node"/>
-  <text x="692" y="815" class="body">对象 / 仓库</text>
+  <text x="692" y="815" class="body">维护对象</text>
   <rect x="852" y="796" width="28" height="24" rx="5" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
   <text x="894" y="815" class="body">harness</text>
   <path d="M1030 807h38" stroke="#5a927c" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#compose-arrow)"/>
-  <text x="1086" y="815" class="body">跨仓接入</text>
-  <text x="60" y="855" class="body">各仓独立维护，以选定版本接入当前工作区。</text>
+  <text x="1086" y="815" class="body">组合挂载</text>
+  <text x="60" y="855" class="body">把个人大脑带进项目，在工作中利用知识、沉淀经验。</text>
 
-  <!-- White repository borders have ports; only their green harnesses are connected. -->
-  <rect x="60" y="900" width="300" height="235" rx="16" fill="#ffffff"/>
-  <path d="M344 900H76q-16 0-16 16v203q0 16 16 16h268q16 0 16-16v-46M360 1041V916q0-16-16-16" fill="none" stroke="#d7e2dc" stroke-width="1.5"/>
-  <text x="210" y="941" class="node-title" text-anchor="middle">个人方法仓</text>
-  <text x="210" y="977" class="body" text-anchor="middle">自身归属与历史</text>
-  <rect x="84" y="994" width="252" height="115" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
-  <text x="210" y="1035" class="node-title" text-anchor="middle">harness</text>
-  <text x="210" y="1078" class="body" text-anchor="middle">可复用方法</text>
+  <!-- The source repository itself is a shared harness. -->
+  <rect x="60" y="990" width="290" height="128" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
+  <text x="205" y="1030" class="node-title" text-anchor="middle">个人大脑仓</text>
+  <text x="205" y="1068" class="body" text-anchor="middle">整个仓库就是 harness</text>
+  <text x="205" y="1100" class="body" text-anchor="middle">自身归属与历史</text>
 
-  <rect x="490" y="900" width="300" height="235" rx="16" fill="#ffffff"/>
-  <path d="M490 1041V916q0-16 16-16h268q16 0 16 16v125M790 1073v46q0 16-16 16H506q-16 0-16-16v-46" fill="none" stroke="#d7e2dc" stroke-width="1.5"/>
-  <text x="640" y="941" class="node-title" text-anchor="middle">当前工作区</text>
-  <text x="640" y="977" class="body" text-anchor="middle">登记所用仓库</text>
-  <rect x="514" y="994" width="252" height="115" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
-  <text x="640" y="1035" class="node-title" text-anchor="middle">harness</text>
-  <text x="640" y="1078" class="body" text-anchor="middle">保留引用版本</text>
+  <!-- Compose enters the mounted instance through a port in the workspace border. -->
+  <rect x="500" y="910" width="720" height="398" rx="18" fill="#ffffff"/>
+  <path d="M500 1040V928q0-18 18-18h684q18 0 18 18v362q0 18-18 18H518q-18 0-18-18v-222" fill="none" stroke="#d7e2dc" stroke-width="1.5"/>
+  <text x="528" y="952" class="ink" font-size="28" font-weight="650">当前项目工作空间</text>
 
-  <rect x="920" y="900" width="300" height="235" rx="16" fill="#ffffff"/>
-  <path d="M920 1041V916q0-16 16-16h268q16 0 16 16v203q0 16-16 16H936q-16 0-16-16v-46" fill="none" stroke="#d7e2dc" stroke-width="1.5"/>
-  <text x="1070" y="941" class="node-title" text-anchor="middle">团队规范仓</text>
-  <text x="1070" y="977" class="body" text-anchor="middle">自身归属与历史</text>
-  <rect x="944" y="994" width="252" height="115" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
-  <text x="1070" y="1035" class="node-title" text-anchor="middle">harness</text>
-  <text x="1070" y="1078" class="body" text-anchor="middle">可复用规范</text>
+  <rect x="528" y="990" width="350" height="128" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
+  <text x="703" y="1030" class="ink" font-size="25" font-weight="600" text-anchor="middle">个人大脑（已挂载）</text>
+  <text x="703" y="1068" class="body" text-anchor="middle">保留来源与引用版本</text>
+  <text x="703" y="1100" class="body" text-anchor="middle">在这里利用与沉淀</text>
 
-  <path d="M336 1057H510" fill="none" stroke="#5a927c" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#compose-arrow)"/>
-  <path d="M944 1057H770" fill="none" stroke="#5a927c" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#compose-arrow)"/>
-  <text x="425" y="1039" fill="#527668" font-size="23" text-anchor="middle">Compose</text>
-  <text x="855" y="1039" fill="#527668" font-size="23" text-anchor="middle">Compose</text>
+  <rect x="906" y="990" width="286" height="128" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
+  <text x="1049" y="1030" class="ink" font-size="25" font-weight="600" text-anchor="middle">项目自身 harness</text>
+  <text x="1049" y="1068" class="body" text-anchor="middle">项目约定与经验</text>
 
-  <text x="640" y="1190" fill="#397e70" font-size="26" font-weight="600" text-anchor="middle">就地建立 · 维护方法本身 · 跨仓组合</text>
+  <path d="M350 1054H514" fill="none" stroke="#5a927c" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#compose-arrow)"/>
+  <text x="430" y="1033" fill="#527668" font-size="23" text-anchor="middle">Compose</text>
+  <text x="430" y="1085" fill="#527668" font-size="23" text-anchor="middle">挂载</text>
+
+  <!-- These solid knowledge flows connect the Agent to the mounted brain, not to the source repository. -->
+  <path d="M620 1118v58" fill="none" stroke="#397e70" stroke-width="2.5" marker-end="url(#knowledge-arrow)"/>
+  <text x="644" y="1158" fill="#397e70" font-size="23">利用知识与方法</text>
+  <path d="M840 1188v-58" fill="none" stroke="#b28a47" stroke-width="2.5" marker-end="url(#experience-arrow)"/>
+  <text x="864" y="1158" fill="#9a7438" font-size="23">沉淀新经验</text>
+
+  <rect x="528" y="1188" width="664" height="92" rx="16" class="plain-node"/>
+  <text x="860" y="1227" class="ink" font-size="28" font-weight="650" text-anchor="middle">Agent</text>
+  <text x="860" y="1262" class="body" text-anchor="middle">推进当前项目</text>
+
+  <text x="640" y="1360" fill="#397e70" font-size="26" font-weight="600" text-anchor="middle">就地建立 · 维护方法本身 · 跨仓组合</text>
 </svg>
