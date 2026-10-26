@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1120" viewBox="0 0 1280 1120" role="img" aria-labelledby="title description">
   <title id="title">Edges 设计：任意目录建立、递归 harness 与跨仓组合</title>
-  <desc id="description">三种可按需要采用的结构。任意目录建立：以 monorepo 中的子 app 为例，monorepo/apps/web/ 是本例选定的目录，其中有 AGENTS.md 入口和 .harness 维护材料；同级 admin/ 是普通目录，不表示沿途或所有目录都自动初始化。递归 harness：项目的 harness 按需组织任务、记忆与技能，其中的代码审阅 Skill 是维护项目的方法。开发或改进这份方法时，Skill 也可以拥有自己的 harness，同样按需采用任务、记忆与技能。两层 harness 以相同颜色和框形重复出现，中间的 Skill 是新的维护对象。这表示维护方法本身也可被维护，不表示常规调用时自动加载内层材料或自动自我改进。跨仓组合使用：个人方法仓与团队规范仓各有一条 Compose 虚线箭头指向当前工作区，保留各自归属、历史和选定的引用版本；组合不表示自动同步。实线树表示目录关系，嵌套边框表示包含关系，虚线箭头表示跨仓接入方向。</desc>
+  <desc id="description">三种可按需要采用的结构。任意目录建立：以 monorepo 中的子 app 为例，monorepo/apps/web/ 是本例选定的目录，其中有 AGENTS.md 入口和 .harness 维护材料；同级 admin/ 是普通目录，不表示沿途或所有目录都自动初始化。递归 harness 展示四层：项目、项目的 harness、代码审阅 Skill、Skill 的 harness。项目是维护对象，它的 harness 按需组织任务、记忆与技能。代码审阅 Skill 是其中维护项目的方法；开发或改进这份方法时，Skill 成为新的维护对象，也可以拥有自己的 harness，同样按需采用任务、记忆与技能。项目与 Skill 使用相同白色框，两层 harness 使用相同绿色框，重复表达对象与其维护空间的关系，不表示常规调用时自动加载内层材料或自动自我改进。跨仓组合使用：个人方法仓与团队规范仓各有一条 Compose 虚线箭头指向当前工作区，保留各自归属、历史和选定的引用版本；组合不表示自动同步。实线树表示目录关系，嵌套边框表示包含关系，虚线箭头表示跨仓接入方向。</desc>
   <defs>
     <style>
       text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
@@ -56,17 +56,19 @@
   <path d="M232 662h10l5 5h14v18h-29z" class="folder"/>
   <text x="275" y="684" class="node-title">admin/</text>
 
-  <!-- Repeating the same harness shape makes the recursive maintenance pattern visible. -->
-  <rect x="680" y="322" width="540" height="380" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
-  <text x="706" y="360" class="node-title">项目的 harness</text>
-  <text x="706" y="397" class="body">按需：任务 · 记忆 · 技能</text>
-  <rect x="706" y="423" width="488" height="255" rx="16" class="plain-node"/>
-  <text x="730" y="462" class="node-title">代码审阅 Skill</text>
-  <text x="730" y="499" class="body">维护项目的方法</text>
-  <rect x="730" y="523" width="440" height="131" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
-  <text x="754" y="560" class="node-title">Skill 的 harness</text>
-  <text x="754" y="593" class="body">维护这份方法</text>
-  <text x="754" y="630" class="body">按需：任务 · 记忆 · 技能</text>
+  <!-- Each white maintenance object owns a green harness; the pair repeats inside itself. -->
+  <rect x="680" y="322" width="540" height="380" rx="16" class="plain-node"/>
+  <text x="706" y="358" class="node-title">项目</text>
+  <text x="1194" y="357" class="body" text-anchor="end">维护对象</text>
+  <rect x="704" y="378" width="492" height="300" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
+  <text x="728" y="414" class="node-title">项目的 harness</text>
+  <text x="728" y="449" class="body">按需：任务 · 记忆 · 技能</text>
+  <rect x="728" y="469" width="444" height="185" rx="16" class="plain-node"/>
+  <text x="752" y="507" class="node-title">代码审阅 Skill</text>
+  <text x="1148" y="506" class="body" text-anchor="end">新的维护对象</text>
+  <rect x="752" y="527" width="396" height="104" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
+  <text x="776" y="563" class="node-title">Skill 的 harness</text>
+  <text x="776" y="599" class="body">按需：任务 · 记忆 · 技能</text>
 
   <path d="M60 734h1160" stroke="#dce5dd" stroke-width="1.5"/>
   <text x="60" y="781" class="heading">跨仓组合使用</text>
