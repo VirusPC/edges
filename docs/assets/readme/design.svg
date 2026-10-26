@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1400" viewBox="0 0 1280 1400" role="img" aria-labelledby="title description">
   <title id="title">Edges 结构：就地建立、递归维护与从项目出发的跨仓引用</title>
-  <desc id="description">任意目录建立与递归维护：白色框表示被维护对象，绿色框表示 harness。monorepo 中选定的 web 子 app 单独拥有 harness。递归示意依次包含项目、项目的 harness、代码审阅 Skill、Skill 的 harness；项目与 Skill 都能拥有自己的维护空间，按需采用任务、记忆与技能，不表示自动加载内层材料或自动自我改进。跨仓组合从已有的当前项目仓库出发：左侧较宽的白色项目仓库包含项目自身的绿色 harness 与白色 Agent，右侧唯一的绿色个人大脑仓是额外引用的共享 harness。两仓平级独立，外框顶部与底部对齐，保留各自归属与历史。Compose 引用虚线从项目 harness 指向个人大脑，记录所选引用版本。两条实线知识流与引用线分开：青绿色箭头从右侧大脑指向左侧 Agent，表示利用知识与方法；琥珀色箭头从左侧 Agent 指向右侧大脑，表示沉淀新经验。这不表示仓库包含、复制合并或自动同步。</desc>
+  <desc id="description">任意目录建立与递归维护：白色框表示被维护对象，绿色框表示 harness。monorepo 中选定的 web 子 app 单独拥有 harness。递归示意依次包含项目、项目的 harness、代码审阅 Skill、Skill 的 harness；项目与 Skill 都能拥有自己的维护空间，按需采用任务、记忆与技能，不表示自动加载内层材料或自动自我改进。跨仓组合从已有的当前项目仓库出发：左侧白色项目仓库包含项目自身的绿色 harness 与白色 Agent，右侧唯一的个人大脑仓是提供跨项目知识与方法的共享 harness。两仓平级独立。Compose 虚线从项目 harness 指向个人大脑，表示引用额外的个人知识库；青绿色实线箭头从大脑指向 Agent，表示利用知识与方法；琥珀色实线箭头从 Agent 指向同一个大脑，表示沉淀新经验。图只展示一个已有项目使用个人大脑的故事。</desc>
   <defs>
     <style>
       text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
@@ -100,16 +100,12 @@
   <!-- The added knowledge source is a peer repository, shown only once and wholly green. -->
   <rect x="890" y="910" width="330" height="400" rx="18" fill="#eaf3eb" stroke="#91b7a4" stroke-width="2"/>
   <text x="1055" y="952" class="ink" font-size="28" font-weight="650" text-anchor="middle">个人大脑仓</text>
-  <text x="1055" y="1003" class="body" text-anchor="middle">整个仓库就是 harness</text>
-  <text x="1055" y="1044" class="body" text-anchor="middle">自身归属与历史</text>
-  <path d="M918 1083h274" stroke="#cfdfd3" stroke-width="1"/>
-  <text x="1055" y="1165" class="body" text-anchor="middle">可复用的知识与方法</text>
-  <text x="1055" y="1245" class="body" text-anchor="middle">从项目沉淀的新经验</text>
+  <text x="1055" y="1003" class="body" text-anchor="middle">共享 harness</text>
+  <text x="1055" y="1165" class="body" text-anchor="middle">跨项目知识与方法</text>
 
   <!-- Compose points from the project to the brain; the two Agent knowledge flows are separate. -->
   <path d="M602 1040H878" fill="none" stroke="#5a927c" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#compose-arrow)"/>
   <text x="760" y="1018" fill="#527668" font-size="23" text-anchor="middle">Compose 引用</text>
-  <text x="760" y="1080" class="body" text-anchor="middle">保留引用版本</text>
 
   <path d="M890 1160H614" fill="none" stroke="#397e70" stroke-width="2.5" marker-end="url(#knowledge-arrow)"/>
   <text x="750" y="1138" fill="#397e70" font-size="23" text-anchor="middle">利用知识与方法</text>
