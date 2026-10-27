@@ -70,7 +70,7 @@ format: ordinary
 - [ECS 上 edges 用 Actions SSH 整仓 pull](<project_teach_site_rsync_push/INDEX.md>) — 改 teaching、/tasks/ 或 ECS 部署时：SSH 只在 deploy.yml 的 deploy job；production 不挂 url；site\-teaching 与 site\-tasks 都 needs deploy，分别登记 https://edges.viruspc.tech/teaching/ 与 /tasks/；summary 列两个 URL。artifacts 仅当 ~/.config/edges/edges.env 有可用 token 时 install 再 restart，不读 artifacts\-preview.env。不要拆成两次 SSH，不要用 teach.\* 或裸 IP。不要新开 workflow（ADR 0021）。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main/INDEX.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks\_direct\_main
 - [知识目录单元与扩展应用归属](project_top_level_content_and_extension_apps/INDEX.md) — 目录单元适用于全部知识内容；共用附件复制，未引用旧 img 归 archive/img，根共享池无引用附件归档；apps 属于 extensions，局部记忆保留归属。
-- [层入口表面命名改为 edges](<project_harness_layer_markers/INDEX.md>) — 改 AGENTS.md 层入口注释或章节标题时：标记为 edges / constraints / local / descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；类型身份用 edges-memory-type，组织清单用 edges-entries-*。不读 project-memory-type 与 project-entries-*。
+- [层入口表面命名改为 edges](<project_harness_layer_markers/INDEX.md>) — 改 AGENTS.md 层入口注释或章节标题时：标记为 edges / constraints / local / descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；类型身份用 edges\-memory\-type，组织清单用 edges\-entries\-\*。不读 project\-memory\-type 与 project\-entries\-\*。
 
 - [递归系统二：系统入口 AGENTS.md 带组成登记](<project_recursive_system_two_entry/INDEX.md>) — 改节点模型、AGENTS.md、Project Harness 或 layout 时打开：核心是递归系统二；系统入口为 AGENTS.md 且必须带组成登记；从 scope 系统入口经登记可达才算节点；无 isLeaf；Task/Note/Skill 由登记挂入。曾议 AGENTS 不带 entries 已否。谁必须有真实 AGENTS 见 grill Q10。
 
@@ -90,7 +90,7 @@ format: ordinary
 
 - [InternalNode 承接组成索引](<project_grill_basenode_type_agents_readme_text/INDEX.md>) — 改节点类层次或 type 时：AgentsNode 与 ReadmeNode 继承 InternalNode；业务节点继承 BaseNode；LeafNode 是纯 text；组织/叶子看组成登记，type 不含 internal。
 
-- [类型入口只写 README，空的类型 AGENTS 桩删除](<project_grill_type_index_as_readme/INDEX.md>) — 改类型索引、init/remember/doctor 或 PROTOCOL 时：memory 与 skills 的类型索引只写 README\+project\-entries。空的同目录 AGENTS 桩删除；缺失索引不补 AGENTS。层系统入口仍是 AGENTS.md。
+- [类型入口只写 README，空的类型 AGENTS 桩删除](<project_grill_type_index_as_readme/INDEX.md>) — 改类型索引、init/remember/doctor 或 PROTOCOL 时：memory 与 skills 的类型索引只写 README\+edges\-entries。空的同目录 AGENTS 桩删除；缺失索引不补 AGENTS。层系统入口仍是 AGENTS.md。
 
 - [递归系统二 spec 已批准可实施](<project_grill_spec_approved_start_impl/INDEX.md>) — 改节点模型/codec 时：2026\-10\-06 recursive\-system\-two\-entries spec 与 ADR 0029 已获用户批准；按实施计划落地，系统一孩子只进 README entries。
 
@@ -100,8 +100,8 @@ format: ordinary
 
 - [traverse 默认走全部 children](<project_grill_traverse_default_all_children/INDEX.md>) — 改 operations/traverse 或依赖其默认的调用方时：默认展开 local∪descendants；本层\-only 用显式 localOnly；不再接受 includeDescendants；includeHarness 仍默认 false。
 
-- [Task Project 组织清单用 README](<project_task_project_readme_org_lists/INDEX.md>) — 改 Task Project / 看板列表或 physicalParent 时：Task Project 与看板项目列表用 README\+project\-entries；新项目默认 README 种子，勿伪造 AGENTS；任务叶子的物理父是项目 README。
-- [层 AGENTS 挂材料 README，list 顺着 children](<project_list_all_forest/INDEX.md>) — 改 tasks 登记、根 AGENTS 或 list 时：层入口挂材料 README（尤其 .edges/tasks/README.md），条目留在 project\-entries。类型目录空 AGENTS 桩删除。不另写 walker。\-\-super 仍只接 scope 目录。
+- [Task Project 组织清单用 README](<project_task_project_readme_org_lists/INDEX.md>) — 改 Task Project / 看板列表或 physicalParent 时：Task Project 与看板项目列表用 README\+edges\-entries；新项目默认 README 种子，勿伪造 AGENTS；任务叶子的物理父是项目 README。
+- [层 AGENTS 挂材料 README，list 顺着 children](<project_list_all_forest/INDEX.md>) — 改 tasks 登记、根 AGENTS 或 list 时：层入口挂材料 README（尤其 .edges/tasks/README.md），条目留在 edges\-entries。类型目录空 AGENTS 桩删除。不另写 walker。\-\-super 仍只接 scope 目录。
 - [各模块 init 只创建本模块的材料](<project_init_module_boundary/INDEX.md>) — 改 edges init 或域 init 时：memory 不顺手建其他模块；每个有材料的模块只初始化自己。
 - [个人仓是长期主干，系统往外拆](<project_personal_repo_is_trunk/INDEX.md>) — 原公开仓改名为用户的个人大脑仓，作个人主干长期保留；系统拆成新仓，不再 archive
 - [new\_note 收成 packages/cli/edges，MCP 保留](<project_cli_from_mcp/INDEX.md>) — 改 note ingest、new\-note MCP 或 cli 时：本地 agent 走仓库根 packages/cli/ 的 edges notes；git 在 CLI 的 TS 模块；MCP 子进程调 edges notes；鉴权 flag 留在 notes create 上；JSON stdout。不要在仓库根另建 clis/，也不要放回已删除的 extensions/。

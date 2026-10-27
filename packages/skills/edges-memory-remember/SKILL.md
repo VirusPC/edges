@@ -1,7 +1,7 @@
 ---
 name: edges-memory-remember
 description: 把可复用结论写入本项目 .edges 并刷新索引。用户要求记住时必须用；被纠正、用户给出可用想法/约定/约束、或任务产出已验证、以后还用得上的结论时也要主动用。
-version: 0.1.0
+version: 0.1.1
 ---
 
 # Project Memory Remember
@@ -48,7 +48,7 @@ version: 0.1.0
 - 产物是 `.edges/memory/users/user_<slug>/INDEX.md`，类型索引是 `.edges/memory/users/README.md`。整类都被 gitignore，**不要 `git add`**。
 - `--slug` 与其他普通记忆一样，小写 snake_case，不带 `user_` 前缀。
 - 正文仍按「一句结论 → `**Why:**` → `**How to apply:**`」。
-- Agent 读的是本机这份 `users/README.md`。换机或删仓前用 `$edges-user-memory-backup`；回注用 `$edges-user-memory-restore`。
+- Agent 读的是本机这份 `users/README.md`。换机或删仓前用 `$edges-memory-user-backup`；回注用 `$edges-memory-user-restore`。
 - v1 不做脱敏晋升：不要把 user 条目改写进 `project` / `feedback` 来「变成可提交」。
 
 `referenced` 不由 remember 写入，作为 `--type` 写入会被拒绝。那份索引对着本层 `.agents/skills/`，内容是人写或 `npx skills` 装的，本套工具只索引不改写。要新增就手写或走 `npx skills`，已有层可用 init 刷新已采用入口；不代为初始化新层。

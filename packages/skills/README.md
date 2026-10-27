@@ -89,7 +89,7 @@ pnpm skills:install-claude-global  # 全局，只装给 Claude Code：实体拷�
 
 > 记忆技能依赖提供 `edges memory` 的 Edges CLI。先构建或安装 CLI，并验证 `edges memory --help`；Skill 的安装不等于安装 CLI。一起安装 `edges-memory-ask`、`edges-memory-init`、`edges-memory-remember`、`edges-memory-add-type`。`project-memory-doctor` 与 `project-memory-reshape` 已删除，没有同名替代；索引诊断用 `edges memory doctor`。执行命令不再定位其他 Skill 的 Python 脚本，模板随 CLI 构建分发。
 
-0.3.0 起不再附带 `project-memory-migrate`，也没有 `edges memory migrate`。仍停在旧 `.memory` 的，先用 `@viruspc/edges@0.2.7` 完成那次转换，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。常规运行不读旧 `.memory`。私有归档使用 [`edges-user-memory-backup`](edges-user-memory-backup/SKILL.md) 与 [`edges-user-memory-restore`](edges-user-memory-restore/SKILL.md)，只处理 `.edges/memory/users`。
+0.3.0 起不再附带 `project-memory-migrate`，也没有 `edges memory migrate`。仍停在旧 `.memory` 的，先用 `@viruspc/edges@0.2.7` 完成那次转换，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。常规运行不读旧 `.memory`。私有归档使用 [`edges-memory-user-backup`](edges-memory-user-backup/SKILL.md) 与 [`edges-memory-user-restore`](edges-memory-user-restore/SKILL.md)，只处理 `.edges/memory/users`。默认归档名是 `edges-memory-user-backup-<UTC时间戳>.tar.gz`。
 
 维护这组 skill 时，按 [Project Memory 开发规范](edges-memory-init/.edges/memory/projects/project_development/INDEX.md) 的顺序修改和验证。
 

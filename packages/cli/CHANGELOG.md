@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **用户记忆归档默认文件名跟着技能改：** `edges memory backup` 写出 `edges-memory-user-backup-<时间戳>.tar.gz`，并给目标目录补上同名忽略规则。`edges memory restore` 仍按给出的归档路径读取，不靠文件名识别技能。
+
 ## [0.4.0] - 2026-10-27
 
 ### Changed

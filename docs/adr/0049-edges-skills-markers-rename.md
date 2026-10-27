@@ -10,6 +10,8 @@ status: accepted
 
 **Supersedes（局部）：** [ADR 0047](0047-rename-harness-directory-to-edges.md) Decision 2 里「`project-memory-*` 与 `project-entries-*` 保持原名」。该 ADR 的目录硬切断、删除 `edges memory migrate`、布局冻结仍然有效。本决定只把当时留下的技能名和类型/清单标记收进同一条 `edges-*` 链路。
 
+**Superseded in part by：** [ADR 0050](0050-memory-user-skills-and-drop-directory-migration-skill.md)。下表里 `user-memory-backup`、`user-memory-restore`、`migrate-directory-nodes` 三行的「新名」不再是现行名字。其余行仍然有效。表本身保留 2026-10-27 这次改名的事实。
+
 ## Decision
 
 1. **技能硬切断。** `packages/skills/` 里下列目录连同 `SKILL.md` 的 `name` 改为新名。不读旧名，不留同名软链。每个改名技能的版本重启为 `0.1.0`，不从旧号递增。旧 annotated tag `skill/<旧名>@*` 留在历史提交上。

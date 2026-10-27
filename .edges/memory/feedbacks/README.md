@@ -38,10 +38,10 @@ format: ordinary
 - [traverse 不兼容 includeDescendants](<feedback_no_include_descendants_compat/INDEX.md>) — 改 traverse / NodeService.query 选项时：不要再接受 includeDescendants；只要本层用 localOnly: true；默认仍是全部 children。
 - [CLI 默认只做系统二操作](<feedback_cli_is_system_two_ops/INDEX.md>) — 改 traverse、scope 根或 tasks 查询入口时：同目录 README 不并进真 AGENTS；层入口本层可登记材料 README，默认 list 顺着它走到任务。\-\-super 仍是虚拟系统。
 - [系统一内容经 SuperAgentsNode 当虚拟系统二](<feedback_content_via_super_agents_node/INDEX.md>) — 改 traverse/\-\-super/tasks 查询时：同目录 README 不并边；层入口可登记材料 README 供默认 list；\-\-super 把材料接到 scope 目录。无 includeContentFace。
-- [traverse 单系统；森林根、Super 挂载与 domain 配置](<feedback_traverse_single_system_and_forest_roots/INDEX.md>) — 改 traverse/森林/Super/harness 材料 IO 时：domain/config/harness\-materials.json；Super 只挂 README；森林 BaseNode\[\]\[\]；edges forest list。
+- [traverse 单系统；森林根、Super 挂载与 domain 配置](<feedback_traverse_single_system_and_forest_roots/INDEX.md>) — 改 traverse/森林/Super/harness 材料 IO 时：domain/config/edges\-materials.json；Super 只挂 README；森林 BaseNode\[\]\[\]；edges forest list。
 - [scope、super、all 的组合形成一切](<feedback_scope_super_all/INDEX.md>) — 改 edges 的 list、写任务、init、doctor、帮助、skill 或持久看板生成时：目录和登记分组只由 \-\-scope、\-\-super、\-\-all 与路径决定，不要再加 purpose、index\-group 或另一套全仓开关。
-- [commands 不直接读 harness 材料表](<feedback_commands_do_not_import_harness_materials/INDEX.md>) — 改 CLI 命令时：不要在 commands 里 import harness\-materials；看板路径与是否存在走该领域 service。
-- [模块 README 不写说明文字](<feedback_no_prose_in_harness_module_readmes/INDEX.md>) — 下放内容或补说明时打开：harness\-materials.json 登记的模块 README（含 \-\-super 视角下根上的 tasks/、notes/、projects/ README）只放标题与受管区块，不加正文；概念进 CONTEXT，命令用法进能力 README。edges/、archive/ 这类内容目录 README 可以写标准。
+- [commands 不直接读 harness 材料表](<feedback_commands_do_not_import_harness_materials/INDEX.md>) — 改 CLI 命令时：不要在 commands 里 import edges\-materials；看板路径与是否存在走该领域 service。
+- [模块 README 不写说明文字](<feedback_no_prose_in_harness_module_readmes/INDEX.md>) — 下放内容或补说明时打开：edges\-materials.json 登记的模块 README（含 \-\-super 视角下根上的 tasks/、notes/、projects/ README）只放标题与受管区块，不加正文；概念进 CONTEXT，命令用法进能力 README。edges/、archive/ 这类内容目录 README 可以写标准。
 - [精简内容前先把要删的迁到合适去处](<feedback_migrate_before_delete/INDEX.md>) — 精简或拆分笔记、清单时：被删的条目先查在别处有没有归宿，没有就先迁过去再删，不直接删除。
 - [grill 每轮经 html\-plan 发布到 Artifacts](<feedback_grill_rounds_as_html_plan/INDEX.md>) — 跑 grill 或交付实现 PR 审阅页时打开：默认 grill → html\-plan 打包 → Artifacts 发布并验证链接 → 用户 Copy response 回传；不要停在本地 HTML 或等用户提醒发布。
 - [叠层 PR：底层 squash 前确认上层已合入](<feedback_stacked_pr_merge_order/INDEX.md>) — 合叠层 PR 或核实修复是否已在 main 时打开：底层 squash 进 main 前确认上层都已合进底层分支，合完把剩余上层改指向 main；PR 显示已合并不等于改动在 main。缘起 \#208/\#211 丢失，见 https://github.com/VirusPC/edges/pull/289。
@@ -57,7 +57,7 @@ format: ordinary
 - [新增文件不造新概念，名字一眼看懂](<feedback_new_files_no_new_concepts/INDEX.md>) — 在 cli 新增文件、目录或改名时打开：不引入抽象新词（如 classify.ts），文件名要一眼看出职责、符合语义；能并进已有文件就不另起。简单命名不等于降低分层质量。
 - [不要加 edges\-note shim 或根目录默认 ingest](<feedback_no_edges_note_shim/INDEX.md>) — 改 edges\-cli 的 bin、默认命令或兼容入口时：只保留 edges；禁止 edges\-note 第二 bin / shim；根目录无子命令不得跑 note ingest。
 - [目录 stem 保留 Unicode，名字校验仍要 ASCII](<feedback_node_stem_unicode_not_ascii_names/INDEX.md>) — 改笔记、项目目录名或任务名 slug 时打开：目录 stem 保留汉字；skill、memory、task project 的名字校验仍要求小写 ASCII，不要一起放宽。
-- [Restore \-\-force 整份替换，不合并](<feedback_restore_force_replaces/INDEX.md>) — 改 edges\-user\-memory\-restore 时：\-\-force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。
+- [Restore \-\-force 整份替换，不合并](<feedback_restore_force_replaces/INDEX.md>) — 改 edges\-memory\-user\-restore 时：\-\-force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。
 - [审阅壳竖线只拖宽度](<feedback_review_shell_dividers_resize_width/INDEX.md>) — 改审阅壳三栏分隔线或拖放时打开：两条竖线只调整左右栏宽度，不搬任务、不改状态。项目拖放仍只在左栏。2026\-09\-24 peng cheng 澄清。
 - [审阅壳筛选靠右、紧挨导出](<feedback_review_shell_filters_before_export/INDEX.md>) — 改审阅壳顶栏筛选或复制导出 JSON 的位置时打开：全文和优先级、负责人、状态整组靠右，紧挨在导出按钮前面。系统名不在这一栏。
 - [改 skill 后必须升级 version、写 changelog、打 tag](<feedback_skill_bump_version/INDEX.md>) — 更新 skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/\<name\>@\<version\> tag。
