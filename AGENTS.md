@@ -20,6 +20,7 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 - 不绑定 Edges 的通用 skill / MCP 配置 / plugin / hook 不放本仓，去个人仓的 `shared-extensions/`。
 - 顶层 `edges` 命令能对上 harness 或领域目录时，命令名跟目录（`notes/` → `notes`，`.harness/skills` → `skills`）。硬切断，不留旧名别名。`tasks`、`memory` 已对齐则不动。不为 `observation` 发明命令。`evaluation` 只提供已定的长驻服务入口 `edges evaluation server`，不另开评测内容命令。
 - 内容节点的 create/get/update/destroy 必须走 NodeService，不得旁路写文件（[ADR 0030](docs/adr/0030-content-leaf-crud-via-nodeservice.md)）。
+- 对本仓任务卡做 grill-with-docs（或同类 grill）细化时：达成共识后、动手改代码前，必须先写 html-plan（正文用中文），并用 `edges artifacts publish` 发布预览链接交给用户；用户确认（Respond / 明确 OK）后再实现。不要跳过 plan / publish；对话同步用中文。
 <!-- project-harness-constraints:end -->
 
 <!-- project-harness-local:start -->
