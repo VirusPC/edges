@@ -8,7 +8,7 @@ status: accepted
 
 > **修订（2026-10-06）：** 系统入口 / README·INDEX 入口合同、组成标记分工、以及不再以 Internal/Leaf 固定类层次表达组织状态，见 [ADR 0029](0029-recursive-system-two-entries.md)。下文仍保留当时落地表述；与 0029 冲突处以 0029 为准。
 
-> **修订（2026-10-27）：** 下文「个人仓 `shared-extensions/`」不再是现行落点。不绑定 Edges 的通用 skill 归使用方仓根 `skills/managed/`，见 [ADR 0048](0048-retire-shared-extensions.md)。该段其余归属判断仍按原文。
+> **修订（2026-10-27）：** 下文「个人仓 `shared-extensions/`」不再是现行落点。不绑定 Edges 的通用 skill 与个人 harness 放使用方自己的内容仓，经 Compose 挂载，布局由该仓自定。见 [ADR 0048](0048-retire-shared-extensions.md)。该段其余归属判断仍按原文。
 
 ## 闭环复利（投资视角）
 

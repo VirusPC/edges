@@ -42,7 +42,7 @@ git submodule update --init packages/evaluation/third_party/locomo
 
 开发时，`pnpm skills:link` 将 `packages/skills/` 链到 `.agents/skills`。本仓维护用的技能在 `.edges/skills`；构建时复制进安装包的 `packages/cli/skills/` 不入 Git。这几处分别承担分发真源、开发发现、本仓维护和构建产物的职责。
 
-使用方的笔记、教学、复盘、任务、项目、记忆、归档、不绑定 Edges 的通用 skill 与对外博客，放在自己的内容仓库。通用 skill 放使用方仓根 `skills/managed/`。本框架仓不挂载个人仓库；使用方可在自己的工作区通过 [Compose](packages/skills/edges-compose/SKILL.md) 挂上使用方自己的 harness 仓。不再使用 `shared-extensions/` 隔间。见 [ADR 0048](docs/adr/0048-retire-shared-extensions.md)。
+使用方的笔记、教学、复盘、任务、项目、记忆、归档、不绑定 Edges 的通用 skill 与对外博客，放在自己的内容仓库。这份仓就是可 Compose 的共享 `.edges`，布局由该仓自定。本框架仓不挂载个人仓库；使用方可在自己的工作区通过 [Compose](packages/skills/edges-compose/SKILL.md) 挂上。不再使用 `shared-extensions/` 隔间。见 [ADR 0048](docs/adr/0048-retire-shared-extensions.md)。
 
 现行术语见 [CONTEXT.md](CONTEXT.md)，设计取舍见 [ADR](docs/adr/)。[架构背景材料](docs/architecture.md) 保留了旧 README 的设计思考，涉及入口或路径时应对照现行术语与后续 ADR。
 

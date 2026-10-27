@@ -8,7 +8,7 @@ status: accepted
 
 **Status:** accepted（ADR 0040）
 
-**Superseded in part by** [ADR 0048](0048-retire-shared-extensions.md)：个人仓不再设 `shared-extensions/`。不绑定 Edges 的通用 skill 改归使用方仓根 `skills/managed/`。下文 Decision 第 2 条里的安置句保留作 2026-10-20 的记录；平铺 `extensions/`、`posts/` 离开本仓，仍然有效。
+**Superseded in part by** [ADR 0048](0048-retire-shared-extensions.md)：个人仓不再设 `shared-extensions/`。不绑定 Edges 的材料改放使用方自己的内容仓，布局由该仓自定。下文 Decision 第 2 条里的安置句保留作 2026-10-20 的记录；平铺 `extensions/`、`posts/` 离开本仓，仍然有效。
 
 ## Decision
 

@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-本文件只记 Edges 这个仓库本身的重要变化，方便扫一眼「系统最近能做什么」。某个对外技能自己的版本记录，看 [`packages/skills/`](packages/skills/) 下面各自的 changelog。不绑定 Edges 的通用 skill 不放本仓，归使用方仓根 `skills/managed/`，见 [ADR 0048](docs/adr/0048-retire-shared-extensions.md)。尚未发版的变化按功能模块分组。Unreleased 的 `###` 用功能模块原名，不要改成「模块：摘要」或只留摘要；每条 `-` 前面加短小标题，写成 `- **小标题：** 正文…`。完整约定在项目记忆 `project_repo_changelog`，示例是 commit `a80d1b0`。
+本文件只记 Edges 这个仓库本身的重要变化，方便扫一眼「系统最近能做什么」。某个对外技能自己的版本记录，看 [`packages/skills/`](packages/skills/) 下面各自的 changelog。不绑定 Edges 的通用 skill 不放本仓，放使用方自己的内容仓（经 `edges compose` 挂载，布局由该仓自定），见 [ADR 0048](docs/adr/0048-retire-shared-extensions.md)。尚未发版的变化按功能模块分组。Unreleased 的 `###` 用功能模块原名，不要改成「模块：摘要」或只留摘要；每条 `-` 前面加短小标题，写成 `- **小标题：** 正文…`。完整约定在项目记忆 `project_repo_changelog`，示例是 commit `a80d1b0`。
 
 领域决策、术语表和实现计划不写进这份根 changelog，分别看 [`docs/adr/`](docs/adr/)、[`CONTEXT.md`](CONTEXT.md) 和 [`docs/superpowers/plans/`](docs/superpowers/plans/)。
 
@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 文档与系统
 
-- **通用 skill 在使用方仓根：** 不绑定 Edges 的通用 skill 放使用方仓根 `skills/managed/`，与 edges-materials `skills.managed` 在 `--super` 下材料根等于仓根对齐。跨机器用 `edges compose` 挂使用方自己的 harness 仓。见 [ADR 0048](docs/adr/0048-retire-shared-extensions.md)。
+- **通用 skill 跟使用方内容仓走：** 不绑定 Edges 的通用 skill 和个人 harness 放使用方自己的内容仓，用 `edges compose` 挂进工作区。这份仓就是可组合的共享 `.edges`，目录由它自己定。框架不再使用 `shared-extensions/`，也不规定这些 skill 必须落在 `.edges/skills/managed/` 或仓根 `skills/managed/`。见 [ADR 0048](docs/adr/0048-retire-shared-extensions.md)。
 - **设计选择与使用优势图解：** README 保留既有配图，更新结构图，以绿色表达 harness；用 monorepo 子 app 说明任意目录建立，用项目与 Skill 各自拥有 harness 的嵌套结构说明递归，以当前项目接入个人大脑仓、Agent 利用知识并沉淀经验说明跨仓组合。另用优势图解释文件系统、Git、跨 Agent 与核心轻运维，集中说明积累怎样扩展、怎样持续掌控和使用，以及维护方法自身怎样继续被维护。
 - **从设计和用例了解 Edges：** 首页按问题、设计思考、十个模块的用例、贯穿场景与 Agent 接入重新组织，搭配首屏插画、系统总览和模块地图，先说明系统如何帮助人与 Agent 持续工作，再解释各模块的用途。上手聚焦通过 Agent 接入与对话使用，接入链接改为现行路径。开发与历史信息集中到贡献指南，评测部署回到服务文档。
 
