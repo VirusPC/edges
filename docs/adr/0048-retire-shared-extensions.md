@@ -4,7 +4,7 @@ status: accepted
 
 # 废止个人仓 shared-extensions 隔间
 
-2026-10-27 用户确认计划后拍板。使用方个人仓不再维护独立的 `shared-extensions/` 隔间，也不再打 `shared-extensions@` tag。不绑定 Edges 的通用 skill 归使用方个人仓（内容仓）的材料目录。本仓只记录这个决定并改现行文档。隔间里的搬家、打 tag 与删除目录由使用方自己的仓另做。
+2026-10-27 用户确认计划后拍板。使用方个人仓不再维护独立的 `shared-extensions/` 隔间，也不再打 `shared-extensions@` tag。不绑定 Edges 的通用 skill 归使用方仓根 `skills/managed/`。本仓只记录这个决定并改现行文档。隔间里的搬家、打 tag 与删除目录由使用方自己的仓另做。
 
 **Status:** accepted（ADR 0048）
 
@@ -16,12 +16,12 @@ status: accepted
 
 2026-10-18，ADR 0036 把不调用 edges CLI 的 skill 移出 npm 包，落到 `shared-extensions/skills/`。2026-10-20，ADR 0040 取消框架仓的 `extensions/` 层，并把当时的 `new-server/`、`others/` 交给个人仓的 `shared-extensions/`。这之后，跨机器、跨 Agent、又不绑定 Edges 的材料被说成要进这一隔间：通用 skill、MCP 配置、plugin、hook，外加整层 `VERSION`、`CHANGELOG.md` 和 `shared-extensions@x.y.z` tag。
 
-使用方自己的 harness 仓已经是跨机器携带的单元。材料目录里有 `.edges/skills/managed/`。Compose 可以把这份仓挂进当前工作区。再维持一个平行隔间和一条独立 tag，新内容会被指到两处，版本线也和该仓自己的 Git 历史重复。隔间里的 mcp、plugins、hooks 在参考用法上是空的，继续为它们保留目录名没有落点。
+使用方自己的 harness 仓已经是跨机器携带的单元。edges-materials 的 `skills.managed` 在 `--super` 下材料根等于仓根，通用 skill 落在仓根 `skills/managed/`。Compose 可以把这份仓挂进当前工作区。再维持一个平行隔间和一条独立 tag，新内容会被指到两处，版本线也和该仓自己的 Git 历史重复。隔间里的 mcp、plugins、hooks 在参考用法上是空的，继续为它们保留目录名没有落点。
 
 ## Decision
 
 1. **废止隔间。** 使用方个人仓不再设 `shared-extensions/`。不要为新材料创建这个目录，不要再维护该层的 `VERSION` 或 `CHANGELOG.md`。`shared-extensions@6.0.0` 是该系列最后一版 annotated tag，打在使用方个人仓上，不打在本框架仓。之后不再打 `shared-extensions@*`。打 tag 和删除隔间由使用方自己的仓执行。
-2. **通用 skill 的现行位置。** 不绑定 Edges 的通用 skill 放使用方个人仓（内容仓）的 `.edges/skills/managed/<name>/`。该仓若仍使用 ADR 0047 之前的材料目录名，放那个目录下的 `skills/managed/<name>/`。它们是该作用域的普通受管 skill，不打进 `@viruspc/edges`，也不进入 `edges skills init` 的安装范围。
+2. **通用 skill 的现行位置。** 不绑定 Edges 的通用 skill 放使用方仓根 `skills/managed/<name>/`。这与 edges-materials `skills.managed` 在 `--super` 下材料根等于仓根对齐。它们是该作用域的普通受管 skill，不打进 `@viruspc/edges`，也不进入 `edges skills init` 的安装范围。
 3. **跨机器靠 Compose。** 要在另一台机器或另一个工作区用到这些 skill，用 `edges compose` 挂上使用方自己的 harness 仓。不为它们再写一套装进 `~/.agents/skills` 的全局安装。
 4. **不新开 mcp / plugins / hooks 目录名。** 与 Edges 无关的 MCP 配置、plugin、hook 仍然不放本框架仓，也不再收回 `shared-extensions/` 下的同名目录。本决定不另起一套目录。若仍要跨机器携带，跟使用方自己的 harness 仓走，由 Compose 挂上。
 5. **接入 Edges 的边界不变。** 为了让 Agent 或外部系统接入、操作 Edges 的 CLI、skill、MCP、服务、应用和 prompt，仍在本仓 `packages/` 下的对应目录。判据仍是「是不是为了接入或操作 Edges」，不是「换机器能不能带走」。
@@ -35,7 +35,7 @@ status: accepted
 
 ## Consequences
 
-- 现行文档把「不绑定 Edges 的通用 skill 放哪」写成使用方 `.edges/skills/managed/`。根 `AGENTS.md` 的对应硬约束按此改写。
+- 现行文档把「不绑定 Edges 的通用 skill 放哪」写成使用方仓根 `skills/managed/`。根 `AGENTS.md` 的对应硬约束按此改写。
 - ADR 0036 仍决定：这些 skill 不进 npm 包，`edges skills init` 只装包内 skill。变的是包外那一份放哪。
 - ADR 0040 仍决定：框架仓没有 `extensions/` 层，`posts/` 在个人仓。变的是个人仓不再用 `shared-extensions/` 接收搬走的材料。
 - 本仓 CHANGELOG、已完成的迁移说明、旧讨论和已完成任务卡里出现的 `shared-extensions/`，保留当时事实。读那些句子时，不要把它当成现在该写入的目录。

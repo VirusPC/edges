@@ -2,7 +2,7 @@
 
 你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 CLI / skill / MCP / 应用与服务、维护 `.edges/` 里讲 Edges 本身的记忆与任务，以及 `packages/evaluation/`、`packages/observation/` 里的评测与观测。
 
-本仓 `VirusPC/edges` 只放 Edges 框架本身（`packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/`、协议、ADR、架构文档）。个人知识（笔记、Edge、教学、复盘、领域任务、不绑定 Edges 的通用 skill、对外博客成稿等）写在使用方个人仓，由使用方用 `edges compose` 挂到自己的 `.edges/compose/README.md`；不要写进本仓。通用 skill 放使用方个人仓的 `.edges/skills/managed/`。2026-10-20 拆仓前的历史、PR 与 Actions 记录都留在个人仓，最后一个拆仓前提交是 `025904fa29bcc6970f45c654d95e30c5390d43d7`。2026-10-20 起不再有 `extensions/` 这一层，映射见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。同日代码目录收进 `packages/`，映射见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
+本仓 `VirusPC/edges` 只放 Edges 框架本身（`packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/`、协议、ADR、架构文档）。个人知识（笔记、Edge、教学、复盘、领域任务、不绑定 Edges 的通用 skill、对外博客成稿等）写在使用方个人仓，由使用方用 `edges compose` 挂到自己的 `.edges/compose/README.md`；不要写进本仓。通用 skill 放使用方仓根 `skills/managed/`。2026-10-20 拆仓前的历史、PR 与 Actions 记录都留在个人仓，最后一个拆仓前提交是 `025904fa29bcc6970f45c654d95e30c5390d43d7`。2026-10-20 起不再有 `extensions/` 这一层，映射见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。同日代码目录收进 `packages/`，映射见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
 
 Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](CONTEXT.md)；AGENTS.md 组织入口发现，各规范正文按职责保持单一真源。
 
@@ -17,7 +17,7 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 - 本仓公开（`github.com/VirusPC/edges`）。凭据、个人信息、未公开 IP、办公文档不入库；内部信息脱敏后再写；允许点名、链接公开使用案例 `VirusPC/edges-brain-viruspc`，其他个人仓和所有私有仓仍不点名、不链接（含历史旧名）；截图按「能不能上公开博客」判断。细则见 README 的「隐私与脱敏」。
 - Git：`type: subject`；AI 参与加 `Co-authored-by`；不提交 `.obsidian/workspace.json`；`pull` / `rebase` 加 `--autostash`。
 - 本机修改本仓（commit/push 或改工作树文件）必须通过独立 `git worktree`：每个 Agent/任务一个 worktree + 独立分支；禁止多 Agent 共用同一工作树并行改文件或切分支；同一分支不得挂两个 worktree。Cursor 云端 Agent 等已在独立 clone/环境中的任务视为已隔离，不要求再套本机 worktree；只读查询可不建 worktree。
-- 不绑定 Edges 的通用 skill、MCP 配置、plugin、hook 不放本仓。通用 skill 归使用方个人仓的 `.edges/skills/managed/<name>/`（该仓若仍用 ADR 0047 之前的材料目录名，放那个目录下的 `skills/managed/<name>/`）。跨机通过 `edges compose` 挂使用方自己的 harness 仓。不再维护 `shared-extensions/` 隔间，也不再打 `shared-extensions@` tag（[ADR 0048](docs/adr/0048-retire-shared-extensions.md)）。
+- 不绑定 Edges 的通用 skill、MCP 配置、plugin、hook 不放本仓。通用 skill 归使用方仓根 `skills/managed/<name>/`（与 edges-materials `skills.managed` 在 `--super` 下材料根等于仓根对齐）。跨机通过 `edges compose` 挂使用方自己的 harness 仓。不再维护 `shared-extensions/` 隔间，也不再打 `shared-extensions@` tag（[ADR 0048](docs/adr/0048-retire-shared-extensions.md)）。
 - 顶层 `edges` 命令能对上 harness 或领域目录时，命令名跟目录（`notes/` → `notes`，`.edges/skills` → `skills`）。硬切断，不留旧名别名。`tasks`、`memory` 已对齐则不动。不为 `observation` 发明命令。`evaluation` 只提供已定的长驻服务入口 `edges evaluation server`，不另开评测内容命令。
 - 内容节点的 create/get/update/destroy 必须走 NodeService，不得旁路写文件（[ADR 0030](docs/adr/0030-content-leaf-crud-via-nodeservice.md)）。
 - 材料目录固定为 `.edges/`。层标记是 `edges` / `edges-*`（外层、constraints、local、descendants、compose）。硬切断，不双读 `.harness` 或 `project-harness`。此布局在 [ADR 0047](docs/adr/0047-rename-harness-directory-to-edges.md) 之后冻结，不借更名改模块结构。
