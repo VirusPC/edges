@@ -13,7 +13,7 @@
 ## 何时**不**放这里
 
 - 用户/Agent 装好之后**天天会用**的命令 → `cli` 的 `edges`（`package.json` `"bin"` 安装挂钩）
-- 跟外部系统或 MCP 协议相关、且为了接入 Edges 的代码 → 仓库根的 `packages/cli/`、`packages/skills/`、`packages/mcp-servers/`、`packages/apps/`、`packages/services/`。不绑定 Edges 的通用 skill 不写进本目录，归使用方仓根 `skills/managed/`，跨机器用 `edges compose` 挂使用方自己的 harness 仓。见 [ADR 0048](../docs/adr/0048-retire-shared-extensions.md)
+- 跟外部系统或 MCP 协议相关、且为了接入 Edges 的代码 → 仓库根的 `packages/cli/`、`packages/skills/`、`packages/mcp-servers/`、`packages/apps/`、`packages/services/`。不绑定 Edges 的通用 skill 不写进本目录，放使用方自己的内容仓，跨机器用 `edges compose` 挂上；布局由该仓自定。见 [ADR 0048](../docs/adr/0048-retire-shared-extensions.md)
 - 纯 Node 包、可被 pnpm 链接的 → `packages/mcp-servers/<name>/`
 
 ## 命名与权限

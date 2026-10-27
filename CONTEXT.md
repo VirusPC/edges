@@ -260,11 +260,11 @@ _避免使用_：一次运行、一次性 Task、Project 分组、已启用的�
 
 **安装技能（Install Skill）**：
 把随 `@viruspc/edges` npm 包分发的 Edges 自有 Skill 装进本机 Agent 的 skill 目录（如 `~/.agents/skills`、`~/.claude/skills`）。`edges skills init` 的安装步骤是固定版本 `skills@1.7.2` 的薄封装：`skills add <包内 skills 目录绝对路径> --skill '*'`，`--` 之后的 token 原样转交；agent、`-g`、`-y`、有无 TTY、同名覆盖都按 vercel-labs/skills 的默认。同一条命令还建 skill 类型索引（Managed / Referenced）。无参 `edges init` 的默认集含 skills，其 `--` 之后只转交给这一步。vercel skills 非零退出则 init 失败。与 Managed / Referenced 的类型索引是两件事：装进 Agent 目录不等于登记进作用域的索引。见 ADR 0036。
-_避免使用_：`edges skills install`、把安装当成可跳过的附加步骤、安装时从 GitHub 拉 skill、把使用方仓根 `skills/managed/` 里不绑定 Edges 的通用 skill 算进安装范围
+_避免使用_：`edges skills install`、把安装当成可跳过的附加步骤、安装时从 GitHub 拉 skill、把使用方内容仓里不绑定 Edges 的通用 skill 算进安装范围
 
 **不绑定 Edges 的通用技能**：
-离开 Edges 仍然有用、不随 `@viruspc/edges` 分发的 skill。放在使用方仓根 `skills/managed/<name>/`（与 edges-materials `skills.managed` 在 `--super` 下材料根等于仓根对齐）。跨机器用 `edges compose` 挂使用方自己的 harness 仓。见 ADR 0048。
-_避免使用_：`shared-extensions/`、`shared-extensions@` tag、把它们算进 `edges skills init` 的安装范围、写进本框架仓 `packages/skills/`、再装一份到 `~/.agents/skills`
+离开 Edges 仍然有用、不随 `@viruspc/edges` 分发的 skill。放在使用方自己的内容仓，经 `edges compose` 挂载；布局由该仓自定。见 ADR 0048。
+_避免使用_：`shared-extensions/`、`shared-extensions@` tag、把它们算进 `edges skills init` 的安装范围、写进本框架仓 `packages/skills/`、再装一份到 `~/.agents/skills`、由框架规定落在 `.edges/skills/managed/` 或仓根 `skills/managed/`
 
 **MCP（Edges）**：
 在无 shell 宿主上暴露 Edges 扩展能力的机器入口；与 CLI、Skill 同属能力面，调用同一套领域契约而非另一套产品。
