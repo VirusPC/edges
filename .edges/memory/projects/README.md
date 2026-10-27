@@ -1,10 +1,10 @@
-<!-- project-memory-type:start -->
+<!-- edges-memory-type:start -->
 name: project
 module: memory
 writable: true
 gitignore: false
 format: ordinary
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 
 # PROJECT — 项目上下文
 
@@ -13,7 +13,7 @@ format: ordinary
 > 怎么写：正文先一句结论，再跟 `**Why:**`（为什么，便于以后判断边界情况）和 `**How to apply:**`（具体怎么做）。相对日期换成绝对日期。
 > 本文件只是索引，条目区块由脚本重算，正文写在 `projects/project_<slug>/index.md` 里。
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [放弃的 ChatGPT MCP 接入](project_abandoned_chatgpt_mcp/INDEX.md) — 2026-02-19 建过两条空的 ChatGPT MCP change，没有设计可恢复；若再做从当前 MCP 布局重开。
@@ -24,15 +24,15 @@ format: ordinary
 - [Edges 云端部署：Obsidian vault 使用仓库 clone](project_box_obsidian_vault_for_preview/INDEX.md) — Edges 仓库部署约定：云端 Obsidian 使用独立 Edges clone，不连接本机 Sync；归根节点部署记忆，具体环境为 2026-09-11 的验证记录。
 - [能力面：CLI / Skill / MCP](project_capability_surface_cli_skill_mcp/INDEX.md) — 能力面是 CLI、Skill、MCP 三者并列；仓根 bin/ 已删除；Note git 在 cli 的 TS；MCP 子进程调 edges notes。禁止「必要时 MCP」或只写 CLI+Skill。新能力不要再加仓根脚本或把 npm bin 当一层。
 - [Changelog 自动化：调研过，暂不生成正文](project_changelog_automation/INDEX.md) — 考虑给仓库或 skill 自动生成 changelog 时：维持手写 Unreleased；若要自动化只切版本和校验，不要从 git log 生成条目。
-- [classifyTasks 与 Task Project 元数据](project_classify_tasks_and_project_metadata/INDEX.md) — 实现或改 edges tasks project / project-tasks-classify Skill 时打开：能力面 CLI + Skill + MCP；按用户已设质心做 LLM / agent 判断；无 embedding、无 classify 动词。第 4 步人闸是 project review-page（Markdown 表仅无 GUI 回退）。四个 project 动词都会 ensure。Skill 目录/id 是 project-tasks-classify（展示名 classifyTasks）。
-- [classifyTasks 按已有质心分类；Task Project 元数据只做索引层](project_classify_tasks_and_task_project_metadata/INDEX.md) — 改 Task Project 元数据、classifyTasks / project-tasks-classify 工作流或看板 AGENTS.md 时：只做索引/描述层（Q18=A），不把 Task 升成 Memory Type。按用户已设 Task Project 质心做归属建议（LLM / agent 判断），不要求 embedding。人闸主路径是 review-page（ADR 0012）。Skill 路径 packages/skills/project-tasks-classify/；新类型走 proposeTypes（ADR 0011）。决策见 docs/adr/0010-classify-tasks-and-task-project-metadata.md。
+- [classifyTasks 与 Task Project 元数据](project_classify_tasks_and_project_metadata/INDEX.md) — 实现或改 edges tasks project / edges-tasks-classify Skill 时打开：能力面 CLI + Skill + MCP；按用户已设质心做 LLM / agent 判断；无 embedding、无 classify 动词。第 4 步人闸是 project review-page（Markdown 表仅无 GUI 回退）。四个 project 动词都会 ensure。Skill 目录/id 是 edges-tasks-classify（展示名 classifyTasks）。
+- [classifyTasks 按已有质心分类；Task Project 元数据只做索引层](project_classify_tasks_and_task_project_metadata/INDEX.md) — 改 Task Project 元数据、classifyTasks / edges-tasks-classify 工作流或看板 AGENTS.md 时：只做索引/描述层（Q18=A），不把 Task 升成 Memory Type。按用户已设 Task Project 质心做归属建议（LLM / agent 判断），不要求 embedding。人闸主路径是 review-page（ADR 0012）。Skill 路径 packages/skills/edges-tasks-classify/；新类型走 proposeTypes（ADR 0011）。决策见 docs/adr/0010-classify-tasks-and-task-project-metadata.md。
 - [CliContext 只装生产快照](project_cli_context_production_snapshot/INDEX.md) — 改 edges CLI 的 CliContext / run\(\) 入参时：只放 env 与 stdin 快照加 Commander 的 result；不要把 ingest、fs、writer、now 等测试替身塞进 Context。输出类型叫 CliResult，不要叫 RunResult。
-- [对话整理采用复盘四栏](project_conversation_notes_fupan_four_columns/INDEX.md) — 改 conversation-to-notes 或对话 Note 结构时：用复盘四栏；相关链接写入【补充说明】并附说明；不要复活已关闭的 FIA 中文换皮；不要批量改写旧笔记；不要把升 Edge 写进该 skill。
-- [conversation-to-tasks：背景+目标必填，人审后落库](project_conversation_to_tasks_body_review_persist/INDEX.md) — 改 conversation-to-tasks 或从对话开卡时：背景→目标→动作→完成标准（后两栏可选）；必填不足先问；成文后交人审再 CLI 落库；STAR 用于制定任务非复盘。
+- [对话整理采用复盘四栏](project_conversation_notes_fupan_four_columns/INDEX.md) — 改 edges-conversation-to-notes 或对话 Note 结构时：用复盘四栏；相关链接写入【补充说明】并附说明；不要复活已关闭的 FIA 中文换皮；不要批量改写旧笔记；不要把升 Edge 写进该 skill。
+- [edges-conversation-to-tasks：背景+目标必填，人审后落库](project_conversation_to_tasks_body_review_persist/INDEX.md) — 改 edges-conversation-to-tasks 或从对话开卡时：背景→目标→动作→完成标准（后两栏可选）；必填不足先问；成文后交人审再 CLI 落库；STAR 用于制定任务非复盘。
 - [Task Issue 优先级用词档位，与 status 正交](project_edges_task_priority/INDEX.md) — Task Issue 优先级为 urgent\|high\|medium\|low\|none，写在 metadata.edges-task-priority，与 status 正交、不搬状态夹。CLI 已落地 create/update --priority 与 list --sort priority；Skill/MCP 后做。决策见 docs/adr/0007-edges-task-priority.md；词 vs P0 调研见 knowledge/projects/tasks/2026-09-15--issue-priority-words-vs-p0.md
 - [Task 看板按 Task Project 目录优先分组](project_edges_task_project/INDEX.md) — 看板 Task Project 为 directory-first + frontmatter 双写；未分组用 \_default。决策见 docs/adr/0009-edges-task-project-grouping.md。CLI 已按 docs/superpowers/plans/2026-09-16-edges-task-project.md 落地；status 只在同 project 内移动。
 - [edges tasks 本轮只做 CLI](project_edges_tasks_cli/INDEX.md) — 本轮 edges tasks 看板操作只做 CLI（list/get/create/update/status + 只读 runs/run-messages）；Skill 与 MCP 后做同一契约。决策见 ADR 0005。
-- [可扩展 Memory Type：LAYOUT 登记，不另开注册表](project_extensible_memory_types/INDEX.md) — 可扩展 Memory Type：扩展面只在 LAYOUT，用 project-memory-add-type 登记；官方种子仍是六类。决策见 docs/adr/0006-extensible-project-memory-types.md。
+- [可扩展 Memory Type：LAYOUT 登记，不另开注册表](project_extensible_memory_types/INDEX.md) — 可扩展 Memory Type：扩展面只在 LAYOUT，用 edges-memory-add-type 登记；官方种子仍是六类。决策见 docs/adr/0006-extensible-edges-memory-types.md。
 - [前端图标默认 Lucide](project_frontend_icon_set/INDEX.md) — 改审阅壳或后续前端图标时打开：默认 Lucide（按需、可调 size/color/stroke）。同一产品不混搭。tasks-review 折叠用 ChevronDown/ChevronRight，筛选关闭用 X，不要可见文字收起/展开/关闭。正文在 knowledge/notes/2026-09-25--前端图标选型.md。
 - [Git 管理记忆的版本与共享范围](project_git_memory_management/INDEX.md) — 概括 Edges 核心思想时：Git 管理还包括跟踪与忽略规则，例如 user memory 通过 gitignore 不随 Git 提交与共享；不能只解释成版本历史、分支和回滚。
 - [idea→task→专家→Cloud Agent→改状态](project_idea_todo_expert_cloud_loop/INDEX.md) — 工作流：idea 在领域 tasks/ 或维护 .edges/tasks/ 落卡，经专家细聊、开发、回写 Task 状态；旧 knowledge/tasks/ 与直推 main 仅是 2026-09-10 历史。
@@ -49,7 +49,7 @@ format: ordinary
 - [定期从目录职责提炼通用维护规范](project_periodic_architecture_review/INDEX.md) — 复盘 Edges 目录架构时：按实际职责与维护对象识别可跨作用域复用的系统二模块，输出规范候选；维护任务管理是例子，当前仅记规范、不启用自动运行。
 - [仓内任务优先用仓库 Skill 与 CLI](project_prefer_repo_skills_and_cli/INDEX.md) — 执行 VirusPC/edges 仓内工作时，优先调用本仓 Skill 与 edges CLI；不可用须向用户说明缺口，勿默认手搓绕过。
 - [订阅管理盘点进展](project_progress/INDEX.md) — 订阅/用量盘点进展：双 Gmail + QQ IMAP、国内 Kimi 无邮箱、CodexBar Linux CLI 已装待鉴权；后续 Apple/微信侧核对。
-- [proposeTypes 从 \_default 提议新 Task Project 类型](project_propose_types_from_default/INDEX.md) — 改 propose-types 工作流或从 \_default 发明新 Task Project 时打开：独立 Skill packages/skills/project-tasks-propose-types/；经同一 review-page 确认，不自动 project create；方法是 LLM/agent 判断；配对 project-tasks-classify、ADR 0011 与 ADR 0012。本轮不写 skill 正文。
+- [proposeTypes 从 \_default 提议新 Task Project 类型](project_propose_types_from_default/INDEX.md) — 改 propose-types 工作流或从 \_default 发明新 Task Project 时打开：独立 Skill packages/skills/project-tasks-propose-types/；经同一 review-page 确认，不自动 project create；方法是 LLM/agent 判断；配对 edges-tasks-classify、ADR 0011 与 ADR 0012。本轮不写 skill 正文。
 - [仓库用根 CHANGELOG 和 v 标签发版](project_repo_changelog/INDEX.md) — 仓库发版先提 PR，合并后给 main 的合并提交打 tag 并发布。写 Edges 仓库级变更时用根目录 CHANGELOG.md 和 v 标签。Unreleased 的 ### 用功能模块原名（如笔记入库与能力面、文档与系统、任务看板与项目、Artifacts 预览），不要改成「模块：摘要」或只留摘要；每条前面写成 \`- \*\*小标题：\*\* 正文\`，小标题白话摘要，正文不因精简文风大段删实现说明（示例 commit a80d1b0）。用人话写清「现在能做什么」，同一条里立刻给出真实命令名；对照 \[1.2.0\] 的完整句，不要堆 schema 字段表。枚举写仓库英文原值（优先级是 urgent/high/medium/low/none）。不要摊成扁平长列表，也不要把决策/术语/计划逐条写进去。 新版本不留 Changed 等未按模块归类的兜底小节；切版时检查重复、条目顺序与已落地范围。
 - [审阅页侧栏筛选用 design A（选中染色 + 未选变淡）](project_review_page_sidebar_filter_design_a/INDEX.md) — 改审阅页左栏项目筛选外观时打开：选中用 accent 实线边加面板底；未选中 opacity 0.6（hover 拉回）；拖过时外扩 outline，须和选中边叠得开。类写在 ProjectColumn，不改点击或拖放。用户 2026-09-17 选定 design A。
 - [根硬约束含平铺后并入的三条](<project_root_important_scope/INDEX.md>) — 改根 AGENTS.md 硬约束时：保留聚光灯、脱敏、git，以及 2026\-10\-20 从 extensions 并入的三条；通用 skill 放使用方内容仓并由该仓自定布局，不要改回 shared\-extensions，也不要写死 skills/managed。目录细则和说话风格仍不进硬约束。
@@ -61,7 +61,7 @@ format: ordinary
 - [系统设计目标：三件事尽量一键](<project_system_one_click_deploy_ingest_output/INDEX.md>) — 改根 README 的系统实现、或讨论 Edges 产品方向时打开：设计目标是一键部署底座、一键接入 Agent 客户端、一键产出对外资产。2026\-10\-08 起 README 按已完成用现在时写，不标「在路上」；实际进度仍按真实状态记在任务与 CHANGELOG。不要另开顶级章节。
 - [TS 数据契约生成 JSON Schema](<project_task_doc_json_schema/INDEX.md>) — Schema 字段真源、生成与分发、运行时输入校验及取舍；Node 22、CLI 获取和真实消费者验收见 ADR 0025。
 - [Task Project 审阅页是 render-only CLI](project_task_project_review_page_render_only_cli/INDEX.md) — 改审阅壳或 edges tasks project review-page 时打开：仍只渲染、无 --mode。桌面三栏见 ADR 0022。窄屏同一页纵向分段，滚动必须能到顶也能到 Details。章节头是过渡色面，状态行贴背景且比章节小一档。筛选入口是 ListFilter 图标。双击章节标题滚到该节，回到看板滚到当前卡片。不要视口面板。源码在 packages/apps/tasks-review-app/。
-- [Tasks 旧记忆逐条审阅后的共享范围与归属](project_task_shared_conventions_ownership/INDEX.md) — 跨层任务约定存根 Project Memory；写法引用 conversation-to-tasks；部署记录与预览 Skill 已归根，局部看板分组仍留 Tasks，对外分发留待办。
+- [Tasks 旧记忆逐条审阅后的共享范围与归属](project_task_shared_conventions_ownership/INDEX.md) — 跨层任务约定存根 Project Memory；写法引用 edges-conversation-to-tasks；部署记录与预览 Skill 已归根，局部看板分组仍留 Tasks，对外分发留待办。
 - [Tasks 核心思想：与 /goal、loop engineering 同构](project_tasks_align_goal_and_loop_engineering/INDEX.md) — 设计或验收 tasks 时：目标+完成标准要与 /goal、loop engineering 一起想；开卡时完成标准可暂缺、grill 后补；沉淀结论时同时写清背景上下文。
 - [Task 看板变更优先走 edges tasks CLI](project_tasks_board_mutations_via_cli/INDEX.md) — 所有层级的领域 tasks 与维护 .edges/tasks 看板变更，优先走 edges tasks CLI 和已有任务 Skill；能力缺口明确反馈，不长期绕过工具直接改文件。
 - [2026\-09\-10 Task 速记直推 main（历史约定）](<project_tasks_direct_main/INDEX.md>) — 2026\-09\-10 旧 knowledge/tasks 只追加速记曾约定直推 main；当前任务写入所选 scope 的节点 harness tasks，并遵守独立 worktree。
@@ -70,7 +70,7 @@ format: ordinary
 - [ECS 上 edges 用 Actions SSH 整仓 pull](<project_teach_site_rsync_push/INDEX.md>) — 改 teaching、/tasks/ 或 ECS 部署时：SSH 只在 deploy.yml 的 deploy job；production 不挂 url；site\-teaching 与 site\-tasks 都 needs deploy，分别登记 https://edges.viruspc.tech/teaching/ 与 /tasks/；summary 列两个 URL。artifacts 仅当 ~/.config/edges/edges.env 有可用 token 时 install 再 restart，不读 artifacts\-preview.env。不要拆成两次 SSH，不要用 teach.\* 或裸 IP。不要新开 workflow（ADR 0021）。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main/INDEX.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks\_direct\_main
 - [知识目录单元与扩展应用归属](project_top_level_content_and_extension_apps/INDEX.md) — 目录单元适用于全部知识内容；共用附件复制，未引用旧 img 归 archive/img，根共享池无引用附件归档；apps 属于 extensions，局部记忆保留归属。
-- [层入口表面命名改为 edges](<project_harness_layer_markers/INDEX.md>) — 改 AGENTS.md 层入口注释或章节标题时：标记为 edges / constraints / local / descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；type 与 entries 仍用 project\-memory\-\*。README 的 project\-entries\-\* 见 grill\_entries 条。
+- [层入口表面命名改为 edges](<project_harness_layer_markers/INDEX.md>) — 改 AGENTS.md 层入口注释或章节标题时：标记为 edges / constraints / local / descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；类型身份用 edges-memory-type，组织清单用 edges-entries-*。不读 project-memory-type 与 project-entries-*。
 
 - [递归系统二：系统入口 AGENTS.md 带组成登记](<project_recursive_system_two_entry/INDEX.md>) — 改节点模型、AGENTS.md、Project Harness 或 layout 时打开：核心是递归系统二；系统入口为 AGENTS.md 且必须带组成登记；从 scope 系统入口经登记可达才算节点；无 isLeaf；Task/Note/Skill 由登记挂入。曾议 AGENTS 不带 entries 已否。谁必须有真实 AGENTS 见 grill Q10。
 
@@ -82,7 +82,7 @@ format: ordinary
 
 - [grill：README/AGENTS 组成分工与 INDEX 迁移脚本](<project_grill_system_entry_q13_q14/INDEX.md>) — 改树遍历或入口迁移时：同目录系统一孩子只在 README entries，AGENTS 只挂系统二材料与下级系统入口；index.md→INDEX.md 用可预览脚本套 CLI traverse，含 posts（本轮改名授权）。原则见 models/README 设计原则节。
 
-- [README entries 与 AGENTS 章节标题定稿](<project_grill_entries_markers_and_titles/INDEX.md>) — 改 README entries 或 AGENTS 三章标题时：README 用 project\-entries\-local/descendants，标题本层内容/下层内容；AGENTS 标题为本层硬约束/本层系统维护信息/下层系统维护信息（标记仍 edges\-\*）。
+- [README entries 与 AGENTS 章节标题定稿](<project_grill_entries_markers_and_titles/INDEX.md>) — 改 README entries 或 AGENTS 三章标题时：README 用 edges\-entries\-local/descendants，标题本层内容/下层内容；AGENTS 标题为本层硬约束/本层系统维护信息/下层系统维护信息（标记仍 edges\-\*）。
 
 - [节点模型落地前先写 spec 与 ADR](<project_grill_q16_spec_and_adr_first/INDEX.md>) — 改递归系统二入口、entries 标记或 INDEX 迁移前：先完成设计 spec 与 ADR 并经人审，再 writing\-plans；本步不写生产代码。
 
@@ -114,4 +114,4 @@ format: ordinary
 - [被组合仓库可写，不加挂载机制](<project_compose_checkout_writable/INDEX.md>) — 改 Compose 写入或想加只读特例、空检出报错、父索引边界时打开：只删只读限制。决定见 ADR 0045。
 - [Routines 记录定义，由外部平台接入执行](<project_routines_from_brain_practice/INDEX.md>) — 设计 routines 时打开：INDEX.md 记录，仓库为接入依据；平台每次读Skill，默认最新可指定，失败停止报告；首版适配全部现有例程，无调度器和分组。
 - [Edges 推广准备：实验、Skills、场景案例与任务归属](<project_edges_promotion_intent/INDEX.md>) — 准备 Edges 对外推广及拆分任务时：先补实验数据、Skills 接入和场景案例；一个主任务及全部子任务统一放框架仓，文章产物归属另行处理。
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->

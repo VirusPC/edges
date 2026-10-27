@@ -105,7 +105,7 @@ function appendAbsentMaterials(readmeFile: string, missing: readonly NodeReferen
     return !text.includes(href);
   });
   if (!fresh.length) return;
-  const end = "<!-- project-entries-local:end -->";
+  const end = "<!-- edges-entries-local:end -->";
   if (!text.includes(end)) throw new Error(`Missing entries block: ${readmeFile}`);
   const block = fresh.map((child) => materialLine(readmeFile, child)).join("\n");
   text = text.replace(end, () => `${block}\n${end}`);

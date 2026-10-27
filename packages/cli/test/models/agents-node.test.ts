@@ -7,33 +7,33 @@ const source = `# Context
 
 See [plain](plain/index.md).
 
-<!-- project-memory-important:start -->
+<!-- edges-constraints:start -->
 ## 本层重要约束
 
 - Keep the rule.
-<!-- project-memory-important:end -->
+<!-- edges-constraints:end -->
 
-<!-- project-memory-local:start -->
+<!-- edges-local:start -->
 ## 本层记忆
 
 Authored **introduction**, kept verbatim.
 
 - [One](one/index.md) — first description
-<!-- project-memory-local:end -->
+<!-- edges-local:end -->
 
-<!-- project-memory-children:start -->
+<!-- edges-descendants:start -->
 ## 下层记忆索引
 
 - [Nested](nested/AGENTS.md) — nested scope
-<!-- project-memory-children:end -->
+<!-- edges-descendants:end -->
 
 Footer stays.
 `;
 
 const modern = source
-  .replaceAll("project-memory-important", "edges-constraints")
-  .replaceAll("project-memory-local", "edges-local")
-  .replaceAll("project-memory-children", "edges-descendants")
+  .replaceAll("edges-constraints", "edges-constraints")
+  .replaceAll("edges-local", "edges-local")
+  .replaceAll("edges-descendants", "edges-descendants")
   .replaceAll("本层重要约束", "本层硬约束")
   .replaceAll("本层记忆", "本层系统维护信息")
   .replaceAll("下层记忆索引", "下层系统维护信息");
@@ -153,18 +153,18 @@ test("parse and body replacement discard old sections and indexes", () => {
 });
 
 test("existing type index entries behave as local without adding section headings", () => {
-  const original = `<!-- project-memory-type:start -->
+  const original = `<!-- edges-memory-type:start -->
 name: project
 module: memory
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 
 # PROJECT
 
 > Authored purpose.
 
-<!-- project-memory-entries:start -->
+<!-- edges-entries-local:start -->
 - [First](first/index.md) — keep
-<!-- project-memory-entries:end -->
+<!-- edges-entries-local:end -->
 `;
   const node = new AgentsNode("/scope/types/AGENTS.md").parse(original);
   assert.deepEqual(node.children, [
@@ -177,12 +177,12 @@ module: memory
     name: "Second",
   });
   const rendered = node.serialize();
-  assert.match(rendered, /project-memory-entries:start/);
+  assert.match(rendered, /edges-entries-local:start/);
   assert.match(rendered, /name: project\nmodule: memory/);
   assert.match(rendered, /> Authored purpose\./);
   assert.doesNotMatch(
     rendered,
-    /## 本层记忆|## 本层组成|## 本层系统维护信息|project-memory-local|edges-local|project-memory-children/,
+    /## 本层记忆|## 本层组成|## 本层系统维护信息|edges-local|edges-local|edges-descendants/,
   );
   assert.deepEqual(
     new AgentsNode(node.path).parse(rendered).children.map((ref) => ref.id),
@@ -221,14 +221,14 @@ test("re-added children serialize in the same order as the current view", () => 
 
 test("CRLF type indexes preserve their markers and local ownership", () => {
   const original =
-    "# Type\r\n\r\n<!-- project-memory-entries:start -->\r\n- [A](a/index.md)\r\n<!-- project-memory-entries:end -->\r\n";
+    "# Type\r\n\r\n<!-- edges-entries-local:start -->\r\n- [A](a/index.md)\r\n<!-- edges-entries-local:end -->\r\n";
   const node = new AgentsNode("/scope/types/AGENTS.md").parse(original);
   assert.deepEqual(node.children, [
     { id: "/scope/types/a/index.md", name: "A" },
   ]);
   assert.equal(node.serialize(), original);
   node.updateChild("/scope/types/a/index.md", { name: "B" });
-  assert.match(node.serialize(), /project-memory-entries:start -->\r\n/);
+  assert.match(node.serialize(), /edges-entries-local:start -->\r\n/);
 });
 
 test("linked prose within ownership sections stays ordinary and survives index edits", () => {
@@ -288,7 +288,7 @@ test("ownership hrefs retain filename escapes, Unicode, spaces and fragments acr
     "plain/index.md#section",
     "目录/有 空格/index.md",
   ];
-  const source = `<!-- project-memory-local:start -->\n${targets.map((target, i) => `- [item ${i}](<${target}>)`).join("\n")}\n<!-- project-memory-local:end -->\n`;
+  const source = `<!-- edges-local:start -->\n${targets.map((target, i) => `- [item ${i}](<${target}>)`).join("\n")}\n<!-- edges-local:end -->\n`;
   const node = new AgentsNode("/scope/AGENTS.md").parse(source);
   assert.deepEqual(
     node.children.map((reference) => reference.id),
@@ -309,7 +309,7 @@ test("ownership hrefs retain filename escapes, Unicode, spaces and fragments acr
 
 test('managed block replacement preserves CRLF and refuses malformed boundaries', async () => {
  const {upsertBlock}=await import('../../src/domain/models/node/document.js');
- const start='<!-- project-memory-local:start -->',end='<!-- project-memory-local:end -->';
+ const start='<!-- edges-local:start -->',end='<!-- edges-local:end -->';
  const source='Intro  \r\n'+start+'\r\nOld\r\n'+end+'\r\nTail  \r\n';
  assert.equal(upsertBlock(source,start,end,start+'\nNew\n'+end),'Intro  \r\n'+start+'\r\nNew\r\n'+end+'\r\nTail  \r\n');
  assert.throws(()=>upsertBlock('Intro\n'+start,start,end,start+'\nNew\n'+end),/marker|boundary|unclosed/i);

@@ -53,7 +53,7 @@ test("init creates system entry AGENTS.md only at scope root, not organization R
   assert.match(read(dir, AGENTS_FILE_NAME), /edges-local:start/);
 });
 
-test("init writes README type indexes with project-entries markers", async (t) => {
+test("init writes README type indexes with edges-entries markers", async (t) => {
   const dir = fixture(t);
   await initMemory({
     targetDir: dir,
@@ -68,8 +68,8 @@ test("init writes README type indexes with project-entries markers", async (t) =
     ".edges/skills/managed/README.md",
   ]) {
     const text = read(dir, rel);
-    assert.match(text, /<!-- project-entries-local:start -->\n## 本层内容/);
-    assert.doesNotMatch(text, /project-memory-entries/);
+    assert.match(text, /<!-- edges-entries-local:start -->\n## 本层内容/);
+    assert.doesNotMatch(text, /project-memory-entries|project-entries-/);
   }
   assert.equal(existsSync(join(dir, ".edges/memory/projects/AGENTS.md")), false);
   assert.match(read(dir, AGENTS_FILE_NAME), /\]\(\.edges\/README\.md\)/);
@@ -84,7 +84,7 @@ test("init writes README type indexes with project-entries markers", async (t) =
   );
 });
 
-test("remember lists the entry in README project-entries-local and registers it once", async (t) => {
+test("remember lists the entry in README edges-entries-local and registers it once", async (t) => {
   const dir = fixture(t);
   await initMemory({ targetDir: dir, memoryTypes: ["project"] });
   const result = await rememberMemory({
@@ -97,12 +97,12 @@ test("remember lists the entry in README project-entries-local and registers it 
   });
   assert.equal(result.index, ".edges/memory/projects/README.md");
   const text = read(dir, ".edges/memory/projects/README.md");
-  assert.match(text, /<!-- project-entries-local:start -->\n## 本层内容/);
+  assert.match(text, /<!-- edges-entries-local:start -->\n## 本层内容/);
   assert.equal(
     text.match(/\]\(<?project_decision\/INDEX\.md>?\)/g)?.length,
     1,
   );
-  assert.doesNotMatch(text, /project-memory-entries/);
+  assert.doesNotMatch(text, /project-memory-entries|project-entries-/);
   assert.doesNotMatch(text, /暂无条目/);
   const again = await rememberMemory({
     targetDir: dir,
@@ -130,8 +130,8 @@ test("add-type creates a README index and links it from layer AGENTS", async (t)
   });
   assert.equal(result.index, ".edges/memory/docs/README.md");
   const text = read(dir, ".edges/memory/docs/README.md");
-  assert.match(text, /<!-- project-memory-type:start -->\nname: docs/);
-  assert.match(text, /<!-- project-entries-local:start -->/);
+  assert.match(text, /<!-- edges-memory-type:start -->\nname: docs/);
+  assert.match(text, /<!-- edges-entries-local:start -->/);
   assert.match(read(dir, AGENTS_FILE_NAME), /\]\(\.edges\/README\.md\)/);
   assert.match(read(dir, ".edges/README.md"), /memory\/docs\/README\.md/);
   assert.doesNotMatch(
@@ -161,27 +161,27 @@ test("a missing type index is created as README.md for memory and skills", async
   assert.equal(existsSync(join(projects, "AGENTS.md")), false);
   assert.equal(existsSync(join(managed, "README.md")), true);
   assert.equal(existsSync(join(managed, "AGENTS.md")), false);
-  assert.match(read(dir, ".edges/memory/projects/README.md"), /project-entries-local/);
-  assert.match(read(dir, ".edges/skills/managed/README.md"), /project-entries-local/);
+  assert.match(read(dir, ".edges/memory/projects/README.md"), /edges-entries-local/);
+  assert.match(read(dir, ".edges/skills/managed/README.md"), /edges-entries-local/);
 });
 
 test("legacy AGENTS.md type index still discovers and loads until migrated", async (t) => {
   const dir = fixture(t);
   await initMemory({ targetDir: dir, memoryTypes: ["project"] });
   const base = join(dir, ".edges/memory/projects");
-  const legacy = `<!-- project-memory-type:start -->
+  const legacy = `<!-- edges-memory-type:start -->
 name: project
 module: memory
 writable: true
 gitignore: false
 format: ordinary
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 
 # PROJECT
 
-<!-- project-memory-entries:start -->
+<!-- edges-entries-local:start -->
 - 暂无条目。
-<!-- project-memory-entries:end -->
+<!-- edges-entries-local:end -->
 `;
   rmSync(join(base, "README.md"));
   writeFileSync(join(base, "AGENTS.md"), legacy);

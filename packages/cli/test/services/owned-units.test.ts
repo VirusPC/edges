@@ -27,10 +27,10 @@ function fixture(t: { after(fn: () => void): void }) {
   return { root, file, write, service: new NodeService({ managedRoot: root }) };
 }
 function index(local = "", descendants = "") {
-  return `# Scope\n\n<!-- project-memory-important:start -->\nKeep constraints.\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n${local}\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n${descendants}\n<!-- project-memory-children:end -->\n`;
+  return `# Scope\n\n<!-- edges-constraints:start -->\nKeep constraints.\n<!-- edges-constraints:end -->\n<!-- edges-local:start -->\n${local}\n<!-- edges-local:end -->\n<!-- edges-descendants:start -->\n${descendants}\n<!-- edges-descendants:end -->\n`;
 }
 function typeIndex(module: string, writable: boolean, entries = "") {
-  return `<!-- project-memory-type:start -->\nname: ${writable ? "managed" : "referenced"}\nmodule: ${module}\nwritable: ${writable}\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n${entries}\n<!-- project-memory-entries:end -->\n`;
+  return `<!-- edges-memory-type:start -->\nname: ${writable ? "managed" : "referenced"}\nmodule: ${module}\nwritable: ${writable}\n<!-- edges-memory-type:end -->\n<!-- edges-entries-local:start -->\n${entries}\n<!-- edges-entries-local:end -->\n`;
 }
 test("update leaves binary bytes untouched and destroy removes only the selected unit", async (t) => {
   const { file, write, service } = fixture(t);

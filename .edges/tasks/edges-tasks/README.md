@@ -2,7 +2,7 @@
 
 看板与 Task 工作流（协作、绑定、Skill/MCP、分类与调度）。
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [tasks\_multiplayer\_author\_claim](<backlog/2026-09-11--tasks%E9%9A%8F%E4%BB%93%E5%A4%9A%E4%BA%BA%E5%8D%8F%E4%BD%9C%E4%B8%8E%E4%BD%9C%E8%80%85%E5%8C%BA%E5%88%86/INDEX.md>) — tasks 随代码仓库时，应考虑同一仓库多人协作，区分任务写入与领取的作者等
@@ -21,10 +21,10 @@
 - [periodic\_tasks\_and\_period\_trigger](<backlog/2026-09-19--%E6%94%AF%E6%8C%81%E5%91%A8%E6%9C%9F%E6%80%A7%E4%BB%BB%E5%8A%A1%E4%B8%8E%E5%91%A8%E6%9C%9F%E8%A7%A6%E5%8F%91/INDEX.md>) — 看板支持周期性任务：按周期触发（cron/间隔等）；与一次性 Task、MQ 派发拆开
 - [edges\_changelog\_cli](<backlog/2026-09-20--edges-changelog-CLI%E5%88%87-Unreleased-%E6%A0%A1%E9%AA%8C/INDEX.md>) — 更新根 CHANGELOG 目前只能手改文件，没有 edges CLI；需要命令支持把 Unreleased 切成版本段并校验忘写，仍不从 git log 自动生成正文。
 - [board\_status\_visualization\_skill](<backlog/2026-09-21--%E7%9C%8B%E6%9D%BF%E7%8A%B6%E6%80%81%E5%8F%AF%E8%A7%86%E5%8C%96-Skillreview-pageHTML-artifacts-publish/INDEX.md>) — 展示 tasks 状态总览时缺少可加载 Skill；需要把「渲状态板 HTML → edges artifacts publish → 公网 URL」封成 Skill，避免 agent 扫目录拼文字列表。
-- [conversation\_to\_tasks\_then\_cli\_persist](<backlog/2026-09-24--conversation-to-tasks%E6%95%B4%E7%90%86%E5%90%8E%E8%B0%83CLI%E8%90%BD%E5%BA%93/INDEX.md>) — conversation\-to\-tasks 只整理成文；另一步用 edges tasks CLI 把草稿写入看板
+- [conversation\_to\_tasks\_then\_cli\_persist](<backlog/2026-09-24--edges-conversation-to-tasks%E6%95%B4%E7%90%86%E5%90%8E%E8%B0%83CLI%E8%90%BD%E5%BA%93/INDEX.md>) — edges\-conversation\-to\-tasks 只整理成文；另一步用 edges tasks CLI 把草稿写入看板
 - [tasks\_board\_default\_path\_dot\_edges\_tasks](<backlog/2026-09-25--%E7%9C%8B%E6%9D%BF%E9%BB%98%E8%AE%A4%E8%B7%AF%E5%BE%84%E6%94%B9%E4%B8%BA.edges-tasks/INDEX.md>) — 按作用域分流任务：维护看板迁入 .edges/tasks/，领域任务归 tasks/；保留 Task/Run 契约并同步工具，新版仅新布局、旧内容一次性迁移。
 - [conversation\_to\_task\_skill\_via\_cli](<cancelled/2026-09-13--conversation-to-task-skill%E8%B0%83%E7%94%A8CLI/INDEX.md>) — conversation\-to\-task skill：按模板从对话总结 Task，并调用 edges tasks CLI 落盘
 - [organize\_default\_project\_tasks\_skill](<in_progress/2026-09-16--%E6%95%B4%E7%90%86default-project%E7%9A%84tasks-skill/INDEX.md>) — Skill：整理 \_default 下的 tasks——归入已有 project、新建 project、或继续留在 \_default
 - [tasks\_list\_agents\_md](<done/2026-10-07--%E8%AE%A9-tasks-list-%E9%A1%BA%E7%9D%80-AGENTSmd-%E8%B5%B0%E5%88%B0%E4%BB%BB%E5%8A%A1/INDEX.md>) — 仓库根 tasks list 应列出 AGENTS.md 指向的 .edges/tasks 任务；\-\-all 的森林里也要有这些任务节点。
 - [list\_subject\_system\_agents\_md](<done/2026-10-07--list-%E6%94%B9%E8%B5%B0%E4%B8%BB%E4%BD%93%E7%B3%BB%E7%BB%9F%E7%B1%BB%E5%9E%8B%E5%85%A5%E5%8F%A3%E6%94%B9%E7%94%A8-AGENTSmd/INDEX.md>) — 用户命令范围只由 \`\-\-scope\` / \`\-\-super\` / \`\-\-all\` 决定；记忆与技能类型入口从 README 改为 AGENTS.md。根上维护任务当时仍挂在项目 README，未在本 PR 收完（见 \#170）。
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->

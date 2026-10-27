@@ -71,7 +71,7 @@ function scopeReadmePath(scopeDir: string): string {
 }
 
 function scopeReadmeSeed(): string {
-  return `# ${SCOPE_README_ENTRY_NAME}\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n<!-- project-entries-local:end -->\n`;
+  return `# ${SCOPE_README_ENTRY_NAME}\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n<!-- edges-entries-local:end -->\n`;
 }
 
 /** `.edges/README.md` is an ordinary ReadmeNode. No YAML frontmatter. */

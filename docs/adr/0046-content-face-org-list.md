@@ -4,7 +4,7 @@ status: accepted
 
 # 系统一叶子登记在内容面 README，缺了就创建
 
-Note、Project 与 Task 是系统一孩子。Q13 规定它们只登记在组织清单 `README.md` 的 `project-entries-*` 里，不进 `AGENTS.md`。创建路径在组织清单不存在、或 README 只是散文、没有 entries 标记时，曾回落到同目录或更上层的 `AGENTS.md`。`edges notes init` / `edges projects init` 又只种 `<scope>/.edges/notes/README.md` 与 `<scope>/.edges/projects/README.md`，而 `edges notes create` / `edges projects create` 写的是 `<scope>/notes/`、`<scope>/projects/`。两份文件不是同一个父节点。
+Note、Project 与 Task 是系统一孩子。Q13 规定它们只登记在组织清单 `README.md` 的 `edges-entries-*` 里，不进 `AGENTS.md`。创建路径在组织清单不存在、或 README 只是散文、没有 entries 标记时，曾回落到同目录或更上层的 `AGENTS.md`。`edges notes init` / `edges projects init` 又只种 `<scope>/.edges/notes/README.md` 与 `<scope>/.edges/projects/README.md`，而 `edges notes create` / `edges projects create` 写的是 `<scope>/notes/`、`<scope>/projects/`。两份文件不是同一个父节点。
 
 **Status:** accepted（ADR 0046）
 
@@ -13,9 +13,9 @@ Note、Project 与 Task 是系统一孩子。Q13 规定它们只登记在组织�
 ## Decision
 
 1. **叶子父节点是内容面组织清单。** `edges notes create` 登记到 `<scope>/notes/README.md`。`edges projects create` 登记到 `<scope>/projects/README.md`。Task 叶子登记到所属 Task Project 的 `README.md`（维护看板在 `<scope>/.edges/tasks/<project>/README.md`，`--super` 在 `<scope>/tasks/<project>/README.md`）。
-2. **缺了就创建，不回落到 AGENTS。** 组织清单不存在时，创建带 `project-entries-local` 的 ReadmeNode。已有散文且没有 entries 标记时，保留原文，只补上标记。`physicalParent` 对系统一孩子只接受带 entries 的 README，或类型索引 README；不再因为同目录有 `AGENTS.md` 就选它。选不中就继续向上找 README，找不到就是没有父节点，而不是挂到 AGENTS。
+2. **缺了就创建，不回落到 AGENTS。** 组织清单不存在时，创建带 `edges-entries-local` 的 ReadmeNode。已有散文且没有 entries 标记时，保留原文，只补上标记。`physicalParent` 对系统一孩子只接受带 entries 的 README，或类型索引 README；不再因为同目录有 `AGENTS.md` 就选它。选不中就继续向上找 README，找不到就是没有父节点，而不是挂到 AGENTS。
 3. **写之前父节点必须就是这份清单。** 创建 note/project 时，若算出来的父节点不是上述内容面 README，命令失败。创建 task 时，若父节点不是该 Task Project 的 README，命令失败。
-4. **init 同时保证内容面清单。** `edges notes init` 与 `edges projects init` 仍把 harness 条目放在 `<scope>/.edges/notes/README.md`、`<scope>/.edges/projects/README.md`，并挂到 `.edges/README.md`（ADR 0035）。同时确保 `<scope>/notes/README.md`、`<scope>/projects/README.md` 存在。harness 条目不带 `project-entries`，不接收叶子。内容面 README 才是叶子的组织清单。init 仍不读 `--super`。
+4. **init 同时保证内容面清单。** `edges notes init` 与 `edges projects init` 仍把 harness 条目放在 `<scope>/.edges/notes/README.md`、`<scope>/.edges/projects/README.md`，并挂到 `.edges/README.md`（ADR 0035）。同时确保 `<scope>/notes/README.md`、`<scope>/projects/README.md` 存在。harness 条目不带 `edges-entries`，不接收叶子。内容面 README 才是叶子的组织清单。init 仍不读 `--super`。
 5. **不在本决定里搬家。** 已经写在 `.edges/projects/` 下的叶子留在原处。个人仓的内容面不在本决定里迁移。
 6. **类型索引不变。** Memory 与 Skill 仍登记在各自的类型 README。路径落在 `.edges` 下、相对 scope 属于 harness 材料时，仍可以由系统入口承接，这不是系统一叶子。
 
@@ -29,7 +29,7 @@ Note、Project 与 Task 是系统一孩子。Q13 规定它们只登记在组织�
 ## Consequences
 
 - 没有 `notes/README.md` 时，`edges notes create` 会创建它并把叶子列进去。`projects` 相同。根 `AGENTS.md` 与 `notes/AGENTS.md` 不会因此多出叶子链接。
-- 内容面 README 已是散文时，原文保留，并出现 `project-entries-local`。
+- 内容面 README 已是散文时，原文保留，并出现 `edges-entries-local`。
 - `edges notes list` / `edges projects list` 会读这份内容面清单，不要求叶子先挂在 `AGENTS.md` 上。
 - 删除叶子时，即使这份 README 没有从 AGENTS 树走到，也会从它的物理父节点摘掉链接。
 - 新的 notes/projects init 会多写出内容面 README。已有 harness 条目文件不会被 init 重写。

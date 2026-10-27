@@ -93,7 +93,7 @@ test("damaged parent index prevents task creation without leaving an orphan", as
     assert.equal(first.exitCode, 0, first.stdout);
     const projectEntry = path.join(board, "_default/README.md");
     const contents = await readFile(projectEntry, "utf8");
-    await writeFile(projectEntry, contents.replace("<!-- project-entries-local:end -->", ""));
+    await writeFile(projectEntry, contents.replace("<!-- edges-entries-local:end -->", ""));
     const next = await call(root, ["create", "--title", "Orphan task"]);
     assert.notEqual(next.exitCode, 0);
     const { readdir } = await import("node:fs/promises");

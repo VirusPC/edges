@@ -36,11 +36,11 @@ test("tasks writes succeed when the scope links a missing users memory index", a
       path.join(repo, ".edges/README.md"),
       `# 本层 harness 材料索引
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [.edges/memory/users/README.md](<memory/users/README.md>) — 绑定本仓库、不宜公开的个人材料。本机文件，不进 git。
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->
 `,
     );
     assert.equal(await missing(path.join(repo, ".edges/memory/users/README.md")), true);
@@ -59,8 +59,8 @@ test("tasks writes succeed when the scope links a missing users memory index", a
     await writeFile(
       projectReadme,
       listed.replace(
-        "<!-- project-entries-local:end -->",
-        "- [gone](backlog/gone/INDEX.md) — missing task\n<!-- project-entries-local:end -->",
+        "<!-- edges-entries-local:end -->",
+        "- [gone](backlog/gone/INDEX.md) — missing task\n<!-- edges-entries-local:end -->",
       ),
     );
 

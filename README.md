@@ -91,7 +91,7 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 
 项目记忆保存当前代码或文件无法直接说明的东西：为什么选了这个方案、哪些做法被纠正过、哪些限制必须继续遵守。记忆归到最相关的作用域，检索时先看索引与说明，再读取需要的正文。
 
-**用例：** 一次实现因兼容性问题放弃某个方案，留下理由和适用条件；后来另一个 Agent 改同一模块时，可以先检索这段经验。[记忆用法](packages/cli/README.md#项目记忆memory) · [检索方式](packages/skills/project-memory-ask/SKILL.md)
+**用例：** 一次实现因兼容性问题放弃某个方案，留下理由和适用条件；后来另一个 Agent 改同一模块时，可以先检索这段经验。[记忆用法](packages/cli/README.md#项目记忆memory) · [检索方式](packages/skills/edges-memory-ask/SKILL.md)
 
 </details>
 
@@ -109,7 +109,7 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 
 通过对应客户端的接入方案，Observation 留存已接入 Agent 下的个人会话与可用执行记录，作为分析自己日常工作的材料。回看这些数据，可以了解自己在做什么、哪些问题反复出现，并结合当前任务与实际文件判断 harness 是否仍然适用、哪些过时内容需要更新或移除。
 
-**用例：** 回看一段时间的个人会话，发现 Agent 反复引用已经失效的约定，定位对应的 harness 文件，确认适用范围后更新或移除，再用评测检查调整的影响。[观测说明](packages/observation/README.md) · [选择会话接入方式](packages/skills/langfuse-agent-tracing/SKILL.md)
+**用例：** 回看一段时间的个人会话，发现 Agent 反复引用已经失效的约定，定位对应的 harness 文件，确认适用范围后更新或移除，再用评测检查调整的影响。[观测说明](packages/observation/README.md) · [选择会话接入方式](packages/skills/edges-langfuse-agent-tracing/SKILL.md)
 
 </details>
 
@@ -191,7 +191,7 @@ Edges 也用自己的记忆、技能与任务维护框架本身。公开使用�
 
 [MIT License](LICENSE)。
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->

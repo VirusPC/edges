@@ -3,8 +3,8 @@
  * Type indexes live only in README.md. Empty co-located AGENTS.md stubs
  * under `.edges/{memory,skills}/<type>/` are removed.
  *
- * An AGENTS.md that still carries `project-memory-type` is converted to a
- * sibling README (`project-entries-*`, titles 本层内容 / 下层内容) and then
+ * An AGENTS.md that still carries `edges-memory-type` is converted to a
+ * sibling README (`edges-entries-*`, titles 本层内容 / 下层内容) and then
  * deleted. A boilerplate stub next to an existing type README is deleted
  * when it has no composition links. Memory and skills type directories are
  * treated the same. Private `users/` indexes are not rewritten.
@@ -71,22 +71,22 @@ export interface SplitPlan {
 
 export function convertTypeIndexSource(source: string): string {
   let out = source
-    .replaceAll("<!-- edges-local:", "<!-- project-entries-local:")
-    .replaceAll("<!-- edges-descendants:", "<!-- project-entries-descendants:")
+    .replaceAll("<!-- edges-local:", "<!-- edges-entries-local:")
+    .replaceAll("<!-- edges-descendants:", "<!-- edges-entries-descendants:")
     .replaceAll("## 本层系统维护信息", "## 本层内容")
     .replaceAll("## 下层系统维护信息", "## 下层内容")
-    .replaceAll("<!-- project-memory-entries:start -->", "<!-- project-entries-local:start -->\n## 本层内容\n")
-    .replaceAll("<!-- project-memory-entries:end -->", "<!-- project-entries-local:end -->");
+    .replaceAll("<!-- edges-entries-local:start -->", "<!-- edges-entries-local:start -->\n## 本层内容\n")
+    .replaceAll("<!-- edges-entries-local:end -->", "<!-- edges-entries-local:end -->");
   out = out.replace(/^<!-- edges:(?:start|end) -->\r?\n?/gm, "");
   return out.replace(/\n{3,}/g, "\n\n").replace(/\s*$/, "\n");
 }
 
 function isOrgIndex(source: string): boolean {
   return (
-    source.includes("<!-- project-memory-type:start -->") ||
-    source.includes("<!-- project-entries-local:start -->") ||
-    source.includes("<!-- project-entries-descendants:start -->") ||
-    source.includes("<!-- project-memory-entries:start -->")
+    source.includes("<!-- edges-memory-type:start -->") ||
+    source.includes("<!-- edges-entries-local:start -->") ||
+    source.includes("<!-- edges-entries-descendants:start -->") ||
+    source.includes("<!-- edges-entries-local:start -->")
   );
 }
 
@@ -114,8 +114,8 @@ const LINK = /\[([^\]\n]*)\]\((<([^>\n]+)>|([^)\s]+))/g;
 const REGISTRATION_BLOCKS = [
   ["<!-- edges-local:start -->", "<!-- edges-local:end -->"],
   ["<!-- edges-descendants:start -->", "<!-- edges-descendants:end -->"],
-  ["<!-- project-entries-local:start -->", "<!-- project-entries-local:end -->"],
-  ["<!-- project-entries-descendants:start -->", "<!-- project-entries-descendants:end -->"],
+  ["<!-- edges-entries-local:start -->", "<!-- edges-entries-local:end -->"],
+  ["<!-- edges-entries-descendants:start -->", "<!-- edges-entries-descendants:end -->"],
 ] as const;
 
 function insideRegistrationBlock(source: string, offset: number): boolean {
@@ -192,7 +192,7 @@ export function planTypeIndexSplit(inputRoot: string): SplitPlan {
       continue;
     }
     const readmePath = path.join(path.dirname(file), "README.md");
-    if (!before.source.includes("<!-- project-memory-type:start -->")) {
+    if (!before.source.includes("<!-- edges-memory-type:start -->")) {
       const readme = fs.existsSync(readmePath) ? readEntry(readmePath) : undefined;
       const hasLink = LINK.test(before.source);
       LINK.lastIndex = 0;
@@ -211,7 +211,7 @@ export function planTypeIndexSplit(inputRoot: string): SplitPlan {
     if (fs.existsSync(to)) {
       const existing = readEntry(to);
       snapshots.push(before);
-      if (existing && !existing.source.includes("<!-- project-memory-type:start -->")) {
+      if (existing && !existing.source.includes("<!-- edges-memory-type:start -->")) {
         conflicts.push(`${rel(root, to)} already exists and is not a type index`);
         continue;
       }

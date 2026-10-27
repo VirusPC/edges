@@ -27,13 +27,13 @@ function fixture(
 const read = (root: string, rel: string) =>
   fs.readFileSync(path.join(root, rel), "utf8");
 
-const typeIndex = `<!-- project-memory-type:start -->
+const typeIndex = `<!-- edges-memory-type:start -->
 name: project
 module: memory
 writable: true
 gitignore: false
 format: ordinary
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 
 # PROJECT
 
@@ -56,10 +56,10 @@ const layer = `# Layer
 <!-- edges-local:end -->
 `;
 
-test("convertTypeIndexSource renames harness list markers to project-entries", () => {
+test("convertTypeIndexSource renames harness list markers to edges-entries", () => {
   const out = convertTypeIndexSource(typeIndex);
-  assert.match(out, /<!-- project-memory-type:start -->/);
-  assert.match(out, /<!-- project-entries-local:start -->\n## 本层内容/);
+  assert.match(out, /<!-- edges-memory-type:start -->/);
+  assert.match(out, /<!-- edges-entries-local:start -->\n## 本层内容/);
   assert.match(out, /- \[x\]\(project_x\/INDEX\.md\) — x/);
   assert.doesNotMatch(out, /edges-local/);
   assert.doesNotMatch(out, /本层系统维护信息/);
@@ -72,7 +72,7 @@ const stub = `# MANAGED
 <!-- edges-constraints:start -->
 ## 本层硬约束
 
-- 本目录有项目记忆。提问或动手前用 \`$project-memory-ask\`；该沉淀用 \`$project-memory-remember\`。本轮查过不重复。
+- 本目录有项目记忆。提问或动手前用 \`$edges-memory-ask\`；该沉淀用 \`$edges-memory-remember\`。本轮查过不重复。
 <!-- edges-constraints:end -->
 
 <!-- edges:end -->
@@ -83,28 +83,28 @@ test("apply moves the type index to README and deletes memory and skills stubs",
     "AGENTS.md": layer,
     ".edges/memory/projects/AGENTS.md": typeIndex,
     ".edges/skills/managed/AGENTS.md": stub,
-    ".edges/skills/managed/README.md": `<!-- project-memory-type:start -->
+    ".edges/skills/managed/README.md": `<!-- edges-memory-type:start -->
 name: managed
 module: skills
 writable: true
 gitignore: false
 format: skills
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 
 # MANAGED
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [method](method/SKILL.md) — method
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->
 `,
     ".edges/tasks/AGENTS.md": "# tasks\n\n<!-- edges-constraints:start -->\n## 本层硬约束\n\n- keep\n<!-- edges-constraints:end -->\n",
-    ".edges/tasks/README.md": "# tasks\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Default](<_default/README.md>)\n<!-- project-entries-local:end -->\n",
+    ".edges/tasks/README.md": "# tasks\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Default](<_default/README.md>)\n<!-- edges-entries-local:end -->\n",
     "tasks/AGENTS.md":
       "# domain tasks\n\n<!-- edges-constraints:start -->\n## 本层硬约束\n\n共同看板约定见[维护看板](../.edges/tasks/AGENTS.md)。\n<!-- edges-constraints:end -->\n",
     "tasks/README.md": "# domain readme\n",
-    "extensions/skills/project-memory-init/AGENTS.md": "# skill package\n",
+    "extensions/skills/edges-memory-init/AGENTS.md": "# skill package\n",
     ".edges/memory/users/AGENTS.md": typeIndex.replace("name: project", "name: user"),
   });
   const plan = planTypeIndexSplit(root);
@@ -120,11 +120,11 @@ format: skills
   assert.ok(plan.skipped.some((s) => s.path.includes("users")));
   await applyTypeIndexSplit(plan);
   const readme = read(root, ".edges/memory/projects/README.md");
-  assert.match(readme, /project-entries-local/);
+  assert.match(readme, /edges-entries-local/);
   assert.match(readme, /project_x\/INDEX\.md/);
   assert.equal(fs.existsSync(path.join(root, ".edges/memory/projects/AGENTS.md")), false);
   assert.equal(fs.existsSync(path.join(root, ".edges/skills/managed/AGENTS.md")), false);
-  assert.match(read(root, ".edges/skills/managed/README.md"), /project-memory-type/);
+  assert.match(read(root, ".edges/skills/managed/README.md"), /edges-memory-type/);
   const top = read(root, "AGENTS.md");
   assert.match(top, /\.edges\/memory\/projects\/README\.md/);
   assert.match(top, /\.edges\/tasks\/README\.md/);
@@ -133,7 +133,7 @@ format: skills
   assert.match(read(root, ".edges/tasks/AGENTS.md"), /keep/);
   assert.match(read(root, "tasks/AGENTS.md"), /\.\.\/\.edges\/tasks\/AGENTS\.md/);
   assert.doesNotMatch(read(root, "tasks/AGENTS.md"), /\.\.\/\.edges\/tasks\/README\.md/);
-  assert.equal(read(root, "extensions/skills/project-memory-init/AGENTS.md"), "# skill package\n");
+  assert.equal(read(root, "extensions/skills/edges-memory-init/AGENTS.md"), "# skill package\n");
   assert.match(read(root, ".edges/memory/users/AGENTS.md"), /name: user/);
   assert.match(read(root, ".edges/memory/users/AGENTS.md"), /project_x/);
 

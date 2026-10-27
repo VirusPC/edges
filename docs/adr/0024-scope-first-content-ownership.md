@@ -12,7 +12,7 @@ status: accepted
 
 ## 闭环复利（投资视角）
 
-目录服务知识进入行动、反馈再回到知识的闭环。领域任务在 `tasks/`，维护当前作用域的任务在 `.edges/tasks/`。通用任务执行约定与 CLI 规则由根 Project Memory 保存，写作方法由 conversation-to-tasks 维护，各层通过引用复用；具体看板的项目分组仍归该看板。
+目录服务知识进入行动、反馈再回到知识的闭环。领域任务在 `tasks/`，维护当前作用域的任务在 `.edges/tasks/`。通用任务执行约定与 CLI 规则由根 Project Memory 保存，写作方法由 edges-conversation-to-tasks 维护，各层通过引用复用；具体看板的项目分组仍归该看板。
 
 ## 任意输入、统一转化、多种输出（ETL 视角）
 

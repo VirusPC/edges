@@ -45,10 +45,22 @@ export class AgentsNode extends InternalNode<AgentsCreateInput, AgentsUpdateInpu
   }
 
   protected override parseBody(markdown: string): void {
-    const syntax = new InternalSyntax(markdown, (href) => {
-      const id = resolveEntryHref(this.path, href);
-      return !!id && identifyNodeType(id) !== undefined;
-    });
+    const entries =
+      markdown.includes("<!-- edges-entries-local:") ||
+      markdown.includes("<!-- edges-entries-descendants:");
+    const layer =
+      markdown.includes("<!-- edges:start -->") ||
+      markdown.includes("<!-- edges-constraints:") ||
+      markdown.includes("<!-- edges-local:") ||
+      markdown.includes("<!-- edges-descendants:");
+    const syntax = new InternalSyntax(
+      markdown,
+      (href) => {
+        const id = resolveEntryHref(this.path, href, entries && !layer);
+        return !!id && identifyNodeType(id) !== undefined;
+      },
+      entries && !layer ? "entries" : "agents",
+    );
     const parsed = syntax.content();
     const hrefs = new Map<string, string>();
     const references = (entries: readonly SyntaxReference[]): NodeReference[] =>

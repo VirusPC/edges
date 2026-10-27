@@ -16,9 +16,9 @@ metadata:
 为 Task Project 分类接入**真正的 Embedding**（本地模型或云端 Embeddings API），才能做可靠的 Embedding-based NCC（最近质心分类）。本卡只跟 **Embedding 通道**；不跟 Memory Type 升格并卡。
 
 **结论 / Why：**
-- classify / `project-tasks-classify` 本质是把不定长 task 文本分到**用户已设好的** Task Project 质心（文本分类；质心预设，**不是** K-means 发现簇）。
+- classify / `edges-tasks-classify` 本质是把不定长 task 文本分到**用户已设好的** Task Project 质心（文本分类；质心预设，**不是** K-means 发现簇）。
 - 曾在 PR #78 把 skill 改成「Embedding-based NCC」表述，但 skill 跑在强 LLM 下时，**不能靠提示词让 Chat LLM 生成可用的真 embedding**（数字无稳定几何意义）。
-- 因此：**撤回 #78 上 NCC 文案改造**；真要 Embedding-based NCC，需后续接入专用 embedding，由本卡跟踪。当前 #78 保留 project CLI + `project-tasks-classify` 改名与元数据；分类可先走 LLM/agent 对已设质心的直接归类 + 人确认 + CLI 迁移。
+- 因此：**撤回 #78 上 NCC 文案改造**；真要 Embedding-based NCC，需后续接入专用 embedding，由本卡跟踪。当前 #78 保留 project CLI + `edges-tasks-classify` 改名与元数据；分类可先走 LLM/agent 对已设质心的直接归类 + 人确认 + CLI 迁移。
 
 **调研：**
 - 最流行路径：`sentence-transformers`（如 `all-MiniLM-L6-v2`）出定长向量 + numpy cosine，或 `sklearn.neighbors.NearestCentroid`（向量先 L2 normalize）。
@@ -40,7 +40,7 @@ metadata:
 - skill/CLI 明确 embedding 提供者；缓存质心向量。
 - 建议表仍人确认后 `update --project`。
 - **交叉但不合并：**
-  - PR #78 / ADR 0010 / skill `project-tasks-classify`（进行中整理 skill）
+  - PR #78 / ADR 0010 / skill `edges-tasks-classify`（进行中整理 skill）
   - backlog：`交互式主题聚类`（含真 embedding+K-means 探讨；发现簇 ≠ NCC）
   - backlog：`classify 沉到 edges tasks CLI`（有 embedding 后 CLI 才好沉）
   - backlog：`tasks-memory与看板语义合并`（Q18=B）— 勿与本卡并

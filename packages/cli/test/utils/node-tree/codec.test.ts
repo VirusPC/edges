@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseNode, serializeNode, createAgentsDocument } from '../../../src/domain/models/node/document.js';
 
-const source = '# Manual identity\n\nKeep this introduction.\n\n<!-- project-memory:start -->\n<!-- project-memory-important:start -->\n## 本层硬约束\n\n- Keep **secrets** private.\n<!-- project-memory-important:end -->\n\n<!-- project-memory-local:start -->\n## 本层记忆\n\nHuman explanation.\n\n- [Tasks](tasks/AGENTS.md) — work in progress\n<!-- custom-extension: untouched -->\n<!-- project-memory-local:end -->\n\n<!-- project-memory-children:start -->\n## 下层记忆索引\n\n- [Child](nested/AGENTS.md)\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n\n## Custom module\n\nDo not rewrite `this`.\n';
+const source = '# Manual identity\n\nKeep this introduction.\n\n<!-- edges:start -->\n<!-- edges-constraints:start -->\n## 本层硬约束\n\n- Keep **secrets** private.\n<!-- edges-constraints:end -->\n\n<!-- edges-local:start -->\n## 本层记忆\n\nHuman explanation.\n\n- [Tasks](tasks/AGENTS.md) — work in progress\n<!-- custom-extension: untouched -->\n<!-- edges-local:end -->\n\n<!-- edges-descendants:start -->\n## 下层记忆索引\n\n- [Child](nested/AGENTS.md)\n<!-- edges-descendants:end -->\n<!-- edges:end -->\n\n## Custom module\n\nDo not rewrite `this`.\n';
 
 test('pure parsing returns the three-part model with unresolved references and no source/location/AST', () => {
   const model = parseNode(source);
@@ -66,7 +66,7 @@ test('missing sections can be added without overwriting manual node text', () =>
 test('editing ambiguous duplicate or unclosed sections fails without fabricating a write', () => {
   for (const original of [
     '## 本层记忆\n\n- First\n\n## 本层记忆\n\n- Second\n',
-    '<!-- project-memory-local:start -->\n## 本层记忆\n\n- First\n',
+    '<!-- edges-local:start -->\n## 本层记忆\n\n- First\n',
   ]) {
     const model = parseNode(original);
     assert.equal(serializeNode(model, original), original);

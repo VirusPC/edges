@@ -15,7 +15,7 @@ function fixture(t: any) {
   return root;
 }
 const ownerText = (local: string, tail = "") =>
-  `# Owner\n\n<!-- authored: keep -->\n<!-- project-memory-important:start -->\nImportant manual text.\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n## Authored pointers\n\n${local}\n<!-- project-memory-local:end -->\n${tail}`;
+  `# Owner\n\n<!-- authored: keep -->\n<!-- edges-constraints:start -->\nImportant manual text.\n<!-- edges-constraints:end -->\n<!-- edges-local:start -->\n## Authored pointers\n\n${local}\n<!-- edges-local:end -->\n${tail}`;
 for (const [kind, href] of [
   ["plain", ".edges/memory/projects/README.md"],
   ["angle", "<.edges/memory/projects/README.md>"],
@@ -55,7 +55,7 @@ for (const kind of ["descendant", "prose", "local-prose"] as const)
       line = "- [projects](<.edges/memory/%70rojects/README.md>) — not local";
     const tail =
       kind === "descendant"
-        ? `<!-- project-memory-children:start -->\n${line}\n<!-- project-memory-children:end -->\n`
+        ? `<!-- edges-descendants:start -->\n${line}\n<!-- edges-descendants:end -->\n`
         : `\n## Other prose\n${line}\n`;
     fs.writeFileSync(
       join(root, "AGENTS.md"),
@@ -106,7 +106,7 @@ test("reviewed restored owners adopt and register their types with only expected
   );
   const owners = [
     "extensions",
-    "extensions/skills/project-memory-init",
+    "extensions/skills/edges-memory-init",
     "shared-extensions",
     "knowledge/notes",
     ".edges/tasks",
@@ -129,7 +129,7 @@ test("reviewed restored owners adopt and register their types with only expected
   }
   const { execFileSync } = await import("node:child_process");
   const { planDirectoryMigration, applyDirectoryMigration } =
-    await import("../../../../scripts/migrations/migrate-directory-nodes.mjs");
+    await import("../../../../scripts/migrations/edges-migrate-directory-nodes.mjs");
   execFileSync("git", ["init", "-q"], { cwd: root });
   execFileSync("git", ["add", "."], { cwd: root });
   applyDirectoryMigration(planDirectoryMigration(root));
@@ -161,7 +161,7 @@ test("existing type files still require a .edges/README.md edge rather than a de
     join(root, "AGENTS.md"),
     ownerText(
       "[prose](<.edges/memory/projects/README.md>)",
-      `<!-- project-memory-children:start -->\n${line}\n<!-- project-memory-children:end -->\n`,
+      `<!-- edges-descendants:start -->\n${line}\n<!-- edges-descendants:end -->\n`,
     ),
   );
   const index = join(root, ".edges/README.md");

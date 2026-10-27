@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Move README-backed Task Project links out of each task board AGENTS.md into the board
- * README.md org list (`project-entries-local`), per the dual-file contract: system-one
+ * README.md org list (`edges-entries-local`), per the dual-file contract: system-one
  * children live only in README entries; the board AGENTS keeps system entries.
  *
  *  - Boards: `<scope>/tasks/AGENTS.md` and `<scope>/.edges/tasks/AGENTS.md` below --root.

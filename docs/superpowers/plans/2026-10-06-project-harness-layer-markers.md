@@ -14,7 +14,7 @@
 
 - 层标记：`edges` / `edges-constraints` / `edges-local` / `edges-descendants`。
 - 标题：`本层硬约束` / `本层组成` / `下层节点`。旧标题 `本层重要约束`、`本层记忆`、`下层记忆索引`、`下层作用域` 只作读别名。
-- `project-memory-type` 与 `project-memory-entries` 本轮字节不变。
+- `edges-memory-type` 与 `edges-entries-local` 本轮字节不变。
 - codec `SectionKey` 仍是 `constraints` | `memory` | `children`；领域字段仍是 `constraints` / `localChildren` / `descendantChildren`。
 - 修改顺序：PROTOCOL → LAYOUT → 模板 → CLI codec → memory 服务 → doctor → 仓内迁移。不能先改 doctor 再改协议。
 - 不改 `.edges/` 目录名、skill 名 `project-memory-*`、`task-projects`、`harnessPath()`、`posts/`。
@@ -25,10 +25,10 @@
 ### Task 1: PROTOCOL、LAYOUT、层入口模板
 
 **Files:**
-- Modify: `packages/skills/project-memory-init/references/PROTOCOL.md`
-- Modify: `packages/skills/project-memory-init/references/LAYOUT.md`
-- Modify: `packages/skills/project-memory-init/references/templates/AGENTS.tmpl.md`
-- `.claude/skills/project-memory-init` 与 `.agents/skills/project-memory-init` 是指向 `packages/skills/project-memory-init` 的软链，不要另改一份。
+- Modify: `packages/skills/edges-memory-init/references/PROTOCOL.md`
+- Modify: `packages/skills/edges-memory-init/references/LAYOUT.md`
+- Modify: `packages/skills/edges-memory-init/references/templates/AGENTS.tmpl.md`
+- `.claude/skills/edges-memory-init` 与 `.agents/skills/edges-memory-init` 是指向 `packages/skills/edges-memory-init` 的软链，不要另改一份。
 
 **Interfaces:**
 - Consumes: spec 的标记表与标题
@@ -44,12 +44,12 @@
 
 - 外层标记改为 `<!-- edges:start -->`，内部顺序 constraints → local → descendants。
 - 三类标题改为「本层硬约束」（兼容「本层重要约束」）、「本层组成」、「下层节点」。
-- 明确写：类型入口仍用 `project-memory-type` / `project-memory-entries`。
+- 明确写：类型入口仍用 `edges-memory-type` / `edges-entries-local`。
 - 前面若仍写「important 区块」，改成「硬约束区块」。
 
 - [ ] **Step 3: 改 `AGENTS.tmpl.md`**
 
-层入口模板只改这四组注释和两个标题。硬约束种子正文不动。`project-memory-type` 模板（`TYPE.tmpl.md` 等）不动。
+层入口模板只改这四组注释和两个标题。硬约束种子正文不动。`edges-memory-type` 模板（`TYPE.tmpl.md` 等）不动。
 
 ```markdown
 # {title}
@@ -59,7 +59,7 @@
 <!-- edges-constraints:start -->
 ## 本层硬约束
 
-- 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
+- 本目录有项目记忆。提问或动手前用 `$edges-memory-ask`；该沉淀用 `$edges-memory-remember`。本轮查过不重复。
 - 本层硬约束直接写在这个区块里，不要链到记忆正文文件。
 <!-- edges-constraints:end -->
 
@@ -92,7 +92,7 @@
 Run:
 
 ```bash
-rg -n "edges|project-memory-important|本层记忆索引" packages/skills/project-memory-init/references/PROTOCOL.md
+rg -n "edges|edges-constraints|本层记忆索引" packages/skills/edges-memory-init/references/PROTOCOL.md
 ```
 
 Expected: PROTOCOL 无这些实现名。LAYOUT 与 `AGENTS.tmpl.md` 含新标记。
@@ -100,9 +100,9 @@ Expected: PROTOCOL 无这些实现名。LAYOUT 与 `AGENTS.tmpl.md` 含新标记
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/references/PROTOCOL.md \
-  packages/skills/project-memory-init/references/LAYOUT.md \
-  packages/skills/project-memory-init/references/templates/AGENTS.tmpl.md
+git add packages/skills/edges-memory-init/references/PROTOCOL.md \
+  packages/skills/edges-memory-init/references/LAYOUT.md \
+  packages/skills/edges-memory-init/references/templates/AGENTS.tmpl.md
 git commit -m "docs: 层入口协议与模板改用 edges"
 ```
 
@@ -119,7 +119,7 @@ git commit -m "docs: 层入口协议与模板改用 edges"
 - Consumes: Task 1 的 canonical 名称
 - Produces:
   - `INTERNAL_SECTIONS.constraints.marker === "edges-constraints"`
-  - `INDEX_MARKERS.type === "project-memory-type"`
+  - `INDEX_MARKERS.type === "edges-memory-type"`
   - `rewriteLayerSurface(source: string): string`
   - `LAYER_BLOCK_ALIASES`：每个 canonical 标记对应旧标记列表
   - `CONSTRAINTS_START` 等 canonical 常量；保留 `IMPORTANT_START` 作为旧别名或删除后改全部引用（本任务在 blocks 内一次做完）
@@ -149,36 +149,36 @@ test("canonical layer markers are edges, type markers stay project-memory", () =
   assert.equal(INTERNAL_SECTIONS.constraints.heading, "本层硬约束");
   assert.equal(INTERNAL_SECTIONS.localChildren.heading, "本层组成");
   assert.equal(INTERNAL_SECTIONS.descendantChildren.heading, "下层节点");
-  assert.equal(INDEX_MARKERS.type, "project-memory-type");
-  assert.equal(INDEX_MARKERS.entries, "project-memory-entries");
+  assert.equal(INDEX_MARKERS.type, "edges-memory-type");
+  assert.equal(INDEX_MARKERS.entries, "edges-entries-local");
   assert.equal(OUTER_START, "<!-- edges:start -->");
   assert.equal(CONSTRAINTS_START, "<!-- edges-constraints:start -->");
   assert.equal(LOCAL_START, "<!-- edges-local:start -->");
   assert.equal(DESCENDANTS_START, "<!-- edges-descendants:start -->");
-  assert.equal(TYPE_META_START, "<!-- project-memory-type:start -->");
-  assert.equal(ENTRIES_START, "<!-- project-memory-entries:start -->");
+  assert.equal(TYPE_META_START, "<!-- edges-memory-type:start -->");
+  assert.equal(ENTRIES_START, "<!-- edges-entries-local:start -->");
 });
 
 test("rewriteLayerSurface upgrades layer comments and titles without touching type indexes", () => {
   const source = `# T
 
-<!-- project-memory:start -->
-<!-- project-memory-important:start -->
+<!-- edges:start -->
+<!-- edges-constraints:start -->
 ## 本层重要约束
 
 - Keep.
-<!-- project-memory-important:end -->
-<!-- project-memory-local:start -->
+<!-- edges-constraints:end -->
+<!-- edges-local:start -->
 ## 本层记忆
 
 - [A](a/AGENTS.md)
-<!-- project-memory-local:end -->
-<!-- project-memory-children:start -->
+<!-- edges-local:end -->
+<!-- edges-descendants:start -->
 ## 下层作用域
 
 - [B](b/AGENTS.md)
-<!-- project-memory-children:end -->
-<!-- project-memory:end -->
+<!-- edges-descendants:end -->
+<!-- edges:end -->
 `;
   const out = rewriteLayerSurface(source);
   assert.match(out, /<!-- edges:start -->/);
@@ -189,17 +189,17 @@ test("rewriteLayerSurface upgrades layer comments and titles without touching ty
   assert.doesNotMatch(out, /project-memory-(important|local|children)/);
   assert.equal(rewriteLayerSurface(out), out);
 
-  const typeIndex = `<!-- project-memory-type:start -->
+  const typeIndex = `<!-- edges-memory-type:start -->
 name: project
 module: memory
 writable: true
 gitignore: false
 format: ordinary
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 # PROJECT
-<!-- project-memory-entries:start -->
+<!-- edges-entries-local:start -->
 - [x](project_x/index.md) — x
-<!-- project-memory-entries:end -->
+<!-- edges-entries-local:end -->
 `;
   assert.equal(rewriteLayerSurface(typeIndex), typeIndex);
 });
@@ -209,7 +209,7 @@ format: ordinary
 
 Run: `pnpm --filter edges-cli exec node --test --import tsx './test/models/layer-markers.test.ts'`
 
-Expected: FAIL，`INTERNAL_SECTIONS.constraints.marker` 仍是 `project-memory-important`，且没有 `rewriteLayerSurface`。
+Expected: FAIL，`INTERNAL_SECTIONS.constraints.marker` 仍是 `edges-constraints`，且没有 `rewriteLayerSurface`。
 
 - [ ] **Step 3: Write minimal implementation**
 
@@ -226,7 +226,7 @@ export const INTERNAL_SECTIONS = {
 } as const;
 ```
 
-`INDEX_MARKERS` 保持 `project-memory-type` / `project-memory-entries`。
+`INDEX_MARKERS` 保持 `edges-memory-type` / `edges-entries-local`。
 
 `blocks.ts` 拆成两个工厂，禁止再用一个 `project-memory` 函数生成层标记：
 
@@ -269,11 +269,11 @@ export const CHILDREN_END = DESCENDANTS_END;
 
 ```ts
 const COMMENT_REWRITES: Array<[RegExp, string]> = [
-  [/^<!-- project-memory:start -->$/gm, "<!-- edges:start -->"],
-  [/^<!-- project-memory:end -->$/gm, "<!-- edges:end -->"],
-  [/^<!-- project-memory-important:(start|end) -->$/gm, "<!-- edges-constraints:$1 -->"],
-  [/^<!-- project-memory-local:(start|end) -->$/gm, "<!-- edges-local:$1 -->"],
-  [/^<!-- project-memory-children:(start|end) -->$/gm, "<!-- edges-descendants:$1 -->"],
+  [/^<!-- edges:start -->$/gm, "<!-- edges:start -->"],
+  [/^<!-- edges:end -->$/gm, "<!-- edges:end -->"],
+  [/^<!-- edges-constraints:(start|end) -->$/gm, "<!-- edges-constraints:$1 -->"],
+  [/^<!-- edges-local:(start|end) -->$/gm, "<!-- edges-local:$1 -->"],
+  [/^<!-- edges-descendants:(start|end) -->$/gm, "<!-- edges-descendants:$1 -->"],
 ];
 const TITLE_REWRITES: Array<[RegExp, string]> = [
   [/^## 本层重要约束\s*$/gm, "## 本层硬约束"],
@@ -319,7 +319,7 @@ git commit -m "feat: 拆开 edges 层标记与 type 标记"
 
 **Interfaces:**
 - Consumes: `INTERNAL_SECTIONS` canonical markers；`rewriteLayerSurface` 不在 patch 路径调用
-- Produces: 旧层标记与新层标记都能 `decodeBody`；无 `originalSource` 的 serialize 发出 `<!-- edges:start -->`；type index 的 entries 仍往返为 `project-memory-entries`
+- Produces: 旧层标记与新层标记都能 `decodeBody`；无 `originalSource` 的 serialize 发出 `<!-- edges:start -->`；type index 的 entries 仍往返为 `edges-entries-local`
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -327,9 +327,9 @@ git commit -m "feat: 拆开 edges 层标记与 type 标记"
 
 ```ts
 const modern = source
-  .replaceAll("project-memory-important", "edges-constraints")
-  .replaceAll("project-memory-local", "edges-local")
-  .replaceAll("project-memory-children", "edges-descendants")
+  .replaceAll("edges-constraints", "edges-constraints")
+  .replaceAll("edges-local", "edges-local")
+  .replaceAll("edges-descendants", "edges-descendants")
   .replaceAll("本层重要约束", "本层硬约束")
   .replaceAll("本层记忆", "本层组成")
   .replaceAll("下层记忆索引", "下层节点");
@@ -351,11 +351,11 @@ test("fresh serialize emits edges markers", () => {
 });
 ```
 
-更稳的无原稿断言放在 codec 测试：给 `serializeNode(model)` **不传** `originalSource`，期望含 `<!-- edges:start -->`，不含 `<!-- project-memory:start -->`。
+更稳的无原稿断言放在 codec 测试：给 `serializeNode(model)` **不传** `originalSource`，期望含 `<!-- edges:start -->`，不含 `<!-- edges:start -->`。
 
 保留现有「未改模型则 serialize === 原稿」和「改一条约束保留周围旧标记」——这是有原稿的 patch 合同，不要改成强制升格，否则会破坏 `codec.test.ts`。
 
-在 `syntax.ts` 相关测试（`internal.test.ts` 后半或 memory 测试）确认：含 `project-memory-entries` 的类型入口 parse 后 serialize 仍是 entries，不是 `edges-local`。
+在 `syntax.ts` 相关测试（`internal.test.ts` 后半或 memory 测试）确认：含 `edges-entries-local` 的类型入口 parse 后 serialize 仍是 entries，不是 `edges-local`。
 
 - [ ] **Step 2: Run tests to verify they fail**
 
@@ -368,18 +368,18 @@ Expected: FAIL，parse 不认 `edges-constraints`；无原稿 serialize 仍写 `
 `parse.ts` 不要再用 `marker.replace("project-memory-", "")` 当键。改为按完整标记查表：
 
 ```ts
-const LAYER_HTML = /<!-- (edges-constraints|edges-local|edges-descendants|project-memory-important|project-memory-local|project-memory-children):(start|end) -->/;
+const LAYER_HTML = /<!-- (edges-constraints|edges-local|edges-descendants|edges-constraints|edges-local|edges-descendants):(start|end) -->/;
 const LAYER_TO_KEY: Record<string, SectionKey> = {
   "edges-constraints": "constraints",
-  "project-memory-important": "constraints",
+  "edges-constraints": "constraints",
   "edges-local": "memory",
-  "project-memory-local": "memory",
+  "edges-local": "memory",
   "edges-descendants": "children",
-  "project-memory-children": "children",
+  "edges-descendants": "children",
 };
 ```
 
-html 节点同时认 `<!-- edges:end -->` 与 `<!-- project-memory:end -->` 作为 `appendAt`。
+html 节点同时认 `<!-- edges:end -->` 与 `<!-- edges:end -->` 作为 `appendAt`。
 
 `titles` 增加：
 
@@ -393,21 +393,21 @@ html 节点同时认 `<!-- edges:end -->` 与 `<!-- project-memory:end -->` 作�
 本层硬约束: "constraints",
 ```
 
-`serialize.ts` 无原稿分支把硬编码的 `<!-- project-memory:start -->` 换成 `OUTER_START` / `OUTER_END`（从 blocks 导入）。`renderSection` 已用 `CODEC_SECTIONS[key].marker`，改 layout 后会自动写新标记。
+`serialize.ts` 无原稿分支把硬编码的 `<!-- edges:start -->` 换成 `OUTER_START` / `OUTER_END`（从 blocks 导入）。`renderSection` 已用 `CODEC_SECTIONS[key].marker`，改 layout 后会自动写新标记。
 
 `syntax.ts` `adaptEntries`：把 entries 改写成 **canonical** `edges-local`，这样 decodeBody 能解析类型入口。回写时 **两种** local 都要映回 entries：
 
 ```ts
 function adaptEntries(source: string): string {
   return source.replace(
-    /^<!-- project-memory-entries:(start|end) -->$/gm,
+    /^<!-- edges-entries-local:(start|end) -->$/gm,
     "<!-- edges-local:$1 -->",
   );
 }
 // serialize 回写
 source
-  .replace(/^<!-- edges-local:(start|end) -->$/gm, "<!-- project-memory-entries:$1 -->")
-  .replace(/^<!-- project-memory-local:(start|end) -->$/gm, "<!-- project-memory-entries:$1 -->");
+  .replace(/^<!-- edges-local:(start|end) -->$/gm, "<!-- edges-entries-local:$1 -->")
+  .replace(/^<!-- edges-local:(start|end) -->$/gm, "<!-- edges-entries-local:$1 -->");
 ```
 
 若当前文件同时把层入口的 `edges-local` 误跑进这条回写，类型入口专用路径必须只在 `this.#entries` 为真时执行（现有 `syntax.ts` 已有 `#entries` 判定，保持这个门闩）。
@@ -453,16 +453,16 @@ import { classifyAgentsSource } from "../../src/services/memory/agents.js";
 import { ensureImportantBlock } from "../../src/services/memory/blocks.js";
 import { rewriteLayerSurface } from "../../src/domain/models/agents/blocks.js";
 
-const legacy = `<!-- project-memory:start -->
-<!-- project-memory-important:start -->
+const legacy = `<!-- edges:start -->
+<!-- edges-constraints:start -->
 ## 本层硬约束
 
 - Keep.
-<!-- project-memory-important:end -->
-<!-- project-memory-local:start -->
+<!-- edges-constraints:end -->
+<!-- edges-local:start -->
 ## 本层记忆
-<!-- project-memory-local:end -->
-<!-- project-memory:end -->
+<!-- edges-local:end -->
+<!-- edges:end -->
 `;
 
 test("legacy layer markers still count as managed", () => {
@@ -473,7 +473,7 @@ test("legacy layer markers still count as managed", () => {
 test("refreshing a legacy file rewrites the layer surface", () => {
   const updated = rewriteLayerSurface(legacy);
   assert.match(updated, /edges-constraints/);
-  assert.doesNotMatch(updated, /project-memory-important/);
+  assert.doesNotMatch(updated, /edges-constraints/);
 });
 ```
 
@@ -563,7 +563,7 @@ Expected: FAIL，模块不存在。
 ```ts
 function convert(file: string, source: string): string {
   const next = rewriteLayerSurface(source);
-  if (next.includes("<!-- project-memory-type:start -->") &&
+  if (next.includes("<!-- edges-memory-type:start -->") &&
       !/<!-- project-(?:memory|harness)-(?:important|constraints|local|children|descendants):/.test(source) &&
       !/<!-- project-memory:(?:start|end) -->/.test(source) &&
       !/<!-- edges:(?:start|end) -->/.test(source)) {
@@ -609,7 +609,7 @@ git commit -m "feat: 预览并重写层入口 edges 标记"
 - Modify: `docs/superpowers/specs/2026-10-05-directory-node-model.md` 若把旧标题写成现行合同
 - Modify: `packages/cli/src/domain/models/README.md` 表格标题
 - Modify: `.edges/memory/projects/project_agents_three_blocks/index.md`
-- Modify: `packages/skills/project-memory-init/.edges/memory/projects/project_important_block/index.md` 及其根层对应条目（若根层没有则只改 skill 层那份，或 remember 更新 `project_harness_layer_markers`）
+- Modify: `packages/skills/edges-memory-init/.edges/memory/projects/project_important_block/index.md` 及其根层对应条目（若根层没有则只改 skill 层那份，或 remember 更新 `project_harness_layer_markers`）
 - Modify: `docs/superpowers/specs/2026-10-06-project-harness-layer-markers-design.md` 状态改为已批准并实施
 - Test: 全量 `pnpm --filter edges-cli test`
 
@@ -666,7 +666,7 @@ git add AGENTS.md teaching/AGENTS.md notes/AGENTS.md AGENTS.md \
   shared-extensions/AGENTS.md CONTEXT.md docs/adr/0024-scope-first-content-ownership.md \
   packages/cli/src/domain/models/README.md \
   .edges/memory/projects \
-  packages/skills/project-memory-init/.edges/memory/projects \
+  packages/skills/edges-memory-init/.edges/memory/projects \
   docs/superpowers/specs/2026-10-06-project-harness-layer-markers-design.md
 git commit -m "refactor: 存量层入口与术语改用 edges"
 ```

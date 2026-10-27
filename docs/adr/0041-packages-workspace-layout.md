@@ -22,4 +22,4 @@ status: accepted
 
 - 仓外写死 `cli/`、`skills/`、`.edges/evaluation/`、`.edges/observation/` 的配置按对照表改。
 - ECS 上 Deploy 在 `git reset --hard` 之后删除未被跟踪的旧顶层目录（`cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/`、`.edges/evaluation/`、`.edges/observation/`）。Artifacts user unit 的 `WorkingDirectory` 与 `ExecStart` 指向 `%h/projects/edges-framework/packages/services/artifacts-preview/`，由仓内 CLI `artifacts server install` 重写。站点布局迁移器三份文件只移动、字节不变，不必为此用 root 重装。
-- 三个 skill 的 `SKILL.md` 正文路径有变（`project-memory-init`、`project-memory-doctor`、`conversation-to-tasks`）。本决定不改它们的版本与 annotated tag；合入后若要让已安装副本跟上，再按 skill 发版规则 force-update。
+- 三个 skill 的 `SKILL.md` 正文路径有变（`edges-memory-init`、`project-memory-doctor`、`edges-conversation-to-tasks`）。本决定不改它们的版本与 annotated tag；合入后若要让已安装副本跟上，再按 skill 发版规则 force-update。

@@ -98,7 +98,7 @@ The in-progress card still says the center board may reuse an open-source kanban
 - `.gitignore` — `packages/cli/src/tasks/project/assets/review-page/`.
 - `.github/workflows/deploy.yml` — install the new package and `pnpm --filter tasks-review-app run build` before `generate-tasks-site.ts`.
 - `packages/cli/README.md`, `packages/cli/deploy/README.md` — build-before-generate.
-- `packages/skills/project-tasks-classify/SKILL.md` + `CHANGELOG.md` — optional thin `doc`; export row unchanged. Version `1.2.0` (tag `1.1.0` already exists; `SKILL.md` on this branch is still `1.0.0`).
+- `packages/skills/edges-tasks-classify/SKILL.md` + `CHANGELOG.md` — optional thin `doc`; export row unchanged. Version `1.2.0` (tag `1.1.0` already exists; `SKILL.md` on this branch is still `1.0.0`).
 - `CHANGELOG.md` — one Chinese Unreleased bullet under `### 任务看板与项目` when the feature lands.
 - Root `pnpm-lock.yaml` — the only lockfile to update. Delete any `pnpm-lock.yaml` or `pnpm-workspace.yaml` the shadcn scaffold writes inside `packages/apps/tasks-review-app/`.
 
@@ -1571,8 +1571,8 @@ EOF
 - Modify: `packages/cli/deploy/README.md`
 - Modify: `packages/cli/README.md`
 - Modify: `packages/cli/src/tasks/list.ts` only if Task 2's help sentence is missing
-- Modify: `packages/skills/project-tasks-classify/SKILL.md`
-- Modify: `packages/skills/project-tasks-classify/CHANGELOG.md`
+- Modify: `packages/skills/edges-tasks-classify/SKILL.md`
+- Modify: `packages/skills/edges-tasks-classify/CHANGELOG.md`
 - Modify: `CHANGELOG.md`
 - Test: `packages/cli/test/tasks/review-page-classify.test.ts`
 - Test: `packages/cli/test/tasks/deploy-review-build.test.ts`
@@ -1681,7 +1681,7 @@ State that the Vite output is gitignored and must be built on the box. Do not wr
 
 In `packages/cli/README.md`, replace the `project review-page` paragraph with: the command still only renders; it reads groups+items JSON; it inlines the prebuilt shell (`pnpm --filter edges-cli run build:tasks-review-app` or `prepack`) into one HTML file; data is `#edges-review-payload`; items may omit `doc`. Mention `dev:tasks-review-app` for local UI work. Keep the Artifacts sentence: render, then `publish` separately.
 
-In `packages/skills/project-tasks-classify/SKILL.md`, set `version: 1.2.0`. Under step 4's `items` bullet, add: `doc` is optional. When present it is `name`, `description`, `metadata`, and `body` (Markdown, `body` may be `""`). Omitting `doc` is valid. The pasted export is still `stem`, `current`, `suggested`, `action`, `note`. Do not require the skill to read Task files into `doc` in this round; the board generator does that for `/tasks/`.
+In `packages/skills/edges-tasks-classify/SKILL.md`, set `version: 1.2.0`. Under step 4's `items` bullet, add: `doc` is optional. When present it is `name`, `description`, `metadata`, and `body` (Markdown, `body` may be `""`). Omitting `doc` is valid. The pasted export is still `stem`, `current`, `suggested`, `action`, `note`. Do not require the skill to read Task files into `doc` in this round; the board generator does that for `/tasks/`.
 
 In that skill's `CHANGELOG.md`, add:
 
@@ -1697,8 +1697,8 @@ In that skill's `CHANGELOG.md`, add:
 Leave the existing `[Unreleased]` bullets in place. Do not retag `1.1.0`. Tag command, after the commit is on the remote:
 
 ```bash
-git tag -a skill/project-tasks-classify@1.2.0 -m "skill(project-tasks-classify): optional thin doc on review JSON"
-git push origin skill/project-tasks-classify@1.2.0
+git tag -a skill/edges-tasks-classify@1.2.0 -m "skill(edges-tasks-classify): optional thin doc on review JSON"
+git push origin skill/edges-tasks-classify@1.2.0
 ```
 
 In the root `CHANGELOG.md` under `## [Unreleased]` / `### 任务看板与项目`, add this bullet and no field table:
@@ -1722,14 +1722,14 @@ Open `dev:tasks-review-app` only if a browser is available. Otherwise the Vitest
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .github/workflows/deploy.yml packages/cli/deploy/README.md packages/cli/README.md packages/skills/project-tasks-classify/SKILL.md packages/skills/project-tasks-classify/CHANGELOG.md CHANGELOG.md packages/cli/test/tasks/review-page-classify.test.ts packages/cli/test/tasks/deploy-review-build.test.ts
+git add .github/workflows/deploy.yml packages/cli/deploy/README.md packages/cli/README.md packages/skills/edges-tasks-classify/SKILL.md packages/skills/edges-tasks-classify/CHANGELOG.md CHANGELOG.md packages/cli/test/tasks/review-page-classify.test.ts packages/cli/test/tasks/deploy-review-build.test.ts
 git commit -m "$(cat <<'EOF'
 ci: build the review shell before generating /tasks/
 
 Co-authored-by: Coding 专家 <grok-bot@users.noreply.github.com>
 EOF
 )"
-git tag -a skill/project-tasks-classify@1.2.0 -m "skill(project-tasks-classify): optional thin doc on review JSON"
+git tag -a skill/edges-tasks-classify@1.2.0 -m "skill(edges-tasks-classify): optional thin doc on review JSON"
 ```
 
 Push the tag with the branch. Do not move the in-progress task card.

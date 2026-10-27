@@ -3,9 +3,7 @@ import type { BlockGrammar } from "../core/node-content/grammar.js";
 const layer = (name: string, edge: string) =>
   `<!-- edges${name ? `-${name}` : ""}:${edge} -->`;
 const type = (name: string, edge: string) =>
-  `<!-- project-memory-${name}:${edge} -->`;
-const legacyLayer = (name: string, edge: string) =>
-  `<!-- project-memory${name ? `-${name}` : ""}:${edge} -->`;
+  `<!-- edges-memory-${name}:${edge} -->`;
 
 export const OUTER_START = layer("", "start"),
   OUTER_END = layer("", "end");
@@ -19,24 +17,12 @@ export const IMPORTANT_START = CONSTRAINTS_START,
   IMPORTANT_END = CONSTRAINTS_END;
 export const CHILDREN_START = DESCENDANTS_START,
   CHILDREN_END = DESCENDANTS_END;
-export const AUTO_START = legacyLayer("auto", "start"),
-  AUTO_END = legacyLayer("auto", "end");
-export const ENTRIES_START = type("entries", "start"),
-  ENTRIES_END = type("entries", "end");
-export const ENTRIES_LOCAL_START = `<!-- project-entries-local:start -->`,
-  ENTRIES_LOCAL_END = `<!-- project-entries-local:end -->`;
-export const ENTRIES_DESCENDANTS_START = `<!-- project-entries-descendants:start -->`,
-  ENTRIES_DESCENDANTS_END = `<!-- project-entries-descendants:end -->`;
+export const ENTRIES_LOCAL_START = `<!-- edges-entries-local:start -->`,
+  ENTRIES_LOCAL_END = `<!-- edges-entries-local:end -->`;
+export const ENTRIES_DESCENDANTS_START = `<!-- edges-entries-descendants:start -->`,
+  ENTRIES_DESCENDANTS_END = `<!-- edges-entries-descendants:end -->`;
 export const TYPE_META_START = type("type", "start"),
   TYPE_META_END = type("type", "end");
-export const LEGACY_OUTER_START = legacyLayer("", "start"),
-  LEGACY_OUTER_END = legacyLayer("", "end");
-export const LEGACY_IMPORTANT_START = legacyLayer("important", "start"),
-  LEGACY_IMPORTANT_END = legacyLayer("important", "end");
-export const LEGACY_LOCAL_START = legacyLayer("local", "start"),
-  LEGACY_LOCAL_END = legacyLayer("local", "end");
-export const LEGACY_CHILDREN_START = legacyLayer("children", "start"),
-  LEGACY_CHILDREN_END = legacyLayer("children", "end");
 export const INNER_BLOCK_ORDER = [
   CONSTRAINTS_START,
   LOCAL_START,
@@ -44,22 +30,6 @@ export const INNER_BLOCK_ORDER = [
 ];
 export const INDEX_ENTRY_PATTERN = /^- \[[^\]]*\]\(([^)]+)\)(?: — (.*))?$/gm;
 
-export const COMMENT_REWRITES: Array<[RegExp, string]> = [
-  [/^<!-- project-memory:start -->$/gm, "<!-- edges:start -->"],
-  [/^<!-- project-memory:end -->$/gm, "<!-- edges:end -->"],
-  [
-    /^<!-- project-memory-important:(start|end) -->$/gm,
-    "<!-- edges-constraints:$1 -->",
-  ],
-  [
-    /^<!-- project-memory-local:(start|end) -->$/gm,
-    "<!-- edges-local:$1 -->",
-  ],
-  [
-    /^<!-- project-memory-children:(start|end) -->$/gm,
-    "<!-- edges-descendants:$1 -->",
-  ],
-];
 export const TITLE_REWRITES: Array<[RegExp, string]> = [
   [/^## 本层重要约束\s*$/gm, "## 本层硬约束"],
   [/^## (?:本层记忆|本层组成)\s*$/gm, "## 本层系统维护信息"],
@@ -75,12 +45,12 @@ export const INTERNAL_SECTIONS = {
     marker: "edges-descendants",
   },
 } as const;
-/** README (project-entries) section headings and markers. */
+/** README (edges-entries) section headings and markers. */
 export const ENTRIES_SECTIONS = {
-  localChildren: { heading: "本层内容", marker: "project-entries-local" },
+  localChildren: { heading: "本层内容", marker: "edges-entries-local" },
   descendantChildren: {
     heading: "下层内容",
-    marker: "project-entries-descendants",
+    marker: "edges-entries-descendants",
   },
 } as const;
 export const COMPOSE_SECTION = {
@@ -94,19 +64,15 @@ export const CODEC_SECTIONS = {
   compose: COMPOSE_SECTION,
 } as const;
 export const INDEX_MARKERS = {
-  type: "project-memory-type",
-  entries: "project-memory-entries",
+  type: "edges-memory-type",
 } as const;
 
 /** Harness document grammar passed into the core block parser. */
 export const HARNESS_GRAMMAR: BlockGrammar = {
   markers: {
     "edges-constraints": "constraints",
-    "project-memory-important": "constraints",
     "edges-local": "memory",
-    "project-memory-local": "memory",
     "edges-descendants": "children",
-    "project-memory-children": "children",
     "edges-compose": "compose",
   },
   headings: {
@@ -121,7 +87,7 @@ export const HARNESS_GRAMMAR: BlockGrammar = {
     下层系统维护信息: "children",
     组合: "compose",
   },
-  outerEnds: [OUTER_END, "<!-- project-memory:end -->"],
+  outerEnds: [OUTER_END],
   sections: CODEC_SECTIONS,
   outerStart: OUTER_START,
   outerEnd: OUTER_END,

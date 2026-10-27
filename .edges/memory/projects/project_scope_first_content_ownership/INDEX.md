@@ -22,13 +22,13 @@ metadata:
 
 ## 2026-10-05 用户确认：Project Memory 执行层统一 TypeScript
 
-**2026-10-05 现行状态：**节点类与 `NodeService` 已接入正常 Task、Memory、Note 操作；有可读 `AGENTS.md` 的目录可被 CLI 选择为节点，不再有独立责任资格门槛，且发现节点不自动 Init。入口保持三部分，43 条公开局部记忆已按当前字节恢复到原所有者：`extensions` 16、`project-memory-init` 17、`shared-extensions` 1、`knowledge/notes` 1、原 Tasks 8 归 `.edges/tasks`。其他克隆的私有纠正仍按可信本机 journal 显式审阅。下方带日期的“待实现”与旧目录判断是当时记录，不应替代此状态；详情见 [ADR 0024](../../../../docs/adr/0024-scope-first-content-ownership.md) 与 [纠正计划](../../../../docs/superpowers/plans/2026-10-05-recursive-node-ownership-correction.md)。
+**2026-10-05 现行状态：**节点类与 `NodeService` 已接入正常 Task、Memory、Note 操作；有可读 `AGENTS.md` 的目录可被 CLI 选择为节点，不再有独立责任资格门槛，且发现节点不自动 Init。入口保持三部分，43 条公开局部记忆已按当前字节恢复到原所有者：`extensions` 16、`edges-memory-init` 17、`shared-extensions` 1、`knowledge/notes` 1、原 Tasks 8 归 `.edges/tasks`。其他克隆的私有纠正仍按可信本机 journal 显式审阅。下方带日期的“待实现”与旧目录判断是当时记录，不应替代此状态；详情见 [ADR 0024](../../../../docs/adr/0024-scope-first-content-ownership.md) 与 [纠正计划](../../../../docs/superpowers/plans/2026-10-05-recursive-node-ownership-correction.md)。
 
 用户确认把原 Python 执行能力迁入 `edges memory`，Skill 保留推理、内容规范与人审流程，模板仍由 init Skill 提供并随 CLI 构建分发。记忆读写、索引、显式迁移及私有归档共享 CLI 的 TypeScript 实现与基础 Markdown/YAML codec。
 
 **Why:** 避免 Python 脚本与 CLI 各维护一套执行行为，也避免 Skill 安装路径成为运行时依赖。
 
-**How to apply:** 下文早期记录里的“Python 尚未接入 / Python 迁入 CLI 待完成”仅描述当时状态，已由本次迁移取代。新领域类模型、统一节点识别、43 条局部记忆归属修复仍独立推进；不得将执行语言统一视为这些工作已经完成。`conversation-to-tasks` 已调用 CLI；本次不改写 conversation-to-notes 的写作和发布流程。验证见 [TypeScript 迁移计划](../../../../docs/superpowers/plans/2026-10-04-project-memory-typescript.md)。
+**How to apply:** 下文早期记录里的“Python 尚未接入 / Python 迁入 CLI 待完成”仅描述当时状态，已由本次迁移取代。新领域类模型、统一节点识别、43 条局部记忆归属修复仍独立推进；不得将执行语言统一视为这些工作已经完成。`edges-conversation-to-tasks` 已调用 CLI；本次不改写 edges-conversation-to-notes 的写作和发布流程。验证见 [TypeScript 迁移计划](../../../../docs/superpowers/plans/2026-10-04-edges-memory-typescript.md)。
 
 ## 2026-10-04 用户确认：统一递归节点模型
 
@@ -52,7 +52,7 @@ metadata:
 
 **Why:** 共享实现由根层维护，不意味着源码目录、模块或内容目录的局部上下文也必须集中存储。跨层复用与发现通过引用实现，不应以撤除局部节点、合并记忆来替代递归。
 
-**How to apply:** 后续修订应按原节点归属恢复局部记忆和入口；节点目录整体搬迁时，记忆随节点搬迁，类型按已确认的 memory/skills 布局转换。停止沿用先前清单中依据“不是独立责任主体”把 extensions、shared-extensions、knowledge/notes、knowledge/tasks、packages/skills/project-memory-init 的局部记忆并入根层的判断。对原节点被拆分等无法直接一一映射的情况，需单独明确归属，不能再次默认并入根或随意复制。这次只记录纠正，尚未搬回文件；先前清单的43条根层合并与相关索引处理仍待修订。
+**How to apply:** 后续修订应按原节点归属恢复局部记忆和入口；节点目录整体搬迁时，记忆随节点搬迁，类型按已确认的 memory/skills 布局转换。停止沿用先前清单中依据“不是独立责任主体”把 extensions、shared-extensions、knowledge/notes、knowledge/tasks、packages/skills/edges-memory-init 的局部记忆并入根层的判断。对原节点被拆分等无法直接一一映射的情况，需单独明确归属，不能再次默认并入根或随意复制。这次只记录纠正，尚未搬回文件；先前清单的43条根层合并与相关索引处理仍待修订。
 
 ## 2026-10-04 用户确认：CLI 与公共节点逻辑解耦
 

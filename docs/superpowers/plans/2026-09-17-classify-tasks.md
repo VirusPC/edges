@@ -4,7 +4,7 @@
 
 **Goal:** Add Task Project index/description metadata (`edges tasks project list|get|create|update`) and the independent classifyTasks Skill so an agent can classify the whole board onto **user-set** Task Project centroids (title + description) by LLM / agent judgment, wait for a human-edited suggestion table, and apply moves only through existing `update --project` — without embeddings, without an `edges tasks classify` verb, and without relocating the live board again.
 
-**Architecture:** Keep the current Commander → `run()` → `src/tasks/*.ts` + `src/tasks/utils/` layout. Reuse `parseTaskProject` / `listProjectIds` / `updateTask(..., { project })` from ADR 0009. Add a focused `project-meta.ts` helper that owns lightweight per-project `AGENTS.md` and the root Task Projects index section **outside** project-memory managed markers. Register a nested `project` command group under `edges tasks` (one file per command node). classifyTasks is a SKILL.md-only workflow (no `scripts/`, no classification library): it calls the CLI, proposes a table, waits, then applies via CLI. Capability Surface remains CLI + Skill + MCP as three peers (ADR 0004); this round implements the project CLI contract plus the project-tasks-classify Skill. Generic tasks Skill/MCP CRUD stays the separate backlog.
+**Architecture:** Keep the current Commander → `run()` → `src/tasks/*.ts` + `src/tasks/utils/` layout. Reuse `parseTaskProject` / `listProjectIds` / `updateTask(..., { project })` from ADR 0009. Add a focused `project-meta.ts` helper that owns lightweight per-project `AGENTS.md` and the root Task Projects index section **outside** project-memory managed markers. Register a nested `project` command group under `edges tasks` (one file per command node). classifyTasks is a SKILL.md-only workflow (no `scripts/`, no classification library): it calls the CLI, proposes a table, waits, then applies via CLI. Capability Surface remains CLI + Skill + MCP as three peers (ADR 0004); this round implements the project CLI contract plus the edges-tasks-classify Skill. Generic tasks Skill/MCP CRUD stays the separate backlog.
 
 **Tech Stack:** TypeScript, Node.js ≥20, existing `commander` + `zod`, `node:test` + `tsx` (not vitest), `node:fs/promises`. No embeddings library. No new YAML library. No `simple-git`. No Multica daemon. No parent / sub-issue / stage.
 
@@ -15,12 +15,12 @@
 - Co-authored-by on every commit: `Coding Agent 专家 <grok-bot@users.noreply.github.com>`
 - Git subject: `type: subject`
 - Capability Surface wording, if mentioned: always **CLI + Skill + MCP** (three peers). Never “必要时 MCP”, never “CLI + Skill” as the Edges shorthand, never npm `package.json` `"bin"` as a layer
-- This round implements **CLI project subcommands + project-tasks-classify Skill**. Do not implement generic edges-tasks Skill/MCP CRUD (that backlog stays separate). Do not add a classify MCP
-- Skill path is exactly `packages/skills/project-tasks-classify/` (frontmatter `name: project-tasks-classify`). Display name in headings is classifyTasks
+- This round implements **CLI project subcommands + edges-tasks-classify Skill**. Do not implement generic edges-tasks Skill/MCP CRUD (that backlog stays separate). Do not add a classify MCP
+- Skill path is exactly `packages/skills/edges-tasks-classify/` (frontmatter `name: edges-tasks-classify`). Display name in headings is classifyTasks
 - Classification is **LLM / agent judgment** onto **already-set** Task Project centroids (title + description). Whole-board classify, not only `_default`. Batch human-editable suggestion table, then CLI apply. Do not require embeddings
-- No embeddings. No vector store. No `scripts/` under project-tasks-classify. No public `edges tasks classify` (or `classify-tasks`) verb
-- CLI: `edges tasks project list|get|create|update`. `create` writes the project directory + lightweight `AGENTS.md` + refreshes the root `knowledge/tasks/AGENTS.md` Task Projects section **outside** `<!-- project-memory:start -->` … `<!-- project-memory:end -->`
-- Every Task Project including `_default` has a lightweight `AGENTS.md` (title + description, optional `## Pointers`). Do **not** run `project-memory-init` on each project
+- No embeddings. No vector store. No `scripts/` under edges-tasks-classify. No public `edges tasks classify` (or `classify-tasks`) verb
+- CLI: `edges tasks project list|get|create|update`. `create` writes the project directory + lightweight `AGENTS.md` + refreshes the root `knowledge/tasks/AGENTS.md` Task Projects section **outside** `<!-- edges:start -->` … `<!-- edges:end -->`
+- Every Task Project including `_default` has a lightweight `AGENTS.md` (title + description, optional `## Pointers`). Do **not** run `edges-memory-init` on each project
 - Task moves stay on existing `edges tasks update --project`. That path must **not** change `edges-tasks-status` or `edges-task-priority`
 - Q18=A: index/description is like Project Memory; board markdown remains SoT. Do not treat Task as a Memory Type (Q18=B / `tasks-memory与看板语义合并`)
 - Absorbs the first knife of `交互式主题聚类（参考 K-means）` and the in-progress `整理 _default project tasks 的 skill` (whole board, not `_default`-only). Embedding / real vector classification and “classify sunk into CLI” remain exploration cards — do not implement them
@@ -34,7 +34,7 @@
 - Public repo: no credentials, tokens, or personal data in commits
 - `pull` / `rebase` use `--autostash`. Do not commit `.obsidian/workspace.json`
 - Do not auto-create/edit/move/delete `knowledge/posts/`
-- This plan-only PR that first lands this document must **not** implement CLI or Skill behavior, must **not** write `packages/skills/project-tasks-classify/**`, and must **not** seed live `knowledge/tasks/**/AGENTS.md`
+- This plan-only PR that first lands this document must **not** implement CLI or Skill behavior, must **not** write `packages/skills/edges-tasks-classify/**`, and must **not** seed live `knowledge/tasks/**/AGENTS.md`
 
 ---
 
@@ -52,8 +52,8 @@ Verified on `origin/main` after ADR 0010 (`1a5875a`). Command tree is `packages/
 - `packages/cli/src/tasks/project/update.ts` — `edges tasks project update <project> [--title] [--description]`
 - `packages/cli/test/tasks/utils/project-meta.test.ts` — pure string + tmpdir helper tests
 - `packages/cli/test/tasks/project.test.ts` — domain CRUD via `createProject` / `listProjects` / `getProject` / `updateProject`
-- `packages/skills/project-tasks-classify/SKILL.md` — classifyTasks workflow (Task 6)
-- `packages/skills/project-tasks-classify/CHANGELOG.md` — skill-local 1.0.0 (Task 6)
+- `packages/skills/edges-tasks-classify/SKILL.md` — classifyTasks workflow (Task 6)
+- `packages/skills/edges-tasks-classify/CHANGELOG.md` — skill-local 1.0.0 (Task 6)
 
 **Modify**
 
@@ -67,7 +67,7 @@ Verified on `origin/main` after ADR 0010 (`1a5875a`). Command tree is `packages/
 - `packages/cli/test/tasks/parse.test.ts` — `run(["tasks", "project", …])` happy/error paths
 - `packages/cli/test/tasks/run.test.ts` — tmpdir `EDGES_REPO` integration
 - `CHANGELOG.md` `[Unreleased]` — Added lines when implementation lands (plan-only PR adds only the plan line)
-- `.memory/projects/project_classify_tasks_and_project_metadata.md` — via `$project-memory-remember` (implementation updates How-to to “project CLI + project-tasks-classify Skill landed”; Capability Surface remains CLI + Skill + MCP)
+- `.memory/projects/project_classify_tasks_and_project_metadata.md` — via `$edges-memory-remember` (implementation updates How-to to “project CLI + edges-tasks-classify Skill landed”; Capability Surface remains CLI + Skill + MCP)
 - Live board metadata only, in Task 7: `knowledge/tasks/_default/AGENTS.md` (create) and the Task Projects section of `knowledge/tasks/AGENTS.md`
 
 **Do not create/commit**
@@ -75,8 +75,8 @@ Verified on `origin/main` after ADR 0010 (`1a5875a`). Command tree is `packages/
 - `packages/skills/edges-tasks/**` or any generic tasks Skill/MCP CRUD wrapper
 - MCP server / tool for classify or for `tasks project`
 - `edges tasks classify` / `edges tasks project classify`
-- Embeddings, vector-classification code, or project-tasks-classify `scripts/`
-- Full `project-memory-init` trees under `knowledge/tasks/<project>/`
+- Embeddings, vector-classification code, or edges-tasks-classify `scripts/`
+- Full `edges-memory-init` trees under `knowledge/tasks/<project>/`
 - Task-as-Memory-Type / Q18=B
 - Parent / sub-issue / stage
 - A second live-board relocate of Task `*.md` / sidecar `.{stem}.log.md`
@@ -262,9 +262,9 @@ Index line format: `- [\`<dir>\`](<dir>/AGENTS.md) — <one-line description>`
 
 1. If `existing` contains `<!-- task-projects:start -->` but not `<!-- task-projects:end -->` (or end before start) → `VALIDATION_ERROR`, `malformed Task Projects markers in knowledge/tasks/AGENTS.md`
 2. If both markers exist: replace the span from start marker through end marker (inclusive) with the canonical block. Leave every other byte unchanged — including the entire project-memory region
-3. If markers are absent and `<!-- project-memory:end -->` exists: insert `\n` + canonical block + `\n` immediately after the first `<!-- project-memory:end -->` line
-4. If neither task-projects markers nor `<!-- project-memory:end -->` exist (tmpdir): the file becomes the canonical block plus a trailing newline
-5. After building the result, if the substring between the first `<!-- project-memory:start -->` and its matching `<!-- project-memory:end -->` (when both exist) differs from the same span in `existing` → `VALIDATION_ERROR`, `refusing to write Task Projects section inside project-memory markers`
+3. If markers are absent and `<!-- edges:end -->` exists: insert `\n` + canonical block + `\n` immediately after the first `<!-- edges:end -->` line
+4. If neither task-projects markers nor `<!-- edges:end -->` exist (tmpdir): the file becomes the canonical block plus a trailing newline
+5. After building the result, if the substring between the first `<!-- edges:start -->` and its matching `<!-- edges:end -->` (when both exist) differs from the same span in `existing` → `VALIDATION_ERROR`, `refusing to write Task Projects section inside project-memory markers`
 
 Never write `<!-- task-projects:* -->` inside the project-memory span. Never hand-edit the Task Projects section; CLI owns it.
 
@@ -477,7 +477,7 @@ test("parseProjectAgents rejects frontmatter and project-memory markers", () => 
     assert.match((error as Error).message, /must not have YAML frontmatter/);
   }
   try {
-    parseProjectAgents("# T\n\nD\n\n<!-- project-memory:start -->\n");
+    parseProjectAgents("# T\n\nD\n\n<!-- edges:start -->\n");
     assert.fail("expected project-memory throw");
   } catch (error) {
     assert.equal((error as { errorCode: string }).errorCode, "VALIDATION_ERROR");
@@ -537,8 +537,8 @@ git commit -m "feat(tasks): parse Task Project AGENTS.md metadata" \
 - Produces:
   - `TASK_PROJECTS_START = "<!-- task-projects:start -->"`
   - `TASK_PROJECTS_END = "<!-- task-projects:end -->"`
-  - `PROJECT_MEMORY_START = "<!-- project-memory:start -->"`
-  - `PROJECT_MEMORY_END = "<!-- project-memory:end -->"`
+  - `PROJECT_MEMORY_START = "<!-- edges:start -->"`
+  - `PROJECT_MEMORY_END = "<!-- edges:end -->"`
   - `oneLineDescription(description: string): string` — `\r?\n` → space, collapse `[ \t]+`, trim
   - `renderTaskProjectsSection(projects: TaskProjectRecord[]): string` — the canonical block including both markers, no extra wrapping newline
   - `rewriteRootAgents(existing: string, projects: TaskProjectRecord[]): string` — rules in Locked design
@@ -697,7 +697,7 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
     const rootAgents = path.join(repo, "knowledge/tasks/AGENTS.md");
     await writeFile(
       rootAgents,
-      `# tasks\n\n<!-- project-memory:start -->\n\n- keep-index\n<!-- project-memory:end -->\n`,
+      `# tasks\n\n<!-- edges:start -->\n\n- keep-index\n<!-- edges:end -->\n`,
       "utf8",
     );
 
@@ -714,7 +714,7 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
     const root = await readFile(rootAgents, "utf8");
     assert.match(root, /- keep-index/);
     assert.match(root, /<!-- task-projects:start -->/);
-    assert.ok(root.indexOf("<!-- project-memory:end -->") < root.indexOf("<!-- task-projects:start -->"));
+    assert.ok(root.indexOf("<!-- edges:end -->") < root.indexOf("<!-- task-projects:start -->"));
 
     const task = await readFile(path.join(repo, taskRel), "utf8");
     assert.equal(task, "# keep\n");
@@ -1062,7 +1062,7 @@ There is no classify command. Task moves stay on update --project (same status a
 Keep the existing “Skill and MCP come later on this same contract. Capability Surface is CLI + Skill + MCP.” sentence. After this round the project metadata Skill (classifyTasks) exists; generic tasks Skill/MCP CRUD is still later. Rewrite that pair to:
 
 ```
-classifyTasks Skill (packages/skills/project-tasks-classify) uses these project verbs plus update --project.
+classifyTasks Skill (packages/skills/edges-tasks-classify) uses these project verbs plus update --project.
 Generic tasks Skill/MCP CRUD is a later backlog on this same contract.
 Capability Surface is CLI + Skill + MCP.
 ```
@@ -1267,7 +1267,7 @@ Register the group and four leaves. Do not add `fs` to `CliContext`. Use `runtim
 `knowledge/tasks/README.md` paragraph to append under “Issue 层 Task Project”:
 
 ```
-每个 Task Project（含 `_default`）有一份轻量 `AGENTS.md`（标题 + 描述，可选 Pointers），不是对该目录做完整 project-memory-init。根 `knowledge/tasks/AGENTS.md` 在 project-memory 受管标记之外有 CLI 维护的 Task Projects 节。读写走 `edges tasks project list|get|create|update`。跨 project 搬家仍用 `update --project`，不得改 status 或 priority。能力面是 CLI + Skill + MCP。
+每个 Task Project（含 `_default`）有一份轻量 `AGENTS.md`（标题 + 描述，可选 Pointers），不是对该目录做完整 edges-memory-init。根 `knowledge/tasks/AGENTS.md` 在 project-memory 受管标记之外有 CLI 维护的 Task Projects 节。读写走 `edges tasks project list|get|create|update`。跨 project 搬家仍用 `update --project`，不得改 status 或 priority。能力面是 CLI + Skill + MCP。
 ```
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -1293,23 +1293,23 @@ git commit -m "feat(tasks): add edges tasks project list|get|create|update" \
 
 ---
 
-### Task 6: project-tasks-classify Skill (workflow only)
+### Task 6: edges-tasks-classify Skill (workflow only)
 
 **Files:**
-- Create: `packages/skills/project-tasks-classify/SKILL.md`
-- Create: `packages/skills/project-tasks-classify/CHANGELOG.md`
-- Modify: run `pnpm skills:link` so `.agents/skills/project-tasks-classify` is a relative symlink to `../../skills/project-tasks-classify` (script is `scripts/link-agent-skills`; commit the symlink if git tracks `.agents/skills` links — if `.agents/skills` ignores Edges-owned links, still run the script and commit only the skill directory)
-- Do not create: `packages/skills/project-tasks-classify/scripts/`
+- Create: `packages/skills/edges-tasks-classify/SKILL.md`
+- Create: `packages/skills/edges-tasks-classify/CHANGELOG.md`
+- Modify: run `pnpm skills:link` so `.agents/skills/edges-tasks-classify` is a relative symlink to `../../skills/edges-tasks-classify` (script is `scripts/link-agent-skills`; commit the symlink if git tracks `.agents/skills` links — if `.agents/skills` ignores Edges-owned links, still run the script and commit only the skill directory)
+- Do not create: `packages/skills/edges-tasks-classify/scripts/`
 
 **Interfaces:**
 - Consumes: CLI from Task 5 (`project list|get|create|update`, `tasks list`, `tasks update --project`)
-- Produces: a loadable Agent Skill whose `name` equals the directory name `project-tasks-classify`; display heading classifyTasks; no classification library
+- Produces: a loadable Agent Skill whose `name` equals the directory name `edges-tasks-classify`; display heading classifyTasks; no classification library
 
 Frontmatter (required):
 
 ```markdown
 ---
-name: project-tasks-classify
+name: edges-tasks-classify
 description: 对整板 Task 按用户已设的 Task Project（标题 + 描述）做归属建议（LLM / agent 判断，不要求 embedding），等人改建议表后再用 edges tasks CLI 落地。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
 version: 1.0.0
 ---
@@ -1320,19 +1320,19 @@ version: 1.0.0
 There is no skill test runner. Use a file probe that must fail before the directory exists:
 
 ```bash
-test ! -f packages/skills/project-tasks-classify/SKILL.md
+test ! -f packages/skills/edges-tasks-classify/SKILL.md
 ```
 
 Expected before Step 3: exit 1 (file missing). After Step 3 the inverse plus content gates:
 
 ```bash
-test -f packages/skills/project-tasks-classify/SKILL.md
-test -f packages/skills/project-tasks-classify/CHANGELOG.md
-test ! -d packages/skills/project-tasks-classify/scripts
+test -f packages/skills/edges-tasks-classify/SKILL.md
+test -f packages/skills/edges-tasks-classify/CHANGELOG.md
+test ! -d packages/skills/edges-tasks-classify/scripts
 python3 - <<'PY'
 from pathlib import Path
-text = Path("packages/skills/project-tasks-classify/SKILL.md").read_text()
-assert text.startswith("---\nname: project-tasks-classify\n")
+text = Path("packages/skills/edges-tasks-classify/SKILL.md").read_text()
+assert text.startswith("---\nname: edges-tasks-classify\n")
 assert "version: 1.0.0" in text.split("---", 2)[1]
 for needle in [
     "classifyTasks",
@@ -1354,13 +1354,13 @@ PY
 
 - [ ] **Step 2: Run probe to verify it fails**
 
-Run: `test ! -f packages/skills/project-tasks-classify/SKILL.md`
+Run: `test ! -f packages/skills/edges-tasks-classify/SKILL.md`
 
 Expected: the `test ! -f` succeeds (file absent) **before** implementation. The python gate is the post-condition.
 
 - [ ] **Step 3: Write the Skill**
 
-Write `packages/skills/project-tasks-classify/SKILL.md` with **exactly** this body after the frontmatter above (executor may wrap lines but must keep every required needle):
+Write `packages/skills/edges-tasks-classify/SKILL.md` with **exactly** this body after the frontmatter above (executor may wrap lines but must keep every required needle):
 
 ```markdown
 # classifyTasks
@@ -1433,7 +1433,7 @@ pnpm --filter edges-cli exec tsx src/index.ts tasks update <stem> --project <sug
 - **MCP：** 对等入口；本轮没有 classify MCP，也没有 generic tasks MCP。缺 shell 时说明 generic tasks Skill/MCP CRUD 仍在 backlog，不要假装 MCP 已能搬 Task
 ```
 
-`packages/skills/project-tasks-classify/CHANGELOG.md`:
+`packages/skills/edges-tasks-classify/CHANGELOG.md`:
 
 ```markdown
 # Changelog
@@ -1451,8 +1451,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - classifyTasks：整板按已有 Task Project 质心做归属建议表，人改后再用 `edges tasks project` 与 `update --project` 落地。无 embedding，无 `classify` 动词。能力面 CLI + Skill + MCP。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-tasks-classify@1.0.0...HEAD
-[1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/project-tasks-classify@1.0.0
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/edges-tasks-classify@1.0.0...HEAD
+[1.0.0]: https://github.com/VirusPC/edges/releases/tag/skill/edges-tasks-classify@1.0.0
 ```
 
 Then:
@@ -1461,22 +1461,22 @@ Then:
 pnpm skills:link
 ```
 
-Do **not** `git tag skill/project-tasks-classify@1.0.0` in the implementation PR unless the human asks to release the skill. The changelog still records 1.0.0 as the first version.
+Do **not** `git tag skill/edges-tasks-classify@1.0.0` in the implementation PR unless the human asks to release the skill. The changelog still records 1.0.0 as the first version.
 
 - [ ] **Step 4: Run probe to verify it passes**
 
-Run the python gate from Step 1. Expected: exit 0. Also `test ! -d packages/skills/project-tasks-classify/scripts`.
+Run the python gate from Step 1. Expected: exit 0. Also `test ! -d packages/skills/edges-tasks-classify/scripts`.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-tasks-classify
-git add -u .agents/skills/project-tasks-classify 2>/dev/null || true
+git add packages/skills/edges-tasks-classify
+git add -u .agents/skills/edges-tasks-classify 2>/dev/null || true
 git commit -m "feat(skills): add classifyTasks workflow skill" \
   --trailer "Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
 
-If `git add -u .agents/skills/project-tasks-classify` stages nothing (ignored vendor hub), that is fine — `pnpm skills:link` still ran.
+If `git add -u .agents/skills/edges-tasks-classify` stages nothing (ignored vendor hub), that is fine — `pnpm skills:link` still ran.
 
 ---
 
@@ -1484,9 +1484,9 @@ If `git add -u .agents/skills/project-tasks-classify` stages nothing (ignored ve
 
 **Files:**
 - Create: `knowledge/tasks/_default/AGENTS.md` (via CLI `ensure`, not by inventing a second format)
-- Modify: `knowledge/tasks/AGENTS.md` — insert the Task Projects section **after** `<!-- project-memory:end -->` only
+- Modify: `knowledge/tasks/AGENTS.md` — insert the Task Projects section **after** `<!-- edges:end -->` only
 - Modify: `CHANGELOG.md` `[Unreleased]` → `### Added` (implementation lines)
-- Modify via `$project-memory-remember` (do not hand-edit indexes): `.memory/projects/project_classify_tasks_and_project_metadata.md` (update How-to: project CLI + project-tasks-classify Skill landed; Capability Surface remains CLI + Skill + MCP; point at this plan)
+- Modify via `$edges-memory-remember` (do not hand-edit indexes): `.memory/projects/project_classify_tasks_and_project_metadata.md` (update How-to: project CLI + edges-tasks-classify Skill landed; Capability Surface remains CLI + Skill + MCP; point at this plan)
 
 **Interfaces:**
 - Consumes: `ensureProjectMetadata` / `edges tasks project list` from Tasks 3–5
@@ -1499,7 +1499,7 @@ Do **not** add a unit test that points at the real `knowledge/tasks/` tree. From
 ```bash
 test ! -f knowledge/tasks/_default/AGENTS.md
 test -f knowledge/tasks/AGENTS.md
-grep -q '<!-- project-memory:end -->' knowledge/tasks/AGENTS.md
+grep -q '<!-- edges:end -->' knowledge/tasks/AGENTS.md
 ! grep -q '<!-- task-projects:start -->' knowledge/tasks/AGENTS.md
 test -f knowledge/tasks/_default/backlog/2026-09-17--classify沉到edges-tasks-CLI.md
 ```
@@ -1515,8 +1515,8 @@ grep -q '<!-- task-projects:start -->' knowledge/tasks/AGENTS.md
 python3 - <<'PY'
 from pathlib import Path
 text = Path("knowledge/tasks/AGENTS.md").read_text()
-mem_start = text.index("<!-- project-memory:start -->")
-mem_end = text.index("<!-- project-memory:end -->")
+mem_start = text.index("<!-- edges:start -->")
+mem_end = text.index("<!-- edges:end -->")
 tp_start = text.index("<!-- task-projects:start -->")
 assert mem_end < tp_start
 assert "<!-- task-projects:start -->" not in text[mem_start:mem_end]
@@ -1551,10 +1551,10 @@ If any Task `*.md` or `.{stem}.log.md` appears, **stop and revert those files**.
 
 ```
 - `edges tasks project list|get|create|update`：Task Project 元数据（每 project 含 `_default` 的轻量 AGENTS.md + 根 `knowledge/tasks/AGENTS.md` Task Projects 节，写在 project-memory 受管标记外）。Q18=A；看板 markdown 仍是 Task 真源。无 embedding，无 `edges tasks classify`。
-- `packages/skills/project-tasks-classify`：classifyTasks 整板按已有 Task Project 质心做归属建议（LLM / agent 判断）；人改建议表后经 CLI 落地。能力面 CLI + Skill + MCP。Generic tasks Skill/MCP CRUD 仍是另卡 backlog。
+- `packages/skills/edges-tasks-classify`：classifyTasks 整板按已有 Task Project 质心做归属建议（LLM / agent 判断）；人改建议表后经 CLI 落地。能力面 CLI + Skill + MCP。Generic tasks Skill/MCP CRUD 仍是另卡 backlog。
 ```
 
-Update the existing project memory via `$project-memory-remember` (do not hand-edit `.memory/PROJECT.md`). Reuse slug `classify_tasks_and_project_metadata` if the plan-only PR already created it; otherwise create it. Body shape:
+Update the existing project memory via `$edges-memory-remember` (do not hand-edit `.memory/PROJECT.md`). Reuse slug `classify_tasks_and_project_metadata` if the plan-only PR already created it; otherwise create it. Body shape:
 
 ```
 ADR 0010 的 CLI project 子命令与 classifyTasks Skill 已按 docs/superpowers/plans/2026-09-17-classify-tasks.md 落地。元数据只在索引/描述层；apply 走 update --project，不改 status / priority。
@@ -1564,11 +1564,11 @@ grill 锁定 Q18=A、按已有质心做 LLM / agent 判断、无 embedding、无
 
 **How to apply:**
 - 改 project 标题/描述用 `edges tasks project update`；新建用 `project create`。
-- 整理看板用 project-tasks-classify Skill，禁止手改路径。
+- 整理看板用 edges-tasks-classify Skill，禁止手改路径。
 - 不要把 Task 升成 Memory Type；不要实现 `edges tasks classify`；不要把 generic tasks Skill/MCP CRUD 塞进本 Skill。
 ```
 
-`--title` `classifyTasks 与 Task Project 元数据`；`--description` 必须写清适用场景：实现或改 `edges tasks project` / project-tasks-classify Skill 时打开；点名 CLI + Skill + MCP、本计划路径、无 embedding / 无 classify 动词。
+`--title` `classifyTasks 与 Task Project 元数据`；`--description` 必须写清适用场景：实现或改 `edges tasks project` / edges-tasks-classify Skill 时打开；点名 CLI + Skill + MCP、本计划路径、无 embedding / 无 classify 动词。
 
 Do not edit `knowledge/posts/`. Do not change status of the interactive-clustering or classify-into-CLI backlog cards in this task unless the human asks; a one-line run-log on `整理default-project的tasks-skill` is optional and not required for the gate.
 
@@ -1594,8 +1594,8 @@ old = subprocess.check_output(["git", "show", "HEAD:knowledge/tasks/AGENTS.md"],
 # use `git show HEAD:knowledge/tasks/AGENTS.md` against the file, extracting the memory span.
 new = Path("knowledge/tasks/AGENTS.md").read_text()
 def span(text: str) -> str:
-    a = text.index("<!-- project-memory:start -->")
-    b = text.index("<!-- project-memory:end -->") + len("<!-- project-memory:end -->")
+    a = text.index("<!-- edges:start -->")
+    b = text.index("<!-- edges:end -->") + len("<!-- edges:end -->")
     return text[a:b]
 assert span(old) == span(new)
 PY
@@ -1625,14 +1625,14 @@ Only stage `.memory/PROJECT.md` if the remember script refreshed the index. Do n
 
 | Decision | Task |
 | --- | --- |
-| Skill `packages/skills/project-tasks-classify/`, display classifyTasks | Task 6 |
+| Skill `packages/skills/edges-tasks-classify/`, display classifyTasks | Task 6 |
 | Classify onto user-set project centroids (LLM / agent judgment); whole-board classify; batch editable table; CLI apply | Task 6 Locked design |
 | No embeddings; no `edges tasks classify` | Global Constraints; Tasks 5–6 tests |
 | `edges tasks project list\|get\|create\|update`; create writes dir + AGENTS.md + root index outside project-memory markers | Tasks 2–5 |
 | Every project including `_default` has lightweight AGENTS.md | Tasks 1, 3, 7 |
 | Task moves via existing `update --project`; must not change status or priority | Task 5 CLI test; existing `write.test.ts` |
 | Q18=A index/description; board files remain SoT; not Task-as-Memory-Type | Locked design; Skill 禁止 |
-| Capability Surface CLI + Skill + MCP; this plan = project CLI + project-tasks-classify Skill; generic CRUD backlog separate | Header, Global Constraints, Task 5/6 copy |
+| Capability Surface CLI + Skill + MCP; this plan = project CLI + edges-tasks-classify Skill; generic CRUD backlog separate | Header, Global Constraints, Task 5/6 copy |
 | Absorbs interactive theme-clustering first knife; embedding / vector classification / classify-in-CLI out of scope | Locked design “Absorbed backlogs” |
 | Bootstrap metadata without relocating Tasks | Tasks 3, 7 |
 

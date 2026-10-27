@@ -45,7 +45,7 @@ test("notes create with no README creates notes/README.md and lists the leaf the
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
   const made = JSON.parse(created.stdout) as { path: string };
   const readme = readFileSync(path.join(root, "notes/README.md"), "utf8");
-  assert.match(readme, /project-entries-local:start/);
+  assert.match(readme, /edges-entries-local:start/);
   assert.match(readme, /fresh-note\/INDEX\.md/);
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /INDEX\.md|notes\/README\.md/);
   assert.equal(existsSync(path.join(root, "notes/AGENTS.md")), false);
@@ -68,7 +68,7 @@ test("projects create with no README creates projects/README.md and does not reg
   );
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
   const readme = readFileSync(path.join(root, "projects/README.md"), "utf8");
-  assert.match(readme, /project-entries-local:start/);
+  assert.match(readme, /edges-entries-local:start/);
   assert.match(readme, /fresh-project\/INDEX\.md/);
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /INDEX\.md|projects\/README\.md/);
   assert.equal(existsSync(path.join(root, "projects/AGENTS.md")), false);
@@ -90,7 +90,7 @@ test("prose notes/README beside notes/AGENTS gains entries and receives the new 
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
   const readme = readFileSync(path.join(root, "notes/README.md"), "utf8");
   assert.match(readme, /待处理想法。公开散文保留。/);
-  assert.match(readme, /project-entries-local:start/);
+  assert.match(readme, /edges-entries-local:start/);
   assert.match(readme, /public-leaf\/INDEX\.md/);
   assert.doesNotMatch(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /INDEX\.md/);
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /INDEX\.md/);
@@ -105,7 +105,7 @@ test("physicalParent does not select AGENTS.md for a system-one note leaf", (t) 
   put(
     root,
     "notes/README.md",
-    "# Notes\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n<!-- project-entries-local:end -->\n",
+    "# Notes\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n<!-- edges-entries-local:end -->\n",
   );
   assert.equal(physicalParent(leaf, root), path.join(root, "notes/README.md"));
   assert.equal(
@@ -119,9 +119,9 @@ test("notes init ensures the content-face org list and still keeps the harness p
   const result = await run(["--scope", root, "notes", "init"], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   const face = readFileSync(path.join(root, "notes/README.md"), "utf8");
-  assert.match(face, /project-entries-local:start/);
+  assert.match(face, /edges-entries-local:start/);
   assert.equal(existsSync(path.join(root, ".edges/notes/README.md")), true);
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /\]\(<?notes\/README\.md>?\)/);
   const placard = readFileSync(path.join(root, ".edges/notes/README.md"), "utf8");
-  assert.doesNotMatch(placard, /project-entries-local:start/);
+  assert.doesNotMatch(placard, /edges-entries-local:start/);
 });

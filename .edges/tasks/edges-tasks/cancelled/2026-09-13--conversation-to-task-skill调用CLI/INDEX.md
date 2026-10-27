@@ -27,4 +27,4 @@ metadata:
 
 ---
 
-**2026-09-24 收口：** 本卡把「总结 skill」与「CLI 落盘」捆在一起，已过时。薄 skill 只整理（PR https://github.com/VirusPC/edges/pull/127）；CLI 落库见后继 `2026-09-24--conversation-to-tasks整理后调CLI落库`。本卡 → cancelled。
+**2026-09-24 收口：** 本卡把「总结 skill」与「CLI 落盘」捆在一起，已过时。薄 skill 只整理（PR https://github.com/VirusPC/edges/pull/127）；CLI 落库见后继 `2026-09-24--edges-conversation-to-tasks整理后调CLI落库`。本卡 → cancelled。

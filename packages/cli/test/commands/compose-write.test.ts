@@ -48,11 +48,11 @@ function hostWithBrain(root: string, brainRel = ".edges/compose/brain"): { brain
   put(root, "AGENTS.md", agents("- [材料](.edges/README.md) — index"));
   put(root, ".edges/README.md", `# 材料
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [组合](compose/README.md) — composed
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->
 `);
   put(root, ".edges/compose/README.md", `# 组合
 

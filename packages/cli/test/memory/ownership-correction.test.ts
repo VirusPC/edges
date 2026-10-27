@@ -181,7 +181,7 @@ async function privateFixture(t: any) {
     current = ".edges/memory/secrets",
     target = "extensions/.edges/memory/secrets";
   const intro =
-    "<!-- project-memory-type:start -->\nname: secret\nmodule: memory\nwritable: true\ngitignore: true\nformat: ordinary\n<!-- project-memory-type:end -->\n# Private custom guidance\n<!-- project-memory-entries:start -->\n- [x](secret_x.md) — x\n<!-- project-memory-entries:end -->\n";
+    "<!-- edges-memory-type:start -->\nname: secret\nmodule: memory\nwritable: true\ngitignore: true\nformat: ordinary\n<!-- edges-memory-type:end -->\n# Private custom guidance\n<!-- edges-entries-local:start -->\n- [x](secret_x.md) — x\n<!-- edges-entries-local:end -->\n";
   const operations = ["AGENTS.md", "secret_x.md"].map((name) => {
     const text = name === "AGENTS.md" ? intro : "private fixture bytes";
     put(f.root, `${current}/${name}`, text);
@@ -198,7 +198,7 @@ async function privateFixture(t: any) {
   put(
     f.root,
     "AGENTS.md",
-    "# root\n<!-- project-memory-local:start -->\n- [secret](.edges/memory/secrets/AGENTS.md) — private\n<!-- project-memory-local:end -->\n",
+    "# root\n<!-- edges-local:start -->\n- [secret](.edges/memory/secrets/AGENTS.md) — private\n<!-- edges-local:end -->\n",
   );
   put(
     f.root,
@@ -360,7 +360,7 @@ test("maintained public correction manifest restores every reviewed record and p
     await import("../../../../scripts/migrations/legacy-index.mjs");
   for (const owner of [
     "extensions",
-    "extensions/skills/project-memory-init",
+    "extensions/skills/edges-memory-init",
     "shared-extensions",
     "knowledge/notes",
     ".edges/tasks",
@@ -655,9 +655,9 @@ for (const [spelling, href] of [
           href,
         );
       rootSource +=
-        "<!-- project-memory-children:start -->\n- [owner](extensions/AGENTS.md)\n<!-- project-memory-children:end -->\n";
+        "<!-- edges-descendants:start -->\n- [owner](extensions/AGENTS.md)\n<!-- edges-descendants:end -->\n";
       fs.writeFileSync(rootEntry, rootSource);
-      const ownerSource = `# extensions\n<!-- authored: preserve -->\n<!-- project-memory-local:start -->\n- [authored secret](<${href}>) — authored description\n<!-- project-memory-local:end -->\n`;
+      const ownerSource = `# extensions\n<!-- authored: preserve -->\n<!-- edges-local:start -->\n- [authored secret](<${href}>) — authored description\n<!-- edges-local:end -->\n`;
       if (location === "destination") fs.writeFileSync(ownerEntry, ownerSource);
       const before = snapshot(f.root);
       assert.equal(m.runPrivateCorrection(f.root, false).status, "dry-run");

@@ -18,7 +18,7 @@ function fixture(t: any) {
   return { root, file, put, service: new NodeService({ managedRoot: root }) };
 }
 function index(local = "", descendants = "") {
-  return `# Scope\n<!-- project-memory-local:start -->\n${local}\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n${descendants}\n<!-- project-memory-children:end -->\n`;
+  return `# Scope\n<!-- edges-local:start -->\n${local}\n<!-- edges-local:end -->\n<!-- edges-descendants:start -->\n${descendants}\n<!-- edges-descendants:end -->\n`;
 }
 test("directory loading separates physical parent, composition and recursive harness", async (t) => {
   const { root, file, put, service } = fixture(t);

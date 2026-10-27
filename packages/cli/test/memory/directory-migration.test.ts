@@ -7,7 +7,7 @@ import { execFileSync } from "node:child_process";
 import {
   planDirectoryMigration,
   applyDirectoryMigration,
-} from "../../../../scripts/migrations/migrate-directory-nodes.mjs";
+} from "../../../../scripts/migrations/edges-migrate-directory-nodes.mjs";
 function fixture(t: any) {
   const root = fs.realpathSync(
     fs.mkdtempSync(path.join(tmpdir(), "directory-migration-")),
@@ -24,7 +24,7 @@ function track(root: string) {
   execFileSync("git", ["add", "."], { cwd: root });
 }
 const typeIndex =
-  "<!-- project-memory-type:start -->\nname: project\nmodule: memory\nwritable: true\ngitignore: false\nformat: ordinary\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n- [Demo](project_demo.md#part) — Use\n<!-- project-memory-entries:end -->\n";
+  "<!-- edges-memory-type:start -->\nname: project\nmodule: memory\nwritable: true\ngitignore: false\nformat: ordinary\n<!-- edges-memory-type:end -->\n<!-- edges-entries-local:start -->\n- [Demo](project_demo.md#part) — Use\n<!-- edges-entries-local:end -->\n";
 test("tracked public migration preserves resources and authored links, previews without mutation and reruns idempotently", (t) => {
   const root = fixture(t);
   put(root, ".edges/memory/projects/AGENTS.md", typeIndex);
@@ -203,12 +203,12 @@ test("command defaults to dry-run and encoded registered note hrefs retain query
   put(
     root,
     "AGENTS.md",
-    "<!-- project-memory-local:start -->\n- [note](knowledge/notes/topic/a%20b.md?q=1#part) — Example\n<!-- project-memory-local:end -->",
+    "<!-- edges-local:start -->\n- [note](knowledge/notes/topic/a%20b.md?q=1#part) — Example\n<!-- edges-local:end -->",
   );
   track(root);
   const script = path.resolve(
     import.meta.dirname,
-    "../../../../scripts/migrations/migrate-directory-nodes.mts",
+    "../../../../scripts/migrations/edges-migrate-directory-nodes.mts",
   );
   const output = execFileSync(
     process.execPath,

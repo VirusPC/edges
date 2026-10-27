@@ -28,7 +28,7 @@ function fixture(t: { after(fn: () => void): void }) {
     name: "One", status: "todo",
     metadata: { metadata: { "edges-task-project": "alpha", "edges-task-priority": "low" } },
   }, { operation: "create" }).serialize());
-  write("README.md", "# Edges\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [领域任务](tasks/AGENTS.md) — 看板。\n<!-- project-entries-local:end -->\n");
+  write("README.md", "# Edges\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [领域任务](tasks/AGENTS.md) — 看板。\n<!-- edges-entries-local:end -->\n");
   return root;
 }
 

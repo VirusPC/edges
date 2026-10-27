@@ -27,10 +27,10 @@ function fixture(t: { after(fn: () => void): void }) {
   return { root, file, write, service: new NodeService({ managedRoot: root }) };
 }
 function index(local = "", descendants = "") {
-  return `# Scope\n\n<!-- project-memory-important:start -->\nKeep constraints.\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n${local}\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n${descendants}\n<!-- project-memory-children:end -->\n`;
+  return `# Scope\n\n<!-- edges-constraints:start -->\nKeep constraints.\n<!-- edges-constraints:end -->\n<!-- edges-local:start -->\n${local}\n<!-- edges-local:end -->\n<!-- edges-descendants:start -->\n${descendants}\n<!-- edges-descendants:end -->\n`;
 }
 function typeIndex(module: string, writable: boolean, entries = "") {
-  return `<!-- project-memory-type:start -->\nname: ${writable ? "managed" : "referenced"}\nmodule: ${module}\nwritable: ${writable}\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n${entries}\n<!-- project-memory-entries:end -->\n`;
+  return `<!-- edges-memory-type:start -->\nname: ${writable ? "managed" : "referenced"}\nmodule: ${module}\nwritable: ${writable}\n<!-- edges-memory-type:end -->\n<!-- edges-entries-local:start -->\n${entries}\n<!-- edges-entries-local:end -->\n`;
 }
 for (const operation of ["update", "create", "attach"] as const) {
   test(`post-commit read failure records and recovers the committed ${operation} destination`, async (t) => {
@@ -142,7 +142,7 @@ test("structured create dispatches task defaults and refuses conflicts before ch
   write("AGENTS.md", index());
   write(
     "tasks/README.md",
-    "# Tasks\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n",
+    "# Tasks\n\n<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n",
   );
   const task = new TaskNode(file("tasks/backlog/one/index.md"));
   assert.equal(
@@ -499,7 +499,7 @@ test('global query omits out-of-root references and linked installations while m
 test('writes skip a pre-existing missing reference instead of rejecting the command', async t => {
   const { write, file, service } = fixture(t);
   write('AGENTS.md', index('- [harness](.edges/README.md)\n- [leaf](leaf/index.md)'));
-  write('.edges/README.md', `# Harness\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [users](memory/users/README.md) — private\n<!-- project-entries-local:end -->\n`);
+  write('.edges/README.md', `# Harness\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [users](memory/users/README.md) — private\n<!-- edges-entries-local:end -->\n`);
   write('leaf/index.md', 'Leaf\n');
   assert.equal(fs.existsSync(file('.edges/memory/users/README.md')), false);
   const created = await service.create(new LeafNode(file('extra/index.md')), { body: 'Extra\n' }, { indexGroup: 'local' });

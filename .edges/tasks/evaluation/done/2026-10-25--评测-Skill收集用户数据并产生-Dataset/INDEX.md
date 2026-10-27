@@ -21,10 +21,10 @@ description: >-
 把已有的 Langfuse 接入 Agent 的 skills 从 brain 迁入框架，整理成主入口 + 四份子 skill，随 `@viruspc/edges` 分发。接入方装好后，能把自己 Agent / Grok Bot 的会话接进 Langfuse，作为后续 Dataset 与实验的数据来源。从 trace 生成 Dataset 不在本卡。
 
 **动作：**
-- 新建 `packages/skills/langfuse-agent-tracing/`（主入口，只做路由）。
-- 把 brain `shared-extensions/skills/langfuse-agent-tracing` 迁为 `packages/skills/langfuse-local-agent-tracing/`。
-- 把 `codex-cloud-langfuse-tracing` 迁为 `langfuse-codex-cloud-tracing/`；把 `cursor-cloud-langfuse-tracing`（含 `templates/`）迁为 `langfuse-cursor-cloud-tracing/`。
-- 新建 `packages/skills/langfuse-grokbot-tracing/`（本卡默认：可触发的大纲；源见 brain `projects/routines/grokbot-langfuse-export/SKILL.md`）。
+- 新建 `packages/skills/edges-langfuse-agent-tracing/`（主入口，只做路由）。
+- 把 brain `shared-extensions/skills/edges-langfuse-agent-tracing` 迁为 `packages/skills/edges-langfuse-local-agent-tracing/`。
+- 把 `codex-cloud-langfuse-tracing` 迁为 `edges-langfuse-codex-cloud-tracing/`；把 `cursor-cloud-langfuse-tracing`（含 `templates/`）迁为 `edges-langfuse-cursor-cloud-tracing/`。
+- 新建 `packages/skills/edges-langfuse-grokbot-tracing/`（本卡默认：可触发的大纲；源见 brain `projects/routines/grokbot-langfuse-export/SKILL.md`）。
 - 子 skill 互相与主入口用相对链接；选错表面时指回主入口。去掉实例域名、brain 相对路径、box 路径。
 - 五份各加 `version: 0.1.0` 与 `CHANGELOG.md`；改 `packages/skills/README.md`；跑 `pnpm skills:link`。
 - brain 另开 PR 删除旧三份副本，shared-extensions 升 5.0.0 并记 Removed。

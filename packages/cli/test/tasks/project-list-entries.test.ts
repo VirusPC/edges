@@ -27,17 +27,17 @@ ${descendants}
 `;
 
 const projectReadme = (title: string, description: string, extra = "") =>
-  `# ${title}\n\n${description}\n\n<!-- project-entries-local:start -->\n## 本层内容\n${extra}<!-- project-entries-local:end -->\n`;
+  `# ${title}\n\n${description}\n\n<!-- edges-entries-local:start -->\n## 本层内容\n${extra}<!-- edges-entries-local:end -->\n`;
 
 const projectAgents = (title: string, description: string) =>
   `# ${title}\n\n${description}\n\n<!-- edges-local:start -->\n## 本层系统维护信息\n<!-- edges-local:end -->\n`;
 
 const harnessIndex = `# 本层 harness 材料索引
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->
 `;
 
 function write(root: string, rel: string, source: string): void {
@@ -63,12 +63,12 @@ async function boardsWithEntries(): Promise<string> {
   write(
     repo,
     ".edges/README.md",
-    "# Harness\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md) — maintenance board\n<!-- project-entries-local:end -->\n",
+    "# Harness\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md) — maintenance board\n<!-- edges-entries-local:end -->\n",
   );
   write(
     repo,
     ".edges/tasks/README.md",
-    "# Tasks\n\nBoard.\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n- [Both](both/README.md) — readme copy\n<!-- project-entries-local:end -->\n",
+    "# Tasks\n\nBoard.\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n- [Both](both/README.md) — readme copy\n<!-- edges-entries-local:end -->\n",
   );
   write(
     repo,
@@ -92,7 +92,7 @@ async function boardsWithEntries(): Promise<string> {
   write(
     repo,
     "tasks/README.md",
-    "# Tasks\n\nDomain.\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Kept](kept/README.md) — domain work\n<!-- project-entries-local:end -->\n",
+    "# Tasks\n\nDomain.\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Kept](kept/README.md) — domain work\n<!-- edges-entries-local:end -->\n",
   );
   write(repo, "tasks/kept/README.md", projectReadme("Kept", "domain work"));
   return repo;
@@ -129,12 +129,12 @@ async function maintenanceEntries(): Promise<string> {
   write(
     repo,
     ".edges/README.md",
-    "# Harness\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md) — board\n<!-- project-entries-local:end -->\n",
+    "# Harness\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md) — board\n<!-- edges-entries-local:end -->\n",
   );
   write(
     repo,
     ".edges/tasks/README.md",
-    "# Tasks\n\nBoard.\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n- [Both](both/README.md) — readme copy\n<!-- project-entries-local:end -->\n",
+    "# Tasks\n\nBoard.\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n- [Both](both/README.md) — readme copy\n<!-- edges-entries-local:end -->\n",
   );
   write(repo, ".edges/tasks/AGENTS.md", scopeAgents("- [Tech](tech/AGENTS.md) — tech work"));
   write(repo, ".edges/tasks/alpha/README.md", projectReadme("Alpha", "alpha work"));
@@ -192,7 +192,7 @@ test("project list --all --super does not require a scope AGENTS.md", async (t) 
   write(
     repo,
     "tasks/README.md",
-    "# Tasks\n\nDomain.\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Kept](kept/README.md) — domain work\n<!-- project-entries-local:end -->\n",
+    "# Tasks\n\nDomain.\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Kept](kept/README.md) — domain work\n<!-- edges-entries-local:end -->\n",
   );
   write(repo, "tasks/kept/README.md", projectReadme("Kept", "domain work"));
   const result = await runList(repo, ["--all", "--super"]);
@@ -210,7 +210,7 @@ test("project list --all includes a composed tasks board and --exclude compose s
   write(
     repo,
     ".edges/README.md",
-    "# 材料\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [组合](compose/README.md) — composed\n<!-- project-entries-local:end -->\n",
+    "# 材料\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [组合](compose/README.md) — composed\n<!-- edges-entries-local:end -->\n",
   );
   write(
     repo,
@@ -221,7 +221,7 @@ test("project list --all includes a composed tasks board and --exclude compose s
   write(
     repo,
     "hidden/tasks/README.md",
-    "# Tasks\n\nHidden.\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Foreign](foreign/README.md) — foreign work\n<!-- project-entries-local:end -->\n",
+    "# Tasks\n\nHidden.\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Foreign](foreign/README.md) — foreign work\n<!-- edges-entries-local:end -->\n",
   );
   write(repo, "hidden/tasks/foreign/README.md", projectReadme("Foreign", "foreign work"));
   const plain = await runList(repo, ["--all"]);
@@ -248,15 +248,15 @@ test("project list fails fast and names the file when one project entry is inval
   write(
     repo,
     ".edges/README.md",
-    "# Harness\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md) — board\n<!-- project-entries-local:end -->\n",
+    "# Harness\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md) — board\n<!-- edges-entries-local:end -->\n",
   );
   write(
     repo,
     ".edges/tasks/README.md",
-    "# Tasks\n\nBoard.\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n- [Bad](bad/README.md) — broken\n<!-- project-entries-local:end -->\n",
+    "# Tasks\n\nBoard.\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n- [Bad](bad/README.md) — broken\n<!-- edges-entries-local:end -->\n",
   );
   write(repo, ".edges/tasks/alpha/README.md", projectReadme("Alpha", "alpha work"));
-  write(repo, ".edges/tasks/bad/README.md", "# Bad\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n");
+  write(repo, ".edges/tasks/bad/README.md", "# Bad\n\n<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n");
   const { run } = await import("../../src/program.js");
   const result = await run(["--scope", repo, "tasks", "project", "list"], { env: {} });
   assert.notEqual(result.exitCode, 0);

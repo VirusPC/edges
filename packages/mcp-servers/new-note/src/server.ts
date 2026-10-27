@@ -58,8 +58,8 @@ function createMcpServer(config: ReturnType<typeof loadConfig>) {
     }
   );
 
-  console.error(`[new-note] Registering MCP prompt: conversation-to-notes`);
-  server.registerPrompt("conversation-to-notes", 
+  console.error(`[new-note] Registering MCP prompt: edges-conversation-to-notes`);
+  server.registerPrompt("edges-conversation-to-notes", 
     {
       description: "Summarize a conversation into a structured note for the Edges system",
       argsSchema: {
@@ -68,7 +68,7 @@ function createMcpServer(config: ReturnType<typeof loadConfig>) {
     }, 
     async ({ transcript }) => {
       try {
-        const skillFile = path.join(config.skillsPath, "conversation-to-notes/SKILL.md");
+        const skillFile = path.join(config.skillsPath, "edges-conversation-to-notes/SKILL.md");
         const skillContent = await fs.readFile(skillFile, "utf-8");
         
         return {

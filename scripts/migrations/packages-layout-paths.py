@@ -26,7 +26,7 @@ MOVED_SCRIPTS = (
     "legacy-index.mts",
     "migrate-agents-indexes.mts",
     "migrate-content-units.mts",
-    "migrate-directory-nodes.mts",
+    "edges-migrate-directory-nodes.mts",
     "migrate-harness-readme-index.mts",
     "migrate-index-to-INDEX.mts",
     "migrate-recursive-layout.mts",

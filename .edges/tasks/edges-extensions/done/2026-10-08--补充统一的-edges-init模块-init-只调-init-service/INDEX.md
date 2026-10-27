@@ -14,7 +14,7 @@ description: >-
 ---
 
 **背景：**
-2026-10-08 凌晨，用户在审 notes/skills CRUD 收口到 NodeService 的叠层 PR（#185 notes/skills → #186 projects CLI + 根 harness/init → #187 commands node 下沉 service）。先问的是「为什么 commands 层有 `node.ts`」，于是把 `commands/{notes,projects,skills}/node.ts` 下沉到 service，开了 #187。接着用户追问：「我只看到 CLI 改了，根目录的 `.edges` 以及 init 命令有改吗？」核对后，#186 确实改了：根 `.edges` 新增 `projects/README.md`、`notes/README.md` 并登记进根 `AGENTS.md`；`packages/cli/src/services/memory/init.ts` 与 `packages/cli/src/domain/config/edges-materials.json` 把 projects、notes 加进了 `edges memory init` 的推荐模块；`project-memory-init` skill 升到 3.4.0。
+2026-10-08 凌晨，用户在审 notes/skills CRUD 收口到 NodeService 的叠层 PR（#185 notes/skills → #186 projects CLI + 根 harness/init → #187 commands node 下沉 service）。先问的是「为什么 commands 层有 `node.ts`」，于是把 `commands/{notes,projects,skills}/node.ts` 下沉到 service，开了 #187。接着用户追问：「我只看到 CLI 改了，根目录的 `.edges` 以及 init 命令有改吗？」核对后，#186 确实改了：根 `.edges` 新增 `projects/README.md`、`notes/README.md` 并登记进根 `AGENTS.md`；`packages/cli/src/services/memory/init.ts` 与 `packages/cli/src/domain/config/edges-materials.json` 把 projects、notes 加进了 `edges memory init` 的推荐模块；`edges-memory-init` skill 升到 3.4.0。
 
 问题也就在这里：notes、projects 的初始化是挂在 `memory init` 下面「顺手」生成的。它们不是 memory 的子概念，只是和 memory 共用 `.edges` 材料清单。结果是语义拧着：要改 harness 布局，得先去摸 memory 的 init。用户据此判断 init 本身也要改：补一个 `edges init`，`edges memory init` 或其他 `edges xxx init` 只是调用 `edges init` 背后的 service 来初始化某个具体模块。讨论中曾考虑叫 `edges harness init`，用户定的是 `edges init`。
 
@@ -37,7 +37,7 @@ init 成为 Edges CLI 的标准命令：根命令 `edges init` 是统一初始�
 - 抽出与 memory 解耦的 init service，接管材料清单（今天的 `edges-materials.json`）与「按模块初始化」逻辑；写盘经 NodeService
 - 新增根命令 `edges init`
 - `edges memory init` 改为薄入口，只把「初始化 memory 模块」交给 init service；后续 `edges <domain> init` 照此
-- 在 ADR / CONTEXT 记下：init 为标准命令、拥有根命令、域 init 委托同一 service；必要时同步 `project-memory-init` skill 与 README
+- 在 ADR / CONTEXT 记下：init 为标准命令、拥有根命令、域 init 委托同一 service；必要时同步 `edges-memory-init` skill 与 README
 
 **决策记录：**
 用户睡前授权，只读 grill 清单共 12 题，由 Grok Bot 于 2026-10-08 03:07（UTC+8）逐题拍板。全文见 [plan](../../../../docs/superpowers/plans/2026-10-08-edges-unified-init.md)。

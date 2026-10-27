@@ -13,7 +13,7 @@ metadata:
   edges-updated-at: '2026-10-06T16:12:57+00:00'
 ---
 
-设计讨论、grill、改模型时，关键取舍一经用户确认或用户明确纠正，必须当轮用 `$project-memory-remember` 落库；不能只改 CONTEXT / 对话里达成一致却不写记忆。
+设计讨论、grill、改模型时，关键取舍一经用户确认或用户明确纠正，必须当轮用 `$edges-memory-remember` 落库；不能只改 CONTEXT / 对话里达成一致却不写记忆。
 
 **Why:** 用户 2026-10-06 在节点模型 grill 中明确要求。grill 轮次多、结论会翻案，只靠对话或未提交的 CONTEXT 时，后续 Agent 会丢基础假设（例如系统入口是否带组成登记）。
 

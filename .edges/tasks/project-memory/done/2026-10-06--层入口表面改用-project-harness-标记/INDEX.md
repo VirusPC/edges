@@ -12,8 +12,8 @@ description: >-
   skill 目录名不动。
 ---
 **背景：**
-层入口三章对应的是 Git 项目上的系统二写法（Project Harness），表面仍叫 project-memory 易与「记忆模块 / edges memory 命令」混淆。需要改注释与标题表面，并更新 skill/CLI 读写逻辑；不改 `$project-memory-ask` / `remember` 与 `edges memory` 命令名。
-- 非目标：不改 skill 目录名；不动 `project-memory-type` / entries 本轮合同
+层入口三章对应的是 Git 项目上的系统二写法（Project Harness），表面仍叫 project-memory 易与「记忆模块 / edges memory 命令」混淆。需要改注释与标题表面，并更新 skill/CLI 读写逻辑；不改 `$edges-memory-ask` / `remember` 与 `edges memory` 命令名。
+- 非目标：不改 skill 目录名；不动 `edges-memory-type` / entries 本轮合同
 - 关联：PR https://github.com/VirusPC/edges/pull/166；兄弟卡 `project harness init skill`（init 能力，非本标记改名）
 
 **目标：**

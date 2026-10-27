@@ -12,7 +12,7 @@ function fixture(t: { after(fn: () => void): void }, source: string) {
 }
 const legacy='<!-- task-projects:start -->\nCustom prose\n- [Project](project/AGENTS.md) — Description\n<!-- task-projects:end -->';
 for(const nested of [false,true]) for(const crlf of [false,true]) test(`migration preserves prose and is idempotent nested=${nested} crlf=${crlf}`,async t=>{
- let source='# Board\n\n'+(nested?'<!-- project-memory-local:start -->\n':'')+legacy+(nested?'\n<!-- project-memory-local:end -->':'')+'\nTail\n';
+ let source='# Board\n\n'+(nested?'<!-- edges-local:start -->\n':'')+legacy+(nested?'\n<!-- edges-local:end -->':'')+'\nTail\n';
  if(crlf) source=source.replaceAll('\n','\r\n');
  const {root,file}=fixture(t,source);const plan=planAgentsIndexes(root);
  assert.equal(fs.readFileSync(file,'utf8'),source);assert.equal(plan.edits.length,1);
@@ -24,14 +24,14 @@ for(const nested of [false,true]) for(const crlf of [false,true]) test(`migratio
 test('migration rejects conflicts and source drift before writing',async t=>{
  const {root,file}=fixture(t,'# Board\n'+legacy+'\n');const plan=planAgentsIndexes(root);
  fs.appendFileSync(file,'drift\n');await assert.rejects(()=>applyAgentsIndexes(plan),/changed|modified|snapshot/i);
- fs.writeFileSync(file,'<!-- project-memory-children:start -->\n- [Project](project/AGENTS.md) — Description\n<!-- project-memory-children:end -->\n'+legacy);
+ fs.writeFileSync(file,'<!-- edges-descendants:start -->\n- [Project](project/AGENTS.md) — Description\n<!-- edges-descendants:end -->\n'+legacy);
  assert.throws(()=>planAgentsIndexes(root),/conflict/i);
 });
 for(const source of ['<!-- task-projects:start -->',legacy+'\n'+legacy,'<!-- task-projects:end -->\n<!-- task-projects:start -->']) test('migration rejects malformed markers '+source.length,t=>{
  const {root}=fixture(t,source);assert.throws(()=>planAgentsIndexes(root),/marker/i);
 });
 test('migration deduplicates matching identities and preserves unrelated links',async t=>{
- const source='<!-- project-memory-local:start -->\n- [Other](other/AGENTS.md) — Keep\n- [Project](project/AGENTS.md) — Description\n<!-- project-memory-local:end -->\n'+legacy.replace('<!-- task-projects:end -->','- [Project](<project/AGENTS.md>) — Description\n<!-- task-projects:end -->');
+ const source='<!-- edges-local:start -->\n- [Other](other/AGENTS.md) — Keep\n- [Project](project/AGENTS.md) — Description\n<!-- edges-local:end -->\n'+legacy.replace('<!-- task-projects:end -->','- [Project](<project/AGENTS.md>) — Description\n<!-- task-projects:end -->');
  const {root,file}=fixture(t,source);await applyAgentsIndexes(planAgentsIndexes(root));
  const node=new AgentsNode(file).parse(fs.readFileSync(file,'utf8'));
  assert.equal(node.children.length,2);assert.equal(node.children[0].name,'Other');

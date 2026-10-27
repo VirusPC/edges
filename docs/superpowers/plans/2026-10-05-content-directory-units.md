@@ -32,5 +32,5 @@ Files: `packages/cli/scripts/content-directory-migration.ts`、`scripts/migratio
 - [x] 先运行无 --apply 的全仓预览，核对文档数、附件数、冲突、缺失和歧义引用。
 - [x] 根据用户选定策略应用；保留 before/after 文件映射及哈希审计至临时报告，不提交原文快照。
 - [x] 对所有改写文件做引用前后目标比较，所有附件做 SHA-256 比较；正文通过移除实际引用目标后比较，确保未重写文字。
-- [x] 更新 README、edges 目录说明和迁移指南；用 project-memory-remember 更新已有目录决策记忆。
+- [x] 更新 README、edges 目录说明和迁移指南；用 edges-memory-remember 更新已有目录决策记忆。
 - [x] 运行脚本严格类型检查、CLI 类型检查、迁移相关测试和构建；独立代码审查通过后提交并更新原 PR，不合并。

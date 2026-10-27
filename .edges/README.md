@@ -1,6 +1,6 @@
 # 本层 harness 材料索引
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [.edges/memory/feedbacks/README.md](<memory/feedbacks/README.md>) — 用户的纠正、确认过的做法与必须遵守的禁止模式。
@@ -12,4 +12,4 @@
 - [.edges/projects/README.md](<projects/README.md>) — 项目模块的 harness 条目。叶子登记在 scope 的 projects/README.md。
 - [.edges/notes/README.md](<notes/README.md>) — 笔记模块的 harness 条目。叶子登记在 scope 的 notes/README.md。
 - [.edges/memory/users/README.md](<memory/users/README.md>) — 绑定本仓库、不宜公开的个人材料（个人偏好、凭据与密钥）。本机文件，不进 git。
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->

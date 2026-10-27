@@ -13,7 +13,7 @@ metadata:
   edges-updated-at: '2026-10-18T05:55:14+00:00'
 ---
 
-改任意层级的领域 `tasks/` 或维护 `.edges/tasks/` 看板（状态/字段/搬家等）必须优先使用 `edges tasks`（list/get/create/update/status 等）。不传 `--super` 写 `<scope>/.edges/tasks`；`--super` 写 `<scope>/tasks`。不要默认手写 Markdown 再 git push。本条是仓根 `prefer_repo_skills_and_cli` 的看板特化：已有 tasks 相关 Skill（如 `project-tasks-classify`）也要优先用；通用 CRUD Skill 仍是 backlog。
+改任意层级的领域 `tasks/` 或维护 `.edges/tasks/` 看板（状态/字段/搬家等）必须优先使用 `edges tasks`（list/get/create/update/status 等）。不传 `--super` 写 `<scope>/.edges/tasks`；`--super` 写 `<scope>/tasks`。不要默认手写 Markdown 再 git push。本条是仓根 `prefer_repo_skills_and_cli` 的看板特化：已有 tasks 相关 Skill（如 `edges-tasks-classify`）也要优先用；通用 CRUD Skill 仍是 backlog。
 
 **Why:**
 与 ADR 0005 及仓根「仓内优先用仓库 Skill 与 CLI」一致；避免双轨导致 frontmatter/路径漂移；暴露 CLI/Skill 缺口才能补齐。

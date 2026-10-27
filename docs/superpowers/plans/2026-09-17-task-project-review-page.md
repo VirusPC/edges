@@ -23,7 +23,7 @@
 - `action` on export is derived in the page: `keep` if `suggested === current`, else `move` (do not invent `create-then-move` in the page; Skill still may `project create` before `update --project` when suggested is unknown)
 - Default output: OS temp file; `--out <path>` overrides; print absolute path in JSON success payload; do **not** open a browser
 - HTML shell lives in the CLI package (`packages/cli/.../assets/`), not under `tools/`
-- classifyTasks Skill path: `packages/skills/project-tasks-classify/` — update step 4 to review-page primary path; Markdown table = no-GUI fallback only
+- classifyTasks Skill path: `packages/skills/edges-tasks-classify/` — update step 4 to review-page primary path; Markdown table = no-GUI fallback only
 - proposeTypes Skill is **not** on main yet (`packages/skills/project-tasks-propose-types/` missing). Do **not** invent that Skill in this plan; only ensure CLI is reusable. Optional one-line note in `packages/skills/README.md` or classify CHANGELOG cross-link is enough
 - Do not put `ingest` / `fs` / `writer` / `now` / `repoPath` on `CliContext`
 - Relative TypeScript imports use `.js` (nodenext)
@@ -55,10 +55,10 @@ Verified against `origin/main` after ADR 0012 merge (`92ea00a`). Command tree: `
 - `packages/cli/README.md` — document `project review-page`; Capability Surface stays CLI + Skill + MCP
 - `packages/cli/test/tasks/cli.test.ts` — project help lists `review-page`
 - `packages/cli/test/tasks/parse.test.ts` — happy path `--from` fixture; bad JSON → exit 2; unknown `classify` still fails
-- `packages/skills/project-tasks-classify/SKILL.md` — step 4 primary = write suggestions JSON → `review-page` → give path → **STOP** → wait for pasted export → step 5 apply; Markdown table = fallback
-- `packages/skills/project-tasks-classify/CHANGELOG.md` — note review-page gate
+- `packages/skills/edges-tasks-classify/SKILL.md` — step 4 primary = write suggestions JSON → `review-page` → give path → **STOP** → wait for pasted export → step 5 apply; Markdown table = fallback
+- `packages/skills/edges-tasks-classify/CHANGELOG.md` — note review-page gate
 - `CHANGELOG.md` `[Unreleased]` — Added `edges tasks project review-page`
-- `.memory/projects/project_task_project_review_page_render_only_cli.md` — How-to: landed (via `$project-memory-remember` if that skill is used; otherwise edit the pointer file consistently with prior plans)
+- `.memory/projects/project_task_project_review_page_render_only_cli.md` — How-to: landed (via `$edges-memory-remember` if that skill is used; otherwise edit the pointer file consistently with prior plans)
 
 **Do not create/commit**
 
@@ -656,8 +656,8 @@ EOF
 ### Task 3: classifyTasks Skill + changelog pointers
 
 **Files:**
-- Modify: `packages/skills/project-tasks-classify/SKILL.md`
-- Modify: `packages/skills/project-tasks-classify/CHANGELOG.md`
+- Modify: `packages/skills/edges-tasks-classify/SKILL.md`
+- Modify: `packages/skills/edges-tasks-classify/CHANGELOG.md`
 - Modify: `CHANGELOG.md`
 - Modify: `.memory/projects/project_task_project_review_page_render_only_cli.md` (How-to landed)
 - Optional: `packages/skills/README.md` one line that proposeTypes (when added) reuses `project review-page`
@@ -685,8 +685,8 @@ Skill-local CHANGELOG + root `CHANGELOG.md` `[Unreleased]` Added line for the co
 - [ ] **Step 3: Commit**
 
 ```bash
-git add packages/skills/project-tasks-classify/SKILL.md \
-  packages/skills/project-tasks-classify/CHANGELOG.md \
+git add packages/skills/edges-tasks-classify/SKILL.md \
+  packages/skills/edges-tasks-classify/CHANGELOG.md \
   CHANGELOG.md \
   .memory/projects/project_task_project_review_page_render_only_cli.md
 git commit -m "$(cat <<'EOF'

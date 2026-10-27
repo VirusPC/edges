@@ -13,7 +13,7 @@ metadata:
   edges-updated-at: '2026-10-06T16:21:18+00:00'
 ---
 
-任意目录都可以有真实系统入口 `AGENTS.md`：由用户决定重点维护哪个目录，并自行调用 init（现 `$project-memory-init`，待演进为 project harness init）初始化。不是按路径白名单禁止 Task Project / 类型目录拥有系统入口。
+任意目录都可以有真实系统入口 `AGENTS.md`：由用户决定重点维护哪个目录，并自行调用 init（现 `$edges-memory-init`，待演进为 project harness init）初始化。不是按路径白名单禁止 Task Project / 类型目录拥有系统入口。
 
 **Why:** 用户 2026-10-06 grill Q10。递归系统二的基础是系统入口带组成；谁拥有入口是产品/用户选择，不是「只有某些固定路径才算系统二」。
 

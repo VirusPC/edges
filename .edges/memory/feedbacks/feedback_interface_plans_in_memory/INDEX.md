@@ -15,7 +15,7 @@ metadata:
 
 接入层的调研、技术方案、设计决策写入仓库根 `.edges/memory`（reference / project）。不要放 `docs/`，也不要放 `knowledge/projects`。2026-10-20 起不再有 `extensions/.memory` 或 `extensions/docs`。
 
-**Why:** 根 `AGENTS.md` 索引 `.edges/memory`。方案放进 `docs/` 后，下次 `$project-memory-ask` 会当没有这条记忆，重复调研。`docs/` 是给人看的说明，不是决策的家。2026-09-07 曾把调研初稿放到当时的 `extensions/docs/` 被纠正。2026-10-20 平铺取消那一层，家改到根 `.edges/memory`。见 ADR 0040。
+**Why:** 根 `AGENTS.md` 索引 `.edges/memory`。方案放进 `docs/` 后，下次 `$edges-memory-ask` 会当没有这条记忆，重复调研。`docs/` 是给人看的说明，不是决策的家。2026-09-07 曾把调研初稿放到当时的 `extensions/docs/` 被纠正。2026-10-20 平铺取消那一层，家改到根 `.edges/memory`。见 ADR 0040。
 
 **How to apply:**
 

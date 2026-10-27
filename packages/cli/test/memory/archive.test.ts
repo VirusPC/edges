@@ -79,7 +79,7 @@ test('restore refuses any occupied content and force replaces the whole users su
 test('only a byte-identical empty generated index is unoccupied', async t => {
   const { source, destination } = await fixture(t);
   const { archive } = await backupUserMemory({ repoDir: source });
-  const template = await readFile(new URL('../../../skills/project-memory-init/references/templates/USER.tmpl.md', import.meta.url), 'utf8');
+  const template = await readFile(new URL('../../../skills/edges-memory-init/references/templates/USER.tmpl.md', import.meta.url), 'utf8');
   await mkdir(path.join(destination, users), { recursive: true });
   const index = path.join(destination, users, TYPE_INDEX_FILE_NAME);
   await writeFile(index, template.trimEnd() + '\n');
@@ -220,14 +220,14 @@ test('backup and restore reject legacy coexistence without changing either layou
   for (const root of [source, destination]) assert.equal(await readFile(path.join(root, '.memory/users/old.md'), 'utf8'), 'legacy bytes');
   assert.equal(await readFile(path.join(destination, users, 'current.md'), 'utf8'), 'current bytes');
   assert.equal(await readFile(path.join(source, users, 'user_pref.md'), 'utf8'), 'private bytes\n');
-  await assert.rejects(stat(path.join(source, 'user-memory-backup-after.tar.gz')), { code: 'ENOENT' });
+  await assert.rejects(stat(path.join(source, 'edges-user-memory-backup-after.tar.gz')), { code: 'ENOENT' });
 });
 
 test('backup refuses hardlinked sources before producing an unusable archive', async t => {
   const { source } = await fixture(t);
   await link(path.join(source, users, 'user_pref.md'), path.join(source, users, 'second.md'));
   await assert.rejects(backupUserMemory({ repoDir: source, timestamp: 'hardlink' }), /hardlink|hard link|硬链接/i);
-  await assert.rejects(stat(path.join(source, 'user-memory-backup-hardlink.tar.gz')), { code: 'ENOENT' });
+  await assert.rejects(stat(path.join(source, 'edges-user-memory-backup-hardlink.tar.gz')), { code: 'ENOENT' });
 });
 
 test('explicit CLI target retains home expansion for the service resolver', async () => {
@@ -276,7 +276,7 @@ test('backup refuses an actually unignored source member before creating its arc
   await exposePrivateMember(source, 'user_pref.md');
   const before = await readFile(path.join(source, users, 'user_pref.md'));
   await assert.rejects(backupUserMemory({ repoDir: source, timestamp: 'exposed' }), /private-ignore|忽略/);
-  await assert.rejects(stat(path.join(source, 'user-memory-backup-exposed.tar.gz')), { code: 'ENOENT' });
+  await assert.rejects(stat(path.join(source, 'edges-user-memory-backup-exposed.tar.gz')), { code: 'ENOENT' });
   assert.deepEqual(await readFile(path.join(source, users, 'user_pref.md')), before);
 });
 
@@ -296,9 +296,9 @@ test('restore refuses an actually unignored destination member before replacing 
 test('backup checks its exact output path against a filename-specific negation', async t => {
   const { source } = await fixture(t);
   execFileSync('git', ['init', '-q', source]);
-  await writeFile(path.join(source, '.gitignore'), 'user-memory-backup-*.tar.gz\n!user-memory-backup-fixed.tar.gz\n');
+  await writeFile(path.join(source, '.gitignore'), 'edges-user-memory-backup-*.tar.gz\n!edges-user-memory-backup-fixed.tar.gz\n');
   await assert.rejects(backupUserMemory({ repoDir: source, timestamp: 'fixed' }), /private-ignore|忽略/);
-  await assert.rejects(stat(path.join(source, 'user-memory-backup-fixed.tar.gz')), { code: 'ENOENT' });
+  await assert.rejects(stat(path.join(source, 'edges-user-memory-backup-fixed.tar.gz')), { code: 'ENOENT' });
 });
 
 test('restore checks the generated stage path before its first private write', async t => {
@@ -321,7 +321,7 @@ test('restore checks the generated stage path before its first private write', a
 test('unignored sample names do not block actually ignored archive and stage paths', async t => {
   const { source, destination } = await fixture(t);
   for (const root of [source, destination]) execFileSync('git', ['init', '-q', root]);
-  await writeFile(path.join(source, '.gitignore'), 'user-memory-backup-*.tar.gz\n!user-memory-backup-sample.tar.gz\n');
+  await writeFile(path.join(source, '.gitignore'), 'edges-user-memory-backup-*.tar.gz\n!edges-user-memory-backup-sample.tar.gz\n');
   await writeFile(path.join(destination, '.gitignore'), '/.private-user-memory-*/\n!/.private-user-memory-sample/\n');
   const { archive } = await backupUserMemory({ repoDir: source, timestamp: 'fixed' });
   await restoreUserMemory({ archive, repoDir: destination });

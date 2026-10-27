@@ -23,7 +23,7 @@ metadata:
 **How to apply:**
 本条仅归根维护看板，不要求其他层级采用同样分组。当前分组与任务分布以看板索引为准。以下清单记录当时操作约定；其中“先不动”“本轮”及 #78/#79 等阶段性限制不作为永久要求。
 - 新开工作项可以落到对应 project；现有 `_default` 卡先不动。
-- 不要对 `.edges/tasks/<project>/` 跑 `project-memory-init`（只要轻量 AGENTS.md）。
+- 不要对 `.edges/tasks/<project>/` 跑 `edges-memory-init`（只要轻量 AGENTS.md）。
 - 不要手改根 `.edges/tasks/AGENTS.md` 的 Task Projects 节（#78 CLI 维护；本轮未写该节）。
 - 不要把`packages/evaluation/` 当成看板 project，也不要在本轮实现 classify 或合并 #78/#79。
 - 七个 slug 与职责：project-memory（类型/索引/reshape/与 docs 边界）；edges-tasks（看板与 Task 工作流）；edges-cli-platform（CLI/脚手架/发布/鉴权）；evaluation（评测与可重复 cases）；observation（观测，与 evaluation 分开）；site-and-content（站点/posts/badge/内容整理）；agent-clients-ux（客户端/插件/外设与本地 UX）。

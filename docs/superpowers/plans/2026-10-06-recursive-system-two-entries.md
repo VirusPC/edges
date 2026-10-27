@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** 落地系统一 / 系统二入口分工：`AGENTS.md` 只挂系统维护信息；`README.md` 用 `project-entries-*` 挂内容；类型入口改 README；`type` 扩展为 `agents|readme|…|text`；存量迁 `INDEX.md`。
+**Goal:** 落地系统一 / 系统二入口分工：`AGENTS.md` 只挂系统维护信息；`README.md` 用 `edges-entries-*` 挂内容；类型入口改 README；`type` 扩展为 `agents|readme|…|text`；存量迁 `INDEX.md`。
 
 **Architecture:** Wave A 先改标记/标题、README 组成 codec、traverse（**默认全部 children** + 双文件并边）、memory 类型索引与 Task Project 等「伪系统入口」迁 README、根 README entries、INDEX 改名——立刻分清系统一/二。Wave B 再扁平类层次、`type` 收口、`SuperAgentsNode` + `--super`、harness init。组成解析参数化现有 `InternalSyntax` / blocks，不另起 Markdown 引擎。
 **Tech Stack:** TypeScript、Node ≥22、`node:test`、tsx、现有 `edges-cli`。不新增依赖。
@@ -72,7 +72,7 @@ flowchart TB
 
   Maint --> TypeIdx[".edges/memory/*/README.md<br/>类型入口"]
   Maint --> HTasks[".edges/tasks/…"]
-  TypeIdx -->|"project-entries-local<br/>本层内容"| MemLeaf["memory 条目 INDEX.md"]
+  TypeIdx -->|"edges-entries-local<br/>本层内容"| MemLeaf["memory 条目 INDEX.md"]
 
   RR -->|"本层内容"| Tasks["tasks/… 本层入口"]
   RR -->|"本层内容"| Notes["notes/…"]
@@ -130,15 +130,15 @@ flowchart LR
 ## Global Constraints
 
 - AGENTS 标记仍 `edges-*`；标题 **本层硬约束 / 本层系统维护信息 / 下层系统维护信息**。旧标题 `本层组成`/`下层节点`/更早别名只读兼容。
-- README 标记 **`project-entries-local` / `project-entries-descendants`**；标题 **本层内容 / 下层内容**。
+- README 标记 **`edges-entries-local` / `edges-entries-descendants`**；标题 **本层内容 / 下层内容**。
 - 下层同合同：AGENTS descendants → AGENTS；README descendants → README。
 - `type` 目标：`agents|readme|task|memory|note|skill|text`。旧 `internal`/`leaf` 读兼容；写不发 `internal`。
-- 类型入口 → `README.md` + `project-entries-*`；`project-memory-type` 身份头保留在 README 顶部；列表不用 `project-memory-entries`（读兼容至迁完）。
+- 类型入口 → `README.md` + `edges-entries-*`；`edges-memory-type` 身份头保留在 README 顶部；不读已删除的 `project-memory-entries`。
 - 叶子入口文件名目标 **`INDEX.md`**；读兼容 `index.md` 至迁完。
 - 虚拟超节点须显式 **`--super`**；默认取当前 scope 的 `AGENTS.md`；缺 AGENTS 不自动合成超节点。
 - traverse **默认**走全部 `children`（local∪descendants）；本层-only 用显式 `localOnly: true`；`includeHarness` 仍默认 false（Q20）。
 - 类层次：Wave B 各节点直继 BaseNode；本计划默认 **删除** `LeafNode`/`isLeaf` 持久语义，`InternalNode` 先改 `type=agents` 再改名为 `AgentsNode`（可短暂 `export { AgentsNode as InternalNode }`）。
-- 不改：`.edges/` 目录名、`edges memory` 命令名、skill 目录名 `project-memory-*`、posts 正文（仅 INDEX 改名）。
+- 不改：`.edges/` 目录名、`edges memory` 命令名、posts 正文（仅 INDEX 改名）。本计划当时不改 skill 目录名；后来由 [ADR 0049](../../adr/0049-edges-skills-markers-rename.md) 改为 `edges-*`。
 - 批量迁移：可预览、冲突检查、幂等；禁止逐文件手改。
 - 测试：`pnpm --filter edges-cli test`（或单文件 `node --test --import tsx …`）。Commit：`type: subject` + `Co-authored-by: Cursor Agent <cursoragent@cursor.com>`。
 
@@ -151,7 +151,7 @@ flowchart LR
 | 组成节点 | `…/agents/agents-node.ts` → 演进为 Agents/Readme |
 | 遍历 | `…/operations/traverse.ts` + NodeService 加载 |
 | 类型索引路径 | `…/services/memory/paths.ts`, `types.ts`, `entries.ts`, `init.ts`, `add-type.ts` |
-| 模板 | `packages/skills/project-memory-init/references/templates/*` |
+| 模板 | `packages/skills/edges-memory-init/references/templates/*` |
 | 协议 | `…/PROTOCOL.md`, `LAYOUT.md` |
 | 迁移脚本 | `scripts/migrate-*.mts` 或 `packages/cli/scripts/`（与现有 migrate 同风格） |
 | 根 README | `/README.md` |
@@ -165,9 +165,9 @@ flowchart LR
 **Files:**
 - Modify: `packages/cli/src/domain/models/layout.ts`
 - Modify: `packages/cli/test/models/agents-node.test.ts`
-- Modify: `packages/skills/project-memory-init/references/LAYOUT.md`
-- Modify: `packages/skills/project-memory-init/references/PROTOCOL.md`（只改称呼，不写 HTML 标记名）
-- Modify: `packages/skills/project-memory-init/references/templates/AGENTS.tmpl.md`
+- Modify: `packages/skills/edges-memory-init/references/LAYOUT.md`
+- Modify: `packages/skills/edges-memory-init/references/PROTOCOL.md`（只改称呼，不写 HTML 标记名）
+- Modify: `packages/skills/edges-memory-init/references/templates/AGENTS.tmpl.md`
 
 **Interfaces:**
 - Produces: `INTERNAL_SECTIONS.localChildren.heading === "本层系统维护信息"`；`descendantChildren.heading === "下层系统维护信息"`；parse 仍认旧标题
@@ -217,7 +217,7 @@ pnpm --filter edges-cli exec node --test --import tsx test/models/agents-node.te
 # apply 后一并 stage 被 rewrite 的各层 AGENTS.md（勿手改标题）
 git add packages/cli/src/domain/models/layout.ts \
   packages/cli/test/models/agents-node.test.ts \
-  packages/skills/project-memory-init/references/ \
+  packages/skills/edges-memory-init/references/ \
   $(git diff --name-only -- '**/AGENTS.md')
 git commit -m "$(cat <<'EOF'
 feat: AGENTS 章节标题改为系统维护信息
@@ -229,7 +229,7 @@ EOF
 
 ---
 
-### Task 2: README `project-entries-*` 组成 codec
+### Task 2: README `edges-entries-*` 组成 codec
 
 **Files:**
 - Modify: `packages/cli/src/domain/models/layout.ts` — 增加 `ENTRY_NAMES.readme`、`ENTRIES_SECTIONS`、`identifyNodeType` 认 `README.md` → 暂映射可解析组成的节点
@@ -239,7 +239,7 @@ EOF
 
 **Interfaces:**
 - Consumes: Task 1 的 section 模式
-- Produces: `ReadmeNode`（或等价）parse/serialize `project-entries-local|descendants`；无 constraints 区块（除非未来需要）
+- Produces: `ReadmeNode`（或等价）parse/serialize `edges-entries-local|descendants`；无 constraints 区块（除非未来需要）
 
 - [ ] **Step 1: 写失败测试**
 
@@ -252,17 +252,17 @@ const md = `# Root
 
 Intro.
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [Tasks](tasks/README.md) — domain board
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->
 
-<!-- project-entries-descendants:start -->
+<!-- edges-entries-descendants:start -->
 ## 下层内容
 
 - [Nested](nested/README.md) — nested org
-<!-- project-entries-descendants:end -->
+<!-- edges-entries-descendants:end -->
 `;
 
 test("readme entries parse local and descendant content", () => {
@@ -274,7 +274,7 @@ test("readme entries parse local and descendant content", () => {
   assert.deepEqual(node.descendantChildren.map((c) => c.id), [
     "/repo/nested/README.md",
   ]);
-  assert.match(node.serialize(), /project-entries-local:start/);
+  assert.match(node.serialize(), /edges-entries-local:start/);
   assert.match(node.serialize(), /## 本层内容/);
 });
 ```
@@ -300,10 +300,10 @@ export const ENTRY_NAMES = {
 } as const;
 
 export const ENTRIES_SECTIONS = {
-  localChildren: { heading: "本层内容", marker: "project-entries-local" },
+  localChildren: { heading: "本层内容", marker: "edges-entries-local" },
   descendantChildren: {
     heading: "下层内容",
-    marker: "project-entries-descendants",
+    marker: "edges-entries-descendants",
   },
 } as const;
 ```
@@ -320,7 +320,7 @@ Run: 同上；再跑 `test/models/agents-node.test.ts` 防回归。
 
 ```bash
 git commit -m "$(cat <<'EOF'
-feat: README project-entries 组成 codec
+feat: README edges-entries 组成 codec
 
 Co-authored-by: Cursor Agent <cursoragent@cursor.com>
 EOF
@@ -409,7 +409,7 @@ EOF
 **Files:**
 - Modify: `packages/cli/src/services/memory/paths.ts` — `typeIndexRelpath` → `…/README.md`
 - Modify: `types.ts`, `entries.ts`, `init.ts`, `add-type.ts`, `agents.ts`（链到类型索引的 href）
-- Modify: 全部 `packages/skills/project-memory-init/references/templates/{USER,FEEDBACK,PROJECT,REFERENCE,MANAGED,REFERENCED,TYPE}.tmpl.md` — entries 区块改 `project-entries-*` + 标题本层内容；保留 `project-memory-type` 头
+- Modify: 全部 `packages/skills/edges-memory-init/references/templates/{USER,FEEDBACK,PROJECT,REFERENCE,MANAGED,REFERENCED,TYPE}.tmpl.md` — entries 区块改 `edges-entries-*` + 标题本层内容；保留 `edges-memory-type` 头
 - Modify: `AGENTS.tmpl.md` local 链接 `…/README.md`
 - Modify: LAYOUT.md 类型入口段
 - Test: 现有 `test/memory/*.test.ts` 中断言 `AGENTS.md` 类型索引的用例
@@ -442,7 +442,7 @@ Run: `pnpm --filter edges-cli exec node --test --import tsx './test/memory/**/*.
 
 ```bash
 git commit -m "$(cat <<'EOF'
-feat: 类型入口改为 README + project-entries
+feat: 类型入口改为 README + edges-entries
 
 Co-authored-by: Cursor Agent <cursoragent@cursor.com>
 EOF
@@ -456,7 +456,7 @@ EOF
 **Files:**
 - Create: `scripts/migrations/migrate-type-index-to-readme.mts`（或 CLI 包内 scripts，与 `migrate:project-harness-markers` 同注册方式）
 - Modify: 根与各层 `.edges/memory/*/AGENTS.md`、`.edges/skills/*/AGENTS.md` → README
-- Modify: **Task Project 等仅列系统一孩子、无真实系统二材料的目录**（如 `.edges/tasks/<project>/AGENTS.md`、`tasks/<project>/AGENTS.md` 若只是任务列表）：组成迁到同目录 `README.md` + `project-entries-*`；若该目录未用户 init 为系统入口，删除或不再维持伪 AGENTS（与 Q10/Q18 一致——有列表 ≠ 系统入口）
+- Modify: **Task Project 等仅列系统一孩子、无真实系统二材料的目录**（如 `.edges/tasks/<project>/AGENTS.md`、`tasks/<project>/AGENTS.md` 若只是任务列表）：组成迁到同目录 `README.md` + `edges-entries-*`；若该目录未用户 init 为系统入口，删除或不再维持伪 AGENTS（与 Q10/Q18 一致——有列表 ≠ 系统入口）
 - 更新所有指向旧路径的链接；`package.json` script 入口
 
 **Interfaces:**
@@ -465,10 +465,10 @@ EOF
 
 - [ ] **Step 1: 脚本骨架（preview）**
 
-**A. 类型索引：** `.edges/memory/*/`、`.edges/skills/*/` 下含 `project-memory-type` / `project-memory-entries` 的 `AGENTS.md` →
+**A. 类型索引：** `.edges/memory/*/`、`.edges/skills/*/` 下含 `edges-memory-type` / `edges-entries-local` 的 `AGENTS.md` →
 
-1. entries → `project-entries-*`，标题「本层内容」（有下层则「下层内容」）
-2. 保留 `project-memory-type` 头
+1. entries → `edges-entries-*`，标题「本层内容」（有下层则「下层内容」）
+2. 保留 `edges-memory-type` 头
 3. 写入 `README.md`，apply 时删旧 AGENTS
 4. 更新层 AGENTS 链接
 
@@ -496,7 +496,7 @@ EOF
 ### Task 6: 根 README 本层内容（Q9b）
 
 **Files:**
-- Modify: `/README.md` — 追加 `project-entries-local`（及如需要的 descendants）
+- Modify: `/README.md` — 追加 `edges-entries-local`（及如需要的 descendants）
 - Test: 可选小测试读根 README 的 localChildren 含 tasks
 
 **链目标锁定（本仓现行）：**
@@ -513,7 +513,7 @@ EOF
 
 ```bash
 git commit -m "$(cat <<'EOF'
-docs: 根 README 增加 project-entries 本层内容
+docs: 根 README 增加 edges-entries 本层内容
 
 Co-authored-by: Cursor Agent <cursoragent@cursor.com>
 EOF
@@ -684,7 +684,7 @@ EOF
 | Spec 要求 | Task |
 | --- | --- |
 | AGENTS 标题系统维护信息 + 存量刷新 | 1 |
-| README project-entries + 标题 | 2 |
+| README edges-entries + 标题 | 2 |
 | 下层同合同递归 | 2 + 3 |
 | 双文件遍历分工 | 3 |
 | traverse 默认全部 children / `localOnly`（Q20） | 3 |
@@ -700,7 +700,7 @@ EOF
 
 ## 验收（实施后，对齐 spec）
 
-- 新写 AGENTS 只有系统维护信息标题与 `edges-*`；README 只有 `project-entries-*` / 本层·下层内容
+- 新写 AGENTS 只有系统维护信息标题与 `edges-*`；README 只有 `edges-entries-*` / 本层·下层内容
 - 旧 AGENTS 标题仍能 parse；写回只发新标题
 - 默认 traverse 进入 descendants；`localOnly` 不进入
 - 同目录双文件：系统一孩子不在 AGENTS 组成字段里，却能经并边 traverse 到；不扫盘
@@ -715,4 +715,4 @@ EOF
 - 双写校验：spec 禁止同一批系统一孩子写进 AGENTS+README；本计划不单开 validate Task——serialize/迁移路径自觉只写边界，必要时在 Task 3/5 加断言。
 - INDEX/SKILL 带组成：Wave B 上收 BaseNode 后自然支持；Wave A 不单独做 INDEX entries codec。
 
-开放题锁定：类删除（可短暂 `InternalNode` re-export）；`project-memory-type` 留 README 顶 HTML 头；`--super` → `SuperAgentsNode extends AgentsNode`。
+开放题锁定：类删除（可短暂 `InternalNode` re-export）；`edges-memory-type` 留 README 顶 HTML 头；`--super` → `SuperAgentsNode extends AgentsNode`。

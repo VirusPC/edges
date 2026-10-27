@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 随包技能
+
+- **技能只认 `edges-*`：** 包内技能目录和名字改为 `edges-memory-*`、`edges-tasks-classify`、`edges-user-memory-backup`、`edges-user-memory-restore`、`edges-conversation-to-notes`、`edges-conversation-to-tasks`、`edges-migrate-directory-nodes`、`edges-langfuse-*-tracing`。每个改名技能的版本从 `0.1.0` 重新计数。已经叫 `edges-*` 的技能版本不动。旧名字不再识别。见 [ADR 0049](docs/adr/0049-edges-skills-markers-rename.md)。
+- **两份技能删掉了：** `project-memory-doctor` 和 `project-memory-reshape` 没有替代技能。查索引用 `edges memory doctor`。
+- **类型和清单标记也改成 `edges-*`：** 类型身份是 `edges-memory-type`，组织清单是 `edges-entries-local` 与 `edges-entries-descendants`。不再读取 `project-memory-type`、`project-entries-*`、`project-memory-entries`，也不再把旧的 `project-memory` 层注释当成受管区块。旧文件先用 `scripts/migrations/rewrite-project-harness-markers.mts` 改写。
+
 ### 材料目录
 
 - **材料目录改叫 `.edges`：** 每个作用域的材料目录从 `.harness` 改为 `.edges`。层入口标记改为 `edges` 与 `edges-*`（硬约束、本层、下层、Compose）。旧目录和旧标记不再识别。见 [ADR 0047](docs/adr/0047-rename-harness-directory-to-edges.md) 与 [迁移说明](docs/migrations/2026-10-27-rename-harness-to-edges.md)。此后不再为改名调整这份布局。
@@ -156,8 +162,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 项目记忆（project-memory）
 
-- **层入口改用 edges 标记：** `AGENTS.md` 受管外层与三章改为 `edges` / `constraints` / `local` / `descendants`，写入标题为本层硬约束、本层系统维护信息、下层系统维护信息；旧标题本层组成、下层节点仍可读，刷新时写回现行标题。`edges memory` 读兼容旧 `project-memory-*` 层标记，刷新时写回新标记。类型目录的组织清单是 `README.md`，列表用 `project-entries`（本层内容 / 下层内容）；类型元数据仍用 `project-memory-type`。存量用 `pnpm migrate:project-harness-markers -- --root <作用域>` 预览，加 `--apply` 才写入。
-- **局部记忆回到所有者：** 将先前上收根层的 43 条公开记忆按当前内容恢复到 `extensions`、`project-memory-init`、`shared-extensions`、`knowledge/notes` 和 `.edges/tasks` 的本地索引，保留人工说明；`pnpm restore:local-ownership --root <独立克隆路径> --manifest <已审阅清单> --dry-run` 可审阅符合旧状态的公开纠正。其他克隆的 ignored 私有记录须各自按 journal 显式审阅。
+- **层入口改用 edges 标记：** `AGENTS.md` 受管外层与三章改为 `edges` / `constraints` / `local` / `descendants`，写入标题为本层硬约束、本层系统维护信息、下层系统维护信息；旧标题本层组成、下层节点仍可读，刷新时写回现行标题。`edges memory` 读兼容旧 `project-memory-*` 层标记，刷新时写回新标记。类型目录的组织清单是 `README.md`，列表用 `edges-entries`（本层内容 / 下层内容）；类型元数据仍用 `edges-memory-type`。存量用 `pnpm migrate:project-harness-markers -- --root <作用域>` 预览，加 `--apply` 才写入。
+- **局部记忆回到所有者：** 将先前上收根层的 43 条公开记忆按当前内容恢复到 `extensions`、`edges-memory-init`、`shared-extensions`、`knowledge/notes` 和 `.edges/tasks` 的本地索引，保留人工说明；`pnpm restore:local-ownership --root <独立克隆路径> --manifest <已审阅清单> --dry-run` 可审阅符合旧状态的公开纠正。其他克隆的 ignored 私有记录须各自按 journal 显式审阅。
 - **统一 CLI 执行入口：** Project Memory 的初始化、写入、类型登记、检查、旧布局迁移和私有归档统一由 TypeScript 的 `edges memory` 执行；模板随 CLI 分发。相关 Skill 改为调用 CLI，移除原 Python 执行层。需先构建或安装 Edges CLI，再升级这些 Skill。
 - **私有内容写入前检查：** `edges memory remember` 及迁移、归档恢复命令会核对实际文件的 Git 忽略结果，遇到例外规则放行私有文件时先拒绝写入。强制恢复失败会回滚原目录，无法回滚时保留受保护的恢复副本。
 
@@ -192,7 +198,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 笔记入库与能力面
 
-- **任务人审后落库：** 新增 `conversation-to-tasks`（`skills/conversation-to-tasks`），从对话整理任务草稿，正文按背景 → 目标 → 动作 → 完成标准组织，使用中文栏名。背景和目标必填，动作和完成标准可选；完成标准可在 `grill-with-docs` 后补齐。通过 `edges tasks create` 或 `edges tasks update` 落库，可以在对话确认后写入，也可以写在独立分支上提 PR 审阅。
+- **任务人审后落库：** 新增 `edges-conversation-to-tasks`（`skills/edges-conversation-to-tasks`），从对话整理任务草稿，正文按背景 → 目标 → 动作 → 完成标准组织，使用中文栏名。背景和目标必填，动作和完成标准可选；完成标准可在 `grill-with-docs` 后补齐。通过 `edges tasks create` 或 `edges tasks update` 落库，可以在对话确认后写入，也可以写在独立分支上提 PR 审阅。
 - **CLI 目录改名：** 多命令 CLI 的代码目录从 `extensions/clis` 改为 `cli`，引用旧路径的本地脚本需要同步调整。当时 npm 包名仍为 `edges-cli`，二进制仍为 `edges`，`pnpm --filter edges-cli` 和命令行为不变。（现行包名是 `@viruspc/edges`，见 Unreleased「一行安装 edges 命令」。）
 - **明确本地 CLI 使用方式：** 当时文档写明包名 `edges-cli` 保持 `private`，不发布到 npm registry。日常可用 `pnpm --filter edges-cli exec tsx src/index.ts` 运行；本地 `edges` 二进制来自 `dist/index.js`，需先让 `pnpm --filter edges-cli build` 成功，`prepack` 会运行同一构建流程。（此条已过时：见上方 Unreleased「一行安装 edges 命令」。现行包名是 `@viruspc/edges`，可以发布到 npm。）
 
@@ -207,11 +213,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 跨 Agent 接力的工作项看板改到 [`knowledge/tasks/`](.edges/tasks)。原来 `knowledge/todos/` 里的条目已经改成现在的任务记录格式并迁了过来；旧目录已删除，没有再留跳转说明。
 - 可以用 `edges tasks` 管理这块看板：`edges tasks list`（列出）、`edges tasks get`（查看）、`edges tasks create`（创建）、`edges tasks update`（更新）、`edges tasks status`（改状态）。运行记录可以只读查看：`edges tasks runs`、`edges tasks run-messages`。目前还不能从命令行删除任务，也还没有和 GitHub 同步。创建或更新时可以用 `--priority` 标优先级，取值为 `urgent` / `high` / `medium` / `low` / `none`（写在 `metadata.edges-task-priority`，缺省为 `none`）；列出时可以用 `edges tasks list --sort priority` 按优先级排序。改优先级不会把任务挪到别的状态文件夹。
 - 任务可以归到一个任务项目里，文件放在 `knowledge/tasks/<项目>/` 下；还没分组的放在 `_default`。创建或筛选时用 `--project`，换项目用 `edges tasks update --project`；`edges tasks status` 只在同一个项目内移动。项目的标题和说明用 `edges tasks project list`、`edges tasks project get`、`edges tasks project create`、`edges tasks project update` 管理；任务正文仍以看板上的 markdown 为准。
-- 新增命令 `edges tasks project review-page`：根据分组建议生成一个本地网页，方便用浏览器拖拽调整任务归属。点左侧分组可以筛选列表，拖到分组上可以改归属。新增 classifyTasks 技能（`skills/project-tasks-classify`）按你已经建好的任务项目给整板提出归属建议；确认时默认打开上面的审阅页，再用 `edges tasks update --project` 落地。没有图形界面时可以退回用表格。
+- 新增命令 `edges tasks project review-page`：根据分组建议生成一个本地网页，方便用浏览器拖拽调整任务归属。点左侧分组可以筛选列表，拖到分组上可以改归属。新增 classifyTasks 技能（`skills/edges-tasks-classify`）按你已经建好的任务项目给整板提出归属建议；确认时默认打开上面的审阅页，再用 `edges tasks update --project` 落地。没有图形界面时可以退回用表格。
 
 ### 项目记忆（project-memory）
 
-- 可以用 `$project-memory-add-type` 给某个项目的记忆目录登记一种新的记忆类型；之后查询和写入都会认到它。官方自带的六类不变。用户个人记忆可以写在本机的 `.memory/users/`，这份副本不进 git；换机器时用 `$user-memory-backup` 打包，用 `$user-memory-restore` 恢复。
+- 可以用 `$edges-memory-add-type` 给某个项目的记忆目录登记一种新的记忆类型；之后查询和写入都会认到它。官方自带的六类不变。用户个人记忆可以写在本机的 `.memory/users/`，这份副本不进 git；换机器时用 `$edges-user-memory-backup` 打包，用 `$edges-user-memory-restore` 恢复。
 - 类型记忆入口从 `.memory/FEEDBACK.md` 一类平铺文件改到对应复数目录下的 `AGENTS.md`（例如 `.memory/feedbacks/AGENTS.md`），与该类型条目同处。层入口 `AGENTS.md` 的本层清单改链到这些类型入口。旧平铺文件由 `$project-memory-doctor` 迁走后删除。
 
 ### 评测与观测

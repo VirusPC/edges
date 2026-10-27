@@ -11,7 +11,7 @@ metadata:
   edges-updated-at: "2026-09-15T15:01:34+00:00"
 ---
 
-记忆系统的研究/优点/related-work 笔记写到 `knowledge/projects/memory/`，不要写进 `packages/skills/project-memory-init/.memory`。
+记忆系统的研究/优点/related-work 笔记写到 `knowledge/projects/memory/`，不要写进 `packages/skills/edges-memory-init/.memory`。
 
 **Why:** 用户先点过 skill 层 `.memory`，随后纠正为 `knowledge/projects/memory/`（记忆研究工作区）。skill 层记忆是协议与设计决策的事实源，研究文是给人读的项目笔记；混放会让 ask 把调研文当仓规，也会把公开研究草稿塞进 skill 家。
 

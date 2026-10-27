@@ -31,7 +31,7 @@ Task Project 人确认闸门是 render-only CLI `edges tasks project review-page
 - `≥768px`：保持 #126 的三栏、可拖分隔线、左栏拖放。观感只允许多出卡片菜单和分区标题上的收起。桌面不要「回到看板」，也不要窄屏那种盖住看板的面板。
 - 命令是 `edges tasks project review-page --from <path|-> [--out <path>]`；成功 JSON 的 `command` 为 `project.review-page`，含绝对 `path`。默认写 OS 临时目录，不打开浏览器。
 - 导出行用 `stem`（文件名去 `.md`），不是 title，也不等于 frontmatter / 文档 `name`。页上 `action` 只有 `keep` | `move`。拖到左栏或「移到项目…」只改 project；中栏不产生状态变更。
-- classifyTasks 第 4 步主路径（已写进 `packages/skills/project-tasks-classify/SKILL.md`）：写 JSON → review-page → 给人 HTML 路径 → 停止 → 等贴回 JSON → 现有 CLI apply。一次性人闸可 `publish` 再给人可达 URL（ADR 0013）。看 main 整板走 `/tasks/`（ADR 0021），不要 `publish` 当固定入口。Markdown 表只作无 GUI 回退。
+- classifyTasks 第 4 步主路径（已写进 `packages/skills/edges-tasks-classify/SKILL.md`）：写 JSON → review-page → 给人 HTML 路径 → 停止 → 等贴回 JSON → 现有 CLI apply。一次性人闸可 `publish` 再给人可达 URL（ADR 0013）。看 main 整板走 `/tasks/`（ADR 0021），不要 `publish` 当固定入口。Markdown 表只作无 GUI 回退。
 - Task Doc 字段真源是 `packages/cli/schemas/task-doc.v1.json`。页只读页内 `doc`，不读磁盘 `.md`，生成器不写 `bodyHtml`。
 - 改审阅壳时，只提交源码和构建管线。由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成 `packages/cli/src/commands/tasks/project/assets/review-page/` 下的 `index.html`、`review.js`、`review.css`，该目录 gitignore。`review-page.ts` 只读这三份文件，把 JS/CSS 内联进单 HTML，把载荷写成 `#edges-review-payload` 的 JSON script。导航用 hash 或 hash+query。不要在用户机器上 `vite build`，不要把产物提交进 git，不要默认 zip+base64，不要 path history 或要服务器 rewrite 的 react-router。源码放仓根 `packages/apps/tasks-review-app/`，不要放进 `packages/cli/` 或 `src/tasks/`，运行时不要 import Vite 源码树。
 - 不要公开 `edges tasks classify`；不要新开 `apply-review`；不要 `--mode`；不要审阅页 MCP；不要自动打开浏览器或靠 Grok Bot 预览当闸门。

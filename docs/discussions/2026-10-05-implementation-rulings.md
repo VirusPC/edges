@@ -54,7 +54,7 @@ flowchart LR
 
 2026-10-05：用户确认第 1 项执行顺序没有问题，并询问归属是否处理完成。
 
-公开归属修正已在 PR #161 分支完成：43 条记忆按当前内容恢复到原所有者，25 个类型索引说明及相关入口、引用已同步并验证。分布为 extensions 16 条、packages/skills/project-memory-init 17 条、shared-extensions 1 条、knowledge/notes 1 条，以及原 Tasks 8 条归 .edges/tasks。第 3 项具体归属选择仍待讨论，此处确认执行顺序不等于预先确认第 3 项。
+公开归属修正已在 PR #161 分支完成：43 条记忆按当前内容恢复到原所有者，25 个类型索引说明及相关入口、引用已同步并验证。分布为 extensions 16 条、packages/skills/edges-memory-init 17 条、shared-extensions 1 条、knowledge/notes 1 条，以及原 Tasks 8 条归 .edges/tasks。第 3 项具体归属选择仍待讨论，此处确认执行顺序不等于预先确认第 3 项。
 
 完成范围不包括真实私有内容：私有迁移工具已实现并通过合成样例测试，但没有在其他克隆自动执行。修正已推至 PR 分支，尚未合并到 main。
 
@@ -400,11 +400,11 @@ flowchart TD
 
 ### 第 3 条确认：STAR 任务写作的适用范围与方法归属
 
-用户确认 project_star_for_agent_task_formulation 覆盖所有层级的维护 .edges/tasks 和领域 tasks；具体写作方法由 conversation-to-tasks Skill 维护，各看板引用。背景→目标→动作→完成标准用于制定任务与下发 brief，尤其面向 Agent，不套用到复盘笔记。核对现有 Skill 后确认 STAR 已被完整覆盖，无需重复合并；用户同意 Skill 保持现状，记忆仅保留采用原因和适用范围，引用 Skill 并去掉重复方法与固定版本号。该精简已通过 CLI 完成；历史决策记忆当前保留原路径，最终存放路径仍随整体归属整理确定。
+用户确认 project_star_for_agent_task_formulation 覆盖所有层级的维护 .edges/tasks 和领域 tasks；具体写作方法由 edges-conversation-to-tasks Skill 维护，各看板引用。背景→目标→动作→完成标准用于制定任务与下发 brief，尤其面向 Agent，不套用到复盘笔记。核对现有 Skill 后确认 STAR 已被完整覆盖，无需重复合并；用户同意 Skill 保持现状，记忆仅保留采用原因和适用范围，引用 Skill 并去掉重复方法与固定版本号。该精简已通过 CLI 完成；历史决策记忆当前保留原路径，最终存放路径仍随整体归属整理确定。
 
 ### 第 4 条确认：Task 内容表达的适用范围与方法归属
 
-用户确认 project_task_separate_facts_from_idea 适用于所有层级的维护 .edges/tasks 和领域 tasks，规则与第 3 条一起由 conversation-to-tasks Skill 维护，各看板引用。第 3 条规定正文结构，本条规定事实与想法分开，并用一两句话说明问题与预期结果。原文包含新旧模板兼容说明，后续随同一写作规范整理。原记忆已通过 CLI 更新确认，尚未执行搬迁或 Skill 合并。
+用户确认 project_task_separate_facts_from_idea 适用于所有层级的维护 .edges/tasks 和领域 tasks，规则与第 3 条一起由 edges-conversation-to-tasks Skill 维护，各看板引用。第 3 条规定正文结构，本条规定事实与想法分开，并用一两句话说明问题与预期结果。原文包含新旧模板兼容说明，后续随同一写作规范整理。原记忆已通过 CLI 更新确认，尚未执行搬迁或 Skill 合并。
 
 ### 第 5 条确认：七个 Task Project 分组保留在根维护看板
 
@@ -422,7 +422,7 @@ flowchart TD
 
 用户确认 preview-tasks-with-box-obsidian 归 Edges 根层沉淀 Skill，目标 .edges/skills/managed/preview-tasks-with-box-obsidian/SKILL.md。第 6 条负责仓库部署约定与缘由，本 Skill 负责可执行步骤，不再归某一 Tasks 看板。目前仅确认目标归属，尚未移动 Skill。
 
-至此 8 条内容审阅完成。第 7 条删除与索引清理已执行；其他条目的范围说明已按上述记录修正，实际迁移、写作规则合并及引用同步仍待落实。第 1、2 条已经确认适用范围，具体共享存放路径在后续整理中收敛；第 3、4 条已确认方法归 conversation-to-tasks，不等于其历史决策记忆的最终路径也已逐一确定。
+至此 8 条内容审阅完成。第 7 条删除与索引清理已执行；其他条目的范围说明已按上述记录修正，实际迁移、写作规则合并及引用同步仍待落实。第 1、2 条已经确认适用范围，具体共享存放路径在后续整理中收敛；第 3、4 条已确认方法归 edges-conversation-to-tasks，不等于其历史决策记忆的最终路径也已逐一确定。
 
 ### 补充原则：仓内共享与对外分发分开
 
@@ -430,7 +430,7 @@ flowchart TD
 
 ### 新提议：对外分发预定义 Project Memory（待讨论）
 
-用户提出在 extensions 下增加 memory 目录，提供可分发的预定义 Project Memory。当前 project-memory-init 的 references/templates 与 CLI 携带的是入口、类型索引及条目骨架；预定义可复用内容属于另一职责。助手建议 extensions/memory 承载经提炼的规则、约定与背景内容，继续使用标准目录入口和 MemoryNode，不新增节点类型；初始化模板继续负责结构生成。
+用户提出在 extensions 下增加 memory 目录，提供可分发的预定义 Project Memory。当前 edges-memory-init 的 references/templates 与 CLI 携带的是入口、类型索引及条目骨架；预定义可复用内容属于另一职责。助手建议 extensions/memory 承载经提炼的规则、约定与背景内容，继续使用标准目录入口和 MemoryNode，不新增节点类型；初始化模板继续负责结构生成。
 
 这为跨层维护任务执行约定等内容提供对外分发候选位置，不自动移动原始历史记忆或复制本仓上下文。写作操作方法仍由对应 Skill 维护，不因新增 memory 目录重复维护方法正文。安装后建议由目标 AGENTS 引用已安装的预定义内容，本地 .edges 留存本仓新增记忆；引用采用或复制为本地内容、更新规则和选择方式尚未确认。此为用户提出的设计方向与助手建议，未新建目录、实现安装功能或改变此前已确认归属。
 
@@ -440,7 +440,7 @@ flowchart TD
 
 ### 第 3 条执行更新：现有 Skill 已覆盖 STAR，记忆精简为原因与范围
 
-现有 conversation-to-tasks 已定义 STAR 顺序、制定任务而非复盘，以及背景／目标必填、动作／完成标准可选，无需再合并 STAR 正文。用户确认保留 Skill 现状，精简 project_star_for_agent_task_formulation：只保留采用原因、覆盖各层两类任务的范围及 Skill 链接，移除重复方法与固定 1.2.0 引用。已通过 CLI 写入并刷新索引；第 4 条内容表达规范的后续整理不在本次修改内。
+现有 edges-conversation-to-tasks 已定义 STAR 顺序、制定任务而非复盘，以及背景／目标必填、动作／完成标准可选，无需再合并 STAR 正文。用户确认保留 Skill 现状，精简 project_star_for_agent_task_formulation：只保留采用原因、覆盖各层两类任务的范围及 Skill 链接，移除重复方法与固定 1.2.0 引用。已通过 CLI 写入并刷新索引；第 4 条内容表达规范的后续整理不在本次修改内。
 
 ## 4. NodeService 的业务适配规则
 
@@ -478,7 +478,7 @@ flowchart TD
 
 ### 后续讨论记录
 
-2026-10-05 开始本项讨论。核对实现发现，NodeService 虽已接受业务回调，仍直接解析 project-memory-type，并识别 memory/skills/referenced 等业务约定；当前边界尚未完全解耦。
+2026-10-05 开始本项讨论。核对实现发现，NodeService 虽已接受业务回调，仍直接解析 edges-memory-type，并识别 memory/skills/referenced 等业务约定；当前边界尚未完全解耦。
 
 结合新模型，助手建议如下分工（待用户确认）：
 - layout 定义目录、入口、章节及模型选择的结构约定，不执行 Git 或权限检查。
@@ -844,7 +844,7 @@ flowchart LR
 
 2026-10-05 用户授权执行。正式约定收敛至 [目录节点模型](../superpowers/specs/2026-10-05-directory-node-model.md)，执行进度见 [实施计划](../superpowers/plans/2026-10-05-directory-node-refactor.md)。本文前文的“尚未实现”描述各轮讨论时点，不能替代实施计划的最新证据。
 
-第 3 项剩余归属已落实：云端 Obsidian 部署记忆与预览 Skill 经 Service 移到根层，事实/想法写法并入 conversation-to-tasks，历史记忆改为原因范围与引用。两个优化待办不在本次实现中。
+第 3 项剩余归属已落实：云端 Obsidian 部署记忆与预览 Skill 经 Service 移到根层，事实/想法写法并入 edges-conversation-to-tasks，历史记忆改为原因范围与引用。两个优化待办不在本次实现中。
 
 ## 目录节点实现中的补充裁定
 
@@ -867,7 +867,7 @@ flowchart LR
 | 缓存副本按基线合并完整持久化状态；元数据按键递归，正文按行保守合并，冲突在写盘前拒绝。 | 未保存改动不能覆盖其他副本已提交的业务字段或非受控正文；使用已锁定的 diff 库计算文本差异。 | 增加一个直接运行时依赖与差异计算；同一行的不同字词及部分插入边界仍可能冲突，细化需调整合并策略与测试。 |
 | 导入来源的归属解析与正常加载共用规则；显式 sourceRoot 优先，否则最近 Git 目录为界，无 Git 时以文件系统根为界。 | 跨中间目录仍应识别已知 Memory，又不能越过独立仓库继承外部约定。 | 需要按目录深度查找祖先；无 Git 的来源可能继承祖先 AGENTS，需更窄边界时由调用方指定。 |
 
-可重复批量操作均使用脚本；正式目录转换工具为 `scripts/migrations/migrate-directory-nodes.mts`，先 dry-run，再显式 apply。代码验证和审查结果记录在实施计划中，历史验证结果不冒充本轮验收。
+可重复批量操作均使用脚本；正式目录转换工具为 `scripts/migrations/edges-migrate-directory-nodes.mts`，先 dry-run，再显式 apply。代码验证和审查结果记录在实施计划中，历史验证结果不冒充本轮验收。
 
 ## 公开迁移验收
 

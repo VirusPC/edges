@@ -73,8 +73,8 @@
 - `packages/cli/README.md` — document `edges artifacts`
 - `packages/cli/test/run.test.ts` — root help lists `artifacts`
 - `packages/cli/test/cli.test.ts` — real entry help lists `artifacts`
-- `packages/skills/project-tasks-classify/SKILL.md` — step 4: after render, `edges artifacts publish` then give URL; still STOP for pasted JSON; no result-back
-- `packages/skills/project-tasks-classify/CHANGELOG.md`
+- `packages/skills/edges-tasks-classify/SKILL.md` — step 4: after render, `edges artifacts publish` then give URL; still STOP for pasted JSON; no result-back
+- `packages/skills/edges-tasks-classify/CHANGELOG.md`
 - `CHANGELOG.md` `[Unreleased]` — new module **Artifacts 预览**
 - `CONTEXT.md` — `edges artifacts（CLI）` drop “约定中的”
 - `.gitignore` — `packages/services/*/node_modules/` and `packages/services/*/dist/` (root `dist/` already covers)
@@ -270,7 +270,7 @@ JSON failure envelope: `{"status":"failed","errorCode":"VALIDATION_ERROR"|"AUTH_
 
 ### Skill orchestration (minimal)
 
-In `packages/skills/project-tasks-classify/SKILL.md` step 4, after `review-page` prints `path`:
+In `packages/skills/edges-tasks-classify/SKILL.md` step 4, after `review-page` prints `path`:
 
 1. If the human needs a reachable URL (phone / other machine):
 
@@ -460,7 +460,7 @@ Root changelog (human Chinese + real command names, no ADR/plan dump):
 
 ### Task 5: Memory pointer + verify
 
-- Update `.memory/projects/project_artifacts_preview_service.md` via `$project-memory-remember` (same slug): implementation landed; How-to lists service package + CLI verbs; drop “本轮只定 CONTEXT / ADR”.
+- Update `.memory/projects/project_artifacts_preview_service.md` via `$edges-memory-remember` (same slug): implementation landed; How-to lists service package + CLI verbs; drop “本轮只定 CONTEXT / ADR”.
 - Run `pnpm --filter edges-artifacts-preview test` and `pnpm --filter edges-cli test`.
 - Do **not** change Task board status.
 

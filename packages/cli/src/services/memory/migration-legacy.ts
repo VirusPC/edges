@@ -23,8 +23,8 @@ const RENAMES: Record<string, string> = {
   skills: "managed",
   agent_skills: "referenced",
 };
-const START = "<!-- project-memory-type:start -->",
-  END = "<!-- project-memory-type:end -->";
+const START = "<!-- edges-memory-type:start -->",
+  END = "<!-- edges-memory-type:end -->";
 export interface LegacyType {
   name: string;
   directory: string;
@@ -75,7 +75,7 @@ function metadata(text: string): Record<string, unknown> {
   if (text.includes(START) !== text.includes(END))
     throw new Error("malformed-type-metadata");
   const body = text.match(
-    /<!-- project-memory-type:start -->\r?\n([\s\S]*?)<!-- project-memory-type:end -->/,
+    /<!-- edges-memory-type:start -->\r?\n([\s\S]*?)<!-- edges-memory-type:end -->/,
   )?.[1];
   return body ? (parseDocument(`---\n${body}---\n`).metadata ?? {}) : {};
 }
@@ -157,8 +157,8 @@ export function parseLegacy(
         throw new Error(`legacy-index-is-symlink: ${index}`);
       const text = readText(index);
       const hasEntries =
-        text.includes("<!-- project-memory-entries:start -->") &&
-        text.includes("<!-- project-memory-entries:end -->");
+        text.includes("<!-- edges-entries-local:start -->") &&
+        text.includes("<!-- edges-entries-local:end -->");
       if (!hasEntries && !(guessed in BUILTINS))
         throw new Error(`missing-entry-block: ${index}`);
       const fields = metadata(text),
@@ -229,7 +229,7 @@ export function parseLegacy(
     }
   }
   const local = readText(join(scope, AGENTS_FILE_NAME)).match(
-    /<!-- project-memory-local:start -->([\s\S]*?)<!-- project-memory-local:end -->/,
+    /<!-- edges-local:start -->([\s\S]*?)<!-- edges-local:end -->/,
   )?.[1];
   if (local)
     for (const [name, dir] of Object.entries(BUILTINS)) {
@@ -358,7 +358,7 @@ export function convertIndex(text: string, spec: LegacyType): string {
     format: spec.format,
   };
   const match = text.match(
-    /<!-- project-memory-type:start -->\r?\n[\s\S]*?<!-- project-memory-type:end -->/,
+    /<!-- edges-memory-type:start -->\r?\n[\s\S]*?<!-- edges-memory-type:end -->/,
   );
   if (match) {
     let block = match[0];

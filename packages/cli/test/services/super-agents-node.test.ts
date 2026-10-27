@@ -14,7 +14,7 @@ function fixture(withAgents = false) {
   fs.writeFileSync(path.join(root, "tasks", "AGENTS.md"), "# Tasks\n");
   fs.writeFileSync(
     path.join(root, "README.md"),
-    "# Edges\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [领域任务](tasks/AGENTS.md) — 看板。\n<!-- project-entries-local:end -->\n",
+    "# Edges\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [领域任务](tasks/AGENTS.md) — 看板。\n<!-- edges-entries-local:end -->\n",
   );
   if (withAgents) fs.writeFileSync(path.join(root, "AGENTS.md"), "# Root\n");
   return root;
@@ -77,11 +77,11 @@ test("--super prefers .edges/README.md and does not flat-mount other materials",
   fs.writeFileSync(path.join(root, ".edges/tasks/README.md"), "# Maintenance tasks\n");
   fs.writeFileSync(
     path.join(root, "README.md"),
-    "# Public\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Notes](notes/README.md)\n<!-- project-entries-local:end -->\n",
+    "# Public\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Notes](notes/README.md)\n<!-- edges-entries-local:end -->\n",
   );
   fs.writeFileSync(
     path.join(root, ".edges/README.md"),
-    "# 本层 harness 材料索引\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md)\n<!-- project-entries-local:end -->\n",
+    "# 本层 harness 材料索引\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md)\n<!-- edges-entries-local:end -->\n",
   );
   const service = new NodeService({ managedRoot: root });
   const nodes = await service.list(root, { super: true });

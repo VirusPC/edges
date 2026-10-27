@@ -69,7 +69,7 @@ export const HARNESS_BOARD_MODULES: readonly HarnessBoardModule[] = [
     materialId: "tasks",
     title: "Tasks",
     description: "任务看板。",
-    body: "# Tasks\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n",
+    body: "# Tasks\n\n<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n",
   },
   {
     module: "projects",
@@ -88,5 +88,5 @@ export const HARNESS_BOARD_MODULES: readonly HarnessBoardModule[] = [
 ];
 
 export function harnessBoardSeed(title: string): string {
-  return `# ${title}\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n<!-- project-entries-local:end -->\n`;
+  return `# ${title}\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n<!-- edges-entries-local:end -->\n`;
 }

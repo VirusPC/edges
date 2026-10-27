@@ -13,7 +13,7 @@ metadata:
 
 节点模型 grill（2026-10-06）Q16=A：在写实现计划或改 codec 之前，先写设计 spec 与 ADR，经人审再进入 writing-plans / 落地。
 
-范围包括：递归系统二入口、README `project-entries-*`、AGENTS 标题「系统维护信息」、同目录双文件遍历分工、INDEX.md 迁移（含 posts）、virtual 系统入口术语、project harness init 待办边界。不在本步写生产代码。
+范围包括：递归系统二入口、README `edges-entries-*`、AGENTS 标题「系统维护信息」、同目录双文件遍历分工、INDEX.md 迁移（含 posts）、virtual 系统入口术语、project harness init 待办边界。不在本步写生产代码。
 
 **Why:** 用户选 A（spec+ADR first）；变更触及遍历核心规则与多文件入口合同，硬反转成本高。
 

@@ -9,7 +9,7 @@ metadata:
   edges-updated-at: "2026-09-08T17:52:03+08:00"
 ---
 
-在 Codex CLI / IDE 里唤起某个 skill 用 `$skill-name`（例如 `$project-memory-ask`），不要用 `/skill-name`。
+在 Codex CLI / IDE 里唤起某个 skill 用 `$skill-name`（例如 `$edges-memory-ask`），不要用 `/skill-name`。
 
 **Why:** `/` 走的是斜杠命令命名空间，和 skill 不是同一套。用户一度以为用户目录 skill 没被识别，实际是用错了唤起前缀。官方约定：ChatGPT 用 `@`，Codex 用 `$` 点名 skill；`/skills` 只用来列出已发现的 skill。
 

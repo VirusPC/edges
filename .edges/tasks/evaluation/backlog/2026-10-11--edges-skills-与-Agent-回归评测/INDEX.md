@@ -19,7 +19,7 @@ description: 用固定真实任务做回归集，自动检查 Agent 是否按 sk
 有一批固定的真实任务作为回归集，能自动检查 Agent 有没有按 skill 走、有没有守住 `AGENTS.md` 的硬约束，每次改动后重跑都能拿到可以对比的结果。
 
 **动作：**
-- 选几条真实任务当回归用例，比如用 conversation-to-notes 整理笔记、用 conversation-to-tasks 开卡、改仓库提 PR。
+- 选几条真实任务当回归用例，比如用 edges-conversation-to-notes 整理笔记、用 edges-conversation-to-tasks 开卡、改仓库提 PR。
 - 用脚本检查能用规则判的部分：文件名、目录、有没有用独立 worktree、是不是走 PR、Co-authored-by trailer、有没有碰 `posts/`。
 - 脱敏够不够、写得好不好这类判断不了对错的，用模型当裁判打分；运行 trace 打进自建的 Langfuse。
 

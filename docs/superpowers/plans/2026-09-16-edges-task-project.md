@@ -75,7 +75,7 @@
 - `packages/cli/test/tasks/run.test.ts`
 - `packages/cli/test/tasks/cli.test.ts`
 - `CHANGELOG.md` `[Unreleased]` — Added line for the CLI + migrate (when implementation lands)
-- `.memory/projects/project_edges_task_project.md` — How-to: CLI has landed; point at this plan (via `$project-memory-remember`, do not hand-edit the index)
+- `.memory/projects/project_edges_task_project.md` — How-to: CLI has landed; point at this plan (via `$edges-memory-remember`, do not hand-edit the index)
 - `.memory/projects/project_tasks_with_status_not_todos.md` — How-to path becomes `knowledge/tasks/<project-slug>/<status>/`
 
 **Do not create/commit**
@@ -1711,7 +1711,7 @@ git commit -m "feat(tasks): add one-shot board migrate helper" \
 **Files:**
 - Modify: every file currently under `knowledge/tasks/{backlog,todo,in_progress,in_review,done,blocked,cancelled}/` — git mv into `knowledge/tasks/_default/<same-status>/` (Task files **and** hidden `.{stem}.log.md` sidecars). Empty leftover status dirs must disappear
 - Do not modify: `knowledge/tasks/AGENTS.md`, `knowledge/tasks/README.md` (already updated in Task 7), `knowledge/tasks/.memory/**`
-- Modify via `$project-memory-remember` (do not hand-edit indexes):
+- Modify via `$edges-memory-remember` (do not hand-edit indexes):
   - `.memory/projects/project_edges_task_project.md`
   - `.memory/projects/project_tasks_with_status_not_todos.md`
 - Modify: `CHANGELOG.md` only if Task 7’s Added line is not already there
@@ -1793,7 +1793,7 @@ Alternatively, if you prefer not to add a temp script: `git mv` every file the h
 Then remember (from repo root):
 
 ```bash
-python3 .agents/skills/project-memory-init/scripts/memory.py remember \
+python3 .agents/skills/edges-memory-init/scripts/memory.py remember \
   --target-dir . \
   --type project \
   --slug edges_task_project \
@@ -1817,7 +1817,7 @@ EOF
 ```
 
 ```bash
-python3 .agents/skills/project-memory-init/scripts/memory.py remember \
+python3 .agents/skills/edges-memory-init/scripts/memory.py remember \
   --target-dir . \
   --type project \
   --slug tasks_with_status_not_todos \

@@ -5,7 +5,7 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 ## Language
 
 **系统入口（System Entry）**：
-引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层系统维护信息与下层系统维护信息，并可写硬约束；Compose 条目不写在这里，而写在 `.edges/compose/README.md`；从作用域根起经系统维护信息登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$project-memory-init` / project harness init；命令 `edges init` 只编排各模块，`edges <module> init` 只初始化该模块；`edges skills init` 另含安装技能，见 ADR 0036），以标记该目录为重点维护作用域；不是路径白名单。CLI 默认遍历根是 `--scope` 下的真实 `AGENTS.md`，只覆盖该系统的系统二；从真 AGENTS 出发到不了同目录 README 上的 tasks/notes 等是预期。对 edges 作用域（`isScope`：目录有可解析为带 edges 标记的 `AgentsNode` 的 `AGENTS.md`），本层系统维护信息**只**登记一条指向 `.edges/README.md` 的组成（材料索引）；各材料不再直接列在 AGENTS 本层。下层系统维护信息与本层硬约束仍写在 AGENTS 上。Compose 入口在 `.edges/compose/README.md`。见 ADR 0035、ADR 0043。
+引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层系统维护信息与下层系统维护信息，并可写硬约束；Compose 条目不写在这里，而写在 `.edges/compose/README.md`；从作用域根起经系统维护信息登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$edges-memory-init` / project harness init；命令 `edges init` 只编排各模块，`edges <module> init` 只初始化该模块；`edges skills init` 另含安装技能，见 ADR 0036），以标记该目录为重点维护作用域；不是路径白名单。CLI 默认遍历根是 `--scope` 下的真实 `AGENTS.md`，只覆盖该系统的系统二；从真 AGENTS 出发到不了同目录 README 上的 tasks/notes 等是预期。对 edges 作用域（`isScope`：目录有可解析为带 edges 标记的 `AgentsNode` 的 `AGENTS.md`），本层系统维护信息**只**登记一条指向 `.edges/README.md` 的组成（材料索引）；各材料不再直接列在 AGENTS 本层。下层系统维护信息与本层硬约束仍写在 AGENTS 上。Compose 入口在 `.edges/compose/README.md`。见 ADR 0035、ADR 0043。
 _避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md、从真 AGENTS 遍历时自动并进 README 组成边、在 edges 作用域的 AGENTS 本层逐条列出各 `.edges/` 材料、把无 edges 标记的普通 AGENTS.md 当成 edges 作用域
 
 **虚拟超节点（SuperAgentsNode）**：
@@ -17,7 +17,7 @@ _避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNod
 _避免使用_：仅指文件夹、磁盘上未登记的 md
 
 **组织清单（README.md）**：
-用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `project-entries-local` / `project-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。在「真系统」视角下这些是系统一材料；经 `SuperAgentsNode` 遍历时，同一批材料被当作**虚拟系统的系统二**展开。edges 作用域的 **`.edges/README.md`** 是该层的**材料索引**（标准组织清单，无 YAML frontmatter）：本层各 harness 材料挂在它的 entries 下，由上层 `AGENTS.md` 本层以单条组成指向它。Note 与 Project 叶子的组织清单是 scope 内容面的 `notes/README.md`、`projects/README.md`：文件不在就创建；已有散文且没有 entries 标记时只补标记，不改写原文。这两类叶子，以及 Task 叶子，不登记到任何 `AGENTS.md`。Task 叶子登记在所属 Task Project 的 `README.md`。`.edges/notes/README.md` 与 `.edges/projects/README.md` 是材料索引里的条目，不是那份叶子清单。见 ADR 0035、ADR 0046。
+用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `edges-entries-local` / `edges-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。在「真系统」视角下这些是系统一材料；经 `SuperAgentsNode` 遍历时，同一批材料被当作**虚拟系统的系统二**展开。edges 作用域的 **`.edges/README.md`** 是该层的**材料索引**（标准组织清单，无 YAML frontmatter）：本层各 harness 材料挂在它的 entries 下，由上层 `AGENTS.md` 本层以单条组成指向它。Note 与 Project 叶子的组织清单是 scope 内容面的 `notes/README.md`、`projects/README.md`：文件不在就创建；已有散文且没有 entries 标记时只补标记，不改写原文。这两类叶子，以及 Task 叶子，不登记到任何 `AGENTS.md`。Task 叶子登记在所属 Task Project 的 `README.md`。`.edges/notes/README.md` 与 `.edges/projects/README.md` 是材料索引里的条目，不是那份叶子清单。见 ADR 0035、ADR 0046。
 _避免使用_：把叶子正文写成 README、把 README 当成真系统入口、无 entries 的普通包说明自动当节点、把 README 组成写成 edges-*、下层内容挂成 INDEX/SKILL、在 AGENTS 与 `.edges/README.md` 双写同一份材料索引、把 Note/Project/Task 叶子登记进 AGENTS.md、缺组织清单时回落到 AGENTS.md
 
 **内容叶子入口（INDEX.md）**：
@@ -25,7 +25,7 @@ Task / Note / Memory 等的入口文件，名为 `INDEX.md`。Skill 仍为 `SKIL
 _避免使用_：index.md（迁移前史料）、把叶子叫 README.md、把 INDEX.md 当成系统入口
 
 **组成登记（entries）**：
-系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口用 `edges-local` / `edges-descendants`（标题「本层系统维护信息 / 下层系统维护信息」）；组织清单用 `project-entries-local` / `project-entries-descendants`（标题「本层内容 / 下层内容」）。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——两套登记并列，持久化上互不为对方的 child。对 edges 作用域：各 `.edges/` 材料组织清单挂在 **`.edges/README.md`** 的 entries 下；上层 `AGENTS.md` 本层**只**登记这一条指向 `.edges/README.md` 的组成（不再在本层逐条挂各材料）。下层系统入口仍登记在 AGENTS 下层区块。目标模型下真 AGENTS 的 traverse **不**自动并同目录 README 边；要逛当前 scope 的内容面须换根到 `SuperAgentsNode`。见 ADR 0035。
+系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口用 `edges-local` / `edges-descendants`（标题「本层系统维护信息 / 下层系统维护信息」）；组织清单用 `edges-entries-local` / `edges-entries-descendants`（标题「本层内容 / 下层内容」）。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——两套登记并列，持久化上互不为对方的 child。对 edges 作用域：各 `.edges/` 材料组织清单挂在 **`.edges/README.md`** 的 entries 下；上层 `AGENTS.md` 本层**只**登记这一条指向 `.edges/README.md` 的组成（不再在本层逐条挂各材料）。下层系统入口仍登记在 AGENTS 下层区块。目标模型下真 AGENTS 的 traverse **不**自动并同目录 README 边；要逛当前 scope 的内容面须换根到 `SuperAgentsNode`。见 ADR 0035。
 _避免使用_：目录扫描结果、把任意 Markdown 链接当子节点、宣称 AGENTS.md 永不登记子项、把系统一孩子双写进 AGENTS 与 README、两套标记混用、把同目录 README 持久化挂成该 AGENTS 的 child、在 edges 作用域的 AGENTS 本层与 `.edges/README.md` 双写材料列表、把材料直接挂在 AGENTS 本层而不经 `.edges/README.md`
 
 **组织节点 / 叶子节点（派生状态）**：
@@ -109,15 +109,15 @@ _避免使用_：把 type 写成全局 JSON 注册表键、把看板状态夹直
 _避免使用_：与系统入口并列的另一种文件
 
 **类型入口**：
-某一 Memory Type（或 Skills 类型）的索引文档节点，与条目同处，由上层系统入口的组成登记挂入。统一为组织清单：`README.md` + `project-entries-*`（`type=readme`），不是系统入口；该目录另经用户 init 才另有 `AGENTS.md`。
-_避免使用_：把类型入口写成全局注册表、未加判断就等同层入口、类型索引继续用 AGENTS.md + project-memory-entries（迁移后）
+某一 Memory Type（或 Skills 类型）的索引文档节点，与条目同处，由上层系统入口的组成登记挂入。统一为组织清单：`README.md` + `edges-entries-*`（`type=readme`），不是系统入口；该目录另经用户 init 才另有 `AGENTS.md`。
+_避免使用_：把类型入口写成全局注册表、未加判断就等同层入口、类型索引继续用 AGENTS.md + edges-entries-local（迁移后）
 
 **用户记忆（User Memory）**：
 项目记忆的一种 Memory Type，保存绑定到某一仓库路径、且不宜公开的个人材料（个人偏好而非项目共享约定、凭据与密钥，以及其他不得公开的上下文）；权威副本在该仓库工作树内，但不进入版本历史。它不是独立于项目记忆的全局层，也不把私有仓当作真源。
 _避免使用_：独立全局 vault、私有仓当真源、机器级单一记忆库、项目共享约定
 
 **可扩展 Memory Type**：
-在指定记忆目录通过 skill（如 `$project-memory-add-type`）登记新的 Memory Type（name / description / 可选特权 metadata），与内置种子类型同构（类型入口 + 同处条目 + 层入口一行）、可被 remember / ask / doctor 发现；官方 init 种子不因示例类型膨胀。扩展面仍只在 LAYOUT，不另开类型注册表。
+在指定记忆目录通过 skill（如 `$edges-memory-add-type`）登记新的 Memory Type（name / description / 可选特权 metadata），与内置种子类型同构（类型入口 + 同处条目 + 层入口一行）、可被 remember / ask / doctor 发现；官方 init 种子不因示例类型膨胀。扩展面仍只在 LAYOUT，不另开类型注册表。
 _避免使用_：单独 JSON/YAML 总配置平面、把示例 type 写进默认种子、把加 type 写成改 PROTOCOL
 
 **检索评测（Retrieval Eval）**：
@@ -201,7 +201,7 @@ _避免使用_：认知更新、Insights、过程栏的复述
 _避免使用_：裸待办清单、Actions（若指本栏）
 
 **对话三角色（笔记 / 记忆 / 任务）：**
-同一段对话可以分出三类产物，不要揉成一张：`conversation-to-notes` 记「这次澄清了什么」（复盘四栏）；`project-memory-remember` 记「以后还该记住什么」（结论 → 为何 → 做法）；`conversation-to-tasks` 记「谁下一步做什么、怎样算完」（背景 → 目标 必填；完成标准与动作可选，完成标准可留到 grill-with-docs；背景须写出产生任务的对话过程；有完成标准时它给循环验收）。`conversation-to-notes` 与 `project-memory-remember` 只成文，写入另一步；`conversation-to-tasks` 成文后交人审，用户确认后再用 CLI 落库。
+同一段对话可以分出三类产物，不要揉成一张：`edges-conversation-to-notes` 记「这次澄清了什么」（复盘四栏）；`edges-memory-remember` 记「以后还该记住什么」（结论 → 为何 → 做法）；`edges-conversation-to-tasks` 记「谁下一步做什么、怎样算完」（背景 → 目标 必填；完成标准与动作可选，完成标准可留到 grill-with-docs；背景须写出产生任务的对话过程；有完成标准时它给循环验收）。`edges-conversation-to-notes` 与 `edges-memory-remember` 只成文，写入另一步；`edges-conversation-to-tasks` 成文后交人审，用户确认后再用 CLI 落库。
 _避免使用_：把任务写成记忆结论；把复盘笔记写成看板待办；交人审确认前就对任务看板写盘；正文栏名中英混写；动作可选却拿它顶替完成标准；背景只有出处标签、没有对话过程；背景或目标不足却硬编或不问；完成标准未定时硬编而不留给 grill
 
 **专项工作区（Initiative Workspace）**：
@@ -355,11 +355,11 @@ _避免使用_：title、name、把展示名当 CLI 查找键
 _避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type、把未确认的候选当成已有 project
 
 **Task Project 索引**：
-所选板 `tasks/README.md` 或 `.edges/tasks/README.md` 的 `project-entries-local` 列表；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。用户 init 为系统入口的 `<project>/AGENTS.md` 仍登记在看板 `AGENTS.md`。
+所选板 `tasks/README.md` 或 `.edges/tasks/README.md` 的 `edges-entries-local` 列表；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。用户 init 为系统入口的 `<project>/AGENTS.md` 仍登记在看板 `AGENTS.md`。
 _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件当记忆条目
 
 **Task Project README.md**：
-每个 Task Project 目录（含 `_default`）内的 `README.md` 组织清单：标题、描述（可选指针）与列出 Task 的 `project-entries-local`。CLI 新建 project 只写 README；用户明确 init 时才有 `AGENTS.md` 系统入口。
+每个 Task Project 目录（含 `_default`）内的 `README.md` 组织清单：标题、描述（可选指针）与列出 Task 的 `edges-entries-local`。CLI 新建 project 只写 README；用户明确 init 时才有 `AGENTS.md` 系统入口。
 _避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
 
 **Task Project 候选（edges）**：
@@ -395,7 +395,7 @@ Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`�
 _避免使用_：用 title 或 name 当查找键、把展示字段当 apply 键
 
 **classifyTasks（edges）**：
-独立工作流 Skill（约定路径 `packages/skills/project-tasks-classify/`，展示名 classifyTasks）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task Project 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
+独立工作流 Skill（约定路径 `packages/skills/edges-tasks-classify/`，展示名 classifyTasks）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task Project 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
 _避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、要求 embedding / 向量分类、只整理 `_default`、公开 `edges tasks classify`、把审阅页当成分类器
 
 **proposeTypes（edges）**：

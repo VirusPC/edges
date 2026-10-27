@@ -17,7 +17,7 @@ export function convert(file: string, source: string): string {
  if (starts !== 1 || ends !== 1 || source.indexOf(start) > source.indexOf(end)) throw new Error(`${file}: malformed or duplicate legacy markers`);
  const from=source.indexOf(start), to=source.indexOf(end)+end.length;
  const block=source.slice(from+start.length,to-end.length);
- const adapted='<!-- project-memory-local:start -->'+block+'<!-- project-memory-local:end -->';
+ const adapted='<!-- edges-local:start -->'+block+'<!-- edges-local:end -->';
  const decoded=decodeBody(adapted);
  if(decoded.unsafe) throw new Error(`${file}: ambiguous legacy markers`);
  const legacy = new Map<string, import("../../packages/cli/src/domain/core/types.js").NodeReference>();
@@ -28,12 +28,12 @@ export function convert(file: string, source: string): string {
   if(!/^(?:[-+*]|\d+[.)])\s/.test(text)) continue;
   const links=item.content.filter(run=>run.kind==='link');
   if(links.length!==1) { if(/\[|\]\(/.test(text)) throw new Error(`${file}: unrecognized legacy link`); continue; }
-  const parsed=new AgentsNode(file).parse('<!-- project-memory-local:start -->\n'+text+'\n<!-- project-memory-local:end -->');
+  const parsed=new AgentsNode(file).parse('<!-- edges-local:start -->\n'+text+'\n<!-- edges-local:end -->');
   if(parsed.children.length!==1) throw new Error(`${file}: unrecognized legacy link`);
   const ref=parsed.children[0], previous=legacy.get(ref.id);
   if(previous && (previous.name!==ref.name || previous.description!==ref.description))throw new Error(`${file}: conflicting legacy reference: ${ref.id}`);
   legacy.set(ref.id,ref);
-  removed.push({start:binding.start-'<!-- project-memory-local:start -->'.length,end:binding.end-'<!-- project-memory-local:start -->'.length});
+  removed.push({start:binding.start-'<!-- edges-local:start -->'.length,end:binding.end-'<!-- edges-local:start -->'.length});
  }
  let prose=block;
  for(const range of removed.reverse()) prose=prose.slice(0,range.start)+prose.slice(range.end);

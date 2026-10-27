@@ -56,7 +56,7 @@ description: 拆仓后 extensions/ 一层多余，平铺到框架仓顶层；pos
 
 - **问题：** `extensions/AGENTS.md` 与 `extensions/.edges/`（22 条记忆）并到哪里？
 - **选项：** 并入根；或挪到 `packages/cli/` 让 CLI 成为下层系统；或按条目分流。
-- **结论：** 并入根。硬约束进根 `AGENTS.md`，22 条记忆并入根 `.edges` 并合并索引。`packages/skills/project-memory-init` 改由根登记。`feedback_cli_under_extensions` 按同一 slug 翻案，写明 2026-10-20 推翻「CLI 不放仓库根」。推荐项，未改。
+- **结论：** 并入根。硬约束进根 `AGENTS.md`，22 条记忆并入根 `.edges` 并合并索引。`packages/skills/edges-memory-init` 改由根登记。`feedback_cli_under_extensions` 按同一 slug 翻案，写明 2026-10-20 推翻「CLI 不放仓库根」。推荐项，未改。
 - **理由：** 平铺之后不再有 extensions 这一层系统。记忆条目与根上无同名目录，只合并索引。
 
 ### 4. 旧路径留不留兼容

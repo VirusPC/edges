@@ -87,7 +87,7 @@ test("create/list/get/update project metadata; create default on virgin board", 
     await assert.rejects(access(path.join(repo, "tasks/AGENTS.md")));
     const list = await readFile(path.join(repo, "tasks/README.md"), "utf8");
     assert.match(list, /\[CLI\]\(<cli\/README\.md>\) — updated CLI/);
-    assert.match(list, /<!-- project-entries-local:start -->/);
+    assert.match(list, /<!-- edges-entries-local:start -->/);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -176,7 +176,7 @@ test("updateProject rejects a project directory that has no README.md", async ()
     await writeFile(task, body, "utf8");
     await writeFile(
       path.join(repo, "tasks/README.md"),
-      "# Tasks\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n",
+      "# Tasks\n\n<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n",
     );
     const writer = nodeBoardWriter();
     await assert.rejects(
@@ -198,7 +198,7 @@ test("updateProject rejects a project directory that has no README.md", async ()
     );
     assert.equal(await readFile(task, "utf8"), body);
     await assert.rejects(access(path.join(repo, "tasks/docs/README.md")));
-    assert.match(await readFile(path.join(repo, "tasks/README.md"), "utf8"), /## 本层内容\n<!-- project-entries-local:end -->/);
+    assert.match(await readFile(path.join(repo, "tasks/README.md"), "utf8"), /## 本层内容\n<!-- edges-entries-local:end -->/);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }
@@ -424,7 +424,7 @@ test("README Task Projects are discovered, read and updated; a user-initialised 
     assert.equal(updated.path, "tasks/cli/README.md");
     const readme = await readFile(path.join(repo, "tasks/cli/README.md"), "utf8");
     assert.match(readme, /^# CLI\n\nupdated CLI\n/);
-    assert.match(readme, /<!-- project-entries-local:start -->\n## 本层内容\n/);
+    assert.match(readme, /<!-- edges-entries-local:start -->\n## 本层内容\n/);
     await assert.rejects(access(path.join(repo, "tasks/cli/AGENTS.md")));
 
     const legacyAgentsBefore = await readFile(path.join(repo, "tasks/legacy/AGENTS.md"), "utf8");
