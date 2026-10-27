@@ -18,4 +18,6 @@
 - [评测实验程序\_experiment\_webhook用\_dataset\_跑实验](<done/2026-10-25--%E8%AF%84%E6%B5%8B%E5%AE%9E%E9%AA%8C%E7%A8%8B%E5%BA%8F-Experiment-Webhook%E7%94%A8-Dataset-%E8%B7%91%E5%AE%9E%E9%AA%8C/INDEX.md>) — 把可复用实验 runner 与统一 Experiment Webhook 收进框架：Webhook 用用户 Dataset 触发并跑实验。
 - [评测\_skill收集用户数据并产生\_dataset](<done/2026-10-25--%E8%AF%84%E6%B5%8B-Skill%E6%94%B6%E9%9B%86%E7%94%A8%E6%88%B7%E6%95%B0%E6%8D%AE%E5%B9%B6%E4%BA%A7%E7%94%9F-Dataset/INDEX.md>) — 把 brain 中现成的 Langfuse 接入 skills 迁入框架 packages/skills，整理为主入口 \+ 四份子 skill，随 @viruspc/edges 分发。
 - [cli评测\_experiment\_webhook\_服务启动入口](<done/2026-10-25--CLI%E8%AF%84%E6%B5%8B-Experiment-Webhook-%E6%9C%8D%E5%8A%A1%E5%90%AF%E5%8A%A8%E5%85%A5%E5%8F%A3/INDEX.md>) — edges CLI 提供启动评测相关长驻服务（含 Experiment Webhook）的入口，接入方不必手写 systemd 命令。
+- [edges\_value\_experiment\_plan](<backlog/2026-10-27--%E6%A2%B3%E7%90%86-Edges-%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E4%B8%8E%E6%8E%A8%E5%B9%BF%E5%AE%9E%E9%AA%8C%E6%96%B9%E6%A1%88/INDEX.md>) — 把拟推广的核心价值对应到使用场景、对照实验或能力验收，明确范围与判断口径。
+- [edges\_value\_experiment\_runs](<backlog/2026-10-27--%E5%AE%8C%E6%88%90-Edges-%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E5%AE%9E%E9%AA%8C%E5%B9%B6%E6%95%B4%E7%90%86%E7%BB%93%E6%9E%9C%E6%8A%A5%E5%91%8A/INDEX.md>) — 按确认的方案跑完核心价值实验，保留真实结果、成本与失败案例，形成可追溯的推广证据。
 <!-- project-entries-local:end -->
