@@ -14,7 +14,7 @@ status: accepted
 
 1. **原名平铺到仓库根：** `cli/`、`skills/`、`apps/`、`services/`、`mcp-servers/`、`system-prompt/`。不套 `packages/`。兄弟目录之间的相对路径保持不变。
 2. **删空占位与个人运维目录：** 删除 `extensions/docs`、`extensions/tools`、`extensions/subagents`。`extensions/new-server` 与 `extensions/others` 从框架仓删除；个人仓 `shared-extensions/` 由 peng cheng 另行搬入。
-3. **拆掉 extensions 这一层 harness：** `extensions/AGENTS.md` 的硬约束并入根 `AGENTS.md`。`extensions/.edges/` 的记忆并入根 `.edges`，索引合并。`skills/project-memory-init` 改由根登记为下层系统。`feedback_cli_under_extensions` 按同一 slug 翻案：CLI 放仓库根 `cli/`，并注明 2026-10-20 推翻「禁止放仓库根」。
+3. **拆掉 extensions 这一层 harness：** `extensions/AGENTS.md` 的硬约束并入根 `AGENTS.md`。`extensions/.edges/` 的记忆并入根 `.edges`，索引合并。`skills/edges-memory-init` 改由根登记为下层系统。`feedback_cli_under_extensions` 按同一 slug 翻案：CLI 放仓库根 `cli/`，并注明 2026-10-20 推翻「禁止放仓库根」。
 4. **旧路径硬切：** 不留 `extensions/` 软链。旧→新映射写在 CHANGELOG 与 `docs/migrations/`。
 5. **仓内路径引用全量改写：** 包括历史计划、done 卡、CHANGELOG 历史条目、评测报告。只改本仓路径；外部 URL 里无关的 `extensions` 字样不动。`../` 相对链接按新位置重算。
 6. **两个 PR：** 先迁出 posts（对 main）；再原子平铺（`git mv` + 路径 + 重新生成的 lockfile + `deploy.yml` 与 `publish-edges-cli.yml` 只改内容、文件名不变）。平铺合入前 main 上不出现半平铺状态。

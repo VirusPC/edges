@@ -4,7 +4,7 @@
 
 **Goal:** edges 作用域（`isScope`）的「本层系统维护信息」材料清单只挂在 `.edges/README.md`；`AGENTS.md` 本层只留一条指向该 README 的组成；`edges init` 保证该文件存在；`--super` 优先从 harness 入口 README 展开，缺失时再扁平挂载。
 
-**Architecture:** 材料索引是普通 `ReadmeNode`（`project-entries-*`，无 YAML frontmatter）。`NodeService` 在 `.edges/README.md` 已带 entries 标记时，本就会把 `.edges/` 下的新材料登记到这份 README（`physicalParent`）。本计划补上：init 先创建该 README；AGENTS 本层只保留单条指针；类型行、看板和 add-type 不再写入 AGENTS 本层；既有清单迁入 README 后从 AGENTS 本层删掉。`--super` 不再一律按 `edges-materials.json` 扁平挂载。
+**Architecture:** 材料索引是普通 `ReadmeNode`（`edges-entries-*`，无 YAML frontmatter）。`NodeService` 在 `.edges/README.md` 已带 entries 标记时，本就会把 `.edges/` 下的新材料登记到这份 README（`physicalParent`）。本计划补上：init 先创建该 README；AGENTS 本层只保留单条指针；类型行、看板和 add-type 不再写入 AGENTS 本层；既有清单迁入 README 后从 AGENTS 本层删掉。`--super` 不再一律按 `edges-materials.json` 扁平挂载。
 
 **Tech Stack:** TypeScript、Node 22、`node:test`、现有 `AgentsNode` / `ReadmeNode` / `NodeService`。
 
@@ -21,9 +21,9 @@
 - 只对 `isScope` 为真的目录生效（`packages/cli/src/services/scope.ts`：`AGENTS.md` 能解析成带 edges XML 标记的 `AgentsNode`）。
 - 只迁「本层系统维护信息」的材料清单。下层系统维护信息、Compose block、本层硬约束仍在 `AGENTS.md`。
 - AGENTS 本层恰好一条组成，指向 `.edges/README.md`，name 为「本层 harness 材料索引」。不双写。
-- `.edges/README.md` 是标准组织清单：`project-entries-local` / `project-entries-descendants`，无 YAML frontmatter。
+- `.edges/README.md` 是标准组织清单：`edges-entries-local` / `edges-entries-descendants`，无 YAML frontmatter。
 - 不合并 `layout.ts` 的 `ENTRY_NAMES` 与 `edges-materials.json`。不改 ADR 0034。不做 Claude 式 `@path` 展开。
-- `project-memory-init` 的 PROTOCOL / LAYOUT / `AGENTS.tmpl.md` 本轮不改。模板里的类型行仍是 `indexFiles()` 与 `seedDescription()` 的说明来源；写入新 AGENTS 时由 `selectedLocalBlock` 去掉这些行，只留指针。技能正文与 CLI 写入形状的差异标为未改。
+- `edges-memory-init` 的 PROTOCOL / LAYOUT / `AGENTS.tmpl.md` 本轮不改。模板里的类型行仍是 `indexFiles()` 与 `seedDescription()` 的说明来源；写入新 AGENTS 时由 `selectedLocalBlock` 去掉这些行，只留指针。技能正文与 CLI 写入形状的差异标为未改。
 - 公开仓库：不写入凭据、Tailscale、100.x 地址。
 
 ---
@@ -44,7 +44,7 @@
   - `HARNESS_INDEX_DESCRIPTION = "本层 harness 材料的组织清单。各材料只在这里登记。"`
   - `harnessIndexPath(scopeDir) → <scope>/.edges/README.md`（`placeHarnessMaterial(scope, "readme")`）
   - `superViewHarnessIndexPath(scopeDir) → <scope>/README.md`（`placeHarnessMaterial(scope, "readme", { super: true })`）
-  - `harnessIndexSeed() → string`（标题 + `project-entries-local`，无 frontmatter）
+  - `harnessIndexSeed() → string`（标题 + `edges-entries-local`，无 frontmatter）
   - `materialOwnershipPaths(scopeDir) → Set<string> | undefined`（README 不存在则为 `undefined`）
   - `preferredSuperHarnessIndex(scopeDir) → string | undefined`
 
@@ -109,12 +109,12 @@
 **行为：**
 
 - 默认预览；`--apply` 才写。可重复运行：已迁完的作用域计划为空。
-- 每个 `isScope` 目录：本层已解析的材料条目，以及本层列表里尚未解析成 child 的节点链接，迁入 `.edges/README.md` 的 `project-entries-local`。AGENTS 本层只留指针。下层与硬约束不动。
+- 每个 `isScope` 目录：本层已解析的材料条目，以及本层列表里尚未解析成 child 的节点链接，迁入 `.edges/README.md` 的 `edges-entries-local`。AGENTS 本层只留指针。下层与硬约束不动。
 - 索引上已有同一 id 时保留索引上的 description，不覆盖。
 - 排除 `posts/`（本仓 AI 不改对外博客）。
 
 - [x] **Step 1:** 实现脚本，对仓库根预览。
-- [x] **Step 2:** `--apply`。抽查根、`extensions/`、`packages/skills/project-memory-init/`：材料在 `.edges/README.md`；下层还在。非材料链接（内容 INDEX、`tech-reading/AGENTS.md`、根上的 README/CONTEXT/adr 导航）留在 AGENTS。
+- [x] **Step 2:** `--apply`。抽查根、`extensions/`、`packages/skills/edges-memory-init/`：材料在 `.edges/README.md`；下层还在。非材料链接（内容 INDEX、`tech-reading/AGENTS.md`、根上的 README/CONTEXT/adr 导航）留在 AGENTS。
 - [x] **Step 3:** 再跑一次预览，计划为空。
 
 ### Task 4: 文档状态
@@ -125,7 +125,7 @@
 - Modify: `CONTEXT.md`（虚拟超节点条去掉「未实现」）
 
 - [x] Decision 8 与 Consequences 改为已实现的行为。
-- [x] 写明未改项：`project-memory-init` 的 PROTOCOL / LAYOUT / 模板正文仍描述「本层链到各类型 README」；CLI 写入已是单条指针。模板类型行仍服务 `indexFiles()` / `seedDescription()`。
+- [x] 写明未改项：`edges-memory-init` 的 PROTOCOL / LAYOUT / 模板正文仍描述「本层链到各类型 README」；CLI 写入已是单条指针。模板类型行仍服务 `indexFiles()` / `seedDescription()`。
 - [x] `--super` 优先序按 Task 1 写清，不把「两边都在就改挂对外 README」说成已做。
 
 ### Task 5: 验证

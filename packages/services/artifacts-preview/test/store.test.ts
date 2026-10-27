@@ -210,7 +210,7 @@ test("put rejects other from.type and invalid task pointers", async () => {
     /from\.type must be task/,
   );
   await assert.rejects(
-    () => store.put({ ttlSeconds: 60, from: { type: "skill", name: "project-tasks-classify" } as never, files }),
+    () => store.put({ ttlSeconds: 60, from: { type: "skill", name: "edges-tasks-classify" } as never, files }),
     /from\.type must be task/,
   );
   await assert.rejects(

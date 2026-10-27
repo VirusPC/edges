@@ -26,8 +26,8 @@ const JOURNAL = ".recursive-layout-migration";
 export const OWNER_MAP: Record<string, string> = {
   ".": ".",
   extensions: "extensions",
-  "extensions/skills/project-memory-init":
-    "extensions/skills/project-memory-init",
+  "extensions/skills/edges-memory-init":
+    "extensions/skills/edges-memory-init",
   "shared-extensions": "shared-extensions",
   "knowledge/tasks": ".edges/tasks",
   "knowledge/notes": "knowledge/notes",
@@ -100,8 +100,8 @@ function block(text: string, name: string, body?: string) {
 function stripScope(text: string) {
   for (const n of ["local", "children"]) text = block(text, n);
   return text
-    .replaceAll("<!-- project-memory:start -->", "")
-    .replaceAll("<!-- project-memory:end -->", "");
+    .replaceAll("<!-- edges:start -->", "")
+    .replaceAll("<!-- edges:end -->", "");
 }
 /** Union raw YAML fields; unsupported keys and conflicting values require review. */
 export function mergeIndexMetadata(
@@ -109,7 +109,7 @@ export function mergeIndexMetadata(
   right: string,
 ): [string, string] {
   const typePattern =
-      /<!-- project-memory-type:start -->\r?\n([\s\S]*?)<!-- project-memory-type:end -->/,
+      /<!-- edges-memory-type:start -->\r?\n([\s\S]*?)<!-- edges-memory-type:end -->/,
     frontPattern = /^\s*---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
   function extract(text: string) {
     const match = text.match(typePattern);
@@ -170,7 +170,7 @@ export function mergeIndexMetadata(
     front = unionFields(lf, rf);
   let header = front ? `---\n${front}---\n\n` : "";
   if (types)
-    header += `<!-- project-memory-type:start -->\n${types}<!-- project-memory-type:end -->\n\n`;
+    header += `<!-- edges-memory-type:start -->\n${types}<!-- edges-memory-type:end -->\n\n`;
   return [header + lb, rb];
 }
 export function makeInstancePlan(
@@ -336,7 +336,7 @@ export function makeInstancePlan(
           generic.decodeState(after),
         );
         const pattern =
-          /<!-- project-memory-entries:start -->([\s\S]*?)<!-- project-memory-entries:end -->/;
+          /<!-- edges-entries-local:start -->([\s\S]*?)<!-- edges-entries-local:end -->/;
         const lines = [
           ...new Set(
             [left, right].flatMap((d) =>
@@ -346,7 +346,7 @@ export function makeInstancePlan(
             ),
           ),
         ].sort((a, b) => a.split("](")[1]!.localeCompare(b.split("](")[1]!));
-        const entries = `<!-- project-memory-entries:start -->\n${(lines.length ? lines : ["- 暂无条目。"]).join("\n")}\n<!-- project-memory-entries:end -->`;
+        const entries = `<!-- edges-entries-local:start -->\n${(lines.length ? lines : ["- 暂无条目。"]).join("\n")}\n<!-- edges-entries-local:end -->`;
         left = left.replace(pattern, () => entries);
         right = right.replace(pattern, "");
         old.after = generic.fileState(
@@ -624,8 +624,8 @@ export function makeInstancePlan(
       const rendered = node.serialize();
       return adrNavigation.length
         ? rendered.replace(
-            "<!-- project-memory-local:end -->",
-            "\n[架构决策](<docs/adr/>) — 架构决策入口。\n<!-- project-memory-local:end -->",
+            "<!-- edges-local:end -->",
+            "\n[架构决策](<docs/adr/>) — 架构决策入口。\n<!-- edges-local:end -->",
           )
         : rendered;
     });
@@ -713,7 +713,7 @@ export function planMissingPrivateIndexes(root: string, job: InstanceJob) {
           ? readText(agents)
           : "",
       local = text.match(
-        /<!-- project-memory-local:start -->[\s\S]*?<!-- project-memory-local:end -->/,
+        /<!-- edges-local:start -->[\s\S]*?<!-- edges-local:end -->/,
       )?.[0];
     if (!local) continue;
     for (const match of local.matchAll(

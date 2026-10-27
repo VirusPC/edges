@@ -25,7 +25,7 @@ function fixture(t: any) {
   put(
     root,
     "AGENTS.md",
-    "# root\n<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n",
+    "# root\n<!-- edges:start -->\n<!-- edges-local:start -->\n<!-- edges-local:end -->\n<!-- edges-descendants:start -->\n<!-- edges-descendants:end -->\n<!-- edges:end -->\n",
   );
   put(root, ".gitignore", "**/.memory/users/\n**/.edges/memory/users/\n");
   put(root, "knowledge/posts/README.md", "# protected\n");
@@ -95,12 +95,12 @@ function legacy(root: string, owner: string, title: string, extra = "") {
     root,
     `${owner}.memory/projects/AGENTS.md`,
     extra +
-      `# Projects\n${title}\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n`,
+      `# Projects\n${title}\n<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n`,
   );
   put(
     root,
     `${owner}AGENTS.md`,
-    "# scope\n<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n- [projects](.memory/projects/AGENTS.md) — projects\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n",
+    "# scope\n<!-- edges:start -->\n<!-- edges-local:start -->\n- [projects](.memory/projects/AGENTS.md) — projects\n<!-- edges-local:end -->\n<!-- edges-descendants:start -->\n<!-- edges-descendants:end -->\n<!-- edges:end -->\n",
   );
 }
 test("instance routes tasks and gitlink while protected posts retain bytes", async (t) => {
@@ -188,7 +188,7 @@ test("upgraded checkout routes ignored remnants into their original module", asy
   put(
     root,
     "extensions/.memory/users/AGENTS.md",
-    "# private manual\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+    "# private manual\n<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n",
   );
   put(root, "extensions/.memory/users/user_x.md", "secret");
   fs.chmodSync(join(root, "extensions/.memory"), 0o700);
@@ -222,8 +222,8 @@ test("pending old instance journal adds missing official private index on resume
     fs
       .readFileSync(agents, "utf8")
       .replace(
-        "<!-- project-memory-local:end -->",
-        "- [users](.edges/memory/users/AGENTS.md) — users\n<!-- project-memory-local:end -->",
+        "<!-- edges-local:end -->",
+        "- [users](.edges/memory/users/AGENTS.md) — users\n<!-- edges-local:end -->",
       ),
   );
   const job = m.makeInstancePlan(root, manifest);
@@ -232,7 +232,7 @@ test("pending old instance journal adds missing official private index on resume
   m.runInstanceMigration(root, manifest, true);
   assert.match(
     fs.readFileSync(join(root, ".edges/memory/users/AGENTS.md"), "utf8"),
-    /project-memory-entries:start/,
+    /edges-entries-local:start/,
   );
 });
 test("pending instance journal detects later target edit before any write", async (t) => {
@@ -315,7 +315,7 @@ test("private indexes of different owners remain separate", async (t) => {
     put(
       root,
       owner + ".memory/users/AGENTS.md",
-      `# private ${owner} manual\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n`,
+      `# private ${owner} manual\n<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n`,
     );
   }
   m.runInstanceMigration(root, manifest, true);
@@ -341,8 +341,8 @@ test("missing adopted custom type refuses before ignore or journal writes", asyn
     fs
       .readFileSync(agents, "utf8")
       .replace(
-        "<!-- project-memory-local:end -->",
-        "- [custom](.edges/memory/custom/AGENTS.md) — custom\n<!-- project-memory-local:end -->",
+        "<!-- edges-local:end -->",
+        "- [custom](.edges/memory/custom/AGENTS.md) — custom\n<!-- edges-local:end -->",
       ),
   );
   const before = snapshot(root);
@@ -360,7 +360,7 @@ test("instance interrupted private copy resumes its persisted plan", async (t) =
   put(
     root,
     "extensions/.memory/users/AGENTS.md",
-    "# private intro\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+    "# private intro\n<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n",
   );
   put(root, "extensions/.memory/users/user_x.md", "private");
   fs.chmodSync(join(root, "extensions/.memory"), 0o700);
@@ -407,7 +407,7 @@ test("flat private index destination receives private permissions", async (t) =>
   put(
     root,
     ".memory/USER.md",
-    "# flat private\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+    "# flat private\n<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n",
   );
   m.runInstanceMigration(root, manifest, true);
   assert.equal(
@@ -427,7 +427,7 @@ test("private remnants preserve external relative links after local layout conve
   put(
     root,
     "extensions/.memory/users/AGENTS.md",
-    "# manual\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+    "# manual\n<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n",
   );
   put(
     root,
@@ -478,7 +478,7 @@ test("instance keeps custom skills module ownership after local layout conversio
   put(
     root,
     ".memory/docs/AGENTS.md",
-    "<!-- project-memory-type:start -->\nname: guide\nmodule: skills\nwritable: false\ngitignore: true\nformat: ordinary\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+    "<!-- edges-memory-type:start -->\nname: guide\nmodule: skills\nwritable: false\ngitignore: true\nformat: ordinary\n<!-- edges-memory-type:end -->\n<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n",
   );
   put(
     root,
@@ -515,13 +515,13 @@ for (const kind of ["users", "docs"])
       m.runInstanceMigration(root, manifest, true);
       const fields =
         kind === "docs"
-          ? "<!-- project-memory-type:start -->\nname: docs\nwritable: false\ngitignore: true\nformat: ordinary\n<!-- project-memory-type:end -->\n"
+          ? "<!-- edges-memory-type:start -->\nname: docs\nwritable: false\ngitignore: true\nformat: ordinary\n<!-- edges-memory-type:end -->\n"
           : "";
       put(
         root,
         `.memory/${kind}/AGENTS.md`,
         fields +
-          "# private\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+          "# private\n<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n",
       );
       const leaf = kind === "users" ? "user_new.md" : "docs_new.md";
       put(root, `.memory/${kind}/${leaf}`, "private bytes");
@@ -776,8 +776,8 @@ test("instance root generator registers owned modules in three sections and pres
     fs
       .readFileSync(file, "utf8")
       .replace(
-        "<!-- project-memory-local:end -->",
-        "- [manual](manual.md) — user pointer\n<!-- project-memory-local:end -->",
+        "<!-- edges-local:end -->",
+        "- [manual](manual.md) — user pointer\n<!-- edges-local:end -->",
       ) + "\n## Authored guidance\nKeep this prose.\n",
   );
   const { runInstanceMigration } = await load();
@@ -817,7 +817,7 @@ test("corrected instance ownership keeps public and custom private records at th
   put(
     root,
     "extensions/.memory/docs/AGENTS.md",
-    "<!-- project-memory-type:start -->\nname: secret\nmodule: memory\nwritable: true\ngitignore: true\nformat: ordinary\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+    "<!-- edges-memory-type:start -->\nname: secret\nmodule: memory\nwritable: true\ngitignore: true\nformat: ordinary\n<!-- edges-memory-type:end -->\n<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n",
   );
   put(root, "extensions/.memory/docs/secret_x.md", "private fixture");
   const m = await load();
@@ -889,7 +889,7 @@ test("private remnant adoption registers its original node and keeps custom priv
   put(
     root,
     "extensions/.memory/docs/AGENTS.md",
-    "<!-- project-memory-type:start -->\nname: secret\nmodule: skills\nwritable: false\ngitignore: true\nformat: ordinary\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+    "<!-- edges-memory-type:start -->\nname: secret\nmodule: skills\nwritable: false\ngitignore: true\nformat: ordinary\n<!-- edges-memory-type:end -->\n<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n",
   );
   put(root, "extensions/.memory/docs/secret_x.md", "private fixture");
   const result = m.runInstanceMigration(root, manifest, true);
@@ -915,8 +915,8 @@ test("instance root generator demotes ADR directory ownership to ordinary local 
     fs
       .readFileSync(file, "utf8")
       .replace(
-        "<!-- project-memory-local:end -->",
-        `- ${navigation}\n<!-- authored comment -->\nKeep manual prose.\n<!-- project-memory-local:end -->`,
+        "<!-- edges-local:end -->",
+        `- ${navigation}\n<!-- authored comment -->\nKeep manual prose.\n<!-- edges-local:end -->`,
       ),
   );
   const { runInstanceMigration } = await load();
@@ -930,8 +930,8 @@ test("instance root generator demotes ADR directory ownership to ordinary local 
     false,
   );
   const local = source
-    .split("<!-- project-memory-local:start -->")[1]!
-    .split("<!-- project-memory-local:end -->")[0]!;
+    .split("<!-- edges-local:start -->")[1]!
+    .split("<!-- edges-local:end -->")[0]!;
   assert.ok(local.includes(`\n${navigation}\n`));
   assert.match(source, /<!-- authored comment -->\nKeep manual prose\./);
   assert.doesNotMatch(source, /## 工作与模块入口|## 下层作用域/);

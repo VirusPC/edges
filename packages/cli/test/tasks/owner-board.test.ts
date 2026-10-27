@@ -133,7 +133,7 @@ test('maintenance registration preserves an existing descendant relation and aut
 
 test('unsafe owner indexes are refused without overwriting their source', async t => {
   const { root, write, call } = fixture(t);
-  const source = '# Root\n<!-- project-memory-local:start -->\n';
+  const source = '# Root\n<!-- edges-local:start -->\n';
   write('AGENTS.md', source);
   const result = await call('.', 'maintenance', ['create', '--title', 'Refused']);
   assert.notEqual(result.exitCode, 0);
@@ -161,8 +161,8 @@ test('task create keeps a scope that already lists the board README', async t =>
   const source = owner.serialize();
   write('AGENTS.md', source);
   write('.edges/tasks/AGENTS.md', '# tasks\n');
-  write('.edges/tasks/README.md', '# Tasks\n\nBoard.\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n<!-- project-entries-local:end -->\n');
-  write('.edges/tasks/alpha/README.md', '# Alpha\n\nalpha work\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n');
+  write('.edges/tasks/README.md', '# Tasks\n\nBoard.\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n<!-- edges-entries-local:end -->\n');
+  write('.edges/tasks/alpha/README.md', '# Alpha\n\nalpha work\n\n<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n');
   const created = await call('.', 'maintenance', ['create', '--title', 'Fresh', '--project', 'alpha']);
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
   assert.equal(fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8'), source);

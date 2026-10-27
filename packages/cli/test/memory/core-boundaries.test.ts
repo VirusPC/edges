@@ -185,7 +185,7 @@ for (const change of [
     text =
       change === "all"
         ? text.replace(
-            /<!-- project-memory-type:start -->[\s\S]*?<!-- project-memory-type:end -->/,
+            /<!-- edges-memory-type:start -->[\s\S]*?<!-- edges-memory-type:end -->/,
             "",
           )
         : change === "invalid"
@@ -220,7 +220,7 @@ for (const [name, field, from, to] of [
     const spec = layerTypeSpecs(d)[0]!;
     const before =
       read(d, spec.indexFile) +
-      `\n<!-- project-memory-type:start -->\nname: ${name}\nmodule: ${spec.module}\nwritable: ${field === "writable" ? to : spec.writable}\ngitignore: ${field === "gitignore" ? to : spec.gitignore}\nformat: ${field === "format" ? to : spec.format}\n<!-- project-memory-type:end -->\n`;
+      `\n<!-- edges-memory-type:start -->\nname: ${name}\nmodule: ${spec.module}\nwritable: ${field === "writable" ? to : spec.writable}\ngitignore: ${field === "gitignore" ? to : spec.gitignore}\nformat: ${field === "format" ? to : spec.format}\n<!-- edges-memory-type:end -->\n`;
     put(d, spec.indexFile, before);
     await assert.rejects(async () => await initMemory({ targetDir: d }));
     assert.ok(
@@ -577,7 +577,7 @@ test("custom privilege YAML rejects string booleans and executable language head
   assert.throws(
     () =>
       parseTypeMeta(
-        '<!-- project-memory-type:start -->\nname: secrets\nwritable: "true"\ngitignore: false\n<!-- project-memory-type:end -->',
+        '<!-- edges-memory-type:start -->\nname: secrets\nwritable: "true"\ngitignore: false\n<!-- edges-memory-type:end -->',
       ),
     /Invalid type flag/,
   );
@@ -666,8 +666,8 @@ for (const type of ["project", "managed", "referenced"] as const)
     assert.equal(result.complete, true, JSON.stringify(result));
     const index = type === "project" ? pi : `.edges/skills/${type}/README.md`;
     const text = read(d, index)
-      .split("<!-- project-entries-local:start -->")[1]!
-      .split("<!-- project-entries-local:end -->")[0]!
+      .split("<!-- edges-entries-local:start -->")[1]!
+      .split("<!-- edges-entries-local:end -->")[0]!
       .replace(/^\s*## 本层内容/, "")
       .trim();
     assert.equal(text.split("\n").length, 1);

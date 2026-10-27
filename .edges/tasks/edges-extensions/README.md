@@ -2,12 +2,12 @@
 
 edges CLI/脚手架/发布/鉴权等平台层。
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [CLI与MCP需加鉴权](<backlog/2026-09-09--CLI%E4%B8%8EMCP%E9%9C%80%E5%8A%A0%E9%89%B4%E6%9D%83/INDEX.md>) — CLI 与 MCP 后续需要加鉴权（产品/基建待办）
 - [system\_project\_or\_user\_home](<backlog/2026-09-12--%E7%B3%BB%E7%BB%9F%E5%8F%AF%E8%B7%9F%E9%A1%B9%E7%9B%AE%E6%88%96%E6%8C%82%E7%94%A8%E6%88%B7%E7%9B%AE%E5%BD%95/INDEX.md>) — 系统很通用：可跟随项目，也可放到用户目录（tasks 可做用户级）；像 Claude Code auto memory 的扩展
-- [project\_memory\_scripts\_to\_edges\_cli](<backlog/2026-09-13--project-memory%E8%84%9A%E6%9C%AC%E8%BF%81%E5%88%B0edges-CLI/INDEX.md>) — 把 project\-memory\-init/remember/ask/doctor 等 Python scripts 迁到 edges CLI
+- [project\_memory\_scripts\_to\_edges\_cli](<backlog/2026-09-13--project-memory%E8%84%9A%E6%9C%AC%E8%BF%81%E5%88%B0edges-CLI/INDEX.md>) — 把 edges\-memory\-init/remember/ask/doctor 等 Python scripts 迁到 edges CLI
 - [publish\_edges\_cli\_as\_package](<done/2026-09-14--edges-CLI%E5%8F%91%E5%B8%83%E6%88%90package/INDEX.md>) — 把 edges CLI 发布成 package，可安装而不是只在仓里跑
 - [encapsulate\_edges\_as\_scaffold\_and\_framework](<backlog/2026-09-16--edges-%E5%B0%81%E8%A3%85%E4%B8%BA%E8%84%9A%E6%89%8B%E6%9E%B6%E6%A1%86%E6%9E%B6%E5%B9%B6%E5%AE%9A%E4%B9%89%E5%8D%87%E7%BA%A7%E8%B7%AF%E5%BE%84/INDEX.md>) — 脚手架管出生、框架管版本升级；非纯 template；knowledge/ 不同步
 - [project\_memory\_tree\_operations\_as\_cli](<backlog/2026-09-24--project-memory-%E6%A0%91%E7%BB%93%E6%9E%84%E6%93%8D%E4%BD%9C%E5%B0%81%E8%A3%85%E4%B8%BACLI/INDEX.md>) — 将 project\-memory 的树结构操作（至少含找最近父节点）封装成 edges CLI，避免散落在 skill 或脚本里
@@ -46,4 +46,4 @@ edges CLI/脚手架/发布/鉴权等平台层。
 - [compose补卸载能力](<backlog/2026-10-26--Compose%E8%A1%A5%E5%8D%B8%E8%BD%BD%E8%83%BD%E5%8A%9B/INDEX.md>) — 现在去掉 Compose 条目只能手改 README；要补一条正式卸载路径。
 - [将\_harness\_目录更名为\_edges](<done/2026-10-27--%E5%B0%86-harness-%E7%9B%AE%E5%BD%95%E6%9B%B4%E5%90%8D%E4%B8%BA-edges/INDEX.md>) — 目录名从通用词 .harness 改为品牌名 .edges，统一 CLI/npm/仓库/目录的品牌链路，并承载边际优势、项目的边、图论的边三层含义；本次为推广前定稿变更，改完冻结布局。
 - [新增 agents 与 teams（channels）模块](<backlog/2026-10-27--%E6%96%B0%E5%A2%9E-agents-%E4%B8%8E-teamschannels%E6%A8%A1%E5%9D%97/INDEX.md>) — 在 edges 中沉淀 agents 与 teams（channels）能力面，记录多 Agent 协作所需的人格与协作通道信息。
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->

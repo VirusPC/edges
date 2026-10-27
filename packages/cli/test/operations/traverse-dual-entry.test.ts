@@ -105,7 +105,7 @@ test("NodeService list from AGENTS is system-two only; --super reaches content f
   write("AGENTS.md", scopeAgentsMd);
   write(
     "README.md",
-    `# Root\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md)\n<!-- project-entries-local:end -->\n\n<!-- project-entries-descendants:start -->\n## 下层内容\n\n- [Lower](lower/README.md)\n<!-- project-entries-descendants:end -->\n`,
+    `# Root\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md)\n<!-- edges-entries-local:end -->\n\n<!-- edges-entries-descendants:start -->\n## 下层内容\n\n- [Lower](lower/README.md)\n<!-- edges-entries-descendants:end -->\n`,
   );
   write("tasks/README.md", "# Tasks\n");
   write("lower/README.md", "# Lower\n");
@@ -130,7 +130,7 @@ test("harness discovery from AGENTS does not walk content face", async (t) => {
     fs.writeFileSync(path.join(root, name), text);
   };
   write("AGENTS.md", scopeAgentsMd);
-  write("README.md", "# Root\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Notes](notes/README.md)\n<!-- project-entries-local:end -->\n");
+  write("README.md", "# Root\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Notes](notes/README.md)\n<!-- edges-entries-local:end -->\n");
   write("notes/AGENTS.md", scopeAgentsMd);
   write("notes/README.md", "# Notes\n");
   const rel = (nodes: BaseNode[]) => nodes.map((n) => path.relative(root, n.path));
@@ -149,7 +149,7 @@ test("harness discovery skips symlinked mirrors of entries reachable by their re
   write("skills/real/SKILL.md", "---\nname: real\ndescription: Real skill.\n---\n\nBody\n");
   fs.mkdirSync(path.join(root, ".agents/skills"), { recursive: true });
   fs.symlinkSync("../../skills/real", path.join(root, ".agents/skills/real"));
-  write(".edges/skills/referenced/README.md", "<!-- project-memory-type:start -->\nname: referenced\nmodule: skills\nwritable: false\n<!-- project-memory-type:end -->\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [real](../../../.agents/skills/real/SKILL.md) — Real skill.\n<!-- project-entries-local:end -->\n");
+  write(".edges/skills/referenced/README.md", "<!-- edges-memory-type:start -->\nname: referenced\nmodule: skills\nwritable: false\n<!-- edges-memory-type:end -->\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [real](../../../.agents/skills/real/SKILL.md) — Real skill.\n<!-- edges-entries-local:end -->\n");
   const nodes = await new NodeService({ managedRoot: root }).query(root, { includeHarness: true }).toArray().value();
   assert.deepEqual(nodes.map((n) => path.relative(root, n.path)), ["AGENTS.md", ".edges/skills/referenced/README.md"]);
 });

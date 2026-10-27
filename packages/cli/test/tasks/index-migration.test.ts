@@ -115,7 +115,7 @@ test("rejects conflicting duplicate indexes and out-of-root references with path
   const { root, write } = fixture(t);
   write(
     "tasks/AGENTS.md",
-    "<!-- project-memory-local:start -->\n- [A](alpha/AGENTS.md)\n- [B](alpha/AGENTS.md)\n<!-- project-memory-local:end -->\n",
+    "<!-- edges-local:start -->\n- [A](alpha/AGENTS.md)\n- [B](alpha/AGENTS.md)\n<!-- edges-local:end -->\n",
   );
   await assert.rejects(
     planTaskIndexes(root),
@@ -123,7 +123,7 @@ test("rejects conflicting duplicate indexes and out-of-root references with path
   );
   write(
     "tasks/AGENTS.md",
-    "<!-- project-memory-local:start -->\n- [outside](../../outside/AGENTS.md)\n<!-- project-memory-local:end -->\n",
+    "<!-- edges-local:start -->\n- [outside](../../outside/AGENTS.md)\n<!-- edges-local:end -->\n",
   );
   await assert.rejects(planTaskIndexes(root), /tasks\/AGENTS.md.*outside/s);
 });
@@ -133,7 +133,7 @@ test("malformed markers reject the whole plan; private and foreign content stays
   write("journal/tasks/_default/todo/private/index.md", "private");
   write("posts/tasks/_default/todo/post/index.md", "post");
   assert.equal((await planTaskIndexes(root)).tasks.length, 2);
-  write("tasks/AGENTS.md", "<!-- project-memory-local:start -->\n");
+  write("tasks/AGENTS.md", "<!-- edges-local:start -->\n");
   await assert.rejects(planTaskIndexes(root), /tasks\/AGENTS.md/);
 });
 test("write failure rolls back only writes made by this apply", async (t) => {
@@ -187,7 +187,7 @@ test("CLI requires root, defaults to preview, writes a report, and applies idemp
 test("preserves existing scope groups, labels, descriptions, and unmanaged text byte for byte", async (t) => {
   const { root, write } = fixture(t);
   const source =
-    "# Scope\n\nManual text\n<!-- project-memory-important:start -->\n## 本层硬约束\n\n- A rule\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n## 本层记忆\n\n- [Custom maintenance](<.edges/tasks/AGENTS.md>) — exact description\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n## 下层作用域\n\n- [Custom domain](tasks/AGENTS.md) — kept\n<!-- project-memory-children:end -->\n\nTail\n";
+    "# Scope\n\nManual text\n<!-- edges-constraints:start -->\n## 本层硬约束\n\n- A rule\n<!-- edges-constraints:end -->\n<!-- edges-local:start -->\n## 本层记忆\n\n- [Custom maintenance](<.edges/tasks/AGENTS.md>) — exact description\n<!-- edges-local:end -->\n<!-- edges-descendants:start -->\n## 下层作用域\n\n- [Custom domain](tasks/AGENTS.md) — kept\n<!-- edges-descendants:end -->\n\nTail\n";
   write("AGENTS.md", source);
   const plan = await planTaskIndexes(root);
   assert.ok(!plan.edits.some((e) => e.path === "AGENTS.md"));

@@ -1,10 +1,10 @@
-<!-- project-memory-type:start -->
+<!-- edges-memory-type:start -->
 name: feedback
 module: memory
 writable: true
 gitignore: false
 format: ordinary
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 
 # FEEDBACK — 纠正与约束
 
@@ -13,7 +13,7 @@ format: ordinary
 > 怎么写：正文先一句结论，再跟 `**Why:**`（为什么，便于以后判断边界情况）和 `**How to apply:**`（具体怎么做）。
 > 本文件只是索引，条目区块由脚本重算，正文写在 `feedbacks/feedback_<slug>/index.md` 里。
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [Skill 分发：能不要的不要，必须留的软链](feedback_agent_skills_hub_symlink/INDEX.md) — 整理仓库或本机 .xxx/skills 时：能读 .agents/skills 的不占目录；Claude Code 只留软链，禁止实体拷贝。commands 目录不适用。
@@ -24,7 +24,7 @@ format: ordinary
 - [artifacts server install 不启动进程](<feedback_artifacts_server_install_not_start/INDEX.md>) — 改 edges artifacts server 的 install/start、或想把装 unit 和拉起进程合成一步时打开：install 在已有 ~/.config/edges/edges.env 上保证 token、装依赖/unit/enable，不 start；文件不在就报错并提示 edges config init，不读 artifacts\-preview.env；start/stop/restart 只做进程生命周期。
 - [能力面必须 CLI / Skill / MCP 并列](feedback_capability_surface_three_peers/INDEX.md) — 写能力面标题、Why、How-to 时：三者并列；禁止「必要时 MCP」、禁止用「一个 CLI + 一份 skill」当本仓简称。
 - [根 changelog 不要堆 schema 字段表](feedback_changelog_no_schema_dump/INDEX.md) — 写根 CHANGELOG Unreleased 时打开：用人话完整句写能做什么，对照 \[1.2.0\] 的语气；不要把 schema 字段表、flag 汤或运维细节塞进一段。小节标题与条目前小标题只看 project\_repo\_changelog，不要另写一套。缘起 https://github.com/VirusPC/edges/pull/110。
-- [classifyTasks 按已有质心归类，不要求 embedding](feedback_classify_tasks_centroids_not_embeddings/INDEX.md) — 写或改 project-tasks-classify / classifyTasks 时：按用户已设 Task Project（标题+描述）做归属建议，用 LLM / agent 判断；不要写成 Embedding-based 最近质心分类，不要要求 embedding，也不要把方法名写成 K-means。Embedding / 真向量分类另卡。缘起 https://github.com/VirusPC/edges/pull/78。
+- [classifyTasks 按已有质心归类，不要求 embedding](feedback_classify_tasks_centroids_not_embeddings/INDEX.md) — 写或改 edges-tasks-classify / classifyTasks 时：按用户已设 Task Project（标题+描述）做归属建议，用 LLM / agent 判断；不要写成 Embedding-based 最近质心分类，不要要求 embedding，也不要把方法名写成 K-means。Embedding / 真向量分类另卡。缘起 https://github.com/VirusPC/edges/pull/78。
 - [reference 的 description 必须带关键链接](feedback_description_must_include_urls/INDEX.md) — 写或更新 .edges/memory/references/\* 时：description 与类型入口索引行必须带关键 URL，不能只写在正文 Links。缘起 https://github.com/VirusPC/edges/pull/45。
 - [本作用域的维护模块登记在本层](feedback_harness_modules_are_local_scope/INDEX.md) — 划分 AGENTS 本层与下层索引时：维护当前作用域的 evaluation、tasks、observation 等属于本层，不因模块有独立入口或验证职责就归下层。
 - [知识闭环的反馈回到捕获](feedback_knowledge_loop_returns_to_capture/INDEX.md) — 绘制或描述知识闭环时：反馈必须重新成为输入并回到捕获，不能绕过捕获直接进入生产或沉淀。
@@ -57,9 +57,9 @@ format: ordinary
 - [新增文件不造新概念，名字一眼看懂](<feedback_new_files_no_new_concepts/INDEX.md>) — 在 cli 新增文件、目录或改名时打开：不引入抽象新词（如 classify.ts），文件名要一眼看出职责、符合语义；能并进已有文件就不另起。简单命名不等于降低分层质量。
 - [不要加 edges\-note shim 或根目录默认 ingest](<feedback_no_edges_note_shim/INDEX.md>) — 改 edges\-cli 的 bin、默认命令或兼容入口时：只保留 edges；禁止 edges\-note 第二 bin / shim；根目录无子命令不得跑 note ingest。
 - [目录 stem 保留 Unicode，名字校验仍要 ASCII](<feedback_node_stem_unicode_not_ascii_names/INDEX.md>) — 改笔记、项目目录名或任务名 slug 时打开：目录 stem 保留汉字；skill、memory、task project 的名字校验仍要求小写 ASCII，不要一起放宽。
-- [Restore \-\-force 整份替换，不合并](<feedback_restore_force_replaces/INDEX.md>) — 改 user\-memory\-restore 时：\-\-force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。
+- [Restore \-\-force 整份替换，不合并](<feedback_restore_force_replaces/INDEX.md>) — 改 edges\-user\-memory\-restore 时：\-\-force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。
 - [审阅壳竖线只拖宽度](<feedback_review_shell_dividers_resize_width/INDEX.md>) — 改审阅壳三栏分隔线或拖放时打开：两条竖线只调整左右栏宽度，不搬任务、不改状态。项目拖放仍只在左栏。2026\-09\-24 peng cheng 澄清。
 - [审阅壳筛选靠右、紧挨导出](<feedback_review_shell_filters_before_export/INDEX.md>) — 改审阅壳顶栏筛选或复制导出 JSON 的位置时打开：全文和优先级、负责人、状态整组靠右，紧挨在导出按钮前面。系统名不在这一栏。
 - [改 skill 后必须升级 version、写 changelog、打 tag](<feedback_skill_bump_version/INDEX.md>) — 更新 skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/\<name\>@\<version\> tag。
 - [根 changelog 从用户视角写](<feedback_changelog_user_perspective/INDEX.md>) — 写或切根 CHANGELOG 时打开：从用户能做什么、和以前差在哪来说；扫一眼 \#\#\# 与每条小标题要能列出关键模块变化；不要写 systemd unit/unit 等运维黑话，目录布局不要摊对照表。缘起 2026\-10\-25 审 \#41。
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->

@@ -32,21 +32,21 @@ const read = (root: string, rel: string) =>
 const exists = (root: string, rel: string) =>
   fs.existsSync(path.join(root, rel));
 
-const typeIndex = `<!-- project-memory-type:start -->
+const typeIndex = `<!-- edges-memory-type:start -->
 name: project
 module: memory
 writable: true
 gitignore: false
 format: ordinary
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 
 # PROJECT
 
 > intro
 
-<!-- project-memory-entries:start -->
+<!-- edges-entries-local:start -->
 - [x](project_x/index.md) — x
-<!-- project-memory-entries:end -->
+<!-- edges-entries-local:end -->
 `;
 
 const layer = `# Layer
@@ -78,16 +78,16 @@ alpha project
 
 test("convertTypeIndex keeps header and renames entries markers", () => {
   const out = convertTypeIndex(typeIndex);
-  assert.match(out, /<!-- project-memory-type:start -->/);
+  assert.match(out, /<!-- edges-memory-type:start -->/);
   assert.match(
     out,
-    /<!-- project-entries-local:start -->\n## 本层内容\n\n- \[x\]\(project_x\/index\.md\) — x\n<!-- project-entries-local:end -->/,
+    /<!-- edges-entries-local:start -->\n## 本层内容\n\n- \[x\]\(project_x\/index\.md\) — x\n<!-- edges-entries-local:end -->/,
   );
-  assert.doesNotMatch(out, /project-memory-entries/);
+  assert.doesNotMatch(out, /edges-entries-local/);
   assert.equal(convertTypeIndex(out), out);
 });
 
-test("convertOrgList moves composition to project-entries and drops empty constraints", () => {
+test("convertOrgList moves composition to edges-entries and drops empty constraints", () => {
   const out = convertOrgList(
     orgList.replace(
       "<!-- edges-local:start -->",
@@ -95,7 +95,7 @@ test("convertOrgList moves composition to project-entries and drops empty constr
     ),
   );
   assert.doesNotMatch(out, /<!-- edges/);
-  assert.match(out, /<!-- project-entries-local:start -->\n## 本层内容\n\n- \[one\]/);
+  assert.match(out, /<!-- edges-entries-local:start -->\n## 本层内容\n\n- \[one\]/);
   assert.doesNotMatch(out, /\n\n- \[two\]/);
   const node = new ReadmeNode(path.resolve("/tmp/x/alpha/README.md")).parse(out);
   assert.equal(node.localChildren.length, 2);
@@ -151,8 +151,8 @@ test("apply writes README, deletes AGENTS, retargets links and is idempotent", a
   await applyTypeIndexMigration(planTypeIndexMigration(root));
   assert.equal(exists(root, ".edges/memory/projects/AGENTS.md"), false);
   assert.equal(exists(root, "alpha/AGENTS.md"), false);
-  assert.match(read(root, ".edges/memory/projects/README.md"), /project-entries-local/);
-  assert.match(read(root, "alpha/README.md"), /project-entries-local/);
+  assert.match(read(root, ".edges/memory/projects/README.md"), /edges-entries-local/);
+  assert.match(read(root, "alpha/README.md"), /edges-entries-local/);
   const top = read(root, "AGENTS.md");
   assert.match(top, /\]\(<\.edges\/memory\/projects\/README\.md>\)/);
   assert.match(top, /\]\(<alpha\/README\.md>\)/);

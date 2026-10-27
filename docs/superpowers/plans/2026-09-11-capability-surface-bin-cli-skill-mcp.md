@@ -1625,7 +1625,7 @@ version: 1.0.0
 ## 什么时候用
 
 - 用户或任务要把一条 Note 写进 `knowledge/notes/YYYY-MM-DD--slug.md` 并 commit（可选 push / PR）。
-- 不要用它整理对话（改用 `conversation-to-notes`）、不要用它改 tasks 看板、不要自己 `git commit`。
+- 不要用它整理对话（改用 `edges-conversation-to-notes`）、不要用它改 tasks 看板、不要自己 `git commit`。
 
 ## 有 shell：调用 CLI
 
@@ -1752,7 +1752,7 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 - Modify: `CHANGELOG.md` only if Task 4 left the ADR Unreleased line saying 「实现另 PR」
 
 **Interfaces:**
-- Consumes: remember CLI `python3 packages/skills/project-memory-init/scripts/memory.py remember`
+- Consumes: remember CLI `python3 packages/skills/edges-memory-init/scripts/memory.py remember`
 - Produces: indexes refreshed by the script; `project_capability_surface_cli_skill_mcp` How-to no longer says 「实现后续 PR」 or 「`bin/new-note` 可当 git 残留」；title/Why/How-to keep CLI + Skill + MCP as equal peers (no 「必要时 MCP」, no two-layer shorthand)
 
 - [ ] **Step 1: Write a failing consistency check**
@@ -1778,7 +1778,7 @@ Run the `rg` above. Expected: matches in the four memory bodies (and/or their de
 Use the skill script; do not hand-write `.memory/PROJECT.md` / `extensions/.memory/PROJECT.md`.
 
 ```bash
-INIT=packages/skills/project-memory-init/scripts/memory.py
+INIT=packages/skills/edges-memory-init/scripts/memory.py
 
 python3 "$INIT" remember \
   --target-dir . \
@@ -1860,7 +1860,7 @@ agent / human
  └─ packages/mcp-servers/new-note   无 shell 的 MCP 宿主（spawn edges note）
 \`\`\`
 
-不要把 npm \`bin\` 当成一层。不要恢复仓根 \`bin/\`。\`conversation-to-notes\` 不进 CLI。隔离仓测用 \`EDGES_REPO\`，不要再设 \`EDGES_SCRIPT\`。
+不要把 npm \`bin\` 当成一层。不要恢复仓根 \`bin/\`。\`edges-conversation-to-notes\` 不进 CLI。隔离仓测用 \`EDGES_REPO\`，不要再设 \`EDGES_SCRIPT\`。
 
 ### CLI 契约
 
@@ -1887,8 +1887,8 @@ If remember reports `agentsAction: needs-doctor`, run doctor (next step) before 
 - [ ] **Step 4: Doctor + living-doc sweep + test**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/memory.py doctor --target-dir .
-python3 packages/skills/project-memory-init/scripts/memory.py doctor --target-dir extensions
+python3 packages/skills/edges-memory-init/scripts/memory.py doctor --target-dir .
+python3 packages/skills/edges-memory-init/scripts/memory.py doctor --target-dir extensions
 # Only --apply if doctor reports index drift you just caused; do not rewrite someone else's AGENTS.md.
 
 rg -n 'bin/new-note|仓根 `bin/`' \

@@ -33,7 +33,7 @@ agent / human
  └─ packages/mcp-servers/new-note   无 shell 的 MCP 宿主（spawn edges notes）
 ```
 
-不要把 npm `bin` 当成一层。不要恢复仓根 `bin/`。`conversation-to-notes` 不进 CLI。隔离仓测用 `EDGES_REPO`，不要再设 `EDGES_SCRIPT`。
+不要把 npm `bin` 当成一层。不要恢复仓根 `bin/`。`edges-conversation-to-notes` 不进 CLI。隔离仓测用 `EDGES_REPO`，不要再设 `EDGES_SCRIPT`。
 
 ### CLI 契约
 

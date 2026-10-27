@@ -23,7 +23,7 @@ test("edges init ensures .edges/README.md and a single AGENTS local pointer", as
   const text = await readFile(index, "utf8");
   assert.equal(existsSync(index), true);
   assert.doesNotMatch(text, /^---/m);
-  assert.match(text, /<!-- project-entries-local:start -->/);
+  assert.match(text, /<!-- edges-entries-local:start -->/);
   assert.match(text, /## 本层内容/);
   assert.match(text, /\.edges\/notes\/README\.md|notes\/README\.md/);
   assert.match(text, /memory\/feedbacks\/README\.md/);

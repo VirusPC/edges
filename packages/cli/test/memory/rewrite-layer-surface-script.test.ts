@@ -42,17 +42,17 @@ const legacyLayer = `# T
 <!-- project-memory:end -->
 `;
 
-const typeIndex = `<!-- project-memory-type:start -->
+const typeIndex = `<!-- edges-memory-type:start -->
 name: project
 module: memory
 writable: true
 gitignore: false
 format: ordinary
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 # PROJECT
-<!-- project-memory-entries:start -->
+<!-- edges-entries-local:start -->
 - [x](project_x/index.md) — x
-<!-- project-memory-entries:end -->
+<!-- edges-entries-local:end -->
 `;
 
 const modernLayer = `# T

@@ -77,7 +77,7 @@ flowchart TD
 | commands | 命令注册、参数与 stdin 适配、stdout/stderr 和退出码 | 把 `notes create` 转成 `packages/services/notes/service` 的创建请求 |
 | services | 加载、跨节点协调、文件操作与完整业务流程 | 各领域 `service.ts`；创建 Task 后登记父 AGENTS、保存、移动整个任务目录 |
 | core | 节点基类、本层/下层索引、关系和通用块机制 | BaseNode、InternalNode.addChild、core/node-content 按传入文法解析区块 |
-| config | 入口文件名、叶子目录规则、区块标题与标记 | config/layout.ts 的 AGENTS.md、README.md、SKILL.md、INDEX.md 和 memory、task、note、project 规则；config/sections.ts 的 edges / project-entries 标题与标记 |
+| config | 入口文件名、叶子目录规则、区块标题与标记 | config/layout.ts 的 AGENTS.md、README.md、SKILL.md、INDEX.md 和 memory、task、note、project 规则；config/sections.ts 的 edges / edges-entries 标题与标记 |
 | models | 节点自身的字段、校验、解析序列化和索引编辑 | Task 优先级校验；models/node/layout.ts 按 memory、task、note、project 判定目录类型；AgentsNode 与 ReadmeNode 经 models/node/document.ts 使用 core/node-content |
 | operations | 对多个元素进行遍历、筛选、分组、查找 | traverse、filter、groupBy、Task 数组排序 |
 | utils | 可复用的底层格式与文件机制 | gray-matter 适配、路径与文件原语 |
@@ -153,7 +153,7 @@ edges --scope <仓库根> --super
 
 默认 list 从真 `AGENTS.md` 做一次 traverse。`--all` 从当前 `--scope` 走森林。`--super` 只换根。最全的一次查询是 `--scope <仓库根> --super --all`。这三个开关都在根命令上。
 
-再往下走的是这两个 README 自己的 `project-entries-*`，不是超节点的另一组孩子。`--super tasks list` 只留下这条链上的 Task。
+再往下走的是这两个 README 自己的 `edges-entries-*`，不是超节点的另一组孩子。`--super tasks list` 只留下这条链上的 Task。
 
 ```ts
 const pending = service.query(scope, { types: ["task"] })
@@ -235,7 +235,7 @@ edges memory restore --repo-dir /absolute/project --archive /private/archive.tar
 
 用户记忆 restore 默认拒绝覆盖，明确使用 --force 才整份替换，失败时回滚。备份和恢复接受未压缩或 gzip tar，解包上限 256 MiB、10,000 文件，拒绝硬链接；中断后若报告 `.private-user-memory-*/previous`，应保留恢复副本。模板随包复制到 dist，运行不依赖相邻 Skill 源码或 Python。
 
-内容类型、私有忽略规则与规范以 [Project Memory LAYOUT](../skills/project-memory-init/references/LAYOUT.md) 为准。
+内容类型、私有忽略规则与规范以 [Project Memory LAYOUT](../skills/edges-memory-init/references/LAYOUT.md) 为准。
 
 ### 笔记：notes
 
@@ -419,7 +419,7 @@ pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/migrate-agents-in
 
 脚本先检查所有候选再写入，保留原文备份，跳过符号链接、依赖目录、受保护的 posts 和嵌套 Git 边界；重复执行无变更。
 
-Task Project 列表属于看板 `README.md`（`project-entries-local`）；看板 `AGENTS.md` 只登记 `<project>/AGENTS.md` 系统入口。把看板 AGENTS 里的 README 型 project 链接（含旧 task-projects 区块）一次性移过去：
+Task Project 列表属于看板 `README.md`（`edges-entries-local`）；看板 `AGENTS.md` 只登记 `<project>/AGENTS.md` 系统入口。把看板 AGENTS 里的 README 型 project 链接（含旧 task-projects 区块）一次性移过去：
 
 ```bash
 pnpm migrate:task-project-lists -- --root /absolute/scope          # 预览

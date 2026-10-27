@@ -56,7 +56,7 @@ async function rejectOldLayer(root: string): Promise<void> {
   if (await info(path.join(root, ".memory"))) throw new Error(CONVERSION);
 }
 
-const CONVERSION = 'conversion-required: this version does not convert legacy .memory archives. Restore with @viruspc/edges@0.2.7 in an isolated old project, migrate there, then create a new user-memory-backup archive.';
+const CONVERSION = 'conversion-required: this version does not convert legacy .memory archives. Restore with @viruspc/edges@0.2.7 in an isolated old project, migrate there, then create a new edges-user-memory-backup archive.';
 const expandHome = (value: string): string => expandHomePath(value, true);
 
 function inside(file: string, root: string): boolean {
@@ -134,10 +134,10 @@ export async function backupUserMemory(options: { repoDir: string; outputDir?: s
   if (inside(destination, path.join(root, USERS))) throw new Error('归档不能写入用户记忆正文目录');
   const stamp = options.timestamp ?? new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   if (!/^[A-Za-z0-9_-]+$/.test(stamp)) throw new Error('非法时间戳');
-  const archive = path.join(destination, `user-memory-backup-${stamp}.tar.gz`);
+  const archive = path.join(destination, `edges-user-memory-backup-${stamp}.tar.gz`);
   if (await info(archive)) throw new Error('归档已存在，拒绝覆盖: ' + archive);
   await fs.mkdir(destination, { recursive: true });
-  await ensureIgnore(destination, ['user-memory-backup-*.tar.gz']);
+  await ensureIgnore(destination, ['edges-user-memory-backup-*.tar.gz']);
   await ensureIgnore(root, ['/' + USERS + '/']);
   assertPrivateIgnored(root, files.map(file => path.join(root, file)), [path.join(root, USERS)]);
   assertPrivateIgnored(destination, [archive]);

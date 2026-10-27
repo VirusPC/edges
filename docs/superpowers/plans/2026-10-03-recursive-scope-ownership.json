@@ -277,7 +277,7 @@
     },
     {
       "title": "需要普通记笔记 skill",
-      "description": "除 conversation-to-notes 外，还需要一个面向日常记事的普通笔记 skill",
+      "description": "除 edges-conversation-to-notes 外，还需要一个面向日常记事的普通笔记 skill",
       "source": "knowledge/tasks/agent-clients-ux/backlog/2026-09-09--需要普通记笔记skill.md",
       "target": ".edges/tasks/agent-clients-ux/backlog/2026-09-09--需要普通记笔记skill.md",
       "scope": ".",
@@ -804,7 +804,7 @@
     },
     {
       "title": "project-memory 脚本迁到 edges CLI",
-      "description": "把 project-memory-init/remember/ask/doctor 等 Python scripts 迁到 edges CLI",
+      "description": "把 edges-memory-init/remember/ask/doctor 等 Python scripts 迁到 edges CLI",
       "source": "knowledge/tasks/edges-cli-platform/backlog/2026-09-13--project-memory脚本迁到edges-CLI.md",
       "target": ".edges/tasks/edges-cli-platform/backlog/2026-09-13--project-memory脚本迁到edges-CLI.md",
       "scope": ".",
@@ -1189,17 +1189,17 @@
       "targetSha256": "8cb230155d739f8db68c30be63c97aee805a0e9c2e71cb730bb64912b42d23f0"
     },
     {
-      "title": "conversation-to-tasks 整理后，用 CLI 落库",
-      "description": "conversation-to-tasks 只整理成文；另一步用 edges tasks CLI 把草稿写入看板",
-      "source": "knowledge/tasks/edges-tasks/backlog/2026-09-24--conversation-to-tasks整理后调CLI落库.md",
-      "target": ".edges/tasks/edges-tasks/backlog/2026-09-24--conversation-to-tasks整理后调CLI落库.md",
+      "title": "edges-conversation-to-tasks 整理后，用 CLI 落库",
+      "description": "edges-conversation-to-tasks 只整理成文；另一步用 edges tasks CLI 把草稿写入看板",
+      "source": "knowledge/tasks/edges-tasks/backlog/2026-09-24--edges-conversation-to-tasks整理后调CLI落库.md",
+      "target": ".edges/tasks/edges-tasks/backlog/2026-09-24--edges-conversation-to-tasks整理后调CLI落库.md",
       "scope": ".",
       "purpose": "maintenance",
-      "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：conversation-to-tasks 整理后，用 CLI 落库",
+      "reason": "该目标建设、验证或改进 Edges 的工具、交互、运行环境或工作规范：edges-conversation-to-tasks 整理后，用 CLI 落库",
       "sha256": "e5fd9583a53ae9225eb6c7a6f1f21a2d4410c0939dfd6de09788f4360779d5df",
       "sidecar": {
-        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-24--conversation-to-tasks整理后调CLI落库.log.md",
-        "target": ".edges/tasks/edges-tasks/backlog/.2026-09-24--conversation-to-tasks整理后调CLI落库.log.md",
+        "source": "knowledge/tasks/edges-tasks/backlog/.2026-09-24--edges-conversation-to-tasks整理后调CLI落库.log.md",
+        "target": ".edges/tasks/edges-tasks/backlog/.2026-09-24--edges-conversation-to-tasks整理后调CLI落库.log.md",
         "sha256": "ca0b24a147fca8e146153501862fcb80679e1c67869c82ba31abb71281287bc2",
         "targetSha256": "ca0b24a147fca8e146153501862fcb80679e1c67869c82ba31abb71281287bc2"
       },
@@ -1812,7 +1812,7 @@
       }
     },
     {
-      "description": "改 user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。",
+      "description": "改 edges-user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。",
       "sha256": "3f1aa01601cb86f98f63721be12abfbedbac05eb30d3e7d6daeecc146085d804",
       "scope": "extensions",
       "target": ".edges/memory/feedbacks/feedback_restore_force_replaces.md",
@@ -1821,7 +1821,7 @@
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/feedbacks/feedback_restore_force_replaces.md",
-        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 edges-user-memory-restore 时：--force 先丢掉 users 与 USER.md 再解压（symlink 只删链接）；成员过滤不依赖 filter=data，拒绝非普通文件。",
         "targetSha256": "3f1aa01601cb86f98f63721be12abfbedbac05eb30d3e7d6daeecc146085d804"
       }
     },
@@ -1968,10 +1968,10 @@
     {
       "description": "改 AGENTS.md 本层记忆清单或挑类型时：先 user，再 feedback，再 project（兜底），再 reference；skills / agent_skills 仍靠后。",
       "sha256": "824f6904e7f5ef8af9fc8fd5415d37fc8b39ecd32331099f22f592c252a55ac1",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/feedbacks/feedback_agents_local_type_order.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/feedbacks/feedback_agents_local_type_order.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/feedbacks/feedback_agents_local_type_order.md",
+      "source": "packages/skills/edges-memory-init/.memory/feedbacks/feedback_agents_local_type_order.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/feedbacks/feedback_agents_local_type_order.md",
@@ -1982,10 +1982,10 @@
     {
       "description": "目标目录就是 --root-dir 时，不要把仓库里其他位置的 .memory 当成这棵树的祖先。",
       "sha256": "3dd628ee0d7954c30de4cff417f8dcc49e0951323ff369af45084dc6c0770653",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/feedbacks/feedback_isolated_root_dir.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/feedbacks/feedback_isolated_root_dir.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/feedbacks/feedback_isolated_root_dir.md",
+      "source": "packages/skills/edges-memory-init/.memory/feedbacks/feedback_isolated_root_dir.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/feedbacks/feedback_isolated_root_dir.md",
@@ -1996,10 +1996,10 @@
     {
       "description": "改 AGENTS.md 记忆形状、增减受管区块、或决定区块外留什么时：只保留 important / local / children；不要独立 auto 区块；硬约束种子是 ask/remember 聚光灯加「写在本区块」；区块外只留身份与指针。",
       "sha256": "713dc7a531afd114a2e8199b4555f200c836867e2e4c7523c7e1ee561b3e7193",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/projects/project_agents_three_blocks.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/projects/project_agents_three_blocks.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/projects/project_agents_three_blocks.md",
+      "source": "packages/skills/edges-memory-init/.memory/projects/project_agents_three_blocks.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_agents_three_blocks.md",
@@ -2010,10 +2010,10 @@
     {
       "description": "这套记忆的承重点、最脆的地方，以及技术选择的判断。",
       "sha256": "a1d978ba1dda8f1924f5f1a678355c62793e5cd3417e1b09c5b6392c07662722",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/projects/project_architecture.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/projects/project_architecture.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/projects/project_architecture.md",
+      "source": "packages/skills/edges-memory-init/.memory/projects/project_architecture.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_architecture.md",
@@ -2024,10 +2024,10 @@
     {
       "description": "成型过程中的关键取舍、翻案与待议；论证不进 PROTOCOL/LAYOUT。",
       "sha256": "a6985706ff18e4b6746d518ae95beb76912a9707a437f0db9fca624be3cc3aab",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/projects/project_design_decisions.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/projects/project_design_decisions.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/projects/project_design_decisions.md",
+      "source": "packages/skills/edges-memory-init/.memory/projects/project_design_decisions.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_design_decisions.md",
@@ -2038,10 +2038,10 @@
     {
       "description": "修改顺序：协议 → 布局 → init → 其他非 doctor skill → doctor。",
       "sha256": "d0bb862a388752e13c8ad244ab2d7636424788416019caf67fc9e42eac3b938d",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/projects/project_development.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/projects/project_development.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/projects/project_development.md",
+      "source": "packages/skills/edges-memory-init/.memory/projects/project_development.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_development.md",
@@ -2052,10 +2052,10 @@
     {
       "description": "改普通记忆条目的 YAML 头、或读旧扁平文件时：写入只留 name/description/metadata，实现字段进 metadata.edges-*；闭集以 https://agentskills.io/specification 为准。读取兼容顶层旧键。",
       "sha256": "53f245041d27abc72e998584c189c524d76804a2abbcb1cef251090e913aaca2",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/projects/project_frontmatter_metadata.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/projects/project_frontmatter_metadata.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/projects/project_frontmatter_metadata.md",
+      "source": "packages/skills/edges-memory-init/.memory/projects/project_frontmatter_metadata.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_frontmatter_metadata.md",
@@ -2064,26 +2064,26 @@
       }
     },
     {
-      "description": "改 AGENTS.md 记忆形状、或决定一条规则该常驻还是进 .memory 时：点名 ask/remember，加上不检索就会做错的仓规，直接写进 project-memory-important；目录细则不进这里也不进 .memory。",
+      "description": "改 AGENTS.md 记忆形状、或决定一条规则该常驻还是进 .memory 时：点名 ask/remember，加上不检索就会做错的仓规，直接写进 edges-constraints；目录细则不进这里也不进 .memory。",
       "sha256": "c054d0c392c34bbf9fecd8564a945e5ce1513b66ae1f81a1b719b42464b35400",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/projects/project_important_block.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/projects/project_important_block.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/projects/project_important_block.md",
+      "source": "packages/skills/edges-memory-init/.memory/projects/project_important_block.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_important_block.md",
-        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 AGENTS.md 记忆形状、或决定一条规则该常驻还是进 .memory 时：点名 ask/remember，加上不检索就会做错的仓规，直接写进 project-memory-important；目录细则不进这里也不进 .memory。",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：改 AGENTS.md 记忆形状、或决定一条规则该常驻还是进 .memory 时：点名 ask/remember，加上不检索就会做错的仓规，直接写进 edges-constraints；目录细则不进这里也不进 .memory。",
         "targetSha256": "c054d0c392c34bbf9fecd8564a945e5ce1513b66ae1f81a1b719b42464b35400"
       }
     },
     {
       "description": "为什么否掉 .memory→.agents 改名，改成 skills（自动沉淀）与 agent_skills（只索引）两个类型；两份入口为什么都放 .memory/；为什么没平铺进 local 区块。",
       "sha256": "a76e7ffa91254ae801ad75fd27aee84a962876838b0f54d11f2ce6b88a6cc2b8",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/projects/project_skill_ownership_split.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/projects/project_skill_ownership_split.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/projects/project_skill_ownership_split.md",
+      "source": "packages/skills/edges-memory-init/.memory/projects/project_skill_ownership_split.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_skill_ownership_split.md",
@@ -2094,10 +2094,10 @@
     {
       "description": "决定 AGENTS.md 要不要点名 skill、或觉得 skill 自己的说明就够时：要点名 ask 和 remember，因为 skill 一多，模型不一定会自己加载它们；不要点名 init/doctor/reshape，也不要在入口里写整套工具怎么用。",
       "sha256": "89e5e29013eae6e72971a53ae99225e529020f3da45cd7ed532e29c26548cadd",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/projects/project_spotlight_ask_remember.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/projects/project_spotlight_ask_remember.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/projects/project_spotlight_ask_remember.md",
+      "source": "packages/skills/edges-memory-init/.memory/projects/project_spotlight_ask_remember.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_spotlight_ask_remember.md",
@@ -2108,10 +2108,10 @@
     {
       "description": "官方 init 种子仍是六类；类型集合由 LAYOUT+本层登记决定，不是 PROTOCOL 闭集。可扩展见仓库根 ADR 0006。类型入口现为复数目录下 AGENTS.md（ADR 0012）。否掉把 docs 等示例写进默认种子。user 进仓且 gitignore；v1 不做晋升。",
       "sha256": "e731e7477720dc29e00ff775d068395b27dc5d9fd1b4f20d633592268d13e11f",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/projects/project_type_set.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/projects/project_type_set.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/projects/project_type_set.md",
+      "source": "packages/skills/edges-memory-init/.memory/projects/project_type_set.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_type_set.md",
@@ -2122,10 +2122,10 @@
     {
       "description": "记忆索引粒度、膨胀与检索的论文证据。",
       "sha256": "7375e2caee40353ffd1120cf1437373252607c10a3c336a0e7e83ec64b1f8b07",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/references/reference_academic_papers.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/references/reference_academic_papers.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/references/reference_academic_papers.md",
+      "source": "packages/skills/edges-memory-init/.memory/references/reference_academic_papers.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/references/reference_academic_papers.md",
@@ -2136,10 +2136,10 @@
     {
       "description": "各家编码 agent / AI IDE 的记忆与 AGENTS.md 实践。",
       "sha256": "effdba89a61559b2d4020627cbfe13efe989572c4b7f7ee46d4bb575013c5656",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/references/reference_coding_agents.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/references/reference_coding_agents.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/references/reference_coding_agents.md",
+      "source": "packages/skills/edges-memory-init/.memory/references/reference_coding_agents.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/references/reference_coding_agents.md",
@@ -2150,10 +2150,10 @@
     {
       "description": "索引粒度、路标 vs 摘要，以及可落地的阈值。",
       "sha256": "cb095231b6c48df27a26f6d7ff57a42a41e8a0957fc566f46e3463298cfb34bd",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/references/reference_index_granularity.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/references/reference_index_granularity.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/references/reference_index_granularity.md",
+      "source": "packages/skills/edges-memory-init/.memory/references/reference_index_granularity.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/references/reference_index_granularity.md",
@@ -2164,10 +2164,10 @@
     {
       "description": "写或核对 SKILL.md / 普通记忆 YAML 头时查：顶层闭集、name 规则、metadata 用途。规范 https://agentskills.io/specification；本仓与生态落差见 extensions 的 reference_skill_format_spec。",
       "sha256": "fb201b6b3765e2456ca81e1c6134293848585df9231c3bb1f63c5dad4b3f3056",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/references/reference_official_skills_spec.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/references/reference_official_skills_spec.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/references/reference_official_skills_spec.md",
+      "source": "packages/skills/edges-memory-init/.memory/references/reference_official_skills_spec.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/references/reference_official_skills_spec.md",
@@ -2178,10 +2178,10 @@
     {
       "description": "开源记忆框架的机制细节与源码取证。",
       "sha256": "46b99b1a3e4da4c2fba82f7cfa001f3b8da7a7722583337910f7e939bebc4c04",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/references/reference_oss_frameworks.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/references/reference_oss_frameworks.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/references/reference_oss_frameworks.md",
+      "source": "packages/skills/edges-memory-init/.memory/references/reference_oss_frameworks.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/references/reference_oss_frameworks.md",
@@ -2192,10 +2192,10 @@
     {
       "description": "四路并行调研的综合结论，改变本方案决策的外部证据总入口。",
       "sha256": "c0f7c52f204dcea88dc8d2be9e34a56254543a845cf1726c65a2a3a233e6d07f",
-      "scope": "packages/skills/project-memory-init",
-      "target": "packages/skills/project-memory-init/.edges/memory/references/reference_prior_art.md",
+      "scope": "packages/skills/edges-memory-init",
+      "target": "packages/skills/edges-memory-init/.edges/memory/references/reference_prior_art.md",
       "reason": "Preserve the original node ownership; layout conversion is owner-local. Original task-board memory belongs to the maintenance board.",
-      "source": "packages/skills/project-memory-init/.memory/references/reference_prior_art.md",
+      "source": "packages/skills/edges-memory-init/.memory/references/reference_prior_art.md",
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/references/reference_prior_art.md",
@@ -2356,7 +2356,7 @@
       }
     },
     {
-      "description": "任务记录员等 agent 改 knowledge/tasks 时优先走 edges tasks CLI 与已有 tasks Skill（如 project-tasks-classify）；缺口上报用户。本条是根 prefer_repo_skills_and_cli 的看板特化。",
+      "description": "任务记录员等 agent 改 knowledge/tasks 时优先走 edges tasks CLI 与已有 tasks Skill（如 edges-tasks-classify）；缺口上报用户。本条是根 prefer_repo_skills_and_cli 的看板特化。",
       "sha256": "b933731b4031a64ee557d2bf459e6ce7f9bf0abfacd0d5f12cfd4968876c1bb9",
       "scope": ".edges/tasks",
       "target": ".edges/tasks/.edges/memory/projects/project_tasks_board_mutations_via_cli.md",
@@ -2365,7 +2365,7 @@
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_tasks_board_mutations_via_cli.md",
-        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：任务记录员等 agent 改 knowledge/tasks 时优先走 edges tasks CLI 与已有 tasks Skill（如 project-tasks-classify）；缺口上报用户。本条是根 prefer_repo_skills_and_cli 的看板特化。",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：任务记录员等 agent 改 knowledge/tasks 时优先走 edges tasks CLI 与已有 tasks Skill（如 edges-tasks-classify）；缺口上报用户。本条是根 prefer_repo_skills_and_cli 的看板特化。",
         "targetSha256": "b933731b4031a64ee557d2bf459e6ce7f9bf0abfacd0d5f12cfd4968876c1bb9"
       }
     },
@@ -2411,7 +2411,7 @@
       "targetSha256": "f7e38abd2ab25ca5cf823ea18790ca88912656b8bdc37acd2d9fe44e130fac62"
     },
     {
-      "description": "写 knowledge/notes：2.3.2 结构；结果遗留逐点问清后交 conversation-to-tasks（一次1～2条）。",
+      "description": "写 knowledge/notes：2.3.2 结构；结果遗留逐点问清后交 edges-conversation-to-tasks（一次1～2条）。",
       "sha256": "5855b789829649aad659aa6a5075ededa4a24bd66ec61a62b87bbb67e3acce35",
       "scope": "knowledge/notes",
       "target": "knowledge/notes/.edges/memory/projects/project_conversation_notes_plain_rich_human_review.md",
@@ -2420,7 +2420,7 @@
       "historicalPromotion": {
         "scope": ".",
         "target": ".edges/memory/projects/project_conversation_notes_plain_rich_human_review.md",
-        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写 knowledge/notes：2.3.2 结构；结果遗留逐点问清后交 conversation-to-tasks（一次1～2条）。",
+        "reason": "该条约束或解释根作用域拥有的能力/流程；源码、看板或笔记目录不是这条维护知识的独立责任主体。 对象：写 knowledge/notes：2.3.2 结构；结果遗留逐点问清后交 edges-conversation-to-tasks（一次1～2条）。",
         "targetSha256": "5855b789829649aad659aa6a5075ededa4a24bd66ec61a62b87bbb67e3acce35"
       }
     }
@@ -2467,7 +2467,7 @@
   "privateOwnerMap": {
     ".": ".",
     "extensions": "extensions",
-    "packages/skills/project-memory-init": "packages/skills/project-memory-init",
+    "packages/skills/edges-memory-init": "packages/skills/edges-memory-init",
     "shared-extensions": "shared-extensions",
     "knowledge/tasks": ".edges/tasks",
     "knowledge/notes": "knowledge/notes",
@@ -2503,7 +2503,7 @@
     "privateOwnerMap": {
       ".": ".",
       "extensions": ".",
-      "packages/skills/project-memory-init": ".",
+      "packages/skills/edges-memory-init": ".",
       "shared-extensions": ".",
       "knowledge/tasks": ".",
       "knowledge/notes": ".",

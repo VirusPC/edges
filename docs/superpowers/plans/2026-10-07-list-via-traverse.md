@@ -313,8 +313,8 @@ EOF
 - Modify: `packages/cli/src/commands/memory/doctor.ts`（去掉 `--index-group`）
 - Modify: `packages/cli/src/services/node/node-service.ts`（`#registration` 自己选分组）
 - Modify: `packages/cli/src/services/tasks/paths.ts`（看板目录由根节点决定）
-- Modify: `packages/skills/conversation-to-tasks/SKILL.md`
-- Modify: `packages/skills/project-tasks-classify/SKILL.md`
+- Modify: `packages/skills/edges-conversation-to-tasks/SKILL.md`
+- Modify: `packages/skills/edges-tasks-classify/SKILL.md`
 - Modify: `packages/cli/README.md`、仓库根 `README.md` 里仍把任务写成用途二选一、或要求调用方选择 index-group 的句子
 - Test: `packages/cli/test/tasks/`、`packages/cli/test/services/` 里仍传这两个选项的用例
 
@@ -331,7 +331,7 @@ EOF
 - 一般：主体是 `--scope` 上的真系统，看板 = `join(harnessRootForScope(scope), "tasks")`，即 `<scope>/.edges/tasks`。
 - 主体是仓库之外的虚拟系统一：`--scope <仓库根> --super` 建立 `SuperAgentsNode`。这个虚拟系统的 harness 就是传入的 scope 目录，看板 = `join(scope, "tasks")`，即 `<仓库根>/tasks`。
 
-`conversation-to-tasks` 与 `project-tasks-classify` 只传 `--scope`。只有主体是这套虚拟系统一时才加 `--super`。
+`edges-conversation-to-tasks` 与 `edges-tasks-classify` 只传 `--scope`。只有主体是这套虚拟系统一时才加 `--super`。
 
 - [ ] **Step 2: Retarget tests**
 
@@ -346,8 +346,8 @@ EOF
 ```bash
 git add packages/cli/src/commands/tasks.ts packages/cli/src/commands/memory/doctor.ts \
   packages/cli/src/services/node/node-service.ts packages/cli/src/services/tasks/paths.ts \
-  packages/skills/conversation-to-tasks/SKILL.md \
-  packages/skills/project-tasks-classify/SKILL.md \
+  packages/skills/edges-conversation-to-tasks/SKILL.md \
+  packages/skills/edges-tasks-classify/SKILL.md \
   packages/cli/README.md README.md packages/cli/test/tasks packages/cli/test/services
 git commit -m "$(cat <<'EOF'
 fix: write tasks into the node harness board

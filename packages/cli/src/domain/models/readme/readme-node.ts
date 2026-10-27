@@ -6,7 +6,7 @@ import type { NodeReference } from "../../core/types.js";
 
 export interface ReadmeCreateInput extends InternalCreateInput {}
 
-/** README.md composition: project-entries-local / project-entries-descendants. */
+/** README.md composition: edges-entries-local / edges-entries-descendants. */
 export class ReadmeNode extends InternalNode<ReadmeCreateInput, ReadmeCreateInput> {
   override readonly type = "readme";
   #syntax = new InternalSyntax("", undefined, "entries");

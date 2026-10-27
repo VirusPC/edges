@@ -10,7 +10,7 @@ name: 让_tasks_list_顺着_agentsmd_走到任务
 description: 仓库根 tasks list 应列出 AGENTS.md 指向的 .edges/tasks 任务；--all 的森林里也要有这些任务节点。
 ---
 **背景：**
-2026-10-07 在核对 `edges tasks list` 的 `--scope`、`--super`、`--all` 时，仓库根默认列出 0 条，`--super` 列出 `tasks/` 下 5 条，`--all` 也是 0。顺着根 `AGENTS.md` 看，它指向 `.edges/tasks/AGENTS.md`，这份文件的 children 是记忆、技能和 `tech-reading/AGENTS.md`。103 条维护任务记在各项目 `README.md` 的 `project-entries` 上，遍历 `AGENTS.md` 的 children 到不了。`--super` 不走这条链，直接挂 `<仓库根>/tasks/README.md`，所以那 5 条是对的。`--all` 有走森林，那些 `AGENTS.md` 树里同样没有任务节点，滤完还是 0。当时把项目 README 链接抄进看板 `AGENTS.md` 被否掉，不要在 list 里再读 README。
+2026-10-07 在核对 `edges tasks list` 的 `--scope`、`--super`、`--all` 时，仓库根默认列出 0 条，`--super` 列出 `tasks/` 下 5 条，`--all` 也是 0。顺着根 `AGENTS.md` 看，它指向 `.edges/tasks/AGENTS.md`，这份文件的 children 是记忆、技能和 `tech-reading/AGENTS.md`。103 条维护任务记在各项目 `README.md` 的 `edges-entries` 上，遍历 `AGENTS.md` 的 children 到不了。`--super` 不走这条链，直接挂 `<仓库根>/tasks/README.md`，所以那 5 条是对的。`--all` 有走森林，那些 `AGENTS.md` 树里同样没有任务节点，滤完还是 0。当时把项目 README 链接抄进看板 `AGENTS.md` 被否掉，不要在 list 里再读 README。
 - 范围只由 `--scope`、`--super`、`--all` 决定。一般主体是 `--scope`，任务写在该系统的 `.edges/tasks`；虚拟系统一用 `--scope <仓库根> --super`，写在 `<仓库根>/tasks`。
 - 非目标：不在 list 里补第二套遍历，也不把 README 上的链接再抄一份到 `AGENTS.md`。
 - 关联：工作树 `fix/super-follows-scope`；报告 `docs/superpowers/reports/2026-10-07-cli-results.md`。

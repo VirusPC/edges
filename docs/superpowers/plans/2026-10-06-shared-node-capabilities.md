@@ -176,7 +176,7 @@ Schema 仅描述明确的 TS 对外数据契约，不要求节点类变成纯数
 - Move: `packages/cli/src/models/` → `packages/cli/src/domain/models/`
 - Move: `packages/cli/src/operations/` → `packages/cli/src/domain/operations/`
 - Exception move: 原 `packages/cli/src/models/note/validation.ts` → `packages/cli/src/services/note/validation.ts`，不进入 domain
-- Update imports: `packages/cli/src/**/*.ts`、`packages/cli/test/**/*.ts`、`scripts/migrations/legacy-index.mts`、`scripts/migrations/migrate-directory-nodes.mts`，以及仓内静态搜索发现的其他源码消费者
+- Update imports: `packages/cli/src/**/*.ts`、`packages/cli/test/**/*.ts`、`scripts/migrations/legacy-index.mts`、`scripts/migrations/edges-migrate-directory-nodes.mts`，以及仓内静态搜索发现的其他源码消费者
 - Update live docs: `packages/cli/README.md`；本次 spec/plan 已使用目标布局；不批量改写已完成的历史设计记录
 - Verify: `packages/cli/tsconfig.json` 仍覆盖 `src/**/*.ts`，无须新增 package、path alias 或 domain 总入口
 - Align runtime baseline: 根及 workspace `package.json` 的 Node engines、现有 Node 版本选择/CI 配置与当前开发文档；历史完成记录不批量改写

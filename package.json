@@ -21,7 +21,7 @@
     "mcp:run": "pnpm --filter",
     "migrate:recursive-layout": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/migrate-recursive-layout.mts",
     "restore:local-ownership": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/restore-local-ownership.mts",
-    "migrate:directory-nodes": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/migrate-directory-nodes.mts",
+    "migrate:directory-nodes": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/edges-migrate-directory-nodes.mts",
     "migrate:top-level-layout": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/flatten-content-layout.mts",
     "migrate:content-units": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/migrate-content-units.mts",
     "migrate:task-indexes": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/index-task-nodes.mts",

@@ -79,7 +79,7 @@ body
     await access(path.join(repo, "tasks/.memory"));
     const { execFileSync } = await import("node:child_process");
     const { planDirectoryMigration, applyDirectoryMigration } =
-      await import("../../../../../scripts/migrations/migrate-directory-nodes.mjs");
+      await import("../../../../../scripts/migrations/edges-migrate-directory-nodes.mjs");
     execFileSync("git", ["init", "-q"], { cwd: repo });
     execFileSync("git", ["add", "."], { cwd: repo });
     applyDirectoryMigration(planDirectoryMigration(repo));

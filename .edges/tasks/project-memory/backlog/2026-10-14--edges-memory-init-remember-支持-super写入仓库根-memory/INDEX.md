@@ -15,7 +15,7 @@ description: 现在 --super 只对读取和 tasks 生效，memory 写入命令�
 - CLI 设计已支持该形状：`--super` 下 scope 目录即超节点的 harness；`edges-materials.json` 已登记 `memory/references/README.md` 等根级材料路径，list 类读取能找到。
 - 预期收益：根级通用备忘也由 CLI 管理，索引不再手写。
 - 非目标：不改 `.edges/memory/` 维护记忆；不改 tasks 现有的 `--super` 行为。
-- 关联：PR #240；`cli`；skill `project-memory-init` / `project-memory-remember`。
+- 关联：PR #240；`cli`；skill `edges-memory-init` / `edges-memory-remember`。
 
 **目标：**
 `memory init` 和 `remember` 支持 `--super`，把类型入口和条目写进 `<scope>/memory/<type>/`；随后用 CLI 把根目录 `memory/` 重整为合规格式。

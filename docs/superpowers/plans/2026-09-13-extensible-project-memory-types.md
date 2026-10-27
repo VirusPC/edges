@@ -2,20 +2,20 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Let a layer register extra Memory Types through LAYOUT artifacts and `$project-memory-add-type`, while official init seeds stay the six built-ins and remember / ask / doctor discover those extras from the layer — no JSON registry, no PROTOCOL type closed set.
+**Goal:** Let a layer register extra Memory Types through LAYOUT artifacts and `$edges-memory-add-type`, while official init seeds stay the six built-ins and remember / ask / doctor discover those extras from the layer — no JSON registry, no PROTOCOL type closed set.
 
-**Architecture:** Keep `index_files()` as the **init seed** map derived from `AGENTS.tmpl.md`. Add a layer discovery function that reads that layer’s `AGENTS.md` local block plus `.memory/*.md` entry files (the LAYOUT products). `$project-memory-add-type` is a thin skill over a new `memory.py add-type` operation in the shared `project-memory-init` scripts: write `.memory/<TYPE>.md`, `.memory/<plural>/`, and one AGENTS local line. Privilege flags live in an HTML comment on the entry file (LAYOUT, not a registry) and are applied by the current Python scripts the same way `user` gitignore works today. `sync_target_agents` / doctor `--apply` must **merge** extra local lines, never replace the local block with the seed-only template.
+**Architecture:** Keep `index_files()` as the **init seed** map derived from `AGENTS.tmpl.md`. Add a layer discovery function that reads that layer’s `AGENTS.md` local block plus `.memory/*.md` entry files (the LAYOUT products). `$edges-memory-add-type` is a thin skill over a new `memory.py add-type` operation in the shared `edges-memory-init` scripts: write `.memory/<TYPE>.md`, `.memory/<plural>/`, and one AGENTS local line. Privilege flags live in an HTML comment on the entry file (LAYOUT, not a registry) and are applied by the current Python scripts the same way `user` gitignore works today. `sync_target_agents` / doctor `--apply` must **merge** extra local lines, never replace the local block with the seed-only template.
 
 **Tech Stack:** Python 3 stdlib (`unittest`, `argparse`, `pathlib`, `re`, `dataclasses`), existing `scripts/memory.py` CLI, Agent Skills frontmatter + Keep a Changelog. No new YAML/JSON library. No `edges` CLI work.
 
-**Spec:** `docs/adr/0006-extensible-project-memory-types.md` (accepted). Glossary: `CONTEXT.md` terms **Memory Type（项目记忆）**, **可扩展 Memory Type**. Layout/protocol: `packages/skills/project-memory-init/references/LAYOUT.md`, `PROTOCOL.md` (PROTOCOL stays non-enumerating). Built-in privilege precedent: `docs/adr/0003-user-memory-in-repo-gitignored.md`. Seed type-set: `packages/skills/project-memory-init/.memory/projects/project_type_set.md`. Capability Surface: `docs/adr/0004-capability-surface-cli-skill-mcp.md`. Out-of-scope backlogs: `knowledge/tasks/backlog/2026-09-13--project-memory脚本迁到edges-CLI.md`, `knowledge/tasks/backlog/2026-09-13--tasks-memory与看板语义合并.md`.
+**Spec:** `docs/adr/0006-extensible-edges-memory-types.md` (accepted). Glossary: `CONTEXT.md` terms **Memory Type（项目记忆）**, **可扩展 Memory Type**. Layout/protocol: `packages/skills/edges-memory-init/references/LAYOUT.md`, `PROTOCOL.md` (PROTOCOL stays non-enumerating). Built-in privilege precedent: `docs/adr/0003-user-memory-in-repo-gitignored.md`. Seed type-set: `packages/skills/edges-memory-init/.memory/projects/project_type_set.md`. Capability Surface: `docs/adr/0004-capability-surface-cli-skill-mcp.md`. Out-of-scope backlogs: `knowledge/tasks/backlog/2026-09-13--project-memory脚本迁到edges-CLI.md`, `knowledge/tasks/backlog/2026-09-13--tasks-memory与看板语义合并.md`.
 
 ## Global Constraints
 
 - Co-authored-by on every commit: `Coding Agent 专家 <grok-bot@users.noreply.github.com>`
 - Git subject: `type: subject`
 - Capability Surface wording, if mentioned: always **CLI + Skill + MCP** (three peers). Never “必要时 MCP”, never “CLI + Skill” as the Edges shorthand
-- This round’s action is **Skill** (`$project-memory-add-type`) plus the current Python `memory.py` scripts. Do **not** wait for, or start, the `edges` CLI migration
+- This round’s action is **Skill** (`$edges-memory-add-type`) plus the current Python `memory.py` scripts. Do **not** wait for, or start, the `edges` CLI migration
 - LAYOUT-only extension: entry file + plural dir + AGENTS local line. **No** JSON/YAML type registry
 - PROTOCOL does **not** enumerate types; do not add a type closed set there
 - Official init seeds stay exactly: `user` / `feedback` / `project` / `reference` / `skills` / `agent_skills`
@@ -26,10 +26,10 @@
 - `tasks` Memory Type is an ordinary LAYOUT type (`.memory/TASKS.md` + `.memory/tasks/`). It is **not** `knowledge/tasks/` and must not touch the board
 - Do **not** change `knowledge/tasks` board status or task bodies
 - Do **not** auto-create/edit/move/delete `knowledge/posts/`
-- Do **not** implement `$project-memory-add-type` in the plan-only PR that first lands this file
+- Do **not** implement `$edges-memory-add-type` in the plan-only PR that first lands this file
 - Public repo: no credentials, tokens, or personal data in commits
 - `pull` / `rebase` use `--autostash`. Do not commit `.obsidian/workspace.json`
-- Skill change order (from `project-memory-init` hard constraint): `PROTOCOL.md` → `LAYOUT.md` → `project-memory-init` → other non-doctor skills → `project-memory-doctor`
+- Skill change order (from `edges-memory-init` hard constraint): `PROTOCOL.md` → `LAYOUT.md` → `edges-memory-init` → other non-doctor skills → `project-memory-doctor`
 
 ---
 
@@ -37,36 +37,36 @@
 
 **Create**
 
-- `packages/skills/project-memory-init/scripts/lib/types.py` — `TypeSpec`, seed vs layer discovery, privilege parse/render, type-name validation
-- `packages/skills/project-memory-init/scripts/operations/add_type.py` — `add_type(...)` writes LAYOUT artifacts
-- `packages/skills/project-memory-init/references/templates/TYPE.tmpl.md` — generic user-type entry (not a seed)
-- `packages/skills/project-memory-init/scripts/tests/test_layer_types.py` — discovery + seed isolation
-- `packages/skills/project-memory-init/scripts/tests/test_add_type.py` — add-type + privileges + no-wipe
-- `packages/skills/project-memory-init/scripts/tests/test_example_types_smoke.py` — six example names, tests only
-- `packages/skills/project-memory-add-type/SKILL.md`
-- `packages/skills/project-memory-add-type/CHANGELOG.md`
+- `packages/skills/edges-memory-init/scripts/lib/types.py` — `TypeSpec`, seed vs layer discovery, privilege parse/render, type-name validation
+- `packages/skills/edges-memory-init/scripts/operations/add_type.py` — `add_type(...)` writes LAYOUT artifacts
+- `packages/skills/edges-memory-init/references/templates/TYPE.tmpl.md` — generic user-type entry (not a seed)
+- `packages/skills/edges-memory-init/scripts/tests/test_layer_types.py` — discovery + seed isolation
+- `packages/skills/edges-memory-init/scripts/tests/test_add_type.py` — add-type + privileges + no-wipe
+- `packages/skills/edges-memory-init/scripts/tests/test_example_types_smoke.py` — six example names, tests only
+- `packages/skills/edges-memory-add-type/SKILL.md`
+- `packages/skills/edges-memory-add-type/CHANGELOG.md`
 
 **Modify**
 
-- `packages/skills/project-memory-init/scripts/lib/blocks.py` — keep `index_files()` as **seeds**; stop calling the local block a closed set; add `TYPE_META_*` markers next to the other HTML comments
-- `packages/skills/project-memory-init/scripts/lib/paths.py` — no new external-root table rows this round (`EXTERNAL_CONTENT_DIRS` stays `{agent_skills: ...}`)
-- `packages/skills/project-memory-init/scripts/nodes/agents.py` — `sync_target_agents` / new-AGENTS path must merge extras, not `build_local_block()` alone
-- `packages/skills/project-memory-init/scripts/nodes/entries.py` — `refresh_index` / `expected_index_document` / `resolve_memory_path` / `ordinary_memory_types` take a target and use layer discovery; generic `TYPE.tmpl.md` fallback
-- `packages/skills/project-memory-init/scripts/operations/init.py` — still create only seed dirs/indexes; after extras exist, refresh them too; do not wipe AGENTS extras
-- `packages/skills/project-memory-init/scripts/operations/remember.py` — refresh discovered types; `sync_target_agents` must not drop extras
-- `packages/skills/project-memory-init/scripts/operations/doctor.py` — per-layer expected types = discovered ∪ seeds; apply must not call seed-only `build_local_block()`
-- `packages/skills/project-memory-init/scripts/memory.py` — `add-type` subcommand; remember `--type` is no longer a static `choices=` list
-- `packages/skills/project-memory-init/scripts/operations/__init__.py` — docstring: four operations
-- `packages/skills/project-memory-init/scripts/OVERVIEW.md` — discovery + add-type + “加普通类型” is add-type, not only editing the seed template
-- `packages/skills/project-memory-init/references/LAYOUT.md` — extension surface, privilege comment, discovery, heading count-free; do **not** add example types to the seed table
-- `packages/skills/project-memory-init/references/templates/AGENTS.tmpl.md` — 「下面六个」→「下面这些」（count-free). **Do not** add docs/progress/tasks/… links
-- `packages/skills/project-memory-init/SKILL.md` + `CHANGELOG.md`
-- `packages/skills/project-memory-remember/SKILL.md` + `CHANGELOG.md`
-- `packages/skills/project-memory-ask/SKILL.md` + `CHANGELOG.md`
+- `packages/skills/edges-memory-init/scripts/lib/blocks.py` — keep `index_files()` as **seeds**; stop calling the local block a closed set; add `TYPE_META_*` markers next to the other HTML comments
+- `packages/skills/edges-memory-init/scripts/lib/paths.py` — no new external-root table rows this round (`EXTERNAL_CONTENT_DIRS` stays `{agent_skills: ...}`)
+- `packages/skills/edges-memory-init/scripts/nodes/agents.py` — `sync_target_agents` / new-AGENTS path must merge extras, not `build_local_block()` alone
+- `packages/skills/edges-memory-init/scripts/nodes/entries.py` — `refresh_index` / `expected_index_document` / `resolve_memory_path` / `ordinary_memory_types` take a target and use layer discovery; generic `TYPE.tmpl.md` fallback
+- `packages/skills/edges-memory-init/scripts/operations/init.py` — still create only seed dirs/indexes; after extras exist, refresh them too; do not wipe AGENTS extras
+- `packages/skills/edges-memory-init/scripts/operations/remember.py` — refresh discovered types; `sync_target_agents` must not drop extras
+- `packages/skills/edges-memory-init/scripts/operations/doctor.py` — per-layer expected types = discovered ∪ seeds; apply must not call seed-only `build_local_block()`
+- `packages/skills/edges-memory-init/scripts/memory.py` — `add-type` subcommand; remember `--type` is no longer a static `choices=` list
+- `packages/skills/edges-memory-init/scripts/operations/__init__.py` — docstring: four operations
+- `packages/skills/edges-memory-init/scripts/OVERVIEW.md` — discovery + add-type + “加普通类型” is add-type, not only editing the seed template
+- `packages/skills/edges-memory-init/references/LAYOUT.md` — extension surface, privilege comment, discovery, heading count-free; do **not** add example types to the seed table
+- `packages/skills/edges-memory-init/references/templates/AGENTS.tmpl.md` — 「下面六个」→「下面这些」（count-free). **Do not** add docs/progress/tasks/… links
+- `packages/skills/edges-memory-init/SKILL.md` + `CHANGELOG.md`
+- `packages/skills/edges-memory-remember/SKILL.md` + `CHANGELOG.md`
+- `packages/skills/edges-memory-ask/SKILL.md` + `CHANGELOG.md`
 - `packages/skills/project-memory-doctor/SKILL.md` + `CHANGELOG.md` (doctor last)
 - `packages/skills/project-memory-reshape/SKILL.md` + `CHANGELOG.md`
 - `CHANGELOG.md` `[Unreleased]` — new skill + discovery (when implementation lands). This plan-only change adds the plan-file line
-- `.agents/skills/project-memory-add-type` — relative symlink via `pnpm skills:link`
+- `.agents/skills/edges-memory-add-type` — relative symlink via `pnpm skills:link`
 
 **Do not create/commit**
 
@@ -104,14 +104,14 @@ if str(SCRIPTS) not in sys.path:
 Run any single file as:
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py -v
 ```
 
 Regression after each implementation step:
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_frontmatter.py -v
-python3 packages/skills/project-memory-init/scripts/tests/test_user_type.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_frontmatter.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_user_type.py -v
 ```
 
 ---
@@ -119,9 +119,9 @@ python3 packages/skills/project-memory-init/scripts/tests/test_user_type.py -v
 ### Task 1: Seed map vs layer discovery
 
 **Files:**
-- Create: `packages/skills/project-memory-init/scripts/lib/types.py`
-- Create: `packages/skills/project-memory-init/scripts/tests/test_layer_types.py`
-- Modify: `packages/skills/project-memory-init/scripts/lib/blocks.py` (comment on `index_files` / `build_local_block` only if needed; keep the functions)
+- Create: `packages/skills/edges-memory-init/scripts/lib/types.py`
+- Create: `packages/skills/edges-memory-init/scripts/tests/test_layer_types.py`
+- Modify: `packages/skills/edges-memory-init/scripts/lib/blocks.py` (comment on `index_files` / `build_local_block` only if needed; keep the functions)
 
 **Interfaces:**
 - Consumes: `lib.blocks.index_files() -> dict[str, str]`, `MEMORY_INDEX_LINK_PATTERN`, `LOCAL_START` / `LOCAL_END` / `ENTRIES_START`, `lib.paths.memory_dir`, `AGENTS_FILE_NAME`
@@ -131,7 +131,7 @@ python3 packages/skills/project-memory-init/scripts/tests/test_user_type.py -v
   - `seed_index_files() -> dict[str, str]` — thin wrapper around `index_files()`
   - `index_file_name(entry_type: str) -> str` — `docs` → `DOCS.md`, `agent_skills` → `AGENT_SKILLS.md` (`entry_type.upper() + ".md"`)
   - `validate_type_name(entry_type: str) -> str` — strip, lower; must match `^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$`; reject seeds
-  - `discover_layer_types(target: Path) -> dict[str, str]` — `name → index filename`, AGENTS local order first, then extra `.memory/[A-Z][A-Z0-9_]*.md` that contain `project-memory-entries` markers
+  - `discover_layer_types(target: Path) -> dict[str, str]` — `name → index filename`, AGENTS local order first, then extra `.memory/[A-Z][A-Z0-9_]*.md` that contain `edges-entries-local` markers
   - `layer_type_specs(target: Path) -> list[TypeSpec]`
   - `layer_writable_types(target: Path) -> tuple[str, ...]` — discovered names that are writable (not `agent_skills`, not `writable=False`)
 
@@ -202,14 +202,14 @@ class DiscoverLayerTypesTests(unittest.TestCase):
             agents = target / "AGENTS.md"
             text = agents.read_text(encoding="utf-8")
             text = text.replace(
-                "<!-- project-memory-local:end -->",
+                "<!-- edges-local:end -->",
                 "- [.memory/DOCS.md](.memory/DOCS.md) — 文档指针\n"
-                "<!-- project-memory-local:end -->",
+                "<!-- edges-local:end -->",
             )
             agents.write_text(text, encoding="utf-8")
             (target / ".memory" / "DOCS.md").write_text(
-                "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
-                "<!-- project-memory-entries:end -->\n",
+                "<!-- edges-entries-local:start -->\n- 暂无条目。\n"
+                "<!-- edges-entries-local:end -->\n",
                 encoding="utf-8",
             )
             discovered = discover_layer_types(target)
@@ -223,8 +223,8 @@ class DiscoverLayerTypesTests(unittest.TestCase):
             target = Path(raw)
             init_memory(target, target, "temp tree")
             (target / ".memory" / "RESEARCH.md").write_text(
-                "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
-                "<!-- project-memory-entries:end -->\n",
+                "<!-- edges-entries-local:start -->\n- 暂无条目。\n"
+                "<!-- edges-entries-local:end -->\n",
                 encoding="utf-8",
             )
             discovered = discover_layer_types(target)
@@ -234,7 +234,7 @@ class DiscoverLayerTypesTests(unittest.TestCase):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py -v
 ```
 
 Expected: `ModuleNotFoundError: No module named 'lib.types'` (or `ImportError`).
@@ -342,8 +342,8 @@ Leave `layer_type_specs` for Task 6 (privilege comment). Task 1 tests only need 
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py -v
-python3 packages/skills/project-memory-init/scripts/tests/test_user_type.py UserTypeRegistrationTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_user_type.py UserTypeRegistrationTests -v
 ```
 
 Expected: PASS. `test_user_type.py` still sees `index_files()` as the six seeds.
@@ -351,8 +351,8 @@ Expected: PASS. `test_user_type.py` still sees `index_files()` as the six seeds.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/scripts/lib/types.py \
-        packages/skills/project-memory-init/scripts/tests/test_layer_types.py
+git add packages/skills/edges-memory-init/scripts/lib/types.py \
+        packages/skills/edges-memory-init/scripts/tests/test_layer_types.py
 git commit -m "feat(memory): discover layer Memory Types from AGENTS artifacts
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -363,10 +363,10 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 2: Stop wiping extra local lines
 
 **Files:**
-- Modify: `packages/skills/project-memory-init/scripts/nodes/agents.py`
-- Modify: `packages/skills/project-memory-init/scripts/lib/types.py` — add `build_layer_local_block`
-- Modify: `packages/skills/project-memory-init/scripts/tests/test_layer_types.py`
-- Modify: `packages/skills/project-memory-init/scripts/operations/init.py` (call site only if `sync_target_agents` signature stays the same)
+- Modify: `packages/skills/edges-memory-init/scripts/nodes/agents.py`
+- Modify: `packages/skills/edges-memory-init/scripts/lib/types.py` — add `build_layer_local_block`
+- Modify: `packages/skills/edges-memory-init/scripts/tests/test_layer_types.py`
+- Modify: `packages/skills/edges-memory-init/scripts/operations/init.py` (call site only if `sync_target_agents` signature stays the same)
 
 **Interfaces:**
 - Consumes: `build_local_block() -> str` (seed-only, brand-new AGENTS.md)
@@ -389,15 +389,15 @@ class PreserveExtraTypesTests(unittest.TestCase):
         text = agents.read_text(encoding="utf-8")
         agents.write_text(
             text.replace(
-                "<!-- project-memory-local:end -->",
+                "<!-- edges-local:end -->",
                 "- [.memory/DOCS.md](.memory/DOCS.md) — 文档指针\n"
-                "<!-- project-memory-local:end -->",
+                "<!-- edges-local:end -->",
             ),
             encoding="utf-8",
         )
         (target / ".memory" / "DOCS.md").write_text(
-            "<!-- project-memory-entries:start -->\n- 暂无条目。\n"
-            "<!-- project-memory-entries:end -->\n",
+            "<!-- edges-entries-local:start -->\n- 暂无条目。\n"
+            "<!-- edges-entries-local:end -->\n",
             encoding="utf-8",
         )
         (target / ".memory" / "docs").mkdir(exist_ok=True)
@@ -436,7 +436,7 @@ class PreserveExtraTypesTests(unittest.TestCase):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py PreserveExtraTypesTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py PreserveExtraTypesTests -v
 ```
 
 Expected: FAIL — after `init_memory` / `remember`, `.memory/DOCS.md` is gone from `AGENTS.md` because `sync_target_agents` wrote `build_local_block()`.
@@ -516,8 +516,8 @@ Do **not** change `render_agents_document` for brand-new files — those still g
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py PreserveExtraTypesTests -v
-python3 packages/skills/project-memory-init/scripts/tests/test_frontmatter.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py PreserveExtraTypesTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_frontmatter.py -v
 ```
 
 Expected: PASS.
@@ -525,9 +525,9 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/scripts/lib/types.py \
-        packages/skills/project-memory-init/scripts/nodes/agents.py \
-        packages/skills/project-memory-init/scripts/tests/test_layer_types.py
+git add packages/skills/edges-memory-init/scripts/lib/types.py \
+        packages/skills/edges-memory-init/scripts/nodes/agents.py \
+        packages/skills/edges-memory-init/scripts/tests/test_layer_types.py
 git commit -m "fix(memory): keep extra AGENTS type lines across init and remember
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -538,10 +538,10 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 3: remember writes discovered types
 
 **Files:**
-- Modify: `packages/skills/project-memory-init/scripts/nodes/entries.py`
-- Modify: `packages/skills/project-memory-init/scripts/operations/remember.py`
-- Modify: `packages/skills/project-memory-init/scripts/memory.py`
-- Modify: `packages/skills/project-memory-init/scripts/tests/test_layer_types.py`
+- Modify: `packages/skills/edges-memory-init/scripts/nodes/entries.py`
+- Modify: `packages/skills/edges-memory-init/scripts/operations/remember.py`
+- Modify: `packages/skills/edges-memory-init/scripts/memory.py`
+- Modify: `packages/skills/edges-memory-init/scripts/tests/test_layer_types.py`
 
 **Interfaces:**
 - Consumes: `discover_layer_types(target)`, `layer_writable_types(target)`, `index_file_name`
@@ -564,16 +564,16 @@ class RememberDiscoveredTypeTests(unittest.TestCase):
             agents = target / "AGENTS.md"
             agents.write_text(
                 agents.read_text(encoding="utf-8").replace(
-                    "<!-- project-memory-local:end -->",
+                    "<!-- edges-local:end -->",
                     "- [.memory/DOCS.md](.memory/DOCS.md) — 文档指针\n"
-                    "<!-- project-memory-local:end -->",
+                    "<!-- edges-local:end -->",
                 ),
                 encoding="utf-8",
             )
             (target / ".memory" / "docs").mkdir()
             (target / ".memory" / "DOCS.md").write_text(
-                "# DOCS\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
-                "<!-- project-memory-entries:end -->\n",
+                "# DOCS\n\n<!-- edges-entries-local:start -->\n- 暂无条目。\n"
+                "<!-- edges-entries-local:end -->\n",
                 encoding="utf-8",
             )
             result = remember(
@@ -599,7 +599,7 @@ Also add a CLI test in the same class (or in `test_frontmatter.py` style) that r
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py RememberDiscoveredTypeTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py RememberDiscoveredTypeTests -v
 ```
 
 Expected: FAIL — `resolve_memory_path` raises `--type 不支持由 remember 写入: docs` because `memory_entry_types()` is seed-only. `expected_index_document` would `KeyError` on `index_files()["docs"]`.
@@ -687,8 +687,8 @@ In `main()`, after `resolve_target`:
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py RememberDiscoveredTypeTests -v
-python3 packages/skills/project-memory-init/scripts/tests/test_frontmatter.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py RememberDiscoveredTypeTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_frontmatter.py -v
 ```
 
 Expected: PASS. Existing `--type project` CLI test still works without `choices=`.
@@ -696,10 +696,10 @@ Expected: PASS. Existing `--type project` CLI test still works without `choices=
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/scripts/nodes/entries.py \
-        packages/skills/project-memory-init/scripts/operations/remember.py \
-        packages/skills/project-memory-init/scripts/memory.py \
-        packages/skills/project-memory-init/scripts/tests/test_layer_types.py
+git add packages/skills/edges-memory-init/scripts/nodes/entries.py \
+        packages/skills/edges-memory-init/scripts/operations/remember.py \
+        packages/skills/edges-memory-init/scripts/memory.py \
+        packages/skills/edges-memory-init/scripts/tests/test_layer_types.py
 git commit -m "feat(memory): remember user-added Memory Types discovered on the layer
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -710,10 +710,10 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 4: Generic `TYPE.tmpl.md` fallback
 
 **Files:**
-- Create: `packages/skills/project-memory-init/references/templates/TYPE.tmpl.md`
-- Modify: `packages/skills/project-memory-init/scripts/lib/templates.py` — optional helper `read_type_entry_template`
-- Modify: `packages/skills/project-memory-init/scripts/nodes/entries.py` — `expected_index_document` fallback
-- Modify: `packages/skills/project-memory-init/scripts/tests/test_layer_types.py`
+- Create: `packages/skills/edges-memory-init/references/templates/TYPE.tmpl.md`
+- Modify: `packages/skills/edges-memory-init/scripts/lib/templates.py` — optional helper `read_type_entry_template`
+- Modify: `packages/skills/edges-memory-init/scripts/nodes/entries.py` — `expected_index_document` fallback
+- Modify: `packages/skills/edges-memory-init/scripts/tests/test_layer_types.py`
 
 **Interfaces:**
 - Consumes: `read_template(output_name)` (raises if `DOCS.tmpl.md` missing)
@@ -733,14 +733,14 @@ class TypeTemplateTests(unittest.TestCase):
             target = Path(raw)
             init_memory(target, target, "temp tree")
             document = expected_index_document(target, "docs")
-            self.assertIn("project-memory-entries:start", document)
+            self.assertIn("edges-entries-local:start", document)
             self.assertIn("docs", document.lower())
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py TypeTemplateTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py TypeTemplateTests -v
 ```
 
 Expected: FAIL — `ValueError: 模板不存在: .../DOCS.tmpl.md`.
@@ -757,17 +757,17 @@ Expected: FAIL — `ValueError: 模板不存在: .../DOCS.tmpl.md`.
 > 怎么写：正文先一句结论，再跟 `**Why:**` 与 `**How to apply:**`。
 > 本文件只是索引，条目区块由脚本重算，正文写在 `{plural}/{type}_<slug>.md` 里。
 
-<!-- project-memory-type:start -->
+<!-- edges-memory-type:start -->
 name: {type}
 description: {description}
 gitignore: {gitignore}
 writable: {writable}
 format: {format}
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 
-<!-- project-memory-entries:start -->
+<!-- edges-entries-local:start -->
 - 暂无条目。
-<!-- project-memory-entries:end -->
+<!-- edges-entries-local:end -->
 ```
 
 `fill_placeholders` drops a line when every `{key}` on that line is empty. Always pass `"true"` / `"false"` / `"ordinary"` strings for the three flags so those lines stay.
@@ -802,7 +802,7 @@ Privilege comment markers (`TYPE_META_START` / `TYPE_META_END`) are added to `li
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py TypeTemplateTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py TypeTemplateTests -v
 ```
 
 Expected: PASS.
@@ -810,10 +810,10 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/references/templates/TYPE.tmpl.md \
-        packages/skills/project-memory-init/scripts/lib/templates.py \
-        packages/skills/project-memory-init/scripts/nodes/entries.py \
-        packages/skills/project-memory-init/scripts/tests/test_layer_types.py
+git add packages/skills/edges-memory-init/references/templates/TYPE.tmpl.md \
+        packages/skills/edges-memory-init/scripts/lib/templates.py \
+        packages/skills/edges-memory-init/scripts/nodes/entries.py \
+        packages/skills/edges-memory-init/scripts/tests/test_layer_types.py
 git commit -m "feat(memory): generic TYPE.tmpl.md for user-added Memory Type indexes
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -824,9 +824,9 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 5: `add_type` writes LAYOUT artifacts (no privilege flags yet)
 
 **Files:**
-- Create: `packages/skills/project-memory-init/scripts/operations/add_type.py`
-- Modify: `packages/skills/project-memory-init/scripts/tests/test_add_type.py` (create)
-- Modify: `packages/skills/project-memory-init/scripts/operations/__init__.py`
+- Create: `packages/skills/edges-memory-init/scripts/operations/add_type.py`
+- Modify: `packages/skills/edges-memory-init/scripts/tests/test_add_type.py` (create)
+- Modify: `packages/skills/edges-memory-init/scripts/operations/__init__.py`
 
 **Interfaces:**
 - Consumes: `validate_type_name`, `index_file_name`, `upsert_local_type_line`, `type_content_dir`, `type_dir_name`, `read_index_template`, `write_atomic`, `refresh_index`
@@ -956,7 +956,7 @@ class AddTypeLayoutTests(unittest.TestCase):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py AddTypeLayoutTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py AddTypeLayoutTests -v
 ```
 
 Expected: `ModuleNotFoundError: No module named 'operations.add_type'`.
@@ -1062,8 +1062,8 @@ def add_type(
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py AddTypeLayoutTests -v
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py AddTypeLayoutTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py -v
 ```
 
 Expected: PASS.
@@ -1071,9 +1071,9 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/scripts/operations/add_type.py \
-        packages/skills/project-memory-init/scripts/operations/__init__.py \
-        packages/skills/project-memory-init/scripts/tests/test_add_type.py
+git add packages/skills/edges-memory-init/scripts/operations/add_type.py \
+        packages/skills/edges-memory-init/scripts/operations/__init__.py \
+        packages/skills/edges-memory-init/scripts/tests/test_add_type.py
 git commit -m "feat(memory): add-type registers a LAYOUT Memory Type on one layer
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1084,21 +1084,21 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 6: Privilege comment + `--gitignore`
 
 **Files:**
-- Modify: `packages/skills/project-memory-init/scripts/lib/blocks.py` — `TYPE_META_START` / `TYPE_META_END`
-- Modify: `packages/skills/project-memory-init/scripts/lib/types.py` — parse/render + `layer_type_specs`
-- Modify: `packages/skills/project-memory-init/scripts/operations/add_type.py` — append gitignore patterns
-- Modify: `packages/skills/project-memory-init/scripts/tests/test_add_type.py`
+- Modify: `packages/skills/edges-memory-init/scripts/lib/blocks.py` — `TYPE_META_START` / `TYPE_META_END`
+- Modify: `packages/skills/edges-memory-init/scripts/lib/types.py` — parse/render + `layer_type_specs`
+- Modify: `packages/skills/edges-memory-init/scripts/operations/add_type.py` — append gitignore patterns
+- Modify: `packages/skills/edges-memory-init/scripts/tests/test_add_type.py`
 
 **Interfaces:**
 - Consumes: ADR-0003 pattern list (`.memory/USER.md`, `**/.memory/USER.md`, dir + `**/` dir)
 - Produces:
-  - `TYPE_META_START = "<!-- project-memory-type:start -->"`
-  - `TYPE_META_END = "<!-- project-memory-type:end -->"`
+  - `TYPE_META_START = "<!-- edges-memory-type:start -->"`
+  - `TYPE_META_END = "<!-- edges-memory-type:end -->"`
   - `parse_type_meta(text: str) -> TypeSpec | None`
   - `ensure_type_gitignore(repo_root: Path, entry_type: str) -> str` — `"updated"` | `"preserved"` | `"skipped-no-git"`
   - `add_type(..., gitignore=True)` calls `ensure_type_gitignore` when a `.git` exists at `resolve_root(target, None)`
 
-This is **not** a JSON registry. The comment lives on the type entry file, the same way entries live in `<!-- project-memory-entries -->`. PROTOCOL still says only `memory_*.md` have YAML frontmatter.
+This is **not** a JSON registry. The comment lives on the type entry file, the same way entries live in `<!-- edges-entries-local -->`. PROTOCOL still says only `memory_*.md` have YAML frontmatter.
 
 Gitignore implementation (feasible, same as `user`):
 
@@ -1116,7 +1116,7 @@ def gitignore_patterns(entry_type: str) -> tuple[str, ...]:
 
 Find the git root by walking `target` and parents for `.git`. If none: do not fail add-type; set `flags["gitignoreAction"] = "skipped-no-git"` and still write `gitignore: true` in the entry comment so a later clone with a repo root can be fixed by hand or a rerun.
 
-If `.gitignore` exists: append a comment line `# Memory type <name> (project-memory-add-type)` plus any missing patterns. Do not rewrite the `user` block.
+If `.gitignore` exists: append a comment line `# Memory type <name> (edges-memory-add-type)` plus any missing patterns. Do not rewrite the `user` block.
 
 Do **not** add a generic “ignore all extra types” rule. Only the type being registered.
 
@@ -1156,7 +1156,7 @@ Also assert `parse_type_meta` on `SECRET.md` returns `TypeSpec(name="secret", gi
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py AddTypeGitignoreTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py AddTypeGitignoreTests -v
 ```
 
 Expected: FAIL — `add_type` does not take `gitignore` seriously yet (or `TypeError`).
@@ -1164,8 +1164,8 @@ Expected: FAIL — `add_type` does not take `gitignore` seriously yet (or `TypeE
 - [ ] **Step 3: Write minimal implementation**
 
 ```python
-TYPE_META_START = "<!-- project-memory-type:start -->"
-TYPE_META_END = "<!-- project-memory-type:end -->"
+TYPE_META_START = "<!-- edges-memory-type:start -->"
+TYPE_META_END = "<!-- edges-memory-type:end -->"
 
 
 def parse_type_meta(text: str) -> TypeSpec | None:
@@ -1200,7 +1200,7 @@ def ensure_type_gitignore(repo_root: Path, entry_type: str) -> str:
         return "preserved"
     block = "\n".join(
         [
-            f"# Memory type {entry_type} (project-memory-add-type)",
+            f"# Memory type {entry_type} (edges-memory-add-type)",
             *missing,
         ]
     )
@@ -1216,8 +1216,8 @@ def ensure_type_gitignore(repo_root: Path, entry_type: str) -> str:
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py AddTypeGitignoreTests -v
-python3 packages/skills/project-memory-init/scripts/tests/test_user_type.py UserGitignoreTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py AddTypeGitignoreTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_user_type.py UserGitignoreTests -v
 ```
 
 Expected: PASS. Existing `user` gitignore patterns stay intact.
@@ -1225,10 +1225,10 @@ Expected: PASS. Existing `user` gitignore patterns stay intact.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/scripts/lib/blocks.py \
-        packages/skills/project-memory-init/scripts/lib/types.py \
-        packages/skills/project-memory-init/scripts/operations/add_type.py \
-        packages/skills/project-memory-init/scripts/tests/test_add_type.py
+git add packages/skills/edges-memory-init/scripts/lib/blocks.py \
+        packages/skills/edges-memory-init/scripts/lib/types.py \
+        packages/skills/edges-memory-init/scripts/operations/add_type.py \
+        packages/skills/edges-memory-init/scripts/tests/test_add_type.py
 git commit -m "feat(memory): add-type --gitignore appends ADR-0003 style patterns
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1239,10 +1239,10 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 7: `--index-only` (writable=false)
 
 **Files:**
-- Modify: `packages/skills/project-memory-init/scripts/operations/add_type.py`
-- Modify: `packages/skills/project-memory-init/scripts/lib/types.py` — `layer_writable_types` uses `TypeSpec.writable`
-- Modify: `packages/skills/project-memory-init/scripts/operations/doctor.py` — skip `missing-type-dir` when `writable` is false (same spirit as `is_external_type`)
-- Modify: `packages/skills/project-memory-init/scripts/tests/test_add_type.py`
+- Modify: `packages/skills/edges-memory-init/scripts/operations/add_type.py`
+- Modify: `packages/skills/edges-memory-init/scripts/lib/types.py` — `layer_writable_types` uses `TypeSpec.writable`
+- Modify: `packages/skills/edges-memory-init/scripts/operations/doctor.py` — skip `missing-type-dir` when `writable` is false (same spirit as `is_external_type`)
+- Modify: `packages/skills/edges-memory-init/scripts/tests/test_add_type.py`
 
 **Interfaces:**
 - Consumes: `layer_type_specs(target)`
@@ -1290,7 +1290,7 @@ class AddTypeIndexOnlyTests(unittest.TestCase):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py AddTypeIndexOnlyTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py AddTypeIndexOnlyTests -v
 ```
 
 Expected: FAIL — `add_type` still `mkdir`s `catalogs/`, and/or doctor reports `missing-type-dir`, and/or remember succeeds.
@@ -1307,7 +1307,7 @@ Do not skip `missing-index` — the entry file is still required.
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py AddTypeIndexOnlyTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py AddTypeIndexOnlyTests -v
 ```
 
 Expected: PASS. A clean init+doctor tree still has zero findings.
@@ -1315,11 +1315,11 @@ Expected: PASS. A clean init+doctor tree still has zero findings.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/scripts/lib/types.py \
-        packages/skills/project-memory-init/scripts/operations/add_type.py \
-        packages/skills/project-memory-init/scripts/operations/doctor.py \
-        packages/skills/project-memory-init/scripts/nodes/entries.py \
-        packages/skills/project-memory-init/scripts/tests/test_add_type.py
+git add packages/skills/edges-memory-init/scripts/lib/types.py \
+        packages/skills/edges-memory-init/scripts/operations/add_type.py \
+        packages/skills/edges-memory-init/scripts/operations/doctor.py \
+        packages/skills/edges-memory-init/scripts/nodes/entries.py \
+        packages/skills/edges-memory-init/scripts/tests/test_add_type.py
 git commit -m "feat(memory): add-type --index-only skips writes and missing-type-dir
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1330,10 +1330,10 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 8: `--skills-format` implement; `--external-content-dir` stub
 
 **Files:**
-- Modify: `packages/skills/project-memory-init/scripts/nodes/entries.py` — format set is seed ∪ layer specs
-- Modify: `packages/skills/project-memory-init/scripts/operations/add_type.py`
-- Modify: `packages/skills/project-memory-init/scripts/memory.py` — reject `--external-content-dir`
-- Modify: `packages/skills/project-memory-init/scripts/tests/test_add_type.py`
+- Modify: `packages/skills/edges-memory-init/scripts/nodes/entries.py` — format set is seed ∪ layer specs
+- Modify: `packages/skills/edges-memory-init/scripts/operations/add_type.py`
+- Modify: `packages/skills/edges-memory-init/scripts/memory.py` — reject `--external-content-dir`
+- Modify: `packages/skills/edges-memory-init/scripts/tests/test_add_type.py`
 
 **Interfaces:**
 - Consumes: existing `AGENT_SKILL_FORMAT_TYPES`, `SKILL.tmpl.md`, kebab-case slug rules
@@ -1396,7 +1396,7 @@ class AddTypeExternalStubTests(unittest.TestCase):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py AddTypeSkillsFormatTests AddTypeExternalStubTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py AddTypeSkillsFormatTests AddTypeExternalStubTests -v
 ```
 
 Expected: FAIL — `resolve_memory_path` uses ordinary `playbook_<slug>.md` because `AGENT_SKILL_FORMAT_TYPES` is still `{skills, agent_skills}`.
@@ -1434,8 +1434,8 @@ In `TYPE.tmpl.md` / playbook entry, `format: skills` changes the “正文写在
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py AddTypeSkillsFormatTests AddTypeExternalStubTests -v
-python3 packages/skills/project-memory-init/scripts/tests/test_frontmatter.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py AddTypeSkillsFormatTests AddTypeExternalStubTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_frontmatter.py -v
 ```
 
 Expected: PASS. Official `skills` / `agent_skills` remember + index paths unchanged.
@@ -1443,11 +1443,11 @@ Expected: PASS. Official `skills` / `agent_skills` remember + index paths unchan
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/scripts/nodes/entries.py \
-        packages/skills/project-memory-init/scripts/operations/add_type.py \
-        packages/skills/project-memory-init/scripts/memory.py \
-        packages/skills/project-memory-init/references/templates/TYPE.tmpl.md \
-        packages/skills/project-memory-init/scripts/tests/test_add_type.py
+git add packages/skills/edges-memory-init/scripts/nodes/entries.py \
+        packages/skills/edges-memory-init/scripts/operations/add_type.py \
+        packages/skills/edges-memory-init/scripts/memory.py \
+        packages/skills/edges-memory-init/references/templates/TYPE.tmpl.md \
+        packages/skills/edges-memory-init/scripts/tests/test_add_type.py
 git commit -m "feat(memory): add-type --skills-format; stub external content roots
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1458,8 +1458,8 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 9: Doctor discovers extras and does not wipe them
 
 **Files:**
-- Modify: `packages/skills/project-memory-init/scripts/operations/doctor.py`
-- Modify: `packages/skills/project-memory-init/scripts/tests/test_add_type.py`
+- Modify: `packages/skills/edges-memory-init/scripts/operations/doctor.py`
+- Modify: `packages/skills/edges-memory-init/scripts/tests/test_add_type.py`
 
 **Interfaces:**
 - Consumes: `discover_layer_types(owner)`, `layer_type_specs(owner)`, `ensure_seed_local_lines`
@@ -1502,8 +1502,8 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
             target = Path(raw)
             init_memory(target, target, "temp tree")
             (target / ".memory" / "RESEARCH.md").write_text(
-                "# RESEARCH\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n"
-                "<!-- project-memory-entries:end -->\n",
+                "# RESEARCH\n\n<!-- edges-entries-local:start -->\n- 暂无条目。\n"
+                "<!-- edges-entries-local:end -->\n",
                 encoding="utf-8",
             )
             report = doctor_memory(target, apply=False)
@@ -1519,7 +1519,7 @@ class DoctorDiscoversExtraTypesTests(unittest.TestCase):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py DoctorDiscoversExtraTypesTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py DoctorDiscoversExtraTypesTests -v
 ```
 
 Expected: FAIL — `test_doctor_clean_after_add_type` sees `outdated-local`. `test_doctor_apply_does_not_drop_docs_line` loses the DOCS line after `--apply`.
@@ -1578,9 +1578,9 @@ Add `unregistered-type` to the doctor SKILL.md table in Task 13 (not here).
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py DoctorDiscoversExtraTypesTests -v
-python3 packages/skills/project-memory-init/scripts/tests/test_frontmatter.py -v
-python3 packages/skills/project-memory-init/scripts/tests/test_user_type.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py DoctorDiscoversExtraTypesTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_frontmatter.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_user_type.py -v
 ```
 
 Expected: PASS. Idempotent: doctor `--apply` then diagnose → zero findings.
@@ -1588,8 +1588,8 @@ Expected: PASS. Idempotent: doctor `--apply` then diagnose → zero findings.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/scripts/operations/doctor.py \
-        packages/skills/project-memory-init/scripts/tests/test_add_type.py
+git add packages/skills/edges-memory-init/scripts/operations/doctor.py \
+        packages/skills/edges-memory-init/scripts/tests/test_add_type.py
 git commit -m "fix(memory): doctor discovers extra types and will not wipe them
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1600,7 +1600,7 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 10: Example-type smoke (not init seeds)
 
 **Files:**
-- Create: `packages/skills/project-memory-init/scripts/tests/test_example_types_smoke.py`
+- Create: `packages/skills/edges-memory-init/scripts/tests/test_example_types_smoke.py`
 
 **Interfaces:**
 - Consumes: `add_type`, `remember`, `doctor_memory`, `init_memory`, `seed_index_files`
@@ -1732,7 +1732,7 @@ class ExampleTypesSmokeTests(unittest.TestCase):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_example_types_smoke.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_example_types_smoke.py -v
 ```
 
 Expected: FAIL only if earlier tasks are incomplete. If Tasks 1–9 already pass, this test should pass on first run — that is acceptable; do not weaken it. If `progresses/` surprises you, that is the existing `type_dir_name` contract — keep it.
@@ -1744,7 +1744,7 @@ No production code if Tasks 1–9 are done. If the smoke fails, fix the underlyi
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_example_types_smoke.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_example_types_smoke.py -v
 ```
 
 Expected: PASS. `test_template_and_seed_map_omit_examples` is the seed-inflation guard.
@@ -1752,7 +1752,7 @@ Expected: PASS. `test_template_and_seed_map_omit_examples` is the seed-inflation
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/scripts/tests/test_example_types_smoke.py
+git add packages/skills/edges-memory-init/scripts/tests/test_example_types_smoke.py
 git commit -m "test(memory): smoke ADR 0006 example types without seeding them
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1763,9 +1763,9 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 11: `memory.py add-type` CLI
 
 **Files:**
-- Modify: `packages/skills/project-memory-init/scripts/memory.py`
-- Modify: `packages/skills/project-memory-init/scripts/tests/test_add_type.py`
-- Modify: `packages/skills/project-memory-init/scripts/OVERVIEW.md`
+- Modify: `packages/skills/edges-memory-init/scripts/memory.py`
+- Modify: `packages/skills/edges-memory-init/scripts/tests/test_add_type.py`
+- Modify: `packages/skills/edges-memory-init/scripts/OVERVIEW.md`
 
 **Interfaces:**
 - Consumes: `add_type(...)`
@@ -1896,7 +1896,7 @@ class AddTypeCliTests(unittest.TestCase):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py AddTypeCliTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py AddTypeCliTests -v
 ```
 
 Expected: FAIL — argparse: `invalid choice: 'add-type'`.
@@ -1953,8 +1953,8 @@ OVERVIEW.md: change “三个子命令” to four; add a table row “在指定�
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py AddTypeCliTests -v
-python3 packages/skills/project-memory-init/scripts/memory.py add-type --help
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py AddTypeCliTests -v
+python3 packages/skills/edges-memory-init/scripts/memory.py add-type --help
 ```
 
 Expected: PASS. `--help` lists `--gitignore` / `--index-only` / `--skills-format` / `--external-content-dir`.
@@ -1962,9 +1962,9 @@ Expected: PASS. `--help` lists `--gitignore` / `--index-only` / `--skills-format
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/scripts/memory.py \
-        packages/skills/project-memory-init/scripts/OVERVIEW.md \
-        packages/skills/project-memory-init/scripts/tests/test_add_type.py
+git add packages/skills/edges-memory-init/scripts/memory.py \
+        packages/skills/edges-memory-init/scripts/OVERVIEW.md \
+        packages/skills/edges-memory-init/scripts/tests/test_add_type.py
 git commit -m "feat(memory): expose add-type on memory.py
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -1975,9 +1975,9 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 12: LAYOUT + seed heading (PROTOCOL untouched)
 
 **Files:**
-- Modify: `packages/skills/project-memory-init/references/LAYOUT.md`
-- Modify: `packages/skills/project-memory-init/references/templates/AGENTS.tmpl.md`
-- Modify: `packages/skills/project-memory-init/scripts/tests/test_layer_types.py`
+- Modify: `packages/skills/edges-memory-init/references/LAYOUT.md`
+- Modify: `packages/skills/edges-memory-init/references/templates/AGENTS.tmpl.md`
+- Modify: `packages/skills/edges-memory-init/scripts/tests/test_layer_types.py`
 
 **Interfaces:**
 - Consumes: ADR 0006 “扩展面 = 只改 LAYOUT”
@@ -2000,7 +2000,7 @@ class LayoutHeadingTests(unittest.TestCase):
 - [ ] **Step 2: Run test to verify it fails**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py LayoutHeadingTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py LayoutHeadingTests -v
 ```
 
 Expected: FAIL — template still says 「下面六个」.
@@ -2020,12 +2020,12 @@ LAYOUT.md edits (exact sections):
 1. After the opening “可以自由升级…” paragraph, add:
 
 ```markdown
-**扩展一个 Memory Type（ADR 0006）：** 只改本文件描述的产物——该层 `.memory/<TYPE>.md` 入口、`.memory/<plural>/` 内容目录、以及 `AGENTS.md` 本层清单一行。用 `$project-memory-add-type`（`memory.py add-type`）登记。**不要**另写 JSON/YAML 类型注册表。PROTOCOL 不枚举类型。官方 init 种子仍是下表六类；`docs` / `progress` / `tasks` / `research` / `reminder` / `scheduler` 只作文档与测试冒烟，不进种子。
+**扩展一个 Memory Type（ADR 0006）：** 只改本文件描述的产物——该层 `.memory/<TYPE>.md` 入口、`.memory/<plural>/` 内容目录、以及 `AGENTS.md` 本层清单一行。用 `$edges-memory-add-type`（`memory.py add-type`）登记。**不要**另写 JSON/YAML 类型注册表。PROTOCOL 不枚举类型。官方 init 种子仍是下表六类；`docs` / `progress` / `tasks` / `research` / `reminder` / `scheduler` 只作文档与测试冒烟，不进种子。
 ```
 
 2. Change 「本实现取六类」to 「官方 init 种子是六类；本层还可以有用户登记的 type，发现顺序以本层 `AGENTS.md` 清单为准，并并上已有的 `.memory/<TYPE>.md` 入口产物」.
 
-3. Document the privilege comment (`<!-- project-memory-type -->`) and the three implemented flags (`gitignore`, `writable`/`index-only`, `format=skills`). Document the stub: content root outside `.memory/` remains `agent_skills` only.
+3. Document the privilege comment (`<!-- edges-memory-type -->`) and the three implemented flags (`gitignore`, `writable`/`index-only`, `format=skills`). Document the stub: content root outside `.memory/` remains `agent_skills` only.
 
 4. Add a row to the type table **footnote** (not a seventh seed row):
 
@@ -2040,13 +2040,13 @@ Do not list example types as official table rows.
 - [ ] **Step 4: Run test to verify it passes**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py LayoutHeadingTests ExampleTypesAreNotSeedsTests -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py LayoutHeadingTests ExampleTypesAreNotSeedsTests -v
 ```
 
 Expected: PASS. `PROTOCOL.md` git diff is empty:
 
 ```bash
-git diff -- packages/skills/project-memory-init/references/PROTOCOL.md
+git diff -- packages/skills/edges-memory-init/references/PROTOCOL.md
 ```
 
 Expected: no output.
@@ -2054,9 +2054,9 @@ Expected: no output.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add packages/skills/project-memory-init/references/LAYOUT.md \
-        packages/skills/project-memory-init/references/templates/AGENTS.tmpl.md \
-        packages/skills/project-memory-init/scripts/tests/test_layer_types.py
+git add packages/skills/edges-memory-init/references/LAYOUT.md \
+        packages/skills/edges-memory-init/references/templates/AGENTS.tmpl.md \
+        packages/skills/edges-memory-init/scripts/tests/test_layer_types.py
 git commit -m "docs(memory): LAYOUT-only Memory Type extension; count-free local heading
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
@@ -2067,30 +2067,30 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ### Task 13: Skills (init → add-type / remember / ask / reshape → doctor)
 
 **Files:**
-- Create: `packages/skills/project-memory-add-type/SKILL.md`
-- Create: `packages/skills/project-memory-add-type/CHANGELOG.md`
-- Modify: `packages/skills/project-memory-init/SKILL.md` + `CHANGELOG.md`
-- Modify: `packages/skills/project-memory-remember/SKILL.md` + `CHANGELOG.md`
-- Modify: `packages/skills/project-memory-ask/SKILL.md` + `CHANGELOG.md`
+- Create: `packages/skills/edges-memory-add-type/SKILL.md`
+- Create: `packages/skills/edges-memory-add-type/CHANGELOG.md`
+- Modify: `packages/skills/edges-memory-init/SKILL.md` + `CHANGELOG.md`
+- Modify: `packages/skills/edges-memory-remember/SKILL.md` + `CHANGELOG.md`
+- Modify: `packages/skills/edges-memory-ask/SKILL.md` + `CHANGELOG.md`
 - Modify: `packages/skills/project-memory-reshape/SKILL.md` + `CHANGELOG.md`
 - Modify: `packages/skills/project-memory-doctor/SKILL.md` + `CHANGELOG.md`
 - Modify: `CHANGELOG.md` (root Unreleased)
 
 **Interfaces:**
 - Consumes: `memory.py add-type` contract from Task 11
-- Produces: thin `$project-memory-add-type` skill (like remember/doctor: no private scripts); sibling skills describe discovery; `pnpm skills:link` symlink
+- Produces: thin `$edges-memory-add-type` skill (like remember/doctor: no private scripts); sibling skills describe discovery; `pnpm skills:link` symlink
 
 Capability Surface sentence to use wherever a skill mentions how this is exposed (copy verbatim):
 
-> 能力面仍是 CLI + Skill + MCP 三者并列。本轮动作是 Skill（`$project-memory-add-type`）加当前 Python `memory.py`；迁到 `edges` CLI 以及其后的 MCP 对齐见 backlog，不在本轮、也不用来推迟特权 flag。
+> 能力面仍是 CLI + Skill + MCP 三者并列。本轮动作是 Skill（`$edges-memory-add-type`）加当前 Python `memory.py`；迁到 `edges` CLI 以及其后的 MCP 对齐见 backlog，不在本轮、也不用来推迟特权 flag。
 
 - [ ] **Step 1: Write the skill files (no extra test harness)**
 
-`packages/skills/project-memory-add-type/SKILL.md`:
+`packages/skills/edges-memory-add-type/SKILL.md`:
 
 ```markdown
 ---
-name: project-memory-add-type
+name: edges-memory-add-type
 description: 在指定记忆目录按 LAYOUT 登记一个 Memory Type（入口文件 + 复数目录 + AGENTS 本层一行）。仅当用户明确要求新增 type 时使用。官方种子仍是六类；不要把示例 type 写进 init 模板。
 version: 1.0.0
 ---
@@ -2099,7 +2099,7 @@ version: 1.0.0
 
 在**已经 init** 的记忆目录登记一个用户 Memory Type。扩展面只在 LAYOUT：`.memory/<TYPE>.md` + `.memory/<plural>/` + 该层 `AGENTS.md` 本层清单一行。不写 JSON/YAML 注册表。PROTOCOL 不枚举类型。
 
-下文的 `<init-dir>` 指同级的 `project-memory-init` skill 目录。
+下文的 `<init-dir>` 指同级的 `edges-memory-init` skill 目录。
 
 ## 什么时候用
 
@@ -2110,7 +2110,7 @@ version: 1.0.0
 
 ## 步骤
 
-1. 确认目标目录已经 `$project-memory-init`（有 `.memory/` 与本套 `AGENTS.md`）。没有就停，先问用户要不要 Init。
+1. 确认目标目录已经 `$edges-memory-init`（有 `.memory/` 与本套 `AGENTS.md`）。没有就停，先问用户要不要 Init。
 2. 要 `--name`（小写 snake_case，不能是 `user` / `feedback` / `project` / `reference` / `skills` / `agent_skills`）和一句 `--description`（写进本层清单，供 ask 挑选）。
 3. 特权 flag 只在用户点名时加：
    - `--gitignore`：按用户记忆 / ADR-0003 把入口与复数目录追加进仓库根 `.gitignore`（含 `**/` 下层）。
@@ -2127,18 +2127,18 @@ version: 1.0.0
      [--gitignore] [--index-only] [--skills-format]
    ```
 
-5. 按返回 JSON 汇报 `type` / `index` / `contentDir` / `action`。然后用 `$project-memory-remember --type <name>` 写一条冒烟，或告诉用户可以开始写。
+5. 按返回 JSON 汇报 `type` / `index` / `contentDir` / `action`。然后用 `$edges-memory-remember --type <name>` 写一条冒烟，或告诉用户可以开始写。
 
 ## 规则
 
-- 能力面仍是 CLI + Skill + MCP 三者并列。本轮动作是 Skill（`$project-memory-add-type`）加当前 Python `memory.py`；迁到 `edges` CLI 以及其后的 MCP 对齐见 backlog，不在本轮、也不用来推迟特权 flag。
+- 能力面仍是 CLI + Skill + MCP 三者并列。本轮动作是 Skill（`$edges-memory-add-type`）加当前 Python `memory.py`；迁到 `edges` CLI 以及其后的 MCP 对齐见 backlog，不在本轮、也不用来推迟特权 flag。
 - 改 LAYOUT 与当前脚本；不要等 edges CLI，也不要先做类型总配置。
 - 官方 init 种子不因示例膨胀。
 ```
 
 `CHANGELOG.md` for the new skill: Keep a Changelog, `## [Unreleased]` empty, `## [1.0.0] - YYYY-MM-DD` Added the skill + ADR 0006 pointer.
 
-Init SKILL.md: one paragraph that extra types are **not** created by init; point to `$project-memory-add-type`. Bump version 1.7.0 → 1.8.0 in frontmatter when you cut the skill release; until then put the note under that skill’s `[Unreleased]`.
+Init SKILL.md: one paragraph that extra types are **not** created by init; point to `$edges-memory-add-type`. Bump version 1.7.0 → 1.8.0 in frontmatter when you cut the skill release; until then put the note under that skill’s `[Unreleased]`.
 
 Remember SKILL.md: `--type` is “该层已登记的可写类型（种子 + AGENTS 本层额外行）”; `agent_skills` still not writable; do not list only five/six names as a closed CLI set. `[Unreleased]` Changed.
 
@@ -2151,7 +2151,7 @@ Doctor SKILL.md (last): add `unregistered-type` to the issue table; change `outd
 Root `CHANGELOG.md` `[Unreleased]` Added:
 
 ```markdown
-- `$project-memory-add-type`：按 LAYOUT 在指定记忆目录登记用户 Memory Type；remember / ask / doctor 从该层产物发现。官方种子仍是六类（ADR-0006）。
+- `$edges-memory-add-type`：按 LAYOUT 在指定记忆目录登记用户 Memory Type；remember / ask / doctor 从该层产物发现。官方种子仍是六类（ADR-0006）。
 ```
 
 Do not bump the repo `package.json` version.
@@ -2163,25 +2163,25 @@ pnpm skills:link
 pnpm skills:link -- --check
 ```
 
-Expected: `.agents/skills/project-memory-add-type` is a relative symlink to `packages/skills/project-memory-add-type`.
+Expected: `.agents/skills/edges-memory-add-type` is a relative symlink to `packages/skills/edges-memory-add-type`.
 
 - [ ] **Step 3: Commit**
 
 ```bash
-git add packages/skills/project-memory-add-type \
-        packages/skills/project-memory-init/SKILL.md \
-        packages/skills/project-memory-init/CHANGELOG.md \
-        packages/skills/project-memory-remember/SKILL.md \
-        packages/skills/project-memory-remember/CHANGELOG.md \
-        packages/skills/project-memory-ask/SKILL.md \
-        packages/skills/project-memory-ask/CHANGELOG.md \
+git add packages/skills/edges-memory-add-type \
+        packages/skills/edges-memory-init/SKILL.md \
+        packages/skills/edges-memory-init/CHANGELOG.md \
+        packages/skills/edges-memory-remember/SKILL.md \
+        packages/skills/edges-memory-remember/CHANGELOG.md \
+        packages/skills/edges-memory-ask/SKILL.md \
+        packages/skills/edges-memory-ask/CHANGELOG.md \
         packages/skills/project-memory-reshape/SKILL.md \
         packages/skills/project-memory-reshape/CHANGELOG.md \
         packages/skills/project-memory-doctor/SKILL.md \
         packages/skills/project-memory-doctor/CHANGELOG.md \
         CHANGELOG.md \
-        .agents/skills/project-memory-add-type
-git commit -m "feat(memory): ship project-memory-add-type skill and sibling copy
+        .agents/skills/edges-memory-add-type
+git commit -m "feat(memory): ship edges-memory-add-type skill and sibling copy
 
 Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 ```
@@ -2195,14 +2195,14 @@ Co-authored-by: Coding Agent 专家 <grok-bot@users.noreply.github.com>"
 - [ ] **Step 1: Run the whole script test suite**
 
 ```bash
-python3 packages/skills/project-memory-init/scripts/tests/test_frontmatter.py -v
-python3 packages/skills/project-memory-init/scripts/tests/test_user_type.py -v
-python3 packages/skills/project-memory-init/scripts/tests/test_user_memory_archive.py -v
-python3 packages/skills/project-memory-init/scripts/tests/test_layer_types.py -v
-python3 packages/skills/project-memory-init/scripts/tests/test_add_type.py -v
-python3 packages/skills/project-memory-init/scripts/tests/test_example_types_smoke.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_frontmatter.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_user_type.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_user_memory_archive.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_layer_types.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_add_type.py -v
+python3 packages/skills/edges-memory-init/scripts/tests/test_example_types_smoke.py -v
 pnpm skills:link -- --check
-git diff -- packages/skills/project-memory-init/references/PROTOCOL.md
+git diff -- packages/skills/edges-memory-init/references/PROTOCOL.md
 ```
 
 Expected: all tests PASS; skills:link check clean; PROTOCOL diff empty.
@@ -2211,7 +2211,7 @@ Expected: all tests PASS; skills:link check clean; PROTOCOL diff empty.
 
 ```bash
 rg -n "docs/progress/tasks/research/reminder/scheduler|\.memory/DOCS.md|\.memory/TASKS.md" \
-  packages/skills/project-memory-init/references/templates/AGENTS.tmpl.md
+  packages/skills/edges-memory-init/references/templates/AGENTS.tmpl.md
 ```
 
 Expected: no matches. Examples live only in `test_example_types_smoke.py` and LAYOUT prose (not the seed table).
@@ -2229,7 +2229,7 @@ Expected: no matches. Examples live only in `test_example_types_smoke.py` and LA
 | 扩展面只改 LAYOUT（入口 + `<plural>/` + AGENTS 本层行） | 5, 12 |
 | 无 JSON/YAML 类型注册表 | File map, 5, 12; privilege comment is on the entry file |
 | PROTOCOL 不枚举具体类型 | 12 (`git diff PROTOCOL.md` empty) |
-| 新 skill `$project-memory-add-type` under `packages/skills/` | 13 |
+| 新 skill `$edges-memory-add-type` under `packages/skills/` | 13 |
 | 官方 init 种子仍是六类 | 1, 10, 12 |
 | 用户 type 与种子同构 | 3, 5, 10 |
 | remember / ask / doctor 从该层 AGENTS / 入口产物发现 | 1, 3, 9, 13 |
@@ -2264,14 +2264,14 @@ No TBD / implement-later / “similar to Task N” without code. Privilege stub 
 - `--skills-format` ⇒ `format="skills"`
 - Doctor issue id: `unregistered-type`
 - Example tuple name: `EXAMPLE_TYPES`
-- Skill name: `project-memory-add-type`
-- Scripts stay in `project-memory-init/scripts/` (shared home). New skill has no `scripts/` of its own.
+- Skill name: `edges-memory-add-type`
+- Scripts stay in `edges-memory-init/scripts/` (shared home). New skill has no `scripts/` of its own.
 
 ## Execution handoff
 
-Plan complete and saved to `docs/superpowers/plans/2026-09-13-extensible-project-memory-types.md`. Two execution options:
+Plan complete and saved to `docs/superpowers/plans/2026-09-13-extensible-edges-memory-types.md`. Two execution options:
 
 1. **Subagent-Driven (recommended)** — dispatch a fresh subagent per task, review between tasks. REQUIRED SUB-SKILL: superpowers:subagent-driven-development.
 2. **Inline Execution** — execute in one session with executing-plans checkpoints. REQUIRED SUB-SKILL: superpowers:executing-plans.
 
-Do not implement `$project-memory-add-type` in the plan-only PR.
+Do not implement `$edges-memory-add-type` in the plan-only PR.

@@ -41,10 +41,10 @@ export function coLocated(entry: string): boolean {
     )
   );
 }
-const TYPE_HEADER = "<!-- project-memory-type:start -->";
+const TYPE_HEADER = "<!-- edges-memory-type:start -->";
 const TYPE_DIRECTORY = /(?:^|\/)\.edges\/(?:memory|skills)\/[^/]+$/;
 
-const ENTRIES_MARKER = /^<!-- project-entries-(?:local|descendants):start -->$/m;
+const ENTRIES_MARKER = /^<!-- edges-entries-(?:local|descendants):start -->$/m;
 
 export type EntrySource = (entry: string) => string | undefined;
 const readSource: EntrySource = (file) => {
@@ -137,7 +137,7 @@ export function indexContract(
 ): (DirectoryContract & { writable: boolean }) | undefined {
   if (!isComposite(node)) return undefined;
   const match = node.body.match(
-    /<!-- project-memory-type:start -->([\s\S]*?)<!-- project-memory-type:end -->/,
+    /<!-- edges-memory-type:start -->([\s\S]*?)<!-- edges-memory-type:end -->/,
   );
   if (!match) return undefined;
   const fields =

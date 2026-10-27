@@ -1,6 +1,6 @@
 ---
 name: project_memory_scripts_to_edges_cli
-description: 把 project-memory-init/remember/ask/doctor 等 Python scripts 迁到 edges CLI
+description: 把 edges-memory-init/remember/ask/doctor 等 Python scripts 迁到 edges CLI
 metadata:
   edges-type: task
   edges-title: project-memory 脚本迁到 edges CLI
@@ -13,7 +13,7 @@ metadata:
   edges-task-project: edges-extensions
 ---
 
-现有 project-memory-init / remember / ask / doctor 等 Python scripts，后续迁到 edges CLI，与能力面 CLI+Skill+MCP 对齐。
+现有 edges-memory-init / remember / ask / doctor 等 Python scripts，后续迁到 edges CLI，与能力面 CLI+Skill+MCP 对齐。
 
 **Why:**
 能力面已定为 CLI、Skill、MCP 并列（ADR 0004）；仓根脚本不再是一层。project-memory 还停在 Python scripts，和 `edges` CLI 两套入口。2026-09-13 grill「可扩展 memory type」时 peng cheng 确认要记这条后续，且本轮 memory type **不包含**这次迁移。

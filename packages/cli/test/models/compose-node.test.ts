@@ -91,11 +91,11 @@ test("default traverse expands the composed README; --exclude compose skips it",
   node.addChild({ name: "brain", description: "个人大脑" });
   const child = new ReadmeNode("/repo/.edges/compose/brain/README.md").parse(`# Brain
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [nested](<nested/README.md>) — nested
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->
 `);
   const nested = new ReadmeNode("/repo/.edges/compose/brain/nested/README.md").parse("# Nested\n");
   const entries = new Map([node, child, nested].map((item) => [item.id, item]));
@@ -131,11 +131,11 @@ test("NodeService list yields the composed README by default and --exclude compo
 `);
   writeFileSync(path.join(scope, ".edges", "README.md"), `# 材料
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [组合](compose/README.md) — 被组合的 harness 仓库。
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->
 `);
   writeFileSync(path.join(scope, ".edges", "compose", "README.md"), `# 组合
 

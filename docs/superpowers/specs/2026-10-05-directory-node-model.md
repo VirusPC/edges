@@ -162,7 +162,7 @@ Task / Memory / Note / Skill 生产路径接入新节点方法。Tasks CLI 接�
 
 2026-10-05 后续目录决定：移除 knowledge 容器，notes、edges、posts、resources、archive 直接放在根层；Note CLI 使用所选作用域内的 notes。apps 移入 apps，作为全局共享的对外扩展实现。此项独立路径迁移不改变节点模型及局部记忆归属；posts 仅按本次明确授权搬迁，保持文件字节。
 
-旧 Tasks 记忆剩余归属：云端 Obsidian 部署记忆移根 Project Memory；preview-tasks-with-box-obsidian 移根 managed Skill；事实/想法写法归 conversation-to-tasks（保留现有 STAR，不强加新的必填字段）；七个 Task Project 分类留 Tasks 本层。不建设 extensions/memory。
+旧 Tasks 记忆剩余归属：云端 Obsidian 部署记忆移根 Project Memory；preview-tasks-with-box-obsidian 移根 managed Skill；事实/想法写法归 edges-conversation-to-tasks（保留现有 STAR，不强加新的必填字段）；七个 Task Project 分类留 Tasks 本层。不建设 extensions/memory。
 
 ## 验收
 

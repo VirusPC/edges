@@ -46,7 +46,7 @@ test("nearest unmarked, type and business AGENTS are CLI nodes without adopting 
     ["plain", "# Plain\n"],
     [
       "plain/type",
-      "<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
+      "<!-- edges-entries-local:start -->\n<!-- edges-entries-local:end -->\n",
     ],
     ["tasks", "# Business\n"],
   ]) {
@@ -127,7 +127,7 @@ test("Doctor preserves sparse generic nodes and registered cross-directory local
 test("Task Project index lives once in local ownership while preserving authored sections", async (t) => {
   const root = fixture(t);
   const source =
-    "# Board\n\n<!-- project-memory-local:start -->\n## 本层记忆\n\n- [guide](guide.md) — authored\n<!-- project-memory-local:end -->\n\n## Authored\nkeep this\n";
+    "# Board\n\n<!-- edges-local:start -->\n## 本层记忆\n\n- [guide](guide.md) — authored\n<!-- edges-local:end -->\n\n## Authored\nkeep this\n";
   const project = {
     project: "demo",
     dir: "demo",
@@ -138,12 +138,12 @@ test("Task Project index lives once in local ownership while preserving authored
   put(root, "tasks/AGENTS.md", source);
   put(root, "tasks/guide.md", "guide");
   const tail =
-    "\n<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n## 本层记忆\n\n- [guide](../guide.md) — shared guide\n<!-- project-memory-local:end -->\n<!-- project-memory:end -->\n\n## Authored\nkeep exactly\n";
+    "\n<!-- edges:start -->\n<!-- edges-local:start -->\n## 本层记忆\n\n- [guide](../guide.md) — shared guide\n<!-- edges-local:end -->\n<!-- edges:end -->\n\n## Authored\nkeep exactly\n";
   put(root, "tasks/demo/AGENTS.md", "# Demo\n\nBusiness purpose\n" + tail);
   put(
     root,
     "tasks/demo/README.md",
-    "# Demo\n\nBusiness purpose\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n",
+    "# Demo\n\nBusiness purpose\n\n<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n",
   );
   const agentsBefore = read(root, "tasks/demo/AGENTS.md");
   const parsed = parseProjectAgents(agentsBefore);
@@ -153,7 +153,7 @@ test("Task Project index lives once in local ownership while preserving authored
   assert.equal(read(root, "tasks/demo/AGENTS.md"), agentsBefore);
   const projectReadme = read(root, "tasks/demo/README.md");
   assert.match(projectReadme, /^# New title\n/);
-  assert.match(projectReadme, /project-entries-local:start/);
+  assert.match(projectReadme, /edges-entries-local:start/);
   const boardAgents = read(root, "tasks/AGENTS.md");
   assert.equal(boardAgents, source);
   assert.doesNotMatch(boardAgents, /## Task Projects/);
@@ -186,7 +186,7 @@ test("sparse Task Project markers are local content and a heading-only local sec
   put(
     root,
     "AGENTS.md",
-    "# Board\n<!-- project-memory-local:start -->\n## Task Projects\n\n- [demo](demo/AGENTS.md) — business\n<!-- project-memory-local:end -->\n",
+    "# Board\n<!-- edges-local:start -->\n## Task Projects\n\n- [demo](demo/AGENTS.md) — business\n<!-- edges-local:end -->\n",
   );
   put(root, "demo/AGENTS.md", "# Demo\n");
   assert.equal(
@@ -219,7 +219,7 @@ test("explicit init keeps an existing local owner and updates an explicitly supp
   });
   assert.equal(result.indexAnchor, root);
   assert.match(read(root, "AGENTS.md"), /Updated description/);
-  assert.doesNotMatch(read(root, "AGENTS.md"), /project-memory-children/);
+  assert.doesNotMatch(read(root, "AGENTS.md"), /edges-descendants/);
   assert.equal(read(root, "physical/AGENTS.md"), "# Physical parent\n");
 });
 
@@ -312,7 +312,7 @@ test("doctor repairs independent valid index while retaining invalid sibling and
     "---\nname: project_new\ndescription: New\n---\nBody",
   );
   const broken =
-    "<!-- project-memory-local:start -->\n- [one](child/AGENTS.md)\n- [two](child/AGENTS.md)\n<!-- project-memory-local:end -->";
+    "<!-- edges-local:start -->\n- [one](child/AGENTS.md)\n- [two](child/AGENTS.md)\n<!-- edges-local:end -->";
   put(root, "broken/AGENTS.md", broken);
   put(root, "broken/child/AGENTS.md", "# Child");
   const agents = read(root, "AGENTS.md").replace(

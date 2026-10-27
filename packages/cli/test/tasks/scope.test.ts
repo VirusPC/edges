@@ -22,7 +22,7 @@ import { run } from "../../src/program.js";
 import { loadConfig } from "../../src/services/config.js";
 
 const marker =
-  "<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n<!-- project-memory-local:end -->\n<!-- project-memory:end -->";
+  "<!-- edges:start -->\n<!-- edges-local:start -->\n<!-- edges-local:end -->\n<!-- edges:end -->";
 async function fixture() {
   const root = await realpath(
     await mkdtemp(path.join(tmpdir(), "edges-scope-")),
@@ -114,7 +114,7 @@ test("scope discovery selects the nearest type or business AGENTS independently 
     await mkdir(nested, { recursive: true });
     await writeFile(
       path.join(nested, "AGENTS.md"),
-      "<!-- project-memory-entries:start -->",
+      "<!-- edges-entries-local:start -->",
     );
     process.chdir(nested);
     assert.equal(loadConfig({}).scopeDir, nested);
@@ -174,7 +174,7 @@ test("discovery crosses maintenance containers but stops at symlinks and nested 
     await mkdir(path.join(root, "important-only"));
     await writeFile(
       path.join(root, "important-only/AGENTS.md"),
-      "<!-- project-memory:start -->\n<!-- project-memory-important:start -->",
+      "<!-- edges:start -->\n<!-- edges-constraints:start -->",
     );
     assert.deepEqual(
       discoverScopes(root).sort(),

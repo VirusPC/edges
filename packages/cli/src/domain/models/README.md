@@ -10,10 +10,10 @@ Model 表达一个文件系统节点的身份、内容、关系与自身行为�
 
 1. **递归系统二：** 系统入口是 `AGENTS.md`，带组成登记。CLI **默认**从 scope 下真 `AGENTS.md` 出发，只做该系统的**系统二**操作。经登记可达才算节点。
 2. **组成边 ≠ 维护边：** `harness` 不进 `children`。默认遍历不跟随 harness。
-3. **同目录双文件：登记分工，不是 traverse 并边：** 若同时存在 `AGENTS.md` 与 `README.md`，系统一孩子只挂在 README 的 `project-entries-*`；AGENTS 的 `edges-*` 只挂系统二材料与下级 AGENTS。持久化上互不为对方的 child。从真 AGENTS 出发**到不了** README 上的 tasks/notes 是预期。
+3. **同目录双文件：登记分工，不是 traverse 并边：** 若同时存在 `AGENTS.md` 与 `README.md`，系统一孩子只挂在 README 的 `edges-entries-*`；AGENTS 的 `edges-*` 只挂系统二材料与下级 AGENTS。持久化上互不为对方的 child。从真 AGENTS 出发**到不了** README 上的 tasks/notes 是预期。
 4. **`traverse` 单系统：** 只走一个入口的 `children`，并沿该入口 Compose block 的边进入登记目录的 `AGENTS.md`，再继续走那边的 `children`。多个系统由 Service 层的 [`system-roots.ts`](../../services/node/system-roots.ts) 收集带 `edges` 的 `AGENTS.md`，并由 [`system-forest-service.ts`](../../services/node/system-forest-service.ts) 拼成森林。收集、判定和 `independent` / `innermost` 见 [CLI README](../../../README.md#多个系统拼成森林)。
 5. **仓库可视为个人系统二 + `SuperAgentsNode`：** 整仓可当作上一级主体（如个人）的系统二；向上建虚拟 `SuperAgentsNode`。当前 scope 目录就是这个超节点的 `.edges`，材料路径是 scope 加上 `edges-materials.json` 里的 path（`tasks/README.md` → `<scope>/tasks/README.md`）。scope 自己的维护目录仍是 `<scope>/.edges`，由真 `AGENTS.md` 走，超节点不再往下找一层。traverse Super 时当作普通 `AgentsNode`，只走 `children`，不挂其它系统 AGENTS，材料可缺。不要从真 AGENTS 临时并 README 边。用户命令的范围只有 `--scope`、`--super`、`--all`：默认 list 从真 `AGENTS.md` 做一次 traverse；`--all` 从当前 scope 走森林；`--super` 只换根。最全是 `--scope <仓库根> --super --all`。`--scope <仓库根>` 与 `--scope <仓库根>/.edges` 的 children 不是同一份。
-6. **入口合同：** 组织清单 → `README.md` + `project-entries-*`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md`。有无子节点看是否出现组成登记，不持久化 `isLeaf`。
+6. **入口合同：** 组织清单 → `README.md` + `edges-entries-*`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md`。有无子节点看是否出现组成登记，不持久化 `isLeaf`。
 7. **谁拥有系统入口：** 任意目录可由用户自行 init；不是路径白名单。有列表 ≠ 系统入口。
 8. **存量迁 `INDEX.md`：** 可预览脚本；含 `posts/`（仅改名）。不要手改、不要另写扫盘冒充组成。
 
@@ -130,7 +130,7 @@ AgentsNode 对应 `AGENTS.md`，把受管部分映射为：
 
 `children` 是 `localChildren` 与 `descendantChildren` 的有序合并。Compose 入口的 children 来自 Compose 区块，默认展开，并且只到被组合 README。`--exclude compose` 跳过。这里的 descendant 是下层索引组，不是已经加载完的所有后代；两组存的都只是当前入口登记的引用。物理目录深度或节点类型不能替代本层/下层的判断，新增登记由调用方明确给出 `local` 或 `descendant`。`moveChild` 只修改当前 AGENTS 中引用的分组，不移动目录、不改变 parent。
 
-已有 Memory 类型入口的 `project-memory-entries` 区块也按本层索引处理；不要求为了使用 AgentsNode 而改写成另一套标题。普通导航链接和非受控 Markdown 保持为正文。
+已有 Memory 类型入口的 `edges-entries-local` 区块也按本层索引处理；不要求为了使用 AgentsNode 而改写成另一套标题。普通导航链接和非受控 Markdown 保持为正文。
 
 每个节点还可以有独立的 `harness` 引用。它不加入 `children`，所以普通树遍历不会自动跨进维护系统。当前[布局协议](node/layout.ts)约定：
 
@@ -160,7 +160,7 @@ flowchart LR
 domain/
 ├── config/
 │   ├── layout.ts            # 入口文件名、旧叶子拼写、旧类型拼写、叶子目录规则顺序
-│   ├── sections.ts          # edges / project-entries 的标题、标记和文法表
+│   ├── sections.ts          # edges / edges-entries 的标题、标记和文法表
 │   └── edges-materials.ts # .edges 材料路径
 ├── core/                    # BaseNode、InternalNode、LeafNode、引用、共享字段、通用块机制
 │   └── node-content/        # parse / serialize / blocks / document：只认区块、标题、标记、条目
@@ -185,7 +185,7 @@ domain/
 | 模块 | 值得保留的拆分 |
 | --- | --- |
 | [core](../core/base-node.ts) | `base-node.ts` 管通用内容与生命周期 hooks；`internal-node.ts` 管本层/下层 children 与索引编辑；`leaf-node.ts` 是纯 text；`types.ts` 管基础契约；`fields.ts` 管共享 metadata 字段；`relations.ts` 保存 Service 协调的路径、parent、harness，不从公共入口开放身份改写。`core/node-content` 的 `parse.ts`/`serialize.ts` 按传入文法保留原文；`blocks.ts` 只提供与标记名无关的区块字符串操作；`document.ts` 是文档表示；`grammar.ts` 描述标题、标记如何对应到区块 |
-| [config/sections.ts](../config/sections.ts) | `INTERNAL_SECTIONS`、`ENTRIES_SECTIONS`、`CODEC_SECTIONS` 是 edges / project-entries 的标题与标记。同一文件放这些标记的注释常量、改写表和 `HARNESS_GRAMMAR` |
+| [config/sections.ts](../config/sections.ts) | `INTERNAL_SECTIONS`、`ENTRIES_SECTIONS`、`CODEC_SECTIONS` 是 edges / edges-entries 的标题与标记。同一文件放这些标记的注释常量、改写表和 `HARNESS_GRAMMAR` |
 | [node/document.ts](node/document.ts) | 按标记插入、替换、改写区块。`decodeBody` / `parseNode` / `serializeNode` 把 `HARNESS_GRAMMAR` 交给 core。`InternalSyntax` 在 agents 与 entries 两档之间换标记 |
 | [agents](agents/agents-node.ts) | `agents-node.ts` 管 AGENTS 引用、约束；`harness-agents.ts` 只根据传入路径与正文判断是不是带 edges 的 `AGENTS.md`，不读盘 |
 | [compose](compose/compose-readme-node.ts) | `compose-readme-node.ts` 是 `.edges/compose/README.md`，继承 `ReadmeNode`。children 是被组合仓库的 `README.md`；`checkout` 给出已展开的目录和 remote |

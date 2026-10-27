@@ -33,5 +33,5 @@ Need to browse the maintenance board `.edges/tasks/` or domain board `tasks/` vi
 - Do not commit Obsidian-local noise (`workspace.json`, etc.) unless the user asks.
 - After **Update Grok Bot's Computer**, reinstall/re-extract if the binary is gone; vault data under `/workspace/edges` usually remains.
 - 改状态走 `cli` 的 `edges tasks`，不要在 Obsidian 里手改。维护看板是 `.edges/tasks/`（`--scope` 指向主体、不加 `--super`）；领域看板是 `tasks/`（同一 scope 再加 `--super`）。
-- `tasks list` 顺着该主体 `AGENTS.md` 的 children。不要为了看见任务再读 README 的 `project-entries`，也不要把 README 链接抄进 `AGENTS.md`。
+- `tasks list` 顺着该主体 `AGENTS.md` 的 children。不要为了看见任务再读 README 的 `edges-entries`，也不要把 README 链接抄进 `AGENTS.md`。
 - 看板文件要进受保护的 `main`，必须开 PR，不要直接 push。

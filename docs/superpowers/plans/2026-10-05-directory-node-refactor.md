@@ -28,7 +28,7 @@
 - models/{task,memory,skill,note}-node.ts: leaf business implementations.
 - packages/services/node-service.ts, traverse.ts, node-files.ts and focused helper modules: filesystem coordination and snapshots, no resource domain.
 - packages/services/{memory,tasks,note}/ and commands/: business CLI adaptation.
-- scripts/migrations/migrate-directory-nodes.mts + matching test + migration Skill: one-time old file conversion.
+- scripts/migrations/edges-migrate-directory-nodes.mts + matching test + migration Skill: one-time old file conversion.
 - README, CONTEXT, ADR, current specs, protocols, indexed memories: current contract and ownership.
 
 ### Task 1: Node models and layout
@@ -94,7 +94,7 @@ assert.notEqual(destinationEntry, original); // no-op separately supported
 
 ### Task 3: CLI adapters and explicit uniform-directory migration
 
-**Files:** packages/services/memory/{node-documents,entries,remember,types,doctor,init}.ts plus related modules; packages/services/tasks/{write,paths,...}.ts; packages/services/note/git/ingest.ts; command input wiring; scripts/migrations/migrate-directory-nodes.mts; package.json; new packages/skills/migrate-directory-nodes/SKILL.md; relevant test/{memory,tasks,note,services}; migration tests.
+**Files:** packages/services/memory/{node-documents,entries,remember,types,doctor,init}.ts plus related modules; packages/services/tasks/{write,paths,...}.ts; packages/services/note/git/ingest.ts; command input wiring; scripts/migrations/edges-migrate-directory-nodes.mts; package.json; new packages/skills/edges-migrate-directory-nodes/SKILL.md; relevant test/{memory,tasks,note,services}; migration tests.
 
 **Interfaces:** consumes new NodeService/model interfaces. Produces directory-only new writes/recognition; explicit migration with dry-run default, --apply, --root and public tracked scope. Existing Markdown note ingest becomes validated import/create, no blind permissive parser. Keep observable useful CLI parameter names unless they advertise legacy formats.
 
@@ -126,9 +126,9 @@ assert.equal(planDirectoryMigration(root).moves.length, 0);
 
 **Interfaces:** consumes Task 3 migration/CLI. Produces migrated repository plus verified documentation and completed checks.
 
-- [x] Use new Service/CLI to move cloud Obsidian deployment memory to root Project Memory and its managed Skill to root managed Skills; refresh both indices. Consolidate fact/idea method minimally in conversation-to-tasks without adding new mandatory fields; history memory points to method. Completed earlier in `23a474e`; not repeated during adoption.
+- [x] Use new Service/CLI to move cloud Obsidian deployment memory to root Project Memory and its managed Skill to root managed Skills; refresh both indices. Consolidate fact/idea method minimally in edges-conversation-to-tasks without adding new mandatory fields; history memory points to method. Completed earlier in `23a474e`; not repeated during adoption.
 - [x] Run migration dry-run on tracked public nodes and review plan against excluded paths, then --apply. Verify idempotence and all rewritten registered links. Restore ownership stays local; no root promotion of descendants. Converted 308 content entries (117 Memory, 103 Task, 88 Note) and 100 runlogs, updating 17 existing reference documents. Second plan: 0 moves / 0 updates. All 308 physical owners and 275 resolvable relative link targets preserved; 4,072 unrelated tracked public files unchanged at apply checkpoint.
-- [x] Update README implementation state, glossary and current ADR/spec/skill contracts to actual model, localChildren/descendantChildren and default traversal boundary. Preserve historical plan results as historical. README, CLI docs, migration guide, ADR/spec and active memory pointers now reflect adopted state; CONTEXT already matches. Fixed all three deferred Minor documentation findings; project-memory-init references patch is 3.1.1.
+- [x] Update README implementation state, glossary and current ADR/spec/skill contracts to actual model, localChildren/descendantChildren and default traversal boundary. Preserve historical plan results as historical. README, CLI docs, migration guide, ADR/spec and active memory pointers now reflect adopted state; CONTEXT already matches. Fixed all three deferred Minor documentation findings; edges-memory-init references patch is 3.1.1.
 - [x] Run `pnpm test`, `pnpm build`, root migration script strict typechecks and git diff --check; record commands/results/counts. Resolve failures, do not merely remove assertions. Full tests: CLI 689, MCP 14, artifacts 42, review UI 27 (772 total), all passed. Workspace build, CLI tsc, strict NodeNext `scripts/*.mts` tsc and diff checks passed. Read-only Doctor: 3 absent ignored user indexes / 7 absent installed Skill sources; no files fabricated. Protected paths unchanged against `726b268`.
 - [x] Review final full branch with an independent architecture/TS reviewer; fix Critical/Important, verify scoped fixes. Commit and update existing draft PR161 with concrete final changes and new evidence; no merge/release.
 

@@ -21,7 +21,7 @@ function fixture(t: { after(fn: () => void): void }, files: Record<string, strin
 const read = (root: string, rel: string) => fs.readFileSync(path.join(root, rel), "utf8");
 const board = (local: string) =>
   `# tasks\n\n<!-- edges-constraints:start -->\n## 本层硬约束\n\nKeep.\n<!-- edges-constraints:end -->\n\n<!-- edges-local:start -->\n## 本层系统维护信息\n${local}<!-- edges-local:end -->\n`;
-const project = (title: string) => `# ${title}\n\n${title} work.\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n`;
+const project = (title: string) => `# ${title}\n\n${title} work.\n\n<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n`;
 
 test("moves README Task Project links (incl. legacy task-projects) into board README; keeps AGENTS projects; idempotent", async (t) => {
   const root = fixture(t, {
@@ -64,7 +64,7 @@ test("moves README Task Project links (incl. legacy task-projects) into board RE
 test("a board README listing the same project with different text is a conflict and nothing is written", async (t) => {
   const root = fixture(t, {
     "tasks/AGENTS.md": board("\n- [Alpha](alpha/README.md) — alpha work\n"),
-    "tasks/README.md": "# Tasks\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — other text\n<!-- project-entries-local:end -->\n",
+    "tasks/README.md": "# Tasks\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — other text\n<!-- edges-entries-local:end -->\n",
     "tasks/alpha/README.md": project("Alpha"),
   });
   const before = read(root, "tasks/AGENTS.md");

@@ -25,8 +25,8 @@ import {
 
 export type { TaskProjectRecord };
 
-export const PROJECT_MEMORY_START = "<!-- project-memory:start -->";
-export const PROJECT_MEMORY_END = "<!-- project-memory:end -->";
+export const PROJECT_MEMORY_START = "<!-- edges:start -->";
+export const PROJECT_MEMORY_END = "<!-- edges:end -->";
 
 export const DEFAULT_PROJECT_TITLE = "Default";
 export const DEFAULT_PROJECT_DESCRIPTION =
@@ -98,7 +98,7 @@ export function parseProjectAgents(markdown: string): {
 
   const body = markdown.slice(heading.length + 1);
   const boundary = body.search(
-    /^(?:## |<!-- (?:edges|project-memory|project-entries|task-projects)(?::|-))/m,
+    /^(?:## |<!-- (?:edges|task-projects)(?::|-))/m,
   );
   const descriptionSource = boundary === -1 ? body : body.slice(0, boundary);
   const description = parseProjectDescription(descriptionSource);
@@ -126,9 +126,9 @@ export function renderProjectAgents(input: {
 }
 
 const EMPTY_ENTRIES = `<!-- ${ENTRIES_SECTIONS.localChildren.marker}:start -->\n## ${ENTRIES_SECTIONS.localChildren.heading}\n<!-- ${ENTRIES_SECTIONS.localChildren.marker}:end -->\n`;
-const ENTRIES_MARKER = /^<!-- project-entries-(?:local|descendants):start -->$/m;
+const ENTRIES_MARKER = /^<!-- edges-entries-(?:local|descendants):start -->$/m;
 
-/** Task Project org list: title, description and an (initially empty) project-entries list. */
+/** Task Project org list: title, description and an (initially empty) edges-entries list. */
 export function renderProjectReadme(input: { title: string; description: string }): string {
   return `# ${input.title}\n\n${input.description}\n\n${EMPTY_ENTRIES}`;
 }
@@ -348,7 +348,7 @@ export async function refreshProjectIndex(
   return records;
 }
 
-/** The configured tasks material; an existing prose file gains an empty project-entries list. */
+/** The configured tasks material; an existing prose file gains an empty edges-entries list. */
 async function ensureBoardMaterial(repoPath: BoardTarget, service: NodeService): Promise<ReadmeNode> {
   const abs = tasksMaterialAbsPath(repoPath);
   const existing = await service.get(abs, ReadmeNode);

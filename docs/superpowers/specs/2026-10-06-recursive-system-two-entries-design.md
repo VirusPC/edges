@@ -125,8 +125,8 @@ flowchart TB
   AGENTS -->|edges-local<br/>本层系统维护信息| M["系统二材料<br/>.edges/memory · skills · 维护看板 …"]
   AGENTS -->|edges-descendants<br/>下层系统维护信息| ChildAgents["其它目录 AGENTS.md"]
 
-  README -->|project-entries-local<br/>本层内容| Sys1["INDEX / SKILL / 本层入口<br/>如 tasks/…、notes/…"]
-  README -->|project-entries-descendants<br/>下层内容| ChildReadme["其它目录 README.md"]
+  README -->|edges-entries-local<br/>本层内容| Sys1["INDEX / SKILL / 本层入口<br/>如 tasks/…、notes/…"]
+  README -->|edges-entries-descendants<br/>下层内容| ChildReadme["其它目录 README.md"]
 
   Sys1 -. 该目录若另有系统入口 .-> ChildAgents
   M -. harness；默认不跟随 .-> AGENTS
@@ -191,25 +191,25 @@ flowchart TB
 | Q9b | Edges 根 `README.md` 增组成登记，指向 `tasks/` 等；`--super` 超节点经此再下钻 |
 | 术语 | 对外名「虚拟超节点」；flag **`--super`**；类名 **`SuperAgentsNode` extends `AgentsNode`**（废止 VirtualSuperNode / virtual-root） |
 | Q20=A | traverse 默认走全部 `children`（local∪descendants）；本层-only 用显式 `localOnly`；`includeHarness` 仍默认 false |
-| Q10 | 任意目录可由用户 init 真实系统入口；配套 **project harness init** skill（演进现 `project-memory-init`） |
+| Q10 | 任意目录可由用户 init 真实系统入口；配套 **project harness init** skill（演进现 `edges-memory-init`） |
 | Q12 | 组织清单 → `README.md`；内容叶子 → `INDEX.md`；Skill → `SKILL.md`；系统入口 → `AGENTS.md` |
 | Q13=A | 同目录双文件：系统一孩子**只**在 README entries；AGENTS **只**挂系统二材料与下级系统入口（遍历核心规则） |
 | Q14=B | 存量 `index.md`→`INDEX.md` 全部迁，**含 `posts/`**（本轮改名授权）；脚本套 CLI traverse，可预览、幂等 |
-| Q15 | README 标记 `project-entries-local` / `project-entries-descendants`；标题见下 |
+| Q15 | README 标记 `edges-entries-local` / `edges-entries-descendants`；标题见下 |
 | Q15c | AGENTS 两章标题改为「系统维护信息」；硬约束标题不变 |
 | Q16=A | 先本 spec + ADR，人审后再实施计划 |
 | 架构审 1 | 四种入口均可因组成登记成为组织节点 |
 | 架构审 3 | 下层同合同递归：AGENTS→AGENTS，README→README |
 | 架构审 4 | 虚拟超节点须显式 `--super`；默认 scope/AGENTS；缺 AGENTS 不自动合成 |
 | Q17 | 取消 Internal/Leaf/internal；各节点直继 BaseNode；`type` 扩展 `agents`/`readme`/`text`，不另造 entryKind |
-| Q18=A | 类型入口统一为 `README.md` + `project-entries-*`（`type=readme`）；迁移后不用 `project-memory-entries` |
+| Q18=A | 类型入口统一为 `README.md` + `edges-entries-*`（`type=readme`）；不再使用已删除的 `project-memory-entries` |
 
 ## 入口合同
 
 | 角色 | 文件 | 组成登记 | 下层组指向 |
 | --- | --- | --- | --- |
 | 系统入口 | `AGENTS.md` | 必有：`edges-*`（外加 constraints） | 其它 `AGENTS.md` |
-| 组织清单 | `README.md` | 可选：`project-entries-*` | 其它 `README.md` |
+| 组织清单 | `README.md` | 可选：`edges-entries-*` | 其它 `README.md` |
 | 内容入口 | `INDEX.md` | 可选；有则当前为组织状态 | （若有下层组）同合同或按登记 |
 | Skill | `SKILL.md` | 同 INDEX；同目录可另有 `AGENTS.md` 作 harness | 同上 |
 
@@ -236,15 +236,15 @@ flowchart TB
 
 | 区块 | HTML 标记 | Markdown 标题 |
 | --- | --- | --- |
-| 本层 | `project-entries-local` | `本层内容` |
-| 下层 | `project-entries-descendants` | `下层内容` |
+| 本层 | `edges-entries-local` | `本层内容` |
+| 下层 | `edges-entries-descendants` | `下层内容` |
 
 给人看的说明可写在区块外；工具只改标记区块。根 README 的本层内容应能指向 `tasks/` 等本层入口（Q9b）；下层内容只登记其它 `README.md`。
 
 ### 类型入口（Q18=A）
 
-类型入口（如 `.edges/memory/projects/` 下的索引）**统一为组织清单**：`README.md`，`type=readme`，组成用 `project-entries-*`。层 `AGENTS.md` 的本层系统维护信息链到这些 README。  
-读兼容旧 `AGENTS.md` + `project-memory-type` / `project-memory-entries`；写与迁移后只发 README 规范。`project-memory-type` 身份头若仍需要区分「这是哪类记忆目录」，可留在 README 或目录约定里——实施计划定落点，但**列表区块不再用 `project-memory-entries`**。
+类型入口（如 `.edges/memory/projects/` 下的索引）**统一为组织清单**：`README.md`，`type=readme`，组成用 `edges-entries-*`。层 `AGENTS.md` 的本层系统维护信息链到这些 README。  
+读兼容旧 `AGENTS.md` + `edges-memory-type` / `edges-entries-local`；写与迁移后只发 README 规范。`edges-memory-type` 身份头若仍需要区分「这是哪类记忆目录」，可留在 README 或目录约定里——实施计划定落点，但**列表区块不再用 `edges-entries-local`**。
 
 ## 遍历规则（核心）
 
@@ -271,13 +271,13 @@ flowchart TB
 
 ## 谁拥有系统入口
 
-任意目录可由用户调用 init（现 `$project-memory-init`，演进为 **project harness init**）创建真实 `AGENTS.md`。不是路径白名单，也不要求每个 Task Project / 类型目录都是系统入口。未 init 的目录不要伪造系统入口标记。组织清单用 README+entries 即可列孩子。
+任意目录可由用户调用 init（现 `$edges-memory-init`，演进为 **project harness init**）创建真实 `AGENTS.md`。不是路径白名单，也不要求每个 Task Project / 类型目录都是系统入口。未 init 的目录不要伪造系统入口标记。组织清单用 README+entries 即可列孩子。
 
 ## 迁移与非目标
 
 **要做（实施阶段）：**
 
-- codec / layout：README `project-entries-*`；AGENTS 新标题；读旧标题。
+- codec / layout：README `edges-entries-*`；AGENTS 新标题；读旧标题。
 - 根 README 增加本层内容登记（Q9b）。
 - 可预览脚本：`index.md`→`INDEX.md`，复用 `operations/traverse`，含 `posts/`（仅改名；不改博客正文）。
 - project harness init skill 待办（已有卡则跟卡）。
@@ -302,7 +302,7 @@ flowchart TB
 ## 验收（实施后）
 
 - 新建/刷新的系统入口只含 `edges` 标记与「本层硬约束 / 本层系统维护信息 / 下层系统维护信息」。
-- 组织清单只含 `project-entries-*` 与「本层内容 / 下层内容」。
+- 组织清单只含 `edges-entries-*` 与「本层内容 / 下层内容」。
 - 同目录双文件 traverse 单测：系统一孩子不出现在 AGENTS 组成解析结果中。
 - `index.md` 迁移 dry-run / apply 幂等；posts 仅文件名变更。
 - 旧 AGENTS 标题仍能 parse；写回为新标题。
@@ -310,5 +310,5 @@ flowchart TB
 ## 开放实施题（不阻塞本 spec 语义）
 
 - 旧 `InternalNode` / `LeafNode` 类是删除还是短暂兼容别名（语义上已取消）。
-- 类型目录里原 `project-memory-type` 身份信息迁到 README 何处（YAML / HTML 注释 / 文件名约定）。
+- 类型目录里原 `edges-memory-type` 身份信息迁到 README 何处（YAML / HTML 注释 / 文件名约定）。
 - 已锁定 flag 名 `--super`；挂载默认经根 README 组成（Q9b）。

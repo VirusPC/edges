@@ -2,7 +2,7 @@
 
 知识库/Agent Evaluation 评测与可重复 cases（benchmark、评测流水线等）。
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [find\_public\_memory\_benchmarks](<backlog/2026-09-11--%E6%89%BE%E5%85%AC%E5%BC%80benchmark%E8%AF%81%E6%98%8Ememory%E6%9C%89%E6%95%88%E6%80%A7/INDEX.md>) — 寻找公开 benchmark，用于证明本套 memory 体系的有效性
@@ -20,4 +20,4 @@
 - [cli评测\_experiment\_webhook\_服务启动入口](<done/2026-10-25--CLI%E8%AF%84%E6%B5%8B-Experiment-Webhook-%E6%9C%8D%E5%8A%A1%E5%90%AF%E5%8A%A8%E5%85%A5%E5%8F%A3/INDEX.md>) — edges CLI 提供启动评测相关长驻服务（含 Experiment Webhook）的入口，接入方不必手写 systemd 命令。
 - [edges\_value\_experiment\_plan](<backlog/2026-10-27--%E6%A2%B3%E7%90%86-Edges-%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E4%B8%8E%E6%8E%A8%E5%B9%BF%E5%AE%9E%E9%AA%8C%E6%96%B9%E6%A1%88/INDEX.md>) — 把拟推广的核心价值对应到使用场景、对照实验或能力验收，明确范围与判断口径。
 - [edges\_value\_experiment\_runs](<backlog/2026-10-27--%E5%AE%8C%E6%88%90-Edges-%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E5%AE%9E%E9%AA%8C%E5%B9%B6%E6%95%B4%E7%90%86%E7%BB%93%E6%9E%9C%E6%8A%A5%E5%91%8A/INDEX.md>) — 按确认的方案跑完核心价值实验，保留真实结果、成本与失败案例，形成可追溯的推广证据。
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->

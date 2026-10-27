@@ -32,9 +32,9 @@ Tasks 1–2 own Python memory tools; Task 3 owns CLI/MCP/task-site consumers; Ta
 ### Task 1: New-layout Project Memory runtime and selected types
 
 **Files:**
-- Modify: `packages/skills/project-memory-init/scripts/{memory.py,lib/paths.py,lib/types.py,lib/blocks.py,lib/templates.py,nodes/agents.py,nodes/entries.py,operations/init.py,operations/add_type.py,operations/remember.py,operations/doctor.py}`.
-- Modify: `packages/skills/project-memory-init/{SKILL.md,references/LAYOUT.md,references/PROTOCOL.md,references/templates/,scripts/OVERVIEW.md}` and `packages/skills/project-memory-{ask,remember,add-type,reshape,doctor}/SKILL.md`.
-- Test: `packages/skills/project-memory-init/scripts/tests/test_harness_layout.py` and existing runtime tests.
+- Modify: `packages/skills/edges-memory-init/scripts/{memory.py,lib/paths.py,lib/types.py,lib/blocks.py,lib/templates.py,nodes/agents.py,nodes/entries.py,operations/init.py,operations/add_type.py,operations/remember.py,operations/doctor.py}`.
+- Modify: `packages/skills/edges-memory-init/{SKILL.md,references/LAYOUT.md,references/PROTOCOL.md,references/templates/,scripts/OVERVIEW.md}` and `packages/skills/project-memory-{ask,remember,add-type,reshape,doctor}/SKILL.md`.
+- Test: `packages/skills/edges-memory-init/scripts/tests/test_harness_layout.py` and existing runtime tests.
 
 **Interfaces:**
 - Consumes: existing frontmatter and managed AGENTS block contracts, explicit `target_dir/root_dir`.
@@ -62,7 +62,7 @@ with tempfile.TemporaryDirectory() as d:
 - [x] Make referenced scans current-scope only, retain different sources with the same name, deduplicate aliases within a type by realpath, preserve same source across both types, and distinguish missing/unreadable sources from successful empty scans. Reject managed paths that resolve outside the selected owner, including linked ancestors. Preserve manual AGENTS text.
 - [x] Remove old-layout repairs from normal commands. Report migration required for legacy layers; never silently re-create `.memory`. Preserve migration-era fixtures for Task 2 rather than asserting legacy repair is current runtime behavior.
 - [x] Update affected packages/skills/templates and LAYOUT with exact new commands, recommendation/selection semantics and two-container type discovery. Do not modify the live instance's `.memory` yet.
-- [x] Run `TMPDIR=/private/tmp PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s packages/skills/project-memory-init/scripts/tests`. Archive tests are explicitly deferred to Task 2 if still bound to old archive paths; report them individually, not as runtime regressions silently ignored. Commit and report RED/GREEN evidence.
+- [x] Run `TMPDIR=/private/tmp PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s packages/skills/edges-memory-init/scripts/tests`. Archive tests are explicitly deferred to Task 2 if still bound to old archive paths; report them individually, not as runtime regressions silently ignored. Commit and report RED/GREEN evidence.
 
 **Verified:** Runtime suite 90/90 passed; 35 harness acceptance cases. Task review and scoped fix review approved; custom permission metadata and managed format are enforced. Archive adaptation is explicitly outstanding in Task 2. Integrated commits: `c77afa1`, `c9d3b08`, `13df3f9`.
 
@@ -70,7 +70,7 @@ with tempfile.TemporaryDirectory() as d:
 
 **Files:**
 - Create: `packages/skills/project-memory-migrate/{SKILL.md,CHANGELOG.md,scripts/migrate.py,scripts/legacy.py,scripts/tests/test_migrate.py}`. Additional focused Python modules under its scripts directory are allowed for journal/link/preflight responsibilities.
-- Modify: `packages/skills/user-memory-{backup,restore}/{SKILL.md,scripts/*.py}` and their tests in `project-memory-init/scripts/tests/test_user_memory_archive.py`.
+- Modify: `packages/skills/user-memory-{backup,restore}/{SKILL.md,scripts/*.py}` and their tests in `edges-memory-init/scripts/tests/test_user_memory_archive.py`.
 - Modify: `packages/skills/README.md` migration/distribution inventory and memory Skill CHANGELOG files relevant to the new release.
 
 **Interfaces:**

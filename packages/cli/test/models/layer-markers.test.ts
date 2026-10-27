@@ -3,22 +3,17 @@ import assert from "node:assert/strict";
 import {
   INTERNAL_SECTIONS,
   INDEX_MARKERS,
-} from "../../src/domain/config/sections.js";
-import {
   CONSTRAINTS_START,
   LOCAL_START,
   DESCENDANTS_START,
   OUTER_START,
-  ENTRIES_START,
+  ENTRIES_LOCAL_START,
   TYPE_META_START,
 } from "../../src/domain/config/sections.js";
 import { rewriteLayerSurface } from "../../src/domain/models/node/document.js";
 
-test("canonical layer markers are edges, type markers stay project-memory", () => {
-  assert.equal(
-    INTERNAL_SECTIONS.constraints.marker,
-    "edges-constraints",
-  );
+test("canonical layer and type markers are edges-*", () => {
+  assert.equal(INTERNAL_SECTIONS.constraints.marker, "edges-constraints");
   assert.equal(INTERNAL_SECTIONS.localChildren.marker, "edges-local");
   assert.equal(
     INTERNAL_SECTIONS.descendantChildren.marker,
@@ -27,23 +22,17 @@ test("canonical layer markers are edges, type markers stay project-memory", () =
   assert.equal(INTERNAL_SECTIONS.constraints.heading, "本层硬约束");
   assert.equal(INTERNAL_SECTIONS.localChildren.heading, "本层系统维护信息");
   assert.equal(INTERNAL_SECTIONS.descendantChildren.heading, "下层系统维护信息");
-  assert.equal(INDEX_MARKERS.type, "project-memory-type");
-  assert.equal(INDEX_MARKERS.entries, "project-memory-entries");
+  assert.equal(INDEX_MARKERS.type, "edges-memory-type");
+  assert.equal("entries" in INDEX_MARKERS, false);
   assert.equal(OUTER_START, "<!-- edges:start -->");
-  assert.equal(
-    CONSTRAINTS_START,
-    "<!-- edges-constraints:start -->",
-  );
+  assert.equal(CONSTRAINTS_START, "<!-- edges-constraints:start -->");
   assert.equal(LOCAL_START, "<!-- edges-local:start -->");
-  assert.equal(
-    DESCENDANTS_START,
-    "<!-- edges-descendants:start -->",
-  );
-  assert.equal(TYPE_META_START, "<!-- project-memory-type:start -->");
-  assert.equal(ENTRIES_START, "<!-- project-memory-entries:start -->");
+  assert.equal(DESCENDANTS_START, "<!-- edges-descendants:start -->");
+  assert.equal(TYPE_META_START, "<!-- edges-memory-type:start -->");
+  assert.equal(ENTRIES_LOCAL_START, "<!-- edges-entries-local:start -->");
 });
 
-test("rewriteLayerSurface upgrades layer comments and titles without touching type indexes", () => {
+test("rewriteLayerSurface rewrites titles and leaves old layer comments", () => {
   const source = `# T
 
 <!-- project-memory:start -->
@@ -65,25 +54,25 @@ test("rewriteLayerSurface upgrades layer comments and titles without touching ty
 <!-- project-memory:end -->
 `;
   const out = rewriteLayerSurface(source);
-  assert.match(out, /<!-- edges:start -->/);
-  assert.match(out, /<!-- edges-constraints:start -->/);
+  assert.match(out, /<!-- project-memory:start -->/);
+  assert.match(out, /<!-- project-memory-important:start -->/);
   assert.match(out, /## 本层硬约束/);
   assert.match(out, /## 本层系统维护信息/);
   assert.match(out, /## 下层系统维护信息/);
-  assert.doesNotMatch(out, /project-memory-(important|local|children)/);
+  assert.doesNotMatch(out, /<!-- edges:start -->/);
   assert.equal(rewriteLayerSurface(out), out);
 
-  const typeIndex = `<!-- project-memory-type:start -->
+  const typeIndex = `<!-- edges-memory-type:start -->
 name: project
 module: memory
 writable: true
 gitignore: false
 format: ordinary
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 # PROJECT
-<!-- project-memory-entries:start -->
+<!-- edges-entries-local:start -->
 - [x](project_x/index.md) — x
-<!-- project-memory-entries:end -->
+<!-- edges-entries-local:end -->
 `;
   assert.equal(rewriteLayerSurface(typeIndex), typeIndex);
 });

@@ -8,7 +8,7 @@ export function templateRoot(): string {
   const here = dirname(fileURLToPath(import.meta.url));
   const candidates = [
     join(here, "../../assets/memory/templates"),
-    join(here, "../../../../skills/project-memory-init/references/templates"),
+    join(here, "../../../../skills/edges-memory-init/references/templates"),
   ];
   const root = candidates.find((p) =>
     existsSync(join(p, `${parse(ENTRY_NAMES.internal).name}.tmpl.md`)),

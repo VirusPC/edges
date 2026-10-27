@@ -41,7 +41,7 @@ test("routines init is explicit, idempotent, and shares the root init module", a
   const file = path.join(root, ".edges/routines/README.md");
   const before = readFileSync(file, "utf8");
   assert.match(before, /# Routines/);
-  assert.match(before, /project-entries-local:start/);
+  assert.match(before, /edges-entries-local:start/);
   assert.match(readFileSync(path.join(root, ".edges/README.md"), "utf8"), /routines\/README\.md/);
   const again = await cli(root, ["--super", "init", "routines"]);
   assert.deepEqual(again.modules, ["routines"]);
@@ -143,7 +143,7 @@ test("registered external routines remain readable while writes and unregistered
   const service = new NodeService({ managedRoot: host });
   const org = await service.get(path.join(host, ".edges/routines/README.md"));
   assert.ok(org);
-  await service.update(org, { body: org.body.replace("<!-- project-entries-local:end -->", `- [Shared routine](<${file}>) — Shared routine\n<!-- project-entries-local:end -->`) });
+  await service.update(org, { body: org.body.replace("<!-- edges-entries-local:end -->", `- [Shared routine](<${file}>) — Shared routine\n<!-- edges-entries-local:end -->`) });
   const listed = await listRoutines(env(host), {});
   assert.deepEqual(names(listed), ["external-review"]);
   assert.equal((await getRoutine(env(host), "external-review", {})).description, "Shared routine");
@@ -175,7 +175,7 @@ test("registered external routine symlinks support list and get but never writes
   const service = new NodeService({ managedRoot: host });
   const index = await service.get(org);
   assert.ok(index);
-  await service.update(index, { body: index.body.replace("<!-- project-entries-local:end -->", `- [Shared](<${linkedFile}>) — Linked routine\n<!-- project-entries-local:end -->`) });
+  await service.update(index, { body: index.body.replace("<!-- edges-entries-local:end -->", `- [Shared](<${linkedFile}>) — Linked routine\n<!-- edges-entries-local:end -->`) });
   const listed = await listRoutines(env(host), {});
   assert.deepEqual(names(listed), ["shared"]);
   for (const target of ["shared", listed[0]!.path]) {

@@ -4,14 +4,18 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **破坏性：随包技能与标记改为 `edges-*`。** 改名技能的版本重启为 `0.1.0`。删除 `project-memory-doctor` 与 `project-memory-reshape`，不设替代技能。索引诊断仍是 `edges memory doctor`。类型标记改为 `edges-memory-type`，组织清单改为 `edges-entries-local` / `edges-entries-descendants`。运行时不读 `project-memory-type`、`project-entries-*`、`project-memory-entries`，也不把 `project-memory` / `project-memory-important` / `project-memory-local` / `project-memory-children` 当受管层标记。一次性改写仍是 `scripts/migrations/rewrite-project-harness-markers.mts`。见 [ADR 0049](../../docs/adr/0049-edges-skills-markers-rename.md)。本条尚未发版；建议下一次 npm 版本为 `0.4.0`。
+
 ## [0.3.0] - 2026-10-27
 
 ### Changed
 
-- **破坏性：材料目录改为 `.edges`。** `edges init` 写出 `.edges/`。层标记是 `<!-- edges:start -->`、`edges-constraints`、`edges-local`、`edges-descendants`、`edges-compose`。不再读取 `.harness` 或 `project-harness`。`project-memory-*` 与 `project-entries-*` 保持原名。见 [ADR 0047](../../docs/adr/0047-rename-harness-directory-to-edges.md) 与 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md)。布局就此冻结。
+- **破坏性：材料目录改为 `.edges`。** `edges init` 写出 `.edges/`。层标记是 `<!-- edges:start -->`、`edges-constraints`、`edges-local`、`edges-descendants`、`edges-compose`。不再读取 `.harness` 或 `project-harness`。`project-memory-*` 与 `edges-entries-*` 保持原名。见 [ADR 0047](../../docs/adr/0047-rename-harness-directory-to-edges.md) 与 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md)。布局就此冻结。
 - **破坏性：删除 `edges memory migrate`。** 命令与随包技能 `project-memory-migrate` 一并删除，不留指向 `.edges/memory` 的版本。仍停在 `.memory` 的，用 `@viruspc/edges@0.2.7` 的 `edges memory migrate` 完成后再改目录名。本版在旧 `.memory` 上初始化会报 `migration-required`，并指向上述说明。
 - **内部配置文件改名：** 材料清单实现文件改为 `edges-materials.json` 与 `edges-materials.ts`。用户目录仍是 `.edges/`。
-- **随包技能：** 路径或步骤跟着改的技能已升版本，见各技能 changelog。其中 `project-memory-init` `5.0.0`、`project-memory-remember` `4.0.0`、`project-memory-reshape` `4.0.0`、`project-memory-add-type` `4.0.0`、`project-memory-doctor` `4.0.0`、`user-memory-backup` `4.0.0`、`user-memory-restore` `4.0.0` 不再指引已删除的迁移命令。
+- **随包技能：** 路径或步骤跟着改的技能已升版本，见各技能 changelog。其中 `edges-memory-init` `5.0.0`、`edges-memory-remember` `4.0.0`、`project-memory-reshape` `4.0.0`、`edges-memory-add-type` `4.0.0`、`project-memory-doctor` `4.0.0`、`edges-user-memory-backup` `4.0.0`、`edges-user-memory-restore` `4.0.0` 不再指引已删除的迁移命令。
 - 本文件 0.3.0 之前的条目里，材料目录与层标记已写成现行名。当时的目录名是 `.harness`，层标记前缀是 `project-harness`。
 
 ## [0.2.7] - 2026-10-26
@@ -33,7 +37,7 @@
 
 ### 随包技能
 
-- **把 Agent 会话接到 Langfuse：** 安装包里多了五份技能。还没确定是本机、Codex Cloud、Cursor Cloud 还是 Grok Bot 时，先打开 `langfuse-agent-tracing`，它只帮你选该用哪一份。`edges init` 或 `edges skills init` 会把包内技能装上。Codex Cloud 的轮询脚本和 Grok Bot 的导出脚本不在这个 npm 包里，步骤写在对应技能里。
+- **把 Agent 会话接到 Langfuse：** 安装包里多了五份技能。还没确定是本机、Codex Cloud、Cursor Cloud 还是 Grok Bot 时，先打开 `edges-langfuse-agent-tracing`，它只帮你选该用哪一份。`edges init` 或 `edges skills init` 会把包内技能装上。Codex Cloud 的轮询脚本和 Grok Bot 的导出脚本不在这个 npm 包里，步骤写在对应技能里。
 
 ## [0.2.5] - 2026-10-22
 
@@ -58,7 +62,7 @@
 - **新提示：** 条目目录不存在或为空（子模块未初始化）时，`compose list` 和默认会读到该条目的命令在 stderr 提示运行 `edges compose update --name <name>`；`--exclude compose` 时不提示。旧路径条目会提示迁移到 `.edges/compose/<name>`。
 - **逐条失败：** 失败处理落在 `compose update`（原先是 `clone` / `pull` / `push`）。失败的条目在 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 每条打一行 `warning: compose update failed for <name>: <reason>`，其余条目继续执行。至少一条成功时退出码 0；全部请求的条目都失败（含 `--name` 指定的单条失败）时以失败结果退出（`status: "failed"`，仍带 `entries`；单条失败时 `reason` 是该条的错误）。缺少作用域 `AGENTS.md`、`--name` 找不到条目照旧整条命令失败。
 - **可排除模块：** `--exclude` 与 `--scope` 同级，逗号分隔，可重复。接受 `compose`、`memory`、`skills`、`notes`、`projects`、`tasks`，与 `--types` 正交。
-- **随包 skills：** `edges-compose` 升到 `0.2.0`，说明与本版 `edges compose` 一致。其余随包 skill 只改仓内路径，命令不变：`conversation-to-notes` `2.7.2`（不再点名个人仓）、`conversation-to-tasks` `1.3.2`、`edges-note` `2.3.2`、`edges-onboarding` `0.1.1`、`project-memory-init` `4.0.1`、`project-tasks-classify` `1.3.1`。`project-memory-doctor` 仍是 `3.3.0`，正文里的容器示例改为 `packages/evaluation`，迁移脚本改为 `scripts/migrations/migrate-agents-indexes.mts`。
+- **随包 skills：** `edges-compose` 升到 `0.2.0`，说明与本版 `edges compose` 一致。其余随包 skill 只改仓内路径，命令不变：`edges-conversation-to-notes` `2.7.2`（不再点名个人仓）、`edges-conversation-to-tasks` `1.3.2`、`edges-note` `2.3.2`、`edges-onboarding` `0.1.1`、`edges-memory-init` `4.0.1`、`edges-tasks-classify` `1.3.1`。`project-memory-doctor` 仍是 `3.3.0`，正文里的容器示例改为 `packages/evaluation`，迁移脚本改为 `scripts/migrations/migrate-agents-indexes.mts`。
 - **迁移提示：** 任务看板仍带 `task-projects` 旧标记时，报错里的脚本路径改为 `scripts/migrations/migrate-agents-indexes.mts`。
 
 ## [0.2.3] - 2026-10-19

@@ -1,6 +1,6 @@
 # 从 `_default` 提议新 Task Project 类型；人确认后再 create + classify
 
-classifyTasks（ADR 0010）按用户已设的 Task Project 质心做归属建议，但不会从堆积的 `_default` 里发现该建哪些新类型。2026-09-17 grill 确认：另开独立 Skill `proposeTypes`（`packages/skills/project-tasks-propose-types/`），只读 `_default` tasks 与已有质心、输出候选表，不自动 `project create`。人确认类型后，再在后续步骤用 `project create` + `project-tasks-classify`。真 embedding 就绪前用 LLM / agent 判断；不称 Embedding NCC，也不用 K-means 命名。本轮只定 CONTEXT / ADR（及记忆指针），不写 skill 正文、不迁看板。**Amends ADR 0010**（路径与类型发现边界；整板归属 + Q18=A 不变）；**Amended by ADR 0012**（人确认闸门复用同一审阅页，不改类型发现边界）。叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
+classifyTasks（ADR 0010）按用户已设的 Task Project 质心做归属建议，但不会从堆积的 `_default` 里发现该建哪些新类型。2026-09-17 grill 确认：另开独立 Skill `proposeTypes`（`packages/skills/project-tasks-propose-types/`），只读 `_default` tasks 与已有质心、输出候选表，不自动 `project create`。人确认类型后，再在后续步骤用 `project create` + `edges-tasks-classify`。真 embedding 就绪前用 LLM / agent 判断；不称 Embedding NCC，也不用 K-means 命名。本轮只定 CONTEXT / ADR（及记忆指针），不写 skill 正文、不迁看板。**Amends ADR 0010**（路径与类型发现边界；整板归属 + Q18=A 不变）；**Amended by ADR 0012**（人确认闸门复用同一审阅页，不改类型发现边界）。叠 ADR 0004 / 0005 / 0009。能力面仍是 ADR 0004 的 CLI + Skill + MCP 三者并列。
 
 **Status:** accepted（ADR 0011；grill 确认于 2026-09-17；同日由 ADR 0012 修订人闸形态）
 
@@ -12,7 +12,7 @@ classifyTasks（ADR 0010）按用户已设的 Task Project 质心做归属建议
 - **输入：** `_default` 下的 Task（各 status），加上已有 Task Project 的标题/描述质心，用来避撞（slug 与主题都不要撞上已有 project，含保留名 `_default`）。
 - **输出：** 候选表。每行：slug、description、supporting stems（支撑该类型的 `_default` Task 文件 stem）。人确认并 `project create` 之前还不是 Task Project。
 - **禁止自动落地：** 本 skill 不调用 `project create`，不改 Task 路径 / `edges-task-project`，不改 `edges-tasks-status` / `edges-task-priority`。
-- **编排：** 人确认要建的类型 → 后续步骤 `edges tasks project create` 写入质心 → 再跑 `project-tasks-classify` 做归属。create 与 classify 都是后一步，不塞进本 skill。
+- **编排：** 人确认要建的类型 → 后续步骤 `edges tasks project create` 写入质心 → 再跑 `edges-tasks-classify` 做归属。create 与 classify 都是后一步，不塞进本 skill。
 - **方法：** 真 embedding 就绪前用 LLM / agent 判断。不称 Embedding NCC（无真向量）；不用 K-means 命名（已有质心是人设类，本 skill 是从 `_default` 提议新类，不是无标签重聚整板）。
 - **批量：** 默认一次 3–7 个候选；宁缺勿滥，剩在 `_default` 比硬凑类型好。
 - **正交：** 不改 status 或 priority。不把 Task 升成 Memory Type（Q18=A 仍只做索引/描述层）。

@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { classifyAgentsSource } from "../../src/services/memory/agents.js";
-import { ensureImportantBlock } from "../../src/services/memory/blocks.js";
 import { rewriteLayerSurface } from "../../src/domain/models/node/document.js";
 
 const legacy = `<!-- project-memory:start -->
@@ -16,30 +15,30 @@ const legacy = `<!-- project-memory:start -->
 <!-- project-memory:end -->
 `;
 
-test("legacy layer markers still count as managed", () => {
-  assert.equal(classifyAgentsSource(legacy), "managed");
-  assert.equal(ensureImportantBlock(legacy), legacy);
+test("legacy layer markers are foreign", () => {
+  assert.equal(classifyAgentsSource(legacy), "foreign");
 });
 
 test("type indexes are not classified as managed layer entries", () => {
-  const typeIndex = `<!-- project-memory-type:start -->
+  const typeIndex = `<!-- edges-memory-type:start -->
 name: project
 module: memory
 writable: true
 gitignore: false
 format: ordinary
-<!-- project-memory-type:end -->
+<!-- edges-memory-type:end -->
 # PROJECT
-<!-- project-memory-entries:start -->
+<!-- edges-entries-local:start -->
 - [x](project_x/index.md) — x
-<!-- project-memory-entries:end -->
+<!-- edges-entries-local:end -->
 `;
   assert.equal(classifyAgentsSource(typeIndex), "foreign");
   assert.equal(rewriteLayerSurface(typeIndex), typeIndex);
 });
 
-test("refreshing a legacy file rewrites the layer surface", () => {
+test("refreshing a legacy file does not rewrite layer comments", () => {
   const updated = rewriteLayerSurface(legacy);
-  assert.match(updated, /edges-constraints/);
-  assert.doesNotMatch(updated, /project-memory-important/);
+  assert.match(updated, /project-memory-important/);
+  assert.match(updated, /## 本层系统维护信息/);
+  assert.doesNotMatch(updated, /edges-constraints/);
 });

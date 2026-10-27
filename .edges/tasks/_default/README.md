@@ -2,7 +2,7 @@
 
 Ungrouped tasks that have not been assigned a named Task Project.
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [locomo\_official\_rag\_single\_file\_followup](<cancelled/2026-09-16--LoCoMo%E5%AE%98%E6%96%B9RAG%E5%8D%95%E6%A1%A3%E8%B7%9F%E8%BF%9B/INDEX.md>) — LoCoMo 官方 RAG 单档（rag\-mode dialog、单一 top\-k）——冒烟基线过关后的可选跟进
@@ -23,4 +23,4 @@ Ungrouped tasks that have not been assigned a named Task Project.
 - [edges\_promotion\_preparation](<backlog/2026-10-27--Edges-%E5%AF%B9%E5%A4%96%E6%8E%A8%E5%B9%BF%E5%87%86%E5%A4%87%E5%AE%9E%E9%AA%8CSkills-%E4%B8%8E%E5%9C%BA%E6%99%AF%E6%A1%88%E4%BE%8B/INDEX.md>) — 完成核心价值验证、Skills 接入梳理与场景案例文章，让 Edges 推广有证据、可接入、可复现。
 - [edges\_case\_scenarios](<backlog/2026-10-27--%E7%A1%AE%E5%AE%9A-Edges-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E4%B8%8E%E6%A1%88%E4%BE%8B%E7%B4%A0%E6%9D%90/INDEX.md>) — 围绕真实用户需求选择案例选题，整理过程、产物和证据，为场景文章准备素材。
 - [edges\_case\_articles](<backlog/2026-10-27--%E6%92%B0%E5%86%99-Edges-%E5%9C%BA%E6%99%AF%E6%A1%88%E4%BE%8B%E6%96%87%E7%AB%A0/INDEX.md>) — 把确认的使用场景、实验结果和接入流程写成读者能理解并尝试的案例文章草稿。
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->

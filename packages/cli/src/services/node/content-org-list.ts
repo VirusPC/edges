@@ -4,9 +4,9 @@ import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { harnessBoardSeed } from "../init/modules.js";
 import type { NodeService } from "./node-service.js";
 
-const ENTRIES_MARKER = /^<!-- project-entries-(?:local|descendants):start -->$/m;
+const ENTRIES_MARKER = /^<!-- edges-entries-(?:local|descendants):start -->$/m;
 
-const EMPTY_ENTRIES = `<!-- project-entries-local:start -->\n## 本层内容\n\n<!-- project-entries-local:end -->\n`;
+const EMPTY_ENTRIES = `<!-- edges-entries-local:start -->\n## 本层内容\n\n<!-- edges-entries-local:end -->\n`;
 
 export type ContentFolder = "notes" | "projects";
 

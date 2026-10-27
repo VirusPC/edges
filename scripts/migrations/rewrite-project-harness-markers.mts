@@ -75,8 +75,24 @@ function assertPaired(file: string, source: string): void {
   }
 }
 
+const LAYER_COMMENT_REWRITES: Array<[RegExp, string]> = [
+  [/^<!-- project-memory:start -->$/gm, "<!-- edges:start -->"],
+  [/^<!-- project-memory:end -->$/gm, "<!-- edges:end -->"],
+  [
+    /^<!-- project-memory-important:(start|end) -->$/gm,
+    "<!-- edges-constraints:$1 -->",
+  ],
+  [/^<!-- project-memory-local:(start|end) -->$/gm, "<!-- edges-local:$1 -->"],
+  [
+    /^<!-- project-memory-children:(start|end) -->$/gm,
+    "<!-- edges-descendants:$1 -->",
+  ],
+];
+
 function convert(file: string, source: string): string {
-  const next = rewriteLayerSurface(source);
+  let next = source;
+  for (const [from, to] of LAYER_COMMENT_REWRITES) next = next.replace(from, to);
+  next = rewriteLayerSurface(next);
   if (next === source) return source;
   assertPaired(file, source);
   return next;

@@ -17,7 +17,7 @@ status: accepted
 1. **适用范围：仅 edges 作用域**：本规则只对 CLI `isScope`（`packages/cli/src/services/scope.ts`）判定为作用域的目录生效——该目录有 `AGENTS.md`，且能解析为带 edges XML 标记的 `AgentsNode`。普通 `AGENTS.md`（无 edges 标记）不是 edges 系统，不强制建 `.edges/`，也不套本规则。
 2. **迁什么、留什么**：只把「本层系统维护信息」里的**材料清单**迁到 `.edges/README.md`。「下层系统维护信息」仍写在 `AGENTS.md`。Compose block 与「本层硬约束」仍写在 `AGENTS.md`，不进 README。
 3. **`AGENTS.md` 本层只留一条组成登记**：本层区块保留**唯一**一条指向 `.edges/README.md` 的组成条目，name / description 写清楚（本层 harness 材料索引）。不再在 `AGENTS.md` 本层逐条列出各材料 README；材料只挂在 `.edges/README.md` 的 entries 下。索引只在一处，不双写。
-4. **`.edges/README.md` 是标准组织清单**：形态为普通 `ReadmeNode`，使用 `project-entries-local` / `project-entries-descendants`；给人看的说明与 entries 可同文件。无 YAML frontmatter。
+4. **`.edges/README.md` 是标准组织清单**：形态为普通 `ReadmeNode`，使用 `edges-entries-local` / `edges-entries-descendants`；给人看的说明与 entries 可同文件。无 YAML frontmatter。
 5. **`edges init` 保证文件存在**：对 edges 作用域，`edges init` 须确保 `.edges/README.md` 存在；之后本层材料只通过该 README 登记，不再直接往 `AGENTS.md` 本层挂材料条目。
 6. **迁移既有链接**：已有 `AGENTS.md` 本层里指向各材料的链接，迁入对应作用域的 `.edges/README.md`；迁完后 `AGENTS.md` 本层不再保留这些材料条目（无双写过渡态）。
 7. **`--super` 优先挂载 `.edges/README.md`**：该文件存在时只挂它，并从它的 entries 展开。不存在时回退为按 `edges-materials.json` 扁平挂已有材料。不把作用域根 `README.md` 当作中间优先层（评审确认：根 README 往往是对外门面，不是这份组织清单）。
@@ -36,6 +36,6 @@ status: accepted
 
 - 已落地：`edges init` 对 edges 作用域创建或保留 `.edges/README.md`（普通 `ReadmeNode`，无 YAML frontmatter）。新建的 notes/projects 与类型索引由 `NodeService` 的 physicalParent 登记到这份 README；tasks 看板仍由 init 显式挂上（NodeService 跳过这块看板）。AGENTS 本层写入单条「本层 harness 材料索引」。没有单独的 harness-index 模块。`--super` 仅在 `<scope>/.edges/README.md` 存在时挂它并展开，否则按 `edges-materials.json` 扁平挂载。
 - 已迁移：各 `isScope` 目录里、位于该作用域 `.edges/` 下的本层材料链接，已移入对应 `.edges/README.md`，并从不在 AGENTS 本层双写。下层系统入口、Compose block、本层硬约束的位置不变。不是 harness 材料的本层链接留在 AGENTS（例如根上的 `README.md` / `CONTEXT.md` / `docs/adr/` 导航，`notes/` 下的内容 `INDEX.md`，`.edges/tasks` 的 `tech-reading/AGENTS.md`）。gitignore 掉、检出里不存在的 `memory/users` 链接仍保留在索引上，不把缺文件当成可删除。
-- 未改：`packages/skills/project-memory-init` 的 PROTOCOL、LAYOUT 与 `AGENTS.tmpl.md` 仍按旧形状描述「本层链到各类型 README」。模板里的类型行继续给 `indexFiles()` / `seedDescription()` 提供说明；CLI 写入新 AGENTS 时会去掉这些行，只留指针。不合并 `layout.ts` 与 `edges-materials.json`，不改 ADR 0034，不做 `@path` 展开。
+- 未改：`packages/skills/edges-memory-init` 的 PROTOCOL、LAYOUT 与 `AGENTS.tmpl.md` 仍按旧形状描述「本层链到各类型 README」。模板里的类型行继续给 `indexFiles()` / `seedDescription()` 提供说明；CLI 写入新 AGENTS 时会去掉这些行，只留指针。不合并 `layout.ts` 与 `edges-materials.json`，不改 ADR 0034，不做 `@path` 展开。
 - 与 Letta / Devin「索引在 harness 内」、以及 Compose 外部库自带索引文件的形状对齐；Agent 与人只需记「材料索引在 `.edges/README.md`」。
 - 术语见 `CONTEXT.md` 的「系统入口」「组成登记」「组织清单」「虚拟超节点」「Project Harness」（均已指向本 ADR）。

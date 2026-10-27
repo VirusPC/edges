@@ -76,7 +76,7 @@ test("shared Leaf metadata retains updated body and metadata removal after subse
   assert.equal(saved.metadata?.obsolete, undefined);
   assert.deepEqual(saved.metadata?.vendor, { keep: 1 });
 });
-const body = `# Root\n\nIntro unchanged.\n\n<!-- project-memory-important:start -->\n- Original constraint\n<!-- project-memory-important:end -->\n\n<!-- project-memory-local:start -->\n- [Child](child/index.md) — Original description\n<!-- keep this comment -->\n<!-- project-memory-local:end -->\n\nTail unchanged.\n`;
+const body = `# Root\n\nIntro unchanged.\n\n<!-- edges-constraints:start -->\n- Original constraint\n<!-- edges-constraints:end -->\n\n<!-- edges-local:start -->\n- [Child](child/index.md) — Original description\n<!-- keep this comment -->\n<!-- edges-local:end -->\n\nTail unchanged.\n`;
 test("shared Internal constraints and reference edits retain authored prose and structural changes", async (t) => {
   const { file, service } = fixture(t);
   const primary = await service.create(new AgentsNode(file("AGENTS.md")), {

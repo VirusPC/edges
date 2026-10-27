@@ -12,7 +12,6 @@ import {
 } from "../../core/node-content/parse.js";
 import { serializeNode as writeNode } from "../../core/node-content/serialize.js";
 import {
-  COMMENT_REWRITES,
   CONSTRAINTS_START,
   DESCENDANTS_END,
   DESCENDANTS_START,
@@ -20,13 +19,6 @@ import {
   HARNESS_GRAMMAR,
   INNER_BLOCK_ORDER,
   INTERNAL_SECTIONS,
-  LEGACY_CHILDREN_END,
-  LEGACY_CHILDREN_START,
-  LEGACY_IMPORTANT_START,
-  LEGACY_LOCAL_END,
-  LEGACY_LOCAL_START,
-  LEGACY_OUTER_END,
-  LEGACY_OUTER_START,
   LOCAL_END,
   LOCAL_START,
   OUTER_END,
@@ -40,27 +32,24 @@ export { appendBlock, blockPattern, escapeRegExp };
 
 export function rewriteLayerSurface(source: string): string {
   let next = source;
-  for (const [from, to] of COMMENT_REWRITES) next = next.replace(from, to);
   for (const [from, to] of TITLE_REWRITES) next = next.replace(from, to);
   return next;
 }
 export const hasConstraintsMarker = (source: string) =>
-  source.includes(CONSTRAINTS_START) || source.includes(LEGACY_IMPORTANT_START);
+  source.includes(CONSTRAINTS_START);
 export const extractLocalBlock = (source: string) =>
-  source.match(blockPattern(LOCAL_START, LOCAL_END))?.[0] ??
-  source.match(blockPattern(LEGACY_LOCAL_START, LEGACY_LOCAL_END))?.[0];
+  source.match(blockPattern(LOCAL_START, LOCAL_END))?.[0];
 export const extractDescendantsBlock = (source: string) =>
-  source.match(blockPattern(DESCENDANTS_START, DESCENDANTS_END))?.[0] ??
-  source.match(blockPattern(LEGACY_CHILDREN_START, LEGACY_CHILDREN_END))?.[0];
+  source.match(blockPattern(DESCENDANTS_START, DESCENDANTS_END))?.[0];
 
 export function insertInnerBlock(
   document: string,
   start: string,
   block: string,
 ): string {
-  if (!document.includes(OUTER_START) && !document.includes(LEGACY_OUTER_START))
+  if (!document.includes(OUTER_START))
     document = appendBlock(document, `${OUTER_START}\n${OUTER_END}`);
-  const outerEnd = document.includes(OUTER_END) ? OUTER_END : LEGACY_OUTER_END;
+  const outerEnd = OUTER_END;
   const anchor =
     INNER_BLOCK_ORDER.slice(INNER_BLOCK_ORDER.indexOf(start) + 1).find((m) =>
       document.includes(m),
@@ -127,13 +116,6 @@ export interface SyntaxContent {
   compose?: readonly SyntaxReference[];
 }
 
-// Existing type indexes use the same local ownership semantics, with different markers.
-function adaptEntries(source: string): string {
-  return source.replace(
-    /^<!-- project-memory-entries:(start|end) -->$/gm,
-    "<!-- edges-local:$1 -->",
-  );
-}
 export type SyntaxProfile = "agents" | "entries";
 
 const PAIRS = [
@@ -235,7 +217,6 @@ function rebuildIndexes(
 export class InternalSyntax {
   readonly #source: string;
   readonly #model: AgentsDocument;
-  readonly #entries: boolean;
   readonly #profile: SyntaxProfile;
   readonly #isIndexed: (href: string) => boolean;
   readonly #indexItems = new Set<AgentsItem>();
@@ -246,10 +227,8 @@ export class InternalSyntax {
   ) {
     this.#profile = profile;
     this.#isIndexed = isIndexed;
-    this.#entries = /^<!-- project-memory-entries:start -->$/m.test(source);
-    this.#source = adaptEntries(
-      this.#profile === "entries" ? toEntriesProfile(source) : source,
-    );
+    this.#source =
+      this.#profile === "entries" ? toEntriesProfile(source) : source;
     const decoded = decodeBody(this.#source);
     this.#model = decoded.model;
     for (const key of ["memory", "children", "compose"] as const) {
@@ -325,16 +304,6 @@ export class InternalSyntax {
     };
     const rendered = serializeNode(model, this.#source);
     if (this.#profile === "entries") return fromEntriesProfile(rendered);
-    return this.#entries
-      ? rendered
-          .replace(
-            /^<!-- edges-local:(start|end) -->$/gm,
-            "<!-- project-memory-entries:$1 -->",
-          )
-          .replace(
-            /^<!-- project-memory-local:(start|end) -->$/gm,
-            "<!-- project-memory-entries:$1 -->",
-          )
-      : rendered;
+    return rendered;
   }
 }

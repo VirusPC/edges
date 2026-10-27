@@ -19,7 +19,7 @@ function fixture(t: { after(fn: () => void): void }) {
   return { root, write };
 }
 const contract =
-  "<!-- project-memory-type:start -->\nname: project\nmodule: memory\nwritable: true\n<!-- project-memory-type:end -->\n";
+  "<!-- edges-memory-type:start -->\nname: project\nmodule: memory\nwritable: true\n<!-- edges-memory-type:end -->\n";
 test("import classification shares runtime nearest physical parent across intermediate directories", async (t) => {
   const { root, write } = fixture(t);
   write(".edges/memory/projects/AGENTS.md", contract);

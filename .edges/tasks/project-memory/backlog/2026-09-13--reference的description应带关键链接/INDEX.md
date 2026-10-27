@@ -22,4 +22,4 @@ metadata:
 - 新建/更新 reference：`description` 里带上关键链接（官方文档、论文、仓库、对照页）。
 - 类型入口索引行同步带链接，不要只写「对照某某」。
 - 可顺带扫一轮现有 references，缺链接的补上。
-- 细聊时也可把这条收进 project-memory-remember 对 reference type 的约定。
+- 细聊时也可把这条收进 edges-memory-remember 对 reference type 的约定。

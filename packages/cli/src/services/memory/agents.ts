@@ -7,17 +7,12 @@ import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
 import { join, dirname, basename, relative, sep } from "node:path";
 import {
-  AUTO_START,
   CHILDREN_START,
   CHILDREN_END,
   IMPORTANT_START,
   LOCAL_START,
   LOCAL_END,
   OUTER_START,
-  LEGACY_OUTER_START,
-  LEGACY_IMPORTANT_START,
-  LEGACY_LOCAL_START,
-  LEGACY_CHILDREN_START,
   INDEX_ENTRY_PATTERN,
   blockPattern,
   buildChildrenBlock,
@@ -44,14 +39,9 @@ export function classifyAgentsSource(source: string | undefined): "missing" | "m
     if (source === undefined) return 'missing';
     return [
       OUTER_START,
-      LEGACY_OUTER_START,
       IMPORTANT_START,
-      LEGACY_IMPORTANT_START,
       LOCAL_START,
-      LEGACY_LOCAL_START,
       CHILDREN_START,
-      LEGACY_CHILDREN_START,
-      AUTO_START,
     ].some(marker => source.includes(marker)) ? 'managed' : 'foreign';
 }
 export function classifyAgentsFile(file: string): "missing" | "managed" | "foreign" {

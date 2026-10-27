@@ -41,8 +41,8 @@ __pycache__/
 .memory/USER.md
 **/.memory/users/
 **/.memory/USER.md
-user-memory-backup-*.tar.gz
-user-memory-backup-*.zip
+edges-user-memory-backup-*.tar.gz
+edges-user-memory-backup-*.zip
 
 # New scope-local private memory: include indexes; retain legacy rules above.
 **/.edges/memory/users/

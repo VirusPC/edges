@@ -12,8 +12,8 @@ description: >-
   AGENTS.md。根上维护任务当时仍挂在项目 README，未在本 PR 收完（见 #170）。
 ---
 **背景：**
-森林与 edges-materials（#167）落地后，list 仍需明确「从哪个主体系统 traverse」以及类型索引用什么文件。同时要把 memory/skills 类型入口统一到 AGENTS.md，避免 README 与层入口两套真相。本 PR 自测说明：仓库根默认 list 仍走不到 `.edges/tasks` 里记在项目 README `project-entries` 上的维护任务——该缺口由后续 #170 收口。
-- 非目标：不把 README project-entries 抄进 AGENTS；不在 list 里加第二套遍历
+森林与 edges-materials（#167）落地后，list 仍需明确「从哪个主体系统 traverse」以及类型索引用什么文件。同时要把 memory/skills 类型入口统一到 AGENTS.md，避免 README 与层入口两套真相。本 PR 自测说明：仓库根默认 list 仍走不到 `.edges/tasks` 里记在项目 README `edges-entries` 上的维护任务——该缺口由后续 #170 收口。
+- 非目标：不把 README edges-entries 抄进 AGENTS；不在 list 里加第二套遍历
 - 关联：PR https://github.com/VirusPC/edges/pull/168；后续 done 卡「让 tasks list 顺着 AGENTS.md 走到任务」（#170）
 
 **目标：**

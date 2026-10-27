@@ -27,7 +27,7 @@ metadata:
 - 将本次逐条确认的 Tasks 相关 Project Memory 列为首批内容，不能只交付分发机制而遗漏约定本身：
   - 维护任务执行流程（project_assign_grill_with_docs_first）：grill → research → plan → implement → validate → close，适用于所有层级的 .edges/tasks，不自动扩展到领域 tasks。
   - 看板变更优先走 CLI（project_tasks_board_mutations_via_cli）：覆盖所有层级的维护 .edges/tasks 和领域 tasks，已有 Skill 优先采用，工具缺口明确反馈。
-  - STAR 任务结构与事实／idea 区分（project_star_for_agent_task_formulation、project_task_separate_facts_from_idea）：覆盖两类任务；预定义记忆保留适用约定并引用 conversation-to-tasks，具体写作方法仍由该 Skill 维护，不复制出第二套方法正文。
+  - STAR 任务结构与事实／idea 区分（project_star_for_agent_task_formulation、project_task_separate_facts_from_idea）：覆盖两类任务；预定义记忆保留适用约定并引用 edges-conversation-to-tasks，具体写作方法仍由该 Skill 维护，不复制出第二套方法正文。
 - 按已确认的范围提炼可分发内容，不直接打包原始历史记忆。根维护看板的七个初始分组、Edges 特定部署记录不纳入通用 Tasks 预定义记忆；已删除的“初始化后先留本地”要求不得重新带入。
 
 完成标准待后续设计讨论补充。

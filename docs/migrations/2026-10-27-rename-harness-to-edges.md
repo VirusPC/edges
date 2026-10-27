@@ -20,7 +20,7 @@ edges memory migrate
 
 在仓库根保存下面的脚本（例如 `/tmp/rename-harness-to-edges.mjs`）。默认只打印。确认清单后再加 `--apply`。
 
-脚本做两件事：把名为 `.harness` 的目录改成 `.edges`（深的先改），以及改写文本里的 `.harness` 路径和 `<!-- project-harness` 标记。`project-memory` 与 `project-entries` 不动。历史文件名里的 `project-harness`（任务 slug、旧规格文件名）不改。`.harness` 与 `.edges` 同时存在时停止，不覆盖。
+脚本做两件事：把名为 `.harness` 的目录改成 `.edges`（深的先改），以及改写文本里的 `.harness` 路径和 `<!-- project-harness` 标记。`project-memory` 与 `edges-entries` 不动。历史文件名里的 `project-harness`（任务 slug、旧规格文件名）不改。`.harness` 与 `.edges` 同时存在时停止，不覆盖。
 
 ```javascript
 #!/usr/bin/env node

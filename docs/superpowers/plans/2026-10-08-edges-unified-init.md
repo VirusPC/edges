@@ -102,7 +102,7 @@
 
 - 问题：ADR、CONTEXT、skill、README 同步到哪一层。
 - 备选项：A 新开 ADR 0031，CONTEXT 只改 init 那一句，skill 只改 SKILL/runtime/LAYOUT；B 修订 0030；C 连 PROTOCOL 一起改。
-- 选择和理由：Q12: A —— 新开 ADR 0031；CONTEXT 只改 init 命令那一句；`project-memory-init` 只同步 SKILL、runtime、LAYOUT 的命令/模块段并升版本；不改 PROTOCOL、模板、doctor、根 README。CLI README 加 `edges init` 示例。
+- 选择和理由：Q12: A —— 新开 ADR 0031；CONTEXT 只改 init 命令那一句；`edges-memory-init` 只同步 SKILL、runtime、LAYOUT 的命令/模块段并升版本；不改 PROTOCOL、模板、doctor、根 README。CLI README 加 `edges init` 示例。
 
 ## Global Constraints
 
@@ -114,7 +114,7 @@
 - 命令只从对应 `packages/services/<module>/service.ts` 进入。commands 的 init 文件不 import `edges-materials`，不 `writeFileSync`。
 - `edges artifacts init` 保持 token 命令，不进 harness 编排。不为 evaluation / observation 发明命令。
 - 不改 PROTOCOL、模板、doctor、根 README。
-- skill 真源只有 `packages/skills/project-memory-init`（`.claude/skills` 与 `.agents/skills` 是指向它的符号链接）。版本 `3.5.0` → `3.6.0`。
+- skill 真源只有 `packages/skills/edges-memory-init`（`.claude/skills` 与 `.agents/skills` 是指向它的符号链接）。版本 `3.5.0` → `3.6.0`。
 
 ## File map
 
@@ -133,7 +133,7 @@
 | `docs/adr/0031-edges-init-standard-command.md` | **Create** |
 | `CONTEXT.md` | 只改系统入口那一句里的命令 |
 | `packages/cli/README.md` | 分层登记 init，加示例 |
-| `packages/skills/project-memory-init/SKILL.md`、`references/runtime.md`、`references/LAYOUT.md` | 命令与模块段，版本 3.5.0 |
+| `packages/skills/edges-memory-init/SKILL.md`、`references/runtime.md`、`references/LAYOUT.md` | 命令与模块段，版本 3.5.0 |
 | `docs/superpowers/plans/2026-10-08-edges-init-grill.md` | grill 全文 |
 | 任务卡 INDEX 与 `.log.md` | `edges tasks` 移到 in_progress，追加决策摘要 |
 

@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript, Node.js >=20, Commander, gray-matter, node:test/tsx.
 
-**Spec:** `packages/skills/project-memory-init/references/PROTOCOL.md`, `LAYOUT.md`, `frontmatter-fields.md`; current Python operations/tests are behavioral references, not a parser implementation to copy.
+**Spec:** `packages/skills/edges-memory-init/references/PROTOCOL.md`, `LAYOUT.md`, `frontmatter-fields.md`; current Python operations/tests are behavioral references, not a parser implementation to copy.
 
 ## Global Constraints
 
@@ -24,7 +24,7 @@
 
 ### Task 1: Port core memory services and behavioral tests
 
-**Files:** Create `packages/cli/src/services/memory/{index,paths,types,templates,blocks,agents,entries,provenance,init,remember,add-type,doctor}.ts` as needed; tests in `packages/cli/test/memory/`. Read existing Python files under `packages/skills/project-memory-init/scripts/` and template resources.
+**Files:** Create `packages/cli/src/services/memory/{index,paths,types,templates,blocks,agents,entries,provenance,init,remember,add-type,doctor}.ts` as needed; tests in `packages/cli/test/memory/`. Read existing Python files under `packages/skills/edges-memory-init/scripts/` and template resources.
 
 **Interfaces:** Export `initMemory(options)`, `rememberMemory(options)`, `addMemoryType(options)`, `doctorMemory(options)` from packages/services/memory/index.ts. Options use camelCase equivalents of Python CLI arguments, with required targetDir; remember accepts content text rather than contentFile. Return current JSON payloads without process IO. Export shared path/type/index helpers for the explicit migrator.
 
@@ -35,7 +35,7 @@
 
 ### Task 2: Port explicit migration and private archives
 
-**Files:** Create `packages/cli/src/services/memory/migrate.ts` and migration helpers; `archive.ts` for user backup/restore; tests under `packages/cli/test/memory/` with distinct names. Also port the direct runtime consumer `scripts/migrate-recursive-layout.py` to `scripts/migrations/migrate-recursive-layout.mts`, with tests ported from `scripts/test_migrate_recursive_layout.py`. Existing Python references: project-memory-migrate/scripts and user-memory-backup/restore/scripts. Dependency updates only if needed for a maintained archive library.
+**Files:** Create `packages/cli/src/services/memory/migrate.ts` and migration helpers; `archive.ts` for user backup/restore; tests under `packages/cli/test/memory/` with distinct names. Also port the direct runtime consumer `scripts/migrate-recursive-layout.py` to `scripts/migrations/migrate-recursive-layout.mts`, with tests ported from `scripts/test_migrate_recursive_layout.py`. Existing Python references: project-memory-migrate/scripts and edges-user-memory-backup/restore/scripts. Dependency updates only if needed for a maintained archive library.
 
 **Interfaces:** `migrateMemory({targetDir,rootDir?,recursive?,dryRun?})`, `backupUserMemory({repoDir,outputDir?,timestamp?})`, `restoreUserMemory({archive,repoDir,force?})`; preserve JSON result fields and migration journal semantics. Consume Task 1's path/type/index helpers without duplicated ordinary runtime.
 

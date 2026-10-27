@@ -8,7 +8,7 @@ import { ReadmeNode } from "../../src/domain/models/index.js";
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const rootReadme = join(repoRoot, "README.md");
 
-test("repo root README project-entries-local lists no posts or personal content dirs", () => {
+test("repo root README edges-entries-local lists no posts or personal content dirs", () => {
   const node = new ReadmeNode(rootReadme).parse(readFileSync(rootReadme, "utf8"));
   const ids = node.localChildren.map((c) => c.id);
   // posts/ and site-and-content left for the personal brain repo on 2026-10-20.

@@ -122,7 +122,7 @@ test("parseProjectAgents rejects frontmatter and accepts sparse node sections", 
   }
   assert.equal(
     parseProjectAgents(
-      "# T\n\nD\n\n<!-- project-memory:start -->\n<!-- project-memory:end -->\n",
+      "# T\n\nD\n\n<!-- edges:start -->\n<!-- edges:end -->\n",
     ).description,
     "D",
   );
@@ -158,7 +158,7 @@ test("ensureProjectMetadata seeds _default and root index without moving Task fi
     const rootAgents = path.join(repo, "tasks/AGENTS.md");
     await writeFile(
       rootAgents,
-      `# tasks\n\n<!-- project-memory:start -->\n\n- keep-index\n<!-- project-memory:end -->\n`,
+      `# tasks\n\n<!-- edges:start -->\n\n- keep-index\n<!-- edges:end -->\n`,
       "utf8",
     );
 

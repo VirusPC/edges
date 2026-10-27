@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Migrate system-one list entries from AGENTS.md to README.md (`project-entries-*`).
+ * Migrate system-one list entries from AGENTS.md to README.md (`edges-entries-*`).
  *
  *  A. Type indexes `.edges/{memory,skills}/<type>/AGENTS.md` carrying
- *     `project-memory-type` / `project-memory-entries` markers.
+ *     `edges-memory-type` / `edges-entries-local` markers.
  *  B. Organisation lists: directories whose AGENTS.md only lists Task/content leaves in
  *     `edges-local`, with no constraints, no `.edges` material and no
  *     descendants. Real system entries are never touched; ambiguous ones are skipped.
@@ -90,20 +90,20 @@ function blockRange(
 }
 
 export const isTypeIndexSource = (source: string): boolean =>
-  source.includes(marker("project-memory-type", "start")) ||
-  source.includes(marker("project-memory-entries", "start"));
+  source.includes(marker("edges-memory-type", "start")) ||
+  source.includes(marker("edges-entries-local", "start"));
 
-/** Type index AGENTS.md → README.md source (type header kept, entries → project-entries-local). */
+/** Type index AGENTS.md → README.md source (type header kept, entries → edges-entries-local). */
 export function convertTypeIndex(source: string): string {
-  const range = blockRange(source, "project-memory-entries");
+  const range = blockRange(source, "edges-entries-local");
   if (!range) return source;
   const body = range.inner.replace(/^\r?\n/, "").replace(/\s+$/, "");
   const next = [
-    marker("project-entries-local", "start"),
+    marker("edges-entries-local", "start"),
     `## ${ENTRIES_HEADINGS.local}`,
     "",
     body || "- 暂无条目。",
-    marker("project-entries-local", "end"),
+    marker("edges-entries-local", "end"),
   ].join("\n");
   return source.slice(0, range.start) + next + source.slice(range.end);
 }
@@ -116,14 +116,14 @@ export interface OrgListFacts {
   harnessDir: boolean;
 }
 
-const LOCAL_NAMES = ["edges-local", "project-memory-local"];
+const LOCAL_NAMES = ["edges-local", "edges-local"];
 const CONSTRAINT_NAMES = [
   "edges-constraints",
-  "project-memory-important",
+  "edges-constraints",
 ];
 const DESCENDANT_NAMES = [
   "edges-descendants",
-  "project-memory-children",
+  "edges-descendants",
 ];
 
 function firstBlock(source: string, names: string[]) {
@@ -202,7 +202,7 @@ function swapBlock(
 /** Pure organisation-list AGENTS.md → README.md source. */
 export function convertOrgList(source: string): string {
   let out = source;
-  out = swapBlock(out, LOCAL_NAMES, "project-entries-local", ENTRIES_HEADINGS.local);
+  out = swapBlock(out, LOCAL_NAMES, "edges-entries-local", ENTRIES_HEADINGS.local);
   for (const names of [CONSTRAINT_NAMES]) {
     const range = firstBlock(out, names);
     if (range && !stripHeading(range.inner))

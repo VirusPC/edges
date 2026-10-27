@@ -24,7 +24,7 @@ test('CLI owns explicit/env precedence and Git fallback independently of node tr
     mkdirSync(path.join(root, '.git'));
     const child = path.join(root, 'project');
     mkdirSync(child);
-    writeFileSync(path.join(child, 'AGENTS.md'), '<!-- project-memory:start -->\n<!-- project-memory-local:start -->');
+    writeFileSync(path.join(child, 'AGENTS.md'), '<!-- edges:start -->\n<!-- edges-local:start -->');
     assert.equal(resolveScope({ EDGES_SCOPE: 'env', EDGES_REPO: root }, child, 'explicit'), path.join(child, 'explicit'));
     assert.equal(resolveScope({ EDGES_SCOPE: 'env', EDGES_REPO: root }, child), path.join(child, 'env'));
     assert.equal(resolveScope({ EDGES_SCOPE: '  ', EDGES_REPO: root }, child), root);

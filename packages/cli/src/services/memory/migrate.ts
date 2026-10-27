@@ -274,7 +274,7 @@ export function referencedDiagnostics(owner: string): MigrationDiagnostic[] {
         code: "source-scan-incomplete",
         path: join(owner, ".agents/skills"),
         detail:
-          "Referenced source unavailable; existing index and adoption preserved. Restore source and run project-memory-doctor.",
+          "Referenced source unavailable; existing index and adoption preserved. Restore the referenced source.",
       },
     ];
   }
@@ -295,9 +295,9 @@ function rebuildEntries(
     return `- [${escapeIndexText(f.title || f.name || name)}](${encodeIndexPath(relative(dirname(index), mapped(path)))}) — ${escapeIndexText(f.description || "缺少 description，请补齐 frontmatter。")}`;
   });
   return text.replace(
-    /<!-- project-memory-entries:start -->[\s\S]*?<!-- project-memory-entries:end -->/,
+    /<!-- edges-entries-local:start -->[\s\S]*?<!-- edges-entries-local:end -->/,
     () =>
-      `<!-- project-memory-entries:start -->\n${(lines.length ? lines : ["- 暂无条目。"]).join("\n")}\n<!-- project-memory-entries:end -->`,
+      `<!-- edges-entries-local:start -->\n## 本层内容\n\n${(lines.length ? lines : ["- 暂无条目。"]).join("\n")}\n<!-- edges-entries-local:end -->`,
   );
 }
 export function planMigration(target: string, recursive = false): MigrationJob {
@@ -471,7 +471,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
       entry = indexSpecs.get(source),
       initial = entry?.spec.synthetic
         ? fileState(
-            `# ${entry.spec.name}\n\n<!-- project-memory-entries:start -->\n- 暂无条目。\n<!-- project-memory-entries:end -->\n`,
+            `# ${entry.spec.name}\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- 暂无条目。\n<!-- edges-entries-local:end -->\n`,
           )
         : before!;
     let after = { ...initial };
@@ -496,16 +496,16 @@ export function planMigration(target: string, recursive = false): MigrationJob {
         if (entry) text = convertIndex(text, entry.spec);
         if (
           entry?.spec.flatRoot &&
-          !text.includes("<!-- project-memory-entries:start -->")
+          !text.includes("<!-- edges-entries-local:start -->")
         )
           text +=
-            "\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n";
+            "\n<!-- edges-entries-local:start -->\n## 本层内容\n\n<!-- edges-entries-local:end -->\n";
         // Obsolete derived links need not be valid URLs. Discard them before
         // rewriting authored links, only when the source inventory is available.
         if (rebuild)
           text = text.replace(
-            /<!-- project-memory-entries:start -->[\s\S]*?<!-- project-memory-entries:end -->/,
-            "<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->",
+            /<!-- edges-entries-local:start -->[\s\S]*?<!-- edges-entries-local:end -->/,
+            "<!-- edges-entries-local:start -->\n## 本层内容\n\n<!-- edges-entries-local:end -->",
           );
         if (
           basename(source) === ENTRY_NAMES.skill &&
@@ -531,9 +531,11 @@ export function planMigration(target: string, recursive = false): MigrationJob {
           text = rebuildEntries(text, entry.owner, entry.spec, dest, mapped);
         if (rebuild && entry.spec.flatRoot)
           text = text.replace(
-            /<!-- project-memory-entries:start -->\r?\n([\s\S]*?)<!-- project-memory-entries:end -->/,
-            (_match, body: string) =>
-              `<!-- project-entries-local:start -->\n## 本层内容\n\n${body.trim()}\n<!-- project-entries-local:end -->`,
+            /<!-- edges-entries-local:start -->\r?\n([\s\S]*?)<!-- edges-entries-local:end -->/,
+            (_match, body: string) => {
+              const rows = body.replace(/^## 本层内容\s*/m, "").trim();
+              return `<!-- edges-entries-local:start -->\n## 本层内容\n\n${rows}\n<!-- edges-entries-local:end -->`;
+            },
           );
         if (
           basename(source) === AGENTS_FILE_NAME &&
@@ -550,9 +552,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
               ),
             );
             if (!text.includes(`](${rel})`)) {
-              const marker: string = text.includes("<!-- project-memory-local:end -->")
-                ? "<!-- project-memory-local:end -->"
-                : "<!-- edges-local:end -->";
+              const marker = "<!-- edges-local:end -->";
               if (!text.includes(marker))
                 throw new Error(`missing-local-adoption-block: ${source}`);
               text = text.replace(

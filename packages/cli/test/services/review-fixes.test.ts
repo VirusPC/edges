@@ -28,7 +28,7 @@ test('Memory derives an index edit from the snapshot loaded after an intervening
     if (target === file && !edited) { edited = true; fs.writeFileSync(file, original + '\nHuman edit survives.\n'); }
     return get.call(this, target, Model);
   });
-  await syncAgentsBlocks(root, '<!-- project-memory-local:start -->\n## Local\n<!-- project-memory-local:end -->');
+  await syncAgentsBlocks(root, '<!-- edges-local:start -->\n## Local\n<!-- edges-local:end -->');
   assert.match(fs.readFileSync(file, 'utf8'), /Human edit survives/);
 });
 
@@ -64,6 +64,6 @@ for (const exists of [false, true]) test(`Memory rejects ${exists ? 'edits' : 'c
     if (target === file && !changed) { changed = true; fs.writeFileSync(file, humanSource); }
     return node;
   });
-  await assert.rejects(() => syncAgentsBlocks(root, '<!-- project-memory-local:start -->\n## Replacement\n<!-- project-memory-local:end -->'), /changed|already exists/);
+  await assert.rejects(() => syncAgentsBlocks(root, '<!-- edges-local:start -->\n## Replacement\n<!-- edges-local:end -->'), /changed|already exists/);
   assert.equal(fs.readFileSync(file, 'utf8'), humanSource);
 });

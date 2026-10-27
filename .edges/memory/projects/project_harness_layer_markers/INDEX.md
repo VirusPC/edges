@@ -2,8 +2,8 @@
 name: project_harness_layer_markers
 description: >-
   改 AGENTS.md 层入口注释或章节标题时：标记为 edges / constraints / local /
-  descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；type 与 entries 仍用
-  project-memory-*。README 的 project-entries-* 见 grill_entries 条。
+  descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；类型身份用
+  edges-memory-type，组织清单用 edges-entries-*。不读 project-memory-type 与 project-entries-*。
 metadata:
   edges-title: 层入口表面命名改为 edges
   edges-type: project
@@ -21,7 +21,7 @@ AGENTS.md 层入口三章是 Project Harness（Git 项目上的系统二写法�
 - `本层系统维护信息`（取代本轮曾落地的 `本层组成`，以及更早的 `本层记忆`）
 - `下层系统维护信息`（取代 `下层节点` / `下层记忆索引` / `下层作用域`）
 
-类型入口的 `project-memory-type` / `project-memory-entries` 仍不改。README 组织清单另用 `project-entries-*` 与「本层内容 / 下层内容」，见 `project_grill_entries_markers_and_titles`。
+类型身份标记是 `edges-memory-type`。README 组织清单用 `edges-entries-*` 与「本层内容 / 下层内容」，见 `project_grill_entries_markers_and_titles`。不读 `project-memory-type`、`project-entries-*`、`project-memory-entries`。
 
 **Why:** 层标记改名那轮用「本层组成 / 下层节点」；节点模型 grill 后与 README「内容」对仗，用户改为「系统维护信息」。
 

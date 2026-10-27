@@ -43,7 +43,7 @@
 | 干净环境全局安装后 agent 能调用 | 不在本计划自动执行。无 TTY 的 `edges init` 按 vercel 默认会退出 1；本环境不写真实 agent 目录、测试不打网络。PR 里这一条保持未勾 |
 | `engines.node` `>=22.20.0`，README 同步 | Task 2、Task 5 |
 | `packages/skills/README.md` 与 `shared-extensions/skills/README.md` | Task 5 |
-| CLI README 与 `project-memory-init` 文案 | Task 5 |
+| CLI README 与 `edges-memory-init` 文案 | Task 5 |
 | ADR 0036 Status / Consequences 改为已实现 | Task 5。合入 main 由 PR 完成，本计划不合并 |
 
 ## 文件结构
@@ -57,7 +57,7 @@
 - Create: `packages/cli/test/register-skills-install-mock.ts` — 测试 preload。
 - Modify: `packages/cli/src/services/init/service.ts`、`modules.ts`、`commands/init.ts`、`commands/skills/init.ts`、`context.ts`、`program.ts`
 - Modify: `packages/cli/package.json`、根 `package.json` 的脚本（若搬家脚本要登记）、`.gitignore`
-- Modify: 文档与 `project-memory-init` 正文；任务卡只追加进展记录。
+- Modify: 文档与 `edges-memory-init` 正文；任务卡只追加进展记录。
 
 调用链：
 
@@ -226,7 +226,7 @@ spawn(process.execPath, [skillsBin, ...skillsAddArgs(dir, forwarded)], { stdio: 
 **Files:**
 
 - Modify: `packages/cli/README.md`、`README.md`、`README.md`、`packages/skills/README.md`、`shared-extensions/skills/README.md`、`CONTEXT.md`、`docs/adr/0036-edges-init-installs-bundled-skills.md`、`CHANGELOG.md`（边界变化的一条）
-- Modify: `packages/skills/project-memory-init/SKILL.md`、`references/LAYOUT.md`、`references/runtime.md`、`CHANGELOG.md`（版本记为 `4.0.0`，行为变化）
+- Modify: `packages/skills/edges-memory-init/SKILL.md`、`references/LAYOUT.md`、`references/runtime.md`、`CHANGELOG.md`（版本记为 `4.0.0`，行为变化）
 - Modify: 任务卡进展记录。不移动卡片目录。
 - Modify: `teaching/link-external-repo/NOTES.md` 里 `packages/skills/learn-repo` 的路径。
 
@@ -236,7 +236,7 @@ spawn(process.execPath, [skillsBin, ...skillsAddArgs(dir, forwarded)], { stdio: 
 - Node 要求写成 22.20.0 及以上（根 README 快速开始、CLI README）。
 - `安装技能` 术语补上薄封装、`--skill '*'`、`--` 转交。
 - ADR 0036 的 Status 改为已实现；Consequences 改为实现后的事实（包内 `packages/skills/`、依赖 `skills@1.7.2`、stdio 继承、无 TTY 时由 vercel skills 自己退出）。
-- `project-memory-init`：无参 `edges init` 现在包含 skills（类型索引 + 安装技能）。`edges skills init` 不只建索引。不建的仍是 user、tasks、evaluation、observation。版本记为 `4.0.0`。本计划不打 tag。
+- `edges-memory-init`：无参 `edges init` 现在包含 skills（类型索引 + 安装技能）。`edges skills init` 不只建索引。不建的仍是 user、tasks、evaluation、observation。版本记为 `4.0.0`。本计划不打 tag。
 - 任务卡追加一条进展：实现了什么、PR 链接。完成标准的勾选留在 PR 正文，不在卡上改成已完成状态目录。
 
 - [ ] **Step 1:** 改文档与 skill 正文。

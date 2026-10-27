@@ -15,7 +15,7 @@ metadata:
 
 CLI 读到不合约定的数据时（例如必需的文件缺失），直接报错，并在报错里写明是哪个目录缺哪个文件。不要为了让读、列表或更新跑通，自动补一个文件把数据问题盖过去。
 
-系统一叶子的创建是另一条路。`notes create`、`projects create`、`tasks create` 在组织清单 README 不存在时，先创建带 `project-entries-local` 的 README，再把叶子登记在那里。已有散文但没有 entries 标记时保留原文，只补标记。这些叶子不登记到任何 `AGENTS.md`。
+系统一叶子的创建是另一条路。`notes create`、`projects create`、`tasks create` 在组织清单 README 不存在时，先创建带 `edges-entries-local` 的 README，再把叶子登记在那里。已有散文但没有 entries 标记时保留原文，只补标记。这些叶子不登记到任何 `AGENTS.md`。
 
 **Why:**
 

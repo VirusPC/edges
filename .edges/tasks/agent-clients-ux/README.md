@@ -2,11 +2,11 @@
 
 客户端/插件/外设与本地 UX 实验。
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
 - [评估Agent\-Plugins客户端支持](<backlog/2026-09-09--%E8%AF%84%E4%BC%B0Agent-Plugins%E5%AE%A2%E6%88%B7%E7%AB%AF%E6%94%AF%E6%8C%81/INDEX.md>) — 评估给哪些 agent 客户端提供 / 补齐 Agent Plugins 支持更合适
-- [需要普通记笔记skill](<backlog/2026-09-09--%E9%9C%80%E8%A6%81%E6%99%AE%E9%80%9A%E8%AE%B0%E7%AC%94%E8%AE%B0skill/INDEX.md>) — 除 conversation\-to\-notes 外，还需要一个面向日常记事的普通笔记 skill
+- [需要普通记笔记skill](<backlog/2026-09-09--%E9%9C%80%E8%A6%81%E6%99%AE%E9%80%9A%E8%AE%B0%E7%AC%94%E8%AE%B0skill/INDEX.md>) — 除 edges\-conversation\-to\-notes 外，还需要一个面向日常记事的普通笔记 skill
 - [data\_view\_separation\_local\_html](<backlog/2026-09-11--%E6%95%B0%E6%8D%AE%E4%B8%8E%E8%A7%86%E5%9B%BE%E5%88%86%E7%A6%BB%E6%9C%AC%E5%9C%B0HTML/INDEX.md>) — 从复杂系统角度，可能需要数据与视图分离，并提供本地 HTML
 - [local\_memory\_visualization\_ui](<backlog/2026-09-11--%E6%9C%AC%E5%9C%B0memory%E5%8F%AF%E8%A7%86%E5%8C%96%E7%95%8C%E9%9D%A2/INDEX.md>) — 提供本地 memory 可视化界面；可能在 init 时本地一并初始化
 - [input\_system\_rokid\_glasses](<backlog/2026-09-11--%E8%BE%93%E5%85%A5%E7%B3%BB%E7%BB%9F%E6%8E%A5%E5%85%A5Rokid%E7%9C%BC%E9%95%9C/INDEX.md>) — 输入系统接入 Rokid 眼镜
@@ -35,4 +35,4 @@
 - [minigtr\_codex\_cli\_remote\_control](<done/2026-09-25--minigtr-%E9%AA%8C%E8%AF%81-Codex-CLI-remote-control/INDEX.md>) — 结论：minigtr Ubuntu 上 Codex CLI remote\-control 可用手机 ChatGPT 配对（codex\-cli 0.157.0；需先 device\-auth 登录）。
 - [github\_artifacts\_preview](<backlog/2026-10-19--Github-Artifacts-Preview/INDEX.md>) — 用 GitHub Pages 提供常开预览 URL，替代依赖自建服务端的 Artifacts Publish；浏览器看页，Grok 里继续决策。候选含 CF Pages 直传与 Tunnel+Nginx。
 - [edges\_new\_user\_onboarding\_validation](<backlog/2026-10-27--%E9%AA%8C%E8%AF%81-Edges-%E6%96%B0%E7%94%A8%E6%88%B7%E6%8E%A5%E5%85%A5%E4%B8%8E%E9%A6%96%E6%AC%A1%E4%BD%BF%E7%94%A8/INDEX.md>) — 从外部用户起点验证安装、Skill 发现和首次真实任务，检查梳理后的接入流程是否可用。
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->

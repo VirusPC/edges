@@ -19,8 +19,6 @@ import { parseDocument } from '../../utils/markdown/document.js';
 import * as fs from "node:fs";
 import { basename, dirname, join, parse } from "node:path";
 import {
-  ENTRIES_START,
-  ENTRIES_END,
   ENTRIES_LOCAL_START,
   ENTRIES_LOCAL_END,
   indexFiles,
@@ -191,21 +189,17 @@ export function buildEntryFields(
   fields.updatedAt = nowTimestamp();
   return fields;
 }
-/** README type indexes use ReadmeNode; a not-yet-migrated AGENTS.md index keeps its legacy model. */
+/** Type indexes are README files. */
 export const typeIndexNode = (file: string): AgentsNode | ReadmeNode =>
   basename(file) === ENTRY_NAMES.readme ? new ReadmeNode(file) : new AgentsNode(file);
-/** An existing legacy AGENTS.md index keeps its dialect. A missing index is created as README. */
-export function typeIndexTemplate(file: string, name: string): string {
-  const template = readIndexTemplate(typeIndexTemplateName(name), name, name);
-  if (basename(file) === ENTRY_NAMES.readme) return template;
-  return template
-    .replace(`${ENTRIES_LOCAL_START}\n## ${ENTRIES_SECTIONS.localChildren.heading}\n\n`, `${ENTRIES_START}\n`)
-    .replace(ENTRIES_LOCAL_END, ENTRIES_END);
+/** Missing indexes are created as README with edges-entries markers. */
+export function typeIndexTemplate(_file: string, name: string): string {
+  return readIndexTemplate(typeIndexTemplateName(name), name, name);
 }
 export function buildEntryIndex(
   target: string,
   name: string,
-  legacy = false,
+  _legacy = false,
 ): string {
   const base = dirname(typeIndexPath(target, name));
   const files = listTypeFiles(
@@ -228,7 +222,6 @@ export function buildEntryIndex(
     });
   });
   const lines = entries.join("\n") || "- 暂无条目。";
-  if (legacy) return [ENTRIES_START, lines, ENTRIES_END].join("\n");
   return [
     ENTRIES_LOCAL_START,
     `## ${ENTRIES_SECTIONS.localChildren.heading}`,

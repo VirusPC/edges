@@ -28,10 +28,10 @@ ${descendants}
 function entriesReadme(title: string): string {
   return `# ${title}
 
-<!-- project-entries-local:start -->
+<!-- edges-entries-local:start -->
 ## 本层内容
 
-<!-- project-entries-local:end -->
+<!-- edges-entries-local:end -->
 `;
 }
 
@@ -171,11 +171,11 @@ test("skills create get update delete and list write .edges/skills/managed", asy
   const root = scope(t);
   put(root, "AGENTS.md", agents("- [managed](.edges/skills/managed/README.md) — managed skills"));
   put(root, ".edges/skills/managed/README.md", [
-    "<!-- project-memory-type:start -->",
+    "<!-- edges-memory-type:start -->",
     "name: managed",
     "module: skills",
     "writable: true",
-    "<!-- project-memory-type:end -->",
+    "<!-- edges-memory-type:end -->",
     "",
     entriesReadme("Skills"),
   ].join("\n"));
@@ -220,20 +220,20 @@ test("skill get by a repeated name is ambiguous", async (t) => {
   put(root, "AGENTS.md", agents("- [managed](.edges/skills/managed/README.md) — managed skills"));
   const skill = "---\nname: demo-skill\ndescription: One\n---\nBody\n";
   put(root, ".edges/skills/managed/README.md", [
-    "<!-- project-memory-type:start -->",
+    "<!-- edges-memory-type:start -->",
     "name: managed",
     "module: skills",
     "writable: true",
-    "<!-- project-memory-type:end -->",
+    "<!-- edges-memory-type:end -->",
     "",
     "# Skills",
     "",
-    "<!-- project-entries-local:start -->",
+    "<!-- edges-entries-local:start -->",
     "## 本层内容",
     "",
     "- [demo-skill](demo-skill/SKILL.md) — One",
     "- [other](other/SKILL.md) — One",
-    "<!-- project-entries-local:end -->",
+    "<!-- edges-entries-local:end -->",
     "",
   ].join("\n"));
   put(root, ".edges/skills/managed/demo-skill/SKILL.md", skill);

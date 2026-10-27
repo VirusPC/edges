@@ -24,9 +24,9 @@
 | 现在 | 改成 | 对应 |
 | --- | --- | --- |
 | `project-memory` | `edges` | 层入口受管外层 |
-| `project-memory-important` | `edges-constraints` | 本层硬约束 |
-| `project-memory-local` | `edges-local` | 本层组成 |
-| `project-memory-children` | `edges-descendants` | 下层节点 |
+| `edges-constraints` | `edges-constraints` | 本层硬约束 |
+| `edges-local` | `edges-local` | 本层组成 |
+| `edges-descendants` | `edges-descendants` | 下层节点 |
 
 标题：
 
@@ -38,11 +38,11 @@
 
 ## 本轮不动
 
-- `project-memory-type` / `project-memory-entries`：类型入口身份与条目清单。几乎只给 doctor / remember 读写，没有层入口那种名实不符。需要时另做机械替换。
+- `edges-memory-type` / `edges-entries-local`：类型入口身份与条目清单。几乎只给 doctor / remember 读写，没有层入口那种名实不符。需要时另做机械替换。
 - `task-projects` 嵌套标记。
 - `.edges/` 路径、Memory Type 名称、skill 名 `project-memory-*`、`edges memory` 命令名。
 - 组成关系、parent / harnessPath、遍历默认只走 localChildren。
-- 硬约束种子点名 `$project-memory-ask` / `$project-memory-remember`；只改包裹它的标记和章节标题。
+- 硬约束种子点名 `$edges-memory-ask` / `$edges-memory-remember`；只改包裹它的标记和章节标题。
 
 实现约束：`agents/blocks.ts` 今天用同一个 `project-memory` 工厂生成外层、三章、type、entries。实施时必须拆开前缀，不能把 type / entries 一并改成 `edges-*`。
 
@@ -73,8 +73,8 @@
 
 - 新建或刷新的层入口只含 `edges` 四条标记和三章新标题。
 - 未迁移的旧层入口仍能被 parse；写回后变为新标记。
-- 类型入口的 `project-memory-type` / `entries` 字节在本轮迁移中不变。
-- `edges memory` 的 init / remember / doctor 在新标记下仍能刷新本层索引；类型入口刷新仍写 `project-memory-entries`。
+- 类型入口的 `edges-memory-type` / `entries` 字节在本轮迁移中不变。
+- `edges memory` 的 init / remember / doctor 在新标记下仍能刷新本层索引；类型入口刷新仍写 `edges-entries-local`。
 - CLI 测试覆盖：旧标记解析、新标记序列化、type/entries 不受层前缀工厂牵连。
 
 ## 非目标

@@ -82,7 +82,7 @@ Verified against `origin/main` after ADR 0021 (`af7986c`). Command tree: `packag
 - `.gitignore` — `knowledge/tasks/_site/`
 - `CHANGELOG.md` `[Unreleased]` — module **任务看板与项目** (human Chinese + real command names; link ADR 0021 only as a reader pointer if needed — do not dump the ADR)
 - `CONTEXT.md` — `edges tasks（CLI）` drop “约定中的” from `list --group-by project` once the flag exists
-- `.memory/projects/project_tasks_persistent_board_site.md` — via `$project-memory-remember` after implementation lands (How-to: generate path + nginx snippet). **Not** in the plan-only PR
+- `.memory/projects/project_tasks_persistent_board_site.md` — via `$edges-memory-remember` after implementation lands (How-to: generate path + nginx snippet). **Not** in the plan-only PR
 
 **Do not create/commit**
 
@@ -594,7 +594,7 @@ Root changelog (human Chinese + real command names; module **任务看板与项�
 
 ### Task 6: Memory pointer + verify (implementation PR only)
 
-- After code lands, update `.memory/projects/project_tasks_persistent_board_site.md` via `$project-memory-remember` (same slug): generate path, nginx snippet path, “Action generates after pull; setup-nginx is one-time”.
+- After code lands, update `.memory/projects/project_tasks_persistent_board_site.md` via `$edges-memory-remember` (same slug): generate path, nginx snippet path, “Action generates after pull; setup-nginx is one-time”.
 - Run `pnpm --filter edges-cli test`.
 - Do **not** change Task board status.
 - Leave the implementation PR open; do not merge unless the human asks.

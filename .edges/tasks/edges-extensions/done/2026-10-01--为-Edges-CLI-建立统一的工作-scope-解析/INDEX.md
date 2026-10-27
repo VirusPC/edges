@@ -28,7 +28,7 @@ CLI 已在操作前统一解析工作 scope，区分目标作用域、Git 仓根
 
 本任务承接“以递归记忆模型重构 Edges 目录架构”。scope 的表示方式、显式参数与自动推断的优先级、与 `EDGES_REPO` 的兼容、适用命令范围，以及上下文规则的落实方式，留待后续 grill-with-docs 细化；完成标准一并补充。
 
-关联：[递归目录架构任务](../../../project-memory/done/2026-09-12--%E6%95%B4%E4%BB%93%E4%B8%8Ememory%E5%90%8C%E6%9E%84%E9%80%92%E5%BD%92%E8%9E%8D%E5%90%88/INDEX.md)、[CLI 配置选址](../../../../../packages/cli/src/utils/config.ts)、[Project Memory 选址](../../../../../packages/skills/project-memory-init/scripts/lib/paths.py)。
+关联：[递归目录架构任务](../../../project-memory/done/2026-09-12--%E6%95%B4%E4%BB%93%E4%B8%8Ememory%E5%90%8C%E6%9E%84%E9%80%92%E5%BD%92%E8%9E%8D%E5%90%88/INDEX.md)、[CLI 配置选址](../../../../../packages/cli/src/utils/config.ts)、[Project Memory 选址](../../../../../packages/skills/edges-memory-init/scripts/lib/paths.py)。
 
 **目标：**
 
