@@ -4,7 +4,7 @@
 
 Python 模块仍叫 `experiment_webhook`。那是 unit 和 `start --dev` 拉起的进程，不是第二个包名。
 
-第一条 runner 是 harness memory 消融：`registry.json` 把 `harness-memory-ablation/v1` 指到 `experiment_webhook.runners.edges_memory_ablation`。适配层把 Langfuse Dataset item 收成 `run_experiment` 已经接受的题，不改 runner 本身。本地 case 文件和 Dataset item 不是同一种形状。
+第一条 runner 是 harness memory 消融：`registry.json` 把 `harness-memory-ablation/v1` 指到 `experiment_webhook.runners.harness_memory_ablation`。适配层把 Langfuse Dataset item 收成 `run_experiment` 已经接受的题，不改 runner 本身。本地 case 文件和 Dataset item 不是同一种形状。
 
 取舍记在 [DECISIONS.md](DECISIONS.md)。真从 Langfuse UI 点 Run 的步骤在 [scripts/REAL-CUSTOM-EXPERIMENT.md](scripts/REAL-CUSTOM-EXPERIMENT.md)。
 

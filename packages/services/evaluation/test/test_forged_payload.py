@@ -73,7 +73,7 @@ class _Response:
 
 class ForgedPayloadTests(unittest.TestCase):
     def test_signed_post_adapts_items_and_writes_local_and_langfuse_results(self) -> None:
-        import experiment_webhook.runners.edges_memory_ablation as adapter
+        import experiment_webhook.runners.harness_memory_ablation as adapter
 
         entered = threading.Event()
         release = threading.Event()

@@ -75,9 +75,9 @@ class RoutingTests(unittest.TestCase):
         mapping = load_registry(ROOT / "registry.json")
         self.assertEqual(
             mapping["harness-memory-ablation/v1"],
-            "experiment_webhook.runners.edges_memory_ablation",
+            "experiment_webhook.runners.harness_memory_ablation",
         )
-        import experiment_webhook.runners.edges_memory_ablation as runner
+        import experiment_webhook.runners.harness_memory_ablation as runner
 
         self.assertTrue(callable(runner.run))
         self.assertTrue(callable(runner.adapt_items))
