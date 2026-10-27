@@ -2,10 +2,10 @@
 metadata:
   edges-type: task
   edges-task-project: edges-extensions
-  edges-updated-at: '2026-10-26T22:53:55.463Z'
+  edges-updated-at: '2026-10-27T01:37:48.820Z'
   edges-title: 将 .harness 目录更名为 .edges
   edges-tasks-status: backlog
-  edges-task-priority: none
+  edges-task-priority: urgent
 name: 将_harness_目录更名为_edges
 description: >-
   目录名从通用词 .harness 改为品牌名 .edges，统一
