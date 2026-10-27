@@ -270,7 +270,7 @@ test("import leaves source and parent index untouched when preflight validation 
     "source/SKILL.md",
     "---\nname: fixture\ndescription: Test fixture\n---\nsource",
   );
-  write("source/.harness/AGENTS.md", index("- [Missing](missing/index.md)"));
+  write("source/.edges/AGENTS.md", index("- [Missing](missing/index.md)"));
   const before = fs.readFileSync(file("AGENTS.md"), "utf8");
   await assert.rejects(
     service.import(file("source/SKILL.md"), file("new/SKILL.md"), { indexGroup: "local" }),
@@ -634,7 +634,7 @@ test('registered collection skips an optional harness removed after its owner wa
   write('owner/AGENTS.md', index());
   write('target/index.md', 'target');
   const owner = (await service.get(file('owner/index.md')))!;
-  assert.equal(owner.harness?.id, file('owner/AGENTS.md'));
+  assert.equal(owner.edges?.id, file('owner/AGENTS.md'));
   fs.unlinkSync(file('owner/AGENTS.md'));
   const target = (await service.get(file('target/index.md')))!;
   await service.move(target, file('moved/index.md'));

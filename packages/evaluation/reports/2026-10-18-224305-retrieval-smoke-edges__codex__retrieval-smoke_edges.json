@@ -26,10 +26,10 @@
       "set_recall": 1.0,
       "predicted": [
         "docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md",
-        ".harness/evaluation/reports/2026-09-16-locomo-smoke-kimi-for-coding.md",
-        ".harness/tasks/_default/done/2026-09-16--LoCoMo评测流水线冒烟/INDEX.md",
+        ".edges/evaluation/reports/2026-09-16-locomo-smoke-kimi-for-coding.md",
+        ".edges/tasks/_default/done/2026-09-16--LoCoMo评测流水线冒烟/INDEX.md",
         "CONTEXT.md",
-        ".harness/evaluation/README.md"
+        ".edges/evaluation/README.md"
       ],
       "score": 1.0,
       "grade": "good",
@@ -114,7 +114,7 @@
       "predicted": [
         "CONTEXT.md",
         "docs/adr/0029-recursive-system-two-entries.md",
-        ".harness/memory/projects/project_recursive_system_two_entry/INDEX.md",
+        ".edges/memory/projects/project_recursive_system_two_entry/INDEX.md",
         "docs/superpowers/specs/2026-10-06-recursive-system-two-entries-design.md",
         "docs/adr/0035-harness-readme-as-layer-material-index.md"
       ],
@@ -168,11 +168,11 @@
       "set_precision": 0.0,
       "set_recall": 0.0,
       "predicted": [
-        ".harness/evaluation/README.md",
-        ".harness/evaluation/cases/locomo-smoke/README.md",
-        ".harness/evaluation/third_party/README.md",
+        ".edges/evaluation/README.md",
+        ".edges/evaluation/cases/locomo-smoke/README.md",
+        ".edges/evaluation/third_party/README.md",
         "docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md",
-        ".harness/evaluation/reports/2026-09-16-locomo-smoke-kimi-for-coding.md"
+        ".edges/evaluation/reports/2026-09-16-locomo-smoke-kimi-for-coding.md"
       ],
       "score": 0.0,
       "grade": "bad",

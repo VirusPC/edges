@@ -66,12 +66,12 @@ flowchart TB
 ```mermaid
 flowchart TB
   VR["SuperAgentsNode<br/>虚拟超节点 · --super"] -.->|挂| RR
-  Scope["--scope → AGENTS.md<br/>type=agents"] --> Maint["本层系统维护信息<br/>project-harness-local"]
+  Scope["--scope → AGENTS.md<br/>type=agents"] --> Maint["本层系统维护信息<br/>edges-local"]
   Scope --> DownA["下层系统维护信息<br/>→ 其它 AGENTS.md"]
   Scope -.同目录.-> RR["README.md<br/>type=readme"]
 
-  Maint --> TypeIdx[".harness/memory/*/README.md<br/>类型入口"]
-  Maint --> HTasks[".harness/tasks/…"]
+  Maint --> TypeIdx[".edges/memory/*/README.md<br/>类型入口"]
+  Maint --> HTasks[".edges/tasks/…"]
   TypeIdx -->|"project-entries-local<br/>本层内容"| MemLeaf["memory 条目 INDEX.md"]
 
   RR -->|"本层内容"| Tasks["tasks/… 本层入口"]
@@ -129,7 +129,7 @@ flowchart LR
 
 ## Global Constraints
 
-- AGENTS 标记仍 `project-harness-*`；标题 **本层硬约束 / 本层系统维护信息 / 下层系统维护信息**。旧标题 `本层组成`/`下层节点`/更早别名只读兼容。
+- AGENTS 标记仍 `edges-*`；标题 **本层硬约束 / 本层系统维护信息 / 下层系统维护信息**。旧标题 `本层组成`/`下层节点`/更早别名只读兼容。
 - README 标记 **`project-entries-local` / `project-entries-descendants`**；标题 **本层内容 / 下层内容**。
 - 下层同合同：AGENTS descendants → AGENTS；README descendants → README。
 - `type` 目标：`agents|readme|task|memory|note|skill|text`。旧 `internal`/`leaf` 读兼容；写不发 `internal`。
@@ -138,7 +138,7 @@ flowchart LR
 - 虚拟超节点须显式 **`--super`**；默认取当前 scope 的 `AGENTS.md`；缺 AGENTS 不自动合成超节点。
 - traverse **默认**走全部 `children`（local∪descendants）；本层-only 用显式 `localOnly: true`；`includeHarness` 仍默认 false（Q20）。
 - 类层次：Wave B 各节点直继 BaseNode；本计划默认 **删除** `LeafNode`/`isLeaf` 持久语义，`InternalNode` 先改 `type=agents` 再改名为 `AgentsNode`（可短暂 `export { AgentsNode as InternalNode }`）。
-- 不改：`.harness/` 目录名、`edges memory` 命令名、skill 目录名 `project-memory-*`、posts 正文（仅 INDEX 改名）。
+- 不改：`.edges/` 目录名、`edges memory` 命令名、skill 目录名 `project-memory-*`、posts 正文（仅 INDEX 改名）。
 - 批量迁移：可预览、冲突检查、幂等；禁止逐文件手改。
 - 测试：`pnpm --filter edges-cli test`（或单文件 `node --test --import tsx …`）。Commit：`type: subject` + `Co-authored-by: Cursor Agent <cursoragent@cursor.com>`。
 
@@ -195,11 +195,11 @@ Expected: FAIL on heading equality（仍是本层组成/下层节点）。
 
 ```ts
 export const INTERNAL_SECTIONS = {
-  constraints: { heading: "本层硬约束", marker: "project-harness-constraints" },
-  localChildren: { heading: "本层系统维护信息", marker: "project-harness-local" },
+  constraints: { heading: "本层硬约束", marker: "edges-constraints" },
+  localChildren: { heading: "本层系统维护信息", marker: "edges-local" },
   descendantChildren: {
     heading: "下层系统维护信息",
-    marker: "project-harness-descendants",
+    marker: "edges-descendants",
   },
 } as const;
 ```
@@ -364,7 +364,7 @@ test("localOnly skips descendant group", async () => {
 });
 
 // 双文件夹具（硬断言）
-// scope/AGENTS.md local → .harness/memory/projects/README.md
+// scope/AGENTS.md local → .edges/memory/projects/README.md
 // scope/README.md local → tasks/README.md
 // 默认 traverse(scopeAgents) 应经并边到达 tasks/README.md
 // assert: scopeAgents.localChildren / descendantChildren 都不含 tasks
@@ -415,7 +415,7 @@ EOF
 - Test: 现有 `test/memory/*.test.ts` 中断言 `AGENTS.md` 类型索引的用例
 
 **Interfaces:**
-- Produces: `typeIndexRelpath("project") === ".harness/memory/projects/README.md"`
+- Produces: `typeIndexRelpath("project") === ".edges/memory/projects/README.md"`
 - 读：若 README 不存在但旧 `AGENTS.md` 存在，discover/load 仍可用（兼容）
 
 - [ ] **Step 1: 写失败测试**
@@ -425,7 +425,7 @@ import { typeIndexRelpath } from "../../src/services/memory/paths.js";
 test("type index path is README.md", () => {
   assert.equal(
     typeIndexRelpath("project"),
-    ".harness/memory/projects/README.md",
+    ".edges/memory/projects/README.md",
   );
 });
 ```
@@ -455,24 +455,24 @@ EOF
 
 **Files:**
 - Create: `scripts/migrations/migrate-type-index-to-readme.mts`（或 CLI 包内 scripts，与 `migrate:project-harness-markers` 同注册方式）
-- Modify: 根与各层 `.harness/memory/*/AGENTS.md`、`.harness/skills/*/AGENTS.md` → README
-- Modify: **Task Project 等仅列系统一孩子、无真实系统二材料的目录**（如 `.harness/tasks/<project>/AGENTS.md`、`tasks/<project>/AGENTS.md` 若只是任务列表）：组成迁到同目录 `README.md` + `project-entries-*`；若该目录未用户 init 为系统入口，删除或不再维持伪 AGENTS（与 Q10/Q18 一致——有列表 ≠ 系统入口）
+- Modify: 根与各层 `.edges/memory/*/AGENTS.md`、`.edges/skills/*/AGENTS.md` → README
+- Modify: **Task Project 等仅列系统一孩子、无真实系统二材料的目录**（如 `.edges/tasks/<project>/AGENTS.md`、`tasks/<project>/AGENTS.md` 若只是任务列表）：组成迁到同目录 `README.md` + `project-entries-*`；若该目录未用户 init 为系统入口，删除或不再维持伪 AGENTS（与 Q10/Q18 一致——有列表 ≠ 系统入口）
 - 更新所有指向旧路径的链接；`package.json` script 入口
 
 **Interfaces:**
-- CLI: `pnpm migrate:type-index-readme -- --root <abs> [--apply]`（可拆第二个脚本 `migrate:org-lists-to-readme`，但须同一验收：系统一列表不在 `project-harness-local`）
+- CLI: `pnpm migrate:type-index-readme -- --root <abs> [--apply]`（可拆第二个脚本 `migrate:org-lists-to-readme`，但须同一验收：系统一列表不在 `edges-local`）
 - dry-run 默认；冲突报错退出
 
 - [ ] **Step 1: 脚本骨架（preview）**
 
-**A. 类型索引：** `.harness/memory/*/`、`.harness/skills/*/` 下含 `project-memory-type` / `project-memory-entries` 的 `AGENTS.md` →
+**A. 类型索引：** `.edges/memory/*/`、`.edges/skills/*/` 下含 `project-memory-type` / `project-memory-entries` 的 `AGENTS.md` →
 
 1. entries → `project-entries-*`，标题「本层内容」（有下层则「下层内容」）
 2. 保留 `project-memory-type` 头
 3. 写入 `README.md`，apply 时删旧 AGENTS
 4. 更新层 AGENTS 链接
 
-**B. 组织清单误用 AGENTS：** dry-run 列出「`project-harness-local` 主要是 Task/内容叶子、几乎无 `.harness` 系统二材料」的目录，预览迁 README；**不**自动剥掉用户已 init、含硬约束/维护模块的真系统入口。
+**B. 组织清单误用 AGENTS：** dry-run 列出「`edges-local` 主要是 Task/内容叶子、几乎无 `.edges` 系统二材料」的目录，预览迁 README；**不**自动剥掉用户已 init、含硬约束/维护模块的真系统入口。
 
 复用 traverse；不要手扫无关 md。
 
@@ -528,7 +528,7 @@ EOF
 - Create: `scripts/migrations/migrate-index-to-INDEX.mts`
 - Modify: `layout.ts` — `identifyNodeType` 认 `INDEX.md` 与 `index.md`；新建默认写 `INDEX.md`
 - Modify: note/task/memory 创建路径
-- 关联卡：`.harness/tasks/project-memory/backlog/2026-10-06--脚本indexmd-迁-INDEXmd含-posts/`
+- 关联卡：`.edges/tasks/project-memory/backlog/2026-10-06--脚本indexmd-迁-INDEXmd含-posts/`
 
 **Interfaces:**
 - `pnpm migrate:index-case -- --root <abs> [--apply]`
@@ -645,7 +645,7 @@ EOF
 ### Task 11: project harness init skill 演进（跟卡）
 
 **Files:**
-- 卡：`.harness/tasks/project-memory/backlog/2026-10-06--project-harness-init-skill/`
+- 卡：`.edges/tasks/project-memory/backlog/2026-10-06--project-harness-init-skill/`
 - Modify: skill 文案与 init 行为对齐「任意目录系统入口」；命令名可仍 `edges memory init`（Global Constraints：不强制改 bin 名）
 - 输出系统入口模板用新标题；可选同目录不自动造 README（组织清单由用户/迁移另建）
 
@@ -700,12 +700,12 @@ EOF
 
 ## 验收（实施后，对齐 spec）
 
-- 新写 AGENTS 只有系统维护信息标题与 `project-harness-*`；README 只有 `project-entries-*` / 本层·下层内容
+- 新写 AGENTS 只有系统维护信息标题与 `edges-*`；README 只有 `project-entries-*` / 本层·下层内容
 - 旧 AGENTS 标题仍能 parse；写回只发新标题
 - 默认 traverse 进入 descendants；`localOnly` 不进入
 - 同目录双文件：系统一孩子不在 AGENTS 组成字段里，却能经并边 traverse 到；不扫盘
 - README 下层组目标均为其它 `README.md`；AGENTS 下层组目标均为其它 `AGENTS.md`
-- 类型索引与 Task Project 任务列表在 README，不在 `project-harness-local`
+- 类型索引与 Task Project 任务列表在 README，不在 `edges-local`
 - `index.md`→`INDEX.md` 幂等；posts 仅改名
 - 无 `--super` 且无 AGENTS → 失败；有 `--super` → `SuperAgentsNode` 经根 README 下钻且不落盘
 

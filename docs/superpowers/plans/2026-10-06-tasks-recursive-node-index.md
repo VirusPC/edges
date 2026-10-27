@@ -10,13 +10,13 @@
 
 **Tech Stack:** TypeScript、现有 NodeService / InternalNode / TaskNode、现有 Markdown codec、Node fs、node:test；不新增包或解析库。
 
-**Spec:** [目录节点模型](../specs/2026-10-05-directory-node-model.md)、[README 系统实现](../../../README.md#系统实现)，以及用户本轮确认：“TaskNode 代表单条任务”“follow 规范递归索引”“根执行默认读取 .harness/tasks”“不能影响查看全仓 tasks”。
+**Spec:** [目录节点模型](../specs/2026-10-05-directory-node-model.md)、[README 系统实现](../../../README.md#系统实现)，以及用户本轮确认：“TaskNode 代表单条任务”“follow 规范递归索引”“根执行默认读取 .edges/tasks”“不能影响查看全仓 tasks”。
 
 ## 已确认的组织方式
 
 ```text
 AGENTS.md                                  根作用域入口
-  ├─ .harness/tasks/AGENTS.md               InternalNode：维护任务板
+  ├─ .edges/tasks/AGENTS.md               InternalNode：维护任务板
   │    └─ <project>/AGENTS.md               InternalNode：项目分组
   │         ├─ backlog/<task-a>/index.md    TaskNode：单条任务
   │         └─ done/<task-b>/index.md       TaskNode：单条任务
@@ -46,7 +46,7 @@ AGENTS.md                                  根作用域入口
 
 - 沿用 `NodeReference { id, name?, description? }`、`localChildren / descendantChildren` 和独立 harness 关系，不新增第二套索引格式。
 - 默认遍历 localChildren，不跟随 harness；includeDescendants 与 includeHarness 分别显式启用下层组成关系与维护关系。全仓视图开启两者，递归汇总各层任务，包括维护系统自身的维护任务；默认查询行为不变。
-- `.harness/tasks` 属于当前作用域的本层维护内容，不因物理路径较深就自动变成下层。
+- `.edges/tasks` 属于当前作用域的本层维护内容，不因物理路径较深就自动变成下层。
 - 普通任务板查询不进入任务板或单条任务自身的维护系统；全仓聚合显式跨维护层级。必须同时验证两种模式，不能只看目录名或深度。
 - 索引解析、修改、序列化复用 InternalNode 及现有 codec；不在 Tasks 层手写第二套 Markdown/XML 正则解析器。
 - 只在独立 worktree 修改；不读取私有 journal、用户记忆，不提交 Obsidian workspace，不部署、不合并。
@@ -104,7 +104,7 @@ AGENTS.md                                  根作用域入口
 // root 是测试创建的临时作用域；显式 purpose 保证测试目标不随默认值变化。
 await run(["--scope", root, "tasks", "--purpose", "maintenance",
   "create", "--title", "Indexed task"], { env: {} });
-const board = path.join(root, ".harness/tasks");
+const board = path.join(root, ".edges/tasks");
 const nodes = await new NodeService({ managedRoot: board }).list(board);
 assert.equal(nodes.filter(node => node instanceof TaskNode).length, 1);
 ```
@@ -215,10 +215,10 @@ const list = await tasks.toArray().map(task => task.id).value();
 2026-10-06 用户确认：全仓总览包含仓库内各层领域任务与维护任务，也包含维护系统自身更深层的维护任务。普通任务板查询仍默认不跨 harness；全仓聚合显式请求跨维护层级，不能以默认边界缩小覆盖范围。
 
 ```text
-.harness/tasks/                                  根维护任务
-notes/example/.harness/tasks/                    笔记维护任务
-packages/cli/.harness/tasks/                   CLI 维护任务
-.harness/tasks/project/task/.harness/tasks/      单条任务自身的维护任务
+.edges/tasks/                                  根维护任务
+notes/example/.edges/tasks/                    笔记维护任务
+packages/cli/.edges/tasks/                   CLI 维护任务
+.edges/tasks/project/task/.edges/tasks/      单条任务自身的维护任务
 ```
 
 以上是范围示例，不代表这些路径都已存在；只要按索引及目录合同可发现，全仓视图均应纳入。包括非 Task 节点的维护空间；不能因为其正文不匹配 task 类型，就停止发现其维护任务。
@@ -377,7 +377,7 @@ pnpm migrate:task-indexes --root /absolute/worktree --apply --report /tmp/task-i
 
 ```ts
 assert.equal(taskBoardLocation(scope).purpose, "maintenance");
-assert.match(created.path, /^\.harness\/tasks\//);
+assert.match(created.path, /^\.edges\/tasks\//);
 assert.deepEqual(defaultListed.map(task => task.title), ["maintenance"]);
 assert.deepEqual(domainListed.map(task => task.title), ["domain"]);
 ```
@@ -394,7 +394,7 @@ assert.deepEqual(domainListed.map(task => task.title), ["domain"]);
 ## 最终验收
 
 1. 单条任务仍是 TaskNode；项目和任务板仍是 InternalNode，没有新增组织节点类型或索引协议。
-2. 根和子作用域默认查询各自 `.harness/tasks/`；领域板需要显式选择。list --all-scopes 本轮交付，默认包含全仓两种用途及所有维护层级，身份集合与看板一致。
+2. 根和子作用域默认查询各自 `.edges/tasks/`；领域板需要显式选择。list --all-scopes 本轮交付，默认包含全仓两种用途及所有维护层级，身份集合与看板一致。
 3. 每条现有任务可沿已登记的 AGENTS 链从对应板入口找到；正常查询仅使用 NodeService。
 4. 新建、状态移动、项目移动及项目描述更新后，索引与入口一致；普通查询不进入任务自己的 harness，全仓显式模式递归包含其中任务。
 5. 全仓结果按来源身份与迁移前任务集合精确相等；fixture 验证节点维护任务及更深层维护任务均被纳入，重复引用不重复输出。不存在遗漏、同名覆盖或额外物理扫描捡漏。

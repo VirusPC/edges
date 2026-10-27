@@ -1,6 +1,6 @@
 import path from "node:path";
 import { existsSync } from "node:fs";
-import { materialHarnessRoot } from "../../domain/config/harness-materials.js";
+import { materialHarnessRoot } from "../../domain/config/edges-materials.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { pathHitsExcludedModule } from "../../domain/config/exclude.js";
 import { RoutineNode } from "../../domain/models/routines/routine-node.js";
@@ -49,7 +49,7 @@ async function listedRoutines(env: NodeJS.ProcessEnv, reach: RoutineReach): Prom
     throw new Error(`Missing routine organization entry: ${org}`);
   }
   // Routine --super selects the flat module that create --super writes. Shared
-  // SuperAgents traversal intentionally prefers .harness/README.md; leave that
+  // SuperAgents traversal intentionally prefers .edges/README.md; leave that
   // behavior unchanged and select this module index explicitly. --all adds it
   // to the shared forest, with identity deduplication below.
   const queryOptions = { types: ["routine", "readme", "agents"], exclude: reach.exclude, scopeDir: scope };

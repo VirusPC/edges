@@ -36,6 +36,6 @@ test("readme round-trips and creates entries sections", () => {
     .update({ localChildren: [{ id: "/repo/a/README.md", name: "A" }] })
     .serialize();
   assert.match(out, /project-entries-local:start -->\n## 本层内容/);
-  assert.doesNotMatch(out, /project-harness/);
+  assert.doesNotMatch(out, /edges/);
   assert.equal(fresh.children.length, 0);
 });

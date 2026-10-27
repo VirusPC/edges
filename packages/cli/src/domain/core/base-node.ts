@@ -63,7 +63,7 @@ export class BaseNode<
     return nodeRelations(this).parent;
   }
   get harness(): Readonly<NodeReference> | undefined {
-    return nodeRelations(this).harness;
+    return nodeRelations(this).edges;
   }
   // #endregion
 

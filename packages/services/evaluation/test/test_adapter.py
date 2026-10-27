@@ -13,7 +13,7 @@ from pathlib import Path
 import support  # noqa: F401  # quiets expected failure logs
 
 from experiment_webhook.dispatch import RunContext, RunFailure
-from experiment_webhook.runners.harness_memory_ablation import adapt_items, run
+from experiment_webhook.runners.edges_memory_ablation import adapt_items, run
 
 
 ITEM = {
@@ -55,7 +55,7 @@ class AdapterTests(unittest.TestCase):
 
             return fake_run_experiment, (lambda client_id: client_id), select_cases, (lambda flag: flag)
 
-        import experiment_webhook.runners.harness_memory_ablation as adapter
+        import experiment_webhook.runners.edges_memory_ablation as adapter
 
         original = adapter._load_entrypoint
         adapter._load_entrypoint = fake_load  # type: ignore[method-assign]

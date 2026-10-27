@@ -5,28 +5,28 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 ## Language
 
 **系统入口（System Entry）**：
-引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层系统维护信息与下层系统维护信息，并可写硬约束；Compose 条目不写在这里，而写在 `.harness/compose/README.md`；从作用域根起经系统维护信息登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$project-memory-init` / project harness init；命令 `edges init` 只编排各模块，`edges <module> init` 只初始化该模块；`edges skills init` 另含安装技能，见 ADR 0036），以标记该目录为重点维护作用域；不是路径白名单。CLI 默认遍历根是 `--scope` 下的真实 `AGENTS.md`，只覆盖该系统的系统二；从真 AGENTS 出发到不了同目录 README 上的 tasks/notes 等是预期。对 edges 作用域（`isScope`：目录有可解析为带 edges 标记的 `AgentsNode` 的 `AGENTS.md`），本层系统维护信息**只**登记一条指向 `.harness/README.md` 的组成（材料索引）；各材料不再直接列在 AGENTS 本层。下层系统维护信息与本层硬约束仍写在 AGENTS 上。Compose 入口在 `.harness/compose/README.md`。见 ADR 0035、ADR 0043。
-_避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md、从真 AGENTS 遍历时自动并进 README 组成边、在 edges 作用域的 AGENTS 本层逐条列出各 `.harness/` 材料、把无 edges 标记的普通 AGENTS.md 当成 edges 作用域
+引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层系统维护信息与下层系统维护信息，并可写硬约束；Compose 条目不写在这里，而写在 `.edges/compose/README.md`；从作用域根起经系统维护信息登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$project-memory-init` / project harness init；命令 `edges init` 只编排各模块，`edges <module> init` 只初始化该模块；`edges skills init` 另含安装技能，见 ADR 0036），以标记该目录为重点维护作用域；不是路径白名单。CLI 默认遍历根是 `--scope` 下的真实 `AGENTS.md`，只覆盖该系统的系统二；从真 AGENTS 出发到不了同目录 README 上的 tasks/notes 等是预期。对 edges 作用域（`isScope`：目录有可解析为带 edges 标记的 `AgentsNode` 的 `AGENTS.md`），本层系统维护信息**只**登记一条指向 `.edges/README.md` 的组成（材料索引）；各材料不再直接列在 AGENTS 本层。下层系统维护信息与本层硬约束仍写在 AGENTS 上。Compose 入口在 `.edges/compose/README.md`。见 ADR 0035、ADR 0043。
+_避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md、从真 AGENTS 遍历时自动并进 README 组成边、在 edges 作用域的 AGENTS 本层逐条列出各 `.edges/` 材料、把无 edges 标记的普通 AGENTS.md 当成 edges 作用域
 
 **虚拟超节点（SuperAgentsNode）**：
-相对当前 `--scope` 的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用。典型叙事：把整个仓库视为上一级主体（如个人）的系统二，向上为该系统构建虚拟根。traverse 时**当作普通 AgentsNode**（只走 `children`，无跨系统特判）。挂载优先 `<scope>/.harness/README.md` 并从它展开；这份组织清单不存在时，再回退按 `packages/cli/src/domain/config/harness-materials.json` 扁平挂已有材料（材料 README；`scope`+path；不挂其它系统 `AGENTS.md`；可空）。不把作用域根 `README.md` 当作中间优先层。见 ADR 0035。缺 AGENTS 且未开 `--super` 不得自动合成。系统森林在 traverse 之外由 `SystemForestService` / `edges forest list` 拼装为 `BaseNode[][]`（`independent` 早停；`innermost` 只留内层）。
-_避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNode、缺 AGENTS 就静默加上超节点、把超节点落盘、用真 AGENTS 遍历并边代替 `--super`、让一次 traverse 跨系统拼森林、Super 挂其它系统 AGENTS、在入口 README 已存在时仍只按 harness-materials.json 扁平挂载（目标行为）
+相对当前 `--scope` 的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用。典型叙事：把整个仓库视为上一级主体（如个人）的系统二，向上为该系统构建虚拟根。traverse 时**当作普通 AgentsNode**（只走 `children`，无跨系统特判）。挂载优先 `<scope>/.edges/README.md` 并从它展开；这份组织清单不存在时，再回退按 `packages/cli/src/domain/config/edges-materials.json` 扁平挂已有材料（材料 README；`scope`+path；不挂其它系统 `AGENTS.md`；可空）。不把作用域根 `README.md` 当作中间优先层。见 ADR 0035。缺 AGENTS 且未开 `--super` 不得自动合成。系统森林在 traverse 之外由 `SystemForestService` / `edges forest list` 拼装为 `BaseNode[][]`（`independent` 早停；`innermost` 只留内层）。
+_避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNode、缺 AGENTS 就静默加上超节点、把超节点落盘、用真 AGENTS 遍历并边代替 `--super`、让一次 traverse 跨系统拼森林、Super 挂其它系统 AGENTS、在入口 README 已存在时仍只按 edges-materials.json 扁平挂载（目标行为）
 
 **文档节点（Document Node）**：
 模型中的 Markdown 单位：系统入口，组织清单，或内容叶子（Task / Note / Memory / Skill 等）。从作用域根（CLI scope 对应的真系统入口，或显式 `--super` 的虚拟超节点）起经登记可达才算节点。
 _避免使用_：仅指文件夹、磁盘上未登记的 md
 
 **组织清单（README.md）**：
-用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `project-entries-local` / `project-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。在「真系统」视角下这些是系统一材料；经 `SuperAgentsNode` 遍历时，同一批材料被当作**虚拟系统的系统二**展开。edges 作用域的 **`.harness/README.md`** 是该层的**材料索引**（标准组织清单，无 YAML frontmatter）：本层各 harness 材料挂在它的 entries 下，由上层 `AGENTS.md` 本层以单条组成指向它。Note 与 Project 叶子的组织清单是 scope 内容面的 `notes/README.md`、`projects/README.md`：文件不在就创建；已有散文且没有 entries 标记时只补标记，不改写原文。这两类叶子，以及 Task 叶子，不登记到任何 `AGENTS.md`。Task 叶子登记在所属 Task Project 的 `README.md`。`.harness/notes/README.md` 与 `.harness/projects/README.md` 是材料索引里的条目，不是那份叶子清单。见 ADR 0035、ADR 0046。
-_避免使用_：把叶子正文写成 README、把 README 当成真系统入口、无 entries 的普通包说明自动当节点、把 README 组成写成 project-harness-*、下层内容挂成 INDEX/SKILL、在 AGENTS 与 `.harness/README.md` 双写同一份材料索引、把 Note/Project/Task 叶子登记进 AGENTS.md、缺组织清单时回落到 AGENTS.md
+用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `project-entries-local` / `project-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。在「真系统」视角下这些是系统一材料；经 `SuperAgentsNode` 遍历时，同一批材料被当作**虚拟系统的系统二**展开。edges 作用域的 **`.edges/README.md`** 是该层的**材料索引**（标准组织清单，无 YAML frontmatter）：本层各 harness 材料挂在它的 entries 下，由上层 `AGENTS.md` 本层以单条组成指向它。Note 与 Project 叶子的组织清单是 scope 内容面的 `notes/README.md`、`projects/README.md`：文件不在就创建；已有散文且没有 entries 标记时只补标记，不改写原文。这两类叶子，以及 Task 叶子，不登记到任何 `AGENTS.md`。Task 叶子登记在所属 Task Project 的 `README.md`。`.edges/notes/README.md` 与 `.edges/projects/README.md` 是材料索引里的条目，不是那份叶子清单。见 ADR 0035、ADR 0046。
+_避免使用_：把叶子正文写成 README、把 README 当成真系统入口、无 entries 的普通包说明自动当节点、把 README 组成写成 edges-*、下层内容挂成 INDEX/SKILL、在 AGENTS 与 `.edges/README.md` 双写同一份材料索引、把 Note/Project/Task 叶子登记进 AGENTS.md、缺组织清单时回落到 AGENTS.md
 
 **内容叶子入口（INDEX.md）**：
 Task / Note / Memory 等的入口文件，名为 `INDEX.md`。Skill 仍为 `SKILL.md`。有无子项仍看是否出现组成登记，不靠文件名分 Internal / Leaf。
 _避免使用_：index.md（迁移前史料）、把叶子叫 README.md、把 INDEX.md 当成系统入口
 
 **组成登记（entries）**：
-系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口用 `project-harness-local` / `project-harness-descendants`（标题「本层系统维护信息 / 下层系统维护信息」）；组织清单用 `project-entries-local` / `project-entries-descendants`（标题「本层内容 / 下层内容」）。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——两套登记并列，持久化上互不为对方的 child。对 edges 作用域：各 `.harness/` 材料组织清单挂在 **`.harness/README.md`** 的 entries 下；上层 `AGENTS.md` 本层**只**登记这一条指向 `.harness/README.md` 的组成（不再在本层逐条挂各材料）。下层系统入口仍登记在 AGENTS 下层区块。目标模型下真 AGENTS 的 traverse **不**自动并同目录 README 边；要逛当前 scope 的内容面须换根到 `SuperAgentsNode`。见 ADR 0035。
-_避免使用_：目录扫描结果、把任意 Markdown 链接当子节点、宣称 AGENTS.md 永不登记子项、把系统一孩子双写进 AGENTS 与 README、两套标记混用、把同目录 README 持久化挂成该 AGENTS 的 child、在 edges 作用域的 AGENTS 本层与 `.harness/README.md` 双写材料列表、把材料直接挂在 AGENTS 本层而不经 `.harness/README.md`
+系统入口或组织清单正文里受管 HTML 注释所登记的直属子节点；有登记则该节点当前有子节点，否则为叶子。普通正文链接与附件不构成组成。系统入口用 `edges-local` / `edges-descendants`（标题「本层系统维护信息 / 下层系统维护信息」）；组织清单用 `project-entries-local` / `project-entries-descendants`（标题「本层内容 / 下层内容」）。系统入口带组成登记是递归系统二的基础假设。同目录并存 `AGENTS.md` 与 `README.md` 时：系统一孩子只登记在 README；AGENTS 只登记系统二材料与下级系统入口——两套登记并列，持久化上互不为对方的 child。对 edges 作用域：各 `.edges/` 材料组织清单挂在 **`.edges/README.md`** 的 entries 下；上层 `AGENTS.md` 本层**只**登记这一条指向 `.edges/README.md` 的组成（不再在本层逐条挂各材料）。下层系统入口仍登记在 AGENTS 下层区块。目标模型下真 AGENTS 的 traverse **不**自动并同目录 README 边；要逛当前 scope 的内容面须换根到 `SuperAgentsNode`。见 ADR 0035。
+_避免使用_：目录扫描结果、把任意 Markdown 链接当子节点、宣称 AGENTS.md 永不登记子项、把系统一孩子双写进 AGENTS 与 README、两套标记混用、把同目录 README 持久化挂成该 AGENTS 的 child、在 edges 作用域的 AGENTS 本层与 `.edges/README.md` 双写材料列表、把材料直接挂在 AGENTS 本层而不经 `.edges/README.md`
 
 **组织节点 / 叶子节点（派生状态）**：
 同一文档节点的当前状态：有组成登记为组织节点，否则为叶子。不是固定类型，模型不持久化 isLeaf。`AgentsNode` 与 `ReadmeNode` 继承 `InternalNode`（本层/下层 children 与索引编辑）；业务节点继承 `BaseNode`。`LeafNode` 是纯 text 节点。`type` 为 `agents` / `readme` / `task` / `memory` / `note` / `skill` / `text`（普通文本兜底），无 `internal`。
@@ -41,15 +41,15 @@ _避免使用_：组成子节点、固定深度截断、把 harness 与「遍历
 _避免使用_：Agent 工具箱、skill 合集、用「Edges」指本仓这个个人实例（说「本仓」或「作者的大脑仓库」）、与 `edges/` 目录或单条 Edge 混用
 
 **组合（Compose）**：
-把别的 harness 仓库（大脑、团队库、规范库、组件库等）叠加进当前工作空间的统一说法，对应 Devin Agent Memory 文章里的 composable。工作空间 = 自身就地 init 的 harness + 若干被组合的 harness 仓库；被组合的仓库各自保持独立的归属、权限和历史。被组合的仓库默认作为 git submodule 装在当前仓库的 `.harness/compose/<name>`。入口是真实文件 `.harness/compose/README.md`（`ComposeReadmeNode extends ReadmeNode`），由 `.harness/README.md` 链进来，不再用虚拟节点，也不再把 Compose 区块写在 `AGENTS.md`（见 ADR 0042、ADR 0043）。子节点 id 是被组合仓库的 `README.md`。默认 traverse 和系统根扫描都会进入 scope 自己的 `.harness/compose/`，并且只到被组合 README 这一层，不展开该仓库自己的 Compose。被组合的仓库可以直接写，提交和推送用原生 git（ADR 0045）。根级 `--exclude compose` 同时跳过扫描和遍历。edges 只管 git 仓库和本地目录树，不管远程入口和大规模检索。组合是 harness 的依赖声明，不是记忆库：`.harness/` 好比项目自己的源码，Compose block 里的本地入口好比依赖声明，Agent 开场读 `AGENTS.md`，经 `.harness/README.md` 走到 `compose/README.md`，顺着其中的路径加载（不另做 `edges context` 命令，暂缓，见 ADR 0034）。它和 docker compose 一样用登记声明由哪些东西组合而成，但组合的是可复用的经验与约束，不是运行中的服务。见 ADR 0034。
+把别的 harness 仓库（大脑、团队库、规范库、组件库等）叠加进当前工作空间的统一说法，对应 Devin Agent Memory 文章里的 composable。工作空间 = 自身就地 init 的 harness + 若干被组合的 harness 仓库；被组合的仓库各自保持独立的归属、权限和历史。被组合的仓库默认作为 git submodule 装在当前仓库的 `.edges/compose/<name>`。入口是真实文件 `.edges/compose/README.md`（`ComposeReadmeNode extends ReadmeNode`），由 `.edges/README.md` 链进来，不再用虚拟节点，也不再把 Compose 区块写在 `AGENTS.md`（见 ADR 0042、ADR 0043）。子节点 id 是被组合仓库的 `README.md`。默认 traverse 和系统根扫描都会进入 scope 自己的 `.edges/compose/`，并且只到被组合 README 这一层，不展开该仓库自己的 Compose。被组合的仓库可以直接写，提交和推送用原生 git（ADR 0045）。根级 `--exclude compose` 同时跳过扫描和遍历。edges 只管 git 仓库和本地目录树，不管远程入口和大规模检索。组合是 harness 的依赖声明，不是记忆库：`.edges/` 好比项目自己的源码，Compose block 里的本地入口好比依赖声明，Agent 开场读 `AGENTS.md`，经 `.edges/README.md` 走到 `compose/README.md`，顺着其中的路径加载（不另做 `edges context` 命令，暂缓，见 ADR 0034）。它和 docker compose 一样用登记声明由哪些东西组合而成，但组合的是可复用的经验与约束，不是运行中的服务。见 ADR 0034。
 _避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作空间的独立记忆库、用组合代替项目知识的就地 init、把 git submodule 当成另一套概念（它只是 Compose 的底层实现）、递归展开被组合仓库的 Compose 条目、另造 `compose.json` / `compose.yaml`、远程入口、远程 MCP 组合、服务端 clone、「一个模型两种部署」、把现有组成登记列表原样复用当外部记忆仓库登记、把 Compose block 当成层模型外的旁路
 
 **外部记忆仓库登记**：
-在 `.harness/compose/README.md` 的 **Compose block**（`project-harness-compose`）里，登记被组合仓库的入口 README。href 相对于 `.harness/compose/`。只有本地入口，没有远程入口。`AGENTS.md` 只指向 `.harness/README.md`，材料索引再指向这份 README。日常命令是 `edges compose add`、`list`、`update`，读写这份文件，缺了就连同索引链接一起建出来。`edges compose doctor` 只做一次性迁移（默认预览，`--apply` 才把旧的 AGENTS 区块搬过来）。`add` 的 `--path` 可选，只收相对于 scope 目录的检出目录，缺省是 `.harness/compose/<name>`；区块里写下的是该检出的 `README.md`，不写绝对路径。底层是 git submodule：`add --remote` 跑 `git submodule add`，`update` 是 `git submodule update --init`（不带 `--recursive`），`update --remote` 跟到远端最新。推送在子模块里用原生 git；去掉条目手删 `compose/README.md` 里那一行（需要时 `git submodule deinit` / `git rm`），没有 unregister / push / sync 命令。旧的 `~/...` / 绝对路径条目仍可读，并提示迁移。默认会展开。`--exclude compose` 跳过。见 ADR 0034、ADR 0043。
-_避免使用_：组合清单、Compose List、`compose.json`、`compose.yaml`、`~/.harness/compose.json`、`.harness/compose.json`、挂载表、记忆源清单（`memory-sources`）、复用 `--super` 的 `harness-materials.json` 表示跨仓库入口、远程入口、MCP 目录根、MCP `remember` / 收件箱（`.harness/inbox/`）、由 edges 维护的远程大库索引（PageIndex 式）、另造与 Git 无关的独立 ACL、把 Compose block 当成不算本层的旁路
+在 `.edges/compose/README.md` 的 **Compose block**（`edges-compose`）里，登记被组合仓库的入口 README。href 相对于 `.edges/compose/`。只有本地入口，没有远程入口。`AGENTS.md` 只指向 `.edges/README.md`，材料索引再指向这份 README。日常命令是 `edges compose add`、`list`、`update`，读写这份文件，缺了就连同索引链接一起建出来。`edges compose doctor` 只做一次性迁移（默认预览，`--apply` 才把旧的 AGENTS 区块搬过来）。`add` 的 `--path` 可选，只收相对于 scope 目录的检出目录，缺省是 `.edges/compose/<name>`；区块里写下的是该检出的 `README.md`，不写绝对路径。底层是 git submodule：`add --remote` 跑 `git submodule add`，`update` 是 `git submodule update --init`（不带 `--recursive`），`update --remote` 跟到远端最新。推送在子模块里用原生 git；去掉条目手删 `compose/README.md` 里那一行（需要时 `git submodule deinit` / `git rm`），没有 unregister / push / sync 命令。旧的 `~/...` / 绝对路径条目仍可读，并提示迁移。默认会展开。`--exclude compose` 跳过。见 ADR 0034、ADR 0043。
+_避免使用_：组合清单、Compose List、`compose.json`、`compose.yaml`、`~/.edges/compose.json`、`.edges/compose.json`、挂载表、记忆源清单（`memory-sources`）、复用 `--super` 的 `edges-materials.json` 表示跨仓库入口、远程入口、MCP 目录根、MCP `remember` / 收件箱（`.edges/inbox/`）、由 edges 维护的远程大库索引（PageIndex 式）、另造与 Git 无关的独立 ACL、把 Compose block 当成不算本层的旁路
 
 **dream**：
-对整棵组合树做整理的过程：入口是工作空间的 `.harness/compose/README.md`（其 Compose block），从该入口自下而上走树（就地 `.harness/` + Compose block 挂上的本地仓库）；大脑 / 团队库是树上的上层节点，不是入口。整理包括合并与删除记忆、清理目录结构、刷新 name / description，并把可跨项目复用的内容经 PR 提升到上层仓库（大脑 / 团队库）。定时 Agent 执行；每 24 小时检查一次，项目 harness 主分支有新提交才运行；产出走 PR。在哪运行另议。见 ADR 0034。
+对整棵组合树做整理的过程：入口是工作空间的 `.edges/compose/README.md`（其 Compose block），从该入口自下而上走树（就地 `.edges/` + Compose block 挂上的本地仓库）；大脑 / 团队库是树上的上层节点，不是入口。整理包括合并与删除记忆、清理目录结构、刷新 name / description，并把可跨项目复用的内容经 PR 提升到上层仓库（大脑 / 团队库）。定时 Agent 执行；每 24 小时检查一次，项目 harness 主分支有新提交才运行；产出走 PR。在哪运行另议。见 ADR 0034。
 _避免使用_：以大脑或团队库为 dream 入口、直接指向大脑、只把 dream 当成「提升」单一职责、把整理目录树当成与 dream 无关的另套流程、消化收件箱、维护远程索引、无条件按固定周期跑、每次有变化就立即跑
 
 **根作用域（Root Scope）**：
@@ -267,8 +267,8 @@ _避免使用_：`edges skills install`、把安装当成可跳过的附加步�
 _避免使用_：唯一入口、替代 CLI、直连仓根脚本（已否决）
 
 **Project Harness（Edges 语境）**：
-Git 项目里递归系统二落在系统入口 `AGENTS.md` 上的写法：本层硬约束、本层系统维护信息（edges 作用域下本层只指向 `.harness/README.md`）、下层系统维护信息。`.harness/` 是材料目录，**`.harness/README.md` 是该层材料索引**（标准组织清单），不是另一套系统入口。各材料挂在该 README 的 entries 下，不必在 AGENTS 本层逐条列出；Compose 也是其中一条，入口是 `.harness/compose/README.md`。内容节点由组织清单或系统入口的组成登记挂入，不必自身也是系统入口。见 ADR 0035、ADR 0043。
-_避免使用_：Agent Harness 的同义词、只等于 `.harness/` 目录、本层组成/下层节点（旧标题）、Project Memory 三章的旧称、要求每个内容目录都有 AGENTS.md、把「AGENTS 本层列出每个材料」当成目标形状
+Git 项目里递归系统二落在系统入口 `AGENTS.md` 上的写法：本层硬约束、本层系统维护信息（edges 作用域下本层只指向 `.edges/README.md`）、下层系统维护信息。`.edges/` 是材料目录，**`.edges/README.md` 是该层材料索引**（标准组织清单），不是另一套系统入口。各材料挂在该 README 的 entries 下，不必在 AGENTS 本层逐条列出；Compose 也是其中一条，入口是 `.edges/compose/README.md`。内容节点由组织清单或系统入口的组成登记挂入，不必自身也是系统入口。见 ADR 0035、ADR 0043。
+_避免使用_：Agent Harness 的同义词、只等于 `.edges/` 目录、本层组成/下层节点（旧标题）、Project Memory 三章的旧称、要求每个内容目录都有 AGENTS.md、把「AGENTS 本层列出每个材料」当成目标形状
 
 **Agent Harness（Edges 语境）**：
 让 Agent 持续有效工作的支撑机制，组织上下文、记忆、工具、约束与反馈；它可承担系统二的角色，也可作为被维护的系统一，不与系统二严格同义。
@@ -284,7 +284,7 @@ _避免使用_：按写入的 Agent 划分归属、把公开仓库的可读范�
 
 **Agent 客户端（Agent Client）**：
 在仓库工作目录里阅读并给出结果的程序，例如 Claude Code、Codex、Cursor。检索评测里它负责交出文档路径。
-_避免使用_：Harness 客户端、通用 SDK、codewiz、把 Project Harness 或 `.harness/` 当成客户端
+_避免使用_：Harness 客户端、通用 SDK、codewiz、把 Project Harness 或 `.edges/` 当成客户端
 
 **Personal Agent**：
 harness 对象是大脑这个虚拟目录的 Agent 客户端；它跨应用和渠道长期为同一个人服务，如 ChatGPT dots、Meta Muse、Manus Cue、Grok Bot。code agent、work agent 的 harness 对象是仓库或子目录。各类 Agent 同等重要，机制相同，区别只在对象是哪个目录。
@@ -347,11 +347,11 @@ Task 文件去掉 `.md` 的文件名，是 `edges tasks` 的查找键；不是�
 _避免使用_：title、name、把展示名当 CLI 查找键
 
 **Task Project（edges）**：
-选定看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；领域板目录为 `tasks/<project-slug>/`，维护板目录为 `.harness/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
+选定看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；领域板目录为 `tasks/<project-slug>/`，维护板目录为 `.edges/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
 _避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type、把未确认的候选当成已有 project
 
 **Task Project 索引**：
-所选板 `tasks/README.md` 或 `.harness/tasks/README.md` 的 `project-entries-local` 列表；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。用户 init 为系统入口的 `<project>/AGENTS.md` 仍登记在看板 `AGENTS.md`。
+所选板 `tasks/README.md` 或 `.edges/tasks/README.md` 的 `project-entries-local` 列表；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。用户 init 为系统入口的 `<project>/AGENTS.md` 仍登记在看板 `AGENTS.md`。
 _避免使用_：手改该节、把它当 Memory Type 入口、把看板文件当记忆条目
 
 **Task Project README.md**：

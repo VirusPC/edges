@@ -8,7 +8,7 @@ const to = path.join(root, "../dist/commands/tasks/project/assets");
 mkdirSync(to, { recursive: true });
 cpSync(from, to, { recursive: true });
 
-const materialsFrom = path.join(root, "../src/domain/config/harness-materials.json");
+const materialsFrom = path.join(root, "../src/domain/config/edges-materials.json");
 const materialsToDir = path.join(root, "../dist/domain/config");
 mkdirSync(materialsToDir, { recursive: true });
-cpSync(materialsFrom, path.join(materialsToDir, "harness-materials.json"));
+cpSync(materialsFrom, path.join(materialsToDir, "edges-materials.json"));

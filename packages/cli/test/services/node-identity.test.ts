@@ -114,7 +114,7 @@ test('co-located harness stays distinct and destroy invalidates both identities 
   const { root, entry, service } = fixture(t);
   const leaf = await service.create(new LeafNode(path.join(root, 'child/index.md')), { body: 'Leaf\n' }, { indexGroup: "local" });
   const harness = await service.create(new AgentsNode(path.join(root, 'child/AGENTS.md')), { body: 'Harness\n' }, { indexGroup: "local" });
-  assert.notStrictEqual(leaf, harness); assert.equal(leaf.harness?.id, harness.path);
+  assert.notStrictEqual(leaf, harness); assert.equal(leaf.edges?.id, harness.path);
   const parent = (await service.get(entry, AgentsNode))!; parent.description = 'Pending parent';
   await service.destroy(leaf);
   assert.equal(parent.children.length, 0);

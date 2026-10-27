@@ -47,7 +47,7 @@ export function composeEntryWarnings(entries: readonly EntryLike[]): string[] {
   return warnings;
 }
 
-/** Same hints for `.harness/compose/README.md`. Never throws; a missing entry yields none. */
+/** Same hints for `.edges/compose/README.md`. Never throws; a missing entry yields none. */
 export function scopeComposeWarnings(env: NodeJS.ProcessEnv): string[] {
   try {
     const file = composeReadmePath(resolveScope(env));

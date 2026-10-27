@@ -58,7 +58,7 @@ test("explicit nested scope separates both boards and co-moves Task/Run without 
       assert.ok(JSON.stringify(listed).includes("Same"));
       const moved = await call(purpose, ["status", task.stem, "done"]);
       assert.equal(moved.exitCode, 0, moved.stdout);
-      const board = purpose === "domain" ? "tasks" : ".harness/tasks";
+      const board = purpose === "domain" ? "tasks" : ".edges/tasks";
       assert.equal(
         await readFile(
           path.join(
@@ -100,7 +100,7 @@ test("explicit nested scope separates both boards and co-moves Task/Run without 
       (await call("maintenance", ["get", domainPath])).exitCode,
       0,
     );
-    await assert.rejects(access(path.join(root, ".harness/tasks")));
+    await assert.rejects(access(path.join(root, ".edges/tasks")));
     await assert.rejects(access(path.join(child, "knowledge/tasks")));
   } finally {
     await rm(root, { recursive: true, force: true });
@@ -110,7 +110,7 @@ test("scope discovery selects the nearest type or business AGENTS independently 
   const { root, child } = await fixture();
   const cwd = process.cwd();
   try {
-    const nested = path.join(child, ".harness/memory/project");
+    const nested = path.join(child, ".edges/memory/project");
     await mkdir(nested, { recursive: true });
     await writeFile(
       path.join(nested, "AGENTS.md"),
@@ -126,7 +126,7 @@ test("scope discovery selects the nearest type or business AGENTS independently 
     assert.equal(loadConfig({ EDGES_REPO: root }).scopeDir, root);
     assert.equal(
       loadConfig({ EDGES_SCOPE: "../.." }).scopeDir,
-      path.join(child, ".harness"),
+      path.join(child, ".edges"),
     );
   } finally {
     process.chdir(cwd);
@@ -147,7 +147,7 @@ test("project reads do not initialize absent board and manual AGENTS content sur
       { env: {} },
     );
     assert.equal(result.exitCode, 0, result.stdout);
-    await assert.rejects(access(path.join(child, ".harness/tasks")));
+    await assert.rejects(access(path.join(child, ".edges/tasks")));
     assert.match(
       "# Manual\n\nKeep rules.\n",
       /# Manual\n\nKeep rules\./,
@@ -163,7 +163,7 @@ test("discovery crosses maintenance containers but stops at symlinks and nested 
     const { discoverScopes } = await import("../../src/services/scope.js");
     const { symlink } = await import("node:fs/promises");
     const evaluation = path.join(root, "packages/evaluation");
-    const method = path.join(root, ".harness/skills/managed/method");
+    const method = path.join(root, ".edges/skills/managed/method");
     const nestedRepo = path.join(root, "vendor");
     for (const dir of [evaluation, method, nestedRepo]) {
       await mkdir(dir, { recursive: true });

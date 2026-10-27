@@ -9,7 +9,7 @@ import {
   firstSymlink,
   findAncestor,
 } from "../../utils/filesystem.js";
-export const MEMORY_DIR_NAME = ".harness/memory";
+export const MEMORY_DIR_NAME = ".edges/memory";
 export function readText(file: string): string {
   return new TextDecoder("utf-8", { fatal: true }).decode(
     fs.readFileSync(file),
@@ -75,7 +75,7 @@ export function rejectLegacy(target: string): void {
       readText(path.join(target, ENTRY_NAMES.internal)).includes("](.memory/"))
   )
     throw new Error(
-      "migration-required: run edges memory migrate --dry-run, then edges memory migrate",
+      "migration-required: legacy .memory layout is not supported since @viruspc/edges@0.3.0. Finish it with @viruspc/edges@0.2.7, then rename the materials directory. See docs/migrations/2026-10-27-rename-harness-to-edges.md",
     );
 }
 export function resolveTarget(raw: string): string {
@@ -131,10 +131,10 @@ export const typeFromDirName = (name: string) =>
 export const AGENTS_FILE_NAME = ENTRY_NAMES.internal;
 export const TYPE_INDEX_FILE_NAME = ENTRY_NAMES.readme;
 export const typeIndexRelpath = (name: string, module = moduleForType(name)) =>
-  `.harness/${module}/${typeDirName(name)}/${TYPE_INDEX_FILE_NAME}`;
+  `.edges/${module}/${typeDirName(name)}/${TYPE_INDEX_FILE_NAME}`;
 /** Pre-migration type indexes lived in AGENTS.md; reads accept them until the directory is split. */
 export const legacyTypeIndexRelpath = (name: string, module = moduleForType(name)) =>
-  `.harness/${module}/${typeDirName(name)}/${AGENTS_FILE_NAME}`;
+  `.edges/${module}/${typeDirName(name)}/${AGENTS_FILE_NAME}`;
 export const isExternalType = (name: string) => name === "referenced";
 export const relativeOrName = (file: string, root: string) =>
   isWithinPath(file, root) ? path.relative(root, file) || "." : path.basename(file);

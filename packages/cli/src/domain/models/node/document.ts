@@ -67,7 +67,7 @@ export function insertInnerBlock(
     ) ?? outerEnd;
   const position = document.indexOf(anchor);
   if (position < 0)
-    throw new Error("Missing project-harness outer closing marker");
+    throw new Error("Missing edges outer closing marker");
   return `${document.slice(0, position).trimEnd()}\n\n${block}\n${document.slice(position)}`;
 }
 export function upsertBlock(
@@ -131,7 +131,7 @@ export interface SyntaxContent {
 function adaptEntries(source: string): string {
   return source.replace(
     /^<!-- project-memory-entries:(start|end) -->$/gm,
-    "<!-- project-harness-local:$1 -->",
+    "<!-- edges-local:$1 -->",
   );
 }
 export type SyntaxProfile = "agents" | "entries";
@@ -328,7 +328,7 @@ export class InternalSyntax {
     return this.#entries
       ? rendered
           .replace(
-            /^<!-- project-harness-local:(start|end) -->$/gm,
+            /^<!-- edges-local:(start|end) -->$/gm,
             "<!-- project-memory-entries:$1 -->",
           )
           .replace(

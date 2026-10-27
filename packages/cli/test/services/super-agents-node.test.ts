@@ -68,33 +68,33 @@ test("--super with no materials mounts empty SuperAgentsNode", async () => {
   assert.deepEqual(nodes[0]!.children, []);
 });
 
-test("--super prefers .harness/README.md and does not flat-mount other materials", async (t) => {
+test("--super prefers .edges/README.md and does not flat-mount other materials", async (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "super-idx-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
+  fs.mkdirSync(path.join(root, ".edges/tasks"), { recursive: true });
   fs.mkdirSync(path.join(root, "tasks"), { recursive: true });
   fs.writeFileSync(path.join(root, "tasks/README.md"), "# Content tasks\n");
-  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# Maintenance tasks\n");
+  fs.writeFileSync(path.join(root, ".edges/tasks/README.md"), "# Maintenance tasks\n");
   fs.writeFileSync(
     path.join(root, "README.md"),
     "# Public\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Notes](notes/README.md)\n<!-- project-entries-local:end -->\n",
   );
   fs.writeFileSync(
-    path.join(root, ".harness/README.md"),
+    path.join(root, ".edges/README.md"),
     "# 本层 harness 材料索引\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Tasks](tasks/README.md)\n<!-- project-entries-local:end -->\n",
   );
   const service = new NodeService({ managedRoot: root });
   const nodes = await service.list(root, { super: true });
   assert.deepEqual(nodes[0]!.children.map((child) => child.id), [
-    path.join(root, ".harness/README.md"),
+    path.join(root, ".edges/README.md"),
   ]);
   const rel = nodes.map((node) => path.relative(root, node.path));
-  assert.ok(rel.includes(path.join(".harness", "tasks", "README.md")));
+  assert.ok(rel.includes(path.join(".edges", "tasks", "README.md")));
   assert.ok(!rel.includes(path.join("tasks", "README.md")));
   assert.ok(!rel.includes("README.md"));
 });
 
-test("--super falls back to flat harness-materials mounts when no index README exists", async (t) => {
+test("--super falls back to flat edges-materials mounts when no index README exists", async (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "super-flat-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(path.join(root, "tasks"), { recursive: true });
@@ -109,18 +109,18 @@ test("--super falls back to flat harness-materials mounts when no index README e
   );
 });
 
-test("super treats the scope directory as its harness and does not mount the scope's own .harness", async (t) => {
+test("super treats the scope directory as its harness and does not mount the scope's own .edges", async (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "super-m-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
+  fs.mkdirSync(path.join(root, ".edges/tasks"), { recursive: true });
   fs.mkdirSync(path.join(root, "tasks"), { recursive: true });
   fs.writeFileSync(path.join(root, "AGENTS.md"), "# Scope\n");
-  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# Maintenance\n");
+  fs.writeFileSync(path.join(root, ".edges/tasks/README.md"), "# Maintenance\n");
   fs.writeFileSync(path.join(root, "tasks/README.md"), "# Content\n");
   const service = new NodeService({ managedRoot: root });
   const nodes = await service.list(root, { super: true });
   const rel = nodes.map((n) => path.relative(root, n.path));
   assert.ok(rel.includes(path.join("tasks", "README.md")));
-  assert.ok(!rel.includes(path.join(".harness", "tasks", "README.md")));
+  assert.ok(!rel.includes(path.join(".edges", "tasks", "README.md")));
   assert.ok(!rel.includes("AGENTS.md"));
 });

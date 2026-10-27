@@ -13,15 +13,15 @@ git init -b main "$ISOLATED" >/dev/null
 cat > "$ISOLATED/AGENTS.md" <<'EOF'
 # Isolated
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 
-<!-- project-harness-descendants:start -->
+<!-- edges-descendants:start -->
 ## 下层系统维护信息
 
-<!-- project-harness-descendants:end -->
+<!-- edges-descendants:end -->
 EOF
 
 echo "Starting integration tests via edges notes"

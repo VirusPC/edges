@@ -40,6 +40,6 @@ format: ordinary
 
 test("refreshing a legacy file rewrites the layer surface", () => {
   const updated = rewriteLayerSurface(legacy);
-  assert.match(updated, /project-harness-constraints/);
+  assert.match(updated, /edges-constraints/);
   assert.doesNotMatch(updated, /project-memory-important/);
 });

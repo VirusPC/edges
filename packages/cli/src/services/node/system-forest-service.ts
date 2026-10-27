@@ -11,7 +11,7 @@ export type SystemForestOptions = {
   form?: ForestForm;
   /** When false, omit the runtime SuperAgentsNode root. Default true. */
   includeSuper?: boolean;
-  /** Global `--exclude`. `compose` skips both the scan of `.harness/compose/` and traversal into it. */
+  /** Global `--exclude`. `compose` skips both the scan of `.edges/compose/` and traversal into it. */
   exclude?: ReadonlySet<string>;
 };
 
@@ -20,7 +20,7 @@ type RootSpec =
   | { kind: "super"; scopeDir: string; path: string };
 
 /**
- * Assemble a forest of system trees: collect project-harness AGENTS roots,
+ * Assemble a forest of system trees: collect edges AGENTS roots,
  * optionally prepend Super, traverse each with resolve early-stop on peer roots.
  */
 export async function buildSystemForest(

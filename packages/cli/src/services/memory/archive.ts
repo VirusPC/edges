@@ -9,7 +9,7 @@ import { assertPrivateIgnored } from './ignore.js';
 import { rejectLegacy, TYPE_INDEX_FILE_NAME } from './paths.js';
 import { readTemplate } from './templates.js';
 
-const USERS = '.harness/memory/users';
+const USERS = '.edges/memory/users';
 const PRIVATE_STAGE_RULE = '/.private-user-memory-*/';
 export const USER_MEMORY_ARCHIVE_LIMITS = { maxExpandedBytes: 256 * 1024 * 1024, maxMembers: 10_000 } as const;
 type ArchiveLimits = { maxExpandedBytes: number; maxMembers: number };
@@ -56,7 +56,7 @@ async function rejectOldLayer(root: string): Promise<void> {
   if (await info(path.join(root, ".memory"))) throw new Error(CONVERSION);
 }
 
-const CONVERSION = 'conversion-required: restore the old archive with its matching older tool in an isolated old project, run edges memory migrate there, then create a new user-memory-backup archive.';
+const CONVERSION = 'conversion-required: this version does not convert legacy .memory archives. Restore with @viruspc/edges@0.2.7 in an isolated old project, migrate there, then create a new user-memory-backup archive.';
 const expandHome = (value: string): string => expandHomePath(value, true);
 
 function inside(file: string, root: string): boolean {
@@ -108,7 +108,7 @@ async function collect(root: string): Promise<string[]> {
   await safeParents(users, root);
   if (!(await info(users))?.isDirectory()) {
     if (await info(path.join(root, '.memory'))) throw new Error(CONVERSION);
-    throw new Error('没有可备份的用户记忆：缺少 .harness/memory/users/');
+    throw new Error('没有可备份的用户记忆：缺少 .edges/memory/users/');
   }
   const files: string[] = [];
   async function visit(dir: string): Promise<void> {
@@ -215,7 +215,7 @@ async function stageMembers(archive: string, staging: string, limits: ArchiveLim
   }
   await Promise.all(pending);
   if (failure) throw failure;
-  if (!seen.size) throw new Error('归档里没有 .harness/memory/users/ 成员');
+  if (!seen.size) throw new Error('归档里没有 .edges/memory/users/ 成员');
   return [...seen];
 }
 

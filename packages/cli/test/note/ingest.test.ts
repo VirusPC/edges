@@ -8,7 +8,7 @@ import { run } from "../../src/program.js";
 test("notes create writes a local leaf without a git repository", async (t) => {
   const repo = await fs.mkdtemp(path.join(await fs.realpath(os.tmpdir()), "edges-cli-note-"));
   t.after(() => fs.rm(repo, { recursive: true, force: true }));
-  await fs.writeFile(path.join(repo, "AGENTS.md"), "# Scope\n\n<!-- project-harness-local:start -->\n## 本层系统维护信息\n\n<!-- project-harness-local:end -->\n");
+  await fs.writeFile(path.join(repo, "AGENTS.md"), "# Scope\n\n<!-- edges-local:start -->\n## 本层系统维护信息\n\n<!-- edges-local:end -->\n");
   const result = await run(
     [
       "--scope",

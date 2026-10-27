@@ -20,7 +20,7 @@ function fixture(t: { after(fn: () => void): void }, files: Record<string, strin
 }
 const read = (root: string, rel: string) => fs.readFileSync(path.join(root, rel), "utf8");
 const board = (local: string) =>
-  `# tasks\n\n<!-- project-harness-constraints:start -->\n## 本层硬约束\n\nKeep.\n<!-- project-harness-constraints:end -->\n\n<!-- project-harness-local:start -->\n## 本层系统维护信息\n${local}<!-- project-harness-local:end -->\n`;
+  `# tasks\n\n<!-- edges-constraints:start -->\n## 本层硬约束\n\nKeep.\n<!-- edges-constraints:end -->\n\n<!-- edges-local:start -->\n## 本层系统维护信息\n${local}<!-- edges-local:end -->\n`;
 const project = (title: string) => `# ${title}\n\n${title} work.\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n`;
 
 test("moves README Task Project links (incl. legacy task-projects) into board README; keeps AGENTS projects; idempotent", async (t) => {
@@ -29,36 +29,36 @@ test("moves README Task Project links (incl. legacy task-projects) into board RE
       "<!-- task-projects:start -->\nCLI-maintained index of Task Project titles and descriptions. Do not hand-edit this section.\n\n- [`alpha`](alpha/README.md) — alpha work\n<!-- task-projects:end -->\n",
     ),
     "tasks/alpha/README.md": project("Alpha"),
-    ".harness/tasks/AGENTS.md": board(
-      "\n- [Memory](.harness/memory/projects/README.md) — memory\n- [Beta](beta/README.md) — beta work\n- [Gamma](gamma/AGENTS.md) — gamma work\n",
+    ".edges/tasks/AGENTS.md": board(
+      "\n- [Memory](.edges/memory/projects/README.md) — memory\n- [Beta](beta/README.md) — beta work\n- [Gamma](gamma/AGENTS.md) — gamma work\n",
     ),
-    ".harness/tasks/README.md": "# Board\n\nProse stays.\n",
-    ".harness/tasks/beta/README.md": project("Beta"),
-    ".harness/tasks/gamma/AGENTS.md": board(""),
+    ".edges/tasks/README.md": "# Board\n\nProse stays.\n",
+    ".edges/tasks/beta/README.md": project("Beta"),
+    ".edges/tasks/gamma/AGENTS.md": board(""),
   });
   const plan = planTaskProjectLists(root);
   assert.deepEqual(plan.conflicts, []);
   assert.deepEqual(
     plan.boards.map((b) => [path.relative(root, b.board), b.moved.map((id) => path.relative(root, id))]),
-    [[".harness/tasks", [".harness/tasks/beta/README.md"]], ["tasks", ["tasks/alpha/README.md"]]],
+    [[".edges/tasks", [".edges/tasks/beta/README.md"]], ["tasks", ["tasks/alpha/README.md"]]],
   );
   await applyTaskProjectLists(plan);
 
   const domain = read(root, "tasks/AGENTS.md");
   assert.doesNotMatch(domain, /task-projects|alpha/);
-  assert.match(domain, /## 本层系统维护信息\n\n<!-- project-harness-local:end -->/);
+  assert.match(domain, /## 本层系统维护信息\n\n<!-- edges-local:end -->/);
   const domainList = new ReadmeNode(path.join(root, "tasks/README.md")).parse(read(root, "tasks/README.md"));
   assert.deepEqual(domainList.localChildren.map((ref) => [path.relative(root, ref.id), ref.description]), [["tasks/alpha/README.md", "alpha work"]]);
 
-  const maintenance = new AgentsNode(path.join(root, ".harness/tasks/AGENTS.md")).parse(read(root, ".harness/tasks/AGENTS.md"));
+  const maintenance = new AgentsNode(path.join(root, ".edges/tasks/AGENTS.md")).parse(read(root, ".edges/tasks/AGENTS.md"));
   assert.deepEqual(maintenance.localChildren.map((ref) => path.basename(path.dirname(ref.id))), ["projects", "gamma"]);
-  const list = read(root, ".harness/tasks/README.md");
+  const list = read(root, ".edges/tasks/README.md");
   assert.match(list, /^# Board\n\nProse stays\.\n/);
   assert.match(list, /\[Beta\]\(<beta\/README\.md>\) — beta work/);
 
-  const snapshot = [read(root, "tasks/AGENTS.md"), read(root, ".harness/tasks/AGENTS.md"), list];
+  const snapshot = [read(root, "tasks/AGENTS.md"), read(root, ".edges/tasks/AGENTS.md"), list];
   assert.deepEqual(planTaskProjectLists(root).boards, []);
-  assert.deepEqual([read(root, "tasks/AGENTS.md"), read(root, ".harness/tasks/AGENTS.md"), read(root, ".harness/tasks/README.md")], snapshot);
+  assert.deepEqual([read(root, "tasks/AGENTS.md"), read(root, ".edges/tasks/AGENTS.md"), read(root, ".edges/tasks/README.md")], snapshot);
 });
 
 test("a board README listing the same project with different text is a conflict and nothing is written", async (t) => {

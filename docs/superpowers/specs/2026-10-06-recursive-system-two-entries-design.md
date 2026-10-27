@@ -6,7 +6,7 @@
 
 ## 目的
 
-行业上 `AGENTS.md` 是给 Agent 的系统二入口。Edges 把它做成**可递归的系统入口树**：每个系统入口登记本层系统维护信息与下层系统入口；系统一的组织清单与内容叶子用另一套入口合同。此前把 Task 列表、类型条目等系统一孩子塞进 `AGENTS.md` 的 `project-harness-local`，或把「有列表」等同于系统入口，都会名实错位。
+行业上 `AGENTS.md` 是给 Agent 的系统二入口。Edges 把它做成**可递归的系统入口树**：每个系统入口登记本层系统维护信息与下层系统入口；系统一的组织清单与内容叶子用另一套入口合同。此前把 Task 列表、类型条目等系统一孩子塞进 `AGENTS.md` 的 `edges-local`，或把「有列表」等同于系统入口，都会名实错位。
 
 本轮只定模型、入口合同、标记/标题、遍历规则与迁移边界。**不写生产代码**（Q16=A）；批准后另开 writing-plans。
 
@@ -122,8 +122,8 @@ flowchart TB
     README["README.md<br/>组织清单"]
   end
 
-  AGENTS -->|project-harness-local<br/>本层系统维护信息| M["系统二材料<br/>.harness/memory · skills · 维护看板 …"]
-  AGENTS -->|project-harness-descendants<br/>下层系统维护信息| ChildAgents["其它目录 AGENTS.md"]
+  AGENTS -->|edges-local<br/>本层系统维护信息| M["系统二材料<br/>.edges/memory · skills · 维护看板 …"]
+  AGENTS -->|edges-descendants<br/>下层系统维护信息| ChildAgents["其它目录 AGENTS.md"]
 
   README -->|project-entries-local<br/>本层内容| Sys1["INDEX / SKILL / 本层入口<br/>如 tasks/…、notes/…"]
   README -->|project-entries-descendants<br/>下层内容| ChildReadme["其它目录 README.md"]
@@ -161,11 +161,11 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-  RootAgents["/AGENTS.md<br/>本层系统维护信息 → .harness/*<br/>下层系统维护信息 → teaching/AGENTS.md …"]
+  RootAgents["/AGENTS.md<br/>本层系统维护信息 → .edges/*<br/>下层系统维护信息 → teaching/AGENTS.md …"]
   RootReadme["/README.md<br/>本层内容 → tasks/ notes/ …<br/>下层内容 → 其它 README.md"]
 
-  RootAgents --> HMem[".harness/memory/…"]
-  RootAgents --> HTasks[".harness/tasks/…"]
+  RootAgents --> HMem[".edges/memory/…"]
+  RootAgents --> HTasks[".edges/tasks/…"]
   RootAgents --> Teaching["teaching/AGENTS.md"]
 
   RootReadme --> DomainTasks["tasks/… 本层入口"]
@@ -208,7 +208,7 @@ flowchart TB
 
 | 角色 | 文件 | 组成登记 | 下层组指向 |
 | --- | --- | --- | --- |
-| 系统入口 | `AGENTS.md` | 必有：`project-harness-*`（外加 constraints） | 其它 `AGENTS.md` |
+| 系统入口 | `AGENTS.md` | 必有：`edges-*`（外加 constraints） | 其它 `AGENTS.md` |
 | 组织清单 | `README.md` | 可选：`project-entries-*` | 其它 `README.md` |
 | 内容入口 | `INDEX.md` | 可选；有则当前为组织状态 | （若有下层组）同合同或按登记 |
 | Skill | `SKILL.md` | 同 INDEX；同目录可另有 `AGENTS.md` 作 harness | 同上 |
@@ -223,14 +223,14 @@ flowchart TB
 
 | 区块 | HTML 标记 | Markdown 标题 |
 | --- | --- | --- |
-| 外层 | `project-harness` | （无独立 H2） |
-| 硬约束 | `project-harness-constraints` | `本层硬约束` |
-| 本层 | `project-harness-local` | `本层系统维护信息` |
-| 下层 | `project-harness-descendants` | `下层系统维护信息` |
+| 外层 | `edges` | （无独立 H2） |
+| 硬约束 | `edges-constraints` | `本层硬约束` |
+| 本层 | `edges-local` | `本层系统维护信息` |
+| 下层 | `edges-descendants` | `下层系统维护信息` |
 
 读兼容旧标题：`本层组成`、`本层记忆`、`下层节点`、`下层记忆索引`、`下层作用域`、`本层重要约束`。写只发上表。
 
-本层系统维护信息：`.harness/memory`、skills、维护看板、evaluation、observation 等系统二材料，以及需要在本层发现的其它维护入口。下层系统维护信息：更窄作用域上的系统入口（其它目录的 `AGENTS.md`）。
+本层系统维护信息：`.edges/memory`、skills、维护看板、evaluation、observation 等系统二材料，以及需要在本层发现的其它维护入口。下层系统维护信息：更窄作用域上的系统入口（其它目录的 `AGENTS.md`）。
 
 ### `README.md`（组织清单）
 
@@ -243,7 +243,7 @@ flowchart TB
 
 ### 类型入口（Q18=A）
 
-类型入口（如 `.harness/memory/projects/` 下的索引）**统一为组织清单**：`README.md`，`type=readme`，组成用 `project-entries-*`。层 `AGENTS.md` 的本层系统维护信息链到这些 README。  
+类型入口（如 `.edges/memory/projects/` 下的索引）**统一为组织清单**：`README.md`，`type=readme`，组成用 `project-entries-*`。层 `AGENTS.md` 的本层系统维护信息链到这些 README。  
 读兼容旧 `AGENTS.md` + `project-memory-type` / `project-memory-entries`；写与迁移后只发 README 规范。`project-memory-type` 身份头若仍需要区分「这是哪类记忆目录」，可留在 README 或目录约定里——实施计划定落点，但**列表区块不再用 `project-memory-entries`**。
 
 ## 遍历规则（核心）
@@ -286,7 +286,7 @@ flowchart TB
 
 **非目标：**
 
-- 本轮不改 `.harness/` 目录名、`edges memory` 命令名、skill 目录名 `project-memory-*`。
+- 本轮不改 `.edges/` 目录名、`edges memory` 命令名、skill 目录名 `project-memory-*`。
 - 不自动给所有目录铺 AGENTS。
 - 不把虚拟超节点默认写成文件。
 - 不借迁移改写 `posts/` 正文（改名除外）。
@@ -301,7 +301,7 @@ flowchart TB
 
 ## 验收（实施后）
 
-- 新建/刷新的系统入口只含 `project-harness` 标记与「本层硬约束 / 本层系统维护信息 / 下层系统维护信息」。
+- 新建/刷新的系统入口只含 `edges` 标记与「本层硬约束 / 本层系统维护信息 / 下层系统维护信息」。
 - 组织清单只含 `project-entries-*` 与「本层内容 / 下层内容」。
 - 同目录双文件 traverse 单测：系统一孩子不出现在 AGENTS 组成解析结果中。
 - `index.md` 迁移 dry-run / apply 幂等；posts 仅文件名变更。

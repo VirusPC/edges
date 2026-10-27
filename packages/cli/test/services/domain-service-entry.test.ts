@@ -9,7 +9,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 import { getNote } from "../../src/services/notes/service.js";
 import { getProject } from "../../src/services/projects/service.js";
 import { createManagedSkill } from "../../src/services/skills/service.js";
-import { initMemory, migrateMemory } from "../../src/services/memory/service.js";
+import { initMemory } from "../../src/services/memory/service.js";
 import { initMemory as initMemoryFromModule } from "../../src/services/memory/init.js";
 import { updateTask } from "../../src/services/tasks/service.js";
 import { updateTask as updateTaskFromModule } from "../../src/services/tasks/write.js";
@@ -39,10 +39,8 @@ test("note and project services reject paths outside their leaf folder", async (
 
 test("domain service entry re-exports the module implementation", () => {
   assert.equal(initMemory, initMemoryFromModule);
-  assert.equal(typeof migrateMemory, "function");
   const memoryService = readFileSync(path.resolve(here, "../../src/services/memory/service.ts"), "utf8");
-  assert.match(memoryService, /import\("\.\/migrate\.js"\)/);
-  assert.doesNotMatch(memoryService, /from ["']\.\/migrate\.js["']/);
+  assert.doesNotMatch(memoryService, /migrateMemory|from ["']\.\/migrate\.js["']|import\(["']\.\/migrate\.js["']\)/);
   assert.equal(typeof createManagedSkill, "function");
   assert.equal(updateTask, updateTaskFromModule);
   assert.equal(loadServerEnv, loadServerEnvFromModule);

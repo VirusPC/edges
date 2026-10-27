@@ -121,8 +121,8 @@ test("edges skills init forwards -- tokens verbatim and still writes skill index
     { env: {} },
   );
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
-  assert.equal(existsSync(path.join(root, ".harness/skills/managed/README.md")), true);
-  assert.equal(existsSync(path.join(root, ".harness/skills/referenced/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/skills/managed/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/skills/referenced/README.md")), true);
   const dir = resolveBundledSkillsDir();
   assert.equal(calls.length, 1);
   assert.equal(calls[0]!.stdio, "inherit");
@@ -222,7 +222,7 @@ test("running edges skills init twice installs twice", async (t) => {
   assert.equal(first.exitCode, 0, first.stdout + first.stderr);
   assert.equal(second.exitCode, 0, second.stdout + second.stderr);
   assert.equal(calls.length, 2);
-  assert.equal(existsSync(path.join(root, ".harness/skills/managed/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/skills/managed/README.md")), true);
 });
 
 test("a skills process that cannot start fails with exit code 1", async (t) => {
@@ -262,9 +262,9 @@ test("vercel exit 3 is the process exit code and the envelope is SKILLS_INSTALL_
   assert.equal(body.status, "failed");
   assert.equal(body.errorCode, "SKILLS_INSTALL_FAILED");
   assert.notEqual(body.errorCode, "VALIDATION_ERROR");
-  assert.ok(body.created.includes(".harness/skills/managed/README.md"), body.created.join(","));
+  assert.ok(body.created.includes(".edges/skills/managed/README.md"), body.created.join(","));
   assert.equal(existsSync(path.join(root, "AGENTS.md")), true);
-  assert.equal(existsSync(path.join(root, ".harness/skills/managed/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/skills/managed/README.md")), true);
 });
 
 test("edges init notes -- -y warns and does not install", async (t) => {
@@ -274,8 +274,8 @@ test("edges init notes -- -y warns and does not install", async (t) => {
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   assert.match(result.stderr, /skills was not selected; ignoring install tokens: -y/);
   assert.equal(calls.length, 0);
-  assert.equal(existsSync(path.join(root, ".harness/notes/README.md")), true);
-  assert.equal(existsSync(path.join(root, ".harness/skills/managed/README.md")), false);
+  assert.equal(existsSync(path.join(root, ".edges/notes/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/skills/managed/README.md")), false);
 });
 
 test("memory type selection does not warn when skills is in the resolved module set", () => {
@@ -351,10 +351,10 @@ test("multi-value --memory-types before -- is not forwarded and is not a module"
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   const body = JSON.parse(result.stdout) as { modules: string[] };
   assert.deepEqual(body.modules, ["memory", "skills", "notes", "projects"]);
-  assert.equal(existsSync(path.join(root, ".harness/memory/projects/README.md")), true);
-  assert.equal(existsSync(path.join(root, ".harness/memory/feedbacks/README.md")), true);
-  assert.equal(existsSync(path.join(root, ".harness/memory/references/README.md")), false);
-  assert.equal(existsSync(path.join(root, ".harness/memory/users/README.md")), false);
+  assert.equal(existsSync(path.join(root, ".edges/memory/projects/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/memory/feedbacks/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/memory/references/README.md")), false);
+  assert.equal(existsSync(path.join(root, ".edges/memory/users/README.md")), false);
   assert.deepEqual(calls[0]!.args.slice(1), skillsAddArgs(resolveBundledSkillsDir(), ["-y"]));
 });
 

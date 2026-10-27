@@ -57,14 +57,14 @@ function relocated(file: string): string {
   return file;
 }
 function privatePath(file: string): boolean {
-  return /(?:^|\/)(?:\.memory|\.harness\/memory)\/(?:users|private)(?:\/|$)/.test(
+  return /(?:^|\/)(?:\.memory|\.edges\/memory)\/(?:users|private)(?:\/|$)/.test(
     file,
   );
 }
 function activeDocumentation(file: string): boolean {
-  if (/(?:^|\/)\.harness\/memory\//.test(file)) return false;
+  if (/(?:^|\/)\.edges\/memory\//.test(file)) return false;
   if (file.endsWith("/AGENTS.md") || file === "AGENTS.md") return true;
-  if (file.includes("/.harness/") || file.startsWith(".harness/")) return false;
+  if (file.includes("/.edges/") || file.startsWith(".edges/")) return false;
   if (/(?:^|\/)CHANGELOG\.md$/.test(file) || file.startsWith("archive/"))
     return false;
   return (

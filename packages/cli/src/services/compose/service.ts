@@ -45,8 +45,8 @@ export interface ComposeAddInput {
   name: string;
   /**
    * Checkout directory relative to the scope directory.
-   * Omitted directories use `.harness/compose/<name>`. Absolute and `~` paths are rejected.
-   * The href written in `compose/README.md` is relative to `.harness/compose/`.
+   * Omitted directories use `.edges/compose/<name>`. Absolute and `~` paths are rejected.
+   * The href written in `compose/README.md` is relative to `.edges/compose/`.
    */
   directory?: string;
   description?: string;
@@ -103,7 +103,7 @@ async function requireScope(env: NodeJS.ProcessEnv): Promise<{ scope: string; se
   return { scope: session.scope, service: session.service };
 }
 
-/** Create `compose/README.md` and its link from `.harness/README.md` when either is missing. */
+/** Create `compose/README.md` and its link from `.edges/README.md` when either is missing. */
 export async function ensureComposeEntry(scope: string, service: NodeService): Promise<ComposeReadmeNode> {
   const file = composeReadmePath(scope);
   await ensureScopeReadme(scope, service);

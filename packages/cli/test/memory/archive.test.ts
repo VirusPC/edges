@@ -11,7 +11,7 @@ import { target } from '../../src/commands/memory/utils/command.js';
 import { resolveTarget, TYPE_INDEX_FILE_NAME } from '../../src/services/memory/paths.js';
 import { backupUserMemory, restoreUserMemory } from '../../src/services/memory/archive.js';
 
-const users = '.harness/memory/users';
+const users = '.edges/memory/users';
 async function fixture(t: TestContext) {
   const root = await realpath(await mkdtemp(path.join(tmpdir(), 'user-memory-archive-')));
   t.after(() => rm(root, { recursive: true, force: true }));
@@ -115,10 +115,10 @@ test('restore rejects linked harness ancestors; force replaces only users link, 
   const external = path.join(root, 'external');
   await mkdir(external);
   await writeFile(path.join(external, 'keep'), 'external');
-  await symlink(external, path.join(destination, '.harness'));
+  await symlink(external, path.join(destination, '.edges'));
   await assert.rejects(restoreUserMemory({ archive, repoDir: destination, force: true }), /symbolic|符号链接/);
-  await rm(path.join(destination, '.harness'));
-  await mkdir(path.join(destination, '.harness/memory'), { recursive: true });
+  await rm(path.join(destination, '.edges'));
+  await mkdir(path.join(destination, '.edges/memory'), { recursive: true });
   await symlink(external, path.join(destination, users));
   await assert.rejects(restoreUserMemory({ archive, repoDir: destination }), /force|symbolic|符号链接/);
   await restoreUserMemory({ archive, repoDir: destination, force: true });
@@ -265,8 +265,8 @@ test('nested compression cannot bypass the expanded tar byte limit', async t => 
 });
 
 async function exposePrivateMember(root: string, name: string) {
-  await mkdir(path.join(root, '.harness'), { recursive: true });
-  await writeFile(path.join(root, '.harness/.gitignore'), `!memory/users/\nmemory/users/*\n!memory/users/${name}\n`);
+  await mkdir(path.join(root, '.edges'), { recursive: true });
+  await writeFile(path.join(root, '.edges/.gitignore'), `!memory/users/\nmemory/users/*\n!memory/users/${name}\n`);
 }
 
 test('backup refuses an actually unignored source member before creating its archive', async t => {
@@ -337,7 +337,7 @@ for (const exposed of [false, true])
     const external = path.join(root, 'external');
     await mkdir(external);
     await writeFile(path.join(external, 'keep'), 'external bytes');
-    await mkdir(path.join(destination, '.harness/memory'), { recursive: true });
+    await mkdir(path.join(destination, '.edges/memory'), { recursive: true });
     await symlink(external, path.join(destination, users));
     if (exposed) {
       await exposePrivateMember(destination, 'user_pref.md');

@@ -40,8 +40,8 @@ MOVED_SCRIPTS = (
 
 # Old directory → new directory. Longest prefix wins.
 DIR_MOVES = (
-    (".harness/evaluation", "packages/evaluation"),
-    (".harness/observation", "packages/observation"),
+    (".edges/evaluation", "packages/evaluation"),
+    (".edges/observation", "packages/observation"),
     ("mcp-servers", "packages/mcp-servers"),
     ("system-prompt", "packages/system-prompt"),
     ("services", "packages/services"),
@@ -284,9 +284,9 @@ def rewrite_prefixes(text: str) -> tuple[str, int]:
         nonlocal count
         count += n
 
-    text, n = re.subn(r"(?<!packages/)\.harness/evaluation", "packages/evaluation", text)
+    text, n = re.subn(r"(?<!packages/)\.edges/evaluation", "packages/evaluation", text)
     bump(n)
-    text, n = re.subn(r"(?<!packages/)\.harness/observation", "packages/observation", text)
+    text, n = re.subn(r"(?<!packages/)\.edges/observation", "packages/observation", text)
     bump(n)
     text, n = EXTENSIONS_PREFIX.subn(r"packages/\1/", text)
     bump(n)

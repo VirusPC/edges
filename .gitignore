@@ -45,7 +45,7 @@ user-memory-backup-*.tar.gz
 user-memory-backup-*.zip
 
 # New scope-local private memory: include indexes; retain legacy rules above.
-**/.harness/memory/users/
+**/.edges/memory/users/
 # Custom private types receive explicit per-scope rules from init/migrate.
 # Migration journals include private material and must never enter Git.
 **/.project-memory-migration/
@@ -56,7 +56,7 @@ knowledge/tasks/_site/
 
 # LoCoMo / evaluation caches (full upstream dump or clone)
 packages/evaluation/.cache/
-**/.harness/evaluation/.cache/
+**/.edges/evaluation/.cache/
 
 # Review shell Vite outDir (ADR 0022). Source is packages/apps/tasks-review-app/.
 packages/cli/src/commands/tasks/project/assets/review-page/
@@ -77,13 +77,13 @@ packages/cli/skills/
 **/.recursive-layout-migration/
 
 # Private harness type user
-.harness/memory/users/
+.edges/memory/users/
 
-/.harness/memory/users/
+/.edges/memory/users/
 
-/teaching/.harness/memory/users/
+/teaching/.edges/memory/users/
 
-/packages/evaluation/.harness/memory/users/
+/packages/evaluation/.edges/memory/users/
 
 # Owner-local correction recovery snapshots (private opt-in may contain secrets).
 **/.ownership-correction/

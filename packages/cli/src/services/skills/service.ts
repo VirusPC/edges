@@ -1,5 +1,5 @@
 import path from "node:path";
-import { materialHarnessRoot } from "../../domain/config/harness-materials.js";
+import { materialHarnessRoot } from "../../domain/config/edges-materials.js";
 import { initScope, type InitScopeOptions } from "../init/service.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { SkillNode } from "../../domain/models/skills/skill-node.js";

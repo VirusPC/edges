@@ -1,5 +1,15 @@
 # Changelog
 
+## [Unreleased]
+
+## [5.0.0] - 2026-10-27
+
+### Changed
+
+- 材料目录改为 `.edges`。层标记改为 `edges` / `edges-*`。`project-memory-*` 与 `project-entries-*` 仍按原职责使用。
+- 不再提供 `edges memory migrate` 或 `$project-memory-migrate`。仍停在 `.memory` 的，先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 `docs/migrations/2026-10-27-rename-harness-to-edges.md` 改目录名。
+- 类型入口只写 `.edges/<module>/<plural>/README.md`，列表用 `project-entries-*`（本层内容 / 下层内容）。层入口链到这些 README。空的同目录类型 `AGENTS.md` 桩删除。尚未迁走、仍带条目列表的旧类型索引入口只读兼容。
+
 ## [4.0.1] - 2026-10-20
 
 ### Changed
@@ -16,7 +26,7 @@
 
 ### Changed
 
-- `edges init` 与各模块 init 不再接受 `--index-group`。新的子作用域按路径登记：`AGENTS.md` 在父级 `.harness` 下记入本层，否则记入下层。已有登记保持原组。`edges memory doctor --apply` 按同一规则补缺失的父级链接。
+- `edges init` 与各模块 init 不再接受 `--index-group`。新的子作用域按路径登记：`AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已有登记保持原组。`edges memory doctor --apply` 按同一规则补缺失的父级链接。
 
 ## [3.6.0] - 2026-10-08
 
@@ -28,13 +38,13 @@
 
 ### Changed
 
-- 未选择类型时，推荐模块包含 projects 与 notes。选定类型并初始化后，会生成 `.harness/projects/README.md` 与 `.harness/notes/README.md` 并登记到本层系统维护信息。
+- 未选择类型时，推荐模块包含 projects 与 notes。选定类型并初始化后，会生成 `.edges/projects/README.md` 与 `.edges/notes/README.md` 并登记到本层系统维护信息。
 
 ## [3.3.0] - 2026-10-07
 
 ### Changed
 
-- 类型入口改为 `.harness/<module>/<plural>/AGENTS.md`，列表用 `project-harness-*`。残留 `README.md` 只读兼容。层入口链到这些 AGENTS，不把 README 链接抄进去。
+- 类型入口改为 `.edges/<module>/<plural>/AGENTS.md`，列表用 `edges-*`。残留 `README.md` 只读兼容。层入口链到这些 AGENTS，不把 README 链接抄进去。
 - `tasks` / `note` 不再使用 `--index-group`。任务范围只讲 `--scope` / `--super` / `--all`；list 顺着 `AGENTS.md` children 一次 traverse。
 
 ## [3.1.1] - 2026-10-05
@@ -54,11 +64,6 @@ All notable changes to this skill will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-### Changed
-
-- 类型入口只写 `.harness/<module>/<plural>/README.md`，列表用 `project-entries-*`（本层内容 / 下层内容），与 ADR 0029 一致。memory 与 skills 相同。层入口链到这些 README。空的同目录类型 `AGENTS.md` 桩删除；不要为了装组织清单在类型目录上 init `AGENTS.md`。层系统入口仍是 `AGENTS.md`。尚未迁走、仍带条目列表的旧类型索引入口只读兼容。
 
 ## [3.0.0] - 2026-10-04
 
@@ -74,7 +79,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- 初始化改为按选择采用 `.harness/memory` 与 `.harness/skills` 类型，保留稀疏作用域、原位技能权限和私有忽略规则；旧布局交独立迁移器。
+- 初始化改为按选择采用 `.edges/memory` 与 `.edges/skills` 类型，保留稀疏作用域、原位技能权限和私有忽略规则；旧布局交独立迁移器。
 
 ## [1.7.0] - 2026-09-11
 
@@ -150,7 +155,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - 按 semver 标记的首个版本。
 
-[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@4.0.1...HEAD
+[Unreleased]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@5.0.0...HEAD
+[5.0.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@4.0.1...skill/project-memory-init@5.0.0
 [4.0.1]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@4.0.0...skill/project-memory-init@4.0.1
 [4.0.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@3.7.0...skill/project-memory-init@4.0.0
 [1.7.0]: https://github.com/VirusPC/edges/compare/skill/project-memory-init@1.6.0...skill/project-memory-init@1.7.0

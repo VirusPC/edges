@@ -8,7 +8,7 @@ import { addComposeUpdateCommand } from "./compose/update.js";
 const COMPOSE_AFTER_HELP = `
 Daily commands, named after git submodule: add, list, update. There is no
 unregister / push / sync: remove an entry by deleting its line from
-.harness/compose/README.md (and git submodule deinit / git rm the directory if
+.edges/compose/README.md (and git submodule deinit / git rm the directory if
 you want it gone); commit and push inside the submodule with plain git.
 compose doctor is migration-only: it moves a Compose block off AGENTS.md.
 `;

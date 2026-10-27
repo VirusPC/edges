@@ -16,8 +16,8 @@ function fixture(t: any) {
   const root = fs.realpathSync(fs.mkdtempSync(join(tmpdir(), "ownership-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   execFileSync("git", ["init", "-q", root]);
-  const source = ".harness/memory/projects/project_child.md",
-    target = "child/.harness/memory/projects/project_child.md";
+  const source = ".edges/memory/projects/project_child.md",
+    target = "child/.edges/memory/projects/project_child.md";
   const latest =
     "---\nname: child\nmetadata:\n  vendor: keep\n---\nChanged after migration. [reference](../../../guide.md)\n";
   const after = latest.replace("../../../guide.md", "../../../../guide.md");
@@ -25,15 +25,15 @@ function fixture(t: any) {
   put(root, "guide.md", "guide");
   put(
     root,
-    ".harness/memory/projects/project_root_new.md",
+    ".edges/memory/projects/project_root_new.md",
     "new independent root record",
   );
-  const index = ".harness/memory/projects/AGENTS.md";
+  const index = ".edges/memory/projects/AGENTS.md";
   put(root, index, "# Root manual\nchild and new root entries\n");
   put(
     root,
     ".gitignore",
-    "**/.ownership-correction/\n**/.harness/memory/users/\n",
+    "**/.ownership-correction/\n**/.edges/memory/users/\n",
   );
   return {
     root,
@@ -59,7 +59,7 @@ function fixture(t: any) {
           after: "# Root manual\nnew root entry\n",
         },
         {
-          path: "child/.harness/memory/projects/AGENTS.md",
+          path: "child/.edges/memory/projects/AGENTS.md",
           beforeSha256: null,
           after: "# Original custom instructions\nchild entry\n",
         },
@@ -98,14 +98,14 @@ test("public correction dry-run is read-only; apply preserves latest bytes, manu
   assert.equal(fs.existsSync(join(f.root, f.source)), false);
   assert.equal(
     fs.readFileSync(
-      join(f.root, ".harness/memory/projects/project_root_new.md"),
+      join(f.root, ".edges/memory/projects/project_root_new.md"),
       "utf8",
     ),
     "new independent root record",
   );
   assert.equal(
     fs.readFileSync(
-      join(f.root, "child/.harness/memory/projects/AGENTS.md"),
+      join(f.root, "child/.edges/memory/projects/AGENTS.md"),
       "utf8",
     ),
     "# Original custom instructions\nchild entry\n",
@@ -140,11 +140,11 @@ for (const kind of ["source", "target", "index"] as const)
 test("public correction refuses undeclared Skill assets and unsafe/protected paths", async (t) => {
   const f = fixture(t),
     m = await load();
-  put(f.root, ".harness/skills/managed/demo/SKILL.md", "skill");
-  put(f.root, ".harness/skills/managed/demo/new-resource.txt", "unreviewed");
+  put(f.root, ".edges/skills/managed/demo/SKILL.md", "skill");
+  put(f.root, ".edges/skills/managed/demo/new-resource.txt", "unreviewed");
   f.manifest.units.push({
-    source: ".harness/skills/managed/demo",
-    target: "child/.harness/skills/managed/demo",
+    source: ".edges/skills/managed/demo",
+    target: "child/.edges/skills/managed/demo",
     files: ["SKILL.md"],
   });
   assert.throws(() => m.runPublicCorrection(f.root, f.manifest, true), /unit/);
@@ -178,8 +178,8 @@ async function privateFixture(t: any) {
   const f = fixture(t),
     g = await import("../../src/services/memory/migrate.js");
   const from = "extensions/.memory/secrets",
-    current = ".harness/memory/secrets",
-    target = "extensions/.harness/memory/secrets";
+    current = ".edges/memory/secrets",
+    target = "extensions/.edges/memory/secrets";
   const intro =
     "<!-- project-memory-type:start -->\nname: secret\nmodule: memory\nwritable: true\ngitignore: true\nformat: ordinary\n<!-- project-memory-type:end -->\n# Private custom guidance\n<!-- project-memory-entries:start -->\n- [x](secret_x.md) — x\n<!-- project-memory-entries:end -->\n";
   const operations = ["AGENTS.md", "secret_x.md"].map((name) => {
@@ -198,12 +198,12 @@ async function privateFixture(t: any) {
   put(
     f.root,
     "AGENTS.md",
-    "# root\n<!-- project-memory-local:start -->\n- [secret](.harness/memory/secrets/AGENTS.md) — private\n<!-- project-memory-local:end -->\n",
+    "# root\n<!-- project-memory-local:start -->\n- [secret](.edges/memory/secrets/AGENTS.md) — private\n<!-- project-memory-local:end -->\n",
   );
   put(
     f.root,
     ".gitignore",
-    "**/.ownership-correction/\n**/.recursive-layout-migration/\n**/.harness/memory/secrets/\n",
+    "**/.ownership-correction/\n**/.recursive-layout-migration/\n**/.edges/memory/secrets/\n",
   );
   fs.chmodSync(join(f.root, current), 0o700);
   const journal = {
@@ -363,13 +363,13 @@ test("maintained public correction manifest restores every reviewed record and p
     "extensions/skills/project-memory-init",
     "shared-extensions",
     "knowledge/notes",
-    ".harness/tasks",
+    ".edges/tasks",
   ]) {
     const node = new AgentsNode(join(f.root, owner, "AGENTS.md")).parse(
       fs.readFileSync(join(f.root, owner, "AGENTS.md"), "utf8"),
     );
     assert.equal(
-      node.children.filter((c) => c.target.startsWith(".harness/")).length,
+      node.children.filter((c) => c.target.startsWith(".edges/")).length,
       5,
     );
     assert.equal(
@@ -383,7 +383,7 @@ test("maintained public correction manifest restores every reviewed record and p
   for (const intro of manifest.introductions) {
     const owner = intro.restoredIndex.slice(
       0,
-      intro.restoredIndex.lastIndexOf("/.harness/"),
+      intro.restoredIndex.lastIndexOf("/.edges/"),
     );
     const text = fs.readFileSync(join(f.root, intro.restoredIndex), "utf8");
     const type = parseTypeMeta(text)!;
@@ -406,7 +406,7 @@ async function interruptPrivate(f: Awaited<ReturnType<typeof privateFixture>>) {
     "../../../../scripts/migrations/restore-local-ownership.mts",
     import.meta.url,
   ).href;
-  const code = `import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';const unlink=fs.unlinkSync;fs.unlinkSync=(path)=>{if(String(path).endsWith('/.harness/memory/secrets/AGENTS.md'))throw Error('injected-before-retire');return unlink(path);};syncBuiltinESMExports();const m=await import(${JSON.stringify(moduleUrl)});m.runPrivateCorrection(${JSON.stringify(f.root)},true);`;
+  const code = `import fs from 'node:fs';import {syncBuiltinESMExports} from 'node:module';const unlink=fs.unlinkSync;fs.unlinkSync=(path)=>{if(String(path).endsWith('/.edges/memory/secrets/AGENTS.md'))throw Error('injected-before-retire');return unlink(path);};syncBuiltinESMExports();const m=await import(${JSON.stringify(moduleUrl)});m.runPrivateCorrection(${JSON.stringify(f.root)},true);`;
   assert.throws(
     () =>
       execFileSync(
@@ -602,8 +602,8 @@ test("private correction retains owner execution and ordinary private modes thro
 test("public Skill unit preserves actual directory mode across clones and repeat", async (t) => {
   const f = fixture(t),
     m = await load();
-  const source = ".harness/skills/managed/demo",
-    target = "child/.harness/skills/managed/demo";
+  const source = ".edges/skills/managed/demo",
+    target = "child/.edges/skills/managed/demo";
   put(f.root, `${source}/SKILL.md`, f.latest);
   fs.chmodSync(join(f.root, source), 0o700);
   const manifest = {
@@ -634,9 +634,9 @@ test("public Skill unit preserves actual directory mode across clones and repeat
 });
 
 for (const [spelling, href] of [
-  ["fragment", ".harness/memory/secrets/AGENTS.md#private"],
-  ["query", ".harness/memory/secrets/AGENTS.md?view=private"],
-  ["encoded", ".harness/memory/%73ecrets/AGENTS.md"],
+  ["fragment", ".edges/memory/secrets/AGENTS.md#private"],
+  ["query", ".edges/memory/secrets/AGENTS.md?view=private"],
+  ["encoded", ".edges/memory/%73ecrets/AGENTS.md"],
 ] as const) {
   for (const location of ["old root", "destination"] as const) {
     test(`private correction resolves ${spelling} ${location} ownership and preserves traversal on repeat`, async (t) => {
@@ -651,7 +651,7 @@ for (const [spelling, href] of [
       let rootSource = fs.readFileSync(rootEntry, "utf8");
       if (location === "old root")
         rootSource = rootSource.replace(
-          ".harness/memory/secrets/AGENTS.md",
+          ".edges/memory/secrets/AGENTS.md",
           href,
         );
       rootSource +=

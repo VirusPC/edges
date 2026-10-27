@@ -10,11 +10,10 @@ import { addMemoryUpdateCommand } from './memory/update.js';
 import { addMemoryAddTypeCommand } from './memory/add-type.js';
 import { addMemoryDoctorCommand } from './memory/doctor.js';
 import { addMemoryBackupCommand } from './memory/backup.js';
-import { addMemoryMigrateCommand } from './memory/migrate.js';
 import { addMemoryRestoreCommand } from './memory/restore.js';
 
 export function addMemoryCommand(program: Command, ctx: CliContext): void {
-  const memory = program.command('memory').description('System entry init, project memory, indexes, and explicit layout migration');
+  const memory = program.command('memory').description('System entry init, project memory, and indexes');
   memory.action(() => { ctx.result = usageError('missing memory command. Use edges memory --help.', 'memory'); });
   addMemoryInitCommand(memory, ctx);
   addMemoryListCommand(memory, ctx);
@@ -27,5 +26,4 @@ export function addMemoryCommand(program: Command, ctx: CliContext): void {
   addMemoryDoctorCommand(memory, ctx);
   addMemoryBackupCommand(memory, ctx);
   addMemoryRestoreCommand(memory, ctx);
-  addMemoryMigrateCommand(memory, ctx);
 }

@@ -2,7 +2,7 @@ import { AgentsNode } from "../../domain/models/agents/agents-node.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { ENTRIES_SECTIONS } from "../../domain/config/sections.js";
 import { decodeBody, createAgentsDocument, serializeNode } from "../../domain/models/node/document.js";
-import { placeHarnessMaterial } from "../../domain/config/harness-materials.js";
+import { placeHarnessMaterial } from "../../domain/config/edges-materials.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { NodeService } from '../node/node-service.js';
 import { assertBoardPath } from './board.js';
@@ -98,7 +98,7 @@ export function parseProjectAgents(markdown: string): {
 
   const body = markdown.slice(heading.length + 1);
   const boundary = body.search(
-    /^(?:## |<!-- (?:project-harness|project-memory|project-entries|task-projects)(?::|-))/m,
+    /^(?:## |<!-- (?:edges|project-memory|project-entries|task-projects)(?::|-))/m,
   );
   const descriptionSource = boundary === -1 ? body : body.slice(0, boundary);
   const description = parseProjectDescription(descriptionSource);
@@ -176,7 +176,7 @@ async function resolveProjectEntry(
 function boardIsVirtual(repoPath: BoardTarget): boolean {
   return resolveBoard(repoPath).purpose === "domain";
 }
-/** Absolute tasks material from harness-materials. Virtual boards sit on the scope; maintenance boards sit under `.harness`. */
+/** Absolute tasks material from edges-materials. Virtual boards sit on the scope; maintenance boards sit under `.edges`. */
 function tasksMaterialAbsPath(repoPath: BoardTarget): string {
   return placeHarnessMaterial(nativeTaskPath(scopeDir(repoPath)), "tasks", {
     super: boardIsVirtual(repoPath),
@@ -336,7 +336,7 @@ export async function refreshProjectIndex(
   const listChildren = synced(list, readmeUpdates);
   if (listChildren) await service.update(list, listChildren);
   const owner = await service.get(path.join(nativeTaskPath(scopeDir(repoPath)), ENTRY_NAMES.internal), AgentsNode);
-  const harnessPrefix = owner ? path.join(owner.directoryPath, ".harness") + path.sep : "";
+  const harnessPrefix = owner ? path.join(owner.directoryPath, ".edges") + path.sep : "";
   // A child already sitting in the board directory counts as hung, whatever its filename.
   const alreadyHung = owner?.children.some((ref) => path.dirname(ref.id) === boardDir) === true;
   if (owner && material.startsWith(harnessPrefix) && !alreadyHung) {

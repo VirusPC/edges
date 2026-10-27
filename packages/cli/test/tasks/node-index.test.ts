@@ -10,9 +10,9 @@ import { TaskNode } from "../../src/domain/models/tasks/task-node.js";
 
 async function fixture() {
   const root = await realpath(await mkdtemp(path.join(tmpdir(), "edges-task-index-")));
-  await mkdir(path.join(root, ".harness/tasks"), { recursive: true });
+  await mkdir(path.join(root, ".edges/tasks"), { recursive: true });
   await writeFile(path.join(root, "AGENTS.md"), "# Scope\n");
-  return { root, board: path.join(root, ".harness/tasks") };
+  return { root, board: path.join(root, ".edges/tasks") };
 }
 
 const call = (root: string, args: string[]) =>

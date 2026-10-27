@@ -111,7 +111,7 @@ test("Memory directory format indexes only entry, updates by same slug and docto
   assert.equal(updated.exitCode, 0, updated.stdout);
   assert.equal(JSON.parse(updated.stdout).path, result.path);
   assert.equal(
-    fs.existsSync(path.join(root, ".harness/memory/projects/project_unit.md")),
+    fs.existsSync(path.join(root, ".edges/memory/projects/project_unit.md")),
     false,
   );
   const doctor = await call(["doctor"]);
@@ -172,11 +172,11 @@ test("Skill type enumeration ignores resource recovery directories", async (t) =
   const root = fixture(t);
   await initSkills({ targetDir: root, skillTypes: ["managed"] });
   put(
-    path.join(root, ".harness/skills/managed/kept/SKILL.md"),
+    path.join(root, ".edges/skills/managed/kept/SKILL.md"),
     "---\nname: kept\ndescription: Kept\n---\nBody",
   );
   put(
-    path.join(root, ".harness/skills/managed/.node-recovery-example/SKILL.md"),
+    path.join(root, ".edges/skills/managed/.node-recovery-example/SKILL.md"),
     "---\nname: recovered\ndescription: Recovery only\n---\nBody",
   );
   const { buildEntryIndex } =
@@ -208,7 +208,7 @@ test("Skill import validates full fields before writing and preserves its source
   assert.notEqual(result.exitCode, 0);
   assert.match(result.stdout, /SKILL.md.*name/);
   assert.equal(
-    fs.existsSync(path.join(root, ".harness/skills/managed/example")),
+    fs.existsSync(path.join(root, ".edges/skills/managed/example")),
     false,
   );
   assert.equal(fs.readFileSync(source, "utf8"), "# Invalid skill");
@@ -255,7 +255,7 @@ test("Memory rejects conflicting import content and wrong entry types before wri
   assert.notEqual(wrong.exitCode, 0);
   assert.match(wrong.stdout, /expected INDEX.md/);
   assert.equal(
-    fs.existsSync(path.join(root, ".harness/memory/projects/project_example")),
+    fs.existsSync(path.join(root, ".edges/memory/projects/project_example")),
     false,
   );
 });
@@ -282,20 +282,20 @@ test("business imports reject known source directory types instead of silently r
   assert.notEqual(result.exitCode, 0);
   assert.match(result.stdout, /type.*task|task.*type/);
   assert.equal(
-    fs.existsSync(path.join(root, ".harness/memory/projects/project_wrong")),
+    fs.existsSync(path.join(root, ".edges/memory/projects/project_wrong")),
     false,
   );
 });
 test("doctor reports legacy memory migration without erasing the existing index", async (t) => {
   const root = fixture(t);
   await initMemory({ targetDir: root, memoryTypes: ["project"] });
-  const index = path.join(root, ".harness/memory/projects/README.md");
+  const index = path.join(root, ".edges/memory/projects/README.md");
   const original = fs
     .readFileSync(index, "utf8")
     .replace("- 暂无条目。", "- [Old](project_old.md) — Legacy");
   put(index, original);
   put(
-    path.join(root, ".harness/memory/projects/project_old.md"),
+    path.join(root, ".edges/memory/projects/project_old.md"),
     "---\ndescription: Legacy\n---\nOld",
   );
   const result = await run(["--scope", root, "memory", "doctor", "--apply"], {

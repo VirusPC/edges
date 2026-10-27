@@ -1,6 +1,6 @@
 import { existsSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
-import { placeHarnessMaterial } from "../../domain/config/harness-materials.js";
+import { placeHarnessMaterial } from "../../domain/config/edges-materials.js";
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import type { NodeReference } from "../../domain/core/types.js";
@@ -74,7 +74,7 @@ function scopeReadmeSeed(): string {
   return `# ${SCOPE_README_ENTRY_NAME}\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n<!-- project-entries-local:end -->\n`;
 }
 
-/** `.harness/README.md` is an ordinary ReadmeNode. No YAML frontmatter. */
+/** `.edges/README.md` is an ordinary ReadmeNode. No YAML frontmatter. */
 export async function ensureScopeReadme(scopeDir: string, service: NodeService): Promise<void> {
   const file = scopeReadmePath(scopeDir);
   if (existsSync(file)) return;
@@ -100,7 +100,7 @@ export async function ensureScopeReadmePointer(scopeDir: string, service: NodeSe
 }
 
 /**
- * Add a child on `.harness/README.md` when NodeService will not.
+ * Add a child on `.edges/README.md` when NodeService will not.
  * Notes, projects, and type indexes register through physicalParent on create.
  * The tasks board is skipped there, and repairs link an existing file.
  */

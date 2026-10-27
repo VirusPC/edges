@@ -1,5 +1,5 @@
 import { basename, dirname, join, resolve, sep } from "node:path";
-import { harnessMaterialById, tasksBoardDirName } from "../../config/harness-materials.js";
+import { harnessMaterialById, tasksBoardDirName } from "../../config/edges-materials.js";
 import {
   ENTRY_NAMES,
   LEAF_DIRECTORIES,
@@ -90,7 +90,7 @@ export function harnessPath(entryPath: string): string {
   return join(
     dirname(entryPath),
     ...(basename(entryPath) === ENTRY_NAMES.internal
-      ? [".harness", ENTRY_NAMES.internal]
+      ? [".edges", ENTRY_NAMES.internal]
       : [ENTRY_NAMES.internal]),
   );
 }
@@ -101,7 +101,7 @@ export function lifecycleUnits(
   coLocatedContent = false,
 ): readonly string[] {
   return basename(entryPath) === ENTRY_NAMES.internal && coLocatedContent
-    ? [entryPath, join(dirname(entryPath), ".harness")]
+    ? [entryPath, join(dirname(entryPath), ".edges")]
     : [dirname(entryPath)];
 }
 
@@ -134,14 +134,14 @@ export function resolveHref(
   }
 }
 
-/** Configured tasks material, a README under `.harness/`, or a project org list under the tasks board directory. */
+/** Configured tasks material, a README under `.edges/`, or a project org list under the tasks board directory. */
 export function isHarnessMaterial(id: string): boolean {
   const tasksPath = harnessMaterialById("tasks").path.split(sep).join("/");
   const norm = id.split(sep).join("/");
   if (norm.endsWith("/" + tasksPath)) return true;
   return (
     basename(id) === ENTRY_NAMES.readme &&
-    (dirname(id).split(sep).includes(".harness") ||
+    (dirname(id).split(sep).includes(".edges") ||
       basename(dirname(dirname(id))) === tasksBoardDirName())
   );
 }

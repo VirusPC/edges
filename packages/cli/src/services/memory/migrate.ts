@@ -1,5 +1,5 @@
 import { isWithinPath, canonicalPath } from '../../utils/filesystem.js';
-/** Explicit, journaled legacy migration. All planning is read-only. */
+/** Journal and path helpers for in-repo historical migration scripts. Not a CLI command. */
 import * as fs from "node:fs";
 import { basename, dirname, extname, join, relative, resolve } from "node:path";
 import { createHash, randomUUID } from "node:crypto";
@@ -11,8 +11,6 @@ import {
   isFile,
   isSymlink,
   readText,
-  resolveTarget,
-  resolveRoot,
   isScope,
   assertScopePath,
   ancestors,
@@ -196,7 +194,7 @@ export function planDirectory(
   return { source, target, mode: sourceMode, originalTargetMode, targetMode };
 }
 function validNewScope(scope: string) {
-  const harness = join(scope, ".harness");
+  const harness = join(scope, ".edges");
   if (!present(harness)) return false;
   assertScopePath(harness, scope);
   if (!isDirectory(harness) || !isScope(scope))
@@ -211,7 +209,7 @@ function validNewScope(scope: string) {
   for (const child of fs.readdirSync(harness))
     if (
       !["memory", "skills"].includes(child) &&
-      !text.includes(`](.harness/${child}/AGENTS.md)`)
+      !text.includes(`](.edges/${child}/AGENTS.md)`)
     )
       throw new Error(`unrelated-harness-conflict: ${child}`);
   return true;
@@ -312,12 +310,12 @@ export function planMigration(target: string, recursive = false): MigrationJob {
       : [];
   const diagnostics: MigrationDiagnostic[] = [];
   if (!owners.length) {
-    if (present(join(target, ".harness"))) validNewScope(target);
+    if (present(join(target, ".edges"))) validNewScope(target);
     for (const { base } of walk(target, true))
       if (
         (recursive || base === target) &&
         isScope(base) &&
-        isFile(join(base, ".harness/skills/referenced/AGENTS.md"))
+        isFile(join(base, ".edges/skills/referenced/AGENTS.md"))
       )
         diagnostics.push(...referencedDiagnostics(base));
     return {
@@ -554,7 +552,7 @@ export function planMigration(target: string, recursive = false): MigrationJob {
             if (!text.includes(`](${rel})`)) {
               const marker: string = text.includes("<!-- project-memory-local:end -->")
                 ? "<!-- project-memory-local:end -->"
-                : "<!-- project-harness-local:end -->";
+                : "<!-- edges-local:end -->";
               if (!text.includes(marker))
                 throw new Error(`missing-local-adoption-block: ${source}`);
               text = text.replace(
@@ -690,226 +688,4 @@ export function assertMigrationIgnores(
   const paths = [journal, ...sensitive];
   for (const path of [...paths, ...directories]) safeAncestors(path, root);
   assertPrivateIgnored(root, paths, [...directories]);
-}
-function ignoreBeforeCopy(target: string, job: MigrationJob) {
-  const ignore = join(target, ".gitignore");
-  safeAncestors(ignore, target);
-  if (isSymlink(ignore)) throw new Error("gitignore-is-symlink");
-  const existing = fs.existsSync(ignore) ? readText(ignore) : "",
-    rules = [
-      `/${MIGRATION_JOURNAL}/`,
-      ...job.private.map((p) => `/${relative(target, p)}/`),
-    ],
-    missing = rules.filter((r) => !existing.split(/\r?\n/).includes(r));
-  if (missing.length)
-    writeState(
-      ignore,
-      fileState(
-        `${existing.trimEnd()}\n\n# Private Project Memory migration\n${missing.join("\n")}\n`,
-        fs.existsSync(ignore) ? mode(ignore) : 0o644,
-      ),
-    );
-  assertMigrationIgnores(
-    target,
-    job.private,
-    job.operations.map((op) => op.target),
-    join(target, MIGRATION_JOURNAL, "journal.json"),
-  );
-}
-function validateSourceInventory(job: MigrationJob) {
-  const sources = new Set(
-      job.operations.filter((o) => o.source !== o.target).map((o) => o.source),
-    ),
-    dirs = new Set(job.directories);
-  for (const owner of job.legacyOwners ?? [])
-    for (const { base, files } of walk(join(owner, ".memory"), false, true)) {
-      if (!dirs.has(base))
-        throw new Error(`source-directory-added-before-retirement: ${base}`);
-      for (const name of files)
-        if (!sources.has(join(base, name)))
-          throw new Error(
-            `source-added-before-retirement: ${join(base, name)}`,
-          );
-    }
-}
-export function preflightMigration(target: string, job: MigrationJob) {
-  for (const directory of [
-    ...job.directories,
-    ...(job.legacyOwners ?? []),
-    ...job.owners,
-  ])
-    safeAncestors(join(directory, "placeholder"), target);
-  validateSourceInventory(job);
-  if (job.operations.length && !job.sourceDirectoryModes)
-    throw new Error(
-      "journal-directory-permissions-missing: review legacy journal before recovery",
-    );
-  for (const [raw, expected] of Object.entries(
-    job.sourceDirectoryModes ?? {},
-  )) {
-    safeAncestors(join(raw, "placeholder"), target);
-    if (present(raw) && (!isDirectory(raw) || mode(raw) !== expected))
-      throw new Error(`resume-source-directory-mode-changed: ${raw}`);
-  }
-  for (const item of job.directoryMap ?? []) {
-    safeAncestors(join(item.target, "placeholder"), target);
-    if (present(item.target) && !isDirectory(item.target))
-      throw new Error(`directory-target-conflict: ${item.target}`);
-    const actual = fs.existsSync(item.target) ? mode(item.target) : null,
-      allowed = ["copied", "validated"].includes(job.phase ?? "")
-        ? [item.targetMode]
-        : [item.originalTargetMode, item.targetMode];
-    if (!allowed.includes(actual as number))
-      throw new Error(`resume-target-directory-mode-changed: ${item.target}`);
-  }
-  for (const op of job.operations) {
-    safeAncestors(op.source, target);
-    safeAncestors(op.target, target);
-    const src = state(op.source),
-      dst = state(op.target);
-    if (
-      op.source === op.target
-        ? !equal(src, op.before) && !equal(src, op.after)
-        : src !== null && !equal(src, op.before)
-    )
-      throw new Error(`resume-source-edited: ${op.source}`);
-    if (
-      !(
-        op.source !== op.target
-          ? [op.originalTarget, op.after]
-          : [op.before, op.after]
-      ).some((v) => equal(dst, v))
-    )
-      throw new Error(`resume-target-edited: ${op.target}`);
-    if (op.before && src === null && !equal(dst, op.after))
-      throw new Error(`resume-source-and-target-missing: ${op.source}`);
-  }
-  for (const p of job.private) safeAncestors(join(p, AGENTS_FILE_NAME), target);
-  const ignore = join(target, ".gitignore");
-  if (present(ignore) && (isSymlink(ignore) || !isFile(ignore)))
-    throw new Error("unsafe-gitignore");
-}
-export function validateMigration(target: string, job: MigrationJob) {
-  preflightMigration(target, job);
-  for (const watch of job.watched ?? []) {
-    const records = inventory(watch.owner, {
-      name: "agent_skills",
-      format: "skills",
-    }).map((path) => ({ path, sha256: sha(fs.readFileSync(path)) }));
-    if (!equal(records, watch.records))
-      throw new Error(
-        `referenced-source-changed-before-retirement: ${watch.owner}`,
-      );
-  }
-  validateSourceInventory(job);
-  for (const op of job.operations)
-    if (!equal(state(op.target), op.after))
-      throw new Error(`copy-validation-failed: ${op.target}`);
-  for (const owner of job.owners) {
-    const text = readText(join(owner, AGENTS_FILE_NAME));
-    for (const spec of layerTypeSpecs(owner)) {
-      if (!text.includes(`](${spec.indexFile})`))
-        throw new Error(`unregistered-migrated-type: ${spec.indexFile}`);
-      const index = join(owner, spec.indexFile);
-      if (!isFile(index))
-        throw new Error(`missing-migrated-index: ${spec.indexFile}`);
-      for (const match of readText(index).matchAll(LINK)) {
-        const raw = match[2]!.split("#")[0]!;
-        if (!raw || /^\w+:|^\//.test(raw)) continue;
-        const linked = resolve(dirname(index), decodeURIComponent(raw));
-        if (
-          job.operations.some((op) => op.target === linked) &&
-          !present(linked)
-        )
-          throw new Error(`missing-mapped-reference: ${linked}`);
-      }
-    }
-  }
-}
-export interface MigrateMemoryOptions {
-  targetDir: string;
-  rootDir?: string;
-  recursive?: boolean;
-  dryRun?: boolean;
-}
-export function migrateMemory(options: MigrateMemoryOptions) {
-  const target = resolveTarget(options.targetDir),
-    recursive = options.recursive ?? false,
-    dryRun = options.dryRun ?? false;
-  resolveRoot(target, options.rootDir);
-  const journalDir = join(target, MIGRATION_JOURNAL),
-    journal = join(journalDir, "journal.json");
-  if (
-    (fs.existsSync(journalDir) &&
-      (!isDirectory(journalDir) || !isFile(journal))) ||
-    isSymlink(journalDir) ||
-    isSymlink(journal)
-  )
-    throw new Error("unsafe-journal-path");
-  let stored: MigrationJob | undefined, job: MigrationJob | undefined;
-  if (fs.existsSync(journal)) {
-    stored = JSON.parse(readText(journal)) as MigrationJob;
-    if (stored.target !== target) throw new Error("journal-target-mismatch");
-    if (stored.phase !== "done") {
-      if (stored.recursive !== recursive)
-        throw new Error("resume-with-original-recursive-option");
-      job = stored;
-    }
-  }
-  if (!job) {
-    job = planMigration(target, recursive);
-    if (stored && !job.operations.length)
-      job.diagnostics.push(
-        ...stored.diagnostics.filter(
-          (d) => d.code !== "source-scan-incomplete",
-        ),
-      );
-    Object.assign(job, { target, recursive, phase: "planned" });
-  }
-  preflightMigration(target, job);
-  const output = {
-    ok: true,
-    status: dryRun
-      ? "dry-run"
-      : job.diagnostics.length
-        ? "unchanged-incomplete"
-        : "unchanged",
-    complete: !job.diagnostics.length,
-    pathMap: job.operations.map(({ source, target }) => ({ source, target })),
-    directoryMap: (job.directoryMap ?? []).map(({ source, target }) => ({
-      source,
-      target,
-    })),
-    diagnostics: job.diagnostics,
-  };
-  if (dryRun || !job.operations.length) return output;
-  ignoreBeforeCopy(target, job);
-  fs.mkdirSync(journalDir, { recursive: true, mode: 0o700 });
-  fs.chmodSync(journalDir, 0o700);
-  saveJournal(journal, job);
-  for (const item of [...job.directoryMap].sort(
-    (a, b) => a.target.split("/").length - b.target.split("/").length,
-  )) {
-    fs.mkdirSync(item.target, { recursive: true, mode: item.targetMode });
-    fs.chmodSync(item.target, item.targetMode);
-  }
-  for (const op of job.operations)
-    if (!equal(state(op.target), op.after)) writeState(op.target, op.after);
-  job.phase = "copied";
-  saveJournal(journal, job);
-  validateMigration(target, job);
-  job.phase = "validated";
-  saveJournal(journal, job);
-  for (const op of job.operations)
-    if (op.source !== op.target && present(op.source)) {
-      if (!equal(state(op.source), op.before))
-        throw new Error(`source-edited-before-retirement: ${op.source}`);
-      fs.unlinkSync(op.source);
-    }
-  for (const p of job.directories)
-    if (isDirectory(p) && !isSymlink(p)) fs.rmdirSync(p);
-  job.phase = "done";
-  saveJournal(journal, job);
-  output.status = job.diagnostics.length ? "migrated-incomplete" : "migrated";
-  return output;
 }

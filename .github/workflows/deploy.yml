@@ -74,7 +74,7 @@ jobs:
                  rm -rf "$stale"
                fi
              done
-             for stale in .harness/evaluation .harness/observation; do
+             for stale in .edges/evaluation .edges/observation; do
                if [ -d "$stale" ] && [ -z "$(git ls-files -- "$stale")" ]; then
                  rm -rf "$stale"
                fi

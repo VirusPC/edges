@@ -14,7 +14,7 @@ export interface ScopeTraversalOptions {
   super?: boolean;
   /** Global `--exclude`: skip these module names during traversal. */
   exclude?: ReadonlySet<string>;
-  /** Scope directory used to recognize `.harness/<module>` paths. Defaults to the service root. */
+  /** Scope directory used to recognize `.edges/<module>` paths. Defaults to the service root. */
   scopeDir?: string;
   /**
    * Forest assembly: do not descend into these absolute entry paths
@@ -81,7 +81,7 @@ export async function* traverse(
     try {
       if (matches(node)) yield node;
       if (stop) return;
-      const harness = options.includeHarness ? node.harness : undefined;
+      const harness = options.includeHarness ? node.edges : undefined;
       const childMode = node.childTraversal() === "leaf" ? "entry" : "expand";
       for (const reference of structuralChildren(node, options)) {
         if (excluded(reference.id)) continue;

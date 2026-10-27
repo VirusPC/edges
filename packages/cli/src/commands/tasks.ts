@@ -14,7 +14,7 @@ import { addUpdateCommand } from "./tasks/update.js";
 const TASKS_AFTER_HELP = `
 TARGET
   edges --scope <directory> tasks ...
-  The subject system is that scope. Tasks are written to its .harness/tasks.
+  The subject system is that scope. Tasks are written to its .edges/tasks.
   edges --scope <directory> --super tasks ...
   --super makes the subject virtual system one. Its harness is the scope directory, so tasks are written to <directory>/tasks.
   edges --scope <directory> --all tasks list

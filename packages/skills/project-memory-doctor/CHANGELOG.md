@@ -1,14 +1,20 @@
 # Changelog
 
+
 ## [Unreleased]
 
+## [4.0.0] - 2026-10-27
+
+### Changed
+
+- 不再调用 `$project-memory-migrate`。旧 `.memory` 仍报 `migration-required`：先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 `docs/migrations/2026-10-27-rename-harness-to-edges.md` 改目录名。doctor 不迁移。
 - 缺失类型入口补 `README.md`（`project-entries-*`），memory 与 skills 都一样。不补类型目录 `AGENTS.md`；已存在的旧 AGENTS 类型索引仍可原地更新。
 
 ## [3.3.0] - 2026-10-18
 
 ### Changed
 
-- `edges memory doctor --apply` 按路径补缺失的父级链接：目标 `AGENTS.md` 在父级 `.harness` 下记入本层，否则记入下层。已有登记保持原组。命令不再接受 `--index-group`。
+- `edges memory doctor --apply` 按路径补缺失的父级链接：目标 `AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已有登记保持原组。命令不再接受 `--index-group`。
 
 ## [3.2.0] - 2026-10-07
 

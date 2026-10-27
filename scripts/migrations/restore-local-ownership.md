@@ -30,7 +30,7 @@ All source and destination private directories, both journals, and copy paths mu
 
 ## Future instance migration and old pending journals
 
-`migrate:recursive-layout` now maps `extensions`, `packages/skills/project-memory-init`, `shared-extensions`, and `knowledge/notes` to themselves; original `knowledge/tasks` memory belongs to `.harness/tasks`. The canonical ownership manifest records these current mappings and retains the superseded promotion metadata solely as historical evidence.
+`migrate:recursive-layout` now maps `extensions`, `packages/skills/project-memory-init`, `shared-extensions`, and `knowledge/notes` to themselves; original `knowledge/tasks` memory belongs to `.edges/tasks`. The canonical ownership manifest records these current mappings and retains the superseded promotion metadata solely as historical evidence.
 
 Pending old journals that would promote a local owner's material into root refuse with `historical-owner-promotion-journal-needs-review`. Keep their journal, original source snapshots, copied destinations, and directory modes for review; do not replay old targets, delete the journal, or treat an incomplete promotion as a completed private correction. Corrected pending journals continue to resume normally.
 

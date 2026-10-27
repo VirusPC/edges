@@ -1,5 +1,5 @@
 import path from "node:path";
-import { placeHarnessMaterial, harnessMaterialById } from "../../domain/config/harness-materials.js";
+import { placeHarnessMaterial, harnessMaterialById } from "../../domain/config/edges-materials.js";
 import { ENTRY_NAMES, LEGACY_LEAF_ENTRY } from "../../domain/config/layout.js";
 import { isLeafEntryName } from "../../domain/models/node/layout.js";
 import { projectDirName } from "../../domain/models/tasks/project.js";
@@ -20,7 +20,7 @@ export type TaskBoardLocation = {
   boardDir: string;
 };
 export type BoardTarget = string | TaskBoardLocation;
-/** A string scope is the real system: materials live under `<scope>/.harness`. Pass `{ super: true }` for the virtual board in the scope directory. */
+/** A string scope is the real system: materials live under `<scope>/.edges`. Pass `{ super: true }` for the virtual board in the scope directory. */
 export function taskBoardLocation(
   scopeDir: string,
   options: { super?: boolean } = {},
@@ -34,7 +34,7 @@ export function taskBoardLocation(
   };
 }
 
-/** Board of the subject system. The directory is the tasks material from harness-materials. Real systems place it under `<scope>/.harness`; `--super` places it in the scope directory. */
+/** Board of the subject system. The directory is the tasks material from edges-materials. Real systems place it under `<scope>/.edges`; `--super` places it in the scope directory. */
 export function subjectTaskBoard(scopeDir: string, options: { super?: boolean } = {}): TaskBoardLocation {
   return taskBoardLocation(scopeDir, options);
 }

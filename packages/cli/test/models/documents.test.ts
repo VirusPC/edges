@@ -28,7 +28,7 @@ test("base documents replace parsed content without injecting path or tree conte
   (node.parent as any).id = "bad";
   assert.equal(node.parent?.id, "/scope/AGENTS.md");
   assert.deepEqual(node.children, []);
-  assert.equal(node.harness?.id, "/scope/one/AGENTS.md");
+  assert.equal(node.edges?.id, "/scope/one/AGENTS.md");
   assert.equal(node.id, "/scope/one.md");
   assert.match(node.serialize(), /parent: authored-data/);
   assert.doesNotMatch(node.serialize(), /\/scope|children:/);

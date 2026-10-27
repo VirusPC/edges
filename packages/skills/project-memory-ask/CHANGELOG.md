@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+## [2.1.0] - 2026-10-27
+
+### Changed
+
+- 类型入口路径改为 `.edges/memory/<plural>/README.md` 与 `.edges/skills/<type>/README.md`。仍带条目列表的旧 AGENTS 类型入口只读兼容；空的同目录桩不是索引。
+
 ## [2.0.1] - 2026-10-05
 
 - 统一 AGENTS 节点身份与三类内容组织；保留显式类型采用、写权限和局部归属，不用 Memory 标记或独立职责筛选节点。
@@ -9,9 +17,6 @@ All notable changes to this skill will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
-
-- 类型入口路径改为 `.harness/memory/<plural>/README.md` 与 `.harness/skills/<type>/README.md`。仍带条目列表的旧 AGENTS 类型入口只读兼容；空的同目录桩不是索引。
 
 ## [2.0.0] - 2026-10-03
 

@@ -100,7 +100,6 @@ test("explicit memory targets choose the mutation tree; errors release the lock"
         "project",
       ],
       ["doctor", "--target-dir", actual, "--apply"],
-      ["migrate", "--target-dir", actual, "--root-dir", root],
       [
         "restore",
         "--repo-dir",
@@ -135,7 +134,7 @@ test("explicit memory targets choose the mutation tree; errors release the lock"
       assert.match(result.stdout, /write lock.*busy/i, JSON.stringify(args));
     }
     const readonly = await run(
-      ["--scope", actual, "memory", "migrate", "--dry-run"],
+      ["--scope", actual, "memory", "doctor"],
       { env: {} },
     );
     assert.doesNotMatch(readonly.stdout, /write lock.*busy/i);

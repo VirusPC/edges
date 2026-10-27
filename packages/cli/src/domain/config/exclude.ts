@@ -32,7 +32,7 @@ export function parseExcludedModules(values: readonly string[] | undefined): Rea
   return found;
 }
 
-/** True when `file` sits in one of `exclude` under `scopeDir` (`.harness/<module>` or a super `<module>`). */
+/** True when `file` sits in one of `exclude` under `scopeDir` (`.edges/<module>` or a super `<module>`). */
 export function pathHitsExcludedModule(
   file: string,
   scopeDir: string,
@@ -42,18 +42,18 @@ export function pathHitsExcludedModule(
   const rel = relative(scopeDir, file);
   if (!rel || rel.startsWith("..") || isAbsolute(rel)) return false;
   const parts = rel.split(sep);
-  const name = parts[0] === ".harness" ? parts[1] : parts[0];
+  const name = parts[0] === ".edges" ? parts[1] : parts[0];
   return !!name && exclude.has(name);
 }
 
 /**
- * A composed checkout is `<scope>/.harness/compose/<name>/…`.
- * The module entry `<scope>/.harness/compose/README.md` is not a checkout.
+ * A composed checkout is `<scope>/.edges/compose/<name>/…`.
+ * The module entry `<scope>/.edges/compose/README.md` is not a checkout.
  */
 export function composedCheckoutRoot(file: string): string | undefined {
   const parts = normalize(file).split(sep);
   for (let i = 0; i < parts.length - 2; i++) {
-    if (parts[i] === ".harness" && parts[i + 1] === "compose" && parts[i + 2] && parts[i + 2] !== ENTRY_NAMES.readme)
+    if (parts[i] === ".edges" && parts[i + 1] === "compose" && parts[i + 2] && parts[i + 2] !== ENTRY_NAMES.readme)
       return parts.slice(0, i + 3).join(sep);
   }
   return undefined;
@@ -66,7 +66,7 @@ export function isInsideComposedCheckout(file: string): boolean {
   return rel === "" || (!rel.startsWith("..") && !isAbsolute(rel));
 }
 
-/** The scope's own `.harness/<module>` directory, or that module at the scope root (super). */
+/** The scope's own `.edges/<module>` directory, or that module at the scope root (super). */
 export function isScopeModuleDir(
   parentDir: string,
   name: string,
@@ -74,9 +74,9 @@ export function isScopeModuleDir(
 ): boolean {
   if (!(EXCLUDABLE_MODULES as readonly string[]).includes(name)) return false;
   const parent = resolve(parentDir);
-  return parent === resolve(join(scopeDir, ".harness")) || parent === resolve(scopeDir);
+  return parent === resolve(join(scopeDir, ".edges")) || parent === resolve(scopeDir);
 }
 
 export function isHarnessComposeDir(parentDir: string, name: string): boolean {
-  return name === "compose" && basename(parentDir) === ".harness";
+  return name === "compose" && basename(parentDir) === ".edges";
 }

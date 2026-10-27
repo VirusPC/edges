@@ -8,14 +8,14 @@ import { run } from '../../src/program.js';
 import { AgentsNode, ReadmeNode, TaskNode } from '../../src/domain/models/index.js';
 
 const maintenancePaths = [
-  '.harness/tasks/alpha/todo/same/INDEX.md',
-  'child/.harness/tasks/alpha/todo/same/INDEX.md',
-  'notes/example/.harness/tasks/beta/done/same/INDEX.md',
-  'tasks/alpha/todo/same/.harness/tasks/alpha/todo/same/INDEX.md',
-  'tasks/alpha/todo/same/.harness/tasks/alpha/todo/same/.harness/tasks/alpha/todo/same/INDEX.md',
+  '.edges/tasks/alpha/todo/same/INDEX.md',
+  'child/.edges/tasks/alpha/todo/same/INDEX.md',
+  'notes/example/.edges/tasks/beta/done/same/INDEX.md',
+  'tasks/alpha/todo/same/.edges/tasks/alpha/todo/same/INDEX.md',
+  'tasks/alpha/todo/same/.edges/tasks/alpha/todo/same/.edges/tasks/alpha/todo/same/INDEX.md',
 ];
 const rootDomainPath = 'tasks/alpha/todo/same/INDEX.md';
-const childMaintenancePath = '.harness/tasks/alpha/todo/same/INDEX.md';
+const childMaintenancePath = '.edges/tasks/alpha/todo/same/INDEX.md';
 
 function fixture(t: { after(fn: () => void): void }, git = true) {
   const root = mkdtempSync(path.join(realpathSync(tmpdir()), 'all-scopes-'));
@@ -44,14 +44,14 @@ function fixture(t: { after(fn: () => void): void }, git = true) {
       metadata: { metadata: { 'edges-task-project': project, 'edges-task-priority': scope === 'child' ? 'high' : 'low' } },
     }, { operation: 'create' }).serialize());
   };
-  for (const scope of ['.', 'child', 'notes/example', 'tasks/alpha/todo/same', 'tasks/alpha/todo/same/.harness/tasks/alpha/todo/same']) {
-    index(path.join(scope, 'AGENTS.md'), ['.harness/tasks/README.md']);
-    board(scope, '.harness/tasks', scope === 'notes/example' ? 'beta' : 'alpha', scope === 'notes/example' ? 'done' : 'todo');
+  for (const scope of ['.', 'child', 'notes/example', 'tasks/alpha/todo/same', 'tasks/alpha/todo/same/.edges/tasks/alpha/todo/same']) {
+    index(path.join(scope, 'AGENTS.md'), ['.edges/tasks/README.md']);
+    board(scope, '.edges/tasks', scope === 'notes/example' ? 'beta' : 'alpha', scope === 'notes/example' ? 'done' : 'todo');
     if (scope === '.' || scope === 'child') board(scope, 'tasks');
   }
   // A valid unrelated leaf lets forest queries exercise traversal rather than YAML failure.
   write('notes/example/INDEX.md', '---\nname: Example\ndescription: Unrelated note\n---\n\n# Example\n');
-  index('AGENTS.md', ['.harness/tasks/README.md', 'notes/example/INDEX.md', 'aliases/AGENTS.md', '.harness/observation/README.md'], ['child/AGENTS.md', 'missing/AGENTS.md']);
+  index('AGENTS.md', ['.edges/tasks/README.md', 'notes/example/INDEX.md', 'aliases/AGENTS.md', '.edges/observation/README.md'], ['child/AGENTS.md', 'missing/AGENTS.md']);
   index('aliases/AGENTS.md', ['../child/AGENTS.md']);
   const call = (scope: string, args: string[]) => {
     const flags = args.filter(arg => arg === '--super' || arg === '--all');
@@ -126,7 +126,7 @@ test('forest grouping, status, priority and project filters retain task paths an
   assertPaths(grouped.groups.find((group: any) => group.key === 'alpha').items, maintenancePaths.filter(task => !task.includes('/beta/')));
   assertPaths(grouped.groups.find((group: any) => group.key === 'beta').items, [maintenancePaths[2]!]);
   const filtered = await listed(call, '.', ['--all', '--status', 'todo', '--priority', 'high', '--project', 'alpha', '--sort', 'priority']);
-  assertPaths(filtered.tasks, ['child/.harness/tasks/alpha/todo/same/INDEX.md']);
+  assertPaths(filtered.tasks, ['child/.edges/tasks/alpha/todo/same/INDEX.md']);
   assertPaths((await listed(call, '.', ['--all', '--status', 'done'])).tasks, [maintenancePaths[2]!]);
   assertPaths((await listed(call, '.', ['--all', '--project', 'beta'])).tasks, [maintenancePaths[2]!]);
   assert.equal((await listed(call, '.', ['--all', '--priority', 'high', '--project', 'beta'])).tasks.length, 0);
@@ -154,7 +154,7 @@ test('without Git, missing registered children skip and --all discovers systems 
   assertPaths((await listed(call, 'child', ['--all'])).tasks, [childMaintenancePath]);
   write('unregistered/tasks/AGENTS.md', '# Not a system entry\n');
   assertPaths((await listed(call, '.', ['--all'])).tasks, maintenancePaths);
-  rmSync(path.join(root, 'child/.harness/tasks/alpha/README.md'));
+  rmSync(path.join(root, 'child/.edges/tasks/alpha/README.md'));
   assertPaths((await listed(call, '.')).tasks, [maintenancePaths[0]!]);
   const remaining = maintenancePaths.filter(task => !task.startsWith('child/'));
   assertPaths((await listed(call, '.', ['--all'])).tasks, remaining);
@@ -162,7 +162,7 @@ test('without Git, missing registered children skip and --all discovers systems 
   assertPaths((await listed(call, '.', ['--all'])).tasks, remaining.slice(1));
   assertPaths((await listed(call, '.')).tasks, [maintenancePaths[0]!]);
   // Remove the existing task-board fallback as well before asserting an absent root.
-  rmSync(path.join(root, '.harness/tasks/README.md'));
+  rmSync(path.join(root, '.edges/tasks/README.md'));
   const missing = await call('.', ['list']);
   assert.notEqual(missing.exitCode, 0);
   assert.match(missing.stdout, /Missing scope entry/);

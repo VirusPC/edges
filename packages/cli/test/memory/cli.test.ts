@@ -73,7 +73,7 @@ test("CLI initializes selected types and remembers a supplied Markdown file in t
   const output = JSON.parse(result.stdout);
   assert.equal(
     output.path,
-    ".harness/memory/projects/project_decision/INDEX.md",
+    ".edges/memory/projects/project_decision/INDEX.md",
   );
   assert.match(
     await readFile(path.join(root, output.path), "utf8"),
@@ -85,10 +85,10 @@ test("CLI initializes selected types and remembers a supplied Markdown file in t
   );
   assert.match(
     await readFile(path.join(root, "AGENTS.md"), "utf8"),
-    /\.harness\/README\.md/,
+    /\.edges\/README\.md/,
   );
   assert.match(
-    await readFile(path.join(root, ".harness/README.md"), "utf8"),
+    await readFile(path.join(root, ".edges/README.md"), "utf8"),
     /memory\/projects\/README\.md/,
   );
 });
@@ -127,7 +127,6 @@ test("memory help exposes core operations and script arguments remain discoverab
     "remember",
     "add-type",
     "doctor",
-    "migrate",
     "backup",
     "restore",
   ])
@@ -135,39 +134,4 @@ test("memory help exposes core operations and script arguments remain discoverab
   const remember = await run(["memory", "remember", "--help"]);
   assert.match(remember.stdout, /--content-file/);
   assert.match(remember.stdout, /--target-dir/);
-});
-
-test("memory migrate dry-run exposes the mapping without moving legacy files", async (t) => {
-  const root = await fixture(t);
-  await mkdir(path.join(root, ".memory/projects"), { recursive: true });
-  await writeFile(
-    path.join(root, ".memory/projects/AGENTS.md"),
-    "# Projects\n<!-- project-memory-entries:start -->\n<!-- project-memory-entries:end -->\n",
-  );
-  const body =
-    "---\nname: project_example\ndescription: Example\n---\nOriginal body\n";
-  await writeFile(
-    path.join(root, ".memory/projects/project_example/INDEX.md"),
-    body,
-  );
-  await writeFile(
-    path.join(root, "AGENTS.md"),
-    "<!-- project-memory:start -->\n<!-- project-memory-local:start -->\n- [Projects](.memory/projects/AGENTS.md) — Projects\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n<!-- project-memory-children:end -->\n<!-- project-memory:end -->\n",
-  );
-  const result = await run(
-    ["--scope", root, "memory", "migrate", "--dry-run"],
-    { env: {} },
-  );
-  assert.equal(result.exitCode, 0, result.stdout);
-  const payload = JSON.parse(result.stdout);
-  assert.equal(payload.ok, true);
-  assert.match(JSON.stringify(payload.pathMap), /\.harness\/memory\/projects/);
-  assert.equal(
-    await readFile(
-      path.join(root, ".memory/projects/project_example/INDEX.md"),
-      "utf8",
-    ),
-    body,
-  );
-  assert.deepEqual((await readdir(root)).sort(), [".memory", "AGENTS.md"]);
 });

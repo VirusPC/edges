@@ -9,22 +9,22 @@ import { NodeService } from "../../src/services/node/node-service.js";
 
 const scopeAgents = (local = "") => `# Scope
 
-<!-- project-harness-constraints:start -->
+<!-- edges-constraints:start -->
 ## 本层硬约束
 
 Keep constraints.
-<!-- project-harness-constraints:end -->
+<!-- edges-constraints:end -->
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
 ${local}
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 
-<!-- project-harness-descendants:start -->
+<!-- edges-descendants:start -->
 ## 下层系统维护信息
 
-<!-- project-harness-descendants:end -->
+<!-- edges-descendants:end -->
 `;
 const projectReadme = (title: string, description: string) =>
   `# ${title}\n\n${description}\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n`;
@@ -37,15 +37,15 @@ function write(root: string, rel: string, source: string): void {
 /** Maintenance board whose Task Projects live on the board README content face. */
 async function readmeBoard(): Promise<string> {
   const repo = fs.realpathSync(await mkdtemp(path.join(tmpdir(), "edges-readme-projects-")));
-  write(repo, "AGENTS.md", scopeAgents("- [Tasks](.harness/tasks/README.md) — board"));
-  write(repo, ".harness/tasks/AGENTS.md", scopeAgents());
+  write(repo, "AGENTS.md", scopeAgents("- [Tasks](.edges/tasks/README.md) — board"));
+  write(repo, ".edges/tasks/AGENTS.md", scopeAgents());
   write(
     repo,
-    ".harness/tasks/README.md",
+    ".edges/tasks/README.md",
     "# Tasks\n\nBoard prose.\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n- [Beta](beta/README.md) — beta work\n<!-- project-entries-local:end -->\n",
   );
-  write(repo, ".harness/tasks/alpha/README.md", projectReadme("Alpha", "alpha work"));
-  write(repo, ".harness/tasks/beta/README.md", projectReadme("Beta", "beta work"));
+  write(repo, ".edges/tasks/alpha/README.md", projectReadme("Alpha", "alpha work"));
+  write(repo, ".edges/tasks/beta/README.md", projectReadme("Beta", "beta work"));
   return repo;
 }
 
@@ -61,17 +61,17 @@ const read = (repo: string, rel: string) => readFile(path.join(repo, rel), "utf8
 test("physicalParent: a project-entries README is the parent of its task leaves", async (t) => {
   const repo = await readmeBoard();
   t.after(() => rm(repo, { recursive: true, force: true }));
-  const leaf = path.join(repo, ".harness/tasks/alpha/backlog/2026-10-06--x/INDEX.md");
-  assert.equal(physicalParent(leaf, repo), path.join(repo, ".harness/tasks/alpha/README.md"));
+  const leaf = path.join(repo, ".edges/tasks/alpha/backlog/2026-10-06--x/INDEX.md");
+  assert.equal(physicalParent(leaf, repo), path.join(repo, ".edges/tasks/alpha/README.md"));
   // System-one README children prefer the board org list over the board AGENTS.
   assert.equal(
-    physicalParent(path.join(repo, ".harness/tasks/gamma/README.md"), repo),
-    path.join(repo, ".harness/tasks/README.md"),
+    physicalParent(path.join(repo, ".edges/tasks/gamma/README.md"), repo),
+    path.join(repo, ".edges/tasks/README.md"),
   );
   // Harness material stays with the system entry even when the scope README has entries.
   write(repo, "README.md", "# Root\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n<!-- project-entries-local:end -->\n");
   assert.equal(
-    physicalParent(path.join(repo, ".harness/memory/projects/README.md"), repo),
+    physicalParent(path.join(repo, ".edges/memory/projects/README.md"), repo),
     path.join(repo, "AGENTS.md"),
   );
   assert.equal(
@@ -83,28 +83,28 @@ test("physicalParent: a project-entries README is the parent of its task leaves"
 test("task create into an AGENTS-only project creates the project README and does not register the leaf on AGENTS", async (t) => {
   const repo = await readmeBoard();
   t.after(() => rm(repo, { recursive: true, force: true }));
-  write(repo, ".harness/tasks/legacy/AGENTS.md", scopeAgents());
-  const boardBefore = await read(repo, ".harness/tasks/AGENTS.md");
-  const legacyAgents = await read(repo, ".harness/tasks/legacy/AGENTS.md");
+  write(repo, ".edges/tasks/legacy/AGENTS.md", scopeAgents());
+  const boardBefore = await read(repo, ".edges/tasks/AGENTS.md");
+  const legacyAgents = await read(repo, ".edges/tasks/legacy/AGENTS.md");
   const created = await cli(repo, ["create", "--title", "Orphan", "--project", "legacy"]);
-  const readme = await read(repo, ".harness/tasks/legacy/README.md");
+  const readme = await read(repo, ".edges/tasks/legacy/README.md");
   assert.match(readme, /project-entries-local:start/);
   assert.ok(readme.includes(created.stem), readme);
-  assert.equal(await read(repo, ".harness/tasks/legacy/AGENTS.md"), legacyAgents);
-  assert.equal(await read(repo, ".harness/tasks/AGENTS.md"), boardBefore);
+  assert.equal(await read(repo, ".edges/tasks/legacy/AGENTS.md"), legacyAgents);
+  assert.equal(await read(repo, ".edges/tasks/AGENTS.md"), boardBefore);
   assert.ok(!(await read(repo, "AGENTS.md")).includes(created.stem));
 });
 
 test("task create into a README-backed project updates the project README, not the board AGENTS", async (t) => {
   const repo = await readmeBoard();
   t.after(() => rm(repo, { recursive: true, force: true }));
-  const boardBefore = await read(repo, ".harness/tasks/AGENTS.md");
+  const boardBefore = await read(repo, ".edges/tasks/AGENTS.md");
   const created = await cli(repo, ["create", "--title", "Fresh", "--project", "alpha"]);
-  const alpha = await read(repo, ".harness/tasks/alpha/README.md");
+  const alpha = await read(repo, ".edges/tasks/alpha/README.md");
   assert.ok(alpha.includes(created.stem), alpha);
   assert.match(alpha, /^# Alpha\n\nalpha work\n/);
-  assert.equal(await read(repo, ".harness/tasks/AGENTS.md"), boardBefore);
-  await assert.rejects(access(path.join(repo, ".harness/tasks/alpha/AGENTS.md")));
+  assert.equal(await read(repo, ".edges/tasks/AGENTS.md"), boardBefore);
+  await assert.rejects(access(path.join(repo, ".edges/tasks/alpha/AGENTS.md")));
   const listed = await cli(repo, ["list"]);
   assert.deepEqual(listed.tasks.map((task: any) => task.stem), [created.stem]);
 });
@@ -115,16 +115,16 @@ test("cross-project move updates both project READMEs", async (t) => {
   await cli(repo, ["create", "--title", "Stay", "--project", "alpha"]);
   const created = await cli(repo, ["create", "--title", "Mover", "--project", "alpha"]);
   const oneItemList = /## 本层内容\n\n- \[[^\n]+\n<!-- project-entries-local:end -->\n$/;
-  assert.match(await read(repo, ".harness/tasks/alpha/README.md"), /## 本层内容\n\n- \[[^\n]+\n- \[[^\n]+\n<!-- project-entries-local:end -->\n$/);
-  const boardBefore = await read(repo, ".harness/tasks/AGENTS.md");
+  assert.match(await read(repo, ".edges/tasks/alpha/README.md"), /## 本层内容\n\n- \[[^\n]+\n- \[[^\n]+\n<!-- project-entries-local:end -->\n$/);
+  const boardBefore = await read(repo, ".edges/tasks/AGENTS.md");
   await cli(repo, ["update", created.stem, "--project", "beta"]);
-  const alpha = await read(repo, ".harness/tasks/alpha/README.md");
+  const alpha = await read(repo, ".edges/tasks/alpha/README.md");
   assert.ok(!alpha.includes(created.stem));
   assert.match(alpha, oneItemList);
-  const beta = await read(repo, ".harness/tasks/beta/README.md");
+  const beta = await read(repo, ".edges/tasks/beta/README.md");
   assert.ok(beta.includes(created.stem));
   assert.match(beta, oneItemList);
-  assert.equal(await read(repo, ".harness/tasks/AGENTS.md"), boardBefore);
+  assert.equal(await read(repo, ".edges/tasks/AGENTS.md"), boardBefore);
   const listed = await cli(repo, ["list"]);
   assert.deepEqual(listed.tasks.map((task: any) => task.project).sort(), ["alpha", "beta"]);
 });
@@ -133,32 +133,32 @@ test("destroy removes references held by READMEs reached as separate content-fac
   const repo = await readmeBoard();
   t.after(() => rm(repo, { recursive: true, force: true }));
   const created = await cli(repo, ["create", "--title", "Doomed", "--project", "alpha"]);
-  const beta = path.join(repo, ".harness/tasks/beta/README.md");
-  write(repo, ".harness/tasks/beta/README.md", (await read(repo, ".harness/tasks/beta/README.md")).replace(
+  const beta = path.join(repo, ".edges/tasks/beta/README.md");
+  write(repo, ".edges/tasks/beta/README.md", (await read(repo, ".edges/tasks/beta/README.md")).replace(
     "<!-- project-entries-local:end -->",
     `<!-- project-entries-local:end -->\n\n<!-- project-entries-descendants:start -->\n## 下层内容\n\n- [Doomed](../alpha/backlog/${created.stem}/INDEX.md)\n<!-- project-entries-descendants:end -->`,
   ));
-  const service = new NodeService({ managedRoot: path.join(repo, ".harness/tasks") });
+  const service = new NodeService({ managedRoot: path.join(repo, ".edges/tasks") });
   const task = (await service.get(path.join(repo, created.path)))!;
   await service.destroy(task);
-  assert.ok(!(await read(repo, ".harness/tasks/alpha/README.md")).includes(created.stem));
+  assert.ok(!(await read(repo, ".edges/tasks/alpha/README.md")).includes(created.stem));
   assert.ok(!fs.readFileSync(beta, "utf8").includes(created.stem));
 });
 
 test("project create lists the new README project in the board README with no seed AGENTS", async (t) => {
   const repo = await readmeBoard();
   t.after(() => rm(repo, { recursive: true, force: true }));
-  const boardBefore = await read(repo, ".harness/tasks/AGENTS.md");
+  const boardBefore = await read(repo, ".edges/tasks/AGENTS.md");
   const created = await cli(repo, ["project", "create", "gamma", "--title", "Gamma", "--description", "gamma work"]);
-  assert.equal(created.path, ".harness/tasks/gamma/README.md");
-  await assert.rejects(access(path.join(repo, ".harness/tasks/gamma/AGENTS.md")));
-  assert.match(await read(repo, ".harness/tasks/gamma/README.md"), /^# Gamma\n\ngamma work\n[\s\S]*<!-- project-entries-local:start -->/);
-  const boardReadme = await read(repo, ".harness/tasks/README.md");
+  assert.equal(created.path, ".edges/tasks/gamma/README.md");
+  await assert.rejects(access(path.join(repo, ".edges/tasks/gamma/AGENTS.md")));
+  assert.match(await read(repo, ".edges/tasks/gamma/README.md"), /^# Gamma\n\ngamma work\n[\s\S]*<!-- project-entries-local:start -->/);
+  const boardReadme = await read(repo, ".edges/tasks/README.md");
   assert.match(boardReadme, /\[Gamma\]\(<?gamma\/README\.md>?\) — gamma work/);
   assert.match(boardReadme, /^# Tasks\n\nBoard prose\./);
-  assert.equal(await read(repo, ".harness/tasks/AGENTS.md"), boardBefore);
+  assert.equal(await read(repo, ".edges/tasks/AGENTS.md"), boardBefore);
   const task = await cli(repo, ["create", "--title", "First", "--project", "gamma"]);
-  assert.ok((await read(repo, ".harness/tasks/gamma/README.md")).includes(task.stem));
+  assert.ok((await read(repo, ".edges/tasks/gamma/README.md")).includes(task.stem));
 });
 
 test("domain board: new project and its tasks live in README org lists; legacy AGENTS project links migrate", async (t) => {

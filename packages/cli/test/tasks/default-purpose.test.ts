@@ -20,13 +20,13 @@ test('root and child scopes default to their own maintenance board for list and 
   const listed=await call(['list']);assert.equal(listed.exitCode,0,listed.stdout);
   assert.deepEqual(JSON.parse(listed.stdout).tasks.map((task:any)=>task.title),['maintenance']);
   const created=await call(['create','--title','Default write']);assert.equal(created.exitCode,0,created.stdout);
-  const task=JSON.parse(created.stdout);assert.match(task.path,/^\.harness\/tasks\//);
+  const task=JSON.parse(created.stdout);assert.match(task.path,/^\.edges\/tasks\//);
   assert.equal((await call(['get',task.stem])).exitCode,0);
   assert.equal((await call(['update',task.stem,'--priority','high'])).exitCode,0);
   assert.equal((await call(['status',task.stem,'done'])).exitCode,0);
   assert.equal((await call(['runs',task.stem,'--output','json'])).exitCode,0);
   const project = await call(['project','get','default']); assert.equal(project.exitCode,0,project.stdout);
-  assert.match(JSON.parse(project.stdout).path,/^\.harness\/tasks\//);
+  assert.match(JSON.parse(project.stdout).path,/^\.edges\/tasks\//);
   const absentRun = await call(['run-messages',task.stem+'--99','--output','json']);
   assert.equal(JSON.parse(absentRun.stdout).errorCode,'RUN_NOT_FOUND');
   const domain=await call(['list'],true);

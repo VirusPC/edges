@@ -2,7 +2,7 @@
 
 > **For agentic workers:** Use subagent-driven-development to execute these tasks with isolated worktrees, test-first implementation, and review before integration.
 
-**Goal:** Replace Project Memory's Python execution layer with TypeScript behind the existing `edges` CLI, preserving the current .harness protocol and source permissions.
+**Goal:** Replace Project Memory's Python execution layer with TypeScript behind the existing `edges` CLI, preserving the current .edges protocol and source permissions.
 
 **Architecture:** Commander adapters call TypeScript services. Scope/type discovery, index synchronization and filesystem operations belong to services; YAML uses existing gray-matter defaults, not a custom parser. Templates remain canonical Markdown resources and are included in the CLI build. Skills keep the reasoning and human-review workflow and call CLI commands. The separately proposed class-model redesign is not silently declared implemented by this migration.
 

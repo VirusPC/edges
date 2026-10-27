@@ -9,17 +9,17 @@ import { physicalParent } from "../../src/services/node/node-layout.js";
 function agents(local = "", descendants = ""): string {
   return `# Scope
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
 ${local}
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 
-<!-- project-harness-descendants:start -->
+<!-- edges-descendants:start -->
 ## 下层系统维护信息
 
 ${descendants}
-<!-- project-harness-descendants:end -->
+<!-- edges-descendants:end -->
 `;
 }
 
@@ -109,7 +109,7 @@ test("physicalParent does not select AGENTS.md for a system-one note leaf", (t) 
   );
   assert.equal(physicalParent(leaf, root), path.join(root, "notes/README.md"));
   assert.equal(
-    physicalParent(path.join(root, ".harness/memory/projects/README.md"), root),
+    physicalParent(path.join(root, ".edges/memory/projects/README.md"), root),
     path.join(root, "AGENTS.md"),
   );
 });
@@ -120,8 +120,8 @@ test("notes init ensures the content-face org list and still keeps the harness p
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   const face = readFileSync(path.join(root, "notes/README.md"), "utf8");
   assert.match(face, /project-entries-local:start/);
-  assert.equal(existsSync(path.join(root, ".harness/notes/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/notes/README.md")), true);
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /\]\(<?notes\/README\.md>?\)/);
-  const placard = readFileSync(path.join(root, ".harness/notes/README.md"), "utf8");
+  const placard = readFileSync(path.join(root, ".edges/notes/README.md"), "utf8");
   assert.doesNotMatch(placard, /project-entries-local:start/);
 });

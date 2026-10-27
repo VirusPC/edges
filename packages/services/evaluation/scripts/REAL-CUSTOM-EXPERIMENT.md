@@ -23,7 +23,7 @@ User-Agent on every call was `edges-observation/1`.
 
 ## What the signed POST verified
 
-Temporary registry `/tmp/edges-experiment-webhook-registry.json` mapped `edges-experiment-webhook-smoke` to `experiment_webhook.runners.harness_memory_ablation`. The shipped `registry.json` still maps only `harness-memory-ablation/v1`. The smoke dataset has one connectivity item, so this run did not load the 30 ablation cases.
+Temporary registry `/tmp/edges-experiment-webhook-registry.json` mapped `edges-experiment-webhook-smoke` to `experiment_webhook.runners.edges_memory_ablation`. The shipped `registry.json` still maps only `harness-memory-ablation/v1`. The smoke dataset has one connectivity item, so this run did not load the 30 ablation cases.
 
 Payload was `{"samples":1,"repeats":1,"judge":"skip","client":"codex"}`. `memoryOff` and `memoryOn` were left out so the adapter would stop before the model client. That client waits up to 600 seconds.
 
@@ -67,7 +67,7 @@ EOF
 chmod 600 /tmp/edges-experiment-webhook.env
 
 cat > /tmp/edges-experiment-webhook-registry.json << 'EOF'
-{"edges-experiment-webhook-smoke": "experiment_webhook.runners.harness_memory_ablation"}
+{"edges-experiment-webhook-smoke": "experiment_webhook.runners.edges_memory_ablation"}
 EOF
 mkdir -p /tmp/edges-experiment-webhook-reports
 ```

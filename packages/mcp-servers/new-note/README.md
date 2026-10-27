@@ -2,7 +2,7 @@
 
 TypeScript + Node.js MCP server，用于在没有 shell 的宿主里本地创建一条 Note。不 commit、不 push、不开 PR。
 
-本地有 shell 的 agent 请用 [`cli` 的 `edges notes`](../../cli/README.md)，不要默认走 MCP。本 server 留给没有 shell 的宿主。决策：[`.harness/memory/projects/project_cli_from_mcp/INDEX.md`](../../../.harness/memory/projects/project_cli_from_mcp/INDEX.md)。
+本地有 shell 的 agent 请用 [`cli` 的 `edges notes`](../../cli/README.md)，不要默认走 MCP。本 server 留给没有 shell 的宿主。决策：[`.edges/memory/projects/project_cli_from_mcp/INDEX.md`](../../../.edges/memory/projects/project_cli_from_mcp/INDEX.md)。
 
 ## What It Does
 

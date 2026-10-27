@@ -27,10 +27,10 @@
 
 ```text
 当前位置：
-edges/.harness/memory/projects/扩展开发约定.md
+edges/.edges/memory/projects/扩展开发约定.md
 
 应该恢复到：
-edges/.harness/memory/projects/扩展开发约定.md
+edges/.edges/memory/projects/扩展开发约定.md
 ```
 
 恢复不只是移动文件，还要更新根索引、子节点索引与相对链接。
@@ -54,7 +54,7 @@ flowchart LR
 
 2026-10-05：用户确认第 1 项执行顺序没有问题，并询问归属是否处理完成。
 
-公开归属修正已在 PR #161 分支完成：43 条记忆按当前内容恢复到原所有者，25 个类型索引说明及相关入口、引用已同步并验证。分布为 extensions 16 条、packages/skills/project-memory-init 17 条、shared-extensions 1 条、knowledge/notes 1 条，以及原 Tasks 8 条归 .harness/tasks。第 3 项具体归属选择仍待讨论，此处确认执行顺序不等于预先确认第 3 项。
+公开归属修正已在 PR #161 分支完成：43 条记忆按当前内容恢复到原所有者，25 个类型索引说明及相关入口、引用已同步并验证。分布为 extensions 16 条、packages/skills/project-memory-init 17 条、shared-extensions 1 条、knowledge/notes 1 条，以及原 Tasks 8 条归 .edges/tasks。第 3 项具体归属选择仍待讨论，此处确认执行顺序不等于预先确认第 3 项。
 
 完成范围不包括真实私有内容：私有迁移工具已实现并通过合成样例测试，但没有在其他克隆自动执行。修正已推至 PR 分支，尚未合并到 main。
 
@@ -188,7 +188,7 @@ agent-memory.md → agent-memory/index.md
 
 ### 用户对通用数据结构复核的逐项确认与纠正
 
-2026-10-05：用户确认复核第 1—5 项：继承结构、单一 parent（理由是遵循文件系统）、两组直属 children、isLeaf 的类型语义，以及遍历／环处理主要依据文件目录。.harness 不属于传统 children，便于独立控制树遍历。
+2026-10-05：用户确认复核第 1—5 项：继承结构、单一 parent（理由是遵循文件系统）、两组直属 children、isLeaf 的类型语义，以及遍历／环处理主要依据文件目录。.edges 不属于传统 children，便于独立控制树遍历。
 
 用户再次确认同目录示例：SkillNode 的 harness 指向 InternalNode（例中的 AGENTS.md），这是此前已经讨论清楚的关系，不应重新视为歧义；BaseNode 的通用 harness 目标仍允许 BaseNode，不因此将所有类型限制为 InternalNode。
 
@@ -220,15 +220,15 @@ agent-memory.md → agent-memory/index.md
 
 ### InternalNode 自身 harness 的递归目录定位
 
-在同目录 SKILL.md → AGENTS.md 的已确认关系基础上，助手提出递归定位规则：普通内容入口 index.md / SKILL.md 的默认 harness 位于同目录 AGENTS.md；AGENTS.md 自身的默认 harness 位于其目录下 .harness/AGENTS.md，再下一层依次为 .harness/.harness/AGENTS.md。入口不存在则不建立 harness、不自动创建。此为待确认提议，不将 BaseNode.harness 的通用目标类型限制为 InternalNode。
+在同目录 SKILL.md → AGENTS.md 的已确认关系基础上，助手提出递归定位规则：普通内容入口 index.md / SKILL.md 的默认 harness 位于同目录 AGENTS.md；AGENTS.md 自身的默认 harness 位于其目录下 .edges/AGENTS.md，再下一层依次为 .edges/.edges/AGENTS.md。入口不存在则不建立 harness、不自动创建。此为待确认提议，不将 BaseNode.edges 的通用目标类型限制为 InternalNode。
 
-例如 my-skill/AGENTS.md 的 localChildren 仍可指向 my-skill/.harness/memory 等当前维护内容；新建 my-skill/.harness/AGENTS.md 是显式建立前者自身的维护入口，其本层维护材料按同一约定放在 my-skill/.harness/.harness/ 中。不能因为普通 children 落在 .harness 内，就自动将 .harness/AGENTS.md 加入 children 或在检索时跨入；关系遵循显式索引与独立 harness 边。仅按需建立递归层，不要求所有节点都有元维护空间。该方案尚待用户讨论，未更新正式 spec 或代码。
+例如 my-skill/AGENTS.md 的 localChildren 仍可指向 my-skill/.edges/memory 等当前维护内容；新建 my-skill/.edges/AGENTS.md 是显式建立前者自身的维护入口，其本层维护材料按同一约定放在 my-skill/.edges/.edges/ 中。不能因为普通 children 落在 .edges 内，就自动将 .edges/AGENTS.md 加入 children 或在检索时跨入；关系遵循显式索引与独立 harness 边。仅按需建立递归层，不要求所有节点都有元维护空间。该方案尚待用户讨论，未更新正式 spec 或代码。
 
-用户随后明确：自身维护也必然递归，递归是系统核心设计原则，不应再将“是否递归”作为待选项。上述递归默认布局据此收敛：内容入口的 harness 为同目录 AGENTS.md，AGENTS.md 的 harness 继续按 .harness/AGENTS.md 向内递归；每一级复用相同目录与章节约定，按需存在，不自动创建无限层级。前段“待确认”保留为提案时状态，以本段确认更新为准。结构支持递归不改变检索边界：进入所请求 harness 后沿组成关系检索，不自动进入其自身或组成节点的 harness。当前仍为设计记录，未修改代码。
+用户随后明确：自身维护也必然递归，递归是系统核心设计原则，不应再将“是否递归”作为待选项。上述递归默认布局据此收敛：内容入口的 harness 为同目录 AGENTS.md，AGENTS.md 的 harness 继续按 .edges/AGENTS.md 向内递归；每一级复用相同目录与章节约定，按需存在，不自动创建无限层级。前段“待确认”保留为提案时状态，以本段确认更新为准。结构支持递归不改变检索边界：进入所请求 harness 后沿组成关系检索，不自动进入其自身或组成节点的 harness。当前仍为设计记录，未修改代码。
 
 ### 通用入口的类型识别（实现细节提案，留待 spec）
 
-已确认通用入口类型依据目录约定确定，不重新讨论是否按目录识别。待细化的是规则如何表达及未知类型如何处理。助手建议 layout 中的通用规则识别 AGENTS.md 为 InternalNode、SKILL.md 为 SkillNode；index.md 根据已登记模块的内容入口布局选择 TaskNode、MemoryNode 或通用 LeafNode。模块规则限定到实际条目位置，不能按路径任意包含 tasks/memory 字符串判断，也不能把某个 Task 自身 .harness 内的 Memory 继续识别成 Task。递归时以对应局部布局识别，同一目标入口不因从哪份 AGENTS 引用而改变类型。
+已确认通用入口类型依据目录约定确定，不重新讨论是否按目录识别。待细化的是规则如何表达及未知类型如何处理。助手建议 layout 中的通用规则识别 AGENTS.md 为 InternalNode、SKILL.md 为 SkillNode；index.md 根据已登记模块的内容入口布局选择 TaskNode、MemoryNode 或通用 LeafNode。模块规则限定到实际条目位置，不能按路径任意包含 tasks/memory 字符串判断，也不能把某个 Task 自身 .edges 内的 Memory 继续识别成 Task。递归时以对应局部布局识别，同一目标入口不因从哪份 AGENTS 引用而改变类型。
 
 未知模块中的合法 index.md 建议加载为通用 LeafNode；有专门行为时再登记类型与模型。已命中 Task/Memory 等规则但字段不合法时仍报告该类型的校验错误，不静默降级。该通用回退行为尚待用户确认；不增加强制 YAML type 或 NodeReference 类型字段。此为设计提议，未修改代码。
 
@@ -358,13 +358,13 @@ A 是使用系统完成工作；B 是任务系统的使用与维护规范。
 ```mermaid
 flowchart TD
     R["Edges"] --> D["tasks：领域任务"]
-    R --> H[".harness/tasks：维护任务节点"]
+    R --> H[".edges/tasks：维护任务节点"]
     D --> T["研究公司的任务"]
     H --> M["任务状态与 Run log 规范"]
     D -. "引用共享规范" .-> M
 ```
 
-原 Tasks 的 8 条记忆主要涉及看板、CLI、写作和预览流程，因此选择让 `.harness/tasks` 节点持有一份，领域任务引用。这里判断的是这 8 条共享规范，不是把所有任务记忆都归维护系统。
+原 Tasks 的 8 条记忆主要涉及看板、CLI、写作和预览流程，因此选择让 `.edges/tasks` 节点持有一份，领域任务引用。这里判断的是这 8 条共享规范，不是把所有任务记忆都归维护系统。
 
 ### 替代方案与改变成本
 
@@ -387,32 +387,32 @@ flowchart TD
 
 2026-10-05 重新核对现有 8 条索引后，助手认为不应把它们整体视为同类共享规范：其中包含任务写作与执行流程、看板 CLI 使用规范、根维护板的具体 Task Project 分组，以及 Obsidian 预览环境和一次 init 的提交约定。
 
-建议按实际维护对象分别判断：维护板专属分组留在 .harness/tasks 的局部记忆；跨看板任务规范由对应通用 Tasks 能力／Skill 的职责节点维护，两块板引用同一真源；预览环境和 init 约定另行核对范围与时效，不能因原来放在 Tasks 就全部认定为通用任务规则。当前路径只是已执行恢复时的归属选择，不等于此次已批准最终位置。先讨论此归属原则，再决定具体条目路径；未执行搬迁。
+建议按实际维护对象分别判断：维护板专属分组留在 .edges/tasks 的局部记忆；跨看板任务规范由对应通用 Tasks 能力／Skill 的职责节点维护，两块板引用同一真源；预览环境和 init 约定另行核对范围与时效，不能因原来放在 Tasks 就全部认定为通用任务规则。当前路径只是已执行恢复时的归属选择，不等于此次已批准最终位置。先讨论此归属原则，再决定具体条目路径；未执行搬迁。
 
 
 ### 第 1 条确认：任务执行阶段的适用范围
 
-用户明确 project_assign_grill_with_docs_first 是所有层级 .harness/tasks 的通用约定，不仅适用于根维护看板，也不自动覆盖领域 tasks。原记忆已通过 CLI 修正适用范围。助手建议作为系统共享约定由根节点维护、各层引用；用户本次确认的是适用范围，最终路径随归属审阅收敛，尚未执行搬迁。
+用户明确 project_assign_grill_with_docs_first 是所有层级 .edges/tasks 的通用约定，不仅适用于根维护看板，也不自动覆盖领域 tasks。原记忆已通过 CLI 修正适用范围。助手建议作为系统共享约定由根节点维护、各层引用；用户本次确认的是适用范围，最终路径随归属审阅收敛，尚未执行搬迁。
 
 ### 第 2 条确认：看板变更优先走 CLI 的适用范围
 
-用户确认 project_tasks_board_mutations_via_cli 适用于所有层级的维护 .harness/tasks 和领域 tasks：任务变更优先走 edges tasks 与已有工作流 Skill，能力缺口明确反馈，不长期直接改文件绕过工具。原记忆已通过 CLI 更新适用范围；尚未执行搬迁，当前确认不决定最终共享存放位置。
+用户确认 project_tasks_board_mutations_via_cli 适用于所有层级的维护 .edges/tasks 和领域 tasks：任务变更优先走 edges tasks 与已有工作流 Skill，能力缺口明确反馈，不长期直接改文件绕过工具。原记忆已通过 CLI 更新适用范围；尚未执行搬迁，当前确认不决定最终共享存放位置。
 
 ### 第 3 条确认：STAR 任务写作的适用范围与方法归属
 
-用户确认 project_star_for_agent_task_formulation 覆盖所有层级的维护 .harness/tasks 和领域 tasks；具体写作方法由 conversation-to-tasks Skill 维护，各看板引用。背景→目标→动作→完成标准用于制定任务与下发 brief，尤其面向 Agent，不套用到复盘笔记。核对现有 Skill 后确认 STAR 已被完整覆盖，无需重复合并；用户同意 Skill 保持现状，记忆仅保留采用原因和适用范围，引用 Skill 并去掉重复方法与固定版本号。该精简已通过 CLI 完成；历史决策记忆当前保留原路径，最终存放路径仍随整体归属整理确定。
+用户确认 project_star_for_agent_task_formulation 覆盖所有层级的维护 .edges/tasks 和领域 tasks；具体写作方法由 conversation-to-tasks Skill 维护，各看板引用。背景→目标→动作→完成标准用于制定任务与下发 brief，尤其面向 Agent，不套用到复盘笔记。核对现有 Skill 后确认 STAR 已被完整覆盖，无需重复合并；用户同意 Skill 保持现状，记忆仅保留采用原因和适用范围，引用 Skill 并去掉重复方法与固定版本号。该精简已通过 CLI 完成；历史决策记忆当前保留原路径，最终存放路径仍随整体归属整理确定。
 
 ### 第 4 条确认：Task 内容表达的适用范围与方法归属
 
-用户确认 project_task_separate_facts_from_idea 适用于所有层级的维护 .harness/tasks 和领域 tasks，规则与第 3 条一起由 conversation-to-tasks Skill 维护，各看板引用。第 3 条规定正文结构，本条规定事实与想法分开，并用一两句话说明问题与预期结果。原文包含新旧模板兼容说明，后续随同一写作规范整理。原记忆已通过 CLI 更新确认，尚未执行搬迁或 Skill 合并。
+用户确认 project_task_separate_facts_from_idea 适用于所有层级的维护 .edges/tasks 和领域 tasks，规则与第 3 条一起由 conversation-to-tasks Skill 维护，各看板引用。第 3 条规定正文结构，本条规定事实与想法分开，并用一两句话说明问题与预期结果。原文包含新旧模板兼容说明，后续随同一写作规范整理。原记忆已通过 CLI 更新确认，尚未执行搬迁或 Skill 合并。
 
 ### 第 5 条确认：七个 Task Project 分组保留在根维护看板
 
-用户确认 project_evaluation_observation_placeholder_projects 属于根维护看板自己的分组决策，保留在 .harness/tasks/.harness/memory/projects/，不要求其他层级使用同样分组。原记忆通过 CLI 将空壳、暂不迁移及当时阶段性操作要求标为历史记录；当前分组与任务分布以看板索引为准。
+用户确认 project_evaluation_observation_placeholder_projects 属于根维护看板自己的分组决策，保留在 .edges/tasks/.edges/memory/projects/，不要求其他层级使用同样分组。原记忆通过 CLI 将空壳、暂不迁移及当时阶段性操作要求标为历史记录；当前分组与任务分布以看板索引为准。
 
 ### 第 6 条确认：云端 Obsidian 配置属于仓库部署逻辑
 
-用户纠正助手将 project_box_obsidian_vault_for_preview 归预览 Skill 局部经验的建议：这条属于 Edges 仓库部署逻辑。按其作用范围归根节点部署记忆，目标为根 .harness/memory/projects/；不归 Tasks 看板或预览 Skill。原记忆已通过 CLI 修正归属说明，旧环境与版本仍作为历史验证记录保留，未验证当前部署状态，也未执行迁移。第 8 条预览 Skill 的归属仍需单独确认。
+用户纠正助手将 project_box_obsidian_vault_for_preview 归预览 Skill 局部经验的建议：这条属于 Edges 仓库部署逻辑。按其作用范围归根节点部署记忆，目标为根 .edges/memory/projects/；不归 Tasks 看板或预览 Skill。原记忆已通过 CLI 修正归属说明，旧环境与版本仍作为历史验证记录保留，未验证当前部署状态，也未执行迁移。第 8 条预览 Skill 的归属仍需单独确认。
 
 ### 第 7 条确认：删除当次初始化的本地审阅要求
 
@@ -420,23 +420,23 @@ flowchart TD
 
 ### 第 8 条确认：预览 Skill 归根层沉淀技能
 
-用户确认 preview-tasks-with-box-obsidian 归 Edges 根层沉淀 Skill，目标 .harness/skills/managed/preview-tasks-with-box-obsidian/SKILL.md。第 6 条负责仓库部署约定与缘由，本 Skill 负责可执行步骤，不再归某一 Tasks 看板。目前仅确认目标归属，尚未移动 Skill。
+用户确认 preview-tasks-with-box-obsidian 归 Edges 根层沉淀 Skill，目标 .edges/skills/managed/preview-tasks-with-box-obsidian/SKILL.md。第 6 条负责仓库部署约定与缘由，本 Skill 负责可执行步骤，不再归某一 Tasks 看板。目前仅确认目标归属，尚未移动 Skill。
 
 至此 8 条内容审阅完成。第 7 条删除与索引清理已执行；其他条目的范围说明已按上述记录修正，实际迁移、写作规则合并及引用同步仍待落实。第 1、2 条已经确认适用范围，具体共享存放路径在后续整理中收敛；第 3、4 条已确认方法归 conversation-to-tasks，不等于其历史决策记忆的最终路径也已逐一确定。
 
 ### 补充原则：仓内共享与对外分发分开
 
-用户要求 README 明确：根 AGENTS.md 与 .harness 承载本仓约定及维护内容；对外安装分发的能力须沉淀到 extensions 或 shared-extensions。目标是任意仓库安装后复用能力，并在自己的作用域中维护节点与 .harness。上述第 1—8 条确认的跨层适用范围，不自动意味着对应原始记忆会随扩展分发；第 8 条移至根沉淀 Skill 也不等于已经对外分发。需要对外复用的方法后续应提炼到扩展目录，仓库特定上下文保留原归属。统一安装全套能力仍为目标，本次只更新 README 与设计记录。
+用户要求 README 明确：根 AGENTS.md 与 .edges 承载本仓约定及维护内容；对外安装分发的能力须沉淀到 extensions 或 shared-extensions。目标是任意仓库安装后复用能力，并在自己的作用域中维护节点与 .edges。上述第 1—8 条确认的跨层适用范围，不自动意味着对应原始记忆会随扩展分发；第 8 条移至根沉淀 Skill 也不等于已经对外分发。需要对外复用的方法后续应提炼到扩展目录，仓库特定上下文保留原归属。统一安装全套能力仍为目标，本次只更新 README 与设计记录。
 
 ### 新提议：对外分发预定义 Project Memory（待讨论）
 
 用户提出在 extensions 下增加 memory 目录，提供可分发的预定义 Project Memory。当前 project-memory-init 的 references/templates 与 CLI 携带的是入口、类型索引及条目骨架；预定义可复用内容属于另一职责。助手建议 extensions/memory 承载经提炼的规则、约定与背景内容，继续使用标准目录入口和 MemoryNode，不新增节点类型；初始化模板继续负责结构生成。
 
-这为跨层维护任务执行约定等内容提供对外分发候选位置，不自动移动原始历史记忆或复制本仓上下文。写作操作方法仍由对应 Skill 维护，不因新增 memory 目录重复维护方法正文。安装后建议由目标 AGENTS 引用已安装的预定义内容，本地 .harness 留存本仓新增记忆；引用采用或复制为本地内容、更新规则和选择方式尚未确认。此为用户提出的设计方向与助手建议，未新建目录、实现安装功能或改变此前已确认归属。
+这为跨层维护任务执行约定等内容提供对外分发候选位置，不自动移动原始历史记忆或复制本仓上下文。写作操作方法仍由对应 Skill 维护，不因新增 memory 目录重复维护方法正文。安装后建议由目标 AGENTS 引用已安装的预定义内容，本地 .edges 留存本仓新增记忆；引用采用或复制为本地内容、更新规则和选择方式尚未确认。此为用户提出的设计方向与助手建议，未新建目录、实现安装功能或改变此前已确认归属。
 
 ### 当前落地位置纠正：先存根 Project Memory，对外分发留待办
 
-用户明确 extensions/memory 是后续待办，当前前两条通用任务约定先放 Project Memory。已将 project_assign_grill_with_docs_first.md 与 project_tasks_board_mutations_via_cli.md 从根维护板局部记忆移到根 .harness/memory/projects/，通过 Memory 服务同步两端索引并验证旧路径移除、新索引包含条目。前述“尚未搬迁”对这两条已由本次操作更新；对外分发未实施，不能将 extensions/memory 当作现有位置。第 3、4 条写作方法合并与其他已确认迁移仍未执行。
+用户明确 extensions/memory 是后续待办，当前前两条通用任务约定先放 Project Memory。已将 project_assign_grill_with_docs_first.md 与 project_tasks_board_mutations_via_cli.md 从根维护板局部记忆移到根 .edges/memory/projects/，通过 Memory 服务同步两端索引并验证旧路径移除、新索引包含条目。前述“尚未搬迁”对这两条已由本次操作更新；对外分发未实施，不能将 extensions/memory 当作现有位置。第 3、4 条写作方法合并与其他已确认迁移仍未执行。
 
 ### 第 3 条执行更新：现有 Skill 已覆盖 STAR，记忆精简为原因与范围
 
@@ -835,8 +835,8 @@ flowchart LR
 
 - [节点模型 spec](../superpowers/specs/2026-10-04-node-domain-model-design.md)
 - [归属修正实施计划](../superpowers/plans/2026-10-05-recursive-node-ownership-correction.md)
-- [节点逻辑归属与资源单元分离](../../.harness/memory/projects/project_node_resource_unit_decision/INDEX.md)
-- [递归节点与自身维护空间](../../.harness/memory/projects/project_scope_first_content_ownership/INDEX.md)
+- [节点逻辑归属与资源单元分离](../../.edges/memory/projects/project_node_resource_unit_decision/INDEX.md)
+- [递归节点与自身维护空间](../../.edges/memory/projects/project_scope_first_content_ownership/INDEX.md)
 - [PR #161](https://github.com/VirusPC/edges/pull/161)
 
 
@@ -854,7 +854,7 @@ flowchart LR
 | --- | --- | --- |
 | 未注册业务类型的合法 `index.md` 使用通用 LeafNode。 | 保留扩展能力，不从正文猜类型。 | 新增目录分类与模型注册；通常不用迁移正文。 |
 | parent 取最近的物理组织入口；跨层发现引用不覆盖它。 | 保持文件系统归属与单 parent。 | 修改关系加载规则；无需重写普通交叉引用。 |
-| 单独删除共址 AGENTS 只删除该入口及其 `.harness`；单独移动它报错。 | 整目录操作会误伤同目录的 Skill/index 内容节点。 | 如需独立迁移这种 harness，要另定迁移与索引合同。 |
+| 单独删除共址 AGENTS 只删除该入口及其 `.edges`；单独移动它报错。 | 整目录操作会误伤同目录的 Skill/index 内容节点。 | 如需独立迁移这种 harness，要另定迁移与索引合同。 |
 | 本次迁移只处理 tracked/public 内容。 | 私有记录不随 Git 分发，也不应由本次公开迁移读取。 | 私有副本需另行授权、审阅与迁移。 |
 | 复用已有隔离工作树，各实现任务串行，使用独立分支。 | 遵守仓库隔离要求，避免同目录并行写冲突。 | 改为并行需要更多独立工作树及合并协调；不影响数据格式。 |
 | 同名附件目录没有入口时，可复用它存放迁移后的 `index.md`。 | 仓库已有这种布局，不必猜测并搬动附件。 | 如果目录归属不合预期，可通过 Git 撤销该路径转换；已有入口或 symlink 仍是冲突。 |

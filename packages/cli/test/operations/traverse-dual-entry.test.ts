@@ -37,7 +37,7 @@ function graph(nodes: BaseNode[]) {
 }
 
 test("traverse defaults to all children", async () => {
-  const mem = agents("scope/.harness/memory/projects");
+  const mem = agents("scope/.edges/memory/projects");
   const nestedAgents = agents("scope/nested");
   const root = agents("scope", [mem], [nestedAgents]);
   const { run } = graph([root, mem, nestedAgents]);
@@ -47,7 +47,7 @@ test("traverse defaults to all children", async () => {
 });
 
 test("localOnly skips descendant group", async () => {
-  const mem = agents("scope/.harness/memory/projects");
+  const mem = agents("scope/.edges/memory/projects");
   const nestedAgents = agents("scope/nested");
   const root = agents("scope", [mem], [nestedAgents]);
   const { run } = graph([root, mem, nestedAgents]);
@@ -65,7 +65,7 @@ test("README local/descendants honour localOnly", async () => {
 });
 
 test("real AGENTS traverse does not reach same-dir README content face", async () => {
-  const mem = agents("scope/.harness/memory/projects");
+  const mem = agents("scope/.edges/memory/projects");
   const tasksReadme = readme("scope/tasks");
   const lowerReadme = readme("scope/lower");
   const scopeAgents = agents("scope", [mem]);
@@ -80,19 +80,19 @@ test("real AGENTS traverse does not reach same-dir README content face", async (
 
 const scopeAgentsMd = `# Scope
 
-<!-- project-harness-constraints:start -->
+<!-- edges-constraints:start -->
 ## 本层硬约束
 
 Keep constraints.
-<!-- project-harness-constraints:end -->
-<!-- project-harness-local:start -->
+<!-- edges-constraints:end -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
-<!-- project-harness-local:end -->
-<!-- project-harness-descendants:start -->
+<!-- edges-local:end -->
+<!-- edges-descendants:start -->
 ## 下层系统维护信息
 
-<!-- project-harness-descendants:end -->
+<!-- edges-descendants:end -->
 `;
 
 test("NodeService list from AGENTS is system-two only; --super reaches content face", async (t) => {
@@ -114,7 +114,7 @@ test("NodeService list from AGENTS is system-two only; --super reaches content f
   assert.deepEqual(rel(await service.list(root)), ["AGENTS.md"]);
   const superList = await service.list(root, { super: true });
   assert.equal(path.basename(path.dirname(superList[0]!.path)), ".super");
-  // No .harness/README.md, so super flat-mounts materials (tasks before readme)
+  // No .edges/README.md, so super flat-mounts materials (tasks before readme)
   // and then expands README children (lower), with seen-path dedupe.
   assert.deepEqual(
     superList.slice(1).map((n) => path.relative(root, n.path)),
@@ -145,11 +145,11 @@ test("harness discovery skips symlinked mirrors of entries reachable by their re
     fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true });
     fs.writeFileSync(path.join(root, name), text);
   };
-  write("AGENTS.md", scopeAgentsMd.replace("## 本层系统维护信息\n", "## 本层系统维护信息\n\n- [Skills](.harness/skills/referenced/README.md)\n"));
+  write("AGENTS.md", scopeAgentsMd.replace("## 本层系统维护信息\n", "## 本层系统维护信息\n\n- [Skills](.edges/skills/referenced/README.md)\n"));
   write("skills/real/SKILL.md", "---\nname: real\ndescription: Real skill.\n---\n\nBody\n");
   fs.mkdirSync(path.join(root, ".agents/skills"), { recursive: true });
   fs.symlinkSync("../../skills/real", path.join(root, ".agents/skills/real"));
-  write(".harness/skills/referenced/README.md", "<!-- project-memory-type:start -->\nname: referenced\nmodule: skills\nwritable: false\n<!-- project-memory-type:end -->\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [real](../../../.agents/skills/real/SKILL.md) — Real skill.\n<!-- project-entries-local:end -->\n");
+  write(".edges/skills/referenced/README.md", "<!-- project-memory-type:start -->\nname: referenced\nmodule: skills\nwritable: false\n<!-- project-memory-type:end -->\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [real](../../../.agents/skills/real/SKILL.md) — Real skill.\n<!-- project-entries-local:end -->\n");
   const nodes = await new NodeService({ managedRoot: root }).query(root, { includeHarness: true }).toArray().value();
-  assert.deepEqual(nodes.map((n) => path.relative(root, n.path)), ["AGENTS.md", ".harness/skills/referenced/README.md"]);
+  assert.deepEqual(nodes.map((n) => path.relative(root, n.path)), ["AGENTS.md", ".edges/skills/referenced/README.md"]);
 });

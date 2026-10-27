@@ -12,7 +12,7 @@
 
 `notes create` 只做本地 `NodeService.create`。不在 create 上做 token 鉴权，也不保留 `--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--content`、`--content-file`、`--markdown`、`--token-file`、`--token-stdin`。
 
-skills create 与 update 写入当前 scope 的受管技能目录 `skills/managed/<kebab-name>/SKILL.md`（与 harness-materials `skills.managed` 对齐；真系统落在 `<scope>/.harness/` 下，`--super` 落在 scope 目录下），并登记父级组织清单。本决定不加 `referenced` 或其他特殊旗标。`edges memory remember` 仍可写 skill 类记忆，与 `edges skills` 并列，不互相代替。
+skills create 与 update 写入当前 scope 的受管技能目录 `skills/managed/<kebab-name>/SKILL.md`（与 edges-materials `skills.managed` 对齐；真系统落在 `<scope>/.edges/` 下，`--super` 落在 scope 目录下），并登记父级组织清单。本决定不加 `referenced` 或其他特殊旗标。`edges memory remember` 仍可写 skill 类记忆，与 `edges skills` 并列，不互相代替。
 
 标准 CRUD 旗标（house CLI surface）：
 

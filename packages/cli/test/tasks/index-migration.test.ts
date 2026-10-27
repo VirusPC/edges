@@ -50,15 +50,15 @@ function fixture(t: { after(fn: () => void): void }) {
     "# Alpha\n\nProject description\n\n## Pointers\n\nHuman prose\n",
   );
   task("tasks/alpha/todo/same/index.md", "alpha");
-  task(".harness/tasks/_default/todo/same/index.md");
+  task(".edges/tasks/_default/todo/same/index.md");
   return { root, write, task };
 }
 test("preview preserves prose and bytes; apply indexes exact task identities, including nested harnesses", async (t) => {
   const { root, write, task } = fixture(t);
   const nested =
-    "tasks/alpha/todo/same/.harness/tasks/_default/todo/same/index.md";
+    "tasks/alpha/todo/same/.edges/tasks/_default/todo/same/index.md";
   task(nested);
-  const internal = "tools/cli/.harness/tasks/_default/todo/same/index.md";
+  const internal = "tools/cli/.edges/tasks/_default/todo/same/index.md";
   task(internal);
   write("tools/cli/AGENTS.md", "# CLI\n");
   write("tasks/alpha/resources.txt", "resource");
@@ -109,7 +109,7 @@ for (const kind of ["addition", "deletion", "task edit", "index edit"] as const)
       fs.appendFileSync(path.join(root, plan.tasks[0]!), "\nChanged\n");
     if (kind === "index edit") write("AGENTS.md", "# Changed\n");
     await assert.rejects(applyTaskIndexes(plan), /changed|drift|Missing/i);
-    assert.ok(!fs.existsSync(path.join(root, ".harness/tasks/AGENTS.md")));
+    assert.ok(!fs.existsSync(path.join(root, ".edges/tasks/AGENTS.md")));
   });
 test("rejects conflicting duplicate indexes and out-of-root references with paths", async (t) => {
   const { root, write } = fixture(t);
@@ -129,7 +129,7 @@ test("rejects conflicting duplicate indexes and out-of-root references with path
 });
 test("malformed markers reject the whole plan; private and foreign content stays outside discovery", async (t) => {
   const { root, write } = fixture(t);
-  write(".harness/memory/users/AGENTS.md", "malformed private");
+  write(".edges/memory/users/AGENTS.md", "malformed private");
   write("journal/tasks/_default/todo/private/index.md", "private");
   write("posts/tasks/_default/todo/post/index.md", "post");
   assert.equal((await planTaskIndexes(root)).tasks.length, 2);
@@ -179,7 +179,7 @@ test("CLI requires root, defaults to preview, writes a report, and applies idemp
   );
   assert.equal(preview.mode, "preview");
   assert.equal(preview.tasks, 2);
-  assert.ok(!fs.existsSync(path.join(root, ".harness/tasks/AGENTS.md")));
+  assert.ok(!fs.existsSync(path.join(root, ".edges/tasks/AGENTS.md")));
   const applied = JSON.parse(run(["--root", root, "--apply"]));
   assert.equal(applied.validation.applied, true);
   assert.deepEqual(JSON.parse(run(["--root", root])).edits, []);
@@ -187,7 +187,7 @@ test("CLI requires root, defaults to preview, writes a report, and applies idemp
 test("preserves existing scope groups, labels, descriptions, and unmanaged text byte for byte", async (t) => {
   const { root, write } = fixture(t);
   const source =
-    "# Scope\n\nManual text\n<!-- project-memory-important:start -->\n## 本层硬约束\n\n- A rule\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n## 本层记忆\n\n- [Custom maintenance](<.harness/tasks/AGENTS.md>) — exact description\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n## 下层作用域\n\n- [Custom domain](tasks/AGENTS.md) — kept\n<!-- project-memory-children:end -->\n\nTail\n";
+    "# Scope\n\nManual text\n<!-- project-memory-important:start -->\n## 本层硬约束\n\n- A rule\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n## 本层记忆\n\n- [Custom maintenance](<.edges/tasks/AGENTS.md>) — exact description\n<!-- project-memory-local:end -->\n<!-- project-memory-children:start -->\n## 下层作用域\n\n- [Custom domain](tasks/AGENTS.md) — kept\n<!-- project-memory-children:end -->\n\nTail\n";
   write("AGENTS.md", source);
   const plan = await planTaskIndexes(root);
   assert.ok(!plan.edits.some((e) => e.path === "AGENTS.md"));
@@ -218,7 +218,7 @@ for (const entryName of ["index.md", "INDEX.md", "SKILL.md"] as const)
     test(`rejects ${entryName} owner ${drift} after preview without index writes`, async (t) => {
       const { root, write, task } = fixture(t);
       write("tools/foo/AGENTS.md", "# Owner\n");
-      task("tools/foo/.harness/tasks/_default/todo/owned/index.md");
+      task("tools/foo/.edges/tasks/_default/todo/owned/index.md");
       const relative = `tools/foo/${entryName}`;
       if (drift !== "addition") write(relative, "# Owner content\n");
       const plan = await planTaskIndexes(root);
@@ -249,7 +249,7 @@ for (const entryName of ["index.md", "INDEX.md", "SKILL.md"] as const)
 test("tracks both possible owner entries, while unrelated content does not cause drift", async (t) => {
   const { root, write, task } = fixture(t);
   write("tools/foo/index.md", "# Owner\n");
-  task("tools/foo/.harness/tasks/_default/todo/owned/index.md");
+  task("tools/foo/.edges/tasks/_default/todo/owned/index.md");
   const plan = await planTaskIndexes(root);
   write("tools/foo/SKILL.md", "# New alternative owner\n");
   await assert.rejects(applyTaskIndexes(plan), /tools\/foo\/SKILL.md/);
@@ -265,7 +265,7 @@ for (const kind of ['directory', 'file'] as const) {
     const { root, write, task } = fixture(t);
     fs.mkdirSync(path.join(root, '.git')); // The selected root itself remains eligible.
     write('ordinary/AGENTS.md', '# Ordinary scope\n');
-    task('ordinary/.harness/tasks/_default/todo/local/index.md');
+    task('ordinary/.edges/tasks/_default/todo/local/index.md');
     write('vendor/upstream/AGENTS.md', '# Foreign scope\n');
     task('vendor/upstream/tasks/_default/todo/foreign/index.md');
     if (kind === 'directory') fs.mkdirSync(path.join(root, 'vendor/upstream/.git'));
@@ -279,7 +279,7 @@ for (const kind of ['directory', 'file'] as const) {
     t.after(() => { guard.mock.restore(); syncBuiltinESMExports(); });
     const plan = await planTaskIndexes(root);
     assert.equal(plan.tasks.length, 3);
-    assert.ok(plan.tasks.includes('ordinary/.harness/tasks/_default/todo/local/index.md'));
+    assert.ok(plan.tasks.includes('ordinary/.edges/tasks/_default/todo/local/index.md'));
     assert.ok(plan.tasks.every(file => !file.startsWith('vendor/')));
     assert.ok(plan.edits.every(edit => !edit.path.startsWith('vendor/')));
     await applyTaskIndexes(plan);
@@ -313,7 +313,7 @@ for (const entryName of ['index.md', 'INDEX.md']) {
     node.addChild('local', { id: content, name: 'Content', description: 'Keep registration' });
     fs.writeFileSync(owner, node.serialize());
     const before = fs.readFileSync(owner, 'utf8');
-    task('tools/foo/.harness/tasks/_default/todo/owned/index.md');
+    task('tools/foo/.edges/tasks/_default/todo/owned/index.md');
     const plan = await planTaskIndexes(root);
     await applyTaskIndexes(plan);
     assert.equal(fs.readFileSync(owner, 'utf8'), before);
@@ -336,7 +336,7 @@ for (const entryName of ['index.md', 'INDEX.md'])
       node.addChild(group, { id: registered, name: 'Keep authored label', description: 'Keep authored description' });
       fs.writeFileSync(owner, node.serialize());
       const before = fs.readFileSync(owner, 'utf8');
-      task('tools/foo/.harness/tasks/_default/todo/owned/index.md');
+      task('tools/foo/.edges/tasks/_default/todo/owned/index.md');
       const plan = await planTaskIndexes(root);
       await applyTaskIndexes(plan);
       assert.equal(fs.readFileSync(owner, 'utf8'), before);
@@ -356,7 +356,7 @@ test('migration identity comparison preserves unrelated linked registrations wit
   node.addChild('local', { id: path.join(link, 'index.md'), name: 'Linked material', description: 'Keep link' });
   fs.writeFileSync(owner, node.serialize());
   write('tools/foo/AGENTS.md', '# Owner\n');
-  task('tools/foo/.harness/tasks/_default/todo/owned/index.md');
+  task('tools/foo/.edges/tasks/_default/todo/owned/index.md');
   const plan = await planTaskIndexes(root);
   await applyTaskIndexes(plan);
   assert.ok(fs.readFileSync(owner, 'utf8').includes('- [Linked material](<linked/index.md>) — Keep link'));

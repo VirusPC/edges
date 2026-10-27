@@ -124,7 +124,7 @@ class PromptTests(unittest.TestCase):
         self.assertNotIn('{"predicted"', prompt)
         self.assertNotIn("ground_truth", prompt)
         self.assertNotIn("判对要点", prompt)
-        self.assertNotIn(".harness/memory/", prompt)
+        self.assertNotIn(".edges/memory/", prompt)
 
 
 class AnswerTests(unittest.TestCase):
@@ -291,7 +291,7 @@ class JudgeTests(unittest.TestCase):
         self.assertIn("要点 A", blob)
         self.assertIn("不要直推 main", blob)
         self.assertIn("回答", blob)
-        self.assertNotIn(".harness/memory/", blob)
+        self.assertNotIn(".edges/memory/", blob)
         self.assertNotIn("sk-test", blob)
         with self.assertRaises(JudgeError):
             OpenAICompatJudge(base_url="", api_key="", model="", opener=opener)

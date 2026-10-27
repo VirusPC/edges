@@ -57,19 +57,19 @@ format: ordinary
 
 const modernLayer = `# T
 
-<!-- project-harness:start -->
-<!-- project-harness-constraints:start -->
+<!-- edges:start -->
+<!-- edges-constraints:start -->
 ## 本层硬约束
 
 - Keep.
-<!-- project-harness-constraints:end -->
-<!-- project-harness:end -->
+<!-- edges-constraints:end -->
+<!-- edges:end -->
 `;
 
 test("plan rewrites layer entries and skips type indexes", (t) => {
   const root = fixture(t, {
     "AGENTS.md": legacyLayer,
-    ".harness/memory/projects/README.md": typeIndex,
+    ".edges/memory/projects/README.md": typeIndex,
     "notes/AGENTS.md": modernLayer,
   });
   const plan = planLayerMarkerRewrite(root);
@@ -77,7 +77,7 @@ test("plan rewrites layer entries and skips type indexes", (t) => {
     plan.edits.map((edit) => path.relative(root, edit.path)).sort(),
     ["AGENTS.md"],
   );
-  assert.match(plan.edits[0]!.after, /<!-- project-harness:start -->/);
+  assert.match(plan.edits[0]!.after, /<!-- edges:start -->/);
   assert.match(plan.edits[0]!.after, /## 本层系统维护信息/);
   assert.doesNotMatch(plan.edits[0]!.after, /project-memory-important/);
   assert.equal(planLayerMarkerRewrite(root).edits.length, 1);
@@ -86,7 +86,7 @@ test("plan rewrites layer entries and skips type indexes", (t) => {
 test("plan is empty when every layer file is already canonical", (t) => {
   const root = fixture(t, {
     "AGENTS.md": modernLayer,
-    ".harness/memory/projects/README.md": typeIndex,
+    ".edges/memory/projects/README.md": typeIndex,
   });
   assert.equal(planLayerMarkerRewrite(root).edits.length, 0);
 });

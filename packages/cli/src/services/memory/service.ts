@@ -38,10 +38,3 @@ export { doctorMemory } from "./doctor.js";
 export { listMemoryEntries, getMemoryEntry, deleteMemoryEntry } from "./records.js";
 export { backupUserMemory, restoreUserMemory } from "./archive.js";
 export { resolveScope } from "../scope.js";
-
-type MigrateMemoryOptions = import("./migrate.js").MigrateMemoryOptions;
-
-/** Dynamic import: this implementation is optional and must not load during ordinary CLI startup. */
-export function migrateMemory(options: MigrateMemoryOptions) {
-  return import("./migrate.js").then((mod) => mod.migrateMemory(options));
-}

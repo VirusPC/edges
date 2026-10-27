@@ -42,7 +42,7 @@ export function coLocated(entry: string): boolean {
   );
 }
 const TYPE_HEADER = "<!-- project-memory-type:start -->";
-const TYPE_DIRECTORY = /(?:^|\/)\.harness\/(?:memory|skills)\/[^/]+$/;
+const TYPE_DIRECTORY = /(?:^|\/)\.edges\/(?:memory|skills)\/[^/]+$/;
 
 const ENTRIES_MARKER = /^<!-- project-entries-(?:local|descendants):start -->$/m;
 
@@ -65,7 +65,7 @@ function readmeOnlyChild(child: string): boolean {
   const type = identifyNodeType(child);
   if (type === "note" || type === "project" || type === "task" || type === "routine") return true;
   const posix = child.split(path.sep).join("/");
-  if (posix.split("/").includes(".harness")) return false;
+  if (posix.split("/").includes(".edges")) return false;
   return (
     /(?:^|\/)(?:notes|routines)\/README\.md$/.test(posix) ||
     /(?:^|\/)(?<!memory\/)projects\/README\.md$/.test(posix)
@@ -82,7 +82,7 @@ function parentEntryIn(
   const readme = path.join(directory, ENTRY_NAMES.readme);
   const systemOne =
     path.basename(child) !== ENTRY_NAMES.internal &&
-    !path.relative(directory, child).split(path.sep).includes(".harness");
+    !path.relative(directory, child).split(path.sep).includes(".edges");
   const readmeOrg =
     exists(readme) &&
     (ENTRIES_MARKER.test(read(readme) ?? "") || isTypeIndexReadme(readme, read));
@@ -99,8 +99,8 @@ export function physicalParent(
   read: EntrySource = readSource,
 ): string | undefined {
   let dir = path.dirname(path.dirname(entry));
-  // The .harness directory is a maintenance relation, never composition of its host.
-  if (path.basename(path.dirname(entry)) === ".harness")
+  // The .edges directory is a maintenance relation, never composition of its host.
+  if (path.basename(path.dirname(entry)) === ".edges")
     dir = path.dirname(dir);
   if (!isWithinPath(dir, root)) return undefined;
   let found: string | undefined;

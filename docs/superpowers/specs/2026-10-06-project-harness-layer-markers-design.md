@@ -1,4 +1,4 @@
-# 层入口表面命名：project-memory → project-harness
+# 层入口表面命名：project-memory → edges
 
 状态：2026-10-06 用户批准并实施。实施计划见 [project-harness-layer-markers](../plans/2026-10-06-project-harness-layer-markers.md)。不替代 [目录节点模型](2026-10-05-directory-node-model.md) 的组成关系。
 
@@ -8,14 +8,14 @@
 
 ## 目的
 
-`AGENTS.md` 层入口的三章是 **Project Harness**：给一个 Git 项目搭的系统二如何落在文件上。现行注释族 `project-memory-*` 和标题「本层记忆 / 下层记忆索引」仍停在 Project Memory 时期，和 `.harness/` 布局、本层已登记的 tasks / evaluation / observation 对不上。
+`AGENTS.md` 层入口的三章是 **Project Harness**：给一个 Git 项目搭的系统二如何落在文件上。现行注释族 `project-memory-*` 和标题「本层记忆 / 下层记忆索引」仍停在 Project Memory 时期，和 `.edges/` 布局、本层已登记的 tasks / evaluation / observation 对不上。
 
-本轮只改**层入口表面**（HTML 注释、章节标题、协议与术语里对这三章的称呼），以及 skill / CLI 里读写这些注释的逻辑。三章职责、索引语义、类型入口标记、`.harness/` 目录名、skill 目录名、`edges memory` 命令名都不动。
+本轮只改**层入口表面**（HTML 注释、章节标题、协议与术语里对这三章的称呼），以及 skill / CLI 里读写这些注释的逻辑。三章职责、索引语义、类型入口标记、`.edges/` 目录名、skill 目录名、`edges memory` 命令名都不动。
 
 ## 已确认的模型
 
 - 每个有 `AGENTS.md` 的节点有一份系统二。三章就是这份系统二的写法：约束、本层组成、下层节点。
-- **Project Harness** 是这个角色在 Git 项目里的名称，不是 `.harness/` 目录的别名。目录仍放这份系统二的材料。
+- **Project Harness** 是这个角色在 Git 项目里的名称，不是 `.edges/` 目录的别名。目录仍放这份系统二的材料。
 - 子目录（`notes/`、`teaching/` 等）的 `AGENTS.md` 用同一套标记：仍是该 Git 项目的系统二，只是挂在更窄的节点上。
 - **Agent Harness**（CONTEXT 现有词）保持：Agent 持续工作的支撑机制。不要把 Agent Harness 与 Project Harness 并成一个词。CONTEXT 里「避免把 harness 当系统二的通用名称」改为：系统二落在层入口上的名称是 Project Harness；Agent Harness 仍不是系统二的通称。
 
@@ -23,10 +23,10 @@
 
 | 现在 | 改成 | 对应 |
 | --- | --- | --- |
-| `project-memory` | `project-harness` | 层入口受管外层 |
-| `project-memory-important` | `project-harness-constraints` | 本层硬约束 |
-| `project-memory-local` | `project-harness-local` | 本层组成 |
-| `project-memory-children` | `project-harness-descendants` | 下层节点 |
+| `project-memory` | `edges` | 层入口受管外层 |
+| `project-memory-important` | `edges-constraints` | 本层硬约束 |
+| `project-memory-local` | `edges-local` | 本层组成 |
+| `project-memory-children` | `edges-descendants` | 下层节点 |
 
 标题：
 
@@ -40,11 +40,11 @@
 
 - `project-memory-type` / `project-memory-entries`：类型入口身份与条目清单。几乎只给 doctor / remember 读写，没有层入口那种名实不符。需要时另做机械替换。
 - `task-projects` 嵌套标记。
-- `.harness/` 路径、Memory Type 名称、skill 名 `project-memory-*`、`edges memory` 命令名。
+- `.edges/` 路径、Memory Type 名称、skill 名 `project-memory-*`、`edges memory` 命令名。
 - 组成关系、parent / harnessPath、遍历默认只走 localChildren。
 - 硬约束种子点名 `$project-memory-ask` / `$project-memory-remember`；只改包裹它的标记和章节标题。
 
-实现约束：`agents/blocks.ts` 今天用同一个 `project-memory` 工厂生成外层、三章、type、entries。实施时必须拆开前缀，不能把 type / entries 一并改成 `project-harness-*`。
+实现约束：`agents/blocks.ts` 今天用同一个 `project-memory` 工厂生成外层、三章、type、entries。实施时必须拆开前缀，不能把 type / entries 一并改成 `edges-*`。
 
 ## 协议与布局
 
@@ -56,7 +56,7 @@
 
 ## 读写兼容
 
-- **读：** 同时识别旧 `project-memory` 四条层标记和新 `project-harness` 四条。旧标题「本层记忆」「下层记忆索引」「下层作用域」「本层重要约束」仍能解析到对应章节。
+- **读：** 同时识别旧 `project-memory` 四条层标记和新 `edges` 四条。旧标题「本层记忆」「下层记忆索引」「下层作用域」「本层重要约束」仍能解析到对应章节。
 - **写：** 只发出新标记和新标题。刷新索引时改标记和标题，不改条目与硬约束正文。
 - **存量：** 可重复执行的迁移（doctor `--apply` 和/或仓内脚本）把已跟踪的层入口改到新标记。禁止逐文件手改。预览、冲突检查、可重跑。
 - 类型入口文件若只有 type / entries、没有层三章，迁移不得给它们强加层三章，也不得改 type / entries 标记。
@@ -71,7 +71,7 @@
 
 ## 验收
 
-- 新建或刷新的层入口只含 `project-harness` 四条标记和三章新标题。
+- 新建或刷新的层入口只含 `edges` 四条标记和三章新标题。
 - 未迁移的旧层入口仍能被 parse；写回后变为新标记。
 - 类型入口的 `project-memory-type` / `entries` 字节在本轮迁移中不变。
 - `edges memory` 的 init / remember / doctor 在新标记下仍能刷新本层索引；类型入口刷新仍写 `project-memory-entries`。
@@ -79,4 +79,4 @@
 
 ## 非目标
 
-不重划三章职责，不把维护模块单独成块，不新建 `.harness/AGENTS.md` 当唯一系统二入口，不改 Agent 客户端的 skills 安装路径。
+不重划三章职责，不把维护模块单独成块，不新建 `.edges/AGENTS.md` 当唯一系统二入口，不改 Agent 客户端的 skills 安装路径。

@@ -9,13 +9,13 @@ const HELP = "See edges compose doctor --help for usage.\n";
 export function addComposeDoctorCommand(compose: Command, ctx: CliContext): void {
   compose
     .command("doctor")
-    .description("One-shot migration of the AGENTS.md Compose block into .harness/compose/README.md (dry-run unless --apply)")
+    .description("One-shot migration of the AGENTS.md Compose block into .edges/compose/README.md (dry-run unless --apply)")
     .option("--apply", "Write the migration. Without this flag, only report what would change")
     .allowExcessArguments(false)
     .addHelpText("after", `
 Daily edits stay on compose add, list, and update. doctor only moves an existing
-AGENTS.md Compose block into .harness/compose/README.md, rewrites those hrefs,
-and links the entry from .harness/README.md. Other mentions of --with-composed
+AGENTS.md Compose block into .edges/compose/README.md, rewrites those hrefs,
+and links the entry from .edges/README.md. Other mentions of --with-composed
 are reported and left unchanged. .agents/skills/, CHANGELOG files, and docs/adr/
 are not listed.
 `)

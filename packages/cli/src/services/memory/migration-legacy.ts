@@ -51,9 +51,9 @@ export interface LegacyInventory extends Array<LegacyType> {
   unclassified: UnclassifiedLegacy[];
 }
 const FILE_SUGGESTION =
-  "无法按文件名归入 project、feedback、reference、user。平铺条目应是 <type>_<slug>.md，类型索引应是 FEEDBACK.md、PROJECT.md、REFERENCE.md 或 USER.md。此文件会挪到 .project-memory-migration/unclassified/，不阻断其余迁移；确认后改名再运行 edges memory migrate。";
+  "无法按文件名归入 project、feedback、reference、user。平铺条目应是 <type>_<slug>.md，类型索引应是 FEEDBACK.md、PROJECT.md、REFERENCE.md 或 USER.md。此文件会挪到 .project-memory-migration/unclassified/，不阻断其余迁移；确认后改名再用 @viruspc/edges@0.2.7 的 memory migrate。";
 const DIRECTORY_SUGGESTION =
-  "没有条目用「目录名/」这样的相对路径引用它，不能判断该跟哪一条记忆走。在对应的 <type>_<slug>.md 里写上这个相对路径后，再运行 edges memory migrate。目录会先挪到 .project-memory-migration/unclassified/，不阻断其余迁移。";
+  "没有条目用「目录名/」这样的相对路径引用它，不能判断该跟哪一条记忆走。在对应的 <type>_<slug>.md 里写上这个相对路径后，再用 @viruspc/edges@0.2.7 的 memory migrate。目录会先挪到 .project-memory-migration/unclassified/，不阻断其余迁移。";
 function make(
   spec: Omit<LegacyType, "newName" | "relativeTarget" | "flatRoot" | "flatEntries" | "assetDirs">,
 ): LegacyType {
@@ -65,7 +65,7 @@ function make(
     flatEntries: [],
     assetDirs: [],
     relativeTarget: join(
-      ".harness",
+      ".edges",
       spec.module,
       RENAMES[spec.name] ? newName : basename(spec.directory),
     ),
@@ -335,7 +335,7 @@ export function parseLegacy(
       kind: "directory",
       suggestion:
         entries.length > 1
-          ? `被这些条目同时引用：${entries.map((entry) => basename(entry)).join("、")}。一次只跟着一个条目迁移。请改成单一引用后再运行 edges memory migrate。目录会先挪到 .project-memory-migration/unclassified/，不阻断其余迁移。`
+          ? `被这些条目同时引用：${entries.map((entry) => basename(entry)).join("、")}。一次只跟着一个条目迁移。请改成单一引用后再用 @viruspc/edges@0.2.7 的 memory migrate。目录会先挪到 .project-memory-migration/unclassified/，不阻断其余迁移。`
           : DIRECTORY_SUGGESTION,
     });
   }

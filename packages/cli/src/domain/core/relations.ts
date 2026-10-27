@@ -37,7 +37,7 @@ export function referenceOf(node: NodeReference): NodeReference {
 export function setNodeRelations(node: BaseNode, value: Relations): void {
   relations.set(node, {
     ...(value.parent ? { parent: referenceOf(value.parent) } : {}),
-    ...(value.harness ? { harness: referenceOf(value.harness) } : {}),
+    ...(value.edges ? { harness: referenceOf(value.edges) } : {}),
   });
 }
 export function nodeRelations(node: BaseNode): Relations {

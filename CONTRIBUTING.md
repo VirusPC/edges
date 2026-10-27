@@ -38,9 +38,9 @@ git submodule update --init packages/evaluation/third_party/locomo
 | [packages/system-prompt/](packages/system-prompt/) | 新 Agent 接入时使用的 system prompt 片段 |
 | [docs/](docs/) | ADR、架构与迁移说明 |
 | [scripts/](scripts/README.md) | 初始化、构建与迁移等维护脚本 |
-| [.harness/](.harness/) | 本仓自身的维护记忆、技能与任务 |
+| [.edges/](.edges/) | 本仓自身的维护记忆、技能与任务 |
 
-开发时，`pnpm skills:link` 将 `packages/skills/` 链到 `.agents/skills`。本仓维护用的技能在 `.harness/skills`；构建时复制进安装包的 `packages/cli/skills/` 不入 Git。这几处分别承担分发真源、开发发现、本仓维护和构建产物的职责。
+开发时，`pnpm skills:link` 将 `packages/skills/` 链到 `.agents/skills`。本仓维护用的技能在 `.edges/skills`；构建时复制进安装包的 `packages/cli/skills/` 不入 Git。这几处分别承担分发真源、开发发现、本仓维护和构建产物的职责。
 
 使用方的笔记、教学、复盘、任务、项目、记忆、归档、shared-extensions 与对外博客，放在自己的内容仓库。本框架仓不挂载个人仓库；使用方可在自己的工作区通过 [Compose](packages/skills/edges-compose/SKILL.md) 组织它们。不绑定 Edges 的通用技能与配置也归使用方维护。
 

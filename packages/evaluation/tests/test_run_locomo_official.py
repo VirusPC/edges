@@ -169,7 +169,7 @@ class RelocatedEvaluationTests(unittest.TestCase):
             repo = Path(tmp) / "repo"
             repo.mkdir()
             (repo / ".git").mkdir()
-            target = repo / ".harness" / "evaluation"
+            target = repo / ".edges" / "evaluation"
             shutil.copytree(EVAL_DIR, target, ignore=shutil.ignore_patterns("third_party", ".cache", ".memory", "__pycache__"))
             adr = repo / "docs/adr/0008-evaluation-smoke-is-not-benchmark-proof.md"
             adr.parent.mkdir(parents=True)
@@ -188,7 +188,7 @@ class RelocatedEvaluationTests(unittest.TestCase):
                 cwd=repo, env=env, capture_output=True, text=True,
             )
             self.assertEqual(printed.returncode, 0, printed.stderr)
-            relocated = ".harness/evaluation"
+            relocated = ".edges/evaluation"
             self.assertIn(f"{relocated}/third_party/locomo/task_eval/evaluate_qa.py", printed.stdout)
             self.assertIn(f"git submodule update --init {relocated}/third_party/locomo", printed.stdout)
             for reports in [target / "reports", repo / "exports/deep/reports", Path(tmp) / "outside"]:
@@ -203,7 +203,7 @@ class RelocatedEvaluationTests(unittest.TestCase):
                         body = (reports / name).read_text()
                         link = re.search(r"See \[.*?\]\((.*?)\)", body).group(1)
                         self.assertEqual((reports / link).resolve(), adr.resolve())
-                        self.assertIn("python3 .harness/evaluation/", body)
+                        self.assertIn("python3 .edges/evaluation/", body)
 
 
 if __name__ == "__main__":

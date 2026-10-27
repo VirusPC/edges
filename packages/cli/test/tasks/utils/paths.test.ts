@@ -31,14 +31,14 @@ test("isTaskStatus rejects Run-layer and old enums", () => {
 });
 
 test("paths join tasks/<project-dir>/<status> and sidecar dotfile", () => {
-  assert.equal(boardRoot("/repo"), "/repo/.harness/tasks");
+  assert.equal(boardRoot("/repo"), "/repo/.edges/tasks");
   assert.equal(
     taskRelPath("default", "in_progress", "2026-09-11--cli"),
-    ".harness/tasks/_default/in_progress/2026-09-11--cli/INDEX.md",
+    ".edges/tasks/_default/in_progress/2026-09-11--cli/INDEX.md",
   );
   assert.equal(
     sidecarRelPath("default", "in_progress", "2026-09-11--cli"),
-    ".harness/tasks/_default/in_progress/2026-09-11--cli/.2026-09-11--cli.log.md",
+    ".edges/tasks/_default/in_progress/2026-09-11--cli/.2026-09-11--cli.log.md",
   );
   const domain = taskBoardLocation("/repo", { super: true });
   assert.equal(boardRoot(domain), "/repo/tasks");

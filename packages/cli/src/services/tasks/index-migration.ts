@@ -207,7 +207,7 @@ export async function planTaskIndexes(
     const boardNode = get(boardEntry);
     const owner = path.dirname(board);
     const scope =
-      path.basename(owner) === ".harness" ? path.dirname(owner) : owner;
+      path.basename(owner) === ".edges" ? path.dirname(owner) : owner;
     // Snapshot both present and absent candidates: adding an entry can change
     // whether this selected public scope is an AgentsNode or a content node.
     const candidates = [...LEAF_ENTRY_NAMES, ENTRY_NAMES.skill].map((name) =>
@@ -223,7 +223,7 @@ export async function planTaskIndexes(
     add(
       scopeEntry,
       path.join(board, ENTRY_NAMES.internal),
-      path.basename(owner) === ".harness" ? "local" : "descendant",
+      path.basename(owner) === ".edges" ? "local" : "descendant",
     );
     connect(content ?? scopeEntry);
   }

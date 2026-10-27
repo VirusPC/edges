@@ -28,7 +28,7 @@
       "prompt": "系统入口是哪个文件，它要不要带组成登记？",
       "ground_truth": [
         [
-          ".harness/memory/projects/project_recursive_system_two_entry/INDEX.md",
+          ".edges/memory/projects/project_recursive_system_two_entry/INDEX.md",
           "CONTEXT.md"
         ]
       ]
@@ -44,7 +44,7 @@
       "id": "edges_smoke_locomo_runner",
       "prompt": "LoCoMo 官方冒烟该跑哪个入口，真实请求用什么环境变量？",
       "ground_truth": [
-        "packages/evaluation/.harness/memory/projects/project_locomo_official_submodule_path/INDEX.md"
+        "packages/evaluation/.edges/memory/projects/project_locomo_official_submodule_path/INDEX.md"
       ]
     }
   ]

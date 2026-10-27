@@ -1,13 +1,13 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
-import { listHarnessMaterialAbsPaths, placeHarnessMaterial } from "../../domain/config/harness-materials.js";
+import { listHarnessMaterialAbsPaths, placeHarnessMaterial } from "../../domain/config/edges-materials.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { SuperAgentsNode } from "../../domain/models/index.js";
 
 /**
  * Runtime SuperAgentsNode.
- * Mount `.harness/README.md` when it exists and expand from it.
- * Otherwise flat-mount existing harness-materials paths.
+ * Mount `.edges/README.md` when it exists and expand from it.
+ * Otherwise flat-mount existing edges-materials paths.
  */
 export function createSuperAgentsNode(scopePath: string): SuperAgentsNode {
   const scopeDir = path.basename(scopePath) === ENTRY_NAMES.internal

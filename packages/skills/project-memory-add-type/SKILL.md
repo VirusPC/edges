@@ -1,12 +1,12 @@
 ---
 name: project-memory-add-type
 description: 在指定记忆目录按 LAYOUT 登记一个 Memory Type（<plural>/README.md + 同目录条目 + 层入口一行）。仅当用户明确要求新增 type 时使用。官方类型按选择采用；不要把示例 type 写进 init 模板。
-version: 3.0.0
+version: 4.0.0
 ---
 
 # Project Memory Add Type
 
-在**已经 init** 的记忆目录登记一个用户 Memory Type。扩展面只在 LAYOUT：`.harness/<module>/<plural>/README.md` + 同目录条目 + 该层 `AGENTS.md` 本层清单一行。不写 JSON/YAML 注册表。PROTOCOL 不枚举类型。
+在**已经 init** 的记忆目录登记一个用户 Memory Type。扩展面只在 LAYOUT：`.edges/<module>/<plural>/README.md` + 同目录条目 + 该层 `AGENTS.md` 本层清单一行。不写 JSON/YAML 注册表。PROTOCOL 不枚举类型。
 
 执行前确认 `edges memory add-type --help` 可用。类型布局参考同级 project-memory-init 的 LAYOUT，执行能力由 Edges CLI 提供。
 
@@ -15,7 +15,7 @@ version: 3.0.0
 - 用户明确要求「给这一层加一个 type / 登记一个 Memory Type」。
 - 不要在 remember / ask / doctor / init 里代为调用。
 - 不要把 `docs` / `progress` / `tasks` / `research` / `reminder` / `scheduler` 写进 `AGENTS.tmpl.md`。它们只是示例名，用户要才登记。
-- `tasks` Memory Type ≠ 作用域 `tasks/` 或 `.harness/tasks/` 看板。看板状态夹本 skill 碰都不能碰。
+- `tasks` Memory Type ≠ 作用域 `tasks/` 或 `.edges/tasks/` 看板。看板状态夹本 skill 碰都不能碰。
 
 ## 步骤
 
@@ -45,4 +45,4 @@ version: 3.0.0
 - 布局按 LAYOUT，执行规则由 CLI service 维护，不另建类型总配置。
 - 官方 init 种子不因示例膨胀。
 
-`--module memory|skills` 默认 memory。模块与 format 独立；现有自定义类型不因 Skill 格式搬容器，同一类型身份不能在两模块重复登记。`--gitignore` 覆盖索引和正文且在写入前生效。旧层需先 `$project-memory-migrate`，常规登记不解析旧 `.memory`。
+`--module memory|skills` 默认 memory。模块与 format 独立；现有自定义类型不因 Skill 格式搬容器，同一类型身份不能在两模块重复登记。`--gitignore` 覆盖索引和正文且在写入前生效。旧 `.memory` 层当前版本不会迁移，常规登记不解析它。先用 `@viruspc/edges@0.2.7` 完成那次转换，再按 `docs/migrations/2026-10-27-rename-harness-to-edges.md` 改目录名。

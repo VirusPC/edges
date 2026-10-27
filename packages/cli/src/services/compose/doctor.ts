@@ -49,7 +49,7 @@ interface PlannedLink {
 
 /**
  * One-shot migration of a Compose block from `AGENTS.md` into
- * `.harness/compose/README.md`. Dry-run unless `apply` is true.
+ * `.edges/compose/README.md`. Dry-run unless `apply` is true.
  * Daily edits stay on `compose add` / `list` / `update`.
  */
 export async function doctorCompose(
@@ -61,7 +61,7 @@ export async function doctorCompose(
   if (!existsSync(agentsFile)) throw new Error(`Missing scope entry: ${agentsFile}. Add AGENTS.md.`);
   const composeFile = composeReadmePath(session.scope);
   const source = readFileSync(agentsFile, "utf8");
-  const markers = /<!-- project-harness-compose:start -->/.test(source);
+  const markers = /<!-- edges-compose:start -->/.test(source);
   const links = markers
     ? (new InternalSyntax(source, () => true).content().compose ?? [])
     : [];
@@ -92,8 +92,8 @@ export async function doctorCompose(
   if (needsIndex) {
     changes.push({
       kind: "index-link",
-      path: path.join(session.scope, ".harness", "README.md"),
-      detail: "link compose/README.md from .harness/README.md",
+      path: path.join(session.scope, ".edges", "README.md"),
+      detail: "link compose/README.md from .edges/README.md",
     });
   }
   if (markers) changes.push({ kind: "clear-agents", path: agentsFile });
@@ -112,7 +112,7 @@ export async function doctorCompose(
       if (!name) throw new Error(`${agentsFile}: compose entry name is required`);
       if (names.has(name)) {
         warnings.push(
-          `warning: compose entry ${name} is already on .harness/compose/README.md; left that line and dropped the AGENTS.md line\n`,
+          `warning: compose entry ${name} is already on .edges/compose/README.md; left that line and dropped the AGENTS.md line\n`,
         );
         continue;
       }
@@ -136,7 +136,7 @@ export async function doctorCompose(
 }
 
 function indexLinksCompose(scopeDir: string): boolean {
-  const readme = path.join(scopeDir, ".harness", "README.md");
+  const readme = path.join(scopeDir, ".edges", "README.md");
   const compose = composeReadmePath(scopeDir);
   if (!existsSync(readme) || !existsSync(compose)) return false;
   return readFileSync(readme, "utf8").includes("compose/README.md");

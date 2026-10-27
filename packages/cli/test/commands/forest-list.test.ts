@@ -24,9 +24,9 @@ function writeAgents(root: string, rel: string, localChildren: string[] = []) {
     { operation: "create" },
   );
   let body = created.serialize();
-  if (!body.includes("project-harness-local:start")) {
+  if (!body.includes("edges-local:start")) {
     body =
-      "# Scope\n\n<!-- project-harness-local:start -->\n## 本层系统维护信息\n\n<!-- project-harness-local:end -->\n";
+      "# Scope\n\n<!-- edges-local:start -->\n## 本层系统维护信息\n\n<!-- edges-local:end -->\n";
   }
   writeFileSync(file, body);
 }

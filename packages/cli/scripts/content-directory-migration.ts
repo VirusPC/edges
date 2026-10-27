@@ -40,9 +40,9 @@ export interface Options {
   archiveUnusedImages?: boolean;
 }
 const contentPath = (f: string) =>
-  /^(edges|notes|posts|archive)\//.test(f) && !f.includes("/.harness/");
+  /^(edges|notes|posts|archive)\//.test(f) && !f.includes("/.edges/");
 const privatePath = (f: string) =>
-  /(?:^|\/)(?:\.memory|\.harness\/memory)\/(?:users|private)(?:\/|$)/.test(f);
+  /(?:^|\/)(?:\.memory|\.edges\/memory)\/(?:users|private)(?:\/|$)/.test(f);
 const admin = (f: string) =>
   ["AGENTS.md", "README.md", "SKILL.md"].includes(path.basename(f));
 const digest = (b: Buffer) => createHash("sha256").update(b).digest("hex");

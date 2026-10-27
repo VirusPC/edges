@@ -1,7 +1,7 @@
 ---
 name: edges-routines
 description: 用 edges routines 创建、查询、更新或删除例程定义，或让外部平台 Agent 按仓库记录接入时使用。记录日程并引用 Skill；实际触发和执行由平台负责。
-version: 0.1.0
+version: 0.2.0
 ---
 
 # Edges Routines
@@ -36,8 +36,8 @@ edges --scope <目录> routines delete daily-review
 ```
 
 - `init` 显式采用本模块；无参 `edges init` 不默认采用 routines。
-- 默认写在 `<scope>/.harness/routines/<name>/INDEX.md`。名称使用稳定的小写 kebab-case，不加日期或 Project 分组。
-- 根级 `--super` 使用 `<scope>/routines/`；`init` 沿用通用初始化规则，仍初始化真实 scope 的 `.harness`。`--all` 只用于读取系统森林。`list` 支持通用 `--filter`、`--group-by`；`--exclude routines` 排除本模块。
+- 默认写在 `<scope>/.edges/routines/<name>/INDEX.md`。名称使用稳定的小写 kebab-case，不加日期或 Project 分组。
+- 根级 `--super` 使用 `<scope>/routines/`；`init` 沿用通用初始化规则，仍初始化真实 scope 的 `.edges`。`--all` 只用于读取系统森林。`list` 支持通用 `--filter`、`--group-by`；`--exclude routines` 排除本模块。
 - `get/update/delete` 可用名称或入口路径。同名不唯一时用准确的 `INDEX.md` 路径。
 - `create` 和 `update` 支持 `--body`、`--metadata key=value`。CLI 维护内容与索引，不替你提交 Git。
 

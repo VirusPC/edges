@@ -449,9 +449,9 @@ test('typed queries keep internal navigation, skip unrelated bodies and preserve
   write('tasks/_default/todo/one/index.md', '---\nname: one\nmetadata:\n  edges-tasks-status: todo\n---\nOne');
   write('memory/AGENTS.md', typeIndex('memory', true, '- [bad](bad/index.md)'));
   write('memory/bad/index.md', '---\nbad: [\n---\n');
-  write('memory/bad/AGENTS.md', index('- [maintenance](.harness/tasks/AGENTS.md)'));
-  write('memory/bad/.harness/tasks/AGENTS.md', index('- [two](_default/todo/two/index.md)'));
-  write('memory/bad/.harness/tasks/_default/todo/two/index.md', 'Two');
+  write('memory/bad/AGENTS.md', index('- [maintenance](.edges/tasks/AGENTS.md)'));
+  write('memory/bad/.edges/tasks/AGENTS.md', index('- [two](_default/todo/two/index.md)'));
+  write('memory/bad/.edges/tasks/_default/todo/two/index.md', 'Two');
   write('child/AGENTS.md', index('- [third](tasks/_default/todo/three/index.md)'));
   write('child/tasks/_default/todo/three/index.md', 'Three');
   assert.deepEqual((await service.query(root, { types: ['task'], localOnly: true }).value()).map(n => path.basename(n.directoryPath)), ['one']);
@@ -463,10 +463,10 @@ test('typed queries keep internal navigation, skip unrelated bodies and preserve
 });
 test('harness traversal deduplicates composition arrivals and detects cycles', async t => {
   const { root, write, service } = fixture(t);
-  write('AGENTS.md', index('- [harness](.harness/AGENTS.md)'));
-  write('.harness/AGENTS.md', index());
+  write('AGENTS.md', index('- [harness](.edges/AGENTS.md)'));
+  write('.edges/AGENTS.md', index());
   assert.equal((await service.query(root, { includeHarness: true }).value()).length, 2);
-  write('.harness/AGENTS.md', index('- [root](../AGENTS.md)'));
+  write('.edges/AGENTS.md', index('- [root](../AGENTS.md)'));
   await assert.rejects(new NodeService({managedRoot: root}).query(root, { includeHarness: true }).value(), /Composition cycle/);
 });
 
@@ -498,10 +498,10 @@ test('global query omits out-of-root references and linked installations while m
 
 test('writes skip a pre-existing missing reference instead of rejecting the command', async t => {
   const { write, file, service } = fixture(t);
-  write('AGENTS.md', index('- [harness](.harness/README.md)\n- [leaf](leaf/index.md)'));
-  write('.harness/README.md', `# Harness\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [users](memory/users/README.md) — private\n<!-- project-entries-local:end -->\n`);
+  write('AGENTS.md', index('- [harness](.edges/README.md)\n- [leaf](leaf/index.md)'));
+  write('.edges/README.md', `# Harness\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [users](memory/users/README.md) — private\n<!-- project-entries-local:end -->\n`);
   write('leaf/index.md', 'Leaf\n');
-  assert.equal(fs.existsSync(file('.harness/memory/users/README.md')), false);
+  assert.equal(fs.existsSync(file('.edges/memory/users/README.md')), false);
   const created = await service.create(new LeafNode(file('extra/index.md')), { body: 'Extra\n' }, { indexGroup: 'local' });
   assert.match(fs.readFileSync(created.path, 'utf8'), /Extra/);
   const leaf = (await service.get(file('leaf/index.md'), LeafNode))!;
@@ -515,8 +515,8 @@ test('typed navigation through a readonly leaf retains readonly origin for its h
   write('AGENTS.md',index('- [memory](memory/AGENTS.md)'));
   write('memory/AGENTS.md',typeIndex('memory',false,'- [leaf](leaf/index.md)'));
   write('memory/leaf/index.md','---\nbad: [\n---\n');
-  write('memory/leaf/AGENTS.md',index('- [task](.harness/tasks/_default/todo/one/index.md)'));
-  write('memory/leaf/.harness/tasks/_default/todo/one/index.md','Task');
+  write('memory/leaf/AGENTS.md',index('- [task](.edges/tasks/_default/todo/one/index.md)'));
+  write('memory/leaf/.edges/tasks/_default/todo/one/index.md','Task');
   const tasks=await service.query(root,{types:['task'],includeHarness:true}).value();
   assert.equal(tasks.length,1);
   await assert.rejects(service.update(tasks[0]!,{description:'changed'}),/Read-only/);

@@ -58,7 +58,7 @@
 - **递归树结构**：
 
   - **逻辑归属**：树的父归属遵循文件目录；索引可跨越目录层级发现节点，普通交叉引用不产生新的所有权。各节点可按需拥有维护空间，根可面向个人、团队、公司等主体。
-  - **全局共享**：仓内全局约定与维护记忆由根节点的 `AGENTS.md` 和 `.harness/` 承载，各层按归属引用复用。对外分发的 Edges 能力放在仓库根的 `packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/`；不依赖 Edges 的通用能力放个人大脑仓的 `shared-extensions/`；目标是让任意仓库安装后复用这套能力，并在自己的作用域内维护节点与 `.harness/`。局部记忆不因共享而上收根层，也不随扩展默认分发。
+  - **全局共享**：仓内全局约定与维护记忆由根节点的 `AGENTS.md` 和 `.edges/` 承载，各层按归属引用复用。对外分发的 Edges 能力放在仓库根的 `packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/`；不依赖 Edges 的通用能力放个人大脑仓的 `shared-extensions/`；目标是让任意仓库安装后复用这套能力，并在自己的作用域内维护节点与 `.edges/`。局部记忆不因共享而上收根层，也不随扩展默认分发。
   - **统一入口**：每个入口文件对应一个节点：`AGENTS.md` 组织内容，`INDEX.md` 或 `SKILL.md` 承载内容。`AGENTS.md` 沿用 Project Memory 的三部分：本层硬约束规定本层规则，本层记忆登记直属材料，下层记忆索引登记子节点。Task Project 等业务索引也放进这三部分。
   - **系统一与系统二**：当前对象是系统一，负责维护和改进它的是系统二；当维护对象换成这套系统二时，它又成为新的系统一。
   - **检索边界**：完整读取当前对象的系统二，但不自动进入系统二自身的系统二。同层分类索引可以继续展开，停止边界由维护关系决定，不由物理目录深度或经过多少个 `AGENTS.md` 决定。
@@ -81,7 +81,7 @@ CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使�
 | 目录 | 职责 | 边界 |
 | --- | --- | --- |
 | `notes/`、`edges/`、`archive/`、`posts/`（个人大脑仓） | 知识生产、提炼、使用与退出 | 在个人仓；每篇内容使用目录入口，附件共置。个人知识经 Compose 挂进本仓 |
-| [`AGENTS.md`](../AGENTS.md) 与各节点的 `.harness/memory/` | 为人和 Agent 提供分层的规则、决策、纠错与流程记忆 | 归属各节点，服务项目维护，不替代长期知识库 |
+| [`AGENTS.md`](../AGENTS.md) 与各节点的 `.edges/memory/` | 为人和 Agent 提供分层的规则、决策、纠错与流程记忆 | 归属各节点，服务项目维护，不替代长期知识库 |
 | [`packages/cli/`](../packages/cli/)、[`packages/skills/`](../packages/skills/)、[`packages/apps/`](../packages/apps/)、[`packages/services/`](../packages/services/)、[`packages/mcp-servers/`](../packages/mcp-servers/)、[`packages/system-prompt/`](../packages/system-prompt/) | 让 Agent 或外部系统接入、操作 Edges | 必须与 Edges 直接相关。2026-10-20 起收进 `packages/`，见 [workspace 说明](migrations/2026-10-20-packages-workspace.md) |
 | `shared-extensions/`（个人大脑仓） | 跨机器、跨 Agent 共用的个人 harness | 离开 Edges 仍然有价值；不在本仓 |
 | [`scripts/`](../scripts/README.md) | 初始化、构建、迁移等维护脚本 | 通过 `pnpm` 调用，不加入 `$PATH` |
@@ -92,7 +92,7 @@ CLI 先选择显式作用域或最近的 `AGENTS.md`。Task、Memory、Note 使�
 
 捕获入口最终回到同一套知识模型：人和有 shell 的 Agent 使用 [`edges` CLI](../packages/cli/README.md) 的 `edges notes …`（稳定参数与 JSON stdout）；没有 shell 的宿主使用 [`new-note` MCP](../packages/mcp-servers/new-note/README.md)；Agent 何时该调用则看 [`edges-note` Skill](../packages/skills/edges-note/SKILL.md)。它们复用同一条 Note 入库链路。npm `package.json` 的 `bin` 只是 `edges` 的安装挂钩，不是单独一层。
 
-Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；各节点的 `AGENTS.md` 和 `.harness/memory/` 保存该节点维护所需的规则、决策与经验；根层的 `notes/`、`edges/` 等目录保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
+Agent Memory 在 Edges 中不是单一目录：当前会话承载尚未入库的临时研究；各节点的 `AGENTS.md` 和 `.edges/memory/` 保存该节点维护所需的规则、决策与经验；根层的 `notes/`、`edges/` 等目录保存长期认知资产；检索和接口负责把资产重新带入任务。Memory 提供连续性，Agent 负责主动管理，两者共同服务于知识闭环。
 
 接入 Edges 的目录收录为了接入或操作 Edges 而存在的 CLI、MCP server、skill、常驻服务、应用和可复用 prompt。判据是「这是为了让 Agent / 外部系统接入或操作 Edges」，而不是「它是代码还是文档」。纯 markdown 一样可以进这些目录：一段能复用的 system prompt 与一个 MCP server 地位相同。只在当下有用、不可复用的总结属于个人仓的 `notes/`；跨机器共用、却不绑定 Edges 的 harness（通用 skill、MCP 配置、plugins、hooks）属于个人大脑仓的 `shared-extensions/`。换 Agent、换机器带得走是进这些目录的必要条件，不是充分条件。个人仓的 `shared-extensions/` 与这些目录互斥。
 
