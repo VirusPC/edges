@@ -35,6 +35,6 @@ metadata:
 - 用户要在某一层自建 type：走 `$edges-memory-add-type`，按 LAYOUT 落入口与目录；不要先做 JSON/YAML 总配置，也不要把示例写进 init 种子。
 - 文档按为什么再读它归类，并按清单顺序先排除更具体的：本仓不宜公开 → `user`；纠正与禁区 → `feedback`；外部指针 → `reference`；对不上再 → `project`（兜底）；**自动沉淀的可执行流程 → `skills`**；人写或装入的技能 → 放 `.agents/skills/`，由 `agent_skills` 索引；常驻指令 → `AGENTS.md` 正文。
 - 不要改 `project` / `reference` 引言去迁就已有文件。
-- 用户记忆的现行结论见 ADR-0003：仓内 `.memory/users/` + `user_<slug>.md`，gitignore，不把家目录或私有仓当真源。类型入口现为 `.edges/memory/users/README.md`。Agent 读本机这份入口。换机用 `$edges-user-memory-backup` / `$edges-user-memory-restore`。不要在 v1 设计晋升到可提交类型，也不要加 `private` 字段。
+- 用户记忆的现行结论见 ADR-0003：仓内 `.memory/users/` + `user_<slug>.md`，gitignore，不把家目录或私有仓当真源。类型入口现为 `.edges/memory/users/README.md`。Agent 读本机这份入口。换机用 `$edges-memory-user-backup` / `$edges-memory-user-restore`。不要在 v1 设计晋升到可提交类型，也不要加 `private` 字段。
 - `.memory/` 类型目录用复数（`users/` `feedbacks/` `projects/` `references/` `packages/skills/`）；`--type`、条目前缀保持单数。类型入口一律是该复数目录下的 `AGENTS.md`（ADR 0012）。`agent_skills` 的索引在 `.memory/agent_skills/AGENTS.md`，内容根仍在 `.agents/skills/`，永不写入 `.agents/`。
 - 可扩展决策与本轮不做的事见 ADR 0006；`tasks` Memory Type 若出现在示例里，不要和 `knowledge/tasks` 看板合并。

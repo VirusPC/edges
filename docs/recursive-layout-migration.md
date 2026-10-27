@@ -16,7 +16,7 @@
 
 本仓已用 `pnpm migrate:directory-nodes --root <独立工作树绝对路径> --apply` 转换 117 条公开 Memory、103 条 Task、88 条 Note 和 100 份 Task runlog；原有 2 条目录 Task 保留。17 份既有引用文档同步更新；一条 Note 复用同 stem 附件目录，附件没有移动或覆盖。应用后 425 份计划写入的内容与权限符合预览，4,072 份无关 tracked/public 文件内容未变；第二次计划为零移动、零更新。
 
-此工具从具备依赖的 Edges checkout 运行，默认 dry-run，显式 `--apply` 才写入；安装日常 CLI 或 Skill 不会分发该仓库维护脚本。它只选择目标工作树中的 tracked、非 ignored、公开受管条目，排除 users/private、文章、第三方/安装目录与历史 ADR/spec。转换保持本地 owner、未知元数据、权限、相对链接的目标与 fragment/query；既有 canonical 节点内的资源不重新解释为 Note。详情见[目录迁移 Skill](../packages/skills/edges-migrate-directory-nodes/SKILL.md)。
+此工具从具备依赖的 Edges checkout 运行，默认 dry-run，显式 `--apply` 才写入；安装日常 CLI 不会分发该仓库维护脚本。没有随包技能。它只选择目标工作树中的 tracked、非 ignored、公开受管条目，排除 users/private、文章、第三方/安装目录与历史 ADR/spec。转换保持本地 owner、未知元数据、权限、相对链接的目标与 fragment/query；既有 canonical 节点内的资源不重新解释为 Note。脚本不自动 stage、commit 或 push。`--root` 必须是 Git 工作树根。旧迁移日志只检查路径是否存在，不读取内容；日志在场就拒绝，不自动删除或续跑。
 
 存在 `.recursive-layout-migration/journal.json`、`.ownership-correction/public.json` 或 `.ownership-correction/private.json` 时，**目录转换一律拒绝**，无论旧流程是否看似完成；只检查存在性，不读取 payload，也不自动删除、归档或续跑。先人工核实旧状态，或在无这些本机日志的独立工作树审阅公开转换。下文旧流程的 resume/权限规则仅适用于对应旧迁移器，不是新目录转换器的行为。
 

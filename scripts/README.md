@@ -46,4 +46,4 @@
 
 `pnpm skills:link -- --check` 只校验不写；`--dry-run` 打印动作；`--self-test` 在临时目录跑一遍。vendor 拷贝（`.agents/skills` 里的实体目录）不碰；source 里删掉的 skill，对应软链会清掉。
 
-统一目录转换：`pnpm migrate:directory-nodes --root <worktree>` 默认预览，`--apply` 写入。实现使用 TypeScript `.mts`（NodeNext ESM），仅迁移 tracked/public 受管内容。完整边界与故障处理见 [迁移 Skill](../packages/skills/edges-migrate-directory-nodes/SKILL.md)。
+统一目录转换：`pnpm migrate:directory-nodes --root <worktree>` 默认预览，`--apply` 写入。实现使用 TypeScript `.mts`（NodeNext ESM），仅迁移 tracked/public 受管内容。没有随包技能，也不再识别 `edges-migrate-directory-nodes` 或 `migrate-directory-nodes`。边界与故障处理见 [迁移说明](../docs/recursive-layout-migration.md)。

@@ -41,6 +41,9 @@ __pycache__/
 .memory/USER.md
 **/.memory/users/
 **/.memory/USER.md
+edges-memory-user-backup-*.tar.gz
+edges-memory-user-backup-*.zip
+# 改名前的默认归档名。只挡住已经落在工作树里的文件，不是技能别名。
 edges-user-memory-backup-*.tar.gz
 edges-user-memory-backup-*.zip
 

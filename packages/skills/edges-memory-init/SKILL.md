@@ -1,7 +1,7 @@
 ---
 name: edges-memory-init
 description: 对用户选定的任意目录初始化或刷新系统入口 AGENTS.md（硬约束 + 组成登记），并按选择采用 Project Memory / Skills 类型。无参 edges init 与 edges skills init 还会安装包内 skill。仅当用户明确要求 init 时使用。标准命令是 edges init；各域 init 只初始化本模块。
-version: 0.1.0
+version: 0.1.1
 ---
 
 # Project harness init（`$edges-memory-init`）
@@ -40,6 +40,6 @@ memory 与 skill 的选择分别执行。显式选择追加采用，不删除既
 
 工具只维护自己的区块，现有硬约束与手写正文不覆盖。需先安装提供 `edges memory` 的 Edges CLI；运行 `edges memory init --help` 检查命令可用性。模板随 CLI 构建分发，类型和字段结构见 references/templates。实现分层见 [运行时说明](references/runtime.md)。
 
-普通记忆正文统一为 `<type>_<slug>/INDEX.md`；Skill 保持 `<name>/SKILL.md`。Init 不转换旧单文件；公开 tracked 内容转换使用 `$edges-migrate-directory-nodes`。
+普通记忆正文统一为 `<type>_<slug>/INDEX.md`；Skill 保持 `<name>/SKILL.md`。Init 不转换旧单文件。公开 tracked 内容转换没有随包技能，在具备依赖的 Edges checkout 里用 `pnpm migrate:directory-nodes --root <工作树>` 预览，`--apply` 才写入。
 
 新建子作用域由 init 按路径登记到父级：目标 `AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已有登记保持原组。`edges memory doctor --apply` 按同一规则补缺失的父级链接。这些命令没有 `--index-group`。缺失 owner 不代为初始化。任务范围只用根上的 `--scope`、`--super`、`--all`：不传 `--super` 时看板在 `<scope>/.edges/tasks`，`--super` 时看板在 `<scope>/tasks`。`tasks list` 顺着主体 `AGENTS.md` 的 children 做一次 traverse；`--all` 从当前 scope 走森林。不要从真 AGENTS 再读同目录 README 的 `edges-entries`，也不要把 README 链接抄进 `AGENTS.md`。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrations/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。

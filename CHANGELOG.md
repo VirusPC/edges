@@ -13,7 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 随包技能
 
-- **技能只认 `edges-*`：** 包内技能目录和名字改为 `edges-memory-*`、`edges-tasks-classify`、`edges-user-memory-backup`、`edges-user-memory-restore`、`edges-conversation-to-notes`、`edges-conversation-to-tasks`、`edges-migrate-directory-nodes`、`edges-langfuse-*-tracing`。每个改名技能的版本从 `0.1.0` 重新计数。已经叫 `edges-*` 的技能版本不动。旧名字不再识别。见 [ADR 0049](docs/adr/0049-edges-skills-markers-rename.md)。
+- **技能只认 `edges-*`：** 包内技能目录和名字改为 `edges-memory-*`、`edges-tasks-classify`、`edges-conversation-to-notes`、`edges-conversation-to-tasks`、`edges-langfuse-*-tracing`。每个改名技能的版本从 `0.1.0` 重新计数。已经叫 `edges-*` 的技能版本不动。旧名字不再识别。见 [ADR 0049](docs/adr/0049-edges-skills-markers-rename.md)。
+- **用户记忆归档改叫 `edges-memory-user-*`：** `edges memory backup` 与 `edges memory restore` 仍是命令。随包技能是 `edges-memory-user-backup` 与 `edges-memory-user-restore`，版本仍是 `0.1.0`。不再识别 `edges-user-memory-*` 或 `user-memory-*`，也不留别名。新的默认归档名是 `edges-memory-user-backup-<UTC时间戳>.tar.gz`。见 [ADR 0050](docs/adr/0050-memory-user-skills-and-drop-directory-migration-skill.md)。
+- **目录迁移不再带技能：** 单文件改成目录入口仍用 `pnpm migrate:directory-nodes --root <工作树>`，先预览，`--apply` 才写入。随包技能 `edges-migrate-directory-nodes` 已删除，不留别名。
 - **两份技能删掉了：** `project-memory-doctor` 和 `project-memory-reshape` 没有替代技能。查索引用 `edges memory doctor`。
 - **类型和清单标记也改成 `edges-*`：** 类型身份是 `edges-memory-type`，组织清单是 `edges-entries-local` 与 `edges-entries-descendants`。不再读取 `project-memory-type`、`project-entries-*`、`project-memory-entries`，也不再把旧的 `project-memory` 层注释当成受管区块。旧文件先用 `scripts/migrations/rewrite-project-harness-markers.mts` 改写。
 
@@ -217,7 +219,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 项目记忆（project-memory）
 
-- 可以用 `$edges-memory-add-type` 给某个项目的记忆目录登记一种新的记忆类型；之后查询和写入都会认到它。官方自带的六类不变。用户个人记忆可以写在本机的 `.memory/users/`，这份副本不进 git；换机器时用 `$edges-user-memory-backup` 打包，用 `$edges-user-memory-restore` 恢复。
+- 可以用 `$edges-memory-add-type` 给某个项目的记忆目录登记一种新的记忆类型；之后查询和写入都会认到它。官方自带的六类不变。用户个人记忆可以写在本机的 `.memory/users/`，这份副本不进 git；换机器时用 `$edges-memory-user-backup` 打包，用 `$edges-memory-user-restore` 恢复。（1.2.0 当时的技能名后来写成 `$edges-user-memory-backup` / `$edges-user-memory-restore`；现行名字不留那两条别名。）
 - 类型记忆入口从 `.memory/FEEDBACK.md` 一类平铺文件改到对应复数目录下的 `AGENTS.md`（例如 `.memory/feedbacks/AGENTS.md`），与该类型条目同处。层入口 `AGENTS.md` 的本层清单改链到这些类型入口。旧平铺文件由 `$project-memory-doctor` 迁走后删除。
 
 ### 评测与观测

@@ -1,12 +1,12 @@
 ---
-name: edges-user-memory-restore
-description: 将新布局 edges-user-memory-backup 归档恢复到指定作用域的 .edges/memory/users。目标已占用时需明确授权 --force 整份替换；旧归档须先在隔离旧项目完成转换。
+name: edges-memory-user-restore
+description: 将 edges-memory-user-backup 归档恢复到指定作用域的 .edges/memory/users。目标已占用时需明确授权 --force 整份替换；旧归档须先在隔离旧项目完成转换。
 version: 0.1.0
 ---
 
 # User Memory Restore
 
-与 `edges-user-memory-backup` 共用 Edges CLI 的归档路径与忽略规则校验。按用户提供的归档和目标执行：
+与 `edges-memory-user-backup` 共用 Edges CLI 的归档路径与忽略规则校验。按用户提供的归档和目标执行：
 
 ```bash
 edges memory restore --archive <归档路径> --repo-dir <作用域目录> [--force]
@@ -18,6 +18,6 @@ edges memory restore --archive <归档路径> --repo-dir <作用域目录> [--fo
 
 支持 `.tar.gz` 和未压缩 `.tar`，不支持其他压缩格式或嵌套压缩。归档展开后的 tar 数据（含头部、填充与元数据）上限为 256 MiB，文件成员最多 10,000 个；超过限制会拒绝恢复，原有用户记忆保留。备份命令采用同样限制。进程被强制终止或断电不属于自动回滚范围；若目标缺失，保留作用域下 `.private-user-memory-*/previous`，先核对恢复副本，不要清理它。
 
-旧 `.memory` 归档返回 `conversion-required`，不会静默写回旧路径。转换步骤：用 `@viruspc/edges@0.2.7` 在隔离的旧项目副本中恢复并完成当时的 memory 迁移，再用当前 `$edges-user-memory-backup` 生成归档。不要直接解压不受信任归档。
+旧 `.memory` 归档返回 `conversion-required`，不会静默写回旧路径。转换步骤：用 `@viruspc/edges@0.2.7` 在隔离的旧项目副本中恢复并完成当时的 memory 迁移，再用当前 `$edges-memory-user-backup` 生成归档。不要直接解压不受信任归档。恢复按给出的归档路径读取，不根据文件名判断技能。
 
 汇报恢复的路径，不展示私有正文，不提交回注数据或归档。
