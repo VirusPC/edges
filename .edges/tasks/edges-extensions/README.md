@@ -46,4 +46,5 @@ edges CLI/脚手架/发布/鉴权等平台层。
 - [compose补卸载能力](<backlog/2026-10-26--Compose%E8%A1%A5%E5%8D%B8%E8%BD%BD%E8%83%BD%E5%8A%9B/INDEX.md>) — 现在去掉 Compose 条目只能手改 README；要补一条正式卸载路径。
 - [将\_harness\_目录更名为\_edges](<done/2026-10-27--%E5%B0%86-harness-%E7%9B%AE%E5%BD%95%E6%9B%B4%E5%90%8D%E4%B8%BA-edges/INDEX.md>) — 目录名从通用词 .harness 改为品牌名 .edges，统一 CLI/npm/仓库/目录的品牌链路，并承载边际优势、项目的边、图论的边三层含义；本次为推广前定稿变更，改完冻结布局。
 - [新增 agents 与 teams（channels）模块](<backlog/2026-10-27--%E6%96%B0%E5%A2%9E-agents-%E4%B8%8E-teamschannels%E6%A8%A1%E5%9D%97/INDEX.md>) — 在 edges 中沉淀 agents 与 teams（channels）能力面，记录多 Agent 协作所需的人格与协作通道信息。
+- [edges\-\* skills 与标记硬切断](<done/2026-10-27--edges-skills-%E4%B8%8E%E6%A0%87%E8%AE%B0%E7%A1%AC%E5%88%87%E6%96%AD/INDEX.md>) — 随包 skill/标记硬切断只认 edges\-\*；删除 doctor/reshape；改名 skill 版本从 0.1.0 起重。按已落地结果补记看板。
 <!-- edges-entries-local:end -->
