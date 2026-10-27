@@ -90,13 +90,13 @@ test("render and parse round-trip title, description, and optional pointers", ()
     description: DEFAULT_PROJECT_DESCRIPTION,
   });
   assert.match(rendered, /^# Default\n\nUngrouped tasks that have not been assigned a named Task Project\.\n/);
-  assert.match(rendered, /<!-- project-harness-constraints:start -->/);
-  assert.match(rendered, /<!-- project-harness-local:start -->/);
-  assert.match(rendered, /<!-- project-harness-descendants:start -->/);
+  assert.match(rendered, /<!-- edges-constraints:start -->/);
+  assert.match(rendered, /<!-- edges-local:start -->/);
+  assert.match(rendered, /<!-- edges-descendants:start -->/);
   const defaultParsed = parseProjectAgents(rendered);
   assert.equal(defaultParsed.title, "Default");
   assert.equal(defaultParsed.description, DEFAULT_PROJECT_DESCRIPTION);
-  assert.match(defaultParsed.tail ?? "", /<!-- project-harness-descendants:end -->/);
+  assert.match(defaultParsed.tail ?? "", /<!-- edges-descendants:end -->/);
 
   const withPointers = renderProjectAgents({
     title: "CLI",
@@ -128,7 +128,7 @@ test("parseProjectAgents rejects frontmatter and accepts sparse node sections", 
   );
   assert.equal(
     parseProjectAgents(
-      "# T\n\nD\n\n<!-- project-harness:start -->\n<!-- project-harness:end -->\n",
+      "# T\n\nD\n\n<!-- edges:start -->\n<!-- edges:end -->\n",
     ).description,
     "D",
   );
@@ -139,8 +139,8 @@ test("oneLineDescription collapses newlines", () => {
 });
 
 test("projectAgentsRelPath uses _default for default", () => {
-  assert.equal(projectAgentsRelPath("default"), ".harness/tasks/_default/AGENTS.md");
-  assert.equal(projectAgentsRelPath("cli"), ".harness/tasks/cli/AGENTS.md");
+  assert.equal(projectAgentsRelPath("default"), ".edges/tasks/_default/AGENTS.md");
+  assert.equal(projectAgentsRelPath("cli"), ".edges/tasks/cli/AGENTS.md");
 });
 
 test("ensureProjectMetadata seeds _default and root index without moving Task files", async () => {
@@ -209,7 +209,7 @@ test("ensureProjectMetadata does not seed a README for an AGENTS-only directory"
     await writeFile(path.join(repo, "tasks/legacy/AGENTS.md"), agents, "utf8");
     await writeFile(
       path.join(repo, "tasks/AGENTS.md"),
-      "# tasks\n\n<!-- project-harness-local:start -->\n## 本层系统维护信息\n\n- [Legacy](legacy/AGENTS.md) — legacy work\n<!-- project-harness-local:end -->\n",
+      "# tasks\n\n<!-- edges-local:start -->\n## 本层系统维护信息\n\n- [Legacy](legacy/AGENTS.md) — legacy work\n<!-- edges-local:end -->\n",
       "utf8",
     );
     await ensureProjectMetadata(domainBoard(repo), nodeBoardWriter(), undefined, ["legacy"]);

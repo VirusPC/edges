@@ -4,9 +4,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Implement the approved recursive `.harness` layout, upgrade the tools that operate it, and migrate the Edges instance without losing content, ownership, or private-data protection.
+**Goal:** Implement the approved recursive `.edges` layout, upgrade the tools that operate it, and migrate the Edges instance without losing content, ownership, or private-data protection.
 
-**Architecture:** Scope AGENTS files directly reference type indexes in `.harness/memory` and `.harness/skills`; business modules retain their contracts. Runtime commands use only the new layout. An independent deterministic migrator converts old Project Memory; an Edges-specific migration maps business content separately.
+**Architecture:** Scope AGENTS files directly reference type indexes in `.edges/memory` and `.edges/skills`; business modules retain their contracts. Runtime commands use only the new layout. An independent deterministic migrator converts old Project Memory; an Edges-specific migration maps business content separately.
 
 **Tech Stack:** Python 3 standard library, TypeScript/Node, Commander, pnpm workspaces, Markdown, Git worktrees and gitlinks.
 
@@ -15,7 +15,7 @@
 ## Global Constraints
 
 - `AGENTS.md` 是人和 Agent 的入口，硬约束仍写在所属层入口的硬约束区块。
-- 本方案不另建 `.harness/skills/AGENTS.md` 总入口。Memory and harness containers also have no mandatory intermediate entry.
+- 本方案不另建 `.edges/skills/AGENTS.md` 总入口。Memory and harness containers also have no mandatory intermediate entry.
 - 通用默认推荐模块为 `memory`、`skills`、`tasks`，供用户按作用域需要选择；“默认推荐”不表示默认创建全部目录。
 - 新版常规运行只支持新布局，不运行时回退读取旧 `.memory`，不双写。
 - 原位引用正文及其元数据不改写。Runtime init/remember/doctor never change installation links.
@@ -51,9 +51,9 @@ with tempfile.TemporaryDirectory() as d:
     subprocess.run([sys.executable, str(MEMORY), 'init', '--target-dir', d,
                     '--root-dir', d, '--memory-types', 'project',
                     '--skill-types', 'managed'], check=True)
-    assert (scope / '.harness/memory/projects/AGENTS.md').is_file()
-    assert (scope / '.harness/skills/managed/AGENTS.md').is_file()
-    assert not (scope / '.harness/memory/users').exists()
+    assert (scope / '.edges/memory/projects/AGENTS.md').is_file()
+    assert (scope / '.edges/skills/managed/AGENTS.md').is_file()
+    assert not (scope / '.edges/memory/users').exists()
     assert not (scope / '.memory').exists()
 ```
 
@@ -77,10 +77,10 @@ with tempfile.TemporaryDirectory() as d:
 - Consumes: Task 1 new-layout path/type/CLI contract; all old parsing resides in this migrator.
 - Produces: `migrate.py --target-dir S [--root-dir R] [--recursive] [--dry-run]`. Without dry-run, one call preflights, ignores private paths, converts, validates and finalizes; reruns are idempotent or resume interrupted work without overwriting later edits.
 - Produces: machine-readable status and source/target path map; no private body content. Recovery journal/backups are ignored, permission-restricted, and bounded to selected scope.
-- Backup/restore operate on `.harness/memory/users` including its index, retain safe member/path validation and explicit force replacement. Old archives get an actionable conversion-required error, never silently restore old runtime paths. A clone upgraded through Git can already have the valid new public layout while old ignored `.memory/users` remains; migration must merge only non-conflicting private remnants without resetting new public files, and report real target conflicts.
+- Backup/restore operate on `.edges/memory/users` including its index, retain safe member/path validation and explicit force replacement. Old archives get an actionable conversion-required error, never silently restore old runtime paths. A clone upgraded through Git can already have the valid new public layout while old ignored `.memory/users` remains; migration must merge only non-conflicting private remnants without resetting new public files, and report real target conflicts.
 
 - [x] Read the skill-creator instructions before creating the migration Skill.
-- [x] Add fixture tests for filesystem-enumerated ignored/untracked private records, custom ordinary/Skill types with unknown metadata and flags, full managed assets, referenced sources, sparse children and nested Git boundaries. Test original bytes/hashes for unchanged body/assets and external sources. Include a scope nested inside an old managed Skill directory: its owner path moves with the parent and its own `.memory` must map to the new owner’s `.harness`, without a second copy or leftover old subtree. Rebase owned relative symlinks to the same mapped or external target without following them to mutate external data.
+- [x] Add fixture tests for filesystem-enumerated ignored/untracked private records, custom ordinary/Skill types with unknown metadata and flags, full managed assets, referenced sources, sparse children and nested Git boundaries. Test original bytes/hashes for unchanged body/assets and external sources. Include a scope nested inside an old managed Skill directory: its owner path moves with the parent and its own `.memory` must map to the new owner’s `.edges`, without a second copy or leftover old subtree. Rebase owned relative symlinks to the same mapped or external target without following them to mutate external data.
 
 ```python
 # Fixture setup writes the old layout, including a private untracked file.
@@ -90,10 +90,10 @@ after = snapshot(scope)  # exclude the ignored operation journal
 assert run_migrate(scope, recursive=True).returncode == 0
 assert snapshot(scope) == after
 assert subprocess.run(['git', '-C', str(scope), 'check-ignore',
-    '.harness/memory/users/AGENTS.md'], capture_output=True).returncode == 0
+    '.edges/memory/users/AGENTS.md'], capture_output=True).returncode == 0
 ```
 
-- [x] Record RED, implement deterministic mapping and conflict detection before mutations: new built-in name collisions, different target contents, malformed/unknown flags, historical unrelated `.harness`, and symlink escapes stop the whole selected operation.
+- [x] Record RED, implement deterministic mapping and conflict detection before mutations: new built-in name collisions, different target contents, malformed/unknown flags, historical unrelated `.edges`, and symlink escapes stop the whole selected operation.
 - [x] Establish private ignore coverage before any new private body/index/backup; preserve original bytes except precise existing type metadata/path references. Do not round-trip old records through `remember` or frontmatter serializers that discard unknown fields.
 - [x] Retarget only explicitly mapped locally owned installation links; don't traverse an externally linked installation directory. Resolve known Markdown paths from original file location then rebase onto mapped targets; preserve manual sections and historical prose. Validate all transformed indexes and source inventory before deleting old source. Implement recoverable journal phases and tests injecting a failure after copying, then resuming safely.
 - [x] Adapt backup/restore and test traversal, linked-target escape, archive occupation, force, and ignore coverage. Add the migration Skill to distribution/docs without installing or rewriting unrelated host skills.
@@ -113,7 +113,7 @@ assert subprocess.run(['git', '-C', str(scope), 'check-ignore',
 **Interfaces:**
 - Consumes: explicit scope versus implementation/Git root distinction; task schema and Run identifiers stay unchanged.
 - Produces: `edges --scope <dir> tasks --purpose domain|maintenance ...`. Explicit scope wins, then explicit `EDGES_SCOPE`, then `EDGES_REPO`, then nearest owning layer/repository of process cwd; never infer target from installed CLI source. Resolve relative scopes against cwd. No owning layer/root yields actionable validation error for writes.
-- Scope discovery recognizes AGENTS with `project-memory:start` plus a managed local or children block; a type entries block, business AGENTS or `.harness` directory alone does not establish a scope. Explicit `--scope` can select a directory without auto-initializing memory. Traverse real scope descendants under `packages/evaluation` or managed methods while respecting nested Git and symlink boundaries.
+- Scope discovery recognizes AGENTS with `project-memory:start` plus a managed local or children block; a type entries block, business AGENTS or `.edges` directory alone does not establish a scope. Explicit `--scope` can select a directory without auto-initializing memory. Traverse real scope descendants under `packages/evaluation` or managed methods while respecting nested Git and symlink boundaries.
 - Produces: internal `TaskBoardLocation { scopeDir: string; purpose: 'domain' | 'maintenance'; boardDir: string }`. Default purpose is domain; maintenance is always explicit. Real Git repo root remains separate for Git operations. All task paths and sidecars remain inside the selected board.
 - Produces: `generate-tasks-site.ts --scope S --purpose domain|maintenance|all --out D`; all renders both sources with stable source identity (scope/purpose/project/stem) without changing stored task stems or merging records. Root deployment uses all. Single-board review-page behavior remains compatible and render-only. Aggregate transport IDs must not replace stored stems or project slugs; exports retain source scope/purpose and real project identity. Public HTML/export source scope uses a portable repository-relative path (`.` for its root), never an absolute local worktree/install path; absolute directories remain internal execution data. Prevent cross-source drag assignments that would imply an unsupported board move; same-source classification remains available.
 - Note writes below selected scope's `knowledge/notes`, Git operations use actual repo root. MCP forwards explicit target via environment/CLI rather than package cwd. Artifacts service implementation location remains root-owned; its `resolveRepoRoot()` currently consumes `loadConfig().repoPath`, so decouple that resource lookup before changing target resolution. A child scope without extensions must not become the default server installer source; keep the existing explicit server source override.
@@ -124,7 +124,7 @@ assert subprocess.run(['git', '-C', str(scope), 'check-ignore',
 // Each fixture is a real temp Git repo with root/child AGENTS entries.
 await runCli(['--scope', child, 'tasks', '--purpose', 'maintenance', 'list']);
 assert.equal(existsSync(join(child, 'knowledge/tasks')), false);
-assert.equal(existsSync(join(root, '.harness/tasks/_default')), false);
+assert.equal(existsSync(join(root, '.edges/tasks/_default')), false);
 ```
 
 - [x] Add scope resolver/context and thread board location through command consumers. Eliminate independent hardcodes in project metadata, migration helpers, run lookups and site generator. Reads must not initialize unrelated boards. Preserve non-index AGENTS content when inserting Task Project blocks, including entries with no Project Memory markers.
@@ -202,7 +202,7 @@ assert.equal(existsSync(join(root, '.harness/tasks/_default')), false);
 **Delivery:** Whole-branch review and its scoped fix review passed. Both architecture and CLI-scope Tasks were updated and moved to `done` through the scoped maintenance CLI; their original Run logs moved with them. ADR 0024 and the CLI Task now link to the final architecture Task path. PR #161 carries the reviewed implementation and acceptance evidence. Other clones still require their own local migration and explicit private ownership/conflict handling; generic Task Skill/MCP CRUD and Python-to-CLI work remain separate backlog. Detailed commands, first-run failures, audit data and changed-file inventory are retained in the worker's local `.superpowers/sdd/2026-10-03-recursive-scope-layout/task-6-report.md` and `task-6-logs/`; these ignored execution artifacts are not public repository content.
 
 
-**Task 6 review fix round 1:** Evaluation README memory links now resolve inside `packages/evaluation/.harness/memory/`, preserving the evaluation scope instead of routing readers to root memory. Its smoke README uses current `.harness/memory` vocabulary. ADR 0024 now separates dated pre-implementation discussion from current evidence, retains decision rationale and explicitly incomplete capabilities, and links this verification section; its final Task-state URL remains controller-owned. Only `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s packages/evaluation/tests -k relocated -v` was rerun: 1 test, all 6 report-location/runner subcases passed under the default `/var/folders/...` TMPDIR. Documentation target checks confirmed both memory links resolve to the evaluation-local namespace and all changed documentation targets exist except the disclosed final Task-state link. `git diff --check` passes; no broad suite was repeated.
+**Task 6 review fix round 1:** Evaluation README memory links now resolve inside `packages/evaluation/.edges/memory/`, preserving the evaluation scope instead of routing readers to root memory. Its smoke README uses current `.edges/memory` vocabulary. ADR 0024 now separates dated pre-implementation discussion from current evidence, retains decision rationale and explicitly incomplete capabilities, and links this verification section; its final Task-state URL remains controller-owned. Only `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s packages/evaluation/tests -k relocated -v` was rerun: 1 test, all 6 report-location/runner subcases passed under the default `/var/folders/...` TMPDIR. Documentation target checks confirmed both memory links resolve to the evaluation-local namespace and all changed documentation targets exist except the disclosed final Task-state link. `git diff --check` passes; no broad suite was repeated.
 
 **Final whole-branch migration fix wave:** Review reproduced two defects: custom Skill-format types incorrectly moved into the skills module, and existing destination directories could expose private copies protected by restrictive legacy directories. Regression tests first failed for both defects and for unguarded recovery chmod changes. Custom types now default to `memory/<original-directory>`, preserve supported explicit module independently of format, and reject official destination conflicts before mutation. Migration plans retain source and target directory modes; every destination is protected before its first private copy, including existing directories, nested assets, and restrictions formerly supplied by `.memory` ancestors. Stricter existing destinations stay stricter. Recovery rejects later directory-mode changes without replaying files or deleting old sources. Direct instance composition preserves these generic type mappings and effective private restrictions; its existing pending-journal recovery tests still pass.
 

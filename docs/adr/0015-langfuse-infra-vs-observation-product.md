@@ -4,7 +4,7 @@
 
 **Status:** accepted（ADR 0015；grill 确认于 2026-09-20）
 
-**See also:** ADR 0014（[v1 宿主 minigtr](0014-self-hosted-langfuse-on-minigtr.md)）；ADR 0016（[官方 docker compose](0016-langfuse-docker-compose.md)）；ADR 0033（[公网 HTTPS，经 Cloudflare Tunnel](0033-langfuse-public-https-via-cloudflare-tunnel.md)，取代 [ADR 0017](0017-langfuse-tailscale-only-access.md)）；ADR 0018（[密钥留 minigtr](0018-langfuse-secrets-stay-on-minigtr.md)）；ADR 0019（[备份](0019-langfuse-named-volumes-manual-backup.md)）；ADR 0020（[先 UI，再 1–2 个客户端](0020-langfuse-ui-then-few-clients.md)）；[自部署 Langfuse](../../.harness/tasks/observation/done/2026-09-20--%E8%87%AA%E9%83%A8%E7%BD%B2-Langfuse/INDEX.md)（基础设施卡，v1 验收已完成；宿主与访问面以 ADR 0014、ADR 0033 为准）；[知识库 Observation 系统](../../.harness/tasks/observation/backlog/2026-09-13--%E7%9F%A5%E8%AF%86%E5%BA%93Observation%E7%B3%BB%E7%BB%9F/INDEX.md)（产品卡，勿改其正文来写部署）
+**See also:** ADR 0014（[v1 宿主 minigtr](0014-self-hosted-langfuse-on-minigtr.md)）；ADR 0016（[官方 docker compose](0016-langfuse-docker-compose.md)）；ADR 0033（[公网 HTTPS，经 Cloudflare Tunnel](0033-langfuse-public-https-via-cloudflare-tunnel.md)，取代 [ADR 0017](0017-langfuse-tailscale-only-access.md)）；ADR 0018（[密钥留 minigtr](0018-langfuse-secrets-stay-on-minigtr.md)）；ADR 0019（[备份](0019-langfuse-named-volumes-manual-backup.md)）；ADR 0020（[先 UI，再 1–2 个客户端](0020-langfuse-ui-then-few-clients.md)）；[自部署 Langfuse](../../.edges/tasks/observation/done/2026-09-20--%E8%87%AA%E9%83%A8%E7%BD%B2-Langfuse/INDEX.md)（基础设施卡，v1 验收已完成；宿主与访问面以 ADR 0014、ADR 0033 为准）；[知识库 Observation 系统](../../.edges/tasks/observation/backlog/2026-09-13--%E7%9F%A5%E8%AF%86%E5%BA%93Observation%E7%B3%BB%E7%BB%9F/INDEX.md)（产品卡，勿改其正文来写部署）
 
 ## Decision
 

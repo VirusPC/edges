@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Move edges-scope AGENTS.md「本层系统维护信息」material links into `.harness/README.md`.
+ * Move edges-scope AGENTS.md「本层系统维护信息」material links into `.edges/README.md`.
  * AGENTS 本层 keeps one pointer. Descendants, constraints, and prose stay.
  *
  * Preview by default. `--apply` writes. Safe to re-run: a migrated scope plans nothing.

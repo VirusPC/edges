@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+## [4.0.0] - 2026-10-27
+
+### Changed
+
+- 写入路径改为 `.edges`。不再提示 `edges memory migrate`。仍停在 `.memory` 的，先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 `docs/migrations/2026-10-27-rename-harness-to-edges.md` 改目录名。
+
 ## [3.1.0] - 2026-10-05
 
 - 统一目录入口、验证后的整目录导入与显式公开迁移；保留非受控正文，非法入口诊断后由调用方修正。

@@ -9,17 +9,17 @@ import { run } from "../../src/program.js";
 function agents(local = "", descendants = ""): string {
   return `# Scope
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
 ${local}
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 
-<!-- project-harness-descendants:start -->
+<!-- edges-descendants:start -->
 ## 下层系统维护信息
 
 ${descendants}
-<!-- project-harness-descendants:end -->
+<!-- edges-descendants:end -->
 `;
 }
 
@@ -43,10 +43,10 @@ function repo(t: test.TestContext, name: string): string {
   return root;
 }
 
-function hostWithBrain(root: string, brainRel = ".harness/compose/brain"): { brain: string } {
+function hostWithBrain(root: string, brainRel = ".edges/compose/brain"): { brain: string } {
   const brain = path.join(root, brainRel);
-  put(root, "AGENTS.md", agents("- [材料](.harness/README.md) — index"));
-  put(root, ".harness/README.md", `# 材料
+  put(root, "AGENTS.md", agents("- [材料](.edges/README.md) — index"));
+  put(root, ".edges/README.md", `# 材料
 
 <!-- project-entries-local:start -->
 ## 本层内容
@@ -54,13 +54,13 @@ function hostWithBrain(root: string, brainRel = ".harness/compose/brain"): { bra
 - [组合](compose/README.md) — composed
 <!-- project-entries-local:end -->
 `);
-  put(root, ".harness/compose/README.md", `# 组合
+  put(root, ".edges/compose/README.md", `# 组合
 
-<!-- project-harness-compose:start -->
+<!-- edges-compose:start -->
 ## 组合
 
-- [brain](<${path.posix.join(path.relative(path.join(root, ".harness/compose"), brain).split(path.sep).join("/"), "README.md")}>) — 个人大脑 remote: https://github.com/example/brain.git
-<!-- project-harness-compose:end -->
+- [brain](<${path.posix.join(path.relative(path.join(root, ".edges/compose"), brain).split(path.sep).join("/"), "README.md")}>) — 个人大脑 remote: https://github.com/example/brain.git
+<!-- edges-compose:end -->
 `);
   put(root, "notes/AGENTS.md", agents(""));
   return { brain };

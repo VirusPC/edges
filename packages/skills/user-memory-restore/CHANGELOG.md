@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-10-27
+
+### Changed
+
+- 只恢复到 `.edges/memory/users/`。旧归档先在 `@viruspc/edges@0.2.7` 上转换并打出新归档，再用本技能恢复。
+
 ## [3.0.0] - 2026-10-04
 
 ### Changed
@@ -21,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- 仅恢复 `.harness/memory/users/`，旧归档明确要求转换；先验证完整归档再替换，保留索引与正文原字节，拒绝重复/穿越/特殊成员及链接祖先，任何已有资产均需 --force。
+- 仅恢复 `.edges/memory/users/`，旧归档明确要求转换；先验证完整归档再替换，保留索引与正文原字节，拒绝重复/穿越/特殊成员及链接祖先，任何已有资产均需 --force。
 
 ## [1.0.0] - 2026-09-11
 

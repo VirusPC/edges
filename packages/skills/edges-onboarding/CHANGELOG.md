@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-27
+
+### Changed
+
+- 材料目录与示例路径改为 `.edges`。写作时对应的 npm 版本改为 `0.3.0`。
+
 ## [0.1.1] - 2026-10-20
 
 ### Changed

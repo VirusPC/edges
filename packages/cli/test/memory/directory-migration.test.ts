@@ -27,27 +27,27 @@ const typeIndex =
   "<!-- project-memory-type:start -->\nname: project\nmodule: memory\nwritable: true\ngitignore: false\nformat: ordinary\n<!-- project-memory-type:end -->\n<!-- project-memory-entries:start -->\n- [Demo](project_demo.md#part) — Use\n<!-- project-memory-entries:end -->\n";
 test("tracked public migration preserves resources and authored links, previews without mutation and reruns idempotently", (t) => {
   const root = fixture(t);
-  put(root, ".harness/memory/projects/AGENTS.md", typeIndex);
+  put(root, ".edges/memory/projects/AGENTS.md", typeIndex);
   put(
     root,
-    ".harness/memory/projects/project_demo.md",
+    ".edges/memory/projects/project_demo.md",
     "---\nname: project_demo\ndescription: Use\n---\n# Demo\n![asset](project_demo/a%20b.png#x)\n[other](../../../../README.md?q#s)\n",
   );
-  put(root, ".harness/memory/projects/project_demo/a b.png", "asset");
+  put(root, ".edges/memory/projects/project_demo/a b.png", "asset");
   put(
     root,
     "README.md",
-    "Ordinary [keep](.harness/memory/projects/project_demo.md)",
+    "Ordinary [keep](.edges/memory/projects/project_demo.md)",
   );
   track(root);
   const before = fs.readFileSync(
-    path.join(root, ".harness/memory/projects/project_demo.md"),
+    path.join(root, ".edges/memory/projects/project_demo.md"),
     "utf8",
   );
   const plan = planDirectoryMigration(root);
   assert.deepEqual(
     plan.moves.map((x) => x.to),
-    [path.join(root, ".harness/memory/projects/project_demo/index.md")],
+    [path.join(root, ".edges/memory/projects/project_demo/index.md")],
   );
   assert.equal(fs.readFileSync(plan.moves[0]!.from, "utf8"), before);
   assert.equal(fs.existsSync(plan.moves[0]!.to), false);
@@ -57,18 +57,18 @@ test("tracked public migration preserves resources and authored links, previews 
   assert.match(saved, /\.\.\/\.\.\/\.\.\/\.\.\/\.\.\/README.md\?q#s/);
   assert.match(
     fs.readFileSync(
-      path.join(root, ".harness/memory/projects/AGENTS.md"),
+      path.join(root, ".edges/memory/projects/AGENTS.md"),
       "utf8",
     ),
     /project_demo\/index.md#part/,
   );
   assert.equal(
     fs.readFileSync(path.join(root, "README.md"), "utf8"),
-    "Ordinary [keep](.harness/memory/projects/project_demo.md)",
+    "Ordinary [keep](.edges/memory/projects/project_demo.md)",
   );
   assert.equal(
     fs.readFileSync(
-      path.join(root, ".harness/memory/projects/project_demo/a b.png"),
+      path.join(root, ".edges/memory/projects/project_demo/a b.png"),
       "utf8",
     ),
     "asset",
@@ -77,14 +77,14 @@ test("tracked public migration preserves resources and authored links, previews 
 });
 test("collision preflight preserves every source and index", (t) => {
   const root = fixture(t);
-  put(root, ".harness/memory/projects/AGENTS.md", typeIndex);
-  put(root, ".harness/memory/projects/project_demo.md", "# Original");
-  put(root, ".harness/memory/projects/project_demo/index.md", "# Existing");
+  put(root, ".edges/memory/projects/AGENTS.md", typeIndex);
+  put(root, ".edges/memory/projects/project_demo.md", "# Original");
+  put(root, ".edges/memory/projects/project_demo/index.md", "# Existing");
   track(root);
   assert.throws(() => planDirectoryMigration(root), /collision/i);
   assert.equal(
     fs.readFileSync(
-      path.join(root, ".harness/memory/projects/project_demo.md"),
+      path.join(root, ".edges/memory/projects/project_demo.md"),
       "utf8",
     ),
     "# Original",
@@ -95,7 +95,7 @@ test("private, untracked and other-system documents are excluded", (t) => {
   for (const p of [
     "knowledge/posts/post.md",
     "docs/adr/0001.md",
-    ".harness/memory/users/user_secret.md",
+    ".edges/memory/users/user_secret.md",
     ".agents/skills/installed/example.md",
     "thirdparty/notes/demo.md",
   ])

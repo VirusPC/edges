@@ -62,7 +62,7 @@ async function withAliasedScope(
   try {
     const statusParent = mode === "domain"
       ? path.join(repo, "tasks/_default/todo")
-      : path.join(repo, ".harness/tasks/_default/todo");
+      : path.join(repo, ".edges/tasks/_default/todo");
     await mkdir(statusParent, { recursive: true });
     const created = await createTask(
       board,
@@ -71,10 +71,10 @@ async function withAliasedScope(
     );
     const wanted = mode === "domain"
       ? `tasks/_default/todo/${created.stem}/INDEX.md`
-      : `.harness/tasks/_default/todo/${created.stem}/INDEX.md`;
+      : `.edges/tasks/_default/todo/${created.stem}/INDEX.md`;
     const projectPath = mode === "domain"
       ? "tasks/_default/README.md"
-      : ".harness/tasks/_default/README.md";
+      : ".edges/tasks/_default/README.md";
     assert.equal(created.path, wanted);
     assert.ok(
       path.relative(callerRoot, path.join(repo, wanted)).startsWith(".."),
@@ -157,7 +157,7 @@ test("grouped repository list keeps task paths inside a casing-aliased root", as
 
 test("maintenance scope casing alias keeps default list, get, and project paths inside the scope", async () => {
   await withAliasedScope("Maintenance case", "maintenance", async ({ repo, stem, wanted, projectPath }) => {
-    await writeFixtureIndex(path.join(repo, "AGENTS.md"), [".harness/tasks/README.md"]);
+    await writeFixtureIndex(path.join(repo, "AGENTS.md"), [".edges/tasks/README.md"]);
     const env = { EDGES_SCOPE: repo };
     const listed = await run(["tasks", "list"], { env });
     assert.equal(listed.exitCode, 0, listed.stdout + listed.stderr);

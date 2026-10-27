@@ -35,14 +35,14 @@ test("routines init is explicit, idempotent, and shares the root init module", a
   const root = scope(t);
   const initial = await initScope({ targetDir: root });
   assert.deepEqual(initial.modules, ["memory", "skills", "notes", "projects"]);
-  assert.equal(existsSync(path.join(root, ".harness/routines")), false);
+  assert.equal(existsSync(path.join(root, ".edges/routines")), false);
   const first = await cli(root, ["routines", "init"]);
   assert.deepEqual(first.modules, ["routines"]);
-  const file = path.join(root, ".harness/routines/README.md");
+  const file = path.join(root, ".edges/routines/README.md");
   const before = readFileSync(file, "utf8");
   assert.match(before, /# Routines/);
   assert.match(before, /project-entries-local:start/);
-  assert.match(readFileSync(path.join(root, ".harness/README.md"), "utf8"), /routines\/README\.md/);
+  assert.match(readFileSync(path.join(root, ".edges/README.md"), "utf8"), /routines\/README\.md/);
   const again = await cli(root, ["--super", "init", "routines"]);
   assert.deepEqual(again.modules, ["routines"]);
   assert.equal(readFileSync(file, "utf8"), before);
@@ -50,7 +50,7 @@ test("routines init is explicit, idempotent, and shares the root init module", a
   const fresh = scope(t);
   await cli(fresh, ["routines", "init"]);
   for (const module of ["memory", "skills", "notes", "projects", "tasks"]) {
-    assert.equal(existsSync(path.join(fresh, ".harness", module)), false, module);
+    assert.equal(existsSync(path.join(fresh, ".edges", module)), false, module);
   }
 });
 
@@ -58,14 +58,14 @@ test("routine CRUD preserves generic frontmatter and Markdown and indexes the de
   const root = scope(t);
   await initScope({ targetDir: root, modules: ["tasks"] });
   const created = await cli(root, ["routines", "create", "daily-review", "--description", "Review daily", "--body", "Every morning, invoke [Skill](SKILL.md).\nPlatform-specific timing is prose.", "--metadata", "owner=me"]);
-  assert.equal(created.path, ".harness/routines/daily-review/INDEX.md");
-  assert.match(readFileSync(path.join(root, ".harness/routines/README.md"), "utf8"), /daily-review\/INDEX\.md/);
+  assert.equal(created.path, ".edges/routines/daily-review/INDEX.md");
+  assert.match(readFileSync(path.join(root, ".edges/routines/README.md"), "utf8"), /daily-review\/INDEX\.md/);
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /daily-review/);
   const got = await cli(root, ["routines", "get", "daily-review"]);
   assert.equal(got.metadata.owner, "me");
   assert.match(got.body, /Platform-specific timing is prose/);
   assert.equal((await new NodeService({ managedRoot: root }).get(path.join(root, created.path)))?.type, "routine");
-  const queried = await new NodeService({ managedRoot: root }).query(path.join(root, ".harness/routines/README.md"), { types: ["routine"] }).value();
+  const queried = await new NodeService({ managedRoot: root }).query(path.join(root, ".edges/routines/README.md"), { types: ["routine"] }).value();
   assert.equal(queried[0] instanceof RoutineNode, true);
   await cli(root, ["routines", "update", "daily-review", "--description", "Updated", "--metadata", "owner=you"]);
   const updated = await cli(root, ["routines", "get", created.path]);
@@ -75,7 +75,7 @@ test("routine CRUD preserves generic frontmatter and Markdown and indexes the de
   assert.equal(filtered.groups[0].key, "daily-review");
   await cli(root, ["routines", "delete", "daily-review"]);
   assert.equal(existsSync(path.join(root, created.path)), false);
-  assert.doesNotMatch(readFileSync(path.join(root, ".harness/routines/README.md"), "utf8"), /daily-review\/INDEX\.md/);
+  assert.doesNotMatch(readFileSync(path.join(root, ".edges/routines/README.md"), "utf8"), /daily-review\/INDEX\.md/);
 });
 
 test("routine updates refresh only its indexed description, including metadata updates", async (t) => {
@@ -83,7 +83,7 @@ test("routine updates refresh only its indexed description, including metadata u
   await initRoutines({ targetDir: root });
   await createRoutine(env(root), { name: "daily", description: "Old summary" });
   await createRoutine(env(root), { name: "other", description: "Unrelated summary" });
-  const file = path.join(root, ".harness/routines/README.md");
+  const file = path.join(root, ".edges/routines/README.md");
   const original = `${readFileSync(file, "utf8")}\nPreserved explanatory text and [external link](https://example.com/).\n`;
   writeFileSync(file, original);
   await cli(root, ["routines", "update", "daily", "--description", "New summary"]);
@@ -114,7 +114,7 @@ test("super selects the flat routine index; all combines forest roots without du
 test("sibling scopes have independent names; forest lookup rejects ambiguity and includes compose", async (t) => {
   const root = scope(t);
   await initRoutines({ targetDir: root });
-  for (const rel of ["left", "right", ".harness/compose/brain"]) {
+  for (const rel of ["left", "right", ".edges/compose/brain"]) {
     const child = path.join(root, rel);
     mkdirSync(child, { recursive: true });
     await initRoutines({ targetDir: child, rootDir: child });
@@ -125,9 +125,9 @@ test("sibling scopes have independent names; forest lookup rejects ambiguity and
   assert.equal((await listRoutines(env(root), { all: true })).length, 3);
   assert.equal((await listRoutines(env(root), { all: true, exclude: new Set(["compose"]) })).length, 2);
   await assert.rejects(() => getRoutine(env(root), "repeat", { all: true }), /ambiguous/);
-  const chosen = await getRoutine(env(root), "left/.harness/routines/repeat/INDEX.md", {});
+  const chosen = await getRoutine(env(root), "left/.edges/routines/repeat/INDEX.md", {});
   assert.equal(chosen.description, "left");
-  await assert.rejects(() => getRoutine(env(path.join(root, "left")), "../right/.harness/routines/repeat/INDEX.md", {}), /escapes managed root/);
+  await assert.rejects(() => getRoutine(env(path.join(root, "left")), "../right/.edges/routines/repeat/INDEX.md", {}), /escapes managed root/);
 });
 
 test("registered external routines remain readable while writes and unregistered external reads fail", async (t) => {
@@ -141,7 +141,7 @@ test("registered external routines remain readable while writes and unregistered
   const hidden = await createRoutine(env(external), { name: "hidden-review", description: "Not registered on host" });
   const file = path.join(external, created.path);
   const service = new NodeService({ managedRoot: host });
-  const org = await service.get(path.join(host, ".harness/routines/README.md"));
+  const org = await service.get(path.join(host, ".edges/routines/README.md"));
   assert.ok(org);
   await service.update(org, { body: org.body.replace("<!-- project-entries-local:end -->", `- [Shared routine](<${file}>) — Shared routine\n<!-- project-entries-local:end -->`) });
   const listed = await listRoutines(env(host), {});
@@ -171,7 +171,7 @@ test("registered external routine symlinks support list and get but never writes
   const linkedRoot = path.join(links, "external-link");
   symlinkSync(external, linkedRoot, "dir");
   const linkedFile = path.join(linkedRoot, created.path);
-  const org = path.join(host, ".harness/routines/README.md");
+  const org = path.join(host, ".edges/routines/README.md");
   const service = new NodeService({ managedRoot: host });
   const index = await service.get(org);
   assert.ok(index);
@@ -198,13 +198,13 @@ test("routines reject invalid names, empty descriptions, renaming, and unrelated
   await assert.rejects(() => updateRoutine(env(root), "valid", { metadata: ["name=other"] }, {}), /stable/);
   await assert.rejects(() => updateRoutine(env(root), "valid", { description: " " }, {}), /nonempty/);
   put(root, "notes/other/INDEX.md", "---\nname: other\ndescription: Not a routine\n---\n# Note\n");
-  for (const target of ["notes/other/INDEX.md", ".harness/routines/README.md", ".harness/routines/valid/SKILL.md", ".harness/routines/valid", "../routines/outside/INDEX.md"]) {
+  for (const target of ["notes/other/INDEX.md", ".edges/routines/README.md", ".edges/routines/valid/SKILL.md", ".edges/routines/valid", "../routines/outside/INDEX.md"]) {
     await assert.rejects(() => deleteRoutine(env(root), target, {}), /routine not found|escapes managed root/);
   }
   assert.equal(existsSync(path.join(root, "notes/other/INDEX.md")), true);
-  assert.equal(identifyNodeType(path.join(root, "projects/example/.harness/routines/test/INDEX.md")), "routine");
+  assert.equal(identifyNodeType(path.join(root, "projects/example/.edges/routines/test/INDEX.md")), "routine");
   assert.notEqual(identifyNodeType(path.join(root, "routines/project/test/INDEX.md")), "routine");
-  await assert.rejects(() => getRoutine(env(root), ".harness/routines/valid/INDEX.md", { exclude: new Set(["routines"]) }), /routine not found/);
+  await assert.rejects(() => getRoutine(env(root), ".edges/routines/valid/INDEX.md", { exclude: new Set(["routines"]) }), /routine not found/);
 });
 
 test("missing registered routine files fail reads and updates without repair", async (t) => {
@@ -216,10 +216,10 @@ test("missing registered routine files fail reads and updates without repair", a
   await assert.rejects(() => getRoutine(env(root), made.path, {}), /routine not found/);
   await assert.rejects(() => updateRoutine(env(root), made.path, { body: "Repair?" }, {}), /routine not found/);
   assert.equal(existsSync(path.join(root, made.path)), false);
-  rmSync(path.join(root, ".harness/routines/README.md"));
+  rmSync(path.join(root, ".edges/routines/README.md"));
   await assert.rejects(() => listRoutines(env(root), {}), /Missing routine organization entry/);
   await assert.rejects(() => getRoutine(env(root), made.path, {}), /Missing routine organization entry/);
-  assert.equal(existsSync(path.join(root, ".harness/routines/README.md")), false);
+  assert.equal(existsSync(path.join(root, ".edges/routines/README.md")), false);
 });
 
 test("routine update validates its existing index registration before changing the definition", async (t) => {
@@ -227,7 +227,7 @@ test("routine update validates its existing index registration before changing t
   await initRoutines({ targetDir: root });
   const created = await createRoutine(env(root), { name: "unindexed", description: "Original summary" });
   const definition = path.join(root, created.path);
-  const org = path.join(root, ".harness/routines/README.md");
+  const org = path.join(root, ".edges/routines/README.md");
   const index = readFileSync(org, "utf8").split("\n").filter((line) => !line.includes("unindexed/INDEX.md")).join("\n");
   writeFileSync(org, index);
   const before = readFileSync(definition, "utf8");
@@ -244,7 +244,7 @@ test("routine update rejects a damaged indexed sibling before writing the defini
   const damaged = path.join(root, second.path);
   writeFileSync(damaged, readFileSync(damaged, "utf8").replace("description: Valid\n", ""));
   const definition = path.join(root, first.path);
-  const org = path.join(root, ".harness/routines/README.md");
+  const org = path.join(root, ".edges/routines/README.md");
   const beforeDefinition = readFileSync(definition, "utf8");
   const beforeIndex = readFileSync(org, "utf8");
   await assert.rejects(() => updateRoutine(env(root), first.path, { description: "New" }, {}), /description must be nonempty/);
@@ -255,12 +255,12 @@ test("routine update rejects a damaged indexed sibling before writing the defini
 test("routine directory lifecycle includes a co-located Skill and preserves an external Skill", async (t) => {
   const root = scope(t);
   await initRoutines({ targetDir: root });
-  put(root, ".harness/routines/daily/SKILL.md", "---\nname: daily\ndescription: Daily steps\n---\nSteps\n");
-  put(root, ".harness/skills/managed/external/SKILL.md", "---\nname: external\ndescription: External steps\n---\nSteps\n");
+  put(root, ".edges/routines/daily/SKILL.md", "---\nname: daily\ndescription: Daily steps\n---\nSteps\n");
+  put(root, ".edges/skills/managed/external/SKILL.md", "---\nname: external\ndescription: External steps\n---\nSteps\n");
   await createRoutine(env(root), { name: "daily", description: "Daily", body: "[Own skill](SKILL.md) and [external](../../skills/managed/external/SKILL.md)." });
   await deleteRoutine(env(root), "daily", {});
-  assert.equal(existsSync(path.join(root, ".harness/routines/daily")), false);
-  assert.equal(existsSync(path.join(root, ".harness/skills/managed/external/SKILL.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/routines/daily")), false);
+  assert.equal(existsSync(path.join(root, ".edges/skills/managed/external/SKILL.md")), true);
 });
 
 test("routine writes reject all and acquire the shared write lock", async (t) => {

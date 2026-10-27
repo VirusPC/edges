@@ -27,7 +27,7 @@ export type CliContext = {
   env: NodeJS.ProcessEnv;
   stdinText?: string;
   stdinIsTTY?: boolean;
-  /** Explicit `--super`: traverse from SuperAgentsNode mounting harness-materials READMEs. */
+  /** Explicit `--super`: traverse from SuperAgentsNode mounting edges-materials READMEs. */
   super?: boolean;
   /** Explicit `--all`: traverse the system forest from the current scope. */
   all?: boolean;

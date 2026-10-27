@@ -22,9 +22,9 @@ const contract =
   "<!-- project-memory-type:start -->\nname: project\nmodule: memory\nwritable: true\n<!-- project-memory-type:end -->\n";
 test("import classification shares runtime nearest physical parent across intermediate directories", async (t) => {
   const { root, write } = fixture(t);
-  write(".harness/memory/projects/AGENTS.md", contract);
+  write(".edges/memory/projects/AGENTS.md", contract);
   const entry = write(
-    ".harness/memory/projects/group/item/index.md",
+    ".edges/memory/projects/group/item/index.md",
     "# Memory\n",
   );
   assert.equal(

@@ -55,7 +55,7 @@ function excluded(file: string): boolean {
     ) ||
     /(?:^|\/)(?:knowledge\/)?posts(?:\/|$)/.test(file) ||
     /(?:^|\/)docs\/(?:adr|superpowers|discussions)(?:\/|$)/.test(file) ||
-    /(?:^|\/)(?:\.memory|\.harness\/memory)\/(?:users|private)(?:\/|$)/.test(
+    /(?:^|\/)(?:\.memory|\.edges\/memory)\/(?:users|private)(?:\/|$)/.test(
       file,
     )
   );
@@ -118,7 +118,7 @@ export function planDirectoryMigration(
   const privateDirs: string[] = [];
   // Inspect only tracked public type headers; never open private descendants.
   for (const file of tracked.filter((f) =>
-    /(?:^|\/)\.harness\/memory\/[^/]+\/AGENTS.md$/.test(f),
+    /(?:^|\/)\.edges\/memory\/[^/]+\/AGENTS.md$/.test(f),
   )) {
     const abs = path.join(root, file);
     if (!present(abs)) continue;
@@ -163,7 +163,7 @@ export function planDirectoryMigration(
               relative,
             )
           ? "task"
-          : /(?:^|\/)(?:knowledge\/)?notes\/(?!.*(?:^|\/)\.harness\/).+\.md$/.test(
+          : /(?:^|\/)(?:knowledge\/)?notes\/(?!.*(?:^|\/)\.edges\/).+\.md$/.test(
                 relative,
               ) && !hasEntryAncestor(from, root)
             ? "note"

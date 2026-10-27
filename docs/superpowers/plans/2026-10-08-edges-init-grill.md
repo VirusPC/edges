@@ -1,6 +1,6 @@
 # edges init grill 问题清单
 
-只读调研。对照任务卡 `edges-unified-init` 的最新正文（PR #189 分支 `cursor/rewrite-edges-init-task-body-94f5` 上的 `.harness/tasks/edges-cli-platform/backlog/2026-10-08--补充统一的-edges-init模块-init-只调-init-service/INDEX.md`），以及当前工作分支（PR #187，`cursor/commands-node-helpers-to-services-20cf`）里的实现。
+只读调研。对照任务卡 `edges-unified-init` 的最新正文（PR #189 分支 `cursor/rewrite-edges-init-task-body-94f5` 上的 `.edges/tasks/edges-cli-platform/backlog/2026-10-08--补充统一的-edges-init模块-init-只调-init-service/INDEX.md`），以及当前工作分支（PR #187，`cursor/commands-node-helpers-to-services-20cf`）里的实现。
 
 这一份是整棵决策树一次交齐，方便一次拍板。标了「依赖」的题，选项会随前置答案收窄，但代价按今天的代码写死，可以一起定。
 
@@ -9,7 +9,7 @@
 - 根命令叫 `edges init`，不叫 `edges harness init`。
 - `edges memory init` 与其他 `edges <domain> init` 是同族入口，只调 init service。
 - 分层是 NodeService → 薄 service → commands 直调 service。
-- `harness-materials.json` 不再归 memory 独享。
+- `edges-materials.json` 不再归 memory 独享。
 - 不改 notes / skills / projects 的 CRUD 行为，不重写 NodeService 合同。
 
 ---
@@ -41,12 +41,12 @@
 
 ❓ **Q2** — **材料清单的归属：按模块登记，还是各模块自己交 init 描述**
 
-**问题：** `packages/cli/src/domain/config/harness-materials.json` 继续当挂载表，还是升级成 init 的模块登记？init 种子写在 JSON 里，还是写在各模块代码里？
+**问题：** `packages/cli/src/domain/config/edges-materials.json` 继续当挂载表，还是升级成 init 的模块登记？init 种子写在 JSON 里，还是写在各模块代码里？
 
 **为什么要定：** 这份 JSON 今天已经不是 memory 私有的。读者包括：
 
 - 超节点挂载：`packages/cli/src/services/node/super-root.ts` 的 `listHarnessMaterialAbsPaths`
-- 路径拼接：`packages/cli/src/domain/config/harness-materials.ts` 的 `placeHarnessMaterial` / `materialHarnessRoot`
+- 路径拼接：`packages/cli/src/domain/config/edges-materials.ts` 的 `placeHarnessMaterial` / `materialHarnessRoot`
 - tasks 目录名与「这是不是看板文件」：`tasksBoardDirName`、`isTasksBoardMaterial`，被 `packages/cli/src/services/node/node-service.ts` 和 `packages/cli/src/domain/models/layout.ts` 使用
 - skills 落盘根：`packages/cli/src/services/skills/service.ts` 的 `materialHarnessRoot`
 
@@ -64,7 +64,7 @@ init 的粒度是另一套，而且是硬编码、三套对不齐：
 **选项 A：** JSON 升级为 init 登记。加上 `module`、种子标题、正文、是否登记到 AGENTS。init service 只读这一份。
 
 - 代价：挂载表和初始化策略耦在一个文件。`optional: true` 今天的意思是「文件不在就不要挂」（`resolveHarnessMaterial`），不是「init 要不要建」。两种语义叠在同一字段上会误挂或误建。`memory.feedbacks` 这种类型材料没有单独的模块级种子，硬塞进同一数组会把类型选择再写一遍。
-- 影响面：所有读 JSON 的测试（`packages/cli/test/domain/harness-materials.test.ts`、`packages/cli/test/memory/content-boards.test.ts`）和 super 挂载一起变。
+- 影响面：所有读 JSON 的测试（`packages/cli/test/domain/edges-materials.test.ts`、`packages/cli/test/memory/content-boards.test.ts`）和 super 挂载一起变。
 
 **选项 B：** JSON 保持挂载表（id + path + optional），只从 `packages/services/memory/` 的归属里挪走（它本来就在 `domain/config/`）。每个模块在自己的 service 里导出 init 描述（要建哪些 material id、种子正文、登记策略）。
 
@@ -84,33 +84,33 @@ init 的粒度是另一套，而且是硬编码、三套对不齐：
 
 ❓ **Q3** — **notes/projects 的组织清单到底是哪一个文件**
 
-**问题：** 「初始化 notes/projects」是继续写 `<scope>/.harness/notes/README.md`（以及 projects 的对应文件），还是去准备内容面的 `<scope>/notes/README.md`？
+**问题：** 「初始化 notes/projects」是继续写 `<scope>/.edges/notes/README.md`（以及 projects 的对应文件），还是去准备内容面的 `<scope>/notes/README.md`？
 
 **为什么要定：** 仓库里这两份同时存在，职责不同。
 
-- init 今天写的是 harness 桩。`ensureContentBoards` 用 `placeHarnessMaterial(target, id)`，真系统的根是 `<scope>/.harness`（`harness-materials.ts` 的 `materialHarnessRoot`）。空目录跑 `edges memory init --memory-types project` 后，测试断言的是 `.harness/projects/README.md` 和 `.harness/notes/README.md`，并且根 `AGENTS.md` 里出现这两条链接（`packages/cli/test/memory/content-boards.test.ts`）。本仓根 `AGENTS.md` 第 33–34 行就是这两条。
-- `edges notes create` / `edges projects create` 写的是 `<scope>/notes/<date>--<slug>/INDEX.md` 和 `<scope>/projects/...`，见 `packages/cli/src/services/node/dated-leaf.ts` 的 `createDatedLeaf`。叶子挂到谁，由 `packages/cli/src/services/node/node-layout.ts` 的 `physicalParent` 决定：同目录若有带 `project-entries-*` 的 README，挂 README；否则挂 AGENTS。测试 `packages/cli/test/commands/notes-skills-crud-nodeservice.test.ts` 把叶子登记在 `notes/README.md` 或 `notes/AGENTS.md`，不在 `.harness/notes/README.md`。
-- 本仓内容面 `notes/README.md` 是手写散文（「待处理想法」），根 `README.md` 的 `project-entries-local` 指向它和 `tasks/README.md`（`packages/cli/test/models/root-readme-entries.test.ts`）。`.harness/notes/README.md` 自己写明：叶子在 scope 的 `notes/`，自己的 `project-entries` 是空的。
+- init 今天写的是 harness 桩。`ensureContentBoards` 用 `placeHarnessMaterial(target, id)`，真系统的根是 `<scope>/.edges`（`edges-materials.ts` 的 `materialHarnessRoot`）。空目录跑 `edges memory init --memory-types project` 后，测试断言的是 `.edges/projects/README.md` 和 `.edges/notes/README.md`，并且根 `AGENTS.md` 里出现这两条链接（`packages/cli/test/memory/content-boards.test.ts`）。本仓根 `AGENTS.md` 第 33–34 行就是这两条。
+- `edges notes create` / `edges projects create` 写的是 `<scope>/notes/<date>--<slug>/INDEX.md` 和 `<scope>/projects/...`，见 `packages/cli/src/services/node/dated-leaf.ts` 的 `createDatedLeaf`。叶子挂到谁，由 `packages/cli/src/services/node/node-layout.ts` 的 `physicalParent` 决定：同目录若有带 `project-entries-*` 的 README，挂 README；否则挂 AGENTS。测试 `packages/cli/test/commands/notes-skills-crud-nodeservice.test.ts` 把叶子登记在 `notes/README.md` 或 `notes/AGENTS.md`，不在 `.edges/notes/README.md`。
+- 本仓内容面 `notes/README.md` 是手写散文（「待处理想法」），根 `README.md` 的 `project-entries-local` 指向它和 `tasks/README.md`（`packages/cli/test/models/root-readme-entries.test.ts`）。`.edges/notes/README.md` 自己写明：叶子在 scope 的 `notes/`，自己的 `project-entries` 是空的。
 - `project-memory-init` 的 SKILL.md 写明：Init **不会**在作用域根自动创建组织清单 `README.md`。
 
 若把「notes init」理解成准备 `edges notes create` 的父索引，就会去写或改 `<scope>/notes/README.md`，可能盖掉手写散文，也改变叶子登记位置，碰到非目标「不改 notes/projects CRUD」。若只建 harness 桩，则 `edges notes init` 之后 CRUD 的父索引仍可能不存在，和「模块已初始化」的直觉不一致。
 
-**选项 A：** 本卡只建 harness 材料桩（`.harness/notes/README.md`、`.harness/projects/README.md`），并登记到 scope 的 `AGENTS.md`。不创建、不改写 `<scope>/notes/README.md` 和 `<scope>/projects/README.md`。
+**选项 A：** 本卡只建 harness 材料桩（`.edges/notes/README.md`、`.edges/projects/README.md`），并登记到 scope 的 `AGENTS.md`。不创建、不改写 `<scope>/notes/README.md` 和 `<scope>/projects/README.md`。
 
 - 代价：域 init 的「组织清单」不是 CRUD 的父索引。文档必须写清这是系统二材料，不是内容面。
 - 影响面：与 `content-boards.test.ts`、现有根 `AGENTS.md` 一致；CRUD 路径不变。
 
 **选项 B：** notes/projects init 改为确保内容面 `<scope>/notes/README.md`（空的 `project-entries` 种子）。harness 桩不再由 init 创建。
 
-- 代价：空 scope 的文件布局和现有 memory init 测试不一致（测试要 `.harness/notes/README.md`）。本仓根 `notes/README.md` 是手写正文，刷新会毁内容。叶子父索引规则不用改，但「已有散文 README、没有 entries 标记」时 `physicalParent` 不会把它当组织清单。
+- 代价：空 scope 的文件布局和现有 memory init 测试不一致（测试要 `.edges/notes/README.md`）。本仓根 `notes/README.md` 是手写正文，刷新会毁内容。叶子父索引规则不用改，但「已有散文 README、没有 entries 标记」时 `physicalParent` 不会把它当组织清单。
 - 影响面：notes/projects CRUD 的登记目标可能变，违反非目标。
 
 **选项 C：** 两份都建。
 
-- 代价：一个模块两次写盘，super 挂载（scope + `notes/README.md`）和 AGENTS 挂载（`.harness/notes/README.md`）会指向两份都叫组织清单的文件。和 SKILL「不在作用域根自动创建 README」冲突。
+- 代价：一个模块两次写盘，super 挂载（scope + `notes/README.md`）和 AGENTS 挂载（`.edges/notes/README.md`）会指向两份都叫组织清单的文件。和 SKILL「不在作用域根自动创建 README」冲突。
 - 影响面：最大，且和 Q5 的 `--super` 路径叠在一起。
 
-**推荐：A。** 本卡的 notes/projects init 等于今天的 `ensureContentBoards`。内容面 README 与叶子父索引留给后续卡。任务卡完成标准写的也是「`.harness` 下已登记模块的组织清单」。
+**推荐：A。** 本卡的 notes/projects init 等于今天的 `ensureContentBoards`。内容面 README 与叶子父索引留给后续卡。任务卡完成标准写的也是「`.edges` 下已登记模块的组织清单」。
 
 依赖：Q2 的模块表里，notes 的 material id 就是 JSON 的 `notes`（path `notes/README.md`），放置规则仍用 `materialHarnessRoot`，不要另写路径。
 
@@ -164,22 +164,22 @@ JSON 信封：`edges memory init` 继续 `{ ok: true, selectionRequired, recomme
 
 ❓ **Q5** — **`--super` 对 init 的写盘位置生不生效**
 
-**问题：** `edges --super init` 是把材料写到 `<scope>/<material.path>`，还是照旧写到 `<scope>/.harness/`，还是直接拒绝？
+**问题：** `edges --super init` 是把材料写到 `<scope>/<material.path>`，还是照旧写到 `<scope>/.edges/`，还是直接拒绝？
 
-**为什么要定：** `--super` 是根旗标，帮助文案写的是运行时超节点、不落盘（`program.ts` 第 92–95 行）。`initMemory` 不读 `ctx.super`，`ensureContentBoards` 调用 `placeHarnessMaterial` 时不传 `{ super: true }`，所以即使用了 `--super`，桩也在 `.harness/` 下。
+**为什么要定：** `--super` 是根旗标，帮助文案写的是运行时超节点、不落盘（`program.ts` 第 92–95 行）。`initMemory` 不读 `ctx.super`，`ensureContentBoards` 调用 `placeHarnessMaterial` 时不传 `{ super: true }`，所以即使用了 `--super`，桩也在 `.edges/` 下。
 
 与此同时，写路径并不统一：
 
-- skills create 会把 `ctx.super` 传进 `materialHarnessRoot`（`packages/cli/src/commands/skills/create.ts`、`packages/services/skills/service.ts`）。`--super` 时技能在 `<scope>/skills/managed/`，不是 `.harness/skills/`。
-- tasks 的约定是：无 `--super` 看板在 `<scope>/.harness/tasks`，有 `--super` 在 `<scope>/tasks`（SKILL.md；`packages/services/tasks/paths.ts` 用 `placeHarnessMaterial(..., { super })`）。
-- 记忆里的范围组合只有 `--scope` / `--super` / `--all`（`.harness/memory/feedbacks/feedback_scope_super_all/INDEX.md` 的索引说明）。init 若发明第四种放置开关，和这条约束冲突；若让 init 跟随 `--super`，又和「超节点不落盘」的帮助文案冲突——超节点本身不落盘，但它的材料路径是落在 scope 目录上的。
+- skills create 会把 `ctx.super` 传进 `materialHarnessRoot`（`packages/cli/src/commands/skills/create.ts`、`packages/services/skills/service.ts`）。`--super` 时技能在 `<scope>/skills/managed/`，不是 `.edges/skills/`。
+- tasks 的约定是：无 `--super` 看板在 `<scope>/.edges/tasks`，有 `--super` 在 `<scope>/tasks`（SKILL.md；`packages/services/tasks/paths.ts` 用 `placeHarnessMaterial(..., { super })`）。
+- 记忆里的范围组合只有 `--scope` / `--super` / `--all`（`.edges/memory/feedbacks/feedback_scope_super_all/INDEX.md` 的索引说明）。init 若发明第四种放置开关，和这条约束冲突；若让 init 跟随 `--super`，又和「超节点不落盘」的帮助文案冲突——超节点本身不落盘，但它的材料路径是落在 scope 目录上的。
 
-**选项 A：** init 忽略 `--super`，永远写 `<scope>/.harness/`。帮助里写明 init 不看这个旗标。
+**选项 A：** init 忽略 `--super`，永远写 `<scope>/.edges/`。帮助里写明 init 不看这个旗标。
 
 - 代价：`edges --super skills create` 与 `edges --super memory init --skill-types managed` 的技能索引不在同一棵树上。这个裂缝今天已经存在。
 - 影响面：现有 memory init 测试不用改。超节点挂载逻辑不动。
 
-**选项 B：** init 跟随 `--super`：真系统写 `.harness/`，`--super` 写 scope 目录（`notes/README.md` 会落在内容面，见 Q3）。
+**选项 B：** init 跟随 `--super`：真系统写 `.edges/`，`--super` 写 scope 目录（`notes/README.md` 会落在内容面，见 Q3）。
 
 - 代价：无参 `edges --super init` 可能创建或撞上本仓那种手写 `notes/README.md`。和 Q3 的推荐 A 冲突。tasks 的放置会和 init 对齐，但 notes 内容面会被 init 碰到。
 - 影响面：写锁目标仍是 scope（`commandWriteTarget`），文件却出现在 scope 根下各材料路径，review 时要单测两条根。
@@ -189,7 +189,7 @@ JSON 信封：`edges memory init` 继续 `{ ok: true, selectionRequired, recomme
 - 代价：多一个拒绝分支。用户不能用一条命令「按超节点的材料路径初始化」。
 - 影响面：最小。和「超节点不落盘」的字面最接近。
 
-**推荐：A。** 本卡 init 只初始化真系统的 `.harness` 材料。`--super` 继续只影响 list/traverse 和那些已经显式把 `ctx.super` 传进写路径的命令（skills create、tasks 看板）。不要在本卡顺手统一 skills 的裂缝。帮助和 skill 里写一句：init 不读取 `--super`。
+**推荐：A。** 本卡 init 只初始化真系统的 `.edges` 材料。`--super` 继续只影响 list/traverse 和那些已经显式把 `ctx.super` 传进写路径的命令（skills create、tasks 看板）。不要在本卡顺手统一 skills 的裂缝。帮助和 skill 里写一句：init 不读取 `--super`。
 
 依赖：若 Q3 改成 B 或 C，这里不能再选 A。
 
@@ -201,11 +201,11 @@ JSON 信封：`edges memory init` 继续 `{ ok: true, selectionRequired, recomme
 
 **为什么要定：** 今天三条路径语义不同。
 
-- 内容桩：`ensureContentBoards` 见 `existsSync` 就 `continue`，不读、不刷新。`NodeService.create` 对已存在文件会抛 `Node target already exists`（`node-service.ts` 的 `create`）。本仓 `.harness/notes/README.md` 比代码里的种子多了一句「叶子写在 scope 的 notes/」；若改成重写正文，再跑 init 会盖掉这句。
+- 内容桩：`ensureContentBoards` 见 `existsSync` 就 `continue`，不读、不刷新。`NodeService.create` 对已存在文件会抛 `Node target already exists`（`node-service.ts` 的 `create`）。本仓 `.edges/notes/README.md` 比代码里的种子多了一句「叶子写在 scope 的 notes/」；若改成重写正文，再跑 init 会盖掉这句。
 - 类型索引：`refreshIndex`（`packages/cli/src/services/memory/entries.ts`）会重算本层列表区块，保留其余正文。再跑 memory init 会更新已采用类型。
 - AGENTS：`syncLoadedAgents`（`packages/cli/src/services/memory/agents.ts`）对 foreign 文件返回 `needs-doctor` 且不覆盖；对已受管文件只 upsert 本层/下层区块，并 `ensureImportantBlock`（缺硬约束才补，不覆盖已有硬约束）。`core.test.ts` 断言第二次无参 init 后 `AGENTS.md` 字节不变。
 
-doctor 的 `--apply` 是另一条修复路径（`packages/services/memory/doctor.ts`），本卡非目标不改它。若 init 改成「总是重写」，会和 doctor 抢修复，也会破坏「硬约束手写保留」（`.claude/skills/project-memory-init/.harness/memory/projects/project_important_block/INDEX.md` 的索引说明，以及 SKILL.md「现有硬约束与手写正文不覆盖」）。
+doctor 的 `--apply` 是另一条修复路径（`packages/services/memory/doctor.ts`），本卡非目标不改它。若 init 改成「总是重写」，会和 doctor 抢修复，也会破坏「硬约束手写保留」（`.claude/skills/project-memory-init/.edges/memory/projects/project_important_block/INDEX.md` 的索引说明，以及 SKILL.md「现有硬约束与手写正文不覆盖」）。
 
 **选项 A：** 保持分裂语义。组织清单桩：不存在才建，存在则一行不改。类型索引：继续 `refreshIndex`。AGENTS：继续只补受管区块，foreign 仍 `needs-doctor`。
 
@@ -214,7 +214,7 @@ doctor 的 `--apply` 是另一条修复路径（`packages/services/memory/doctor
 
 **选项 B：** 全部刷新。桩也按种子重写正文。
 
-- 代价：盖掉 `.harness/notes/README.md`、`.harness/projects/README.md` 上已经写上的说明。foreign AGENTS 若也刷新，就破坏 doctor 的边界。
+- 代价：盖掉 `.edges/notes/README.md`、`.edges/projects/README.md` 上已经写上的说明。foreign AGENTS 若也刷新，就破坏 doctor 的边界。
 - 影响面：本仓根 harness 的 notes/projects README 在有人重新 init 根 scope 时会被改写。
 
 **选项 C：** 全部改为缺了才建，连类型索引也不再刷新。
@@ -235,7 +235,7 @@ doctor 的 `--apply` 是另一条修复路径（`packages/services/memory/doctor
 - 「只把初始化 memory 模块交给 init service」
 - 「`edges memory init` 的输出与改造前一致（现有 memory init 测试不改断言即通过）」
 
-现状是：只要类型选择通过，`init.ts` 第 123 行总会 `ensureContentBoards`，与用户有没有「选择 notes 模块」无关。推荐 JSON 里虽然列出 `tasks`，但 tasks 文件不会被创建。`content-boards.test.ts` 同时断言推荐列表含 projects/notes，以及带 `--memory-types project` 后两个 harness README 和 AGENTS 链接存在。`uniform-nodes.test.ts` 也把 `.harness/projects/README.md`、`.harness/notes/README.md` 算进某层 list 的结果。
+现状是：只要类型选择通过，`init.ts` 第 123 行总会 `ensureContentBoards`，与用户有没有「选择 notes 模块」无关。推荐 JSON 里虽然列出 `tasks`，但 tasks 文件不会被创建。`content-boards.test.ts` 同时断言推荐列表含 projects/notes，以及带 `--memory-types project` 后两个 harness README 和 AGENTS 链接存在。`uniform-nodes.test.ts` 也把 `.edges/projects/README.md`、`.edges/notes/README.md` 算进某层 list 的结果。
 
 命令文件若自己再调三次 init service（memory、notes、projects），业务组合就留在 commands 里，违反「commands 下没有 init 业务逻辑」。若 service 的 memory 入口不再建桩，测试必须改。
 
@@ -269,7 +269,7 @@ doctor 的 `--apply` 是另一条修复路径（`packages/services/memory/doctor
 - `edges memory init`（本卡的对象）
 - `edges artifacts init`（`packages/cli/src/commands/artifacts/init.ts`）：写客户端 token 和 `~/.config/edges/artifacts.env`，不是 harness 材料。记忆与 ADR 0013 把「没有 server init、客户端才是 `edges artifacts init`」当成已定规格。
 
-notes、projects、tasks、skills 的命令文件只有 list/get/create/update/delete（tasks 另有 status、project、runs）。`AGENTS.md` 硬约束：不为 `evaluation` / `observation` 发明命令。这两项却在 `harness-materials.json` 里，本仓也有 `packages/evaluation/README.md` 和 `packages/observation/README.md`，是手写的，init 不生成。
+notes、projects、tasks、skills 的命令文件只有 list/get/create/update/delete（tasks 另有 status、project、runs）。`AGENTS.md` 硬约束：不为 `evaluation` / `observation` 发明命令。这两项却在 `edges-materials.json` 里，本仓也有 `packages/evaluation/README.md` 和 `packages/observation/README.md`，是手写的，init 不生成。
 
 任务卡正文写「后续 `edges <domain> init` 照此」，完成标准没有要求本卡把每个域的子命令都做完；用户本轮的约束则把域 init 说成同族入口。
 
@@ -298,14 +298,14 @@ notes、projects、tasks、skills 的命令文件只有 list/get/create/update/d
 
 **问题：** init 创建 tasks 看板时，是否绕过 `NodeService.create` 对 tasks 材料「不登记进 AGENTS」的特例？
 
-**为什么要定：** `node-service.ts` 的 `#registration` 对 `isTasksBoardMaterial` 直接 `return undefined`（约第 424–426 行），注释写明看板由 tasks service 去挂，super 只挂载、不在这里挂。真正挂到 scope AGENTS 的逻辑在 `packages/cli/src/services/tasks/project-meta.ts`：`ensureBoardMaterial` 创建或补 `project-entries`，`refreshProjectIndex` 再在 owner AGENTS 上补一条（约第 280–289 行）。memory init 的推荐列表含 `tasks`，但 `CONTENT_BOARDS` 不含它，所以今天 init 不建 `.harness/tasks/README.md`。
+**为什么要定：** `node-service.ts` 的 `#registration` 对 `isTasksBoardMaterial` 直接 `return undefined`（约第 424–426 行），注释写明看板由 tasks service 去挂，super 只挂载、不在这里挂。真正挂到 scope AGENTS 的逻辑在 `packages/cli/src/services/tasks/project-meta.ts`：`ensureBoardMaterial` 创建或补 `project-entries`，`refreshProjectIndex` 再在 owner AGENTS 上补一条（约第 280–289 行）。memory init 的推荐列表含 `tasks`，但 `CONTENT_BOARDS` 不含它，所以今天 init 不建 `.edges/tasks/README.md`。
 
-本仓 `.harness/tasks/README.md` 是手写长文，不是空种子。若 init 用 notes 那种短种子去「缺了才建」，已有文件会跳过（Q6），空 scope 则会得到一块新看板。`NodeService.create` 不会把它登记到 AGENTS；不额外调用 tasks 的挂接函数的话，`edges tasks list` 顺着 AGENTS children 会看不见这块新看板。
+本仓 `.edges/tasks/README.md` 是手写长文，不是空种子。若 init 用 notes 那种短种子去「缺了才建」，已有文件会跳过（Q6），空 scope 则会得到一块新看板。`NodeService.create` 不会把它登记到 AGENTS；不额外调用 tasks 的挂接函数的话，`edges tasks list` 顺着 AGENTS children 会看不见这块新看板。
 
 **选项 A：** 本卡 init 默认集不包含 tasks，init service 不创建看板，也不调用 `ensureBoardMaterial`。推荐 JSON 里可以继续提到 tasks，但要和「会写盘的模块」分开，避免再出现「推荐了却不建」而不说明。
 
 - 代价：空 scope 的 `edges init` 之后仍没有 tasks 看板，要等第一次 tasks 写入才懒创建。和今天 memory init 的实际写盘一致。
-- 影响面：tasks 路径、登记特例、手写 `.harness/tasks/README.md` 都不变。
+- 影响面：tasks 路径、登记特例、手写 `.edges/tasks/README.md` 都不变。
 
 **选项 B：** init 的 tasks 模块只调用现有 `ensureBoardMaterial`（以及它后面的挂接），不在 init service 里复制一份创建逻辑。
 
@@ -364,9 +364,9 @@ archive / migrate 的 `fs.writeFile` 不在 init 路径上。tasks 的看板写�
 
 **问题：** `edges notes init` / `edges init notes` 在 scope 还没有 `AGENTS.md` 时，要不要创建系统入口？
 
-**为什么要定：** 今天 AGENTS 只由 memory init（以及 doctor `--apply`）写出。模板在 `loadAgentsTemplate` / `renderAgentsDocument`（`packages/services/memory/blocks.ts`），种子来自 `AGENTS.tmpl.md`。`syncTargetAgents` 还会把已采用类型的索引行 upsert 进本层区块。内容桩是在 AGENTS 已经建好之后，由 `NodeService.create` 的 `#registration` 挂上去的（`physicalParent` 会走到 scope 的 `AGENTS.md`，因为路径里带 `.harness`，不会挂到同目录内容 README）。
+**为什么要定：** 今天 AGENTS 只由 memory init（以及 doctor `--apply`）写出。模板在 `loadAgentsTemplate` / `renderAgentsDocument`（`packages/services/memory/blocks.ts`），种子来自 `AGENTS.tmpl.md`。`syncTargetAgents` 还会把已采用类型的索引行 upsert 进本层区块。内容桩是在 AGENTS 已经建好之后，由 `NodeService.create` 的 `#registration` 挂上去的（`physicalParent` 会走到 scope 的 `AGENTS.md`，因为路径里带 `.edges`，不会挂到同目录内容 README）。
 
-若 notes init 在没有 AGENTS 时只写 `.harness/notes/README.md`，`#registration` 找不到父节点，桩会变成孤儿，traverse 从真 AGENTS 走不到它。若 notes init 总是创建一整份 AGENTS（含硬约束种子），则「初始化 notes」会把一个目录标成系统入口。这和已定记忆一致：任意目录由用户 init 才有 AGENTS，未 init 不伪造（`.harness/memory/feedbacks/feedback_harness_markers_not_task_project_indexes/INDEX.md`，以及 `project_grill_system_entry_q9b_q10_q11` 的 Q10）。无参 `edges memory init` 仍必须不创建 AGENTS（测试要求目录为空）。
+若 notes init 在没有 AGENTS 时只写 `.edges/notes/README.md`，`#registration` 找不到父节点，桩会变成孤儿，traverse 从真 AGENTS 走不到它。若 notes init 总是创建一整份 AGENTS（含硬约束种子），则「初始化 notes」会把一个目录标成系统入口。这和已定记忆一致：任意目录由用户 init 才有 AGENTS，未 init 不伪造（`.edges/memory/feedbacks/feedback_harness_markers_not_task_project_indexes/INDEX.md`，以及 `project_grill_system_entry_q9b_q10_q11` 的 Q10）。无参 `edges memory init` 仍必须不创建 AGENTS（测试要求目录为空）。
 
 **选项 A：** 凡是会写 harness 材料或类型索引的 init（包括 notes/projects，以及带类型的 memory）都确保 scope `AGENTS.md` 存在：没有就按模板创建，有则只补受管区块。不采用 memory 类型时，本层区块里没有类型行，只有随后登记上的材料。无参 `edges memory init` 在 `selectionRequired` 时仍什么都不写。
 
@@ -434,26 +434,26 @@ archive / migrate 的 `fs.writeFile` 不在 init 路径上。tasks 的看板写�
 
 ## 现状速览
 
-**数据流（今天）：** `edges memory init` → `initMemory`。无已采用类型且未给 `--memory-types` / `--skill-types` 时只返回推荐 JSON。一旦要写，就用 `memoryNodes()` 得到的 `NodeService` 创建类型 README 和 `AGENTS.md`（模板来自 `AGENTS.tmpl.md`，只补受管区块），再按硬编码列表创建 `.harness/projects/README.md` 与 `.harness/notes/README.md`，由 NodeService 登记进 AGENTS。`harness-materials.json` 提供 path，同时被超节点挂载、tasks、skills 读取；init 只借用其中 projects/notes 两个 id。tasks 看板不在这条链上，由 tasks 服务以后懒创建，并且 NodeService 故意不自动登记它。
+**数据流（今天）：** `edges memory init` → `initMemory`。无已采用类型且未给 `--memory-types` / `--skill-types` 时只返回推荐 JSON。一旦要写，就用 `memoryNodes()` 得到的 `NodeService` 创建类型 README 和 `AGENTS.md`（模板来自 `AGENTS.tmpl.md`，只补受管区块），再按硬编码列表创建 `.edges/projects/README.md` 与 `.edges/notes/README.md`，由 NodeService 登记进 AGENTS。`edges-materials.json` 提供 path，同时被超节点挂载、tasks、skills 读取；init 只借用其中 projects/notes 两个 id。tasks 看板不在这条链上，由 tasks 服务以后懒创建，并且 NodeService 故意不自动登记它。
 
 **涉及的文件：**
 
-- 任务正文：PR #189 分支上的 `.harness/tasks/edges-cli-platform/backlog/2026-10-08--补充统一的-edges-init模块-init-只调-init-service/INDEX.md`（当前工作树里没有这份重写正文）
+- 任务正文：PR #189 分支上的 `.edges/tasks/edges-cli-platform/backlog/2026-10-08--补充统一的-edges-init模块-init-只调-init-service/INDEX.md`（当前工作树里没有这份重写正文）
 - 初始化实现：`packages/cli/src/services/memory/init.ts`、`agents.ts`、`blocks.ts`、`templates.ts`、`types.ts`、`entries.ts`、`service.ts`（仅 `memoryNodes`）、`index.ts`
-- 材料表：`packages/cli/src/domain/config/harness-materials.json`、`harness-materials.ts`
+- 材料表：`packages/cli/src/domain/config/edges-materials.json`、`edges-materials.ts`
 - 命令：`packages/cli/src/commands/memory/init.ts`、`commands/memory.ts`、`commands/memory/utils/command.ts`、`program.ts`；对照用的 `commands/artifacts/init.ts`、`commands/notes.ts`、`commands/projects.ts`、`commands/skills.ts`、`commands/tasks.ts`
 - 写盘与登记：`packages/cli/src/services/node/node-service.ts`（`create` / `#registration`）、`node-files.ts`（`saveEntries`）、`node-layout.ts`（`physicalParent`）、`super-root.ts`、`packages/services/node/dated-leaf.ts`、`packages/services/skills/service.ts`、`packages/services/tasks/project-meta.ts`、`packages/services/tasks/paths.ts`
 - 测试断言：`packages/cli/test/memory/content-boards.test.ts`、`cli.test.ts`、`core.test.ts`、`uniform-nodes.test.ts`，以及多处只把 `initMemory` 当夹具的测试
 - 术语与决策：`CONTEXT.md`（系统入口那段）、`docs/adr/0027-facade-crud-verbs.md`、`docs/adr/0030-content-leaf-crud-via-nodeservice.md`、`docs/adr/0029-recursive-system-two-entries.md`（init 仍是用户对目录的显式动作）
 - Skill：`.claude/skills/project-memory-init/SKILL.md`、`references/runtime.md`、`references/LAYOUT.md`、`references/PROTOCOL.md`（本卡不应改）
-- 仓库里已经被 init 碰过的产物示例：根 `AGENTS.md`（链到 `.harness/notes/README.md` 与 `.harness/projects/README.md`）、`.harness/notes/README.md`、`.harness/projects/README.md`；内容面 `notes/README.md` 与根 `README.md` 的 entries 不是这条 init 链写的
+- 仓库里已经被 init 碰过的产物示例：根 `AGENTS.md`（链到 `.edges/notes/README.md` 与 `.edges/projects/README.md`）、`.edges/notes/README.md`、`.edges/projects/README.md`；内容面 `notes/README.md` 与根 `README.md` 的 entries 不是这条 init 链写的
 
 ## 本轮参考过的项目记忆
 
-- `.harness/memory/feedbacks/README.md`
-- `.harness/memory/feedbacks/feedback_harness_markers_not_task_project_indexes/INDEX.md`
-- `.harness/memory/projects/README.md`
-- `.harness/memory/projects/project_grill_system_entry_q9b_q10_q11/INDEX.md`
-- `.claude/skills/project-memory-init/.harness/memory/projects/project_development/INDEX.md`（索引与修改顺序）
-- `.claude/skills/project-memory-init/.harness/memory/projects/project_important_block/INDEX.md`（索引说明：硬约束缺了才补）
-- `.claude/skills/project-memory-init/.harness/memory/projects/project_type_set/INDEX.md`（索引说明：官方种子不是闭集、不要把示例写进默认种子）
+- `.edges/memory/feedbacks/README.md`
+- `.edges/memory/feedbacks/feedback_harness_markers_not_task_project_indexes/INDEX.md`
+- `.edges/memory/projects/README.md`
+- `.edges/memory/projects/project_grill_system_entry_q9b_q10_q11/INDEX.md`
+- `.claude/skills/project-memory-init/.edges/memory/projects/project_development/INDEX.md`（索引与修改顺序）
+- `.claude/skills/project-memory-init/.edges/memory/projects/project_important_block/INDEX.md`（索引说明：硬约束缺了才补）
+- `.claude/skills/project-memory-init/.edges/memory/projects/project_type_set/INDEX.md`（索引说明：官方种子不是闭集、不要把示例写进默认种子）

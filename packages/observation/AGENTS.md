@@ -1,6 +1,6 @@
 # 观测 (packages/observation/)
 
-`packages/observation/` 观测 Edges **怎么被用**：telemetry 笔记、仪表盘备忘、run log、「野外看到了什么」。这是系统元工作，运营向观测，不替代 [`memory/`](../../.harness/memory) 里的决策，也不进入 notes → edges → archive 主链。
+`packages/observation/` 观测 Edges **怎么被用**：telemetry 笔记、仪表盘备忘、run log、「野外看到了什么」。这是系统元工作，运营向观测，不替代 [`memory/`](../../.edges/memory) 里的决策，也不进入 notes → edges → archive 主链。
 
 ## 放什么
 
@@ -11,7 +11,7 @@
 ## 不放什么
 
 - 凭据、未公开 IP、可识别个人、未脱敏的内部信息
-- 已确认的决策、纠错、必须遵守的做法 → [`memory/`](../../.harness/memory)
+- 已确认的决策、纠错、必须遵守的做法 → [`memory/`](../../.edges/memory)
 - 认知资产、研究笔记 → [`knowledge/`](../../knowledge)
 - 接入 Edges 的接口实现 → 仓库根 [`packages/cli/`](../cli)、[`packages/skills/`](../skills)、[`packages/apps/`](../apps)、[`packages/services/`](../services)、[`packages/mcp-servers/`](../mcp-servers)、[`packages/system-prompt/`](../system-prompt)
 - 可复现的评测用例、harness 与分数 → [`evaluation/`](../evaluation/README.md)
@@ -24,7 +24,7 @@
 | 目录 | 关系 |
 | --- | --- |
 | [`knowledge/`](../../knowledge) | 认知资产。观测记录的是系统如何被使用，不是研究笔记。野外现象若值得沉淀为可复用判断，先回到捕获入口。 |
-| [`memory/`](../../.harness/memory) | 运营账本。观测提供证据；被采纳的决策、纠错与约束写进 维护记忆，不把本目录当成第二份决策库。 |
+| [`memory/`](../../.edges/memory) | 运营账本。观测提供证据；被采纳的决策、纠错与约束写进 维护记忆，不把本目录当成第二份决策库。 |
 | 仓库根 `packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/` | 接口层。观测可以记录这些能力在野外的表现；实现仍在这些目录。 |
 | [`evaluation/`](../evaluation/README.md) | 评测把假设做成可复现对照；本目录只记看到了什么。观测不是评测。 |
 
@@ -39,8 +39,8 @@
 - [`smoke/`](smoke/README.md)：不含密钥的可复现冒烟；Langfuse v4 events_only 的 OTLP 用法写在该处
 - 本 README
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
-- [本层 harness 材料索引](<.harness/README.md>) — 本层 harness 材料的组织清单。各材料只在这里登记。
-<!-- project-harness-local:end -->
+- [本层 harness 材料索引](<.edges/README.md>) — 本层 harness 材料的组织清单。各材料只在这里登记。
+<!-- edges-local:end -->

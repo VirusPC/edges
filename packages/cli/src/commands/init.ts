@@ -15,7 +15,7 @@ export function ignoredInstallTokens(
 }
 
 const AFTER_HELP = `
-This command does not read --super. Materials always land under <scope>/.harness.
+This command does not read --super. Materials always land under <scope>/.edges.
 Tokens after -- are forwarded only to the bundled skills install step.
   edges init -- -y --agent '*'
 

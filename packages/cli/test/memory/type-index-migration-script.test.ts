@@ -51,29 +51,29 @@ format: ordinary
 
 const layer = `# Layer
 
-<!-- project-harness-constraints:start -->
+<!-- edges-constraints:start -->
 ## 本层硬约束
 
 - Keep.
-<!-- project-harness-constraints:end -->
+<!-- edges-constraints:end -->
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
-- [project](<.harness/memory/projects/AGENTS.md>) — p
+- [project](<.edges/memory/projects/AGENTS.md>) — p
 - [Alpha](<alpha/AGENTS.md>) — alpha project
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 `;
 
 const orgList = `# Alpha
 
 alpha project
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 - [one](<backlog/2026-01-01--one/index.md>) — one
 
-- [two](<todo/2026-01-02--two/index.md>) — mentions .harness/memory in prose
-<!-- project-harness-local:end -->
+- [two](<todo/2026-01-02--two/index.md>) — mentions .edges/memory in prose
+<!-- edges-local:end -->
 `;
 
 test("convertTypeIndex keeps header and renames entries markers", () => {
@@ -90,11 +90,11 @@ test("convertTypeIndex keeps header and renames entries markers", () => {
 test("convertOrgList moves composition to project-entries and drops empty constraints", () => {
   const out = convertOrgList(
     orgList.replace(
-      "<!-- project-harness-local:start -->",
-      "<!-- project-harness-constraints:start -->\n## 本层硬约束\n<!-- project-harness-constraints:end -->\n\n<!-- project-harness-local:start -->",
+      "<!-- edges-local:start -->",
+      "<!-- edges-constraints:start -->\n## 本层硬约束\n<!-- edges-constraints:end -->\n\n<!-- edges-local:start -->",
     ),
   );
-  assert.doesNotMatch(out, /project-harness/);
+  assert.doesNotMatch(out, /<!-- edges/);
   assert.match(out, /<!-- project-entries-local:start -->\n## 本层内容\n\n- \[one\]/);
   assert.doesNotMatch(out, /\n\n- \[two\]/);
   const node = new ReadmeNode(path.resolve("/tmp/x/alpha/README.md")).parse(out);
@@ -114,12 +114,12 @@ test("retargetLinks rewrites angled and plain links to moved AGENTS only", () =>
 test("plan classifies type indexes, org lists and real system entries", (t) => {
   const root = fixture(t, {
     "AGENTS.md": layer,
-    ".harness/memory/projects/AGENTS.md": typeIndex,
+    ".edges/memory/projects/AGENTS.md": typeIndex,
     "alpha/AGENTS.md": orgList,
     "alpha/backlog/2026-01-01--one/index.md": "# one\n",
     "beta/AGENTS.md":
-      "# Beta\n\n<!-- project-harness-local:start -->\n## 本层系统维护信息\n- [m](<.harness/memory/projects/README.md>)\n- [l](<x/index.md>)\n<!-- project-harness-local:end -->\n",
-    "beta/.harness/memory/projects/README.md": "# p\n",
+      "# Beta\n\n<!-- edges-local:start -->\n## 本层系统维护信息\n- [m](<.edges/memory/projects/README.md>)\n- [l](<x/index.md>)\n<!-- edges-local:end -->\n",
+    "beta/.edges/memory/projects/README.md": "# p\n",
     "gamma/AGENTS.md": "# Gamma\n\nplain agent prose, no list\n",
   });
   const plan = planTypeIndexMigration(root);
@@ -127,7 +127,7 @@ test("plan classifies type indexes, org lists and real system entries", (t) => {
     plan.migrations.map((m) => [m.kind, path.relative(root, m.from)]).sort(),
     [
       ["org-list", "alpha/AGENTS.md"],
-      ["type-index", ".harness/memory/projects/AGENTS.md"],
+      ["type-index", ".edges/memory/projects/AGENTS.md"],
     ],
   );
   assert.deepEqual(plan.skipped.map((s) => s.path).sort(), [
@@ -139,22 +139,22 @@ test("plan classifies type indexes, org lists and real system entries", (t) => {
     plan.linkEdits.map((e) => path.relative(root, e.path)),
     ["AGENTS.md"],
   );
-  assert.ok(exists(root, ".harness/memory/projects/AGENTS.md"), "dry-run");
+  assert.ok(exists(root, ".edges/memory/projects/AGENTS.md"), "dry-run");
 });
 
 test("apply writes README, deletes AGENTS, retargets links and is idempotent", async (t) => {
   const root = fixture(t, {
     "AGENTS.md": layer,
-    ".harness/memory/projects/AGENTS.md": typeIndex,
+    ".edges/memory/projects/AGENTS.md": typeIndex,
     "alpha/AGENTS.md": orgList,
   });
   await applyTypeIndexMigration(planTypeIndexMigration(root));
-  assert.equal(exists(root, ".harness/memory/projects/AGENTS.md"), false);
+  assert.equal(exists(root, ".edges/memory/projects/AGENTS.md"), false);
   assert.equal(exists(root, "alpha/AGENTS.md"), false);
-  assert.match(read(root, ".harness/memory/projects/README.md"), /project-entries-local/);
+  assert.match(read(root, ".edges/memory/projects/README.md"), /project-entries-local/);
   assert.match(read(root, "alpha/README.md"), /project-entries-local/);
   const top = read(root, "AGENTS.md");
-  assert.match(top, /\]\(<\.harness\/memory\/projects\/README\.md>\)/);
+  assert.match(top, /\]\(<\.edges\/memory\/projects\/README\.md>\)/);
   assert.match(top, /\]\(<alpha\/README\.md>\)/);
   assert.match(top, /Keep\./);
 
@@ -176,7 +176,7 @@ test("existing README next to a migrating AGENTS is a conflict and nothing is wr
 
 test("private user memory type indexes are never migrated", (t) => {
   const root = fixture(t, {
-    ".harness/memory/users/AGENTS.md": typeIndex.replace("project", "user"),
+    ".edges/memory/users/AGENTS.md": typeIndex.replace("project", "user"),
   });
   const plan = planTypeIndexMigration(root);
   assert.equal(plan.migrations.length, 0);

@@ -14,7 +14,7 @@ export interface ScopeTraversalOptions {
   super?: boolean;
   /** Global `--exclude`: skip these module names during traversal. */
   exclude?: ReadonlySet<string>;
-  /** Scope directory used to recognize `.harness/<module>` paths. Defaults to the service root. */
+  /** Scope directory used to recognize `.edges/<module>` paths. Defaults to the service root. */
   scopeDir?: string;
   /**
    * Forest assembly: do not descend into these absolute entry paths

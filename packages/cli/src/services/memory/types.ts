@@ -156,10 +156,10 @@ function setCandidate(
   module: "memory" | "skills",
   dirname: string,
 ): void {
-  const readme = `.harness/${module}/${dirname}/${TYPE_INDEX_FILE_NAME}`;
+  const readme = `.edges/${module}/${dirname}/${TYPE_INDEX_FILE_NAME}`;
   if (rel !== readme && candidates.has(readme)) return;
   if (rel === readme)
-    candidates.delete(`.harness/${module}/${dirname}/${AGENTS_FILE_NAME}`);
+    candidates.delete(`.edges/${module}/${dirname}/${AGENTS_FILE_NAME}`);
   candidates.set(rel, { module, dirname });
 }
 export function layerTypeSpecs(target: string): TypeSpec[] {
@@ -171,7 +171,7 @@ export function layerTypeSpecs(target: string): TypeSpec[] {
     const rel = relative(canonicalPath(target), file);
     const [harness, module, directory, entry, ...rest] = rel.split("/");
     if (
-      harness === ".harness" &&
+      harness === ".edges" &&
       (module === "memory" || module === "skills") &&
       directory &&
       entry !== undefined &&
@@ -181,7 +181,7 @@ export function layerTypeSpecs(target: string): TypeSpec[] {
       setCandidate(candidates, rel, module, directory);
   }
   for (const module of ["memory", "skills"] as const) {
-    const container = assertScopePath(join(target, ".harness", module), target);
+    const container = assertScopePath(join(target, ".edges", module), target);
     if (isDirectory(container))
       for (const child of fs.readdirSync(container).sort())
         for (const name of TYPE_INDEX_FILES) {
@@ -190,7 +190,7 @@ export function layerTypeSpecs(target: string): TypeSpec[] {
           if (isFile(file) && isTypeIndexSource(readText(file)))
             setCandidate(
               candidates,
-              `.harness/${module}/${child}/${name}`,
+              `.edges/${module}/${child}/${name}`,
               module,
               child,
             );
@@ -282,9 +282,9 @@ export function ensureLayerTypeGitignore(
     assertPrivateIgnored(root ?? target, files, files.map(dirname));
   }
 }
-/** Children of `<scope>/.harness/README.md` when that organization list exists. */
+/** Children of `<scope>/.edges/README.md` when that organization list exists. */
 export function layerReadmePaths(target: string): Set<string> | undefined {
-  const file = join(resolve(target), ".harness", ENTRY_NAMES.readme);
+  const file = join(resolve(target), ".edges", ENTRY_NAMES.readme);
   if (!isFile(file)) return undefined;
   try {
     const node = new ReadmeNode(file).parse(readText(file));
@@ -299,14 +299,14 @@ export function layerReadmePaths(target: string): Set<string> | undefined {
   }
 }
 
-/** AGENTS 本层只留指向 `.harness/README.md` 的一条。类型行登记在那份 README 上。 */
+/** AGENTS 本层只留指向 `.edges/README.md` 的一条。类型行登记在那份 README 上。 */
 export function selectedLocalBlock(_specs: TypeSpec[] = []): string {
   let block = buildLocalBlock().replace(
-    /^- \[.*\]\(\.harness\/.*\).*\n?/gm,
+    /^- \[.*\]\(\.edges\/.*\).*\n?/gm,
     "",
   );
-  const line = `- [${SCOPE_README_ENTRY_NAME}](.harness/README.md) — ${SCOPE_README_ENTRY_DESCRIPTION}`;
-  if (!block.includes("](.harness/README.md)") && !block.includes("](<.harness/README.md>)"))
+  const line = `- [${SCOPE_README_ENTRY_NAME}](.edges/README.md) — ${SCOPE_README_ENTRY_DESCRIPTION}`;
+  if (!block.includes("](.edges/README.md)") && !block.includes("](<.edges/README.md>)"))
     block = block.replace(LOCAL_END, () => `${line}\n${LOCAL_END}`);
   return block;
 }

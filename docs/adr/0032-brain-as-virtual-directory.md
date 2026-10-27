@@ -4,7 +4,7 @@ status: accepted
 
 # harness 落成仓库，大脑是虚拟目录，经验按谁 × 在哪沉淀
 
-2026-10-08 至 10-09 重写根 README 的 grill 确认：任何目录都能配一套 harness（`AGENTS.md` 加 `.harness/`），由用户对选定目录 init。一个人的大脑被看作一个不落盘的虚拟目录，位于此人自己的仓库之上；它的 harness 落成一个 Git 仓库（作者的那一个就是本仓）。code agent 经各客户端的用户级配置接到这个仓库，personal agent 在自己的电脑上 clone 它；各类 Agent 机制相同，区别只在 harness 对象是哪个目录。经验按「谁 × 在哪」沉淀：在哪由目录决定；谁由共享范围决定，也就是提交进哪个仓库、谁能访问。团队仓库的上一层是团队，不是某个人的大脑；个人的大脑 harness 在他进入团队仓库时叠加生效。一个大脑只设一个 harness 仓库。被 gitignore 的用户记忆只放密码等隐私材料，不构成「谁」的一层。
+2026-10-08 至 10-09 重写根 README 的 grill 确认：任何目录都能配一套 harness（`AGENTS.md` 加 `.edges/`），由用户对选定目录 init。一个人的大脑被看作一个不落盘的虚拟目录，位于此人自己的仓库之上；它的 harness 落成一个 Git 仓库（作者的那一个就是本仓）。code agent 经各客户端的用户级配置接到这个仓库，personal agent 在自己的电脑上 clone 它；各类 Agent 机制相同，区别只在 harness 对象是哪个目录。经验按「谁 × 在哪」沉淀：在哪由目录决定；谁由共享范围决定，也就是提交进哪个仓库、谁能访问。团队仓库的上一层是团队，不是某个人的大脑；个人的大脑 harness 在他进入团队仓库时叠加生效。一个大脑只设一个 harness 仓库。被 gitignore 的用户记忆只放密码等隐私材料，不构成「谁」的一层。
 
 ## Considered Options
 

@@ -1,20 +1,20 @@
-# 系统森林、Super 挂载与 harness-materials 配置 Implementation Plan
+# 系统森林、Super 挂载与 edges-materials 配置 Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** 落地「traverse 只跑单系统；森林在外拼装；Super 按 domain JSON 挂 README 材料；Service 交出 `BaseNode[][]` 供 review」整条链路。
 
-**Architecture:** `traverse` 保持只走单系统 `children`。森林根用扫盘认 `project-harness` 的 `AGENTS.md`；对每根并行/串行 `traverse`，`resolve` 遇其它根早停。`SuperAgentsNode` 按 `harness-materials.json` 挂材料 README（不挂其它系统 AGENTS）。创建/读取材料一律 `scope + 配置 path`。业务 Service 组装二维林并投影给 review。
+**Architecture:** `traverse` 保持只走单系统 `children`。森林根用扫盘认 `edges` 的 `AGENTS.md`；对每根并行/串行 `traverse`，`resolve` 遇其它根早停。`SuperAgentsNode` 按 `edges-materials.json` 挂材料 README（不挂其它系统 AGENTS）。创建/读取材料一律 `scope + 配置 path`。业务 Service 组装二维林并投影给 review。
 
 **Tech Stack:** TypeScript、Node ≥22、`node:test`、tsx、现有 `edges-cli`。配置用 JSON（不加 YAML 依赖）。
 
-**Spec / 约束真源:** `.harness/memory/feedbacks/feedback_traverse_single_system_and_forest_roots/INDEX.md`；`CONTEXT.md`（SuperAgentsNode）；`packages/cli/src/domain/operations/README.md`（单系统 traverse）。
+**Spec / 约束真源:** `.edges/memory/feedbacks/feedback_traverse_single_system_and_forest_roots/INDEX.md`；`CONTEXT.md`（SuperAgentsNode）；`packages/cli/src/domain/operations/README.md`（单系统 traverse）。
 
 ## Global Constraints
 
 - `traverse` **不**跨系统、**不**拼森林；无 `includeContentFace` / companion 兼容。
 - Super **不**挂其它系统的 `AGENTS.md`；只挂配置中的材料 path（README）。
-- 整仓可视为个人系统二；材料相对 path **不带** `.harness/` 前缀；解析时 harness 根 = `join(repoRoot, ".harness")`（若存在）否则 `repoRoot`（见 Task 1）。
+- 整仓可视为个人系统二；材料相对 path **不带** `.edges/` 前缀；解析时 harness 根 = `join(repoRoot, ".edges")`（若存在）否则 `repoRoot`（见 Task 1）。
 - review 默认交林形式：**全部独立**；树间无从属用 resolve 早停；嵌套形式（只留内层）用「从 B traverse 可达 A 根」判定，本计划 API 一并提供。
 - 公开仓：无凭据；commit 用 `type: subject` + `Co-authored-by`。
 - 禁止改 `posts/`。
@@ -23,14 +23,14 @@
 
 | 文件 | 职责 |
 | --- | --- |
-| `packages/cli/src/domain/config/harness-materials.json` | 材料 `{ id, path, optional }[]` |
-| `packages/cli/src/domain/config/harness-materials.ts` | 加载、校验、`resolveHarnessMaterial(scopeDir, id)` |
+| `packages/cli/src/domain/config/edges-materials.json` | 材料 `{ id, path, optional }[]` |
+| `packages/cli/src/domain/config/edges-materials.ts` | 加载、校验、`resolveHarnessMaterial(scopeDir, id)` |
 | `packages/cli/src/domain/operations/system-forest.ts` | `collectSystemRoots`、`isSystemEntry`（扫盘 + 标志） |
 | `packages/cli/src/services/node/system-forest-service.ts` | 组装 `BaseNode[][]`；全部独立 / 嵌套只留内层；resolve 禁入其它根 |
 | `packages/cli/src/services/node/node-service.ts` | `#superRoot` 改为按配置挂载材料 |
 | `packages/cli/src/domain/models/agents/super-agents-node.ts` | 注释对齐：材料挂载，非「只挂一个 README」 |
 | `packages/cli/src/commands/tasks/…` 或新 `forest` 子命令 / review 接线 | 暴露森林给 CLI / review |
-| `packages/cli/test/domain/harness-materials.test.ts` | 配置与解析 |
+| `packages/cli/test/domain/edges-materials.test.ts` | 配置与解析 |
 | `packages/cli/test/operations/system-forest.test.ts` | 收根 |
 | `packages/cli/test/services/system-forest-service.test.ts` | 二维林、早停、嵌套形式 |
 | `packages/cli/test/services/super-agents-node.test.ts`（扩展） | Super 挂载表 |
@@ -38,7 +38,7 @@
 
 ```mermaid
 flowchart TB
-  CFG["harness-materials.json"] --> LM["harness-materials.ts"]
+  CFG["edges-materials.json"] --> LM["edges-materials.ts"]
   LM --> SUPER["#superRoot → SuperAgentsNode mounts"]
   SCAN["collectSystemRoots FS scan"] --> SFS["SystemForestService"]
   SUPER --> SFS
@@ -48,19 +48,19 @@ flowchart TB
 
 ---
 
-### Task 1: harness-materials.json + loader
+### Task 1: edges-materials.json + loader
 
 **Files:**
-- Create: `packages/cli/src/domain/config/harness-materials.json`
-- Create: `packages/cli/src/domain/config/harness-materials.ts`
-- Test: `packages/cli/test/domain/harness-materials.test.ts`
+- Create: `packages/cli/src/domain/config/edges-materials.json`
+- Create: `packages/cli/src/domain/config/edges-materials.ts`
+- Test: `packages/cli/test/domain/edges-materials.test.ts`
 
 **Interfaces:**
 - Produces:
   - `type HarnessMaterial = { id: string; path: string; optional?: boolean }`
   - `type HarnessMaterialsConfig = { materials: HarnessMaterial[] }`
   - `loadHarnessMaterialsConfig(): HarnessMaterialsConfig`
-  - `harnessRootForScope(scopeDir: string): string` — `join(scopeDir, ".harness")` if that dir exists, else `scopeDir`
+  - `harnessRootForScope(scopeDir: string): string` — `join(scopeDir, ".edges")` if that dir exists, else `scopeDir`
   - `resolveHarnessMaterial(scopeDir: string, id: string): { absPath: string; material: HarnessMaterial } | undefined` — missing optional → `undefined`；required missing → throw
   - `listHarnessMaterialAbsPaths(scopeDir: string): { id: string; absPath: string }[]` — 仅存在的文件
 
@@ -78,7 +78,7 @@ import {
   harnessRootForScope,
   resolveHarnessMaterial,
   listHarnessMaterialAbsPaths,
-} from "../../src/domain/config/harness-materials.js";
+} from "../../src/domain/config/edges-materials.js";
 
 test("config lists tasks README and not AGENTS", () => {
   const cfg = loadHarnessMaterialsConfig();
@@ -86,24 +86,24 @@ test("config lists tasks README and not AGENTS", () => {
   assert.ok(!cfg.materials.some((m) => m.path.endsWith("AGENTS.md")));
 });
 
-test("resolve uses .harness under scope when present", () => {
+test("resolve uses .edges under scope when present", () => {
   const root = mkdtempSync(path.join(tmpdir(), "hm-"));
-  fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
-  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# t\n");
-  assert.equal(harnessRootForScope(root), path.join(root, ".harness"));
+  fs.mkdirSync(path.join(root, ".edges/tasks"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".edges/tasks/README.md"), "# t\n");
+  assert.equal(harnessRootForScope(root), path.join(root, ".edges"));
   const hit = resolveHarnessMaterial(root, "tasks");
-  assert.equal(hit?.absPath, path.join(root, ".harness/tasks/README.md"));
+  assert.equal(hit?.absPath, path.join(root, ".edges/tasks/README.md"));
 });
 ```
 
 - [x] **Step 2: Run tests — expect FAIL (module missing)**
 
-Run: `cd cli && pnpm exec node --import tsx --test test/domain/harness-materials.test.ts`  
+Run: `cd cli && pnpm exec node --import tsx --test test/domain/edges-materials.test.ts`  
 Expected: FAIL cannot find module
 
 - [x] **Step 3: Add JSON + loader**
 
-`harness-materials.json`:
+`edges-materials.json`:
 
 ```json
 {
@@ -128,10 +128,10 @@ Loader: `readFileSync` + `import.meta.url` 定位 JSON；校验每项有非空 `
 - [x] **Step 5: Commit**
 
 ```bash
-git add packages/cli/src/domain/config/harness-materials.json \
-  packages/cli/src/domain/config/harness-materials.ts \
-  packages/cli/test/domain/harness-materials.test.ts
-git commit -m "feat: domain harness-materials.json 与 path 解析"
+git add packages/cli/src/domain/config/edges-materials.json \
+  packages/cli/src/domain/config/edges-materials.ts \
+  packages/cli/test/domain/edges-materials.test.ts
+git commit -m "feat: domain edges-materials.json 与 path 解析"
 ```
 
 ---
@@ -150,16 +150,16 @@ git commit -m "feat: domain harness-materials.json 与 path 解析"
 - [x] **Step 1: Write failing test**
 
 ```ts
-test("super mounts configured README materials under .harness, not root AGENTS", async (t) => {
+test("super mounts configured README materials under .edges, not root AGENTS", async (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "super-m-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
+  fs.mkdirSync(path.join(root, ".edges/tasks"), { recursive: true });
   fs.writeFileSync(path.join(root, "AGENTS.md"), "# Scope\n");
-  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# Tasks\n");
+  fs.writeFileSync(path.join(root, ".edges/tasks/README.md"), "# Tasks\n");
   const service = new NodeService({ managedRoot: root });
   const nodes = await service.list(root, { super: true });
   const rel = nodes.map((n) => path.relative(root, n.path));
-  assert.ok(rel.some((p) => p === path.join(".harness/tasks/README.md") || p.endsWith("tasks/README.md")));
+  assert.ok(rel.some((p) => p === path.join(".edges/tasks/README.md") || p.endsWith("tasks/README.md")));
   assert.ok(!rel.includes("AGENTS.md"));
 });
 ```
@@ -177,14 +177,14 @@ test("super mounts configured README materials under .harness, not root AGENTS",
 }
 ```
 
-更新 `SuperAgentsNode` 类注释：组成来自 harness-materials 配置的材料入口。
+更新 `SuperAgentsNode` 类注释：组成来自 edges-materials 配置的材料入口。
 
-- [x] **Step 4: Fix / update 既有 `--super` 测试**（`traverse-dual-entry`、`super-flag` 等）使期望与「材料挂载」一致；仓根仅 README、无 `.harness/tasks` 时 Super 可只有 `readme` 材料或空。
+- [x] **Step 4: Fix / update 既有 `--super` 测试**（`traverse-dual-entry`、`super-flag` 等）使期望与「材料挂载」一致；仓根仅 README、无 `.edges/tasks` 时 Super 可只有 `readme` 材料或空。
 
 - [x] **Step 5: Tests PASS + Commit**
 
 ```bash
-git commit -m "feat: SuperAgentsNode 按 harness-materials 挂载"
+git commit -m "feat: SuperAgentsNode 按 edges-materials 挂载"
 ```
 
 ---
@@ -198,7 +198,7 @@ git commit -m "feat: SuperAgentsNode 按 harness-materials 挂载"
 
 **Interfaces:**
 - Produces:
-  - `isProjectHarnessAgentsFile(absPath: string, source: string): boolean` — 含 `project-harness-local` / `project-harness-constraints` / `project-harness-descendants` 任一 start 标记（或 `decodeBody` 显示 memory/constraints 区块）
+  - `isProjectHarnessAgentsFile(absPath: string, source: string): boolean` — 含 `edges-local` / `edges-constraints` / `edges-descendants` 任一 start 标记（或 `decodeBody` 显示 memory/constraints 区块）
   - `collectSystemRoots(scopeDir: string): string[]` — 递归扫 `AGENTS.md`（跳过 `node_modules`、`.git`、常见大目录），返回绝对路径列表，排序稳定
 
 - [x] **Step 1: Failing test** — fixture 含带标记的 `AGENTS.md`、无标记的 `AGENTS.md`、嵌套一层；断言只收集带标记的。
@@ -208,7 +208,7 @@ git commit -m "feat: SuperAgentsNode 按 harness-materials 挂载"
 - [x] **Step 3: PASS + Commit**
 
 ```bash
-git commit -m "feat: collectSystemRoots 扫盘认 project-harness"
+git commit -m "feat: collectSystemRoots 扫盘认 edges"
 ```
 
 ---
@@ -279,14 +279,14 @@ git commit -m "feat: CLI forest list 输出二维系统林"
 - Modify: `packages/cli/src/domain/models/README.md`
 - Modify: `packages/cli/README.md`
 - Modify: `CONTEXT.md`（Super 挂载改为材料表）
-- Update: `.harness/memory/feedbacks/feedback_traverse_single_system_and_forest_roots/INDEX.md`（补全 Q22 首版条目表 + 「本轮全部落地」）
+- Update: `.edges/memory/feedbacks/feedback_traverse_single_system_and_forest_roots/INDEX.md`（补全 Q22 首版条目表 + 「本轮全部落地」）
 
 - [x] **Step 1: 写入原则**：配置路径、扫盘收根、`BaseNode[][]`、resolve 早停、嵌套形式、Super 不挂 AGENTS
 
 - [x] **Step 2: Commit**
 
 ```bash
-git commit -m "docs: 系统森林与 harness-materials 配置原则"
+git commit -m "docs: 系统森林与 edges-materials 配置原则"
 ```
 
 ---

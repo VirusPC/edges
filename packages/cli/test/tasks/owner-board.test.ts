@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { run } from '../../src/program.js';
 import { AgentsNode, ReadmeNode } from '../../src/domain/models/index.js';
-import { placeHarnessMaterial } from '../../src/domain/config/harness-materials.js';
+import { placeHarnessMaterial } from '../../src/domain/config/edges-materials.js';
 import { generateTasksSite } from '../../src/services/tasks/generate-site.js';
 
 function fixture(t: { after(fn: () => void): void }) {
@@ -63,7 +63,7 @@ test('CLI first projects and tasks connect existing root, child and content scop
     assert.ok(node.localChildren.some(ref => ref.id === material));
     assert.equal(fs.existsSync(path.join(path.dirname(material), 'AGENTS.md')), false);
     assert.equal(fs.existsSync(path.join(path.dirname(placeHarnessMaterial(path.join(root, scope), 'tasks', { super: true }).absPath), 'AGENTS.md')), false);
-    assert.ok(!fs.existsSync(path.join(root, scope, '.harness/AGENTS.md')));
+    assert.ok(!fs.existsSync(path.join(root, scope, '.edges/AGENTS.md')));
   }
   assert.deepEqual(read('.').constraints, ['Keep this']);
   assert.deepEqual(read('.').descendantChildren.find(ref => ref.id === path.join(root, 'child/AGENTS.md')), owner.descendantChildren[0]);
@@ -78,7 +78,7 @@ for (const domainGroup of ['local', 'descendant'] as const)
     const node = new AgentsNode(path.join(root, 'AGENTS.md')).parse('# Scope\n\nIntro\n');
     node.setConstraints(['Rule']);
     node.addChild(domainGroup, { id: path.join(root, 'tasks/AGENTS.md'), name: 'Domain label', description: 'Domain description' });
-    node.addChild('local', { id: path.join(root, '.harness/tasks/AGENTS.md'), name: 'Maintenance label', description: 'Maintenance description' });
+    node.addChild('local', { id: path.join(root, '.edges/tasks/AGENTS.md'), name: 'Maintenance label', description: 'Maintenance description' });
     const source = node.serialize() + '\nTail\n'; write('AGENTS.md', source);
     for (const purpose of ['domain', 'maintenance']) for (const title of ['First', 'Second']) {
       const result = await call('.', purpose, ['create', '--title', title]);
@@ -96,7 +96,7 @@ test('fresh scope writes remain authorized without initializing Project Memory o
     assert.equal(JSON.parse((await call('.', purpose, ['list'])).stdout).tasks.length, 1);
   }
   assert.ok(!fs.existsSync(path.join(root, 'AGENTS.md')));
-  assert.ok(!fs.existsSync(path.join(root, '.harness/memory')));
+  assert.ok(!fs.existsSync(path.join(root, '.edges/memory')));
   const global = await run(['--scope', root, '--all', 'tasks', 'list'], { env: {} });
   assert.equal(global.exitCode, 0, global.stdout + global.stderr);
   assert.deepEqual(JSON.parse(global.stdout).tasks, []);
@@ -122,7 +122,7 @@ test('first task creation registers both purposes without an earlier project com
 test('maintenance registration preserves an existing descendant relation and authored metadata', async t => {
   const { root, write, call, read } = fixture(t);
   const node = new AgentsNode(path.join(root, 'AGENTS.md')).parse('# Root\n\nKeep prose\n');
-  const reference = { id: path.join(root, '.harness/tasks/AGENTS.md'), name: 'My upkeep', description: 'Keep description' };
+  const reference = { id: path.join(root, '.edges/tasks/AGENTS.md'), name: 'My upkeep', description: 'Keep description' };
   node.addChild('descendant', reference);
   write('AGENTS.md', node.serialize());
   const result = await call('.', 'maintenance', ['create', '--title', 'First']);
@@ -138,7 +138,7 @@ test('unsafe owner indexes are refused without overwriting their source', async 
   const result = await call('.', 'maintenance', ['create', '--title', 'Refused']);
   assert.notEqual(result.exitCode, 0);
   assert.equal(fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8'), source);
-  assert.ok(!fs.existsSync(path.join(root, '.harness/tasks/_default/backlog')));
+  assert.ok(!fs.existsSync(path.join(root, '.edges/tasks/_default/backlog')));
 });
 
 test('unlinked maintenance board registers the tasks README without index-group', async t => {
@@ -157,16 +157,16 @@ test('unlinked maintenance board registers the tasks README without index-group'
 test('task create keeps a scope that already lists the board README', async t => {
   const { root, write, call } = fixture(t);
   const owner = new AgentsNode(path.join(root, 'AGENTS.md')).parse('# Scope\n\nKeep prose\n');
-  owner.addChild('local', { id: path.join(root, '.harness/tasks/README.md'), name: 'Tasks', description: 'board' });
+  owner.addChild('local', { id: path.join(root, '.edges/tasks/README.md'), name: 'Tasks', description: 'board' });
   const source = owner.serialize();
   write('AGENTS.md', source);
-  write('.harness/tasks/AGENTS.md', '# tasks\n');
-  write('.harness/tasks/README.md', '# Tasks\n\nBoard.\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n<!-- project-entries-local:end -->\n');
-  write('.harness/tasks/alpha/README.md', '# Alpha\n\nalpha work\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n');
+  write('.edges/tasks/AGENTS.md', '# tasks\n');
+  write('.edges/tasks/README.md', '# Tasks\n\nBoard.\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n<!-- project-entries-local:end -->\n');
+  write('.edges/tasks/alpha/README.md', '# Alpha\n\nalpha work\n\n<!-- project-entries-local:start -->\n## 本层内容\n<!-- project-entries-local:end -->\n');
   const created = await call('.', 'maintenance', ['create', '--title', 'Fresh', '--project', 'alpha']);
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
   assert.equal(fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8'), source);
-  assert.match(fs.readFileSync(path.join(root, '.harness/tasks/alpha/README.md'), 'utf8'), /Fresh/);
+  assert.match(fs.readFileSync(path.join(root, '.edges/tasks/alpha/README.md'), 'utf8'), /Fresh/);
 });
 
 test('super project create writes the configured tasks material and leaves the real owner unchanged', async t => {

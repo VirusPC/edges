@@ -51,7 +51,7 @@ const remember = async (d: string, type: string, slug = "example") =>
     username: "fixture",
     email: "fixture@example.test",
   });
-const pi = ".harness/memory/projects/README.md";
+const pi = ".edges/memory/projects/README.md";
 test("recommendation names and custom name validation preserve type identity rules", () => {
   assert.deepEqual(Object.keys(indexFiles()), [
     "user",
@@ -93,7 +93,7 @@ for (const module of ["memory", "skills"] as const)
     await remember(d, "recipes", "run-it");
     await initMemory({ targetDir: d });
     assert.ok(
-      fs.existsSync(join(d, `.harness/${module}/recipes/run-it/SKILL.md`)),
+      fs.existsSync(join(d, `.edges/${module}/recipes/run-it/SKILL.md`)),
     );
     await assert.rejects(
       async () =>
@@ -108,7 +108,7 @@ for (const module of ["memory", "skills"] as const)
 test("custom type plural path collision cannot overwrite original type", async (t) => {
   const d = await base(t);
   await addMemoryType({ targetDir: d, name: "docs", description: "Docs" });
-  const before = read(d, ".harness/memory/docs/README.md");
+  const before = read(d, ".edges/memory/docs/README.md");
   await assert.rejects(
     async () =>
       await addMemoryType({
@@ -118,7 +118,7 @@ test("custom type plural path collision cannot overwrite original type", async (
       }),
     /already belongs/,
   );
-  assert.equal(read(d, ".harness/memory/docs/README.md"), before);
+  assert.equal(read(d, ".edges/memory/docs/README.md"), before);
 });
 test("custom readonly, external source stub and no-git flags are explicit", async (t) => {
   const d = await base(t);
@@ -162,7 +162,7 @@ test("old skills name is not a runtime alias but can be a custom ordinary type",
   });
   await remember(d, "skills");
   assert.ok(
-    fs.existsSync(join(d, ".harness/memory/skills/skills_example/INDEX.md")),
+    fs.existsSync(join(d, ".edges/memory/skills/skills_example/INDEX.md")),
   );
 });
 for (const change of [
@@ -180,7 +180,7 @@ for (const change of [
       indexOnly: true,
       gitignore: true,
     });
-    const index = ".harness/memory/secrets/README.md";
+    const index = ".edges/memory/secrets/README.md";
     let text = read(d, index);
     text =
       change === "all"
@@ -202,7 +202,7 @@ for (const change of [
       ),
     );
     assert.equal(read(d, index), text);
-    assert.equal(fs.existsSync(join(d, ".harness/memory/feedbacks")), false);
+    assert.equal(fs.existsSync(join(d, ".edges/memory/feedbacks")), false);
   });
 for (const [name, field, from, to] of [
   ["user", "gitignore", "true", "false"],
@@ -233,14 +233,14 @@ for (const [name, field, from, to] of [
 test("linked harness and linked managed write ancestor never escape", async (t) => {
   const d = fixture(t),
     external = fixture(t);
-  fs.symlinkSync(external, join(d, ".harness"));
+  fs.symlinkSync(external, join(d, ".edges"));
   await assert.rejects(
     async () => await initMemory({ targetDir: d, memoryTypes: ["project"] }),
   );
   assert.deepEqual(fs.readdirSync(external), []);
-  fs.unlinkSync(join(d, ".harness"));
+  fs.unlinkSync(join(d, ".edges"));
   await initSkills({ targetDir: d, skillTypes: ["managed"] });
-  fs.symlinkSync(external, join(d, ".harness/skills/managed/escape"));
+  fs.symlinkSync(external, join(d, ".edges/skills/managed/escape"));
   await assert.rejects(async () => await remember(d, "managed", "escape"));
   assert.deepEqual(fs.readdirSync(external), []);
 });
@@ -254,7 +254,7 @@ test("linked index and gitignore reject writes before private content", async (t
   fs.symlinkSync(join(outside, "ignore"), join(d, ".gitignore"));
   await assert.rejects(async () => await remember(d, "user"));
   assert.equal(
-    fs.existsSync(join(d, ".harness/memory/users/user_example/INDEX.md")),
+    fs.existsSync(join(d, ".edges/memory/users/user_example/INDEX.md")),
     false,
   );
   assert.equal(read(outside, "ignore"), "Keep");
@@ -268,8 +268,8 @@ test("private ignore is reestablished before remember and applies to nested user
   fs.unlinkSync(join(d, ".gitignore"));
   await remember(nested, "user");
   for (const file of [
-    "nested/.harness/memory/users/README.md",
-    "nested/.harness/memory/users/user_example/INDEX.md",
+    "nested/.edges/memory/users/README.md",
+    "nested/.edges/memory/users/user_example/INDEX.md",
   ])
     assert.ok(
       execFileSync("git", ["-C", d, "check-ignore", file], {
@@ -280,22 +280,22 @@ test("private ignore is reestablished before remember and applies to nested user
 test("source aliases deduplicate per type but same names and cross-type ownership survive", async (t) => {
   const d = fixture(t);
   await initSkills({ targetDir: d, skillTypes: ["managed", "referenced"] });
-  put(d, ".harness/skills/managed/original/SKILL.md", skill);
-  fs.symlinkSync("original", join(d, ".harness/skills/managed/alias"));
+  put(d, ".edges/skills/managed/original/SKILL.md", skill);
+  fs.symlinkSync("original", join(d, ".edges/skills/managed/alias"));
   fs.mkdirSync(join(d, ".agents/skills"), { recursive: true });
   fs.symlinkSync(
-    join(d, ".harness/skills/managed/original"),
+    join(d, ".edges/skills/managed/original"),
     join(d, ".agents/skills/linked"),
   );
   put(d, ".agents/skills/other/SKILL.md", skill);
   put(d, "child/.agents/skills/hidden/SKILL.md", skill);
   assert.equal((await initSkills({ targetDir: d })).complete, true);
   assert.equal(
-    read(d, ".harness/skills/managed/README.md").split(" — example").length - 1,
+    read(d, ".edges/skills/managed/README.md").split(" — example").length - 1,
     1,
   );
   assert.equal(
-    read(d, ".harness/skills/referenced/README.md").split(" — example").length -
+    read(d, ".edges/skills/referenced/README.md").split(" — example").length -
       1,
     2,
   );
@@ -304,7 +304,7 @@ test("broken and unreadable referenced sources preserve exact index bytes", asyn
   const d = fixture(t);
   put(d, ".agents/skills/one/SKILL.md", skill);
   await initSkills({ targetDir: d, skillTypes: ["referenced"] });
-  const index = ".harness/skills/referenced/README.md",
+  const index = ".edges/skills/referenced/README.md",
     before = read(d, index);
   fs.symlinkSync("missing", join(d, ".agents/skills/broken"));
   assert.equal((await initSkills({ targetDir: d })).complete, false);
@@ -355,7 +355,7 @@ test("legacy owner or legacy explicit root rejects all daily mutation", async (t
     ),
   );
   assert.equal(read(d, ".memory/projects/project_old/INDEX.md"), "old");
-  assert.equal(fs.existsSync(join(d, ".harness")), false);
+  assert.equal(fs.existsSync(join(d, ".edges")), false);
 });
 for (const remove of ["index", "directory", "scope"])
   test(`doctor restores missing adopted ${remove} without expanding adoption`, async (t) => {
@@ -366,7 +366,7 @@ for (const remove of ["index", "directory", "scope"])
         remove === "index"
           ? pi
           : remove === "directory"
-            ? ".harness/memory/projects"
+            ? ".edges/memory/projects"
             : "AGENTS.md",
       ),
       { recursive: true },
@@ -389,14 +389,14 @@ test("doctor never recreates missing custom permissions from path", async (t) =>
     indexOnly: true,
     gitignore: true,
   });
-  fs.unlinkSync(join(d, ".harness/memory/secrets/README.md"));
+  fs.unlinkSync(join(d, ".edges/memory/secrets/README.md"));
   assert.ok(
     (await doctorMemory({ targetDir: d, apply: true })).remaining.some(
       (f) => f.code === "unsafe-layout",
     ),
   );
   assert.equal(
-    fs.existsSync(join(d, ".harness/memory/secrets/README.md")),
+    fs.existsSync(join(d, ".edges/memory/secrets/README.md")),
     false,
   );
 });
@@ -478,10 +478,10 @@ test("unregistered custom types are rediscovered and metadata/manual introductio
   await addMemoryType({ targetDir: d, name: "docs", description: "Docs" });
   put(
     d,
-    ".harness/README.md",
-    read(d, ".harness/README.md").replace(/^- .*memory\/docs\/README\.md.*\n/gm, ""),
+    ".edges/README.md",
+    read(d, ".edges/README.md").replace(/^- .*memory\/docs\/README\.md.*\n/gm, ""),
   );
-  const index = ".harness/memory/docs/README.md";
+  const index = ".edges/memory/docs/README.md";
   put(
     d,
     index,
@@ -498,12 +498,12 @@ test("unregistered custom types are rediscovered and metadata/manual introductio
   await initMemory({ targetDir: d });
   assert.match(read(d, index), /unknown-key: retain/);
   assert.match(read(d, index), /^Manual type preface/);
-  assert.match(read(d, ".harness/README.md"), /memory\/docs\/README\.md/);
+  assert.match(read(d, ".edges/README.md"), /memory\/docs\/README\.md/);
   assert.doesNotMatch(read(d, "AGENTS.md"), /memory\/docs\/README\.md/);
 });
 test("standard YAML parsing supports quoted, multiline and nested metadata; nested values win", async (t) => {
   const d = await base(t);
-  const file = ".harness/memory/projects/project_yaml/INDEX.md";
+  const file = ".edges/memory/projects/project_yaml/INDEX.md";
   put(
     d,
     file,
@@ -569,7 +569,7 @@ test("slug and content validation fail before writing", async (t) => {
       }),
   );
   assert.equal(
-    fs.existsSync(join(d, ".harness/memory/projects/project_empty/INDEX.md")),
+    fs.existsSync(join(d, ".edges/memory/projects/project_empty/INDEX.md")),
     false,
   );
 });
@@ -582,7 +582,7 @@ test("custom privilege YAML rejects string booleans and executable language head
     /Invalid type flag/,
   );
   const d = await base(t),
-    file = ".harness/memory/projects/project_js/INDEX.md";
+    file = ".edges/memory/projects/project_js/INDEX.md";
   put(d, file, '---js\n{description: "should not execute"}\n---\nBody');
   assert.deepEqual(parseFrontmatter(join(d, file)), {});
   assert.ok(
@@ -606,7 +606,7 @@ test("private entry updates preserve existing OS permissions", async (t) => {
   const d = fixture(t);
   await initMemory({ targetDir: d, memoryTypes: ["user"] });
   await remember(d, "user");
-  const file = join(d, ".harness/memory/users/user_example/INDEX.md");
+  const file = join(d, ".edges/memory/users/user_example/INDEX.md");
   fs.chmodSync(file, 0o640);
   await remember(d, "user", "example");
   assert.equal(fs.statSync(file).mode & 0o777, 0o640);
@@ -623,7 +623,7 @@ for (const [label, source] of [
 ] as const)
   test(`remember refuses ${label} without changing entry or index`, async (t) => {
     const d = await base(t),
-      file = ".harness/memory/projects/project_broken/INDEX.md";
+      file = ".edges/memory/projects/project_broken/INDEX.md";
     put(d, file, source);
     const beforeEntry = fs.readFileSync(join(d, file)),
       beforeIndex = fs.readFileSync(join(d, pi));
@@ -653,9 +653,9 @@ for (const type of ["project", "managed", "referenced"] as const)
       directory = "tricky ) [name] #?.skill";
     const file =
       type === "project"
-        ? ".harness/memory/projects/project_source/INDEX.md"
+        ? ".edges/memory/projects/project_source/INDEX.md"
         : type === "managed"
-          ? `.harness/skills/managed/${directory}/SKILL.md`
+          ? `.edges/skills/managed/${directory}/SKILL.md`
           : `.agents/skills/${directory}/SKILL.md`;
     const source =
       "---\nname: source\nmetadata:\n  edges-title: |-\n    Safe ](../../wrong.md)\n    - [Forged title](../../elsewhere.md)\ndescription: |-\n  Good summary\n  - [Forged](../../elsewhere.md) — injected\n---\nOriginal body\n";
@@ -664,7 +664,7 @@ for (const type of ["project", "managed", "referenced"] as const)
       ? await initMemory({ targetDir: d, memoryTypes: [type] })
       : await initSkills({ targetDir: d, skillTypes: [type] });
     assert.equal(result.complete, true, JSON.stringify(result));
-    const index = type === "project" ? pi : `.harness/skills/${type}/README.md`;
+    const index = type === "project" ? pi : `.edges/skills/${type}/README.md`;
     const text = read(d, index)
       .split("<!-- project-entries-local:start -->")[1]!
       .split("<!-- project-entries-local:end -->")[0]!
@@ -709,7 +709,7 @@ for (const type of ["project", "managed", "referenced"] as const)
 function exposeTypePath(scope: string, directory: string, filename: string) {
   put(
     scope,
-    ".harness/.gitignore",
+    ".edges/.gitignore",
     `!memory/${directory}/\nmemory/${directory}/*\n${filename.includes("/") ? `!memory/${directory}/${filename.split("/")[0]}/\n` : ""}!memory/${directory}/${filename}\n`,
   );
 }
@@ -719,8 +719,8 @@ for (const exposed of ["user_example/INDEX.md", "README.md"])
     execFileSync("git", ["init", "-q", d]);
     await initMemory({ targetDir: d, memoryTypes: ["user"] });
     await remember(d, "user");
-    const index = ".harness/memory/users/README.md",
-      entry = ".harness/memory/users/user_example/INDEX.md";
+    const index = ".edges/memory/users/README.md",
+      entry = ".edges/memory/users/user_example/INDEX.md";
     const oldIndex = read(d, index),
       oldEntry = read(d, entry);
     exposeTypePath(d, "users", exposed);
@@ -741,11 +741,11 @@ test("private index refresh refuses to write an exposed index", async (t) => {
   const d = fixture(t);
   execFileSync("git", ["init", "-q", d]);
   await initMemory({ targetDir: d, memoryTypes: ["user"] });
-  const index = ".harness/memory/users/README.md",
+  const index = ".edges/memory/users/README.md",
     before = read(d, index);
   put(
     d,
-    ".harness/memory/users/user_new/INDEX.md",
+    ".edges/memory/users/user_new/INDEX.md",
     "---\nname: user_new\ndescription: synthetic private description\n---\nsecret body\n",
   );
   exposeTypePath(d, "users", "README.md");
@@ -764,7 +764,7 @@ test("init and add-type refuse an exposed private index before creation", async 
     /private-ignore|忽略/,
   );
   assert.equal(
-    fs.existsSync(join(d, ".harness/memory/users/README.md")),
+    fs.existsSync(join(d, ".edges/memory/users/README.md")),
     false,
   );
   await initMemory({ targetDir: d, memoryTypes: ["project"] });
@@ -780,7 +780,7 @@ test("init and add-type refuse an exposed private index before creation", async 
     /private-ignore|忽略/,
   );
   assert.equal(
-    fs.existsSync(join(d, ".harness/memory/secrets/README.md")),
+    fs.existsSync(join(d, ".edges/memory/secrets/README.md")),
     false,
   );
 });
@@ -789,7 +789,7 @@ test("doctor leaves an exposed missing private index unrepaired", async (t) => {
   execFileSync("git", ["init", "-q", d]);
   await initMemory({ targetDir: d, memoryTypes: ["user"] });
   await remember(d, "user");
-  const index = ".harness/memory/users/README.md";
+  const index = ".edges/memory/users/README.md";
   fs.unlinkSync(join(d, index));
   exposeTypePath(d, "users", "README.md");
   const report = await doctorMemory({ targetDir: d, apply: true });
@@ -815,7 +815,7 @@ test("custom private child scopes preflight effective ignores and preserve non-G
     "check-ignore",
     "-q",
     "--no-index",
-    "child/.harness/memory/secrets/secrets_allowed/INDEX.md",
+    "child/.edges/memory/secrets/secrets_allowed/INDEX.md",
   ]);
   exposeTypePath(child, "secrets", "secrets_example/INDEX.md");
   await assert.rejects(
@@ -824,7 +824,7 @@ test("custom private child scopes preflight effective ignores and preserve non-G
   );
   assert.equal(
     fs.existsSync(
-      join(child, ".harness/memory/secrets/secrets_example/INDEX.md"),
+      join(child, ".edges/memory/secrets/secrets_example/INDEX.md"),
     ),
     false,
   );
@@ -832,7 +832,7 @@ test("custom private child scopes preflight effective ignores and preserve non-G
   await initMemory({ targetDir: plain, memoryTypes: ["user"] });
   await remember(plain, "user");
   assert.equal(
-    fs.existsSync(join(plain, ".harness/memory/users/user_example/INDEX.md")),
+    fs.existsSync(join(plain, ".edges/memory/users/user_example/INDEX.md")),
     true,
   );
 });
@@ -849,7 +849,7 @@ test("Git discovery failure cannot expose private memory through a missing GIT_D
   execFileSync("git", ["init", "-q", d]);
   await initMemory({ targetDir: d, memoryTypes: ["user"] });
   exposeTypePath(d, "users", "user_example/INDEX.md");
-  const index = ".harness/memory/users/README.md",
+  const index = ".edges/memory/users/README.md",
     before = read(d, index);
   temporaryEnvironment(t, "GIT_DIR", join(d, "missing-git-dir"));
   await assert.rejects(
@@ -857,7 +857,7 @@ test("Git discovery failure cannot expose private memory through a missing GIT_D
     /private-ignore-check-failed/,
   );
   assert.equal(
-    fs.existsSync(join(d, ".harness/memory/users/user_example/INDEX.md")),
+    fs.existsSync(join(d, ".edges/memory/users/user_example/INDEX.md")),
     false,
   );
   assert.equal(read(d, index), before);
@@ -917,7 +917,7 @@ for (const context of [
   ] as const)
     test(`${operation} guards private writes with ${context} and no discoverable Git root`, async (t) => {
       const d = fixture(t),
-        index = ".harness/memory/users/README.md";
+        index = ".edges/memory/users/README.md";
       await initMemory({
         targetDir: d,
         memoryTypes:
@@ -928,7 +928,7 @@ for (const context of [
       if (operation === "refresh")
         put(
           d,
-          ".harness/memory/users/user_new/INDEX.md",
+          ".edges/memory/users/user_new/INDEX.md",
           "---\nname: user_new\ndescription: private synthetic description\n---\nbody\n",
         );
       if (operation === "doctor") fs.unlinkSync(join(d, index));
@@ -967,11 +967,11 @@ for (const context of [
           /private-ignore-(?:check|coverage)-failed/,
         );
       assert.equal(
-        fs.existsSync(join(d, ".harness/memory/secrets/README.md")),
+        fs.existsSync(join(d, ".edges/memory/secrets/README.md")),
         false,
       );
       assert.equal(
-        fs.existsSync(join(d, ".harness/memory/users/user_example/INDEX.md")),
+        fs.existsSync(join(d, ".edges/memory/users/user_example/INDEX.md")),
         false,
       );
       assert.equal(
@@ -981,7 +981,7 @@ for (const context of [
     });
 test("all private callers still work in a confirmed non-Git scope without a Git binary", async (t) => {
   const d = fixture(t),
-    index = ".harness/memory/users/README.md";
+    index = ".edges/memory/users/README.md";
   temporaryEnvironment(t, "PATH", join(d, "missing-bin"));
   await initMemory({ targetDir: d, memoryTypes: ["user"] });
   await addMemoryType({
@@ -1000,10 +1000,10 @@ test("all private callers still work in a confirmed non-Git scope without a Git 
   );
   assert.ok(fs.existsSync(join(d, index)));
   assert.ok(
-    fs.existsSync(join(d, ".harness/memory/users/user_example/INDEX.md")),
+    fs.existsSync(join(d, ".edges/memory/users/user_example/INDEX.md")),
   );
   assert.ok(
-    fs.existsSync(join(d, ".harness/memory/secrets/secrets_example/INDEX.md")),
+    fs.existsSync(join(d, ".edges/memory/secrets/secrets_example/INDEX.md")),
   );
 });
 
@@ -1013,6 +1013,6 @@ test("type scan functions remain public after moving out of path primitives", as
   const { typeIndexPath, typeContentDir, listTypeFiles } = await import("../../src/services/memory/types.js");
   assert.equal(typeIndexPath(target, "project"), join(target, pi));
   assert.equal(typeContentDir(target, "project"), dirname(join(target, pi)));
-  assert.deepEqual(listTypeFiles(target, "project"), [join(target, ".harness/memory/projects/project_example/INDEX.md")]);
+  assert.deepEqual(listTypeFiles(target, "project"), [join(target, ".edges/memory/projects/project_example/INDEX.md")]);
   assert.equal(typeContentDir(target, "referenced"), join(target, ".agents/skills"));
 });

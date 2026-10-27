@@ -5,7 +5,7 @@ import { nodeErrorCode } from "../node-result.js";
 import { failWithExit, succeed } from "../result.js";
 
 export const COMPOSE_GIT_AFTER_HELP = `
-Entries inside the owner's git repo (default .harness/compose/<name>) are git
+Entries inside the owner's git repo (default .edges/compose/<name>) are git
 submodules: update runs "git submodule update --init -- <path>" (never
 --recursive). With --remote it adds --remote to follow the remote tip, plus
 --merge when the submodule is on a branch. Legacy entries outside the repo

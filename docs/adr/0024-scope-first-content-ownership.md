@@ -10,7 +10,7 @@ status: accepted
 
 ## 闭环复利（投资视角）
 
-目录服务知识进入行动、反馈再回到知识的闭环。领域任务在 `tasks/`，维护当前作用域的任务在 `.harness/tasks/`。通用任务执行约定与 CLI 规则由根 Project Memory 保存，写作方法由 conversation-to-tasks 维护，各层通过引用复用；具体看板的项目分组仍归该看板。
+目录服务知识进入行动、反馈再回到知识的闭环。领域任务在 `tasks/`，维护当前作用域的任务在 `.edges/tasks/`。通用任务执行约定与 CLI 规则由根 Project Memory 保存，写作方法由 conversation-to-tasks 维护，各层通过引用复用；具体看板的项目分组仍归该看板。
 
 ## 任意输入、统一转化、多种输出（ETL 视角）
 
@@ -26,9 +26,9 @@ Task、Memory、Note 等统一采用目录与 `index.md` 入口，标准 Skill �
 
 父归属遵循文件目录，一个节点至多一个 parent。索引可以跨目录层级发现节点，普通交叉引用不增加 parent。引用仅含路径派生的 id 和可选 name、description。遍历默认展开全部组成 `children`（本层∪下层）；只要本层时显式收窄（见 ADR 0029 / Q20）。
 
-任意节点可拥有独立 harness，承载它的系统二。组成遍历不自动跟随 harness：读取当前系统二的组成内容，不继续检索它或其组成节点的系统二。同目录 SKILL.md 与 AGENTS.md 分别是 Skill 叶子与它的 harness；AGENTS 的 harness 则可继续位于 `.harness/AGENTS.md`。叶子没有组成子节点，也可以拥有 harness；空组织节点仍是 InternalNode。
+任意节点可拥有独立 harness，承载它的系统二。组成遍历不自动跟随 harness：读取当前系统二的组成内容，不继续检索它或其组成节点的系统二。同目录 SKILL.md 与 AGENTS.md 分别是 Skill 叶子与它的 harness；AGENTS 的 harness 则可继续位于 `.edges/AGENTS.md`。叶子没有组成子节点，也可以拥有 harness；空组织节点仍是 InternalNode。
 
-各节点的局部上下文留在所属层，不能因通用递归而上收根层。根 `AGENTS.md` 和 `.harness/` 保存仓内共享约定；只有提炼到仓库根 `packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/` 与个人仓 `shared-extensions/` 的能力才用于对外分发。预定义可分发记忆仍是独立待办，不把原始历史记忆直接分发。
+各节点的局部上下文留在所属层，不能因通用递归而上收根层。根 `AGENTS.md` 和 `.edges/` 保存仓内共享约定；只有提炼到仓库根 `packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/` 与个人仓 `shared-extensions/` 的能力才用于对外分发。预定义可分发记忆仍是独立待办，不把原始历史记忆直接分发。
 
 ## 文件系统
 

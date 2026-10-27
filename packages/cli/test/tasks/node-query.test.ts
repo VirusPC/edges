@@ -91,7 +91,7 @@ test("missing board is empty, existing unindexed board requests migration", asyn
   const target = taskBoardLocation(root, { super: true });
   assert.deepEqual(await listTaskNodes(target), []);
   write("tasks/_default/todo/old/index.md", "Old");
-  const material = (await import("../../src/domain/config/harness-materials.js")).placeHarnessMaterial(root, "tasks", { super: true }).absPath;
+  const material = (await import("../../src/domain/config/edges-materials.js")).placeHarnessMaterial(root, "tasks", { super: true }).absPath;
   await assert.rejects(listTaskNodes(target), (error: Error) =>
     error.message.includes("Task board material missing") && error.message.includes(material));
 });
@@ -99,11 +99,11 @@ test("repository includes every harness depth and physical origins despite alias
   const { root, index, task, write } = fixture(t);
   const entries = [
     "tasks/_default/todo/same/index.md",
-    ".harness/tasks/_default/todo/same/index.md",
-    "notes/example/.harness/tasks/_default/todo/same/index.md",
-    "cli/.harness/tasks/_default/todo/same/index.md",
-    "tasks/_default/todo/same/.harness/tasks/_default/todo/same/index.md",
-    "tasks/_default/todo/same/.harness/tasks/_default/todo/same/.harness/tasks/_default/todo/same/index.md",
+    ".edges/tasks/_default/todo/same/index.md",
+    "notes/example/.edges/tasks/_default/todo/same/index.md",
+    "cli/.edges/tasks/_default/todo/same/index.md",
+    "tasks/_default/todo/same/.edges/tasks/_default/todo/same/index.md",
+    "tasks/_default/todo/same/.edges/tasks/_default/todo/same/.edges/tasks/_default/todo/same/index.md",
   ];
   for (const entry of entries) {
     const board = path.dirname(path.dirname(path.dirname(path.dirname(entry))));
@@ -113,17 +113,17 @@ test("repository includes every harness depth and physical origins despite alias
   }
   index(
     "AGENTS.md",
-    ["tasks/AGENTS.md", ".harness/tasks/AGENTS.md"],
+    ["tasks/AGENTS.md", ".edges/tasks/AGENTS.md"],
     ["notes/example/index.md", "cli/AGENTS.md"],
   );
-  index(".harness/AGENTS.md", ["tasks/AGENTS.md"]);
+  index(".edges/AGENTS.md", ["tasks/AGENTS.md"]);
   write("notes/example/index.md", "---\nbad: [\n---\n");
-  index("notes/example/AGENTS.md", [".harness/tasks/AGENTS.md"]);
-  index("cli/AGENTS.md", [".harness/tasks/AGENTS.md"]);
-  index("tasks/_default/todo/same/AGENTS.md", [".harness/tasks/AGENTS.md"]);
+  index("notes/example/AGENTS.md", [".edges/tasks/AGENTS.md"]);
+  index("cli/AGENTS.md", [".edges/tasks/AGENTS.md"]);
+  index("tasks/_default/todo/same/AGENTS.md", [".edges/tasks/AGENTS.md"]);
   index(
-    "tasks/_default/todo/same/.harness/tasks/_default/todo/same/AGENTS.md",
-    [".harness/tasks/AGENTS.md"],
+    "tasks/_default/todo/same/.edges/tasks/_default/todo/same/AGENTS.md",
+    [".edges/tasks/AGENTS.md"],
   );
   assert.equal(
     (await listTaskNodes(taskBoardLocation(root, { super: true }))).length,
@@ -146,7 +146,7 @@ test("repository includes every harness depth and physical origins despite alias
       { scope: "notes/example", purpose: "maintenance" },
       { scope: "tasks/_default/todo/same", purpose: "maintenance" },
       {
-        scope: "tasks/_default/todo/same/.harness/tasks/_default/todo/same",
+        scope: "tasks/_default/todo/same/.edges/tasks/_default/todo/same",
         purpose: "maintenance",
       },
     ],
@@ -157,11 +157,11 @@ test("global grouped projection preserves empty indexed projects and separates s
   const { root, index, task, write } = fixture(t);
   index("AGENTS.md", [
     "tasks/AGENTS.md",
-    ".harness/tasks/AGENTS.md",
+    ".edges/tasks/AGENTS.md",
     "categories/AGENTS.md",
   ]);
   index("categories/AGENTS.md", []);
-  for (const board of ["tasks", ".harness/tasks"]) {
+  for (const board of ["tasks", ".edges/tasks"]) {
     index(`${board}/AGENTS.md`, ["_default/AGENTS.md", "empty/AGENTS.md"]);
     index(`${board}/_default/AGENTS.md`, ["todo/same/index.md"]);
     index(`${board}/empty/AGENTS.md`, []);
@@ -211,8 +211,8 @@ test("explicit get rejects status metadata mismatch just like indexed lists", as
 
 test("selected board rejects a registered reference into another board", async (t) => {
   const { root, index, task } = fixture(t);
-  index("tasks/AGENTS.md", ["../.harness/tasks/_default/todo/same/index.md"]);
-  task(".harness/tasks/_default/todo/same/index.md");
+  index("tasks/AGENTS.md", ["../.edges/tasks/_default/todo/same/index.md"]);
+  task(".edges/tasks/_default/todo/same/index.md");
   await assert.rejects(
     listTaskNodes(taskBoardLocation(root, { super: true })),
     /outside selected task board/,

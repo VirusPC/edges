@@ -29,7 +29,7 @@ import {
   recoveryPath,
   type ResourceSnapshot,
 } from "./node-resources.js";
-import { isTasksBoardMaterial } from "../../domain/config/harness-materials.js";
+import { isTasksBoardMaterial } from "../../domain/config/edges-materials.js";
 import { createSuperAgentsNode } from "./super-root.js";
 import {
   coLocated,
@@ -82,9 +82,9 @@ const clone = <T extends BaseNode>(node: T, file = node.path): T =>
   new (node.constructor as Model<T>)(file).parse(node.serialize());
 
 /** Coordinates directory IO and indexes. References are discovery, not ownership. */
-/** Parent registration follows the subject system. Paths inside `.harness` stay local. A nested AGENTS entry is a descendant system. */
+/** Parent registration follows the subject system. Paths inside `.edges` stay local. A nested AGENTS entry is a descendant system. */
 function registrationGroup(parent: BaseNode, node: BaseNode): ChildGroup {
-  const harness = path.join(parent.directoryPath, ".harness");
+  const harness = path.join(parent.directoryPath, ".edges");
   if (node.path === harness || node.path.startsWith(harness + path.sep)) return "local";
   if (path.basename(node.path) === ENTRY_NAMES.internal && path.dirname(node.path) !== parent.directoryPath) return "descendant";
   return "local";
@@ -213,8 +213,8 @@ export class NodeService {
     return node;
   }
   /**
-   * Runtime-only super entry. Mounts `.harness/README.md` when it exists;
-   * otherwise flat harness-materials paths (empty allowed).
+   * Runtime-only super entry. Mounts `.edges/README.md` when it exists;
+   * otherwise flat edges-materials paths (empty allowed).
    */
   #superRoot(scopePath: string): SuperAgentsNode {
     return createSuperAgentsNode(scopePath);
@@ -459,13 +459,13 @@ export class NodeService {
     node: BaseNode,
     group?: ChildGroup,
   ): Promise<Planned | undefined> {
-    // The tasks board file is placed from harness-materials. The tasks service
+    // The tasks board file is placed from edges-materials. The tasks service
     // links a maintenance board; super mounts it and does not hang it here.
     if (isTasksBoardMaterial(node.path, this.managedRoot)) return undefined;
     // Same-dir README next to AGENTS is the content face, not registered as AGENTS' child.
     if (
       coLocated(node.path) ||
-      path.basename(node.directoryPath) === ".harness" ||
+      path.basename(node.directoryPath) === ".edges" ||
       (path.basename(node.path) === ENTRY_NAMES.readme &&
         fs.existsSync(path.join(node.directoryPath, ENTRY_NAMES.internal)))
     )

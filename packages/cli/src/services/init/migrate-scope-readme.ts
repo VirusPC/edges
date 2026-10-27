@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
-import { placeHarnessMaterial } from "../../domain/config/harness-materials.js";
+import { placeHarnessMaterial } from "../../domain/config/edges-materials.js";
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
 import type { NodeReference } from "../../domain/core/types.js";
 import { identifyNodeType, isHarnessMaterial, resolveHref } from "../../domain/models/node/layout.js";
@@ -34,11 +34,11 @@ function listItemHref(line: string): { href: string; label: string; description?
   };
 }
 
-/** Materials under `<scope>/.harness/`. Content leaves and other system entries stay on AGENTS. */
+/** Materials under `<scope>/.edges/`. Content leaves and other system entries stay on AGENTS. */
 function isLayerMaterial(scopeDir: string, id: string): boolean {
   const rel = relative(scopeDir, id).split(sep).join("/");
-  if (rel === ".harness/README.md") return false;
-  if (rel === ".harness" || rel.startsWith(".harness/")) return true;
+  if (rel === ".edges/README.md") return false;
+  if (rel === ".edges" || rel.startsWith(".edges/")) return true;
   return isHarnessMaterial(id);
 }
 
@@ -119,7 +119,7 @@ export type ScopeReadmeMigration = {
 };
 
 /**
- * Move this scope's `.harness/` material links from AGENTS 本层 onto `.harness/README.md`.
+ * Move this scope's `.edges/` material links from AGENTS 本层 onto `.edges/README.md`.
  * `write: false` only reports what would change.
  */
 export async function migrateScopeMaterialIndex(

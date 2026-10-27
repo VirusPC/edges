@@ -71,7 +71,7 @@ test("nearest unmarked, type and business AGENTS are CLI nodes without adopting 
     }),
     /type|init|初始化/i,
   );
-  assert.equal(existsSync(join(target, ".harness")), false);
+  assert.equal(existsSync(join(target, ".edges")), false);
 });
 test("Doctor preserves sparse generic nodes and registered cross-directory local and descendant ownership", async (t) => {
   const root = fixture(t);
@@ -97,7 +97,7 @@ test("Doctor preserves sparse generic nodes and registered cross-directory local
     "nested/AGENTS.md",
     "nested/deep/AGENTS.md",
     "unowned/AGENTS.md",
-    ".harness/memory/projects/README.md",
+    ".edges/memory/projects/README.md",
   ];
   const before = files.map((file) => read(root, file));
   const report = await doctorMemory({ targetDir: root, apply: true });
@@ -119,8 +119,8 @@ test("Doctor preserves sparse generic nodes and registered cross-directory local
       join(root, "business/AGENTS.md"),
       join(root, "shared/AGENTS.md"),
       join(root, "nested/deep/AGENTS.md"),
-      join(root, "nested/deep/.harness/README.md"),
-      join(root, "nested/deep/.harness/memory/projects/README.md"),
+      join(root, "nested/deep/.edges/README.md"),
+      join(root, "nested/deep/.edges/memory/projects/README.md"),
     ],
   );
 });
@@ -234,16 +234,16 @@ test("Doctor diagnoses overlapping ownership groups without choosing an authored
     "AGENTS.md",
     read(root, "AGENTS.md")
       .replace(
-        "<!-- project-harness-local:end -->",
-        `${localLine}\n<!-- project-harness-local:end -->`,
+        "<!-- edges-local:end -->",
+        `${localLine}\n<!-- edges-local:end -->`,
       )
       .replace(
-        "<!-- project-harness:end -->",
-        "<!-- project-harness-descendants:start -->\n## 下层系统维护信息\n\n- [Descendant](owned/AGENTS.md) — Old descendant description.\n- [Duplicate](owned/AGENTS.md) — Duplicate description.\n<!-- project-harness-descendants:end -->\n<!-- project-harness:end -->",
+        "<!-- edges:end -->",
+        "<!-- edges-descendants:start -->\n## 下层系统维护信息\n\n- [Descendant](owned/AGENTS.md) — Old descendant description.\n- [Duplicate](owned/AGENTS.md) — Duplicate description.\n<!-- edges-descendants:end -->\n<!-- edges:end -->",
       ),
   );
   const beforeLocal = read(root, "AGENTS.md").match(
-    /<!-- project-harness-local:start -->[\s\S]*?<!-- project-harness-local:end -->/,
+    /<!-- edges-local:start -->[\s\S]*?<!-- edges-local:end -->/,
   )![0];
   const result = await doctorMemory({ targetDir: root, apply: true });
   assert.ok(
@@ -254,7 +254,7 @@ test("Doctor diagnoses overlapping ownership groups without choosing an authored
   );
   assert.equal(
     read(root, "AGENTS.md").match(
-      /<!-- project-harness-local:start -->[\s\S]*?<!-- project-harness-local:end -->/,
+      /<!-- edges-local:start -->[\s\S]*?<!-- edges-local:end -->/,
     )![0],
     beforeLocal,
   );
@@ -295,7 +295,7 @@ test("Doctor repairs an adopted child missing AGENTS and its missing registratio
     ),
   );
   assert.equal(read(root, "business/AGENTS.md"), "# Business stays sparse\n");
-  assert.equal(existsSync(join(root, "business/.harness")), false);
+  assert.equal(existsSync(join(root, "business/.edges")), false);
   assert.deepEqual(
     (await doctorMemory({ targetDir: root, apply: true })).repaired,
     [],
@@ -305,10 +305,10 @@ test("Doctor repairs an adopted child missing AGENTS and its missing registratio
 test("doctor repairs independent valid index while retaining invalid sibling and its reference", async (t) => {
   const root = fixture(t);
   await initMemory({ targetDir: root, memoryTypes: ["project"] });
-  const index = ".harness/memory/projects/README.md";
+  const index = ".edges/memory/projects/README.md";
   put(
     root,
-    ".harness/memory/projects/project_new/index.md",
+    ".edges/memory/projects/project_new/index.md",
     "---\nname: project_new\ndescription: New\n---\nBody",
   );
   const broken =
@@ -316,8 +316,8 @@ test("doctor repairs independent valid index while retaining invalid sibling and
   put(root, "broken/AGENTS.md", broken);
   put(root, "broken/child/AGENTS.md", "# Child");
   const agents = read(root, "AGENTS.md").replace(
-    "<!-- project-harness:end -->",
-    "<!-- project-harness-descendants:start -->\n- [Broken](broken/AGENTS.md) — retain\n<!-- project-harness-descendants:end -->\n<!-- project-harness:end -->",
+    "<!-- edges:end -->",
+    "<!-- edges-descendants:start -->\n- [Broken](broken/AGENTS.md) — retain\n<!-- edges-descendants:end -->\n<!-- edges:end -->",
   );
   put(root, "AGENTS.md", agents);
   const result = await doctorMemory({

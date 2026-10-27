@@ -1,7 +1,7 @@
 ---
 name: project-memory-doctor
-description: 诊断并修复已采用的 .harness 项目记忆索引与作用域登记。默认只诊断；明确授权修复时 apply。旧布局只报告迁移需求。
-version: 3.3.0
+description: 诊断并修复已采用的 .edges 项目记忆索引与作用域登记。默认只诊断；明确授权修复时 apply。旧布局只报告迁移需求。
+version: 4.0.0
 ---
 
 # Project Memory Doctor
@@ -13,7 +13,7 @@ edges --scope <目录> memory doctor \
   [--target-dir <scope>] [--root-dir <boundary>] [--apply]
 ```
 
-只修已采用类型的派生索引、层入口和下层登记，不代为 Init 未采用模块或类型，不改正文、文件头或安装链接。旧 `.memory` 返回 `migration-required`，由独立 `$project-memory-migrate` 转换。
+只修已采用类型的派生索引、层入口和下层登记，不代为 Init 未采用模块或类型，不改正文、文件头或安装链接。旧 `.memory` 返回 `migration-required`。0.3.0 起没有 `$project-memory-migrate`。先用 `@viruspc/edges@0.2.7` 完成那次转换，再按 `docs/migrations/2026-10-27-rename-harness-to-edges.md` 改目录名。doctor 不迁移。
 
 | code / issue | 处理 |
 | --- | --- |
@@ -35,4 +35,4 @@ edges --scope <目录> memory doctor \
 
 旧单文件不作为生产节点。目录转换用 `$migrate-directory-nodes`，Doctor 不自动迁移。若 AGENTS 本身无效，本次 apply 保留文件并返回诊断，不猜测应保留的索引组或条目。
 
-`memory init` 与 `memory doctor` 没有 `--index-group`。`--apply` 补缺失的父级链接时按路径决定：目标 `AGENTS.md` 在父级 `.harness` 下记入本层，否则记入下层。已有登记保持原组。缺失 owner 不代为初始化。Tasks 的范围是根上的 `--scope` / `--super` / `--all`。list 顺着主体 `AGENTS.md` 的 children 一次 traverse，不要再扫 README `project-entries`，也不要把 README 链接抄进 `AGENTS.md`。看板变更只通过 `edges tasks` 改文件；送进受保护的 `main` 必须开 PR，不要直接 push。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrations/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。
+`memory init` 与 `memory doctor` 没有 `--index-group`。`--apply` 补缺失的父级链接时按路径决定：目标 `AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已有登记保持原组。缺失 owner 不代为初始化。Tasks 的范围是根上的 `--scope` / `--super` / `--all`。list 顺着主体 `AGENTS.md` 的 children 一次 traverse，不要再扫 README `project-entries`，也不要把 README 链接抄进 `AGENTS.md`。看板变更只通过 `edges tasks` 改文件；送进受保护的 `main` 必须开 PR，不要直接 push。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrations/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。

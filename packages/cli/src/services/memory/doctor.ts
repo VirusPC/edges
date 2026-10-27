@@ -69,7 +69,7 @@ export function* walkOwners(root: string): Generator<string> {
       fs.existsSync(join(owner, AGENTS_FILE_NAME)) ||
       fs.existsSync(join(owner, ".memory")) ||
       ["memory", "skills"].some((m) =>
-        fs.existsSync(join(owner, ".harness", m)),
+        fs.existsSync(join(owner, ".edges", m)),
       )
     )
       yield owner;
@@ -79,7 +79,7 @@ export function* walkOwners(root: string): Generator<string> {
       if (
         !entry.isDirectory() ||
         entry.isSymbolicLink() ||
-        (entry.name.startsWith(".") && entry.name !== ".harness") ||
+        (entry.name.startsWith(".") && entry.name !== ".edges") ||
         entry.name === "node_modules"
       )
         continue;

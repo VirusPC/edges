@@ -37,7 +37,7 @@ export class AgentsNode extends InternalNode<AgentsCreateInput, AgentsUpdateInpu
     return [...this.#constraints];
   }
 
-  /** Drop a legacy Compose block. The entry now lives on `.harness/compose/README.md`. */
+  /** Drop a legacy Compose block. The entry now lives on `.edges/compose/README.md`. */
   clearComposeSection(): this {
     this.#dropCompose = true;
     this.parse(stripComposeBlock(this.serialize()));

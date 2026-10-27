@@ -140,14 +140,14 @@ test("layout follows canonical task statuses, registered contracts and recursive
   assert.equal(identifyNodeType("/repo/custom/a/index.md"), "custom");
   unregister();
   assert.equal(harnessPath("/repo/a/SKILL.md"), "/repo/a/AGENTS.md");
-  assert.equal(harnessPath("/repo/a/AGENTS.md"), "/repo/a/.harness/AGENTS.md");
+  assert.equal(harnessPath("/repo/a/AGENTS.md"), "/repo/a/.edges/AGENTS.md");
   assert.equal(
-    harnessPath("/repo/a/.harness/AGENTS.md"),
-    "/repo/a/.harness/.harness/AGENTS.md",
+    harnessPath("/repo/a/.edges/AGENTS.md"),
+    "/repo/a/.edges/.edges/AGENTS.md",
   );
   assert.deepEqual(lifecycleUnits("/repo/a/AGENTS.md", true), [
     "/repo/a/AGENTS.md",
-    "/repo/a/.harness",
+    "/repo/a/.edges",
   ]);
   assert.deepEqual(lifecycleUnits("/repo/a/SKILL.md", true), ["/repo/a"]);
   assert.throws(

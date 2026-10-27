@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript、Node `>=22.20.0`、`node:test`、tsx、Commander、pnpm。新增运行时依赖 `skills@1.7.2`（确切版本，无 `^` / `~`）。
 
-**Spec:** `.harness/tasks/edges-extensions/backlog/2026-10-18--安装-edges-后自动装好-skills/INDEX.md`（总原则、Q1–Q15、完成标准）；`docs/adr/0036-edges-init-installs-bundled-skills.md`；ADR 0031 的 Amended by 仍有效。
+**Spec:** `.edges/tasks/edges-extensions/backlog/2026-10-18--安装-edges-后自动装好-skills/INDEX.md`（总原则、Q1–Q15、完成标准）；`docs/adr/0036-edges-init-installs-bundled-skills.md`；ADR 0031 的 Amended by 仍有效。
 
 ## Global Constraints
 
@@ -118,7 +118,7 @@ edges init / edges skills init
 **Interfaces:**
 
 - Produces:
-  - `copyBundledSkills(sourceDir, destDir)`：清空 dest 后，只拷贝直接子目录里含 `SKILL.md` 的 skill。不拷 README、`.harness`、`AGENTS.md`。
+  - `copyBundledSkills(sourceDir, destDir)`：清空 dest 后，只拷贝直接子目录里含 `SKILL.md` 的 skill。不拷 README、`.edges`、`AGENTS.md`。
   - `package.json` `files` 含 `"skills"` 与 `"dist"`。
   - `engines.node` 为 `">=22.20.0"`。
   - `dependencies.skills` 为 `"1.7.2"`。
@@ -208,7 +208,7 @@ spawn(process.execPath, [skillsBin, ...skillsAddArgs(dir, forwarded)], { stdio: 
 - 命令层捕获 `SkillsInstallError`：退出码用 `error.exitCode`，信封 reason 用 `error.message`。
 
 - [ ] **Step 1:** 写失败测试（preload 换成记录调用的假 spawn）：
-  - 无参 `edges init` 的 `modules` 为 `["memory","skills","notes","projects"]`，并写 `.harness/skills/managed/README.md` 与 `referenced`。
+  - 无参 `edges init` 的 `modules` 为 `["memory","skills","notes","projects"]`，并写 `.edges/skills/managed/README.md` 与 `referenced`。
   - `edges init --help` 的创建段含 `skills`，`NOT CREATED HERE` 段不含 “skills init adopts”。
   - `edges skills init -- -g -y --agent claude-code` 的 spawn 参数等于 `skillsAddArgs(resolveBundledSkillsDir(), ["-g","-y","--agent","claude-code"])`。
   - `edges init a b -- x`：未知模块仍失败，且不把 `x` 当成模块名（断言失败原因是未知模块 `a` / `b`，reason 不含把 `x` 当成模块）。改为 `edges init notes projects -- x`：`modules` 是 `["notes","projects"]`，不调用安装（notes/projects 不含 skills）。再测 `edges init memory skills -- x`：`modules` 为 `["memory","skills"]`，转发只有 `["x"]`。

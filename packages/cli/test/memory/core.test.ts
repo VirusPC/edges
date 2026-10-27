@@ -34,7 +34,7 @@ const put = (dir: string, file: string, body: string | Buffer) => {
   mkdirSync(join(path, ".."), { recursive: true });
   writeFileSync(path, body);
 };
-const projectIndex = ".harness/memory/projects/README.md";
+const projectIndex = ".edges/memory/projects/README.md";
 test("init requires selection without mutation and reruns preserve selected adoption", async (t) => {
   const targetDir = fixture(t);
   assert.equal((await initMemory({ targetDir })).selectionRequired, true);
@@ -47,7 +47,7 @@ test("init requires selection without mutation and reruns preserve selected adop
   const before = read(targetDir, "AGENTS.md");
   await initMemory({ targetDir });
   assert.equal(read(targetDir, "AGENTS.md"), before);
-  assert.equal(existsSync(join(targetDir, ".harness/memory/users")), false);
+  assert.equal(existsSync(join(targetDir, ".edges/memory/users")), false);
 });
 test("remember refreshes index and preserves YAML metadata and origin on update", async (t) => {
   const targetDir = fixture(t);
@@ -61,7 +61,7 @@ test("remember refreshes index and preserves YAML metadata and origin on update"
     content: "Original",
     originSessionId: "first",
   });
-  const path = ".harness/memory/projects/project_decision/INDEX.md";
+  const path = ".edges/memory/projects/project_decision/INDEX.md";
   put(
     targetDir,
     path,
@@ -102,7 +102,7 @@ test("managed uses skill format and referenced remains read only with missing so
   });
   assert.equal(
     parseFrontmatter(
-      join(targetDir, ".harness/skills/managed/my-method/SKILL.md"),
+      join(targetDir, ".edges/skills/managed/my-method/SKILL.md"),
     ).name,
     "my-method",
   );
@@ -131,7 +131,7 @@ test("private custom privileges are preserved, ignored before writing, and canno
   });
   assert.match(
     read(targetDir, ".gitignore"),
-    /\*\*\/\.harness\/memory\/recipes\//,
+    /\*\*\/\.edges\/memory\/recipes\//,
   );
   await addMemoryType({ targetDir, name: "recipes", description: "Retry" });
   await rememberMemory({
@@ -145,7 +145,7 @@ test("private custom privileges are preserved, ignored before writing, and canno
     layerTypeSpecs(targetDir).find((s) => s.name === "recipes")?.gitignore,
     true,
   );
-  const index = ".harness/memory/recipes/README.md";
+  const index = ".edges/memory/recipes/README.md";
   put(targetDir, index, read(targetDir, index).replace("writable: true\n", ""));
   await assert.rejects(
     async () => await initMemory({ targetDir }),
@@ -163,7 +163,7 @@ test("doctor diagnoses without writes and apply repairs foreign agents and stale
   put(targetDir, "AGENTS.md", "# Manual\nKeep this.\n");
   put(
     targetDir,
-    ".harness/memory/projects/project_a/INDEX.md",
+    ".edges/memory/projects/project_a/INDEX.md",
     "---\nname: a\ndescription: test\n---\nBody\n",
   );
   const before = read(targetDir, projectIndex);
@@ -186,7 +186,7 @@ test("source read errors preserve existing indexes and invalid frontmatter remai
   const before = read(targetDir, projectIndex);
   put(
     targetDir,
-    ".harness/memory/projects/project_bad/INDEX.md",
+    ".edges/memory/projects/project_bad/INDEX.md",
     Buffer.from([0xff]),
   );
   assert.equal((await initMemory({ targetDir })).complete, false);
@@ -198,7 +198,7 @@ test("source read errors preserve existing indexes and invalid frontmatter remai
   );
   put(
     targetDir,
-    ".harness/memory/projects/project_bad/INDEX.md",
+    ".edges/memory/projects/project_bad/INDEX.md",
     "---\ndescription: unclosed\n",
   );
   assert.ok(
@@ -218,7 +218,7 @@ test("managed symlink escapes are rejected and referenced links deduplicate by r
     targetDir,
     skillTypes: ["referenced"],
   });
-  symlinkSync(external, join(targetDir, ".harness/memory/projects/escape"));
+  symlinkSync(external, join(targetDir, ".edges/memory/projects/escape"));
   await assert.rejects(
     async () =>
       await rememberMemory({
@@ -241,7 +241,7 @@ test("managed symlink escapes are rejected and referenced links deduplicate by r
   const initialized = await initSkills({ targetDir });
   assert.equal(initialized.complete, true, JSON.stringify(initialized));
   assert.equal(
-    read(targetDir, ".harness/skills/referenced/README.md").split(" — external")
+    read(targetDir, ".edges/skills/referenced/README.md").split(" — external")
       .length - 1,
     1,
   );

@@ -4,7 +4,7 @@ status: accepted
 
 # 被组合仓库直接可写
 
-2026-10-21。被组合仓库装在 `.harness/compose/<name>`，底层是 git submodule。ADR 0043 第 9 条把这些内容定成只读，NodeService 会拒绝写入。子模块工作区本身是普通 git 工作区，只读挡不住别的工具去写，只是让 edges 自己的写命令不能用。一个工作空间挂多个仓库时，挂了却写不进去。
+2026-10-21。被组合仓库装在 `.edges/compose/<name>`，底层是 git submodule。ADR 0043 第 9 条把这些内容定成只读，NodeService 会拒绝写入。子模块工作区本身是普通 git 工作区，只读挡不住别的工具去写，只是让 edges 自己的写命令不能用。一个工作空间挂多个仓库时，挂了却写不进去。
 
 原则就一句：保持简单，不加额外机制。被组合仓库可写，只是删掉 Compose 只读特例之后的自然结果。
 
@@ -15,8 +15,8 @@ status: accepted
 ## Decision
 
 1. **保持简单，不加额外机制。** 不增加挂载分类、可写标记、独立 worktree、同步命令、权限层，也不在 `compose/README.md` 或 Compose 契约里加字段。
-2. **删掉只读特例。** 已检出的仓库上，现有写命令直接写进子模块工作区 `.harness/compose/<name>`（条目用了相对 `--path` 时，就是那个检出目录）。CLI 只改文件。提交和推送用原生 git。
-3. **Compose 仍不递归。** 不展开被组合仓库自己的 `.harness/compose/`。
+2. **删掉只读特例。** 已检出的仓库上，现有写命令直接写进子模块工作区 `.edges/compose/<name>`（条目用了相对 `--path` 时，就是那个检出目录）。CLI 只改文件。提交和推送用原生 git。
+3. **Compose 仍不递归。** 不展开被组合仓库自己的 `.edges/compose/`。
 
 ## Considered Options
 

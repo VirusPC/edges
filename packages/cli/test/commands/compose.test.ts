@@ -10,13 +10,13 @@ import { buildSystemForest } from "../../src/services/node/system-forest-service
 
 const agents = (body = "") => `# Scope
 
-<!-- project-harness:start -->
-<!-- project-harness-constraints:start -->
+<!-- edges:start -->
+<!-- edges-constraints:start -->
 ## 本层硬约束
 
 - keep
-<!-- project-harness-constraints:end -->
-${body}<!-- project-harness:end -->
+<!-- edges-constraints:end -->
+${body}<!-- edges:end -->
 `;
 
 function git(args: string[], cwd?: string): string {
@@ -118,13 +118,13 @@ test("compose add writes the description into the Compose block", async (t) => {
     { env },
   );
   assert.equal(registered.exitCode, 0, registered.stdout + registered.stderr);
-  const source = readFileSync(path.join(scope, ".harness", "compose", "README.md"), "utf8");
+  const source = readFileSync(path.join(scope, ".edges", "compose", "README.md"), "utf8");
   assert.match(
     source,
     /\[brain\]\(<brain\/README\.md>\) — 个人大脑：只在记跨项目判断时写入 remote: https:\/\/github\.com\/example\/brain\.git/,
   );
-  assert.doesNotMatch(readFileSync(file, "utf8"), /project-harness-compose/);
-  assert.match(readFileSync(path.join(scope, ".harness", "README.md"), "utf8"), /compose\/README\.md/);
+  assert.doesNotMatch(readFileSync(file, "utf8"), /edges-compose/);
+  assert.match(readFileSync(path.join(scope, ".edges", "README.md"), "utf8"), /compose\/README\.md/);
   const body = JSON.parse(registered.stdout) as { description?: string; href?: string; submodule?: string };
   assert.equal(body.description, "个人大脑：只在记跨项目判断时写入");
   assert.equal(body.href, "brain/README.md");
@@ -172,11 +172,11 @@ function commitAll(cwd: string, message: string): void {
 }
 
 function composeBlock(lines: string[]): string {
-  return `<!-- project-harness-compose:start -->
+  return `<!-- edges-compose:start -->
 ## 组合
 
 ${lines.join("\n")}
-<!-- project-harness-compose:end -->
+<!-- edges-compose:end -->
 `;
 }
 
@@ -218,13 +218,13 @@ interface GitEntries {
   entries: Array<{ name: string; action: string; error?: string; directory?: string }>;
 }
 
-test("compose add --remote adds a git submodule at .harness/compose/<name> with a relative href", async (t) => {
+test("compose add --remote adds a git submodule at .edges/compose/<name> with a relative href", async (t) => {
   const root = mkdtempSync(path.join(tmpdir(), "compose-sub-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const { bare, source } = setupRemote(root, "brain");
   const owner = setupOwner(root);
   const env = { ...process.env, ...FILE_PROTOCOL, EDGES_SCOPE: owner };
-  const checkout = path.join(owner, ".harness", "compose", "brain");
+  const checkout = path.join(owner, ".edges", "compose", "brain");
 
   const registered = await run(
     ["compose", "add", "--name", "brain", "--remote", bare, "--description", "个人大脑"],
@@ -235,11 +235,11 @@ test("compose add --remote adds a git submodule at .harness/compose/<name> with 
   assert.equal(body.submodule, "added");
   assert.equal(body.href, "brain/README.md");
   assert.equal(body.directory, checkout);
-  const block = readFileSync(path.join(owner, ".harness", "compose", "README.md"), "utf8");
+  const block = readFileSync(path.join(owner, ".edges", "compose", "README.md"), "utf8");
   assert.match(block, /\[brain\]\(<brain\/README\.md>\) — 个人大脑 remote: /);
-  assert.doesNotMatch(readFileSync(path.join(owner, "AGENTS.md"), "utf8"), /project-harness-compose/);
+  assert.doesNotMatch(readFileSync(path.join(owner, "AGENTS.md"), "utf8"), /edges-compose/);
   assert.doesNotMatch(block, new RegExp(`\\]\\(<${root.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
-  assert.match(git(["config", "-f", ".gitmodules", "--get-regexp", "path"], owner), /\.harness\/compose\/brain/);
+  assert.match(git(["config", "-f", ".gitmodules", "--get-regexp", "path"], owner), /\.edges\/compose\/brain/);
   assert.equal(readFileSync(path.join(checkout, "README.md"), "utf8"), "brain\n");
 
   // Same URL again: the submodule exists, so add only rewrites the line.
@@ -249,10 +249,10 @@ test("compose add --remote adds a git submodule at .harness/compose/<name> with 
   );
   assert.equal(again.exitCode, 0, again.stdout + again.stderr);
   assert.equal((JSON.parse(again.stdout) as { submodule?: string }).submodule, "existing");
-  assert.match(readFileSync(path.join(owner, ".harness", "compose", "README.md"), "utf8"), /个人大脑 v2/);
+  assert.match(readFileSync(path.join(owner, ".edges", "compose", "README.md"), "utf8"), /个人大脑 v2/);
 
   // A different URL at the same path is refused and the compose entry is left alone.
-  const before = readFileSync(path.join(owner, ".harness", "compose", "README.md"), "utf8");
+  const before = readFileSync(path.join(owner, ".edges", "compose", "README.md"), "utf8");
   const other = setupRemote(root, "other").bare;
   const clash = await run(
     ["compose", "add", "--name", "brain", "--remote", other, "--description", "x"],
@@ -260,11 +260,11 @@ test("compose add --remote adds a git submodule at .harness/compose/<name> with 
   );
   assert.notEqual(clash.exitCode, 0);
   assert.match(clash.stdout, /already points at/);
-  assert.equal(readFileSync(path.join(owner, ".harness", "compose", "README.md"), "utf8"), before);
+  assert.equal(readFileSync(path.join(owner, ".edges", "compose", "README.md"), "utf8"), before);
   commitAll(owner, "compose brain");
 
   // Fresh-clone state: the submodule directory is empty until compose update.
-  git(["submodule", "deinit", "-q", "-f", ".harness/compose/brain"], owner);
+  git(["submodule", "deinit", "-q", "-f", ".edges/compose/brain"], owner);
   assert.deepEqual(readdirSync(checkout), []);
   const listed = await run(["compose", "list"], { env });
   assert.equal(listed.exitCode, 0, listed.stdout);
@@ -320,7 +320,7 @@ test("compose add rejects absolute and ~ paths and keeps a relative --path relat
     assert.equal(failed(result.stdout).errorCode, "VALIDATION_ERROR");
     assert.match(result.stdout, /must be relative/);
     assert.equal(readFileSync(path.join(owner, "AGENTS.md"), "utf8"), before);
-    assert.equal(existsSync(path.join(owner, ".harness", "compose", "README.md")), false);
+    assert.equal(existsSync(path.join(owner, ".edges", "compose", "README.md")), false);
   }
   const { bare } = setupRemote(root, "team");
   const relative = await run(
@@ -329,7 +329,7 @@ test("compose add rejects absolute and ~ paths and keeps a relative --path relat
   );
   assert.equal(relative.exitCode, 0, relative.stdout + relative.stderr);
   assert.equal((JSON.parse(relative.stdout) as { submodule?: string }).submodule, "added");
-  assert.match(readFileSync(path.join(owner, ".harness", "compose", "README.md"), "utf8"), /\[team\]\(<\.\.\/\.\.\/vendor\/team\/README\.md>\)/);
+  assert.match(readFileSync(path.join(owner, ".edges", "compose", "README.md"), "utf8"), /\[team\]\(<\.\.\/\.\.\/vendor\/team\/README\.md>\)/);
   assert.equal(existsSync(path.join(owner, "vendor", "team", "README.md")), true);
 
   // No --remote: a plain local directory, nothing runs in git.
@@ -338,7 +338,7 @@ test("compose add rejects absolute and ~ paths and keeps a relative --path relat
     { env },
   );
   assert.equal(local.exitCode, 0, local.stdout + local.stderr);
-  assert.match(readFileSync(path.join(owner, ".harness", "compose", "README.md"), "utf8"), /\[notes\]\(<\.\.\/\.\.\/\.\.\/notes\/README\.md>\)/);
+  assert.match(readFileSync(path.join(owner, ".edges", "compose", "README.md"), "utf8"), /\[notes\]\(<\.\.\/\.\.\/\.\.\/notes\/README\.md>\)/);
   assert.doesNotMatch(readFileSync(path.join(owner, ".gitmodules"), "utf8"), /notes/);
 });
 
@@ -349,13 +349,13 @@ test("compose update skips a failing submodule entry, warns, and still exits 0",
   const owner = setupOwner(root);
   const env = { ...process.env, ...FILE_PROTOCOL, EDGES_SCOPE: owner };
   // "bad" is authored by hand (no .gitmodules record) with a remote that does not exist.
-  mkdirSync(path.join(owner, ".harness", "compose"), { recursive: true });
-  writeFileSync(path.join(owner, ".harness", "compose", "README.md"), composeReadme([
+  mkdirSync(path.join(owner, ".edges", "compose"), { recursive: true });
+  writeFileSync(path.join(owner, ".edges", "compose", "README.md"), composeReadme([
     `- [bad](<bad/README.md>) — 坏 remote: ${path.join(root, "missing.git")}`,
   ]));
   const registered = await run(["compose", "add", "--name", "good", "--remote", good.bare, "--description", "好"], { env });
   assert.equal(registered.exitCode, 0, registered.stdout + registered.stderr);
-  git(["submodule", "deinit", "-q", "-f", ".harness/compose/good"], owner);
+  git(["submodule", "deinit", "-q", "-f", ".edges/compose/good"], owner);
 
   const updated = await run(["compose", "update"], { env });
   assert.equal(updated.exitCode, 0, updated.stdout + updated.stderr);
@@ -383,8 +383,8 @@ function legacyEntries(_root: string, entries: Array<{ name: string; dir: string
 
 function writeLegacy(scope: string, source: string): void {
   writeFileSync(path.join(scope, "AGENTS.md"), agents());
-  mkdirSync(path.join(scope, ".harness", "compose"), { recursive: true });
-  writeFileSync(path.join(scope, ".harness", "compose", "README.md"), source);
+  mkdirSync(path.join(scope, ".edges", "compose"), { recursive: true });
+  writeFileSync(path.join(scope, ".edges", "compose", "README.md"), source);
 }
 
 test("legacy absolute entries: update clones when missing, pulls with --remote, and warns to migrate", async (t) => {
@@ -404,7 +404,7 @@ test("legacy absolute entries: update clones when missing, pulls with --remote, 
 
   const listed = await run(["compose", "list"], { env });
   assert.equal(listed.exitCode, 0, listed.stdout);
-  assert.match(listed.stderr, /^warning: compose entry good uses a legacy path .*migrate it to a git submodule at \.harness\/compose\/good \(edges compose add --name good/m);
+  assert.match(listed.stderr, /^warning: compose entry good uses a legacy path .*migrate it to a git submodule at \.edges\/compose\/good \(edges compose add --name good/m);
   assert.match(listed.stderr, /^warning: compose entry good is not checked out at .*; run edges compose update --name good$/m);
 
   const updated = await run(["compose", "update"], { env });
@@ -429,14 +429,14 @@ test("legacy absolute entries: update clones when missing, pulls with --remote, 
 
   // Migrating: add with the same name and no --path replaces the legacy line.
   const owner = setupOwner(root, "owner");
-  mkdirSync(path.join(owner, ".harness", "compose"), { recursive: true });
-  writeFileSync(path.join(owner, ".harness", "compose", "README.md"), legacyEntries(root, [{ name: "good", dir: goodCheckout, remote: good.bare }]));
+  mkdirSync(path.join(owner, ".edges", "compose"), { recursive: true });
+  writeFileSync(path.join(owner, ".edges", "compose", "README.md"), legacyEntries(root, [{ name: "good", dir: goodCheckout, remote: good.bare }]));
   const migrated = await run(
     ["compose", "add", "--name", "good", "--remote", good.bare, "--description", "好"],
     { env: { ...process.env, ...FILE_PROTOCOL, EDGES_SCOPE: owner } },
   );
   assert.equal(migrated.exitCode, 0, migrated.stdout + migrated.stderr);
-  const source = readFileSync(path.join(owner, ".harness", "compose", "README.md"), "utf8");
+  const source = readFileSync(path.join(owner, ".edges", "compose", "README.md"), "utf8");
   assert.match(source, /\[good\]\(<good\/README\.md>\)/);
   assert.equal(source.includes(goodCheckout), false);
 });
@@ -498,10 +498,10 @@ test("Compose never recurses: two repos registering each other stay one layer de
   assert.equal(inA.exitCode, 0, inA.stdout + inA.stderr);
   commitAll(a.source, "compose b");
 
-  const bCheckout = path.join(a.source, ".harness", "compose", "b");
-  const nested = path.join(bCheckout, ".harness", "compose", "a");
+  const bCheckout = path.join(a.source, ".edges", "compose", "b");
+  const nested = path.join(bCheckout, ".edges", "compose", "a");
   // Fresh-clone state, then compose update: never --recursive, so B's own entry stays empty.
-  git(["submodule", "deinit", "-q", "-f", ".harness/compose/b"], a.source);
+  git(["submodule", "deinit", "-q", "-f", ".edges/compose/b"], a.source);
   const hint = await run(["forest", "list", "--no-super"], { env });
   assert.equal(hint.exitCode, 0, hint.stdout + hint.stderr);
   assert.match(hint.stderr, /^warning: compose entry b is not checked out at b\/README\.md; run edges compose update --name b$/m);
@@ -538,7 +538,7 @@ test("Compose never recurses: two repos registering each other stay one layer de
   assert.deepEqual(excludedForest.map((tree) => tree[0]?.path), [path.join(a.source, "AGENTS.md")]);
   const cli = await run(["forest", "list", "--no-super"], { env });
   const trees = (JSON.parse(cli.stdout) as { trees: Array<{ root: string }> }).trees.map((tree) => tree.root);
-  assert.deepEqual(trees.sort(), [".harness/compose/b/AGENTS.md", "AGENTS.md"]);
+  assert.deepEqual(trees.sort(), [".edges/compose/b/AGENTS.md", "AGENTS.md"]);
   const excludedCli = await run(["--exclude", "compose", "forest", "list", "--no-super"], { env });
   assert.equal(excludedCli.exitCode, 0, excludedCli.stdout + excludedCli.stderr);
   assert.deepEqual(
@@ -582,7 +582,7 @@ test("compose doctor dry-run reports the move and --apply writes it once", async
   mkdirSync(scope, { recursive: true });
   const agentsFile = path.join(scope, "AGENTS.md");
   writeFileSync(agentsFile, agents(composeBlock([
-    "- [brain](<.harness/compose/brain>) — 个人大脑 remote: https://github.com/example/brain.git",
+    "- [brain](<.edges/compose/brain>) — 个人大脑 remote: https://github.com/example/brain.git",
     "- [team](<vendor/team>) — 团队库",
   ])));
   writeFileSync(path.join(scope, "NOTES.md"), "Run edges --with-composed forest list\n");
@@ -600,22 +600,22 @@ test("compose doctor dry-run reports the move and --apply writes it once", async
   assert.ok(kinds.includes("index-link"));
   assert.ok(kinds.includes("clear-agents"));
   assert.equal(kinds.filter((kind) => kind === "docs").length, 2);
-  assert.ok(dryBody.changes.some((change) => change.detail === ".harness/compose/brain -> brain/README.md"));
+  assert.ok(dryBody.changes.some((change) => change.detail === ".edges/compose/brain -> brain/README.md"));
   assert.ok(dryBody.changes.some((change) => change.detail === "vendor/team -> ../../vendor/team/README.md"));
   assert.equal(readFileSync(agentsFile, "utf8"), beforeAgents);
-  assert.equal(existsSync(path.join(scope, ".harness", "compose", "README.md")), false);
+  assert.equal(existsSync(path.join(scope, ".edges", "compose", "README.md")), false);
   assert.match(readFileSync(path.join(scope, "NOTES.md"), "utf8"), /--with-composed/);
 
   const applied = await run(["compose", "doctor", "--apply"], { env });
   assert.equal(applied.exitCode, 0, applied.stdout + applied.stderr);
   assert.equal((JSON.parse(applied.stdout) as { apply: boolean }).apply, true);
-  const composeFile = readFileSync(path.join(scope, ".harness", "compose", "README.md"), "utf8");
+  const composeFile = readFileSync(path.join(scope, ".edges", "compose", "README.md"), "utf8");
   assert.match(composeFile, /\[brain\]\(<brain\/README\.md>\) — 个人大脑 remote: https:\/\/github\.com\/example\/brain\.git/);
   assert.match(composeFile, /\[team\]\(<\.\.\/\.\.\/vendor\/team\/README\.md>\) — 团队库/);
   const agentsAfter = readFileSync(agentsFile, "utf8");
-  assert.doesNotMatch(agentsAfter, /project-harness-compose/);
-  assert.match(agentsAfter, /\.harness\/README\.md/);
-  assert.match(readFileSync(path.join(scope, ".harness", "README.md"), "utf8"), /compose\/README\.md/);
+  assert.doesNotMatch(agentsAfter, /edges-compose/);
+  assert.match(agentsAfter, /\.edges\/README\.md/);
+  assert.match(readFileSync(path.join(scope, ".edges", "README.md"), "utf8"), /compose\/README\.md/);
   assert.equal(readFileSync(path.join(scope, "NOTES.md"), "utf8"), "Run edges --with-composed forest list\n");
   assert.match(readFileSync(path.join(scope, "sample.test.ts"), "utf8"), /--with-composed/);
 
@@ -624,7 +624,7 @@ test("compose doctor dry-run reports the move and --apply writes it once", async
   const againChanges = (JSON.parse(again.stdout) as { changes: Array<{ kind: string; detail?: string }> }).changes;
   assert.deepEqual(againChanges.map((change) => change.kind), ["docs", "docs"]);
   assert.ok(againChanges.every((change) => change.detail === "mentions --with-composed; left unchanged"));
-  assert.equal(readFileSync(path.join(scope, ".harness", "compose", "README.md"), "utf8"), composeFile);
+  assert.equal(readFileSync(path.join(scope, ".edges", "compose", "README.md"), "utf8"), composeFile);
 });
 
 test("compose doctor leaves --with-composed prose in place and skips skills and history", async (t) => {
@@ -663,7 +663,7 @@ test("compose doctor does nothing when AGENTS.md has no Compose block", async (t
   const result = await run(["compose", "doctor", "--apply"], { env: { ...process.env, EDGES_SCOPE: root } });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   assert.deepEqual((JSON.parse(result.stdout) as { changes: unknown[] }).changes, []);
-  assert.equal(existsSync(path.join(root, ".harness", "compose", "README.md")), false);
+  assert.equal(existsSync(path.join(root, ".edges", "compose", "README.md")), false);
 });
 
 test("compose update --help documents --remote and per-entry failure handling", async () => {

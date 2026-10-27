@@ -2,10 +2,10 @@
 /**
  * Migrate system-one list entries from AGENTS.md to README.md (`project-entries-*`).
  *
- *  A. Type indexes `.harness/{memory,skills}/<type>/AGENTS.md` carrying
+ *  A. Type indexes `.edges/{memory,skills}/<type>/AGENTS.md` carrying
  *     `project-memory-type` / `project-memory-entries` markers.
  *  B. Organisation lists: directories whose AGENTS.md only lists Task/content leaves in
- *     `project-harness-local`, with no constraints, no `.harness` material and no
+ *     `edges-local`, with no constraints, no `.edges` material and no
  *     descendants. Real system entries are never touched; ambiguous ones are skipped.
  *
  * Preview by default; `--apply` writes README, deletes the old AGENTS and retargets links.
@@ -67,8 +67,8 @@ export interface TypeIndexMigrationPlan {
   snapshots: EntryFile[];
 }
 
-const TYPE_DIR = /(?:^|\/)\.harness\/(memory|skills)\/([^/]+)\/AGENTS\.md$/;
-const PRIVATE_TYPE_DIR = /(?:^|\/)\.harness\/memory\/(?:users|private)\//;
+const TYPE_DIR = /(?:^|\/)\.edges\/(memory|skills)\/([^/]+)\/AGENTS\.md$/;
+const PRIVATE_TYPE_DIR = /(?:^|\/)\.edges\/memory\/(?:users|private)\//;
 
 const marker = (name: string, edge: "start" | "end") =>
   `<!-- ${name}:${edge} -->`;
@@ -116,13 +116,13 @@ export interface OrgListFacts {
   harnessDir: boolean;
 }
 
-const LOCAL_NAMES = ["project-harness-local", "project-memory-local"];
+const LOCAL_NAMES = ["edges-local", "project-memory-local"];
 const CONSTRAINT_NAMES = [
-  "project-harness-constraints",
+  "edges-constraints",
   "project-memory-important",
 ];
 const DESCENDANT_NAMES = [
-  "project-harness-descendants",
+  "edges-descendants",
   "project-memory-children",
 ];
 
@@ -152,7 +152,7 @@ export function orgListFacts(source: string, harnessDir: boolean): OrgListFacts 
     entries: lines.length,
     harnessEntries: lines.filter((line) => {
       const target = /\]\((?:<([^>\n]+)>|([^)\s]+))/.exec(line);
-      return /(?:^|\/)\.harness\//.test(target?.[1] ?? target?.[2] ?? "");
+      return /(?:^|\/)\.edges\//.test(target?.[1] ?? target?.[2] ?? "");
     }).length,
     constraints: !!constraints && !!stripHeading(constraints.inner),
     descendants: !!descendants && !!stripHeading(descendants.inner),
@@ -165,9 +165,9 @@ export function orgListSkipReason(facts: OrgListFacts): string | undefined {
   if (!facts.entries) return "no list entries";
   if (facts.constraints) return "has non-empty constraints (real system entry)";
   if (facts.descendants) return "has descendants block (real system entry)";
-  if (facts.harnessDir) return "owns a .harness directory (real system entry)";
+  if (facts.harnessDir) return "owns a .edges directory (real system entry)";
   if (facts.harnessEntries)
-    return `links ${facts.harnessEntries}/${facts.entries} .harness material (mixed; unsure)`;
+    return `links ${facts.harnessEntries}/${facts.entries} .edges material (mixed; unsure)`;
 }
 
 const compactBlock = (inner: string): string =>
@@ -208,7 +208,7 @@ export function convertOrgList(source: string): string {
     if (range && !stripHeading(range.inner))
       out = out.slice(0, range.start) + out.slice(range.end);
   }
-  for (const outer of ["project-harness", "project-memory"])
+  for (const outer of ["edges", "project-memory"])
     out = out
       .replace(new RegExp(`^<!-- ${outer}:(?:start|end) -->\\r?\\n?`, "gm"), "");
   return out.replace(/\n{3,}/g, "\n\n").replace(/\s*$/, "\n");
@@ -301,7 +301,7 @@ export function planTypeIndexMigration(
     } else if (!typeDir && scope !== "type-indexes") {
       const facts = orgListFacts(
         before.source,
-        fs.existsSync(path.join(path.dirname(file), ".harness")),
+        fs.existsSync(path.join(path.dirname(file), ".edges")),
       );
       if (!facts.entries && !firstBlock(before.source, LOCAL_NAMES)) continue;
       const reason = orgListSkipReason(facts);

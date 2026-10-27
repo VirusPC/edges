@@ -29,17 +29,17 @@ export const OWNER_MAP: Record<string, string> = {
   "extensions/skills/project-memory-init":
     "extensions/skills/project-memory-init",
   "shared-extensions": "shared-extensions",
-  "knowledge/tasks": ".harness/tasks",
+  "knowledge/tasks": ".edges/tasks",
   "knowledge/notes": "knowledge/notes",
-  evaluation: ".harness/evaluation",
+  evaluation: ".edges/evaluation",
   "knowledge/teaching": "teaching",
 };
 const DIRECTORIES: Record<string, string> = {
   "knowledge/projects": "projects",
   "knowledge/teaching": "teaching",
-  evaluation: ".harness/evaluation",
-  observation: ".harness/observation",
-  "knowledge/tasks": ".harness/tasks",
+  evaluation: ".edges/evaluation",
+  observation: ".edges/observation",
+  "knowledge/tasks": ".edges/tasks",
 };
 interface ReviewedFile {
   source: string;
@@ -83,7 +83,7 @@ const git = (root: string, ...args: string[]) =>
 const hash = (path: string) => generic.sha(fs.readFileSync(path));
 const privatePath = (path: string) =>
   path.includes(".memory/users") ||
-  path.includes(".harness/memory/users") ||
+  path.includes(".edges/memory/users") ||
   path.endsWith("/.memory/USER.md");
 function block(text: string, name: string, body?: string) {
   return text.replace(
@@ -262,10 +262,10 @@ export function makeInstancePlan(
     )) {
       const prefix = owner === "." ? "" : owner + "/";
       for (const [old, next] of [
-        [".memory/skills", ".harness/skills/managed"],
-        [".memory/agent_skills", ".harness/skills/referenced"],
-        [".memory", ".harness/memory"],
-        [".harness", ".harness"],
+        [".memory/skills", ".edges/skills/managed"],
+        [".memory/agent_skills", ".edges/skills/referenced"],
+        [".memory", ".edges/memory"],
+        [".edges", ".edges"],
       ]) {
         const source = prefix + old;
         if (rel === source || rel.startsWith(source + "/"))
@@ -442,7 +442,7 @@ export function makeInstancePlan(
           if (
             !spec &&
             !isFile(
-              join(root, owners[owner]!, ".harness/memory/users/AGENTS.md"),
+              join(root, owners[owner]!, ".edges/memory/users/AGENTS.md"),
             )
           )
             throw new Error(
@@ -486,7 +486,7 @@ export function makeInstancePlan(
     );
   for (const old of Object.keys(DIRECTORIES)) {
     for (const { base, dirs, files } of generic.walk(join(root, old))) {
-      for (const n of [".cache", "_site", ".memory", ".harness"]) {
+      for (const n of [".cache", "_site", ".memory", ".edges"]) {
         const i = dirs.indexOf(n);
         if (i >= 0) dirs.splice(i, 1);
       }
@@ -531,7 +531,7 @@ export function makeInstancePlan(
     for (const directory of memory.private) {
       const destination = mapped(directory);
       const owner = Object.values(owners)
-        .filter((value) => isWithinPath(destination, join(root, value, ".harness")))
+        .filter((value) => isWithinPath(destination, join(root, value, ".edges")))
         .sort((a, b) => b.length - a.length)[0];
       if (owner === undefined)
         throw new Error("private-remnant-owner-unresolved");
@@ -569,7 +569,7 @@ export function makeInstancePlan(
       let text = generic.rewriteLinks(readText(source), source, dest, mapped);
       if (rel === "AGENTS.md") {
         text = stripScope(block(text, "important"));
-        text += "\n共同看板约定见[维护看板](../.harness/tasks/AGENTS.md)。\n";
+        text += "\n共同看板约定见[维护看板](../.edges/tasks/AGENTS.md)。\n";
         text = text.replace(
           /^- \[.*?\]\(([^)]+)\/AGENTS.md\).*\n/gm,
           (line, p: string) => (domainProjects.has(p) ? line : ""),
@@ -605,9 +605,9 @@ export function makeInstancePlan(
       for (const child of adrNavigation) node.removeChild(child);
       const links = [
         ["tasks/AGENTS.md", "领域任务", "descendant"],
-        [".harness/tasks/AGENTS.md", "根维护任务", "local"],
-        [".harness/evaluation/AGENTS.md", "评测", "descendant"],
-        [".harness/observation/AGENTS.md", "观测职责与资料", "local"],
+        [".edges/tasks/AGENTS.md", "根维护任务", "local"],
+        [".edges/evaluation/AGENTS.md", "评测", "descendant"],
+        [".edges/observation/AGENTS.md", "观测职责与资料", "local"],
         ["teaching/AGENTS.md", "教学与学习状态", "descendant"],
         ["extensions/AGENTS.md", "对外能力实现约束", "descendant"],
         ["shared-extensions/AGENTS.md", "共享扩展约束", "descendant"],
@@ -631,18 +631,18 @@ export function makeInstancePlan(
     });
     const observation = join(root, "observation/README.md");
     if (fs.existsSync(observation))
-      edit(".harness/observation/AGENTS.md", () =>
+      edit(".edges/observation/AGENTS.md", () =>
         generic.rewriteLinks(
           readText(observation),
           observation,
-          join(root, ".harness/observation/AGENTS.md"),
+          join(root, ".edges/observation/AGENTS.md"),
           mapped,
         ),
       );
     edit(".gitmodules", (text) =>
       text.replace(
         "path = evaluation/third_party/locomo",
-        "path = .harness/evaluation/third_party/locomo",
+        "path = .edges/evaluation/third_party/locomo",
       ),
     );
   }
@@ -717,7 +717,7 @@ export function planMissingPrivateIndexes(root: string, job: InstanceJob) {
       )?.[0];
     if (!local) continue;
     for (const match of local.matchAll(
-      /\]\((\.harness\/(memory|skills)\/([^/\s)]+)\/AGENTS\.md)\)/g,
+      /\]\((\.edges\/(memory|skills)\/([^/\s)]+)\/AGENTS\.md)\)/g,
     )) {
       const rel = match[1]!,
         index = join(scope, rel);
@@ -727,7 +727,7 @@ export function planMissingPrivateIndexes(root: string, job: InstanceJob) {
         throw new Error(
           `adopted-index-path-conflict: ${relative(root, index)}`,
         );
-      if (rel !== ".harness/memory/users/AGENTS.md")
+      if (rel !== ".edges/memory/users/AGENTS.md")
         throw new Error(
           `missing-adopted-type-index: ${relative(root, index)}; restore original type metadata before migration`,
         );
@@ -925,10 +925,10 @@ export function runInstanceMigration(
         for (const [old, owner] of Object.entries(OWNER_MAP)) {
           if (old === "." || owner === ".") continue;
           if (
-            [`${old}/.memory/`, `${old}/.harness/`].some((prefix) =>
+            [`${old}/.memory/`, `${old}/.edges/`].some((prefix) =>
               rel.startsWith(prefix),
             ) &&
-            !isWithinPath(op.target, join(root, owner, ".harness"))
+            !isWithinPath(op.target, join(root, owner, ".edges"))
           )
             throw new Error(
               "historical-owner-promotion-journal-needs-review: preserve journal and source/target bytes; do not resume with obsolete ownership",
@@ -961,9 +961,9 @@ export function runInstanceMigration(
     currentDiagnostics = [
       root,
       join(root, "teaching"),
-      join(root, ".harness/evaluation"),
+      join(root, ".edges/evaluation"),
     ].flatMap((scope) =>
-      isFile(join(scope, ".harness/skills/referenced/AGENTS.md"))
+      isFile(join(scope, ".edges/skills/referenced/AGENTS.md"))
         ? generic.referencedDiagnostics(scope)
         : [],
     ),
@@ -988,7 +988,7 @@ export function runInstanceMigration(
   let text = fs.existsSync(ignore) ? readText(ignore) : "";
   const rules = [
     `**/${JOURNAL}/`,
-    "**/.harness/memory/users/",
+    "**/.edges/memory/users/",
     "**/.memory/users/",
     ...(job.private ?? []).map((p) => "/" + relative(root, p) + "/"),
   ];

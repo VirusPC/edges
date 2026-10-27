@@ -104,10 +104,10 @@ groupBy 调用时不触发计算，但 value 执行后需要物化分组。先 f
 
 ### traverse 只走单个系统
 
-1. **一次 traverse 走一个系统**：走该入口的 `children`（系统二组成）。Compose 入口是 `.harness/compose/README.md`，和别的模块一样默认展开；它的子节点是被组合仓库的 `README.md`，并且只到这一层。`--exclude compose` 跳过。
+1. **一次 traverse 走一个系统**：走该入口的 `children`（系统二组成）。Compose 入口是 `.edges/compose/README.md`，和别的模块一样默认展开；它的子节点是被组合仓库的 `README.md`，并且只到这一层。`--exclude compose` 跳过。
 2. **`SuperAgentsNode` 无特判**：traverse 时当作普通 `AgentsNode`（同一套 `children` 规则）。
 3. **`excludeRoots` 早停**：调用方传入的绝对入口路径在 resolve 时停住，不再沿该入口向下。
-4. **仓库可视为个人系统二 + Super**：整仓可当作上一级主体的系统二；`SuperAgentsNode` 按 `domain/config/harness-materials.json` 挂**存在的**材料 README（`scope` + path；材料 path 不带 `.harness/` 前缀；harness 根 = `<scope>/.harness` 若存在否则 `scope`）。零个材料时允许空挂载；**不**挂其它系统的 `AGENTS.md`。
+4. **仓库可视为个人系统二 + Super**：整仓可当作上一级主体的系统二；`SuperAgentsNode` 按 `domain/config/edges-materials.json` 挂**存在的**材料 README（`scope` + path；材料 path 不带 `.edges/` 前缀；harness 根 = `<scope>/.edges` 若存在否则 `scope`）。零个材料时允许空挂载；**不**挂其它系统的 `AGENTS.md`。
 
 多个系统由 Service 层收集系统根并拼成森林，见 [CLI README](../../../README.md#多个系统拼成森林)。
 
@@ -133,7 +133,7 @@ roots 是一个已加载节点或一组节点。多根时每一棵只走自己�
 | --- | --- |
 | 默认 | 展开全部组成 `children`（local ∪ descendants），含 Compose 入口 |
 | `localOnly: true` | 展开 localChildren |
-| `exclude` | 跳过列出的模块（`.harness/<module>` 或超节点上的同名目录）。`compose` 不展开被组合 README |
+| `exclude` | 跳过列出的模块（`.edges/<module>` 或超节点上的同名目录）。`compose` 不展开被组合 README |
 | `includeHarness: true` | 额外沿独立 harness 关系递归，不只进入一层 |
 | `types` | 选择输出类型，不自动删掉通往目标的导航节点 |
 
@@ -144,7 +144,7 @@ roots 是一个已加载节点或一组节点。多根时每一棵只走自己�
 | 根 | 何时 | 走到什么 |
 | --- | --- | --- |
 | 真 `AGENTS.md` | CLI 默认（`--scope`） | 仅该系统的系统二（维护信息、下层 AGENTS） |
-| `SuperAgentsNode` | 显式 `--super` | 按 `harness-materials.json` 挂载的材料 README；**遍历语义同普通 AgentsNode** |
+| `SuperAgentsNode` | 显式 `--super` | 按 `edges-materials.json` 挂载的材料 README；**遍历语义同普通 AgentsNode** |
 
 同目录 `AGENTS.md` 与 `README.md` 在磁盘上是**并列登记**：系统一孩子只写在 README，不写进 AGENTS 组成字段。从真 AGENTS 的 **query/list 不到内容面**是预期。要逛内容面须换根到 `SuperAgentsNode`。没有查询并边，也没有 `includeContentFace` 兼容开关。
 

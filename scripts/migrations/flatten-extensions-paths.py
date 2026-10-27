@@ -18,15 +18,15 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-KEPT = ("cli", "skills", "apps", "services", "mcp-servers", "system-prompt", ".harness")
+KEPT = ("cli", "skills", "apps", "services", "mcp-servers", "system-prompt", ".edges")
 DELETED = ("docs", "tools", "subagents", "new-server", "others")
 SKIP_PREFIXES = (
     "docs/adr/0040-flatten-extensions-posts-to-personal-repo.md",
     "docs/migrations/2026-10-20-flatten-extensions.md",
     "CHANGELOG.md",
-    ".harness/tasks/edges-extensions/todo/2026-10-20--框架仓平铺-extensions-并把-posts-搬回个人仓/",
-    ".harness/memory/feedbacks/feedback_cli_under_extensions/INDEX.md",
-    ".harness/memory/projects/project_root_important_scope/INDEX.md",
+    ".edges/tasks/edges-extensions/todo/2026-10-20--框架仓平铺-extensions-并把-posts-搬回个人仓/",
+    ".edges/memory/feedbacks/feedback_cli_under_extensions/INDEX.md",
+    ".edges/memory/projects/project_root_important_scope/INDEX.md",
     "scripts/flatten-extensions-paths.py",
     "scripts/flatten-content-layout.mts",
     "scripts/migrate-recursive-layout.mts",
@@ -45,13 +45,13 @@ SKIP_PREFIXES = (
     "services/artifacts-preview/deploy/migrate-teaching-nginx-prefix.py",
 )
 KNOWN_ROOT = {
-    "docs", "scripts", ".github", ".harness", ".agents", "shared-extensions",
+    "docs", "scripts", ".github", ".edges", ".agents", "shared-extensions",
     "CHANGELOG.md", "README.md", "AGENTS.md", "CONTEXT.md", "package.json",
     "tsconfig.base.json", "pnpm-workspace.yaml", "LICENSE",
     *KEPT,
 }
 PREFIX_RE = re.compile(
-    r"(?<![\w.-])extensions/(cli|skills|apps|services|mcp-servers|system-prompt|\.harness)(?![\w])"
+    r"(?<![\w.-])extensions/(cli|skills|apps|services|mcp-servers|system-prompt|\.edges)(?![\w])"
 )
 DELETED_RE = re.compile(
     r"(?<![\w.-])extensions/(?:docs|tools|subagents|new-server|others)(?:/[A-Za-z0-9_./%-]*)?"

@@ -9,11 +9,11 @@ export interface ReadmeEntryModel {
   model: new (file: string) => ReadmeNode;
 }
 
-/** True for `<scope>/.harness/compose/README.md`, including a composed repo's own entry. */
+/** True for `<scope>/.edges/compose/README.md`, including a composed repo's own entry. */
 export function isComposeEntryReadme(file: string): boolean {
   return basename(file) === ENTRY_NAMES.readme
     && basename(dirname(file)) === "compose"
-    && basename(dirname(dirname(file))) === ".harness";
+    && basename(dirname(dirname(file))) === ".edges";
 }
 
 /**

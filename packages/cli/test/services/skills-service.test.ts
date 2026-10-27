@@ -9,7 +9,7 @@ test("managed skill files use kebab-case names under skills/managed", () => {
   const scope = path.resolve("/tmp/edges-skill-scope");
   assert.equal(
     managedSkillFile(scope, "demo-skill", false),
-    path.join(scope, ".harness/skills/managed/demo-skill/SKILL.md"),
+    path.join(scope, ".edges/skills/managed/demo-skill/SKILL.md"),
   );
   assert.equal(
     managedSkillFile(scope, "demo-skill", true),

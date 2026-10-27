@@ -4,7 +4,7 @@ import {
   harnessMaterialById,
   placeHarnessMaterial,
   tasksBoardDirName,
-} from "../../domain/config/harness-materials.js";
+} from "../../domain/config/edges-materials.js";
 
 export { tasksBoardDirName };
 

@@ -8,17 +8,17 @@ import { run } from "../../src/program.js";
 function agents(local: string, descendants = ""): string {
   return `# Scope
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
 ${local}
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 
-<!-- project-harness-descendants:start -->
+<!-- edges-descendants:start -->
 ## 下层系统维护信息
 
 ${descendants}
-<!-- project-harness-descendants:end -->
+<!-- edges-descendants:end -->
 `;
 }
 

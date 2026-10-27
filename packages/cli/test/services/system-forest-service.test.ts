@@ -24,8 +24,8 @@ function writeAgents(
   );
   let body = created.serialize();
   // Empty composition serializes to ""; still need harness markers for root scan.
-  if (!body.includes("project-harness-local:start")) {
-    body = `# Scope\n\n<!-- project-harness-local:start -->\n## 本层系统维护信息\n\n<!-- project-harness-local:end -->\n`;
+  if (!body.includes("edges-local:start")) {
+    body = `# Scope\n\n<!-- edges-local:start -->\n## 本层系统维护信息\n\n<!-- edges-local:end -->\n`;
   }
   fs.writeFileSync(file, body);
   return file;
@@ -34,9 +34,9 @@ function writeAgents(
 function fixture(t: { after(fn: () => void): void }) {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "forest-svc-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
+  fs.mkdirSync(path.join(root, ".edges/tasks"), { recursive: true });
   fs.mkdirSync(path.join(root, "tasks"), { recursive: true });
-  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# Maintenance\n");
+  fs.writeFileSync(path.join(root, ".edges/tasks/README.md"), "# Maintenance\n");
   fs.writeFileSync(path.join(root, "tasks/README.md"), "# Content\n");
   const outer = writeAgents(root, "AGENTS.md", ["inner/AGENTS.md"]);
   const inner = writeAgents(root, "inner/AGENTS.md");
@@ -72,7 +72,7 @@ test("Super root mounts materials, not scope AGENTS", async (t) => {
     superTree.some((n) => n.path === path.join(root, "tasks/README.md")),
   );
   assert.ok(
-    !superTree.some((n) => n.path === path.join(root, ".harness/tasks/README.md")),
+    !superTree.some((n) => n.path === path.join(root, ".edges/tasks/README.md")),
   );
   assert.ok(!superTree.slice(1).some((n) => n.path === outer));
 });

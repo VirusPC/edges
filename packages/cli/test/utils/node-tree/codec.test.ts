@@ -30,7 +30,7 @@ test('editing one constraint preserves every other original source fragment', ()
 
 test('adding, changing and removing entries preserves unknown sections and manual introductions', () => {
   const model = parseNode(source);
-  model.memory[1].content[0] = { kind: 'link', label: 'Tasks', target: '.harness/tasks/AGENTS.md' };
+  model.memory[1].content[0] = { kind: 'link', label: 'Tasks', target: '.edges/tasks/AGENTS.md' };
   model.children.push({ content: [{ kind: 'link', label: '新节点', target: 'deep/new node/AGENTS.md' }] });
   model.constraints = [];
   const result = serializeNode(model, source);
@@ -47,7 +47,7 @@ test('new model serialization escapes Markdown syntax without changing text or t
   model.references.push({ kind: 'link', label: 'Outside', target: 'https://example.com/a?q=1&x=2' });
   const rendered = serializeNode(model);
   assert.deepEqual(parseNode(rendered), model);
-  assert.match(rendered, /<!-- project-harness:start -->/);
+  assert.match(rendered, /<!-- edges:start -->/);
   assert.doesNotMatch(rendered, /<!-- project-memory:start -->/);
   assert.match(rendered, /## 本层硬约束/);
   assert.match(rendered, /## 本层系统维护信息/);

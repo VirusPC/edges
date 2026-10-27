@@ -68,7 +68,7 @@ const reference = { id: node.id, ...(node.name ? {name:node.name} : {}), ...(nod
 
 **Interfaces:** consumes models/layout and spec model methods. Produces spec NodeService CRUD/move/import/list, with explicit managedRoot and typed get overload; returns same node for mutations. No public reparent. Business assertWrite/read-only hooks retained; no createMode/resourceMode. Task 3 replaces legacy production file paths; this task migrates relevant test fixtures to directories.
 
-- [x] Add real tempfile tests before implementation for Skill directory with AGENTS harness and .harness/AGENTS; list must visit composition only, never nested harness. Explicit get(harness.id) loads maintenance tree when requested.
+- [x] Add real tempfile tests before implementation for Skill directory with AGENTS harness and .edges/AGENTS; list must visit composition only, never nested harness. Explicit get(harness.id) loads maintenance tree when requested.
 ```ts
 const node = await service.get('/managed/skills/a/SKILL.md');
 const moved = await service.move(node!, '/managed/skills/b/SKILL.md');
@@ -111,7 +111,7 @@ assert.equal(readFileSync(join(fixtureRoot, result.path), 'utf8').includes('extr
 - [x] Implement migration plan using tracked public managed entries only, target `<stem>/index.md`, rewrite registered node hrefs and moved-document relative resource links, no source content loss. Fail target collision before mutation. No scanning private content; no guessing asset ownership. Exclude posts/thirdparty/ADRs. Existing Skill dirs/entry dirs unchanged.
 ```ts
 const plan = planDirectoryMigration(root);
-assert.deepEqual(plan.moves.map(x => x.to), [join(root, '.harness/memory/projects/project_demo/index.md')]);
+assert.deepEqual(plan.moves.map(x => x.to), [join(root, '.edges/memory/projects/project_demo/index.md')]);
 applyDirectoryMigration(plan);
 assert.equal(planDirectoryMigration(root).moves.length, 0);
 ```

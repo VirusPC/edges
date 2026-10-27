@@ -39,7 +39,7 @@
 - 禁止在 notes/skills 命令或替代模块里 `readFileSync`/`writeFileSync`/`rmSync`/`readdir` 直改叶子或父索引（测试可证）。
 - `NodeService.destroy` 删除；错误尽量映射为既有 `VALIDATION_ERROR`（not found / ambiguous / must be）。
 - 不重做 artifacts；不大改 tasks/memory 编排。统一旗标原则写入 ADR 与 CONTEXT；本卡不改 README / 组织列表、memory、tasks 的命令实现。
-- skills create/update 真写 `skills/managed/<kebab-name>/SKILL.md`（与 harness-materials `skills.managed` 对齐）并登记父级 README。本卡不加 `referenced` 或其他特殊旗标。
+- skills create/update 真写 `skills/managed/<kebab-name>/SKILL.md`（与 edges-materials `skills.managed` 对齐）并登记父级 README。本卡不加 `referenced` 或其他特殊旗标。
 - ADR 0027 中「skills create/update 只提示 remember」改为真写说明；另写短 ADR。`memory create/update`、`tasks delete` 提示语义不动。
 - CLI 旗标对齐是全仓标准，不只 notes/skills：create/update 只走 metadata + `--body` 加最少类型旗标；get/delete 只有目标参数，不挂 body/filter。list（含 README / 组织列表，以及 memory、tasks 适用处）调用既有 `list-query` 的 `--filter` / `--group-by`（先滤后分组，同字段 OR、异字段 AND），范围只用全局 `--scope` / `--super` / `--all`。不发明 `--content` 或域专用 list 旗标。本卡只把 notes/skills 做成这样；短 ADR 与 CONTEXT 陈述原则，让其他域跟随。
 - `notes create` 不做 git commit、push 或 PR，只 `NodeService.create` 写本地叶子。标准面是 metadata + `--body`；note 标题经正文 H1 或类型 helper。不保留 `--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--content`、`--content-file`、`--markdown`，也不在 create 上挂 `--token-file` / `--token-stdin`（鉴权归 CLI）。

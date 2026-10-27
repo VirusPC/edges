@@ -20,41 +20,41 @@ test("tasks writes succeed when the scope links a missing users memory index", a
   const repo = await realpath(await mkdtemp(path.join(tmpdir(), "edges-tasks-missing-users-")));
   const io = { fs: nodeBoardWriter(), now: new Date("2026-10-19T00:00:00Z") };
   try {
-    await mkdir(path.join(repo, ".harness"), { recursive: true });
+    await mkdir(path.join(repo, ".edges"), { recursive: true });
     await writeFile(
       path.join(repo, "AGENTS.md"),
       `# repo
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
-- [本层 harness 材料索引](<.harness/README.md>) — 本层 harness 材料的组织清单。
-<!-- project-harness-local:end -->
+- [本层 harness 材料索引](<.edges/README.md>) — 本层 harness 材料的组织清单。
+<!-- edges-local:end -->
 `,
     );
     await writeFile(
-      path.join(repo, ".harness/README.md"),
+      path.join(repo, ".edges/README.md"),
       `# 本层 harness 材料索引
 
 <!-- project-entries-local:start -->
 ## 本层内容
 
-- [.harness/memory/users/README.md](<memory/users/README.md>) — 绑定本仓库、不宜公开的个人材料。本机文件，不进 git。
+- [.edges/memory/users/README.md](<memory/users/README.md>) — 绑定本仓库、不宜公开的个人材料。本机文件，不进 git。
 <!-- project-entries-local:end -->
 `,
     );
-    assert.equal(await missing(path.join(repo, ".harness/memory/users/README.md")), true);
+    assert.equal(await missing(path.join(repo, ".edges/memory/users/README.md")), true);
 
     const created = await createTask(
       repo,
       { title: "Backlog without users memory", status: "backlog" },
       io,
     );
-    assert.match(created.path, /^\.harness\/tasks\/_default\/backlog\//);
+    assert.match(created.path, /^\.edges\/tasks\/_default\/backlog\//);
     assert.match(await readFile(path.join(repo, created.path), "utf8"), /Backlog without users memory/);
-    assert.equal(await missing(path.join(repo, ".harness/memory/users/README.md")), true);
+    assert.equal(await missing(path.join(repo, ".edges/memory/users/README.md")), true);
 
-    const projectReadme = path.join(repo, ".harness/tasks/_default/README.md");
+    const projectReadme = path.join(repo, ".edges/tasks/_default/README.md");
     const listed = await readFile(projectReadme, "utf8");
     await writeFile(
       projectReadme,
@@ -78,8 +78,8 @@ test("tasks writes succeed when the scope links a missing users memory index", a
       now: new Date("2026-10-19T02:00:00Z"),
     });
     assert.equal(moved.to, "todo");
-    assert.match(moved.path, /^\.harness\/tasks\/_default\/todo\//);
-    assert.equal(await missing(path.join(repo, ".harness/memory/users/README.md")), true);
+    assert.match(moved.path, /^\.edges\/tasks\/_default\/todo\//);
+    assert.equal(await missing(path.join(repo, ".edges/memory/users/README.md")), true);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }

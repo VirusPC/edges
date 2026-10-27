@@ -127,7 +127,7 @@ test("ignored users and symlink targets are never read or migrated", (t) => {
   put(".gitignore", "notes/private/\n");
   put("notes/private/secret.md", "private");
   put("edges/a.md", "# A");
-  put("edges/.harness/memory/users/private.md", "private");
+  put("edges/.edges/memory/users/private.md", "private");
   fs.symlinkSync(
     path.join(root, "notes/private/secret.md"),
     path.join(root, "edges/link.md"),
@@ -137,7 +137,7 @@ test("ignored users and symlink targets are never read or migrated", (t) => {
   applyContentUnits(planContentUnits(root));
   assert(fs.existsSync(path.join(root, "notes/private/secret.md")));
   assert(
-    fs.existsSync(path.join(root, "edges/.harness/memory/users/private.md")),
+    fs.existsSync(path.join(root, "edges/.edges/memory/users/private.md")),
   );
 });
 test("HTML comments and script examples do not claim or rewrite attachments", (t) => {

@@ -17,7 +17,7 @@ function projectNode(node: BaseNode, scopeDir: string) {
 export function addForestCommand(program: Command, ctx: CliContext): void {
   const command = program
     .command("forest")
-    .description("System forest: project-harness AGENTS roots plus Super materials");
+    .description("System forest: edges AGENTS roots plus Super materials");
   command.action(() => {
     ctx.result = usageError("missing forest command. Use edges forest --help.", "root");
   });

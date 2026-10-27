@@ -31,9 +31,9 @@ Footer stays.
 `;
 
 const modern = source
-  .replaceAll("project-memory-important", "project-harness-constraints")
-  .replaceAll("project-memory-local", "project-harness-local")
-  .replaceAll("project-memory-children", "project-harness-descendants")
+  .replaceAll("project-memory-important", "edges-constraints")
+  .replaceAll("project-memory-local", "edges-local")
+  .replaceAll("project-memory-children", "edges-descendants")
   .replaceAll("本层重要约束", "本层硬约束")
   .replaceAll("本层记忆", "本层系统维护信息")
   .replaceAll("下层记忆索引", "下层系统维护信息");
@@ -182,7 +182,7 @@ module: memory
   assert.match(rendered, /> Authored purpose\./);
   assert.doesNotMatch(
     rendered,
-    /## 本层记忆|## 本层组成|## 本层系统维护信息|project-memory-local|project-harness-local|project-memory-children/,
+    /## 本层记忆|## 本层组成|## 本层系统维护信息|project-memory-local|edges-local|project-memory-children/,
   );
   assert.deepEqual(
     new AgentsNode(node.path).parse(rendered).children.map((ref) => ref.id),

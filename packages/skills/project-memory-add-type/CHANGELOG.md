@@ -5,9 +5,14 @@ All notable changes to this skill will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
 ## [Unreleased]
 
-- 新类型入口写 `.harness/<module>/<plural>/README.md`，层入口一行链到这份 README。
+## [4.0.0] - 2026-10-27
+
+### Changed
+
+- 新类型入口写 `.edges/<module>/<plural>/README.md`，层入口一行链到这份 README。
 
 ## [3.0.0] - 2026-10-04
 

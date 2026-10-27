@@ -77,14 +77,14 @@ flowchart TD
 | commands | 命令注册、参数与 stdin 适配、stdout/stderr 和退出码 | 把 `notes create` 转成 `packages/services/notes/service` 的创建请求 |
 | services | 加载、跨节点协调、文件操作与完整业务流程 | 各领域 `service.ts`；创建 Task 后登记父 AGENTS、保存、移动整个任务目录 |
 | core | 节点基类、本层/下层索引、关系和通用块机制 | BaseNode、InternalNode.addChild、core/node-content 按传入文法解析区块 |
-| config | 入口文件名、叶子目录规则、区块标题与标记 | config/layout.ts 的 AGENTS.md、README.md、SKILL.md、INDEX.md 和 memory、task、note、project 规则；config/sections.ts 的 project-harness / project-entries 标题与标记 |
+| config | 入口文件名、叶子目录规则、区块标题与标记 | config/layout.ts 的 AGENTS.md、README.md、SKILL.md、INDEX.md 和 memory、task、note、project 规则；config/sections.ts 的 edges / project-entries 标题与标记 |
 | models | 节点自身的字段、校验、解析序列化和索引编辑 | Task 优先级校验；models/node/layout.ts 按 memory、task、note、project 判定目录类型；AgentsNode 与 ReadmeNode 经 models/node/document.ts 使用 core/node-content |
 | operations | 对多个元素进行遍历、筛选、分组、查找 | traverse、filter、groupBy、Task 数组排序 |
 | utils | 可复用的底层格式与文件机制 | gray-matter 适配、路径与文件原语 |
 
 Model 的 create/update/destroy 是内存领域方法；创建目录、保存文档等完整动作通过 Service 完成。operations 通过回调取得加载能力，不反向依赖 Service。不要让业务调用方重新拼装模型修改与文件读写。
 
-每个领域模块有 `packages/services/<module>/service.ts`。commands 只从这份主文件进入，不直接装配 `NodeService`，也不直接 import 模块里的其他文件。实现可以留在原文件，主文件 re-export 即可，不必为了统一入口把函数搬一遍。`memory` 的 `migrateMemory` 在主文件里动态 `import("./migrate.js")`：这份实现可以不随 CLI 启动加载，命令入口仍是 `service.ts`。notes 与 projects 的主文件固定各自的叶子规格，再委托共用底层。
+每个领域模块有 `packages/services/<module>/service.ts`。commands 只从这份主文件进入，不直接装配 `NodeService`，也不直接 import 模块里的其他文件。实现可以留在原文件，主文件 re-export 即可，不必为了统一入口把函数搬一遍。notes 与 projects 的主文件固定各自的叶子规格，再委托共用底层。
 
 init 的主文件是 `packages/services/init/service.ts`。`edges init` 只从这份文件进入，做公共的系统入口步骤，再依次调用各模块自己的那一段。`edges notes init`、`edges projects init`、`edges skills init`、`edges tasks init` 经各自 `service.ts` 上的薄转发，只把本模块交给 init service。`edges memory init` 从 `packages/services/memory/service.ts` 的 `initMemory` 进入，只初始化 memory。模块之间不创建对方的材料。`edges artifacts init` 仍只写 artifacts 自己的 token 配置。
 
@@ -92,7 +92,7 @@ init 的主文件是 `packages/services/init/service.ts`。`edges init` 只从�
 
 notes、projects、skills、memory、tasks、artifacts、forest 的 commands 都只调用各自的 `service.ts`。tasks list 的看板目录名、README 位置与是否存在由 `packages/services/tasks/service.ts` 回答，命令不读挂载表。审阅页仍负责读输入、选输出路径和写 HTML。artifacts 的 token 配置写入仍在 command 侧。调用点收口了，list 的遍历顺序没有改写。
 
-[解耦 CLI commands 与 Service](../../.harness/tasks/edges-extensions/done/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md) 记录了这层入口约定。`packages/services/tasks/result.ts` 仍组装命令运行时（地点、读写和时钟），审阅页命令仍负责读输入、选输出路径和写 HTML。
+[解耦 CLI commands 与 Service](../../.edges/tasks/edges-extensions/done/2026-10-06--解耦-CLI-commands-与-Service/INDEX.md) 记录了这层入口约定。`packages/services/tasks/result.ts` 仍组装命令运行时（地点、读写和时钟），审阅页命令仍负责读输入、选输出路径和写 HTML。
 
 详细设计按职责分开阅读：
 
@@ -119,37 +119,37 @@ edges --scope /absolute/project memory doctor
 
 AGENTS 的本层硬约束、本层记忆、下层索引分别对应 constraints、localChildren、descendantChildren。NodeReference 只有 id，以及可选的 name、description；作者写下的相对链接由解析和序列化层维护。
 
-每个节点可以有独立的 harness。内容叶节点的 harness 是同目录 AGENTS.md；AgentsNode 的下一层 harness 位于 `.harness/AGENTS.md`。harness 不混入 children，普通查询不会自动进入维护系统的下一层。
+每个节点可以有独立的 harness。内容叶节点的 harness 是同目录 AGENTS.md；AgentsNode 的下一层 harness 位于 `.edges/AGENTS.md`。harness 不混入 children，普通查询不会自动进入维护系统的下一层。
 
-新增父级登记跟着主体系统走。路径在该系统的 `.harness` 里进本层；另一套系统入口进下层。已有关系保留原分组。缺少 owner 时不会自动初始化；生成的 Task 项目与 Memory 类型入口使用其固定本层系统维护信息关系。
+新增父级登记跟着主体系统走。路径在该系统的 `.edges` 里进本层；另一套系统入口进下层。已有关系保留原分组。缺少 owner 时不会自动初始化；生成的 Task 项目与 Memory 类型入口使用其固定本层系统维护信息关系。
 
 ### 查询遵循索引
 
-NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认走全部组成 children（local∪descendants），含 `.harness/compose/README.md`；显式 `localOnly` 走 localChildren；根级 `--exclude` 按模块名跳过；includeHarness 才沿维护关系递归。**traverse 一次走一个系统的 `children`。Compose 子节点是被组合仓库的 `README.md`，并且只到这一层。** 多个系统由 Service 层收集并拼成森林，见[多个系统拼成森林](#多个系统拼成森林)。默认根是 scope 下真 `AGENTS.md`。显式 `--super` 在这个 scope 的上一级建 `SuperAgentsNode`：当前 scope 目录就是该超节点的 `.harness`，材料 README 按 `harness-materials.json` 的 path 直接挂在 scope 下（`tasks/README.md` 即 `<scope>/tasks/README.md`）。scope 自己的 `<scope>/.harness/` 是再下一层维护系统，由真 `AGENTS.md` 进入，超节点不把它再当成材料根。遍历仍当普通 `AgentsNode`，只走 `children`，不从真 AGENTS 并 README 边。详见 [models 设计原则](src/domain/models/README.md#设计原则树与入口)与 [operations 遍历原则](src/domain/operations/README.md#traverse-只走单个系统)。
+NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认走全部组成 children（local∪descendants），含 `.edges/compose/README.md`；显式 `localOnly` 走 localChildren；根级 `--exclude` 按模块名跳过；includeHarness 才沿维护关系递归。**traverse 一次走一个系统的 `children`。Compose 子节点是被组合仓库的 `README.md`，并且只到这一层。** 多个系统由 Service 层收集并拼成森林，见[多个系统拼成森林](#多个系统拼成森林)。默认根是 scope 下真 `AGENTS.md`。显式 `--super` 在这个 scope 的上一级建 `SuperAgentsNode`：当前 scope 目录就是该超节点的 `.edges`，材料 README 按 `edges-materials.json` 的 path 直接挂在 scope 下（`tasks/README.md` 即 `<scope>/tasks/README.md`）。scope 自己的 `<scope>/.edges/` 是再下一层维护系统，由真 `AGENTS.md` 进入，超节点不把它再当成材料根。遍历仍当普通 `AgentsNode`，只走 `children`，不从真 AGENTS 并 README 边。详见 [models 设计原则](src/domain/models/README.md#设计原则树与入口)与 [operations 遍历原则](src/domain/operations/README.md#traverse-只走单个系统)。
 
 ### 多个系统拼成森林
 
 多个系统由 Service 层收集并拼成森林。
 
-[`packages/services/node/system-roots.ts`](src/services/node/system-roots.ts) 的 `collectSystemRoots` 扫盘，收下带 `project-harness` 标记的 `AGENTS.md`。一份路径和正文算不算这种入口，由 [`models/agents/harness-agents.ts`](src/domain/models/agents/harness-agents.ts) 的 `isProjectHarnessAgentsFile` 判断；这个函数只看传入的文本。
+[`packages/services/node/system-roots.ts`](src/services/node/system-roots.ts) 的 `collectSystemRoots` 扫盘，收下带 `edges` 标记的 `AGENTS.md`。一份路径和正文算不算这种入口，由 [`models/agents/harness-agents.ts`](src/domain/models/agents/harness-agents.ts) 的 `isProjectHarnessAgentsFile` 判断；这个函数只看传入的文本。
 
 [`packages/services/node/system-forest-service.ts`](src/services/node/system-forest-service.ts) 的 `buildSystemForest` 对每个根各自做一次 traverse，得到 `BaseNode[][]`。`independent`（默认）在 resolve 遇到其它根时停住；`innermost` 在外层能走到内层时只留下内层。命令行是 `edges forest list`。
 
-超节点的 `children` 只有这一层本层挂载，`descendantChildren` 为空。表里的 path 相对当前 scope；文件不存在就跳过，不扫盘补。以本仓库根为 `--scope` 时，九条材料里只有 `tasks/README.md` 和 `README.md` 在根上，所以 `children` 就是这两份。`memory/`、`packages/skills/`、`evaluation/`、`observation/` 实际在 `.harness/` 下，根上没有同名路径，不会挂上。`.harness/tasks/README.md` 也不是这个超节点的孩子。
+超节点的 `children` 只有这一层本层挂载，`descendantChildren` 为空。表里的 path 相对当前 scope；文件不存在就跳过，不扫盘补。以本仓库根为 `--scope` 时，九条材料里只有 `tasks/README.md` 和 `README.md` 在根上，所以 `children` 就是这两份。`memory/`、`packages/skills/`、`evaluation/`、`observation/` 实际在 `.edges/` 下，根上没有同名路径，不会挂上。`.edges/tasks/README.md` 也不是这个超节点的孩子。
 
 ```text
 edges --scope <仓库根> --super
 
 虚拟超节点
-└── <仓库根>/                         ← 超节点的 .harness
+└── <仓库根>/                         ← 超节点的 .edges
       ├── tasks/README.md             ← children
       ├── README.md                   ← children
-      └── .harness/                   ← 仓库自己的维护系统，不在 children 里
+      └── .edges/                   ← 仓库自己的维护系统，不在 children 里
             ├── tasks/README.md
             └── memory/feedbacks/README.md
 ```
 
-把 `--scope` 指到 `<仓库根>/.harness` 才是下一层：这个目录本身成为超节点的 `.harness`。它的 children 是该目录下存在的 `tasks/README.md`、`memory/feedbacks/README.md`、`memory/projects/README.md`、`memory/references/README.md`、`skills/managed/README.md`、`skills/referenced/README.md`、`projects/README.md`、`notes/README.md`。这不是仓库根那一份名单。评测与观测在 `packages/evaluation/`、`packages/observation/`，不再是 harness 材料。
+把 `--scope` 指到 `<仓库根>/.edges` 才是下一层：这个目录本身成为超节点的 `.edges`。它的 children 是该目录下存在的 `tasks/README.md`、`memory/feedbacks/README.md`、`memory/projects/README.md`、`memory/references/README.md`、`skills/managed/README.md`、`skills/referenced/README.md`、`projects/README.md`、`notes/README.md`。这不是仓库根那一份名单。评测与观测在 `packages/evaluation/`、`packages/observation/`，不再是 harness 材料。
 
 默认 list 从真 `AGENTS.md` 做一次 traverse。`--all` 从当前 `--scope` 走森林。`--super` 只换根。最全的一次查询是 `--scope <仓库根> --super --all`。这三个开关都在根命令上。
 
@@ -187,7 +187,7 @@ commands 的目录对应命令树：一个文件注册一个命令节点，同�
 
 ### 任务：tasks
 
-主体系统由 `--scope` 决定。一般任务写在 `<scope>/.harness/tasks`。`--super` 把主体换成该 scope 上的虚拟系统一，它的 harness 就是这个 scope 目录，任务写在 `<scope>/tasks`。`--all` 从当前 scope 走森林。最全的一次查询是 `--scope <仓库根> --super --all`。
+主体系统由 `--scope` 决定。一般任务写在 `<scope>/.edges/tasks`。`--super` 把主体换成该 scope 上的虚拟系统一，它的 harness 就是这个 scope 目录，任务写在 `<scope>/tasks`。`--all` 从当前 scope 走森林。最全的一次查询是 `--scope <仓库根> --super --all`。
 
 ```bash
 edges --scope <directory> tasks list
@@ -227,12 +227,11 @@ edges --scope /absolute/project memory remember --type project --slug decision \
   --description "记录本项目的设计取舍" --content-file /tmp/decision.md
 edges --scope /absolute/project memory doctor
 edges --scope /absolute/project memory doctor --apply
-edges --scope /absolute/legacy-project memory migrate --recursive --dry-run
 edges memory backup --repo-dir /absolute/project
 edges memory restore --repo-dir /absolute/project --archive /private/archive.tar.gz
 ```
 
-新作用域的 `edges memory init` 未选择类型时只返回推荐项，不创建 notes、projects、skills 或 tasks 的材料。无参 `edges init` 的默认集包含 skills。`edges skills init` 既写 skill 类型索引，也把包内 skill 装给本机 agent：安装步骤是固定的 `skills@1.7.2`，只额外传入包内 skills 目录和 `--skill '*'`，`--` 之后的 token 原样转交。`skills@1.7.2` 在探测到自己跑在 agent 里时会非交互，并只装给那个 agent；没有探测到、stdin 又不是 TTY 时，不带 `-y` 会退出 1。非交互且保留自动探测时用 `edges init -- -g -y`（`-g` 装到用户目录，`-y` 跳过确认；本机没有已安装 agent 时它会装给全部 agent）。指定某一个则用 `edges init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。`--` 只在 `init` 和 `skills init` 上切开；其他命令把 `--` 和后面的 token 原样交给 commander。解析后的模块集合里没有 skills 时，这次 init 不会装，stderr 会列出被忽略的 token。memory 还在等类型选择、因而提前返回时，不因为没装 skills 而报这句。安装失败时进程退出码就是安装器的退出码，stdout 信封是 `{ status: "failed", errorCode: "SKILLS_INSTALL_FAILED", reason, created }`。`created` 是失败前已经写好的相对路径。`errorCode` 与 `VALIDATION_ERROR` 不同；不要用退出码是不是 2 来判断是不是校验错误，安装器自己也可能退出 2。校验错误仍然是退出码 2、`errorCode` 为 `VALIDATION_ERROR`。`edges tasks init` 只写任务看板。remember 不初始化缺失作用域；doctor 默认只诊断。旧 `.memory` 通过显式 `edges memory migrate` 转换，普通命令不兼容迁移。`edges init` 遇到旧层会失败，并提示先跑 `edges memory migrate --dry-run`，看完再跑不带 `--dry-run` 的同一条命令。迁移认识目录式旧布局，也认识早期平铺的大写类型索引（`FEEDBACK.md`、`PROJECT.md`、`REFERENCE.md`、`USER.md`）和根上的 `<type>_<slug>.md`；被条目用相对路径引用的附件目录跟该条目进 `<type>_<slug>/`。无法归类的路径写在 JSON 的 `diagnostics`（`unclassified-legacy-path`）里，正式迁移时挪到 `.project-memory-migration/unclassified/`，不让一个文件挡住其余条目。符号链接和路径冲突仍然整次停止。新建子作用域按路径登记到父级：`AGENTS.md` 在父级 `.harness` 下记入本层，否则记入下层。已经登记的保持原组。`edges memory doctor --apply` 按同一规则补上缺失的父级链接。
+新作用域的 `edges memory init` 未选择类型时只返回推荐项，不创建 notes、projects、skills 或 tasks 的材料。无参 `edges init` 的默认集包含 skills。`edges skills init` 既写 skill 类型索引，也把包内 skill 装给本机 agent：安装步骤是固定的 `skills@1.7.2`，只额外传入包内 skills 目录和 `--skill '*'`，`--` 之后的 token 原样转交。`skills@1.7.2` 在探测到自己跑在 agent 里时会非交互，并只装给那个 agent；没有探测到、stdin 又不是 TTY 时，不带 `-y` 会退出 1。非交互且保留自动探测时用 `edges init -- -g -y`（`-g` 装到用户目录，`-y` 跳过确认；本机没有已安装 agent 时它会装给全部 agent）。指定某一个则用 `edges init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。`--` 只在 `init` 和 `skills init` 上切开；其他命令把 `--` 和后面的 token 原样交给 commander。解析后的模块集合里没有 skills 时，这次 init 不会装，stderr 会列出被忽略的 token。memory 还在等类型选择、因而提前返回时，不因为没装 skills 而报这句。安装失败时进程退出码就是安装器的退出码，stdout 信封是 `{ status: "failed", errorCode: "SKILLS_INSTALL_FAILED", reason, created }`。`created` 是失败前已经写好的相对路径。`errorCode` 与 `VALIDATION_ERROR` 不同；不要用退出码是不是 2 来判断是不是校验错误，安装器自己也可能退出 2。校验错误仍然是退出码 2、`errorCode` 为 `VALIDATION_ERROR`。`edges tasks init` 只写任务看板。remember 不初始化缺失作用域；doctor 默认只诊断。0.3.0 起没有 `edges memory migrate`。旧 `.memory` 会让 `edges init` 失败并返回 `migration-required`；先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。新建子作用域按路径登记到父级：`AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已经登记的保持原组。`edges memory doctor --apply` 按同一规则补上缺失的父级链接。
 
 用户记忆 restore 默认拒绝覆盖，明确使用 --force 才整份替换，失败时回滚。备份和恢复接受未压缩或 gzip tar，解包上限 256 MiB、10,000 文件，拒绝硬链接；中断后若报告 `.private-user-memory-*/previous`，应保留恢复副本。模板随包复制到 dist，运行不依赖相邻 Skill 源码或 Python。
 
@@ -267,7 +266,7 @@ edges --scope <directory> skills get <name-or-path>
 edges skills delete <name-or-path>
 ```
 
-`skills create` 与 `skills update` 写入当前 scope 的 `skills/managed/<name>/SKILL.md`（真系统在 `<scope>/.harness/` 下）。`edges memory remember` 仍可另写 skill 类记忆，两者并列。没有 `edges skill` 别名。
+`skills create` 与 `skills update` 写入当前 scope 的 `skills/managed/<name>/SKILL.md`（真系统在 `<scope>/.edges/` 下）。`edges memory remember` 仍可另写 skill 类记忆，两者并列。没有 `edges skill` 别名。
 
 ### 例程：routines
 
@@ -282,7 +281,7 @@ edges --scope /absolute/project --super routines list
 edges --scope /absolute/project --all routines list
 ```
 
-`routines init`（或 `init routines`）显式采用模块，无参 `init` 的默认集不变。记录位于 `<scope>/.harness/routines/<name>/INDEX.md`，`--super` 创建与查询 `<scope>/routines/`；init 与其他模块一样只初始化真实 scope，不读 `--super`。名称为稳定的小写 kebab-case（1–64 字符），不加日期或 Project 分组。
+`routines init`（或 `init routines`）显式采用模块，无参 `init` 的默认集不变。记录位于 `<scope>/.edges/routines/<name>/INDEX.md`，`--super` 创建与查询 `<scope>/routines/`；init 与其他模块一样只初始化真实 scope，不读 `--super`。名称为稳定的小写 kebab-case（1–64 字符），不加日期或 Project 分组。
 
 `create` 需要名称和非空 `--description`，可带 `--body` 与重复的 `--metadata key=value`；`update` 修改说明、正文或 metadata。`get/update/delete` 接受名称或准确的入口路径，同名不唯一就报错。`list` 使用通用 `--filter` / `--group-by`；`--all` 只读，`--exclude routines` 排除模块。索引随 NodeService 的写入更新；查询沿已登记关系读取，不扫描目录补录孤立文件。
 
@@ -333,11 +332,11 @@ edges config show
 
 ### 组合仓库：compose
 
-作用域 `AGENTS.md` 的 `project-harness-compose` 区块登记被组合的 harness 仓库。每条是一个本地目录链接：链接文字是名字，破折号后面是说明，`remote: <git-url>` 是 git 地址。完整操作见 [`edges-compose`](../skills/edges-compose/SKILL.md)。
+作用域 `AGENTS.md` 的 `edges-compose` 区块登记被组合的 harness 仓库。每条是一个本地目录链接：链接文字是名字，破折号后面是说明，`remote: <git-url>` 是 git 地址。完整操作见 [`edges-compose`](../skills/edges-compose/SKILL.md)。
 
 底层是 git submodule，CLI 只有三个子命令，名字对应 git submodule：`add`、`list`、`update`。没有 `register`、`unregister`、`clone`、`pull`、`push`、`sync`，也没有别名；推送和去掉条目交给原生 git 和手改 `AGENTS.md`（见下文）。
 
-`add` 不传 `--path` 时，目录是仓内的 `.harness/compose/<name>`。区块里的链接永远是相对路径，相对于这份 `AGENTS.md` 所在的目录（在仓库根的 `AGENTS.md` 就是相对于 git 仓库根）。`--path` 只收相对路径，原样（规范化后）写进区块；绝对路径和 `~` 开头的路径以校验错误拒绝（退出码 2），不写区块。拒绝而不是只给 warning，是为了保证新写的区块换机器也能用。`--description` 必填，要写清这个仓存什么、什么时候该往里写；不传或传空字符串时校验失败，不写区块。
+`add` 不传 `--path` 时，目录是仓内的 `.edges/compose/<name>`。区块里的链接永远是相对路径，相对于这份 `AGENTS.md` 所在的目录（在仓库根的 `AGENTS.md` 就是相对于 git 仓库根）。`--path` 只收相对路径，原样（规范化后）写进区块；绝对路径和 `~` 开头的路径以校验错误拒绝（退出码 2），不写区块。拒绝而不是只给 warning，是为了保证新写的区块换机器也能用。`--description` 必填，要写清这个仓存什么、什么时候该往里写；不传或传空字符串时校验失败，不写区块。
 
 ```bash
 edges --scope <directory> compose add --name brain --remote https://github.com/example/brain.git --description "个人大脑：只在记跨项目判断时写入"
@@ -349,24 +348,24 @@ edges --scope <directory> compose update --remote --name brain
 
 | 命令 | 仓内条目（git submodule） | 旧条目 / 仓外条目 |
 | --- | --- | --- |
-| `add --remote` | `git -C <仓库根> submodule add -- <remote> <path>`，再写 `.harness/compose/README.md`。同一路径已是同一 URL 的子模块时只登记（JSON `submodule: "existing"`），URL 不同时报错。同名再 `add` 替换原来那一行。 | 跳过 submodule add，stderr 打 warning |
+| `add --remote` | `git -C <仓库根> submodule add -- <remote> <path>`，再写 `.edges/compose/README.md`。同一路径已是同一 URL 的子模块时只登记（JSON `submodule: "existing"`），URL 不同时报错。同名再 `add` 替换原来那一行。 | 跳过 submodule add，stderr 打 warning |
 | `list` | 列出条目；每条带 `href` 和 `initialized`（目录存在且非空） | 同左 |
 | `update` | `git submodule update --init -- <path>`，从不带 `--recursive`。条目还不在 `.gitmodules` 里时先 `submodule add`。 | 目录不存在时 `git clone`；已是同一 origin 的检出时不动 |
 | `update --remote` | `git submodule update --init --remote -- <path>`。子模块在分支上时加 `--merge`，合进该分支，不切成 detached HEAD。 | 目录不存在时 `git clone`，否则 `git pull` |
 
-`update` 的每条 `action` 是 `initialized`（原来没检出，现在有了）、`present`（已检出，没动）、`updated`（`--remote` 跟到了远端）或 `failed`。「仓内条目」指目录在 scope 所在 git 仓库的工作树里。scope 不在 git 仓库里、目录在仓库外（例如 `--path ../notes`），或区块里是旧的 `~/...` / 绝对路径时，按旧条目处理。`add` 不带 `--remote` 时只登记本地目录，不碰 git。`add` 之后 `.gitmodules` 与子模块进了主仓库的暂存区，要和 `.harness/compose/README.md` 一起提交。
+`update` 的每条 `action` 是 `initialized`（原来没检出，现在有了）、`present`（已检出，没动）、`updated`（`--remote` 跟到了远端）或 `failed`。「仓内条目」指目录在 scope 所在 git 仓库的工作树里。scope 不在 git 仓库里、目录在仓库外（例如 `--path ../notes`），或区块里是旧的 `~/...` / 绝对路径时，按旧条目处理。`add` 不带 `--remote` 时只登记本地目录，不碰 git。`add` 之后 `.gitmodules` 与子模块进了主仓库的暂存区，要和 `.edges/compose/README.md` 一起提交。
 
 `update` 逐条处理：某一条失败（git 报错、URL 与登记不符、没有 remote 等）时，这条在 `entries` 里记为 `action: "failed"` 并带 `error`，stderr 打一行 `warning: compose update failed for <名字>: <原因>`，其余条目照常执行。至少一条成功时退出码 0；全部请求的条目都失败（含 `--name` 指定的那一条失败）时非零退出，失败结果里仍带 `entries`。缺少作用域 `AGENTS.md`、`--name` 找不到条目这类错误照旧整条命令失败。
 
-推送：在子模块目录里用原生 git。子模块默认是 detached HEAD，先 `git -C .harness/compose/<name> switch <branch>`，提交后 `git -C .harness/compose/<name> push`。
+推送：在子模块目录里用原生 git。子模块默认是 detached HEAD，先 `git -C .edges/compose/<name> switch <branch>`，提交后 `git -C .edges/compose/<name> push`。
 
-去掉一条：在 `.harness/compose/README.md` 的 Compose 区块删掉那一行；要连子模块一起删时，跑 `git submodule deinit -f <path>` 和 `git rm <path>` 再提交。`ComposeReadmeNode.removeChild` 仍在，只是不再有 CLI 入口。
+去掉一条：在 `.edges/compose/README.md` 的 Compose 区块删掉那一行；要连子模块一起删时，跑 `git submodule deinit -f <path>` 和 `git rm <path>` 再提交。`ComposeReadmeNode.removeChild` 仍在，只是不再有 CLI 入口。
 
-不递归：只看当前仓库自己的条目。`update` 不初始化被组合仓库里的子模块。默认查询会展开 `compose/README.md`，子节点是被组合仓库的 `README.md`，不展开该仓库自己的 Compose。系统森林扫描默认进入 scope 自己的 `.harness/compose/`，把其中带 project-harness 标记的 `AGENTS.md` 当作系统根；被组合仓库内部的 `.harness/compose/` 不扫描。`--exclude compose` 同时跳过扫描和遍历。两个仓库互相登记也只到一层。被组合的仓库可以直接写，提交和推送用原生 git。
+不递归：只看当前仓库自己的条目。`update` 不初始化被组合仓库里的子模块。默认查询会展开 `compose/README.md`，子节点是被组合仓库的 `README.md`，不展开该仓库自己的 Compose。系统森林扫描默认进入 scope 自己的 `.edges/compose/`，把其中带 edges 标记的 `AGENTS.md` 当作系统根；被组合仓库内部的 `.edges/compose/` 不扫描。`--exclude compose` 同时跳过扫描和遍历。两个仓库互相登记也只到一层。被组合的仓库可以直接写，提交和推送用原生 git。
 
 提示：条目目录不存在或是空的（子模块还没初始化）时，`compose list` 和默认会读到该条目的命令在 stderr 打 `warning: compose entry <name> is not checked out at <href>; run edges compose update --name <name>`。`--exclude compose` 时不打这行。旧的 `~/...` / 绝对路径条目照样能读，并提示不带 `--path` 用同一个名字重新 `compose add --remote ...`，把旧行换成 `<name>/README.md`。
 
-`edges compose doctor` 只做迁移：把还写在 `AGENTS.md` 上的区块搬进 `.harness/compose/README.md`，补上材料索引链接，改写 href。默认只打印会改什么，`--apply` 才写。其它文件里的 `--with-composed` 只报告、不改写；`.agents/skills/`、CHANGELOG 和 `docs/adr/` 不列入。日常修改用 `add` / `list` / `update`。
+`edges compose doctor` 只做迁移：把还写在 `AGENTS.md` 上的区块搬进 `.edges/compose/README.md`，补上材料索引链接，改写 href。默认只打印会改什么，`--apply` 才写。其它文件里的 `--with-composed` 只报告、不改写；`.agents/skills/`、CHANGELOG 和 `docs/adr/` 不列入。日常修改用 `add` / `list` / `update`。
 
 根级 `--exclude <modules>` 与 `--scope` 同级，逗号分隔，可重复。允许 `compose, memory, skills, notes, projects, tasks, routines`。未知名字直接报错。与 `--types` 正交。没有 `--only`，也没有 `--with-composed`。
 

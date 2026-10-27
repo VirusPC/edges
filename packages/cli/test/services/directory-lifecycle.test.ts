@@ -35,7 +35,7 @@ test("directory loading separates physical parent, composition and recursive har
   );
   put("packages/skills/a/AGENTS.md", index("- [Memory](memory/index.md)"));
   put("packages/skills/a/memory/index.md", "memory");
-  put("packages/skills/a/.harness/AGENTS.md", index());
+  put("packages/skills/a/.edges/AGENTS.md", index());
   put("other/index.md", "other");
   const nodes = await service.list(root, { localOnly: true });
   assert.deepEqual(
@@ -45,7 +45,7 @@ test("directory loading separates physical parent, composition and recursive har
   assert.equal(nodes[1]?.parent?.id, file("AGENTS.md"));
   assert.equal(nodes[1]?.harness?.id, file("packages/skills/a/AGENTS.md"));
   const harness = (await service.get(nodes[1]!.harness!.id))!;
-  assert.equal(harness.harness?.id, file("packages/skills/a/.harness/AGENTS.md"));
+  assert.equal(harness.harness?.id, file("packages/skills/a/.edges/AGENTS.md"));
   assert.deepEqual(
     (await service.list(harness.path, { localOnly: true })).map((n) => n.path),
     [harness.path, file("packages/skills/a/memory/index.md")],
@@ -80,7 +80,7 @@ test("move keeps instances and relocates resources, harness and authored href su
   );
   put("a/image#one.png", "bytes");
   put("a/AGENTS.md", index());
-  put("a/.harness/AGENTS.md", index());
+  put("a/.edges/AGENTS.md", index());
   put("outside/index.md", "extra prose [back](../a/SKILL.md#anchor)");
   const root = (await service.get(file("AGENTS.md"), AgentsNode))!;
   root.addChild("local", { id: file("outside/index.md") });
@@ -92,7 +92,7 @@ test("move keeps instances and relocates resources, harness and authored href su
   assert.equal(copy.path, node.path);
   assert.equal(harness.path, file("deep/b/AGENTS.md"));
   assert.equal(fs.existsSync(file("a")), false);
-  assert.equal(fs.existsSync(file("deep/b/.harness/AGENTS.md")), true);
+  assert.equal(fs.existsSync(file("deep/b/.edges/AGENTS.md")), true);
   assert.match(
     fs.readFileSync(file("AGENTS.md"), "utf8"),
     /deep\/b\/SKILL.md\?view=1#top/,
@@ -168,7 +168,7 @@ test("destroy co-located harness preserves content; destroy Internal deletes uni
     "---\nname: fixture\ndescription: Test fixture\n---\nskill",
   );
   put("a/AGENTS.md", index());
-  put("a/.harness/AGENTS.md", index());
+  put("a/.edges/AGENTS.md", index());
   put("a/asset", "asset");
   const skill = (await service.get(file("a/SKILL.md")))!;
   await service.destroy((await service.get(file("a/AGENTS.md")))!);

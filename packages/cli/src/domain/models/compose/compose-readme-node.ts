@@ -20,7 +20,7 @@ export interface ComposeEntry {
 export interface ComposeCheckout {
   name: string;
   directory: string;
-  /** Authored link target, relative to `.harness/compose/` for new entries. */
+  /** Authored link target, relative to `.edges/compose/` for new entries. */
   href: string;
   remote?: string;
 }
@@ -60,17 +60,17 @@ export function composeReadmeSeed(): string {
   // the markers opens the section, and the markers then open it again.
   return `# 被组合的 harness 仓库
 
-<!-- project-harness-compose:start -->
+<!-- edges-compose:start -->
 ## 组合
 
-<!-- project-harness-compose:end -->
+<!-- edges-compose:end -->
 `;
 }
 
 /** Remove a Compose block, including its markers. */
 export function stripComposeBlock(source: string): string {
   const stripped = source.replace(
-    /\r?\n?<!-- project-harness-compose:start -->[\s\S]*?<!-- project-harness-compose:end -->\r?\n?/g,
+    /\r?\n?<!-- edges-compose:start -->[\s\S]*?<!-- edges-compose:end -->\r?\n?/g,
     "\n",
   );
   return stripped.replace(/\n{3,}/g, "\n\n");
@@ -155,7 +155,7 @@ export function composeEntryLocation(ownerFile: string, href: string): { directo
 
 /**
  * `--path` is a checkout directory relative to the scope. The href stored in
- * `compose/README.md` is that checkout's README, relative to `.harness/compose/`.
+ * `compose/README.md` is that checkout's README, relative to `.edges/compose/`.
  */
 export function hrefForScopeCheckout(composeFile: string, scopeDir: string, raw: string): string {
   const relative = relativeComposeHref(scopeDir, raw);
@@ -183,7 +183,7 @@ function singleDirectoryName(name: string): boolean {
 }
 
 /**
- * Real module entry for Compose: `<scope>/.harness/compose/README.md`.
+ * Real module entry for Compose: `<scope>/.edges/compose/README.md`.
  * Subclasses ReadmeNode. The compose block is the child list; each child id is
  * the composed repository's `README.md`. Children are not descended into
  * (no recursive Compose).

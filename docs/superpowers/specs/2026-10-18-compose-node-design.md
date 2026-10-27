@@ -1,10 +1,10 @@
 # Compose 虚拟节点
 
-> 2026-10-20 更新：默认检出目录与路径规则已由 [ADR 0042](../../adr/0042-compose-on-git-submodule.md) 取代。现在底层是 git submodule，默认装到仓内 `.harness/compose/<name>`，区块只写相对路径。下文的 `~/.edges/composed/<name>` 与绝对路径写法是当时的设计，仅作历史记录。
+> 2026-10-20 更新：默认检出目录与路径规则已由 [ADR 0042](../../adr/0042-compose-on-git-submodule.md) 取代。现在底层是 git submodule，默认装到仓内 `.edges/compose/<name>`，区块只写相对路径。下文的 `~/.edges/composed/<name>` 与绝对路径写法是当时的设计，仅作历史记录。
 
 状态：方案，2026-10-18。本文件只定模型，不含实现。基线是 `main` 的 `56850a06`。
 
-磁盘格式沿用 ADR 0034：组合条目仍写在所属 `AGENTS.md` 的 `project-harness-compose` 区块，链接指向本地目录，`remote: <git-url>` 写在说明里。本方案改的是这块文本在 Domain 里的节点形状。
+磁盘格式沿用 ADR 0034：组合条目仍写在所属 `AGENTS.md` 的 `edges-compose` 区块，链接指向本地目录，`remote: <git-url>` 写在说明里。本方案改的是这块文本在 Domain 里的节点形状。
 
 ## 现状
 
@@ -30,7 +30,7 @@
 - `BaseNode` / `AgentsNode` 去掉 `composeChildren`。
 - 默认 list / query 只含当前 scope 内的节点，不走进 Compose 边。根级 `--with-composed` 在这份结果上再带上已被组合进来的外部仓库入口，并且只到该入口这一层。
 - 无类型 list 不 yield `ComposeNode`。`--with-composed` 时 traverse 穿过挂载点，yield 外部仓库的真实入口。
-- 序列化时 `AgentsNode` 读写该子节点，写回 `project-harness-compose`。
+- 序列化时 `AgentsNode` 读写该子节点，写回 `edges-compose`。
 - clone / pull / push 的目录和 remote 由 `ComposeNode` 给出。git 进程仍在 Service。
 - `edges compose register` 的 `--path` 可选。不传时检出目录是 `~/.edges/composed/<name>`，`<name>` 为 `--name`。显式 `--path` 使用传入值。默认检出在用户主目录：同一外部仓在本机一份，多个工作空间登记同一条路径。
 - 依赖方向保持 models → core。core 不知道标记名、remote 语法和 git。
@@ -43,7 +43,7 @@
 packages/cli/src/domain/models/
 ├── agents/
 │   ├── agents-node.ts       # AgentsNode。一条 compose 边，序列化时读写 ComposeNode
-│   └── harness-agents.ts    # 判断路径和正文是不是带 project-harness 的 AGENTS.md
+│   └── harness-agents.ts    # 判断路径和正文是不是带 edges 的 AGENTS.md
 ├── super-agents/
 │   └── super-agents-node.ts # SuperAgentsNode extends AgentsNode
 ├── compose/
@@ -119,7 +119,7 @@ Compose 实现 PR 不再夹带这次搬家。`ComposeNode` 从第一天就放在
 
 **`--with-composed` 才走 Compose 边。** 这是根级参数，与 `--scope`、`--super`、`--all` 同级，对应 `NodeQueryOptions.withComposed`。它在当前 scope 的结果上再带上已被组合进来的外部仓库。打开后，访问顺序在结构 children 之后加上 `node.compose` 这一条。traverse 穿过 `<所属目录>/.compose/README.md`，yield 每个被组合仓库的入口 `AGENTS.md`。停在这一层：不沿该入口的 children 再往下，包括它的下层。该入口若同时由当前 scope 里的普通组成边指到，那条边按既有的 `localOnly` 与 `includeHarness` 展开。
 
-`localOnly` 只收当前 scope 的本层 children。它不打开 Compose 边。`includeHarness` 只打开下一层 `.harness/AGENTS.md`。Compose 用自己的开关，不复用 `includeHarness`。
+`localOnly` 只收当前 scope 的本层 children。它不打开 Compose 边。`includeHarness` 只打开下一层 `.edges/AGENTS.md`。Compose 用自己的开关，不复用 `includeHarness`。
 
 参数名是 `--with-composed`。它与 `--scope`、`--super`、`--all` 同级，表示在当前 scope 的结果上再带上已被组合进来的外部仓库。`edges compose` 是登记与 git 子命令，和这个遍历开关不是同一个入口。
 
@@ -133,7 +133,7 @@ Compose 实现 PR 不再夹带这次搬家。`ComposeNode` 从第一天就放在
 
 ## 持久化
 
-所属 `AGENTS.md` 仍是唯一文件。`InternalSyntax` 的 compose 段不变：标题「组合」，标记 `project-harness-compose`。
+所属 `AGENTS.md` 仍是唯一文件。`InternalSyntax` 的 compose 段不变：标题「组合」，标记 `edges-compose`。
 
 读：段内链接 → `ComposeNode` 内部记录。说明里的 `remote:` 解析成字段 `remote`，其余文字是 `description`。原文后缀留着，字段未改时原样写回。
 
@@ -180,7 +180,7 @@ Service 执行 `git`。它先取 `AgentsNode.composeNode().checkout(name)`，再
 - **让 `ComposeNode` 自己执行 git。** 模型不做 IO。
 - **默认检出放进当前仓库。** 同一外部仓在本机只 clone 一份，目录是用户主目录下的 `~/.edges/composed/<name>`，多个工作空间登记这一条路径。
 - **用 `localOnly` 打开 Compose 边。** `localOnly` 只决定当前 scope 的本层范围。Compose 由 `--with-composed` 决定。
-- **用 `includeHarness` 打开 Compose 边。** `includeHarness` 只打开下一层 `.harness/AGENTS.md`。
+- **用 `includeHarness` 打开 Compose 边。** `includeHarness` 只打开下一层 `.edges/AGENTS.md`。
 - **默认 list 带上外部仓库，或 `--with-composed` 继续展开该仓库的下层。** 默认只含当前 scope。`--with-composed` 只到外部仓库入口这一层。
 - **无类型 list yield `ComposeNode`。** 挂载点只给 traverse、图和 `checkout` 用。
 - **先把 `ComposeNode` 放进 `agents/`，以后再拆目录。** 目录规则在本方案里一次定清。

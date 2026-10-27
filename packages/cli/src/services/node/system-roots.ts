@@ -32,9 +32,9 @@ function inDirectory(file: string, dir: string): boolean {
 }
 
 /**
- * Recursively collect AGENTS.md roots that carry project-harness markers. Stable sort.
- * The scope's own `.harness/compose/` is scanned unless `exclude` contains `compose`.
- * A composed repository's own `.harness/compose/` is never scanned (no recursive Compose).
+ * Recursively collect AGENTS.md roots that carry edges markers. Stable sort.
+ * The scope's own `.edges/compose/` is scanned unless `exclude` contains `compose`.
+ * A composed repository's own `.edges/compose/` is never scanned (no recursive Compose).
  * `--exclude <module>` also skips that module directory under the scope.
  */
 export function collectSystemRoots(scopeDir: string, exclude?: ReadonlySet<string>): string[] {
@@ -55,7 +55,7 @@ export function collectSystemRoots(scopeDir: string, exclude?: ReadonlySet<strin
       if (entry.isDirectory()) {
         if (SKIP_DIR_NAMES.has(entry.name)) continue;
         if (isHarnessComposeDir(dir, entry.name)) {
-          const scopeCompose = resolve(dir) === resolve(join(scopeDir, ".harness"));
+          const scopeCompose = resolve(dir) === resolve(join(scopeDir, ".edges"));
           // Only the scope's own compose directory is part of this forest, and only by default.
           if (!scopeCompose || exclude?.has("compose")) continue;
         } else if (exclude?.has(entry.name) && isScopeModuleDir(dir, entry.name, scopeDir)) {

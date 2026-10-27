@@ -54,7 +54,7 @@ function fixtureWithDescendantTask(t: { after(fn: () => void): void }) {
   writeFileSync(agents, new AgentsNode(agents).create({
     descendantChildren: [{ id: path.join(root, "tasks/AGENTS.md") }],
   }, { operation: "create" }).serialize());
-  const harnessTask = path.join(root, ".harness/tasks/_default/todo/keep/index.md");
+  const harnessTask = path.join(root, ".edges/tasks/_default/todo/keep/index.md");
   mkdirSync(path.dirname(harnessTask), { recursive: true });
   writeFileSync(harnessTask, new TaskNode(harnessTask).create({
     name: "Keep", status: "todo",
@@ -73,7 +73,7 @@ test("tasks list follows descendant systems through traverse", async (t) => {
   const superListed = await run(["--scope", root, "--super", "tasks", "list"], { env: {} });
   assert.equal(superListed.exitCode, 0, superListed.stdout + superListed.stderr);
   const superTasks = JSON.parse(superListed.stdout).tasks as { path: string }[];
-  assert.ok(superTasks.every((task) => !task.path.includes(".harness/tasks/")));
+  assert.ok(superTasks.every((task) => !task.path.includes(".edges/tasks/")));
 });
 
 test("--all traverses the forest from the given scope", async (t) => {

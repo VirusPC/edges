@@ -270,7 +270,7 @@ test("import leaves source and parent index untouched when preflight validation 
     "source/SKILL.md",
     "---\nname: fixture\ndescription: Test fixture\n---\nsource",
   );
-  write("source/.harness/AGENTS.md", index("- [Missing](missing/index.md)"));
+  write("source/.edges/AGENTS.md", index("- [Missing](missing/index.md)"));
   const before = fs.readFileSync(file("AGENTS.md"), "utf8");
   await assert.rejects(
     service.import(file("source/SKILL.md"), file("new/SKILL.md"), { indexGroup: "local" }),

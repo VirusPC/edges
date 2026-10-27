@@ -39,21 +39,21 @@ format: ordinary
 
 > intro
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
 - [x](project_x/INDEX.md) — x
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 `;
 
 const layer = `# Layer
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
-- [project](<.harness/memory/projects/AGENTS.md>) — p
-- [根维护任务](<.harness/tasks/AGENTS.md>) — board
+- [project](<.edges/memory/projects/AGENTS.md>) — p
+- [根维护任务](<.edges/tasks/AGENTS.md>) — board
 - [领域任务](<tasks/AGENTS.md>) — domain
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 `;
 
 test("convertTypeIndexSource renames harness list markers to project-entries", () => {
@@ -61,29 +61,29 @@ test("convertTypeIndexSource renames harness list markers to project-entries", (
   assert.match(out, /<!-- project-memory-type:start -->/);
   assert.match(out, /<!-- project-entries-local:start -->\n## 本层内容/);
   assert.match(out, /- \[x\]\(project_x\/INDEX\.md\) — x/);
-  assert.doesNotMatch(out, /project-harness-local/);
+  assert.doesNotMatch(out, /edges-local/);
   assert.doesNotMatch(out, /本层系统维护信息/);
 });
 
 const stub = `# MANAGED
 
-<!-- project-harness:start -->
+<!-- edges:start -->
 
-<!-- project-harness-constraints:start -->
+<!-- edges-constraints:start -->
 ## 本层硬约束
 
 - 本目录有项目记忆。提问或动手前用 \`$project-memory-ask\`；该沉淀用 \`$project-memory-remember\`。本轮查过不重复。
-<!-- project-harness-constraints:end -->
+<!-- edges-constraints:end -->
 
-<!-- project-harness:end -->
+<!-- edges:end -->
 `;
 
 test("apply moves the type index to README and deletes memory and skills stubs", async (t) => {
   const root = fixture(t, {
     "AGENTS.md": layer,
-    ".harness/memory/projects/AGENTS.md": typeIndex,
-    ".harness/skills/managed/AGENTS.md": stub,
-    ".harness/skills/managed/README.md": `<!-- project-memory-type:start -->
+    ".edges/memory/projects/AGENTS.md": typeIndex,
+    ".edges/skills/managed/AGENTS.md": stub,
+    ".edges/skills/managed/README.md": `<!-- project-memory-type:start -->
 name: managed
 module: skills
 writable: true
@@ -99,43 +99,43 @@ format: skills
 - [method](method/SKILL.md) — method
 <!-- project-entries-local:end -->
 `,
-    ".harness/tasks/AGENTS.md": "# tasks\n\n<!-- project-harness-constraints:start -->\n## 本层硬约束\n\n- keep\n<!-- project-harness-constraints:end -->\n",
-    ".harness/tasks/README.md": "# tasks\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Default](<_default/README.md>)\n<!-- project-entries-local:end -->\n",
+    ".edges/tasks/AGENTS.md": "# tasks\n\n<!-- edges-constraints:start -->\n## 本层硬约束\n\n- keep\n<!-- edges-constraints:end -->\n",
+    ".edges/tasks/README.md": "# tasks\n\n<!-- project-entries-local:start -->\n## 本层内容\n\n- [Default](<_default/README.md>)\n<!-- project-entries-local:end -->\n",
     "tasks/AGENTS.md":
-      "# domain tasks\n\n<!-- project-harness-constraints:start -->\n## 本层硬约束\n\n共同看板约定见[维护看板](../.harness/tasks/AGENTS.md)。\n<!-- project-harness-constraints:end -->\n",
+      "# domain tasks\n\n<!-- edges-constraints:start -->\n## 本层硬约束\n\n共同看板约定见[维护看板](../.edges/tasks/AGENTS.md)。\n<!-- edges-constraints:end -->\n",
     "tasks/README.md": "# domain readme\n",
     "extensions/skills/project-memory-init/AGENTS.md": "# skill package\n",
-    ".harness/memory/users/AGENTS.md": typeIndex.replace("name: project", "name: user"),
+    ".edges/memory/users/AGENTS.md": typeIndex.replace("name: project", "name: user"),
   });
   const plan = planTypeIndexSplit(root);
   assert.deepEqual(
     plan.migrations.map((m) => path.relative(root, m.from)),
-    [".harness/memory/projects/AGENTS.md"],
+    [".edges/memory/projects/AGENTS.md"],
   );
   assert.deepEqual(
     plan.deletions.map((d) => path.relative(root, d.path)),
-    [".harness/skills/managed/AGENTS.md"],
+    [".edges/skills/managed/AGENTS.md"],
   );
   assert.equal(plan.conflicts.length, 0);
   assert.ok(plan.skipped.some((s) => s.path.includes("users")));
   await applyTypeIndexSplit(plan);
-  const readme = read(root, ".harness/memory/projects/README.md");
+  const readme = read(root, ".edges/memory/projects/README.md");
   assert.match(readme, /project-entries-local/);
   assert.match(readme, /project_x\/INDEX\.md/);
-  assert.equal(fs.existsSync(path.join(root, ".harness/memory/projects/AGENTS.md")), false);
-  assert.equal(fs.existsSync(path.join(root, ".harness/skills/managed/AGENTS.md")), false);
-  assert.match(read(root, ".harness/skills/managed/README.md"), /project-memory-type/);
+  assert.equal(fs.existsSync(path.join(root, ".edges/memory/projects/AGENTS.md")), false);
+  assert.equal(fs.existsSync(path.join(root, ".edges/skills/managed/AGENTS.md")), false);
+  assert.match(read(root, ".edges/skills/managed/README.md"), /project-memory-type/);
   const top = read(root, "AGENTS.md");
-  assert.match(top, /\.harness\/memory\/projects\/README\.md/);
-  assert.match(top, /\.harness\/tasks\/README\.md/);
+  assert.match(top, /\.edges\/memory\/projects\/README\.md/);
+  assert.match(top, /\.edges\/tasks\/README\.md/);
   assert.match(top, /\]\(<tasks\/AGENTS\.md>\)/);
   assert.doesNotMatch(top, /\]\(<tasks\/README\.md>\)/);
-  assert.match(read(root, ".harness/tasks/AGENTS.md"), /keep/);
-  assert.match(read(root, "tasks/AGENTS.md"), /\.\.\/\.harness\/tasks\/AGENTS\.md/);
-  assert.doesNotMatch(read(root, "tasks/AGENTS.md"), /\.\.\/\.harness\/tasks\/README\.md/);
+  assert.match(read(root, ".edges/tasks/AGENTS.md"), /keep/);
+  assert.match(read(root, "tasks/AGENTS.md"), /\.\.\/\.edges\/tasks\/AGENTS\.md/);
+  assert.doesNotMatch(read(root, "tasks/AGENTS.md"), /\.\.\/\.edges\/tasks\/README\.md/);
   assert.equal(read(root, "extensions/skills/project-memory-init/AGENTS.md"), "# skill package\n");
-  assert.match(read(root, ".harness/memory/users/AGENTS.md"), /name: user/);
-  assert.match(read(root, ".harness/memory/users/AGENTS.md"), /project_x/);
+  assert.match(read(root, ".edges/memory/users/AGENTS.md"), /name: user/);
+  assert.match(read(root, ".edges/memory/users/AGENTS.md"), /project_x/);
 
   const again = planTypeIndexSplit(root);
   assert.equal(again.migrations.length, 0);

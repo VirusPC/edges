@@ -62,7 +62,7 @@ export function indexFiles(): Record<string, string> {
   return Object.fromEntries(
     [
       ...extractBlock(LOCAL_START, LOCAL_END).matchAll(
-        /\]\((\.harness\/(?:memory|skills)\/([^/]+)\/(?:README|AGENTS)\.md)\)/g,
+        /\]\((\.edges\/(?:memory|skills)\/([^/]+)\/(?:README|AGENTS)\.md)\)/g,
       ),
     ].map((m) => [typeFromDirName(m[2]!), m[1]!]),
   );

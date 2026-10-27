@@ -10,9 +10,9 @@ export const ENTRY_NAMES = {
 /**
  * Default Compose checkout root when `edges compose add` omits `--path`.
  * Relative to the scope directory; each entry is a git submodule at
- * `.harness/compose/<name>`. The module entry is `.harness/compose/README.md`.
+ * `.edges/compose/<name>`. The module entry is `.edges/compose/README.md`.
  */
-export const COMPOSED_CHECKOUT_ROOT = ".harness/compose";
+export const COMPOSED_CHECKOUT_ROOT = ".edges/compose";
 
 /** Pre-migration spelling of the leaf entry; still read everywhere, never created. */
 export const LEGACY_LEAF_ENTRY = "index.md";

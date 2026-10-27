@@ -116,7 +116,7 @@ function addRootCommand(
     )
     .option(
       "--super",
-      "Root at a runtime SuperAgentsNode mounting harness-materials README paths (never written to disk)",
+      "Root at a runtime SuperAgentsNode mounting edges-materials README paths (never written to disk)",
     )
     .option(
       "--all",

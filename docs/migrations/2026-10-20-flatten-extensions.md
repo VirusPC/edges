@@ -1,5 +1,7 @@
 # 2026-10-20：取消 `extensions/`，平铺到仓库根
 
+2026-10-27 起材料目录叫 `.edges`。本表里的材料目录前缀已写成这个现行名；当时的目录名是 `.harness`。对照见 [更名说明](2026-10-27-rename-harness-to-edges.md)。
+
 决定见 [ADR 0040](../adr/0040-flatten-extensions-posts-to-personal-repo.md)。旧路径硬切，不留软链。仓外写死旧路径的配置按本表改。同日稍后这些目录又收进 `packages/`，现行路径见 [workspace 说明](2026-10-20-packages-workspace.md)。下表是平铺当时的落点。
 
 | 旧路径 | 新路径 |
@@ -10,7 +12,7 @@
 | `extensions/services/` | [`services/`](../../services/) |
 | `extensions/mcp-servers/` | [`mcp-servers/`](../../mcp-servers/) |
 | `extensions/system-prompt/` | [`system-prompt/`](../../system-prompt/) |
-| `extensions/.harness/` | 并入根 [`.harness/`](../../.harness/) |
+| `extensions/.edges/` | 并入根 [`.edges/`](../../.edges/) |
 | `extensions/AGENTS.md` | 硬约束并入根 [`AGENTS.md`](../../AGENTS.md) |
 | `extensions/README.md` | 目录表在根 [`README.md`](../../README.md)；收录标准与接入准则在 [`docs/architecture.md`](../architecture.md) |
 | `extensions/docs/`、`extensions/tools/`、`extensions/subagents/` | 空占位，已删除 |

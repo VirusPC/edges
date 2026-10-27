@@ -17,9 +17,9 @@ function fixture(t: any) {
 const ownerText = (local: string, tail = "") =>
   `# Owner\n\n<!-- authored: keep -->\n<!-- project-memory-important:start -->\nImportant manual text.\n<!-- project-memory-important:end -->\n<!-- project-memory-local:start -->\n## Authored pointers\n\n${local}\n<!-- project-memory-local:end -->\n${tail}`;
 for (const [kind, href] of [
-  ["plain", ".harness/memory/projects/README.md"],
-  ["angle", "<.harness/memory/projects/README.md>"],
-  ["encoded-angle", "<.harness/memory/%70rojects/README.md#entries>"],
+  ["plain", ".edges/memory/projects/README.md"],
+  ["angle", "<.edges/memory/projects/README.md>"],
+  ["encoded-angle", "<.edges/memory/%70rojects/README.md#entries>"],
 ] as const) {
   test(`Memory ${kind} local adoption recognizes missing type indexes and Doctor preserves authored links`, async (t) => {
     const root = fixture(t);
@@ -32,7 +32,7 @@ for (const [kind, href] of [
       fs.readFileSync(join(root, "AGENTS.md"), "utf8"),
       rewriteLayerSurface(text),
     );
-    fs.unlinkSync(join(root, ".harness/memory/projects/README.md"));
+    fs.unlinkSync(join(root, ".edges/memory/projects/README.md"));
     assert.deepEqual(
       layerTypeSpecs(root).map((spec) => spec.name),
       ["project"],
@@ -52,7 +52,7 @@ for (const [kind, href] of [
 for (const kind of ["descendant", "prose", "local-prose"] as const)
   test(`Memory ${kind} references do not adopt a local type`, async (t) => {
     const root = fixture(t),
-      line = "- [projects](<.harness/memory/%70rojects/README.md>) — not local";
+      line = "- [projects](<.edges/memory/%70rojects/README.md>) — not local";
     const tail =
       kind === "descendant"
         ? `<!-- project-memory-children:start -->\n${line}\n<!-- project-memory-children:end -->\n`
@@ -76,7 +76,7 @@ test("AgentsNode generated local references are recognized as adopted types", as
   const root = fixture(t),
     node = new AgentsNode(join(root, "AGENTS.md")).parse(ownerText(""));
   node.addChild("local", {
-    id: join(root, ".harness/memory/projects/README.md"),
+    id: join(root, ".edges/memory/projects/README.md"),
     name: "projects",
     description: "project context",
   });
@@ -109,14 +109,14 @@ test("reviewed restored owners adopt and register their types with only expected
     "extensions/skills/project-memory-init",
     "shared-extensions",
     "knowledge/notes",
-    ".harness/tasks",
+    ".edges/tasks",
   ];
   for (const edit of manifest.edits) {
     if (
       !owners.some(
         (owner) =>
           edit.path === `${owner}/AGENTS.md` ||
-          edit.path.startsWith(`${owner}/.harness/`),
+          edit.path.startsWith(`${owner}/.edges/`),
       )
     )
       continue;
@@ -152,19 +152,19 @@ test("reviewed restored owners adopt and register their types with only expected
     );
   }
 });
-test("existing type files still require a .harness/README.md edge rather than a descendant or prose reference", async (t) => {
+test("existing type files still require a .edges/README.md edge rather than a descendant or prose reference", async (t) => {
   const root = fixture(t);
   await initMemory({ targetDir: root, memoryTypes: ["project"] });
   const line =
-    "- [projects](<.harness/memory/%70rojects/README.md>) — descendant";
+    "- [projects](<.edges/memory/%70rojects/README.md>) — descendant";
   fs.writeFileSync(
     join(root, "AGENTS.md"),
     ownerText(
-      "[prose](<.harness/memory/projects/README.md>)",
+      "[prose](<.edges/memory/projects/README.md>)",
       `<!-- project-memory-children:start -->\n${line}\n<!-- project-memory-children:end -->\n`,
     ),
   );
-  const index = join(root, ".harness/README.md");
+  const index = join(root, ".edges/README.md");
   fs.writeFileSync(index, fs.readFileSync(index, "utf8").replace(/^- .*\n/gm, ""));
   const findings = (await doctorMemory({ targetDir: root })).findings;
   assert.equal(

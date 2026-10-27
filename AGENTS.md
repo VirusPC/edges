@@ -1,14 +1,14 @@
 # Agent Developer Guide
 
-你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 CLI / skill / MCP / 应用与服务、维护 `.harness/` 里讲 Edges 本身的记忆与任务，以及 `packages/evaluation/`、`packages/observation/` 里的评测与观测。
+你是维护 Edges 系统的 AI 工程师：维护仓库基础设施、开发 CLI / skill / MCP / 应用与服务、维护 `.edges/` 里讲 Edges 本身的记忆与任务，以及 `packages/evaluation/`、`packages/observation/` 里的评测与观测。
 
-本仓 `VirusPC/edges` 只放 Edges 框架本身（`packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/`、协议、ADR、架构文档）。个人知识（笔记、Edge、教学、复盘、领域任务、shared-extensions、对外博客成稿等）写在个人主干仓，由使用方用 `edges compose` 挂到自己的 `.harness/compose/README.md`；不要写进本仓。2026-10-20 拆仓前的历史、PR 与 Actions 记录都留在个人仓，最后一个拆仓前提交是 `025904fa29bcc6970f45c654d95e30c5390d43d7`。2026-10-20 起不再有 `extensions/` 这一层，映射见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。同日代码目录收进 `packages/`，映射见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
+本仓 `VirusPC/edges` 只放 Edges 框架本身（`packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/`、协议、ADR、架构文档）。个人知识（笔记、Edge、教学、复盘、领域任务、shared-extensions、对外博客成稿等）写在个人主干仓，由使用方用 `edges compose` 挂到自己的 `.edges/compose/README.md`；不要写进本仓。2026-10-20 拆仓前的历史、PR 与 Actions 记录都留在个人仓，最后一个拆仓前提交是 `025904fa29bcc6970f45c654d95e30c5390d43d7`。2026-10-20 起不再有 `extensions/` 这一层，映射见 [平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)。同日代码目录收进 `packages/`，映射见 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。
 
 Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](CONTEXT.md)；AGENTS.md 组织入口发现，各规范正文按职责保持单一真源。
 
-<!-- project-harness:start -->
+<!-- edges:start -->
 
-<!-- project-harness-constraints:start -->
+<!-- edges-constraints:start -->
 ## 本层硬约束
 
 - 本目录有项目记忆。提问或动手前用 `$project-memory-ask`；该沉淀用 `$project-memory-remember`。本轮查过不重复。
@@ -18,27 +18,28 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 - Git：`type: subject`；AI 参与加 `Co-authored-by`；不提交 `.obsidian/workspace.json`；`pull` / `rebase` 加 `--autostash`。
 - 本机修改本仓（commit/push 或改工作树文件）必须通过独立 `git worktree`：每个 Agent/任务一个 worktree + 独立分支；禁止多 Agent 共用同一工作树并行改文件或切分支；同一分支不得挂两个 worktree。Cursor 云端 Agent 等已在独立 clone/环境中的任务视为已隔离，不要求再套本机 worktree；只读查询可不建 worktree。
 - 不绑定 Edges 的通用 skill / MCP 配置 / plugin / hook 不放本仓，去个人仓的 `shared-extensions/`。
-- 顶层 `edges` 命令能对上 harness 或领域目录时，命令名跟目录（`notes/` → `notes`，`.harness/skills` → `skills`）。硬切断，不留旧名别名。`tasks`、`memory` 已对齐则不动。不为 `observation` 发明命令。`evaluation` 只提供已定的长驻服务入口 `edges evaluation server`，不另开评测内容命令。
+- 顶层 `edges` 命令能对上 harness 或领域目录时，命令名跟目录（`notes/` → `notes`，`.edges/skills` → `skills`）。硬切断，不留旧名别名。`tasks`、`memory` 已对齐则不动。不为 `observation` 发明命令。`evaluation` 只提供已定的长驻服务入口 `edges evaluation server`，不另开评测内容命令。
 - 内容节点的 create/get/update/destroy 必须走 NodeService，不得旁路写文件（[ADR 0030](docs/adr/0030-content-leaf-crud-via-nodeservice.md)）。
+- 材料目录固定为 `.edges/`。层标记是 `edges` / `edges-*`（外层、constraints、local、descendants、compose）。硬切断，不双读 `.harness` 或 `project-harness`。此布局在 [ADR 0047](docs/adr/0047-rename-harness-directory-to-edges.md) 之后冻结，不借更名改模块结构。
 - 对本仓任务卡做 grill-with-docs（或同类 grill）细化时：达成共识后、动手改代码前，必须先写 html-plan（正文用中文），并用 `edges artifacts publish` 发布预览链接交给用户；用户确认（Respond / 明确 OK）后再实现。不要跳过 plan / publish；对话同步用中文。
-<!-- project-harness-constraints:end -->
+<!-- edges-constraints:end -->
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 下面这些是索引，不是正文。按条目说明挑要读的，再打开对应内容。
 
-- [本层 harness 材料索引](<.harness/README.md>) — 本层 harness 材料的组织清单。各材料只在这里登记。
+- [本层 harness 材料索引](<.edges/README.md>) — 本层 harness 材料的组织清单。各材料只在这里登记。
 - [目录与内容说明](<README.md>) — 目录与内容说明入口。
 - [领域术语](<CONTEXT.md>) — 领域术语入口。
 - [架构决策](<docs/adr/>) — 架构决策入口。
-- [.harness/tasks/AGENTS.md](<.harness/tasks/AGENTS.md>) — tasks 目录的项目记忆与规范入口。
-<!-- project-harness-local:end -->
+- [.edges/tasks/AGENTS.md](<.edges/tasks/AGENTS.md>) — tasks 目录的项目记忆与规范入口。
+<!-- edges-local:end -->
 
-<!-- project-harness-descendants:start -->
+<!-- edges-descendants:start -->
 ## 下层系统维护信息
 - [project-memory-init](<packages/skills/project-memory-init/AGENTS.md>) — project-memory 系列 skill 的项目记忆与规范入口。
 - [evaluation](<packages/evaluation/AGENTS.md>) — evaluation 目录的项目记忆与规范入口。
 - [observation](<packages/observation/AGENTS.md>) — observation 目录的项目记忆与规范入口。
 
-<!-- project-harness-descendants:end -->
-<!-- project-harness:end -->
+<!-- edges-descendants:end -->
+<!-- edges:end -->

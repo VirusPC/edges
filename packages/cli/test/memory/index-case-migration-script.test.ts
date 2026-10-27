@@ -31,18 +31,18 @@ const names = (root: string, rel: string) =>
 
 const rootAgents = `# Root
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 - [guide](<guide/AGENTS.md>) — g
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 `;
 const guideAgents = `# Guide
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 - [Alpha 笔记](<notes/alpha 一/index.md#top>) — alpha
 - [Beta](notes/beta/index.md) — beta
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 `;
 const note = (name: string, body = "") =>
   `---\nname: ${name}\ndescription: ${name}\nmetadata:\n  edges-type: note\n---\n${body}\n`;

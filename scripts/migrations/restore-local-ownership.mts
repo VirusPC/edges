@@ -365,7 +365,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
   const recovery = safePath(root, ".ownership-correction/private.json");
   if (!migration.present(journal))
     return review(
-      ".harness",
+      ".edges",
       "missing-local-journal: ownership of promoted private content is unresolved",
     );
   if (
@@ -433,9 +433,9 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
         !isAbsolute(directory) ||
         !isWithinPath(directory, root)
       )
-        return review(".harness", "private-directory-outside-clone");
+        return review(".edges", "private-directory-outside-clone");
       const rel = relative(root, directory);
-      if (!/^\.harness\/(memory|skills)\/[^/]+$/.test(rel)) continue;
+      if (!/^\.edges\/(memory|skills)\/[^/]+$/.test(rel)) continue;
       safePath(root, rel);
       const ops = old.operations.filter((op) => isWithinPath(op.target, directory));
       const promoted = ops.filter((op) =>
@@ -500,7 +500,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
       if (
         !meta?.gitignore ||
         meta.module !==
-          relative(join(root, ".harness"), directory).split("/")[0]
+          relative(join(root, ".edges"), directory).split("/")[0]
       )
         return review(rel, "private-type-module-or-permission-mismatch");
       const oldMeta = parseTypeMeta(migration.decodeState(index.before));
@@ -551,7 +551,7 @@ export function runPrivateCorrection(rawRoot: string, apply: boolean) {
     }
     if (!candidates.length)
       return review(
-        ".harness",
+        ".edges",
         "no-uniquely-proven-promoted-private-types; ownership remains unresolved",
       );
     const mapping = (path: string) => {

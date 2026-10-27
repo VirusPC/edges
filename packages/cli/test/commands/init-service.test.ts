@@ -64,13 +64,13 @@ test("edges init on an empty scope writes AGENTS, public memory types, and harne
   assert.deepEqual(body.modules, ["memory", "skills", "notes", "projects"]);
   for (const rel of [
     "AGENTS.md",
-    ".harness/notes/README.md",
-    ".harness/projects/README.md",
-    ".harness/memory/feedbacks/README.md",
-    ".harness/memory/projects/README.md",
-    ".harness/memory/references/README.md",
-    ".harness/skills/managed/README.md",
-    ".harness/skills/referenced/README.md",
+    ".edges/notes/README.md",
+    ".edges/projects/README.md",
+    ".edges/memory/feedbacks/README.md",
+    ".edges/memory/projects/README.md",
+    ".edges/memory/references/README.md",
+    ".edges/skills/managed/README.md",
+    ".edges/skills/referenced/README.md",
   ]) {
     assert.equal(existsSync(path.join(root, rel)), true, rel);
   }
@@ -79,19 +79,19 @@ test("edges init on an empty scope writes AGENTS, public memory types, and harne
     assert.match(face, /project-entries-local:start/, rel);
   }
   for (const rel of [
-    ".harness/memory/users/README.md",
-    ".harness/tasks/README.md",
-    ".harness/evaluation/README.md",
-    ".harness/observation/README.md",
+    ".edges/memory/users/README.md",
+    ".edges/tasks/README.md",
+    ".edges/evaluation/README.md",
+    ".edges/observation/README.md",
   ]) {
     assert.equal(existsSync(path.join(root, rel)), false, rel);
   }
   const agents = await readFile(path.join(root, "AGENTS.md"), "utf8");
-  assert.match(agents, /\.harness\/README\.md/);
-  assert.doesNotMatch(agents, /\.harness\/notes\/README\.md/);
-  assert.doesNotMatch(agents, /\.harness\/projects\/README\.md/);
-  assert.doesNotMatch(agents, /\.harness\/memory\/feedbacks\/README\.md/);
-  const index = await readFile(path.join(root, ".harness/README.md"), "utf8");
+  assert.match(agents, /\.edges\/README\.md/);
+  assert.doesNotMatch(agents, /\.edges\/notes\/README\.md/);
+  assert.doesNotMatch(agents, /\.edges\/projects\/README\.md/);
+  assert.doesNotMatch(agents, /\.edges\/memory\/feedbacks\/README\.md/);
+  const index = await readFile(path.join(root, ".edges/README.md"), "utf8");
   assert.match(index, /notes\/README\.md/);
   assert.match(index, /projects\/README\.md/);
   assert.match(index, /memory\/feedbacks\/README\.md/);
@@ -117,29 +117,29 @@ test("edges init notes and edges notes init write the same files", async (t) => 
   assert.deepEqual(domainBody.modules, ["notes"]);
   assert.equal(rootBody.command, "init");
   assert.equal(domainBody.command, "notes.init");
-  assert.equal(existsSync(path.join(left, ".harness/projects/README.md")), false);
+  assert.equal(existsSync(path.join(left, ".edges/projects/README.md")), false);
   assert.match(await readFile(path.join(left, "notes/README.md"), "utf8"), /project-entries-local:start/);
-  assert.doesNotMatch(await readFile(path.join(left, ".harness/notes/README.md"), "utf8"), /project-entries-local:start/);
+  assert.doesNotMatch(await readFile(path.join(left, ".edges/notes/README.md"), "utf8"), /project-entries-local:start/);
   const notesAgents = await readFile(path.join(left, "AGENTS.md"), "utf8");
-  assert.match(notesAgents, /\.harness\/README\.md/);
-  assert.doesNotMatch(notesAgents, /\.harness\/notes\/README\.md/);
-  assert.match(await readFile(path.join(left, ".harness/README.md"), "utf8"), /notes\/README\.md/);
+  assert.match(notesAgents, /\.edges\/README\.md/);
+  assert.doesNotMatch(notesAgents, /\.edges\/notes\/README\.md/);
+  assert.match(await readFile(path.join(left, ".edges/README.md"), "utf8"), /notes\/README\.md/);
 });
 
 test("edges init memory does not create notes or projects boards", async (t) => {
   const root = await scope(t);
   const result = await run(["--scope", root, "init", "memory"], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
-  assert.equal(existsSync(path.join(root, ".harness/memory/feedbacks/README.md")), true);
-  assert.equal(existsSync(path.join(root, ".harness/notes/README.md")), false);
-  assert.equal(existsSync(path.join(root, ".harness/projects/README.md")), false);
+  assert.equal(existsSync(path.join(root, ".edges/memory/feedbacks/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/notes/README.md")), false);
+  assert.equal(existsSync(path.join(root, ".edges/projects/README.md")), false);
 });
 
 test("edges init is idempotent and keeps an existing harness board", async (t) => {
   const root = await scope(t);
   const first = await run(["--scope", root, "init"], { env: {} });
   assert.equal(first.exitCode, 0, first.stdout);
-  const notes = path.join(root, ".harness/notes/README.md");
+  const notes = path.join(root, ".edges/notes/README.md");
   const custom = `${await readFile(notes, "utf8")}\n手写说明保留。\n`;
   const { writeFile } = await import("node:fs/promises");
   await writeFile(notes, custom);
@@ -154,7 +154,7 @@ test("edges init does not read --super when choosing the write root", async (t) 
   const root = await scope(t);
   const result = await run(["--scope", root, "--super", "init", "notes"], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
-  assert.equal(existsSync(path.join(root, ".harness/notes/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/notes/README.md")), true);
   assert.match(await readFile(path.join(root, "notes/README.md"), "utf8"), /project-entries-local:start/);
 });
 
@@ -172,7 +172,7 @@ test("commands do not import the harness material catalog", () => {
     const text = readFileSync(file, "utf8");
     assert.doesNotMatch(
       text,
-      /domain\/config\/harness-materials/,
+      /domain\/config\/edges-materials/,
       path.relative(commandsRoot, file),
     );
   }
@@ -189,7 +189,7 @@ test("init commands do not import the material catalog or write files themselves
   ].map((rel) => path.join(commandsRoot, rel));
   for (const file of files) {
     const text = readFileSync(file, "utf8");
-    assert.doesNotMatch(text, /harness-materials/);
+    assert.doesNotMatch(text, /edges-materials/);
     assert.doesNotMatch(text, /writeFileSync|readFileSync|mkdirSync/);
     assert.match(text, /services\/(init|notes|projects|memory|skills|tasks)\/service\.js/);
   }
@@ -224,21 +224,21 @@ test("memory init does not create or register notes or projects", async (t) => {
   const root = await scope(t);
   const result = await run(["--scope", root, "memory", "init", "--memory-types", "project"], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
-  assert.equal(existsSync(path.join(root, ".harness/memory/projects/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/memory/projects/README.md")), true);
   for (const rel of [
-    ".harness/notes/README.md",
-    ".harness/projects/README.md",
-    ".harness/tasks/README.md",
-    ".harness/skills/managed/README.md",
+    ".edges/notes/README.md",
+    ".edges/projects/README.md",
+    ".edges/tasks/README.md",
+    ".edges/skills/managed/README.md",
   ]) {
     assert.equal(existsSync(path.join(root, rel)), false, rel);
   }
   const agents = await readFile(path.join(root, "AGENTS.md"), "utf8");
-  assert.match(agents, /\.harness\/README\.md/);
-  assert.doesNotMatch(agents, /\.harness\/memory\/projects\/README\.md/);
-  assert.doesNotMatch(agents, /\.harness\/notes\/README\.md/);
-  assert.doesNotMatch(agents, /\.harness\/projects\/README\.md/);
-  assert.match(await readFile(path.join(root, ".harness/README.md"), "utf8"), /memory\/projects\/README\.md/);
+  assert.match(agents, /\.edges\/README\.md/);
+  assert.doesNotMatch(agents, /\.edges\/memory\/projects\/README\.md/);
+  assert.doesNotMatch(agents, /\.edges\/notes\/README\.md/);
+  assert.doesNotMatch(agents, /\.edges\/projects\/README\.md/);
+  assert.match(await readFile(path.join(root, ".edges/README.md"), "utf8"), /memory\/projects\/README\.md/);
 });
 
 test("memory init rejects skill type flags and writes nothing", async (t) => {
@@ -251,7 +251,7 @@ test("memory init rejects skill type flags and writes nothing", async (t) => {
   assert.notEqual(cli.exitCode, 0);
   assert.match(cli.stdout, /skill-types|unknown option/i);
   assert.equal(existsSync(path.join(root, "AGENTS.md")), false);
-  assert.equal(existsSync(path.join(root, ".harness")), false);
+  assert.equal(existsSync(path.join(root, ".edges")), false);
 });
 
 test("skill type flags without the skills module are rejected", async (t) => {
@@ -282,16 +282,16 @@ test("edges init skills and edges skills init write the same files", async (t) =
   assert.equal(rootBody.command, "init");
   assert.equal(domainBody.command, "skills.init");
   for (const rel of [
-    ".harness/skills/managed/README.md",
-    ".harness/skills/referenced/README.md",
+    ".edges/skills/managed/README.md",
+    ".edges/skills/referenced/README.md",
   ]) {
     assert.equal(existsSync(path.join(left, rel)), true, rel);
   }
   for (const rel of [
-    ".harness/notes/README.md",
-    ".harness/projects/README.md",
-    ".harness/tasks/README.md",
-    ".harness/memory/projects/README.md",
+    ".edges/notes/README.md",
+    ".edges/projects/README.md",
+    ".edges/tasks/README.md",
+    ".edges/memory/projects/README.md",
   ]) {
     assert.equal(existsSync(path.join(left, rel)), false, rel);
   }
@@ -313,25 +313,25 @@ test("edges init tasks and edges tasks init write only the tasks board", async (
   const domainBody = JSON.parse(fromDomain.stdout) as { modules: string[]; command: string };
   assert.deepEqual(domainBody.modules, ["tasks"]);
   assert.equal(domainBody.command, "tasks.init");
-  const board = await readFile(path.join(left, ".harness/tasks/README.md"), "utf8");
+  const board = await readFile(path.join(left, ".edges/tasks/README.md"), "utf8");
   assert.match(board, /project-entries-local:start/);
   const agents = await readFile(path.join(left, "AGENTS.md"), "utf8");
-  assert.match(agents, /\.harness\/README\.md/);
-  assert.doesNotMatch(agents, /\.harness\/tasks\/README\.md/);
-  assert.match(await readFile(path.join(left, ".harness/README.md"), "utf8"), /tasks\/README\.md/);
+  assert.match(agents, /\.edges\/README\.md/);
+  assert.doesNotMatch(agents, /\.edges\/tasks\/README\.md/);
+  assert.match(await readFile(path.join(left, ".edges/README.md"), "utf8"), /tasks\/README\.md/);
   for (const rel of [
-    ".harness/notes/README.md",
-    ".harness/projects/README.md",
-    ".harness/skills/managed/README.md",
-    ".harness/memory/feedbacks/README.md",
+    ".edges/notes/README.md",
+    ".edges/projects/README.md",
+    ".edges/skills/managed/README.md",
+    ".edges/memory/feedbacks/README.md",
     "tasks/README.md",
   ]) {
     assert.equal(existsSync(path.join(left, rel)), false, rel);
   }
   const custom = `${board}\n手写看板保留。\n`;
   const { writeFile } = await import("node:fs/promises");
-  await writeFile(path.join(left, ".harness/tasks/README.md"), custom);
+  await writeFile(path.join(left, ".edges/tasks/README.md"), custom);
   const again = await run(["--scope", left, "tasks", "init"], { env: {} });
   assert.equal(again.exitCode, 0, again.stdout + again.stderr);
-  assert.equal(await readFile(path.join(left, ".harness/tasks/README.md"), "utf8"), custom);
+  assert.equal(await readFile(path.join(left, ".edges/tasks/README.md"), "utf8"), custom);
 });

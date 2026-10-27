@@ -4,7 +4,7 @@
 
 **Goal:** 用户命令的范围只由 `--scope`、`--super`、`--all` 的组合决定。list 只调用现成的 `traverse` 或 `buildSystemForest`。
 
-**Architecture:** `--scope` 选定主体。`--super` 把主体换成该 scope 上的虚拟系统一，材料挂在 scope 目录上。不传 `--all` 时用 `NodeService.query`（内部就是 `traverse`）。`--all` 用 `buildSystemForest`，森林从当前 `--scope` 出发。这三个开关同级，挂在根命令上。缺文件的登记边在 query 的 resolve 里跳过。Tasks 只看主体系统：一般写入 `<scope>/.harness/tasks`；`--scope <仓库根> --super` 写入 `<仓库根>/tasks`。实现完成后再交仓库根与 `.harness` 的实测报告，实现前不跑。
+**Architecture:** `--scope` 选定主体。`--super` 把主体换成该 scope 上的虚拟系统一，材料挂在 scope 目录上。不传 `--all` 时用 `NodeService.query`（内部就是 `traverse`）。`--all` 用 `buildSystemForest`，森林从当前 `--scope` 出发。这三个开关同级，挂在根命令上。缺文件的登记边在 query 的 resolve 里跳过。Tasks 只看主体系统：一般写入 `<scope>/.edges/tasks`；`--scope <仓库根> --super` 写入 `<仓库根>/tasks`。实现完成后再交仓库根与 `.edges` 的实测报告，实现前不跑。
 
 **Tech Stack:** TypeScript、Node ≥22、`node:test`、tsx、`edges-cli`。
 
@@ -24,7 +24,7 @@
 | 文件 | 职责 |
 | --- | --- |
 | `packages/cli/src/services/node/node-service.ts` | `query` 的 resolve：目标不存在则跳过 |
-| `packages/cli/src/domain/config/harness-materials.ts` | 超节点材料 = `join(scopeDir, path)`；`harnessRootForScope` 仍只找 `<scope>/.harness` |
+| `packages/cli/src/domain/config/edges-materials.ts` | 超节点材料 = `join(scopeDir, path)`；`harnessRootForScope` 仍只找 `<scope>/.edges` |
 | `packages/cli/src/context.ts` | `ctx.all` |
 | `packages/cli/src/program.ts` | 根选项 `--all` |
 | `packages/cli/src/commands/tasks/list.ts` | 读 `--all`：单树或森林，滤 `TaskNode` |
@@ -95,34 +95,34 @@ EOF
 ### Task 2: 超节点材料挂在 scope 目录上
 
 **Files:**
-- Modify: `packages/cli/src/domain/config/harness-materials.ts`
-- Test: `packages/cli/test/domain/harness-materials.test.ts`
+- Modify: `packages/cli/src/domain/config/edges-materials.ts`
+- Test: `packages/cli/test/domain/edges-materials.test.ts`
 - Test: `packages/cli/test/services/super-agents-node.test.ts`
 - Test: `packages/cli/test/services/system-forest-service.test.ts`
 
 **Interfaces:**
-- Consumes: `harness-materials.json` 的 `path`
-- Produces: `resolveHarnessMaterial(scopeDir, id)` 返回 `join(scopeDir, path)` 上存在的文件；`harnessRootForScope(scopeDir)` 仍返回 `<scope>/.harness`（若存在）
+- Consumes: `edges-materials.json` 的 `path`
+- Produces: `resolveHarnessMaterial(scopeDir, id)` 返回 `join(scopeDir, path)` 上存在的文件；`harnessRootForScope(scopeDir)` 仍返回 `<scope>/.edges`（若存在）
 
 - [ ] **Step 1: Write the failing test**
 
 ```ts
 test("super materials use the scope directory; the scope's own harness is one level down", () => {
   const root = mkdtempSync(path.join(tmpdir(), "hm-"));
-  fs.mkdirSync(path.join(root, ".harness/tasks"), { recursive: true });
+  fs.mkdirSync(path.join(root, ".edges/tasks"), { recursive: true });
   fs.mkdirSync(path.join(root, "tasks"), { recursive: true });
-  fs.writeFileSync(path.join(root, ".harness/tasks/README.md"), "# maintenance\n");
+  fs.writeFileSync(path.join(root, ".edges/tasks/README.md"), "# maintenance\n");
   fs.writeFileSync(path.join(root, "tasks/README.md"), "# content\n");
-  assert.equal(harnessRootForScope(root), path.join(root, ".harness"));
+  assert.equal(harnessRootForScope(root), path.join(root, ".edges"));
   assert.equal(resolveHarnessMaterial(root, "tasks")?.absPath, path.join(root, "tasks/README.md"));
 });
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Run: `cd cli && node --test --import tsx --test-name-pattern 'super materials use the scope' ./test/domain/harness-materials.test.ts`
+Run: `cd cli && node --test --import tsx --test-name-pattern 'super materials use the scope' ./test/domain/edges-materials.test.ts`
 
-Expected: FAIL，实际路径是 `root/.harness/tasks/README.md`
+Expected: FAIL，实际路径是 `root/.edges/tasks/README.md`
 
 - [ ] **Step 3: Join scopeDir, not harnessRootForScope**
 
@@ -136,21 +136,21 @@ const absPath = join(scopeDir, material.path);
 
 - [ ] **Step 4: Align super and forest tests**
 
-`super-agents-node.test.ts`：同时写下 `<root>/tasks/README.md` 与 `<root>/.harness/tasks/README.md`，`list(root, { super: true })` 包含前者、不包含后者、不包含根 `AGENTS.md`。
+`super-agents-node.test.ts`：同时写下 `<root>/tasks/README.md` 与 `<root>/.edges/tasks/README.md`，`list(root, { super: true })` 包含前者、不包含后者、不包含根 `AGENTS.md`。
 
 `system-forest-service.test.ts` 的 Super 树断言同样改成 `<root>/tasks/README.md`。
 
 - [ ] **Step 5: Run tests**
 
-Run: `cd cli && node --test --import tsx ./test/domain/harness-materials.test.ts ./test/services/super-agents-node.test.ts ./test/services/system-forest-service.test.ts ./test/operations/traverse-dual-entry.test.ts`
+Run: `cd cli && node --test --import tsx ./test/domain/edges-materials.test.ts ./test/services/super-agents-node.test.ts ./test/services/system-forest-service.test.ts ./test/operations/traverse-dual-entry.test.ts`
 
 Expected: PASS
 
 - [ ] **Step 6: Commit**
 
 ```bash
-git add packages/cli/src/domain/config/harness-materials.ts \
-  packages/cli/test/domain/harness-materials.test.ts \
+git add packages/cli/src/domain/config/edges-materials.ts \
+  packages/cli/test/domain/edges-materials.test.ts \
   packages/cli/test/services/super-agents-node.test.ts \
   packages/cli/test/services/system-forest-service.test.ts
 git commit -m "$(cat <<'EOF'
@@ -176,7 +176,7 @@ EOF
 
 - [ ] **Step 1: Write the failing test**
 
-仓库根有真 `AGENTS.md`，下层登记 `tasks/AGENTS.md`，该入口的组成里有一条 Task；同时存在 `.harness/tasks/` 上的另一条 Task。不传 `--super` 的 list 必须包含下层那条（路径含 `tasks/` 且不是只打开维护板才能看见）。`--super` 的 list 来自 scope 上的材料 README，不把 `.harness/tasks/` 并进同一次结果，除非材料 path 自己指到那里。
+仓库根有真 `AGENTS.md`，下层登记 `tasks/AGENTS.md`，该入口的组成里有一条 Task；同时存在 `.edges/tasks/` 上的另一条 Task。不传 `--super` 的 list 必须包含下层那条（路径含 `tasks/` 且不是只打开维护板才能看见）。`--super` 的 list 来自 scope 上的材料 README，不把 `.edges/tasks/` 并进同一次结果，除非材料 path 自己指到那里。
 
 ```ts
 test("tasks list follows descendant systems through traverse", async (t) => {
@@ -191,7 +191,7 @@ test("tasks list follows descendant systems through traverse", async (t) => {
 
 - [ ] **Step 2: Run test to verify it fails**
 
-Expected: FAIL。当前 list 只打开 `<root>/.harness/tasks/`。
+Expected: FAIL。当前 list 只打开 `<root>/.edges/tasks/`。
 
 - [ ] **Step 3: Replace the board walk**
 
@@ -252,7 +252,7 @@ EOF
 
 - [ ] **Step 5: Smoke the tree path only**
 
-只确认单树能退出 0。仓库根与 `.harness` 的完整矩阵留给 Task 6，这里不要跑。
+只确认单树能退出 0。仓库根与 `.edges` 的完整矩阵留给 Task 6，这里不要跑。
 
 ```bash
 cd cli
@@ -288,10 +288,10 @@ EOF
 
 在 CLI README 用本仓库根写死两种 scope：
 
-- `--scope <仓库根> --super` 的 children 只有根上存在的 `tasks/README.md` 与 `README.md`。`.harness/tasks/README.md` 不在这层。
-- `--scope <仓库根>/.harness --super` 的 children 是该目录下存在的 `tasks/README.md`、`memory/*`、`packages/skills/*`、`evaluation/README.md`、`observation/README.md`。
+- `--scope <仓库根> --super` 的 children 只有根上存在的 `tasks/README.md` 与 `README.md`。`.edges/tasks/README.md` 不在这层。
+- `--scope <仓库根>/.edges --super` 的 children 是该目录下存在的 `tasks/README.md`、`memory/*`、`packages/skills/*`、`evaluation/README.md`、`observation/README.md`。
 
-并写明：默认 list 是从真 `AGENTS.md` 的一次 traverse；`--all` 是从当前 `--scope` 出发的森林；`--super` 只换根。最全是 `--scope <仓库根> --super --all`。`--scope <仓库根>/.harness` 是下一层，不与仓库根写成同一份 children。
+并写明：默认 list 是从真 `AGENTS.md` 的一次 traverse；`--all` 是从当前 `--scope` 出发的森林；`--super` 只换根。最全是 `--scope <仓库根> --super --all`。`--scope <仓库根>/.edges` 是下一层，不与仓库根写成同一份 children。
 
 - [ ] **Step 2: Commit**
 
@@ -320,7 +320,7 @@ EOF
 
 **Interfaces:**
 - Consumes: 主体系统。一般是 `--scope` 上的真 AgentsNode，其 harness 为 `harnessRootForScope(scope)`。`--scope <仓库根> --super` 的主体是虚拟系统一，其 harness 就是该 scope 目录。
-- Produces: 普通 `edges --scope <dir> tasks create` 写入 `<dir>/.harness/tasks`。`edges --scope <仓库根> --super tasks create` 写入 `<仓库根>/tasks`。get / update / status / project 用同一块板。tasks 源码里不出现用途或 index-group。
+- Produces: 普通 `edges --scope <dir> tasks create` 写入 `<dir>/.edges/tasks`。`edges --scope <仓库根> --super tasks create` 写入 `<仓库根>/tasks`。get / update / status / project 用同一块板。tasks 源码里不出现用途或 index-group。
 
 - [ ] **Step 1: Point writes at the subject system's harness tasks**
 
@@ -328,14 +328,14 @@ EOF
 
 看板只由主体系统决定：
 
-- 一般：主体是 `--scope` 上的真系统，看板 = `join(harnessRootForScope(scope), "tasks")`，即 `<scope>/.harness/tasks`。
+- 一般：主体是 `--scope` 上的真系统，看板 = `join(harnessRootForScope(scope), "tasks")`，即 `<scope>/.edges/tasks`。
 - 主体是仓库之外的虚拟系统一：`--scope <仓库根> --super` 建立 `SuperAgentsNode`。这个虚拟系统的 harness 就是传入的 scope 目录，看板 = `join(scope, "tasks")`，即 `<仓库根>/tasks`。
 
 `conversation-to-tasks` 与 `project-tasks-classify` 只传 `--scope`。只有主体是这套虚拟系统一时才加 `--super`。
 
 - [ ] **Step 2: Retarget tests**
 
-测试里写 `<scope>/.harness/tasks` 的，只传 `--scope`。写 `<仓库根>/tasks` 的，传 `--scope <仓库根> --super`。删掉对用途和 `--index-group` 的传参。帮助文案和 README 只写主体系统与它的 `.harness/tasks`。
+测试里写 `<scope>/.edges/tasks` 的，只传 `--scope`。写 `<仓库根>/tasks` 的，传 `--scope <仓库根> --super`。删掉对用途和 `--index-group` 的传参。帮助文案和 README 只写主体系统与它的 `.edges/tasks`。
 
 - [ ] **Step 3: Run one create smoke**
 
@@ -358,7 +358,7 @@ EOF
 
 ---
 
-### Task 7: 交仓库根与 `.harness` 的实测报告
+### Task 7: 交仓库根与 `.edges` 的实测报告
 
 实现任务完成之前不要跑。这是验收，不是探路。
 
@@ -367,8 +367,8 @@ EOF
 
 - [ ] **Step 1: Run the matrix**
 
-Scope 用本仓库。四列是默认、`--super`、`--all`、`--super --all`。两行是仓库根、`<仓库根>/.harness`。每格跑 `tasks list`、`tasks project list`、`memory list`、`skill list`、`note list`。
+Scope 用本仓库。四列是默认、`--super`、`--all`、`--super --all`。两行是仓库根、`<仓库根>/.edges`。每格跑 `tasks list`、`tasks project list`、`memory list`、`skill list`、`note list`。
 
 - [ ] **Step 2: Write the report**
 
-每格写：退出码、条数、直接 children（相对路径 + 类型）。`--all` 写森林每棵树的根，以及超节点在不在里面。任务路径落在 `tasks/` 还是 `.harness/tasks/`，或更下层。缺文件被跳过时写出来。点明最全的一格是 `--scope <仓库根> --super --all`，并写出它比另外七格多覆盖了什么。仓库根与 `.harness` 的 children 分开写，不要并成一份名单。
+每格写：退出码、条数、直接 children（相对路径 + 类型）。`--all` 写森林每棵树的根，以及超节点在不在里面。任务路径落在 `tasks/` 还是 `.edges/tasks/`，或更下层。缺文件被跳过时写出来。点明最全的一格是 `--scope <仓库根> --super --all`，并写出它比另外七格多覆盖了什么。仓库根与 `.edges` 的 children 分开写，不要并成一份名单。

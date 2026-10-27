@@ -1,7 +1,7 @@
 import type { BlockGrammar } from "../core/node-content/grammar.js";
 
 const layer = (name: string, edge: string) =>
-  `<!-- project-harness${name ? `-${name}` : ""}:${edge} -->`;
+  `<!-- edges${name ? `-${name}` : ""}:${edge} -->`;
 const type = (name: string, edge: string) =>
   `<!-- project-memory-${name}:${edge} -->`;
 const legacyLayer = (name: string, edge: string) =>
@@ -45,19 +45,19 @@ export const INNER_BLOCK_ORDER = [
 export const INDEX_ENTRY_PATTERN = /^- \[[^\]]*\]\(([^)]+)\)(?: — (.*))?$/gm;
 
 export const COMMENT_REWRITES: Array<[RegExp, string]> = [
-  [/^<!-- project-memory:start -->$/gm, "<!-- project-harness:start -->"],
-  [/^<!-- project-memory:end -->$/gm, "<!-- project-harness:end -->"],
+  [/^<!-- project-memory:start -->$/gm, "<!-- edges:start -->"],
+  [/^<!-- project-memory:end -->$/gm, "<!-- edges:end -->"],
   [
     /^<!-- project-memory-important:(start|end) -->$/gm,
-    "<!-- project-harness-constraints:$1 -->",
+    "<!-- edges-constraints:$1 -->",
   ],
   [
     /^<!-- project-memory-local:(start|end) -->$/gm,
-    "<!-- project-harness-local:$1 -->",
+    "<!-- edges-local:$1 -->",
   ],
   [
     /^<!-- project-memory-children:(start|end) -->$/gm,
-    "<!-- project-harness-descendants:$1 -->",
+    "<!-- edges-descendants:$1 -->",
   ],
 ];
 export const TITLE_REWRITES: Array<[RegExp, string]> = [
@@ -66,13 +66,13 @@ export const TITLE_REWRITES: Array<[RegExp, string]> = [
   [/^## (?:下层记忆索引|下层作用域|下层节点)\s*$/gm, "## 下层系统维护信息"],
 ];
 
-/** AGENTS (project-harness) section headings and markers. */
+/** AGENTS (edges) section headings and markers. */
 export const INTERNAL_SECTIONS = {
-  constraints: { heading: "本层硬约束", marker: "project-harness-constraints" },
-  localChildren: { heading: "本层系统维护信息", marker: "project-harness-local" },
+  constraints: { heading: "本层硬约束", marker: "edges-constraints" },
+  localChildren: { heading: "本层系统维护信息", marker: "edges-local" },
   descendantChildren: {
     heading: "下层系统维护信息",
-    marker: "project-harness-descendants",
+    marker: "edges-descendants",
   },
 } as const;
 /** README (project-entries) section headings and markers. */
@@ -85,7 +85,7 @@ export const ENTRIES_SECTIONS = {
 } as const;
 export const COMPOSE_SECTION = {
   heading: "组合",
-  marker: "project-harness-compose",
+  marker: "edges-compose",
 } as const;
 export const CODEC_SECTIONS = {
   constraints: INTERNAL_SECTIONS.constraints,
@@ -101,13 +101,13 @@ export const INDEX_MARKERS = {
 /** Harness document grammar passed into the core block parser. */
 export const HARNESS_GRAMMAR: BlockGrammar = {
   markers: {
-    "project-harness-constraints": "constraints",
+    "edges-constraints": "constraints",
     "project-memory-important": "constraints",
-    "project-harness-local": "memory",
+    "edges-local": "memory",
     "project-memory-local": "memory",
-    "project-harness-descendants": "children",
+    "edges-descendants": "children",
     "project-memory-children": "children",
-    "project-harness-compose": "compose",
+    "edges-compose": "compose",
   },
   headings: {
     本层重要约束: "constraints",

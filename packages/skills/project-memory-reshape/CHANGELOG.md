@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0] - 2026-10-27
+
+### Changed
+
+- 重组后的材料目录是 `.edges`。不再把旧布局交给 `edges memory migrate`。仍停在 `.memory` 的，先用 `@viruspc/edges@0.2.7`，再按 `docs/migrations/2026-10-27-rename-harness-to-edges.md` 改目录名。
+
 ## [3.0.0] - 2026-10-04
 
 ### Changed

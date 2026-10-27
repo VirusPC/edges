@@ -25,24 +25,24 @@ const excluded = new Set([
 
 const LAYER_PAIRS: Array<[string, string]> = [
   ["<!-- project-memory:start -->", "<!-- project-memory:end -->"],
-  ["<!-- project-harness:start -->", "<!-- project-harness:end -->"],
+  ["<!-- edges:start -->", "<!-- edges:end -->"],
   [
     "<!-- project-memory-important:start -->",
     "<!-- project-memory-important:end -->",
   ],
   [
-    "<!-- project-harness-constraints:start -->",
-    "<!-- project-harness-constraints:end -->",
+    "<!-- edges-constraints:start -->",
+    "<!-- edges-constraints:end -->",
   ],
   ["<!-- project-memory-local:start -->", "<!-- project-memory-local:end -->"],
-  ["<!-- project-harness-local:start -->", "<!-- project-harness-local:end -->"],
+  ["<!-- edges-local:start -->", "<!-- edges-local:end -->"],
   [
     "<!-- project-memory-children:start -->",
     "<!-- project-memory-children:end -->",
   ],
   [
-    "<!-- project-harness-descendants:start -->",
-    "<!-- project-harness-descendants:end -->",
+    "<!-- edges-descendants:start -->",
+    "<!-- edges-descendants:end -->",
   ],
 ];
 
@@ -63,7 +63,7 @@ function count(source: string, marker: string): number {
 function assertPaired(file: string, source: string): void {
   if (
     source.includes("<!-- project-memory:start -->") &&
-    source.includes("<!-- project-harness:start -->")
+    source.includes("<!-- edges:start -->")
   )
     throw new Error(`${file}: mixed layer outer markers`);
   for (const [start, end] of LAYER_PAIRS) {

@@ -11,9 +11,9 @@ const DESCRIPTION_REQUIRED = "--description is required";
 export function addComposeAddCommand(compose: Command, ctx: CliContext): void {
   compose
     .command("add")
-    .description("git submodule add a repository and record it in .harness/compose/README.md")
+    .description("git submodule add a repository and record it in .edges/compose/README.md")
     .requiredOption("--name <name>", "Entry name")
-    .option("--path <directory>", "Checkout directory relative to the scope directory (default: .harness/compose/<name>). The link stored in .harness/compose/README.md is that checkout's README, relative to .harness/compose/. Absolute and ~ paths are rejected")
+    .option("--path <directory>", "Checkout directory relative to the scope directory (default: .edges/compose/<name>). The link stored in .edges/compose/README.md is that checkout's README, relative to .edges/compose/. Absolute and ~ paths are rejected")
     .option("--remote <url>", "Git remote; inside a git repo this runs git submodule add <url> <path>")
     .requiredOption("--description <text>", "Required. What this repository stores and when to write into it")
     .allowExcessArguments(false)

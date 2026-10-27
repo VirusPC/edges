@@ -7,10 +7,10 @@ import { collectSystemRoots } from "../../src/services/node/system-roots.js";
 
 const harnessAgents = `# Scope
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 `;
 
 const plainAgents = `# Plain

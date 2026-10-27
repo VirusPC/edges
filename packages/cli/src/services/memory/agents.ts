@@ -158,7 +158,7 @@ export async function syncIndexEntry(anchor: string, target: string, description
     const patch = (refs: typeof node.localChildren) => refs.map(ref => ref.id === registered?.id ? { ...ref, description: normalized } : ref);
     const localChildren = patch(node.localChildren), descendantChildren = patch(node.descendantChildren);
     if (!registered) {
-        const harness = join(anchor, ".harness");
+        const harness = join(anchor, ".edges");
         const group = id === harness || id.startsWith(harness + sep) ? "local" : "descendant";
         (group === "local" ? localChildren : descendantChildren).push({ id, name: rel, description: normalized });
     }

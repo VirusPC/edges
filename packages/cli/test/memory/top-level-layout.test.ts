@@ -90,11 +90,11 @@ test("stale source snapshots reject apply before directory moves", (t) => {
 });
 test("ignored memory is carried unchanged without rewriting and historical migration manifests retain old paths", (t) => {
   const root = fixture(t);
-  put(root, ".gitignore", "**/.harness/memory/users/\n");
+  put(root, ".gitignore", "**/.edges/memory/users/\n");
   put(root, "knowledge/notes/README.md", "# Notes");
   put(
     root,
-    "knowledge/notes/.harness/memory/users/private.md",
+    "knowledge/notes/.edges/memory/users/private.md",
     "[root](../../../../../README.md)",
   );
   put(
@@ -106,7 +106,7 @@ test("ignored memory is carried unchanged without rewriting and historical migra
   applyTopLevelLayout(planTopLevelLayout(root));
   assert.equal(
     fs.readFileSync(
-      path.join(root, "notes/.harness/memory/users/private.md"),
+      path.join(root, "notes/.edges/memory/users/private.md"),
       "utf8",
     ),
     "[root](../../../../../README.md)",
@@ -138,7 +138,7 @@ test("reruns preserve current extension-relative app links and memory index desc
   put(root, "extensions/apps/demo/README.md", "# app\n");
   put(
     root,
-    ".harness/memory/projects/README.md",
+    ".edges/memory/projects/README.md",
     "- [history](old/index.md) — Historical knowledge/notes/ scope.\n",
   );
   track(root);

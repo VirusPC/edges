@@ -21,8 +21,8 @@
 - AGENTS.md → InternalNode；SKILL.md → SkillNode；index.md → 按注册目录合同选择 TaskNode、MemoryNode、NoteNode 或通用 LeafNode。
 - 通用未知 index.md 是 LeafNode；任意普通 .md 不是新模型节点，导入/迁移明确转换后才登记。外部普通文档链接保持正文，不进入组成关系。
 - 每个节点 path 是规范化绝对入口路径，id 等于 path（含文件名），directoryPath 是 dirname(path)。Markdown 引用仍为相对路径，以来源文件为基准。
-- Leaf harness 默认同目录 AGENTS.md；Internal harness 默认本目录 .harness/AGENTS.md；继续递归。只发现已有入口，不自动创建。
-- 同目录 SKILL.md 与 AGENTS.md 是两个节点；AGENTS 是 Skill 的 harness。删除/移动 Skill 操作整个目录及其中的 harness。单独删除 AGENTS 不应删除同目录内容入口：其生命周期只覆盖 AGENTS 及属于它的 .harness 目录；单独移动这种共址 AGENTS 须拒绝并指示移动内容节点。独立 AGENTS 目录可以整体移动/删除。
+- Leaf harness 默认同目录 AGENTS.md；Internal harness 默认本目录 .edges/AGENTS.md；继续递归。只发现已有入口，不自动创建。
+- 同目录 SKILL.md 与 AGENTS.md 是两个节点；AGENTS 是 Skill 的 harness。删除/移动 Skill 操作整个目录及其中的 harness。单独删除 AGENTS 不应删除同目录内容入口：其生命周期只覆盖 AGENTS 及属于它的 .edges 目录；单独移动这种共址 AGENTS 须拒绝并指示移动内容节点。独立 AGENTS 目录可以整体移动/删除。
 - 普通 legacy 单 .md 的转换只经显式一次性迁移；生产创建、索引与读取以统一目录模型为准，不长期保留双格式选项。
 
 ## 数据结构
@@ -77,7 +77,7 @@ BaseNode → InternalNode / LeafNode；TaskNode、MemoryNode、SkillNode、现�
 
 InternalNode 有 constraints、localChildren、descendantChildren，children 是两组直属引用的去重并集；两组不重叠。Leaf children 为空；isLeaf 为类别固定标志，空 Internal 仍 false。引用只保存 id/name/description，不含分组，不递归序列化完整对象。
 
-唯一 parent 依据实际目录归属恢复：从所在目录向上寻找最近有效组织入口（同目录内容的 AGENTS 是 harness，不能反向作为其 parent；.harness/AGENTS 不把其宿主当 parent）。跨层索引可用于发现，并不覆盖物理父归属；跨目录普通引用不形成第二个 parent。harness 与 parent/children 独立。
+唯一 parent 依据实际目录归属恢复：从所在目录向上寻找最近有效组织入口（同目录内容的 AGENTS 是 harness，不能反向作为其 parent；.edges/AGENTS 不把其宿主当 parent）。跨层索引可用于发现，并不覆盖物理父归属；跨目录普通引用不形成第二个 parent。harness 与 parent/children 独立。
 
 ## Node 方法
 

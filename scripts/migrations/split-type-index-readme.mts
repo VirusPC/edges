@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Type indexes live only in README.md. Empty co-located AGENTS.md stubs
- * under `.harness/{memory,skills}/<type>/` are removed.
+ * under `.edges/{memory,skills}/<type>/` are removed.
  *
  * An AGENTS.md that still carries `project-memory-type` is converted to a
  * sibling README (`project-entries-*`, titles 本层内容 / 下层内容) and then
@@ -10,7 +10,7 @@
  * treated the same. Private `users/` indexes are not rewritten.
  *
  * Layer links to those deleted files, and registration links to
- * `.harness/{tasks,evaluation,observation}/AGENTS.md` when a sibling README
+ * `.edges/{tasks,evaluation,observation}/AGENTS.md` when a sibling README
  * exists, are retargeted to README.md. Layer and package AGENTS.md outside
  * type directories stay.
  *
@@ -39,8 +39,8 @@ const excluded = new Set([
   ".obsidian",
 ]);
 
-const TYPE_DIR = /(?:^|\/)\.harness\/(memory|skills)\/([^/]+)\/AGENTS\.md$/;
-const PRIVATE_TYPE = /(?:^|\/)\.harness\/memory\/(?:users|private)\//;
+const TYPE_DIR = /(?:^|\/)\.edges\/(memory|skills)\/([^/]+)\/AGENTS\.md$/;
+const PRIVATE_TYPE = /(?:^|\/)\.edges\/memory\/(?:users|private)\//;
 const MATERIAL_BOARDS = ["tasks", "evaluation", "observation"] as const;
 
 export interface SplitMigration {
@@ -71,13 +71,13 @@ export interface SplitPlan {
 
 export function convertTypeIndexSource(source: string): string {
   let out = source
-    .replaceAll("<!-- project-harness-local:", "<!-- project-entries-local:")
-    .replaceAll("<!-- project-harness-descendants:", "<!-- project-entries-descendants:")
+    .replaceAll("<!-- edges-local:", "<!-- project-entries-local:")
+    .replaceAll("<!-- edges-descendants:", "<!-- project-entries-descendants:")
     .replaceAll("## 本层系统维护信息", "## 本层内容")
     .replaceAll("## 下层系统维护信息", "## 下层内容")
     .replaceAll("<!-- project-memory-entries:start -->", "<!-- project-entries-local:start -->\n## 本层内容\n")
     .replaceAll("<!-- project-memory-entries:end -->", "<!-- project-entries-local:end -->");
-  out = out.replace(/^<!-- project-harness:(?:start|end) -->\r?\n?/gm, "");
+  out = out.replace(/^<!-- edges:(?:start|end) -->\r?\n?/gm, "");
   return out.replace(/\n{3,}/g, "\n\n").replace(/\s*$/, "\n");
 }
 
@@ -112,8 +112,8 @@ const rel = (root: string, file: string) =>
 const LINK = /\[([^\]\n]*)\]\((<([^>\n]+)>|([^)\s]+))/g;
 
 const REGISTRATION_BLOCKS = [
-  ["<!-- project-harness-local:start -->", "<!-- project-harness-local:end -->"],
-  ["<!-- project-harness-descendants:start -->", "<!-- project-harness-descendants:end -->"],
+  ["<!-- edges-local:start -->", "<!-- edges-local:end -->"],
+  ["<!-- edges-descendants:start -->", "<!-- edges-descendants:end -->"],
   ["<!-- project-entries-local:start -->", "<!-- project-entries-local:end -->"],
   ["<!-- project-entries-descendants:start -->", "<!-- project-entries-descendants:end -->"],
 ] as const;
@@ -235,7 +235,7 @@ export function planTypeIndexSplit(inputRoot: string): SplitPlan {
       if (path.basename(file) !== "AGENTS.md") continue;
       if (path.basename(path.dirname(file)) !== board) continue;
       // Only the scope harness board, not a domain `tasks/` system entry.
-      if (path.basename(path.dirname(path.dirname(file))) !== ".harness") continue;
+      if (path.basename(path.dirname(path.dirname(file))) !== ".edges") continue;
       const readme = path.join(path.dirname(file), "README.md");
       if (!fs.existsSync(readme)) continue;
       moved.set(file, readme);

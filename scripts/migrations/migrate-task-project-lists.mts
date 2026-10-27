@@ -4,7 +4,7 @@
  * README.md org list (`project-entries-local`), per the dual-file contract: system-one
  * children live only in README entries; the board AGENTS keeps system entries.
  *
- *  - Boards: `<scope>/tasks/AGENTS.md` and `<scope>/.harness/tasks/AGENTS.md` below --root.
+ *  - Boards: `<scope>/tasks/AGENTS.md` and `<scope>/.edges/tasks/AGENTS.md` below --root.
  *  - Legacy `task-projects` blocks are first converted to ordinary local references.
  *  - Only `<board>/<project>/README.md` links move; `<project>/AGENTS.md` system entries stay.
  *  - An existing prose README keeps its text and gains the entries list.
@@ -65,7 +65,7 @@ function planBoard(board: string, conflicts: string[]): BoardMigration | undefin
   if (!moving.length && !legacy) return undefined;
   for (const ref of moving) agents.removeChild(ref.id);
   const agentsSource = agents.serialize().replace(
-    /(<!-- project-harness-local:start -->)([\s\S]*?)(<!-- project-harness-local:end -->)/,
+    /(<!-- edges-local:start -->)([\s\S]*?)(<!-- edges-local:end -->)/,
     (_, start: string, body: string, end: string) => start + body.replace(/\n{3,}/g, "\n\n") + end,
   );
   const edits: BoardMigration["edits"] = [{ path: agentsFile.path, before: agentsFile, source: agentsSource }];

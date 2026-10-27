@@ -2,7 +2,7 @@ import { isWithinPath } from '../../utils/filesystem.js';
 import { nativeTaskPath } from "./realpath.js";
 import * as fs from "node:fs";
 import path from "node:path";
-import { harnessMaterialById, tasksBoardDirName } from "../../domain/config/harness-materials.js";
+import { harnessMaterialById, tasksBoardDirName } from "../../domain/config/edges-materials.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { identifyNodeType } from "../../domain/models/node/layout.js";
 import { BaseNode, AgentsNode, ReadmeNode, TaskNode } from "../../domain/models/index.js";
@@ -203,7 +203,7 @@ export async function listRepositoryTaskNodes(
       .value();
   }
   // System entries whose directory is the tasks board, plus the configured material
-  // hung from any system root. The material path comes from harness-materials.
+  // hung from any system root. The material path comes from edges-materials.
   const boardDirs = await collectTaskBoardDirs(canonicalRoot);
   const seen = new Set<string>();
   const out: TaskNode[] = [];
@@ -240,7 +240,7 @@ export function boardLocationOf(
     );
   const owner = path.dirname(board);
   const purpose: TaskPurpose =
-    path.basename(owner) === ".harness" ? "maintenance" : "domain";
+    path.basename(owner) === ".edges" ? "maintenance" : "domain";
   return {
     scopeDir: purpose === "maintenance" ? path.dirname(owner) : owner,
     purpose,

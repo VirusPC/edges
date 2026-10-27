@@ -1,12 +1,12 @@
 ---
 name: conversation-to-tasks
 description: 把对话整理成任务（背景 → 目标 → 动作 → 完成标准；后两栏可选）。必填不足先提问；成文后交人审（对话确认或 PR），再用 CLI 落库。看板文件进受保护的 main 必须开 PR，不要直推。
-version: 1.3.2
+version: 1.4.0
 ---
 
 从对话整理任务：**成文 → 交人审 → 落库**（人审可以是对话确认或 PR）。正文顺序：**背景 → 目标**（必填）→ **动作** → **完成标准**（后两栏可选；完成标准可留到 `grill-with-docs` 后再补）。与 `conversation-to-notes` 主题行动指南同序（背景 → 问题/目标 → 方案/动作 → 验收/完成标准），便于从笔记开卡平移。四栏同构 STAR（Situation / Task / Action / Result）：用来**制定任务**，尤其是派给 agent 的 brief；**不要**拿 STAR 写复盘（复盘走 `conversation-to-notes`）。
 
-先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.harness/tasks`。主体是仓库之外的虚拟系统一时，再加 `--super`，任务写在 `<SCOPE>/tasks`。Task Project 只是该看板的分组，不决定作用域。后续命令使用 `--scope "$SCOPE"`，只有虚拟系统一才加 `--super`。仓内维护 Edges 时显式选仓根，不要依赖执行命令时的源码目录。CLI 在 `cli`。
+先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.edges/tasks`。主体是仓库之外的虚拟系统一时，再加 `--super`，任务写在 `<SCOPE>/tasks`。Task Project 只是该看板的分组，不决定作用域。后续命令使用 `--scope "$SCOPE"`，只有虚拟系统一才加 `--super`。仓内维护 Edges 时显式选仓根，不要依赖执行命令时的源码目录。CLI 在 `cli`。
 
 `tasks list` 的范围只由 `--scope`、`--super`、`--all` 决定。不传 `--all` 时，从当前主体做一次 traverse，顺着 `AGENTS.md` 的 children 走到任务。`--all` 从当前 `--scope` 走森林。最全的一次查询是 `edges --scope <仓库根> --super --all tasks list`。不要为了列出任务再读 README 的 `project-entries`，也不要把 README 上的链接抄进 `AGENTS.md`。
 

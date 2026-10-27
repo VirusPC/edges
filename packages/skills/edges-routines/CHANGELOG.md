@@ -4,6 +4,12 @@ All notable changes to this skill are documented here, following Keep a Changelo
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-27
+
+### Changed
+
+- 例程记录路径改为 `.edges/routines/`。命令不变。
+
 ## [0.1.0] - 2026-10-26
 
 ### Added

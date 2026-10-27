@@ -1,12 +1,12 @@
 ---
 name: project-memory-reshape
-description: 把已有 AGENTS.md 按 project-memory-init 的形状重新组织：硬约束写进入口对应区块，区块外只留身份与指针，长规范进 important 或 README，记忆内容抽到 .harness/memory，其余受管区块只留索引。用户要求整理、改造、迁移、重组已有 AGENTS.md 时使用；init/doctor 不改正文，不要用它们代替本 skill。
-version: 3.0.0
+description: 把已有 AGENTS.md 按 project-memory-init 的形状重新组织：硬约束写进入口对应区块，区块外只留身份与指针，长规范进 important 或 README，记忆内容抽到 .edges/memory，其余受管区块只留索引。用户要求整理、改造、迁移、重组已有 AGENTS.md 时使用；init/doctor 不改正文，不要用它们代替本 skill。
+version: 4.0.0
 ---
 
 # Project Memory Reshape
 
-把一份**已经存在**的 `AGENTS.md` 收成 init 要求的形状：硬约束写在入口的对应区块里，其它受管区块是索引，区块外只留身份与指向真理源的指针，长规范进 important 或 README，记忆正文在 `.harness/memory/` 条目里。
+把一份**已经存在**的 `AGENTS.md` 收成 init 要求的形状：硬约束写在入口的对应区块里，其它受管区块是索引，区块外只留身份与指向真理源的指针，长规范进 important 或 README，记忆正文在 `.edges/memory/` 条目里。
 
 只在用户明确要求重组这份文件时运行。形状见 [`PROTOCOL.md`](../project-memory-init/references/PROTOCOL.md)；落盘细节认 `$project-memory-init` 的 CLI 与产物，不要手写记忆文件、也不要手改受管区块。
 
@@ -26,13 +26,13 @@ version: 3.0.0
 
 ## 正文怎么拆
 
-可检索的记忆内容不要塞进索引区块。不检索就会做错事的规则写进本层硬约束区块，直接列出，不要链到 `.harness/memory`。每一段只进一处：
+可检索的记忆内容不要塞进索引区块。不检索就会做错事的规则写进本层硬约束区块，直接列出，不要链到 `.edges/memory`。每一段只进一处：
 
 | 去哪 | 收什么 |
 | --- | --- |
 | 写进本层硬约束区块 | ask / remember 聚光灯（点名即可，不写用法）+ 该目录不检索就会做错的仓规。不要写 init / doctor / reshape，不要把 README 长规范搬进来 |
 | 留在 `AGENTS.md` 区块外 | 标题、一两句身份、职责与模块入口、指向规范正文的指针（README 是可选说明）。不要把长规范留在这里 |
-| 抽到 `.harness/memory` | 按 `$project-memory-remember` 的闸门：纠正与禁止 → `feedback`；代码/git 推不出的决策 → `project`；外部资料去哪找 → `reference`；个人偏好 / 凭据 / 不得公开 → `user`（gitignore，不进 git）。该层 `AGENTS.md` 已列出的额外 type 也可以作为 remember `--type` |
+| 抽到 `.edges/memory` | 按 `$project-memory-remember` 的闸门：纠正与禁止 → `feedback`；代码/git 推不出的决策 → `project`；外部资料去哪找 → `reference`；个人偏好 / 凭据 / 不得公开 → `user`（gitignore，不进 git）。该层 `AGENTS.md` 已列出的额外 type 也可以作为 remember `--type` |
 | 删掉 | 与 README 或其他真理源重复的结构说明、能从代码推出来的架构与路径、过期进度、一次性流程。可执行流程该是 skill，不要在这里新造一份 |
 
 同一条事实不要既留在正文又写成记忆。常驻需要的留正文、不 remember；按需才看的抽走、从正文删掉。拿不准就留正文、不抽——错误的记忆条目以后会被检索出来当真。
@@ -52,8 +52,8 @@ version: 3.0.0
 ## 规则
 
 - 默认先计划后改，和 doctor 一样。这会改人写的正文、并往 git 里写记忆。
-- 不发明布局，不绕开脚本往 `.harness/memory/feedbacks/` 等目录丢文件。
+- 不发明布局，不绕开脚本往 `.edges/memory/feedbacks/` 等目录丢文件。
 - 不要把 README 抄进 `AGENTS.md`。目录与业务约定指向仓库里已有的真理源。
-- 不要为了「整齐」把硬约束抽进 `.harness/memory`——抽走后必须靠检索才能看见，等于没写。
+- 不要为了「整齐」把硬约束抽进 `.edges/memory`——抽走后必须靠检索才能看见，等于没写。
 
-旧 `.memory` 层先通过 `$project-memory-migrate` 转换，reshape 不手工搬目录。重组不为每个源码包制造作用域，保留已有业务模块入口和真实子层关系；不添加 memory/skills 容器总入口。
+旧 `.memory` 层当前版本不会迁移。先用 `@viruspc/edges@0.2.7` 完成那次转换，再按 `docs/migrations/2026-10-27-rename-harness-to-edges.md` 改目录名。reshape 不手工搬目录。重组不为每个源码包制造作用域，保留已有业务模块入口和真实子层关系；不添加 memory/skills 容器总入口。

@@ -11,17 +11,17 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 function agents(local: string, descendants = ""): string {
   return `# Scope
 
-<!-- project-harness-local:start -->
+<!-- edges-local:start -->
 ## 本层系统维护信息
 
 ${local}
-<!-- project-harness-local:end -->
+<!-- edges-local:end -->
 
-<!-- project-harness-descendants:start -->
+<!-- edges-descendants:start -->
 ## 下层系统维护信息
 
 ${descendants}
-<!-- project-harness-descendants:end -->
+<!-- edges-descendants:end -->
 `;
 }
 
@@ -167,10 +167,10 @@ test("notes create rejects removed ingest flags", async (t) => {
   }
 });
 
-test("skills create get update delete and list write .harness/skills/managed", async (t) => {
+test("skills create get update delete and list write .edges/skills/managed", async (t) => {
   const root = scope(t);
-  put(root, "AGENTS.md", agents("- [managed](.harness/skills/managed/README.md) — managed skills"));
-  put(root, ".harness/skills/managed/README.md", [
+  put(root, "AGENTS.md", agents("- [managed](.edges/skills/managed/README.md) — managed skills"));
+  put(root, ".edges/skills/managed/README.md", [
     "<!-- project-memory-type:start -->",
     "name: managed",
     "module: skills",
@@ -186,9 +186,9 @@ test("skills create get update delete and list write .harness/skills/managed", a
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
   const made = JSON.parse(created.stdout) as { path: string; name: string };
   assert.equal(made.name, "demo-skill");
-  assert.equal(made.path, ".harness/skills/managed/demo-skill/SKILL.md");
+  assert.equal(made.path, ".edges/skills/managed/demo-skill/SKILL.md");
   assert.match(readFileSync(path.join(root, made.path), "utf8"), /name: demo-skill/);
-  assert.match(readFileSync(path.join(root, ".harness/skills/managed/README.md"), "utf8"), /demo-skill\/SKILL\.md/);
+  assert.match(readFileSync(path.join(root, ".edges/skills/managed/README.md"), "utf8"), /demo-skill\/SKILL\.md/);
 
   const got = await run(["--scope", root, "skills", "get", "demo-skill"], { env: {} });
   assert.equal(got.exitCode, 0, got.stdout);
@@ -212,14 +212,14 @@ test("skills create get update delete and list write .harness/skills/managed", a
   const removed = await run(["--scope", root, "skills", "delete", "demo-skill"], { env: {} });
   assert.equal(removed.exitCode, 0, removed.stdout);
   assert.equal(existsSync(path.join(root, made.path)), false);
-  assert.doesNotMatch(readFileSync(path.join(root, ".harness/skills/managed/README.md"), "utf8"), /demo-skill\/SKILL\.md/);
+  assert.doesNotMatch(readFileSync(path.join(root, ".edges/skills/managed/README.md"), "utf8"), /demo-skill\/SKILL\.md/);
 });
 
 test("skill get by a repeated name is ambiguous", async (t) => {
   const root = scope(t);
-  put(root, "AGENTS.md", agents("- [managed](.harness/skills/managed/README.md) — managed skills"));
+  put(root, "AGENTS.md", agents("- [managed](.edges/skills/managed/README.md) — managed skills"));
   const skill = "---\nname: demo-skill\ndescription: One\n---\nBody\n";
-  put(root, ".harness/skills/managed/README.md", [
+  put(root, ".edges/skills/managed/README.md", [
     "<!-- project-memory-type:start -->",
     "name: managed",
     "module: skills",
@@ -236,8 +236,8 @@ test("skill get by a repeated name is ambiguous", async (t) => {
     "<!-- project-entries-local:end -->",
     "",
   ].join("\n"));
-  put(root, ".harness/skills/managed/demo-skill/SKILL.md", skill);
-  put(root, ".harness/skills/managed/other/SKILL.md", skill);
+  put(root, ".edges/skills/managed/demo-skill/SKILL.md", skill);
+  put(root, ".edges/skills/managed/other/SKILL.md", skill);
   const result = await run(["--scope", root, "skills", "get", "demo-skill"], { env: {} });
   assert.equal(result.exitCode, 2, result.stdout);
   assert.match(JSON.parse(result.stdout).reason, /ambiguous/);

@@ -89,9 +89,9 @@ pnpm skills:install-claude-global  # 全局，只装给 Claude Code：实体拷�
 
 > Project Memory 系列依赖提供 `edges memory` 的 Edges CLI。先构建或安装 CLI，并验证 `edges memory --help`；Skill 的安装不等于安装 CLI。建议一起安装 `project-memory-ask` / `-doctor` / `-init` / `-remember` / `-reshape`，以保留互相引用的工作流与协议资料。执行命令不再定位其他 Skill 的 Python 脚本，模板随 CLI 构建分发。
 
-旧 Project Memory 升级使用 [`project-memory-migrate`](project-memory-migrate/SKILL.md) 调用 `edges memory migrate`；其 `--dry-run` 可预览一次性转换，包括早期平铺的 `<type>_<slug>.md`。还没装这个 skill 时直接跑同一条 CLI。常规运行时不兼容旧 `.memory`。私有归档使用 [`user-memory-backup`](user-memory-backup/SKILL.md) 与 [`user-memory-restore`](user-memory-restore/SKILL.md) 调用同一 CLI 的 backup/restore，仅处理新 `.harness/memory/users`。Git 更新公共布局后，每台机器仍须迁移自己的 ignored 私有残留。
+0.3.0 起不再附带 `project-memory-migrate`，也没有 `edges memory migrate`。仍停在旧 `.memory` 的，先用 `@viruspc/edges@0.2.7` 完成那次转换，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。常规运行不读旧 `.memory`。私有归档使用 [`user-memory-backup`](user-memory-backup/SKILL.md) 与 [`user-memory-restore`](user-memory-restore/SKILL.md)，只处理 `.edges/memory/users`。
 
-维护这组 skill 时，按 [Project Memory 开发规范](project-memory-init/.harness/memory/projects/project_development/INDEX.md) 的顺序修改和验证。
+维护这组 skill 时，按 [Project Memory 开发规范](project-memory-init/.edges/memory/projects/project_development/INDEX.md) 的顺序修改和验证。
 
 ### 卸载
 

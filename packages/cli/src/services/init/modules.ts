@@ -1,6 +1,6 @@
 /**
  * Init module table. Paths are not stored here: catalog rows are material ids,
- * and placeHarnessMaterial is the only reader of harness-materials.json paths.
+ * and placeHarnessMaterial is the only reader of edges-materials.json paths.
  * notes is not a child of memory.
  */
 export const INIT_MODULE_NAMES = ["memory", "skills", "tasks", "notes", "projects", "routines"] as const;
@@ -32,7 +32,7 @@ export const DEFAULT_PUBLIC_MEMORY_TYPES = [
 ] as const;
 
 /**
- * Official type name to harness-materials id.
+ * Official type name to edges-materials id.
  * `user` has no catalog row; custom types keep their TypeSpec index path.
  */
 export const TYPE_MATERIAL_IDS: Readonly<Record<string, string>> = {
@@ -43,7 +43,7 @@ export const TYPE_MATERIAL_IDS: Readonly<Record<string, string>> = {
   referenced: "skills.referenced",
 };
 
-/** AGENTS 本层指向 `.harness/README.md` 的那条组成。 */
+/** AGENTS 本层指向 `.edges/README.md` 的那条组成。 */
 export const SCOPE_README_ENTRY_NAME = "本层 harness 材料索引";
 export const SCOPE_README_ENTRY_DESCRIPTION =
   "本层 harness 材料的组织清单。各材料只在这里登记。";
