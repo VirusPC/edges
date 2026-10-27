@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: evaluation
-  edges-updated-at: '2026-10-25T06:10:08.884Z'
+  edges-updated-at: '2026-10-27T07:04:38.092Z'
   edges-title: 框架附带可接入评测能力（含 Experiment Webhook 适配层）
-  edges-tasks-status: backlog
+  edges-tasks-status: done
   edges-task-priority: none
 name: 框架附带可接入评测能力含_experiment_webhook_适配层
 description: AGIS/Edges 附带评测能力总目的卡。链路：Skill→Dataset → Webhook+实验程序跑实验 → CLI 启服务。子卡三张解耦落地。
@@ -37,3 +37,6 @@ Edges 框架附带一套可接入的评测能力，让使用方能对照自有�
 - 顺序：先合脑仓 #378（已合），再从业务实现抽统一适配层进框架。
 
 报表落盘与指标定义挂在「实验程序 + Webhook」子卡，不另开第四张。
+
+**收口（2026-10-26）：**
+三张子卡都已落到 `evaluation/done/`，本卡按拆卡约定收口。Skill→Dataset 子卡落地的是 Langfuse 接入 skills（主入口 + 四份）随包分发；从 trace 生成 Dataset 按该子卡不在范围内。实验程序 + Experiment Webhook、CLI 启服务两张此前已 done。
