@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-27
+
+### Changed
+
+- **路径：** 布局改到总入口 `edges` 的 `references/memory/references/LAYOUT.md`。Init 改从 `$edges` 进入。
+
 ## [0.1.0] - 2026-10-27
 
 ### Changed

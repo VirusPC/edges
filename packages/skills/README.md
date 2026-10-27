@@ -1,6 +1,6 @@
 # Skills (packages/skills/)
 
-本目录是 Edges **对外分发、接入本系统**的 skill 真源，供外部 AI Agent（Claude Code、Codex、Cursor、Gemini CLI、Factory、opencode）加载。评测接入类 skill（`edges-langfuse-*-tracing`：把 Agent / Grok Bot 会话接进 Langfuse）也放这里；主入口是 `edges-langfuse-agent-tracing`。其余不绑定 Edges 的通用 skill 放在使用方自己的内容仓（经 Compose 挂载，布局由该仓自定），不要放进本仓。见 [ADR 0048](../../docs/adr/0048-retire-shared-extensions.md)。classifyTasks（`edges-tasks-classify`）人闸走 `edges tasks project review-page`；尚未入库的 proposeTypes Skill 应复用同一命令与同一 HTML 壳，不要另开 `--mode`。
+本目录是 Edges **对外分发、接入本系统**的 skill 真源，供外部 AI Agent（Claude Code、Codex、Cursor、Gemini CLI、Factory、opencode）加载。日常模块的总入口是 `edges`（[ADR 0051](../../docs/adr/0051-bundled-skills-single-entry.md)）。把 Agent / Grok Bot 会话接进 Langfuse 用 `edges-langfuse-agent-tracing`，四个表面的步骤在它的 `references/`。其余不绑定 Edges 的通用 skill 放在使用方自己的内容仓（经 Compose 挂载，布局由该仓自定），不要放进本仓。见 [ADR 0048](../../docs/adr/0048-retire-shared-extensions.md)。classifyTasks 仍是独立 skill [`edges-tasks-classify`](edges-tasks-classify/SKILL.md)，人闸走 `edges tasks project review-page`；尚未入库的 proposeTypes Skill 应复用同一命令与同一 HTML 壳，不要另开 `--mode`。
 
 ## 目录规范
 
@@ -32,9 +32,9 @@ version: <semver>
 查找某个版本对应的 commit：
 
 ```bash
-git show skill/edges-memory-init@1.1.0
-git log --oneline skill/edges-memory-init@1.0.0..skill/edges-memory-init@1.1.0 -- packages/skills/edges-memory-init
-git tag -l 'skill/edges-memory-init@*'
+git show skill/edges@0.1.0
+git log --oneline skill/edges-memory-ask@0.1.0..skill/edges-memory-ask@0.1.1 -- packages/skills/edges-memory-ask
+git tag -l 'skill/edges@*'
 ```
 
 `name` 与目录名一致这条**没有机器校验了**（旧的 `install-skills` 脚本会拦，已退役）。两个 skill 的 `name` 撞车时，后一个会被静默丢弃。
@@ -87,11 +87,11 @@ pnpm skills:install-claude-global  # 全局，只装给 Claude Code：实体拷�
 
 > ⚠️ **改完必须重跑。** `npx skills` 会把源目录里的软链一并 `dereference` 掉，所以改了本目录下的文件不会自动生效。对本地路径源，`skills update` 会跳过，只能重跑安装命令。
 
-> 记忆技能依赖提供 `edges memory` 的 Edges CLI。先构建或安装 CLI，并验证 `edges memory --help`；Skill 的安装不等于安装 CLI。一起安装 `edges-memory-ask`、`edges-memory-init`、`edges-memory-remember`、`edges-memory-add-type`。`project-memory-doctor` 与 `project-memory-reshape` 已删除，没有同名替代；索引诊断用 `edges memory doctor`。执行命令不再定位其他 Skill 的 Python 脚本，模板随 CLI 构建分发。
+> 记忆技能依赖提供 `edges memory` 的 Edges CLI。先构建或安装 CLI，并验证 `edges memory --help`；Skill 的安装不等于安装 CLI。一起安装 `edges`、`edges-memory-ask`、`edges-memory-remember`、`edges-memory-add-type`。`project-memory-doctor` 与 `project-memory-reshape` 已删除，没有同名替代；索引诊断用 `edges memory doctor`。执行命令不再定位其他 Skill 的 Python 脚本，模板随 CLI 构建分发，真源在 `edges/references/memory/references/templates`。
 
-0.3.0 起不再附带 `project-memory-migrate`，也没有 `edges memory migrate`。仍停在旧 `.memory` 的，先用 `@viruspc/edges@0.2.7` 完成那次转换，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。常规运行不读旧 `.memory`。私有归档使用 [`edges-memory-user-backup`](edges-memory-user-backup/SKILL.md) 与 [`edges-memory-user-restore`](edges-memory-user-restore/SKILL.md)，只处理 `.edges/memory/users`。默认归档名是 `edges-memory-user-backup-<UTC时间戳>.tar.gz`。
+0.3.0 起不再附带 `project-memory-migrate`，也没有 `edges memory migrate`。仍停在旧 `.memory` 的，先用 `@viruspc/edges@0.2.7` 完成那次转换，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。常规运行不读旧 `.memory`。私有归档从 `$edges` 进入，说明见 [`memory-user-backup.md`](edges/references/memory-user-backup.md) 与 [`memory-user-restore.md`](edges/references/memory-user-restore.md)，只处理 `.edges/memory/users`。默认归档名仍是 `edges-memory-user-backup-<UTC时间戳>.tar.gz`。
 
-维护这组 skill 时，按 [Project Memory 开发规范](edges-memory-init/.edges/memory/projects/project_development/INDEX.md) 的顺序修改和验证。
+维护记忆协议时，按 [Project Memory 开发规范](edges/references/memory/.edges/memory/projects/project_development/INDEX.md) 的顺序修改和验证。
 
 ### 卸载
 

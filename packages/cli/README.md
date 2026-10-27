@@ -235,7 +235,7 @@ edges memory restore --repo-dir /absolute/project --archive /private/archive.tar
 
 用户记忆 restore 默认拒绝覆盖，明确使用 --force 才整份替换，失败时回滚。备份和恢复接受未压缩或 gzip tar，解包上限 256 MiB、10,000 文件，拒绝硬链接；中断后若报告 `.private-user-memory-*/previous`，应保留恢复副本。模板随包复制到 dist，运行不依赖相邻 Skill 源码或 Python。
 
-内容类型、私有忽略规则与规范以 [Project Memory LAYOUT](../skills/edges-memory-init/references/LAYOUT.md) 为准。
+内容类型、私有忽略规则与规范以 [Project Memory LAYOUT](../skills/edges/references/memory/references/LAYOUT.md) 为准。
 
 ### 笔记：notes
 
@@ -287,7 +287,7 @@ edges --scope /absolute/project --all routines list
 
 `INDEX.md` 用通用 name/description 元数据与 Markdown 正文，记录平台日程并链接同目录或外置 Skill。CLI 不解释 cron，不统一不同平台的日程格式。删除 routine 会处理整个目录，包括同目录 Skill；引用的外置 Skill 保留原处。
 
-平台接入约定是：仓库作为配置依据；每次运行前读取记录和 Skill；默认读取来源仓库默认分支最新内容，明确指定的 branch/tag/commit 优先；读取失败停止本次并报告。修改日程后须另行更新平台配置。Edges 提供记录管理，不提供调度器、启停、缓存或平台连接器。完整示例见 [`edges-routines`](../skills/edges-routines/SKILL.md)。
+平台接入约定是：仓库作为配置依据；每次运行前读取记录和 Skill；默认读取来源仓库默认分支最新内容，明确指定的 branch/tag/commit 优先；读取失败停止本次并报告。修改日程后须另行更新平台配置。Edges 提供记录管理，不提供调度器、启停、缓存或平台连接器。完整示例见 [`routines`](../skills/edges/references/routines.md)。
 
 <a id="artifacts"></a>
 
@@ -332,7 +332,7 @@ edges config show
 
 ### 组合仓库：compose
 
-作用域 `AGENTS.md` 的 `edges-compose` 区块登记被组合的 harness 仓库。每条是一个本地目录链接：链接文字是名字，破折号后面是说明，`remote: <git-url>` 是 git 地址。完整操作见 [`edges-compose`](../skills/edges-compose/SKILL.md)。
+作用域 `AGENTS.md` 的 `edges-compose` 区块登记被组合的 harness 仓库。每条是一个本地目录链接：链接文字是名字，破折号后面是说明，`remote: <git-url>` 是 git 地址。完整操作见 [`compose`](../skills/edges/references/compose.md)。
 
 底层是 git submodule，CLI 只有三个子命令，名字对应 git submodule：`add`、`list`、`update`。没有 `register`、`unregister`、`clone`、`pull`、`push`、`sync`，也没有别名；推送和去掉条目交给原生 git 和手改 `AGENTS.md`（见下文）。
 

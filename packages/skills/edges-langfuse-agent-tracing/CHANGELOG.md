@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-27
+
+### Changed
+
+- **四个表面收进 references：** 本机 Agent、Codex Cloud、Cursor Cloud、Grok Bot 的步骤改在本 skill 的 `references/`。不再另有 `edges-langfuse-codex-cloud-tracing`、`edges-langfuse-cursor-cloud-tracing`、`edges-langfuse-grokbot-tracing`、`edges-langfuse-local-agent-tracing`。旧 tag 留在当时的提交上。
+
 ## [0.1.0] - 2026-10-27
 
 ### Changed

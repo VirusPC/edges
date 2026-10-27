@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-27
+
+### Changed
+
+- **路径：** 协议与布局改到总入口 `edges` 的 `references/memory/`。Init、用户记忆备份与恢复改从 `$edges` 进入，不再指向已删除的独立 skill。
+
 ## [0.1.1] - 2026-10-27
 
 ### Changed

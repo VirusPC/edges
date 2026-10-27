@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-27
+
+### Changed
+
+- **协议路径：** `PROTOCOL.md` 改到总入口 `edges` 的 `references/memory/references/PROTOCOL.md`。
+
 ## [0.1.0] - 2026-10-27
 
 ### Changed

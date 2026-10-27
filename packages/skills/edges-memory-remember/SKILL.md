@@ -1,14 +1,14 @@
 ---
 name: edges-memory-remember
 description: 把可复用结论写入本项目 .edges 并刷新索引。用户要求记住时必须用；被纠正、用户给出可用想法/约定/约束、或任务产出已验证、以后还用得上的结论时也要主动用。
-version: 0.1.1
+version: 0.1.2
 ---
 
 # Project Memory Remember
 
 把结论写进仓库内的项目记忆。可提交类型（`feedback` / `project` / `reference` / `managed`）写入会进 git，是永久的；`--type user` 落在 gitignore 的 `.edges/memory/users/`，类型索引是 `.edges/memory/users/README.md`，不进版本历史。闸门按类型分开。
 
-执行能力由 Edges CLI 的 `edges memory remember` 提供；布局参考同级 edges-memory-init 的 LAYOUT。
+执行能力由 Edges CLI 的 `edges memory remember` 提供；布局见 [`LAYOUT.md`](../edges/references/memory/references/LAYOUT.md)。
 
 ## 什么时候写
 
@@ -48,14 +48,14 @@ version: 0.1.1
 - 产物是 `.edges/memory/users/user_<slug>/INDEX.md`，类型索引是 `.edges/memory/users/README.md`。整类都被 gitignore，**不要 `git add`**。
 - `--slug` 与其他普通记忆一样，小写 snake_case，不带 `user_` 前缀。
 - 正文仍按「一句结论 → `**Why:**` → `**How to apply:**`」。
-- Agent 读的是本机这份 `users/README.md`。换机或删仓前用 `$edges-memory-user-backup`；回注用 `$edges-memory-user-restore`。
+- Agent 读的是本机这份 `users/README.md`。换机或删仓前用 `$edges` 做用户记忆备份；回注同样用 `$edges`。说明在 [备份](../edges/references/memory-user-backup.md) 与 [恢复](../edges/references/memory-user-restore.md)。
 - v1 不做脱敏晋升：不要把 user 条目改写进 `project` / `feedback` 来「变成可提交」。
 
 `referenced` 不由 remember 写入，作为 `--type` 写入会被拒绝。那份索引对着本层 `.agents/skills/`，内容是人写或 `npx skills` 装的，本套工具只索引不改写。要新增就手写或走 `npx skills`，已有层可用 init 刷新已采用入口；不代为初始化新层。
 
 返回的 `path` 和 `action`（`created` / `updated`）就是写入凭据——索引是全量重算的，返回了路径就说明索引里有它，不必再查一遍。`agentsAction` 是 `needs-doctor` 时要一并说明：那表示该目录的 `AGENTS.md` 还没纳管，索引没能刷新。
 
-目标目录还没初始化（没有已采用的可写类型或本套作用域 `AGENTS.md`）时，CLI 会拒绝写入。问用户要不要 Init，得到明确同意后再跑 `$edges-memory-init`；不要自己 Init。
+目标目录还没初始化（没有已采用的可写类型或本套作用域 `AGENTS.md`）时，CLI 会拒绝写入。问用户要不要 Init，得到明确同意后再跑 `$edges` 的 memory init（[memory-init.md](../edges/references/memory-init.md)）；不要自己 Init。
 
 ## 什么时候改派 subagent
 
@@ -65,7 +65,7 @@ version: 0.1.1
 
 ## 写哪一层
 
-记忆按目录分层，结构约定见 [`PROTOCOL.md`](../edges-memory-init/references/PROTOCOL.md)。写到**与结论作用范围最贴近的那一层**：只对某目录成立的写该目录节点；可读 AGENTS 即为节点，不需要独立职责资格。整个项目都成立的写记忆根，不能因为模块属于维护对象就把其局部记录提升到根。目标尚未采用可写类型时先说明缺口，不能代为 Init，也不能用根层兜底改变归属。
+记忆按目录分层，结构约定见 [`PROTOCOL.md`](../edges/references/memory/references/PROTOCOL.md)。写到**与结论作用范围最贴近的那一层**：只对某目录成立的写该目录节点；可读 AGENTS 即为节点，不需要独立职责资格。整个项目都成立的写记忆根，不能因为模块属于维护对象就把其局部记录提升到根。目标尚未采用可写类型时先说明缺口，不能代为 Init，也不能用根层兜底改变归属。
 
 **先看这次任务实际碰过哪些文件**，它们所在的目录就是候选：都落在同一个模块下，那个模块目录是第一候选；散在几个互不相干的目录，基本就是记忆根。但**作用范围不等于改动范围**——改的是某个模块，结论却可能是关于构建工具、发布流程或团队规范的，那仍然属于整仓。判据始终是「这条结论对哪些代码成立」，改动集只用来提候选。
 

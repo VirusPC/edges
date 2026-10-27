@@ -79,7 +79,7 @@ test('restore refuses any occupied content and force replaces the whole users su
 test('only a byte-identical empty generated index is unoccupied', async t => {
   const { source, destination } = await fixture(t);
   const { archive } = await backupUserMemory({ repoDir: source });
-  const template = await readFile(new URL('../../../skills/edges-memory-init/references/templates/USER.tmpl.md', import.meta.url), 'utf8');
+  const template = await readFile(new URL('../../../skills/edges/references/memory/references/templates/USER.tmpl.md', import.meta.url), 'utf8');
   await mkdir(path.join(destination, users), { recursive: true });
   const index = path.join(destination, users, TYPE_INDEX_FILE_NAME);
   await writeFile(index, template.trimEnd() + '\n');

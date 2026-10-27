@@ -37,7 +37,7 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 
 <!-- edges-descendants:start -->
 ## 下层系统维护信息
-- [edges-memory-init](<packages/skills/edges-memory-init/AGENTS.md>) — edges-memory 系列 skill 的项目记忆与规范入口。
+- [edges memory](<packages/skills/edges/references/memory/AGENTS.md>) — edges-memory 系列的协议、布局与维护记忆。总入口 skill 是 `edges`。
 - [evaluation](<packages/evaluation/AGENTS.md>) — evaluation 目录的项目记忆与规范入口。
 - [observation](<packages/observation/AGENTS.md>) — observation 目录的项目记忆与规范入口。
 
