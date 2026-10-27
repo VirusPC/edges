@@ -4,9 +4,11 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-27
+
 ### Changed
 
-- **破坏性：随包技能与标记改为 `edges-*`。** 改名技能的版本重启为 `0.1.0`。删除 `project-memory-doctor` 与 `project-memory-reshape`，不设替代技能。索引诊断仍是 `edges memory doctor`。类型标记改为 `edges-memory-type`，组织清单改为 `edges-entries-local` / `edges-entries-descendants`。运行时不读 `project-memory-type`、`project-entries-*`、`project-memory-entries`，也不把 `project-memory` / `project-memory-important` / `project-memory-local` / `project-memory-children` 当受管层标记。一次性改写仍是 `scripts/migrations/rewrite-project-harness-markers.mts`。见 [ADR 0049](../../docs/adr/0049-edges-skills-markers-rename.md)。本条尚未发版；建议下一次 npm 版本为 `0.4.0`。
+- **破坏性：随包技能与标记改为 `edges-*`。** 改名技能的版本重启为 `0.1.0`。删除 `project-memory-doctor` 与 `project-memory-reshape`，不设替代技能。索引诊断仍是 `edges memory doctor`。类型标记改为 `edges-memory-type`，组织清单改为 `edges-entries-local` / `edges-entries-descendants`。运行时不读 `project-memory-type`、`project-entries-*`、`project-memory-entries`，也不把 `project-memory` / `project-memory-important` / `project-memory-local` / `project-memory-children` 当受管层标记。一次性改写仍是 `scripts/migrations/rewrite-project-harness-markers.mts`。见 [ADR 0049](../../docs/adr/0049-edges-skills-markers-rename.md)。
 
 ## [0.3.0] - 2026-10-27
 
