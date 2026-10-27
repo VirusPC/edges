@@ -46,7 +46,7 @@ Cancel a Task with: edges tasks status <stem> cancelled
 delete only prints that command. It does not remove the Task file or sidecar.
 
 Run layer is read-only (no append).
-classifyTasks Skill (packages/skills/edges-tasks-classify) uses these project verbs plus update --project.
+classifyTasks (packages/skills/edges/references/tasks-classify.md) uses these project verbs plus update --project.
 Generic tasks Skill/MCP CRUD is a later backlog on this same contract.
 Capability Surface is CLI + Skill + MCP.
 

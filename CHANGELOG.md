@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 随包技能
 
+- **日常技能收成总入口 `edges`：** 随包装上的技能剩下 8 个。`edges` 负责挂仓库、写笔记、例程、任务归类、初始化系统入口，以及用户记忆的备份和恢复。检索仍是 `edges-memory-ask`，沉淀仍是 `edges-memory-remember`。第一次接入、整理对话、把会话接到 Langfuse 仍是各自的技能。见 [ADR 0051](docs/adr/0051-bundled-skills-single-entry.md)。
 - **技能只认 `edges-*`：** 包内技能目录和名字改为 `edges-memory-*`、`edges-tasks-classify`、`edges-conversation-to-notes`、`edges-conversation-to-tasks`、`edges-langfuse-*-tracing`。每个改名技能的版本从 `0.1.0` 重新计数。已经叫 `edges-*` 的技能版本不动。旧名字不再识别。见 [ADR 0049](docs/adr/0049-edges-skills-markers-rename.md)。
 - **用户记忆归档改叫 `edges-memory-user-*`：** `edges memory backup` 与 `edges memory restore` 仍是命令。随包技能是 `edges-memory-user-backup` 与 `edges-memory-user-restore`，版本仍是 `0.1.0`。不再识别 `edges-user-memory-*` 或 `user-memory-*`，也不留别名。新的默认归档名是 `edges-memory-user-backup-<UTC时间戳>.tar.gz`。见 [ADR 0050](docs/adr/0050-memory-user-skills-and-drop-directory-migration-skill.md)。
 - **目录迁移不再带技能：** 单文件改成目录入口仍用 `pnpm migrate:directory-nodes --root <工作树>`，先预览，`--apply` 才写入。随包技能 `edges-migrate-directory-nodes` 已删除，不留别名。

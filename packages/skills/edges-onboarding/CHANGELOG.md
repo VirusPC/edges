@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-10-27
+
+### Changed
+
+- **入口：** 写笔记、初始化系统入口、任务分类和组合仓库改走总入口 `edges`。检索与沉淀仍是 `edges-memory-ask` / `edges-memory-remember`。
+
 ## [0.2.0] - 2026-10-27
 
 ### Changed

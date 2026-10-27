@@ -5,7 +5,7 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 ## Language
 
 **系统入口（System Entry）**：
-引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层系统维护信息与下层系统维护信息，并可写硬约束；Compose 条目不写在这里，而写在 `.edges/compose/README.md`；从作用域根起经系统维护信息登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$edges-memory-init` / project harness init；命令 `edges init` 只编排各模块，`edges <module> init` 只初始化该模块；`edges skills init` 另含安装技能，见 ADR 0036），以标记该目录为重点维护作用域；不是路径白名单。CLI 默认遍历根是 `--scope` 下的真实 `AGENTS.md`，只覆盖该系统的系统二；从真 AGENTS 出发到不了同目录 README 上的 tasks/notes 等是预期。对 edges 作用域（`isScope`：目录有可解析为带 edges 标记的 `AgentsNode` 的 `AGENTS.md`），本层系统维护信息**只**登记一条指向 `.edges/README.md` 的组成（材料索引）；各材料不再直接列在 AGENTS 本层。下层系统维护信息与本层硬约束仍写在 AGENTS 上。Compose 入口在 `.edges/compose/README.md`。见 ADR 0035、ADR 0043。
+引出并承载系统二的入口文件，文件名为 `AGENTS.md`。它登记本层系统维护信息与下层系统维护信息，并可写硬约束；Compose 条目不写在这里，而写在 `.edges/compose/README.md`；从作用域根起经系统维护信息登记可达的系统入口构成递归系统二树。任意目录都可由用户自行 init 出系统入口（`$edges` / project harness init；命令 `edges init` 只编排各模块，`edges <module> init` 只初始化该模块；`edges skills init` 另含安装技能，见 ADR 0036），以标记该目录为重点维护作用域；不是路径白名单。CLI 默认遍历根是 `--scope` 下的真实 `AGENTS.md`，只覆盖该系统的系统二；从真 AGENTS 出发到不了同目录 README 上的 tasks/notes 等是预期。对 edges 作用域（`isScope`：目录有可解析为带 edges 标记的 `AgentsNode` 的 `AGENTS.md`），本层系统维护信息**只**登记一条指向 `.edges/README.md` 的组成（材料索引）；各材料不再直接列在 AGENTS 本层。下层系统维护信息与本层硬约束仍写在 AGENTS 上。Compose 入口在 `.edges/compose/README.md`。见 ADR 0035、ADR 0043。
 _避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md、从真 AGENTS 遍历时自动并进 README 组成边、在 edges 作用域的 AGENTS 本层逐条列出各 `.edges/` 材料、把无 edges 标记的普通 AGENTS.md 当成 edges 作用域
 
 **虚拟超节点（SuperAgentsNode）**：
@@ -395,7 +395,7 @@ Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`�
 _避免使用_：用 title 或 name 当查找键、把展示字段当 apply 键
 
 **classifyTasks（edges）**：
-独立工作流 Skill（约定路径 `packages/skills/edges-tasks-classify/`，展示名 classifyTasks）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task Project 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
+独立工作流（约定路径 `packages/skills/edges/references/tasks-classify.md`，展示名 classifyTasks，入口 skill 是 `edges`）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task Project 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
 _避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、要求 embedding / 向量分类、只整理 `_default`、公开 `edges tasks classify`、把审阅页当成分类器
 
 **proposeTypes（edges）**：

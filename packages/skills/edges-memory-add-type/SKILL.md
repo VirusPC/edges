@@ -1,14 +1,14 @@
 ---
 name: edges-memory-add-type
 description: 在指定记忆目录按 LAYOUT 登记一个 Memory Type（<plural>/README.md + 同目录条目 + 层入口一行）。仅当用户明确要求新增 type 时使用。官方类型按选择采用；不要把示例 type 写进 init 模板。
-version: 0.1.0
+version: 0.1.1
 ---
 
 # Project Memory Add Type
 
 在**已经 init** 的记忆目录登记一个用户 Memory Type。扩展面只在 LAYOUT：`.edges/<module>/<plural>/README.md` + 同目录条目 + 该层 `AGENTS.md` 本层清单一行。不写 JSON/YAML 注册表。PROTOCOL 不枚举类型。
 
-执行前确认 `edges memory add-type --help` 可用。类型布局参考同级 edges-memory-init 的 LAYOUT，执行能力由 Edges CLI 提供。
+执行前确认 `edges memory add-type --help` 可用。类型布局见 [`LAYOUT.md`](../edges/references/memory/references/LAYOUT.md)，执行能力由 Edges CLI 提供。
 
 ## 什么时候用
 
@@ -19,7 +19,7 @@ version: 0.1.0
 
 ## 步骤
 
-1. 确认目标目录已经 `$edges-memory-init`（有已采用类型与本套作用域 `AGENTS.md`；Skills-only 也合法）。没有就停，先问用户要不要 Init。
+1. 确认目标目录已经做过 memory init（有已采用类型与本套作用域 `AGENTS.md`；Skills-only 也合法）。没有就停，先问用户要不要用 `$edges` 做 Init（[memory-init.md](../edges/references/memory-init.md)）。
 2. 要 `--name`（小写 snake_case，不能是 `user` / `feedback` / `project` / `reference` / `managed` / `referenced`）和一句 `--description`（写进本层清单，供 ask 挑选）。
 3. 特权 flag 只在用户点名时加：
    - `--gitignore`：按用户记忆 / ADR-0003 把入口与复数目录追加进仓库根 `.gitignore`（含 `**/` 下层）。

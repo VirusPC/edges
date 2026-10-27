@@ -75,7 +75,10 @@ test("install forwards the absolute bundled directory and inherits stdio", async
 
   const dir = resolveBundledSkillsDir();
   assert.equal(path.isAbsolute(dir), true);
-  assert.equal(existsSync(path.join(dir, "edges-note", "SKILL.md")), true);
+  assert.equal(existsSync(path.join(dir, "edges", "SKILL.md")), true);
+  for (const removed of ["edges-note", "edges-compose", "edges-memory-init", "edges-langfuse-codex-cloud-tracing"]) {
+    assert.equal(existsSync(path.join(dir, removed)), false, removed);
+  }
   for (const name of MOVED_SKILL_NAMES) {
     assert.equal(existsSync(path.join(dir, name)), false, name);
   }
