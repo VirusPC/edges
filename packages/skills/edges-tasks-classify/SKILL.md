@@ -1,4 +1,8 @@
-本文件是总入口 skill `edges` 的模块说明，不是独立 skill。
+---
+name: edges-tasks-classify
+description: 对整板 Task 按用户已设的 Task Project（标题 + 描述）做归属建议（LLM / agent 判断，不要求 embedding），经 edges tasks project review-page 审阅页等人贴回导出 JSON 后再用 CLI 落地。无 GUI 时才退回 Markdown 表。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
+version: 0.1.0
+---
 
 # classifyTasks
 

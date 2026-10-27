@@ -1,6 +1,6 @@
 # Skills (packages/skills/)
 
-本目录是 Edges **对外分发、接入本系统**的 skill 真源，供外部 AI Agent（Claude Code、Codex、Cursor、Gemini CLI、Factory、opencode）加载。日常模块的总入口是 `edges`（[ADR 0051](../../docs/adr/0051-bundled-skills-single-entry.md)）。把 Agent / Grok Bot 会话接进 Langfuse 用 `edges-langfuse-agent-tracing`，四个表面的步骤在它的 `references/`。其余不绑定 Edges 的通用 skill 放在使用方自己的内容仓（经 Compose 挂载，布局由该仓自定），不要放进本仓。见 [ADR 0048](../../docs/adr/0048-retire-shared-extensions.md)。classifyTasks 的步骤在 `edges` 的 `references/tasks-classify.md`，人闸走 `edges tasks project review-page`；尚未入库的 proposeTypes Skill 应复用同一命令与同一 HTML 壳，不要另开 `--mode`。
+本目录是 Edges **对外分发、接入本系统**的 skill 真源，供外部 AI Agent（Claude Code、Codex、Cursor、Gemini CLI、Factory、opencode）加载。日常模块的总入口是 `edges`（[ADR 0051](../../docs/adr/0051-bundled-skills-single-entry.md)）。把 Agent / Grok Bot 会话接进 Langfuse 用 `edges-langfuse-agent-tracing`，四个表面的步骤在它的 `references/`。其余不绑定 Edges 的通用 skill 放在使用方自己的内容仓（经 Compose 挂载，布局由该仓自定），不要放进本仓。见 [ADR 0048](../../docs/adr/0048-retire-shared-extensions.md)。classifyTasks 仍是独立 skill [`edges-tasks-classify`](edges-tasks-classify/SKILL.md)，人闸走 `edges tasks project review-page`；尚未入库的 proposeTypes Skill 应复用同一命令与同一 HTML 壳，不要另开 `--mode`。
 
 ## 目录规范
 

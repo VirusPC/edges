@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-10-27
+
+### Changed
+
+- **任务归类：** 整板按 Task Project 归类改回独立 skill `edges-tasks-classify`。写笔记、初始化和组合仓库仍走 `edges`。
+
 ## [0.2.1] - 2026-10-27
 
 ### Changed

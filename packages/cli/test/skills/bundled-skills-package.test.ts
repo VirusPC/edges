@@ -41,6 +41,7 @@ test("copyBundledSkills copies every remaining extensions skill and not the six 
     "edges-memory-ask",
     "edges-memory-remember",
     "edges-onboarding",
+    "edges-tasks-classify",
   ]);
   assert.deepEqual(copied, expected);
   assert.ok(expected.length > 0);

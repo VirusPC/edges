@@ -395,7 +395,7 @@ Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`�
 _避免使用_：用 title 或 name 当查找键、把展示字段当 apply 键
 
 **classifyTasks（edges）**：
-独立工作流（约定路径 `packages/skills/edges/references/tasks-classify.md`，展示名 classifyTasks，入口 skill 是 `edges`）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task Project 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
+独立工作流（约定路径 `packages/skills/edges-tasks-classify/SKILL.md`，展示名 classifyTasks，入口 skill 是 `edges-tasks-classify`）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task Project 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
 _避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、要求 embedding / 向量分类、只整理 `_default`、公开 `edges tasks classify`、把审阅页当成分类器
 
 **proposeTypes（edges）**：

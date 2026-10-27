@@ -5,13 +5,13 @@ description: >-
   把外部 harness 仓库挂到当前 scope（edges compose add、list、update；add 必须带 --description；不经手 git token）；
   把一条 Note 入库（有 shell 用 edges notes，没有 shell 用 new-note MCP；只写本地叶子，不要自己跑 git）；
   用 edges routines 创建、查询、更新或删除例程定义，或让外部平台 Agent 按仓库记录接入（记录日程并引用 Skill，触发和执行由平台负责）；
-  对整板 Task 按用户已设的 Task Project（标题 + 描述）做归属建议（LLM / agent 判断，不要求 embedding），经 edges tasks project review-page 等人贴回导出 JSON 后再用 CLI 落地；
   对用户选定的目录初始化或刷新系统入口 AGENTS.md（仅当用户明确要求 init；标准命令是 edges init；各域 init 只初始化本模块）；
   将 .edges/memory/users 的本机私有记忆打成归档，或从归档恢复（换机、删仓；目标已占用时须明确授权 --force 整份替换）。
   检索项目记忆用 edges-memory-ask，沉淀用 edges-memory-remember，新增 Memory Type 用 edges-memory-add-type。
   第一次接入用 edges-onboarding。整理对话用 edges-conversation-to-notes 或 edges-conversation-to-tasks。
+  整板 Task 按已有 Task Project 归类用 edges-tasks-classify。
   把会话接到 Langfuse 用 edges-langfuse-agent-tracing。
-version: 0.1.0
+version: 0.1.1
 ---
 
 # edges
@@ -45,7 +45,6 @@ edges --scope <目录> <module> delete <目标>
 | 挂外部 harness 仓库 | [compose.md](references/compose.md) |
 | 入库一条 Note | [notes.md](references/notes.md) |
 | 例程定义，或让平台按记录接入 | [routines.md](references/routines.md) |
-| 整板 Task 按已有 Task Project 归类 | [tasks-classify.md](references/tasks-classify.md) |
 | 初始化或刷新系统入口 | [memory-init.md](references/memory-init.md) |
 | 备份本机用户记忆 | [memory-user-backup.md](references/memory-user-backup.md) |
 | 恢复本机用户记忆 | [memory-user-restore.md](references/memory-user-restore.md) |
@@ -59,4 +58,5 @@ edges --scope <目录> <module> delete <目标>
 - 用户明确要求新增 Memory Type：`edges-memory-add-type`
 - 第一次安装、初始化一台机器或一个仓库：`edges-onboarding`
 - 把对话整理成笔记或任务：`edges-conversation-to-notes`、`edges-conversation-to-tasks`
+- 整板 Task 按已有 Task Project 归类：`edges-tasks-classify`
 - 把会话接到 Langfuse：`edges-langfuse-agent-tracing`
