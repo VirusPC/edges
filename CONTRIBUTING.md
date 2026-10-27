@@ -42,7 +42,7 @@ git submodule update --init packages/evaluation/third_party/locomo
 
 开发时，`pnpm skills:link` 将 `packages/skills/` 链到 `.agents/skills`。本仓维护用的技能在 `.edges/skills`；构建时复制进安装包的 `packages/cli/skills/` 不入 Git。这几处分别承担分发真源、开发发现、本仓维护和构建产物的职责。
 
-使用方的笔记、教学、复盘、任务、项目、记忆、归档、shared-extensions 与对外博客，放在自己的内容仓库。本框架仓不挂载个人仓库；使用方可在自己的工作区通过 [Compose](packages/skills/edges-compose/SKILL.md) 组织它们。不绑定 Edges 的通用技能与配置也归使用方维护。
+使用方的笔记、教学、复盘、任务、项目、记忆、归档、不绑定 Edges 的通用 skill 与对外博客，放在自己的内容仓库。通用 skill 放使用方个人仓的 `.edges/skills/managed/`（或等价材料路径下的 `skills/managed/`）。本框架仓不挂载个人仓库；使用方可在自己的工作区通过 [Compose](packages/skills/edges-compose/SKILL.md) 挂上使用方自己的 harness 仓。不再使用 `shared-extensions/` 隔间。见 [ADR 0048](docs/adr/0048-retire-shared-extensions.md)。
 
 现行术语见 [CONTEXT.md](CONTEXT.md)，设计取舍见 [ADR](docs/adr/)。[架构背景材料](docs/architecture.md) 保留了旧 README 的设计思考，涉及入口或路径时应对照现行术语与后续 ADR。
 
@@ -60,7 +60,7 @@ git submodule update --init packages/evaluation/third_party/locomo
 
 2026-10-20 起，原 `VirusPC/edges` 改名为作者的[公开个人大脑仓](https://github.com/VirusPC/edges-brain-viruspc)并长期保留。本框架仓从拆仓前提交 `025904fa29bcc6970f45c654d95e30c5390d43d7` 拆出，以只含系统路径的单个初始提交开始；更早的 commit、PR、Issue 与 Actions 记录仍在个人大脑仓。npm 包名 `@viruspc/edges` 不变。
 
-同日先移除了 `extensions/` 层，再将代码目录收进 `packages/`。路径对照见[平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)和 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。原 `extensions/` 下的空占位 `docs/`、`tools/`、`subagents/` 已删除；`new-server/` 与 `others/` 从本仓移出，由个人仓放入 `shared-extensions/`。
+同日先移除了 `extensions/` 层，再将代码目录收进 `packages/`。路径对照见[平铺说明](docs/migrations/2026-10-20-flatten-extensions.md)和 [workspace 说明](docs/migrations/2026-10-20-packages-workspace.md)。原 `extensions/` 下的空占位 `docs/`、`tools/`、`subagents/` 已删除；`new-server/` 与 `others/` 从本仓移出，当时由个人仓放入 `shared-extensions/`。2026-10-27 起该隔间废止，见 [ADR 0048](docs/adr/0048-retire-shared-extensions.md)。
 
 ## 隐私与脱敏
 
