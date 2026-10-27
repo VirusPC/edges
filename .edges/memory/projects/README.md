@@ -70,7 +70,7 @@ format: ordinary
 - [ECS 上 edges 用 Actions SSH 整仓 pull](<project_teach_site_rsync_push/INDEX.md>) — 改 teaching、/tasks/ 或 ECS 部署时：SSH 只在 deploy.yml 的 deploy job；production 不挂 url；site\-teaching 与 site\-tasks 都 needs deploy，分别登记 https://edges.viruspc.tech/teaching/ 与 /tasks/；summary 列两个 URL。artifacts 仅当 ~/.config/edges/edges.env 有可用 token 时 install 再 restart，不读 artifacts\-preview.env。不要拆成两次 SSH，不要用 teach.\* 或裸 IP。不要新开 workflow（ADR 0021）。
 - [todos 只追加直接推 main（已由 tasks 路径取代）](project_todos_direct_main/INDEX.md) — 旧约定：往 knowledge/todos/ 只追加速记曾直接推 main；该路径已删除，现行入口见 tasks\_direct\_main
 - [知识目录单元与扩展应用归属](project_top_level_content_and_extension_apps/INDEX.md) — 目录单元适用于全部知识内容；共用附件复制，未引用旧 img 归 archive/img，根共享池无引用附件归档；apps 属于 extensions，局部记忆保留归属。
-- [层入口表面命名改为 project\-harness](<project_harness_layer_markers/INDEX.md>) — 改 AGENTS.md 层入口注释或章节标题时：标记为 project\-harness / constraints / local / descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；type 与 entries 仍用 project\-memory\-\*。README 的 project\-entries\-\* 见 grill\_entries 条。
+- [层入口表面命名改为 edges](<project_harness_layer_markers/INDEX.md>) — 改 AGENTS.md 层入口注释或章节标题时：标记为 edges / constraints / local / descendants；标题为本层硬约束 / 本层系统维护信息 / 下层系统维护信息；type 与 entries 仍用 project\-memory\-\*。README 的 project\-entries\-\* 见 grill\_entries 条。
 
 - [递归系统二：系统入口 AGENTS.md 带组成登记](<project_recursive_system_two_entry/INDEX.md>) — 改节点模型、AGENTS.md、Project Harness 或 layout 时打开：核心是递归系统二；系统入口为 AGENTS.md 且必须带组成登记；从 scope 系统入口经登记可达才算节点；无 isLeaf；Task/Note/Skill 由登记挂入。曾议 AGENTS 不带 entries 已否。谁必须有真实 AGENTS 见 grill Q10。
 
@@ -82,7 +82,7 @@ format: ordinary
 
 - [grill：README/AGENTS 组成分工与 INDEX 迁移脚本](<project_grill_system_entry_q13_q14/INDEX.md>) — 改树遍历或入口迁移时：同目录系统一孩子只在 README entries，AGENTS 只挂系统二材料与下级系统入口；index.md→INDEX.md 用可预览脚本套 CLI traverse，含 posts（本轮改名授权）。原则见 models/README 设计原则节。
 
-- [README entries 与 AGENTS 章节标题定稿](<project_grill_entries_markers_and_titles/INDEX.md>) — 改 README entries 或 AGENTS 三章标题时：README 用 project\-entries\-local/descendants，标题本层内容/下层内容；AGENTS 标题为本层硬约束/本层系统维护信息/下层系统维护信息（标记仍 project\-harness\-\*）。
+- [README entries 与 AGENTS 章节标题定稿](<project_grill_entries_markers_and_titles/INDEX.md>) — 改 README entries 或 AGENTS 三章标题时：README 用 project\-entries\-local/descendants，标题本层内容/下层内容；AGENTS 标题为本层硬约束/本层系统维护信息/下层系统维护信息（标记仍 edges\-\*）。
 
 - [节点模型落地前先写 spec 与 ADR](<project_grill_q16_spec_and_adr_first/INDEX.md>) — 改递归系统二入口、entries 标记或 INDEX 迁移前：先完成设计 spec 与 ADR 并经人审，再 writing\-plans；本步不写生产代码。
 
@@ -113,4 +113,5 @@ format: ordinary
 - [.edges 模块保持同一入口，便于插件化](<project_harness_module_consistency_for_plugins/INDEX.md>) — 新增或改 .edges 模块、或给单个模块加特殊节点时打开：各模块同一套入口 README（可继承定制），不为单个模块发明虚拟节点；Compose 写进 compose/README.md。目标是架构一致、便于后续插件化。
 - [被组合仓库可写，不加挂载机制](<project_compose_checkout_writable/INDEX.md>) — 改 Compose 写入或想加只读特例、空检出报错、父索引边界时打开：只删只读限制。决定见 ADR 0045。
 - [Routines 记录定义，由外部平台接入执行](<project_routines_from_brain_practice/INDEX.md>) — 设计 routines 时打开：INDEX.md 记录，仓库为接入依据；平台每次读Skill，默认最新可指定，失败停止报告；首版适配全部现有例程，无调度器和分组。
+- [Edges 推广准备：实验、Skills、场景案例与任务归属](<project_edges_promotion_intent/INDEX.md>) — 准备 Edges 对外推广及拆分任务时：先补实验数据、Skills 接入和场景案例；一个主任务及全部子任务统一放框架仓，文章产物归属另行处理。
 <!-- project-entries-local:end -->

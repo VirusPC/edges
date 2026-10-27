@@ -20,4 +20,7 @@ Ungrouped tasks that have not been assigned a named Task Project.
 - [locomo\_fork\_thin\_wrap\_edges\_submodule](<done/2026-09-16--LoCoMo-fork%E8%96%84%E5%B0%81%E8%A3%85%E4%B8%8Eedges-submodule/INDEX.md>) — LoCoMo fork 薄封装 \+ edges submodule，替换仓内 port harness
 - [locomo\_eval\_pipeline\_smoke](<done/2026-09-16--LoCoMo%E8%AF%84%E6%B5%8B%E6%B5%81%E6%B0%B4%E7%BA%BF%E5%86%92%E7%83%9F/INDEX.md>) — 先跑通 LoCoMo 评测流水线（写入→检索→作答→打分）；不把分数当 project\-memory 证据
 - [root\_repo\_release\_since\_v1\_1\_0](<done/2026-09-20--%E6%A0%B9%E4%BB%93%E5%BA%93%E5%8F%91%E7%89%88%E8%87%AA-v110-%E8%B5%B7/INDEX.md>) — 上次正式发版停在 v1.1.0（2026\-09\-09），距今约 11 天主线有不少能力变化未切版本；需要走一轮发版（定版本号、收 Unreleased、打 tag/release）。
+- [edges\_promotion\_preparation](<backlog/2026-10-27--Edges-%E5%AF%B9%E5%A4%96%E6%8E%A8%E5%B9%BF%E5%87%86%E5%A4%87%E5%AE%9E%E9%AA%8CSkills-%E4%B8%8E%E5%9C%BA%E6%99%AF%E6%A1%88%E4%BE%8B/INDEX.md>) — 完成核心价值验证、Skills 接入梳理与场景案例文章，让 Edges 推广有证据、可接入、可复现。
+- [edges\_case\_scenarios](<backlog/2026-10-27--%E7%A1%AE%E5%AE%9A-Edges-%E4%BD%BF%E7%94%A8%E5%9C%BA%E6%99%AF%E4%B8%8E%E6%A1%88%E4%BE%8B%E7%B4%A0%E6%9D%90/INDEX.md>) — 围绕真实用户需求选择案例选题，整理过程、产物和证据，为场景文章准备素材。
+- [edges\_case\_articles](<backlog/2026-10-27--%E6%92%B0%E5%86%99-Edges-%E5%9C%BA%E6%99%AF%E6%A1%88%E4%BE%8B%E6%96%87%E7%AB%A0/INDEX.md>) — 把确认的使用场景、实验结果和接入流程写成读者能理解并尝试的案例文章草稿。
 <!-- project-entries-local:end -->
