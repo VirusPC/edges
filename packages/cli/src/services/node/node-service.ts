@@ -303,7 +303,7 @@ export class NodeService {
         if (isWithinPath(file, service.managedRoot) && fs.existsSync(file)) yield node;
     }
     const maintenanceOnly = (node: BaseNode, ref: NodeReference) =>
-      node.edges?.id === ref.id && !node.children.some(child => child.id === ref.id);
+      node.harness?.id === ref.id && !node.children.some(child => child.id === ref.id);
     let readonly = false;
     const resolve = (parent: BaseNode, ref: NodeReference) => {
       if (!isWithinPath(ref.id, this.managedRoot) || deferred(ref.id)) return undefined;

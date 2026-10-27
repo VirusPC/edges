@@ -81,7 +81,7 @@ export async function* traverse(
     try {
       if (matches(node)) yield node;
       if (stop) return;
-      const harness = options.includeHarness ? node.edges : undefined;
+      const harness = options.includeHarness ? node.harness : undefined;
       const childMode = node.childTraversal() === "leaf" ? "entry" : "expand";
       for (const reference of structuralChildren(node, options)) {
         if (excluded(reference.id)) continue;

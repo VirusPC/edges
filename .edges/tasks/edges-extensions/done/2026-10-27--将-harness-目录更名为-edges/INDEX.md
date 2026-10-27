@@ -2,9 +2,9 @@
 metadata:
   edges-type: task
   edges-task-project: edges-extensions
-  edges-updated-at: '2026-10-27T02:24:55.386Z'
+  edges-updated-at: '2026-10-27T02:38:52.133Z'
   edges-title: 将 .harness 目录更名为 .edges
-  edges-tasks-status: in_progress
+  edges-tasks-status: done
   edges-task-priority: urgent
 name: 将_harness_目录更名为_edges
 description: >-
@@ -32,5 +32,5 @@ description: >-
 
 **完成标准：**
 - [x] 迁移说明入库，写明外部仓库用临时脚本（rename 目录 + 改写 `.harness` 路径与 `project-harness` 标记）。脚本不提交。本仓材料目录、标记、skills 与文档已改为 `.edges`。
-- [ ] `edges init` 新初始化的目录生成 `.edges` 结构；`edges memory migrate` 已删除；相关测试通过。
+- [x] `edges init` 新初始化的目录生成 `.edges` 结构；`edges memory migrate` 已删除；`@viruspc/edges` 测试 1094 通过。
 - [x] ADR 0047 入库，包含更名三层含义、硬切断与「此后布局冻结」的明确承诺。

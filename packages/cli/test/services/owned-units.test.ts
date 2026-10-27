@@ -634,7 +634,7 @@ test('registered collection skips an optional harness removed after its owner wa
   write('owner/AGENTS.md', index());
   write('target/index.md', 'target');
   const owner = (await service.get(file('owner/index.md')))!;
-  assert.equal(owner.edges?.id, file('owner/AGENTS.md'));
+  assert.equal(owner.harness?.id, file('owner/AGENTS.md'));
   fs.unlinkSync(file('owner/AGENTS.md'));
   const target = (await service.get(file('target/index.md')))!;
   await service.move(target, file('moved/index.md'));

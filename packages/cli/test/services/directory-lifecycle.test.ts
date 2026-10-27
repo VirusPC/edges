@@ -43,9 +43,9 @@ test("directory loading separates physical parent, composition and recursive har
     [file("AGENTS.md"), file("packages/skills/a/SKILL.md")],
   );
   assert.equal(nodes[1]?.parent?.id, file("AGENTS.md"));
-  assert.equal(nodes[1]?.edges?.id, file("packages/skills/a/AGENTS.md"));
-  const harness = (await service.get(nodes[1]!.edges!.id))!;
-  assert.equal(harness.edges?.id, file("packages/skills/a/.edges/AGENTS.md"));
+  assert.equal(nodes[1]?.harness?.id, file("packages/skills/a/AGENTS.md"));
+  const harness = (await service.get(nodes[1]!.harness!.id))!;
+  assert.equal(harness.harness?.id, file("packages/skills/a/.edges/AGENTS.md"));
   assert.deepEqual(
     (await service.list(harness.path, { localOnly: true })).map((n) => n.path),
     [harness.path, file("packages/skills/a/memory/index.md")],
@@ -68,7 +68,7 @@ test("structured creation in existing directory registers a node and updates all
   assert.equal(copy.body, "second\n");
   const harness = new AgentsNode(file("a/AGENTS.md"));
   await service.create(harness, { constraints: ["rule"] }, { indexGroup: "local" });
-  assert.equal(node.edges?.id, harness.id);
+  assert.equal(node.harness?.id, harness.id);
   assert.equal(fs.readFileSync(file("a/asset"), "utf8"), "asset");
 });
 test("move keeps instances and relocates resources, harness and authored href suffixes", async (t) => {
@@ -174,7 +174,7 @@ test("destroy co-located harness preserves content; destroy Internal deletes uni
   await service.destroy((await service.get(file("a/AGENTS.md")))!);
   assert.equal(fs.existsSync(skill.path), true);
   assert.equal(fs.existsSync(file("a/asset")), true);
-  assert.equal(skill.edges, undefined);
+  assert.equal(skill.harness, undefined);
   put("b/AGENTS.md", index("- [external](../a/SKILL.md)"));
   await service.destroy((await service.get(file("b/AGENTS.md")))!);
   assert.equal(fs.existsSync(file("b")), false);

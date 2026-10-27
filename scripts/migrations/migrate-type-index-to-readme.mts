@@ -165,9 +165,9 @@ export function orgListSkipReason(facts: OrgListFacts): string | undefined {
   if (!facts.entries) return "no list entries";
   if (facts.constraints) return "has non-empty constraints (real system entry)";
   if (facts.descendants) return "has descendants block (real system entry)";
-  if (facts.edgesDir) return "owns a .edges directory (real system entry)";
-  if (facts.edgesEntries)
-    return `links ${facts.edgesEntries}/${facts.entries} .edges material (mixed; unsure)`;
+  if (facts.harnessDir) return "owns a .edges directory (real system entry)";
+  if (facts.harnessEntries)
+    return `links ${facts.harnessEntries}/${facts.entries} .edges material (mixed; unsure)`;
 }
 
 const compactBlock = (inner: string): string =>

@@ -94,7 +94,7 @@ test("convertOrgList moves composition to project-entries and drops empty constr
       "<!-- edges-constraints:start -->\n## 本层硬约束\n<!-- edges-constraints:end -->\n\n<!-- edges-local:start -->",
     ),
   );
-  assert.doesNotMatch(out, /edges/);
+  assert.doesNotMatch(out, /<!-- edges/);
   assert.match(out, /<!-- project-entries-local:start -->\n## 本层内容\n\n- \[one\]/);
   assert.doesNotMatch(out, /\n\n- \[two\]/);
   const node = new ReadmeNode(path.resolve("/tmp/x/alpha/README.md")).parse(out);
