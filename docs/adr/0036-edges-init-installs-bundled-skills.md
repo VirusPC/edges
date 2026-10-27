@@ -10,7 +10,7 @@ status: accepted
 
 **Status:** accepted，已实现（2026-10-18；合入 main 随本变更的 PR。实现前的「待做」记录见任务卡进展）
 
-**Superseded in part by** [ADR 0048](0048-retire-shared-extensions.md)：与 edges CLI 无关的通用 skill 不再放个人仓 `shared-extensions/`，改归使用方 `.edges/skills/managed/`。下文 Decision 与 Consequences 里的安置句保留作当时记录；「不进 npm 包、`edges skills init` 只装包内 skill」仍然有效。
+**Superseded in part by** [ADR 0048](0048-retire-shared-extensions.md)：与 edges CLI 无关的通用 skill 不再放个人仓 `shared-extensions/`，改归使用方仓根 `skills/managed/`。下文 Decision 与 Consequences 里的安置句保留作当时记录；「不进 npm 包、`edges skills init` 只装包内 skill」仍然有效。
 
 **See also:** ADR 0031、ADR 0004；[Agent Skills 规范](https://agentskills.io/specification)
 
