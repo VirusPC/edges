@@ -2,7 +2,7 @@
 metadata:
   edges-type: task
   edges-task-project: edges-extensions
-  edges-updated-at: '2026-10-27T02:38:52.133Z'
+  edges-updated-at: '2026-10-27T02:55:33.000Z'
   edges-title: 将 .harness 目录更名为 .edges
   edges-tasks-status: done
   edges-task-priority: urgent
@@ -34,3 +34,11 @@ description: >-
 - [x] 迁移说明入库，写明外部仓库用临时脚本（rename 目录 + 改写 `.harness` 路径与 `project-harness` 标记）。脚本不提交。本仓材料目录、标记、skills 与文档已改为 `.edges`。
 - [x] `edges init` 新初始化的目录生成 `.edges` 结构；`edges memory migrate` 已删除；`@viruspc/edges` 测试 1094 通过。
 - [x] ADR 0047 入库，包含更名三层含义、硬切断与「此后布局冻结」的明确承诺。
+
+**2026-10-27 进展（#67）：**
+
+框架仓 #67 已 squash 合入 main（24fdc02）。材料目录从 `.harness` 硬切到 `.edges`，不留旧名别名；`@viruspc/edges` 版本升到 0.3.0；ADR 0047 与迁移说明 `docs/migrations/2026-10-27-rename-harness-to-edges.md` 已入库。`edges memory migrate` 与随包技能 `project-memory-migrate` 已删除。AGENTS.md 区块标记改为 `edges-*`，原 `project-harness` 标记改为 `edges-materials`。随包 skill 的 `skill/*` tag 已改指到 24fdc02。
+
+公开脑 VirusPC/edges-brain-viruspc #391 已合（63712a9），私密脑 #6 已合（123f976），两仓材料目录均已改为 `.edges`。workspace 仓 VirusPC/edges-workspace-viruspc 根目录 `.harness` 已改为 `.edges`，三仓 submodule 已 pin 到合入后的提交。
+
+未做（用户暂停）：npm 发布 0.3.0；README 中可观测与评估部分的更新；各机器升级到新版本。
