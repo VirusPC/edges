@@ -16,7 +16,7 @@
 | `extensions/AGENTS.md` | 硬约束并入根 [`AGENTS.md`](../../AGENTS.md) |
 | `extensions/README.md` | 目录表在根 [`README.md`](../../README.md)；收录标准与接入准则在 [`docs/architecture.md`](../architecture.md) |
 | `extensions/docs/`、`extensions/tools/`、`extensions/subagents/` | 空占位，已删除 |
-| `extensions/new-server/`、`extensions/others/` | 从本仓删除。个人仓 `shared-extensions/` 由维护者另行搬入，不在这次提交里 |
+| `extensions/new-server/`、`extensions/others/` | 从本仓删除。当时由维护者另行搬入个人仓 `shared-extensions/`，不在这次提交里。该隔间已于 2026-10-27 废止，见 [ADR 0048](../adr/0048-retire-shared-extensions.md)；不绑定 Edges 的通用 skill 现行位置是使用方 `.edges/skills/managed/` |
 
 npm 包名仍是 `@viruspc/edges`。`cli/package.json` 的 `repository.directory` 是 `cli`。外部安装 skill 的仓库路径是 `VirusPC/edges/skills`，不再是 `VirusPC/edges/extensions/skills`。
 
