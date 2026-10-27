@@ -4,8 +4,12 @@
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-27
+
 ### Changed
 
+- **随包技能收成总入口 `edges`，例外仍单独发现。** 挂仓库、写笔记、例程、初始化系统入口，以及用户记忆的备份和恢复，从 `edges` 进入。仍单独安装的是 `edges-memory-ask`、`edges-memory-remember`、`edges-memory-add-type`、`edges-onboarding`、`edges-conversation-to-notes`、`edges-conversation-to-tasks`、`edges-tasks-classify`、`edges-langfuse-agent-tracing`。已经装上的旧技能目录不会自己消失，需要再跑一次 `edges skills init`。见 [ADR 0051](../../docs/adr/0051-bundled-skills-single-entry.md)。
+- **记忆模板改到 `packages/skills/edges/references/memory/`。** 协议、布局和模板整棵搬到这个目录。CLI 读模板的三处路径已经对齐：构建拷贝 `scripts/copy-memory-templates.ts`、运行时 `src/services/memory/templates.ts`、测试 `test/memory/archive.test.ts`。
 - **用户记忆归档默认文件名跟着技能改：** `edges memory backup` 写出 `edges-memory-user-backup-<时间戳>.tar.gz`，并给目标目录补上同名忽略规则。`edges memory restore` 仍按给出的归档路径读取，不靠文件名识别技能。
 
 ## [0.4.0] - 2026-10-27
