@@ -89,23 +89,44 @@ function blockRange(
   };
 }
 
-export const isTypeIndexSource = (source: string): boolean =>
-  source.includes(marker("edges-memory-type", "start")) ||
-  source.includes(marker("edges-entries-local", "start"));
+const TYPE_INDEX_MARKERS = [
+  "edges-memory-type",
+  "project-memory-type",
+  "edges-entries-local",
+  "project-entries-local",
+  "project-memory-entries",
+];
 
-/** Type index AGENTS.md → README.md source (type header kept, entries → edges-entries-local). */
+export const isTypeIndexSource = (source: string): boolean =>
+  TYPE_INDEX_MARKERS.some((name) => source.includes(marker(name, "start")));
+
+/** Type index AGENTS.md → README.md source. Writes edges-entries-local; still accepts old list markers. */
 export function convertTypeIndex(source: string): string {
-  const range = blockRange(source, "edges-entries-local");
-  if (!range) return source;
-  const body = range.inner.replace(/^\r?\n/, "").replace(/\s+$/, "");
-  const next = [
-    marker("edges-entries-local", "start"),
-    `## ${ENTRIES_HEADINGS.local}`,
-    "",
-    body || "- 暂无条目。",
-    marker("edges-entries-local", "end"),
-  ].join("\n");
-  return source.slice(0, range.start) + next + source.slice(range.end);
+  const name = [
+    "project-memory-entries",
+    "project-entries-local",
+    "edges-entries-local",
+  ].find((candidate) => blockRange(source, candidate));
+  let out = source;
+  if (name) {
+    const range = blockRange(source, name)!;
+    const body = range.inner
+      .replace(/^\r?\n/, "")
+      .replace(/^\s*##\s+本层内容\s*\r?\n/, "")
+      .replace(/\s+$/, "");
+    const next = [
+      marker("edges-entries-local", "start"),
+      `## ${ENTRIES_HEADINGS.local}`,
+      "",
+      body || "- 暂无条目。",
+      marker("edges-entries-local", "end"),
+    ].join("\n");
+    out = source.slice(0, range.start) + next + source.slice(range.end);
+  }
+  return out.replaceAll(
+    "<!-- project-memory-type:",
+    "<!-- edges-memory-type:",
+  );
 }
 
 export interface OrgListFacts {
@@ -116,15 +137,9 @@ export interface OrgListFacts {
   harnessDir: boolean;
 }
 
-const LOCAL_NAMES = ["edges-local", "edges-local"];
-const CONSTRAINT_NAMES = [
-  "edges-constraints",
-  "edges-constraints",
-];
-const DESCENDANT_NAMES = [
-  "edges-descendants",
-  "edges-descendants",
-];
+const LOCAL_NAMES = ["project-memory-local", "edges-local"];
+const CONSTRAINT_NAMES = ["project-memory-important", "edges-constraints"];
+const DESCENDANT_NAMES = ["project-memory-children", "edges-descendants"];
 
 function firstBlock(source: string, names: string[]) {
   for (const name of names) {

@@ -83,7 +83,7 @@ test("convertTypeIndex keeps header and renames entries markers", () => {
     out,
     /<!-- edges-entries-local:start -->\n## 本层内容\n\n- \[x\]\(project_x\/index\.md\) — x\n<!-- edges-entries-local:end -->/,
   );
-  assert.doesNotMatch(out, /edges-entries-local/);
+  assert.doesNotMatch(out, /project-memory-entries|project-entries-/);
   assert.equal(convertTypeIndex(out), out);
 });
 
@@ -94,7 +94,7 @@ test("convertOrgList moves composition to edges-entries and drops empty constrai
       "<!-- edges-constraints:start -->\n## 本层硬约束\n<!-- edges-constraints:end -->\n\n<!-- edges-local:start -->",
     ),
   );
-  assert.doesNotMatch(out, /<!-- edges/);
+  assert.doesNotMatch(out, /<!-- edges:(?:start|end)|<!-- edges-(?:constraints|local|descendants):/);
   assert.match(out, /<!-- edges-entries-local:start -->\n## 本层内容\n\n- \[one\]/);
   assert.doesNotMatch(out, /\n\n- \[two\]/);
   const node = new ReadmeNode(path.resolve("/tmp/x/alpha/README.md")).parse(out);

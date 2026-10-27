@@ -69,7 +69,7 @@ test("init writes README type indexes with edges-entries markers", async (t) => 
   ]) {
     const text = read(dir, rel);
     assert.match(text, /<!-- edges-entries-local:start -->\n## 本层内容/);
-    assert.doesNotMatch(text, /edges-entries-local/);
+    assert.doesNotMatch(text, /project-memory-entries|project-entries-/);
   }
   assert.equal(existsSync(join(dir, ".edges/memory/projects/AGENTS.md")), false);
   assert.match(read(dir, AGENTS_FILE_NAME), /\]\(\.edges\/README\.md\)/);
@@ -102,7 +102,7 @@ test("remember lists the entry in README edges-entries-local and registers it on
     text.match(/\]\(<?project_decision\/INDEX\.md>?\)/g)?.length,
     1,
   );
-  assert.doesNotMatch(text, /edges-entries-local/);
+  assert.doesNotMatch(text, /project-memory-entries|project-entries-/);
   assert.doesNotMatch(text, /暂无条目/);
   const again = await rememberMemory({
     targetDir: dir,

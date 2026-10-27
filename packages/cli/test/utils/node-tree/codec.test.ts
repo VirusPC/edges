@@ -48,7 +48,7 @@ test('new model serialization escapes Markdown syntax without changing text or t
   const rendered = serializeNode(model);
   assert.deepEqual(parseNode(rendered), model);
   assert.match(rendered, /<!-- edges:start -->/);
-  assert.doesNotMatch(rendered, /<!-- edges:start -->/);
+  assert.doesNotMatch(rendered, /<!-- project-memory:start -->/);
   assert.match(rendered, /## 本层硬约束/);
   assert.match(rendered, /## 本层系统维护信息/);
   assert.match(rendered, /## 下层系统维护信息/);

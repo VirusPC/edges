@@ -166,7 +166,7 @@ test("instance preserves owner-local metadata, introductions and AGENTS registra
   assert.match(index, /other: kept/);
   assert.match(
     fs.readFileSync(join(root, "extensions/AGENTS.md"), "utf8"),
-    /project-memory:start/,
+    /edges:start/,
   );
 });
 test("metadata merge cannot silently discard authored fields", async () => {
