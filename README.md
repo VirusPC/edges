@@ -8,7 +8,7 @@
 
 ![从零散材料到有序目录，再展开下一次工作：经验成为新的起点](docs/assets/readme/hero.png)
 
-[开始使用](#怎么开始) · [深入了解](#深入了解)
+[开始使用](#怎么开始) · [深入了解](#深入了解) · [Edges 小助手](https://edges-rag.viruspc.tech/)
 
 ## 这是什么，能帮我做什么？
 
@@ -165,7 +165,7 @@ Agent 可以把纠正写成记忆，把重复成功的做法整理成技能；�
 
 ### 公开实践
 
-Edges 从作者长期的个人知识管理与 Agent 协作实践中发展而来。[公开个人 brain](https://github.com/VirusPC/edges-brain-viruspc) 保留了笔记、任务、教学与复盘；可以结合[教学站](https://edges.viruspc.tech/teaching/)与[任务看板](https://edges.viruspc.tech/tasks/)查看这些内容怎样被使用。
+Edges 从作者长期的个人知识管理与 Agent 协作实践中发展而来。[公开个人 brain](https://github.com/VirusPC/edges-brain-viruspc) 保留了笔记、任务、教学与复盘；可以结合[教学站](https://edges.viruspc.tech/teaching/)与[任务看板](https://edges.viruspc.tech/tasks/)查看这些内容怎样被使用。框架仓相关的问题，可以问[Edges 小助手](https://edges-rag.viruspc.tech/)。
 
 Edges 也用自己的记忆、技能与任务维护框架本身。公开使用记录能帮助理解设计从何而来，具体改进是否有效则由相应的评测报告与使用证据支持。
 
