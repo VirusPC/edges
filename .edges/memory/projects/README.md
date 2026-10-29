@@ -114,5 +114,5 @@ format: ordinary
 - [被组合仓库可写，不加挂载机制](<project_compose_checkout_writable/INDEX.md>) — 改 Compose 写入或想加只读特例、空检出报错、父索引边界时打开：只删只读限制。决定见 ADR 0045。
 - [Routines 记录定义，由外部平台接入执行](<project_routines_from_brain_practice/INDEX.md>) — 设计 routines 时打开：INDEX.md 记录，仓库为接入依据；平台每次读Skill，默认最新可指定，失败停止报告；首版适配全部现有例程，无调度器和分组。
 - [Edges 推广准备：实验、Skills、场景案例与任务归属](<project_edges_promotion_intent/INDEX.md>) — 准备 Edges 对外推广及拆分任务时：先补实验数据、Skills 接入和场景案例；一个主任务及全部子任务统一放框架仓，文章产物归属另行处理。
-- [对外知识问答试用挂在 README，homepage 指向站点根](<project_public_knowledge_qa_trial/INDEX.md>) — 改根 README 公开实践、页首导航或 GitHub 仓库 homepage 时打开：知识问答试用是 https://edges\-rag.viruspc.tech/；homepage 用 https://edges.viruspc.tech。公开文案不写访问网络限制。
+- [对外入口叫 Edges 小助手，homepage 指向站点根](<project_public_knowledge_qa_trial/INDEX.md>) — 改根 README 公开实践、页首导航或 GitHub 仓库 homepage 时打开：链接文案是 Edges 小助手，地址 https://edges\-rag.viruspc.tech/；homepage 用 https://edges.viruspc.tech。公开文案不写「试用」或访问网络限制。
 <!-- edges-entries-local:end -->
