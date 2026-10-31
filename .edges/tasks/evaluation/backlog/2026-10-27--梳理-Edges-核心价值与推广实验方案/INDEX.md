@@ -2,10 +2,10 @@
 metadata:
   edges-type: task
   edges-task-project: evaluation
-  edges-updated-at: '2026-10-27T07:09:22.851Z'
+  edges-updated-at: '2026-10-31T07:28:16.591Z'
   edges-title: 梳理 Edges 核心价值与推广实验方案
   edges-tasks-status: backlog
-  edges-task-priority: none
+  edges-task-priority: high
 name: edges_value_experiment_plan
 description: 把拟推广的核心价值对应到使用场景、对照实验或能力验收，明确范围与判断口径。
 ---

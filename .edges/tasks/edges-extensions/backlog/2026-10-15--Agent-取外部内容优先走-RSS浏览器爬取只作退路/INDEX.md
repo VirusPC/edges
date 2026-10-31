@@ -2,10 +2,10 @@
 metadata:
   edges-type: task
   edges-task-project: edges-extensions
-  edges-updated-at: '2026-10-14T16:40:34.643Z'
+  edges-updated-at: '2026-10-31T07:28:23.130Z'
   edges-title: Agent 取外部内容优先走 RSS，浏览器爬取只作退路
   edges-tasks-status: backlog
-  edges-task-priority: none
+  edges-task-priority: high
 name: agent_取外部内容优先走_rss浏览器爬取只作退路
 description: 现在 Agent 抓文章常靠开浏览器爬页面，又慢又不稳。改成先找 RSS 源拉结构化内容，找不到再爬。
 ---

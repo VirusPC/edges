@@ -2,15 +2,17 @@
 metadata:
   edges-type: task
   edges-task-project: default
-  edges-updated-at: '2026-10-27T07:08:53.235Z'
+  edges-updated-at: '2026-10-31T07:28:29.415Z'
   edges-title: 确定 Edges 使用场景与案例素材
   edges-tasks-status: backlog
-  edges-task-priority: none
+  edges-task-priority: high
 name: edges_case_scenarios
 description: 围绕真实用户需求选择案例选题，整理过程、产物和证据，为场景文章准备素材。
 ---
 **背景：**
 2026-10-27，在提出实验与 Skills 梳理后，用户补充希望写下使用案例，瞄准一些使用场景写文章。此前讨论提出跨会话继续项目、把想法留成可推进任务、跨项目复用经验、评估记忆收益等例子，但尚未选定目标读者、首篇题目或文章数量。
+
+2026-10-31 用户把本卡列为高优「补充 use case」（「先全落高优 backlog，细节 grill 后补」），因此抬为高优，不另建近似重复卡。
 
 - 主任务：[Edges 对外推广准备：实验、Skills 与场景案例](<../2026-10-27--Edges-对外推广准备实验Skills-与场景案例/INDEX.md>)
 
