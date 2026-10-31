@@ -2,10 +2,10 @@
 metadata:
   edges-type: task
   edges-task-project: evaluation
-  edges-updated-at: '2026-10-27T07:09:12.605Z'
+  edges-updated-at: '2026-10-31T07:28:13.436Z'
   edges-title: 完成 Edges 核心价值实验并整理结果报告
   edges-tasks-status: backlog
-  edges-task-priority: none
+  edges-task-priority: high
 name: edges_value_experiment_runs
 description: 按确认的方案跑完核心价值实验，保留真实结果、成本与失败案例，形成可追溯的推广证据。
 ---

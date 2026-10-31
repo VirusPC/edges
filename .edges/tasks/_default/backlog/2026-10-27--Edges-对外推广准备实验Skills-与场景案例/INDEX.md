@@ -2,10 +2,10 @@
 metadata:
   edges-type: task
   edges-task-project: default
-  edges-updated-at: '2026-10-27T07:08:34.444Z'
+  edges-updated-at: '2026-10-31T07:28:19.912Z'
   edges-title: Edges 对外推广准备：实验、Skills 与场景案例
   edges-tasks-status: backlog
-  edges-task-priority: none
+  edges-task-priority: high
 name: edges_promotion_preparation
 description: 完成核心价值验证、Skills 接入梳理与场景案例文章，让 Edges 推广有证据、可接入、可复现。
 ---

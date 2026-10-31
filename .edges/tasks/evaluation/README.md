@@ -20,4 +20,7 @@
 - [cli评测\_experiment\_webhook\_服务启动入口](<done/2026-10-25--CLI%E8%AF%84%E6%B5%8B-Experiment-Webhook-%E6%9C%8D%E5%8A%A1%E5%90%AF%E5%8A%A8%E5%85%A5%E5%8F%A3/INDEX.md>) — edges CLI 提供启动评测相关长驻服务（含 Experiment Webhook）的入口，接入方不必手写 systemd 命令。
 - [edges\_value\_experiment\_plan](<backlog/2026-10-27--%E6%A2%B3%E7%90%86-Edges-%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E4%B8%8E%E6%8E%A8%E5%B9%BF%E5%AE%9E%E9%AA%8C%E6%96%B9%E6%A1%88/INDEX.md>) — 把拟推广的核心价值对应到使用场景、对照实验或能力验收，明确范围与判断口径。
 - [edges\_value\_experiment\_runs](<backlog/2026-10-27--%E5%AE%8C%E6%88%90-Edges-%E6%A0%B8%E5%BF%83%E4%BB%B7%E5%80%BC%E5%AE%9E%E9%AA%8C%E5%B9%B6%E6%95%B4%E7%90%86%E7%BB%93%E6%9E%9C%E6%8A%A5%E5%91%8A/INDEX.md>) — 按确认的方案跑完核心价值实验，保留真实结果、成本与失败案例，形成可追溯的推广证据。
+- [memory\_消融实验正式报告](<backlog/2026-10-31--Memory-%E6%B6%88%E8%9E%8D%E5%AE%9E%E9%AA%8C%E6%AD%A3%E5%BC%8F%E6%8A%A5%E5%91%8A/INDEX.md>) — 在真 harness（非全文注入 smoke）跑完后整理可对外引用的正式报告。
+- [目录结构消融实验程序与报告](<backlog/2026-10-31--%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E6%B6%88%E8%9E%8D%E5%AE%9E%E9%AA%8C%E7%A8%8B%E5%BA%8F%E4%B8%8E%E6%8A%A5%E5%91%8A/INDEX.md>) — 在固定仓库快照上对照不同目录/布局，落地 runner 与结果报告。
+- [memory\_ab\_分流量开关与\_langfuse\_标签评测](<backlog/2026-10-31--Memory-AB-%E5%88%86%E6%B5%81%E9%87%8F%E5%BC%80%E5%85%B3%E4%B8%8E-Langfuse-%E6%A0%87%E7%AD%BE%E8%AF%84%E6%B5%8B/INDEX.md>) — 支持按流量开/关 memory，Langfuse 打标签，再做离线 eval。
 <!-- edges-entries-local:end -->
