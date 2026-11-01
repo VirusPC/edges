@@ -104,7 +104,7 @@ test("note create refuses a linked destination before changing the outside note"
   writeFileSync(path.join(root, "AGENTS.md"), "# Scope\n");
   const target = path.join(outside, "source.md");
   writeFileSync(target, "Outside original\n");
-  const dir = path.join(root, "notes", `${localDateYmd(new Date())}--hello`);
+  const dir = path.join(root, ".edges/notes", `${localDateYmd(new Date())}--hello`);
   mkdirSync(dir, { recursive: true });
   symlinkSync(target, path.join(dir, "INDEX.md"));
   const result = await run(

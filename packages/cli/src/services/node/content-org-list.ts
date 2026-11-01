@@ -1,5 +1,4 @@
-import path from "node:path";
-import { ENTRY_NAMES } from "../../domain/config/layout.js";
+import { placeHarnessMaterial } from "../../domain/config/edges-materials.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { harnessBoardSeed } from "../init/modules.js";
 import type { NodeService } from "./node-service.js";
@@ -10,9 +9,9 @@ const EMPTY_ENTRIES = `<!-- edges-entries-local:start -->\n## 本层内容\n\n<!
 
 export type ContentFolder = "notes" | "projects";
 
-/** `<scope>/notes/README.md` or `<scope>/projects/README.md`. Not the harness placard. */
-export function contentOrgListPath(scopeDir: string, folder: ContentFolder): string {
-  return path.join(scopeDir, folder, ENTRY_NAMES.readme);
+/** Use the same material placement as tasks, skills, and routines. */
+export function contentOrgListPath(scopeDir: string, folder: ContentFolder, options: { super?: boolean } = {}): string {
+  return placeHarnessMaterial(scopeDir, folder, options).absPath;
 }
 
 /**

@@ -9,7 +9,7 @@
 - [.edges/skills/managed/README.md](<skills/managed/README.md>) — 从会话里沉淀出来的可复用流程，动手前先看本层有没有现成的。
 - [.edges/skills/referenced/README.md](<skills/referenced/README.md>) — 本层 .agents/skills/ 下人写或装入的标准技能，工具只索引不改写。
 - [根维护任务](<tasks/README.md>) — 根维护任务入口。
-- [.edges/projects/README.md](<projects/README.md>) — 项目模块的 harness 条目。叶子登记在 scope 的 projects/README.md。
-- [.edges/notes/README.md](<notes/README.md>) — 笔记模块的 harness 条目。叶子登记在 scope 的 notes/README.md。
+- [.edges/projects/README.md](<projects/README.md>) — 项目内容叶子的组织清单。
+- [.edges/notes/README.md](<notes/README.md>) — 笔记内容叶子的组织清单。
 - [.edges/memory/users/README.md](<memory/users/README.md>) — 绑定本仓库、不宜公开的个人材料（个人偏好、凭据与密钥）。本机文件，不进 git。
 <!-- edges-entries-local:end -->

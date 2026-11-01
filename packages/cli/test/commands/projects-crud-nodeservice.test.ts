@@ -39,7 +39,7 @@ test("projects create get update delete and list go through a local leaf", async
   put(root, "AGENTS.md", agents("", "- [projects](projects/AGENTS.md) — projects"));
   put(root, "projects/AGENTS.md", agents(""));
   const created = await run(
-    ["--scope", root, "projects", "create", "--title", "Hello Project", "--body", "Body line", "--metadata", "custom=kept"],
+    ["--scope", root, "--super", "projects", "create", "--title", "Hello Project", "--body", "Body line", "--metadata", "custom=kept"],
     { env: {} },
   );
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
@@ -55,13 +55,13 @@ test("projects create get update delete and list go through a local leaf", async
   assert.doesNotMatch(readFileSync(path.join(root, "projects/AGENTS.md"), "utf8"), /hello-project\/INDEX\.md/);
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /INDEX\.md/);
 
-  const got = await run(["--scope", root, "projects", "get", made.path], { env: {} });
+  const got = await run(["--scope", root, "--super", "projects", "get", made.path], { env: {} });
   assert.equal(got.exitCode, 0, got.stdout);
   assert.equal(JSON.parse(got.stdout).title, "Hello Project");
   assert.match(JSON.parse(got.stdout).body, /Body line/);
 
   const updated = await run(
-    ["--scope", root, "projects", "update", made.path, "--title", "Next", "--body", "Updated", "--metadata", "custom=next"],
+    ["--scope", root, "--super", "projects", "update", made.path, "--title", "Next", "--body", "Updated", "--metadata", "custom=next"],
     { env: {} },
   );
   assert.equal(updated.exitCode, 0, updated.stdout);
@@ -69,7 +69,7 @@ test("projects create get update delete and list go through a local leaf", async
   assert.match(readFileSync(path.join(root, made.path), "utf8"), /Updated/);
 
   const listed = await run(
-    ["--scope", root, "projects", "list", "--filter", "title=Next", "--group-by", "stem"],
+    ["--scope", root, "--super", "projects", "list", "--filter", "title=Next", "--group-by", "stem"],
     { env: {} },
   );
   assert.equal(listed.exitCode, 0, listed.stdout);
@@ -78,7 +78,7 @@ test("projects create get update delete and list go through a local leaf", async
   assert.equal(groups.groupBy, "stem");
   assert.equal(groups.groups[0]?.items[0]?.title, "Next");
 
-  const removed = await run(["--scope", root, "projects", "delete", made.path], { env: {} });
+  const removed = await run(["--scope", root, "--super", "projects", "delete", made.path], { env: {} });
   assert.equal(removed.exitCode, 0, removed.stdout);
   assert.equal(existsSync(path.join(root, made.path)), false);
   assert.doesNotMatch(readFileSync(path.join(root, "projects/README.md"), "utf8"), /hello-project\/INDEX\.md/);

@@ -11,7 +11,7 @@ export function addNoteUpdateCommand(note: Command, ctx: CliContext): void {
   note
     .command("update")
     .description("Update a note title, body, or metadata")
-    .argument("<path>", "notes/<stem>/INDEX.md")
+    .argument("<path>", ".edges/notes/<stem>/INDEX.md (--super: notes/<stem>/INDEX.md)")
     .option("--title <title>", "New title, written as the H1")
     .option("--body <markdown>", "New body")
     .option("--metadata <key=value>", "Repeatable frontmatter field", collectRepeat, [])
@@ -21,6 +21,7 @@ export function addNoteUpdateCommand(note: Command, ctx: CliContext): void {
           title: opts.title,
           body: opts.body,
           metadata: opts.metadata,
+          super: ctx.super === true,
         });
         ctx.result = succeed({
           command: "notes.update",

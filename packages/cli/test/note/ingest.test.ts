@@ -27,7 +27,7 @@ test("notes create writes a local leaf without a git repository", async (t) => {
   const parsed = JSON.parse(result.stdout) as { status: string; path: string; command: string };
   assert.equal(parsed.status, "success");
   assert.equal(parsed.command, "notes.create");
-  assert.match(parsed.path, /^notes\/\d{4}-\d{2}-\d{2}--cli-isolated-note\/INDEX\.md$/);
+  assert.match(parsed.path, /^\.edges\/notes\/\d{4}-\d{2}-\d{2}--cli-isolated-note\/INDEX\.md$/);
   await fs.access(path.join(repo, parsed.path));
   assert.equal(await fs.stat(path.join(repo, ".git")).then(() => true, () => false), false);
 });

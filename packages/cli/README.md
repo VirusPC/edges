@@ -111,7 +111,11 @@ edges --scope /absolute/project memory doctor
 
 作用域按 `--scope` → `EDGES_SCOPE` → `EDGES_REPO` → 当前工作目录附近的所属 AGENTS 作用域或 Git 根解析。相对路径基于调用时的 cwd，CLI 的安装目录不是默认内容目录；指定作用域不会自动初始化 Project Memory。
 
-笔记写入选定作用域的 `notes/`，Git 操作使用它实际所属的仓库根。Artifacts 服务安装操作使用 CLI 实现仓库，独立于内容作用域。new-note MCP 未显式配置目标时保存调用方 cwd；显式配置优先，Skill 和 CLI 实现路径仍指向实现仓库。
+notes、projects、tasks、skills、routines 共用材料定位规则：默认写入 `<scope>/.edges/` 下的对应模块，显式 `--super` 写入 `<scope>/` 下的对应模块。读取、更新、删除与列表使用同一视角；不会因为 `.edges/` 尚不存在而回退到 scope 直属目录。`--scope` 仍指向被维护的目录，无需为了写维护材料把它改成 `<scope>/.edges`。路径由 [`materialHarnessRoot` / `placedMaterialPath`](src/domain/config/edges-materials.ts) 统一计算，模块服务不另写一套 scope / super 判断。
+
+**升级注意：** notes/projects 的默认目录从 scope 直属目录改为 `.edges/`，这是尚未发布到 npm 的破坏性行为变化。已有内容不会自动迁移，也不会被默认操作兼容读取；继续操作旧 `notes/`、`projects/` 内容时显式使用 `--super`。
+
+Git 操作使用内容实际所属的仓库根。Artifacts 服务安装操作使用 CLI 实现仓库，独立于内容作用域。new-note MCP 未显式配置目标时保存调用方 cwd；显式配置优先，Skill 和 CLI 实现路径仍指向实现仓库。
 
 ### 目录是内容单位，入口是节点身份
 
@@ -233,6 +237,8 @@ edges memory restore --repo-dir /absolute/project --archive /private/archive.tar
 
 新作用域的 `edges memory init` 未选择类型时只返回推荐项，不创建 notes、projects、skills 或 tasks 的材料。无参 `edges init` 的默认集包含 skills。`edges skills init` 既写 skill 类型索引，也把包内 skill 装给本机 agent：安装步骤是固定的 `skills@1.7.2`，只额外传入包内 skills 目录和 `--skill '*'`，`--` 之后的 token 原样转交。`skills@1.7.2` 在探测到自己跑在 agent 里时会非交互，并只装给那个 agent；没有探测到、stdin 又不是 TTY 时，不带 `-y` 会退出 1。非交互且保留自动探测时用 `edges init -- -g -y`（`-g` 装到用户目录，`-y` 跳过确认；本机没有已安装 agent 时它会装给全部 agent）。指定某一个则用 `edges init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。`--` 只在 `init` 和 `skills init` 上切开；其他命令把 `--` 和后面的 token 原样交给 commander。解析后的模块集合里没有 skills 时，这次 init 不会装，stderr 会列出被忽略的 token。memory 还在等类型选择、因而提前返回时，不因为没装 skills 而报这句。安装失败时进程退出码就是安装器的退出码，stdout 信封是 `{ status: "failed", errorCode: "SKILLS_INSTALL_FAILED", reason, created }`。`created` 是失败前已经写好的相对路径。`errorCode` 与 `VALIDATION_ERROR` 不同；不要用退出码是不是 2 来判断是不是校验错误，安装器自己也可能退出 2。校验错误仍然是退出码 2、`errorCode` 为 `VALIDATION_ERROR`。`edges tasks init` 只写任务看板。remember 不初始化缺失作用域；doctor 默认只诊断。0.3.0 起没有 `edges memory migrate`。旧 `.memory` 会让 `edges init` 失败并返回 `migration-required`；先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。新建子作用域按路径登记到父级：`AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已经登记的保持原组。`edges memory doctor --apply` 按同一规则补上缺失的父级链接。
 
+`edges notes init` 与 `edges projects init` 只创建真实 scope 下的 `.edges/notes/README.md`、`.edges/projects/README.md`，作为接收叶子的组织清单，并登记到 `.edges/README.md`。它们不再同时创建根目录的 `notes/README.md`、`projects/README.md` 与不接收叶子的占位文件。和其他模块一样，init 不读取 `--super`；使用 `--super` 创建叶子时，会按需补齐 scope 直属的模块 README。
+
 用户记忆 restore 默认拒绝覆盖，明确使用 --force 才整份替换，失败时回滚。备份和恢复接受未压缩或 gzip tar，解包上限 256 MiB、10,000 文件，拒绝硬链接；中断后若报告 `.private-user-memory-*/previous`，应保留恢复副本。模板随包复制到 dist，运行不依赖相邻 Skill 源码或 Python。
 
 内容类型、私有忽略规则与规范以 [Project Memory LAYOUT](../skills/edges/references/memory/references/LAYOUT.md) 为准。
@@ -241,22 +247,26 @@ edges memory restore --repo-dir /absolute/project --archive /private/archive.tar
 
 ```bash
 edges --scope /absolute/project notes create --title "Design note" --body "正文。"
-edges --scope /absolute/project notes get notes/2026-10-08--design-note/INDEX.md
-edges --scope /absolute/project notes update notes/2026-10-08--design-note/INDEX.md --body "更新后的正文。"
-edges --scope /absolute/project notes delete notes/2026-10-08--design-note/INDEX.md
+edges --scope /absolute/project notes get .edges/notes/2026-10-08--design-note/INDEX.md
+edges --scope /absolute/project notes update .edges/notes/2026-10-08--design-note/INDEX.md --body "更新后的正文。"
+edges --scope /absolute/project notes delete .edges/notes/2026-10-08--design-note/INDEX.md
+edges --scope /absolute/project --super notes create --title "Reading note" --body "正文。"
+edges --scope /absolute/project --super notes get notes/2026-10-08--reading-note/INDEX.md
 ```
 
-`notes create` 只在该 scope 的 `notes/` 下本地创建叶子，不 commit、不 push、不开 PR。标题来自 `--title` 或正文里的一级标题，正文用 `--body`。没有 `--content`、`--import-entry`、`--co-author`、`--mode`、`--dry-run` 或 token 旗标。get 与 delete 只收目标路径；list 用共享的 `--filter` / `--group-by`。stdout 为 JSON，诊断在 stderr；退出码为成功 0、运行错误 1、用法或校验 2。
+`notes create` 默认在该 scope 的 `.edges/notes/` 下本地创建叶子，`--super` 写入 `notes/`。叶子只登记在所选目录的 `README.md`，不登记到 `AGENTS.md`；缺少组织清单时先创建它，已有正文则保留。创建不 commit、不 push、不开 PR。标题来自 `--title` 或正文里的一级标题，正文用 `--body`。没有 `--content`、`--import-entry`、`--co-author`、`--mode`、`--dry-run` 或 token 旗标。get 与 delete 只收目标路径，get / update / delete 要求路径属于当前选择的材料目录；list 使用同一目录与共享的 `--filter` / `--group-by`。stdout 为 JSON，诊断在 stderr；退出码为成功 0、运行错误 1、用法或校验 2。
 
 ### 项目：projects
 
 ```bash
 edges --scope /absolute/project projects create --title "Demo" --body "What this project is."
 edges --scope /absolute/project projects list --filter title=Demo
-edges --scope /absolute/project projects get projects/2026-10-08--demo/INDEX.md
+edges --scope /absolute/project projects get .edges/projects/2026-10-08--demo/INDEX.md
+edges --scope /absolute/project --super projects create --title "Research" --body "Research materials."
+edges --scope /absolute/project --super projects list
 ```
 
-`projects create` 只在该 scope 的 `projects/` 下本地创建叶子，不 commit、不 push、不开 PR。旗标与 `notes` 相同：metadata、`--body`，标题来自 `--title` 或正文一级标题。get 与 delete 只收目标；list 用共享的 `--filter` / `--group-by`。
+`projects create` 默认在该 scope 的 `.edges/projects/` 下本地创建叶子，`--super` 写入 `projects/`，登记规则与 notes 相同。创建不 commit、不 push、不开 PR。旗标与 `notes` 相同：metadata、`--body`，标题来自 `--title` 或正文一级标题。get 与 delete 只收目标；get / update / delete 的路径校验与 list 都遵循同一材料目录，list 用共享的 `--filter` / `--group-by`。
 
 ### 技能：skills
 

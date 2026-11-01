@@ -21,6 +21,7 @@ export function addProjectCreateCommand(project: Command, ctx: CliContext): void
           title: opts.title,
           body: opts.body,
           metadata: opts.metadata,
+          super: ctx.super === true,
         });
         ctx.result = succeed({
           command: "projects.create",

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-02
+
+### Changed
+
+- 笔记和项目沿用统一材料定位：默认写入所选 scope 的 `.edges/`，`--super` 写入 scope 直属目录；创建与后续读写保持同一选择，旧根目录内容通过 `--super` 访问。
+
 ## [0.1.1] - 2026-10-27
 
 ### Changed

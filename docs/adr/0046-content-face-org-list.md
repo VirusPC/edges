@@ -2,34 +2,39 @@
 status: accepted
 ---
 
-# 系统一叶子登记在内容面 README，缺了就创建
+# 叶子登记在模块 README，材料目录遵循统一作用域规则
 
-Note、Project 与 Task 是系统一孩子。Q13 规定它们只登记在组织清单 `README.md` 的 `edges-entries-*` 里，不进 `AGENTS.md`。创建路径在组织清单不存在、或 README 只是散文、没有 entries 标记时，曾回落到同目录或更上层的 `AGENTS.md`。`edges notes init` / `edges projects init` 又只种 `<scope>/.edges/notes/README.md` 与 `<scope>/.edges/projects/README.md`，而 `edges notes create` / `edges projects create` 写的是 `<scope>/notes/`、`<scope>/projects/`。两份文件不是同一个父节点。
+Note、Project 与 Task 是系统一孩子。Q13 规定它们只登记在组织清单 `README.md` 的 `edges-entries-*` 里，不进 `AGENTS.md`。组织清单不存在、或 README 只是散文、没有 entries 标记时，创建曾回落到同目录或更上层的 `AGENTS.md`。本 ADR 最初修复这一问题，但保留了 notes/projects 总是写 scope 直属目录的特例：init 同时创建根目录的叶子清单与 `.edges/` 下不接收叶子的占位条目。
 
-**Status:** accepted（ADR 0046）
+2026-11-02 用户指出，同一个 `--scope` 不应在 notes/projects 与 tasks、skills、routines 上产生两套默认目录规则，模块应共用目录定位函数。这个特例还迫使调用者把 scope 改为 `.edges` 才能写维护项目，混淆了被维护的目录与它的材料目录。
 
-**See also:** ADR 0029（Q13：系统一孩子只在 README）、ADR 0031（init 编排；notes/projects 只建 harness 清单的那句由本 ADR 修订）、ADR 0035（`.edges/README.md` 仍是材料索引）
+**Status:** accepted（ADR 0046；2026-11-02 修订，取代本 ADR 原有 notes/projects 路径特例与双清单 init 决定）
+
+**See also:** ADR 0029（Q13：系统一孩子只在 README）、ADR 0030（内容叶子生命周期经 NodeService）、ADR 0031（init 编排与真实作用域）、ADR 0035（`.edges/README.md` 仍是材料索引）
 
 ## Decision
 
-1. **叶子父节点是内容面组织清单。** `edges notes create` 登记到 `<scope>/notes/README.md`。`edges projects create` 登记到 `<scope>/projects/README.md`。Task 叶子登记到所属 Task Project 的 `README.md`（维护看板在 `<scope>/.edges/tasks/<project>/README.md`，`--super` 在 `<scope>/tasks/<project>/README.md`）。
-2. **缺了就创建，不回落到 AGENTS。** 组织清单不存在时，创建带 `edges-entries-local` 的 ReadmeNode。已有散文且没有 entries 标记时，保留原文，只补上标记。`physicalParent` 对系统一孩子只接受带 entries 的 README，或类型索引 README；不再因为同目录有 `AGENTS.md` 就选它。选不中就继续向上找 README，找不到就是没有父节点，而不是挂到 AGENTS。
-3. **写之前父节点必须就是这份清单。** 创建 note/project 时，若算出来的父节点不是上述内容面 README，命令失败。创建 task 时，若父节点不是该 Task Project 的 README，命令失败。
-4. **init 同时保证内容面清单。** `edges notes init` 与 `edges projects init` 仍把 harness 条目放在 `<scope>/.edges/notes/README.md`、`<scope>/.edges/projects/README.md`，并挂到 `.edges/README.md`（ADR 0035）。同时确保 `<scope>/notes/README.md`、`<scope>/projects/README.md` 存在。harness 条目不带 `edges-entries`，不接收叶子。内容面 README 才是叶子的组织清单。init 仍不读 `--super`。
-5. **不在本决定里搬家。** 已经写在 `.edges/projects/` 下的叶子留在原处。个人仓的内容面不在本决定里迁移。
-6. **类型索引不变。** Memory 与 Skill 仍登记在各自的类型 README。路径落在 `.edges` 下、相对 scope 属于 harness 材料时，仍可以由系统入口承接，这不是系统一叶子。
+1. **材料目录统一由 scope / super 决定。** notes、projects 与 tasks、skills、routines 共用 `packages/cli/src/domain/config/edges-materials.ts` 中的 `materialHarnessRoot`、`placedMaterialPath` / `placeHarnessMaterial`：默认材料根是 `<scope>/.edges`，`--super` 的材料根是 `<scope>`。无论目录是否已存在，都不回退到另一材料根。模块服务从这组辅助函数定位目录，不再自行拼接 `scope + 模块目录` 或复制 super 分支。notes/projects 的创建、目标路径校验与列表使用同一选择。
+2. **叶子父节点是所选目录的组织清单。** `edges notes create` 默认登记到 `<scope>/.edges/notes/README.md`，`edges projects create` 默认登记到 `<scope>/.edges/projects/README.md`；`--super` 分别登记到 `<scope>/notes/README.md`、`<scope>/projects/README.md`。Task 叶子登记到所属 Task Project 的 `README.md`（默认在 `<scope>/.edges/tasks/<project>/README.md`，`--super` 在 `<scope>/tasks/<project>/README.md`）。内容叶子的 create/get/update/destroy 仍经 NodeService。
+3. **缺了就创建，不回落到 AGENTS。** 组织清单不存在时，创建带 `edges-entries-local` 的 ReadmeNode。已有散文且没有 entries 标记时，保留原文，只补上标记。`physicalParent` 对系统一孩子只接受带 entries 的 README，或类型索引 README；不再因为同目录有 `AGENTS.md` 就选它。选不中就继续向上找 README，找不到就是没有父节点，而不是挂到 AGENTS。
+4. **写之前父节点必须就是这份清单。** 创建 note/project 时，若算出来的父节点不是上述所选模块 README，命令失败。创建 task 时，若父节点不是该 Task Project 的 README，命令失败。
+5. **init 只准备真实作用域的模块清单。** `edges notes init` 与 `edges projects init` 在 `<scope>/.edges/notes/README.md`、`<scope>/.edges/projects/README.md` 创建接收叶子的组织清单，并挂到 `.edges/README.md`（ADR 0035）。不再另建根目录内容清单与 `.edges` 占位条目。init 仍不读 `--super`；`--super create` 按需创建 scope 直属的模块清单。
+6. **这是路径行为的破坏性变化，不自动迁移。** 旧根目录的笔记、项目与索引留在原处；默认操作不再兼容读取它们，也不双读两个材料根。需要继续处理旧内容时显式使用 `--super`。本次决定尚未发布到 npm，已安装的旧版仍遵循旧行为。
+7. **类型索引不变。** Memory 与 Skill 仍登记在各自的类型 README。模块 README 仍由材料索引承接，不把叶子直接登记到 AGENTS。
 
 ## Considered Options
 
 - **继续在没有 README 时登记到 AGENTS：** 否决。和 Q13 相反。
 - **只改 notes/projects，tasks 仍可挂到项目 AGENTS：** 否决。Task 叶子同样是系统一孩子。写任务时若项目只有 `AGENTS.md`，补项目 README 再登记。发现阶段不把每个仅有 AGENTS 的目录都补成项目。
-- **取消 `.edges/notes|projects/README.md`，只留内容面：** 否决。那会拆掉 ADR 0035 的材料索引条目。两份文件职责不同：一份是索引条目，一份是叶子清单。
-- **把 create 改到 `.edges/notes/`：** 否决。叶子路径仍是 `<scope>/notes/<date>--<slug>/INDEX.md` 与 `<scope>/projects/...`。
+- **保留 notes/projects 的 scope 直属目录特例：** 2026-11-02 否决，取代本 ADR 原先否决默认 `.edges/notes/` 的决定。同一 scope 应采用同一材料根规则，调用者不应为某个模块改变 scope 的含义。
+- **继续维护 `.edges` 占位条目与根目录叶子清单：** 2026-11-02 否决，取代原双清单决定。默认 `.edges` 模块 README 本身就是叶子清单，仍满足 ADR 0035 的材料索引职责。
+- **默认双读旧根目录与 `.edges`：** 否决。它会模糊 scope / super 的边界，写入与读取也会不一致。旧内容通过显式 `--super` 操作，不暗中搬迁。
+- **为 notes/projects 再造目录辅助函数：** 否决。复用已有 `materialHarnessRoot` / `placedMaterialPath` / `placeHarnessMaterial`，统一来源也统一调用。
 
 ## Consequences
 
-- 没有 `notes/README.md` 时，`edges notes create` 会创建它并把叶子列进去。`projects` 相同。根 `AGENTS.md` 与 `notes/AGENTS.md` 不会因此多出叶子链接。
-- 内容面 README 已是散文时，原文保留，并出现 `edges-entries-local`。
-- `edges notes list` / `edges projects list` 会读这份内容面清单，不要求叶子先挂在 `AGENTS.md` 上。
+- 没有所选模块的 `README.md` 时，create 会创建它并把叶子列进去。默认 notes 在 `.edges/notes/`，`--super` 在 `notes/`；projects 同理。`AGENTS.md` 不会因此多出叶子链接。
+- 模块 README 已是散文时，原文保留，并出现 `edges-entries-local`。
+- `edges notes list` / `edges projects list` 读取当前 scope / super 所选择的模块清单；get、update、delete 不接受另一视角下的目标路径。
 - 删除叶子时，即使这份 README 没有从 AGENTS 树走到，也会从它的物理父节点摘掉链接。
-- 新的 notes/projects init 会多写出内容面 README。已有 harness 条目文件不会被 init 重写。
+- notes/projects init 与默认 create 使用同一份 `.edges` 模块 README，旧根目录内容保持原样。升级后调用旧路径的脚本需显式加 `--super`，或另行安排可审阅的迁移。

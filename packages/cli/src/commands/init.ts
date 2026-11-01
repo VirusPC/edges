@@ -24,7 +24,7 @@ CREATED WHEN NO MODULE IS GIVEN
   memory types: feedback, project, reference
   skills: managed and referenced type indexes, then install bundled skills
   harness index entries: notes, projects
-  content-face org lists: <scope>/notes/README.md, <scope>/projects/README.md
+  notes/projects org lists: <scope>/.edges/notes/README.md, <scope>/.edges/projects/README.md
 
 NOT CREATED HERE
   tasks (not in the default set; edges tasks init creates only that board)

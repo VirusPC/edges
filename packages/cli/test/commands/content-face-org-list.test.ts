@@ -39,7 +39,7 @@ test("notes create with no README creates notes/README.md and lists the leaf the
   const root = scope(t, "edges-note-org-");
   put(root, "AGENTS.md", agents(""));
   const created = await run(
-    ["--scope", root, "notes", "create", "--title", "Fresh Note", "--body", "Body"],
+    ["--scope", root, "--super", "notes", "create", "--title", "Fresh Note", "--body", "Body"],
     { env: {} },
   );
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
@@ -50,11 +50,11 @@ test("notes create with no README creates notes/README.md and lists the leaf the
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /INDEX\.md|notes\/README\.md/);
   assert.equal(existsSync(path.join(root, "notes/AGENTS.md")), false);
 
-  const listed = await run(["--scope", root, "notes", "list"], { env: {} });
+  const listed = await run(["--scope", root, "--super", "notes", "list"], { env: {} });
   assert.equal(listed.exitCode, 0, listed.stdout + listed.stderr);
   assert.match(listed.stdout, /Fresh Note/);
 
-  const removed = await run(["--scope", root, "notes", "delete", made.path], { env: {} });
+  const removed = await run(["--scope", root, "--super", "notes", "delete", made.path], { env: {} });
   assert.equal(removed.exitCode, 0, removed.stdout + removed.stderr);
   assert.doesNotMatch(readFileSync(path.join(root, "notes/README.md"), "utf8"), /INDEX\.md/);
 });
@@ -63,7 +63,7 @@ test("projects create with no README creates projects/README.md and does not reg
   const root = scope(t, "edges-project-org-");
   put(root, "AGENTS.md", agents(""));
   const created = await run(
-    ["--scope", root, "projects", "create", "--title", "Fresh Project", "--body", "Body"],
+    ["--scope", root, "--super", "projects", "create", "--title", "Fresh Project", "--body", "Body"],
     { env: {} },
   );
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
@@ -73,7 +73,7 @@ test("projects create with no README creates projects/README.md and does not reg
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /INDEX\.md|projects\/README\.md/);
   assert.equal(existsSync(path.join(root, "projects/AGENTS.md")), false);
 
-  const listed = await run(["--scope", root, "projects", "list"], { env: {} });
+  const listed = await run(["--scope", root, "--super", "projects", "list"], { env: {} });
   assert.equal(listed.exitCode, 0, listed.stdout + listed.stderr);
   assert.match(listed.stdout, /Fresh Project/);
 });
@@ -84,7 +84,7 @@ test("prose notes/README beside notes/AGENTS gains entries and receives the new 
   put(root, "notes/AGENTS.md", agents(""));
   put(root, "notes/README.md", "# Notes\n\n待处理想法。公开散文保留。\n");
   const created = await run(
-    ["--scope", root, "notes", "create", "--title", "Public Leaf", "--body", "Body"],
+    ["--scope", root, "--super", "notes", "create", "--title", "Public Leaf", "--body", "Body"],
     { env: {} },
   );
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
@@ -114,14 +114,12 @@ test("physicalParent does not select AGENTS.md for a system-one note leaf", (t) 
   );
 });
 
-test("notes init ensures the content-face org list and still keeps the harness placard", async (t) => {
+test("notes init creates the harness org list without a second content-face index", async (t) => {
   const root = scope(t, "edges-notes-init-face-");
   const result = await run(["--scope", root, "notes", "init"], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
-  const face = readFileSync(path.join(root, "notes/README.md"), "utf8");
-  assert.match(face, /edges-entries-local:start/);
-  assert.equal(existsSync(path.join(root, ".edges/notes/README.md")), true);
+  assert.equal(existsSync(path.join(root, "notes/README.md")), false);
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /\]\(<?notes\/README\.md>?\)/);
-  const placard = readFileSync(path.join(root, ".edges/notes/README.md"), "utf8");
-  assert.doesNotMatch(placard, /edges-entries-local:start/);
+  const index = readFileSync(path.join(root, ".edges/notes/README.md"), "utf8");
+  assert.match(index, /edges-entries-local:start/);
 });
