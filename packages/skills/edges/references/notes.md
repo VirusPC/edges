@@ -6,7 +6,7 @@
 
 ## 什么时候用
 
-- 用户或任务要把一条 Note 写进选定 scope 的 `notes/YYYY-MM-DD--slug/INDEX.md`。
+- 用户或任务要把一条 Note 写进选定 scope 的 `.edges/notes/YYYY-MM-DD--slug/INDEX.md`；显式 `--super` 写入 `notes/`。
 - 不要用它整理对话（改用 `edges-conversation-to-notes`）、不要用它改 tasks 看板、不要自己 `git commit`。
 
 ## 有 shell：调用 CLI
@@ -20,26 +20,27 @@ pnpm --filter @viruspc/edges exec tsx src/index.ts --scope <目录> notes create
   --json
 ```
 
-子命令是 `notes create`。已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。`package.json` 的 `"bin": { "edges": "./dist/index.js" }` 只是安装挂钩：装过之后也可以 `npx edges --scope <目录> notes create …`，不要再包一层仓根脚本。笔记写入该 scope 的 `notes/`。`notes` 没有 `--index-group`。
+子命令是 `notes create`。已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。`package.json` 的 `"bin": { "edges": "./dist/index.js" }` 只是安装挂钩：装过之后也可以 `npx edges --scope <目录> notes create …`，不要再包一层仓根脚本。笔记默认写入该 scope 的 `.edges/notes/`，`--super` 写入 `notes/`；旧根目录笔记通过 `--super` 操作，不自动搬迁。`notes` 没有 `--index-group`。
 
 标题来自 `--title`，或来自 `--body` 里的一级标题。已经由 `edges-conversation-to-notes` 写好的 Markdown 放进 `--body`。不接受 `--content`、`--content-file`、`--markdown`、`--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--token-file`、`--token-stdin`。创建不会复制旁路目录，也不会 commit。
 
 读取、更新、删除：
 
 ```bash
-edges --scope <目录> notes get notes/<date>--<slug>/INDEX.md
-edges --scope <目录> notes update notes/<date>--<slug>/INDEX.md --body "<markdown>"
-edges --scope <目录> notes delete notes/<date>--<slug>/INDEX.md
+edges --scope <目录> notes get .edges/notes/<date>--<slug>/INDEX.md
+edges --scope <目录> notes update .edges/notes/<date>--<slug>/INDEX.md --body "<markdown>"
+edges --scope <目录> notes delete .edges/notes/<date>--<slug>/INDEX.md
+edges --scope <目录> --super notes get notes/<date>--<slug>/INDEX.md
 ```
 
-get 与 delete 只收目标。update 至少给 `--title`、`--body` 或 `--metadata key=value` 之一。
+get 与 delete 只收目标。update 至少给 `--title`、`--body` 或 `--metadata key=value` 之一。创建和后续读写使用同一 scope / `--super` 选择，以返回的 path 为准。
 
 ### stdout JSON
 
 成功 exit 0：
 
 ```json
-{"status":"success","command":"notes.create","path":"notes/2026-10-08--slug/INDEX.md","title":"slug"}
+{"status":"success","command":"notes.create","path":".edges/notes/2026-10-08--slug/INDEX.md","title":"slug"}
 ```
 
 失败时 `status` 为 `failed`，带 `errorCode` 与 `reason`。

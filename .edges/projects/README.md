@@ -1,7 +1,5 @@
 # projects
 
-项目模块在 harness 材料索引里的条目。此后 `edges projects create` 的新叶子登记在当前 scope 的 `projects/README.md`。下面这条是既有叶子，本次不搬家。
-
 <!-- edges-entries-local:start -->
 ## 本层内容
 

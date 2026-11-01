@@ -82,16 +82,27 @@ function listTree(
   exclude: ReadonlySet<string> | undefined,
 ): Promise<BaseNode[]> {
   const rootPath = spec.kind === "super" ? spec.scopeDir : spec.path;
+  return service.list(rootPath, {
+    super: spec.kind === "super",
+    excludeRoots,
+    ...forestScopeOptions(rootPath, hostScope, exclude),
+  });
+}
+
+/** Apply the same Compose boundary to forest trees and explicit module queries. */
+export function forestScopeOptions(
+  rootPath: string,
+  hostScope: string,
+  exclude?: ReadonlySet<string>,
+): { scopeDir: string; exclude?: ReadonlySet<string> } {
   // A system that already lives in a checkout does not expand its own Compose entries.
   const checkout = composedCheckoutRoot(rootPath);
   const nested = checkout !== undefined && path.relative(checkout, rootPath) !== "";
   const nextExclude = nested ? new Set([...(exclude ?? []), "compose"]) : exclude;
-  return service.list(spec.kind === "super" ? spec.scopeDir : spec.path, {
-    super: spec.kind === "super",
-    excludeRoots,
+  return {
     scopeDir: nested && checkout ? checkout : hostScope,
     ...(nextExclude && nextExclude.size > 0 ? { exclude: nextExclude } : {}),
-  });
+  };
 }
 
 /** Set that records peer-root hits then excludes them (early-stop + reachability). */

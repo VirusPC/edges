@@ -30,8 +30,8 @@ test("note and project services reject paths outside their leaf folder", async (
   const root = mkdtempSync(path.join(realpathSync(tmpdir()), "edges-domain-service-"));
   try {
     const env = { EDGES_SCOPE: root };
-    await assert.rejects(() => getNote(env, "projects/x/INDEX.md"), /note path must be notes\/<stem>\/INDEX\.md/);
-    await assert.rejects(() => getProject(env, "notes/x/INDEX.md"), /project path must be projects\/<stem>\/INDEX\.md/);
+    await assert.rejects(() => getNote(env, ".edges/projects/x/INDEX.md"), /note path must be \.edges\/notes\/<stem>\/INDEX\.md/);
+    await assert.rejects(() => getProject(env, ".edges/notes/x/INDEX.md"), /project path must be \.edges\/projects\/<stem>\/INDEX\.md/);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

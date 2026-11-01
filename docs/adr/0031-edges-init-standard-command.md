@@ -8,7 +8,7 @@
 
 **Amended by:** [ADR 0036](0036-edges-init-installs-bundled-skills.md) — 无参 `edges init` 的默认集加入 skills；`edges skills init` 在建类型索引之外，还把 npm 包内的 skill 装给本机 agent。下文「不建 user、skills……」「`edges skills init` 只采用 skill 类型」两处以 0036 为准；其余不变。
 
-**Amended by:** [ADR 0046](0046-content-face-org-list.md) — notes/projects 叶子的组织清单是 scope 内容面的 `notes/README.md`、`projects/README.md`。`edges notes init` / `edges projects init` 在 harness 条目之外确保这份内容面清单。下文「只建各自的 harness 组织清单」以 0046 为准。
+**Amended by:** [ADR 0046](0046-content-face-org-list.md)（2026-11-02 修订）— notes/projects 与其他材料模块统一：默认叶子登记到 `<scope>/.edges/notes/README.md`、`<scope>/.edges/projects/README.md`，显式 `--super` 才使用 scope 直属目录。`edges notes init` / `edges projects init` 只准备真实 scope 的 `.edges` 模块组织清单，不再另建根目录叶子清单与不接收叶子的占位条目；init 仍不读 `--super`。这取代了 0046 最初增加的双清单决定。
 
 ## Decision
 

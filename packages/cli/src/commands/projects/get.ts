@@ -10,10 +10,10 @@ export function addProjectGetCommand(project: Command, ctx: CliContext): void {
   project
     .command("get")
     .description("Read one project leaf")
-    .argument("<path>", "projects/<stem>/INDEX.md")
+    .argument("<path>", ".edges/projects/<stem>/INDEX.md (--super: projects/<stem>/INDEX.md)")
     .action(async (entryPath: string) => {
       try {
-        const loaded = await getProject(ctx.env, entryPath);
+        const loaded = await getProject(ctx.env, entryPath, { super: ctx.super });
         ctx.result = succeed({
           command: "projects.get",
           path: loaded.path,

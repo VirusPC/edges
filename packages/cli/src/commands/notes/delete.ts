@@ -10,10 +10,10 @@ export function addNoteDeleteCommand(note: Command, ctx: CliContext): void {
   note
     .command("delete")
     .description("Delete one note")
-    .argument("<path>", "notes/<stem>/INDEX.md")
+    .argument("<path>", ".edges/notes/<stem>/INDEX.md (--super: notes/<stem>/INDEX.md)")
     .action(async (entryPath: string) => {
       try {
-        const removed = await deleteNote(ctx.env, entryPath);
+        const removed = await deleteNote(ctx.env, entryPath, { super: ctx.super });
         ctx.result = succeed({ command: "notes.delete", path: removed.path });
       } catch (error) {
         failNodeCommand(ctx, error, HELP);

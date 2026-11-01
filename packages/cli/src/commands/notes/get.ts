@@ -10,10 +10,10 @@ export function addNoteGetCommand(note: Command, ctx: CliContext): void {
   note
     .command("get")
     .description("Read one note")
-    .argument("<path>", "notes/<stem>/INDEX.md")
+    .argument("<path>", ".edges/notes/<stem>/INDEX.md (--super: notes/<stem>/INDEX.md)")
     .action(async (entryPath: string) => {
       try {
-        const loaded = await getNote(ctx.env, entryPath);
+        const loaded = await getNote(ctx.env, entryPath, { super: ctx.super });
         ctx.result = succeed({
           command: "notes.get",
           path: loaded.path,

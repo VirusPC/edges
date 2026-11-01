@@ -9,7 +9,7 @@ TypeScript + Node.js MCP server，用于在没有 shell 的宿主里本地创建
 - 暴露 MCP 工具 `new_note`
 - 接收结构化输入：`title`、`body`
 - 子进程调用 `edges notes create --title --body`（与 CLI 同一套 JSON 契约）
-- 在目标 scope 的 `notes/YYYY-MM-DD--slug/INDEX.md` 本地创建叶子
+- 在目标 scope 的 `.edges/notes/YYYY-MM-DD--slug/INDEX.md` 本地创建叶子（遵循 CLI 默认材料定位）
 - 返回结构化 JSON 结果，便于客户端自动处理
 
 ## Requirements
@@ -85,7 +85,7 @@ MCP tool 名称：`new_note`
 ```json
 {
   "status": "success",
-  "path": "notes/2026-02-18--daily-summary/INDEX.md",
+  "path": ".edges/notes/2026-02-18--daily-summary/INDEX.md",
   "title": "daily-summary",
   "stdoutSummary": "..."
 }

@@ -86,7 +86,7 @@ test("notes create get update delete and list go through a local leaf", async (t
   put(root, "AGENTS.md", agents("", "- [notes](notes/AGENTS.md) — notes"));
   put(root, "notes/AGENTS.md", agents(""));
   const created = await run(
-    ["--scope", root, "notes", "create", "--title", "Hello Note", "--body", "Body line", "--metadata", "custom=kept"],
+    ["--scope", root, "--super", "notes", "create", "--title", "Hello Note", "--body", "Body line", "--metadata", "custom=kept"],
     { env: {} },
   );
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
@@ -102,19 +102,19 @@ test("notes create get update delete and list go through a local leaf", async (t
   assert.doesNotMatch(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /hello-note\/INDEX\.md/);
   assert.doesNotMatch(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /INDEX\.md/);
 
-  const got = await run(["--scope", root, "notes", "get", made.path], { env: {} });
+  const got = await run(["--scope", root, "--super", "notes", "get", made.path], { env: {} });
   assert.equal(got.exitCode, 0, got.stdout);
   assert.equal(JSON.parse(got.stdout).title, "Hello Note");
 
   const updated = await run(
-    ["--scope", root, "notes", "update", made.path, "--title", "Next", "--metadata", "custom=next"],
+    ["--scope", root, "--super", "notes", "update", made.path, "--title", "Next", "--metadata", "custom=next"],
     { env: {} },
   );
   assert.equal(updated.exitCode, 0, updated.stdout);
   assert.match(readFileSync(path.join(root, made.path), "utf8"), /^# Next/m);
 
   const listed = await run(
-    ["--scope", root, "notes", "list", "--filter", "title=Next", "--group-by", "stem"],
+    ["--scope", root, "--super", "notes", "list", "--filter", "title=Next", "--group-by", "stem"],
     { env: {} },
   );
   assert.equal(listed.exitCode, 0, listed.stdout);
@@ -122,7 +122,7 @@ test("notes create get update delete and list go through a local leaf", async (t
   assert.equal(groups.groupBy, "stem");
   assert.equal(groups.groups[0]?.items[0]?.title, "Next");
 
-  const removed = await run(["--scope", root, "notes", "delete", made.path], { env: {} });
+  const removed = await run(["--scope", root, "--super", "notes", "delete", made.path], { env: {} });
   assert.equal(removed.exitCode, 0, removed.stdout);
   assert.equal(existsSync(path.join(root, made.path)), false);
   assert.doesNotMatch(readFileSync(path.join(root, "notes/README.md"), "utf8"), /hello-note\/INDEX\.md/);
@@ -135,7 +135,7 @@ test("notes create registers on the parent README when it owns entries", async (
   put(root, "notes/AGENTS.md", agents(""));
   put(root, "notes/README.md", entriesReadme("Notes"));
   const created = await run(
-    ["--scope", root, "notes", "create", "--body", "# From H1\n\nText\n"],
+    ["--scope", root, "--super", "notes", "create", "--body", "# From H1\n\nText\n"],
     { env: {} },
   );
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
@@ -143,7 +143,7 @@ test("notes create registers on the parent README when it owns entries", async (
   assert.equal(made.title, "From H1");
   assert.match(readFileSync(path.join(root, "notes/README.md"), "utf8"), /INDEX\.md/);
   assert.doesNotMatch(readFileSync(path.join(root, "notes/AGENTS.md"), "utf8"), /INDEX\.md/);
-  const removed = await run(["--scope", root, "notes", "delete", made.path], { env: {} });
+  const removed = await run(["--scope", root, "--super", "notes", "delete", made.path], { env: {} });
   assert.equal(removed.exitCode, 0, removed.stdout);
   assert.doesNotMatch(readFileSync(path.join(root, "notes/README.md"), "utf8"), /INDEX\.md/);
 });
@@ -159,7 +159,7 @@ test("notes create rejects removed ingest flags", async (t) => {
   assert.doesNotMatch(help.stdout, /--content\b|--mode\b/);
   for (const flag of ["--co-author", "--import-entry", "--dry-run", "--mode", "--content", "--token-file"]) {
     const result = await run(
-      ["--scope", root, "notes", "create", "--title", "T", "--body", "b", flag, "x"],
+      ["--scope", root, "--super", "notes", "create", "--title", "T", "--body", "b", flag, "x"],
       { env: {} },
     );
     assert.equal(result.exitCode, 2, flag + result.stdout);

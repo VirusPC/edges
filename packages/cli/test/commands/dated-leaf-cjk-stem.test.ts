@@ -35,7 +35,7 @@ test("notes and projects create keep Chinese characters in the dated directory s
   put(root, "projects/AGENTS.md", agents());
 
   const note = await run(
-    ["--scope", root, "notes", "create", "--title", "中文标题", "--body", "正文"],
+    ["--scope", root, "--super", "notes", "create", "--title", "中文标题", "--body", "正文"],
     { env: {} },
   );
   assert.equal(note.exitCode, 0, note.stdout + note.stderr);
@@ -45,7 +45,7 @@ test("notes and projects create keep Chinese characters in the dated directory s
   assert.equal(existsSync(path.join(root, noteMade.path)), true);
 
   const project = await run(
-    ["--scope", root, "projects", "create", "--title", "中文标题", "--body", "正文"],
+    ["--scope", root, "--super", "projects", "create", "--title", "中文标题", "--body", "正文"],
     { env: {} },
   );
   assert.equal(project.exitCode, 0, project.stdout + project.stderr);
@@ -63,7 +63,7 @@ test("notes create shortens a long CJK title so the directory name fits", async 
   const title = "测".repeat(120);
 
   const note = await run(
-    ["--scope", root, "notes", "create", "--title", title, "--body", "正文"],
+    ["--scope", root, "--super", "notes", "create", "--title", title, "--body", "正文"],
     { env: {} },
   );
   assert.equal(note.exitCode, 0, note.stdout + note.stderr);

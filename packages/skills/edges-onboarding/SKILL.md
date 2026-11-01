@@ -1,7 +1,7 @@
 ---
 name: edges-onboarding
 description: 帮用户第一次接入 Edges 时使用：安装 edges CLI（npm 包 @viruspc/edges）、初始化目录、跑一次验证、学会常用命令、排查安装与鉴权报错。用户说「帮我接入 edges」「安装 edges」「edges 怎么用」「edges 报错了」「给我的仓库配一套 edges」时触发。已经装好、只是要写笔记请改用 edges；整理对话改用 edges-conversation-to-notes；项目记忆的检索与沉淀改用 edges-memory-ask / edges-memory-remember，初始化系统入口改用 edges。本 skill 只做入口与引导，具体操作一律交给 edges CLI 执行。
-version: 0.2.2
+version: 0.3.0
 ---
 
 # edges onboarding
@@ -134,22 +134,22 @@ edges --scope . memory doctor
 预期：
 
 - 每条命令退出码 0，stdout 是 `"status":"success"` 的 JSON（`memory doctor` 输出 `"ok": true`）。
-- `notes create` 返回 `"path":"notes/<今天日期>--edges-接入验证/INDEX.md"`。
+- `notes create` 返回 `"path":".edges/notes/<今天日期>--edges-接入验证/INDEX.md"`；读取时使用返回的路径。统一材料定位之前的 0.4.1 返回 `notes/...`，核对已安装版本，不把旧版落点差异误报为安装失败。
 - `tasks create` 返回的 `path` 在 `.edges/tasks/_default/backlog/` 下，`tasks list` 能列出它。
 
 验证通过后告诉用户可以删掉 `/tmp/edges-check`（由用户决定，不要擅自删除用户目录）。任何一步失败，按下面「常见错误排查」处理。
 
 ## 常用操作
 
-以下命令都只改本地文件，不 commit、不 push。`<目录>` 换成作用域路径。
+以下命令都只改本地文件，不 commit、不 push。`<目录>` 换成作用域路径。Notes、Projects 等材料默认放在 `<目录>/.edges/`；显式 `--super` 使用 `<目录>/`，旧根目录笔记和项目用该选项访问。创建与后续读写使用同一选择，以命令返回的 path 为准；init 始终只初始化真实 scope。
 
 ```bash
 # 笔记
 edges --scope <目录> notes create --title "标题" --body "正文 Markdown"
 edges --scope <目录> notes list
-edges --scope <目录> notes get notes/<日期>--<slug>/INDEX.md
-edges --scope <目录> notes update notes/<日期>--<slug>/INDEX.md --body "新正文"
-edges --scope <目录> notes delete notes/<日期>--<slug>/INDEX.md
+edges --scope <目录> notes get .edges/notes/<日期>--<slug>/INDEX.md
+edges --scope <目录> notes update .edges/notes/<日期>--<slug>/INDEX.md --body "新正文"
+edges --scope <目录> notes delete .edges/notes/<日期>--<slug>/INDEX.md
 
 # 项目
 edges --scope <目录> projects create --title "Demo" --body "这个项目是什么。"

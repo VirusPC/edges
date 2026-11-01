@@ -82,7 +82,7 @@ test("notes create and update write inside an initialized composed checkout", as
   const head = git(["rev-parse", "HEAD"], brain);
 
   const created = await run(
-    ["--scope", brain, "notes", "create", "--title", "Inside", "--body", "From the composed repo"],
+    ["--scope", brain, "--super", "notes", "create", "--title", "Inside", "--body", "From the composed repo"],
     { env: {} },
   );
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
@@ -97,7 +97,7 @@ test("notes create and update write inside an initialized composed checkout", as
   assert.match(git(["status", "--porcelain"], brain), /inside/);
 
   const updated = await run(
-    ["--scope", brain, "notes", "update", made.path, "--body", "Rewritten in the checkout"],
+    ["--scope", brain, "--super", "notes", "update", made.path, "--body", "Rewritten in the checkout"],
     { env: {} },
   );
   assert.equal(updated.exitCode, 0, updated.stdout + updated.stderr);
@@ -111,7 +111,7 @@ test("a missing composed README does not block a host note", async (t) => {
   put(root, "AGENTS.md", agents("", "- [notes](notes/AGENTS.md) — notes"));
   put(root, "notes/AGENTS.md", agents(""));
   const created = await run(
-    ["--scope", root, "notes", "create", "--title", "Host", "--body", "still works"],
+    ["--scope", root, "--super", "notes", "create", "--title", "Host", "--body", "still works"],
     { env: {} },
   );
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
