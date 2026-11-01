@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="900" viewBox="0 0 1280 900" role="img" aria-labelledby="title description">
   <title id="title">Edges 工作总览：换会话、换 Agent，工作和经验仍能接着用</title>
-  <desc id="description">你提出目标并审阅成果与经验，Agent 结合背景与方法推进工作，交付可审阅的方案、修改或报告，再由你审阅与反馈。Edges 是随目录保留的工作与经验基础：Agent 从中读取背景与方法，并留下材料与经验；它不是自动编排或执行器。基础中包括材料 Notes 与 Projects、工作 Tasks 与 Routines、经验 Memory 与 Skills。Routines 在此记录日程与方法，执行仍由外部平台触发。按需接入跨仓复用、过程观测与效果评测、产物预览。目录索引、Markdown 与 Git 让这些积累可以读取、维护和延续。</desc>
+  <desc id="description">你提出目标并审阅成果与经验，Agent 结合背景与方法推进工作，交付可审阅的方案、修改或报告，再由你审阅与反馈。Edges 是随目录保留的工作与经验基础：Agent 从中读取背景与方法，并留下材料与经验；它不是自动编排或执行器。基础中包括材料 Notes 与 Projects、工作 Tasks 与 Routines、经验 Memory 与 Skills。Routines 在此记录日程与方法，执行仍由外部平台触发。按需接入跨仓复用、个人会话留存与个人评测、产物预览；个人评测用自己的材料、目标与判断标准检验 harness 的作用。目录索引、Markdown 与 Git 让这些积累可以读取、维护和延续。</desc>
   <defs>
     <style>
       text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; }
@@ -97,7 +97,7 @@
   <text x="88" y="793" fill="#527668" font-size="21" font-weight="600">按需接入</text>
   <text x="236" y="793" class="label">跨仓复用</text>
   <circle cx="382" cy="785" r="2" fill="#9ab0a3"/>
-  <text x="409" y="793" class="label">回看过程、验证改进</text>
+  <text x="409" y="793" class="label">个人会话 · 个人评测</text>
   <circle cx="671" cy="785" r="2" fill="#9ab0a3"/>
   <text x="698" y="793" class="label">分享产物预览</text>
 
