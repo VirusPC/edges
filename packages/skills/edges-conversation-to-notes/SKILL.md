@@ -4,11 +4,12 @@ description: >-
   将原始对话整理为可独立阅读的中文笔记（记录 + 复盘）：背景/主题/过程/结果/所学/行动指南/补充说明。
   主题=一段主题+难点列表；凡写做什么须带可选项与不做原因；取舍在过程保留并在所学与行动指南补充。
   行动指南分主题层与细节若则。结果有未闭环项时逐点问清再交 edges-conversation-to-tasks；必须保留原始材料引用。用户说整理/总结对话时使用；入库所选目录的 notes/。
-version: 0.1.0
+version: 0.1.1
 ---
 
 将原始对话整理为结构清晰的中文笔记（**同时包含记录与复盘总结**）。
-文件名：`YYYY-MM-DD--主题简述.md`。
+路径名：`notes/YYYY-MM-DD--主题简述/INDEX.md`（日期只在目录，用于排序和 URL）。
+显示标题（`--title`、正文 `#`、frontmatter `title`）只写主题简述，不带日期。
 术语与已定决策见同目录 [CONTEXT.md](./CONTEXT.md) 与 [docs/adr/](./docs/adr/)。
 
 ## When to Use
@@ -22,7 +23,7 @@ version: 0.1.0
 ## Instructions
 
 1. 识别核心主题；一场对话多主题时可写 **总览笔记 + 各主题笔记**，在补充说明里互相链接。
-2. 文件名：`YYYY-MM-DD--主题简述.md`（用户本地时区当天，除非对话明确对应另一天）。
+2. 路径名：`notes/YYYY-MM-DD--主题简述/INDEX.md`（用户本地时区当天，除非对话明确对应另一天）。日期只放在目录名。显示标题不带日期，不要把路径名抄成正文 `#`。
 3. 全文用 Markdown 标题分层（`##` / `###` / `####`），**不要**再用【背景】等方括号栏名。**章节标题不要加括号**。
 4. 正文章节顺序固定为：
    `背景 → 主题 → 过程 → 结果 → 所学 → 行动指南 → 补充说明`
@@ -51,8 +52,10 @@ version: 0.1.0
 13. 不在本 skill 里「升为 Edge」。
 14. 输出必须为中文。
 15. **入库**（正文写作与审阅完成后）：
-    - 入口：`notes/YYYY-MM-DD--主题简述/INDEX.md`（选定 scope 下的 `notes/`）。
-    - 有 shell 时交给 `edges --scope <目录> notes create --title "主题简述" --body "<审阅后的 Markdown>"`。子命令是 `notes create`。完整 Markdown 放进 `--body`；标题用 `--title`（若正文已有一级标题，CLI 会按该标题对齐）。这次调用只在本地写下叶子，不 commit、不 push、不开 PR。不要自己 `git commit`，也不要传已删除的 `--content`、`--content-file`、`--markdown`、`--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--format`、`--resources`、`--index-group`。
+    - 入口：`notes/YYYY-MM-DD--主题简述/INDEX.md`（选定 scope 下的 `notes/`）。日期只出现在这个路径里。
+    - 有 shell 时交给 `edges --scope <目录> notes create --title "主题简述" --body "<审阅后的 Markdown>"`。子命令是 `notes create`。完整 Markdown 放进 `--body`。`--title`、正文 `#` 一级标题、frontmatter `title` 都只写主题简述，禁止写成 `YYYY-MM-DD--主题简述`。
+    - **带日期的 H1 会污染存储标题。** 正文里若已有一级标题，CLI 会让存储标题与该 H1 对齐：不传 `--title` 时标题就取这个 H1，写成 `# YYYY-MM-DD--主题简述` 会把显示标题存成带日期；传了 `--title` 时 CLI 会把 H1 改写成 `--title`，所以 `--title` 抄了路径名也会同样污染。`--title`、H1、frontmatter `title` 都只写主题简述。
+    - 这次调用只在本地写下叶子，不 commit、不 push、不开 PR。不要自己 `git commit`，也不要传已删除的 `--content`、`--content-file`、`--markdown`、`--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--format`、`--resources`、`--index-group`。
     - `notes create` 不复制旁路目录。图片等资源不要指望随笔记一起导入；正文里需要的材料写进 `--body`。不批量转换旧笔记。
     - 仓：普通内容写进用户自己的笔记仓（`--scope` 指向的目录）。私密内容写入你自己的私密仓：调用时把 `--scope` 指向私密仓的目录，`notes create` 不会自动换仓。CLI 源码在本仓 `packages/cli/`。
     - 大范围代码改动仍走 Cursor cloud agent
@@ -64,8 +67,10 @@ version: 0.1.0
 
 ## Output Format（压缩范例）
 
+路径（不要抄进正文标题）：`notes/YYYY-MM-DD--主题简述/INDEX.md`
+
 ```markdown
-# YYYY-MM-DD--主题简述
+# 主题简述
 
 > 可选：为何重要（一两句）
 
@@ -114,7 +119,7 @@ version: 0.1.0
 
 ## 补充说明
 - 原始材料：…（会话/助手、PR 或路径、时间范围）
-- 链接：[其它笔记](./YYYY-MM-DD--….md) — 说明
+- 链接：[其它笔记](../YYYY-MM-DD--其它主题/INDEX.md) — 说明（这是路径，可以带日期；链接文字仍用对方的显示标题）
 ```
 
 ## Constraints
@@ -129,6 +134,7 @@ version: 0.1.0
 - 主题须有一段话；难点列表按实填写。
 - 结果有未闭环项时，默认逐点问清后交 `edges-conversation-to-tasks`（一次 1～2 条）；用户说先不转任务可跳过。
 - **必须保留原始材料引用**（补充说明或背景末）：会话/PR/路径/相关 note 等可追溯指针；脱敏后仍要能找回。
+- 路径名可以带日期（`notes/YYYY-MM-DD--主题简述/INDEX.md`）。显示标题、`--title`、正文 `#` 一级标题、frontmatter `title` 不得带日期前缀。禁止 `# YYYY-MM-DD--主题简述`。
 - 忌「记完结构」交差；人看不懂就加长改写后再入库。
 
 ## Limitations

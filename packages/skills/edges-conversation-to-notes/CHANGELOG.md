@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-01
+
+### Fixed
+
+- 分清路径名与显示标题。路径仍是 `notes/YYYY-MM-DD--主题简述/INDEX.md`。`--title`、正文 `#` 和 frontmatter `title` 只写主题简述。Output Format 不再示范 `# YYYY-MM-DD--主题简述`。正文里带日期的一级标题会让 CLI 把存储标题对齐成带日期。
+
 ## [0.1.0] - 2026-10-27
 
 ### Changed
