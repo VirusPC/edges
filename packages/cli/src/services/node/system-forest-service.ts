@@ -82,14 +82,14 @@ function listTree(
   exclude: ReadonlySet<string> | undefined,
 ): Promise<BaseNode[]> {
   const rootPath = spec.kind === "super" ? spec.scopeDir : spec.path;
-  return service.list(spec.kind === "super" ? spec.scopeDir : spec.path, {
+  return service.list(rootPath, {
     super: spec.kind === "super",
     excludeRoots,
     ...forestScopeOptions(rootPath, hostScope, exclude),
   });
 }
 
-/** Keep supplemental material queries within the same Compose boundary as the forest. */
+/** Apply the same Compose boundary to forest trees and explicit module queries. */
 export function forestScopeOptions(
   rootPath: string,
   hostScope: string,

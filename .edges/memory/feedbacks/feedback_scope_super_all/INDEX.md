@@ -10,7 +10,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: VirusPC
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-11-02T06:20:59+08:00'
+  edges-updated-at: '2026-11-02T06:36:39+08:00'
 ---
 
 `--scope`、`--super`、`--all` 与路径决定目录和登记分组。不设 purpose、index-group 之类用途旗标。
@@ -36,3 +36,4 @@ metadata:
 - notes/projects 的 create/get/update/delete/list 使用同一位置规则；init 仍只初始化真实 scope 的 .edges 模块索引，不再同时生成根内容清单与 harness 占位说明。
 - 旧根目录内容通过 --super 访问，不静默搬迁；文档、Skill、ADR 和回归测试随接口调整同步。
 - 这条记忆记录用户确认的目标规则。具体可用版本以发布记录为准，不把未发布实现当作已安装 CLI 的能力。
+- 用户随后要求统一后应更简洁：复用公共定位与遍历时，同步删除旧路径特例对应的二次扫描和重复处理，不以新增包装代替消除重复机制。

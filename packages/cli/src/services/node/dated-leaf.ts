@@ -12,10 +12,8 @@ import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { contentOrgListPath, ensureContentOrgList } from "./content-org-list.js";
 import type { Model } from "./node-layout.js";
 import { physicalParent } from "./node-layout.js";
-import { collectSystemRoots } from "./system-roots.js";
 import { openNodeSession, scopeRelativePath } from "./scope-session.js";
 import { buildSystemForest, forestScopeOptions } from "./system-forest-service.js";
-import { scopeTraversal } from "../../domain/operations/traverse.js";
 import { ensureScopeReadme, ensureScopeReadmePointer, linkScopeReadme } from "../init/service.js";
 
 export type TitledLeaf = BaseNode & { title: string };
@@ -203,26 +201,6 @@ export async function deleteDatedLeaf<T extends TitledLeaf>(
   return { path: scopeRelativePath(scope, file) };
 }
 
-async function orgListLeaves<T extends TitledLeaf>(
-  service: ReturnType<typeof openNodeSession>["service"],
-  indexes: readonly { path: string; root: string }[],
-  spec: DatedLeafSpec<T>,
-  scope: string,
-  reach: Pick<LeafReach, "all" | "exclude">,
-): Promise<T[]> {
-  const out: T[] = [];
-  for (const index of indexes) {
-    const readme = await service.get(index.path, ReadmeNode);
-    if (!readme) continue;
-    const options = reach.all
-      ? forestScopeOptions(index.root, scope, reach.exclude)
-      : { exclude: reach.exclude, scopeDir: scope };
-    const nodes = await service.query(index.path, { types: [spec.queryType], ...options }).value();
-    out.push(...nodes.filter((node): node is T => node instanceof spec.Model));
-  }
-  return out;
-}
-
 export async function listDatedLeaves<T extends TitledLeaf>(
   env: NodeJS.ProcessEnv,
   spec: DatedLeafSpec<T>,
@@ -230,25 +208,16 @@ export async function listDatedLeaves<T extends TitledLeaf>(
 ): Promise<DatedLeafItem[]> {
   if (reach.exclude?.has(spec.folder)) return [];
   const { scope, service } = openNodeSession(env);
-  const fromTree = reach.all
+  const queryOptions = { types: [spec.queryType], exclude: reach.exclude, scopeDir: scope };
+  const nodes = reach.all
     ? (await buildSystemForest(scope, { includeSuper: reach.super === true, exclude: reach.exclude, form: "independent" })).flat()
-    : reach.super ? [] : await service
-      .query(scope, { types: [spec.queryType], ...scopeTraversal(reach), scopeDir: scope })
-      .value();
-  const directories = reach.all
-    ? [scope, ...collectSystemRoots(scope, reach.exclude).map((entry) => path.dirname(entry))]
-    : [scope];
-  const indexes = directories.map((dir) => ({ path: contentOrgListPath(dir, spec.folder), root: path.join(dir, ENTRY_NAMES.internal) }));
+    : reach.super ? [] : await service.query(scope, queryOptions).value();
+  // Super traversal prefers .edges/README.md; select the flat module explicitly,
+  // as routines does. Default and --all use the registered tree without a second scan.
   if (reach.super) {
-    if (!reach.all) indexes.length = 0;
-    indexes.push({ path: contentOrgListPath(scope, spec.folder, reach), root: scope });
-  }
-  const nodes = [...fromTree];
-  const seen = new Set(nodes.map((node) => node.path));
-  for (const node of await orgListLeaves(service, indexes, spec, scope, reach)) {
-    if (seen.has(node.path)) continue;
-    seen.add(node.path);
-    nodes.push(node);
+    const org = contentOrgListPath(scope, spec.folder, reach);
+    const options = reach.all ? { ...queryOptions, ...forestScopeOptions(scope, scope, reach.exclude) } : queryOptions;
+    if (await service.get(org, ReadmeNode)) nodes.push(...await service.query(org, options).value());
   }
   return [...new Map(nodes.map((node) => [node.path, node])).values()].flatMap((node) => {
     if (!(node instanceof spec.Model)) return [];

@@ -202,6 +202,22 @@ for (const module of ["notes", "projects"] as const) {
     }
   });
 
+  test(`${module} --super --all keeps the Compose boundary when scope is inside a checkout`, async (t) => {
+    const root = scope(t);
+    const checkout = path.join(root, ".edges/compose/demo");
+    const selected = path.join(checkout, "feature");
+    const nested = path.join(checkout, ".edges/compose/nested");
+    const local = await successful<Leaf>(call(selected, module, true, ["create", "--title", "Local"]));
+    await successful(call(nested, module, true, ["create", "--title", "Remote"]));
+    const index = path.join(selected, module, "README.md");
+    const link = path.relative(path.dirname(index), path.join(nested, module, "README.md"));
+    writeFileSync(index, readFileSync(index, "utf8").replace(
+      "<!-- edges-entries-local:end -->",
+      `- [Nested](${link}) — nested Compose\n<!-- edges-entries-local:end -->`,
+    ));
+    assert.deepEqual(await paths(selected, module, true, true), [local.path]);
+  });
+
   test(`${module} parent and child scopes keep their own default and --super leaves`, async (t) => {
     const root = scope(t);
     const child = path.join(root, "child");
