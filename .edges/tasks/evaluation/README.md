@@ -23,4 +23,5 @@
 - [memory\_消融实验正式报告](<backlog/2026-10-31--Memory-%E6%B6%88%E8%9E%8D%E5%AE%9E%E9%AA%8C%E6%AD%A3%E5%BC%8F%E6%8A%A5%E5%91%8A/INDEX.md>) — 在真 harness（非全文注入 smoke）跑完后整理可对外引用的正式报告。
 - [目录结构消融实验程序与报告](<backlog/2026-10-31--%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E6%B6%88%E8%9E%8D%E5%AE%9E%E9%AA%8C%E7%A8%8B%E5%BA%8F%E4%B8%8E%E6%8A%A5%E5%91%8A/INDEX.md>) — 在固定仓库快照上对照不同目录/布局，落地 runner 与结果报告。
 - [memory\_ab\_分流量开关与\_langfuse\_标签评测](<backlog/2026-10-31--Memory-AB-%E5%88%86%E6%B5%81%E9%87%8F%E5%BC%80%E5%85%B3%E4%B8%8E-Langfuse-%E6%A0%87%E7%AD%BE%E8%AF%84%E6%B5%8B/INDEX.md>) — 支持按流量开/关 memory，Langfuse 打标签，再做离线 eval。
+- [personal\_evaluation自定义目标线上数据自动清洗与定期评测](<backlog/2026-11-02--Personal-Evaluation%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9B%AE%E6%A0%87%E7%BA%BF%E4%B8%8A%E6%95%B0%E6%8D%AE%E8%87%AA%E5%8A%A8%E6%B8%85%E6%B4%97%E4%B8%8E%E5%AE%9A%E6%9C%9F%E8%AF%84%E6%B5%8B/INDEX.md>) — 结合通用评测框架，让用户自由定义 eval 目标，自动清洗个人线上会话数据，并设置 Routine 定期评测。
 <!-- edges-entries-local:end -->
