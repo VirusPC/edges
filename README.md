@@ -220,5 +220,4 @@ Edges 在框架根目录，以及[评测](packages/evaluation/AGENTS.md)、[观�
 <!-- edges-entries-local:start -->
 ## 本层内容
 
-- [projects/README.md](<projects/README.md>)
 <!-- edges-entries-local:end -->

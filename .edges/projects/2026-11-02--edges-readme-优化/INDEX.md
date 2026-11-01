@@ -13,14 +13,16 @@ description: 专门优化 Edges 框架 README 的定位与价值表达、阅读�
 
 ## 范围
 
-- 主要对象：[框架根 README](../../README.md)及其[配图](../../docs/assets/readme/)。
+- 主要对象：[框架根 README](../../../README.md)及其[配图](../../../docs/assets/readme/)。
 - 重点关注定位与价值表达、阅读顺序、术语解释、模块用例、接入指引和文档导航。
 - 需要补充细节时，链接对应能力文档、CONTEXT 或 ADR；内容调整涉及这些文档时保持一致。
 - 框架能力开发、独立推广文章与全仓文档重写另行安排，不由 README 优化自动扩展。
 
 ## 已有约定
 
-以[根 README 方向记忆](../../.edges/memory/projects/project_root_readme_direction/INDEX.md)中的当前有效决定为依据，后续新决定继续维护原记忆，避免本项目复制出另一套规范。
+本项目维护 Edges 框架自身，归入框架的 `.edges/projects/`，由本层 harness 索引发现。
+
+以[根 README 方向记忆](../../../.edges/memory/projects/project_root_readme_direction/INDEX.md)中的当前有效决定为依据，后续新决定继续维护原记忆，避免本项目复制出另一套规范。
 
 当前需优先延续的方向：
 
@@ -51,8 +53,8 @@ description: 专门优化 Edges 框架 README 的定位与价值表达、阅读�
 
 ## 参考入口
 
-- [框架 README](../../README.md)
-- [根 README 方向与历史取舍](../../.edges/memory/projects/project_root_readme_direction/INDEX.md)
-- [领域术语](../../CONTEXT.md)
-- [CLI 能力文档](../../packages/cli/README.md)
-- [架构决策](../../docs/adr/)
+- [框架 README](../../../README.md)
+- [根 README 方向与历史取舍](../../../.edges/memory/projects/project_root_readme_direction/INDEX.md)
+- [领域术语](../../../CONTEXT.md)
+- [CLI 能力文档](../../../packages/cli/README.md)
+- [架构决策](../../../docs/adr/)

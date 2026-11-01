@@ -62,4 +62,5 @@ format: ordinary
 - [审阅壳筛选靠右、紧挨导出](<feedback_review_shell_filters_before_export/INDEX.md>) — 改审阅壳顶栏筛选或复制导出 JSON 的位置时打开：全文和优先级、负责人、状态整组靠右，紧挨在导出按钮前面。系统名不在这一栏。
 - [改 skill 后必须升级 version、写 changelog、打 tag](<feedback_skill_bump_version/INDEX.md>) — 更新 skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/\<name\>@\<version\> tag。
 - [根 changelog 从用户视角写](<feedback_changelog_user_perspective/INDEX.md>) — 写或切根 CHANGELOG 时打开：从用户能做什么、和以前差在哪来说；扫一眼 \#\#\# 与每条小标题要能列出关键模块变化；不要写 systemd unit/unit 等运维黑话，目录布局不要摊对照表。缘起 2026\-10\-25 审 \#41。
+- [框架维护项目归入 .edges/projects](<feedback_maintenance_projects_in_harness/INDEX.md>) — 创建 Edges 框架自身的维护 Project 时：归入 .edges/projects，先判定维护对象再选 scope，不把 CLI 默认落点当归属。
 <!-- edges-entries-local:end -->
