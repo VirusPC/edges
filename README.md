@@ -126,15 +126,17 @@ Observation 为不同 Agent 提供 Langfuse 接入说明，按各客户端的接
 </details>
 
 <details>
-<summary>Evaluation · 线上真实数据，自定义 eval 目标</summary>
+<summary>Evaluation · 线上真实数据，预置与自定义 eval 目标</summary>
 
-Evaluation 以 **线上真实数据** 和 **自定义 eval 目标** 为核心。你可以让 Agent 从 Observation 留存的真实工作会话中选取问题、上下文与结果，围绕被 harness 的目录及其目标，定义要改善什么、怎样才算有效，再整理成可复现的评测样本。目标可以是回答是否有依据、是否遵守约定，或某类任务的 token 与时间成本，让评测直接对应这套 harness 要解决的实际问题。
+Evaluation 用 **线上真实数据**，围绕 **预置或自定义的 eval 目标** 检验 harness 的作用。可以从“Memory 是否起到正向作用”等预置目标开始，也可以围绕被 harness 的目录及其目标，自定义要改善什么、怎样才算有效，例如回答是否有依据、是否遵守约定，或某类任务的 token 与时间成本。
+
+让 Agent 从 Observation 留存的真实工作会话中选取问题、上下文与结果，按选定目标整理成可复现的评测样本，让评测直接对应这套 harness 要解决的实际问题。
 
 **用例：** 在真实维护会话中发现 Agent 多次引用已失效的 API 约定，就把相关问题与必要上下文整理成样本，自定义“避免错误引用、遵守当前约定”的目标与判分标准。固定样本、Agent 和其他实验条件，对照改动前后的 harness，比较达标情况与成本，判断哪些记忆需要更新或移除。
 
-现有检索评测、记忆消融与 Langfuse 实验入口提供了具体实验基础；题集、判分与实验条件仍需按目标准备。[记忆消融实验](packages/evaluation/experiments/harness_memory_ablation/README.md) · [评测说明](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
+现有记忆消融实验为“Memory 是否起到正向作用”提供了评测基础：固定问题与 Agent，对照有记忆与无记忆的表现，比较回答质量、约束遵守及成本。另有检索评测与 Langfuse 实验入口；题集、判分与实验条件仍需按目标准备。[记忆消融实验](packages/evaluation/experiments/harness_memory_ablation/README.md) · [评测说明](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
 
-下一步将结合通用评测框架，在用户定义目标后，由系统自动清洗与整理线上数据，并设置 Routine 定期评测。详见[评测闭环规划](.edges/tasks/evaluation/backlog/2026-11-02--Personal-Evaluation自定义目标线上数据自动清洗与定期评测/INDEX.md)。
+下一步将结合通用评测框架，在用户选择预置目标或自定义目标后，由系统自动清洗与整理线上数据，并设置 Routine 定期评测。详见[评测闭环规划](.edges/tasks/evaluation/backlog/2026-11-02--Personal-Evaluation自定义目标线上数据自动清洗与定期评测/INDEX.md)。
 
 </details>
 
