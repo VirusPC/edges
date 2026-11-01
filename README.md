@@ -14,7 +14,9 @@
 
 和 Agent 一起工作时，想做的改进、方案的取舍、做到一半的任务、下次可以复用的方法，常常留在聊天里。时间一久容易忘记，换个会话又要重新解释。
 
-Edges 把它们组织成**跟随目录、由 Git 管理的工作记忆与协作方法**，让不同会话、不同 Agent 能找到已有积累，接着推进工作。围绕一个目录维护的这套材料，就是它的 **harness**；代码库、长期项目和个人大脑都可以拥有自己的一套。
+Edges 把这些积累放回它们服务的目录，形成**嵌入项目骨架、以文件目录为作用域的 harness**。在需要维护的目录中，用 `.edges/` 组织记忆、技能与维护任务，由 `AGENTS.md` 引出；这些材料与所服务的代码、文档或方法放在一起，供不同会话、不同 Agent 接续使用。
+
+**目录决定作用域，Git 管理版本。** 项目根、monorepo 中的子 app、某个模块或 Skill 目录，都可以按需拥有自己的 harness；多个目录的 harness 可以和项目一起保存在同一个 Git 仓库中。
 
 ![Edges 系统总览：人提出目标并审阅，Agent 读取目录中的背景与方法、推进工作并留下材料与经验；按需接入会话观测与效果评测，围绕被 harness 的目录及其目标检验改进](docs/assets/readme/overview.svg)
 
@@ -24,7 +26,7 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 
 ![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块；Observation 收集所有 Agent 下真实会话，Evaluation 自定义 harness eval 目标，Artifacts 提供跨 Agent Artifacts 预览能力](docs/assets/readme/modules.svg)
 
-经验留在适用的地方，方法本身也能被维护；各处独立积累，需要时再跨仓复用。
+共同约定留在项目根，子 app 和模块的经验留在各自目录。开发一项 Skill 时，也可以为它建立 harness，维护这套方法本身；需要复用跨项目的个人或团队积累时，再通过 Compose 接入共享 harness。
 
 ![Edges 的三种组织方式：monorepo 子 app 内建立 web 的 harness；项目、项目的 harness、Skill、Skill 的 harness 四层嵌套；从左侧当前项目仓出发，通过 Compose 引用右侧的「共享的 harness 仓库」，以个人大脑为例，在项目中利用已有知识与方法，并向大脑沉淀新的经验](docs/assets/readme/design.svg)
 
@@ -48,7 +50,7 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 
 ## 案例：把 Edges 用于个人大脑
 
-可以用一个仓库为个人大脑建立 **Personal Harness**，保存一个人长期关心的目标、知识与方法，供 **Personal Agent** 持续使用，并沿用 Edges 的组织与改进方式。比如，手机上想到一个改进调研方式的点子，先让 Agent 记成任务，留下想做什么和缘由；几周后有时间，再在电脑上继续讨论和实施。换会话、换 Agent，仍可沿着保存的背景与进展接续。
+需要独立维护跨项目的个人积累时，也可以用一个仓库为个人大脑建立 **Personal Harness**，保存长期关心的目标、知识与方法，供 **Personal Agent** 持续使用。这个仓库整体承担共享 harness 的角色，是目录模型的一种应用。比如，手机上想到一个改进调研方式的点子，先让 Agent 记成任务，留下想做什么和缘由；几周后有时间，再在电脑上继续讨论和实施。换会话、换 Agent，仍可沿着保存的背景与进展接续。
 
 一次讨论或阅读先用 Notes 保留材料和来源。值得以后参考的取舍与约定，可以整理成 Memory；反复有效的调研步骤，可以沉淀为 Skills。积累由此成为下一次工作的背景与方法。
 
@@ -161,7 +163,7 @@ Evaluation 用 **线上真实数据**，围绕 **预置或自定义的 eval 目�
 <details>
 <summary>设计依据与使用边界</summary>
 
-**目录与作用域。** 一个项目的共同约定适合放在根，某个子模块的特殊限制适合留在那个目录。Edges 允许你为选定目录建立局部 harness，各层通过索引连接；Agent 从当前问题所在的作用域出发，读取相关层的约束，再按索引选择需要的材料，减少每次塞进上下文的无关背景。
+**目录与作用域。** 每一层 harness 服务于所在目录及其子树。共同约定放在项目根的 `.edges/`，子 app 或模块的经验留在各自目录的 `.edges/`；各层由 `AGENTS.md` 引出材料，并通过索引连接。Agent 从当前问题所在的作用域出发，读取适用的祖先层与本层约束，再按索引选择需要的材料，减少每次塞进上下文的无关背景。
 
 这样，经验的归属和适用范围都能被看见。团队约定随团队仓库共享，个人方法留在自己的仓库；跨目录复用通过引用与组合完成。详细理由见[按作用域确定内容归属](docs/adr/0024-scope-first-content-ownership.md)。
 
@@ -185,7 +187,7 @@ Agent 可以把纠正写成记忆，把重复成功的做法整理成技能；�
 
 #### Edges 仓库：用自己的 harness 维护框架
 
-Edges 用自己的记忆、技能与任务开发和维护框架。Agent 沿项目入口读取已有约定、接续任务，把开发中确认的经验沉淀回来；变化通过 Git 与 PR 留下可审阅的记录。从[框架任务](.edges/tasks/README.md)、[项目记忆](.edges/memory/projects/README.md)和[架构决策](docs/adr/)，可以看到待解决的问题、已确认的约定与设计取舍。
+Edges 在框架根目录，以及[评测](packages/evaluation/AGENTS.md)、[观测](packages/observation/AGENTS.md)等子目录内维护各自的 harness。Agent 沿对应目录的入口读取约定、接续任务，把开发中确认的经验沉淀回来；变化通过 Git 与 PR 留下可审阅的记录。从[框架任务](.edges/tasks/README.md)、[项目记忆](.edges/memory/projects/README.md)和[架构决策](docs/adr/)，可以看到待解决的问题、已确认的约定与设计取舍。
 
 框架仓相关的问题，可以问[Edges 小助手](https://edges-rag.viruspc.tech/)。源码布局、拆仓历史与开发步骤见[贡献指南](CONTRIBUTING.md)。
 
