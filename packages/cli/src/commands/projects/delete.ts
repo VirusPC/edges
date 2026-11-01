@@ -10,10 +10,10 @@ export function addProjectDeleteCommand(project: Command, ctx: CliContext): void
   project
     .command("delete")
     .description("Delete one project leaf")
-    .argument("<path>", "projects/<stem>/INDEX.md")
+    .argument("<path>", ".edges/projects/<stem>/INDEX.md (--super: projects/<stem>/INDEX.md)")
     .action(async (entryPath: string) => {
       try {
-        const removed = await deleteProject(ctx.env, entryPath);
+        const removed = await deleteProject(ctx.env, entryPath, { super: ctx.super });
         ctx.result = succeed({ command: "projects.delete", path: removed.path });
       } catch (error) {
         failNodeCommand(ctx, error, HELP);

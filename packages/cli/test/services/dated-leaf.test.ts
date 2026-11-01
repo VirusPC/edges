@@ -3,30 +3,30 @@ import assert from "node:assert/strict";
 import path from "node:path";
 import { datedLeafFile, NOTE_LEAF, PROJECT_LEAF } from "../../src/services/node/dated-leaf.js";
 
-test("dated leaf paths stay inside the resource folder and use a leaf entry name", () => {
-  const scope = path.resolve("/tmp/edges-dated-leaf-scope");
-  assert.equal(
-    datedLeafFile(scope, "notes/hello/INDEX.md", NOTE_LEAF),
-    path.join(scope, "notes/hello/INDEX.md"),
-  );
-  assert.equal(
-    datedLeafFile(scope, "projects/hello/index.md", PROJECT_LEAF),
-    path.join(scope, "projects/hello/index.md"),
-  );
-  assert.throws(
-    () => datedLeafFile(scope, "../secrets/INDEX.md", NOTE_LEAF),
-    /note path must be notes\/<stem>\/INDEX\.md/,
-  );
-  assert.throws(
-    () => datedLeafFile(scope, "notes/hello/README.md", NOTE_LEAF),
-    /note path must be notes\/<stem>\/INDEX\.md/,
-  );
-  assert.throws(
-    () => datedLeafFile(scope, "projects/hello/INDEX.md", NOTE_LEAF),
-    /note path must be notes\/<stem>\/INDEX\.md/,
-  );
-  assert.throws(
-    () => datedLeafFile(scope, "notes/hello/INDEX.md", PROJECT_LEAF),
-    /project path must be projects\/<stem>\/INDEX\.md/,
-  );
-});
+for (const spec of [NOTE_LEAF, PROJECT_LEAF]) {
+  for (const superScope of [false, true]) {
+    test(`${spec.folder} paths stay inside the ${superScope ? "super" : "default"} material folder`, () => {
+      const scope = path.resolve("/tmp/edges-dated-leaf-scope");
+      const folder = superScope ? spec.folder : `.edges/${spec.folder}`;
+      const otherFolder = superScope ? `.edges/${spec.folder}` : spec.folder;
+      const reach = { super: superScope };
+      for (const entry of ["INDEX.md", "index.md"]) {
+        assert.equal(
+          datedLeafFile(scope, `${folder}/hello/${entry}`, spec, reach),
+          path.join(scope, folder, "hello", entry),
+        );
+      }
+      for (const entryPath of [
+        "../secrets/INDEX.md",
+        `${folder}/hello/README.md`,
+        `${otherFolder}/hello/INDEX.md`,
+        `${folder}-other/hello/INDEX.md`,
+      ]) {
+        assert.throws(
+          () => datedLeafFile(scope, entryPath, spec, reach),
+          { message: `${spec.label} path must be ${folder}/<stem>/INDEX.md` },
+        );
+      }
+    });
+  }
+}

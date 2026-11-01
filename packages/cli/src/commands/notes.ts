@@ -17,7 +17,7 @@ STRUCTURED OUTPUT
   Success and failure are JSON objects on stdout.
 
   Success:
-    {"status":"success","command":"notes.create","path":"notes/<date>--<slug>/INDEX.md","title":"..."}
+    {"status":"success","command":"notes.create","path":".edges/notes/<date>--<slug>/INDEX.md","title":"..."}
 
   Failure:
     {"status":"failed","errorCode":"VALIDATION_ERROR|UNKNOWN_ERROR","reason":"..."}
@@ -32,7 +32,10 @@ FLAGS
 
   create/update use metadata plus --body. The title is the body H1, or --title.
   get and delete take only the target. list uses the shared filter/group envelope.
-  Scope comes from --scope / --super / --all. There is no git commit, push, or PR.
+  Default: <scope>/.edges/notes/. --super: <scope>/notes/.
+  Use the same scope and --super selection for create/get/update/delete/list.
+  --all lists the system forest. init always initializes the real scope.
+  There is no git commit, push, or PR.
 
 EXIT CODES
   0  success

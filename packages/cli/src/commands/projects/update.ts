@@ -11,7 +11,7 @@ export function addProjectUpdateCommand(project: Command, ctx: CliContext): void
   project
     .command("update")
     .description("Update a project title, body, or metadata")
-    .argument("<path>", "projects/<stem>/INDEX.md")
+    .argument("<path>", ".edges/projects/<stem>/INDEX.md (--super: projects/<stem>/INDEX.md)")
     .option("--title <title>", "New title, written as the H1")
     .option("--body <markdown>", "New body")
     .option("--metadata <key=value>", "Repeatable frontmatter field", collectRepeat, [])
@@ -21,6 +21,7 @@ export function addProjectUpdateCommand(project: Command, ctx: CliContext): void
           title: opts.title,
           body: opts.body,
           metadata: opts.metadata,
+          super: ctx.super === true,
         });
         ctx.result = succeed({
           command: "projects.update",

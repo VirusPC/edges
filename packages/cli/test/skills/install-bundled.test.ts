@@ -320,7 +320,7 @@ test("edges notes get -- -weird/INDEX.md keeps the path operand", async (t) => {
   assert.equal(ready.exitCode, 0, ready.stdout + ready.stderr);
   const result = await run(["--scope", root, "notes", "get", "--", "-weird/INDEX.md"], { env: {} });
   assert.notEqual(result.exitCode, 0);
-  assert.match(result.stdout, /note path must be notes\/<stem>\/INDEX.md/);
+  assert.match(result.stdout, /note path must be \.edges\/notes\/<stem>\/INDEX.md/);
   assert.doesNotMatch(result.stdout + result.stderr, /missing required argument/);
 });
 

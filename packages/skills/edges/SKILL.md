@@ -11,7 +11,7 @@ description: >-
   第一次接入用 edges-onboarding。整理对话用 edges-conversation-to-notes 或 edges-conversation-to-tasks。
   整板 Task 按已有 Task Project 归类用 edges-tasks-classify。
   把会话接到 Langfuse 用 edges-langfuse-agent-tracing。
-version: 0.1.1
+version: 0.2.0
 ---
 
 # edges
@@ -33,6 +33,7 @@ edges --scope <目录> <module> delete <目标>
 - stdout 只有 JSON。诊断在 stderr。只解析 stdout。
 - 退出码：`0` 成功，`1` 运行失败，`2` 用法或校验失败。
 - 先定 `--scope`（或已设置的 `EDGES_SCOPE`）。不要手改节点文件，不要绕开 CLI 写内容叶子。
+- Notes、Projects、Tasks、Skills、Routines 的材料默认归入 `<scope>/.edges/`；显式 `--super` 使用 `<scope>/`。创建和后续读写保持同一选择，使用 CLI 返回的路径；不要通过把 scope 改成 `.edges` 来代替这项选择。旧根目录笔记与项目用 `--super` 访问，不自动搬迁。
 - 具体旗标以 `edges <module> --help` 为准。下面没写的旗标不要猜。
 - 已经有专门命令的写入不要再套 create / update。例如 `memory create` 与 `memory update` 会失败并指向 `edges memory remember`。
 

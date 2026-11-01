@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-02
+
+### Changed
+
+- 接入验证与笔记读写示例对齐统一材料定位，默认使用 `.edges/notes/`；提示使用返回路径并区分旧版 0.4.1 的落点，避免将版本差异误判为安装失败。
+
 ## [0.2.2] - 2026-10-27
 
 ### Changed

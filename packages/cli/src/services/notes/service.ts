@@ -22,8 +22,8 @@ export function createNote(
   return createDatedLeaf(env, NOTE_LEAF, input);
 }
 
-export function getNote(env: NodeJS.ProcessEnv, entryPath: string): Promise<DatedLeafView> {
-  return getDatedLeaf(env, NOTE_LEAF, entryPath);
+export function getNote(env: NodeJS.ProcessEnv, entryPath: string, reach: Pick<LeafReach, "super"> = {}): Promise<DatedLeafView> {
+  return getDatedLeaf(env, NOTE_LEAF, entryPath, reach);
 }
 
 export function updateNote(
@@ -34,8 +34,8 @@ export function updateNote(
   return updateDatedLeaf(env, NOTE_LEAF, entryPath, input);
 }
 
-export function deleteNote(env: NodeJS.ProcessEnv, entryPath: string): Promise<{ path: string }> {
-  return deleteDatedLeaf(env, NOTE_LEAF, entryPath);
+export function deleteNote(env: NodeJS.ProcessEnv, entryPath: string, reach: Pick<LeafReach, "super"> = {}): Promise<{ path: string }> {
+  return deleteDatedLeaf(env, NOTE_LEAF, entryPath, reach);
 }
 
 export function listNotes(env: NodeJS.ProcessEnv, reach: LeafReach): Promise<DatedLeafItem[]> {
