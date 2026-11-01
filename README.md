@@ -16,13 +16,13 @@
 
 Edges 把它们组织成**跟随目录、由 Git 管理的工作记忆与协作方法**，让不同会话、不同 Agent 能找到已有积累，接着推进工作。围绕一个目录维护的这套材料，就是它的 **harness**；代码库、长期项目和个人大脑都可以拥有自己的一套。
 
-![Edges 系统总览：人提出目标并审阅，Agent 读取目录中的背景与方法、推进工作并留下材料与经验，让下一次会话继续使用这些积累](docs/assets/readme/overview.svg)
+![Edges 系统总览：人提出目标并审阅，Agent 读取目录中的背景与方法、推进工作并留下材料与经验；按需接入个人会话留存与个人评测，让积累持续改进并用于下一次工作](docs/assets/readme/overview.svg)
 
 ## 为什么值得用？
 
 Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的组织方式与使用流程：Tasks 区分任务目标与执行尝试，Memory 按适用范围检索，Skills 保留可复用的步骤与判断。你可以按需组合这些模块，沿用已有的设计，再结合自己的工作持续改进。
 
-![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块](docs/assets/readme/modules.svg)
+![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块；Observation 留存个人会话，Evaluation 按自己的目标评测](docs/assets/readme/modules.svg)
 
 经验留在适用的地方，方法本身也能被维护；各处独立积累，需要时再跨仓复用。
 
@@ -32,7 +32,7 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 
 ![Edges 的长期使用优势：文件系统让内容可读可迁移，Git 让变更可追溯可审阅，跨 Agent 接入让任务可接力，零运维让核心本地可用并提供现成服务接入](docs/assets/readme/foundations.svg)
 
-**自己的 harness 有没有用，看得见，也测得出。** 记录不同 Agent 下的个人会话，分析日常工作与 harness 的使用情况，找出需要改进或清理的内容；再用自己的材料和问题开展对照评测，衡量质量与成本，让取舍有依据。
+**Personal Evaluation：用自己的工作，检验自己的 harness。** 从编码 Agent 到 Grok Bot 这样的个人助手，通过 Langfuse 留下自己的会话数据，发现日常工作中的问题。围绕自己关心的目标，准备材料、问题与判断标准，再开展对照评测，让记忆、技能和使用方式的取舍有依据。
 
 ## 怎么开始？
 
@@ -107,18 +107,20 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 <details>
 <summary>Observation · 记录不同 Agent 下的个人会话</summary>
 
-通过对应客户端的接入方案，Observation 留存已接入 Agent 下的个人会话与可用执行记录，作为分析自己日常工作的材料。回看这些数据，可以了解自己在做什么、哪些问题反复出现，并结合当前任务与实际文件判断 harness 是否仍然适用、哪些过时内容需要更新或移除。
+Observation 为不同编码 Agent，以及 Grok Bot 这样的个人助手提供 Langfuse 接入说明，让个人会话成为可以回看和分析的工作材料。各客户端按其接入方式留存会话与可用执行记录；结合这些数据、当前任务与实际文件，可以了解哪些问题反复出现，判断 harness 是否仍然适用、哪些过时内容需要更新或移除，也为个人评测寻找值得验证的问题。
 
 **用例：** 回看一段时间的个人会话，发现 Agent 反复引用已经失效的约定，定位对应的 harness 文件，确认适用范围后更新或移除，再用评测检查调整的影响。[观测说明](packages/observation/README.md) · [选择会话接入方式](packages/skills/edges-langfuse-agent-tracing/SKILL.md)
 
 </details>
 
 <details>
-<summary>Evaluation · 检验自己的 harness 是否真正有用</summary>
+<summary>Evaluation · 按自己的目标，检验 harness 是否有用</summary>
 
-用自己的材料和关心的问题构建评测，通过可复现的对照比较回答质量、规则遵守及 token、时间成本，判断一次修改是否改善了自己的工作。Evaluation 提供检索评测、记忆消融等实验与报告；跑通程序之后，需要匹配问题的题集与判分，才能判断实际收益。
+Personal Evaluation 从自己的工作目标出发：什么样的回答才有用，哪些约定必须遵守，节省的时间是否值得增加的成本？用自己的材料、问题与判断标准构建评测，通过可复现的对照判断一次修改是否改善了自己的工作。Evaluation 已提供检索评测、记忆消融等实验与报告，可比较回答质量、规则遵守及 token、时间成本；具体评测仍需准备相应题集、判分与实验条件。
 
 **用例：** 同一个 Agent 回答同一批问题，比较有记忆与无记忆两个工作目录中的表现，检查回答是否更好、违反约束是否减少、成本增加了多少，再决定怎样调整记忆。[记忆消融实验](packages/evaluation/experiments/harness_memory_ablation/README.md) · [评测说明](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
+
+下一步将结合通用评测框架，让用户自由定义 eval 目标，由系统按目标自动清洗线上会话数据，并设置 Routine 定期评测。详见[个人评测闭环规划](.edges/tasks/evaluation/backlog/2026-11-02--Personal-Evaluation自定义目标线上数据自动清洗与定期评测/INDEX.md)。
 
 </details>
 
@@ -159,7 +161,7 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 
 **经验怎样继续改进工作。** 值得复用的判断可以从一次实践中提炼出来，成为 **Edge**——带着理由和适用边界、能帮助未来行动的判断优势，Edges 由此得名。它可以再次用于工作，也可以发展成报告、文章、教学或工具。
 
-Agent 可以把纠正写成记忆，把重复成功的做法整理成技能；人通过对话或 Git diff 审阅这些变化。个人会话记录为分析日常工作、识别过时的 harness 内容提供依据，评测用自己的材料与问题验证更新或清理的影响，再将有依据的改进用于后续工作。这也是 Edges 实践持续自我改进的方式。
+Agent 可以把纠正写成记忆，把重复成功的做法整理成技能；人通过对话或 Git diff 审阅这些变化。来自不同 Agent 的个人会话帮助发现问题，Personal Evaluation 按自己的目标与判断标准验证更新或清理的影响，再将有依据的改进用于后续工作。这也是 Edges 实践持续自我改进的方式。
 
 </details>
 
