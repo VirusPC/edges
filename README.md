@@ -48,7 +48,7 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 
 ## 案例：把 Edges 用于个人大脑
 
-个人大脑（**Personal Brain**）可以用一个仓库承载，为 **Personal Agent** 保存一个人长期关心的目标、知识与方法，沿用 Edges 的组织与改进方式。比如，手机上想到一个改进调研方式的点子，先让 Agent 记成任务，留下想做什么和缘由；几周后有时间，再在电脑上继续讨论和实施。换会话、换 Agent，仍可沿着保存的背景与进展接续。
+可以用一个仓库为个人大脑建立 **Personal Harness**，保存一个人长期关心的目标、知识与方法，供 **Personal Agent** 持续使用，并沿用 Edges 的组织与改进方式。比如，手机上想到一个改进调研方式的点子，先让 Agent 记成任务，留下想做什么和缘由；几周后有时间，再在电脑上继续讨论和实施。换会话、换 Agent，仍可沿着保存的背景与进展接续。
 
 一次讨论或阅读先用 Notes 保留材料和来源。值得以后参考的取舍与约定，可以整理成 Memory；反复有效的调研步骤，可以沉淀为 Skills。积累由此成为下一次工作的背景与方法。
 
@@ -189,9 +189,9 @@ Edges 用自己的记忆、技能与任务开发和维护框架。Agent 沿项�
 
 框架仓相关的问题，可以问[Edges 小助手](https://edges-rag.viruspc.tech/)。源码布局、拆仓历史与开发步骤见[贡献指南](CONTRIBUTING.md)。
 
-#### 个人大脑：面向 Personal Agent 的 Personal Brain
+#### 个人大脑：面向 Personal Agent 的 Personal Harness
 
-作者的[公开个人大脑](https://github.com/VirusPC/edges-brain-viruspc) 是持续维护的 **Personal Brain** 实践，保留了笔记、任务、教学与复盘。这里的 **Personal**，强调围绕同一个人的长期目标、知识与工作方式积累，为 **Personal Agent** 提供可持续使用和改进的背景与方法；**Personal Evaluation** 则围绕个人真实会话与目标，检验这些积累是否有帮助。
+作者在[公开个人大脑](https://github.com/VirusPC/edges-brain-viruspc)中持续维护自己的 **Personal Harness**，保留了笔记、任务、教学与复盘。这里的 **Personal**，强调围绕同一个人的长期目标、知识与工作方式积累，为 **Personal Agent** 提供可持续使用和改进的背景与方法；**Personal Evaluation** 则围绕个人真实会话与目标，检验这些积累是否有帮助。
 
 可以结合[教学站](https://edges.viruspc.tech/teaching/)与[任务看板](https://edges.viruspc.tech/tasks/)查看这些内容怎样被使用，完整使用故事见[个人大脑案例](#案例把-edges-用于个人大脑)。你的知识与工作材料同样可以保存在自己的仓库，按需要通过 Compose 接入项目。
 
