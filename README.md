@@ -22,7 +22,7 @@ Edges 把它们组织成**跟随目录、由 Git 管理的工作记忆与协作�
 
 Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的组织方式与使用流程：Tasks 区分任务目标与执行尝试，Memory 按适用范围检索，Skills 保留可复用的步骤与判断。你可以按需组合这些模块，沿用已有的设计，再结合自己的工作持续改进。
 
-![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块；Observation 留存不同 Agent 的会话，Evaluation 检验 harness 的作用](docs/assets/readme/modules.svg)
+![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块；Observation 留存不同 Agent 的会话，Evaluation 自定义 harness eval 目标](docs/assets/readme/modules.svg)
 
 经验留在适用的地方，方法本身也能被维护；各处独立积累，需要时再跨仓复用。
 
