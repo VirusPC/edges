@@ -10,7 +10,7 @@ metadata:
   edges-agent-client: cursor
   edges-username: VirusPC
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-11-02T06:36:39+08:00'
+  edges-updated-at: '2026-11-02T06:52:14+08:00'
 ---
 
 `--scope`、`--super`、`--all` 与路径决定目录和登记分组。不设 purpose、index-group 之类用途旗标。
@@ -37,3 +37,7 @@ metadata:
 - 旧根目录内容通过 --super 访问，不静默搬迁；文档、Skill、ADR 和回归测试随接口调整同步。
 - 这条记忆记录用户确认的目标规则。具体可用版本以发布记录为准，不把未发布实现当作已安装 CLI 的能力。
 - 用户随后要求统一后应更简洁：复用公共定位与遍历时，同步删除旧路径特例对应的二次扫描和重复处理，不以新增包装代替消除重复机制。
+
+## 显式路径的后续目标
+
+用户在各模块 create 增加 --path 的讨论中进一步澄清：在模块行为一致的前提下尽可能受控，并保留兜底方法。路径输入不能只放开 create 而与 get/update/delete 脱节；尽量复用公共函数，删除重复机制。跨模块目录覆盖和兜底入口的具体形式仍待细化，不把任意目录写入候选当成已确认契约。具体边界以设计确认后的契约为准。
