@@ -2,6 +2,8 @@
 
 这份材料为 [Edges README 优化项目](INDEX.md)提供文案依据：从仓库内的架构决策、项目记忆、Skill、实现和测试中，提取首页尚未充分解释的重要设计理由。它是研究与候选表达，不是已确认的 README 改稿。
 
+进一步的决策演化、替代方案、代价与反证见[深层设计研究](README-design-deep-research.md)。本稿保留按模块查找的用途，深研稿解释这些机制之间的共同取舍。
+
 核对日期：2026-11-02。代码基线：`main@7c7bcdd`；研究分支已合入这一基线。下文的“已实现”指该版本可由代码或测试支持的机制；“协议”指需要 Agent 或外部平台遵循的工作约定；“实验”不代表已证明产品收益。来源链接使用仓库内相对路径，行号仅供本次核对定位。
 
 ## 先说发现
@@ -102,7 +104,7 @@
 
 **README 缺口。** Artifacts 已讲预览、发布和写回分步，但没有解释这种拆分怎样连接人的判断与工具执行。
 
-**证据与边界。** [任务分类 Skill](../../../packages/skills/edges-tasks-classify/SKILL.md)规定 Agent 判断、页面只渲染，收到导出的 JSON 后再校验并通过 CLI 应用，`keep` 不写盘；[review-page 命令](../../../packages/cli/src/commands/tasks/project/review-page.ts)只读取输入、渲染、返回路径。此流程已存在，但结果仍需复制回聊天，并非自动回传；也不能从这一具体工作流推导出所有操作都必须额外审批。
+**证据与边界。** [任务分类 Skill](../../../packages/skills/edges-tasks-classify/SKILL.md)规定 Agent 判断、页面只渲染，收到导出的 JSON 后再校验并通过 CLI 应用，`keep` 不写盘；[review-page 命令](../../../packages/cli/src/commands/tasks/project/review-page.ts)只读取输入、渲染、返回路径。此流程已存在，但结果仍需复制回聊天，并非自动回传；导出结果也不携带内容版本，延迟应用时仍需核对当前状态，不能当成防止陈旧修改的机制。也不能从这一具体工作流推导出所有操作都必须额外审批。
 
 **候选表达：** Agent 整理建议，人集中调整和确认，再由工具按确认结果执行；审阅结果本身就是可继续工作的输入。
 
@@ -146,13 +148,13 @@
 
 ## 11. Compose 共享来源，同时保留版本、归属和展开边界
 
-**设计与价值。** 共享材料保留在原来的 Git 仓库，主仓用 submodule 记录版本，相关路径随仓迁移；本地形成的新认识可以写回来源，再由原生 Git 决定何时提交与推送。复用、文件修改与发布各自可见。
+**设计与价值。** 共享材料保留独立维护来源。在仓内采用 Git submodule 时，主仓能记录被组合仓库的版本，相关路径随仓迁移；本地形成的新认识可以写回来源，再由原生 Git 决定何时提交与推送。复用、文件修改与发布各自可见。
 
 另一个容易遗漏的取舍是只展开当前仓直接登记的组合，不继续自动展开对方的 Compose。这让接入一个仓库的含义更明确，避免间接依赖持续扩大工作上下文。
 
 **README 缺口。** Compose 已有 submodule、写回和各自历史的说明，但没有充分连接版本复现、路径迁移和有限展开的用户价值。
 
-**证据与边界。** [ADR 0042](../../../docs/adr/0042-compose-on-git-submodule.md)解释采用 Git submodule；入口位置以后续 [ADR 0043](../../../docs/adr/0043-compose-readme-entry.md)为准；[ADR 0045](../../../docs/adr/0045-compose-checkout-writable.md)明确可写且提交推送交 Git；[森林实现](../../../packages/cli/src/services/node/system-forest-service.ts)限制嵌套 Compose 展开；[Compose 测试](../../../packages/cli/test/commands/compose.test.ts)和[写回测试](../../../packages/cli/test/commands/compose-write.test.ts)验证展开与写入边界。Compose 不提供隔离沙箱或权限系统；不递归展开不等于只读，也不等于自动同步或自动发布。
+**证据与边界。** [ADR 0042](../../../docs/adr/0042-compose-on-git-submodule.md)解释采用 Git submodule；入口位置以后续 [ADR 0043](../../../docs/adr/0043-compose-readme-entry.md)为准；[ADR 0045](../../../docs/adr/0045-compose-checkout-writable.md)明确可写且提交推送交 Git；[森林实现](../../../packages/cli/src/services/node/system-forest-service.ts)限制嵌套 Compose 展开；[Compose 测试](../../../packages/cli/test/commands/compose.test.ts)和[写回测试](../../../packages/cli/test/commands/compose-write.test.ts)验证展开与写入边界。[Compose 服务](../../../packages/cli/src/services/compose/service.ts)仍允许本地路径等接入方式，不能将所有组合都视为可随仓恢复的 submodule。Compose 不提供隔离沙箱或权限系统；不递归展开不等于只读，也不等于自动同步或自动发布。
 
 **候选表达：** 把共享积累带入当前工作，同时保留它的来源、版本和维护位置；复用到哪里、改了什么、何时发布，都可以检查。
 
