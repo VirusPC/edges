@@ -47,4 +47,5 @@ edges CLI/脚手架/发布/鉴权等平台层。
 - [将\_harness\_目录更名为\_edges](<done/2026-10-27--%E5%B0%86-harness-%E7%9B%AE%E5%BD%95%E6%9B%B4%E5%90%8D%E4%B8%BA-edges/INDEX.md>) — 目录名从通用词 .harness 改为品牌名 .edges，统一 CLI/npm/仓库/目录的品牌链路，并承载边际优势、项目的边、图论的边三层含义；本次为推广前定稿变更，改完冻结布局。
 - [新增 agents 与 teams（channels）模块](<backlog/2026-10-27--%E6%96%B0%E5%A2%9E-agents-%E4%B8%8E-teamschannels%E6%A8%A1%E5%9D%97/INDEX.md>) — 在 edges 中沉淀 agents 与 teams（channels）能力面，记录多 Agent 协作所需的人格与协作通道信息。
 - [edges\-\* skills 与标记硬切断](<done/2026-10-27--edges-skills-%E4%B8%8E%E6%A0%87%E8%AE%B0%E7%A1%AC%E5%88%87%E6%96%AD/INDEX.md>) — 随包 skill/标记硬切断只认 edges\-\*；删除 doctor/reshape；改名 skill 版本从 0.1.0 起重。按已落地结果补记看板。
+- [统一各模块路径规则默认受控并保留显式兜底](<backlog/2026-11-02--%E7%BB%9F%E4%B8%80%E5%90%84%E6%A8%A1%E5%9D%97%E8%B7%AF%E5%BE%84%E8%A7%84%E5%88%99%E9%BB%98%E8%AE%A4%E5%8F%97%E6%8E%A7%E5%B9%B6%E4%BF%9D%E7%95%99%E6%98%BE%E5%BC%8F%E5%85%9C%E5%BA%95/INDEX.md>) — 统一 create/get/update/delete 的路径语义，在受控默认规则下支持显式路径与明确兜底，并复用公共定位和校验函数。
 <!-- edges-entries-local:end -->
