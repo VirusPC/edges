@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1040" viewBox="0 0 1280 1040" role="img" aria-labelledby="title description">
   <title id="title">Edges 模块地图：从当前工作出发，按需选用</title>
-  <desc id="description">按用途寻找十个模块，没有固定执行顺序。材料组织：Notes 留下原始材料、Projects 组织持续工作。工作安排：Tasks 接续目标与进度、Routines 记录日程与方法。经验积累：Memory 保留判断理由、Skills 复用有效做法。改进依据：Observation 留存编码 Agent 与个人助手等已接入 Agent 的个人会话；Evaluation 按自己的目标评测，用自己的材料、问题与判断标准检验 harness 的作用。产物审阅：Artifacts 交付产物供审阅。跨仓复用：Compose 组合不同仓库，为当前工作接入外部积累，可配合其他用途使用。共同基础是目录与作用域、递归索引、Markdown 与 Git，以及 CLI、Skill、MCP 三种接入方式。</desc>
+  <desc id="description">按用途寻找十个模块，没有固定执行顺序。材料组织：Notes 留下原始材料、Projects 组织持续工作。工作安排：Tasks 接续目标与进度、Routines 记录日程与方法。经验积累：Memory 保留判断理由、Skills 复用有效做法。改进依据：Observation 收集所有 Agent 下真实会话；Evaluation 围绕被 harness 的目录自定义 harness eval 目标，用相关材料、任务与判断标准开展评测。产物审阅：Artifacts 提供跨 Agent Artifacts 预览能力。跨仓复用：Compose 组合不同仓库，为当前工作接入外部积累，可配合其他用途使用。共同基础是目录与作用域、递归索引、Markdown 与 Git，以及 CLI、Skill、MCP 三种接入方式。</desc>
 
   <defs>
     <style>
@@ -67,7 +67,7 @@
   <text x="88" y="630" class="module">Skills</text>
   <text x="596" y="630" class="value" text-anchor="end">复用有效做法</text>
 
-  <!-- Personal conversations and evaluation against the user's own goals. -->
+  <!-- Conversations and evaluation for the directory served by the harness. -->
   <rect x="656" y="446" width="564" height="220" rx="20" class="card"/>
   <rect x="680" y="469" width="38" height="38" rx="11" fill="#f7ecd8"/>
   <g class="amber-icon">
@@ -75,12 +75,11 @@
     <path d="m689 483 8-7 8 4"/>
   </g>
   <text x="733" y="498" class="heading">改进依据</text>
-  <text x="1192" y="497" class="muted" font-size="18" text-anchor="end">Personal Evaluation</text>
   <path d="M680 525h516" class="rule"/>
   <text x="684" y="574" class="module">Observation</text>
-  <text x="1192" y="574" class="value" text-anchor="end">留存各 Agent 的个人会话</text>
+  <text x="1192" y="574" class="value" text-anchor="end">收集所有 Agent 下真实会话</text>
   <text x="684" y="630" class="module">Evaluation</text>
-  <text x="1192" y="630" class="value" text-anchor="end">按自己的目标评测</text>
+  <text x="1192" y="630" class="value" text-anchor="end">自定义 harness eval 目标</text>
 
   <!-- Human review of deliverables. -->
   <rect x="60" y="694" width="564" height="220" rx="20" class="card"/>
@@ -93,7 +92,7 @@
   <text x="137" y="746" class="heading">产物审阅</text>
   <path d="M84 773h516" class="rule"/>
   <text x="88" y="822" class="module">Artifacts</text>
-  <text x="596" y="822" class="value" text-anchor="end">交付产物供审阅</text>
+  <text x="596" y="822" class="value" text-anchor="end">跨 Agent Artifacts 预览能力</text>
 
   <!-- Composition is cross-cutting: bring external material into any of the uses above. -->
   <rect x="656" y="694" width="564" height="220" rx="20" class="card"/>

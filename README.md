@@ -8,7 +8,7 @@
 
 ![从零散材料到有序目录，再展开下一次工作：经验成为新的起点](docs/assets/readme/hero.png)
 
-[开始使用](#怎么开始) · [深入了解](#深入了解) · [Edges 小助手](https://edges-rag.viruspc.tech/)
+[开始使用](#怎么开始) · [个人大脑案例](#案例把-edges-用于个人大脑) · [深入了解](#深入了解) · [Edges 小助手](https://edges-rag.viruspc.tech/)
 
 ## 这是什么，能帮我做什么？
 
@@ -16,13 +16,13 @@
 
 Edges 把它们组织成**跟随目录、由 Git 管理的工作记忆与协作方法**，让不同会话、不同 Agent 能找到已有积累，接着推进工作。围绕一个目录维护的这套材料，就是它的 **harness**；代码库、长期项目和个人大脑都可以拥有自己的一套。
 
-![Edges 系统总览：人提出目标并审阅，Agent 读取目录中的背景与方法、推进工作并留下材料与经验；按需接入个人会话留存与个人评测，让积累持续改进并用于下一次工作](docs/assets/readme/overview.svg)
+![Edges 系统总览：人提出目标并审阅，Agent 读取目录中的背景与方法、推进工作并留下材料与经验；按需接入会话观测与效果评测，围绕被 harness 的目录及其目标检验改进](docs/assets/readme/overview.svg)
 
 ## 为什么值得用？
 
 Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的组织方式与使用流程：Tasks 区分任务目标与执行尝试，Memory 按适用范围检索，Skills 保留可复用的步骤与判断。你可以按需组合这些模块，沿用已有的设计，再结合自己的工作持续改进。
 
-![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块；Observation 留存个人会话，Evaluation 按自己的目标评测](docs/assets/readme/modules.svg)
+![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块；Observation 收集所有 Agent 下真实会话，Evaluation 自定义 harness eval 目标，Artifacts 提供跨 Agent Artifacts 预览能力](docs/assets/readme/modules.svg)
 
 经验留在适用的地方，方法本身也能被维护；各处独立积累，需要时再跨仓复用。
 
@@ -32,7 +32,7 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 
 ![Edges 的长期使用优势：文件系统让内容可读可迁移，Git 让变更可追溯可审阅，跨 Agent 接入让任务可接力，零运维让核心本地可用并提供现成服务接入](docs/assets/readme/foundations.svg)
 
-**Personal Evaluation：用自己的工作，检验自己的 harness。** 从编码 Agent 到 Grok Bot 这样的个人助手，通过 Langfuse 留下自己的会话数据，发现日常工作中的问题。围绕自己关心的目标，准备材料、问题与判断标准，再开展对照评测，让记忆、技能和使用方式的取舍有依据。
+**Harness 是否真正有用，可以观察，也可以检验。** 围绕被 harness 的目录及其目标，收集各 Agent 下的真实会话，从实际工作中发现问题；用相关材料、任务与判断标准开展对照评测，比较结果质量、约束遵守与成本，让记忆、技能和使用方式的取舍有依据。
 
 ## 怎么开始？
 
@@ -45,6 +45,18 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 Agent 会检查环境，在你选择的目录初始化，并验证内容能写入和读回。让 Agent 在这个目录工作并加载 `AGENTS.md`，即可沿入口发现相关材料。[接入说明](packages/skills/edges-onboarding/SKILL.md)
 
 接入后，直接通过对话使用：记下这次讨论、把想法整理成任务、查找过去的决策，或把有效做法沉淀为技能。你通过对话和成果审阅推进工作。
+
+## 案例：把 Edges 用于个人大脑
+
+个人大脑（**Personal Brain**）可以用一个仓库承载，为 **Personal Agent** 保存一个人长期关心的目标、知识与方法，沿用 Edges 的组织与改进方式。比如，手机上想到一个改进调研方式的点子，先让 Agent 记成任务，留下想做什么和缘由；几周后有时间，再在电脑上继续讨论和实施。换会话、换 Agent，仍可沿着保存的背景与进展接续。
+
+一次讨论或阅读先用 Notes 保留材料和来源。值得以后参考的取舍与约定，可以整理成 Memory；反复有效的调研步骤，可以沉淀为 Skills。积累由此成为下一次工作的背景与方法。
+
+进入具体项目时，通过 Compose 接入个人大脑，复用已有的调研方法。工作中产生的新认识，再按适用范围沉淀：项目特有的留在项目，可跨项目使用的放回大脑。个人大脑作为共享 harness，为不同项目提供积累，也持续吸收新经验。
+
+编码 Agent、Grok Bot 等个人助手的会话，可以按各自的 Langfuse 接入方式留存，用来回看日常工作、发现反复出现的问题。**在个人大脑这个用例中，围绕其目标开展的评测就是 Personal Evaluation。** 例如，检查已有调研方法是否减少了遗漏、过时的约定是否干扰了判断；据此准备问题和判分标准，通过对照评测决定哪些记忆或方法值得保留、更新或移除。
+
+还可以用 Routines 记录定期复盘的安排与方法，由接入平台触发执行，让新的问题和改进继续进入大脑。自动清洗线上数据并定期评测的通用闭环仍在规划中，详见下方 Evaluation 说明。[查看公开个人大脑](https://github.com/VirusPC/edges-brain-viruspc)
 
 ## 深入了解
 
@@ -105,22 +117,26 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 </details>
 
 <details>
-<summary>Observation · 记录不同 Agent 下的个人会话</summary>
+<summary>Observation · 收集所有 Agent 下真实会话</summary>
 
-Observation 为不同编码 Agent，以及 Grok Bot 这样的个人助手提供 Langfuse 接入说明，让个人会话成为可以回看和分析的工作材料。各客户端按其接入方式留存会话与可用执行记录；结合这些数据、当前任务与实际文件，可以了解哪些问题反复出现，判断 harness 是否仍然适用、哪些过时内容需要更新或移除，也为个人评测寻找值得验证的问题。
+Observation 用于收集各 Agent 下的真实会话，按各客户端的 Langfuse 接入方式留存真实会话与可用执行记录。围绕被 harness 的目录及其目标，结合相关会话、任务与实际文件，可以了解哪些问题反复出现，判断 harness 是否仍然适用、哪些过时内容需要更新或移除，也为评测寻找值得验证的问题。
 
-**用例：** 回看一段时间的个人会话，发现 Agent 反复引用已经失效的约定，定位对应的 harness 文件，确认适用范围后更新或移除，再用评测检查调整的影响。[观测说明](packages/observation/README.md) · [选择会话接入方式](packages/skills/edges-langfuse-agent-tracing/SKILL.md)
+**用例：** 回看某个模块的维护会话，发现 Agent 反复引用已经失效的约定，定位对应的 harness 文件，确认适用范围后更新或移除，再用评测检查调整的影响。[观测说明](packages/observation/README.md) · [选择会话接入方式](packages/skills/edges-langfuse-agent-tracing/SKILL.md)
 
 </details>
 
 <details>
-<summary>Evaluation · 按自己的目标，检验 harness 是否有用</summary>
+<summary>Evaluation · 线上真实数据，预置与自定义 eval 目标</summary>
 
-Personal Evaluation 从自己的工作目标出发：什么样的回答才有用，哪些约定必须遵守，节省的时间是否值得增加的成本？用自己的材料、问题与判断标准构建评测，通过可复现的对照判断一次修改是否改善了自己的工作。Evaluation 已提供检索评测、记忆消融等实验与报告，可比较回答质量、规则遵守及 token、时间成本；具体评测仍需准备相应题集、判分与实验条件。
+Evaluation 用 **线上真实数据**，围绕 **预置或自定义的 eval 目标** 检验 harness 的作用。可以从“Memory 是否起到正向作用”等预置目标开始，也可以围绕被 harness 的目录及其目标，自定义要改善什么、怎样才算有效，例如回答是否有依据、是否遵守约定，或某类任务的 token 与时间成本。
 
-**用例：** 同一个 Agent 回答同一批问题，比较有记忆与无记忆两个工作目录中的表现，检查回答是否更好、违反约束是否减少、成本增加了多少，再决定怎样调整记忆。[记忆消融实验](packages/evaluation/experiments/harness_memory_ablation/README.md) · [评测说明](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
+让 Agent 从 Observation 留存的真实工作会话中选取问题、上下文与结果，按选定目标整理成可复现的评测样本，让评测直接对应这套 harness 要解决的实际问题。
 
-下一步将结合通用评测框架，让用户自由定义 eval 目标，由系统按目标自动清洗线上会话数据，并设置 Routine 定期评测。详见[个人评测闭环规划](.edges/tasks/evaluation/backlog/2026-11-02--Personal-Evaluation自定义目标线上数据自动清洗与定期评测/INDEX.md)。
+**用例：** 在真实维护会话中发现 Agent 多次引用已失效的 API 约定，就把相关问题与必要上下文整理成样本，自定义“避免错误引用、遵守当前约定”的目标与判分标准。固定样本、Agent 和其他实验条件，对照改动前后的 harness，比较达标情况与成本，判断哪些记忆需要更新或移除。
+
+现有记忆消融实验为“Memory 是否起到正向作用”提供了评测基础：固定问题与 Agent，对照有记忆与无记忆的表现，比较回答质量、约束遵守及成本。另有检索评测与 Langfuse 实验入口；题集、判分与实验条件仍需按目标准备。[记忆消融实验](packages/evaluation/experiments/harness_memory_ablation/README.md) · [评测说明](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
+
+下一步将结合通用评测框架，在用户选择预置目标或自定义目标后，由系统自动清洗与整理线上数据，并设置 Routine 定期评测。详见[评测闭环规划](.edges/tasks/evaluation/backlog/2026-11-02--Personal-Evaluation自定义目标线上数据自动清洗与定期评测/INDEX.md)。
 
 </details>
 
@@ -161,17 +177,23 @@ Personal Evaluation 从自己的工作目标出发：什么样的回答才有用
 
 **经验怎样继续改进工作。** 值得复用的判断可以从一次实践中提炼出来，成为 **Edge**——带着理由和适用边界、能帮助未来行动的判断优势，Edges 由此得名。它可以再次用于工作，也可以发展成报告、文章、教学或工具。
 
-Agent 可以把纠正写成记忆，把重复成功的做法整理成技能；人通过对话或 Git diff 审阅这些变化。来自不同 Agent 的个人会话帮助发现问题，Personal Evaluation 按自己的目标与判断标准验证更新或清理的影响，再将有依据的改进用于后续工作。这也是 Edges 实践持续自我改进的方式。
+Agent 可以把纠正写成记忆，把重复成功的做法整理成技能；人通过对话或 Git diff 审阅这些变化。来自不同 Agent 的会话帮助发现问题，评测围绕被 harness 的目录及其目标验证更新或清理的影响，再将有依据的改进用于后续工作。这也是 Edges 实践持续自我改进的方式。
 
 </details>
 
 ### 公开实践
 
-Edges 从作者长期的个人知识管理与 Agent 协作实践中发展而来。[公开个人 brain](https://github.com/VirusPC/edges-brain-viruspc) 保留了笔记、任务、教学与复盘；可以结合[教学站](https://edges.viruspc.tech/teaching/)与[任务看板](https://edges.viruspc.tech/tasks/)查看这些内容怎样被使用。框架仓相关的问题，可以问[Edges 小助手](https://edges-rag.viruspc.tech/)。
+#### Edges 仓库：用自己的 harness 维护框架
 
-Edges 也用自己的记忆、技能与任务维护框架本身。公开使用记录能帮助理解设计从何而来，具体改进是否有效则由相应的评测报告与使用证据支持。
+Edges 用自己的记忆、技能与任务开发和维护框架。Agent 沿项目入口读取已有约定、接续任务，把开发中确认的经验沉淀回来；变化通过 Git 与 PR 留下可审阅的记录。从[框架任务](.edges/tasks/README.md)、[项目记忆](.edges/memory/projects/README.md)和[架构决策](docs/adr/)，可以看到待解决的问题、已确认的约定与设计取舍。
 
-本仓维护框架；你的知识与工作材料放在自己的仓库，按需要通过 Compose 组合。源码布局、2026-10-20 拆仓历史与开发步骤见[贡献指南](CONTRIBUTING.md)。
+框架仓相关的问题，可以问[Edges 小助手](https://edges-rag.viruspc.tech/)。源码布局、拆仓历史与开发步骤见[贡献指南](CONTRIBUTING.md)。
+
+#### 个人大脑：面向 Personal Agent 的 Personal Brain
+
+作者的[公开个人大脑](https://github.com/VirusPC/edges-brain-viruspc) 是持续维护的 **Personal Brain** 实践，保留了笔记、任务、教学与复盘。这里的 **Personal**，强调围绕同一个人的长期目标、知识与工作方式积累，为 **Personal Agent** 提供可持续使用和改进的背景与方法；**Personal Evaluation** 则围绕个人真实会话与目标，检验这些积累是否有帮助。
+
+可以结合[教学站](https://edges.viruspc.tech/teaching/)与[任务看板](https://edges.viruspc.tech/tasks/)查看这些内容怎样被使用，完整使用故事见[个人大脑案例](#案例把-edges-用于个人大脑)。你的知识与工作材料同样可以保存在自己的仓库，按需要通过 Compose 接入项目。
 
 ### 文档导航
 
