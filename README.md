@@ -22,7 +22,7 @@ Edges 把它们组织成**跟随目录、由 Git 管理的工作记忆与协作�
 
 Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的组织方式与使用流程：Tasks 区分任务目标与执行尝试，Memory 按适用范围检索，Skills 保留可复用的步骤与判断。你可以按需组合这些模块，沿用已有的设计，再结合自己的工作持续改进。
 
-![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块；Observation 收集所有 Agent 客户端会话，Evaluation 自定义 harness eval 目标，Artifacts 提供跨 Agent Artifacts 预览能力](docs/assets/readme/modules.svg)
+![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块；Observation 收集所有 Agent 下真实会话，Evaluation 自定义 harness eval 目标，Artifacts 提供跨 Agent Artifacts 预览能力](docs/assets/readme/modules.svg)
 
 经验留在适用的地方，方法本身也能被维护；各处独立积累，需要时再跨仓复用。
 
@@ -32,7 +32,7 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 
 ![Edges 的长期使用优势：文件系统让内容可读可迁移，Git 让变更可追溯可审阅，跨 Agent 接入让任务可接力，零运维让核心本地可用并提供现成服务接入](docs/assets/readme/foundations.svg)
 
-**Harness 是否真正有用，可以观察，也可以检验。** 围绕被 harness 的目录及其目标，收集各 Agent 客户端的会话，从实际工作中发现问题；用相关材料、任务与判断标准开展对照评测，比较结果质量、约束遵守与成本，让记忆、技能和使用方式的取舍有依据。
+**Harness 是否真正有用，可以观察，也可以检验。** 围绕被 harness 的目录及其目标，收集各 Agent 下的真实会话，从实际工作中发现问题；用相关材料、任务与判断标准开展对照评测，比较结果质量、约束遵守与成本，让记忆、技能和使用方式的取舍有依据。
 
 ## 怎么开始？
 
@@ -117,9 +117,9 @@ Agent 会检查环境，在你选择的目录初始化，并验证内容能写�
 </details>
 
 <details>
-<summary>Observation · 收集所有 Agent 客户端会话</summary>
+<summary>Observation · 收集所有 Agent 下真实会话</summary>
 
-Observation 用于收集各 Agent 客户端的会话，按各客户端的 Langfuse 接入方式留存真实会话与可用执行记录。围绕被 harness 的目录及其目标，结合相关会话、任务与实际文件，可以了解哪些问题反复出现，判断 harness 是否仍然适用、哪些过时内容需要更新或移除，也为评测寻找值得验证的问题。
+Observation 用于收集各 Agent 下的真实会话，按各客户端的 Langfuse 接入方式留存真实会话与可用执行记录。围绕被 harness 的目录及其目标，结合相关会话、任务与实际文件，可以了解哪些问题反复出现，判断 harness 是否仍然适用、哪些过时内容需要更新或移除，也为评测寻找值得验证的问题。
 
 **用例：** 回看某个模块的维护会话，发现 Agent 反复引用已经失效的约定，定位对应的 harness 文件，确认适用范围后更新或移除，再用评测检查调整的影响。[观测说明](packages/observation/README.md) · [选择会话接入方式](packages/skills/edges-langfuse-agent-tracing/SKILL.md)
 
