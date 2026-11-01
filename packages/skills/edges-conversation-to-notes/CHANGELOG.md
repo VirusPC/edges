@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-01
+
+### Fixed
+
+- 路径用 `notes/YYYY-MM-DD--主题简述/INDEX.md`。`--title`、正文 `#`、frontmatter `title` 只写主题简述。范例一级标题改为 `# 主题简述`。
+
 ## [0.1.0] - 2026-10-27
 
 ### Changed
