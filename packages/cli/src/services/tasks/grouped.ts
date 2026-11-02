@@ -1,3 +1,4 @@
+import { leafEntryPath } from "../node/entry-path.js";
 import path from "node:path";
 import { validateTaskDocInput } from "./task-doc.js";
 import { nativeTaskPath } from "./realpath.js";
@@ -215,7 +216,7 @@ export function parseGroupedList(raw: unknown): GroupedList {
 async function ownerGroup(root: string, source: TaskSource, project?: string): Promise<GroupedListGroup> {
   const id = sourceIdentity(source, project);
   if (!project) return { id, source, title: source.purpose === "domain" ? "Scope tasks" : "Unassigned", description: "Tasks directly in the scope material root." };
-  const file = path.join(root, source.scope, ".edges/projects", project, "INDEX.md");
+  const file = leafEntryPath(path.join(root, source.scope, ".edges/projects", project));
   const node = await new NodeService({ managedRoot: root }).get(file, ProjectNode);
   if (!node) throw new TasksError("PROJECT_NOT_FOUND", `Project not found: ${file}`);
   return { id, source, project, title: node.title, description: node.description };

@@ -1,3 +1,4 @@
+import { leafEntryPath } from "./entry-path.js";
 import path from "node:path";
 import { gitRoot, resolveScope } from "../scope.js";
 import { NodeService } from "./node-service.js";
@@ -34,7 +35,7 @@ export async function queryMaterialNodes(
   const root = reach.project ?? scope;
   const options = { types, exclude: reach.exclude, scopeDir: root };
   const nodes = reach.project
-    ? await service.query(path.join(root, "INDEX.md"), options).value()
+    ? await service.query(leafEntryPath(root), options).value()
     : reach.all ? [] : await service.query(root, { ...options, ...scopeTraversal(reach) }).value();
   if (reach.all) {
     nodes.push(...(await buildSystemForest(root, {

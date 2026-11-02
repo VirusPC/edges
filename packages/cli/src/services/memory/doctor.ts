@@ -1,3 +1,4 @@
+import { leafEntryPath } from "../node/entry-path.js";
 import type { MaterialOptions } from "../../domain/config/edges-materials.js";
 import { ProjectNode } from "../../domain/models/projects/project-node.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
@@ -151,7 +152,7 @@ export function collectFindings(root: string, options: MaterialOptions = {}): Me
     owners = options.project ? [root] : [...walkOwners(root)],
     scopes = new Set(options.project ? [] : owners.filter(safeScope));
   for (const owner of owners) {
-    const file = options.project ? join(options.project, ENTRY_NAMES.leaf) : join(owner, AGENTS_FILE_NAME);
+    const file = options.project ? leafEntryPath(options.project) : join(owner, AGENTS_FILE_NAME);
     if (fs.existsSync(file))
       try {
         (options.project ? new ProjectNode(file) : new AgentsNode(file)).parse(readText(file)).validate();

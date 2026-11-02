@@ -1,3 +1,4 @@
+import { leafEntryPath } from "../node/entry-path.js";
 import { materialHarnessRoot, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { ProjectNode } from "../../domain/models/projects/project-node.js";
 import { readEntry, saveEntries } from '../node/node-files.js';
@@ -287,7 +288,7 @@ export function ensureLayerTypeGitignore(
 }
 /** Children of `<scope>/.edges/README.md` when that organization list exists. */
 export function layerReadmePaths(target: string, options: MaterialOptions = {}): Set<string> | undefined {
-  const file = options.project ? join(options.project, ENTRY_NAMES.leaf) : join(materialHarnessRoot(resolve(target), options), ENTRY_NAMES.readme);
+  const file = options.project ? leafEntryPath(options.project) : join(materialHarnessRoot(resolve(target), options), ENTRY_NAMES.readme);
   if (!isFile(file)) return undefined;
   try {
     const node = (options.project ? new ProjectNode(file) : new ReadmeNode(file)).parse(readText(file));

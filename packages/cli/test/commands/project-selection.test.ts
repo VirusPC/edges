@@ -104,6 +104,15 @@ test("Project deletion requires recursive for resources and nested materials", a
   const { root, ok, call } = fixture(t);
   const empty = await ok("projects", "create", "--title", "Empty");
   await ok("projects", "delete", empty.path);
+  const scaffold = await ok("projects", "create", "--title", "Scaffold");
+  for (const module of ["notes", "tasks", "projects", "routines", "memory"]) {
+    await ok("--project", selection(scaffold.path), module, "init", ...(module === "memory" ? ["--memory-types", "project"] : []));
+  }
+  await ok("projects", "delete", scaffold.path);
+  const authored = await ok("projects", "create", "--title", "Authored index");
+  await ok("--project", selection(authored.path), "notes", "init");
+  fs.appendFileSync(path.join(root, path.dirname(authored.path), "notes/README.md"), "\nUser explanation to preserve.\n");
+  assert.match((await call("projects", "delete", authored.path)).stdout, /--recursive/);
   for (const resource of [true, false]) {
     const p = await ok("projects", "create", "--title", resource ? "Resources" : "Materials");
     if (resource) fs.writeFileSync(path.join(root, path.dirname(p.path), "unregistered.bin"), Buffer.from([0, 255, 17]));
@@ -121,7 +130,29 @@ test("Compose uses the selected Project index and leaves the default material se
   const project = selection(p.path);
   await ok("--project", project, "compose", "add", "--name", "vendor", "--description", "Shared skills");
   assert.match(fs.readFileSync(path.join(root, p.path), "utf8"), /compose\/README\.md/);
+  const checkout = path.join(root, path.dirname(p.path), "compose/vendor");
+  fs.mkdirSync(checkout, { recursive: true });
+  for (const args of [["notes", "init"], ["notes", "create", "--title", "Vendor note"]]) {
+    const result = await run(["--scope", checkout, ...args], { env: {} });
+    assert.equal(result.exitCode, 0, result.stdout);
+  }
+  assert.equal((await ok("--project", project, "--all", "notes", "list")).items.length, 1);
+  assert.equal((await ok("--project", project, "--all", "--exclude", "compose", "notes", "list")).items.length, 0);
   assert.equal((await ok("--project", project, "compose", "list")).entries.length, 1);
   assert.equal((await ok("compose", "list")).entries.length, 0);
   assert.equal(fs.existsSync(path.join(root, path.dirname(p.path), "AGENTS.md")), false);
+});
+
+
+test("Project selection keeps reading legacy lowercase entry filenames", async (t) => {
+  const { root, ok } = fixture(t);
+  const p = await ok("projects", "create", "--title", "Legacy");
+  const directory = path.dirname(path.join(root, p.path));
+  fs.renameSync(path.join(directory, "INDEX.md"), path.join(directory, "index.md"));
+  const project = selection(p.path);
+  await ok("--project", project, "notes", "create", "--title", "Still reachable");
+  await ok("--project", project, "memory", "init", "--memory-types", "project");
+  await ok("--project", project, "memory", "remember", "--type", "project", "--slug", "context", "--title", "Context", "--description", "Known context", "--content", "Known context");
+  assert.equal((await ok("--project", project, "notes", "list")).items.length, 1);
+  assert.match(fs.readFileSync(path.join(directory, "index.md"), "utf8"), /notes\/README/);
 });

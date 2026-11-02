@@ -1,9 +1,10 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { isAbsolute, join, relative, resolve } from "node:path";
+import { isAbsolute, join, relative } from "node:path";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { isHarnessComposeDir, isScopeModuleDir } from "../../domain/config/exclude.js";
 import { isProjectHarnessAgentsFile } from "../../domain/models/agents/harness-agents.js";
 import { ComposeReadmeNode, composeReadmePath } from "../../domain/models/compose/compose-readme-node.js";
+import { identifyNodeType } from "../../domain/models/node/layout.js";
 
 const SKIP_DIR_NAMES = new Set([
   "node_modules",
@@ -17,13 +18,15 @@ const SKIP_DIR_NAMES = new Set([
 
 /** Checkout directories registered on this scope's compose entry. */
 function composedDirectories(scopeDir: string): string[] {
-  const file = composeReadmePath(scopeDir);
-  if (!existsSync(file)) return [];
-  try {
-    return new ComposeReadmeNode(file).parse(readFileSync(file, "utf8")).entries().map((entry) => entry.directory);
-  } catch {
-    return [];
-  }
+  const files = [composeReadmePath(scopeDir)];
+  if (identifyNodeType(join(scopeDir, ENTRY_NAMES.leaf)) === "project")
+    files.push(composeReadmePath(scopeDir, { project: scopeDir }));
+  return files.flatMap((file) => {
+    if (!existsSync(file)) return [];
+    try {
+      return new ComposeReadmeNode(file).parse(readFileSync(file, "utf8")).entries().map((entry) => entry.directory);
+    } catch { return []; }
+  });
 }
 
 function inDirectory(file: string, dir: string): boolean {
@@ -55,7 +58,7 @@ export function collectSystemRoots(scopeDir: string, exclude?: ReadonlySet<strin
       if (entry.isDirectory()) {
         if (SKIP_DIR_NAMES.has(entry.name)) continue;
         if (isHarnessComposeDir(dir, entry.name)) {
-          const scopeCompose = resolve(dir) === resolve(join(scopeDir, ".edges"));
+          const scopeCompose = isScopeModuleDir(dir, entry.name, scopeDir);
           // Only the scope's own compose directory is part of this forest, and only by default.
           if (!scopeCompose || exclude?.has("compose")) continue;
         } else if (exclude?.has(entry.name) && isScopeModuleDir(dir, entry.name, scopeDir)) {

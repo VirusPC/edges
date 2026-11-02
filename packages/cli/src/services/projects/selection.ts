@@ -1,3 +1,4 @@
+import { leafEntryPath } from "../node/entry-path.js";
 import path from "node:path";
 import { lstatSync } from "node:fs";
 import { ProjectNode } from "../../domain/models/projects/project-node.js";
@@ -21,7 +22,7 @@ export async function resolveProjectSelection(
   }
   // Check each parent too: an arbitrary directory containing projects/Q is not a Project.
   for (let i = 1; i <= parts.length; i += 2) {
-    const file = path.join(root, ...parts.slice(0, i), "INDEX.md");
+    const file = leafEntryPath(path.join(root, ...parts.slice(0, i)));
     let regular = false;
     try { regular = lstatSync(file).isFile(); }
     catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }

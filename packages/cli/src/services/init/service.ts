@@ -1,3 +1,4 @@
+import { leafEntryPath } from "../node/entry-path.js";
 import { existsSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { placeHarnessMaterial, type MaterialOptions } from "../../domain/config/edges-materials.js";
@@ -68,7 +69,7 @@ export interface InitScopeOptions extends MaterialOptions {
 }
 
 function scopeReadmePath(scopeDir: string, options: MaterialOptions = {}): string {
-  return options.project ? join(options.project, ENTRY_NAMES.leaf) : placeHarnessMaterial(scopeDir, "readme", options).absPath;
+  return options.project ? leafEntryPath(options.project) : placeHarnessMaterial(scopeDir, "readme", options).absPath;
 }
 
 function scopeReadmeSeed(): string {

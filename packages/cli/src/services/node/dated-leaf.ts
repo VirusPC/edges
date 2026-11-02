@@ -1,5 +1,5 @@
 import path from "node:path";
-import { readdirSync } from "node:fs";
+import { projectHasContents } from "../projects/contents.js";
 import { materialHarnessRoot, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { BaseNode } from "../../domain/models/index.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
@@ -195,7 +195,7 @@ export async function deleteDatedLeaf<T extends TitledLeaf>(
   reach: MaterialOptions & { recursive?: boolean } = {},
 ): Promise<{ path: string }> {
   const { scope, service, node, file } = await loadDatedLeaf(env, spec, entryPath, reach);
-  if (node instanceof ProjectNode && !reach.recursive && projectHasContents(path.dirname(file))) {
+  if (node instanceof ProjectNode && !reach.recursive && projectHasContents(scope, file)) {
     throw new Error("Project contains materials or user resources; use --recursive to delete its contents.");
   }
   await service.destroy(node);
@@ -221,7 +221,7 @@ export async function listDatedLeaves<T extends TitledLeaf>(
     if (await service.get(org, ReadmeNode)) nodes.push(...await service.query(org, options).value());
   }
   return [...new Map(nodes.map((node) => [node.path, node])).values()].flatMap((node) => {
-    if (!(node instanceof spec.Model) || node.path === path.join(reach.project ?? "", ENTRY_NAMES.leaf)) return [];
+    if (!(node instanceof spec.Model) || path.dirname(node.path) === reach.project) return [];
     return [{
       stem: path.basename(path.dirname(node.path)),
       path: scopeRelativePath(scope, node.path),
@@ -230,17 +230,3 @@ export async function listDatedLeaves<T extends TitledLeaf>(
   });
 }
 
-/** A directory scaffold is empty; any file other than the Project entry is content. */
-function projectHasContents(directory: string): boolean {
-  for (const entry of readdirSync(directory, { withFileTypes: true })) {
-    if (entry.isFile() && entry.name === ENTRY_NAMES.leaf) continue;
-    // Empty directories are harmless, but every nested entry (including links) is user content.
-    if (!entry.isDirectory() || directoryHasFiles(path.join(directory, entry.name))) return true;
-  }
-  return false;
-}
-function directoryHasFiles(directory: string): boolean {
-  return readdirSync(directory, { withFileTypes: true }).some((entry) =>
-    !entry.isDirectory() || directoryHasFiles(path.join(directory, entry.name)),
-  );
-}
