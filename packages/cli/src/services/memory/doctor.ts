@@ -1,3 +1,7 @@
+import { leafEntryPath } from "../node/entry-path.js";
+import type { MaterialOptions } from "../../domain/config/edges-materials.js";
+import { ProjectNode } from "../../domain/models/projects/project-node.js";
+import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 import { listTypeFiles } from './types.js';
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
@@ -142,16 +146,16 @@ function validAnchor(
   }
   return root;
 }
-export function collectFindings(root: string): MemoryFinding[] {
+export function collectFindings(root: string, options: MaterialOptions = {}): MemoryFinding[] {
   const findings: MemoryFinding[] = [],
     invalid = new Set<string>(),
-    owners = [...walkOwners(root)],
-    scopes = new Set(owners.filter(safeScope));
+    owners = options.project ? [root] : [...walkOwners(root)],
+    scopes = new Set(options.project ? [] : owners.filter(safeScope));
   for (const owner of owners) {
-    const file = join(owner, AGENTS_FILE_NAME);
+    const file = options.project ? leafEntryPath(options.project) : join(owner, AGENTS_FILE_NAME);
     if (fs.existsSync(file))
       try {
-        new AgentsNode(file).parse(readText(file)).validate();
+        (options.project ? new ProjectNode(file) : new AgentsNode(file)).parse(readText(file)).validate();
       } catch (error) {
         invalid.add(owner);
         findings.push(
@@ -177,7 +181,7 @@ export function collectFindings(root: string): MemoryFinding[] {
     }
     let specs;
     try {
-      specs = layerTypeSpecs(owner);
+      specs = layerTypeSpecs(owner, options);
       assertScopePath(join(owner, AGENTS_FILE_NAME), owner);
     } catch (error) {
       findings.push(finding("unsafe-layout", owner, root, errorText(error)));
@@ -186,7 +190,7 @@ export function collectFindings(root: string): MemoryFinding[] {
     if (!specs.length) continue;
     const agents = join(owner, AGENTS_FILE_NAME),
       state = classifyAgentsFile(agents);
-    if (state !== "managed")
+    if (!options.project && state !== "managed")
       findings.push(
         finding(
           state === "foreign" ? "foreign-agents" : "missing-agents",
@@ -195,7 +199,7 @@ export function collectFindings(root: string): MemoryFinding[] {
           "Attach managed blocks preserving manual text",
         ),
       );
-    else {
+    else if (!options.project) {
       const text = readText(agents);
       if (!hasConstraintsMarker(text))
         findings.push(
@@ -212,20 +216,14 @@ export function collectFindings(root: string): MemoryFinding[] {
           finding("outdated-local", agents, root, "Missing type list"),
         );
       else {
-        const registered = layerReadmePaths(owner) ?? localOwnershipPaths(owner, text);
-        for (const spec of specs)
-          if (!registered.has(canonicalPath(join(owner, spec.indexFile))))
-            findings.push(
-              finding(
-                "unregistered-type",
-                join(owner, spec.indexFile),
-                root,
-                "Type is missing from scope list",
-                { owner: relativeOrName(owner, root) },
-              ),
-            );
+        // Type ownership is checked on the shared material composition below.
       }
     }
+    const registered = layerReadmePaths(owner, options) ?? (options.project ? new Set<string>() : localOwnershipPaths(owner));
+    for (const spec of specs)
+      if (!registered.has(canonicalPath(join(owner, spec.indexFile))))
+        findings.push(finding("unregistered-type", join(owner, spec.indexFile), root,
+          "Type is missing from material list", { owner: relativeOrName(owner, root) }));
     for (const spec of specs) {
       const index = join(owner, spec.indexFile);
       if (!fs.existsSync(index)) {
@@ -242,11 +240,12 @@ export function collectFindings(root: string): MemoryFinding[] {
       }
       let expected;
       try {
-        expected = expectedIndexDocument(owner, spec.name);
+        expected = expectedIndexDocument(owner, spec.name, undefined, options);
         for (const entry of listTypeFiles(
           owner,
           spec.name,
-          isSkillFormat(owner, spec.name) ? "*/SKILL.md" : `${spec.name}_*.md`,
+          isSkillFormat(owner, spec.name, options) ? "*/SKILL.md" : `${spec.name}_*.md`,
+          options,
         ))
           if (!parseFrontmatter(entry).description)
             findings.push(
@@ -328,6 +327,7 @@ export function collectFindings(root: string): MemoryFinding[] {
 export async function applyFindings(
   root: string,
   findings: MemoryFinding[],
+  options: MaterialOptions = {},
 ): Promise<string[]> {
   const invalid = new Set(
     findings
@@ -342,13 +342,14 @@ export async function applyFindings(
         .filter((f) => ["migration-required", "unsafe-layout"].includes(f.code))
         .map((f) => join(root, f.path)),
     );
-  for (const owner of walkOwners(root)) {
+  for (const owner of options.project ? [root] : walkOwners(root)) {
     if (blocked.has(owner) || blockedBy(owner, invalid)) continue;
     try {
-      const specs = layerTypeSpecs(owner);
+      const specs = layerTypeSpecs(owner, options);
       if (!specs.length) continue;
+      const service = memoryNodes(owner, options);
+      if (!options.project) {
       const file = assertScopePath(join(owner, AGENTS_FILE_NAME), owner);
-      const service = memoryNodes(owner);
       const node = await service.get(prepareMemoryWrite(owner, file), AgentsNode);
       if (
         classifyAgentsSource(
@@ -367,17 +368,18 @@ export async function applyFindings(
       const action = await syncTargetAgents(owner, root, service);
       if (action !== "preserved")
         repaired.push(`${action}-agents: ${relativeOrName(owner, root)}`);
+      }
       for (const spec of specs)
         try {
           if (blockedBy(dirname(join(owner, spec.indexFile)), invalid))
             continue;
-          const action = await refreshIndex(owner, spec.name, service);
+          const action = await refreshIndex(owner, spec.name, service, options);
           if (action !== "preserved")
             repaired.push(`${action}-index: ${spec.indexFile}`);
         } catch {
           /* Keep old index on failed scan. */
         }
-      await ensureScopeReadme(owner, service);
+      await ensureScopeReadme(owner, service, options);
       for (const spec of specs) {
         const id = join(owner, spec.indexFile);
         if (!fs.existsSync(id)) continue;
@@ -389,12 +391,14 @@ export async function applyFindings(
             description: spec.description || spec.name,
           },
           service,
+          options,
         );
       }
     } catch {
       /* Unsafe owners remain reported by the second scan. */
     }
   }
+  if (options.project) return repaired;
   const registrations = new Map<
     string,
     { anchor: string; description?: string }
@@ -453,7 +457,7 @@ export async function applyFindings(
   }
   return repaired;
 }
-export interface DoctorMemoryOptions {
+export interface DoctorMemoryOptions extends MaterialOptions {
   targetDir: string;
   rootDir?: string;
   apply?: boolean;
@@ -462,7 +466,7 @@ export async function doctorMemory(options: DoctorMemoryOptions) {
   const target = resolveTarget(options.targetDir);
   let root: string;
   try {
-    root = resolveRoot(target, options.rootDir);
+    root = options.project ? target : resolveRoot(target, options.rootDir);
   } catch (error) {
     // A malformed root must be diagnosable without loading it as a runtime node.
     if (options.rootDir || !fs.existsSync(join(target, AGENTS_FILE_NAME)))
@@ -470,14 +474,14 @@ export async function doctorMemory(options: DoctorMemoryOptions) {
     root = target;
   }
   const applied = options.apply ?? false,
-    findings = collectFindings(root),
-    repaired = applied ? await applyFindings(root, findings) : [],
-    remaining = applied ? collectFindings(root) : findings;
+    findings = collectFindings(root, options),
+    repaired = applied ? await applyFindings(root, findings, options) : [],
+    remaining = applied ? collectFindings(root, options) : findings;
   return {
     operation: "doctor",
     rootDir: root,
     applied,
-    memoryDirs: discoverMemoryDirs(root).map((p) => relativeOrName(p, root)),
+    memoryDirs: (options.project ? [options.project] : discoverMemoryDirs(root)).map((p) => relativeOrName(p, root)),
     findings,
     repaired,
     remaining,

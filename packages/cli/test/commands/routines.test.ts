@@ -5,7 +5,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync,
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
-import { RoutineNode } from "../../src/domain/models/index.js";
+import { AgentsNode, RoutineNode } from "../../src/domain/models/index.js";
 import { identifyNodeType } from "../../src/domain/models/node/layout.js";
 import { NodeService } from "../../src/services/node/node-service.js";
 import { acquireWriteLock } from "../../src/services/node/node-lock.js";
@@ -128,6 +128,25 @@ test("sibling scopes have independent names; forest lookup rejects ambiguity and
   const chosen = await getRoutine(env(root), "left/.edges/routines/repeat/INDEX.md", {});
   assert.equal(chosen.description, "left");
   await assert.rejects(() => getRoutine(env(path.join(root, "left")), "../right/.edges/routines/repeat/INDEX.md", {}), /escapes managed root/);
+});
+
+test("excluded missing routine references obey each traversed system scope", async (t) => {
+  const root = scope(t);
+  const child = path.join(root, "registered");
+  mkdirSync(child);
+  await initRoutines({ targetDir: child, rootDir: child });
+  await createRoutine(env(child), { name: "visible", description: "Same system" });
+  const entry = path.join(child, "AGENTS.md");
+  const node = new AgentsNode(entry).parse(readFileSync(entry, "utf8"));
+  node.addChild("local", { id: path.join(child, ".edges/projects/missing/routines/README.md") });
+  writeFileSync(entry, node.serialize());
+  put(root, "AGENTS.md", new AgentsNode(path.join(root, "AGENTS.md")).create({
+    descendantChildren: [{ id: entry }],
+  }, { operation: "create" }).serialize());
+  for (const all of [false, true]) {
+    assert.deepEqual(names(await listRoutines(env(root), { all, exclude: new Set(["projects"]) })), ["visible"]);
+    await assert.rejects(() => listRoutines(env(root), { all }), /Missing routine entry/);
+  }
 });
 
 test("registered external routines remain readable while writes and unregistered external reads fail", async (t) => {

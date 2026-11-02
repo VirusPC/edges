@@ -1,3 +1,4 @@
+import { materialHarnessRoot, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { createReadStream, promises as fs } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import { Transform, PassThrough } from 'node:stream';
@@ -104,8 +105,7 @@ async function ensureIgnore(root: string, rules: string[]): Promise<void> {
   if (missing.length) await fs.writeFile(file, before.trimEnd() + '\n\n# Private user memory\n' + missing.join('\n') + '\n');
 }
 
-async function collect(root: string): Promise<string[]> {
-  const users = path.join(root, USERS);
+async function collect(root: string, users: string): Promise<string[]> {
   await safeParents(users, root);
   if (!(await info(users))?.isDirectory()) {
     if (await info(path.join(root, '.memory'))) throw new Error(CONVERSION);
@@ -126,26 +126,28 @@ async function collect(root: string): Promise<string[]> {
   return files;
 }
 
-export async function backupUserMemory(options: { repoDir: string; outputDir?: string; timestamp?: string }): Promise<{ archive: string }> {
+export async function backupUserMemory(options: { repoDir: string; outputDir?: string; timestamp?: string } & MaterialOptions): Promise<{ archive: string }> {
   const root = await directory(options.repoDir);
   await rejectOldLayer(root);
-  const files = await collect(root);
+  const users = path.join(materialHarnessRoot(root, options), "memory/users");
+  const usersRelative = path.relative(root, users).split(path.sep).join("/");
+  const files = await collect(root, users);
   if (files.length > USER_MEMORY_ARCHIVE_LIMITS.maxMembers) throw new Error('archive member count limit exceeded');
   const destination = await realLocation(options.outputDir ?? root);
-  if (inside(destination, path.join(root, USERS))) throw new Error('归档不能写入用户记忆正文目录');
+  if (inside(destination, users)) throw new Error('归档不能写入用户记忆正文目录');
   const stamp = options.timestamp ?? new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
   if (!/^[A-Za-z0-9_-]+$/.test(stamp)) throw new Error('非法时间戳');
   const archive = path.join(destination, `${ARCHIVE_BASENAME_PREFIX}-${stamp}.tar.gz`);
   if (await info(archive)) throw new Error('归档已存在，拒绝覆盖: ' + archive);
   await fs.mkdir(destination, { recursive: true });
   await ensureIgnore(destination, [`${ARCHIVE_BASENAME_PREFIX}-*.tar.gz`]);
-  await ensureIgnore(root, ['/' + USERS + '/']);
-  assertPrivateIgnored(root, files.map(file => path.join(root, file)), [path.join(root, USERS)]);
+  await ensureIgnore(root, ['/' + usersRelative + '/']);
+  assertPrivateIgnored(root, files.map(file => path.join(root, file)), [users]);
   assertPrivateIgnored(destination, [archive]);
   const handle = await fs.open(archive, 'wx', 0o600);
   try {
     for (const file of files) await safeParents(path.join(root, file), root);
-    await pipeline(create({ cwd: root, noDirRecurse: true, strict: true }, files), expandedByteLimit(USER_MEMORY_ARCHIVE_LIMITS.maxExpandedBytes), createGzip(), handle.createWriteStream());
+    await pipeline(create({ cwd: users, prefix: USERS, noDirRecurse: true, strict: true }, files.map(file => path.relative(users, path.join(root, file)))), expandedByteLimit(USER_MEMORY_ARCHIVE_LIMITS.maxExpandedBytes), createGzip(), handle.createWriteStream());
   } catch (error) {
     await handle.close();
     await fs.rm(archive, { force: true });
@@ -154,8 +156,8 @@ export async function backupUserMemory(options: { repoDir: string; outputDir?: s
   return { archive };
 }
 
-async function occupied(root: string): Promise<boolean> {
-  const users = path.join(root, USERS), entry = await info(users);
+async function occupied(users: string): Promise<boolean> {
+  const entry = await info(users);
   if (!entry) return false;
   if (!entry.isDirectory() || entry.isSymbolicLink()) return true;
   const files = await fs.readdir(users);
@@ -220,21 +222,22 @@ async function stageMembers(archive: string, staging: string, limits: ArchiveLim
   return [...seen];
 }
 
-export async function restoreUserMemory(options: { archive: string; repoDir: string; force?: boolean; limits?: Partial<ArchiveLimits> }) {
+export async function restoreUserMemory(options: { archive: string; repoDir: string; force?: boolean; limits?: Partial<ArchiveLimits> } & MaterialOptions) {
   const archive = await fs.realpath(expandHome(options.archive)), root = await directory(options.repoDir);
   await rejectOldLayer(root);
   if (!(await fs.stat(archive)).isFile()) throw new Error('归档不存在或不是文件');
-  const users = path.join(root, USERS);
+  const users = path.join(materialHarnessRoot(root, options), "memory/users");
+  const usersRelative = path.relative(root, users).split(path.sep).join("/");
   if (inside(archive, users)) throw new Error('先将归档移到待替换 users 目录之外');
   await safeParents(path.dirname(users), root);
-  if (await occupied(root) && !options.force) throw new Error('目标已有用户记忆，拒绝覆盖；确认后加 --force（替换，不合并）');
+  if (await occupied(users) && !options.force) throw new Error('目标已有用户记忆，拒绝覆盖；确认后加 --force（替换，不合并）');
   const limits = { ...USER_MEMORY_ARCHIVE_LIMITS, ...options.limits };
   if (Object.values(limits).some(value => !Number.isSafeInteger(value) || value <= 0)) throw new Error('Invalid archive limits');
   const ignore = path.join(root, '.gitignore'), ignoreInfo = await info(ignore);
   if (ignoreInfo && (!ignoreInfo.isFile() || ignoreInfo.isSymbolicLink())) throw new Error('不安全的 .gitignore');
   const beforeIgnore = ignoreInfo ? await fs.readFile(ignore) : undefined;
   // Stage on the target filesystem. Ignore rules and the 0700 container precede private writes.
-  await ensureIgnore(root, ['/' + USERS + '/', PRIVATE_STAGE_RULE]);
+  await ensureIgnore(root, ['/' + usersRelative + '/', PRIVATE_STAGE_RULE]);
   const temporaryIgnore = await fs.readFile(ignore);
   let staging: string | undefined, retainRecovery = false, installed = false;
   try {
@@ -247,7 +250,7 @@ export async function restoreUserMemory(options: { archive: string; repoDir: str
     await safeParents(path.dirname(users), root);
     await fs.mkdir(path.dirname(users), { recursive: true });
     const previousInfo = await info(users), hadPrevious = Boolean(previousInfo);
-    const destinations = members.map(member => path.join(root, member));
+    const destinations = members.map(member => path.join(users, member.slice(USERS.length + 1)));
     // Git cannot check descendants of a symlink. Move only that link aside, then
     // validate its future replacement paths inside the existing rollback boundary.
     if (!previousInfo?.isSymbolicLink()) assertPrivateIgnored(root, destinations, [users]);

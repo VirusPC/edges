@@ -1,22 +1,16 @@
 import path from "node:path";
-import { materialHarnessRoot } from "../../domain/config/edges-materials.js";
+import { materialHarnessRoot, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { initScope, type InitScopeOptions } from "../init/service.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { SkillNode } from "../../domain/models/skills/skill-node.js";
 import { isWithinPath } from "../../utils/filesystem.js";
 import { parseMetadata } from "../metadata.js";
-import { openNodeSession, scopeRelativePath } from "../node/scope-session.js";
-import { buildSystemForest } from "../node/system-forest-service.js";
-import { scopeTraversal } from "../../domain/operations/traverse.js";
+import { openNodeSession, scopeRelativePath, queryMaterialNodes, type MaterialReach } from "../node/scope-session.js";
 import type { NodeService } from "../node/node-service.js";
 
 export { presentListed } from "../list-query.js";
 
-export type SkillReach = {
-  all?: boolean;
-  super?: boolean;
-  exclude?: ReadonlySet<string>;
-};
+export type SkillReach = MaterialReach;
 
 export type SkillFields = {
   description?: string;
@@ -30,24 +24,21 @@ export type SkillItem = {
   description: string;
 };
 
-export function managedSkillFile(scope: string, name: string, superRoot: boolean): string {
+export function managedSkillFile(scope: string, name: string, options: MaterialOptions | boolean = {}): string {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(name) || name.length > 64) {
     throw new Error(`${name}: name must be lowercase kebab-case, 1–64 characters.`);
   }
-  const harness = materialHarnessRoot(scope, { super: superRoot });
+  const harness = materialHarnessRoot(scope, typeof options === "boolean" ? { super: options } : options);
   return path.join(harness, "skills", "managed", name, ENTRY_NAMES.skill);
 }
 
 async function listedSkills(
   env: NodeJS.ProcessEnv,
   reach: SkillReach,
+  session = openNodeSession(env),
 ): Promise<SkillNode[]> {
-  const { scope, service } = openNodeSession(env);
-  const nodes = reach.all
-    ? (await buildSystemForest(scope, { includeSuper: reach.super === true, exclude: reach.exclude, form: "independent" })).flat()
-    : await service
-      .query(scope, { types: ["skill"], ...scopeTraversal(reach) })
-      .value();
+  const { scope, service } = session;
+  const nodes = await queryMaterialNodes(scope, service, ["skill"], reach);
   return nodes.filter((node): node is SkillNode => node instanceof SkillNode);
 }
 
@@ -63,11 +54,16 @@ export async function resolveSkill(
     if (!isWithinPath(abs, managedRoot) || path.basename(abs) !== ENTRY_NAMES.skill) {
       throw new Error(`skill not found: ${target}`);
     }
+    if (reach.project) {
+      const listed = await listedSkills(env, reach, { scope, managedRoot, service });
+      if (!isWithinPath(abs, reach.project) && !listed.some((node) => node.path === abs))
+        throw new Error(`skill not found: ${target}`);
+    }
     const node = await service.get(abs, SkillNode);
     if (!node) throw new Error(`skill not found: ${target}`);
     return { scope, service, node };
   }
-  const matches = (await listedSkills(env, reach)).filter((node) => node.name === target);
+  const matches = (await listedSkills(env, reach, { scope, managedRoot, service })).filter((node) => node.name === target);
   if (matches.length !== 1) {
     throw new Error(matches.length === 0 ? `skill not found: ${target}` : `skill name is ambiguous: ${target}`);
   }
@@ -78,12 +74,12 @@ export async function resolveSkill(
 
 export async function createManagedSkill(
   env: NodeJS.ProcessEnv,
-  input: { name: string; description: string; body?: string; metadata?: string[]; super?: boolean },
+  input: { name: string; description: string; body?: string; metadata?: string[] } & MaterialOptions,
 ): Promise<{ name: string; path: string }> {
   if (!input.description.trim()) throw new Error("description must be nonempty");
   const metadata = parseMetadata(input.metadata);
   const { scope, service } = openNodeSession(env);
-  const file = managedSkillFile(scope, input.name, input.super === true);
+  const file = managedSkillFile(scope, input.name, input);
   const node = new SkillNode(file);
   await service.create(node, {
     name: input.name,
@@ -143,12 +139,8 @@ export function initSkills(options: Omit<InitScopeOptions, "modules">) {
 }
 
 export async function listSkills(env: NodeJS.ProcessEnv, reach: SkillReach): Promise<SkillItem[]> {
-  const { scope, service } = openNodeSession(env);
-  const nodes = reach.all
-    ? (await buildSystemForest(scope, { includeSuper: reach.super === true, exclude: reach.exclude, form: "independent" })).flat()
-    : await service
-      .query(scope, { types: ["skill"], ...scopeTraversal(reach) })
-      .value();
+  const { scope } = openNodeSession(env);
+  const nodes = await listedSkills(env, reach);
   return nodes.flatMap((node) => node instanceof SkillNode ? [{
     name: node.name ?? "",
     path: scopeRelativePath(scope, node.path),

@@ -62,7 +62,7 @@ packages/evaluation/.cache/
 **/.edges/evaluation/.cache/
 
 # Review shell Vite outDir (ADR 0022). Source is packages/apps/tasks-review-app/.
-packages/cli/src/commands/tasks/project/assets/review-page/
+packages/cli/src/commands/tasks/assets/review-page/
 
 # Copied into @viruspc/edges at build time from @viruspc/edges-skills.
 packages/cli/skills/

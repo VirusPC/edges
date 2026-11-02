@@ -10,7 +10,7 @@ const HELP = "See edges projects --help for usage.\n";
 export function addProjectCreateCommand(project: Command, ctx: CliContext): void {
   project
     .command("create")
-    .description("Create a local project leaf")
+    .description("Create a local project container")
     .option("--title <title>", "Project title; written as the H1")
     .option("--body <markdown>", "Project body")
     .option("--metadata <key=value>", "Repeatable frontmatter field", collectRepeat, [])
@@ -22,6 +22,7 @@ export function addProjectCreateCommand(project: Command, ctx: CliContext): void
           body: opts.body,
           metadata: opts.metadata,
           super: ctx.super === true,
+          project: ctx.project,
         });
         ctx.result = succeed({
           command: "projects.create",

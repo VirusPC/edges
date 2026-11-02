@@ -1,5 +1,8 @@
+import type { MaterialOptions } from "../../domain/config/edges-materials.js";
+import { queryMaterialNodes, type MaterialReach } from "../node/scope-session.js";
 import { existsSync } from "node:fs";
-import { relative } from "node:path";
+import { basename, dirname, relative } from "node:path";
+import { isLeafEntryName } from "../../domain/models/node/layout.js";
 import { memoryNodes } from "./service.js";
 import { resolveTarget } from "./paths.js";
 import { resolveMemoryPath } from "./entries.js";
@@ -9,26 +12,20 @@ function slugOf(file: string, type: string, skill: boolean): string {
     const parts = file.split("/");
     return parts[parts.length - 2] ?? file;
   }
-  const base = file.split("/").pop() ?? file;
+  const base = isLeafEntryName(basename(file)) ? basename(dirname(file)) : basename(file, ".md");
   const prefix = `${type}_`;
-  return base.startsWith(prefix) ? base.slice(prefix.length, -".md".length) : base.replace(/\.md$/, "");
+  return base.startsWith(prefix) ? base.slice(prefix.length) : base;
 }
 
 export async function listMemoryEntries(
   targetDir: string | undefined,
   type?: string,
-  mode: { all?: boolean; super?: boolean; exclude?: ReadonlySet<string> } = {},
+  mode: MaterialReach = {},
 ) {
   const target = resolveTarget(targetDir ?? process.cwd());
   const { NodeService } = await import("../node/node-service.js");
   const { MemoryNode } = await import("../../domain/models/memory/memory-node.js");
-  const { buildSystemForest } = await import("../node/system-forest-service.js");
-  const { scopeTraversal } = await import("../../domain/operations/traverse.js");
-  const nodes = mode.all
-    ? (await buildSystemForest(target, { includeSuper: mode.super === true, exclude: mode.exclude, form: "independent" })).flat()
-    : await new NodeService({ managedRoot: target })
-      .query(target, { types: ["memory"], ...scopeTraversal(mode) })
-      .value();
+  const nodes = await queryMaterialNodes(target, new NodeService({ managedRoot: target }), ["memory"], mode);
   const items = nodes.flatMap((node) => {
     if (!(node instanceof MemoryNode)) return [];
     const memoryType = node.memoryType ?? "";
@@ -43,10 +40,10 @@ export async function listMemoryEntries(
   return { targetDir: target, items };
 }
 
-export async function getMemoryEntry(targetDir: string | undefined, type: string, slug: string) {
+export async function getMemoryEntry(targetDir: string | undefined, type: string, slug: string, options: MaterialOptions = {}) {
   const target = resolveTarget(targetDir ?? process.cwd());
-  const file = resolveMemoryPath(target, type, slug);
-  const node = await memoryNodes(target).get(file);
+  const file = resolveMemoryPath(target, type, slug, options);
+  const node = await memoryNodes(target, options).get(file);
   if (!node) {
     throw new Error(`memory entry not found: ${type} ${slug}`);
   }
@@ -60,13 +57,13 @@ export async function getMemoryEntry(targetDir: string | undefined, type: string
   };
 }
 
-export async function deleteMemoryEntry(targetDir: string | undefined, type: string, slug: string) {
+export async function deleteMemoryEntry(targetDir: string | undefined, type: string, slug: string, options: MaterialOptions = {}) {
   const target = resolveTarget(targetDir ?? process.cwd());
-  const file = resolveMemoryPath(target, type, slug);
+  const file = resolveMemoryPath(target, type, slug, options);
   if (!existsSync(file)) {
     throw new Error(`memory entry not found: ${type} ${slug}`);
   }
-  const service = memoryNodes(target);
+  const service = memoryNodes(target, options);
   const node = await service.get(file);
   if (!node) {
     throw new Error(`memory entry not found: ${type} ${slug}`);

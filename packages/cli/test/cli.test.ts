@@ -67,5 +67,6 @@ test("real entry tasks --help names board verbs and forbids log", async () => {
     assert.match(result.stdout, new RegExp(`\\b${verb}\\b`));
   }
   assert.doesNotMatch(result.stdout, /^\s+log\b/m);
-  assert.match(result.stdout, /CLI \+ Skill \+ MCP/);
+  assert.match(result.stdout, /--project selects an existing Project/);
+  assert.match(result.stdout, /tasks\/<status>\/<stem>\/INDEX\.md/);
 });

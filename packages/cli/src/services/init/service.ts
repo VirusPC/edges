@@ -1,7 +1,10 @@
+import { leafEntryPath } from "../node/entry-path.js";
 import { existsSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
-import { placeHarnessMaterial } from "../../domain/config/edges-materials.js";
+import { placeHarnessMaterial, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
+import { ProjectNode } from "../../domain/models/projects/project-node.js";
+import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import type { NodeReference } from "../../domain/core/types.js";
 import { parseDocument } from "../../utils/markdown/document.js";
@@ -53,7 +56,7 @@ import { migrateScopeMaterialIndex } from "./migrate-scope-readme.js";
 
 export type { InitMemoryOptions };
 
-export interface InitScopeOptions {
+export interface InitScopeOptions extends MaterialOptions {
   targetDir?: string;
   env?: NodeJS.ProcessEnv;
   rootDir?: string;
@@ -65,8 +68,8 @@ export interface InitScopeOptions {
   skillsInstallArgs?: readonly string[];
 }
 
-function scopeReadmePath(scopeDir: string): string {
-  return placeHarnessMaterial(scopeDir, "readme").absPath;
+function scopeReadmePath(scopeDir: string, options: MaterialOptions = {}): string {
+  return options.project ? leafEntryPath(options.project) : placeHarnessMaterial(scopeDir, "readme", options).absPath;
 }
 
 function scopeReadmeSeed(): string {
@@ -74,16 +77,21 @@ function scopeReadmeSeed(): string {
 }
 
 /** `.edges/README.md` is an ordinary ReadmeNode. No YAML frontmatter. */
-export async function ensureScopeReadme(scopeDir: string, service: NodeService): Promise<void> {
-  const file = scopeReadmePath(scopeDir);
+export async function ensureScopeReadme(scopeDir: string, service: NodeService, options: MaterialOptions = {}): Promise<void> {
+  const file = scopeReadmePath(scopeDir, options);
+  if (options.project) {
+    if (!(await service.get(file, ProjectNode))) throw new Error(`Missing Project entry: ${file}`);
+    return;
+  }
   if (existsSync(file)) return;
   await service.create(new ReadmeNode(file), { body: scopeReadmeSeed() });
 }
 
-export async function ensureScopeReadmePointer(scopeDir: string, service: NodeService): Promise<void> {
+export async function ensureScopeReadmePointer(scopeDir: string, service: NodeService, options: MaterialOptions = {}): Promise<void> {
+  if (options.project) return;
   const agents = await service.get(join(scopeDir, AGENTS_FILE_NAME), AgentsNode);
   if (!agents) return;
-  const readme = scopeReadmePath(scopeDir);
+  const readme = scopeReadmePath(scopeDir, options);
   if (agents.localChildren.some((child) => child.id === readme)) return;
   await service.update(agents, {
     localChildren: [
@@ -107,10 +115,11 @@ export async function linkScopeReadme(
   scopeDir: string,
   reference: NodeReference,
   service: NodeService,
+  options: MaterialOptions = {},
 ): Promise<void> {
-  await ensureScopeReadme(scopeDir, service);
-  const file = scopeReadmePath(scopeDir);
-  const node = await service.get(file, ReadmeNode);
+  await ensureScopeReadme(scopeDir, service, options);
+  const file = scopeReadmePath(scopeDir, options);
+  const node = options.project ? await service.get(file, ProjectNode) : await service.get(file, ReadmeNode);
   if (!node) throw new Error(`Missing scope README: ${file}`);
   const existing = node.localChildren.find((child) => child.id === reference.id);
   if (!existing) {
@@ -137,9 +146,9 @@ export async function linkScopeReadme(
   });
 }
 
-function indexPathForSpec(target: string, spec: TypeSpec): string {
+function indexPathForSpec(target: string, spec: TypeSpec, options: MaterialOptions = {}): string {
   const materialId = TYPE_MATERIAL_IDS[spec.name];
-  if (materialId) return placeHarnessMaterial(target, materialId).absPath;
+  if (materialId) return placeHarnessMaterial(target, materialId, options).absPath;
   return join(target, spec.indexFile);
 }
 
@@ -161,8 +170,9 @@ async function ensureHarnessBoard(
   target: string,
   board: HarnessBoardModule,
   service: NodeService,
+  options: MaterialOptions = {},
 ): Promise<"created" | "preserved"> {
-  const file = placeHarnessMaterial(target, board.materialId).absPath;
+  const file = placeHarnessMaterial(target, board.materialId, options).absPath;
   if (existsSync(file)) return "preserved";
   await service.create(new ReadmeNode(file), {
     name: board.title,
@@ -176,23 +186,24 @@ async function ensureHarnessBoards(
   target: string,
   modules: readonly string[],
   service: NodeService,
+  options: MaterialOptions = {},
 ): Promise<{ created: string[]; preserved: string[] }> {
   const created: string[] = [];
   const preserved: string[] = [];
-  await ensureScopeReadme(target, service);
+  await ensureScopeReadme(target, service, options);
   for (const board of HARNESS_BOARD_MODULES) {
     if (!modules.includes(board.module)) continue;
-    const absPath = placeHarnessMaterial(target, board.materialId).absPath;
+    const absPath = placeHarnessMaterial(target, board.materialId, options).absPath;
     const rel = relative(target, absPath);
-    if ((await ensureHarnessBoard(target, board, service)) === "created") created.push(rel);
+    if ((await ensureHarnessBoard(target, board, service, options)) === "created") created.push(rel);
     else preserved.push(rel);
     // NodeService skips the tasks board. Link that README here.
-    if (board.materialId === "tasks") {
+    if (board.materialId === "tasks" || options.project) {
       await linkScopeReadme(target, {
         id: absPath,
         name: board.title,
         description: board.description,
-      }, service);
+      }, service, options);
     }
   }
   return { created, preserved };
@@ -268,7 +279,7 @@ async function runTypeInit(
   let memoryTypes = options.memoryTypes;
   let skillTypes = options.skillTypes;
   const specs = new Map(
-    layerTypeSpecs(target)
+    layerTypeSpecs(target, options)
       .filter((spec) => spec.module === module)
       .map((spec) => [spec.name, spec]),
   );
@@ -293,25 +304,25 @@ async function runTypeInit(
     if (!(allowed as readonly string[]).includes(name)) {
       throw new Error(`Unknown ${module} type: ${name}; register custom types with add-type`);
     }
-    if (!specs.has(name)) specs.set(name, seedSpec(name));
+    if (!specs.has(name)) specs.set(name, seedSpec(name, target, options));
   }
   if (!specs.size) throw new Error("Select at least one memory or skill type");
   assertScopePath(join(target, AGENTS_FILE_NAME), target);
-  for (const spec of specs.values()) assertScopePath(indexPathForSpec(target, spec), target);
+  for (const spec of specs.values()) assertScopePath(indexPathForSpec(target, spec, options), target);
   const anchor = findIndexAnchor(target, root);
-  const service = memoryNodes(target);
-  await ensureScopeReadme(target, service);
+  const service = memoryNodes(target, options);
+  await ensureScopeReadme(target, service, options);
   const created: string[] = [];
   const preserved: string[] = [];
   const diagnostics: { code: string; type: string; message: string }[] = [];
   for (const spec of specs.values()) {
     const gitRoot = findGitRoot(target);
     if (spec.gitignore && gitRoot) {
-      ensureTypeGitignore(gitRoot, spec.name, spec.module, spec.indexFile);
+      ensureTypeGitignore(gitRoot, spec.name, spec.module, relative(gitRoot, join(target, spec.indexFile)));
     }
-    const file = indexPathForSpec(target, spec);
+    const file = indexPathForSpec(target, spec, options);
     if (spec.gitignore) assertPrivateIgnored(gitRoot ?? target, [file], [dirname(file)]);
-    const entry = prepareMemoryWrite(target, file);
+    const entry = prepareMemoryWrite(target, file, options);
     const node = await service.get(entry);
     if (node) preserved.push(spec.indexFile);
     else {
@@ -329,10 +340,11 @@ async function runTypeInit(
       );
       created.push(spec.indexFile);
     }
+    if (options.project) await linkScopeReadme(target, { id: file, name: spec.name, description: spec.description }, service, options);
   }
   for (const name of specs.keys()) {
     try {
-      await refreshIndex(target, name, service);
+      await refreshIndex(target, name, service, options);
     } catch (error) {
       diagnostics.push({
         code: "source-scan-error",
@@ -341,24 +353,22 @@ async function runTypeInit(
       });
     }
   }
-  const agentsAction = await syncTargetAgents(target, root, service);
-  await ensureScopeReadmePointer(target, service);
+  const agentsAction = options.project ? "not-applicable" : await syncTargetAgents(target, root, service);
+  await ensureScopeReadmePointer(target, service, options);
   if (
-    target !== root &&
+    !options.project && target !== root &&
     existsSync(join(root, AGENTS_FILE_NAME)) &&
     layerTypeSpecs(root).some((spec) => spec.module === module)
   ) {
     await syncTargetAgents(root, root);
   }
-  const [indexAction, indexEntry, indexDescription] = await syncIndexEntry(
-    anchor,
-    target,
-    options.description,
-  );
+  const [indexAction, indexEntry, indexDescription] = options.project
+    ? ["not-applicable", null, null] as const
+    : await syncIndexEntry(anchor, target, options.description);
   return {
     operation: "init",
     targetDir: target,
-    memoryDir: memoryDir(target),
+    memoryDir: memoryDir(target, options),
     agentsMd: join(target, AGENTS_FILE_NAME),
     agentsAction,
     rootDir: root,
@@ -382,15 +392,13 @@ async function ensureScopeEntry(options: InitMemoryOptions) {
   const { target, root } = await openScope(options);
   assertScopePath(join(target, AGENTS_FILE_NAME), target);
   const anchor = findIndexAnchor(target, root);
-  const service = memoryNodes(target);
-  await ensureScopeReadme(target, service);
-  const agentsAction = await syncTargetAgents(target, root, service);
-  await ensureScopeReadmePointer(target, service);
-  const [indexAction, indexEntry, indexDescription] = await syncIndexEntry(
-    anchor,
-    target,
-    options.description,
-  );
+  const service = memoryNodes(target, options);
+  await ensureScopeReadme(target, service, options);
+  const agentsAction = options.project ? "not-applicable" : await syncTargetAgents(target, root, service);
+  await ensureScopeReadmePointer(target, service, options);
+  const [indexAction, indexEntry, indexDescription] = options.project
+    ? ["not-applicable", null, null] as const
+    : await syncIndexEntry(anchor, target, options.description);
   return {
     targetDir: target,
     agentsAction,
@@ -402,6 +410,8 @@ async function ensureScopeEntry(options: InitMemoryOptions) {
 }
 
 export async function initScope(options: InitScopeOptions) {
+  // Init adopts the real material root; the Project selector takes precedence.
+  options = { ...options, super: false };
   const targetDir = options.targetDir ?? resolveScope(options.env ?? process.env);
   const requested =
     options.modules === undefined || options.modules.length === 0
@@ -419,6 +429,7 @@ export async function initScope(options: InitScopeOptions) {
     targetDir,
     rootDir: options.rootDir,
     description: options.description,
+    project: options.project,
   };
   // Shared system entry, then each module writes only its own materials.
   const scope = await ensureScopeEntry(base);
@@ -445,11 +456,11 @@ export async function initScope(options: InitScopeOptions) {
       complete = (complete ?? true) && typeResult.complete;
       continue;
     }
-    const boards = await ensureHarnessBoards(scope.targetDir, [module], memoryNodes(scope.targetDir));
+    const boards = await ensureHarnessBoards(scope.targetDir, [module], memoryNodes(scope.targetDir, options), options);
     created = [...created, ...boards.created];
     preserved = [...preserved, ...boards.preserved];
   }
-  await migrateScopeMaterialIndex(scope.targetDir);
+  if (!options.project) await migrateScopeMaterialIndex(scope.targetDir);
   return {
     ...(typeResult ?? {}),
     targetDir: scope.targetDir,

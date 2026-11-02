@@ -1,5 +1,5 @@
 import { basename, dirname, join, resolve, sep } from "node:path";
-import { harnessMaterialById, tasksBoardDirName } from "../../config/edges-materials.js";
+import { harnessMaterialById, loadHarnessMaterialsConfig, tasksBoardDirName } from "../../config/edges-materials.js";
 import {
   ENTRY_NAMES,
   LEAF_DIRECTORIES,
@@ -12,7 +12,7 @@ import { TASK_STATUSES } from "../tasks/types.js";
 export { ENTRY_NAMES, LEGACY_LEAF_ENTRY, LEAF_ENTRY_NAMES };
 
 export type NodeType =
-  "agents" | "readme" | "routine" | "skill" | "task" | "memory" | "note" | "text" | (string & {});
+  "agents" | "readme" | "routine" | "skill" | "task" | "memory" | "note" | "project" | "text" | (string & {});
 
 export const isLeafEntryName = (name: string): boolean =>
   LEAF_ENTRY_NAMES.includes(name);
@@ -47,17 +47,28 @@ function taskLeafPath(): RegExp {
   );
 }
 
-/** Built from LEAF_DIRECTORIES. Later registerDirectoryClassifier calls run first. */
-const classifiers: DirectoryClassifier[] = LEAF_DIRECTORIES.map((rule) => {
-  if ("module" in rule) {
-    return (_entry, contract) =>
-      contract?.module === rule.module ? rule.type : undefined;
+/** Explicit extensions run before the built-in directory rules. */
+const classifiers: DirectoryClassifier[] = [];
+
+/** Only the nearest material boundary can classify a nested content entry. */
+function materialEntryType(entryPath: string, contract?: DirectoryContract): NodeType | undefined {
+  for (const rule of LEAF_DIRECTORIES)
+    if ("module" in rule && contract?.module === rule.module) return rule.type;
+  const parts = entryPath.split(sep);
+  const modules = new Set(loadHarnessMaterialsConfig().materials.map((material) => material.path.split(sep)[0]));
+  for (let index = parts.length - 3; index >= 0; index--) {
+    if (!modules.has(parts[index]!)) continue;
+    // memory/projects is a Memory Type, not the Project organization module.
+    if (parts[index] === "projects" && parts[index - 1] === "memory") return undefined;
+    const suffix = parts.slice(index).join("/");
+    for (const rule of LEAF_DIRECTORIES) {
+      if ("path" in rule && rule.path.test(suffix)) return rule.type;
+      if (!("path" in rule) && !("module" in rule) && taskLeafPath().test(suffix)) return "task";
+    }
+    return undefined;
   }
-  if ("path" in rule) {
-    return (entry) => (rule.path.test(entry) ? rule.type : undefined);
-  }
-  return (entry) => (taskLeafPath().test(entry) ? "task" : undefined);
-});
+  return undefined;
+}
 
 /** Register a directory contract; return a disposer for scoped registrations. */
 export function registerDirectoryClassifier(
@@ -83,7 +94,7 @@ export function identifyNodeType(
     const type = classify(entryPath, contract);
     if (type !== undefined) return type;
   }
-  return "text";
+  return materialEntryType(entryPath, contract) ?? "text";
 }
 
 export function harnessPath(entryPath: string): string {

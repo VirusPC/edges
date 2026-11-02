@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-02
+
+### Changed
+
+- **主题存储：** 通过全局 `--project` 写入主题直属 memory / skills，按选定材料根检查已采用类型和重复条目，不从父层或兄弟主题借用类型。
+- **入口与隐私：** 保留原 scope 的有效系统入口要求，Project 不另建 AGENTS；说明实际路径、`not-applicable` 结果和按单份 users 子树备份恢复的边界。
+
 ## [0.1.2] - 2026-10-27
 
 ### Changed

@@ -1,108 +1,45 @@
 ---
 name: edges-tasks-classify
-description: 对整板 Task 按用户已设的 Task Project（标题 + 描述）做归属建议（LLM / agent 判断，不要求 embedding），经 edges tasks project review-page 审阅页等人贴回导出 JSON 后再用 CLI 落地。无 GUI 时才退回 Markdown 表。不要只用 _default、不要 embedding、不要手改路径、不要当通用 edges-tasks Skill+MCP CRUD。
-version: 0.1.0
+description: 按真实 Project 的主题与正文整理 Task 归属，覆盖根板和已有 Project；用 edges tasks review-page 交人审阅，收到导出 JSON 后以 tasks update --to-project/--to-default 落地。只在同一 owner scope 内移动，不手改目录，不改状态或优先级。
+version: 0.2.0
 ---
 
-# classifyTasks
+# 按 Project 整理任务
 
-独立工作流 Skill，不是通用 edges-tasks Skill+MCP CRUD。能力面是 CLI + Skill + MCP 三者并列：有 shell 的宿主走 `edges` CLI；本文件是工作流入口；无 shell 宿主的 generic tasks MCP 是另卡 backlog，本 Skill **不**发明 classify MCP，也 **不**手改看板路径。
+先确定 `SCOPE` 和用户要求整理的范围。没有 Project 的任务在 `<SCOPE>/.edges/tasks/<状态>/<stem>/INDEX.md`；Project 中的任务在 `<P>/tasks/<状态>/<stem>/INDEX.md`。Project 是各模块共用的主题容器，Tasks 没有单独的 Project 模型或 `_default` 目录。
 
-## 什么时候用
+全局 `--project <路径>` 选择已有 Project，路径相对 `<SCOPE>/.edges/projects`，子项目使用 `P/projects/Q` 的实际路径。它选择来源，移动目的地另用 `--to-project` 或 `--to-default`。普通查询递归进入已登记组成；`--all` 额外发现选定物理范围内的独立系统。不要另写目录扫描，也不要把 README 链接抄进 AGENTS。
 
-- 用户要按主题整理 Task 看板：整板分类（含已有 named project，不只 `_default`）。
-- 已有 Task Project 带标题与描述，要把它们当用户已设的分类质心。
-- 不要用它做单条 CRUD（那是后续 generic tasks Skill/MCP）；不要要求 embedding；不要调用不存在的 `edges tasks classify`。
+CLI 只修改文件，不执行 Git。看板变更进入受保护的 main 必须开 PR。没有 shell 时说明缺少可用执行入口，不虚构 classify MCP 或手改路径。
 
-先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.edges/tasks`。主体是仓库之外的虚拟系统一时，再加 `--super`，任务写在 `<SCOPE>/tasks`。Task Project 只是该看板的分组，不决定作用域。后续命令使用 `--scope "$SCOPE"`，只有虚拟系统一才加 `--super`。仓内维护 Edges 时显式选仓根，不要依赖执行命令时的源码目录。CLI 在 `cli`。
+## 先读再建议
 
-`tasks list` 与 `tasks project list` 顺着该主体 `AGENTS.md` 的 children 做一次 traverse。要把当前 scope 下各系统都算进来再加 `--all`（森林）。最全的一次查询是 `--scope <仓库根> --super --all`。不要另写一套 README `edges-entries` 扫描，也不要把 README 链接抄进 `AGENTS.md` 来凑列表。
+1. 用 `edges --scope "$SCOPE" projects list` 取得真实 Project，必要时 `projects get <path>` 读取主题正文。用户已限定 P 时，先读 P 的 INDEX，再给子 Project 的 list/get 加根参数 `--project <P路径>`；不要扩大到兄弟主题。项目身份取目录相对 `.edges/projects` 的实际路径，不用标题或自造短名。
+2. 用 `edges --scope "$SCOPE" tasks list` 取得范围内任务；已选 P 时带相同 `--project <P路径>`，未选 Project 的虚拟根板加 `--super`；仅在用户需要独立系统一起参与时再加 `--all`。不要只整理未归属的任务。每行保留 `path`、`stem`、`source.scope`、`source.purpose` 和可选 `project`；不存在 `project` 表示根材料板。读取正文时选择原 owner scope 与 Project，或在该板内使用返回的完整任务路径。不能仅凭同名 stem 猜任务。
+3. 用任务标题、描述与必要正文对照各 Project 主题，建议归入已有 Project或保留未归属。无需 embedding。独立 AGENTS scope 不因主题相似而合并；目的地只能是同一 owner scope 下的 Project 或根材料板。新 Project 的主题、标题与正文需要先给人确认，创建后才使用返回路径。
 
-`edges tasks` 只改文件。这些看板变更要进受保护的 `main` 时必须开 PR，不要直接 push `main`。审阅页仍只渲染；给人可达 URL 时另跑 `edges artifacts publish`，不要把发布并进 `review-page`。
+## 审阅后应用
 
-## 步骤（必须按序，第 4 步要停）
+1. 将建议写入本工作区规定的临时目录。审阅输入为 `{groups, items}`：
+   - `groups[]` 有 `id`、`title`、`description`、`source:{scope,purpose}` 与可选 `project`。`project` 是实际相对路径；根材料板省略它。`id` 用 `JSON.stringify([source.scope,source.purpose,project ?? null])`。
+   - `items[]` 有 `stem`、`id`、`source`、可选 `project`、`current`、`suggested`。`id` 用 `JSON.stringify([source.scope,source.purpose,project ?? null,stem])`。`current` 和 `suggested` 引用 `groups[].id`；当前组必须与任务真实归属一致。`title`、`description`、`note` 用于展示；可选 `doc` 为 `{name,description,metadata,body}`，body 是 Markdown。
+2. 运行 `edges tasks review-page --from <建议JSON路径> --out <HTML路径>`。结果 `command` 为 `review-page`，返回 `path`、`groupCount`、`itemCount`。这一步只渲染，不移动任务。
+3. 需要可达 URL 时使用 `edges artifacts publish <HTML绝对路径>`，直接采用无来源发布模式。将返回 URL 给人，使用系统浏览器审阅；不假定 localhost 可跨设备访问。
+4. **停止并等待人贴回导出 JSON。** 导出行包含 `stem`、`source`、`destination`、`current`、`suggested`、`action`、`note`。有来源信息时，`current/suggested` 是 Project 相对路径或 `null`（根材料板），`destination` 是目标 owner scope/purpose。状态与优先级不在导出中。无 GUI 才改用包含同等身份信息的 Markdown 表并等待确认。
+5. 对每行重新读取原任务和真实 Project，核对来源仍与审阅快照一致，`action` 与目标变化一致；冲突、歧义或目标消失时停止该行，不猜测。`keep` 不写盘。批量落地先生成可重复执行的脚本并预览冲突，所有内容移动仍交 CLI。
+6. 在行对应的 owner scope 下操作。来源在 P 时加全局 `--project "$P"`；来源为虚拟根板才加 `--super`。移动到 Q：
 
-1. **读已有质心。** 在仓库根：
+   ```sh
+   edges --scope "$OWNER_SCOPE" --project "$P" tasks update "$STEM" --to-project "$Q"
+   ```
 
-```bash
-pnpm --filter @viruspc/edges exec tsx src/index.ts --scope "$SCOPE" tasks project list
-```
+   返回该 scope 的根材料板：
 
-已 build 时把 `tsx src/index.ts` 换成 `node dist/index.js`。解析 stdout JSON：`command` 为 `project.list`，`projects[].project|title|description` 是用户已设的质心（slug + 标题 + 描述）。若 `_default` 还没有 AGENTS.md，这条命令会 bootstrap 元数据，**不会**搬 Task 文件。
+   ```sh
+   edges --scope "$OWNER_SCOPE" --project "$P" tasks update "$STEM" --to-default
+   ```
 
-2. **读整板 Task。**
+   未归属来源省略 `--project`。两个目的地参数互斥。CLI 保留状态、优先级、stem、资源和日志；同 stem 目标冲突必须处理后再执行，不能覆盖或擅自重命名。
+7. 重查列表、任务及日志路径，报告实际变更。需要进入 main 时开 PR。
 
-```bash
-pnpm --filter @viruspc/edges exec tsx src/index.ts --scope "$SCOPE" tasks list
-```
-
-对需要正文的行再 `tasks get <stem>`。必须包含所有 project，禁止 `list --project default` 当作唯一输入。
-
-3. **按已有质心做归属建议。** 用每个 Task 的 title/description 对照每个 project 的 title/description，由 LLM / agent 判断归入已有质心、留 `default`、或建议新 slug。不要 embedding，不要向量距离，不要在本目录写 `scripts/`。
-
-4. **渲审阅页并等待人类贴回导出 JSON。** 主路径是 `edges tasks project review-page`（只渲染，不搬 Task、不建 project）。按序：
-
-   1. 把建议写成 UTF-8 JSON，落到 **OS 临时文件**（不要提交，不要长期放仓库）。形状是通用 `groups` + `items`：
-      - `groups`：来自 `project list`（`id` = CLI id，`default` 或 kebab；`title` / `description` 来自质心）。若第 3 步建议了尚不存在的 slug，把该候选也写进 `groups`（带 title/description），否则 `review-page` 会因 `suggested` 不在 `groups[].id` 里校验失败。
-      - `items`：整板每一条。`stem` 是文件名去掉 `.md` 的 CLI 查找键（不是 title，也不等于 frontmatter `name`）；`current` = `task.project`；`suggested` = 第 3 步的选择（必须是某个 `groups[].id`）；`title` / `description` / `note` 仅展示。`doc` 可选。有则是 `name`、`description`、`metadata`、`body`（Markdown，`body` 可以是 `""`）。省略 `doc` 仍然合法。贴回来的导出行仍是 `stem`、`current`、`suggested`、`action`、`note`。
-   2. 渲染（`--from` 必填；省略 `--out` 则写 OS 临时 HTML；**不要** `--open` / `--mode`，命令不会打开浏览器）：
-
-```bash
-pnpm --filter @viruspc/edges exec tsx src/index.ts --scope "$SCOPE" tasks project review-page --from /tmp/suggestions.json
-```
-
-   3. 解析 stdout JSON：`status` 为 `success`，`command` 为 `project.review-page`，读出绝对路径 `path`（另有 `groupCount` / `itemCount`）。`review-page` 仍只渲染，不要把 publish 并进这条命令。
-   4. 若人需要可达 URL（手机 / 另一台机器），再发布，不要假定 localhost：
-
-```bash
-pnpm --filter @viruspc/edges exec tsx src/index.ts artifacts publish <绝对 HTML 路径>
-```
-
-      若这条预览的来源是看板 Task，再加上 `--from-type task --from-id <stem> --task-project <slug>`（`from.id` 是 task stem）。没有 Task 关联就不要带 `from` 相关 flag。不要用 `--from-name` / `--task-stem`，也不要写 `--from-type skill`。解析 stdout：`command` 为 `artifacts.publish`，把 `url` 给人。告诉人用 **系统浏览器**（Chrome / Safari / Firefox）打开该 URL。手机必须用 ECS / 公开的 `EDGES_ARTIFACTS_BASE_URL`，不能给 `localhost`。未 `edges artifacts init`、或服务没起来时，说明缺口，不要手搓上传。不要用聊天 HTML 预览当闸门——Grok Bot 预览里拖拽不可靠，见 `notes/2026-09-17--Grok-Bot-HTML预览拖拽异常.md`。本步不实现审阅结果回传 Agent 客户端。
-   5. **停止。** 等人在页上拖拽改组、点「复制导出 JSON」，把导出数组贴回聊天。在此之前不要 `project create` / `update --project`。
-
-   恢复后校验贴回的审阅导出行：每行含 `stem`、`current`、`suggested`、`action`，`note` 可缺省或为空串。`action` 为 `keep`（`suggested === current`）或 `move`。页上**没有** `create-then-move`；若 `suggested` 还不在 `project list` 里，第 5 步仍可先 `project create` 再 `update --project`。校验失败就停，不要猜。
-
-### Fallback（无 GUI）
-
-只有宿主无法打开 HTML 时，才改输出下面这张表然后 **停止**，等人改 `suggested` / `action` / `note`：
-
-| stem | current | suggested | action | note |
-| --- | --- | --- | --- | --- |
-| 2026-09-13--demo | default | cli | move | matches CLI centroid |
-
-`current` / `suggested` 用 CLI id（`default` 或 kebab），不用 `_default`。回退表里的 `action` 可以是 `keep` | `move` | `create-then-move`。人可以改目标、留 `default`、丢掉建议、或补新 project。
-
-5. **经 CLI 应用（禁止手改路径）。** 人贴回导出行（或改完回退表）之后：
-   - 每个还不在 `project list` 里的 `suggested`（且不是 `default`）：先问人要 title 与 description，再
-
-```bash
-pnpm --filter @viruspc/edges exec tsx src/index.ts --scope "$SCOPE" tasks project create <slug> --title "<title>" --description "<description>"
-```
-
-     不要自动批量编造 description，不要一次 create 未经人确认的一串 project。
-   - 再对 `suggested !== current` 的每一行：
-
-```bash
-pnpm --filter @viruspc/edges exec tsx src/index.ts --scope "$SCOPE" tasks update <stem> --project <suggested>
-```
-
-   - `keep` 或 `suggested === current`：不写盘。
-
-## 禁止
-
-- 不要 `edges tasks classify`（没有这个动词）。
-- 不要改 `edges-tasks-status` 或 `edges-task-priority`（不要 `status`，不要 `update --priority`）。
-- 不要 `mkdir` / `mv` / 手改 Task 文件 / 手改 `AGENTS.md` / 手改根 Task Projects 节。
-- 不要只用 `_default` 分类；不要 embedding；不要把 Task 升成 Memory Type。
-- 不要在本 skill 下写 `scripts/`。
-- 不要把 npm `bin` 说成能力面的一层。能力面是 CLI + Skill + MCP。
-- 不要把审阅页当分类器，也不要靠聊天 HTML 预览当拖拽闸门。
-
-## 能力面
-
-- **CLI：** `edges tasks project list|get|create|update|review-page` 与 `edges tasks list` / `edges tasks update --project`；可达 URL 用 `edges artifacts publish`（`review-page` 不发布）
-- **Skill：** 本文件（classifyTasks）
-- **MCP：** 对等入口；本轮没有 classify MCP，也没有 generic tasks MCP，也没有 review-page MCP，也没有 artifacts MCP。缺 shell 时说明 generic tasks Skill/MCP CRUD 仍在 backlog，不要假装 MCP 已能搬 Task
-
-Whole-board classification onto user-set centroids; wait for the human-pasted review-page export (Markdown table only if HTML cannot be opened) before apply.
+不要改任务状态或优先级；不要手动 mkdir/mv、改 Task 元数据或索引；不要调用已删除的 `tasks project`，也不要发明 `tasks classify`。审阅页只收集人的选择，不承担自动分类或自动写回。

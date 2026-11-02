@@ -11,5 +11,5 @@ export function addMemoryInitCommand(memory: Command, ctx: CliContext): void {
         rootDir?: string;
         description?: string;
         memoryTypes?: string[];
-    }) => operation(ctx, async () => await initMemory({ ...options, targetDir: target(options, ctx) })));
+    }) => operation(ctx, async () => await initMemory({ ...options, targetDir: target(options, ctx), project: ctx.project })));
 }

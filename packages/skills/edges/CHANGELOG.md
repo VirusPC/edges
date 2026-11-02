@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-02
+
+### Changed
+
+- 目录材料与检索流程采用递归 Project；区分 scope、Project、Super 入口和 All 系统发现，并保持查询后写回的真实归属。
+- Memory 协议、布局、初始化与私有归档说明同步 Project 容器，保留类型采用和隐私边界。
+- Notes CLI 与 MCP 入库可选择 Project；MCP 支持可选 project/super，路径校验复用 CLI，仍只本地创建。
+
 ## [0.2.0] - 2026-11-02
 
 ### Changed

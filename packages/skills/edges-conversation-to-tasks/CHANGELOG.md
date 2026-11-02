@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-02
+
+### Changed
+
+- 任务使用真实 Project 直属分组与全局 `--project`，移除 Task Project 和 `_default` 布局约定。
+- 去重、读回与写入保持 scope / Project 归属；`--all` 仅扩大独立系统发现，写入回到结果的真实 owner。
+- 调整归属使用 `tasks update --to-project` / `--to-default`；接续笔记工作流时保留已选主题。
+
 ## [0.1.0] - 2026-10-27
 
 ### Changed

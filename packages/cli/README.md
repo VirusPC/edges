@@ -139,7 +139,7 @@ NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认�
 
 [`packages/services/node/system-forest-service.ts`](src/services/node/system-forest-service.ts) 的 `buildSystemForest` 对每个根各自做一次 traverse，得到 `BaseNode[][]`。`independent`（默认）在 resolve 遇到其它根时停住；`innermost` 在外层能走到内层时只留下内层。命令行是 `edges forest list`。
 
-超节点的 `children` 只有这一层本层挂载，`descendantChildren` 为空。表里的 path 相对当前 scope；文件不存在就跳过，不扫盘补。以本仓库根为 `--scope` 时，九条材料里只有 `tasks/README.md` 和 `README.md` 在根上，所以 `children` 就是这两份。`memory/`、`packages/skills/`、`evaluation/`、`observation/` 实际在 `.edges/` 下，根上没有同名路径，不会挂上。`.edges/tasks/README.md` 也不是这个超节点的孩子。
+超节点的 `children` 只有这一层配置材料，`descendantChildren` 为空。配置里的 path 相对当前 scope；文件不存在就跳过，不扫盘补，也不因 `.edges/README.md` 存在而切换到它。例如 scope 直属只有 `tasks/README.md` 和 `README.md` 两份配置材料时，`children` 就是这两份；`.edges/tasks/README.md` 不会自动成为这个超节点的孩子。
 
 ```text
 edges --scope <仓库根> --super
@@ -155,7 +155,7 @@ edges --scope <仓库根> --super
 
 把 `--scope` 指到 `<仓库根>/.edges` 才是下一层：这个目录本身成为超节点的 `.edges`。它的 children 是该目录下存在的 `tasks/README.md`、`memory/feedbacks/README.md`、`memory/projects/README.md`、`memory/references/README.md`、`skills/managed/README.md`、`skills/referenced/README.md`、`projects/README.md`、`notes/README.md`。这不是仓库根那一份名单。评测与观测在 `packages/evaluation/`、`packages/observation/`，不再是 harness 材料。
 
-默认 list 从真 `AGENTS.md` 做一次 traverse。`--all` 从当前 `--scope` 走森林。`--super` 只换根。最全的一次查询是 `--scope <仓库根> --super --all`。这三个开关都在根命令上。
+各目录模块通过 [`queryMaterialNodes`](src/services/node/scope-session.ts) 共用查询范围：默认从真 `AGENTS.md` 读取；`--super` 换成直属材料的虚拟超节点；`--all` 只读，从当前 scope 发现独立系统并走森林；`--super --all` 再加入该 scope 的虚拟超节点。不会给每个独立系统自动加 Super，也不会把 scope 扩大到 Git 根。指定 `--project` 后，以 Project 的 INDEX 组成作为入口，优先于 `--super`；`--all` 仅追加该 Project 子树内的独立系统。
 
 再往下走的是这两个 README 自己的 `edges-entries-*`，不是超节点的另一组孩子。`--super tasks list` 只留下这条链上的 Task。
 
@@ -185,28 +185,39 @@ query 最初只加载入口快照。对查询结果执行目录 move/destroy 前
 
 模型与文档处理保留未修改的业务扩展字段及 AGENTS 非受控正文。YAML 使用 gray-matter 的正常行为，不承诺编辑后保留 YAML 注释与样式。只读引用和管理根边界由 Service 执行，不把资源管理或新的业务权限体系塞进 Model。
 
+## 材料归属
+
+`--scope` 选择维护对象；全局 `--project` 在该 scope 内选择主题材料容器。省略 Project 时材料根是 `<scope>/.edges`；指定后是 Project 目录 P，模块直接放在 `P/notes`、`P/tasks`、`P/projects`、`P/memory`、`P/skills`、`P/routines`。不自动创建 P/AGENTS.md 或 P/.edges。
+
+Project 保留 `INDEX.md` 正文，并用显式 `edges-entries-*` 登记直属模块。读写共用 HarnessMaterial 配置和材料定位函数。`--project` 要求现有 Project 的相对路径，拒绝绝对路径、越界、符号链接和非 Project 入口。它与 `--target-dir` / `--repo-dir` 冲突；先用 `--scope` 选择维护对象。
+
+指定 Project 时 `--super` 不改变其材料根。`--all` 只读，在所选 Project 子树内追加发现独立系统；普通查询沿已登记的组成关系递归。省略 Project 时，`--super` 选择 scope 直属材料。Artifacts 和 Evaluation 服务没有新增本地材料目录。非空 Project 删除必须显式 `projects delete <path> --recursive`，包括未登记的用户资源。
+
 ## 命令
 
 commands 的目录对应命令树：一个文件注册一个命令节点，同名子目录放它的子命令及参数、输出辅助代码。完整参数以各层 `--help` 为准。
 
 ### 任务：tasks
 
-主体系统由 `--scope` 决定。一般任务写在 `<scope>/.edges/tasks`。`--super` 把主体换成该 scope 上的虚拟系统一，它的 harness 就是这个 scope 目录，任务写在 `<scope>/tasks`。`--all` 从当前 scope 走森林。最全的一次查询是 `--scope <仓库根> --super --all`。
+主体系统由 `--scope` 决定。一般任务写在 `<scope>/.edges/tasks`，没有 `_default` 层。全局 `--project <P>` 以 `<scope>/.edges/projects` 为根选择实际 Project 目录，任务写在 `P/tasks`；嵌套目录如 `P/projects/Q`。`--super` 把主体换成该 scope 上的虚拟系统一，它的 harness 就是这个 scope 目录，任务写在 `<scope>/tasks`。`--all` 从当前 scope 走森林。最全的一次查询是 `--scope <仓库根> --super --all`。
 
 ```bash
 edges --scope <directory> tasks list
 edges --scope <directory> --all tasks list --status todo --priority high --sort priority
 edges --scope <directory> --all tasks list --group-by project
 edges --scope <directory> --super tasks list
-edges --scope <directory> tasks create --title "修复构建" --project default
+edges --scope <directory> tasks create --title "修复构建"
+edges --scope <directory> --project <P> tasks create --title "主题内工作"
+edges --scope <directory> tasks update <stem或路径> --to-project <P>
+edges --scope <directory> --project <P> tasks update <stem或路径> --to-default
 edges tasks get <stem或路径>
 edges tasks update <stem或路径> --priority high
 edges tasks status <stem或路径> done
-edges tasks project list
-edges tasks project review-page --from /tmp/tasks.json --out /tmp/review.html
+edges projects list
+edges tasks review-page --from /tmp/tasks.json --out /tmp/review.html
 ```
 
-任务写操作只改文件，不执行 Git；取消使用 status cancelled，没有 delete 命令。任务以 `<stem>/index.md` 存储，并带 `.<stem>.log.md`；状态或项目变化移动整个目录。
+任务写操作只改文件，不执行 Git；取消使用 `status cancelled`，`delete` 只返回取消操作提示，不删除文件。任务以 `tasks/<status>/<stem>/INDEX.md` 存储，并带 `.<stem>.log.md`；状态或项目变化移动整个目录。
 
 `edges --scope <目录> --super tasks list` 在该 scope 上建超节点，列出从材料 README 能走到的任务，范围不改去 Git 根。`edges --scope <目录> --all tasks list` 从该 scope 走森林，不另跳 Git 根。未登记的看板不会因物理存在而自动出现。
 
@@ -266,7 +277,7 @@ edges --scope /absolute/project --super projects create --title "Research" --bod
 edges --scope /absolute/project --super projects list
 ```
 
-`projects create` 默认在该 scope 的 `.edges/projects/` 下本地创建叶子，`--super` 写入 `projects/`，登记规则与 notes 相同。创建不 commit、不 push、不开 PR。旗标与 `notes` 相同：metadata、`--body`，标题来自 `--title` 或正文一级标题。get 与 delete 只收目标；get / update / delete 的路径校验与 list 都遵循同一材料目录，list 用共享的 `--filter` / `--group-by`。
+`projects create` 默认在该 scope 的 `.edges/projects/` 下创建容器，`--super` 写入 `projects/`；`--project <P>` 则创建 `P/projects/<date>--<slug>/INDEX.md`。Project 的 `INDEX.md` 同时保留正文与模块索引，更新正文不会删除既有子材料登记。创建不 commit、不 push、不开 PR。使用 metadata、`--body`，标题来自 `--title` 或正文一级标题。含下级材料或资源的 Project 删除必须带 `--recursive`；get / update / delete 的路径校验与 list 都遵循同一材料目录，list 用共享的 `--filter` / `--group-by`。
 
 ### 技能：skills
 
@@ -429,9 +440,6 @@ pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/migrate-agents-in
 
 脚本先检查所有候选再写入，保留原文备份，跳过符号链接、依赖目录、受保护的 posts 和嵌套 Git 边界；重复执行无变更。
 
-Task Project 列表属于看板 `README.md`（`edges-entries-local`）；看板 `AGENTS.md` 只登记 `<project>/AGENTS.md` 系统入口。把看板 AGENTS 里的 README 型 project 链接（含旧 task-projects 区块）一次性移过去：
+旧 Task Project 数据需用递归 Project 迁移脚本提升为真实 Project，`_default` 的任务仅去掉这一层。每个新 Project 日期取组内最早 Task 日期。先预览并检查冲突，确认后显式 apply；普通命令不会自动迁移。迁移脚本与恢复步骤见 [ADR 0052](../../docs/adr/0052-projects-as-recursive-material-groups.md)。历史迁移脚本保留用于旧版本数据，不应在新布局上运行。
 
-```bash
-pnpm migrate:task-project-lists -- --root /absolute/scope          # 预览
-pnpm migrate:task-project-lists -- --root /absolute/scope --apply
-```目录迁移与本机私有内容恢复见[迁移指南](../../docs/recursive-layout-migration.md)。
+目录迁移与本机私有内容恢复见[迁移指南](../../docs/recursive-layout-migration.md)。

@@ -44,7 +44,7 @@ test('Memory does not overwrite a destination that appears before its creation s
 });
 
 test('Task body update preserves supplied blank lines and trailing spaces', async t => {
-  const root = fixture(t), rel = 'tasks/_default/todo/2026-10-05--body/index.md';
+  const root = fixture(t), rel = 'tasks/todo/2026-10-05--body/index.md';
   fs.mkdirSync(path.dirname(path.join(root, rel)), { recursive: true });
   fs.writeFileSync(path.join(root, rel), '---\nname: body\nmetadata:\n  edges-tasks-status: todo\n---\nOld\n');
   await indexTaskFixtureBoard(path.join(root, 'tasks'));

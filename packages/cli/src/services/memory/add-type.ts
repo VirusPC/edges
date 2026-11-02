@@ -1,3 +1,4 @@
+import { materialHarnessRoot, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node/node-service.js';
@@ -9,7 +10,7 @@ import { readIndexTemplate } from "./templates.js";
 import { ensureTypeGitignore, findGitRoot, indexFileName, layerTypeSpecs, typeIndexTemplateName, validateTypeName, } from "./types.js";
 import { ensureScopeReadme, ensureScopeReadmePointer, linkScopeReadme } from "../init/service.js";
 import { refreshIndex, typeIndexNode } from "./entries.js";
-export interface AddMemoryTypeOptions {
+export interface AddMemoryTypeOptions extends MaterialOptions {
     targetDir: string;
     name: string;
     description: string;
@@ -32,21 +33,21 @@ export async function addMemoryType(options: AddMemoryTypeOptions) {
         throw new Error("add-type 必须提供 --description");
     if (!isScope(target))
         throw new Error("目标目录尚未初始化，请先执行 init");
-    const existing = layerTypeSpecs(target), adopted = existing.find((s) => s.name === name);
+    const existing = layerTypeSpecs(target, options), adopted = existing.find((s) => s.name === name);
     if (adopted && adopted.module !== module)
         throw new Error("Type already belongs to another module");
-    const indexName = adopted?.indexFile ?? indexFileName(name, module), file = assertScopePath(join(target, indexName), target);
+    const indexName = adopted?.indexFile ?? relative(target, join(materialHarnessRoot(target, options), indexFileName(name, module).slice(".edges/".length))), file = assertScopePath(join(target, indexName), target);
     const conflict = existing.find((s) => s.indexFile === indexName && s.name !== name);
     if (conflict)
         throw new Error(`Type path already belongs to ${conflict.name}: ${indexName}`);
     const gitignore = adopted?.gitignore ?? options.gitignore ?? false, writable = adopted?.writable ?? !options.indexOnly, format = adopted?.format ?? (options.skillsFormat ? "skills" : "ordinary"), root = findGitRoot(target);
     if (gitignore && root)
-        ensureTypeGitignore(root, name, module, indexName);
+        ensureTypeGitignore(root, name, module, relative(root, file));
     if (gitignore)
         assertPrivateIgnored(root ?? target, [file], [dirname(file)]);
-    const service = memoryNodes(target);
-    await ensureScopeReadme(target, service);
-    const entryPath = prepareMemoryWrite(target, file);
+    const service = memoryNodes(target, options);
+    await ensureScopeReadme(target, service, options);
+    const entryPath = prepareMemoryWrite(target, file, options);
     const node = await service.get(entryPath);
     const existed = !!node;
     if (!existed)
@@ -56,17 +57,20 @@ export async function addMemoryType(options: AddMemoryTypeOptions) {
             writable: String(writable),
             format,
         })), { indexGroup: "local" });
-    else
-        await linkScopeReadme(target, { id: file, name: indexName, description }, service);
-    await refreshIndex(target, name, service);
-    const agents = assertScopePath(join(target, AGENTS_FILE_NAME), target);
-    const entry = (await service.get(prepareMemoryWrite(target, agents), AgentsNode))!;
-    const before = entry.body;
-    await ensureScopeReadmePointer(target, service);
-    const after = (await service.get(prepareMemoryWrite(target, agents), AgentsNode))!.body;
+    if (existed || options.project)
+        await linkScopeReadme(target, { id: file, name: indexName, description }, service, options);
+    await refreshIndex(target, name, service, options);
+    let agentsAction = "not-applicable";
+    if (!options.project) {
+        const agents = assertScopePath(join(target, AGENTS_FILE_NAME), target);
+        const before = (await service.get(prepareMemoryWrite(target, agents), AgentsNode))!.body;
+        await ensureScopeReadmePointer(target, service, options);
+        const after = (await service.get(prepareMemoryWrite(target, agents), AgentsNode))!.body;
+        agentsAction = before === after ? "preserved" : "updated";
+    }
     const gitignoreAction = gitignore
         ? root
-            ? ensureTypeGitignore(root, name, module, indexName)
+            ? ensureTypeGitignore(root, name, module, relative(root, file))
             : "skipped-no-git"
         : null;
     return {
@@ -76,7 +80,7 @@ export async function addMemoryType(options: AddMemoryTypeOptions) {
         module,
         index: indexName,
         contentDir: relative(target, dirname(file)),
-        agentsAction: before === after ? "preserved" : "updated",
+        agentsAction,
         action: existed ? "preserved" : "created",
         gitignoreAction,
         flags: { gitignore, writable, format, gitignoreAction },

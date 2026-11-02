@@ -227,7 +227,7 @@ test("default MCP target follows captured caller scope, with implementation reso
     );
     assert.match(
       result.path,
-      /^notes\/\d{4}-\d{2}-\d{2}--caller-scope\/INDEX\.md$/,
+      /^\.edges\/notes\/\d{4}-\d{2}-\d{2}--caller-scope\/INDEX\.md$/,
     );
     assert.equal(result.title, "Caller Scope");
     assert.match(

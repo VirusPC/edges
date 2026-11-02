@@ -39,6 +39,6 @@ export const LEAF_DIRECTORIES = [
   { type: "note", path: /(?:^|\/)notes\/(?:[^/]+\/)+(?:INDEX|index)\.md$/ },
   {
     type: "project",
-    path: /(?:^|\/)(?<!memory\/)projects\/(?:[^/]+\/)+(?:INDEX|index)\.md$/,
+    path: /(?:^|\/)(?<!memory\/)projects\/[^/]+\/(?:INDEX|index)\.md$/,
   },
 ] as const;

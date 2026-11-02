@@ -1,3 +1,4 @@
+import type { MaterialOptions } from "../../domain/config/edges-materials.js";
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import {
@@ -54,19 +55,19 @@ import {
 } from "../../domain/models/memory/documents.js";
 import { ORIGIN_FIELDS, AUDIT_FIELDS, nowTimestamp } from "./provenance.js";
 export const AGENT_SKILL_FORMAT_TYPES = new Set(["managed", "referenced"]);
-export const memoryEntryTypes = (target?: string) =>
+export const memoryEntryTypes = (target?: string, options: MaterialOptions = {}) =>
   target
-    ? layerWritableTypes(target)
+    ? layerWritableTypes(target, options)
     : Object.keys(indexFiles()).filter((n) => !isExternalType(n));
-export const isSkillFormat = (target: string, name: string) =>
+export const isSkillFormat = (target: string, name: string, options: MaterialOptions = {}) =>
   AGENT_SKILL_FORMAT_TYPES.has(name) ||
-  layerTypeSpecs(target).some((s) => s.name === name && s.format === "skills");
-export const entryOutputName = (name: string, target?: string) =>
-  (target ? isSkillFormat(target, name) : AGENT_SKILL_FORMAT_TYPES.has(name))
+  layerTypeSpecs(target, options).some((s) => s.name === name && s.format === "skills");
+export const entryOutputName = (name: string, target?: string, options: MaterialOptions = {}) =>
+  (target ? isSkillFormat(target, name, options) : AGENT_SKILL_FORMAT_TYPES.has(name))
     ? ENTRY_NAMES.skill
     : ENTRY_NAMES.leaf;
-export const entryName = (file: string, name: string, target?: string) =>
-  entryOutputName(name, target) === ENTRY_NAMES.skill ||
+export const entryName = (file: string, name: string, target?: string, options: MaterialOptions = {}) =>
+  entryOutputName(name, target, options) === ENTRY_NAMES.skill ||
   isLeafEntryName(basename(file))
     ? basename(dirname(file))
     : parse(file).name;
@@ -109,12 +110,13 @@ export function resolveMemoryPath(
   target: string,
   name: string,
   slug?: string,
+  options: MaterialOptions = {},
 ): string {
-  if (!memoryEntryTypes(target).includes(name))
-    throw new Error(rejectUnwritableType(target, name));
+  if (!memoryEntryTypes(target, options).includes(name))
+    throw new Error(rejectUnwritableType(target, name, options));
   const normalized = (slug ?? "").trim().toLowerCase(),
-    directory = typeContentDir(target, name);
-  if (isSkillFormat(target, name)) {
+    directory = typeContentDir(target, name, options);
+  if (isSkillFormat(target, name, options)) {
     if (
       !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(normalized) ||
       normalized.length > 64
@@ -132,7 +134,7 @@ export function resolveMemoryPath(
       "--slug 必须是小写 snake_case，例如 reuse_existing_constants",
     );
   if (
-    Object.keys(discoverLayerTypes(target)).some((n) =>
+    Object.keys(discoverLayerTypes(target, options)).some((n) =>
       normalized.startsWith(`${n}_`),
     )
   )
@@ -164,9 +166,10 @@ export function buildEntryFields(
   detected: Record<string, string>,
   overrides: Record<string, string | undefined>,
   target?: string,
+  options: MaterialOptions = {},
 ): Record<string, string> {
   const skill = target
-      ? isSkillFormat(target, type)
+      ? isSkillFormat(target, type, options)
       : AGENT_SKILL_FORMAT_TYPES.has(type),
     resolvedTitle = (title || existing.title || "").trim(),
     resolvedDescription = (description || existing.description || "").trim();
@@ -200,18 +203,20 @@ export function buildEntryIndex(
   target: string,
   name: string,
   _legacy = false,
+  options: MaterialOptions = {},
 ): string {
-  const base = dirname(typeIndexPath(target, name));
+  const base = dirname(typeIndexPath(target, name, options));
   const files = listTypeFiles(
     target,
     name,
-    isSkillFormat(target, name) ? "*/SKILL.md" : `${name}_*.md`,
+    isSkillFormat(target, name, options) ? "*/SKILL.md" : `${name}_*.md`,
+    options,
   );
   const entries = files.map((file) => {
     const fields = parseFrontmatter(file);
     return renderLine(ENTRY_LINE_TEMPLATE, {
       title: escapeIndexText(
-        fields.title || fields.name || entryName(file, name, target),
+        fields.title || fields.name || entryName(file, name, target, options),
       ),
       path: encodeIndexPath(
         relativeLink(isExternalType(name) ? file : canonicalPath(file), base),
@@ -234,19 +239,20 @@ export function expectedIndexDocument(
   target: string,
   name: string,
   source?: string,
+  options: MaterialOptions = {},
 ): string {
-  const file = assertScopePath(typeIndexPath(target, name), target);
+  const file = assertScopePath(typeIndexPath(target, name, options), target);
   const existing =
     source ??
     (isFile(file)
       ? readText(file)
       : typeIndexTemplate(file, name));
   const legacy = basename(file) !== ENTRY_NAMES.readme;
-  const generated = typeIndexNode(file).parse(buildEntryIndex(target, name, legacy));
+  const generated = typeIndexNode(file).parse(buildEntryIndex(target, name, legacy, options));
   const node = typeIndexNode(file).parse(generated.localChildren.length ? existing.replace(/^- 暂无条目。\r?\n/gm, "") : existing);
   const desired = new Map(generated.localChildren.map(ref => [ref.id, ref]));
-  const base = canonicalPath(typeContentDir(target, name));
-  const own = (id: string) => isWithinPath(id, base) && (isSkillFormat(target, name) || basename(dirname(id)).startsWith(name + '_') || basename(id).startsWith(name + '_'));
+  const base = canonicalPath(typeContentDir(target, name, options));
+  const own = (id: string) => isWithinPath(id, base) && (isSkillFormat(target, name, options) || basename(dirname(id)).startsWith(name + '_') || basename(id).startsWith(name + '_'));
   const localChildren = node.localChildren.flatMap(ref => {
     const next = desired.get(ref.id);
     if (next) { desired.delete(ref.id); return [next]; }
@@ -259,20 +265,22 @@ export function expectedIndexDocument(
 export async function refreshIndex(
   target: string,
   name: string,
-  service = memoryNodes(target),
+  service: NodeService | undefined = undefined,
+  options: MaterialOptions = {},
 ): Promise<string> {
+  service ??= memoryNodes(target, options);
   target = canonicalPath(target);
-  const file = assertScopePath(typeIndexPath(target, name), target);
-  ensureLayerTypeGitignore(target, name);
-  if (name in discoverLayerTypes(target) && !isExternalType(name))
+  const file = assertScopePath(typeIndexPath(target, name, options), target);
+  ensureLayerTypeGitignore(target, name, [], options);
+  if (name in discoverLayerTypes(target, options) && !isExternalType(name))
     fs.mkdirSync(dirname(file), { recursive: true });
-  const entry = prepareMemoryWrite(target, file);
+  const entry = prepareMemoryWrite(target, file, options);
   const node = (await service.get(entry)) as AgentsNode | ReadmeNode | undefined;
   const existed = !!node, before = node?.body ?? "";
   const source = existed
     ? before
     : typeIndexTemplate(file, name);
-  const after = expectedIndexDocument(target, name, source);
+  const after = expectedIndexDocument(target, name, source, options);
   if (!existed || before !== after) {
     if (node) await service.update(node, { body: after });
     else await service.create(typeIndexNode(entry), parseDocument(after), { indexGroup: "local" });

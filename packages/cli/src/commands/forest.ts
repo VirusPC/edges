@@ -41,7 +41,7 @@ export function addForestCommand(program: Command, ctx: CliContext): void {
         return;
       }
       const scopeDir = resolveScope(ctx.env);
-      const forest = await buildSystemForest(scopeDir, {
+      const forest = await buildSystemForest(ctx.project ?? scopeDir, {
         form,
         includeSuper: opts.super !== false,
         exclude: ctx.exclude,

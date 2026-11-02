@@ -13,7 +13,7 @@ export function addNoteDeleteCommand(note: Command, ctx: CliContext): void {
     .argument("<path>", ".edges/notes/<stem>/INDEX.md (--super: notes/<stem>/INDEX.md)")
     .action(async (entryPath: string) => {
       try {
-        const removed = await deleteNote(ctx.env, entryPath, { super: ctx.super });
+        const removed = await deleteNote(ctx.env, entryPath, { super: ctx.super, project: ctx.project });
         ctx.result = succeed({ command: "notes.delete", path: removed.path });
       } catch (error) {
         failNodeCommand(ctx, error, HELP);

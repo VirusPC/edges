@@ -36,7 +36,7 @@ test("run tasks list rejects Run status values", async () => {
 test("run tasks get/create/update/status/runs/run-messages", async () => {
   const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-tasks-"));
   try {
-    await mkdir(path.join(repo, "tasks/_default/backlog"), { recursive: true });
+    await mkdir(path.join(repo, "tasks/backlog"), { recursive: true });
     const env = { ...process.env, EDGES_REPO: repo };
     const created = await run(["tasks", "create", "--title", "Hello"], { env });
     assert.equal(created.exitCode, 0);
@@ -76,7 +76,8 @@ test("run tasks delete points at status cancelled and does not require a board",
   const body = JSON.parse(result.stdout) as { status: string; errorCode: string; reason: string };
   assert.equal(body.status, "failed");
   assert.equal(body.errorCode, "VALIDATION_ERROR");
-  assert.match(body.reason, /edges tasks status 2026-09-11--cli cancelled/);
+  assert.match(body.reason, /same --scope, --project and --super selection and target/);
+  assert.match(body.reason, /replace delete with status and append cancelled/);
 });
 
 test("run rejects tasks log and a missing subcommand", async () => {
@@ -149,7 +150,7 @@ test("run tasks classify is VALIDATION_ERROR", async () => {
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
 });
 
-test("run tasks project review-page --from fixture writes html and returns path", async () => {
+test("run tasks review-page --from fixture writes html and returns path", async () => {
   const dir = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-rp-cli-"));
   try {
     const fixture = path.join(dir, "in.json");
@@ -168,13 +169,13 @@ test("run tasks project review-page --from fixture writes html and returns path"
       "utf8",
     );
     const result = await run(
-      ["tasks", "project", "review-page", "--from", fixture, "--out", out],
+      ["tasks", "review-page", "--from", fixture, "--out", out],
       { env: { ...process.env, EDGES_REPO: dir } },
     );
     assert.equal(result.exitCode, 0);
     const payload = JSON.parse(result.stdout);
     assert.equal(payload.status, "success");
-    assert.equal(payload.command, "project.review-page");
+    assert.equal(payload.command, "review-page");
     assert.equal(payload.path, path.resolve(out));
     assert.equal(payload.itemCount, 1);
     assert.equal(payload.groupCount, 2);
@@ -186,14 +187,14 @@ test("run tasks project review-page --from fixture writes html and returns path"
   }
 });
 
-test("run tasks project review-page --from bad json is VALIDATION_ERROR", async () => {
+test("run tasks review-page --from bad json is VALIDATION_ERROR", async () => {
   const dir = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-rp-bad-"));
   try {
     const fixture = path.join(dir, "bad.json");
     await writeFile(fixture, "{", "utf8");
     const out = path.join(dir, "out.html");
     const result = await run(
-      ["tasks", "project", "review-page", "--from", fixture, "--out", out],
+      ["tasks", "review-page", "--from", fixture, "--out", out],
       { env: { ...process.env, EDGES_REPO: dir } },
     );
     assert.equal(result.exitCode, 2);
@@ -206,11 +207,11 @@ test("run tasks project review-page --from bad json is VALIDATION_ERROR", async 
   }
 });
 
-test("run tasks project review-page --from missing file is VALIDATION_ERROR", async () => {
+test("run tasks review-page --from missing file is VALIDATION_ERROR", async () => {
   const dir = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-rp-miss-"));
   try {
     const missing = path.join(dir, "nope.json");
-    const result = await run(["tasks", "project", "review-page", "--from", missing], {
+    const result = await run(["tasks", "review-page", "--from", missing], {
       env: { ...process.env, EDGES_REPO: dir },
     });
     assert.equal(result.exitCode, 2);
@@ -223,12 +224,12 @@ test("run tasks project review-page --from missing file is VALIDATION_ERROR", as
   }
 });
 
-test("run tasks project review-page --from - writes html from stdinText", async () => {
+test("run tasks review-page --from - writes html from stdinText", async () => {
   const dir = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-rp-stdin-"));
   try {
     const out = path.join(dir, "out.html");
     const result = await run(
-      ["tasks", "project", "review-page", "--from", "-", "--out", out],
+      ["tasks", "review-page", "--from", "-", "--out", out],
       {
         env: { ...process.env, EDGES_REPO: dir },
         stdinText: JSON.stringify({
@@ -239,7 +240,7 @@ test("run tasks project review-page --from - writes html from stdinText", async 
     );
     assert.equal(result.exitCode, 0);
     const payload = JSON.parse(result.stdout);
-    assert.equal(payload.command, "project.review-page");
+    assert.equal(payload.command, "review-page");
     assert.equal(payload.path, path.resolve(out));
     assert.match(await readFile(out, "utf8"), /2026-09-13--demo/);
   } finally {
@@ -247,8 +248,8 @@ test("run tasks project review-page --from - writes html from stdinText", async 
   }
 });
 
-test("run tasks project review-page --from - with empty stdin is VALIDATION_ERROR", async () => {
-  const result = await run(["tasks", "project", "review-page", "--from", "-"], {
+test("run tasks review-page --from - with empty stdin is VALIDATION_ERROR", async () => {
+  const result = await run(["tasks", "review-page", "--from", "-"], {
     stdinText: "",
   });
   assert.equal(result.exitCode, 2);
@@ -262,5 +263,5 @@ test("run tasks project without subcommand is VALIDATION_ERROR", async () => {
   const result = await run(["tasks", "project"]);
   assert.equal(result.exitCode, 2);
   assert.equal(failedJson(result.stdout).errorCode, "VALIDATION_ERROR");
-  assert.match(JSON.parse(result.stdout).reason, /missing project subcommand/);
+  assert.match(JSON.parse(result.stdout).reason, /too many arguments|unknown command/);
 });

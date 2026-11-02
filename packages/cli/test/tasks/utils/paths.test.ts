@@ -30,21 +30,21 @@ test("isTaskStatus rejects Run-layer and old enums", () => {
   assert.equal(isTaskStatus("status"), false);
 });
 
-test("paths join tasks/<project-dir>/<status> and sidecar dotfile", () => {
+test("paths join tasks/<status> and sidecar dotfile", () => {
   assert.equal(boardRoot("/repo"), "/repo/.edges/tasks");
   assert.equal(
-    taskRelPath("default", "in_progress", "2026-09-11--cli"),
-    ".edges/tasks/_default/in_progress/2026-09-11--cli/INDEX.md",
+    taskRelPath("in_progress", "2026-09-11--cli"),
+    ".edges/tasks/in_progress/2026-09-11--cli/INDEX.md",
   );
   assert.equal(
-    sidecarRelPath("default", "in_progress", "2026-09-11--cli"),
-    ".edges/tasks/_default/in_progress/2026-09-11--cli/.2026-09-11--cli.log.md",
+    sidecarRelPath("in_progress", "2026-09-11--cli"),
+    ".edges/tasks/in_progress/2026-09-11--cli/.2026-09-11--cli.log.md",
   );
   const domain = taskBoardLocation("/repo", { super: true });
   assert.equal(boardRoot(domain), "/repo/tasks");
   assert.equal(
-    taskRelPath("cli", "todo", "2026-09-11--cli", domain),
-    "tasks/cli/todo/2026-09-11--cli/INDEX.md",
+    taskRelPath("todo", "2026-09-11--cli", domain),
+    "tasks/todo/2026-09-11--cli/INDEX.md",
   );
 });
 
@@ -61,13 +61,13 @@ test("parseTarget still accepts stem or new-layout path", () => {
     stem: "2026-09-11--cli",
   });
   assert.deepEqual(
-    parseTarget("tasks/_default/done/2026-09-11--cli/INDEX.md"),
+    parseTarget("tasks/done/2026-09-11--cli/INDEX.md"),
     {
       kind: "path",
       stem: "2026-09-11--cli",
     },
   );
-  assert.deepEqual(parseTarget("tasks/cli/todo/2026-09-11--cli/INDEX.md"), {
+  assert.deepEqual(parseTarget("tasks/todo/2026-09-11--cli/INDEX.md"), {
     kind: "path",
     stem: "2026-09-11--cli",
   });

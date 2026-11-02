@@ -25,7 +25,7 @@ export function addRoutineUpdateCommand(routine: Command, ctx: CliContext): void
             body: opts.body,
             metadata: opts.metadata,
           },
-          { all: ctx.all, super: ctx.super, exclude: ctx.exclude },
+          { all: ctx.all, super: ctx.super, project: ctx.project, exclude: ctx.exclude },
         );
         ctx.result = succeed({
           command: "routines.update",

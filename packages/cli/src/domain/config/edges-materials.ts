@@ -12,6 +12,9 @@ export type HarnessMaterialsConfig = {
   materials: HarnessMaterial[];
 };
 
+/** `project` is the validated absolute directory selected by the CLI. */
+export type MaterialOptions = { super?: boolean; project?: string };
+
 const CONFIG_PATH = join(dirname(fileURLToPath(import.meta.url)), "edges-materials.json");
 
 function assertMaterial(raw: unknown, index: number): HarnessMaterial {
@@ -79,15 +82,15 @@ export function harnessMaterialById(id: string): HarnessMaterial {
 }
 
 /** Real systems place materials under `<scope>/.edges` even before that directory exists. Super places them in the scope directory. */
-export function materialHarnessRoot(scopeDir: string, options: { super?: boolean } = {}): string {
-  return options.super === true ? scopeDir : join(scopeDir, ".edges");
+export function materialHarnessRoot(scopeDir: string, options: MaterialOptions = {}): string {
+  return options.project ?? (options.super === true ? scopeDir : join(scopeDir, ".edges"));
 }
 
 /** Join a harness root with a material path from config. The relative path is the only entry name. */
 export function placedMaterialPath(
   scopeDir: string,
   materialPath: string,
-  options: { super?: boolean } = {},
+  options: MaterialOptions = {},
 ): string {
   return join(materialHarnessRoot(scopeDir, options), materialPath);
 }
@@ -95,7 +98,7 @@ export function placedMaterialPath(
 export function placeHarnessMaterial(
   scopeDir: string,
   id: string,
-  options: { super?: boolean } = {},
+  options: MaterialOptions = {},
 ): { material: HarnessMaterial; absPath: string } {
   const material = harnessMaterialById(id);
   return { material, absPath: placedMaterialPath(scopeDir, material.path, options) };

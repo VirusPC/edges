@@ -1,3 +1,6 @@
+import { leafEntryPath } from "../node/entry-path.js";
+import { materialHarnessRoot, type MaterialOptions } from "../../domain/config/edges-materials.js";
+import { ProjectNode } from "../../domain/models/projects/project-node.js";
 import { readEntry, saveEntries } from '../node/node-files.js';
 import { canonicalPath, findAncestor } from "../../utils/filesystem.js";
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
@@ -29,8 +32,8 @@ import {
   readText,
   TYPE_INDEX_FILE_NAME,
   typeFromDirName,
+  typeDirName,
   typeIndexRelpath,
-  legacyTypeIndexRelpath,
 } from "./paths.js";
 import {
   SCOPE_README_ENTRY_DESCRIPTION,
@@ -119,11 +122,11 @@ export function seedDescription(name: string): string {
     )?.[1] ?? name
   );
 }
-export function seedSpec(name: string): TypeSpec {
+export function seedSpec(name: string, target?: string, options: MaterialOptions = {}): TypeSpec {
   const module = moduleForType(name);
   return {
     name,
-    indexFile: indexFileName(name),
+    indexFile: target ? relative(target, join(materialHarnessRoot(target, options), indexFileName(name).slice(".edges/".length))) : indexFileName(name),
     description: seedDescription(name),
     writable: name !== "referenced",
     gitignore: name === "user",
@@ -152,33 +155,35 @@ function setCandidate(
   rel: string,
   module: "memory" | "skills",
   dirname: string,
+  prefix: string,
 ): void {
-  const readme = `.edges/${module}/${dirname}/${TYPE_INDEX_FILE_NAME}`;
+  const readme = join(prefix, module, dirname, TYPE_INDEX_FILE_NAME);
   if (rel !== readme && candidates.has(readme)) return;
   if (rel === readme)
-    candidates.delete(`.edges/${module}/${dirname}/${AGENTS_FILE_NAME}`);
+    candidates.delete(join(prefix, module, dirname, AGENTS_FILE_NAME));
   candidates.set(rel, { module, dirname });
 }
-export function layerTypeSpecs(target: string): TypeSpec[] {
+export function layerTypeSpecs(target: string, options: MaterialOptions = {}): TypeSpec[] {
+  const harness = materialHarnessRoot(target, options);
+  const prefix = relative(target, harness);
   const candidates = new Map<
     string,
     { module: "memory" | "skills"; dirname: string }
   >();
-  for (const file of layerReadmePaths(target) ?? localOwnershipPaths(target)) {
+  for (const file of layerReadmePaths(target, options) ?? (options.project ? new Set<string>() : localOwnershipPaths(target))) {
     const rel = relative(canonicalPath(target), file);
-    const [harness, module, directory, entry, ...rest] = rel.split("/");
+    const [module, directory, entry, ...rest] = relative(harness, file).split("/");
     if (
-      harness === ".edges" &&
       (module === "memory" || module === "skills") &&
       directory &&
       entry !== undefined &&
       TYPE_INDEX_FILES.includes(entry) &&
       !rest.length
     )
-      setCandidate(candidates, rel, module, directory);
+      setCandidate(candidates, rel, module, directory, prefix);
   }
   for (const module of ["memory", "skills"] as const) {
-    const container = assertScopePath(join(target, ".edges", module), target);
+    const container = assertScopePath(join(harness, module), target);
     if (isDirectory(container))
       for (const child of fs.readdirSync(container).sort())
         for (const name of TYPE_INDEX_FILES) {
@@ -187,9 +192,10 @@ export function layerTypeSpecs(target: string): TypeSpec[] {
           if (isFile(file) && isTypeIndexSource(readText(file)))
             setCandidate(
               candidates,
-              `.edges/${module}/${child}/${name}`,
+              join(prefix, module, child, name),
               module,
               child,
+              prefix,
             );
         }
   }
@@ -206,8 +212,8 @@ export function layerTypeSpecs(target: string): TypeSpec[] {
       throw new Error(`Type module disagrees with path: ${rel}`);
     if (
       SEED_TYPE_NAMES.includes(name) &&
-      rel !== indexFileName(name) &&
-      rel !== legacyTypeIndexRelpath(name)
+      rel !== join(prefix, moduleForType(name), typeDirName(name), TYPE_INDEX_FILE_NAME) &&
+      rel !== join(prefix, moduleForType(name), typeDirName(name), AGENTS_FILE_NAME)
     )
       throw new Error(`Official type path conflict: ${name}`);
     if (result.has(name) && result.get(name)!.indexFile !== rel)
@@ -227,16 +233,16 @@ export function layerTypeSpecs(target: string): TypeSpec[] {
       : SEED_TYPE_NAMES.length;
   return [...result.values()].sort((a, b) => order(a.name) - order(b.name));
 }
-export const discoverLayerTypes = (target: string): Record<string, string> =>
-  Object.fromEntries(layerTypeSpecs(target).map((s) => [s.name, s.indexFile]));
-export const layerWritableTypes = (target: string) =>
-  layerTypeSpecs(target)
+export const discoverLayerTypes = (target: string, options: MaterialOptions = {}): Record<string, string> =>
+  Object.fromEntries(layerTypeSpecs(target, options).map((s) => [s.name, s.indexFile]));
+export const layerWritableTypes = (target: string, options: MaterialOptions = {}) =>
+  layerTypeSpecs(target, options)
     .filter((s) => s.writable)
     .map((s) => s.name);
-export function rejectUnwritableType(target: string, name: string): string {
-  return layerTypeSpecs(target).some((s) => s.name === name && !s.writable)
+export function rejectUnwritableType(target: string, name: string, options: MaterialOptions = {}): string {
+  return layerTypeSpecs(target, options).some((s) => s.name === name && !s.writable)
     ? `--type ${name} 只索引，不能 remember`
-    : `--type 未在该层登记为可写类型: ${name}。已登记可写类型: ${layerWritableTypes(target).join(", ") || "(none)"}`;
+    : `--type 未在该层登记为可写类型: ${name}。已登记可写类型: ${layerWritableTypes(target, options).join(", ") || "(none)"}`;
 }
 export function gitignorePatterns(
   name: string,
@@ -269,22 +275,23 @@ export function ensureLayerTypeGitignore(
   target: string,
   name: string,
   destinations: readonly string[] = [],
+  options: MaterialOptions = {},
 ): void {
-  const spec = layerTypeSpecs(target).find((s) => s.name === name),
+  const spec = layerTypeSpecs(target, options).find((s) => s.name === name),
     root = findGitRoot(target);
   if (spec?.gitignore) {
-    if (root) ensureTypeGitignore(root, name, spec.module, spec.indexFile);
+    if (root) ensureTypeGitignore(root, name, spec.module, relative(root, join(target, spec.indexFile)));
     const files = [join(target, spec.indexFile), ...destinations];
     // Ignored parent directories also cover the shared writer's private temporary files.
     assertPrivateIgnored(root ?? target, files, files.map(dirname));
   }
 }
 /** Children of `<scope>/.edges/README.md` when that organization list exists. */
-export function layerReadmePaths(target: string): Set<string> | undefined {
-  const file = join(resolve(target), ".edges", ENTRY_NAMES.readme);
+export function layerReadmePaths(target: string, options: MaterialOptions = {}): Set<string> | undefined {
+  const file = options.project ? leafEntryPath(options.project) : join(materialHarnessRoot(resolve(target), options), ENTRY_NAMES.readme);
   if (!isFile(file)) return undefined;
   try {
-    const node = new ReadmeNode(file).parse(readText(file));
+    const node = (options.project ? new ProjectNode(file) : new ReadmeNode(file)).parse(readText(file));
     return new Set(
       node.children.flatMap((reference) => {
         const id = canonicalPath(reference.id);
@@ -309,24 +316,26 @@ export function selectedLocalBlock(_specs: TypeSpec[] = []): string {
 }
 
 /** Existing leftover AGENTS indexes stay readable. A missing index is always the README path. */
-export function typeIndexPath(target: string, name: string): string {
-  const rel = discoverLayerTypes(target)[name];
-  if (!rel) return join(target, typeIndexRelpath(name));
+export function typeIndexPath(target: string, name: string, options: MaterialOptions = {}): string {
+  const rel = discoverLayerTypes(target, options)[name];
+  const fallback = join(materialHarnessRoot(target, options), typeIndexRelpath(name).slice(".edges/".length));
+  if (!rel) return fallback;
   const preferred = join(target, rel);
   if (basename(preferred) !== TYPE_INDEX_FILE_NAME && !isFile(preferred))
-    return join(target, typeIndexRelpath(name));
+    return fallback;
   return preferred;
 }
-export const typeContentDir = (target: string, name: string) =>
+export const typeContentDir = (target: string, name: string, options: MaterialOptions = {}) =>
   isExternalType(name)
     ? join(target, ".agents/skills")
-    : dirname(typeIndexPath(target, name));
+    : dirname(typeIndexPath(target, name, options));
 export function listTypeFiles(
   target: string,
   name: string,
   pattern = "*.md",
+  options: MaterialOptions = {},
 ): string[] {
-  const directory = typeContentDir(target, name),
+  const directory = typeContentDir(target, name, options),
     external = isExternalType(name);
   if (!external) assertScopePath(directory, target);
   if (!fs.existsSync(directory))

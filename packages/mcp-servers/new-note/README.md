@@ -7,9 +7,9 @@ TypeScript + Node.js MCP server，用于在没有 shell 的宿主里本地创建
 ## What It Does
 
 - 暴露 MCP 工具 `new_note`
-- 接收结构化输入：`title`、`body`
-- 子进程调用 `edges notes create --title --body`（与 CLI 同一套 JSON 契约）
-- 在目标 scope 的 `.edges/notes/YYYY-MM-DD--slug/INDEX.md` 本地创建叶子（遵循 CLI 默认材料定位）
+- 接收结构化输入：`title`、`body`，可选 `project`、`super`
+- 子进程调用 `edges [--project <path>] [--super] notes create --title --body`，Project 校验与材料定位复用 CLI
+- 默认在服务器 scope 的 `.edges/notes/YYYY-MM-DD--slug/INDEX.md` 创建；选 Project 后写 `P/notes`，仅选 Super 时写 `scope/notes`
 - 返回结构化 JSON 结果，便于客户端自动处理
 
 ## Requirements
@@ -79,6 +79,10 @@ MCP tool 名称：`new_note`
 输入字段：
 - `title` (string)
 - `body` (string, optional)
+- `project` (string, optional)：相对服务器 scope 下 `.edges/projects` 的已有 Project 路径，例如 `P/projects/Q`。不能用绝对路径、`..` 或不存在的 Project。
+- `super` (boolean, optional)：选择 scope 直属内容；同时提供 `project` 时以 Project 为准。
+
+`scope` 由服务器配置决定，不作为工具输入；不要把 Project 路径替换成 scope。`all` 是读取范围选项，不适用于创建。
 
 成功返回（JSON 文本）示例：
 
@@ -126,7 +130,7 @@ MCP tool 名称：`new_note`
 }
 ```
 
-**提示**：配置 `EDGES_SCOPE` 可固定笔记归属；否则从启动 cwd 查找所属作用域。Server 安装位置不决定写入目标。笔记写入作用域的 `notes/`，Git 操作使用实际仓库根。
+**提示**：配置 `EDGES_SCOPE` 可固定作用域；否则从启动 cwd 查找所属作用域。Server 安装位置不决定写入目标；Project 与 Super 在这个 scope 内选择材料位置，不执行 Git 提交。
 
 如需源码直跑（开发环境）：
 

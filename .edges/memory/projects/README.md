@@ -44,7 +44,7 @@ format: ordinary
 - [v1 Langfuse 先证明 UI 再试 1–2 个客户端](<project_langfuse_ui_then_few_clients/INDEX.md>) — 写自部署 Langfuse 的 v1 验收、或想一次接上 Grok/edges Agent 时打开：先证明 UI 健康，再试 1–2 个客户端。2026\-10\-11 已按此验收。更广接线留在 Observation 产品卡。决策见 docs/adr/0020\-langfuse\-ui\-then\-few\-clients.md。
 - [记忆研究笔记落 knowledge/projects/memory](project_memory_research_notes_in_knowledge_projects/INDEX.md) — 写 project-memory 的调研、优点、related work 等研究笔记时：落到 knowledge/projects/memory/；skill 层 .memory 只记协议与设计决策，不当成对外研究笔记落点。
 - [整仓 MIT，不拆 knowledge 许可证](project_mit_license/INDEX.md) — 给仓库选许可证、改 LICENSE 或 package.json license 字段时：整仓 MIT，不要给 knowledge/ 另开一份。
-- [new-note MCP 的 ingest 约束](project_new_note_ingest/INDEX.md) — 改 new-note 或新增 MCP ingest 时：TS+Node 编排，子进程调用 edges notes，失败即停，返回机器可解析 JSON。不要 Python server，不要 in-process import CLI，不要再找仓根 bin/。
+- [new\-note MCP 的本地存储与材料选择](<project_new_note_ingest/INDEX.md>) — 改 new\-note MCP 时：title/body 与 project/super 透传 CLI，服务器控制 scope，NodeService 校验路径；只本地创建，不恢复旧 content/coAuthor/Git ingest。
 - [节点目录单元与组织关系设计](project_node_resource_unit_decision/INDEX.md) — 递归目录与 harness 的现行决定及理由；模型与公开目录已采用，历史讨论保留但不替代现行 spec，私有材料逐克隆审阅。
 - [定期从目录职责提炼通用维护规范](project_periodic_architecture_review/INDEX.md) — 复盘 Edges 目录架构时：按实际职责与维护对象识别可跨作用域复用的系统二模块，输出规范候选；维护任务管理是例子，当前仅记规范、不启用自动运行。
 - [仓内任务优先用仓库 Skill 与 CLI](project_prefer_repo_skills_and_cli/INDEX.md) — 执行 VirusPC/edges 仓内工作时，优先调用本仓 Skill 与 edges CLI；不可用须向用户说明缺口，勿默认手搓绕过。
@@ -115,4 +115,5 @@ format: ordinary
 - [Routines 记录定义，由外部平台接入执行](<project_routines_from_brain_practice/INDEX.md>) — 设计 routines 时打开：INDEX.md 记录，仓库为接入依据；平台每次读Skill，默认最新可指定，失败停止报告；首版适配全部现有例程，无调度器和分组。
 - [Edges 推广准备：实验、Skills、场景案例与任务归属](<project_edges_promotion_intent/INDEX.md>) — 准备 Edges 对外推广及拆分任务时：先补实验数据、Skills 接入和场景案例；一个主任务及全部子任务统一放框架仓，文章产物归属另行处理。
 - [对外入口叫 Edges 小助手，homepage 指向站点根](<project_public_knowledge_qa_trial/INDEX.md>) — 改根 README 公开实践、页首导航或 GitHub 仓库 homepage 时打开：链接文案是 Edges 小助手，地址 https://edges\-rag.viruspc.tech/；homepage 用 https://edges.viruspc.tech。公开文案不写「试用」或访问网络限制。
+- [递归 Project：直属材料分组与统一选择](<project_recursive_projects/INDEX.md>) — 递归 Project 已实现并验证：直属材料、全局 \-\-project、按最早 Task 日期迁移七组；163 Task、160 日志及共享图片保真。说明归属、删除与迁移恢复边界。
 <!-- edges-entries-local:end -->

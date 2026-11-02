@@ -78,7 +78,7 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 <details>
 <summary>Projects · 围绕目标持续组织材料</summary>
 
-一项持续推进的工作会产生资料、方案、实验和交付物。Projects 为它们提供共同的上下文与归属，让后续工作能找到此前的积累。项目内容可以与任务、笔记相互引用；任务看板里的 Task Project 则负责给任务分组。
+一项持续推进的工作会产生资料、方案、实验和交付物。Projects 为它们提供共同的上下文与归属，让后续工作能找到此前的积累。同一主题的 Notes、Tasks、Memory、Skills、Routines 可以直接放在 Project 下；主题继续细分时，再嵌套子 Project。各模块共用这一种归属方式，不必分别维护分组。Project 聚合材料，不要求为每个主题再初始化一个独立系统。
 
 **用例：** 为一次产品调研建立项目，把访谈材料、备选方案与报告放在一起，再用 Tasks 跟进需要完成的动作。[项目用法](packages/cli/README.md#项目projects)
 
@@ -140,7 +140,7 @@ Evaluation 用 **线上真实数据**，围绕 **预置或自定义的 eval 目�
 
 现有记忆消融实验为“Memory 是否起到正向作用”提供了评测基础：固定问题与 Agent，对照有记忆与无记忆的表现，比较回答质量、约束遵守及成本。另有检索评测与 Langfuse 实验入口；题集、判分与实验条件仍需按目标准备。[记忆消融实验](packages/evaluation/experiments/harness_memory_ablation/README.md) · [评测说明](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
 
-下一步将结合通用评测框架，在用户选择预置目标或自定义目标后，由系统自动清洗与整理线上数据，并设置 Routine 定期评测。详见[评测闭环规划](.edges/tasks/evaluation/backlog/2026-11-02--Personal-Evaluation自定义目标线上数据自动清洗与定期评测/INDEX.md)。
+下一步将结合通用评测框架，在用户选择预置目标或自定义目标后，由系统自动清洗与整理线上数据，并设置 Routine 定期评测。详见[评测闭环规划](.edges/projects/2026-09-11--evaluation/tasks/backlog/2026-11-02--Personal-Evaluation%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9B%AE%E6%A0%87%E7%BA%BF%E4%B8%8A%E6%95%B0%E6%8D%AE%E8%87%AA%E5%8A%A8%E6%B8%85%E6%B4%97%E4%B8%8E%E5%AE%9A%E6%9C%9F%E8%AF%84%E6%B5%8B/INDEX.md)。
 
 </details>
 

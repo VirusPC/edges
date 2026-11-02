@@ -6,8 +6,9 @@ import { TasksError, type TasksErrorCode } from "../../domain/models/tasks/types
 export function openTasksRuntime(input: {
   env: NodeJS.ProcessEnv;
   super?: boolean;
+  project?: string;
 }) {
-  const location = subjectTaskBoard(loadConfig(input.env).scopeDir, { super: input.super });
+  const location = subjectTaskBoard(loadConfig(input.env).scopeDir, { super: input.super, project: input.project });
   return {
     location,
     fs: createNodeBoardFs(location),

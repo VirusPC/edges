@@ -18,7 +18,6 @@ FLAGS
   --name <name>            frontmatter name
   --assignee <text>        edges-task-assignee
   --priority <priority>    edges-task-priority: urgent | high | medium | low | none
-  --project <project>      edges-task-project (default, or lowercase kebab slug)
   --json                   Write JSON to stdout (always on)
 
 Writes the Task file plus an empty sidecar .{stem}.log.md. No git.
@@ -46,10 +45,6 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
         ...TASK_PRIORITIES,
       ]),
     )
-    .option(
-      "--project <project>",
-      "edges-task-project (default, or lowercase kebab slug)",
-    )
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", CREATE_AFTER_HELP)
     .action(
@@ -61,7 +56,6 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
         name?: string;
         assignee?: string;
         priority?: TaskPriority;
-        project?: string;
       }) => {
         await runTasksCommand(ctx, async (runtime) => {
           const created = await createTask(
@@ -74,7 +68,6 @@ export function addCreateCommand(tasks: Command, ctx: CliContext): void {
               name: opts.name,
               assignee: opts.assignee,
               priority: opts.priority,
-              project: opts.project,
             },
             { fs: runtime.writer, now: runtime.now },
           );

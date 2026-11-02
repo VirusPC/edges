@@ -135,7 +135,7 @@ test("loadBuiltReviewShell names the build command when an asset is missing", as
 });
 
 test("default asset dir is the gitignored review-page build", () => {
-  assert.match(defaultReviewPageAssetDir(), /project[/\\]assets[/\\]review-page[/\\]?$/);
+  assert.match(defaultReviewPageAssetDir(), /tasks[/\\]assets[/\\]review-page[/\\]?$/);
 });
 
 test("writeReviewPage writes utf8 html", async () => {
@@ -205,7 +205,7 @@ test('source-aware review payload requires valid real project identities on grou
   const source = { scope: '.', purpose: 'domain' };
   const group = { id: '[".","domain","cli"]', title: 'CLI', source, project: 'cli' };
   const item = { id: '[".","domain","cli","same"]', stem: 'same', current: group.id, suggested: group.id, source, project: 'cli' };
-  for (const project of [undefined, null, 1, [], { value: 'cli' }, group.id, '_default', '']) {
+  for (const project of [null, 1, [], { value: 'cli' }, '../escape', '/absolute', '']) {
     assert.throws(() => parseReviewPageInput({ groups: [{ ...group, project }], items: [item] }), /project/);
     assert.throws(() => parseReviewPageInput({ groups: [group], items: [{ ...item, project }] }), /project/);
   }
@@ -224,4 +224,15 @@ test('review JSON preserves extended metadata and rejects invalid contract field
   for (const badDoc of [ { ...doc, extra: true }, { ...doc, metadata: { 'edges-tasks-status': 'unknown' } }, { ...doc, metadata: { 'edges-updated-at': 'today' } }, { ...doc, metadata: { 'edges-title': 1 } } ]) {
     assert.throws(() => parseReviewPageInput({ ...input, items: [{ ...input.items[0], doc: badDoc }] }), /doc/);
   }
+});
+
+test('source identities cannot be forged by changing transport IDs and current ownership must match', () => {
+  const source = { scope: '.', purpose: 'maintenance' };
+  const group = { id: 'p', title: 'P', source, project: 'P/projects/Q' };
+  const item = { id: 'ignored', stem: 'same', current: 'p', suggested: 'p', source, project: 'P/projects/Q' };
+  assert.throws(() => parseReviewPageInput({ groups: [group], items: [item, {...item,id:'different'}] }), /duplicate/);
+  assert.throws(() => parseReviewPageInput({ groups: [group], items: [{...item,project:undefined}] }), /ownership/);
+  const parsed = parseReviewPageInput({ groups: [group,{id:'root',title:'Unassigned',source}], items: [{...item,suggested:'root'}] });
+  assert.equal(parsed.items[0]?.id,JSON.stringify(['.','maintenance','P/projects/Q','same']));
+  assert.equal(parsed.groups[1]?.project,undefined);
 });

@@ -22,12 +22,6 @@ import {
   rememberMemory,
 } from "../../src/services/memory/index.js";
 import { NodeService } from "../../src/services/node/node-service.js";
-import {
-  refreshProjectIndex,
-  parseProjectAgents,
-  updateProject,
-} from "../../src/services/tasks/project-meta.js";
-import { domainBoard, nodeBoardWriter } from "../tasks/utils/helpers.js";
 function fixture(t: any) {
   const root = realpathSync(mkdtempSync(join(tmpdir(), "uniform-nodes-")));
   t.after(() => rmSync(root, { recursive: true, force: true }));
@@ -124,69 +118,12 @@ test("Doctor preserves sparse generic nodes and registered cross-directory local
     ],
   );
 });
-test("Task Project index lives once in local ownership while preserving authored sections", async (t) => {
-  const root = fixture(t);
-  const source =
-    "# Board\n\n<!-- edges-local:start -->\n## 本层记忆\n\n- [guide](guide.md) — authored\n<!-- edges-local:end -->\n\n## Authored\nkeep this\n";
-  const project = {
-    project: "demo",
-    dir: "demo",
-    title: "Demo",
-    description: "Business purpose",
-    path: "tasks/demo/AGENTS.md",
-  };
-  put(root, "tasks/AGENTS.md", source);
-  put(root, "tasks/guide.md", "guide");
-  const tail =
-    "\n<!-- edges:start -->\n<!-- edges-local:start -->\n## 本层记忆\n\n- [guide](../guide.md) — shared guide\n<!-- edges-local:end -->\n<!-- edges:end -->\n\n## Authored\nkeep exactly\n";
-  put(root, "tasks/demo/AGENTS.md", "# Demo\n\nBusiness purpose\n" + tail);
-  put(
-    root,
-    "tasks/demo/README.md",
-    "# Demo\n\nBusiness purpose\n\n<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n",
-  );
-  const agentsBefore = read(root, "tasks/demo/AGENTS.md");
-  const parsed = parseProjectAgents(agentsBefore);
-  assert.equal(parsed.description, "Business purpose");
-  const board = domainBoard(root);
-  await updateProject(board, "demo", { title: "New title" }, nodeBoardWriter());
-  assert.equal(read(root, "tasks/demo/AGENTS.md"), agentsBefore);
-  const projectReadme = read(root, "tasks/demo/README.md");
-  assert.match(projectReadme, /^# New title\n/);
-  assert.match(projectReadme, /edges-entries-local:start/);
-  const boardAgents = read(root, "tasks/AGENTS.md");
-  assert.equal(boardAgents, source);
-  assert.doesNotMatch(boardAgents, /## Task Projects/);
-  assert.doesNotMatch(boardAgents, /demo\/AGENTS\.md/);
-  const index = read(root, "tasks/README.md");
-  assert.equal(index.split("demo/README.md").length - 1, 1);
-  const { ReadmeNode } = await import("../../src/domain/models/readme/readme-node.js");
-  const node = await new NodeService({ managedRoot: root }).get(
-    join(root, "tasks/README.md"),
-    ReadmeNode,
-  );
-  assert.ok(node);
-  assert.ok(
-    node.localChildren.some(
-      (child) => child.id === join(root, "tasks/demo/README.md"),
-    ),
-  );
-  assert.equal(
-    node.descendantChildren.some(
-      (child) => child.id === join(root, "tasks/demo/README.md"),
-    ),
-    false,
-  );
-  await refreshProjectIndex(board, nodeBoardWriter());
-  assert.equal(read(root, "tasks/AGENTS.md"), source);
-  assert.equal(read(root, "tasks/README.md"), index);
-});
-test("sparse Task Project markers are local content and a heading-only local section is reused", async (t) => {
+test("sparse business markers are local content and a heading-only local section is reused", async (t) => {
   const root = fixture(t);
   put(
     root,
     "AGENTS.md",
-    "# Board\n<!-- edges-local:start -->\n## Task Projects\n\n- [demo](demo/AGENTS.md) — business\n<!-- edges-local:end -->\n",
+    "# Board\n<!-- edges-local:start -->\n## Business contents\n\n- [demo](demo/AGENTS.md) — business\n<!-- edges-local:end -->\n",
   );
   put(root, "demo/AGENTS.md", "# Demo\n");
   assert.equal(

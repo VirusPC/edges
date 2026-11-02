@@ -64,26 +64,7 @@ test("explicit nested scope separates both boards and co-moves Task/Run without 
           path.join(
             child,
             board,
-            "_default/done",
-            `${task.stem}/.${task.stem}.log.md`,
-          ),
-          "utf8",
-        ),
-        runLog,
-      );
-      const classified = await call(purpose, [
-        "update",
-        task.stem,
-        "--project",
-        "cli",
-      ]);
-      assert.equal(classified.exitCode, 0, classified.stdout);
-      assert.equal(
-        await readFile(
-          path.join(
-            child,
-            board,
-            "cli/done",
+            "done",
             `${task.stem}/.${task.stem}.log.md`,
           ),
           "utf8",
@@ -94,7 +75,7 @@ test("explicit nested scope separates both boards and co-moves Task/Run without 
       assert.equal(runs.exitCode, 0, runs.stdout);
       assert.ok(runs.stdout.includes(`${task.stem}--1`));
       if (purpose === "domain")
-        domainPath = path.join(child, JSON.parse(classified.stdout).path);
+        domainPath = path.join(child, JSON.parse(moved.stdout).path);
     }
     assert.notEqual(
       (await call("maintenance", ["get", domainPath])).exitCode,
@@ -133,30 +114,6 @@ test("scope discovery selects the nearest type or business AGENTS independently 
     await rm(root, { recursive: true, force: true });
   }
 });
-test("project reads do not initialize absent board and manual AGENTS content survives index insertion", async () => {
-  const { root, child } = await fixture();
-  try {
-    const result = await run(
-      [
-        "--scope",
-        child,
-        "tasks",
-        "project",
-        "list",
-      ],
-      { env: {} },
-    );
-    assert.equal(result.exitCode, 0, result.stdout);
-    await assert.rejects(access(path.join(child, ".edges/tasks")));
-    assert.match(
-      "# Manual\n\nKeep rules.\n",
-      /# Manual\n\nKeep rules\./,
-    );
-  } finally {
-    await rm(root, { recursive: true, force: true });
-  }
-});
-
 test("discovery crosses maintenance containers but stops at symlinks and nested Git roots", async () => {
   const { root, child } = await fixture();
   try {
@@ -216,7 +173,6 @@ test("render-only review-page works outside a repository and explicit fresh scop
     const rendered = await run(
       [
         "tasks",
-        "project",
         "review-page",
         "--from",
         "-",
@@ -246,23 +202,5 @@ test("render-only review-page works outside a repository and explicit fresh scop
   } finally {
     process.chdir(cwd);
     await rm(dir, { recursive: true, force: true });
-  }
-});
-
-test("project list ignores unindexed project directories without creating metadata", async () => {
-  const { root, child } = await fixture();
-  try {
-    await mkdir(path.join(child, "tasks/cli/todo"), { recursive: true });
-    const result = await run(["--scope", child, "--super", "tasks", "project", "list"], {
-      env: {},
-    });
-    assert.equal(result.exitCode, 0, result.stdout);
-    assert.deepEqual(JSON.parse(result.stdout).projects, []);
-    await assert.rejects(access(path.join(child, "tasks/cli/AGENTS.md")));
-    await assert.rejects(access(path.join(child, "tasks/cli/README.md")));
-    await assert.rejects(access(path.join(child, "tasks/README.md")));
-    await assert.rejects(access(path.join(child, "tasks/_default")));
-  } finally {
-    await rm(root, { recursive: true, force: true });
   }
 });

@@ -3,15 +3,11 @@ import { nativeTaskPath } from "./realpath.js";
 import * as fs from "node:fs";
 import path from "node:path";
 import { harnessMaterialById, tasksBoardDirName } from "../../domain/config/edges-materials.js";
-import { ENTRY_NAMES } from "../../domain/config/layout.js";
+import { ENTRY_NAMES, LEAF_ENTRY_NAMES } from "../../domain/config/layout.js";
 import { identifyNodeType } from "../../domain/models/node/layout.js";
 import { BaseNode, AgentsNode, ReadmeNode, TaskNode } from "../../domain/models/index.js";
 import { domainFields, scalar } from "../../domain/core/fields.js";
 import { decodeBody } from "../../domain/models/node/document.js";
-import {
-  assertProjectDualWrite,
-  projectIdFromDir,
-} from "../../domain/models/tasks/project.js";
 import { TasksError } from "../../domain/models/tasks/types.js";
 import { checkPath } from "../node/node-files.js";
 
@@ -81,6 +77,8 @@ export async function taskBoardQuery(
   return query(async function* () {
     const seen = new Set<string>();
     const accept = (node: BaseNode) => {
+      if (node instanceof TaskNode && path.dirname(path.dirname(node.directoryPath)) !== root)
+        throw new TasksError("VALIDATION_ERROR", `Task is not directly owned by the selected board; migrate legacy Task Project layouts first: ${node.path}`);
       if (seen.has(node.path)) return false;
       seen.add(node.path);
       return true;
@@ -161,7 +159,7 @@ async function collectTaskBoardDirs(
   const queryOptions = {
     // agents: system entries. readme: module entries, including a Compose child README.
     // Leaf notes stay unread so a broken note body cannot fail board discovery.
-    types: ["agents", "readme"] as const,
+    types: ["agents", "readme", "project"] as const,
     includeHarness: true,
     ...(options.exclude && options.exclude.size > 0 ? { exclude: options.exclude } : {}),
   };
@@ -218,87 +216,48 @@ export async function listRepositoryTaskNodes(
   }
   return out;
 }
-/** Classify a board from physical ownership, never from the reference used to reach it. */
-export function boardLocationOf(
-  board: string,
-  root: string,
-): TaskBoardLocation {
-  if (path.basename(board) !== tasksBoardDirName())
-    throw new TasksError(
-      "VALIDATION_ERROR",
-      `Invalid task board layout: ${board}`,
-    );
-  const relative = path.relative(path.resolve(root), board);
-  if (
-    relative === ".." ||
-    relative.startsWith(`..${path.sep}`) ||
-    path.isAbsolute(relative)
-  )
-    throw new TasksError(
-      "VALIDATION_ERROR",
-      `Task board is outside selected root: ${board}`,
-    );
+/** Physical board ownership, independent of the link used to reach it. */
+export function boardLocationOf(board: string, root: string): TaskBoardLocation {
+  if (path.basename(board) !== tasksBoardDirName() || !isWithinPath(board, path.resolve(root)))
+    throw new TasksError("VALIDATION_ERROR", `Invalid task board location: ${board}`);
   const owner = path.dirname(board);
-  const purpose: TaskPurpose =
-    path.basename(owner) === ".edges" ? "maintenance" : "domain";
-  return {
-    scopeDir: purpose === "maintenance" ? path.dirname(owner) : owner,
-    purpose,
-    boardDir: path.resolve(board),
-  };
+  let cursor = owner;
+  while (isWithinPath(cursor, path.resolve(root))) {
+    if (path.basename(cursor) === ".edges") {
+      const scope = path.dirname(cursor);
+      const relativeOwner = path.relative(cursor, owner);
+      if (!relativeOwner) return { scopeDir: scope, purpose: "maintenance", boardDir: board };
+      const isProjectOwner = LEAF_ENTRY_NAMES.some(name => {
+        const entry = path.join(owner, name);
+        return fs.existsSync(entry) && identifyNodeType(entry) === "project";
+      });
+      if (relativeOwner.startsWith(`projects${path.sep}`) && isProjectOwner)
+        return { scopeDir: scope, purpose: "maintenance", boardDir: board, project: owner };
+      break;
+    }
+    const parent = path.dirname(cursor);
+    if (parent === cursor) break;
+    cursor = parent;
+  }
+  return { scopeDir: owner, purpose: "domain", boardDir: board };
 }
 export function taskLocationOf(node: TaskNode, root: string) {
-  const stem = path.basename(node.directoryPath),
-    statusDir = path.dirname(node.directoryPath);
-  const status = path.basename(statusDir),
-    projectDir = path.dirname(statusDir);
-  const location = boardLocationOf(
-    path.dirname(projectDir),
-    path.resolve(root),
-  );
-  if (!isTaskStatus(status))
-    throw new TasksError(
-      "VALIDATION_ERROR",
-      `Invalid task status directory: ${node.path}`,
-    );
-  const fields = Object.fromEntries(
-    Object.entries(domainFields(node.metadata)).map(([key, value]) => [
-      key,
-      scalar(value),
-    ]),
-  );
-  const project = assertProjectDualWrite(path.basename(projectDir), fields);
+  const stem = path.basename(node.directoryPath);
+  const statusDir = path.dirname(node.directoryPath);
+  const status = path.basename(statusDir);
+  if (!isTaskStatus(status)) throw new TasksError("VALIDATION_ERROR", `Invalid task status directory: ${node.path}; migrate legacy Task Project layouts first`);
+  const board = path.dirname(statusDir);
+  if (path.basename(board) !== tasksBoardDirName())
+    throw new TasksError("VALIDATION_ERROR", `Legacy Task Project layout requires migration: ${node.path}`);
+  const location = boardLocationOf(board, path.resolve(root));
+  const fields = Object.fromEntries(Object.entries(domainFields(node.metadata)).map(([key,value]) => [key,scalar(value)]));
+  if (fields["edges-task-project"] !== undefined)
+    throw new TasksError("VALIDATION_ERROR", `Legacy Task Project metadata requires migration: ${node.path}`);
   if (fields["edges-tasks-status"] && fields["edges-tasks-status"] !== status)
-    throw new TasksError(
-      "VALIDATION_ERROR",
-      `edges-tasks-status dual-write mismatch: ${node.path}`,
-    );
+    throw new TasksError("VALIDATION_ERROR", `edges-tasks-status dual-write mismatch: ${node.path}`);
   return {
-    source: {
-      scope:
-        path
-          .relative(path.resolve(root), location.scopeDir)
-          .split(path.sep)
-          .join("/") || ".",
-      purpose: location.purpose,
-    },
-    project,
-    status,
-    stem,
-  };
-}
-export function projectLocationOf(node: AgentsNode, root: string) {
-  const board = path.dirname(node.directoryPath);
-  if (path.basename(board) !== tasksBoardDirName()) return undefined;
-  const location = boardLocationOf(board, root);
-  const project = projectIdFromDir(path.basename(node.directoryPath));
-  return {
-    location,
-    project,
-    source: {
-      scope:
-        path.relative(root, location.scopeDir).split(path.sep).join("/") || ".",
-      purpose: location.purpose,
-    },
+    source: { scope: path.relative(path.resolve(root),location.scopeDir).split(path.sep).join("/") || ".", purpose: location.purpose },
+    project: location.project ? path.relative(path.join(location.scopeDir,".edges/projects"),location.project).split(path.sep).join("/") : undefined,
+    location, status, stem,
   };
 }

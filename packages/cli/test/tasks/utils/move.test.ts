@@ -19,9 +19,9 @@ for (const entryName of ["index.md", "INDEX.md"]) {
 test(`moveTaskStatus updates frontmatter and moves Task + sidecar (${entryName})`, async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const fromDir = path.join(repo, "tasks/_default/todo");
+    const fromDir = path.join(repo, "tasks/todo");
     await mkdir(fromDir, { recursive: true });
-    await mkdir(path.join(repo, "tasks/_default/in_progress"), {
+    await mkdir(path.join(repo, "tasks/in_progress"), {
       recursive: true,
     });
     await writeFile(
@@ -59,7 +59,7 @@ body
     await access(
       path.join(
         repo,
-        "tasks/_default/in_progress/2026-09-13--mv/.2026-09-13--mv.log.md",
+        "tasks/in_progress/2026-09-13--mv/.2026-09-13--mv.log.md",
       ),
     );
     await assert.rejects(access(path.join(fromDir, `2026-09-13--mv/${entryName}`)));
@@ -71,9 +71,9 @@ body
 test(`status cancelled keeps both files under cancelled/ (${entryName})`, async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const fromDir = path.join(repo, "tasks/_default/backlog");
+    const fromDir = path.join(repo, "tasks/backlog");
     await mkdir(fromDir, { recursive: true });
-    await mkdir(path.join(repo, "tasks/_default/cancelled"), {
+    await mkdir(path.join(repo, "tasks/cancelled"), {
       recursive: true,
     });
     await writeFile(
@@ -101,12 +101,12 @@ body
       now: new Date("2026-09-13T12:00:00Z"),
     });
     await access(
-      path.join(repo, `tasks/_default/cancelled/2026-09-13--stop/${entryName}`),
+      path.join(repo, `tasks/cancelled/2026-09-13--stop/${entryName}`),
     );
     await access(
       path.join(
         repo,
-        "tasks/_default/cancelled/2026-09-13--stop/.2026-09-13--stop.log.md",
+        "tasks/cancelled/2026-09-13--stop/.2026-09-13--stop.log.md",
       ),
     );
   } finally {
@@ -114,71 +114,14 @@ body
   }
 });
 
-test(`moveTaskStatus stays inside a named project and preserves edges-task-project (${entryName})`, async () => {
-  const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
-  try {
-    const fromDir = path.join(repo, "tasks/cli/todo");
-    await mkdir(fromDir, { recursive: true });
-    await writeFile(
-      path.join(fromDir, `2026-09-16--keep/${entryName}`),
-      `---
-name: keep
-description: keep
-metadata:
-  edges-type: task
-  edges-title: keep
-  edges-tasks-status: todo
-  edges-task-project: cli
-  edges-task-priority: urgent
----
 
-body
-`,
-      "utf8",
-    );
-    await writeFile(
-      path.join(fromDir, "2026-09-16--keep/.2026-09-16--keep.log.md"),
-      "# Run log: 2026-09-16--keep\n",
-      "utf8",
-    );
-    const result = await moveTaskStatus(
-      domainBoard(repo),
-      "2026-09-16--keep",
-      "in_progress",
-      {
-        fs: nodeBoardWriter(),
-        now: new Date("2026-09-16T12:00:00Z"),
-      },
-    );
-    assert.equal(result.to, "in_progress");
-    assert.equal(
-      result.path,
-      `tasks/cli/in_progress/2026-09-16--keep/${entryName}`,
-    );
-    const md = await readFile(path.join(repo, result.path), "utf8");
-    assert.match(md, /edges-tasks-status: in_progress/);
-    assert.match(md, /edges-task-project: cli/);
-    assert.match(md, /edges-task-priority: urgent/);
-    await access(
-      path.join(
-        repo,
-        "tasks/cli/in_progress/2026-09-16--keep/.2026-09-16--keep.log.md",
-      ),
-    );
-    await assert.rejects(
-      access(path.join(fromDir, `2026-09-16--keep/${entryName}`)),
-    );
-  } finally {
-    await rm(repo, { recursive: true, force: true });
-  }
-});
 
 test(`moveTaskStatus preserves edges-task-priority and still moves folders (${entryName})`, async () => {
   const repo = await mkdtemp(path.join(tmpdir(), "edges-tasks-"));
   try {
-    const fromDir = path.join(repo, "tasks/_default/todo");
+    const fromDir = path.join(repo, "tasks/todo");
     await mkdir(fromDir, { recursive: true });
-    await mkdir(path.join(repo, "tasks/_default/in_progress"), {
+    await mkdir(path.join(repo, "tasks/in_progress"), {
       recursive: true,
     });
     await writeFile(
@@ -218,7 +161,7 @@ body
     await access(
       path.join(
         repo,
-        "tasks/_default/in_progress/2026-09-16--keep/.2026-09-16--keep.log.md",
+        "tasks/in_progress/2026-09-16--keep/.2026-09-16--keep.log.md",
       ),
     );
   } finally {

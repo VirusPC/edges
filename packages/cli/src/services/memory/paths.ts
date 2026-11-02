@@ -1,3 +1,4 @@
+import { materialHarnessRoot, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { isScope } from "../scope.js";
 import * as fs from "node:fs";
@@ -112,7 +113,7 @@ export function resolveRoot(target: string, rawRoot?: string): string {
     target
   );
 }
-export const memoryDir = (target: string) => path.join(target, MEMORY_DIR_NAME);
+export const memoryDir = (target: string, options: MaterialOptions = {}) => path.join(materialHarnessRoot(target, options), "memory");
 export const moduleForType = (name: string): "memory" | "skills" =>
   ["managed", "referenced"].includes(name) ? "skills" : "memory";
 export const typeDirName = (name: string) =>

@@ -50,11 +50,11 @@ test("tasks writes succeed when the scope links a missing users memory index", a
       { title: "Backlog without users memory", status: "backlog" },
       io,
     );
-    assert.match(created.path, /^\.edges\/tasks\/_default\/backlog\//);
+    assert.match(created.path, /^\.edges\/tasks\/backlog\//);
     assert.match(await readFile(path.join(repo, created.path), "utf8"), /Backlog without users memory/);
     assert.equal(await missing(path.join(repo, ".edges/memory/users/README.md")), true);
 
-    const projectReadme = path.join(repo, ".edges/tasks/_default/README.md");
+    const projectReadme = path.join(repo, ".edges/tasks/README.md");
     const listed = await readFile(projectReadme, "utf8");
     await writeFile(
       projectReadme,
@@ -78,7 +78,7 @@ test("tasks writes succeed when the scope links a missing users memory index", a
       now: new Date("2026-10-19T02:00:00Z"),
     });
     assert.equal(moved.to, "todo");
-    assert.match(moved.path, /^\.edges\/tasks\/_default\/todo\//);
+    assert.match(moved.path, /^\.edges\/tasks\/todo\//);
     assert.equal(await missing(path.join(repo, ".edges/memory/users/README.md")), true);
   } finally {
     await rm(repo, { recursive: true, force: true });

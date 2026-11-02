@@ -31,10 +31,12 @@ FLAGS
   init     [--target-dir] [--root-dir] [--description]
 
   create/update use metadata plus --body. The title is the body H1, or --title.
-  get and delete take only the target. list uses the shared filter/group envelope.
+  list uses the shared filter/group envelope.
   Default: <scope>/.edges/notes/. --super: <scope>/notes/.
-  Use the same scope and --super selection for create/get/update/delete/list.
-  --all lists the system forest. init always initializes the real scope.
+  Global --project selects direct materials inside P (relative to <scope>/.edges/projects).
+  Use the same scope and Project selection for create/get/update/delete/list.
+  --all adds independent systems beneath the selected scope or Project.
+  init adopts only this module; selected Projects do not gain AGENTS.md or .edges.
   There is no git commit, push, or PR.
 
 EXIT CODES

@@ -1,30 +1,22 @@
-import { validateTaskDocInput } from "./task-doc.js";
+import { leafEntryPath } from "../node/entry-path.js";
 import path from "node:path";
+import { validateTaskDocInput } from "./task-doc.js";
 import { nativeTaskPath } from "./realpath.js";
-import { AgentsNode } from "../../domain/models/index.js";
-import { query } from "../../domain/operations/query.js";
-import { projectLocationOf } from "./node-query.js";
-import { resolveBoard, taskBoardLocation } from "./paths.js";
-import { scopeDir, type BoardTarget } from "./paths.js";
-import { isTaskProjectId } from "../../domain/models/tasks/project.js";
+import { ProjectNode } from "../../domain/models/index.js";
+import { tasksBoardDirName } from "../../domain/config/edges-materials.js";
+import { boardLocationOf } from "./node-query.js";
+import { resolveBoard, scopeDir, type BoardTarget } from "./paths.js";
 import { NodeService } from "../node/node-service.js";
 import { portableScope } from "../scope.js";
-import { listRepositoryTasksWithDocs, createNodeBoardFs, listProjectIds, listTasksWithDocs, type BoardFs, type TaskListOpts } from "./board.js";
-import {
-  DEFAULT_PROJECT_DESCRIPTION,
-  DEFAULT_PROJECT_TITLE,
-  readProjectRecord,
-  seedDescriptionFor,
-  seedTitleFor,
-} from "./project-meta.js";
+import { listRepositoryTasksWithDocs, listTasksWithDocs, type BoardFs, type TaskListOpts } from "./board.js";
 import type { ReviewPageInput, ReviewPageItem } from "./review-page.js";
-import { DEFAULT_TASK_PROJECT, TasksError, type TaskListItem, type TaskProjectId } from "../../domain/models/tasks/types.js";
+import { TasksError, type TaskListItem } from "../../domain/models/tasks/types.js";
 import type { TaskDoc } from "../../domain/models/tasks/task-doc.js";
 
 export const GROUPED_LIST_SCHEMA = "edges.tasks.grouped/v1";
 
 export type TaskSource = { scope: string; purpose: "domain" | "maintenance" };
-export function sourceIdentity(source: TaskSource, project: string, stem?: string): string {
+export function sourceIdentity(source: TaskSource, project: string | undefined, stem?: string): string {
   return JSON.stringify(stem === undefined ? [source.scope, source.purpose, project] : [source.scope, source.purpose, project, stem]);
 }
 
@@ -63,19 +55,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 }
 
 function fallbackGroups(): GroupedListGroup[] {
-  return [{ id: DEFAULT_TASK_PROJECT, title: DEFAULT_PROJECT_TITLE, description: DEFAULT_PROJECT_DESCRIPTION }];
-}
-
-function sortGroupIds(ids: Iterable<string>): string[] {
-  return [...new Set(ids)].sort((a, b) => {
-    if (a === DEFAULT_TASK_PROJECT) {
-      return -1;
-    }
-    if (b === DEFAULT_TASK_PROJECT) {
-      return 1;
-    }
-    return a.localeCompare(b);
-  });
+  return [{ id: sourceIdentity({ scope: ".", purpose: "maintenance" }, undefined), title: "Unassigned", description: "Tasks at the scope material root.", source: { scope: ".", purpose: "maintenance" } }];
 }
 
 export function buildGroupedList(tasks: GroupedTaskInput[], groups: GroupedListGroup[]): GroupedList {
@@ -86,7 +66,7 @@ export function buildGroupedList(tasks: GroupedTaskInput[], groups: GroupedListG
       const item: GroupedListItem = {
         id: task.stem,
         stem: task.stem,
-        group: task.project,
+        group: groups.find(group => group.project === task.project)?.id ?? fallbackGroups()[0]!.id,
         title: task.title,
         status: task.status,
         description: task.description,
@@ -107,10 +87,10 @@ export function parseSource(raw: unknown): TaskSource | undefined {
   }
   return { scope: raw.scope, purpose: raw.purpose as TaskSource["purpose"] };
 }
-export function parseSourceProject(raw: unknown): string {
-  if (typeof raw !== "string" || !isTaskProjectId(raw)) {
-    throw new TasksError("VALIDATION_ERROR", "source-aware project must be a real Task Project id (default or lowercase ASCII kebab-case slug)");
-  }
+export function parseSourceProject(raw: unknown): string | undefined {
+  if (raw === undefined) return undefined;
+  if (typeof raw !== "string" || !raw || raw.startsWith("/") || raw.includes("\\") || raw.split("/").some(part => !part || part === "." || part === "..") || /^[a-z]:/i.test(raw))
+    throw new TasksError("VALIDATION_ERROR", "project must be a relative Project path under scope/.edges/projects");
   return raw;
 }
 
@@ -217,89 +197,66 @@ export function parseGroupedList(raw: unknown): GroupedList {
   if (!Array.isArray(raw.groups) || !Array.isArray(raw.items)) {
     throw new TasksError("VALIDATION_ERROR", "grouped list must have groups[] and items[]");
   }
-  return {
-    schema: GROUPED_LIST_SCHEMA,
-    groups: raw.groups.map(parseGroup),
-    items: raw.items.map(parseItem),
-  };
-}
-
-async function resolveGroup(
-  repoPath: BoardTarget,
-  id: TaskProjectId,
-  fs: BoardFs,
-): Promise<GroupedListGroup> {
-  try {
-    const record = await readProjectRecord(repoPath, id, fs);
-    return { id: record.project, title: record.title, description: record.description };
-  } catch (error) {
-    if (error instanceof TasksError && error.errorCode === "PROJECT_NOT_FOUND") {
-      return { id, title: seedTitleFor(id), description: seedDescriptionFor(id) };
-    }
-    throw error;
+  const groups = raw.groups.map(parseGroup);
+  const items = raw.items.map(parseItem);
+  const seen = new Set<string>();
+  for (const item of items) {
+    const identity = item.source ? sourceIdentity(item.source,item.project,item.stem) : item.id;
+    if (seen.has(identity)) throw new TasksError("VALIDATION_ERROR", `duplicate grouped task identity: ${identity}`);
+    seen.add(identity);
+    const group = groups.find(group => group.id === item.group);
+    if (!group) throw new TasksError("VALIDATION_ERROR", `group not found: ${item.group}`);
+    if (item.source && (!group.source || group.source.scope !== item.source.scope || group.source.purpose !== item.source.purpose || group.project !== item.project))
+      throw new TasksError("VALIDATION_ERROR", "grouped item ownership must match its group");
+    if (item.source) item.id = identity;
   }
+  return { schema: GROUPED_LIST_SCHEMA, groups, items };
 }
 
-export async function listGroupedByProject(
-  repoPath: BoardTarget,
-  opts: TaskListOpts,
-  fs: BoardFs,
-  sourceScope = portableScope(scopeDir(repoPath)),
-): Promise<GroupedList> {
+async function ownerGroup(root: string, source: TaskSource, project?: string): Promise<GroupedListGroup> {
+  const id = sourceIdentity(source, project);
+  if (!project) return { id, source, title: source.purpose === "domain" ? "Scope tasks" : "Unassigned", description: "Tasks directly in the scope material root." };
+  const file = leafEntryPath(path.join(root, source.scope, ".edges/projects", project));
+  const node = await new NodeService({ managedRoot: root }).get(file, ProjectNode);
+  if (!node) throw new TasksError("PROJECT_NOT_FOUND", `Project not found: ${file}`);
+  return { id, source, project, title: node.title, description: node.description };
+}
+export async function listGroupedByProject(repoPath: BoardTarget, opts: TaskListOpts, fs: BoardFs, sourceScope = portableScope(scopeDir(repoPath))): Promise<GroupedList> {
   const tasks = await listTasksWithDocs(repoPath, opts, fs);
-  const groupedTasks = await query(async function* () { yield* tasks; }).groupBy(task => task.project).value();
-  const requested = opts.projects ?? [];
-  const ids =
-    requested.length > 0
-      ? requested
-      : [...(await listProjectIds(repoPath, fs)), ...Object.keys(groupedTasks)];
-  const groups: GroupedListGroup[] = [];
-  for (const id of sortGroupIds(ids)) {
-    groups.push(await resolveGroup(repoPath, id, fs));
-  }
-  const grouped = buildGroupedList(tasks, groups);
-  const source: TaskSource = { scope: sourceScope, purpose: resolveBoard(repoPath).purpose };
-  return {
-    ...grouped,
-    groups: grouped.groups.map(group => ({ ...group, source, project: group.id, id: sourceIdentity(source, group.id) })),
-    items: grouped.items.map(item => ({ ...item, source, project: item.group, id: sourceIdentity(source, item.group, item.stem), group: sourceIdentity(source, item.group) })),
-  };
+  const location = resolveBoard(repoPath);
+  const project = location.project ? path.relative(path.join(location.scopeDir,".edges/projects"), location.project).split(path.sep).join("/") : undefined;
+  const source: TaskSource = { scope: sourceScope, purpose: location.purpose };
+  const localSource = { ...source, scope: "." };
+  const group = { ...await ownerGroup(location.scopeDir, localSource, project), id: sourceIdentity(source, project), source };
+  return { schema: GROUPED_LIST_SCHEMA, groups: [group], items: tasks.map(task => ({
+    id: sourceIdentity(source,project,task.stem), stem: task.stem, group: group.id, source, project,
+    path: task.path, title: task.title, description: task.description, status: task.status, priority: task.priority, doc: task.doc,
+  })) };
 }
-
-/** Repository groups use physical source identity, retaining registered empty projects. */
-export async function listRepositoryGroupedByProject(
-  root: string, opts: TaskListOpts = {},
-): Promise<GroupedList> {
+/** Repository grouping follows real Project ownership and retains empty registered Projects. */
+export async function listRepositoryGroupedByProject(root: string, opts: TaskListOpts = {}): Promise<GroupedList> {
   root = nativeTaskPath(root);
   const tasks = await listRepositoryTasksWithDocs(root, opts);
-  const groupedTasks = await query(async function* () { yield* tasks; })
-    .groupBy(task => sourceIdentity(task.source, task.project)).value();
   const groups = new Map<string, GroupedListGroup>();
-  const service = new NodeService({ managedRoot: root });
-  const projects = await service.query(root, {
-    types: ["agents"], includeHarness: true,
-  })
-    .filter((node): node is AgentsNode => node instanceof AgentsNode)
-    .map(node => projectLocationOf(node, root))
-    .filter((entry): entry is NonNullable<typeof entry> => !!entry)
-    .filter(entry => !opts.projects?.length || opts.projects.includes(entry.project)).value();
-  for (const { location, project, source } of projects) {
-    // Identity can still come from a legacy AGENTS.md link. Title and description
-    // come only from README.md; a missing org list falls back to the seed text.
-    const record = await resolveGroup(location, project, createNodeBoardFs(location));
-    const id = sourceIdentity(source, project);
-    groups.set(id, { ...record, id, project, source });
+  const defaultGroup = await ownerGroup(root, { scope: ".", purpose: "maintenance" });
+  groups.set(defaultGroup.id, defaultGroup);
+  const nodes = await new NodeService({ managedRoot: root }).query(root, { types: ["project"], includeHarness: true }).value();
+  for (const node of nodes) {
+    if (!(node instanceof ProjectNode)) continue;
+    const location = boardLocationOf(path.join(node.directoryPath,tasksBoardDirName()),root);
+    if (!location.project) continue;
+    const source: TaskSource = { scope: path.relative(root,location.scopeDir).split(path.sep).join("/") || ".", purpose: location.purpose };
+    const project = path.relative(path.join(location.scopeDir,".edges/projects"),location.project).split(path.sep).join("/");
+    const group = await ownerGroup(root,source,project);
+    groups.set(group.id,group);
   }
-  for (const [id, rows] of Object.entries(groupedTasks)) {
-    if (groups.has(id)) continue;
-    const { source, project } = rows[0]!;
-    const target = taskBoardLocation(path.resolve(root, source.scope), { super: source.purpose === "domain" });
-    const record = await resolveGroup(target, project, createNodeBoardFs(target));
-    groups.set(id, { ...record, id, source, project });
+  for (const task of tasks) {
+    const id = sourceIdentity(task.source,task.project);
+    if (!groups.has(id)) groups.set(id,await ownerGroup(root,task.source,task.project));
   }
   return { schema: GROUPED_LIST_SCHEMA, groups: [...groups.values()], items: tasks.map(task => ({
-    id: sourceIdentity(task.source, task.project, task.stem), stem: task.stem,
-    group: sourceIdentity(task.source, task.project), source: task.source, project: task.project,
+    id: sourceIdentity(task.source,task.project,task.stem), stem: task.stem,
+    group: sourceIdentity(task.source,task.project), source: task.source, project: task.project,
     path: task.path, title: task.title, status: task.status, description: task.description, priority: task.priority, doc: task.doc,
   })) };
 }

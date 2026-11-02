@@ -8,7 +8,7 @@ const HELP = "See edges notes init --help for usage.\n";
 export function addNoteInitCommand(notes: Command, ctx: CliContext): void {
   notes
     .command("init")
-    .description("Initialize .edges/notes/README.md and scope AGENTS.md. Does not read --super.")
+    .description("Initialize .edges/notes/README.md and scope AGENTS.md. With --project, registers direct materials on the selected Project.")
     .option("--target-dir <directory>", "Explicit target scope (otherwise use --scope or scope discovery)")
     .option("--root-dir <directory>", "Boundary for the scope tree")
     .option("--description <text>", "Description in the parent scope index")
@@ -20,7 +20,7 @@ export function addNoteInitCommand(notes: Command, ctx: CliContext): void {
         description?: string;
       }) => {
         try {
-          const result = await initNotes({ ...options, env: ctx.env });
+          const result = await initNotes({ ...options, env: ctx.env, project: ctx.project });
           ctx.result = succeed({ ...result, command: "notes.init" });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

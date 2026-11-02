@@ -88,9 +88,9 @@ jobs:
              fi
              pnpm install --frozen-lockfile --filter @viruspc/edges... --filter tasks-review-app...
              pnpm --filter tasks-review-app run build
-             test -s packages/cli/src/commands/tasks/project/assets/review-page/index.html
-             test -s packages/cli/src/commands/tasks/project/assets/review-page/review.js
-             test -s packages/cli/src/commands/tasks/project/assets/review-page/review.css
+             test -s packages/cli/src/commands/tasks/assets/review-page/index.html
+             test -s packages/cli/src/commands/tasks/assets/review-page/review.js
+             test -s packages/cli/src/commands/tasks/assets/review-page/review.css
              # dist/schemas is gitignored. Review-page doc checks read it at runtime.
              pnpm --filter @viruspc/edges run build:schemas
              pnpm --filter @viruspc/edges exec -- tsx scripts/generate-tasks-site.ts \

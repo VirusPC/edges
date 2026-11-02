@@ -31,6 +31,7 @@ export function addSkillInitCommand(skills: Command, ctx: CliContext): void {
             ...options,
             skillsInstallArgs: ctx.skillsInstallArgs,
             env: ctx.env,
+            project: ctx.project,
           });
           const skillsInstall = result.skillsInstall === true;
           const { skillsInstall: _install, ...payload } = result;

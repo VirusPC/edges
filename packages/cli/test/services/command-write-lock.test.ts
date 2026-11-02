@@ -273,17 +273,8 @@ test("all node-writing command groups lock; validation and persistence failures 
       ["tasks", "create", "--title", "Test"],
       ["tasks", "update", "test", "--title", "Test"],
       ["tasks", "status", "test", "done"],
-      [
-        "tasks",
-        "project",
-        "create",
-        "demo",
-        "--title",
-        "Demo",
-        "--description",
-        "Demo",
-      ],
-      ["tasks", "project", "update", "demo", "--title", "Demo"],
+      ["projects", "create", "--title", "Demo"],
+      ["projects", "update", ".edges/projects/demo/INDEX.md", "--title", "Demo"],
     ])
       assert.match(
         (await run(["--scope", root, ...args], { env: {} })).stdout,

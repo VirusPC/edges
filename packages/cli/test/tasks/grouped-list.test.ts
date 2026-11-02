@@ -56,71 +56,12 @@ test("list --group-by project emits groups of items", async () => {
     assert.equal(body.groupBy, "project");
     assert.equal(body.schema, undefined);
     assert.equal(body.tasks, undefined);
-    const group = body.groups.find((entry) => entry.key === "default");
+    const group = body.groups.find((entry) => entry.key === "__undefined__");
     assert.ok(group);
     assert.equal(group?.items[0]?.title, "Alpha");
     assert.equal(group?.items[0]?.status, "todo");
     // doc is optional in the grouped envelope; task identity remains required.
     assert.equal(typeof group?.items[0]?.stem, "string");
-  } finally {
-    await rm(repo, { recursive: true, force: true });
-  }
-});
-
-test("list filters apply before grouping", async () => {
-  const repo = await mkdtemp(path.join(realpathSync(tmpdir()), "edges-grouped-"));
-  try {
-    const env = { ...process.env, EDGES_REPO: repo };
-    await run(
-      ["--super", "tasks", "create", "--title", "KeepHigh", "--status", "todo", "--project", "cli", "--priority", "high"],
-      { env },
-    );
-    await run(
-      ["--super", "tasks", "create", "--title", "KeepUrgent", "--status", "todo", "--project", "docs", "--priority", "urgent"],
-      { env },
-    );
-    await run(
-      ["--super", "tasks", "create", "--title", "SkipStatus", "--status", "backlog", "--project", "cli", "--priority", "high"],
-      { env },
-    );
-    await run(
-      ["--super", "tasks", "create", "--title", "SkipPriority", "--status", "todo", "--project", "docs", "--priority", "low"],
-      { env },
-    );
-    await run(
-      ["--super", "tasks", "create", "--title", "SkipProject", "--status", "todo", "--project", "other", "--priority", "high"],
-      { env },
-    );
-    const result = await run(
-      [
-        "--super", "tasks",
-        "list",
-        "--group-by",
-        "project",
-        "--format",
-        "json",
-        "--status",
-        "todo",
-        "--project",
-        "cli",
-        "--project",
-        "docs",
-        "--priority",
-        "high",
-        "--priority",
-        "urgent",
-        "--sort",
-        "priority",
-      ],
-      { env },
-    );
-    assert.equal(result.exitCode, 0);
-    const body = JSON.parse(result.stdout) as {
-      groups: Array<{ key: string; items: Array<{ title?: string; priority?: string }> }>;
-    };
-    const titles = body.groups.flatMap((group) => group.items.map((item) => item.title));
-    assert.deepEqual(titles.sort(), ["KeepHigh", "KeepUrgent"]);
-    assert.deepEqual(body.groups.map((group) => group.key).sort(), ["cli", "docs"]);
   } finally {
     await rm(repo, { recursive: true, force: true });
   }

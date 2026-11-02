@@ -20,6 +20,7 @@
     "cli:notes": "pnpm --filter @viruspc/edges exec tsx src/index.ts notes",
     "mcp:run": "pnpm --filter",
     "migrate:recursive-layout": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/migrate-recursive-layout.mts",
+    "migrate:recursive-projects": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/recursive-projects.mts",
     "restore:local-ownership": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/restore-local-ownership.mts",
     "migrate:directory-nodes": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/edges-migrate-directory-nodes.mts",
     "migrate:top-level-layout": "pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/flatten-content-layout.mts",

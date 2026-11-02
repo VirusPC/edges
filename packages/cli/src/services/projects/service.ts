@@ -22,7 +22,7 @@ export function createProject(
   return createDatedLeaf(env, PROJECT_LEAF, input);
 }
 
-export function getProject(env: NodeJS.ProcessEnv, entryPath: string, reach: Pick<LeafReach, "super"> = {}): Promise<DatedLeafView> {
+export function getProject(env: NodeJS.ProcessEnv, entryPath: string, reach: Pick<LeafReach, "super" | "project"> = {}): Promise<DatedLeafView> {
   return getDatedLeaf(env, PROJECT_LEAF, entryPath, reach);
 }
 
@@ -34,7 +34,7 @@ export function updateProject(
   return updateDatedLeaf(env, PROJECT_LEAF, entryPath, input);
 }
 
-export function deleteProject(env: NodeJS.ProcessEnv, entryPath: string, reach: Pick<LeafReach, "super"> = {}): Promise<{ path: string }> {
+export function deleteProject(env: NodeJS.ProcessEnv, entryPath: string, reach: Pick<LeafReach, "super" | "project"> & { recursive?: boolean } = {}): Promise<{ path: string }> {
   return deleteDatedLeaf(env, PROJECT_LEAF, entryPath, reach);
 }
 

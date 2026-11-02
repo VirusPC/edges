@@ -1,3 +1,4 @@
+import type { MaterialOptions } from "../../domain/config/edges-materials.js";
 import { execFile } from "node:child_process";
 import { existsSync, lstatSync, mkdirSync, readdirSync, realpathSync } from "node:fs";
 import path from "node:path";
@@ -41,7 +42,7 @@ export interface ComposeGitReport {
   error?: string;
 }
 
-export interface ComposeAddInput {
+export interface ComposeAddInput extends MaterialOptions {
   name: string;
   /**
    * Checkout directory relative to the scope directory.
@@ -94,8 +95,9 @@ async function gitTry(args: string[], env: NodeJS.ProcessEnv): Promise<string | 
   }
 }
 
-async function requireScope(env: NodeJS.ProcessEnv): Promise<{ scope: string; service: NodeService }> {
+async function requireScope(env: NodeJS.ProcessEnv, options: MaterialOptions = {}): Promise<{ scope: string; service: NodeService }> {
   const session = openNodeSession(env);
+  if (options.project) return { scope: session.scope, service: session.service };
   const file = path.join(session.scope, ENTRY_NAMES.internal);
   if (!fileExists(file)) throw new Error(`Missing scope entry: ${file}. Add AGENTS.md.`);
   const node = await session.service.get(file, AgentsNode);
@@ -104,10 +106,10 @@ async function requireScope(env: NodeJS.ProcessEnv): Promise<{ scope: string; se
 }
 
 /** Create `compose/README.md` and its link from `.edges/README.md` when either is missing. */
-export async function ensureComposeEntry(scope: string, service: NodeService): Promise<ComposeReadmeNode> {
-  const file = composeReadmePath(scope);
-  await ensureScopeReadme(scope, service);
-  await ensureScopeReadmePointer(scope, service);
+export async function ensureComposeEntry(scope: string, service: NodeService, options: MaterialOptions = {}): Promise<ComposeReadmeNode> {
+  const file = composeReadmePath(scope, options);
+  await ensureScopeReadme(scope, service, options);
+  await ensureScopeReadmePointer(scope, service, options);
   if (!fileExists(file)) {
     await service.create(new ComposeReadmeNode(file), {
       name: COMPOSE_INDEX_NAME,
@@ -119,19 +121,19 @@ export async function ensureComposeEntry(scope: string, service: NodeService): P
     id: file,
     name: COMPOSE_INDEX_NAME,
     description: COMPOSE_INDEX_DESCRIPTION,
-  }, service);
+  }, service, options);
   const node = await service.get(file, ComposeReadmeNode);
   if (!node) throw new Error(`Missing compose entry: ${file}`);
   return node;
 }
 
-async function loadCompose(env: NodeJS.ProcessEnv): Promise<{
+async function loadCompose(env: NodeJS.ProcessEnv, options: MaterialOptions = {}): Promise<{
   service: NodeService;
   node: ComposeReadmeNode;
   scope: string;
 }> {
-  const { scope, service } = await requireScope(env);
-  const node = await ensureComposeEntry(scope, service);
+  const { scope, service } = await requireScope(env, options);
+  const node = await ensureComposeEntry(scope, service, options);
   return { service, node, scope };
 }
 
@@ -289,8 +291,9 @@ export interface ComposeListEntry extends ComposeEntry {
 
 export async function listCompose(
   env: NodeJS.ProcessEnv,
+  options: MaterialOptions = {},
 ): Promise<{ entries: ComposeListEntry[]; warnings: string[] }> {
-  const { node } = await loadCompose(env);
+  const { node } = await loadCompose(env, options);
   const entries = node.entries();
   return {
     entries: entries.map((entry) => ({
@@ -305,11 +308,11 @@ export async function addCompose(
   env: NodeJS.ProcessEnv,
   input: ComposeAddInput,
 ): Promise<ComposeAddResult> {
-  const loaded = await requireScope(env);
+  const loaded = await requireScope(env, input);
   const name = input.name.trim();
-  if (input.directory !== undefined) hrefForScopeCheckout(composeReadmePath(loaded.scope), loaded.scope, input.directory);
+  if (input.directory !== undefined) hrefForScopeCheckout(composeReadmePath(loaded.scope, input), loaded.scope, input.directory);
   const { service } = loaded;
-  const node = await ensureComposeEntry(loaded.scope, service);
+  const node = await ensureComposeEntry(loaded.scope, service, input);
   // Validate (name, relative path, duplicates) before touching git.
   node.addChild({
     name,
@@ -389,9 +392,9 @@ async function updateStandalone(
  */
 export async function updateCompose(
   env: NodeJS.ProcessEnv,
-  options: { name?: string; remote?: boolean } = {},
+  options: MaterialOptions & { name?: string; remote?: boolean } = {},
 ): Promise<ComposeGitRun> {
-  const { node, scope } = await loadCompose(env);
+  const { node, scope } = await loadCompose(env, options);
   const ownerDir = scope;
   const remote = options.remote === true;
   return eachCheckout(checkouts(node, options.name), async (entry) => {

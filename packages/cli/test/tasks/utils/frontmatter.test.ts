@@ -90,7 +90,7 @@ test("renderNewTaskDoc writes edges-task-priority after status when high", () =>
   assert.equal(parseTaskDoc(md).metadata["edges-task-priority"], "high");
 });
 
-test("renderNewTaskDoc omits edges-task-project when default or omitted", () => {
+test("renderNewTaskDoc omits edges-task-project on new tasks", () => {
   const omitted = renderNewTaskDoc({
     name: "edges_tasks_cli",
     description: "edges tasks CLI",
@@ -106,26 +106,24 @@ test("renderNewTaskDoc omits edges-task-project when default or omitted", () => 
     description: "edges tasks CLI",
     title: "edges tasks CLI",
     status: "backlog",
-    project: "default",
     updatedAt: "2026-09-13T03:00:00+00:00",
     body: "body\n",
   });
   assert.doesNotMatch(explicitDefault, /edges-task-project/);
 });
 
-test("renderNewTaskDoc writes edges-task-project after status when not default", () => {
+test("renderNewTaskDoc has status and priority without task project metadata", () => {
   const md = renderNewTaskDoc({
     name: "edges_tasks_cli",
     description: "edges tasks CLI",
     title: "edges tasks CLI",
     status: "todo",
-    project: "cli",
     priority: "high",
     updatedAt: "2026-09-13T03:00:00+00:00",
     body: "body\n",
   });
-  assert.match(md, /edges-tasks-status: todo\n  edges-task-project: cli\n  edges-task-priority: high\n/);
-  assert.equal(parseTaskDoc(md).metadata["edges-task-project"], "cli");
+  assert.match(md, /edges-tasks-status: todo\n  edges-task-priority: high\n/);
+  assert.equal(parseTaskDoc(md).metadata["edges-task-project"], undefined);
 });
 
 test("setMetadataField can set edges-task-priority to none", () => {

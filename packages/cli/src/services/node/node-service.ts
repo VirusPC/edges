@@ -213,24 +213,23 @@ export class NodeService {
     return node;
   }
   /**
-   * Runtime-only super entry. Mounts `.edges/README.md` when it exists;
-   * otherwise flat edges-materials paths (empty allowed).
+   * Runtime-only super entry over scope-relative configured materials (empty allowed).
    */
   #superRoot(scopePath: string): SuperAgentsNode {
     return createSuperAgentsNode(scopePath);
   }
-  /** Deferred, streaming reads from a scope, AGENTS.md, or explicit README.md.
+  /** Deferred reads from a scope, AGENTS.md, README.md, or Project INDEX.md.
    * Before moving or destroying a returned node, call get(node.path) to capture
    * its resources. */
   query(scopePath: string, options: NodeQueryOptions = {}): AsyncQuery<BaseNode> {
     const service = this;
     return query(async function* () {
-      const readmeRoot = path.basename(scopePath) === ENTRY_NAMES.readme;
-      const entry = readmeRoot || path.basename(scopePath) === ENTRY_NAMES.internal
+      const contentRoot = ["readme", "project"].includes(identifyNodeType(scopePath) ?? "");
+      const entry = contentRoot || path.basename(scopePath) === ENTRY_NAMES.internal
         ? path.resolve(scopePath) : path.join(path.resolve(scopePath), ENTRY_NAMES.internal);
-      const root = options.super
+      const root = options.super && !contentRoot
         ? service.#superRoot(scopePath)
-        : await service.#read(entry, readmeRoot ? undefined : AgentsNode, false, false);
+        : await service.#read(entry, contentRoot ? undefined : AgentsNode, false, false);
       if (!root)
         throw new Error(
           `Missing scope entry: ${entry}. Add AGENTS.md or pass --super to traverse the content face (README) as a virtual system.`,
@@ -241,7 +240,10 @@ export class NodeService {
       yield* traverse(root, { ...options, scopeDir }, (parent, reference) => {
         if (options.excludeRoots?.has(reference.id)) return undefined;
         if (pathHitsExcludedModule(reference.id, scopeDir, options.exclude)) return undefined;
-        if (!fs.existsSync(reference.id)) return undefined;
+        if (!fs.existsSync(reference.id)) {
+          options.onMissingReference?.(reference);
+          return undefined;
+        }
         if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.
@@ -342,6 +344,7 @@ export class NodeService {
   async #validateGraph(
     plan: Map<string, Planned>,
     removed: (file: string) => boolean = () => false,
+    relocatePersisted: (file: string) => string = (file) => file,
   ): Promise<void> {
     function* roots(): Iterable<BaseNode> {
       for (const write of plan.values()) yield write.node;
@@ -360,7 +363,7 @@ export class NodeService {
         if (!fs.existsSync(ref.id) && !plan.has(ref.id)) {
           // A mount lists its entry before the checkout exists. That is an absent edge.
           if (_parent.childTraversal() === "leaf") return undefined;
-          if (this.#persistedReference(plan, _parent, ref.id)) return undefined;
+          if (this.#persistedReference(plan, _parent, ref.id, relocatePersisted)) return undefined;
           throw new Error(`Missing referenced node: ${ref.id}`);
         }
         readonly = this.#referenceReadOnly(_parent, ref);
@@ -377,12 +380,13 @@ export class NodeService {
     plan: ReadonlyMap<string, Planned>,
     parent: BaseNode,
     refId: string,
+    relocate: (file: string) => string,
   ): boolean {
     const planned = plan.get(parent.path);
     if (!planned) return true;
     if (!planned.before) return false;
     const disk = parseComposite(planned.before.path, planned.before.source);
-    return disk.children.some((child) => child.id === refId);
+    return disk.children.some((child) => relocate(child.id) === refId);
   }
   #proposedParent(
     file: string,
@@ -653,7 +657,7 @@ export class NodeService {
       );
     }
     // Destination snapshots still point at the source until the rename commits.
-    await this.#validateGraph(plan, (file) => isWithinPath(file, sourceRoot));
+    await this.#validateGraph(plan, (file) => isWithinPath(file, sourceRoot), relocate);
     await this.#preflight("move", plan);
     for (const write of plan.values())
       if (write.before && isWithinPath(write.before.path, sourceRoot)) {
@@ -897,7 +901,6 @@ export class NodeService {
     validateResources(snapshot);
     fs.mkdirSync(path.dirname(destRoot), { recursive: true });
     checkPath(destRoot);
-    fs.mkdirSync(destRoot);
     let copied: ResourceSnapshot | undefined;
     try {
       fs.cpSync(sourceRoot, destRoot, {

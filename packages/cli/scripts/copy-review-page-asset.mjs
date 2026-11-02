@@ -3,8 +3,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = path.dirname(fileURLToPath(import.meta.url));
-const from = path.join(root, "../src/commands/tasks/project/assets");
-const to = path.join(root, "../dist/commands/tasks/project/assets");
+const from = path.join(root, "../src/commands/tasks/assets");
+const to = path.join(root, "../dist/commands/tasks/assets");
 mkdirSync(to, { recursive: true });
 cpSync(from, to, { recursive: true });
 

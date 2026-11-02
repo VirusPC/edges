@@ -1,3 +1,4 @@
+import { placedMaterialPath, type MaterialOptions } from "../../config/edges-materials.js";
 import { homedir } from "node:os";
 import path from "node:path";
 import { ReadmeNode } from "../readme/readme-node.js";
@@ -51,8 +52,8 @@ interface ComposeItem {
 export const COMPOSE_INDEX_NAME = "组合";
 export const COMPOSE_INDEX_DESCRIPTION = "被组合的 harness 仓库。";
 
-export function composeReadmePath(scopeDir: string): string {
-  return path.join(scopeDir, COMPOSED_CHECKOUT_ROOT, ENTRY_NAMES.readme);
+export function composeReadmePath(scopeDir: string, options: MaterialOptions = {}): string {
+  return placedMaterialPath(scopeDir, "compose/README.md", options);
 }
 
 export function composeReadmeSeed(): string {

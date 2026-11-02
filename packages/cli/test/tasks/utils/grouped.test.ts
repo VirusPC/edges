@@ -16,15 +16,15 @@ test("buildGroupedList emits edges.tasks.grouped/v1 with groups and items", () =
         title: "Alpha",
         status: "todo",
         description: "first",
-        path: "tasks/_default/todo/2026-09-21--alpha/index.md",
+        path: "tasks/todo/2026-09-21--alpha/index.md",
         sidecarPath:
-          "tasks/_default/todo/2026-09-21--alpha/.2026-09-21--alpha.log.md",
+          "tasks/todo/2026-09-21--alpha/.2026-09-21--alpha.log.md",
         runCount: 0,
         priority: "high",
         project: "default",
       },
     ],
-    [{ id: "default", title: "Default", description: "ungrouped" }],
+    [{ id: "default", title: "Default", project: "default", description: "ungrouped" }],
   );
   assert.equal(grouped.schema, "edges.tasks.grouped/v1");
   assert.equal(grouped.schema, GROUPED_LIST_SCHEMA);
@@ -43,14 +43,14 @@ test("parseGroupedList accepts envelope or raw schema and id or stem", () => {
     status: "success",
     command: "list",
     schema: "edges.tasks.grouped/v1",
-    groups: [{ id: "default", title: "Default" }],
+    groups: [{ id: "default", title: "Default", project: "default" }],
     items: [{ stem: "2026-09-21--alpha", group: "default" }],
   });
   assert.equal(fromStem.items[0]?.id, "2026-09-21--alpha");
 
   const fromRawId = parseGroupedList({
     schema: "edges.tasks.grouped/v1",
-    groups: [{ id: "cli", title: "CLI" }],
+    groups: [{ id: "cli", title: "CLI", project: "cli" }],
     items: [{ id: "2026-09-21--beta", group: "cli" }],
   });
   assert.equal(fromRawId.items[0]?.id, "2026-09-21--beta");
@@ -69,7 +69,7 @@ test("parseGroupedList rejects missing schema, arrays, or identity", () => {
     () =>
       parseGroupedList({
         schema: "edges.tasks.grouped/v0",
-        groups: [{ id: "default", title: "Default" }],
+        groups: [{ id: "default", title: "Default", project: "default" }],
         items: [],
       }),
     (error: unknown) => {
@@ -93,7 +93,7 @@ test("parseGroupedList rejects missing schema, arrays, or identity", () => {
     () =>
       parseGroupedList({
         schema: "edges.tasks.grouped/v1",
-        groups: [{ id: "default", title: "Default" }],
+        groups: [{ id: "default", title: "Default", project: "default" }],
         items: [{ group: "default" }],
       }),
     (error: unknown) => {
@@ -106,7 +106,7 @@ test("parseGroupedList rejects missing schema, arrays, or identity", () => {
 test("groupedListToReviewPageInput maps group → current/suggested without renaming schema", () => {
   const page = groupedListToReviewPageInput({
     schema: "edges.tasks.grouped/v1",
-    groups: [{ id: "cli", title: "CLI" }],
+    groups: [{ id: "cli", title: "CLI", project: "cli" }],
     items: [{ id: "2026-09-21--beta", group: "cli", title: "Beta" }],
   });
   assert.equal(page.items[0]?.stem, "2026-09-21--beta");
@@ -123,9 +123,9 @@ test("buildGroupedList copies doc and omits rawFrontmatter", () => {
         title: "Alpha",
         status: "todo",
         description: "first",
-        path: "tasks/_default/todo/2026-09-21--alpha/index.md",
+        path: "tasks/todo/2026-09-21--alpha/index.md",
         sidecarPath:
-          "tasks/_default/todo/2026-09-21--alpha/.2026-09-21--alpha.log.md",
+          "tasks/todo/2026-09-21--alpha/.2026-09-21--alpha.log.md",
         runCount: 0,
         priority: "high",
         project: "default",
@@ -144,7 +144,7 @@ test("buildGroupedList copies doc and omits rawFrontmatter", () => {
         },
       },
     ],
-    [{ id: "default", title: "Default", description: "ungrouped" }],
+    [{ id: "default", title: "Default", project: "default", description: "ungrouped" }],
   );
   assert.equal(grouped.items[0]?.doc?.body, "hello body");
   assert.equal(grouped.items[0]?.doc?.metadata["edges-task-assignee"], "Ada");
@@ -154,7 +154,7 @@ test("buildGroupedList copies doc and omits rawFrontmatter", () => {
 test("groupedListToReviewPageInput copies status, priority, and doc", () => {
   const page = groupedListToReviewPageInput({
     schema: "edges.tasks.grouped/v1",
-    groups: [{ id: "cli", title: "CLI" }],
+    groups: [{ id: "cli", title: "CLI", project: "cli" }],
     items: [
       {
         id: "2026-09-21--beta",
@@ -194,7 +194,7 @@ test("buildGroupedList omits doc when the caller has none", () => {
         project: "default",
       },
     ],
-    [{ id: "default", title: "Default" }],
+    [{ id: "default", title: "Default", project: "default" }],
   );
   assert.equal("doc" in grouped.items[0]!, false);
 });
@@ -215,14 +215,12 @@ test("source-aware grouped payload requires real project identities and stored s
     project: "cli",
   };
   for (const project of [
-    undefined,
     null,
     1,
     [],
     { value: "cli" },
-    group.id,
-    "_default",
-    "",
+    "../escape",
+        "",
   ]) {
     assert.throws(
       () =>

@@ -8,7 +8,7 @@ const HELP = "See edges projects init --help for usage.\n";
 export function addProjectInitCommand(projects: Command, ctx: CliContext): void {
   projects
     .command("init")
-    .description("Initialize .edges/projects/README.md and scope AGENTS.md. Does not read --super.")
+    .description("Initialize .edges/projects/README.md and scope AGENTS.md. With --project, registers direct materials on the selected Project.")
     .option("--target-dir <directory>", "Explicit target scope (otherwise use --scope or scope discovery)")
     .option("--root-dir <directory>", "Boundary for the scope tree")
     .option("--description <text>", "Description in the parent scope index")
@@ -20,7 +20,7 @@ export function addProjectInitCommand(projects: Command, ctx: CliContext): void 
         description?: string;
       }) => {
         try {
-          const result = await initProjects({ ...options, env: ctx.env });
+          const result = await initProjects({ ...options, env: ctx.env, project: ctx.project });
           ctx.result = succeed({ ...result, command: "projects.init" });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

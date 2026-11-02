@@ -1,6 +1,12 @@
+import { leafEntryPath } from "./entry-path.js";
 import path from "node:path";
 import { gitRoot, resolveScope } from "../scope.js";
 import { NodeService } from "./node-service.js";
+import type { MaterialOptions } from "../../domain/config/edges-materials.js";
+import { buildSystemForest } from "./system-forest-service.js";
+import { scopeTraversal, type NodeQueryOptions } from "../../domain/operations/traverse.js";
+
+export type MaterialReach = MaterialOptions & { all?: boolean; exclude?: ReadonlySet<string> };
 
 export type NodeSession = {
   scope: string;
@@ -17,4 +23,28 @@ export function openNodeSession(env: NodeJS.ProcessEnv): NodeSession {
 
 export function scopeRelativePath(scope: string, file: string): string {
   return path.relative(scope, file).split(path.sep).join("/");
+}
+
+/** Select composition first; --all also discovers independent systems below it. */
+export async function queryMaterialNodes(
+  scope: string,
+  service: NodeService,
+  types: readonly string[],
+  reach: MaterialReach,
+  queryOptions: Pick<NodeQueryOptions, "onMissingReference"> = {},
+) {
+  const root = reach.project ?? scope;
+  const options = { ...queryOptions, types, exclude: reach.exclude, scopeDir: root };
+  const nodes = reach.project
+    ? await service.query(leafEntryPath(root), options).value()
+    : reach.all ? [] : await service.query(root, { ...options, ...scopeTraversal(reach) }).value();
+  if (reach.all) {
+    nodes.push(...(await buildSystemForest(root, {
+      ...queryOptions,
+      includeSuper: !reach.project && reach.super === true,
+      exclude: reach.exclude,
+      form: "independent",
+    })).flat().filter((node) => types.includes(node.type)));
+  }
+  return [...new Map(nodes.map((node) => [node.path, node])).values()];
 }

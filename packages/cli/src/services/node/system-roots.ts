@@ -1,9 +1,11 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { isAbsolute, join, relative, resolve } from "node:path";
+import { isAbsolute, join, relative } from "node:path";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { isHarnessComposeDir, isScopeModuleDir } from "../../domain/config/exclude.js";
 import { isProjectHarnessAgentsFile } from "../../domain/models/agents/harness-agents.js";
 import { ComposeReadmeNode, composeReadmePath } from "../../domain/models/compose/compose-readme-node.js";
+import { identifyNodeType } from "../../domain/models/node/layout.js";
+import { leafEntryPath } from "./entry-path.js";
 
 const SKIP_DIR_NAMES = new Set([
   "node_modules",
@@ -17,13 +19,15 @@ const SKIP_DIR_NAMES = new Set([
 
 /** Checkout directories registered on this scope's compose entry. */
 function composedDirectories(scopeDir: string): string[] {
-  const file = composeReadmePath(scopeDir);
-  if (!existsSync(file)) return [];
-  try {
-    return new ComposeReadmeNode(file).parse(readFileSync(file, "utf8")).entries().map((entry) => entry.directory);
-  } catch {
-    return [];
-  }
+  const files = [composeReadmePath(scopeDir)];
+  if (identifyNodeType(leafEntryPath(scopeDir)) === "project")
+    files.push(composeReadmePath(scopeDir, { project: scopeDir }));
+  return files.flatMap((file) => {
+    if (!existsSync(file)) return [];
+    try {
+      return new ComposeReadmeNode(file).parse(readFileSync(file, "utf8")).entries().map((entry) => entry.directory);
+    } catch { return []; }
+  });
 }
 
 function inDirectory(file: string, dir: string): boolean {
@@ -40,14 +44,23 @@ function inDirectory(file: string, dir: string): boolean {
 export function collectSystemRoots(scopeDir: string, exclude?: ReadonlySet<string>): string[] {
   const composed = exclude?.has("compose") ? composedDirectories(scopeDir) : [];
   const roots: string[] = [];
-  const stack = [scopeDir];
+  const stack = [{ dir: scopeDir, materialScope: scopeDir }];
   while (stack.length) {
-    const dir = stack.pop()!;
+    const current = stack.pop()!;
+    const { dir } = current;
     let entries;
     try {
       entries = readdirSync(dir, { withFileTypes: true });
     } catch {
       continue;
+    }
+    const entryPath = join(dir, ENTRY_NAMES.internal);
+    const isSystem = entries.some((entry) => entry.isFile() && entry.name === ENTRY_NAMES.internal) && isSystemEntry(entryPath);
+    const materialScope = isSystem ? dir : current.materialScope;
+    if (isSystem) roots.push(entryPath);
+    if (exclude?.has("compose") && dir !== scopeDir && (isSystem ||
+        (isScopeModuleDir(dir, "compose", materialScope) && identifyNodeType(leafEntryPath(dir)) === "project"))) {
+      composed.push(...composedDirectories(dir));
     }
     for (const entry of entries) {
       const abs = join(dir, entry.name);
@@ -55,24 +68,16 @@ export function collectSystemRoots(scopeDir: string, exclude?: ReadonlySet<strin
       if (entry.isDirectory()) {
         if (SKIP_DIR_NAMES.has(entry.name)) continue;
         if (isHarnessComposeDir(dir, entry.name)) {
-          const scopeCompose = resolve(dir) === resolve(join(scopeDir, ".edges"));
+          const scopeCompose = isScopeModuleDir(dir, entry.name, scopeDir);
           // Only the scope's own compose directory is part of this forest, and only by default.
           if (!scopeCompose || exclude?.has("compose")) continue;
-        } else if (exclude?.has(entry.name) && isScopeModuleDir(dir, entry.name, scopeDir)) {
+        } else if (exclude?.has(entry.name) && isScopeModuleDir(dir, entry.name, materialScope)) {
           continue;
         }
         if (composed.some((checkout) => inDirectory(abs, checkout))) continue;
-        stack.push(abs);
+        stack.push({ dir: abs, materialScope });
         continue;
       }
-      if (!entry.isFile() || entry.name !== ENTRY_NAMES.internal) continue;
-      let source: string;
-      try {
-        source = readFileSync(abs, "utf8");
-      } catch {
-        continue;
-      }
-      if (isProjectHarnessAgentsFile(abs, source)) roots.push(abs);
     }
   }
   return roots.sort((a, b) => a.localeCompare(b));

@@ -1,5 +1,6 @@
 import { isAbsolute, relative, resolve, sep, basename, join, normalize } from "node:path";
 import { ENTRY_NAMES } from "./layout.js";
+import { identifyNodeType } from "../models/node/layout.js";
 
 /** Module names `--exclude` accepts. Orthogonal to node `--types`. */
 export const EXCLUDABLE_MODULES = [
@@ -32,7 +33,22 @@ export function parseExcludedModules(values: readonly string[] | undefined): Rea
   return found;
 }
 
-/** True when `file` sits in one of `exclude` under `scopeDir` (`.edges/<module>` or a super `<module>`). */
+/** Material boundaries along a relative composition path, including nested Projects. */
+function moduleSegments(parts: readonly string[]): string[] {
+  let index = parts[0] === ".edges" ? 1 : 0;
+  const modules: string[] = [];
+  while (index < parts.length) {
+    const name = parts[index]!;
+    if (!(EXCLUDABLE_MODULES as readonly string[]).includes(name)) break;
+    modules.push(name);
+    if (name !== "projects" || !parts[index + 1] || parts[index + 1] === ENTRY_NAMES.readme) break;
+    index += 2;
+    if (parts[index] === ".edges") index++;
+  }
+  return modules;
+}
+
+/** True when an excluded material contains `file` within the selected composition. */
 export function pathHitsExcludedModule(
   file: string,
   scopeDir: string,
@@ -42,8 +58,7 @@ export function pathHitsExcludedModule(
   const rel = relative(scopeDir, file);
   if (!rel || rel.startsWith("..") || isAbsolute(rel)) return false;
   const parts = rel.split(sep);
-  const name = parts[0] === ".edges" ? parts[1] : parts[0];
-  return !!name && exclude.has(name);
+  return moduleSegments(parts).some((name) => exclude.has(name));
 }
 
 /**
@@ -52,9 +67,9 @@ export function pathHitsExcludedModule(
  */
 export function composedCheckoutRoot(file: string): string | undefined {
   const parts = normalize(file).split(sep);
-  for (let i = 0; i < parts.length - 2; i++) {
-    if (parts[i] === ".edges" && parts[i + 1] === "compose" && parts[i + 2] && parts[i + 2] !== ENTRY_NAMES.readme)
-      return parts.slice(0, i + 3).join(sep);
+  for (let i = 1; i < parts.length - 1; i++) {
+    if (isHarnessComposeDir(parts.slice(0, i).join(sep), parts[i]!) && parts[i + 1] && parts[i + 1] !== ENTRY_NAMES.readme)
+      return parts.slice(0, i + 2).join(sep);
   }
   return undefined;
 }
@@ -74,9 +89,17 @@ export function isScopeModuleDir(
 ): boolean {
   if (!(EXCLUDABLE_MODULES as readonly string[]).includes(name)) return false;
   const parent = resolve(parentDir);
-  return parent === resolve(join(scopeDir, ".edges")) || parent === resolve(scopeDir);
+  if (parent === resolve(join(scopeDir, ".edges")) || parent === resolve(scopeDir)) return true;
+  const rel = relative(scopeDir, parent);
+  if (rel.startsWith("..") || isAbsolute(rel)) return false;
+  const parts = rel.split(sep);
+  if (parts.at(-1) === ".edges") parts.pop();
+  const prefix = parts[0] === ".edges" ? 1 : 0;
+  // The direct modules of P, P/projects/Q, etc. obey the same exclusion policy.
+  return parts.length > prefix && (parts.length - prefix) % 2 === 0 &&
+    parts.slice(prefix).every((part, index) => index % 2 !== 0 || part === "projects");
 }
 
 export function isHarnessComposeDir(parentDir: string, name: string): boolean {
-  return name === "compose" && basename(parentDir) === ".edges";
+  return name === "compose" && (basename(parentDir) === ".edges" || identifyNodeType(join(parentDir, ENTRY_NAMES.leaf)) === "project");
 }

@@ -1,11 +1,9 @@
 import path from "node:path";
-import { placeHarnessMaterial, harnessMaterialById } from "../../domain/config/edges-materials.js";
+import { placeHarnessMaterial, harnessMaterialById, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { ENTRY_NAMES, LEGACY_LEAF_ENTRY } from "../../domain/config/layout.js";
 import { isLeafEntryName } from "../../domain/models/node/layout.js";
-import { projectDirName } from "../../domain/models/tasks/project.js";
 import {
   TASK_STATUSES,
-  type TaskProjectId,
   type TaskStatus,
 } from "../../domain/models/tasks/types.js";
 
@@ -18,24 +16,27 @@ export type TaskBoardLocation = {
   scopeDir: string;
   purpose: TaskPurpose;
   boardDir: string;
+  /** Absolute selected Project directory, if this board belongs to one. */
+  project?: string;
 };
 export type BoardTarget = string | TaskBoardLocation;
 /** A string scope is the real system: materials live under `<scope>/.edges`. Pass `{ super: true }` for the virtual board in the scope directory. */
 export function taskBoardLocation(
   scopeDir: string,
-  options: { super?: boolean } = {},
+  options: MaterialOptions = {},
 ): TaskBoardLocation {
-  const superFace = options.super === true;
-  const { absPath } = placeHarnessMaterial(scopeDir, "tasks", { super: superFace });
+  const superFace = options.super === true && !options.project;
+  const { absPath } = placeHarnessMaterial(scopeDir, "tasks", options);
   return {
     scopeDir,
+    ...(options.project ? { project: options.project } : {}),
     purpose: superFace ? "domain" : "maintenance",
     boardDir: path.dirname(absPath),
   };
 }
 
 /** Board of the subject system. The directory is the tasks material from edges-materials. Real systems place it under `<scope>/.edges`; `--super` places it in the scope directory. */
-export function subjectTaskBoard(scopeDir: string, options: { super?: boolean } = {}): TaskBoardLocation {
+export function subjectTaskBoard(scopeDir: string, options: MaterialOptions = {}): TaskBoardLocation {
   return taskBoardLocation(scopeDir, options);
 }
 export function resolveBoard(target: BoardTarget): TaskBoardLocation {
@@ -53,21 +54,18 @@ export function boardRel(target: BoardTarget = ""): string {
 
 export function statusDir(
   repoPath: BoardTarget,
-  project: TaskProjectId,
   status: TaskStatus,
 ): string {
-  return path.join(boardRoot(repoPath), projectDirName(project), status);
+  return path.join(boardRoot(repoPath), status);
 }
 
 export function taskRelPath(
-  project: TaskProjectId,
   status: TaskStatus,
   stem: string,
   target: BoardTarget = "",
 ): string {
   return path.join(
     boardRel(target),
-    projectDirName(project),
     status,
     stem,
     ENTRY_NAMES.leaf,
@@ -76,13 +74,12 @@ export function taskRelPath(
 
 /** Same task location with the pre-migration `index.md` entry name. */
 export function legacyTaskRelPath(
-  project: TaskProjectId,
   status: TaskStatus,
   stem: string,
   target: BoardTarget = "",
 ): string {
   return path.join(
-    path.dirname(taskRelPath(project, status, stem, target)),
+    path.dirname(taskRelPath(status, stem, target)),
     LEGACY_LEAF_ENTRY,
   );
 }
@@ -93,14 +90,12 @@ export function withEntryName(destination: string, source: string): string {
 }
 
 export function sidecarRelPath(
-  project: TaskProjectId,
   status: TaskStatus,
   stem: string,
   target: BoardTarget = "",
 ): string {
   return path.join(
     boardRel(target),
-    projectDirName(project),
     status,
     stem,
     `.${stem}.log.md`,

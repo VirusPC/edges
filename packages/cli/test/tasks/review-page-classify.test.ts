@@ -26,7 +26,7 @@ test("review-page renders classify JSON with a missing doc and a thin doc", asyn
   const dir = await mkdtemp(path.join(tmpdir(), "edges-classify-"));
   try {
     const out = path.join(dir, "out.html");
-    const result = await run(["tasks", "project", "review-page", "--from", "-", "--out", out], {
+    const result = await run(["tasks", "review-page", "--from", "-", "--out", out], {
       stdinText: JSON.stringify(classify),
     });
     assert.equal(result.exitCode, 0, result.stderr);
@@ -39,7 +39,7 @@ test("review-page renders classify JSON with a missing doc and a thin doc", asyn
     assert.doesNotMatch(html, /playwrightReportBase64/);
     assert.match(html, /edges-task-assignee/);
     const body = JSON.parse(result.stdout) as { command: string; path: string };
-    assert.equal(body.command, "project.review-page");
+    assert.equal(body.command, "review-page");
     assert.equal(body.path, out);
   } finally {
     await rm(dir, { recursive: true, force: true });

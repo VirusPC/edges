@@ -1,6 +1,6 @@
 # Skills (packages/skills/)
 
-本目录是 Edges **对外分发、接入本系统**的 skill 真源，供外部 AI Agent（Claude Code、Codex、Cursor、Gemini CLI、Factory、opencode）加载。日常模块的总入口是 `edges`（[ADR 0051](../../docs/adr/0051-bundled-skills-single-entry.md)）。把 Agent / Grok Bot 会话接进 Langfuse 用 `edges-langfuse-agent-tracing`，四个表面的步骤在它的 `references/`。其余不绑定 Edges 的通用 skill 放在使用方自己的内容仓（经 Compose 挂载，布局由该仓自定），不要放进本仓。见 [ADR 0048](../../docs/adr/0048-retire-shared-extensions.md)。classifyTasks 仍是独立 skill [`edges-tasks-classify`](edges-tasks-classify/SKILL.md)，人闸走 `edges tasks project review-page`；尚未入库的 proposeTypes Skill 应复用同一命令与同一 HTML 壳，不要另开 `--mode`。
+本目录是 Edges **对外分发、接入本系统**的 skill 真源，供外部 AI Agent（Claude Code、Codex、Cursor、Gemini CLI、Factory、opencode）加载。日常模块的总入口是 `edges`（[ADR 0051](../../docs/adr/0051-bundled-skills-single-entry.md)）。把 Agent / Grok Bot 会话接进 Langfuse 用 `edges-langfuse-agent-tracing`，四个表面的步骤在它的 `references/`。其余不绑定 Edges 的通用 skill 放在使用方自己的内容仓（经 Compose 挂载，布局由该仓自定），不要放进本仓。见 [ADR 0048](../../docs/adr/0048-retire-shared-extensions.md)。classifyTasks 仍是独立 skill [`edges-tasks-classify`](edges-tasks-classify/SKILL.md)，人闸走 `edges tasks review-page`；尚未入库的 proposeTypes Skill 应复用同一命令与同一 HTML 壳，不要另开 `--mode`。
 
 ## 目录规范
 
@@ -40,6 +40,8 @@ git tag -l 'skill/edges@*'
 `name` 与目录名一致这条**没有机器校验了**（旧的 `install-skills` 脚本会拦，已退役）。两个 skill 的 `name` 撞车时，后一个会被静默丢弃。
 
 ## 安装
+
+Skill 的材料归属与 Agent 安装位置是两件事。`edges --scope <目录> --project <相对路径> skills ...` 选择已有 Project 的直属 `skills/`，并保留原 scope；材料索引登记在 P 的 INDEX，不把 P 当成新 scope。Agent 安装仍由下面的安装器及其参数决定，选择 Project 不代表给主题另装一套 Agent。
 
 外部用户先 `npm install -g @viruspc/edges`（Node.js 22.20 及以上），再执行 `edges skills init` 或无参 `edges init`。命令会建 skill 类型索引，并把包内 skill 交给固定的 `skills@1.7.2`：`skills add <包内 skills 目录的绝对路径> --skill '*'`。要传给安装器的旗标写在 `--` 后面。没有 TTY、又没探测到 agent 时，不带这些旗标会退出 1。非交互且仍让安装器自动探测 agent 时用 `-g -y`：
 

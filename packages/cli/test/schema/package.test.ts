@@ -46,7 +46,7 @@ test('packed CLI works outside repo with production dependencies and fails clear
     assert.equal(inventory.some(file => file.startsWith('src/') || file.startsWith('scripts/') || (file.endsWith('.ts') && !file.endsWith('.d.ts'))),false);
     assert.ok(inventory.includes('dist/schemas/task-doc.v1.json'));
     assert.ok(inventory.includes('dist/schemas/manifest.json'));
-    assert.ok(inventory.includes('dist/commands/tasks/project/assets/review-page/review.js'));
+    assert.ok(inventory.includes('dist/commands/tasks/assets/review-page/review.js'));
     assert.equal(inventory.some(file => file.endsWith('.tsx')), false);
     assert.ok(inventory.some(file => file.startsWith('dist/assets/memory/templates/')));
     const installed = await readdir(path.join(packageDir, 'node_modules'));

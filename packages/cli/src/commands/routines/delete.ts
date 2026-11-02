@@ -13,7 +13,7 @@ export function addRoutineDeleteCommand(routine: Command, ctx: CliContext): void
     .argument("<target>", "INDEX.md path or routine name")
     .action(async (target: string) => {
       try {
-        const removed = await deleteRoutine(ctx.env, target, { all: ctx.all, super: ctx.super, exclude: ctx.exclude });
+        const removed = await deleteRoutine(ctx.env, target, { all: ctx.all, super: ctx.super, project: ctx.project, exclude: ctx.exclude });
         ctx.result = succeed({ command: "routines.delete", path: removed.path });
       } catch (error) {
         failNodeCommand(ctx, error, HELP);

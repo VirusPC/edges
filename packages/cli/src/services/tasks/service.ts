@@ -38,7 +38,6 @@ export async function findRun(
 }
 
 export { createTask, updateTask } from "./write.js";
-export { createProject, getProject, listProjectsInScope, updateProject, projectRecordFromEntry } from "./project-meta.js";
 export { renderReviewPageFromText } from "./review-page.js";
 export { asTasksError, openTasksRuntime } from "./result.js";
 export { formatRunsTable, formatRunMessagesTable } from "./format.js";
@@ -51,7 +50,8 @@ export function initTasks(options: Omit<InitScopeOptions, "modules">) {
 }
 
 export { isTasksBoardReadmeNode, tasksBoardDirName, tasksBoardReadmeExists, tasksBoardReadmePath } from "./board-material.js";
-export { listTaskNodes } from "./node-query.js";
+export { listTaskNodes, taskLocationOf } from "./node-query.js";
+export { queryMaterialNodes, type MaterialReach } from "../node/scope-session.js";
 export { gitRoot } from "../scope.js";
 export { NodeService } from "../node/node-service.js";
 export { buildSystemForest } from "../node/system-forest-service.js";

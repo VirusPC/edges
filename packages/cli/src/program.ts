@@ -28,6 +28,8 @@ import { acquireWriteLock } from "./services/node/node-lock.js";
 import { installBundledSkills, SkillsInstallError } from "./services/skills/install-bundled.js";
 import { splitSkillsInstallArgs } from "./services/skills/split-skills-install-args.js";
 import { createRequire } from "node:module";
+import { resolveScope } from "./services/scope.js";
+import { resolveProjectSelection } from "./services/projects/selection.js";
 
 const VERSION = (createRequire(import.meta.url)("../package.json") as {
   version: string;
@@ -115,12 +117,16 @@ function addRootCommand(
       "Target content scope (default: EDGES_SCOPE, EDGES_REPO, or cwd owner)",
     )
     .option(
+      "--project <directory>",
+      "Project directory relative to <scope>/.edges/projects (P or P/projects/Q)",
+    )
+    .option(
       "--super",
-      "Root at a runtime SuperAgentsNode mounting edges-materials README paths (never written to disk)",
+      "Use scope-relative configured materials via a runtime SuperAgentsNode; --project takes precedence",
     )
     .option(
       "--all",
-      "Traverse the system forest from the current scope",
+      "Read independent systems below the selected scope or Project; combines with --super",
     )
     .option(
       "--exclude <modules>",
@@ -139,8 +145,9 @@ function addRootCommand(
     .helpCommand(false);
 
   program.hook("preAction", async (_program, command) => {
-    const { scope, super: useSuper, all, exclude } = program.opts<{
+    const { scope, project, super: useSuper, all, exclude } = program.opts<{
       scope?: string;
+      project?: string;
       super?: boolean;
       all?: boolean;
       exclude?: string[];
@@ -149,11 +156,16 @@ function addRootCommand(
     if (all) ctx.all = true;
     if (exclude !== undefined) ctx.exclude = parseExcludedModules(exclude);
     if (scope !== undefined) ctx.env = { ...ctx.env, EDGES_SCOPE: scope };
+    if (project !== undefined && (command.opts().targetDir !== undefined || command.opts().repoDir !== undefined)) {
+      throw new Error("--project cannot be combined with --target-dir or --repo-dir; select the owner with --scope.");
+    }
     const target = commandWriteTarget(command, ctx.env);
     if (all && target !== undefined) {
       throw new Error("--all is only supported by read commands.");
     }
     if (target !== undefined) await beforeWrite?.(target);
+    // Validation reads happen under the same lock as the ensuing write.
+    if (project !== undefined) ctx.project = await resolveProjectSelection(resolveScope(ctx.env), project);
   });
 
   program.action(() => {
@@ -194,9 +206,6 @@ function commandWriteTarget(
     (parent === "routines" && ["create", "update", "delete", "init"].includes(name)) ||
     (parent === "skills" && ["create", "update", "delete", "init"].includes(name)) ||
     (parent === "tasks" && ["create", "update", "status", "init"].includes(name)) ||
-    (parent === "project" &&
-      command.parent?.parent?.name() === "tasks" &&
-      ["create", "update"].includes(name)) ||
     (parent === "memory" &&
       (["init", "add-type", "remember", "restore", "delete"].includes(name) ||
         (name === "doctor" && options.apply) ||
@@ -340,7 +349,7 @@ export async function run(
  */
 function appendComposeWarnings(ctx: CliContext, argv: string[]): void {
   if (ctx.exclude?.has("compose") || !ctx.result || usageScope(argv) === "compose") return;
-  const warnings = scopeComposeWarnings(ctx.env).join("");
+  const warnings = scopeComposeWarnings(ctx.env, { project: ctx.project }).join("");
   if (!warnings) return;
   const previous = ctx.result.stderr;
   ctx.result = {

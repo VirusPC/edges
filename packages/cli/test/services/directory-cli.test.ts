@@ -17,7 +17,7 @@ function put(file: string, content: string) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, content);
 }
-test("Task directory create/get/update/status/project keep assets and runlog together", async (t) => {
+test("Task directory create/get/update/status/Project keep assets and runlog together", async (t) => {
   const root = fixture(t);
   put(path.join(root, "AGENTS.md"), "# Scope");
   const call = (args: string[]) =>
@@ -45,10 +45,15 @@ test("Task directory create/get/update/status/project keep assets and runlog tog
     "asset",
   );
   assert.equal(fs.existsSync(path.join(root, item.path)), false);
-  const changed = await call(["update", item.stem, "--project", "resources"]);
+  const project = await run(["--scope", root, "projects", "create", "--title", "Resources"], { env: {} });
+  assert.equal(project.exitCode, 0, project.stdout);
+  const projectPath = path.relative(path.join(root, ".edges/projects"), path.dirname(path.join(root, JSON.parse(project.stdout).path)));
+  const changed = await call(["update", item.stem, "--to-project", projectPath]);
   assert.equal(changed.exitCode, 0, changed.stdout);
   const changedItem = JSON.parse(changed.stdout);
-  assert.match(changedItem.path, /resources\/done\/.*\/INDEX.md$/);
+  assert.equal(changedItem.path, path.join(".edges/projects", projectPath, "tasks/done", item.stem, "INDEX.md"));
+  assert.equal(fs.readFileSync(path.join(root, path.dirname(changedItem.path), "image.png"), "utf8"), "asset");
+  assert.equal(fs.readFileSync(path.join(root, path.dirname(changedItem.path), "resource.md"), "utf8"), "not a task");
   assert.equal(
     fs.existsSync(
       path.join(
@@ -125,16 +130,16 @@ test("Task directory status refuses same-stem standalone destination and preserv
   const result = await call(["create", "--title", "Collision"]);
   assert.equal(result.exitCode, 0, result.stdout);
   const item = JSON.parse(result.stdout);
-  const collision = path.join(root, "tasks/_default/done", item.stem + ".md");
+  const collision = path.join(root, "tasks/done", item.stem + ".md");
   put(collision, "# Independent");
-  put(path.join(root, "tasks/_default/backlog/sibling.md"), "# Sibling");
+  put(path.join(root, "tasks/backlog/sibling.md"), "# Sibling");
   const move = await call(["status", item.path, "done"]);
   assert.notEqual(move.exitCode, 0);
   assert.equal(fs.existsSync(path.join(root, item.path)), true);
   assert.equal(fs.readFileSync(collision, "utf8"), "# Independent");
   assert.equal(
     fs.readFileSync(
-      path.join(root, "tasks/_default/backlog/sibling.md"),
+      path.join(root, "tasks/backlog/sibling.md"),
       "utf8",
     ),
     "# Sibling",
@@ -262,7 +267,7 @@ test("Memory rejects conflicting import content and wrong entry types before wri
 test("business imports reject known source directory types instead of silently retyping them", async (t) => {
   const root = fixture(t);
   await initMemory({ targetDir: root, memoryTypes: ["project"] });
-  const source = path.join(root, "tasks/_default/backlog/task/INDEX.md");
+  const source = path.join(root, "tasks/backlog/task/INDEX.md");
   put(source, "# Task");
   const result = await run(
     [

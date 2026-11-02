@@ -8,13 +8,6 @@ export interface TaskMetadata {
   /** Display title. Board title falls back to name, then the Task stem. */
   "edges-title"?: string;
   "edges-tasks-status"?: TaskStatus;
-  /**
-   * Task Project id. Omit when default (directory _default). Not a status folder or directory name.
-   * @maxLength 64
-   * @pattern ^[a-z][a-z0-9]*(-[a-z0-9]+)*$
-   * @not {"$ref":"#/definitions/TaskStatus"}
-   */
-  "edges-task-project"?: string;
   /** Orthogonal to status. Absent reads as none. */
   "edges-task-priority"?: TaskPriority;
   "edges-task-assignee"?: string;

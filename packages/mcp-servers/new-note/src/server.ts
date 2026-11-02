@@ -8,10 +8,11 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { loadConfig } from "./config.js";
 import { runIngest } from "./service.js";
+import { ingestInputSchema } from "./validation.js";
 import { createAuthMiddleware, validateAuthConfig, type AuthenticatedRequest } from "./authMiddleware.js";
 
 // Create MCP server instance with tools and prompts registered
-function createMcpServer(config: ReturnType<typeof loadConfig>) {
+export function createMcpServer(config: ReturnType<typeof loadConfig>) {
   const server = new McpServer({
     name: "new-note",
     version: "0.1.0",
@@ -24,13 +25,10 @@ function createMcpServer(config: ReturnType<typeof loadConfig>) {
   server.registerTool("new_note", {
     title: "New Note Tool",
     description: "Create a local note leaf through edges notes. Does not commit, push, or open a pull request.",
-    inputSchema: {
-      title: z.string().describe("Note title, 1–120 characters"),
-      body: z.string().optional().describe("Note markdown body"),
-    },
-  }, async ({ title, body }) => {
+    inputSchema: ingestInputSchema.shape,
+  }, async (input) => {
       try {
-        const result = await runIngest({ title, body: body ?? "" }, config);
+        const result = await runIngest(input, config);
         return {
           content: [
             {
@@ -203,7 +201,7 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
       console.error(`[new-note]     POST/GET/DELETE ${baseUrl}${MCP_PATH}`);
       console.error(`[new-note] ------------------------------------------`);
       console.error(`[new-note] Available Tools:`);
-      console.error(`[new-note]   • new_note: Create a new note and commit/push`);
+      console.error(`[new-note]   • new_note: Create a local note in the selected materials`);
       console.error(`[new-note] ==========================================\n`);
     });
   } else {

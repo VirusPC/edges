@@ -114,7 +114,7 @@ test("NodeService list from AGENTS is system-two only; --super reaches content f
   assert.deepEqual(rel(await service.list(root)), ["AGENTS.md"]);
   const superList = await service.list(root, { super: true });
   assert.equal(path.basename(path.dirname(superList[0]!.path)), ".super");
-  // No .edges/README.md, so super flat-mounts materials (tasks before readme)
+  // Super mounts configured scope-relative materials (tasks before readme).
   // and then expands README children (lower), with seen-path dedupe.
   assert.deepEqual(
     superList.slice(1).map((n) => path.relative(root, n.path)),

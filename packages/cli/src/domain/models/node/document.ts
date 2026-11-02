@@ -15,10 +15,9 @@ import {
   CONSTRAINTS_START,
   DESCENDANTS_END,
   DESCENDANTS_START,
-  ENTRIES_SECTIONS,
+  ENTRIES_GRAMMAR,
   HARNESS_GRAMMAR,
   INNER_BLOCK_ORDER,
-  INTERNAL_SECTIONS,
   LOCAL_END,
   LOCAL_START,
   OUTER_END,
@@ -118,33 +117,6 @@ export interface SyntaxContent {
 
 export type SyntaxProfile = "agents" | "entries";
 
-const PAIRS = [
-  [ENTRIES_SECTIONS.localChildren, INTERNAL_SECTIONS.localChildren],
-  [ENTRIES_SECTIONS.descendantChildren, INTERNAL_SECTIONS.descendantChildren],
-] as const;
-
-function toEntriesProfile(source: string): string {
-  let out = source;
-  for (const [entries, agents] of PAIRS)
-    out = out.replaceAll(`<!-- ${entries.marker}:`, `<!-- ${agents.marker}:`);
-  return out;
-}
-
-function fromEntriesProfile(rendered: string): string {
-  let out = rendered;
-  for (const [entries, agents] of PAIRS)
-    out = out
-      .replaceAll(`<!-- ${agents.marker}:`, `<!-- ${entries.marker}:`)
-      .replaceAll(
-        new RegExp(
-          `(<!-- ${entries.marker}:start -->\\r?\\n)## ${agents.heading}`,
-          "g",
-        ),
-        `$1## ${entries.heading}`,
-      );
-  return out;
-}
-
 function constraintText(item: AgentsItem): string {
   return item.content
     .map((run) => (run.kind === "text" ? run.value : run.label))
@@ -227,9 +199,8 @@ export class InternalSyntax {
   ) {
     this.#profile = profile;
     this.#isIndexed = isIndexed;
-    this.#source =
-      this.#profile === "entries" ? toEntriesProfile(source) : source;
-    const decoded = decodeBody(this.#source);
+    this.#source = source;
+    const decoded = readBody(source, this.#profile === "entries" ? ENTRIES_GRAMMAR : HARNESS_GRAMMAR);
     this.#model = decoded.model;
     for (const key of ["memory", "children", "compose"] as const) {
       decoded.bindings[key].forEach((binding, index) => {
@@ -302,8 +273,6 @@ export class InternalSyntax {
       ),
       references: this.#model.references,
     };
-    const rendered = serializeNode(model, this.#source);
-    if (this.#profile === "entries") return fromEntriesProfile(rendered);
-    return rendered;
+    return writeNode(model, this.#source, this.#profile === "entries" ? ENTRIES_GRAMMAR : HARNESS_GRAMMAR);
   }
 }

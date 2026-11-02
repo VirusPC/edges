@@ -17,12 +17,12 @@ export function splitSkillsInstallArgs(argv: readonly string[]): {
   };
 }
 
-/** Root `--scope <directory>` is the only value option before the command word. */
+/** Root scope and project selectors may precede the command word. */
 function installsBundledSkills(head: readonly string[]): boolean {
   const words: string[] = [];
   for (let index = 0; index < head.length; index += 1) {
     const token = head[index]!;
-    if (token === "--scope") {
+    if (token === "--scope" || token === "--project") {
       index += 1;
       continue;
     }

@@ -1,16 +1,14 @@
 ---
 name: feedback_scope_super_all
-description: >-
-  改 edges 的 list、写任务、init、doctor、帮助、skill 或持久看板生成时：目录和登记分组只由
-  --scope、--super、--all 与路径决定，不要再加 purpose、index-group 或另一套全仓开关。
+description: 改目录模块查询与写入时：scope/project 选择对象与材料，super 换运行时入口，all 扩大独立系统发现；各模块复用公共实现并删除补查。
 metadata:
-  edges-title: scope、super、all 的组合形成一切
+  edges-title: scope、project、super、all 分别选择对象、材料、视角与系统范围
   edges-type: feedback
   edges-origin-session-id: ed32d8b9-d356-4eb9-8822-6ad2ddc36d1c
   edges-agent-client: cursor
   edges-username: VirusPC
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-11-02T06:52:14+08:00'
+  edges-updated-at: '2026-11-02T12:57:44+08:00'
 ---
 
 `--scope`、`--super`、`--all` 与路径决定目录和登记分组。不设 purpose、index-group 之类用途旗标。
@@ -41,3 +39,13 @@ metadata:
 ## 显式路径的后续目标
 
 用户在各模块 create 增加 --path 的讨论中进一步澄清：在模块行为一致的前提下尽可能受控，并保留兜底方法。路径输入不能只放开 create 而与 get/update/delete 脱节；尽量复用公共函数，删除重复机制。跨模块目录覆盖和兜底入口的具体形式仍待细化，不把任意目录写入候选当成已确认契约。具体边界以设计确认后的契约为准。
+
+## 2026-11-02：统一 Super 与 All 的语义和实现
+
+用户在递归 Project 实现后继续要求：super 和 all 也应在各模块间统一。这是不同维度的两个选择，不应合并含义。
+
+**Why:** 仅统一创建落点还不够；相同参数如果在不同模块选择不同查询入口，就需要各模块补查，会再次产生例外和重复机制。
+
+**How to apply:** `--super` 换成相对当前 scope 的运行时 Super 入口，把 scope 的内容作为上一级主体的维护材料；挂载入口使用 scope 直属的既有材料配置，登记的下层组成继续递归展开。`--all` 扩大系统发现范围，在所选目录下发现独立真实系统并组成森林，不给每个系统自动加 Super。两者组合是当前 scope 的 Super 内容树加真实系统森林。默认真实 AGENTS 的登记边界保持不变。
+
+递归 Project 是另一个已确认的材料选择：`--project` 选定 P 的组成入口并优先于 `--super`；Project 组成递归不需要 `--all`，后者只额外发现 P 子树内的独立系统。各目录模块复用公共选择和遍历，删除旧的补查与重复分支，不另造模块专属开关。
