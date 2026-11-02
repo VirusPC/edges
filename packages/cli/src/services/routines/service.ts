@@ -43,16 +43,14 @@ async function listedRoutines(env: NodeJS.ProcessEnv, reach: RoutineReach): Prom
   if (existsSync(path.dirname(org)) && !await service.get(org, ReadmeNode)) {
     throw new Error(`Missing routine organization entry: ${org}`);
   }
-  const nodes = await queryMaterialNodes(scope, service, ["routine", "readme", "agents", "project"], reach);
   // Generic traversal permits absent optional references. A registered routine
-  // material or definition is required; reads must expose damage, never repair it.
-  for (const parent of nodes) {
-    for (const child of parent.children) {
-      const material = path.basename(child.id) === ENTRY_NAMES.readme && path.basename(path.dirname(child.id)) === "routines";
-      if ((!material && !isRoutineEntry(child.id)) || pathHitsExcludedModule(child.id, reach.project ?? scope, reach.exclude)) continue;
-      if (!await service.get(child.id)) throw new Error(`Missing routine entry: ${child.id}`);
-    }
-  }
+  // material or definition is required, after the common traversal excludes edges.
+  const nodes = await queryMaterialNodes(scope, service, ["routine"], reach, {
+    onMissingReference: ({ id }) => {
+      const material = path.basename(id) === ENTRY_NAMES.readme && path.basename(path.dirname(id)) === "routines";
+      if (material || isRoutineEntry(id)) throw new Error(`Missing routine entry: ${id}`);
+    },
+  });
   return nodes.filter((node): node is RoutineNode => node instanceof RoutineNode);
 }
 

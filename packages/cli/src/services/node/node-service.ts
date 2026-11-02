@@ -240,7 +240,10 @@ export class NodeService {
       yield* traverse(root, { ...options, scopeDir }, (parent, reference) => {
         if (options.excludeRoots?.has(reference.id)) return undefined;
         if (pathHitsExcludedModule(reference.id, scopeDir, options.exclude)) return undefined;
-        if (!fs.existsSync(reference.id)) return undefined;
+        if (!fs.existsSync(reference.id)) {
+          options.onMissingReference?.(reference);
+          return undefined;
+        }
         if (options.includeHarness) {
           if (!isWithinPath(reference.id, service.managedRoot)) return undefined;
           // Symlinked mirrors (e.g. installed .agents/skills) are discovered through their real path.

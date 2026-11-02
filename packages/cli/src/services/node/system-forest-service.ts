@@ -1,13 +1,14 @@
 import path from "node:path";
 import { BaseNode } from "../../domain/models/index.js";
-import { composedCheckoutRoot } from "../../domain/config/exclude.js";
+import { composedCheckoutRoot, pathHitsExcludedModule } from "../../domain/config/exclude.js";
 import { collectSystemRoots } from "./system-roots.js";
 import { NodeService } from "./node-service.js";
 import { createSuperAgentsNode } from "./super-root.js";
+import type { NodeQueryOptions } from "../../domain/operations/traverse.js";
 
 export type ForestForm = "independent" | "innermost";
 
-export type SystemForestOptions = {
+export type SystemForestOptions = Pick<NodeQueryOptions, "onMissingReference"> & {
   form?: ForestForm;
   /** When false, omit the runtime SuperAgentsNode root. Default true. */
   includeSuper?: boolean;
@@ -48,7 +49,7 @@ export async function buildSystemForest(
         const peers = new Set(rootSet);
         peers.delete(spec.path);
         const hits = new Set<string>();
-        await listTree(service, spec, recordingExclude(peers, hits), scope, options.exclude);
+        await listTree(service, spec, recordingExclude(peers, hits), options);
         reachability.set(spec.path, hits);
       }),
     );
@@ -69,7 +70,7 @@ export async function buildSystemForest(
     active.map((spec) => {
       const exclude = new Set(activeSet);
       exclude.delete(spec.path);
-      return listTree(service, spec, exclude, scope, options.exclude);
+      return listTree(service, spec, exclude, options);
     }),
   );
 }
@@ -78,31 +79,23 @@ function listTree(
   service: NodeService,
   spec: RootSpec,
   excludeRoots: ReadonlySet<string>,
-  hostScope: string,
-  exclude: ReadonlySet<string> | undefined,
+  options: SystemForestOptions,
 ): Promise<BaseNode[]> {
   const rootPath = spec.kind === "super" ? spec.scopeDir : spec.path;
-  return service.list(rootPath, {
-    super: spec.kind === "super",
-    excludeRoots,
-    ...forestScopeOptions(rootPath, hostScope, exclude),
-  });
-}
-
-/** Apply the same Compose boundary to forest trees and explicit module queries. */
-export function forestScopeOptions(
-  rootPath: string,
-  hostScope: string,
-  exclude?: ReadonlySet<string>,
-): { scopeDir: string; exclude?: ReadonlySet<string> } {
-  // A system that already lives in a checkout does not expand its own Compose entries.
   const checkout = composedCheckoutRoot(rootPath);
   const nested = checkout !== undefined && path.relative(checkout, rootPath) !== "";
-  const nextExclude = nested ? new Set([...(exclude ?? []), "compose"]) : exclude;
-  return {
-    scopeDir: nested && checkout ? checkout : hostScope,
-    ...(nextExclude && nextExclude.size > 0 ? { exclude: nextExclude } : {}),
-  };
+  const compose = new Set(["compose"]);
+  // Module filters are local to this system. Nested Compose stays bounded by
+  // its checkout, including authored links that leave this system's directory.
+  return service.list(rootPath, {
+    super: spec.kind === "super",
+    scopeDir: spec.kind === "super" ? spec.scopeDir : path.dirname(spec.path),
+    exclude: nested ? new Set([...(options.exclude ?? []), "compose"]) : options.exclude,
+    onMissingReference: options.onMissingReference,
+    excludeRoots: nested ? {
+      has: (id: string) => excludeRoots.has(id) || pathHitsExcludedModule(id, checkout, compose),
+    } as ReadonlySet<string> : excludeRoots,
+  });
 }
 
 /** Set that records peer-root hits then excludes them (early-stop + reachability). */

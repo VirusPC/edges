@@ -21,6 +21,8 @@ export interface ScopeTraversalOptions {
    * (other system roots). Used outside traverse's single-system contract.
    */
   excludeRoots?: ReadonlySet<string>;
+  /** Service hook for missing references after traversal exclusions are applied. */
+  onMissingReference?: (reference: NodeReference) => void;
 }
 /** Same-directory README next to an AGENTS.md (content face). Not an AGENTS child. */
 export function contentFaceReadme(node: BaseNode): NodeReference | undefined {
@@ -69,10 +71,10 @@ export async function* traverse(
     active = new Set<string>();
   const matches = (node: BaseNode) =>
     !options.types || options.types.map(normalizeNodeType).includes(node.type);
-  const excluded = (id: string) =>
-    options.scopeDir !== undefined && pathHitsExcludedModule(id, options.scopeDir, options.exclude);
+  const excluded = (id: string, scopeDir: string | undefined) =>
+    scopeDir !== undefined && pathHitsExcludedModule(id, scopeDir, options.exclude);
 
-  async function* visit(node: BaseNode, stop: boolean): AsyncGenerator<BaseNode> {
+  async function* visit(node: BaseNode, stop: boolean, scopeDir: string | undefined): AsyncGenerator<BaseNode> {
     if (active.has(node.path))
       throw new Error(`Composition cycle: ${node.path}`);
     if (seen.has(node.path)) return;
@@ -84,10 +86,10 @@ export async function* traverse(
       const harness = options.includeHarness ? node.harness : undefined;
       const childMode = node.childTraversal() === "leaf" ? "entry" : "expand";
       for (const reference of structuralChildren(node, options)) {
-        if (excluded(reference.id)) continue;
-        yield* step(node, reference, harness, childMode);
+        if (excluded(reference.id, scopeDir)) continue;
+        yield* step(node, reference, harness, childMode, scopeDir);
       }
-      if (harness && !excluded(harness.id)) yield* step(node, harness, harness, "expand");
+      if (harness && !excluded(harness.id, scopeDir)) yield* step(node, harness, harness, "expand", scopeDir);
     } finally {
       active.delete(node.path);
     }
@@ -98,6 +100,7 @@ export async function* traverse(
     reference: NodeReference,
     harness: NodeReference | undefined,
     mode: "expand" | "mount" | "entry",
+    scopeDir: string | undefined,
   ): AsyncGenerator<BaseNode> {
     validateChild(reference);
     const target = resolve(parent, reference);
@@ -116,15 +119,15 @@ export async function* traverse(
       active.add(loaded.path);
       try {
         for (const child of loaded.children)
-          yield* step(loaded, child, undefined, "entry");
+          yield* step(loaded, child, undefined, "entry", scopeDir);
       } finally {
         active.delete(loaded.path);
       }
       return;
     }
-    yield* visit(loaded, mode === "entry");
+    yield* visit(loaded, mode === "entry", loaded.type === "agents" ? dirname(loaded.path) : scopeDir);
   }
 
   for (const root of roots instanceof BaseNode ? [roots] : roots)
-    yield* visit(root, false);
+    yield* visit(root, false, options.scopeDir);
 }
