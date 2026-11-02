@@ -69,3 +69,9 @@ test("init without -- forwards nothing", () => {
     skillsInstallArgs: [],
   });
 });
+
+
+test("project and scope selectors before init keep installer tokens separated", () => {
+  const argv = ["--scope", "/scope", "--project", "P/projects/Q", "skills", "init", "--", "-y"];
+  assert.deepEqual(splitSkillsInstallArgs(argv), { argv: argv.slice(0, -2), skillsInstallArgs: ["-y"] });
+});

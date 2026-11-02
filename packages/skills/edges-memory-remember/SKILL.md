@@ -25,6 +25,8 @@ version: 0.1.2
 
 ## 怎么写
 
+主题材料已归入某个 Project 时，保持原 scope，增加根参数 `--project <相对 .edges/projects 的路径>`；正文直接写入该 Project 的 memory 或 skills 模块。先在所选 Project 内去重并确认类型已采用，同名类型不从根层借用；不能为此自动初始化 Project 的 AGENTS 或 .edges。下文 `.edges/...` 是省略 Project 时的默认路径，实际位置以 CLI 返回为准。
+
 1. 挑 `type`（该层已登记的可写类型：种子 + `AGENTS.md` 本层额外行；可选值和各自收什么见 `--help`，不要把 CLI 当成只有五/六个名字的闭集）和一个 `slug`（小写 snake_case，**不带类型前缀**，CLI 会按 `type` 自动加；`managed` 例外，见下）。`referenced` 仍然只索引、不能 remember。`type` 决定这条记忆归到哪份记忆入口下，而读方是**按问题性质先挑入口**的——分错类型不只是标签错了，是让相关的人检索时压根走不到这条。
 2. 去重：先看该类型的记忆入口，已有同主题条目就复用它的 `slug` 走更新，不要另起一条近义的。入口通常已经在上下文里；不在就 `rg` 一下。
 3. 拟 `--title` 和 `--description`。`description` 是索引里那句说明，**是别人判断「要不要打开这条」的唯一依据**，写清楚适用场景。

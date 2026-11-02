@@ -1,7 +1,8 @@
 import type { MaterialOptions } from "../../domain/config/edges-materials.js";
 import { queryMaterialNodes, type MaterialReach } from "../node/scope-session.js";
 import { existsSync } from "node:fs";
-import { relative } from "node:path";
+import { basename, dirname, relative } from "node:path";
+import { isLeafEntryName } from "../../domain/models/node/layout.js";
 import { memoryNodes } from "./service.js";
 import { resolveTarget } from "./paths.js";
 import { resolveMemoryPath } from "./entries.js";
@@ -11,9 +12,9 @@ function slugOf(file: string, type: string, skill: boolean): string {
     const parts = file.split("/");
     return parts[parts.length - 2] ?? file;
   }
-  const base = file.split("/").pop() ?? file;
+  const base = isLeafEntryName(basename(file)) ? basename(dirname(file)) : basename(file, ".md");
   const prefix = `${type}_`;
-  return base.startsWith(prefix) ? base.slice(prefix.length, -".md".length) : base.replace(/\.md$/, "");
+  return base.startsWith(prefix) ? base.slice(prefix.length) : base;
 }
 
 export async function listMemoryEntries(

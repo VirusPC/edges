@@ -6,7 +6,7 @@ version: 0.1.1
 
 # Project Memory Add Type
 
-在**已经 init** 的记忆目录登记一个用户 Memory Type。扩展面只在 LAYOUT：`.edges/<module>/<plural>/README.md` + 同目录条目 + 该层 `AGENTS.md` 本层清单一行。不写 JSON/YAML 注册表。PROTOCOL 不枚举类型。
+在**已经 init** 的记忆目录登记一个用户 Memory Type。扩展面只在 LAYOUT：`.edges/<module>/<plural>/README.md` + 同目录条目 + 该层 `AGENTS.md` 本层清单一行。不写 JSON/YAML 注册表。PROTOCOL 不枚举类型。选择主题 Project 时保持原 scope，使用根参数 `--project <相对 .edges/projects 的路径>`，类型直接写在 Project 的 memory / skills 下，登记到 Project INDEX；同名类型只在所选材料根内检查唯一性，不另建 AGENTS 或 .edges。
 
 执行前确认 `edges memory add-type --help` 可用。类型布局见 [`LAYOUT.md`](../edges/references/memory/references/LAYOUT.md)，执行能力由 Edges CLI 提供。
 

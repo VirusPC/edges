@@ -33,6 +33,8 @@ import { EntriesNode } from "../../domain/models/node/entries-node.js";
 import { createReadmeNode, readmeModelFor } from "../../domain/models/readme/specialize.js";
 import { parseDocument } from "../../utils/markdown/document.js";
 import { checkPath, readEntry } from "./node-files.js";
+import { SEED_TYPE_NAMES, seedSpec } from "../memory/types.js";
+import { typeFromDirName, typeDirName } from "../memory/paths.js";
 export type Model<T extends BaseNode = BaseNode> = new (file: string) => T;
 export function coLocated(entry: string): boolean {
   return (
@@ -146,7 +148,17 @@ export function indexContract(
   const match = node.body.match(
     /<!-- edges-memory-type:start -->([\s\S]*?)<!-- edges-memory-type:end -->/,
   );
-  if (!match) return undefined;
+  if (!match) {
+    // Official templates predate explicit type metadata. Their adopted index
+    // layout supplies the same seed contract at scope and Project roots.
+    if (!ENTRIES_MARKER.test(node.body)) return undefined;
+    const directory = path.basename(path.dirname(node.path));
+    const name = typeFromDirName(directory);
+    if (!SEED_TYPE_NAMES.includes(name) || directory !== typeDirName(name)) return undefined;
+    const spec = seedSpec(name);
+    if (path.basename(path.dirname(path.dirname(node.path))) !== spec.module) return undefined;
+    return { module: spec.module, name: spec.name, format: spec.format, writable: spec.writable };
+  }
   const fields =
     parseDocument(`---\n${match[1]!.trim()}\n---\n`).metadata ?? {};
   if (fields.writable !== undefined && typeof fields.writable !== "boolean")

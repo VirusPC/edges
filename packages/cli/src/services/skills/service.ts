@@ -35,8 +35,9 @@ export function managedSkillFile(scope: string, name: string, options: MaterialO
 async function listedSkills(
   env: NodeJS.ProcessEnv,
   reach: SkillReach,
+  session = openNodeSession(env),
 ): Promise<SkillNode[]> {
-  const { scope, service } = openNodeSession(env);
+  const { scope, service } = session;
   const nodes = await queryMaterialNodes(scope, service, ["skill"], reach);
   return nodes.filter((node): node is SkillNode => node instanceof SkillNode);
 }
@@ -50,14 +51,19 @@ export async function resolveSkill(
   const looksPath = target.includes("/") || target.endsWith(ENTRY_NAMES.skill);
   if (looksPath) {
     const abs = path.resolve(scope, target);
-    if (!isWithinPath(abs, reach.project ?? managedRoot) || path.basename(abs) !== ENTRY_NAMES.skill) {
+    if (!isWithinPath(abs, managedRoot) || path.basename(abs) !== ENTRY_NAMES.skill) {
       throw new Error(`skill not found: ${target}`);
+    }
+    if (reach.project) {
+      const listed = await listedSkills(env, reach, { scope, managedRoot, service });
+      if (!isWithinPath(abs, reach.project) && !listed.some((node) => node.path === abs))
+        throw new Error(`skill not found: ${target}`);
     }
     const node = await service.get(abs, SkillNode);
     if (!node) throw new Error(`skill not found: ${target}`);
     return { scope, service, node };
   }
-  const matches = (await listedSkills(env, reach)).filter((node) => node.name === target);
+  const matches = (await listedSkills(env, reach, { scope, managedRoot, service })).filter((node) => node.name === target);
   if (matches.length !== 1) {
     throw new Error(matches.length === 0 ? `skill not found: ${target}` : `skill name is ambiguous: ${target}`);
   }
@@ -133,7 +139,7 @@ export function initSkills(options: Omit<InitScopeOptions, "modules">) {
 }
 
 export async function listSkills(env: NodeJS.ProcessEnv, reach: SkillReach): Promise<SkillItem[]> {
-  const { scope, service } = openNodeSession(env);
+  const { scope } = openNodeSession(env);
   const nodes = await listedSkills(env, reach);
   return nodes.flatMap((node) => node instanceof SkillNode ? [{
     name: node.name ?? "",
