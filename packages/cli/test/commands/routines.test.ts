@@ -34,7 +34,8 @@ async function cli(root: string, args: string[]) {
 test("routines init is explicit, idempotent, and shares the root init module", async (t) => {
   const root = scope(t);
   const initial = await initScope({ targetDir: root });
-  assert.deepEqual(initial.modules, ["memory", "skills", "notes", "projects"]);
+  assert.deepEqual(initial.modules, ["memory", "skills", "tasks", "notes", "projects"]);
+  assert.equal(existsSync(path.join(root, ".edges/tasks/README.md")), true);
   assert.equal(existsSync(path.join(root, ".edges/routines")), false);
   const first = await cli(root, ["routines", "init"]);
   assert.deepEqual(first.modules, ["routines"]);

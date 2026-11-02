@@ -87,7 +87,7 @@ cd <用户的仓库>
 edges --scope . init -- -g -y
 ```
 
-- 无参 `init` 默认写入：`AGENTS.md`、memory 类型 `feedback` / `project` / `reference`、skills 类型索引（managed、referenced），并把包内 Edges skills 装给本机 agent；还有 notes、projects 的组织列表。任务看板**不在**默认集里，需要时另跑 `edges --scope . tasks init`。
+- 无参 `init` 默认写入：`AGENTS.md`、memory 类型 `feedback` / `project` / `reference`、skills 类型索引（managed、referenced），并把包内 Edges skills 装给本机 agent；还有 tasks、notes、projects 的组织列表。任务看板在 `.edges/tasks`，登记在 `AGENTS.md` 指向的材料索引上。只建这一块看板仍用 `edges --scope . tasks init`。routines 不在默认集里。
 - `--` 后面的旗标原样交给 `skills@1.7.2` 安装器：`-g` 装到用户目录，`-y` 跳过确认。没有 TTY、又没探测到 agent 时，不带 `-y` 会退出 1。
 - 只给某一个 agent 装：`edges --scope . init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。
 - 只想建目录结构、不装 skill：`edges --scope . init notes tasks`（列出要的模块，可选 `memory`、`skills`、`tasks`、`notes`、`projects`、`routines`）。

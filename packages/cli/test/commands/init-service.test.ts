@@ -36,7 +36,7 @@ async function tree(root: string): Promise<Map<string, string>> {
   return out;
 }
 
-test("edges init --help separates tasks from modules this command creates and ignores --super", async () => {
+test("edges init --help lists tasks with modules this command creates and keeps routines out", async () => {
   const help = await run(["init", "--help"], { env: {} });
   assert.equal(help.exitCode, 0, help.stdout + help.stderr);
   assert.match(help.stdout, /does not read --super/);
@@ -49,8 +49,12 @@ test("edges init --help separates tasks from modules this command creates and ig
   assert.match(created, /\bskills\b/);
   assert.match(created, /\bnotes\b/);
   assert.match(created, /\bprojects\b/);
-  assert.doesNotMatch(created, /\btasks\b/);
-  assert.match(rest, /\btasks\b/);
+  assert.match(created, /\btasks\b/);
+  assert.match(created, /\.edges\/tasks/);
+  assert.doesNotMatch(created, /\broutines\b/);
+  assert.doesNotMatch(rest, /\btasks\b/);
+  assert.match(rest, /\broutines\b/);
+  assert.match(rest, /not in the default set/);
   assert.doesNotMatch(rest, /adopts skill types/);
 });
 
@@ -61,9 +65,10 @@ test("edges init on an empty scope writes AGENTS, public memory types, and harne
   const body = JSON.parse(result.stdout) as { status: string; command: string; modules: string[] };
   assert.equal(body.status, "success");
   assert.equal(body.command, "init");
-  assert.deepEqual(body.modules, ["memory", "skills", "notes", "projects"]);
+  assert.deepEqual(body.modules, ["memory", "skills", "tasks", "notes", "projects"]);
   for (const rel of [
     "AGENTS.md",
+    ".edges/tasks/README.md",
     ".edges/notes/README.md",
     ".edges/projects/README.md",
     ".edges/memory/feedbacks/README.md",
@@ -74,14 +79,14 @@ test("edges init on an empty scope writes AGENTS, public memory types, and harne
   ]) {
     assert.equal(existsSync(path.join(root, rel)), true, rel);
   }
-  for (const module of ["notes", "projects"]) {
+  for (const module of ["tasks", "notes", "projects"]) {
     assert.equal(existsSync(path.join(root, module, "README.md")), false, module);
     const index = await readFile(path.join(root, ".edges", module, "README.md"), "utf8");
     assert.match(index, /edges-entries-local:start/, module);
   }
   for (const rel of [
     ".edges/memory/users/README.md",
-    ".edges/tasks/README.md",
+    ".edges/routines/README.md",
     ".edges/evaluation/README.md",
     ".edges/observation/README.md",
   ]) {
@@ -89,10 +94,12 @@ test("edges init on an empty scope writes AGENTS, public memory types, and harne
   }
   const agents = await readFile(path.join(root, "AGENTS.md"), "utf8");
   assert.match(agents, /\.edges\/README\.md/);
+  assert.doesNotMatch(agents, /\.edges\/tasks\/README\.md/);
   assert.doesNotMatch(agents, /\.edges\/notes\/README\.md/);
   assert.doesNotMatch(agents, /\.edges\/projects\/README\.md/);
   assert.doesNotMatch(agents, /\.edges\/memory\/feedbacks\/README\.md/);
   const index = await readFile(path.join(root, ".edges/README.md"), "utf8");
+  assert.match(index, /tasks\/README\.md/);
   assert.match(index, /notes\/README\.md/);
   assert.match(index, /projects\/README\.md/);
   assert.match(index, /memory\/feedbacks\/README\.md/);
