@@ -4,6 +4,29 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-02
+
+### 材料归属
+
+- **破坏性：笔记和项目默认写进 `.edges/`。** `edges notes` 与 `edges projects` 的创建、读取、更新、删除和列表默认使用 `<scope>/.edges/notes`、`<scope>/.edges/projects`。已经放在 scope 根下 `notes/`、`projects/` 的内容不会自动搬走，默认命令也读不到；继续操作它们要加 `--super`。`edges notes init` 与 `edges projects init` 只准备 `.edges/` 里的组织清单，不读 `--super`。见 [CLI 作用域说明](README.md#先确定内容归属)。
+- **用一个 Project 装下同一主题的材料。** 根命令 `--project <路径>` 与 `--scope` 同级。路径相对 `<scope>/.edges/projects`，可以是 `P` 或 `P/projects/Q`，并且这个 Project 必须已经存在。选中之后，notes、tasks、memory、skills、routines 和子 Project 直接放在该目录下（`P/notes`、`P/tasks` 等），不会自动生成 `P/AGENTS.md` 或 `P/.edges`。不写 `--project` 时，材料仍在 `<scope>/.edges/`。指定了 `--project` 之后，`--super` 不再改这组材料的位置。非空 Project 要用 `edges projects delete <路径> --recursive` 才删整棵目录。见 [ADR 0052](../../docs/adr/0052-projects-as-recursive-material-groups.md)。
+- **`--super` 看 scope 直属材料，`--all` 只用来多看几套系统。** 各目录模块共用这两个根开关。`--super` 改看 `<scope>/` 下的 notes、tasks 等，不把范围扩到 Git 根。`--all` 只读，从当前 scope 或所选 Project 往下发现独立系统；写命令带 `--all` 会失败。最广的一次查询是 `edges --scope <目录> --super --all`。查到的结果按它真实所在的 scope 或 Project 写回。
+- **`--exclude` 按你正在看的那一层生效。** 可排除的模块名仍是 `compose`、`memory`、`skills`、`notes`、`projects`、`tasks`、`routines`。排除跟着所选 scope、Project 或 `--super` 的材料边界走，嵌套 Project 里的目录也算在内；被组合仓库内部不会被当成当前系统的材料扫进去。
+- **记忆的写入和用户归档跟着所选材料根。** `edges memory remember` 与 `edges memory add-type` 写在 `<scope>/.edges/memory`，或 `--project` 下的 `P/memory`。`edges memory backup` 与 `edges memory restore` 只处理这一份 `memory/users/`；`--super` 和 `--all` 不改归档位置。`edges memory list` 可以加 `--all` 多看独立系统。
+
+### 任务
+
+- **破坏性：任务分组改成上面的 Project，`edges tasks project` 没有了。** 不再有 Task Project、`_default` 和 `edges tasks project list|get|create|update`。任务文件是所选材料根下的 `tasks/<status>/<stem>/INDEX.md`。新建用 `edges tasks create`；放进某个主题用 `edges --project <路径> tasks create`。换主题用 `edges tasks update <目标> --to-project <路径>`，回到 scope 的任务板用 `--to-default`。`edges tasks status` 只在当前这块板上改状态。安装这个包不会改写已有任务目录；原来按任务组存放的看板，用仓库里的 [迁移说明](../../scripts/migrations/recursive-projects.md) 预览后再搬。审阅页和 `edges tasks list --group-by project` 按这些 Project 分组。
+
+### 笔记
+
+- **MCP `new_note` 可以选主题或 scope 根。** 没有 shell 时，工具多了可选的 `project` 和 `super`，传给 `edges notes create`，路径校验与 CLI 相同。scope 仍由服务端决定。只在本地创建笔记，不提交、不推送。选 Project 写到 `P/notes`，只选 super 写到 `<scope>/notes`，否则写到 `<scope>/.edges/notes`。
+
+### 随包技能
+
+- **随包技能改到同一套归属。** 再跑一次 `edges skills init` 后，`edges`、`edges-memory-ask`、`edges-memory-remember`、`edges-memory-add-type`、`edges-onboarding`、`edges-conversation-to-notes`、`edges-conversation-to-tasks`、`edges-tasks-classify` 会按 scope、`--project`、`--super` 和只读的 `--all` 来读写。任务归类不再调用 `edges tasks project`，确认后用 `edges tasks update --to-project` 或 `--to-default`。
+- **对话笔记的标题只写主题。** `edges-conversation-to-notes` 让 `--title`、正文一级标题和 frontmatter `title` 只保留主题简述。目录仍是 `notes/YYYY-MM-DD--主题简述/INDEX.md`。
+
 ## [0.4.1] - 2026-10-27
 
 ### Changed
