@@ -1,5 +1,3 @@
-import { queryMaterialNodes, type MaterialReach } from "../../services/node/scope-session.js";
-import { taskLocationOf } from "../../services/tasks/node-query.js";
 import * as fs from "node:fs";
 import path from "node:path";
 import { Command, Option } from "commander";
@@ -7,13 +5,11 @@ import type { CliContext } from "../../context.js";
 import { parseTaskPriority } from "../../domain/models/tasks/priority.js";
 import { TaskNode } from "../../domain/models/tasks/task-node.js";
 import { sortTasksByPriority } from "../../domain/operations/tasks.js";
-import { scopeTraversal } from "../../domain/operations/traverse.js";
 import { TASK_PRIORITIES, TASK_STATUSES, type TaskPriority, type TaskStatus } from "../../domain/models/tasks/types.js";
 import { runTasksCommand, succeed } from "./run.js";
 import { TasksError } from "../../domain/models/tasks/types.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import {
-  buildSystemForest,
   gitRoot,
   groupRecords,
   listTaskNodes,
@@ -21,11 +17,13 @@ import {
   nativeTaskPath,
   NodeService,
   parseFieldFilter,
+  queryMaterialNodes,
   relativePathInsideScope,
   subjectTaskBoard,
-  tasksBoardDirName,
+  taskLocationOf,
   tasksBoardReadmeExists,
   type FieldFilter,
+  type MaterialReach,
 } from "../../services/tasks/service.js";
 
 const LIST_AFTER_HELP = `

@@ -24,7 +24,7 @@ function fixture(t: any) {
 test("task update adds title and priority metadata to an indexed task and status preserves its runlog", async (t) => {
   const root = fixture(t),
     scope = path.join(root, "nested");
-  const folder = path.join(scope, "tasks/_default/todo");
+  const folder = path.join(scope, "tasks/todo");
   mkdirSync(folder, { recursive: true });
   const stem = "2026-10-05--plain";
   mkdirSync(path.join(folder, stem), { recursive: true });
@@ -52,14 +52,14 @@ test("task update adds title and priority metadata to an indexed task and status
   assert.equal(moved.exitCode, 0, moved.stdout);
   assert.match(
     readFileSync(
-      path.join(scope, "tasks/_default/done", stem, "INDEX.md"),
+      path.join(scope, "tasks/done", stem, "INDEX.md"),
       "utf8",
     ),
     /Body stays/,
   );
   assert.equal(
     readFileSync(
-      path.join(scope, "tasks/_default/done", stem, "run.log.md"),
+      path.join(scope, "tasks/done", stem, "run.log.md"),
       "utf8",
     ),
     "Run evidence\n",
@@ -149,7 +149,7 @@ test("ordinary CLI startup works without the optional legacy migration implement
 });
 
 test("indexed task with malformed status is rejected without changing its body or runlog", async t => {
-  const root = fixture(t), folder = path.join(root, "tasks/_default/todo/bad");
+  const root = fixture(t), folder = path.join(root, "tasks/todo/bad");
   mkdirSync(folder, { recursive: true });
   const original = "---\nmetadata:\n  edges-type: task\n  edges-tasks-status: invalid\n---\nOriginal\n";
   writeFileSync(path.join(folder, "INDEX.md"), original);
