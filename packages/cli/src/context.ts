@@ -29,6 +29,8 @@ export type CliContext = {
   stdinIsTTY?: boolean;
   /** Explicit `--super`: traverse from SuperAgentsNode mounting edges-materials READMEs. */
   super?: boolean;
+  /** Validated absolute Project directory; the original scope remains in env. */
+  project?: string;
   /** Explicit `--all`: traverse the system forest from the current scope. */
   all?: boolean;
   /** Global `--exclude`: module names skipped by traversal and the system-root scan. */
@@ -75,7 +77,8 @@ export function usageError(reason: string, scope: "root" | "notes" | "projects" 
 }
 
 export function usageScope(argv: string[]): "root" | "notes" | "projects" | "tasks" | "artifacts" | "memory" | "skills" | "routines" | "schema" | "compose" | "evaluation" | "config" {
-  const command = argv.filter((arg, i) => arg !== "--scope" && argv[i - 1] !== "--scope" && !arg.startsWith("--scope=") && arg !== "--exclude" && argv[i - 1] !== "--exclude" && !arg.startsWith("--exclude=") && arg !== "--super" && arg !== "--all")[0];
+  const valued = ["--scope", "--project", "--exclude"];
+  const command = argv.filter((arg, i) => !valued.some((flag) => arg === flag || argv[i - 1] === flag || arg.startsWith(`${flag}=`)) && arg !== "--super" && arg !== "--all")[0];
   if (command === "notes") return "notes";
   if (command === "projects") return "projects";
   if (command === "tasks") return "tasks";
