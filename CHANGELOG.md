@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### 初始化
+
+- **无参 `edges init` 同时创建任务看板。** 不指定模块时，默认集是 memory、skills、tasks、notes、projects，会写出 `<scope>/.edges/tasks/README.md`，并登记到 `AGENTS.md` 指向的材料索引。`edges tasks init` 与 `edges init tasks` 仍只建这一块看板。routines 仍不在默认集里，要单独 `edges routines init`。
+
 ### 随包技能
 
 - **日常技能收成总入口 `edges`：** 随包装上的技能剩下 9 个。`edges` 负责挂仓库、写笔记、例程、初始化系统入口，以及用户记忆的备份和恢复。检索仍是 `edges-memory-ask`，沉淀仍是 `edges-memory-remember`。第一次接入、整理对话、整板任务归类（`edges-tasks-classify`）、把会话接到 Langfuse 仍是各自的技能。见 [ADR 0051](docs/adr/0051-bundled-skills-single-entry.md)。

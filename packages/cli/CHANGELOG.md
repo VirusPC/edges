@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### 初始化
+
+- **无参 `edges init` 同时创建任务看板。** 不指定模块时，默认集是 memory、skills、tasks、notes、projects，会写出 `<scope>/.edges/tasks/README.md`，并登记到 `AGENTS.md` 指向的材料索引。`edges tasks init` 与 `edges init tasks` 仍只建这一块看板。routines 仍不在默认集里，要单独 `edges routines init`。
+
 ## [0.5.0] - 2026-11-02
 
 ### 材料归属

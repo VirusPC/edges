@@ -20,6 +20,7 @@ export const MODULE_RUN_ORDER: readonly InitModuleName[] = [
 export const DEFAULT_INIT_MODULES: readonly InitModuleName[] = [
   "memory",
   "skills",
+  "tasks",
   "notes",
   "projects",
 ];

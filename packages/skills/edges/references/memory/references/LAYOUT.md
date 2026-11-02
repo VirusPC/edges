@@ -6,7 +6,7 @@
 
 `AGENTS.md` 是人和 Agent 的入口。本层硬约束直接写在所属层的硬约束区块，已有规则不覆盖；本层系统维护信息和下层系统维护信息只放链接与描述。区块外手写内容、其他工具区块和业务模块入口保持原文。
 
-通用推荐模块为 `memory`、`skills`、`tasks`；推荐不代表自动创建。无参 `edges init` 创建 `AGENTS.md`、feedback / project / reference、skills 的 managed / referenced，以及 notes / projects 的 `.edges` 组织清单，并安装包内 skill；不创建 user、tasks。`edges memory init` 只初始化用户选择的 memory 类型，未选择时不写盘，也不创建其他模块的材料。`edges skills init` 初始化 skill 类型，并安装包内 skill。`edges tasks init` 只创建任务看板；tasks 首次写入仍会在看板缺失时补上同一份文件。未采用的模块和类型不创建空目录。模块之间不互相创建材料。
+通用推荐模块为 `memory`、`skills`、`tasks`；推荐不代表自动创建。无参 `edges init` 创建 `AGENTS.md`、feedback / project / reference、skills 的 managed / referenced，以及 tasks / notes / projects 的 `.edges` 组织清单，并安装包内 skill；不创建 user、routines。`edges memory init` 只初始化用户选择的 memory 类型，未选择时不写盘，也不创建其他模块的材料。`edges skills init` 初始化 skill 类型，并安装包内 skill。`edges tasks init` 只创建任务看板；tasks 首次写入仍会在看板缺失时补上同一份文件。未采用的模块和类型不创建空目录。模块之间不互相创建材料。
 
 ```text
 <scope>/
