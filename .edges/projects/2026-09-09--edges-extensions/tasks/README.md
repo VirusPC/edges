@@ -49,4 +49,5 @@ edges CLI/脚手架/发布/鉴权等平台层。
 - [edges\-\* skills 与标记硬切断](<done/2026-10-27--edges-skills-%E4%B8%8E%E6%A0%87%E8%AE%B0%E7%A1%AC%E5%88%87%E6%96%AD/INDEX.md>) — 随包 skill/标记硬切断只认 edges\-\*；删除 doctor/reshape；改名 skill 版本从 0.1.0 起重。按已落地结果补记看板。
 - [统一各模块路径规则默认受控并保留显式兜底](<backlog/2026-11-02--%E7%BB%9F%E4%B8%80%E5%90%84%E6%A8%A1%E5%9D%97%E8%B7%AF%E5%BE%84%E8%A7%84%E5%88%99%E9%BB%98%E8%AE%A4%E5%8F%97%E6%8E%A7%E5%B9%B6%E4%BF%9D%E7%95%99%E6%98%BE%E5%BC%8F%E5%85%9C%E5%BA%95/INDEX.md>) — 统一 create/get/update/delete 的路径语义，在受控默认规则下支持显式路径与明确兜底，并复用公共定位和校验函数。
 - [落地递归系统二入口、系统森林与 edges\-materials](<done/2026-10-07--%E8%90%BD%E5%9C%B0%E9%80%92%E5%BD%92%E7%B3%BB%E7%BB%9F%E4%BA%8C%E5%85%A5%E5%8F%A3%E7%B3%BB%E7%BB%9F%E6%A3%AE%E6%9E%97%E4%B8%8E-harness-materials/INDEX.md>) — AGENTS/README 并列登记，traverse 只跑单系统 children，森林外拼；引入 edges\-materials 与 \`\-\-super\` / \`forest list\`，删掉旧 content\-face 兼容。
+- [落地带鉴权的\_http\_skill\_示例](<backlog/2026-11-02--%E8%90%BD%E5%9C%B0%E5%B8%A6%E9%89%B4%E6%9D%83%E7%9A%84-HTTP-Skill-%E7%A4%BA%E4%BE%8B/INDEX.md>) — 在 Edges 里做出可复用的带鉴权 HTTP Skill/模板，默认不依赖自定义 MCP。
 <!-- edges-entries-local:end -->
