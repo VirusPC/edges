@@ -144,7 +144,7 @@ export function physicalParentNode(
 export function indexContract(
   node: BaseNode,
 ): (DirectoryContract & { writable: boolean }) | undefined {
-  if (!isComposite(node)) return undefined;
+  if (!isComposite(node) || node instanceof ProjectNode) return undefined;
   const match = node.body.match(
     /<!-- edges-memory-type:start -->([\s\S]*?)<!-- edges-memory-type:end -->/,
   );

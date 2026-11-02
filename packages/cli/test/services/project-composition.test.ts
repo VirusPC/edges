@@ -8,6 +8,7 @@ import { identifyNodeType } from "../../src/domain/models/node/layout.js";
 import { ComposeReadmeNode } from "../../src/domain/models/compose/compose-readme-node.js";
 import { readmeModelFor } from "../../src/domain/models/readme/specialize.js";
 import { NodeService } from "../../src/services/node/node-service.js";
+import { indexContract } from "../../src/services/node/node-layout.js";
 import { pathHitsExcludedModule, isScopeModuleDir } from "../../src/domain/config/exclude.js";
 
 const prose = `# A Project
@@ -21,6 +22,15 @@ const prose = `# A Project
 <!-- edges-local:start -->
 - This is quoted AGENTS syntax, not a Project child list.
 <!-- edges-local:end -->
+
+\`\`\`markdown
+<!-- edges-memory-type:start -->
+name: referenced
+module: skills
+format: skills
+writable: false
+<!-- edges-memory-type:end -->
+\`\`\`
 `;
 const entries = "<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n";
 
@@ -28,6 +38,7 @@ test("Project and README only interpret explicit entries markers and preserve au
   for (const node of [new ProjectNode("/repo/projects/P/INDEX.md"), new ReadmeNode("/repo/README.md")]) {
     assert.equal(node.isLeaf, false, "navigation must know composition before loading the body");
     node.parse(prose);
+    if (node instanceof ProjectNode) assert.equal(indexContract(node), undefined);
     assert.deepEqual(node.children, []);
     assert.equal(node.serialize(), prose);
     node.addChild("local", { id: path.join(node.directoryPath, "notes/README.md"), name: "Notes" });

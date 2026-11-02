@@ -36,6 +36,7 @@
 |---|---|---|
 | `setup` | `pnpm setup` | 首次接入初始化：加载 .env；只清带 `# edges bin` 或 `$REPO/bin` 的 PATH。`pnpm setup --uninstall` 再去掉 `source "<repo>/.env"` |
 | `migrations/migrate-recursive-layout.mts` | `pnpm migrate:recursive-layout --worktree <path> --dry-run` | 按审阅归属迁移当前 Edges 实例；改用 `--apply` 写入，见[迁移指南](../docs/recursive-layout-migration.md) |
+| `migrations/recursive-projects.mts` | `pnpm migrate:recursive-projects --root <abs> --plan <json> [--apply]` | 先保存预览；将 Task 分组按最早 Task 日期提升为 Project，未归属任务去掉 `_default` 层。原文、资源、Run Log 和引用随迁移保留，同一计划可恢复与重跑；见[迁移说明](migrations/recursive-projects.md) |
 | `migrations/restore-local-ownership.mts` | `pnpm restore:local-ownership --root <path> --manifest <path> --dry-run` | 审阅符合旧清单的局部所有权纠正；已采用现行公开布局的工作树不重放旧快照 |
 | `migrations/edges-migrate-directory-nodes.mts` | `pnpm migrate:directory-nodes --root <path>` | 默认预览 tracked/public 旧单文件到目录入口，显式 `--apply` 写入；旧 journal 存在即拒绝 |
 | `migrations/migrate-index-to-INDEX.mts` | `pnpm migrate:index-case -- --root <abs> [--apply]` | 内容叶子入口 `index.md` → `INDEX.md`（含 `posts/`，仅改名）；预览默认，`--apply` 写入；重写登记与正文链接，可重复执行 |
