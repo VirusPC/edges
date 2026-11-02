@@ -14,9 +14,9 @@
 
 和 Agent 一起工作时，想做的改进、方案的取舍、做到一半的任务、下次可以复用的方法，常常留在聊天里。时间一久容易忘记，换个会话又要重新解释。
 
-Edges 把这些积累放回它们服务的目录，形成**嵌入项目骨架、以文件目录为作用域的 harness**。在需要维护的目录中，用 `.edges/` 组织记忆、技能与维护任务，由 `AGENTS.md` 引出；这些材料与所服务的代码、文档或方法放在一起，供不同会话、不同 Agent 接续使用。
+**先确定维护对象，再组织上下文。** 你要持续维护的可能是整个项目、某个模块，也可能是一套反复使用的方法。Edges 把相关的经验、技能与维护任务组织到对应目录的 `.edges/` 中，由 `AGENTS.md` 引出，形成**嵌入项目骨架、以文件目录为作用域的 harness**，供不同会话、不同 Agent 接续使用。
 
-**目录决定作用域，Git 管理版本。** 项目根、monorepo 中的子 app、某个模块或 Skill 目录，都可以按需拥有自己的 harness；多个目录的 harness 可以和项目一起保存在同一个 Git 仓库中。
+**目录决定作用域，Git 管理版本。** 同一仓库中的项目根、monorepo 子 app、模块或 Skill 目录，都可以按需拥有自己的 harness，随各自的维护需要积累材料。
 
 ![Edges 系统总览：人提出目标并审阅，Agent 读取目录中的背景与方法、推进工作并留下材料与经验；按需接入会话观测与效果评测，围绕被 harness 的目录及其目标检验改进](docs/assets/readme/overview.svg)
 
@@ -26,7 +26,9 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 
 ![Edges 模块地图：按材料组织、工作安排、经验积累、改进依据、产物审阅、跨仓复用六种用途选择模块；Observation 收集所有 Agent 下真实会话，Evaluation 自定义 harness eval 目标，Artifacts 提供跨 Agent Artifacts 预览能力](docs/assets/readme/modules.svg)
 
-共同约定留在项目根，子 app 和模块的经验留在各自目录。开发一项 Skill 时，也可以为它建立 harness，维护这套方法本身；需要复用跨项目的个人或团队积累时，再通过 Compose 接入共享 harness。
+共同约定留在项目根，模块的兼容性取舍留在模块旁。即使共用工具与方法，各处的局部经验仍保留自己的归属；需要跨项目复用个人或团队积累时，再通过 Compose 接入共享 harness。
+
+维护对象也可以是方法本身。执行调研时，沿用调研 Skill 的步骤，并遵守当前项目约定；改进这套调研方法时，再进入 Skill 自己的纠正、任务和设计材料。**对象变了，需要组织和读取的上下文也随之改变。**
 
 ![Edges 的三种组织方式：monorepo 子 app 内建立 web 的 harness；项目、项目的 harness、Skill、Skill 的 harness 四层嵌套；从左侧当前项目仓出发，通过 Compose 引用右侧的「共享的 harness 仓库」，以个人大脑为例，在项目中利用已有知识与方法，并向大脑沉淀新的经验](docs/assets/readme/design.svg)
 
@@ -44,7 +46,7 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 读 https://raw.githubusercontent.com/VirusPC/edges/main/packages/skills/edges-onboarding/SKILL.md ，帮我接入 edges。
 ```
 
-Agent 会检查环境，在你选择的目录初始化，并验证内容能写入和读回。让 Agent 在这个目录工作并加载 `AGENTS.md`，即可沿入口发现相关材料。[接入说明](packages/skills/edges-onboarding/SKILL.md)
+告诉 Agent 你希望持续维护哪个项目、模块或方法。Agent 会检查环境，按你选定的对象在对应目录初始化，并验证内容能写入和读回。让 Agent 在这个目录工作并加载 `AGENTS.md`，即可沿入口发现相关材料。[接入说明](packages/skills/edges-onboarding/SKILL.md)
 
 接入后，直接通过对话使用：记下这次讨论、把想法整理成任务、查找过去的决策，或把有效做法沉淀为技能。你通过对话和成果审阅推进工作。
 
@@ -163,11 +165,13 @@ Evaluation 用 **线上真实数据**，围绕 **预置或自定义的 eval 目�
 <details>
 <summary>设计依据与使用边界</summary>
 
-**目录与作用域。** 每一层 harness 服务于所在目录及其子树。项目级经验放在根目录的 `.edges/`，子 app 或模块的经验留在各自目录的 `.edges/`；各层由 `AGENTS.md` 引出材料，并通过索引连接。Agent 从当前问题所在的作用域出发，读取适用的祖先层与本层约束，再按索引选择需要的材料，减少每次塞进上下文的无关背景。
+**从维护对象确定作用域。** 先明确这次要维护哪个项目、模块或方法，再到对应目录查找背景与约定。每一层 harness 服务于所在目录及其子树；Agent 读取适用的祖先层与本层约束，再按索引选择当前问题需要的材料。局部经验补充共同约定，让读取范围与正在处理的问题相匹配。
 
-这样，经验的归属和适用范围都能被看见。团队约定随团队仓库共享，个人方法留在自己的仓库；跨目录复用通过引用与组合完成。详细理由见[按作用域确定内容归属](docs/adr/0024-scope-first-content-ownership.md)。
+材料放在与其适用范围最贴近的目录：项目级经验放在根目录的 `.edges/`，模块经验留在模块自己的 `.edges/`。共享工具与实现时，局部经验仍在原处维护；引用与组合让它们能被其他地方发现和复用。团队约定随团队仓库共享，个人方法留在自己的仓库。详细理由见[按作用域确定内容归属](docs/adr/0024-scope-first-content-ownership.md)。
 
-目录中既有正在做的工作，也有帮助你维护和改进它的经验。`README.md` 组织内容，`AGENTS.md` 引出维护信息，`.edges/README.md` 汇总该层材料。当维护对象变成一套复盘技能或 harness 本身时，它也可以拥有自己的维护材料，记录这套方法的纠正、任务与改进。各层沿用同一结构，Edges 自身也用它来维护框架。入口分工见[递归系统设计](docs/adr/0029-recursive-system-two-entries.md)与[材料索引](docs/adr/0035-harness-readme-as-layer-material-index.md)。
+**维护方法时，沿用同一套结构。** Skill 或 harness 本身也可以拥有维护材料，记录它的纠正、任务与改进。默认检索沿登记展开当前作用域的维护材料，不自动进入这些材料自身的下一层 harness；当工作转为改进方法本身时，再进入对应的维护上下文。
+
+各层由 `README.md` 组织内容，`AGENTS.md` 引出维护信息，`.edges/README.md` 汇总该层材料。Edges 自身也用这套结构维护框架。入口分工见[递归系统设计](docs/adr/0029-recursive-system-two-entries.md)与[材料索引](docs/adr/0035-harness-readme-as-layer-material-index.md)。
 
 **文件目录让内容可读、可迁移。** 笔记、任务、记忆和技能以 Markdown 保存，正文与附件放在同一内容目录中，组织关系写在索引里。你可以用常见编辑器阅读，用文件工具检索和备份；换工具时，已有材料仍可继续使用。
 
