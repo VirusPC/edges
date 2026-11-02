@@ -1,15 +1,15 @@
 import path from "node:path";
 import { NodeService } from "../node/node-service.js";
 import { TaskNode } from "../../domain/models/tasks/task-node.js";
+import type { BaseNode } from "../../domain/models/index.js";
 import { setDomainField } from "../../domain/core/fields.js";
 import { assertBoardPath, assertCurrentBoard, createNodeBoardWriter, getTask, nativeTaskPath, type BoardWriter } from "./board.js";
-import { scopeDir, boardRoot, resolveBoard, taskBoardLocation, sidecarRelPath, statusDir, taskRelPath, withEntryName, type BoardTarget } from "./paths.js";
+import { scopeDir, resolveBoard, taskBoardLocation, sidecarRelPath, statusDir, taskRelPath, withEntryName, type BoardTarget } from "./paths.js";
 import { taskBody } from "../../domain/models/tasks/frontmatter.js";
 import { newTaskStem, taskNameSlug } from "../../domain/models/tasks/slug.js";
 import { parseTaskPriority } from "../../domain/models/tasks/priority.js";
 import { resolveProjectSelection } from "../projects/selection.js";
 import { ensureMaterialOrg } from "../node/content-org-list.js";
-import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { TASK_STATUSES, TasksError, type TaskStatus } from "../../domain/models/tasks/types.js";
 
 export type { BoardWriter };
@@ -88,14 +88,25 @@ export async function updateTask(
 
 /** NodeService needs the shared scope root to update both board indexes atomically. */
 export function taskNodes(target: BoardTarget, destination: BoardTarget = target): NodeService {
-  return new NodeService({
-    managedRoot: nativeTaskPath(scopeDir(target)),
-    assertWrite: async ({ node }) => {
-      const destinationRoot = taskFile(destination, path.relative(scopeDir(destination),boardRoot(destination)));
-      const board = node.path === destinationRoot || node.path.startsWith(`${destinationRoot}${path.sep}`) ? destination : target;
-      await assertBoardPath(board, node.path);
-    },
-  });
+  return new TaskNodeService(target, destination);
+}
+class TaskNodeService extends NodeService {
+  constructor(private readonly sourceBoard: BoardTarget, private readonly destinationBoard: BoardTarget) {
+    super({
+      managedRoot: nativeTaskPath(scopeDir(sourceBoard)),
+      assertWrite: async ({ operation, node }) => {
+        // A validated move also rewrites incoming links in other registered
+        // materials. NodeService retains its scope, symlink and read-only guards.
+        if (operation !== "move") await assertBoardPath(sourceBoard, node.path);
+      },
+    });
+  }
+  override async move<T extends BaseNode>(node: T, destinationPath: string): Promise<T> {
+    if (!(node instanceof TaskNode)) throw new TasksError("VALIDATION_ERROR", "task moves require a Task root");
+    await assertBoardPath(this.sourceBoard, node.path);
+    await assertBoardPath(this.destinationBoard, destinationPath);
+    return super.move(node, destinationPath);
+  }
 }
 export function taskFile(target: BoardTarget, relative: string): string { return path.join(nativeTaskPath(scopeDir(target)), relative); }
 export async function ensureTaskDestination(target: BoardTarget, status: TaskStatus, writer: BoardWriter): Promise<void> {

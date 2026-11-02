@@ -8,6 +8,8 @@ import { NodeService } from "../../src/services/node/node-service.js";
 import { TaskNode, ReadmeNode } from "../../src/domain/models/index.js";
 import { listRepositoryGroupedByProject } from "../../src/services/tasks/grouped.js";
 import { planTaskIndexes } from "../../src/services/tasks/index-migration.js";
+import { taskNodes } from "../../src/services/tasks/write.js";
+import { taskBoardLocation } from "../../src/services/tasks/paths.js";
 
 async function fixture(t: { after(fn: () => Promise<void>): void }) {
   const scope = await realpath(await mkdtemp(path.join(tmpdir(),"recursive-tasks-")));
@@ -122,4 +124,72 @@ test("ordinary task operations refuse legacy groups and retired index migration 
   }
   await assert.rejects(planTaskIndexes(scope),/retired/);
   assert.deepEqual(await readdir(group),[]);
+});
+
+test("task moves rewrite incoming Note and Project body links throughout the selected scope", async t => {
+  const { scope, ok } = await fixture(t);
+  const task = await ok(["tasks", "create", "--title", "Linked", "--status", "todo"]);
+  const body = `[Task](../../tasks/todo/${task.stem}/INDEX.md)`;
+  const note = await ok(["notes", "create", "--title", "Reference", "--body", body]);
+  const project = await ok(["projects", "create", "--title", "Destination", "--body", body]);
+  const projectPath = path.relative(path.join(scope, ".edges/projects"), path.dirname(path.join(scope, project.path)));
+  const references = [note.path, project.path].map(file => path.join(scope, file));
+  const assertReferences = async (target: string) => {
+    for (const file of references) {
+      const href = path.relative(path.dirname(file), path.join(scope, target)).split(path.sep).join("/");
+      assert.ok((await readFile(file, "utf8")).includes(`[Task](${href})`), file);
+    }
+  };
+  const done = await ok(["tasks", "status", task.stem, "done"]);
+  await assertReferences(done.path);
+  const moved = await ok(["tasks", "update", task.stem, "--to-project", projectPath]);
+  await assertReferences(moved.path);
+  const back = await ok(["tasks", "update", task.stem, "--to-default"], projectPath);
+  await assertReferences(back.path);
+});
+
+test("task move guards constrain the primary entity and preserve bytes on unauthorized destinations", async t => {
+  const { scope, ok, project } = await fixture(t);
+  const first = await ok(["tasks", "create", "--title", "Source", "--status", "todo"]);
+  const p = await project("Allowed"), q = await project("Other");
+  const other = await ok(["tasks", "create", "--title", "Other", "--status", "todo"], q);
+  const note = await ok(["notes", "create", "--title", "Source reference", "--body", `[Task](../../tasks/todo/${first.stem}/INDEX.md)`]);
+  const files = [first.path, first.sidecarPath, other.path, note.path].map(file => path.join(scope, file));
+  const before = await Promise.all(files.map(file => readFile(file, "utf8")));
+  const service = taskNodes(scope, taskBoardLocation(scope, { project: path.join(scope, ".edges/projects", p) }));
+  const source = await service.get(path.join(scope, first.path), TaskNode);
+  const foreign = await service.get(path.join(scope, other.path), TaskNode);
+  assert.ok(source && foreign);
+  const unauthorized = path.join(scope, ".edges/projects", q, "tasks/done", first.stem, "INDEX.md");
+  await assert.rejects(service.move(source, unauthorized), /outside selected task board/);
+  const allowed = path.join(scope, ".edges/projects", p, "tasks/done", other.stem, "INDEX.md");
+  await assert.rejects(service.move(foreign, allowed), /outside selected task board/);
+  assert.deepEqual(await Promise.all(files.map(file => readFile(file, "utf8"))), before);
+  await assert.rejects(access(unauthorized));
+  await assert.rejects(access(allowed));
+});
+
+test("task link repair respects the original scope and writes still reject all", async t => {
+  const { scope, ok } = await fixture(t);
+  const child = path.join(scope, "child");
+  await mkdir(child);
+  await writeFile(path.join(child, "AGENTS.md"), "# Independent child\n");
+  const call = (args: string[]) => run(["--scope", child, ...args], { env: {} });
+  const childOk = async (args: string[]) => {
+    const result = await call(args);
+    assert.equal(result.exitCode, 0, result.stdout + result.stderr);
+    return JSON.parse(result.stdout);
+  };
+  const task = await childOk(["tasks", "create", "--title", "Scoped", "--status", "todo"]);
+  const local = await childOk(["notes", "create", "--title", "Inside", "--body", `[Task](../../tasks/todo/${task.stem}/INDEX.md)`]);
+  const outside = await ok(["notes", "create", "--title", "Outside", "--body", `[Task](../../../child/${task.path})`]);
+  const outsidePath = path.join(scope, outside.path), localPath = path.join(child, local.path);
+  const files = [outsidePath, localPath, path.join(child, task.path), path.join(child, task.sidecarPath)];
+  const before = await Promise.all(files.map(file => readFile(file, "utf8")));
+  const denied = await call(["--all", "tasks", "status", task.stem, "done"]);
+  assert.equal(denied.exitCode, 2);
+  assert.deepEqual(await Promise.all(files.map(file => readFile(file, "utf8"))), before);
+  await childOk(["tasks", "status", task.stem, "done"]);
+  assert.equal(await readFile(outsidePath, "utf8"), before[0]);
+  assert.ok((await readFile(localPath, "utf8")).includes(`[Task](../../tasks/done/${task.stem}/INDEX.md)`));
 });
