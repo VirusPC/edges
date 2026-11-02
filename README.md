@@ -140,7 +140,7 @@ Evaluation 用 **线上真实数据**，围绕 **预置或自定义的 eval 目�
 
 现有记忆消融实验为“Memory 是否起到正向作用”提供了评测基础：固定问题与 Agent，对照有记忆与无记忆的表现，比较回答质量、约束遵守及成本。另有检索评测与 Langfuse 实验入口；题集、判分与实验条件仍需按目标准备。[记忆消融实验](packages/evaluation/experiments/harness_memory_ablation/README.md) · [评测说明](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
 
-下一步将结合通用评测框架，在用户选择预置目标或自定义目标后，由系统自动清洗与整理线上数据，并设置 Routine 定期评测。详见[评测闭环规划](.edges/tasks/evaluation/backlog/2026-11-02--Personal-Evaluation自定义目标线上数据自动清洗与定期评测/INDEX.md)。
+下一步将结合通用评测框架，在用户选择预置目标或自定义目标后，由系统自动清洗与整理线上数据，并设置 Routine 定期评测。详见[评测闭环规划](.edges/projects/2026-09-11--evaluation/tasks/backlog/2026-11-02--Personal-Evaluation%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9B%AE%E6%A0%87%E7%BA%BF%E4%B8%8A%E6%95%B0%E6%8D%AE%E8%87%AA%E5%8A%A8%E6%B8%85%E6%B4%97%E4%B8%8E%E5%AE%9A%E6%9C%9F%E8%AF%84%E6%B5%8B/INDEX.md)。
 
 </details>
 

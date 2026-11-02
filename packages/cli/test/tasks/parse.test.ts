@@ -76,7 +76,8 @@ test("run tasks delete points at status cancelled and does not require a board",
   const body = JSON.parse(result.stdout) as { status: string; errorCode: string; reason: string };
   assert.equal(body.status, "failed");
   assert.equal(body.errorCode, "VALIDATION_ERROR");
-  assert.match(body.reason, /edges tasks status 2026-09-11--cli cancelled/);
+  assert.match(body.reason, /same --scope, --project and --super selection and target/);
+  assert.match(body.reason, /replace delete with status and append cancelled/);
 });
 
 test("run rejects tasks log and a missing subcommand", async () => {

@@ -8,4 +8,6 @@
 
 迁移保留原有七个任务分组，各提升为同名主题 Project；新 Project 的目录日期取该组最早 Task 的日期，未归属的 18 条任务只去掉 `_default` 层。迁移前生成预览并检查冲突，任务、日志及组内共享资源一并保留。日期沿用原任务起点，避免把迁移当天误当作主题起始时间。
 
-含下级材料或用户资源的 Project，普通删除拒绝，必须显式 `--recursive` 才删除整棵目录；空容器仍可普通删除。这是容器生命周期的控制规则，不是实际数据删除指令。剩余实现建议与执行验收见[设计稿](../../.edges/memory/projects/project_recursive_projects/INDEX.md)，实现与验收以该设计稿为准。
+含下级材料或用户资源的 Project，普通删除拒绝，必须显式 `--recursive` 才删除整棵目录；只有自身正文和未改写生成索引的空容器仍可普通删除。这是容器生命周期的控制规则，不是实际数据删除指令。完整行为与边界见[设计稿](../../.edges/memory/projects/project_recursive_projects/INDEX.md)，迁移命令、冲突检查与中断恢复见[迁移说明](../../scripts/migrations/recursive-projects.md)。
+
+实现后的框架仓数据核对见[迁移验收](../migrations/2026-11-02-recursive-projects.md)。

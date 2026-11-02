@@ -1,24 +1,24 @@
 ---
 name: project_recursive_projects
 description: >-
-  2026-11-02 已批准实施：Project 直属主题材料、全局 --project、七组按最早Task日期提升、非空删除须
-  --recursive；复用 HarnessMaterial/NodeService，Artifacts 不改，迁移先预览检查冲突。
+  递归 Project 已实现并验证：直属材料、全局 --project、按最早 Task 日期迁移七组；163 Task、160
+  日志及共享图片保真。说明归属、删除与迁移恢复边界。
 metadata:
   edges-title: 递归 Project：直属材料分组与统一选择
   edges-type: project
   edges-agent-client: codex
   edges-username: VirusPC
   edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-11-02T11:47:07+08:00'
+  edges-updated-at: '2026-11-02T12:34:45+08:00'
 ---
 
-# 递归 Project 与统一归属：已批准实施方案
+# 递归 Project 与统一归属：已实现约定
 
-Project 是按主题聚合材料的递归组成容器，用来统一各模块的分组；全局 `--project` 从 `--scope` 下选择目标 Project；Tasks 退出独立的 Task Project 分组。它不要求成为独立维护系统。顶层 CLI 命令不都对应目录材料，Artifacts 不参与此次目录重构。这是已明确的设计方向，尚未作为现行实现发布。
+Project 是按主题聚合材料的递归组成容器，用来统一各模块的分组；全局 `--project` 从 `--scope` 下选择目标 Project；Tasks 退出独立的 Task Project 分组。它不要求成为独立维护系统。顶层 CLI 命令不都对应目录材料，Artifacts 不参与此次目录重构。本次实现已按此约定验证；版本发布另行进行。
 
 **Why:** 当前通用 Project 与 Task Project 是两套归属概念。用户希望各模块行为一致、尽可能受控，并通过复用减少代码；让 Project 递归拥有各模块，比为每种模块增加分组模型更容易扩展。
 
-**How to apply:** 2026-11-02 用户明确回复“实现吧”，批准本总审方案及先预览、检查冲突再迁移的执行顺序。按本文实现与验证；迁移不含真实 Project 删除，尚未验证的实现结果不得当作已交付。
+**How to apply:** 2026-11-02 用户明确回复“实现吧”，批准本总审方案及先预览、检查冲突再迁移的执行顺序。使用这一归属约定继续维护。迁移不包含真实 Project 删除；跨模块定位继续复用 HarnessMaterial 与 NodeService，避免恢复第二套分组模型。
 
 ## 1. 用户已确定的目标
 
@@ -64,7 +64,7 @@ scope/
 
 选择子项目 Q 的参数是 `--project 'P/projects/Q'`，相对 `<scope>/.edges/projects` 按真实路径解析；不把 P/Q 偷换成别名，也不新增全局项目名注册表。
 
-下面的命令仅演示目标接口，当前版本尚未支持全局 `--project`：
+全局选择接口如下：
 
 ```sh
 edges --scope /repo --project P notes create ...
@@ -75,7 +75,7 @@ edges --scope /repo --project 'P/projects/Q' memory remember ...
 
 创建子项目时，`--project P` 选的是父容器；新项目本身继续由 `projects create` 的参数指定。未传 `--project` 时保留原 scope 行为。
 
-## 3. 公共选择器与受控边界（实施建议）
+## 3. 公共选择器与受控边界（已落实）
 
 1. 在命令根统一解析 `--scope` 与 `--project`，先算候选目录，在现有锁保护下验证，再统一选择材料根与查询入口。保留基础 scope 的约束；不能只把 scope 改为 P 后继续追加 .edges，也不靠暗开 --super 实现 Project 分组。模块路径复用现有 material 配置和公共辅助函数。
 2. 不接受绝对 Project 路径、空值、父级逃逸、指向非 Project 的目录或穿越到根外的软链接；目标必须是已经存在且可验证的 Project。不存在时明确报错，不隐式创建。
@@ -112,9 +112,9 @@ edges --scope /repo --project 'P/projects/Q' memory remember ...
 
 ## 6. 数据迁移（必须先预览）
 
-以框架仓基线 `1211393` 为例，当前根板有 163 条任务、160 份 Run Log。7 个命名组共 145 条任务；`_default` 有 18 条。这个统计只说明迁移规模，不代表已迁移。
+以框架仓基线 `1211393` 为例，当前根板有 163 条任务、160 份 Run Log。7 个命名组共 145 条任务；`_default` 有 18 条。这是迁移前基线；执行结果见文末验收记录。
 
-1. 生成清单：`旧 board + 分组 → 目标 Project`。支持映射已有 Project，名称不能自动当作唯一身份。预览列出任务、空组、目标路径和引用变化。
+1. 生成清单：`旧 board + 分组 → 目标 Project`。本次按已确认的七组一一提升为新 Project；已有目标视为冲突，不按名称自动合并。预览列出任务、空组、目标路径和引用变化。
 2. `_default` 的任务留在上层 scope，只去掉那一层。命名组迁入对应真实 Project，原标题、description、其它正文及独立维护材料保留。新 Project 日期取组内最早 Task stem 的 YYYY-MM-DD 日期，不取迁移当天、文件修改时间或 updated-at；本仓全部 163 条任务都有有效前缀。遇空组或日期缺失时预览列为待指定项，不能丢组或猜日期。
 3. 搬运并映射组内全部材料，保留任务 stem、状态、优先级、附件和历史 Run Log；已有 3 条无日志的任务不补造日志。尤其保留 agent-clients-ux/done/img/ 下四张共享图片，随组进入新 Project 的 tasks/done/img，保持任务正文的 ../img 相对引用有效。
 4. 使用 NodeService 的目录资源移动和受管引用更新，范围限定在共同祖先内；目标冲突则停止，不覆盖或悄悄改名。
@@ -153,7 +153,7 @@ edges --scope /repo --project 'P/projects/Q' memory remember ...
 - `packages/apps/tasks-review-app/src/export.ts`：现有跨 source 移动限制。
 - `packages/cli/src/commands/artifacts/utils/from.ts`、`packages/services/artifacts-preview/src/from.ts`：旧来源合同。
 
-来源：2026-11-02 用户关于递归 Project、全局 `--project` 与去掉 `_default` 的明确指示，以及随后指出 Artifacts 并非目录模块的纠正；其余标注为实施建议的内容仍待审。
+来源：2026-11-02 用户关于递归 Project、全局 `--project` 与去掉 `_default` 的明确指示，以及随后指出 Artifacts 并非目录模块的纠正；实施建议已在总审中确认。
 
 ## 10. Grill 决策树：第 1 轮已回答
 
@@ -225,3 +225,11 @@ edges --scope /repo --project 'P/projects/Q' memory remember ...
 本次实施的验收必须包含：根/P/子Project 的同名类型不串写；Project create 不隐式初始化独立 harness；旧正文与共享图片不丢；迁移后仍有 163 条 Task 和 160 份既有 Run Log；重复运行无新增变更；目标冲突与中途失败可恢复；完整执行 CLI、schema 和任务审阅前端的相关检查。
 
 2026-11-02 用户回复“实现吧”，总审通过，开始按本稿实施。此前已确认的决定不再重复请示；出现目标冲突或超出既定映射的内容时保留现场并报告。
+
+## 13. 实施验收与后续维护
+
+按确认的七组及最早 Task 日期完成迁移；根层保留 18 条任务。实际目录与 CLI 均核对为 163 条 Task，160 份原有 Run Log 和 4 张共享图片的 SHA-256 均不变，同一迁移计划复跑无新增变更。默认组旧说明留在根任务板的明确历史段中；现行任务入口的说明已按新归属修订。
+
+原索引有 2 条失效引用、4 条任务漏登记。迁移保留失效引用原文并补登记真实存在的任务，不凭相似标题猜测链接目标。后续整理旧索引时，要把已有问题与迁移产生的问题区分开。
+
+迁移、恢复与冲突处理使用 `pnpm migrate:recursive-projects`，先保存计划再 apply；不要重跑已退役的 Task Project 索引迁移。具体步骤见 `scripts/migrations/recursive-projects.md`，设计理由见 ADR 0052。
