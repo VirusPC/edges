@@ -16,7 +16,7 @@ export function addComposeUpdateCommand(compose: Command, ctx: CliContext): void
     .addHelpText("after", COMPOSE_GIT_AFTER_HELP)
     .action(async (opts: { name?: string; remote?: boolean }) => {
       try {
-        const { reports, warnings } = await updateCompose(ctx.env, opts);
+        const { reports, warnings } = await updateCompose(ctx.env, { ...opts, project: ctx.project });
         ctx.result = composeGitResult("update", reports, HELP, warnings);
       } catch (error) {
         failNodeCommand(ctx, error, HELP);

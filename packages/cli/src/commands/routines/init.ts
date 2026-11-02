@@ -8,7 +8,7 @@ const HELP = "See edges routines init --help for usage.\n";
 export function addRoutineInitCommand(routines: Command, ctx: CliContext): void {
   routines
     .command("init")
-    .description("Initialize routines/README.md in the harness and scope AGENTS.md. Does not read --super.")
+    .description("Initialize routines/README.md in the harness and scope AGENTS.md. With --project, registers direct materials on the selected Project.")
     .option("--target-dir <directory>", "Explicit target scope (otherwise use --scope or scope discovery)")
     .option("--root-dir <directory>", "Boundary for the scope tree")
     .option("--description <text>", "Description in the parent scope index")
@@ -20,7 +20,7 @@ export function addRoutineInitCommand(routines: Command, ctx: CliContext): void 
         description?: string;
       }) => {
         try {
-          const result = await initRoutines({ ...options, env: ctx.env });
+          const result = await initRoutines({ ...options, env: ctx.env, project: ctx.project });
           ctx.result = succeed({ ...result, command: "routines.init" });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

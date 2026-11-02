@@ -23,6 +23,7 @@ export function addRoutineCreateCommand(routine: Command, ctx: CliContext): void
           body: opts.body,
           metadata: opts.metadata,
           super: ctx.super === true,
+          project: ctx.project,
         });
         ctx.result = succeed({
           command: "routines.create",

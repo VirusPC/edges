@@ -13,7 +13,7 @@ export function addRoutineGetCommand(routine: Command, ctx: CliContext): void {
     .argument("<target>", "INDEX.md path or routine name")
     .action(async (target: string) => {
       try {
-        const loaded = await getRoutine(ctx.env, target, { all: ctx.all, super: ctx.super, exclude: ctx.exclude });
+        const loaded = await getRoutine(ctx.env, target, { all: ctx.all, super: ctx.super, project: ctx.project, exclude: ctx.exclude });
         ctx.result = succeed({
           command: "routines.get",
           name: loaded.name,

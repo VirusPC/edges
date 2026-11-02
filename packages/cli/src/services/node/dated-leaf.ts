@@ -1,4 +1,6 @@
 import path from "node:path";
+import { readdirSync } from "node:fs";
+import { materialHarnessRoot, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { BaseNode } from "../../domain/models/index.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { isLeafEntryName } from "../../domain/models/node/layout.js";
@@ -9,12 +11,11 @@ import { localDateYmd } from "../../utils/date.js";
 import { isWithinPath } from "../../utils/filesystem.js";
 import { parseMetadata } from "../metadata.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
-import { contentOrgListPath, ensureContentOrgList } from "./content-org-list.js";
+import { contentOrgListPath, ensureMaterialOrg } from "./content-org-list.js";
 import type { Model } from "./node-layout.js";
 import { physicalParent } from "./node-layout.js";
-import { openNodeSession, scopeRelativePath } from "./scope-session.js";
+import { openNodeSession, scopeRelativePath, queryMaterialNodes, type MaterialReach } from "./scope-session.js";
 import { buildSystemForest, forestScopeOptions } from "./system-forest-service.js";
-import { ensureScopeReadme, ensureScopeReadmePointer, linkScopeReadme } from "../init/service.js";
 
 export type TitledLeaf = BaseNode & { title: string };
 
@@ -39,11 +40,10 @@ export const PROJECT_LEAF: DatedLeafSpec<ProjectNode> = {
   queryType: "project",
 };
 
-export type DatedLeafFields = {
+export type DatedLeafFields = MaterialOptions & {
   title?: string;
   body?: string;
   metadata?: string[];
-  super?: boolean;
 };
 
 export type DatedLeafView = {
@@ -58,22 +58,18 @@ export type DatedLeafItem = {
   title: string;
 };
 
-export type LeafReach = {
-  all?: boolean;
-  super?: boolean;
-  exclude?: ReadonlySet<string>;
-};
+export type LeafReach = MaterialReach;
 
 export function datedLeafFile<T extends TitledLeaf>(
   scope: string,
   entryPath: string,
   spec: DatedLeafSpec<T>,
-  reach: Pick<LeafReach, "super"> = {},
+  reach: MaterialOptions = {},
 ): string {
   const abs = path.resolve(scope, entryPath);
   const directory = path.dirname(contentOrgListPath(scope, spec.folder, reach));
   if (
-    !isWithinPath(abs, directory) ||
+    !isWithinPath(abs, materialHarnessRoot(scope, reach)) ||
     !isLeafEntryName(path.basename(abs))
   ) {
     throw new Error(`${spec.label} path must be ${scopeRelativePath(scope, directory)}/<stem>/INDEX.md`);
@@ -114,12 +110,12 @@ async function loadDatedLeaf<T extends TitledLeaf>(
   env: NodeJS.ProcessEnv,
   spec: DatedLeafSpec<T>,
   entryPath: string,
-  reach: Pick<LeafReach, "super">,
+  reach: MaterialOptions,
 ): Promise<{ scope: string; node: T; file: string; service: ReturnType<typeof openNodeSession>["service"] }> {
   const { scope, service } = openNodeSession(env);
   const file = datedLeafFile(scope, entryPath, spec, reach);
-  const node = await service.get(file, spec.Model);
-  if (!node) throw new Error(`${spec.label} not found: ${entryPath}`);
+  const node = await service.get(file);
+  if (!(node instanceof spec.Model)) throw new Error(`${spec.label} not found: ${entryPath}`);
   return { scope, service, node, file };
 }
 
@@ -134,12 +130,7 @@ export async function createDatedLeaf<T extends TitledLeaf>(
   const now = new Date();
   const org = contentOrgListPath(scope, spec.folder, input);
   const file = path.join(path.dirname(org), `${localDateYmd(now)}--${titleSlug(composed.title, now)}`, ENTRY_NAMES.leaf);
-  if (!input.super) await ensureScopeReadme(scope, service);
-  await ensureContentOrgList(service, org, spec.folder);
-  if (!input.super) {
-    await linkScopeReadme(scope, { id: org, name: spec.folder, description: `${spec.label === "note" ? "笔记" : "项目"}内容叶子的组织清单。` }, service);
-    await ensureScopeReadmePointer(scope, service);
-  }
+  await ensureMaterialOrg(service, scope, spec.folder, spec.folder, `${spec.label === "note" ? "笔记" : "项目"}内容的组织清单。`, input);
   const parent = physicalParent(file, managedRoot);
   if (parent !== org) {
     throw new Error(`${spec.label} must register on ${scopeRelativePath(scope, org)}`);
@@ -156,7 +147,7 @@ export async function getDatedLeaf<T extends TitledLeaf>(
   env: NodeJS.ProcessEnv,
   spec: DatedLeafSpec<T>,
   entryPath: string,
-  reach: Pick<LeafReach, "super"> = {},
+  reach: MaterialOptions = {},
 ): Promise<DatedLeafView> {
   const { scope, node, file } = await loadDatedLeaf(env, spec, entryPath, reach);
   return { path: scopeRelativePath(scope, file), title: node.title, body: node.body };
@@ -185,6 +176,7 @@ export async function updateDatedLeaf<T extends TitledLeaf>(
   }
   const updated = await service.update(node, {
     ...(body !== undefined ? { body } : {}),
+    ...(node instanceof ProjectNode ? { localChildren: [...node.localChildren], descendantChildren: [...node.descendantChildren] } : {}),
     ...(metadata ? { metadata } : {}),
   });
   return { path: scopeRelativePath(scope, file), title: updated.title };
@@ -194,9 +186,12 @@ export async function deleteDatedLeaf<T extends TitledLeaf>(
   env: NodeJS.ProcessEnv,
   spec: DatedLeafSpec<T>,
   entryPath: string,
-  reach: Pick<LeafReach, "super"> = {},
+  reach: MaterialOptions & { recursive?: boolean } = {},
 ): Promise<{ path: string }> {
   const { scope, service, node, file } = await loadDatedLeaf(env, spec, entryPath, reach);
+  if (node instanceof ProjectNode && !reach.recursive && projectHasContents(path.dirname(file))) {
+    throw new Error("Project contains materials or user resources; use --recursive to delete its contents.");
+  }
   await service.destroy(node);
   return { path: scopeRelativePath(scope, file) };
 }
@@ -209,22 +204,37 @@ export async function listDatedLeaves<T extends TitledLeaf>(
   if (reach.exclude?.has(spec.folder)) return [];
   const { scope, service } = openNodeSession(env);
   const queryOptions = { types: [spec.queryType], exclude: reach.exclude, scopeDir: scope };
-  const nodes = reach.all
+  const nodes = reach.project ? await queryMaterialNodes(scope, service, [spec.queryType], reach) : reach.all
     ? (await buildSystemForest(scope, { includeSuper: reach.super === true, exclude: reach.exclude, form: "independent" })).flat()
     : reach.super ? [] : await service.query(scope, queryOptions).value();
   // Super traversal prefers .edges/README.md; select the flat module explicitly,
   // as routines does. Default and --all use the registered tree without a second scan.
-  if (reach.super) {
+  if (reach.super && !reach.project) {
     const org = contentOrgListPath(scope, spec.folder, reach);
     const options = reach.all ? { ...queryOptions, ...forestScopeOptions(scope, scope, reach.exclude) } : queryOptions;
     if (await service.get(org, ReadmeNode)) nodes.push(...await service.query(org, options).value());
   }
   return [...new Map(nodes.map((node) => [node.path, node])).values()].flatMap((node) => {
-    if (!(node instanceof spec.Model)) return [];
+    if (!(node instanceof spec.Model) || node.path === path.join(reach.project ?? "", ENTRY_NAMES.leaf)) return [];
     return [{
       stem: path.basename(path.dirname(node.path)),
       path: scopeRelativePath(scope, node.path),
       title: node.title,
     }];
   });
+}
+
+/** A directory scaffold is empty; any file other than the Project entry is content. */
+function projectHasContents(directory: string): boolean {
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    if (entry.isFile() && entry.name === ENTRY_NAMES.leaf) continue;
+    // Empty directories are harmless, but every nested entry (including links) is user content.
+    if (!entry.isDirectory() || directoryHasFiles(path.join(directory, entry.name))) return true;
+  }
+  return false;
+}
+function directoryHasFiles(directory: string): boolean {
+  return readdirSync(directory, { withFileTypes: true }).some((entry) =>
+    !entry.isDirectory() || directoryHasFiles(path.join(directory, entry.name)),
+  );
 }

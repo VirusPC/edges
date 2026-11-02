@@ -13,7 +13,7 @@ export function addNoteGetCommand(note: Command, ctx: CliContext): void {
     .argument("<path>", ".edges/notes/<stem>/INDEX.md (--super: notes/<stem>/INDEX.md)")
     .action(async (entryPath: string) => {
       try {
-        const loaded = await getNote(ctx.env, entryPath, { super: ctx.super });
+        const loaded = await getNote(ctx.env, entryPath, { super: ctx.super, project: ctx.project });
         ctx.result = succeed({
           command: "notes.get",
           path: loaded.path,

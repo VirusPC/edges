@@ -1,3 +1,4 @@
+import type { MaterialOptions } from "../../domain/config/edges-materials.js";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { ComposeReadmeNode, composeReadmePath, isLegacyComposeHref } from "../../domain/models/compose/compose-readme-node.js";
@@ -48,9 +49,9 @@ export function composeEntryWarnings(entries: readonly EntryLike[]): string[] {
 }
 
 /** Same hints for `.edges/compose/README.md`. Never throws; a missing entry yields none. */
-export function scopeComposeWarnings(env: NodeJS.ProcessEnv): string[] {
+export function scopeComposeWarnings(env: NodeJS.ProcessEnv, options: MaterialOptions = {}): string[] {
   try {
-    const file = composeReadmePath(resolveScope(env));
+    const file = composeReadmePath(resolveScope(env), options);
     if (!existsSync(file)) return [];
     const node = new ComposeReadmeNode(file).parse(readFileSync(file, "utf8"));
     return composeEntryWarnings(node.entries());

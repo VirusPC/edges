@@ -21,6 +21,7 @@ are not listed.
 `)
     .action(async (opts: { apply?: boolean }) => {
       try {
+        if (ctx.project) throw new Error("compose doctor migrates legacy scope AGENTS.md blocks; omit --project.");
         const apply = opts.apply === true;
         const { changes, warnings } = await doctorCompose(ctx.env, apply);
         ctx.result = succeed({

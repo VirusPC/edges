@@ -15,7 +15,7 @@ export function addRoutineListCommand(routine: Command, ctx: CliContext): void {
     .option("--group-by <field>", "Group filtered routines by one field")
     .action(async (opts: { filter?: string[]; groupBy?: string }) => {
       try {
-        const items = await listRoutines(ctx.env, { all: ctx.all, super: ctx.super, exclude: ctx.exclude });
+        const items = await listRoutines(ctx.env, { all: ctx.all, super: ctx.super, project: ctx.project, exclude: ctx.exclude });
         ctx.result = succeed(presentListed("routines.list", items, opts));
       } catch (error) {
         failNodeCommand(ctx, error, HELP);

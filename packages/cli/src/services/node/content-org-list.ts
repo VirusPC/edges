@@ -1,7 +1,8 @@
-import { placeHarnessMaterial } from "../../domain/config/edges-materials.js";
+import { placeHarnessMaterial, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { harnessBoardSeed } from "../init/modules.js";
 import type { NodeService } from "./node-service.js";
+import { ensureScopeReadme, ensureScopeReadmePointer, linkScopeReadme } from "../init/service.js";
 
 const ENTRIES_MARKER = /^<!-- edges-entries-(?:local|descendants):start -->$/m;
 
@@ -10,7 +11,7 @@ const EMPTY_ENTRIES = `<!-- edges-entries-local:start -->\n## 本层内容\n\n<!
 export type ContentFolder = "notes" | "projects";
 
 /** Use the same material placement as tasks, skills, and routines. */
-export function contentOrgListPath(scopeDir: string, folder: ContentFolder, options: { super?: boolean } = {}): string {
+export function contentOrgListPath(scopeDir: string, folder: ContentFolder, options: MaterialOptions = {}): string {
   return placeHarnessMaterial(scopeDir, folder, options).absPath;
 }
 
@@ -30,4 +31,24 @@ export async function ensureContentOrgList(
   }
   if (ENTRIES_MARKER.test(existing.body)) return;
   await service.update(existing, { body: `${existing.body.trimEnd()}\n\n${EMPTY_ENTRIES}` });
+}
+
+/** Adopt one material index without initializing a new system or unrelated modules. */
+export async function ensureMaterialOrg(
+  service: NodeService,
+  scope: string,
+  id: string,
+  title: string,
+  description: string,
+  options: MaterialOptions = {},
+): Promise<string> {
+  const file = placeHarnessMaterial(scope, id, options).absPath;
+  const indexed = options.project !== undefined || !options.super;
+  if (indexed) await ensureScopeReadme(scope, service, options);
+  await ensureContentOrgList(service, file, title);
+  if (indexed) {
+    await linkScopeReadme(scope, { id: file, name: title, description }, service, options);
+    await ensureScopeReadmePointer(scope, service, options);
+  }
+  return file;
 }

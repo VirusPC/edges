@@ -349,7 +349,7 @@ export async function run(
  */
 function appendComposeWarnings(ctx: CliContext, argv: string[]): void {
   if (ctx.exclude?.has("compose") || !ctx.result || usageScope(argv) === "compose") return;
-  const warnings = scopeComposeWarnings(ctx.env).join("");
+  const warnings = scopeComposeWarnings(ctx.env, { project: ctx.project }).join("");
   if (!warnings) return;
   const previous = ctx.result.stderr;
   ctx.result = {
