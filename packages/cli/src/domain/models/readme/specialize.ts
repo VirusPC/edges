@@ -1,7 +1,8 @@
-import { basename, dirname } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { ENTRY_NAMES } from "../../config/layout.js";
 import { ComposeReadmeNode } from "../compose/compose-readme-node.js";
 import { ReadmeNode } from "./readme-node.js";
+import { identifyNodeType } from "../node/layout.js";
 
 /** A module entry README that adds behavior by subclassing ReadmeNode. */
 export interface ReadmeEntryModel {
@@ -9,11 +10,12 @@ export interface ReadmeEntryModel {
   model: new (file: string) => ReadmeNode;
 }
 
-/** True for `<scope>/.edges/compose/README.md`, including a composed repo's own entry. */
+/** Compose is a harness material or a direct module of a Project container. */
 export function isComposeEntryReadme(file: string): boolean {
   return basename(file) === ENTRY_NAMES.readme
     && basename(dirname(file)) === "compose"
-    && basename(dirname(dirname(file))) === ".edges";
+    && (basename(dirname(dirname(file))) === ".edges"
+      || identifyNodeType(join(dirname(dirname(file)), ENTRY_NAMES.leaf)) === "project");
 }
 
 /**

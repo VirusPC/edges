@@ -5,6 +5,8 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { ProjectNode, NoteNode, ReadmeNode } from "../../src/domain/models/index.js";
 import { identifyNodeType } from "../../src/domain/models/node/layout.js";
+import { ComposeReadmeNode } from "../../src/domain/models/compose/compose-readme-node.js";
+import { readmeModelFor } from "../../src/domain/models/readme/specialize.js";
 import { NodeService } from "../../src/services/node/node-service.js";
 import { pathHitsExcludedModule, isScopeModuleDir } from "../../src/domain/config/exclude.js";
 
@@ -99,4 +101,39 @@ test("module exclusions follow recursive Projects and stay bounded by the select
   assert.equal(isScopeModuleDir("/repo/.edges/projects/P/projects/Q", "notes", root), true);
   assert.equal(isScopeModuleDir("/repo/.edges/projects/P/projects/Q/.edges", "notes", root), true);
   assert.equal(isScopeModuleDir("/repo/.edges/projects/P/resources", "notes", root), false);
+});
+
+
+test("Compose specialization recognizes direct Project modules without claiming arbitrary compose directories", () => {
+  for (const file of [
+    "/repo/.edges/compose/README.md",
+    "/repo/.edges/projects/P/compose/README.md",
+    "/repo/.edges/projects/P/projects/Q/compose/README.md",
+  ]) assert.equal(readmeModelFor(file), ComposeReadmeNode, file);
+  for (const file of [
+    "/repo/compose/README.md",
+    "/repo/.edges/projects/P/resources/compose/README.md",
+    "/repo/.edges/memory/projects/M/compose/README.md",
+  ]) assert.equal(readmeModelFor(file), ReadmeNode, file);
+});
+
+test("Project import copies its nested composition and resources, retaining source and rejecting occupied targets", async (t) => {
+  const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "project-import-"));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const file = (relative: string) => path.join(root, relative);
+  const service = new NodeService({ managedRoot: root });
+  await service.create(new ReadmeNode(file("projects/README.md")), { body: "# Projects\n\n" + entries });
+  const project = await service.create(new ProjectNode(file("projects/P/INDEX.md")), { body: "# P\n" });
+  await service.create(new ReadmeNode(file("projects/P/notes/README.md")), { body: "# Notes\n\n" + entries });
+  await service.create(new NoteNode(file("projects/P/notes/N/INDEX.md")), { body: "# Note\n" });
+  fs.writeFileSync(file("projects/P/resource.bin"), Buffer.from([1, 2, 255]));
+  const source = fs.readFileSync(project.path, "utf8");
+  const imported = await service.import(project.path, file("projects/Copy/INDEX.md"));
+  assert.ok(imported instanceof ProjectNode);
+  assert.equal(fs.readFileSync(project.path, "utf8"), source);
+  assert.deepEqual(fs.readFileSync(file("projects/Copy/resource.bin")), Buffer.from([1, 2, 255]));
+  assert.deepEqual((await service.query(imported.path, { types: ["note"] }).toArray().value()).map((node) => node.path), [file("projects/Copy/notes/N/INDEX.md")]);
+  assert.match(fs.readFileSync(file("projects/README.md"), "utf8"), /Copy\/INDEX\.md/);
+  await assert.rejects(service.import(project.path, imported.path), /already exists/);
+  assert.equal(fs.readFileSync(project.path, "utf8"), source);
 });

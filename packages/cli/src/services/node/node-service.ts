@@ -897,7 +897,6 @@ export class NodeService {
     validateResources(snapshot);
     fs.mkdirSync(path.dirname(destRoot), { recursive: true });
     checkPath(destRoot);
-    fs.mkdirSync(destRoot);
     let copied: ResourceSnapshot | undefined;
     try {
       fs.cpSync(sourceRoot, destRoot, {
