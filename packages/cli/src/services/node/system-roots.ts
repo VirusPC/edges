@@ -5,6 +5,7 @@ import { isHarnessComposeDir, isScopeModuleDir } from "../../domain/config/exclu
 import { isProjectHarnessAgentsFile } from "../../domain/models/agents/harness-agents.js";
 import { ComposeReadmeNode, composeReadmePath } from "../../domain/models/compose/compose-readme-node.js";
 import { identifyNodeType } from "../../domain/models/node/layout.js";
+import { leafEntryPath } from "./entry-path.js";
 
 const SKIP_DIR_NAMES = new Set([
   "node_modules",
@@ -19,7 +20,7 @@ const SKIP_DIR_NAMES = new Set([
 /** Checkout directories registered on this scope's compose entry. */
 function composedDirectories(scopeDir: string): string[] {
   const files = [composeReadmePath(scopeDir)];
-  if (identifyNodeType(join(scopeDir, ENTRY_NAMES.leaf)) === "project")
+  if (identifyNodeType(leafEntryPath(scopeDir)) === "project")
     files.push(composeReadmePath(scopeDir, { project: scopeDir }));
   return files.flatMap((file) => {
     if (!existsSync(file)) return [];
@@ -46,6 +47,10 @@ export function collectSystemRoots(scopeDir: string, exclude?: ReadonlySet<strin
   const stack = [scopeDir];
   while (stack.length) {
     const dir = stack.pop()!;
+    if (exclude?.has("compose") && dir !== scopeDir &&
+        isScopeModuleDir(dir, "compose", scopeDir) && identifyNodeType(leafEntryPath(dir)) === "project") {
+      composed.push(...composedDirectories(dir));
+    }
     let entries;
     try {
       entries = readdirSync(dir, { withFileTypes: true });

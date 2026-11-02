@@ -156,3 +156,20 @@ test("Project selection keeps reading legacy lowercase entry filenames", async (
   assert.equal((await ok("--project", project, "notes", "list")).items.length, 1);
   assert.match(fs.readFileSync(path.join(directory, "index.md"), "utf8"), /notes\/README/);
 });
+
+test("Compose exclusions cover custom checkouts of nested Projects", async (t) => {
+  const { root, ok } = fixture(t);
+  const p = await ok("projects", "create", "--title", "Parent");
+  const q = await ok("--project", selection(p.path), "projects", "create", "--title", "Child");
+  const checkout = path.join(path.dirname(q.path), "vendor");
+  await ok("--project", selection(q.path), "compose", "add", "--name", "vendor", "--path", checkout, "--description", "Nested shared notes");
+  fs.mkdirSync(path.join(root, checkout), { recursive: true });
+  for (const args of [["notes", "init"], ["notes", "create", "--title", "Nested vendor note"]]) {
+    const result = await run(["--scope", path.join(root, checkout), ...args], { env: {} });
+    assert.equal(result.exitCode, 0, result.stdout);
+  }
+  for (const project of [selection(p.path), selection(q.path)]) {
+    assert.equal((await ok("--project", project, "--all", "notes", "list")).items.length, 1);
+    assert.equal((await ok("--project", project, "--all", "--exclude", "compose", "notes", "list")).items.length, 0);
+  }
+});
