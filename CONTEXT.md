@@ -9,8 +9,12 @@ Edges 采用通用的递归记忆与改进模型，当前以个人递归自我�
 _避免使用_：把内容叶子当成系统入口、未经用户 init 就自动给所有目录铺 AGENTS.md、从真 AGENTS 遍历时自动并进 README 组成边、在 edges 作用域的 AGENTS 本层逐条列出各 `.edges/` 材料、把无 edges 标记的普通 AGENTS.md 当成 edges 作用域
 
 **虚拟超节点（SuperAgentsNode）**：
-相对当前 `--scope` 的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用。典型叙事：把整个仓库视为上一级主体（如个人）的系统二，向上为该系统构建虚拟根。traverse 时**当作普通 AgentsNode**（只走 `children`，无跨系统特判）。挂载优先 `<scope>/.edges/README.md` 并从它展开；这份组织清单不存在时，再回退按 `packages/cli/src/domain/config/edges-materials.json` 扁平挂已有材料（材料 README；`scope`+path；不挂其它系统 `AGENTS.md`；可空）。不把作用域根 `README.md` 当作中间优先层。见 ADR 0035。缺 AGENTS 且未开 `--super` 不得自动合成。系统森林在 traverse 之外由 `SystemForestService` / `edges forest list` 拼装为 `BaseNode[][]`（`independent` 早停；`innermost` 只留内层）。
-_避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNode、缺 AGENTS 就静默加上超节点、把超节点落盘、用真 AGENTS 遍历并边代替 `--super`、让一次 traverse 跨系统拼森林、Super 挂其它系统 AGENTS、在入口 README 已存在时仍只按 edges-materials.json 扁平挂载（目标行为）
+相对当前 `--scope` 的运行时系统入口，不落盘。实现类 **`SuperAgentsNode`，继承 `AgentsNode`**。仅当显式 **`--super`** 时启用。典型叙事：把整个仓库视为上一级主体（如个人）的系统二，向上为该系统构建虚拟根。traverse 时**当作普通 AgentsNode**（只走 `children`，无跨系统特判）。当前 scope 就是其材料根：按 `packages/cli/src/domain/config/edges-materials.json` 挂已有的直属材料（`scope`+path；可空），与 `create --super` 的落点一致。根 `README.md` 是配置材料之一，没有优先级；不因 `<scope>/.edges/README.md` 存在而切换材料根。材料仍按自身 entries 展开。见 ADR 0046（修订 ADR 0035 的 super 条款）。缺 AGENTS 且未开 `--super` 不得自动合成。
+_避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNode、缺 AGENTS 就静默加上超节点、把超节点落盘、用真 AGENTS 遍历并边代替 `--super`、让一次 traverse 跨系统拼森林、Super 自动挂其它系统 AGENTS、按 `.edges/README.md` 是否存在切换 super 材料根
+
+**查询范围（Material Reach）**：
+各目录模块共用同一选择：默认沿 scope 的真实 `AGENTS.md` 组成读取；`--super` 换成直属材料的虚拟超节点；`--all` 只读，扫描当前 scope 下的独立系统并拼成森林，和 `--super` 同用时再加入该 scope 的虚拟超节点。指定 `--project` 后从 P 的 `INDEX.md` 组成读取，优先于 `--super`；再加 `--all` 只在 P 子树内追加独立系统，不扩大到原 scope 或 Git 根。系统森林在 traverse 之外由 `SystemForestService` / `edges forest list` 拼装为 `BaseNode[][]`（`independent` 早停；`innermost` 只留内层）。
+_避免使用_：各模块另补一套 super / all 查询、给每个独立系统自动加 Super、把 all 当作未登记叶子的文件扫描、用查询范围改变材料所有权
 
 **文档节点（Document Node）**：
 模型中的 Markdown 单位：系统入口，组织清单，或内容叶子（Task / Note / Memory / Skill 等）。从作用域根（CLI scope 对应的真系统入口，或显式 `--super` 的虚拟超节点）起经登记可达才算节点。

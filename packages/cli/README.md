@@ -139,7 +139,7 @@ NodeService.query 按已登记关系遍历，不靠扫描补齐遗漏。默认�
 
 [`packages/services/node/system-forest-service.ts`](src/services/node/system-forest-service.ts) 的 `buildSystemForest` 对每个根各自做一次 traverse，得到 `BaseNode[][]`。`independent`（默认）在 resolve 遇到其它根时停住；`innermost` 在外层能走到内层时只留下内层。命令行是 `edges forest list`。
 
-超节点的 `children` 只有这一层本层挂载，`descendantChildren` 为空。表里的 path 相对当前 scope；文件不存在就跳过，不扫盘补。以本仓库根为 `--scope` 时，九条材料里只有 `tasks/README.md` 和 `README.md` 在根上，所以 `children` 就是这两份。`memory/`、`packages/skills/`、`evaluation/`、`observation/` 实际在 `.edges/` 下，根上没有同名路径，不会挂上。`.edges/tasks/README.md` 也不是这个超节点的孩子。
+超节点的 `children` 只有这一层配置材料，`descendantChildren` 为空。配置里的 path 相对当前 scope；文件不存在就跳过，不扫盘补，也不因 `.edges/README.md` 存在而切换到它。例如 scope 直属只有 `tasks/README.md` 和 `README.md` 两份配置材料时，`children` 就是这两份；`.edges/tasks/README.md` 不会自动成为这个超节点的孩子。
 
 ```text
 edges --scope <仓库根> --super
@@ -155,7 +155,7 @@ edges --scope <仓库根> --super
 
 把 `--scope` 指到 `<仓库根>/.edges` 才是下一层：这个目录本身成为超节点的 `.edges`。它的 children 是该目录下存在的 `tasks/README.md`、`memory/feedbacks/README.md`、`memory/projects/README.md`、`memory/references/README.md`、`skills/managed/README.md`、`skills/referenced/README.md`、`projects/README.md`、`notes/README.md`。这不是仓库根那一份名单。评测与观测在 `packages/evaluation/`、`packages/observation/`，不再是 harness 材料。
 
-默认 list 从真 `AGENTS.md` 做一次 traverse。`--all` 从当前 `--scope` 走森林。`--super` 只换根。最全的一次查询是 `--scope <仓库根> --super --all`。这三个开关都在根命令上。
+各目录模块通过 [`queryMaterialNodes`](src/services/node/scope-session.ts) 共用查询范围：默认从真 `AGENTS.md` 读取；`--super` 换成直属材料的虚拟超节点；`--all` 只读，从当前 scope 发现独立系统并走森林；`--super --all` 再加入该 scope 的虚拟超节点。不会给每个独立系统自动加 Super，也不会把 scope 扩大到 Git 根。指定 `--project` 后，以 Project 的 INDEX 组成作为入口，优先于 `--super`；`--all` 仅追加该 Project 子树内的独立系统。
 
 再往下走的是这两个 README 自己的 `edges-entries-*`，不是超节点的另一组孩子。`--super tasks list` 只留下这条链上的 Task。
 
@@ -191,7 +191,7 @@ query 最初只加载入口快照。对查询结果执行目录 move/destroy 前
 
 Project 保留 `INDEX.md` 正文，并用显式 `edges-entries-*` 登记直属模块。读写共用 HarnessMaterial 配置和材料定位函数。`--project` 要求现有 Project 的相对路径，拒绝绝对路径、越界、符号链接和非 Project 入口。它与 `--target-dir` / `--repo-dir` 冲突；先用 `--scope` 选择维护对象。
 
-指定 Project 时 `--super` 不改变其材料根。`--all` 只读，在所选 Project 范围内追加发现独立系统；普通查询沿已登记的组成关系递归。省略 Project 时沿用已有 `--super` 行为。Artifacts 和 Evaluation 服务没有新增本地材料目录。非空 Project 删除必须显式 `projects delete <path> --recursive`，包括未登记的用户资源。
+指定 Project 时 `--super` 不改变其材料根。`--all` 只读，在所选 Project 子树内追加发现独立系统；普通查询沿已登记的组成关系递归。省略 Project 时，`--super` 选择 scope 直属材料。Artifacts 和 Evaluation 服务没有新增本地材料目录。非空 Project 删除必须显式 `projects delete <path> --recursive`，包括未登记的用户资源。
 
 ## 命令
 
