@@ -43,13 +43,20 @@ for (const module of ["notes", "projects"] as const) {
       assert.deepEqual(await paths(root, module, superScope), [made.path]);
 
       const stem = path.basename(path.dirname(made.path));
+      const grouped = module === "projects" ? `group/projects/${stem}` : `group/${stem}`;
       const group = path.join(root, folder, "group");
-      mkdirSync(group);
-      renameSync(path.dirname(path.join(root, made.path)), path.join(group, stem));
+      mkdirSync(path.dirname(path.join(root, folder, grouped)), { recursive: true });
+      renameSync(path.dirname(path.join(root, made.path)), path.join(root, folder, grouped));
       const entries = (link: string) => `# Organization\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [child](${link}) — child\n<!-- edges-entries-local:end -->\n`;
-      writeFileSync(path.join(root, folder, "README.md"), entries("group/README.md"));
-      writeFileSync(path.join(group, "README.md"), entries(`${stem}/INDEX.md`));
-      assert.deepEqual(await paths(root, module, superScope), [`${folder}/group/${stem}/INDEX.md`]);
+      writeFileSync(path.join(root, folder, "README.md"), entries(module === "projects" ? "group/INDEX.md" : "group/README.md"));
+      if (module === "projects") {
+        writeFileSync(path.join(group, "INDEX.md"), entries("projects/README.md"));
+        writeFileSync(path.join(group, "projects/README.md"), entries(`${stem}/INDEX.md`));
+      } else writeFileSync(path.join(group, "README.md"), entries(`${stem}/INDEX.md`));
+      assert.deepEqual(await paths(root, module, superScope), [
+        ...(module === "projects" ? [`${folder}/group/INDEX.md`] : []),
+        `${folder}/${grouped}/INDEX.md`,
+      ].sort());
     }
   });
 

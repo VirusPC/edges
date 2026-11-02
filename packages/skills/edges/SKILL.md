@@ -9,7 +9,7 @@ description: >-
   将 .edges/memory/users 的本机私有记忆打成归档，或从归档恢复（换机、删仓；目标已占用时须明确授权 --force 整份替换）。
   检索项目记忆用 edges-memory-ask，沉淀用 edges-memory-remember，新增 Memory Type 用 edges-memory-add-type。
   第一次接入用 edges-onboarding。整理对话用 edges-conversation-to-notes 或 edges-conversation-to-tasks。
-  整板 Task 按已有 Task Project 归类用 edges-tasks-classify。
+  整板 Task 按已有 Project 归类用 edges-tasks-classify。
   把会话接到 Langfuse 用 edges-langfuse-agent-tracing。
 version: 0.2.0
 ---
@@ -59,5 +59,5 @@ edges --scope <目录> <module> delete <目标>
 - 用户明确要求新增 Memory Type：`edges-memory-add-type`
 - 第一次安装、初始化一台机器或一个仓库：`edges-onboarding`
 - 把对话整理成笔记或任务：`edges-conversation-to-notes`、`edges-conversation-to-tasks`
-- 整板 Task 按已有 Task Project 归类：`edges-tasks-classify`
+- 整板 Task 按已有 Project 归类：`edges-tasks-classify`
 - 把会话接到 Langfuse：`edges-langfuse-agent-tracing`

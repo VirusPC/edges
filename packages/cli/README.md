@@ -185,28 +185,39 @@ query 最初只加载入口快照。对查询结果执行目录 move/destroy 前
 
 模型与文档处理保留未修改的业务扩展字段及 AGENTS 非受控正文。YAML 使用 gray-matter 的正常行为，不承诺编辑后保留 YAML 注释与样式。只读引用和管理根边界由 Service 执行，不把资源管理或新的业务权限体系塞进 Model。
 
+## 材料归属
+
+`--scope` 选择维护对象；全局 `--project` 在该 scope 内选择主题材料容器。省略 Project 时材料根是 `<scope>/.edges`；指定后是 Project 目录 P，模块直接放在 `P/notes`、`P/tasks`、`P/projects`、`P/memory`、`P/skills`、`P/routines`。不自动创建 P/AGENTS.md 或 P/.edges。
+
+Project 保留 `INDEX.md` 正文，并用显式 `edges-entries-*` 登记直属模块。读写共用 HarnessMaterial 配置和材料定位函数。`--project` 要求现有 Project 的相对路径，拒绝绝对路径、越界、符号链接和非 Project 入口。它与 `--target-dir` / `--repo-dir` 冲突；先用 `--scope` 选择维护对象。
+
+指定 Project 时 `--super` 不改变其材料根。`--all` 只读，在所选 Project 范围内追加发现独立系统；普通查询沿已登记的组成关系递归。省略 Project 时沿用已有 `--super` 行为。Artifacts 和 Evaluation 服务没有新增本地材料目录。非空 Project 删除必须显式 `projects delete <path> --recursive`，包括未登记的用户资源。
+
 ## 命令
 
 commands 的目录对应命令树：一个文件注册一个命令节点，同名子目录放它的子命令及参数、输出辅助代码。完整参数以各层 `--help` 为准。
 
 ### 任务：tasks
 
-主体系统由 `--scope` 决定。一般任务写在 `<scope>/.edges/tasks`。`--super` 把主体换成该 scope 上的虚拟系统一，它的 harness 就是这个 scope 目录，任务写在 `<scope>/tasks`。`--all` 从当前 scope 走森林。最全的一次查询是 `--scope <仓库根> --super --all`。
+主体系统由 `--scope` 决定。一般任务写在 `<scope>/.edges/tasks`，没有 `_default` 层。全局 `--project <P>` 以 `<scope>/.edges/projects` 为根选择实际 Project 目录，任务写在 `P/tasks`；嵌套目录如 `P/projects/Q`。`--super` 把主体换成该 scope 上的虚拟系统一，它的 harness 就是这个 scope 目录，任务写在 `<scope>/tasks`。`--all` 从当前 scope 走森林。最全的一次查询是 `--scope <仓库根> --super --all`。
 
 ```bash
 edges --scope <directory> tasks list
 edges --scope <directory> --all tasks list --status todo --priority high --sort priority
 edges --scope <directory> --all tasks list --group-by project
 edges --scope <directory> --super tasks list
-edges --scope <directory> tasks create --title "修复构建" --project default
+edges --scope <directory> tasks create --title "修复构建"
+edges --scope <directory> --project <P> tasks create --title "主题内工作"
+edges --scope <directory> tasks update <stem或路径> --to-project <P>
+edges --scope <directory> --project <P> tasks update <stem或路径> --to-default
 edges tasks get <stem或路径>
 edges tasks update <stem或路径> --priority high
 edges tasks status <stem或路径> done
-edges tasks project list
-edges tasks project review-page --from /tmp/tasks.json --out /tmp/review.html
+edges projects list
+edges tasks review-page --from /tmp/tasks.json --out /tmp/review.html
 ```
 
-任务写操作只改文件，不执行 Git；取消使用 status cancelled，没有 delete 命令。任务以 `<stem>/index.md` 存储，并带 `.<stem>.log.md`；状态或项目变化移动整个目录。
+任务写操作只改文件，不执行 Git；取消使用 status cancelled，没有 delete 命令。任务以 `tasks/<status>/<stem>/INDEX.md` 存储，并带 `.<stem>.log.md`；状态或项目变化移动整个目录。
 
 `edges --scope <目录> --super tasks list` 在该 scope 上建超节点，列出从材料 README 能走到的任务，范围不改去 Git 根。`edges --scope <目录> --all tasks list` 从该 scope 走森林，不另跳 Git 根。未登记的看板不会因物理存在而自动出现。
 
@@ -429,9 +440,6 @@ pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/migrate-agents-in
 
 脚本先检查所有候选再写入，保留原文备份，跳过符号链接、依赖目录、受保护的 posts 和嵌套 Git 边界；重复执行无变更。
 
-Task Project 列表属于看板 `README.md`（`edges-entries-local`）；看板 `AGENTS.md` 只登记 `<project>/AGENTS.md` 系统入口。把看板 AGENTS 里的 README 型 project 链接（含旧 task-projects 区块）一次性移过去：
+旧 Task Project 数据需用递归 Project 迁移脚本提升为真实 Project，`_default` 的任务仅去掉这一层。每个新 Project 日期取组内最早 Task 日期。先预览并检查冲突，确认后显式 apply；普通命令不会自动迁移。迁移脚本与恢复步骤见 [ADR 0052](../../docs/adr/0052-projects-as-recursive-material-groups.md)。历史迁移脚本保留用于旧版本数据，不应在新布局上运行。
 
-```bash
-pnpm migrate:task-project-lists -- --root /absolute/scope          # 预览
-pnpm migrate:task-project-lists -- --root /absolute/scope --apply
-```目录迁移与本机私有内容恢复见[迁移指南](../../docs/recursive-layout-migration.md)。
+目录迁移与本机私有内容恢复见[迁移指南](../../docs/recursive-layout-migration.md)。

@@ -78,7 +78,7 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 <details>
 <summary>Projects · 围绕目标持续组织材料</summary>
 
-一项持续推进的工作会产生资料、方案、实验和交付物。Projects 为它们提供共同的上下文与归属，让后续工作能找到此前的积累。项目内容可以与任务、笔记相互引用；任务看板里的 Task Project 则负责给任务分组。
+一项持续推进的工作会产生资料、方案、实验和交付物。Projects 为它们提供共同的上下文与归属，让后续工作能找到此前的积累。同一主题的 Notes、Tasks、Memory、Skills、Routines 可以直接放在 Project 下；主题继续细分时，再嵌套子 Project。各模块共用这一种归属方式，不必分别维护分组。Project 聚合材料，不要求为每个主题再初始化一个独立系统。
 
 **用例：** 为一次产品调研建立项目，把访谈材料、备选方案与报告放在一起，再用 Tasks 跟进需要完成的动作。[项目用法](packages/cli/README.md#项目projects)
 

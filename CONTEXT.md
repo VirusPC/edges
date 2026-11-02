@@ -17,7 +17,7 @@ _避免使用_：虚拟系统入口、虚拟根、virtual-root、VirtualSuperNod
 _避免使用_：仅指文件夹、磁盘上未登记的 md
 
 **组织清单（README.md）**：
-用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `edges-entries-local` / `edges-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。在「真系统」视角下这些是系统一材料；经 `SuperAgentsNode` 遍历时，同一批材料被当作**虚拟系统的系统二**展开。edges 作用域的 **`.edges/README.md`** 是该层的**材料索引**（标准组织清单，无 YAML frontmatter）：本层各 harness 材料挂在它的 entries 下，由上层 `AGENTS.md` 本层以单条组成指向它。Note 与 Project 叶子的组织清单默认是 `<scope>/.edges/notes/README.md`、`<scope>/.edges/projects/README.md`；显式 `--super` 时是 `<scope>/notes/README.md`、`<scope>/projects/README.md`。它们与 tasks、skills、routines 共用材料根规则：默认 `<scope>/.edges`，`--super` 为 `<scope>`，由统一路径辅助函数定位，目录尚不存在也不回退。创建叶子时清单不在就创建；已有散文且没有 entries 标记时只补标记，不改写原文。这两类叶子，以及 Task 叶子，不登记到任何 `AGENTS.md`。Task 叶子登记在所属 Task Project 的 `README.md`。`.edges/notes/README.md` 与 `.edges/projects/README.md` 本身就是接收叶子的组织清单，init 不再另建根目录清单与占位条目。旧根目录内容不自动迁移，须显式用 `--super` 继续操作。见 ADR 0035、ADR 0046（2026-11-02 修订）。
+用 `README.md` 承载组成登记的文档节点：本层内容挂系统一孩子（如 `tasks/`、Task、类型条目）；下层内容只挂其它 `README.md`（与 AGENTS 下层只挂 AGENTS 同理）。标记为 `edges-entries-local` / `edges-entries-descendants`，标题为「本层内容 / 下层内容」。给人看的说明与 entries 可同文件；工具只改标记区块。在「真系统」视角下这些是系统一材料；经 `SuperAgentsNode` 遍历时，同一批材料被当作**虚拟系统的系统二**展开。edges 作用域的 **`.edges/README.md`** 是该层的**材料索引**（标准组织清单，无 YAML frontmatter）：本层各 harness 材料挂在它的 entries 下，由上层 `AGENTS.md` 本层以单条组成指向它。Note 与 Project 的组织清单默认是 `<scope>/.edges/notes/README.md`、`<scope>/.edges/projects/README.md`；显式 `--super` 时是 `<scope>/notes/README.md`、`<scope>/projects/README.md`。它们与 tasks、skills、routines 共用材料根规则：默认 `<scope>/.edges`，`--super` 为 `<scope>`，由统一路径辅助函数定位，目录尚不存在也不回退。创建叶子时清单不在就创建；已有散文且没有 entries 标记时只补标记，不改写原文。Note、Project，以及 Task，不登记到任何 `AGENTS.md`。Task 直接登记在所属材料根的 `tasks/README.md`。指定 `--project` 后，材料根是 Project 目录 P：`P/notes`、`P/tasks`、`P/projects`；P 的 `INDEX.md` 使用同一种 entries 机制登记这些模块。`.edges/notes/README.md` 与 `.edges/projects/README.md` 本身就是接收叶子的组织清单，init 不再另建根目录清单与占位条目。旧根目录内容不自动迁移，须显式用 `--super` 继续操作。见 ADR 0035、ADR 0046（2026-11-02 修订）。
 _避免使用_：把叶子正文写成 README、把 README 当成真系统入口、无 entries 的普通包说明自动当节点、把 README 组成写成 edges-*、下层内容挂成 INDEX/SKILL、在 AGENTS 与 `.edges/README.md` 双写同一份材料索引、把 Note/Project/Task 叶子登记进 AGENTS.md、缺组织清单时回落到 AGENTS.md
 
 **内容叶子入口（INDEX.md）**：
@@ -343,44 +343,32 @@ _避免使用_：普通反馈闭环、知识更新、仅增加 meta 层级、未
 _避免使用_：知识出口、历史知识库、失效 Edge 专区
 
 **Task**：
-跨 Agent 接力的工作项，从想法捕获、澄清、执行到收口；目标模型中归属某个 Project 或当前作用域，工作状态与归属相互独立。
+跨 Agent 接力的工作项，从想法捕获、澄清、执行到收口；归属某个 Project 或当前作用域，工作状态与归属相互独立。
 _避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目、`tasks` Memory Type（若指看板工作项）
 
 **Task stem（edges）**：
-Task 文件去掉 `.md` 的文件名，是 `edges tasks` 的查找键；不是展示标题，也不等于 frontmatter / 文档 `name`（三者常碰巧相同）。
+Task 目录名（`<stem>/INDEX.md` 的 `<stem>`），是 `edges tasks` 的查找键；不是展示标题，也不等于 frontmatter / 文档 `name`（三者常碰巧相同）。
 _避免使用_：title、name、把展示名当 CLI 查找键
 
-**Task Project（edges 旧模型，待移除）**：
-选定看板内带标题与描述的任务分组，曾作为分类工作的归属依据；目标模型由真实 Project 承接归属，不再保留这层独立分组。
-_避免使用_：与目标模型的 Project 混用、把旧分组当作已迁移的 Project、把任务状态当成项目
-
-**Task Project 索引**：
-所选板 `tasks/README.md` 或 `.edges/tasks/README.md` 的 `edges-entries-local` 列表；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。用户 init 为系统入口的 `<project>/AGENTS.md` 仍登记在看板 `AGENTS.md`。
-_避免使用_：手改该节、把它当 Memory Type 入口、把看板文件当记忆条目
-
-**Task Project README.md**：
-每个 Task Project 目录（含 `_default`）内的 `README.md` 组织清单：标题、描述（可选指针）与列出 Task 的 `edges-entries-local`。CLI 新建 project 只写 README；用户明确 init 时才有 `AGENTS.md` 系统入口。
-_避免使用_：每 project 一套完整项目记忆、把 Task 文件登记为 Memory Type
-
-**Task Project 候选（edges）**：
-proposeTypes 输出的一行：建议 slug、描述，以及支撑该类型的 `_default` Task stem 列表（文件名去 `.md`，不是 title）。人确认并 `project create` 之前还不是 Task Project。
-_避免使用_：已落盘的 Task Project、自动当成质心、Memory Type
+**Task 归属（edges）**：
+任务归属以实际材料目录为准：未选 Project 是 `<scope>/.edges/tasks/<status>/<stem>/INDEX.md`；选定 P 后是 `P/tasks/<status>/<stem>/INDEX.md`。Task Project 专用模型、命令、`_default` 目录和 `edges-task-project` 字段已移除。历史数据须显式迁移，普通命令不自动搬迁。
+_避免使用_：两套 Project 模型、把分组再写一份 frontmatter、用状态夹表达归属
 
 **Task Doc（edges）**：
 一份 Task 的文档：`name`、`description`、`metadata`，以及 Markdown 正文 `body`。字段约定独立于某一页；CLI 的 frontmatter 与看板条目嵌入的文档对齐同一形状。
 _避免使用_：自造轻量配置、看板专用的另一套文档、预编译 HTML 正文、Task stem、edges-title（若指 `name`）
 
-**Task Project 审阅页（edges）**：
-classifyTasks、proposeTypes、本地 `edges tasks project review-page` 与 `/tasks/` 共用的那一份审阅壳：由 CLI 渲出的 HTML，载荷仍是通用 groups+items。组是已有 Task Project 还是 proposeTypes 候选由调用方 Skill 解释；审阅页本身不是 Task Project，也不是分类算法，也不负责托管。页仍只渲染。
+**Task 审阅页（edges）**：
+classifyTasks、proposeTypes、本地 `edges tasks review-page` 与 `/tasks/` 共用的那一份审阅壳：由 CLI 渲出的 HTML，载荷仍是通用 groups+items。组是已有 Project 还是候选由调用方 Skill 解释；审阅页本身不是 Project，也不是分类算法，也不负责托管。页仍只渲染。
 _避免使用_：把它当 Task Project、当分类算法、`--mode`、把它当 Artifacts 预览服务、让 review-page 负责发布、把它当成 `/tasks/` 站点本身、status station、按用途再拆一壳
 
 **审阅壳（Review Shell）**：
-Task Project 审阅页这一份交互界面。仓库只留下源码和构建管线：源码在仓根 `packages/apps/tasks-review-app/`（包名 `tasks-review-app`，与 CLI 分开，`packages/apps/` 可再放别的预构建壳），产物在 `packages/cli/src/commands/tasks/project/assets/review-page/`（`index.html`、`review.js`、`review.css`）且不入库，由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成。Vite 把产物写进 CLI 那份目录；`review-page.ts` 只读产物，不读 `packages/apps/` 源码。写出的页把预构建 JS/CSS 内联成一份 HTML，数据是页内 JSON script `#edges-review-payload`。导航是 hash 或 hash 上的 query，同一份产物用于 `file://`、Artifacts 与 `/tasks/`。左栏是 Task Project：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。视口不窄于 Tailwind `md`（`≥768px`）时仍是这一套三栏。窄于 `md` 时同一壳改成纵向长滚动：项目筛选区、状态板，点卡片后详情接在状态板下方，仍在同一页里滚动。每张任务卡都有「移到项目…」，桌面与窄屏都能把卡片改到另一个 Task Project；这只改页内 JSON，写回仍是 Copy JSON。桌面左栏拖放还在。
+Task 审阅页这一份交互界面。仓库只留下源码和构建管线：源码在仓根 `packages/apps/tasks-review-app/`（包名 `tasks-review-app`，与 CLI 分开，`packages/apps/` 可再放别的预构建壳），产物在 `packages/cli/src/commands/tasks/assets/review-page/`（`index.html`、`review.js`、`review.css`）且不入库，由 `build:tasks-review-app`、prepack、CI 或 ECS 部署链生成。Vite 把产物写进 CLI 那份目录；`review-page.ts` 只读产物，不读 `packages/apps/` 源码。写出的页把预构建 JS/CSS 内联成一份 HTML，数据是页内 JSON script `#edges-review-payload`。导航是 hash 或 hash 上的 query，同一份产物用于 `file://`、Artifacts 与 `/tasks/`。左栏是实际 Project 归属：点选既是筛选也是拖放落点，拖到左栏只改 project。中栏是按 edges-tasks-status 分的列，只展示状态。右栏展示所点条目的 Task Doc 正文。顶栏筛全文、edges-task-priority、edges-task-assignee 与 edges-tasks-status。视口不窄于 Tailwind `md`（`≥768px`）时仍是这一套三栏。窄于 `md` 时同一壳改成纵向长滚动：项目筛选区、状态板，点卡片后详情接在状态板下方，仍在同一页里滚动。每张任务卡都有「移到项目…」，桌面与窄屏都能把卡片改到另一个 Project；这只改页内 JSON，写回仍是 Copy JSON。桌面左栏拖放还在。
 _避免使用_：三套页面、status station、本轮在中栏改状态、把语义检索算进这份壳、用另一套看板产品充当 Task 的领域模型、在用户机器上现编这份壳、把预构建产物提交进 git、默认用 zip+base64 装载荷、path history、靠服务器 rewrite 的 react-router、窄屏只做抽屉、底栏分页、左右滑页、窄屏另做一壳、窄屏在状态列上改状态
 
 **`/tasks/` 持久看板站**：
 固定公网路径 `/tasks/` 上的持久入口，始终反映 main 看板；部署链从看板生成分组列表，经薄映射喂给同一审阅壳。页内文档来自分组条目嵌入的 Task Doc。不是新的 status station 产品，也不是 Artifacts 短 TTL 预览。
-_避免使用_：status station、Artifacts 预览服务、把它当 Task Project 审阅页命令本身、本轮按 project 拆 URL 树、本地 HTML 视图、教学站点、浏览器去读仓内 `.md`、本轮把页上拖拽写回 git
+_避免使用_：status station、Artifacts 预览服务、把它当 Task 审阅页命令本身、本轮按 project 拆 URL 树、本地 HTML 视图、教学站点、浏览器去读仓内 `.md`、本轮把页上拖拽写回 git
 
 **列表分组**：
 四种叶子的 `list --group-by` 共用的输出：`{ status: "success", groupBy, groups: [{ key, items }] }`。字段只认一层键。缺字段的 `key` 是 `__undefined__`，过滤也把缺字段当成这个值。对象和数组按键名排序后的 JSON 文本参加比较和分组。`/tasks/` 把任务的这份输出映射成审阅页自己的 groups 与 items，这一组的 id 和 title 同样是 `__undefined__`。审阅页输入不是列表输出。
@@ -391,35 +379,31 @@ _避免使用_：`edges.tasks.grouped/v1`、`a.b` 路径取值、按资源各做
 _避免使用_：另开看板顶层 schema、浏览器读取磁盘 `.md`、生成器里的预编译 HTML 正文
 
 **审阅导出行（edges）**：
-Task Project 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`、`action`，可选 `note`。查找键是 Task stem，不是 title 或 `name`。
+Task 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`、`action`，可选 `note`。查找时携带来源 scope、Project 路径与 stem；同 stem 的多个命中必须拒绝歧义，不能靠标题猜测。
 _避免使用_：用 title 或 name 当查找键、把展示字段当 apply 键
 
 **classifyTasks（edges）**：
-独立工作流（约定路径 `packages/skills/edges-tasks-classify/SKILL.md`，展示名 classifyTasks，入口 skill 是 `edges-tasks-classify`）：以用户已设、带描述的 Task Project 为质心，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task Project 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
-_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、要求 embedding / 向量分类、只整理 `_default`、公开 `edges tasks classify`、把审阅页当成分类器
+独立工作流（约定路径 `packages/skills/edges-tasks-classify/SKILL.md`，展示名 classifyTasks，入口 skill 是 `edges-tasks-classify`）：以用户已设、带描述的 Project 为分类依据，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
+_避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、要求 embedding / 向量分类、只整理未归属任务、公开 `edges tasks classify`、把审阅页当成分类器
 
 **proposeTypes（edges）**：
-独立工作流 Skill（约定路径 `packages/skills/project-tasks-propose-types/`，展示名 proposeTypes）：从 `_default` Task 与已有 Task Project 质心提议新的 Task Project 候选，复用同一 Task Project 审阅页给人确认（无 GUI 时候选表回退），本身不落地为 Task Project。
+独立工作流 Skill（约定路径 `packages/skills/project-tasks-propose-types/`，展示名 proposeTypes）：从未归属任务与已有 Project 提议新的主题 Project 候选，复用同一 Task 审阅页给人确认（无 GUI 时候选表回退），本身不创建 Project。
 _避免使用_：并进 classifyTasks、自动建 project、Embedding NCC、K-means 命名、公开 `edges tasks propose`、为 proposeTypes 另开 `--mode`
 
-**edges-task-project**：
-frontmatter `metadata.edges-task-project`，与目录 project-slug 双写；`_default` 对应 `default` 或不写字段。
-_避免使用_：只改 frontmatter 不改路径、或只改路径不同步 frontmatter
-
 **edges-tasks-status**：
-Task（Issue 层）的唯一状态字段，取值为 backlog | todo | in_progress | in_review | done | blocked | cancelled；与 Task Project、edges-task-priority 正交，不表达谁先做或属于哪个分组。迁移后状态夹落在所属 Task Project 目录内。
+Task（Issue 层）的唯一状态字段，取值为 backlog | todo | in_progress | in_review | done | blocked | cancelled；与 Project 归属、edges-task-priority 正交，不表达谁先做或属于哪个分组。状态夹位于材料根的 `tasks/` 下。
 _避免使用_：裸 status 字段名、Run 层状态、open/discussing/building 旧枚举、把状态夹当成 Task Project
 
 **edges-task-priority**：
-Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`，写在 frontmatter `metadata.edges-task-priority`；与 edges-tasks-status、Task Project 正交，不决定状态夹或 project 目录。缺省或旧文件无字段时视为 `none`。
+Task Issue 层的需求优先级，枚举 `urgent | high | medium | low | none`，写在 frontmatter `metadata.edges-task-priority`；与 edges-tasks-status、Project 归属正交，不决定状态夹或 project 目录。缺省或旧文件无字段时视为 `none`。
 _避免使用_：用文件夹或文件名编码优先级、把 P0/P1 事故等级直接当看板 priority、改 priority 时搬状态夹
 
 **edges-task-assignee**：
-Task 的指派，写在 frontmatter `metadata.edges-task-assignee`；与 edges-tasks-status、edges-task-priority、Task Project 正交。
+Task 的指派，写在 frontmatter `metadata.edges-task-assignee`；与 edges-tasks-status、edges-task-priority、Project 归属正交。
 _避免使用_：用状态夹或 Task Project 表达谁负责、在看板条目上再造一份与 Task Doc 平行的必填指派字段
 
 **edges tasks（CLI）**：
-以 `edges tasks` 为入口的 Task 看板命令面：Issue 层 list/get/create/update/status；`delete` 不删除文件，只提示改用 `status <target> cancelled`；Run 层只读 runs / run-messages。create/update 用 `--priority`，list 可用 `--sort priority`；`list --group-by` 产出列表分组，条目可嵌入可选的 Task Doc（`doc`）；`/tasks/` 再把它映射成审阅页输入；`status` 不带优先级，只在同一 Task Project 内搬家；跨 project 用 `update --project`。`project list|get|create|update` 读写 Task Project 元数据；`project review-page` 只读不入库的预构建审阅壳，把 JS/CSS 内联成单份 HTML，把 groups+items 写成 `#edges-review-payload` 的 JSON script，不算分类、不落地、不托管，运行时不现编，页只读载荷里的 `doc`，导航用 hash 或 hash 上的 query。`/tasks/` 持久看板站是部署链消费者，不新开看板动词。
+以 `edges tasks` 为入口的看板命令面：Issue 层 list/get/create/update/status，Run 层只读 runs / run-messages；取消用 `status cancelled`。全局 `--project` 选择操作的材料范围，`status` 只在同一 tasks 材料目录内搬家；`update --to-project <相对路径>` 改归属，`--to-default` 回到原 scope 未归属看板，两者互斥。移动整个任务目录，保持 stem、优先级、日志与资源。`projects` 顶层命令管理共同的主题 Project；`tasks review-page` 只渲染审阅 HTML，不搬任务、不托管。列表可按 project 分组，缺 Project 使用通用缺字段规则。
 _避免使用_：手搓 git 改看板、仓根 bin、自造 `log` 动词顶替 runs/run-messages、用 status 跨 project 搬家、公开 `classify` / `propose` / `apply-review` 动词（本轮）、把 review-page 扩成 Artifacts 预览服务或 `/tasks/` 托管、把分组 schema 命名成 review-page 专属、为看板另开顶层 schema、让浏览器读仓内 `.md`、在用户机器上现编审阅壳、把预构建产物提交进 git、默认用 zip+base64 装载荷、path history、靠服务器 rewrite 的 react-router
 
 **Artifacts 预览服务**：
@@ -435,7 +419,7 @@ _避免使用_：Post、知识资产、长期站点页面、聊天附件预览�
 _避免使用_：已公开的 Artifact、本地 HTML 文件、把上传直接当成已经可以打开
 
 **edges artifacts（CLI）**：
-`edges artifacts` 命令面：`init` 准备 token；`create` 只保存草稿；`publish` 公开已有草稿，或对本地路径先保存再公开；`delete` 删除草稿或已公开的包。`edges tasks project review-page` 仍只渲染，不发布。
+`edges artifacts` 命令面：`init` 准备 token；`create` 只保存草稿；`publish` 公开已有草稿，或对本地路径先保存再公开；`delete` 删除草稿或已公开的包。`edges tasks review-page` 仍只渲染，不发布。
 _避免使用_：把 review-page 扩成托管、手搓上传绕过 CLI、`rm`、把 `create` 当成已经公开
 
 **聊天 HTML 预览**：
@@ -444,7 +428,7 @@ _避免使用_：Artifacts 预览服务、系统浏览器打开的托管 URL、�
 
 **本地 HTML 视图**：
 对着仓内数据文件的持久本机/仓内查看层（数据与视图分离），不是一次性渲出的人闸，也不是对外可达的短生命周期托管，也不是公网 `/tasks/` 持久看板站。
-_避免使用_：Artifacts 预览服务、云临时托管、Task Project 审阅页的临时 HTML、`/tasks/` 持久看板站
+_避免使用_：Artifacts 预览服务、云临时托管、Task 审阅页的临时 HTML、`/tasks/` 持久看板站
 
 **Task Run（edges）**：
 对应 Multica Run 的一次执行尝试；仓内落在 Task 同目录 sidecar `.{stem}.log.md` 中带稳定 `run-id` 的记录，由 `edges tasks runs` / `run-messages` 只读查看。

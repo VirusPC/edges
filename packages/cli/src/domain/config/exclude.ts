@@ -1,5 +1,6 @@
 import { isAbsolute, relative, resolve, sep, basename, join, normalize } from "node:path";
 import { ENTRY_NAMES } from "./layout.js";
+import { identifyNodeType } from "../models/node/layout.js";
 
 /** Module names `--exclude` accepts. Orthogonal to node `--types`. */
 export const EXCLUDABLE_MODULES = [
@@ -66,9 +67,9 @@ export function pathHitsExcludedModule(
  */
 export function composedCheckoutRoot(file: string): string | undefined {
   const parts = normalize(file).split(sep);
-  for (let i = 0; i < parts.length - 2; i++) {
-    if (parts[i] === ".edges" && parts[i + 1] === "compose" && parts[i + 2] && parts[i + 2] !== ENTRY_NAMES.readme)
-      return parts.slice(0, i + 3).join(sep);
+  for (let i = 1; i < parts.length - 1; i++) {
+    if (isHarnessComposeDir(parts.slice(0, i).join(sep), parts[i]!) && parts[i + 1] && parts[i + 1] !== ENTRY_NAMES.readme)
+      return parts.slice(0, i + 2).join(sep);
   }
   return undefined;
 }
@@ -100,5 +101,5 @@ export function isScopeModuleDir(
 }
 
 export function isHarnessComposeDir(parentDir: string, name: string): boolean {
-  return name === "compose" && basename(parentDir) === ".edges";
+  return name === "compose" && (basename(parentDir) === ".edges" || identifyNodeType(join(parentDir, ENTRY_NAMES.leaf)) === "project");
 }

@@ -3,7 +3,7 @@ import { readdirSync } from "node:fs";
 import { materialHarnessRoot, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { BaseNode } from "../../domain/models/index.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
-import { isLeafEntryName } from "../../domain/models/node/layout.js";
+import { identifyNodeType, isLeafEntryName } from "../../domain/models/node/layout.js";
 import { directoryStem } from "../../domain/models/node/stem.js";
 import { NoteNode } from "../../domain/models/notes/note-node.js";
 import { ProjectNode } from "../../domain/models/projects/project-node.js";
@@ -70,7 +70,8 @@ export function datedLeafFile<T extends TitledLeaf>(
   const directory = path.dirname(contentOrgListPath(scope, spec.folder, reach));
   if (
     !isWithinPath(abs, materialHarnessRoot(scope, reach)) ||
-    !isLeafEntryName(path.basename(abs))
+    !isLeafEntryName(path.basename(abs)) || identifyNodeType(abs) !== spec.queryType ||
+    (reach.super && !reach.project && path.relative(scope, abs).split(path.sep)[0] === ".edges")
   ) {
     throw new Error(`${spec.label} path must be ${scopeRelativePath(scope, directory)}/<stem>/INDEX.md`);
   }
@@ -174,9 +175,14 @@ export async function updateDatedLeaf<T extends TitledLeaf>(
     draft.title = input.title;
     body = draft.body;
   }
+  if (node instanceof ProjectNode && body !== undefined) {
+    const draft = new ProjectNode(file);
+    draft.body = body;
+    draft.update({ localChildren: node.localChildren, descendantChildren: node.descendantChildren }, { operation: "update" });
+    body = draft.body;
+  }
   const updated = await service.update(node, {
     ...(body !== undefined ? { body } : {}),
-    ...(node instanceof ProjectNode ? { localChildren: [...node.localChildren], descendantChildren: [...node.descendantChildren] } : {}),
     ...(metadata ? { metadata } : {}),
   });
   return { path: scopeRelativePath(scope, file), title: updated.title };

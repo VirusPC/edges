@@ -135,7 +135,7 @@ edges --scope . memory doctor
 
 - 每条命令退出码 0，stdout 是 `"status":"success"` 的 JSON（`memory doctor` 输出 `"ok": true`）。
 - `notes create` 返回 `"path":".edges/notes/<今天日期>--edges-接入验证/INDEX.md"`；读取时使用返回的路径。统一材料定位之前的 0.4.1 返回 `notes/...`，核对已安装版本，不把旧版落点差异误报为安装失败。
-- `tasks create` 返回的 `path` 在 `.edges/tasks/_default/backlog/` 下，`tasks list` 能列出它。
+- `tasks create` 返回的 `path` 在 `.edges/tasks/backlog/` 下，`tasks list` 能列出它。
 
 验证通过后告诉用户可以删掉 `/tmp/edges-check`（由用户决定，不要擅自删除用户目录）。任何一步失败，按下面「常见错误排查」处理。
 
@@ -161,7 +161,7 @@ edges --scope <目录> tasks create --title "修复构建" --project default
 edges --scope <目录> tasks list --status todo --priority high --sort priority
 edges --scope <目录> tasks update <stem或路径> --priority high
 edges --scope <目录> tasks status <stem或路径> done
-edges --scope <目录> tasks project list
+edges --scope <目录> projects list
 
 # 项目记忆
 edges --scope <目录> memory init --memory-types project feedback
