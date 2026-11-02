@@ -1,4 +1,5 @@
-export interface InitMemoryOptions {
+import type { MaterialOptions } from "../../domain/config/edges-materials.js";
+export interface InitMemoryOptions extends MaterialOptions {
   targetDir: string;
   rootDir?: string;
   description?: string;

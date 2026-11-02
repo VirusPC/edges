@@ -15,7 +15,8 @@ export function ignoredInstallTokens(
 }
 
 const AFTER_HELP = `
-This command does not read --super. Materials always land under <scope>/.edges.
+This command does not read --super. Materials land under <scope>/.edges, or directly under the selected --project.
+Project initialization registers materials on INDEX.md without creating AGENTS.md.
 Tokens after -- are forwarded only to the bundled skills install step.
   edges init -- -y --agent '*'
 
@@ -63,6 +64,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
             modules,
             skillsInstallArgs: ctx.skillsInstallArgs,
             env: ctx.env,
+            project: ctx.project,
           });
           const skillsInstall = result.skillsInstall === true;
           const { skillsInstall: _install, ...payload } = result;

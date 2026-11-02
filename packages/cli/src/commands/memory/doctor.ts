@@ -9,5 +9,5 @@ export function addMemoryDoctorCommand(memory: Command, ctx: CliContext): void {
         .action((options: TargetOptions & {
         rootDir?: string;
         apply?: boolean;
-    }) => operation(ctx, async () => await doctorMemory({ ...options, targetDir: target(options, ctx) })));
+    }) => operation(ctx, async () => await doctorMemory({ ...options, targetDir: target(options, ctx), project: ctx.project })));
 }

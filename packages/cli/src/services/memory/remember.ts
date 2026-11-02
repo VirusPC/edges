@@ -1,3 +1,4 @@
+import type { MaterialOptions } from "../../domain/config/edges-materials.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
 import { isLeafEntryName } from "../../domain/models/node/layout.js";
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
@@ -28,7 +29,7 @@ import {
   logicalFields,
   strictFrontmatterData,
 } from "../../domain/models/memory/documents.js";
-export interface RememberMemoryOptions {
+export interface RememberMemoryOptions extends MaterialOptions {
   targetDir: string;
   type: string;
   slug: string;
@@ -46,15 +47,15 @@ export async function rememberMemory(options: RememberMemoryOptions) {
   const target = resolveTarget(options.targetDir);
   rejectLegacy(target);
   if (!isScope(target)) throw new Error("目标目录尚未初始化，请先执行 init");
-  const file = resolveMemoryPath(target, options.type, options.slug);
+  const file = resolveMemoryPath(target, options.type, options.slug, options);
   const exists = existsSync(file),
-    service = memoryNodes(target);
+    service = memoryNodes(target, options);
   if (options.importEntry) {
     if (options.content !== undefined)
       throw new Error("importEntry conflicts with content");
     const source = resolve(options.importEntry);
     const expected =
-      entryOutputName(options.type, target) === ENTRY_NAMES.skill
+      entryOutputName(options.type, target, options) === ENTRY_NAMES.skill
         ? ENTRY_NAMES.skill
         : ENTRY_NAMES.leaf;
     if (
@@ -74,25 +75,25 @@ export async function rememberMemory(options: RememberMemoryOptions) {
     )
       throw new Error(`${source}: memoryType must be ${options.type}`);
     const destination = join(dirname(file), basename(source));
-    ensureLayerTypeGitignore(target, options.type, [destination]);
+    ensureLayerTypeGitignore(target, options.type, [destination], options);
     await service.import(source, destination, { indexGroup: "local" });
-    await refreshIndex(target, options.type, service);
-    const agentsAction = await syncTargetAgents(target, resolveRoot(target), service);
+    await refreshIndex(target, options.type, service, options);
+    const agentsAction = options.project ? "not-applicable" : await syncTargetAgents(target, resolveRoot(target), service);
     return {
       operation: "remember",
       targetDir: target,
       type: options.type,
-      name: entryName(destination, options.type, target),
+      name: entryName(destination, options.type, target, options),
       title: options.title || imported.name,
       path: relative(target, destination),
-      index: relative(target, typeIndexPath(target, options.type)),
+      index: relative(target, typeIndexPath(target, options.type, options)),
       action: "created",
       agentsAction,
       provenance: {},
     };
   }
   const Model =
-    entryOutputName(options.type, target) === ENTRY_NAMES.skill
+    entryOutputName(options.type, target, options) === ENTRY_NAMES.skill
       ? SkillNode
       : MemoryNode;
   const node = exists
@@ -106,7 +107,7 @@ export async function rememberMemory(options: RememberMemoryOptions) {
       ? {}
       : logicalFields(strictFrontmatterData(previousSource));
   const detected = { ...agentContext(options.env), ...gitIdentity(target) };
-  const name = entryName(file, options.type, target);
+  const name = entryName(file, options.type, target, options);
   const fields = buildEntryFields(
     name,
     options.type,
@@ -121,14 +122,15 @@ export async function rememberMemory(options: RememberMemoryOptions) {
       email: options.email,
     },
     target,
+    options,
   );
   const rendered = renderEntry(
     fields,
     options.content!,
-    entryOutputName(options.type, target),
+    entryOutputName(options.type, target, options),
     previousSource,
   );
-  ensureLayerTypeGitignore(target, options.type, [file]);
+  ensureLayerTypeGitignore(target, options.type, [file], options);
   const draft = new Model(file).parse(rendered);
   const input = {
     name,
@@ -139,8 +141,8 @@ export async function rememberMemory(options: RememberMemoryOptions) {
   };
   if (exists) await service.update(node, input);
   else await service.create(node, input, { indexGroup: "local" });
-  await refreshIndex(target, options.type, service);
-  const agentsAction = await syncTargetAgents(target, resolveRoot(target), service);
+  await refreshIndex(target, options.type, service, options);
+  const agentsAction = options.project ? "not-applicable" : await syncTargetAgents(target, resolveRoot(target), service);
   return {
     operation: "remember",
     targetDir: target,
@@ -148,7 +150,7 @@ export async function rememberMemory(options: RememberMemoryOptions) {
     name,
     title: fields.title || name,
     path: relative(target, file),
-    index: relative(target, typeIndexPath(target, options.type)),
+    index: relative(target, typeIndexPath(target, options.type, options)),
     action: exists ? "updated" : "created",
     agentsAction,
     provenance: Object.fromEntries(
