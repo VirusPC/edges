@@ -35,11 +35,6 @@ test('CLI first projects and tasks connect existing root, child and content scop
   const maintenance: string[] = [];
   for (const scope of ['.', 'child', 'notes/example']) {
     for (const purpose of ['maintenance', 'domain']) {
-      const project = await call(scope, purpose, ['project', 'create', 'empty', '--title', 'Empty', '--description', 'No tasks yet']);
-      assert.equal(project.exitCode, 0, project.stdout);
-      const globalEmpty = await run(['--scope', root, '--all', 'tasks', 'list', '--group-by', 'project'], { env: {} });
-      assert.equal(globalEmpty.exitCode, 0, globalEmpty.stdout);
-      assert.equal(JSON.parse(globalEmpty.stdout).groupBy, "project");
       const created = await call(scope, purpose, ['create', '--title', 'Same']);
       assert.equal(created.exitCode, 0, created.stdout);
       if (purpose === 'maintenance') maintenance.push(path.join(scope, JSON.parse(created.stdout).path));
@@ -60,7 +55,7 @@ test('CLI first projects and tasks connect existing root, child and content scop
   for (const scope of ['.', 'child', 'notes/example']) {
     const node = read(scope);
     const material = placeHarnessMaterial(path.join(root, scope), 'tasks').absPath;
-    assert.ok(node.localChildren.some(ref => ref.id === material));
+    assert.ok(node.localChildren.some(ref => ref.id === path.join(root,scope,'.edges/README.md')));
     assert.equal(fs.existsSync(path.join(path.dirname(material), 'AGENTS.md')), false);
     assert.equal(fs.existsSync(path.join(path.dirname(placeHarnessMaterial(path.join(root, scope), 'tasks', { super: true }).absPath), 'AGENTS.md')), false);
     assert.ok(!fs.existsSync(path.join(root, scope, '.edges/AGENTS.md')));
@@ -84,8 +79,10 @@ for (const domainGroup of ['local', 'descendant'] as const)
       const result = await call('.', purpose, ['create', '--title', title]);
       assert.equal(result.exitCode, 0, result.stdout);
     }
-    assert.equal(fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8'), source);
-    assert.equal(read('.').children.length, 2);
+    const after = read('.');
+    for (const ref of node.children) assert.deepEqual(after.children.find(child => child.id === ref.id),ref);
+    assert.equal(after.children.length, 3);
+    assert.match(after.body,/Tail/);
   });
 
 test('fresh scope writes remain authorized without initializing Project Memory or a root index', async t => {
@@ -127,7 +124,7 @@ test('maintenance registration preserves an existing descendant relation and aut
   write('AGENTS.md', node.serialize());
   const result = await call('.', 'maintenance', ['create', '--title', 'First']);
   assert.equal(result.exitCode, 0, result.stdout);
-  assert.deepEqual(read('.').localChildren, []);
+  assert.equal(read('.').localChildren[0]?.id,path.join(root,'.edges/README.md'));
   assert.deepEqual(read('.').descendantChildren, [reference]);
 });
 
@@ -138,20 +135,21 @@ test('unsafe owner indexes are refused without overwriting their source', async 
   const result = await call('.', 'maintenance', ['create', '--title', 'Refused']);
   assert.notEqual(result.exitCode, 0);
   assert.equal(fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8'), source);
-  assert.ok(!fs.existsSync(path.join(root, '.edges/tasks/_default/backlog')));
+  assert.ok(!fs.existsSync(path.join(root, '.edges/tasks/backlog')));
 });
 
 test('unlinked maintenance board registers the tasks README without index-group', async t => {
   const { root, write, read } = fixture(t);
   write('AGENTS.md', '# Owner\n');
-  const created = await run(['--scope', root, 'tasks', 'project', 'create', 'example', '--title', 'Example', '--description', 'Description'], { env: {} });
+  const created = await run(['--scope', root, 'tasks', 'create', '--title', 'Example', '--description', 'Description'], { env: {} });
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
   const material = placeHarnessMaterial(root, 'tasks').absPath;
-  assert.equal(read('.').localChildren[0]?.id, material);
+  assert.equal(read('.').localChildren[0]?.id, path.join(root,'.edges/README.md'));
   assert.equal(read('.').descendantChildren.length, 0);
   assert.equal(fs.existsSync(path.join(path.dirname(material), 'AGENTS.md')), false);
   const list = new ReadmeNode(material).parse(fs.readFileSync(material, 'utf8'));
-  assert.equal(list.localChildren.filter(ref => ref.name === 'Example').length, 1);
+  assert.equal(list.localChildren.length, 1);
+  assert.match(list.localChildren[0]!.id,/backlog\/[^/]+\/INDEX\.md$/);
 });
 
 test('task create keeps a scope that already lists the board README', async t => {
@@ -161,22 +159,22 @@ test('task create keeps a scope that already lists the board README', async t =>
   const source = owner.serialize();
   write('AGENTS.md', source);
   write('.edges/tasks/AGENTS.md', '# tasks\n');
-  write('.edges/tasks/README.md', '# Tasks\n\nBoard.\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [Alpha](alpha/README.md) — alpha work\n<!-- edges-entries-local:end -->\n');
+  write('.edges/tasks/README.md', '# Tasks\n\nBoard.\n\n<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n');
   write('.edges/tasks/alpha/README.md', '# Alpha\n\nalpha work\n\n<!-- edges-entries-local:start -->\n## 本层内容\n<!-- edges-entries-local:end -->\n');
-  const created = await call('.', 'maintenance', ['create', '--title', 'Fresh', '--project', 'alpha']);
+  const created = await call('.', 'maintenance', ['create', '--title', 'Fresh']);
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
-  assert.equal(fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8'), source);
-  assert.match(fs.readFileSync(path.join(root, '.edges/tasks/alpha/README.md'), 'utf8'), /Fresh/);
+  assert.match(fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8'), /Keep prose/);
+  assert.match(fs.readFileSync(path.join(root, '.edges/tasks/README.md'), 'utf8'), /Fresh/);
 });
 
-test('super project create writes the configured tasks material and leaves the real owner unchanged', async t => {
+test('super task create writes the configured tasks material and leaves the real owner unchanged', async t => {
   const { root, write, read } = fixture(t);
   const owner = new AgentsNode(path.join(root, 'AGENTS.md')).parse('# Owner\n\nKeep prose\n');
   owner.setConstraints(['Keep rule']);
   owner.addChild('local', { id: path.join(root, 'other/AGENTS.md'), name: 'Authored', description: 'Keep' });
   const source = owner.serialize();
   write('AGENTS.md', source); write('other/AGENTS.md', '# Other\n');
-  const result = await run(['--scope', root, '--super', 'tasks', 'project', 'create', 'example', '--title', 'Example', '--description', 'Description'], { env: {} });
+  const result = await run(['--scope', root, '--super', 'tasks', 'create', '--title', 'Example', '--description', 'Description'], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   assert.equal(fs.readFileSync(path.join(root, 'AGENTS.md'), 'utf8'), source);
   const material = placeHarnessMaterial(root, 'tasks', { super: true }).absPath;

@@ -6,9 +6,9 @@ version: 0.1.0
 
 从对话整理任务：**成文 → 交人审 → 落库**（人审可以是对话确认或 PR）。正文顺序：**背景 → 目标**（必填）→ **动作** → **完成标准**（后两栏可选；完成标准可留到 `grill-with-docs` 后再补）。与 `edges-conversation-to-notes` 主题行动指南同序（背景 → 问题/目标 → 方案/动作 → 验收/完成标准），便于从笔记开卡平移。四栏同构 STAR（Situation / Task / Action / Result）：用来**制定任务**，尤其是派给 agent 的 brief；**不要**拿 STAR 写复盘（复盘走 `edges-conversation-to-notes`）。
 
-先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.edges/tasks`。主体是仓库之外的虚拟系统一时，再加 `--super`，任务写在 `<SCOPE>/tasks`。Task Project 只是该看板的分组，不决定作用域。后续命令使用 `--scope "$SCOPE"`，只有虚拟系统一才加 `--super`。仓内维护 Edges 时显式选仓根，不要依赖执行命令时的源码目录。CLI 在 `cli`。
+先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.edges/tasks/<状态>/<stem>/INDEX.md`。需要归入主题时，用全局 `--project <相对路径>` 选择已有 Project，路径相对 `<SCOPE>/.edges/projects`，任务写入该 Project 的直属 tasks。没有 Task Project 或 `_default` 层。虚拟系统一仍可用 `--super` 选择 `<SCOPE>/tasks`；选定 Project 后材料根优先于 super。后续命令显式传 `--scope "$SCOPE"`；仓内维护 Edges 时选择仓根，不依赖执行命令时的源码目录。CLI 在 `packages/cli`。
 
-`tasks list` 的范围只由 `--scope`、`--super`、`--all` 决定。不传 `--all` 时，从当前主体做一次 traverse，顺着 `AGENTS.md` 的 children 走到任务。`--all` 从当前 `--scope` 走森林。最全的一次查询是 `edges --scope <仓库根> --super --all tasks list`。不要为了列出任务再读 README 的 `edges-entries`，也不要把 README 上的链接抄进 `AGENTS.md`。
+`tasks list` 从当前主体的组成入口递归查找任务；选定 Project 时，从其 INDEX 进入，包括登记可达的子 Project。`--all` 额外发现所选物理范围中的独立系统。不要为了列出任务再写一套目录扫描，也不要把 README 的链接抄进 AGENTS。
 
 `edges tasks` 只改文件，不执行 Git。看板变更要进受保护的 `main` 时必须开 PR，不要直接 push `main`。对话里确认文案不等于可以直推。
 
@@ -17,9 +17,9 @@ version: 0.1.0
 1. **判是不是任务。** 对话里是否已有可接力的下一步？若实质是复盘或耐久结论，改派对应技能，停在这里。一条对话可以整理出多条、一条，或零条。
 2. **只读去重（可选）。** 用 `edges --scope "$SCOPE" tasks list`（虚拟系统一再加 `--super`；要各系统一起看再加 `--all`）和 `get` 看开放任务。同一意图已有卡 → 在输出里建议更新该条，不要近义新建。
 3. **必填门闩。** 自检 **背景、目标** 是否都能从对话里有依据地写出。任一不足 → **先提问**（可一次问多栏，但问题要具体），等用户想清楚再继续；不要用「无」占位，也不要替人编。**动作**、**完成标准**缺了不必追问；对话里已谈清做法时再写入动作，已有可核对验收条件时再写入完成标准，否则整栏省略，并在交人审时注明「完成标准待 grill-with-docs 补」。
-4. **按模板成文。** 写出标题、简介建议与正文；字段怎么写见下方「各栏要点」与模板。再用 `edges --scope "$SCOPE" tasks project list`（虚拟系统一再加 `--super`）建议已有项目（不要自造短名，除非先问人）；默认状态待办（`backlog`）；未点名负责人则不写。
+4. **按模板成文。** 写出标题、简介建议与正文；字段怎么写见下方「各栏要点」与模板。用 `edges --scope "$SCOPE" projects list` 建议已有 Project，保留返回的实际目录路径；没有合适主题时可以不指定 Project。默认状态待办（`backlog`）；未点名负责人则不写。
 5. **交人审阅。** 交出标题、简介、正文、建议的项目与状态，供人过目；可说明「若落库大致会是哪条路径」。人审方式任选：对话里确认，或整段在分支上落库后提 PR 审。对话确认路径：确认前不要写盘，也不调用 `create` / `update` / `status`。若已有完成标准且需导出 `/goal` 一句契约，用「目标 + 完成标准」，必要时补上背景里的约束；完成标准仍缺则不要硬造 `/goal` 契约。
-6. **落库。** 用 `edges --scope "$SCOPE" tasks create` 新建（虚拟系统一再加 `--super`），或对已有卡用 `update`（及必要时 `status`）；用户改了草稿则按改后的内容写。对话确认路径：确认后再写。写完的看板文件要进 `main`，必须开 PR 并回传链接；不要直接 push `main`。
+6. **落库。** 用 `edges --scope "$SCOPE" tasks create` 新建；归入 Project 时加全局 `--project <路径>`，虚拟系统一再加 `--super`。已有卡用 `update`（及必要时 `status`）；用户改了草稿则按改后的内容写。调整归属另用 `update --to-project <路径>` 或 `--to-default`，全局参数只选择来源。对话确认路径：确认后再写。写完的看板文件要进 `main`，必须开 PR 并回传链接；不要直接 push `main`。
 
 ## 各栏要点
 
@@ -60,4 +60,4 @@ version: 0.1.0
 - 写给人审阅，白话完整句；不添加对话里没有的新需求。
 - 不要把复盘四栏或记忆结论塞进任务顶替背景；不写执行流水。
 
-新建父级登记跟着主体系统走，调用方不再选择 local 或 descendant。已有登记保留原分组。缺失 owner 不代为初始化。生成结构内部已有的固定组成关系由 Service 执行，不逐桶询问。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrations/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。
+新建父级登记跟着主体系统或已选 Project 走，调用方不选择 local 或 descendant。缺失 owner 不代为初始化；组成关系由 Service 维护。遇到旧 `tasks/<分组>/<状态>` 布局时，先生成递归 Project 迁移预览并检查冲突；普通命令不自动迁移。

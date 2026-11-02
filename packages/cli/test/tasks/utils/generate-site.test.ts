@@ -52,24 +52,12 @@ test("aggregate site preserves duplicate stems with portable scope/purpose/proje
       );
       assert.equal(result.exitCode, 0, result.stdout);
     }
-    // Existing records may share a stem across Task Projects; no stored rename is permitted.
-    const { mkdir, writeFile } = await import("node:fs/promises");
-    const listed = JSON.parse(
-      (await run(["--scope", repo, "tasks", "list"], { env })).stdout,
-    );
-    const original = listed.tasks[0];
-    await mkdir(path.join(repo, "tasks/cli/backlog", original.stem), {
-      recursive: true,
-    });
-    await writeFile(
-      path.join(repo, "tasks/cli/backlog", `${original.stem}/index.md`),
-      (await readFile(path.join(repo, original.path), "utf8")).replace(
-        "edges-task-project: default",
-        "edges-task-project: cli",
-      ),
-    );
-    await indexTaskFixtureBoard(path.join(repo,'tasks'));
-    await writeFixtureIndex(path.join(repo,'AGENTS.md'), ['tasks/AGENTS.md','.edges/tasks/AGENTS.md']);
+    const createdProject = await run(["--scope",repo,"projects","create","--title","Theme"],{env});
+    assert.equal(createdProject.exitCode,0,createdProject.stdout);
+    const project = path.relative(path.join(repo,".edges/projects"),path.dirname(path.join(repo,JSON.parse(createdProject.stdout).path)));
+    const inProject = await run(["--scope",repo,"--project",project,"tasks","create","--title","Same"],{env});
+    assert.equal(inProject.exitCode,0,inProject.stdout);
+    await writeFixtureIndex(path.join(repo,'AGENTS.md'), ['tasks/README.md','.edges/README.md']);
     const outPath = path.join(repo, "site/index.html");
     await generateTasksSite({ repoPath: repo, outPath, env });
     const html = await readFile(outPath, "utf8");
@@ -83,13 +71,13 @@ test("aggregate site preserves duplicate stems with portable scope/purpose/proje
     assert.equal(payload.items[0].stem, payload.items[1].stem);
     assert.deepEqual(
       payload.items.map((item: any) => item.source.purpose).sort(),
-      ["domain", "domain", "maintenance"],
+      ["domain", "maintenance", "maintenance"],
     );
     assert.ok(
       payload.items.every(
         (item: any) =>
           item.source.scope === "." &&
-          ["default", "cli"].includes(item.project),
+          (item.project === undefined || item.project === project),
       ),
     );
     assert.ok(!JSON.stringify(payload).includes(repo));

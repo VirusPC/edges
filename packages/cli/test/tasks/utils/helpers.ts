@@ -65,51 +65,36 @@ export function nodeBoardWriter(): BoardWriter {
   };
 }
 
-/** Seed current README org lists for task fixtures; production never performs this scan. */
+/** Fixture-only directory scan: production indexes remain NodeService-managed. */
 export async function indexTaskFixtureBoard(board: string): Promise<void> {
   const { ReadmeNode } = await import("../../../src/domain/models/readme/readme-node.js");
   const { TASK_STATUSES } = await import('../../../src/domain/models/tasks/types.js');
-  const { isUserProjectSlug } = await import('../../../src/domain/models/tasks/project.js');
-  const { renderProjectReadme, seedTitleFor, seedDescriptionFor } = await import('../../../src/services/tasks/project-meta.js');
   const path = await import('node:path');
   const { realpath } = await import('node:fs/promises');
   board = await realpath(board);
-  const loadIndex = async (file: string, fallback: string) => {
-    let source = fallback;
-    try { source = await readFile(file,'utf8'); } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
-    return new ReadmeNode(file).parse(source);
-  };
-  const root = await loadIndex(path.join(board,'README.md'),'# Tasks\n');
-  for (const name of await readdir(board)) {
-    if (name !== '_default' && !isUserProjectSlug(name)) continue;
-    const project = name === '_default' ? 'default' : name;
-    const dir = path.join(board,name);
-    try { await readdir(dir); } catch { continue; }
-    const node = await loadIndex(path.join(dir,'README.md'),renderProjectReadme({title:seedTitleFor(project),description:seedDescriptionFor(project)}));
-    for (const status of TASK_STATUSES) {
-      let names: string[];
-      try { names = await readdir(path.join(dir,status)); } catch { continue; }
-      for (const stem of names) {
-        let entry = '';
-        for (const leaf of ['INDEX.md','index.md']) {
-          try { entry = await realpath(path.join(dir,status,stem,leaf)); break; } catch { /* try legacy spelling */ }
-        }
-        if (!entry) continue;
-        if (!node.children.some(ref=>ref.id===entry)) node.addChild('local',{id:entry});
+  const file = path.join(board,'README.md');
+  let source = '# Tasks\n';
+  try { source = await readFile(file,'utf8'); } catch {}
+  const root = new ReadmeNode(file).parse(source);
+  for (const status of TASK_STATUSES) {
+    let names: string[];
+    try { names = await readdir(path.join(board,status)); } catch { continue; }
+    for (const stem of names) {
+      let entry = '';
+      for (const leaf of ['INDEX.md','index.md']) {
+        try { entry = await realpath(path.join(board,status,stem,leaf)); break; } catch {}
       }
+      if (entry && !root.children.some(ref=>ref.id===entry)) root.addChild('local',{id:entry});
     }
-    await writeFile(node.path,node.serialize());
-    if (!root.children.some(ref=>ref.id===node.path)) root.addChild('local',{id:node.path});
   }
   await writeFile(root.path,root.serialize());
 }
-
 export async function writeIndexedTaskFixture(...args: Parameters<typeof writeFile>): Promise<void> {
   const path = await import('node:path');
   const file = String(args[0]);
   await mkdir(path.dirname(file),{recursive:true});
   await writeFile(...args);
-  const match = file.match(/^(.*\/tasks)\/[^/]+\/(?:backlog|todo|in_progress|in_review|done|blocked|cancelled)\/[^/]+\/(?:INDEX|index)\.md$/);
+  const match = file.match(/^(.*\/tasks)\/(?:backlog|todo|in_progress|in_review|done|blocked|cancelled)\/[^/]+\/(?:INDEX|index)\.md$/);
   if (match) await indexTaskFixtureBoard(match[1]!);
   else if (path.basename(file)==='AGENTS.md' && path.basename(path.dirname(file))==='tasks') await indexTaskFixtureBoard(path.dirname(file));
 }

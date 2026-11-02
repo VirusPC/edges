@@ -4,7 +4,7 @@ import {
   nativeTaskPath,
   relativePathInsideScope,
 } from "./realpath.js";
-import { TaskNode, AgentsNode, ReadmeNode } from "../../domain/models/index.js";
+import { TaskNode } from "../../domain/models/index.js";
 import { taskBoardQuery, taskLocationOf, listRepositoryTaskNodes } from "./node-query.js";
 import { resolveBoard, scopeDir, taskBoardLocation, type BoardTarget } from "./paths.js";
 import {
@@ -25,14 +25,6 @@ import {
 } from "../../domain/models/tasks/task-doc.js";
 import { priorityFromMetadata } from "../../domain/models/tasks/priority.js";
 import { sortTasksByPriority } from "../../domain/operations/tasks.js";
-import {
-  assertProjectDualWrite,
-  DEFAULT_TASK_PROJECT,
-  DEFAULT_TASK_PROJECT_DIR,
-  isUserProjectSlug,
-  projectDirName,
-  type TaskProjectId,
-} from "../../domain/models/tasks/project.js";
 import { isLeafEntryName } from "../../domain/models/node/layout.js";
 import {
   boardRoot,
@@ -139,6 +131,19 @@ export function createNodeBoardWriter(target?: BoardTarget): BoardWriter {
   };
 }
 
+/** Ordinary commands refuse legacy groups; migration is explicit and previewed. */
+export async function assertCurrentBoard(target: BoardTarget, fs: BoardFs): Promise<void> {
+  const board = boardRoot(target);
+  if (!(await fs.exists(board))) return;
+  for (const child of await fs.readdir(board)) {
+    if (TASK_STATUSES.includes(child as TaskStatus)) continue;
+    for (const status of TASK_STATUSES) {
+      if (await fs.exists(path.join(board, child, status)))
+        throw new TasksError("VALIDATION_ERROR", `Legacy Task Project layout requires migration: ${path.join(board, child)}`);
+    }
+  }
+}
+
 function countSidecarRuns(markdown: string): number {
   const rows = markdown
     .split(/\r?\n/)
@@ -159,37 +164,6 @@ function countSidecarRuns(markdown: string): number {
   return count;
 }
 
-export async function listProjectIds(
-  repoPath: BoardTarget,
-  fs: BoardFs,
-): Promise<TaskProjectId[]> {
-  const target = resolveBoard(repoPath);
-  // Content face (board README) holds org-list projects; real AGENTS still holds
-  // system-entry projects and legacy README links awaiting migration.
-  const [fromContent, fromAgents] = await Promise.all([
-    (await taskBoardQuery(target, ["agents", "readme"], { super: true })).value(),
-    (await taskBoardQuery(target, ["agents", "readme"], { super: false })).value(),
-  ]);
-  const nodes = [...fromContent, ...fromAgents];
-  const boardPath = boardRoot(repoPath);
-  const board = await fs.exists(boardPath) ? nativeTaskPath(boardPath) : boardPath;
-  const names = new Set(nodes
-    .filter(node => (node instanceof AgentsNode || node instanceof ReadmeNode) && path.dirname(node.directoryPath) === board)
-    .map(node => path.basename(node.directoryPath)));
-  const ids: TaskProjectId[] = [...names]
-    .filter(name => name === DEFAULT_TASK_PROJECT_DIR || isUserProjectSlug(name))
-    .map(name => name === DEFAULT_TASK_PROJECT_DIR ? DEFAULT_TASK_PROJECT : name);
-  return ids.sort((a, b) => {
-    if (a === DEFAULT_TASK_PROJECT) {
-      return -1;
-    }
-    if (b === DEFAULT_TASK_PROJECT) {
-      return 1;
-    }
-    return a.localeCompare(b);
-  });
-}
-
 function scopeNodeRoot(repoPath: BoardTarget): string {
   return nativeTaskPath(scopeDir(repoPath));
 }
@@ -201,19 +175,18 @@ export type ListedTask = {
 
 async function readListItem(
   repoPath: BoardTarget,
-  project: TaskProjectId,
   status: TaskStatus,
   stem: string,
   fs: BoardFs,
   providedNode?: TaskNode,
 ): Promise<ListedTask> {
-  let rel = taskRelPath(project, status, stem, repoPath);
+  let rel = taskRelPath(status, stem, repoPath);
   if (
     !providedNode &&
     !(await fs.exists(path.join(scopeDir(repoPath), rel)))
   )
-    rel = legacyTaskRelPath(project, status, stem, repoPath);
-  const sidecarRel = sidecarRelPath(project, status, stem, repoPath);
+    rel = legacyTaskRelPath(status, stem, repoPath);
+  const sidecarRel = sidecarRelPath(status, stem, repoPath);
   const abs = path.join(scopeDir(repoPath), rel);
   const sidecarAbs = path.join(scopeDir(repoPath), sidecarRel);
   const markdown = providedNode?.serialize() ?? await fs.readFile(abs);
@@ -222,11 +195,8 @@ async function readListItem(
   rel = relativePathInsideScope(scopeRoot, node.path);
   taskLocationOf(node, scopeRoot);
   const parsed = parseTaskDoc(markdown);
+  if (parsed.metadata["edges-task-project"] !== undefined) throw new TasksError("VALIDATION_ERROR", `Legacy Task Project metadata requires migration: ${abs}`);
   const doc = taskDocFromParsed(parsed);
-  const resolvedProject = assertProjectDualWrite(
-    projectDirName(project),
-    doc.metadata,
-  );
   let runCount = 0;
   if (await fs.exists(sidecarAbs)) {
     runCount = countSidecarRuns(await fs.readFile(sidecarAbs));
@@ -242,7 +212,7 @@ async function readListItem(
       sidecarPath: sidecarRel,
       runCount,
       priority: priorityFromMetadata(doc.metadata),
-      project: resolvedProject,
+      project: taskLocationOf(node, scopeRoot).project,
     },
   };
 }
@@ -250,7 +220,6 @@ async function readListItem(
 export type TaskListOpts = {
   status?: TaskStatus;
   priorities?: TaskPriority[];
-  projects?: TaskProjectId[];
   sort?: "priority";
 };
 
@@ -259,6 +228,7 @@ export async function listTasksWithDocs(
   opts: TaskListOpts,
   fs: BoardFs,
 ): Promise<Array<TaskListItem & { doc: TaskDoc }>> {
+  await assertCurrentBoard(repoPath, fs);
   const target = resolveBoard(repoPath);
   const root = scopeNodeRoot(repoPath);
   const filtered = await (await taskBoardQuery(target))
@@ -266,14 +236,11 @@ export async function listTasksWithDocs(
     .map(node => ({ node, location: taskLocationOf(node, root) }))
     .filter(({ location }) => !opts.status || location.status === opts.status)
     .filter(({ node }) => !opts.priorities?.length || opts.priorities.includes(node.priority))
-    .filter(({ location }) => !opts.projects?.length || opts.projects.includes(location.project))
     .map(async ({ node, location }) => {
-      const listed = await readListItem(repoPath, location.project, location.status, location.stem, fs, node);
+      const listed = await readListItem(repoPath, location.status, location.stem, fs, node);
       return { ...listed.item, doc: listed.doc };
     }).value();
-  // Keep the established project/status/stem ordering independently of index order.
-  filtered.sort((a,b) => (a.project === b.project ? 0 : a.project === DEFAULT_TASK_PROJECT ? -1 : b.project === DEFAULT_TASK_PROJECT ? 1 : a.project.localeCompare(b.project))
-    || TASK_STATUSES.indexOf(a.status) - TASK_STATUSES.indexOf(b.status) || a.stem.localeCompare(b.stem));
+  filtered.sort((a,b) => TASK_STATUSES.indexOf(a.status) - TASK_STATUSES.indexOf(b.status) || a.stem.localeCompare(b.stem));
 
   if (opts.sort === "priority") {
     return sortTasksByPriority(filtered);
@@ -300,24 +267,24 @@ async function findByStem(
   repoPath: BoardTarget,
   stem: string,
   fs: BoardFs,
-): Promise<Array<{ project: TaskProjectId; status: TaskStatus }>> {
+): Promise<Array<{ status: TaskStatus }>> {
+  await assertCurrentBoard(repoPath, fs);
   const target = resolveBoard(repoPath);
   const root = scopeNodeRoot(repoPath);
   return (await taskBoardQuery(target))
     .filter((node): node is TaskNode => node instanceof TaskNode)
     .map(node => taskLocationOf(node, root))
     .filter(location => location.stem === stem)
-    .map(({ project, status }) => ({ project, status })).value();
+    .map(({ status }) => ({ status })).value();
 }
 
 async function loadRecord(
   repoPath: BoardTarget,
-  project: TaskProjectId,
   status: TaskStatus,
   stem: string,
   fs: BoardFs,
 ): Promise<TaskRecord> {
-  const item = (await readListItem(repoPath, project, status, stem, fs)).item;
+  const item = (await readListItem(repoPath, status, stem, fs)).item;
   const abs = path.join(scopeDir(repoPath), item.path);
   const sidecarAbs = path.join(scopeDir(repoPath), item.sidecarPath);
   const markdown = await fs.readFile(abs);
@@ -341,6 +308,7 @@ export async function getTask(
   target: string,
   fs: BoardFs,
 ): Promise<TaskRecord> {
+  await assertCurrentBoard(repoPath, fs);
   const parsed = parseTarget(target);
   if (parsed.kind === "path") {
     const abs = path.isAbsolute(target)
@@ -354,21 +322,10 @@ export async function getTask(
       path.dirname(path.dirname(abs)),
     );
     const parts = rel.split(path.sep).filter(Boolean);
-    if (parts.length !== 2 || !TASK_STATUSES.includes(parts[1] as TaskStatus)) {
+    if (parts.length !== 1 || !TASK_STATUSES.includes(parts[0] as TaskStatus)) {
       throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
     }
-    const project =
-      parts[0] === DEFAULT_TASK_PROJECT_DIR ? DEFAULT_TASK_PROJECT : parts[0];
-    if (project !== DEFAULT_TASK_PROJECT && !isUserProjectSlug(project)) {
-      throw new TasksError("TASK_NOT_FOUND", `task not found: ${target}`);
-    }
-    return loadRecord(
-      repoPath,
-      project,
-      parts[1] as TaskStatus,
-      parsed.stem,
-      fs,
-    );
+    return loadRecord(repoPath, parts[0] as TaskStatus, parsed.stem, fs);
   }
 
   const hits = await findByStem(repoPath, parsed.stem, fs);
@@ -378,12 +335,11 @@ export async function getTask(
   if (hits.length > 1) {
     throw new TasksError(
       "AMBIGUOUS_TASK",
-      `stem ${parsed.stem} exists in multiple project/status folders`,
+      `stem ${parsed.stem} exists in multiple status folders`,
     );
   }
   return loadRecord(
     repoPath,
-    hits[0]!.project,
     hits[0]!.status,
     parsed.stem,
     fs,
@@ -405,17 +361,16 @@ export async function listRepositoryTasksWithDocs(
     .map(node => ({ node, location: taskLocationOf(node, root) }))
     .filter(({ location }) => !opts.status || location.status === opts.status)
     .filter(({ node }) => !opts.priorities?.length || opts.priorities.includes(node.priority))
-    .filter(({ location }) => !opts.projects?.length || opts.projects.includes(location.project))
     .map(async ({ node, location }) => {
-      const { source, project, status, stem } = location;
-      const target = taskBoardLocation(path.resolve(root, source.scope), { super: source.purpose === "domain" });
-      const listed = await readListItem(target, project, status, stem, createNodeBoardFs(target), node);
+      const { source, status, stem } = location;
+      const target = location.location;
+      const listed = await readListItem(target, status, stem, createNodeBoardFs(target), node);
       return { ...listed.item, doc: listed.doc, source,
         path: relativePathInsideScope(root, node.path),
         sidecarPath: relativePathInsideScope(root, path.join(target.scopeDir, listed.item.sidecarPath)) };
     }).value();
   rows.sort((a,b) => a.source.scope.localeCompare(b.source.scope) || a.source.purpose.localeCompare(b.source.purpose)
-    || (a.project === b.project ? 0 : a.project === DEFAULT_TASK_PROJECT ? -1 : b.project === DEFAULT_TASK_PROJECT ? 1 : a.project.localeCompare(b.project))
+
     || TASK_STATUSES.indexOf(a.status) - TASK_STATUSES.indexOf(b.status) || a.stem.localeCompare(b.stem));
   if (opts.sort === 'priority') return sortTasksByPriority(rows);
   if (opts.sort !== undefined) throw new TasksError('VALIDATION_ERROR', `invalid --sort: ${String(opts.sort)} (expected priority)`);

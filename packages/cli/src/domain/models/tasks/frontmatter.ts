@@ -3,7 +3,7 @@ import { setDomainField } from "../../core/fields.js";
 import { createMarkdownCodec } from "../../../utils/markdown/document.js";
 import type { DocumentCodec, MarkdownDocument, Metadata, MetadataValue } from "../../../utils/markdown/types.js";
 import matter from "gray-matter";
-import type { TaskPriority, TaskProjectId, TaskStatus } from "./types.js";
+import type { TaskPriority, TaskStatus } from "./types.js";
 
 export type ParsedTaskDoc = {
   name: string;
@@ -78,7 +78,6 @@ export function renderNewTaskDoc(input: {
   description: string;
   title: string;
   status: TaskStatus;
-  project?: TaskProjectId;
   priority?: TaskPriority;
   assignee?: string;
   updatedAt: string;
@@ -89,7 +88,6 @@ export function renderNewTaskDoc(input: {
     "edges-title": input.title,
     "edges-tasks-status": input.status,
   };
-  if (input.project && input.project !== "default") metadata["edges-task-project"] = input.project;
   if (input.priority && input.priority !== "none") metadata["edges-task-priority"] = input.priority;
   if (input.assignee) metadata["edges-task-assignee"] = input.assignee;
   metadata["edges-updated-at"] = input.updatedAt;

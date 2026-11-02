@@ -7,7 +7,6 @@ import path from "node:path";
 import { createTask, updateTask } from "../../src/services/tasks/write.js";
 import {
   getTask,
-  listProjectIds,
   listRepositoryTasksWithDocs,
   listTasks,
   relativePathInsideScope,
@@ -61,8 +60,8 @@ async function withAliasedScope(
   const board: BoardTarget = mode === "domain" ? domainBoard(repo) : repo;
   try {
     const statusParent = mode === "domain"
-      ? path.join(repo, "tasks/_default/todo")
-      : path.join(repo, ".edges/tasks/_default/todo");
+      ? path.join(repo, "tasks/todo")
+      : path.join(repo, ".edges/tasks/todo");
     await mkdir(statusParent, { recursive: true });
     const created = await createTask(
       board,
@@ -70,11 +69,11 @@ async function withAliasedScope(
       { fs: writer, now: new Date(2026, 9, 11, 12, 0, 0) },
     );
     const wanted = mode === "domain"
-      ? `tasks/_default/todo/${created.stem}/INDEX.md`
-      : `.edges/tasks/_default/todo/${created.stem}/INDEX.md`;
+      ? `tasks/todo/${created.stem}/INDEX.md`
+      : `.edges/tasks/todo/${created.stem}/INDEX.md`;
     const projectPath = mode === "domain"
-      ? "tasks/_default/README.md"
-      : ".edges/tasks/_default/README.md";
+      ? "tasks/README.md"
+      : ".edges/tasks/README.md";
     assert.equal(created.path, wanted);
     assert.ok(
       path.relative(callerRoot, path.join(repo, wanted)).startsWith(".."),
@@ -97,7 +96,7 @@ test("scope casing alias keeps listed task paths inside the scope", async () => 
     assert.equal(items.length, 1);
     assert.equal(items[0]?.path, wanted);
     assert.equal(items[0]?.path.includes(".."), false);
-    assert.equal(items[0]?.sidecarPath, `tasks/_default/todo/${stem}/.${stem}.log.md`);
+    assert.equal(items[0]?.sidecarPath, `tasks/todo/${stem}/.${stem}.log.md`);
 
     const fetched = await getTask(board, items[0]!.path, fs);
     assert.equal(fetched.stem, stem);
@@ -133,14 +132,7 @@ test("repository list keeps task paths inside a casing-aliased root", async () =
     assert.equal(rows[0]?.path, wanted);
     assert.equal(rows[0]?.path.includes(".."), false);
     assert.equal(rows[0]?.sidecarPath.includes(".."), false);
-    assert.equal(rows[0]?.sidecarPath, `tasks/_default/todo/${stem}/.${stem}.log.md`);
-  });
-});
-
-test("project ids stay visible under a scope casing alias", async () => {
-  await withAliasedScope("Project case", "domain", async ({ board, fs }) => {
-    const ids = await listProjectIds(board, fs);
-    assert.ok(ids.includes("default"));
+    assert.equal(rows[0]?.sidecarPath, `tasks/todo/${stem}/.${stem}.log.md`);
   });
 });
 
@@ -171,11 +163,6 @@ test("maintenance scope casing alias keeps default list, get, and project paths 
     assert.equal(fetched.exitCode, 0, fetched.stdout + fetched.stderr);
     assert.equal(JSON.parse(fetched.stdout).task.path, wanted);
 
-    const projects = await run(["tasks", "project", "list"], { env });
-    assert.equal(projects.exitCode, 0, projects.stdout + projects.stderr);
-    const rows = JSON.parse(projects.stdout).projects as Array<{ path: string; project: string }>;
-    assert.equal(rows.find((row) => row.project === "default")?.path, projectPath);
-    assert.equal(rows.some((row) => row.path.includes("..")), false);
   });
 });
 
@@ -203,11 +190,6 @@ test("domain scope casing alias keeps super list, all, get, update, and project 
     assert.equal(updated.exitCode, 0, updated.stdout + updated.stderr);
     assert.equal(JSON.parse(updated.stdout).path, wanted);
 
-    const projects = await run(["--super", "tasks", "project", "list"], { env });
-    assert.equal(projects.exitCode, 0, projects.stdout + projects.stderr);
-    const rows = JSON.parse(projects.stdout).projects as Array<{ path: string; project: string }>;
-    assert.equal(rows.find((row) => row.project === "default")?.path, projectPath);
-    assert.equal(rows.some((row) => row.path.includes("..")), false);
   });
 });
 
@@ -215,9 +197,9 @@ test("matching scope spelling stays a relative path inside the scope", () => {
   assert.equal(
     relativePathInsideScope(
       "/repo/Scope",
-      "/repo/Scope/tasks/_default/todo/stem/INDEX.md",
+      "/repo/Scope/tasks/todo/stem/INDEX.md",
     ),
-    "tasks/_default/todo/stem/INDEX.md",
+    "tasks/todo/stem/INDEX.md",
   );
 });
 
@@ -226,7 +208,7 @@ test("a task path outside the scope is rejected instead of returned as ..", () =
     () =>
       relativePathInsideScope(
         "/repo/Scope",
-        "/other/tasks/_default/todo/stem/INDEX.md",
+        "/other/tasks/todo/stem/INDEX.md",
       ),
     (error: unknown) => error instanceof TasksError && error.errorCode === "VALIDATION_ERROR",
   );
@@ -237,7 +219,7 @@ test("mixed realpath casing cannot bypass the scope check", () => {
     () =>
       relativePathInsideScope(
         "/repo/scope",
-        "/repo/Scope/tasks/_default/todo/stem/INDEX.md",
+        "/repo/Scope/tasks/todo/stem/INDEX.md",
       ),
     (error: unknown) => error instanceof TasksError && error.errorCode === "VALIDATION_ERROR",
   );

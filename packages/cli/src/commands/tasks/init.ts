@@ -20,7 +20,7 @@ export function addTaskInitCommand(tasks: Command, ctx: CliContext): void {
         description?: string;
       }) => {
         try {
-          const result = await initTasks({ ...options, env: ctx.env });
+          const result = await initTasks({ ...options, env: ctx.env, project: ctx.project });
           ctx.result = succeed({ ...result, command: "tasks.init" });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

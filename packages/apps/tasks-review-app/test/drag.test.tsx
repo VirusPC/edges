@@ -50,7 +50,7 @@ it("copies export JSON without status", async () => {
   expect(writeText).toHaveBeenCalledWith(JSON.stringify(exportReviewRows(payload.items), null, 2));
 });
 
-it('selects duplicate stored stems by source identity and exports real project slugs', async () => {
+it('selects duplicate stored stems by source identity and exports real Project paths', async () => {
   const user = userEvent.setup();
   let copied = '';
   Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async (text: string) => { copied = text; } } });
@@ -71,7 +71,7 @@ it('selects duplicate stored stems by source identity and exports real project s
   expect(document.querySelector('[data-markdown-pane] h1')?.textContent).toBe('Domain detail');
   await user.click(screen.getByRole('button', { name: '复制导出 JSON' }));
   expect(JSON.parse(copied)).toEqual([
-    { stem: 'same', source, current: 'default', suggested: 'default', action: 'keep', note: '' },
-    { stem: 'same', source: other, current: 'cli', suggested: 'cli', action: 'keep', note: '' },
+    { stem: 'same', source, destination: source, current: 'default', suggested: 'default', action: 'keep', note: '' },
+    { stem: 'same', source: other, destination: other, current: 'cli', suggested: 'cli', action: 'keep', note: '' },
   ]);
 });

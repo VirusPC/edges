@@ -1,13 +1,14 @@
+import { queryMaterialNodes, type MaterialReach } from "../../services/node/scope-session.js";
+import { taskLocationOf } from "../../services/tasks/node-query.js";
 import * as fs from "node:fs";
 import path from "node:path";
 import { Command, Option } from "commander";
 import type { CliContext } from "../../context.js";
-import { parseTaskProject } from "../../domain/models/tasks/project.js";
 import { parseTaskPriority } from "../../domain/models/tasks/priority.js";
 import { TaskNode } from "../../domain/models/tasks/task-node.js";
 import { sortTasksByPriority } from "../../domain/operations/tasks.js";
 import { scopeTraversal } from "../../domain/operations/traverse.js";
-import { TASK_PRIORITIES, TASK_STATUSES, type TaskPriority, type TaskProjectId, type TaskStatus } from "../../domain/models/tasks/types.js";
+import { TASK_PRIORITIES, TASK_STATUSES, type TaskPriority, type TaskStatus } from "../../domain/models/tasks/types.js";
 import { runTasksCommand, succeed } from "./run.js";
 import { TasksError } from "../../domain/models/tasks/types.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
@@ -31,7 +32,6 @@ const LIST_AFTER_HELP = `
 FLAGS
   --status <edges-tasks-status>  Filter: backlog | todo | in_progress | in_review | done | blocked | cancelled
   --priority <priority>  Repeatable OR filter: urgent | high | medium | low | none
-  --project <project>  Repeatable OR filter: default or kebab slug
   --sort priority        urgent → high → medium → low → none (stable). Default stays board order
   --group-by <field>    After filters, emit { groupBy, groups: [{ key, items }] }
   --filter <field=value>  Repeatable. Same field is OR, different fields are AND
@@ -63,13 +63,6 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
           parseTaskPriority(value),
         ]),
     )
-    .addOption(
-      new Option("--project <project>", "edges-task-project (repeatable, OR)")
-        .argParser((value: string, previous: TaskProjectId[]) => [
-          ...(previous ?? []),
-          parseTaskProject(value),
-        ]),
-    )
     .addOption(new Option("--sort <field>", "sort list").choices(["priority"]))
     .addOption(new Option("--group-by <field>", "group filtered tasks by one field"))
     .addOption(new Option("--format <format>", "stdout format (always json)").choices(["json"]))
@@ -82,7 +75,6 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
     .action(async (opts: {
       status?: TaskStatus;
       priority?: TaskPriority[];
-      project?: TaskProjectId[];
       sort?: "priority";
       groupBy?: string;
       format?: "json";
@@ -101,12 +93,12 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
         const listOpts = {
           status: opts.status,
           priorities: opts.priority,
-          projects: opts.project,
           sort: opts.sort,
         };
         const scopeDir = runtime.location.scopeDir;
         const listed = (await collectTasks(scopeDir, {
           all: ctx.all === true,
+          project: ctx.project,
           super: ctx.super === true,
           exclude: ctx.exclude,
         })).filter((item) => itemMatches(item, listOpts));
@@ -131,50 +123,32 @@ export function addListCommand(tasks: Command, ctx: CliContext): void {
     });
 }
 
-async function collectTasks(scopeDir: string, mode: { all: boolean; super: boolean; exclude?: ReadonlySet<string> }) {
+async function collectTasks(scopeDir: string, mode: MaterialReach) {
   const managed = gitRoot(scopeDir) ?? scopeDir;
-  if (mode.all) {
-    const forest = await buildSystemForest(scopeDir, { includeSuper: mode.super, exclude: mode.exclude, form: "independent" });
-    return forest.flat().flatMap((node) => node instanceof TaskNode ? [taskItem(node, scopeDir)] : []);
-  }
   const scopeEntry = path.join(path.resolve(scopeDir), ENTRY_NAMES.internal);
-  if (!mode.super && !fs.existsSync(scopeEntry)) {
-    if (tasksBoardReadmeExists(scopeDir)) {
-      return (await listTaskNodes(subjectTaskBoard(scopeDir))).map((node) => taskItem(node, scopeDir));
-    }
-    throw new Error(
-      `Missing scope entry: ${scopeEntry}. Add AGENTS.md or pass --super to traverse the content face (README) as a virtual system.`,
-    );
+  if (!mode.project && !mode.all && !mode.super && !fs.existsSync(scopeEntry)) {
+    if (tasksBoardReadmeExists(scopeDir))
+      return (await listTaskNodes(subjectTaskBoard(scopeDir))).map(node => taskItem(node, scopeDir));
+    throw new Error(`Missing scope entry: ${scopeEntry}. Add AGENTS.md or pass --super.`);
   }
-  const nodes = await new NodeService({ managedRoot: managed })
-    .query(scopeDir, { types: ["task"], ...scopeTraversal(mode) })
-    .filter((node): node is TaskNode => node instanceof TaskNode)
-    .value();
-  return nodes.map((node) => taskItem(node, scopeDir));
+  const service = new NodeService({ managedRoot: managed });
+  const hasDirectBoard = fs.existsSync(path.join(subjectTaskBoard(scopeDir, { super: true }).boardDir, ENTRY_NAMES.readme));
+  const nodes = mode.super && !mode.project && !mode.all && hasDirectBoard ? [] : await queryMaterialNodes(scopeDir, service, ["task"], mode);
+  if (mode.super && !mode.project && !mode.exclude?.has("tasks")) {
+    const board = subjectTaskBoard(scopeDir, { super: true });
+    const entry = path.join(board.boardDir, ENTRY_NAMES.readme);
+    if (fs.existsSync(entry)) nodes.push(...await service.query(entry, { types: ["task"], exclude: mode.exclude, scopeDir }).value());
+  }
+  return [...new Map(nodes.map(node => [node.path,node])).values()].filter((node): node is TaskNode => node instanceof TaskNode).map(node => taskItem(node, scopeDir));
 }
-
 function taskItem(node: TaskNode, root: string) {
-  const rel = relativePathInsideScope(nativeTaskPath(root), node.path).split(path.sep).join("/");
-  const parts = rel.split("/");
-  const at = parts.lastIndexOf(tasksBoardDirName());
-  const projectDir = at >= 0 ? parts[at + 1] : undefined;
+  const location = taskLocationOf(node, root);
   return {
-    stem: path.basename(path.dirname(node.path)),
-    path: rel,
-    title: node.title,
-    status: node.status,
-    priority: node.priority,
-    project: projectDir === "_default" ? "default" : projectDir,
-    description: node.description,
+    stem: location.stem, path: relativePathInsideScope(nativeTaskPath(root), node.path).split(path.sep).join("/"),
+    title: node.title, status: node.status, priority: node.priority, project: location.project,
+    source: location.source, description: node.description,
   };
 }
-
-function itemMatches(
-  item: { status: TaskStatus; priority: TaskPriority; project?: string },
-  opts: { status?: TaskStatus; priorities?: TaskPriority[]; projects?: TaskProjectId[] },
-) {
-  if (opts.status && item.status !== opts.status) return false;
-  if (opts.priorities?.length && !opts.priorities.includes(item.priority)) return false;
-  if (opts.projects?.length && item.project !== undefined && !opts.projects.includes(item.project as TaskProjectId)) return false;
-  return true;
+function itemMatches(item: { status: TaskStatus; priority: TaskPriority }, opts: { status?: TaskStatus; priorities?: TaskPriority[] }) {
+  return (!opts.status || item.status === opts.status) && (!opts.priorities?.length || opts.priorities.includes(item.priority));
 }

@@ -1,15 +1,15 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { Command } from "commander";
-import type { CliContext } from "../../../context.js";
-import { asTasksError, renderReviewPageFromText } from "../../../services/tasks/service.js";
-import { TasksError } from "../../../domain/models/tasks/types.js";
-import { failTask, succeed } from "../run.js";
+import type { CliContext } from "../../context.js";
+import { asTasksError, renderReviewPageFromText } from "../../services/tasks/service.js";
+import { TasksError } from "../../domain/models/tasks/types.js";
+import { failTask, succeed } from "./run.js";
 
-export function addProjectReviewPageCommand(project: Command, ctx: CliContext): void {
+export function addReviewPageCommand(project: Command, ctx: CliContext): void {
   project
     .command("review-page")
-    .description("Render a Task Project review HTML page from groups+items JSON (no board writes)")
+    .description("Render a Project task review HTML page from groups+items JSON (no board writes)")
     .requiredOption("--from <path>", "JSON file path, or - for stdin")
     .option("--out <path>", "HTML output path (default: OS temp file)")
     .action(async (opts: { from: string; out?: string }) => {
@@ -23,7 +23,7 @@ export function addProjectReviewPageCommand(project: Command, ctx: CliContext): 
         });
         ctx.result = succeed({
           status: "success",
-          command: "project.review-page",
+          command: "review-page",
           path: rendered.path,
           groupCount: rendered.groupCount,
           itemCount: rendered.itemCount,

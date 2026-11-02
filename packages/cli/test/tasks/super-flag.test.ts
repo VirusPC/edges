@@ -22,11 +22,10 @@ function fixture(t: { after(fn: () => void): void }) {
       localChildren: children.map((id) => ({ id: path.resolve(path.dirname(file), id) })),
     }, { operation: "create" }).serialize());
   };
-  index("tasks/AGENTS.md", ["alpha/AGENTS.md"]);
-  index("tasks/alpha/AGENTS.md", ["todo/one/index.md"]);
-  write("tasks/alpha/todo/one/index.md", new TaskNode(path.join(root, "tasks/alpha/todo/one/index.md")).create({
+  index("tasks/AGENTS.md", ["todo/one/index.md"]);
+  write("tasks/todo/one/index.md", new TaskNode(path.join(root, "tasks/todo/one/index.md")).create({
     name: "One", status: "todo",
-    metadata: { metadata: { "edges-task-project": "alpha", "edges-task-priority": "low" } },
+    metadata: { metadata: { "edges-task-priority": "low" } },
   }, { operation: "create" }).serialize());
   write("README.md", "# Edges\n\n<!-- edges-entries-local:start -->\n## 本层内容\n\n- [领域任务](tasks/AGENTS.md) — 看板。\n<!-- edges-entries-local:end -->\n");
   return root;
@@ -37,7 +36,7 @@ test("--super lists tasks through the root README without writing AGENTS.md", as
   const result = await run(["--scope", root, "--super", "tasks", "list"], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   const payload = JSON.parse(result.stdout);
-  assert.deepEqual(payload.tasks.map((task: { path: string }) => task.path), ["tasks/alpha/todo/one/index.md"]);
+  assert.deepEqual(payload.tasks.map((task: { path: string }) => task.path), ["tasks/todo/one/index.md"]);
   assert.equal(existsSync(path.join(root, "AGENTS.md")), false);
 });
 
@@ -54,11 +53,11 @@ function fixtureWithDescendantTask(t: { after(fn: () => void): void }) {
   writeFileSync(agents, new AgentsNode(agents).create({
     descendantChildren: [{ id: path.join(root, "tasks/AGENTS.md") }],
   }, { operation: "create" }).serialize());
-  const harnessTask = path.join(root, ".edges/tasks/_default/todo/keep/index.md");
+  const harnessTask = path.join(root, ".edges/tasks/todo/keep/index.md");
   mkdirSync(path.dirname(harnessTask), { recursive: true });
   writeFileSync(harnessTask, new TaskNode(harnessTask).create({
     name: "Keep", status: "todo",
-    metadata: { metadata: { "edges-task-project": "default", "edges-task-priority": "low" } },
+    metadata: { metadata: { "edges-task-priority": "low" } },
   }, { operation: "create" }).serialize());
   return root;
 }

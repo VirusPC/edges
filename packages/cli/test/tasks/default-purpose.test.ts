@@ -25,8 +25,6 @@ test('root and child scopes default to their own maintenance board for list and 
   assert.equal((await call(['update',task.stem,'--priority','high'])).exitCode,0);
   assert.equal((await call(['status',task.stem,'done'])).exitCode,0);
   assert.equal((await call(['runs',task.stem,'--output','json'])).exitCode,0);
-  const project = await call(['project','get','default']); assert.equal(project.exitCode,0,project.stdout);
-  assert.match(JSON.parse(project.stdout).path,/^\.edges\/tasks\//);
   const absentRun = await call(['run-messages',task.stem+'--99','--output','json']);
   assert.equal(JSON.parse(absentRun.stdout).errorCode,'RUN_NOT_FOUND');
   const domain=await call(['list'],true);

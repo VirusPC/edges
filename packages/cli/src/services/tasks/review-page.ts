@@ -1,5 +1,5 @@
 import { validateTaskDocInput } from "./task-doc.js";
-import { parseSource, parseSourceProject, type TaskSource } from "./grouped.js";
+import { parseSource, parseSourceProject, sourceIdentity, type TaskSource } from "./grouped.js";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { TasksError } from "../../domain/models/tasks/types.js";
@@ -91,7 +91,8 @@ function parseItem(raw: unknown, groupIds: Set<string>, seenStems: Set<string>):
   }
   const stem = raw.stem.trim();
   const source = parseSource(raw.source);
-  const id = source && typeof raw.id === "string" && raw.id ? raw.id : stem;
+  const project = parseSourceProject(raw.project);
+  const id = source ? sourceIdentity(source, project, stem) : stem;
   if (seenStems.has(id)) {
     fail(`duplicate review-page item stem: ${stem}`);
   }
@@ -106,7 +107,7 @@ function parseItem(raw: unknown, groupIds: Set<string>, seenStems: Set<string>):
     fail(`review-page item ${stem} suggested group not found: ${suggested}`);
   }
 
-  const item: ReviewPageItem = { stem, current, suggested, ...(source ? { id, source, project: parseSourceProject(raw.project) } : {}) };
+  const item: ReviewPageItem = { stem, current, suggested, ...(source ? { id, source, project } : {}) };
   const title = optionalString(raw.title);
   const description = optionalString(raw.description);
   const note = optionalString(raw.note);
@@ -150,16 +151,19 @@ export function parseReviewPageInput(raw: unknown): ReviewPageInput {
   const items = raw.items.map((item) => parseItem(item, seenIds, seenStems));
   for (const item of items) {
     if (!item.source) continue;
+    const current = groups.find(group => group.id === item.current)!;
+    if (!current.source || current.source.scope !== item.source.scope || current.source.purpose !== item.source.purpose || current.project !== item.project)
+      fail("review-page item ownership must match its current group");
     for (const id of [item.current, item.suggested]) {
       const group = groups.find(group => group.id === id)!;
-      if (!group.source || group.source.scope !== item.source.scope || group.source.purpose !== item.source.purpose) fail("review-page cannot assign across source boards");
+      if (!group.source || group.source.scope !== item.source.scope || (group.source.purpose === "domain" && id !== item.current)) fail("review-page destination must be a Project or default board in the same owner scope");
     }
   }
   return { groups, items };
 }
 
 export function defaultReviewPageAssetDir(): string {
-  return fileURLToPath(new URL("../../commands/tasks/project/assets/review-page/", import.meta.url));
+  return fileURLToPath(new URL("../../commands/tasks/assets/review-page/", import.meta.url));
 }
 
 function missingAsset(abs: string): never {

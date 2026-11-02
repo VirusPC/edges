@@ -6,7 +6,7 @@ This is generated HTML only. It is not Artifacts (`publish` / UUID / TTL) and no
 
 ## Generate (every deploy)
 
-After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs. Two gitignored build outputs must exist before generate: the Vite review shell under `packages/cli/src/commands/tasks/project/assets/review-page/`, and the schema artifacts under `packages/cli/dist/schemas/`. `generate-tasks-site.ts` validates each task `doc` with that schema. It does not generate the schema itself.
+After `git fetch` / `reset --hard origin/main`, the existing `.github/workflows/deploy.yml` job always runs. Two gitignored build outputs must exist before generate: the Vite review shell under `packages/cli/src/commands/tasks/assets/review-page/`, and the schema artifacts under `packages/cli/dist/schemas/`. `generate-tasks-site.ts` validates each task `doc` with that schema. It does not generate the schema itself.
 
 ```bash
 pnpm install --frozen-lockfile --filter @viruspc/edges... --filter tasks-review-app...

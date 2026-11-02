@@ -17,15 +17,6 @@ const cases: [string, unknown, boolean][] = [
   ['cjk name', { ...base, name: '为_edges_cli_建立_scope' }, true],
   ['nested metadata', metadataCase({custom: {nested: true}, tags: ['a'], count: 1, enabled: false, extra: null}), true],
   ['task type', metadataCase({'edges-type': 'task'}), true],
-  ['default project', metadataCase({'edges-task-project': 'default'}), true],
-  ['kebab project', metadataCase({'edges-task-project': 'team-1'}), true],
-  ['64-char project', metadataCase({'edges-task-project': 'a'.repeat(64)}), true],
-  ['65-char project', metadataCase({'edges-task-project': 'a'.repeat(65)}), false],
-  ['directory project', metadataCase({'edges-task-project': '_default'}), false],
-  ['uppercase project', metadataCase({'edges-task-project': 'Team'}), false],
-  ['numeric project', metadataCase({'edges-task-project': 1}), false],
-  ['empty project', metadataCase({'edges-task-project': ''}), false],
-  ['malformed slug', metadataCase({'edges-task-project': 'team--a'}), false],
   ['datetime', metadataCase({'edges-updated-at': '2026-10-06T08:00:00.000Z'}), true],
   ['bad date', metadataCase({'edges-updated-at': '2026-02-30T00:00:00Z'}), false],
   ['date only', metadataCase({'edges-updated-at': '2026-10-06'}), false],
@@ -41,7 +32,6 @@ const cases: [string, unknown, boolean][] = [
   ['null metadata', metadataCase(null), false],
   ...statuses.flatMap(status => [
     [`status ${status}`, metadataCase({'edges-tasks-status': status}), true] as [string, unknown, boolean],
-    [`reserved project ${status}`, metadataCase({'edges-task-project': status}), false] as [string, unknown, boolean],
   ]),
   ...priorities.map(priority => [`priority ${priority}`, metadataCase({'edges-task-priority': priority}), true] as [string, unknown, boolean]),
   ...Object.keys(base).flatMap(key => {

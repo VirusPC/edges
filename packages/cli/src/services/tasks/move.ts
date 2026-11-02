@@ -21,11 +21,10 @@ export async function moveTaskStatus(
 }> {
   const record = await getTask(repoPath, target, io.fs);
   const destRel = withEntryName(
-    taskRelPath(record.project, next, record.stem, repoPath),
+    taskRelPath(next, record.stem, repoPath),
     record.path,
   );
   const destSidecarRel = sidecarRelPath(
-    record.project,
     next,
     record.stem,
     repoPath,
@@ -48,7 +47,7 @@ export async function moveTaskStatus(
     );
   }
 
-  await ensureTaskDestination(repoPath, record.project, next, io.fs);
+  await ensureTaskDestination(repoPath, next, io.fs);
   const sourceAbs = path.join(scopeDir(repoPath), record.path);
   const service = taskNodes(repoPath);
   const node = await service.get(taskFile(repoPath, record.path), TaskNode);

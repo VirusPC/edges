@@ -8,14 +8,14 @@ import { run } from '../../src/program.js';
 import { AgentsNode, ReadmeNode, TaskNode } from '../../src/domain/models/index.js';
 
 const maintenancePaths = [
-  '.edges/tasks/alpha/todo/same/INDEX.md',
-  'child/.edges/tasks/alpha/todo/same/INDEX.md',
-  'notes/example/.edges/tasks/beta/done/same/INDEX.md',
-  'tasks/alpha/todo/same/.edges/tasks/alpha/todo/same/INDEX.md',
-  'tasks/alpha/todo/same/.edges/tasks/alpha/todo/same/.edges/tasks/alpha/todo/same/INDEX.md',
+  '.edges/tasks/todo/same/INDEX.md',
+  'child/.edges/tasks/todo/same/INDEX.md',
+  'notes/example/.edges/tasks/done/same/INDEX.md',
+  'tasks/todo/same/.edges/tasks/todo/same/INDEX.md',
+  'tasks/todo/same/.edges/tasks/todo/same/.edges/tasks/todo/same/INDEX.md',
 ];
-const rootDomainPath = 'tasks/alpha/todo/same/INDEX.md';
-const childMaintenancePath = '.edges/tasks/alpha/todo/same/INDEX.md';
+const rootDomainPath = 'tasks/todo/same/INDEX.md';
+const childMaintenancePath = '.edges/tasks/todo/same/INDEX.md';
 
 function fixture(t: { after(fn: () => void): void }, git = true) {
   const root = mkdtempSync(path.join(realpathSync(tmpdir()), 'all-scopes-'));
@@ -35,16 +35,14 @@ function fixture(t: { after(fn: () => void): void }, git = true) {
     }, { operation: 'create' }).serialize());
   };
   const board = (scope: string, rel: string, project = 'alpha', status: 'todo' | 'done' = 'todo') => {
-    const entry = path.join(scope, rel, project, status, 'same/INDEX.md');
-    index(path.join(scope, rel, 'README.md'), [`${project}/README.md`, 'empty/README.md']);
-    index(path.join(scope, rel, project, 'README.md'), [`${status}/same/INDEX.md`]);
-    index(path.join(scope, rel, 'empty/README.md'), []);
+    const entry = path.join(scope, rel, status, 'same/INDEX.md');
+    index(path.join(scope, rel, 'README.md'), [`${status}/same/INDEX.md`]);
     write(entry, new TaskNode(path.join(root, entry)).create({
       name: 'Same', status,
-      metadata: { metadata: { 'edges-task-project': project, 'edges-task-priority': scope === 'child' ? 'high' : 'low' } },
+      metadata: { metadata: { 'edges-task-priority': scope === 'child' ? 'high' : 'low' } },
     }, { operation: 'create' }).serialize());
   };
-  for (const scope of ['.', 'child', 'notes/example', 'tasks/alpha/todo/same', 'tasks/alpha/todo/same/.edges/tasks/alpha/todo/same']) {
+  for (const scope of ['.', 'child', 'notes/example', 'tasks/todo/same', 'tasks/todo/same/.edges/tasks/todo/same']) {
     index(path.join(scope, 'AGENTS.md'), ['.edges/tasks/README.md']);
     board(scope, '.edges/tasks', scope === 'notes/example' ? 'beta' : 'alpha', scope === 'notes/example' ? 'done' : 'todo');
     if (scope === '.' || scope === 'child') board(scope, 'tasks');
@@ -90,8 +88,8 @@ test('default list follows registered local and descendant children and preserve
   assert.deepEqual(root.tasks.map((task: any) => ({
     stem: task.stem, title: task.title, status: task.status, priority: task.priority, project: task.project,
   })), [
-    { stem: 'same', title: 'Same', status: 'todo', priority: 'low', project: 'alpha' },
-    { stem: 'same', title: 'Same', status: 'todo', priority: 'high', project: 'alpha' },
+    { stem: 'same', title: 'Same', status: 'todo', priority: 'low', project: undefined },
+    { stem: 'same', title: 'Same', status: 'todo', priority: 'high', project: undefined },
   ]);
   assert.ok(root.tasks.every((task: any) => !('doc' in task)));
   assertPaths((await listed(call, 'child')).tasks, [childMaintenancePath]);
@@ -117,22 +115,14 @@ test('--super mounts the configured material face and --super --all also collect
   assertPaths((await listed(call, 'child', ['--super', '--all'])).tasks, [rootDomainPath, childMaintenancePath]);
 });
 
-test('forest grouping, status, priority and project filters retain task paths and current fields', async t => {
+test('forest grouping and filters retain physical paths and task fields', async t => {
   const { call } = fixture(t);
-  const grouped = await listed(call, '.', ['--all', '--group-by', 'project']);
-  assert.equal(grouped.groupBy, 'project');
-  assert.deepEqual(grouped.groups.map((group: any) => group.key).sort(), ['alpha', 'beta']);
+  const grouped = await listed(call, '.', ['--all', '--group-by', 'status']);
+  assert.deepEqual(grouped.groups.map((group: any) => group.key).sort(), ['done', 'todo']);
   assertPaths(grouped.groups.flatMap((group: any) => group.items), maintenancePaths);
-  assertPaths(grouped.groups.find((group: any) => group.key === 'alpha').items, maintenancePaths.filter(task => !task.includes('/beta/')));
-  assertPaths(grouped.groups.find((group: any) => group.key === 'beta').items, [maintenancePaths[2]!]);
-  const filtered = await listed(call, '.', ['--all', '--status', 'todo', '--priority', 'high', '--project', 'alpha', '--sort', 'priority']);
-  assertPaths(filtered.tasks, ['child/.edges/tasks/alpha/todo/same/INDEX.md']);
+  assertPaths((await listed(call, '.', ['--all', '--status', 'todo', '--priority', 'high'])).tasks, ['child/.edges/tasks/todo/same/INDEX.md']);
   assertPaths((await listed(call, '.', ['--all', '--status', 'done'])).tasks, [maintenancePaths[2]!]);
-  assertPaths((await listed(call, '.', ['--all', '--project', 'beta'])).tasks, [maintenancePaths[2]!]);
-  assert.equal((await listed(call, '.', ['--all', '--priority', 'high', '--project', 'beta'])).tasks.length, 0);
   assert.deepEqual((await listed(call, '.', ['--all', '--sort', 'priority'])).tasks.map((task: any) => task.priority), ['high', 'low', 'low', 'low', 'low']);
-  const empty = await listed(call, '.', ['--all', '--status', 'done', '--project', 'empty', '--group-by', 'project']);
-  assert.deepEqual(empty.groups, []);
 });
 
 test('write commands reject --all', async t => {
@@ -154,7 +144,7 @@ test('without Git, missing registered children skip and --all discovers systems 
   assertPaths((await listed(call, 'child', ['--all'])).tasks, [childMaintenancePath]);
   write('unregistered/tasks/AGENTS.md', '# Not a system entry\n');
   assertPaths((await listed(call, '.', ['--all'])).tasks, maintenancePaths);
-  rmSync(path.join(root, 'child/.edges/tasks/alpha/README.md'));
+  rmSync(path.join(root, 'child/.edges/tasks/README.md'));
   assertPaths((await listed(call, '.')).tasks, [maintenancePaths[0]!]);
   const remaining = maintenancePaths.filter(task => !task.startsWith('child/'));
   assertPaths((await listed(call, '.', ['--all'])).tasks, remaining);
