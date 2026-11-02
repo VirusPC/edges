@@ -342,6 +342,7 @@ export class NodeService {
   async #validateGraph(
     plan: Map<string, Planned>,
     removed: (file: string) => boolean = () => false,
+    relocatePersisted: (file: string) => string = (file) => file,
   ): Promise<void> {
     function* roots(): Iterable<BaseNode> {
       for (const write of plan.values()) yield write.node;
@@ -360,7 +361,7 @@ export class NodeService {
         if (!fs.existsSync(ref.id) && !plan.has(ref.id)) {
           // A mount lists its entry before the checkout exists. That is an absent edge.
           if (_parent.childTraversal() === "leaf") return undefined;
-          if (this.#persistedReference(plan, _parent, ref.id)) return undefined;
+          if (this.#persistedReference(plan, _parent, ref.id, relocatePersisted)) return undefined;
           throw new Error(`Missing referenced node: ${ref.id}`);
         }
         readonly = this.#referenceReadOnly(_parent, ref);
@@ -377,12 +378,13 @@ export class NodeService {
     plan: ReadonlyMap<string, Planned>,
     parent: BaseNode,
     refId: string,
+    relocate: (file: string) => string,
   ): boolean {
     const planned = plan.get(parent.path);
     if (!planned) return true;
     if (!planned.before) return false;
     const disk = parseComposite(planned.before.path, planned.before.source);
-    return disk.children.some((child) => child.id === refId);
+    return disk.children.some((child) => relocate(child.id) === refId);
   }
   #proposedParent(
     file: string,
@@ -653,7 +655,7 @@ export class NodeService {
       );
     }
     // Destination snapshots still point at the source until the rename commits.
-    await this.#validateGraph(plan, (file) => isWithinPath(file, sourceRoot));
+    await this.#validateGraph(plan, (file) => isWithinPath(file, sourceRoot), relocate);
     await this.#preflight("move", plan);
     for (const write of plan.values())
       if (write.before && isWithinPath(write.before.path, sourceRoot)) {
