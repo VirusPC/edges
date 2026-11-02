@@ -6,8 +6,9 @@
 - `remember`：写入条目并刷新其类型索引和层入口。
 - `add-type`：登记自定义格式与权限；不会隐式初始化作用域。
 - `doctor`：诊断作用域和索引，只有 `--apply` 写修复。
-- `migrate`：显式将旧 .memory 转为 .edges，保留冲突检测与恢复日志。
 - `backup` / `restore`：归档与恢复私有用户记忆，恢复覆盖仍需明确授权。
+
+上述操作可用根参数 `--project <相对 scope/.edges/projects 的路径>` 选择主题材料，沿用原 scope；不把 Project 当作新作用域。路径、类型采用、查询范围与旧布局迁移边界统一见 [LAYOUT](LAYOUT.md)，当前版本没有 `edges memory migrate`。
 
 使用 `edges --scope <目录> memory <命令> --help` 查看契约。模板真源位于本 Skill 的 references/templates；CLI 构建产物自带模板，安装后的命令不依赖相邻 Skill 目录。源码环境与构建后环境共用同一套模板内容。
 

@@ -4,14 +4,15 @@
 
 ```mermaid
 flowchart TD
-    Root["AGENTS.md（层入口）"]
+    Root["AGENTS.md（系统入口）"]
+    Materials["材料清单／主题 Project 组成入口（可递归）"]
 
     subgraph localMem [本层系统维护信息]
         EntryA["MEMORY_TYPE_A/README.md"]
         EntryB["MEMORY_TYPE_B/README.md"]
-        MemA1["memory_1/index.md"]
-        MemA2["memory_2/index.md"]
-        MemB1["memory_3/index.md"]
+        MemA1["memory_1/INDEX.md"]
+        MemA2["memory_2/INDEX.md"]
+        MemB1["memory_3/INDEX.md"]
         EntryA --> MemA1
         EntryA --> MemA2
         EntryB --> MemB1
@@ -24,8 +25,9 @@ flowchart TD
         Sub1 --> Dots
     end
 
-    Root --> EntryA
-    Root --> EntryB
+    Root --> Materials
+    Materials --> EntryA
+    Materials --> EntryB
     Root --> Sub1
     Root --> Sub2
 ```
@@ -48,9 +50,9 @@ flowchart TD
 - 它是同一种节点的类型索引用途：条目属于本层索引，可用稀疏形式呈现；类型身份与写权限仍由已采用的内容契约决定，不因有 `README.md` 就自动采用 Memory。类型目录不另建 `AGENTS.md` 来装这份清单；空的同目录桩删掉。层系统入口仍是 `AGENTS.md`。
 - 每个 `type` 一份，只列该类型的记忆文件——一条记忆归在哪份入口下，就是它的 `type`。类型入口到正文是一跳；上游可经材料清单或主题 Project 的组成索引到达，按实际链接逐层挑选。
 
-## `memory_*/index.md` — 详细记忆内容
+## `memory_*/INDEX.md` — 详细记忆内容
 
-- `memory_*/index.md` 是**详细记忆内容**，一条记忆一个目录，入口是 index.md，附件与递归 harness 随目录生命周期移动，形态是「YAML frontmatter + markdown 正文」；其他入口也可按自身合同使用 frontmatter。
+- `memory_*/INDEX.md` 是**详细记忆内容**，一条记忆一个目录，入口是 INDEX.md，附件与递归 harness 随目录生命周期移动，形态是「YAML frontmatter + markdown 正文」；其他入口也可按自身合同使用 frontmatter。
 - 必需字段只有 `description`：就是入口里那句说明，同一个东西的两个位置。
 - 另有三个可选、含义固定的保留键。不写不影响合规，写了必须是这个意思：
   - `name`：内容目录名，缺了就从目录名推。
@@ -60,6 +62,8 @@ flowchart TD
 ## 主题 Project 中的记忆
 
 Project 按主题聚合材料，可递归包含其他 Project；它的组成入口可以登记记忆类型入口。Project 不因此成为系统作用域，不自动生成 `AGENTS.md`；祖先系统入口的硬约束继续适用。记忆仍先归属类型，再通过组成链接被发现。同一系统作用域中，不同 Project 可以各自采用同名类型，身份和权限分别以各自的类型入口为准。
+
+检索按实际登记逐层选择，不限定从系统入口到正文的总跳数。Project 的组成递归与发现独立系统是两件事；不能因为主题容器没有 `AGENTS.md` 就跳过它，也不能把每个材料目录自动当成新的系统。
 
 ## 边界
 

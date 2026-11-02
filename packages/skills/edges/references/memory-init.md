@@ -26,13 +26,14 @@ edges --scope <目录> skills init \
   [--skill-types managed referenced] \
   -- -g -y
 edges --scope <目录> tasks init
+edges --scope <目录> --project <P/projects/Q> memory init --memory-types project feedback
 ```
 
 memory 与 skill 的选择分别执行。显式选择追加采用，不删除既有或自定义类型。自定义类型使用 `$edges-memory-add-type`，不要改官方推荐模板。`--memory-types` 需要 memory 模块，`--skill-types` 需要 skills 模块。
 
-层入口直接链到 `.edges/memory/<plural>/README.md` 与 `.edges/skills/<type>/README.md`，经本层材料清单或 Project 组成索引到达类型入口，再打开正文。新索引只写 README。尚未迁走、仍带 `edges-entries-*` 或 `edges-memory-type` 的类型目录 `AGENTS.md` 可以读取。`project-entries-*`、`project-memory-type`、`project-memory-entries` 不读。空桩不是索引。可读 AGENTS 都是节点；本层和下层按显式登记区分，容器可跨层直达。已有登记不因中间目录新增入口而重归属，节点身份不自动采用 Memory。`--root-dir` 是边界；默认先取 Git 根，否则最近受管层入口，否则目标自身，不能从工具安装目录推断目标。
+系统入口经本层材料清单或 Project 组成索引到达类型入口，再打开正文；实际路径见 [LAYOUT](memory/references/LAYOUT.md)。新索引只写 README。尚未迁走、仍带 `edges-entries-*` 或 `edges-memory-type` 的类型目录 `AGENTS.md` 可以读取。`project-entries-*`、`project-memory-type`、`project-memory-entries` 不读。空桩不是索引。可读 AGENTS 都是节点；本层和下层按显式登记区分，容器可跨层直达。已有登记不因中间目录新增入口而重归属，节点身份不自动采用 Memory。`--root-dir` 是边界；默认先取 Git 根，否则最近受管层入口，否则目标自身，不能从工具安装目录推断目标。
 
-`managed` 可写本地 Skill；`referenced` 仅索引当前层 `.agents/skills`，不创建来源目录、不动原位正文或安装链接。同源别名在类型内去重，不同真源同名保留。私有类型先补 ignore 再创建索引。
+`managed` 可写本地 Skill；`referenced` 仅索引原 scope 的 `.agents/skills`，即使类型索引位于 Project 也不另建来源目录、不动原位正文或安装链接。同源别名在类型内去重，不同真源同名保留。私有类型先补 ignore 再创建索引。
 
 按 JSON 汇报 created / preserved、agentsAction / indexAction 和下层条目移动。`needs-doctor` 表示只有人工 AGENTS，文件未被覆盖；交给 `edges memory doctor` 追加区块。`complete: false` 的 diagnostics 必须说明，尤其来源缺失或不可读时保留原索引，不能称为空来源刷新成功。旧层返回 `migration-required`。0.3.0 起没有 `edges memory migrate`。仍停在 `.memory` 的，先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 [迁移说明](../../../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。不要让 `edges memory doctor` 做那次迁移。
 
@@ -40,4 +41,4 @@ memory 与 skill 的选择分别执行。显式选择追加采用，不删除既
 
 普通记忆正文统一为 `<type>_<slug>/INDEX.md`；Skill 保持 `<name>/SKILL.md`。Init 不转换旧单文件。公开 tracked 内容转换没有随包技能，在具备依赖的 Edges checkout 里用 `pnpm migrate:directory-nodes --root <工作树>` 预览，`--apply` 才写入。
 
-新建子作用域由 init 按路径登记到父级：目标 `AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已有登记保持原组。`edges memory doctor --apply` 按同一规则补缺失的父级链接。这些命令没有 `--index-group`。缺失 owner 不代为初始化。任务范围使用根上的 `--scope`、`--project`、`--super`、`--all`：选择 Project 时看板在 `P/tasks`；否则不传 `--super` 时看板在 `<scope>/.edges/tasks`，`--super` 时看板在 `<scope>/tasks`。`tasks list` 顺着主体 `AGENTS.md` 的 children 做一次 traverse；`--all` 从当前 scope 走森林。不要从真 AGENTS 再读同目录 README 的 `edges-entries`，也不要把 README 链接抄进 `AGENTS.md`。遇到 `task-projects` 旧标记时，先对用户选定范围运行 `scripts/migrations/migrate-agents-indexes.mts --root /absolute/scope --check`，明确执行迁移才加 `--write`；普通命令不自动迁移。
+新建子作用域由 init 按路径登记到父级：目标 `AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已有登记保持原组。`edges memory doctor --apply` 按同一规则补缺失的父级链接。这些命令没有 `--index-group`。缺失 owner 不代为初始化。Project 的直属材料登记到其 INDEX，不走子作用域登记；查询入口与 `--super` / `--all` 的区别见 [LAYOUT](memory/references/LAYOUT.md#查询入口与发现范围)。

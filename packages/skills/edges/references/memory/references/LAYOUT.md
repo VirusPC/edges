@@ -42,6 +42,16 @@ edges --scope S --project P memory remember --type project --slug decision \
 edges --scope S --project P/projects/Q skills init -- -y
 ```
 
+## 查询入口与发现范围
+
+`memory list` 与 `skills list` 共用其他目录材料模块的查询规则：
+
+- 默认沿 `scope/AGENTS.md` 登记的组成递归查询；选择 Project 后改从它的 `INDEX.md` 组成开始。主题嵌套不需要 `--all`。
+- `--super` 以运行时 `SuperAgentsNode` 挂载 scope 直属配置材料，再沿登记递归展开，不自动进入材料自身的 harness。已选 Project 时保持 Project 入口。
+- `--all` 额外发现所选物理目录下的独立真实系统；与 `--super` 组合时包含当前 scope 的 Super 内容树，不给每个发现的系统再加 Super。Project 的发现范围留在该 Project 内。
+
+这些查询选项不赋予写权限。`memory remember`、`add-type`、`get`、`delete`、`doctor`、`backup`、`restore` 按 `--scope` 与可选 `--project` 定位，当前这些 memory 命令不以 `--super` 切换写入或单条定位路径，也不以 `--all` 批量操作。类型采用、去重与私有规则始终按选定材料根检查。
+
 ## 选择式初始化
 
 ```bash
@@ -74,7 +84,7 @@ edges --scope S memory add-type \
 
 `--module memory|skills` 默认 memory。`--gitignore` 忽略整类正文及索引；`--index-only` 使 remember 拒绝写正文；`--skills-format` 采用 `<name>/SKILL.md`。模块、格式、可写性是独立维度。自定义 Skill 格式类型默认仍在 `.edges/memory/<原复数目录>`，不能因格式自动移到 skills。自定义类型身份全层唯一，跨模块重复登记报错；官方名称和路径不能被覆盖。外部自定义来源参数暂不支持。
 
-类型入口是组织清单 `README.md`：`.edges/<module>/<plural>/README.md`（memory 与 skills 相同），列表用 `edges-entries-local` / `edges-entries-descendants`，标题「本层内容 / 下层内容」。层 `AGENTS.md` 的本层系统维护信息链到这些 README。写入只发 README 与 `edges-entries-*`。不要在类型目录上 init 一份 `AGENTS.md` 来装组织清单。空的同目录类型 `AGENTS.md` 桩删掉。不读 `project-entries-*`、`project-memory-type`、`project-memory-entries`。残留旧标记视为未登记。层系统入口仍是 `AGENTS.md`。
+类型入口是组织清单 `README.md`：默认 `.edges/<module>/<plural>/README.md`，选择 Project 时为 `P/<module>/<plural>/README.md`（memory 与 skills 相同），列表用 `edges-entries-local` / `edges-entries-descendants`，标题「本层内容 / 下层内容」。系统入口经材料清单、Project 组成到达这些 README。写入只发 README 与 `edges-entries-*`。不要在类型目录上 init 一份 `AGENTS.md` 来装组织清单。空的同目录类型 `AGENTS.md` 桩删掉。不读 `project-entries-*`、`project-memory-type`、`project-memory-entries`。残留旧标记视为未登记。层系统入口仍是 `AGENTS.md`。
 
 类型入口特权注释为 `edges-memory-type`，字段包括 `name`、`module`、`description`、`gitignore`、`writable`、`format`。省略 module 的现有自定义元数据默认 memory；`format` 为 `ordinary|skills`，布尔字段必须解析为 YAML boolean，推荐写成 `true` / `false`，不接受字符串。未知元数据不影响发现。刷新只替换当前索引的本层列表区块（README 上是 `edges-entries-local`，残留 AGENTS 上是旧列表标记），保留原 metadata 与手写引言。没有 metadata 的官方类型按官方契约推导；自定义类型必须保留 metadata 区块，且显式包含 writable 与 gitignore 权限字段；单个权限字段缺失也拒绝推断。索引或区块缺失时无法安全恢复身份与权限，报告 unsafe-layout 并拒绝写入，不能从目录名猜测可写/公开默认值。
 
