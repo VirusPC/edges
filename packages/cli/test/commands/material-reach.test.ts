@@ -91,7 +91,7 @@ test("directory modules share default, super and all selection with Compose boun
   // The registered child is also discovered as a forest root and must occur once.
   f.agents(f.root, [path.join(f.root, ".edges/README.md")], [path.join(f.root, "registered/AGENTS.md")]);
 
-  for (const module of modules) await t.test(module, async () => {
+  for (const module of modules) await t.test(module, async (t) => {
     const forest = [own.files[module], registered.files[module], independent.files[module], vendor.files[module]];
     const cases: Array<[string[], string[]]> = [
       [[], [own.files[module], registered.files[module]]],
@@ -104,7 +104,9 @@ test("directory modules share default, super and all selection with Compose boun
       [["--super", "--all", "--exclude", module], []],
     ];
     for (const [flags, expected] of cases) {
-      assert.deepEqual(await f.listed(module, flags), expected.sort(), flags.join(" ") || "default");
+      await t.test(flags.join(" ") || "default", async () => {
+        assert.deepEqual(await f.listed(module, flags), expected.sort());
+      });
     }
   });
 });
@@ -123,7 +125,7 @@ test("directory modules share Project precedence, recursive composition and boun
   f.system(path.join(checkout, ".edges/compose/nested"), "nested-vendor");
   f.system(path.join(f.root, "sibling"), "sibling");
 
-  for (const module of modules) await t.test(module, async () => {
+  for (const module of modules) await t.test(module, async (t) => {
     const composition = [direct.files[module], nested.files[module], ...(module === "projects" ? [path.join(child, "INDEX.md")] : [])];
     const forest = [independent.files[module], vendor.files[module]];
     const cases: Array<[string[], string[]]> = [
@@ -136,7 +138,9 @@ test("directory modules share Project precedence, recursive composition and boun
       [["--all", "--exclude", module], []],
     ];
     for (const [flags, expected] of cases) {
-      assert.deepEqual(await f.listed(module, ["--project", "parent", ...flags]), expected.sort(), flags.join(" ") || "default");
+      await t.test(flags.join(" ") || "default", async () => {
+        assert.deepEqual(await f.listed(module, ["--project", "parent", ...flags]), expected.sort());
+      });
     }
   });
 });
