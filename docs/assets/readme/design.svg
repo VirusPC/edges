@@ -27,7 +27,7 @@
   <rect width="1280" height="1140" rx="24" fill="#f7f8f4"/>
   <path d="M60 48h28" stroke="#1b817b" stroke-width="4" stroke-linecap="round"/>
   <text x="102" y="55" class="muted" font-size="18" font-weight="600" letter-spacing="2">EDGES / 结构设计</text>
-  <text x="60" y="112" class="ink" font-size="40" font-weight="650">一套结构，从任意目录开始</text>
+  <text x="60" y="112" class="ink" font-size="40" font-weight="650">一套结构，从任意被维护目录开始</text>
 
   <!-- The legend applies to all three structural examples. -->
   <g class="muted" font-size="20">
