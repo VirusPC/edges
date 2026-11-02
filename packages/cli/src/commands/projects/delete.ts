@@ -15,7 +15,7 @@ export function addProjectDeleteCommand(project: Command, ctx: CliContext): void
     .action(async (entryPath: string, opts: { recursive?: boolean }) => {
       try {
         const removed = await deleteProject(ctx.env, entryPath, { super: ctx.super, project: ctx.project, recursive: opts.recursive });
-        ctx.result = succeed({ command: "projects.delete", path: removed.path });
+        ctx.result = succeed({ command: "projects.delete", ...removed });
       } catch (error) {
         failNodeCommand(ctx, error, HELP);
       }

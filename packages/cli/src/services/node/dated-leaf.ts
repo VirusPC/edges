@@ -193,13 +193,14 @@ export async function deleteDatedLeaf<T extends TitledLeaf>(
   spec: DatedLeafSpec<T>,
   entryPath: string,
   reach: MaterialOptions & { recursive?: boolean } = {},
-): Promise<{ path: string }> {
+): Promise<{ path: string; directory?: string }> {
   const { scope, service, node, file } = await loadDatedLeaf(env, spec, entryPath, reach);
+  const directory = node instanceof ProjectNode ? scopeRelativePath(scope, path.dirname(file)) : undefined;
   if (node instanceof ProjectNode && !reach.recursive && projectHasContents(scope, file)) {
-    throw new Error("Project contains materials or user resources; use --recursive to delete its contents.");
+    throw new Error(`Project contains materials or user resources: ${directory}. Use --recursive to delete this entire directory and its contents.`);
   }
   await service.destroy(node);
-  return { path: scopeRelativePath(scope, file) };
+  return { path: scopeRelativePath(scope, file), ...(directory ? { directory } : {}) };
 }
 
 export async function listDatedLeaves<T extends TitledLeaf>(
@@ -229,4 +230,3 @@ export async function listDatedLeaves<T extends TitledLeaf>(
     }];
   });
 }
-

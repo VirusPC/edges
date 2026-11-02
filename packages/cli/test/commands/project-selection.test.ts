@@ -5,6 +5,7 @@ import path from "node:path";
 import { tmpdir } from "node:os";
 import { run } from "../../src/program.js";
 import { acquireWriteLock } from "../../src/services/node/node-lock.js";
+import { composeReadmeSeed } from "../../src/domain/models/compose/compose-readme-node.js";
 
 function fixture(t: test.TestContext) {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "project-selection-"));
@@ -108,7 +109,10 @@ test("Project deletion requires recursive for resources and nested materials", a
   for (const module of ["notes", "tasks", "projects", "routines", "memory"]) {
     await ok("--project", selection(scaffold.path), module, "init", ...(module === "memory" ? ["--memory-types", "project"] : []));
   }
-  await ok("projects", "delete", scaffold.path);
+  const compose = path.join(root, path.dirname(scaffold.path), "compose");
+  fs.mkdirSync(compose);
+  fs.writeFileSync(path.join(compose, "README.md"), composeReadmeSeed());
+  assert.equal((await ok("projects", "delete", scaffold.path)).directory, path.dirname(scaffold.path));
   const authored = await ok("projects", "create", "--title", "Authored index");
   await ok("--project", selection(authored.path), "notes", "init");
   fs.appendFileSync(path.join(root, path.dirname(authored.path), "notes/README.md"), "\nUser explanation to preserve.\n");

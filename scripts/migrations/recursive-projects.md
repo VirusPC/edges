@@ -5,10 +5,10 @@
 在框架仓执行，先保存预览，再使用同一份计划执行：
 
 ```sh
-pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/recursive-projects.mts \
+pnpm migrate:recursive-projects \
   --root /absolute/scope --plan /absolute/work/migration-plan.json
 
-pnpm --filter @viruspc/edges exec tsx ../../scripts/migrations/recursive-projects.mts \
+pnpm migrate:recursive-projects \
   --root /absolute/scope --plan /absolute/work/migration-plan.json --apply
 ```
 
