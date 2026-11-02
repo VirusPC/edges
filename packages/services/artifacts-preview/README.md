@@ -10,14 +10,14 @@ Short-lived static **Artifacts 预览服务** (ADR 0013): upload → public URL 
 
 | 用例 | 达成什么 | CLI | HTTP | review-page / Skill / Action |
 | --- | --- | --- | --- | --- |
-| 手机 / 浏览器打开 Agent 审阅 HTML | 本地渲染页变成可达 UUID URL | `edges artifacts publish`（客户端已 `init`；`EDGES_ARTIFACTS_BASE_URL` 示例 `https://edges.viruspc.tech`） | `POST /artifacts`；人打开 `GET /artifacts/:id/`。对该主机的 POST，缺浏览器式 User-Agent 时 Cloudflare 回 1010，带上则为 201；GET 通常正常 | `edges tasks project review-page` **只渲染**；Skill：render → publish → 给 URL |
+| 手机 / 浏览器打开 Agent 审阅 HTML | 本地渲染页变成可达 UUID URL | `edges artifacts publish`（客户端已 `init`；`EDGES_ARTIFACTS_BASE_URL` 示例 `https://edges.viruspc.tech`） | `POST /artifacts`；人打开 `GET /artifacts/:id/`。对该主机的 POST，缺浏览器式 User-Agent 时 Cloudflare 回 1010，带上则为 201；GET 通常正常 | `edges tasks review-page` **只渲染**；Skill：render → publish → 给 URL |
 | 固定入口看 main 整板 | 不是本服务（无 TTL 的 `/tasks/` 持久看板站） | — | — | 见 [ADR 0021](../../../docs/adr/0021-persistent-tasks-board-site.md)；不要 `publish` UUID 当长期入口 |
 | 首次托管服务（本机或 ECS 式） | 写出 env / unit，拉起进程，必要时对外反代 | `server install` → `start` →（经 nginx 对外时）`setup-nginx` → `status`；客户端 `artifacts init` | `GET /health` | 无 Action |
 | 日常发布 / 删除短生命周期页 | 上传一页或提前删掉 | 一次 `init` → `publish` / `rm` | `POST /artifacts` / `DELETE /artifacts/:id` | 无 |
 | 仓库部署 pull 之后 | 盒上已有 server env 时跟上新代码并重启 | `server install` 再 `restart`（env 不存在则跳过） | 重启后 `GET /health` | Action：[`.github/workflows/deploy.yml`](../../../.github/workflows/deploy.yml)；不要从 Action 再跑 `setup-nginx` |
 | 轮换 token | 换共享 token，服务与客户端都跟上 | `server install --force` → `restart` → 客户端 `init --force` | 写接口换新 Bearer | 无 |
 
-This package is the HTTP process. The thin command surface is `edges artifacts` in [`../../cli`](../../cli/). `edges tasks project review-page` stays render-only; Skill orchestration is render → `edges artifacts publish` → give the human the URL. Capability Surface is CLI + Skill + MCP; this round has no artifacts MCP.
+This package is the HTTP process. The thin command surface is `edges artifacts` in [`../../cli`](../../cli/). `edges tasks review-page` stays render-only; Skill orchestration is render → `edges artifacts publish` → give the human the URL. Capability Surface is CLI + Skill + MCP; this round has no artifacts MCP.
 
 Phone review needs a **reachable** `EDGES_ARTIFACTS_BASE_URL` (ECS / public host). Localhost only works on the same machine.
 

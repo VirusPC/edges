@@ -50,6 +50,8 @@ test("global Project selects direct materials and nested composition without cre
   assert.match(body, /projects\/README\.md/);
   await ok("--project", project, "routines", "create", "weekly", "--description", "Review notes");
   assert.equal((await ok("--project", project, "routines", "get", "weekly")).description, "Review notes");
+  const routine = (await ok("--project", project, "routines", "list")).items[0];
+  assert.equal((await ok("--project", project, "--exclude", "projects", "routines", "get", routine.path)).description, "Review notes");
   await ok("--project", project, "routines", "delete", "weekly");
   await ok("--project", project, "notes", "delete", direct.path);
   for (const directory of [path.dirname(p.path), path.dirname(q.path)]) {

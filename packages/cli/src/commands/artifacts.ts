@@ -22,7 +22,7 @@ Write (create / publish / delete) needs the shared token. Browser GET of artifac
 Phone review needs a reachable EDGES_ARTIFACTS_BASE_URL (not localhost).
 Public example: https://edges.viruspc.tech
 POST /artifacts there returns Cloudflare 1010 without a browser User-Agent, and 201 with one. GET usually works either way. publish / delete always send a stable browser User-Agent.
-edges tasks project review-page still only renders; publish separately.
+edges tasks review-page still only renders; publish separately.
 Capability Surface is CLI + Skill + MCP. This round has no artifacts MCP.
 
 EXAMPLES

@@ -277,7 +277,7 @@ edges --scope /absolute/project --super projects create --title "Research" --bod
 edges --scope /absolute/project --super projects list
 ```
 
-`projects create` 默认在该 scope 的 `.edges/projects/` 下本地创建叶子，`--super` 写入 `projects/`，登记规则与 notes 相同。创建不 commit、不 push、不开 PR。旗标与 `notes` 相同：metadata、`--body`，标题来自 `--title` 或正文一级标题。get 与 delete 只收目标；get / update / delete 的路径校验与 list 都遵循同一材料目录，list 用共享的 `--filter` / `--group-by`。
+`projects create` 默认在该 scope 的 `.edges/projects/` 下创建容器，`--super` 写入 `projects/`；`--project <P>` 则创建 `P/projects/<date>--<slug>/INDEX.md`。Project 的 `INDEX.md` 同时保留正文与模块索引，更新正文不会删除既有子材料登记。创建不 commit、不 push、不开 PR。使用 metadata、`--body`，标题来自 `--title` 或正文一级标题。含下级材料或资源的 Project 删除必须带 `--recursive`；get / update / delete 的路径校验与 list 都遵循同一材料目录，list 用共享的 `--filter` / `--group-by`。
 
 ### 技能：skills
 

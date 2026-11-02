@@ -63,7 +63,7 @@ async function listedRoutines(env: NodeJS.ProcessEnv, reach: RoutineReach): Prom
   for (const parent of nodes) {
     for (const child of parent.children) {
       const material = path.basename(child.id) === ENTRY_NAMES.readme && path.basename(path.dirname(child.id)) === "routines";
-      if ((!material && !isRoutineEntry(child.id)) || pathHitsExcludedModule(child.id, scope, reach.exclude)) continue;
+      if ((!material && !isRoutineEntry(child.id)) || pathHitsExcludedModule(child.id, reach.project ?? scope, reach.exclude)) continue;
       if (!await service.get(child.id)) throw new Error(`Missing routine entry: ${child.id}`);
     }
   }
@@ -81,7 +81,7 @@ export async function resolveRoutine(
   if (target.includes("/") || target.endsWith(".md")) {
     file = path.resolve(scope, target);
     if (reach.project && !isWithinPath(file, reach.project)) throw new Error(`routine path escapes selected Project: ${target}`);
-    if (!isRoutineEntry(file) || reach.exclude?.has("routines") || pathHitsExcludedModule(file, scope, reach.exclude)) {
+    if (!isRoutineEntry(file) || reach.exclude?.has("routines") || pathHitsExcludedModule(file, reach.project ?? scope, reach.exclude)) {
       throw new Error(`routine not found: ${target}`);
     }
     if (!isWithinPath(file, managedRoot) || firstSymlink(file)) {
