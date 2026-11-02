@@ -49,6 +49,8 @@ export async function runEdgesNote(
   const { file, prefix } = spawnArgs(path.resolve(cwd, config.cliEntry));
   const args = [
     ...prefix,
+    ...(input.project !== undefined ? ["--project", input.project] : []),
+    ...(input.super ? ["--super"] : []),
     "notes",
     "create",
     "--title",

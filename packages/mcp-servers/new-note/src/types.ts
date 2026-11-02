@@ -9,6 +9,8 @@ export type IngestErrorCode =
 export interface IngestRequest {
   title: string;
   body: string;
+  project?: string;
+  super?: boolean;
 }
 
 export interface IngestSuccess {
