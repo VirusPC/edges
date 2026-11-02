@@ -59,7 +59,7 @@
 
   - **逻辑归属**：树的父归属遵循文件目录；索引可跨越目录层级发现节点，普通交叉引用不产生新的所有权。各节点可按需拥有维护空间，根可面向个人、团队、公司等主体。
   - **全局共享**：仓内全局约定与维护记忆由根节点的 `AGENTS.md` 和 `.edges/` 承载，各层按归属引用复用。对外分发的 Edges 能力放在仓库根的 `packages/cli/`、`packages/skills/`、`packages/apps/`、`packages/services/`、`packages/mcp-servers/`、`packages/system-prompt/`；不绑定 Edges 的通用 skill 与个人 harness 放使用方自己的内容仓。这份仓就是可 Compose 的共享 `.edges`，布局由该仓自定，不再设 `shared-extensions/`。目标是让任意仓库安装后复用 Edges 这套能力，并在自己的作用域内维护节点与 `.edges/`。局部记忆不因共享而上收根层，也不随扩展默认分发。见 [ADR 0048](adr/0048-retire-shared-extensions.md)。
-  - **统一入口**：每个入口文件对应一个节点：`AGENTS.md` 组织内容，`INDEX.md` 或 `SKILL.md` 承载内容。`AGENTS.md` 沿用 Project Memory 的三部分：本层硬约束规定本层规则，本层记忆登记直属材料，下层记忆索引登记子节点。Task Project 等业务索引也放进这三部分。
+  - **统一入口**：每个入口文件对应一个节点。`AGENTS.md` 登记本层硬约束、本层系统维护信息和下层系统维护信息；本层材料经 `.edges/README.md` 统一索引。模块 `README.md` 登记直属内容，`INDEX.md` 或 `SKILL.md` 承载内容。Project 的 `INDEX.md` 也可登记直属模块与嵌套 Project；Task 直接登记到其所属材料根的 `tasks/README.md`，不另设 Task Project 索引。
   - **系统一与系统二**：当前对象是系统一，负责维护和改进它的是系统二；当维护对象换成这套系统二时，它又成为新的系统一。
   - **检索边界**：完整读取当前对象的系统二，但不自动进入系统二自身的系统二。同层分类索引可以继续展开，停止边界由维护关系决定，不由物理目录深度或经过多少个 `AGENTS.md` 决定。
 

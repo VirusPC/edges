@@ -39,7 +39,7 @@
 | `migrations/restore-local-ownership.mts` | `pnpm restore:local-ownership --root <path> --manifest <path> --dry-run` | 审阅符合旧清单的局部所有权纠正；已采用现行公开布局的工作树不重放旧快照 |
 | `migrations/edges-migrate-directory-nodes.mts` | `pnpm migrate:directory-nodes --root <path>` | 默认预览 tracked/public 旧单文件到目录入口，显式 `--apply` 写入；旧 journal 存在即拒绝 |
 | `migrations/migrate-index-to-INDEX.mts` | `pnpm migrate:index-case -- --root <abs> [--apply]` | 内容叶子入口 `index.md` → `INDEX.md`（含 `posts/`，仅改名）；预览默认，`--apply` 写入；重写登记与正文链接，可重复执行 |
-| `migrations/migrate-task-project-lists.mts` | `pnpm migrate:task-project-lists -- --root <abs> [--apply]` | 看板 `AGENTS.md` 里的 README 型 Task Project 链接（含旧 `task-projects` 区块）移入看板 `README.md` 的 `edges-entries-local`；`<project>/AGENTS.md` 系统入口留在 AGENTS；预览默认，冲突即停，可重复执行 |
+| `migrations/migrate-task-project-lists.mts` | 已退役；旧入口只返回迁移提示 | 不再执行 Task Project 列表迁移；旧分组应按 [ADR 0052](../docs/adr/0052-projects-as-recursive-material-groups.md) 迁移为递归 Project，先预览并检查冲突 |
 | `migrations/flatten-content-layout.mts` | `pnpm migrate:top-level-layout --root <path>` | 预览去掉 knowledge 层及 apps 移入 extensions，显式 `--apply`；只改 tracked/public 引用，posts 仅搬迁且不改字节 |
 | `migrations/migrate-content-units.mts` | `pnpm migrate:content-units --root <path>` | 预览普通 Markdown 目录化与附件归位；`--copy-shared` 复制共用附件，`--archive-unreferenced` 归档根 resources 的无引用附件，`--archive-unused-img` 将未引用旧 img 附件归入 archive/img，`--apply` 写入 |
 | `link-agent-skills` | `pnpm skills:link` | 把 `packages/skills` 里每个 skill 软链到 `.agents/skills` |

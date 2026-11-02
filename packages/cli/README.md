@@ -217,7 +217,7 @@ edges projects list
 edges tasks review-page --from /tmp/tasks.json --out /tmp/review.html
 ```
 
-任务写操作只改文件，不执行 Git；取消使用 status cancelled，没有 delete 命令。任务以 `tasks/<status>/<stem>/INDEX.md` 存储，并带 `.<stem>.log.md`；状态或项目变化移动整个目录。
+任务写操作只改文件，不执行 Git；取消使用 `status cancelled`，`delete` 只返回取消操作提示，不删除文件。任务以 `tasks/<status>/<stem>/INDEX.md` 存储，并带 `.<stem>.log.md`；状态或项目变化移动整个目录。
 
 `edges --scope <目录> --super tasks list` 在该 scope 上建超节点，列出从材料 README 能走到的任务，范围不改去 Git 根。`edges --scope <目录> --all tasks list` 从该 scope 走森林，不另跳 Git 根。未登记的看板不会因物理存在而自动出现。
 

@@ -126,7 +126,7 @@ mkdir -p /tmp/edges-check && cd /tmp/edges-check && git init -q
 edges --scope . init notes tasks
 edges --scope . notes create --title "edges 接入验证" --body "安装后第一条笔记。"
 edges --scope . notes list
-edges --scope . tasks create --title "试一下任务" --project default
+edges --scope . tasks create --title "试一下任务"
 edges --scope . tasks list
 edges --scope . memory doctor
 ```
@@ -157,7 +157,7 @@ edges --scope <目录> projects list --filter title=Demo
 
 # 任务（取消用 status cancelled，没有删除任务的用法）
 edges --scope <目录> tasks init
-edges --scope <目录> tasks create --title "修复构建" --project default
+edges --scope <目录> tasks create --title "修复构建"
 edges --scope <目录> tasks list --status todo --priority high --sort priority
 edges --scope <目录> tasks update <stem或路径> --priority high
 edges --scope <目录> tasks status <stem或路径> done

@@ -371,8 +371,10 @@ _避免使用_：三套页面、status station、本轮在中栏改状态、把�
 _避免使用_：status station、Artifacts 预览服务、把它当 Task 审阅页命令本身、本轮按 project 拆 URL 树、本地 HTML 视图、教学站点、浏览器去读仓内 `.md`、本轮把页上拖拽写回 git
 
 **列表分组**：
-四种叶子的 `list --group-by` 共用的输出：`{ status: "success", groupBy, groups: [{ key, items }] }`。字段只认一层键。缺字段的 `key` 是 `__undefined__`，过滤也把缺字段当成这个值。对象和数组按键名排序后的 JSON 文本参加比较和分组。`/tasks/` 把任务的这份输出映射成审阅页自己的 groups 与 items，这一组的 id 和 title 同样是 `__undefined__`。审阅页输入不是列表输出。
-_避免使用_：`edges.tasks.grouped/v1`、`a.b` 路径取值、按资源各做一种分组契约、`null`、`unspecified`、review-page 输入 schema、把扁平 list 当成分组结果
+四种叶子的 CLI `list --group-by` 共用输出：`{ status: "success", groupBy, groups: [{ key, items }] }`。字段只认一层键。缺字段的 `key` 是 `__undefined__`，过滤也把缺字段当成这个值。对象和数组按键名排序后的 JSON 文本参加比较和分组。
+
+`/tasks/` 站点生成器另按实际 owner scope 与 Project 汇总任务及正文，保留空的已登记 Project。这个内部投影沿用 `edges.tasks.grouped/v1`，经薄映射传入审阅页的 groups/items；它不是 CLI `list --group-by` 的输出契约。组标题取 Project 标题，未归属根材料组为 `Unassigned`；组和条目的身份包含 owner scope、purpose、可选 Project 路径，条目再加 stem，避免同名任务混淆。
+_避免使用_：`a.b` 路径取值、按资源各做一种 CLI 分组契约、用 `null` 或 `unspecified` 代替 CLI 缺字段键、把审阅页输入当成 CLI 列表输出、把扁平 list 当成分组结果
 
 **doc（看板条目）**：
 分组列表 `items[]` 上可选嵌入的 Task Doc（`name`、`description`、`metadata`、`body`）。审阅页只读页内 JSON 里的这份文档。

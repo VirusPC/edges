@@ -126,6 +126,38 @@ test("ordinary task operations refuse legacy groups and retired index migration 
   assert.deepEqual(await readdir(group),[]);
 });
 
+test("list gives migration guidance for an indexed legacy Task Project layout", async t => {
+  const { scope, ok, call } = await fixture(t);
+  await ok(["tasks", "create", "--title", "Current"]);
+  const legacy = path.join(scope, ".edges/tasks/topic/todo/legacy/INDEX.md");
+  const service = new NodeService({ managedRoot: scope });
+  await service.create(new TaskNode(legacy), { name: "legacy", title: "Legacy", status: "todo", body: "Preserve legacy evidence." });
+  const before = await readFile(legacy, "utf8");
+  const result = await call(["tasks", "list"]);
+  assert.equal(result.exitCode, 2, result.stdout);
+  assert.match(JSON.parse(result.stdout).reason, /Legacy Task Project layout requires migration/);
+  assert.equal(await readFile(legacy, "utf8"), before);
+});
+
+test("delete guidance retains the selected owner when root and Project share a stem", async t => {
+  const { scope, ok, call, project } = await fixture(t);
+  const p = await project("Selected");
+  const rootTask = await ok(["tasks", "create", "--title", "Same", "--status", "todo"]);
+  const projectTask = await ok(["tasks", "create", "--title", "Same", "--status", "todo"], p);
+  assert.equal(rootTask.stem, projectTask.stem);
+  const files = [rootTask.path, projectTask.path].map(file => path.join(scope, file));
+  const before = await Promise.all(files.map(file => readFile(file, "utf8")));
+  for (const selected of [undefined, p]) {
+    const result = await call(["tasks", "delete", rootTask.stem], selected);
+    assert.equal(result.exitCode, 2);
+    const reason = JSON.parse(result.stdout).reason;
+    assert.match(reason, /same --scope, --project and --super selection and target/);
+    assert.match(reason, /replace delete with status and append cancelled/);
+    assert.doesNotMatch(reason, /Run: edges tasks status/);
+  }
+  assert.deepEqual(await Promise.all(files.map(file => readFile(file, "utf8"))), before);
+});
+
 test("task moves rewrite incoming Note and Project body links throughout the selected scope", async t => {
   const { scope, ok } = await fixture(t);
   const task = await ok(["tasks", "create", "--title", "Linked", "--status", "todo"]);

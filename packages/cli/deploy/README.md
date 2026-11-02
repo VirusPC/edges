@@ -2,7 +2,7 @@
 
 Public URL: [https://edges.viruspc.tech/tasks/](https://edges.viruspc.tech/tasks/) and [https://edges.viruspc.tech/teaching/](https://edges.viruspc.tech/teaching/) (Cloudflare Tunnel to the same Aliyun ECS nginx). Decision: [ADR 0021](../../../docs/adr/0021-persistent-tasks-board-site.md).
 
-This is generated HTML only. It is not Artifacts (`publish` / UUID / TTL) and not a new status-station product. `edges tasks project review-page` still only renders.
+This is generated HTML only. It is not Artifacts (`publish` / UUID / TTL) and not a new status-station product. `edges tasks review-page` still only renders.
 
 ## Generate (every deploy)
 

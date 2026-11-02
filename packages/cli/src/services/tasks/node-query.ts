@@ -245,8 +245,11 @@ export function taskLocationOf(node: TaskNode, root: string) {
   const stem = path.basename(node.directoryPath);
   const statusDir = path.dirname(node.directoryPath);
   const status = path.basename(statusDir);
-  const location = boardLocationOf(path.dirname(statusDir), path.resolve(root));
   if (!isTaskStatus(status)) throw new TasksError("VALIDATION_ERROR", `Invalid task status directory: ${node.path}; migrate legacy Task Project layouts first`);
+  const board = path.dirname(statusDir);
+  if (path.basename(board) !== tasksBoardDirName())
+    throw new TasksError("VALIDATION_ERROR", `Legacy Task Project layout requires migration: ${node.path}`);
+  const location = boardLocationOf(board, path.resolve(root));
   const fields = Object.fromEntries(Object.entries(domainFields(node.metadata)).map(([key,value]) => [key,scalar(value)]));
   if (fields["edges-task-project"] !== undefined)
     throw new TasksError("VALIDATION_ERROR", `Legacy Task Project metadata requires migration: ${node.path}`);
