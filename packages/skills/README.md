@@ -41,6 +41,8 @@ git tag -l 'skill/edges@*'
 
 ## 安装
 
+Skill 的材料归属与 Agent 安装位置是两件事。`edges --scope <目录> --project <相对路径> skills ...` 选择已有 Project 的直属 `skills/`，并保留原 scope；材料索引登记在 P 的 INDEX，不把 P 当成新 scope。Agent 安装仍由下面的安装器及其参数决定，选择 Project 不代表给主题另装一套 Agent。
+
 外部用户先 `npm install -g @viruspc/edges`（Node.js 22.20 及以上），再执行 `edges skills init` 或无参 `edges init`。命令会建 skill 类型索引，并把包内 skill 交给固定的 `skills@1.7.2`：`skills add <包内 skills 目录的绝对路径> --skill '*'`。要传给安装器的旗标写在 `--` 后面。没有 TTY、又没探测到 agent 时，不带这些旗标会退出 1。非交互且仍让安装器自动探测 agent 时用 `-g -y`：
 
 ```bash

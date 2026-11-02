@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-02
+
+### Changed
+
+- 接入说明补充递归 Project 的直属材料与初始化行为，区分 scope、Project、Super 内容入口和 All 系统发现。
+- 任务示例采用无 Task Project、无 `_default` 的布局；补充 Project 中创建、检索笔记与子主题的命令。
+- 无 shell 的 Notes 入口补充 MCP 的 `project` / `super` 选择及固定服务端 scope 边界。
+
 ## [0.3.0] - 2026-11-02
 
 ### Changed

@@ -14,8 +14,8 @@ CLI 只修改文件，不执行 Git。看板变更进入受保护的 main 必须
 
 ## 先读再建议
 
-1. 用 `edges --scope "$SCOPE" projects list` 取得真实 Project，必要时 `projects get <path>` 读取主题正文。项目身份取目录相对 `.edges/projects` 的实际路径，不用标题或自造短名。
-2. 用 `edges --scope "$SCOPE" tasks list` 取得范围内任务；仅在用户需要独立系统一起参与时加 `--all`。不要只整理未归属的任务。每行保留 `path`、`stem`、`source.scope`、`source.purpose` 和可选 `project`；不存在 `project` 表示根材料板。读取正文时选择原 owner scope 与 Project，或在该板内使用返回的完整任务路径。不能仅凭同名 stem 猜任务。
+1. 用 `edges --scope "$SCOPE" projects list` 取得真实 Project，必要时 `projects get <path>` 读取主题正文。用户已限定 P 时，先读 P 的 INDEX，再给子 Project 的 list/get 加根参数 `--project <P路径>`；不要扩大到兄弟主题。项目身份取目录相对 `.edges/projects` 的实际路径，不用标题或自造短名。
+2. 用 `edges --scope "$SCOPE" tasks list` 取得范围内任务；已选 P 时带相同 `--project <P路径>`，未选 Project 的虚拟根板加 `--super`；仅在用户需要独立系统一起参与时再加 `--all`。不要只整理未归属的任务。每行保留 `path`、`stem`、`source.scope`、`source.purpose` 和可选 `project`；不存在 `project` 表示根材料板。读取正文时选择原 owner scope 与 Project，或在该板内使用返回的完整任务路径。不能仅凭同名 stem 猜任务。
 3. 用任务标题、描述与必要正文对照各 Project 主题，建议归入已有 Project或保留未归属。无需 embedding。独立 AGENTS scope 不因主题相似而合并；目的地只能是同一 owner scope 下的 Project 或根材料板。新 Project 的主题、标题与正文需要先给人确认，创建后才使用返回路径。
 
 ## 审阅后应用

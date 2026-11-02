@@ -1,7 +1,7 @@
 ---
 name: edges-onboarding
 description: 帮用户第一次接入 Edges 时使用：安装 edges CLI（npm 包 @viruspc/edges）、初始化目录、跑一次验证、学会常用命令、排查安装与鉴权报错。用户说「帮我接入 edges」「安装 edges」「edges 怎么用」「edges 报错了」「给我的仓库配一套 edges」时触发。已经装好、只是要写笔记请改用 edges；整理对话改用 edges-conversation-to-notes；项目记忆的检索与沉淀改用 edges-memory-ask / edges-memory-remember，初始化系统入口改用 edges。本 skill 只做入口与引导，具体操作一律交给 edges CLI 执行。
-version: 0.3.0
+version: 0.4.0
 ---
 
 # edges onboarding
@@ -90,7 +90,8 @@ edges --scope . init -- -g -y
 - 无参 `init` 默认写入：`AGENTS.md`、memory 类型 `feedback` / `project` / `reference`、skills 类型索引（managed、referenced），并把包内 Edges skills 装给本机 agent；还有 notes、projects 的组织列表。任务看板**不在**默认集里，需要时另跑 `edges --scope . tasks init`。
 - `--` 后面的旗标原样交给 `skills@1.7.2` 安装器：`-g` 装到用户目录，`-y` 跳过确认。没有 TTY、又没探测到 agent 时，不带 `-y` 会退出 1。
 - 只给某一个 agent 装：`edges --scope . init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。
-- 只想建目录结构、不装 skill：`edges --scope . init notes tasks`（列出要的模块，可选 `memory`、`skills`、`tasks`、`notes`、`projects`）。
+- 只想建目录结构、不装 skill：`edges --scope . init notes tasks`（列出要的模块，可选 `memory`、`skills`、`tasks`、`notes`、`projects`、`routines`）。
+- 为已有主题 Project 采用材料模块时用 `edges --scope . --project <Project相对路径> init notes tasks`。模块直接放在 P 下并登记到 `P/INDEX.md`；不会为 P 创建独立 AGENTS 或 `.edges`。Project 必须已存在，不把 P 当作新 scope，也不为完成一次存储擅自初始化。init 不读取 `--super`。
 
 预期 stdout（示例，字段以实际为准）：
 
@@ -141,7 +142,9 @@ edges --scope . memory doctor
 
 ## 常用操作
 
-以下命令都只改本地文件，不 commit、不 push。`<目录>` 换成作用域路径。Notes、Projects 等材料默认放在 `<目录>/.edges/`；显式 `--super` 使用 `<目录>/`，旧根目录笔记和项目用该选项访问。创建与后续读写使用同一选择，以命令返回的 path 为准；init 始终只初始化真实 scope。
+以下命令都只改本地文件，不 commit、不 push。`<目录>` 换成作用域路径。目录材料默认放在 `<目录>/.edges/`；选定已有 Project 时用根级 `--project <相对路径>`，相对 `<目录>/.edges/projects`，子项目示例为 `P/projects/Q`，材料直接归入 P 的对应模块。创建、检索和后续读写使用同一选择，以命令返回的 path 为准。
+
+对 Notes、Projects、Tasks、Memory、Skills、Routines，`--super` 换成 scope 的运行时内容入口，挂载直属材料并递归登记组成；写入 `<目录>/<module>/`。选定 Project 后其入口与材料根优先。`--all` 仅在读取时补充所选物理范围内的独立真实系统，不是开启 Project 递归，也不为每个系统自动加 Super。不要把扩大后的查询范围带到写命令。init 的 Project 行为见上节；Artifacts 继续处理显式上传文件，不采用材料分组。
 
 ```bash
 # 笔记
@@ -154,6 +157,10 @@ edges --scope <目录> notes delete .edges/notes/<日期>--<slug>/INDEX.md
 # 项目
 edges --scope <目录> projects create --title "Demo" --body "这个项目是什么。"
 edges --scope <目录> projects list --filter title=Demo
+# Project参数取上一步返回目录相对<scope>/.edges/projects的路径
+edges --scope <目录> --project <Project相对路径> notes create --title "项目笔记" --body "正文"
+edges --scope <目录> --project <Project相对路径> notes list
+edges --scope <目录> --project <Project相对路径> projects create --title "子主题" --body "子主题的范围。"
 
 # 任务（取消用 status cancelled，没有删除任务的用法）
 edges --scope <目录> tasks init
@@ -184,7 +191,7 @@ edges --scope <目录> compose update
 
 细节交给对应 skill：写笔记、初始化和组合仓库走 `edges`，整板任务归类走 `edges-tasks-classify`，整理对话 `edges-conversation-to-notes`，记忆检索与沉淀 `edges-memory-ask` / `edges-memory-remember`。
 
-没有 shell 的宿主（只能调 MCP）：用 `packages/mcp-servers/new-note` 暴露的 `new_note` 工具（参数 `title`、`body`），它在背后调用同一个 `edges notes create`。目前 MCP 只覆盖新建笔记。
+没有 shell 的宿主（只能调 MCP）：用 `packages/mcp-servers/new-note` 暴露的 `new_note` 工具，必填 `title`、`body`，可选 `project`、`super`；它在服务端确定的 scope 内调用同一个 `edges notes create`，Project 优先于 super。工具不能指定 scope，不能将 P 路径当作 scope。当前 MCP 只覆盖新建笔记；旧版工具若未提供选择参数，报告版本能力限制，不静默写到默认位置。
 
 ## 常见错误排查
 
