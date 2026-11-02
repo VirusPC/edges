@@ -29,6 +29,7 @@ import {
   RoutineNode,
   ReadmeNode,
 } from "../../domain/models/index.js";
+import { EntriesNode } from "../../domain/models/node/entries-node.js";
 import { createReadmeNode, readmeModelFor } from "../../domain/models/readme/specialize.js";
 import { parseDocument } from "../../utils/markdown/document.js";
 import { checkPath, readEntry } from "./node-files.js";
@@ -78,6 +79,10 @@ function parentEntryIn(
   exists: (entry: string) => boolean,
   read: EntrySource,
 ): string | undefined {
+  // A Project owns its direct material entries without becoming a harness.
+  const project = LEAF_ENTRY_NAMES.map((name) => path.join(directory, name))
+    .find((file) => identifyNodeType(file) === "project" && exists(file));
+  if (project && !path.relative(directory, child).split(path.sep).includes(".edges")) return project;
   const agents = path.join(directory, ENTRY_NAMES.internal);
   const readme = path.join(directory, ENTRY_NAMES.readme);
   const systemOne =
@@ -115,13 +120,15 @@ export function physicalParent(
   return found;
 }
 /** Nodes whose body lists composition children. */
-export type CompositeNode = AgentsNode | ReadmeNode;
+export type CompositeNode = AgentsNode | EntriesNode;
 export const isComposite = (node: unknown): node is CompositeNode =>
-  node instanceof AgentsNode || node instanceof ReadmeNode;
+  node instanceof AgentsNode || node instanceof EntriesNode;
 export function parseComposite(file: string, source: string): CompositeNode {
   return path.basename(file) === ENTRY_NAMES.readme
     ? createReadmeNode(file).parse(source)
-    : new AgentsNode(file).parse(source);
+    : identifyNodeType(file) === "project"
+      ? new ProjectNode(file).parse(source)
+      : new AgentsNode(file).parse(source);
 }
 /** Runtime and import classification use exactly the same physical owner. */
 export function physicalParentNode(
@@ -300,7 +307,7 @@ export function rewriteLinks(
 
 /** Source syntax fields stay outside the domain's NodeReference projection. */
 function syntaxOf(node: CompositeNode): InternalSyntax {
-  const readme = node instanceof ReadmeNode;
+  const readme = node instanceof EntriesNode;
   return new InternalSyntax(
     node.body,
     (href) => resolveEntryHref(node.path, href, readme) !== undefined,
@@ -311,7 +318,7 @@ export function referenceSuffix(
   node: CompositeNode,
   id: string,
 ): string | undefined {
-  const readme = node instanceof ReadmeNode;
+  const readme = node instanceof EntriesNode;
   const content = syntaxOf(node).content();
   const reference = [
     ...content.localChildren,
@@ -327,7 +334,7 @@ export function setReferenceSuffix(
   suffix: string,
 ): void {
   if (referenceSuffix(node, id) === suffix) return;
-  const readme = node instanceof ReadmeNode;
+  const readme = node instanceof EntriesNode;
   const syntax = syntaxOf(node);
   const content = syntax.content();
   const patch = (refs: readonly SyntaxReference[]) =>

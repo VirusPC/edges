@@ -93,3 +93,19 @@ export const HARNESS_GRAMMAR: BlockGrammar = {
   outerEnd: OUTER_END,
 };
 
+/** Content indexes only own explicitly marked lists; ordinary headings are prose. */
+export const ENTRIES_GRAMMAR: BlockGrammar = {
+  markers: {
+    "edges-entries-local": "memory",
+    "edges-entries-descendants": "children",
+  },
+  headings: {},
+  outerEnds: [],
+  sections: {
+    ...CODEC_SECTIONS,
+    memory: ENTRIES_SECTIONS.localChildren,
+    children: ENTRIES_SECTIONS.descendantChildren,
+  },
+  outerStart: "",
+  outerEnd: "",
+};
