@@ -8,6 +8,7 @@ import {
   listTaskNodes,
   listRepositoryTaskNodes,
   taskLocationOf,
+  boardLocationOf,
 } from "../../src/services/tasks/node-query.js";
 import { taskBoardLocation } from "../../src/services/tasks/paths.js";
 import {
@@ -159,6 +160,23 @@ test("selected board rejects a registered reference into another board", async (
     listTaskNodes(taskBoardLocation(root, { super: true })),
     /outside selected task board/,
   );
+});
+
+test("board ownership distinguishes a Project from a nested material's domain board", (t) => {
+  const { root, write } = fixture(t);
+  write(".edges/projects/p/INDEX.md", "# P\n");
+  write(".edges/projects/p/notes/n/INDEX.md", "# N\n");
+  const project = path.join(root, ".edges/projects/p");
+  const note = path.join(project, "notes/n");
+  assert.deepEqual(boardLocationOf(path.join(project, "tasks"), root), {
+    scopeDir: root, purpose: "maintenance", project, boardDir: path.join(project, "tasks"),
+  });
+  assert.deepEqual(boardLocationOf(path.join(note, "tasks"), root), {
+    scopeDir: note, purpose: "domain", boardDir: path.join(note, "tasks"),
+  });
+  write(".edges/projects/p/projects/q/index.md", "# Q\n");
+  const nested = path.join(project, "projects/q");
+  assert.equal(boardLocationOf(path.join(nested, "tasks"), root).project, nested);
 });
 
 test('board query grouping keeps chaining lazy and repeatable after operations migration', async t => {

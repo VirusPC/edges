@@ -2,6 +2,7 @@ import path from "node:path";
 import { validateTaskDocInput } from "./task-doc.js";
 import { nativeTaskPath } from "./realpath.js";
 import { ProjectNode } from "../../domain/models/index.js";
+import { tasksBoardDirName } from "../../domain/config/edges-materials.js";
 import { boardLocationOf } from "./node-query.js";
 import { resolveBoard, scopeDir, type BoardTarget } from "./paths.js";
 import { NodeService } from "../node/node-service.js";
@@ -241,7 +242,7 @@ export async function listRepositoryGroupedByProject(root: string, opts: TaskLis
   const nodes = await new NodeService({ managedRoot: root }).query(root, { types: ["project"], includeHarness: true }).value();
   for (const node of nodes) {
     if (!(node instanceof ProjectNode)) continue;
-    const location = boardLocationOf(path.join(node.directoryPath,"tasks"),root);
+    const location = boardLocationOf(path.join(node.directoryPath,tasksBoardDirName()),root);
     if (!location.project) continue;
     const source: TaskSource = { scope: path.relative(root,location.scopeDir).split(path.sep).join("/") || ".", purpose: location.purpose };
     const project = path.relative(path.join(location.scopeDir,".edges/projects"),location.project).split(path.sep).join("/");

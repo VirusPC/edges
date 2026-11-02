@@ -3,7 +3,7 @@ import { nativeTaskPath } from "./realpath.js";
 import * as fs from "node:fs";
 import path from "node:path";
 import { harnessMaterialById, tasksBoardDirName } from "../../domain/config/edges-materials.js";
-import { ENTRY_NAMES } from "../../domain/config/layout.js";
+import { ENTRY_NAMES, LEAF_ENTRY_NAMES } from "../../domain/config/layout.js";
 import { identifyNodeType } from "../../domain/models/node/layout.js";
 import { BaseNode, AgentsNode, ReadmeNode, TaskNode } from "../../domain/models/index.js";
 import { domainFields, scalar } from "../../domain/core/fields.js";
@@ -227,7 +227,11 @@ export function boardLocationOf(board: string, root: string): TaskBoardLocation 
       const scope = path.dirname(cursor);
       const relativeOwner = path.relative(cursor, owner);
       if (!relativeOwner) return { scopeDir: scope, purpose: "maintenance", boardDir: board };
-      if (relativeOwner.startsWith(`projects${path.sep}`))
+      const isProjectOwner = LEAF_ENTRY_NAMES.some(name => {
+        const entry = path.join(owner, name);
+        return fs.existsSync(entry) && identifyNodeType(entry) === "project";
+      });
+      if (relativeOwner.startsWith(`projects${path.sep}`) && isProjectOwner)
         return { scopeDir: scope, purpose: "maintenance", boardDir: board, project: owner };
       break;
     }

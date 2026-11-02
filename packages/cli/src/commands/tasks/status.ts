@@ -11,7 +11,7 @@ ARGUMENTS
 FLAGS
   --json  Write JSON to stdout (always on)
 
-Moves the Task file and its sidecar. Moves inside the same Task Project. Reassign across projects with edges tasks update (not status). Cancel with: cancelled. delete only points at this command and does not remove files.
+Moves the complete Task directory within the selected board. Reassign with edges tasks update --to-project <path> or --to-default. Cancel with: cancelled. delete only points at this command and does not remove files.
 
 EXAMPLES
   edges tasks status 2026-09-11--cli in_progress
