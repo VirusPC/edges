@@ -115,4 +115,5 @@ format: ordinary
 - [Routines 记录定义，由外部平台接入执行](<project_routines_from_brain_practice/INDEX.md>) — 设计 routines 时打开：INDEX.md 记录，仓库为接入依据；平台每次读Skill，默认最新可指定，失败停止报告；首版适配全部现有例程，无调度器和分组。
 - [Edges 推广准备：实验、Skills、场景案例与任务归属](<project_edges_promotion_intent/INDEX.md>) — 准备 Edges 对外推广及拆分任务时：先补实验数据、Skills 接入和场景案例；一个主任务及全部子任务统一放框架仓，文章产物归属另行处理。
 - [对外入口叫 Edges 小助手，homepage 指向站点根](<project_public_knowledge_qa_trial/INDEX.md>) — 改根 README 公开实践、页首导航或 GitHub 仓库 homepage 时打开：链接文案是 Edges 小助手，地址 https://edges\-rag.viruspc.tech/；homepage 用 https://edges.viruspc.tech。公开文案不写「试用」或访问网络限制。
+- [递归 Project：直属材料分组与统一选择](<project_recursive_projects/INDEX.md>) — 2026\-11\-02 已批准实施：Project 直属主题材料、全局 \-\-project、七组按最早Task日期提升、非空删除须 \-\-recursive；复用 HarnessMaterial/NodeService，Artifacts 不改，迁移先预览检查冲突。
 <!-- edges-entries-local:end -->

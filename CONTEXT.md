@@ -208,9 +208,9 @@ _避免使用_：把任务写成记忆结论；把复盘笔记写成看板待办
 围绕一个明确目标持续组织材料、状态和产出的有边界工作空间；可直接产生需要提炼为 Edge 的经验。
 _避免使用_：长笔记、主题分类、知识资产
 
-**项目工作区（Project Workspace）**：
-以解决问题或交付产出为目标的专项工作区。
-_避免使用_：教学工作区、专题笔记
+**项目工作区（Project / Project Workspace，目标模型）**：
+按某个主题聚合相关材料的组成容器，可包含任务、笔记、记忆、技能、例程以及子 Project；用于统一各模块的分组，不以建立独立维护系统为前提。
+_避免使用_：必建的独立作用域、长笔记、Task Project 专用分组、把所有顶层 CLI 服务都当作项目材料
 
 **Edges 扩展（Edges Extension）**：
 因 Agent 或外部系统需要接入、操作 Edges 而存在的可复用能力。
@@ -343,16 +343,16 @@ _避免使用_：普通反馈闭环、知识更新、仅增加 meta 层级、未
 _避免使用_：知识出口、历史知识库、失效 Edge 专区
 
 **Task**：
-跨 Agent 接力的工作项（idea 捕获后经细聊与开发直至收口）；分组属 Task Project，再按 edges-tasks-status 分夹；需求先后用 edges-task-priority，不改状态夹。
+跨 Agent 接力的工作项，从想法捕获、澄清、执行到收口；目标模型中归属某个 Project 或当前作用域，工作状态与归属相互独立。
 _避免使用_：todo（若指工作项本身）、普通勾选清单、Multica 式可抢单队列条目、`tasks` Memory Type（若指看板工作项）
 
 **Task stem（edges）**：
 Task 文件去掉 `.md` 的文件名，是 `edges tasks` 的查找键；不是展示标题，也不等于 frontmatter / 文档 `name`（三者常碰巧相同）。
 _避免使用_：title、name、把展示名当 CLI 查找键
 
-**Task Project（edges）**：
-选定看板内对 Task 的分组单位（对齐 Multica Project 概念，本轮不做完整 parent/stage）；领域板目录为 `tasks/<project-slug>/`，维护板目录为 `.edges/tasks/<project-slug>/`，未分组用保留名 `_default`。每个已存在的 project 带标题与描述，是用户已设的分类质心；索引与 per-project AGENTS.md 只在元数据层，看板 markdown 仍是 Task 真源。
-_避免使用_：把 edges-tasks-status 当 project、用任意深层目录当 project、根下直接放 status 夹（迁移后）、项目工作区（若指看板分组）、把 Task Project 当 Memory Type、把未确认的候选当成已有 project
+**Task Project（edges 旧模型，待移除）**：
+选定看板内带标题与描述的任务分组，曾作为分类工作的归属依据；目标模型由真实 Project 承接归属，不再保留这层独立分组。
+_避免使用_：与目标模型的 Project 混用、把旧分组当作已迁移的 Project、把任务状态当成项目
 
 **Task Project 索引**：
 所选板 `tasks/README.md` 或 `.edges/tasks/README.md` 的 `edges-entries-local` 列表；由 CLI 维护各 project 的标题与描述指针，只做索引/描述层（Q18=A），不把每条 Task 升成 Memory Type。用户 init 为系统入口的 `<project>/AGENTS.md` 仍登记在看板 `AGENTS.md`。
