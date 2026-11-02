@@ -10,12 +10,10 @@ import { ProjectNode } from "../../domain/models/projects/project-node.js";
 import { localDateYmd } from "../../utils/date.js";
 import { isWithinPath } from "../../utils/filesystem.js";
 import { parseMetadata } from "../metadata.js";
-import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { contentOrgListPath, ensureMaterialOrg } from "./content-org-list.js";
 import type { Model } from "./node-layout.js";
 import { physicalParent } from "./node-layout.js";
 import { openNodeSession, scopeRelativePath, queryMaterialNodes, type MaterialReach } from "./scope-session.js";
-import { buildSystemForest, forestScopeOptions } from "./system-forest-service.js";
 
 export type TitledLeaf = BaseNode & { title: string };
 
@@ -210,18 +208,8 @@ export async function listDatedLeaves<T extends TitledLeaf>(
 ): Promise<DatedLeafItem[]> {
   if (reach.exclude?.has(spec.folder)) return [];
   const { scope, service } = openNodeSession(env);
-  const queryOptions = { types: [spec.queryType], exclude: reach.exclude, scopeDir: scope };
-  const nodes = reach.project ? await queryMaterialNodes(scope, service, [spec.queryType], reach) : reach.all
-    ? (await buildSystemForest(scope, { includeSuper: reach.super === true, exclude: reach.exclude, form: "independent" })).flat()
-    : reach.super ? [] : await service.query(scope, queryOptions).value();
-  // Super traversal prefers .edges/README.md; select the flat module explicitly,
-  // as routines does. Default and --all use the registered tree without a second scan.
-  if (reach.super && !reach.project) {
-    const org = contentOrgListPath(scope, spec.folder, reach);
-    const options = reach.all ? { ...queryOptions, ...forestScopeOptions(scope, scope, reach.exclude) } : queryOptions;
-    if (await service.get(org, ReadmeNode)) nodes.push(...await service.query(org, options).value());
-  }
-  return [...new Map(nodes.map((node) => [node.path, node])).values()].flatMap((node) => {
+  const nodes = await queryMaterialNodes(scope, service, [spec.queryType], reach);
+  return nodes.flatMap((node) => {
     if (!(node instanceof spec.Model) || path.dirname(node.path) === reach.project) return [];
     return [{
       stem: path.basename(path.dirname(node.path)),

@@ -68,7 +68,7 @@ test("--super with no materials mounts empty SuperAgentsNode", async () => {
   assert.deepEqual(nodes[0]!.children, []);
 });
 
-test("--super prefers .edges/README.md and does not flat-mount other materials", async (t) => {
+test("--super mounts scope-relative materials even when .edges/README.md exists", async (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "super-idx-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(path.join(root, ".edges/tasks"), { recursive: true });
@@ -86,15 +86,16 @@ test("--super prefers .edges/README.md and does not flat-mount other materials",
   const service = new NodeService({ managedRoot: root });
   const nodes = await service.list(root, { super: true });
   assert.deepEqual(nodes[0]!.children.map((child) => child.id), [
-    path.join(root, ".edges/README.md"),
+    path.join(root, "tasks/README.md"),
+    path.join(root, "README.md"),
   ]);
   const rel = nodes.map((node) => path.relative(root, node.path));
-  assert.ok(rel.includes(path.join(".edges", "tasks", "README.md")));
-  assert.ok(!rel.includes(path.join("tasks", "README.md")));
-  assert.ok(!rel.includes("README.md"));
+  assert.ok(!rel.includes(path.join(".edges", "tasks", "README.md")));
+  assert.ok(rel.includes(path.join("tasks", "README.md")));
+  assert.ok(rel.includes("README.md"));
 });
 
-test("--super falls back to flat edges-materials mounts when no index README exists", async (t) => {
+test("--super mounts configured materials without requiring a root README", async (t) => {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "super-flat-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(path.join(root, "tasks"), { recursive: true });

@@ -213,8 +213,7 @@ export class NodeService {
     return node;
   }
   /**
-   * Runtime-only super entry. Mounts `.edges/README.md` when it exists;
-   * otherwise flat edges-materials paths (empty allowed).
+   * Runtime-only super entry over scope-relative configured materials (empty allowed).
    */
   #superRoot(scopePath: string): SuperAgentsNode {
     return createSuperAgentsNode(scopePath);

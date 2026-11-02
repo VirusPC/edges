@@ -130,14 +130,8 @@ async function collectTasks(scopeDir: string, mode: MaterialReach) {
     throw new Error(`Missing scope entry: ${scopeEntry}. Add AGENTS.md or pass --super.`);
   }
   const service = new NodeService({ managedRoot: managed });
-  const hasDirectBoard = fs.existsSync(path.join(subjectTaskBoard(scopeDir, { super: true }).boardDir, ENTRY_NAMES.readme));
-  const nodes = mode.super && !mode.project && !mode.all && hasDirectBoard ? [] : await queryMaterialNodes(scopeDir, service, ["task"], mode);
-  if (mode.super && !mode.project && !mode.exclude?.has("tasks")) {
-    const board = subjectTaskBoard(scopeDir, { super: true });
-    const entry = path.join(board.boardDir, ENTRY_NAMES.readme);
-    if (fs.existsSync(entry)) nodes.push(...await service.query(entry, { types: ["task"], exclude: mode.exclude, scopeDir }).value());
-  }
-  return [...new Map(nodes.map(node => [node.path,node])).values()].filter((node): node is TaskNode => node instanceof TaskNode).map(node => taskItem(node, scopeDir));
+  const nodes = await queryMaterialNodes(scopeDir, service, ["task"], mode);
+  return nodes.filter((node): node is TaskNode => node instanceof TaskNode).map(node => taskItem(node, scopeDir));
 }
 function taskItem(node: TaskNode, root: string) {
   const location = taskLocationOf(node, root);

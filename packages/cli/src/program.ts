@@ -122,11 +122,11 @@ function addRootCommand(
     )
     .option(
       "--super",
-      "Root at a runtime SuperAgentsNode mounting edges-materials README paths (never written to disk)",
+      "Use scope-relative configured materials via a runtime SuperAgentsNode; --project takes precedence",
     )
     .option(
       "--all",
-      "Traverse the system forest from the current scope",
+      "Read independent systems below the selected scope or Project; combines with --super",
     )
     .option(
       "--exclude <modules>",

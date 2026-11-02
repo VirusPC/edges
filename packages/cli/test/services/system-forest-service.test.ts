@@ -37,8 +37,9 @@ function fixture(t: { after(fn: () => void): void }) {
   fs.mkdirSync(path.join(root, ".edges/tasks"), { recursive: true });
   fs.mkdirSync(path.join(root, "tasks"), { recursive: true });
   fs.writeFileSync(path.join(root, ".edges/tasks/README.md"), "# Maintenance\n");
+  fs.writeFileSync(path.join(root, ".edges/README.md"), "# Harness\n\n<!-- edges-entries-local:start -->\n- [Tasks](tasks/README.md)\n<!-- edges-entries-local:end -->\n");
   fs.writeFileSync(path.join(root, "tasks/README.md"), "# Content\n");
-  const outer = writeAgents(root, "AGENTS.md", ["inner/AGENTS.md"]);
+  const outer = writeAgents(root, "AGENTS.md", [".edges/README.md", "inner/AGENTS.md"]);
   const inner = writeAgents(root, "inner/AGENTS.md");
   return { root, outer, inner };
 }
@@ -75,4 +76,6 @@ test("Super root mounts materials, not scope AGENTS", async (t) => {
     !superTree.some((n) => n.path === path.join(root, ".edges/tasks/README.md")),
   );
   assert.ok(!superTree.slice(1).some((n) => n.path === outer));
+  const outerTree = forest.find((tree) => tree[0]!.path === outer)!;
+  assert.ok(outerTree.some((n) => n.path === path.join(root, ".edges/tasks/README.md")));
 });

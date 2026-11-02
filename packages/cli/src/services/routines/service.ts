@@ -6,7 +6,6 @@ import { pathHitsExcludedModule } from "../../domain/config/exclude.js";
 import { RoutineNode } from "../../domain/models/routines/routine-node.js";
 import { ReadmeNode } from "../../domain/models/readme/readme-node.js";
 import { identifyNodeType } from "../../domain/models/node/layout.js";
-import { scopeTraversal } from "../../domain/operations/traverse.js";
 import { firstSymlink, isWithinPath } from "../../utils/filesystem.js";
 import { parseMetadata } from "../metadata.js";
 import {
@@ -16,7 +15,6 @@ import {
 import { ensureMaterialOrg } from "../node/content-org-list.js";
 import { physicalParent } from "../node/node-layout.js";
 import { openNodeSession, scopeRelativePath, queryMaterialNodes, type MaterialReach } from "../node/scope-session.js";
-import { buildSystemForest } from "../node/system-forest-service.js";
 
 export { presentListed } from "../list-query.js";
 export type RoutineReach = MaterialReach;
@@ -45,19 +43,7 @@ async function listedRoutines(env: NodeJS.ProcessEnv, reach: RoutineReach): Prom
   if (existsSync(path.dirname(org)) && !await service.get(org, ReadmeNode)) {
     throw new Error(`Missing routine organization entry: ${org}`);
   }
-  // Routine --super selects the flat module that create --super writes. Shared
-  // SuperAgents traversal intentionally prefers .edges/README.md; leave that
-  // behavior unchanged and select this module index explicitly. --all adds it
-  // to the shared forest, with identity deduplication below.
-  const queryOptions = { types: ["routine", "readme", "agents"], exclude: reach.exclude, scopeDir: scope };
-  const nodes = reach.project ? await queryMaterialNodes(scope, service, ["routine", "readme", "agents", "project"], reach) : reach.all
-    ? (await buildSystemForest(scope, { includeSuper: reach.super === true, exclude: reach.exclude, form: "independent" })).flat()
-    : reach.super
-      ? []
-      : await service.query(scope, { ...queryOptions, ...scopeTraversal(reach) }).value();
-  if (reach.super && !reach.project && await service.get(org, ReadmeNode)) {
-    nodes.push(...await service.query(org, queryOptions).value());
-  }
+  const nodes = await queryMaterialNodes(scope, service, ["routine", "readme", "agents", "project"], reach);
   // Generic traversal permits absent optional references. A registered routine
   // material or definition is required; reads must expose damage, never repair it.
   for (const parent of nodes) {
@@ -67,7 +53,7 @@ async function listedRoutines(env: NodeJS.ProcessEnv, reach: RoutineReach): Prom
       if (!await service.get(child.id)) throw new Error(`Missing routine entry: ${child.id}`);
     }
   }
-  return [...new Map(nodes.filter((node): node is RoutineNode => node instanceof RoutineNode).map((node) => [node.path, node])).values()];
+  return nodes.filter((node): node is RoutineNode => node instanceof RoutineNode);
 }
 
 export async function resolveRoutine(
