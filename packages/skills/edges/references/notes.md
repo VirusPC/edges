@@ -59,7 +59,7 @@ get 与 delete 只收目标。update 至少给 `--title`、`--body` 或 `--metad
 
 ## 无 shell：改用 MCP
 
-宿主不能 exec 时，调用 `packages/mcp-servers/new-note` 的工具 `new_note`，必填参数 `title`、`body`（同一套标题长度），可选 `project`（相对服务端 scope 的 `.edges/projects`）和 `super`（布尔值）。不传选择时写入 `.edges/notes/`；传 Project 则写入 P 的直属 notes，并优先于 `super`。scope 由服务端配置固定或按启动目录解析，工具不接受 scope，不把 Project 路径当 scope 传入。它同样只本地创建叶子，路径与 Project 校验交给 CLI。不要 import CLI 模块，不要找已删除的 `bin/new-note`。
+宿主不能 exec 时，调用 `packages/mcp-servers/new-note` 的工具 `new_note`，必填参数 `title`（同一套标题长度），可选 `body`、`project`（相对服务端 scope 的 `.edges/projects`）和 `super`（布尔值）。不传选择时写入 `.edges/notes/`；传 Project 则写入 P 的直属 notes，并优先于 `super`。scope 由服务端配置固定或按启动目录解析，工具不接受 scope，不把 Project 路径当 scope 传入。它同样只本地创建叶子，路径与 Project 校验交给 CLI。不要 import CLI 模块，不要找已删除的 `bin/new-note`。
 
 ## 禁止
 

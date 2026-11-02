@@ -201,7 +201,7 @@ export async function startServer(transportType: 'stdio' | 'http' = 'stdio', por
       console.error(`[new-note]     POST/GET/DELETE ${baseUrl}${MCP_PATH}`);
       console.error(`[new-note] ------------------------------------------`);
       console.error(`[new-note] Available Tools:`);
-      console.error(`[new-note]   • new_note: Create a new note and commit/push`);
+      console.error(`[new-note]   • new_note: Create a local note in the selected materials`);
       console.error(`[new-note] ==========================================\n`);
     });
   } else {
