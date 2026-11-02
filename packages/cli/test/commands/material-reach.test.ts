@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { run } from "../../src/program.js";
 import {
-  AgentsNode, MemoryNode, NoteNode, ProjectNode, ReadmeNode, RoutineNode, SkillNode, TaskNode,
+  AgentsNode, ComposeReadmeNode, MemoryNode, NoteNode, ProjectNode, ReadmeNode, RoutineNode, SkillNode, TaskNode,
 } from "../../src/domain/models/index.js";
 
 const modules = ["notes", "projects", "tasks", "memory", "skills", "routines"] as const;
@@ -30,7 +30,7 @@ function fixture(t: test.TestContext) {
       localChildren: refs(children), descendantChildren: refs(descendants),
     }, { operation: "create" }).serialize());
   };
-  const materials = (directory: string, label: string) => {
+  const materials = (directory: string, label: string, selectedModules: readonly Module[] = modules) => {
     const files: Materials = {
       notes: path.join(directory, "notes", label, "INDEX.md"),
       projects: path.join(directory, "projects", label, "INDEX.md"),
@@ -40,13 +40,16 @@ function fixture(t: test.TestContext) {
       routines: path.join(directory, "routines", label, "INDEX.md"),
     };
     const context = { operation: "create" } as const;
-    put(files.notes, new NoteNode(files.notes).create({ body: `# ${label}\n` }, context).serialize());
-    put(files.projects, new ProjectNode(files.projects).create({ body: `# ${label}\n` }, context).serialize());
-    put(files.tasks, new TaskNode(files.tasks).create({ title: label, status: "todo" }, context).serialize());
-    put(files.memory, new MemoryNode(files.memory).create({ name: label, description: label, memoryType: "project" }, context).serialize());
-    put(files.skills, new SkillNode(files.skills).create({ name: label, description: label }, context).serialize());
-    put(files.routines, new RoutineNode(files.routines).create({ name: label, description: label }, context).serialize());
-    const indexes = modules.map((module) => {
+    const documents: Record<Module, string> = {
+      notes: new NoteNode(files.notes).create({ body: `# ${label}\n` }, context).serialize(),
+      projects: new ProjectNode(files.projects).create({ body: `# ${label}\n` }, context).serialize(),
+      tasks: new TaskNode(files.tasks).create({ title: label, status: "todo" }, context).serialize(),
+      memory: new MemoryNode(files.memory).create({ name: label, description: label, memoryType: "project" }, context).serialize(),
+      skills: new SkillNode(files.skills).create({ name: label, description: label }, context).serialize(),
+      routines: new RoutineNode(files.routines).create({ name: label, description: label }, context).serialize(),
+    };
+    const indexes = selectedModules.map((module) => {
+      put(files[module], documents[module]);
       const parents = { tasks: "tasks", memory: "memory/projects", skills: "skills/managed" };
       const file = path.join(directory, module in parents ? parents[module as keyof typeof parents] : module, "README.md");
       index(file, [files[module]]);
@@ -55,8 +58,8 @@ function fixture(t: test.TestContext) {
     index(path.join(directory, "README.md"), indexes);
     return { files, indexes };
   };
-  const system = (directory: string, label: string) => {
-    const result = materials(path.join(directory, ".edges"), label);
+  const system = (directory: string, label: string, selectedModules: readonly Module[] = modules) => {
+    const result = materials(path.join(directory, ".edges"), label, selectedModules);
     agents(directory, [path.join(directory, ".edges/README.md")]);
     return result;
   };
@@ -76,7 +79,7 @@ function fixture(t: test.TestContext) {
     assert.equal(new Set(paths).size, paths.length, `${module}: a material reached twice must occur once`);
     return paths;
   };
-  return { root, index, agents, materials, system, project, listed };
+  return { root, put, index, agents, materials, system, project, listed };
 }
 
 test("directory modules share default, super and all selection with Compose boundaries", async (t) => {
@@ -85,6 +88,10 @@ test("directory modules share default, super and all selection with Compose boun
   const flat = f.materials(f.root, "flat");
   const registered = f.system(path.join(f.root, "registered"), "registered");
   const independent = f.system(path.join(f.root, "independent"), "independent");
+  // Exclusion must stop physical discovery too: these systems live inside the excluded material.
+  const embedded = Object.fromEntries(modules.map((module) => [module,
+    f.system(path.dirname(independent.files[module]), `embedded-${module}`, [module]).files[module],
+  ])) as Materials;
   const checkout = path.join(f.root, ".edges/compose/vendor");
   const vendor = f.system(checkout, "vendor");
   f.system(path.join(checkout, ".edges/compose/nested"), "nested-vendor");
@@ -92,7 +99,7 @@ test("directory modules share default, super and all selection with Compose boun
   f.agents(f.root, [path.join(f.root, ".edges/README.md")], [path.join(f.root, "registered/AGENTS.md")]);
 
   for (const module of modules) await t.test(module, async (t) => {
-    const forest = [own.files[module], registered.files[module], independent.files[module], vendor.files[module]];
+    const forest = [own.files[module], registered.files[module], independent.files[module], embedded[module], vendor.files[module]];
     const cases: Array<[string[], string[]]> = [
       [[], [own.files[module], registered.files[module]]],
       [["--super"], [flat.files[module]]],
@@ -100,6 +107,8 @@ test("directory modules share default, super and all selection with Compose boun
       [["--super", "--all"], [flat.files[module], ...forest]],
       [["--all", "--exclude", "compose"], forest.filter((file) => file !== vendor.files[module])],
       [["--super", "--all", "--exclude", "compose"], [flat.files[module], ...forest.filter((file) => file !== vendor.files[module])]],
+      [["--exclude", module], []],
+      [["--all", "--exclude", module], []],
       [["--super", "--exclude", module], []],
       [["--super", "--all", "--exclude", module], []],
     ];
@@ -143,4 +152,21 @@ test("directory modules share Project precedence, recursive composition and boun
       });
     }
   });
+});
+
+test("all excludes a custom Compose checkout registered by an independent child system", async (t) => {
+  const f = fixture(t);
+  const own = f.system(f.root, "host", ["notes"]);
+  const child = path.join(f.root, "independent");
+  const independent = f.system(child, "independent", ["notes"]);
+  const checkout = path.join(child, "vendor");
+  const vendor = f.system(checkout, "vendor", ["notes"]);
+  f.index(path.join(checkout, "README.md"), [path.join(checkout, ".edges/README.md")]);
+  const file = path.join(child, ".edges/compose/README.md");
+  const compose = new ComposeReadmeNode(file).create({ body: "# Shared repositories\n" }, { operation: "create" });
+  compose.addChild({ name: "vendor", href: path.relative(path.dirname(file), checkout), description: "Shared notes" });
+  f.put(file, compose.serialize());
+  f.index(path.join(child, ".edges/README.md"), [...independent.indexes, file]);
+  assert.deepEqual(await f.listed("notes", ["--all"]), [own.files.notes, independent.files.notes, vendor.files.notes].sort());
+  assert.deepEqual(await f.listed("notes", ["--all", "--exclude", "compose"]), [own.files.notes, independent.files.notes].sort());
 });
