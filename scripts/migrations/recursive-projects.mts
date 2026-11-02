@@ -9,6 +9,7 @@ import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { BaseNode, ProjectNode, ReadmeNode, TaskNode } from "../../packages/cli/src/domain/models/index.js";
 import { TASK_STATUSES } from "../../packages/cli/src/domain/models/tasks/types.js";
+import { domainFields } from "../../packages/cli/src/domain/core/fields.js";
 import { identifyNodeType } from "../../packages/cli/src/domain/models/node/layout.js";
 import { placeHarnessMaterial } from "../../packages/cli/src/domain/config/edges-materials.js";
 import { NodeService } from "../../packages/cli/src/services/node/node-service.js";
@@ -108,6 +109,41 @@ function withoutChildren(source: string, file: string): string {
   for (const child of node.children) node.removeChild(child.id);
   return node.serialize();
 }
+const defaultStart = "<!-- edges-migrated-task-default:start -->";
+const defaultEnd = "<!-- edges-migrated-task-default:end -->";
+function defaultSection(plan: RecursiveProjectsPlan, group: GroupMigration): string {
+  const from = path.join(group.source, "README.md"), to = path.join(group.destination, "README.md");
+  const prose = rewriteLinks(withoutChildren(group.readme, from), from, to, (target) => relocate(plan, target))
+    .replace(/<!-- edges-entries-(?:local|descendants):(?:start|end) -->\s*\n?/g, "")
+    .replace(/^---\n([\s\S]*?)\n---\n/, "```yaml\n$1\n```\n").trim();
+  return `${defaultStart}\n## 原未分组任务说明\n\n${prose}\n${defaultEnd}`;
+}
+function checkDefaultSection(plan: RecursiveProjectsPlan, group: GroupMigration, body: string): boolean {
+  const begin = body.indexOf(defaultStart), end = body.indexOf(defaultEnd);
+  if (begin === -1 && end === -1) return false;
+  if (begin === -1 || end < begin || body.indexOf(defaultStart, begin + 1) !== -1 || body.indexOf(defaultEnd, end + 1) !== -1 || body.slice(begin, end + defaultEnd.length) !== defaultSection(plan, group))
+    throw new Error("Preserved default README differs from saved migration plan");
+  return true;
+}
+async function preserveDefault(service: NodeService, plan: RecursiveProjectsPlan, group: GroupMigration): Promise<void> {
+  const entry = path.join(group.destination, "README.md"), oldEntry = path.join(group.source, "README.md");
+  const board = (await service.get(entry, ReadmeNode))!;
+  const hadChild = board.children.some((child) => child.id === oldEntry);
+  if (hadChild) board.removeChild(oldEntry);
+  const present = checkDefaultSection(plan, group, board.body);
+  if (!present) board.body = `${board.body.trimEnd()}\n\n${defaultSection(plan, group)}\n`;
+  if (hadChild || !present) await service.update(board, {});
+  // Only current registered nodes participate; historical documents and run logs
+  // are never searched or rewritten. Remove the old composition edge first so
+  // mapping the former group entry cannot introduce a self-edge on the board.
+  const nodes = await service.query(plan.root, { includeHarness: true, super: !fs.existsSync(path.join(plan.root, "AGENTS.md")) }).toArray().value();
+  for (const node of nodes) {
+    if (inside(node.path, group.source)) continue;
+    const current = node.serialize();
+    const next = rewriteLinks(current, node.path, node.path, (target) => inside(target, group.source) ? path.join(group.destination, path.relative(group.source, target)) : target);
+    if (next !== current) { node.parse(next); await service.update(node, {}); }
+  }
+}
 
 /** No writes, no node mutation. Unknown default-group resources are conflicts. */
 export function planRecursiveProjects(inputRoot: string, dates: Record<string, string> = {}): RecursiveProjectsPlan {
@@ -129,6 +165,10 @@ export function planRecursiveProjects(inputRoot: string, dates: Record<string, s
       const tasks = names.filter(isTask).map((relative) => {
         const task = new TaskNode(path.join(source, relative)).parse(fs.readFileSync(path.join(source, relative), "utf8"));
         if (task.status !== relative.split(path.sep)[0]) plan.conflicts.push(`Task status and directory disagree: ${path.join(source, relative)}`);
+        const expectedGroup = item.name === "_default" ? "default" : item.name;
+        const recordedGroup = domainFields(task.metadata)["edges-task-project"] || "default";
+        if (recordedGroup !== expectedGroup || (task.metadata?.["edges-task-project"] !== undefined && task.metadata["edges-task-project"] !== expectedGroup))
+          plan.conflicts.push(`Task project and directory disagree: ${path.join(source, relative)}`);
         return { relative, status: relative.split(path.sep)[0]!, stem: relative.split(path.sep)[1]!, name: task.title, ...(task.description ? { description: task.description } : {}) };
       });
       const readme = fs.readFileSync(readmePath, "utf8");
@@ -220,6 +260,18 @@ function verifyPlan(plan: RecursiveProjectsPlan): void {
     const sourceExists = fs.existsSync(group.source);
     const destinationExists = group.project && fs.existsSync(group.destination);
     if (sourceExists && destinationExists) throw new Error(`Both source and destination exist: ${group.source}`);
+    if (!group.project) for (const task of group.tasks) {
+      const sourceUnit = path.dirname(path.join(group.source, task.relative));
+      const destinationUnit = path.dirname(path.join(group.destination, task.relative));
+      checkPath(destinationUnit);
+      if (fs.existsSync(sourceUnit) && fs.existsSync(destinationUnit)) throw new Error(`Default Task destination already exists: ${destinationUnit}`);
+      for (const status of TASK_STATUSES)
+        if (status !== task.status && fs.existsSync(path.join(group.destination, status, task.stem))) throw new Error(`Default Task stem already exists: ${task.stem}`);
+      if (fs.existsSync(destinationUnit)) for (const name of inventory(destinationUnit)) {
+        const relative = path.join(task.status, task.stem, name);
+        if (!group.files.some((file) => file.relative === relative)) throw new Error(`Unplanned resource: ${path.join(destinationUnit, name)}`);
+      }
+    }
     if (!group.project && sourceExists) {
       const index = path.join(group.source, "README.md");
       const current = fs.readFileSync(index, "utf8");
@@ -229,6 +281,7 @@ function verifyPlan(plan: RecursiveProjectsPlan): void {
       for (const child of new ReadmeNode(index).parse(current).children)
         if (!expected.includes(child.id)) throw new Error(`Unplanned default group child: ${child.id}`);
     }
+    if (!group.project) checkDefaultSection(plan, group, new ReadmeNode(path.join(board, "README.md")).parse(fs.readFileSync(path.join(board, "README.md"), "utf8")).body);
     const known = new Set(group.files.map((file) => file.relative));
     for (const dir of [group.source, ...(group.project ? [group.destination] : [])]) {
       if (!fs.existsSync(dir)) continue;
@@ -236,6 +289,8 @@ function verifyPlan(plan: RecursiveProjectsPlan): void {
     }
     for (const file of group.files) {
       const from = path.join(group.source, file.relative), to = path.join(group.destination, file.relative);
+      checkPath(from);
+      checkPath(to);
       const isDefaultIndex = !group.project && file.relative === "README.md";
       if (isDefaultIndex || (!group.project && path.basename(file.relative) === ".gitkeep")) continue;
       const locations = [from, to].filter((candidate) => fs.existsSync(candidate));
@@ -302,12 +357,18 @@ export async function applyRecursiveProjects(plan: RecursiveProjectsPlan, progre
         const node = (await service.get(path.join(group.destination, task.relative)))!;
         if (stripTaskProject(node)) await service.update(node, {});
       }
-      if (!group.project && fs.existsSync(group.source)) {
-        const remainder = inventory(group.source).filter((name) => name !== "README.md" && path.basename(name) !== ".gitkeep");
-        if (remainder.length) throw new Error(`Default group is not empty after migration: ${remainder.join(", ")}`);
-        const node = await service.get(path.join(group.source, "README.md"));
-        if (!node) throw new Error(`Missing default group README: ${group.source}`);
-        await service.destroy(node);
+      if (!group.project) {
+        progress("Preserving default README");
+        await preserveDefault(service, plan, group);
+        progress("Preserved default README and incoming links");
+        if (fs.existsSync(group.source)) {
+          const remainder = inventory(group.source).filter((name) => name !== "README.md" && path.basename(name) !== ".gitkeep");
+          if (remainder.length) throw new Error(`Default group is not empty after migration: ${remainder.join(", ")}`);
+          const node = await service.get(path.join(group.source, "README.md"));
+          if (!node) throw new Error(`Missing default group README: ${group.source}`);
+          await service.destroy(node);
+        }
+        progress("Removed default README");
       }
       const tasksIndex = (await service.get(path.join(group.destination, "README.md"), ReadmeNode))!;
       if (registerTasks(tasksIndex, group)) await service.update(tasksIndex, {});

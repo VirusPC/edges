@@ -20,18 +20,18 @@ function fixture(t: { after(fn: () => void): void }) {
   write("AGENTS.md", "<!-- edges-local:start -->\n- [Materials](.edges/README.md)\n<!-- edges-local:end -->\n");
   write(".edges/README.md", "# Materials\n\n" + entries(["- [Tasks](tasks/README.md)", "- [Projects](projects/README.md)"]));
   write(".edges/projects/README.md", "# Projects\n\n" + entries(["- [Existing](existing/INDEX.md)"]));
-  write(".edges/projects/existing/INDEX.md", "# Existing\n\n[Task](../../tasks/topic/done/2026-09-01--early/INDEX.md#result)\n");
-  write(".edges/tasks/README.md", "# Tasks\n\n" + entries(["- [Topic](topic/README.md)", "- [Default](_default/README.md)"]));
+  write(".edges/projects/existing/INDEX.md", "# Existing\n\n[Task](../../tasks/topic/done/2026-09-01--early/INDEX.md#result)\n\n[Unassigned board](../../tasks/_default/README.md)\n");
+  write(".edges/tasks/README.md", "# Tasks\n\nKeep root board prose.\n\n" + entries(["- [Topic](topic/README.md)", "- [Default](_default/README.md)"]));
   write(".edges/tasks/topic/README.md", "---\nname: Topic\ndescription: Preserve description\n---\n# Topic title\n\nKeep authored prose.\n\n## 本层硬约束\n- Keep this instruction.\n\n" + entries(["- [Early](done/2026-09-01--early/INDEX.md)", "- [Later](todo/2026-10-02--later/INDEX.md)"]));
-  write(".edges/tasks/_default/README.md", "# Default\n\nDefault prose retained in saved plan.\n\n" + entries(["- [Free](backlog/2026-10-01--free/INDEX.md)"]));
+  write(".edges/tasks/_default/README.md", "---\nname: Unassigned\ndescription: Keep this metadata\n---\n# Default\n\nKeep default authored prose.\n\n" + entries(["- [Free](backlog/2026-10-01--free/INDEX.md)"]));
   for (const [group, status, stem] of [["topic", "done", "2026-09-01--early"], ["topic", "todo", "2026-10-02--later"], ["_default", "backlog", "2026-10-01--free"]]) {
     const dir = `.edges/tasks/${group}/${status}/${stem}`;
-    write(`${dir}/INDEX.md`, `---\nname: ${stem}\nmetadata:\n  edges-task-project: ${group}\n  edges-tasks-status: ${status}\n  edges-task-priority: high\n---\n# Task\n\n[Group](../../README.md)\n` + (status === "done" ? "\n![Proof](../img/proof.png)\n" : ""));
+    write(`${dir}/INDEX.md`, `---\nname: ${stem}\nmetadata:\n  edges-task-project: ${group === "_default" ? "default" : group}\n  edges-tasks-status: ${status}\n  edges-task-priority: high\n---\n# Task\n\n[Group](../../README.md)\n` + (status === "done" ? "\n![Proof](../img/proof.png)\n" : ""));
     write(`${dir}/.${stem}.log.md`, `Historical snapshot: ../../tasks/${group}/${status}/${stem}/INDEX.md\n\u0000 bytes stay fixed\n`);
   }
   write(".edges/tasks/topic/done/img/proof.png", Buffer.from([0, 13, 10, 255, 42]));
   write(".edges/tasks/topic/unregistered-resource.txt", "User resource\n");
-  write("docs/history.json", '{"source":".edges/tasks/topic/done/2026-09-01--early/INDEX.md"}\n');
+  write("docs/history.json", '{"source":".edges/tasks/topic/done/2026-09-01--early/INDEX.md","default":".edges/tasks/_default/README.md"}\n');
   return { root, file, write };
 }
 
@@ -82,6 +82,12 @@ test("preview is read-only; apply preserves tasks, prose, resources, logs, incom
   }
   assert.equal(fs.readFileSync(file("docs/history.json")).toString("base64"), before["docs/history.json"]);
   assert.match(fs.readFileSync(file(".edges/projects/existing/INDEX.md"), "utf8"), /2026-09-01--topic\/tasks\/done\/2026-09-01--early\/INDEX.md#result/);
+  assert.match(fs.readFileSync(file(".edges/projects/existing/INDEX.md"), "utf8"), /\[Unassigned board\]\(\.\.\/\.\.\/tasks\/README.md\)/);
+  const board = fs.readFileSync(file(".edges/tasks/README.md"), "utf8");
+  assert.match(board, /Keep root board prose/);
+  assert.match(board, /Keep default authored prose/);
+  assert.match(board, /description: Keep this metadata/);
+  assert.match(board, /backlog\/2026-10-01--free\/INDEX.md/);
   const after = snapshot(root);
   await applyRecursiveProjects(JSON.parse(JSON.stringify(plan)));
   assert.deepEqual(snapshot(root), after);
@@ -173,4 +179,47 @@ test("group relocation preserves a pre-existing dangling index reference without
   const listed = await run(["--scope", root, "tasks", "list"], { env: {} });
   assert.equal(listed.exitCode, 0, listed.stderr);
   assert.equal(JSON.parse(listed.stdout).tasks.length, 3);
+});
+
+
+test("saved preview rejects late destination conflicts before any migration writes", async (t) => {
+  for (const conflict of ["other-status", "occupied-unit", "linked-status"]) {
+    const { root, file, write } = fixture(t);
+    const plan = planRecursiveProjects(root);
+    if (conflict === "other-status") write(".edges/tasks/todo/2026-10-01--free/INDEX.md", "# Other Task\n");
+    if (conflict === "occupied-unit") write(".edges/tasks/backlog/2026-10-01--free/user.txt", "User data\n");
+    if (conflict === "linked-status") fs.symlinkSync(file("docs"), file(".edges/tasks/backlog"));
+    await assert.rejects(applyRecursiveProjects(plan), /already exists|symbolic link/);
+    assert.equal(fs.existsSync(file(".edges/projects/2026-09-01--topic")), false);
+  }
+});
+
+test("default README preservation resumes before append, before destroy, and after destroy without duplication", async (t) => {
+  for (const checkpoint of ["Preserving default README", "Preserved default README and incoming links", "Removed default README"]) {
+    const { root, file } = fixture(t);
+    const plan = planRecursiveProjects(root);
+    await assert.rejects(applyRecursiveProjects(plan, (message) => { if (message === checkpoint) throw new Error("Simulated interruption"); }), /Simulated interruption/);
+    await applyRecursiveProjects(JSON.parse(JSON.stringify(plan)));
+    const board = fs.readFileSync(file(".edges/tasks/README.md"), "utf8");
+    assert.equal(board.split("Keep default authored prose").length - 1, 1, checkpoint);
+    assert.match(board, /Keep root board prose/);
+    assert.match(fs.readFileSync(file(".edges/projects/existing/INDEX.md"), "utf8"), /\[Unassigned board\]\(\.\.\/\.\.\/tasks\/README.md\)/);
+    assert.equal(fs.existsSync(file(".edges/tasks/_default")), false);
+    const after = snapshot(root);
+    await applyRecursiveProjects(plan);
+    assert.deepEqual(snapshot(root), after, checkpoint);
+  }
+});
+
+test("legacy Task status and project metadata must agree with physical grouping", async (t) => {
+  for (const [field, value] of [["edges-tasks-status", "backlog"], ["edges-task-project", "other"]]) {
+    const { root, file } = fixture(t);
+    const task = file(".edges/tasks/topic/done/2026-09-01--early/INDEX.md");
+    fs.writeFileSync(task, fs.readFileSync(task, "utf8").replace(new RegExp(`${field}: .*`), `${field}: ${value}`));
+    const plan = planRecursiveProjects(root);
+    assert.ok(plan.conflicts.some((item) => item.includes("and directory disagree")));
+    const before = snapshot(root);
+    await assert.rejects(applyRecursiveProjects(plan), /Conflicts block apply/);
+    assert.deepEqual(snapshot(root), before);
+  }
 });
