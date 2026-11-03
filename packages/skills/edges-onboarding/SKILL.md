@@ -1,7 +1,7 @@
 ---
 name: edges-onboarding
 description: 帮用户第一次接入 Edges 时使用：安装 edges CLI（npm 包 @viruspc/edges）、初始化目录、跑一次验证、学会常用命令、排查安装与鉴权报错。用户说「帮我接入 edges」「安装 edges」「edges 怎么用」「edges 报错了」「给我的仓库配一套 edges」时触发。已经装好、只是要写笔记请改用 edges；整理对话改用 edges-conversation-to-notes；项目记忆的检索与沉淀改用 edges-memory-ask / edges-memory-remember，初始化系统入口改用 edges。本 skill 只做入口与引导，具体操作一律交给 edges CLI 执行。
-version: 0.4.0
+version: 0.4.1
 ---
 
 # edges onboarding
@@ -51,7 +51,7 @@ git --version
 ## 安装
 
 ```bash
-npm install -g @viruspc/edges
+npm install -g @viruspc/edges@latest
 edges --version
 edges --help
 ```
@@ -59,7 +59,7 @@ edges --help
 预期：
 
 - `npm install` 末尾出现 `added N packages`。
-- `edges --version` 打印一个版本号（写作本 skill 时 npm 上是 `0.3.0`）。
+- `edges --version` 打印一个版本号。
 - `edges --help` 打印 `Usage: edges [options] [command]`，命令列表里有 `init`、`notes`、`projects`、`tasks`、`memory`、`skills`、`artifacts`、`schema`、`forest`、`compose`。
 
 失败时：
