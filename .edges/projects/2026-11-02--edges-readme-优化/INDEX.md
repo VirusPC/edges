@@ -64,3 +64,9 @@ description: 专门优化 Edges 框架 README 的定位与价值表达、阅读�
 - [领域术语](../../../CONTEXT.md)
 - [CLI 能力文档](../../../packages/cli/README.md)
 - [架构决策](../../../docs/adr/)
+
+<!-- edges-entries-local:start -->
+## 本层内容
+
+- [tasks/README.md](<tasks/README.md>) — Task board
+<!-- edges-entries-local:end -->
