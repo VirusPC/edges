@@ -43,19 +43,27 @@ git tag -l 'skill/edges@*'
 
 Skill 的材料归属与 Agent 安装位置是两件事。`edges --scope <目录> --project <相对路径> skills ...` 选择已有 Project 的直属 `skills/`，并保留原 scope；材料索引登记在 P 的 INDEX，不把 P 当成新 scope。Agent 安装仍由下面的安装器及其参数决定，选择 Project 不代表给主题另装一套 Agent。
 
-外部用户先 `npm install -g @viruspc/edges`（Node.js 22.20 及以上），再执行 `edges skills init` 或无参 `edges init`。命令会建 skill 类型索引，并把包内 skill 交给固定的 `skills@1.7.2`：`skills add <包内 skills 目录的绝对路径> --skill '*'`。要传给安装器的旗标写在 `--` 后面。没有 TTY、又没探测到 agent 时，不带这些旗标会退出 1。非交互且仍让安装器自动探测 agent 时用 `-g -y`：
+外部用户先 `npm install -g @viruspc/edges`（Node.js 22.20 及以上），再执行 `edges skills init` 或无参 `edges init`。命令会建 skill 类型索引，并把包内 skill 交给固定的 `skills@1.7.2`：`skills add <包内 skills 目录的绝对路径> --skill '*'`。要传给安装器的旗标写在 `--` 后面。没有 TTY、又没探测到 agent 时，不带 `-y` 会退出 1。默认装进当前项目，示例不带 `-g`：
 
 ```bash
+edges init -- -y
+edges skills init -- -y
+edges init -- -y --agent cursor
 edges init -- -g -y
-edges skills init -- -g -y
-edges init -- -y --agent claude-code
 ```
 
-`-g` 装到用户目录（Claude Code 是 `$CLAUDE_CONFIG_DIR/skills`，否则 `~/.claude/skills`）。不加 `-g` 时写当前项目的 agent 目录，例如 `.claude/skills`。探测到当前 agent 时，`skills@1.7.2` 只装给那一个；没探测到且本机没有已安装 agent 时，`-y` 会装给它支持的全部 agent。edges 不另选 agent，也不对用户开放 `--skill`。安装器的 stdout / stderr 原样出现在终端里。它非零退出时，init 以同一退出码失败，信封 `errorCode` 为 `SKILLS_INSTALL_FAILED`。
+不加 `-g` 时写当前项目，并在当前目录留下 `skills-lock.json`。`skills@1.7.2` 的落点（2026-11-04，空 `HOME` 实测）：
+
+- 探测到 Cursor（`CURSOR_AGENT`）时，项目内是 `.agents/skills/<name>/`。Cursor、Codex、Gemini CLI 都读这个目录。
+- `--agent cursor` 同样只写项目内 `.agents/skills/<name>/`。`--agent claude-code` 只写项目内 `.claude/skills/<name>/`。
+- 没探测到 agent、本机也没有已安装 agent、又带了 `-y` 时，空项目上留下 `.agents/skills/<name>/`（实体）、`.claude/skills/<name>`（软链）和 Eve 的 `agent/skills/<name>/`。
+- `-g` 是显式的本机用户目录，不进仓库。`--agent cursor` 写 `~/.agents/skills`；`--agent claude-code` 写 `$CLAUDE_CONFIG_DIR/skills`，否则 `~/.claude/skills`。云端 Agent 和只 clone 仓库的机器看不见。
+
+edges 不另选 agent，也不对用户开放 `--skill`。安装器的 stdout / stderr 原样出现在终端里。它非零退出时，init 以同一退出码失败，信封 `errorCode` 为 `SKILLS_INSTALL_FAILED`。
 
 不要再让外部用户执行 `npx skills add VirusPC/edges/skills`，也不要写不带版本的 `npx skills` 或 `npx skills@latest`。不带版本时，npm 可能把命令名解析到已废弃的 `add-skill` 老包。CLI 把 `skills@1.7.2` 锁在自己的依赖里。
 
-> 改完 skill 目录结构后，用这条复核，别只看退出码（`<安装目录>` 是 `~/.agents/skills` 或 `~/.claude/skills`，看用的哪种装法）：
+> 改完 skill 目录结构后，用这条复核，别只看退出码（`<安装目录>` 按上面的落点：项目内常见是 `.agents/skills` 或 `.claude/skills`，`-g` 则是 `~/.agents/skills` 或 `~/.claude/skills`）：
 > ```bash
 > diff <(cd <src> && find . -type f | sort) \
 >      <(cd <安装目录>/<name> && find . -type f | sort)

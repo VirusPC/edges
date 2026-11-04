@@ -56,6 +56,23 @@ test("copyBundledSkills copies every remaining extensions skill and not the six 
   assert.equal(existsSync(path.join(dest, "AGENTS.md")), false);
 });
 
+test("onboarding and init docs recommend a project install without -g", async () => {
+  const onboarding = await readFile(path.join(sourceSkills, "edges-onboarding/SKILL.md"), "utf8");
+  const initSection = onboarding.split("## 初始化一个目录")[1]?.split("## ")[0] ?? "";
+  const firstFence = initSection.match(/```bash\n([\s\S]*?)```/)?.[1] ?? "";
+  assert.match(firstFence, /^cd <用户的仓库>\nedges --scope \. init -- -y\n$/);
+  assert.equal(firstFence.includes("-g"), false);
+  assert.match(initSection, /edges --scope \. init -- -g -y/);
+  assert.match(initSection, /--agent cursor/);
+  assert.match(initSection, /\.agents\/skills/);
+  assert.match(initSection, /\.claude\/skills/);
+
+  const memoryInit = await readFile(path.join(sourceSkills, "edges/references/memory-init.md"), "utf8");
+  assert.match(memoryInit, /edges --scope <目录> init -- -y\n/);
+  assert.equal(memoryInit.includes("init -- -g -y"), false);
+  assert.match(memoryInit, /-- -y --agent cursor/);
+});
+
 test("the published package pins skills@1.7.2 and ships a skills directory", async () => {
   const pkg = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
     files: string[];

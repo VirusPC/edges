@@ -12,6 +12,8 @@ status: accepted
 
 **Superseded in part by** [ADR 0048](0048-retire-shared-extensions.md)：与 edges CLI 无关的通用 skill 不再放个人仓 `shared-extensions/`，改放使用方自己的内容仓，布局由该仓自定。下文 Decision 与 Consequences 里的安置句保留作当时记录；「不进 npm 包、`edges skills init` 只装包内 skill」仍然有效。
 
+**Amended 2026-11-04：** 文档、帮助和 onboarding 的默认示例改为项目内安装（`edges init -- -y`，不加 `-g`）。`-g` 仍由调用方显式传入，才会写用户目录。edges 仍不自己加 `-g` / `-y` / `--agent`。
+
 **See also:** ADR 0031、ADR 0004；[Agent Skills 规范](https://agentskills.io/specification)
 
 ## Decision
@@ -35,6 +37,6 @@ status: accepted
 
 - `@viruspc/edges` 的 `files` 包含构建时拷入的 `packages/skills/`。与 edges CLI 无关的 6 个 skill 在 `shared-extensions/skills/`，不进包。
 - 安装步骤调用依赖里的 `skills@1.7.2`：`node <该包 bin> add <包内 skills 目录绝对路径> --skill '*'`，再加上 `--` 之后的 token。stdio 继承，edges 不改写安装器输出，因此它的输出与 edges 的 JSON 信封会出现在同一次进程的 stdout / stderr 上。
-- 会写用户级 agent 目录（如 `~/.agents/skills`、`~/.claude/skills`）。测试用假 spawn，不写开发机的这些目录。
+- 不加 `-g` 时写当前项目的 agent 技能目录（Cursor 等共用 `.agents/skills`；`--agent claude-code` 写 `.claude/skills`）。加上 `-g` 才写用户目录（如 `~/.agents/skills`、`~/.claude/skills`）。测试用假 spawn，不写这些目录。
 - 无 TTY 又需要交互时，vercel skills 不装、退出码 1，init 以同一退出码失败。
 - 升级固定的 vercel skills 版本时，复核其旗标语义与 node 要求，并改 `VERCEL_SKILLS_VERSION` 与 `dependencies.skills`。

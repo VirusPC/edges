@@ -7,6 +7,7 @@
 ### 初始化
 
 - **无参 `edges init` 同时创建任务看板。** 不指定模块时，默认集是 memory、skills、tasks、notes、projects，会写出 `<scope>/.edges/tasks/README.md`，并登记到 `AGENTS.md` 指向的材料索引。`edges tasks init` 与 `edges init tasks` 仍只建这一块看板。routines 仍不在默认集里，要单独 `edges routines init`。
+- **帮助里的 skill 安装示例改为当前项目。** `edges init --help` 与 `edges skills init --help` 的第一条示例是 `-- -y`。`-g` 仍列在后面，表示只写本机用户目录。安装器仍只接收 `--` 后面原样转交的旗标，不会自己加上 `-g`。
 
 ## [0.5.0] - 2026-11-02
 
