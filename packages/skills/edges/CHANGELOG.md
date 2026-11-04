@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **初始化时 skill 默认进当前项目。** `memory-init`、LAYOUT 与 runtime 的示例从 `-- -g -y` 改为 `-- -y`。`-g` 只在明确只要本机用户目录、不进仓库时使用。
+- **初始化示例改为当前项目。** 含 skills 的 init 用 `-- -y`。`-g` 仍可用于本机用户目录。
 
 ## [0.3.0] - 2026-11-02
 

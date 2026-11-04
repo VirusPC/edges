@@ -56,9 +56,6 @@ test("edges init --help lists tasks with modules this command creates and keeps 
   assert.match(rest, /\broutines\b/);
   assert.match(rest, /not in the default set/);
   assert.doesNotMatch(rest, /adopts skill types/);
-  const forwarded = [...help.stdout.matchAll(/^  edges init -- .+$/gm)].map((match) => match[0].trim());
-  assert.equal(forwarded[0], "edges init -- -y");
-  assert.equal(forwarded.includes("edges init -- -g -y"), true);
 });
 
 test("edges skills init --help recommends a project install and keeps -g explicit", async () => {

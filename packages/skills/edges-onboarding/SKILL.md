@@ -88,13 +88,8 @@ edges --scope . init -- -y
 ```
 
 - 无参 `init` 默认写入：`AGENTS.md`、memory 类型 `feedback` / `project` / `reference`、skills 类型索引（managed、referenced），并把包内 Edges skills 装进当前项目；还有 tasks、notes、projects 的组织列表。任务看板在 `.edges/tasks`，登记在 `AGENTS.md` 指向的材料索引上。只建这一块看板仍用 `edges --scope . tasks init`。routines 不在默认集里。
-- `--` 后面的旗标原样交给 `skills@1.7.2`。默认命令带 `-y`、不带 `-g`：技能写进当前目录，可以提交进仓库。云端 Agent、换一台机器、或只 clone 仓库的 agent 读的是仓库里的这份，所以个人大脑和要共享的仓库用这一条。装完后当前目录会多出技能目录和 `skills-lock.json`，由用户自己提交；本 skill 不替用户 commit。没有 TTY、又没探测到 agent 时，不带 `-y` 会退出 1。
-- 落点按 `skills@1.7.2` 实测（空的 `HOME`，2026-11-04）：
-  - 探测到当前 agent 时安装器不再询问。Cursor 云端设了 `CURSOR_AGENT`，记成 `cursor`，并带上所有把项目技能目录定成 `.agents/skills` 的 agent。它们共用这一份，所以仓库里出现 `.agents/skills/<name>/`。Cursor、Codex、Gemini CLI 都读这个目录。
-  - 没探测到 agent、本机也没有已安装的 agent、又带了 `-y` 时，安装器面向它支持的全部 agent，项目里还不存在的 agent 目录会跳过。空目录上留下 `.agents/skills/<name>/`（实体）、`.claude/skills/<name>`（指向前者的软链）、`agent/skills/<name>/`（Eve 的一份拷贝）。
-  - 本机已经装了若干 agent 时，`-y` 装给那些 agent，再补上共用 `.agents/skills` 的 agent。多个目录并存时，实体在 `.agents/skills/<name>/`，其余是指向它的软链。
-- 钉死一个项目内目录：`edges --scope . init -- -y --agent cursor` 只写 `.agents/skills/<name>/`。`edges --scope . init -- -y --agent claude-code` 只写 `.claude/skills/<name>/`（实体拷贝）。`--agent` 选择哪一家的目录；项目内还是用户目录由有没有 `-g` 决定。
-- 只要本机用户目录、不进仓库时，显式加 `-g`：`edges --scope . init -- -g -y`。`--agent cursor` 写到 `~/.agents/skills`；`--agent claude-code` 写到 `$CLAUDE_CONFIG_DIR/skills`，没设这个变量则是 `~/.claude/skills`。这份不在仓库里，别的机器和云端 Agent 看不见。
+- `--` 后面的旗标原样交给 `skills@1.7.2`。默认不带 `-g`，技能写进当前项目。`-g` 是显式的本机用户目录：`edges --scope . init -- -g -y`。`-y` 跳过确认。没有 TTY、又没探测到 agent 时，不带 `-y` 会退出 1。
+- 只给某一个 agent 装：`edges --scope . init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。
 - 只想建目录结构、不装 skill：`edges --scope . init notes tasks`（列出要的模块，可选 `memory`、`skills`、`tasks`、`notes`、`projects`、`routines`）。
 - 为已有主题 Project 采用材料模块时用 `edges --scope . --project <Project相对路径> init notes tasks`。模块直接放在 P 下并登记到 `P/INDEX.md`；不会为 P 创建独立 AGENTS 或 `.edges`。Project 必须已存在，不把 P 当作新 scope，也不为完成一次存储擅自初始化。init 不读取 `--super`。
 
@@ -214,6 +209,6 @@ edges --scope <目录> compose update
 | 写命令报 busy / 锁冲突 | 同一 worktree 里另一个 edges 写命令正在运行（锁目录 `.edges-write.lock/`） | 等它结束再重试；不要手动删除正在使用的锁。 |
 | `--all is only supported by read commands.` | 在写命令上用了 `--all` | `--all` 只配 `list` 这类只读命令。 |
 | `schema` 命令说缺少构建产物 | 源码方式没 build | `pnpm --filter @viruspc/edges build`，或改用 npm 安装的版本。 |
-| 装了 skill 但 agent 找不到 | 装到了用户目录或别的 agent 目录，或改了 skill 没重装 | 重跑 `edges --scope <目录> skills init -- -y`。要钉死目录再加 `--agent cursor`（项目内 `.agents/skills`）或 `--agent claude-code`（项目内 `.claude/skills`）。只要本机用户目录才加 `-g`。不要用不带版本号的 `npx skills`。 |
+| 装了 skill 但 agent 找不到 | 装到了别的 agent 目录，或改了 skill 没重装 | 重跑 `edges --scope <目录> skills init -- -y`（或 `--agent <名字>`；只要本机用户目录再加 `-g`）。不要用不带版本号的 `npx skills`。 |
 
 仍无法解决：把命令、stdout JSON、stderr（**先删掉任何 token 或 URL 里的密钥**）、`edges --version`、`node -v` 交给用户，建议到 https://github.com/VirusPC/edges/issues 反馈。

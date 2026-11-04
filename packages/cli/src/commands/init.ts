@@ -18,9 +18,7 @@ const AFTER_HELP = `
 This command does not read --super. Materials land under <scope>/.edges, or directly under the selected --project.
 Project initialization registers materials on INDEX.md without creating AGENTS.md.
 Tokens after -- are forwarded only to the bundled skills install step.
-Default installs into the current project. -g is the explicit home-directory install.
-  edges init -- -y
-  edges init -- -g -y
+  edges init -- -y --agent '*'
 
 CREATED WHEN NO MODULE IS GIVEN
   AGENTS.md

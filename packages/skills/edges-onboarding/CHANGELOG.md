@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **默认把 skill 装进当前项目。** 初始化示例从 `edges --scope . init -- -g -y` 改为 `edges --scope . init -- -y`。`-g` 仍是显式选项，只写本机用户目录，不进仓库。按 `skills@1.7.2` 写明不加 `-g`、以及 `--agent cursor` / `--agent claude-code` 的落点。云端 Agent 和多机优先用项目内这份，并提交装出来的文件。
+- **默认把 skill 装进当前项目。** 示例改为 `edges --scope . init -- -y`。`-g` 仍可用于本机用户目录。
 
 ## [0.4.1] - 2026-11-03
 

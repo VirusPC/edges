@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 初始化
 
 - **无参 `edges init` 同时创建任务看板。** 不指定模块时，默认集是 memory、skills、tasks、notes、projects，会写出 `<scope>/.edges/tasks/README.md`，并登记到 `AGENTS.md` 指向的材料索引。`edges tasks init` 与 `edges init tasks` 仍只建这一块看板。routines 仍不在默认集里，要单独 `edges routines init`。
-- **接入时 skill 默认装进当前项目。** 推荐命令改为 `edges --scope . init -- -y` 和 `edges skills init -- -y`。`--` 后面仍原样交给 `skills@1.7.2`，安装器本身不改。不加 `-g` 时写当前目录：Cursor 云端（设了 `CURSOR_AGENT`）落在 `.agents/skills/<name>/`；`--agent claude-code` 落在 `.claude/skills/<name>/`。`-g` 仍可用，只写本机用户目录（Cursor 是 `~/.agents/skills`，Claude Code 是 `$CLAUDE_CONFIG_DIR/skills` 或 `~/.claude/skills`），不进仓库。云端 Agent 和只 clone 仓库的机器读项目内这份。以前的文档把 `edges init -- -g -y` 写成非交互默认。
+- **接入时 skill 默认装进当前项目。** 推荐 `edges --scope . init -- -y`。`-g` 仍可用于本机用户目录。
 
 ### 随包技能
 

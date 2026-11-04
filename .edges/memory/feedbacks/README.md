@@ -63,5 +63,4 @@ format: ordinary
 - [改 skill 后必须升级 version、写 changelog、打 tag](<feedback_skill_bump_version/INDEX.md>) — 更新 skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/\<name\>@\<version\> tag。
 - [根 changelog 从用户视角写](<feedback_changelog_user_perspective/INDEX.md>) — 写或切根 CHANGELOG 时打开：从用户能做什么、和以前差在哪来说；扫一眼 \#\#\# 与每条小标题要能列出关键模块变化；不要写 systemd unit/unit 等运维黑话，目录布局不要摊对照表。缘起 2026\-10\-25 审 \#41。
 - [框架维护项目归入 .edges/projects](<feedback_maintenance_projects_in_harness/INDEX.md>) — 创建框架维护 Project 时归入 .edges/projects；scope 选择维护对象，各模块统一默认与 \-\-super 定位，0.4.1 的 scope/.edges 仅是临时绕过。
-- [skill 默认装进当前项目](<feedback_skill_install_defaults_to_project/INDEX.md>) — 写 onboarding、init 示例或代用户装 skill 时打开：默认 edges init \-\- \-y 装进当前项目；\-g 只在明确只要本机用户目录时使用。
 <!-- edges-entries-local:end -->
