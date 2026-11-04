@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-04
+
+### Changed
+
+- **默认把 skill 装进当前项目。** 示例改为 `edges --scope . init -- -y`。`-g` 仍可用于本机用户目录。
+
 ## [0.4.1] - 2026-11-03
 
 ### Changed

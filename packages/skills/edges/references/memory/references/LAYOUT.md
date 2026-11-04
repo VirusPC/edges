@@ -55,10 +55,10 @@ edges --scope S --project P/projects/Q skills init -- -y
 ## 选择式初始化
 
 ```bash
-edges --scope S init -- -g -y
+edges --scope S init -- -y
 edges --scope S memory init --root-dir R \
   --memory-types project feedback reference user
-edges --scope S skills init --skill-types managed referenced -- -g -y
+edges --scope S skills init --skill-types managed referenced -- -y
 edges --scope S tasks init
 ```
 

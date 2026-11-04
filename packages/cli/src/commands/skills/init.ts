@@ -6,7 +6,8 @@ import { fail, succeed } from "../result.js";
 const HELP = "See edges skills init --help for usage.\n";
 const AFTER_HELP = `
 Tokens after -- are forwarded to skills add.
-  edges skills init -- -g -y --agent claude-code
+  edges skills init -- -y
+  edges skills init -- -g -y
 `;
 
 export function addSkillInitCommand(skills: Command, ctx: CliContext): void {

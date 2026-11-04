@@ -43,15 +43,15 @@ git tag -l 'skill/edges@*'
 
 Skill 的材料归属与 Agent 安装位置是两件事。`edges --scope <目录> --project <相对路径> skills ...` 选择已有 Project 的直属 `skills/`，并保留原 scope；材料索引登记在 P 的 INDEX，不把 P 当成新 scope。Agent 安装仍由下面的安装器及其参数决定，选择 Project 不代表给主题另装一套 Agent。
 
-外部用户先 `npm install -g @viruspc/edges`（Node.js 22.20 及以上），再执行 `edges skills init` 或无参 `edges init`。命令会建 skill 类型索引，并把包内 skill 交给固定的 `skills@1.7.2`：`skills add <包内 skills 目录的绝对路径> --skill '*'`。要传给安装器的旗标写在 `--` 后面。没有 TTY、又没探测到 agent 时，不带这些旗标会退出 1。非交互且仍让安装器自动探测 agent 时用 `-g -y`：
+外部用户先 `npm install -g @viruspc/edges`（Node.js 22.20 及以上），再执行 `edges skills init` 或无参 `edges init`。命令会建 skill 类型索引，并把包内 skill 交给固定的 `skills@1.7.2`：`skills add <包内 skills 目录的绝对路径> --skill '*'`。要传给安装器的旗标写在 `--` 后面。没有 TTY、又没探测到 agent 时，不带 `-y` 会退出 1。默认装进当前项目：
 
 ```bash
+edges init -- -y
+edges skills init -- -y
 edges init -- -g -y
-edges skills init -- -g -y
-edges init -- -y --agent claude-code
 ```
 
-`-g` 装到用户目录（Claude Code 是 `$CLAUDE_CONFIG_DIR/skills`，否则 `~/.claude/skills`）。不加 `-g` 时写当前项目的 agent 目录，例如 `.claude/skills`。探测到当前 agent 时，`skills@1.7.2` 只装给那一个；没探测到且本机没有已安装 agent 时，`-y` 会装给它支持的全部 agent。edges 不另选 agent，也不对用户开放 `--skill`。安装器的 stdout / stderr 原样出现在终端里。它非零退出时，init 以同一退出码失败，信封 `errorCode` 为 `SKILLS_INSTALL_FAILED`。
+不加 `-g` 写当前项目的 agent 目录，例如 `.claude/skills`。`-g` 才装到用户目录（Claude Code 是 `$CLAUDE_CONFIG_DIR/skills`，否则 `~/.claude/skills`）。探测到当前 agent 时，`skills@1.7.2` 只装给那一个；没探测到且本机没有已安装 agent 时，`-y` 会装给它支持的全部 agent。edges 不另选 agent，也不对用户开放 `--skill`。安装器的 stdout / stderr 原样出现在终端里。它非零退出时，init 以同一退出码失败，信封 `errorCode` 为 `SKILLS_INSTALL_FAILED`。
 
 不要再让外部用户执行 `npx skills add VirusPC/edges/skills`，也不要写不带版本的 `npx skills` 或 `npx skills@latest`。不带版本时，npm 可能把命令名解析到已废弃的 `add-skill` 老包。CLI 把 `skills@1.7.2` 锁在自己的依赖里。
 

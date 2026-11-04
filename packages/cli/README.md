@@ -230,12 +230,13 @@ review-page 只把 groups/items JSON 渲染成 HTML，不改任务、不打开�
 Project Memory 的执行能力由 TS CLI 提供，Skill 负责工作流和调用规范。
 
 ```bash
-edges --scope /absolute/project init -- -g -y
+edges --scope /absolute/project init -- -y
 edges --scope /absolute/project init notes
 edges --scope /absolute/project notes init
 edges --scope /absolute/project memory init --memory-types project feedback
 edges --scope /absolute/project skills init --skill-types managed referenced
-edges --scope /absolute/project skills init -- -g -y --agent claude-code
+edges --scope /absolute/project skills init -- -y
+edges --scope /absolute/project init -- -g -y
 edges --scope /absolute/project init -- -y --agent '*'
 edges --scope /absolute/project tasks init
 edges --scope /absolute/project memory remember --type project --slug decision \
@@ -246,7 +247,7 @@ edges memory backup --repo-dir /absolute/project
 edges memory restore --repo-dir /absolute/project --archive /private/archive.tar.gz
 ```
 
-新作用域的 `edges memory init` 未选择类型时只返回推荐项，不创建 notes、projects、skills 或 tasks 的材料。无参 `edges init` 的默认集包含 skills。`edges skills init` 既写 skill 类型索引，也把包内 skill 装给本机 agent：安装步骤是固定的 `skills@1.7.2`，只额外传入包内 skills 目录和 `--skill '*'`，`--` 之后的 token 原样转交。`skills@1.7.2` 在探测到自己跑在 agent 里时会非交互，并只装给那个 agent；没有探测到、stdin 又不是 TTY 时，不带 `-y` 会退出 1。非交互且保留自动探测时用 `edges init -- -g -y`（`-g` 装到用户目录，`-y` 跳过确认；本机没有已安装 agent 时它会装给全部 agent）。指定某一个则用 `edges init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。`--` 只在 `init` 和 `skills init` 上切开；其他命令把 `--` 和后面的 token 原样交给 commander。解析后的模块集合里没有 skills 时，这次 init 不会装，stderr 会列出被忽略的 token。memory 还在等类型选择、因而提前返回时，不因为没装 skills 而报这句。安装失败时进程退出码就是安装器的退出码，stdout 信封是 `{ status: "failed", errorCode: "SKILLS_INSTALL_FAILED", reason, created }`。`created` 是失败前已经写好的相对路径。`errorCode` 与 `VALIDATION_ERROR` 不同；不要用退出码是不是 2 来判断是不是校验错误，安装器自己也可能退出 2。校验错误仍然是退出码 2、`errorCode` 为 `VALIDATION_ERROR`。`edges tasks init` 只写任务看板。remember 不初始化缺失作用域；doctor 默认只诊断。0.3.0 起没有 `edges memory migrate`。旧 `.memory` 会让 `edges init` 失败并返回 `migration-required`；先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。新建子作用域按路径登记到父级：`AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已经登记的保持原组。`edges memory doctor --apply` 按同一规则补上缺失的父级链接。
+新作用域的 `edges memory init` 未选择类型时只返回推荐项，不创建 notes、projects、skills 或 tasks 的材料。无参 `edges init` 的默认集包含 skills。`edges skills init` 既写 skill 类型索引，也把包内 skill 装进当前项目：安装步骤是固定的 `skills@1.7.2`，只额外传入包内 skills 目录和 `--skill '*'`，`--` 之后的 token 原样转交。`skills@1.7.2` 在探测到自己跑在 agent 里时会非交互，并只装给那个 agent；没有探测到、stdin 又不是 TTY 时，不带 `-y` 会退出 1。非交互且保留自动探测时用 `edges init -- -y`（当前项目；`-g` 才装到用户目录，`-y` 跳过确认；本机没有已安装 agent 时它会装给全部 agent）。指定某一个则用 `edges init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。`--` 只在 `init` 和 `skills init` 上切开；其他命令把 `--` 和后面的 token 原样交给 commander。解析后的模块集合里没有 skills 时，这次 init 不会装，stderr 会列出被忽略的 token。memory 还在等类型选择、因而提前返回时，不因为没装 skills 而报这句。安装失败时进程退出码就是安装器的退出码，stdout 信封是 `{ status: "failed", errorCode: "SKILLS_INSTALL_FAILED", reason, created }`。`created` 是失败前已经写好的相对路径。`errorCode` 与 `VALIDATION_ERROR` 不同；不要用退出码是不是 2 来判断是不是校验错误，安装器自己也可能退出 2。校验错误仍然是退出码 2、`errorCode` 为 `VALIDATION_ERROR`。`edges tasks init` 只写任务看板。remember 不初始化缺失作用域；doctor 默认只诊断。0.3.0 起没有 `edges memory migrate`。旧 `.memory` 会让 `edges init` 失败并返回 `migration-required`；先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。新建子作用域按路径登记到父级：`AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已经登记的保持原组。`edges memory doctor --apply` 按同一规则补上缺失的父级链接。
 
 `edges notes init` 与 `edges projects init` 只创建真实 scope 下的 `.edges/notes/README.md`、`.edges/projects/README.md`，作为接收叶子的组织清单，并登记到 `.edges/README.md`。它们不再同时创建根目录的 `notes/README.md`、`projects/README.md` 与不接收叶子的占位文件。和其他模块一样，init 不读取 `--super`；使用 `--super` 创建叶子时，会按需补齐 scope 直属的模块 README。
 

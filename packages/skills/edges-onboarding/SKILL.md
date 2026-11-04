@@ -1,7 +1,7 @@
 ---
 name: edges-onboarding
 description: 帮用户第一次接入 Edges 时使用：安装 edges CLI（npm 包 @viruspc/edges）、初始化目录、跑一次验证、学会常用命令、排查安装与鉴权报错。用户说「帮我接入 edges」「安装 edges」「edges 怎么用」「edges 报错了」「给我的仓库配一套 edges」时触发。已经装好、只是要写笔记请改用 edges；整理对话改用 edges-conversation-to-notes；项目记忆的检索与沉淀改用 edges-memory-ask / edges-memory-remember，初始化系统入口改用 edges。本 skill 只做入口与引导，具体操作一律交给 edges CLI 执行。
-version: 0.4.1
+version: 0.5.0
 ---
 
 # edges onboarding
@@ -84,11 +84,11 @@ Edges 把任意目录当成一个「作用域」。先选定作用域，再初�
 
 ```bash
 cd <用户的仓库>
-edges --scope . init -- -g -y
+edges --scope . init -- -y
 ```
 
-- 无参 `init` 默认写入：`AGENTS.md`、memory 类型 `feedback` / `project` / `reference`、skills 类型索引（managed、referenced），并把包内 Edges skills 装给本机 agent；还有 tasks、notes、projects 的组织列表。任务看板在 `.edges/tasks`，登记在 `AGENTS.md` 指向的材料索引上。只建这一块看板仍用 `edges --scope . tasks init`。routines 不在默认集里。
-- `--` 后面的旗标原样交给 `skills@1.7.2` 安装器：`-g` 装到用户目录，`-y` 跳过确认。没有 TTY、又没探测到 agent 时，不带 `-y` 会退出 1。
+- 无参 `init` 默认写入：`AGENTS.md`、memory 类型 `feedback` / `project` / `reference`、skills 类型索引（managed、referenced），并把包内 Edges skills 装进当前项目；还有 tasks、notes、projects 的组织列表。任务看板在 `.edges/tasks`，登记在 `AGENTS.md` 指向的材料索引上。只建这一块看板仍用 `edges --scope . tasks init`。routines 不在默认集里。
+- `--` 后面的旗标原样交给 `skills@1.7.2`。默认不带 `-g`，技能写进当前项目。`-g` 是显式的本机用户目录：`edges --scope . init -- -g -y`。`-y` 跳过确认。没有 TTY、又没探测到 agent 时，不带 `-y` 会退出 1。
 - 只给某一个 agent 装：`edges --scope . init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。
 - 只想建目录结构、不装 skill：`edges --scope . init notes tasks`（列出要的模块，可选 `memory`、`skills`、`tasks`、`notes`、`projects`、`routines`）。
 - 为已有主题 Project 采用材料模块时用 `edges --scope . --project <Project相对路径> init notes tasks`。模块直接放在 P 下并登记到 `P/INDEX.md`；不会为 P 创建独立 AGENTS 或 `.edges`。Project 必须已存在，不把 P 当作新 scope，也不为完成一次存储擅自初始化。init 不读取 `--super`。
@@ -209,6 +209,6 @@ edges --scope <目录> compose update
 | 写命令报 busy / 锁冲突 | 同一 worktree 里另一个 edges 写命令正在运行（锁目录 `.edges-write.lock/`） | 等它结束再重试；不要手动删除正在使用的锁。 |
 | `--all is only supported by read commands.` | 在写命令上用了 `--all` | `--all` 只配 `list` 这类只读命令。 |
 | `schema` 命令说缺少构建产物 | 源码方式没 build | `pnpm --filter @viruspc/edges build`，或改用 npm 安装的版本。 |
-| 装了 skill 但 agent 找不到 | 装到了别的 agent 目录，或改了 skill 没重装 | 重跑 `edges --scope <目录> skills init -- -g -y`（或 `--agent <名字>`）。不要用不带版本号的 `npx skills`。 |
+| 装了 skill 但 agent 找不到 | 装到了别的 agent 目录，或改了 skill 没重装 | 重跑 `edges --scope <目录> skills init -- -y`（或 `--agent <名字>`；只要本机用户目录再加 `-g`）。不要用不带版本号的 `npx skills`。 |
 
 仍无法解决：把命令、stdout JSON、stderr（**先删掉任何 token 或 URL 里的密钥**）、`edges --version`、`node -v` 交给用户，建议到 https://github.com/VirusPC/edges/issues 反馈。

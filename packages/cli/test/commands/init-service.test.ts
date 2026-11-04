@@ -58,6 +58,14 @@ test("edges init --help lists tasks with modules this command creates and keeps 
   assert.doesNotMatch(rest, /adopts skill types/);
 });
 
+test("edges skills init --help recommends a project install and keeps -g explicit", async () => {
+  const help = await run(["skills", "init", "--help"], { env: {} });
+  assert.equal(help.exitCode, 0, help.stdout + help.stderr);
+  const forwarded = [...help.stdout.matchAll(/^  edges skills init -- .+$/gm)].map((match) => match[0].trim());
+  assert.equal(forwarded[0], "edges skills init -- -y");
+  assert.equal(forwarded.includes("edges skills init -- -g -y"), true);
+});
+
 test("edges init on an empty scope writes AGENTS, public memory types, and harness boards", async (t) => {
   const root = await scope(t);
   const result = await run(["--scope", root, "init"], { env: {} });

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-04
+
+### Changed
+
+- **初始化示例改为当前项目。** 含 skills 的 init 用 `-- -y`。`-g` 仍可用于本机用户目录。
+
 ## [0.3.0] - 2026-11-02
 
 ### Changed
