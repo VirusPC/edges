@@ -36,4 +36,5 @@
 - [github\_artifacts\_preview](<backlog/2026-10-19--Github-Artifacts-Preview/INDEX.md>) — 用 GitHub Pages 提供常开预览 URL，替代依赖自建服务端的 Artifacts Publish；浏览器看页，Grok 里继续决策。候选含 CF Pages 直传与 Tunnel+Nginx。
 - [edges\_new\_user\_onboarding\_validation](<backlog/2026-10-27--%E9%AA%8C%E8%AF%81-Edges-%E6%96%B0%E7%94%A8%E6%88%B7%E6%8E%A5%E5%85%A5%E4%B8%8E%E9%A6%96%E6%AC%A1%E4%BD%BF%E7%94%A8/INDEX.md>) — 从外部用户起点验证安装、Skill 发现和首次真实任务，检查梳理后的接入流程是否可用。
 - [edges connector：自建远程 MCP 让各聊天窗口读写 edges](<backlog/2026-10-14--edges-connector%E8%87%AA%E5%BB%BA%E8%BF%9C%E7%A8%8B-MCP-%E8%AE%A9%E5%90%84%E8%81%8A%E5%A4%A9%E7%AA%97%E5%8F%A3%E8%AF%BB%E5%86%99-edges/INDEX.md>) — 自建远程 MCP 服务，让各聊天窗口和编程 Agent 以最低成本查询并写入 edges
+- [个人大脑跨客户端与工作空间接入指南](<backlog/2026-11-08--%E4%B8%AA%E4%BA%BA%E5%A4%A7%E8%84%91%E8%B7%A8%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8E%E5%B7%A5%E4%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A5%E5%85%A5%E6%8C%87%E5%8D%97/INDEX.md>) — 补齐把已有个人大脑接到各 Agent 客户端/工作空间并跨空间复用的 onboarding 指南与核验契约；首期重点 Codex 与 Grok Bot。
 <!-- edges-entries-local:end -->
