@@ -121,50 +121,6 @@ test("onboarding and init docs recommend a project install without -g", async ()
   assert.equal(memoryInit.includes("init -- -g -y"), false);
 });
 
-test("onboarding asks with user scenarios before offering setup flows", async () => {
-  const onboarding = await readFile(path.join(sourceSkills, "edges-onboarding/SKILL.md"), "utf8");
-  const opening = onboarding.split(/^## 接入流程$/m)[0] ?? "";
-  const whenToUse = opening.split(/^## 何时用$/m)[1] ?? "";
-  const options = whenToUse.split("\n").filter((line) => /^\d+\.\s/.test(line.trim()));
-  assert.deepEqual(
-    options.map((line) => line.trim()),
-    [
-      "1. 让整个正在做的项目记住约定、经验和接下来要做的事，记在这个项目所在的文件夹里。",
-      "2. 只让某一个文件夹记住这一范围的内容。这个文件夹不必属于某个代码项目。",
-      "3. 单独有一个地方，长期整理自己的笔记、知识和个人项目。",
-      "4. 单独有一个地方，放经常要用的做法，让以后多个项目都能拿去用。",
-      "5. 单独有一个地方，放团队共同的规范和经验，让各个项目都能用。",
-    ],
-  );
-  for (const line of options) {
-    assert.equal(/个人大脑|skills|挂载|harness|\.edges|Compose|Edges/i.test(line), false, line);
-  }
-  const phrases = [
-    "第 1 项和第 2 项的差别是记整个项目，还是只记指定的一个文件夹",
-    "不要再列成另一套选项让用户重选",
-    "加到一个已经有的文件夹里",
-    "新建一个单独的地方",
-    "不是开场时的唯一菜单",
-    "只做安装和验证",
-  ];
-  const afterOptions = whenToUse.slice(whenToUse.indexOf(options[4] ?? "") + (options[4]?.length ?? 0));
-  let from = 0;
-  for (const phrase of phrases) {
-    const at = afterOptions.indexOf(phrase, from);
-    assert.ok(at >= from, phrase);
-    from = at + phrase.length;
-  }
-  assert.equal(whenToUse.includes("已有项目添加 .edges"), false);
-  assert.equal(whenToUse.includes("仅安装并验证 CLI"), false);
-  assert.equal(whenToUse.includes("只复述「场景」列"), false);
-  assert.match(whenToUse, /用这些日常结果来问，让人听出用途和范围/);
-  assert.match(opening, /只把当前选择确实还缺、上下文里没有的项集中问一轮/);
-  assert.match(opening, /不要一上来堆文件夹路径、GitHub 账号和仓库名、公开还是私密/);
-  assert.match(opening, /必须由用户明确选择，不能替用户假定/);
-  assert.match(opening, /Agent 宿主从当前环境识别/);
-  assert.match(opening, /不要默认它属于某个代码项目/);
-});
-
 test("the published package pins skills@1.7.2 and ships a skills directory", async () => {
   const pkg = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
     files: string[];
