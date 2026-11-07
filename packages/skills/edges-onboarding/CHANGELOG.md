@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- 保持三个主章节，在接入流程内补回环境检查、内容与凭证保护边界、GitHub 用户授权和精简排错；验证仍留在各流程，不恢复常用操作百科。
 - 接入前按流程集中收集必要信息，沿用上下文中的已有选择；仅本地接入跳过 GitHub 信息，授权后连续执行，遇到新冲突再询问。
 - 用户场景映射到两种流程：已有项目添加 edges harness 目录、创建独立 edges harness 仓库。精简文档，按流程组织操作步骤。
 - 独立 harness 完整接入包含 GitHub 建仓、首次提交推送与远程读回验证，同时支持用户明确选择仅本地。显式区分 private/public 的内容边界与挂载权限，未指定可见性时先询问。
