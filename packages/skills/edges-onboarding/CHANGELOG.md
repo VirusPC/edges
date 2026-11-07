@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-11-08
+
+### Changed
+
+- 「何时用」与开场选项补两条 tasks 场景：给项目或子目录创建日常任务看板，跟踪待办与进度（已有项目添加 edges harness 目录）；给自己一个记录 idea 和待办、并追踪进展的地方（创建独立 edges harness 仓库）。
+- 开场场景由五项改为七项；流程兜底仍为最后两项。
+
 ## [0.6.2] - 2026-11-07
 
 ### Changed
