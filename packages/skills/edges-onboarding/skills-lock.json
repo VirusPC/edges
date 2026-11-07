@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "skills": {
+    "edges": {
+      "source": "..",
+      "sourceType": "local",
+      "computedHash": "193f824be9504b8bf655734dac183697dab335a530c8d9642f0de187c0578e74"
+    },
+    "edges-conversation-to-notes": {
+      "source": "..",
+      "sourceType": "local",
+      "computedHash": "c0ca4139df86cf68202ffd5b289b406ce28cc615a9c80d2de232e895dd477b75"
+    },
+    "edges-conversation-to-tasks": {
+      "source": "..",
+      "sourceType": "local",
+      "computedHash": "a6cf13230d09e766877e1619f0e426b695995a769f1068dc74ba792c1a78377d"
+    },
+    "edges-langfuse-agent-tracing": {
+      "source": "..",
+      "sourceType": "local",
+      "computedHash": "101f2b9fc648a1a32c37dd35be292b2a135790cbfe82f0e7787dbcaf010f0b1d"
+    },
+    "edges-memory-add-type": {
+      "source": "..",
+      "sourceType": "local",
+      "computedHash": "33b82f1b1f038c0be63fc6451f3ac04bf719b867721b8f95682ad47ace5b78c4"
+    },
+    "edges-memory-ask": {
+      "source": "..",
+      "sourceType": "local",
+      "computedHash": "65c2a49dbfd0e1ea09b7943f55e3d3144b6a089a13ad598d8a4442af08666acf"
+    },
+    "edges-memory-remember": {
+      "source": "..",
+      "sourceType": "local",
+      "computedHash": "2067722d7ad9009e45da775a902f4f07641e43c56d46b98497fbbc50fa52da54"
+    },
+    "edges-onboarding": {
+      "source": "..",
+      "sourceType": "local",
+      "computedHash": "eacd389bc2f5c03a6b74b0f3e7971b9b8c57ff646b2a4c8bc1fadf132bea75ed"
+    },
+    "edges-tasks-classify": {
+      "source": "..",
+      "sourceType": "local",
+      "computedHash": "03edffc81fb25963adbffe21f1aaf7936f21d12ccf90e8627edf25bd3b880f14"
+    }
+  }
+}

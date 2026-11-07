@@ -41,5 +41,6 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 - [evaluation](<packages/evaluation/AGENTS.md>) — evaluation 目录的项目记忆与规范入口。
 - [observation](<packages/observation/AGENTS.md>) — observation 目录的项目记忆与规范入口。
 
+- [packages/skills/edges\-onboarding/AGENTS.md](<packages/skills/edges-onboarding/AGENTS.md>) — edges\-onboarding 目录的项目记忆与规范入口。
 <!-- edges-descendants:end -->
 <!-- edges:end -->
