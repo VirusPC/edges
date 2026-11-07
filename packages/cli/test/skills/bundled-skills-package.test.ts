@@ -119,6 +119,23 @@ test("onboarding and init docs recommend a project install without -g", async ()
   const memoryInit = await readFile(path.join(sourceSkills, "edges/references/memory-init.md"), "utf8");
   assert.match(memoryInit, /edges --scope <目录> init -- -y\n/);
   assert.equal(memoryInit.includes("init -- -g -y"), false);
+  assert.match(
+    onboarding,
+    /\| 给某个目录，例如为 monorepo 中的某个子包单独积累上下文 \| 已有项目添加 edges harness 目录 \|/,
+  );
+  assert.equal(onboarding.includes("为 monorepo 中的某个模块单独积累上下文"), false);
+  const whenToUse = sectionAfter(onboarding, "## 何时用");
+  const ask = sectionAfter(onboarding, "## 开始前提问");
+  assert.match(whenToUse, /根据用户想做的事对照下表/);
+  assert.equal(whenToUse.includes("开场的唯一菜单"), false);
+  assert.match(ask, /第一步：问场景（含流程兜底）/);
+  assert.match(ask, /不要把这两条流程当成开场的唯一菜单/);
+  assert.match(ask, /第二步：补参数/);
+  assert.match(ask, /创建个人大脑，长期保存笔记、知识与个人项目/);
+  assert.match(ask, /6\. 已有项目添加 edges harness 目录/);
+  assert.match(ask, /7\. 创建独立 edges harness 仓库/);
+  assert.match(ask, /\| 已有项目添加 edges harness 目录 \| 目标目录 \|/);
+  assert.equal(ask.includes("整个项目还是某个模块"), false);
 });
 
 test("the published package pins skills@1.7.2 and ships a skills directory", async () => {
