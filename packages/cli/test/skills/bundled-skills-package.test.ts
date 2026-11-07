@@ -121,6 +121,36 @@ test("onboarding and init docs recommend a project install without -g", async ()
   assert.equal(memoryInit.includes("init -- -g -y"), false);
 });
 
+test("onboarding asks with user scenarios before offering setup flows", async () => {
+  const onboarding = await readFile(path.join(sourceSkills, "edges-onboarding/SKILL.md"), "utf8");
+  const opening = onboarding.split(/^## 接入流程$/m)[0] ?? "";
+  const whenToUse = opening.split(/^## 何时用$/m)[1] ?? "";
+  const phrases = [
+    "维护整个现有项目",
+    "维护某个目录或模块",
+    "这个目录不一定是代码项目的一部分",
+    "个人大脑",
+    "方法和 skills",
+    "团队共享的规范和经验",
+    "在已有位置添加",
+    "新建一个独立仓库",
+    "不是开场时的唯一菜单",
+    "只安装 CLI",
+  ];
+  let from = 0;
+  for (const phrase of phrases) {
+    const at = whenToUse.indexOf(phrase, from);
+    assert.ok(at >= from, phrase);
+    from = at + phrase.length;
+  }
+  assert.equal(whenToUse.includes("已有项目添加 .edges"), false);
+  assert.equal(whenToUse.includes("仅安装并验证 CLI"), false);
+  assert.match(whenToUse, /向用户只复述「场景」列/);
+  assert.match(opening, /只把缺失项集中问一轮/);
+  assert.match(opening, /Agent 宿主从当前环境识别/);
+  assert.match(opening, /不要默认它属于某个代码项目/);
+});
+
 test("the published package pins skills@1.7.2 and ships a skills directory", async () => {
   const pkg = JSON.parse(await readFile(packageJsonPath, "utf8")) as {
     files: string[];
