@@ -4,9 +4,11 @@ description: 设计 onboarding 提问时：Agent 宿主从当前会话和环境�
 metadata:
   edges-title: 接入时从环境识别 Agent 宿主
   edges-type: feedback
-  edges-username: viruspc
-  edges-email: cheng.peng.helloworld@gmail.com
-  edges-updated-at: '2026-11-07T20:16:58+08:00'
+  edges-origin-session-id: bc-2f53ec8a-a076-5cff-b804-c01179d4f837
+  edges-agent-client: cursor
+  edges-username: Cursor Agent
+  edges-email: cursoragent@cursor.com
+  edges-updated-at: '2026-11-07T15:03:00+00:00'
 ---
 
 用户确认，onboarding 不应要求用户重复确认当前使用的 Agent 宿主。

@@ -8,5 +8,6 @@
 <!-- edges-entries-local:start -->
 ## 本层内容
 
-- 暂无条目。
+- [接入时从环境识别 Agent 宿主](<feedback_onboarding_detect_agent_host/INDEX.md>) — 设计 onboarding 提问时：Agent 宿主从当前会话和环境识别，不列为必答项；只在无法判断且影响入口配置时询问。
+- [开场用新用户能回答的日常结果](<feedback_onboarding_two_scenarios/INDEX.md>) — 设计 onboarding 开场时：按还不了解系统的人来写；每条用日常结果说明用途和范围；整个项目和某一个文件夹必须分开；流程只作兜底；路径和公开范围只在当前选择需要且上下文没有时再问。
 <!-- edges-entries-local:end -->
