@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - 「何时用」中，目录场景写为：给某个目录，例如为 monorepo 中的某个子包单独积累上下文。仍使用已有项目添加 edges harness 目录。
+- 开场优先问用户场景。已有项目添加 edges harness 目录、创建独立 edges harness 仓库两条流程只作兜底，不当开场唯一菜单。上下文明确就沿用，缺了再问一轮。
 
 ## [0.6.1] - 2026-11-07
 

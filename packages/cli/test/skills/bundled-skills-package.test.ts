@@ -124,6 +124,14 @@ test("onboarding and init docs recommend a project install without -g", async ()
     /\| 给某个目录，例如为 monorepo 中的某个子包单独积累上下文 \| 已有项目添加 edges harness 目录 \|/,
   );
   assert.equal(onboarding.includes("为 monorepo 中的某个模块单独积累上下文"), false);
+  const whenToUse = sectionAfter(onboarding, "## 何时用");
+  const ask = sectionAfter(onboarding, "## 开始前提问");
+  assert.match(whenToUse, /问的是下表左列的场景/);
+  assert.match(whenToUse, /不要当成开场的唯一菜单/);
+  assert.match(ask, /不是开场菜单/);
+  const scenarioAt = whenToUse.indexOf("给正在开发的项目保存约定");
+  const fallbackAt = whenToUse.indexOf("不要当成开场的唯一菜单");
+  assert.ok(fallbackAt >= 0 && scenarioAt > fallbackAt);
 });
 
 test("the published package pins skills@1.7.2 and ships a skills directory", async () => {
