@@ -63,4 +63,6 @@ format: ordinary
 - [改 skill 后必须升级 version、写 changelog、打 tag](<feedback_skill_bump_version/INDEX.md>) — 更新 skills 下任何一个 skill 后，升 SKILL.md version，写 CHANGELOG.md，并打 skill/\<name\>@\<version\> tag。
 - [根 changelog 从用户视角写](<feedback_changelog_user_perspective/INDEX.md>) — 写或切根 CHANGELOG 时打开：从用户能做什么、和以前差在哪来说；扫一眼 \#\#\# 与每条小标题要能列出关键模块变化；不要写 systemd unit/unit 等运维黑话，目录布局不要摊对照表。缘起 2026\-10\-25 审 \#41。
 - [框架维护项目归入 .edges/projects](<feedback_maintenance_projects_in_harness/INDEX.md>) — 创建框架维护 Project 时归入 .edges/projects；scope 选择维护对象，各模块统一默认与 \-\-super 定位，0.4.1 的 scope/.edges 仅是临时绕过。
+- [接入时从环境识别 Agent 宿主](<feedback_onboarding_detect_agent_host/INDEX.md>) — 设计 onboarding 提问时：Agent 宿主从当前会话和环境识别，不列为必答项；只在无法判断且影响入口配置时询问。
+- [Onboarding 场景映射到两种接入流程](<feedback_onboarding_two_scenarios/INDEX.md>) — 设计 onboarding 时：何时用描述用户场景，多个场景可映射到同一流程；执行流程只分已有项目添加目录、创建独立仓库。
 <!-- edges-entries-local:end -->
