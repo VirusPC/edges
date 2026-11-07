@@ -64,5 +64,5 @@ format: ordinary
 - [根 changelog 从用户视角写](<feedback_changelog_user_perspective/INDEX.md>) — 写或切根 CHANGELOG 时打开：从用户能做什么、和以前差在哪来说；扫一眼 \#\#\# 与每条小标题要能列出关键模块变化；不要写 systemd unit/unit 等运维黑话，目录布局不要摊对照表。缘起 2026\-10\-25 审 \#41。
 - [框架维护项目归入 .edges/projects](<feedback_maintenance_projects_in_harness/INDEX.md>) — 创建框架维护 Project 时归入 .edges/projects；scope 选择维护对象，各模块统一默认与 \-\-super 定位，0.4.1 的 scope/.edges 仅是临时绕过。
 - [接入时从环境识别 Agent 宿主](<feedback_onboarding_detect_agent_host/INDEX.md>) — 设计 onboarding 提问时：Agent 宿主从当前会话和环境识别，不列为必答项；只在无法判断且影响入口配置时询问。
-- [开场先列用户场景，接入流程只作兜底](<feedback_onboarding_two_scenarios/INDEX.md>) — 设计 onboarding 开场时：选项先列用户场景，两条接入流程只作兜底；区分维护整个现有项目和维护某个目录或模块；上下文能确定就不问。
+- [开场选项同时写明用途和落点](<feedback_onboarding_two_scenarios/INDEX.md>) — 设计 onboarding 开场时：每条场景选项同时写明用途和落点；流程只作兜底；区分整个项目与某个目录；上下文能确定就不问。
 <!-- edges-entries-local:end -->

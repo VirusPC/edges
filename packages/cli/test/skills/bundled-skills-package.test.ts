@@ -126,12 +126,12 @@ test("onboarding asks with user scenarios before offering setup flows", async ()
   const opening = onboarding.split(/^## 接入流程$/m)[0] ?? "";
   const whenToUse = opening.split(/^## 何时用$/m)[1] ?? "";
   const phrases = [
-    "维护整个现有项目",
-    "维护某个目录或模块",
-    "这个目录不一定是代码项目的一部分",
-    "个人大脑",
-    "方法和 skills",
-    "团队共享的规范和经验",
+    "维护整个现有项目：在项目根目录接入，积累项目约定、经验和任务。",
+    "维护某个目录或模块：只在指定目录接入，保存这一范围的上下文。这个目录不一定属于代码项目。",
+    "建立个人大脑：新建独立仓库，长期保存笔记、知识和个人项目。",
+    "集中管理常用方法与 skills：独立维护，供多个项目挂载复用。",
+    "建立团队共享库：集中保存团队规范与经验，供各项目使用。",
+    "不要再列成另一套选项让用户重选",
     "在已有位置添加",
     "新建一个独立仓库",
     "不是开场时的唯一菜单",
@@ -145,7 +145,8 @@ test("onboarding asks with user scenarios before offering setup flows", async ()
   }
   assert.equal(whenToUse.includes("已有项目添加 .edges"), false);
   assert.equal(whenToUse.includes("仅安装并验证 CLI"), false);
-  assert.match(whenToUse, /向用户只复述「场景」列/);
+  assert.equal(whenToUse.includes("只复述「场景」列"), false);
+  assert.match(whenToUse, /带上用途和落点/);
   assert.match(opening, /只把缺失项集中问一轮/);
   assert.match(opening, /Agent 宿主从当前环境识别/);
   assert.match(opening, /不要默认它属于某个代码项目/);
