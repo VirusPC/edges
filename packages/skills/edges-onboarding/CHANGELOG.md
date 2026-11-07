@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-07
+
+### Fixed
+
+- 补发接入保障修订：保留紧凑结构，包含环境检查、内容与凭证保护、GitHub 用户授权和精简排错。既有 0.6.0 tag 保持不变。
+
 ## [0.6.0] - 2026-11-07
 
 ### Changed
