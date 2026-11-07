@@ -11,10 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### CLI 0.5.1
-
-- 随包发布 edges-onboarding 0.6.1：两种接入流程与必要环境检查、操作边界、用户授权及排错保障。CLI 实现不变。
-
 ### 初始化
 
 - **无参 `edges init` 同时创建任务看板。** 不指定模块时，默认集是 memory、skills、tasks、notes、projects，会写出 `<scope>/.edges/tasks/README.md`，并登记到 `AGENTS.md` 指向的材料索引。`edges tasks init` 与 `edges init tasks` 仍只建这一块看板。routines 仍不在默认集里，要单独 `edges routines init`。
@@ -22,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 随包技能
 
+- **接入按两条流程把 skill 装进当前项目。** `@viruspc/edges@0.5.2` 带上 `edges-onboarding` 0.6.1。已有项目用 `edges --scope <目标目录> init -- -y`，独立仓库用 `edges --scope <仓库目录> init -- -y`。默认不加 `-g`；只有明确要装到本机用户目录时才加。
 - **日常技能收成总入口 `edges`：** 随包装上的技能剩下 9 个。`edges` 负责挂仓库、写笔记、例程、初始化系统入口，以及用户记忆的备份和恢复。检索仍是 `edges-memory-ask`，沉淀仍是 `edges-memory-remember`。第一次接入、整理对话、整板任务归类（`edges-tasks-classify`）、把会话接到 Langfuse 仍是各自的技能。见 [ADR 0051](docs/adr/0051-bundled-skills-single-entry.md)。
 - **技能只认 `edges-*`：** 包内技能目录和名字改为 `edges-memory-*`、`edges-tasks-classify`、`edges-conversation-to-notes`、`edges-conversation-to-tasks`、`edges-langfuse-*-tracing`。每个改名技能的版本从 `0.1.0` 重新计数。已经叫 `edges-*` 的技能版本不动。旧名字不再识别。见 [ADR 0049](docs/adr/0049-edges-skills-markers-rename.md)。
 - **用户记忆归档改叫 `edges-memory-user-*`：** `edges memory backup` 与 `edges memory restore` 仍是命令。随包技能是 `edges-memory-user-backup` 与 `edges-memory-user-restore`，版本仍是 `0.1.0`。不再识别 `edges-user-memory-*` 或 `user-memory-*`，也不留别名。新的默认归档名是 `edges-memory-user-backup-<UTC时间戳>.tar.gz`。见 [ADR 0050](docs/adr/0050-memory-user-skills-and-drop-directory-migration-skill.md)。

@@ -4,9 +4,17 @@
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-07
+
+0.5.1 没有发布到 npm。annotated tag `@viruspc/edges@0.5.1` 仍指向原提交，本版不移动它。
+
 ### 初始化
 
 - **无参 `edges init` 同时创建任务看板。** 不指定模块时，默认集是 memory、skills、tasks、notes、projects，会写出 `<scope>/.edges/tasks/README.md`，并登记到 `AGENTS.md` 指向的材料索引。`edges tasks init` 与 `edges init tasks` 仍只建这一块看板。routines 仍不在默认集里，要单独 `edges routines init`。
+
+### 随包技能
+
+- **接入说明按两条流程把 skill 装进当前项目。** 包内 `edges-onboarding` 仍是 0.6.1。已有项目用 `edges --scope <目标目录> init -- -y`，独立仓库用 `edges --scope <仓库目录> init -- -y`。默认不加 `-g`；只有明确要装到本机用户目录时才加。
 
 ## [0.5.0] - 2026-11-02
 
