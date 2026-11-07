@@ -1,7 +1,7 @@
 ---
 name: edges-onboarding
 description: 帮用户维护整个现有项目、某个目录或模块，或新建个人大脑、可复用方法和团队规范库。先按场景补齐缺失信息，再安装 CLI、初始化并验证；独立仓库默认包含 GitHub 建仓及首次推送。用户明确只安装 CLI 时只做安装和验证。
-version: 0.7.0
+version: 0.6.2
 ---
 
 # Edges 接入
