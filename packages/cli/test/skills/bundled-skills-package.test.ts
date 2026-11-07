@@ -119,6 +119,11 @@ test("onboarding and init docs recommend a project install without -g", async ()
   const memoryInit = await readFile(path.join(sourceSkills, "edges/references/memory-init.md"), "utf8");
   assert.match(memoryInit, /edges --scope <目录> init -- -y\n/);
   assert.equal(memoryInit.includes("init -- -g -y"), false);
+  assert.match(
+    onboarding,
+    /\| 给某个目录，例如为 monorepo 中的某个子包单独积累上下文 \| 已有项目添加 edges harness 目录 \|/,
+  );
+  assert.equal(onboarding.includes("为 monorepo 中的某个模块单独积累上下文"), false);
 });
 
 test("the published package pins skills@1.7.2 and ships a skills directory", async () => {

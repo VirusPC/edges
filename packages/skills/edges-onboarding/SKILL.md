@@ -1,7 +1,7 @@
 ---
 name: edges-onboarding
 description: 帮用户给已有项目添加 edges harness 目录，或创建独立 edges harness 仓库。负责收齐必要信息、安装 CLI、初始化和验证；独立仓库默认包含 GitHub 建仓及首次推送。
-version: 0.6.1
+version: 0.6.2
 ---
 
 # Edges 接入
@@ -13,7 +13,7 @@ version: 0.6.1
 | 用户场景 | 使用流程 |
 | --- | --- |
 | 给正在开发的项目保存约定、经验和维护任务，方便 Agent 接续工作 | 已有项目添加 edges harness 目录 |
-| 为 monorepo 中的某个模块单独积累上下文 | 已有项目添加 edges harness 目录 |
+| 给某个目录，例如为 monorepo 中的某个子包单独积累上下文 | 已有项目添加 edges harness 目录 |
 | 创建个人大脑，长期保存笔记、知识与个人项目 | 创建独立 edges harness 仓库 |
 | 把个人常用方法与 skills 放在一个仓库，供多个项目挂载复用 | 创建独立 edges harness 仓库 |
 | 建立团队共享的规范与经验库，供各项目使用 | 创建独立 edges harness 仓库 |
