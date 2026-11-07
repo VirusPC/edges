@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### CLI 0.5.1
+
+- 随包发布 edges-onboarding 0.6.1：两种接入流程与必要环境检查、操作边界、用户授权及排错保障。CLI 实现不变。
+
 ### 初始化
 
 - **无参 `edges init` 同时创建任务看板。** 不指定模块时，默认集是 memory、skills、tasks、notes、projects，会写出 `<scope>/.edges/tasks/README.md`，并登记到 `AGENTS.md` 指向的材料索引。`edges tasks init` 与 `edges init tasks` 仍只建这一块看板。routines 仍不在默认集里，要单独 `edges routines init`。

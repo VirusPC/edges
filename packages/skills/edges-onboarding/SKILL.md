@@ -1,7 +1,7 @@
 ---
 name: edges-onboarding
 description: 帮用户给已有项目添加 edges harness 目录，或创建独立 edges harness 仓库。负责收齐必要信息、安装 CLI、初始化和验证；独立仓库默认包含 GitHub 建仓及首次推送。
-version: 0.6.0
+version: 0.6.1
 ---
 
 # Edges 接入
