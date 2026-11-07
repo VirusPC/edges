@@ -56,13 +56,65 @@ test("copyBundledSkills copies every remaining extensions skill and not the six 
   assert.equal(existsSync(path.join(dest, "AGENTS.md")), false);
 });
 
+function sectionAfter(markdown: string, heading: string): string {
+  const marker = `\n${heading}\n`;
+  const start = markdown.indexOf(marker);
+  assert.ok(start >= 0, `missing ${heading}`);
+  const body = markdown.slice(start + marker.length);
+  const next = body.search(/\n#{2,3} /);
+  return next === -1 ? body : body.slice(0, next);
+}
+
+function bashFences(section: string): string[] {
+  return [...section.matchAll(/```bash\n([\s\S]*?)```/g)].map((match) => match[1] ?? "");
+}
+
+function fencedEdgesInitLines(section: string): string[] {
+  return bashFences(section).flatMap((block) =>
+    block
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => /^edges\b/.test(line) && /\binit\b/.test(line)),
+  );
+}
+
 test("onboarding and init docs recommend a project install without -g", async () => {
   const onboarding = await readFile(path.join(sourceSkills, "edges-onboarding/SKILL.md"), "utf8");
-  const initSection = onboarding.split("## 初始化一个目录")[1]?.split("## ")[0] ?? "";
-  const firstFence = initSection.match(/```bash\n([\s\S]*?)```/)?.[1] ?? "";
-  assert.match(firstFence, /^cd <用户的仓库>\nedges --scope \. init -- -y\n$/);
-  assert.equal(firstFence.includes("-g"), false);
-  assert.match(initSection, /edges --scope \. init -- -g -y/);
+  assert.deepEqual(
+    [...onboarding.matchAll(/^## .+$/gm)].map((match) => match[0]),
+    ["## 何时用", "## 开始前提问", "## 接入流程"],
+  );
+
+  const flowIntro = sectionAfter(onboarding, "## 接入流程");
+  assert.deepEqual(fencedEdgesInitLines(flowIntro), []);
+  assert.match(flowIntro, /npm install -g @viruspc\/edges@latest\nedges --version\n/);
+
+  const existingProject = sectionAfter(onboarding, "### 已有项目添加 edges harness 目录");
+  const standaloneRepo = sectionAfter(onboarding, "### 创建独立 edges harness 仓库");
+  const projectInits = [
+    ...fencedEdgesInitLines(existingProject),
+    ...fencedEdgesInitLines(standaloneRepo),
+  ];
+  assert.deepEqual(projectInits, [
+    "edges --scope <目标目录> init -- -y",
+    "edges --scope <仓库目录> init -- -y",
+  ]);
+  for (const command of projectInits) {
+    assert.equal(command.split(/\s+/).includes("-g"), false, command);
+    assert.equal(command.endsWith(" -- -y"), true, command);
+  }
+  assert.equal(/\binit\b[^\n]*-g|-g[^\n]*\binit\b/.test(existingProject), false);
+  assert.equal(/\binit\b[^\n]*-g|-g[^\n]*\binit\b/.test(standaloneRepo), false);
+
+  const trouble = sectionAfter(onboarding, "### 遇到问题");
+  assert.match(trouble, /默认装当前项目，只有明确要用户级安装时才加 `-g`/);
+  const recovery = [...trouble.matchAll(/`([^`\n]+)`/g)]
+    .map((match) => match[1] ?? "")
+    .filter((snippet) => /\binit\b/.test(snippet));
+  assert.deepEqual(recovery, [
+    "edges --scope <目标目录> skills init -- -y --agent <宿主标识>",
+  ]);
+  assert.equal(recovery[0]?.split(/\s+/).includes("-g"), false);
 
   const memoryInit = await readFile(path.join(sourceSkills, "edges/references/memory-init.md"), "utf8");
   assert.match(memoryInit, /edges --scope <目录> init -- -y\n/);
