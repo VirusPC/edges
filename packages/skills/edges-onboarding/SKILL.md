@@ -1,7 +1,7 @@
 ---
 name: edges-onboarding
-description: 帮用户给已有项目添加 edges harness 目录，创建独立 edges harness 仓库，或把已有个人大脑接到当前 Agent 客户端的客户端工作区。负责收齐必要信息、安装 CLI、初始化和验证；独立仓库默认包含 GitHub 建仓及首次推送。
-version: 0.7.0
+description: 帮用户给已有项目添加 edges harness 目录，创建独立 edges harness 仓库，或把已有个人大脑接入当前 Agent 客户端（接入已有大脑）。负责收齐必要信息、安装 CLI、初始化和验证；独立仓库默认包含 GitHub 建仓及首次推送。
+version: 0.7.1
 ---
 
 # Edges 接入
@@ -100,11 +100,11 @@ GitHub 同名仓库或已有 origin 先核对，遇到冲突保留现场并报�
 
 ### 接入已有大脑
 
-把已有个人大脑接到当前 Agent 客户端的**客户端工作区**。不新建仓库、不在 GitHub 建仓，也不套用「已有项目添加 edges harness 目录」。
+把已有个人大脑接入当前 Agent 客户端。不新建仓库、不在 GitHub 建仓，也不套用「已有项目添加 edges harness 目录」。
 
 1. **定位大脑**：先问大脑在哪（本机目录或远端仓库地址；需要时再 clone）。若环境里有多份 clone，列出候选让用户选；只有存在真实使用记录时才把某份标为「最近使用」并优先，不猜。
 2. **识别客户端**：从当前会话与环境识别宿主；识别不出且影响分组时再问。不要让用户先选 personal / work / coding / chat 菜单。按 [client-access/README.md](references/client-access/README.md) 打开对应分组指南。
-3. **按指南接入**：客户端工作区根应是大脑仓库根（或该客户端约定的大脑入口）。指南在 `references/client-access/`（personal、work-space、coding、chat）。
+3. **按指南接入**：有客户端工作区概念的客户端，把客户端工作区根设为大脑仓库根；Grok Bot 没有绑定工作区的概念，从所有 Bot 共用的共享长期记忆检索大脑仓库身份与路径，先读该路径的 `AGENTS.md`。指南在 `references/client-access/`（personal、work-space、coding、chat）。
 4. **核验**：按 [contract.md](references/client-access/contract.md) 的七层可观察证据逐层确认。第 7 层 Git 同步必验；任一层失败记入报告，不阻塞其他层。未实测处保持「未实测 / 待试」，不得写成已支持。
 
 ### 遇到问题
@@ -118,7 +118,7 @@ GitHub 同名仓库或已有 origin 先核对，遇到冲突保留现场并报�
 | `SKILLS_INSTALL_FAILED` | 结构可能已写入，先看返回的 `created` 和安装器 stderr；检查 Node 版本、网络与非交互参数 `-y`，修好后重跑原命令，不删除已有材料。 |
 | 已装 skill 但 Agent 找不到 | 核对目标 scope、宿主及安装目录；需要时运行 `edges --scope <目标目录> skills init -- -y --agent <宿主标识>`（有效标识查帮助）。默认装当前项目，只有明确要用户级安装时才加 `-g`；重新加载宿主后验证。 |
 | busy / 写锁冲突 | 等同一 worktree 的其他写命令结束再重试，不手动删除正在使用的 `.edges-write.lock/`；无法判断锁状态时保留现场并报告。 |
-| 答不出大脑 AGENTS.md 里的约定 | 客户端工作区可能不是大脑根，或规则未加载；按该客户端分组指南与 contract 第 2 层排查。 |
+| 答不出大脑 AGENTS.md 里的约定 | 客户端工作区可能不是大脑根，或（Grok Bot）共享记忆里的路径未检索到或已失效；按该客户端分组指南与 contract 第 2 层排查。 |
 | 技能列表里没有 edges | 技能未装到当前客户端可发现的位置；两边皆可（仓库或用户级），不设权威。 |
 
 命令参数以 `--help` 为准，详细用法见 [CLI 文档](../../cli/README.md)，挂载规则见 [Compose 说明](../edges/references/compose.md)。

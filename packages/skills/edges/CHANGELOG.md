@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-11-08
+
+### Changed
+
+- 条件说明改为「共享长期记忆记有大脑仓库身份与路径」；路径失效先按身份重新定位，不猜、不重建。
+
 ## [0.4.1] - 2026-11-08
 
 ### Changed

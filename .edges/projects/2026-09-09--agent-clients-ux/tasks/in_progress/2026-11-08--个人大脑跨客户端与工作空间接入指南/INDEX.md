@@ -1,7 +1,7 @@
 ---
 metadata:
   edges-type: task
-  edges-updated-at: '2026-11-08T02:24:11.466Z'
+  edges-updated-at: '2026-11-08T02:43:17.931Z'
   edges-title: 个人大脑跨客户端与工作空间接入指南
   edges-tasks-status: in_progress
   edges-task-priority: medium
@@ -32,7 +32,7 @@ description: 补齐把已有个人大脑接到各 Agent 客户端/工作空间�
 **完成标准：**
 - [ ] references 中各组指南与共享核验契约（契约内容待 grill 定稿）已合入；默认可写，不以「先只读」为产品默认
 - [ ] 开场可选「接入已有大脑」；该路径不建仓、不套用「已有项目添加 harness」
-- [ ] Grok 规则入口按「记忆记路径 + 通用技能先读 AGENTS.md」写清限制；第 3 层遇同名技能两个版本时只记录两边版本与路径并继续
+- [ ] Grok 规则入口按「共享长期记忆记仓库身份与路径 + 通用技能先读 AGENTS.md」写清限制（Grok 无绑定工作区，第 1 层不适用并给证据）；第 3 层遇同名技能两个版本时只记录两边版本与路径并继续
 - [ ] Codex（本机 CLI、桌面 App、Cloud）、Grok Bot 至少各有一份可跟随步骤，并用可观察证据完成七层最小核验（含 Git 同步必验）；某一层失败不阻塞其他步骤，失败记入报告；未实测能力不得写成已支持
 - [ ] work 组参考 ChatGPT Work 写一版并标明官方来源与待试点；Claude Cowork 暂不处理，不与「Codex Cowork」混写
 - [ ] 事实边界写进指南：不得宣称 Grok Bot 仅 clone/切目录就会自动加载 AGENTS.md；写明 Grok Bot 技能目录与仓库 `.agents/skills` 是两套存放

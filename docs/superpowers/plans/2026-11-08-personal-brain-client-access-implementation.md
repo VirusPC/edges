@@ -1,6 +1,6 @@
 # 个人大脑客户端接入：实施计划
 
-状态：2026-11-08 用户已审阅并批准本计划；**已在分支落地文档与 skill 文案（本批未发包、未合并、未实测）**。设计取舍的真源是 [ADR 0053](../../adr/0053-personal-brain-reused-across-agent-clients.md)，本文只写怎么落地，不重新决定设计。
+状态：2026-11-08 用户已审阅并批准本计划；**已落地（onboarding 0.7.0 / edges 0.4.0→0.4.1）；2026-11-08 按用户修正 Grok 共享记忆模型（onboarding 0.7.1 / edges 0.4.2，未发包）；七层未实测**。设计取舍的真源是 [ADR 0053](../../adr/0053-personal-brain-reused-across-agent-clients.md)，本文只写怎么落地，不重新决定设计。
 
 - 任务卡：[个人大脑跨客户端与工作空间接入指南](../../../.edges/projects/2026-09-09--agent-clients-ux/tasks/in_progress/2026-11-08--个人大脑跨客户端与工作空间接入指南/INDEX.md)
 - 术语：客户端工作区，见 [CONTEXT.md](../../../CONTEXT.md)
@@ -10,7 +10,7 @@
 1. 用户能在开场菜单选「接入已有大脑」，该流程不建仓。
 2. 建完个人大脑后，默认继续接入当前客户端，缺参数再补问；用户可选稍后再接。
 3. Agent 按客户端分组打开 references 里的指南；onboarding 主流程不写客户端细节。
-4. Grok Bot 接入时把大脑路径写进长期记忆；被加载的 edges 技能按该路径先读 `AGENTS.md`。
+4. Grok Bot 无绑定工作区概念：接入时把大脑仓库身份与路径写进所有 Bot 共用的共享长期记忆；被加载的 edges 技能按该路径先读 `AGENTS.md`。
 5. 用户按指南接入后，能用可观察证据跑完七层核验。
 
 ## 文件范围
@@ -39,10 +39,10 @@
    4. 按 `contract.md` 做七层核验。
    - 不做：init 新仓、GitHub 建仓、套用「已有项目添加 edges harness 目录」。
 3. **建脑后路由**：在「创建独立 edges harness 仓库」推送之后、Compose 之前，插入「接入当前客户端」，走第 2 步的 2–4。Compose 仍只在用户要求挂载时执行，并标明是旁路。
-4. **通用 edges 技能**：在 `packages/skills/edges/SKILL.md` 加一句条件说明：若长期记忆里记有个人大脑路径，先读该路径下的 `AGENTS.md`。不写死路径，不加 Grok 专有步骤。
+4. **通用 edges 技能**：在 `packages/skills/edges/SKILL.md` 加一句条件说明：若共享长期记忆记有大脑仓库身份与路径，先读该路径下的 `AGENTS.md`。不写死路径，不加 Grok 专有步骤。
 5. **references 指南**：
    - `contract.md`：默认可写；每层要可观察证据，Agent 自报不算；第 2 层规则加载与第 3 层技能发现分开验收；第 7 层 Git 同步所有接入必验，失败记入报告、不阻塞其他层；同名技能两个版本时记下两边版本与路径并继续；文首声明未实测的客户端不得写成已支持。
-   - `personal.md`：确认客户端工作区就是大脑 clone 路径；写入长期记忆「个人大脑路径 = 绝对路径」（只定位，不抄规则正文）；技能用已有 edges 技能或按环境安装，两边皆可；写明限制：技能正文只在被加载时执行，记忆按需检索、检索不到要问路径，未证实每个新会话会自动读仓库文件。Muse、Dot 列为待核验。
+   - `personal.md`：Grok Bot 不绑定工作区；写入共享长期记忆「仓库身份 + 绝对路径」（只定位，不抄规则正文；路径失效先按身份重新定位）；技能用已有 edges 技能或按环境安装，两边皆可；写明限制：技能正文只在被加载时执行，记忆按需检索、检索不到要问路径，未证实每个新会话会自动读仓库文件。Muse、Dot 列为待核验。
    - `work-space.md`：按 ChatGPT Work 官方资料写步骤并标【官方】；Work 会话是否加载 `AGENTS.md` 标【待试】；不写 Claude Cowork。
    - `coding.md`：Codex 本机 CLI、桌面 App、Cloud 三种形态；Cursor、Claude Code 作对照；Cloud 是否同规则读 `AGENTS.md` 与 `.agents/skills` 标【待试】。
    - `chat.md`：需要服务端接口，只留坑位。

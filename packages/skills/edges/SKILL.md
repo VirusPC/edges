@@ -11,14 +11,14 @@ description: >-
   第一次接入用 edges-onboarding。整理对话用 edges-conversation-to-notes 或 edges-conversation-to-tasks。
   整板 Task 按已有 Project 归类用 edges-tasks-classify。
   把会话接到 Langfuse 用 edges-langfuse-agent-tracing。
-version: 0.4.1
+version: 0.4.2
 ---
 
 # edges
 
 人和有 shell 的 Agent 共用 `edges` CLI。本 skill 说明何时调用、命令长什么样。落盘在 CLI 的 NodeService 里。能力面是 CLI、Skill、MCP 三者并列。
 
-若长期记忆里记有个人大脑路径，先读该路径下的 `AGENTS.md`，再执行下方模块操作。只使用记忆中的路径，不要写死任何个人路径；记忆检索不到时先问用户，不要猜。
+若共享长期记忆（同一用户的各 Bot 共用）记有个人大脑的仓库身份与本地路径，先读该路径下的 `AGENTS.md`，再按仓库规则执行下方模块操作。共享记忆只是入口索引，不替代仓库规则。不要写死任何个人路径；路径失效时按仓库身份在可用候选中重新定位，仍找不到或检索不到时先问用户，不要猜，也不要重建大脑。
 
 ## 通用形状
 

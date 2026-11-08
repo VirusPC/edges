@@ -1,6 +1,6 @@
 # 客户端接入指南
 
-把已有个人大脑接到当前 Agent 客户端的客户端工作区时，按客户端分组打开本目录对应文件。设计取舍见 [ADR 0053](../../../../../docs/adr/0053-personal-brain-reused-across-agent-clients.md)。
+接入已有大脑时，按客户端分组打开本目录对应文件。有客户端工作区概念的客户端把大脑仓库根作为客户端工作区；Grok Bot 没有绑定客户端工作区的概念，改用共享长期记忆定位大脑（见 personal.md）。设计取舍见 [ADR 0053](../../../../../docs/adr/0053-personal-brain-reused-across-agent-clients.md)。
 
 ## 怎么选分组
 

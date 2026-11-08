@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-08
+
+### Changed
+
+- Grok Bot 不再描述为绑定客户端工作区：改为从所有 Bot 共用的共享长期记忆检索大脑仓库身份与路径，先读 `AGENTS.md`；路径失效先按仓库身份重新定位，找不到再问。
+- 七层核验第 1 层对 Grok Bot 标为不适用，并给出可见证据；Git 同步仍必验、失败不阻塞。
+
 ## [0.7.0] - 2026-11-08
 
 ### Added
