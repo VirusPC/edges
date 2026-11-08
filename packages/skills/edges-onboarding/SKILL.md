@@ -1,7 +1,7 @@
 ---
 name: edges-onboarding
 description: 帮用户给已有项目添加 edges harness 目录，创建独立 edges harness 仓库，或把已有个人大脑接入当前 Agent 客户端（接入已有大脑）。负责收齐必要信息、安装 CLI、初始化和验证；独立仓库默认包含 GitHub 建仓及首次推送。
-version: 0.7.1
+version: 0.7.2
 ---
 
 # Edges 接入
@@ -106,6 +106,7 @@ GitHub 同名仓库或已有 origin 先核对，遇到冲突保留现场并报�
 2. **识别客户端**：从当前会话与环境识别宿主；识别不出且影响分组时再问。不要让用户先选 personal / work / coding / chat 菜单。按 [client-access/README.md](references/client-access/README.md) 打开对应分组指南。
 3. **按指南接入**：有客户端工作区概念的客户端，把客户端工作区根设为大脑仓库根；Grok Bot 没有绑定工作区的概念，从所有 Bot 共用的共享长期记忆检索大脑仓库身份与路径，先读该路径的 `AGENTS.md`。指南在 `references/client-access/`（personal、work-space、coding、chat）。
 4. **核验**：按 [contract.md](references/client-access/contract.md) 的七层可观察证据逐层确认。第 7 层 Git 同步必验；任一层失败记入报告，不阻塞其他层。未实测处保持「未实测 / 待试」，不得写成已支持。
+5. **可选：接入 Langfuse 观测**：需要记录和评估 Agent 使用大脑的过程，可以继续接入 Langfuse，按对应可观测性 Skill 操作（[edges-langfuse-agent-tracing](../edges-langfuse-agent-tracing/SKILL.md)）。此步可选，不属于接入必验项。
 
 ### 遇到问题
 

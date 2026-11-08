@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-11-08
+
+### Changed
+
+- 「接入已有大脑」新增可选第 5 步：接入 Langfuse 观测，链接 edges-langfuse-agent-tracing；不属于接入验收。
+
 ## [0.7.1] - 2026-11-08
 
 ### Changed
