@@ -17,4 +17,5 @@ format: ordinary
 ## 本层内容
 
 - [按验证对象归档完整框架实验](<feedback_edges_architecture_experiments_ownership/INDEX.md>) — 验证 Edges 架构时完整维护设计、数据、生成与评测、审计和报告；区分公开材料与本地原件，并保留可复现的合成逻辑。
+- [合成检索题以真实请求机制和质量区分度为目标](<feedback_synthetic_retrieval_validity/INDEX.md>) — 扩充 Edges 合成检索数据时：先说明真实请求依据与场景覆盖，再验证检索质量区分度，不能用成本差异或模板数量替代。
 <!-- edges-entries-local:end -->
