@@ -1,7 +1,7 @@
 ---
 metadata:
   edges-type: task
-  edges-updated-at: '2026-11-08T01:39:13.051Z'
+  edges-updated-at: '2026-11-08T01:42:11.404Z'
   edges-title: 个人大脑跨客户端与工作空间接入指南
   edges-tasks-status: backlog
   edges-task-priority: medium
@@ -14,13 +14,13 @@ description: 补齐把已有个人大脑接到各 Agent 客户端/工作空间�
 - 相关现状：已发布 onboarding 开场仍是五场景 + 两条流程兜底（共七项）；个人大脑建仓流程已有，跨客户端/工作空间接入指南缺失
 - 预期收益：新人或换客户端时，能按可观察证据把同一份大脑接到目标工作空间，而不是只凭 Agent 自报「读到了」
 - 非目标：本卡不实现 onboarding 功能改动、不改 skill 行为、不发包、不合并；不把 CLI init 与 skill 安装解耦纳入本卡；chat 场景只留坑位，不深入服务端接口
-- 关联：设计稿 [个人大脑接入各 Agent 客户端](<../../../../../../docs/superpowers/specs/2026-11-08-personal-brain-client-access-design.md>)（已确认项、方案草案与待决问题）；兄弟卡 [完善个人大脑场景的安装与使用说明](<../../../../2026-11-02--edges-readme-优化/tasks/backlog/2026-11-03--完善个人大脑场景的安装与使用说明/INDEX.md>)；记忆索引 [个人大脑跨客户端与工作空间接入](<../../../../../memory/projects/project_personal_brain_client_workspace_access/INDEX.md>)
+- 关联：ADR [0053 个人大脑以跨客户端复用为主路径](<../../../../../../docs/adr/0053-personal-brain-reused-across-agent-clients.md>)（取舍、已定项、待验证事实与开放问题）；兄弟卡 [完善个人大脑场景的安装与使用说明](<../../../../2026-11-02--edges-readme-优化/tasks/backlog/2026-11-03--完善个人大脑场景的安装与使用说明/INDEX.md>)；记忆索引 [个人大脑跨客户端与工作空间接入](<../../../../../memory/projects/project_personal_brain_client_workspace_access/INDEX.md>)
 
 **目标：**
 `edges-onboarding` 能引导用户把已有个人大脑接入目标 Agent 客户端或工作空间，并按统一核验契约跨空间复用同一份大脑；开场菜单可新增「接入已有大脑」场景（提案 6+2=8，现状发布仍 5+2=7）。
 
 **动作：**
-- 在 `packages/skills/edges-onboarding/references/` 下按组新增客户端接入指南（文件布局为提案，见设计稿）
+- 在 `packages/skills/edges-onboarding/references/` 下按组新增客户端接入指南（具体文件布局未定）
 - 开场菜单新增「已有个人大脑 → 接入新客户端/工作空间」独立场景；流程只定位已有大脑并接入，不重建仓
 - 建完个人大脑后增加「接入当前客户端」路由步骤：识别宿主 → 打开对应分组指南 → 按契约核验
 - 首期优先写清并实测 Codex 与 Grok Bot；Cursor、Claude Code 作对照示例；chat 只留限制与接口坑位
