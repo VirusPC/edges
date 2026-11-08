@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "data_kind": "synthetic",
+  "data_sha256": "f074b815c2cee6eb77ed35fa6b07716f7dd34bcf066e89a91d73efef2f5d16c7",
+  "status": "reviewed_before_model_execution",
+  "cases": 48,
+  "memories": 336,
+  "semantic_reviews": {
+    "dev": {
+      "cases": 12,
+      "unresolved_blockers": 0
+    },
+    "test": {
+      "cases": 36,
+      "unresolved_blockers": 0
+    }
+  },
+  "reviewer_type": "Two separate AI agents, not human expert consensus",
+  "blinding": "Candidate01 independent predictions frozen before author gold; subsequent necessity addendum and revisions explicitly unblinded.",
+  "receipt_sha256": {
+    "dev_candidate01_blind": "073a1b025ed9ec4c52f5bc8ca18387775860d85cf69f8ff20a45a66f0309536e",
+    "dev_candidate01_comparison": "97aa990538f92e5ad5e86b54a189aef8daecca26eb639ebdac06cc3363216ea8",
+    "dev_candidate02_revision": "85bd0b3a690ebfeeb6e190961fb3bfb6412212c6d871116364efe9bff61594a8",
+    "dev_candidate03_final": "c8c1e5bddca135ec6399441c6ec55fa54e638e8e67ca797cc7c84a64653b9d25",
+    "test_candidate01_blind": "a555ff1623b9ffbde443369b86ae5d60c7a9713aa12c615b4627274b6d73239c",
+    "test_candidate01_comparison": "8242b3565c58f3512cb03f377947c4290977f05f2146da35b85f35e8ed541989",
+    "test_necessity_addendum_after_unblinding": "fe419da0dcb942f8319174776ec1d368b2a5ad4405796fb29bdb760bcb8b089b",
+    "test_candidate02_revision": "7c7d0ef4e253c84c2cf5546ff89875be1f61ab8b827fde5ab13d3ea61aa02e57",
+    "test_candidate03_final": "2ba135c27e00eb48904861ecda41acc6416b49b144acac656d10acf112549806"
+  },
+  "candidate_data_sha256": {
+    "v2-candidate01": "0588ed5360487104cb13c186d3be1bce9ceff8a4db4426bdce7dafd34bd36bdc",
+    "v2-candidate02": "5e578f2a2caa6633b6c7d2e528ffbf88c29e4f89eb3862012a3da0d6f2054b49",
+    "v2-candidate03": "f074b815c2cee6eb77ed35fa6b07716f7dd34bcf066e89a91d73efef2f5d16c7"
+  },
+  "offline_tests": {
+    "passed": 129,
+    "model_calls": 0,
+    "log_sha256": "c8d1ad33f3c86571a5a000d4ded949f0e4127d97992fd4ae0f8437e51942ee96"
+  },
+  "limitations": [
+    "Author and reviewer model family can share blind spots.",
+    "Review establishes scoped data validity, not population coverage or model discrimination.",
+    "Raw receipts remain in the local experiment archive; hashes bind artifacts but do not prove independent authenticity."
+  ]
+}
