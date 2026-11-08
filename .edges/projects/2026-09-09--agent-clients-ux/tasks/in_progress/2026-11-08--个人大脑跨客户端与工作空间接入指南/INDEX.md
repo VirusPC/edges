@@ -1,0 +1,39 @@
+---
+metadata:
+  edges-type: task
+  edges-updated-at: '2026-11-08T02:24:11.466Z'
+  edges-title: 个人大脑跨客户端与工作空间接入指南
+  edges-tasks-status: in_progress
+  edges-task-priority: medium
+name: 个人大脑跨客户端与工作空间接入指南
+description: 补齐把已有个人大脑接到各 Agent 客户端/工作空间并跨空间复用的 onboarding 指南与核验契约；首期重点 Codex 与 Grok Bot。
+---
+
+**背景：**
+创建个人大脑已经能走通后，讨论落到：还缺「把已有个人大脑接到不同 Agent 客户端 / 工作空间、并跨空间复用同一份大脑」的指南。用户确认这不是「在某个代码项目里 compose 挂材料」的主故事，而是把大脑本身当作各客户端的工作区来用；并要求补上独立场景「我已经有个人大脑，想在新的客户端或工作空间里继续使用」。批注拍板：指南放在 `edges-onboarding/references` 按组各一份、默认可写、落地顺序 personal → work → coding → chat，首期重点 Codex 与 Grok Bot。本卡只记录任务与设计取舍，不在本卡直接改 onboarding 实现或发包。
+- 相关现状：已发布 onboarding 开场仍是五场景 + 两条流程兜底（共七项）；个人大脑建仓流程已有，跨客户端/工作空间接入指南缺失
+- 预期收益：新人或换客户端时，能按可观察证据把同一份大脑接到目标工作空间，而不是只凭 Agent 自报「读到了」
+- 非目标：本卡不实现 onboarding 功能改动、不改 skill 行为、不发包、不合并；不把 CLI init 与 skill 安装解耦纳入本卡；chat 场景只留坑位，不深入服务端接口
+- 关联：ADR [0053 个人大脑以跨客户端复用为主路径](<../../../../../../docs/adr/0053-personal-brain-reused-across-agent-clients.md>)（取舍、已定项、待验证事实与开放问题）；兄弟卡 [完善个人大脑场景的安装与使用说明](<../../../../2026-11-02--edges-readme-%E4%BC%98%E5%8C%96/tasks/backlog/2026-11-03--%E5%AE%8C%E5%96%84%E4%B8%AA%E4%BA%BA%E5%A4%A7%E8%84%91%E5%9C%BA%E6%99%AF%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E/INDEX.md>)；记忆索引 [个人大脑跨客户端与工作空间接入](<../../../../../memory/projects/project_personal_brain_client_workspace_access/INDEX.md>)
+
+- 进展：2026-11-08 grill 达成共识并批准[实施计划](<../../../../../../docs/superpowers/plans/2026-11-08-personal-brain-client-access-implementation.md>)；同日已在分支落地 onboarding 0.7.0（菜单 6+2、接入已有大脑、建脑后默认接入、`references/client-access/`）与 edges 0.4.1（记忆路径条件说明）。**未发包、未合并、七层与 E1–E4 未实测**；完成标准勾选待合并与验收后。
+
+**目标：**
+`edges-onboarding` 能引导用户把已有个人大脑接入目标 Agent 客户端或工作空间，并按统一核验契约跨空间复用同一份大脑；开场菜单可新增「接入已有大脑」场景（提案 6+2=8，现状发布仍 5+2=7）。
+
+**动作：**
+- 在 `packages/skills/edges-onboarding/references/` 下按组新增客户端接入指南（具体文件布局未定）
+- 开场菜单新增「已有个人大脑 → 接入新客户端/工作空间」独立场景；流程只定位已有大脑并接入，不重建仓
+- 建完个人大脑后默认继续接入当前客户端（缺参数再补问）：识别宿主 → 打开对应分组指南 → 按契约核验
+- 首期优先写清并实测 Codex（本机 CLI、桌面 App、Cloud）与 Grok Bot；Cursor、Claude Code 作对照示例；chat 只留限制与接口坑位
+- 通用 `packages/skills/edges/SKILL.md` 加一句条件说明（不写死个人路径）
+- Compose 进代码项目降为可选旁路，不写进主路径
+
+**完成标准：**
+- [ ] references 中各组指南与共享核验契约（契约内容待 grill 定稿）已合入；默认可写，不以「先只读」为产品默认
+- [ ] 开场可选「接入已有大脑」；该路径不建仓、不套用「已有项目添加 harness」
+- [ ] Grok 规则入口按「记忆记路径 + 通用技能先读 AGENTS.md」写清限制；第 3 层遇同名技能两个版本时只记录两边版本与路径并继续
+- [ ] Codex（本机 CLI、桌面 App、Cloud）、Grok Bot 至少各有一份可跟随步骤，并用可观察证据完成七层最小核验（含 Git 同步必验）；某一层失败不阻塞其他步骤，失败记入报告；未实测能力不得写成已支持
+- [ ] work 组参考 ChatGPT Work 写一版并标明官方来源与待试点；Claude Cowork 暂不处理，不与「Codex Cowork」混写
+- [ ] 事实边界写进指南：不得宣称 Grok Bot 仅 clone/切目录就会自动加载 AGENTS.md；写明 Grok Bot 技能目录与仓库 `.agents/skills` 是两套存放
+- [ ] 本卡范围内未改无关实现、未发包

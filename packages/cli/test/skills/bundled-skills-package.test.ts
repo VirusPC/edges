@@ -132,8 +132,9 @@ test("onboarding and init docs recommend a project install without -g", async ()
   assert.match(ask, /不要把这两条流程当成开场的唯一菜单/);
   assert.match(ask, /第二步：补参数/);
   assert.match(ask, /创建个人大脑，长期保存笔记、知识与个人项目，记录 idea 和个人待办并追踪后续进展/);
-  assert.match(ask, /6\. 已有项目添加 edges harness 目录/);
-  assert.match(ask, /7\. 创建独立 edges harness 仓库/);
+  assert.match(ask, /接入已有大脑/);
+  assert.match(ask, /7\. 已有项目添加 edges harness 目录/);
+  assert.match(ask, /8\. 创建独立 edges harness 仓库/);
   assert.match(ask, /\| 已有项目添加 edges harness 目录 \| 目标目录 \|/);
   assert.equal(ask.includes("整个项目还是某个模块"), false);
 });

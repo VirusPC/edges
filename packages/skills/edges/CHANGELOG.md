@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-08
+
+### Changed
+
+- 若长期记忆记有个人大脑路径，先读该路径下的 AGENTS.md；不写死个人路径。
+
 ## [0.4.0] - 2026-11-04
 
 ### Changed

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-08
+
+### Added
+
+- 开场场景与提问菜单增加「接入已有大脑」；新建接入流程（不建仓、先问路径、按客户端工作区分组指南核验）。
+- `references/client-access/`：contract、personal、work-space、coding、chat 与 README。
+
+### Changed
+
+- 创建个人大脑后默认继续接入当前客户端；Compose 标为可选旁路。
+- 提问菜单由五场景加两条兜底改为六场景加两条兜底。
+
 ## [0.6.3] - 2026-11-08
 
 ### Changed
