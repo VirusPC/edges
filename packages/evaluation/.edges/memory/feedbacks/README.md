@@ -16,5 +16,5 @@ format: ordinary
 <!-- edges-entries-local:start -->
 ## 本层内容
 
-- 暂无条目。
+- [按验证对象区分框架实验与个人选型研究](<feedback_edges_architecture_experiments_ownership/INDEX.md>) — 沿用个人研究代码开展 Edges 架构消融时，以研究问题确定归属，保留公开汇总与原始材料边界及冻结来源。
 <!-- edges-entries-local:end -->
