@@ -16,4 +16,6 @@
 | 6 跨会话 | 新会话读回那条 idea | 复述与文件一致 | 依赖上一会话记忆 |
 | 7 Git 同步 | 提交并推送；另一份 clone pull 后读回 | 另一份 clone 看到同一条 | 只提交未推送 |
 
+第 1 层只适用于有客户端工作区概念的客户端（Codex、ChatGPT Work、Cursor、Claude Code 等）。**Grok Bot 不适用**：报告写「不适用：Grok Bot 无绑定客户端工作区」，并附可见证据——从共享长期记忆检索到的仓库身份与路径、该路径存在、`git -C <路径> remote get-url origin` 与仓库身份一致。不得把第 1 层记为通过。
+
 测完删除测试 idea，再提交推送。

@@ -49,7 +49,7 @@ _避免使用_：Agent 工具箱、skill 合集、用「Edges」指本仓这个�
 _避免使用_：外部记忆、挂载、mount、把 edges 当成要接进工作空间的独立记忆库、用组合代替项目知识的就地 init、把 git submodule 当成另一套概念（它只是 Compose 的底层实现）、递归展开被组合仓库的 Compose 条目、另造 `compose.json` / `compose.yaml`、远程入口、远程 MCP 组合、服务端 clone、「一个模型两种部署」、把现有组成登记列表原样复用当外部记忆仓库登记、把 Compose block 当成层模型外的旁路
 
 **客户端工作区（Client Workspace）**：
-Agent 客户端打开或绑定的那个目录（例如 Codex 的 primary 文件夹、Grok Bot 盒子上的大脑 clone 路径）。个人大脑跨客户端复用时，客户端工作区根应是大脑仓库根（或该客户端约定的大脑入口）。
+Agent 客户端打开或绑定的那个目录（例如 Codex 的 primary 文件夹）。不是每个客户端都有：Grok Bot 不绑定客户端工作区，改由所有 Bot 共用的共享长期记忆记录大脑仓库身份与路径。个人大脑跨客户端复用时，客户端工作区根应是大脑仓库根（或该客户端约定的大脑入口）。
 _避免使用_：工作空间（Compose 语境下另有定义：就地 harness + 被组合仓库）、工作目录（易与 shell 的 cwd 混淆）、把 Compose 进代码项目当成打开客户端工作区
 
 **外部记忆仓库登记**：
