@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "document_kind": "public view of frozen protocol; not the original frozen file",
+  "source_schema_version": 1,
+  "original_archive": "../local/archive/",
+  "omitted_fields": [
+    "input digests",
+    "program revision and historical review links",
+    "container image digest",
+    "development run identifier"
+  ],
+  "exact_reproduction_requires_authorized_archive": true,
+  "frozen_at": "2026-11-08T16:38:26.865977+00:00",
+  "status_at_freeze": "before first formal test trial; only dev results have been inspected",
+  "run_name": "test-v1",
+  "model": "gpt-6.1-sol",
+  "harbor_version": "0.25.0",
+  "codex_version": "0.162.1",
+  "reasoning_effort": "low",
+  "timeout_sec": 180,
+  "seed": 20261108,
+  "repeats": 3,
+  "concurrency": 12,
+  "cases": 31,
+  "source_sessions": 23,
+  "planned_trials": 279,
+  "positive_cases": 24,
+  "negative_cases": 7,
+  "common_root_cases": 25,
+  "gold_above_five_cases": 7,
+  "mean_positive_recall_ceiling": 0.8872227309727309,
+  "primary_comparison": "scoped minus root",
+  "primary_metric": "selected_recall_at_5",
+  "interpretation_rule": "Report the paired estimate and interval without forcing a positive finding. A descriptive recall interval wholly above zero supports a benefit only within this dataset/protocol; intervals spanning zero are inconclusive, and resource tradeoffs are reported separately.",
+  "case_tracks": {
+    "memory_qa": 11,
+    "pre_task_retrieval": 20
+  },
+  "secondary_metrics": [
+    "evidence_recall_at_5",
+    "marker_recall_at_5",
+    "content_recall_at_5",
+    "precision_at_5",
+    "mrr",
+    "empty_gold_selection_rate",
+    "unknown_selected_count",
+    "answer_checks_pass",
+    "input_tokens",
+    "output_tokens",
+    "cached_input_tokens",
+    "uncached_input_tokens",
+    "total_tokens",
+    "tool_calls",
+    "agent_latency_ms",
+    "trial_wall_ms",
+    "failure_rate"
+  ],
+  "statistical_plan": {
+    "unit": "case mean across three repeats; equal weight per eligible case",
+    "bootstrap_clusters": "source session",
+    "bootstrap_samples": 2000,
+    "ci": "descriptive percentile 95%, no multiplicity correction",
+    "latency_percentiles": "raw individual trials p50/p95; pair differences use case mean",
+    "missing": "unknown values remain null; all repeat values needed for complete paired case; report every failure and coverage",
+    "negative_cases": "recall/precision/MRR N/A; evaluate false memory selection separately",
+    "ceiling": "retain all directly relevant gold even when >5; report min(5,gold_count)/gold_count"
+  },
+  "strata": [
+    "all",
+    "memory_qa",
+    "pre_task_retrieval",
+    "known non-root scope",
+    "common root/unknown scope"
+  ],
+  "execution_policy": {
+    "retry": 0,
+    "queue": "fixed seeded submission order, at most twelve native Harbor jobs in flight; each has an independent Docker environment and separate verifier",
+    "stop_rule": "complete the full planned matrix irrespective of observed quality; retain infrastructure failures; any amended run must get a new protocol and output directory",
+    "cache": "provider cache is not isolated; record reported cached and uncached tokens",
+    "latency": "measured under twelve-way bounded concurrency, not isolated latency"
+  },
+  "scope_of_claim": [
+    "Single user, single model alias and fixed historical corpus; model backend revision not supplied by provider.",
+    "Placement and discovery-index protocol are a joint treatment; not a pure directory-depth experiment.",
+    "The agent starts in a reconstructed memory workspace, not a complete historical code checkout.",
+    "QA and pre-task retrieval are separate tracks; no execution-success claim for original work requests.",
+    "Annotation and independent review were performed by AI agents, not a human gold panel.",
+    "Most queries have a common-root/unknown current scope; only six test cases have a known non-root scope.",
+    "None-arm recall zero is structural and cannot establish a hierarchy benefit over flat files.",
+    "Exposure markers/snippets do not prove comprehension or causal use; regex answer checks are narrow.",
+    "Snapshots use Git version time, not full historical replay; post-cutoff memories are absent."
+  ],
+  "concurrency_qualification": {
+    "trials": 12,
+    "failures": 0,
+    "batch_wall_seconds": 76.11072758299997,
+    "observed_container_memory_peak_mib": 1412.4,
+    "docker_memory_mib": 1970.18,
+    "native_agent_overlap_seconds": 27.66,
+    "limitations": "Observed container working-set peak is a lower bound; sampling gaps and VM/daemon/build overhead mean nominal headroom is not guaranteed. No further pressure expansion."
+  },
+  "annotation_boundaries": [
+    "Resume material is private when it contains sensitive data, not intrinsically because it is a resume.",
+    "The notes CLI/MCP gold applies to routing/contracts; its obsolete edges-note Skill pathname is not a required answer.",
+    "Generic AGENTS-to-Skill-to-CLI navigation is not gold for every task; concrete action-specific scope/CLI/task-writing constraints are included consistently."
+  ]
+}
