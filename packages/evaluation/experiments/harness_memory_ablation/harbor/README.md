@@ -16,6 +16,7 @@
 | 离线完整性、计量审计与资源采样 | [audit/](audit/README.md) |
 | 真实实验公开结果 | [Markdown](../../../reports/2026-11-09-harbor-memory-ablation.md)、[聚合 JSON](../../../reports/2026-11-09-harbor-memory-ablation.json) |
 | 合成实验正式结果 | [结论与边界](synthetic/RESULTS.md)、[统计报告](synthetic/reports/test-v1/report.md)、[聚合 JSON](synthetic/reports/test-v1/report.json) |
+| 自然请求补充集 v2 | [48 题、生成器与开发诊断入口](synthetic/v2/README.md)、[覆盖依据与缺口](synthetic/v2/COVERAGE.md)；与 v1 和真实历史结果分别报告 |
 | 历史辅助审计与发布脚本 | [local/support/](local/support/)，含当次复核决策与脚本；Git 忽略 |
 
 公开 Git 保存可公开的设计、说明、合成数据、程序与报告。真实问题、来源标识、完整命令及原始日志在同一实验下的 `local/` 集中归档，但不公开；该目录的存在不等于已远程备份。原始受限备份保留，公开克隆不随附本地原件。
