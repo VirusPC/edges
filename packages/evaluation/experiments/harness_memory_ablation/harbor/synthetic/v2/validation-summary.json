@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "data_kind": "synthetic",
+  "study_stage": "development_diagnostic_only",
+  "run_status": "complete",
+  "planned_trials": 36,
+  "observed_trials": 36,
+  "failed_trials": 0,
+  "offline_tests_passed": 129,
+  "integrity_checks": 2232,
+  "integrity_differences": 0,
+  "protocol_precedes_execution": true,
+  "resources": {
+    "samples": 54,
+    "active_samples": 41,
+    "valid_complete_memory_samples": 26,
+    "stats_nonzero_samples": 15,
+    "ps_error_samples": 0,
+    "sampled_oom_positive_frames": 0,
+    "oom_inspect_error_frames": 14,
+    "runtime_memory_peak_observed_bytes": 1463612866.56,
+    "runtime_memory_peak_is_lower_bound": true,
+    "native_peak_agent_overlap": 12,
+    "early_agent_execution_unobserved_seconds": 0,
+    "agents_started_before_first_sample": 0,
+    "agents_finished_before_first_sample": 0
+  },
+  "tokens": {
+    "input_tokens": 3569779,
+    "cached_input_tokens": 2812288,
+    "uncached_input_tokens": 757491,
+    "output_tokens": 19408,
+    "total_tokens": 3589187
+  },
+  "tool_review": {
+    "trials": 36,
+    "shell_commands": 152,
+    "distinct_shell_commands": 126,
+    "shell_orchestration_calls": 143,
+    "metadata_only_calls": 1,
+    "workspace_external_probes": 11,
+    "probe_trials": 10,
+    "observed_model_network_commands": 0,
+    "observed_explicit_persistent_file_mutations": 0,
+    "observed_external_body_reads": 0,
+    "observed_business_operations": 0,
+    "catalog_refresh_timeout_lines": 18,
+    "catalog_refresh_timeout_trials": 14,
+    "proof_of_hard_isolation": false
+  },
+  "quality_review": {
+    "reviewed_memory_trials": 24,
+    "positive_trials": 20,
+    "positive_full_recall_trials": 19,
+    "distinct_valid_positive_omission_scenes": 1,
+    "omitted_necessary_memories": 2,
+    "predeclared_minimum_omission_scenes": 2,
+    "recall_gate_passed": false,
+    "strict_extra_selections": 12,
+    "nonexact_answers_reviewed": 9,
+    "observed_wrong_rule_application_in_reviewed_answers": 0,
+    "empty_gold_cases_with_relevance_contract_boundary": 2,
+    "answer_accuracy_measured": false,
+    "note": "Strict gold-set deviations are not established semantic errors; 12 extra selections were accurately used as historical, temporal or scope contrasts."
+  },
+  "receipt_sha256": {
+    "integrity_audit": "457859cb0606b5ef3e16f84f8a39ef4e39264736d5bbcd7b8b82fd99110059b7",
+    "native_semantic_review": "a2f4b0ab650cc73d62be40d34c3b5648790c194859d6608bdcc4a067431cebd6",
+    "anonymous_quality_review": "2ca0648bf8fa1684d5349e0f80966c901d7362aba4ac69fb6dca1d2ee06c5a9e",
+    "pre_model_review": "d570a8ea4ba0a2218501cd5233f301972525d409c7931e2800e67e6ade137fc2"
+  },
+  "frozen_run_sha256": {
+    "manifest.json": "5fa0f9a52e8beb3be5596f5117d6a3acb606a2989e712eeae9792b00b1eff49d",
+    "dataset.json": "f074b815c2cee6eb77ed35fa6b07716f7dd34bcf066e89a91d73efef2f5d16c7",
+    "plan.json": "0fedefaafb910123deee4fc13fb83ec6484f40b3fcfac8012a4e199e76eefd8a",
+    "trials.json": "3eaca977aa696e70b9c88ecc6b47d62685c061bb1309e69a1cc59711976676f4",
+    "result.json": "8ce482f1ace50411cadfaebe78ac03e1de83b60cccfb72d4dd8b2d27f5b7fa2e"
+  },
+  "public_outputs_sha256": {
+    "reports/dev-v2/report.json": "a7c21f8257416521794813dd9436e67cd7844f0c361166152e314b8f8daa95a2",
+    "reports/dev-v2/trials.csv": "aece9bfbe4c6b78183479156bef53abdfbe1e60d8bd515af39f0390d7d303d49",
+    "reports/quality-v2/quality.json": "111746c16937141af8b03b0de38d28cc69e1eac62d8297c71f1666896ac9bf0b"
+  },
+  "public_markdown_note": "A post-run interpretation link was added to generated report.md; numeric JSON/CSV were not edited.",
+  "heldout_test_trials": 0
+}
