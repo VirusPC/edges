@@ -90,7 +90,7 @@ def generate(run_dir: Path, output: Path, bootstrap: int = 2000) -> dict:
              '| --- | ---: | ---: | ---: | --- |']
     labels = {'selected_recall_at_5': 'recall@5 (%)', 'evidence_recall_at_5': '正文证据 recall@5 (%)',
               'answer_checks_pass': '局部答案检查 (%)', 'empty_gold_selection_rate': '负例误选率 (%)',
-              'total_tokens': '累计总 token', 'uncached_input_tokens': '未缓存输入 token',
+              'total_tokens': '平均累计总 token', 'uncached_input_tokens': '未缓存输入 token',
               'agent_latency_ms': 'Agent 时延 (秒)', 'trial_wall_ms': 'trial 墙钟 (秒)', 'tool_calls': '工具调用数'}
     for metric in METRICS:
         scale = 100 if metric.endswith('_at_5') or metric in ('answer_checks_pass', 'empty_gold_selection_rate') else .001 if metric.endswith('_ms') else 1
@@ -107,13 +107,14 @@ def generate(run_dir: Path, output: Path, bootstrap: int = 2000) -> dict:
         paired = summary['paired_comparisons']['scoped-vs-root']['selected_recall_at_5']
         ci = paired.get('ci95') or [None, None]
         lines.append(f"| {name} | {summary['cases']} / {summary['positive_cases']} | " +
-                     number(paired['left_mean'], 100) + '% | ' + number(paired['right_mean'], 100) + '% | ' +
+                     (number(paired['left_mean'], 100) + '%' if paired['left_mean'] is not None else 'N/A') + ' | ' +
+                     (number(paired['right_mean'], 100) + '%' if paired['right_mean'] is not None else 'N/A') + ' | ' +
                      f"{number(paired['delta_left_minus_right'], 100)} [{number(ci[0], 100)}, {number(ci[1], 100)}] |")
     lines += ['', '## 口径与局限', '',
               '- 每题先平均重复，再按场景等权；以合成场景 session 聚类 bootstrap，区间为描述性且未校正多重比较。不同实体共享生成模板，不等于从真实任务总体独立随机抽样。',
-              '- 正例 recall 上限按完整 gold 计算；无 gold 为 N/A，另报误选。none 的 recall 零是无实验记忆的结构基线。答案检查是预先声明的局部事实正则，不是语义完成率。',
+              '- 正例 recall 上限按完整 gold 计算；无 gold 为 N/A，另报误选。none 的 recall 零是无实验记忆的结构基线。本轮未配置答案正则，答案检查为 N/A，不报告答案正确率或原始任务成功率。',
               '- 两种有记忆条件使用相同正文和时间过滤，root 保留 scope 元数据。处理包含目录位置与发现索引；此实验不能分离这两者。',
-              '- 词法基线与 oracle 的离线差距只能验证合成任务需要区分作用域，不能替代真实 Agent 三组差异。若两组均接近满分，应报告天花板，不能宣称检索质量优势。',
+              '- 离线诊断显示部分模板存在词法排名与适用规则 oracle 的差距，不能替代真实 Agent 三组差异。若两组均接近满分，应报告天花板，不能宣称检索质量优势。',
               '- 总 token 包含缓存输入；提供方缓存未隔离。并发时延包含共享资源竞争，不等于独立执行时延。JSON 保留完整覆盖率与原始 trial 分位数。',
               '- 使用冻结程序的统计函数重算；另需离线审计原生用量、评分、工具行为及输入完整性。本导出器不自动证明工具命令语义符合约束。',
               '- 未根据正式测试结果重选题目、修改 gold 或调参。生成器、数据报告和预先协议应与本报告一同审阅。', '',

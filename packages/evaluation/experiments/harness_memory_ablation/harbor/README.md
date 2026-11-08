@@ -15,6 +15,7 @@
 | Eval 程序 | 本目录 `run.py`、`metrics.py`、`report.py`、`verify.py` 及依赖锁 |
 | 离线完整性、计量审计与资源采样 | [audit/](audit/README.md) |
 | 真实实验公开结果 | [Markdown](../../../reports/2026-11-09-harbor-memory-ablation.md)、[聚合 JSON](../../../reports/2026-11-09-harbor-memory-ablation.json) |
+| 合成实验正式结果 | [结论与边界](synthetic/RESULTS.md)、[统计报告](synthetic/reports/test-v1/report.md)、[聚合 JSON](synthetic/reports/test-v1/report.json) |
 | 历史辅助审计与发布脚本 | [local/support/](local/support/)，含当次复核决策与脚本；Git 忽略 |
 
 公开 Git 保存可公开的设计、说明、合成数据、程序与报告。真实问题、来源标识、完整命令及原始日志在同一实验下的 `local/` 集中归档，但不公开；该目录的存在不等于已远程备份。原始受限备份保留，公开克隆不随附本地原件。
@@ -46,7 +47,7 @@ python local_archive.py --source /authorized/experiment --name archive --apply
 
 `task_mode` 默认为 `memory_qa`。对于真实代码修改、写笔记等工作请求，可使用 `pre_task_retrieval`：保留原始用户请求，明确只做执行前的记忆选择与适用规则说明，不实际执行外部操作或改仓库。逐 trial 保留 task_mode，最终分析须按这两个 track 分层；本程序整体汇总不能自动解释成完整真实任务成功率。
 
-真实 trace、记忆、题目及运行记录应保存在私密归档或工作区 `.work/`；本公开目录只保存通用程序和合成测试。数据来源核验、作者归属、问题去重、人工 gold 审核和正文脱敏由数据集建设阶段负责；通过本程序 schema 检查不等于数据集质量已获认证。
+真实 trace、记忆、题目及运行记录集中在本实验的 Git 忽略区 `local/`，并保留受限备份；公开 Git 保存设计、聚合结果、通用程序及明确标识的合成数据。数据来源核验、作者归属、问题去重、人工 gold 审核和正文脱敏由数据集建设阶段负责；通过本程序 schema 检查不等于数据集质量已获认证。
 
 ```bash
 cd packages/evaluation/experiments/harness_memory_ablation/harbor
