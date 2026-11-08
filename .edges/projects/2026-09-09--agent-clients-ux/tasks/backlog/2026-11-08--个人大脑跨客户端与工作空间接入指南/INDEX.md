@@ -1,7 +1,7 @@
 ---
 metadata:
   edges-type: task
-  edges-updated-at: '2026-11-08T02:10:59.222Z'
+  edges-updated-at: '2026-11-08T02:19:18.371Z'
   edges-title: 个人大脑跨客户端与工作空间接入指南
   edges-tasks-status: backlog
   edges-task-priority: medium
@@ -16,6 +16,8 @@ description: 补齐把已有个人大脑接到各 Agent 客户端/工作空间�
 - 非目标：本卡不实现 onboarding 功能改动、不改 skill 行为、不发包、不合并；不把 CLI init 与 skill 安装解耦纳入本卡；chat 场景只留坑位，不深入服务端接口
 - 关联：ADR [0053 个人大脑以跨客户端复用为主路径](<../../../../../../docs/adr/0053-personal-brain-reused-across-agent-clients.md>)（取舍、已定项、待验证事实与开放问题）；兄弟卡 [完善个人大脑场景的安装与使用说明](<../../../../2026-11-02--edges-readme-优化/tasks/backlog/2026-11-03--完善个人大脑场景的安装与使用说明/INDEX.md>)；记忆索引 [个人大脑跨客户端与工作空间接入](<../../../../../memory/projects/project_personal_brain_client_workspace_access/INDEX.md>)
 
+- 进展：2026-11-08 grill 达成共识；用户审阅并批准[实施计划](<../../../../../../docs/superpowers/plans/2026-11-08-personal-brain-client-access-implementation.md>)，选定通用 `packages/skills/edges/SKILL.md` 也加一句「按长期记忆里的大脑路径先读 AGENTS.md」的条件说明。尚未实施。
+
 **目标：**
 `edges-onboarding` 能引导用户把已有个人大脑接入目标 Agent 客户端或工作空间，并按统一核验契约跨空间复用同一份大脑；开场菜单可新增「接入已有大脑」场景（提案 6+2=8，现状发布仍 5+2=7）。
 
@@ -24,6 +26,7 @@ description: 补齐把已有个人大脑接到各 Agent 客户端/工作空间�
 - 开场菜单新增「已有个人大脑 → 接入新客户端/工作空间」独立场景；流程只定位已有大脑并接入，不重建仓
 - 建完个人大脑后默认继续接入当前客户端（缺参数再补问）：识别宿主 → 打开对应分组指南 → 按契约核验
 - 首期优先写清并实测 Codex（本机 CLI、桌面 App、Cloud）与 Grok Bot；Cursor、Claude Code 作对照示例；chat 只留限制与接口坑位
+- 通用 `packages/skills/edges/SKILL.md` 加一句条件说明（不写死个人路径）
 - Compose 进代码项目降为可选旁路，不写进主路径
 
 **完成标准：**
