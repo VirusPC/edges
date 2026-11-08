@@ -45,7 +45,8 @@ def generate(run_dir: Path, output: Path, bootstrap: int = 2000) -> dict:
         raise ValueError('Output must be outside the immutable run')
     manifest = reporting.read_json(run_dir / 'manifest.json')
     dataset = reporting.read_json(run_dir / 'dataset.json')
-    if not dataset.get('cases') or any(c.get('source', {}).get('kind') != 'synthetic' for c in dataset['cases']):
+    if (dataset.get('source', {}).get('kind') != 'synthetic' or not dataset.get('cases') or not dataset.get('memories')
+            or any(item.get('source', {}).get('kind') != 'synthetic' for item in [*dataset['cases'], *dataset['memories']])):
         raise ValueError('Only explicitly synthetic datasets may use this public exporter')
     if manifest.get('dataset_sha256') != reporting.sha256(run_dir / 'dataset.json'):
         raise ValueError('Dataset hash mismatch')

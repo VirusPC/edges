@@ -11,6 +11,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import shutil
+import tempfile
 
 HERE = Path(__file__).resolve().parent
 FORBIDDEN = {'auth.json', '.env', '.env.local', '.env.current', 'credentials',
@@ -45,7 +46,7 @@ def inventory(source: Path) -> list[dict]:
 
 def archive(source: Path, name: str, apply: bool = False, base: Path = HERE) -> dict:
     relative = PurePosixPath(name)
-    if relative.is_absolute() or '..' in relative.parts or str(relative) != name or name in ('', '.'):
+    if relative.is_absolute() or '..' in relative.parts or str(relative) != name or name in ('', '.') or relative.parts[0] == 'receipts':
         raise ValueError('Name must be a normalized relative directory')
     if source.is_symlink():
         raise ValueError('Source must not be a symlink')
@@ -53,6 +54,11 @@ def archive(source: Path, name: str, apply: bool = False, base: Path = HERE) -> 
     base = base.resolve(strict=True)
     local = base / 'local'
     target = local / name
+    receipt = local / 'receipts' / name / 'manifest.json'
+    if any(path.is_symlink() for path in (receipt, *receipt.parents)):
+        raise ValueError('Receipt ancestry contains a symlink')
+    if receipt.exists() and not receipt.is_file():
+        raise ValueError('Receipt must be a regular file')
     for ancestor in [local, target, *target.parents]:
         if ancestor.is_symlink():
             raise ValueError('Destination ancestry contains a symlink')
@@ -91,17 +97,18 @@ def archive(source: Path, name: str, apply: bool = False, base: Path = HERE) -> 
             if digest(destination) != row['sha256']:
                 destination.unlink()
                 raise ValueError('Source changed during import; rerun the preview')
-        receipts = local / 'receipts'
-        receipts.mkdir(mode=0o700, exist_ok=True)
-        receipt = receipts / (name.replace('/', '--') + '.json')
+        receipt.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
         payload = {'schema_version': 1, 'source': str(source), 'destination': name,
                    'files': rows, 'source_deleted': False}
-        temporary = receipt.with_suffix('.tmp')
-        fd = os.open(temporary, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-        with os.fdopen(fd, 'w') as stream:
-            json.dump(payload, stream, ensure_ascii=False, indent=2)
-            stream.write('\n')
-        temporary.replace(receipt)
+        fd, temporary_name = tempfile.mkstemp(prefix='.receipt-', dir=receipt.parent)
+        temporary = Path(temporary_name)
+        try:
+            with os.fdopen(fd, 'w') as stream:
+                json.dump(payload, stream, ensure_ascii=False, indent=2)
+                stream.write('\n')
+            temporary.replace(receipt)
+        finally:
+            temporary.unlink(missing_ok=True)
         summary['applied'] = True
     return summary
 

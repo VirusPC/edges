@@ -41,6 +41,27 @@ class ArchiveTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 archive.archive(src, '../escape', base=root)
 
+    def test_receipt_namespace_symlink_and_nested_names(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            src = root / 'input'
+            src.mkdir()
+            (src / 'manifest.json').write_text('immutable original')
+            base = root / 'experiment'
+            base.mkdir()
+            with self.assertRaises(ValueError):
+                archive.archive(src, 'receipts', apply=True, base=base)
+            (base / 'local').mkdir()
+            (base / 'local/receipts').symlink_to(src)
+            with self.assertRaisesRegex(ValueError, 'symlink'):
+                archive.archive(src, 'archive', apply=True, base=base)
+            self.assertEqual((src / 'manifest.json').read_text(), 'immutable original')
+            (base / 'local/receipts').unlink()
+            archive.archive(src, 'a/b', apply=True, base=base)
+            archive.archive(src, 'a--b', apply=True, base=base)
+            self.assertTrue((base / 'local/receipts/a/b/manifest.json').is_file())
+            self.assertTrue((base / 'local/receipts/a--b/manifest.json').is_file())
+
 
 if __name__ == '__main__':
     unittest.main()
