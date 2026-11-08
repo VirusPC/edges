@@ -1,7 +1,7 @@
 ---
 metadata:
   edges-type: task
-  edges-updated-at: '2026-11-08T01:42:11.404Z'
+  edges-updated-at: '2026-11-08T01:52:19.123Z'
   edges-title: 个人大脑跨客户端与工作空间接入指南
   edges-tasks-status: backlog
   edges-task-priority: medium
@@ -22,13 +22,13 @@ description: 补齐把已有个人大脑接到各 Agent 客户端/工作空间�
 **动作：**
 - 在 `packages/skills/edges-onboarding/references/` 下按组新增客户端接入指南（具体文件布局未定）
 - 开场菜单新增「已有个人大脑 → 接入新客户端/工作空间」独立场景；流程只定位已有大脑并接入，不重建仓
-- 建完个人大脑后增加「接入当前客户端」路由步骤：识别宿主 → 打开对应分组指南 → 按契约核验
-- 首期优先写清并实测 Codex 与 Grok Bot；Cursor、Claude Code 作对照示例；chat 只留限制与接口坑位
+- 建完个人大脑后默认继续接入当前客户端（缺参数再补问）：识别宿主 → 打开对应分组指南 → 按契约核验
+- 首期优先写清并实测 Codex（本机 CLI、桌面 App、Cloud）与 Grok Bot；Cursor、Claude Code 作对照示例；chat 只留限制与接口坑位
 - Compose 进代码项目降为可选旁路，不写进主路径
 
 **完成标准：**
 - [ ] references 中各组指南与共享核验契约（契约内容待 grill 定稿）已合入；默认可写，不以「先只读」为产品默认
 - [ ] 开场可选「接入已有大脑」；该路径不建仓、不套用「已有项目添加 harness」
-- [ ] Codex、Grok Bot 至少各有一份可跟随步骤，并用可观察证据完成最小核验（规则加载、技能发现、读写、跨会话、Git 同步）；未实测能力不得写成已支持
+- [ ] Codex（本机 CLI、桌面 App、Cloud）、Grok Bot 至少各有一份可跟随步骤，并用可观察证据完成七层最小核验（含 Git 同步必验）；某一层失败不阻塞其他步骤，失败记入报告；未实测能力不得写成已支持
 - [ ] 事实边界写进指南：不得把未确认的「Codex Cowork」等同 ChatGPT Work；不得宣称 Grok Bot 仅 clone/切目录就会自动加载 AGENTS.md；写明 Grok Bot 技能目录与仓库 `.agents/skills` 是两套存放
 - [ ] 本卡范围内未改无关实现、未发包
