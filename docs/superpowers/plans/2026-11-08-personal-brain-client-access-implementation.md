@@ -1,8 +1,8 @@
 # 个人大脑客户端接入：实施计划
 
-状态：2026-11-08 用户已审阅并批准本计划；**尚未实施**。设计取舍的真源是 [ADR 0053](../../adr/0053-personal-brain-reused-across-agent-clients.md)，本文只写怎么落地，不重新决定设计。
+状态：2026-11-08 用户已审阅并批准本计划；**已在分支落地文档与 skill 文案（本批未发包、未合并、未实测）**。设计取舍的真源是 [ADR 0053](../../adr/0053-personal-brain-reused-across-agent-clients.md)，本文只写怎么落地，不重新决定设计。
 
-- 任务卡：[个人大脑跨客户端与工作空间接入指南](../../../.edges/projects/2026-09-09--agent-clients-ux/tasks/backlog/2026-11-08--个人大脑跨客户端与工作空间接入指南/INDEX.md)
+- 任务卡：[个人大脑跨客户端与工作空间接入指南](../../../.edges/projects/2026-09-09--agent-clients-ux/tasks/in_progress/2026-11-08--个人大脑跨客户端与工作空间接入指南/INDEX.md)
 - 术语：客户端工作区，见 [CONTEXT.md](../../../CONTEXT.md)
 
 ## 要做到的行为

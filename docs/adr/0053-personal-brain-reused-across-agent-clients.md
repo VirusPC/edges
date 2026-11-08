@@ -36,4 +36,4 @@
 
 本轮开放问题已清。剩余项均为待验证事实（见上一节），不是未决设计决策。
 
-后续工作见[任务卡](../../.edges/projects/2026-09-09--agent-clients-ux/tasks/backlog/2026-11-08--个人大脑跨客户端与工作空间接入指南/INDEX.md)。
+后续工作见[任务卡](../../.edges/projects/2026-09-09--agent-clients-ux/tasks/in_progress/2026-11-08--个人大脑跨客户端与工作空间接入指南/INDEX.md)。

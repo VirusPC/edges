@@ -1,9 +1,9 @@
 ---
 metadata:
   edges-type: task
-  edges-updated-at: '2026-11-08T02:19:18.371Z'
+  edges-updated-at: '2026-11-08T02:24:11.466Z'
   edges-title: 个人大脑跨客户端与工作空间接入指南
-  edges-tasks-status: backlog
+  edges-tasks-status: in_progress
   edges-task-priority: medium
 name: 个人大脑跨客户端与工作空间接入指南
 description: 补齐把已有个人大脑接到各 Agent 客户端/工作空间并跨空间复用的 onboarding 指南与核验契约；首期重点 Codex 与 Grok Bot。
@@ -14,9 +14,9 @@ description: 补齐把已有个人大脑接到各 Agent 客户端/工作空间�
 - 相关现状：已发布 onboarding 开场仍是五场景 + 两条流程兜底（共七项）；个人大脑建仓流程已有，跨客户端/工作空间接入指南缺失
 - 预期收益：新人或换客户端时，能按可观察证据把同一份大脑接到目标工作空间，而不是只凭 Agent 自报「读到了」
 - 非目标：本卡不实现 onboarding 功能改动、不改 skill 行为、不发包、不合并；不把 CLI init 与 skill 安装解耦纳入本卡；chat 场景只留坑位，不深入服务端接口
-- 关联：ADR [0053 个人大脑以跨客户端复用为主路径](<../../../../../../docs/adr/0053-personal-brain-reused-across-agent-clients.md>)（取舍、已定项、待验证事实与开放问题）；兄弟卡 [完善个人大脑场景的安装与使用说明](<../../../../2026-11-02--edges-readme-优化/tasks/backlog/2026-11-03--完善个人大脑场景的安装与使用说明/INDEX.md>)；记忆索引 [个人大脑跨客户端与工作空间接入](<../../../../../memory/projects/project_personal_brain_client_workspace_access/INDEX.md>)
+- 关联：ADR [0053 个人大脑以跨客户端复用为主路径](<../../../../../../docs/adr/0053-personal-brain-reused-across-agent-clients.md>)（取舍、已定项、待验证事实与开放问题）；兄弟卡 [完善个人大脑场景的安装与使用说明](<../../../../2026-11-02--edges-readme-%E4%BC%98%E5%8C%96/tasks/backlog/2026-11-03--%E5%AE%8C%E5%96%84%E4%B8%AA%E4%BA%BA%E5%A4%A7%E8%84%91%E5%9C%BA%E6%99%AF%E7%9A%84%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8%E8%AF%B4%E6%98%8E/INDEX.md>)；记忆索引 [个人大脑跨客户端与工作空间接入](<../../../../../memory/projects/project_personal_brain_client_workspace_access/INDEX.md>)
 
-- 进展：2026-11-08 grill 达成共识；用户审阅并批准[实施计划](<../../../../../../docs/superpowers/plans/2026-11-08-personal-brain-client-access-implementation.md>)，选定通用 `packages/skills/edges/SKILL.md` 也加一句「按长期记忆里的大脑路径先读 AGENTS.md」的条件说明。尚未实施。
+- 进展：2026-11-08 grill 达成共识并批准[实施计划](<../../../../../../docs/superpowers/plans/2026-11-08-personal-brain-client-access-implementation.md>)；同日已在分支落地 onboarding 0.7.0（菜单 6+2、接入已有大脑、建脑后默认接入、`references/client-access/`）与 edges 0.4.1（记忆路径条件说明）。**未发包、未合并、七层与 E1–E4 未实测**；完成标准勾选待合并与验收后。
 
 **目标：**
 `edges-onboarding` 能引导用户把已有个人大脑接入目标 Agent 客户端或工作空间，并按统一核验契约跨空间复用同一份大脑；开场菜单可新增「接入已有大脑」场景（提案 6+2=8，现状发布仍 5+2=7）。

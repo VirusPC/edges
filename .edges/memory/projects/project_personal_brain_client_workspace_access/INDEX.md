@@ -17,5 +17,5 @@ metadata:
 
 **How to apply:**
 - ADR：[0053 个人大脑以跨客户端复用为主路径](<../../../../docs/adr/0053-personal-brain-reused-across-agent-clients.md>)
-- 任务：[个人大脑跨客户端与工作空间接入指南](<../../../projects/2026-09-09--agent-clients-ux/tasks/backlog/2026-11-08--个人大脑跨客户端与工作空间接入指南/INDEX.md>)
+- 任务：[个人大脑跨客户端与工作空间接入指南](<../../../projects/2026-09-09--agent-clients-ux/tasks/in_progress/2026-11-08--%E4%B8%AA%E4%BA%BA%E5%A4%A7%E8%84%91%E8%B7%A8%E5%AE%A2%E6%88%B7%E7%AB%AF%E4%B8%8E%E5%B7%A5%E4%BD%9C%E7%A9%BA%E9%97%B4%E6%8E%A5%E5%85%A5%E6%8C%87%E5%8D%97/INDEX.md>)
 - ADR「开放问题」里的条目未定，不要当成已定或已实现。
