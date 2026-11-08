@@ -133,7 +133,7 @@ def generate(run_dir: Path, output: Path, bootstrap: int = 2000) -> dict:
     (output / 'report.md').write_text('\n'.join(lines))
     fields = ['case_id', 'condition', 'repeat', 'failed', *METRICS]
     with (output / 'trials.csv').open('w', newline='') as stream:
-        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer = csv.DictWriter(stream, fieldnames=fields, lineterminator='\n')
         writer.writeheader()
         writer.writerows(safe_rows)
     return result
