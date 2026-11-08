@@ -103,6 +103,7 @@ SCENES += [
     {
         "family": "historical_decision", "split": "test",
         "blueprint": "meal_box_weekly_choice", "entity": "青砾食盒库",
+        "required_units": ["no_default_renewal", "weekly_cutoff"],
         "question": "青砾食盒库又有人建议默认续下一周的食盒，当时为何没采用，这轮订盒怎么安排？",
         "context": "青砾食盒库每周按报名准备食盒，订盒者中有人固定领取，也有人只在特定周参加。库房准备更换提醒页面，设计稿再次出现沿用上周订单的选项，负责接待的同伴想确认它与旧决定是否相符。",
         "operation": "weekly_meal_box_choice", "task_mode": "memory_qa",
@@ -149,6 +150,7 @@ SCENES += [
     {
         "family": "historical_decision", "split": "test",
         "blueprint": "dyed_yarn_sample_shipping", "entity": "澹枫纱棚",
+        "required_units": ["retain_colour_variation", "physical_sample_ring"],
         "question": "澹枫纱棚的新染线准备寄样，之前否掉的统一调色照片方案现在该怎样替代？",
         "context": "澹枫纱棚把几个小染批整理成可寄出的样品，买方通常先看图片再决定是否要实物。负责这轮寄样的人看到旧图册颜色十分整齐，又听说后来停用过一种修图办法，因而回查当时的处理记录。",
         "operation": "dyed_yarn_sample_dispatch", "task_mode": "pre_task_retrieval",
@@ -198,7 +200,7 @@ SCENES += [
     {
         "family": "conditional_override", "split": "dev",
         "blueprint": "greenhouse_teacher_rehearsal", "entity": "赤苔温室",
-        "question": "赤苔温室这次只有内部老师排演，能直接沿用外部报名页吗？",
+        "question": "赤苔温室这次只有内部老师排演，外部报名页能沿用哪些部分？把这次报名安排说清楚。",
         "context": "赤苔温室将在正式开放前让内部老师走一遍接待流程，参加者都是本次排演小组成员。负责页面的人手边已有外部活动报名模板，想省去重新排版的工作，但还没有复制页面或发出填写链接。",
         "operation": "teacher_rehearsal_registration", "task_mode": "memory_qa",
         "facts": {"audience": "internal", "phase": "rehearsal"},
@@ -221,7 +223,7 @@ SCENES += [
     {
         "family": "conditional_override", "split": "dev",
         "blueprint": "archive_internal_projection", "entity": "霜篱档案室",
-        "question": "霜篱档案室的内部新人练习，能把访客浏览那套图片直接拿来投屏吗？",
+        "question": "霜篱档案室要给内部新人做一轮投屏练习，手头有访客浏览那套图片；从准备到收尾，这次该怎么用？",
         "context": "霜篱档案室准备给内部新同伴做一次辨认编目差异的练习，教室使用多人共用的投屏设备。带教人发现访客入口里已有清晰的扫描图，正在选取材料，尚未把任何图片复制到教学设备。",
         "operation": "archive_training_projection", "task_mode": "memory_qa",
         "facts": {"audience": "internal", "phase": "rehearsal"},
@@ -244,7 +246,7 @@ SCENES += [
     {
         "family": "conditional_override", "split": "test",
         "blueprint": "scent_internal_blind_trial", "entity": "松芦试香屋",
-        "question": "松芦试香屋内部盲评这轮，能照外请评议员那样把配方册一起发下去吗？",
+        "question": "松芦试香屋要做一轮内部盲评，有人建议照外请评议员那样发配方册；从开场到讲评，这次怎么安排合适？",
         "context": "松芦试香屋安排一轮内部样品辨识练习，参加者中有熟悉调配工作的人，也有新加入的记录员。主持者看到上次外请评议活动的材料包，考虑是否照用其中的文件，当前尚未公布样品对应关系。",
         "operation": "internal_scent_blind_trial", "task_mode": "memory_qa",
         "facts": {"audience": "internal", "phase": "blind_rehearsal"},
@@ -267,7 +269,7 @@ SCENES += [
     {
         "family": "conditional_override", "split": "test",
         "blueprint": "puppet_closed_rehearsal_feedback", "entity": "卿湾木偶室",
-        "question": "卿湾木偶室这次闭门排演，能沿用正式演出的全程录像来收集意见吗？",
+        "question": "卿湾木偶室这次闭门排演想收集意见，手头有正式演出那套全程录像流程；请把这轮收集意见的安排说明白。",
         "context": "卿湾木偶室准备在不开放观众的时段试演新段落，参与者需要一边尝试动作一边调整台词。观察小组手边仍有正式演出时的记录设备，正在讨论如何把排演中发现的问题带到之后的修改会议。",
         "operation": "closed_puppet_rehearsal_feedback", "task_mode": "memory_qa",
         "facts": {"audience": "internal", "phase": "closed_rehearsal"},
@@ -290,7 +292,7 @@ SCENES += [
     {
         "family": "conditional_override", "split": "test",
         "blueprint": "nursery_internal_scale_drill", "entity": "荇舟种苗站",
-        "question": "荇舟种苗站给内部称量员做练习，能直接走正式领苗单把这一轮跑完吗？",
+        "question": "荇舟种苗站要给内部称量员安排一轮练习，有人想沿用正式领苗单；这轮从准备到结束该怎样开展，遇到不对劲的情况又该怎样接着处理？",
         "context": "荇舟种苗站的新称量员将在培训时段熟悉容器读数和填单动作，当天没有安排对外领取。带教人希望让练习接近日常工作，因此拿出了一张正式领苗表作为参考，尚未选择练习物料和操作环境。",
         "operation": "internal_weighing_drill", "task_mode": "memory_qa",
         "facts": {"audience": "internal", "phase": "calibration_rehearsal"},
@@ -313,7 +315,7 @@ SCENES += [
     {
         "family": "conditional_override", "split": "test",
         "blueprint": "recycling_route_token_rehearsal", "entity": "萤栎回收亭",
-        "question": "萤栎回收亭的内部路线演练，能借正式交运二维码让新人照着跑一趟吗？",
+        "question": "萤栎回收亭要带内部新人做一轮路线演练，手头有正式交运二维码；这次怎样组织和收尾，途中有意外情况又该怎样衔接？",
         "context": "萤栎回收亭准备带内部新人认识附近各站点，正式交运车辆当天仍按原排班工作。带队人希望新人沿途练习识别站点，于是查看了常用交运标签，正在决定本次演练需要携带哪些材料。",
         "operation": "internal_route_token_rehearsal", "task_mode": "memory_qa",
         "facts": {"audience": "internal", "phase": "route_rehearsal"},
@@ -336,7 +338,7 @@ SCENES += [
     {
         "family": "conditional_override", "split": "test",
         "blueprint": "print_internal_proofing", "entity": "稚岚排印所",
-        "question": "稚岚排印所这轮内部校样练习，能套用客户急件的免复核通道吗？",
+        "question": "稚岚排印所要安排一轮内部校样练习，有人建议套用客户急件的免复核通道；请把这轮练习从开场到讲评的做法说明白。",
         "context": "稚岚排印所安排内部同伴练习找出样稿中的差异，参加者会轮流使用共享打样机。排班负责人发现当天人员较少，想参考客户急件的处理办法压缩练习时间，练习稿此时还未发到各人手中。",
         "operation": "internal_proofreading_drill", "task_mode": "memory_qa",
         "facts": {"audience": "internal", "phase": "proofing_rehearsal"},
@@ -359,7 +361,7 @@ SCENES += [
     {
         "family": "conditional_override", "split": "test",
         "blueprint": "wheel_shop_reconciliation_drill", "entity": "茵砂修轮棚",
-        "question": "茵砂修轮棚的新同伴在内部练习对账，能用客户快速退款按钮把样例单清掉吗？",
+        "question": "茵砂修轮棚的新同伴要练习对账，有人提议用客户快速退款按钮清掉样例单；这轮该怎样进行和收尾，遇到意外情况又该怎样衔接？",
         "context": "茵砂修轮棚正在训练新同伴理解订单、支付与备件记录之间的关系，练习结束后还要给下一组使用。带教人看到界面上有熟悉的退款按钮，正在考虑如何让这轮样例恢复初始状态，尚未执行清理。",
         "operation": "internal_refund_reconciliation", "task_mode": "memory_qa",
         "facts": {"audience": "internal", "phase": "reconciliation_rehearsal"},

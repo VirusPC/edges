@@ -1,10 +1,10 @@
 {
   "artifacts_sha256": {
-    "DATA_REPORT.json": "35d97b5bf4daa388664fad84f2415f0df073133ee3cbd8a417aba37c3980a91c",
-    "DATA_REPORT.md": "9355bb45afba64b3b4df899e9e09185ff1ca482c92b5ddd9117aa3db2aa823d5",
-    "data-v2.json": "0588ed5360487104cb13c186d3be1bce9ceff8a4db4426bdce7dafd34bd36bdc"
+    "DATA_REPORT.json": "26a1970cf0af1371fe29568cf786c0df91972b7542cef602c5152f27ab5c2493",
+    "DATA_REPORT.md": "52dbde50002d5e11dac318f1d8c8bf17afab97713ac144ff331b99ef68e54d5d",
+    "data-v2.json": "f074b815c2cee6eb77ed35fa6b07716f7dd34bcf066e89a91d73efef2f5d16c7"
   },
-  "build_sha256": "530be8336be3de1dc6073bd94be1afa91f9d5ac0a9834fb8f16f3c1e169e8718",
+  "build_sha256": "13e8a3696efaf4d0f0452ceec0733647e3cca8e5b1f0514672864e5bcb8e59b0",
   "command": "python -m synthetic.v2.generate --seed <seed> --output <directory>",
   "generator": "natural-scenarios-v2",
   "input_policy": "Only bundled fictional blueprint constants; source files are read solely to hash the build. No external corpus, network or model.",
@@ -12,11 +12,11 @@
   "seed": 20261110,
   "source_sha256": {
     "__init__.py": "deb55ac244e0ce5dc42b94305bd2cfbcfea419c6bc1a2e09337568504fbb02e1",
-    "generate.py": "c9d62a39a7dd03bc7d940ae9a2648e17d32705fa8dfbd16089cbe2cbf8d6d32c",
+    "generate.py": "442ba120971a2200fe10201e0ce1c2a90245f3d8fb8702b1897f194072e76b39",
     "harbor/dataset.py": "d55f8ace736c92a60eee5ea5cc35b587e58cf9fbd47a01ab610023a9a0159167",
     "harbor/run.py": "71db7e07b13a082c52ee97eda7b11e60b365339851a1f447d96334c6a4ccb916",
     "oracle.py": "a4dc6ee33bdf739415bedfa8170aaf1e22c8aaba9c7ca8927be7697707be73a8",
-    "scenes_actions.py": "cfad27a202211625975a24d53fb98fafde8bbc6a6d5c0a890d9c48de33afed17",
-    "scenes_reasoning.py": "5e4499743f6bea3390d398b67e89b77de7a809d5a2b9eb0ef4dd1bb073502f8f"
+    "scenes_actions.py": "3aa818dc12de386e458ac7577cc252fc0635607bf6ecbd3e1aeff39c1ba15d93",
+    "scenes_reasoning.py": "a2085cb5bf3f53b506dcfe99c3a007b35342d08780c72f4d6f8b21c7d754f7e8"
   }
 }

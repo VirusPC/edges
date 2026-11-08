@@ -92,7 +92,7 @@ class NaturalSyntheticTests(unittest.TestCase):
     def test_condition_flip_changes_winner_without_question_matching(self):
         data = self.data
         truth = data['scene_truth']
-        case = deepcopy(next(c for c in truth['cases'] if c['scenario_family'] == 'conditional_override'))
+        case = deepcopy(next(c for c in truth['cases'] if c['scenario_family'] == 'implicit_workflow'))
         original = expected_memory_ids(truth, case)
         alternative = next(r for r in truth['rules'] if r['scene_id'] == case['scene_id'] and r['variant'] == 'other_condition')
         case['facts']['phase'] = 'facilitated_training'
@@ -178,6 +178,38 @@ class NaturalSyntheticTests(unittest.TestCase):
         truth['rules'].append(rule)
         with self.assertRaisesRegex(ValueError, 'ambiguous'):
             resolve(truth, case)
+
+    def test_training_distractor_has_a_separate_natural_activity(self):
+        truth = self.data['scene_truth']
+        for case in truth['cases']:
+            if case['scenario_family'] != 'conditional_override':
+                continue
+            rule = next(r for r in truth['rules'] if r['scene_id'] == case['scene_id'] and r['variant'] == 'other_condition')
+            self.assertNotEqual(rule['operation'], case['operation'])
+            self.assertEqual(resolve(truth, case)['exclusions'][rule['rule_id']], 'different_operation')
+            self.assertIn('火警撤离', rule['boundary'])
+            self.assertNotIn('facilitated_training', rule['when'].values())
+
+    def test_current_but_unrequested_evidence_is_not_automatically_gold(self):
+        truth = self.data['scene_truth']
+        for entity, excluded_unit in [('砂灯木作社', 'action'), ('澹枫纱棚', 'sample_dispute_hold'), ('青砾食盒库', 'cancelled_box_handover')]:
+            case = next(c for c in truth['cases'] if c['entity'] == entity)
+            result = resolve(truth, case)
+            self.assertEqual(len(result['rule_ids']), 2)
+            current = [r for r in truth['rules'] if r['scene_id'] == case['scene_id'] and r['variant'] == 'current']
+            self.assertEqual(len(current), 3)
+            excluded = next(r for r in current if r['unit'] == excluded_unit)
+            self.assertEqual(result['exclusions'][excluded['rule_id']], 'not_required_for_requested_operation')
+
+    def test_explicit_obligations_still_expand_dependencies_and_reject_unknowns(self):
+        from synthetic.v2.scenes_reasoning import SCENES
+        scene = deepcopy(next(s for s in SCENES if s['family'] == 'multihop_plan'))
+        scene['required_units'] = [scene['rules'][-1]['key']]
+        built = g.build_dataset(_scenes=[scene])
+        self.assertEqual(len(built['cases'][0]['gold_memory_ids']), len(scene['rules']))
+        scene['required_units'] = ['unknown-evidence-unit']
+        with self.assertRaisesRegex(ValueError, 'required_units'):
+            g.build_dataset(_scenes=[scene])
 
 
 if __name__ == '__main__':

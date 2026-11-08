@@ -100,8 +100,8 @@
       "bm25_recall": 1.0,
       "bm25_top5": [
         "m-7cecc4141c497aff9039b6b2",
-        "m-c80e48bd3a563d700643d16d",
         "m-630af9691f6c8e841a678a4e",
+        "m-00f95ee524cc321b29af9568",
         "m-d554574e8bf33527caca80d0",
         "m-06f807e6eacab0a952105ae0"
       ],
@@ -118,8 +118,8 @@
         "m-1c4b6bca2afece9025bcb4b6",
         "m-f053231094a15c9473d20a23",
         "m-337cf06054facad396b75f37",
-        "m-b96a5a89639279a866c5e09c",
-        "m-2ba097f9a1025abbb1199b0e"
+        "m-2ba097f9a1025abbb1199b0e",
+        "m-62e01c499125431d821b5458"
       ],
       "case_id": "case-56478f9967350795d1a1e5b7",
       "family": "conditional_override",
@@ -331,7 +331,7 @@
       ],
       "case_id": "case-7aa483474ee456c576d5db4b",
       "family": "boundary_routing",
-      "gold_count": 3,
+      "gold_count": 2,
       "split": "test",
       "theoretical_recall_ceiling": 1.0,
       "visible_memories": 336
@@ -411,7 +411,7 @@
       ],
       "case_id": "case-09ce8b8a25e7a1ddfb525fda",
       "family": "historical_decision",
-      "gold_count": 3,
+      "gold_count": 2,
       "split": "test",
       "theoretical_recall_ceiling": 1.0,
       "visible_memories": 336
@@ -475,19 +475,19 @@
       ],
       "case_id": "case-03f87712af5bb30ddd6dd136",
       "family": "historical_decision",
-      "gold_count": 3,
+      "gold_count": 2,
       "split": "test",
       "theoretical_recall_ceiling": 1.0,
       "visible_memories": 336
     },
     {
-      "bm25_recall": 0.3333333333333333,
+      "bm25_recall": 0.6666666666666666,
       "bm25_top5": [
         "m-44560fc2701edd13e6424df7",
-        "m-9ea0a0ca792c913b6200b311",
         "m-cfa8d196e0c999fd2bcdcc3f",
-        "m-3e17b8e6fe9afa90dbe7c95d",
-        "m-bd968cf54dbf26bd1541d4c2"
+        "m-bd968cf54dbf26bd1541d4c2",
+        "m-aee794c22e024babe49de934",
+        "m-3e17b8e6fe9afa90dbe7c95d"
       ],
       "case_id": "case-6e9507f0b2d94cd59bc53d1d",
       "family": "conditional_override",
@@ -500,10 +500,10 @@
       "bm25_recall": 1.0,
       "bm25_top5": [
         "m-7ac8cf0b6e6b645438ed8c53",
-        "m-becbbd3c3618af3f8438384b",
-        "m-2935eb2a2624362c66d9584d",
         "m-ddd7b08ad78f1e08e850d040",
-        "m-f43b4960ef6867943642d1d2"
+        "m-2935eb2a2624362c66d9584d",
+        "m-f43b4960ef6867943642d1d2",
+        "m-87813a9b322f442fa332ec76"
       ],
       "case_id": "case-6c8824539bad16685b35cb98",
       "family": "conditional_override",
@@ -517,7 +517,7 @@
       "bm25_top5": [
         "m-7cf19293600858506ae4441c",
         "m-33c41e49c67db6673f3bc004",
-        "m-2e6b093b6c05e17f75be4f36",
+        "m-592c25a15621cfe999f2303f",
         "m-ce2c3648963f3696af685257",
         "m-9e0a9e4ef57e88b40fa24c00"
       ],
@@ -532,10 +532,10 @@
       "bm25_recall": 1.0,
       "bm25_top5": [
         "m-a388d82e4fe7a175230d5995",
-        "m-a29ad097c76205cce102b28f",
-        "m-6cec221cf3514d8273c07437",
         "m-3a01b0cffc3e19db2afef74e",
-        "m-12b747ae8d7fa2fa3604d080"
+        "m-6cec221cf3514d8273c07437",
+        "m-12b747ae8d7fa2fa3604d080",
+        "m-1544c86d16f725166390a540"
       ],
       "case_id": "case-4fa8018f4b4375c66fa437b8",
       "family": "conditional_override",
@@ -549,9 +549,9 @@
       "bm25_top5": [
         "m-194d676f49632e4343f97b6d",
         "m-a8659ab5dbe58075090c6b37",
-        "m-ff1a55609b2c680a874aa83a",
         "m-b63f31575e6c2f699417a270",
-        "m-cc47bc9ab6296b1774c3936d"
+        "m-cc47bc9ab6296b1774c3936d",
+        "m-e1f77a965388f99e9bff3f30"
       ],
       "case_id": "case-1b76fb21d9d0ba5440618f1a",
       "family": "conditional_override",
@@ -565,8 +565,8 @@
       "bm25_top5": [
         "m-576297a08979de630177d6b6",
         "m-6c45dc1467bda2aaae121807",
-        "m-c611610425ffea3585f5d074",
         "m-c14c9a14d8a02c56129b1f78",
+        "m-e3af378d878a255d0f1369a4",
         "m-8f6d90aed7a0b6691d196338"
       ],
       "case_id": "case-2f573c8ed6cfc2cf0ca3dee6",
@@ -644,8 +644,8 @@
       "bm25_recall": 0.6666666666666666,
       "bm25_top5": [
         "m-aab29d237496ad08fd24e6ba",
-        "m-dfcfba0acf15e42760aed5c8",
         "m-4b95849855fe18277ea8e60a",
+        "m-dfcfba0acf15e42760aed5c8",
         "m-de993a892e73f9921f1ee370",
         "m-df38ec0c51fd645e42ef46de"
       ],
@@ -755,8 +755,8 @@
     {
       "bm25_recall": null,
       "bm25_top5": [
-        "m-0dd572a9b8f57d941ad1779e",
         "m-49c48f42d30b0271b8e09116",
+        "m-0dd572a9b8f57d941ad1779e",
         "m-61059007bb1381cb46b181a6",
         "m-e0361bf7c84f71fcac417239",
         "m-8e72f9d3ed0fbaad4413af2b"
@@ -775,12 +775,13 @@
     "cases": 48,
     "gold_counts": {
       "0": 8,
-      "3": 39,
+      "2": 3,
+      "3": 36,
       "4": 1
     },
     "memories": 336
   },
-  "dataset_sha256": "0588ed5360487104cb13c186d3be1bce9ceff8a4db4426bdce7dafd34bd36bdc",
+  "dataset_sha256": "f074b815c2cee6eb77ed35fa6b07716f7dd34bcf066e89a91d73efef2f5d16c7",
   "kind": "offline_construct_diagnostics_not_agent_results",
   "limitations": [
     "Purposeful fictional engineering coverage, not a representative sample.",

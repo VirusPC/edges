@@ -7,7 +7,7 @@
 | dev | 12 | 8 | 3 | 1 |
 | test | 36 | 24 | 8 | 4 |
 
-Gold 数量分布：{0: 8, 3: 39, 4: 1}。正文中文字符范围：230–384。
+Gold 数量分布：{0: 8, 2: 3, 3: 36, 4: 1}。正文中文字符范围：230–384。
 
 - Purposeful fictional engineering coverage, not a representative sample.
 - Eight distinct blueprints per family remain authored from one design distribution; version/training/administration distractor scaffolds are shared across scenes.

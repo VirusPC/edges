@@ -89,7 +89,10 @@ def build_dataset(seed: int = DEFAULT_SEED, *, _scenes: list[dict] | None = None
         dependencies = {key for r in specs for key in r.get('requires', [])}
         if not dependencies <= keys:
             raise ValueError('unknown authored evidence dependency')
-        obligations = sorted(keys - dependencies)
+        required_units = scene.get('required_units', sorted(keys - dependencies))
+        if not isinstance(required_units, list) or len(set(required_units)) != len(required_units) or not set(required_units) <= keys or (not required_units and not negative):
+            raise ValueError('invalid authored required_units')
+        obligations = sorted(required_units)
         ct = dict(case_id=cid, scene_id=scene_id, entity=scene['entity'], blueprint=scene['blueprint'],
                   scope=scope, scope_start=start, query_at=QUERY_AT, split=split, question=scene['question'],
                   task_mode=scene['task_mode'], scenario_family=scene['family'], operation=scene['operation'],
@@ -130,6 +133,20 @@ def build_dataset(seed: int = DEFAULT_SEED, *, _scenes: list[dict] | None = None
                 rule['why'] = '带教需要让新人安全地试错，因此使用可重置的样例，并由现场人员确认练习进度。这个安排不能替代真实工作的确认步骤，真实资料也不能为了省事直接放进练习环境。'
                 rule['boundary'] = '只有明确组织的带教演练才采用本页办法。一般草稿、内部准备和正式任务并不自动等于演练；没有带教安排时，仍查实际工作的现行记录，不以本页简化流程。'
                 rule['status_note'] = '演练分支长期有效，与实际业务分支并存；条件不同，不是全面替代。'
+                if scene['family'] == 'conditional_override':
+                    # Business training may itself have a facilitator. A hidden phase
+                    # label cannot make that natural-language condition inapplicable.
+                    # Use a genuinely different, explicit activity for this distractor.
+                    rule['operation'] = 'fire_evacuation_tabletop'
+                    rule['when'] = {'audience': 'internal', 'purpose': 'evacuation_drill'}
+                    rule['title'] = '年度撤离路线桌面推演的讲评记录'
+                    rule['context'] = f"{scene['entity']}每年安排一次消防疏散桌面推演，参加者不操作业务设备，而是在纸面上确认火警时的撤离路线和集合点。主持人收集不同岗位对路线的理解，再把尚未确认的地方交给场地负责人核实。"
+                    rule['decision'] = '桌面推演使用专门绘制的虚构楼层草图，参加者依次说明发现火警后的撤离与清点安排。主持人对照已经确认的安全要求讲评，结束后回收临时草图，只保存本次发现的路线理解差异与待确认问题。'
+                    rule['why'] = '过去有人把日常通行习惯直接用于紧急撤离，忽略了出口受阻时的变化。纸面推演让不同岗位先暴露各自的假设，不需要启动真实报警，也不把尚未核实的草图当成正式疏散指示张贴出去。'
+                    rule['boundary'] = '这份记录只用于以火警撤离、人员清点和集合点交接为目的的桌面推演。业务技能授课或日常上岗练习不是这里所说的疏散演练；即使由同一名带教人主持，也不能把本页回收草图的办法扩大到其他业务记录。'
+                    rule['activity_label'] = '消防疏散桌面推演'
+                    rule['condition_text'] = '目的必须是消防撤离和集合点交接。'
+                    rule['status_note'] = '只适用于消防疏散桌面推演，不是本题的业务技能练习。'
             elif kind == 'expired':
                 rule['title'] = base['title'] + '：早期试办留档'
                 rule['activity_label'] = '试办期间的临时行政交接'
