@@ -11,28 +11,30 @@
 ## 已确定
 
 - 指南放在 `edges-onboarding/references`，每个客户端分组一份。
-- 落地顺序：personal agent（Grok Bot、Muse、Dot 等）→ work 类简单工作区 → coding 项目空间（Codex、Claude Code、Cursor 等）→ chat（需服务端接口，只留坑位）。分组由 Agent 从会话与环境判断，不让用户选分组菜单。
+- 落地顺序：personal agent（Grok Bot、Muse、Dot 等）→ work 类简单工作区（首期参考 ChatGPT Work 写一版；Claude Cowork 暂不处理） → coding 项目空间（Codex、Claude Code、Cursor 等）→ chat（需服务端接口，只留坑位）。分组由 Agent 从会话与环境判断，不让用户选分组菜单。
 - 首期重点 Codex 与 Grok Bot；Cursor、Claude Code 作对照示例。
 - Codex 首期指南覆盖本机 CLI、桌面 App 与 Codex Cloud 三种形态。
+- 接入已有大脑时先问一句大脑在哪；有多份 clone 时列出候选让人选，只有存在真实使用记录时才把某份标为「最近使用」并优先，不猜。
+- 客户端用大脑仓库里的 skills 或用户级全局安装都可以，不约定哪边是权威，也不规定同步责任。
+- Grok Bot 规则入口两条都要：技能里写明先读大脑 `AGENTS.md`，会话或长期记忆作兜底。长期记忆只用于提醒大脑位置，不替代仓库里的规则；两条都不能保证每个新会话自动加载，具体触发机制仍待澄清（见开放问题）。
 - 默认可写，不设「先只读再升级」门禁；客户端客观上不能写时记为该客户端的限制。
 - 新增独立场景「已有个人大脑，接入新客户端」：定位已有大脑后接入，不新建仓库、不在 GitHub 建仓，也不套用「已有项目添加 harness」。开场菜单由现行五场景加两条流程兜底（七项）变为六场景加两条兜底（八项）；宿主提问组件的选项上限（如 Kimi Work 最多四项）属宿主限制，不因此删场景。
 - 建完个人大脑后，默认继续接入当前客户端；缺参数再补问。用户仍可选稍后再接。
 - 客户端打开或绑定的那个目录称为**客户端工作区**，与 Compose 语境下的「工作空间」区分；术语见 [CONTEXT.md](../../CONTEXT.md)。
-- 接入是否成功要看人能观察到的证据，不凭 Agent 自称已加载。核验按七层给出可观察证据（打开或绑定、规则加载、技能发现、读、写、跨会话、Git 同步）；每一层都要有证据。Git 同步在所有接入中都必须验收；用户批注：绝大部分情况下没有 GitHub 同步就没有意义。某一层（含 Git 同步）测试不通过时，不阻塞其他步骤继续，失败结果记入报告。
+- 接入是否成功要看人能观察到的证据，不凭 Agent 自称已加载。核验按七层给出可观察证据（打开或绑定、规则加载、技能发现、读、写、跨会话、Git 同步）；每一层都要有证据，第 7 层才是 Git 同步。规则加载看 Agent 能否在不提示路径时引用大脑 `AGENTS.md` 里的约定，技能发现看技能能否被列出或唤起，两者分开验收。Git 同步在所有接入中都必须验收；用户批注：绝大部分情况下没有 GitHub 同步就没有意义。某一层（含 Git 同步）测试不通过时，不阻塞其他步骤继续，失败结果记入报告。
 
 ## 待验证事实
 
 - 尚无证据表明 Grok Bot 仅 clone 或切换目录就会自动加载大脑 `AGENTS.md`。待做最小实验：新会话不提示路径时能否答出只写在大脑 `AGENTS.md` 的约定；技能版本与 Grok Bot 技能目录是否一致；两个 bot 经 Git 写入并读回；大脑仓库技能升版后 Grok Bot 侧是否仍是旧版。
-- 用户所称「Codex Cowork」对应哪种产品形态未确认；未找到 OpenAI 官方使用此名的页面，不与 ChatGPT Work 等同。
+- 未找到 OpenAI 官方使用「Codex Cowork」这个名字的页面；它与 Anthropic 的 Claude Cowork 是两回事，不混写。Claude Cowork 由用户决定暂不处理。
+- ChatGPT Work【官方，learn.chatgpt.com/docs/projects】：桌面 App 的本地项目可挂多个文件夹，新会话从 primary 文件夹开始；文档写明 Codex 从 primary 文件夹自动发现 `AGENTS.md`、skills 与 `config.toml`，次要文件夹不自动发现。Work 会话本身是否同样加载 `AGENTS.md` 文档未明说，待试。Work 用 Cloud 时需挂文件夹的电脑在线，会话同步不上传整个文件夹【官方，learn.chatgpt.com/docs/enterprise/chatgpt-work-overview】。
 - 各客户端完整接入链路均未实测；实测前指南不得宣称已支持。Codex Cloud 是否按与本机相同的规则读取 `AGENTS.md` 与 `.agents/skills` 仍待试。
 
 ## 开放问题
 
 以下尚未决定，不得当作已定：
 
-1. Grok Bot 若不会自动加载规则，固定入口用技能内显式读取、会话或长期记忆提示，还是两者都要。
-2. 客户端使用大脑仓库里的 skills 还是用户级全局安装；版本不一致时以谁为准、谁负责同步。
-3. 接入已有大脑时默认从哪里定位大脑，多份 clone 并存时用哪份。
-4. work 类工作区形态确认前，其指南只放占位还是参考 ChatGPT Work 先写一版。
+1. Grok Bot 每个新会话如何被引到大脑 `AGENTS.md`：用户专属的大脑路径记在长期记忆、由通用 edges 技能按记忆去读，还是生成一份写死路径的用户专属技能。用户批注「选项没说清楚」，本条是澄清 Q5 的机制，不推翻 Q5。
+2. 「两边皆可」下，技能发现核验遇到同名技能两个版本时，指南只记录两边版本并继续，还是请用户选留一份。
 
 后续工作见[任务卡](../../.edges/projects/2026-09-09--agent-clients-ux/tasks/backlog/2026-11-08--个人大脑跨客户端与工作空间接入指南/INDEX.md)。
