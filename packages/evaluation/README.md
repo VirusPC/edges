@@ -14,7 +14,7 @@
 - 已采纳的决策、纠错、操作手册 → [`.edges/memory/`](.edges/memory/)
 - 接入 Edges 的 CLI / MCP / skill 实现 → 仓库根 [`packages/cli/`](../cli)、[`packages/skills/`](../skills)、[`packages/mcp-servers/`](../mcp-servers)
 - 野外使用记录、运行日志、仪表盘笔记 → [`observation/`](../observation/README.md)
-- 编造的数据集、假分数、尚未跑过的「结果」
+- 冒充真实来源的数据集、假分数、尚未跑过的「结果」。明确标识生成规则、用途和局限的可复现合成数据可以用于诊断，并与真实数据实验分开报告。
 
 本仓公开。用例与报告按根 README「公开仓库边界」脱敏；不要写入凭据、未公开 IP 或可识别个人。
 

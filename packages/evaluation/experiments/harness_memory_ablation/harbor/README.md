@@ -2,7 +2,31 @@
 
 本程序使用 Harbor 0.25.0 的内置 `codex`、每次独立 Docker 环境和 separate verifier，在 Edges 评测区比较分作用域记忆、根目录记忆和无记忆。它与[父目录的双组 runner](../README.md)独立；准备模式和离线测试不调用模型。
 
-本目录是该三组实验程序的维护入口。[2026-11-09 的真实实验聚合报告](../../../reports/2026-11-09-harbor-memory-ablation.md)保留实际结果与边界；真实问题、源标识及完整运行日志不进入公开仓库。归属迁移保持程序字节和已冻结的运行证据，不为迁移重跑模型。
+本目录是该实验的完整维护入口，统一组织设计、数据、生成与评测程序、审计、结果和运行原件。[2026-11-09 的真实实验聚合报告](../../../reports/2026-11-09-harbor-memory-ablation.md)保留实际结果与边界。真实实验的冻结来源不因归档改变；后续合成实验单独冻结、执行与报告。
+
+## 完整实验入口
+
+| 材料 | 入口 |
+| --- | --- |
+| 真实实验设计与统计协议 | [design/DESIGN.md](design/DESIGN.md)、[公开协议视图](design/protocol-v1.json) |
+| 数据来源、构成与标注方法 | [data/](data/README.md)、[标注审阅准则](design/ANNOTATION_GUIDE.md) |
+| 真实冻结数据集与全部运行原件 | [local/archive/](local/archive/)：实际 dataset、候选、标注、raw、runs、完整报告与审计；Git 忽略 |
+| 可复用的合成数据、生成逻辑与新报告 | [synthetic/](synthetic/README.md)，与真实样本及结论分开 |
+| Eval 程序 | 本目录 `run.py`、`metrics.py`、`report.py`、`verify.py` 及依赖锁 |
+| 离线完整性、计量审计与资源采样 | [audit/](audit/README.md) |
+| 真实实验公开结果 | [Markdown](../../../reports/2026-11-09-harbor-memory-ablation.md)、[聚合 JSON](../../../reports/2026-11-09-harbor-memory-ablation.json) |
+| 历史辅助审计与发布脚本 | [local/support/](local/support/)，含当次复核决策与脚本；Git 忽略 |
+
+公开 Git 保存可公开的设计、说明、合成数据、程序与报告。真实问题、来源标识、完整命令及原始日志在同一实验下的 `local/` 集中归档，但不公开；该目录的存在不等于已远程备份。原始受限备份保留，公开克隆不随附本地原件。
+
+完整归档使用可预览、校验冲突和重复执行的脚本，逐文件保留内容并生成本地 SHA-256 收据，不删除来源：
+
+```bash
+python local_archive.py --source /authorized/experiment --name archive
+python local_archive.py --source /authorized/experiment --name archive --apply
+```
+
+`local/archive/runs/test-v1/source/` 是真实正式运行源码，复现既有结果时以它及该运行的冻结输入为准。当前程序的合成场景使用独立的 `three-arm-synthetic-retrieval-v1` 提示版本；真实题仍使用原提示版本，不能把两批分数混合。新的真实或合成执行必须另建输出目录。
 
 ## 三个条件
 

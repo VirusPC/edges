@@ -210,19 +210,22 @@ def directory_digest(directory: Path) -> str:
 
 def instruction(case: dict) -> str:
     mode = case.get("task_mode", "memory_qa")
+    synthetic = case.get("source", {}).get("kind") == "synthetic"
     task_instruction = (
-        "下方是历史用户任务。不要执行外部操作或更改仓库；选择在执行前应该读取的已有记忆。"
+        ("下方是合成场景任务。" if synthetic else "下方是历史用户任务。")
+        + "不要执行外部操作或更改仓库；选择在执行前应该读取的已有记忆。"
         "读取文件后给出最多 5 个 ID，并在 answer 中简述适用规则和未知条件。答案不是完整任务执行结果。\n"
         if mode == "pre_task_retrieval" else "回答下方问题，并说明适用的已知事实。\n"
     )
     return (
-        "在 /workspace 的独立环境中回答下面的真实问题。当前任务作用域是 " + json.dumps(case["scope"], ensure_ascii=False) + "。\n"
-        "历史任务时间为 " + case["query_at"] + "；请按该时间理解记忆中的事实与变更。\n"
+        ("在 /workspace 的独立环境中回答下面的合成场景问题。当前任务作用域是 " if synthetic else
+         "在 /workspace 的独立环境中回答下面的真实问题。当前任务作用域是 ") + json.dumps(case["scope"], ensure_ascii=False) + "。\n"
+        + ("场景任务时间为 " if synthetic else "历史任务时间为 ") + case["query_at"] + "；请按该时间理解记忆中的事实与变更。\n"
         "可读取本地文件；若存在 AGENTS.md，则从它发现相关材料。仅使用适用于该作用域的事实；可以参考祖先或其他作用域的材料，但不要混淆适用范围。\n"
         "不要联网、修改文件或虚构未获得的事实。只有实际读取过正文的记忆才能进入 selected_memory_ids。\n"
         "按与问题的相关程度排序，最多选择 5 个不同 memory_id；没有相关记忆则返回空数组。记忆 ID 见正文。\n"
         "最终仅输出 JSON 对象，精确包含 answer（自然语言答案）与 selected_memory_ids（字符串数组）两个字段。\n\n"
-        + task_instruction + ("历史用户任务：" if mode == "pre_task_retrieval" else "问题：") + case["question"] + "\n"
+        + task_instruction + (("合成场景任务：" if synthetic else "历史用户任务：") if mode == "pre_task_retrieval" else "问题：") + case["question"] + "\n"
     )
 
 
@@ -332,7 +335,9 @@ def prepare(args: argparse.Namespace) -> tuple[dict, list[dict], list[dict], dic
                        for mode in ("memory_qa", "pre_task_retrieval")},
         "dataset_sha256": hashlib.sha256(args.dataset.read_bytes()).hexdigest(),
         "program_sha256": {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in source_dir.glob("*.py")},
-        "prompt_version": "three-arm-historical-retrieval-v2",
+        "prompt_version": ("three-arm-synthetic-retrieval-v1" if all(case.get("source", {}).get("kind") == "synthetic" for case in cases)
+                           else "three-arm-mixed-retrieval-v1" if any(case.get("source", {}).get("kind") == "synthetic" for case in cases)
+                           else "three-arm-historical-retrieval-v2"),
         "prompt_sha256": {case['case_id']: hashlib.sha256(instruction(case).encode()).hexdigest() for case in cases},
         "snapshots": snapshots, "platform": platform.platform(), "python": platform.python_version(),
         "isolation": "fresh Docker per trial; separate verifier; native Codex clean HOME",
