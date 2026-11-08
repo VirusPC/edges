@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "data_kind": "synthetic",
+  "declared_at": "2026-11-08T17:59:26.908519+00:00",
+  "freeze_stage": "before any synthetic model trials",
+  "dataset_sha256": "2e4f02df87127881a3bfe240c322ae1c84db372d18f231bc5e8b4ed962ea97b7",
+  "generator_build_manifest_sha256": "2c90a84f9a978bf9d2b987f7e5e021fa58437bc2c7927e2f514ca5de5ab722e4",
+  "hypothesis": "Scope placement plus navigation may change recall and retrieval cost with identical memory bodies; no required direction of effect.",
+  "conditions": [
+    "scoped",
+    "root",
+    "none"
+  ],
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "low",
+  "harbor_version": "0.25.0",
+  "codex_version": "0.162.1",
+  "agent_image": "edges-harbor-codex@sha256:9d716a68df44e82b2dc449d653e0e0321cc7becba7438f7c4184f0a22becccfd",
+  "agent_timeout_sec": 180,
+  "concurrency": 12,
+  "seed": 20261109,
+  "bootstrap": 2000,
+  "automatic_retries": 0,
+  "dev": {
+    "cases": 8,
+    "repeats_per_condition": 1,
+    "planned_trials": 24,
+    "purpose": "Check execution, isolation and measurement; not evidence of effectiveness."
+  },
+  "test": {
+    "cases": 32,
+    "positive_cases": 28,
+    "negative_cases": 4,
+    "repeats_per_condition": 3,
+    "planned_trials": 288
+  },
+  "prespecified_families": {
+    "local": 12,
+    "override": 6,
+    "cross_scope": 6,
+    "global": 4,
+    "negative": 4
+  },
+  "primary_comparison": "scoped-vs-root",
+  "primary_metric": "selected_recall_at_5",
+  "secondary_metrics": [
+    "evidence_recall_at_5",
+    "total_tokens",
+    "uncached_input_tokens",
+    "agent_latency_ms",
+    "tool_calls",
+    "empty_gold_selection_rate"
+  ],
+  "answer_quality": "No regex answer checks; reference answers are for dataset semantic review. No task-success claim.",
+  "analysis": "Average repeats per case; equal case weighting; bootstrap scene/session clusters; descriptive percentile 95% CI without multiplicity correction. Shared templates limit independence and generalization.",
+  "discriminability": "Report oracle-vs-lexical offline diagnostic separately from real Agent comparisons. Report null/ceiling/negative effects and direction of cost changes. A nonzero interval applies only to this controlled synthetic set.",
+  "stopping": "Complete the frozen matrix independent of quality. Preserve failures and missing values; do not silently retry, select seeds, revise gold, remove test cases or tune from test outcomes.",
+  "independent_review": {
+    "cases_resolved_from_body_and_question": 40,
+    "requested_facts": 85,
+    "memories_checked": 682,
+    "ambiguous_winners": 0,
+    "gold_mismatches": 0,
+    "body_metadata_mismatches": 0,
+    "development_gate": "passed"
+  },
+  "runtime_limits": "Fresh Docker and separate verifier per trial; shared host and provider cache, no network hard isolation. Keep runtime logs local and publish numeric summaries."
+}

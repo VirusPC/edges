@@ -211,6 +211,11 @@ def directory_digest(directory: Path) -> str:
 def instruction(case: dict) -> str:
     mode = case.get("task_mode", "memory_qa")
     synthetic = case.get("source", {}).get("kind") == "synthetic"
+    scope_instruction = (
+        "可读取本地文件；若存在 AGENTS.md，则从它发现相关材料。当前作用域是工作的起点。若题目明确涉及多个业务，须分别按每个目标业务的作用域解释和回答；不能把其他业务规则套到当前业务。可以参考祖先或其他作用域的材料，但不要混淆适用对象。\n"
+        if synthetic else
+        "可读取本地文件；若存在 AGENTS.md，则从它发现相关材料。仅使用适用于该作用域的事实；可以参考祖先或其他作用域的材料，但不要混淆适用范围。\n"
+    )
     task_instruction = (
         ("下方是合成场景任务。" if synthetic else "下方是历史用户任务。")
         + "不要执行外部操作或更改仓库；选择在执行前应该读取的已有记忆。"
@@ -221,8 +226,8 @@ def instruction(case: dict) -> str:
         ("在 /workspace 的独立环境中回答下面的合成场景问题。当前任务作用域是 " if synthetic else
          "在 /workspace 的独立环境中回答下面的真实问题。当前任务作用域是 ") + json.dumps(case["scope"], ensure_ascii=False) + "。\n"
         + ("场景任务时间为 " if synthetic else "历史任务时间为 ") + case["query_at"] + "；请按该时间理解记忆中的事实与变更。\n"
-        "可读取本地文件；若存在 AGENTS.md，则从它发现相关材料。仅使用适用于该作用域的事实；可以参考祖先或其他作用域的材料，但不要混淆适用范围。\n"
-        "不要联网、修改文件或虚构未获得的事实。只有实际读取过正文的记忆才能进入 selected_memory_ids。\n"
+        + scope_instruction
+        + "不要联网、修改文件或虚构未获得的事实。只有实际读取过正文的记忆才能进入 selected_memory_ids。\n"
         "按与问题的相关程度排序，最多选择 5 个不同 memory_id；没有相关记忆则返回空数组。记忆 ID 见正文。\n"
         "最终仅输出 JSON 对象，精确包含 answer（自然语言答案）与 selected_memory_ids（字符串数组）两个字段。\n\n"
         + task_instruction + (("合成场景任务：" if synthetic else "历史用户任务：") if mode == "pre_task_retrieval" else "问题：") + case["question"] + "\n"
