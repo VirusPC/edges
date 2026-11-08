@@ -1,0 +1,1003 @@
+{
+  "baseline_definition": "BM25-style title/body character-bigram ranking over time-visible documents only, including document-frequency statistics; explicit directory strings and scope metadata omitted; business names and dates retained; top 5, no abstention; no semantic ancestry/version reasoning. This is not an LLM and does not compare placement arms.",
+  "cases": [
+    {
+      "case_id": "syn-5b76e516c0cdd75f2b5053c0",
+      "gold_count": 2,
+      "oracle_answer": "白榆书亭的发布门槛：观察至少 58 分钟，且错误计数不超过 4 次；白榆书亭的留存期限：业务流水的原始记录保留 108 天，业务摘要保留 323 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-fc12ee908298399002f56ad9",
+        "m-8dfdbcd73c3efa4569b59837"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-71b370065c01d7c58d411f1a",
+        "m-8dfdbcd73c3efa4569b59837",
+        "m-c40b146572e972defede087a",
+        "m-783bfc8867ba2a49c384e093",
+        "m-fc12ee908298399002f56ad9"
+      ],
+      "split": "dev",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-935bfd65c3d5bfa4646b5a60",
+      "gold_count": 2,
+      "oracle_answer": "青梧租赁的发布门槛：观察至少 124 分钟，且错误计数不超过 6 次；青梧租赁的留存期限：业务流水的原始记录保留 198 天，业务摘要保留 361 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-67a6b1eff6cbcfefe373abda",
+        "m-75813a105907bd8ca6bc0140"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-75813a105907bd8ca6bc0140",
+        "m-9bf6d139c40cb44b4eab4151",
+        "m-ae21335f37f2f6c58f3362aa",
+        "m-67a6b1eff6cbcfefe373abda",
+        "m-9523ff473c3352cf94212102"
+      ],
+      "split": "dev",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-fda6ddd7ca1192d5963b6c02",
+      "gold_count": 2,
+      "oracle_answer": "浅泉花房的发布门槛：观察至少 90 分钟，且错误计数不超过 1 次；浅泉花房的留存期限：业务流水的原始记录保留 166 天，业务摘要保留 466 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-2623c840be97bf03cd4c39ab",
+        "m-ee2eaba0721facccee82e29b"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-2c856190c245f3e125cfccad",
+        "m-c1659b1d036956e3915e4f6e",
+        "m-ee2eaba0721facccee82e29b",
+        "m-2623c840be97bf03cd4c39ab",
+        "m-ed1eb2e30840b8282ec6b8c8"
+      ],
+      "split": "dev",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-e51ed349a6c3f0d74d82ebb0",
+      "gold_count": 3,
+      "oracle_answer": "星砂票务的发布门槛：观察至少 26 分钟，且错误计数不超过 1 次；星砂票务的留存期限：业务流水的原始记录保留 146 天，业务摘要保留 400 天；星砂票务的回退条件：连续 11 个检查窗口失败时回退，并恢复最近 6 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-39d2357743029edbb85d7f4c",
+        "m-2bec1221a1e984969fbe5082",
+        "m-0b6bd805bdf7db949c59033a"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "override",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-0b6bd805bdf7db949c59033a",
+        "m-39d2357743029edbb85d7f4c",
+        "m-84603f1be2fcd0c56aea2e6e",
+        "m-2bec1221a1e984969fbe5082",
+        "m-8815afd38fceb7b0a2cd5b38"
+      ],
+      "split": "dev",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-b2bddb9e8b0512b0a0b041f2",
+      "gold_count": 3,
+      "oracle_answer": "晨湾食集的发布门槛：观察至少 147 分钟，且错误计数不超过 2 次；星砂工坊的留存期限：业务流水的原始记录保留 110 天，业务摘要保留 463 天；星砂工坊的回退条件：连续 12 个检查窗口失败时回退，并恢复最近 2 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-c9b5cd7429ccae858417e834",
+        "m-63226999c86261fcf907dfd8",
+        "m-2c72628386086f99c970ac14"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "cross_scope",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.6666666666666666,
+      "scope_blind_lexical_top5": [
+        "m-ca6af47b6c3385a5b9890103",
+        "m-2c72628386086f99c970ac14",
+        "m-c9b5cd7429ccae858417e834",
+        "m-d6e4528161c2be31da57dff7",
+        "m-9bdbc77a30e306783692426d"
+      ],
+      "split": "dev",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-911c77366245cf7d4832740d",
+      "gold_count": 3,
+      "oracle_answer": "远帆展馆的发布门槛：观察至少 96 分钟，且错误计数不超过 5 次；栖鹭花房的留存期限：业务流水的原始记录保留 62 天，业务摘要保留 708 天；栖鹭花房的回退条件：连续 3 个检查窗口失败时回退，并恢复最近 2 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-43c830a7460da82d71534cc9",
+        "m-c0ac4f3b3bc3e55a1639c036",
+        "m-034ea890ea843e724b710e45"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "cross_scope",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.6666666666666666,
+      "scope_blind_lexical_top5": [
+        "m-034ea890ea843e724b710e45",
+        "m-e4fef61f5ecc354edd5c081f",
+        "m-5da5586a61156e96db7805d3",
+        "m-dad6b8dfaf17849b99177272",
+        "m-43c830a7460da82d71534cc9"
+      ],
+      "split": "dev",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-4e8ae368ebc87cf08810a964",
+      "gold_count": 2,
+      "oracle_answer": "远帆花房的归档规则：复核记录按月归档，保留 36 个月；远帆花房的通知时限：异常确认后 26 分钟内通知值班协调员。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-b5ade400fbea0640e6dbed0b",
+        "m-4e39ff195f34b6547c49962d"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "global",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.5,
+      "scope_blind_lexical_top5": [
+        "m-4e39ff195f34b6547c49962d",
+        "m-061a8143aa321ee47fc686b0",
+        "m-124ba7e9f6aa7cbb48d24309",
+        "m-35d75c06f10cfb1207c5d606",
+        "m-937bf3f87848cd5b0b8b1813"
+      ],
+      "split": "dev",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-589a46d29f41680dfe402602",
+      "gold_count": 0,
+      "oracle_answer": "共 20 件。此题仅需算术，没有适用的项目记忆。",
+      "oracle_memory_ids": [],
+      "oracle_recall_at_5": null,
+      "scenario_family": "negative",
+      "scope_blind_lexical_negative_selection": true,
+      "scope_blind_lexical_recall_at_5": null,
+      "scope_blind_lexical_top5": [
+        "m-318c721fd56de743bb911ceb",
+        "m-546ee2aa7c19b30920a568bd",
+        "m-5c595a6733855254405e2879",
+        "m-35cb4a69953994919b399ca5",
+        "m-4d53aab4d8c984ffa335639a"
+      ],
+      "split": "dev",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-8e11dd0e1c15265cd92ba1a2",
+      "gold_count": 2,
+      "oracle_answer": "星砂书亭的发布门槛：观察至少 100 分钟，且错误计数不超过 8 次；星砂书亭的留存期限：业务流水的原始记录保留 89 天，业务摘要保留 363 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-aeccfb61aebe2d9ff2f52130",
+        "m-33118e48b01808f79d46f519"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-33118e48b01808f79d46f519",
+        "m-7b898f1f58108d9e649ec6f6",
+        "m-8dcb8a46801743b67d2852f4",
+        "m-2bcb23c95d8803a5a28f0707",
+        "m-aeccfb61aebe2d9ff2f52130"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-afcac31c8b22f2ae8b120d2a",
+      "gold_count": 2,
+      "oracle_answer": "晨湾花房的发布门槛：观察至少 57 分钟，且错误计数不超过 7 次；晨湾花房的留存期限：业务流水的原始记录保留 48 天，业务摘要保留 614 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-9aad46bee188f29fbd519b2b",
+        "m-867923499b31101c62644caa"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-867923499b31101c62644caa",
+        "m-a795caf7207fd3dfe1b1f6f9",
+        "m-b533b41167ffdeef9973ed10",
+        "m-9aad46bee188f29fbd519b2b",
+        "m-ab59bc3b4f2249b66927cbd4"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-a3029875977d70edb68038d7",
+      "gold_count": 2,
+      "oracle_answer": "银杉花房的发布门槛：观察至少 23 分钟，且错误计数不超过 7 次；银杉花房的留存期限：业务流水的原始记录保留 221 天，业务摘要保留 399 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-2f415b45006e0daf8cb5a0d3",
+        "m-9b393b853185addb407547bb"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-011d345b42bdb09fad9230f3",
+        "m-6eba421fa641e87b2acef2ee",
+        "m-9b393b853185addb407547bb",
+        "m-2f415b45006e0daf8cb5a0d3",
+        "m-662377860ea31181846a082d"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-9b699be008c9e9faeffb9e93",
+      "gold_count": 2,
+      "oracle_answer": "远帆票务的发布门槛：观察至少 103 分钟，且错误计数不超过 7 次；远帆票务的留存期限：业务流水的原始记录保留 178 天，业务摘要保留 429 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-f46d112b8368da19f290f198",
+        "m-ee22d3e0cb76b4103d10d9f3"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-06c87acdadc0e105ccc6e816",
+        "m-98b0b5b5898f10dc0c998580",
+        "m-ee22d3e0cb76b4103d10d9f3",
+        "m-28d16e8174f3d06d440fdbd9",
+        "m-f46d112b8368da19f290f198"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-eefe72d5a0bf618c5f46a5c5",
+      "gold_count": 2,
+      "oracle_answer": "秋岚工坊的发布门槛：观察至少 129 分钟，且错误计数不超过 7 次；秋岚工坊的留存期限：业务流水的原始记录保留 25 天，业务摘要保留 522 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-a5e0f7591417a272f297fde1",
+        "m-dd978e304bc2e4be698eb675"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-0247370350ae128678527204",
+        "m-3353692e9c8b3dac4d4c3e32",
+        "m-dd978e304bc2e4be698eb675",
+        "m-450990b9f0aa336e1610a588",
+        "m-a5e0f7591417a272f297fde1"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-737a0086e38c457be46103ac",
+      "gold_count": 2,
+      "oracle_answer": "秋岚票务的发布门槛：观察至少 90 分钟，且错误计数不超过 4 次；秋岚票务的留存期限：业务流水的原始记录保留 216 天，业务摘要保留 698 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-20a120d42434d4efab803646",
+        "m-070c1eb919006f15f415e023"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-070c1eb919006f15f415e023",
+        "m-3c8349bc2090ec9008cee411",
+        "m-f2eb7f611a2984ec9d7dbc95",
+        "m-20a120d42434d4efab803646",
+        "m-32f612826a31e41a6980df4a"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-ef1080fc130b540d5e721f94",
+      "gold_count": 2,
+      "oracle_answer": "蓝穗仓配的发布门槛：观察至少 49 分钟，且错误计数不超过 6 次；蓝穗仓配的留存期限：业务流水的原始记录保留 116 天，业务摘要保留 438 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-e7cd0efd7e8b234f844e8721",
+        "m-8447df64a0b6fb5c7a4ff9ca"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-1e259cb16495daec3ff48e47",
+        "m-8447df64a0b6fb5c7a4ff9ca",
+        "m-d2487c353d35b8d68a9c9c29",
+        "m-0ba441660c749030554e2803",
+        "m-e7cd0efd7e8b234f844e8721"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-c422b233530a6a1f1b820d2d",
+      "gold_count": 2,
+      "oracle_answer": "白榆票务的发布门槛：观察至少 46 分钟，且错误计数不超过 7 次；白榆票务的留存期限：业务流水的原始记录保留 122 天，业务摘要保留 501 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-6f395098b1d0ebd1024074c9",
+        "m-12a7b6a87057cc8117cc65cf"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-12a7b6a87057cc8117cc65cf",
+        "m-2691e783f0a62fab91e22623",
+        "m-fc2cd6c1687158fb4e765095",
+        "m-0a1ffa8fb097aa1e170c53a5",
+        "m-6f395098b1d0ebd1024074c9"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-bba09d561a75696945590b40",
+      "gold_count": 2,
+      "oracle_answer": "晨湾工坊的发布门槛：观察至少 145 分钟，且错误计数不超过 8 次；晨湾工坊的留存期限：业务流水的原始记录保留 141 天，业务摘要保留 381 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-3395c212808d103cc8001af0",
+        "m-a3f263461c6fc5f8eda9e9e0"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-0d373aa9742d8b41904f61e0",
+        "m-a3f263461c6fc5f8eda9e9e0",
+        "m-b42780d504033cc020ebf811",
+        "m-3395c212808d103cc8001af0",
+        "m-4a6214aaf470f2dc070dbbf3"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-95fccd4f16667a7a01109364",
+      "gold_count": 2,
+      "oracle_answer": "青梧食集的发布门槛：观察至少 58 分钟，且错误计数不超过 4 次；青梧食集的留存期限：业务流水的原始记录保留 128 天，业务摘要保留 687 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-6cbb9b406afa17e7d55bd465",
+        "m-dbdaa6050100f556ae068139"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-94e8e20d04db4f003350f3d6",
+        "m-dbdaa6050100f556ae068139",
+        "m-f779c00e2a3973790a087942",
+        "m-6cbb9b406afa17e7d55bd465",
+        "m-f6eb4e6291d79b290b696340"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-0d4e81a71cd035eb589854d6",
+      "gold_count": 2,
+      "oracle_answer": "雾岭票务的发布门槛：观察至少 78 分钟，且错误计数不超过 6 次；雾岭票务的留存期限：业务流水的原始记录保留 74 天，业务摘要保留 659 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-cd022e5d6c5f7f1e176d63ec",
+        "m-e751ad50f55d8bc1c3c7b7d6"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-275c0368483396ebd37d6574",
+        "m-e751ad50f55d8bc1c3c7b7d6",
+        "m-fd88bf78043b0fcce5764645",
+        "m-5731c5a1179db3d801514100",
+        "m-cd022e5d6c5f7f1e176d63ec"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-99aabde85d041482d3152f4e",
+      "gold_count": 2,
+      "oracle_answer": "白榆展馆的发布门槛：观察至少 149 分钟，且错误计数不超过 7 次；白榆展馆的留存期限：业务流水的原始记录保留 191 天，业务摘要保留 609 天。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-884d324e2799b22c1a70eccc",
+        "m-38881868216aa890d62e43ec"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "local",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-2d355957852bf339376ea1ca",
+        "m-38881868216aa890d62e43ec",
+        "m-5b9b8eedf79166ec05f910df",
+        "m-5c5a61f4ff4adfa02f64927a",
+        "m-884d324e2799b22c1a70eccc"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-7f44acd9d507be7f3b3bdd5f",
+      "gold_count": 3,
+      "oracle_answer": "蓝穗书亭的发布门槛：观察至少 21 分钟，且错误计数不超过 6 次；蓝穗书亭的留存期限：业务流水的原始记录保留 67 天，业务摘要保留 702 天；蓝穗书亭的回退条件：连续 14 个检查窗口失败时回退，并恢复最近 2 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-cf8dcb815f4e4fb71924499b",
+        "m-9b4ef864f144a0b2378c6fbc",
+        "m-c88c98350002fdb7ff2f1abc"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "override",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-c88c98350002fdb7ff2f1abc",
+        "m-3f0a53fe94661355d81e7020",
+        "m-cf8dcb815f4e4fb71924499b",
+        "m-79789cbacfd034e0a54777cd",
+        "m-9b4ef864f144a0b2378c6fbc"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-c04ab43204bc8d45b91a27a2",
+      "gold_count": 3,
+      "oracle_answer": "栖鹭工坊的发布门槛：观察至少 81 分钟，且错误计数不超过 5 次；栖鹭工坊的留存期限：业务流水的原始记录保留 153 天，业务摘要保留 274 天；栖鹭工坊的回退条件：连续 7 个检查窗口失败时回退，并恢复最近 8 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-be5de6bc4840fb5f98f0c5af",
+        "m-2e00ef52466ef868b08690bb",
+        "m-03f6905468445137a3fac936"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "override",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-03f6905468445137a3fac936",
+        "m-7f354f45a691de762e420ee4",
+        "m-be5de6bc4840fb5f98f0c5af",
+        "m-2e00ef52466ef868b08690bb",
+        "m-9102c465d56e63001e6eb1f3"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-2980a4459d6b57544723cf67",
+      "gold_count": 3,
+      "oracle_answer": "雾岭花房的发布门槛：观察至少 34 分钟，且错误计数不超过 2 次；雾岭花房的留存期限：业务流水的原始记录保留 138 天，业务摘要保留 621 天；雾岭花房的回退条件：连续 3 个检查窗口失败时回退，并恢复最近 7 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-fb7b67df54fa2091e43a9a9a",
+        "m-f23615890c49680934fbc27c",
+        "m-9b360d51feed372216b59d65"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "override",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.6666666666666666,
+      "scope_blind_lexical_top5": [
+        "m-9b360d51feed372216b59d65",
+        "m-19e1c44e4ef2df30b5edd685",
+        "m-fb7b67df54fa2091e43a9a9a",
+        "m-2a031f26ffe79eb843f0288b",
+        "m-7cfde13a96bfe96fcb55e5fe"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-2c44d771e0af7bdc27f05f0a",
+      "gold_count": 3,
+      "oracle_answer": "秋岚食集的发布门槛：观察至少 106 分钟，且错误计数不超过 8 次；秋岚食集的留存期限：业务流水的原始记录保留 106 天，业务摘要保留 490 天；秋岚食集的回退条件：连续 7 个检查窗口失败时回退，并恢复最近 4 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-25a82a19c739c38ebb7452c9",
+        "m-06a600b09a8196fa9181fbf4",
+        "m-d808311c2596c93d0ba78702"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "override",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-d808311c2596c93d0ba78702",
+        "m-25a82a19c739c38ebb7452c9",
+        "m-7e1ca1993b8c86e2fe7a1cd9",
+        "m-06a600b09a8196fa9181fbf4",
+        "m-69dbc5fefc925a0e1a79f7f2"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-d5745e67c86f196f7419e633",
+      "gold_count": 3,
+      "oracle_answer": "浅泉租赁的发布门槛：观察至少 149 分钟，且错误计数不超过 3 次；浅泉租赁的留存期限：业务流水的原始记录保留 140 天，业务摘要保留 702 天；浅泉租赁的回退条件：连续 14 个检查窗口失败时回退，并恢复最近 2 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-38f9092d4b695139e0d765e7",
+        "m-b0762884f4410e8b44f1a8c2",
+        "m-e3ddc1f7e6e4aace2e0c64a4"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "override",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-e3ddc1f7e6e4aace2e0c64a4",
+        "m-28b2ed291b34764bc9aef061",
+        "m-38f9092d4b695139e0d765e7",
+        "m-3e03d424e858b40908040142",
+        "m-b0762884f4410e8b44f1a8c2"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-f211b0e915421121f90c611b",
+      "gold_count": 3,
+      "oracle_answer": "栖鹭仓配的发布门槛：观察至少 30 分钟，且错误计数不超过 6 次；栖鹭仓配的留存期限：业务流水的原始记录保留 157 天，业务摘要保留 274 天；栖鹭仓配的回退条件：连续 11 个检查窗口失败时回退，并恢复最近 6 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-b6f656b4c5683b92f090c2bf",
+        "m-0bed1bb7add390f2b8658942",
+        "m-74b04e3cfbd29e2331bb0226"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "override",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 1.0,
+      "scope_blind_lexical_top5": [
+        "m-74b04e3cfbd29e2331bb0226",
+        "m-29fdba1a367b79470ff54c2d",
+        "m-b6f656b4c5683b92f090c2bf",
+        "m-0bed1bb7add390f2b8658942",
+        "m-717556d3bbcec73daae181c4"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-657b43494817dc4976b19892",
+      "gold_count": 3,
+      "oracle_answer": "雾岭书亭的发布门槛：观察至少 99 分钟，且错误计数不超过 1 次；雾岭展馆的留存期限：业务流水的原始记录保留 91 天，业务摘要保留 480 天；雾岭展馆的回退条件：连续 6 个检查窗口失败时回退，并恢复最近 6 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-0d3b9241098eaa64d5d508a5",
+        "m-2391f69993b122f6fc4b1b99",
+        "m-395777818bba57abefa7b55a"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "cross_scope",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.6666666666666666,
+      "scope_blind_lexical_top5": [
+        "m-395777818bba57abefa7b55a",
+        "m-a770342efe56a189f35241de",
+        "m-41c47b4529cecd46cd51e804",
+        "m-68bb86856b48637df1ee343b",
+        "m-0d3b9241098eaa64d5d508a5"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-dd684c2edcc3ca2d681715d2",
+      "gold_count": 3,
+      "oracle_answer": "蓝穗租赁的发布门槛：观察至少 27 分钟，且错误计数不超过 6 次；星砂租赁的留存期限：业务流水的原始记录保留 102 天，业务摘要保留 587 天；星砂租赁的回退条件：连续 7 个检查窗口失败时回退，并恢复最近 6 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-1fd8970c03e3f2a5ce7d2053",
+        "m-e4e7d42b0a84fe2615d53311",
+        "m-3599635b6fde128693f34ff9"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "cross_scope",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.6666666666666666,
+      "scope_blind_lexical_top5": [
+        "m-07f309e5c795e7947c18282c",
+        "m-3599635b6fde128693f34ff9",
+        "m-1fd8970c03e3f2a5ce7d2053",
+        "m-25ac2e7ddda941176988cd54",
+        "m-909b0b177f1274498c1f03ee"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-1064969ec9fc815d1215c930",
+      "gold_count": 3,
+      "oracle_answer": "浅泉票务的发布门槛：观察至少 37 分钟，且错误计数不超过 6 次；栖鹭食集的留存期限：业务流水的原始记录保留 120 天，业务摘要保留 594 天；栖鹭食集的回退条件：连续 6 个检查窗口失败时回退，并恢复最近 3 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-7f20e79268795fb63c759f5b",
+        "m-cbc512819e45a91f8244a66d",
+        "m-9000b27ae9feed493419329b"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "cross_scope",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.6666666666666666,
+      "scope_blind_lexical_top5": [
+        "m-9000b27ae9feed493419329b",
+        "m-e4156d0c055cc1271b95055e",
+        "m-269258b3e205ed4c96adb986",
+        "m-69f01263670f1886ed614bb9",
+        "m-7f20e79268795fb63c759f5b"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-b88dbd14f1bcaf7e40e1a016",
+      "gold_count": 3,
+      "oracle_answer": "晴屿展馆的发布门槛：观察至少 121 分钟，且错误计数不超过 7 次；晴屿租赁的留存期限：业务流水的原始记录保留 153 天，业务摘要保留 573 天；晴屿租赁的回退条件：连续 11 个检查窗口失败时回退，并恢复最近 5 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-f3f01d8e6da5ad6b70618f44",
+        "m-a8efdd1de3634b6629c1cc91",
+        "m-3775d83e49220dba49ee4ed9"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "cross_scope",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.3333333333333333,
+      "scope_blind_lexical_top5": [
+        "m-3775d83e49220dba49ee4ed9",
+        "m-c11247167195750d08870fc4",
+        "m-3f13ae25a87157e82747c943",
+        "m-ba200e6fb2b36028fbfb3a34",
+        "m-eb088f1f04c95fdcd558f498"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-589770a4fb643c95f9c240c8",
+      "gold_count": 3,
+      "oracle_answer": "晴屿票务的发布门槛：观察至少 83 分钟，且错误计数不超过 8 次；白榆仓配的留存期限：业务流水的原始记录保留 54 天，业务摘要保留 421 天；白榆仓配的回退条件：连续 10 个检查窗口失败时回退，并恢复最近 9 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-282166121a5fd25e8130fce6",
+        "m-e6f279e2e9a2292bbda04c75",
+        "m-84b08fb42baee7f97fe752bc"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "cross_scope",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.6666666666666666,
+      "scope_blind_lexical_top5": [
+        "m-8db69b441fcb164de717a240",
+        "m-84b08fb42baee7f97fe752bc",
+        "m-282166121a5fd25e8130fce6",
+        "m-df7badbf33465a8c97593c10",
+        "m-7dc59d51030c4416c12890bb"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-b73fa9d6fc509efe46d09a94",
+      "gold_count": 3,
+      "oracle_answer": "远帆书亭的发布门槛：观察至少 63 分钟，且错误计数不超过 6 次；蓝穗花房的留存期限：业务流水的原始记录保留 212 天，业务摘要保留 264 天；蓝穗花房的回退条件：连续 8 个检查窗口失败时回退，并恢复最近 9 份快照中的最后一份通过校验者。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-e942b8fc398e62d40087f22f",
+        "m-2867b4de67ed833d7a67db49",
+        "m-25f821e4cfee3cf7ec533f3b"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "cross_scope",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.3333333333333333,
+      "scope_blind_lexical_top5": [
+        "m-25f821e4cfee3cf7ec533f3b",
+        "m-ee0e864814f6a2b610f9751f",
+        "m-221030326c76352242534865",
+        "m-3a9e2ab58d7cc8c9263f9ab1",
+        "m-aade0c3238b4a590dd873025"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-3d80d201a130a778e77995ae",
+      "gold_count": 2,
+      "oracle_answer": "银杉仓配的归档规则：复核记录按月归档，保留 18 个月；银杉仓配的通知时限：异常确认后 84 分钟内通知值班协调员。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-096aaf642a68a55d17cea1ba",
+        "m-061a8143aa321ee47fc686b0"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "global",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.5,
+      "scope_blind_lexical_top5": [
+        "m-061a8143aa321ee47fc686b0",
+        "m-937bf3f87848cd5b0b8b1813",
+        "m-124ba7e9f6aa7cbb48d24309",
+        "m-35d75c06f10cfb1207c5d606",
+        "m-4e39ff195f34b6547c49962d"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-edcd5e8b00d83f99f1ee812a",
+      "gold_count": 2,
+      "oracle_answer": "青梧工坊的归档规则：复核记录按月归档，保留 24 个月；青梧工坊的通知时限：异常确认后 31 分钟内通知值班协调员。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-d8a58d448bea33d3c516c855",
+        "m-124ba7e9f6aa7cbb48d24309"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "global",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.5,
+      "scope_blind_lexical_top5": [
+        "m-124ba7e9f6aa7cbb48d24309",
+        "m-35d75c06f10cfb1207c5d606",
+        "m-061a8143aa321ee47fc686b0",
+        "m-4e39ff195f34b6547c49962d",
+        "m-937bf3f87848cd5b0b8b1813"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-5c7d4f243e9d949016cfb529",
+      "gold_count": 2,
+      "oracle_answer": "银杉书亭的归档规则：复核记录按月归档，保留 21 个月；银杉书亭的通知时限：异常确认后 62 分钟内通知值班协调员。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-e992e85883a0328ccb294b90",
+        "m-937bf3f87848cd5b0b8b1813"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "global",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.5,
+      "scope_blind_lexical_top5": [
+        "m-937bf3f87848cd5b0b8b1813",
+        "m-061a8143aa321ee47fc686b0",
+        "m-124ba7e9f6aa7cbb48d24309",
+        "m-35d75c06f10cfb1207c5d606",
+        "m-4e39ff195f34b6547c49962d"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-017dfba42ef2e44895a99615",
+      "gold_count": 2,
+      "oracle_answer": "白榆工坊的归档规则：复核记录按月归档，保留 44 个月；白榆工坊的通知时限：异常确认后 47 分钟内通知值班协调员。仅列执行前规则，不表示外部任务已经完成。",
+      "oracle_memory_ids": [
+        "m-4a16b8f35a68d26b101e62f9",
+        "m-35d75c06f10cfb1207c5d606"
+      ],
+      "oracle_recall_at_5": 1.0,
+      "scenario_family": "global",
+      "scope_blind_lexical_negative_selection": null,
+      "scope_blind_lexical_recall_at_5": 0.5,
+      "scope_blind_lexical_top5": [
+        "m-35d75c06f10cfb1207c5d606",
+        "m-124ba7e9f6aa7cbb48d24309",
+        "m-061a8143aa321ee47fc686b0",
+        "m-4e39ff195f34b6547c49962d",
+        "m-937bf3f87848cd5b0b8b1813"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-d5f20dddf87ab4e13c408c33",
+      "gold_count": 0,
+      "oracle_answer": "共 24 件。此题仅需算术，没有适用的项目记忆。",
+      "oracle_memory_ids": [],
+      "oracle_recall_at_5": null,
+      "scenario_family": "negative",
+      "scope_blind_lexical_negative_selection": true,
+      "scope_blind_lexical_recall_at_5": null,
+      "scope_blind_lexical_top5": [
+        "m-73138409ec404b2632e639a8",
+        "m-af1a1ebdb1a9d229f90e003f",
+        "m-098d93fd37954c52707aa7a4",
+        "m-4fb83924582cf9df4b01fe59",
+        "m-e70144867b8deeebb4f20dba"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-2e02002b483f6694c92d3f65",
+      "gold_count": 0,
+      "oracle_answer": "共 40 件。此题仅需算术，没有适用的项目记忆。",
+      "oracle_memory_ids": [],
+      "oracle_recall_at_5": null,
+      "scenario_family": "negative",
+      "scope_blind_lexical_negative_selection": true,
+      "scope_blind_lexical_recall_at_5": null,
+      "scope_blind_lexical_top5": [
+        "m-83dc19334b9bf94a9083a930",
+        "m-557ffd6125ee5bbbc0609d41",
+        "m-c3124f85853ad40adbb23480",
+        "m-1c325aa3ab3267c9db000125",
+        "m-e1c1e257c92f6b2f94f7b231"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-3ae6f6e4398c05974bc0fead",
+      "gold_count": 0,
+      "oracle_answer": "共 60 件。此题仅需算术，没有适用的项目记忆。",
+      "oracle_memory_ids": [],
+      "oracle_recall_at_5": null,
+      "scenario_family": "negative",
+      "scope_blind_lexical_negative_selection": true,
+      "scope_blind_lexical_recall_at_5": null,
+      "scope_blind_lexical_top5": [
+        "m-874f6c9e8124926246fe3a8c",
+        "m-2ab40121e4120ce91a9c0c46",
+        "m-3181338cf6f3db13ef1a3696",
+        "m-01455cfa7682795be25ca300",
+        "m-79f64219f2575c919ccfe580"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    },
+    {
+      "case_id": "syn-e700fa5fd7fb07f14b1c91b8",
+      "gold_count": 0,
+      "oracle_answer": "共 84 件。此题仅需算术，没有适用的项目记忆。",
+      "oracle_memory_ids": [],
+      "oracle_recall_at_5": null,
+      "scenario_family": "negative",
+      "scope_blind_lexical_negative_selection": true,
+      "scope_blind_lexical_recall_at_5": null,
+      "scope_blind_lexical_top5": [
+        "m-019407af7e58320a00e07112",
+        "m-98f7f4cee670a9bc5359c2f2",
+        "m-d20c84b31ceac907ef3a4bd4",
+        "m-144e11aef59bbb203e05e36d",
+        "m-6c2a8c7ba5169a8b8a6bdc95"
+      ],
+      "split": "test",
+      "visible_memory_count": 586
+    }
+  ],
+  "counts": {
+    "cases": 40,
+    "domains": 96,
+    "future_memories": 96,
+    "max_gold": 3,
+    "memories": 682,
+    "memory_scopes": 193,
+    "test_nonroot_cases": 30
+  },
+  "dataset_sha256": "2e4f02df87127881a3bfe240c322ae1c84db372d18f231bc5e8b4ed962ea97b7",
+  "discriminability_policy": "Before model runs, report oracle-minus-lexical by family, duplicate-title rate and scope/version conflicts. A positive gap means lexical confounding exists, not that scoped will beat root. No effect-size threshold is used to select seeds or revise test cases.",
+  "duplicate_title_fraction": 0.9926686217008798,
+  "generator": "synthetic-scenes-v1",
+  "groups": {
+    "dev/cross_scope": {
+      "cases": 2,
+      "oracle_minus_lexical": 0.33333333333333337,
+      "oracle_recall_at_5": 1.0,
+      "positive_cases": 2,
+      "scope_blind_lexical_recall_at_5": 0.6666666666666666
+    },
+    "dev/global": {
+      "cases": 1,
+      "oracle_minus_lexical": 0.5,
+      "oracle_recall_at_5": 1.0,
+      "positive_cases": 1,
+      "scope_blind_lexical_recall_at_5": 0.5
+    },
+    "dev/local": {
+      "cases": 3,
+      "oracle_minus_lexical": 0.0,
+      "oracle_recall_at_5": 1.0,
+      "positive_cases": 3,
+      "scope_blind_lexical_recall_at_5": 1.0
+    },
+    "dev/negative": {
+      "cases": 1,
+      "oracle_minus_lexical": null,
+      "oracle_recall_at_5": null,
+      "positive_cases": 0,
+      "scope_blind_lexical_recall_at_5": null
+    },
+    "dev/override": {
+      "cases": 1,
+      "oracle_minus_lexical": 0.0,
+      "oracle_recall_at_5": 1.0,
+      "positive_cases": 1,
+      "scope_blind_lexical_recall_at_5": 1.0
+    },
+    "test/cross_scope": {
+      "cases": 6,
+      "oracle_minus_lexical": 0.4444444444444444,
+      "oracle_recall_at_5": 1.0,
+      "positive_cases": 6,
+      "scope_blind_lexical_recall_at_5": 0.5555555555555556
+    },
+    "test/global": {
+      "cases": 4,
+      "oracle_minus_lexical": 0.5,
+      "oracle_recall_at_5": 1.0,
+      "positive_cases": 4,
+      "scope_blind_lexical_recall_at_5": 0.5
+    },
+    "test/local": {
+      "cases": 12,
+      "oracle_minus_lexical": 0.0,
+      "oracle_recall_at_5": 1.0,
+      "positive_cases": 12,
+      "scope_blind_lexical_recall_at_5": 1.0
+    },
+    "test/negative": {
+      "cases": 4,
+      "oracle_minus_lexical": null,
+      "oracle_recall_at_5": null,
+      "positive_cases": 0,
+      "scope_blind_lexical_recall_at_5": null
+    },
+    "test/override": {
+      "cases": 6,
+      "oracle_minus_lexical": 0.05555555555555569,
+      "oracle_recall_at_5": 1.0,
+      "positive_cases": 6,
+      "scope_blind_lexical_recall_at_5": 0.9444444444444443
+    }
+  },
+  "kind": "offline_construct_diagnostics_not_model_results",
+  "limitations": [
+    "Templates are shared across dev/test; entities, sessions, facts and IDs are disjoint.",
+    "Synthetic difficulty and arbitrary policy values do not establish real-world memory effectiveness.",
+    "Oracle and lexical diagnostic outcomes are constructed/offline, not model experiment results.",
+    "Generator validation is not an independent semantic review; freeze only after a separate reviewer checks scene/renderer/question agreement.",
+    "Root keeps full scope/time metadata and identical bodies; scope is never used to hide memories from root.",
+    "No model output was used to design cases, select seeds, or tune test difficulty."
+  ],
+  "parameters": {
+    "distractor_scopes": 48,
+    "seed": 20261109
+  },
+  "validation": {
+    "entity_overlap": 0,
+    "gold_resolved_from_scene": true,
+    "matrix": {
+      "dev": {
+        "cross_scope": 2,
+        "global": 1,
+        "local": 3,
+        "negative": 1,
+        "override": 1
+      },
+      "test": {
+        "cross_scope": 6,
+        "global": 4,
+        "local": 12,
+        "negative": 4,
+        "override": 6
+      }
+    }
+  }
+}
