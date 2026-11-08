@@ -1,0 +1,22 @@
+{
+  "artifacts_sha256": {
+    "DATA_REPORT.json": "35d97b5bf4daa388664fad84f2415f0df073133ee3cbd8a417aba37c3980a91c",
+    "DATA_REPORT.md": "9355bb45afba64b3b4df899e9e09185ff1ca482c92b5ddd9117aa3db2aa823d5",
+    "data-v2.json": "0588ed5360487104cb13c186d3be1bce9ceff8a4db4426bdce7dafd34bd36bdc"
+  },
+  "build_sha256": "530be8336be3de1dc6073bd94be1afa91f9d5ac0a9834fb8f16f3c1e169e8718",
+  "command": "python -m synthetic.v2.generate --seed <seed> --output <directory>",
+  "generator": "natural-scenarios-v2",
+  "input_policy": "Only bundled fictional blueprint constants; source files are read solely to hash the build. No external corpus, network or model.",
+  "schema_version": 1,
+  "seed": 20261110,
+  "source_sha256": {
+    "__init__.py": "deb55ac244e0ce5dc42b94305bd2cfbcfea419c6bc1a2e09337568504fbb02e1",
+    "generate.py": "c9d62a39a7dd03bc7d940ae9a2648e17d32705fa8dfbd16089cbe2cbf8d6d32c",
+    "harbor/dataset.py": "d55f8ace736c92a60eee5ea5cc35b587e58cf9fbd47a01ab610023a9a0159167",
+    "harbor/run.py": "71db7e07b13a082c52ee97eda7b11e60b365339851a1f447d96334c6a4ccb916",
+    "oracle.py": "a4dc6ee33bdf739415bedfa8170aaf1e22c8aaba9c7ca8927be7697707be73a8",
+    "scenes_actions.py": "cfad27a202211625975a24d53fb98fafde8bbc6a6d5c0a890d9c48de33afed17",
+    "scenes_reasoning.py": "5e4499743f6bea3390d398b67e89b77de7a809d5a2b9eb0ef4dd1bb073502f8f"
+  }
+}
