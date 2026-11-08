@@ -77,10 +77,15 @@ def generate(run_dir: Path, output: Path, bootstrap: int = 2000) -> dict:
               'bootstrap_replicates': bootstrap, 'tracks': tracks,
               'interpretation': 'Synthetic controlled diagnostic; scenario clusters share templates. Descriptive intervals, no multiplicity correction; not real-world effectiveness proof.'}
     overall = tracks['all']
-    lines = ['# 合成场景三组记忆消融结果', '',
+    development = manifest.get('split') == 'dev'
+    title = '# 合成场景开发集：执行与计量验证' if development else '# 合成场景三组记忆消融结果（正式 test）'
+    interpretation = ('本页为 **dev 开发集**，仅验证执行、评分和计量。以下数字不作为正式效应结论，也不据此调整测试题或参数。'
+                      if development else
+                      f"recall@5：{comparison_statement(overall, 'selected_recall_at_5')}。总 token：{comparison_statement(overall, 'total_tokens')}。Agent 时延：{comparison_statement(overall, 'agent_latency_ms')}。")
+    lines = [title, '',
              '**本报告只描述程序生成的受控场景，与真实历史问题实验分开。**', '',
              f"执行 {overall['observed_trials']}/{overall['planned_trials']} trials，失败 {overall['failed_trials']}；{len(cases)} 题，三条件各重复 {manifest['repeats']} 次，固定 {manifest['concurrency']} 路并发。", '',
-             f"recall@5：{comparison_statement(overall, 'selected_recall_at_5')}。总 token：{comparison_statement(overall, 'total_tokens')}。Agent 时延：{comparison_statement(overall, 'agent_latency_ms')}。", '',
+             interpretation, '',
              '## 整体指标', '', '| 指标 | scoped | root | none | scoped−root / 描述性 95% CI |',
              '| --- | ---: | ---: | ---: | --- |']
     labels = {'selected_recall_at_5': 'recall@5 (%)', 'evidence_recall_at_5': '正文证据 recall@5 (%)',

@@ -2,12 +2,19 @@
 
 这是公开、确定性生成的构念诊断数据，用于检验目录放置是否改变检索命中、误选、token 与时延。所有组织、业务、问题、约定和来源 ID 均为虚构；没有读取或复用真实用户问题、私密记忆或其编码来源。它不替代真实场景证据，也不预设 scoped 应胜过 root。
 
+材料入口：[完整题集与场景真值](data-v1.json)、[数据报告](DATA_REPORT.md)、[机器可读诊断](DATA_REPORT.json)、[构建摘要](BUILD_MANIFEST.json)、[冻结模型实验协议](protocol-v1.json)、[独立审阅方法与证据](REVIEW.md)、[dev 执行验证](reports/dev-v1/report.md)。
+
 在 Harbor 程序目录运行：
 
 ```bash
 python3 -B -m synthetic.generate \
   --seed 20261109 --distractor-scopes 48 --output synthetic
 python3 -B -m unittest discover -s tests -p 'test_synthetic.py' -v
+
+# 独立解析自然语言题目和正文，不调用生成器 oracle
+python3 -B synthetic/review.py --dataset synthetic/data-v1.json \
+  --protocol synthetic/protocol-v1.json --runner run.py \
+  --output local/synthetic-review.json
 ```
 
 相同程序与参数产生逐字节相同的四份产物：`data-v1.json`、`DATA_REPORT.json`、`DATA_REPORT.md`、`BUILD_MANIFEST.json`。生成时间和绝对路径不进入产物。重复运行是无写入的幂等检查；已有任一产物内容变化时拒绝覆盖，且在写入前检查全部目标。新的 seed、干扰数量或程序版本应使用新目录/版本，不覆盖冻结实验。
@@ -46,3 +53,22 @@ scoped 和 root 由同一个 runner 渲染相同正文，保留完整 scope/titl
 判读区分度时，先检查 oracle 可解、可见 gold、非 gold 干扰、版本与目录冲突，再按 family 报告 oracle 与词法的差距。local 可以词法即全中，代表命中率中性但存在导航成本机会；跨域可能让分层导航退化；根层与负例提供控制。**不设一个要求 scoped 获胜的门槛，也不根据 test 的词法或模型成绩换 seed、删题或改难度。** 数据规模与诊断结果如实保留。
 
 冻结前须由另一审阅者检查场景、问题、正文与 oracle 的一致性；程序验证不替代独审。先用 8 个 dev 场景检查协议、运行与评分可用性，再固定参数跑 32 个 test 场景。dev 可修实现错误，但不能按 test 模型效果挑数据；若冻结后发现语义缺陷，应保留旧版并另发版本及变更说明。正式模型结果由外部 runner/report 另行生成，`DATA_REPORT.*` 始终只代表离线数据诊断。
+
+## 复用执行链路
+
+生成器与 oracle 是数据构造程序；`review.py` 是独立的 v1 模板解析验证器，其适用边界见 [REVIEW.md](REVIEW.md)。修改模板时须同步审阅验证逻辑，不能因为旧解析器通过就宣布新语义正确。
+
+安装依赖和构建基础镜像见[实验总入口](../README.md)。下列命令会调用真实模型；输出目录必须是新的，凭据仅从授权本地文件注入。固定 seed 控制数据、派发顺序和统计抽样，不保证模型输出逐字节重复。
+
+```bash
+python run.py --dataset synthetic/data-v1.json --output local/new-synthetic-test \
+  --model gpt-6.1-sol --codex-version 0.162.1 \
+  --agent-image edges-harbor-codex:0.162.1 --auth-json /authorized/auth.json \
+  --split test --repeats 3 --seed 20261109 --concurrency 12
+python report.py --run local/new-synthetic-test --output local/new-synthetic-report
+python synthetic_report.py --run local/new-synthetic-test --output local/new-public-report
+```
+
+正式复现应按 `protocol-v1.json` 使用冻结镜像 digest，并记录实际运行源码；更换输入、模型、资源或并发须另立运行记录。上面的 12 路是本轮经过开发验收的设置，不是所有机器都适合的永久默认。离线审计和并行资源采样见 [audit/](../audit/README.md)。
+
+新 seed、干扰数量或生成逻辑使用新目录，例如 `--output local/synthetic-v2`；独立审阅后为新数据记录新的协议和摘要，不能沿用本版协议的输入 hash。原始模型输出保存在实验 `local/`，公开结果导出器仅接受 dataset、memory、case 三层均明确为 synthetic 的数据，且不导出回答、命令、宿主路径或运行时私密上下文。
