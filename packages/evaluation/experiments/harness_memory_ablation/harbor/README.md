@@ -30,6 +30,28 @@ python local_archive.py --source /authorized/experiment --name archive --apply
 
 `local/archive/runs/test-v1/source/` 是真实正式运行源码，复现既有结果时以它及该运行的冻结输入为准。当前程序的合成场景使用独立的 `three-arm-synthetic-retrieval-v1` 提示版本；真实题仍使用原提示版本，不能把两批分数混合。新的真实或合成执行必须另建输出目录。
 
+## Langfuse 数据集副本
+
+[`publish_langfuse_dataset.py`](publish_langfuse_dataset.py) 将冻结输入发布为两份关联 Dataset：`<prefix>/<版本>/cases` 保存题目，`<prefix>/<版本>/corpus` 保存完整记忆语料。真实与合成版本分别发布，保留原 dev/test 划分；corpus 是辅助材料，不是另一批测试题。此命令不执行模型，也不创建实验运行或分数。
+
+case 的 `input` 只含题目、时间、scope 和 task_mode；gold、参考答案与检查规则进入 `expectedOutput`，标注审阅与来源保存在 metadata。原始顶层字段（含合成场景真值）保存在 cases Dataset metadata。未来的记忆也保留在 corpus 中，由运行器按时间选择，不能把整个 metadata 注入 Agent 提示词。Langfuse 普通 prompt 实验不会自动恢复记忆文件；运行适配器应读取关联 corpus，并沿用本实验的文件物化流程。来源 ID 作为 provenance 保存，不自动创建平台 trace 关联。
+
+```bash
+# 默认仅转换并检查本地无损回组，不访问 Langfuse。
+python publish_langfuse_dataset.py \
+  --dataset real-v1=/authorized/dataset-v1.json \
+  --dataset synthetic-v1=synthetic/data-v1.json \
+  --dataset synthetic-v2=synthetic/v2/data-v2.json \
+  --output local/langfuse-publication/new-publication
+
+# 确认目标项目后，使用同一参数组追加：
+# --apply --config /private/langfuse.json --project-id <project-id>
+```
+
+认证 JSON 沿用 `export_langfuse.py` 的 `base_url/public_key/secret_key` 格式。首次创建前检查所有同名目标；已有记录内容一致时跳过，不一致则停止。发布过程可补齐缺失条目，成功回执目录不能复用。只读复核用 `--verify-only`，并指定新的本地输出目录。对相同目标避免并发编辑；平台 upsert 不提供此脚本所需的原子 compare-and-swap。
+
+完成后逐条读回 input、expectedOutput、metadata 与状态，按原顺序重组全部题目和记忆，以 canonical JSON SHA-256 对照原始对象；另记录输入文件字节 SHA-256。只有全部检查通过才写 `receipt.json`。回执含实例地址与本机路径，必须留在被忽略的 `local/`，不进入公开 Git。代码和数据版本、模型运行结果的归档仍按本页原有约定执行。
+
 ## 三个条件
 
 | 条件 | 记忆正文 | 发现入口 |
