@@ -6,6 +6,8 @@
 
 覆盖主张、真实来源画像的限制、工程配额与开发验收标准见 [COVERAGE.md](COVERAGE.md)。本集不以任何一组胜出作为有效标准，也不把源码或独立审阅通过等同模型检索有效。
 
+[未满召回的 trace 分析](TRACE_ANALYSIS.md)逐一对照四次低分与同题成功重复，区分未继续发现、索引到正文未展开，以及已读但最终未选择；事后诊断不替换冻结分数。
+
 数据入口：[完整题集与真值](data-v2.json)、[离线构造诊断](DATA_REPORT.md)、[生成摘要](BUILD_MANIFEST.json)、[独立审阅与修订过程](REVIEW.md)、[审阅收据摘要](review-summary.json)、[开发协议](protocol-dev-v2.json)、[首次 test 运行前冻结的测试协议](protocol-test-v2.json)。最终数据为 48 题、336 条虚构记忆，gold 数量为 0 条 × 8 题、2 条 × 3 题、3 条 × 36 题、4 条 × 1 题。
 
 在 Harbor 目录运行生成程序：
