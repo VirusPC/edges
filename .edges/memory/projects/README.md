@@ -113,7 +113,7 @@ format: ordinary
 - [.edges 模块保持同一入口，便于插件化](<project_harness_module_consistency_for_plugins/INDEX.md>) — 新增或改 .edges 模块、或给单个模块加特殊节点时打开：各模块同一套入口 README（可继承定制），不为单个模块发明虚拟节点；Compose 写进 compose/README.md。目标是架构一致、便于后续插件化。
 - [被组合仓库可写，不加挂载机制](<project_compose_checkout_writable/INDEX.md>) — 改 Compose 写入或想加只读特例、空检出报错、父索引边界时打开：只删只读限制。决定见 ADR 0045。
 - [Routines 记录定义，由外部平台接入执行](<project_routines_from_brain_practice/INDEX.md>) — 设计 routines 时打开：INDEX.md 记录，仓库为接入依据；平台每次读Skill，默认最新可指定，失败停止报告；首版适配全部现有例程，无调度器和分组。
-- [Edges 推广准备：实验、Skills、场景案例与任务归属](<project_edges_promotion_intent/INDEX.md>) — 准备 Edges 对外推广及拆分任务时：先补实验数据、Skills 接入和场景案例；一个主任务及全部子任务统一放框架仓，文章产物归属另行处理。
+- [Edges 推广准备：实验、Skills、场景案例与任务归属](<project_edges_promotion_intent/INDEX.md>) — 准备 Edges 对外推广或 README 实验文案时：突出已验证收益，简述条件与局限并链接报告；实验、Skills 接入和场景案例主任务及子任务统一放框架仓。
 - [对外入口叫 Edges 小助手，homepage 指向站点根](<project_public_knowledge_qa_trial/INDEX.md>) — 改根 README 公开实践、页首导航或 GitHub 仓库 homepage 时打开：链接文案是 Edges 小助手，地址 https://edges\-rag.viruspc.tech/；homepage 用 https://edges.viruspc.tech。公开文案不写「试用」或访问网络限制。
 - [递归 Project：直属材料分组与统一选择](<project_recursive_projects/INDEX.md>) — 递归 Project 已实现并验证：直属材料、全局 \-\-project、按最早 Task 日期迁移七组；163 Task、160 日志及共享图片保真。说明归属、删除与迁移恢复边界。
 - [个人大脑跨客户端与工作空间接入](<project_personal_brain_client_workspace_access/INDEX.md>) — 个人大脑接入各 Agent 客户端的检索入口：主路径是跨客户端复用同一大脑；取舍与开放问题见 ADR 0053。
