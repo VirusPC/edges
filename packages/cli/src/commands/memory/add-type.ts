@@ -19,5 +19,5 @@ export function addMemoryAddTypeCommand(memory: Command, ctx: CliContext): void 
         indexOnly?: boolean;
         skillsFormat?: boolean;
         externalContentDir?: string;
-    }) => operation(ctx, async () => await addMemoryType({ ...options, targetDir: target(options, ctx), project: ctx.project })));
+    }) => operation(ctx, async () => await addMemoryType({ ...options, targetDir: target(options, ctx), project: ctx.project, super: ctx.super === true })));
 }

@@ -9,7 +9,7 @@ TypeScript + Node.js MCP server，用于在没有 shell 的宿主里本地创建
 - 暴露 MCP 工具 `new_note`
 - 接收结构化输入：`title`、`body`，可选 `project`、`super`
 - 子进程调用 `edges [--project <path>] [--super] notes create --title --body`，Project 校验与材料定位复用 CLI
-- 默认在服务器 scope 的 `.edges/notes/YYYY-MM-DD--slug/INDEX.md` 创建；选 Project 后写 `P/notes`，仅选 Super 时写 `scope/notes`
+- 默认在服务器 scope 的 `.edges/notes/YYYY-MM-DD--slug/INDEX.md` 创建；只选 Super 时写 `scope/notes`。`project` 在默认材料面相对 `.edges/projects`，与 `super` 一起时相对 `projects/`；选定后仍写 `P/notes`
 - 返回结构化 JSON 结果，便于客户端自动处理
 
 ## Requirements
@@ -79,8 +79,8 @@ MCP tool 名称：`new_note`
 输入字段：
 - `title` (string)
 - `body` (string, optional)
-- `project` (string, optional)：相对服务器 scope 下 `.edges/projects` 的已有 Project 路径，例如 `P/projects/Q`。不能用绝对路径、`..` 或不存在的 Project。
-- `super` (boolean, optional)：选择 scope 直属内容；同时提供 `project` 时以 Project 为准。
+- `project` (string, optional)：已有 Project 的相对路径，例如 `P/projects/Q`。默认相对 `.edges/projects`；`super` 为 true 时相对 `projects/`。不能用绝对路径、`..` 或不存在的 Project。
+- `super` (boolean, optional)：选择 scope 直属内容。与 `project` 一起时，先到 `<scope>/projects` 找 Project，材料仍写在该 Project 目录里。
 
 `scope` 由服务器配置决定，不作为工具输入；不要把 Project 路径替换成 scope。`all` 是读取范围选项，不适用于创建。
 

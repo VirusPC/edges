@@ -15,7 +15,7 @@ const TASKS_AFTER_HELP = `
 TARGET
   edges --scope <directory> tasks ...
   edges --scope <directory> --project <path> tasks ...
-  --project selects an existing Project under scope/.edges/projects.
+  --project selects an existing Project under scope/.edges/projects, or scope/projects with --super.
   Tasks live directly at the selected material root: tasks/<status>/<stem>/INDEX.md.
   --super and --all are root switches. --all is read-only.
 COMMANDS

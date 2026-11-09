@@ -120,7 +120,7 @@ test("directory modules share default, super and all selection with Compose boun
   });
 });
 
-test("directory modules share Project precedence, recursive composition and bounded all discovery", async (t) => {
+test("directory modules share Project composition and keep super on its own projects tree", async (t) => {
   const f = fixture(t);
   f.system(f.root, "outside");
   const parent = path.join(f.root, ".edges/projects/parent");
@@ -139,13 +139,15 @@ test("directory modules share Project precedence, recursive composition and boun
     const forest = [independent.files[module], vendor.files[module]];
     const cases: Array<[string[], string[]]> = [
       [[], composition],
-      [["--super"], composition],
       [["--all"], [...composition, ...forest]],
-      [["--super", "--all"], [...composition, ...forest]],
       [["--all", "--exclude", "compose"], [...composition, independent.files[module]]],
       [["--exclude", "projects"], module === "projects" ? [] : [direct.files[module]]],
       [["--all", "--exclude", module], []],
     ];
+    for (const flags of [["--super"], ["--super", "--all"]]) {
+      const missed = await run(["--scope", f.root, "--project", "parent", ...flags, module, "list"], { env: {} });
+      assert.notEqual(missed.exitCode, 0, `${module} ${flags.join(" ")} must not reuse the harness Project`);
+    }
     for (const [flags, expected] of cases) {
       await t.test(flags.join(" ") || "default", async () => {
         assert.deepEqual(await f.listed(module, ["--project", "parent", ...flags]), expected.sort());

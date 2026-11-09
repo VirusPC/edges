@@ -15,6 +15,7 @@ import { NodeService } from "../node/node-service.js";
 import { collectSystemRoots } from "../node/system-roots.js";
 import { query } from "../../domain/operations/query.js";
 import { traverse } from "../../domain/operations/traverse.js";
+import { relativeProjectPath } from "../projects/selection.js";
 import {
   isTaskStatus,
   type TaskBoardLocation,
@@ -216,22 +217,49 @@ export async function listRepositoryTaskNodes(
   }
   return out;
 }
+function isProjectDirectory(owner: string): boolean {
+  return LEAF_ENTRY_NAMES.some(name => {
+    const entry = path.join(owner, name);
+    return fs.existsSync(entry) && identifyNodeType(entry) === "project";
+  });
+}
+
+function isProjectRelative(relative: string): boolean {
+  if (!relative || relative.startsWith("..")) return false;
+  const parts = relative.split(path.sep);
+  return parts.length % 2 === 1 && parts.every((part, index) => part !== "" && part !== "." && part !== ".." && (index % 2 === 0 || part === "projects"));
+}
+
+/** Outermost `<scope>/projects/<P>` owner. Harness projects under `.edges` are handled first. */
+function superProjectBoard(owner: string, root: string): { scopeDir: string; project: string } | undefined {
+  if (!isProjectDirectory(owner)) return undefined;
+  let cursor = path.dirname(owner);
+  let found: { scopeDir: string; project: string } | undefined;
+  while (isWithinPath(cursor, root)) {
+    if (path.basename(cursor) === "projects") {
+      const relative = path.relative(cursor, owner);
+      if (isProjectRelative(relative)) found = { scopeDir: path.dirname(cursor), project: owner };
+    }
+    const parent = path.dirname(cursor);
+    if (parent === cursor) break;
+    cursor = parent;
+  }
+  return found;
+}
+
 /** Physical board ownership, independent of the link used to reach it. */
 export function boardLocationOf(board: string, root: string): TaskBoardLocation {
   if (path.basename(board) !== tasksBoardDirName() || !isWithinPath(board, path.resolve(root)))
     throw new TasksError("VALIDATION_ERROR", `Invalid task board location: ${board}`);
   const owner = path.dirname(board);
+  const resolvedRoot = path.resolve(root);
   let cursor = owner;
-  while (isWithinPath(cursor, path.resolve(root))) {
+  while (isWithinPath(cursor, resolvedRoot)) {
     if (path.basename(cursor) === ".edges") {
       const scope = path.dirname(cursor);
       const relativeOwner = path.relative(cursor, owner);
       if (!relativeOwner) return { scopeDir: scope, purpose: "maintenance", boardDir: board };
-      const isProjectOwner = LEAF_ENTRY_NAMES.some(name => {
-        const entry = path.join(owner, name);
-        return fs.existsSync(entry) && identifyNodeType(entry) === "project";
-      });
-      if (relativeOwner.startsWith(`projects${path.sep}`) && isProjectOwner)
+      if (relativeOwner.startsWith(`projects${path.sep}`) && isProjectDirectory(owner))
         return { scopeDir: scope, purpose: "maintenance", boardDir: board, project: owner };
       break;
     }
@@ -239,6 +267,8 @@ export function boardLocationOf(board: string, root: string): TaskBoardLocation 
     if (parent === cursor) break;
     cursor = parent;
   }
+  const superProject = superProjectBoard(owner, resolvedRoot);
+  if (superProject) return { scopeDir: superProject.scopeDir, purpose: "domain", boardDir: board, project: superProject.project, super: true };
   return { scopeDir: owner, purpose: "domain", boardDir: board };
 }
 export function taskLocationOf(node: TaskNode, root: string) {
@@ -257,7 +287,7 @@ export function taskLocationOf(node: TaskNode, root: string) {
     throw new TasksError("VALIDATION_ERROR", `edges-tasks-status dual-write mismatch: ${node.path}`);
   return {
     source: { scope: path.relative(path.resolve(root),location.scopeDir).split(path.sep).join("/") || ".", purpose: location.purpose },
-    project: location.project ? path.relative(path.join(location.scopeDir,".edges/projects"),location.project).split(path.sep).join("/") : undefined,
+    project: location.project ? relativeProjectPath(location.scopeDir, location.project) : undefined,
     location, status, stem,
   };
 }

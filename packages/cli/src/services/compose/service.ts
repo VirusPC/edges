@@ -310,15 +310,17 @@ export async function addCompose(
 ): Promise<ComposeAddResult> {
   const loaded = await requireScope(env, input);
   const name = input.name.trim();
-  if (input.directory !== undefined) hrefForScopeCheckout(composeReadmePath(loaded.scope, input), loaded.scope, input.directory);
+  const checkoutDir = input.directory ?? (input.super === true && !input.project ? name : undefined);
+  if (checkoutDir !== undefined) hrefForScopeCheckout(composeReadmePath(loaded.scope, input), loaded.scope, checkoutDir);
   const { service } = loaded;
   const node = await ensureComposeEntry(loaded.scope, service, input);
   // Validate (name, relative path, duplicates) before touching git.
+  // --super places the default checkout at <scope>/<name>, beside compose/, matching a workspace root.
   node.addChild({
     name,
-    ...(input.directory === undefined
+    ...(checkoutDir === undefined
       ? {}
-      : { href: hrefForScopeCheckout(node.path, loaded.scope, input.directory) }),
+      : { href: hrefForScopeCheckout(node.path, loaded.scope, checkoutDir) }),
     description: input.description,
     remote: input.remote,
   });

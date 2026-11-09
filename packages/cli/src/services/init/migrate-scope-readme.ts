@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
-import { placeHarnessMaterial } from "../../domain/config/edges-materials.js";
+import { placeHarnessMaterial, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
 import type { NodeReference } from "../../domain/core/types.js";
 import { identifyNodeType, isHarnessMaterial, resolveHref } from "../../domain/models/node/layout.js";
@@ -16,8 +16,8 @@ import {
 const LIST_ITEM =
   /^[-*+] \[([^\]]*)\]\((<[^>]+>|[^)\s]+)\)(?:\s*[—–-]\s*(.*?))?\s*$/;
 
-function scopeReadmePath(scopeDir: string): string {
-  return placeHarnessMaterial(scopeDir, "readme").absPath;
+function scopeReadmePath(scopeDir: string, options: MaterialOptions = {}): string {
+  return placeHarnessMaterial(scopeDir, "readme", options).absPath;
 }
 
 function listItemHref(line: string): { href: string; label: string; description?: string } | undefined {
@@ -46,7 +46,7 @@ function unparsedLocalMaterials(agents: AgentsNode): NodeReference[] {
   const block = extractLocalBlock(agents.body);
   if (!block) return [];
   const known = new Set(agents.localChildren.map((child) => child.id));
-  const readme = scopeReadmePath(agents.directoryPath);
+  const readme = scopeReadmePath(agents.directoryPath, {});
   const out: NodeReference[] = [];
   for (const line of block.split("\n")) {
     const item = listItemHref(line);
@@ -63,8 +63,8 @@ function unparsedLocalMaterials(agents: AgentsNode): NodeReference[] {
   return out;
 }
 
-function materialsToMove(scopeDir: string, agents: AgentsNode): NodeReference[] {
-  const readme = scopeReadmePath(scopeDir);
+function materialsToMove(scopeDir: string, agents: AgentsNode, options: MaterialOptions = {}): NodeReference[] {
+  const readme = scopeReadmePath(scopeDir, options);
   return [
     ...agents.localChildren.filter(
       (child) => child.id !== readme && isLayerMaterial(scopeDir, child.id),
@@ -124,7 +124,7 @@ export type ScopeReadmeMigration = {
  */
 export async function migrateScopeMaterialIndex(
   scopeDir: string,
-  options: { write?: boolean; service?: NodeService } = {},
+  options: MaterialOptions & { write?: boolean; service?: NodeService } = {},
 ): Promise<ScopeReadmeMigration> {
   const empty = { moved: [] as string[], createdReadme: false, addedPointer: false };
   if (!isScope(scopeDir)) return empty;
@@ -136,8 +136,8 @@ export async function migrateScopeMaterialIndex(
   } catch {
     return empty;
   }
-  const readme = scopeReadmePath(scopeDir);
-  const moving = materialsToMove(scopeDir, agents);
+  const readme = scopeReadmePath(scopeDir, options);
+  const moving = materialsToMove(scopeDir, agents, options);
   const createdReadme = !existsSync(readme);
   const addedPointer = !agents.localChildren.some((child) => child.id === readme);
   const report = {
@@ -149,10 +149,10 @@ export async function migrateScopeMaterialIndex(
 
   const service = options.service ?? memoryNodes(scopeDir);
   const { ensureScopeReadme, linkScopeReadme } = await import("./service.js");
-  await ensureScopeReadme(scopeDir, service);
+  await ensureScopeReadme(scopeDir, service, options);
   const present = moving.filter((child) => existsSync(child.id));
   const absent = moving.filter((child) => !existsSync(child.id));
-  for (const child of present) await linkScopeReadme(scopeDir, child, service);
+  for (const child of present) await linkScopeReadme(scopeDir, child, service, options);
   appendAbsentMaterials(readme, absent);
   const movedIds = new Set(report.moved);
   const kept = agents.localChildren.filter((child) => !movedIds.has(child.id));

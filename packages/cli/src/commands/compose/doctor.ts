@@ -23,7 +23,7 @@ are not listed.
       try {
         if (ctx.project) throw new Error("compose doctor migrates legacy scope AGENTS.md blocks; omit --project.");
         const apply = opts.apply === true;
-        const { changes, warnings } = await doctorCompose(ctx.env, apply);
+        const { changes, warnings } = await doctorCompose(ctx.env, apply, { super: ctx.super === true });
         ctx.result = succeed({
           command: "compose.doctor",
           apply,

@@ -11,3 +11,5 @@
 含下级材料或用户资源的 Project，普通删除拒绝，必须显式 `--recursive` 才删除整棵目录；只有自身正文和未改写生成索引的空容器仍可普通删除。这是容器生命周期的控制规则，不是实际数据删除指令。完整行为与边界见[设计稿](../../.edges/memory/projects/project_recursive_projects/INDEX.md)，迁移命令、冲突检查与中断恢复见[迁移说明](../../scripts/migrations/recursive-projects.md)。
 
 实现后的框架仓数据核对见[迁移验收](../migrations/2026-11-02-recursive-projects.md)。
+
+2026-11-09 补充：`--super` 是整仓材料面，不是单个模块的特例。默认材料根仍是 `<scope>/.edges`。显式 `--super` 时，notes、tasks、routines、skills、memory、compose 以及 `edges init` 都使用 `<scope>/<module>`。`--project` 只在这一面的 projects 目录里解析：默认 `<scope>/.edges/projects`，`--super` 时 `<scope>/projects`，两条路径互不回退。选中 P 之后，材料仍在 `P/<module>`。`edges init --super` 还会在 scope 的 `AGENTS.md` 硬约束里追加一次「这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数」，保留用户已写的其他约束。`edges --super compose add` 在未给路径时把检出放在 `<scope>/<name>`，登记表是 `<scope>/compose/README.md`。不带 `--super` 的 init 与 compose 仍使用 `.edges/`。

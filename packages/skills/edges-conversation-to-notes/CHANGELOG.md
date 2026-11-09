@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-09
+
+### Changed
+
+- **Project 路径跟随材料面。** 笔记归入 scope 直属 `projects/` 里的主题时，`--project` 与 `--super` 一起用。
+
 ## [0.2.0] - 2026-11-02
 
 ### Changed

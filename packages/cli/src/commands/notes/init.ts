@@ -20,7 +20,7 @@ export function addNoteInitCommand(notes: Command, ctx: CliContext): void {
         description?: string;
       }) => {
         try {
-          const result = await initNotes({ ...options, env: ctx.env, project: ctx.project });
+          const result = await initNotes({ ...options, env: ctx.env, project: ctx.project, super: ctx.super === true });
           ctx.result = succeed({ ...result, command: "notes.init" });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

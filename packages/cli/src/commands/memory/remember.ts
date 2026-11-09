@@ -84,7 +84,7 @@ export function addMemoryRememberCommand(
                 );
           return await rememberMemory({
             ...rest,
-            targetDir: target(options, ctx), project: ctx.project,
+            targetDir: target(options, ctx), project: ctx.project, super: ctx.super === true,
             content,
             env: ctx.env,
           });

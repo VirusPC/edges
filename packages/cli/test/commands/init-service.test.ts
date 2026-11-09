@@ -39,7 +39,8 @@ async function tree(root: string): Promise<Map<string, string>> {
 test("edges init --help lists tasks with modules this command creates and keeps routines out", async () => {
   const help = await run(["init", "--help"], { env: {} });
   assert.equal(help.exitCode, 0, help.stdout + help.stderr);
-  assert.match(help.stdout, /does not read --super/);
+  assert.match(help.stdout, /--super uses <scope>\/<module>\//);
+  assert.doesNotMatch(help.stdout, /does not read --super/);
   const createdAt = help.stdout.indexOf("CREATED WHEN NO MODULE IS GIVEN");
   const notCreatedAt = help.stdout.indexOf("NOT CREATED HERE");
   assert.ok(createdAt >= 0 && notCreatedAt > createdAt, help.stdout);
@@ -166,13 +167,13 @@ test("edges init is idempotent and keeps an existing harness board", async (t) =
   assert.equal(await readFile(notes, "utf8"), custom);
 });
 
-test("edges init does not read --super when choosing the write root", async (t) => {
+test("edges init without --super stays on .edges and does not add the independent-harness line", async (t) => {
   const root = await scope(t);
-  const result = await run(["--scope", root, "--super", "init", "notes"], { env: {} });
+  const result = await run(["--scope", root, "init", "notes"], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   assert.equal(existsSync(path.join(root, ".edges/notes/README.md")), true);
   assert.equal(existsSync(path.join(root, "notes/README.md")), false);
-  assert.match(await readFile(path.join(root, ".edges/notes/README.md"), "utf8"), /edges-entries-local:start/);
+  assert.doesNotMatch(await readFile(path.join(root, "AGENTS.md"), "utf8"), /这是独立 edges harness 仓库/);
 });
 
 test("commands do not import the harness material catalog", () => {

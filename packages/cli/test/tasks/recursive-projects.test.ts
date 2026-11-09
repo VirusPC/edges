@@ -29,7 +29,7 @@ async function fixture(t: { after(fn: () => Promise<void>): void }) {
 }
 
 test("root, Project and nested Project tasks use direct boards and real owner identities",async t=>{
-  const {scope,ok,project}=await fixture(t);
+  const {scope,ok,project,call}=await fixture(t);
   const p=await project("Parent"),q=await project("Child",p);
   const records=[];
   for(const selected of [undefined,p,q]) {
@@ -49,8 +49,8 @@ test("root, Project and nested Project tasks use direct boards and real owner id
   assert.ok(parent.tasks.every((item:any)=>item.path.startsWith(`.edges/projects/${p}/`)));
   const nested=await ok(["tasks","list"],q);
   assert.equal(nested.tasks.length,1);
-  const plusSuper=await ok(["--super","tasks","list"],q);
-  assert.deepEqual(plusSuper.tasks,nested.tasks);
+  const plusSuper=await call(["--super","tasks","list"],q);
+  assert.notEqual(plusSuper.exitCode,0,plusSuper.stdout);
   const grouped=await listRepositoryGroupedByProject(scope);
   assert.equal(grouped.items.length,3);
   assert.equal(new Set(grouped.items.map(item=>item.id)).size,3);

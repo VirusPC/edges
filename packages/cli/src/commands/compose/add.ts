@@ -32,6 +32,7 @@ export function addComposeAddCommand(compose: Command, ctx: CliContext): void {
         const { entry, submodule, warnings } = await addCompose(ctx.env, {
           name: opts.name,
           project: ctx.project,
+          super: ctx.super === true,
           directory: opts.path,
           remote: opts.remote,
           description,

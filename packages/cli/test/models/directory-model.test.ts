@@ -167,7 +167,7 @@ test("updates preserve unedited body bytes and reject non-entry child identities
   assert.equal(node.body, "Body without trailing newline");
   const root = new AgentsNode("/repo/AGENTS.md").parse("Keep\n");
   assert.throws(
-    () => root.addChild("local", { id: "/repo/README.md" }),
+    () => root.addChild("local", { id: "/repo/notes/README.md" }),
     /entry/,
   );
   assert.equal(root.serialize(), "Keep\n");

@@ -9,5 +9,5 @@ export function addMemoryBackupCommand(memory: Command, ctx: CliContext): void {
     .option('--output-dir <directory>', 'Archive directory (defaults to the scope)')
     .option('--timestamp <stamp>', 'Explicit archive filename timestamp')
     .action((options: { repoDir?: string; outputDir?: string; timestamp?: string }) =>
-      operation(ctx, () => backupUserMemory({ ...options, repoDir: options.repoDir ?? resolveScope(ctx.env), project: ctx.project })));
+      operation(ctx, () => backupUserMemory({ ...options, repoDir: options.repoDir ?? resolveScope(ctx.env), project: ctx.project, super: ctx.super === true })));
 }

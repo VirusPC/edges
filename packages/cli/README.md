@@ -155,7 +155,7 @@ edges --scope <仓库根> --super
 
 把 `--scope` 指到 `<仓库根>/.edges` 才是下一层：这个目录本身成为超节点的 `.edges`。它的 children 是该目录下存在的 `tasks/README.md`、`memory/feedbacks/README.md`、`memory/projects/README.md`、`memory/references/README.md`、`skills/managed/README.md`、`skills/referenced/README.md`、`projects/README.md`、`notes/README.md`。这不是仓库根那一份名单。评测与观测在 `packages/evaluation/`、`packages/observation/`，不再是 harness 材料。
 
-各目录模块通过 [`queryMaterialNodes`](src/services/node/scope-session.ts) 共用查询范围：默认从真 `AGENTS.md` 读取；`--super` 换成直属材料的虚拟超节点；`--all` 只读，从当前 scope 发现独立系统并走森林；`--super --all` 再加入该 scope 的虚拟超节点。不会给每个独立系统自动加 Super，也不会把 scope 扩大到 Git 根。指定 `--project` 后，以 Project 的 INDEX 组成作为入口，优先于 `--super`；`--all` 仅追加该 Project 子树内的独立系统。
+各目录模块通过 [`queryMaterialNodes`](src/services/node/scope-session.ts) 共用查询范围：默认从真 `AGENTS.md` 读取；`--super` 换成直属材料的虚拟超节点；`--all` 只读，从当前 scope 发现独立系统并走森林；`--super --all` 再加入该 scope 的虚拟超节点。不会给每个独立系统自动加 Super，也不会把 scope 扩大到 Git 根。`--project` 先按当前材料面找 Project：默认 `<scope>/.edges/projects`，`--super` 时 `<scope>/projects`，两条路径互不回退。找到 P 之后，以 P 的 INDEX 组成作为入口，材料仍在 `P/<module>`；`--all` 仅追加该 Project 子树内的独立系统。
 
 再往下走的是这两个 README 自己的 `edges-entries-*`，不是超节点的另一组孩子。`--super tasks list` 只留下这条链上的 Task。
 
@@ -189,9 +189,9 @@ query 最初只加载入口快照。对查询结果执行目录 move/destroy 前
 
 `--scope` 选择维护对象；全局 `--project` 在该 scope 内选择主题材料容器。省略 Project 时材料根是 `<scope>/.edges`；指定后是 Project 目录 P，模块直接放在 `P/notes`、`P/tasks`、`P/projects`、`P/memory`、`P/skills`、`P/routines`。不自动创建 P/AGENTS.md 或 P/.edges。
 
-Project 保留 `INDEX.md` 正文，并用显式 `edges-entries-*` 登记直属模块。读写共用 HarnessMaterial 配置和材料定位函数。`--project` 要求现有 Project 的相对路径，拒绝绝对路径、越界、符号链接和非 Project 入口。它与 `--target-dir` / `--repo-dir` 冲突；先用 `--scope` 选择维护对象。
+Project 保留 `INDEX.md` 正文，并用显式 `edges-entries-*` 登记直属模块。读写共用 HarnessMaterial 配置和 [`resolveProjectSelection`](src/services/projects/selection.ts)。`--project` 要求现有 Project 的相对路径，拒绝绝对路径、越界、符号链接和非 Project 入口。它与 `--target-dir` / `--repo-dir` 冲突；先用 `--scope` 选择维护对象。
 
-指定 Project 时 `--super` 不改变其材料根。`--all` 只读，在所选 Project 子树内追加发现独立系统；普通查询沿已登记的组成关系递归。省略 Project 时，`--super` 选择 scope 直属材料。Artifacts 和 Evaluation 服务没有新增本地材料目录。非空 Project 删除必须显式 `projects delete <path> --recursive`，包括未登记的用户资源。
+`--project <P>` 相对当前材料面的 projects 目录：默认 `<scope>/.edges/projects`，显式 `--super` 时 `<scope>/projects`。同一相对路径不会从另一面补找。解析到 P 之后，材料根是 P 本身，不再改写到 scope 直属目录。`--all` 只读，在所选 Project 子树内追加发现独立系统；普通查询沿已登记的组成关系递归。省略 Project 时，`--super` 选择 scope 直属材料。`tasks update --to-project` 与 `--to-default` 跟随同一次选择的材料面。Artifacts 和 Evaluation 服务没有新增本地材料目录。非空 Project 删除必须显式 `projects delete <path> --recursive`，包括未登记的用户资源。
 
 ## 命令
 
@@ -199,7 +199,7 @@ commands 的目录对应命令树：一个文件注册一个命令节点，同�
 
 ### 任务：tasks
 
-主体系统由 `--scope` 决定。一般任务写在 `<scope>/.edges/tasks`，没有 `_default` 层。全局 `--project <P>` 以 `<scope>/.edges/projects` 为根选择实际 Project 目录，任务写在 `P/tasks`；嵌套目录如 `P/projects/Q`。`--super` 把主体换成该 scope 上的虚拟系统一，它的 harness 就是这个 scope 目录，任务写在 `<scope>/tasks`。`--all` 从当前 scope 走森林。最全的一次查询是 `--scope <仓库根> --super --all`。
+主体系统由 `--scope` 决定。一般任务写在 `<scope>/.edges/tasks`，没有 `_default` 层。全局 `--project <P>` 以当前材料面的 projects 目录为根：默认 `<scope>/.edges/projects`，`--super` 时 `<scope>/projects`。任务写在 `P/tasks`；嵌套目录如 `P/projects/Q`。省略 Project 时，`--super` 把主体换成该 scope 上的虚拟系统一，它的 harness 就是这个 scope 目录，任务写在 `<scope>/tasks`。`--all` 从当前 scope 走森林。最全的一次查询是 `--scope <仓库根> --super --all`。
 
 ```bash
 edges --scope <directory> tasks list
@@ -208,6 +208,7 @@ edges --scope <directory> --all tasks list --group-by project
 edges --scope <directory> --super tasks list
 edges --scope <directory> tasks create --title "修复构建"
 edges --scope <directory> --project <P> tasks create --title "主题内工作"
+edges --scope <directory> --super --project <P> notes create --title "直属主题笔记"
 edges --scope <directory> tasks update <stem或路径> --to-project <P>
 edges --scope <directory> --project <P> tasks update <stem或路径> --to-default
 edges tasks get <stem或路径>
@@ -249,7 +250,7 @@ edges memory restore --repo-dir /absolute/project --archive /private/archive.tar
 
 新作用域的 `edges memory init` 未选择类型时只返回推荐项，不创建 notes、projects、skills 或 tasks 的材料。无参 `edges init` 的默认集包含 skills。`edges skills init` 既写 skill 类型索引，也把包内 skill 装进当前项目：安装步骤是固定的 `skills@1.7.2`，只额外传入包内 skills 目录和 `--skill '*'`，`--` 之后的 token 原样转交。`skills@1.7.2` 在探测到自己跑在 agent 里时会非交互，并只装给那个 agent；没有探测到、stdin 又不是 TTY 时，不带 `-y` 会退出 1。非交互且保留自动探测时用 `edges init -- -y`（当前项目；`-g` 才装到用户目录，`-y` 跳过确认；本机没有已安装 agent 时它会装给全部 agent）。指定某一个则用 `edges init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。`--` 只在 `init` 和 `skills init` 上切开；其他命令把 `--` 和后面的 token 原样交给 commander。解析后的模块集合里没有 skills 时，这次 init 不会装，stderr 会列出被忽略的 token。memory 还在等类型选择、因而提前返回时，不因为没装 skills 而报这句。安装失败时进程退出码就是安装器的退出码，stdout 信封是 `{ status: "failed", errorCode: "SKILLS_INSTALL_FAILED", reason, created }`。`created` 是失败前已经写好的相对路径。`errorCode` 与 `VALIDATION_ERROR` 不同；不要用退出码是不是 2 来判断是不是校验错误，安装器自己也可能退出 2。校验错误仍然是退出码 2、`errorCode` 为 `VALIDATION_ERROR`。`edges tasks init` 只写任务看板。remember 不初始化缺失作用域；doctor 默认只诊断。0.3.0 起没有 `edges memory migrate`。旧 `.memory` 会让 `edges init` 失败并返回 `migration-required`；先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。新建子作用域按路径登记到父级：`AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已经登记的保持原组。`edges memory doctor --apply` 按同一规则补上缺失的父级链接。
 
-`edges notes init` 与 `edges projects init` 只创建真实 scope 下的 `.edges/notes/README.md`、`.edges/projects/README.md`，作为接收叶子的组织清单，并登记到 `.edges/README.md`。它们不再同时创建根目录的 `notes/README.md`、`projects/README.md` 与不接收叶子的占位文件。和其他模块一样，init 不读取 `--super`；使用 `--super` 创建叶子时，会按需补齐 scope 直属的模块 README。
+不带 `--super` 时，`edges notes init` 与 `edges projects init` 只创建 `<scope>/.edges/notes/README.md`、`<scope>/.edges/projects/README.md`，并登记到 `.edges/README.md`。`edges init --super`（以及 `edges <module> init` 带上根级 `--super`）改为创建 `<scope>/notes/`、`<scope>/projects/`、`<scope>/tasks/`、`<scope>/memory/`、`<scope>/skills/`，组织清单登记在 `<scope>/README.md`。同时在 `AGENTS.md` 的硬约束区块追加一次「这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数」；已有这句或用户的其他约束都保留，重复执行不追加第二遍。
 
 用户记忆 restore 默认拒绝覆盖，明确使用 --force 才整份替换，失败时回滚。备份和恢复接受未压缩或 gzip tar，解包上限 256 MiB、10,000 文件，拒绝硬链接；中断后若报告 `.private-user-memory-*/previous`，应保留恢复副本。模板随包复制到 dist，运行不依赖相邻 Skill 源码或 Python。
 
@@ -278,7 +279,7 @@ edges --scope /absolute/project --super projects create --title "Research" --bod
 edges --scope /absolute/project --super projects list
 ```
 
-`projects create` 默认在该 scope 的 `.edges/projects/` 下创建容器，`--super` 写入 `projects/`；`--project <P>` 则创建 `P/projects/<date>--<slug>/INDEX.md`。Project 的 `INDEX.md` 同时保留正文与模块索引，更新正文不会删除既有子材料登记。创建不 commit、不 push、不开 PR。使用 metadata、`--body`，标题来自 `--title` 或正文一级标题。含下级材料或资源的 Project 删除必须带 `--recursive`；get / update / delete 的路径校验与 list 都遵循同一材料目录，list 用共享的 `--filter` / `--group-by`。
+`projects create` 默认在该 scope 的 `.edges/projects/` 下创建容器，`--super` 写入 `projects/`；`--project <P>` 则在已选中的 P 下创建 `P/projects/<date>--<slug>/INDEX.md`。`--super --project <P>` 的 P 来自 `<scope>/projects`。Project 的 `INDEX.md` 同时保留正文与模块索引，更新正文不会删除既有子材料登记。创建不 commit、不 push、不开 PR。使用 metadata、`--body`，标题来自 `--title` 或正文一级标题。含下级材料或资源的 Project 删除必须带 `--recursive`；get / update / delete 的路径校验与 list 都遵循同一材料目录，list 用共享的 `--filter` / `--group-by`。
 
 ### 技能：skills
 
@@ -303,7 +304,7 @@ edges --scope /absolute/project --super routines list
 edges --scope /absolute/project --all routines list
 ```
 
-`routines init`（或 `init routines`）显式采用模块，无参 `init` 的默认集不变。记录位于 `<scope>/.edges/routines/<name>/INDEX.md`，`--super` 创建与查询 `<scope>/routines/`；init 与其他模块一样只初始化真实 scope，不读 `--super`。名称为稳定的小写 kebab-case（1–64 字符），不加日期或 Project 分组。
+`routines init`（或 `init routines`）显式采用模块，无参 `init` 的默认集不变。不带 `--super` 时记录位于 `<scope>/.edges/routines/<name>/INDEX.md`；`--super` 创建、查询和 init 都使用 `<scope>/routines/`。名称为稳定的小写 kebab-case（1–64 字符），不加日期或 Project 分组。
 
 `create` 需要名称和非空 `--description`，可带 `--body` 与重复的 `--metadata key=value`；`update` 修改说明、正文或 metadata。`get/update/delete` 接受名称或准确的入口路径，同名不唯一就报错。`list` 使用通用 `--filter` / `--group-by`；`--all` 只读，`--exclude routines` 排除模块。索引随 NodeService 的写入更新；查询沿已登记关系读取，不扫描目录补录孤立文件。
 

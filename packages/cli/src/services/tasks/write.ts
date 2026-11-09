@@ -8,7 +8,7 @@ import { scopeDir, resolveBoard, taskBoardLocation, sidecarRelPath, statusDir, t
 import { taskBody } from "../../domain/models/tasks/frontmatter.js";
 import { newTaskStem, taskNameSlug } from "../../domain/models/tasks/slug.js";
 import { parseTaskPriority } from "../../domain/models/tasks/priority.js";
-import { resolveProjectSelection } from "../projects/selection.js";
+import { relativeProjectPath, resolveProjectSelection } from "../projects/selection.js";
 import { ensureMaterialOrg } from "../node/content-org-list.js";
 import { TASK_STATUSES, TasksError, type TaskStatus } from "../../domain/models/tasks/types.js";
 
@@ -47,7 +47,7 @@ export async function createTask(target: BoardTarget, input: TasksCreateInput, i
 }
 function relativeProject(target: BoardTarget): string | undefined {
   const location = resolveBoard(target);
-  return location.project ? path.relative(path.join(location.scopeDir, ".edges/projects"), location.project).split(path.sep).join("/") : undefined;
+  return location.project ? relativeProjectPath(location.scopeDir, location.project) : undefined;
 }
 export async function updateTask(
   target: BoardTarget, task: string,
@@ -61,9 +61,10 @@ export async function updateTask(
   const priority = patch.priority === undefined ? undefined : parseTaskPriority(patch.priority);
   const record = await getTask(target, task, io.fs);
   const location = resolveBoard(target);
+  const face = { super: location.super === true };
   const destination = patch.toProject !== undefined
-    ? taskBoardLocation(location.scopeDir, { project: await resolveProjectSelection(location.scopeDir, patch.toProject) })
-    : patch.toDefault ? taskBoardLocation(location.scopeDir) : location;
+    ? taskBoardLocation(location.scopeDir, { ...face, project: await resolveProjectSelection(location.scopeDir, patch.toProject, face) })
+    : patch.toDefault ? taskBoardLocation(location.scopeDir, face) : location;
   const destinationFs = destination.boardDir === location.boardDir ? io.fs : createNodeBoardWriter(destination);
   await assertCurrentBoard(destination, destinationFs);
   const destRel = withEntryName(taskRelPath(record.status, record.stem, destination), record.path);

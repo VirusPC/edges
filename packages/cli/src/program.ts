@@ -118,11 +118,11 @@ function addRootCommand(
     )
     .option(
       "--project <directory>",
-      "Project directory relative to <scope>/.edges/projects (P or P/projects/Q)",
+      "Project directory relative to the selected projects material (<scope>/.edges/projects, or <scope>/projects with --super)",
     )
     .option(
       "--super",
-      "Use scope-relative configured materials via a runtime SuperAgentsNode; --project takes precedence",
+      "Use scope-relative materials via a runtime SuperAgentsNode. --project then resolves under <scope>/projects; selected Project materials stay in P/<module>",
     )
     .option(
       "--all",
@@ -165,7 +165,7 @@ function addRootCommand(
     }
     if (target !== undefined) await beforeWrite?.(target);
     // Validation reads happen under the same lock as the ensuing write.
-    if (project !== undefined) ctx.project = await resolveProjectSelection(resolveScope(ctx.env), project);
+    if (project !== undefined) ctx.project = await resolveProjectSelection(resolveScope(ctx.env), project, { super: useSuper === true });
   });
 
   program.action(() => {
@@ -349,7 +349,7 @@ export async function run(
  */
 function appendComposeWarnings(ctx: CliContext, argv: string[]): void {
   if (ctx.exclude?.has("compose") || !ctx.result || usageScope(argv) === "compose") return;
-  const warnings = scopeComposeWarnings(ctx.env, { project: ctx.project }).join("");
+  const warnings = scopeComposeWarnings(ctx.env, { project: ctx.project, super: ctx.super === true }).join("");
   if (!warnings) return;
   const previous = ctx.result.stderr;
   ctx.result = {

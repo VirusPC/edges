@@ -8,7 +8,7 @@ const HELP = "See edges tasks init --help for usage.\n";
 export function addTaskInitCommand(tasks: Command, ctx: CliContext): void {
   tasks
     .command("init")
-    .description("Initialize the tasks board and scope AGENTS.md. Does not read --super.")
+    .description("Initialize the tasks board and scope AGENTS.md. --super writes <scope>/tasks/.")
     .option("--target-dir <directory>", "Explicit target scope (otherwise use --scope or scope discovery)")
     .option("--root-dir <directory>", "Boundary for the scope tree")
     .option("--description <text>", "Description in the parent scope index")
@@ -20,7 +20,7 @@ export function addTaskInitCommand(tasks: Command, ctx: CliContext): void {
         description?: string;
       }) => {
         try {
-          const result = await initTasks({ ...options, env: ctx.env, project: ctx.project });
+          const result = await initTasks({ ...options, env: ctx.env, project: ctx.project, super: ctx.super === true });
           ctx.result = succeed({ ...result, command: "tasks.init" });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);

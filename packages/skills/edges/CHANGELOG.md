@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.4] - 2026-11-09
+
+### Changed
+
+- **`--super` 覆盖 init、memory 与 compose。** `edges init --super` 把材料放到 `<scope>/<module>/`，并在硬约束里写一次独立仓提示。memory 与 compose 的读写同样跟着这面走；默认不带 `--super` 仍是 `.edges/`。
+
+## [0.4.3] - 2026-11-09
+
+### Changed
+
+- **`--project` 跟随材料面。** 默认相对 `<scope>/.edges/projects`；`--super` 时相对 `<scope>/projects`。选中 P 后材料仍在 `P/<module>`。未选 Project 时，memory 写入和 init 仍不因 `--super` 改位置。
+
 ## [0.4.2] - 2026-11-08
 
 ### Changed

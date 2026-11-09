@@ -97,7 +97,7 @@ test("onboarding and init docs recommend a project install without -g", async ()
   ];
   assert.deepEqual(projectInits, [
     "edges --scope <目标目录> init -- -y",
-    "edges --scope <仓库目录> init -- -y",
+    "edges --scope <仓库目录> --super init -- -y",
   ]);
   for (const command of projectInits) {
     assert.equal(command.split(/\s+/).includes("-g"), false, command);

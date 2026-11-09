@@ -13,13 +13,14 @@ test("MCP discovery and note creation share CLI Project selection and boundaries
   const root = await realpath(await mkdtemp(path.join(tmpdir(), "mcp-project-")));
   t.after(() => rm(root, { recursive: true, force: true }));
   await writeFile(path.join(root, "AGENTS.md"), "# Scope\n");
-  const project = async (...args: string[]) => {
+  const project = async (face: ".edges/projects" | "projects", ...args: string[]) => {
     const result = await run(["--scope", root, ...args, "projects", "create", "--title", "Topic"], { env: {} });
     assert.equal(result.exitCode, 0, result.stdout + result.stderr);
-    return path.relative(".edges/projects", path.dirname(JSON.parse(result.stdout).path));
+    return path.relative(face, path.dirname(JSON.parse(result.stdout).path));
   };
-  const parent = await project();
-  const child = await project("--project", parent);
+  const parent = await project(".edges/projects");
+  const child = await project(".edges/projects", "--project", parent);
+  const superChild = await project("projects", "--super");
   const server = createMcpServer({
     scopeDir: root, cwd: root,
     cliEntry: fileURLToPath(new URL("../../../cli/src/index.ts", import.meta.url)),
@@ -42,7 +43,8 @@ test("MCP discovery and note creation share CLI Project selection and boundaries
   for (const [flags, folder] of [
     [{}, ".edges/notes"],
     [{ super: true }, "notes"],
-    [{ project: child, super: true }, `.edges/projects/${child}/notes`],
+    [{ project: child }, `.edges/projects/${child}/notes`],
+    [{ project: superChild, super: true }, `projects/${superChild}/notes`],
   ] as const) {
     const result = await create({ title: "Stored", body: "Content", ...flags });
     assert.equal(result.status, "success", JSON.stringify(result));

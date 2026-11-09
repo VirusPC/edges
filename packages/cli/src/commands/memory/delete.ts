@@ -11,6 +11,6 @@ export function addMemoryDeleteCommand(memory: Command, ctx: CliContext): void {
       .requiredOption("--type <type>", "Memory type")
       .requiredOption("--slug <slug>", "Entry slug"),
   ).action((opts: TargetOptions & { type: string; slug: string }) =>
-    present(ctx, async () => ({ command: "memory.delete", ...(await deleteMemoryEntry(target(opts, ctx), opts.type, opts.slug, { project: ctx.project })) })),
+    present(ctx, async () => ({ command: "memory.delete", ...(await deleteMemoryEntry(target(opts, ctx), opts.type, opts.slug, { project: ctx.project, super: ctx.super === true })) })),
   );
 }

@@ -11,6 +11,7 @@ import { parseDocument } from "../../utils/markdown/document.js";
 import { NodeService } from "../node/node-service.js";
 import {
   findIndexAnchor,
+  ensureIndependentHarnessConstraint,
   syncIndexEntry,
   syncTargetAgents,
 } from "../memory/agents.js";
@@ -353,14 +354,16 @@ async function runTypeInit(
       });
     }
   }
-  const agentsAction = options.project ? "not-applicable" : await syncTargetAgents(target, root, service);
+  const agentsAction = options.project ? "not-applicable" : await syncTargetAgents(target, root, service, options);
+  if (options.super === true && !options.project && agentsAction !== "needs-doctor")
+    await ensureIndependentHarnessConstraint(target, service);
   await ensureScopeReadmePointer(target, service, options);
   if (
     !options.project && target !== root &&
     existsSync(join(root, AGENTS_FILE_NAME)) &&
-    layerTypeSpecs(root).some((spec) => spec.module === module)
+    layerTypeSpecs(root, options).some((spec) => spec.module === module)
   ) {
-    await syncTargetAgents(root, root);
+    await syncTargetAgents(root, root, memoryNodes(root, options), options);
   }
   const [indexAction, indexEntry, indexDescription] = options.project
     ? ["not-applicable", null, null] as const
@@ -394,7 +397,9 @@ async function ensureScopeEntry(options: InitMemoryOptions) {
   const anchor = findIndexAnchor(target, root);
   const service = memoryNodes(target, options);
   await ensureScopeReadme(target, service, options);
-  const agentsAction = options.project ? "not-applicable" : await syncTargetAgents(target, root, service);
+  const agentsAction = options.project ? "not-applicable" : await syncTargetAgents(target, root, service, options);
+  if (options.super === true && !options.project && agentsAction !== "needs-doctor")
+    await ensureIndependentHarnessConstraint(target, service);
   await ensureScopeReadmePointer(target, service, options);
   const [indexAction, indexEntry, indexDescription] = options.project
     ? ["not-applicable", null, null] as const
@@ -410,8 +415,6 @@ async function ensureScopeEntry(options: InitMemoryOptions) {
 }
 
 export async function initScope(options: InitScopeOptions) {
-  // Init adopts the real material root; the Project selector takes precedence.
-  options = { ...options, super: false };
   const targetDir = options.targetDir ?? resolveScope(options.env ?? process.env);
   const requested =
     options.modules === undefined || options.modules.length === 0
@@ -429,7 +432,8 @@ export async function initScope(options: InitScopeOptions) {
     targetDir,
     rootDir: options.rootDir,
     description: options.description,
-    project: options.project,
+    ...(options.project ? { project: options.project } : {}),
+    ...(options.super === true ? { super: true } : {}),
   };
   // Shared system entry, then each module writes only its own materials.
   const scope = await ensureScopeEntry(base);
@@ -460,7 +464,7 @@ export async function initScope(options: InitScopeOptions) {
     created = [...created, ...boards.created];
     preserved = [...preserved, ...boards.preserved];
   }
-  if (!options.project) await migrateScopeMaterialIndex(scope.targetDir);
+  if (!options.project) await migrateScopeMaterialIndex(scope.targetDir, base);
   return {
     ...(typeResult ?? {}),
     targetDir: scope.targetDir,

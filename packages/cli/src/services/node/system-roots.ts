@@ -19,7 +19,7 @@ const SKIP_DIR_NAMES = new Set([
 
 /** Checkout directories registered on this scope's compose entry. */
 function composedDirectories(scopeDir: string): string[] {
-  const files = [composeReadmePath(scopeDir)];
+  const files = [composeReadmePath(scopeDir), composeReadmePath(scopeDir, { super: true })];
   if (identifyNodeType(leafEntryPath(scopeDir)) === "project")
     files.push(composeReadmePath(scopeDir, { project: scopeDir }));
   return files.flatMap((file) => {

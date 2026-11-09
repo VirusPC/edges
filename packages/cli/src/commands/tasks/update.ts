@@ -15,7 +15,7 @@ FLAGS
   --assignee <text>
   --name <name>            frontmatter name
   --priority <priority>    edges-task-priority: urgent | high | medium | low | none
-  --to-project <path>     move to a Project relative to scope/.edges/projects
+  --to-project <path>     move to a Project on the same face (scope/.edges/projects, or scope/projects with --super)
   --to-default            move to the scope tasks board
   --json  Write JSON to stdout (always on)
 
@@ -37,7 +37,7 @@ export function addUpdateCommand(tasks: Command, ctx: CliContext): void {
     .option("--assignee <text>")
     .option("--name <name>", "frontmatter name")
     .addOption(new Option("--priority <priority>", "edges-task-priority").choices([...TASK_PRIORITIES]))
-    .addOption(new Option("--to-project <path>", "Destination Project relative to scope/.edges/projects").conflicts("toDefault"))
+    .addOption(new Option("--to-project <path>", "Destination Project on the same material face").conflicts("toDefault"))
     .addOption(new Option("--to-default", "Return to the scope tasks board").conflicts("toProject"))
     .option("--json", "Write JSON to stdout (always on)")
     .addHelpText("after", UPDATE_AFTER_HELP)

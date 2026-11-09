@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { basename, dirname, join, resolve, sep } from "node:path";
 import { harnessMaterialById, loadHarnessMaterialsConfig, tasksBoardDirName } from "../../config/edges-materials.js";
 import {
@@ -150,11 +151,11 @@ export function isHarnessMaterial(id: string): boolean {
   const tasksPath = harnessMaterialById("tasks").path.split(sep).join("/");
   const norm = id.split(sep).join("/");
   if (norm.endsWith("/" + tasksPath)) return true;
-  return (
-    basename(id) === ENTRY_NAMES.readme &&
-    (dirname(id).split(sep).includes(".edges") ||
-      basename(dirname(dirname(id))) === tasksBoardDirName())
-  );
+  if (basename(id) !== ENTRY_NAMES.readme) return false;
+  if (dirname(id).split(sep).includes(".edges")) return true;
+  if (basename(dirname(dirname(id))) === tasksBoardDirName()) return true;
+  // <scope>/README.md is the super-face material index, next to AGENTS.md.
+  return existsSync(join(dirname(id), ENTRY_NAMES.internal));
 }
 
 /** Exclude ordinary navigation before applying strict child-path decoding. */

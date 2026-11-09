@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### 目录选择
+
+- **`--super` 覆盖 init、memory 和 compose。** 默认材料仍在 `<scope>/.edges/`。`--super` 时 notes、tasks、routines、skills、memory、compose 和 init 都写到 `<scope>/<module>/`。`init --super` 在硬约束追加一次独立仓提示，重复运行不重复、不改其他约束。`compose add --super` 省略 `--path` 时检出到 `<scope>/<name>`。`--project` 仍只在当前材料面的 projects 目录里找，不跨面回退。
+
 ## [0.5.6] - 2026-11-08
 
 ### 随包技能
