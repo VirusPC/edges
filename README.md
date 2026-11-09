@@ -8,7 +8,7 @@
 
 ![从零散材料到有序目录，再展开下一次工作：经验成为新的起点](docs/assets/readme/hero.png)
 
-[开始使用](#怎么开始) · [个人大脑案例](#案例把-edges-用于个人大脑) · [深入了解](#深入了解) · [Edges 小助手](https://edges-rag.viruspc.tech/)
+[开始使用](#怎么开始) · [实验结果](#实验结果) · [个人大脑案例](#案例把-edges-用于个人大脑) · [深入了解](#深入了解) · [Edges 小助手](https://edges-rag.viruspc.tech/)
 
 ## 这是什么，能帮我做什么？
 
@@ -37,6 +37,24 @@ Edges 识别出 Agent 协作中的关键工作，并为各模块打磨专门的�
 ![Edges 的长期使用优势：可读与迁移，以普通 Markdown 文件形式融入项目目录，将 harness 放在与被 harness 对象最接近的地方；Git 让变更可追溯可审阅，跨 Agent 接入让任务可接力，零运维让核心本地可用并提供现成服务接入](docs/assets/readme/foundations.svg)
 
 **Harness 是否真正有用，可以观察，也可以检验。** 围绕被 harness 的目录及其目标，收集各 Agent 下的真实会话，从实际工作中发现问题；用相关材料、任务与判断标准开展对照评测，比较结果质量、约束遵守与成本，让记忆、技能和使用方式的取舍有依据。
+
+## 实验结果
+
+**在受控合成 v1 测试中，两组正例记忆召回均为 100%，分层组织比根目录平铺少用 35.75% 的总 token，平均 Agent 用时缩短 15.87%。** 这是在相同记忆正文下，对分层目录与发现索引的实际检验。
+
+三批测试共 **99 道题、891 次执行，全部完成且零运行失败**。下表分别报告分层记忆（scoped）与根目录平铺（root）的结果，降幅均以 root 为基准；重复执行不增加独立题目数。
+
+| 测试集与完整报告 | 测试题 / 执行次数 | 记忆 recall@5：分层 / 平铺 | 观察到的效率收益 |
+| --- | ---: | ---: | --- |
+| [受控合成 v1](packages/evaluation/experiments/harness_memory_ablation/harbor/synthetic/RESULTS.md) | 32 / 288 | **100% / 100%** | 总 token **−35.75%**；Agent 用时 **−15.87%** |
+| [自然工作请求合成 v2](packages/evaluation/experiments/harness_memory_ablation/harbor/synthetic/v2/TEST_RESULTS.md) | 36 / 324 | 97.78% / 100% | 未缓存输入 token **−22.76%**；Agent 用时 **−4.16%** |
+| [真实历史请求](packages/evaluation/reports/2026-11-09-harbor-memory-ablation.md) | 31 / 279 | 54.11% / 52.41% | 工具调用 **−13.17%**；整体召回、token 和用时优势尚未确立 |
+
+**实验条件（2026-11-09）：** Harbor 0.25.0 + Codex 0.162.1，模型 `gpt-6.1-sol / low`；分层、平铺、无记忆三条件，每题各重复 3 次，Agent 时限 180 秒、12 路并发。两种有记忆条件使用相同正文与时间可见集合；逐题平均后比较，区间、场景分层和审计见各批报告。
+
+**适用范围：** 这里测的是记忆检索与资源开销，召回只统计有相关记忆的题，不是答案正确率或完整任务成功率。真实数据来自单用户，合成题共享设计模板，均只测一个模型配置。v2 总 token 差异尚不明确，部分题目的必要证据范围存在歧义，尚未建立稳定的质量区分度。总 token 包含缓存输入，缓存未隔离，并发用时受共享资源影响，不能直接换算为费用节省或推广到所有真实任务。
+
+[查看完整实验：设计、数据、生成器、评测程序与报告](packages/evaluation/experiments/harness_memory_ablation/harbor/README.md)
 
 ## 怎么开始？
 
@@ -138,7 +156,7 @@ Evaluation 用 **线上真实数据**，围绕 **预置或自定义的 eval 目�
 
 **用例：** 在真实维护会话中发现 Agent 多次引用已失效的 API 约定，就把相关问题与必要上下文整理成样本，自定义“避免错误引用、遵守当前约定”的目标与判分标准。固定样本、Agent 和其他实验条件，对照改动前后的 harness，比较达标情况与成本，判断哪些记忆需要更新或移除。
 
-现有记忆消融实验为“Memory 是否起到正向作用”提供了评测基础：固定问题与 Agent，对照有记忆与无记忆的表现，比较回答质量、约束遵守及成本。另有检索评测与 Langfuse 实验入口；题集、判分与实验条件仍需按目标准备。[记忆消融实验](packages/evaluation/experiments/harness_memory_ablation/README.md) · [评测说明](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
+现有 Harbor 记忆消融实验已完成真实历史请求、受控合成 v1 与自然请求合成 v2 三批测试，对照分层、根目录平铺与无记忆，比较记忆召回及资源开销。[实验结果](#实验结果)展示已观察到的收益与边界；完整设计、数据、生成器和审计保存在[实验目录](packages/evaluation/experiments/harness_memory_ablation/harbor/README.md)。另有检索评测与 Langfuse 实验入口，题集和判分仍需按目标准备。[评测说明](packages/evaluation/README.md) · [从 Langfuse 发起实验](packages/services/evaluation/README.md)
 
 下一步将结合通用评测框架，在用户选择预置目标或自定义目标后，由系统自动清洗与整理线上数据，并设置 Routine 定期评测。详见[评测闭环规划](.edges/projects/2026-09-11--evaluation/tasks/backlog/2026-11-02--Personal-Evaluation%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9B%AE%E6%A0%87%E7%BA%BF%E4%B8%8A%E6%95%B0%E6%8D%AE%E8%87%AA%E5%8A%A8%E6%B8%85%E6%B4%97%E4%B8%8E%E5%AE%9A%E6%9C%9F%E8%AF%84%E6%B5%8B/INDEX.md)。
 
