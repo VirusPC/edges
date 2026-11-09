@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-11-09
+
+### Changed
+
+- **独立仓标记。** `init --super` 在硬约束里写 `<edges-harness mode="super" />`。Agent 用它决定是否加 `--super`；CLI 不自动识别。没有标记但根上已有材料目录时先问。
+
 ## [0.4.4] - 2026-11-09
 
 ### Changed

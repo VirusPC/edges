@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { tmpdir } from "node:os";
 import { run } from "../../src/program.js";
-import { INDEPENDENT_HARNESS_CONSTRAINT } from "../../src/services/memory/agents.js";
+import { INDEPENDENT_HARNESS_CONSTRAINT, SUPER_HARNESS_MARKER, hasSuperHarnessMarker } from "../../src/services/memory/agents.js";
 
 function fixture(t: test.TestContext) {
   const root = fs.mkdtempSync(path.join(fs.realpathSync(tmpdir()), "super-face-"));
@@ -42,12 +42,16 @@ test("init --super writes the scope-root material face and one constraints line"
   assert.equal(fs.existsSync(path.join(root, ".edges/projects/README.md")), false);
   const agents = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
   assert.equal(count(agents, INDEPENDENT_HARNESS_CONSTRAINT), 1);
+  assert.equal(count(agents, SUPER_HARNESS_MARKER), 1);
+  assert.ok(agents.includes(`${INDEPENDENT_HARNESS_CONSTRAINT}\n${SUPER_HARNESS_MARKER}`));
+  assert.match(agents, /<!-- edges-constraints:start -->[\s\S]*<edges-harness mode="super" \/>[\s\S]*<!-- edges-constraints:end -->/);
   assert.match(agents, /本目录有项目记忆/);
   const before = agents;
   await ok("--super", "init");
   const again = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
   assert.equal(again, before);
   assert.equal(count(again, INDEPENDENT_HARNESS_CONSTRAINT), 1);
+  assert.equal(count(again, SUPER_HARNESS_MARKER), 1);
 });
 
 test("init --super keeps authored constraints and module init uses the same face", async (t) => {
@@ -68,8 +72,47 @@ test("init --super keeps authored constraints and module init uses the same face
   const agents = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
   assert.match(agents, /用户自己的约束保留/);
   assert.equal(count(agents, INDEPENDENT_HARNESS_CONSTRAINT), 1);
+  assert.equal(count(agents, SUPER_HARNESS_MARKER), 1);
   await ok("--super", "notes", "init");
-  assert.equal(count(fs.readFileSync(path.join(root, "AGENTS.md"), "utf8"), INDEPENDENT_HARNESS_CONSTRAINT), 1);
+  const twice = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
+  assert.equal(count(twice, INDEPENDENT_HARNESS_CONSTRAINT), 1);
+  assert.equal(count(twice, SUPER_HARNESS_MARKER), 1);
+});
+
+test("init --super adds the marker beside an older sentence and does not duplicate a marked element", async (t) => {
+  const { root, ok } = fixture(t);
+  const end = "<!-- edges-constraints:end -->";
+  fs.writeFileSync(path.join(root, "AGENTS.md"), `# Scope
+
+<!-- edges:start -->
+<!-- edges-constraints:start -->
+## 本层硬约束
+
+- ${INDEPENDENT_HARNESS_CONSTRAINT}
+${end}
+<!-- edges:end -->
+`);
+  await ok("--super", "init", "notes");
+  const added = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
+  assert.equal(count(added, SUPER_HARNESS_MARKER), 1);
+  assert.equal(count(added, INDEPENDENT_HARNESS_CONSTRAINT), 1);
+  fs.writeFileSync(path.join(root, "AGENTS.md"), added.replace(
+    SUPER_HARNESS_MARKER,
+    '<edges-harness mode="super" note="later" />',
+  ));
+  await ok("--super", "notes", "init");
+  const kept = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
+  assert.equal(count(kept, "<edges-harness"), 1);
+  assert.equal(hasSuperHarnessMarker(kept), true);
+  assert.equal(kept.includes(SUPER_HARNESS_MARKER), false);
+});
+
+test("the harness marker does not make the CLI select the super face", async (t) => {
+  const { root, ok } = fixture(t);
+  await ok("--super", "init", "notes");
+  const note = await ok("notes", "create", "--title", "Plain face");
+  assert.ok(note.path.startsWith(".edges/notes/"));
+  assert.equal(note.path.startsWith("notes/"), false);
 });
 
 test("memory and compose follow --super and do not fall back to .edges", async (t) => {

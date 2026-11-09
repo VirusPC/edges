@@ -1,7 +1,7 @@
 ---
 name: edges-memory-add-type
 description: 在所选作用域或主题 Project 按 LAYOUT 登记一个自定义 Memory Type。仅当用户明确要求新增 type 时使用。官方类型按选择采用；不要把示例 type 写进 init 模板。
-version: 0.2.2
+version: 0.2.3
 ---
 
 # Project Memory Add Type
@@ -36,7 +36,7 @@ version: 0.2.2
      [--gitignore] [--index-only] [--skills-format]
    ```
 
-   属于主题时，在 `memory` 前加 `--project <P/projects/Q>`；不要把 Project 路径填进 `--target-dir`。Project 在 scope 直属 `projects/` 时同时加 `--super`。未选 Project 时，`--super` 把类型登记到 `<scope>/memory`。`--all` 不用于写入。
+   属于主题时，在 `memory` 前加 `--project <P/projects/Q>`；不要把 Project 路径填进 `--target-dir`。根 `AGENTS.md` 含 `<edges-harness mode="super" />` 时同时加 `--super`。没有该元素但根上已有 `projects/`、`notes/`、`tasks/`、`memory/` 或 `compose/` 时先问。未选 Project 且带上 `--super` 时，类型登记到 `<scope>/memory`。`--all` 不用于写入。
 
 5. 按返回 JSON 汇报 `type` / `index` / `contentDir` / `action`，路径相对原 scope。若用户同时要求保存内容，用相同 scope / Project 调用 `$edges-memory-remember`；不要为了冒烟往真实记忆里写测试条目。
 

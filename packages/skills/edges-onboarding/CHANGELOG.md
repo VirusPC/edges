@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.4] - 2026-11-09
+
+### Changed
+
+- **挂载前读 `<edges-harness mode="super" />`。** 使用方 AGENTS.md 有这个元素就给 compose 加 `--super`；没有元素且根上没有材料目录就不加；没有元素但根上已有材料目录时先问。
+
 ## [0.7.3] - 2026-11-09
 
 ### Changed

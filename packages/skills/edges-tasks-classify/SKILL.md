@@ -1,7 +1,7 @@
 ---
 name: edges-tasks-classify
 description: 按真实 Project 的主题与正文整理 Task 归属，覆盖根板和已有 Project；用 edges tasks review-page 交人审阅，收到导出 JSON 后以 tasks update --to-project/--to-default 落地。只在同一 owner scope 内移动，不手改目录，不改状态或优先级。
-version: 0.2.1
+version: 0.2.2
 ---
 
 # 按 Project 整理任务
@@ -15,7 +15,7 @@ CLI 只修改文件，不执行 Git。看板变更进入受保护的 main 必须
 ## 先读再建议
 
 1. 用 `edges --scope "$SCOPE" projects list` 取得真实 Project，必要时 `projects get <path>` 读取主题正文。用户已限定 P 时，先读 P 的 INDEX，再给子 Project 的 list/get 加根参数 `--project <P路径>`；不要扩大到兄弟主题。项目身份取目录相对 `.edges/projects` 的实际路径，不用标题或自造短名。
-2. 用 `edges --scope "$SCOPE" tasks list` 取得范围内任务；已选 P 时带相同 `--project <P路径>`，P 在 scope 直属 `projects/` 时同时加 `--super`；未选 Project 的虚拟根板加 `--super`；仅在用户需要独立系统一起参与时再加 `--all`。不要只整理未归属的任务。每行保留 `path`、`stem`、`source.scope`、`source.purpose` 和可选 `project`；不存在 `project` 表示根材料板。读取正文时选择原 owner scope 与 Project，或在该板内使用返回的完整任务路径。不能仅凭同名 stem 猜任务。
+2. 用 `edges --scope "$SCOPE" tasks list` 取得范围内任务；已选 P 时带相同 `--project <P路径>`。根 `AGENTS.md` 含 `<edges-harness mode="super" />` 时同时加 `--super`；没有该元素但根上已有 `projects/`、`notes/`、`tasks/`、`memory/` 或 `compose/` 时先问；仅在用户需要独立系统一起参与时再加 `--all`。不要只整理未归属的任务。每行保留 `path`、`stem`、`source.scope`、`source.purpose` 和可选 `project`；不存在 `project` 表示根材料板。读取正文时选择原 owner scope 与 Project，或在该板内使用返回的完整任务路径。不能仅凭同名 stem 猜任务。
 3. 用任务标题、描述与必要正文对照各 Project 主题，建议归入已有 Project或保留未归属。无需 embedding。独立 AGENTS scope 不因主题相似而合并；目的地只能是同一 owner scope 下的 Project 或根材料板。新 Project 的主题、标题与正文需要先给人确认，创建后才使用返回路径。
 
 ## 审阅后应用
@@ -27,7 +27,7 @@ CLI 只修改文件，不执行 Git。看板变更进入受保护的 main 必须
 3. 需要可达 URL 时使用 `edges artifacts publish <HTML绝对路径>`，直接采用无来源发布模式。将返回 URL 给人，使用系统浏览器审阅；不假定 localhost 可跨设备访问。
 4. **停止并等待人贴回导出 JSON。** 导出行包含 `stem`、`source`、`destination`、`current`、`suggested`、`action`、`note`。有来源信息时，`current/suggested` 是 Project 相对路径或 `null`（根材料板），`destination` 是目标 owner scope/purpose。状态与优先级不在导出中。无 GUI 才改用包含同等身份信息的 Markdown 表并等待确认。
 5. 对每行重新读取原任务和真实 Project，核对来源仍与审阅快照一致，`action` 与目标变化一致；冲突、歧义或目标消失时停止该行，不猜测。`keep` 不写盘。批量落地先生成可重复执行的脚本并预览冲突，所有内容移动仍交 CLI。
-6. 在行对应的 owner scope 下操作。来源在 P 时加全局 `--project "$P"`；P 位于 scope 直属 `projects/` 或来源为虚拟根板时加 `--super`。移动到 Q：
+6. 在行对应的 owner scope 下操作。来源在 P 时加全局 `--project "$P"`。根 `AGENTS.md` 含 `<edges-harness mode="super" />` 时加 `--super`；没有该元素但根上已有材料目录时先问。移动到 Q：
 
    ```sh
    edges --scope "$OWNER_SCOPE" --project "$P" tasks update "$STEM" --to-project "$Q"
