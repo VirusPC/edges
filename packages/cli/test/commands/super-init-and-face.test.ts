@@ -107,6 +107,25 @@ ${end}
   assert.equal(kept.includes(SUPER_HARNESS_MARKER), false);
 });
 
+test("init --super writes the harness marker on the scope AGENTS.md even when a Project is selected", async (t) => {
+  const { root, ok } = fixture(t);
+  const face = await ok("--super", "projects", "create", "--title", "Face");
+  const facePath = path.relative("projects", path.dirname(face.path));
+  await ok("--super", "--project", facePath, "notes", "init");
+  const agents = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
+  assert.equal(count(agents, INDEPENDENT_HARNESS_CONSTRAINT), 1);
+  assert.equal(count(agents, SUPER_HARNESS_MARKER), 1);
+  assert.ok(agents.includes(`${INDEPENDENT_HARNESS_CONSTRAINT}\n${SUPER_HARNESS_MARKER}`));
+  assert.equal(fs.existsSync(path.join(root, "projects", facePath, "notes/README.md")), true);
+  assert.equal(fs.existsSync(path.join(root, "notes/README.md")), false);
+  assert.equal(fs.existsSync(path.join(root, "projects", facePath, "AGENTS.md")), false);
+  await ok("--super", "--project", facePath, "notes", "init");
+  const again = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
+  assert.equal(count(again, INDEPENDENT_HARNESS_CONSTRAINT), 1);
+  assert.equal(count(again, SUPER_HARNESS_MARKER), 1);
+  assert.equal(again, agents);
+});
+
 test("the harness marker does not make the CLI select the super face", async (t) => {
   const { root, ok } = fixture(t);
   await ok("--super", "init", "notes");

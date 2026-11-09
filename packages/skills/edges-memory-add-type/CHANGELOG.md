@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **用独立仓标记决定 `--super`。** 看到 `<edges-harness mode="super" />` 才把类型写到 scope 根；没有标记但根上已有材料目录时先问。
+- **用独立仓标记决定 `--super`。** 看到 `<edges-harness mode="super" />` 就加 `--super`，与是否选择 Project 无关。没有标记但根上已有材料目录时先问。省略 Project 时类型仍登记在 scope 根；选定 Project 后仍在该 Project。
 
 ## [0.2.2] - 2026-11-09
 

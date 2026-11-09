@@ -6,7 +6,7 @@
 
 ### 目录选择
 
-- **独立仓多一个机器可读标记。** `edges init --super` 在硬约束里、中文句旁边写一次 `<edges-harness mode="super" />`。重复执行不追加。不带 `--super` 的 init 不写它。命令不会因为文件里有这个元素就自动改用根目录材料。
+- **独立仓多一个机器可读标记。** `edges init --super` 在 scope 的硬约束里、中文句旁边写一次 `<edges-harness mode="super" />`。同时带 `--project` 也写在这份文件上，材料仍进该 Project。重复执行不追加。不带 `--super` 的 init 不写它。命令不会因为文件里有这个元素就自动改用根目录材料。
 
 ## [0.5.7] - 2026-11-09
 

@@ -355,8 +355,7 @@ async function runTypeInit(
     }
   }
   const agentsAction = options.project ? "not-applicable" : await syncTargetAgents(target, root, service, options);
-  if (options.super === true && !options.project && agentsAction !== "needs-doctor")
-    await ensureIndependentHarnessConstraint(target, service);
+  await markSuperHarness(target, root, service, options, agentsAction);
   await ensureScopeReadmePointer(target, service, options);
   if (
     !options.project && target !== root &&
@@ -390,6 +389,23 @@ async function runTypeInit(
   };
 }
 
+/** The repo marker follows --super only. --project still selects a topic and does not suppress it. */
+async function markSuperHarness(
+  target: string,
+  root: string,
+  service: NodeService,
+  options: InitMemoryOptions,
+  agentsAction: string,
+): Promise<void> {
+  if (options.super !== true || agentsAction === "needs-doctor") return;
+  if (!existsSync(join(target, AGENTS_FILE_NAME))) {
+    await ensureScopeReadme(target, service, { super: true });
+    const created = await syncTargetAgents(target, root, service, { super: true });
+    if (created === "needs-doctor") return;
+  }
+  await ensureIndependentHarnessConstraint(target, service);
+}
+
 /** Notes/projects (and any non-memory module list) still create the scope AGENTS.md. */
 async function ensureScopeEntry(options: InitMemoryOptions) {
   const { target, root } = await openScope(options);
@@ -398,8 +414,7 @@ async function ensureScopeEntry(options: InitMemoryOptions) {
   const service = memoryNodes(target, options);
   await ensureScopeReadme(target, service, options);
   const agentsAction = options.project ? "not-applicable" : await syncTargetAgents(target, root, service, options);
-  if (options.super === true && !options.project && agentsAction !== "needs-doctor")
-    await ensureIndependentHarnessConstraint(target, service);
+  await markSuperHarness(target, root, service, options, agentsAction);
   await ensureScopeReadmePointer(target, service, options);
   const [indexAction, indexEntry, indexDescription] = options.project
     ? ["not-applicable", null, null] as const

@@ -6,7 +6,7 @@ version: 0.2.2
 
 从对话整理任务：**成文 → 交人审 → 落库**（人审可以是对话确认或 PR）。正文顺序：**背景 → 目标**（必填）→ **动作** → **完成标准**（后两栏可选；完成标准可留到 `grill-with-docs` 后再补）。与 `edges-conversation-to-notes` 主题行动指南同序（背景 → 问题/目标 → 方案/动作 → 验收/完成标准），便于从笔记开卡平移。四栏同构 STAR（Situation / Task / Action / Result）：用来**制定任务**，尤其是派给 agent 的 brief；**不要**拿 STAR 写复盘（复盘走 `edges-conversation-to-notes`）。
 
-先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.edges/tasks/<状态>/<stem>/INDEX.md`。需要归入主题时，用全局 `--project <相对路径>` 选择已有 Project。默认相对 `<SCOPE>/.edges/projects`，`--super` 时相对 `<SCOPE>/projects`，任务写入该 Project 的直属 tasks。没有 Task Project 或 `_default` 层。未选 Project 时，根 `AGENTS.md` 含 `<edges-harness mode="super" />` 才用 `--super` 选择 `<SCOPE>/tasks`。没有该元素但根上已有 `projects/`、`notes/`、`tasks/`、`memory/` 或 `compose/` 时先问。选定 Project 后材料留在 `P/tasks`。后续命令显式传 `--scope "$SCOPE"`；仓内维护 Edges 时选择仓根，不依赖执行命令时的源码目录。CLI 在 `packages/cli`。
+先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.edges/tasks/<状态>/<stem>/INDEX.md`。需要归入主题时，用全局 `--project <相对路径>` 选择已有 Project。默认相对 `<SCOPE>/.edges/projects`，`--super` 时相对 `<SCOPE>/projects`，任务写入该 Project 的直属 tasks。没有 Task Project 或 `_default` 层。根 `AGENTS.md` 含 `<edges-harness mode="super" />` 就加 `--super`，与是否选择 Project 无关。没有该元素但根上已有 `projects/`、`notes/`、`tasks/`、`memory/` 或 `compose/` 时先问。带 `--super` 且省略 Project 时材料在 `<SCOPE>/tasks`；选定 Project 后材料留在 `P/tasks`。后续命令显式传 `--scope "$SCOPE"`；仓内维护 Edges 时选择仓根，不依赖执行命令时的源码目录。CLI 在 `packages/cli`。
 
 `tasks list` 从当前主体的组成入口递归查找任务；选定 Project 时，从其 INDEX 进入，包括登记可达的子 Project。`--all` 额外发现所选物理范围中的独立系统。不要为了列出任务再写一套目录扫描，也不要把 README 的链接抄进 AGENTS。
 
