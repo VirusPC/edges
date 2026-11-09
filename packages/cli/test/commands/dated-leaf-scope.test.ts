@@ -122,20 +122,20 @@ for (const module of ["notes", "projects"] as const) {
     assert.deepEqual(await paths(root, module, true), []);
   });
 
-  test(`${module} init ignores --super and create reuses its harness index`, async (t) => {
+  test(`${module} init --super writes the scope-root index and leaves the .edges face alone`, async (t) => {
     const root = scope(t);
     await successful(call(root, module, true, ["init"]));
-    const index = path.join(root, ".edges", module, "README.md");
-    assert.match(readFileSync(index, "utf8"), /edges-entries-local:start/);
-    assert.equal(existsSync(path.join(root, module)), false);
+    const superIndex = path.join(root, module, "README.md");
+    assert.match(readFileSync(superIndex, "utf8"), /edges-entries-local:start/);
+    assert.equal(existsSync(path.join(root, ".edges", module)), false);
     const made = await successful<Leaf>(call(root, module, false, ["create", "--title", "Initialized leaf"]));
     assert.equal(path.dirname(path.dirname(made.path)), `.edges/${module}`);
-    assert.match(readFileSync(index, "utf8"), /initialized-leaf\/INDEX\.md/);
-    assert.equal(existsSync(path.join(root, module)), false);
+    assert.doesNotMatch(readFileSync(superIndex, "utf8"), /initialized-leaf\/INDEX\.md/);
+    assert.match(readFileSync(path.join(root, ".edges", module, "README.md"), "utf8"), /initialized-leaf\/INDEX\.md/);
     assert.deepEqual(await paths(root, module, false), [made.path]);
     assert.deepEqual(await paths(root, module, true), []);
     await successful(call(root, module, true, ["init"]));
-    assert.match(readFileSync(index, "utf8"), /initialized-leaf\/INDEX\.md/);
+    assert.doesNotMatch(readFileSync(superIndex, "utf8"), /initialized-leaf\/INDEX\.md/);
     assert.deepEqual(await paths(root, module, false), [made.path]);
   });
 

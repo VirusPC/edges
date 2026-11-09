@@ -250,7 +250,7 @@ edges memory restore --repo-dir /absolute/project --archive /private/archive.tar
 
 新作用域的 `edges memory init` 未选择类型时只返回推荐项，不创建 notes、projects、skills 或 tasks 的材料。无参 `edges init` 的默认集包含 skills。`edges skills init` 既写 skill 类型索引，也把包内 skill 装进当前项目：安装步骤是固定的 `skills@1.7.2`，只额外传入包内 skills 目录和 `--skill '*'`，`--` 之后的 token 原样转交。`skills@1.7.2` 在探测到自己跑在 agent 里时会非交互，并只装给那个 agent；没有探测到、stdin 又不是 TTY 时，不带 `-y` 会退出 1。非交互且保留自动探测时用 `edges init -- -y`（当前项目；`-g` 才装到用户目录，`-y` 跳过确认；本机没有已安装 agent 时它会装给全部 agent）。指定某一个则用 `edges init -- -y --agent claude-code`（不加 `-g` 时写当前项目的 `.claude/skills`）。`--` 只在 `init` 和 `skills init` 上切开；其他命令把 `--` 和后面的 token 原样交给 commander。解析后的模块集合里没有 skills 时，这次 init 不会装，stderr 会列出被忽略的 token。memory 还在等类型选择、因而提前返回时，不因为没装 skills 而报这句。安装失败时进程退出码就是安装器的退出码，stdout 信封是 `{ status: "failed", errorCode: "SKILLS_INSTALL_FAILED", reason, created }`。`created` 是失败前已经写好的相对路径。`errorCode` 与 `VALIDATION_ERROR` 不同；不要用退出码是不是 2 来判断是不是校验错误，安装器自己也可能退出 2。校验错误仍然是退出码 2、`errorCode` 为 `VALIDATION_ERROR`。`edges tasks init` 只写任务看板。remember 不初始化缺失作用域；doctor 默认只诊断。0.3.0 起没有 `edges memory migrate`。旧 `.memory` 会让 `edges init` 失败并返回 `migration-required`；先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 [迁移说明](../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。新建子作用域按路径登记到父级：`AGENTS.md` 在父级 `.edges` 下记入本层，否则记入下层。已经登记的保持原组。`edges memory doctor --apply` 按同一规则补上缺失的父级链接。
 
-`edges notes init` 与 `edges projects init` 只创建真实 scope 下的 `.edges/notes/README.md`、`.edges/projects/README.md`，作为接收叶子的组织清单，并登记到 `.edges/README.md`。它们不再同时创建根目录的 `notes/README.md`、`projects/README.md` 与不接收叶子的占位文件。和其他模块一样，init 不读取 `--super`；使用 `--super` 创建叶子时，会按需补齐 scope 直属的模块 README。
+不带 `--super` 时，`edges notes init` 与 `edges projects init` 只创建 `<scope>/.edges/notes/README.md`、`<scope>/.edges/projects/README.md`，并登记到 `.edges/README.md`。`edges init --super`（以及 `edges <module> init` 带上根级 `--super`）改为创建 `<scope>/notes/`、`<scope>/projects/`、`<scope>/tasks/`、`<scope>/memory/`、`<scope>/skills/`，组织清单登记在 `<scope>/README.md`。同时在 `AGENTS.md` 的硬约束区块追加一次「这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数」；已有这句或用户的其他约束都保留，重复执行不追加第二遍。
 
 用户记忆 restore 默认拒绝覆盖，明确使用 --force 才整份替换，失败时回滚。备份和恢复接受未压缩或 gzip tar，解包上限 256 MiB、10,000 文件，拒绝硬链接；中断后若报告 `.private-user-memory-*/previous`，应保留恢复副本。模板随包复制到 dist，运行不依赖相邻 Skill 源码或 Python。
 
@@ -304,7 +304,7 @@ edges --scope /absolute/project --super routines list
 edges --scope /absolute/project --all routines list
 ```
 
-`routines init`（或 `init routines`）显式采用模块，无参 `init` 的默认集不变。记录位于 `<scope>/.edges/routines/<name>/INDEX.md`，`--super` 创建与查询 `<scope>/routines/`；init 与其他模块一样只初始化真实 scope，不读 `--super`。名称为稳定的小写 kebab-case（1–64 字符），不加日期或 Project 分组。
+`routines init`（或 `init routines`）显式采用模块，无参 `init` 的默认集不变。不带 `--super` 时记录位于 `<scope>/.edges/routines/<name>/INDEX.md`；`--super` 创建、查询和 init 都使用 `<scope>/routines/`。名称为稳定的小写 kebab-case（1–64 字符），不加日期或 Project 分组。
 
 `create` 需要名称和非空 `--description`，可带 `--body` 与重复的 `--metadata key=value`；`update` 修改说明、正文或 metadata。`get/update/delete` 接受名称或准确的入口路径，同名不唯一就报错。`list` 使用通用 `--filter` / `--group-by`；`--all` 只读，`--exclude routines` 排除模块。索引随 NodeService 的写入更新；查询沿已登记关系读取，不扫描目录补录孤立文件。
 

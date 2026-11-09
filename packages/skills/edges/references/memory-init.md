@@ -8,7 +8,7 @@
 
 **谁不该 init：** 仅为列系统一孩子、尚未需要系统二材料的目录（用同目录 `README.md` + `edges-entries-*`，或迁移脚本另建）；未经用户要求不要给全仓或批量目录铺 `AGENTS.md`。看板和类型目录上的 README 是组织清单，不是系统入口。不要在类型目录上 init `AGENTS.md` 来装组织清单，空的同目录桩删掉。不要让 list 另开一套 README 遍历。层系统入口仍是 `AGENTS.md`。Init **不会**在作用域根自动创建组织清单 `README.md`——那是系统一入口，由用户或迁移单独建立。
 
-无参 `edges init` 写出 `AGENTS.md`、memory 的 feedback / project / reference、skills 的 managed / referenced 类型索引，以及 `.edges/tasks/README.md`、`.edges/notes/README.md` 与 `.edges/projects/README.md`，并把 npm 包内的 Edges skill 装进当前项目。不建 user、routines。`edges init` 不读 `--super`，材料落在 `<scope>/.edges`。`edges init <module>` 与 `edges <module> init` 写同一批文件，而且只写该模块。模块之间不创建对方的材料。安装只在这次 init 包含 skills 时发生。
+无参 `edges init` 写出 `AGENTS.md`、memory 的 feedback / project / reference、skills 的 managed / referenced 类型索引，以及 `.edges/tasks/README.md`、`.edges/notes/README.md` 与 `.edges/projects/README.md`，并把 npm 包内的 Edges skill 装进当前项目。不建 user、routines。不带 `--super` 时材料落在 `<scope>/.edges`。`edges init --super` 改写 `<scope>/<module>/`，并在 `AGENTS.md` 硬约束追加一次「这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数」，不改用户已有的其他约束。`edges init <module>` 与 `edges <module> init` 写同一批文件，而且只写该模块。模块之间不创建对方的材料。安装只在这次 init 包含 skills 时发生。
 
 选择 `--project <相对当前材料面 projects 目录的路径>` 时，init 只采用该主题容器的直属模块，将类型 README 登记到已有 Project `INDEX.md`；不自动建立 Project 的 AGENTS、.edges 或 .agents。默认相对 `.edges/projects`；若 Project 在 scope 直属 `projects/`，解析它需要 `--super`，但 init 仍不因 `--super` 改未选 Project 时的写入根。省略 Project 时保持 scope 初始化行为。嵌套选择可写成 `P/projects/Q`。
 

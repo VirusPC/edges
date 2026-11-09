@@ -115,7 +115,9 @@ test("a missing composed README does not block a host note", async (t) => {
     { env: {} },
   );
   assert.equal(created.exitCode, 0, created.stdout + created.stderr);
-  assert.match(created.stderr, /edges compose update --name brain/);
+  assert.doesNotMatch(created.stderr, /edges compose update --name brain/);
+  const listed = await run(["--scope", root, "compose", "list"], { env: {} });
+  assert.match(listed.stderr, /edges compose update --name brain/);
   const made = JSON.parse(created.stdout) as { path: string };
   assert.equal(existsSync(path.join(root, made.path)), true);
   assert.match(readFileSync(path.join(root, "notes/README.md"), "utf8"), /INDEX\.md/);

@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { isAbsolute, relative, resolve, sep, basename, join, normalize } from "node:path";
 import { ENTRY_NAMES } from "./layout.js";
 import { identifyNodeType } from "../models/node/layout.js";
@@ -101,5 +102,9 @@ export function isScopeModuleDir(
 }
 
 export function isHarnessComposeDir(parentDir: string, name: string): boolean {
-  return name === "compose" && (basename(parentDir) === ".edges" || identifyNodeType(join(parentDir, ENTRY_NAMES.leaf)) === "project");
+  if (name !== "compose") return false;
+  if (basename(parentDir) === ".edges") return true;
+  if (identifyNodeType(join(parentDir, ENTRY_NAMES.leaf)) === "project") return true;
+  // Super face: <scope>/compose next to AGENTS.md, not under .edges.
+  return existsSync(join(parentDir, ENTRY_NAMES.internal));
 }

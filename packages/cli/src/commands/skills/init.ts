@@ -13,7 +13,7 @@ Tokens after -- are forwarded to skills add.
 export function addSkillInitCommand(skills: Command, ctx: CliContext): void {
   skills
     .command("init")
-    .description("Initialize skill type indexes, install bundled skills, and scope AGENTS.md. Does not read --super.")
+    .description("Initialize skill type indexes, install bundled skills, and scope AGENTS.md. --super writes <scope>/skills/.")
     .option("--target-dir <directory>", "Explicit target scope (otherwise use --scope or scope discovery)")
     .option("--root-dir <directory>", "Boundary for the scope tree")
     .option("--description <text>", "Description in the parent scope index")
@@ -33,6 +33,7 @@ export function addSkillInitCommand(skills: Command, ctx: CliContext): void {
             skillsInstallArgs: ctx.skillsInstallArgs,
             env: ctx.env,
             project: ctx.project,
+            super: ctx.super === true,
           });
           const skillsInstall = result.skillsInstall === true;
           const { skillsInstall: _install, ...payload } = result;

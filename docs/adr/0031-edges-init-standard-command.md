@@ -18,7 +18,7 @@
 
 `--memory-types` 只在本次包含 memory 时有效；`--skill-types` 只在本次包含 skills 时有效。祖先类型行的刷新只发生在该模块自己的类型 init 里，而且只刷新根上已经有的该模块类型行。
 
-init 不读 `--super`，材料永远落在 `<scope>/.edges`。帮助把「本次会创建」和默认集之外的 tasks、skills 分开。无 TTY。无参 `edges memory init` 仍返回 `selectionRequired` 且不写盘。根 init 与 notes / projects / skills / tasks init 的成功信封是 `status: success`；memory init 仍是 `ok: true`。
+2026-11-09 起，`edges init --super` 读取该旗标，把材料写到 `<scope>/<module>`，并追加一次独立仓硬约束。不带 `--super` 时材料仍落在 `<scope>/.edges`。此前「init 不读 `--super`」只描述不带该旗标的路径。帮助把「本次会创建」和默认集之外的 tasks、skills 分开。无 TTY。无参 `edges memory init` 仍返回 `selectionRequired` 且不写盘。根 init 与 notes / projects / skills / tasks init 的成功信封是 `status: success`；memory init 仍是 `ok: true`。
 
 创建或补齐 scope `AGENTS.md` 是 init service 的公共步骤。桩缺了才建；类型索引继续刷新；AGENTS 只补受管区块。节点文件经 NodeService。tasks 看板不走 NodeService 的自动登记，由 tasks init 自己把这一份文件挂到 scope `AGENTS.md`。唯一例外是非节点 `.gitignore`，仍由 `saveEntries` 写入。
 

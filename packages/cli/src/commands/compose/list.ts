@@ -14,7 +14,7 @@ export function addComposeListCommand(compose: Command, ctx: CliContext): void {
     .allowExcessArguments(false)
     .action(async () => {
       try {
-        const { entries, warnings } = await listCompose(ctx.env, { project: ctx.project });
+        const { entries, warnings } = await listCompose(ctx.env, { project: ctx.project, super: ctx.super === true });
         ctx.result = succeed({
           command: "compose.list",
           entries: entries.map((entry) => ({ ...presentComposeEntry(entry), href: entry.href, initialized: entry.initialized })),

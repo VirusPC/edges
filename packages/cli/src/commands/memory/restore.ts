@@ -9,5 +9,5 @@ export function addMemoryRestoreCommand(memory: Command, ctx: CliContext): void 
     .option('--repo-dir <directory>', 'Target scope (otherwise use --scope)')
     .option('--force', 'Replace occupied user memory; requires explicit user authorization')
     .action((options: { archive: string; repoDir?: string; force?: boolean }) =>
-      operation(ctx, () => restoreUserMemory({ ...options, repoDir: options.repoDir ?? resolveScope(ctx.env), project: ctx.project })));
+      operation(ctx, () => restoreUserMemory({ ...options, repoDir: options.repoDir ?? resolveScope(ctx.env), project: ctx.project, super: ctx.super === true })));
 }

@@ -15,7 +15,7 @@ export function ignoredInstallTokens(
 }
 
 const AFTER_HELP = `
-This command does not read --super. Materials land under <scope>/.edges, or directly under the selected --project.
+Without --super, materials land under <scope>/.edges. --super uses <scope>/<module>/ and adds one constraints line. Selected --project still wins for the material root.
 Project initialization registers materials on INDEX.md without creating AGENTS.md.
 Tokens after -- are forwarded only to the bundled skills install step.
   edges init -- -y --agent '*'
@@ -25,8 +25,9 @@ CREATED WHEN NO MODULE IS GIVEN
   memory types: feedback, project, reference
   skills: managed and referenced type indexes, then install bundled skills
   harness index entries: tasks, notes, projects
-  tasks board: <scope>/.edges/tasks/README.md, registered on the harness index linked from AGENTS.md
+  tasks board: <scope>/.edges/tasks/README.md (--super: <scope>/tasks/README.md)
   notes/projects org lists: <scope>/.edges/notes/README.md, <scope>/.edges/projects/README.md
+    (--super: <scope>/notes/README.md, <scope>/projects/README.md)
 
 NOT CREATED HERE
   routines (not in the default set; edges routines init creates only that module)
@@ -37,7 +38,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
   program
     .command("init")
     .description(
-      "Initialize AGENTS.md and selected modules. This command does not read --super.",
+      "Initialize AGENTS.md and selected modules. --super writes the scope-root material face.",
     )
     .argument("[module...]", "Repeatable module: memory, skills, tasks, notes, projects, or routines")
     .option("--target-dir <directory>", "Explicit target scope (otherwise use --scope or scope discovery)")
@@ -65,6 +66,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
             skillsInstallArgs: ctx.skillsInstallArgs,
             env: ctx.env,
             project: ctx.project,
+            super: ctx.super === true,
           });
           const skillsInstall = result.skillsInstall === true;
           const { skillsInstall: _install, ...payload } = result;

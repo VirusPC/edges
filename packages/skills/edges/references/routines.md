@@ -33,7 +33,7 @@ edges --scope <目录> routines delete daily-review
 
 - `init` 显式采用本模块；无参 `edges init` 不默认采用 routines。选定 Project 时只采用 P 的直属材料并登记到 `P/INDEX.md`，不为 P 新建 AGENTS 或 `.edges`。
 - 默认写在 `<scope>/.edges/routines/<name>/INDEX.md`，选定 Project 后写在 `P/routines/<name>/INDEX.md`。名称使用稳定的小写 kebab-case，不加日期；主题归属由全局 Project 选择负责。
-- 未选 Project 时，根级 `--super` 换成当前 scope 的运行时内容入口，使用 `<scope>/routines/`；选定 Project 后，以 P 的组成入口为准。`init` 不读 `--super`。`list` 递归已登记组成，`--all` 仅额外发现所选物理范围内的独立真实系统，不用于写入。`list` 支持通用 `--filter`、`--group-by`；`--exclude routines` 排除本模块。
+- 未选 Project 时，根级 `--super` 换成当前 scope 的运行时内容入口，使用 `<scope>/routines/`；选定 Project 后，以 P 的组成入口为准。`init --super` 与其他模块一样初始化 `<scope>/routines/`。`list` 递归已登记组成，`--all` 仅额外发现所选物理范围内的独立真实系统，不用于写入。`list` 支持通用 `--filter`、`--group-by`；`--exclude routines` 排除本模块。
 - `get/update/delete` 可用名称或入口路径。同名不唯一时用准确的 `INDEX.md` 路径。
 - `create` 和 `update` 支持 `--body`、`--metadata key=value`。CLI 维护内容与索引，不替你提交 Git。
 

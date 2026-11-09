@@ -1,3 +1,5 @@
+import type { MaterialOptions } from "../../domain/config/edges-materials.js";
+import { placeHarnessMaterial } from "../../domain/config/edges-materials.js";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
@@ -55,11 +57,12 @@ interface PlannedLink {
 export async function doctorCompose(
   env: NodeJS.ProcessEnv,
   apply: boolean,
+  options: MaterialOptions = {},
 ): Promise<ComposeDoctorResult> {
   const session = openNodeSession(env);
   const agentsFile = path.join(session.scope, ENTRY_NAMES.internal);
   if (!existsSync(agentsFile)) throw new Error(`Missing scope entry: ${agentsFile}. Add AGENTS.md.`);
-  const composeFile = composeReadmePath(session.scope);
+  const composeFile = composeReadmePath(session.scope, options);
   const source = readFileSync(agentsFile, "utf8");
   const markers = /<!-- edges-compose:start -->/.test(source);
   const links = markers
@@ -71,7 +74,7 @@ export async function doctorCompose(
   }));
   const docs = collectDocHits(session.scope);
   const needsBlock = markers;
-  const needsIndex = needsBlock && !indexLinksCompose(session.scope);
+  const needsIndex = needsBlock && !indexLinksCompose(session.scope, options);
   const changes: ComposeDoctorChange[] = [];
   if (planned.length > 0) {
     changes.push({
@@ -92,8 +95,8 @@ export async function doctorCompose(
   if (needsIndex) {
     changes.push({
       kind: "index-link",
-      path: path.join(session.scope, ".edges", "README.md"),
-      detail: "link compose/README.md from .edges/README.md",
+      path: placeHarnessMaterial(session.scope, "readme", options).absPath,
+      detail: "link compose/README.md from the material index",
     });
   }
   if (markers) changes.push({ kind: "clear-agents", path: agentsFile });
@@ -103,7 +106,7 @@ export async function doctorCompose(
   if (!apply || changes.length === 0) return { changes, warnings };
 
   if (needsBlock) {
-    const node = await ensureComposeEntry(session.scope, session.service);
+    const node = await ensureComposeEntry(session.scope, session.service, options);
     const kept = node.links();
     const names = new Set(node.entries().map((entry) => entry.name));
     const incoming: ComposeLink[] = [];
@@ -135,9 +138,9 @@ export async function doctorCompose(
   return { changes, warnings };
 }
 
-function indexLinksCompose(scopeDir: string): boolean {
-  const readme = path.join(scopeDir, ".edges", "README.md");
-  const compose = composeReadmePath(scopeDir);
+function indexLinksCompose(scopeDir: string, options: MaterialOptions = {}): boolean {
+  const readme = placeHarnessMaterial(scopeDir, "readme", options).absPath;
+  const compose = composeReadmePath(scopeDir, options);
   if (!existsSync(readme) || !existsSync(compose)) return false;
   return readFileSync(readme, "utf8").includes("compose/README.md");
 }

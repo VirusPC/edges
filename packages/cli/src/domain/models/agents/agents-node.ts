@@ -1,4 +1,4 @@
-import { relative, dirname } from "node:path";
+import { relative, dirname, basename } from "node:path";
 import { InternalNode, type InternalCreateInput } from "../../core/internal-node.js";
 import { InternalSyntax, type SyntaxContent, type SyntaxReference } from "../node/document.js";
 import { identifyNodeType, resolveEntryHref, isHarnessMaterial } from "../node/layout.js";
@@ -114,7 +114,10 @@ export class AgentsNode extends InternalNode<AgentsCreateInput, AgentsUpdateInpu
   protected override sync(): void {
     for (const reference of [...this.locals, ...this.descendants]) {
       const childType = identifyNodeType(reference.id);
-      if (childType === undefined || (childType === "readme" && !isHarnessMaterial(reference.id)))
+      const superIndex = childType === "readme"
+        && basename(reference.id) === "README.md"
+        && dirname(reference.id) === dirname(this.path);
+      if (childType === undefined || (childType === "readme" && !isHarnessMaterial(reference.id) && !superIndex))
         throw new Error(`${this.path}: child must identify a directory entry: ${reference.id}`);
     }
     if (this.#constraints.some((value) => typeof value !== "string"))

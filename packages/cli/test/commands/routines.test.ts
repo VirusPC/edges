@@ -47,7 +47,8 @@ test("routines init is explicit, idempotent, and shares the root init module", a
   const again = await cli(root, ["--super", "init", "routines"]);
   assert.deepEqual(again.modules, ["routines"]);
   assert.equal(readFileSync(file, "utf8"), before);
-  assert.equal(existsSync(path.join(root, "routines")), false);
+  assert.match(readFileSync(path.join(root, "routines/README.md"), "utf8"), /edges-entries-local:start/);
+  assert.match(readFileSync(path.join(root, "AGENTS.md"), "utf8"), /这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数/);
   const fresh = scope(t);
   await cli(fresh, ["routines", "init"]);
   for (const module of ["memory", "skills", "notes", "projects", "tasks"]) {

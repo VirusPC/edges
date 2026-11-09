@@ -361,11 +361,11 @@ export async function applyFindings(
           insertInnerBlock(
             node!.body,
             LOCAL_START,
-            selectedLocalBlock(specs),
+            selectedLocalBlock(specs, options),
           ) },
         );
       }
-      const action = await syncTargetAgents(owner, root, service);
+      const action = await syncTargetAgents(owner, root, service, options);
       if (action !== "preserved")
         repaired.push(`${action}-agents: ${relativeOrName(owner, root)}`);
       }

@@ -304,13 +304,14 @@ export function layerReadmePaths(target: string, options: MaterialOptions = {}):
 }
 
 /** AGENTS 本层只留指向 `.edges/README.md` 的一条。类型行登记在那份 README 上。 */
-export function selectedLocalBlock(_specs: TypeSpec[] = []): string {
+export function selectedLocalBlock(_specs: TypeSpec[] = [], options: MaterialOptions = {}): string {
   let block = buildLocalBlock().replace(
     /^- \[.*\]\(\.edges\/.*\).*\n?/gm,
     "",
   );
-  const line = `- [${SCOPE_README_ENTRY_NAME}](.edges/README.md) — ${SCOPE_README_ENTRY_DESCRIPTION}`;
-  if (!block.includes("](.edges/README.md)") && !block.includes("](<.edges/README.md>)"))
+  const href = options.super === true && !options.project ? "README.md" : ".edges/README.md";
+  const line = `- [${SCOPE_README_ENTRY_NAME}](${href}) — ${SCOPE_README_ENTRY_DESCRIPTION}`;
+  if (!block.includes(`](${href})`) && !block.includes(`](<${href}>)`))
     block = block.replace(LOCAL_END, () => `${line}\n${LOCAL_END}`);
   return block;
 }

@@ -6,7 +6,7 @@
 
 ### 目录选择
 
-- **`--project` 跟着 `--super` 换 projects 目录。** 默认仍相对 `<scope>/.edges/projects`。加上 `--super` 后，相对 `<scope>/projects`，和 `projects create --super` 建出来的 Project 是同一处。选中之后，notes、tasks、routines、memory、skills 仍写在 `P/<module>`。`tasks update --to-project` 和 `--to-default` 使用同一次选择的材料面。`edges init` 仍不读 `--super`。
+- **`--super` 覆盖 init、memory 和 compose。** 默认材料仍在 `<scope>/.edges/`。`--super` 时 notes、tasks、routines、skills、memory、compose 和 init 都写到 `<scope>/<module>/`。`init --super` 在硬约束追加一次独立仓提示，重复运行不重复、不改其他约束。`compose add --super` 省略 `--path` 时检出到 `<scope>/<name>`。`--project` 仍只在当前材料面的 projects 目录里找，不跨面回退。
 
 ## [0.5.6] - 2026-11-08
 

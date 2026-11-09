@@ -3,7 +3,7 @@ import type { CliContext } from '../../context.js';
 import { initMemory } from '../../services/memory/service.js';
 import { operation, scoped, target, type TargetOptions } from './utils/command.js';
 export function addMemoryInitCommand(memory: Command, ctx: CliContext): void {
-    scoped(memory.command('init').description('Initialize the memory module only: system entry and selected memory types. Does not read --super.'))
+    scoped(memory.command('init').description('Initialize the memory module only: system entry and selected memory types. --super writes <scope>/memory/.'))
         .option('--root-dir <directory>', 'Boundary for the memory tree')
         .option('--description <text>', 'Description in the parent scope index')
         .option('--memory-types <types...>', 'Select memory types: project feedback reference user')
@@ -11,5 +11,5 @@ export function addMemoryInitCommand(memory: Command, ctx: CliContext): void {
         rootDir?: string;
         description?: string;
         memoryTypes?: string[];
-    }) => operation(ctx, async () => await initMemory({ ...options, targetDir: target(options, ctx), project: ctx.project })));
+    }) => operation(ctx, async () => await initMemory({ ...options, targetDir: target(options, ctx), project: ctx.project, super: ctx.super === true })));
 }

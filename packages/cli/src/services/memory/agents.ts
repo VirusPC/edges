@@ -34,6 +34,7 @@ import {
   ownershipTarget,
 } from "./paths.js";
 import { ENTRY_LINE_TEMPLATE, renderLine } from "./templates.js";
+import type { MaterialOptions } from "../../domain/config/edges-materials.js";
 import { selectedLocalBlock } from "./types.js";
 export function classifyAgentsSource(source: string | undefined): "missing" | "managed" | "foreign" {
     if (source === undefined) return 'missing';
@@ -68,12 +69,33 @@ export async function syncAgentsBlocks(directory: string, local = "", children =
     const file = prepareMemoryWrite(directory, join(directory, AGENTS_FILE_NAME));
     return syncLoadedAgents(service, await service.get(file, AgentsNode), file, directory, local, children);
 }
-export async function syncTargetAgents(target: string, _root: string, service = memoryNodes(target)): Promise<string> {
+export const INDEPENDENT_HARNESS_CONSTRAINT =
+  "这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数";
+
+export async function syncTargetAgents(
+  target: string,
+  _root: string,
+  service = memoryNodes(target),
+  options: MaterialOptions = {},
+): Promise<string> {
     const file = prepareMemoryWrite(target, join(target, AGENTS_FILE_NAME));
     const node = await service.get(file, AgentsNode);
     const surface = node ? rewriteLayerSurface(node.body) : undefined;
-    const local = extractLocalBlock(surface ?? "") ?? selectedLocalBlock([]);
+    const local = extractLocalBlock(surface ?? "") ?? selectedLocalBlock([], options);
     return syncLoadedAgents(service, node, file, target, local, "");
+}
+
+/** Append the independent-harness line once, without escaping it or rewriting other constraints. */
+export async function ensureIndependentHarnessConstraint(target: string, service: NodeService): Promise<"preserved" | "updated"> {
+  const file = prepareMemoryWrite(target, join(target, AGENTS_FILE_NAME));
+  const current = isFile(file) ? readText(file) : "";
+  if (current.includes(INDEPENDENT_HARNESS_CONSTRAINT)) return "preserved";
+  const end = "<!-- edges-constraints:end -->";
+  if (!current.includes(end)) return "preserved";
+  const node = await service.get(file, AgentsNode);
+  if (!node) return "preserved";
+  await service.update(node, { body: current.replace(end, `- ${INDEPENDENT_HARNESS_CONSTRAINT}\n${end}`) });
+  return "updated";
 }
 export const normalizeIndexDescription = (target: string, description?: string) => description?.trim().replace(/\s+/g, " ") ||
     `${basename(target)} 目录的项目记忆与规范入口。`;

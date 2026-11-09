@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-11-09
+
+### Changed
+
+- **add-type 跟随 `--super`。** 未选 Project 时类型写到 `<scope>/memory`。
+
 ## [0.2.1] - 2026-11-09
 
 ### Changed
