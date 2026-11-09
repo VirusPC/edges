@@ -4,9 +4,17 @@
 
 ## [Unreleased]
 
+## [0.5.7] - 2026-11-09
+
 ### 目录选择
 
-- **`--super` 覆盖 init、memory 和 compose。** 默认材料仍在 `<scope>/.edges/`。`--super` 时 notes、tasks、routines、skills、memory、compose 和 init 都写到 `<scope>/<module>/`。`init --super` 在硬约束追加一次独立仓提示，重复运行不重复、不改其他约束。`compose add --super` 省略 `--path` 时检出到 `<scope>/<name>`。`--project` 仍只在当前材料面的 projects 目录里找，不跨面回退。
+- **`--super` 统一 notes、projects、tasks、routines、skills、memory、compose 和 init。** 带上 `--super` 时，这些模块的材料在 `<scope>/<module>/`。不带 `--super` 时仍全部在 `<scope>/.edges/`。`edges --super compose add` 省略 `--path` 时，把仓库检出到 `<scope>/<name>`，登记在 `<scope>/compose/README.md`。
+- **`--project` 跟随当前材料面，两面不回退。** 默认只查 `<scope>/.edges/projects`；加上 `--super` 只查 `<scope>/projects`。同一相对路径不会到另一面补找。选中 Project 之后，材料仍在 `P/<module>`。
+- **`edges init --super` 初始化仓库根，并幂等写入硬约束。** 默认集仍是 projects、notes、tasks、memory、skills（routines 仍要单独 `edges routines init`），组织清单在 `<scope>/README.md`。同时在 `AGENTS.md` 硬约束追加一次「这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数」；已有这句或其他约束都保留，重复执行不追加第二遍。
+
+### 随包技能
+
+- **独立仓 onboarding 走 `--super init`。** 包内 `edges-onboarding` 升到 0.7.3：「创建独立 edges harness 仓库」改为 `edges --scope <仓库目录> --super init -- -y`。给已有项目加 harness 仍不带 `--super`。`edges` 升到 0.4.4；`edges-memory-remember` 与 `edges-memory-add-type` 升到 0.2.2；`edges-memory-ask`、`edges-conversation-to-notes`、`edges-conversation-to-tasks`、`edges-tasks-classify` 升到 0.2.1，`--project` 同样跟随材料面。
 
 ## [0.5.6] - 2026-11-08
 
