@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "data_kind": "synthetic",
+  "study_stage": "heldout_extension_after_known_development_results",
+  "freeze_stage": "before any v2 test model trials; v2 dev findings already known",
+  "inputs": {
+    "build_dataset.py": "bc26e4e30c747d98ccaea7f3ee4605d943d0a2e6454cc77f427fe03e29c1543f",
+    "dataset.py": "d55f8ace736c92a60eee5ea5cc35b587e58cf9fbd47a01ab610023a9a0159167",
+    "export_langfuse.py": "6ccbb4ca7100e5f8523c32eb0978983aee8d156cc77a7b820a2e918c1faf3b9d",
+    "local_archive.py": "813e707111bac9c2d6e8f15fd7433c20c97fb19bddc7ad2258f14a16d08832d0",
+    "metrics.py": "f1fac6def6c05d3c3bdfc24a9b2a6dc5864903a9515d84179701e9d382119968",
+    "report.py": "6e7edc3b6184302807335ce0bf715c0b324c78f6c6a813cea9b3583539b4eb52",
+    "run.py": "71db7e07b13a082c52ee97eda7b11e60b365339851a1f447d96334c6a4ccb916",
+    "synthetic/v2/BUILD_MANIFEST.json": "55730d5651b39fe3c86580b69c26cef8d8e0f750f9ad8b29296d6b42ea4cca7e",
+    "synthetic/v2/COVERAGE.md": "4e5f96fecc8770607668bdf37a749db34b2bf9d25846b6c7e7961684946fc7f0",
+    "synthetic/v2/DATA_REPORT.json": "26a1970cf0af1371fe29568cf786c0df91972b7542cef602c5152f27ab5c2493",
+    "synthetic/v2/DATA_REPORT.md": "52dbde50002d5e11dac318f1d8c8bf17afab97713ac144ff331b99ef68e54d5d",
+    "synthetic/v2/REVIEW.md": "fefa8f39a43523a617e7b2145fee4d037c9a81d546215ed66c1d4c19c3936496",
+    "synthetic/v2/__init__.py": "deb55ac244e0ce5dc42b94305bd2cfbcfea419c6bc1a2e09337568504fbb02e1",
+    "synthetic/v2/data-v2.json": "f074b815c2cee6eb77ed35fa6b07716f7dd34bcf066e89a91d73efef2f5d16c7",
+    "synthetic/v2/diagnose_run.py": "b8c144d8e24764447cf7dc87f455a564ce7eae69e581d87d0c1b3eba75a6f204",
+    "synthetic/v2/generate.py": "442ba120971a2200fe10201e0ce1c2a90245f3d8fb8702b1897f194072e76b39",
+    "synthetic/v2/oracle.py": "a4dc6ee33bdf739415bedfa8170aaf1e22c8aaba9c7ca8927be7697707be73a8",
+    "synthetic/v2/review-summary.json": "d570a8ea4ba0a2218501cd5233f301972525d409c7931e2800e67e6ade137fc2",
+    "synthetic/v2/scenes_actions.py": "3aa818dc12de386e458ac7577cc252fc0635607bf6ecbd3e1aeff39c1ba15d93",
+    "synthetic/v2/scenes_reasoning.py": "a2085cb5bf3f53b506dcfe99c3a007b35342d08780c72f4d6f8b21c7d754f7e8",
+    "synthetic_report.py": "6288be31c64a351a94420cc639fe412f037a5aa3fd7dd8a6c207cc4b67cf98b1",
+    "tests/test_synthetic_v2.py": "35e669edfa7d4b2144ceac4f14257acb0b45d2c7504b955943756310aa1ec77e",
+    "tests/test_synthetic_v2_diagnostics.py": "4a29956c55a7405d81ab5dd0a4e09d79ce034fdfa6e48c75b998c257dd0135b8",
+    "verify.py": "874add8d519d09face2caf8baee567d9656f464a19331139626441227bf0d31e",
+    "Dockerfile.base": "6a29f41d3427b9160d108dfb8d538dda248588a32bdc3a8ae42da169ae5aa5a9",
+    "requirements.lock.txt": "e648fbd26fee77810940608b7666a27dae36f4926ad8317103581c10ad9f4db2",
+    "requirements.txt": "f706797ac5189d00dde71f60793015a9f8ba9e5d73f465a72010fcbf3a57b3e8",
+    "audit/check.py": "1118e13c65e11a2c00dcb1c36e02dd71295b7e5d5a723254516cb74895dc99af",
+    "audit/monitor_resources.py": "0f9781958abc9095c30559990cd75829d4c87ac6caee445db4b55ef3073aece1"
+  },
+  "hypothesis": "Estimate necessary-evidence recall and resource differences on the unchanged held-out v2 cases, with no required winning arm.",
+  "model": "gpt-6.1-sol",
+  "reasoning_effort": "low",
+  "harbor_version": "0.25.0",
+  "codex_version": "0.162.1",
+  "agent_image": "edges-harbor-codex@sha256:9d716a68df44e82b2dc449d653e0e0321cc7becba7438f7c4184f0a22becccfd",
+  "seed": 20261110,
+  "timeout_sec": 180,
+  "concurrency": 12,
+  "split": "test",
+  "limit": null,
+  "cases": 36,
+  "repeats": 3,
+  "planned_trials": 324,
+  "conditions": [
+    "scoped",
+    "root",
+    "none"
+  ],
+  "automatic_retries": 0,
+  "heldout_test": {
+    "cases": 36,
+    "planned_trials_this_round": 324,
+    "model_evaluated_before_this_protocol": false,
+    "note": "All held-out cases retained; independent of dev source sessions, but shared authoring distribution."
+  },
+  "primary_quality_metrics": [
+    "selected_recall_at_5",
+    "evidence_recall_at_5"
+  ],
+  "secondary_quality_metrics": [
+    "selected_precision",
+    "selected_set_exact",
+    "evidence_set_exact",
+    "extra_selected_count",
+    "empty_gold_selection_rate"
+  ],
+  "secondary_resources": [
+    "total_tokens",
+    "uncached_input_tokens",
+    "agent_latency_ms",
+    "tool_calls"
+  ],
+  "predeclared_strata": [
+    "scenario_family",
+    "scope_start",
+    "coverage_role"
+  ],
+  "quality_diagnostic_gate": {
+    "minimum_distinct_positive_scenes_with_recall_below_one_in_either_memory_arm": 2,
+    "also_require_some_full_recall_positive_scene": true,
+    "semantic_error_review_required": true,
+    "all_trials_complete_without_quality_missing": true,
+    "required_winning_arm": null,
+    "interpretation": "Retained historical development diagnostic; not a gate for this authorized test extension, statistical significance, or representativeness."
+  },
+  "statistical_plan": {
+    "bootstrap_samples": 2000,
+    "interpretation": "Average repetitions per case, then equal case weights; paired source-session clustered percentile 95% intervals; no multiplicity correction; disclose eligible and complete cases."
+  },
+  "stopping": "Execute all 324 frozen planned trials regardless of interim quality. No automatic retries, score-driven stopping, substitutions, gold/prompt changes, or edits to prior results. Preserve failed trials and known resource use.",
+  "answer_quality": "No semantic answer accuracy or original task-success claim. All strict-set diagnostics remain arithmetic relative to frozen gold.",
+  "coverage_claim": "Scope-limited, source-informed synthetic diagnosis plus separately labeled deep-scope stress; 11 purposively selected real dev cases do not establish population coverage.",
+  "declared_at_utc": "2026-11-09T01:31:32.598305+00:00",
+  "runtime_source_commit": "59ec9611d9fcc44da1bb2f1945444dde555f3cf0",
+  "known_development_limitations": {
+    "dev_gate_passed": false,
+    "confirmed_dev_omission_scenes": 1,
+    "dev_gate_required_omission_scenes": 2,
+    "gold_prompt_contract": "Gold is necessary evidence, while prompt permits relevant background. Strict precision, exact-set and empty-gold selection are fixed-gold set diagnostics, not semantic error rates.",
+    "dev_results_sha256": "e93e5f60f546ab8ff199d685e895c35caa2cd06e45b5f530c87daf9b8bfe9ea8",
+    "interpretation": "User-requested evaluation of unchanged v2 despite known limits, not certification that all development acceptance criteria passed."
+  },
+  "semantic_review_plan": "Review positive recall omissions after execution without changing frozen gold; distinguish alternate adequate evidence or label ambiguity from valid omissions. Extra selections alone do not establish misuse. Report review scope and whether arm identities were hidden."
+}

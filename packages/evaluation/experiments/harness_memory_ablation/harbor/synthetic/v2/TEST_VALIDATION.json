@@ -1,0 +1,170 @@
+{
+  "schema_version": 1,
+  "kind": "synthetic_v2_test_validation_public_summary",
+  "matrix": {
+    "cases": 36,
+    "source_sessions": 36,
+    "conditions": 3,
+    "repeats": 3,
+    "planned_trials": 324,
+    "observed_trials": 324,
+    "failed_trials": 0
+  },
+  "checks": {
+    "preflight": 2199,
+    "completed_integrity_and_accounting": 15141,
+    "independent_statistics": 9496,
+    "errors": 0
+  },
+  "semantic_review": {
+    "reviewer": "separate AI agent; not human gold panel",
+    "blinding": {
+      "condition_hidden": true,
+      "repeat_hidden": true,
+      "gold_disclosed": true,
+      "read_arm_map_or_raw_trials": false,
+      "not_blinded_gold_creation": true
+    },
+    "scope": {
+      "packets": 4,
+      "distinct_scenes": 3,
+      "successful_memory_arm_positive_trials_only": true,
+      "all_observed_memory_bodies_available": true,
+      "not_reviewed": "Full-scoring trials, all negative/extra selections, or complete task success."
+    },
+    "summary": {
+      "fixed_gold_nonfull_trials": 4,
+      "fixed_gold_nonfull_scenes": 3,
+      "unambiguous_valid_omission_trials": 1,
+      "unambiguous_valid_omission_scenes": 1,
+      "scope_sensitive_trials": 3,
+      "scope_sensitive_scenes": 2,
+      "omitted_gold_already_observed_trials": 2,
+      "omitted_gold_already_observed_scenes": 1,
+      "equivalent_observed_evidence_found": false,
+      "two_scene_engineering_gate_unambiguously_established": false
+    },
+    "interpretation": [
+      "Keep all original gold and arithmetic scores unchanged. This review is post-run interpretation, not a replacement scoring rule.",
+      "Absence from the final selected set is not necessarily failure to discover the document.",
+      "Scope-sensitive does not mean gold is proven wrong or the answer is proven fully correct. It means strict necessary-evidence necessity is not unambiguous under the concise-response contract.",
+      "Do not turn this selected error review into semantic answer accuracy, a new adjusted recall, or a general discrimination claim."
+    ]
+  },
+  "native_tool_review": {
+    "schema_version": 1,
+    "kind": "completed_native_tool_semantic_review",
+    "reviewed_at_utc": "2026-11-09T02:15:50.946917+00:00",
+    "logs_reviewed": 324,
+    "completed_command_invocations": 1373,
+    "unique_command_expressions": 705,
+    "semantic_review_views": 610,
+    "reviewed_unique_expressions": 705,
+    "unreviewed_expressions": 0,
+    "normalization": "Only 24-hex synthetic memory IDs replaced for display; all shell structure, paths, search patterns and original expressions preserved; every replaced ID validated against the dataset.",
+    "review_method": "Agent inspected all semantic views, including complete shell expressions, not only keyword flags. Every original expression and invocation is linked to a category; scope exceptions additionally checked against returned output.",
+    "command_start_completion_pairs": 1373,
+    "root_audit_export_matches": true,
+    "tool_call_types": {
+      "agent_message": 648,
+      "command_execution": 1373
+    },
+    "categories_by_invocation": {
+      "experimental_workspace_content_read": 588,
+      "readonly_navigation_beyond_experimental_workspace": 105,
+      "experimental_workspace_discovery_and_metadata": 517,
+      "experimental_workspace_content_search": 163
+    },
+    "outside_workspace_probe_invocations": 105,
+    "outside_workspace_probe_trials": 100,
+    "outside_workspace_probe_flags": {
+      "ancestor_AGENTS_existence_or_conditional_read_probe": 82,
+      "broad_filesystem_filename_discovery": 12,
+      "container_root_or_home_metadata_listing": 13
+    },
+    "agent_network_command_findings": 0,
+    "explicit_content_write_command_findings": 0,
+    "original_task_execution_findings": 0,
+    "non_experimental_auxiliary_document_content_read_findings": 0,
+    "runtime_model_catalog_timeout_warning_lines": 29,
+    "trials_with_runtime_model_catalog_timeout_warning": 27,
+    "command_exit_codes": {
+      "0": 1210,
+      "1": 155,
+      "2": 6,
+      "128": 2
+    },
+    "findings": [
+      "Observed agent commands were local content reads/searches, path discovery, git metadata reads, and stdout processing.",
+      "Some none trials probed ancestor AGENTS, container root/home metadata, or whole-filesystem filenames; returned content was limited to the shared README, names/metadata and absence messages. No auxiliary document body read was observed.",
+      "Runtime model-catalog refresh timeout warnings concern Codex runtime metadata requests, not agent shell networking; all 324 trials completed successfully.",
+      "Nonzero shell exits include no-match searches, absent AGENTS paths and HEAD lookup in the empty repository; these are not failed model trials."
+    ],
+    "limitations": [
+      "This is a complete review of logged agent commands and targeted scope-exception outputs, not packet capture or filesystem-diff proof.",
+      "No explicit content-mutating command was observed; incidental runtime, shell, cache or git metadata writes are outside this statement.",
+      "No agent network command does not imply network hard isolation: model service, installation and runtime metadata access remain possible.",
+      "Semantic review was performed by an AI agent, not a human security audit or adversarial sandbox certification."
+    ],
+    "source_hashes": {
+      "inventory.json": "841404e71dd72052af6d65313ae1856dad3bdc2bc1634a3afcaa1ba798608d26",
+      "review-groups.json": "17f9357c6bf5272d08a87458d4eb7fc0114c01f852fdda5d9dfd6553c33c7bd4",
+      "extraction.json": "eee46cf4ed5832a26aee0c85aa5dab8c985d84d01f031a968541dddaaa7ba919"
+    },
+    "root_export_sha256": "a9f404ac5dac00fad23e72fed955b6fe17d0359af3ac06bff9333f400b169a31",
+    "review_script_sha256": "6535ec4ff2ffae5970f1c950b7a41f8a2f7956bc95a0cfb27a9414a425e87724"
+  },
+  "resources": {
+    "samples": 431,
+    "active_samples": 408,
+    "valid_complete_memory_samples": 279,
+    "stats_nonzero_samples": 129,
+    "ps_error_samples": 0,
+    "sampled_oom_positive_frames": 0,
+    "oom_inspect_error_frames": 161,
+    "runtime_memory_peak_observed_bytes": 1415242055.68,
+    "runtime_memory_peak_is_lower_bound": true,
+    "native_peak_agent_overlap": 12,
+    "early_agent_execution_unobserved_seconds": 0,
+    "agents_started_before_first_sample": 0,
+    "agents_finished_before_first_sample": 0
+  },
+  "token_totals": {
+    "input_tokens": {
+      "known_sum": 31946451,
+      "known_trials": 324
+    },
+    "output_tokens": {
+      "known_sum": 183263,
+      "known_trials": 324
+    },
+    "cached_input_tokens": {
+      "known_sum": 26036480,
+      "known_trials": 324
+    },
+    "uncached_input_tokens": {
+      "known_sum": 5909971,
+      "known_trials": 324
+    },
+    "total_tokens": {
+      "known_sum": 32129714,
+      "known_trials": 324
+    }
+  },
+  "artifact_sha256": {
+    "protocol-test-v2.json": "4c95f7008a904a3f14a77be395907085d2c2e8831973216b17b324031ce7ead4",
+    "data-v2.json": "f074b815c2cee6eb77ed35fa6b07716f7dd34bcf066e89a91d73efef2f5d16c7",
+    "completed_integrity_audit": "bbf1f2f8dcf81206fcf933cd1b0a550855d34449c1599aef50f3773e8dfbeda8",
+    "independent_statistics_audit": "41a3a5431c50f181dbe3ee17fc7d80401aa8127c4afa69b949ae896cf5db6a3f",
+    "semantic_review": "2e01ac50a9aff8ac8b842a1f87b29a83fc534b5e7fc57b5f6d693675fa44bd09",
+    "native_tool_review": "cb322fc82c0333cb0fffee339cbcdcfe73b6b158ded60a965e9b635acbf0fea0",
+    "public_numeric_report": "1d2dcd9703e18f14f8df6623cb67196bd970fdabd1a4f1eddf27975e4e4ea8f6"
+  },
+  "limits": [
+    "Counts are checks performed, not independent scientific samples.",
+    "Hashes bind local artifacts but do not prove reviewer independence or authenticity.",
+    "Command-log review is not packet capture or filesystem-diff proof.",
+    "Finite resource samples do not establish complete peaks or absence of OOM.",
+    "Semantic review covers only four positive fixed-gold omission trials, not all answer correctness."
+  ]
+}
