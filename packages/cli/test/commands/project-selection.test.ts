@@ -30,12 +30,12 @@ test("global Project selects direct materials and nested composition without cre
   assert.match(child, /--parent\/projects\/.*--child$/);
   const own = await ok("notes", "create", "--title", "Root note");
   const direct = await ok("--project", project, "notes", "create", "--title", "Direct note");
-  const nested = await ok("--project", child, "--super", "notes", "create", "--title", "Nested note");
+  const nested = await ok("--project", child, "notes", "create", "--title", "Nested note");
   assert.ok(direct.path.startsWith(path.dirname(p.path) + "/notes/"));
   assert.ok(nested.path.startsWith(path.dirname(q.path) + "/notes/"));
   const paths = (result: { items: Array<{ path: string }> }) => result.items.map((item) => item.path).sort();
   assert.deepEqual(paths(await ok("--project", project, "notes", "list")), [direct.path, nested.path].sort());
-  assert.deepEqual(paths(await ok("--project", project, "--super", "notes", "list")), [direct.path, nested.path].sort());
+  assert.notEqual((await call("--project", project, "--super", "notes", "list")).exitCode, 0);
   assert.deepEqual(paths(await ok("--project", child, "notes", "list")), [nested.path]);
   assert.deepEqual(paths(await ok("notes", "list")), [own.path, direct.path, nested.path].sort());
   assert.deepEqual(paths(await ok("--project", project, "--exclude", "projects", "notes", "list")), [direct.path]);
@@ -75,9 +75,7 @@ test("Project all includes its unregistered independent systems but not siblings
     assert.equal(made.exitCode, 0, made.stdout);
   }
   assert.deepEqual((await ok("--project", project, "notes", "list")).items.map((item: { path: string }) => item.path), [direct.path]);
-  for (const flags of [["--all"], ["--all", "--super"]]) {
-    assert.deepEqual((await ok("--project", project, ...flags, "notes", "list")).items.map((item: { title: string }) => item.title).sort(), ["Direct", "Inside"]);
-  }
+  assert.deepEqual((await ok("--project", project, "--all", "notes", "list")).items.map((item: { title: string }) => item.title).sort(), ["Direct", "Inside"]);
 });
 
 test("Project selector rejects traversal, nonprojects, aliases and conflicting targets before mutation", async (t) => {

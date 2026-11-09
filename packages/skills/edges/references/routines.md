@@ -6,7 +6,7 @@ Routine 是持续保留的例行工作定义。仓库记录是接入依据，`IN
 
 ## 维护记录
 
-先明确目标 scope 与可选的已有 Project，再用当前 CLI 的 `edges routines --help` 检查参数。属于 Project 的记录在以下各条命令中均加根参数 `--project <相对路径>`；路径相对 `<scope>/.edges/projects`，子项目使用 `P/projects/Q`。
+先明确目标 scope 与可选的已有 Project，再用当前 CLI 的 `edges routines --help` 检查参数。属于 Project 的记录在以下各条命令中均加根参数 `--project <相对路径>`。默认相对 `<scope>/.edges/projects`，`--super` 时相对 `<scope>/projects`，子项目使用 `P/projects/Q`。
 
 ```bash
 edges --scope <目录> routines init

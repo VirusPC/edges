@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-11-09
+
+### Changed
+
+- **`--project` 跟随材料面。** 默认相对 `<scope>/.edges/projects`；`--super` 时相对 `<scope>/projects`。选中 P 后材料仍在 `P/<module>`。未选 Project 时，memory 写入和 init 仍不因 `--super` 改位置。
+
 ## [0.4.2] - 2026-11-08
 
 ### Changed

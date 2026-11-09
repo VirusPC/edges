@@ -18,6 +18,8 @@ export type TaskBoardLocation = {
   boardDir: string;
   /** Absolute selected Project directory, if this board belongs to one. */
   project?: string;
+  /** Scope-relative super face: projects live in `<scope>/projects`, not `<scope>/.edges/projects`. */
+  super?: boolean;
 };
 export type BoardTarget = string | TaskBoardLocation;
 /** A string scope is the real system: materials live under `<scope>/.edges`. Pass `{ super: true }` for the virtual board in the scope directory. */
@@ -25,12 +27,13 @@ export function taskBoardLocation(
   scopeDir: string,
   options: MaterialOptions = {},
 ): TaskBoardLocation {
-  const superFace = options.super === true && !options.project;
+  const faceSuper = options.super === true;
   const { absPath } = placeHarnessMaterial(scopeDir, "tasks", options);
   return {
     scopeDir,
     ...(options.project ? { project: options.project } : {}),
-    purpose: superFace ? "domain" : "maintenance",
+    ...(faceSuper ? { super: true } : {}),
+    purpose: faceSuper ? "domain" : "maintenance",
     boardDir: path.dirname(absPath),
   };
 }

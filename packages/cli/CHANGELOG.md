@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### 目录选择
+
+- **`--project` 跟着 `--super` 换 projects 目录。** 默认仍相对 `<scope>/.edges/projects`。加上 `--super` 后，相对 `<scope>/projects`，和 `projects create --super` 建出来的 Project 是同一处。选中之后，notes、tasks、routines、memory、skills 仍写在 `P/<module>`。`tasks update --to-project` 和 `--to-default` 使用同一次选择的材料面。`edges init` 仍不读 `--super`。
+
 ## [0.5.6] - 2026-11-08
 
 ### 随包技能

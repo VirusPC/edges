@@ -11,3 +11,5 @@
 含下级材料或用户资源的 Project，普通删除拒绝，必须显式 `--recursive` 才删除整棵目录；只有自身正文和未改写生成索引的空容器仍可普通删除。这是容器生命周期的控制规则，不是实际数据删除指令。完整行为与边界见[设计稿](../../.edges/memory/projects/project_recursive_projects/INDEX.md)，迁移命令、冲突检查与中断恢复见[迁移说明](../../scripts/migrations/recursive-projects.md)。
 
 实现后的框架仓数据核对见[迁移验收](../migrations/2026-11-02-recursive-projects.md)。
+
+2026-11-09 补充：`--project` 的解析根跟随材料面。默认仍是 `<scope>/.edges/projects`；显式 `--super` 时改为 `<scope>/projects`，与 `projects create --super` 的落点相同，两条路径互不回退。选中 P 之后，材料仍在 `P/<module>`，不改写到 scope 直属目录。这只修正 Project 目录的查找，不把 `--super` 当成独立仓库身份，也不让 `edges init` 开始读取 `--super`。

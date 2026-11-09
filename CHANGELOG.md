@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 材料目录
 
+- **`--super` 与 `--project` 使用同一套材料面。** `edges --super --project <P>` 在 `<scope>/projects/<P>` 查找已有 Project，notes、tasks、routines、memory、skills 以及子 Project 都写在这个 P 下面。不带 `--super` 时仍只查 `<scope>/.edges/projects/<P>`，两条路径不会互相兜底。省略 `--project` 时，`--super` 仍表示 scope 直属材料。`edges init` 继续不读 `--super`。
 - **笔记和项目跟其他模块用同一套目录规则：** `edges notes create` 与 `edges projects create` 默认写入所选目录的 `.edges/`，显式使用 `--super` 才写 scope 直属目录；读取、更新、删除与列表同步使用这一选择。`edges notes init` 与 `edges projects init` 只准备 `.edges/` 下接收叶子的组织清单。这是尚未发布到 npm 的破坏性行为变化：已有内容不会自动迁移，继续操作旧的根目录笔记和项目时须加 `--super`。详见 [CLI 作用域说明](packages/cli/README.md#先确定内容归属)。
 - **材料目录改叫 `.edges`：** 每个作用域的材料目录从 `.harness` 改为 `.edges`。层入口标记改为 `edges` 与 `edges-*`（硬约束、本层、下层、Compose）。旧目录和旧标记不再识别。见 [ADR 0047](docs/adr/0047-rename-harness-directory-to-edges.md) 与 [迁移说明](docs/migrations/2026-10-27-rename-harness-to-edges.md)。此后不再为改名调整这份布局。
 - **旧的记忆迁移命令没有了：** `@viruspc/edges@0.3.0` 删除 `edges memory migrate`，也不再附带技能 `project-memory-migrate`。记忆已经在材料目录里的不用再迁。还停在 `.memory/` 的，先装 `@viruspc/edges@0.2.7` 跑完 `edges memory migrate`，再按迁移说明改目录名。

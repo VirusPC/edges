@@ -33,7 +33,7 @@ FLAGS
   create/update use metadata plus --body. The title is the body H1, or --title.
   list uses the shared filter/group envelope.
   Default: <scope>/.edges/notes/. --super: <scope>/notes/.
-  Global --project selects direct materials inside P (relative to <scope>/.edges/projects).
+  Global --project selects direct materials inside P (relative to <scope>/.edges/projects, or <scope>/projects with --super).
   Use the same scope and Project selection for create/get/update/delete/list.
   --all adds independent systems beneath the selected scope or Project.
   init adopts only this module; selected Projects do not gain AGENTS.md or .edges.

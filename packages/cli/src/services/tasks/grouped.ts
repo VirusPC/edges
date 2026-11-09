@@ -1,4 +1,5 @@
 import { leafEntryPath } from "../node/entry-path.js";
+import { relativeProjectPath } from "../projects/selection.js";
 import path from "node:path";
 import { validateTaskDocInput } from "./task-doc.js";
 import { nativeTaskPath } from "./realpath.js";
@@ -90,7 +91,7 @@ export function parseSource(raw: unknown): TaskSource | undefined {
 export function parseSourceProject(raw: unknown): string | undefined {
   if (raw === undefined) return undefined;
   if (typeof raw !== "string" || !raw || raw.startsWith("/") || raw.includes("\\") || raw.split("/").some(part => !part || part === "." || part === "..") || /^[a-z]:/i.test(raw))
-    throw new TasksError("VALIDATION_ERROR", "project must be a relative Project path under scope/.edges/projects");
+    throw new TasksError("VALIDATION_ERROR", "project must be a relative Project path (P or P/projects/Q)");
   return raw;
 }
 
@@ -216,7 +217,8 @@ export function parseGroupedList(raw: unknown): GroupedList {
 async function ownerGroup(root: string, source: TaskSource, project?: string): Promise<GroupedListGroup> {
   const id = sourceIdentity(source, project);
   if (!project) return { id, source, title: source.purpose === "domain" ? "Scope tasks" : "Unassigned", description: "Tasks directly in the scope material root." };
-  const file = leafEntryPath(path.join(root, source.scope, ".edges/projects", project));
+  const collection = source.purpose === "domain" ? "projects" : path.join(".edges", "projects");
+  const file = leafEntryPath(path.join(root, source.scope, collection, project));
   const node = await new NodeService({ managedRoot: root }).get(file, ProjectNode);
   if (!node) throw new TasksError("PROJECT_NOT_FOUND", `Project not found: ${file}`);
   return { id, source, project, title: node.title, description: node.description };
@@ -224,7 +226,7 @@ async function ownerGroup(root: string, source: TaskSource, project?: string): P
 export async function listGroupedByProject(repoPath: BoardTarget, opts: TaskListOpts, fs: BoardFs, sourceScope = portableScope(scopeDir(repoPath))): Promise<GroupedList> {
   const tasks = await listTasksWithDocs(repoPath, opts, fs);
   const location = resolveBoard(repoPath);
-  const project = location.project ? path.relative(path.join(location.scopeDir,".edges/projects"), location.project).split(path.sep).join("/") : undefined;
+  const project = location.project ? relativeProjectPath(location.scopeDir, location.project) : undefined;
   const source: TaskSource = { scope: sourceScope, purpose: location.purpose };
   const localSource = { ...source, scope: "." };
   const group = { ...await ownerGroup(location.scopeDir, localSource, project), id: sourceIdentity(source, project), source };
@@ -246,7 +248,7 @@ export async function listRepositoryGroupedByProject(root: string, opts: TaskLis
     const location = boardLocationOf(path.join(node.directoryPath,tasksBoardDirName()),root);
     if (!location.project) continue;
     const source: TaskSource = { scope: path.relative(root,location.scopeDir).split(path.sep).join("/") || ".", purpose: location.purpose };
-    const project = path.relative(path.join(location.scopeDir,".edges/projects"),location.project).split(path.sep).join("/");
+    const project = relativeProjectPath(location.scopeDir, location.project);
     const group = await ownerGroup(root,source,project);
     groups.set(group.id,group);
   }
