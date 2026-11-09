@@ -1,0 +1,128 @@
+{
+  "schema_version": 1,
+  "document_kind": "aggregate description of the real frozen dataset; not runnable cases",
+  "original_archive": "../local/archive/",
+  "contains_synthetic_replacement_cases": false,
+  "source_population": {
+    "raw_root_observations": 3379,
+    "unique_observations": 3376,
+    "observations_with_multiple_versions": 3,
+    "excluded_multiple_version_rows": 6,
+    "export_pages": 34,
+    "automatic_candidates": 1724,
+    "agent_annotated_candidates": 61,
+    "accepted_cases": 42,
+    "rejected_candidates": 19
+  },
+  "automatic_filter_exclusions": {
+    "unsupported_observation_name": 655,
+    "missing_input_or_output": 277,
+    "text_length_outside_8_to_5000_characters": 521,
+    "machine_context_or_forwarded_result": 190,
+    "same_session_duplicate_normalized_prompt": 6,
+    "all_rows_of_multiple_version_observations": 6
+  },
+  "candidate_observation_name_counts": {
+    "Grok Bot Turn": 1375,
+    "Codex Turn": 178,
+    "Cursor Turn": 171
+  },
+  "splits": {
+    "all": {
+      "cases": 42,
+      "source_sessions": 31,
+      "memory_qa_cases": 14,
+      "pre_task_retrieval_cases": 28,
+      "positive_cases": 34,
+      "negative_cases": 8,
+      "memory_qa_positive_cases": 6,
+      "memory_qa_negative_cases": 8,
+      "known_non_root_scope_cases": 9,
+      "common_root_or_unknown_scope_cases": 33,
+      "explicit_unknown_scope_cases": 28,
+      "gold_above_five_cases": 11,
+      "maximum_gold_count": 13,
+      "mean_positive_recall_ceiling_percent_rounded": 87.74,
+      "visible_memory_min": 117,
+      "visible_memory_median": 181,
+      "visible_memory_max": 181
+    },
+    "test": {
+      "cases": 31,
+      "source_sessions": 23,
+      "memory_qa_cases": 11,
+      "pre_task_retrieval_cases": 20,
+      "positive_cases": 24,
+      "negative_cases": 7,
+      "memory_qa_positive_cases": 4,
+      "memory_qa_negative_cases": 7,
+      "known_non_root_scope_cases": 6,
+      "common_root_or_unknown_scope_cases": 25,
+      "explicit_unknown_scope_cases": 22,
+      "gold_above_five_cases": 7,
+      "maximum_gold_count": 13,
+      "mean_positive_recall_ceiling_percent_rounded": 88.72,
+      "visible_memory_min": 117,
+      "visible_memory_median": 180,
+      "visible_memory_max": 181
+    },
+    "dev": {
+      "cases": 11,
+      "source_sessions": 8,
+      "memory_qa_cases": 3,
+      "pre_task_retrieval_cases": 8,
+      "positive_cases": 10,
+      "negative_cases": 1,
+      "memory_qa_positive_cases": 2,
+      "memory_qa_negative_cases": 1,
+      "known_non_root_scope_cases": 3,
+      "common_root_or_unknown_scope_cases": 8,
+      "explicit_unknown_scope_cases": 6,
+      "gold_above_five_cases": 4,
+      "maximum_gold_count": 11,
+      "mean_positive_recall_ceiling_percent_rounded": 85.38,
+      "visible_memory_min": 176,
+      "visible_memory_median": 181,
+      "visible_memory_max": 181
+    }
+  },
+  "memory_corpus": {
+    "files": 181,
+    "registered_scopes": 7,
+    "framework_files": 160,
+    "public_personal_brain_files": 21,
+    "snapshot_cutoff": "2026-10-31T00:00:00Z",
+    "query_visibility_rule": "available_at < query_at",
+    "version_time_source": "most recent Git commit for the selected file path at the frozen revision",
+    "full_historical_replay": false
+  },
+  "export_window": {
+    "start": "2026-10-20T00:00:00Z",
+    "end": "2026-11-08T00:00:00Z"
+  },
+  "annotation": {
+    "initial_labeling": "AI agents",
+    "independent_review": "different AI agents",
+    "human_gold_panel": false,
+    "sampling": "purposeful, not random representative sampling",
+    "minimally_normalized_cases": 5,
+    "cases_with_verified_prior_context": 12
+  },
+  "split_policy": {
+    "unit": "source session",
+    "rule": "first eight SHA-256 hexadecimal digits modulo five: zero is dev; otherwise test",
+    "shared_source_sessions_between_dev_and_test": 0,
+    "chronological_future_holdout": false
+  },
+  "formal_plan": {
+    "conditions": [
+      "scoped",
+      "root",
+      "none"
+    ],
+    "repeats_per_condition": 3,
+    "test_cases": 31,
+    "planned_trials": 279,
+    "concurrency": 12
+  }
+}

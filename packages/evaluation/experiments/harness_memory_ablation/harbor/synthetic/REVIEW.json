@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "parser_version": 1,
+  "supported_generator": "synthetic-scenes-v1",
+  "decision": "passed",
+  "review_kind": "independent template-constrained data validation",
+  "cases_checked": 40,
+  "requested_facts_checked": 85,
+  "exact_gold_matches": 40,
+  "ambiguous_winner_count": 0,
+  "body_metadata_consistency_count": 682,
+  "business_domains_checked": 96,
+  "visible_memories_per_case": [
+    586
+  ],
+  "positive_question_numeric_or_identity_leaks": 0,
+  "dev_test_business_overlap": 0,
+  "matrix": [
+    {
+      "split": "dev",
+      "family": "cross_scope",
+      "gold_count": 3,
+      "cases": 2
+    },
+    {
+      "split": "dev",
+      "family": "global",
+      "gold_count": 2,
+      "cases": 1
+    },
+    {
+      "split": "dev",
+      "family": "local",
+      "gold_count": 2,
+      "cases": 3
+    },
+    {
+      "split": "dev",
+      "family": "negative",
+      "gold_count": 0,
+      "cases": 1
+    },
+    {
+      "split": "dev",
+      "family": "override",
+      "gold_count": 3,
+      "cases": 1
+    },
+    {
+      "split": "test",
+      "family": "cross_scope",
+      "gold_count": 3,
+      "cases": 6
+    },
+    {
+      "split": "test",
+      "family": "global",
+      "gold_count": 2,
+      "cases": 4
+    },
+    {
+      "split": "test",
+      "family": "local",
+      "gold_count": 2,
+      "cases": 12
+    },
+    {
+      "split": "test",
+      "family": "negative",
+      "gold_count": 0,
+      "cases": 4
+    },
+    {
+      "split": "test",
+      "family": "override",
+      "gold_count": 3,
+      "cases": 6
+    }
+  ],
+  "dataset_sha256": "2e4f02df87127881a3bfe240c322ae1c84db372d18f231bc5e8b4ed962ea97b7",
+  "protocol_sha256": "5f2f33208081b776803d29e76a72fd19a232db24d922675c2100b7990f0f16c1",
+  "runner_sha256": "71db7e07b13a082c52ee97eda7b11e60b365339851a1f447d96334c6a4ccb916",
+  "reviewer_sha256": "ed1fa3404ef49c3e4a24293850448ee1a9b5e36838cd1562f23357b9297dc04e",
+  "build_manifest_sha256": "2c90a84f9a978bf9d2b987f7e5e021fa58437bc2c7927e2f514ca5de5ab722e4",
+  "manifest_artifacts_and_programs_verified": 5,
+  "prompt_clarification_verified_cases": 40,
+  "dataset_matches_frozen_protocol": true
+}

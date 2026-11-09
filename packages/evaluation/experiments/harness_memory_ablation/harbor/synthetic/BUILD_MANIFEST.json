@@ -1,0 +1,16 @@
+{
+  "artifacts": {
+    "DATA_REPORT.json": "ece88fe61d272061c758f5921c23b26d1db0d83ac4d6178344dd23843fa1a357",
+    "DATA_REPORT.md": "d243c559007bede9ed87b51fe016194c946ee88eca6293bd87d0acbfa8af649d",
+    "data-v1.json": "2e4f02df87127881a3bfe240c322ae1c84db372d18f231bc5e8b4ed962ea97b7"
+  },
+  "generator": "synthetic-scenes-v1",
+  "parameters": {
+    "distractor_scopes": 48,
+    "seed": 20261109
+  },
+  "programs": {
+    "generate.py": "105758f031011e347c82e7749c741bf4feaf7e94f3eacdeb491eb9a35aa0d220",
+    "oracle.py": "cbce17d63d889ac8845bb7129967bf0493bf6839586850ca95c6589c8d37397c"
+  }
+}

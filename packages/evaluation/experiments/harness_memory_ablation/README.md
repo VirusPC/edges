@@ -1,5 +1,7 @@
 # Harness memory 消融 runner
 
+本实验目录按实现方式提供两个入口：本页的本地 memory off/on 双组 runner，以及 [Harbor scoped/root/none 三组 runner](harbor/README.md)。后者使用独立 Docker、原生 Codex 与 separate verifier，支持真实数据复核和有上限的并发。实际聚合结果见 [2026-11-09 Harbor 三组实验报告](../../reports/2026-11-09-harbor-memory-ablation.md)。
+
 比较同一 Agent、同一题面下，工作目录里有没有 harness memory，对回答、输入 token 和端到端耗时的差别。
 
 回答由 Agent client 在你给的本地目录里自己读文件。默认 `codex exec`。`--client pi` 走已接好的 pi client。提示词只有题目。不会把记忆正文拼进 chat.completions。判分如果打开，才是另一次 chat completion。

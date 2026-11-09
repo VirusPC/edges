@@ -1,0 +1,3 @@
+# Complete experiment inputs and raw runs can live beside the public program.
+# These may contain private conversations, identifiers and runtime metadata.
+/local/

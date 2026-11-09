@@ -14,7 +14,7 @@
 - 已采纳的决策、纠错、操作手册 → [`.edges/memory/`](.edges/memory/)
 - 接入 Edges 的 CLI / MCP / skill 实现 → 仓库根 [`packages/cli/`](../cli)、[`packages/skills/`](../skills)、[`packages/mcp-servers/`](../mcp-servers)
 - 野外使用记录、运行日志、仪表盘笔记 → [`observation/`](../observation/README.md)
-- 编造的数据集、假分数、尚未跑过的「结果」
+- 冒充真实来源的数据集、假分数、尚未跑过的「结果」。明确标识生成规则、用途和局限的可复现合成数据可以用于诊断，并与真实数据实验分开报告。
 
 本仓公开。用例与报告按根 README「公开仓库边界」脱敏；不要写入凭据、未公开 IP 或可识别个人。
 
@@ -39,6 +39,7 @@
 | [`experiments/locomo/cases/locomo-smoke/`](experiments/locomo/cases/locomo-smoke/README.md) | LoCoMo 历史 hand-port，legacy。 |
 | [`experiments/memorybench/`](experiments/memorybench/README.md) | MemoryBench NFCats 小规模无记忆 / BM25-M 对照。用例在 [`cases/memorybench-smoke/`](experiments/memorybench/cases/memorybench-smoke/README.md)。 |
 | [`experiments/harness_memory_ablation/`](experiments/harness_memory_ablation/README.md) | 本地 A/B 工作目录上的 harness memory 消融（真实 Agent client）。方法与 30 题在个人主干仓 `evaluations/harness-memory-ablation`（Dataset `harness-memory-ablation/v1`）。 |
+| [`experiments/harness_memory_ablation/harbor/`](experiments/harness_memory_ablation/harbor/README.md) | Harbor 原生 Codex + 独立 Docker 的分作用域／根目录／无记忆三组实验；真实数据审阅、并发执行及 recall/token/时延统计。聚合报告见 [`reports/`](reports/README.md)。 |
 | [`third_party/`](third_party/README.md) | 评测用 git submodule（现有 [`third_party/locomo/`](third_party/locomo)）。 |
 
 Python 包名仍是 `retrieval_eval` 和 `harness_memory_ablation`。入口把 `experiments/` 放进 `sys.path`，内部 `from retrieval_eval...` 不用改名。`import retrieval_eval` 仍把 `packages/observation` 放进 `sys.path`。
