@@ -36,7 +36,7 @@ version: 0.2.3
      [--gitignore] [--index-only] [--skills-format]
    ```
 
-   属于主题时，在 `memory` 前加 `--project <P/projects/Q>`；不要把 Project 路径填进 `--target-dir`。根 `AGENTS.md` 含 `<edges-harness mode="super" />` 就加 `--super`，与是否选择 Project 无关。没有该元素但根上已有 `projects/`、`notes/`、`tasks/`、`memory/` 或 `compose/` 时先问。省略 Project 且带 `--super` 时，类型登记到 `<scope>/memory`；选定 Project 后仍登记到该 Project 的 memory。`--all` 不用于写入。
+   属于主题时，在 `memory` 前加 `--project <P/projects/Q>`；不要把 Project 路径填进 `--target-dir`。是否加 `--super` 按 `$edges`。省略 Project 且带 `--super` 时，类型登记到 `<scope>/memory`。`--all` 不用于写入。
 
 5. 按返回 JSON 汇报 `type` / `index` / `contentDir` / `action`，路径相对原 scope。若用户同时要求保存内容，用相同 scope / Project 调用 `$edges-memory-remember`；不要为了冒烟往真实记忆里写测试条目。
 
