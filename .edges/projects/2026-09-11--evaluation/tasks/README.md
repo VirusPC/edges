@@ -24,4 +24,5 @@
 - [目录结构消融实验程序与报告](<backlog/2026-10-31--%E7%9B%AE%E5%BD%95%E7%BB%93%E6%9E%84%E6%B6%88%E8%9E%8D%E5%AE%9E%E9%AA%8C%E7%A8%8B%E5%BA%8F%E4%B8%8E%E6%8A%A5%E5%91%8A/INDEX.md>) — 在固定仓库快照上对照不同目录/布局，落地 runner 与结果报告。
 - [memory\_ab\_分流量开关与\_langfuse\_标签评测](<backlog/2026-10-31--Memory-AB-%E5%88%86%E6%B5%81%E9%87%8F%E5%BC%80%E5%85%B3%E4%B8%8E-Langfuse-%E6%A0%87%E7%AD%BE%E8%AF%84%E6%B5%8B/INDEX.md>) — 支持按流量开/关 memory，Langfuse 打标签，再做离线 eval。
 - [evaluation自定义目标线上数据自动清洗与定期评测](<backlog/2026-11-02--Personal-Evaluation%E8%87%AA%E5%AE%9A%E4%B9%89%E7%9B%AE%E6%A0%87%E7%BA%BF%E4%B8%8A%E6%95%B0%E6%8D%AE%E8%87%AA%E5%8A%A8%E6%B8%85%E6%B4%97%E4%B8%8E%E5%AE%9A%E6%9C%9F%E8%AF%84%E6%B5%8B/INDEX.md>) — 结合通用评测框架，围绕被 harness 的目录自定义目标，自动清洗相关线上会话数据，并通过 Routine 定期评测。
+- [评估分层记忆与根目录平铺在沉淀环节的成本差异](<backlog/2026-11-10--%E8%AF%84%E4%BC%B0%E5%88%86%E5%B1%82%E8%AE%B0%E5%BF%86%E4%B8%8E%E6%A0%B9%E7%9B%AE%E5%BD%95%E5%B9%B3%E9%93%BA%E5%9C%A8%E6%B2%89%E6%B7%80%E7%8E%AF%E8%8A%82%E7%9A%84%E6%88%90%E6%9C%AC%E5%B7%AE%E5%BC%82/INDEX.md>) — 量化分层记忆在写入/沉淀端的成本，并与已有读取端收益合起来，判断两种组织方式在结构稳定的大仓与频繁新增模块的个人大脑下的净收益。
 <!-- edges-entries-local:end -->
