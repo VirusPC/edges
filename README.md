@@ -6,6 +6,8 @@
 
 *Harness any directory. Your brain is one too.*
 
+> 解决 Monorepo 等多业务模块协作场景下，换人或换 Agent 后项目知识丢失的问题。以目录作用域构建递归 Harness，通过 AGENTS.md 和 .edges/ 分层组织记忆、技能与任务，实现渐进式披露；支持以 Harness 自身为对象进行递归维护和持续演进。同时支持以人为 Harness 对象构建 Personal Harness（个人大脑），基于个人真实数据与需求开展 Personal Eval。受控合成实验中，相比平铺记忆，总 Token 消耗降低 35.75%，Agent 用时缩短 15.87%。
+
 ![从零散材料到有序目录，再展开下一次工作：经验成为新的起点](docs/assets/readme/hero.png)
 
 [开始使用](#怎么开始) · [实验结果](#实验结果) · [个人大脑案例](#案例把-edges-用于个人大脑) · [深入了解](#深入了解) · [Edges 小助手](https://edges-rag.viruspc.tech/)
