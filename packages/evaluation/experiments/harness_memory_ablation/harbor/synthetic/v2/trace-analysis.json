@@ -1,0 +1,1201 @@
+{
+  "schema_version": 1,
+  "kind": "posthoc_trace_diagnosis_not_new_benchmark_scores",
+  "source_binding": {
+    "dataset_sha256": "f074b815c2cee6eb77ed35fa6b07716f7dd34bcf066e89a91d73efef2f5d16c7",
+    "trials_sha256": "8be229ceab837df272b52bf2933044d139c18f37537926e60c675d0940b1e44a",
+    "manifest_sha256": "f4089e1da6d8ee519a96882dcfc8de16e7c6836bb6b7320a9a91e4cb637ba404",
+    "runtime_source_sha256": {
+      "metrics.py": "f1fac6def6c05d3c3bdfc24a9b2a6dc5864903a9515d84179701e9d382119968",
+      "run.py": "71db7e07b13a082c52ee97eda7b11e60b365339851a1f447d96334c6a4ccb916",
+      "export_langfuse.py": "6ccbb4ca7100e5f8523c32eb0978983aee8d156cc77a7b820a2e918c1faf3b9d",
+      "dataset.py": "d55f8ace736c92a60eee5ea5cc35b587e58cf9fbd47a01ab610023a9a0159167",
+      "local_archive.py": "813e707111bac9c2d6e8f15fd7433c20c97fb19bddc7ad2258f14a16d08832d0",
+      "build_dataset.py": "bc26e4e30c747d98ccaea7f3ee4605d943d0a2e6454cc77f427fe03e29c1543f",
+      "verify.py": "874add8d519d09face2caf8baee567d9656f464a19331139626441227bf0d31e",
+      "report.py": "6e7edc3b6184302807335ce0bf715c0b324c78f6c6a813cea9b3583539b4eb52",
+      "synthetic_report.py": "6288be31c64a351a94420cc639fe412f037a5aa3fd7dd8a6c207cc4b67cf98b1"
+    }
+  },
+  "scope": "All four non-full selected-recall positive test trials in memory arms; plus all fourteen successful same-case memory-arm repetitions. none excluded as a structural zero-memory baseline.",
+  "definition": "Body exposure is marker/unique-body-snippet presence in completed tool output; not full reading, understanding or use. Existing evidence recall additionally requires final selection.",
+  "decomposition": {
+    "scoped": {
+      "positive_cases": 30,
+      "positive_trials": 90,
+      "body_exposure_only_posthoc": 0.9888888888888889,
+      "frozen_selected_recall": 0.9777777777777777,
+      "non_exposure_loss_pp": 1.1111111111111072,
+      "exposed_not_selected_loss_pp": 1.1111111111111183
+    },
+    "root": {
+      "positive_cases": 30,
+      "positive_trials": 90,
+      "body_exposure_only_posthoc": 1.0,
+      "frozen_selected_recall": 1.0,
+      "non_exposure_loss_pp": 0.0,
+      "exposed_not_selected_loss_pp": 0.0
+    }
+  },
+  "prefix_checks": {
+    "food_first_three_commands_and_outputs_identical": true,
+    "wall_first_command_and_output_identical": true,
+    "archive_first_two_commands_and_outputs_identical": false
+  },
+  "cases": [
+    {
+      "case_id": "case-03f87712af5bb30ddd6dd136",
+      "question": "青砾食盒库又有人建议默认续下一周的食盒，当时为何没采用，这轮订盒怎么安排？",
+      "scope": ".",
+      "gold": [
+        {
+          "id": "m-6b0bef6683354ee7a1b1e43b",
+          "title": "青砾食盒库 · 备料数量的每周锁定点",
+          "scope": "workspaces/15ec3cfa41"
+        },
+        {
+          "id": "m-cbdb576c91449f1387b0d881",
+          "title": "青砾食盒库 · 默认续订提案的撤回记录",
+          "scope": "."
+        }
+      ]
+    },
+    {
+      "case_id": "case-4d667eb7418f1aae83a41c3a",
+      "question": "绛禾夜学堂这期成果墙还做成绩排行吗？请沿用上次定下的展示办法。",
+      "scope": ".",
+      "gold": [
+        {
+          "id": "m-208ddc8ad85939052ca8abb2",
+          "title": "绛禾夜学堂 · 由学员选择的进步卡",
+          "scope": "workspaces/27d361203a"
+        },
+        {
+          "id": "m-2f11c08f44265c47822595f4",
+          "title": "绛禾夜学堂 · 公开进度排行的停用决定",
+          "scope": "."
+        },
+        {
+          "id": "m-f45c1c2e0bfc0487123b07fe",
+          "title": "绛禾夜学堂 · 成果墙撤换与电子副本范围",
+          "scope": "workspaces/27d361203a/workbench"
+        }
+      ]
+    },
+    {
+      "case_id": "case-fff9f0599682cededa63d43e",
+      "question": "把绒溪档案室的扫描件批量换成统一命名，目录位置先保持原样。",
+      "scope": "workspaces/9aa1e94899",
+      "gold": [
+        {
+          "id": "m-96bacd5c4bf97f74f9ae2514",
+          "title": "绒溪档案室 · 目录卡仍要找得到原件",
+          "scope": "workspaces/9aa1e94899"
+        },
+        {
+          "id": "m-bf85a03e0e221d89079867f5",
+          "title": "绒溪档案室 · 隐藏工作文件的界线",
+          "scope": "workspaces/9aa1e94899/workbench"
+        },
+        {
+          "id": "m-d392b3ec40da05049dbcf74c",
+          "title": "绒溪档案室 · 改名之前留一张对照表",
+          "scope": "."
+        }
+      ]
+    }
+  ],
+  "trials": [
+    {
+      "trial_id": "trial-000093",
+      "case_id": "case-03f87712af5bb30ddd6dd136",
+      "condition": "root",
+      "repeat": 1,
+      "gold_ids": [
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "selected_ids": [
+        "m-cbdb576c91449f1387b0d881",
+        "m-6b0bef6683354ee7a1b1e43b"
+      ],
+      "exposed_ids": [
+        "m-5945c35c970b08a8e9b3e9d5",
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-9cf7ec54232a9137b1d2db66",
+        "m-a2a87d5c00802058dee2829d",
+        "m-b22312a588ee6e1aa48ab883",
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "selected_gold_count": 2,
+      "exposed_gold_count": 2,
+      "tool_calls": 4,
+      "agent_latency_ms": 32814.949,
+      "total_tokens": 116576,
+      "source_trace": "jobs/trial-000093/case-0018-root__V4oM7pp/agent/codex.txt",
+      "source_trace_sha256": "5275e3b4c63794f0cb29fe390489773039dc6faa9727eb82bea97f9f14451e6c",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "377de6cfde803012f27cc1261b90ecef5fec0c07aeda33c243030e72e381d936",
+          "output_sha256": "4c2b82b9c2d5b098eb01a0141a2a5708419bbe35dce2041f9073abb79f0c5e79",
+          "output_characters": 37,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "f9d6b495efacbefd466c3428c2dc0b5fed10adb2e3b2d89f71343b2464e58396",
+          "output_sha256": "44157318ae3a604ff7d6c43b781ae271fd9b023910e7ac7040ae7934ae584bb8",
+          "output_characters": 39146,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "c6398c0087aa14682d36a9fd4287f06834fc376a75fa6945a27808ba5bd77305",
+          "output_sha256": "1ac740f6d3e36b430afcc1d8956ad3ac3e4d0e3ac58a10ac10a6b6b947044b6e",
+          "output_characters": 815,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "0aca95e2721762d286939a3701079181c7199a12990c6a236f0ab95323147145",
+          "output_sha256": "467ebee7169b3c0fbd77422d98436effb000400a58ae1838fceafa0bfc4c9fb5",
+          "output_characters": 3534,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 13
+    },
+    {
+      "trial_id": "trial-000050",
+      "case_id": "case-03f87712af5bb30ddd6dd136",
+      "condition": "root",
+      "repeat": 2,
+      "gold_ids": [
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "selected_ids": [
+        "m-cbdb576c91449f1387b0d881",
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-9cf7ec54232a9137b1d2db66"
+      ],
+      "exposed_ids": [
+        "m-5945c35c970b08a8e9b3e9d5",
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-9cf7ec54232a9137b1d2db66",
+        "m-a2a87d5c00802058dee2829d",
+        "m-b22312a588ee6e1aa48ab883",
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "selected_gold_count": 2,
+      "exposed_gold_count": 2,
+      "tool_calls": 4,
+      "agent_latency_ms": 28979.488,
+      "total_tokens": 116639,
+      "source_trace": "jobs/trial-000050/case-0018-root__PWAXsuK/agent/codex.txt",
+      "source_trace_sha256": "b530a8377c02cc5a66844a0780a7ddf249cb5afcfa8078b5409b6f88dc166c97",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "da8cdcb18e74af603471ce56c88352faa4be7e10e322ac235c91ec910614e9d1",
+          "output_sha256": "74d43eb7428822c5b06c5dd8e516ff533fa1d1b54c0b02bba5f46764c5767807",
+          "output_characters": 37,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "f9d6b495efacbefd466c3428c2dc0b5fed10adb2e3b2d89f71343b2464e58396",
+          "output_sha256": "44157318ae3a604ff7d6c43b781ae271fd9b023910e7ac7040ae7934ae584bb8",
+          "output_characters": 39146,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "c6398c0087aa14682d36a9fd4287f06834fc376a75fa6945a27808ba5bd77305",
+          "output_sha256": "1ac740f6d3e36b430afcc1d8956ad3ac3e4d0e3ac58a10ac10a6b6b947044b6e",
+          "output_characters": 815,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "0aca95e2721762d286939a3701079181c7199a12990c6a236f0ab95323147145",
+          "output_sha256": "467ebee7169b3c0fbd77422d98436effb000400a58ae1838fceafa0bfc4c9fb5",
+          "output_characters": 3534,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 13
+    },
+    {
+      "trial_id": "trial-000262",
+      "case_id": "case-03f87712af5bb30ddd6dd136",
+      "condition": "root",
+      "repeat": 3,
+      "gold_ids": [
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "selected_ids": [
+        "m-cbdb576c91449f1387b0d881",
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-9cf7ec54232a9137b1d2db66"
+      ],
+      "exposed_ids": [
+        "m-5945c35c970b08a8e9b3e9d5",
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-9cf7ec54232a9137b1d2db66",
+        "m-a2a87d5c00802058dee2829d",
+        "m-b22312a588ee6e1aa48ab883",
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "selected_gold_count": 2,
+      "exposed_gold_count": 2,
+      "tool_calls": 4,
+      "agent_latency_ms": 30579.69,
+      "total_tokens": 116243,
+      "source_trace": "jobs/trial-000262/case-0018-root__BFrjGGV/agent/codex.txt",
+      "source_trace_sha256": "0d065909bbb6153c24187cac2b9b0957d217c165f3fbf35450ed764a2f9f5cd0",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "da8cdcb18e74af603471ce56c88352faa4be7e10e322ac235c91ec910614e9d1",
+          "output_sha256": "4c2b82b9c2d5b098eb01a0141a2a5708419bbe35dce2041f9073abb79f0c5e79",
+          "output_characters": 37,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "f9d6b495efacbefd466c3428c2dc0b5fed10adb2e3b2d89f71343b2464e58396",
+          "output_sha256": "44157318ae3a604ff7d6c43b781ae271fd9b023910e7ac7040ae7934ae584bb8",
+          "output_characters": 39146,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "77182bd98fe1b252fe8f8dadf9aa01fe8a34e7012d6e1aef2aae415c24faf196",
+          "output_sha256": "1ac740f6d3e36b430afcc1d8956ad3ac3e4d0e3ac58a10ac10a6b6b947044b6e",
+          "output_characters": 815,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "0aca95e2721762d286939a3701079181c7199a12990c6a236f0ab95323147145",
+          "output_sha256": "467ebee7169b3c0fbd77422d98436effb000400a58ae1838fceafa0bfc4c9fb5",
+          "output_characters": 3534,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 13
+    },
+    {
+      "trial_id": "trial-000324",
+      "case_id": "case-03f87712af5bb30ddd6dd136",
+      "condition": "scoped",
+      "repeat": 1,
+      "gold_ids": [
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "selected_ids": [
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "exposed_ids": [
+        "m-5945c35c970b08a8e9b3e9d5",
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-a2a87d5c00802058dee2829d",
+        "m-cbdb576c91449f1387b0d881",
+        "m-d3d7c4bddf95ee131e42f238"
+      ],
+      "selected_gold_count": 1,
+      "exposed_gold_count": 2,
+      "tool_calls": 3,
+      "agent_latency_ms": 24173.772,
+      "total_tokens": 75294,
+      "source_trace": "jobs/trial-000324/case-0018-scoped__bS6BeH8/agent/codex.txt",
+      "source_trace_sha256": "a8babaeb4bfa934cc0e83557dd7de43b1240df2de4e5898e2b291ede129314b9",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "c587fa347e67128314f25cdc09df47bf051e3472b55ca9651197e28cb084f9d7",
+          "output_sha256": "82b03965057412eca16d0b88b4d65a0611e0ca1ce897244ddcb98b7fb3398771",
+          "output_characters": 1689,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "8e14b7459e9ea768a4d3fa626220304125e5f3702785dbc1aa29f88ab759b6b4",
+          "output_sha256": "b633826c92a7d6abb83204594b1f7ab3269b9217e4a5013f4aceecee779e05d2",
+          "output_characters": 341,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "f39f24994181b2aa939e75687bb308b310b535b107e9016ce03333c3fa3b8ad3",
+          "output_sha256": "f0cb888911165bbbb749d67ec043808f784c12f74e4a2aa03da97e641209bf13",
+          "output_characters": 1830,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 11
+    },
+    {
+      "trial_id": "trial-000292",
+      "case_id": "case-03f87712af5bb30ddd6dd136",
+      "condition": "scoped",
+      "repeat": 2,
+      "gold_ids": [
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "selected_ids": [
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "exposed_ids": [
+        "m-5945c35c970b08a8e9b3e9d5",
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-a2a87d5c00802058dee2829d",
+        "m-cbdb576c91449f1387b0d881",
+        "m-d3d7c4bddf95ee131e42f238"
+      ],
+      "selected_gold_count": 1,
+      "exposed_gold_count": 2,
+      "tool_calls": 3,
+      "agent_latency_ms": 29761.389000000003,
+      "total_tokens": 75319,
+      "source_trace": "jobs/trial-000292/case-0018-scoped__HE2uLqD/agent/codex.txt",
+      "source_trace_sha256": "957964c55d412912e404e6d42bb1075af119b3449249bde9faf5e2b8832f9a79",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "c587fa347e67128314f25cdc09df47bf051e3472b55ca9651197e28cb084f9d7",
+          "output_sha256": "82b03965057412eca16d0b88b4d65a0611e0ca1ce897244ddcb98b7fb3398771",
+          "output_characters": 1689,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "8e14b7459e9ea768a4d3fa626220304125e5f3702785dbc1aa29f88ab759b6b4",
+          "output_sha256": "b633826c92a7d6abb83204594b1f7ab3269b9217e4a5013f4aceecee779e05d2",
+          "output_characters": 341,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "f39f24994181b2aa939e75687bb308b310b535b107e9016ce03333c3fa3b8ad3",
+          "output_sha256": "f0cb888911165bbbb749d67ec043808f784c12f74e4a2aa03da97e641209bf13",
+          "output_characters": 1830,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 11
+    },
+    {
+      "trial_id": "trial-000108",
+      "case_id": "case-03f87712af5bb30ddd6dd136",
+      "condition": "scoped",
+      "repeat": 3,
+      "gold_ids": [
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-cbdb576c91449f1387b0d881"
+      ],
+      "selected_ids": [
+        "m-cbdb576c91449f1387b0d881",
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-9cf7ec54232a9137b1d2db66"
+      ],
+      "exposed_ids": [
+        "m-5945c35c970b08a8e9b3e9d5",
+        "m-6b0bef6683354ee7a1b1e43b",
+        "m-9cf7ec54232a9137b1d2db66",
+        "m-a2a87d5c00802058dee2829d",
+        "m-b22312a588ee6e1aa48ab883",
+        "m-cbdb576c91449f1387b0d881",
+        "m-d3d7c4bddf95ee131e42f238"
+      ],
+      "selected_gold_count": 2,
+      "exposed_gold_count": 2,
+      "tool_calls": 5,
+      "agent_latency_ms": 31602.804,
+      "total_tokens": 129563,
+      "source_trace": "jobs/trial-000108/case-0018-scoped__YbXJpar/agent/codex.txt",
+      "source_trace_sha256": "d8c6c9286264bca36f099ad998f63e5968ead05d60e15ea177a9da9dfaaeb97e",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "c587fa347e67128314f25cdc09df47bf051e3472b55ca9651197e28cb084f9d7",
+          "output_sha256": "82b03965057412eca16d0b88b4d65a0611e0ca1ce897244ddcb98b7fb3398771",
+          "output_characters": 1689,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "8e14b7459e9ea768a4d3fa626220304125e5f3702785dbc1aa29f88ab759b6b4",
+          "output_sha256": "b633826c92a7d6abb83204594b1f7ab3269b9217e4a5013f4aceecee779e05d2",
+          "output_characters": 341,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "f39f24994181b2aa939e75687bb308b310b535b107e9016ce03333c3fa3b8ad3",
+          "output_sha256": "f0cb888911165bbbb749d67ec043808f784c12f74e4a2aa03da97e641209bf13",
+          "output_characters": 1830,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "3cf100d237a1fc4b0d4432ac53734faebbaac970147b5424efa0308273df5e1d",
+          "output_sha256": "d379f893e335ef33dd8fe6188fa2a9b9accb4f8d3b0c1614d01bc72384c9722e",
+          "output_characters": 535,
+          "exit_code": 0
+        },
+        {
+          "line": 14,
+          "command_sha256": "06b4fb5382f8d097c536b2bbeac7f5e2e8ac605117981b44e058344aaa7b62f8",
+          "output_sha256": "84c2bf24cacda9678f39824cb70b9f4c31ae1ca006f033e619212e541c9701cb",
+          "output_characters": 1189,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 15
+    },
+    {
+      "trial_id": "trial-000174",
+      "case_id": "case-4d667eb7418f1aae83a41c3a",
+      "condition": "root",
+      "repeat": 1,
+      "gold_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_ids": [
+        "m-2f11c08f44265c47822595f4",
+        "m-208ddc8ad85939052ca8abb2",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "exposed_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-b0386c034e5e6d37a3e02f6b",
+        "m-e926954f20ba9c180814b6cf",
+        "m-f21b369fb59de4c4e19877ca",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_gold_count": 3,
+      "exposed_gold_count": 3,
+      "tool_calls": 4,
+      "agent_latency_ms": 29084.769,
+      "total_tokens": 101577,
+      "source_trace": "jobs/trial-000174/case-0016-root__KqgaRX4/agent/codex.txt",
+      "source_trace_sha256": "08cc60d21802f3055878a2a03d8414f634b2a3abd2a01e44e9e74a9b01b7bb37",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "377de6cfde803012f27cc1261b90ecef5fec0c07aeda33c243030e72e381d936",
+          "output_sha256": "74d43eb7428822c5b06c5dd8e516ff533fa1d1b54c0b02bba5f46764c5767807",
+          "output_characters": 37,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "f9d6b495efacbefd466c3428c2dc0b5fed10adb2e3b2d89f71343b2464e58396",
+          "output_sha256": "44157318ae3a604ff7d6c43b781ae271fd9b023910e7ac7040ae7934ae584bb8",
+          "output_characters": 39146,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "dd4323a2882a2033271cd4abd0b4d1ac0d6c257539299f2479a1369fc7f3f1dd",
+          "output_sha256": "80fcf020185c1085a61df73455b0c96e8eef503fd99be962ca0fd85b11818c64",
+          "output_characters": 817,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "96cc330769b4552e396dbdde9f9ef5582ea73330389c0980b8c58a7ca38da7a8",
+          "output_sha256": "c30af4b6fef89b82e3224a9142abb2084a48ddcd713191ffc6fb7b124c9507f0",
+          "output_characters": 3523,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 13
+    },
+    {
+      "trial_id": "trial-000274",
+      "case_id": "case-4d667eb7418f1aae83a41c3a",
+      "condition": "root",
+      "repeat": 2,
+      "gold_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_ids": [
+        "m-2f11c08f44265c47822595f4",
+        "m-208ddc8ad85939052ca8abb2",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "exposed_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-e926954f20ba9c180814b6cf",
+        "m-f21b369fb59de4c4e19877ca",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_gold_count": 3,
+      "exposed_gold_count": 3,
+      "tool_calls": 4,
+      "agent_latency_ms": 31135.215,
+      "total_tokens": 85672,
+      "source_trace": "jobs/trial-000274/case-0016-root__M6rfeQE/agent/codex.txt",
+      "source_trace_sha256": "73423f5e230ff7b3b6b8c654881c8849b6bf117a41cf4b20d39fdf929212ca31",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "5781af2a0d0653b187cf6acc5eb66dc2e0fe2410b7913ac7eb45d815baa11458",
+          "output_sha256": "ac3d3e1a8bc6b0588cadc0decf44e69df6c106af4f9038a8dc3819dc55287037",
+          "output_characters": 38947,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "96fac71f4bb73fbcd089fa417356f9a371a84ccb20d3bc2669a7bf22c6ade66c",
+          "output_sha256": "53d4404fbed9c50afd73e1150ad22cae1d03c26c1748f9b41585aac24357ba02",
+          "output_characters": 827,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "8c0a8a61a26591bc20ae237783b59879f4625be1918012e870c0f510e9726c90",
+          "output_sha256": "5df7bf8cd53c9ae4415c01a355a0556799be02124711a68be5e180d71807d1a1",
+          "output_characters": 2954,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "1c1e49149df38fa35d536b9ddda53d9a67b00e8a26b69218b646f7fb1dd3ef46",
+          "output_sha256": "be62076ae17049dbe7e1ffde9db12579aad93cf7618620a98a02b4e54b5ed223",
+          "output_characters": 199,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 13
+    },
+    {
+      "trial_id": "trial-000198",
+      "case_id": "case-4d667eb7418f1aae83a41c3a",
+      "condition": "root",
+      "repeat": 3,
+      "gold_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_ids": [
+        "m-2f11c08f44265c47822595f4",
+        "m-208ddc8ad85939052ca8abb2",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "exposed_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-b0386c034e5e6d37a3e02f6b",
+        "m-e926954f20ba9c180814b6cf",
+        "m-f21b369fb59de4c4e19877ca",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_gold_count": 3,
+      "exposed_gold_count": 3,
+      "tool_calls": 4,
+      "agent_latency_ms": 29507.763,
+      "total_tokens": 96250,
+      "source_trace": "jobs/trial-000198/case-0016-root__BBtohAv/agent/codex.txt",
+      "source_trace_sha256": "32899a6a672cf12fea32e9cee9254d635af767368678b962b934e6ba82d8d25d",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "377de6cfde803012f27cc1261b90ecef5fec0c07aeda33c243030e72e381d936",
+          "output_sha256": "4c2b82b9c2d5b098eb01a0141a2a5708419bbe35dce2041f9073abb79f0c5e79",
+          "output_characters": 37,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "f9d6b495efacbefd466c3428c2dc0b5fed10adb2e3b2d89f71343b2464e58396",
+          "output_sha256": "44157318ae3a604ff7d6c43b781ae271fd9b023910e7ac7040ae7934ae584bb8",
+          "output_characters": 39146,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "dd4323a2882a2033271cd4abd0b4d1ac0d6c257539299f2479a1369fc7f3f1dd",
+          "output_sha256": "80fcf020185c1085a61df73455b0c96e8eef503fd99be962ca0fd85b11818c64",
+          "output_characters": 817,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "96cc330769b4552e396dbdde9f9ef5582ea73330389c0980b8c58a7ca38da7a8",
+          "output_sha256": "c30af4b6fef89b82e3224a9142abb2084a48ddcd713191ffc6fb7b124c9507f0",
+          "output_characters": 3523,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 13
+    },
+    {
+      "trial_id": "trial-000295",
+      "case_id": "case-4d667eb7418f1aae83a41c3a",
+      "condition": "scoped",
+      "repeat": 1,
+      "gold_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_ids": [
+        "m-2f11c08f44265c47822595f4"
+      ],
+      "exposed_ids": [
+        "m-2f11c08f44265c47822595f4",
+        "m-e569e911e7f71e343000af5e",
+        "m-e926954f20ba9c180814b6cf"
+      ],
+      "selected_gold_count": 1,
+      "exposed_gold_count": 1,
+      "tool_calls": 1,
+      "agent_latency_ms": 18635.055,
+      "total_tokens": 48601,
+      "source_trace": "jobs/trial-000295/case-0016-scoped__oan63Lt/agent/codex.txt",
+      "source_trace_sha256": "30555c4f1aea643cc35ee47c47bf74314b5e0fcbf2491db82c2e14c7a39d0998",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "d52fef24b74fa5dd959abf970a2fb16b94949ea300020e4a562909e4748be07d",
+          "output_sha256": "8fa1c078ed90e3d64a2b02de4ff75510e5da61e23c47e00486e082d30fc01ab6",
+          "output_characters": 1679,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 7
+    },
+    {
+      "trial_id": "trial-000137",
+      "case_id": "case-4d667eb7418f1aae83a41c3a",
+      "condition": "scoped",
+      "repeat": 2,
+      "gold_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_ids": [
+        "m-2f11c08f44265c47822595f4",
+        "m-208ddc8ad85939052ca8abb2",
+        "m-f45c1c2e0bfc0487123b07fe",
+        "m-b0386c034e5e6d37a3e02f6b"
+      ],
+      "exposed_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-b0386c034e5e6d37a3e02f6b",
+        "m-e569e911e7f71e343000af5e",
+        "m-e926954f20ba9c180814b6cf",
+        "m-f21b369fb59de4c4e19877ca",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_gold_count": 3,
+      "exposed_gold_count": 3,
+      "tool_calls": 5,
+      "agent_latency_ms": 29388.79,
+      "total_tokens": 129334,
+      "source_trace": "jobs/trial-000137/case-0016-scoped__LQRQwAq/agent/codex.txt",
+      "source_trace_sha256": "0231b610cd0da6d3799caa452a7e2c82fce583b2a2aca085df0497cc5ef089aa",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "d52fef24b74fa5dd959abf970a2fb16b94949ea300020e4a562909e4748be07d",
+          "output_sha256": "8fa1c078ed90e3d64a2b02de4ff75510e5da61e23c47e00486e082d30fc01ab6",
+          "output_characters": 1679,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "32c31e2e0b029048ced5373c6c012a4e8e1dcd25e1fea86b6f9347c754ec79a7",
+          "output_sha256": "7732751711296b8313ef9d919f0bfd2eedfc1889f5431da36a96018eacefe35e",
+          "output_characters": 339,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "92c26a7848e4eb17a92c6e8779b4de3e9a9fb971565690dcc1ddcdb9ca0ba8e3",
+          "output_sha256": "fde17038ac23fe55802b13d2cf95f75a2d99b06ace6af4e1ae1293596837eec8",
+          "output_characters": 1822,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "69d35bfa8a80113821141bcd58332692418b37ac3f1403471c3a1a1f6789d07a",
+          "output_sha256": "67592d15ffb546fa4aa92fb06c9d08e7b21490124fc3fe2f945b60d110a8abfd",
+          "output_characters": 539,
+          "exit_code": 0
+        },
+        {
+          "line": 14,
+          "command_sha256": "a007439e46e1e09a86ed632272be1457ce158339a8d2eb85977f51badf72c88c",
+          "output_sha256": "2e6b404845c5b488187457dcd4c926b9b6b549225c4d12ba805db2c02979f523",
+          "output_characters": 1191,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 15
+    },
+    {
+      "trial_id": "trial-000032",
+      "case_id": "case-4d667eb7418f1aae83a41c3a",
+      "condition": "scoped",
+      "repeat": 3,
+      "gold_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_ids": [
+        "m-2f11c08f44265c47822595f4",
+        "m-208ddc8ad85939052ca8abb2",
+        "m-f45c1c2e0bfc0487123b07fe",
+        "m-b0386c034e5e6d37a3e02f6b"
+      ],
+      "exposed_ids": [
+        "m-208ddc8ad85939052ca8abb2",
+        "m-2f11c08f44265c47822595f4",
+        "m-b0386c034e5e6d37a3e02f6b",
+        "m-e569e911e7f71e343000af5e",
+        "m-e926954f20ba9c180814b6cf",
+        "m-f21b369fb59de4c4e19877ca",
+        "m-f45c1c2e0bfc0487123b07fe"
+      ],
+      "selected_gold_count": 3,
+      "exposed_gold_count": 3,
+      "tool_calls": 5,
+      "agent_latency_ms": 33854.809,
+      "total_tokens": 129330,
+      "source_trace": "jobs/trial-000032/case-0016-scoped__RDNyjKT/agent/codex.txt",
+      "source_trace_sha256": "51b65f3be9cf306439b6dc4d897a1323116f8c35af9c5800519705db5abc7cf1",
+      "completed_commands": [
+        {
+          "line": 7,
+          "command_sha256": "d52fef24b74fa5dd959abf970a2fb16b94949ea300020e4a562909e4748be07d",
+          "output_sha256": "8fa1c078ed90e3d64a2b02de4ff75510e5da61e23c47e00486e082d30fc01ab6",
+          "output_characters": 1679,
+          "exit_code": 0
+        },
+        {
+          "line": 9,
+          "command_sha256": "32c31e2e0b029048ced5373c6c012a4e8e1dcd25e1fea86b6f9347c754ec79a7",
+          "output_sha256": "7732751711296b8313ef9d919f0bfd2eedfc1889f5431da36a96018eacefe35e",
+          "output_characters": 339,
+          "exit_code": 0
+        },
+        {
+          "line": 11,
+          "command_sha256": "92c26a7848e4eb17a92c6e8779b4de3e9a9fb971565690dcc1ddcdb9ca0ba8e3",
+          "output_sha256": "fde17038ac23fe55802b13d2cf95f75a2d99b06ace6af4e1ae1293596837eec8",
+          "output_characters": 1822,
+          "exit_code": 0
+        },
+        {
+          "line": 13,
+          "command_sha256": "69d35bfa8a80113821141bcd58332692418b37ac3f1403471c3a1a1f6789d07a",
+          "output_sha256": "67592d15ffb546fa4aa92fb06c9d08e7b21490124fc3fe2f945b60d110a8abfd",
+          "output_characters": 539,
+          "exit_code": 0
+        },
+        {
+          "line": 15,
+          "command_sha256": "a007439e46e1e09a86ed632272be1457ce158339a8d2eb85977f51badf72c88c",
+          "output_sha256": "2e6b404845c5b488187457dcd4c926b9b6b549225c4d12ba805db2c02979f523",
+          "output_characters": 1191,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 16
+    },
+    {
+      "trial_id": "trial-000263",
+      "case_id": "case-fff9f0599682cededa63d43e",
+      "condition": "root",
+      "repeat": 1,
+      "gold_ids": [
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_ids": [
+        "m-d392b3ec40da05049dbcf74c",
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-bf85a03e0e221d89079867f5"
+      ],
+      "exposed_ids": [
+        "m-692126df66580ddafa5433eb",
+        "m-731a46faa25aff5938a3c95d",
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-add954e3fada691ccafe41cf",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_gold_count": 3,
+      "exposed_gold_count": 3,
+      "tool_calls": 5,
+      "agent_latency_ms": 38775.88,
+      "total_tokens": 103615,
+      "source_trace": "jobs/trial-000263/case-0002-root__gEj2PsU/agent/codex.txt",
+      "source_trace_sha256": "d0d65acac87187cd3ebfa5330b8a7336303345936a8105e57e6dafc4e8ba7361",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "377de6cfde803012f27cc1261b90ecef5fec0c07aeda33c243030e72e381d936",
+          "output_sha256": "f82b8f0746206cdd07e862e6c92545244f449b6b6c06acc853495784ef8d523f",
+          "output_characters": 33,
+          "exit_code": 1
+        },
+        {
+          "line": 8,
+          "command_sha256": "5e7774b7fcca30f222b751a4c8a33debef9f16bc425907e225d3a9596ed44ce4",
+          "output_sha256": "8fe2b5e6ccfcd9cd3b7eee348b9399e5116875a08c4ea9289f3fb55c88157d3a",
+          "output_characters": 198,
+          "exit_code": 1
+        },
+        {
+          "line": 10,
+          "command_sha256": "0e523d1e38463deca43f462a2d581a94514d58878c90e7ddf3fc96aa62681294",
+          "output_sha256": "afe3347d7ff7bcb2c4256fe4d9e32246794b7b08071d8ca1edea1abb1d0f8f14",
+          "output_characters": 29987,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "c3c2fd1a54e60873cfc844448e6889bb042821b07556d03395fa710d99457f72",
+          "output_sha256": "e46d6763f5c707376ea70c56f38e46747b1c69b541c9c9f883949b9dcc37522e",
+          "output_characters": 1038,
+          "exit_code": 0
+        },
+        {
+          "line": 14,
+          "command_sha256": "2b93d30025cf6ae584c3427370cf850810bd115f82f1c0964ee8b0df2e8b530b",
+          "output_sha256": "8bce1a69754394dc394eba1740514258981dade0846d5d57047e25e2f1203634",
+          "output_characters": 3156,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 15
+    },
+    {
+      "trial_id": "trial-000090",
+      "case_id": "case-fff9f0599682cededa63d43e",
+      "condition": "root",
+      "repeat": 2,
+      "gold_ids": [
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_ids": [
+        "m-d392b3ec40da05049dbcf74c",
+        "m-bf85a03e0e221d89079867f5",
+        "m-96bacd5c4bf97f74f9ae2514"
+      ],
+      "exposed_ids": [
+        "m-692126df66580ddafa5433eb",
+        "m-731a46faa25aff5938a3c95d",
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-add954e3fada691ccafe41cf",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_gold_count": 3,
+      "exposed_gold_count": 3,
+      "tool_calls": 5,
+      "agent_latency_ms": 42253.251,
+      "total_tokens": 129701,
+      "source_trace": "jobs/trial-000090/case-0002-root__WeDqx23/agent/codex.txt",
+      "source_trace_sha256": "02f4582f679a6501aa074b3f71f634836e7b34e30a42f22ef384faef211549a3",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "377de6cfde803012f27cc1261b90ecef5fec0c07aeda33c243030e72e381d936",
+          "output_sha256": "f82b8f0746206cdd07e862e6c92545244f449b6b6c06acc853495784ef8d523f",
+          "output_characters": 33,
+          "exit_code": 1
+        },
+        {
+          "line": 8,
+          "command_sha256": "37e6038e9a2007c51a03aeb9b646f59a1c24d3540448e9b6fac21b6c34625456",
+          "output_sha256": "89e14109d78f34851aedf13f8ce78acb63e62f43554779ee053dbdd277337d13",
+          "output_characters": 198,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "b5d32f483cae57d8b420063e54234bdc7097fbe4904f5d1f390944ed2424816a",
+          "output_sha256": "44157318ae3a604ff7d6c43b781ae271fd9b023910e7ac7040ae7934ae584bb8",
+          "output_characters": 39146,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "a4bde61e857fb57c0486c8fdb0f41bc785669423e2ffe3380bb27154ba5797af",
+          "output_sha256": "1c6b0720443ff312c59a1ccb1ab17ae73995aba4278a4b71bfca8a3bf4dd95fd",
+          "output_characters": 811,
+          "exit_code": 0
+        },
+        {
+          "line": 14,
+          "command_sha256": "85224224f0098e88f448bb1de371e3cd0a08aeb8ed2f6b4ee02a60aa329d07ff",
+          "output_sha256": "4fe227a6f5ab843adbf9085f7696e292f34ba29e677172b085c2891f1e7716de",
+          "output_characters": 3156,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 15
+    },
+    {
+      "trial_id": "trial-000226",
+      "case_id": "case-fff9f0599682cededa63d43e",
+      "condition": "root",
+      "repeat": 3,
+      "gold_ids": [
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_ids": [
+        "m-d392b3ec40da05049dbcf74c",
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-bf85a03e0e221d89079867f5"
+      ],
+      "exposed_ids": [
+        "m-692126df66580ddafa5433eb",
+        "m-731a46faa25aff5938a3c95d",
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-add954e3fada691ccafe41cf",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_gold_count": 3,
+      "exposed_gold_count": 3,
+      "tool_calls": 6,
+      "agent_latency_ms": 36200.286,
+      "total_tokens": 142520,
+      "source_trace": "jobs/trial-000226/case-0002-root__p65byCK/agent/codex.txt",
+      "source_trace_sha256": "b20a06ab500b7dae60c81ba8c0b09d5014f51a5324e860b2cc65e7888401115f",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "377de6cfde803012f27cc1261b90ecef5fec0c07aeda33c243030e72e381d936",
+          "output_sha256": "f82b8f0746206cdd07e862e6c92545244f449b6b6c06acc853495784ef8d523f",
+          "output_characters": 33,
+          "exit_code": 1
+        },
+        {
+          "line": 8,
+          "command_sha256": "5e7774b7fcca30f222b751a4c8a33debef9f16bc425907e225d3a9596ed44ce4",
+          "output_sha256": "8fe2b5e6ccfcd9cd3b7eee348b9399e5116875a08c4ea9289f3fb55c88157d3a",
+          "output_characters": 198,
+          "exit_code": 1
+        },
+        {
+          "line": 10,
+          "command_sha256": "93407dfa96a7d3e22fc0fcf87f9899c1d50c3f871bb8f8bdffc0d2914826f395",
+          "output_sha256": "b7cd39c463ce3a5a8038393d998d086cc03f712b0f29ac2ad72c11f9e48d9137",
+          "output_characters": 48,
+          "exit_code": 0
+        },
+        {
+          "line": 12,
+          "command_sha256": "b5d32f483cae57d8b420063e54234bdc7097fbe4904f5d1f390944ed2424816a",
+          "output_sha256": "44157318ae3a604ff7d6c43b781ae271fd9b023910e7ac7040ae7934ae584bb8",
+          "output_characters": 39146,
+          "exit_code": 0
+        },
+        {
+          "line": 14,
+          "command_sha256": "a4bde61e857fb57c0486c8fdb0f41bc785669423e2ffe3380bb27154ba5797af",
+          "output_sha256": "1c6b0720443ff312c59a1ccb1ab17ae73995aba4278a4b71bfca8a3bf4dd95fd",
+          "output_characters": 811,
+          "exit_code": 0
+        },
+        {
+          "line": 16,
+          "command_sha256": "8b670bf100414ce5975f1cfd4441d6632a4f55ab7f6c0226d2e039574b141cda",
+          "output_sha256": "14d70af34f3b81605323db12f4de0f6736404f54c4d6dd74dfab70e9c2fe6b8f",
+          "output_characters": 3156,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 17
+    },
+    {
+      "trial_id": "trial-000119",
+      "case_id": "case-fff9f0599682cededa63d43e",
+      "condition": "scoped",
+      "repeat": 1,
+      "gold_ids": [
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_ids": [
+        "m-d392b3ec40da05049dbcf74c",
+        "m-96bacd5c4bf97f74f9ae2514"
+      ],
+      "exposed_ids": [
+        "m-692126df66580ddafa5433eb",
+        "m-731a46faa25aff5938a3c95d",
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_gold_count": 2,
+      "exposed_gold_count": 2,
+      "tool_calls": 2,
+      "agent_latency_ms": 27606.37,
+      "total_tokens": 74166,
+      "source_trace": "jobs/trial-000119/case-0002-scoped__Fe2ywN6/agent/codex.txt",
+      "source_trace_sha256": "62ca2c9a3bdbd9d71be5fbec78b55cfa7a70fc903d11776f66e5426a1866b60f",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "d1d25bd41a2cfb82123483f1c72f3ca536c050eb6f754f2dfa8d86a4b915ed7d",
+          "output_sha256": "3f890ca38e2e20558cac90a465828b67591580deb89f3c93b8afc2b2b564a501",
+          "output_characters": 63,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "2e01b6183f18f7907fb29b9678d9184c962cd4ddfbbaabfcca844706e04a1d2d",
+          "output_sha256": "49b58c98ed37c4b4f96f012f131ab2fbd5cc7fc62ab5069bb29a90dbb8aeab82",
+          "output_characters": 3258,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 9
+    },
+    {
+      "trial_id": "trial-000063",
+      "case_id": "case-fff9f0599682cededa63d43e",
+      "condition": "scoped",
+      "repeat": 2,
+      "gold_ids": [
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_ids": [
+        "m-d392b3ec40da05049dbcf74c",
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-bf85a03e0e221d89079867f5"
+      ],
+      "exposed_ids": [
+        "m-692126df66580ddafa5433eb",
+        "m-731a46faa25aff5938a3c95d",
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-add954e3fada691ccafe41cf",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_gold_count": 3,
+      "exposed_gold_count": 3,
+      "tool_calls": 3,
+      "agent_latency_ms": 26906.296000000002,
+      "total_tokens": 100646,
+      "source_trace": "jobs/trial-000063/case-0002-scoped__CKoSZtp/agent/codex.txt",
+      "source_trace_sha256": "59fb30c7c051c6d9d8a19548d4f98d13d99bc739b8c398041b8ea49840d7fa41",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "9556c64dfc5ea8ade0372acf443fc5e26e4000b5789ac7fcb1258e5b7ee42e72",
+          "output_sha256": "3f890ca38e2e20558cac90a465828b67591580deb89f3c93b8afc2b2b564a501",
+          "output_characters": 63,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "f47241a0da3d11ad4be83f7dd7ae2567245a482731a7e3494c9fc62817d10916",
+          "output_sha256": "c2f4ea45e5d7bfc59d17b8b3229658d15ea9bd312d73450543195f66fefda9a6",
+          "output_characters": 2374,
+          "exit_code": 1
+        },
+        {
+          "line": 10,
+          "command_sha256": "40ef319ae88373b5922126e5d29bacde206b1fd78b9e4ab1f7e8254e7b942a1d",
+          "output_sha256": "182c682ee9006854dc51793d78093f689f7bf6fc75f88a6f45959ef3504ab517",
+          "output_characters": 2140,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 11
+    },
+    {
+      "trial_id": "trial-000276",
+      "case_id": "case-fff9f0599682cededa63d43e",
+      "condition": "scoped",
+      "repeat": 3,
+      "gold_ids": [
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_ids": [
+        "m-d392b3ec40da05049dbcf74c",
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-bf85a03e0e221d89079867f5"
+      ],
+      "exposed_ids": [
+        "m-692126df66580ddafa5433eb",
+        "m-731a46faa25aff5938a3c95d",
+        "m-96bacd5c4bf97f74f9ae2514",
+        "m-add954e3fada691ccafe41cf",
+        "m-bf85a03e0e221d89079867f5",
+        "m-d392b3ec40da05049dbcf74c"
+      ],
+      "selected_gold_count": 3,
+      "exposed_gold_count": 3,
+      "tool_calls": 3,
+      "agent_latency_ms": 33526.292,
+      "total_tokens": 105907,
+      "source_trace": "jobs/trial-000276/case-0002-scoped__aj6Zcew/agent/codex.txt",
+      "source_trace_sha256": "a723ac0400ce5ac01126b3fd73f1fa2dbf7d69f832197c367165adfdc623cc6a",
+      "completed_commands": [
+        {
+          "line": 6,
+          "command_sha256": "a47197dd8066baa3b733e5d312c75312d575657ef69efa35aed372caa5686975",
+          "output_sha256": "b41ee7bc2c6d8402af9aee6c9e37e7ef27d06ec9deb8be4f283883ab71300f03",
+          "output_characters": 4662,
+          "exit_code": 0
+        },
+        {
+          "line": 8,
+          "command_sha256": "3a135b7cc5d701af90cc348d30b400562a035ba8a994be452ba667377b87e32e",
+          "output_sha256": "f375b9a10f71766ebe2a1e618b8a5343436fa14d2de23df2387acd4b6a74a5e6",
+          "output_characters": 3258,
+          "exit_code": 0
+        },
+        {
+          "line": 10,
+          "command_sha256": "aa4840a4e33e6437fc7950da116602b4cde6693f179ee2e9d886b433978d4914",
+          "output_sha256": "11dcf076bc7061a6ff5accdd4b6faa94bf699abcb81f28adc9ac78692f8451ee",
+          "output_characters": 1068,
+          "exit_code": 0
+        }
+      ],
+      "final_answer_line": 11
+    }
+  ],
+  "limitations": [
+    "Post-hoc diagnostic; original protocol, scores, labels and inputs unchanged.",
+    "Trace identifies observed divergence, not hidden reasoning or causal effect.",
+    "Two case gold scopes remain ambiguous; arithmetic loss is not semantic error rate.",
+    "Repeated trials do not increase independent scenario count."
+  ]
+}
