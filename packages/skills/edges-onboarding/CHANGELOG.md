@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.4] - 2026-11-09
+
+### Changed
+
+- **挂载前按 `<edges-harness mode="super" />` 决定 `--super`。** 规则见 `edges` 技能。加上时检出在 `<scope>/<名称>`。
+
 ## [0.7.3] - 2026-11-09
 
 ### Changed

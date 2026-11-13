@@ -11,7 +11,7 @@ description: >-
   第一次接入用 edges-onboarding。整理对话用 edges-conversation-to-notes 或 edges-conversation-to-tasks。
   整板 Task 按已有 Project 归类用 edges-tasks-classify。
   把会话接到 Langfuse 用 edges-langfuse-agent-tracing。
-version: 0.4.4
+version: 0.4.5
 ---
 
 # edges
@@ -38,7 +38,8 @@ edges --scope <目录> --project <Project相对路径> <module> create ...
 - 先定 `--scope`（或已设置的 `EDGES_SCOPE`），再按内容归属选择已有 Project。`--project` 是相对当前材料面 projects 目录的实际路径，例如 `P` 或 `P/projects/Q`：默认 `<scope>/.edges/projects`，`--super` 时 `<scope>/projects`。它不创建 Project，也不改变 scope。不要手改节点文件，不要绕开 CLI 写内容叶子。
 - 目录材料默认归入 `<scope>/.edges/`；选定 Project 后归入 `P/<module>/`，登记在 `P/INDEX.md`。创建、检索和后续读写保持同一选择，使用 CLI 返回的路径；不要把 scope 改成 `.edges` 或 P 来模拟归属。
 - Notes、Projects、Tasks、Memory、Skills、Routines 的 `list --super` 换成当前 scope 的运行时 Super 入口，挂载 scope 直属材料并递归展开登记组成。`--super` 同时决定 `--project` 去 `<scope>/projects` 查找；找到 P 之后，以该 Project 的组成入口和材料根为准，材料留在 `P/<module>`。旧根目录材料不会自动搬迁。
-- Notes、Projects、Tasks、Skills、Routines、Memory、Compose 的读写都跟随 `--super`：材料在 `<scope>/<module>/`。选定 Project 时写入 `P/<module>`。`edges init --super` 同样初始化这套根目录材料，并在 AGENTS.md 硬约束里写一次「这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数」。不带 `--super` 的 init 仍只写 `<scope>/.edges`，不加这句。
+- Notes、Projects、Tasks、Skills、Routines、Memory、Compose 的读写都跟随显式 `--super`：材料在 `<scope>/<module>/`。选定 Project 时写入 `P/<module>`。`edges init --super` 初始化这套根目录材料，并在 `AGENTS.md` 硬约束里写上「这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数」和 `<edges-harness mode="super" />`。不带 `--super` 的 init 仍写 `<scope>/.edges`。
+- 根 `AGENTS.md` 有 `<edges-harness mode="super" />` 就加 `--super`；没有就不加；没有标记但根目录有 `projects/`、`notes/`、`tasks/`、`memory/`、`compose/` 时，问用户。
 - `--all` 只用于读取，额外发现所选 scope 或 Project 目录下的独立真实系统；它不是开启组成递归，也不为每个系统自动加 Super。检索扩大范围后，写入仍须按结果的真实 owner scope 与 Project 定位，不携带 `--all`。Compose 的登记与更新规则另见对应 reference；Artifacts 不因 `--project` 改变上传或发布归属。
 - 具体旗标以 `edges <module> --help` 为准。下面没写的旗标不要猜。
 - 已经有专门命令的写入不要再套 create / update。例如 `memory create` 与 `memory update` 会失败并指向 `edges memory remember`。

@@ -1,7 +1,7 @@
 ---
 name: edges-onboarding
 description: 帮用户给已有项目添加 edges harness 目录，创建独立 edges harness 仓库，或把已有个人大脑接入当前 Agent 客户端（接入已有大脑）。负责收齐必要信息、安装 CLI、初始化和验证；独立仓库默认包含 GitHub 建仓及首次推送。
-version: 0.7.3
+version: 0.7.4
 ---
 
 # Edges 接入
@@ -84,16 +84,25 @@ edges --version
    edges --scope <仓库目录> --super init -- -y
    ```
 
-3. 补充 README.md 的用途说明。`init --super` 已在 AGENTS.md 硬约束写入独立仓提示；这里再记内容归属与隐私边界，不要删掉或再写一遍那句。检查当前 Agent 能加载入口并发现根目录材料与 skills。
+3. 补充 README.md 的用途说明。`init --super` 已在 AGENTS.md 硬约束写入独立仓提示和 `<edges-harness mode="super" />`。这里再记内容归属与隐私边界。检查当前 Agent 能加载入口并发现根目录材料与 skills。
 4. 用已连接的 GitHub 工具或已鉴权的 gh 创建仓库；gh 未鉴权时，让用户在自己的终端执行 `gh auth login` 并完成授权，不索取 PAT。按明确选择设置 private/public。检查待提交文件，首次提交并推送，读回远程可见性和提交 SHA。返回仓库地址、本地路径和分支。仅本地接入在本地验证完成后交付。
 5. **默认继续接入当前客户端**（缺参数再补问）。用户可选稍后再接。识别宿主后打开 [references/client-access/](references/client-access/README.md) 对应分组指南，再按 [contract.md](references/client-access/contract.md) 核验。步骤细节见下一节「接入已有大脑」的第 2–4 步。
-6. **旁路（可选）**：仅当用户要求把大脑挂进某个代码项目时，在使用方项目执行 Compose，再检查条目已检出、入口可读。Compose 不是把大脑接到客户端工作区的主路径。
+6. **旁路（可选）**：仅当用户要求把大脑挂进某个仓库时，在使用方仓库执行 Compose，再检查条目已检出、入口可读。Compose 不是把大脑接到客户端工作区的主路径。是否加 `--super` 按 `$edges`。加上时检出在 `<scope>/<名称>`，登记在 `<scope>/compose/README.md`：
 
    ```bash
-   edges --scope <使用方项目> compose add \
+   edges --scope <使用方仓库> --super compose add \
      --name <名称> --remote <仓库Git地址> \
      --description "存什么，以及何时往这里写"
-   edges --scope <使用方项目> compose list
+   edges --scope <使用方仓库> --super compose list
+   ```
+
+   不加 `--super` 时登记在 `<scope>/.edges/compose/`：
+
+   ```bash
+   edges --scope <使用方仓库> compose add \
+     --name <名称> --remote <仓库Git地址> \
+     --description "存什么，以及何时往这里写"
+   edges --scope <使用方仓库> compose list
    ```
 
 GitHub 同名仓库或已有 origin 先核对，遇到冲突保留现场并报告。中途失败时说明已完成的步骤，重试复用已有结果。

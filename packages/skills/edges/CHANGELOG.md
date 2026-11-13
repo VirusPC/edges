@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-11-09
+
+### Changed
+
+- **独立仓标记。** `init --super` 在硬约束里写 `<edges-harness mode="super" />`。根 AGENTS.md 有这个元素就加 `--super`；没有就不加；没有标记但根目录有 `projects/`、`notes/`、`tasks/`、`memory/`、`compose/` 时，问用户。
+
 ## [0.4.4] - 2026-11-09
 
 ### Changed

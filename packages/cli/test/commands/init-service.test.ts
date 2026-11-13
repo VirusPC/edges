@@ -173,7 +173,9 @@ test("edges init without --super stays on .edges and does not add the independen
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   assert.equal(existsSync(path.join(root, ".edges/notes/README.md")), true);
   assert.equal(existsSync(path.join(root, "notes/README.md")), false);
-  assert.doesNotMatch(await readFile(path.join(root, "AGENTS.md"), "utf8"), /这是独立 edges harness 仓库/);
+  const agents = await readFile(path.join(root, "AGENTS.md"), "utf8");
+  assert.doesNotMatch(agents, /这是独立 edges harness 仓库/);
+  assert.doesNotMatch(agents, /<edges-harness\b/);
 });
 
 test("commands do not import the harness material catalog", () => {

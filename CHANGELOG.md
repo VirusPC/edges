@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 初始化
 
+- **独立仓标记。** `edges init --super` 在 AGENTS.md 硬约束里写一次 `<edges-harness mode="super" />`。是否加 `--super` 见 `edges` 技能。
 - **无参 `edges init` 同时创建任务看板。** 不指定模块时，默认集是 memory、skills、tasks、notes、projects，会写出 `<scope>/.edges/tasks/README.md`，并登记到 `AGENTS.md` 指向的材料索引。`edges tasks init` 与 `edges init tasks` 仍只建这一块看板。routines 仍不在默认集里，要单独 `edges routines init`。
 - **接入时 skill 默认装进当前项目。** 推荐 `edges --scope . init -- -y`。`-g` 仍可用于本机用户目录。
 

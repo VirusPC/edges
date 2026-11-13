@@ -71,6 +71,17 @@ export async function syncAgentsBlocks(directory: string, local = "", children =
 }
 export const INDEPENDENT_HARNESS_CONSTRAINT =
   "这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数";
+/** Canonical marker written by init --super. Detection also accepts extra attributes. */
+export const SUPER_HARNESS_MARKER = '<edges-harness mode="super" />';
+
+/** True when an edges-harness element has mode="super". Other mode values do not match. */
+export function hasSuperHarnessMarker(source: string): boolean {
+  for (const match of source.matchAll(/<edges-harness\b([^>]*?)\/?>/gi)) {
+    const attrs = match[1] ?? "";
+    if (/\bmode\s*=\s*(?:"super"|'super')/.test(attrs)) return true;
+  }
+  return false;
+}
 
 export async function syncTargetAgents(
   target: string,
@@ -85,16 +96,25 @@ export async function syncTargetAgents(
     return syncLoadedAgents(service, node, file, target, local, "");
 }
 
-/** Append the independent-harness line once, without escaping it or rewriting other constraints. */
+/** Append the human sentence and the super marker once, inside the constraints block. */
 export async function ensureIndependentHarnessConstraint(target: string, service: NodeService): Promise<"preserved" | "updated"> {
   const file = prepareMemoryWrite(target, join(target, AGENTS_FILE_NAME));
   const current = isFile(file) ? readText(file) : "";
-  if (current.includes(INDEPENDENT_HARNESS_CONSTRAINT)) return "preserved";
   const end = "<!-- edges-constraints:end -->";
-  if (!current.includes(end)) return "preserved";
+  const hasSentence = current.includes(INDEPENDENT_HARNESS_CONSTRAINT);
+  const hasMarker = hasSuperHarnessMarker(current);
+  if ((hasSentence && hasMarker) || !current.includes(end)) return "preserved";
   const node = await service.get(file, AgentsNode);
   if (!node) return "preserved";
-  await service.update(node, { body: current.replace(end, `- ${INDEPENDENT_HARNESS_CONSTRAINT}\n${end}`) });
+  let next = current;
+  if (!hasSentence) next = next.replace(end, `- ${INDEPENDENT_HARNESS_CONSTRAINT}\n${end}`);
+  if (!hasMarker) {
+    next = next.includes(INDEPENDENT_HARNESS_CONSTRAINT)
+      ? next.replace(INDEPENDENT_HARNESS_CONSTRAINT, `${INDEPENDENT_HARNESS_CONSTRAINT}\n${SUPER_HARNESS_MARKER}`)
+      : next.replace(end, `${SUPER_HARNESS_MARKER}\n${end}`);
+  }
+  if (next === current) return "preserved";
+  await service.update(node, { body: next });
   return "updated";
 }
 export const normalizeIndexDescription = (target: string, description?: string) => description?.trim().replace(/\s+/g, " ") ||
