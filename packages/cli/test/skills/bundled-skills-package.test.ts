@@ -36,6 +36,7 @@ test("copyBundledSkills copies every remaining extensions skill and not the six 
     "edges",
     "edges-conversation-to-notes",
     "edges-conversation-to-tasks",
+    "edges-create-learning-notes",
     "edges-langfuse-agent-tracing",
     "edges-memory-add-type",
     "edges-memory-ask",
