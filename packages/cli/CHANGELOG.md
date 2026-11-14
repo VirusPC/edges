@@ -4,9 +4,17 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-14
+
 ### 随包技能
 
-- **笔记与任务技能按动作重命名。** `new-note` 注册的 prompt 改为 `edges-create-notes`。整理对话和边学边记走这个技能；把对话整理成任务走 `edges-create-tasks`。不再提供 `edges-conversation-to-notes` 与 `edges-conversation-to-tasks`。
+- **破坏性：笔记和任务按动作各用一个技能。** 整理一段对话，或把文章、视频、播客、代码记成学习笔记，都用 `edges-create-notes`。它先看材料：对话记录或要求整理对话时，按对话复盘来写；给了外部材料并且要学习或边看边记时，笔记分成 Summary 和 Comments。判断不了会先问一句。把对话整理成任务用 `edges-create-tasks`：背景和目标必填，动作与完成标准可选；写好后先给人确认，再用 `edges tasks` 落库。笔记落盘仍是 `edges notes create`。
+- **旧技能名已删除。** 安装包不再带 `edges-conversation-to-notes` 和 `edges-conversation-to-tasks`，也没有同名入口。升级后重新运行 `edges skills init` 才会装上新技能。已经装好的旧 skill 目录要自己删掉，`edges skills init` 不会删它们。
+- **总入口改指向新技能。** 包内 `edges` 升到 0.4.5，说明改为使用 `edges-create-notes` 和 `edges-create-tasks`。这两个新技能都是 0.1.0。
+
+### 笔记
+
+- **`new-note` 的 prompt 改名为 `edges-create-notes`。** 没有 shell、走 MCP 写笔记时，注册的 prompt 名是 `edges-create-notes`，读的是新技能。旧名 `edges-conversation-to-notes` 不再注册。对话和学习材料仍由这个技能分流。
 
 ## [0.5.7] - 2026-11-09
 
