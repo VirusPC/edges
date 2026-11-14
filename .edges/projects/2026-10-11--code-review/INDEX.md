@@ -218,3 +218,9 @@ description: 在 Cursor Bugbot 之外，为 edges 选型并试点自动 PR 代�
 ## 下一步
 
 grill 之后选定 1 个试点。试点范围和验收另开 Task。
+
+<!-- edges-entries-local:start -->
+## 本层内容
+
+- [tasks/README.md](<tasks/README.md>) — Task board
+<!-- edges-entries-local:end -->
