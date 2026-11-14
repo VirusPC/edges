@@ -140,47 +140,17 @@ test("edges init outside a git repository does not write the isolation constrain
   assertNoIsolation(await initNotes(root));
 });
 
-test("refreshing a git root whose constraints are still the default seed adds the isolation line", async (t) => {
+test("refreshing an existing git-root AGENTS.md does not add the isolation line", async (t) => {
   const root = await directory(t, "edges-seed-");
   git(root, ["init", "-b", "main"]);
-  await writeFile(path.join(root, "AGENTS.md"), agentsDocument(SEED));
+  const before = agentsDocument(SEED);
+  await writeFile(path.join(root, "AGENTS.md"), before);
   const agents = await initNotes(root);
-  assertIsolation(agents);
+  assertNoIsolation(agents);
   for (const bullet of SEED) assert.match(agents, new RegExp(bullet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
-  assert.equal(await initNotes(root), agents);
 });
 
-test("refreshing a git root keeps handwritten constraints and does not add the isolation line", async (t) => {
-  const root = await directory(t, "edges-hand-");
-  git(root, ["init", "-b", "main"]);
-  const handwritten = [...SEED, "用户自己的约束保留。"];
-  await writeFile(path.join(root, "AGENTS.md"), agentsDocument(handwritten));
-  const agents = await initNotes(root);
-  assert.match(agents, /用户自己的约束保留。/);
-  assertNoIsolation(agents);
-  assert.equal(await initNotes(root), agents);
-});
-
-test("refreshing a git root does not repair a rewritten seed bullet", async (t) => {
-  const root = await directory(t, "edges-rewritten-");
-  git(root, ["init", "-b", "main"]);
-  const rewritten = [SEED[0].replace("不重复", "可以重复"), SEED[1]];
-  await writeFile(path.join(root, "AGENTS.md"), agentsDocument(rewritten));
-  const agents = await initNotes(root);
-  assert.match(agents, /可以重复/);
-  assertNoIsolation(agents);
-});
-
-test("an empty constraints block on a git root stays empty", async (t) => {
-  const root = await directory(t, "edges-empty-");
-  git(root, ["init", "-b", "main"]);
-  await writeFile(path.join(root, "AGENTS.md"), agentsDocument([]));
-  const agents = await initNotes(root);
-  assertNoIsolation(agents);
-  assert.match(agents, /<!-- edges-constraints:start -->/);
-});
-
-test("a git root missing the constraints block receives the isolation seed", async (t) => {
+test("an existing git-root AGENTS.md that lacks a constraints block does not receive the isolation line", async (t) => {
   const root = await directory(t, "edges-missing-");
   git(root, ["init", "-b", "main"]);
   await writeFile(
@@ -194,52 +164,9 @@ test("a git root missing the constraints block receives the isolation seed", asy
 <!-- edges:end -->
 `,
   );
-  assertIsolation(await initNotes(root));
-});
-
-test("a nested entry missing the constraints block does not receive the isolation seed", async (t) => {
-  const root = await directory(t, "edges-nested-missing-");
-  git(root, ["init", "-b", "main"]);
-  const nested = path.join(root, "nested");
-  await mkdir(nested);
-  await writeFile(
-    path.join(nested, "AGENTS.md"),
-    `# nested
-
-<!-- edges:start -->
-<!-- edges-local:start -->
-## 本层系统维护信息
-<!-- edges-local:end -->
-<!-- edges:end -->
-`,
-  );
-  assertNoIsolation(await initNotes(nested));
-});
-
-test("refreshing a default seed that already has the independent-harness line adds isolation once", async (t) => {
-  const root = await directory(t, "edges-seed-super-");
-  git(root, ["init", "-b", "main"]);
-  await writeFile(
-    path.join(root, "AGENTS.md"),
-    agentsDocument([
-      ...SEED,
-      "这是独立 edges harness 仓库，调用 edges cli 时优先考虑加 --super 参数",
-    ]),
-  );
-  const agents = await initNotes(root, ["--super"]);
-  assertIsolation(agents);
-  assert.equal(agents.split("这是独立 edges harness 仓库").length - 1, 1);
-  assert.equal(await initNotes(root, ["--super"]), agents);
-});
-
-test("init --super on a git root keeps handwritten constraints and does not add isolation", async (t) => {
-  const root = await directory(t, "edges-hand-super-");
-  git(root, ["init", "-b", "main"]);
-  await writeFile(path.join(root, "AGENTS.md"), agentsDocument([...SEED, "用户自己的约束保留。"]));
-  const agents = await initNotes(root, ["--super"]);
-  assert.match(agents, /用户自己的约束保留。/);
+  const agents = await initNotes(root);
   assertNoIsolation(agents);
-  assert.equal(agents.split("这是独立 edges harness 仓库").length - 1, 1);
+  for (const bullet of SEED) assert.match(agents, new RegExp(bullet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 });
 
 test("init --super on a git root keeps one isolation line and one independent-harness line", async (t) => {

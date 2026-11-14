@@ -25,9 +25,9 @@ import {
 } from '../../domain/models/node/document.js';
 export * from '../../domain/config/sections.js';
 export * from '../../domain/models/node/document.js';
-export const GIT_ROOT_CONSTRAINT_MARKER = "<!-- git-root-constraint -->";
+const GIT_ROOT_CONSTRAINT_MARKER = "<!-- git-root-constraint -->";
 
-/** Drop the template directive. Keep its following bullet only for a git-root entry. */
+/** Drop the template directive. Keep its following bullet only for a new git-root entry. */
 function applyGitRootConstraint(text: string, include: boolean): string {
   const directive = `${GIT_ROOT_CONSTRAINT_MARKER}\n`;
   const bullet = new RegExp(
@@ -36,14 +36,6 @@ function applyGitRootConstraint(text: string, include: boolean): string {
   if (!bullet.test(text))
     throw new Error("AGENTS template missing git-root constraint");
   return include ? text.replace(directive, "") : text.replace(bullet, "");
-}
-
-export function gitRootConstraintText(): string {
-  const match = readTemplate(ENTRY_NAMES.internal).match(
-    new RegExp(`${escapeRegExp(GIT_ROOT_CONSTRAINT_MARKER)}\\n- (.*)\\n`),
-  );
-  if (!match?.[1]) throw new Error("AGENTS template missing git-root constraint");
-  return match[1];
 }
 
 export function loadAgentsTemplate(options?: {
@@ -86,30 +78,18 @@ export function indexFiles(): Record<string, string> {
     ].map((m) => [typeFromDirName(m[2]!), m[1]!]),
   );
 }
-export function buildImportantBlock(gitRootConstraint = false): string {
-  const block = loadAgentsTemplate({ gitRootConstraint }).match(
-    blockPattern(IMPORTANT_START, IMPORTANT_END),
-  )?.[0];
-  if (!block) throw new Error(`Missing template block: ${IMPORTANT_START}`);
-  return block;
-}
+export const buildImportantBlock = () =>
+  extractBlock(IMPORTANT_START, IMPORTANT_END);
 export const buildLocalBlock = () => extractBlock(LOCAL_START, LOCAL_END);
 export const buildChildrenBlock = (entries: string) =>
   extractBlock(CHILDREN_START, CHILDREN_END).replace(
     "{index_entries}",
     () => entries,
   );
-export const ensureImportantBlock = (
-  document: string,
-  gitRootConstraint = false,
-) =>
+export const ensureImportantBlock = (document: string) =>
   hasConstraintsMarker(document)
     ? document
-    : insertInnerBlock(
-        document,
-        IMPORTANT_START,
-        buildImportantBlock(gitRootConstraint),
-      );
+    : insertInnerBlock(document, IMPORTANT_START, buildImportantBlock());
 export function renderAgentsDocument(
   title: string,
   local: string,
