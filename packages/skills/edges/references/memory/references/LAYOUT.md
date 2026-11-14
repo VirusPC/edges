@@ -106,7 +106,7 @@ edges --scope S memory add-type \
 
 普通条目为 YAML frontmatter + Markdown，前缀仍是类型原值，slug 为 snake_case。Skill 格式 slug 为 kebab-case（1–64 字符），name 为目录名。详细字段见 [`frontmatter-fields.md`](frontmatter-fields.md)：顶层遵循 Agent Skills 闭集，实现字段放 `metadata.edges-*`；读取既有顶层字段不等于支持旧目录布局，常规 doctor 不重写文件头。
 
-模板在 `templates/`：层入口 `AGENTS.tmpl.md`；官方类型 `USER/FEEDBACK/PROJECT/REFERENCE/MANAGED/REFERENCED.tmpl.md`；自定义类型 `TYPE.tmpl.md`；普通正文 `index.tmpl.md`、Skill 正文 `SKILL.tmpl.md`；列表行 `entry_line.tmpl.md`。类型模板正文写 `edges-entries-*` 与「本层内容 / 下层内容」，CLI 写到 README 时保持原文。不要把类型条目再抄进同目录 `AGENTS.md`。模板官方全集用于推荐与选中类型渲染，不自动采用全部类型。CLI 构建时携带这些模板；运行已构建的 CLI 不依赖另一个已安装 Skill 的源码目录。全层硬约束种子仍是两句。`AGENTS.tmpl.md` 里 `<!-- git-root-constraint -->` 的下一行只在新建 Git 根系统入口时写入（普通仓库的 `.git` 目录，或 worktree 根上的 `.git` 文件），落盘去掉这行注释。下层入口和非 Git 目录不写。已有 `AGENTS.md` 不补这一行，缺硬约束区块时补上的仍是那两句通用种子。
+模板在 `templates/`：层入口 `AGENTS.tmpl.md`；官方类型 `USER/FEEDBACK/PROJECT/REFERENCE/MANAGED/REFERENCED.tmpl.md`；自定义类型 `TYPE.tmpl.md`；普通正文 `index.tmpl.md`、Skill 正文 `SKILL.tmpl.md`；列表行 `entry_line.tmpl.md`。类型模板正文写 `edges-entries-*` 与「本层内容 / 下层内容」，CLI 写到 README 时保持原文。不要把类型条目再抄进同目录 `AGENTS.md`。模板官方全集用于推荐与选中类型渲染，不自动采用全部类型。CLI 构建时携带这些模板；运行已构建的 CLI 不依赖另一个已安装 Skill 的源码目录。Git 根新建入口的硬约束以 `AGENTS.tmpl.md` 为准。
 
 ## 执行入口
 
