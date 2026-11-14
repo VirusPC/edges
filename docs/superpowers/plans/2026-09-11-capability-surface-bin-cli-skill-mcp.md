@@ -1625,7 +1625,7 @@ version: 1.0.0
 ## 什么时候用
 
 - 用户或任务要把一条 Note 写进 `knowledge/notes/YYYY-MM-DD--slug.md` 并 commit（可选 push / PR）。
-- 不要用它整理对话（改用 `edges-conversation-to-notes`）、不要用它改 tasks 看板、不要自己 `git commit`。
+- 不要用它整理对话（改用 `edges-create-notes`）、不要用它改 tasks 看板、不要自己 `git commit`。
 
 ## 有 shell：调用 CLI
 
@@ -1860,7 +1860,7 @@ agent / human
  └─ packages/mcp-servers/new-note   无 shell 的 MCP 宿主（spawn edges note）
 \`\`\`
 
-不要把 npm \`bin\` 当成一层。不要恢复仓根 \`bin/\`。\`edges-conversation-to-notes\` 不进 CLI。隔离仓测用 \`EDGES_REPO\`，不要再设 \`EDGES_SCRIPT\`。
+不要把 npm \`bin\` 当成一层。不要恢复仓根 \`bin/\`。\`edges-create-notes\` 不进 CLI。隔离仓测用 \`EDGES_REPO\`，不要再设 \`EDGES_SCRIPT\`。
 
 ### CLI 契约
 

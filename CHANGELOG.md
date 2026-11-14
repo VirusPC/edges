@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 随包技能
 
+- **笔记和任务按动作分技能。** 整理对话，以及边学边记（Summary / Comments），都用 `edges-create-notes`，再按场景打开其中的 reference。把对话整理成任务用 `edges-create-tasks`（背景 → 目标必填，人审后用 `edges tasks` 落库）。笔记落盘仍是 `edges notes create`。原先的 `edges-conversation-to-notes` 与 `edges-conversation-to-tasks` 已删除，不留同名入口。已安装的旧目录不会自动消失，需要再跑一次 `edges skills init`，并删掉旧目录。
 - **接入开场改为场景优先。** `@viruspc/edges@0.5.3` 带上 `edges-onboarding` 0.6.2：先问用户场景（同轮附两条流程兜底），再补缺参数。
 - **接入按两条流程把 skill 装进当前项目。** `@viruspc/edges@0.5.2` 带上 `edges-onboarding` 0.6.1。已有项目用 `edges --scope <目标目录> init -- -y`，独立仓库用 `edges --scope <仓库目录> init -- -y`。默认不加 `-g`；只有明确要装到本机用户目录时才加。
 - **日常技能收成总入口 `edges`：** 随包装上的技能剩下 9 个。`edges` 负责挂仓库、写笔记、例程、初始化系统入口，以及用户记忆的备份和恢复。检索仍是 `edges-memory-ask`，沉淀仍是 `edges-memory-remember`。第一次接入、整理对话、整板任务归类（`edges-tasks-classify`）、把会话接到 Langfuse 仍是各自的技能。见 [ADR 0051](docs/adr/0051-bundled-skills-single-entry.md)。

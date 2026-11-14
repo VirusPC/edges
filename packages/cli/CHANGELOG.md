@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### 随包技能
+
+- **笔记与任务技能按动作重命名。** `new-note` 注册的 prompt 改为 `edges-create-notes`。整理对话和边学边记走这个技能；把对话整理成任务走 `edges-create-tasks`。不再提供 `edges-conversation-to-notes` 与 `edges-conversation-to-tasks`。
+
 ## [0.5.7] - 2026-11-09
 
 ### 目录选择

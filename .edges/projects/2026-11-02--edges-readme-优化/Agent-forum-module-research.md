@@ -82,7 +82,7 @@ Notes 与 Projects 通过同一个 `dated-leaf` 实现创建、定位、查询�
 
 内容规则主要由 Skill 执行。CLI 负责本地叶子与索引写入，不判断正文是否完整保留了推理，也不承诺来源链接永久可用。Note 标题从 Markdown H1 读取／设置，避免再手工维护一份独立标题；正文和资源属于同一目录单元。创建命令不顺便 commit、push 或发布。
 
-证据：[整理 Skill](../../../packages/skills/edges-conversation-to-notes/SKILL.md)第 33–82 行、[保留取舍 ADR](../../../packages/skills/edges-conversation-to-notes/docs/adr/0008-tradeoffs-supplement-not-compress.md)、[保留原材料 ADR](../../../packages/skills/edges-conversation-to-notes/docs/adr/0010-keep-source-material-refs.md)、[Note 模型](../../../packages/cli/src/domain/models/notes/note-node.ts)、[本地写入机制](../../../packages/cli/src/services/node/dated-leaf.ts)。
+证据：[整理 Skill](../../../packages/skills/edges-create-notes/references/conversation.md)第 33–82 行、[保留取舍 ADR](../../../packages/skills/edges-create-notes/docs/adr/0008-tradeoffs-supplement-not-compress.md)、[保留原材料 ADR](../../../packages/skills/edges-create-notes/docs/adr/0010-keep-source-material-refs.md)、[Note 模型](../../../packages/cli/src/domain/models/notes/note-node.ts)、[本地写入机制](../../../packages/cli/src/services/node/dated-leaf.ts)。
 
 **适合展示：** 一段讨论中保留“曾考虑 A，因条件 X 选择 B”；条件变为 Y 后，Agent 能回看依据重新判断。这个例子展示材料组织，不等于已通过实验证明它一定提高推理质量。
 
@@ -166,7 +166,7 @@ Memory 的 remember 入口拒绝写 referenced；NodeService 在同一实例内�
 
 开卡时要求真实背景和目标，动作与完成标准可后补，避免 Agent 为满足表单编造确定性。准备交给持续执行时，再澄清可观察、可证伪的完成条件。这是 Skill 的分阶段工作协议；CLI 不解析自然语言验收标准，也不自动阻止无标准任务进入执行。
 
-证据：[对话转任务 Skill](../../../packages/skills/edges-conversation-to-tasks/SKILL.md)第 19–31 行、[目标与循环验收约定](../../../.edges/memory/projects/project_tasks_align_goal_and_loop_engineering/INDEX.md)、[Task 字段校验](../../../packages/cli/src/domain/models/tasks/task-node.ts)。
+证据：[对话转任务 Skill](../../../packages/skills/edges-create-tasks/references/conversation.md)第 19–31 行、[目标与循环验收约定](../../../.edges/memory/projects/project_tasks_align_goal_and_loop_engineering/INDEX.md)、[Task 字段校验](../../../packages/cli/src/domain/models/tasks/task-node.ts)。
 
 ### 7.3 分类建议、人类决定、受控写回分离
 

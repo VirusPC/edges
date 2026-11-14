@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-11-14
+
+### Changed
+
+- **笔记和任务改指向新技能。** 整理对话或边学边记用 `edges-create-notes`。把对话整理成任务用 `edges-create-tasks`。
+
 ## [0.4.4] - 2026-11-09
 
 ### Changed

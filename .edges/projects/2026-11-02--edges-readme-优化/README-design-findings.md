@@ -92,7 +92,7 @@
 
 **README 缺口。** Tasks 已写 Task/Run 与逐步澄清，但没有充分解释状态为什么独立，以及为什么允许未定事项保持未定。
 
-**证据与边界。** [Task 组织说明](../../../.edges/tasks/README.md)明确 Task 状态不从 Run 状态直接推导；[状态类型](../../../packages/cli/src/domain/models/tasks/types.ts)分别定义两套状态；[CONTEXT](../../../CONTEXT.md)的 Run 约定使用稳定 `run-id` 与独立追加记录；[delete 命令](../../../packages/cli/src/commands/tasks/delete.ts)拒绝删除并提示改为 cancelled；[对话转任务 Skill](../../../packages/skills/edges-conversation-to-tasks/SKILL.md)第 19–31 行规定必填门槛和事实区分。模型与查询已存在，Run CLI 为只读；自然语言内容质量依赖 Skill，不能宣传为已有自动调度器或自动验收系统。
+**证据与边界。** [Task 组织说明](../../../.edges/tasks/README.md)明确 Task 状态不从 Run 状态直接推导；[状态类型](../../../packages/cli/src/domain/models/tasks/types.ts)分别定义两套状态；[CONTEXT](../../../CONTEXT.md)的 Run 约定使用稳定 `run-id` 与独立追加记录；[delete 命令](../../../packages/cli/src/commands/tasks/delete.ts)拒绝删除并提示改为 cancelled；[对话转任务 Skill](../../../packages/skills/edges-create-tasks/references/conversation.md)第 19–31 行规定必填门槛和事实区分。模型与查询已存在，Run CLI 为只读；自然语言内容质量依赖 Skill，不能宣传为已有自动调度器或自动验收系统。
 
 **候选表达：** 保存稳定的目标，记录每一次尝试；让尚未确定的方案继续澄清，让执行结果成为判断目标是否完成的证据。
 

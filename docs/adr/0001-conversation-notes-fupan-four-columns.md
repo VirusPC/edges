@@ -1,6 +1,6 @@
 # 对话整理采用复盘四栏
 
-整理对话为 Note 时，Facts–Insights–Actions（及其中文「主要结论 / 认知更新 / 行动指南」映射）容易把过程与判断塌成一栏、把行动写成待办清单。我们改用**复盘四栏**（背景→过程→所学→行动指南）：灵感来自 After Action Review，但不是美军官方 AAR 模板。四栏分开「为何谈 / 发生了什么 / 可带走的判断 / 带触发的做法」，并刻意不把「升 Edge」写进 edges-conversation-to-notes（Notes → Edges 仍是另一步）。旧笔记不批量改写。
+整理对话为 Note 时，Facts–Insights–Actions（及其中文「主要结论 / 认知更新 / 行动指南」映射）容易把过程与判断塌成一栏、把行动写成待办清单。我们改用**复盘四栏**（背景→过程→所学→行动指南）：灵感来自 After Action Review，但不是美军官方 AAR 模板。四栏分开「为何谈 / 发生了什么 / 可带走的判断 / 带触发的做法」，并刻意不把「升 Edge」写进 edges-create-notes（Notes → Edges 仍是另一步）。旧笔记不批量改写。
 
 ## Considered Options
 

@@ -100,7 +100,7 @@ TaskDoc 以 TS 契约生成 JSON Schema，避免手写两份字段定义；发�
 
 ### 为何有时宁可更长，也不只保留结论
 
-笔记 Skill 要求过程保留真实取舍，所学与行动指南再补充适用判断；原材料引用也不能省略。它明确接受更长的笔记，拒绝用一段漂亮总结替换讨论过程。原因是后来遇到新条件时，需要知道当时比较过什么、为什么没选、哪些依据如今不再成立。[取舍不压缩过程的 ADR](../../../packages/skills/edges-conversation-to-notes/docs/adr/0008-tradeoffs-supplement-not-compress.md)、[原始材料引用 ADR](../../../packages/skills/edges-conversation-to-notes/docs/adr/0010-keep-source-material-refs.md)明确记载了这一决定。
+笔记 Skill 要求过程保留真实取舍，所学与行动指南再补充适用判断；原材料引用也不能省略。它明确接受更长的笔记，拒绝用一段漂亮总结替换讨论过程。原因是后来遇到新条件时，需要知道当时比较过什么、为什么没选、哪些依据如今不再成立。[取舍不压缩过程的 ADR](../../../packages/skills/edges-create-notes/docs/adr/0008-tradeoffs-supplement-not-compress.md)、[原始材料引用 ADR](../../../packages/skills/edges-create-notes/docs/adr/0010-keep-source-material-refs.md)明确记载了这一决定。
 
 这与“记忆不要复制代码事实”并不矛盾。笔记保留一次认识形成的材料，Memory 保存后来工作仍需调用的判断与理由，Skill 保存可重复执行的方法；它们回答不同问题。减少重复维护，不意味着把过程证据也删掉。
 
@@ -185,7 +185,7 @@ NodeService 测试能支持某个保存边界；runner 跑通能支持可以执�
 | 下一轮使用 | 按 scope 检索，或 Routine 读确定版本 | 消费端真的加载并遵循新方法 | 仓库更新 ≠ 客户端已采用 |
 | 再次检验 | 新会话与后续实验 | 比较收益、成本和其他任务退化 | 一次改善 ≠ 长期持续收益 |
 
-这条链有多个可自动执行的局部，但连接它们的语义判断仍有人工和 Agent 工作。[笔记转任务交接](../../../packages/skills/edges-conversation-to-notes/docs/adr/0009-open-items-to-conversation-to-tasks.md)、[任务分类流程](../../../packages/skills/edges-tasks-classify/SKILL.md)和 Routine 协议已经规定了一些交接；在本轮检查的 Task runlog、消融 runner 与 trace 映射中，未发现通用的“Task Run → 真实会话 → 评测样本 → 采纳 commit”自动关联合同，不能从模块同时存在推断它已经连通。
+这条链有多个可自动执行的局部，但连接它们的语义判断仍有人工和 Agent 工作。[笔记转任务交接](../../../packages/skills/edges-create-notes/docs/adr/0009-open-items-to-conversation-to-tasks.md)、[任务分类流程](../../../packages/skills/edges-tasks-classify/SKILL.md)和 Routine 协议已经规定了一些交接；在本轮检查的 Task runlog、消融 runner 与 trace 映射中，未发现通用的“Task Run → 真实会话 → 评测样本 → 采纳 commit”自动关联合同，不能从模块同时存在推断它已经连通。
 
 有价值的下一份公开案例应展示这一整条证据链，同时记录人工介入、失败与耗时。相比继续补模块图，它更能检验组合是否真的帮助工作。
 

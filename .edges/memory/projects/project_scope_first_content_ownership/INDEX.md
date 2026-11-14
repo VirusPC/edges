@@ -28,7 +28,7 @@ metadata:
 
 **Why:** 避免 Python 脚本与 CLI 各维护一套执行行为，也避免 Skill 安装路径成为运行时依赖。
 
-**How to apply:** 下文早期记录里的“Python 尚未接入 / Python 迁入 CLI 待完成”仅描述当时状态，已由本次迁移取代。新领域类模型、统一节点识别、43 条局部记忆归属修复仍独立推进；不得将执行语言统一视为这些工作已经完成。`edges-conversation-to-tasks` 已调用 CLI；本次不改写 edges-conversation-to-notes 的写作和发布流程。验证见 [TypeScript 迁移计划](../../../../docs/superpowers/plans/2026-10-04-edges-memory-typescript.md)。
+**How to apply:** 下文早期记录里的“Python 尚未接入 / Python 迁入 CLI 待完成”仅描述当时状态，已由本次迁移取代。新领域类模型、统一节点识别、43 条局部记忆归属修复仍独立推进；不得将执行语言统一视为这些工作已经完成。`edges-create-tasks` 已调用 CLI；本次不改写 edges-create-notes 的写作和发布流程。验证见 [TypeScript 迁移计划](../../../../docs/superpowers/plans/2026-10-04-edges-memory-typescript.md)。
 
 ## 2026-10-04 用户确认：统一递归节点模型
 

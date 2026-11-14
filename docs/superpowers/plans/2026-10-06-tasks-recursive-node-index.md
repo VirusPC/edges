@@ -419,7 +419,7 @@ Task 1–3 已由 controller 独立审阅并整合至 Task 4 基线 b06dbfb；�
 - 2026-10-06 顺序运行根 pnpm test → pnpm build，均退出 0；CLI 778 项通过，其余 workspace tests 通过。其后仅补强测试断言，相关 all-scopes/project 9 项复跑通过。strict NodeNext 的 index-task-nodes.mts 与 async-query.types.ts 合并类型检查通过。构建仅有既有 Vite __dirname/native loader 与 inlineDynamicImports 弃用提示。
 - 自审调用链：Task list/get-by-stem/project-list 和全仓看板的发现只沿 NodeService 登记关系；BoardFs 的 readdir 仍为迁移/写入依赖保留，但查询发现不调用它。get/兼容 list 的资源快照读取属于原生命周期合同，文档明确 query/get/list 区别；没有宣称所有 IO 都不读取资源。
 - Task 3 证据已复核并保存于[迁移指南](../../recursive-layout-migration.md#2026-10-06-task-递归索引采用)：11 个项目索引、105 个入口、277 个非索引文件路径/字节/blob 保持一致，复跑零修改。公开受控投影的 NodeService/HTML payload 105 条身份精确一致；摘要见指南。不对可能读取私有 users 的真实根执行全仓查询，fixture 证明更深层覆盖，不宣称真实私有覆盖。
-- 根 README、CLI README/help、模型 spec、迁移指南已同步。edges-conversation-to-tasks 与 edges-tasks-classify 原已贯穿显式 scope/purpose；其他技能仅概述 CLI 无相反用途指令，因此无技能版本 churn。部署仍 purpose=all 且本轮未执行。既有持久看板项目记忆通过 memory remember 更新，保留原部署与 UI 决策，追加局部/全仓边界和原生延迟查询取舍。
+- 根 README、CLI README/help、模型 spec、迁移指南已同步。edges-create-tasks 与 edges-tasks-classify 原已贯穿显式 scope/purpose；其他技能仅概述 CLI 无相反用途指令，因此无技能版本 churn。部署仍 purpose=all 且本轮未执行。既有持久看板项目记忆通过 memory remember 更新，保留原部署与 UI 决策，追加局部/全仓边界和原生延迟查询取舍。
 
 复现命令：
 

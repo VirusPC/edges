@@ -63,7 +63,7 @@ packages/skills/example/scripts/... # Skill 的资源
 
 `create(node, placement?, { resources?: absoluteDirectory })` 仅给新目录节点显式导入资源。Memory/Note 对应 `--format directory --resources <directory>`：只复制被显式选择目录内的相对路径，不猜 content-file 邻居。导入拒绝 symlink、特殊文件、入口覆盖以及 AGENTS.md/SKILL.md 边界；这是导入限制，不是节点类型推断。已有目录不接受合并导入。createMode 只决定入口权限；新资源默认保留源文件权限。可选 resourceMode(node, sourceMode) 独立返回 0 至 0o777 的整数权限位，在首次写入前校验。Memory 适配器按已登记类型策略处理：公开资源保留原权限，私有资源清除 group/other 权限，非执行文件为 0600、保留 owner execute 的脚本为 0700。导入失败报告仍需人工恢复的路径。
 
-Note `--content-file <path> --markdown` 接收已经写好和审阅过的完整 UTF-8 Markdown；保留作者正文与标题，不额外套 ingest 模板。文档仍通过标准 BaseNode.parse/serialize 和 gray-matter，YAML 可规范化，不保证 frontmatter 字节/样式/注释保真，也不把 YAML 塞进 body。`--title` 仍用于文件名和提交信息。此入口不取代 edges-conversation-to-notes 的写作/审阅流程，也不改变鉴权、Git、PR 或发布默认值。
+Note `--content-file <path> --markdown` 接收已经写好和审阅过的完整 UTF-8 Markdown；保留作者正文与标题，不额外套 ingest 模板。文档仍通过标准 BaseNode.parse/serialize 和 gray-matter，YAML 可规范化，不保证 frontmatter 字节/样式/注释保真，也不把 YAML 塞进 body。`--title` 仍用于文件名和提交信息。此入口不取代 edges-create-notes 的写作/审阅流程，也不改变鉴权、Git、PR 或发布默认值。
 
 
 ## 实例解析与序列化
