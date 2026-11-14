@@ -11,7 +11,7 @@ description: >-
   第一次接入用 edges-onboarding。整理对话或边学边记用 edges-create-notes，把对话整理成任务用 edges-create-tasks。
   整板 Task 按已有 Project 归类用 edges-tasks-classify。
   把会话接到 Langfuse 用 edges-langfuse-agent-tracing。
-version: 0.4.5
+version: 0.4.6
 ---
 
 # edges

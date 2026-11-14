@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 初始化
 
+- **Git 根的新入口先核验 worktree。** `edges init` 在 Git 仓库根（含 worktree 根）新建 `AGENTS.md` 时，硬约束写明：改 tracked 内容前先核验 git 顶层、`git worktree list`、当前分支和 status。下层目录的入口不写这句。已经手写过的硬约束保持原样；还只有原先两句种子时，再跑 init 会补上这句。
 - **无参 `edges init` 同时创建任务看板。** 不指定模块时，默认集是 memory、skills、tasks、notes、projects，会写出 `<scope>/.edges/tasks/README.md`，并登记到 `AGENTS.md` 指向的材料索引。`edges tasks init` 与 `edges init tasks` 仍只建这一块看板。routines 仍不在默认集里，要单独 `edges routines init`。
 - **接入时 skill 默认装进当前项目。** 推荐 `edges --scope . init -- -y`。`-g` 仍可用于本机用户目录。
 

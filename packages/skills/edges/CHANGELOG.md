@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.6] - 2026-11-14
+
+### Changed
+
+- **Git 根初始化带上 checkout 隔离硬约束。** `AGENTS.tmpl.md` 用 `<!-- git-root-constraint -->` 标出这一句。新建的 Git 根入口（含 worktree 根）会写入：改 tracked 内容前先核验 git 顶层、`git worktree list`、当前分支和 status。下层入口不写。已有手写硬约束不覆盖。仍是通用两句种子时，再次 init 补上这一句，不改那两句。
+
 ## [0.4.5] - 2026-11-14
 
 ### Changed

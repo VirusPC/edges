@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### 初始化
+
+- **Git 根的新入口写明先核验 worktree。** `edges init` 在 Git 仓库根，包括 worktree 根，新建 `AGENTS.md` 时，硬约束多一条：改 tracked 内容之前先核验 git 顶层、`git worktree list`、当前分支和 status。下层目录不写这句。已经写过的硬约束保持原样。还只有原先两句种子时，再跑 init 会补上这句，不改那两句。随包技能 `edges` 记为 0.4.6。
+
 ## [0.6.0] - 2026-11-14
 
 ### 随包技能

@@ -1,7 +1,7 @@
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 export { ownershipTarget } from './paths.js';
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
-import { discoverScopes } from '../scope.js';
+import { discoverScopes, gitRoot } from '../scope.js';
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
@@ -10,15 +10,18 @@ import {
   CHILDREN_START,
   CHILDREN_END,
   IMPORTANT_START,
+  IMPORTANT_END,
   LOCAL_START,
   LOCAL_END,
   OUTER_START,
   INDEX_ENTRY_PATTERN,
   blockPattern,
   buildChildrenBlock,
+  buildImportantBlock,
   ensureImportantBlock,
   escapeRegExp,
   extractLocalBlock,
+  gitRootConstraintText,
   insertInnerBlock,
   renderAgentsDocument,
   rewriteLayerSurface,
@@ -48,16 +51,41 @@ export function classifyAgentsSource(source: string | undefined): "missing" | "m
 export function classifyAgentsFile(file: string): "missing" | "managed" | "foreign" {
     return classifyAgentsSource(isFile(file) ? readText(file) : undefined);
 }
+function isGitRootEntry(directory: string): boolean {
+    const root = gitRoot(directory);
+    return root !== undefined && canonicalPath(root) === canonicalPath(directory);
+}
+
+function constraintBullets(block: string): string[] {
+    return [...block.matchAll(/^- (.*)$/gm)].map((match) => match[1]!);
+}
+
+/** Add the git-root seed line only when the block is still the untouched default seed. */
+function appendGitRootConstraintIfUnmodified(document: string): string {
+    const bullet = gitRootConstraintText();
+    if (document.includes(bullet)) return document;
+    const block = document.match(blockPattern(IMPORTANT_START, IMPORTANT_END))?.[0];
+    if (!block) return document;
+    const current = constraintBullets(block);
+    const seed = constraintBullets(buildImportantBlock(false));
+    const allowed = new Set([...seed, INDEPENDENT_HARNESS_CONSTRAINT]);
+    if (!seed.length || !seed.every((item) => current.includes(item))) return document;
+    if (!current.every((item) => allowed.has(item))) return document;
+    return document.replace(IMPORTANT_END, `- ${bullet}\n${IMPORTANT_END}`);
+}
+
 async function syncLoadedAgents(service: NodeService, node: AgentsNode | undefined, file: string, directory: string, local: string, children: string): Promise<string> {
     const existing = node?.body;
     const state = classifyAgentsSource(existing);
+    const gitRootConstraint = isGitRootEntry(directory);
     if (state === 'foreign') return 'needs-doctor';
     if (!node) {
-        await service.create(new AgentsNode(file), parseDocument(renderAgentsDocument(basename(directory), local, children)), { indexGroup: 'local' });
+        await service.create(new AgentsNode(file), parseDocument(renderAgentsDocument(basename(directory), local, children, gitRootConstraint)), { indexGroup: 'local' });
         return 'created';
     }
     let updated = rewriteLayerSurface(existing!);
-    updated = ensureImportantBlock(updated);
+    updated = ensureImportantBlock(updated, gitRootConstraint);
+    if (gitRootConstraint) updated = appendGitRootConstraintIfUnmodified(updated);
     if (local) updated = upsertBlock(updated, LOCAL_START, LOCAL_END, local);
     if (children) updated = upsertBlock(updated, CHILDREN_START, CHILDREN_END, children);
     updated = rewriteLayerSurface(updated);

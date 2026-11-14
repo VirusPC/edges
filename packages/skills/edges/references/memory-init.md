@@ -37,7 +37,7 @@ memory 与 skill 的选择分别执行。显式选择追加采用，不删除既
 
 按 JSON 汇报 created / preserved、agentsAction / indexAction 和下层条目移动。`needs-doctor` 表示只有人工 AGENTS，文件未被覆盖；交给 `edges memory doctor` 追加区块。`complete: false` 的 diagnostics 必须说明，尤其来源缺失或不可读时保留原索引，不能称为空来源刷新成功。旧层返回 `migration-required`。0.3.0 起没有 `edges memory migrate`。仍停在 `.memory` 的，先用 `@viruspc/edges@0.2.7` 完成那次迁移，再按 [迁移说明](../../../../docs/migrations/2026-10-27-rename-harness-to-edges.md) 把材料目录改成 `.edges`。不要让 `edges memory doctor` 做那次迁移。
 
-工具只维护自己的区块，现有硬约束与手写正文不覆盖。需先安装提供 `edges memory` 的 Edges CLI；运行 `edges memory init --help` 检查命令可用性。模板随 CLI 构建分发，类型和字段结构见 memory/references/templates。实现分层见 [运行时说明](memory/references/runtime.md)。
+工具只维护自己的区块，现有硬约束与手写正文不覆盖。Git 根（含 worktree 根）新建系统入口时，硬约束种子多一条 checkout 隔离规则：改 tracked 内容前先核验 git 顶层、`git worktree list`、当前分支和 status。正文是 `AGENTS.tmpl.md` 里 `<!-- git-root-constraint -->` 的下一行，落盘时去掉这行注释。下层入口不写。已有手写硬约束、改过的种子句子、以及空的硬约束区块保持原文。区块里仍只有通用两句种子时（可以另有 `--super` 追加的独立仓提示），再次 init 补上这一条，不改已有句子。需先安装提供 `edges memory` 的 Edges CLI；运行 `edges memory init --help` 检查命令可用性。模板随 CLI 构建分发，类型和字段结构见 memory/references/templates。实现分层见 [运行时说明](memory/references/runtime.md)。
 
 普通记忆正文统一为 `<type>_<slug>/INDEX.md`；Skill 保持 `<name>/SKILL.md`。Init 不转换旧单文件。公开 tracked 内容转换没有随包技能，在具备依赖的 Edges checkout 里用 `pnpm migrate:directory-nodes --root <工作树>` 预览，`--apply` 才写入。
 

@@ -16,7 +16,7 @@ Edges 是什么、怎么用看 [README.md](README.md)；术语看 [CONTEXT.md](C
 - 重复批量操作先写可重复执行的脚本，再用脚本执行；迁移与批量修改须可预览、检查冲突并安全重复运行，不逐文件手工重复操作。
 - 本仓公开（`github.com/VirusPC/edges`）。凭据、个人信息、未公开 IP、办公文档不入库；内部信息脱敏后再写；允许点名、链接公开使用案例 `VirusPC/edges-brain-viruspc`，其他个人仓和所有私有仓仍不点名、不链接（含历史旧名）；截图按「能不能上公开博客」判断。细则见 README 的「隐私与脱敏」。
 - Git：`type: subject`；AI 参与加 `Co-authored-by`；不提交 `.obsidian/workspace.json`；`pull` / `rebase` 加 `--autostash`。
-- 本机修改本仓（commit/push 或改工作树文件）必须通过独立 `git worktree`：每个 Agent/任务一个 worktree + 独立分支；禁止多 Agent 共用同一工作树并行改文件或切分支；同一分支不得挂两个 worktree。Cursor 云端 Agent 等已在独立 clone/环境中的任务视为已隔离，不要求再套本机 worktree；只读查询可不建 worktree。
+- 本机在已有 checkout 上改本仓 tracked 内容之前，先核验 git 顶层与当前路径、`git worktree list`、当前分支和 status 基线：必须是当前任务自己的 worktree 和独立分支；多个 Agent 不得共用同一工作树写入；同一分支不得挂两个 worktree。技能安装、生成索引，以及其他会改 tracked 文件的操作，同样先核验。不满足则停写，先隔离开再写。Cursor 云端 Agent 等已在独立 clone/环境中的任务视为已隔离，不要求再套本机 worktree；只读查询可不建 worktree。全局安装写明目标目录，并确认没有写入本仓 checkout；全局安装不更新仓内 tracked 副本，仓内副本要换版时另开 PR，不在现有目录上覆盖。已有改动保留，不对未知改动执行 clean、reset 或 stash。
 - 不绑定 Edges 的通用 skill、MCP 配置、plugin、hook 不放本仓，放使用方自己的内容仓，经 `edges compose` 挂载；布局由该仓自定。不再维护 `shared-extensions/` 隔间，也不再打 `shared-extensions@` tag（[ADR 0048](docs/adr/0048-retire-shared-extensions.md)）。
 - 顶层 `edges` 命令能对上 harness 或领域目录时，命令名跟目录（`notes/` → `notes`，`.edges/skills` → `skills`）。硬切断，不留旧名别名。`tasks`、`memory` 已对齐则不动。不为 `observation` 发明命令。`evaluation` 只提供已定的长驻服务入口 `edges evaluation server`，不另开评测内容命令。
 - 内容节点的 create/get/update/destroy 必须走 NodeService，不得旁路写文件（[ADR 0030](docs/adr/0030-content-leaf-crud-via-nodeservice.md)）。
