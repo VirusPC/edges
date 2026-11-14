@@ -25,7 +25,22 @@ import {
 } from '../../domain/models/node/document.js';
 export * from '../../domain/config/sections.js';
 export * from '../../domain/models/node/document.js';
-export function loadAgentsTemplate(): string {
+const GIT_ROOT_CONSTRAINT_MARKER = "<!-- git-root-constraint -->";
+
+/** Drop the template directive. Keep its following bullet only for a new git-root entry. */
+function applyGitRootConstraint(text: string, include: boolean): string {
+  const directive = `${GIT_ROOT_CONSTRAINT_MARKER}\n`;
+  const bullet = new RegExp(
+    `${escapeRegExp(directive)}- [^\\n]*\\n`,
+  );
+  if (!bullet.test(text))
+    throw new Error("AGENTS template missing git-root constraint");
+  return include ? text.replace(directive, "") : text.replace(bullet, "");
+}
+
+export function loadAgentsTemplate(options?: {
+  gitRootConstraint?: boolean;
+}): string {
   const text = readTemplate(ENTRY_NAMES.internal);
   let position = -1;
   for (const marker of [
@@ -47,7 +62,7 @@ export function loadAgentsTemplate(): string {
       throw new Error(`Invalid AGENTS template marker: ${marker}`);
     position = index;
   }
-  return text;
+  return applyGitRootConstraint(text, options?.gitRootConstraint === true);
 }
 export function extractBlock(start: string, end: string): string {
   const block = loadAgentsTemplate().match(blockPattern(start, end))?.[0];
@@ -79,9 +94,10 @@ export function renderAgentsDocument(
   title: string,
   local: string,
   children: string,
+  gitRootConstraint = false,
 ): string {
   return (
-    loadAgentsTemplate()
+    loadAgentsTemplate({ gitRootConstraint })
       .replace("{title}", () => title)
       .replace(blockPattern(LOCAL_START, LOCAL_END), () => local)
       .replace(blockPattern(CHILDREN_START, CHILDREN_END), () => children)

@@ -1,7 +1,7 @@
 import { canonicalPath, isWithinPath } from '../../utils/filesystem.js';
 export { ownershipTarget } from './paths.js';
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
-import { discoverScopes } from '../scope.js';
+import { discoverScopes, gitRoot } from '../scope.js';
 import { memoryNodes, prepareMemoryWrite } from './service.js';
 import { NodeService } from '../node/node-service.js';
 import { parseDocument } from '../../utils/markdown/document.js';
@@ -48,12 +48,17 @@ export function classifyAgentsSource(source: string | undefined): "missing" | "m
 export function classifyAgentsFile(file: string): "missing" | "managed" | "foreign" {
     return classifyAgentsSource(isFile(file) ? readText(file) : undefined);
 }
+function isGitRootEntry(directory: string): boolean {
+    const root = gitRoot(directory);
+    return root !== undefined && canonicalPath(root) === canonicalPath(directory);
+}
+
 async function syncLoadedAgents(service: NodeService, node: AgentsNode | undefined, file: string, directory: string, local: string, children: string): Promise<string> {
     const existing = node?.body;
     const state = classifyAgentsSource(existing);
     if (state === 'foreign') return 'needs-doctor';
     if (!node) {
-        await service.create(new AgentsNode(file), parseDocument(renderAgentsDocument(basename(directory), local, children)), { indexGroup: 'local' });
+        await service.create(new AgentsNode(file), parseDocument(renderAgentsDocument(basename(directory), local, children, isGitRootEntry(directory))), { indexGroup: 'local' });
         return 'created';
     }
     let updated = rewriteLayerSurface(existing!);
