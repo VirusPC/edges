@@ -400,11 +400,11 @@ flowchart TD
 
 ### 第 3 条确认：STAR 任务写作的适用范围与方法归属
 
-用户确认 project_star_for_agent_task_formulation 覆盖所有层级的维护 .edges/tasks 和领域 tasks；具体写作方法由 edges-conversation-to-tasks Skill 维护，各看板引用。背景→目标→动作→完成标准用于制定任务与下发 brief，尤其面向 Agent，不套用到复盘笔记。核对现有 Skill 后确认 STAR 已被完整覆盖，无需重复合并；用户同意 Skill 保持现状，记忆仅保留采用原因和适用范围，引用 Skill 并去掉重复方法与固定版本号。该精简已通过 CLI 完成；历史决策记忆当前保留原路径，最终存放路径仍随整体归属整理确定。
+用户确认 project_star_for_agent_task_formulation 覆盖所有层级的维护 .edges/tasks 和领域 tasks；具体写作方法由 edges-create-tasks Skill 维护，各看板引用。背景→目标→动作→完成标准用于制定任务与下发 brief，尤其面向 Agent，不套用到复盘笔记。核对现有 Skill 后确认 STAR 已被完整覆盖，无需重复合并；用户同意 Skill 保持现状，记忆仅保留采用原因和适用范围，引用 Skill 并去掉重复方法与固定版本号。该精简已通过 CLI 完成；历史决策记忆当前保留原路径，最终存放路径仍随整体归属整理确定。
 
 ### 第 4 条确认：Task 内容表达的适用范围与方法归属
 
-用户确认 project_task_separate_facts_from_idea 适用于所有层级的维护 .edges/tasks 和领域 tasks，规则与第 3 条一起由 edges-conversation-to-tasks Skill 维护，各看板引用。第 3 条规定正文结构，本条规定事实与想法分开，并用一两句话说明问题与预期结果。原文包含新旧模板兼容说明，后续随同一写作规范整理。原记忆已通过 CLI 更新确认，尚未执行搬迁或 Skill 合并。
+用户确认 project_task_separate_facts_from_idea 适用于所有层级的维护 .edges/tasks 和领域 tasks，规则与第 3 条一起由 edges-create-tasks Skill 维护，各看板引用。第 3 条规定正文结构，本条规定事实与想法分开，并用一两句话说明问题与预期结果。原文包含新旧模板兼容说明，后续随同一写作规范整理。原记忆已通过 CLI 更新确认，尚未执行搬迁或 Skill 合并。
 
 ### 第 5 条确认：七个 Task Project 分组保留在根维护看板
 
@@ -422,7 +422,7 @@ flowchart TD
 
 用户确认 preview-tasks-with-box-obsidian 归 Edges 根层沉淀 Skill，目标 .edges/skills/managed/preview-tasks-with-box-obsidian/SKILL.md。第 6 条负责仓库部署约定与缘由，本 Skill 负责可执行步骤，不再归某一 Tasks 看板。目前仅确认目标归属，尚未移动 Skill。
 
-至此 8 条内容审阅完成。第 7 条删除与索引清理已执行；其他条目的范围说明已按上述记录修正，实际迁移、写作规则合并及引用同步仍待落实。第 1、2 条已经确认适用范围，具体共享存放路径在后续整理中收敛；第 3、4 条已确认方法归 edges-conversation-to-tasks，不等于其历史决策记忆的最终路径也已逐一确定。
+至此 8 条内容审阅完成。第 7 条删除与索引清理已执行；其他条目的范围说明已按上述记录修正，实际迁移、写作规则合并及引用同步仍待落实。第 1、2 条已经确认适用范围，具体共享存放路径在后续整理中收敛；第 3、4 条已确认方法归 edges-create-tasks，不等于其历史决策记忆的最终路径也已逐一确定。
 
 ### 补充原则：仓内共享与对外分发分开
 
@@ -440,7 +440,7 @@ flowchart TD
 
 ### 第 3 条执行更新：现有 Skill 已覆盖 STAR，记忆精简为原因与范围
 
-现有 edges-conversation-to-tasks 已定义 STAR 顺序、制定任务而非复盘，以及背景／目标必填、动作／完成标准可选，无需再合并 STAR 正文。用户确认保留 Skill 现状，精简 project_star_for_agent_task_formulation：只保留采用原因、覆盖各层两类任务的范围及 Skill 链接，移除重复方法与固定 1.2.0 引用。已通过 CLI 写入并刷新索引；第 4 条内容表达规范的后续整理不在本次修改内。
+现有 edges-create-tasks 已定义 STAR 顺序、制定任务而非复盘，以及背景／目标必填、动作／完成标准可选，无需再合并 STAR 正文。用户确认保留 Skill 现状，精简 project_star_for_agent_task_formulation：只保留采用原因、覆盖各层两类任务的范围及 Skill 链接，移除重复方法与固定 1.2.0 引用。已通过 CLI 写入并刷新索引；第 4 条内容表达规范的后续整理不在本次修改内。
 
 ## 4. NodeService 的业务适配规则
 
@@ -844,7 +844,7 @@ flowchart LR
 
 2026-10-05 用户授权执行。正式约定收敛至 [目录节点模型](../superpowers/specs/2026-10-05-directory-node-model.md)，执行进度见 [实施计划](../superpowers/plans/2026-10-05-directory-node-refactor.md)。本文前文的“尚未实现”描述各轮讨论时点，不能替代实施计划的最新证据。
 
-第 3 项剩余归属已落实：云端 Obsidian 部署记忆与预览 Skill 经 Service 移到根层，事实/想法写法并入 edges-conversation-to-tasks，历史记忆改为原因范围与引用。两个优化待办不在本次实现中。
+第 3 项剩余归属已落实：云端 Obsidian 部署记忆与预览 Skill 经 Service 移到根层，事实/想法写法并入 edges-create-tasks，历史记忆改为原因范围与引用。两个优化待办不在本次实现中。
 
 ## 目录节点实现中的补充裁定
 

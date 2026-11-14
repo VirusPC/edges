@@ -8,6 +8,8 @@ status: accepted
 
 **Status:** accepted（ADR 0051）
 
+**现行入口（2026-11-14）：** 对话笔记与边学边记是 `edges-create-notes`，对话开卡是 `edges-create-tasks`。下文的 `edges-conversation-to-notes` 与 `edges-conversation-to-tasks` 是 2026-10-27 的目录名；这两个目录已删除，不留别名。
+
 ## Decision
 
 1. **默认一个总入口。** 新建 `edges`（`0.1.0`，同日补丁 `0.1.1` 把任务归类划出）。正文只写各模块共用的 list / get / create / update / delete 形状。模块差异放在 `references/`。并入后删除这些目录：`edges-compose`、`edges-note`、`edges-routines`、`edges-memory-init`、`edges-memory-user-backup`、`edges-memory-user-restore`。`edges-tasks-classify` 不在此列。

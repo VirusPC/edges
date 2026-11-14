@@ -23,7 +23,7 @@ Task 正文位于任务目录的 `INDEX.md`，Run Log 是同目录 `.{stem}.log.
 
 ## 工作约定
 
-Task 的 description 用一句话说明问题和预期结果；正文区分事实背景与想法，说明 Why、How 和完成标准，不塞执行流水。具体写法遵循 [edges-conversation-to-tasks](../../packages/skills/edges-conversation-to-tasks/SKILL.md)。
+Task 的 description 用一句话说明问题和预期结果；正文区分事实背景与想法，说明 Why、How 和完成标准，不塞执行流水。具体写法遵循 [edges-create-tasks](../../packages/skills/edges-create-tasks/references/conversation.md)。
 
 任务推进采用 grill → research → plan → implement → validate → close；未通过验证不标 done，用户明确指定的流程优先。看板、索引与代码改动遵循仓库 [AGENTS.md](../../AGENTS.md) 的提交和审阅规则。
 

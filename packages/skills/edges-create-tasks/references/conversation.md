@@ -1,10 +1,8 @@
----
-name: edges-conversation-to-tasks
-description: 把对话整理成任务（背景 → 目标 → 动作 → 完成标准；后两栏可选）。必填不足先提问；成文后交人审（对话确认或 PR），再用 CLI 落库。看板文件进受保护的 main 必须开 PR，不要直推。
-version: 0.2.1
----
+# conversation
 
-从对话整理任务：**成文 → 交人审 → 落库**（人审可以是对话确认或 PR）。正文顺序：**背景 → 目标**（必填）→ **动作** → **完成标准**（后两栏可选；完成标准可留到 `grill-with-docs` 后再补）。与 `edges-conversation-to-notes` 主题行动指南同序（背景 → 问题/目标 → 方案/动作 → 验收/完成标准），便于从笔记开卡平移。四栏同构 STAR（Situation / Task / Action / Result）：用来**制定任务**，尤其是派给 agent 的 brief；**不要**拿 STAR 写复盘（复盘走 `edges-conversation-to-notes`）。
+本文件是 `edges-create-tasks` 目前唯一的场景。共同入口见 [SKILL.md](../SKILL.md)。
+
+从对话整理任务：**成文 → 交人审 → 落库**（人审可以是对话确认或 PR）。正文顺序：**背景 → 目标**（必填）→ **动作** → **完成标准**（后两栏可选；完成标准可留到 `grill-with-docs` 后再补）。与 `edges-create-notes` 主题行动指南同序（背景 → 问题/目标 → 方案/动作 → 验收/完成标准），便于从笔记开卡平移。四栏同构 STAR（Situation / Task / Action / Result）：用来**制定任务**，尤其是派给 agent 的 brief；**不要**拿 STAR 写复盘（复盘走 `edges-create-notes`）。
 
 先确定内容所属的作用域 `SCOPE`。一般这就是主体系统，任务写在 `<SCOPE>/.edges/tasks/<状态>/<stem>/INDEX.md`。需要归入主题时，用全局 `--project <相对路径>` 选择已有 Project。默认相对 `<SCOPE>/.edges/projects`，`--super` 时相对 `<SCOPE>/projects`，任务写入该 Project 的直属 tasks。没有 Task Project 或 `_default` 层。未选 Project 时，虚拟系统一仍用 `--super` 选择 `<SCOPE>/tasks`；选定 Project 后材料留在 `P/tasks`。后续命令显式传 `--scope "$SCOPE"`；仓内维护 Edges 时选择仓根，不依赖执行命令时的源码目录。CLI 在 `packages/cli`。
 

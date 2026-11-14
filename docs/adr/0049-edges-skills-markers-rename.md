@@ -36,6 +36,8 @@ status: accepted
 
    已经是 `edges-*` 的技能保持原名和原版本：`edges-compose`、`edges-note`、`edges-onboarding`、`edges-routines`。
 
+   2026-11-14：表中的 `edges-conversation-to-notes` 与 `edges-conversation-to-tasks` 再改为 `edges-create-notes` 与 `edges-create-tasks`（与 `edges notes` / `edges tasks` 的动作对齐，并保留 `edges-` 前缀）。旧目录已删除，不留别名。表内名称仍是 2026-10-27 当天的事实。
+
 2. **删除两份技能，不设替代。** `project-memory-doctor` 与 `project-memory-reshape` 从包内移除。不要再安装或调用这两个名字。索引诊断仍是 CLI `edges memory doctor`。整理已有入口的区块外正文没有单独技能，按现行布局手改。
 
 3. **标记硬切断。** 类型身份注释是 `edges-memory-type`。组织清单是 `edges-entries-local` 与 `edges-entries-descendants`。运行时不读 `project-memory-type`、`project-entries-*`、`project-memory-entries`。`project-memory-entries` 删除，不改名为 `edges-memory-entries`。层注释 `project-memory`、`project-memory-important`、`project-memory-local`、`project-memory-children` 不再算受管区块，解析器不双读。标题别名（例如「本层记忆」写成「本层系统维护信息」）仍在写入表面时替换，这不是标记双读。

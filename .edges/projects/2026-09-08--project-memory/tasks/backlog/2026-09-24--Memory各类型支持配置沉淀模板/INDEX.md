@@ -13,7 +13,7 @@ metadata:
 
 **背景/场景：**
 
-- 【背景/场景】2026-09-24 讨论：记 Task 时套了 `remember` 的「结论→Why→How」骨架，但缺对话场景；进一步厘清 edges-conversation-to-notes（复盘四栏/【背景】）与 `edges-memory-remember`（耐久结论）应分开；`skills` 类型正文本来就不套 Why/How。
+- 【背景/场景】2026-09-24 讨论：记 Task 时套了 `remember` 的「结论→Why→How」骨架，但缺对话场景；进一步厘清 edges-create-notes（复盘四栏/【背景】）与 `edges-memory-remember`（耐久结论）应分开；`skills` 类型正文本来就不套 Why/How。
 - 这说明不同 Memory type 的沉淀目的和正文形状并不相同，不能把同一套「结论→Why→How」模板写死给所有类型。
 
 **Why：**
@@ -30,8 +30,8 @@ metadata:
 
 **非目标：**
 
-- 不在本文件中实现 edges-conversation-to-tasks；这是另一个独立想法。
-- 不在本任务中修改 notes skill；edges-conversation-to-notes 的复盘四栏/【背景】边界另行处理。
+- 不在本文件中实现 edges-create-tasks；这是另一个独立想法。
+- 不在本任务中修改 notes skill；edges-create-notes 的复盘四栏/【背景】边界另行处理。
 
 **关联：**
 

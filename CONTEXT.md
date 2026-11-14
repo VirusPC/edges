@@ -209,7 +209,7 @@ _避免使用_：认知更新、Insights、过程栏的复述
 _避免使用_：裸待办清单、Actions（若指本栏）
 
 **对话三角色（笔记 / 记忆 / 任务）：**
-同一段对话可以分出三类产物，不要揉成一张：`edges-conversation-to-notes` 记「这次澄清了什么」（复盘四栏）；`edges-memory-remember` 记「以后还该记住什么」（结论 → 为何 → 做法）；`edges-conversation-to-tasks` 记「谁下一步做什么、怎样算完」（背景 → 目标 必填；完成标准与动作可选，完成标准可留到 grill-with-docs；背景须写出产生任务的对话过程；有完成标准时它给循环验收）。`edges-conversation-to-notes` 与 `edges-memory-remember` 只成文，写入另一步；`edges-conversation-to-tasks` 成文后交人审，用户确认后再用 CLI 落库。
+同一段对话可以分出三类产物，不要揉成一张：`edges-create-notes` 记「这次澄清了什么」（复盘四栏）；`edges-memory-remember` 记「以后还该记住什么」（结论 → 为何 → 做法）；`edges-create-tasks` 记「谁下一步做什么、怎样算完」（背景 → 目标 必填；完成标准与动作可选，完成标准可留到 grill-with-docs；背景须写出产生任务的对话过程；有完成标准时它给循环验收）。`edges-create-notes` 与 `edges-memory-remember` 只成文，写入另一步；`edges-create-tasks` 成文后交人审，用户确认后再用 CLI 落库。
 _避免使用_：把任务写成记忆结论；把复盘笔记写成看板待办；交人审确认前就对任务看板写盘；正文栏名中英混写；动作可选却拿它顶替完成标准；背景只有出处标签、没有对话过程；背景或目标不足却硬编或不问；完成标准未定时硬编而不留给 grill
 
 **专项工作区（Initiative Workspace）**：

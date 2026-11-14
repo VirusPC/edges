@@ -8,10 +8,10 @@ description: >-
   对用户选定的目录初始化或刷新系统入口 AGENTS.md（仅当用户明确要求 init；标准命令是 edges init；各域 init 只初始化本模块）；
   将 .edges/memory/users 的本机私有记忆打成归档，或从归档恢复（换机、删仓；目标已占用时须明确授权 --force 整份替换）。
   检索项目记忆用 edges-memory-ask，沉淀用 edges-memory-remember，新增 Memory Type 用 edges-memory-add-type。
-  第一次接入用 edges-onboarding。整理对话用 edges-conversation-to-notes 或 edges-conversation-to-tasks。
+  第一次接入用 edges-onboarding。整理对话或边学边记用 edges-create-notes，把对话整理成任务用 edges-create-tasks。
   整板 Task 按已有 Project 归类用 edges-tasks-classify。
   把会话接到 Langfuse 用 edges-langfuse-agent-tracing。
-version: 0.4.4
+version: 0.4.5
 ---
 
 # edges
@@ -64,6 +64,6 @@ edges --scope <目录> --project <Project相对路径> <module> create ...
 - 把结论写进项目记忆：`edges-memory-remember`
 - 用户明确要求新增 Memory Type：`edges-memory-add-type`
 - 第一次安装、初始化一台机器或一个仓库：`edges-onboarding`
-- 把对话整理成笔记或任务：`edges-conversation-to-notes`、`edges-conversation-to-tasks`
+- 把对话整理成笔记、边学边记，或整理成任务：`edges-create-notes`、`edges-create-tasks`
 - 整板 Task 按已有 Project 归类：`edges-tasks-classify`
 - 把会话接到 Langfuse：`edges-langfuse-agent-tracing`

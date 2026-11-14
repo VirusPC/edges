@@ -1,10 +1,4 @@
----
-name: edges-create-learning-notes
-description: 边学边记：学习文章、视频、播客或代码时，生成并持续更新一份分成 Summary（原文讲了什么）和 Comments（我怎么看）的学习笔记。用户说「记笔记」「边看边记」「帮我整理这篇的学习笔记」时使用。
-version: 0.1.0
----
-
-# edges-create-learning-notes
+# create-learning-notes
 
 一份学习笔记只有两部分，**事实和观点严格分开**：
 
@@ -50,7 +44,7 @@ version: 0.1.0
 4. **边学边记**：分多次学习时，在同一份笔记里追加，不要另起一份。
    - 新内容补进 Summary 对应要点；用户的即时想法直接追加到 Comments。
    - 读完时重读一遍「一句话」，必要时改写，并把状态改为「读完」。
-5. **存放**：在 Edges 仓库里用 `edges` 写入 `notes/`（标题用材料标题）；否则存为用户指定位置的 Markdown 文件。更新已有笔记时修改原文件，不新建。
+5. **存放**：在 Edges 仓库里用 `edges-note` 写入 `notes/`（标题用材料标题）；否则存为用户指定位置的 Markdown 文件。更新已有笔记时修改原文件，不新建。
 
 ## 不要
 
