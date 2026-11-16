@@ -1,10 +1,10 @@
 ---
 metadata:
   edges-type: task
-  edges-updated-at: '2026-11-16T02:30:31.868Z'
+  edges-updated-at: '2026-11-16T02:33:11.293Z'
   edges-title: 将 edges 拆为主框架和 personal harness 扩展
   edges-tasks-status: backlog
-  edges-task-priority: high
+  edges-task-priority: urgent
 name: 将_edges_拆为主框架和_personal_harness_扩展
 description: >-
   edges 框架只保留 memory、task 等核心模块并支持自由注册模块；内置 routine、personal
