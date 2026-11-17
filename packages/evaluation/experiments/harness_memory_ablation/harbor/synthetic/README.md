@@ -31,7 +31,7 @@ python3 -B synthetic/review.py --dataset synthetic/data-v1.json \
 | global | 1 | 4 | 根层有明确受众的行政规则，不是当前服务的业务流水规则 |
 | negative | 1 | 4 | 自包含算术问题；可见语料存在，但没有适用记忆 |
 
-共 40 题，每题独立场景；dev/test 按业务实体、session 和 trace 隔离。**模板和解析规则共享**，因此不能把这种划分说成未见过的任务模板泛化。默认 48 个额外干扰域，加 40 个主要实体与 8 个协作实体，共 96 个虚构业务域。所有域有两层业务目录、重复主题和版本；根层另有行政规则。共有 193 个记忆 scope、682 条记忆，查询时可见 586 条，96 条未来记忆按原 runner 的时间过滤不可见。test 30 题处于非根 scope，另 2 题为根 scope。每题 gold 0–3 条，没有为了 @5 截断必要证据。
+共 40 题，每题独立场景；dev/test 按业务实体、session 和 trace 隔离。**模板和解析规则共享**，因此不能把这种划分说成未见过的任务模板泛化。默认 48 个额外干扰域，加 40 个主要实体与 8 个协作实体，共 96 个虚构业务域。所有域有两层业务目录、重复主题和版本；根层另有行政规则。Agent 工作区中共有 193 个记忆 scope、586 条记忆（分布与样例见 [DATASET.md](DATASET.md)）。test 30 题处于非根 scope，另 2 题为根 scope。每题 gold 0–3 条，没有为了 @5 截断必要证据。
 
 ## 场景事实到问题与 gold
 
@@ -44,7 +44,7 @@ python3 -B synthetic/review.py --dataset synthetic/data-v1.json \
 3. 同主题优先选更深的有效规则；同层优先选生效起点更晚的版本。同优先级未解冲突直接拒绝，不随意挑一个。
 4. 跨域请求分别求解，再合并所有必要规则；最后把 rule ID 映射到 opaque memory ID。
 
-正文逐条写明同样的适用、覆盖和时间语义。过期版本、被子层覆盖的父规则、兄弟业务、未请求主题与未来记录都有结构化排除理由。每题的 `relevance_rationale` 列出每个必要 gold 的理由，`non_gold_exclusion` 给排除类别计数与示例；完整排除映射可用 `oracle.exclusion_reasons` 重算。`reference_answer` 从 scene truth 计算，用于独立审阅，不采用易误判释义的答案正则；模型实验的答案规则指标为 N/A，范围是检索与成本。
+正文逐条写明同样的适用、覆盖和时间语义。过期版本、被子层覆盖的父规则、兄弟业务与未请求主题都有结构化排除理由。每题的 `relevance_rationale` 列出每个必要 gold 的理由，`non_gold_exclusion` 给排除类别计数与示例；完整排除映射可用 `oracle.exclusion_reasons` 重算。`reference_answer` 从 scene truth 计算，用于独立审阅，不采用易误判释义的答案正则；模型实验的答案规则指标为 N/A，范围是检索与成本。
 
 ## 三臂与诊断边界
 
