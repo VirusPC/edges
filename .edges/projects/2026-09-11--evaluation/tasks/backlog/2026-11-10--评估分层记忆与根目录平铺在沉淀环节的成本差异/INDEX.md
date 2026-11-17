@@ -1,7 +1,7 @@
 ---
 metadata:
   edges-type: task
-  edges-updated-at: '2026-11-10T04:38:08.564Z'
+  edges-updated-at: '2026-11-17T12:54:11.180Z'
   edges-title: 评估分层记忆与根目录平铺在沉淀环节的成本差异
   edges-tasks-status: backlog
   edges-task-priority: none
@@ -15,6 +15,7 @@ description: 量化分层记忆在写入/沉淀端的成本，并与已有读取
 - 预期收益：补上沉淀端成本后，可以判断分层记忆的净收益，避免只根据读取端数字外推适用场景。
 - 非目标：不重做已完成的读取端消融，也不改简历文案。
 - 关联：同 Project 笔记 [分层记忆的适用边界：复杂度前移到沉淀环节](../../../notes/2026-11-10--分层记忆的适用边界复杂度前移到沉淀环节/INDEX.md)；读取端报告 `packages/evaluation/experiments/harness_memory_ablation/harbor/` 与 `packages/evaluation/reports/2026-11-09-harbor-memory-ablation.md`；既有卡「Memory 消融实验正式报告」。
+- 关联：[VirusPC/edges PR #133](https://github.com/VirusPC/edges/pull/133)：合成消融 v1 的数据集说明与按检索目标位置分组结果已合入（分层比平铺少用 36% token、16% 时间，两组都全部找对；只覆盖检索侧）。
 
 **目标：**
 量化分层记忆与根目录平铺在沉淀（写入）环节的成本差异，并与已有读取端收益合起来，判断两种组织方式在「结构稳定的大仓」与「频繁新增模块的个人大脑」两类场景下的净收益。
