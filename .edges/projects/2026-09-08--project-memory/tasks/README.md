@@ -30,4 +30,5 @@ Project Memory 类型/索引/reshape/与 docs 边界等。
 - [评估是否需要\_edges\_context](<backlog/2026-10-17--%E8%AF%84%E4%BC%B0%E6%98%AF%E5%90%A6%E9%9C%80%E8%A6%81-edges-context/INDEX.md>) — ADR 0034 第九轮暂缓了 edges context，前提是 Agent 会顺着 AGENTS.md 里 Compose block 的路径往下读；要实测核实这一点，再决定要不要做这个命令。
 - [project\_改为分组轴不再作为顶层内容模块](<backlog/2026-10-19--Project-%E6%94%B9%E4%B8%BA%E5%88%86%E7%BB%84%E8%BD%B4%E4%B8%8D%E5%86%8D%E4%BD%9C%E4%B8%BA%E9%A1%B6%E5%B1%82%E5%86%85%E5%AE%B9%E6%A8%A1%E5%9D%97/INDEX.md>) — 把 Project 从与 Notes/Tasks/Memory 平级的类型，改成横切分组；Tasks 已有的 projects/ 目录成为统一归属方式。
 - [笔记洗成 project\-memory 格式](<backlog/2026-09-09--%E7%AC%94%E8%AE%B0%E6%B4%97%E6%88%90project-memory%E6%A0%BC%E5%BC%8F/INDEX.md>) — 把既有笔记统一洗成 project\-memory 格式
+- [把日复盘沉淀为\_dream\_机制](<backlog/2026-11-17--%E6%8A%8A%E6%97%A5%E5%A4%8D%E7%9B%98%E6%B2%89%E6%B7%80%E4%B8%BA-dream-%E6%9C%BA%E5%88%B6/INDEX.md>) — 把已在跑的日复盘例程（每天回看对话、挑出值得沉淀的内容、交人确认后入库）提炼成 Edges 框架里通用的 dream 机制。
 <!-- edges-entries-local:end -->
