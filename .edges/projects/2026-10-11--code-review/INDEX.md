@@ -15,6 +15,7 @@ description: 在 Cursor Bugbot 之外，为 edges 选型并试点自动 PR 代�
 已经讨论过 Cursor Bugbot。为了少审非 CLI 的 PR，曾经尝试「只让 CLI 的 PR 自动触发 Bugbot」，没有达到预期。这条触发机制的实测结论记在 todo 卡里，本项目不重复做那份调研：
 
 - [搁置：只让 CLI 的 PR 自动触发 Bugbot](../2026-09-09--edges-extensions/tasks/todo/2026-10-11--%E6%90%81%E7%BD%AE%E5%8F%AA%E8%AE%A9-CLI-%E7%9A%84-PR-%E8%87%AA%E5%8A%A8%E8%A7%A6%E5%8F%91-Bugbot/INDEX.md)
+- 账号级 CodeRabbit 中央配置的规则自迭代属于个人 AI 研发流程，记在个人大脑：[建立 CodeRabbit CR 规则自迭代流程](https://github.com/VirusPC/edges-brain-viruspc/blob/main/projects/2026-11-14--ai-%E7%A0%94%E5%8F%91%E6%B5%81%E7%A8%8B%E4%BC%98%E5%8C%96/tasks/backlog/2026-11-15--%E5%BB%BA%E7%AB%8B-CodeRabbit-CR-%E8%A7%84%E5%88%99%E8%87%AA%E8%BF%AD%E4%BB%A3%E6%B5%81%E7%A8%8B/INDEX.md)。
 
 用户接着问除 Cursor 以外的自动 review，并点名想了解 Codex、Kimi、MiniMax、GLM、Droid、Devin、Amp、Gemini 等是否支持自动审查。下面「候选范围」是 2026-10 按官方文档和官方仓库补的调研，不是已经选定的方案。
 
