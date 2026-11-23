@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 文档与系统
 
+- **删除 `grill-me`：** 仓库不再附带 `grill-me`。追问改用 `grill-with-docs`，它会同时写术语和 ADR。已从 `skills-lock.json` 和技能索引里移除。
 - **Edges 小助手：** 根 README 的公开实践与页首导航可以打开 https://edges-rag.viruspc.tech/ ，向 Edges 小助手询问框架仓相关问题。
 - **通用 skill 跟使用方内容仓走：** 不绑定 Edges 的通用 skill 和个人 harness 放使用方自己的内容仓，用 `edges compose` 挂进工作区。这份仓就是可组合的共享 `.edges`，目录由它自己定。框架不再使用 `shared-extensions/`，也不规定这些 skill 必须落在 `.edges/skills/managed/` 或仓根 `skills/managed/`。见 [ADR 0048](docs/adr/0048-retire-shared-extensions.md)。
 - **设计选择与使用优势图解：** README 保留既有配图，更新结构图，以绿色表达 harness；用 monorepo 子 app 说明任意目录建立，用项目与 Skill 各自拥有 harness 的嵌套结构说明递归，以当前项目接入个人大脑仓、Agent 利用知识并沉淀经验说明跨仓组合。另用优势图解释文件系统、Git、跨 Agent 与核心轻运维，集中说明积累怎样扩展、怎样持续掌控和使用，以及维护方法自身怎样继续被维护。
