@@ -8,13 +8,13 @@ status: accepted
 
 **Status:** accepted（尚未实现）
 
-**Amended by** [ADR 0058](0058-module-naming-and-capture-initiation.md)（硬约束片段的点名层、审批闸门写法与沉淀发起方已定）
+**Amended by** [ADR 0058](0058-module-naming-and-capture-initiation.md)（硬约束片段的点名层、审批闸门写法与沉淀发起方已定；六类官方呈现顺序以 0058 为准）
 
 **Supersedes in part:** [ADR 0056](0056-reinit-snippets-and-uniform-timing.md) 第 3 点
 
 ## Decision
 
-1. **按类型各写一条时机句。** 系统入口 `AGENTS.md` 的 `edges-constraints` 区块内，每初始化一个官方材料类型（Memory、Notes、Tasks、Projects、Skills、Routines），就增补该类型自己的官方片段。每个片段必须分别写清该类型的检索时机和沉淀时机（何时查、何时写），并点名经 `edges` 执行。不再使用 ADR 0056 第 3 点的「一条统一、不分类型的时机句」作为唯一种子。
+1. **按类型各写一条时机句。** 系统入口 `AGENTS.md` 的 `edges-constraints` 区块内，每初始化一个官方材料类型（Memory、Notes、Skills、Tasks、Routines、Projects），就增补该类型自己的官方片段。每个片段必须分别写清该类型的检索时机和沉淀时机（何时查、何时写），并点名经 `edges` 执行。不再使用 ADR 0056 第 3 点的「一条统一、不分类型的时机句」作为唯一种子。
 
 2. **保留 ADR 0056 第 1、2 点。** 已初始化的仓库再跑无参 `edges init`，必须补装新进入默认集且尚未安装的模块。同一 `edges-constraints` 区块内，只增补缺失的、或仍等于官方原文的片段；不覆盖用户改过的句子，也不改区块外文字。不为每个模块拆独立的硬约束区块。
 
