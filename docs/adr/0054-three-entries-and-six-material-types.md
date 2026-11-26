@@ -4,9 +4,11 @@ status: accepted
 
 # 框架随包技能收成三个入口，发现与沉淀覆盖固定六类材料
 
-2026-11-26 用户确认第一轮 grill。框架对外只留 `edges`、`edges-onboarding`、`edges-langfuse-agent-tracing`；提问或动手前按固定六类材料做相关发现；沉淀沿用各类既有创建与审批规则。本 ADR 部分取代 ADR 0051 中「ask / remember 等必须保持独立技能」的条款。初始化是否默认装齐六类材料、旧技能名兼容，以及存量 AGENTS 迁移，不在本决策范围，留待后续。
+2026-11-26 用户确认第一轮 grill。框架对外只留 `edges`、`edges-onboarding`、`edges-langfuse-agent-tracing`；提问或动手前按固定六类材料做相关发现；沉淀沿用各类既有创建与审批规则。本 ADR 部分取代 ADR 0051 中「ask / remember 等必须保持独立技能」的条款。初始化、旧技能名兼容与存量 AGENTS 迁移已由 [ADR 0055](0055-layered-init-hard-cut-and-reach.md) 补全。
 
 **Status:** accepted（尚未实现）
+
+**Amended by** [ADR 0055](0055-layered-init-hard-cut-and-reach.md)。
 
 **Supersedes in part:** [ADR 0051](0051-bundled-skills-single-entry.md)
 
@@ -40,5 +42,5 @@ status: accepted
 
 - ADR 0051 第 3 条中「必须单独触发 / 非常规整理与归类」所保留的独立技能，除 `edges-onboarding` 与 `edges-langfuse-agent-tracing` 外，均并入 `edges`。0051 关于「默认一个总入口、记忆共享资源整棵搬家、已删目录硬切断」的决定仍然有效。
 - 0051 曾否决「连 ask / remember 也并进 edges」；本 ADR 基于入口收敛后的新权衡，推翻这一条。
-- 尚未实现。旧技能名兼容、存量 AGENTS 与 bot 安装迁移、初始化是否默认装齐六类材料，另轮决定后再改代码。
+- 尚未实现。初始化、旧名兼容与存量迁移见 ADR 0055。
 - 使用方内容仓与 bot 的 UpdateSkill 不在本次文档提交里。
