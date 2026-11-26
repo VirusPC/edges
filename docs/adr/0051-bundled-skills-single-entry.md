@@ -8,6 +8,8 @@ status: accepted
 
 **Status:** accepted（ADR 0051）
 
+**Superseded in part by** [ADR 0054](0054-three-entries-and-six-material-types.md)：除 `edges-onboarding` 与 `edges-langfuse-agent-tracing` 外，原保留为独立技能的 ask / remember / add-type / create-notes / create-tasks / tasks-classify 并入 `edges`。0051 关于总入口、记忆共享资源搬家、已删目录硬切断的决定仍然有效。
+
 **现行入口（2026-11-14）：** 对话笔记与边学边记是 `edges-create-notes`，对话开卡是 `edges-create-tasks`。下文的 `edges-conversation-to-notes` 与 `edges-conversation-to-tasks` 是 2026-10-27 的目录名；这两个目录已删除，不留别名。
 
 ## Decision
