@@ -6,7 +6,7 @@ status: accepted
 
 2026-11-26 用户确认第三轮 grill，三题均保持推荐项。本 ADR 补全 ADR 0055 留下的存量升级、硬约束写入方式和官方种子句式。
 
-**Status:** accepted（尚未实现）
+**Status:** Partially superseded by [ADR 0057](0057-per-type-retrieval-and-capture-timing.md)（第 3 点）
 
 **Amends:** [ADR 0055](0055-layered-init-hard-cut-and-reach.md)
 
