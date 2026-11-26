@@ -8,6 +8,8 @@ status: accepted
 
 **Status:** accepted（尚未实现）
 
+**Amended by** [ADR 0058](0058-module-naming-and-capture-initiation.md)（硬约束片段的点名层、审批闸门写法与沉淀发起方已定）
+
 **Supersedes in part:** [ADR 0056](0056-reinit-snippets-and-uniform-timing.md) 第 3 点
 
 ## Decision
