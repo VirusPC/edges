@@ -8,6 +8,8 @@ status: accepted
 
 **Status:** accepted（尚未实现）
 
+**Amended by** [ADR 0056](0056-reinit-snippets-and-uniform-timing.md)
+
 **Amends:** [ADR 0054](0054-three-entries-and-six-material-types.md)、[ADR 0031](0031-edges-init-standard-command.md)、[ADR 0036](0036-edges-init-installs-bundled-skills.md)（应用层默认集纳入例程）
 
 ## Decision
@@ -32,4 +34,5 @@ status: accepted
 
 - ADR 0054 中「初始化、旧名兼容、存量迁移另轮再定」的条款由本 ADR 取代。0054 其余决定仍然有效。硬约束必须写清检索与沉淀时机，这一点不变；但覆盖的材料类型以已初始化模块为准，未装模块不写进同一份硬约束。
 - 无参 `edges init` 与 onboarding 的默认集将包含 routines。这是对 ADR 0031 / 0036 默认集的修订。
+- 存量升级、硬约束片段与种子句式见 ADR 0056。
 - 尚未实现。使用方内容仓与 bot 的 UpdateSkill 随实现进行，不在本次文档提交里。
