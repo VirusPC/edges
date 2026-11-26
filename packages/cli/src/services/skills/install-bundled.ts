@@ -1,4 +1,9 @@
 import { spawn } from "node:child_process";
+import {
+  applyEdgesSkillCleanup,
+  formatSkillCleanup,
+  skillRootsFromInstallArgs,
+} from "./skill-install-manifest.js";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import path from "node:path";
@@ -134,7 +139,10 @@ function defaultSpawn(
   });
 }
 
-export async function installBundledSkills(forwarded: readonly string[]): Promise<void> {
+export async function installBundledSkills(
+  forwarded: readonly string[],
+  options: { dryRun?: boolean; cwd?: string } = {},
+): Promise<string> {
   let bin: string;
   let skillsDir: string;
   try {
@@ -145,6 +153,15 @@ export async function installBundledSkills(forwarded: readonly string[]): Promis
     const message = error instanceof Error ? error.message : String(error);
     throw new SkillsInstallError(`skills@${VERCEL_SKILLS_VERSION} could not be started: ${message}`, 1);
   }
+  const cwd = options.cwd ?? process.cwd();
+  const global = forwarded.includes("-g") || forwarded.includes("--global");
+  const report = () =>
+    skillRootsFromInstallArgs(cwd, forwarded)
+      .map((root) =>
+        formatSkillCleanup(applyEdgesSkillCleanup(root, { dryRun: options.dryRun, cwd, global }), options.dryRun === true),
+      )
+      .join("");
+  if (options.dryRun) return report();
   const spawnImpl = spawnForTests ?? defaultSpawn;
   let code: number;
   try {
@@ -159,4 +176,5 @@ export async function installBundledSkills(forwarded: readonly string[]): Promis
   if (code !== 0) {
     throw new SkillsInstallError(`skills@${VERCEL_SKILLS_VERSION} add exited ${code}`, code);
   }
+  return report();
 }

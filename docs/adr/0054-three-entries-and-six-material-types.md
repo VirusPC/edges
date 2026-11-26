@@ -12,6 +12,8 @@ status: accepted
 
 **Amended by** [ADR 0058](0058-module-naming-and-capture-initiation.md)（六类官方呈现顺序以 0058 为准）。
 
+**Amended by** [ADR 0060](0060-deprecate-mcp-keep-installed.md)（MCP 标为已过时但不删除；旧随包技能只删 edges 自己装过且未改的副本）。
+
 **Supersedes in part:** [ADR 0051](0051-bundled-skills-single-entry.md)
 
 ## Decision

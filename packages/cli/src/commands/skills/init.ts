@@ -18,6 +18,7 @@ export function addSkillInitCommand(skills: Command, ctx: CliContext): void {
     .option("--root-dir <directory>", "Boundary for the scope tree")
     .option("--description <text>", "Description in the parent scope index")
     .option("--skill-types <types...>", "Select skill types: managed referenced")
+    .option("--dry-run", "Preview removal of edges-installed skills that are no longer bundled")
     .allowExcessArguments(false)
     .addHelpText("after", AFTER_HELP)
     .action(
@@ -26,6 +27,7 @@ export function addSkillInitCommand(skills: Command, ctx: CliContext): void {
         rootDir?: string;
         description?: string;
         skillTypes?: string[];
+        dryRun?: boolean;
       }) => {
         try {
           const result = await initSkills({
@@ -42,6 +44,7 @@ export function addSkillInitCommand(skills: Command, ctx: CliContext): void {
               args: ctx.skillsInstallArgs ?? [],
               created: payload.created,
               stderrHint: HELP,
+              dryRun: options.dryRun === true,
             };
           }
           ctx.result = succeed({ ...payload, command: "skills.init" });

@@ -45,6 +45,7 @@ export type CliContext = {
     args: readonly string[];
     created: string[];
     stderrHint: string;
+    dryRun?: boolean;
   };
   result: CliResult | undefined;
 };

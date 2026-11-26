@@ -6,6 +6,8 @@ Agent 与人发现并调用 Edges 扩展能力的入口定为 CLI、Skill 与 MC
 
 **Status:** accepted（grill 确认于 2026-09-11）
 
+**Amended by** [ADR 0060](0060-deprecate-mcp-keep-installed.md)（MCP 现标为已过时，功能仍保留；新能力不再追加 MCP 入口）。
+
 ## Considered Options
 
 - 保留仓根 `bin/` 作为人用层：否决。

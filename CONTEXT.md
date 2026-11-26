@@ -249,7 +249,7 @@ _避免使用_：必建的独立作用域、长笔记、Task Project 专用分�
 _避免使用_：共享扩展、通用 Agent 工具
 
 **能力面（Capability Surface）**：
-Agent 与人发现并调用 Edges 扩展能力的入口集合；本仓定为 CLI、Skill 与 MCP 三者。
+Agent 与人发现并调用 Edges 扩展能力的入口集合；本仓定为 CLI、Skill 与 MCP 三者。MCP 已过时（deprecated），功能仍保留，新能力不再追加 MCP 入口。见 ADR 0060。
 _避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成单独一层、仅 CLI+Skill（漏掉 MCP）
 
 **CLI**：
@@ -299,7 +299,7 @@ _避免使用_：`edges skills install`、把安装当成可跳过的附加步�
 _避免使用_：`shared-extensions/`、`shared-extensions@` tag、把它们算进 `edges skills init` 的安装范围、写进本框架仓 `packages/skills/`、再装一份到 `~/.agents/skills`、由框架规定落在 `.edges/skills/managed/` 或仓根 `skills/managed/`
 
 **MCP（Edges）**：
-在无 shell 宿主上暴露 Edges 扩展能力的机器入口；与 CLI、Skill 同属能力面，调用同一套领域契约而非另一套产品。
+在无 shell 宿主上暴露 Edges 扩展能力的机器入口；与 CLI、Skill 调用同一套领域契约。已过时（deprecated）：`packages/mcp-servers/`、`new-note` 和 prompt `edges-create-notes` 仍可调用，启动时提示弃用。优先使用 CLI。见 ADR 0060。
 _避免使用_：唯一入口、替代 CLI、直连仓根脚本（已否决）
 
 **Project Harness（Edges 语境）**：

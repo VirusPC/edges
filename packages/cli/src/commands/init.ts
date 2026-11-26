@@ -46,6 +46,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
     .option("--description <text>", "Description in the parent scope index")
     .option("--memory-types <types...>", "Select memory types: project feedback reference user")
     .option("--skill-types <types...>", "Select skill types: managed referenced")
+    .option("--dry-run", "Preview removal of edges-installed skills that are no longer bundled")
     .allowExcessArguments(false)
     .addHelpText("after", AFTER_HELP)
     .action(
@@ -57,6 +58,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
           description?: string;
           memoryTypes?: string[];
           skillTypes?: string[];
+          dryRun?: boolean;
         },
       ) => {
         try {
@@ -75,6 +77,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
               args: ctx.skillsInstallArgs ?? [],
               created: payload.created,
               stderrHint: HELP,
+              dryRun: options.dryRun === true,
             };
           }
           ctx.result = succeed(

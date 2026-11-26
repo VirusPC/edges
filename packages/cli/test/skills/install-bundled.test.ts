@@ -116,6 +116,14 @@ function recordSpawn(t: test.TestContext): { command: string; args: string[]; st
   return calls;
 }
 
+test("edges skills init --dry-run does not spawn the installer", async (t) => {
+  const root = await scope(t);
+  const calls = recordSpawn(t);
+  const result = await run(["--scope", root, "skills", "init", "--dry-run"], { env: {} });
+  assert.equal(result.exitCode, 0, result.stdout + result.stderr);
+  assert.equal(calls.length, 0);
+});
+
 test("edges skills init forwards -- tokens verbatim and still writes skill indexes", async (t) => {
   const root = await scope(t);
   const calls = recordSpawn(t);

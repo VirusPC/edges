@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "type": "module",
-  "description": "MCP server that creates a local note leaf through edges notes",
+  "description": "Deprecated. MCP server that creates a local note leaf through edges notes",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc -p tsconfig.json",
