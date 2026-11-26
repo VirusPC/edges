@@ -8,7 +8,7 @@ version: 0.2.2
 
 把结论写进仓库内的项目记忆。公开类型可进入 Git；`user` 的索引、正文和资产整类 gitignore。主题归属不改变公开与私有边界。
 
-执行能力由 Edges CLI 的 `edges memory remember` 提供；布局见 [`LAYOUT.md`](../edges/references/memory/references/LAYOUT.md)。
+执行能力由 Edges CLI 的 `edges memory remember` 提供；布局见 [`LAYOUT.md`](../memory/references/LAYOUT.md)。
 
 ## 什么时候写
 
@@ -37,7 +37,7 @@ version: 0.2.2
 
 判据是**这条东西下次要不要被执行**。可执行的重复步骤（同一串操作已经做过第二遍）→ `managed`；「以后别这么干」这类判断 → `feedback`；「为什么当初这么定」→ `project`。同一件事常常两边都要写一条，别硬塞进一条里。
 
-写 `managed` 时三点不同：
+写 `managed` 前先向用户提议，用户同意后才写入。不要把同一串步骤做成未获同意的主动写入。同意之后三点不同：
 
 - `--slug` 是**技能目录名**，用 kebab-case（`rerun-failed-e2e`），不是 snake_case。产物在所选材料根的 `skills/managed/<slug>/SKILL.md`。
 - `--title` 可省——Agent Skills 没有这个概念，给了会存进 `metadata`。普通记忆的 `title` / `type` / 出处 / 审计同样写进 `metadata.edges-*`，不要手写扁平顶层键。
@@ -50,14 +50,14 @@ version: 0.2.2
 - 产物在所选材料根的 `memory/users/user_<slug>/INDEX.md`，类型索引是同一 users 目录的 `README.md`。整类都被 gitignore，**不要 `git add`**。
 - `--slug` 与其他普通记忆一样，小写 snake_case，不带 `user_` 前缀。
 - 正文仍按「一句结论 → `**Why:**` → `**How to apply:**`」。
-- Agent 读的是本机这份 `users/README.md`。换机或删仓前用 `$edges` 做用户记忆备份；回注同样用 `$edges`，沿用所选 scope / Project。每次归档只处理一份 users 子树，不汇总子 Project。说明在 [备份](../edges/references/memory-user-backup.md) 与 [恢复](../edges/references/memory-user-restore.md)。
+- Agent 读的是本机这份 `users/README.md`。换机或删仓前用 `$edges` 做用户记忆备份；回注同样用 `$edges`，沿用所选 scope / Project。每次归档只处理一份 users 子树，不汇总子 Project。说明在 [备份](../memory-user-backup.md) 与 [恢复](../memory-user-restore.md)。
 - v1 不做脱敏晋升：不要把 user 条目改写进 `project` / `feedback` 来「变成可提交」。
 
-`referenced` 不由 remember 写入，作为 `--type` 写入会被拒绝。其来源始终是原 scope 的 `.agents/skills/`，即使索引位于 Project 也不变；内容由人或安装器维护，索引不赋予改写来源的权限。安装与刷新按 `$edges` 的 [init 说明](../edges/references/memory-init.md)，不代为初始化新层。
+`referenced` 不由 remember 写入，作为 `--type` 写入会被拒绝。其来源始终是原 scope 的 `.agents/skills/`，即使索引位于 Project 也不变；内容由人或安装器维护，索引不赋予改写来源的权限。安装与刷新按 `$edges` 的 [init 说明](../memory-init.md)，不代为初始化新层。
 
 返回的 `path`、`index` 和 `action`（`created` / `updated`）就是写入凭据，路径相对原 scope，包含实际 Project 归属。`agentsAction: not-applicable` 是 Project 写入的正常结果；`needs-doctor` 表示 scope 的 AGENTS 尚未纳管，要说明这个入口缺口，不把它误报为正文没写入。
 
-原 scope 没有有效 AGENTS，或选定材料根未采用目标可写类型时，CLI 会拒绝写入。说明缺口；已有会话授权覆盖初始化时可继续，否则取得明确同意后再按 [memory-init.md](../edges/references/memory-init.md) 执行。不能为避开缺口改写到根层，也不能给 Project 伪造 AGENTS。
+原 scope 没有有效 AGENTS，或选定材料根未采用目标可写类型时，CLI 会拒绝写入。说明缺口；已有会话授权覆盖初始化时可继续，否则取得明确同意后再按 [memory-init.md](../memory-init.md) 执行。不能为避开缺口改写到根层，也不能给 Project 伪造 AGENTS。
 
 ## 什么时候改派 subagent
 
@@ -67,7 +67,7 @@ version: 0.2.2
 
 ## 写哪一层
 
-记忆按目录分层，主题再由 Project 聚合，结构见 [`PROTOCOL.md`](../edges/references/memory/references/PROTOCOL.md)。写到**与结论作用范围最贴近的 scope，再选择实际所属主题**；只对某目录成立的不提升到根，整个项目通用的也不因本次在某主题内工作就限制到该 Project。目标尚未采用可写类型时先说明缺口，不用根层兜底改变归属。
+记忆按目录分层，主题再由 Project 聚合，结构见 [`PROTOCOL.md`](../memory/references/PROTOCOL.md)。写到**与结论作用范围最贴近的 scope，再选择实际所属主题**；只对某目录成立的不提升到根，整个项目通用的也不因本次在某主题内工作就限制到该 Project。目标尚未采用可写类型时先说明缺口，不用根层兜底改变归属。
 
 **先看这次任务实际碰过哪些文件**，它们所在的目录就是候选：都落在同一个模块下，那个模块目录是第一候选；散在几个互不相干的目录，基本就是记忆根。但**作用范围不等于改动范围**——改的是某个模块，结论却可能是关于构建工具、发布流程或团队规范的，那仍然属于整仓。判据始终是「这条结论对哪些代码成立」，改动集只用来提候选。
 

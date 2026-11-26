@@ -34,14 +34,8 @@ test("copyBundledSkills copies every remaining extensions skill and not the six 
   const expected = await skillDirs(sourceSkills);
   assert.deepEqual(expected, [
     "edges",
-    "edges-create-notes",
-    "edges-create-tasks",
     "edges-langfuse-agent-tracing",
-    "edges-memory-add-type",
-    "edges-memory-ask",
-    "edges-memory-remember",
     "edges-onboarding",
-    "edges-tasks-classify",
   ]);
   assert.deepEqual(copied, expected);
   assert.ok(expected.length > 0);

@@ -20,7 +20,7 @@ version: 0.1.0
 ## 共同规则
 
 - **不编造。** 材料或对话里没有的数字、引语、结论、需求不写。
-- **落盘。** 在 Edges 仓库里用 `edges notes create`（技能 `edges`；旧名 `edges-note` 已并入这一处）。有 shell 时：`edges --scope <目录> notes create --title "<标题>" --body "<Markdown>"`。无 shell 时按 `$edges` 的 [Notes reference](../edges/references/notes.md) 调用 `new_note`。更新已有笔记时改原文件，不新建。reference 里写的 `edges-note` 就是这一处。
+- **落盘。** 在 Edges 仓库里用 `edges notes create`（技能 `edges`；旧名 `edges-note` 已并入这一处）。有 shell 时：`edges --scope <目录> notes create --title "<标题>" --body "<Markdown>"`。无 shell 时按 `$edges` 的 [Notes reference](../notes.md) 调用 `new_note`。更新已有笔记时改原文件，不新建。reference 里写的 `edges-note` 就是这一处。
 - **frontmatter。** 笔记文件的 `title` 与正文一级标题一致。对话笔记的标题只写主题简述；学习笔记的标题用材料标题。场景专有字段以对应 reference 为准，不要互相套用。
 
 场景的章节、模板和步骤都在 reference 里。本文件不重复那些正文。

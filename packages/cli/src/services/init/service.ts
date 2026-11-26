@@ -54,6 +54,7 @@ import {
   type InitModuleName,
 } from "./modules.js";
 import { migrateScopeMaterialIndex } from "./migrate-scope-readme.js";
+import { applyOfficialConstraintSeed } from "./constraint-seed.js";
 
 export type { InitMemoryOptions };
 
@@ -261,7 +262,9 @@ export async function initMemory(options: InitMemoryOptions): Promise<MemoryInit
   if (options.skillTypes !== undefined) {
     throw new Error("Type flags require the skills module");
   }
-  return runTypeInit(options, "memory");
+  const result = await runTypeInit(options, "memory");
+  if (!result.selectionRequired && !options.project) await writeConstraintSeed(result.targetDir, ["memory"], options);
+  return result;
 }
 
 /** Skills init adopts skill types only. */
@@ -269,7 +272,9 @@ export async function initSkills(options: InitMemoryOptions): Promise<MemoryInit
   if (options.memoryTypes !== undefined) {
     throw new Error("Type flags require the memory module");
   }
-  return runTypeInit(options, "skills");
+  const result = await runTypeInit(options, "skills");
+  if (!result.selectionRequired && !options.project) await writeConstraintSeed(result.targetDir, ["skills"], options);
+  return result;
 }
 
 async function runTypeInit(
@@ -293,7 +298,7 @@ async function runTypeInit(
       targetDir: target,
       selectionRequired: true,
       recommendations: {
-        modules: ["memory", "skills", "tasks", "projects", "notes"],
+        modules: ["memory", "notes", "skills", "tasks", "routines", "projects"],
         memoryTypes: [...MEMORY_TYPE_NAMES],
         skillTypes: [...SKILL_TYPE_NAMES],
       },
@@ -414,6 +419,21 @@ async function ensureScopeEntry(options: InitMemoryOptions) {
   };
 }
 
+async function writeConstraintSeed(
+  target: string,
+  modules: readonly InitModuleName[],
+  options: MaterialOptions,
+): Promise<void> {
+  const file = join(target, AGENTS_FILE_NAME);
+  if (!existsSync(file)) return;
+  const service = memoryNodes(target, options);
+  const node = await service.get(file, AgentsNode);
+  if (!node) return;
+  const next = applyOfficialConstraintSeed(node.body, modules);
+  if (next === node.body) return;
+  await service.update(node, { body: next });
+}
+
 export async function initScope(options: InitScopeOptions) {
   const targetDir = options.targetDir ?? resolveScope(options.env ?? process.env);
   const requested =
@@ -464,7 +484,10 @@ export async function initScope(options: InitScopeOptions) {
     created = [...created, ...boards.created];
     preserved = [...preserved, ...boards.preserved];
   }
-  if (!options.project) await migrateScopeMaterialIndex(scope.targetDir, base);
+  if (!options.project) {
+    await writeConstraintSeed(scope.targetDir, requested, options);
+    await migrateScopeMaterialIndex(scope.targetDir, base);
+  }
   return {
     ...(typeResult ?? {}),
     targetDir: scope.targetDir,

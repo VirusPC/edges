@@ -66,7 +66,7 @@ export function createMcpServer(config: ReturnType<typeof loadConfig>) {
     }, 
     async ({ transcript }) => {
       try {
-        const skillFile = path.join(config.skillsPath, "edges-create-notes/SKILL.md");
+        const skillFile = path.join(config.skillsPath, "edges/references/create-notes/guide.md");
         const skillContent = await fs.readFile(skillFile, "utf-8");
         
         return {

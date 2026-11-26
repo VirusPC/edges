@@ -30,6 +30,7 @@ test("init --super writes the scope-root material face and one constraints line"
     "projects/README.md",
     "notes/README.md",
     "tasks/README.md",
+    "routines/README.md",
     "memory/feedbacks/README.md",
     "memory/projects/README.md",
     "memory/references/README.md",
@@ -42,7 +43,8 @@ test("init --super writes the scope-root material face and one constraints line"
   assert.equal(fs.existsSync(path.join(root, ".edges/projects/README.md")), false);
   const agents = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
   assert.equal(count(agents, INDEPENDENT_HARNESS_CONSTRAINT), 1);
-  assert.match(agents, /本目录有项目记忆/);
+  assert.match(agents, /材料放在本层/);
+  assert.doesNotMatch(agents, /\$edges-memory-ask/);
   const before = agents;
   await ok("--super", "init");
   const again = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");

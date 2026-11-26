@@ -22,7 +22,7 @@
 
 - 用户要把另一个 harness 仓库挂到当前工作目录，让 Agent 开场就能看到它的入口。
 - 用户要初始化、列出或更新已经登记的组合仓库（例如新机器上刚 clone 完主仓库）。
-- 不要用它写笔记（见 [notes.md](notes.md)）、建任务，或改项目记忆（检索用 `edges-memory-ask`，沉淀用 `edges-memory-remember`）。
+- 不要用它写笔记（见 [notes.md](notes.md)）、建任务，或改项目记忆（检索见 [memory-ask/guide.md](memory-ask/guide.md)，沉淀见 [memory-remember/guide.md](memory-remember/guide.md)）。
 
 ## 硬规则
 

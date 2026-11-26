@@ -7,9 +7,9 @@
 <!-- edges-constraints:start -->
 ## 本层硬约束
 
-- 本目录有项目记忆。提问或动手前用 `$edges-memory-ask`；该沉淀用 `$edges-memory-remember`。本轮查过不重复。
-- 本层硬约束直接写在这个区块里，不要通过记忆正文链接代替本区块的硬约束。
-- 改这套材料的顺序：`PROTOCOL.md` → `LAYOUT.md` → `edges` 的 memory 说明（`../memory-init.md` 与 `references/templates`）→ 其他记忆 skill（`edges-memory-ask`、`edges-memory-remember`、`edges-memory-add-type`）。不能跳到下游再反过来定义上游。
+<!-- edges-seed:preamble -->
+材料放在本层 `.edges/` 下各类型的目录里，以 `.edges/README` 的登记为准，只认已经初始化的类型。读写都走 `edges` skill，按类型用 `edges <模块>`，不要手改受管理的目录和索引。提问或动手之前，按当前任务的相关性，从该类型的根目录到相关子目录逐层查；本轮已经查过、输入也没变，就不再重复查。沉淀遵守该类型既有的创建与审批规则；识别出候选不等于获准落盘。
+- 改这套材料的顺序：`PROTOCOL.md` → `LAYOUT.md` → `edges` 的 memory 说明（`../memory-init.md` 与 `references/templates`）→ `edges` 的 references（`memory-ask`、`memory-remember`、`memory-add-type`）。不能跳到下游再反过来定义上游。
 - Init 只在用户明确要求时运行；Remember / Ask / Doctor 不得代为 Init。
 <!-- edges-constraints:end -->
 

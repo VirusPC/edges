@@ -1,6 +1,6 @@
 # conversation
 
-本文件是 `edges-create-tasks` 目前唯一的场景。共同入口见 [SKILL.md](../SKILL.md)。
+本文件是 `edges-create-tasks` 目前唯一的场景。共同入口见 [guide.md](../guide.md)。
 
 从对话整理任务：**成文 → 交人审 → 落库**（人审可以是对话确认或 PR）。正文顺序：**背景 → 目标**（必填）→ **动作** → **完成标准**（后两栏可选；完成标准可留到 `grill-with-docs` 后再补）。与 `edges-create-notes` 主题行动指南同序（背景 → 问题/目标 → 方案/动作 → 验收/完成标准），便于从笔记开卡平移。四栏同构 STAR（Situation / Task / Action / Result）：用来**制定任务**，尤其是派给 agent 的 brief；**不要**拿 STAR 写复盘（复盘走 `edges-create-notes`）。
 

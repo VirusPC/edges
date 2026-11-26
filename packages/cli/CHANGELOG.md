@@ -4,6 +4,14 @@
 
 ## [Unreleased]
 
+### 随包技能
+
+- **破坏性：随包技能收成三个公开入口。** 只保留 `edges`、`edges-onboarding`、`edges-langfuse-agent-tracing`。`edges-memory-ask`、`edges-memory-remember`、`edges-memory-add-type`、`edges-create-notes`、`edges-create-tasks`、`edges-tasks-classify` 并入 `edges` 的 `references/`，不留同名目录或软链。已安装的旧副本需重新 `edges skills init` 才会换成新包里的内容；init 不会删除本机上已经装好的旧目录。见 ADR 0054、ADR 0055。
+
+### 初始化
+
+- **无参 `edges init` 默认集加入 routines。** 已初始化的仓库再跑无参 init 会补装尚未安装的默认模块。`edges <module> init` 仍只初始化该模块。`AGENTS.md` 的 `edges-constraints` 在首个类型初始化时写入 ADR 0059 的共用主旨，之后不重写；各类型特殊点随该类型初始化增补。仍等于旧官方句子的片段会刷新，用户改过的句子和区块外正文不动。见 ADR 0055、ADR 0056、ADR 0059。
+
 ## [0.6.1] - 2026-11-14
 
 ### 初始化

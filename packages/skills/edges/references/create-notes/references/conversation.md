@@ -1,6 +1,6 @@
 # conversation
 
-本文件是 `edges-create-notes` 的对话场景。落盘、frontmatter 与不编造见 [SKILL.md](../SKILL.md)。
+本文件是 `edges-create-notes` 的对话场景。落盘、frontmatter 与不编造见 [guide.md](../guide.md)。
 
 将原始对话整理为结构清晰的中文笔记（**同时包含记录与复盘总结**）。
 
@@ -51,7 +51,7 @@
 14. 输出必须为中文。
 15. **入库**（正文写作与审阅完成后）：
     - 有 shell 时交给 `edges --scope <目录> notes create --title "主题简述" --body "<审阅后的 Markdown>"`；归入已有 Project 则加根参数 `--project <相对路径>`，默认相对 `<scope>/.edges/projects`，`--super` 时相对 `<scope>/projects`，嵌套用 `P/projects/Q`。需要 scope 直属 Notes 且未选 Project 时才用 `--super`。不把 P 改成 scope，不代为初始化。子命令是 `notes create`。完整 Markdown 放进 `--body`。这次调用只在本地写下叶子，不 commit、不 push、不开 PR。不要自己 `git commit`，也不要传已删除的 `--content`、`--content-file`、`--markdown`、`--import-entry`、`--co-author`、`--mode`、`--dry-run`、`--format`、`--resources`、`--index-group`。
-    - 无 shell 时按 `$edges` 的 [Notes reference](../../edges/references/notes.md) 调用 `new_note`，传相同正文和可选 `project` / `super`；scope 由服务端确定。工具版本缺少所需选择参数时说明限制，不静默改归属。创建后保留返回 path，后续查读与更新沿用原 scope 和 Project 选择。
+    - 无 shell 时按 `$edges` 的 [Notes reference](../../notes.md) 调用 `new_note`，传相同正文和可选 `project` / `super`；scope 由服务端确定。工具版本缺少所需选择参数时说明限制，不静默改归属。创建后保留返回 path，后续查读与更新沿用原 scope 和 Project 选择。
     - `notes create` 不复制旁路目录。图片等资源不要指望随笔记一起导入；正文里需要的材料写进 `--body`。不批量转换旧笔记。
     - 仓：普通内容写进用户自己的笔记仓（`--scope` 指向的目录）；主题归属再用 Project 选择。私密内容写入用户指定的私密仓：调用时把 `--scope` 指向私密仓的目录，`notes create` 不会自动换仓。CLI 源码在本仓 `packages/cli/`。
     - 大范围代码改动仍走 Cursor cloud agent
