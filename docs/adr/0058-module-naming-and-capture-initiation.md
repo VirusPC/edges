@@ -8,6 +8,8 @@ status: accepted
 
 **Status:** accepted（尚未实现）
 
+**Amended by** [ADR 0059](0059-shared-preamble-and-per-type-deltas.md)（种子片段的结构由 0059 取代：0058 的六段原文不再是官方种子，但 0058 第 1–5 点决定仍然有效）
+
 **Amends:** [ADR 0057](0057-per-type-retrieval-and-capture-timing.md)
 
 ## Decision

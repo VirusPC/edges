@@ -10,6 +10,8 @@ status: accepted
 
 **Amended by** [ADR 0058](0058-module-naming-and-capture-initiation.md)（硬约束片段的点名层、审批闸门写法与沉淀发起方已定；六类官方呈现顺序以 0058 为准）
 
+**Amended by** [ADR 0059](0059-shared-preamble-and-per-type-deltas.md)（硬约束片段的结构以 0059 为准：共用主旨加按类型特殊点，不再每类一段完整片段）
+
 **Supersedes in part:** [ADR 0056](0056-reinit-snippets-and-uniform-timing.md) 第 3 点
 
 ## Decision
