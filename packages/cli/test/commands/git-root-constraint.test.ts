@@ -111,7 +111,9 @@ test("edges init at a git root writes the isolation constraint once", async (t) 
   git(root, ["init", "-b", "main"]);
   const agents = await initNotes(root);
   assertIsolation(agents);
-  for (const bullet of SEED) assert.match(agents, new RegExp(bullet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.match(agents, /材料放在本层/);
+  assert.match(agents, /话题可能已经有笔记时先查/);
+  assert.doesNotMatch(agents, /\$edges-memory-ask/);
   assert.equal(await initNotes(root), agents);
 });
 
@@ -147,7 +149,9 @@ test("refreshing an existing git-root AGENTS.md does not add the isolation line"
   await writeFile(path.join(root, "AGENTS.md"), before);
   const agents = await initNotes(root);
   assertNoIsolation(agents);
-  for (const bullet of SEED) assert.match(agents, new RegExp(bullet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.match(agents, /材料放在本层/);
+  assert.match(agents, /话题可能已经有笔记时先查/);
+  assert.doesNotMatch(agents, /\$edges-memory-ask/);
 });
 
 test("an existing git-root AGENTS.md that lacks a constraints block does not receive the isolation line", async (t) => {
@@ -166,7 +170,8 @@ test("an existing git-root AGENTS.md that lacks a constraints block does not rec
   );
   const agents = await initNotes(root);
   assertNoIsolation(agents);
-  for (const bullet of SEED) assert.match(agents, new RegExp(bullet.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+  assert.match(agents, /材料放在本层/);
+  assert.match(agents, /话题可能已经有笔记时先查/);
 });
 
 test("init --super on a git root keeps one isolation line and one independent-harness line", async (t) => {

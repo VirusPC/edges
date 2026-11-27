@@ -1,5 +1,7 @@
 # new-note
 
+**Deprecated.** 这个 MCP server 和 prompt `edges-create-notes` 已过时，功能仍保留。有 shell 时用 CLI。见 [ADR 0060](../../../docs/adr/0060-deprecate-mcp-keep-installed.md)。
+
 TypeScript + Node.js MCP server，用于在没有 shell 的宿主里本地创建一条 Note。不 commit、不 push、不开 PR。
 
 本地有 shell 的 agent 请用 [`cli` 的 `edges notes`](../../cli/README.md)，不要默认走 MCP。本 server 留给没有 shell 的宿主。决策：[`.edges/memory/projects/project_cli_from_mcp/INDEX.md`](../../../.edges/memory/projects/project_cli_from_mcp/INDEX.md)。

@@ -12,7 +12,11 @@ import { ingestInputSchema } from "./validation.js";
 import { createAuthMiddleware, validateAuthConfig, type AuthenticatedRequest } from "./authMiddleware.js";
 
 // Create MCP server instance with tools and prompts registered
+const DEPRECATION =
+  "[new-note] deprecated: this MCP server and the edges-create-notes prompt are outdated and will not gain new features. Use the edges CLI. The server still runs.";
+
 export function createMcpServer(config: ReturnType<typeof loadConfig>) {
+  console.error(DEPRECATION);
   const server = new McpServer({
     name: "new-note",
     version: "0.1.0",
@@ -56,17 +60,17 @@ export function createMcpServer(config: ReturnType<typeof loadConfig>) {
     }
   );
 
-  console.error(`[new-note] Registering MCP prompt: edges-create-notes`);
+  console.error(`[new-note] Registering deprecated MCP prompt: edges-create-notes`);
   server.registerPrompt("edges-create-notes", 
     {
-      description: "Write an Edges note. The skill routes a conversation to references/conversation.md and external learning material to references/learning.md.",
+      description: "Deprecated. Write an Edges note. The skill routes a conversation to references/conversation.md and external learning material to references/learning.md.",
       argsSchema: {
         transcript: z.string().optional().describe("The raw conversation transcript to summarize"),
       }
     }, 
     async ({ transcript }) => {
       try {
-        const skillFile = path.join(config.skillsPath, "edges-create-notes/SKILL.md");
+        const skillFile = path.join(config.skillsPath, "edges/references/create-notes/guide.md");
         const skillContent = await fs.readFile(skillFile, "utf-8");
         
         return {

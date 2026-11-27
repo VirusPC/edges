@@ -24,14 +24,14 @@ CREATED WHEN NO MODULE IS GIVEN
   AGENTS.md
   memory types: feedback, project, reference
   skills: managed and referenced type indexes, then install bundled skills
-  harness index entries: tasks, notes, projects
+  harness index entries: tasks, notes, projects, routines
   tasks board: <scope>/.edges/tasks/README.md (--super: <scope>/tasks/README.md)
-  notes/projects org lists: <scope>/.edges/notes/README.md, <scope>/.edges/projects/README.md
-    (--super: <scope>/notes/README.md, <scope>/projects/README.md)
+  notes/projects/routines org lists: <scope>/.edges/notes/README.md, <scope>/.edges/projects/README.md, <scope>/.edges/routines/README.md
+    (--super: <scope>/notes/README.md, <scope>/projects/README.md, <scope>/routines/README.md)
 
 NOT CREATED HERE
-  routines (not in the default set; edges routines init creates only that module)
   user memory, evaluation, and observation
+  edges <module> init creates only that module
 `;
 
 export function addInitCommand(program: Command, ctx: CliContext): void {
@@ -46,6 +46,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
     .option("--description <text>", "Description in the parent scope index")
     .option("--memory-types <types...>", "Select memory types: project feedback reference user")
     .option("--skill-types <types...>", "Select skill types: managed referenced")
+    .option("--dry-run", "Preview removal of edges-installed skills that are no longer bundled")
     .allowExcessArguments(false)
     .addHelpText("after", AFTER_HELP)
     .action(
@@ -57,6 +58,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
           description?: string;
           memoryTypes?: string[];
           skillTypes?: string[];
+          dryRun?: boolean;
         },
       ) => {
         try {
@@ -75,6 +77,7 @@ export function addInitCommand(program: Command, ctx: CliContext): void {
               args: ctx.skillsInstallArgs ?? [],
               created: payload.created,
               stderrHint: HELP,
+              dryRun: options.dryRun === true,
             };
           }
           ctx.result = succeed(

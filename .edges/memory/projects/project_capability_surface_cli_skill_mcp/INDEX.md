@@ -17,6 +17,7 @@ metadata:
 能力面始终是三条对等入口：CLI、Skill、MCP。经典项目（gh / AXI / Agent Skills）只示范 CLI 与 Skill 的形状，用来去掉「给人的 PATH 脚本」这层假分层；Edges 另外把 MCP 作为无 shell 宿主的一等入口，不是事后加装。删除仓根 `bin/` 后，MCP 仍通过子进程调用 CLI。2026-09-11 grill 确认（ADR 0004）。实现已按 `docs/superpowers/plans/2026-09-11-capability-surface-bin-cli-skill-mcp.md` 落地。
 
 **How to apply:**
-- 新能力落 CLI 契约 + Skill 说明 + MCP 暴露（需要机器入口时一并提供；能力面定义里 MCP 不是可选项）。禁止 Skill → 仓根 `bin/`，也禁止把 npm `bin` 定义成一层。
+- 2026-11-26 起 MCP 已过时（[ADR 0060](../../../../docs/adr/0060-deprecate-mcp-keep-installed.md)）：不要新增 MCP server。已有 `new-note` 仍可运行，并在启动时提示弃用。
+- 新能力落 CLI 契约 + Skill 说明。禁止 Skill → 仓根 `bin/`，也禁止把 npm `bin` 定义成一层。
 - 不要恢复仓根 `bin/`、只搬 bash、半迁移 git、或 MCP in-process import CLI。
 - 对照来源见 `reference_bin_cli_skill_classic_projects`。

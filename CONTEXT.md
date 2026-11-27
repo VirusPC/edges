@@ -249,7 +249,7 @@ _避免使用_：必建的独立作用域、长笔记、Task Project 专用分�
 _避免使用_：共享扩展、通用 Agent 工具
 
 **能力面（Capability Surface）**：
-Agent 与人发现并调用 Edges 扩展能力的入口集合；本仓定为 CLI、Skill 与 MCP 三者。
+Agent 与人发现并调用 Edges 扩展能力的入口集合；本仓定为 CLI、Skill 与 MCP 三者。MCP 已过时（deprecated），功能仍保留，新能力不再追加 MCP 入口。见 ADR 0060。
 _避免使用_：仓根 `bin/`、把 npm `package.json` 的 `bin` 字段当成单独一层、仅 CLI+Skill（漏掉 MCP）
 
 **CLI**：
@@ -299,7 +299,7 @@ _避免使用_：`edges skills install`、把安装当成可跳过的附加步�
 _避免使用_：`shared-extensions/`、`shared-extensions@` tag、把它们算进 `edges skills init` 的安装范围、写进本框架仓 `packages/skills/`、再装一份到 `~/.agents/skills`、由框架规定落在 `.edges/skills/managed/` 或仓根 `skills/managed/`
 
 **MCP（Edges）**：
-在无 shell 宿主上暴露 Edges 扩展能力的机器入口；与 CLI、Skill 同属能力面，调用同一套领域契约而非另一套产品。
+在无 shell 宿主上暴露 Edges 扩展能力的机器入口；与 CLI、Skill 调用同一套领域契约。已过时（deprecated）：`packages/mcp-servers/`、`new-note` 和 prompt `edges-create-notes` 仍可调用，启动时提示弃用。优先使用 CLI。见 ADR 0060。
 _避免使用_：唯一入口、替代 CLI、直连仓根脚本（已否决）
 
 **Project Harness（Edges 语境）**：
@@ -417,7 +417,7 @@ Task 审阅页导出 JSON 的一行：`stem`、`current`、`suggested`、`action
 _避免使用_：用 title 或 name 当查找键、把展示字段当 apply 键
 
 **classifyTasks（edges）**：
-独立工作流（约定路径 `packages/skills/edges-tasks-classify/SKILL.md`，展示名 classifyTasks，入口 skill 是 `edges-tasks-classify`）：以用户已设、带描述的 Project 为分类依据，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
+独立工作流（约定路径 `packages/skills/edges/references/tasks-classify/guide.md`，展示名 classifyTasks，入口 skill 是 `edges`）：以用户已设、带描述的 Project 为分类依据，对整板做归属建议（LLM / agent 判断，不要求 embedding），经 Task 审阅页给人改组（无 GUI 时 Markdown 建议表回退），人贴回审阅导出行后再经现有 CLI 落地。新类型由 proposeTypes 另议，本 skill 不自动建 project。
 _避免使用_：通用 edges-tasks Skill+MCP CRUD、自动批量建 project、Embedding NCC、K-means 命名、要求 embedding / 向量分类、只整理未归属任务、公开 `edges tasks classify`、把审阅页当成分类器
 
 **proposeTypes（edges）**：

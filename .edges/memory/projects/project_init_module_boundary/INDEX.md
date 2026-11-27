@@ -1,6 +1,6 @@
 ---
 name: project_init_module_boundary
-description: 改 edges init 或域 init 时：各模块只初始化自己；无参默认集含 tasks，不含 routines。
+description: 改 edges init 或域 init 时：各模块只初始化自己；无参默认集含 tasks 和 routines。见 ADR 0055。
 metadata:
   edges-title: 各模块 init 只创建本模块的材料
   edges-type: project
@@ -13,6 +13,6 @@ metadata:
 
 各模块的 init 只创建并登记本模块的材料。`edges memory init` 不创建 notes、projects、skills、tasks。根命令 `edges init` 只编排公共系统入口，再调用各模块自己的 init。
 
-**Why:** 用户审 #190 后推翻了兼容包和「域入口只有 memory、notes、projects」。原话是「不顺手创建，明确划分模块，简化模型」和「各管各的，简化心智」。顺手创建会让调用方分不清一条命令会带上哪些模块。2026-11-02 用户要求把 tasks 补进无参 `edges init` 的默认集；routines 仍不进。
+**Why:** 用户审 #190 后推翻了兼容包和「域入口只有 memory、notes、projects」。原话是「不顺手创建，明确划分模块，简化模型」和「各管各的，简化心智」。顺手创建会让调用方分不清一条命令会带上哪些模块。2026-11-02 用户要求把 tasks 补进无参 `edges init` 的默认集。2026-11-26 ADR 0055 把 routines 也纳入应用层默认集；已初始化仓库再跑无参 init 会补装尚未安装的默认模块。
 
-**How to apply:** 给模块加 init 时，只建该模块自己的 harness 材料，并经 `packages/services/<module>/service.ts` 薄转发到 init service 里对应的那一段。`edges init <module>` 与 `edges <module> init` 写同一批文件。没有可初始化材料的模块不要硬造命令：evaluation 与 observation 没有领域 CLI；`edges artifacts init` 只写 token 配置。无参 `edges init` 的默认集是 memory、skills、tasks、notes、projects。显式给出模块时仍只建列出的那些。routines 不在默认集里。
+**How to apply:** 给模块加 init 时，只建该模块自己的 harness 材料，并经 `packages/services/<module>/service.ts` 薄转发到 init service 里对应的那一段。`edges init <module>` 与 `edges <module> init` 写同一批文件。没有可初始化材料的模块不要硬造命令：evaluation 与 observation 没有领域 CLI；`edges artifacts init` 只写 token 配置。无参 `edges init` 的默认集是 memory、notes、skills、tasks、routines、projects。显式给出模块时仍只建列出的那些。

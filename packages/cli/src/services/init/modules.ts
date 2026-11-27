@@ -17,11 +17,13 @@ export const MODULE_RUN_ORDER: readonly InitModuleName[] = [
   "notes",
 ];
 
+/** 无参 init 的应用层默认集。顺序与 ADR 0058 官方呈现顺序一致。 */
 export const DEFAULT_INIT_MODULES: readonly InitModuleName[] = [
   "memory",
+  "notes",
   "skills",
   "tasks",
-  "notes",
+  "routines",
   "projects",
 ];
 

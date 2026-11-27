@@ -363,7 +363,14 @@ async function installSkillsAfterLock(ctx: CliContext): Promise<void> {
   const pending = ctx.pendingSkillsInstall;
   if (!pending || ctx.result?.exitCode !== 0) return;
   try {
-    await installBundledSkills(pending.args);
+    const notice = await installBundledSkills(pending.args, { dryRun: pending.dryRun });
+    if (notice && ctx.result) {
+      const previous = ctx.result.stderr;
+      ctx.result = {
+        ...ctx.result,
+        stderr: previous + (previous && !previous.endsWith("\n") ? "\n" : "") + notice,
+      };
+    }
   } catch (error) {
     const exitCode = error instanceof SkillsInstallError ? error.exitCode || 1 : 1;
     const reason = error instanceof Error ? error.message : String(error);

@@ -14,7 +14,7 @@ metadata:
 
 修改顺序这条硬约束写在本目录 `AGENTS.md` 的本层硬约束区块里。本文件只展开每一步的完成判据。
 
-本文件规定 memory 协议、总入口 `edges` 里的 memory 说明，以及 `edges-memory-ask`、`edges-memory-remember`、`edges-memory-add-type` 的修改顺序。`project-memory-doctor` 与 `project-memory-reshape` 已删除，没有同名替代。索引诊断仍是 CLI `edges memory doctor`。
+本文件规定 memory 协议、总入口 `edges` 里的 memory 说明，以及 `edges` references 里 `memory-ask`、`memory-remember`、`memory-add-type` 的修改顺序。`project-memory-doctor` 与 `project-memory-reshape` 已删除，没有同名替代。索引诊断仍是 CLI `edges memory doctor`。
 
 ```text
 PROTOCOL.md
@@ -48,7 +48,7 @@ edges 的 memory 说明（../memory-init.md）
 
 ## 4. 修改其他受影响的记忆 skill
 
-依次检查 `edges-memory-ask`、`edges-memory-remember`、`edges-memory-add-type`。只修改实际受影响者；优先继续依赖 `PROTOCOL.md`、CLI `--help` 或落盘产物等自描述接口，不复制 `LAYOUT.md` 的实现细节。
+依次检查 `edges` 的 `references/memory-ask`、`references/memory-remember`、`references/memory-add-type`。只修改实际受影响者；优先继续依赖 `PROTOCOL.md`、CLI `--help` 或落盘产物等自描述接口，不复制 `LAYOUT.md` 的实现细节。
 
 完成判据：读、写及其他工作流能正确使用新实现，未受影响的 skill 没有为了表面同步而增加耦合。
 

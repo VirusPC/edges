@@ -116,6 +116,14 @@ function recordSpawn(t: test.TestContext): { command: string; args: string[]; st
   return calls;
 }
 
+test("edges skills init --dry-run does not spawn the installer", async (t) => {
+  const root = await scope(t);
+  const calls = recordSpawn(t);
+  const result = await run(["--scope", root, "skills", "init", "--dry-run"], { env: {} });
+  assert.equal(result.exitCode, 0, result.stdout + result.stderr);
+  assert.equal(calls.length, 0);
+});
+
 test("edges skills init forwards -- tokens verbatim and still writes skill indexes", async (t) => {
   const root = await scope(t);
   const calls = recordSpawn(t);
@@ -158,7 +166,7 @@ test("edges init -- -y --agent * uses the default modules and forwards the token
   const result = await run(["--scope", root, "init", "--", "-y", "--agent", "*"], { env: {} });
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   const body = JSON.parse(result.stdout) as { modules: string[] };
-  assert.deepEqual(body.modules, ["memory", "skills", "tasks", "notes", "projects"]);
+  assert.deepEqual(body.modules, ["memory", "notes", "skills", "tasks", "routines", "projects"]);
   assert.equal(body.modules.includes("-y"), false);
   assert.deepEqual(calls[0]!.args.slice(1), skillsAddArgs(resolveBundledSkillsDir(), ["-y", "--agent", "*"]));
 });
@@ -353,7 +361,7 @@ test("multi-value --memory-types before -- is not forwarded and is not a module"
   );
   assert.equal(result.exitCode, 0, result.stdout + result.stderr);
   const body = JSON.parse(result.stdout) as { modules: string[] };
-  assert.deepEqual(body.modules, ["memory", "skills", "tasks", "notes", "projects"]);
+  assert.deepEqual(body.modules, ["memory", "notes", "skills", "tasks", "routines", "projects"]);
   assert.equal(existsSync(path.join(root, ".edges/memory/projects/README.md")), true);
   assert.equal(existsSync(path.join(root, ".edges/memory/feedbacks/README.md")), true);
   assert.equal(existsSync(path.join(root, ".edges/memory/references/README.md")), false);

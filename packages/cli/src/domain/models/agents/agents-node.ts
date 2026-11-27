@@ -4,6 +4,92 @@ import { InternalSyntax, type SyntaxContent, type SyntaxReference } from "../nod
 import { identifyNodeType, resolveEntryHref, isHarnessMaterial } from "../node/layout.js";
 import type { NodeReference } from "../../core/types.js";
 import { stripComposeBlock } from "../compose/compose-readme-node.js";
+import { MATERIAL_TYPES } from "../../config/material-types.js";
+import { CONSTRAINT_SEED_PREAMBLE, PREVIOUS_OFFICIAL_CONSTRAINT_LINES, constraintSeedMarker } from "../../config/constraint-seeds.js";
+import { CONSTRAINTS_END, CONSTRAINTS_START, INTERNAL_SECTIONS } from "../../config/sections.js";
+
+function seedBlockEnd(inner: string, from: number): number {
+  const next = inner.indexOf("<!-- edges-seed:", from);
+  return next < 0 ? inner.length : next;
+}
+
+function replaceSeedBlock(inner: string, id: string, official: string): string {
+  const at = inner.indexOf(constraintSeedMarker(id));
+  const bodyStart = inner.indexOf("\n", at);
+  const end = seedBlockEnd(inner, bodyStart + 1);
+  return `${inner.slice(0, bodyStart + 1)}${official}\n${inner.slice(end)}`;
+}
+
+function insertSeedBlock(inner: string, id: string, official: string, afterId: string | null): string {
+  const piece = `${constraintSeedMarker(id)}\n${official}\n`;
+  if (afterId && inner.includes(constraintSeedMarker(afterId))) {
+    const markerAt = inner.indexOf(constraintSeedMarker(afterId));
+    const bodyStart = inner.indexOf("\n", markerAt);
+    const end = seedBlockEnd(inner, bodyStart + 1);
+    const prefix = inner[end - 1] === "\n" ? "" : "\n";
+    return inner.slice(0, end) + prefix + piece + inner.slice(end);
+  }
+  const heading = inner.indexOf(`## ${INTERNAL_SECTIONS.constraints.heading}`);
+  if (heading >= 0) {
+    const lineEnd = inner.indexOf("\n", heading);
+    const at = lineEnd < 0 ? inner.length : lineEnd + 1;
+    const prefix = at > 0 && inner[at - 1] === "\n" ? "" : "\n";
+    return inner.slice(0, at) + prefix + piece + inner.slice(at);
+  }
+  return piece + inner;
+}
+
+function ensureSeedBlock(inner: string, id: string, official: string, afterId: string | null): string {
+  const at = inner.indexOf(constraintSeedMarker(id));
+  if (at < 0) return insertSeedBlock(inner, id, official, afterId);
+  const bodyStart = inner.indexOf("\n", at);
+  const end = seedBlockEnd(inner, bodyStart + 1);
+  const raw = inner.slice(bodyStart + 1, end);
+  if (raw.trim() !== official || raw === `${official}\n`) return inner;
+  return replaceSeedBlock(inner, id, official);
+}
+
+function normalizeSeedBlock(inner: string, id: string, official: string): string {
+  const at = inner.indexOf(constraintSeedMarker(id));
+  if (at < 0) return inner;
+  const bodyStart = inner.indexOf("\n", at);
+  const end = seedBlockEnd(inner, bodyStart + 1);
+  const raw = inner.slice(bodyStart + 1, end);
+  if (raw.trim() !== official || raw === `${official}\n`) return inner;
+  return replaceSeedBlock(inner, id, official);
+}
+
+function stripPreviousOfficialConstraintLines(inner: string): string {
+  return inner.split("\n").filter((line) => {
+    const text = line.trim().replace(/^- /, "").trim();
+    return !(PREVIOUS_OFFICIAL_CONSTRAINT_LINES as readonly string[]).includes(text);
+  }).join("\n");
+}
+
+function refreshConstraintSection(document: string, initializedTypes: readonly string[]): string {
+  const start = document.indexOf(CONSTRAINTS_START);
+  const end = document.indexOf(CONSTRAINTS_END);
+  if (start < 0 || end < start) return document;
+  const selected = new Set(initializedTypes);
+  let inner = stripPreviousOfficialConstraintLines(document.slice(start + CONSTRAINTS_START.length, end));
+  inner = ensureSeedBlock(inner, "preamble", CONSTRAINT_SEED_PREAMBLE, null);
+  let previous = "preamble";
+  for (const type of MATERIAL_TYPES) {
+    const id = type.id;
+    if (!selected.has(id)) {
+      if (inner.includes(constraintSeedMarker(id))) previous = id;
+      continue;
+    }
+    inner = ensureSeedBlock(inner, id, type.constraint, previous);
+    previous = id;
+  }
+  inner = normalizeSeedBlock(inner, "preamble", CONSTRAINT_SEED_PREAMBLE);
+  for (const type of MATERIAL_TYPES) {
+    if (inner.includes(constraintSeedMarker(type.id)))
+      inner = normalizeSeedBlock(inner, type.id, type.constraint);
+  }
+  return document.slice(0, start + CONSTRAINTS_START.length) + inner + document.slice(end);
+}
 
 export interface AgentsCreateInput extends InternalCreateInput {
   constraints?: readonly string[];
@@ -35,6 +121,15 @@ export class AgentsNode extends InternalNode<AgentsCreateInput, AgentsUpdateInpu
   }
   get constraints(): readonly string[] {
     return [...this.#constraints];
+  }
+
+  /** Refresh official seed blocks for initialized scope material types. */
+  refreshConstraintSeeds(initializedTypes: readonly string[]): boolean {
+    const previous = this.body;
+    const next = refreshConstraintSection(previous, initializedTypes);
+    if (next === previous) return false;
+    this.body = next;
+    return true;
   }
 
   /** Drop a legacy Compose block. The entry now lives on `.edges/compose/README.md`. */

@@ -17,4 +17,4 @@ metadata:
 
 **Why:** 2026-09-06 把根硬约束收成四条，是为了不把 README 目录细则和说话风格写进闸门。2026-10-20 取消 `extensions/` 这一层后，那三条已经没有子目录可放，peng cheng 拍板并入根。它们是会做错事的闸门，不是目录说明。见 ADR 0040。2026-10-27 起，其中「去个人仓 `shared-extensions/`」改为「放使用方自己的内容仓，布局由该仓自定」，不规定 `.edges/skills/managed/` 或仓根 `skills/managed/`。见 ADR 0048。
 
-**How to apply:** 改根硬约束时不要把 README 里的目录细则或说话风格搬回来。不要为了恢复「只留四条」而删掉 2026-10-20 并入的三条。不要把通用 skill 的落点改回 `shared-extensions/`，也不要写成必须落在 `.edges/skills/managed/` 或仓根 `skills/managed/`，不要写死某一份个人仓的名字。skill 用法仍在 ask / remember 正文。
+**How to apply:** 改根硬约束时不要把 README 里的目录细则或说话风格搬回来。不要为了恢复「只留四条」而删掉 2026-10-20 并入的三条。不要把通用 skill 的落点改回 `shared-extensions/`，也不要写成必须落在 `.edges/skills/managed/` 或仓根 `skills/managed/`，不要写死某一份个人仓的名字。检索与沉淀的官方句子以 ADR 0059 的共用主旨和已初始化类型的特殊点为准，不再点名已切断的 `edges-memory-ask` / `edges-memory-remember`。脱敏、git 和 2026-10-20 并入的三条仍留在区块里。

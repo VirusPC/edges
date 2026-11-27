@@ -52,10 +52,9 @@ test("edges init --help lists tasks with modules this command creates and keeps 
   assert.match(created, /\bprojects\b/);
   assert.match(created, /\btasks\b/);
   assert.match(created, /\.edges\/tasks/);
-  assert.doesNotMatch(created, /\broutines\b/);
+  assert.match(created, /\broutines\b/);
   assert.doesNotMatch(rest, /\btasks\b/);
-  assert.match(rest, /\broutines\b/);
-  assert.match(rest, /not in the default set/);
+  assert.doesNotMatch(rest, /not in the default set/);
   assert.doesNotMatch(rest, /adopts skill types/);
 });
 
@@ -74,7 +73,7 @@ test("edges init on an empty scope writes AGENTS, public memory types, and harne
   const body = JSON.parse(result.stdout) as { status: string; command: string; modules: string[] };
   assert.equal(body.status, "success");
   assert.equal(body.command, "init");
-  assert.deepEqual(body.modules, ["memory", "skills", "tasks", "notes", "projects"]);
+  assert.deepEqual(body.modules, ["memory", "notes", "skills", "tasks", "routines", "projects"]);
   for (const rel of [
     "AGENTS.md",
     ".edges/tasks/README.md",
@@ -88,14 +87,13 @@ test("edges init on an empty scope writes AGENTS, public memory types, and harne
   ]) {
     assert.equal(existsSync(path.join(root, rel)), true, rel);
   }
-  for (const module of ["tasks", "notes", "projects"]) {
+  for (const module of ["tasks", "notes", "projects", "routines"]) {
     assert.equal(existsSync(path.join(root, module, "README.md")), false, module);
     const index = await readFile(path.join(root, ".edges", module, "README.md"), "utf8");
     assert.match(index, /edges-entries-local:start/, module);
   }
   for (const rel of [
     ".edges/memory/users/README.md",
-    ".edges/routines/README.md",
     ".edges/evaluation/README.md",
     ".edges/observation/README.md",
   ]) {
@@ -111,8 +109,13 @@ test("edges init on an empty scope writes AGENTS, public memory types, and harne
   assert.match(index, /tasks\/README\.md/);
   assert.match(index, /notes\/README\.md/);
   assert.match(index, /projects\/README\.md/);
+  assert.match(index, /routines\/README\.md/);
   assert.match(index, /memory\/feedbacks\/README\.md/);
   assert.doesNotMatch(index, /^---/m);
+  assert.equal(agents.split("材料放在本层").length - 1, 1);
+  for (const point of ["只改文案时不查", "话题可能已经有笔记时先查", "动手前先查本层的 managed 技能", "提到待办、进度、下一步", "提到定时、周期或例行工作", "给任务、笔记选主题前先查"]) {
+    assert.match(agents, new RegExp(point));
+  }
 });
 
 test("edges init notes and edges notes init write the same files", async (t) => {
@@ -174,6 +177,64 @@ test("edges init without --super stays on .edges and does not add the independen
   assert.equal(existsSync(path.join(root, ".edges/notes/README.md")), true);
   assert.equal(existsSync(path.join(root, "notes/README.md")), false);
   assert.doesNotMatch(await readFile(path.join(root, "AGENTS.md"), "utf8"), /这是独立 edges harness 仓库/);
+});
+
+test("single module init writes only that module and its constraint point", async (t) => {
+  const root = await scope(t);
+  const result = await run(["--scope", root, "init", "notes"], { env: {} });
+  assert.equal(result.exitCode, 0, result.stdout + result.stderr);
+  assert.equal(existsSync(path.join(root, ".edges/notes/README.md")), true);
+  assert.equal(existsSync(path.join(root, ".edges/routines/README.md")), false);
+  assert.equal(existsSync(path.join(root, ".edges/memory/feedbacks/README.md")), false);
+  const agents = await readFile(path.join(root, "AGENTS.md"), "utf8");
+  assert.match(agents, /话题可能已经有笔记时先查/);
+  assert.doesNotMatch(agents, /只改文案时不查/);
+  assert.doesNotMatch(agents, /提到定时、周期或例行工作/);
+  assert.equal(agents.split("材料放在本层").length - 1, 1);
+});
+
+test("re-running init on an older default set adds routines without rewriting the preamble", async (t) => {
+  const root = await scope(t);
+  const first = await run(["--scope", root, "init", "memory", "notes", "skills", "tasks", "projects"], { env: {} });
+  assert.equal(first.exitCode, 0, first.stdout + first.stderr);
+  assert.equal(existsSync(path.join(root, ".edges/routines/README.md")), false);
+  const agentsPath = path.join(root, "AGENTS.md");
+  const before = await readFile(agentsPath, "utf8");
+  const edited = before.replace("材料放在本层", "材料放在用户改过的本层");
+  const { writeFile } = await import("node:fs/promises");
+  await writeFile(agentsPath, edited);
+  const second = await run(["--scope", root, "init"], { env: {} });
+  assert.equal(second.exitCode, 0, second.stdout + second.stderr);
+  assert.equal(existsSync(path.join(root, ".edges/routines/README.md")), true);
+  const after = await readFile(agentsPath, "utf8");
+  assert.match(after, /材料放在用户改过的本层/);
+  assert.equal(after.split("材料放在").length - 1, 1);
+  assert.match(after, /提到定时、周期或例行工作/);
+  assert.match(after, /话题可能已经有笔记时先查/);
+});
+
+test("a user-edited type point is kept and an old official sentence is refreshed", async (t) => {
+  const root = await scope(t);
+  const first = await run(["--scope", root, "init", "notes"], { env: {} });
+  assert.equal(first.exitCode, 0, first.stdout + first.stderr);
+  const agentsPath = path.join(root, "AGENTS.md");
+  const { writeFile } = await import("node:fs/promises");
+  const edited = (await readFile(agentsPath, "utf8")).replace("不新开", "不新开，这是用户改过的句子");
+  const withOld = `${edited.replace(
+    "<!-- edges-constraints:end -->",
+    "- 本目录有项目记忆。提问或动手前用 `$edges-memory-ask`；该沉淀用 `$edges-memory-remember`。本轮查过不重复。\n<!-- edges-constraints:end -->",
+  )}`;
+  await writeFile(agentsPath, withOld);
+  const second = await run(["--scope", root, "init", "notes", "memory"], { env: {} });
+  assert.equal(second.exitCode, 0, second.stdout + second.stderr);
+  const after = await readFile(agentsPath, "utf8");
+  assert.match(after, /不新开，这是用户改过的句子/);
+  assert.doesNotMatch(after, /\$edges-memory-ask/);
+  assert.match(after, /只改文案时不查/);
+  assert.equal(after.split("材料放在本层").length - 1, 1);
+  const notesAt = after.indexOf("不新开，这是用户改过的句子");
+  const memoryAt = after.indexOf("只改文案时不查");
+  assert.ok(memoryAt >= 0 && memoryAt < notesAt, after);
 });
 
 test("commands do not import the harness material catalog", () => {
