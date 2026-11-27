@@ -1,7 +1,7 @@
 import { leafEntryPath } from "../node/entry-path.js";
 import { existsSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
-import { placeHarnessMaterial, type MaterialOptions } from "../../domain/config/edges-materials.js";
+import { materialHarnessRoot, placeHarnessMaterial, type MaterialOptions } from "../../domain/config/edges-materials.js";
 import { AgentsNode } from "../../domain/models/agents/agents-node.js";
 import { ProjectNode } from "../../domain/models/projects/project-node.js";
 import { ENTRY_NAMES } from "../../domain/config/layout.js";
@@ -54,7 +54,7 @@ import {
   type InitModuleName,
 } from "./modules.js";
 import { migrateScopeMaterialIndex } from "./migrate-scope-readme.js";
-import { applyOfficialConstraintSeed } from "./constraint-seed.js";
+import { getInitializedConstraintTypes } from "../../domain/operations/constraint-seeds.js";
 
 export type { InitMemoryOptions };
 
@@ -263,7 +263,7 @@ export async function initMemory(options: InitMemoryOptions): Promise<MemoryInit
     throw new Error("Type flags require the skills module");
   }
   const result = await runTypeInit(options, "memory");
-  if (!result.selectionRequired && !options.project) await writeConstraintSeed(result.targetDir, ["memory"], options);
+  if (!result.selectionRequired && !options.project) await refreshConstraintSeeds(result.targetDir, options);
   return result;
 }
 
@@ -273,7 +273,7 @@ export async function initSkills(options: InitMemoryOptions): Promise<MemoryInit
     throw new Error("Type flags require the memory module");
   }
   const result = await runTypeInit(options, "skills");
-  if (!result.selectionRequired && !options.project) await writeConstraintSeed(result.targetDir, ["skills"], options);
+  if (!result.selectionRequired && !options.project) await refreshConstraintSeeds(result.targetDir, options);
   return result;
 }
 
@@ -419,19 +419,20 @@ async function ensureScopeEntry(options: InitMemoryOptions) {
   };
 }
 
-async function writeConstraintSeed(
-  target: string,
-  modules: readonly InitModuleName[],
-  options: MaterialOptions,
-): Promise<void> {
+async function refreshConstraintSeeds(target: string, options: MaterialOptions): Promise<void> {
   const file = join(target, AGENTS_FILE_NAME);
   if (!existsSync(file)) return;
   const service = memoryNodes(target, options);
-  const node = await service.get(file, AgentsNode);
-  if (!node) return;
-  const next = applyOfficialConstraintSeed(node.body, modules);
-  if (next === node.body) return;
-  await service.update(node, { body: next });
+  const readmePath = placeHarnessMaterial(target, "readme", options).absPath;
+  const readme = await service.get(readmePath, ReadmeNode);
+  const agents = await service.get(file, AgentsNode);
+  if (!readme || !agents) return;
+  const initialized = getInitializedConstraintTypes(
+    readme.localChildren.map((child) => child.id),
+    materialHarnessRoot(target, options),
+  );
+  if (!agents.refreshConstraintSeeds(initialized)) return;
+  await service.update(agents, { body: agents.body });
 }
 
 export async function initScope(options: InitScopeOptions) {
@@ -485,8 +486,8 @@ export async function initScope(options: InitScopeOptions) {
     preserved = [...preserved, ...boards.preserved];
   }
   if (!options.project) {
-    await writeConstraintSeed(scope.targetDir, requested, options);
     await migrateScopeMaterialIndex(scope.targetDir, base);
+    await refreshConstraintSeeds(scope.targetDir, options);
   }
   return {
     ...(typeResult ?? {}),

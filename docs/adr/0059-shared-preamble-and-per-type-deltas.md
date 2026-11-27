@@ -6,7 +6,7 @@ status: accepted
 
 2026-11-26 用户确认。本 ADR 修订 [ADR 0057](0057-per-type-retrieval-and-capture-timing.md) 与 [ADR 0058](0058-module-naming-and-capture-initiation.md) 中「每类一段完整片段、六段逐字重复共性句」的写法。
 
-**Status:** accepted（尚未实现）
+**Status:** accepted（已实现）
 
 **Amends:** [ADR 0057](0057-per-type-retrieval-and-capture-timing.md)、[ADR 0058](0058-module-naming-and-capture-initiation.md)
 
@@ -57,4 +57,4 @@ status: accepted
 ## Consequences
 
 - 官方种子改为一段主旨加六条特殊点。ADR 0058 的六段原文保留作当时记录，不再当作官方种子。
-- 尚未实现。模板与 `AGENTS.md` 种子不在本次文档提交里改写。
+- 实现落点（2026-11-27 调整）：主旨和旧官方句放在 `packages/cli/src/domain/config/constraint-seeds.ts`，六类材料各自的特殊点挂在 `domain/config/material-types.ts` 的类型登记上，登记顺序就是呈现顺序。`<!-- edges-seed:id -->` 段的查找、插入、刷新和规范化是 `AgentsNode` 的 `refreshConstraintSeeds`。补哪几段由 domain 按本层 `.edges/README`（`--super` 时为 scope 根的 `README.md`）的登记判定（`domain/operations/constraint-seeds.ts`），init 不再传模块名。service 只决定何时调用：`init`、`init <模块>`、`memory init`、`skills init` 在写完材料之后各调用一次（`init` 放在迁移完登记之后），`--project` 不调用。
